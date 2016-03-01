@@ -84,13 +84,10 @@ contains
 !$omp& shared(f) &
 !$omp& shared(fsendf)
     do k=1,nproc
-       ! i_loc = 0
        i1 = 1+iproc*ni_loc
        i2 = (1+iproc)*ni_loc
-       ! do i=1+iproc*ni_loc,(1+iproc)*ni_loc
        do i=i1,i2
-          ! i_loc = i_loc+1
-          i_loc = (i-i1+1) 
+          i_loc = i-i1+1 
           do j=1,nj_loc
              fsendf(j,i_loc,k) = f(i_loc,j+(k-1)*nj_loc) 
           enddo
@@ -126,13 +123,10 @@ contains
 !$omp& shared(ft) &
 !$omp& shared(fsendr)
     do k=1,nproc
-       ! j_loc = 0
        j1 = 1+iproc*nj_loc
        j2 = (1+iproc)*nj_loc
-       ! do j=1+iproc*nj_loc,(1+iproc)*nj_loc
        do j=j1,j2
-          ! j_loc = j_loc+1
-          j_loc = (j-j1+1) 
+          j_loc = j-j1+1 
           do i=1,ni_loc
              fsendr(i,j_loc,k) = ft(j_loc,i+(k-1)*ni_loc) 
           enddo
@@ -168,15 +162,11 @@ contains
 !$omp& shared(fin) &
 !$omp& shared(fsendr)
     do k=1,nproc
-       ! j_loc = 0
        j1 = 1+iproc*nj_loc
        j2 = (1+iproc)*nj_loc
-       ! do j=1+iproc*nj_loc,(1+iproc)*nj_loc
        do j=j1,j2
-          ! j_loc = j_loc+1
-          j_loc = (j-j1+1) 
+          j_loc = j-j1+1 
           do i=1,ni_loc
-             ! fsendr(i,j_loc,k) = ft(j_loc,i+(k-1)*ni_loc) 
              fsendr(i,j_loc,k) = fin(i+(k-1)*ni_loc,j_loc) 
           enddo
        enddo
@@ -211,13 +201,10 @@ contains
 !$omp& shared(ft) &
 !$omp& shared(fsendr_real)
     do k=1,nproc
-       ! j_loc = 0
        j1 = 1+iproc*nj_loc
        j2 = (1+iproc)*nj_loc
-       ! do j=1+iproc*nj_loc,(1+iproc)*nj_loc
        do j=j1,j2
-          ! j_loc = j_loc+1
-          j_loc = (j-j1+1)
+          j_loc = j-j1+1
           do i=1,ni_loc
              fsendr_real(i,j_loc,k) = ft(j_loc,i+(k-1)*ni_loc) 
           enddo
@@ -251,15 +238,11 @@ contains
 !$omp& shared(fin) &
 !$omp& shared(fsendr_real)
     do k=1,nproc
-       ! j_loc = 0
        j1 = 1+iproc*nj_loc
        j2 = (1+iproc)*nj_loc
-       ! do j=1+iproc*nj_loc,(1+iproc)*nj_loc
        do j=j1,j2
-          ! j_loc = j_loc+1
-          j_loc = (j-j1+1)
+          j_loc = j-j1+1
           do i=1,ni_loc
-             ! fsendr_real(i,j_loc,k) = ft(j_loc,i+(k-1)*ni_loc) 
              fsendr_real(i,j_loc,k) = fin(i+(k-1)*ni_loc,j_loc) 
           enddo
        enddo

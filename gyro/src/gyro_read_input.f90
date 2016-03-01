@@ -226,6 +226,7 @@ subroutine gyro_read_input
   call readbc_int(z_eff_method)
   call readbc_int(truncation_method)
   call readbc_real(fluxaverage_window)
+  call readbc_int(huge_restart)
 
   ! GK eigenvalue solver inputs
   call readbc_int(gkeigen_proc_mult)
