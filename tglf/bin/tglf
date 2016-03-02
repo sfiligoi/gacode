@@ -214,7 +214,7 @@ then
      echo 'no mpi'  >> $RUNBASE
 #     $GACODE_ROOT/shared/exec/gyro.$GACODE_PLATFORM \
      cd    $SIMDIR 
-     $TGLF_DIR/src/tglf >> $RUNBASE
+     $TGLF_DIR/src/tglf_nn >> $RUNBASE
    else
      $GACODE_ROOT/shared/exec/gyro.$GACODE_PLATFORM \
      $SIMDIR $NPROC $TGLF_DIR/src/tglf_mpi $NOMP $NUMA $MPINUMA >> $RUNBASE

@@ -26,13 +26,14 @@ subroutine tglf_run_nn()
   real :: OUT_ENERGY_FLUX_1_RNG, OUT_ENERGY_FLUX_3_RNG, OUT_PARTICLE_FLUX_1_RNG
   real :: OUT_PARTICLE_FLUX_3_RNG, OUT_STRESS_TOR_1_RNG, OUT_STRESS_TOR_3_RNG
 
-  real :: nn_in_lim=2
-  real :: nn_in_lim2=3
-  real :: rng_lim=0.1
-  real :: rng_lim2=1.5
-
+  real :: nn_in_lim=10000
+  integer :: nn_check=0
+    
   integer :: i_ion,n
   complex :: xi=(0.0,1.0)
+
+  ! CHECK <<<---------------------------------------------<<<
+  write(*,*) 'prima', tglf_nn_thrsh_energy_in
 
   call put_signs(tglf_sign_Bt_in,tglf_sign_It_in)
 
@@ -74,7 +75,7 @@ subroutine tglf_run_nn()
        tglf_nbasis_min_in, &
        tglf_nxgrid_in, &
        tglf_nky_in)
-
+       
   call put_rare_switches(tglf_theta_trapped_in, &
        tglf_park_in, &
        tglf_ghat_in, &
@@ -150,10 +151,14 @@ subroutine tglf_run_nn()
 
   if (tglf_use_transport_model_in) then
 
+
+     ! CHECK <<<---------------------------------------------<<<
+     write (*,*) 'partenza', tglf_nn_thrsh_energy_in       
+
      ! Check proper processor setup
-     if (iProcTglf .ne. iProc0Tglf) then
-     	write (*,*) 'wrong processor setup: parallelization not yet supported for NN'
-     	stop
+     if ((iProcTglf .ne. -1) .and. (iProcTglf .ne. iProc0Tglf)) then
+        write (*,*) 'wrong processor setup: parallelization not yet supported for NN'
+        stop
      endif
 
      ! Write input file for the NN
@@ -167,7 +172,15 @@ subroutine tglf_run_nn()
      close(14)
 
      ! Execute the NN
-     CALL SYSTEM('cd '//TRIM(tglf_path_in)//' ;/u/ludat/brainfuse_orso/run.exe /u/ludat/testnets/brainfuse_* input.dat')
+     if (tglf_path_in == "") then
+        ! FOR TGLF    O N L Y
+        write(*,*) 'tglf_run_nn --> tglf_path_in is blank'
+        CALL SYSTEM('/u/ludat/brainfuse_orso/run.exe /u/ludat/testnets/brainfuse_* input.dat')
+     else
+        write(*,*) 'tglf_run_nn --> tglf_path_in: ', trim(tglf_path_in)
+        ! FOR TGYRO
+        CALL SYSTEM('cd '//TRIM(tglf_path_in)//' ;/u/ludat/brainfuse_orso/run.exe /u/ludat/testnets/brainfuse_* input.dat')
+     endif
 
      ! Read outputs
      open (unit=15, file=TRIM(tglf_path_in)//"output.avg", action="read")
@@ -200,9 +213,8 @@ subroutine tglf_run_nn()
           (OUT_PARTICLE_FLUX_3_RNG==0) .and. (OUT_STRESS_TOR_1_RNG==0) .and. (OUT_STRESS_TOR_3_RNG==0)) then
         nn_in_lim=2
      else 
-        nn_in_lim=9999
+        nn_in_lim=9999 
      endif
-
 
      ! Switch between TGLF and the NN depending on 'input.lim' values
      if ((abs(AS_2_LIM)<nn_in_lim) .and. (abs(AS_3_LIM)<nn_in_lim) .and. (abs(BETAE_LIM)<nn_in_lim) .and. &
@@ -210,14 +222,17 @@ subroutine tglf_run_nn()
           (abs(Q_PRIME_LOC_LIM)<nn_in_lim) .and. (abs(RLNS_1_LIM)<nn_in_lim) .and. (abs(RLTS_1_LIM)<nn_in_lim) .and. &
           (abs(RLTS_2_LIM)<nn_in_lim) .and. (abs(RMAJ_LOC_LIM)<nn_in_lim) .and. (abs(RMIN_LOC_LIM)<nn_in_lim) .and. &
           (abs(S_KAPPA_LOC_LIM)<nn_in_lim) .and. (abs(TAUS_2_LIM)<nn_in_lim) .and. (abs(XNUE_LIM)<nn_in_lim) .and. &
-          (OUT_ENERGY_FLUX_1_RNG<rng_lim) .and. (OUT_ENERGY_FLUX_3_RNG<rng_lim) .and. (OUT_PARTICLE_FLUX_1_RNG<rng_lim) .and. &
-          (OUT_PARTICLE_FLUX_3_RNG<rng_lim) .and. (OUT_STRESS_TOR_1_RNG<rng_lim2) .and. (OUT_STRESS_TOR_3_RNG<rng_lim2)) then
+          (OUT_ENERGY_FLUX_1_RNG<tglf_nn_thrsh_energy_in) .and. (OUT_ENERGY_FLUX_3_RNG<tglf_nn_thrsh_energy_in) .and. &
+          (OUT_PARTICLE_FLUX_1_RNG<tglf_nn_thrsh_energy_in) .and. (OUT_PARTICLE_FLUX_3_RNG<tglf_nn_thrsh_energy_in) .and. &
+          (OUT_STRESS_TOR_1_RNG<tglf_nn_thrsh_energy_in) .and. (OUT_STRESS_TOR_3_RNG<tglf_nn_thrsh_energy_in)) then
 	  
 	write(*,*) '------------>  THE NN IS RUNNING  <--------------'
         write(*,"(6(f6.3,x))") OUT_ENERGY_FLUX_1_RNG, OUT_ENERGY_FLUX_3_RNG, OUT_PARTICLE_FLUX_1_RNG, &
              OUT_PARTICLE_FLUX_3_RNG, OUT_STRESS_TOR_1_RNG, OUT_STRESS_TOR_3_RNG
 
-        ! NN case: store results in the file 'results.nn'
+        nn_check=1
+	
+	! NN case: store results in the file 'results.nn'
         open (unit=18, file=TRIM(tglf_path_in)//"results.nn", position="append", action="write")
         write (18,*) tglf_path_in      
         write (18,*) 'STD: OEF1  OEF3  OPF1  OPF3  OST1  OST3'

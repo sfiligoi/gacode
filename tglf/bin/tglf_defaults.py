@@ -151,6 +151,7 @@ def set_defaults() :
      t.add('Q_PRIME_LOC','16.0')
      t.add('P_PRIME_LOC','0.0')
      t.add('KX0_LOC','0.0')
+     t.add('NN_THRSH_ENERGY','-1.0')
      # Deprecated parameters
      t.dep('X1','never really existed')
      t.dep('ALPHA_KX0','replaced with alpha_kx_e')

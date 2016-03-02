@@ -36,6 +36,7 @@
 !
       IMPLICIT NONE
       SAVE
+    
 ! global constants
       REAL :: pi
       REAL :: pi_2
@@ -240,6 +241,12 @@
       INTEGER :: nmodes_out
       INTEGER :: nfields_out
       character (len=80) :: error_msg='null' 
+! NN activation parameters (thresholds)  
+      REAL :: nn_thrsh_energy_in = -1.0
+    !REAL :: nn_thrsh_particle_in = 0.1
+    !REAL :: nn_thrsh_momentum_in = 0.1
+    
+     
 !
       END MODULE tglf_global
 !------------------------------------------------- 
