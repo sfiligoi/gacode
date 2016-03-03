@@ -14,30 +14,33 @@ subroutine tglf_run()
 
   use tglf_pkg
   use tglf_interface
+  use tglf_global
   
-  #ifdef MPI_TGLF
+#ifdef MPI_TGLF
   use tglf_mpi
-  #endif
+#endif
   
   implicit none
 
-  real :: OUT_ENERGY_FLUX_1, OUT_PARTICLE_FLUX_1, OUT_STRESS_TOR_1
-  real :: OUT_ENERGY_FLUX_3, OUT_PARTICLE_FLUX_3, OUT_STRESS_TOR_3
   real :: OUT_ENERGY_FLUX_1_STD, OUT_ENERGY_FLUX_3_STD, OUT_PARTICLE_FLUX_1_STD
   real :: OUT_PARTICLE_FLUX_3_STD, OUT_STRESS_TOR_1_STD, OUT_STRESS_TOR_3_STD
+
+  real :: OUT_ENERGY_FLUX_1_LIM, OUT_ENERGY_FLUX_3_LIM, OUT_PARTICLE_FLUX_1_LIM
+  real :: OUT_PARTICLE_FLUX_3_LIM, OUT_STRESS_TOR_1_LIM, OUT_STRESS_TOR_3_LIM
+
+  real :: OUT_ENERGY_FLUX_1_RNG, OUT_ENERGY_FLUX_3_RNG, OUT_PARTICLE_FLUX_1_RNG
+  real :: OUT_PARTICLE_FLUX_3_RNG, OUT_STRESS_TOR_1_RNG, OUT_STRESS_TOR_3_RNG
+
   real :: AS_2_LIM, AS_3_LIM, BETAE_LIM, DELTA_LOC_LIM, KAPPA_LOC_LIM, Q_LOC_LIM
   real :: Q_PRIME_LOC_LIM, RLNS_1_LIM, RLTS_1_LIM, RLTS_2_LIM, RMAJ_LOC_LIM 
   real :: RMIN_LOC_LIM, S_KAPPA_LOC_LIM, TAUS_2_LIM, XNUE_LIM
-  real :: OUT_ENERGY_FLUX_1_LIM, OUT_ENERGY_FLUX_3_LIM, OUT_PARTICLE_FLUX_1_LIM
-  real :: OUT_PARTICLE_FLUX_3_LIM, OUT_STRESS_TOR_1_LIM, OUT_STRESS_TOR_3_LIM
-  real :: OUT_ENERGY_FLUX_1_RNG, OUT_ENERGY_FLUX_3_RNG, OUT_PARTICLE_FLUX_1_RNG
-  real :: OUT_PARTICLE_FLUX_3_RNG, OUT_STRESS_TOR_1_RNG, OUT_STRESS_TOR_3_RNG
+
 
   real :: nn_in_lim=10000
   integer :: nn_check=0
     
   integer :: i_ion,n
-  complex :: xi=(0.0,1.0)
+  !complex :: xi=(0.0,1.0)
 
   call put_signs(tglf_sign_Bt_in,tglf_sign_It_in)
 
@@ -155,13 +158,13 @@ subroutine tglf_run()
 
   if (tglf_use_transport_model_in) then
 
-     #ifdef MPI_TGLF
-     ! Check proper processor setup
-     if (iProcTglf .ne. iProc0Tglf) then
-        write (*,*) 'wrong processor setup: parallelization not yet supported for NN'
-        stop
-     endif
-     #endif
+#ifdef MPI_TGLF
+         ! Check proper processor setup
+         if (iProcTglf .ne. iProc0Tglf) then
+            write (*,*) 'wrong processor setup: parallelization not yet supported for NN'
+            stop
+         endif
+#endif
 
      ! Write input file for the NN
      open (unit=14, file=TRIM(tglf_path_in)//"input.dat", action="write")
@@ -186,10 +189,15 @@ subroutine tglf_run()
 
      ! Read outputs
      open (unit=15, file=TRIM(tglf_path_in)//"output.avg", action="read")
-     read(15,*) n, OUT_ENERGY_FLUX_1, OUT_ENERGY_FLUX_3, &
-          OUT_PARTICLE_FLUX_1, OUT_PARTICLE_FLUX_3, &
-          OUT_STRESS_TOR_1, OUT_STRESS_TOR_3
+     read(15,*) n, energy_flux_out(1,1), energy_flux_out(3,1), &
+          particle_flux_out(1,1), particle_flux_out(3,1), &
+          stress_tor_out(1,1), stress_tor_out(3,1)
      close(15)
+     
+     energy_flux_out(2,1)=energy_flux_out(3,1)
+     particle_flux_out(2,1)=particle_flux_out(3,1)
+     stress_tor_out(2,1)=stress_tor_out(3,1)
+     
 
      ! Read values for checking accuracy of the NN
      open (unit=16, file=TRIM(tglf_path_in)//"output.std", action="read")
@@ -232,77 +240,6 @@ subroutine tglf_run()
         write(*,"(6(f6.3,x))") OUT_ENERGY_FLUX_1_RNG, OUT_ENERGY_FLUX_3_RNG, OUT_PARTICLE_FLUX_1_RNG, &
              OUT_PARTICLE_FLUX_3_RNG, OUT_STRESS_TOR_1_RNG, OUT_STRESS_TOR_3_RNG
 
-	! NN case: store results in the file 'results.nn'
-        open (unit=18, file=TRIM(tglf_path_in)//"results.nn", position="append", action="write")
-        write (18,*) tglf_path_in      
-        write (18,*) 'STD: OEF1  OEF3  OPF1  OPF3  OST1  OST3'
-        write (18,"(6(f6.3,x))") OUT_ENERGY_FLUX_1_STD, OUT_ENERGY_FLUX_3_STD, OUT_PARTICLE_FLUX_1_STD, &
-             OUT_PARTICLE_FLUX_3_STD, OUT_STRESS_TOR_1_STD, OUT_STRESS_TOR_3_STD
-        write (18,*) 'NN_OUT: OEF1  OEF3  OPF1  OPF3  OST1  OST3'
-        write (18,"(6(f6.3,x))") OUT_ENERGY_FLUX_1, OUT_ENERGY_FLUX_3, OUT_PARTICLE_FLUX_1, &
-             OUT_PARTICLE_FLUX_3, OUT_STRESS_TOR_1, OUT_STRESS_TOR_3
-        write (18,*) 'LIM: AS2  AS3  BETAE  DELTA  KAPPA  Q  QPRIME  RLNS1  RLTS1  RLTS2  RMAJ  RMIN  SKAPPA  TAUS2  XNUE'
-        write (18,"(15(f8.3,x))") AS_2_LIM, AS_3_LIM, BETAE_LIM, DELTA_LOC_LIM, KAPPA_LOC_LIM, Q_LOC_LIM, &
-             Q_PRIME_LOC_LIM, RLNS_1_LIM, RLTS_1_LIM, RLTS_2_LIM, RMAJ_LOC_LIM, &
-             RMIN_LOC_LIM, S_KAPPA_LOC_LIM, TAUS_2_LIM, XNUE_LIM
-        write (18,*) 'LIM: OEF1  OEF3  OPF1  OPF3  OST1  OST3'
-        write (18,"(6(f6.3,x))") OUT_ENERGY_FLUX_1_LIM, OUT_ENERGY_FLUX_3_LIM, OUT_PARTICLE_FLUX_1_LIM, &
-             OUT_PARTICLE_FLUX_3_LIM, OUT_STRESS_TOR_1_LIM, OUT_STRESS_TOR_3_LIM
-        close(18)
-
-        ! Write outputs for all the radial points where the NN is used
-        open (unit=25, file="results.nns", position="append", action="write")
-        write (25,*) tglf_path_in
-        write (25,*) 'NN: OEF1  OEF3  OPF1  OPF3  OST1  OST3'
-        write (25,"(6(f6.3,x))") OUT_ENERGY_FLUX_1, OUT_ENERGY_FLUX_3, OUT_PARTICLE_FLUX_1, &
-             OUT_PARTICLE_FLUX_3, OUT_STRESS_TOR_1, OUT_STRESS_TOR_3
-        write (25,*)
-        close(25)
-
-        !---------------------------------------------
-        ! Output (normalized to Q_GB)
-        ! 
-        ! Electrons
-
-        ! Gammae/Gamma_GB
-        tglf_elec_pflux_out = OUT_PARTICLE_FLUX_1
-
-        ! Qe/Q_GB
-        tglf_elec_eflux_low_out = OUT_ENERGY_FLUX_1
-        ! _low already included EM terms
-        tglf_elec_eflux_out     = OUT_ENERGY_FLUX_1
-
-        ! Pi_e/Pi_GB
-        tglf_elec_mflux_out = OUT_STRESS_TOR_1
-
-        ! S_e/S_GB
-        !tglf_elec_expwd_out = get_exchange(1,1)  &
-        !     + get_exchange(1,2)                 &
-        !     + get_exchange(1,3)
-
-        ! Ions
-
-        do i_ion=1,5
-
-           ! Gammai/Gamma_GB
-           tglf_ion_pflux_out(i_ion) = OUT_PARTICLE_FLUX_3
-
-           ! Qi/Q_GB
-           tglf_ion_eflux_low_out(i_ion) = OUT_ENERGY_FLUX_3
-           ! _low already included EM terms
-           tglf_ion_eflux_out(i_ion)     = OUT_ENERGY_FLUX_3
-
-           ! Pi_i/Pi_GB
-           tglf_ion_mflux_out(i_ion) = OUT_STRESS_TOR_3
-
-           ! S_i/S_GB
-           !tglf_ion_expwd_out(i_ion) = get_exchange(i_ion+1,1)    &
-           !     + get_exchange(i_ion+1,2)                         &
-           !     + get_exchange(i_ion+1,3)
-
-        enddo
-
-
      else
 
         ! TGLF default case
@@ -326,100 +263,74 @@ subroutine tglf_run()
         write(*,"(6(f6.3,x))") OUT_ENERGY_FLUX_1_RNG, OUT_ENERGY_FLUX_3_RNG, OUT_PARTICLE_FLUX_1_RNG, &
              OUT_PARTICLE_FLUX_3_RNG, OUT_STRESS_TOR_1_RNG, OUT_STRESS_TOR_3_RNG
 
-        
-	#ifdef MPI_TGLF
-	call tglf_tm_mpi
-	write(*,*) 'hello'
-	#else
-	call tglf_tm
-        write(*,*) 'no hello'
-	#endif
-
-        !---------------------------------------------
-        ! Output (normalized to Q_GB)
-        ! 
-        ! Electrons
-
-        ! Gammae/Gamma_GB
-        tglf_elec_pflux_out = get_particle_flux(1,1)  &
-             + get_particle_flux(1,2)                 &
-             + get_particle_flux(1,3)
-
-        write(*,*) 'e particle flux for TLGF and NN: ', tglf_elec_pflux_out, OUT_PARTICLE_FLUX_1
-
-        ! Qe/Q_GB
-        tglf_elec_eflux_low_out = get_q_low(1)
-        tglf_elec_eflux_out     = get_energy_flux(1,1) &
-             + get_energy_flux(1,2)                    &
-             + get_energy_flux(1,3)
-
-        write(*,*) 'e energy flux for TLGF and NN: ', tglf_elec_eflux_out, OUT_ENERGY_FLUX_1
-
-        ! Pi_e/Pi_GB
-        tglf_elec_mflux_out = get_stress_tor(1,1)   &
-             + get_stress_tor(1,2)                  &
-             + get_stress_tor(1,3)
-
-        ! S_e/S_GB
-        tglf_elec_expwd_out = get_exchange(1,1)  &
-             + get_exchange(1,2)                 &
-             + get_exchange(1,3)
-
-        ! Ions
-
-        do i_ion=1,5
-
-           ! Gammai/Gamma_GB
-           tglf_ion_pflux_out(i_ion) = get_particle_flux(i_ion+1,1) &
-                + get_particle_flux(i_ion+1,2)                      &
-                + get_particle_flux(i_ion+1,3)
-
-           ! Qi/Q_GB
-           tglf_ion_eflux_low_out(i_ion) = get_q_low(i_ion+1)
-           ! _low already included EM terms
-           tglf_ion_eflux_out(i_ion)     = get_energy_flux(i_ion+1,1) &
-                + get_energy_flux(i_ion+1,2)                          &
-                + get_energy_flux(i_ion+1,3)
-
-           ! Pi_i/Pi_GB
-           tglf_ion_mflux_out(i_ion) = get_stress_tor(i_ion+1,1)  &
-                + get_stress_tor(i_ion+1,2)                       &
-                + get_stress_tor(i_ion+1,3)
-
-           ! S_i/S_GB
-           tglf_ion_expwd_out(i_ion) = get_exchange(i_ion+1,1)    &
-                + get_exchange(i_ion+1,2)                         &
-                + get_exchange(i_ion+1,3)
-
-        enddo
-
-
-        ! TGLF case: store results in the file 'results.tglf'
-        open (unit=21, file=TRIM(tglf_path_in)//"results.tglf", position="append", action="write")
-        write (21,*) tglf_path_in
-        write (21,*) 'TGLF: OEF1  OEF3  OPF1  OPF3  OST1  OST3'
-        write (21,"(6(f6.3,x))") tglf_elec_eflux_out, tglf_ion_eflux_out(1), tglf_elec_pflux_out, &
-             tglf_ion_pflux_out(1), tglf_elec_mflux_out, tglf_ion_mflux_out(1)
-        close(21)
-
-        ! Write outputs for all the radial points where TGLF is used
-        open (unit=27, file="results.nns", position="append", action="write")
-        write (27,*) tglf_path_in
-        write (27,*) 'TGLF: OEF1  OEF3  OPF1  OPF3  OST1  OST3'
-        write (27,"(6(f6.3,x))") tglf_elec_eflux_out, tglf_ion_eflux_out(1), tglf_elec_pflux_out, &
-             tglf_ion_pflux_out(1), tglf_elec_mflux_out, tglf_ion_mflux_out(1)
-        write (27,*)
-        close(27)
-
-
-        call get_error_status(tglf_error_message,tglf_error_status)
-
-        IF (tglf_error_status.EQ.0) THEN
-           CALL tglf_harvest_local
-        ENDIF
-
+        #ifdef MPI_TGLF
+	    call tglf_tm_mpi
+        #else
+	    call tglf_tm
+        #endif
 
      end if
+     
+     !---------------------------------------------
+     ! Output (normalized to Q_GB)
+     ! 
+     ! Electrons
+
+     ! Gammae/Gamma_GB
+     tglf_elec_pflux_out = get_particle_flux(1,1)  &
+     	  + get_particle_flux(1,2)		   &
+     	  + get_particle_flux(1,3)
+
+     ! Qe/Q_GB
+     tglf_elec_eflux_low_out = get_q_low(1)
+     tglf_elec_eflux_out     = get_energy_flux(1,1) &
+     	  + get_energy_flux(1,2)		    &
+     	  + get_energy_flux(1,3)
+
+     ! Pi_e/Pi_GB
+     tglf_elec_mflux_out = get_stress_tor(1,1)   &
+     	  + get_stress_tor(1,2) 		 &
+     	  + get_stress_tor(1,3)
+
+     ! S_e/S_GB
+     tglf_elec_expwd_out = get_exchange(1,1)  &
+     	  + get_exchange(1,2)		      &
+     	  + get_exchange(1,3)
+
+     ! Ions
+
+     do i_ion=1,5
+
+     	! Gammai/Gamma_GB
+     	tglf_ion_pflux_out(i_ion) = get_particle_flux(i_ion+1,1) &
+     	     + get_particle_flux(i_ion+1,2)			 &
+     	     + get_particle_flux(i_ion+1,3)
+
+     	! Qi/Q_GB
+     	tglf_ion_eflux_low_out(i_ion) = get_q_low(i_ion+1)
+     	! _low already included EM terms
+     	tglf_ion_eflux_out(i_ion)     = get_energy_flux(i_ion+1,1) &
+     	     + get_energy_flux(i_ion+1,2)			   &
+     	     + get_energy_flux(i_ion+1,3)
+
+     	! Pi_i/Pi_GB
+     	tglf_ion_mflux_out(i_ion) = get_stress_tor(i_ion+1,1)  &
+     	     + get_stress_tor(i_ion+1,2)		       &
+     	     + get_stress_tor(i_ion+1,3)
+
+     	! S_i/S_GB
+     	tglf_ion_expwd_out(i_ion) = get_exchange(i_ion+1,1)    &
+     	     + get_exchange(i_ion+1,2)  		       &
+     	     + get_exchange(i_ion+1,3)
+
+     enddo
+
+     call get_error_status(tglf_error_message,tglf_error_status)
+
+     if (tglf_error_status.EQ.0) then
+     	CALL tglf_harvest_local
+     endif
+
 
   else
 
@@ -432,15 +343,15 @@ subroutine tglf_run()
      enddo
 
      ! Print eigenfunction if flag set
-     #ifdef MPI_TGLF
+#ifdef MPI_TGLF
      if (iProcTglf == iProc0Tglf .and. tglf_write_wavefunction_flag_in == 1) then
         call write_wavefunction_out(trim(tglf_path_in)//'out.tglf.wavefunction')
      endif     
-     #else
+#else
      if (tglf_write_wavefunction_flag_in == 1) then
         call write_wavefunction_out(trim(tglf_path_in)//'out.tglf.wavefunction')
      endif
-     #endif
+#endif
 
   endif
 
