@@ -7,9 +7,9 @@
 !---------------------------------------------------------
 
 #ifdef MPI_TGLF
-subroutine tglf_run_nn_mpi()
+subroutine tglf_run_mpi()
 #else
-subroutine tglf_run_nn()
+subroutine tglf_run()
 #endif
 
   use tglf_pkg
@@ -176,10 +176,10 @@ subroutine tglf_run_nn()
      ! Execute the NN
      if (tglf_path_in == "") then
         ! FOR TGLF    O N L Y
-        write(*,*) 'tglf_run_nn --> tglf_path_in is blank'
+        write(*,*) 'tglf_run --> tglf_path_in is blank'
         CALL SYSTEM('/u/ludat/brainfuse_orso/run.exe /u/ludat/testnets/brainfuse_* input.dat')
      else
-        write(*,*) 'tglf_run_nn --> tglf_path_in: ', trim(tglf_path_in)
+        write(*,*) 'tglf_run --> tglf_path_in: ', trim(tglf_path_in)
         ! FOR TGYRO
         CALL SYSTEM('cd '//TRIM(tglf_path_in)//' ;/u/ludat/brainfuse_orso/run.exe /u/ludat/testnets/brainfuse_* input.dat')
      endif
@@ -449,7 +449,7 @@ subroutine tglf_run_nn()
   interchange_DM = get_DM()
 
 #ifdef MPI_TGLF
-end subroutine tglf_run_nn_mpi
+end subroutine tglf_run_mpi
 #else
-end subroutine tglf_run_nn
+end subroutine tglf_run
 #endif

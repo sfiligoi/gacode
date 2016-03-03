@@ -2,6 +2,8 @@ include ${GACODE_ROOT}/shared/install/make.inc.${GACODE_PLATFORM}
 
 TGLFISNAN = tglf_isnan_generic.o
 
+EXTRA_LIBS=../../shared/harvest_client/libharvest.a
+
 include ../install/make.ext.${GACODE_PLATFORM}
 
 ifeq ($(OPT),debug)
@@ -10,9 +12,8 @@ else
    FFLAGS=${FOPT}
 endif
 
-EXEC1=tglf_mpi
-EXEC2=tglf
-EXEC3=tglf_nn
+EXEC1=tglf
+EXEC2=tglf_mpi
 
 LLIB=tglf_lib
 
@@ -43,13 +44,10 @@ OBJECTS = ${TGLFISNAN}      \
           tglf_run_mpi.o    \
           tglf_TM_mpi.o     \
           tglf_harvest.o    \
-          tglf_nn.o         \
-          tglf_run_nn.o     \
-          tglf_run_nn_mpi.o \
 
 .SUFFIXES : .o .f90 .F90
 
-all: $(LLIB).a $(EXEC1) $(EXEC2) $(EXEC3)
+all: $(LLIB).a $(EXEC1) $(EXEC2)
 
 $(EXEC1): $(LLIB).a $(EXEC1).o $(EXTRA_LIBS)
 	$(FC) $(FFLAGS) -o $(EXEC1) $(EXEC1).o $(LLIB).a $(EXTRA_LIBS) $(LMATH)
@@ -57,14 +55,11 @@ $(EXEC1): $(LLIB).a $(EXEC1).o $(EXTRA_LIBS)
 $(EXEC2): $(LLIB).a $(EXEC2).o $(EXTRA_LIBS)
 	$(FC) $(FFLAGS) -o $(EXEC2) $(EXEC2).o $(LLIB).a $(EXTRA_LIBS) $(LMATH)
 
-$(EXEC3): $(LLIB).a $(EXEC3).o $(EXTRA_LIBS)
-	$(FC) $(FFLAGS) -o $(EXEC3) $(EXEC3).o $(LLIB).a $(EXTRA_LIBS) $(LMATH)
-
 $(LLIB).a: $(OBJECTS)
 	$(ARCH) $(LLIB).a $(OBJECTS)
 
-tglf_run_nn_mpi.o : tglf_run_nn.F90
-	MPI_TGLF=1; $(FC) -o tglf_run_nn_mpi.o $(FMATH) $(FFLAGS) -c $<
+tglf_run_mpi.o : tglf_run.F90
+	$(FC) -o tglf_run_mpi.o $(FMATH) $(FFLAGS) -DMPI_TGLF=1 -c $<
 
 .f90.o :
 	$(FC) $(FMATH) $(FFLAGS) -c $<
