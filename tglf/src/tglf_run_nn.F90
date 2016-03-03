@@ -6,12 +6,19 @@
 !  TGYRO usage.
 !---------------------------------------------------------
 
+#ifdef MPI_TGLF
+subroutine tglf_run_nn_mpi()
+#else
 subroutine tglf_run_nn()
+#endif
 
   use tglf_pkg
   use tglf_interface
+  
+  #ifdef MPI_TGLF
   use tglf_mpi
-
+  #endif
+  
   implicit none
 
   real :: OUT_ENERGY_FLUX_1, OUT_PARTICLE_FLUX_1, OUT_STRESS_TOR_1
@@ -31,9 +38,6 @@ subroutine tglf_run_nn()
     
   integer :: i_ion,n
   complex :: xi=(0.0,1.0)
-
-  ! CHECK <<<---------------------------------------------<<<
-  write(*,*) 'prima', tglf_nn_thrsh_energy_in
 
   call put_signs(tglf_sign_Bt_in,tglf_sign_It_in)
 
@@ -151,15 +155,13 @@ subroutine tglf_run_nn()
 
   if (tglf_use_transport_model_in) then
 
-
-     ! CHECK <<<---------------------------------------------<<<
-     write (*,*) 'partenza', tglf_nn_thrsh_energy_in       
-
+     #ifdef MPI_TGLF
      ! Check proper processor setup
-     if ((iProcTglf .ne. -1) .and. (iProcTglf .ne. iProc0Tglf)) then
+     if (iProcTglf .ne. iProc0Tglf) then
         write (*,*) 'wrong processor setup: parallelization not yet supported for NN'
         stop
      endif
+     #endif
 
      ! Write input file for the NN
      open (unit=14, file=TRIM(tglf_path_in)//"input.dat", action="write")
@@ -230,8 +232,6 @@ subroutine tglf_run_nn()
         write(*,"(6(f6.3,x))") OUT_ENERGY_FLUX_1_RNG, OUT_ENERGY_FLUX_3_RNG, OUT_PARTICLE_FLUX_1_RNG, &
              OUT_PARTICLE_FLUX_3_RNG, OUT_STRESS_TOR_1_RNG, OUT_STRESS_TOR_3_RNG
 
-        nn_check=1
-	
 	! NN case: store results in the file 'results.nn'
         open (unit=18, file=TRIM(tglf_path_in)//"results.nn", position="append", action="write")
         write (18,*) tglf_path_in      
@@ -316,7 +316,7 @@ subroutine tglf_run_nn()
         write(*,*) 'q=', tglf_q_loc_in, 'q lim=', Q_LOC_LIM
         write(*,*) 'q prime=', tglf_q_prime_loc_in, 'q prime lim=', Q_PRIME_LOC_LIM
         write(*,*) 's kappa=', tglf_s_kappa_loc_in, 's kapa lim=', S_KAPPA_LOC_LIM
-        write(*,*) 'as2=', tglf_as_in(2), 'as2 lim=', AS_2_LIM
+        write(*,*) 'AAAs2=', tglf_as_in(2), 'as2 lim=', AS_2_LIM
         write(*,*) 'as3=', tglf_as_in(3), 'as3 lim=', AS_3_LIM
         write(*,*) 'xnue=', tglf_xnue_in, 'xnue lim=', XNUE_LIM
         write(*,*) 'taus2=', tglf_taus_in(3), 'taus2 lim=', TAUS_2_LIM
@@ -326,7 +326,14 @@ subroutine tglf_run_nn()
         write(*,"(6(f6.3,x))") OUT_ENERGY_FLUX_1_RNG, OUT_ENERGY_FLUX_3_RNG, OUT_PARTICLE_FLUX_1_RNG, &
              OUT_PARTICLE_FLUX_3_RNG, OUT_STRESS_TOR_1_RNG, OUT_STRESS_TOR_3_RNG
 
-        call tglf_tm_mpi
+        
+	#ifdef MPI_TGLF
+	call tglf_tm_mpi
+	write(*,*) 'hello'
+	#else
+	call tglf_tm
+        write(*,*) 'no hello'
+	#endif
 
         !---------------------------------------------
         ! Output (normalized to Q_GB)
@@ -425,9 +432,15 @@ subroutine tglf_run_nn()
      enddo
 
      ! Print eigenfunction if flag set
+     #ifdef MPI_TGLF
      if (iProcTglf == iProc0Tglf .and. tglf_write_wavefunction_flag_in == 1) then
         call write_wavefunction_out(trim(tglf_path_in)//'out.tglf.wavefunction')
+     endif     
+     #else
+     if (tglf_write_wavefunction_flag_in == 1) then
+        call write_wavefunction_out(trim(tglf_path_in)//'out.tglf.wavefunction')
      endif
+     #endif
 
   endif
 
@@ -435,4 +448,8 @@ subroutine tglf_run_nn()
   interchange_DR = get_DR()
   interchange_DM = get_DM()
 
+#ifdef MPI_TGLF
+end subroutine tglf_run_nn_mpi
+#else
 end subroutine tglf_run_nn
+#endif

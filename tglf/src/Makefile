@@ -44,9 +44,10 @@ OBJECTS = ${TGLFISNAN}      \
           tglf_TM_mpi.o     \
           tglf_harvest.o    \
           tglf_nn.o         \
-          tglf_run_nn.o
+          tglf_run_nn.o     \
+          tglf_run_nn_mpi.o \
 
-.SUFFIXES : .o .f90
+.SUFFIXES : .o .f90 .F90
 
 all: $(LLIB).a $(EXEC1) $(EXEC2) $(EXEC3)
 
@@ -62,7 +63,13 @@ $(EXEC3): $(LLIB).a $(EXEC3).o $(EXTRA_LIBS)
 $(LLIB).a: $(OBJECTS)
 	$(ARCH) $(LLIB).a $(OBJECTS)
 
+tglf_run_nn_mpi.o : tglf_run_nn.F90
+	MPI_TGLF=1; $(FC) -o tglf_run_nn_mpi.o $(FMATH) $(FFLAGS) -c $<
+
 .f90.o :
+	$(FC) $(FMATH) $(FFLAGS) -c $<
+
+.F90.o :
 	$(FC) $(FMATH) $(FFLAGS) -c $<
 
 clean:
