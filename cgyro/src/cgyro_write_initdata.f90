@@ -128,6 +128,20 @@ subroutine cgyro_write_initdata
      close(io)
 
   endif
+
+  if (silent_flag == 0 .and. i_proc == 0 .and. profile_model == 2) then
+
+     open(unit=io,file=trim(path)//'out.cgyro.expnorm',status='replace')
+     write (io,fmtstr,advance='no') a_meters
+     write (io,fmtstr,advance='no') b_unit
+     write (io,fmtstr,advance='no') dens_norm
+     write (io,fmtstr,advance='no') temp_norm
+     write (io,fmtstr,advance='no') vth_norm
+     write (io,*)
+     close(io)
+
+  endif
+
   !----------------------------------------------------------------------------
 
   !----------------------------------------------------------------------------
