@@ -142,7 +142,15 @@ subroutine tglf_run()
      
      ! Call the NN or TGLF if the NN is not accurate
      #ifdef MPI_TGLF
-     	 call tglf_tm_mpi
+         ! Check proper processor setup
+         if (nProcTglf .eq. 1) then
+     	    call tglf_nn_tm  
+     	    if (.not. valid_nn) then
+     	       call tglf_tm_mpi
+            endif
+	 else
+            call tglf_tm_mpi
+         endif
      #else
      	 call tglf_nn_tm  
      	 if (.not. valid_nn) then

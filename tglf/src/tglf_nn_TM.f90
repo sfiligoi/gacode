@@ -21,8 +21,6 @@
 !
      real :: OUT_ENERGY_FLUX_1_STD, OUT_ENERGY_FLUX_3_STD, OUT_PARTICLE_FLUX_1_STD
      real :: OUT_PARTICLE_FLUX_3_STD, OUT_STRESS_TOR_1_STD, OUT_STRESS_TOR_3_STD
-     real :: OUT_ENERGY_FLUX_1_LIM, OUT_ENERGY_FLUX_3_LIM, OUT_PARTICLE_FLUX_1_LIM
-     real :: OUT_PARTICLE_FLUX_3_LIM, OUT_STRESS_TOR_1_LIM, OUT_STRESS_TOR_3_LIM
      real :: OUT_ENERGY_FLUX_1_RNG, OUT_ENERGY_FLUX_3_RNG, OUT_PARTICLE_FLUX_1_RNG
      real :: OUT_PARTICLE_FLUX_3_RNG, OUT_STRESS_TOR_1_RNG, OUT_STRESS_TOR_3_RNG
      real :: AS_2_LIM, AS_3_LIM, BETAE_LIM, DELTA_LOC_LIM, KAPPA_LOC_LIM, Q_LOC_LIM
@@ -85,20 +83,16 @@
 !
      open (unit=16, file=TRIM(tglf_path_in)//"output.std", action="read")
      open (unit=17, file=TRIM(tglf_path_in)//"input.lim", action="read")
-     open (unit=19, file=TRIM(tglf_path_in)//"output.lim", action="read")
      open (unit=20, file=TRIM(tglf_path_in)//"output.rng", action="read")
      read(16,*) n, OUT_ENERGY_FLUX_1_STD, OUT_ENERGY_FLUX_3_STD, OUT_PARTICLE_FLUX_1_STD, &
           OUT_PARTICLE_FLUX_3_STD, OUT_STRESS_TOR_1_STD, OUT_STRESS_TOR_3_STD     
      read(17,*) n, AS_2_LIM, AS_3_LIM, BETAE_LIM, DELTA_LOC_LIM, KAPPA_LOC_LIM, Q_LOC_LIM, &
           Q_PRIME_LOC_LIM, RLNS_1_LIM, RLTS_1_LIM, RLTS_2_LIM, RMAJ_LOC_LIM, &
           RMIN_LOC_LIM, S_KAPPA_LOC_LIM, TAUS_2_LIM, XNUE_LIM
-     read(19,*) n, OUT_ENERGY_FLUX_1_LIM, OUT_ENERGY_FLUX_3_LIM, OUT_PARTICLE_FLUX_1_LIM, &
-          OUT_PARTICLE_FLUX_3_LIM, OUT_STRESS_TOR_1_LIM, OUT_STRESS_TOR_3_LIM
      read(20,*) n, OUT_ENERGY_FLUX_1_RNG, OUT_ENERGY_FLUX_3_RNG, OUT_PARTICLE_FLUX_1_RNG, &
           OUT_PARTICLE_FLUX_3_RNG, OUT_STRESS_TOR_1_RNG, OUT_STRESS_TOR_3_RNG
      close(16)
      close(17)
-     close(19)
      close(20)
 !
 ! If only 1 NN: check 'input.lim', else: check JUST 'output.rng'

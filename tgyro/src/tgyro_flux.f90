@@ -266,7 +266,7 @@ subroutine tgyro_flux
      ! Map TGYRO parameters to TGLF_NN
      call tgyro_tglf_map
 
-     call tglf_run_nn
+     call tglf_run_mpi
 
      call tgyro_trap_component_error(tglf_error_status,tglf_error_message)
 
