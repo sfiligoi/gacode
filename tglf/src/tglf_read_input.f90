@@ -12,16 +12,7 @@ subroutine tglf_read_input
   use tglf_interface
 
   implicit none
-  
-  ! It's useless. I wanted to see if this was the problem.     
-  CHARACTER(len=255) :: cwd
-  CALL getcwd(cwd)
-  if (tglf_path_in == "") then
-     write(*,*) 'tglf_read_input --> tglf_path_in is blank'
-     tglf_path_in=trim(cwd) // '/'
-     write(*,*) 'tglf_read_input --> tglf_path_in is now: ', trim(tglf_path_in)
-  endif  
-  
+
   open(unit=1,file=trim(tglf_path_in)//'input.tglf.gen',status='old')
 
   read(1,*) tglf_use_transport_model_in

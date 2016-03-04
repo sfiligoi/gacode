@@ -140,6 +140,7 @@ subroutine tglf_run()
 
   if (tglf_use_transport_model_in) then
      
+     ! Call the NN or TGLF if the NN is not accurate
      #ifdef MPI_TGLF
      	 call tglf_tm_mpi
      #else
@@ -208,7 +209,6 @@ subroutine tglf_run()
      if (tglf_error_status.EQ.0) then
      	CALL tglf_harvest_local
      endif
-
 
   else
 
