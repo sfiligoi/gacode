@@ -44,6 +44,7 @@ OBJECTS = ${TGLFISNAN}      \
           tglf_run_mpi.o    \
           tglf_TM_mpi.o     \
           tglf_harvest.o    \
+          tglf_nn_TM.o      
 
 .SUFFIXES : .o .f90 .F90
 

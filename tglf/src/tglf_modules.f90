@@ -245,6 +245,7 @@
       REAL :: nn_thrsh_energy_in = -1.0
     !REAL :: nn_thrsh_particle_in = 0.1
     !REAL :: nn_thrsh_momentum_in = 0.1
+      LOGICAL :: valid_nn = .FALSE.
     
      
 !
