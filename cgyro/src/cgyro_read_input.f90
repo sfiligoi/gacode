@@ -65,6 +65,7 @@ subroutine cgyro_read_input
   call readbc_real(gamma_e_decay)
   call readbc_int(hiprec_flag)
   call readbc_int(udsymmetry_flag)
+  call readbc_int(shear_model)
 
   call readbc_real(rmin)
   call readbc_real(rmaj)

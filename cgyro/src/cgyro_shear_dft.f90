@@ -19,52 +19,29 @@ subroutine cgyro_shear_dft
 
   implicit none
 
-  integer :: ir
-  real :: dp
-  complex, dimension(n_theta,nv_loc) :: a1
+  integer :: j,jx,it
 
+  include 'fftw3.f03'
 
-  dp = omega_eb*delta_t
-  do i=1,n_radial
-     p = i-n_radial/2-1
-     do ip=1,n_radial
-        m = ip-n_radial/2-1
-        cr(i,ip) = exp(i_c*m*p*(pi_2/n_x))
+  do iv=nv1,nv2
+     iv_loc = iv-nv1+1
+     do it=1,n_theta
+        
+        fp(:) = h_x(ic_c(:,it),iv_loc)
+
+        call fftw_execute_dft(plan_p2j,fp,fj)
+        do j=1,n_radial
+           jx = j-1
+           if (jx > n_radial/2-1) jx=jx-n_radial
+           fj(j) = exp(2*i_c*pi*jx*omega_eb*delta_t/n_radial)*fj(j)
+        enddo
+        call fftw_execute_dft(plan_j2p,fj,fp)
+
+        h_x(ic_c(:,it),iv_loc) = fp(:)
+
      enddo
   enddo
 
-  ! Forward shearing
-  if (gtime > 0.5) then
+  call cgyro_field_c
 
-     gtime = gtime-1.0
-
-     a1 = h_x(ic_c(1,:),:)
-
-     do ir=2,n_radial
-        h_x(ic_c(ir-1,:),:) = h_x(ic_c(ir,:),:)
-     enddo
-
-     h_x(ic_c(n_radial,:),:) = a1*gamma_e_decay
-
-     call cgyro_field_c
-
-  endif
-
-  ! Backward shearing
-  if (gtime < -0.5) then
-
-     gtime = gtime+1.0
-
-     a1 = h_x(ic_c(n_radial,:),:) 
-
-     do ir=n_radial-1,1,-1
-        h_x(ic_c(ir+1,:),:) = h_x(ic_c(ir,:),:)
-     enddo
-
-     h_x(ic_c(1,:),:) = a1*gamma_e_decay
-
-     call cgyro_field_c
-
-  endif
-
-end subroutine cgyro_shear
+end subroutine cgyro_shear_dft

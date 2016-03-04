@@ -222,6 +222,12 @@ subroutine cgyro_init_manager
      ! Create plans once and for all, with global arrays fx,ux
      plan_c2r = fftw_plan_dft_c2r_2d(nx,ny,fx,ux,FFTW_PATIENT)
      plan_r2c = fftw_plan_dft_r2c_2d(nx,ny,ux,fx,FFTW_PATIENT)
+
+     allocate(fj(nx))
+     allocate(fp(nx))
+
+     plan_j2p = fftw_plan_dft_1d(n,fj,fp,FFTW_FORWARD,FFTW_PATIENT)
+     plan_p2j = fftw_plan_dft_1d(n,fp,fj,FFTW_BACKWARD,FFTW_PATIENT)
 #ifdef _OPENACC
      howmany = nsplit
      allocate( fxmany(0:ny/2,0:nx-1,howmany) )

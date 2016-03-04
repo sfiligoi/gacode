@@ -73,6 +73,7 @@ module cgyro_globals
   real :: gamma_e_decay
   integer :: hiprec_flag
   integer :: udsymmetry_flag
+  integer :: shear_model
   !
   ! Geometry input
   !
@@ -286,18 +287,19 @@ module cgyro_globals
   real, dimension(:,:,:), allocatable :: flux_loc
   real, dimension(:,:,:), allocatable :: flux
   !
+  ! Nonlinear plans
   type(C_PTR) :: plan_r2c
   type(C_PTR) :: plan_c2r
+  ! Shear plans
+  type(C_PTR) :: plan_j2p
+  type(C_PTR) :: plan_p2j
+  ! GPU-FFTW plans
 #ifdef _OPENACC
-
   integer(c_int) :: cu_plan_r2c_many
   integer(c_int) :: cu_plan_c2r_many
-
   complex, dimension(:,:,:),allocatable :: fxmany,fymany,gxmany,gymany
   real, dimension(:,:,:), allocatable :: uxmany,uymany
   real, dimension(:,:,:), allocatable :: vxmany,vymany,uvmany
-
-
 #endif
   !  
   integer :: nx,ny
@@ -312,6 +314,8 @@ module cgyro_globals
   complex, dimension(:,:),allocatable :: fy
   complex, dimension(:,:),allocatable :: gx
   complex, dimension(:,:),allocatable :: gy
+  complex, dimension(:), allocatable :: fp
+  complex, dimension(:), allocatable :: fj
   !
   ! Work arrays
   !
