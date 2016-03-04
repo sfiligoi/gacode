@@ -7,17 +7,20 @@
 !  space, compute the convolution (uv), and transform back to the 
 !  spectral form using a real-to-complex transform (r2c).
 !  
-!  NOTE: Need to be careful with (p=-nr/2,n=0) component.
+! NOTE: Need to be careful with (p=-nr/2,n=0) component.
 !-----------------------------------------------------------------
 
 subroutine cgyro_nl_fftw(ij)
 
   use timer_lib
   use parallel_lib
-
   use cgyro_globals
 
+  implicit none
+
   integer, intent(in) :: ij
+  integer :: ix,iy
+  integer :: ir,it,in
   integer :: j,p,iexch
 
   complex :: f0,g0

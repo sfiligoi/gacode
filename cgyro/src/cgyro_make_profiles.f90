@@ -32,7 +32,7 @@ subroutine cgyro_make_profiles
      ! GK electrons
      ae_flag = 0
      call cgyro_info('Using gyrokinetic electrons.')
-  
+
   else
      call cgyro_error('ERROR: (CGYRO) Only one electron species allowed.')
      return
@@ -93,7 +93,7 @@ subroutine cgyro_make_profiles
         temp_ele = temp(is_ele)
         mass_ele = mass(is_ele)
      endif
-    
+
 
      ! Normalizing quantities
      dens_norm       = dens_ele
@@ -109,7 +109,7 @@ subroutine cgyro_make_profiles
           / (mass_deuterium)) * 1.0e4
 
      ! Compute collision frequency
-     
+
      cc = sqrt(2.0) * pi * charge_norm_fac**4 &
           * 1.0 / (4.0 * pi * 8.8542)**2 &
           * 1.0 / (sqrt(mass_deuterium) * temp_norm_fac**1.5) &
@@ -126,12 +126,12 @@ subroutine cgyro_make_profiles
      !                           ( 1e4*B[T] )^2
      !
      !      = 4.027e-3 n[1e19/m^3]*T[keV]/B[T]^2
-     
+
      betae_unit = 4.027e-3 * dens_ele * temp_ele / b_unit**2
 
      ! Debye length (from NRL plasma formulary):
      ! Use input lambda_debye as scaling parameter
-     
+
      lambda_debye = 7.43 * sqrt((1e3*temp_norm)/(1e13*dens_norm))/a_meters 
 
      ! Normalize
@@ -179,7 +179,7 @@ subroutine cgyro_make_profiles
   else
 
      q = abs(q)*(ipccw)*(btccw)
-     
+
      if (ae_flag == 1) then
         dens_ele = ne_ade
         temp_ele = te_ade
@@ -191,15 +191,15 @@ subroutine cgyro_make_profiles
      endif
 
      do is=1,n_species
-        
+
         ! thermal velocity
         vth(is) = sqrt(temp(is)/mass(is))
-        
+
         ! collision frequency
         nu(is) = nu_ee *(1.0*z(is))**4 &
              * dens(is) / dens_ele &
              * sqrt(mass_ele/mass(is)) * (temp_ele/temp(is))**1.5
-        
+
      enddo
 
   endif
@@ -214,7 +214,7 @@ subroutine cgyro_make_profiles
      k_theta = q/rmin
      rho     = abs(ky/k_theta)*(-btccw)
      length  = abs(box_size/(s*k_theta))
-     
+
      k_theta = 0
 
      call cgyro_info('Triggered zonal flow test.')
@@ -261,12 +261,19 @@ subroutine cgyro_make_profiles
   ! ExB shear
   !
   if (abs(gamma_e) > 1e-10) then
-     call cgyro_info('Triggered ExB shear.') 
      omega_eb = k_theta*length*gamma_e/(2*pi)
+     select case (shear_method)
+     case (1)
+        call cgyro_info('Integer-shift (Hammett) ExB shear method.') 
+     case (2)
+        call cgyro_info('Continuous-shift ExB shear method.') 
+     end select
+  else
+     omega_eb = 0.0
+     shear_method = 0
+     call cgyro_info('No ExB shear.') 
   endif
   !------------------------------------------------------------------------
-
-  !-------------------------------------------------------------
 
   !-------------------------------------------------------------
   ! Fourier index mapping
@@ -280,8 +287,6 @@ subroutine cgyro_make_profiles
      px(ir) = -n_radial/2 + (ir-1)
   enddo
   if (zf_test_flag == 1) px(1) = 1
-  !-------------------------------------------------------------
-
   !-------------------------------------------------------------
 
 end subroutine cgyro_make_profiles

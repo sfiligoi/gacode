@@ -68,10 +68,10 @@ subroutine cgyro_kernel
      call cgyro_step_gk
 
      ! Spectral ExB shear
-     select case(shear_model)
-     case(2)
+     select case(shear_method)
+     case(1)
         call cgyro_shear
-     case(3)
+     case(2)
         call cgyro_shear_dft
      end select
         

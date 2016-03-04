@@ -73,7 +73,7 @@ module cgyro_globals
   real :: gamma_e_decay
   integer :: hiprec_flag
   integer :: udsymmetry_flag
-  integer :: shear_model
+  integer :: shear_method
   !
   ! Geometry input
   !
@@ -119,8 +119,10 @@ module cgyro_globals
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------
-  ! MPI variables and pointers
+  ! MPI/OpenMP variables and pointers
   ! 
+  integer :: n_omp
+  !
   integer :: i_err
   integer :: i_proc
   integer :: i_proc_1
@@ -138,11 +140,11 @@ module cgyro_globals
   integer, dimension(:), allocatable :: recv_status
   !
   ! Pointers
-  !
   integer :: nv,iv
   integer :: nv_loc,iv_loc
   integer :: nc,ic
   integer :: nc_loc,ic_loc
+  integer, dimension(:), allocatable :: ic_locv,iv_locv
   integer, dimension(:), allocatable :: ie_v
   integer, dimension(:), allocatable :: ix_v
   integer, dimension(:), allocatable :: is_v
@@ -193,7 +195,6 @@ module cgyro_globals
   integer :: io_control
   integer :: signal
   integer :: restart_flag
-  integer :: n_theta_plot=1
   !
   ! Standard precision for IO (there are optionally reset to higher precision later)
   character(len=8)  :: fmtstr    ='(es11.4)'
@@ -233,8 +234,7 @@ module cgyro_globals
   !---------------------------------------------------------------
   ! Numerical/work arrays and dimensions
   !
-  ! Velocity space
-  ! 
+  ! Velocity space 
   integer, dimension(:), allocatable :: indx_xi, px
   real, dimension(:), allocatable :: energy, vel, w_e
   real, dimension(:), allocatable :: xi, w_xi
@@ -242,7 +242,6 @@ module cgyro_globals
   real, dimension(:,:), allocatable :: e_deriv1_mat, e_deriv2_mat
   !
   ! Parallel streaming
-  !
   real, dimension(:), allocatable :: theta
   real, dimension(:), allocatable :: uderiv
   real, dimension(:), allocatable :: cderiv
@@ -252,7 +251,6 @@ module cgyro_globals
   complex, dimension(:,:), allocatable :: dtheta_up
   !
   ! Distributions
-  !
   complex, dimension(:,:,:), allocatable :: rhs
   complex, dimension(:,:), allocatable :: h_x
   complex, dimension(:,:), allocatable :: g_x
@@ -271,7 +269,6 @@ module cgyro_globals
   real, dimension(:,:,:), allocatable :: jvec_v
   !
   ! Fields
-  !
   real, dimension(:,:), allocatable :: fcoef
   real, dimension(:,:), allocatable :: gcoef
   real, dimension(:,:), allocatable :: res_norm
@@ -290,9 +287,11 @@ module cgyro_globals
   ! Nonlinear plans
   type(C_PTR) :: plan_r2c
   type(C_PTR) :: plan_c2r
+  !
   ! Shear plans
   type(C_PTR) :: plan_j2p
   type(C_PTR) :: plan_p2j
+  !
   ! GPU-FFTW plans
 #ifdef _OPENACC
   integer(c_int) :: cu_plan_r2c_many
@@ -301,10 +300,12 @@ module cgyro_globals
   real, dimension(:,:,:), allocatable :: uxmany,uymany
   real, dimension(:,:,:), allocatable :: vxmany,vymany,uvmany
 #endif
-  !  
+  ! 
+  ! 2D FFT dimensions 
   integer :: nx,ny
   integer :: nx0,ny0
   !
+  ! 2D FFT work arrays
   real, dimension(:,:), allocatable :: ux
   real, dimension(:,:), allocatable :: uy
   real, dimension(:,:), allocatable :: vx
@@ -314,28 +315,28 @@ module cgyro_globals
   complex, dimension(:,:),allocatable :: fy
   complex, dimension(:,:),allocatable :: gx
   complex, dimension(:,:),allocatable :: gy
+  !
+  ! 1D FFT work arrays
   complex, dimension(:), allocatable :: fp
   complex, dimension(:), allocatable :: fj
   !
   ! Work arrays
-  !
   complex, dimension(:,:), allocatable :: f_balloon
   real :: field_error
   !
   ! LAPACK work arrays 
-  !
   real, dimension(:), allocatable :: work  
   integer, dimension(:), allocatable :: i_piv
   integer :: info
   !
-  ! Implicit streaminggk/field matrices
-  !
+  ! Implicit streaming gk/field matrices
   complex, dimension(:,:), allocatable   :: gkvec
   complex, dimension(:,:), allocatable   :: fieldmat
   integer, dimension(:,:), allocatable   :: idfield
   integer, dimension(:),   allocatable   :: i_piv_field
   complex, dimension(:),   allocatable   :: fieldvec, fieldvec_loc
-  ! umfpack
+  !
+  ! UMFPACK arrays
   real,    dimension(:,:), allocatable :: gksp_cntl
   integer, dimension(:,:), allocatable :: gksp_icntl, gksp_keep
   real,    dimension(20) ::  gksp_rinfo
@@ -345,22 +346,18 @@ module cgyro_globals
   complex, dimension(:), allocatable   :: gksvec, gkwvec 
   integer :: gksp_nelem, gksp_nmax
   !
-  ! Some field solve parameters
-  !
+  ! Field solve variables
   real :: sum_den_h
   real, dimension(:), allocatable :: sum_den_x, sum_cur_x
   !
   ! n=0 test variables
-  !
   real, dimension(:,:,:), allocatable :: hzf, xzf 
   real, dimension(:), allocatable :: pvec_in, pvec_outr, pvec_outi
   !
   ! Collision operator
-  !
   real, dimension(:,:,:), allocatable :: cmat
   ! 
   ! Equilibrium/geometry arrays
-  !
   integer :: it0
   real :: d_theta
   real, dimension(:,:), allocatable   :: thetab
@@ -377,7 +374,6 @@ module cgyro_globals
   !
   ! Number of gridpoints for Miller geometry integration grid
   integer, parameter :: geo_ntheta=1001 
-  !
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------
@@ -388,9 +384,6 @@ module cgyro_globals
   integer :: geo_ny
   real, dimension(:,:), allocatable :: geo_yin
   !---------------------------------------------------------------
-
-  integer :: n_omp
-  integer, dimension(:), allocatable :: ic_locv,iv_locv
 
   real :: total_memory
   

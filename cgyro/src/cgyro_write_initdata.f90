@@ -179,7 +179,6 @@ subroutine cgyro_write_initdata
      write(io,'(i4)') n_theta
      write(io,'(i4)') n_energy
      write(io,'(i4)') n_xi
-     write(io,'(i4)') n_theta_plot
      write(io,'(i4)') box_size
      write(io,'(1pe12.5)') length/rho
      write(io,'(i4)') px(:)

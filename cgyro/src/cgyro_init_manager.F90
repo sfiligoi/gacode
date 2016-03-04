@@ -188,6 +188,15 @@ subroutine cgyro_init_manager
   call cgyro_init_h
   call timer_lib_out('str_init')
 
+  !---------------------------------------------------------------
+  ! 1D FFT for ExB shear
+  allocate(fj(0:n_radial-1))
+  allocate(fp(0:n_radial-1))
+
+  plan_j2p = fftw_plan_dft_1d(n_radial,fj,fp,FFTW_FORWARD,FFTW_PATIENT)
+  plan_p2j = fftw_plan_dft_1d(n_radial,fp,fj,FFTW_BACKWARD,FFTW_PATIENT)
+  !---------------------------------------------------------------
+
   ! Initialize nonlinear dimensions and arrays 
   if (nonlinear_method == 1) then
 
@@ -223,11 +232,6 @@ subroutine cgyro_init_manager
      plan_c2r = fftw_plan_dft_c2r_2d(nx,ny,fx,ux,FFTW_PATIENT)
      plan_r2c = fftw_plan_dft_r2c_2d(nx,ny,ux,fx,FFTW_PATIENT)
 
-     allocate(fj(nx))
-     allocate(fp(nx))
-
-     plan_j2p = fftw_plan_dft_1d(n,fj,fp,FFTW_FORWARD,FFTW_PATIENT)
-     plan_p2j = fftw_plan_dft_1d(n,fp,fj,FFTW_BACKWARD,FFTW_PATIENT)
 #ifdef _OPENACC
      howmany = nsplit
      allocate( fxmany(0:ny/2,0:nx-1,howmany) )
@@ -275,9 +279,6 @@ subroutine cgyro_init_manager
      &  merge(CUFFT_C2R,CUFFT_Z2D,kind(uxmany).eq.singlePrecision),      &
      &                                    howmany )
       
-
-
-
       idist = size(uxmany,1)*size(uxmany,2)
       odist = size(fxmany,1)*size(fxmany,2)
       inembed = size(uxmany,1)
@@ -296,7 +297,6 @@ subroutine cgyro_init_manager
      & merge(CUFFT_R2C,CUFFT_D2Z,kind(uxmany).eq.singlePrecision),       &
      &                     howmany )
 #endif
-
 
   endif
 

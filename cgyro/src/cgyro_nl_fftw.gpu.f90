@@ -1,5 +1,5 @@
 !-----------------------------------------------------------------
-! cgyro_nl_fftw.gpu.f90
+! cgyro_nl_fftw.gpu.f90 [GPU version]
 !
 ! PURPOSE:
 !  Evaluate nonlinear bracket with dealiased FFT.  It is natural 
@@ -7,7 +7,7 @@
 !  space, compute the convolution (uv), and transform back to the 
 !  spectral form using a real-to-complex transform (r2c).
 !  
-!  NOTE: Need to be careful with (p=-nr/2,n=0) component.
+! NOTE: Need to be careful with (p=-nr/2,n=0) component.
 !-----------------------------------------------------------------
 
 subroutine cgyro_nl_fftw(ij)
@@ -90,8 +90,6 @@ subroutine cgyro_nl_fftw(ij)
   enddo
   enddo
 !$acc end parallel
-
-
 
   if (use_acc) then
 !$acc parallel 
