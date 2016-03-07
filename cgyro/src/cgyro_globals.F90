@@ -74,6 +74,7 @@ module cgyro_globals
   integer :: hiprec_flag
   integer :: udsymmetry_flag
   integer :: shear_method
+  integer :: shear_pad
   !
   ! Geometry input
   !

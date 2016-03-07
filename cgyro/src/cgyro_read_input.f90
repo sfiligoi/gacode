@@ -66,6 +66,7 @@ subroutine cgyro_read_input
   call readbc_int(hiprec_flag)
   call readbc_int(udsymmetry_flag)
   call readbc_int(shear_method)
+  call readbc_int(shear_pad)
 
   call readbc_real(rmin)
   call readbc_real(rmaj)
