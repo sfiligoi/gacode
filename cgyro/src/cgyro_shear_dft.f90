@@ -26,7 +26,6 @@ subroutine cgyro_shear_dft
   include 'fftw3.f03'
 
   a = omega_eb*delta_t
-  a = 1.0
 
   nxs = n_radial+2*shear_pad
 
