@@ -95,10 +95,6 @@ subroutine cgyro_check
      return
   end select
 
-  if (collision_model == 1 .and. ae_flag == 1) then
-     call cgyro_error('Collision_model=1 requires kinetic electrons')
-     return
-  endif
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
@@ -118,21 +114,36 @@ subroutine cgyro_check
   case (4) 
      call cgyro_info('Collision model 4: Sugama')
 
+  case(5)
+     call cgyro_info('Collision model 5: Simple Lorentz ee+ei')
+
   case default
      call cgyro_error('Invalid value for collision_model')
      return
 
   end select
 
-  select case (collision_mom_restore)
-  case(0)
-     call cgyro_info('Collision momentum restoring: off')
-  case(1)
-     call cgyro_info('Collision momentum restoring: on')
-  case default
-     call cgyro_error('Invalid value for collision_mom_restore')
-     return
-  end select
+  if (collision_model /= 5) then
+     select case (collision_mom_restore)
+     case(0)
+        call cgyro_info('Collision momentum restoring: off')
+     case(1)
+        call cgyro_info('Collision momentum restoring: on')
+     case default
+        call cgyro_error('Invalid value for collision_mom_restore')
+        return
+     end select
+
+     select case (collision_field_model)
+     case(0)
+        call cgyro_info('Collision field corrections : off')
+     case (1)
+        call cgyro_info('Collision field corrections : on')
+     case default
+        call cgyro_error('Invalid value for collision_field_model')
+        return
+     end select
+  endif
 
   if (collision_model == 4) then
      select case (collision_ene_diffusion)
@@ -164,15 +175,6 @@ subroutine cgyro_check
      end select
   endif
 
-  select case (collision_field_model)
-  case(0)
-     call cgyro_info('Collision field corrections : off')
-  case (1)
-     call cgyro_info('Collision field corrections : on')
-  case default
-     call cgyro_error('Invalid value for collision_kperp')
-     return
-  end select
   !
   !------------------------------------------------------------------------
 

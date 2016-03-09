@@ -122,7 +122,11 @@ subroutine cgyro_check_memory(datafile)
      write(io,*) 'Collision operator'
      write(io,*)
 
-     call alloc_add(io,(8.0*nv)*nv*nc_loc,'cmat')
+     if(collision_model == 5) then
+        call alloc_add(io,(8.0*n_xi)*n_xi*n_species*n_energy*n_theta,'cmat')
+     else
+        call alloc_add(io,(8.0*nv)*nv*nc_loc,'cmat')
+     endif
 
      if (implicit_flag == 1) then
         write(io,*)

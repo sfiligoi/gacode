@@ -25,7 +25,6 @@ subroutine cgyro_read_input
   call readbc_int(print_step)
   call readbc_int(restart_step)
   call readbc_real(freq_tol)
-  call readbc_int(restart_write)
   call readbc_int(restart_mode)
   call readbc_real(up_radial)
   call readbc_real(up_theta)

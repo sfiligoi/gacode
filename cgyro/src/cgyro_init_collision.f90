@@ -15,10 +15,14 @@ subroutine cgyro_init_collision
   integer :: jv
   integer :: is,ir,it,ix,ie,js,je,jx,ks
   ! parameters for matrix solve
-  real, dimension(:,:), allocatable :: amat, bmat
+  real, dimension(:,:), allocatable :: amat
   real, dimension(:,:,:,:,:,:), allocatable :: ctest
   real, dimension(:,:,:,:,:), allocatable :: bessel
-  logical, parameter :: use_dgetri = .false.
+
+  if(collision_model == 5) then
+     call cgyro_init_collision_simple
+     return
+  endif
 
   allocate(nu_d(n_energy,n_species,n_species))
   allocate(nu_s(n_energy,n_species,n_species))
@@ -515,9 +519,7 @@ subroutine cgyro_init_collision
   end if
 
   ! matrix solve parameters
-  allocate(work(nv*nv))
   allocate(i_piv(nv))
-  allocate(bmat(nv,nv))
 
   ! set-up the collision matrix
   ic_loc = 0
@@ -531,7 +533,7 @@ subroutine cgyro_init_collision
 !$omp& shared(k_perp,vth,mass,z,bmag,nu_d,xi,nu_par,w_e,w_xi) &
 !$omp& private(ic,ic_loc,it,ir,info) &
 !$omp& private(iv,is,ix,ie,jv,js,jx,je,ks) &
-!$omp& private(amat,bmat,work,i_piv) &
+!$omp& private(amat,i_piv) &
 !$omp& shared(cmat)
   do ic=nc1,nc2
      !ic_loc = ic_loc+1
@@ -678,25 +680,14 @@ subroutine cgyro_init_collision
 
      ! H_bar = (1 - dt/2 C - Poisson)^(-1) * (1 + dt/2 C + Poisson) H
      ! Lapack factorization and inverse of LHS
-     if (use_dgetri) then
-       call DGETRF(nv,nv,cmat(:,:,ic_loc),nv,i_piv,info)
-       call DGETRI(nv,cmat(:,:,ic_loc),nv,i_piv,work,size(work),info)
-       ! Matrix multiply
-       call DGEMM('N','N',nv,nv,nv,num1,cmat(:,:,ic_loc),&
-          nv,amat,nv,num0,bmat,nv)
-     else
-       call DGESV(nv,nv,cmat(:,:,ic_loc),size(cmat,1), &
-                  i_piv,amat,size(amat,1),info)
-       bmat(:,:) = amat(:,:)
-     endif
-     cmat(:,:,ic_loc) = bmat(:,:)
+     call DGESV(nv,nv,cmat(:,:,ic_loc),size(cmat,1), &
+          i_piv,amat,size(amat,1),info)
+     cmat(:,:,ic_loc) = amat(:,:)
 
   enddo
 !$acc  enter data copyin(cmat)
 
   deallocate(amat)
-  deallocate(bmat)
-  deallocate(work)
   deallocate(i_piv)
   deallocate(nu_d)
   deallocate(nu_s)

@@ -148,9 +148,14 @@ subroutine cgyro_init_manager
         endif
      endif
 
-     allocate(cmat(nv,nv,nc_loc))
+     if(collision_model == 5) then
+        allocate(cmat_simple(n_xi,n_xi,n_species,n_energy,n_theta))
+     else
+        allocate(cmat(nv,nv,nc_loc))
+     endif
 
   endif
+  
 
   ! Compute equilibrium quantities (even in test mode)
   GEO_model_in    = geo_numeq_flag
