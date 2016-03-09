@@ -1,5 +1,5 @@
 !-----------------------------------------------------------------
-! cgyro_nl_fftw.gpu.f90
+! cgyro_nl_fftw.gpu.f90 [GPU version]
 !
 ! PURPOSE:
 !  Evaluate nonlinear bracket with dealiased FFT.  It is natural 
@@ -7,7 +7,7 @@
 !  space, compute the convolution (uv), and transform back to the 
 !  spectral form using a real-to-complex transform (r2c).
 !  
-!  NOTE: Need to be careful with (p=-nr/2,n=0) component.
+! NOTE: Need to be careful with (p=-nr/2,n=0) component.
 !-----------------------------------------------------------------
 
 subroutine cgyro_nl_fftw(ij)
@@ -27,10 +27,10 @@ subroutine cgyro_nl_fftw(ij)
   integer :: it,ir,in,ix,iy
   integer :: i1,i2
 
-  complex*16 :: f0,g0
-  complex*16, dimension(:,:), allocatable :: fpack
-  complex*16, dimension(:,:), allocatable :: gpack
-  real*8 :: inv_nxny
+  complex :: f0,g0
+  complex, dimension(:,:), allocatable :: fpack
+  complex, dimension(:,:), allocatable :: gpack
+  real :: inv_nxny
 
   logical, parameter :: use_cufft = .true.
   logical, parameter :: use_acc = .true.
@@ -75,25 +75,35 @@ subroutine cgyro_nl_fftw(ij)
 !$acc& pcreate(uvmany)
 #endif
 
-!$acc kernels
-    fxmany(:,:,:) = 0
-    fymany(:,:,:) = 0
-    gxmany(:,:,:) = 0
-    gymany(:,:,:) = 0
-!$acc end kernels
-
-
+!$acc parallel
+!$acc loop gang
+  do  j=lbound(fxmany,3),ubound(fxmany,3)
+!$acc loop worker
+  do ix=lbound(fxmany,2),ubound(fxmany,2)
+!$acc loop vector
+  do iy=lbound(fxmany,1),ubound(fxmany,1)
+    fxmany(iy,ix,j) = 0
+    fymany(iy,ix,j) = 0
+    gxmany(iy,ix,j) = 0
+    gymany(iy,ix,j) = 0
+  enddo
+  enddo
+  enddo
+!$acc end parallel
 
   if (use_acc) then
-!$acc kernels 
+!$acc parallel 
+!$acc loop gang
   do j=1,nsplit
 
      ! Array mapping
+!$acc loop worker private(p,ix)
      do ir=1,n_radial
 
         p  = ir-1-nx0/2
         ix = p
         if (ix < 0) ix = ix+nx  
+!$acc   loop vector private(iy,f0,g0)
         do in=1,n_toroidal
            iy = in-1
            f0 = i_c*f_nl(ir,j,in)
@@ -105,7 +115,7 @@ subroutine cgyro_nl_fftw(ij)
       enddo
       enddo
     enddo
-!$acc end kernels
+!$acc end parallel
   else
 !$acc update host(f_nl,g_nl) &
 !$acc& host(fxmany,gxmany,fymany,gymany)
@@ -138,15 +148,18 @@ subroutine cgyro_nl_fftw(ij)
 
 
      if (kxfilter_flag == 1) then
-!$acc  kernels
-!$acc  loop independent gang
+!$acc  parallel
+!$acc  loop gang
        do j=1,nsplit
-        fxmany(:,-nx0/2+nx,j) = 0.0
-        fymany(:,-nx0/2+nx,j) = 0.0
-        gxmany(:,-nx0/2+nx,j) = 0.0
-        gymany(:,-nx0/2+nx,j) = 0.0
+!$acc  loop vector
+       do iy=lbound(fxmany,1),ubound(fxmany,1)
+        fxmany(iy,-nx0/2+nx,j) = 0.0
+        fymany(iy,-nx0/2+nx,j) = 0.0
+        gxmany(iy,-nx0/2+nx,j) = 0.0
+        gymany(iy,-nx0/2+nx,j) = 0.0
        enddo
-!$acc  end kernels
+       enddo
+!$acc  end parallel
      endif
 
    if (use_cufft) then
@@ -207,17 +220,19 @@ subroutine cgyro_nl_fftw(ij)
      inv_nxny = dble(1)/dble(nx*ny)
 
    if (use_acc) then
-!$acc  kernels 
-!$acc loop independent gang
+!$acc  parallel 
+!$acc loop gang
    do j=1,nsplit
+!$acc loop worker
    do ix=lbound(uvmany,2),ubound(uvmany,2)
+!$acc loop vector
    do iy=lbound(uvmany,1),ubound(uvmany,1)
     uvmany(iy,ix,j) = (uxmany(iy,ix,j)*vymany(iy,ix,j)- &
                        uymany(iy,ix,j)*vxmany(iy,ix,j))*inv_nxny
    enddo
    enddo
    enddo
-!$acc  end kernels
+!$acc  end parallel
    else
 !$acc update host(uxmany,uymany,vxmany,vymany)
 !$acc wait
@@ -273,20 +288,22 @@ subroutine cgyro_nl_fftw(ij)
 
      
    if (use_acc) then
-!$acc kernels  
+!$acc parallel  
+!$acc loop gang
      do j=1,nsplit
+!$acc loop worker private(ix)
      do ir=1,n_radial 
         ix = ir-1-nx0/2
-
         if (ix < 0) ix = ix+nx
 
+!$acc   loop vector private(iy)
         do in=1,n_toroidal
            iy = in-1
            g_nl(ir,j,in) = fxmany(iy,ix,j)
         enddo
      enddo
      enddo
-!$acc end kernels
+!$acc end parallel
 !$acc wait
   else
 !$acc update host(fxmany,g_nl)
@@ -339,7 +356,7 @@ subroutine cgyro_nl_fftw(ij)
   ! RHS -> -[f,g] = [f,g]_{r,-alpha}
 
 !$omp workshare
-  rhs(ij,:,:) = rhs(ij,:,:)+((q*rho/rmin)*(2*pi/length))*psi(:,:)
+  rhs(:,:,ij) = rhs(:,:,ij)+((q*rho/rmin)*(2*pi/length))*psi(:,:)
 !$omp end workshare
 
 end subroutine cgyro_nl_fftw

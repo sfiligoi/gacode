@@ -50,9 +50,6 @@ subroutine cgyro_read_restart
 
   call MPI_BCAST(t_current,&
        1,MPI_DOUBLE_PRECISION,0,CGYRO_COMM_WORLD,i_err)
-
-  call MPI_BCAST(gtime,&
-       1,MPI_DOUBLE_PRECISION,0,CGYRO_COMM_WORLD,i_err)
   !---------------------------------------------------------
 
   filemode = IOR(MPI_MODE_RDWR,MPI_MODE_CREATE)

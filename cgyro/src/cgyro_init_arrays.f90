@@ -306,7 +306,7 @@ subroutine cgyro_init_arrays
      do ir=1,n_radial
         do it=1,n_theta
            hzf(ir,it,it) = k_perp(ic_c(ir,it))**2 * lambda_debye**2 &
-                * dens_ele / temp_ele + sum_den_h
+                * dens_ele/temp_ele + sum_den_h
            do jt=1,n_theta
               hzf(ir,it,jt) = hzf(ir,it,jt) &
                    - dens_ele/temp_ele*w_theta(jt)
@@ -327,11 +327,11 @@ subroutine cgyro_init_arrays
      xzf(:,:,:) = 0.0     
      do ir=1,n_radial
         do it=1,n_theta
-           xzf(ir,it,it) = k_perp(ic_c(ir,it))**2 * lambda_debye**2 &
-                * dens_ele / temp_ele + sum_den_x(ic_c(ir,it))
+           xzf(ir,it,it) = k_perp(ic_c(ir,it))**2*lambda_debye**2 &
+                * dens_ele/temp_ele+sum_den_x(ic_c(ir,it))
            do jt=1,n_theta
               xzf(ir,it,jt) = xzf(ir,it,jt) &
-                   - dens_ele / temp_ele * w_theta(jt)
+                   - dens_ele/temp_ele*w_theta(jt)
            enddo
         enddo
      enddo
@@ -354,16 +354,8 @@ subroutine cgyro_init_arrays
 
 
   !-------------------------------------------------------------------------
-  ! Streaming arrays
+  ! Derivative and dissipation stencils
   !
-  ! cyclic index (for theta-periodicity)
-  do it=1,n_theta
-     thcyc(it-n_theta) = it
-     thcyc(it) = it
-     thcyc(it+n_theta) = it
-  enddo
-!$acc enter data copyin(thcyc)
-
   allocate(cderiv(-nup_theta:nup_theta))
   allocate(uderiv(-nup_theta:nup_theta))
 
@@ -451,71 +443,56 @@ subroutine cgyro_init_arrays
      spec_uderiv(:) = (70-112*cos(u)+56*cos(2*u)-16*cos(3*u)+2*cos(4*u))/280
 
   end select
+  !-------------------------------------------------------------------------
 
+  !-------------------------------------------------------------------------
+  ! Streaming coefficient arrays
+  !
   if (ipccw*btccw < 0) then
      ccw_fac = -1
   else
      ccw_fac = 1
   endif
 
-
-  ! Indices for parallel streaming with upwinding
   do ir=1,n_radial
      do it=1,n_theta
         do id=-nup_theta,nup_theta
-           jt = thcyc(it+id)
+           jt = modulo(it+id-1,n_theta)+1
            if (it+id < 1) then
               thfac = exp(2*pi*i_c*k_theta*rmin)
-              jr = ir-n*box_size*ccw_fac
-              if (jr < 1) then
-                 jr = jr+n_radial
-              endif
-              if (jr > n_radial) then
-                 jr = jr-n_radial
-              endif
+              jr = modulo(ir-n*box_size*ccw_fac-1,n_radial)+1
            else if (it+id > n_theta) then
               thfac = exp(-2*pi*i_c*k_theta*rmin)
-              jr = ir+n*box_size*ccw_fac
-              if (jr > n_radial) then
-                 jr = jr-n_radial
-              endif
-              if(jr < 1) then
-                 jr = jr+n_radial
-              end if
+              jr = modulo(ir+n*box_size*ccw_fac-1,n_radial)+1
            else
               thfac = (1.0,0.0)
               jr = ir
            endif
            dtheta(ic_c(ir,it),id)    = cderiv(id)*thfac
            dtheta_up(ic_c(ir,it),id) = uderiv(id)*thfac*up_theta
-           icd_c(ic_c(ir,it),id)     = ic_c(jr,thcyc(it+id))
+           icd_c(ic_c(ir,it),id)     = ic_c(jr,modulo(it+id-1,n_theta)+1)
         enddo
      enddo
   enddo
-!$acc enter data copyin(dtheta,dtheta_up)
+!$acc enter data copyin(dtheta,dtheta_up,icd_c)
 
   ! Streaming coefficients (for speed optimization)
 
-  iv_loc = 0
 !$omp parallel do collapse(2) &
 !$omp& private(iv,ic,iv_loc,is,ix,ie,ir,it,carg)
   do iv=nv1,nv2
      do ic=1,nc
 
-        ! iv_loc = iv_loc+1
         iv_loc = iv-nv1+1
-
         is = is_v(iv)
         ix = ix_v(iv)
         ie = ie_v(iv)
-
-
         ir = ir_c(ic) 
         it = it_c(ic)
 
         ! omega_dalpha
         omega_cap_h(ic,iv_loc) = &
-             -omega_adrift(it,is)*energy(ie)*(1.0 + xi(ix)**2)*i_c*k_theta
+             -omega_adrift(it,is)*energy(ie)*(1.0+xi(ix)**2)*i_c*k_theta
 
         ! omega_dalpha - pressure component
         omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
@@ -543,8 +520,7 @@ subroutine cgyro_init_arrays
         omega_s(:,ic,iv_loc) = carg*jvec_c(:,ic,iv_loc)
 
      enddo
-
   enddo
-  !-------------------------------------------------------------------------
 !$acc enter data copyin(omega_cap_h,omega_h,omega_s)
+ 
 end subroutine cgyro_init_arrays

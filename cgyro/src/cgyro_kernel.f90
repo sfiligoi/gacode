@@ -68,8 +68,13 @@ subroutine cgyro_kernel
      call cgyro_step_gk
 
      ! Spectral ExB shear
-     if (abs(gamma_e) > 1e-10) call cgyro_shear
-
+     select case(shear_method)
+     case(1)
+        call cgyro_shear
+     case(2)
+        call cgyro_shear_dft
+     end select
+        
      ! Collisionless implicit streaming term step
      ! : returns new h_x, cap_h_x, fields 
      call cgyro_step_implicit_gk

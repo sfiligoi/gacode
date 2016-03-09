@@ -115,13 +115,12 @@ subroutine cgyro_init_manager
      allocate(flux_loc(n_radial,n_species,2))
      allocate(recv_status(MPI_STATUS_SIZE))
 
-     allocate(thcyc(1-n_theta:2*n_theta))
      allocate(icd_c(nc,-nup_theta:nup_theta))
      allocate(dtheta(nc,-nup_theta:nup_theta))
      allocate(dtheta_up(nc,-nup_theta:nup_theta))
 
      ! Velocity-distributed arrays
-     allocate(rhs(4,nc,nv_loc))
+     allocate(rhs(nc,nv_loc,4))
      allocate(h_x(nc,nv_loc))
      allocate(g_x(nc,nv_loc))
      allocate(psi(nc,nv_loc))
@@ -189,6 +188,15 @@ subroutine cgyro_init_manager
   call cgyro_init_h
   call timer_lib_out('str_init')
 
+  !---------------------------------------------------------------
+  ! 1D FFT for ExB shear
+  allocate(fj(0:n_radial-1+2*shear_pad))
+  allocate(fp(0:n_radial-1+2*shear_pad))
+
+  plan_j2p = fftw_plan_dft_1d(n_radial+2*shear_pad,fj,fp,FFTW_FORWARD,FFTW_PATIENT)
+  plan_p2j = fftw_plan_dft_1d(n_radial+2*shear_pad,fp,fj,FFTW_BACKWARD,FFTW_PATIENT)
+  !---------------------------------------------------------------
+
   ! Initialize nonlinear dimensions and arrays 
   if (nonlinear_method == 1) then
 
@@ -223,6 +231,7 @@ subroutine cgyro_init_manager
      ! Create plans once and for all, with global arrays fx,ux
      plan_c2r = fftw_plan_dft_c2r_2d(nx,ny,fx,ux,FFTW_PATIENT)
      plan_r2c = fftw_plan_dft_r2c_2d(nx,ny,ux,fx,FFTW_PATIENT)
+
 #ifdef _OPENACC
      howmany = nsplit
      allocate( fxmany(0:ny/2,0:nx-1,howmany) )
@@ -270,9 +279,6 @@ subroutine cgyro_init_manager
      &  merge(CUFFT_C2R,CUFFT_Z2D,kind(uxmany).eq.singlePrecision),      &
      &                                    howmany )
       
-
-
-
       idist = size(uxmany,1)*size(uxmany,2)
       odist = size(fxmany,1)*size(fxmany,2)
       inembed = size(uxmany,1)
@@ -292,10 +298,9 @@ subroutine cgyro_init_manager
      &                     howmany )
 #endif
 
-
   endif
 
   call GEO_alloc(0)
 
-!$acc enter data copyin(energy,xi)
+!$acc enter data copyin(energy,xi,vel)
 end subroutine cgyro_init_manager

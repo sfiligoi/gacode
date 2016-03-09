@@ -64,7 +64,7 @@ subroutine cgyro_write_initdata
      write(io,20) '  kappa:',kappa,'s_kappa:',s_kappa
      write(io,20) '  delta:',delta,'s_delta:',s_delta
      write(io,20) '   zeta:',zeta, ' s_zeta:',s_zeta
-     write(io,20) '   zmag:',zmag, ' s_zmag:',s_zmag
+     write(io,20) '   zmag:',zmag, ' dzmag:',dzmag
      write(io,*)
      write(io,20) '  betae:',betae_unit, ' beta_*:',beta_star
 
@@ -128,6 +128,20 @@ subroutine cgyro_write_initdata
      close(io)
 
   endif
+
+  if (silent_flag == 0 .and. i_proc == 0 .and. profile_model == 2) then
+
+     open(unit=io,file=trim(path)//'out.cgyro.expnorm',status='replace')
+     write (io,fmtstr,advance='no') a_meters
+     write (io,fmtstr,advance='no') b_unit
+     write (io,fmtstr,advance='no') dens_norm
+     write (io,fmtstr,advance='no') temp_norm
+     write (io,fmtstr,advance='no') vth_norm
+     write (io,*)
+     close(io)
+
+  endif
+
   !----------------------------------------------------------------------------
 
   !----------------------------------------------------------------------------
@@ -165,7 +179,6 @@ subroutine cgyro_write_initdata
      write(io,'(i4)') n_theta
      write(io,'(i4)') n_energy
      write(io,'(i4)') n_xi
-     write(io,'(i4)') n_theta_plot
      write(io,'(i4)') box_size
      write(io,'(1pe12.5)') length/rho
      write(io,'(i4)') px(:)

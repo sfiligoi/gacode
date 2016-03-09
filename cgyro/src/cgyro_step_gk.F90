@@ -22,23 +22,23 @@ subroutine cgyro_step_gk
   
   ! Stage 1
   call cgyro_rhs(1)
-  h_x = h0_x + 0.5 * delta_t * rhs(1,:,:)
+  h_x = h0_x + 0.5 * delta_t * rhs(:,:,1)
   call cgyro_field_c
 
   ! Stage 2
   call cgyro_rhs(2)
-  h_x = h0_x + 0.5 * delta_t * rhs(2,:,:)
+  h_x = h0_x + 0.5 * delta_t * rhs(:,:,2)
   call cgyro_field_c
 
   ! Stage 3
   call cgyro_rhs(3)
-  h_x = h0_x + delta_t * rhs(3,:,:)
+  h_x = h0_x + delta_t * rhs(:,:,3)
   call cgyro_field_c
 
   ! Stage 4
   call cgyro_rhs(4)
   h_x = h0_x + delta_t/6.0 * &
-       (rhs(1,:,:)+2.0*rhs(2,:,:)+2.0*rhs(3,:,:)+rhs(4,:,:))  
+       (rhs(:,:,1)+2.0*rhs(:,:,2)+2.0*rhs(:,:,3)+rhs(:,:,4))  
   call cgyro_field_c
 
   ! Filter special spectral components
@@ -81,7 +81,6 @@ subroutine cgyro_rhs(ij)
   endif
 
   call timer_lib_in('str_comm')
-  !call cgyro_hsym
   call cgyro_upwind
   call timer_lib_out('str_comm')
 
@@ -92,8 +91,8 @@ subroutine cgyro_rhs(ij)
 !$acc& pcopyin(h_x,field,cap_h_c) &
 !$acc& present(is_v,ix_v,ie_v,it_c) &
 !$acc& present(omega_cap_h,omega_h,omega_s) &
-!$acc& present(omega_stream,energy,xi) &
-!$acc& present(thcyc,ic_c,dtheta,dtheta_up)
+!$acc& present(omega_stream,energy,xi,vel) &
+!$acc& present(dtheta,dtheta_up,icd_c)
 
 !$acc kernels
    rhs_ij(:,:) = (0.0,0.0)
@@ -141,7 +140,7 @@ subroutine cgyro_rhs(ij)
   enddo
 !$acc end data
 
-  rhs(ij,:,:) = rhs_ij(:,:)
+  rhs(:,:,ij) = rhs_ij(:,:)
 
   call timer_lib_out('str')
 

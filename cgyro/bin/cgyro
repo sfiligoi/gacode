@@ -59,7 +59,7 @@ then
   echo "         Copy <template> into simulation path."
   echo
   echo "UTILITIES"
-  echo
+  echo 
   echo "         -h" 
   echo "         Version and platform information."
   echo
@@ -119,9 +119,11 @@ while [ $# -gt 0 ] ; do
 
   -reset) RESET=1 ;;
 
+  -h) gacode_printversion CGYRO ; exit 0 ;;
+
   -clean) CLEAN_FLAG=1 ;;
 
-  *) echo "ERROR (cgyro script): incorrect cgyro syntax." ; exit 1 ;;
+  *) echo "ERROR (cgyro script): unknown option $1." ; exit 1 ;;
  
   esac
   shift
@@ -191,7 +193,7 @@ fi
 # Everything else must be done in $SIMDIR; so ensure existence 
 # of $SIMDIR (needed at this point) and go there: 
 #
-if ! cgyro_sim_warn $SIMDIR
+if ! gacode_sim_warn $SIMDIR
 then
    exit 1 
 fi 
@@ -229,7 +231,7 @@ emethod=(${IN// / })
 if [ $emethod -eq 2 ]
 then
    python $GACODE_ROOT/shared/math/gauss_exp_quad.py $emax $ne
-   echo "INFO (cgyro) Generated energy mesh data"
+   echo "INFO: (cgyro) Generated energy mesh data"
 fi
 #============================================================
 # Now remove test flag if it was added

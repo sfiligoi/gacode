@@ -20,6 +20,7 @@ subroutine prgen_read_dskgato
   real :: dummy(4)
   real, dimension(:), allocatable :: psi
   real, dimension(:), allocatable :: q_dsk
+  real, dimension(:), allocatable :: ps_dsk
   real, dimension(:), allocatable :: pdum
   real, dimension(:), allocatable :: tdum
   real, dimension(:,:), allocatable :: xs
@@ -67,6 +68,7 @@ subroutine prgen_read_dskgato
   allocate(tdum(ntht))
   allocate(psi(0:nsurf))
   allocate(q_dsk(0:nsurf))
+  allocate(ps_dsk(0:nsurf))
   allocate(pdum(0:nsurf))
   allocate(xs(narc,0:nsurf))
   allocate(zs(narc,0:nsurf))
@@ -74,7 +76,7 @@ subroutine prgen_read_dskgato
   read(1,10) psi(:)
   read(1,10) pdum(:) ! fval
   read(1,10) pdum(:) ! ffprime
-  read(1,10) pdum(:) ! sp
+  read(1,10) ps_dsk(:) ! sp
   read(1,10) pdum(:) ! pprime
   read(1,10) q_dsk(:) ! qsfin
   read(1,10) pdum(:) ! nel
@@ -231,6 +233,7 @@ subroutine prgen_read_dskgato
 
   if (nogatoq_flag == 0 .or. format_type == 3 .or. format_type == 7) then
      call cub_spline(psi,q_dsk,nsurf+1,dpsi,q,nx)
+     call cub_spline(psi,ps_dsk,nsurf+1,dpsi,p_gato,nx)
   endif
 
   ! Cleanup
@@ -241,6 +244,8 @@ subroutine prgen_read_dskgato
   deallocate(psi)
   deallocate(tdum)
   deallocate(pdum)
+  deallocate(q_dsk)
+  deallocate(ps_dsk)
 
 10 format(1p4e19.12)
 
