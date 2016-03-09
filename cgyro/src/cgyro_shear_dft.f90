@@ -27,6 +27,20 @@ subroutine cgyro_shear_dft
 
   a = omega_eb*delta_t
 
+  ! Partial-shift option (dshift > 0)
+  if (dshift > 0.0) then
+     gtime = gtime+a
+     if (gtime > dshift) then
+        a     = dshift
+        gtime = gtime-a
+     else if (gtime < -dshift) then
+        a     = -dshift 
+        gtime = gtime-a
+     else
+        return
+     endif
+  endif
+
   nxs = n_radial+2*shear_pad
 
   do iv=nv1,nv2
@@ -53,7 +67,7 @@ subroutine cgyro_shear_dft
            fj(ix) = exp(2*pi*i_c*p*a/nxs)*fj(ix)
         enddo
         call fftw_execute_dft(plan_j2p,fj,fp)
-        
+
         do ir=1,n_radial
            ix = ir-1-n_radial/2
            if (ix < 0) ix = ix+nxs
