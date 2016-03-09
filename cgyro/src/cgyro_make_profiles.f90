@@ -171,9 +171,19 @@ subroutine cgyro_make_profiles
      mach         = mach         * mach_scale
      q            = q            * q_scale
      s            = s            * s_scale
+     shift        = shift        * shift_scale
+     kappa        = kappa        * kappa_scale
+     delta        = delta        * delta_scale
+     zeta         = zeta         * zeta_scale
+     s_kappa      = s_kappa      * s_kappa_scale
+     s_delta      = s_delta      * s_delta_scale
+     s_zeta       = s_zeta       * s_zeta_scale
+     beta_star    = beta_star    * beta_star_scale
+     betae_unit   = betae_unit   * betae_unit_scale
      do is=1,n_species
         dlnndr(is) = dlnndr(is)  * dlnndr_scale(is) 
         dlntdr(is) = dlntdr(is)  * dlntdr_scale(is)  
+        nu(is)     = nu(is)      * nu_ee_scale
      enddo
 
   else

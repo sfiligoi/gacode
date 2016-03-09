@@ -106,6 +106,16 @@ subroutine cgyro_read_input
   call readbc_real(mach_scale)
   call readbc_real(q_scale)
   call readbc_real(s_scale)
+  call readbc_real(shift_scale)
+  call readbc_real(kappa_scale)
+  call readbc_real(delta_scale)
+  call readbc_real(zeta_scale)
+  call readbc_real(s_kappa_scale)
+  call readbc_real(s_delta_scale)
+  call readbc_real(s_zeta_scale)
+  call readbc_real(beta_star_scale)
+  call readbc_real(betae_unit_scale)
+  call readbc_real(nu_ee_scale)
   do is=1,6
      call readbc_real(x)   ; dlnndr_scale(is) = x
      call readbc_real(x)   ; dlntdr_scale(is) = x
