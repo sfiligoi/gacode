@@ -26,6 +26,7 @@ subroutine prgen_map_null
   EXPRO_rmaj = rmaj(:)
   ! COORDINATES: set sign of q
   EXPRO_q = abs(q(:))*ipccw*btccw
+  EXPRO_ptot = p_gato(:)
   EXPRO_kappa = kappa(:)
   EXPRO_delta = delta(:)
   EXPRO_zeta = zeta(:)

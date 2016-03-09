@@ -144,6 +144,7 @@ subroutine tgyro_init_profiles
      call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_rho(:),n_exp,r,rho,n_r)
   endif
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_q(:),n_exp,r,q,n_r)
+  call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_ptot(:),n_exp,r,ptot,n_r)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_s(:),n_exp,r,s,n_r)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_kappa(:),n_exp,r,kappa,n_r)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_delta(:),n_exp,r,delta,n_r)
@@ -170,6 +171,7 @@ subroutine tgyro_init_profiles
   ! Convert T to eV (from keV) and length to cm (from m):
   call cub_spline(EXPRO_rmin(:)/r_min,1e3*EXPRO_te(:),n_exp,r,te,n_r)
   call cub_spline(EXPRO_rmin(:)/r_min,1e13*EXPRO_ne(:),n_exp,r,ne,n_r)
+  call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_dlnptotdr(:)/100.0,n_exp,r,dlnptotdr,n_r)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_dlnnedr(:)/100.0,n_exp,r,dlnnedr,n_r)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_dlntedr(:)/100.0,n_exp,r,dlntedr,n_r)
   do i_ion=1,loc_n_ion
