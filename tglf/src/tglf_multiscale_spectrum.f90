@@ -110,7 +110,7 @@
       j1=0
       do j=2,nky
          ky0 = ky_spectrum(j)
-         j1=j1+1
+         if(ky0 .lt. kylow)j1=j1+1
          test = gamma_net(j)/ky0
          if(test .gt. testmax2)then
            testmax2 = test
@@ -121,14 +121,14 @@
            endif      
          endif        
       enddo
-      if(jmax1.lt.nky)then
-        test=gamma_net(jmax1+1)/ky_spectrum(jmax1+1)
-        if(testmax1.le.test)then
+!      if(jmax1.lt.nky)then
+!        test=gamma_net(jmax1+1)/ky_spectrum(jmax1+1)
+!        if(testmax1.le.test)then
           ! there is no low-k peak 
 !          write(*,*)" gammamax1/kymax1 = ",gammamax1/kymax1, test
-          jmax1=jmax2  
-        endif
-      endif
+!          jmax1=jmax2  
+!        endif
+!      endif
       gammamax2 = gamma_net(jmax2)
       kymax2 = ky_spectrum(jmax2)
       gammamax1 = gamma_net(jmax1)
