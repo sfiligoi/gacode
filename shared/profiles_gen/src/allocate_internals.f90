@@ -18,7 +18,7 @@ subroutine allocate_internals
   allocate(zeta(nx))
   allocate(omega0(nx))
   allocate(q_gato(nx))
-  allocate(p_gato(nx))
+  allocate(p_tot(nx))
 
   ! Powers
 

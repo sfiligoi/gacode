@@ -22,6 +22,8 @@ subroutine prgen_read_omfit
   real, dimension(:,:), allocatable :: r2,z2
   real, dimension(:), allocatable :: sqdpsi
   real, dimension(:), allocatable :: psi
+  real, dimension(:), allocatable :: q_omfit
+  real, dimension(:), allocatable :: p_omfit
   real, dimension(:,:), allocatable :: gvec
   real, dimension(:,:,:), allocatable :: g3vec
   real, dimension(:,:,:), allocatable :: g3rho
@@ -38,24 +40,27 @@ subroutine prgen_read_omfit
   ! Read the OMFIT mapper file
   open(unit=1,file='ffile',status='old')
 
-  do i=1,7
+  do i=1,8
      read(1,*) a
   enddo
   read(1,*) nsurf
+
   allocate(narcv(nsurf))
   read(1,*) narcv(:)
 
   ntot = sum(narcv)
-
   narc = narcv(1)
 
   allocate(psi(nsurf))
+  allocate(q_omfit(nsurf))
+  allocate(p_omfit(nsurf))
   allocate(r_raw(ntot))
   allocate(z_raw(ntot))
   allocate(l_raw(ntot))
 
   read(1,*) psi(:)
-  read(1,*) q(:)
+  read(1,*) q_omfit(:)
+  read(1,*) p_omfit(:)
   read(1,*) r_raw(:)
   read(1,*) z_raw(:)
   read(1,*) l_raw(:)
@@ -148,6 +153,10 @@ subroutine prgen_read_omfit
   call cub_spline(sqrt(psi),gvec(5,:),nsurf,sqdpsi,delta,nx)
   call cub_spline(sqrt(psi),gvec(6,:),nsurf,sqdpsi,zeta,nx)
 
+  ! Map q and p into poloidal flux grid
+  call cub_spline(sqrt(psi),q_omfit,nsurf,sqdpsi,q,nx)
+  call cub_spline(sqrt(psi),p_omfit,nsurf,sqdpsi,p_tot,nx)
+
   ! Explicitly set rmin=0 at origin
   rmin(1) = 0.0
 
@@ -209,5 +218,7 @@ subroutine prgen_read_omfit
   deallocate(r2)
   deallocate(z2)
   deallocate(psi)
+  deallocate(q_omfit)
+  deallocate(p_omfit)
 
 end subroutine prgen_read_omfit

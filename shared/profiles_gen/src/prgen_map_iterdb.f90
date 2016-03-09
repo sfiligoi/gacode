@@ -125,7 +125,7 @@ subroutine prgen_map_iterdb
   EXPRO_sbcx = sbcx_d(:)
   EXPRO_sscxl = onetwo_sscxl(:)
   EXPRO_zmag = zmag(:)
-  EXPRO_ptot = onetwo_press(:) ! Total pressure
+  EXPRO_ptot = p_tot(:) ! Total pressure
   ! COORDINATES: set sign of poloidal flux
   EXPRO_polflux = abs(dpsi(:))*(-ipccw)
 

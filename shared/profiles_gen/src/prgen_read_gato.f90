@@ -215,6 +215,8 @@ subroutine prgen_read_gato
   if (nogatoq_flag == 0 .or. format_type == 3 .or. format_type == 7) then
      q(:) = q_gato(:)
   endif
+
+  p_tot = 0.0
   !-------------------------------------------------------------  
 
   ! Clean up

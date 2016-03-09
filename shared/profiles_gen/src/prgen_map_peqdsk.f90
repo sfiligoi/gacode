@@ -76,7 +76,7 @@ subroutine prgen_map_peqdsk
   EXPRO_flow_beam(:) = 0.0      ! flow_beam
   EXPRO_flow_wall(:) = 0.0      ! flow_wall_exp
   EXPRO_zmag(:)      = zmag(:)  
-  EXPRO_ptot(:)      = 0.0      
+  EXPRO_ptot(:)      = p_tot(:)      
   ! COORDINATES: set sign of poloidal flux
   EXPRO_polflux = abs(dpsi(:))*(-ipccw)
 

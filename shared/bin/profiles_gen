@@ -1018,8 +1018,12 @@ fi
 # Use OMFIT:
 if [ $EFIT_METHOD -eq 3 ]
 then
+    # OMFIT mapper options
+    # uniform -> points around separatrix
+    # levels -> flux surfaces
+    # resolution -> in mm
    cp $GFILE gfile
-   python $OMFIT fluxSurfaceTracer "resolution=4, uniform=1000, levels=256, rhoVSpsi='rho', averages=0, namelist=0, fluxsurfaces=1, maxPSI=0.9999, gfiles='$GFILE'" >& out.omfit
+   python $OMFIT fluxSurfaceTracer "resolution=0.001, uniform=1000, levels=256, rhoVSpsi='rho', averages=0, namelist=0, fluxsurfaces=1, maxPSI=0.9999, gfiles='$GFILE'" >& out.omfit
    cat out.omfit
    cp flux_* ffile
 fi

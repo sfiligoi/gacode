@@ -41,7 +41,7 @@ module prgen_globals
   real, dimension(:), allocatable :: rmaj
   real, dimension(:), allocatable :: q
   real, dimension(:), allocatable :: q_gato
-  real, dimension(:), allocatable :: p_gato
+  real, dimension(:), allocatable :: p_tot
   real, dimension(:), allocatable :: vphi_exp
   real, dimension(:), allocatable :: vphi_carbon
   real, dimension(:), allocatable :: vpolc_exp
