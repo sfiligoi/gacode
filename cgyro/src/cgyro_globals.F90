@@ -75,6 +75,7 @@ module cgyro_globals
   integer :: udsymmetry_flag
   integer :: shear_method
   integer :: shear_pad
+  real :: dshift
   !
   ! Geometry input
   !
