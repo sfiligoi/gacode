@@ -95,7 +95,6 @@ module prgen_globals
   ! ONETWO variables
   !
   integer :: onetwo_ishot
-  integer :: onetwo_nj
   integer :: onetwo_nb
   integer :: onetwo_npsi
   integer :: onetwo_nion
@@ -242,7 +241,6 @@ module prgen_globals
   !---------------------------------------------------------
   ! PEQDSK variables
   !
-  integer :: peqdsk_nj
   real :: peqdsk_bref
   real :: peqdsk_arho
   real, dimension(:), allocatable :: peqdsk_psi
@@ -317,7 +315,6 @@ module prgen_globals
   !---------------------------------------------------------
   ! UFILE variables
   !
-  integer, parameter :: ufile_nx=51
   integer :: ufile_nion
   real :: ufile_bref
   real :: ufile_arho

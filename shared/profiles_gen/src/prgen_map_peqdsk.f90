@@ -53,7 +53,7 @@ subroutine prgen_map_peqdsk
   !---------------------------------------------------------
   ! Map profile data onto single array:
   !
-  EXPRO_n_exp = peqdsk_nj
+  EXPRO_n_exp = nx
   call EXPRO_alloc('./',1)
   !
   EXPRO_rho(:)  = rho(:)
@@ -92,7 +92,7 @@ subroutine prgen_map_peqdsk
   do i=1,peqdsk_nimp
      EXPRO_ti(1+i,:) = peqdsk_ti(:)
   enddo
-  do i=1,peqdsk_nj
+  do i=1,nx
      if (peqdsk_nb(i) > epsilon(0.)) then
         EXPRO_ti(1+peqdsk_nimp+1,i) = peqdsk_pb(i)/(peqdsk_nb(i)*10)/1.602
      else

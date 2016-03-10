@@ -21,8 +21,8 @@ subroutine prgen_map_iterdb
   integer :: ip
   integer :: n0
 
-  do i=1,onetwo_nj
-     rho(i) = (i-1)/(onetwo_nj-1.0)
+  do i=1,nx
+     rho(i) = (i-1)/(nx-1.0)
   enddo
 
   call volint(1e-6*onetwo_qbeame,pow_e_nb)
@@ -101,7 +101,7 @@ subroutine prgen_map_iterdb
   !---------------------------------------------------------
   ! Map profile data into EXPRO interface variables
   !
-  EXPRO_n_exp = onetwo_nj
+  EXPRO_n_exp = nx
   call EXPRO_alloc('./',1)
   !
   EXPRO_rho  = rho
@@ -321,19 +321,19 @@ end subroutine prgen_map_iterdb
 subroutine volint(f,fdv)
 
   use prgen_globals, &
-       only : onetwo_rho_grid,pi,onetwo_R0,onetwo_hcap,onetwo_nj
+       only : onetwo_rho_grid,pi,onetwo_R0,onetwo_hcap,nx
 
   implicit none
 
   integer :: i
-  real, intent(in) :: f(onetwo_nj)
-  real, intent(out) :: fdv(onetwo_nj)
+  real, intent(in) :: f(nx)
+  real, intent(out) :: fdv(nx)
   real :: drho
   real :: dvoldr_p,dvoldr_m
 
   fdv(1) = 0.0
 
-  do i=2,onetwo_nj
+  do i=2,nx
 
      drho = onetwo_rho_grid(i)-onetwo_rho_grid(i-1)
 

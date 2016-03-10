@@ -38,6 +38,7 @@ OBJECTS = cgyro_globals.o \
           cgyro_read_input.o \
           cgyro_shear.o \
           cgyro_shear_dft.o \
+          cgyro_shear_pt.o \
 	  cgyro_step_gk.o \
           cgyro_write_initdata.o \
           cgyro_read_restart.o \

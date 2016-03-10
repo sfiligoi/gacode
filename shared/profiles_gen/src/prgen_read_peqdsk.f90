@@ -23,8 +23,7 @@ subroutine prgen_read_peqdsk
 
   open(unit=1,file='pfile.ne',status='old')
   read(1,*) i
-  peqdsk_nj = i
-  nx = peqdsk_nj
+  nx = i
   call allocate_peqdsk_vars
   close(1)
 
@@ -48,7 +47,7 @@ subroutine prgen_read_peqdsk
   read(1,*) i
   allocate(xv(ncol,i))
   read(1,*) xv
-  call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_te,peqdsk_nj)
+  call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_te,nx)
   deallocate(xv)
   close(1)
 
@@ -57,7 +56,7 @@ subroutine prgen_read_peqdsk
   read(1,*) i
   allocate(xv(ncol,i))
   read(1,*) xv
-  call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_ni,peqdsk_nj)
+  call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_ni,nx)
   deallocate(xv)
   close(1)
 
@@ -71,7 +70,7 @@ subroutine prgen_read_peqdsk
   read(1,*) i
   allocate(xv(ncol,i))
   read(1,*) xv
-  call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_ti,peqdsk_nj)
+  call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_ti,nx)
   deallocate(xv)
   close(1)
 
@@ -82,7 +81,7 @@ subroutine prgen_read_peqdsk
      read(1,*) i
      allocate(xv(ncol,i))
      read(1,*) xv
-     call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_nb,peqdsk_nj)
+     call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_nb,nx)
      deallocate(xv)
      close(1)
      peqdsk_nbeams = 1
@@ -98,7 +97,7 @@ subroutine prgen_read_peqdsk
      read(1,*) i
      allocate(xv(ncol,i))
      read(1,*) xv
-     call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_pb,peqdsk_nj)
+     call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_pb,nx)
      deallocate(xv)
      close(1)
   else
@@ -113,7 +112,7 @@ subroutine prgen_read_peqdsk
      read(1,*) i
      allocate(xv(ncol,i))
      read(1,*) xv
-     call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_nz(1,:),peqdsk_nj)
+     call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_nz(1,:),nx)
      deallocate(xv)
      close(1)
      peqdsk_nimp = peqdsk_nimp + 1
@@ -123,7 +122,7 @@ subroutine prgen_read_peqdsk
         read(1,*) i
         allocate(xv(ncol,i))
         read(1,*) xv
-        call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_nz(2,:),peqdsk_nj)
+        call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_nz(2,:),nx)
         deallocate(xv)
         close(1)
         peqdsk_nimp = peqdsk_nimp + 1
@@ -133,7 +132,7 @@ subroutine prgen_read_peqdsk
            read(1,*) i
            allocate(xv(ncol,i))
            read(1,*) xv
-           call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_nz(3,:),peqdsk_nj)
+           call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_nz(3,:),nx)
            deallocate(xv)
            close(1)
            peqdsk_nimp = peqdsk_nimp + 1 
@@ -184,7 +183,7 @@ subroutine prgen_read_peqdsk
      read(1,*) i
      allocate(xv(ncol,i))
      read(1,*) xv
-     call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_omegat,peqdsk_nj)
+     call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_omegat,nx)
      deallocate(xv)
      close(1)
   else
@@ -198,7 +197,7 @@ subroutine prgen_read_peqdsk
      read(1,*) i
      allocate(xv(ncol,i))
      read(1,*) xv
-     call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_omgeb,peqdsk_nj)
+     call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_omgeb,nx)
      deallocate(xv)
      close(1)
   else

@@ -40,8 +40,9 @@ subroutine prgen_read_ufile
      read(1,*) ufile_m(i)
   enddo
   close(1)
-
-  nx = ufile_nx
+ 
+  ! NOTE: this is a hardwired dimension
+  nx = 51
 
   call allocate_internals
   call allocate_ufile_vars

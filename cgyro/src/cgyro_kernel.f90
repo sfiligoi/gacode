@@ -73,6 +73,8 @@ subroutine cgyro_kernel
         call cgyro_shear
      case(2)
         call cgyro_shear_dft
+     case(3)
+        call cgyro_shear_pt
      end select
         
      ! Collisionless implicit streaming term step

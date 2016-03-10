@@ -4,15 +4,15 @@ subroutine allocate_peqdsk_vars
 
   implicit none
 
-  allocate(peqdsk_psi(peqdsk_nj))
-  allocate(peqdsk_ne(peqdsk_nj))
-  allocate(peqdsk_te(peqdsk_nj))
-  allocate(peqdsk_ni(peqdsk_nj))
-  allocate(peqdsk_ti(peqdsk_nj))
-  allocate(peqdsk_nz(3,peqdsk_nj))
-  allocate(peqdsk_nb(peqdsk_nj))
-  allocate(peqdsk_pb(peqdsk_nj))
-  allocate(peqdsk_omegat(peqdsk_nj))
-  allocate(peqdsk_omgeb(peqdsk_nj))
+  allocate(peqdsk_psi(nx))
+  allocate(peqdsk_ne(nx))
+  allocate(peqdsk_te(nx))
+  allocate(peqdsk_ni(nx))
+  allocate(peqdsk_ti(nx))
+  allocate(peqdsk_nz(3,nx))
+  allocate(peqdsk_nb(nx))
+  allocate(peqdsk_pb(nx))
+  allocate(peqdsk_omegat(nx))
+  allocate(peqdsk_omgeb(nx))
 
 end subroutine allocate_peqdsk_vars

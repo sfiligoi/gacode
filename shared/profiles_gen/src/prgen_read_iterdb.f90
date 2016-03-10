@@ -24,7 +24,7 @@ subroutine prgen_read_iterdb
   read(1,*) t
 
   read(1,*) t ; read(1,*) onetwo_ishot
-  read(1,*) t ; read(1,*) onetwo_nj
+  read(1,*) t ; read(1,*) nx
   read(1,*) t ; read(1,*) onetwo_nion
   read(1,*) t ; read(1,*) onetwo_nprim
   read(1,*) t ; read(1,*) onetwo_nimp
@@ -52,12 +52,10 @@ subroutine prgen_read_iterdb
   read(1,*) t ; read(1,*) x ! Te0
   read(1,*) t ; read(1,*) x ! Ti0
 
-  nx = onetwo_nj
-
   call allocate_internals
   call allocate_iterdb_vars
 
-  allocate(xv(onetwo_nj))
+  allocate(xv(nx))
 
   read(1,*) t ; read(1,*) onetwo_psi ! psi on rho grid
   read(1,*) t ; read(1,*) onetwo_rho_grid
