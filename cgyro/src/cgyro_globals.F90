@@ -30,7 +30,6 @@ module cgyro_globals
   integer :: print_step
   integer :: restart_step
   real    :: freq_tol
-  integer :: restart_write
   integer :: restart_mode
   real    :: up_radial
   integer :: up_radial_n
@@ -364,6 +363,7 @@ module cgyro_globals
   !
   ! Collision operator
   real, dimension(:,:,:), allocatable :: cmat
+  real, dimension(:,:,:,:,:), allocatable :: cmat_simple
   ! 
   ! Equilibrium/geometry arrays
   integer :: it0

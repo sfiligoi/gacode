@@ -22,8 +22,10 @@ OBJECTS = cgyro_globals.o \
           cgyro_upwind.o \
           cgyro_init_h.o \
           cgyro_init_arrays.o \
+	  cgyro_init_collision_simple.o \
           cgyro_init_collision.o \
           cgyro_init_manager.o \
+	  cgyro_step_collision_simple.o \
           cgyro_step_collision.o \
 	  cgyro_implicit_gk.o \
           cgyro_kernel.o \
