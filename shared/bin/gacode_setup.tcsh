@@ -15,7 +15,7 @@ setenv PATH ${PATH}:$GACODE_ROOT/shared/bin
 
 if ( -d $GACODE_ADD_ROOT ) 
 then
-   SETENV PATH=${PATH}:$GACODE_ADD_ROOT/freya/bin
+   SETENV PATH ${PATH}:$GACODE_ADD_ROOT/freya/bin
 fi
 
 if ( $?PYTHONPATH ) then
