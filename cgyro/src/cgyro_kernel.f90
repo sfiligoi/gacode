@@ -167,6 +167,8 @@ subroutine cgyro_kernel
     deallocate(cmat)
   endif
 
+  call GEO_alloc(0)
+
   call cgyro_clean_implicit_gk
 
 end subroutine cgyro_kernel
