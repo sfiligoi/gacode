@@ -37,12 +37,14 @@ subroutine cgyro_shear_pt
         ir = ir_c(ic) 
         it = it_c(ic)
 
+        call GEO_interp(theta(it))     
+
         ! omega_rdrift
         omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) & 
              -omega_rdrift(it,is)*energy(ie)*&
              (1.0 + xi(ix)**2)*(2.0*pi*i_c*a/length) 
 
-        k_perp(ic_c(ir,it)) = sqrt((2.0*pi*(px(ir)+gtime)*GEO_grad_r/length &
+        k_perp(ic) = sqrt((2.0*pi*(px(ir)+gtime)*GEO_grad_r/length &
              + k_theta*GEO_gq*GEO_captheta)**2 &
              + (k_theta*GEO_gq)**2) 
 
@@ -83,12 +85,14 @@ subroutine cgyro_shear_pt
            ir = ir_c(ic) 
            it = it_c(ic)
 
+           call GEO_interp(theta(it))     
+
            ! omega_rdrift
            omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) & 
                 -omega_rdrift(it,is)*energy(ie)*&
                 (1.0 + xi(ix)**2)*(2.0*pi*i_c*(-1.0)/length) 
 
-           k_perp(ic_c(ir,it)) = sqrt((2.0*pi*(px(ir)+gtime)*GEO_grad_r/length &
+           k_perp(ic) = sqrt((2.0*pi*(px(ir)+gtime)*GEO_grad_r/length &
                 + k_theta*GEO_gq*GEO_captheta)**2 &
                 + (k_theta*GEO_gq)**2) 
 
