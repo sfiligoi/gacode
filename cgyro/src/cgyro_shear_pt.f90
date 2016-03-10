@@ -22,8 +22,8 @@ subroutine cgyro_shear_pt
   real :: a
   complex, dimension(n_theta,nv_loc) :: a1
 
-  gtime = gtime+omega_eb*delta_t
   a     = omega_eb*delta_t
+  gtime = gtime+a
 
   do iv=nv1,nv2
      do ic=1,nc
@@ -56,10 +56,22 @@ subroutine cgyro_shear_pt
 
      h_x(ic_c(n_radial,:),:) = a1*gamma_e_decay
 
-        ! omega_rdrift
-        omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) & 
-             -omega_rdrift(it,is)*energy(ie)*&
-             (1.0 + xi(ix)**2)*(2.0*pi*i_c*(-1.0)/length) 
+     do iv=nv1,nv2
+        do ic=1,nc
+
+           iv_loc = iv-nv1+1
+           is = is_v(iv)
+           ix = ix_v(iv)
+           ie = ie_v(iv)
+           ir = ir_c(ic) 
+           it = it_c(ic)
+           ! omega_rdrift
+           omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) & 
+                -omega_rdrift(it,is)*energy(ie)*&
+                (1.0 + xi(ix)**2)*(2.0*pi*i_c*(-1.0)/length) 
+
+        enddo
+     enddo
 
      call cgyro_field_c
 
