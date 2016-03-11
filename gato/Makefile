@@ -18,7 +18,7 @@ all: $(OBJECTS)
 	$(FC) $(FFLAGS) -o $(EXEC) $(OBJECTS)
 
 .f.o :
-	$(F77) $(FFLAGS) -c $<
+	$(F77) $(FMATH) $(FFLAGS) -c $<
 
 clean:
 	rm -f *.o *~ $(EXEC)
