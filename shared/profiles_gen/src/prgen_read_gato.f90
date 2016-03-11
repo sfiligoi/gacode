@@ -75,25 +75,9 @@ subroutine prgen_read_gato
   read(1,'(a)') cdum
   read(1,*) gato_p(:)
 
-  ! Pressure Gradient
-  read(1,'(a)') cdum
-  read(1,*) gato_dummy(:)
-
-  ! Toroidal Field
-  read(1,'(a)') cdum
-  read(1,*) gato_dummy(:)
-
-  ! Toroidal Field Gradient
-  read(1,'(a)') cdum
-  read(1,*) gato_dummy(:)
-
   ! Safety Factor
   read(1,'(a)') cdum
   read(1,*) gato_q(:)
-
-  ! Density
-  read(1,'(a)') cdum
-  read(1,*) gato_dummy(:)
 
   ! 2D (R,Z)
   read(1,'(a)') cdum
