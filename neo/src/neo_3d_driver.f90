@@ -6,6 +6,8 @@ module neo_3d_driver
 
   character(len=80),private  :: runfile_f = 'out.neo.f_3d'
   character(len=80),private  :: runfile_transp = 'out.neo.transport_3d'
+  character(len=80),private :: runfile_check  = 'out.neo.prec'
+  real, private :: check_sum
   integer, dimension(:,:,:,:), allocatable, private :: mindx 
   integer, private :: stat
   real, dimension(:,:), allocatable, private :: tpmat_trap, tpmat_stream_dt, &
@@ -138,36 +140,16 @@ contains
     ! Bandwidth = KL = KU = 2*nb-1
     bw  = 2*nb-1
 
-    if (scalapack_flag == 0) then
-
-       ! LAPACK Parameters
-
-       npb = n_row
-
-       n_fill = bw
-
-       ! LDAB = 1+2*KL+KU 
-       ldab = 1+2*bw+n_fill
-
-       n_piv = n_row
-
-
-    else
-
-       ! SCALAPACK Parameters
-
-       npb = n_row/n_proc
-
-       ! More fill-in for PDGBSV than for DGBSV 
-       n_fill = 2*bw
-
-       ! LDAB = 1+2*(KL+KU)
-       ldab  = 1+2*bw+n_fill
-
-       n_piv = npb+2*bw
-
-
-    endif
+    ! LAPACK Parameters
+    
+    npb = n_row
+    
+    n_fill = bw
+    
+    ! LDAB = 1+2*KL+KU 
+    ldab = 1+2*bw+n_fill
+    
+    n_piv = n_row
 
     ! Here, npb means 'number of columns in a distributed block'
     allocate(ab(ldab,npb),stat=ierr)
@@ -397,15 +379,9 @@ contains
        close(io_neoout)
     endif
 
-    if (scalapack_flag == 0) then
-       ! Factor and solve with LAPACK band-matrix routine
-       g(:) = g_loc(:)
-       call DGBSV(n_row,2*nb-1,2*nb-1,1,ab,ldab,ipiv,g,n_row,info)
-    else
-       ! Factor and solve with SCALAPACK band-matrix routine
-       ! if available.
-       call neo_scalapack(info)
-    endif
+    ! Factor and solve with LAPACK band-matrix routine
+    g(:) = g_loc(:)
+    call DGBSV(n_row,2*nb-1,2*nb-1,1,ab,ldab,ipiv,g,n_row,info)
 
     if(info /= 0) then
        call neo_error('ERROR: (NEO) Matrix factorization failed')
@@ -530,6 +506,8 @@ contains
     allocate(upar(n_species,tpmatsize))
     allocate(ntv(n_species))
 
+    check_sum=0.0
+
     pflux(:)  = 0.0
     eflux(:)  = 0.0
     uparB(:)  = 0.0
@@ -621,12 +599,23 @@ contains
        close(1)
     endif
 
+    do is=1,n_species
+       check_sum = check_sum &
+            +  (abs(pflux(is)) + abs(eflux(is)) + abs(ntv(is)))/rho(ir)**2 &
+            + abs(uparB(is))/rho(ir)
+    enddo
+    if(silent_flag == 0 .and. i_proc == 0) then
+       open(unit=1,file=trim(path)//runfile_check,status='replace')
+       write (1,'(e16.8)',advance='no') check_sum
+       close(1)
+    endif
+
     deallocate(pflux)
     deallocate(eflux)
     deallocate(uparB)
     deallocate(upar)
     deallocate(ntv)
-    
+
   end subroutine threed_transport
 
 end module neo_3d_driver

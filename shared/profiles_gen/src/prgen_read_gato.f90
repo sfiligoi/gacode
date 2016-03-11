@@ -46,7 +46,7 @@ subroutine prgen_read_gato
   !
   ! nsurf = number of finite flux surfaces
   ! 
-  open(unit=1,file='grid.dat',status='old')
+  open(unit=1,file='out.gato.fluxsurf',status='old')
   read(1,'(a)') cdum
   read(1,*) nsurf,narc
 

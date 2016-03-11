@@ -38,7 +38,7 @@ subroutine prgen_read_omfit
 
   !----------------------------------------------------------------
   ! Read the OMFIT mapper file
-  open(unit=1,file='ffile',status='old')
+  open(unit=1,file='out.omfit.fluxsurf',status='old')
 
   do i=1,8
      read(1,*) a
