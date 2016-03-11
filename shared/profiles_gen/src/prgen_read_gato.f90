@@ -22,9 +22,9 @@ subroutine prgen_read_gato
   integer :: ip
   real :: fa,fb
   real, dimension(:), allocatable :: gato_psi  
-  real, dimension(:), allocatable :: gato_volume
-  real, dimension(:), allocatable :: gato_dvoldpsi
+  real, dimension(:), allocatable :: gato_dummy
   real, dimension(:), allocatable :: gato_q
+  real, dimension(:), allocatable :: gato_p
   real, dimension(:,:), allocatable :: gato_bigr
   real, dimension(:,:), allocatable :: gato_bigz
   real, dimension(:,:), allocatable :: gvec
@@ -32,10 +32,6 @@ subroutine prgen_read_gato
   real, dimension(:,:,:), allocatable :: g3rho
 
   character (len=70) :: cdum
-
-  character (len=10) :: a
-  character (len=10) :: b
-  character (len=10) :: c
 
   !--------------------------------------------------
   ! Read gfile header info
@@ -55,18 +51,51 @@ subroutine prgen_read_gato
   read(1,*) nsurf,narc
 
   allocate(gato_psi(0:nsurf))
-  allocate(gato_volume(0:nsurf))
-  allocate(gato_dvoldpsi(0:nsurf))
+  allocate(gato_dummy(0:nsurf))
+  allocate(gato_q(0:nsurf))
+  allocate(gato_p(0:nsurf))
   allocate(gato_bigr(narc,nsurf))
   allocate(gato_bigz(narc,nsurf))
 
   read(1,'(a)') cdum
+
+  ! psi mesh
   read(1,'(a)') cdum
   read(1,*) gato_psi(:) 
+
+  ! Volume
   read(1,'(a)') cdum
-  read(1,*) gato_volume(:)
+  read(1,*) gato_dummy(:)
+
+  ! dVol/dpsi
   read(1,'(a)') cdum
-  read(1,*) gato_dvoldpsi(:)
+  read(1,*) gato_dummy(:)
+
+  ! Pressure
+  read(1,'(a)') cdum
+  read(1,*) gato_p(:)
+
+  ! Pressure Gradient
+  read(1,'(a)') cdum
+  read(1,*) gato_dummy(:)
+
+  ! Toroidal Field
+  read(1,'(a)') cdum
+  read(1,*) gato_dummy(:)
+
+  ! Toroidal Field Gradient
+  read(1,'(a)') cdum
+  read(1,*) gato_dummy(:)
+
+  ! Safety Factor
+  read(1,'(a)') cdum
+  read(1,*) gato_q(:)
+
+  ! Density
+  read(1,'(a)') cdum
+  read(1,*) gato_dummy(:)
+
+  ! 2D (R,Z)
   read(1,'(a)') cdum
   read(1,*) gato_bigr(:,:)
   read(1,'(a)') cdum
@@ -98,7 +127,7 @@ subroutine prgen_read_gato
   endif
   !----------------------------------------------------------------
 
-  !----------------------------------------------------
+  !----------------------------------------------------------------
   ! Get Miller-style (model shape) coefficients using 
   ! fluxfit routines:
   !
@@ -126,7 +155,6 @@ subroutine prgen_read_gato
      call bound_extrap(fa,fb,gvec(i,:),gato_psi,nsurf+1)
      gvec(i,0) = fa
   enddo
-  
 
   ! Map shape coefficients onto poloidal flux (dpsi) grid:
   ! NOTE: need sqrt here to get sensible behaviour as r -> 0.
@@ -137,11 +165,17 @@ subroutine prgen_read_gato
   call cub_spline(gato_psi,gvec(5,:),nsurf+1,dpsi,delta,nx)
   call cub_spline(gato_psi,gvec(6,:),nsurf+1,dpsi,zeta,nx)
 
+  ! Total pressure and q from GATO-EFIT
+  call cub_spline(gato_psi,gato_p,nsurf+1,dpsi,p_tot,nx)
+  if (nogatoq_flag == 0 .or. format_type == 3 .or. format_type == 7) then
+     call cub_spline(gato_psi,gato_q,nsurf+1,dpsi,q,nx)
+  endif
+
   ! Explicitly set rmin=0 at origin
   rmin(1) = 0.0
 
   deallocate(gvec)
-  !----------------------------------------------------
+  !----------------------------------------------------------------
 
   !----------------------------------------------------
   ! Get general geometry coefficients
@@ -193,40 +227,14 @@ subroutine prgen_read_gato
   close(1)
   !----------------------------------------------------
 
-  !-------------------------------------------------------------
-  ! Read q profile data in GATO's o1gta file and map to psi grid
-  !
-  allocate(gato_q(0:nsurf))
-  open(unit=1,file='o1gta',status='old')
- 
-  do
-     read(1,*) a,b,c
-     if (a(1:1) == 'q') then
-        if (c(1:2) == '(f') then
-           read(1,*) gato_q(:)
-           exit
-        endif
-     endif
-  enddo
-
-  close(1)
-
-  call cub_spline(gato_psi,gato_q,nsurf+1,dpsi,q_gato,nx)
-  if (nogatoq_flag == 0 .or. format_type == 3 .or. format_type == 7) then
-     q(:) = q_gato(:)
-  endif
-
-  p_tot = 0.0
-  !-------------------------------------------------------------  
-
   ! Clean up
   deallocate(g3vec)
   deallocate(g3rho)
   deallocate(gato_psi)
-  deallocate(gato_volume)
-  deallocate(gato_dvoldpsi)
+  deallocate(gato_q)
+  deallocate(gato_p)
+  deallocate(gato_dummy)
   deallocate(gato_bigr)
   deallocate(gato_bigz)
-  deallocate(gato_q)
 
 end subroutine prgen_read_gato
