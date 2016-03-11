@@ -103,3 +103,14 @@ Local neoclassical templates:
                      - General shaped geometry
                      - FP collisions
 
+ 3d_gke	             GA standard case with 3D effects
+                     - ions, electrons
+                     - Miller circular geometry with small 3D perturbation
+                     - FP collisions
+
+ 3d_gke_er	     GA standard case with 3D effects
+                     - ions, electrons
+                     - Miller circular geometry with small 3D perturbation
+                     - FP collisions
+		     - higher-order ExB drift effects
+

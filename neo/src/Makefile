@@ -32,7 +32,6 @@ OBJECTS = neo_globals.o \
           neo_map_experimental_profiles.o \
           neo_read_input.o \
           neo_run.o \
-          neo_scalapack.o \
           neo_spitzer.o 
 
 .SUFFIXES : .o .f90

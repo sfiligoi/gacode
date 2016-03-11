@@ -116,9 +116,7 @@ module neo_globals
   integer :: n_tpvarphi
   integer :: indx_c00
   !
-  ! LAPACK/SCALAPACK VARIABLES
-  integer :: scalapack_flag
-  integer :: ictxt
+  ! LAPACK VARIABLES
   integer :: bw
   integer :: npb
   integer :: ldab
