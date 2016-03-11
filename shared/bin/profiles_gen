@@ -204,8 +204,11 @@ then
    echo
    echo "OMFIT mapper control options"
    echo 
-   echo "             -omfit"
+   echo "             -omfit <parameter=val,parameter=val,...>"
    echo "             Toggle OMFIT mapper instead of default GATO mapper."
+   echo
+   echo "             -omfitres <resolution>"
+   echo "              <resolution>=low,medium,high (default medium)."
    echo
    echo "GFILE MERGE MODE"
    echo
@@ -352,6 +355,7 @@ GATO_ARGS=
 
 # OMFIT mapper variables
 OMFIT_FLAG=0
+OMFIT_RES="medium"
 
 # CER file 
 CER_FILE=null
@@ -425,6 +429,7 @@ while [ $# -gt 0 ] ; do
   -gato) shift ; GATO_ARGS="$1" ;;
 
   -omfit) OMFIT_FLAG=1 ;;
+  -omfitres) shift ; OMFIT_RES=$1 ;;
 
   -V) VERBOSE_FLAG=1 ;;
 
@@ -1005,13 +1010,14 @@ then
    done
    echo " &end" >> ingta
 
-   $GATO >& out.gato.stdout
+   $GATO >& out.gato.info
    if [ -f 'gato_error' ]
    then
       echo 'ERROR: (gato) Fatal error.'
       exit 1 
    else
-      echo 'INFO: (gato) Success.'
+      mv grid.dat out.gato.fluxsurf
+      echo 'INFO: (gato) Done.  Check out.gato.info for diagnostics.'
    fi
 fi
 
@@ -1023,9 +1029,27 @@ then
     # levels -> flux surfaces
     # resolution -> in mm
    cp $GFILE gfile
-   python $OMFIT fluxSurfaceTracer "resolution=0.001, uniform=1000, levels=256, rhoVSpsi='rho', averages=0, namelist=0, fluxsurfaces=1, maxPSI=0.9999, gfiles='$GFILE'" >& out.omfit
-   cat out.omfit
-   cp flux_* ffile
+   case "$OMFIT_RES" in
+      low)    RES="resolution=0.003 uniform=500 levels=128" ;;
+      medium) RES="resolution=0.002 uniform=750 levels=256" ;;
+      high)   RES="resolution=0.001 uniform=1000 levels=512" ;;
+   esac 
+   echo "INFO: (omfit) Running with parameters $RES"
+   OMFIT_OPT="rhoVSpsi='rho' 
+              averages=0
+              namelist=0 
+              fluxsurfaces=1 
+              maxPSI=0.9999 
+              gfiles='$GFILE'"
+   python $OMFIT fluxSurfaceTracer $RES $OMFIT_OPT >& out.omfit.info
+   if ls flux_* 1> /dev/null 2>&1
+   then 
+      mv flux_* out.omfit.fluxsurf
+      echo "INFO: (omfit) Done.  Check out.omfit.info for OMFIT diagnostics."
+   else
+      echo "ERROR: (omfit) OMFIT failed.  Check out.omfit.info for OMFIT diagnostics." 
+      exit 1
+   fi
 fi
 
 # DSKGATO
@@ -1094,25 +1118,16 @@ fi
 #  Remove configuration files, output files, etc.
 rm -f egta eqgta nova.*
 #  Remove stale files
-rm -f out.gato.* input.gato.* out.omfit dummy.peq
+rm -f input.gato.* dummy.peq
 
 if [ $VERBOSE_FLAG -eq 0 ]
 then
    rm -f $CONFIG fluxfit.* ingta o1gta grid.dat success
    rm -f *.ave out.com out.dim out.ufile.log 
-   rm -f gfile ffile out.expro.run pfile.*
+   rm -f gfile out.expro.run pfile.*
 else
    if [ -f "ingta" ] ; then 
       mv ingta input.gato.ingta
-   fi
-   if [ -f "o1gta" ] ; then
-      mv o1gta out.gato.o1gta
-   fi
-   if [ -f "grid.dat" ] ; then
-      mv grid.dat out.gato.grid
-   fi
-   if [ -f "ffile" ] ; then
-      mv ffile out.omfit.mapper
    fi
 fi
 #==============================================================
