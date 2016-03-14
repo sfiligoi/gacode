@@ -38,6 +38,7 @@ OBJECTS = cgyro_globals.o \
 	  cgyro_nl_direct.o \
 	  cgyro_nl_fftw.o \
           cgyro_read_input.o \
+          cgyro_shear_interface.o \
           cgyro_shear.o \
           cgyro_shear_dft.o \
           cgyro_shear_pt.o \

@@ -13,6 +13,8 @@
 
 subroutine cgyro_shear_pt
 
+  use cgyro_shear_interface
+
   use cgyro_globals
   use timer_lib
   use GEO_interface
@@ -23,6 +25,16 @@ subroutine cgyro_shear_pt
   real :: a,arg
   complex, dimension(n_theta,nv_loc) :: a1
   complex :: carg
+
+  if (i_time == 1) then
+     allocate(sum_den_x0(nc))
+     allocate(fcoef0(n_field,nc))
+     allocate(gcoef0(n_field,nc))
+
+     sum_den_x0(:) = sum_den_x(:)
+     fcoef0(1,:)   = fcoef(1,:)
+     gcoef0(1,:)   = gcoef(1,:)
+  endif
 
   a     = omega_eb*delta_t
   gtime = gtime+a
@@ -57,7 +69,13 @@ subroutine cgyro_shear_pt
              -i_c*k_theta*rho*(sqrt(2.0*energy(ie))*xi(ix)/vth(is) &
              *omega_gammap(it))
 
-        omega_s(1,ic,iv_loc) = carg*jvec_c(1,ic,iv_loc)
+        omega_s(:,ic,iv_loc) = carg*jvec_c(:,ic,iv_loc)
+
+        if (ir < n_radial) then 
+           fcoef(:,ic) = fcoef0(:,ic_c(ir,it))*(1-gtime) + fcoef0(:,ic_c(ir+1,it))*gtime
+           gcoef(:,ic) = gcoef0(:,ic_c(ir,it))*(1-gtime) + gcoef0(:,ic_c(ir+1,it))*gtime
+           sum_den_x(ic) = sum_den_x0(ic_c(ir,it))*(1-gtime) + sum_den_x0(ic_c(ir+1,it))*gtime
+        endif
 
      enddo
   enddo
@@ -106,6 +124,12 @@ subroutine cgyro_shear_pt
                 *omega_gammap(it))
 
            omega_s(1,ic,iv_loc) = carg*jvec_c(1,ic,iv_loc)
+
+           if (ir < n_radial) then 
+              fcoef(1,ic) = fcoef0(1,ic_c(ir,it))*(1-gtime) + fcoef0(1,ic_c(ir+1,it))*gtime
+              gcoef(1,ic) = gcoef0(1,ic_c(ir,it))*(1-gtime) + gcoef0(1,ic_c(ir+1,it))*gtime
+              sum_den_x(ic) = sum_den_x0(ic_c(ir,it))*(1-gtime) + sum_den_x0(ic_c(ir+1,it))*gtime
+           endif
 
         enddo
      enddo
