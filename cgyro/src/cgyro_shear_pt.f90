@@ -42,7 +42,7 @@ subroutine cgyro_shear_pt
   gtime = gtime+a
  
   ! Forward shearing
-  if (gtime > 1e3) then
+  if (gtime > 1.0) then
 
      gtime = gtime-1.0
 
