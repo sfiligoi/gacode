@@ -22,19 +22,15 @@ subroutine cgyro_shear_pt
   implicit none
 
   integer :: ir,it,is,ie,ix
-  real :: a,arg,gtime0
+  real :: a,arg
   complex, dimension(n_theta,nv_loc) :: a1
-  !complex :: carg
 
   if (i_time == 1) then
-     allocate(sum_den_x0(nc))
      allocate(fcoef0(n_field,nc))
      allocate(gcoef0(n_field,nc))
      allocate(omega_s0(n_field,nc,nv_loc))
      allocate(omega_cap_h0(nc,nv_loc))
      allocate(jvec_c0(n_field,nc,nv_loc))
-
-     sum_den_x0 = sum_den_x
      fcoef0     = fcoef
      gcoef0     = gcoef
      omega_s0   = omega_s
@@ -44,57 +40,9 @@ subroutine cgyro_shear_pt
 
   a     = omega_eb*delta_t
   gtime = gtime+a
-  gtime0 = 0.5
-
-  do iv=nv1,nv2
-     do ic=1,nc
-
-        iv_loc = iv-nv1+1
-        is = is_v(iv)
-        ix = ix_v(iv)
-        ie = ie_v(iv)
-        ir = ir_c(ic) 
-        it = it_c(ic)
-
-        !call GEO_interp(theta(it))     
-
-        ! omega_rdrift
-        !omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) & 
-        !     -omega_rdrift(it,is)*energy(ie)*&
-        !     (1.0 + xi(ix)**2)*(2.0*pi*i_c*a/length) 
-
-        !k_perp(ic) = sqrt((2.0*pi*(px(ir)+gtime)*GEO_grad_r/length &
-        !     + k_theta*GEO_gq*GEO_captheta)**2 &
-        !     + (k_theta*GEO_gq)**2) 
-
-        !arg = k_perp(ic)*rho*vth(is)*mass(is)/(z(is)*bmag(it)) &
-        !     *sqrt(2.0*energy(ie))*sqrt(1.0-xi(ix)**2)
-
-        !jvec_c(1,ic,iv_loc) = bessel_j0(abs(arg))
-
-        !carg = -i_c*k_theta*rho*(dlnndr(is)+dlntdr(is)*(energy(ie)-1.5)) &
-        !     -i_c*k_theta*rho*(sqrt(2.0*energy(ie))*xi(ix)/vth(is) &
-        !     *omega_gammap(it))
-
-        !omega_s(:,ic,iv_loc) = carg*jvec_c(:,ic,iv_loc)
-
-        if (ir < n_radial) then 
-           fcoef(:,ic) = fcoef0(:,ic_c(ir,it))*(1-gtime0) + fcoef0(:,ic_c(ir+1,it))*gtime0
-           gcoef(:,ic) = gcoef0(:,ic_c(ir,it))*(1-gtime0) + gcoef0(:,ic_c(ir+1,it))*gtime0
-           sum_den_x(ic) = sum_den_x0(ic_c(ir,it))*(1-gtime0) + sum_den_x0(ic_c(ir+1,it))*gtime0
-           omega_cap_h(ic,iv_loc) = omega_cap_h0(ic_c(ir,it),iv_loc)*(1-gtime0) &
-                +omega_cap_h0(ic_c(ir+1,it),iv_loc)*gtime0
-           omega_s(:,ic,iv_loc) = omega_s0(:,ic_c(ir,it),iv_loc)*(1-gtime0) &
-                +omega_s0(:,ic_c(ir+1,it),iv_loc)*gtime0
-           jvec_c(:,ic,iv_loc) = jvec_c0(:,ic_c(ir,it),iv_loc)*(1-gtime0) &
-                +jvec_c0(:,ic_c(ir+1,it),iv_loc)*gtime0
-        endif
-
-     enddo
-  enddo
-
+ 
   ! Forward shearing
-  if (gtime > 1.0) then
+  if (gtime > 1e3) then
 
      gtime = gtime-1.0
 
@@ -106,55 +54,33 @@ subroutine cgyro_shear_pt
 
      h_x(ic_c(n_radial,:),:) = a1*gamma_e_decay
 
-     do iv=nv1,nv2
-        do ic=1,nc
-
-           iv_loc = iv-nv1+1
-           is = is_v(iv)
-           ix = ix_v(iv)
-           ie = ie_v(iv)
-           ir = ir_c(ic) 
-           it = it_c(ic)
-
-           !call GEO_interp(theta(it))     
-
-           ! omega_rdrift
-           !omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) & 
-           !     -omega_rdrift(it,is)*energy(ie)*&
-           !     (1.0 + xi(ix)**2)*(2.0*pi*i_c*(-1.0)/length) 
-
-           !k_perp(ic) = sqrt((2.0*pi*(px(ir)+gtime)*GEO_grad_r/length &
-           !     + k_theta*GEO_gq*GEO_captheta)**2 &
-           !     + (k_theta*GEO_gq)**2) 
-
-           !arg = k_perp(ic)*rho*vth(is)*mass(is)/(z(is)*bmag(it)) &
-           !     *sqrt(2.0*energy(ie))*sqrt(1.0-xi(ix)**2)
-
-           !jvec_c(1,ic,iv_loc) = bessel_j0(abs(arg))
-
-           !carg = -i_c*k_theta*rho*(dlnndr(is)+dlntdr(is)*(energy(ie)-1.5)) &
-           !     -i_c*k_theta*rho*(sqrt(2.0*energy(ie))*xi(ix)/vth(is) &
-           !     *omega_gammap(it))
-
-           !omega_s(1,ic,iv_loc) = carg*jvec_c(1,ic,iv_loc)
-
-           if (ir < n_radial) then 
-              fcoef(:,ic) = fcoef0(:,ic_c(ir,it))*(1-gtime0) + fcoef0(:,ic_c(ir+1,it))*gtime0
-              gcoef(:,ic) = gcoef0(:,ic_c(ir,it))*(1-gtime0) + gcoef0(:,ic_c(ir+1,it))*gtime0
-              sum_den_x(ic) = sum_den_x0(ic_c(ir,it))*(1-gtime0) + sum_den_x0(ic_c(ir+1,it))*gtime0
-              omega_cap_h(ic,iv_loc) = omega_cap_h0(ic_c(ir,it),iv_loc)*(1-gtime0) &
-                   +omega_cap_h0(ic_c(ir+1,it),iv_loc)*gtime0
-              omega_s(:,ic,iv_loc) = omega_s0(:,ic_c(ir,it),iv_loc)*(1-gtime0) &
-                   +omega_s0(:,ic_c(ir+1,it),iv_loc)*gtime0
-              jvec_c(:,ic,iv_loc) = jvec_c0(:,ic_c(ir,it),iv_loc)*(1-gtime0) &
-                   +jvec_c0(:,ic_c(ir+1,it),iv_loc)*gtime0
-           endif
-
-        enddo
-     enddo
-
      call cgyro_field_c
 
   endif
+
+  do iv=nv1,nv2
+     do ic=1,nc
+
+        iv_loc = iv-nv1+1
+        is = is_v(iv)
+        ix = ix_v(iv)
+        ie = ie_v(iv)
+        ir = ir_c(ic) 
+        it = it_c(ic)
+
+        if (ir < n_radial) then 
+           fcoef(:,ic) = fcoef0(:,ic_c(ir,it))*(1-gtime) + fcoef0(:,ic_c(ir+1,it))*gtime
+           gcoef(:,ic) = gcoef0(:,ic_c(ir,it))*(1-gtime) + gcoef0(:,ic_c(ir+1,it))*gtime
+           omega_cap_h(ic,iv_loc) = omega_cap_h0(ic_c(ir,it),iv_loc)*(1-gtime) &
+                +omega_cap_h0(ic_c(ir+1,it),iv_loc)*gtime
+           omega_s(:,ic,iv_loc) = omega_s0(:,ic_c(ir,it),iv_loc)*(1-gtime) &
+                +omega_s0(:,ic_c(ir+1,it),iv_loc)*gtime
+           jvec_c(:,ic,iv_loc) = jvec_c0(:,ic_c(ir,it),iv_loc)*(1-gtime) &
+                +jvec_c0(:,ic_c(ir+1,it),iv_loc)*gtime
+        endif
+
+     enddo
+  enddo
+    call cgyro_field_c
 
 end subroutine cgyro_shear_pt

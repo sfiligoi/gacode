@@ -142,6 +142,11 @@ subroutine cgyro_rhs(ij)
 
   rhs(:,:,ij) = rhs_ij(:,:)
 
+  ! TRAPPING TERM
+  if (shear_method == 3) then
+  call cgyro_rhs_trap(ij)
+  endif
+
   call timer_lib_out('str')
 
   ! Nonlinear evaluation [f,g]
@@ -177,3 +182,62 @@ subroutine cgyro_filter
   endif
 
 end subroutine cgyro_filter
+
+subroutine cgyro_rhs_trap(ij)
+
+  use parallel_lib
+
+  use cgyro_globals
+
+  implicit none
+
+  integer, intent(in) :: ij
+  integer :: is,ir,it,ie,ix,jx
+  complex :: val
+
+  call parallel_lib_r(transpose(cap_h_c),cap_h_v)
+  cap_h_v_prime(:,:) = (0.0,0.0)
+  ic_loc = 0
+  do ic=nc1,nc2
+     ic_loc = ic_loc+1
+     it = it_c(ic)
+     ir = ir_c(ic)
+     do iv=1,nv
+        is = is_v(iv)
+        ix = ix_v(iv)
+        ie = ie_v(iv)
+
+        do jx=1,n_xi
+           cap_h_v_prime(ic_loc,iv) = cap_h_v_prime(ic_loc,iv) &
+                +xi_deriv_mat(ix,jx)*cap_h_v(ic_loc,iv_v(ie,jx,is))
+        enddo
+     enddo
+  enddo
+
+  ! Now have cap_h_v(ic_loc,iv)   
+
+  call parallel_lib_f(cap_h_v_prime,cap_h_ct)
+  cap_h_c = transpose(cap_h_ct)
+
+  iv_loc = 0
+  do iv=nv1,nv2
+
+     iv_loc = iv_loc+1
+
+     is = is_v(iv)
+     ix = ix_v(iv)
+     ie = ie_v(iv)
+
+     do ic=1,nc
+
+        ir = ir_c(ic) 
+        it = it_c(ic)
+
+        val = omega_trap(it,is)*sqrt(energy(ie))*(1.0-xi(ix)**2) 
+
+        rhs(ic,iv_loc,ij) = rhs(ic,iv_loc,ij) &
+             -val*cap_h_c(ic,iv_loc)
+     enddo
+  enddo
+
+end subroutine cgyro_rhs_trap

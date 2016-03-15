@@ -66,23 +66,13 @@ subroutine cgyro_kernel
 
      ! Collisionless step: returns new h_x, cap_h_x, fields 
      call cgyro_step_gk
-
-     ! Spectral ExB shear
-     select case(shear_method)
-     case(1)
-        call cgyro_shear
-     case(2)
-        call cgyro_shear_dft
-     case(3)
-        call cgyro_shear_pt
-     end select
         
      ! Collisionless implicit streaming term step
      ! : returns new h_x, cap_h_x, fields 
      call cgyro_step_implicit_gk
 
      ! Collision step: returns new h_x, cap_h_x, fields
-     call cgyro_step_collision
+     if (shear_method /= 3) call cgyro_step_collision
      !------------------------------------------------------------
 
      !------------------------------------------------------------
@@ -93,6 +83,16 @@ subroutine cgyro_kernel
      ! Error estimate
      call cgyro_error_estimate
      !------------------------------------------------------------
+
+     ! Spectral ExB shear
+     select case(shear_method)
+     case(1)
+        call cgyro_shear
+     case(2)
+        call cgyro_shear_dft
+     case(3)
+        call cgyro_shear_pt
+     end select
 
      !---------------------------------------
      ! IO
