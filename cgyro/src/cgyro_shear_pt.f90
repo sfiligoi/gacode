@@ -22,9 +22,9 @@ subroutine cgyro_shear_pt
   implicit none
 
   integer :: ir,it,is,ie,ix
-  real :: a,arg
+  real :: a,arg,gtime0
   complex, dimension(n_theta,nv_loc) :: a1
-  complex :: carg
+  !complex :: carg
 
   if (i_time == 1) then
      allocate(sum_den_x0(nc))
@@ -44,6 +44,7 @@ subroutine cgyro_shear_pt
 
   a     = omega_eb*delta_t
   gtime = gtime+a
+  gtime0 = 0.5
 
   do iv=nv1,nv2
      do ic=1,nc
@@ -78,15 +79,15 @@ subroutine cgyro_shear_pt
         !omega_s(:,ic,iv_loc) = carg*jvec_c(:,ic,iv_loc)
 
         if (ir < n_radial) then 
-           fcoef(:,ic) = fcoef0(:,ic_c(ir,it))*(1-gtime) + fcoef0(:,ic_c(ir+1,it))*gtime
-           gcoef(:,ic) = gcoef0(:,ic_c(ir,it))*(1-gtime) + gcoef0(:,ic_c(ir+1,it))*gtime
-           sum_den_x(ic) = sum_den_x0(ic_c(ir,it))*(1-gtime) + sum_den_x0(ic_c(ir+1,it))*gtime
-           omega_cap_h(ic,iv_loc) = omega_cap_h0(ic_c(ir,it),iv_loc)*(1-gtime) &
-                +omega_cap_h0(ic_c(ir+1,it),iv_loc)*gtime
-           omega_s(:,ic,iv_loc) = omega_s0(:,ic_c(ir,it),iv_loc)*(1-gtime) &
-                +omega_s0(:,ic_c(ir+1,it),iv_loc)*gtime
-           jvec_c(:,ic,iv_loc) = jvec_c0(:,ic_c(ir,it),iv_loc)*(1-gtime) &
-                +jvec_c0(:,ic_c(ir+1,it),iv_loc)*gtime
+           fcoef(:,ic) = fcoef0(:,ic_c(ir,it))*(1-gtime0) + fcoef0(:,ic_c(ir+1,it))*gtime0
+           gcoef(:,ic) = gcoef0(:,ic_c(ir,it))*(1-gtime0) + gcoef0(:,ic_c(ir+1,it))*gtime0
+           sum_den_x(ic) = sum_den_x0(ic_c(ir,it))*(1-gtime0) + sum_den_x0(ic_c(ir+1,it))*gtime0
+           omega_cap_h(ic,iv_loc) = omega_cap_h0(ic_c(ir,it),iv_loc)*(1-gtime0) &
+                +omega_cap_h0(ic_c(ir+1,it),iv_loc)*gtime0
+           omega_s(:,ic,iv_loc) = omega_s0(:,ic_c(ir,it),iv_loc)*(1-gtime0) &
+                +omega_s0(:,ic_c(ir+1,it),iv_loc)*gtime0
+           jvec_c(:,ic,iv_loc) = jvec_c0(:,ic_c(ir,it),iv_loc)*(1-gtime0) &
+                +jvec_c0(:,ic_c(ir+1,it),iv_loc)*gtime0
         endif
 
      enddo
@@ -138,15 +139,15 @@ subroutine cgyro_shear_pt
            !omega_s(1,ic,iv_loc) = carg*jvec_c(1,ic,iv_loc)
 
            if (ir < n_radial) then 
-              fcoef(:,ic) = fcoef0(:,ic_c(ir,it))*(1-gtime) + fcoef0(:,ic_c(ir+1,it))*gtime
-              gcoef(:,ic) = gcoef0(:,ic_c(ir,it))*(1-gtime) + gcoef0(:,ic_c(ir+1,it))*gtime
-              sum_den_x(ic) = sum_den_x0(ic_c(ir,it))*(1-gtime) + sum_den_x0(ic_c(ir+1,it))*gtime
-              omega_cap_h(ic,iv_loc) = omega_cap_h0(ic_c(ir,it),iv_loc)*(1-gtime) &
-                   +omega_cap_h0(ic_c(ir+1,it),iv_loc)*gtime
-              omega_s(:,ic,iv_loc) = omega_s0(:,ic_c(ir,it),iv_loc)*(1-gtime) &
-                   +omega_s0(:,ic_c(ir+1,it),iv_loc)*gtime
-              jvec_c(:,ic,iv_loc) = jvec_c0(:,ic_c(ir,it),iv_loc)*(1-gtime) &
-                   +jvec_c0(:,ic_c(ir+1,it),iv_loc)*gtime
+              fcoef(:,ic) = fcoef0(:,ic_c(ir,it))*(1-gtime0) + fcoef0(:,ic_c(ir+1,it))*gtime0
+              gcoef(:,ic) = gcoef0(:,ic_c(ir,it))*(1-gtime0) + gcoef0(:,ic_c(ir+1,it))*gtime0
+              sum_den_x(ic) = sum_den_x0(ic_c(ir,it))*(1-gtime0) + sum_den_x0(ic_c(ir+1,it))*gtime0
+              omega_cap_h(ic,iv_loc) = omega_cap_h0(ic_c(ir,it),iv_loc)*(1-gtime0) &
+                   +omega_cap_h0(ic_c(ir+1,it),iv_loc)*gtime0
+              omega_s(:,ic,iv_loc) = omega_s0(:,ic_c(ir,it),iv_loc)*(1-gtime0) &
+                   +omega_s0(:,ic_c(ir+1,it),iv_loc)*gtime0
+              jvec_c(:,ic,iv_loc) = jvec_c0(:,ic_c(ir,it),iv_loc)*(1-gtime0) &
+                   +jvec_c0(:,ic_c(ir+1,it),iv_loc)*gtime0
            endif
 
         enddo
