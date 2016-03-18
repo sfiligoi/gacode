@@ -19,8 +19,8 @@ subroutine cgyro_step_collision_simple
 
   integer :: is,ie,ix,jx,it,ir
   integer :: ivp
-  complex, dimension(n_species,n_energy,n_xi) :: cvec
-  complex, dimension(n_species,n_energy,n_xi) :: bvec
+  complex, dimension(n_xi,n_energy,n_species) :: cvec
+  complex, dimension(n_xi,n_energy,n_species) :: bvec
   real :: cvec_re,cvec_im
 
   !----------------------------------------------------------------
@@ -40,28 +40,23 @@ subroutine cgyro_step_collision_simple
      ! Set-up the RHS: H = f + ze/T G phi
 
      do iv=1,nv
-        is = is_v(iv)
-        ix = ix_v(iv)
-        ie = ie_v(iv)
-        cvec(is,ie,ix) = cap_h_v(ic_loc,iv)
+        cvec(ix_v(iv),ie_v(iv),is_v(iv)) = cap_h_v(ic_loc,iv)
      enddo
 
      ! Avoid singularity of n=0,p=0:
      if (px(ir) == 0 .and. n == 0) then
         bvec = cvec
      else
-
+        bvec = 0.0
         do is=1,n_species
            do ie=1,n_energy
-              bvec(is,ie,:) = (0.0,0.0)
-              
               do jx=1,n_xi
-                 
-                 cvec_re = real(cvec(is,ie,jx),kind=kind(cmat_simple))
-                 cvec_im = aimag(cvec(is,ie,jx))
-                 
+
+                 cvec_re = real(cvec(jx,ie,is))
+                 cvec_im = aimag(cvec(jx,ie,is))
+
                  do ix=1,n_xi
-                    bvec(is,ie,ix) = bvec(is,ie,ix)+ &
+                    bvec(ix,ie,is) = bvec(ix,ie,is)+ &
                          cmplx(cmat_simple(ix,jx,is,ie,it)*cvec_re, &
                          cmat_simple(ix,jx,is,ie,it)*cvec_im)
                  enddo
@@ -71,10 +66,7 @@ subroutine cgyro_step_collision_simple
      endif
 
      do iv=1,nv
-        is = is_v(iv)
-        ix = ix_v(iv)
-        ie = ie_v(iv)
-       cap_h_v(ic_loc,iv) = bvec(is,ie,ix)
+        cap_h_v(ic_loc,iv) = bvec(ix_v(iv),ie_v(iv),is_v(iv))
      enddo
 
   enddo

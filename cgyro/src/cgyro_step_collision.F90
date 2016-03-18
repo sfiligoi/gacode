@@ -23,7 +23,7 @@ subroutine cgyro_step_collision
   complex, dimension(size(cap_h_v,2),nc1:nc2) :: bvec
   real :: cvec_re,cvec_im
 
-  if(collision_model == 5) then
+  if (collision_model == 5) then
      call cgyro_step_collision_simple
      return
   endif
