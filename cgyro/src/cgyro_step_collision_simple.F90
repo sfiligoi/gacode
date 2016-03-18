@@ -32,6 +32,16 @@ subroutine cgyro_step_collision_simple
 
   call timer_lib_in('coll')
 
+#ifdef _OPENACC
+!$acc  data present(cmat_simple) &
+!$acc& pcopy(cap_h_v)
+
+!$acc  parallel 
+!$acc  loop gang private(ic_loc,ivp,iv,is,ix,jx,ie,ir,it,cvec_re,cvec_im,bvec,cvec)
+#else
+!$omp parallel private(ic_loc,ivp,iv,is,ix,jx,ie,ir,it,cvec_re,cvec_im,bvec,cvec)
+!$omp do
+#endif
   do ic=nc1,nc2
      ic_loc = ic-nc1+1
      ir = ir_c(ic)
@@ -39,6 +49,7 @@ subroutine cgyro_step_collision_simple
 
      ! Set-up the RHS: H = f + ze/T G phi
 
+!$acc loop vector
      do iv=1,nv
         is = is_v(iv)
         ix = ix_v(iv)
@@ -51,10 +62,11 @@ subroutine cgyro_step_collision_simple
         bvec = cvec
      else
 
+        bvec = 0.0
+
+!$acc loop vector
         do is=1,n_species
-           do ie=1,n_energy
-              bvec(is,ie,:) = (0.0,0.0)
-              
+           do ie=1,n_energy              
               do jx=1,n_xi
                  
                  cvec_re = real(cvec(is,ie,jx),kind=kind(cmat_simple))
@@ -70,6 +82,7 @@ subroutine cgyro_step_collision_simple
         enddo
      endif
 
+!$acc loop vector
      do iv=1,nv
         is = is_v(iv)
         ix = ix_v(iv)
@@ -78,6 +91,13 @@ subroutine cgyro_step_collision_simple
      enddo
 
   enddo
+#ifdef _OPENACC
+!$acc end parallel
+!$acc end data
+#else
+!$omp end do
+!$omp end parallel
+#endif
 
   call timer_lib_out('coll')
 
@@ -90,11 +110,11 @@ subroutine cgyro_step_collision_simple
 
   ! Compute H given h and [phi(h), apar(h)]
 
+!$omp parallel do &
+!$omp& private(iv,iv_loc,is,ix,ie,ic)
   do iv=nv1,nv2
      iv_loc = iv-nv1+1
      is = is_v(iv)
-     ix = ix_v(iv)
-     ie = ie_v(iv)
      do ic=1,nc
         psi(ic,iv_loc) = sum(jvec_c(:,ic,iv_loc)*field(:,ic))
         h_x(ic,iv_loc) = cap_h_c(ic,iv_loc)-psi(ic,iv_loc)*(z(is)/temp(is))
