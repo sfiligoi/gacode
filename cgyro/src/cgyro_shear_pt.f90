@@ -40,7 +40,7 @@ subroutine cgyro_shear_pt
 
   a     = omega_eb*delta_t
   gtime = gtime+a
- 
+
   ! Forward shearing
   if (gtime > 1.0) then
 
@@ -81,6 +81,6 @@ subroutine cgyro_shear_pt
 
      enddo
   enddo
-    call cgyro_field_c
+  call cgyro_field_c
 
 end subroutine cgyro_shear_pt
