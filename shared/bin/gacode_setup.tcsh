@@ -13,11 +13,10 @@ setenv PATH ${PATH}:$GACODE_ROOT/glf23/bin
 setenv PATH ${PATH}:$GACODE_ROOT/le3/bin
 setenv PATH ${PATH}:$GACODE_ROOT/shared/bin
 
-if ( -d $GACODE_ADD_ROOT ) 
-then
+if ( -d $GACODE_ADD_ROOT ) then
    SETENV PATH ${PATH}:$GACODE_ADD_ROOT/freya/bin
    SETENV PATH ${PATH}:$GACODE_ADD_ROOT/prefreya/bin
-fi
+endif
 
 if ( $?PYTHONPATH ) then
  setenv PYTHONPATH ${PYTHONPATH}:$GACODE_ROOT/python
