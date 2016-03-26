@@ -1,0 +1,19 @@
+#!/bin/sh
+#
+# SCRIPT:
+#  gyro.DROP
+#
+# FUNCTION:
+#  Parallel execution script
+
+simdir=${1}
+nmpi=${2}
+exec=${3}
+nomp=${4}
+numa=${5}
+mpinuma=${6}
+nidle=${7}
+
+cd $simdir
+
+mpiexec -x OMP_NUM_THREADS=$nomp -n $nmpi $exec
