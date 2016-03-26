@@ -1,11 +1,11 @@
 #!/bin/bash
 
 bfile=$SIMDIR/batch.src
-echo "#$ -N $LOCDIR" > $bfile
-echo "#$ -o $SIMDIR/batch.out" >> $bfile
-echo "#$ -e $SIMDIR/batch.err" >> $bfile
-echo "#$ -q $QUEUE" >> $bfile
-echo "#$ -V" >> $bfile
-echo "#$ -S /bin/bash" >> $bfile
-echo "#$ -pe mpi $nmpi" >> $bfile
+echo "#PBS -N $LOCDIR" > $bfile
+echo "#PBS -o $SIMDIR/batch.out" >> $bfile
+echo "#PBS -e $SIMDIR/batch.err" >> $bfile
+echo "#PBS -q $QUEUE" >> $bfile
+echo "#PBS -V" >> $bfile
+echo "#PBS -S /bin/bash" >> $bfile
+echo "#PBS -l nodes=$nodes:ppn=$mpinode" >> $bfile
 echo "$CODE -e $LOCDIR -n $nmpi -nomp $nomp -p $SIMROOT" >> $bfile
