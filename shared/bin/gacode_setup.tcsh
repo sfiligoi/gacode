@@ -13,9 +13,13 @@ setenv PATH ${PATH}:$GACODE_ROOT/glf23/bin
 setenv PATH ${PATH}:$GACODE_ROOT/le3/bin
 setenv PATH ${PATH}:$GACODE_ROOT/shared/bin
 
-if ( -d $GACODE_ADD_ROOT ) then
-   SETENV PATH ${PATH}:$GACODE_ADD_ROOT/freya/bin
-   SETENV PATH ${PATH}:$GACODE_ADD_ROOT/prefreya/bin
+if (! $?GACODE_ADD_ROOT) then       
+  #echo "variable is undefined"
+else
+    if ( -d $GACODE_ADD_ROOT ) 
+    then
+       SETENV PATH=${PATH}:$GACODE_ADD_ROOT/freya/bin
+    fi
 endif
 
 if ( $?PYTHONPATH ) then
