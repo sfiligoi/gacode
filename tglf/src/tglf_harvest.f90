@@ -41,6 +41,7 @@
     ENDIF
 
     ierr=init_harvest('TGLF_spectrum_2'//NUL,harvest_sendline,LEN(harvest_sendline))
+
     ierr=set_harvest_payload_str(harvest_sendline,'VERSION'//NUL,'APS15_1'//NUL) !no underscore to allow different versions of the same run
 
 !   '#---------------------------------------------------'
