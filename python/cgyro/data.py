@@ -91,19 +91,19 @@ class cgyrodata:
         # Read ballooning potentials
         #
         try:
-            data = np.loadtxt('out.cgyro.phib')
+            data = np.loadtxt(self.dir+'out.cgyro.phib')
             self.phib = np.reshape(data,(2,self.n_theta*self.n_radial/self.m_box,nt),'F')
             print "INFO: (data.py) Read data in out.cgyro.phib."
         except:
             pass
         try:
-            data = np.loadtxt('out.cgyro.aparb')
+            data = np.loadtxt(self.dir+'out.cgyro.aparb')
             self.aparb = np.reshape(data,(2,self.n_theta*self.n_radial/self.m_box,nt),'F')
             print "INFO: (data.py) Read data in out.cgyro.aparb."
         except:
             pass
         try:
-            data = np.loadtxt('out.cgyro.bparb')
+            data = np.loadtxt(self.dir+'out.cgyro.bparb')
             self.bparb = np.reshape(data,(2,self.n_theta*self.n_radial/self.m_box,nt),'F')
             print "INFO: (data.py) Read data in out.cgyro.bparb."
         except:
