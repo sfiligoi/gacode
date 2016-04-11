@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # SCRIPT:
-#  gyro.DROP
+#  gyro.SHENMA
 #
 # FUNCTION:
 #  Parallel execution script
@@ -16,4 +16,5 @@ nidle=${7}
 
 cd $simdir
 
-mpiexec -x OMP_NUM_THREADS=$nomp -n $nmpi $exec
+echo "mpiexec -x OMP_NUM_THREADS=$nomp -n $nmpi $exec"
+mpiexec -x OMP_NUM_THREADS=$nomp --hostfile "$PBS_NODEFILE" -n $nmpi $exec
