@@ -662,6 +662,7 @@
       call gyro_set_exit_status(gkeigen_message,2)
 
       call VecDestroy(dummy_vec,ierr)
+      call VecDestroy(dummy_vec2,ierr)
       call MatDestroy(time_derivative_matrix,ierr)
       call EPSDestroy(epsolve,ierr)
 !      call PetscViewerDestroy(vecfile,ierr)
