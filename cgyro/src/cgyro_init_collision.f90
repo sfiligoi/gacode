@@ -9,6 +9,7 @@ subroutine cgyro_init_collision
   real, dimension(:,:,:), allocatable :: nu_d, nu_s, nu_par, nu_par_deriv
   real, dimension(:,:), allocatable :: rs
   real, dimension(:,:,:,:), allocatable :: rsvec, rsvect 
+  integer :: test_constnu_flag = 1
 
   real :: arg
   real :: xa, xb, tauinv_ab
@@ -117,6 +118,10 @@ subroutine cgyro_init_collision
                       + 2.0*exp(-xb*xb)/sqrt(pi) - erf(xb)/xb**3))
               endif
 
+           case(6)
+              ! Const nu(energy)
+              nu_d(ie,is,js) = tauinv_ab
+              
            end select
 
         enddo
@@ -244,7 +249,7 @@ subroutine cgyro_init_collision
 
   select case (collision_model)
 
-  case(1,2,3)
+  case(1,2,3,6)
      if(collision_mom_restore == 1) then
         do is=1,n_species
            do js=1,n_species
@@ -579,15 +584,17 @@ subroutine cgyro_init_collision
               endif
 
               ! Trapping (not part of collision operator but contains xi-derivative)
-              if (is == js .and. ie == je) then
-                 cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
-                      + (0.5*delta_t) * omega_trap(it,is) &
-                      * vel(ie) * (1.0 - xi(ix)**2) &
-                      * xi_deriv_mat(ix,jx) 
-                 amat(iv,jv) = amat(iv,jv) &
-                      - (0.5*delta_t) * omega_trap(it,is) &
-                      * vel(ie) * (1.0 - xi(ix)**2) &
-                      * xi_deriv_mat(ix,jx) 
+              if(collision_model /= 6) then
+                 if (is == js .and. ie == je) then
+                    cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
+                         + (0.5*delta_t) * omega_trap(it,is) &
+                         * vel(ie) * (1.0 - xi(ix)**2) &
+                         * xi_deriv_mat(ix,jx) 
+                    amat(iv,jv) = amat(iv,jv) &
+                         - (0.5*delta_t) * omega_trap(it,is) &
+                         * vel(ie) * (1.0 - xi(ix)**2) &
+                         * xi_deriv_mat(ix,jx) 
+                 endif
               endif
 
               ! Finite-kperp test particle corrections -- ion w/ ions only

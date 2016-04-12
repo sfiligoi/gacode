@@ -117,6 +117,9 @@ subroutine cgyro_check
   case(5)
      call cgyro_info('Collision model 5: Simple Lorentz ee+ei')
 
+  case(6)
+     call cgyro_info('Collision model 6: Test model (const nu)')
+
   case default
      call cgyro_error('Invalid value for collision_model')
      return
