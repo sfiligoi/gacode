@@ -80,7 +80,7 @@ subroutine tgyro_tglf_map
   !----------------------------------------------------------------
   ! TGLF-specific quantities
   q_prime = (q_abs/(r(i_r)/r_min))**2*s(i_r)
-  if(loc_num_equil_flag == 1)then
+  if (tgyro_ptot_flag == 1)then
     p_prime = (q_abs/(r(i_r)/r_min))*(beta_unit(i_r)/(8*pi))*(-r_min*dlnptotdr(i_r)) 
     p_prime = 10.0*(ptot(i_r)/pr(i_r))*p_prime  ! factor of 10 for conversion from SI to cgs units 
   else
@@ -318,7 +318,7 @@ subroutine tgyro_tglf_map
   
   ! Harvest targets and gyro-bohm normalizations
   
-  if ( i_tran ==0 ) then
+  if (i_tran == 0) then
     ! Initialization
     tglf_harvest_extra_in = NUL
     harvest_err=set_harvest_verbose(0)
@@ -342,4 +342,5 @@ subroutine tgyro_tglf_map
     ! Indication of thermal ions
     harvest_err=set_harvest_payload_int_array(tglf_harvest_extra_in,'tgyro_therm_vec'//NUL,therm_vec(:),size(therm_vec))
   endif
+
 end subroutine tgyro_tglf_map

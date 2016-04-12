@@ -277,7 +277,6 @@ module tgyro_globals
   real :: loc_betae_scale
   integer :: loc_chang_hinton
   real :: loc_me_multiplier
-  integer :: loc_sawtooth_model
   integer :: loc_bc_offset
   integer :: tgyro_tglf_revision
   integer :: tgyro_tglf_dump_flag
@@ -307,7 +306,6 @@ module tgyro_globals
   real :: tgyro_stab_deltaky
   real :: tgyro_rmin
   real :: tgyro_rmax
-  integer :: tgyro_global_radii
   integer :: tgyro_expwd_flag
   real :: tgyro_input_den_scale
   real :: tgyro_input_te_scale
@@ -322,7 +320,7 @@ module tgyro_globals
   integer :: tgyro_fix_concentration_flag
   integer :: tgyro_write_profiles_flag
   integer :: tgyro_neo_n_theta
-  real :: tgyro_resmax
+  integer :: tgyro_ptot_flag
   !
   ! Iteration variables (global)
   !

@@ -313,11 +313,11 @@ subroutine tgyro_write_input
      case (0)
 
         write(1,10) 'LOC_HE_FEEDBACK_FLAG','He evolution OFF'
-        
+
      case (1)
 
         write(1,10) 'LOC_HE_FEEDBACK_FLAG','He evolution ON'
-        
+
      case default
 
         error_flag = 1
@@ -392,29 +392,6 @@ subroutine tgyro_write_input
 
         error_flag = 1
         error_msg = 'Error: TGYRO_DT_METHOD'
-
-     end select
-     !--------------------------------------------------------
-
-     !--------------------------------------------------------
-     select case (loc_sawtooth_model)
-
-     case (1)
-
-        write(1,10) 'LOC_SAWTOOTH_MODEL','No corrections for sawteeth'
-
-     case (2)
-
-        write(1,10) 'LOC_SAWTOOTH_MODEL','Enhanced qe for q < 1'
-
-     case (3)
-
-        write(1,10) 'LOC_SAWTOOTH_MODEL','Enhanced qi and qe for q < 1.'
-
-     case default
-
-        error_flag = 1
-        error_msg = 'Error: LOC_SAWTOOTH_MODEL'
 
      end select
      !--------------------------------------------------------
@@ -507,6 +484,11 @@ subroutine tgyro_write_input
         write(1,10) '-> Fluctuations','Electromagnetic'
      else
         write(1,10) '-> Fluctuations','Electrostatic'
+     endif
+     if (tgyro_ptot_flag == 0) then
+        write(1,10) '-> Pressure','Using pressure (beta) computed by summing over included species.'
+     else
+        write(1,10) '-> Pressure','Using total pressure from GFILE.'
      endif
 
      !--------------------------------------------------------
