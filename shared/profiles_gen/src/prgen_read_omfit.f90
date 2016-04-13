@@ -154,8 +154,14 @@ subroutine prgen_read_omfit
   call cub_spline(sqrt(psi),gvec(6,:),nsurf,sqdpsi,zeta,nx)
 
   ! Map q and p into poloidal flux grid
-  call cub_spline(sqrt(psi),q_omfit,nsurf,sqdpsi,q,nx)
-  call cub_spline(sqrt(psi),p_omfit,nsurf,sqdpsi,p_tot,nx)
+  if (nop_flag == 0) then
+     print '(a)','INFO: (prgen) Using total pressure from gfile.'
+     call cub_spline(sqrt(psi),p_omfit,nsurf,sqdpsi,p_tot,nx)
+  endif
+  if (noq_flag == 0) then 
+     print '(a)','INFO: (prgen) Using safety factor (q) from gfile.'
+     call cub_spline(sqrt(psi),q_omfit,nsurf,sqdpsi,q,nx)
+  endif
 
   ! Explicitly set rmin=0 at origin
   rmin(1) = 0.0

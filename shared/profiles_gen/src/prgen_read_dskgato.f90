@@ -229,7 +229,7 @@ subroutine prgen_read_dskgato
   close(1)
   !----------------------------------------------------------------
 
-  if (nogatoq_flag == 0 .or. format_type == 3 .or. format_type == 7) then
+  if (noq_flag == 0) then
      call cub_spline(psi,q_dsk,nsurf+1,dpsi,q,nx)
   endif
 

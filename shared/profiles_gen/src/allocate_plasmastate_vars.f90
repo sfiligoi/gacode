@@ -10,7 +10,6 @@ subroutine allocate_plasmastate_vars
   allocate(plst_m_all(plst_dp1_nspec_all))
   allocate(plst_ns(nx,plst_dp1_nspec_th+1))
   allocate(plst_ts(nx,plst_dp1_nspec_th+1))
-  allocate(plst_ptowb(nx))
   allocate(plst_nb(nx))
   allocate(plst_nmini(nx))
   allocate(plst_nfusi(nx))

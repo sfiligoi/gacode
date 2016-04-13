@@ -230,7 +230,7 @@ subroutine prgen_read_plasmastate
 
   ! Total plasma pressure, thermal + fast ions
   err = nf90_inq_varid(ncid,trim('P_eq'),varid)
-  err = nf90_get_var(ncid,varid,plst_ptowb(:))
+  err = nf90_get_var(ncid,varid,p_tot)
 
   ! NOTE: Fast-ion handling: 
   !

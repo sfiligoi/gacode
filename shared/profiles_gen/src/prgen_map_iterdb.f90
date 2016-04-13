@@ -179,7 +179,7 @@ subroutine prgen_map_iterdb
 
      onetwo_enion_vec(n0,:) = onetwo_enalp(:)*1e-19
 
-     onetwo_tion_vec(n0,:) = (onetwo_press(:)-&
+     onetwo_tion_vec(n0,:) = (p_tot(:)-&
           (sum(onetwo_enion_vec(1:n0-1,:)*&
           onetwo_tion_vec(1:n0-1,:),dim=1)*1e19+&
           onetwo_ene(:)*onetwo_te(:))*1.6022e-16)/(onetwo_enalp(:))/1.6022e-16

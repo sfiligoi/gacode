@@ -279,7 +279,7 @@ subroutine prgen_map_plasmastate
   EXPRO_flow_beam = flow_beam(:)
   EXPRO_flow_wall = 0.0
   EXPRO_zmag = zmag(:)
-  EXPRO_ptot = plst_ptowb ! total pressure, thermal + fast ion
+  EXPRO_ptot = p_tot ! total pressure, thermal + fast ion
   ! COORDINATES: This poloidal flux has correct sign (see above).
   EXPRO_polflux = dpsi(:)
 

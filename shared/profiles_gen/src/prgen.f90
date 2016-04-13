@@ -38,7 +38,8 @@ program prgen
   read(1,'(a)') raw_data_type
   read(1,'(a)') cer_file
   read(1,*) efit_method
-  read(1,*) nogatoq_flag
+  read(1,*) noq_flag
+  read(1,*) nop_flag
   read(1,*) verbose_flag
   read(1,*) gmerge_flag
   read(1,*) ipccw

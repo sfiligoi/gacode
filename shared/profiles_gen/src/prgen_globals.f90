@@ -17,7 +17,8 @@ module prgen_globals
   integer :: nx
   integer :: format_type
   integer :: efit_method
-  integer :: nogatoq_flag
+  integer :: noq_flag
+  integer :: nop_flag
   integer :: verbose_flag
   integer :: gmerge_flag
   character (len=70) :: efit_header
@@ -149,7 +150,6 @@ module prgen_globals
   real, dimension(:), allocatable :: onetwo_enalp
   real, dimension(:), allocatable :: onetwo_psi
   real, dimension(:), allocatable :: onetwo_storqueb
-  real, dimension(:), allocatable :: onetwo_press
   real, dimension(:,:), allocatable :: onetwo_enion
   real, dimension(:,:), allocatable :: onetwo_enbeam
   real, dimension(:,:), allocatable :: onetwo_pressb
@@ -195,7 +195,6 @@ module prgen_globals
   real, dimension(:), allocatable :: plst_m_all
   real, dimension(:,:), allocatable :: plst_ts
   real, dimension(:,:), allocatable :: plst_ns
-  real, dimension(:), allocatable :: plst_ptowb
   real, dimension(:), allocatable :: plst_nb
   real, dimension(:), allocatable :: plst_nmini
   real, dimension(:), allocatable :: plst_nfusi
@@ -252,7 +251,6 @@ module prgen_globals
   real, dimension(:), allocatable :: peqdsk_omgeb
   real, dimension(:), allocatable :: peqdsk_nb
   real, dimension(:), allocatable :: peqdsk_pb
-  real, dimension(:), allocatable :: peqdsk_ptot
   integer :: peqdsk_fmt, peqdsk_nion, peqdsk_nimp, peqdsk_nbeams
   real, dimension(n_ion_max) :: peqdsk_z
   real, dimension(n_ion_max) :: peqdsk_m

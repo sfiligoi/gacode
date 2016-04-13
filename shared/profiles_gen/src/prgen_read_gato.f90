@@ -149,9 +149,14 @@ subroutine prgen_read_gato
   call cub_spline(gato_psi,gvec(5,:),nsurf+1,dpsi,delta,nx)
   call cub_spline(gato_psi,gvec(6,:),nsurf+1,dpsi,zeta,nx)
 
-  ! Total pressure and q from GATO-EFIT
-  call cub_spline(gato_psi,gato_p,nsurf+1,dpsi,p_tot,nx)
-  if (nogatoq_flag == 0 .or. format_type == 3 .or. format_type == 7) then
+  ! Total pressure and q from GATO-EFIT 
+  ! (possible overwrite from raw data input in statefile)
+  if (nop_flag == 0) then
+     print '(a)','INFO: (prgen) Using total pressure from gfile.'
+     call cub_spline(gato_psi,gato_p,nsurf+1,dpsi,p_tot,nx)
+  endif
+  if (noq_flag == 0) then
+     print '(a)','INFO: (prgen) Using safety factor (q) from gfile.'
      call cub_spline(gato_psi,gato_q,nsurf+1,dpsi,q,nx)
   endif
 
