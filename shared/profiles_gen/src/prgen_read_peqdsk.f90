@@ -74,6 +74,20 @@ subroutine prgen_read_peqdsk
   deallocate(xv)
   close(1)
 
+  ! ptot (KPa)
+  inquire(file='pfile.ptot',exist=ierr)
+  if(ierr) then
+     open(unit=1,file='pfile.ptot',status='old')
+     read(1,*) i
+     allocate(xv(ncol,i))
+     read(1,*) xv
+     call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_ptot,nx)
+     deallocate(xv)
+     close(1)
+  else
+     peqdsk_ptot(:) = 0.0
+  endif
+
   ! nb(10^20/m^3)
   inquire(file='pfile.nb',exist=ierr)
   if(ierr) then
