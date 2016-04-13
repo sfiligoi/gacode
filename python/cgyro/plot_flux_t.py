@@ -26,11 +26,12 @@ ax.set_xlabel(r'$(c_s/a)\, t$')
 color = ['k','m','b','c','g','r']
 
 if moment == 'n':
-    im
     mtag = '\Gamma'
+    ttag = 'G'
     y = np.sum(sim.flux_n,axis=(0,2))
 elif moment == 'e':
     mtag = 'Q'
+    ttag = 'Q'
     y = np.sum(sim.flux_e,axis=(0,2))
 elif moment == 'm':
     print 'm not implemented.'
@@ -65,6 +66,14 @@ if ymax != 'auto':
 
 if ftype == 'screen':
    plt.show()
+elif ftype == 'dump':
+    data = np.column_stack((sim.t,y[0,:]))
+    head = '(cs/a) t     '+ttag+'_1/'+ttag+'_GB'
+    for ispec in range(1,ns,1):
+        head = head+'       '+ttag+'_'+str(ispec+1)+'/'+ttag+'_GB'
+        data = np.column_stack((data,y[ispec,:]))
+    np.savetxt('out.cgyro.dump.flux_t',data,fmt='%.8e',header=head)
+    print 'INFO: (plot_flux_t) Created out.cgyro.dump.flux_t'
 else:
    outfile = 'flux_t.'+ftype
    plt.savefig(outfile)
