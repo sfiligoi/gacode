@@ -74,9 +74,10 @@ elif ftype == 'dump':
     for ispec in range(1,ns,1):
         head = head+'       '+ttag+'_'+str(ispec+1)+'/'+ttag+'_GB'
         data = np.column_stack((data,y[ispec,:]))
-    np.savetxt('out.cgyro.dump.flux_t',data,fmt='%.8e',header=head)
-    print 'INFO: (plot_flux_t) Created '+fname+'txt'
+    fname = fname+'txt'
+    np.savetxt(fname,data,fmt='%.8e',header=head)
+    print 'INFO: (plot_flux_t) Created '+fname
 else:
-   outfile = fname+ftype
-   print 'INFO: (plot_flux_t) Created '+outfile
-   plt.savefig(outfile)
+   fname = fname+ftype
+   print 'INFO: (plot_flux_t) Created '+fname
+   plt.savefig(fname)
