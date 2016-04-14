@@ -64,6 +64,8 @@ ax.legend(loc=2)
 if ymax != 'auto':
     ax.set_ylim([0,float(ymax)])
 
+fname = 'out.cgyro.fluxt.'+ttag+'.'
+
 if ftype == 'screen':
    plt.show()
 elif ftype == 'dump':
@@ -73,7 +75,8 @@ elif ftype == 'dump':
         head = head+'       '+ttag+'_'+str(ispec+1)+'/'+ttag+'_GB'
         data = np.column_stack((data,y[ispec,:]))
     np.savetxt('out.cgyro.dump.flux_t',data,fmt='%.8e',header=head)
-    print 'INFO: (plot_flux_t) Created out.cgyro.dump.flux_t'
+    print 'INFO: (plot_flux_t) Created '+fname+'txt'
 else:
-   outfile = 'flux_t.'+ftype
+   outfile = fname+ftype
+   print 'INFO: (plot_flux_t) Created '+outfile
    plt.savefig(outfile)
