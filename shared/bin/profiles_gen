@@ -1037,21 +1037,21 @@ then
       low)    RES="resolution=0.003 uniform=500 levels=128" ;;
       medium) RES="resolution=0.002 uniform=750 levels=256" ;;
       high)   RES="resolution=0.001 uniform=1000 levels=512" ;;
-   esac 
+   esac
    echo "INFO: (omfit) Running with parameters $RES"
-   OMFIT_OPT="rhoVSpsi='rho' 
+   OMFIT_OPT="rhoVSpsi='rho'
               averages=0
-              namelist=0 
-              fluxsurfaces=1 
-              maxPSI=0.9999 
+              namelist=0
+              fluxsurfaces=1
+              maxPSI=0.9999
               gfiles='$GFILE'"
    python $OMFIT fluxSurfaceTracer $RES $OMFIT_OPT >& out.omfit.info
    if ls flux_* 1> /dev/null 2>&1
-   then 
+   then
       mv flux_* out.omfit.fluxsurf
       echo "INFO: (omfit) Done.  Check out.omfit.info for OMFIT diagnostics."
    else
-      echo "ERROR: (omfit) OMFIT failed.  Check out.omfit.info for OMFIT diagnostics." 
+      echo "ERROR: (omfit) OMFIT failed.  Check out.omfit.info for OMFIT diagnostics."
       exit 1
    fi
 fi
