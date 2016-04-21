@@ -543,7 +543,7 @@ contains
     use neo_rotation
     implicit none
     integer, intent (in) :: ir
-    integer :: is, jt, it
+    integer :: is, jt
 
     if(silent_flag > 0 .or. i_proc > 0) return
 
