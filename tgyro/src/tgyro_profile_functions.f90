@@ -1,6 +1,7 @@
 subroutine tgyro_profile_functions
 
   use tgyro_globals
+  use tgyro_ped
 
   implicit none
 
@@ -11,6 +12,9 @@ subroutine tgyro_profile_functions
   real, dimension(n_r) :: c_a
   real, dimension(n_r) :: x_a
   real, external :: sivukhin
+
+  ! Acquire pivot boundary conditions from pedestal model
+  call tgyro_pedestal
 
   ! Note flag to only evolve only gradients
   if (loc_evolve_grad_only_flag == 0 .and. &

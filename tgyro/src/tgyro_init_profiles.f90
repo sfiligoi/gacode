@@ -9,6 +9,7 @@ subroutine tgyro_init_profiles
 
   use mpi
   use tgyro_globals
+  use tgyro_ped
   use EXPRO_interface
 
   implicit none
@@ -211,7 +212,7 @@ subroutine tgyro_init_profiles
   !
   i_ash = 0
   do i=1,loc_n_ion
-     if (zi_vec(i) == 2.0 .and. mi_vec(i) == 4.0 .and. therm_flag(i) == 1) then
+     if (nint(zi_vec(i)) == 2 .and. nint(mi_vec(i)) == 4 .and. therm_flag(i) == 1) then
         i_ash = i
      endif
   enddo
@@ -342,6 +343,20 @@ subroutine tgyro_init_profiles
      loc_num_equil_flag = 0
 
   endif
+
+  !-----------------------------------------------------------------
+  ! Capture additional parameters for pedestal model
+  a_in       = r_min
+  !  betan_in   = 
+  bt_in      = EXPRO_bt0(n_exp) 
+  delta_in = EXPRO_delta(n_exp)  
+  !  ip_in      = 
+  kappa_in = EXPRO_kappa(n_exp) 
+  m_in        = mi_vec(1) 
+  !  neped_in   = 
+  r_in     = EXPRO_rmaj(n_exp)
+  !  zeffped_in = 
+  !-----------------------------------------------------------------
 
   call EXPRO_palloc(MPI_COMM_WORLD,'./',0)
 
