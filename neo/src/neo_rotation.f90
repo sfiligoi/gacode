@@ -84,7 +84,6 @@ module neo_rotation
            lam_rot_rderiv_aniso
       real, dimension(:), allocatable :: dens_avg, dens_avg_new
       real :: dens_new
-      integer :: test_flag
 
       if(rotation_model == 1 .or. spitzer_model==1) then
          phi_rot(:) = 0.0

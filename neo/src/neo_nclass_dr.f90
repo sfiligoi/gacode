@@ -8,8 +8,8 @@ module neo_nclass_dr
   
   integer, parameter, private :: mx_mi = 9
   integer, parameter, private :: mx_ms = 40
-  integer, parameter, private :: mx_mz = 50  ! increased this and pamx_mz.inc
-					     ! from 18 to 50 for higher Z
+  integer, parameter, private :: mx_mz = 100 ! increased this and pamx_mz.inc
+					     ! for higher Z
   
   integer, parameter, private :: io_nc = 41
   character(len=80),private :: runfile = 'out.neo.theory_nclass'
