@@ -19,6 +19,7 @@ subroutine tgyro_init_profiles
   integer :: i
   integer :: n
   real :: arho
+  real :: p_ave
 
   !------------------------------------------------------
   ! PHYSICAL CONSTANTS
@@ -32,6 +33,8 @@ subroutine tgyro_init_profiles
   mp      = 1.6726e-24 ! g
   malpha  = 4*mp       ! g
   c       = 2.9979e10  ! cm/s
+  !
+  mu_0    = 4*pi*1e-7  ! N/A^2
   !------------------------------------------------------
 
   !------------------------------------------------------
@@ -145,7 +148,6 @@ subroutine tgyro_init_profiles
      call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_rho(:),n_exp,r,rho,n_r)
   endif
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_q(:),n_exp,r,q,n_r)
-  call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_ptot(:),n_exp,r,ptot,n_r)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_s(:),n_exp,r,s,n_r)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_kappa(:),n_exp,r,kappa,n_r)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_delta(:),n_exp,r,delta,n_r)
@@ -156,6 +158,9 @@ subroutine tgyro_init_profiles
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_dzmag(:),n_exp,r,dzmag,n_r)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_zeta(:),n_exp,r,zeta,n_r)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_szeta(:),n_exp,r,s_zeta,n_r)
+
+  ! Convert ptot to Ba from Pascals (1 Pa = 10 Ba)
+  call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_ptot(:)*10.0,n_exp,r,ptot,n_r)
 
   ! Convert V and dV/dr from m^3 to cm^3
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_vol(:)*1e6,n_exp,r,vol,n_r)
@@ -172,7 +177,7 @@ subroutine tgyro_init_profiles
   ! Convert T to eV (from keV) and length to cm (from m):
   call cub_spline(EXPRO_rmin(:)/r_min,1e3*EXPRO_te(:),n_exp,r,te,n_r)
   call cub_spline(EXPRO_rmin(:)/r_min,1e13*EXPRO_ne(:),n_exp,r,ne,n_r)
-  call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_dlnptotdr(:)/100.0,n_exp,r,dlnptotdr,n_r)
+  call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_dlnptotdr(:)/100.0,n_exp,r,dlnnedr,n_r)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_dlnnedr(:)/100.0,n_exp,r,dlnnedr,n_r)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_dlntedr(:)/100.0,n_exp,r,dlntedr,n_r)
   do i_ion=1,loc_n_ion
@@ -182,6 +187,31 @@ subroutine tgyro_init_profiles
      call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_dlnnidr(i_ion,:)/100.0,n_exp,r,dlnnidr(i_ion,:),n_r)
   enddo
 
+  if (tgyro_ptot_flag == 1) then
+
+     ! Total pressure correction from included species
+
+     pr(:) = ne(:)*k*te(:)
+     do i_ion=1,loc_n_ion
+        pr(:) = pr(:)+ni(i_ion,:)*k*ti(i_ion,:)
+     enddo
+     pext(:) = ptot(:)-pr(:)
+     pr(:)   = ptot(:) 
+
+     dlnpdr(:) = ne(:)*k*te(:)*(dlnnedr(:)+dlntedr(:))/pr(:)
+     do i_ion=1,loc_n_ion
+        dlnpdr(:) = dlnpdr(:)+&
+             ni(i_ion,:)*k*ti(i_ion,:)*(dlnnidr(i_ion,:)+dlntidr(i_ion,:))/pr(:)
+     enddo
+     dpext(:) = pr(:)*(dlnptotdr(:)-dlnpdr(:))
+     dlnpdr(:) = dlnptotdr(:)
+     
+  else
+     
+     pext(:)  = 0.0
+     dpext(:) = 0.0
+     
+  endif
   !------------------------------------------------------------------------------------------
 
   !------------------------------------------------------------------------------------------
@@ -345,17 +375,45 @@ subroutine tgyro_init_profiles
   endif
 
   !-----------------------------------------------------------------
-  ! Capture additional parameters for pedestal model
-  a_in       = r_min
-  !  betan_in   = 
-  bt_in      = EXPRO_bt0(n_exp) 
+  ! Capture additional parameters for pedestal model [Not in CGS]
+  !
+  ! Typical values
+  !
+  !       a = 0.55
+  !   betan = 1.28
+  !      bt = 1.69
+  !   delta = 0.54
+  !      ip = 1.30
+  !   kappa = 1.86
+  !       m = 2.00
+  !   neped = 3.62
+  !       r = 1.70
+  ! zeffped = 2.07
+  !
+  ! Average pressure [Pa]
+  p_ave = sum(EXPRO_volp(:)*EXPRO_ptot(:))/sum(EXPRO_volp(:))
+  !
+  ! a [m]
+  a_in = r_min
+  ! Bt on axis [T]
+  bt_in = EXPRO_bt0(1)
+  ! Plasma current Ip[Ma]
+  ip_in = abs(1e-6*EXPRO_ip(n_exp-2))
+  ! betan [%] = betat/In*100 where In = Ip/(a Bt) 
+  betan_in = ( p_ave/(0.5*bt_in**2/mu_0) ) / ( ip_in/(a_in*bt_in) ) * 100.0
+  ! Triangularity [-]
   delta_in = EXPRO_delta(n_exp)  
-  !  ip_in      = 
+  ! Elongation [-]
   kappa_in = EXPRO_kappa(n_exp) 
-  m_in        = mi_vec(1) 
-  !  neped_in   = 
-  r_in     = EXPRO_rmaj(n_exp)
-  !  zeffped_in = 
+  ! Main ion mass [mp]
+  m_in = mi_vec(1)
+  ! R0(a) [m]
+  r_in = EXPRO_rmaj(n_exp)
+
+  allocate(rmin_eped(n_exp))
+  rmin_eped = EXPRO_rmin*100.0
+  allocate(polflux_eped(n_exp))
+  polflux_eped = EXPRO_polflux/EXPRO_polflux(n_exp)
   !-----------------------------------------------------------------
 
   call EXPRO_palloc(MPI_COMM_WORLD,'./',0)

@@ -135,7 +135,7 @@ subroutine tgyro_profile_functions
   frac_ae(:) = 1.0-frac_ai(:)
 
   ! Total pressure and beta (dimensionless) 
-  pr(:) = ne(:)*k*te(:)
+  pr(:) = pext(:)+ne(:)*k*te(:)
   do i_ion=1,loc_n_ion
     pr(:) = pr(:)+ni(i_ion,:)*k*ti(i_ion,:)
   enddo
@@ -143,7 +143,7 @@ subroutine tgyro_profile_functions
   betae_unit(:) = beta_unit(:)*ne(:)*k*te(:)/pr(:)
 
   ! Pressure gradient inverse scale length (1/cm)
-  dlnpdr(:) = ne(:)*k*te(:)*(dlnnedr(:)+dlntedr(:))/pr(:)
+  dlnpdr(:) = dpext(:)/pr(:)+ne(:)*k*te(:)*(dlnnedr(:)+dlntedr(:))/pr(:)
   do i_ion=1,loc_n_ion
     dlnpdr(:) = dlnpdr(:)+&
       ni(i_ion,:)*k*ti(i_ion,:)*(dlnnidr(i_ion,:)+dlntidr(i_ion,:))/pr(:)

@@ -1,12 +1,11 @@
-!------------------------------------------------
+!--------------------------------------------------------------------
 ! GEO_do.f90
 !
 ! PURPOSE:
-!  Calculation of geometry coefficients for 
-!  Miller local equilibrium model.
+!  Calculation of geometry coefficients for local equilibrium model.
 !
 !  See usage description in GEO_interface.f90
-!------------------------------------------------
+!--------------------------------------------------------------------
  
 subroutine GEO_do()
 
@@ -289,8 +288,8 @@ subroutine GEO_do()
   ! gsin  (generalized sine)
   ! gcos1 (generalized cosine)
   ! gcos2 
-  ! g_theta    (G_theta)
-  ! gq    (G_q)
+  ! g_theta (G_theta)
+  ! gq      (G_q)
   !
   !
   ! Use 5-point stencils for derivatives.  We get poor 
@@ -398,6 +397,7 @@ subroutine GEO_do()
   ! dV = (0.5*R*dphi)*(R*dZ) 
   !
   GEO_volume = 0.5*pi_2*sum(bigz_t(1:n_theta-1)*bigr(1:n_theta-1)**2)*d_theta
+  GEO_bl     = sum(l_t(:)*bp(:))*d_theta
   !-----------------------------------------------------------
 
   !-----------------------------------------------------------

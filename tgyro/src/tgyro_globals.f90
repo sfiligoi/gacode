@@ -157,6 +157,9 @@ module tgyro_globals
   real :: w0_norm
 
   real, dimension(:), allocatable :: pr
+  real, dimension(:), allocatable :: ptot
+  real, dimension(:), allocatable :: pext
+  real, dimension(:), allocatable :: dpext
   real, dimension(:), allocatable :: dlnpdr
   real, dimension(:), allocatable :: dlnptotdr
   real, dimension(:), allocatable :: beta_unit
@@ -170,7 +173,6 @@ module tgyro_globals
   real, dimension(:), allocatable :: r
   real, dimension(:), allocatable :: r_maj
   real, dimension(:), allocatable :: q
-  real, dimension(:), allocatable :: ptot
   real, dimension(:), allocatable :: s
   real, dimension(:), allocatable :: kappa
   real, dimension(:), allocatable :: delta
@@ -238,6 +240,7 @@ module tgyro_globals
   real :: malpha
   real :: c
   real :: aspect_rat
+  real :: mu_0
   !
   real :: b_ref
   real :: r_min

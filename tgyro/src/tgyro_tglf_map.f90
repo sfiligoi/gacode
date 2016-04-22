@@ -80,13 +80,7 @@ subroutine tgyro_tglf_map
   !----------------------------------------------------------------
   ! TGLF-specific quantities
   q_prime = (q_abs/(r(i_r)/r_min))**2*s(i_r)
-  if (tgyro_ptot_flag == 1)then
-    p_prime = (q_abs/(r(i_r)/r_min))*(beta_unit(i_r)/(8*pi))*(-r_min*dlnptotdr(i_r)) 
-    p_prime = 10.0*(ptot(i_r)/pr(i_r))*p_prime  ! factor of 10 for conversion from SI to cgs units 
-  else
-    p_prime = (q_abs/(r(i_r)/r_min))*(beta_unit(i_r)/(8*pi))*(-r_min*dlnpdr(i_r))
-  endif
-  p_prime = loc_betae_scale*p_prime
+  p_prime = (q_abs/(r(i_r)/r_min))*(beta_unit(i_r)/(8*pi))*(-r_min*dlnpdr(i_r))
   !----------------------------------------------------------------
   
   !----------------------------------------------------------------

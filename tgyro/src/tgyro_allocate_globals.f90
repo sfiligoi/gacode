@@ -85,6 +85,9 @@ subroutine tgyro_allocate_globals
   allocate(u00(n_r))
 
   allocate(pr(n_r))
+  allocate(ptot(n_r))
+  allocate(pext(n_r))
+  allocate(dpext(n_r))
   allocate(dlnpdr(n_r))
   allocate(dlnptotdr(n_r))
   allocate(beta_unit(n_r))
@@ -98,7 +101,6 @@ subroutine tgyro_allocate_globals
   allocate(r(n_r))
   allocate(r_maj(n_r))
   allocate(q(n_r))
-  allocate(ptot(n_r))
   allocate(s(n_r))
   allocate(kappa(n_r))
   allocate(s_kappa(n_r))
