@@ -6,6 +6,8 @@ module tgyro_ped
 
   implicit none
 
+  integer :: nr
+
   real :: a_in
   real :: betan_in
   real :: bt_in
@@ -32,7 +34,8 @@ module tgyro_ped
 
   real, dimension(:), allocatable :: rmin_eped
   real, dimension(:), allocatable :: polflux_eped
-  
+  real, dimension(:), allocatable :: polfluxp_eped
+
 contains
 
   subroutine tgyro_pedestal
@@ -45,8 +48,8 @@ contains
     real :: t_ped,n_ped
     real :: zt_ped,zn_ped
     real :: zn_star,zt_star
-    real :: width_NP,t_ped_NP,n_ped_NP
-    real :: psi_ped(1),r_ped(1)
+    real :: width_NP,t_ped_NP,n_ped_NP,n_edge_NP,t_edge_NP
+    real :: psi_ped(1),r_ped(1),psip_ped(1)
 
     integer, parameter :: print_flag=1
 
@@ -74,34 +77,40 @@ contains
        print 10,'    m_in [-]',m_in
        print 10,'neped_in [-]',neped_in
        print 10,'    r_in [m]',r_in
-       print 10,'ze*ed_in [m]',zeffped_in
+       print 10,'ze-ed_in [m]',zeffped_in
        stop
     endif
     !-------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------
-    ! 2. call neuped
+    ! 2. Call neuped
     !
     ! NEUPED OUTPUTS: width_NP, t_ped_NP, n_ped_NP
     width_NP = 0.1
-    t_ped_NP = 0.0
-    n_ped_NP = 0.0
+    t_ped_NP = 1e3
+    n_ped_NP = 1e6 
+    n_edge_NP = 0.0
+    t_edge_NP = 0.0
     !-------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------
     ! 3. Map NEUPED outputs to TGYRO pedestal parameters
     !
+    nr = size(rmin_eped)
     psi_ped(1) = 1-2.0*width_NP
-    call cub_spline(polflux_eped,rmin_eped,size(rmin_eped),psi_ped,r_ped,1)
+    call cub_spline(polflux_eped,rmin_eped,nr,psi_ped,r_ped,1)
+    call cub_spline(polflux_eped,polfluxp_eped,nr,psi_ped,psip_ped,1)
 
-    t_ped  = t_ped_NP
-    n_ped  = n_ped_NP
-    zt_ped = 0.0
-    zn_ped = 0.0
+    t_ped  = t_ped_NP*1e-3 ! Convert from eV to keV
+    n_ped  = n_ped_NP*1e-6 ! Convert from 10^13/m^3 to 10^19/m^3
+
+    zt_ped = (t_ped-t_edge_NP)/(2*tanh(1.0))*(-1/width_NP)*(1-tanh(1.0)**2)*psip_ped(1)
+    zn_ped = (n_ped-n_edge_NP)/(2*tanh(1.0))*(-1/width_NP)*(1-tanh(1.0)**2)*psip_ped(1)
+    !-------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------
-    ! 4. integrate to obtain TGYRO pivot
-
+    ! 4. Integrate to obtain TGYRO pivot
+    
     ! Integration backward from r_ped to r_star
     t_star = t_ped*exp(0.5*(zt_star+zt_ped)*(r_ped(1)-r_star))
     n_star = n_ped*exp(0.5*(zn_star+zn_ped)*(r_ped(1)-r_star))
@@ -110,10 +119,10 @@ contains
     !-------------------------------------------------------------------------
     ! 5. Map back to TGYRO
     !
-    ni(:,n_r) = n_star
-    ti(:,n_r) = t_star  
-    ne(n_r)   = n_star
-    te(n_r)   = t_star  
+    ni(:,n_r) = n_ped*exp(0.5*(dlnnidr(:,n_r)+zn_ped)*(r_ped(1)-r_star))
+    ti(:,n_r) = t_ped*exp(0.5*(dlntidr(:,n_r)+zt_ped)*(r_ped(1)-r_star))
+    ne(n_r)   = n_ped*exp(0.5*(dlnnedr(n_r)+zn_ped)*(r_ped(1)-r_star))
+    te(n_r)   = t_ped*exp(0.5*(dlntedr(n_r)+zt_ped)*(r_ped(1)-r_star))
     !-------------------------------------------------------------------------
 
 10  format(a,1pe12.5)

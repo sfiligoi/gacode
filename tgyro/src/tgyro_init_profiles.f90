@@ -398,22 +398,24 @@ subroutine tgyro_init_profiles
   ! Bt on axis [T]
   bt_in = EXPRO_bt0(1)
   ! Plasma current Ip[Ma]
-  ip_in = abs(1e-6*EXPRO_ip(n_exp-2))
+  ip_in = abs(1e-6*EXPRO_ip(n_exp-3))
   ! betan [%] = betat/In*100 where In = Ip/(a Bt) 
   betan_in = ( p_ave/(0.5*bt_in**2/mu_0) ) / ( ip_in/(a_in*bt_in) ) * 100.0
   ! Triangularity [-]
-  delta_in = EXPRO_delta(n_exp)  
+  delta_in = EXPRO_delta(n_exp-3)  
   ! Elongation [-]
-  kappa_in = EXPRO_kappa(n_exp) 
+  kappa_in = EXPRO_kappa(n_exp-3) 
   ! Main ion mass [mp]
   m_in = mi_vec(1)
   ! R0(a) [m]
-  r_in = EXPRO_rmaj(n_exp)
+  r_in = EXPRO_rmaj(n_exp-3)
 
   allocate(rmin_eped(n_exp))
   rmin_eped = EXPRO_rmin*100.0
   allocate(polflux_eped(n_exp))
   polflux_eped = EXPRO_polflux/EXPRO_polflux(n_exp)
+  allocate(polfluxp_eped(n_exp))
+  polfluxp_eped = EXPRO_bunit*EXPRO_rmin/EXPRO_q/EXPRO_polflux(n_exp)
   !-----------------------------------------------------------------
 
   call EXPRO_palloc(MPI_COMM_WORLD,'./',0)
