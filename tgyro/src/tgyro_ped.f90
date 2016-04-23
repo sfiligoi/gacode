@@ -2,7 +2,7 @@
 
 module tgyro_ped
 
-  ! NEUPED inputs
+  ! EPED1NN inputs
 
   implicit none
 
@@ -40,14 +40,22 @@ contains
 
   subroutine tgyro_pedestal
 
+    use mpi
     use tgyro_globals
 
     implicit none
 
     real :: t_ped,n_ped
     real :: zt_ped
-    real :: width_NP,t_ped_NP,n_ped_NP,n_edge_NP,t_edge_NP
+    real :: beta_ped_NN
+    real :: p_ped_NN,w_ped_NN
+    real :: p_top_NN,w_top_NN
+    real :: t_ped_NN,n_ped_NN
+    real :: n_edge_NN,t_edge_NN
     real :: psi_ped(1),r_ped(1),psip_ped(1)
+    character(len=1000) :: nn_executable
+    character(len=1000) :: nn_files
+    integer dummy
 
     integer, parameter :: print_flag=1
 
@@ -59,6 +67,7 @@ contains
     ! ** temporary **
     neped_in   = 3.62
     zeffped_in = 2.07
+    betan_in   = 1.28
 
     ! All *_in variables set in tgyro_init_profiles
 
@@ -77,31 +86,68 @@ contains
     !-------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------
-    ! 2. Call neuped
+    ! 2. Call EPED1NN to get p_ped_NN, w_ped_NN
     !
-    n_ped_NP  = neped_in
-    n_edge_NP = 0.0
-    ! NEUPED OUTPUTS: width_NP, t_ped_NP, t_edge_NP
-    width_NP  = 0.06
-    t_ped_NP  = 1e3
-    t_edge_NP = 0.2e3
+    n_ped_NN  = neped_in
+    n_edge_NN = neped_in*0.25
+    t_edge_NN  = 80
+
+    if (print_flag == 1 .and. i_proc_global == 0) then
+        !
+        ! Write input file for the NN
+        !
+        open (unit=14, file="input.dat", action="write")
+        write (14,*) '1'
+        write (14,"(10(f6.3,x))") a_in       ,&
+                                  betan_in   ,&
+                                  bt_in      ,&
+                                  delta_in   ,&
+                                  ip_in      ,&
+                                  kappa_in   ,&
+                                  m_in       ,&
+                                  neped_in   ,&
+                                  r_in       ,&
+                                  zeffped_in
+         close(14)
+
+        !
+        ! Execute the NN
+        !
+        call get_environment_variable('BRAINFUSE_RUN',nn_executable)
+        call get_environment_variable('EPED1NN',nn_files)
+        call system(trim(nn_executable)//' '//trim(nn_files)//' input.dat')
+    endif
+
+    ! All processes wait for pedestal calculation to finish and read results
+    call mpi_barrier(MPI_COMM_WORLD,ierr)
+
+    !
+    ! Read outputs
+    !
+    open (unit=14, file="output.avg", action="read")
+    read(14,*) dummy
+    read(14,*) beta_ped_NN,p_ped_NN,p_top_NN,w_ped_NN,w_top_NN
+    close(14)
+
+    t_ped_NN=p_ped_NN/n_ped_NN/1.6021766208/2.*1E6 ! From pressure in MPa to temperature in eV
+
     !-------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------
-    ! 3. Map NEUPED outputs to TGYRO pedestal parameters
+    ! 3. Map EPED1NN outputs to TGYRO pedestal parameters
     !
     nr = size(rmin_eped)
-    psi_ped(1) = 1-2.0*width_NP
+    psi_ped(1) = 1-2.0*w_ped_NN
     call cub_spline(polflux_eped,rmin_eped,nr,psi_ped,r_ped,1)
     call cub_spline(polflux_eped,polfluxp_eped,nr,psi_ped,psip_ped,1)
 
-    t_ped  = t_ped_NP*1e-3 ! Convert from eV to keV
-    n_ped  = n_ped_NP
+    t_ped  = t_ped_NN*1e-3 ! Convert from eV to keV
+    n_ped  = n_ped_NN
 
     ! z = -1/T dT/dr at r=r_ped
     ! Use dT/dr = dT/dx dx/dr where x = Psi_norm 
-    zt_ped = (t_ped_NP-t_edge_NP)/(2*tanh(1.0))*(1/width_NP)*(1-tanh(1.0)**2) &
-         *psip_ped(1)/t_ped_NP
+    zt_ped = (t_ped_NN-t_edge_NN)/(2*tanh(1.0))*(1/w_ped_NN)*(1-tanh(1.0)**2) &
+         *psip_ped(1)/t_ped_NN
     !-------------------------------------------------------------------------
 
     if (print_flag == 1 .and. i_proc_global == 0) then
