@@ -413,9 +413,11 @@ subroutine tgyro_init_profiles
   allocate(rmin_eped(n_exp))
   rmin_eped = EXPRO_rmin*100.0
   allocate(polflux_eped(n_exp))
+  ! Psi_norm
   polflux_eped = EXPRO_polflux/EXPRO_polflux(n_exp)
   allocate(polfluxp_eped(n_exp))
-  polfluxp_eped = EXPRO_bunit*EXPRO_rmin/EXPRO_q/EXPRO_polflux(n_exp)
+  ! d (Psi_norm)/dr in units of 1/cm
+  polfluxp_eped = EXPRO_bunit*EXPRO_rmin/EXPRO_q/EXPRO_polflux(n_exp)/100.0
   !-----------------------------------------------------------------
 
   call EXPRO_palloc(MPI_COMM_WORLD,'./',0)

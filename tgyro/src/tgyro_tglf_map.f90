@@ -106,7 +106,7 @@ subroutine tgyro_tglf_map
      tglf_q_prime_fourier_in = q_prime
      tglf_p_prime_fourier_in = p_prime
      tglf_nfourier_in        = n_fourier_geo
-     tglf_fourier_in(:,:)    = a_fourier_geo(:,:,i_r)
+     tglf_fourier_in(:,0:n_fourier_geo) = a_fourier_geo(:,0:n_fourier_geo,i_r)
 
   else
 
