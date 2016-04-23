@@ -115,7 +115,7 @@ contains
         !
         call get_environment_variable('BRAINFUSE_RUN',nn_executable)
         call get_environment_variable('EPED1NN',nn_files)
-        call system(trim(nn_executable)//' '//trim(nn_files)//' input.dat')
+        call execute_command_line(trim(nn_executable)//' '//trim(nn_files)//' input.dat')
     endif
 
     ! All processes wait for pedestal calculation to finish and read results
