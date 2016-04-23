@@ -98,7 +98,7 @@ contains
         !
         open (unit=14, file="input.dat", action="write")
         write (14,*) '1'
-        write (14,"(10(f6.3,x))") a_in       ,&
+        write (14,"(10(f6.3,1x))") a_in       ,&
                                   betan_in   ,&
                                   bt_in      ,&
                                   delta_in   ,&
