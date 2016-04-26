@@ -252,8 +252,12 @@ module neo_globals
   ! Gamma_HH, Qi_HH, Qe_HH, Qi_CH, jpar_S, jpar_K, jpar_N
   real, dimension(7)   :: neo_th_out=0.0
 
-  ! nclass viscosity coefficients
-  real, dimension(11) :: neo_nclass_out=0.0
+  ! nclass (n_species_max, transport coeff)
+  ! transport coeff: 1-> gamma, 2-> Q, 3-> vpol,  4-> vtor
+  real, dimension(11,4) :: neo_nclass_out=0.0
+
+  ! species-independent transport coeff (currently just jpar)
+  real                 :: neo_nclass_1d_out= 0.0
 
   ! (n_species_max, transport coeff)
   ! multi-species theory: 1-> gamma_HS, 2-> Q_HS

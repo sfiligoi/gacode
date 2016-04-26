@@ -80,7 +80,7 @@ subroutine neo_do
   cderiv(1)  =  8
   cderiv(2)  = -1
 
-  if(sim_model == 0) then
+  if(sim_model == 0 .or. sim_model == 3) then
      ! Theory calculation only -- no numerical kinetic calculation
      call EQUIL_alloc(1)
      call THEORY_alloc(1)
@@ -601,6 +601,7 @@ subroutine neo_do
      call g_xi
 
   end do ! ir
+
 
   ! Clean-up
 100 continue
