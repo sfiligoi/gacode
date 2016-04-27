@@ -1,19 +1,26 @@
-! r (IN)
-! z (IN)
-! n_r (IN)
+!-----------------------------------------------------------------
+! tgyro_expro_map.f90
 !
-! r_exp (IN)
-! p_exp (OUT)
-! n_exp
+! PURPOSE:
+!  Map evolved TGYRO profiles onto EXPRO grid *inside* r(n_r).
+!
+! NOTES:
+!  Inputs:  r,z,n_r
+!  Outputs: r_exp, p_exp, n_exp
+!-----------------------------------------------------------------
 
 subroutine tgyro_expro_map(r,z,n_r,r_exp,p_exp,n_exp)
 
+  implicit none
+  
   integer, intent(in) :: n_r,n_exp
   real, intent(in), dimension(n_r) :: r,z
   real, intent(in), dimension(n_exp) :: r_exp
   real, intent(inout), dimension(n_exp) :: p_exp
   real, dimension(n_exp) :: z_exp
-  integer :: i,i_exp
+  real :: dr
+  integer :: i
+  integer :: i_exp
 
 
   ! Compute z's on exp grid

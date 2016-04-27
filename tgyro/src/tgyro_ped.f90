@@ -1,13 +1,16 @@
-!-------------------------------------------------------
+!-----------------------------------------------------------------
+! tgyro_ped.f90
+!
+! PURPOSE:
+!  Manage dynamic pedestal interface including infamous
+!  no-man's-land (NML).
+!-----------------------------------------------------------------
 
 module tgyro_ped
 
-  ! EPED1NN inputs
-
   implicit none
 
-  integer :: nr
-
+  ! EPED_NN inputs
   real :: a_in
   real :: betan_in
   real :: bt_in
@@ -18,24 +21,25 @@ module tgyro_ped
   real :: neped_in
   real :: r_in
   real :: zeffped_in
- 
-  ! Typical values
-  !
-  !       a = 0.55
-  !   betan = 1.28
-  !      bt = 1.69
-  !   delta = 0.54
-  !      ip = 1.30
-  !   kappa = 1.86
-  !       m = 2.00
-  !   neped = 3.62
-  !       r = 1.70
-  ! zeffped = 2.07
+
+  ! EPED_NN outputs
+  integer, parameter :: nx_nn=1001
+  real :: nn_vec(nx_nn,3) 
+  real :: nn_w_ped
+
+  ! Derivatives wrt psi
+  real :: t_vec(nx_nn)
+  real :: n_p(nx_nn)
+  real :: t_p(nx_nn)
 
   integer :: n_exp
   real, dimension(:), allocatable :: rmin_exp
   real, dimension(:), allocatable :: psi_exp
   real, dimension(:), allocatable :: dpsidr_exp
+
+  ! Pedestal top scale lengths
+  real :: zn_top,zt_top
+  real :: r_top(1)
 
 contains
 
@@ -47,23 +51,12 @@ contains
     implicit none
 
     ! Parameters interpolated at top of pedestal
-    real :: zn_top,zt_top
     real, dimension(1) :: psi_top
     real, dimension(1) :: n_top,t_top,p_top
     real, dimension(1) :: n_p_top,t_p_top
-    real, dimension(1) :: r_top,dpsidr_top
-
-    character(len=1000) :: nn_executable
-    character(len=1000) :: nn_files
-    character(len=1) :: dummy
-    integer, parameter :: nx_nn=1001
-    real :: nn_vec(nx_nn,3) 
-    real :: n_p(nx_nn)
-    real :: t_p(nx_nn)
-    real :: w_ped
+    real, dimension(1) :: dpsidr_top
 
     integer, parameter :: print_flag=1
-    integer, parameter :: test_flag=1
 
     if (tgyro_ped_model == 1) return
 
@@ -79,41 +72,11 @@ contains
     ! 2. Call EPED1NN 
     !
     if (i_proc_global == 0) then
-       !
-       ! Write input file for the NN
-       open(unit=1,file='input.dat',status='replace')
-       write(1,'(a)') '1'
-       write(1,'(10(f6.3,1x))') &
-            a_in       ,&
-            betan_in   ,&
-            bt_in      ,&
-            delta_in   ,&
-            ip_in      ,&
-            kappa_in   ,&
-            m_in       ,&
-            neped_in   ,&
-            r_in       ,&
-            zeffped_in
-       close(1)
-       !
-       ! Execute the NN
-       if (test_flag == 0) then
-          !call get_environment_variable('BRAINFUSE_RUN',nn_executable)
-          !call get_environment_variable('EPED1NN',nn_files)
-          !call execute_command_line(trim(nn_executable)//' '//trim(nn_files)//' input.dat')
-       endif
 
-       ! Read neuped_vec=[psi_norm,ne,ptot=2 ne T]
-       open(unit=1,file='neuped.profiles',status='old')
-       read(1,*) dummy
-       read(1,*) nn_vec
-       close(1)
+       ! Inputs stored in interface
+       call tgyro_eped_nn
 
-       !open (unit=1, file="output.avg", action="read")
-       !read(1,*) dummy
-       !close(1)
-       w_ped   = 0.05
-       psi_top(1) = 1.0-1.5*w_ped
+       psi_top(1) = 1.0-1.5*nn_w_ped
 
     endif
 
@@ -135,7 +98,8 @@ contains
 
     ! n', T':
     call bound_deriv(n_p,nn_vec(:,2),nn_vec(:,1),nx_nn)
-    call bound_deriv(t_p,nn_vec(:,3)/(2*nn_vec(:,2)*k),nn_vec(:,1),nx_nn)
+    t_vec = nn_vec(:,3)/(2*nn_vec(:,2)*k)
+    call bound_deriv(t_p,t_vec,nn_vec(:,1),nx_nn)
 
     ! n_top', t_top'
     call cub_spline(nn_vec(:,1),n_p,nx_nn,psi_top,n_p_top,1)
@@ -176,12 +140,54 @@ contains
        print 10,'psi_top [-]',psi_top(1)
        print 10,' r_top [cm]',r_top(1)
        print 10,'r(n_r) [cm]',r(n_r)
+       !stop
     endif
-
-    stop
 
 10  format(a,1pe12.5)
 
   end subroutine tgyro_pedestal
+
+  subroutine tgyro_pedestal_map
+
+    use tgyro_globals
+    use EXPRO_interface
+
+    implicit none
+
+    integer :: i_exp,i0
+    real :: r_exp(n_exp),z_exp(n_exp),zt_exp(n_exp)
+    real :: ne_exp(n_exp)
+    real :: x0
+
+    r_exp(:) = 100.0*EXPRO_rmin(:)
+
+    do i_exp=2,n_exp
+       x0 = r_exp(i_exp)
+       if (x0 > r(n_r) .and. x0 <= r_top(1)) then 
+          z_exp(i_exp) = (dlnnedr(n_r)*(r_top(1)-x0)+zn_top*(x0-r(n_r)))/(r_top(1)-r(n_r))
+          zt_exp(i_exp) = (dlntedr(n_r)*(r_top(1)-x0)+zt_top*(x0-r(n_r)))/(r_top(1)-r(n_r))
+          !print *,i_exp,r_exp(i_exp),z_exp(i_exp),zt_exp(i_exp)
+       endif
+       if (x0 > r_top(1)) then
+          i0 = i_exp
+          exit
+       endif
+    enddo
+
+    call cub_spline(nn_vec(:,1),-n_p/nn_vec(:,2),nx_nn,psi_exp(i0:n_exp),z_exp(i0:n_exp),n_exp-i0+1) 
+    call cub_spline(nn_vec(:,1),-t_p/t_vec(:),nx_nn,psi_exp(i0:n_exp),zt_exp(i0:n_exp),n_exp-i0+1) 
+
+    do i_exp=i0,n_exp
+       z_exp(i_exp) = z_exp(i_exp)*dpsidr_exp(i_exp)
+       zt_exp(i_exp) = zt_exp(i_exp)*dpsidr_exp(i_exp)
+       !print *,i_exp,r_exp(i_exp),z_exp(i_exp)*dpsidr_exp(i_exp),zt_exp(i_exp)*dpsidr_exp(i_exp)
+    enddo
+
+    do i_exp=i0,1,-1
+          ne_exp(i_exp-1) = ne_exp(i_exp)*exp(0.5*(z_exp(i_exp)+z_exp(i_exp-1))* &
+               (r_exp(i_exp)-r_exp(i_exp-1)))
+    enddo
+
+  end subroutine tgyro_pedestal_map
 
 end module tgyro_ped

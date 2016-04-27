@@ -16,6 +16,7 @@ subroutine tgyro_iteration_driver
   use mpi
   use tgyro_globals
   use tgyro_iteration_variables
+  use tgyro_ped
   use EXPRO_interface
 
   implicit none
@@ -234,21 +235,35 @@ subroutine tgyro_iteration_driver
   if (tgyro_write_profiles_flag == 1) then
      call EXPRO_palloc(MPI_COMM_WORLD,'./',1) 
      call EXPRO_pread
+
      if (i_proc_global == 0) then
+
+        ! Map data inside r < r(n_r)
+
         call tgyro_expro_map(r,dlnnedr,n_r,100*EXPRO_rmin,EXPRO_ne,EXPRO_n_exp)
         call tgyro_expro_map(r,dlntedr,n_r,100*EXPRO_rmin,EXPRO_te,EXPRO_n_exp)
         do i_ion=1,loc_n_ion
            call tgyro_expro_map(r,dlnnidr(i_ion,:),n_r,100*EXPRO_rmin,EXPRO_ni(i_ion,:),EXPRO_n_exp)
            call tgyro_expro_map(r,dlntidr(i_ion,:),n_r,100*EXPRO_rmin,EXPRO_ti(i_ion,:),EXPRO_n_exp)
         enddo
+
+        if (tgyro_ped_model > 1) then
+           ! Map data past r(n_r)
+           call tgyro_pedestal_map
+        endif
+
+        ! Write data to file
         call EXPRO_write_original(&
              1,'input.profiles',&
              2,'input.profiles.new',&
              'Profiles modified by TGYRO')
         call EXPRO_compute_derived
         call EXPRO_write_derived(1,'input.profiles.extra')
+
      endif
+
      call EXPRO_palloc(MPI_COMM_WORLD,'./',0) 
+
   endif
   !--------------------------------------------------------------------------------
 
