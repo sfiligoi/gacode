@@ -342,7 +342,7 @@ module tgyro_globals
   integer :: igmin
   integer :: igmax
   real :: length
-  real :: dlength 
+  real :: dlength
   !---------------------------------------------------------
 
 end module tgyro_globals

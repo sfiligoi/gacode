@@ -15,7 +15,6 @@ subroutine tgyro_init_profiles
   implicit none
 
   integer :: i_ion
-  integer :: n_exp
   integer :: i
   integer :: n
   real :: arho
@@ -410,14 +409,14 @@ subroutine tgyro_init_profiles
   ! R0(a) [m]
   r_in = EXPRO_rmaj(n_exp-3)
 
-  allocate(rmin_eped(n_exp))
-  rmin_eped = EXPRO_rmin*100.0
-  allocate(polflux_eped(n_exp))
+  allocate(rmin_exp(n_exp))
+  rmin_exp = EXPRO_rmin*100.0
+  allocate(psi_exp(n_exp))
   ! Psi_norm
-  polflux_eped = EXPRO_polflux/EXPRO_polflux(n_exp)
-  allocate(polfluxp_eped(n_exp))
+  psi_exp = EXPRO_polflux/EXPRO_polflux(n_exp)
+  allocate(dpsidr_exp(n_exp))
   ! d (Psi_norm)/dr in units of 1/cm
-  polfluxp_eped = EXPRO_bunit*EXPRO_rmin/EXPRO_q/EXPRO_polflux(n_exp)/100.0
+  dpsidr_exp = EXPRO_bunit*EXPRO_rmin/EXPRO_q/EXPRO_polflux(n_exp)/100.0
   !-----------------------------------------------------------------
 
   call EXPRO_palloc(MPI_COMM_WORLD,'./',0)

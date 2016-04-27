@@ -32,9 +32,10 @@ module tgyro_ped
   !       r = 1.70
   ! zeffped = 2.07
 
-  real, dimension(:), allocatable :: rmin_eped
-  real, dimension(:), allocatable :: polflux_eped
-  real, dimension(:), allocatable :: polfluxp_eped
+  integer :: n_exp
+  real, dimension(:), allocatable :: rmin_exp
+  real, dimension(:), allocatable :: psi_exp
+  real, dimension(:), allocatable :: dpsidr_exp
 
 contains
 
@@ -45,21 +46,21 @@ contains
 
     implicit none
 
-    real :: t_ped,n_ped
-    real :: zt_ped
-    real :: beta_ped_NN
-    real :: n_ped_NN,n_edge_NN
-    real :: t_ped_NN,t_edge_NN 
-    real :: p_ped_NN,w_ped_NN
-    real :: p_top_NN,w_top_NN
-    real :: n_top_NN
-    real :: psi_ped(1),r_ped(1),psip_ped(1)
+    ! Parameters interpolated at top of pedestal
+    real :: zn_top,zt_top
+    real, dimension(1) :: psi_top
+    real, dimension(1) :: n_top,t_top,p_top
+    real, dimension(1) :: n_p_top,t_p_top
+    real, dimension(1) :: r_top,dpsidr_top
+
     character(len=1000) :: nn_executable
     character(len=1000) :: nn_files
     character(len=1) :: dummy
-    integer :: nx_exp
     integer, parameter :: nx_nn=1001
     real :: nn_vec(nx_nn,3) 
+    real :: n_p(nx_nn)
+    real :: t_p(nx_nn)
+    real :: w_ped
 
     integer, parameter :: print_flag=1
     integer, parameter :: test_flag=1
@@ -75,7 +76,7 @@ contains
     !-------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------
-    ! 2. Call EPED1NN to get p_ped_NN, w_ped_NN
+    ! 2. Call EPED1NN 
     !
     if (i_proc_global == 0) then
        !
@@ -102,74 +103,82 @@ contains
           !call execute_command_line(trim(nn_executable)//' '//trim(nn_files)//' input.dat')
        endif
 
-       ! Read neuped_vec=[psi_norm,ne,ptot]
+       ! Read neuped_vec=[psi_norm,ne,ptot=2 ne T]
        open(unit=1,file='neuped.profiles',status='old')
        read(1,*) dummy
        read(1,*) nn_vec
        close(1)
 
-       open (unit=1, file="output.avg", action="read")
-       read(1,*) dummy
-       read(1,*) beta_ped_NN,p_ped_NN,p_top_NN,w_ped_NN,w_top_NN
-       close(1)
+       !open (unit=1, file="output.avg", action="read")
+       !read(1,*) dummy
+       !close(1)
+       w_ped   = 0.05
+       psi_top(1) = 1.0-1.5*w_ped
 
     endif
 
-    ! Data from output.avg
+    ! Communicated needed data from output.avg
     call MPI_BCAST(nn_vec,size(nn_vec),MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
+    call MPI_BCAST(psi_top,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
 
-    !call cub_spline(nn_vec(:,1),nn_vec(:,2),nx_nn,psi_top,ne_top,1)
-    !call cub_spline(nn_vec(:,1),nn_vec(:,3),nx_nn,psi_top,p_top,1)
- 
-    ! Convert p [MPa] and n [10^13/cm^3] to T [eV]
-    t_ped_NN  = 1e-6*p_top_NN/(2*n_top_NN*k) 
-    ! EPED assumptions: 
-    n_edge_NN = neped_in*0.25
-    t_edge_NN = 80.0
+    ! n_top: convert to 1/cm^3 from 1/m^3
+    nn_vec(:,2) = nn_vec(:,2)*1e-6
+    call cub_spline(nn_vec(:,1),nn_vec(:,2),nx_nn,psi_top,n_top,1)
+    ! p_top: convert to Ba from Pa 
+    nn_vec(:,3) = nn_vec(:,3)*10.0
+    call cub_spline(nn_vec(:,1),nn_vec(:,3),nx_nn,psi_top,p_top,1) 
 
+    ! FORMULA: P = 2nkT 
+
+    ! t_top [eV]
+    t_top = p_top/(2*n_top*k) 
+
+    ! n', T':
+    call bound_deriv(n_p,nn_vec(:,2),nn_vec(:,1),nx_nn)
+    call bound_deriv(t_p,nn_vec(:,3)/(2*nn_vec(:,2)*k),nn_vec(:,1),nx_nn)
+
+    ! n_top', t_top'
+    call cub_spline(nn_vec(:,1),n_p,nx_nn,psi_top,n_p_top,1)
+    call cub_spline(nn_vec(:,1),t_p,nx_nn,psi_top,t_p_top,1) 
     !-------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------
-    ! 3. Map EPED1NN outputs to TGYRO pedestal parameters
+    ! 3. Compute z parameters at pedestal top
+    ! 
+    ! zn_top = -(1/n) dn/dr 
+    ! zt_top = -(1/T) dT/dr 
     !
-    nx_exp = size(rmin_eped)
-    psi_ped(1) = 1-3.0*w_ped_NN
-    call cub_spline(polflux_eped,rmin_eped,nx_exp,psi_ped,r_ped,1)
-    call cub_spline(polflux_eped,polfluxp_eped,nx_exp,psi_ped,psip_ped,1)
+    call cub_spline(psi_exp,rmin_exp    ,n_exp,psi_top,r_top,1)
+    call cub_spline(psi_exp,dpsidr_exp,n_exp,psi_top,dpsidr_top,1)
 
-    t_ped  = t_ped_NN*1e-3 ! Convert from eV to keV
-    n_ped  = n_ped_NN
-
-    ! z = -1/T dT/dr at r=r_ped
-    ! Use dT/dr = dT/dx dx/dr where x = Psi_norm 
-    zt_ped = (t_ped_NN-t_edge_NN)/(2*tanh(1.0))*(1/w_ped_NN)*(1-tanh(1.0)**2) &
-         *psip_ped(1)/t_ped_NN
+    zn_top = -n_p_top(1)/n_top(1)*dpsidr_top(1)
+    zt_top = -t_p_top(1)/t_top(1)*dpsidr_top(1)
     !-------------------------------------------------------------------------
-
-    if (print_flag == 1 .and. i_proc_global == 0) then
-       print *
-       print 10,'   t_ped [keV]',t_ped
-       print 10,' zt_ped [1/cm]',zt_ped
-       print 10,'dlntedr [1/cm]',dlnnedr(n_r)
-    endif
 
     !-------------------------------------------------------------------------
     ! 4. Integrate to obtain TGYRO pivot
 
-    ! Integration backward from r_ped to r_star
-    ti(:,n_r) = t_ped*exp(0.5*(dlntidr(:,n_r)+zt_ped)*(r_ped(1)-r(n_r)))
-    te(n_r)   = t_ped*exp(0.5*(dlntedr(n_r)+zt_ped)*(r_ped(1)-r(n_r)))
+    ! Integration backward from r_top to r_star
+    ti(:,n_r) = t_top(1)*exp(0.5*(dlntidr(:,n_r)+zt_top)*(r_top(1)-r(n_r)))
+    te(n_r)   = t_top(1)*exp(0.5*(dlntedr(n_r)  +zt_top)*(r_top(1)-r(n_r)))
+    ne(n_r)   = n_top(1)*exp(0.5*(dlnnedr(n_r)  +zn_top)*(r_top(1)-r(n_r)))
     !-------------------------------------------------------------------------
 
     if (print_flag == 1 .and. i_proc_global == 0) then
        print *
-       print 10,'psi_ped [-]',psi_ped(1)
-       print 10,' r_ped [cm]',r_ped(1)
+       print 10,'n_top [1/cm^3]',n_top
+       print 10,'t_top     [eV]',t_top
+       print 10,'p_top     [Ba]',p_top
+       print 10,'zn_top  [1/cm]',zn_top
+       print 10,'zt_top  [1/cm]',zt_top
+       print 10,'dlntedr [1/cm]',dlnnedr(n_r)
+       print *
+       print 10,'psi_top [-]',psi_top(1)
+       print 10,' r_top [cm]',r_top(1)
        print 10,'r(n_r) [cm]',r(n_r)
-       print 10,' t_ped[keV]',t_ped
-       print 10,'te_piv[keV]',te(n_r)
-       stop
     endif
+
+    stop
 
 10  format(a,1pe12.5)
 
