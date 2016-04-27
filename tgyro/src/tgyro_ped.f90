@@ -1,10 +1,9 @@
-!-----------------------------------------------------------------
+!-------------------------------------------------------------------
 ! tgyro_ped.f90
 !
 ! PURPOSE:
-!  Manage dynamic pedestal interface including infamous
-!  no-man's-land (NML).
-!-----------------------------------------------------------------
+!  Manage dynamic pedestal interface including no-man's-land (NML).
+!-------------------------------------------------------------------
 
 module tgyro_ped
 
@@ -39,7 +38,11 @@ module tgyro_ped
 
   ! Pedestal top scale lengths
   real :: zn_top,zt_top
+  real :: n_top(1),t_top(1)
   real :: r_top(1)
+  real :: dr_nml
+  real, dimension(1) :: psi_top
+  real, dimension(1) :: p_top
 
 contains
 
@@ -51,20 +54,15 @@ contains
     implicit none
 
     ! Parameters interpolated at top of pedestal
-    real, dimension(1) :: psi_top
-    real, dimension(1) :: n_top,t_top,p_top
     real, dimension(1) :: n_p_top,t_p_top
     real, dimension(1) :: dpsidr_top
-
-    integer, parameter :: print_flag=1
 
     if (tgyro_ped_model == 1) return
 
     !-------------------------------------------------------------------------
     ! 1. Initializations
     !
-    ! ** temporary **
-    neped_in   = 3.62
+    neped_in   = tgyro_neped
     zeffped_in = 2.07
     !-------------------------------------------------------------------------
 
@@ -123,50 +121,40 @@ contains
     ! 4. Integrate to obtain TGYRO pivot
 
     ! Integration backward from r_top to r_star
-    ti(:,n_r) = t_top(1)*exp(0.5*(dlntidr(:,n_r)+zt_top)*(r_top(1)-r(n_r)))
-    te(n_r)   = t_top(1)*exp(0.5*(dlntedr(n_r)  +zt_top)*(r_top(1)-r(n_r)))
-    ne(n_r)   = n_top(1)*exp(0.5*(dlnnedr(n_r)  +zn_top)*(r_top(1)-r(n_r)))
+    dr_nml = r_top(1)-r(n_r)
+    ti(:,n_r) = t_top(1)*exp(0.5*(dlntidr(:,n_r)+zt_top)*dr_nml)
+    te(n_r)   = t_top(1)*exp(0.5*(dlntedr(n_r)  +zt_top)*dr_nml)
+    ne(n_r)   = n_top(1)*exp(0.5*(dlnnedr(n_r)  +zn_top)*dr_nml)
     !-------------------------------------------------------------------------
-
-    if (print_flag == 1 .and. i_proc_global == 0) then
-       print *
-       print 10,'n_top [1/cm^3]',n_top
-       print 10,'t_top     [eV]',t_top
-       print 10,'p_top     [Ba]',p_top
-       print 10,'zn_top  [1/cm]',zn_top
-       print 10,'zt_top  [1/cm]',zt_top
-       print 10,'dlntedr [1/cm]',dlnnedr(n_r)
-       print *
-       print 10,'psi_top [-]',psi_top(1)
-       print 10,' r_top [cm]',r_top(1)
-       print 10,'r(n_r) [cm]',r(n_r)
-       !stop
-    endif
-
-10  format(a,1pe12.5)
 
   end subroutine tgyro_pedestal
 
-  subroutine tgyro_pedestal_map
+  subroutine tgyro_pedestal_map(z_star,z_top,f_top,p_vec,i_star,f_exp)
 
     use tgyro_globals
-    use EXPRO_interface
 
     implicit none
 
+    real, intent(in) :: z_star,z_top,f_top
+    real, intent(in) :: p_vec(nx_nn)
+    integer, intent(inout) :: i_star
+    real, intent(inout) :: f_exp(n_exp)
+
     integer :: i_exp,i0
-    real :: r_exp(n_exp),z_exp(n_exp),zt_exp(n_exp)
-    real :: ne_exp(n_exp)
     real :: x0
 
-    r_exp(:) = 100.0*EXPRO_rmin(:)
-
+    ! 1. Scale-length interpolation over NML (r_star < r < r_top)
+    !                    zb                         za
+    ! f(r) = f(rb)*exp[ ---- ( dr^2 - (r-ra)^2 ) - ---- ( rb-r )^2 ]
+    !                   2 dr                       2 dr
+    !
+    i_star = 0
     do i_exp=2,n_exp
-       x0 = r_exp(i_exp)
+       x0 = rmin_exp(i_exp)
        if (x0 > r(n_r) .and. x0 <= r_top(1)) then 
-          z_exp(i_exp) = (dlnnedr(n_r)*(r_top(1)-x0)+zn_top*(x0-r(n_r)))/(r_top(1)-r(n_r))
-          zt_exp(i_exp) = (dlntedr(n_r)*(r_top(1)-x0)+zt_top*(x0-r(n_r)))/(r_top(1)-r(n_r))
-          !print *,i_exp,r_exp(i_exp),z_exp(i_exp),zt_exp(i_exp)
+          if (i_star == 0) i_star = i_exp
+          f_exp(i_exp) = f_top*exp(&
+               0.5*z_top/dr_nml*(dr_nml**2-(x0-r(n_r))**2)+0.5*z_star/dr_nml*(r_top(1)-x0)**2)
        endif
        if (x0 > r_top(1)) then
           i0 = i_exp
@@ -174,19 +162,8 @@ contains
        endif
     enddo
 
-    call cub_spline(nn_vec(:,1),-n_p/nn_vec(:,2),nx_nn,psi_exp(i0:n_exp),z_exp(i0:n_exp),n_exp-i0+1) 
-    call cub_spline(nn_vec(:,1),-t_p/t_vec(:),nx_nn,psi_exp(i0:n_exp),zt_exp(i0:n_exp),n_exp-i0+1) 
-
-    do i_exp=i0,n_exp
-       z_exp(i_exp) = z_exp(i_exp)*dpsidr_exp(i_exp)
-       zt_exp(i_exp) = zt_exp(i_exp)*dpsidr_exp(i_exp)
-       !print *,i_exp,r_exp(i_exp),z_exp(i_exp)*dpsidr_exp(i_exp),zt_exp(i_exp)*dpsidr_exp(i_exp)
-    enddo
-
-    do i_exp=i0,1,-1
-          ne_exp(i_exp-1) = ne_exp(i_exp)*exp(0.5*(z_exp(i_exp)+z_exp(i_exp-1))* &
-               (r_exp(i_exp)-r_exp(i_exp-1)))
-    enddo
+    ! 2. Direct spline interpolation over pedestal (r_top < r < a)
+    call cub_spline(nn_vec(:,1),p_vec,nx_nn,psi_exp(i0:n_exp),f_exp(i0:n_exp),n_exp-i0+1) 
 
   end subroutine tgyro_pedestal_map
 

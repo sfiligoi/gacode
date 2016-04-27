@@ -13,9 +13,6 @@ subroutine tgyro_profile_functions
   real, dimension(n_r) :: x_a
   real, external :: sivukhin
 
-  ! Acquire pivot boundary conditions from pedestal model
-  call tgyro_pedestal
-
   ! Note flag to only evolve only gradients
   if (loc_evolve_grad_only_flag == 0 .and. &
        (loc_lock_profile_flag == 0 .or. i_tran > 0)) then
@@ -167,5 +164,8 @@ subroutine tgyro_profile_functions
   q_tgb(:) = ni(1,:)*k*ti(1,:)*(sqrt(2.0)*v_i(:))*&
        (sqrt(2.0)*rho_i(:)*b_unit(:)/b_ref/r_min)**2
   !----------------------------------------------------------------------
+
+  ! Acquire pivot boundary conditions from pedestal model
+  call tgyro_pedestal
 
 end subroutine tgyro_profile_functions

@@ -325,6 +325,7 @@ module tgyro_globals
   integer :: tgyro_neo_n_theta
   integer :: tgyro_ptot_flag
   integer :: tgyro_ped_model
+  real :: tgyro_neped
   !
   ! Iteration variables (global)
   !

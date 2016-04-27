@@ -27,7 +27,7 @@ subroutine tgyro_eped_nn
   ! Execute the NN
   call get_environment_variable('BRAINFUSE_RUN',nn_executable)
   call get_environment_variable('EPED1NN',nn_files)
-  call execute_command_line(trim(nn_executable)//' '//trim(nn_files)//' input.dat')
+  !call execute_command_line(trim(nn_executable)//' '//trim(nn_files)//' input.dat')
 
   ! Read neuped_vec=[psi_norm,ne,ptot=2 ne T]
   open(unit=1,file='neuped.profiles',status='old')
