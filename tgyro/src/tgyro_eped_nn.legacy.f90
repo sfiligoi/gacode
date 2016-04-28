@@ -27,6 +27,8 @@ subroutine tgyro_eped_nn
   ! Execute the NN
   call get_environment_variable('EPEDNN_EXEC',nn_executable)
   call get_environment_variable('EPEDNN_MODEL',nn_files)
+  !write(*,*)'EPEDNN executable: ',trim(nn_executable)
+  !write(*,*)'EPEDNN model: ',trim(nn_files)
   call system(trim(nn_executable)//' '//trim(nn_files)//' input.dat')
 
   ! Read epednn_vec=[psi_norm,ne,ptot=2 ne T]
