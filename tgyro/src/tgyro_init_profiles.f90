@@ -204,12 +204,12 @@ subroutine tgyro_init_profiles
      enddo
      dpext(:) = pr(:)*(dlnptotdr(:)-dlnpdr(:))
      dlnpdr(:) = dlnptotdr(:)
-     
+
   else
-     
+
      pext(:)  = 0.0
      dpext(:) = 0.0
-     
+
   endif
   !------------------------------------------------------------------------------------------
 
@@ -267,19 +267,21 @@ subroutine tgyro_init_profiles
   !------------------------------------------------------------------------------------------
 
   !------------------------------------------------------------------------------------------
-  ! Apply rescaling factors:
+  ! Apply rescaling factors if starting a new simulation
   !
-  ne(:) = tgyro_input_den_scale*ne(:)
-  te(:) = tgyro_input_te_scale*te(:)
-  do i_ion=1,loc_n_ion
-     ni(i_ion,:) = tgyro_input_den_scale*ni(i_ion,:)
-     ti(i_ion,:) = tgyro_input_ti_scale*ti(i_ion,:)
-  enddo
-  w0(:) = tgyro_input_w0_scale*w0(:)
-  w0p(:) = tgyro_input_w0_scale*w0p(:)
+  if (loc_restart_flag == 0) then
+     ne(:) = tgyro_input_den_scale*ne(:)
+     te(:) = tgyro_input_te_scale*te(:)
+     do i_ion=1,loc_n_ion
+        ni(i_ion,:) = tgyro_input_den_scale*ni(i_ion,:)
+        ti(i_ion,:) = tgyro_input_ti_scale*ti(i_ion,:)
+     enddo
+     w0(:) = tgyro_input_w0_scale*w0(:)
+     w0p(:) = tgyro_input_w0_scale*w0p(:)
 
-  dlntedr(:)   = dlntedr(:)  *tgyro_input_dlntdr_scale
-  dlntidr(:,:) = dlntidr(:,:)*tgyro_input_dlntdr_scale
+     dlntedr(:)   = dlntedr(:)  *tgyro_input_dlntdr_scale
+     dlntidr(:,:) = dlntidr(:,:)*tgyro_input_dlntdr_scale
+  endif
   !------------------------------------------------------------------------------------------
 
   !------------------------------------------------------------------------------------------

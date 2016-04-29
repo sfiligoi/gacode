@@ -131,7 +131,7 @@ subroutine tgyro_profile_functions
   enddo
   frac_ae(:) = 1.0-frac_ai(:)
 
-  ! Total pressure and beta (dimensionless) 
+  ! Total pressure (Ba) and beta (dimensionless) 
   pr(:) = pext(:)+ne(:)*k*te(:)
   do i_ion=1,loc_n_ion
     pr(:) = pr(:)+ni(i_ion,:)*k*ti(i_ion,:)
@@ -165,7 +165,15 @@ subroutine tgyro_profile_functions
        (sqrt(2.0)*rho_i(:)*b_unit(:)/b_ref/r_min)**2
   !----------------------------------------------------------------------
 
+  !----------------------------------------------------------------------
   ! Acquire pivot boundary conditions from pedestal model
+
+  ! betan [%] = betat/In*100 where In = Ip/(a Bt) 
+  !call tgyro_volume_int(pr,pr)
+  !p_ave = 
+  !betan_in = ( p_ave/(0.5*bt_in**2/mu_0) ) / ( ip_in/(a_in*bt_in) ) * 100.0
+
   call tgyro_pedestal
+  !----------------------------------------------------------------------
 
 end subroutine tgyro_profile_functions
