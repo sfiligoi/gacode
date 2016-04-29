@@ -302,7 +302,6 @@ module tgyro_globals
   real :: lm_boost
   real :: lm_drop
   integer :: tgyro_rotation_flag
-  integer :: tgyro_rotation_theory_method
   integer :: tgyro_stab_nsearch
   integer :: tgyro_stab_nky
   real :: tgyro_stab_kymin
@@ -315,6 +314,7 @@ module tgyro_globals
   real :: tgyro_input_ti_scale
   real :: tgyro_input_w0_scale
   real :: tgyro_input_paux_scale
+  real :: tgyro_input_dlntdr_scale
   integer :: tgyro_er_bc
   integer :: tgyro_noturb_flag
   integer :: tgyro_use_rho

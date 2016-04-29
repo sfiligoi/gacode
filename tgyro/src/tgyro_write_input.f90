@@ -580,6 +580,7 @@ subroutine tgyro_write_input
 
      end select
      !--------------------------------------------------------
+
      !--------------------------------------------------------
      select case (loc_evolve_grad_only_flag)
 
@@ -599,6 +600,28 @@ subroutine tgyro_write_input
      end select
 
      !--------------------------------------------------------
+
+     write(1,*)
+     write(1,*) 'Pedestal parameters'
+     write(1,*) 
+
+     select case (tgyro_ped_model)
+
+     case (1)
+
+        write(1,10) 'TGYRO_PED_MODEL','No pedestal.  Use fixed pivot.'
+
+     case (2)
+
+        write(1,10) 'TGYRO_PED_MODEL','Dynamic EPED1_NN pedestal.'
+
+     case default
+
+        error_flag = 1
+        error_msg = 'Error: TGYRO_PED_MODEL'
+
+     end select
+
      write(1,*)
      write(1,*) 'Ion parameters'
      write(1,*) 
@@ -625,25 +648,6 @@ subroutine tgyro_write_input
      write(1,*)
      write(1,*) 'Rotation and field orientation'
      write(1,*) 
-     select case (tgyro_rotation_theory_method)
-
-     case (1)
-
-        write(1,10) 'TGYRO_ROTATION_THEORY_METHOD','Candy method'
-
-     case (2)
-
-        write(1,10) 'TGYRO_ROTATION_THEORY_METHOD','Waltz method'
-
-        error_flag = 1
-        error_msg = 'Error: Waltz method for TGYRO_ROTATION_THEORY_METHOD not implemented.'
-
-     case default
-
-        error_flag = 1
-        error_msg = 'Error: TGYRO_ROTATION_THEORY_METHOD'
-
-     end select
 
      if (tgyro_rotation_flag == 1) then
         write(1,10) 'TGYRO_ROTATION_FLAG','Rotation effects ON'

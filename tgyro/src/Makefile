@@ -24,6 +24,7 @@ OBJECTS +=	tgyro_globals.o \
 		tgyro_flux_vector_dense.o \
 		tgyro_gyro_map.o \
 		tgyro_init_profiles.o \
+		tgyro_init_profiles_axis.o \
 		tgyro_iteration_driver.o \
 		tgyro_iteration_standard.o \
 		tgyro_iteration_pppl.o \
