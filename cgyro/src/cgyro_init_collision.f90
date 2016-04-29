@@ -597,10 +597,9 @@ subroutine cgyro_init_collision
                  endif
               endif
 
-              ! Finite-kperp test particle corrections -- ion w/ ions only
+              ! Finite-kperp test particle corrections 
               if(collision_model == 4 .and. collision_kperp == 1) then
-                 if(is == js .and. jx == ix .and. je == ie .and. &
-                      is /= is_ele) then
+                 if(is == js .and. jx == ix .and. je == ie) then
                     do ks=1,n_species
                        cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
                             - (0.5*delta_t) &
