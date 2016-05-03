@@ -63,7 +63,7 @@
 !
      open (unit=14, file=TRIM(tglf_path_in)//"input.dat", action="write")
      write (14,*) '1' 
-     write (14,"(15(f6.3,x))") tglf_as_in(ions_order(2)), tglf_as_in(ions_order(3)), tglf_betae_in, &
+     write (14,"(15(f6.3,1x))") tglf_as_in(ions_order(2)), tglf_as_in(ions_order(3)), tglf_betae_in, &
           tglf_delta_loc_in, tglf_kappa_loc_in, tglf_q_loc_in, &
           tglf_q_prime_loc_in, tglf_rlns_in(1), tglf_rlts_in(1), &
           tglf_rlts_in(3), tglf_rmaj_loc_in, tglf_rmin_loc_in, &
