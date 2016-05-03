@@ -82,8 +82,7 @@
      if (tglf_path_in .ne. "") then
         nn_executable='cd '//TRIM(tglf_path_in)//' ;'//trim(nn_executable)
      endif
-     call system(trim(nn_executable)//' '//trim(nn_files)//' input.dat')
-     !call execute_command_line(trim(nn_executable)//' '//trim(nn_files)//' input.dat')
+     call gacode_system(trim(nn_executable)//' '//trim(nn_files)//' input.dat')
 !
 ! Read outputs
 !
