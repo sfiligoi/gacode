@@ -1,8 +1,8 @@
-subroutine tgyro_system(arg)
+subroutine gacode_system(arg)
 
   implicit none
   character(len=*), intent(in) :: arg
 
   call execute_command_line(arg)
 
-end subroutine tgyro_system
+end subroutine gacode_system

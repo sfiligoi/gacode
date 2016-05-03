@@ -43,7 +43,6 @@ OBJECTS +=	tgyro_globals.o \
 		tgyro_residual.o \
 		tgyro_restart.o \
 		tgyro_source.o \
-                tgyro_system.o \
 		tgyro_stab_driver.o \
 		tgyro_target_vector.o \
 		tgyro_tglf_map.o \
@@ -68,4 +67,3 @@ clean:
 	rm -f $(EXEC)
 	rm -f *.o ${GACODE_ROOT}/modules/tgyro*.mod
 
--include ../install/make.ext.${GACODE_PLATFORM}

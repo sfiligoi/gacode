@@ -1,3 +1,0 @@
-tgyro_system.o : tgyro_system.legacy.f90
-	$(FC) $(FMATH) $(FFLAGS) -o tgyro_system.o -c tgyro_system.legacy.f90
-
