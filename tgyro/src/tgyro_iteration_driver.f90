@@ -16,13 +16,9 @@ subroutine tgyro_iteration_driver
   use mpi
   use tgyro_globals
   use tgyro_iteration_variables
-  use tgyro_ped
   use EXPRO_interface
 
   implicit none
-
-  integer :: i_ion
-  integer :: i_star
 
   n_r   = n_inst+1
   p_max = n_evolve*(n_r-1)
@@ -237,34 +233,14 @@ subroutine tgyro_iteration_driver
      call EXPRO_palloc(MPI_COMM_WORLD,'./',1) 
      call EXPRO_pread
 
+     call tgyro_profile_reintegrate( &
+          EXPRO_ptot,&
+          EXPRO_ne,&
+          EXPRO_te,&
+          EXPRO_ni(1:loc_n_ion,:),&
+          EXPRO_ti(1:loc_n_ion,:))
+
      if (i_proc_global == 0) then
-
-        ! Map data inside r < r(n_r)
-
-        if (tgyro_ped_model > 1) then
-           ! Map data past r(n_r)
-           call tgyro_pedestal_map(dlnnedr(n_r),zn_top,n_top(1),nn_vec(:,2),i_star,EXPRO_ne)
-           EXPRO_ne(i_star:n_exp) = EXPRO_ne(i_star:n_exp)*1e-13
-           call tgyro_pedestal_map(dlntedr(n_r),zt_top,t_top(1),t_vec(:),i_star,EXPRO_te)
-           EXPRO_te(i_star:n_exp) = EXPRO_te(i_star:n_exp)*1e-3
-           call tgyro_pedestal_map(dlntidr(1,n_r),zt_top,t_top(1),t_vec(:),i_star,EXPRO_ti(1,:))
-           EXPRO_ti(1,i_star:n_exp) = EXPRO_ti(1,i_star:n_exp)*1e-3
-           if (loc_n_ion == 1) then
-              EXPRO_ni(1,i_star:n_exp) = EXPRO_ne(i_star:n_exp)
-           else if (loc_n_ion == 2) then
-              EXPRO_ni(1,i_star:n_exp) = EXPRO_ne(i_star:n_exp)-zi_vec(2)*EXPRO_ni(2,i_star:n_exp)
-              if (therm_flag(2) == 1) EXPRO_ti(2,i_star:n_exp) = EXPRO_ti(1,i_star:n_exp)
-           endif
-        endif
-
-        call tgyro_expro_map(r,dlnnedr,n_r,100*EXPRO_rmin,EXPRO_ne,EXPRO_n_exp)
-        call tgyro_expro_map(r,dlntedr,n_r,100*EXPRO_rmin,EXPRO_te,EXPRO_n_exp)
-        do i_ion=1,loc_n_ion
-           if (therm_flag(i_ion) == 1) then
-              call tgyro_expro_map(r,dlnnidr(i_ion,:),n_r,100*EXPRO_rmin,EXPRO_ni(i_ion,:),EXPRO_n_exp)
-              call tgyro_expro_map(r,dlntidr(i_ion,:),n_r,100*EXPRO_rmin,EXPRO_ti(i_ion,:),EXPRO_n_exp)
-           endif
-        enddo
 
         ! Write data to file
         call EXPRO_write_original(&

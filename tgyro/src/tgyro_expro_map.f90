@@ -26,9 +26,11 @@ subroutine tgyro_expro_map(r,z,n_r,r_exp,p_exp,n_exp)
   z_exp(:) = 0.0
   i = 1
   do i_exp=2,n_exp
-     if (r(i+1) < r_exp(i_exp)) i = i+1
-     dr = r(i+1)-r(i)
-     z_exp(i_exp) = z(i+1)*(r_exp(i_exp)-r(i))/dr + z(i)*(r(i+1)-r_exp(i_exp))/dr
+     if (r_exp(i_exp) <= r(n_r)) then
+        if (r(i+1) < r_exp(i_exp)) i = i+1
+        dr = r(i+1)-r(i)
+        z_exp(i_exp) = z(i+1)*(r_exp(i_exp)-r(i))/dr + z(i)*(r(i+1)-r_exp(i_exp))/dr
+     endif
   enddo
 
   do i_exp=n_exp,2,-1
