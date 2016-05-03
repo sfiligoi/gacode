@@ -4,7 +4,7 @@
 
 # Compilers and flags
 
-FC	= mpif90-mpich-gcc5 -I$(GACODE_ROOT)/modules -J$(GACODE_ROOT)/modules
+FC	= mpif90-mpich-gcc5 -I$(GACODE_ROOT)/modules -J$(GACODE_ROOT)/modules -I/opt/local/include
 F77	= mpif90-mpich-gcc5
 
 FOMP    = -fopenmp
@@ -14,7 +14,7 @@ FDEBUG  = -Wall -fcheck=all -ffpe-trap=invalid,zero,overflow
 
 # System math libraries
 
-LMATH = -framework Accelerate
+LMATH = -framework Accelerate /opt/local/lib/libfftw3.a
 
 # NetCDF libraries
 
