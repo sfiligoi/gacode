@@ -11,15 +11,18 @@
 !
      IMPLICIT NONE
 !
-     INTEGER :: j,is
-     REAl :: v_bar0, phi_bar0
-     REAL :: pflux0(nsm,3),eflux0(nsm,3)
-     REAL :: stress_par0(nsm,3),stress_tor0(nsm,3)
-     REAL :: exch0(nsm,3)
-     REAL :: nsum0(nsm),tsum0(nsm)
+     character(len=1000) :: nn_executable
+     character(len=1000) :: nn_files
+
+     integer :: j,is
+     real :: v_bar0, phi_bar0
+     real :: pflux0(nsm,3),eflux0(nsm,3)
+     real :: stress_par0(nsm,3),stress_tor0(nsm,3)
+     real :: exch0(nsm,3)
+     real :: nsum0(nsm),tsum0(nsm)
 !
-     REAL, DIMENSION(10) :: tmp
-     INTEGER, DIMENSION(10) :: ions_order
+     real, DIMENSION(10) :: tmp
+     integer, DIMENSION(10) :: ions_order
 !
      real :: OUT_ENERGY_FLUX_1_STD, OUT_ENERGY_FLUX_3_STD, OUT_PARTICLE_FLUX_1_STD
      real :: OUT_PARTICLE_FLUX_3_STD, OUT_STRESS_TOR_1_STD, OUT_STRESS_TOR_3_STD
@@ -50,14 +53,14 @@
 ! '#---------------------------------------------------'
      tmp=0.0
      tmp(1)=1E10
-     DO i = 2,tglf_ns_in
+     do i = 2,tglf_ns_in
          tmp(i)=tglf_mass_in(i)*100000+tglf_zs_in(i)*1000+1./(1+tglf_rlts_in(i))
-     ENDDO
-     DO i = 1,tglf_ns_in
+     enddo
+     do i = 1,tglf_ns_in
          j=MAXLOC(tmp, DIM=1)
          ions_order(i)=j
          tmp(j)=0
-     ENDDO
+     enddo
 !
 ! Write input file for the NN
 !
@@ -72,13 +75,15 @@
 !
 ! Execute the NN
 !
-     if (tglf_path_in == "") then
-        ! FOR TGLF in standalone mode: no sub-directories
-        CALL SYSTEM('/u/ludat/brainfuse_orso/run.exe /u/ludat/testnets/brainfuse_* input.dat')
-     else
-        ! FOR TGYRO
-        CALL SYSTEM('cd '//TRIM(tglf_path_in)//' ;/u/ludat/brainfuse_orso/run.exe /u/ludat/testnets/brainfuse_* input.dat')
+     call get_environment_variable('TGLFNN_EXEC',nn_executable)
+     call get_environment_variable('TGLFNN_MODEL',nn_files)
+     !write(*,*)'TGLFNN_EXEC: ',trim(nn_executable)
+     !write(*,*)'TGLFNN_MODEL: ',trim(nn_files)
+     if (tglf_path_in .ne. "") then
+        nn_executable='cd '//TRIM(tglf_path_in)//' ;'//trim(nn_executable)
      endif
+     call system(trim(nn_executable)//' '//trim(nn_files)//' input.dat')
+     !call execute_command_line(trim(nn_executable)//' '//trim(nn_files)//' input.dat')
 !
 ! Read outputs
 !
