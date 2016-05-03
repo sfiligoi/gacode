@@ -1,3 +1,0 @@
-tgyro_eped_nn.o : tgyro_eped_nn.legacy.f90
-	$(FC) $(FMATH) $(FFLAGS) -o tgyro_eped_nn.o -c tgyro_eped_nn.legacy.f90
-

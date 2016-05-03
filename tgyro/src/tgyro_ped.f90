@@ -31,10 +31,18 @@ module tgyro_ped
   real :: n_p(nx_nn)
   real :: t_p(nx_nn)
 
+  ! Copies of EXPRO variables
   integer :: n_exp
+  !
   real, dimension(:), allocatable :: rmin_exp
   real, dimension(:), allocatable :: psi_exp
   real, dimension(:), allocatable :: dpsidr_exp
+  real, dimension(:), allocatable :: volp_exp
+  real, dimension(:), allocatable :: ptot_exp
+  real, dimension(:), allocatable :: exp_ne
+  real, dimension(:), allocatable :: exp_te
+  real, dimension(:,:), allocatable :: exp_ni
+  real, dimension(:,:), allocatable :: exp_ti
 
   ! Pedestal top scale lengths
   real :: zn_top,zt_top
@@ -63,7 +71,7 @@ contains
     ! 1. Initializations
     !
     neped_in   = tgyro_neped
-    zeffped_in = 2.07
+    zeffped_in = tgyro_zeffped
     !-------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------

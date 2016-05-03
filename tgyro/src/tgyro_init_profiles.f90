@@ -381,21 +381,12 @@ subroutine tgyro_init_profiles
   !-----------------------------------------------------------------
   ! Capture additional parameters for pedestal model [Not in CGS]
   !
-  ! Typical values
-  !
-  !       a = 0.55
-  !   betan = 1.28
-  !      bt = 1.69
-  !   delta = 0.54
-  !      ip = 1.30
-  !   kappa = 1.86
-  !       m = 2.00
-  !   neped = 3.62
-  !       r = 1.70
-  ! zeffped = 2.07
-  !
   ! Average pressure [Pa]
-  p_ave = sum(EXPRO_volp(:)*EXPRO_ptot(:))/sum(EXPRO_volp(:))
+  allocate(volp_exp(n_exp))
+  volp_exp = EXPRO_volp
+  allocate(ptot_exp(n_exp))
+  ptot_exp = EXPRO_ptot
+  p_ave = sum(volp_exp*ptot_exp)/sum(volp_exp)
   !
   ! a [m]
   a_in = r_min
@@ -422,6 +413,13 @@ subroutine tgyro_init_profiles
   allocate(dpsidr_exp(n_exp))
   ! d (Psi_norm)/dr in units of 1/cm
   dpsidr_exp = EXPRO_bunit*EXPRO_rmin/EXPRO_q/EXPRO_polflux(n_exp)/100.0
+  !
+  allocate(exp_te(n_exp))
+  allocate(exp_ne(n_exp))
+  allocate(exp_ti(loc_n_ion,n_exp))
+  allocate(exp_ni(loc_n_ion,n_exp))
+  !
+  call tgyro_pedestal
   !-----------------------------------------------------------------
 
   call EXPRO_palloc(MPI_COMM_WORLD,'./',0)

@@ -29,7 +29,7 @@ subroutine tgyro_eped_nn
   call get_environment_variable('EPEDNN_MODEL',nn_files)
   !write(*,*)'EPEDNN_EXEC: ',trim(nn_executable)
   !write(*,*)'EPEDNN_MODEL: ',trim(nn_files)
-  call execute_command_line(trim(nn_executable)//' '//trim(nn_files)//' input.dat')
+  call gacode_system(trim(nn_executable)//' '//trim(nn_files)//' input.dat')
 
   ! Read epednn_vec=[psi_norm,ne,ptot=2 ne T]
   open(unit=1,file='epednn.profiles',status='old')

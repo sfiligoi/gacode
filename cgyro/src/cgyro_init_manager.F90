@@ -37,9 +37,9 @@ subroutine cgyro_init_manager
 #endif
 
   if (hiprec_flag == 1) then
-     fmtstr    ='(es13.6)'
-     fmtstr2   ='(2(es13.6,1x))'
-     fmtstrn   ='(10(es13.6,1x))'
+     fmtstr    ='(es16.9)'
+     fmtstr2   ='(2(es16.9,1x))'
+     fmtstrn   ='(10(es16.9,1x))'
   endif
 
   !------------------------------------------------------

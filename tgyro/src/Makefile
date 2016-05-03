@@ -13,8 +13,8 @@ EXEC = tgyro_main
 OBJECTS +=	tgyro_globals.o \
 		tgyro_iteration_variables.o \
 		tgyro_allocate_globals.o \
-		tgyro_ped.o \
-		tgyro_eped_nn.o \
+                tgyro_ped.o \
+                tgyro_eped_nn.o \
 		tgyro_catch_error.o \
 		tgyro_comm_setup.o \
 		tgyro_comm_sync.o \
@@ -34,6 +34,7 @@ OBJECTS +=	tgyro_globals.o \
 		tgyro_multi_driver.o \
 		tgyro_neo_map.o \
 		tgyro_profile_functions.o \
+		tgyro_profile_reintegrate.o \
 		tgyro_quasineutral.o \
 		tgyro_quasigrad.o \
 		tgyro_read_input.o \
@@ -66,4 +67,3 @@ clean:
 	rm -f $(EXEC)
 	rm -f *.o ${GACODE_ROOT}/modules/tgyro*.mod
 
--include ../install/make.ext.${GACODE_PLATFORM}
