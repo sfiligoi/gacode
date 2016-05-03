@@ -266,7 +266,7 @@ subroutine tgyro_tglf_map
   !----------------------------------------------------------------
 
   !----------------------------------------------------------------
-  ! New TGLF settings
+  ! NEW TGLF SETTINGS
   !
   select case (tgyro_tglf_revision)
 
@@ -300,18 +300,27 @@ subroutine tgyro_tglf_map
   end select
 
   !----------------------------------------------------------------
-
-  ! Dump parameters
+  ! DUMP PARAMETERS
+  !
   if (tgyro_tglf_dump_flag == 0) then
      tglf_dump_flag_in   = .false.
   else
      tglf_dump_flag_in = .true.
   endif
 
+  !----------------------------------------------------------------
+  ! VERBOSITY
+  !
   tglf_quiet_flag_in = .true.
-  
-  ! Harvest targets and gyro-bohm normalizations
-  
+
+  !----------------------------------------------------------------
+  ! TGLFNN ACTIVATION THRESHOLD
+  !
+  tglf_nn_thrsh_energy_in=tgyro_tglf_nn_thrsh_energy
+
+  !----------------------------------------------------------------
+  ! HARVEST TARGETS AND GYRO-BOHM NORMALIZATIONS
+  !
   if (i_tran == 0) then
     ! Initialization
     tglf_harvest_extra_in = NUL
