@@ -70,6 +70,7 @@ NPROC=1
 NOMP=1
 NUMA=0
 MPINUMA=0
+NIDLE=0
 START=new
 #=============================================================
 
@@ -115,6 +116,6 @@ CODE="$CODE -start $START"
 
 # Pass control to platform-specific script
 $GACODE_ROOT/shared/batch/queue.${GACODE_PLATFORM} \
- $NPROC $LOCDIR $SIMROOT "$CODE" $NOMP $NUMA $MPINUMA
+ $NPROC $LOCDIR $SIMROOT "$CODE" $NOMP $NUMA $MPINUMA $NIDLE
 
 exit 0

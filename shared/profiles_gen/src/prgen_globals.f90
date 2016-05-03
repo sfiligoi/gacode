@@ -17,7 +17,8 @@ module prgen_globals
   integer :: nx
   integer :: format_type
   integer :: efit_method
-  integer :: nogatoq_flag
+  integer :: noq_flag
+  integer :: nop_flag
   integer :: verbose_flag
   integer :: gmerge_flag
   character (len=70) :: efit_header
@@ -40,7 +41,7 @@ module prgen_globals
   real, dimension(:), allocatable :: rmin
   real, dimension(:), allocatable :: rmaj
   real, dimension(:), allocatable :: q
-  real, dimension(:), allocatable :: q_gato
+  real, dimension(:), allocatable :: p_tot
   real, dimension(:), allocatable :: vphi_exp
   real, dimension(:), allocatable :: vphi_carbon
   real, dimension(:), allocatable :: vpolc_exp
@@ -94,7 +95,6 @@ module prgen_globals
   ! ONETWO variables
   !
   integer :: onetwo_ishot
-  integer :: onetwo_nj
   integer :: onetwo_nb
   integer :: onetwo_npsi
   integer :: onetwo_nion
@@ -150,7 +150,6 @@ module prgen_globals
   real, dimension(:), allocatable :: onetwo_enalp
   real, dimension(:), allocatable :: onetwo_psi
   real, dimension(:), allocatable :: onetwo_storqueb
-  real, dimension(:), allocatable :: onetwo_press
   real, dimension(:,:), allocatable :: onetwo_enion
   real, dimension(:,:), allocatable :: onetwo_enbeam
   real, dimension(:,:), allocatable :: onetwo_pressb
@@ -196,7 +195,6 @@ module prgen_globals
   real, dimension(:), allocatable :: plst_m_all
   real, dimension(:,:), allocatable :: plst_ts
   real, dimension(:,:), allocatable :: plst_ns
-  real, dimension(:), allocatable :: plst_ptowb
   real, dimension(:), allocatable :: plst_nb
   real, dimension(:), allocatable :: plst_nmini
   real, dimension(:), allocatable :: plst_nfusi
@@ -241,7 +239,6 @@ module prgen_globals
   !---------------------------------------------------------
   ! PEQDSK variables
   !
-  integer :: peqdsk_nj
   real :: peqdsk_bref
   real :: peqdsk_arho
   real, dimension(:), allocatable :: peqdsk_psi
@@ -316,7 +313,6 @@ module prgen_globals
   !---------------------------------------------------------
   ! UFILE variables
   !
-  integer, parameter :: ufile_nx=51
   integer :: ufile_nion
   real :: ufile_bref
   real :: ufile_arho

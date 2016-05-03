@@ -160,7 +160,7 @@ module GEO_interface
   real :: GEO_theta_s
   real :: GEO_chi2
 
-  ! Flux-surface averages:
+  ! Scalar-valued functions (i.e., flux-surface averages, etc)
 
   real :: GEO_f
   real :: GEO_ffprime
@@ -171,5 +171,6 @@ module GEO_interface
   real :: GEO_fluxsurfave_grad_r
   real :: GEO_grad_r0
   real :: GEO_thetascale
+  real :: GEO_bl
 
 end module GEO_interface

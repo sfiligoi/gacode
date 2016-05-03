@@ -13,6 +13,8 @@ EXEC = tgyro_main
 OBJECTS +=	tgyro_globals.o \
 		tgyro_iteration_variables.o \
 		tgyro_allocate_globals.o \
+		tgyro_ped.o \
+		tgyro_eped_nn.o \
 		tgyro_catch_error.o \
 		tgyro_comm_setup.o \
 		tgyro_comm_sync.o \
@@ -22,6 +24,7 @@ OBJECTS +=	tgyro_globals.o \
 		tgyro_flux_vector_dense.o \
 		tgyro_gyro_map.o \
 		tgyro_init_profiles.o \
+		tgyro_init_profiles_axis.o \
 		tgyro_iteration_driver.o \
 		tgyro_iteration_standard.o \
 		tgyro_iteration_pppl.o \
@@ -51,7 +54,7 @@ OBJECTS +=	tgyro_globals.o \
 		tgyro_write_jacobian.o \
 		$(EXEC).o
 
-.SUFFIXES : .o .f90 
+.SUFFIXES : .o .f90
 
 all: $(OBJECTS) $(EXTRA_LIBS)
 	$(FC) $(FFLAGS) -o $(EXEC) $(OBJECTS) $(EXTRA_LIBS) $(LMATH)
@@ -63,4 +66,4 @@ clean:
 	rm -f $(EXEC)
 	rm -f *.o ${GACODE_ROOT}/modules/tgyro*.mod
 
-
+-include ../install/make.ext.${GACODE_PLATFORM}

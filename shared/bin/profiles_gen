@@ -35,8 +35,7 @@ EXEC=${GACODE_ROOT}/shared/profiles_gen/src/prgen
 # - GATO executable
 GATO=${GACODE_ROOT}/gato/gato
 # - OMFIT script
-OMFIT_ROOT=${GACODE_ROOT}/../OMFIT-source
-OMFIT="${OMFIT_ROOT}/src/omfit.py fluxSurfaceTracer.py"
+OMFIT=${OMFIT_ROOT}/src/omfit.py
 # - locpargen executable
 LOCPARGEN=${GACODE_ROOT}/shared/profiles_gen/locpargen/locpargen
 # - exprodump executable
@@ -85,6 +84,14 @@ then
    echo "             -V"
    echo "             Verbose (for debugging; use this if you get an error)."
    echo 
+   echo "Flags for gfile control (see -g option below)"
+   echo 
+   echo "             -noq"
+   echo "             Do not use the q from the EFIT gfile"
+   echo 
+   echo "             -nop"
+   echo "             Do not use the P_tot from the EFIT gfile."
+   echo
    echo "ITERDB Options"
    echo 
    echo "             -i <data>"
@@ -95,9 +102,6 @@ then
    echo 
    echo "             -nfourier <int>"
    echo "             Number of Fourier modes to retain in input.profiles.geo/input.geo. (default: 24)"
-   echo
-   echo "             -nogq"
-   echo "             Do not use q from GATO (by default, if gfile is specified q is from GATO)."
    echo 
    echo "             -cer <vpol>"
    echo "             Merge data Er and velocity data from Solomon's cer datafile."
@@ -116,13 +120,10 @@ then
    echo "             Specify NetCDF data file."
    echo
    echo "             -g <gfile>"
-   echo "             Merge EFIT gfile for high-precision geometry data."
+   echo "             EFIT gfile for high-precision geometry data (includes q and P_tot)."
    echo 
    echo "             -nfourier <int>"
    echo "             Number of Fourier modes to retain in input.profiles.geo/input.geo. (default: 24)"
-   echo 
-   echo "             -nogq"
-   echo "             Do not use q from GATO (by default, if gfile is specified q is from GATO)."
    echo 
    echo "             -r <i1,i2,i3,i4,i5>"
    echo "             Reorder ions."
@@ -139,13 +140,10 @@ then
    echo "             Specify Corsica data file."
    echo
    echo "             -g <gfile>"
-   echo "             GFILE (geqdsk) containing flux-surface data [required]."
+   echo "             EFIT gfile for high-precision geometry data (includes q and P_tot)."
    echo 
    echo "             -nfourier <int>"
    echo "             Number of Fourier modes to retain in input.profiles.geo/input.geo. (default: 24)"
-   echo 
-   echo "             -nogq"
-   echo "             Do not use q from GATO (by default, if gfile is specified q is from GATO)."
    echo 
    echo "             -r <reorder sequence>"
    echo "             Reorder ions."
@@ -175,7 +173,7 @@ then
    echo "             Specify PFILE (peqdsk) data file."
    echo
    echo "             -g <gfile>"
-   echo "             GFILE (geqdsk) containing flux-surface data [required]."
+   echo "             EFIT gfile for high precision geometry data [REQUIRED] (includes q and P_tot)"
    echo 
    echo "             -nfourier <int>"
    echo "             Number of Fourier modes to retain in input.profiles.geo/input.geo. (default 24)"
@@ -205,8 +203,11 @@ then
    echo
    echo "OMFIT mapper control options"
    echo 
-   echo "             -omfit"
+   echo "             -omfit <parameter=val,parameter=val,...>"
    echo "             Toggle OMFIT mapper instead of default GATO mapper."
+   echo
+   echo "             -omfitres <resolution>"
+   echo "              <resolution>=low,medium,high (default medium)."
    echo
    echo "GFILE MERGE MODE"
    echo
@@ -348,11 +349,15 @@ BTCCW=-1
 NFOURIER=24
 
 # GATO variables
-NOGQ_FLAG=0
 GATO_ARGS=
+
+# EFIT data options
+NOP_FLAG=0
+NOQ_FLAG=0
 
 # OMFIT mapper variables
 OMFIT_FLAG=0
+OMFIT_RES="medium"
 
 # CER file 
 CER_FILE=null
@@ -426,10 +431,12 @@ while [ $# -gt 0 ] ; do
   -gato) shift ; GATO_ARGS="$1" ;;
 
   -omfit) OMFIT_FLAG=1 ;;
+  -omfitres) shift ; OMFIT_RES=$1 ;;
 
   -V) VERBOSE_FLAG=1 ;;
 
-  -nogq) NOGQ_FLAG=1 ;;
+  -nop) NOP_FLAG=1 ;;
+  -noq) NOQ_FLAG=1 ;;
 
   -r) shift ; ORDER="$1" ; ORDER_FLAG=1 ;;
 
@@ -850,8 +857,9 @@ echo $CER_FILE >> $CONFIG
 # EFIT method 
 echo $EFIT_METHOD >> $CONFIG
 
-# Don't use gato q (-nogq) flag
-echo $NOGQ_FLAG >> $CONFIG
+# EFIT options 
+echo $NOQ_FLAG >> $CONFIG
+echo $NOP_FLAG >> $CONFIG
 
 # Verbosity
 echo $VERBOSE_FLAG >> $CONFIG
@@ -1006,23 +1014,46 @@ then
    done
    echo " &end" >> ingta
 
-   $GATO >& out.gato.stdout
+   $GATO >& out.gato.info
    if [ -f 'gato_error' ]
    then
       echo 'ERROR: (gato) Fatal error.'
       exit 1 
    else
-      echo 'INFO: (gato) Success.'
+      mv grid.dat out.gato.fluxsurf
+      echo 'INFO: (gato) Done.  Check out.gato.info for diagnostics.'
    fi
 fi
 
 # Use OMFIT:
 if [ $EFIT_METHOD -eq 3 ]
 then
+    # OMFIT mapper options
+    # uniform -> points around separatrix
+    # levels -> flux surfaces
+    # resolution -> in mm
    cp $GFILE gfile
-   python $OMFIT -r 4 -u 200 -l 256 -x rho -a 0 -f 1 $GFILE >& out.omfit
-   cat out.omfit
-   cp flux_* ffile
+   case "$OMFIT_RES" in
+      low)    RES="resolution=0.003 uniform=500 levels=128" ;;
+      medium) RES="resolution=0.002 uniform=750 levels=256" ;;
+      high)   RES="resolution=0.001 uniform=1000 levels=512" ;;
+   esac
+   echo "INFO: (omfit) Running with parameters $RES"
+   OMFIT_OPT="rhoVSpsi='rho'
+              averages=0
+              namelist=0
+              fluxsurfaces=1
+              maxPSI=0.9999
+              gfiles='$GFILE'"
+   python $OMFIT fluxSurfaceTracer $RES $OMFIT_OPT >& out.omfit.info
+   if ls flux_* 1> /dev/null 2>&1
+   then
+      mv flux_* out.omfit.fluxsurf
+      echo "INFO: (omfit) Done.  Check out.omfit.info for OMFIT diagnostics."
+   else
+      echo "ERROR: (omfit) OMFIT failed.  Check out.omfit.info for OMFIT diagnostics."
+      exit 1
+   fi
 fi
 
 # DSKGATO
@@ -1091,25 +1122,16 @@ fi
 #  Remove configuration files, output files, etc.
 rm -f egta eqgta nova.*
 #  Remove stale files
-rm -f out.gato.* input.gato.* out.omfit dummy.peq
+rm -f input.gato.* dummy.peq
 
 if [ $VERBOSE_FLAG -eq 0 ]
 then
    rm -f $CONFIG fluxfit.* ingta o1gta grid.dat success
    rm -f *.ave out.com out.dim out.ufile.log 
-   rm -f gfile ffile out.expro.run pfile.*
+   rm -f gfile out.expro.run pfile.*
 else
    if [ -f "ingta" ] ; then 
       mv ingta input.gato.ingta
-   fi
-   if [ -f "o1gta" ] ; then
-      mv o1gta out.gato.o1gta
-   fi
-   if [ -f "grid.dat" ] ; then
-      mv grid.dat out.gato.grid
-   fi
-   if [ -f "ffile" ] ; then
-      mv ffile out.omfit.mapper
    fi
 fi
 #==============================================================

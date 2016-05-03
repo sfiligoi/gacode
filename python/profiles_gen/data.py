@@ -23,7 +23,7 @@ vars_input_profiles_extra = [
     'dlntidr_1', 'dlntidr_2', 'dlntidr_3', 'dlntidr_4', 'dlntidr_5',
     'dlntidr_6', 'dlntidr_7', 'dlntidr_8', 'dlntidr_9', 'dlntidr_10',
     'dlnptotdr', 'drdrho', 'w0p', 'vol', 'volp', 'cs', 'rhos', 'ni_new', 'dlnnidr_new',
-    'grad_r0', 'ave_grad_r', 'bp0', 'bt0', 'gamma_e', 'gamma_p', 'mach'
+    'grad_r0', 'ave_grad_r', 'bp0', 'bt0', 'gamma_e', 'gamma_p', 'mach', 'ip'
 ]
 
 vars_input_profiles_jbs = ['expro_rho', 'jbs_err', 'jbs_neo', 'jbs_sauter', 'jbs_nclass', 'jbs_koh']
@@ -87,6 +87,7 @@ fancyNames = \
               'gamma_e'    : ('r/q d(\\omega_0)/dr'       ,'1/s'          ,''),
               'gamma_p'    : ('R_0 d(\\omega_0)/dr'       ,'1/s'          ,''),
               'mach'       : ('R_0 \\omega_0/c_s'         ,''             ,''),
+              'ip'         : ('I_p'                       ,'A'            ,''),
               #jbs
               'expro_rho'  : ('\\rho'                     ,''             ,''),
               'jbs_err'    : ('j_\mathrm{bs,err}'         ,'MA/m^2'       ,''),

@@ -1,12 +1,33 @@
 program cgyro
 
   use mpi
-  use cgyro_globals, only : path, CGYRO_COMM_WORLD, i_proc, n_proc, i_err
+  use cgyro_globals, only : path, CGYRO_COMM_WORLD, i_proc, n_proc, i_err, n_omp
+  use cgyro_io
 
   implicit none
+  integer :: supported
+  integer, external :: omp_get_max_threads
 
-  call MPI_INIT(i_err)
-  
+  !----------------------------------------------------------------
+  ! Query OpenMP for threads
+  !
+  n_omp = omp_get_max_threads()
+  !-----------------------------------------------------------------
+
+  !-----------------------------------------------------------------
+  ! Initialize MPI_COMM_WORLD communicator, including support for 
+  ! funneled threading (needed if OpenMP is enabled).
+  !
+  if (n_omp > 1) then
+     call MPI_INIT_THREAD(MPI_THREAD_FUNNELED,supported,i_err)
+     if (supported < MPI_THREAD_FUNNELED) then
+        call cgyro_error('Multi-threaded MPI not supported.')
+     endif
+  else 
+     call MPI_INIT_THREAD(MPI_THREAD_SINGLE,supported,i_err)
+  endif
+  !-----------------------------------------------------------------
+
   ! Path is cwd:
   path= './'
 

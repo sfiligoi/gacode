@@ -21,8 +21,7 @@ subroutine gyro_write_restart
   integer :: data_step_old
   integer :: n_proc_old
   integer :: i_restart_old
-  !
-  !----------------------------------------------
+  character (len=1) :: i_tag
   !
   ! Required for MPI-IO: 
   !
@@ -58,35 +57,76 @@ subroutine gyro_write_restart
   filemode = IOR(MPI_MODE_RDWR,MPI_MODE_CREATE)
   disp     = 0
 
-  call MPI_INFO_CREATE(finfo,i_err)
+  if (huge_restart == 0) then
 
-  call MPI_FILE_OPEN(GYRO_COMM_WORLD,&
-       trim(path)//file_restart(i_restart),&
-       filemode,&
-       finfo,&
-       fhv,&
-       i_err)
+     call MPI_INFO_CREATE(finfo,i_err)
 
-  call MPI_FILE_SET_VIEW(fhv,&
-       disp,&
-       MPI_COMPLEX16,&
-       MPI_COMPLEX16,&
-       'native',&
-       finfo,&
-       i_err)
+     call MPI_FILE_OPEN(GYRO_COMM_WORLD,&
+          trim(path)//file_restart(i_restart),&
+          filemode,&
+          finfo,&
+          fhv,&
+          i_err)
 
-  offset1 = size(h)*i_proc
+     call MPI_FILE_SET_VIEW(fhv,&
+          disp,&
+          MPI_COMPLEX16,&
+          MPI_COMPLEX16,&
+          'native',&
+          finfo,&
+          i_err)
 
-  call MPI_FILE_WRITE_AT(fhv,&
-       offset1,&
-       h,&
-       size(h),&
-       MPI_COMPLEX16,&
-       fstatus,&
-       i_err)
+     offset1 = size(h)*i_proc
 
-  call MPI_FILE_SYNC(fhv,i_err)
-  call MPI_FILE_CLOSE(fhv,i_err)
+     call MPI_FILE_WRITE_AT(fhv,&
+          offset1,&
+          h,&
+          size(h),&
+          MPI_COMPLEX16,&
+          fstatus,&
+          i_err)
+
+     call MPI_FILE_SYNC(fhv,i_err)
+     call MPI_FILE_CLOSE(fhv,i_err)
+
+  else
+
+     do is=1,n_kinetic
+        i_tag = achar(is-1+iachar("0"))
+
+        call MPI_INFO_CREATE(finfo,i_err)
+
+        call MPI_FILE_OPEN(GYRO_COMM_WORLD,&
+             trim(path)//file_restart(i_restart)//i_tag,&
+             filemode,&
+             finfo,&
+             fhv,&
+             i_err)
+
+        call MPI_FILE_SET_VIEW(fhv,&
+             disp,&
+             MPI_COMPLEX16,&
+             MPI_COMPLEX16,&
+             'native',&
+             finfo,&
+             i_err)
+
+        offset1 = size(h(:,:,:,is))*i_proc
+
+        call MPI_FILE_WRITE_AT(fhv,&
+             offset1,&
+             h(:,:,:,is),&
+             size(h(:,:,:,is)),&
+             MPI_COMPLEX16,&
+             fstatus,&
+             i_err)
+
+        call MPI_FILE_SYNC(fhv,i_err)
+        call MPI_FILE_CLOSE(fhv,i_err)
+
+     enddo
+
+  endif
 
   !---------------------------------------------------------
   ! Dump restart parameters

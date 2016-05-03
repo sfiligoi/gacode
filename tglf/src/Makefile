@@ -1,10 +1,14 @@
 include ${GACODE_ROOT}/shared/install/make.inc.${GACODE_PLATFORM}
 
-TGLFISNAN = tglf_isnan_generic.o
-
-EXTRA_LIBS=../../shared/harvest_client/libharvest.a
-
-include ../install/make.ext.${GACODE_PLATFORM}
+#<<<<<<< HEAD
+#TGLFISNAN = tglf_isnan_generic.o
+#
+#EXTRA_LIBS=../../shared/harvest_client/libharvest.a
+#
+#include ../install/make.ext.${GACODE_PLATFORM}
+#=======
+-include ../install/make.ext.${GACODE_PLATFORM}
+#>>>>>>> master
 
 ifeq ($(OPT),debug)
    FFLAGS=${FDEBUG}
@@ -17,7 +21,7 @@ EXEC2=tglf_mpi
 
 LLIB=tglf_lib
 
-OBJECTS = ${TGLFISNAN}      \
+OBJECTS = tglf_isnan.o      \
           tglf_modules.o    \
           tglf_pkg.o        \
           tglf_allocate.o   \

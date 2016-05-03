@@ -8,7 +8,12 @@ w      = float(sys.argv[2])
 ifield = sys.argv[3]
 
 sim = cgyrodata('./')
-sim.getbig()
+
+if sim.n_n > 1:
+    print "ERROR: (plot_zf.py) This plot option valid for ZF test only."
+    sys.exit()
+else:
+    sim.getbig()
 
 phic = sim.phi[0,0,0,:]
 y    = phic[:]/phic[0]

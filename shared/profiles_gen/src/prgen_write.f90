@@ -180,7 +180,7 @@ subroutine prgen_write
      EXPRO_arho  = null_arho
   case (1)
      EXPRO_b_ref = -btccw*abs(onetwo_Btor)
-     EXPRO_arho  = onetwo_rho_grid(onetwo_nj)
+     EXPRO_arho  = onetwo_rho_grid(nx)
   case (2)
      EXPRO_b_ref = -btccw*abs(plst_b_axis_vac)
      EXPRO_arho  = sqrt(plst_phit(nx)/plst_b_axis_vac/pi)

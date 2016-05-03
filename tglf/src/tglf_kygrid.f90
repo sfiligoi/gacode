@@ -11,6 +11,7 @@
       integer :: nk_zones,nky0,nky1,nky2 
       INTEGER :: spectrum_type=0
       INTEGER :: i
+      INTEGER :: ntest
       REAL :: ky_min=0.05
       REAL :: ky_max=0.7
       REAL :: ky0,ky1,lnky,dky0
@@ -175,12 +176,31 @@
         endif
         nky = nky + nky_in
       endif
+!
+      if(spectrum_type.eq.5)then
+        nky=nky_in
+        ky1=ky_in
+        dky0=ky1/REAL(nky)
+        ntest=INT(0.5/dky0)+1
+        nky=11 + nky_in - ntest
+        do i=1,10
+          ky_spectrum(i) = REAL(i)*0.05
+          dky_spectrum(i) = 0.05
+        enddo
+        ky_spectrum(11) = REAL(ntest)*dky0
+        dky_spectrum(i) = ky_spectrum(11)-0.5
+        do i=12,nky
+          ky_spectrum(i) = ky_spectrum(i-1) + dky0
+          dky_spectrum(i) = dky0
+        enddo
+      endif
+
 
 ! debug
 !      write(*,*)"ky_min=",ky_min,"ky_max=",ky_max
 !      write(*,*)"nky = ",nky,"ky0 = ",ky0," ky1 = ",ky1
 !      do i=1,nky
-!       write(*,*)i,"ky=",ky_spectrum(i),"dky=",dky_spectrum(i)
+!      write(*,*)i,"ky=",ky_spectrum(i),"dky=",dky_spectrum(i)
 !      enddo
 !
       END SUBROUTINE get_ky_spectrum

@@ -8,8 +8,8 @@ module neo_nclass_dr
   
   integer, parameter, private :: mx_mi = 9
   integer, parameter, private :: mx_ms = 40
-  integer, parameter, private :: mx_mz = 50  ! increased this and pamx_mz.inc
-					     ! from 18 to 50 for higher Z
+  integer, parameter, private :: mx_mz = 100 ! increased this and pamx_mz.inc
+					     ! for higher Z
   
   integer, parameter, private :: io_nc = 41
   character(len=80),private :: runfile = 'out.neo.theory_nclass'
@@ -504,7 +504,6 @@ contains
        eflux_nc(i) = (rdum(1) + rdum(2) + rdum(4) + rdum(5)) / eflux_nc_norm
     enddo
 
-    
     if(silent_flag == 0 .and. i_proc == 0) then
        open(io_nc,file=trim(path)//runfile,status='old',position='append')
        write (io_nc,'(e16.8)',advance='no') r(ir)
@@ -520,10 +519,18 @@ contains
        close(io_nc)
     end if
 
-    do i=1,m_s
-       neo_nclass_out(i) = ymu_s(1,1,i) / (mass_deuterium * 1e-27 &
-            * dens_norm(ir) * 1e19 * vth_norm(ir))
-    enddo
+    ! Store the local nclass transport values at ir=1 in neo_nclass_out
+    if(ir == 1) then
+       neo_nclass_out(:,:) = 0.0
+       neo_nclass_1d_out   = 0.0
+       do is=1,n_species
+          neo_nclass_out(is,1) = pflux_nc(is)
+          neo_nclass_out(is,2) = eflux_nc(is)
+          neo_nclass_out(is,3) = vpol_nc(is)
+          neo_nclass_out(is,4) = vtor_nc(is)
+       enddo
+       neo_nclass_1d_out = jbs_nc 
+    endif
 
   end subroutine NCLASS_DR_do
 

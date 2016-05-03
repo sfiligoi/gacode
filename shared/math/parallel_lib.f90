@@ -75,13 +75,19 @@ contains
 
     complex, intent(in), dimension(ni_loc,nj) :: f
     complex, intent(inout), dimension(nj_loc,ni) :: ft
-    integer :: ierr,i_loc,i,j,k
+    integer :: ierr,i_loc,i,j,k, i1,i2
 
 
+!$omp  parallel do default(none) &
+!$omp& shared(nproc,iproc,ni_loc,nj_loc) &
+!$omp& private(k,i,i_loc,j,i1,i2) &
+!$omp& shared(f) &
+!$omp& shared(fsendf)
     do k=1,nproc
-       i_loc = 0
-       do i=1+iproc*ni_loc,(1+iproc)*ni_loc
-          i_loc = i_loc+1
+       i1 = 1+iproc*ni_loc
+       i2 = (1+iproc)*ni_loc
+       do i=i1,i2
+          i_loc = i-i1+1 
           do j=1,nj_loc
              fsendf(j,i_loc,k) = f(i_loc,j+(k-1)*nj_loc) 
           enddo
@@ -109,12 +115,18 @@ contains
 
     complex, intent(in), dimension(nj_loc,ni) :: ft
     complex, intent(inout), dimension(ni_loc,nj) :: f
-    integer :: ierr,j_loc,i,j,k
+    integer :: ierr,j_loc,i,j,k, j1,j2
 
+!$omp parallel do default(none) &
+!$omp& shared(nproc,iproc,nj_loc,ni_loc) &
+!$omp& private(k,j,j_loc,i,j1,j2) &
+!$omp& shared(ft) &
+!$omp& shared(fsendr)
     do k=1,nproc
-       j_loc = 0
-       do j=1+iproc*nj_loc,(1+iproc)*nj_loc
-          j_loc = j_loc+1
+       j1 = 1+iproc*nj_loc
+       j2 = (1+iproc)*nj_loc
+       do j=j1,j2
+          j_loc = j-j1+1 
           do i=1,ni_loc
              fsendr(i,j_loc,k) = ft(j_loc,i+(k-1)*ni_loc) 
           enddo
@@ -132,6 +144,45 @@ contains
 
   end subroutine parallel_lib_r
 
+  subroutine parallel_lib_rtrans(fin,f)
+! -----------------------------------------
+! transpose version of parallel_lib_r(fin,f)
+! -----------------------------------------
+    use mpi
+
+    implicit none
+
+    complex, intent(in), dimension(:,:) :: fin
+    complex, intent(inout), dimension(ni_loc,nj) :: f
+    integer :: ierr,j_loc,i,j,k, j1,j2
+
+!$omp parallel do default(none) &
+!$omp& shared(nproc,iproc,nj_loc,ni_loc) &
+!$omp& private(k,j,j_loc,i,j1,j2) &
+!$omp& shared(fin) &
+!$omp& shared(fsendr)
+    do k=1,nproc
+       j1 = 1+iproc*nj_loc
+       j2 = (1+iproc)*nj_loc
+       do j=j1,j2
+          j_loc = j-j1+1 
+          do i=1,ni_loc
+             fsendr(i,j_loc,k) = fin(i+(k-1)*ni_loc,j_loc) 
+          enddo
+       enddo
+    enddo
+
+    call MPI_ALLTOALL(fsendr, &
+         nsend, &
+         MPI_DOUBLE_COMPLEX, &
+         f, &
+         nsend, &
+         MPI_DOUBLE_COMPLEX, &
+         lib_comm, &
+         ierr)
+
+  end subroutine parallel_lib_rtrans
+
   !=========================================================
 
   subroutine parallel_lib_r_real(ft,f)
@@ -142,12 +193,18 @@ contains
 
     real, intent(in), dimension(nj_loc,ni) :: ft
     real, intent(inout), dimension(ni_loc,nj) :: f
-    integer :: ierr,j_loc,i,j,k
+    integer :: ierr,j_loc,i,j,k,j1,j2
 
+!$omp  parallel do default(none) &
+!$omp& shared(nproc,iproc,nj_loc,ni_loc) &
+!$omp& private(k,j,j_loc,i,j1,j2) &
+!$omp& shared(ft) &
+!$omp& shared(fsendr_real)
     do k=1,nproc
-       j_loc = 0
-       do j=1+iproc*nj_loc,(1+iproc)*nj_loc
-          j_loc = j_loc+1
+       j1 = 1+iproc*nj_loc
+       j2 = (1+iproc)*nj_loc
+       do j=j1,j2
+          j_loc = j-j1+1
           do i=1,ni_loc
              fsendr_real(i,j_loc,k) = ft(j_loc,i+(k-1)*ni_loc) 
           enddo
@@ -164,6 +221,43 @@ contains
          ierr)
 
   end subroutine parallel_lib_r_real
+
+  subroutine parallel_lib_rtrans_real(fin,f)
+
+    use mpi
+
+    implicit none
+
+    real, intent(in), dimension(:,:) :: fin
+    real, intent(inout), dimension(ni_loc,nj) :: f
+    integer :: ierr,j_loc,i,j,k,j1,j2
+
+!$omp  parallel do default(none) &
+!$omp& shared(nproc,iproc,nj_loc,ni_loc) &
+!$omp& private(k,j,j_loc,i,j1,j2) &
+!$omp& shared(fin) &
+!$omp& shared(fsendr_real)
+    do k=1,nproc
+       j1 = 1+iproc*nj_loc
+       j2 = (1+iproc)*nj_loc
+       do j=j1,j2
+          j_loc = j-j1+1
+          do i=1,ni_loc
+             fsendr_real(i,j_loc,k) = fin(i+(k-1)*ni_loc,j_loc) 
+          enddo
+       enddo
+    enddo
+
+    call MPI_ALLTOALL(fsendr_real, &
+         nsend, &
+         MPI_DOUBLE_PRECISION,&
+         f, &
+         nsend, &
+         MPI_DOUBLE_PRECISION, &
+         lib_comm, &
+         ierr)
+
+  end subroutine parallel_lib_rtrans_real
 
   !=========================================================
 
@@ -222,9 +316,19 @@ contains
     integer :: ierr
     !-------------------------------------------------------
 
+!$omp  parallel do default(none) &
+!$omp& shared(nexch) &
+!$omp& private(j) &
+!$omp& shared(x_in) &
+!$omp& shared(x)
     do j=1,nexch
        x(:,j) = x_in(:,j)
     enddo
+
+!$omp  parallel do default(none) &
+!$omp& shared(nexch,nsplit,nn) &
+!$omp& private(j) &
+!$omp& shared(x)
     do j=nexch+1,nsplit*nn
        x(:,j) = (0.0,0.0)
     enddo
@@ -266,6 +370,11 @@ contains
          slib_comm, &
          ierr)
 
+!$omp  parallel do default(none) &
+!$omp& shared(nexch) &
+!$omp& private(j) &
+!$omp& shared(x) &
+!$omp& shared(x_out)
     do j=1,nexch
        x_out(:,j) = x(:,j)
     enddo

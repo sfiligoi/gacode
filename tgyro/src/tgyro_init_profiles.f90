@@ -9,15 +9,16 @@ subroutine tgyro_init_profiles
 
   use mpi
   use tgyro_globals
+  use tgyro_ped
   use EXPRO_interface
 
   implicit none
 
   integer :: i_ion
-  integer :: n_exp
   integer :: i
   integer :: n
   real :: arho
+  real :: p_ave
 
   !------------------------------------------------------
   ! PHYSICAL CONSTANTS
@@ -31,6 +32,8 @@ subroutine tgyro_init_profiles
   mp      = 1.6726e-24 ! g
   malpha  = 4*mp       ! g
   c       = 2.9979e10  ! cm/s
+  !
+  mu_0    = 4*pi*1e-7  ! N/A^2
   !------------------------------------------------------
 
   !------------------------------------------------------
@@ -155,6 +158,9 @@ subroutine tgyro_init_profiles
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_zeta(:),n_exp,r,zeta,n_r)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_szeta(:),n_exp,r,s_zeta,n_r)
 
+  ! Convert ptot to Ba from Pascals (1 Pa = 10 Ba)
+  call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_ptot(:)*10.0,n_exp,r,ptot,n_r)
+
   ! Convert V and dV/dr from m^3 to cm^3
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_vol(:)*1e6,n_exp,r,vol,n_r)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_volp(:)*1e4,n_exp,r,volp,n_r)
@@ -170,6 +176,7 @@ subroutine tgyro_init_profiles
   ! Convert T to eV (from keV) and length to cm (from m):
   call cub_spline(EXPRO_rmin(:)/r_min,1e3*EXPRO_te(:),n_exp,r,te,n_r)
   call cub_spline(EXPRO_rmin(:)/r_min,1e13*EXPRO_ne(:),n_exp,r,ne,n_r)
+  call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_dlnptotdr(:)/100.0,n_exp,r,dlnnedr,n_r)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_dlnnedr(:)/100.0,n_exp,r,dlnnedr,n_r)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_dlntedr(:)/100.0,n_exp,r,dlntedr,n_r)
   do i_ion=1,loc_n_ion
@@ -179,6 +186,31 @@ subroutine tgyro_init_profiles
      call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_dlnnidr(i_ion,:)/100.0,n_exp,r,dlnnidr(i_ion,:),n_r)
   enddo
 
+  if (tgyro_ptot_flag == 1) then
+
+     ! Total pressure correction from included species
+
+     pr(:) = ne(:)*k*te(:)
+     do i_ion=1,loc_n_ion
+        pr(:) = pr(:)+ni(i_ion,:)*k*ti(i_ion,:)
+     enddo
+     pext(:) = ptot(:)-pr(:)
+     pr(:)   = ptot(:) 
+
+     dlnpdr(:) = ne(:)*k*te(:)*(dlnnedr(:)+dlntedr(:))/pr(:)
+     do i_ion=1,loc_n_ion
+        dlnpdr(:) = dlnpdr(:)+&
+             ni(i_ion,:)*k*ti(i_ion,:)*(dlnnidr(i_ion,:)+dlntidr(i_ion,:))/pr(:)
+     enddo
+     dpext(:) = pr(:)*(dlnptotdr(:)-dlnpdr(:))
+     dlnpdr(:) = dlnptotdr(:)
+
+  else
+
+     pext(:)  = 0.0
+     dpext(:) = 0.0
+
+  endif
   !------------------------------------------------------------------------------------------
 
   !------------------------------------------------------------------------------------------
@@ -209,7 +241,7 @@ subroutine tgyro_init_profiles
   !
   i_ash = 0
   do i=1,loc_n_ion
-     if (zi_vec(i) == 2.0 .and. mi_vec(i) == 4.0 .and. therm_flag(i) == 1) then
+     if (nint(zi_vec(i)) == 2 .and. nint(mi_vec(i)) == 4 .and. therm_flag(i) == 1) then
         i_ash = i
      endif
   enddo
@@ -235,16 +267,21 @@ subroutine tgyro_init_profiles
   !------------------------------------------------------------------------------------------
 
   !------------------------------------------------------------------------------------------
-  ! Apply rescaling factors:
+  ! Apply rescaling factors if starting a new simulation
   !
-  ne(:) = tgyro_input_den_scale*ne(:)
-  te(:) = tgyro_input_te_scale*te(:)
-  do i_ion=1,loc_n_ion
-     ni(i_ion,:) = tgyro_input_den_scale*ni(i_ion,:)
-     ti(i_ion,:) = tgyro_input_ti_scale*ti(i_ion,:)
-  enddo
-  w0(:) = tgyro_input_w0_scale*w0(:)
-  w0p(:) = tgyro_input_w0_scale*w0p(:)
+  if (loc_restart_flag == 0) then
+     ne(:) = tgyro_input_den_scale*ne(:)
+     te(:) = tgyro_input_te_scale*te(:)
+     do i_ion=1,loc_n_ion
+        ni(i_ion,:) = tgyro_input_den_scale*ni(i_ion,:)
+        ti(i_ion,:) = tgyro_input_ti_scale*ti(i_ion,:)
+     enddo
+     w0(:) = tgyro_input_w0_scale*w0(:)
+     w0p(:) = tgyro_input_w0_scale*w0p(:)
+
+     dlntedr(:)   = dlntedr(:)  *tgyro_input_dlntdr_scale
+     dlntidr(:,:) = dlntidr(:,:)*tgyro_input_dlntdr_scale
+  endif
   !------------------------------------------------------------------------------------------
 
   !------------------------------------------------------------------------------------------
@@ -341,6 +378,52 @@ subroutine tgyro_init_profiles
 
   endif
 
+  !-----------------------------------------------------------------
+  ! Capture additional parameters for pedestal model [Not in CGS]
+  !
+  ! Typical values
+  !
+  !       a = 0.55
+  !   betan = 1.28
+  !      bt = 1.69
+  !   delta = 0.54
+  !      ip = 1.30
+  !   kappa = 1.86
+  !       m = 2.00
+  !   neped = 3.62
+  !       r = 1.70
+  ! zeffped = 2.07
+  !
+  ! Average pressure [Pa]
+  p_ave = sum(EXPRO_volp(:)*EXPRO_ptot(:))/sum(EXPRO_volp(:))
+  !
+  ! a [m]
+  a_in = r_min
+  ! Bt on axis [T]
+  bt_in = EXPRO_bt0(1)
+  ! Plasma current Ip[Ma]
+  ip_in = abs(1e-6*EXPRO_ip(n_exp-3))
+  ! betan [%] = betat/In*100 where In = Ip/(a Bt) 
+  betan_in = ( p_ave/(0.5*bt_in**2/mu_0) ) / ( ip_in/(a_in*bt_in) ) * 100.0
+  ! Triangularity [-]
+  delta_in = EXPRO_delta(n_exp-3)  
+  ! Elongation [-]
+  kappa_in = EXPRO_kappa(n_exp-3) 
+  ! Main ion mass [mp]
+  m_in = mi_vec(1)
+  ! R0(a) [m]
+  r_in = EXPRO_rmaj(n_exp-3)
+
+  allocate(rmin_exp(n_exp))
+  rmin_exp = EXPRO_rmin*100.0
+  allocate(psi_exp(n_exp))
+  ! Psi_norm
+  psi_exp = EXPRO_polflux/EXPRO_polflux(n_exp)
+  allocate(dpsidr_exp(n_exp))
+  ! d (Psi_norm)/dr in units of 1/cm
+  dpsidr_exp = EXPRO_bunit*EXPRO_rmin/EXPRO_q/EXPRO_polflux(n_exp)/100.0
+  !-----------------------------------------------------------------
+
   call EXPRO_palloc(MPI_COMM_WORLD,'./',0)
 
   ! Convert r_min to cm (from m):
@@ -372,63 +455,7 @@ subroutine tgyro_init_profiles
   endif
   !----------------------------------------------------------
 
-  !----------------------------------------------------
-  ! Set conditions at r=0
-  !
-  ! Zero derivatives of (ne,ni,Te,Ti) at origin.
-  dlnnidr(:,1) = 0.0
-  dlnnedr(1) = 0.0
-  dlntidr(:,1) = 0.0
-  dlntedr(1) = 0.0
-
-  if (loc_er_feedback_flag == 1) then
-     select case(tgyro_er_bc)
-     case (1)
-        ! Fixed derivative of w0 
-        f_rot(1) = f_rot(1)
-     case (2)
-        ! Zero derivative of w0, similar to profiles
-        f_rot(1) = 0.0
-     case(3)
-        ! Zero second derivative
-        f_rot(1) = f_rot(2)
-     end select
-  endif
-
-  pflux_e_neo(1) = 0.0
-  pflux_e_tur(1) = 0.0
-  pflux_i_neo(:,1) = 0.0
-  pflux_i_tur(:,1) = 0.0
-
-  eflux_e_neo(1) = 0.0
-  eflux_e_tur(1) = 0.0
-  eflux_i_neo(:,1) = 0.0
-  eflux_i_tur(:,1) = 0.0
-
-  mflux_e_neo(1) = 0.0
-  mflux_e_tur(1) = 0.0
-  mflux_i_neo(:,1) = 0.0
-  mflux_i_tur(:,1) = 0.0
-
-  pflux_i_tot(1) = 0.0
-  pflux_e_tot(1) = 0.0
-
-  eflux_i_tot(1) = 0.0
-  eflux_e_tot(1) = 0.0
-
-  mflux_tot(1) = 0.0
-  pflux_he_tot(1) = 0.0
-
-  eflux_i_target(1) = 0.0
-  eflux_e_target(1) = 0.0
-  pflux_e_target(1) = 0.0
-  mflux_target(1)   = 0.0
-  pflux_he_target(1) = 0.0
-
-  ! Also need to zero initial exchanges to prevent use in tgyro_source 
-  ! on iteration 0 before definition
-  expwd_i_tur(:,:) = 0.0
-  expwd_e_tur(:) = 0.0
-  !----------------------------------------------------
+  ! Axis boundary conditions
+  call tgyro_init_profiles_axis
 
 end subroutine tgyro_init_profiles

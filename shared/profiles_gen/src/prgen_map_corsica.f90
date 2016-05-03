@@ -15,7 +15,7 @@ subroutine prgen_map_corsica
   ! Compute rho, bref and arho:
   ! Ignore corsica input "rho", "rmin", and "q"; use gato and corsica poloidal
   ! flux
-  call prgen_get_chi(nx,q_gato,kappa,rmin,dpsi,rho,corsica_bref,corsica_arho)
+  call prgen_get_chi(nx,q,kappa,rmin,dpsi,rho,corsica_bref,corsica_arho)
 
   !---------------------------------------------------------
   ! Map profile data onto single array:
@@ -41,7 +41,7 @@ subroutine prgen_map_corsica
   EXPRO_flow_beam(:) = 0.0      ! flow_beam
   EXPRO_flow_wall(:) = 0.0      ! flow_wall_exp
   EXPRO_zmag(:)      = zmag(:)  
-  EXPRO_ptot(:)      = 0.0      ! ptot
+  EXPRO_ptot(:)      = p_tot(:)
   EXPRO_polflux(:)   = dpsi(:)
 
   ! Construct ion densities and temperatures assuming corsica ion species

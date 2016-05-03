@@ -28,7 +28,7 @@ subroutine prgen_read_iterdb_nc
   err = nf90_get_var(ncid,varid,onetwo_ishot)
 
   err = nf90_inq_varid(ncid,trim('nj'),varid)
-  err = nf90_get_var(ncid,varid,onetwo_nj)
+  err = nf90_get_var(ncid,varid,nx)
 
   err = nf90_inq_dimid(ncid,trim('dim_npsi'),varid)
   err = nf90_Inquire_Dimension(ncid,varid,len=onetwo_npsi)
@@ -84,7 +84,7 @@ subroutine prgen_read_iterdb_nc
   err = nf90_inq_varid(ncid,trim('btor'),varid)
   err = nf90_get_var(ncid,varid,onetwo_Btor)
 
-  nx = onetwo_nj
+  nx = nx
 
   call allocate_internals
   call allocate_iterdb_vars
@@ -123,7 +123,7 @@ subroutine prgen_read_iterdb_nc
 
   ! Total plasma pressure
   err = nf90_inq_varid(ncid,trim('press'),varid)
-  err = nf90_get_var(ncid,varid,onetwo_press)
+  err = nf90_get_var(ncid,varid,p_tot)
 
   err = nf90_inq_varid(ncid,trim('pressb'),varid)
   err = nf90_get_var(ncid,varid,onetwo_pressb(:,1:onetwo_nbion))
@@ -213,10 +213,10 @@ subroutine prgen_read_iterdb_nc
 
   ! shrink flux
   onetwo_rho_mhd_gridnpsi = onetwo_rho_mhd_gridnpsi &
-       * onetwo_rho_grid(onetwo_nj) &
+       * onetwo_rho_grid(nx) &
        / onetwo_rho_mhd_gridnpsi(onetwo_npsi)
 
-  onetwo_rho_mhd_gridnpsi(onetwo_npsi) = onetwo_rho_grid(onetwo_nj)
+  onetwo_rho_mhd_gridnpsi(onetwo_npsi) = onetwo_rho_grid(nx)
 
   err = nf90_inq_varid(ncid,trim('rmajavnpsi'),varid)
   err = nf90_get_var(ncid,varid,work)
@@ -253,18 +253,18 @@ subroutine prgen_read_iterdb_nc
   err = nf90_get_var(ncid,varid,onetwo_sscxl)
   
   call cub_spline(onetwo_rho_mhd_gridnpsi,onetwo_rmajavnpsi,onetwo_npsi,&
-       onetwo_rho_grid,rmaj,onetwo_nj)
+       onetwo_rho_grid,rmaj,nx)
 
   call cub_spline(onetwo_rho_mhd_gridnpsi,onetwo_rminavnpsi,onetwo_npsi,&
-       onetwo_rho_grid,rmin,onetwo_nj)
+       onetwo_rho_grid,rmin,nx)
 
   call cub_spline(onetwo_rho_mhd_gridnpsi,onetwo_elongxnpsi,onetwo_npsi,&
-       onetwo_rho_grid,kappa,onetwo_nj)
+       onetwo_rho_grid,kappa,nx)
 
   work = 0.5*(onetwo_triangnpsi_u+onetwo_triangnpsi_l)
 
   call cub_spline(onetwo_rho_mhd_gridnpsi,work,onetwo_npsi,&
-       onetwo_rho_grid,delta,onetwo_nj)
+       onetwo_rho_grid,delta,nx)
 
   err = nf90_close(ncid)
 

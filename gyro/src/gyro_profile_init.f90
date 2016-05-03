@@ -196,6 +196,9 @@ subroutine gyro_profile_init
         gamma_e_s(i) = gamma_e
         mach_s(i)    = mach0
 
+        ! Total pressure not available
+        dlnptotdr_s(i) = 0.0
+
      enddo
 
   case (3) 

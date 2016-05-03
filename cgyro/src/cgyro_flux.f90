@@ -28,7 +28,7 @@ subroutine cgyro_flux
      ix = ix_v(iv)
      ie = ie_v(iv)
 
-     dv  = 0.5*w_xi(ix)*w_e(ie)
+     dv  = w_xi(ix)*w_e(ie)
      c_n = dens(is)*                    dv*k_theta*rho
      c_t = dens(is)*temp(is)*energy(ie)*dv*k_theta*rho
 
@@ -79,5 +79,3 @@ subroutine cgyro_flux
        i_err)
 
 end subroutine cgyro_flux
-
-!==========================================================================================

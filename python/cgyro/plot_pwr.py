@@ -16,6 +16,7 @@ ax.grid(which="majorminor",ls=":")
 ax.grid(which="major",ls=":")
 ax.set_xlabel(r'$(c_s/a)\, t$')
 ax.set_ylabel(r'$\Phi$')
+ax.set_yscale('log')
 
 y = np.sum(sim.phisq,axis=0)
 
@@ -29,7 +30,11 @@ for n in range(sim.n_n):
 ax.set_xlim([0,max(sim.t)])
 #======================================
 
-ax.legend(loc=2, ncol=3, prop={'size':11})
+if sim.n_n > 16:
+    ax.legend(loc=4, ncol=5, prop={'size':12})
+else:
+    ax.legend(loc=4, ncol=6, prop={'size':12})
+
 
 if ftype == 'screen':
     plt.show()

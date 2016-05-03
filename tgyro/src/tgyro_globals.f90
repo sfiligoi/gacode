@@ -157,7 +157,11 @@ module tgyro_globals
   real :: w0_norm
 
   real, dimension(:), allocatable :: pr
+  real, dimension(:), allocatable :: ptot
+  real, dimension(:), allocatable :: pext
+  real, dimension(:), allocatable :: dpext
   real, dimension(:), allocatable :: dlnpdr
+  real, dimension(:), allocatable :: dlnptotdr
   real, dimension(:), allocatable :: beta_unit
   real, dimension(:), allocatable :: betae_unit
   real, dimension(:), allocatable :: c_s
@@ -236,6 +240,7 @@ module tgyro_globals
   real :: malpha
   real :: c
   real :: aspect_rat
+  real :: mu_0
   !
   real :: b_ref
   real :: r_min
@@ -275,7 +280,6 @@ module tgyro_globals
   real :: loc_betae_scale
   integer :: loc_chang_hinton
   real :: loc_me_multiplier
-  integer :: loc_sawtooth_model
   integer :: loc_bc_offset
   integer :: tgyro_tglf_revision
   integer :: tgyro_tglf_dump_flag
@@ -298,20 +302,19 @@ module tgyro_globals
   real :: lm_boost
   real :: lm_drop
   integer :: tgyro_rotation_flag
-  integer :: tgyro_rotation_theory_method
   integer :: tgyro_stab_nsearch
   integer :: tgyro_stab_nky
   real :: tgyro_stab_kymin
   real :: tgyro_stab_deltaky
   real :: tgyro_rmin
   real :: tgyro_rmax
-  integer :: tgyro_global_radii
   integer :: tgyro_expwd_flag
   real :: tgyro_input_den_scale
   real :: tgyro_input_te_scale
   real :: tgyro_input_ti_scale
   real :: tgyro_input_w0_scale
   real :: tgyro_input_paux_scale
+  real :: tgyro_input_dlntdr_scale
   integer :: tgyro_er_bc
   integer :: tgyro_noturb_flag
   integer :: tgyro_use_rho
@@ -320,7 +323,9 @@ module tgyro_globals
   integer :: tgyro_fix_concentration_flag
   integer :: tgyro_write_profiles_flag
   integer :: tgyro_neo_n_theta
-  real :: tgyro_resmax
+  integer :: tgyro_ptot_flag
+  integer :: tgyro_ped_model
+  real :: tgyro_neped
   !
   ! Iteration variables (global)
   !
@@ -338,7 +343,7 @@ module tgyro_globals
   integer :: igmin
   integer :: igmax
   real :: length
-  real :: dlength 
+  real :: dlength
   !---------------------------------------------------------
 
 end module tgyro_globals

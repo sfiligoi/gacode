@@ -212,6 +212,8 @@ subroutine EXPRO_alloc_control(i_proc,flag)
      EXPRO_bt0(:)=0.0
      allocate(EXPRO_polflux(EXPRO_n_exp))
      EXPRO_polflux(:)=0.0
+     allocate(EXPRO_ip(EXPRO_n_exp))
+     EXPRO_ip(:)=0.0
 
   else
 
@@ -293,6 +295,7 @@ subroutine EXPRO_alloc_control(i_proc,flag)
      deallocate(EXPRO_bp0)
      deallocate(EXPRO_bt0)
      deallocate(EXPRO_dlnptotdr)
+     deallocate(EXPRO_ip)
 
   endif
 

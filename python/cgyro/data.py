@@ -46,11 +46,10 @@ class cgyrodata:
         self.n_theta   = int(data[4])
         self.n_energy  = int(data[5])
         self.n_xi      = int(data[6])
-        self.n_theta_plot = int(data[7])
-        self.m_box     = int(data[8])
-        self.length    = float(data[9])
+        self.m_box     = int(data[7])
+        self.length    = float(data[8])
         # Set l to last data index plus one.
-        l=10
+        l=9
 
         self.p = np.array(data[l:l+self.n_radial],dtype=int)
         self.kx = 2*np.pi*self.p/self.length
@@ -65,9 +64,9 @@ class cgyrodata:
         self.xi   = np.array(data[mark:mark+self.n_xi])
 
         mark = mark+self.n_xi
-        self.thetab = np.array(data[mark:mark+self.n_theta*self.n_radial/self.m_box])        
+        self.thetab = np.array(data[mark:mark+self.n_theta*(self.n_radial/self.m_box)])        
          
-        mark = mark+self.n_theta*self.n_radial/self.m_box
+        mark = mark+self.n_theta*(self.n_radial/self.m_box)
         self.ky = np.array(data[mark:mark+self.n_n])
 
         print "INFO: (data.py) Read grid data in out.cgyro.grids."
@@ -92,19 +91,19 @@ class cgyrodata:
         # Read ballooning potentials
         #
         try:
-            data = np.loadtxt('out.cgyro.phib')
+            data = np.fromfile(self.dir+'out.cgyro.phib',dtype='float',sep=" ")
             self.phib = np.reshape(data,(2,self.n_theta*self.n_radial/self.m_box,nt),'F')
             print "INFO: (data.py) Read data in out.cgyro.phib."
         except:
             pass
         try:
-            data = np.loadtxt('out.cgyro.aparb')
+            data = np.fromfile(self.dir+'out.cgyro.aparb',dtype='float',sep=" ")
             self.aparb = np.reshape(data,(2,self.n_theta*self.n_radial/self.m_box,nt),'F')
             print "INFO: (data.py) Read data in out.cgyro.aparb."
         except:
             pass
         try:
-            data = np.loadtxt('out.cgyro.bparb')
+            data = np.fromfile(self.dir+'out.cgyro.bparb',dtype='float',sep=" ")
             self.bparb = np.reshape(data,(2,self.n_theta*self.n_radial/self.m_box,nt),'F')
             print "INFO: (data.py) Read data in out.cgyro.bparb."
         except:
@@ -115,7 +114,7 @@ class cgyrodata:
         # Ballooning distribution
         #
         try:
-            data = np.loadtxt(self.dir+'out.cgyro.hb')
+            data = np.fromfile(self.dir+'out.cgyro.hb',dtype='float',sep=" ")
             self.hb = np.reshape(data,(2,self.n_radial*self.n_theta/self.m_box,
                                        self.n_species,self.n_xi,self.n_energy,nt),'F')
             self.hb = self.hb/np.max(self.hb)
@@ -127,11 +126,12 @@ class cgyrodata:
         #-----------------------------------------------------------------
         # Particle and energy fluxes
         #
+        nd = self.n_radial*self.n_species*self.n_n*nt
         try:
             start = time.time()
             data = np.fromfile(self.dir+'out.cgyro.kxky_flux_n',dtype='float',sep=" ")
             end = time.time()
-            self.flux_n = np.reshape(data,(self.n_radial,self.n_species,self.n_n,nt),'F')
+            self.flux_n = np.reshape(data[0:nd],(self.n_radial,self.n_species,self.n_n,nt),'F')
             print "INFO: (data.py) Read data in out.cgyro.kxky_flux_n. TIME = "+str(end-start)
         except:
             pass
@@ -140,10 +140,10 @@ class cgyrodata:
             start = time.time()
             data = np.fromfile(self.dir+'out.cgyro.kxky_flux_e',dtype='float',sep=" ")
             end = time.time()
-            self.flux_e = np.reshape(data,(self.n_radial,self.n_species,self.n_n,nt),'F')
+            self.flux_e = np.reshape(data[0:nd],(self.n_radial,self.n_species,self.n_n,nt),'F')
             print "INFO: (data.py) Read data in out.cgyro.kxky_flux_e. TIME = "+str(end-start)
         except:
-            pass
+            pass 
         #-----------------------------------------------------------------
 
 

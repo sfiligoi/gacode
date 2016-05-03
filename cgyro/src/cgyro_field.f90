@@ -1,5 +1,15 @@
-!============================================================================================
-! Velocity-space field solve
+!-----------------------------------------------------------------
+! cgyro_field.f90
+!
+! PURPOSE:
+!  Perform field solves for data distributed in both the velocity 
+!  and configuration indices:
+!  
+!  - cgyro_field_v() (configuration distributed)
+!  - cgyro_field_c() (velocity distributed)
+!-----------------------------------------------------------------
+
+! Velocity (configuration-distributed) field solve
 
 subroutine cgyro_field_v
 
@@ -10,51 +20,37 @@ subroutine cgyro_field_v
 
   implicit none
 
-  integer :: is, ie, ix, ir, it
+  integer :: is, ie, ix, ir
   complex :: fac
+
+  logical, parameter :: use_dgemv = .false.
+  integer :: i,j
+  real, dimension(n_theta) :: pvec_inr, pvec_ini
 
   call timer_lib_in('field_H')
 
-  field_loc(:,:,:) = (0.0,0.0)
+!$omp workshare
+  field_loc(:,:) = (0.0,0.0)
+!$omp end workshare
 
   ! Poisson and Ampere RHS integrals of H
 
-  ic_loc = 0
+!$omp parallel do    &
+!$omp& private(ic,ic_loc,iv,is,ix,ie,fac)
   do ic=nc1,nc2
-     ic_loc = ic_loc+1
-
-     it = it_c(ic)
-     ir = ir_c(ic)
-
+     ic_loc = ic-nc1+1
      do iv=1,nv
-
         is = is_v(iv)
         ix = ix_v(iv)
         ie = ie_v(iv)
-
-        fac = w_e(ie)*0.5*w_xi(ix)*z(is)*dens(is)*&
-             j0_v(ic_loc,iv)*cap_h_v(ic_loc,iv)
-
-        field_loc(ir,it,1) = field_loc(ir,it,1)+fac 
-
-        if (n_field > 1) then
-           field_loc(ir,it,2) = field_loc(ir,it,2) + fac &
-                *xi(ix)*sqrt(2.0*energy(ie))*vth(is)
-
-           if (n_field > 2) then
-              fac = w_e(ie)*0.5*w_xi(ix)*dens(is)*temp(is) &
-                   *j0perp_v(ic_loc,iv)*cap_h_v(ic_loc,iv)
-              field_loc(ir,it,3) = field_loc(ir,it,3) + fac &
-                   * 2.0*energy(ie)*(1-xi(ix)**2)
-           endif
-        endif
-
+        fac = (w_e(ie)*w_xi(ix)*z(is)*dens(is))*cap_h_v(ic_loc,iv)
+        field_loc(:,ic) = field_loc(:,ic)+fac*jvec_v(:,ic_loc,iv) 
      enddo
   enddo
 
-  call MPI_ALLREDUCE(field_loc(:,:,:),&
-       field(:,:,:),&
-       size(field(:,:,:)),&
+  call MPI_ALLREDUCE(field_loc(:,:),&
+       field(:,:),&
+       size(field(:,:)),&
        MPI_DOUBLE_COMPLEX,&
        MPI_SUM,&
        NEW_COMM_1,&
@@ -63,66 +59,53 @@ subroutine cgyro_field_v
   ! Poisson LHS factors
 
   if (n == 0 .and. ae_flag == 1) then
-
+!$omp parallel do &
+!$omp& private(ir,i,j) &
+!$omp& private(pvec_in,pvec_outr,pvec_outi) &
+!$omp& private(pvec_ini,pvec_inr)
      do ir=1,n_radial
         if ((px(ir) == 0 .or. ir == 1) .and. zf_test_flag == 0) then
-           field(ir,:,1) = 0.0
+           field(1,ic_c(ir,:)) = 0.0
         else
-           pvec_in(:) = real(field(ir,:,1))
+          if (use_dgemv) then
+           pvec_in(:) = real(field(1,ic_c(ir,:)))
            call DGEMV('N',n_theta,n_theta,num1,hzf(ir,:,:),&
                 n_theta,pvec_in(:),1,num0,pvec_outr(:),1)
-           pvec_in(:) = aimag(field(ir,:,1))
+           pvec_in(:) = aimag(field(1,ic_c(ir,:)))
            call DGEMV('N',n_theta,n_theta,num1,hzf(ir,:,:),&
                 n_theta,pvec_in(:),1,num0,pvec_outi(:),1)
-           field(ir,:,1) = pvec_outr(:) + i_c * pvec_outi(:)
+           field(1,ic_c(ir,:)) = pvec_outr(:) + i_c * pvec_outi(:)
+          else
+           do i=1,n_theta
+            pvec_inr(i) = real(field(1,ic_c(ir,i)),kind=kind(hzf))
+            pvec_ini(i) = aimag(field(1,ic_c(ir,i)))
+           enddo
+
+           do i=1,n_theta
+            pvec_outr(i) = 0
+            pvec_outi(i) = 0
+           enddo
+
+            do j=1,n_theta
+            do i=1,n_theta
+              pvec_outr(i) = pvec_outr(i) + hzf(ir,i,j)*pvec_inr(j)
+              pvec_outi(i) = pvec_outi(i) + hzf(ir,i,j)*pvec_ini(j)
+            enddo
+            enddo
+
+            do i=1,n_theta
+              field(1,ic_c(ir,i)) = cmplx(pvec_outr(i),pvec_outi(i))
+            enddo
+
+          endif
         endif
      enddo
 
   else
 
-     do ir=1,n_radial
-        if (n == 0 .and. (px(ir) == 0 .or. ir == 1) .and. zf_test_flag == 0) then
-           field(ir,:,1) = 0.0
-        else
-           do it=1,n_theta
-              field(ir,it,1) = field(ir,it,1) &
-                   /(k_perp(it,ir)**2*lambda_debye**2* &
-                   dens_ele/temp_ele+sum_den_h)
-           enddo
-        endif
-     enddo
-
-  endif
-
-  ! Ampere LHS factors
-
-  if (n_field > 1) then
-     do ir=1,n_radial
-        if (n == 0 .and. (px(ir) == 0 .or. ir == 1) .and. zf_test_flag == 0) then
-           field(ir,:,2) = 0.0
-        else
-           do it=1,n_theta
-              field(ir,it,2) = field(ir,it,2) &
-                   /(2.0*k_perp(it,ir)**2*rho**2 &
-                   /betae_unit*dens_ele*temp_ele)
-           enddo
-        endif
-     enddo
-
-     ! Ampere Bpar LHS factors
-     
-     if (n_field > 2) then
-        do ir=1,n_radial
-           if (n == 0 .and. (px(ir) == 0 .or. ir == 1) .and. zf_test_flag == 0) then
-              field(ir,:,3) = 0.0
-           else
-              do it=1,n_theta
-                 field(ir,it,3) = field(ir,it,3) &
-                      * (-0.5*betae_unit)/(dens_ele*temp_ele)/Bmag(it)
-              enddo
-           endif
-        enddo
-     endif
+!$omp workshare
+     field(:,:) = fcoef(:,:)*field(:,:)
+!$omp end workshare
 
   endif
 
@@ -130,8 +113,8 @@ subroutine cgyro_field_v
 
 end subroutine cgyro_field_v
 
-!============================================================================================
-! Configuration-space field solve
+
+! Configuration (velocity-distributed) field solve
 
 subroutine cgyro_field_c
 
@@ -142,160 +125,117 @@ subroutine cgyro_field_c
 
   implicit none
 
-  integer :: is, ie, ix, ir, it
+  integer :: is, ie, ix, ir
   complex :: fac
- 
+  complex, dimension(nc) :: tmp
+  integer :: i,j
+  logical, parameter :: use_dgemv = .false.
+  real, dimension(n_theta) :: pvec_inr,pvec_ini
+
   call timer_lib_in('field_h')
 
-  field_loc(:,:,:) = (0.0,0.0)
+!$omp workshare
+  field_loc(:,:) = (0.0,0.0)
+!$omp end workshare
 
   ! Poisson and Ampere RHS integrals of h
 
-  iv_loc = 0
+!$omp parallel private(ic,iv_loc,is,ix,ie,fac)
+!$omp do reduction(+:field_loc)
   do iv=nv1,nv2
-
-     iv_loc = iv_loc+1
-
+     iv_loc = iv-nv1+1
      is = is_v(iv)
      ix = ix_v(iv)
      ie = ie_v(iv)
 
      do ic=1,nc
-
-        ir = ir_c(ic)
-        it = it_c(ic)
-
-        fac = w_e(ie)*0.5*w_xi(ix)*z(is)*dens(is)* &
-             j0_c(ic,iv_loc)*h_x(ic,iv_loc)
-
-        field_loc(ir,it,1) = field_loc(ir,it,1)+fac 
-
-        if (n_field > 1) then
-           field_loc(ir,it,2) = field_loc(ir,it,2) + &
-                fac*xi(ix)*sqrt(2.0*energy(ie))*vth(is)
-
-           if (n_field > 2) then
-              fac = w_e(ie)*0.5*w_xi(ix)*dens(is)*temp(is) &
-                   *j0perp_c(ic,iv_loc)*h_x(ic,iv_loc)
-              field_loc(ir,it,3) = field_loc(ir,it,3) + fac &
-                   * 2.0*energy(ie)*(1-xi(ix)**2)
-           endif
-        endif
-
+        fac = w_e(ie)*w_xi(ix)*z(is)*dens(is)*h_x(ic,iv_loc)
+        field_loc(:,ic) = field_loc(:,ic)+jvec_c(:,ic,iv_loc)*fac
      enddo
   enddo
+!$omp end do
+!$omp end parallel
 
-  call MPI_ALLREDUCE(field_loc(:,:,:),&
-       field(:,:,:),&
-       size(field(:,:,:)),&
+  call MPI_ALLREDUCE(field_loc(:,:),&
+       field(:,:),&
+       size(field(:,:)),&
        MPI_DOUBLE_COMPLEX,&
        MPI_SUM,&
        NEW_COMM_1,&
        i_err)
 
-  if(n_field > 2) then
-     do it=1,n_theta
-        field(:,it,3) = field(:,it,3) &
-             *(-0.5*betae_unit)/(dens_ele*temp_ele)/Bmag(it)
-     enddo
+  if (n_field > 2) then
+     field(3,:) = field(3,:)*fcoef(3,:)
   endif
 
   ! Poisson LHS factors
 
   if (n == 0 .and. ae_flag == 1) then
-
+!$omp parallel do &
+!$omp& private(ir,i,j) &
+!$omp& private(pvec_in,pvec_inr,pvec_ini,pvec_outr,pvec_outi)
      do ir=1,n_radial
         if ((px(ir) == 0 .or. ir == 1) .and. zf_test_flag == 0) then
-           field(ir,:,1) = 0.0
+           field(1,ic_c(ir,:)) = 0.0
         else
-           pvec_in(:) = real(field(ir,:,1))
+          if (use_dgemv) then
+           pvec_in(:) = real(field(1,ic_c(ir,:)))
            call DGEMV('N',n_theta,n_theta,num1,xzf(ir,:,:),&
                 n_theta,pvec_in(:),1,num0,pvec_outr(:),1)
-           pvec_in(:) = aimag(field(ir,:,1))
+           pvec_in(:) = aimag(field(1,ic_c(ir,:)))
            call DGEMV('N',n_theta,n_theta,num1,xzf(ir,:,:),&
                 n_theta,pvec_in(:),1,num0,pvec_outi(:),1)
-           field(ir,:,1) = pvec_outr(:) + i_c * pvec_outi(:)
+           field(1,ic_c(ir,:)) = pvec_outr(:) + i_c * pvec_outi(:)
+          else
+            do i=1,n_theta
+              pvec_outr(i) = 0
+              pvec_outi(i) = 0
+            enddo
+            do i=1,n_theta
+              pvec_inr(i) = real(field(1,ic_c(ir,i)),kind=kind(xzf))
+              pvec_ini(i) = aimag(field(1,ic_c(ir,i)))
+            enddo
+
+            do j=1,n_theta
+            do i=1,n_theta
+              pvec_outr(i) = pvec_outr(i) + xzf(ir,i,j)*pvec_inr(j)
+              pvec_outi(i) = pvec_outi(i) + xzf(ir,i,j)*pvec_ini(j)
+            enddo
+            enddo
+
+            do i=1,n_theta
+               field(1,ic_c(ir,i)) = cmplx( pvec_outr(i),pvec_outi(i))
+            enddo
+
+          endif
         endif
      enddo
 
   else
 
-     do ir=1,n_radial
+     if (n_field > 2) then
+        tmp(:) = field(1,:)
+        field(1,:) = gcoef(1,:)*field(1,:)+gcoef(4,:)*field(3,:)
+        field(2,:) = gcoef(2,:)*field(2,:)
+        field(3,:) = gcoef(3,:)*field(3,:)+gcoef(5,:)*tmp(:)
+     else
+!$omp workshare
+        field(:,:) = gcoef(:,:)*field(:,:)
+!$omp end workshare
+     endif
 
-        if (n == 0 .and. (px(ir) == 0 .or. ir == 1) .and. zf_test_flag == 0) then
-           field(ir,:,1) = 0.0
-           if(n_field > 2) then
-              field(ir,:,3) = 0.0
-           endif
-
-        else
-
-           if (n_field == 3) then
-              do it=1,n_theta
-                 fac = field(ir,it,1)
-
-                 field(ir,it,1) =  poisson_pb22(ir,it)*field(ir,it,1) &
-                      - poisson_pb12(ir,it)*field(ir,it,3)
-                 
-                 field(ir,it,3) =  -poisson_pb21(ir,it)*fac &
-                      + poisson_pb11(ir,it)*field(ir,it,3)
-              enddo
-           
-           else
-              do it=1,n_theta
-                 field(ir,it,1) = field(ir,it,1) &
-                      /(k_perp(it,ir)**2*lambda_debye**2* &
-                      dens_ele/temp_ele+sum_den_x(ir,it))
-              enddo
-           endif
-
-        endif
-     enddo
   endif
 
-  ! Ampere LHS factors
-
-  if (n_field > 1) then
-     do ir=1,n_radial
-        if (n == 0 .and. (px(ir) == 0 .or. ir == 1) .and. zf_test_flag == 0) then
-           field(ir,:,2) = 0.0
-        else
-           do it=1,n_theta
-              field(ir,it,2) = field(ir,it,2) &
-                   /(2.0*k_perp(it,ir)**2*rho**2/betae_unit & 
-                   *dens_ele*temp_ele+sum_cur_x(ir,it))
-           enddo
-        endif
-     enddo
-  endif
-
-  ! Compute H given h and [phi(h), apar(h)]
-
-  iv_loc = 0
+!$omp parallel do  &
+!$omp& private(iv,iv_loc,is,ix,ie,ic)
   do iv=nv1,nv2
-
-     iv_loc = iv_loc+1
-
+     iv_loc = iv-nv1+1
      is = is_v(iv)
      ix = ix_v(iv)
      ie = ie_v(iv)
-
      do ic=1,nc
-
-        ir = ir_c(ic)
-        it = it_c(ic)
-
-        psi(ic,iv_loc) = j0_c(ic,iv_loc)*efac(iv_loc,1)*field(ir,it,1)
-        if (n_field > 1) then
-           psi(ic,iv_loc) = psi(ic,iv_loc)+j0_c(ic,iv_loc)*efac(iv_loc,2)*field(ir,it,2)
-           if (n_field > 2) then
-              psi(ic,iv_loc) = psi(ic,iv_loc) &
-                   + j0perp_c(ic,iv_loc)*efac(iv_loc,3)/Bmag(it) * field(ir,it,3)
-           endif
-        endif
-
-        cap_h_c(ic,iv_loc) = h_x(ic,iv_loc)+psi(ic,iv_loc)*z(is)/temp(is)
-
+        psi(ic,iv_loc) = sum(jvec_c(:,ic,iv_loc)*field(:,ic))
+        cap_h_c(ic,iv_loc) = h_x(ic,iv_loc)+psi(ic,iv_loc)*(z(is)/temp(is))
      enddo
   enddo
 

@@ -10,6 +10,7 @@ subroutine allocate_internals
   allocate(rmin(nx))
   allocate(rmaj(nx))
   allocate(q(nx))
+  allocate(p_tot(nx))
   allocate(rho(nx))
   allocate(dpsi(nx))
   allocate(kappa(nx))
@@ -17,7 +18,6 @@ subroutine allocate_internals
   allocate(zmag(nx))
   allocate(zeta(nx))
   allocate(omega0(nx))
-  allocate(q_gato(nx))
 
   ! Powers
 

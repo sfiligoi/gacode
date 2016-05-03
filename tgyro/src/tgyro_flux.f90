@@ -314,26 +314,4 @@ subroutine tgyro_flux
   endif
   !-------------------------------------------------------------------
 
-  !----------------------------------------------------------
-  ! Some nonsensical "fudges" to account for sawteeth.  
-  ! In general, these should NOT be used.
-  !
-  select case (loc_sawtooth_model)
-
-  case (2)
-
-     if (q(i_r) <= 1.0) then
-        eflux_e_tot(i_r) = eflux_i_neo(1,i_r)+eflux_e_tur(i_r)
-     endif
-
-  case (3)
-
-     if (q(i_r) <= 1.0) then
-        eflux_e_tot(i_r) = eflux_i_neo(1,i_r)+eflux_e_tur(i_r)
-        eflux_i_tot(i_r) = 10*eflux_i_neo(1,i_r)+eflux_i_tur(1,i_r)
-     endif
-
-  end select
-  !----------------------------------------------------------
-
 end subroutine tgyro_flux

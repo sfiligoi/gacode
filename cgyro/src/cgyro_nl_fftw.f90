@@ -7,17 +7,20 @@
 !  space, compute the convolution (uv), and transform back to the 
 !  spectral form using a real-to-complex transform (r2c).
 !  
-!  NOTE: Need to be careful with (p=-nr/2,n=0) component.
+! NOTE: Need to be careful with (p=-nr/2,n=0) component.
 !-----------------------------------------------------------------
 
 subroutine cgyro_nl_fftw(ij)
 
   use timer_lib
   use parallel_lib
-
   use cgyro_globals
 
+  implicit none
+
   integer, intent(in) :: ij
+  integer :: ix,iy
+  integer :: ir,it,in
   integer :: j,p,iexch
 
   complex :: f0,g0
@@ -48,6 +51,8 @@ subroutine cgyro_nl_fftw(ij)
 
   call timer_lib_in('nl')
 
+!$omp parallel private(fx,gx,fy,gy,in,iy,ir,p,ix,f0,g0,uv,ux,uy,vx,vy)
+!$omp do
   do j=1,nsplit
 
      fx = 0.0
@@ -56,18 +61,18 @@ subroutine cgyro_nl_fftw(ij)
      gy = 0.0
 
      ! Array mapping
-     do in=1,n_toroidal
-        iy = in-1
-        do ir=1,n_radial
-           p  = ir-1-nx0/2
-           ix = p
-           if (ix < 0) ix = ix+nx  
-           f0 = f_nl(ir,j,in)
-           g0 = g_nl(ir,j,in)
-           fx(iy,ix) = i_c*p*f0
-           gx(iy,ix) = i_c*p*g0
-           fy(iy,ix) = i_c*iy*f0
-           gy(iy,ix) = i_c*iy*g0
+     do ir=1,n_radial
+        p  = ir-1-nx0/2
+        ix = p
+        if (ix < 0) ix = ix+nx  
+        do in=1,n_toroidal
+           iy = in-1
+           f0 = i_c*f_nl(ir,j,in)
+           g0 = i_c*g_nl(ir,j,in)
+           fx(iy,ix) = p*f0
+           gx(iy,ix) = p*g0
+           fy(iy,ix) = iy*f0
+           gy(iy,ix) = iy*g0
         enddo
      enddo
 
@@ -102,6 +107,8 @@ subroutine cgyro_nl_fftw(ij)
      enddo
 
   enddo ! j
+!$omp end do
+!$omp end parallel
 
   call timer_lib_out('nl')
 
@@ -122,6 +129,6 @@ subroutine cgyro_nl_fftw(ij)
 
   ! RHS -> -[f,g] = [f,g]_{r,-alpha}
 
-  rhs(ij,:,:) = rhs(ij,:,:)+(q*rho/rmin)*(2*pi/length)*psi(:,:)
+  rhs(:,:,ij) = rhs(:,:,ij)+(q*rho/rmin)*(2*pi/length)*psi(:,:)
 
 end subroutine cgyro_nl_fftw
