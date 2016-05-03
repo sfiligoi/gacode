@@ -118,11 +118,11 @@
      close(16)
      close(20)
 !
-! Switch between TGLF and the NN depending on 'nn_thrsh' values
+! Switch between TGLF and the NN depending on 'nn_max_error' values
 !
-     if ((OUT_ENERGY_FLUX_1_RNG<tglf_nn_thrsh_energy_in) .and. (OUT_ENERGY_FLUX_3_RNG<tglf_nn_thrsh_energy_in) .and. &
-          (OUT_PARTICLE_FLUX_1_RNG<tglf_nn_thrsh_energy_in) .and. (OUT_PARTICLE_FLUX_3_RNG<tglf_nn_thrsh_energy_in) .and. &
-          (OUT_STRESS_TOR_1_RNG<tglf_nn_thrsh_energy_in) .and. (OUT_STRESS_TOR_3_RNG<tglf_nn_thrsh_energy_in)) then
+     if ((OUT_ENERGY_FLUX_1_RNG<tglf_nn_max_error_in) .and. (OUT_ENERGY_FLUX_3_RNG<tglf_nn_max_error_in) .and. &
+          (OUT_PARTICLE_FLUX_1_RNG<tglf_nn_max_error_in) .and. (OUT_PARTICLE_FLUX_3_RNG<tglf_nn_max_error_in) .and. &
+          (OUT_STRESS_TOR_1_RNG<tglf_nn_max_error_in) .and. (OUT_STRESS_TOR_3_RNG<tglf_nn_max_error_in)) then
 !
         valid_nn = .TRUE.
 !  

@@ -243,9 +243,7 @@
       INTEGER :: nfields_out
       character (len=80) :: error_msg='null' 
 ! NN activation parameters (thresholds)  
-      REAL :: nn_thrsh_energy_in = -1.0
-    !REAL :: nn_thrsh_particle_in = -1.0
-    !REAL :: nn_thrsh_momentum_in = -1.0
+      REAL :: nn_max_error_in = -1.0
       LOGICAL :: valid_nn = .FALSE.
     
      

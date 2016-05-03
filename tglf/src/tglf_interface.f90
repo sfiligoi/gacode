@@ -202,12 +202,10 @@ module tglf_interface
   integer :: tglf_error_status=0
   
   ! Set threshold for TGLF-NN execution versus full TGLF calculation
-  real    :: tglf_nn_thrsh_energy_in = 0.0
- !real    :: tglf_nn_thrsh_particle_in = 0.0
- !real    :: tglf_nn_thrsh_momentum_in = 0.0  
+  real    :: tglf_nn_max_error_in = 0.0
 
  ! CHECK <<<---------------------------------------------<<<
- !write(*,*) 'tglf_interface --> tglf_nn_thrsh_energy_in: ', tglf_nn_thrsh_energy_in       
+ !write(*,*) 'tglf_interface --> tglf_nn_max_error_in: ', tglf_nn_max_error_in
 
  
   
@@ -364,9 +362,7 @@ contains
     write(1,30) 'GRADB_FACTOR',tglf_gradB_factor_in
     write(1,30) 'FILTER',tglf_filter_in
     write(1,30) 'THETA_TRAPPED',tglf_theta_trapped_in
-    write(1,30) 'NN_THRSH_ENERGY', tglf_nn_thrsh_energy_in
-  !write(1,30) 'NN_THRSH_PARTICLE', tglf_nn_thrsh_particle_in
-  !write(1,30) 'NN_THRSH_MOMENTUM', tglf_nn_thrsh_momentum_in
+    write(1,30) 'NN_MAX_ERROR', tglf_nn_max_error_in
 
     close(1)
 
@@ -529,9 +525,7 @@ contains
     write(1,30) 'GRADB_FACTOR',gradB_factor_in
     write(1,30) 'FILTER',filter_in
     write(1,30) 'THETA_TRAPPED',theta_trapped_in
-    write(1,30) 'NN_THRSH_ENERGY', nn_thrsh_energy_in
-  !write(1,30) 'NN_THRSH_PARTICLE', nn_thrsh_particle_in
-  !write(1,30) 'NN_THRSH_MOMENTUM', nn_thrsh_momentum_in
+    write(1,30) 'NN_MAX_ERROR', nn_max_error_in
 
     close(1)
 

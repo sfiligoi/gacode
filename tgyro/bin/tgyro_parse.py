@@ -98,7 +98,7 @@ x.add('TGYRO_PTOT_FLAG','0')
 x.add('TGYRO_PED_MODEL','1')
 x.add('TGYRO_NEPED','3.62')
 x.add('TGYRO_ZEFFPED','2.07')
-x.add('TGYRO_TGLF_NN_THRSH_ENERGY','-1')
+x.add('TGYRO_TGLF_NN_MAX_ERROR','-1')
 
 # Deprecated parameters
 x.dep('LOC_N_FEEDBACK','new parameter is LOC_NE_FEEDBACK_FLAG')

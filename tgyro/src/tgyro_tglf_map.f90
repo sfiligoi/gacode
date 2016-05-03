@@ -316,7 +316,7 @@ subroutine tgyro_tglf_map
   !----------------------------------------------------------------
   ! TGLFNN ACTIVATION THRESHOLD
   !
-  tglf_nn_thrsh_energy_in=tgyro_tglf_nn_thrsh_energy
+  tglf_nn_max_error_in=tgyro_tglf_nn_max_error
 
   !----------------------------------------------------------------
   ! HARVEST TARGETS AND GYRO-BOHM NORMALIZATIONS

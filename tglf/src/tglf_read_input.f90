@@ -181,9 +181,7 @@ subroutine tglf_read_input
   read(1,*) tglf_kx0_loc_in
 
   ! Set threshold for TGLF-NN execution versus full TGLF calculation
-  read(1,*) tglf_nn_thrsh_energy_in
- !read(1,*) tglf_nn_thrsh_particle_in
- !read(1,*) tglf_nn_thrsh_momentum_in
+  read(1,*) tglf_nn_max_error_in
 
   close(1)
 
