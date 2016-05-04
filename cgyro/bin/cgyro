@@ -33,10 +33,22 @@ then
   echo "         -n <MPI tasks>" 
   echo "         Number of MPI tasks."
   echo
+  echo "         -nomp <threads>" 
+  echo "         Number of OpenMP threads per MPI task."
+  echo
+  echo "         -numa <n>" 
+  echo "         NUMAs active per node."
+  echo
+  echo "         -mpinuma <n>" 
+  echo "         MPI tasks per active NUMA."
+  echo
   echo "REGRESSION TESTING"
   echo
   echo "         -r"
   echo "         Run full regression suite."
+  echo 
+  echo "         -reset"
+  echo "         Reset regression data."
   echo 
   echo "TEMPLATE GENERATION"
   echo
@@ -47,7 +59,7 @@ then
   echo "         Copy <template> into simulation path."
   echo
   echo "UTILITIES"
-  echo
+  echo 
   echo "         -h" 
   echo "         Version and platform information."
   echo
@@ -68,11 +80,13 @@ NPROC=1
 NOMP=1
 NUMA=0
 MPINUMA=0
+NIDLE=0
 # Execute/test mode flags
 TEST_FLAG=0
 GENERATE_FLAG=0
 REGRESS_FLAG=0
 CLEAN_FLAG=0
+RESET=0
 #=============================================================
 
 #=============================================================
@@ -97,13 +111,19 @@ while [ $# -gt 0 ] ; do
 
   -mpinuma) shift ; MPINUMA=$1 ;;
 
+  -nidle) shift ; NIDLE=$1 ;;
+
   -g) shift ; LOCDIR=$1 ; GENERATE_FLAG=1 ;;
 
   -r) REGRESS_FLAG=1 ;;
 
+  -reset) RESET=1 ;;
+
+  -h) gacode_printversion CGYRO ; exit 0 ;;
+
   -clean) CLEAN_FLAG=1 ;;
 
-  *) echo "ERROR (cgyro script): incorrect cgyro syntax." ; exit 1 ;;
+  *) echo "ERROR (cgyro script): unknown option $1." ; exit 1 ;;
  
   esac
   shift
@@ -164,7 +184,7 @@ then
       exit 1
    fi
    # NOMP=1 RESET=0
-   gacode_reg_do $NPROC 1 0 cgyro 1e-6
+   gacode_reg_do $NPROC $NOMP $RESET cgyro 1e-6
    exit 0
 fi
 #============================================================
@@ -173,7 +193,7 @@ fi
 # Everything else must be done in $SIMDIR; so ensure existence 
 # of $SIMDIR (needed at this point) and go there: 
 #
-if ! cgyro_sim_warn $SIMDIR
+if ! gacode_sim_warn $SIMDIR
 then
    exit 1 
 fi 
@@ -211,7 +231,7 @@ emethod=(${IN// / })
 if [ $emethod -eq 2 ]
 then
    python $GACODE_ROOT/shared/math/gauss_exp_quad.py $emax $ne
-   echo "INFO (cgyro) Generated energy mesh data"
+   echo "INFO: (cgyro) Generated energy mesh data"
 fi
 #============================================================
 # Now remove test flag if it was added
@@ -243,7 +263,7 @@ date >> out.cgyro.version
 gacode_printversion CGYRO
   
 $GACODE_ROOT/shared/exec/gyro.$GACODE_PLATFORM \
-  $SIMDIR $NPROC $CGYRO_DIR/src/cgyro $NOMP $NUMA $MPINUMA
+  $SIMDIR $NPROC $CGYRO_DIR/src/cgyro $NOMP $NUMA $MPINUMA $NIDLE
 #===========================================================
 
 #============================================================

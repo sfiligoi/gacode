@@ -25,7 +25,6 @@ subroutine cgyro_read_input
   call readbc_int(print_step)
   call readbc_int(restart_step)
   call readbc_real(freq_tol)
-  call readbc_int(restart_write)
   call readbc_int(restart_mode)
   call readbc_real(up_radial)
   call readbc_real(up_theta)
@@ -33,7 +32,6 @@ subroutine cgyro_read_input
   call readbc_int(nup_radial)
   call readbc_int(implicit_flag)
   call readbc_int(constant_wind_flag)
-  call readbc_int(upconserve_flag)
   call readbc_real(ky)
   call readbc_int(box_size)
   call readbc_real(ipccw)
@@ -65,6 +63,10 @@ subroutine cgyro_read_input
   call readbc_int(kxfilter_flag)
   call readbc_real(gamma_e_decay)
   call readbc_int(hiprec_flag)
+  call readbc_int(udsymmetry_flag)
+  call readbc_int(shear_method)
+  call readbc_int(shear_pad)
+  call readbc_real(dshift)
 
   call readbc_real(rmin)
   call readbc_real(rmaj)
@@ -78,7 +80,7 @@ subroutine cgyro_read_input
   call readbc_real(zeta)      
   call readbc_real(s_zeta)
   call readbc_real(zmag)       
-  call readbc_real(s_zmag)
+  call readbc_real(dzmag)
   call readbc_real(beta_star)
   call readbc_real(betae_unit)
 
@@ -103,6 +105,16 @@ subroutine cgyro_read_input
   call readbc_real(mach_scale)
   call readbc_real(q_scale)
   call readbc_real(s_scale)
+  call readbc_real(shift_scale)
+  call readbc_real(kappa_scale)
+  call readbc_real(delta_scale)
+  call readbc_real(zeta_scale)
+  call readbc_real(s_kappa_scale)
+  call readbc_real(s_delta_scale)
+  call readbc_real(s_zeta_scale)
+  call readbc_real(beta_star_scale)
+  call readbc_real(betae_unit_scale)
+  call readbc_real(nu_ee_scale)
   do is=1,6
      call readbc_real(x)   ; dlnndr_scale(is) = x
      call readbc_real(x)   ; dlntdr_scale(is) = x

@@ -141,22 +141,26 @@ subroutine tglf_run()
   if (tglf_use_transport_model_in) then
      
      ! Call the NN or TGLF if the NN is not accurate
-     #ifdef MPI_TGLF
+#ifdef MPI_TGLF
          ! Check proper processor setup
          if (nProcTglf .eq. 1) then
-     	    call tglf_nn_tm  
+            if (tglf_nn_max_error_in .gt. 0) then
+     	       call tglf_nn_tm
+     	    endif
      	    if (.not. valid_nn) then
      	       call tglf_tm_mpi
             endif
 	 else
             call tglf_tm_mpi
          endif
-     #else
-     	 call tglf_nn_tm  
+#else
+         if (tglf_nn_max_error_in .gt. 0) then
+     	    call tglf_nn_tm
+     	 endif
      	 if (.not. valid_nn) then
      	     call tglf_tm
          endif
-     #endif
+#endif
      
      !---------------------------------------------
      ! Output (normalized to Q_GB)

@@ -40,12 +40,13 @@
        RETURN
     ENDIF
 
-    ierr=init_harvest('TGLF_spectrum_2'//NUL,harvest_sendline,LEN(harvest_sendline))
+    ierr=init_harvest('TGLF_spectrum_3'//NUL,harvest_sendline,LEN(harvest_sendline))
+
     ierr=set_harvest_payload_str(harvest_sendline,'VERSION'//NUL,'APS15_1'//NUL) !no underscore to allow different versions of the same run
 
-!   '#---------------------------------------------------'
-!   '# Plasma parameters:'
-!   '#---------------------------------------------------'
+!   ---------------------------------------------------
+!    Plasma parameters
+!   ---------------------------------------------------
     ierr=set_harvest_payload_bol(harvest_sendline,'SIGN_BT'//NUL,INT((tglf_sign_bt_in+1)/2.))
     ierr=set_harvest_payload_bol(harvest_sendline,'SIGN_IT'//NUL,INT((tglf_sign_it_in+1)/2.))
     IF (tglf_kygrid_model_in.NE.1) THEN
@@ -59,12 +60,15 @@
         ierr=set_harvest_payload_dbl(harvest_sendline,'DEBYE'//NUL,tglf_debye_in)
     ENDIF
 
-!   '#---------------------------------------------------'
-!   '# Sort ions by A, Z, Te/Ti'
-!   '#---------------------------------------------------'
+!   ---------------------------------------------------
+!    Sort ions by A, Z, Te/Ti
+!    electrons always first (as required by TGLF)
+!    !main ion always second (affects GB normalization)
+!   ---------------------------------------------------
     tmp=0.0
     tmp(1)=1E10
-    DO i = 2,tglf_ns_in
+    tmp(2)=1E9
+    DO i = 3,tglf_ns_in
         tmp(i)=tglf_mass_in(i)*100000+tglf_zs_in(i)*1000+1./(1+tglf_rlts_in(i))
     ENDDO
     DO i = 1,tglf_ns_in
@@ -73,9 +77,9 @@
         tmp(j)=0
     ENDDO
 
-!   '#---------------------------------------------------'
-!   '# Species vectors:'
-!   '#---------------------------------------------------'
+!   ---------------------------------------------------
+!    Species vectors
+!   ---------------------------------------------------
     DO i = 1,tglf_ns_in
       IF (i < 10) THEN
          write (NUM, "(I01,A1)") i,NUL
@@ -97,9 +101,9 @@
       ierr=set_harvest_payload_dbl(harvest_sendline,'VPAR_SHEAR_'//NUM,tglf_vpar_shear_in(j))
     ENDDO
 
-!   '#---------------------------------------------------'
-!   '# Miller geometry parameters:'
-!   '#---------------------------------------------------'
+!   ---------------------------------------------------
+!    Miller geometry parameters
+!   ---------------------------------------------------
     ierr=set_harvest_payload_dbl(harvest_sendline,'RMIN_LOC'//NUL,tglf_rmin_loc_in)
     ierr=set_harvest_payload_dbl(harvest_sendline,'RMAJ_LOC'//NUL,tglf_rmaj_loc_in)
     ierr=set_harvest_payload_dbl(harvest_sendline,'ZMAJ_LOC'//NUL,tglf_zmaj_loc_in)
@@ -121,17 +125,17 @@
         ierr=set_harvest_payload_dbl(harvest_sendline,'KX0_LOC'//NUL,tglf_kx0_loc_in) !should be always 0.0
     ENDIF
 
-!   '#---------------------------------------------------'
-!   '# Gaussian width parameters:'
-!   '#---------------------------------------------------'
+!   ---------------------------------------------------
+!    Gaussian width parameters
+!   ---------------------------------------------------
     ierr=set_harvest_payload_dbl(harvest_sendline,'+WIDTH'//NUL,tglf_width_in)
     ierr=set_harvest_payload_dbl(harvest_sendline,'+WIDTH_MIN'//NUL,tglf_width_min_in)
     ierr=set_harvest_payload_bol(harvest_sendline,'+FIND_WIDTH'//NUL,tglf_find_width_in)
     ierr=set_harvest_payload_int(harvest_sendline,'+NWIDTH'//NUL,tglf_nwidth_in)
 
-!   '#---------------------------------------------------'
-!   '# Control parameters:'
-!   '#---------------------------------------------------'
+!   ---------------------------------------------------
+!    Control parameters
+!   ---------------------------------------------------
     ierr=set_harvest_payload_bol(harvest_sendline,'+USE_TRANSPORT_MODEL'//NUL,tglf_use_transport_model_in)
     ierr=set_harvest_payload_int(harvest_sendline,'+GEOMETRY_FLAG'//NUL,tglf_geometry_flag_in)
     ierr=set_harvest_payload_bol(harvest_sendline,'+IFLUX'//NUL,tglf_iflux_in)
@@ -161,9 +165,9 @@
     ierr=set_harvest_payload_dbl(harvest_sendline,'+DEBYE_FACTOR'//NUL,tglf_debye_factor_in)
     ierr=set_harvest_payload_dbl(harvest_sendline,'+ETG_FACTOR'//NUL,tglf_etg_factor_in)
 
-!   '#---------------------------------------------------'
-!   '# Expert parameters:'
-!   '#---------------------------------------------------'
+!   ---------------------------------------------------
+!    Expert parameters
+!   ---------------------------------------------------
     ierr=set_harvest_payload_dbl(harvest_sendline,'+DAMP_PSI'//NUL,tglf_damp_psi_in)
     ierr=set_harvest_payload_dbl(harvest_sendline,'+DAMP_SIG'//NUL,tglf_damp_sig_in)
     ierr=set_harvest_payload_dbl(harvest_sendline,'+PARK'//NUL,tglf_park_in)
@@ -175,18 +179,18 @@
     ierr=set_harvest_payload_dbl(harvest_sendline,'+FILTER'//NUL,tglf_filter_in)
     ierr=set_harvest_payload_dbl(harvest_sendline,'+THETA_TRAPPED'//NUL,tglf_theta_trapped_in)
 
-!   '#---------------------------------------------------'
-!   '# Disabled harvest:'
-!   '#---------------------------------------------------'
+!   ---------------------------------------------------
+!    Disabled harvest
+!   ---------------------------------------------------
 !   ierr=set_harvest_payload_bol(harvest_sendline,'+NEW_EIKONAL'//NUL,tglf_new_eikonal_in) !DISABLED because not used anymore and should not make difference anyways
 !   ierr=set_harvest_payload_dbl(harvest_sendline,'+VEXB'//NUL,tglf_vexb_in) !DISABLED because not used anymore
 !   ierr=set_harvest_payload_int(harvest_sendline,'+WRITE_WAVEFUNCTION_FLAG'//NUL,tglf_write_wavefunction_flag_in)  ! DISABLED because it does not matter for us
 !   ierr=set_harvest_payload_dbl(harvest_sendline,'VNS_SHEAR_'//NUM,tglf_vns_shear_in(j)) !DISABLED because not used anymore
 !   ierr=set_harvest_payload_dbl(harvest_sendline,'VTS_SHEAR_'//NUM,tglf_vts_shear_in(j)) !DISABLED because not used anymore
 
-!   '#---------------------------------------------------'
-!   '# Output results:'
-!   '#---------------------------------------------------'
+!   ---------------------------------------------------
+!    Output results
+!   ---------------------------------------------------
     DO i = 1,tglf_ns_in
       IF (i < 10) THEN
          write (NUM, "(I01,A1)") i,NUL
@@ -219,8 +223,10 @@
       ENDIF
 
    ENDDO
-   
 
+!   ---------------------------------------------------
+!    Spectra
+!   ---------------------------------------------------
    nky = get_nky_out()
 
    ALLOCATE(spectrum(nky))
@@ -228,7 +234,7 @@
    DO i = 1, nky
       spectrum(i) = get_ky_spectrum_out(i)
    ENDDO
-   
+
    ierr=set_harvest_payload_dbl_array(harvest_sendline,'KY_SPECTRUM'//NUL,spectrum,nky)
    
    DO i = 1, tglf_nmodes_in
@@ -247,13 +253,20 @@
       ENDDO
       ierr=set_harvest_payload_dbl_array(harvest_sendline,'OUT_EIGENVALUE_SPECTRUM_OMEGA'//NUM,spectrum,nky)
    ENDDO
+   DEALLOCATE(spectrum)
+
+!   ---------------------------------------------------
+!    Additional entries only if an harvest_tag is set
+!   ---------------------------------------------------
    harvest_tag = NUL
    ierr = get_harvest_tag(harvest_tag,len(harvest_tag))
-   if ( len_trim(harvest_tag) > 1) then
-      harvest_sendline = TRIM(harvest_sendline) // TRIM(tglf_harvest_extra_in) // NUL
+   if ( len_trim(harvest_tag) .gt. 1) then
+      ierr=set_harvest_payload_raw(harvest_sendline,TRIM(tglf_harvest_extra_in)//NUL)
    endif
+
+!   ---------------------------------------------------
+!    Send data
+!   ---------------------------------------------------
    ierr=harvest_send(harvest_sendline)
-   
-   DEALLOCATE(spectrum)
-   
+
   END SUBROUTINE tglf_harvest_local

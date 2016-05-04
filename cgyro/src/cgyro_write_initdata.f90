@@ -10,7 +10,7 @@ subroutine cgyro_write_initdata
   use mpi
   use cgyro_globals
   use cgyro_experimental_globals
-
+  
   implicit none
 
   integer :: in,is
@@ -25,13 +25,14 @@ subroutine cgyro_write_initdata
 
      open(unit=io,file=trim(path)//runfile_info,status='old',position='append')
 
+  
      write(io,*)
      write(io,'(a)') ' n_theta | n_species | n_energy | n_xi '
      write(io,'(t4,i3,t16,i1,t26,i2,t36,i2)') n_theta,n_species,n_energy,n_xi
      if (test_flag == 0) then
         write(io,*) 
-        write(io,'(a)') ' nc_loc | nv_loc | nsplit | n_MPI'
-        write(io,'(t3,i4,t12,i4,t21,i4,t29,i4)') nc_loc,nv_loc,nsplit,n_proc
+        write(io,'(a)') ' nc_loc | nv_loc | nsplit | n_MPI | n_OMP'
+        write(io,'(t3,i4,t12,i4,t21,i4,t29,i4,t36,i4)') nc_loc,nv_loc,nsplit,n_proc,n_omp
      endif
 
      if (zf_test_flag == 0) then
@@ -44,10 +45,10 @@ subroutine cgyro_write_initdata
         endif
 
         write(io,*)
-        write(io,*) '          n   Delta     Max     L/rho'
-        write(io,'(a,i4,2x,2(f6.3,2x),2x,f6.2)') ' kx*rho:',&
+        write(io,*) '          n    Delta      Max     L/rho'
+        write(io,'(a,i4,2x,2(f7.3,2x),2x,f6.2)') ' kx*rho:',&
              n_radial,2*pi*rho/length,2*pi*rho*(n_radial/2-1)/length,length/rho
-        write(io,'(a,i4,2x,2(f6.3,2x),2x,f6.2)') ' ky*rho:',&
+        write(io,'(a,i4,2x,2(f7.3,2x),2x,f6.2)') ' ky*rho:',&
              n_toroidal,q/rmin*rho,kymax,2*pi/ky
 
      else
@@ -63,7 +64,7 @@ subroutine cgyro_write_initdata
      write(io,20) '  kappa:',kappa,'s_kappa:',s_kappa
      write(io,20) '  delta:',delta,'s_delta:',s_delta
      write(io,20) '   zeta:',zeta, ' s_zeta:',s_zeta
-     write(io,20) '   zmag:',zmag, ' s_zmag:',s_zmag
+     write(io,20) '   zmag:',zmag, ' dzmag:',dzmag
      write(io,*)
      write(io,20) '  betae:',betae_unit, ' beta_*:',beta_star
 
@@ -103,7 +104,7 @@ subroutine cgyro_write_initdata
 
   endif
   !----------------------------------------------------------------------------
-
+  
   !----------------------------------------------------------------------------
   ! Write the initial equilibrium data
   !
@@ -127,6 +128,20 @@ subroutine cgyro_write_initdata
      close(io)
 
   endif
+
+  if (silent_flag == 0 .and. i_proc == 0 .and. profile_model == 2) then
+
+     open(unit=io,file=trim(path)//'out.cgyro.expnorm',status='replace')
+     write (io,fmtstr,advance='no') a_meters
+     write (io,fmtstr,advance='no') b_unit
+     write (io,fmtstr,advance='no') dens_norm
+     write (io,fmtstr,advance='no') temp_norm
+     write (io,fmtstr,advance='no') vth_norm
+     write (io,*)
+     close(io)
+
+  endif
+
   !----------------------------------------------------------------------------
 
   !----------------------------------------------------------------------------
@@ -145,7 +160,7 @@ subroutine cgyro_write_initdata
      write(io,fmtstr) omega_aprdrift(:,1)
      write(io,fmtstr) omega_cdrift(:,1)
      write(io,fmtstr) omega_gammap(:)
-     write(io,fmtstr) k_perp(:,n_radial/2+1)
+     write(io,fmtstr) k_perp(ic_c(n_radial/2+1,:))
      close(io)
 
   endif
@@ -164,7 +179,6 @@ subroutine cgyro_write_initdata
      write(io,'(i4)') n_theta
      write(io,'(i4)') n_energy
      write(io,'(i4)') n_xi
-     write(io,'(i4)') n_theta_plot
      write(io,'(i4)') box_size
      write(io,'(1pe12.5)') length/rho
      write(io,'(i4)') px(:)

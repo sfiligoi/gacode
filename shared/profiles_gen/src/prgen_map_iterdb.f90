@@ -21,8 +21,8 @@ subroutine prgen_map_iterdb
   integer :: ip
   integer :: n0
 
-  do i=1,onetwo_nj
-     rho(i) = (i-1)/(onetwo_nj-1.0)
+  do i=1,nx
+     rho(i) = (i-1)/(nx-1.0)
   enddo
 
   call volint(1e-6*onetwo_qbeame,pow_e_nb)
@@ -101,7 +101,7 @@ subroutine prgen_map_iterdb
   !---------------------------------------------------------
   ! Map profile data into EXPRO interface variables
   !
-  EXPRO_n_exp = onetwo_nj
+  EXPRO_n_exp = nx
   call EXPRO_alloc('./',1)
   !
   EXPRO_rho  = rho
@@ -125,7 +125,7 @@ subroutine prgen_map_iterdb
   EXPRO_sbcx = sbcx_d(:)
   EXPRO_sscxl = onetwo_sscxl(:)
   EXPRO_zmag = zmag(:)
-  EXPRO_ptot = onetwo_press(:) ! Total pressure
+  EXPRO_ptot = p_tot(:) ! Total pressure
   ! COORDINATES: set sign of poloidal flux
   EXPRO_polflux = abs(dpsi(:))*(-ipccw)
 
@@ -179,7 +179,7 @@ subroutine prgen_map_iterdb
 
      onetwo_enion_vec(n0,:) = onetwo_enalp(:)*1e-19
 
-     onetwo_tion_vec(n0,:) = (onetwo_press(:)-&
+     onetwo_tion_vec(n0,:) = (p_tot(:)-&
           (sum(onetwo_enion_vec(1:n0-1,:)*&
           onetwo_tion_vec(1:n0-1,:),dim=1)*1e19+&
           onetwo_ene(:)*onetwo_te(:))*1.6022e-16)/(onetwo_enalp(:))/1.6022e-16
@@ -321,19 +321,19 @@ end subroutine prgen_map_iterdb
 subroutine volint(f,fdv)
 
   use prgen_globals, &
-       only : onetwo_rho_grid,pi,onetwo_R0,onetwo_hcap,onetwo_nj
+       only : onetwo_rho_grid,pi,onetwo_R0,onetwo_hcap,nx
 
   implicit none
 
   integer :: i
-  real, intent(in) :: f(onetwo_nj)
-  real, intent(out) :: fdv(onetwo_nj)
+  real, intent(in) :: f(nx)
+  real, intent(out) :: fdv(nx)
   real :: drho
   real :: dvoldr_p,dvoldr_m
 
   fdv(1) = 0.0
 
-  do i=2,onetwo_nj
+  do i=2,nx
 
      drho = onetwo_rho_grid(i)-onetwo_rho_grid(i-1)
 

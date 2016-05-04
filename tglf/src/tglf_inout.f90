@@ -330,7 +330,7 @@ SUBROUTINE put_model_parameters(adi_elec,alpha_e,alpha_p,alpha_mach,  &
   ! check for changes and update flow controls
   !
   if(adi_elec .NEQV. adiabatic_elec_in)new_matrix = .TRUE.
-  if(kygrid_model.lt.0.or.kygrid_model.gt.3)kygrid_model = kygrid_model_in
+  if(kygrid_model.lt.0.or.kygrid_model.gt.5)kygrid_model = kygrid_model_in
   if(xnu_model.lt.0.or.xnu_model.gt.3)xnu_model = xnu_model_in
   if(sat_rule.lt.0.or.sat_rule.gt.1)sat_rule=sat_rule_in
   if(vpar_model.lt.-1.or.vpar_model.gt.1)vpar_model=vpar_model_in
@@ -1551,7 +1551,7 @@ SUBROUTINE write_tglf_input
      write(11,*)"! stress_tor(",is,",1) = ",get_stress_tor(is,1)
   enddo
   write(11,*)"! trace_path=",(trace_path(is),is=1,7)
-  write(11,*)"      nn_thrsh_energy_tg=",nn_thrsh_energy_in
+  write(11,*)"      nn_max_error_tg=",nn_max_error_in
   close(11)
   !
 END SUBROUTINE write_tglf_input
@@ -1654,7 +1654,7 @@ SUBROUTINE write_tglf_flux_spectrum
   !
   if(new_start)then
      write(*,*)"error: tglf_TM must be called before write_tglf_flux_spectrum"
-     write(*,*)"       NN doesn't compute spectra -> if needed set tglf_nn_thrsh_energy_in=-1"
+     write(*,*)"       NN doesn't compute spectra -> if needed set tglf_nn_max_error_in=-1"
   endif
   !
   OPEN(unit=33,file=fluxfile,status='replace')
@@ -1793,7 +1793,7 @@ SUBROUTINE write_tglf_density_spectrum
   !
   if(new_start)then
      write(*,*)"error: tglf_TM must be called before write_tglf_density_spectrum"
-     write(*,*)"       NN doesn't compute spectra -> if needed set tglf_nn_thrsh_energy_in=-1"
+     write(*,*)"       NN doesn't compute spectra -> if needed set tglf_nn_max_error_in=-1"
   endif
   !
   OPEN(unit=33,file=fluxfile,status='replace')
@@ -1830,7 +1830,7 @@ SUBROUTINE write_tglf_temperature_spectrum
   !
   if(new_start)then
      write(*,*)"error: tglf_TM must be called before write_tglf_temperature_spectrum"
-     write(*,*)"       NN doesn't compute spectra -> if needed set tglf_nn_thrsh_energy_in=-1"
+     write(*,*)"       NN doesn't compute spectra -> if needed set tglf_nn_max_error_in=-1"
   endif
   !
   OPEN(unit=33,file=fluxfile,status='replace')
@@ -1867,7 +1867,7 @@ SUBROUTINE write_tglf_potential_spectrum
   !
   if(new_start)then
      write(*,*)"error: tglf_TM must be called before write_tglf_potential_spectrum"
-     write(*,*)"       NN doesn't compute spectra -> if needed set tglf_nn_thrsh_energy_in=-1"
+     write(*,*)"       NN doesn't compute spectra -> if needed set tglf_nn_max_error_in=-1"
   endif
   !
   OPEN(unit=33,file=fluxfile,status='replace')
@@ -1901,7 +1901,7 @@ SUBROUTINE write_tglf_eigenvalue_spectrum
   !
   if(new_start)then
      write(*,*)"error: tglf_TM must be called before write_tglf_eigenvalue_spectrum"
-     write(*,*)"       NN doesn't compute spectra -> if needed set tglf_nn_thrsh_energy_in=-1"
+     write(*,*)"       NN doesn't compute spectra -> if needed set tglf_nn_max_error_in=-1"
   endif
   !
   OPEN(unit=33,file=fluxfile,status='replace')
@@ -1930,7 +1930,7 @@ SUBROUTINE write_tglf_nete_crossphase_spectrum
   !
   if(new_start)then
      write(*,*)"error: tglf_TM must be called before write_tglf_nete_crossphase_spectrum"
-     write(*,*)"       NN doesn't compute spectra -> if needed set tglf_nn_thrsh_energy_in=-1"
+     write(*,*)"       NN doesn't compute spectra -> if needed set tglf_nn_max_error_in=-1"
   endif
   !
   OPEN(unit=33,file=fluxfile,status='replace')

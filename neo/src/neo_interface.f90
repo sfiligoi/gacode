@@ -212,7 +212,6 @@ module neo_interface
   real    :: neo_threed_exb_dphi0dr_in = 0.0
   integer :: neo_threed_drift_model_in = 0
   real    :: neo_threed_hyperxi_in = 0.0
-  integer :: neo_scalapack_flag_in = 0
   integer :: neo_laguerre_method_in = 1
   integer :: neo_write_cmoments_flag_in = 0
   integer :: neo_geo_ny_in = 0
@@ -245,8 +244,12 @@ module neo_interface
   real, dimension(11) :: neo_efluxtot_gv_out  = 0.0
   real, dimension(11) :: neo_efluxncv_gv_out  = 0.0
   real, dimension(11) :: neo_mflux_gv_out  = 0.0
-  ! nclass viscosities
-  real, dimension(11) :: neo_nclassvis_out  = 0.0
+  ! nclass
+  real, dimension(11) :: neo_pflux_nclass_out    = 0.0
+  real, dimension(11) :: neo_efluxtot_nclass_out = 0.0
+  real, dimension(11) :: neo_vpol_nclass_out     = 0.0
+  real, dimension(11) :: neo_vtor_nclass_out     = 0.0
+  real                :: neo_jpar_nclass_out     = 0.0
   ! error checking
   integer :: neo_error_status_out=0
   character(len=80) :: neo_error_message_out=''
@@ -456,7 +459,6 @@ contains
     neo_threed_exb_dphi0dr_in = threed_exb_dphi0dr
     neo_threed_drift_model_in = threed_drift_model
     neo_threed_hyperxi_in = threed_hyperxi
-    neo_scalapack_flag_in = scalapack_flag 
     neo_laguerre_method_in = laguerre_method 
     neo_write_cmoments_flag_in = write_cmoments_flag 
     neo_geo_ny_in = geo_ny_in
@@ -668,7 +670,6 @@ contains
     threed_exb_dphi0dr = neo_threed_exb_dphi0dr_in
     threed_drift_model = neo_threed_drift_model_in
     threed_hyperxi = neo_threed_hyperxi_in
-    scalapack_flag = neo_scalapack_flag_in 
     laguerre_method = neo_laguerre_method_in
     write_cmoments_flag = neo_write_cmoments_flag_in 
     geo_ny_in = neo_geo_ny_in
@@ -905,7 +906,6 @@ contains
     write(1,30) 'S_ZMAG=',neo_s_zmag_in
     write(1,30) 'BETA_STAR=',neo_beta_star_in
 
-    write(1,20) 'SCALAPACK_FLAG=',neo_scalapack_flag_in
     write(1,20) 'LAGUERRE_METHOD=',neo_laguerre_method_in
     write(1,20) 'WRITE_CMOMENTS_FLAG=',neo_write_cmoments_flag_in
 

@@ -50,9 +50,9 @@ subroutine neo_run()
   ! NEO boostrap current         : j_norm     = e n0_norm vt_norm B_unit
   ! where vt_norm = sqrt(T_norm / mass_norm)
 
-!!!!!!!!!!!!!!!!!!
+  !!!!!!!!!!!!!!!!!!
   ! theory results
-!!!!!!!!!!!!!!!!!!
+  !!!!!!!!!!!!!!!!!!
 
   ! Hinton-Hazeltine and Chang-Hinton fluxes
   neo_pflux_thHH_out   = neo_th_out(1)               ! Gamma_i/Gamma_norm 
@@ -62,7 +62,7 @@ subroutine neo_run()
   neo_eflux_thCHi_out  = neo_th_out(4)               ! Q_i/Q_norm (CH)
 
   ! Hirshman-Sigmar (multi-species) fluxes
-  do is=1,6
+  do is=1,11
      neo_pflux_thHS_out(is) = neo_thHS_out(is,1)     ! Gamma_s/Gamma_norm 
      neo_eflux_thHS_out(is) = neo_thHS_out(is,2)     ! Q_s/Q_norm
   enddo
@@ -72,13 +72,21 @@ subroutine neo_run()
   neo_jpar_thK_out    = neo_th_out(6)                ! <j B> / j_norm (Koh)
   neo_jpar_thN_out    = neo_th_out(7)                ! <j B> / j_norm (NCLASS)
 
-  ! NCLASS viscosity coefficients
-  do is=1,6
-     neo_nclassvis_out(is) = neo_nclass_out(is)          ! ymu_s(1,1) / (m_norm*dens_norm*vth_norm/a_norm)
+  !!!!!!!!!!!!!!!!!!
+  ! NCLASS results
+  !!!!!!!!!!!!!!!!!!
+  do is=1,11
+     neo_pflux_nclass_out(is)    = neo_nclass_out(is,1)    ! Gamma_is/Gamma_norm
+     neo_efluxtot_nclass_out(is) = neo_nclass_out(is,2)    ! Q_is/Q_norm total
+     neo_vpol_nclass_out(is)     = neo_nclass_out(is,3)    ! v_theta/vt_norm (at theta=0)
+     neo_vtor_nclass_out(is)     = neo_nclass_out(is,4)    ! v_phi/vt_norm (at theta=0)
   enddo
-
+  neo_jpar_nclass_out = neo_nclass_1d_out                  ! <j B> / j_norm
+ 
+  !!!!!!!!!!!!!!!!!!
   ! dke results
-  do is=1,6
+  !!!!!!!!!!!!!!!!!!
+  do is=1,11
      neo_pflux_dke_out(is)    = neo_dke_out(is,1)    ! Gamma_is/Gamma_norm
      neo_efluxtot_dke_out(is) = neo_dke_out(is,2)    ! Q_is/Q_norm total
      neo_mflux_dke_out(is)    = neo_dke_out(is,3)    ! Pi_is/Pi_norm
@@ -86,10 +94,10 @@ subroutine neo_run()
      neo_vpol_dke_out(is)     = neo_dke_out(is,5)    ! v_theta/vt_norm (at theta=0)
      neo_vtor_dke_out(is)     = neo_dke_out(is,6)    ! v_phi/vt_norm (at theta=0)
   enddo
-  neo_jpar_dke_out = neo_dke_1d_out                  ! <j B> / j_norm            
+  neo_jpar_dke_out = neo_dke_1d_out                  ! <j B> / j_norm
 
   ! gyro-viscosity results
-  do is=1,6
+  do is=1,11
      neo_pflux_gv_out(is)     = neo_gv_out(is,1)     ! Gamma_is/Gamma_norm
      neo_efluxtot_gv_out(is)  = neo_gv_out(is,2)     ! Q_is/Q_norm total
      neo_mflux_gv_out(is)     = neo_gv_out(is,3)     ! Pi_is/Pi_norm

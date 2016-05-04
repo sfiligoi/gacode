@@ -13,7 +13,7 @@ subroutine prgen_map_null
   implicit none
 
   ! Compute rho, bref and arho:
-  call prgen_get_chi(nx,q_gato,kappa,rmin,dpsi,rho,null_bref,null_arho)
+  call prgen_get_chi(nx,q,kappa,rmin,dpsi,rho,null_bref,null_arho)
 
   !---------------------------------------------------------
   ! Map profile data into EXPRO interface names:
@@ -26,6 +26,7 @@ subroutine prgen_map_null
   EXPRO_rmaj = rmaj(:)
   ! COORDINATES: set sign of q
   EXPRO_q = abs(q(:))*ipccw*btccw
+  EXPRO_ptot = p_tot(:)
   EXPRO_kappa = kappa(:)
   EXPRO_delta = delta(:)
   EXPRO_zeta = zeta(:)

@@ -1,6 +1,7 @@
 subroutine tgyro_profile_functions
 
   use tgyro_globals
+  use tgyro_ped
 
   implicit none
 
@@ -11,6 +12,7 @@ subroutine tgyro_profile_functions
   real, dimension(n_r) :: c_a
   real, dimension(n_r) :: x_a
   real, external :: sivukhin
+  real :: p_ave
 
   ! Note flag to only evolve only gradients
   if (loc_evolve_grad_only_flag == 0 .and. &
@@ -130,22 +132,20 @@ subroutine tgyro_profile_functions
   enddo
   frac_ae(:) = 1.0-frac_ai(:)
 
-  ! Total pressure and beta (dimensionless) 
-  pr(:) = ne(:)*k*te(:)
+  ! Total pressure (Ba) and beta (dimensionless) 
+  pr(:) = pext(:)+ne(:)*k*te(:)
   do i_ion=1,loc_n_ion
-     pr(:) = pr(:)+ni(i_ion,:)*k*ti(i_ion,:)
+    pr(:) = pr(:)+ni(i_ion,:)*k*ti(i_ion,:)
   enddo
-
   beta_unit(:)  = 8*pi*pr(:)/b_unit**2
   betae_unit(:) = beta_unit(:)*ne(:)*k*te(:)/pr(:)
 
   ! Pressure gradient inverse scale length (1/cm)
-  dlnpdr(:) = ne(:)*k*te(:)*(dlnnedr(:)+dlntedr(:))/pr(:)
+  dlnpdr(:) = dpext(:)/pr(:)+ne(:)*k*te(:)*(dlnnedr(:)+dlntedr(:))/pr(:)
   do i_ion=1,loc_n_ion
-     dlnpdr(:) = dlnpdr(:)+&
-          ni(i_ion,:)*k*ti(i_ion,:)*(dlnnidr(i_ion,:)+dlntidr(i_ion,:))/pr(:)
+    dlnpdr(:) = dlnpdr(:)+&
+      ni(i_ion,:)*k*ti(i_ion,:)*(dlnnidr(i_ion,:)+dlntidr(i_ion,:))/pr(:)
   enddo
-
   !----------------------------------
   ! Functions connected with rotation
   !---------------------------------- 
@@ -164,6 +164,18 @@ subroutine tgyro_profile_functions
   !
   q_tgb(:) = ni(1,:)*k*ti(1,:)*(sqrt(2.0)*v_i(:))*&
        (sqrt(2.0)*rho_i(:)*b_unit(:)/b_ref/r_min)**2
+  !----------------------------------------------------------------------
+
+  !----------------------------------------------------------------------
+  ! Acquire pivot boundary conditions from pedestal model
+
+  ! Repeat calculation of beta from tgyro_init_profiles
+  ! betan [%] = betat/In*100 where In = Ip/(a Bt) 
+  ! Average pressure [Pa]
+  call tgyro_profile_reintegrate
+  p_ave = sum(volp_exp*ptot_exp)/sum(volp_exp)
+  betan_in = ( p_ave/(0.5*bt_in**2/mu_0) ) / ( ip_in/(a_in*bt_in) ) * 100.0
+  call tgyro_pedestal
   !----------------------------------------------------------------------
 
 end subroutine tgyro_profile_functions

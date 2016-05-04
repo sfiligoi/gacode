@@ -30,7 +30,7 @@ subroutine cgyro_experimental_map
   call cub_spline(rmin_exp,zeta_exp,n_grid_exp,rmin,zeta,1)
   call cub_spline(rmin_exp,s_zeta_exp,n_grid_exp,rmin,s_zeta,1)
   call cub_spline(rmin_exp,zmag_exp,n_grid_exp,rmin,zmag,1)
-  call cub_spline(rmin_exp,s_zmag_exp,n_grid_exp,rmin,s_zmag,1)
+  call cub_spline(rmin_exp,dzmag_exp,n_grid_exp,rmin,dzmag,1)
   call cub_spline(rmin_exp,gamma_e_exp,n_grid_exp,rmin,gamma_e,1)
   call cub_spline(rmin_exp,gamma_p_exp,n_grid_exp,rmin,gamma_p,1)
   call cub_spline(rmin_exp,mach_exp,n_grid_exp,rmin,mach,1)
@@ -49,7 +49,7 @@ subroutine cgyro_experimental_map
      call cub_spline(rmin_exp,dlnndr_exp(i,:),n_grid_exp,rmin,dlnndr(i),1)
   enddo
 
-  if(geo_numeq_flag == 1) then
+  if (geo_numeq_flag == 1) then
      do i=1,8
         do j=0,geo_ny
            call cub_spline(rmin_exp,geo_yin_exp(i,j,:),n_grid_exp,rmin, &

@@ -28618,6 +28618,14 @@ c
       write(kugrd,2210)  dpsivol(1)
       write(kugrd,2220) (dpsivol(jj),jj=2,jpsi2)
 c
+c JC: PRESSURE
+      write(kugrd,2300)
+      write(kugrd,2310) (p(jj),jj=jpsi1,1,-1),plim
+c
+c JC: Q
+      write(kugrd,2700)
+      write(kugrd,2710) (qp(jj),jj=jpsi1,1,-1),qlim
+c
 c
 c
 c 3.0 Write out the mesh quantities
@@ -28656,6 +28664,10 @@ c
  2200 format(1x,'dVol/dpsi:')
  2210 format(1x,e23.16)
  2220 format(5(1x,e23.16))
+ 2300 format(1x,'Pressure:')
+ 2310 format(5(1x,e23.16))
+ 2700 format(1x,'Safety Factor:')
+ 2710 format(5(1x,e23.16))
  3000 format(1x,'r(psi,theta) mesh (cell centers):')
  3050 format(5(1x,e23.17))
  3100 format(1x,'z(psi,theta) mesh (cell centers):')

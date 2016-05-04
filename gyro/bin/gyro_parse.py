@@ -175,6 +175,8 @@ x.add('POISSON_Z_EFF_FLAG','1')
 x.add('Z_EFF_METHOD','1')
 x.add('TRUNCATION_METHOD','1')
 x.add('FLUXAVE_WINDOW','0.9')
+x.add('HUGE_RESTART','0')
+
 x.add('GKEIGEN_PROC_MULT','1')
 x.add('GKEIGEN_METHOD','1')
 x.add('GKEIGEN_MATRIXONLY','0')

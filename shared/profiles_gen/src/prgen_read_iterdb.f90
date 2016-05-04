@@ -24,7 +24,7 @@ subroutine prgen_read_iterdb
   read(1,*) t
 
   read(1,*) t ; read(1,*) onetwo_ishot
-  read(1,*) t ; read(1,*) onetwo_nj
+  read(1,*) t ; read(1,*) nx
   read(1,*) t ; read(1,*) onetwo_nion
   read(1,*) t ; read(1,*) onetwo_nprim
   read(1,*) t ; read(1,*) onetwo_nimp
@@ -52,12 +52,10 @@ subroutine prgen_read_iterdb
   read(1,*) t ; read(1,*) x ! Te0
   read(1,*) t ; read(1,*) x ! Ti0
 
-  nx = onetwo_nj
-
   call allocate_internals
   call allocate_iterdb_vars
 
-  allocate(xv(onetwo_nj))
+  allocate(xv(nx))
 
   read(1,*) t ; read(1,*) onetwo_psi ! psi on rho grid
   read(1,*) t ; read(1,*) onetwo_rho_grid
@@ -154,8 +152,8 @@ subroutine prgen_read_iterdb
   read(1,*) t ; read(1,*) xv ! surface area each flux surface
   read(1,*) t ; read(1,*) xv ! cross-sectional area each surface
   read(1,*) t ; read(1,*) xv ! flux surface average absolute grad rho
-  read(1,*) t ; read(1,*) xv ! flux surface  grad_rho_sq
-  read(1,*) t ; read(1,*) onetwo_nb !number points in plasma boundary
+  read(1,*) t ; read(1,*) xv ! flux surface grad_rho_sq
+  read(1,*) t ; read(1,*) onetwo_nb ! number points in plasma boundary
 
   allocate(xvv(onetwo_nb))
 
@@ -185,9 +183,9 @@ subroutine prgen_read_iterdb
   read(1,'(a)',iostat=i) t
   if (i == 0) then
      print '(3(a))', 'INFO: (prgen) Assuming "', trim(t), '" is total pressure.'
-    read(1,*) onetwo_press(:)
+    read(1,*) p_tot(:)
   else
-    onetwo_press(:) = 0.0
+    p_tot(:) = 0.0
   endif
 
   ! sscxl may be missing in iterdb file

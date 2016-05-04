@@ -12,7 +12,7 @@ subroutine tgyro_gyro_map
   if (loc_n_ion > 5) then
      call tgyro_catch_error('ERROR: (TGYRO) n_ion > 5 not supported in GYRO interface.')
   endif
-  
+
   ! Initialize GYRO
   call gyro_init(paths(i_r-1), gyro_comm)
 
@@ -35,6 +35,11 @@ subroutine tgyro_gyro_map
   gyro_aspect_ratio_in = r_maj(i_r)/r_min
   gyro_radius_in = r(i_r)/r_min
   gyro_betae_unit_in = betae_unit(i_r)*loc_betae_scale
+  if (tgyro_ptot_flag == 1) then
+     error_flag = 1
+     error_msg  = 'Error: GYRO cannot use ptot via TGYRO.'
+  endif
+
   gyro_mu_electron_in = sqrt(mi(1)/(me*loc_me_multiplier))
   gyro_nu_ei_in = nue(i_r)*r_min/c_s(i_r)*loc_nu_scale
   gyro_dlnndr_electron_in = r_min*dlnnedr(i_r)
@@ -48,7 +53,7 @@ subroutine tgyro_gyro_map
   gyro_mu_1_in       = sqrt(2*mp/mi(1))
   gyro_dlnndr_in     = r_min*dlnnidr(1,i_r)
   gyro_dlntdr_in     = r_min*dlntidr(1,i_r)
-  
+
   if (loc_n_ion > 1) then
      gyro_z_2_in          = zi_vec(2)
      gyro_ni_over_ne_2_in = ni(2,i_r)/ne(i_r)

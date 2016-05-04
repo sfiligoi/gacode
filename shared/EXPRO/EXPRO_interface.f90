@@ -42,6 +42,7 @@
 !  EXPRO_drdrho(:)      dr/d(rho) [r and rho have units of length]
 !  EXPRO_bp0(:)         B_pol at theta=0 (T)
 !  EXPRO_bt0(:)         B_tor at theta=0 (T)
+!  EXPRO_ip(:)          Plasma current (A)
 !  EXPRO_gamma_e(:)     r/q d(w0)/dr (1/s)
 !  EXPRO_gamma_p(:)     R_0 d(w0)/dr (1/s)
 !  EXPRO_mach(:)        R_0 w0/cs
@@ -243,6 +244,7 @@ module EXPRO_interface
 
   real, dimension(:),allocatable :: EXPRO_bp0
   real, dimension(:),allocatable :: EXPRO_bt0
+  real, dimension(:),allocatable :: EXPRO_ip
 
   ! input.profiles.geo dimension and arrays
 

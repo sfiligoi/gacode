@@ -14,6 +14,7 @@ subroutine tgyro_quasigrad(ne,dlnnedr,ni,dlnnidr,zi,n_ion)
   use tgyro_globals, only : &
        tgyro_quasineutral_flag, &
        tgyro_fix_concentration_flag, &
+       loc_he_feedback_flag, &
        i_ash
 
   implicit none
@@ -54,7 +55,7 @@ subroutine tgyro_quasigrad(ne,dlnnedr,ni,dlnnidr,zi,n_ion)
 
         ! Some algebra shows that this implies all gradient scale lengths are equal
         do i=1,n_ion
-           if (i /= i_ash) dlnnidr(i) = dlnnedr 
+           if (i /= i_ash .or. loc_he_feedback_flag == 0) dlnnidr(i) = dlnnedr 
         enddo
      
      endif

@@ -6,7 +6,7 @@
 #  *) echo "ERROR: (qsub.DROP) Invalid value for OpenMP threads" ; exit ;;
 #esac
 
-bfile=$SIMDIR/batch.src
+bfile=$SIMDIR/batch.sh
 echo "#$ -N $LOCDIR" > $bfile
 echo "#$ -o $SIMDIR/batch.out" >> $bfile
 echo "#$ -e $SIMDIR/batch.err" >> $bfile

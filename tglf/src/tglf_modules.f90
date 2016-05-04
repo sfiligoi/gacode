@@ -226,6 +226,7 @@
       REAL,DIMENSION(5,nsm,3,nkym,maxmodes) :: flux_spectrum_out=0.0
       REAL,DIMENSION(2,nkym,maxmodes) :: eigenvalue_spectrum_out=0.0
       REAl,DIMENSION(nkym,maxmodes) :: ne_te_phase_spectrum_out=0.0
+      REAL,DIMENSION(nkym) :: spectral_shift_out=0.0
       REAL :: phi_bar_sum_out=0.0
       REAL :: v_bar_sum_out=0.0
       REAL :: gamma_nb_min_out=0.0
@@ -242,9 +243,7 @@
       INTEGER :: nfields_out
       character (len=80) :: error_msg='null' 
 ! NN activation parameters (thresholds)  
-      REAL :: nn_thrsh_energy_in = -1.0
-    !REAL :: nn_thrsh_particle_in = -1.0
-    !REAL :: nn_thrsh_momentum_in = -1.0
+      REAL :: nn_max_error_in = -1.0
       LOGICAL :: valid_nn = .FALSE.
     
      

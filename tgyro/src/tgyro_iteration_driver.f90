@@ -20,8 +20,6 @@ subroutine tgyro_iteration_driver
 
   implicit none
 
-  integer :: i_ion
-
   n_r   = n_inst+1
   p_max = n_evolve*(n_r-1)
 
@@ -242,21 +240,28 @@ subroutine tgyro_iteration_driver
   if (tgyro_write_profiles_flag == 1) then
      call EXPRO_palloc(MPI_COMM_WORLD,'./',1) 
      call EXPRO_pread
+
+     call tgyro_profile_reintegrate( &
+          EXPRO_ptot,&
+          EXPRO_ne,&
+          EXPRO_te,&
+          EXPRO_ni(1:loc_n_ion,:),&
+          EXPRO_ti(1:loc_n_ion,:))
+
      if (i_proc_global == 0) then
-        call tgyro_expro_map(r,dlnnedr,n_r,100*EXPRO_rmin,EXPRO_ne,EXPRO_n_exp)
-        call tgyro_expro_map(r,dlntedr,n_r,100*EXPRO_rmin,EXPRO_te,EXPRO_n_exp)
-        do i_ion=1,loc_n_ion
-           call tgyro_expro_map(r,dlnnidr(i_ion,:),n_r,100*EXPRO_rmin,EXPRO_ni(i_ion,:),EXPRO_n_exp)
-           call tgyro_expro_map(r,dlntidr(i_ion,:),n_r,100*EXPRO_rmin,EXPRO_ti(i_ion,:),EXPRO_n_exp)
-        enddo
+
+        ! Write data to file
         call EXPRO_write_original(&
              1,'input.profiles',&
              2,'input.profiles.new',&
              'Profiles modified by TGYRO')
         call EXPRO_compute_derived
         call EXPRO_write_derived(1,'input.profiles.extra')
+
      endif
+
      call EXPRO_palloc(MPI_COMM_WORLD,'./',0) 
+
   endif
   !--------------------------------------------------------------------------------
 

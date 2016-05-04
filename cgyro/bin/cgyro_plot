@@ -160,6 +160,9 @@ case "$PLOT_TYPE" in
    pwr_np)  
 	python $PYROOT/plot_pwr_np.py $FTYPE $W $FIELD & ;;
 
+   pwr_zf)  
+	python $PYROOT/plot_pwr_zf.py $FTYPE $W $FIELD & ;;
+
    zf)  
 	python $PYROOT/plot_zf.py $FTYPE $W $FIELD & ;;
 

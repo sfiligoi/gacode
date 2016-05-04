@@ -45,7 +45,6 @@ subroutine gyro_field_interpolation
   !-----------------------------------------------------------------
 
   call gyro_timer_in('Field-interp.a')
-!$acc kernels loop 
 !$omp parallel do default(shared) private(cmplx_phase,j_int,x,vtemp,j)
   do i=1,n_x
      cmplx_phase = phase(in_1,i)
@@ -62,13 +61,10 @@ subroutine gyro_field_interpolation
 
      enddo ! j_int
   enddo ! i
-!$end parallel do
-!$acc end kernels loop 
 
   !---------------------------------------------------------------
   ! Interpolate phi, A_par, and B_par onto orbit-grid:
   !
-!$acc kernels loop
 !$omp parallel do default(shared) private(p_nek_loc,p_nek,k,ck,m,m0,ix)
   do i=1,n_x
      p_nek_loc = 0
@@ -92,8 +88,6 @@ subroutine gyro_field_interpolation
 
      enddo ! p_nek
   enddo ! i
-!$end parallel do
-!$acc end kernels loop
   !
   !---------------------------------------------------------------
 
@@ -147,7 +141,6 @@ subroutine gyro_field_interpolation
            gyro_uv(:,:,p_nek_loc,is,1) = (0.0,0.0)
            kyro_uv(:,:,p_nek_loc,is,1) = (0.0,0.0)
 
-!$acc kernels loop
 !$omp parallel do default(shared) private(i_diff,m)
            do i=1,n_x
               do i_diff=-m_gyro,m_gyro-i_gyro
@@ -164,15 +157,12 @@ subroutine gyro_field_interpolation
                  enddo
               enddo
            enddo
-!$omp end parallel do
-!$acc end kernels loop
 
         case (2) 
 
            gyro_uv(:,:,p_nek_loc,is,1:2) = (0.0,0.0)
            kyro_uv(:,:,p_nek_loc,is,1:2) = (0.0,0.0)
 
-!$acc kernels loop
 !$omp parallel do default(shared) private(i_diff,m)
            do i=1,n_x
               do i_diff=-m_gyro,m_gyro-i_gyro
@@ -195,14 +185,12 @@ subroutine gyro_field_interpolation
               enddo
            enddo
 !$omp end parallel do
-!$acc end kernels loop
 
         case (3)
 
            gyro_uv(:,:,p_nek_loc,is,1:3) = (0.0,0.0)
            kyro_uv(:,:,p_nek_loc,is,1:3) = (0.0,0.0)
 
-!$acc kernels loop
 !$omp parallel do default(shared) private(i_diff,m)
            do i=1,n_x
               do i_diff=-m_gyro,m_gyro-i_gyro
@@ -234,7 +222,6 @@ subroutine gyro_field_interpolation
               enddo
            enddo
 !$omp end parallel do
-!$acc end kernels loop
 
         end select
 
@@ -270,7 +257,6 @@ subroutine gyro_field_interpolation
 
         case(2)
 
-!$acc kernels loop
 !$omp parallel do default(shared) private(m)
            do i=1,n_x
               do m=1,n_stack
@@ -279,12 +265,9 @@ subroutine gyro_field_interpolation
                       -v_para(m,i,p_nek_loc,n_spec)*field_tau(m,i,p_nek_loc,2)
               enddo
            enddo
-!$omp end parallel do
-!$acc end kernels loop
 
         case (3)
 
-!$acc kernels loop
 !$omp parallel do default(shared) private(m)
            do i=1,n_x
               do m=1,n_stack
@@ -296,8 +279,6 @@ subroutine gyro_field_interpolation
                       *field_tau(m,i,p_nek_loc,3)
               enddo
            enddo
-!$omp end parallel do
-!$acc end kernels loop
         end select
 
      enddo ! p_nek
@@ -307,9 +288,6 @@ subroutine gyro_field_interpolation
   endif
 
 
-!!! added acc kernels loop by Sri V. that is not mapped to the openMP set.
-!!! will have to remove the one of the (!) to get working.
-!!$acc kernels loop
   do is=1,n_kinetic
      do p_nek_loc=1,n_nek_loc_1
         do i=1,n_x
@@ -319,7 +297,6 @@ subroutine gyro_field_interpolation
         enddo
      enddo
   enddo
-!!$acc end kernels loop
 
   call gyro_timer_out('Field-interp.b')
 

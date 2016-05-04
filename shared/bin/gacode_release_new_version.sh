@@ -19,5 +19,5 @@ git push
 git push --tags
 git checkout master
 git pull
-git merge stable
-git push
+#git merge stable
+#git push

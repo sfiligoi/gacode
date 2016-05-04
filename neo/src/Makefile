@@ -1,4 +1,4 @@
-include ../../shared/install/make.inc.${GACODE_PLATFORM}
+include ${GACODE_ROOT}/shared/install/make.inc.${GACODE_PLATFORM}
 
 ifeq ($(OPT),debug)
    FFLAGS=${FDEBUG}
@@ -32,7 +32,6 @@ OBJECTS = neo_globals.o \
           neo_map_experimental_profiles.o \
           neo_read_input.o \
           neo_run.o \
-          neo_scalapack.o \
           neo_spitzer.o 
 
 .SUFFIXES : .o .f90
@@ -50,4 +49,4 @@ clean:
 	rm -rf *.o neo_lib.a $(EXEC) *~
 	cd ${GACODE_ROOT}/modules ; rm -f neo*.mod
 
-include ../install/make.ext.${GACODE_PLATFORM}
+-include ../install/make.ext.${GACODE_PLATFORM}

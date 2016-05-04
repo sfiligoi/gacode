@@ -16,9 +16,7 @@ fig = plt.figure(figsize=(6*ns,6))
 color = ['m','k','b','c']
 
 ky  = sim.ky
-
-dk  = ky[1]-ky[0]
-ave = np.zeros((sim.n_n))
+ave = np.zeros((sim.n_n,ns))
 
 if moment == 'n':
     imoment = 0 
@@ -68,17 +66,30 @@ if ftype == 'dump':
     print 'Wrote output to '+datafile
     sys.exit()
 else:
+
+    if ky[1] < 0.0:
+        ky = -ky
+        xlabel=r'$-k_\theta \rho_s$'
+    else:
+        xlabel=r'$k_\theta \rho_s$'
+    
+    dk = ky[1]-ky[0]
+    
+    for ispec in range(ns):
+        for j in range(sim.n_n):
+            ave[j,ispec] = average(y[ispec,j,:],sim.t,w)
+
+    ymax = np.max(ave)*1.1
+
     for ispec in range(ns):
         stag = str(ispec)
         ax = fig.add_subplot(1,ns,ispec+1)
-        ax.set_xlabel(r'$k_\theta \rho_s$')
+        ax.set_xlabel(xlabel)
         ax.set_ylabel(r'$'+mtag+'_'+stag+'$',color='k')
-        for j in range(sim.n_n):
-            ave[j] = average(y[ispec,j,:],sim.t,w)
         ax.set_title(r'$'+str(sim.t[imin])+' < (c_s/a) t < '+str(sim.t[-1])+'$')
-        ax.bar(ky-dk/2.0,ave,width=dk/1.1,color=color[ispec],alpha=0.5,edgecolor='black')
+        ax.bar(ky-dk/2.0,ave[:,ispec],width=dk/1.1,color=color[ispec],alpha=0.5,edgecolor='black')
+        ax.set_ylim([0,ymax])
 
-        
 if ftype == 'screen':
    plt.show()
 else:

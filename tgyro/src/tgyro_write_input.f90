@@ -313,11 +313,11 @@ subroutine tgyro_write_input
      case (0)
 
         write(1,10) 'LOC_HE_FEEDBACK_FLAG','He evolution OFF'
-        
+
      case (1)
 
         write(1,10) 'LOC_HE_FEEDBACK_FLAG','He evolution ON'
-        
+
      case default
 
         error_flag = 1
@@ -392,29 +392,6 @@ subroutine tgyro_write_input
 
         error_flag = 1
         error_msg = 'Error: TGYRO_DT_METHOD'
-
-     end select
-     !--------------------------------------------------------
-
-     !--------------------------------------------------------
-     select case (loc_sawtooth_model)
-
-     case (1)
-
-        write(1,10) 'LOC_SAWTOOTH_MODEL','No corrections for sawteeth'
-
-     case (2)
-
-        write(1,10) 'LOC_SAWTOOTH_MODEL','Enhanced qe for q < 1'
-
-     case (3)
-
-        write(1,10) 'LOC_SAWTOOTH_MODEL','Enhanced qi and qe for q < 1.'
-
-     case default
-
-        error_flag = 1
-        error_msg = 'Error: LOC_SAWTOOTH_MODEL'
 
      end select
      !--------------------------------------------------------
@@ -508,6 +485,11 @@ subroutine tgyro_write_input
      else
         write(1,10) '-> Fluctuations','Electrostatic'
      endif
+     if (tgyro_ptot_flag == 0) then
+        write(1,10) '-> Pressure','Using pressure (beta) computed by summing over included species.'
+     else
+        write(1,10) '-> Pressure','Using total pressure from GFILE.'
+     endif
 
      !--------------------------------------------------------
      select case (loc_zeff_flag)
@@ -598,6 +580,7 @@ subroutine tgyro_write_input
 
      end select
      !--------------------------------------------------------
+
      !--------------------------------------------------------
      select case (loc_evolve_grad_only_flag)
 
@@ -617,6 +600,28 @@ subroutine tgyro_write_input
      end select
 
      !--------------------------------------------------------
+
+     write(1,*)
+     write(1,*) 'Pedestal parameters'
+     write(1,*) 
+
+     select case (tgyro_ped_model)
+
+     case (1)
+
+        write(1,10) 'TGYRO_PED_MODEL','No pedestal.  Use fixed pivot.'
+
+     case (2)
+
+        write(1,10) 'TGYRO_PED_MODEL','Dynamic EPED1_NN pedestal.'
+
+     case default
+
+        error_flag = 1
+        error_msg = 'Error: TGYRO_PED_MODEL'
+
+     end select
+
      write(1,*)
      write(1,*) 'Ion parameters'
      write(1,*) 
@@ -643,25 +648,6 @@ subroutine tgyro_write_input
      write(1,*)
      write(1,*) 'Rotation and field orientation'
      write(1,*) 
-     select case (tgyro_rotation_theory_method)
-
-     case (1)
-
-        write(1,10) 'TGYRO_ROTATION_THEORY_METHOD','Candy method'
-
-     case (2)
-
-        write(1,10) 'TGYRO_ROTATION_THEORY_METHOD','Waltz method'
-
-        error_flag = 1
-        error_msg = 'Error: Waltz method for TGYRO_ROTATION_THEORY_METHOD not implemented.'
-
-     case default
-
-        error_flag = 1
-        error_msg = 'Error: TGYRO_ROTATION_THEORY_METHOD'
-
-     end select
 
      if (tgyro_rotation_flag == 1) then
         write(1,10) 'TGYRO_ROTATION_FLAG','Rotation effects ON'

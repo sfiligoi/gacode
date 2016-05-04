@@ -26,11 +26,12 @@ ax.set_xlabel(r'$(c_s/a)\, t$')
 color = ['k','m','b','c','g','r']
 
 if moment == 'n':
-    im
     mtag = '\Gamma'
+    ttag = 'G'
     y = np.sum(sim.flux_n,axis=(0,2))
 elif moment == 'e':
     mtag = 'Q'
+    ttag = 'Q'
     y = np.sum(sim.flux_e,axis=(0,2))
 elif moment == 'm':
     print 'm not implemented.'
@@ -63,8 +64,20 @@ ax.legend(loc=2)
 if ymax != 'auto':
     ax.set_ylim([0,float(ymax)])
 
+fname = 'out.cgyro.fluxt.'+ttag+'.'
+
 if ftype == 'screen':
    plt.show()
+elif ftype == 'dump':
+    data = np.column_stack((sim.t,y[0,:]))
+    head = '(cs/a) t     '+ttag+'_1/'+ttag+'_GB'
+    for ispec in range(1,ns,1):
+        head = head+'       '+ttag+'_'+str(ispec+1)+'/'+ttag+'_GB'
+        data = np.column_stack((data,y[ispec,:]))
+    fname = fname+'txt'
+    np.savetxt(fname,data,fmt='%.8e',header=head)
+    print 'INFO: (plot_flux_t) Created '+fname
 else:
-   outfile = 'flux_t.'+ftype
-   plt.savefig(outfile)
+   fname = fname+ftype
+   print 'INFO: (plot_flux_t) Created '+fname
+   plt.savefig(fname)

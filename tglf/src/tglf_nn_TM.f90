@@ -11,21 +11,24 @@
 !
      IMPLICIT NONE
 !
-     INTEGER :: j, is, k
-     REAl :: v_bar0, phi_bar0
-     REAL :: pflux0(nsm,3),eflux0(nsm,3)
-     REAL :: stress_par0(nsm,3),stress_tor0(nsm,3)
-     REAL :: exch0(nsm,3)
-     REAL :: nsum0(nsm),tsum0(nsm)
+     character(len=1000) :: nn_executable
+     character(len=1000) :: nn_files
+
+     integer :: j,is
+     real :: v_bar0, phi_bar0
+     real :: pflux0(nsm,3),eflux0(nsm,3)
+     real :: stress_par0(nsm,3),stress_tor0(nsm,3)
+     real :: exch0(nsm,3)
+     real :: nsum0(nsm),tsum0(nsm)
 !
-     REAL, DIMENSION(10) :: tmp
-     INTEGER, DIMENSION(10) :: ions_order
+     real, DIMENSION(10) :: tmp
+     integer, DIMENSION(10) :: ions_order
 !
      real :: OUT_ENERGY_FLUX_1_STD, OUT_ENERGY_FLUX_3_STD, OUT_PARTICLE_FLUX_1_STD
      real :: OUT_PARTICLE_FLUX_3_STD, OUT_STRESS_TOR_3_STD
      real :: OUT_ENERGY_FLUX_1_RNG, OUT_ENERGY_FLUX_3_RNG, OUT_PARTICLE_FLUX_1_RNG
      real :: OUT_PARTICLE_FLUX_3_RNG, OUT_STRESS_TOR_3_RNG
-     integer :: n, j, i
+     integer :: n, i
 !
 ! initialize fluxes
 !
@@ -50,21 +53,20 @@
 ! '#---------------------------------------------------'
      tmp=0.0
      tmp(1)=1E10
-     DO i = 3,tglf_ns_in
+     do i = 3,tglf_ns_in
          tmp(i)=tglf_mass_in(i)*100000+tglf_zs_in(i)*1000+1./(1+tglf_rlts_in(i))
-     ENDDO
-     DO i = 1,tglf_ns_in
-         k=MAXLOC(tmp, DIM=1)
-         ions_order(i)=k
-         tmp(k)=0
-     ENDDO
+     enddo
+     do i = 1,tglf_ns_in
+         j=MAXLOC(tmp, DIM=1)
+         ions_order(i)=j
+         tmp(j)=0
+     enddo
 !
 ! Write input file for the NN
 !
      open (unit=14, file=TRIM(tglf_path_in)//"input.dat", action="write")
      write (14,*) '1' 
-!--------     write (14,"(15(f6.3,x))") tglf_as_in(2), tglf_as_in(ions_order(3)), tglf_betae_in, &
-     write (14,"(15(f6.3,x))") tglf_as_in(3), tglf_as_in(2), tglf_betae_in, &
+     write (14,"(15(f6.3,1x))") tglf_as_in(ions_order(2)), tglf_as_in(ions_order(3)), tglf_betae_in, &
           tglf_delta_loc_in, tglf_kappa_loc_in, tglf_q_loc_in, &
           tglf_q_prime_loc_in, tglf_rlns_in(1), tglf_rlts_in(1), &
           tglf_rlts_in(3), tglf_rmaj_loc_in, tglf_rmin_loc_in, &
@@ -73,13 +75,14 @@
 !
 ! Execute the NN
 !
-     if (tglf_path_in == "") then
-        ! FOR TGLF in standalone mode: no sub-directories
-        CALL SYSTEM('/u/ludat/brainfuse_orso/run.exe /u/ludat/testnets/brainfuse_* input.dat')
-     else
-        ! FOR TGYRO
-        CALL SYSTEM('cd '//TRIM(tglf_path_in)//' ;/u/ludat/brainfuse_orso/run.exe /u/ludat/testnets/brainfuse_* input.dat')
+     call get_environment_variable('TGLFNN_EXEC',nn_executable)
+     call get_environment_variable('TGLFNN_MODEL',nn_files)
+     !write(*,*)'TGLFNN_EXEC: ',trim(nn_executable)
+     !write(*,*)'TGLFNN_MODEL: ',trim(nn_files)
+     if (tglf_path_in .ne. "") then
+        nn_executable='cd '//TRIM(tglf_path_in)//' ;'//trim(nn_executable)
      endif
+     call gacode_system(trim(nn_executable)//' '//trim(nn_files)//' input.dat')
 !
 ! Read outputs
 !
@@ -115,11 +118,11 @@
      close(16)
      close(20)
 !
-! Switch between TGLF and the NN depending on 'nn_thrsh' values
+! Switch between TGLF and the NN depending on 'nn_max_error' values
 !
-     if ((OUT_ENERGY_FLUX_1_RNG<tglf_nn_thrsh_energy_in) .and. (OUT_ENERGY_FLUX_3_RNG<tglf_nn_thrsh_energy_in) .and. &
-          (OUT_PARTICLE_FLUX_1_RNG<tglf_nn_thrsh_energy_in) .and. (OUT_PARTICLE_FLUX_3_RNG<tglf_nn_thrsh_energy_in) .and. &
-          (OUT_STRESS_TOR_3_RNG<tglf_nn_thrsh_energy_in)) then
+     if ((OUT_ENERGY_FLUX_1_RNG<tglf_nn_max_error_in) .and. (OUT_ENERGY_FLUX_3_RNG<tglf_nn_max_error_in) .and. &
+          (OUT_PARTICLE_FLUX_1_RNG<tglf_nn_max_error_in) .and. (OUT_PARTICLE_FLUX_3_RNG<tglf_nn_max_error_in) .and. &
+          (OUT_STRESS_TOR_1_RNG<tglf_nn_max_error_in) .and. (OUT_STRESS_TOR_3_RNG<tglf_nn_max_error_in)) then
 !
         valid_nn = .TRUE.
 !  

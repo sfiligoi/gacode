@@ -12,6 +12,7 @@ subroutine tgyro_write_data(i_print)
 
   use mpi
   use tgyro_globals
+  use tgyro_ped
 
   implicit none
 
@@ -86,6 +87,11 @@ subroutine tgyro_write_data(i_print)
 
      if (trinity_flag == 1) then
         open(unit=1,file='out.tgyro.trinity.eflux.out',status='replace')
+        close(1)
+     endif
+
+     if (tgyro_ped_model > 1) then
+        open(unit=1,file='out.tgyro.ped',status='replace')
         close(1)
      endif
 
@@ -505,6 +511,22 @@ subroutine tgyro_write_data(i_print)
   endif
   !--------------------------------------------------------------------------------
 
+  if (tgyro_ped_model > 1) then
+     open(unit=1,file='out.tgyro.ped',status='old',position='append')
+     write(1,50) 'PEDESTAL PARAMETERS ---------------------'
+     write(1,50) 'n_top [1/cm^3]',n_top
+     write(1,50) 't_top     [eV]',t_top
+     write(1,50) 'p_top     [Ba]',p_top
+     write(1,50) 'zn_top  [1/cm]',zn_top
+     write(1,50) 'dlnnedr [1/cm]',dlnnedr(n_r)
+     write(1,50) 'zt_top  [1/cm]',zt_top
+     write(1,50) 'dlntedr [1/cm]',dlntedr(n_r)
+     write(1,50) 'psi_top [-]',psi_top(1)
+     write(1,50) ' r_top [cm]',r_top(1)
+     write(1,50) 'r(n_r) [cm]',r(n_r)
+     close(1)
+  endif
+
   ! Write progress to screen
   if (i_tran < 10) then
      print '(a,i1,a,1pe10.3,a)', 'INFO: (TGYRO) Finished iteration ',i_tran,' [',sum(res)/size(res),']'
@@ -522,5 +544,6 @@ subroutine tgyro_write_data(i_print)
 30 format(t2,a,i3,1pe12.5,2x,'[',i6,']')
   ! Residuals
 40 format(t2,f8.6,5(2x,2(1pe10.3,1x)))
+50 format(a,1pe12.5)
 
 end subroutine tgyro_write_data

@@ -21,6 +21,8 @@ subroutine cgyro_mpi_grid
   integer :: splitkey
   integer, external :: parallel_dim
 
+  integer, external :: omp_get_max_threads, omp_get_thread_num
+
   ! Velocity-space (v) and configuration-space (c) dimensions
   nv = n_energy*n_xi*n_species
   nc = n_radial*n_theta
@@ -38,15 +40,15 @@ subroutine cgyro_mpi_grid
      write(io,'(a,i5)') '         nc: ',nc
      write(io,'(a,i5)') ' GCD(nv,nc): ',d
      write(io,*)
-     write(io,*) '        [coll]    [str]     [NL]'
-     write(io,*) 'n_MPI   nc_loc   nv_loc  n_split'
-     write(io,*) '-----   ------   ------  -------'
+     write(io,*) '          [coll]     [str]      [NL]'
+     write(io,*) ' n_MPI    nc_loc    nv_loc   n_split'
+     write(io,*) '------    ------    ------   -------'
      do it=1,d*n_toroidal
         if (mod(d*n_toroidal,it) == 0 .and. mod(it,n_toroidal) == 0) then
            n_proc_1 = it/n_toroidal
            nc_loc = nc/n_proc_1           
            nv_loc = nv/n_proc_1           
-           write(io,'(t2,4(i5,4x))') it,nc_loc,nv_loc,1+(nv_loc*n_theta-1)/n_toroidal
+           write(io,'(t2,4(i6,4x))') it,nc_loc,nv_loc,1+(nv_loc*n_theta-1)/n_toroidal
         endif
      enddo
      close(io)
@@ -63,8 +65,41 @@ subroutine cgyro_mpi_grid
   allocate(ic_c(n_radial,n_theta))
   allocate(iv_v(n_energy,n_xi,n_species))
 
-  if (test_flag == 1) return
+  ! Velocity pointers
+  iv = 0
+  do ie=1,n_energy
+     do ix=1,n_xi
+        do is=1,n_species
+           iv = iv+1
+           ie_v(iv) = ie
+           ix_v(iv) = ix
+           is_v(iv) = is
+           iv_v(ie,ix,is) = iv
+        enddo
+     enddo
+  enddo
+!$acc enter data copyin(ie_v,ix_v,is_v,iv_v)
 
+  ! Configuration pointers
+  ic = 0
+  do ir=1,n_radial
+     do it=1,n_theta
+        ic = ic+1
+        ir_c(ic) = ir
+        it_c(ic) = it
+        ic_c(ir,it) = ic
+     enddo
+  enddo
+!$acc enter data copyin(ir_c,it_c,ic_c)
+
+  if (test_flag == 1) then
+     ! Set dimensions for calculation of memory in test mode
+     nv_loc = nv
+     nc_loc = nc
+     nsplit = nv_loc*n_theta/n_toroidal
+     return
+  endif
+  
   !-------------------------------------------------------------
   ! Check that n_proc is a multiple of n_toroidal
   !
@@ -124,31 +159,6 @@ subroutine cgyro_mpi_grid
   !
   !-----------------------------------------------------------
 
-  ! Velocity pointers
-  iv = 0
-  do ie=1,n_energy
-     do ix=1,n_xi
-        do is=1,n_species
-           iv = iv+1
-           ie_v(iv) = ie
-           ix_v(iv) = ix
-           is_v(iv) = is
-           iv_v(ie,ix,is) = iv
-        enddo
-     enddo
-  enddo
-
-  ! Configuration pointers
-  ic = 0
-  do ir=1,n_radial
-     do it=1,n_theta
-        ic = ic+1
-        ir_c(ic) = ir
-        it_c(ic) = it
-        ic_c(ir,it) = ic
-     enddo
-  enddo
-
   ! Linear parallelization dimensions
 
   ! ni -> nc
@@ -169,6 +179,23 @@ subroutine cgyro_mpi_grid
      call parallel_slib_init(n_toroidal,nv_loc*n_theta,n_radial,nsplit,NEW_COMM_2)
   endif
 
+  ! OMP code
+  n_omp = omp_get_max_threads()
+
+  allocate(ic_locv(nc1:nc2))
+  allocate(iv_locv(nv1:nv2))
+  
+  ic_loc = 0
+  do ic=nc1,nc2
+     ic_loc = ic_loc+1
+     ic_locv(ic) = ic_loc
+  enddo
+  iv_loc = 0
+  do iv=nv1,nv2
+     iv_loc = iv_loc+1
+     iv_locv(iv) = iv_loc
+  enddo
+!$acc enter data copyin(ic_locv,iv_locv)
 end subroutine cgyro_mpi_grid
 
 subroutine gcd(m,n,d)

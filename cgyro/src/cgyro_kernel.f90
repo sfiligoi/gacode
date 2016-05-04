@@ -66,27 +66,33 @@ subroutine cgyro_kernel
 
      ! Collisionless step: returns new h_x, cap_h_x, fields 
      call cgyro_step_gk
-
-     ! Spectral ExB shear
-     if (abs(gamma_e) > 1e-10) call cgyro_shear
-
+        
      ! Collisionless implicit streaming term step
      ! : returns new h_x, cap_h_x, fields 
      call cgyro_step_implicit_gk
 
      ! Collision step: returns new h_x, cap_h_x, fields
-     call cgyro_step_collision
+     if (shear_method /= 3) call cgyro_step_collision
      !------------------------------------------------------------
 
      !------------------------------------------------------------
      ! Diagnostics
      !
-     ! Fluxes
-     call cgyro_flux
+     ! NOTE: Fluxes are calculated in cgyro_write_timedata
 
      ! Error estimate
      call cgyro_error_estimate
      !------------------------------------------------------------
+
+     ! Spectral ExB shear
+     select case(shear_method)
+     case(1)
+        call cgyro_shear
+     case(2)
+        call cgyro_shear_dft
+     case(3)
+        call cgyro_shear_pt
+     end select
 
      !---------------------------------------
      ! IO
@@ -114,9 +120,12 @@ subroutine cgyro_kernel
   if(allocated(theta))          deallocate(theta)
   if(allocated(thetab))         deallocate(thetab)
   if(allocated(w_theta))        deallocate(w_theta)
-  if(allocated(Bmag))           deallocate(Bmag)
+  if(allocated(bmag))           deallocate(bmag)
   if(allocated(k_perp))         deallocate(k_perp)
-  if(allocated(omega_stream))   deallocate(omega_stream)
+  if(allocated(omega_stream))   then
+!$acc exit data delete(omega_stream)
+      deallocate(omega_stream)
+  endif
   if(allocated(omega_trap))     deallocate(omega_trap)
   if(allocated(omega_rdrift))   deallocate(omega_rdrift)
   if(allocated(omega_adrift))   deallocate(omega_adrift)
@@ -126,15 +135,20 @@ subroutine cgyro_kernel
 
   if(allocated(indx_xi))       deallocate(indx_xi)
   if(allocated(px))            deallocate(px)
-  if(allocated(energy))        deallocate(energy)
+  if(allocated(energy))        then
+!$acc exit data delete(energy)
+    deallocate(energy)
+  endif
   if(allocated(w_e))           deallocate(w_e)
   if(allocated(e_deriv1_mat))  deallocate(e_deriv1_mat)
   if(allocated(e_deriv2_mat))  deallocate(e_deriv2_mat)
-  if(allocated(xi))            deallocate(xi)
+  if(allocated(xi))            then
+!$acc exit data delete(xi)
+    deallocate(xi)
+  endif
   if(allocated(w_xi))          deallocate(w_xi)
   if(allocated(xi_lor_mat))    deallocate(xi_lor_mat)
   if(allocated(xi_deriv_mat))  deallocate(xi_deriv_mat)
-  if(allocated(xi_upderiv_mat)) deallocate(xi_upderiv_mat)
   if(allocated(h_x))           deallocate(h_x)
   if(allocated(cap_h_c))       deallocate(cap_h_c)
   if(allocated(cap_h_v))       deallocate(cap_h_v)
@@ -148,9 +162,12 @@ subroutine cgyro_kernel
   if(allocated(pvec_outr))     deallocate(pvec_outr)
   if(allocated(pvec_outi))     deallocate(pvec_outi)
 
-  if(allocated(cmat))       deallocate(cmat)
-  if(allocated(cvec))       deallocate(cvec)
-  if(allocated(bvec))       deallocate(bvec)
+  if(allocated(cmat))       then
+!$acc exit data delete(cmat)
+    deallocate(cmat)
+  endif
+
+  call GEO_alloc(0)
 
   call cgyro_clean_implicit_gk
 

@@ -17,7 +17,7 @@ import string
 n=len(sys.argv)
 
 if n <> 5:
-    print "Usage: gyro_reg <testdir> <compdir> <precfile> <tol>"
+    print "Usage: gacode_reg <testdir> <compdir> <precfile> <tol>"
     print 
     print "       Note that <testdir> must match a reference directory"
     print "       contained in <compdir>" 

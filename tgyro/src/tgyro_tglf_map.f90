@@ -81,7 +81,6 @@ subroutine tgyro_tglf_map
   ! TGLF-specific quantities
   q_prime = (q_abs/(r(i_r)/r_min))**2*s(i_r)
   p_prime = (q_abs/(r(i_r)/r_min))*(beta_unit(i_r)/(8*pi))*(-r_min*dlnpdr(i_r))
-  p_prime = loc_betae_scale*p_prime
   !----------------------------------------------------------------
   
   !----------------------------------------------------------------
@@ -107,7 +106,7 @@ subroutine tgyro_tglf_map
      tglf_q_prime_fourier_in = q_prime
      tglf_p_prime_fourier_in = p_prime
      tglf_nfourier_in        = n_fourier_geo
-     tglf_fourier_in(:,:)    = a_fourier_geo(:,:,i_r)
+     tglf_fourier_in(:,0:n_fourier_geo) = a_fourier_geo(:,0:n_fourier_geo,i_r)
 
   else
 
@@ -267,7 +266,7 @@ subroutine tgyro_tglf_map
   !----------------------------------------------------------------
 
   !----------------------------------------------------------------
-  ! New TGLF settings
+  ! NEW TGLF SETTINGS
   !
   select case (tgyro_tglf_revision)
 
@@ -301,19 +300,28 @@ subroutine tgyro_tglf_map
   end select
 
   !----------------------------------------------------------------
-
-  ! Dump parameters
+  ! DUMP PARAMETERS
+  !
   if (tgyro_tglf_dump_flag == 0) then
      tglf_dump_flag_in   = .false.
   else
      tglf_dump_flag_in = .true.
   endif
 
+  !----------------------------------------------------------------
+  ! VERBOSITY
+  !
   tglf_quiet_flag_in = .true.
-  
-  ! Harvest targets and gyro-bohm normalizations
-  
-  if ( i_tran ==0 ) then
+
+  !----------------------------------------------------------------
+  ! TGLFNN ACTIVATION THRESHOLD
+  !
+  tglf_nn_max_error_in=tgyro_tglf_nn_max_error
+
+  !----------------------------------------------------------------
+  ! HARVEST TARGETS AND GYRO-BOHM NORMALIZATIONS
+  !
+  if (i_tran == 0) then
     ! Initialization
     tglf_harvest_extra_in = NUL
     harvest_err=set_harvest_verbose(0)
@@ -337,4 +345,5 @@ subroutine tgyro_tglf_map
     ! Indication of thermal ions
     harvest_err=set_harvest_payload_int_array(tglf_harvest_extra_in,'tgyro_therm_vec'//NUL,therm_vec(:),size(therm_vec))
   endif
+
 end subroutine tgyro_tglf_map

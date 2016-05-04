@@ -1,0 +1,28 @@
+#---------------------------------------------------
+# SATURN_GCC at General Atomics (copied mostly from GFORTRAN_OSX_MACPORTS)
+# module load mpich/gcc-4.7.2
+# module load netcdf
+#---------------------------------------------------
+
+IDENTITY="GA saturn or iris cluster"
+CORES_PER_NODE=12
+NUMAS_PER_NODE=1
+
+FC	= mpif90 -I$(GACODE_ROOT)/modules -J$(GACODE_ROOT)/modules -g 
+F77 = mpif90 -g
+
+FMATH	= -fdefault-real-8
+FOPT	= -O3
+FDEBUG	= -Wall -fcheck=all -fbacktrace -fbounds-check -O0 -Wextra -finit-real=nan -Wunderflow -ffpe-trap=invalid,zero,overflow
+FBOUND	= -Wall -fbounds-check
+FOMP	= -fopenmp
+
+# System math libraries
+
+LMATH=$(LLIBS) -llapack -lblas 
+NETCDF =  -L$(NETCDF_DIR)/lib -lnetcdff -lnetcdf -Wl,-rpath,$(NETCDF_DIR)/lib
+NETCDF_INC = $(NETCDF_DIR)/include
+
+# Archive
+
+ARCH = ar cr

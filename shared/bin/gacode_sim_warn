@@ -1,0 +1,15 @@
+#!/bin/sh
+#
+# SCRIPT:
+#  gacode_sim_warn
+#
+# FUNCTION:
+#  Check for existence of sim directory
+#-------------------------------------------------------------
+
+if [ ! -d "$1" ]
+  then
+  echo "$1 is not a valid simulation directory."
+  echo "Please create the directory first, or use -g option."
+  exit 1
+fi

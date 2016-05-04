@@ -60,6 +60,7 @@ NPROC=1
 NOMP=1
 NUMA=0
 MPINUMA=0
+NIDLE=0
 START=new
 #=============================================================
 
@@ -80,6 +81,8 @@ while [ $# -gt 0 ] ; do
   -numa) shift ; NUMA=$1 ;;
 
   -mpinuma) shift ; MPINUMA=$1 ;;
+
+  -nidle) shift ; NIDLE=$1 ;;
 
   -start) shift ; START=$1 ;;
 
@@ -105,6 +108,6 @@ CODE="$CODE -start $START"
 
 # Pass control to platform-specific script
 $GACODE_ROOT/shared/batch/queue.${GACODE_PLATFORM} \
- $NPROC $LOCDIR $SIMROOT "$CODE" $NOMP $NUMA $MPINUMA
+ $NPROC $LOCDIR $SIMROOT "$CODE" $NOMP $NUMA $MPINUMA $NIDLE
 
 exit 0
