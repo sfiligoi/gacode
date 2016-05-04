@@ -260,8 +260,8 @@
 !   ---------------------------------------------------
    harvest_tag = NUL
    ierr = get_harvest_tag(harvest_tag,len(harvest_tag))
-   if ( len_trim(harvest_tag) > 1) then
-      harvest_sendline = TRIM(harvest_sendline) // TRIM(tglf_harvest_extra_in) // NUL
+   if ( len_trim(harvest_tag) .gt. 1) then
+      ierr=set_harvest_payload_raw(harvest_sendline,TRIM(tglf_harvest_extra_in)//NUL)
    endif
 
 !   ---------------------------------------------------
