@@ -144,7 +144,9 @@ subroutine tglf_run()
 #ifdef MPI_TGLF
          ! Check proper processor setup
          if (nProcTglf .eq. 1) then
-     	    call tglf_nn_tm  
+            if (tglf_nn_max_error_in .gt. 0) then
+     	       call tglf_nn_tm
+     	    endif
      	    if (.not. valid_nn) then
      	       call tglf_tm_mpi
             endif
@@ -152,7 +154,9 @@ subroutine tglf_run()
             call tglf_tm_mpi
          endif
 #else
-     	 call tglf_nn_tm  
+         if (tglf_nn_max_error_in .gt. 0) then
+     	    call tglf_nn_tm
+     	 endif
      	 if (.not. valid_nn) then
      	     call tglf_tm
          endif
