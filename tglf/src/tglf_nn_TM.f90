@@ -122,7 +122,7 @@
 !
      if ((OUT_ENERGY_FLUX_1_RNG<tglf_nn_max_error_in) .and. (OUT_ENERGY_FLUX_3_RNG<tglf_nn_max_error_in) .and. &
           (OUT_PARTICLE_FLUX_1_RNG<tglf_nn_max_error_in) .and. (OUT_PARTICLE_FLUX_3_RNG<tglf_nn_max_error_in) .and. &
-          (OUT_STRESS_TOR_1_RNG<tglf_nn_max_error_in) .and. (OUT_STRESS_TOR_3_RNG<tglf_nn_max_error_in)) then
+          (OUT_STRESS_TOR_3_RNG<tglf_nn_max_error_in)) then
 !
         valid_nn = .TRUE.
 !  
