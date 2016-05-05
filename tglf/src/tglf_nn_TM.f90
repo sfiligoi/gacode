@@ -92,21 +92,6 @@
           stress_tor_out(3,1)
      close(15)
 !
-! Set negative energy fluxes to zero
-!    
-     if (energy_flux_out(1,1)<0) then
-        energy_flux_out(1,1)=0
-     endif
-     if (energy_flux_out(3,1)<0) then
-        energy_flux_out(3,1)=0
-     endif
-!
-! Set Carbon fluxes equal to Deuterium fluxes
-!
-   !  energy_flux_out(2,1)=energy_flux_out(3,1)
-   !  particle_flux_out(2,1)=particle_flux_out(3,1)
-   !  stress_tor_out(2,1)=stress_tor_out(3,1)
-!
 ! Read values for checking accuracy of the NN
 !
      open (unit=16, file=TRIM(tglf_path_in)//"output.std", action="read")
