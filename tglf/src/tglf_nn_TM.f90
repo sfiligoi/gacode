@@ -25,9 +25,9 @@
      integer, DIMENSION(10) :: ions_order
 !
      real :: OUT_ENERGY_FLUX_1_STD, OUT_ENERGY_FLUX_3_STD, OUT_PARTICLE_FLUX_1_STD
-     real :: OUT_PARTICLE_FLUX_3_STD, OUT_STRESS_TOR_3_STD
+     real :: OUT_STRESS_TOR_3_STD
      real :: OUT_ENERGY_FLUX_1_RNG, OUT_ENERGY_FLUX_3_RNG, OUT_PARTICLE_FLUX_1_RNG
-     real :: OUT_PARTICLE_FLUX_3_RNG, OUT_STRESS_TOR_3_RNG
+     real :: OUT_STRESS_TOR_3_RNG
      integer :: n, i
 !
 ! initialize fluxes
@@ -66,7 +66,7 @@
 !
      open (unit=14, file=TRIM(tglf_path_in)//"input.dat", action="write")
      write (14,*) '1' 
-     write (14,"(15(f6.3,1x))") tglf_as_in(ions_order(2)), tglf_as_in(ions_order(3)), tglf_betae_in, &
+     write (14,"(15(f6.3,1x))") tglf_as_in(2), tglf_as_in(3), tglf_betae_in, &
           tglf_delta_loc_in, tglf_kappa_loc_in, tglf_q_loc_in, &
           tglf_q_prime_loc_in, tglf_rlns_in(1), tglf_rlts_in(1), &
           tglf_rlts_in(3), tglf_rmaj_loc_in, tglf_rmin_loc_in, &
@@ -88,7 +88,7 @@
 !
      open (unit=15, file=TRIM(tglf_path_in)//"output.avg", action="read")
      read(15,*) n, energy_flux_out(1,1), energy_flux_out(3,1), &
-          particle_flux_out(1,1), particle_flux_out(3,1), &
+          particle_flux_out(1,1), &
           stress_tor_out(3,1)
      close(15)
 !
@@ -97,16 +97,16 @@
      open (unit=16, file=TRIM(tglf_path_in)//"output.std", action="read")
      open (unit=20, file=TRIM(tglf_path_in)//"output.rng", action="read")
      read(16,*) n, OUT_ENERGY_FLUX_1_STD, OUT_ENERGY_FLUX_3_STD, OUT_PARTICLE_FLUX_1_STD, &
-          OUT_PARTICLE_FLUX_3_STD, OUT_STRESS_TOR_3_STD     
+          OUT_STRESS_TOR_3_STD     
      read(20,*) n, OUT_ENERGY_FLUX_1_RNG, OUT_ENERGY_FLUX_3_RNG, OUT_PARTICLE_FLUX_1_RNG, &
-          OUT_PARTICLE_FLUX_3_RNG, OUT_STRESS_TOR_3_RNG
+          OUT_STRESS_TOR_3_RNG
      close(16)
      close(20)
 !
 ! Switch between TGLF and the NN depending on 'nn_max_error' values
 !
      if ((OUT_ENERGY_FLUX_1_RNG<tglf_nn_max_error_in) .and. (OUT_ENERGY_FLUX_3_RNG<tglf_nn_max_error_in) .and. &
-          (OUT_PARTICLE_FLUX_1_RNG<tglf_nn_max_error_in) .and. (OUT_PARTICLE_FLUX_3_RNG<tglf_nn_max_error_in) .and. &
+          (OUT_PARTICLE_FLUX_1_RNG<tglf_nn_max_error_in) .and. &
           (OUT_STRESS_TOR_3_RNG<tglf_nn_max_error_in)) then
 !
         valid_nn = .TRUE.
