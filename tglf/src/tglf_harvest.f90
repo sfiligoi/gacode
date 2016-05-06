@@ -68,6 +68,7 @@
     tmp=0.0
     tmp(1)=1E10
     tmp(2)=1E9
+    ions_order=0
     DO i = 3,tglf_ns_in
         tmp(i)=tglf_mass_in(i)*100000+tglf_zs_in(i)*1000+1./(1+tglf_rlts_in(i))
     ENDDO
