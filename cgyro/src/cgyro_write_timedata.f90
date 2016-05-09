@@ -35,24 +35,24 @@ subroutine cgyro_write_timedata
   if (nonlinear_flag == 1) then
 
      ! Density flux for all species
-     call write_distributed_real(&
+     call cgyro_write_distributed_real(&
           trim(path)//runfile_kxky_flux(1),&
           size(flux(:,:,1)),&
           flux(:,:,1))
      ! Energy flux for all species
-     call write_distributed_real(&
+     call cgyro_write_distributed_real(&
           trim(path)//runfile_kxky_flux(2),&
           size(flux(:,:,2)),&
           flux(:,:,2))
      ! Density moment for all species at theta=0
-     call write_distributed_complex(&
+     call cgyro_write_distributed_complex(&
           trim(path)//runfile_kxky_n,&
           size(moment(:,:)),&
           moment(:,:))
   endif
 
   ! Complex potential at theta=0 
-  call write_distributed_complex(&
+  call cgyro_write_distributed_complex(&
        trim(path)//runfile_kxky_phi,&
        size(field(1,ic_c(:,it0))),&
        field(1,ic_c(:,it0)))
@@ -86,7 +86,7 @@ subroutine cgyro_write_timedata
   call cgyro_freq
   vfreq(1) = real(freq) 
   vfreq(2) = aimag(freq)
-  call write_distributed_real(trim(path)//runfile_freq,size(vfreq),vfreq)
+  call cgyro_write_distributed_real(trim(path)//runfile_freq,size(vfreq),vfreq)
 
   if (n_toroidal == 1) call print_scrdata()
 
@@ -112,13 +112,13 @@ end subroutine cgyro_write_timedata
 !===============================================================================
 
 !------------------------------------------------------
-! write_distributed_complex.f90
+! cgyro_write_distributed_complex.f90
 !
 ! PURPOSE:
 !  Control merged output of complex distributed array.
 !------------------------------------------------------
 
-subroutine write_distributed_complex(datafile,n_fn,fn)
+subroutine cgyro_write_distributed_complex(datafile,n_fn,fn)
 
   use mpi
   use cgyro_globals
@@ -235,17 +235,17 @@ subroutine write_distributed_complex(datafile,n_fn,fn)
 
   end select
 
-end subroutine write_distributed_complex
+end subroutine cgyro_write_distributed_complex
 
 
 !------------------------------------------------------
-! write_distributed_real.f90
+! cgyro_write_distributed_real.f90
 !
 ! PURPOSE:
 !  Control merged output of real distributed array.
 !------------------------------------------------------
 
-subroutine write_distributed_real(datafile,n_fn,fn)
+subroutine cgyro_write_distributed_real(datafile,n_fn,fn)
 
   use mpi
   use cgyro_globals
@@ -361,7 +361,7 @@ subroutine write_distributed_real(datafile,n_fn,fn)
 
   end select
 
-end subroutine write_distributed_real
+end subroutine cgyro_write_distributed_real
 
 !------------------------------------------------------
 ! write_precision.f90
