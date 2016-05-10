@@ -531,7 +531,7 @@ contains
        enddo
        neo_nclass_1d_out = jbs_nc 
     endif
-
+    
   end subroutine NCLASS_DR_do
 
 end module neo_nclass_dr

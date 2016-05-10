@@ -38,8 +38,7 @@ OBJECTS +=	tgyro_globals.o \
 		tgyro_quasineutral.o \
 		tgyro_quasigrad.o \
 		tgyro_read_input.o \
-		tgyro_readbc_int.o \
-		tgyro_readbc_real.o \
+		tgyro_read_routines.o \
 		tgyro_residual.o \
 		tgyro_restart.o \
 		tgyro_source.o \
