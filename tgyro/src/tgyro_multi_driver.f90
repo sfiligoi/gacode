@@ -19,11 +19,23 @@ subroutine tgyro_multi_driver
   ! See gyro/src/gyro_globals.f90 for definition of transport_method
   transport_method = 1
 
-  ! Initialize GYRO
-  call gyro_init(paths(color+1),gyro_comm)
+  if (tgyro_multi_code == 'gyro') then
 
-  ! Run GYRO
-  call gyro_run(gyrotest_flag,gyro_restart_method,transport_method)
+     ! Initialize GYRO
+     call gyro_init(paths(color+1),gyro_comm)
+
+     ! Run GYRO
+     call gyro_run(gyrotest_flag,gyro_restart_method,transport_method)
+
+  else 
+
+     ! Initialize GYRO
+     call cgyro_init(paths(color+1),gyro_comm)
+
+     ! Run GYRO
+     call cgyro_run(gyrotest_flag)
+
+  endif
 
   ! Artificially trigger error to print message
   gyro_error_status_out = 1

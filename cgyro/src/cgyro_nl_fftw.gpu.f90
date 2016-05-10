@@ -21,33 +21,41 @@ subroutine cgyro_nl_fftw(ij)
 
   use cgyro_globals
   implicit none
-
+  include 'mpif.h'
   integer, intent(in) :: ij
   integer :: j,p,iexch
   integer :: it,ir,in,ix,iy
   integer :: i1,i2
+  integer :: ierr
 
   complex :: f0,g0
+#ifdef USE_HEAP
   complex, dimension(:,:), allocatable :: fpack
   complex, dimension(:,:), allocatable :: gpack
+#else
+  complex :: fpack(n_radial,nv_loc*n_theta)
+  complex :: gpack(n_radial,nv_loc*n_theta)
+#endif
+  
   real :: inv_nxny
 
   logical, parameter :: use_cufft = .true.
   logical, parameter :: use_acc = .true.
+  integer, parameter :: default_size = 1024 * 1024 * 32
+  logical :: use_openmp 
 
 
   include 'fftw3.f03'
 
   call timer_lib_in('nl_comm')
 
+#ifdef USE_HEAP
   allocate(fpack(n_radial,nv_loc*n_theta))
   allocate(gpack(n_radial,nv_loc*n_theta))
-!$omp workshare
-   fpack = 0.0
-   gpack = 0.0
-!$omp end workshare
+#endif
+  use_openmp = (size(fpack) >= default_size)
   iexch = 0
-!$omp  parallel do  &
+!$omp  parallel do  if (use_openmp) &
 !$omp& private(iv_loc,it,ir,iexch,ic_loc)
   do iv_loc=1,nv_loc
      do it=1,n_theta
@@ -55,8 +63,8 @@ subroutine cgyro_nl_fftw(ij)
         iexch = it + (iv_loc-1)*n_theta
         do ir=1,n_radial
  
-           ic_loc = ic_c(ir,it)
-           ! ic_loc = it + (ir-1)*n_theta
+           !ic_loc = ic_c(ir,it)
+           ic_loc = it + (ir-1)*n_theta
            fpack(ir,iexch) = h_x(ic_loc,iv_loc)
            gpack(ir,iexch) = psi(ic_loc,iv_loc)
         enddo
@@ -237,7 +245,7 @@ subroutine cgyro_nl_fftw(ij)
 !$acc update host(uxmany,uymany,vxmany,vymany)
 !$acc wait
 
-!$omp workshare
+!$omp workshare 
   uvmany = (uxmany*vymany-uymany*vxmany)/(nx*ny)
 !$omp end workshare
 
@@ -336,7 +344,7 @@ subroutine cgyro_nl_fftw(ij)
   call timer_lib_in('nl_comm')
   call parallel_slib_r(g_nl,gpack)
   iexch = 0
-!$omp  parallel do &
+!$omp  parallel do if (use_openmp) &
 !$omp& private(iv_loc,it,ir,iexch,ic_loc)
   do iv_loc=1,nv_loc
      do it=1,n_theta
@@ -349,13 +357,15 @@ subroutine cgyro_nl_fftw(ij)
         enddo
      enddo
   enddo
+#ifdef USE_HEAP
   deallocate(fpack)
   deallocate(gpack)
+#endif
   call timer_lib_out('nl_comm')
 
   ! RHS -> -[f,g] = [f,g]_{r,-alpha}
 
-!$omp workshare
+!$omp workshare 
   rhs(:,:,ij) = rhs(:,:,ij)+((q*rho/rmin)*(2*pi/length))*psi(:,:)
 !$omp end workshare
 

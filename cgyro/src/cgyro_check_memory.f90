@@ -17,32 +17,32 @@ subroutine cgyro_check_memory(datafile)
      write(io,*)
      write(io,*) 'Pointers'
      write(io,*)    
-     call alloc_add(io,nv*4.0,'ie_v')
-     call alloc_add(io,nv*4.0,'ix_v')
-     call alloc_add(io,nc*4.0,'ir_c')
-     call alloc_add(io,nc*4.0,'it_c')
-     call alloc_add(io,n_radial*n_theta*4.0,'ic_c')
-     call alloc_add(io,n_energy*n_xi*n_species*4.0,'iv_v')
-     call alloc_add(io,nc*(2*nup_theta+1)*4.0,'icd_c')
-     call alloc_add(io,nc*(2*nup_theta+1)*16.0,'dtheta')
-     call alloc_add(io,nc*(2*nup_theta+1)*16.0,'dtheta_up')
+     call cgyro_alloc_add(io,nv*4.0,'ie_v')
+     call cgyro_alloc_add(io,nv*4.0,'ix_v')
+     call cgyro_alloc_add(io,nc*4.0,'ir_c')
+     call cgyro_alloc_add(io,nc*4.0,'it_c')
+     call cgyro_alloc_add(io,n_radial*n_theta*4.0,'ic_c')
+     call cgyro_alloc_add(io,n_energy*n_xi*n_species*4.0,'iv_v')
+     call cgyro_alloc_add(io,nc*(2*nup_theta+1)*4.0,'icd_c')
+     call cgyro_alloc_add(io,nc*(2*nup_theta+1)*16.0,'dtheta')
+     call cgyro_alloc_add(io,nc*(2*nup_theta+1)*16.0,'dtheta_up')
 
      write(io,*)
      write(io,*) 'Fields and field solve'
      write(io,*)
-     call alloc_add(io,n_field*nc*16.0,'field')
-     call alloc_add(io,n_field*nc*16.0,'field_loc')
-     call alloc_add(io,n_field*nc*16.0,'field_old')
-     call alloc_add(io,n_field*nc*16.0,'field_old2')
-     call alloc_add(io,n_field*nc*16.0,'field_old3')
-     call alloc_add(io,n_field*nc*8.0,'fcoef')
+     call cgyro_alloc_add(io,n_field*nc*16.0,'field')
+     call cgyro_alloc_add(io,n_field*nc*16.0,'field_loc')
+     call cgyro_alloc_add(io,n_field*nc*16.0,'field_old')
+     call cgyro_alloc_add(io,n_field*nc*16.0,'field_old2')
+     call cgyro_alloc_add(io,n_field*nc*16.0,'field_old3')
+     call cgyro_alloc_add(io,n_field*nc*8.0,'fcoef')
      if (n_field < 3) then
-        call alloc_add(io,n_field*nc*8.0,'gcoef')
+        call cgyro_alloc_add(io,n_field*nc*8.0,'gcoef')
      else
-        call alloc_add(io,5*nc*8.0,'gcoef')
+        call cgyro_alloc_add(io,5*nc*8.0,'gcoef')
      endif
-     call alloc_add(io,nc*8.0,'sum_den_x')
-     call alloc_add(io,nc*8.0,'sum_cur_x')
+     call cgyro_alloc_add(io,nc*8.0,'sum_den_x')
+     call cgyro_alloc_add(io,nc*8.0,'sum_cur_x')
 
      if (nonlinear_flag == 1) then
         write(io,*)
@@ -54,15 +54,15 @@ subroutine cgyro_check_memory(datafile)
            ny0 = 2*n_toroidal-1
            nx = (3*nx0)/2
            ny = (3*ny0)/2
-           call alloc_add(io,(ny/2+1)*nx*16.0,'fx')
-           call alloc_add(io,(ny/2+1)*nx*16.0,'gx')
-           call alloc_add(io,(ny/2+1)*nx*16.0,'fy')
-           call alloc_add(io,(ny/2+1)*nx*16.0,'gy')
-           call alloc_add(io,ny*nx*8.0,'ux')
-           call alloc_add(io,ny*nx*8.0,'vx')
-           call alloc_add(io,ny*nx*8.0,'uy')
-           call alloc_add(io,ny*nx*8.0,'vy')
-           call alloc_add(io,ny*nx*8.0,'uv')
+           call cgyro_alloc_add(io,(ny/2+1)*nx*16.0,'fx')
+           call cgyro_alloc_add(io,(ny/2+1)*nx*16.0,'gx')
+           call cgyro_alloc_add(io,(ny/2+1)*nx*16.0,'fy')
+           call cgyro_alloc_add(io,(ny/2+1)*nx*16.0,'gy')
+           call cgyro_alloc_add(io,ny*nx*8.0,'ux')
+           call cgyro_alloc_add(io,ny*nx*8.0,'vx')
+           call cgyro_alloc_add(io,ny*nx*8.0,'uy')
+           call cgyro_alloc_add(io,ny*nx*8.0,'vy')
+           call cgyro_alloc_add(io,ny*nx*8.0,'uv')
         endif
      endif
 
@@ -78,31 +78,31 @@ subroutine cgyro_check_memory(datafile)
         write(io,*)
         write(io,*) 'Implicit time advance'
         write(io,*)
-        call alloc_add(io,nc*nv_loc*16.0,'gkvec')
-        call alloc_add(io,(2*nup_theta+1)*nc*10*nv_loc*16.0,'gksp_mat')
-        call alloc_add(io,(2*nup_theta+1)*nc*10*nv_loc*2*4.0,'gksp_indx')
-        call alloc_add(io,10*nv_loc*8.0,'gksp_cntl')
-        call alloc_add(io,20*nv_loc*4.0,'gksp_icntl')
-        call alloc_add(io,20*nv_loc*4.0,'gksp_keep')
+        call cgyro_alloc_add(io,nc*nv_loc*16.0,'gkvec')
+        call cgyro_alloc_add(io,(2*nup_theta+1)*nc*10*nv_loc*16.0,'gksp_mat')
+        call cgyro_alloc_add(io,(2*nup_theta+1)*nc*10*nv_loc*2*4.0,'gksp_indx')
+        call cgyro_alloc_add(io,10*nv_loc*8.0,'gksp_cntl')
+        call cgyro_alloc_add(io,20*nv_loc*4.0,'gksp_icntl')
+        call cgyro_alloc_add(io,20*nv_loc*4.0,'gksp_keep')
      endif
 
      write(io,*)
      write(io,*) 'Distribution-like arrays'
      write(io,*)
-     call alloc_add(io,4*nc*nv_loc*16.0,'rhs')
-     call alloc_add(io,n_field*nc*nv_loc*16.0,'omega_s')
-     call alloc_add(io,nc*nv_loc*16.0,'omega_cap_h')
-     call alloc_add(io,nc*nv_loc*16.0,'omega_h')
-     call alloc_add(io,nc*nv_loc*16.0,'h_x')
-     call alloc_add(io,nc*nv_loc*16.0,'g_x')
-     call alloc_add(io,nc*nv_loc*16.0,'psi')
-     call alloc_add(io,nc*nv_loc*16.0,'h0_x')
-     call alloc_add(io,nc*nv_loc*16.0,'cap_h_c')
-     call alloc_add(io,nc*nv_loc*16.0,'cap_h_ct')
-     call alloc_add(io,n_field*nc*nv_loc*8.0,'jvec_c')
-     call alloc_add(io,n_field*nc_loc*nv*8.0,'jvec_v')
-     call alloc_add(io,nc_loc*nv*16.0,'cap_h_v')
-     call alloc_add(io,nc_loc*nv*16.0,'cap_h_v_prime')
+     call cgyro_alloc_add(io,4*nc*nv_loc*16.0,'rhs')
+     call cgyro_alloc_add(io,n_field*nc*nv_loc*16.0,'omega_s')
+     call cgyro_alloc_add(io,nc*nv_loc*16.0,'omega_cap_h')
+     call cgyro_alloc_add(io,nc*nv_loc*16.0,'omega_h')
+     call cgyro_alloc_add(io,nc*nv_loc*16.0,'h_x')
+     call cgyro_alloc_add(io,nc*nv_loc*16.0,'g_x')
+     call cgyro_alloc_add(io,nc*nv_loc*16.0,'psi')
+     call cgyro_alloc_add(io,nc*nv_loc*16.0,'h0_x')
+     call cgyro_alloc_add(io,nc*nv_loc*16.0,'cap_h_c')
+     call cgyro_alloc_add(io,nc*nv_loc*16.0,'cap_h_ct')
+     call cgyro_alloc_add(io,n_field*nc*nv_loc*8.0,'jvec_c')
+     call cgyro_alloc_add(io,n_field*nc_loc*nv*8.0,'jvec_v')
+     call cgyro_alloc_add(io,nc_loc*nv*16.0,'cap_h_v')
+     call cgyro_alloc_add(io,nc_loc*nv*16.0,'cap_h_v_prime')
 
      if (nonlinear_flag == 1) then
         write(io,*)
@@ -110,11 +110,11 @@ subroutine cgyro_check_memory(datafile)
         write(io,*)
         ! nsplit * n_toroidal = nv_loc * n_theta
         if (nonlinear_method == 1) then
-           call alloc_add(io,nc*nsplit*n_toroidal*16.0,'f_nl')
-           call alloc_add(io,nc*nsplit*n_toroidal*16.0,'g_nl')
+           call cgyro_alloc_add(io,nc*nsplit*n_toroidal*16.0,'f_nl')
+           call cgyro_alloc_add(io,nc*nsplit*n_toroidal*16.0,'g_nl')
         else
-           call alloc_add(io,n_radial*nsplit*n_toroidal*16.0,'f_nl')
-           call alloc_add(io,n_radial*nsplit*n_toroidal*16.0,'g_nl')
+           call cgyro_alloc_add(io,n_radial*nsplit*n_toroidal*16.0,'f_nl')
+           call cgyro_alloc_add(io,n_radial*nsplit*n_toroidal*16.0,'g_nl')
         endif
      endif
 
@@ -123,22 +123,22 @@ subroutine cgyro_check_memory(datafile)
      write(io,*)
 
      if(collision_model == 5) then
-        call alloc_add(io,(8.0*n_xi)*n_xi*n_species*n_energy*n_theta,'cmat')
+        call cgyro_alloc_add(io,(8.0*n_xi)*n_xi*n_species*n_energy*n_theta,'cmat')
      else
-        call alloc_add(io,(8.0*nv)*nv*nc_loc,'cmat')
+        call cgyro_alloc_add(io,(8.0*nv)*nv*nc_loc,'cmat')
      endif
 
      if (implicit_flag == 1) then
         write(io,*)
         write(io,*) 'implicit gk'
         write(io,*)
-        call alloc_add(io,(nc*n_field)**2*16.0,'fieldmat')
-        call alloc_add(io,nc*n_field*4.0,'idfield')
-        call alloc_add(io,nc*n_field*4.0,'i_piv_field')
-        call alloc_add(io,nc*n_field*16.0,'fieldvec')
-        call alloc_add(io,nc*n_field*16.0,'fieldvec_loc')
-        call alloc_add(io,nc*16.0,'gksvec')
-        call alloc_add(io,2*nc*16.0,'gkwvec')
+        call cgyro_alloc_add(io,(nc*n_field)**2*16.0,'fieldmat')
+        call cgyro_alloc_add(io,nc*n_field*4.0,'idfield')
+        call cgyro_alloc_add(io,nc*n_field*4.0,'i_piv_field')
+        call cgyro_alloc_add(io,nc*n_field*16.0,'fieldvec')
+        call cgyro_alloc_add(io,nc*n_field*16.0,'fieldvec_loc')
+        call cgyro_alloc_add(io,nc*16.0,'gksvec')
+        call cgyro_alloc_add(io,2*nc*16.0,'gkwvec')
      endif
 
      write(io,*)
@@ -163,13 +163,13 @@ subroutine cgyro_check_memory(datafile)
 end subroutine cgyro_check_memory
 
 !------------------------------------------------
-! alloc_add.f90
+! cgyro_alloc_add.f90
 !
 ! PURPOSE:
 !  Primitive allocation addition routine.
 !------------------------------------------------
 
-subroutine alloc_add(my_io,bytes,name)
+subroutine cgyro_alloc_add(my_io,bytes,name)
 
   use cgyro_globals
 
@@ -193,4 +193,4 @@ subroutine alloc_add(my_io,bytes,name)
 
 10 format(t2,f8.3,a,3x,a)
   
-end subroutine alloc_add
+end subroutine cgyro_alloc_add
