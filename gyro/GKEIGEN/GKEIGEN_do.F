@@ -20,13 +20,13 @@
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #include "finclude/petsc.h"
-#include "finclude/petscvec.h"
-#include "finclude/petscmat.h"
-#include "finclude/petscis.h"
-#include "finclude/petscsys.h"
-#include "finclude/petscviewer.h"
+!#include "finclude/petscvec.h"
+!#include "finclude/petscmat.h"
+!#include "finclude/petscis.h"
+!#include "finclude/petscsys.h"
+!#include "finclude/petscviewer.h"
 #include "finclude/slepc.h"
-#include "finclude/slepceps.h"
+!#include "finclude/slepceps.h"
 
 !--------------------------------------------------
 ! PETSc, SLEPc, and other local variable declarations. These variables
@@ -44,8 +44,14 @@
      &               ncol
 
       Vec            dummy_vec
+!     -------------------------------------------------------
+!     declare dummy_vec2 to avoid using PETSC_NULL in Fortran
+!     -------------------------------------------------------
+      Vec            dummy_vec2
+      PetscReal      eigr
+      PetscReal      eigi
 
-      PetscScalar    dummy_scalar,
+      PetscScalar    dummy_scalar,dummy_scalar2,                        &
      &               gkeigen_target,                                    &
      &               one_col(h_length_loc),                             &
      &               M_seq(seq_length),                                 &
@@ -111,8 +117,11 @@
       call SlepcInitialize(PETSC_NULL_CHARACTER,ierr)
 !
       call VecCreate(MPI_COMM_WORLD,dummy_vec,ierr)
+      call VecCreate(MPI_COMM_WORLD,dummy_vec2,ierr)
       call VecSetSizes(dummy_vec,PETSC_DECIDE,h_length,ierr)
+      call VecSetSizes(dummy_vec2,PETSC_DECIDE,h_length,ierr)
       call VecSetFromOptions(dummy_vec,ierr)
+      call VecSetFromOptions(dummy_vec2,ierr)
 !
 !
       call MatCreate(MPI_COMM_WORLD,time_derivative_matrix,ierr)
@@ -513,11 +522,18 @@
       If (l_print) Print *, n_converged, ' converged solution(s)'
       step = 0
       Do iev = 0, n_converged-1
-        call EPSGetEigenpair(epsolve,iev,dummy_scalar,PETSC_NULL,       &
-     &          dummy_vec,PETSC_NULL,ierr)
-        call EPSComputeResidualNorm(epsolve,iev,residual,ierr)
-        ev_omega = -aimag(dummy_scalar)
-        ev_gamma = real(dummy_scalar)
+        call EPSGetEigenpair(epsolve,iev,eigr,eigi,                     &
+     &          dummy_vec,dummy_vec2,ierr)
+        ! ev_omega = -aimag(dummy_scalar)
+        ! ev_gamma = real(dummy_scalar)
+        ev_omega = -eigi
+        ev_gamma = eigr
+
+
+        ! Interface change in SLEPC
+        ! call EPSComputeResidualNorm(epsolve,iev,residual,ierr)
+        call  EPSComputeError(epsolve,iev,EPS_ERROR_RELATIVE,           &
+     &                        residual,ierr)
         If (l_print) Then
           print 20, iev+1, ev_omega, ev_gamma, residual
           if (iev==0) then
@@ -646,6 +662,7 @@
       call gyro_set_exit_status(gkeigen_message,2)
 
       call VecDestroy(dummy_vec,ierr)
+      call VecDestroy(dummy_vec2,ierr)
       call MatDestroy(time_derivative_matrix,ierr)
       call EPSDestroy(epsolve,ierr)
 !      call PetscViewerDestroy(vecfile,ierr)
