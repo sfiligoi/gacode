@@ -7,6 +7,7 @@ ftype = sys.argv[1]
 itime = int(sys.argv[2])
 ispec = int(sys.argv[3])
 tmax = float(sys.argv[4])
+theta = sys.argv[5]
 
 sim = cgyrodata('./')
 
@@ -18,6 +19,11 @@ fig.subplots_adjust(left=0.07,right=0.95,top=0.94,bottom=0.06,wspace=0.25,hspace
 fig.suptitle(r'${\rm species}='+str(ispec)+'$')
 
 func = sim.hb
+
+# Compute index for theta value in pitch angle and energy plots
+i0 = (1.0+float(theta))*sim.n_theta/2.0
+if i0 > sim.n_theta-1:
+    i0 = sim.n_theta-1
 
 p = 0
 for row in range(3):
@@ -68,10 +74,10 @@ for row in range(3):
     ax.grid(which="majorminor",ls=":")
     ax.grid(which="major",ls=":")
 
-    ax.set_title(r'$\theta=0 \quad {\rm ie}='+str(ie)+'$')
+    ax.set_title(r'$\theta/\pi='+theta+' \quad {\rm ie}='+str(ie)+'$')
     ax.set_xlabel(r'$\xi = v_\parallel/v$')
 
-    n0 = (sim.n_radial/2)*sim.n_theta+sim.n_theta/2 
+    n0 = (sim.n_radial/2)*sim.n_theta+i0
 
     hp = np.array(func[0,:,ispec,:,ie,itime])
     ax.plot(sim.xi,hp[n0,:],'-o',color='black',markersize=2)
@@ -87,10 +93,10 @@ for row in range(3):
     ax.grid(which="majorminor",ls=":")
     ax.grid(which="major",ls=":")
 
-    ax.set_title(r'$\theta=0 \quad {\rm ix}='+str(ix)+'$')
+    ax.set_title(r'$\theta/\pi='+theta+' \quad {\rm ix}='+str(ix)+'$')
     ax.set_xlabel(r'$x=\sqrt{\varepsilon}$')
 
-    n0 = (sim.n_radial/2)*sim.n_theta+sim.n_theta/2
+    n0 = (sim.n_radial/2)*sim.n_theta+i0
 
     hp = np.array(func[0,:,ispec,ix,:,itime])
     ax.plot(np.sqrt(sim.energy),hp[n0,:],'-o',color='black',markersize=2)
