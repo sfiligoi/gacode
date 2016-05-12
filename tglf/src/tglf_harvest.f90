@@ -47,8 +47,8 @@
 !   ---------------------------------------------------
 !    Plasma parameters
 !   ---------------------------------------------------
-    ierr=set_harvest_payload_bol(harvest_sendline,'SIGN_BT'//NUL,INT((tglf_sign_bt_in+1)/2.))
-    ierr=set_harvest_payload_bol(harvest_sendline,'SIGN_IT'//NUL,INT((tglf_sign_it_in+1)/2.))
+    ierr=set_harvest_payload_int(harvest_sendline,'SIGN_BT'//NUL,tglf_sign_bt_in)
+    ierr=set_harvest_payload_int(harvest_sendline,'SIGN_IT'//NUL,tglf_sign_it_in)
     IF (tglf_kygrid_model_in.NE.1) THEN
         ierr=set_harvest_payload_dbl(harvest_sendline,'KY'//NUL,tglf_ky_in)
     ENDIF
