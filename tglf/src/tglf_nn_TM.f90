@@ -83,6 +83,8 @@
                                 tglf_q_loc_in,       & ! Q_LOC
                                 tglf_q_prime_loc_in, & ! Q_PRIME_LOC
                                 tglf_rlns_in(1),     & ! RLNS_1
+                                tglf_rlns_in(2),     & ! RLNS_2
+                                tglf_rlns_in(3),     & ! RLNS_3
                                 tglf_rlts_in(1),     & ! RLTS_1
                                 tglf_rlts_in(2),     & ! RLTS_2
                                 tglf_rmaj_loc_in,    & ! RMAJ_LOC
