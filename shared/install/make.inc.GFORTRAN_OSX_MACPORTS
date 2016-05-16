@@ -1,6 +1,7 @@
 #---------------------------------------------------
 # OSX,gfortran+openmpi from MacPorts
-# sudo port install openmpi netcdf-fortran fftw-3
+# sudo port install openmpi netcdf-fortran 
+# sudo port install fftw-3 +openmpi
 #---------------------------------------------------
 
 MAKE = make
@@ -13,7 +14,7 @@ MF90 = mpif90
 #set up for diff mpif90s
 #
 
-FC	= ${MF90} -std=f2008 -I$(GACODE_ROOT)/modules -J$(GACODE_ROOT)/modules -g
+FC	= ${MF90} -std=f2008 -I$(GACODE_ROOT)/modules -J$(GACODE_ROOT)/modules -g -I/opt/local/include
 F77	= ${MF90} -g 
 
 FMATH	= -fdefault-real-8
@@ -24,7 +25,7 @@ FOMP	= -fopenmp
 
 # System math libraries
 
-LMATH = -framework Accelerate
+LMATH = -framework Accelerate -L/opt/local/lib -lfftw3
 
 NETCDF = -L/opt/local/lib -lnetcdff -lnetcdf 
 NETCDF_INC =${NETCDF_PATH}/include
