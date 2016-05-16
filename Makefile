@@ -12,13 +12,14 @@ all:
 
 some:
 	cd shared ; make
+	cd cgyro ; make stub
 	cd gato ; make 
 	cd neo ; make 
 	cd vgen ; make 
 	cd glf23 ; make
 	cd tglf ; make
 	cd gyro ; make 
-	cd tgyro ; make
+	cd tgyro ; make stub
 
 clean:
 	cd shared ; make clean

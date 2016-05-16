@@ -31,6 +31,16 @@ all:
 	cd ${GACODE_ROOT}/cgyro ; make
 	cd src ; make
 
+stub:
+	gacode_getversion > .VERSION
+	cd ${GACODE_ROOT}/shared ; make
+	cd ${GACODE_ROOT}/neo ; make
+	cd ${GACODE_ROOT}/tglf ; make
+	cd ${GACODE_ROOT}/glf23 ; make
+	cd ${GACODE_ROOT}/gyro ; make
+	cd ${GACODE_ROOT}/cgyro ; make stub
+	cd src ; make
+
 clean:
 	cd src ; make clean
 	rm -rf .VERSION

@@ -55,6 +55,10 @@ OBJECTS = cgyro_globals.o \
 all: cgyro_lib.a $(EXEC).o $(EXTRA_LIBS)
 	$(FC) $(FFLAGS) -o $(EXEC) $(EXEC).o cgyro_lib.a $(EXTRA_LIBS) $(LMATH)
 
+stub: 
+	$(FC) $(FFLAGS) -c cgyro_stub.f90
+	$(ARCH) cgyro_lib.a cgyro_stub.o
+
 cgyro_lib.a: $(OBJECTS)
 	$(ARCH) cgyro_lib.a $(OBJECTS)
 
