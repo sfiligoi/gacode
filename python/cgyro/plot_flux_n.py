@@ -52,8 +52,8 @@ if ftype == 'dump':
     stag = '# (k_y rho_s'
     for ispec in range(ns):
         for j in range(sim.n_n):
-            ave[j] = average(y[ispec,j,:],sim.t,w)
-        arr[:,ispec+1] = ave
+            ave = average(y[ispec,j,:],sim.t,w)
+            arr[j,ispec+1] = ave
         stag = stag+' , s'+str(ispec)
             
     fid = open(datafile,'w')
