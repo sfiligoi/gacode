@@ -6,11 +6,11 @@ import tables
 import sys
 
 def dataAtTorAngle(modeData,n0,n_n,nu,omega,phi):
-  """ Given a dictionary containing the mode data, and the 
+     """ Given a dictionary containing the mode data, and the 
       transform variables (n0,n_n,omega,nu) show the data at a
       particular toroidal angle
 
-  """
+     """
      firstkey=modeData.keys()[0]
      # Shape will 
      modeShape=modeData[firstkey].shape
@@ -20,21 +20,21 @@ def dataAtTorAngle(modeData,n0,n_n,nu,omega,phi):
        if (n0==0):
            istart=2
            for iphi in range(1,nphi+1):
-             real_buff(:,:,:,iphi)=real(buffn(:,:,:,1))
+             real_buff[:,:,:,iphi]=real(buffn[:,:,:,1])
        else:
          istart=1
-         real_buff(:,:,:,:)=0.
+         real_buff[:,:,:,:]=0.
          #Get alpha coordinate on either the coarse or fine mesh.
          # Include doppler shift here
          if (iscoarse):
-           alpha_loc=alpha_phi(:,:,iphi)+omega_exp*t_current
+           alpha_loc=alpha_phi[:,:,iphi]+omega_exp*t_current
          else:
-           alpha_loc=alpha_phi_fine(:,:,iphi)+omega_exp*t_current
+           alpha_loc=alpha_phi_fine[:,:,iphi]+omega_exp*t_current
          for im in range(istart,n_n+1):
             nn=n0+(im-1)*d_n
             for ikin in range(1,n3+1):
-              real_buff(:,:,ikin,iphi)=real_buff(:,:,ikin,iphi)&
-                    +2.*real(buffn(:,:,ikin,im)*exp(-c_i*nn*alpha_loc(:,:)))
+              real_buff[:,:,ikin,iphi]=real_buff[:,:,ikin,iphi]\
+                    +2.*real(buffn[:,:,ikin,im]*exp(-c_i*nn*alpha_loc[:,:]))
 
 def main():
     """ SEK: Once the pretty print can be figured out, then we can look

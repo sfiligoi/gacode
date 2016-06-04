@@ -12,112 +12,112 @@ subroutine cgyro_read_input
 
   if (i_proc == 0) open(unit=1,file=trim(path)//'input.cgyro.gen',status='old')
 
-  call readbc_int(n_energy)
-  call readbc_int(n_xi)
-  call readbc_int(n_theta)
-  call readbc_int(n_radial)
-  call readbc_int(n_toroidal)
-  call readbc_int(n_field)
-  call readbc_real(e_max)
-  call readbc_int(e_method)
-  call readbc_real(delta_t)
-  call readbc_real(max_time)
-  call readbc_int(print_step)
-  call readbc_int(restart_step)
-  call readbc_real(freq_tol)
-  call readbc_int(restart_mode)
-  call readbc_real(up_radial)
-  call readbc_real(up_theta)
-  call readbc_int(nup_theta)
-  call readbc_int(nup_radial)
-  call readbc_int(implicit_flag)
-  call readbc_int(constant_wind_flag)
-  call readbc_real(ky)
-  call readbc_int(box_size)
-  call readbc_real(ipccw)
-  call readbc_real(btccw)
-  call readbc_int(silent_flag)
-  call readbc_int(profile_model)
-  call readbc_int(equilibrium_model)
-  call readbc_int(collision_model)
-  call readbc_int(collision_mom_restore)
-  call readbc_int(collision_ene_restore)
-  call readbc_int(collision_ene_diffusion)
-  call readbc_int(collision_kperp)
-  call readbc_int(collision_field_model)
-  call readbc_int(zf_test_flag)
-  call readbc_int(nonlinear_flag)
-  call readbc_int(nonlinear_method)
-  call readbc_real(te_ade)
-  call readbc_real(ne_ade)
-  call readbc_real(masse_ade)
-  call readbc_real(lambda_debye)
-  call readbc_int(test_flag)
-  call readbc_int(h_print_flag)
-  call readbc_real(amp0)
-  call readbc_real(amp)
-  call readbc_real(gamma_e)
-  call readbc_real(gamma_p)
-  call readbc_real(mach)
-  call readbc_real(error_tol)
-  call readbc_int(kxfilter_flag)
-  call readbc_real(gamma_e_decay)
-  call readbc_int(hiprec_flag)
-  call readbc_int(udsymmetry_flag)
-  call readbc_int(shear_method)
-  call readbc_int(shear_pad)
-  call readbc_real(dshift)
+  call cgyro_readbc_int(n_energy)
+  call cgyro_readbc_int(n_xi)
+  call cgyro_readbc_int(n_theta)
+  call cgyro_readbc_int(n_radial)
+  call cgyro_readbc_int(n_toroidal)
+  call cgyro_readbc_int(n_field)
+  call cgyro_readbc_real(e_max)
+  call cgyro_readbc_int(e_method)
+  call cgyro_readbc_real(delta_t)
+  call cgyro_readbc_real(max_time)
+  call cgyro_readbc_int(print_step)
+  call cgyro_readbc_int(restart_step)
+  call cgyro_readbc_real(freq_tol)
+  call cgyro_readbc_int(restart_mode)
+  call cgyro_readbc_real(up_radial)
+  call cgyro_readbc_real(up_theta)
+  call cgyro_readbc_int(nup_theta)
+  call cgyro_readbc_int(nup_radial)
+  call cgyro_readbc_int(implicit_flag)
+  call cgyro_readbc_int(constant_wind_flag)
+  call cgyro_readbc_real(ky)
+  call cgyro_readbc_int(box_size)
+  call cgyro_readbc_real(ipccw)
+  call cgyro_readbc_real(btccw)
+  call cgyro_readbc_int(silent_flag)
+  call cgyro_readbc_int(profile_model)
+  call cgyro_readbc_int(equilibrium_model)
+  call cgyro_readbc_int(collision_model)
+  call cgyro_readbc_int(collision_mom_restore)
+  call cgyro_readbc_int(collision_ene_restore)
+  call cgyro_readbc_int(collision_ene_diffusion)
+  call cgyro_readbc_int(collision_kperp)
+  call cgyro_readbc_int(collision_field_model)
+  call cgyro_readbc_int(zf_test_flag)
+  call cgyro_readbc_int(nonlinear_flag)
+  call cgyro_readbc_int(nonlinear_method)
+  call cgyro_readbc_real(te_ade)
+  call cgyro_readbc_real(ne_ade)
+  call cgyro_readbc_real(masse_ade)
+  call cgyro_readbc_real(lambda_debye)
+  call cgyro_readbc_int(test_flag)
+  call cgyro_readbc_int(h_print_flag)
+  call cgyro_readbc_real(amp0)
+  call cgyro_readbc_real(amp)
+  call cgyro_readbc_real(gamma_e)
+  call cgyro_readbc_real(gamma_p)
+  call cgyro_readbc_real(mach)
+  call cgyro_readbc_real(error_tol)
+  call cgyro_readbc_int(kxfilter_flag)
+  call cgyro_readbc_real(gamma_e_decay)
+  call cgyro_readbc_int(hiprec_flag)
+  call cgyro_readbc_int(udsymmetry_flag)
+  call cgyro_readbc_int(shear_method)
+  call cgyro_readbc_int(shear_pad)
+  call cgyro_readbc_real(dshift)
 
-  call readbc_real(rmin)
-  call readbc_real(rmaj)
-  call readbc_real(q)
-  call readbc_real(s)
-  call readbc_real(shift)    
-  call readbc_real(kappa)   
-  call readbc_real(s_kappa)  
-  call readbc_real(delta)       
-  call readbc_real(s_delta)
-  call readbc_real(zeta)      
-  call readbc_real(s_zeta)
-  call readbc_real(zmag)       
-  call readbc_real(dzmag)
-  call readbc_real(beta_star)
-  call readbc_real(betae_unit)
+  call cgyro_readbc_real(rmin)
+  call cgyro_readbc_real(rmaj)
+  call cgyro_readbc_real(q)
+  call cgyro_readbc_real(s)
+  call cgyro_readbc_real(shift)    
+  call cgyro_readbc_real(kappa)   
+  call cgyro_readbc_real(s_kappa)  
+  call cgyro_readbc_real(delta)       
+  call cgyro_readbc_real(s_delta)
+  call cgyro_readbc_real(zeta)      
+  call cgyro_readbc_real(s_zeta)
+  call cgyro_readbc_real(zmag)       
+  call cgyro_readbc_real(dzmag)
+  call cgyro_readbc_real(beta_star)
+  call cgyro_readbc_real(betae_unit)
 
-  call readbc_int(subroutine_flag)
+  call cgyro_readbc_int(subroutine_flag)
 
-  call readbc_int(n_species)
+  call cgyro_readbc_int(n_species)
 
-  call readbc_real(nu_ee)
+  call cgyro_readbc_real(nu_ee)
 
   do is=1,6
-     call readbc_int(xint) ; z(is) = xint
-     call readbc_real(x)   ; mass(is) = x
-     call readbc_real(x)   ; dens(is) = x
-     call readbc_real(x)   ; temp(is) = x
-     call readbc_real(x)   ; dlnndr(is) = x
-     call readbc_real(x)   ; dlntdr(is) = x
+     call cgyro_readbc_int(xint) ; z(is) = xint
+     call cgyro_readbc_real(x)   ; mass(is) = x
+     call cgyro_readbc_real(x)   ; dens(is) = x
+     call cgyro_readbc_real(x)   ; temp(is) = x
+     call cgyro_readbc_real(x)   ; dlnndr(is) = x
+     call cgyro_readbc_real(x)   ; dlntdr(is) = x
   enddo
 
-  call readbc_real(lambda_debye_scale)
-  call readbc_real(gamma_e_scale)
-  call readbc_real(gamma_p_scale)
-  call readbc_real(mach_scale)
-  call readbc_real(q_scale)
-  call readbc_real(s_scale)
-  call readbc_real(shift_scale)
-  call readbc_real(kappa_scale)
-  call readbc_real(delta_scale)
-  call readbc_real(zeta_scale)
-  call readbc_real(s_kappa_scale)
-  call readbc_real(s_delta_scale)
-  call readbc_real(s_zeta_scale)
-  call readbc_real(beta_star_scale)
-  call readbc_real(betae_unit_scale)
-  call readbc_real(nu_ee_scale)
+  call cgyro_readbc_real(lambda_debye_scale)
+  call cgyro_readbc_real(gamma_e_scale)
+  call cgyro_readbc_real(gamma_p_scale)
+  call cgyro_readbc_real(mach_scale)
+  call cgyro_readbc_real(q_scale)
+  call cgyro_readbc_real(s_scale)
+  call cgyro_readbc_real(shift_scale)
+  call cgyro_readbc_real(kappa_scale)
+  call cgyro_readbc_real(delta_scale)
+  call cgyro_readbc_real(zeta_scale)
+  call cgyro_readbc_real(s_kappa_scale)
+  call cgyro_readbc_real(s_delta_scale)
+  call cgyro_readbc_real(s_zeta_scale)
+  call cgyro_readbc_real(beta_star_scale)
+  call cgyro_readbc_real(betae_unit_scale)
+  call cgyro_readbc_real(nu_ee_scale)
   do is=1,6
-     call readbc_real(x)   ; dlnndr_scale(is) = x
-     call readbc_real(x)   ; dlntdr_scale(is) = x
+     call cgyro_readbc_real(x)   ; dlnndr_scale(is) = x
+     call cgyro_readbc_real(x)   ; dlntdr_scale(is) = x
   enddo
 
   if (i_proc == 0) close(1)
@@ -152,7 +152,7 @@ end subroutine cgyro_read_input
 !
 ! (1) read and broadcast an integer:
 !
-subroutine readbc_int(p)
+subroutine cgyro_readbc_int(p)
 
   use mpi
   use cgyro_globals
@@ -164,11 +164,11 @@ subroutine readbc_int(p)
 
   call MPI_BCAST(p,1,MPI_INTEGER,0,CGYRO_COMM_WORLD,i_err)
 
-end subroutine readbc_int
+end subroutine cgyro_readbc_int
 !
 ! (2) read and broadcast a real:
 !
-subroutine readbc_real(x)
+subroutine cgyro_readbc_real(x)
   
   use mpi
   use cgyro_globals
@@ -180,5 +180,5 @@ subroutine readbc_real(x)
 
   call MPI_BCAST(x,1,MPI_DOUBLE_PRECISION,0,CGYRO_COMM_WORLD,i_err)
 
-end subroutine readbc_real
+end subroutine cgyro_readbc_real
 !------------------------------------------------------------

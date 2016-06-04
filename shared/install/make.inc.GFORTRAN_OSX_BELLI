@@ -1,34 +1,26 @@
 #---------------------------------------------------
-# Generic {Intel OSX,gfortran} 
+# OSX Mountain Lion (10.8.x)
 #---------------------------------------------------
-
-FFTWDIR=/usr/local
-ROOT=/Users/belli/scisoft
-
-# Reset make command
-#MAKE = make
 
 # Compilers and flags
 
-FC	= mpif90 -fall-intrinsics -std=f2008 -I$(GACODE_ROOT)/modules -J$(GACODE_ROOT)/modules -I/usr/local/include
-F77	= mpif90 -I$(GACODE_ROOT)/modules
+FC	= mpif90-mpich-gcc5 -I$(GACODE_ROOT)/modules -J$(GACODE_ROOT)/modules -I/opt/local/include
+F77	= mpif90-mpich-gcc5
 
 FOMP    = -fopenmp
 FMATH	= -fdefault-real-8
-FOPT	= -O3 
-FDEBUG  = -Wall -fcheck=all -fbacktrace -O -W -finit-real=nan -fbounds-check -ffpe-trap=invalid,zero,overflow
+FOPT	= -O3
+FDEBUG  = -Wall -fcheck=all -ffpe-trap=invalid,zero,overflow
 
 # System math libraries
 
-LMATH = /System/Library/Frameworks/vecLib.framework/Versions/A/vecLib \
-       -lSystem  \
-       $(FFTWDIR)/lib/libfftw3.a
+LMATH = -framework Accelerate /opt/local/lib/libfftw3.a
 
-# OPTIONAL: netCDF (for gyro2gkv)
-NETCDF = $(ROOT)/lib/libnetcdf.a $(ROOT)/lib/libnetcdff.a -lcurl 
-NETCDF_INC = $(ROOT)/include/
+# NetCDF libraries
+
+NETCDF = -L/opt/local/lib -lnetcdff -L/opt/local/lib -Wl,-headerpad_max_install_names -lnetcdf -lnetcdf
+NETCDF_INC = /opt/local/include
  
 # Archive
 
-ARCH = ar -c -r -s
-
+ARCH = ar cr

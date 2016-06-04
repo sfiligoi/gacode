@@ -20,6 +20,7 @@ OBJECTS = cgyro_globals.o \
           cgyro_flux.o \
           cgyro_freq.o \
           cgyro_upwind.o \
+          cgyro_init.o \
           cgyro_init_h.o \
           cgyro_init_arrays.o \
 	  cgyro_init_collision_simple.o \
@@ -38,6 +39,7 @@ OBJECTS = cgyro_globals.o \
 	  cgyro_nl_direct.o \
 	  cgyro_nl_fftw.o \
           cgyro_read_input.o \
+          cgyro_run.o \
           cgyro_shear_interface.o \
           cgyro_shear.o \
           cgyro_shear_dft.o \
@@ -52,6 +54,10 @@ OBJECTS = cgyro_globals.o \
 
 all: cgyro_lib.a $(EXEC).o $(EXTRA_LIBS)
 	$(FC) $(FFLAGS) -o $(EXEC) $(EXEC).o cgyro_lib.a $(EXTRA_LIBS) $(LMATH)
+
+stub: 
+	$(FC) $(FFLAGS) -c cgyro_stub.f90
+	$(ARCH) cgyro_lib.a cgyro_stub.o
 
 cgyro_lib.a: $(OBJECTS)
 	$(ARCH) cgyro_lib.a $(OBJECTS)

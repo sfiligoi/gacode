@@ -396,8 +396,15 @@ class ManagerInput:
                 print 'INFO: (gacodeinput) Processed input.* in '+basedir+'; CPU_max=1'
                 
             else:
-                basefile = basedir+'/input.gyro' 
-                tempfile = basedir+'/input.gyro.temp' 
+
+                if os.path.isfile(basedir+'/input.gyro'):
+                    code='gyro'
+                else:
+                    code='cgyro'
+
+                basefile = basedir+'/input.'+code 
+                tempfile = basefile+'.temp' 
+
                 file_base = open(basefile,'r')
                 file_temp = open(tempfile,'w')
 
@@ -414,10 +421,14 @@ class ManagerInput:
                 os.system('cat '+self.overlayfile[p]+' >> '+tempfile)
                 os.system('mv '+tempfile+' '+basefile)
 
-                os.system('gyro -i '+basedir+' -n 1 -nomp 1 -p $PWD '+gyro_start)
-                cpu = self.getcpu(basedir)
-                print 'INFO: (gacodeinput) Processed input.* in '+basedir+'; CPU_max='+str(cpu)
-
+                if code == 'gyro':
+                    os.system(code+' -i '+basedir+' -n 1 -nomp 1 -p $PWD '+gyro_start)
+                    cpu = self.getcpu(basedir)
+                    print 'INFO: (gacodeinput) Processed input.* in '+basedir+'; CPU_max='+str(cpu)
+                else:
+                    os.system(code+' -t '+basedir+' -n 1 -nomp 1 -p $PWD > out.tgyro.testlog')
+                    print 'INFO: (gacodeinput) Processed input.* in '+basedir+'; see out.cgyro.mpi/info'
+                  
             os.system('rm '+self.overlayfile[p])
 
         print 'INFO: (gacodeinput) Required MPI tasks in TGYRO: '+str(self.sum_proc)

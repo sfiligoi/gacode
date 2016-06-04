@@ -333,9 +333,12 @@ subroutine tgyro_tglf_map
     harvest_err=set_harvest_payload_dbl(tglf_harvest_extra_in,'tgyro_mflux_target'//NUL,mflux_target(i_r))
 
     ! Neoclassical fluxes
+    harvest_err=set_harvest_payload_dbl(tglf_harvest_extra_in,'tgyro_eflux_e_neo'//NUL,eflux_e_neo(i_r))
     harvest_err=set_harvest_payload_dbl(tglf_harvest_extra_in,'tgyro_sum_eflux_i_neo'//NUL,&
     & sum(eflux_i_neo(therm_vec(:),i_r)))
     harvest_err=set_harvest_payload_dbl(tglf_harvest_extra_in,'tgyro_pflux_e_neo'//NUL,pflux_e_neo(i_r))
+    harvest_err=set_harvest_payload_dbl(tglf_harvest_extra_in,'tgyro_sum_mflux_i_neo'//NUL,&
+    & sum(mflux_i_neo(therm_vec(:),i_r)))
 
     ! Gyrobohm normalizations
     harvest_err=set_harvest_payload_dbl(tglf_harvest_extra_in,'tgyro_q_gb'//NUL,q_gb(i_r))

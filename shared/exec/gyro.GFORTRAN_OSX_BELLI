@@ -15,5 +15,5 @@ mpinuma=${6}
 
 cd $simdir
 export OMP_NUM_THREADS=$nomp 
-mpirun -np $nmpi $exec
+mpiexec-mpich-gcc5 -np $nmpi $exec
 
