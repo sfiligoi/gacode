@@ -29,17 +29,24 @@ ax.grid(which="majorminor",ls=":")
 ax.grid(which="major",ls=":")
 ax.set_xlabel(r'$\theta_*/\pi$')
 
-x = sim.thetab/np.pi
+if sim.n_radial == 1:
+    x = sim.theta/np.pi
+    ax.set_xlim([-1,1])
+else:
+    x = sim.thetab/np.pi
+    if tmax < 0.0:
+        ax.set_xlim([1-sim.n_radial,-1+sim.n_radial])
+    else:
+        ax.set_xlim([-tmax,tmax])
+
 y1 = np.real(f)
 y2 = np.imag(f)
 
 ax.plot(x,y1,'-o',color='black',markersize=2,label='Re')
 ax.plot(x,y2,'-o',color='blue',markersize=2,label='Im')
 
-if tmax < 0.0:
-    ax.set_xlim([1-sim.n_radial,-1+sim.n_radial])
-else:
-    ax.set_xlim([-tmax,tmax])
+
+
 
 ax.legend()
 #======================================

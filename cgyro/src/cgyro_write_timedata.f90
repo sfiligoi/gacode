@@ -61,10 +61,10 @@ subroutine cgyro_write_timedata
   ! Note that value is a distributed real scalar
   call write_precision(trim(path)//runfile_prec,sum(abs(flux))+sum(abs(moment)))
 
-  !---------------------------------------------------------------
-  ! Ballooning mode output for linear runs with a single mode
+  !------------------------------------------------------------------
+  ! Ballooning mode (or ZF) output for linear runs with a single mode
   !
-  if (n_toroidal == 1 .and. n > 0) then
+  if (n_toroidal == 1) then
      do i_field=1,n_field
 
         do ir=1,n_radial
@@ -75,9 +75,15 @@ subroutine cgyro_write_timedata
 
         if (i_field == 1) a_norm = ftemp(n_radial/2+1,n_theta/2+1) 
 
-        call write_balloon(&
-             trim(path)//runfile_fieldb(i_field),&
-             ftemp(:,:)/a_norm)
+        if (n == 0) then
+           call write_zf(&
+                trim(path)//runfile_fieldb(i_field),&
+                ftemp(:,:)/a_norm)
+        else
+           call write_balloon(&
+                trim(path)//runfile_fieldb(i_field),&
+                ftemp(:,:)/a_norm)
+        endif
      enddo
   endif
   !---------------------------------------------------------------
@@ -505,6 +511,63 @@ subroutine write_balloon(datafile,fn)
 
 end subroutine write_balloon
 
+subroutine write_zf(datafile,fn)
+
+  use cgyro_globals
+
+  !------------------------------------------------------
+  implicit none
+  !
+  character (len=*), intent(in) :: datafile
+  complex, intent(in) :: fn(n_radial,n_theta)
+  complex :: ftmp(n_radial,n_theta)
+  !
+  integer :: ir,jr,it,np
+  integer :: i_dummy
+  !------------------------------------------------------
+
+  if (i_proc > 0) return
+
+  select case (io_control)
+
+  case(0)
+
+     return
+
+  case(1)
+
+     ! Open
+
+     open(unit=io,file=datafile,status='replace')
+     close(io)
+
+  case(2)
+
+     ! Append
+
+     open(unit=io,file=datafile,status='old',position='append')
+
+     ! Construct ballooning-space form of field
+         
+     write(io,fmtstr) fn(:,:)
+     close(io)
+
+     !-------------------------------------------------------
+
+  case(3)
+
+     ! Rewind
+
+     open(unit=io,file=datafile,status='old')
+     do i_dummy=1,i_current
+        read(io,fmtstr) ftmp(:,:)
+     enddo
+     endfile(io)
+     close(io)
+
+  end select
+
+end subroutine write_zf
 
 subroutine write_time(datafile)
 
