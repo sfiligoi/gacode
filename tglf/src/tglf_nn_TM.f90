@@ -32,16 +32,16 @@
 !
      do is=1,ns
        do j=1,3 
-     	 particle_flux_out(is,j) = 0.0
-     	 energy_flux_out(is,j) = 0.0
-     	 stress_par_out(is,j) = 0.0
-     	 stress_tor_out(is,j) = 0.0
-     	 exchange_out(is,j) = 0.0
-     	 pflux0(is,j) = 0.0
-     	 eflux0(is,j) = 0.0
-     	 stress_par0(is,j) = 0.0
-     	 stress_tor0(is,j) = 0.0
-     	 exch0(is,j) = 0.0
+          particle_flux_out(is,j) = 0.0
+          energy_flux_out(is,j) = 0.0
+          stress_par_out(is,j) = 0.0
+          stress_tor_out(is,j) = 0.0
+          exchange_out(is,j) = 0.0
+          pflux0(is,j) = 0.0
+          eflux0(is,j) = 0.0
+          stress_par0(is,j) = 0.0
+          stress_tor0(is,j) = 0.0
+          exch0(is,j) = 0.0
        enddo
        q_low_out(is) = 0.0
      enddo

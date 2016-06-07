@@ -145,20 +145,20 @@ subroutine tglf_run()
          ! Check proper processor setup
          if (nProcTglf .eq. 1) then
             if (tglf_nn_max_error_in .gt. 0) then
-     	       call tglf_nn_tm
-     	    endif
-     	    if (.not. valid_nn) then
-     	       call tglf_tm_mpi
+                    call tglf_nn_tm
+                 endif
+                 if (.not. valid_nn) then
+                    call tglf_tm_mpi
             endif
-	 else
+         else
             call tglf_tm_mpi
          endif
 #else
          if (tglf_nn_max_error_in .gt. 0) then
-     	    call tglf_nn_tm
-     	 endif
-     	 if (.not. valid_nn) then
-     	     call tglf_tm
+                 call tglf_nn_tm
+              endif
+              if (.not. valid_nn) then
+                  call tglf_tm
          endif
 #endif
      
@@ -169,57 +169,57 @@ subroutine tglf_run()
 
      ! Gammae/Gamma_GB
      tglf_elec_pflux_out = get_particle_flux(1,1)  &
-     	  + get_particle_flux(1,2)		   &
-     	  + get_particle_flux(1,3)
+               + get_particle_flux(1,2)            &
+               + get_particle_flux(1,3)
 
      ! Qe/Q_GB
      tglf_elec_eflux_low_out = get_q_low(1)
      tglf_elec_eflux_out     = get_energy_flux(1,1) &
-     	  + get_energy_flux(1,2)		    &
-     	  + get_energy_flux(1,3)
+               + get_energy_flux(1,2)               &
+               + get_energy_flux(1,3)
 
      ! Pi_e/Pi_GB
      tglf_elec_mflux_out = get_stress_tor(1,1)   &
-     	  + get_stress_tor(1,2) 		 &
-     	  + get_stress_tor(1,3)
+               + get_stress_tor(1,2)             &
+               + get_stress_tor(1,3)
 
      ! S_e/S_GB
      tglf_elec_expwd_out = get_exchange(1,1)  &
-     	  + get_exchange(1,2)		      &
-     	  + get_exchange(1,3)
+               + get_exchange(1,2)            &
+               + get_exchange(1,3)
 
      ! Ions
 
      do i_ion=1,5
 
-     	! Gammai/Gamma_GB
-     	tglf_ion_pflux_out(i_ion) = get_particle_flux(i_ion+1,1) &
-     	     + get_particle_flux(i_ion+1,2)			 &
-     	     + get_particle_flux(i_ion+1,3)
+             ! Gammai/Gamma_GB
+             tglf_ion_pflux_out(i_ion) = get_particle_flux(i_ion+1,1) &
+                  + get_particle_flux(i_ion+1,2)                      &
+                  + get_particle_flux(i_ion+1,3)
 
-     	! Qi/Q_GB
-     	tglf_ion_eflux_low_out(i_ion) = get_q_low(i_ion+1)
-     	! _low already included EM terms
-     	tglf_ion_eflux_out(i_ion)     = get_energy_flux(i_ion+1,1) &
-     	     + get_energy_flux(i_ion+1,2)			   &
-     	     + get_energy_flux(i_ion+1,3)
+             ! Qi/Q_GB
+             tglf_ion_eflux_low_out(i_ion) = get_q_low(i_ion+1)
+             ! _low already included EM terms
+             tglf_ion_eflux_out(i_ion)     = get_energy_flux(i_ion+1,1) &
+                  + get_energy_flux(i_ion+1,2)                          &
+                  + get_energy_flux(i_ion+1,3)
 
-     	! Pi_i/Pi_GB
-     	tglf_ion_mflux_out(i_ion) = get_stress_tor(i_ion+1,1)  &
-     	     + get_stress_tor(i_ion+1,2)		       &
-     	     + get_stress_tor(i_ion+1,3)
+             ! Pi_i/Pi_GB
+             tglf_ion_mflux_out(i_ion) = get_stress_tor(i_ion+1,1)  &
+                  + get_stress_tor(i_ion+1,2)                       &
+                  + get_stress_tor(i_ion+1,3)
 
-     	! S_i/S_GB
-     	tglf_ion_expwd_out(i_ion) = get_exchange(i_ion+1,1)    &
-     	     + get_exchange(i_ion+1,2)  		       &
-     	     + get_exchange(i_ion+1,3)
+             ! S_i/S_GB
+             tglf_ion_expwd_out(i_ion) = get_exchange(i_ion+1,1)    &
+                  + get_exchange(i_ion+1,2)                         &
+                  + get_exchange(i_ion+1,3)
 
      enddo
 
      call get_error_status(tglf_error_message,tglf_error_status)
 
      if ((tglf_error_status.EQ.0) .and. (.not. valid_nn)) then
-	CALL tglf_harvest_local
+        CALL tglf_harvest_local
      endif
 
   else
