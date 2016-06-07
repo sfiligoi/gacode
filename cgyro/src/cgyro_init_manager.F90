@@ -85,7 +85,7 @@ subroutine cgyro_init_manager
   ! NOTE: without this we have poor grid-convergence for small e_max
   !
   b = sqrt(e_max)
-  w_e(n_energy) = w_e(n_energy)+2.0*exp(-e_max)*b/sqrt(pi)+erfc(b)
+  !w_e(n_energy) = w_e(n_energy)+2.0*exp(-e_max)*b/sqrt(pi)+erfc(b)
   !----------------------------------------------------------------------
 
   allocate(xi(n_xi))
