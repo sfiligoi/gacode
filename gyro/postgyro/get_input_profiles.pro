@@ -165,6 +165,15 @@ FUNCTION get_input_profiles, simdir, FILENAME=filename, $
   exp_pow_e_aux = REFORM(arr[3,*])   ;MW
   exp_pow_i_aux = REFORM(arr[4,*])   ;MW
 
+  s = '#'
+  WHILE (STRPOS(s, 'pow_e_fus') EQ -1) DO READF, 1, s
+  READF, 1, arr
+  exp_pow_e_fus = REFORM(arr[0,*])  ;MW
+  exp_pow_i_fus = REFORM(arr[1,*])        ;MW
+  exp_pow_e_sync = REFORM(arr[2,*])        ;MW
+  exp_pow_e_brem = REFORM(arr[3,*])   ;MW
+  exp_pow_e_line = REFORM(arr[4,*])   ;MW
+
   CLOSE, 1
 
   n_exp_profile = 46           ;should be 37, but use 25 for back-compatibility
@@ -187,6 +196,7 @@ FUNCTION get_input_profiles, simdir, FILENAME=filename, $
       CLOSE, 1
   ENDELSE
   exp_Bunit = REFORM(arr[*,0])
+  exp_vol = REFORM(arr[*,32])
   exp_vprime = REFORM(arr[*,33])
 
  data = {simdir: simdir, $     ;simulation directory
@@ -207,6 +217,7 @@ FUNCTION get_input_profiles, simdir, FILENAME=filename, $
           exp_delta: exp_delta, $ ;triangularity
           exp_zeta: exp_zeta, $ ;squareness
           exp_zmag: exp_zmag, $ ;Z0(r)  ;m
+          exp_vol: exp_vol, $ ;m^3
           exp_vprime: exp_vprime, $ ;dV/drmin m^2
           exp_Bunit: exp_Bunit, $ ;T
           exp_omega0: exp_omega0, $     ; 1/s
@@ -219,7 +230,12 @@ FUNCTION get_input_profiles, simdir, FILENAME=filename, $
           exp_pow_exch: exp_pow_exch, $  ;ion-electron exchange term in Mw
           exp_pow_e_aux: exp_pow_e_aux, $     ; total electron heating in Mw
           exp_pow_i_aux: exp_pow_i_aux, $     ; total ion heating in Mw
-          exp_flow_beam: exp_flow_beam, $ ; beam-driven Gamma_e  in MW/keV?
+  	  exp_pow_e_fus: exp_pow_e_fus, $    ; integrated e- heating by alphas
+  	  exp_pow_i_fus: exp_pow_i_fus, $    ; integrated ionheating by alphas
+  	  exp_pow_e_sync: exp_pow_e_sync, $  ; integrated sync. radiation
+  	  exp_pow_e_brem: exp_pow_e_brem, $  ; integrated bremstrahlung radiation
+  	  exp_pow_e_line: exp_pow_e_line, $  ; integrated line radiation
+          exp_flow_beam: exp_flow_beam, $ ; beam-driven Gamma_e  in MW/keV
           exp_flow_wall: exp_flow_wall, $ ; wall-source-driven Gamma_e
           exp_flow: exp_flow_Beam+exp_flow_wall, $  ; total exp. Gamma_e (beam+wall)
           exp_ptot: exp_ptot, $ ;total pressure inc. fast ions (pa)

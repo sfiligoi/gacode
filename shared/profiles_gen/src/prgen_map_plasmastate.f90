@@ -312,12 +312,17 @@ subroutine prgen_map_plasmastate
      allocate(vtorc_exp(nx))
      call prgen_read_cer
      EXPRO_w0 = omega0(:)
-     do i=1,n_ion_max
-        if (reorder_vec(i) == onetwo_nprim+1) then
-           EXPRO_vtor(i,:) = vtorc_exp(:)
-           EXPRO_vpol(i,:) = vpolc_exp(:)
-        endif
-     enddo
+!CH hack- should be fixed at some point
+     print '(a)','WARNING: (prgen) Assuming thermal C is 2nd species for recording CER velocities!'
+     print '(a)','WARNING: (prgen) User should confirm magnitude and signs of vtor_2 and vpol_2 are correct!'
+     EXPRO_vtor(2,:) = vtorc_exp(:)
+     EXPRO_vpol(2,:) = vpolc_exp(:)
+!     do i=1,n_ion_max
+!        if (reorder_vec(i) == onetwo_nprim+1) then
+!           EXPRO_vtor(i,:) = vtorc_exp(:)
+!           EXPRO_vpol(i,:) = vpolc_exp(:)
+!        endif
+!     enddo
   endif
   !---------------------------------------------------
 
