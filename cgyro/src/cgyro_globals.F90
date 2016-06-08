@@ -37,7 +37,7 @@ module cgyro_globals
   integer :: nup_theta
   integer :: nup_radial
   integer :: implicit_flag
-  integer :: constant_wind_flag
+  integer :: constant_stream_flag
   real    :: ky
   integer :: box_size
   real    :: ipccw

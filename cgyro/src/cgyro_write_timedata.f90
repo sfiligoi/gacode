@@ -724,7 +724,7 @@ subroutine write_timers(datafile)
   !
   character (len=*), intent(in) :: datafile
   integer :: i_dummy
-  real, dimension(9) :: dummy
+  real, dimension(10) :: dummy
   character (len=1) :: sdummy
   !-------------------------------------------------
 
