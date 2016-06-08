@@ -101,7 +101,10 @@ class cgyrodata:
             pass
         try:
             data = np.fromfile(self.dir+'out.cgyro.aparb',dtype='float',sep=" ")
-            self.aparb = np.reshape(data,(2,self.n_theta*self.n_radial/self.m_box,nt),'F')
+            if self.n_radial == 1:
+                self.aparb = np.reshape(data,(2,self.n_theta,nt),'F')
+            else:
+                self.aparb = np.reshape(data,(2,self.n_theta*self.n_radial/self.m_box,nt),'F')
             print "INFO: (data.py) Read data in out.cgyro.aparb."
         except:
             pass
