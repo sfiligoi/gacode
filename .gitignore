@@ -55,3 +55,6 @@ le3/profiles_3d/profiles_3d
 # Regression logs and directories
 *.log
 *regression_test/
+
+# local working files not to be shared
+tmp.py
