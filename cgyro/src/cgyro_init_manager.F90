@@ -22,17 +22,19 @@ subroutine cgyro_init_manager
 #ifdef _OPENACC
   use precision_m, only : singlePrecision
   use cufft_m, only : cufftPlanMany, &
-        CUFFT_C2R,CUFFT_Z2D,CUFFT_R2C,CUFFT_D2Z
+       CUFFT_C2R,CUFFT_Z2D,CUFFT_R2C,CUFFT_D2Z
 #endif
   implicit none
+
+  real :: b
 
   include 'fftw3.f03'
 
 #ifdef _OPENACC
-    integer :: howmany,istatus
-    integer, parameter :: irank = 2
-    integer, dimension(irank) :: ndim,inembed,onembed
-    integer :: idist,odist,istride,ostride
+  integer :: howmany,istatus
+  integer, parameter :: irank = 2
+  integer, dimension(irank) :: ndim,inembed,onembed
+  integer :: idist,odist,istride,ostride
 
 #endif
 
@@ -61,11 +63,30 @@ subroutine cgyro_init_manager
   allocate(e_deriv2_mat(n_energy,n_energy))
   ! Construct energy nodes and weights
   if (e_method == 1) then
-     call pseudo_maxwell(n_energy,nint(e_max),energy,w_e,e_deriv1_mat,e_deriv2_mat)
+     call pseudo_maxwell(n_energy,&
+          nint(e_max),&
+          energy,&
+          w_e,&
+          e_deriv1_mat,&
+          e_deriv2_mat)
   else
-     call pseudo_maxwell_new(n_energy,e_max,energy,w_e,e_deriv1_mat,e_deriv2_mat,trim(path)//'out.cgyro.egrid')
+     call pseudo_maxwell_new(n_energy,&
+          e_max,&
+          energy,&
+          w_e,&
+          e_deriv1_mat,&
+          e_deriv2_mat,&
+          trim(path)//'out.cgyro.egrid')
   endif
   vel(:) = sqrt(energy(:))
+
+  !----------------------------------------------------------------------
+  ! Correction factor for missing energy interval to ensure sum(w)=1.0
+  ! NOTE: without this we have poor grid-convergence for small e_max
+  !
+  b = sqrt(e_max)
+  !w_e(n_energy) = w_e(n_energy)+2.0*exp(-e_max)*b/sqrt(pi)+erfc(b)
+  !----------------------------------------------------------------------
 
   allocate(xi(n_xi))
   allocate(w_xi(n_xi))
@@ -155,7 +176,7 @@ subroutine cgyro_init_manager
      endif
 
   endif
-  
+
 
   ! Compute equilibrium quantities (even in test mode)
   GEO_model_in    = geo_numeq_flag
@@ -206,7 +227,7 @@ subroutine cgyro_init_manager
   if (nonlinear_method == 1) then
 
      ! Direct convolution
-     
+
      ny0 = n_toroidal-1
      nx0 = n_radial/2
      ny = int(1.5*ny0)+1
@@ -254,56 +275,56 @@ subroutine cgyro_init_manager
 !!$acc enter data create(uvmany)
 
 
-!   -------------------------------------
-! 2D
-!   input[ b*idist + (x * inembed[1] + y) * istride ]
-!   output[ b*odist + (x * onembed[1] + y)*ostride ]
-!   isign is the sign of the exponent in the formula that defines
-!   Fourier transform  -1 == FFTW_FORWARD
-!                       1 == FFTW_BACKWARD
-!   -------------------------------------
+     !   -------------------------------------
+     ! 2D
+     !   input[ b*idist + (x * inembed[1] + y) * istride ]
+     !   output[ b*odist + (x * onembed[1] + y)*ostride ]
+     !   isign is the sign of the exponent in the formula that defines
+     !   Fourier transform  -1 == FFTW_FORWARD
+     !                       1 == FFTW_BACKWARD
+     !   -------------------------------------
 
-      ndim(1) = nx
-      ndim(2) = ny
-      idist = size( fxmany,1)*size(fxmany,2)
-      odist = size( uxmany,1)*size(uxmany,2)
-      istride = 1
-      ostride = 1
-      inembed = size(fxmany,1)
-      onembed = size(uxmany,1)
+     ndim(1) = nx
+     ndim(2) = ny
+     idist = size( fxmany,1)*size(fxmany,2)
+     odist = size( uxmany,1)*size(uxmany,2)
+     istride = 1
+     ostride = 1
+     inembed = size(fxmany,1)
+     onembed = size(uxmany,1)
 
-      istatus = cufftPlanMany( cu_plan_c2r_many,                         &
-     &                                    irank,                         &
-     &                                    ndim,                          &
-     &                                    inembed,                       &
-     &                                    istride,                       &
-     &                                    idist,                         &
-     &                                    onembed,                       &
-     &                                    ostride,                       &
-     &                                    odist,                         &
-     &  merge(CUFFT_C2R,CUFFT_Z2D,kind(uxmany).eq.singlePrecision),      &
-     &                                    howmany )
-      
-      idist = size(uxmany,1)*size(uxmany,2)
-      odist = size(fxmany,1)*size(fxmany,2)
-      inembed = size(uxmany,1)
-      onembed = size(fxmany,1) 
-      istride = 1
-      ostride = 1
-      istatus = cufftPlanMany( cu_plan_r2c_many,                         &
-     &                     irank,                                        &
-     &                     ndim,                                         &
-     &                     inembed,                                      &
-     &                     istride,                                      &
-     &                     idist,                                        &
-     &                     onembed,                                      &
-     &                     ostride,                                      &
-     &                     odist,                                        &
-     & merge(CUFFT_R2C,CUFFT_D2Z,kind(uxmany).eq.singlePrecision),       &
-     &                     howmany )
+     istatus = cufftPlanMany( cu_plan_c2r_many,                         &
+          &                                    irank,                         &
+          &                                    ndim,                          &
+          &                                    inembed,                       &
+          &                                    istride,                       &
+          &                                    idist,                         &
+          &                                    onembed,                       &
+          &                                    ostride,                       &
+          &                                    odist,                         &
+          &  merge(CUFFT_C2R,CUFFT_Z2D,kind(uxmany).eq.singlePrecision),      &
+          &                                    howmany )
+
+     idist = size(uxmany,1)*size(uxmany,2)
+     odist = size(fxmany,1)*size(fxmany,2)
+     inembed = size(uxmany,1)
+     onembed = size(fxmany,1) 
+     istride = 1
+     ostride = 1
+     istatus = cufftPlanMany( cu_plan_r2c_many,                         &
+          &                     irank,                                        &
+          &                     ndim,                                         &
+          &                     inembed,                                      &
+          &                     istride,                                      &
+          &                     idist,                                        &
+          &                     onembed,                                      &
+          &                     ostride,                                      &
+          &                     odist,                                        &
+          & merge(CUFFT_R2C,CUFFT_D2Z,kind(uxmany).eq.singlePrecision),       &
+          &                     howmany )
 #endif
 
   endif
 
-!$acc enter data copyin(energy,xi,vel)
+  !$acc enter data copyin(energy,xi,vel)
 end subroutine cgyro_init_manager

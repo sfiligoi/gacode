@@ -42,6 +42,9 @@ then
   echo "          -tmax <float>"
   echo "          Maximum value of ballooning angle."
   echo
+  echo "          -theta <value>"
+  echo "          Value of theta/pi used in hbcut"
+  echo
   echo "          -ymax <float>"
   echo "          Maximum value of vertical axis (where applicable)."
   echo
@@ -83,6 +86,7 @@ YMAX=auto
 W=0.5
 MOMENT=e
 INDX=1
+THETA=0.0
 #==============================================================================
 
 #==============================================================================
@@ -108,6 +112,8 @@ while [ $# -gt 0 ] ; do
   -t) shift ; TIME=$1 ;;
 
   -tmax) shift ; TMAX=$1 ;;
+
+  -theta) shift ; THETA=$1 ;;
 
   -ymax) shift ; YMAX=$1 ;;
 
@@ -137,43 +143,43 @@ PYROOT=$GACODE_ROOT/python/cgyro
 case "$PLOT_TYPE" in
 
    ball)  
-	python $PYROOT/plot_ball.py $FTYPE $TIME $FIELD $TMAX & ;;
+	python $PYROOT/plot_ball.py $FTYPE $TIME $FIELD $TMAX ;;
 
    hb)  
-	python $PYROOT/plot_hb.py $FTYPE $TIME $SPECIES $TMAX & ;;
+	python $PYROOT/plot_hb.py $FTYPE $TIME $SPECIES $TMAX ;;
 
    hbcut)  
-	python $PYROOT/plot_hbcut.py $FTYPE $TIME $SPECIES $TMAX & ;;
+	python $PYROOT/plot_hbcut.py $FTYPE $TIME $SPECIES $TMAX $THETA ;;
 
    freq)  
-	python $PYROOT/plot_freq.py $FTYPE & ;;
+	python $PYROOT/plot_freq.py $FTYPE ;;
 
    fluxn)  
-	python $PYROOT/plot_flux_n.py $FTYPE $W $MOMENT & ;;
+	python $PYROOT/plot_flux_n.py $FTYPE $W $MOMENT ;;
 
    fluxt)  
-	python $PYROOT/plot_flux_t.py $FTYPE $W $MOMENT $YMAX & ;;
+	python $PYROOT/plot_flux_t.py $FTYPE $W $MOMENT $YMAX ;;
 
    pwr)  
-	python $PYROOT/plot_pwr.py $FTYPE $FIELD & ;;
+	python $PYROOT/plot_pwr.py $FTYPE $FIELD ;;
 
    pwr_np)  
-	python $PYROOT/plot_pwr_np.py $FTYPE $W $FIELD & ;;
+	python $PYROOT/plot_pwr_np.py $FTYPE $W $FIELD ;;
 
    pwr_zf)  
-	python $PYROOT/plot_pwr_zf.py $FTYPE $W $FIELD & ;;
+	python $PYROOT/plot_pwr_zf.py $FTYPE $W $FIELD ;;
 
    zf)  
-	python $PYROOT/plot_zf.py $FTYPE $W $FIELD & ;;
+	python $PYROOT/plot_zf.py $FTYPE $W $FIELD ;;
 
    geo)
-	python $PYROOT/plot_geo.py $FTYPE & ;;
+	python $PYROOT/plot_geo.py $FTYPE ;;
 
    text)
-   	python $PYROOT/text.py $W $FTYPE & ;;
+   	python $PYROOT/text.py $W $FTYPE ;;
 
    note)
-   	python $PYROOT/plot_notebook.py $W $FTYPE $SPECIES & ;;
+   	python $PYROOT/plot_notebook.py $W $FTYPE $SPECIES ;;
 
    *)
         echo "Unrecognized argument to -plot" ; exit 1 ;;

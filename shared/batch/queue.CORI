@@ -1,10 +1,10 @@
 #! /usr/bin/env bash
 #
 # SCRIPT:
-#  queue.EDISON_CRAY
+#  queue.CORI
 #
 # FUNCTION:
-#  Batch generator for Cray XC30 (edison.nersc.gov)  
+#  Batch generator for NERSC Cori
 #---------------------------------------------------
 
 nmpi=${1}
@@ -14,6 +14,7 @@ code=${4}
 nomp=${5}
 numa=${6}
 mpinuma=${7}
+nidle=${8}
 
 # nmpi = MPI tasks
 # nomp = OpenMP threads per MPI task
@@ -65,24 +66,19 @@ bfile=$simpath/$sim/batch.src
 # Copy appropriate commands to batch directory:
 
 # Repository selection
-#getnim -U `whoami`
+getnim -U `whoami`
 
-#read -p "Specify a repository [0 for default] " repo
+read -p "Specify a repository [0 for default] " repo
 
 echo "#!/bin/bash -l" > $bfile
 echo "#SBATCH -J $sim" >> $bfile
-if [ "$repo" != "0" ]
-then
-   echo "#SBATCH -A $repo" >> $bfile
-fi
+echo "#SBATCH -A $repo" >> $bfile
 echo "#SBATCH -o $simpath/$sim/batch.out" >> $bfile
 echo "#SBATCH -e $simpath/$sim/batch.err" >> $bfile
 echo "#SBATCH -p $queue" >> $bfile
 echo "#SBATCH -t $limit" >> $bfile
 echo "#SBATCH -N $nodes" >> $bfile
 echo " " >> $bfile
-
-#echo "module load python" >> $bfile
 
 gyro_opts="-e $sim -n $nmpi -nomp $nomp -numa $numa -mpinuma $mpinuma -p $simpath"
 

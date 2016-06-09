@@ -176,7 +176,7 @@ subroutine tgyro_init_profiles
   ! Convert T to eV (from keV) and length to cm (from m):
   call cub_spline(EXPRO_rmin(:)/r_min,1e3*EXPRO_te(:),n_exp,r,te,n_r)
   call cub_spline(EXPRO_rmin(:)/r_min,1e13*EXPRO_ne(:),n_exp,r,ne,n_r)
-  call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_dlnptotdr(:)/100.0,n_exp,r,dlnnedr,n_r)
+  call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_dlnptotdr(:)/100.0,n_exp,r,dlnptotdr,n_r)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_dlnnedr(:)/100.0,n_exp,r,dlnnedr,n_r)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_dlntedr(:)/100.0,n_exp,r,dlntedr,n_r)
   do i_ion=1,loc_n_ion

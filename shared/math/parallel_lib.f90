@@ -24,6 +24,7 @@ module parallel_lib
   integer, private :: nsplit
   integer, private :: slib_comm
 
+  integer, private, parameter :: default_size = 1024*1024*32
 contains
 
   !=========================================================
@@ -78,7 +79,8 @@ contains
     integer :: ierr,i_loc,i,j,k, i1,i2
 
 
-!$omp  parallel do default(none) &
+
+!$omp  parallel do if (size(fsendf) >= default_size) default(none) &
 !$omp& shared(nproc,iproc,ni_loc,nj_loc) &
 !$omp& private(k,i,i_loc,j,i1,i2) &
 !$omp& shared(f) &
@@ -117,7 +119,7 @@ contains
     complex, intent(inout), dimension(ni_loc,nj) :: f
     integer :: ierr,j_loc,i,j,k, j1,j2
 
-!$omp parallel do default(none) &
+!$omp  parallel do if (size(fsendr) >= default_size) default(none) &
 !$omp& shared(nproc,iproc,nj_loc,ni_loc) &
 !$omp& private(k,j,j_loc,i,j1,j2) &
 !$omp& shared(ft) &
@@ -156,7 +158,7 @@ contains
     complex, intent(inout), dimension(ni_loc,nj) :: f
     integer :: ierr,j_loc,i,j,k, j1,j2
 
-!$omp parallel do default(none) &
+!$omp  parallel do if (size(fsendr) >= default_size) default(none) &
 !$omp& shared(nproc,iproc,nj_loc,ni_loc) &
 !$omp& private(k,j,j_loc,i,j1,j2) &
 !$omp& shared(fin) &
@@ -195,7 +197,7 @@ contains
     real, intent(inout), dimension(ni_loc,nj) :: f
     integer :: ierr,j_loc,i,j,k,j1,j2
 
-!$omp  parallel do default(none) &
+!$omp  parallel do if (size(fsendr_real) >= default_size) default(none) &
 !$omp& shared(nproc,iproc,nj_loc,ni_loc) &
 !$omp& private(k,j,j_loc,i,j1,j2) &
 !$omp& shared(ft) &
@@ -232,7 +234,7 @@ contains
     real, intent(inout), dimension(ni_loc,nj) :: f
     integer :: ierr,j_loc,i,j,k,j1,j2
 
-!$omp  parallel do default(none) &
+!$omp  parallel do if (size(fsendr_real) >= default_size) default(none) &
 !$omp& shared(nproc,iproc,nj_loc,ni_loc) &
 !$omp& private(k,j,j_loc,i,j1,j2) &
 !$omp& shared(fin) &
@@ -316,7 +318,7 @@ contains
     integer :: ierr
     !-------------------------------------------------------
 
-!$omp  parallel do default(none) &
+!$omp  parallel do if (size(x) >= default_size) default(none) &
 !$omp& shared(nexch) &
 !$omp& private(j) &
 !$omp& shared(x_in) &
@@ -325,7 +327,7 @@ contains
        x(:,j) = x_in(:,j)
     enddo
 
-!$omp  parallel do default(none) &
+!$omp  parallel do if (size(x) >= default_size) default(none) &
 !$omp& shared(nexch,nsplit,nn) &
 !$omp& private(j) &
 !$omp& shared(x)
@@ -370,7 +372,7 @@ contains
          slib_comm, &
          ierr)
 
-!$omp  parallel do default(none) &
+!$omp  parallel do if (size(x) >= default_size) default(none) &
 !$omp& shared(nexch) &
 !$omp& private(j) &
 !$omp& shared(x) &

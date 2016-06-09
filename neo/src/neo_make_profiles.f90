@@ -242,10 +242,12 @@ subroutine neo_make_profiles
         dphi0dr(:) = dphi0dr(:) * a_meters / temp_norm(:) / 1000
      end select
      
-     ! Compute rho/a for species 1 using dimensional quantities
+     ! Compute rho/a for using dimensional quantities
      ! mass(i) is thus measured in units of deuterium mass.
+     ! EAB: Note on 05/09/16 fixed error in which this had
+     ! an extra factor of sqrt(mass(1))
      rho(:) = sqrt(temp(1,:) * temp_norm_fac &
-          * mass(1) * mass_deuterium) &
+          * mass_deuterium) &
           / (charge_norm_fac * b_unit(:)) &
           * 1.0e-4 / a_meters
      
@@ -264,7 +266,6 @@ subroutine neo_make_profiles
            ! EAB: 03/22/09 redefined this wrt electron species
            ! (was previously defined wrt species 1)
            loglam = 24.0 - log(sqrt(ne_ade(ir)*1e13)/(te_ade(ir)*1000))
-
 
            ! Collision rate (1/sec)
            nu(is,ir) = cc * loglam * dens(is,ir) * z(is)**4 &

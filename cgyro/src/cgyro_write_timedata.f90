@@ -35,24 +35,24 @@ subroutine cgyro_write_timedata
   if (nonlinear_flag == 1) then
 
      ! Density flux for all species
-     call write_distributed_real(&
+     call cgyro_write_distributed_real(&
           trim(path)//runfile_kxky_flux(1),&
           size(flux(:,:,1)),&
           flux(:,:,1))
      ! Energy flux for all species
-     call write_distributed_real(&
+     call cgyro_write_distributed_real(&
           trim(path)//runfile_kxky_flux(2),&
           size(flux(:,:,2)),&
           flux(:,:,2))
      ! Density moment for all species at theta=0
-     call write_distributed_complex(&
+     call cgyro_write_distributed_complex(&
           trim(path)//runfile_kxky_n,&
           size(moment(:,:)),&
           moment(:,:))
   endif
 
   ! Complex potential at theta=0 
-  call write_distributed_complex(&
+  call cgyro_write_distributed_complex(&
        trim(path)//runfile_kxky_phi,&
        size(field(1,ic_c(:,it0))),&
        field(1,ic_c(:,it0)))
@@ -61,10 +61,10 @@ subroutine cgyro_write_timedata
   ! Note that value is a distributed real scalar
   call write_precision(trim(path)//runfile_prec,sum(abs(flux))+sum(abs(moment)))
 
-  !---------------------------------------------------------------
-  ! Ballooning mode output for linear runs with a single mode
+  !------------------------------------------------------------------
+  ! Ballooning mode (or ZF) output for linear runs with a single mode
   !
-  if (n_toroidal == 1 .and. n > 0) then
+  if (n_toroidal == 1) then
      do i_field=1,n_field
 
         do ir=1,n_radial
@@ -75,9 +75,15 @@ subroutine cgyro_write_timedata
 
         if (i_field == 1) a_norm = ftemp(n_radial/2+1,n_theta/2+1) 
 
-        call write_balloon(&
-             trim(path)//runfile_fieldb(i_field),&
-             ftemp(:,:)/a_norm)
+        if (n == 0) then
+           call write_zf(&
+                trim(path)//runfile_fieldb(i_field),&
+                ftemp(:,:)/a_norm)
+        else
+           call write_balloon(&
+                trim(path)//runfile_fieldb(i_field),&
+                ftemp(:,:)/a_norm)
+        endif
      enddo
   endif
   !---------------------------------------------------------------
@@ -86,7 +92,7 @@ subroutine cgyro_write_timedata
   call cgyro_freq
   vfreq(1) = real(freq) 
   vfreq(2) = aimag(freq)
-  call write_distributed_real(trim(path)//runfile_freq,size(vfreq),vfreq)
+  call cgyro_write_distributed_real(trim(path)//runfile_freq,size(vfreq),vfreq)
 
   if (n_toroidal == 1) call print_scrdata()
 
@@ -112,13 +118,13 @@ end subroutine cgyro_write_timedata
 !===============================================================================
 
 !------------------------------------------------------
-! write_distributed_complex.f90
+! cgyro_write_distributed_complex.f90
 !
 ! PURPOSE:
 !  Control merged output of complex distributed array.
 !------------------------------------------------------
 
-subroutine write_distributed_complex(datafile,n_fn,fn)
+subroutine cgyro_write_distributed_complex(datafile,n_fn,fn)
 
   use mpi
   use cgyro_globals
@@ -235,17 +241,17 @@ subroutine write_distributed_complex(datafile,n_fn,fn)
 
   end select
 
-end subroutine write_distributed_complex
+end subroutine cgyro_write_distributed_complex
 
 
 !------------------------------------------------------
-! write_distributed_real.f90
+! cgyro_write_distributed_real.f90
 !
 ! PURPOSE:
 !  Control merged output of real distributed array.
 !------------------------------------------------------
 
-subroutine write_distributed_real(datafile,n_fn,fn)
+subroutine cgyro_write_distributed_real(datafile,n_fn,fn)
 
   use mpi
   use cgyro_globals
@@ -361,7 +367,7 @@ subroutine write_distributed_real(datafile,n_fn,fn)
 
   end select
 
-end subroutine write_distributed_real
+end subroutine cgyro_write_distributed_real
 
 !------------------------------------------------------
 ! write_precision.f90
@@ -505,6 +511,63 @@ subroutine write_balloon(datafile,fn)
 
 end subroutine write_balloon
 
+subroutine write_zf(datafile,fn)
+
+  use cgyro_globals
+
+  !------------------------------------------------------
+  implicit none
+  !
+  character (len=*), intent(in) :: datafile
+  complex, intent(in) :: fn(n_radial,n_theta)
+  complex :: ftmp(n_radial,n_theta)
+  !
+  integer :: ir,jr,it,np
+  integer :: i_dummy
+  !------------------------------------------------------
+
+  if (i_proc > 0) return
+
+  select case (io_control)
+
+  case(0)
+
+     return
+
+  case(1)
+
+     ! Open
+
+     open(unit=io,file=datafile,status='replace')
+     close(io)
+
+  case(2)
+
+     ! Append
+
+     open(unit=io,file=datafile,status='old',position='append')
+
+     ! Construct ballooning-space form of field
+         
+     write(io,fmtstr) fn(:,:)
+     close(io)
+
+     !-------------------------------------------------------
+
+  case(3)
+
+     ! Rewind
+
+     open(unit=io,file=datafile,status='old')
+     do i_dummy=1,i_current
+        read(io,fmtstr) ftmp(:,:)
+     enddo
+     endfile(io)
+     close(io)
+
+  end select
+
+end subroutine write_zf
 
 subroutine write_time(datafile)
 
@@ -661,7 +724,7 @@ subroutine write_timers(datafile)
   !
   character (len=*), intent(in) :: datafile
   integer :: i_dummy
-  real, dimension(9) :: dummy
+  real, dimension(10) :: dummy
   character (len=1) :: sdummy
   !-------------------------------------------------
 

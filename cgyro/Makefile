@@ -15,6 +15,9 @@ all:
 	cd ${GACODE_ROOT}/shared ; make
 	cd src ; make
 
+stub:
+	cd src ; make stub
+
 clean:
 	cd ${GACODE_ROOT}/modules ; rm -f cgyro*.mod
 	cd src ; make clean
