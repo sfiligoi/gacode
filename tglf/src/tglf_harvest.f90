@@ -12,8 +12,9 @@
     USE tglf_interface
     USE tglf_pkg
     USE tglf_global
+    USE tglf_kyspectrum
 
-    INTEGER :: ierr, i, j, nky
+    INTEGER :: ierr, i, j
     CHARACTER(LEN=65507) :: harvest_sendline
     CHARACTER(LEN=255) :: harvest_tag
     CHARACTER(LEN=2) :: NUM
@@ -228,8 +229,6 @@
 !   ---------------------------------------------------
 !    Spectra
 !   ---------------------------------------------------
-   nky = get_nky_out()
-
    ALLOCATE(spectrum(nky))
    
    DO i = 1, nky
