@@ -62,6 +62,7 @@ module tgyro_globals
   !===============================================================
   ! Variables for LOCAL transport mode
   !
+  integer :: shot
   integer, parameter :: n_ion_max = 9
   integer, parameter :: n_evolve_max = 5
   character(len=14) :: runfile='out.tgyro.run'
