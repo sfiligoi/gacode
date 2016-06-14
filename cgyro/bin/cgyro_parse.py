@@ -77,8 +77,8 @@ x.add('ZMAG','0.0')
 x.add('DZMAG','0.0')
 x.add('BETA_STAR','0.0')
 x.add('BETAE_UNIT','0.0')
-
 x.add('SUBROUTINE_FLAG','0')
+x.add('USE_ALLTOALL','1')
 
 x.add('N_SPECIES','1')
 x.add('NU_EE','0.1')

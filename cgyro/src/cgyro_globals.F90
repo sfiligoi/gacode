@@ -106,6 +106,7 @@ module cgyro_globals
   real, dimension(6) :: dlntdr
 
   integer :: subroutine_flag  ! only used for cgyro_read_input
+  integer :: use_alltoall
 
   ! Re-scaling parameters for experimental profiles
   real :: lambda_debye_scale

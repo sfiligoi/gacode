@@ -83,9 +83,8 @@ subroutine cgyro_read_input
   call cgyro_readbc_real(dzmag)
   call cgyro_readbc_real(beta_star)
   call cgyro_readbc_real(betae_unit)
-
   call cgyro_readbc_int(subroutine_flag)
-
+  call cgyro_readbc_int(use_alltoall)
   call cgyro_readbc_int(n_species)
 
   call cgyro_readbc_real(nu_ee)
