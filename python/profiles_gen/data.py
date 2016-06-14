@@ -208,6 +208,7 @@ class profiles_gen:
         import numpy as np
 
         self.data = {}
+        self.shot = 0
         self.n_ion = 0
         self.n_exp = 0
         self.bt_exp = 0.0
@@ -216,6 +217,8 @@ class profiles_gen:
         row = 0
         for line in open(infile, 'r').readlines():
             row = row + 1
+            if line[0:5] == 'SHOT':
+                self.shot = int(line.split('=')[1])
             if line[0:5] == 'N_ION':
                 self.n_ion = int(line.split('=')[1])
             if line[0:5] == 'N_EXP':
