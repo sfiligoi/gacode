@@ -66,7 +66,7 @@ subroutine cgyro_write_initdata
      write(io,20) '   zeta:',zeta, ' s_zeta:',s_zeta
      write(io,20) '   zmag:',zmag, '  dzmag:',dzmag
      write(io,*)
-     write(io,20) '  betae:',betae_unit, ' beta_*:',beta_star,'lambda_d:',lambda_debye
+     write(io,20) '  betae:',betae_unit, ' beta_*:',beta_star,' lam/rho:',lambda_debye/rho
      write(io,*)
      write(io,20) 'gamma_e:', gamma_e,   'gamma_p:', gamma_p, '    mach:', mach
 
