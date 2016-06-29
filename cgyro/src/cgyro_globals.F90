@@ -59,7 +59,7 @@ module cgyro_globals
   real :: dlntdre_ade   ! used only for experimental profiles
   real :: dlnndre_ade   ! used only for experimental profiles
   real :: masse_ade
-  real :: lambda_debye
+  real :: lambda_star
   integer :: test_flag
   integer :: h_print_flag
   real :: amp0
@@ -109,7 +109,7 @@ module cgyro_globals
   integer :: use_alltoall
 
   ! Re-scaling parameters for experimental profiles
-  real :: lambda_debye_scale
+  real :: lambda_star_scale
   real :: gamma_e_scale
   real :: gamma_p_scale
   real :: mach_scale
@@ -123,6 +123,9 @@ module cgyro_globals
   real :: nu_ee_scale
   real, dimension(6) :: dlnndr_scale
   real, dimension(6) :: dlntdr_scale
+
+  real :: lambda_debye
+  real :: rhos
 
   !---------------------------------------------------------------
 

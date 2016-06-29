@@ -36,6 +36,7 @@ subroutine cgyro_experimental_alloc(flag)
      allocate(gamma_e_exp(n_grid_exp))
      allocate(gamma_p_exp(n_grid_exp))
      allocate(mach_exp(n_grid_exp))
+     allocate(rhos_exp(n_grid_exp))
 
      allocate(geo_yin_exp(8,0:geo_ny,n_grid_exp))
      geo_yin_exp(:,:,:)=0.0
@@ -70,6 +71,7 @@ subroutine cgyro_experimental_alloc(flag)
      if(allocated(gamma_e_exp))     deallocate(gamma_e_exp)
      if(allocated(gamma_p_exp))     deallocate(gamma_p_exp)
      if(allocated(mach_exp))        deallocate(mach_exp)
+     if(allocated(rhos_exp))        deallocate(rhos_exp)
 
      if(allocated(geo_yin_exp))     deallocate(geo_yin_exp)
 

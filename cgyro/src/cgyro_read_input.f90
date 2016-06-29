@@ -51,7 +51,7 @@ subroutine cgyro_read_input
   call cgyro_readbc_real(te_ade)
   call cgyro_readbc_real(ne_ade)
   call cgyro_readbc_real(masse_ade)
-  call cgyro_readbc_real(lambda_debye)
+  call cgyro_readbc_real(lambda_star)
   call cgyro_readbc_int(test_flag)
   call cgyro_readbc_int(h_print_flag)
   call cgyro_readbc_real(amp0)
@@ -98,7 +98,7 @@ subroutine cgyro_read_input
      call cgyro_readbc_real(x)   ; dlntdr(is) = x
   enddo
 
-  call cgyro_readbc_real(lambda_debye_scale)
+  call cgyro_readbc_real(lambda_star_scale)
   call cgyro_readbc_real(gamma_e_scale)
   call cgyro_readbc_real(gamma_p_scale)
   call cgyro_readbc_real(mach_scale)

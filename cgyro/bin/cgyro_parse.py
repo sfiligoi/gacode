@@ -45,7 +45,7 @@ x.add('NONLINEAR_METHOD','2')
 x.add('TE_ADE','1.0')
 x.add('NE_ADE','1.0')
 x.add('MASSE_ADE','0.0002724486');
-x.add('LAMBDA_DEBYE','0.0')
+x.add('LAMBDA_STAR','0.0')
 x.add('TEST_FLAG','0')
 x.add('H_PRINT_FLAG','0')
 x.add('AMP0','0.0')
@@ -119,7 +119,7 @@ x.add('TEMP_6','1.0')
 x.add('DLNNDR_6','1.0')
 x.add('DLNTDR_6','1.0')
 
-x.add('LAMBDA_DEBYE_SCALE','0.0');
+x.add('LAMBDA_STAR_SCALE','0.0');
 x.add('GAMMA_E_SCALE','1.0')
 x.add('GAMMA_P_SCALE','1.0')
 x.add('MACH_SCALE','1.0')
