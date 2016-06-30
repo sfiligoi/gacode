@@ -58,29 +58,21 @@ subroutine cgyro_shear_pt
 
   endif
 
-  do iv=nv1,nv2
-     do ic=1,nc
-
-        iv_loc = iv-nv1+1
-        is = is_v(iv)
-        ix = ix_v(iv)
-        ie = ie_v(iv)
-        ir = ir_c(ic) 
+  do ic=1,nc
+     ir = ir_c(ic) 
+     if (ir < n_radial) then 
         it = it_c(ic)
-
-        if (ir < n_radial) then 
-           fcoef(:,ic) = fcoef0(:,ic_c(ir,it))*(1-gtime) + fcoef0(:,ic_c(ir+1,it))*gtime
-           gcoef(:,ic) = gcoef0(:,ic_c(ir,it))*(1-gtime) + gcoef0(:,ic_c(ir+1,it))*gtime
-           omega_cap_h(ic,iv_loc) = omega_cap_h0(ic_c(ir,it),iv_loc)*(1-gtime) &
-                +omega_cap_h0(ic_c(ir+1,it),iv_loc)*gtime
-           omega_s(:,ic,iv_loc) = omega_s0(:,ic_c(ir,it),iv_loc)*(1-gtime) &
-                +omega_s0(:,ic_c(ir+1,it),iv_loc)*gtime
-           jvec_c(:,ic,iv_loc) = jvec_c0(:,ic_c(ir,it),iv_loc)*(1-gtime) &
-                +jvec_c0(:,ic_c(ir+1,it),iv_loc)*gtime
-        endif
-
-     enddo
+        fcoef(:,ic) = fcoef0(:,ic_c(ir,it))*(1-gtime) + fcoef0(:,ic_c(ir+1,it))*gtime
+        gcoef(:,ic) = gcoef0(:,ic_c(ir,it))*(1-gtime) + gcoef0(:,ic_c(ir+1,it))*gtime
+        omega_cap_h(ic,:) = omega_cap_h0(ic_c(ir,it),:)*(1-gtime) &
+             +omega_cap_h0(ic_c(ir+1,it),:)*gtime
+        omega_s(:,ic,:) = omega_s0(:,ic_c(ir,it),:)*(1-gtime) &
+             +omega_s0(:,ic_c(ir+1,it),:)*gtime
+        jvec_c(:,ic,:) = jvec_c0(:,ic_c(ir,it),:)*(1-gtime) &
+             +jvec_c0(:,ic_c(ir+1,it),:)*gtime
+     endif
   enddo
+
   call cgyro_field_c
 
 end subroutine cgyro_shear_pt

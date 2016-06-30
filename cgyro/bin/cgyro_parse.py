@@ -48,6 +48,7 @@ x.add('MASSE_ADE','0.0002724486');
 x.add('LAMBDA_STAR','0.0')
 x.add('TEST_FLAG','0')
 x.add('H_PRINT_FLAG','0')
+x.add('MOMENT_PRINT_FLAG','0')
 x.add('AMP0','0.0')
 x.add('AMP','0.1')
 x.add('GAMMA_E','0.0')

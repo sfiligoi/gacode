@@ -62,6 +62,7 @@ module cgyro_globals
   real :: lambda_star
   integer :: test_flag
   integer :: h_print_flag
+  integer :: moment_print_flag
   real :: amp0
   real :: amp
   real :: gamma_e
@@ -193,6 +194,7 @@ module cgyro_globals
   character(len=18) :: runfile_freq    = 'out.cgyro.freq'
   character(len=18) :: runfile_kxky_phi = 'out.cgyro.kxky_phi'
   character(len=18) :: runfile_kxky_n   = 'out.cgyro.kxky_n'
+  character(len=18) :: runfile_kxky_e   = 'out.cgyro.kxky_e'
   character(len=15), dimension(3)  :: runfile_fieldb = &
        (/'out.cgyro.phib ','out.cgyro.aparb','out.cgyro.bparb'/)
   character(len=21), dimension(2)  :: runfile_kxky_flux = &
@@ -288,8 +290,8 @@ module cgyro_globals
   complex, dimension(:,:), allocatable :: field_old
   complex, dimension(:,:), allocatable :: field_old2
   complex, dimension(:,:), allocatable :: field_old3
-  complex, dimension(:,:), allocatable :: moment_loc
-  complex, dimension(:,:), allocatable :: moment
+  complex, dimension(:,:,:), allocatable :: moment_loc
+  complex, dimension(:,:,:), allocatable :: moment
   !
   ! Nonlinear fluxes 
   real, dimension(:,:,:), allocatable :: flux_loc

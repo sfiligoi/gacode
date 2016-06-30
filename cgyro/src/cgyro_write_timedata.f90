@@ -44,11 +44,19 @@ subroutine cgyro_write_timedata
           trim(path)//runfile_kxky_flux(2),&
           size(flux(:,:,2)),&
           flux(:,:,2))
-     ! Density moment for all species at theta=0
-     call cgyro_write_distributed_complex(&
-          trim(path)//runfile_kxky_n,&
-          size(moment(:,:)),&
-          moment(:,:))
+
+     if (moment_print_flag == 1) then
+        ! Density moment for all species at theta=0
+        call cgyro_write_distributed_complex(&
+             trim(path)//runfile_kxky_n,&
+             size(moment(:,:,1)),&
+             moment(:,:,1))
+        ! Energy moment for all species at theta=0
+        call cgyro_write_distributed_complex(&
+             trim(path)//runfile_kxky_e,&
+             size(moment(:,:,2)),&
+             moment(:,:,2))
+     endif
   endif
 
   ! Complex potential at theta=0 
