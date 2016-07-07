@@ -2,9 +2,8 @@
 ! cgyro_shear_pt.f90
 !
 ! PURPOSE:
-!  Spectral shear algorithm.  Wavenumbers are shifted
-!  to the left or right depending upon sign of omega_eb.
-!
+!  Spectral shear algorithm with linear wavenumber variation.
+
 ! NOTE:
 !                       k_theta*length*gamma_e
 !           omega_eb  = ---------------------- 
