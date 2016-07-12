@@ -174,7 +174,7 @@ then
        exit 1
     fi
     SDIR=$SIMDIR-s
-    echo "Compressing $LOCDIR -> $LOCDIR-s"
+    echo "INFO: (cgyro) Compressing $LOCDIR -> $LOCDIR-s"
     # Basic content
     mkdir $SDIR
     cp $SIMDIR/input.cgyro $SDIR
@@ -185,8 +185,7 @@ then
     cp $SIMDIR/out.cgyro.info $SDIR
     if grep -q NONLINEAR_FLAG=1 $SDIR/input.cgyro
     then
-       cgyro_plot -plot flux_time -moment e -e $LOCDIR -ext dump
-       cgyro_plot -plot flux_time -moment n -e $LOCDIR -ext dump
+       cgyro_plot -plot flux_time -e $LOCDIR -ext dump
        mv $SIMDIR/out.cgyro.flux* $SDIR
     else
        cp $SIMDIR/out.cgyro.freq $SDIR

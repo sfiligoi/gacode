@@ -158,8 +158,13 @@ case "$PLOT_TYPE" in
 	python $PYROOT/plot_flux_ky.py $FTYPE $W $MOMENT ;;
 
    flux_time)  
-	python $PYROOT/plot_flux_time.py $FTYPE $W $MOMENT $YMAX ;;
-
+	if [ "$FTYPE" == "dump" ]
+        then
+	   python $PYROOT/dump_flux_time.py 
+        else
+	   python $PYROOT/plot_flux_time.py $FTYPE $W $MOMENT $YMAX 
+        fi
+        ;;
    pwr)  
 	python $PYROOT/plot_pwr.py $FTYPE $FIELD ;;
 
