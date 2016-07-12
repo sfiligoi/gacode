@@ -175,19 +175,23 @@ then
        echo "Directory exists."
        exit 1
     fi
+    SDIR=$SIMDIR-s
+    echo "Compressing $LOCDIR -> $LOCDIR-s"
     # Basic content
-    mkdir $SIMDIR-s
-    cp $SIMDIR/input.cgyro $SIMDIR-s
-    cp $SIMDIR/input.cgyro.gen $SIMDIR-s/input.cgyro.gen.original
-    cp $SIMDIR/out.cgyro.version $SIMDIR-s
-    if grep -q NONLINEAR_FLAG=1 $SIMDIR/input.cgyro
+    mkdir $SDIR
+    cp $SIMDIR/input.cgyro $SDIR
+    cp $SIMDIR/input.cgyro.gen $SDIR/input.cgyro.gen.original
+    cp $SIMDIR/out.cgyro.version $SDIR
+    cp $SIMDIR/out.cgyro.grids $SDIR
+    cp $SIMDIR/out.cgyro.time $SDIR
+    cp $SIMDIR/out.cgyro.info $SDIR
+    if grep -q NONLINEAR_FLAG=1 $SDIR/input.cgyro
     then
        cgyro_plot -plot fluxt -moment e -e $LOCDIR -ext dump
        cgyro_plot -plot fluxt -moment n -e $LOCDIR -ext dump
-       cp $SIMDIR/out.cgyro.fluxt.Q.txt $SIMDIR-s
-       cp $SIMDIR/out.cgyro.fluxt.G.txt $SIMDIR-s
+       mv $SIMDIR/out.cgyro.ky_flux* $SDIR
     else
-       
+       cp $SIMDIR/out.cgyro.freq $SDIR
     fi
     exit 1
 fi
