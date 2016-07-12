@@ -137,9 +137,8 @@ class cgyrodata:
             start = time.time()
             data = np.loadtxt(self.dir+'out.cgyro.flux_n',dtype='float')
             end = time.time()
-            print data[:,1:]
             self.flux_n = np.transpose(data[:,1:])
-            print "INFO: (data.py) Read data in out.cgyro.flux_n. TIME = "+str(end-start)
+            print "INFO: (data.py) Read data in out.cgyro.flux_n."
         except:
             pass
 
@@ -148,7 +147,7 @@ class cgyrodata:
             data = np.loadtxt(self.dir+'out.cgyro.flux_e',dtype='float')
             end = time.time()
             self.flux_e = np.transpose(data[:,1:])
-            print "INFO: (data.py) Read data in out.cgyro.flux_e. TIME = "+str(end-start)
+            print "INFO: (data.py) Read data in out.cgyro.flux_e."
         except:
             pass 
         #-----------------------------------------------------------------
