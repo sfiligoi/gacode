@@ -366,18 +366,19 @@ subroutine cgyro_init_collision
                     jx = ix_v(jv)
                     je = ie_v(jv)
 
-                    if (abs(rs(is,js)) > epsilon(0.)) then
+                    ! EAB: 07/08/16 fixed bug, had (vtb/vta)**2
+                    if (abs(rs(is,js)) > epsilon(0.)) then 
                        cmat(iv,jv,ic_loc) &
                             = cmat(iv,jv,ic_loc) &
                             - mass(js)/mass(is) * (dens(js)/dens(is)) &
-                            * (vth(js)/vth(is))**2 * rsvec(is,js,ix,ie) &
+                            * (vth(js)/vth(is)) * rsvec(is,js,ix,ie) &
                             * bessel(is,ix,ie,ic_loc,0) / rs(is,js) &
                             * rsvec(js,is,jx,je) * bessel(js,jx,je,ic_loc,0) &
                             * w_xi(jx)*w_e(je)
                        cmat(iv,jv,ic_loc) &
                             = cmat(iv,jv,ic_loc) &
                             - mass(js)/mass(is) * (dens(js)/dens(is)) &
-                            * (vth(js)/vth(is))**2 * rsvec(is,js,ix,ie) &
+                            * (vth(js)/vth(is)) * rsvec(is,js,ix,ie) &
                             * bessel(is,ix,ie,ic_loc,1) &
                             * sqrt(1.0-xi(ix)**2)/xi(ix) / rs(is,js) &
                             * rsvec(js,is,jx,je) * bessel(js,jx,je,ic_loc,1) &
