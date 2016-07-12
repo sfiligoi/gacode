@@ -144,8 +144,6 @@ else
    SIMDIR=$SIMROOT/$LOCDIR
 fi
 
-RUN_FILE=$SIMDIR/out.cgyro.run
-
 #============================================================
 # Check for inconsistent flags:
 FLAG_SUM=$[ $EXEC_FLAG + $TEST_FLAG + $GENERATE_FLAG 
@@ -187,9 +185,9 @@ then
     cp $SIMDIR/out.cgyro.info $SDIR
     if grep -q NONLINEAR_FLAG=1 $SDIR/input.cgyro
     then
-       cgyro_plot -plot fluxt -moment e -e $LOCDIR -ext dump
-       cgyro_plot -plot fluxt -moment n -e $LOCDIR -ext dump
-       mv $SIMDIR/out.cgyro.ky_flux* $SDIR
+       cgyro_plot -plot flux_time -moment e -e $LOCDIR -ext dump
+       cgyro_plot -plot flux_time -moment n -e $LOCDIR -ext dump
+       mv $SIMDIR/out.cgyro.flux* $SDIR
     else
        cp $SIMDIR/out.cgyro.freq $SDIR
     fi

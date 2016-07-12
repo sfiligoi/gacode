@@ -28,13 +28,19 @@ color = ['k','m','b','c','g','r']
 if moment == 'n':
     mtag = '\Gamma'
     ttag = 'G'
-    ftag = 'ky_flux_n'
-    y = np.sum(sim.flux_n,axis=(0,2))
+    ftag = 'flux_n'
+    if hasattr(sim,'kxky_flux_n'):
+        y = np.sum(sim.kxky_flux_n,axis=(0,2))
+    else:
+        y = sim.flux_n
 elif moment == 'e':
     mtag = 'Q'
     ttag = 'Q'
-    ftag = 'ky_flux_e'
-    y = np.sum(sim.flux_e,axis=(0,2))
+    ftag = 'flux_e'
+    if hasattr(sim,'kxky_flux_e'):
+        y = np.sum(sim.kxky_flux_e,axis=(0,2))
+    else:
+        y = sim.flux_e
 elif moment == 'm':
     print 'm not implemented.'
     sys.exit()
@@ -42,7 +48,7 @@ elif moment == 's':
     print 's not implemented.'
     sys.exit()
 else:
-    print 'ERROR (plot_flux_t.py) Invalid moment.'
+    print 'ERROR (plot_flux_time.py) Invalid moment.'
     sys.exit()
 
 # Determine tmin
@@ -77,8 +83,8 @@ elif ftype == 'dump':
         head = head+'       '+ttag+'_'+str(ispec+1)+'/'+ttag+'_GB'
         data = np.column_stack((data,y[ispec,:]))
     np.savetxt(fname,data,fmt='%.8e',header=head)
-    print 'INFO: (plot_flux_t) Created '+fname
+    print 'INFO: (plot_flux_time) Created '+fname
 else:
    fname = fname+ftype
-   print 'INFO: (plot_flux_t) Created '+fname
+   print 'INFO: (plot_flux_time) Created '+fname
    plt.savefig(fname)

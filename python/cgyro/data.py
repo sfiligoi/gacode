@@ -137,7 +137,7 @@ class cgyrodata:
             start = time.time()
             data = np.fromfile(self.dir+'out.cgyro.kxky_flux_n',dtype='float',sep=" ")
             end = time.time()
-            self.flux_n = np.reshape(data[0:nd],(self.n_radial,self.n_species,self.n_n,nt),'F')
+            self.kxky_flux_n = np.reshape(data[0:nd],(self.n_radial,self.n_species,self.n_n,nt),'F')
             print "INFO: (data.py) Read data in out.cgyro.kxky_flux_n. TIME = "+str(end-start)
         except:
             pass
@@ -146,8 +146,32 @@ class cgyrodata:
             start = time.time()
             data = np.fromfile(self.dir+'out.cgyro.kxky_flux_e',dtype='float',sep=" ")
             end = time.time()
-            self.flux_e = np.reshape(data[0:nd],(self.n_radial,self.n_species,self.n_n,nt),'F')
+            self.kxky_flux_e = np.reshape(data[0:nd],(self.n_radial,self.n_species,self.n_n,nt),'F')
             print "INFO: (data.py) Read data in out.cgyro.kxky_flux_e. TIME = "+str(end-start)
+        except:
+            pass 
+        #-----------------------------------------------------------------
+
+        #-----------------------------------------------------------------
+        # Compressed particle and energy fluxes
+        #
+        nd = self.n_species*nt
+        try:
+            start = time.time()
+            data = np.loadtxt(self.dir+'out.cgyro.flux_n',dtype='float')
+            end = time.time()
+            print data[:,1:]
+            self.flux_n = np.transpose(data[:,1:])
+            print "INFO: (data.py) Read data in out.cgyro.flux_n. TIME = "+str(end-start)
+        except:
+            pass
+
+        try:
+            start = time.time()
+            data = np.loadtxt(self.dir+'out.cgyro.flux_e',dtype='float')
+            end = time.time()
+            self.flux_e = np.transpose(data[:,1:])
+            print "INFO: (data.py) Read data in out.cgyro.flux_e. TIME = "+str(end-start)
         except:
             pass 
         #-----------------------------------------------------------------
