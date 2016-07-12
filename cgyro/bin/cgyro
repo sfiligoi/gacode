@@ -65,6 +65,9 @@ then
   echo
   echo "         -clean" 
   echo "         Clean simulation directory."
+  echo
+  echo "         -compress" 
+  echo "         Compress simulation directory."
 
   exit 1
 fi
@@ -86,6 +89,7 @@ TEST_FLAG=0
 GENERATE_FLAG=0
 REGRESS_FLAG=0
 CLEAN_FLAG=0
+COMPRESS_FLAG=0
 RESET=0
 #=============================================================
 
@@ -123,6 +127,8 @@ while [ $# -gt 0 ] ; do
 
   -clean) CLEAN_FLAG=1 ;;
 
+  -compress) COMPRESS_FLAG=1 ;;
+
   *) echo "ERROR (cgyro script): unknown option $1." ; exit 1 ;;
  
   esac
@@ -151,11 +157,41 @@ then
 fi
 #============================================================
 
+#============================================================
+# Clean option
 if [ $CLEAN_FLAG -eq 1 ]
 then
     rm -f out.* batch.out batch.err *~ *gen
     exit 1
 fi
+#============================================================
+
+#============================================================
+# Compress option
+if [ $COMPRESS_FLAG -eq 1 ]
+then
+    if [ -d $SIMDIR-s ] 
+    then
+       echo "Directory exists."
+       exit 1
+    fi
+    # Basic content
+    mkdir $SIMDIR-s
+    cp $SIMDIR/input.cgyro $SIMDIR-s
+    cp $SIMDIR/input.cgyro.gen $SIMDIR-s/input.cgyro.gen.original
+    cp $SIMDIR/out.cgyro.version $SIMDIR-s
+    if grep -q NONLINEAR_FLAG=1 $SIMDIR/input.cgyro
+    then
+       cgyro_plot -plot fluxt -moment e -e $LOCDIR -ext dump
+       cgyro_plot -plot fluxt -moment n -e $LOCDIR -ext dump
+       cp $SIMDIR/out.cgyro.fluxt.Q.txt $SIMDIR-s
+       cp $SIMDIR/out.cgyro.fluxt.G.txt $SIMDIR-s
+    else
+       
+    fi
+    exit 1
+fi
+#============================================================
 
 #============================================================
 # Generate simdir if -g set, then exit.

@@ -21,7 +21,7 @@
 !  where t = t0-m
 !---------------------------------------------
 
-real function BLEND_f4(m,t0) result (f)
+real function BLEND_f4(m,t0)
 
   implicit none
 
@@ -33,15 +33,15 @@ real function BLEND_f4(m,t0) result (f)
   t = t0-m
 
   if (t <= 0.0 .or. t >= 4.0) then
-     f = 0.0 
+     BLEND_f4 = 0.0 
   else if (t < 1.0) then
-     f = t*t*t/6.0
+     BLEND_f4 = t*t*t/6.0
   else if (t < 2.0) then
-     f = (1.0+t*(-3.0+t*(3.0-0.75*t)))*2.0/3.0
+     BLEND_f4 = (1.0+t*(-3.0+t*(3.0-0.75*t)))*2.0/3.0
   else if (t < 3.0) then
-     f = (-11.0+t*(15.0+t*(-6.0+0.75*t)))*2.0/3.0
+     BLEND_f4 = (-11.0+t*(15.0+t*(-6.0+0.75*t)))*2.0/3.0
   else
-     f = (4.0-t)**3/6.0
+     BLEND_f4 = (4.0-t)**3/6.0
   endif
 
 end function BLEND_f4
