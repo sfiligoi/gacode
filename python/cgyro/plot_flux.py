@@ -9,14 +9,15 @@ moment = sys.argv[3]
 ymax = sys.argv[4]
 
 sim = cgyrodata('./')
+sim.getbigflux()
 
 ns = sim.n_species
-t = sim.t
+t  = sim.t
 
 #======================================
 # Set figure size and axes
 fig = plt.figure(figsize=(12,6))
-fig.subplots_adjust(left=0.05,right=0.95,top=0.92,bottom=0.12)
+fig.subplots_adjust(left=0.05,right=0.96,top=0.92,bottom=0.12)
 ax = fig.add_subplot(111)
 ax.grid(which="majorminor",ls=":")
 ax.grid(which="major",ls=":")
@@ -83,8 +84,8 @@ elif ftype == 'dump':
         head = head+'       '+ttag+'_'+str(ispec+1)+'/'+ttag+'_GB'
         data = np.column_stack((data,y[ispec,:]))
     np.savetxt(fname,data,fmt='%.8e',header=head)
-    print 'INFO: (plot_flux_time) Created '+fname
+    print 'INFO: (plot_flux) Created '+fname
 else:
-   fname = fname+ftype
-   print 'INFO: (plot_flux_time) Created '+fname
+   fname = fname+'.'+ftype
+   print 'INFO: (plot_flux) Created '+fname
    plt.savefig(fname)

@@ -170,8 +170,8 @@ if [ $COMPRESS_FLAG -eq 1 ]
 then
     if [ -d $SIMDIR-s ] 
     then
-       echo "Directory exists."
-       exit 1
+       echo "WARNING: Removed old directory $SIMDIR-s."
+       rm -r $SIMDIR-s
     fi
     SDIR=$SIMDIR-s
     echo "INFO: (cgyro) Compressing $LOCDIR -> $LOCDIR-s"
@@ -185,8 +185,10 @@ then
     cp $SIMDIR/out.cgyro.info $SDIR
     if grep -q NONLINEAR_FLAG=1 $SDIR/input.cgyro
     then
-       cgyro_plot -plot flux_time -e $LOCDIR -ext dump
+       cgyro_plot -plot flux -e $LOCDIR -ext dump
        mv $SIMDIR/out.cgyro.flux* $SDIR
+       cgyro_plot -plot phi -e $LOCDIR -ext dump
+       mv $SIMDIR/out.cgyro.phi $SDIR
     else
        cp $SIMDIR/out.cgyro.freq $SDIR
     fi

@@ -6,8 +6,10 @@ from cgyro.data import cgyrodata
 ftype = sys.argv[1]
 w = float(sys.argv[2])
 moment = sys.argv[3]
+ymax = sys.argv[4]
 
 sim = cgyrodata('./')
+sim.getbigflux()
 
 ns = sim.n_species
 
@@ -21,13 +23,13 @@ ave = np.zeros((sim.n_n,ns))
 if moment == 'n':
     imoment = 0 
     mtag = '\Gamma'
-    y = np.sum(sim.flux_n,axis=0)
-    datafile = 'out.cgyro.fluxn'
+    y = np.sum(sim.kxky_flux_n,axis=0)
+    fname = 'out.cgyro.ky_flux_n'
 elif moment == 'e':
     imoment = 1
     mtag = 'Q'
-    y = np.sum(sim.flux_e,axis=0)
-    datafile = 'out.cgyro.fluxe'
+    y = np.sum(sim.kxky_flux_e,axis=0)
+    fname = 'out.cgyro.ky_flux_e'
 elif moment == 'm':
     print 'm not implemented.'
     sys.exit()
@@ -56,14 +58,14 @@ if ftype == 'dump':
             arr[j,ispec+1] = ave
         stag = stag+' , s'+str(ispec)
             
-    fid = open(datafile,'w')
+    fid = open(fname,'w')
     fid.write('# Moment  : '+mtag+'\n')
     fid.write('# Time    : '+str(sim.t[imin])+' < (c_s/a) t < '+str(sim.t[-1])+'\n')
     fid.write(stag+')\n')
     np.savetxt(fid,arr,fmt='%.5e')
     fid.close()
 
-    print 'Wrote output to '+datafile
+    print 'INFO: (plot_ky_flux) Wrote output to '+fname
     sys.exit()
 else:
 
@@ -79,8 +81,6 @@ else:
         for j in range(sim.n_n):
             ave[j,ispec] = average(y[ispec,j,:],sim.t,w)
 
-    ymax = np.max(ave)*1.1
-
     for ispec in range(ns):
         stag = str(ispec)
         ax = fig.add_subplot(1,ns,ispec+1)
@@ -88,10 +88,13 @@ else:
         ax.set_ylabel(r'$'+mtag+'_'+stag+'$',color='k')
         ax.set_title(r'$'+str(sim.t[imin])+' < (c_s/a) t < '+str(sim.t[-1])+'$')
         ax.bar(ky-dk/2.0,ave[:,ispec],width=dk/1.1,color=color[ispec],alpha=0.5,edgecolor='black')
-        ax.set_ylim([0,ymax])
+        if ymax != 'auto':
+            ax.set_ylim([0,float(ymax)])
+
 
 if ftype == 'screen':
    plt.show()
 else:
-   outfile = 'flux_n.'+ftype
-   plt.savefig(outfile)
+    fname=fname+'.'+ftype
+    print 'INFO: (plot_ky_flux) Created '+fname
+    plt.savefig(fname)

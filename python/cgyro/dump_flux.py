@@ -4,6 +4,7 @@ from gacodeplotdefs import *
 from cgyro.data import cgyrodata
 
 sim = cgyrodata('./')
+sim.getbigflux()
 
 ns = sim.n_species
 t = sim.t
