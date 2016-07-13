@@ -80,6 +80,7 @@ then
   echo "  $ cgyro_plot -plot flux -ext png  [... above to PNG file]"
   echo "  $ cgyro_plot -plot flux -ext dump [... above to datafile]"
   echo "  $ cgyro_plot -plot flux -moment n [particle flux versus time]"
+  echo "  $ cgyro_plot -plot ky_flux        [energy flux versus ky]"
   echo "  $ cgyro_plot -plot phi            [n=0 and n>0 potentials versus time]"
 
 
