@@ -13,9 +13,9 @@ if sim.n_n > 1:
     print "ERROR: (plot_zf.py) This plot option valid for ZF test only."
     sys.exit()
 else:
-    sim.getbig()
+    sim.getbigfield()
 
-phic = sim.phi[0,0,0,:]
+phic = sim.kxky_phi[0,0,0,:]
 y    = phic[:]/phic[0]
 t    = sim.t
 
