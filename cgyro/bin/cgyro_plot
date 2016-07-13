@@ -75,13 +75,19 @@ then
   echo "          Specify integer time index (-1 is last time)."
   echo
   echo
+  echo " LINEAR EXAMPLES:"
+  echo "  $ cgyro_plot -e . -plot freq           [frequency versus time]"
+  echo "  $ cgyro_plot -e . -plot ball -field 0  [phi versus ballooning angle]"
+  echo "  $ cgyro_plot -e . -plot zf             [zf phi versus time]"
+  echo
+  echo
   echo " NONLINEAR EXAMPLES:"
-  echo "  $ cgyro_plot -plot flux           [energy flux versus time]"
-  echo "  $ cgyro_plot -plot flux -ext png  [... above to PNG file]"
-  echo "  $ cgyro_plot -plot flux -ext dump [... above to datafile]"
-  echo "  $ cgyro_plot -plot flux -moment n [particle flux versus time]"
-  echo "  $ cgyro_plot -plot ky_flux        [energy flux versus ky]"
-  echo "  $ cgyro_plot -plot phi            [n=0 and n>0 potentials versus time]"
+  echo "  $ cgyro_plot -e . -plot flux           [energy flux versus time]"
+  echo "  $ cgyro_plot -e . -plot flux -ext png  [... above to PNG file]"
+  echo "  $ cgyro_plot -e . -plot flux -ext dump [... above to datafile]"
+  echo "  $ cgyro_plot -e . -plot flux -moment n [particle flux versus time]"
+  echo "  $ cgyro_plot -e . -plot ky_flux        [energy flux versus ky]"
+  echo "  $ cgyro_plot -e . -plot phi            [n=0 and n>0 potentials versus time]"
 
 
   exit 1
