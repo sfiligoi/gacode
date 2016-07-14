@@ -34,4 +34,4 @@ for moment in ['n','e']:
         head = head+'       '+ttag+'_'+str(ispec+1)+'/'+ttag+'_GB'
         data = np.column_stack((data,y[ispec,:]))
     np.savetxt(fname,data,fmt='%.8e',header=head)
-    print 'INFO: (dump_flux_time) Created '+fname
+    print 'INFO: (dump_flux.py) Created '+fname
