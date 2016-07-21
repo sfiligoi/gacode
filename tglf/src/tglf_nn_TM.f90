@@ -26,7 +26,11 @@
 !
      real :: OUT_ENERGY_FLUX_1_RNG, OUT_ENERGY_FLUX_i_RNG
      real :: OUT_PARTICLE_FLUX_1_RNG, OUT_STRESS_TOR_i_RNG
+     real :: INPUT_PARAMETERS(23)
      integer :: n, i
+
+     CHARACTER NUL
+     PARAMETER(NUL = CHAR(0))
 
      include 'brainfuse_lib.inc'
 !
@@ -47,6 +51,50 @@
        enddo
        q_low_out(is) = 0.0
      enddo
+
+!
+!fill in input parameters array
+!
+    INPUT_PARAMETERS( 1)=tglf_as_in(2)         ! AS_2
+    INPUT_PARAMETERS( 2)=tglf_as_in(3)         ! AS_3
+    INPUT_PARAMETERS( 3)=tglf_betae_in         ! BETAE
+    INPUT_PARAMETERS( 4)=tglf_delta_loc_in     ! DELTA_LOC
+    INPUT_PARAMETERS( 5)=tglf_drmajdx_loc_in   ! DRMAJDX_LOC
+    INPUT_PARAMETERS( 6)=tglf_kappa_loc_in     ! KAPPA_LOC
+    INPUT_PARAMETERS( 7)=tglf_p_prime_loc_in   ! P_PRIME_LOC
+    INPUT_PARAMETERS( 8)=tglf_q_loc_in         ! Q_LOC
+    INPUT_PARAMETERS( 9)=tglf_q_prime_loc_in   ! Q_PRIME_LOC
+    INPUT_PARAMETERS(10)=tglf_rlns_in(1)       ! RLNS_1
+    INPUT_PARAMETERS(11)=tglf_rlns_in(2)       ! RLNS_2
+    INPUT_PARAMETERS(12)=tglf_rlns_in(3)       ! RLNS_3
+    INPUT_PARAMETERS(13)=tglf_rlts_in(1)       ! RLTS_1
+    INPUT_PARAMETERS(14)=tglf_rlts_in(2)       ! RLTS_2
+    INPUT_PARAMETERS(15)=tglf_rmaj_loc_in      ! RMAJ_LOC
+    INPUT_PARAMETERS(16)=tglf_rmin_loc_in      ! RMIN_LOC
+    INPUT_PARAMETERS(17)=tglf_s_kappa_loc_in   ! S_KAPPA_LOC
+    INPUT_PARAMETERS(18)=tglf_taus_in(2)       ! TAUS_2
+    INPUT_PARAMETERS(19)=tglf_vexb_shear_in    ! VEXB_SHEAR
+    INPUT_PARAMETERS(20)=tglf_vpar_in(1)       ! VPAR_1
+    INPUT_PARAMETERS(21)=tglf_vpar_shear_in(1) ! VPAR_SHEAR_1
+    INPUT_PARAMETERS(22)=tglf_xnue_in          ! XNUE
+    INPUT_PARAMETERS(23)=tglf_zeff_in          ! ZEFF
+
+!    WRITE(*,*)INPUT_PARAMETERS
+
+    call get_environment_variable('TGLFNN_MODEL',nn_files)
+    ierr=load_anns(TRIM(nn_files)//NUL,'brainfuse'//NUL)
+    ierr=run_anns()
+
+    energy_flux_out(1,1)   = get_anns_avg(0)
+    energy_flux_out(3,1)   = get_anns_avg(1)
+    particle_flux_out(1,1) = get_anns_avg(2)
+    stress_tor_out(3,1)    = get_anns_avg(3)
+
+!    write(*,*)    energy_flux_out(1,1),   &
+!                  energy_flux_out(3,1),   &
+!                  particle_flux_out(1,1), &
+!                  stress_tor_out(3,1)
+
 !
 ! '#---------------------------------------------------'
 ! '# Sort ions by A, Z, Te/Ti'
@@ -67,69 +115,17 @@
          (tglf_zs_in(2)   .ne. 1) .or. &
          (tglf_mass_in(3) .ne. 6) .or. &
          (tglf_zs_in(3)   .ne. 6) ) then
-        write(*,*)'A',tglf_mass_in
-        write(*,*)'Z',tglf_zs_in
+        write(*,*)'A',tglf_mass_in(:tglf_ns_in)
+        write(*,*)'Z',tglf_zs_in(:tglf_ns_in)
         write (*,*)'NN trained only with D C ions'
         stop
     endif
 
-! Write input file for the NN
-!
-     open (unit=14, file=TRIM(tglf_path_in)//"input.dat", action="write")
-     write (14,*) '1'
-     write (14,"(15(f6.3,1x))") tglf_as_in(2),       & ! AS_2
-                                tglf_as_in(3),       & ! AS_3
-                                tglf_betae_in,       & ! BETAE
-                                tglf_delta_loc_in,   & ! DELTA_LOC
-                                tglf_kappa_loc_in,   & ! KAPPA_LOC
-                                tglf_q_loc_in,       & ! Q_LOC
-                                tglf_q_prime_loc_in, & ! Q_PRIME_LOC
-                                tglf_rlns_in(1),     & ! RLNS_1
-                                tglf_rlns_in(2),     & ! RLNS_2
-                                tglf_rlns_in(3),     & ! RLNS_3
-                                tglf_rlts_in(1),     & ! RLTS_1
-                                tglf_rlts_in(2),     & ! RLTS_2
-                                tglf_rmaj_loc_in,    & ! RMAJ_LOC
-                                tglf_rmin_loc_in,    & ! RMIN_LOC
-                                tglf_s_kappa_loc_in, & ! S_KAPPA_LOC
-                                tglf_taus_in(2),     & ! TAUS_2
-                                tglf_xnue_in           ! XNUE
-     close(14)
-!
-! Execute the NN
-!
-     call get_environment_variable('TGLFNN_EXEC',nn_executable)
-     call get_environment_variable('TGLFNN_MODEL',nn_files)
-     if (len(trim(nn_executable))==0) then
-        write(*,*)'TGLFNN_EXEC environmental variable must be defined to use NN model'
-        stop
-     endif
-     if (len(trim(trim(nn_files)))==0) then
-        write(*,*)'TGLFNN_MODEL environmental variable must be defined to use NN model'
-        stop
-     endif
-     if (tglf_path_in .ne. "") then
-        nn_executable='cd '//TRIM(tglf_path_in)//' ;'//trim(nn_executable)
-     endif
-     call gacode_system(trim(nn_executable)//' '//trim(nn_files)//' input.dat')
-!
-! Read outputs
-!
-     open (unit=15, file=TRIM(tglf_path_in)//"output.avg", action="read")
-     read(15,*) n,  energy_flux_out(1,1),   &
-                    energy_flux_out(3,1),   &
-                    particle_flux_out(1,1), &
-                    stress_tor_out(3,1)
-     close(15)
-!
-! Read values for checking accuracy of the NN
-!
-     open (unit=15, file=TRIM(tglf_path_in)//"output.rng", action="read")
-     read(15,*) n,  OUT_ENERGY_FLUX_1_RNG,   &
-                    OUT_ENERGY_FLUX_i_RNG,   &
-                    OUT_PARTICLE_FLUX_1_RNG, &
-                    OUT_STRESS_TOR_i_RNG
-     close(15)
+    OUT_ENERGY_FLUX_i_RNG=0
+    OUT_ENERGY_FLUX_1_RNG=0
+    OUT_PARTICLE_FLUX_1_RNG=0
+    OUT_STRESS_TOR_i_RNG=0
+
 !
 ! Switch between TGLF and the NN depending on 'nn_max_error' values
 !
