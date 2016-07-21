@@ -14,7 +14,7 @@
      character(len=1000) :: nn_executable
      character(len=1000) :: nn_files
 
-     integer :: j,is
+     integer :: j,is,ierr
      real :: v_bar0, phi_bar0
      real :: pflux0(nsm,3),eflux0(nsm,3)
      real :: stress_par0(nsm,3),stress_tor0(nsm,3)
@@ -27,6 +27,8 @@
      real :: OUT_ENERGY_FLUX_1_RNG, OUT_ENERGY_FLUX_i_RNG
      real :: OUT_PARTICLE_FLUX_1_RNG, OUT_STRESS_TOR_i_RNG
      integer :: n, i
+
+     include 'brainfuse_lib.inc'
 !
 ! initialize fluxes
 !

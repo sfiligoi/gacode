@@ -1,14 +1,10 @@
 include ${GACODE_ROOT}/shared/install/make.inc.${GACODE_PLATFORM}
 
-#<<<<<<< HEAD
 #TGLFISNAN = tglf_isnan_generic.o
-#
-#EXTRA_LIBS=../../shared/harvest_client/libharvest.a
-#
+
+#EXTRA_LIBS=../../shared/harvest_client/libharvest.a ../../shared/neural/libbrainfuse.a
+
 #include ../install/make.ext.${GACODE_PLATFORM}
-#=======
--include ../install/make.ext.${GACODE_PLATFORM}
-#>>>>>>> master
 
 ifeq ($(OPT),debug)
    FFLAGS=${FDEBUG}
@@ -42,7 +38,7 @@ OBJECTS = tglf_isnan.o      \
           tglf_read_input.o \
           tglf_multiscale_spectrum.o \
           tglf_kygrid.o     \
-	  tglf_run.o        \
+          tglf_run.o        \
           tglf_TM.o         \
           tglf_init_mpi.o   \
           tglf_run_mpi.o    \
@@ -52,13 +48,13 @@ OBJECTS = tglf_isnan.o      \
 
 .SUFFIXES : .o .f90 .F90
 
-all: $(LLIB).a $(EXEC1) $(EXEC2)
+all: $(LLIB).a $(EXEC1) $(EXEC2) Makefile
 
 $(EXEC1): $(LLIB).a $(EXEC1).o $(EXTRA_LIBS)
-	$(FC) $(FFLAGS) -o $(EXEC1) $(EXEC1).o $(LLIB).a $(EXTRA_LIBS) $(LMATH)
+	$(FC) $(FFLAGS) -o $(EXEC1) $(EXEC1).o $(LLIB).a $(EXTRA_LIBS) $(LMATH) -I$(GACODE_ROOT)/shared/harvest_client/ -L$(GACODE_ROOT)/shared/harvest_client/ -I$(GACODE_ROOT)/shared/neural/ -L$(GACODE_ROOT)/shared/neural/ -lbrainfuse -lharvest -lfann
 
 $(EXEC2): $(LLIB).a $(EXEC2).o $(EXTRA_LIBS)
-	$(FC) $(FFLAGS) -o $(EXEC2) $(EXEC2).o $(LLIB).a $(EXTRA_LIBS) $(LMATH)
+	$(FC) $(FFLAGS) -o $(EXEC2) $(EXEC2).o $(LLIB).a $(EXTRA_LIBS) $(LMATH) -I$(GACODE_ROOT)/shared/harvest_client/ -L$(GACODE_ROOT)/shared/harvest_client/ -I$(GACODE_ROOT)/shared/neural/ -L$(GACODE_ROOT)/shared/neural/ -lbrainfuse -lharvest -lfann
 
 $(LLIB).a: $(OBJECTS)
 	$(ARCH) $(LLIB).a $(OBJECTS)
@@ -67,10 +63,10 @@ tglf_run_mpi.o : tglf_run.F90
 	$(FC) -o tglf_run_mpi.o $(FMATH) $(FFLAGS) -DMPI_TGLF=1 -c $<
 
 .f90.o :
-	$(FC) $(FMATH) $(FFLAGS) -c $<
+	$(FC) $(FMATH) $(FFLAGS) -c $< -I$(GACODE_ROOT)/shared/harvest_client/ -L$(GACODE_ROOT)/shared/harvest_client/ -I$(GACODE_ROOT)/shared/neural/ -L$(GACODE_ROOT)/shared/neural/ -lbrainfuse -lharvest -lfann
 
 .F90.o :
-	$(FC) $(FMATH) $(FFLAGS) -c $<
+	$(FC) $(FMATH) $(FFLAGS) -c $< -I$(GACODE_ROOT)/shared/harvest_client/ -L$(GACODE_ROOT)/shared/harvest_client/ -I$(GACODE_ROOT)/shared/neural/ -L$(GACODE_ROOT)/shared/neural/ -lbrainfuse -lharvest -lfann
 
 clean:
 	rm -f *.o *.lst $(LLIB).a $(EXEC1) $(EXEC2) $(EXEC3)

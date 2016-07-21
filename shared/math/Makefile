@@ -27,7 +27,7 @@ OBJECTS = math_constants.o \
           j0y0.o \
           linint.o \
           logint.o \
-	  parallel_dim.o \
+          parallel_dim.o \
           pascal.o \
           polydiff.o \
           poly2diff.o \
@@ -36,7 +36,7 @@ OBJECTS = math_constants.o \
           parallel_lib.o \
           pseudospec_lib.o \
           remap_grid.o \
-	  rjbesl.o \
+          rjbesl.o \
           sigv.o \
           sivukhin.o \
           timer_lib.o
