@@ -80,7 +80,7 @@
 
 !    WRITE(*,*)INPUT_PARAMETERS
 
-    call get_environment_variable('TGLFNN_MODEL',tglfnn_model)
+    call get_environment_variable('TGLFNN_MODEL_DIR',tglfnn_model)
     ierr=load_anns(TRIM(tglfnn_model)//NUL,'brainfuse'//NUL)
     ierr=load_anns_inputs(INPUT_PARAMETERS)
     ierr=run_anns()
