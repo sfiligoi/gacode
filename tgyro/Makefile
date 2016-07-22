@@ -9,6 +9,7 @@ export EXTRA_LIBS = \
        ${GACODE_ROOT}/shared/nclass/nclass_lib.a \
        ${GACODE_ROOT}/tglf/src/tglf_lib.a \
        ${GACODE_ROOT}/shared/harvest_client/libharvest.a \
+       ${GACODE_ROOT}/shared/neural/libbrainfuse.a \
        ${GACODE_ROOT}/glf23/src/glf23_lib.a \
        ${GACODE_ROOT}/gyro/src/gyro_lib.a \
        ${GACODE_ROOT}/gyro/BLEND/BLEND_lib.a \

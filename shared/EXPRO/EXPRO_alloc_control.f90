@@ -25,6 +25,7 @@ subroutine EXPRO_alloc_control(i_proc,flag)
              iostat=ierr)
 
         if (ierr == 0) then
+           read(io,*) EXPRO_shot
            read(io,*) EXPRO_n_ion
            read(io,*) EXPRO_n_exp
            close(io)

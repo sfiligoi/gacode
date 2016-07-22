@@ -122,6 +122,8 @@ subroutine tgyro_init_profiles
   call EXPRO_palloc(MPI_COMM_WORLD,'./',1) 
   call EXPRO_pread
 
+  shot = EXPRO_shot
+
   n_exp = EXPRO_n_exp
 
   ! r_min in m:

@@ -319,7 +319,7 @@ subroutine tgyro_tglf_map
   tglf_nn_max_error_in=tgyro_tglf_nn_max_error
 
   !----------------------------------------------------------------
-  ! HARVEST TARGETS AND GYRO-BOHM NORMALIZATIONS
+  ! HARVEST: NEO AND TARGET FLUXES, GYRO-BOHM NORMALIZATIONS, SHOT
   !
   if (i_tran == 0) then
     ! Initialization
@@ -347,6 +347,9 @@ subroutine tgyro_tglf_map
 
     ! Indication of thermal ions
     harvest_err=set_harvest_payload_int_array(tglf_harvest_extra_in,'tgyro_therm_vec'//NUL,therm_vec(:),size(therm_vec))
+
+    ! Experimental shot
+    harvest_err=set_harvest_payload_int(tglf_harvest_extra_in,'shot'//NUL,shot)
   endif
 
 end subroutine tgyro_tglf_map

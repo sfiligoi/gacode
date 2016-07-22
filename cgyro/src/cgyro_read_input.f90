@@ -31,7 +31,7 @@ subroutine cgyro_read_input
   call cgyro_readbc_int(nup_theta)
   call cgyro_readbc_int(nup_radial)
   call cgyro_readbc_int(implicit_flag)
-  call cgyro_readbc_int(constant_wind_flag)
+  call cgyro_readbc_int(constant_stream_flag)
   call cgyro_readbc_real(ky)
   call cgyro_readbc_int(box_size)
   call cgyro_readbc_real(ipccw)

@@ -114,7 +114,7 @@ class ProfileInput:
 
             # Remove leading and trailing whitespace from line
             line = string.strip(line)
-
+                
             # Skip blank lines
             if len(line) > 0 and line[0] != '#':
                 x = string.splitfields(line,'=')
@@ -148,8 +148,11 @@ class ProfileInput:
 
             # Split inputfile (input.profiles) into scalar and 
             # vector data:
+            if 'SHOT' in line:
+                x = string.splitfields(line,':')[1]
+                file_temp.write('SHOT='+string.strip(x)+'\n')
 
-            if (len(line) > 0) and (line[0] != '#'):
+            if (len(line) > 0) and (line[0] != '#'):                
                 if string.find(line,'=') > -1:
                     # Write scalar data into temp file
                     file_temp.write(line+'\n')
