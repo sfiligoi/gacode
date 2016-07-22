@@ -83,6 +83,7 @@
 
     call get_environment_variable('TGLFNN_MODEL',nn_files)
     ierr=load_anns(TRIM(nn_files)//NUL,'brainfuse'//NUL)
+    ierr=load_anns_inputs(INPUT_PARAMETERS)
     ierr=run_anns()
 
     energy_flux_out(1,1)   = get_anns_avg(0)
