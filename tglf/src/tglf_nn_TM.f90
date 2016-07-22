@@ -11,8 +11,7 @@
 !
      IMPLICIT NONE
 !
-     character(len=1000) :: nn_executable
-     character(len=1000) :: nn_files
+     character(len=1000) :: tglfnn_model
 
      integer :: j,is,ierr
      real :: v_bar0, phi_bar0
@@ -81,8 +80,8 @@
 
 !    WRITE(*,*)INPUT_PARAMETERS
 
-    call get_environment_variable('TGLFNN_MODEL',nn_files)
-    ierr=load_anns(TRIM(nn_files)//NUL,'brainfuse'//NUL)
+    call get_environment_variable('TGLFNN_MODEL',tglfnn_model)
+    ierr=load_anns(TRIM(tglfnn_model)//NUL,'brainfuse'//NUL)
     ierr=load_anns_inputs(INPUT_PARAMETERS)
     ierr=run_anns()
 
