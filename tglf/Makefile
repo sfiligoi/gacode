@@ -9,6 +9,7 @@ export EXTRA_LIBS = \
 	${GACODE_ROOT}/shared/math/math_lib.a
 
 all: ${harvest_lib} ${brainfuse_lib}
+	cd ../shared/neural/; make
 	cd src ; make
 
 clean:

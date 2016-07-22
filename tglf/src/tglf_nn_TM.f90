@@ -25,13 +25,17 @@
 !
      real :: OUT_ENERGY_FLUX_1_RNG, OUT_ENERGY_FLUX_i_RNG
      real :: OUT_PARTICLE_FLUX_1_RNG, OUT_STRESS_TOR_i_RNG
-     real :: INPUT_PARAMETERS(23)
+     real*4 :: INPUT_PARAMETERS(23)
+     real*4 :: OUTPUT_PARAMETERS(4)
+     real :: start, finish
      integer :: n, i
 
      CHARACTER NUL
      PARAMETER(NUL = CHAR(0))
 
      include 'brainfuse_lib.inc'
+
+     call cpu_time(start)
 !
 ! initialize fluxes
 !
@@ -84,11 +88,12 @@
     ierr=load_anns(TRIM(tglfnn_model)//NUL,'brainfuse'//NUL)
     ierr=load_anns_inputs(INPUT_PARAMETERS)
     ierr=run_anns()
+    ierr=get_anns_avg_array(OUTPUT_PARAMETERS)
 
-    energy_flux_out(1,1)   = get_anns_avg(0)
-    energy_flux_out(3,1)   = get_anns_avg(1)
-    particle_flux_out(1,1) = get_anns_avg(2)
-    stress_tor_out(3,1)    = get_anns_avg(3)
+    energy_flux_out(1,1)   = OUTPUT_PARAMETERS(1)
+    energy_flux_out(3,1)   = OUTPUT_PARAMETERS(2)
+    particle_flux_out(1,1) = OUTPUT_PARAMETERS(3)
+    stress_tor_out(3,1)    = OUTPUT_PARAMETERS(4)
 
 !    write(*,*)    energy_flux_out(1,1),   &
 !                  energy_flux_out(3,1),   &
@@ -139,4 +144,7 @@
         write(*,*) '------------>   TGLF    RUNNING   <--------------'
      endif
 !
+     call cpu_time(finish)
+     print '("Time = ",f12.6," seconds.")',finish-start
+
       END SUBROUTINE tglf_nn_TM
