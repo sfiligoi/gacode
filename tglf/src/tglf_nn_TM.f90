@@ -27,7 +27,7 @@
      real :: OUT_PARTICLE_FLUX_1_RNG, OUT_STRESS_TOR_i_RNG
      real*4 :: INPUT_PARAMETERS(23)
      real*4 :: OUTPUT_PARAMETERS(4)
-     real :: start, finish
+!     real :: start, finish
      integer :: n, i
 
      CHARACTER NUL
@@ -35,7 +35,7 @@
 
      include 'brainfuse_lib.inc'
 
-     call cpu_time(start)
+!     call cpu_time(start)
 !
 ! initialize fluxes
 !
@@ -144,7 +144,7 @@
         write(*,*) '------------>   TGLF    RUNNING   <--------------'
      endif
 !
-     call cpu_time(finish)
-     print '("Time = ",f12.6," seconds.")',finish-start
+!     call cpu_time(finish)
+!     print '("Time = ",f12.6," seconds.")',finish-start
 
       END SUBROUTINE tglf_nn_TM
