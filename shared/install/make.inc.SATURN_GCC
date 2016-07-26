@@ -2,13 +2,14 @@
 # SATURN_GCC at General Atomics (copied mostly from GFORTRAN_OSX_MACPORTS)
 # module load mpich/gcc-4.7.2
 # module load netcdf
+# module load fann
 #---------------------------------------------------
 
 IDENTITY="GA saturn or iris cluster"
 CORES_PER_NODE=12
 NUMAS_PER_NODE=1
 
-FC	= mpif90 -I$(GACODE_ROOT)/modules -J$(GACODE_ROOT)/modules -g -I$(FFTW_DIR)/include -I${FANN_ROOT}/src/include -L${FANN_ROOT}/src
+FC	= mpif90 -I$(GACODE_ROOT)/modules -J$(GACODE_ROOT)/modules -g -I$(FFTW_DIR)/include -I${FANN_ROOT}/include/ -L${FANN_ROOT}/lib/
 F77 = mpif90 -g
 
 FMATH	= -fdefault-real-8
@@ -26,3 +27,6 @@ NETCDF_INC = $(NETCDF_DIR)/include
 # Archive
 
 ARCH = ar cr
+
+FANN_ROOT=$(FANN_DIR)
+CFLAGS=-I$(FANN_DIR)/include

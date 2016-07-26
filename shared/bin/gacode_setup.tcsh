@@ -29,3 +29,6 @@ if ( $?IDL_PATH ) then
 else
    setenv IDL_PATH $GACODE_ROOT/gyro/vugyro
 endif
+
+setenv EPEDNN_MODEL EPED1_ALL
+setenv TGLFNN_MODEL_DIR $GACODE_ROOT/shared/neural/tglfnn/models/DIIID_ion_stiffness_60_rotation/
