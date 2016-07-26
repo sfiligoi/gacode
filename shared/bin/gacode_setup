@@ -22,4 +22,6 @@ fi
 export PYTHONPATH=$GACODE_ROOT/python:${PYTHONPATH}
 
 export IDL_PATH=$GACODE_ROOT/gyro/vugyro:${IDL_PATH}
+export EPEDNN_MODEL=EPED1_ALL
+export TGLFNN_MODEL_DIR=$GACODE_ROOT/shared/neural/tglfnn/models/DIIID_ion_stiffness_60_rotation/
 
