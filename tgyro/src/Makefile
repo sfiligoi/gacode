@@ -57,10 +57,10 @@ OBJECTS +=	tgyro_globals.o \
 .SUFFIXES : .o .f90
 
 all: $(OBJECTS) $(EXTRA_LIBS)
-	$(FC) $(FFLAGS) -o $(EXEC) $(OBJECTS) $(EXTRA_LIBS) $(LMATH) -lfann
+	$(FC) $(FFLAGS) -o $(EXEC) $(OBJECTS) $(EXTRA_LIBS) $(LMATH) -L$(GACODE_ROOT)/shared/harvest_client/ -I$(GACODE_ROOT)/shared/harvest_client/ -I$(GACODE_ROOT)/shared/neural/ -L$(GACODE_ROOT)/shared/neural/ -lbrainfuse -lharvest -lfann
 
 .f90.o :
-	$(FC) $(FMATH) $(FFLAGS) -I$(GACODE_ROOT)/shared/harvest_client/ -I$(GACODE_ROOT)/shared/neural/ -c $< -lfann
+	$(FC) $(FMATH) $(FFLAGS) -I$(GACODE_ROOT)/shared/harvest_client/ -L$(GACODE_ROOT)/shared/harvest_client/ -I$(GACODE_ROOT)/shared/neural/ -L$(GACODE_ROOT)/shared/neural/ -c $<  -lbrainfuse -lharvest -lfann
 
 clean:
 	rm -f $(EXEC)
