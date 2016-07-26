@@ -3,6 +3,13 @@
 !
 ! PURPOSE:
 !  Manage dynamic pedestal interface including no-man's-land (NML).
+!
+! CRITICAL RADII:
+!  Let w be the pedestal width in psi_norm:
+!
+!  top -> 1-2.5*w
+!  ped -> 1-2.0*w
+!  sym -> 1-1.0*w
 !-------------------------------------------------------------------
 
 module tgyro_ped
@@ -68,7 +75,7 @@ contains
     if (tgyro_ped_model == 1) return
 
     !-------------------------------------------------------------------------
-    ! 1. Initializations
+    ! 1. Initializations (not used)
     !
     neped_in   = tgyro_neped
     zeffped_in = tgyro_zeffped
@@ -82,7 +89,8 @@ contains
        ! Inputs stored in interface
        call tgyro_eped_nn
 
-       psi_top(1) = 1.0-1.5*nn_w_ped
+       !psi_top(1) = 1.0-1.5*nn_w_ped
+       psi_top(1) = 0.9
 
     endif
 
