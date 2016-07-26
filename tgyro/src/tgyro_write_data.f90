@@ -21,14 +21,7 @@ subroutine tgyro_write_data(i_print)
   integer :: i_print
   integer :: i_ion
   integer :: p
-  integer, parameter :: trinity_flag=0
   real, dimension(2:n_r,n_evolve_max) :: res2,relax2
-
-  !--------------------------------------------------------------------------------
-  ! First, generate and write TGLF linear growth rates
-  ! (commenting out because not used as of 24 June 2015)
-  !call tgyro_stab_driver
-  !--------------------------------------------------------------------------------
 
   if (i_proc_global > 0) return
 
@@ -84,11 +77,6 @@ subroutine tgyro_write_data(i_print)
 
      open(unit=1,file='out.tgyro.profile',status='replace')
      close(1)
-
-     if (trinity_flag == 1) then
-        open(unit=1,file='out.tgyro.trinity.eflux.out',status='replace')
-        close(1)
-     endif
 
      if (tgyro_ped_model > 1) then
         open(unit=1,file='out.tgyro.ped',status='replace')
@@ -490,26 +478,6 @@ subroutine tgyro_write_data(i_print)
   open(unit=1,file='out.tgyro.prec',status='old',position='append')
   write(1,*) sum(abs(eflux_i_tot(:))+abs(eflux_e_tot(:)))
   close(1)
-
-  !--------------------------------------------------------------------------------
-  ! Trinity-type fluxes
-  ! Electron particle and energy fluxes (flux_e.out)
-
-  if (trinity_flag == 1) then
-     open(unit=1,file='out.tgyro.trinity.eflux.out',status='old',position='append')
-
-     write(1,20) 'r/a','eflux_i_neo','eflux_e_neo','eflux_i_tur','eflux_e_tur'
-     write(1,20) '','(TGB)','(TGB)','(TGB)','(TGB)'
-     do i=1,n_r
-        write(1,10) r(i)/r_min,&
-             eflux_i_neo(1,i)*q_gb(i)/q_tgb(i),&
-             eflux_e_neo(i)*q_gb(i)/q_tgb(i),&
-             eflux_i_tur(1,i)*q_gb(i)/q_tgb(i),&
-             eflux_e_tur(i)*q_gb(i)/q_tgb(i)
-     enddo
-     close(1)
-  endif
-  !--------------------------------------------------------------------------------
 
   if (tgyro_ped_model > 1) then
      open(unit=1,file='out.tgyro.ped',status='old',position='append')

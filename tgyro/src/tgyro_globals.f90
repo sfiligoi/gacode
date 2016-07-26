@@ -298,15 +298,8 @@ module tgyro_globals
   integer :: tgyro_neo_gv_flag
   integer :: tglf_q_low_flag
   integer :: tgyro_global_newton_flag
-  integer :: tgyro_backtrack_method
   integer :: tgyro_iteration_method
-  real :: lm_boost
-  real :: lm_drop
   integer :: tgyro_rotation_flag
-  integer :: tgyro_stab_nsearch
-  integer :: tgyro_stab_nky
-  real :: tgyro_stab_kymin
-  real :: tgyro_stab_deltaky
   real :: tgyro_rmin
   real :: tgyro_rmax
   integer :: tgyro_expwd_flag
@@ -341,6 +334,7 @@ module tgyro_globals
   integer :: i_bc
   integer :: flux_counter
   integer :: i_ash
+  integer :: evolve_indx(5)
   !
   ! Global TGYRO variables
   integer :: igmin

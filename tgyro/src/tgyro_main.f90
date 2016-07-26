@@ -58,7 +58,7 @@ program tgyro_main
 
   select case (tgyro_mode)
 
-  case (1,2)
+  case (1)
 
      ! Local transport model
 

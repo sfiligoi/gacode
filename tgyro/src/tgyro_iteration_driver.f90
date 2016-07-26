@@ -49,44 +49,6 @@ subroutine tgyro_iteration_driver
   b_flag(:) = ' ' 
   !---------------------------------------
 
-  ! Mapping function from radius/field to p
-  if (tgyro_mode /= 2) then
-     p = 0
-     do i=2,n_r
-        ip = 0
-        if (loc_ti_feedback_flag == 1) then
-           p  = p+1
-           ip = ip+1
-           pmap(i,ip) = p
-           quant(p) = 'ti'
-        endif
-        if (loc_te_feedback_flag == 1) then
-           p  = p+1
-           ip = ip+1
-           pmap(i,ip) = p
-           quant(p) = 'te'
-        endif
-        if (loc_ne_feedback_flag == 1) then
-           p  = p+1
-           ip = ip+1
-           pmap(i,ip) = p
-           quant(p) = 'ne'
-        endif
-        if (loc_er_feedback_flag == 1) then
-           p  = p+1
-           ip = ip+1
-           pmap(i,ip) = p
-           quant(p) = 'er'
-        endif
-        if (loc_he_feedback_flag == 1) then
-           p  = p+1
-           ip = ip+1
-           pmap(i,ip) = p
-           quant(p) = 'he'
-        endif
-     enddo
-  endif
-
   ! Generate ALL radial profiles.
   call tgyro_init_profiles
 
@@ -141,18 +103,11 @@ subroutine tgyro_iteration_driver
 
   ! NOTE: See gyro/src/gyro_globals.f90 for definition of transport_method
 
-  if (tgyro_mode == 2) then
-     ! Branch off to stability calculation
-     transport_method = 1
-     call tgyro_stab_driver
-     return
+  ! Standard transport calculation
+  if (tgyro_gyro_restart_flag == 0) then
+     transport_method = 2
   else
-     ! Standard transport calculation
-     if (tgyro_gyro_restart_flag == 0) then
-        transport_method = 2
-     else
-        transport_method = 3
-     endif
+     transport_method = 3
   endif
 
   if (loc_restart_flag == 0) then
@@ -170,27 +125,43 @@ subroutine tgyro_iteration_driver
 
   correct_flag = 0
 
+  ! Mapping function from radius/field to p
   p = 0
   do i=2,n_r
+     ip = 0
      if (loc_ti_feedback_flag == 1) then
-        p = p+1
-        ! Assume 1 represents the thermal ion temperature
+        p  = p+1
+        ip = ip+1
+        pmap(i,ip) = p
+        quant(p) = 'ti'
         x_vec(p) = dlntidr(1,i)
      endif
      if (loc_te_feedback_flag == 1) then
-        p = p+1
+        p  = p+1
+        ip = ip+1
+        pmap(i,ip) = p
+        quant(p) = 'te'
         x_vec(p) = dlntedr(i)
      endif
      if (loc_ne_feedback_flag == 1) then
-        p = p+1
+        p  = p+1
+        ip = ip+1
+        pmap(i,ip) = p
+        quant(p) = 'ne'
         x_vec(p) = dlnnedr(i)
      endif
      if (loc_er_feedback_flag == 1) then
-        p = p+1
+        p  = p+1
+        ip = ip+1
+        pmap(i,ip) = p
+        quant(p) = 'er'
         x_vec(p) = f_rot(i)
      endif
      if (loc_he_feedback_flag == 1) then
-        p = p+1
+        p  = p+1
+        ip = ip+1
+        pmap(i,ip) = p
+        quant(p) = 'he'
         x_vec(p) = dlnnidr(i_ash,i)
      endif
   enddo
@@ -207,10 +178,6 @@ subroutine tgyro_iteration_driver
   case (1) 
 
      call tgyro_iteration_standard
-
-  case (2,3) 
-
-     call tgyro_iteration_pppl
 
   case (4) 
 
