@@ -52,18 +52,6 @@ subroutine tgyro_write_input
      write(1,*) 'Job control'
      write(1,*) 
 
-     if (tgyro_mode == 2) then
-
-        write(1,30) 'TGYRO_STAB_NSEARCH',tgyro_stab_nsearch
-        write(1,30) 'TGYRO_STAB_NKY',tgyro_stab_nky
-        write(1,20) 'TGYRO_STAB_KYMIN',tgyro_stab_kymin
-
-        ! Ooh the dreaded goto ...
-
-        goto 100
-
-     endif
-
      !--------------------------------------------------------
      select case (loc_restart_flag)
 
@@ -93,22 +81,6 @@ subroutine tgyro_write_input
 
         write(1,10) 'TGYRO_ITERATION_METHOD','Local Residual Minimization (original scheme)'
 
-     case (2)
-
-        write(1,10) 'TGYRO_ITERATION_METHOD','Levenberg-Marquardt Minimization Algorithm'
-
-        if (loc_residual_method == 2) then
-           error_flag = 1
-           error_msg = 'Error: TGYRO_ITERATION_METHOD=2 not compatible with LOC_RESIDUAL_METHOD=2'
-        endif
-
-        write(1,20) '*LM_BOOST (damp inc)',lm_boost
-        write(1,20) '*LM_DROP (damp decr)',lm_drop
-
-     case (3)
-
-        write(1,10) 'TGYRO_ITERATION_METHOD','Newton with Linesearch'
-
      case (4)
 
         write(1,10) 'TGYRO_ITERATION_METHOD','Block method (serial)'
@@ -127,37 +99,6 @@ subroutine tgyro_write_input
         error_msg = 'Error: TGYRO_ITERATION_METHOD'
 
      end select
-
-     !--------------------------------------------------------
-     if (tgyro_iteration_method == 2 .or. tgyro_iteration_method == 3) then
-
-        select case (tgyro_backtrack_method)
-
-        case (0)
-
-           write(1,10) '*TGYRO_BACKTRACK_METHOD','Backtracking Off'
-
-        case (1)
-
-           write(1,10) '*TGYRO_BACKTRACK_METHOD','Golden Ratio Search'
-
-        case (2)
-
-           write(1,10) '*TGYRO_BACKTRACK_METHOD','Optimal Parabolic Backtrack'
-
-        case (3)
-
-           write(1,10) '*TGYRO_BACKTRACK_METHOD','3'
-
-        case default
-
-           error_flag = 1
-           error_msg = 'Error: TGYRO_BACKTRACK_METHOD'
-
-        end select
-
-     endif
-     !--------------------------------------------------------
 
      if (tgyro_global_newton_flag == 0) then
         write(1,10) 'TGYRO_GLOBAL_NEWTON_FLAG','Block-diagonal flux Jacobian'
@@ -468,8 +409,6 @@ subroutine tgyro_write_input
 
      end select
      !--------------------------------------------------------
-
-100  continue 
 
      write(1,*)
      write(1,*) 'Physics parameters'

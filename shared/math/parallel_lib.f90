@@ -3,6 +3,19 @@ module parallel_lib
   implicit none
 
   ! lib
+  logical :: use_alltoall_lib_f = .true.
+  logical :: use_alltoall_lib_r = .true.
+  logical :: use_alltoall_slib_f = .true.
+  logical :: use_alltoall_slib_r = .true.
+
+  public :: use_alltoall_lib_f 
+  public :: use_alltoall_lib_r 
+  public :: use_alltoall_slib_f 
+  public :: use_alltoall_slib_r 
+
+  integer, parameter :: idebug = 0
+  integer, parameter :: TAG_UB = 32767
+  complex, parameter :: czero = (0.0,0.0)
 
   integer, private :: nproc,iproc
   integer, private :: ni,nj
@@ -25,7 +38,23 @@ module parallel_lib
   integer, private :: slib_comm
 
   integer, private, parameter :: default_size = 1024*1024*32
+  private :: assert
+
 contains
+
+  subroutine assert(lcond,msg,ival)
+    implicit none
+    logical,intent(in) :: lcond
+    character*(*), intent(in) :: msg
+    integer, intent(in) :: ival
+
+    if (.not.lcond) then
+       write(*,*) msg,ival
+       stop 'assertion failed'
+    endif
+
+  end subroutine assert
+
 
   !=========================================================
 
@@ -78,32 +107,83 @@ contains
     complex, intent(inout), dimension(nj_loc,ni) :: ft
     integer :: ierr,i_loc,i,j,k, i1,i2
 
+    integer :: irequest,source, dest, tag
+    integer :: request_list(nproc+nproc)
 
+    if (idebug >= 1) then
+       print 9010, iproc,nsend,ni_loc,nj,nj_loc,ni
+9010   format('parallel_lib_f: iproc=',i5,' nsend=',i5,                   &
+            ' ni_loc=',i5,' nj=',i5,' nj_loc=',i5,' ni=',i5)
+    endif
 
-!$omp  parallel do if (size(fsendf) >= default_size) default(none) &
-!$omp& shared(nproc,iproc,ni_loc,nj_loc) &
-!$omp& private(k,i,i_loc,j,i1,i2) &
-!$omp& shared(f) &
-!$omp& shared(fsendf)
-    do k=1,nproc
-       i1 = 1+iproc*ni_loc
-       i2 = (1+iproc)*ni_loc
-       do i=i1,i2
-          i_loc = i-i1+1 
-          do j=1,nj_loc
-             fsendf(j,i_loc,k) = f(i_loc,j+(k-1)*nj_loc) 
+    if (use_alltoall_lib_f) then
+
+       do k=1,nproc
+          i1 = 1+iproc*ni_loc
+          i2 = (1+iproc)*ni_loc
+          do i=i1,i2
+             i_loc = i-i1+1 
+             do j=1,nj_loc
+                fsendf(j,i_loc,k) = f(i_loc,j+(k-1)*nj_loc) 
+             enddo
           enddo
        enddo
-    enddo
 
-    call MPI_ALLTOALL(fsendf, &
-         nsend, &
-         MPI_DOUBLE_COMPLEX, &
-         ft, &
-         nsend, &
-         MPI_DOUBLE_COMPLEX, &
-         lib_comm, &
-         ierr)
+       call MPI_ALLTOALL(fsendf, &
+            nsend, &
+            MPI_DOUBLE_COMPLEX, &
+            ft, &
+            nsend, &
+            MPI_DOUBLE_COMPLEX, &
+            lib_comm, &
+            ierr)
+    else
+
+       !     ----------------
+       !     post mpi_irecv()
+       !     ----------------
+
+       do k=1,nproc
+          source = (k-1)
+          dest = iproc
+          tag = mod(source + dest*nproc,TAG_UB)
+          call MPI_Irecv( ft(1,k), nsend, MPI_DOUBLE_COMPLEX,         &
+               source, tag, lib_comm, irequest,ierr)
+          call assert(ierr.eq.MPI_SUCCESS,                            &
+               'parallel_lib_f: MPI_Irecv return ierr',ierr) 
+          request_list(k) = irequest
+       enddo
+
+       !     ----------------
+       !     post mpi_isend()
+       !     ----------------
+
+       do k=1,nproc
+          i1 = 1+iproc*ni_loc
+          i2 = (1+iproc)*ni_loc
+          do i=i1,i2
+             i_loc = i-i1+1 
+             do j=1,nj_loc
+                fsendf(j,i_loc,k) = f(i_loc,j+(k-1)*nj_loc) 
+             enddo
+          enddo
+
+          source = iproc
+          dest = (k-1)
+          tag = mod(source + dest*nproc,TAG_UB)
+          call MPI_Isend(fsendf(1,1,k),nsend,MPI_DOUBLE_COMPLEX,            &
+               dest, tag, lib_comm, irequest, ierr)
+          call assert(ierr.eq.MPI_SUCCESS,                                  &
+               'parallel_lib_f:MPI_Isend return ierr',ierr)
+          request_list(nproc+k) = irequest
+
+       enddo
+
+       call MPI_Waitall(2*nproc,request_list, MPI_STATUSES_IGNORE,ierr)
+       call assert(ierr.eq.MPI_SUCCESS,                                   &
+            'parallel_lib_f:MPI_Waitall return ierr',ierr)
+
+    endif
 
   end subroutine parallel_lib_f
 
@@ -119,11 +199,17 @@ contains
     complex, intent(inout), dimension(ni_loc,nj) :: f
     integer :: ierr,j_loc,i,j,k, j1,j2
 
-!$omp  parallel do if (size(fsendr) >= default_size) default(none) &
-!$omp& shared(nproc,iproc,nj_loc,ni_loc) &
-!$omp& private(k,j,j_loc,i,j1,j2) &
-!$omp& shared(ft) &
-!$omp& shared(fsendr)
+    if (idebug >= 1) then
+       print 9010, iproc,nsend,ni_loc,nj,nj_loc,ni
+9010   format('parallel_lib_f: iproc=',i5,' nsend=',i5,                   &
+            ' ni_loc=',i5,' nj=',i5,' nj_loc=',i5,' ni=',i5)
+    endif
+
+!!$omp  parallel do if (size(fsendr) >= default_size) default(none) &
+!!$omp& shared(nproc,iproc,nj_loc,ni_loc) &
+!!$omp& private(k,j,j_loc,i,j1,j2) &
+!!$omp& shared(ft) &
+!!$omp& shared(fsendr)
     do k=1,nproc
        j1 = 1+iproc*nj_loc
        j2 = (1+iproc)*nj_loc
@@ -147,9 +233,9 @@ contains
   end subroutine parallel_lib_r
 
   subroutine parallel_lib_rtrans(fin,f)
-! -----------------------------------------
-! transpose version of parallel_lib_r(fin,f)
-! -----------------------------------------
+    ! -----------------------------------------
+    ! transpose version of parallel_lib_r(fin,f)
+    ! -----------------------------------------
     use mpi
 
     implicit none
@@ -158,11 +244,11 @@ contains
     complex, intent(inout), dimension(ni_loc,nj) :: f
     integer :: ierr,j_loc,i,j,k, j1,j2
 
-!$omp  parallel do if (size(fsendr) >= default_size) default(none) &
-!$omp& shared(nproc,iproc,nj_loc,ni_loc) &
-!$omp& private(k,j,j_loc,i,j1,j2) &
-!$omp& shared(fin) &
-!$omp& shared(fsendr)
+!!$omp  parallel do if (size(fsendr) >= default_size) default(none) &
+!!$omp& shared(nproc,iproc,nj_loc,ni_loc) &
+!!$omp& private(k,j,j_loc,i,j1,j2) &
+!!$omp& shared(fin) &
+!!$omp& shared(fsendr)
     do k=1,nproc
        j1 = 1+iproc*nj_loc
        j2 = (1+iproc)*nj_loc
@@ -197,11 +283,11 @@ contains
     real, intent(inout), dimension(ni_loc,nj) :: f
     integer :: ierr,j_loc,i,j,k,j1,j2
 
-!$omp  parallel do if (size(fsendr_real) >= default_size) default(none) &
-!$omp& shared(nproc,iproc,nj_loc,ni_loc) &
-!$omp& private(k,j,j_loc,i,j1,j2) &
-!$omp& shared(ft) &
-!$omp& shared(fsendr_real)
+!!$omp  parallel do if (size(fsendr_real) >= default_size) default(none) &
+!!$omp& shared(nproc,iproc,nj_loc,ni_loc) &
+!!$omp& private(k,j,j_loc,i,j1,j2) &
+!!$omp& shared(ft) &
+!!$omp& shared(fsendr_real)
     do k=1,nproc
        j1 = 1+iproc*nj_loc
        j2 = (1+iproc)*nj_loc
@@ -234,11 +320,11 @@ contains
     real, intent(inout), dimension(ni_loc,nj) :: f
     integer :: ierr,j_loc,i,j,k,j1,j2
 
-!$omp  parallel do if (size(fsendr_real) >= default_size) default(none) &
-!$omp& shared(nproc,iproc,nj_loc,ni_loc) &
-!$omp& private(k,j,j_loc,i,j1,j2) &
-!$omp& shared(fin) &
-!$omp& shared(fsendr_real)
+!!$omp  parallel do if (size(fsendr_real) >= default_size) default(none) &
+!!$omp& shared(nproc,iproc,nj_loc,ni_loc) &
+!!$omp& private(k,j,j_loc,i,j1,j2) &
+!!$omp& shared(fin) &
+!!$omp& shared(fsendr_real)
     do k=1,nproc
        j1 = 1+iproc*nj_loc
        j2 = (1+iproc)*nj_loc
@@ -301,7 +387,7 @@ contains
 
   end subroutine parallel_slib_init
 
-!=========================================================
+  !=========================================================
 
   subroutine parallel_slib_f(x_in,xt)
 
@@ -312,41 +398,102 @@ contains
     !
     complex, intent(in), dimension(nkeep,nexch) :: x_in
     complex, dimension(nkeep,nsplit*nn) :: x
-    complex, intent(inout), dimension(nkeep,nsplit,nn) :: xt
+    complex, intent(inout), dimension(nkeep*nsplit*nn) :: xt
     !
     integer :: j
     integer :: ierr
+    integer :: icount, ip, irequest, k, source, dest, tag, offset
+    integer :: request_list(nsproc+nsproc)
+    logical :: isok
     !-------------------------------------------------------
+    if (idebug >= 1) then
+       print 9010, isproc,nkeep,nexch,nsplit,nn
+9010   format('parallel_slib_f: isproc=',i5,' nkeep=',i5,                  &
+            ' nexch=',i5,' nsplit=',i5,' nn=',i5)
+    endif
 
-!$omp  parallel do if (size(x) >= default_size) default(none) &
-!$omp& shared(nexch) &
-!$omp& private(j) &
-!$omp& shared(x_in) &
-!$omp& shared(x)
-    do j=1,nexch
-       x(:,j) = x_in(:,j)
-    enddo
+    isok = (nsproc <= nn)
+    if (.not.isok) then
+       print 9020,isproc,nsproc,nsplit,nn
+9020   format('parallel_slib_f:invalid nn, isproc=',i5,                   &
+            ' nsproc=',i5,' nsplit=',i5,' nn=',i5)
+    endif
+    call assert(isok,'parallel_slib_f: invalid nn=',nn)
 
-!$omp  parallel do if (size(x) >= default_size) default(none) &
-!$omp& shared(nexch,nsplit,nn) &
-!$omp& private(j) &
-!$omp& shared(x)
-    do j=nexch+1,nsplit*nn
-       x(:,j) = (0.0,0.0)
-    enddo
+    if (use_alltoall_slib_f) then
+       do j=1,nexch
+          x(:,j) = x_in(:,j)
+       enddo
 
-    call MPI_ALLTOALL(x, &
-         nkeep*nsplit, &
-         MPI_DOUBLE_COMPLEX, &
-         xt, &
-         nkeep*nsplit, &
-         MPI_DOUBLE_COMPLEX, &
-         slib_comm, &
-         ierr)
+       do j=nexch+1,nsplit*nn
+          x(:,j) = czero
+       enddo
+
+       call MPI_ALLTOALL(x, &
+            nkeep*nsplit, &
+            MPI_DOUBLE_COMPLEX, &
+            xt, &
+            nkeep*nsplit, &
+            MPI_DOUBLE_COMPLEX, &
+            slib_comm, &
+            ierr)
+    else
+
+
+       !   --------------
+       !   post MPI_Irecv
+       !   --------------
+       do k=1,nsproc
+          source = (k-1)
+          dest = isproc
+          tag = mod( source + dest*nsproc,TAG_UB)
+          offset = 1 + (k-1)*(nkeep*nsplit)
+          icount = nkeep*nsplit
+          call MPI_Irecv( xt(offset),icount,MPI_DOUBLE_COMPLEX,              &
+               source, tag, slib_comm, irequest,ierr)
+          call assert(ierr.eq.MPI_SUCCESS,                                   &
+               'parallel_slib_f: MPI_Irecv return ierr',ierr)
+          request_list(k) = irequest
+       enddo
+
+       !    ---------------------
+       !    copy data into buffer
+       !    ---------------------
+       do j=1,nexch
+          x(:,j) = x_in(:,j)
+       enddo
+
+       do j=nexch+1,nsplit*nn
+          x(:,j) = czero
+       enddo
+
+       !   -----------------
+       !   perform MPI_Isend
+       !   -----------------
+
+       do k=1,nsproc
+          source = isproc
+          dest = (k-1)
+          tag = mod(source+dest*nsproc,TAG_UB)
+          ip = 1 + (k-1)*nsplit
+          icount = nkeep*nsplit
+          call MPI_Isend( x(1,ip),icount,MPI_DOUBLE_COMPLEX,                 &
+               dest, tag, slib_comm, irequest, ierr)
+          call assert(ierr.eq.MPI_SUCCESS, &
+               'parallel_slib_f: MPI_Isend return ierr',ierr)
+          request_list(nsproc+k) = irequest
+       enddo
+
+       call MPI_Waitall(2*nsproc,request_list,MPI_STATUSES_IGNORE,ierr)
+       call assert(ierr.eq.MPI_SUCCESS,                                     &
+            'parallel_slib_f:MPI_Waitall return ierr',ierr)
+
+
+    endif
 
   end subroutine parallel_slib_f
 
- !=========================================================
+  !=========================================================
 
   subroutine parallel_slib_r(xt,x_out)
 
@@ -355,32 +502,86 @@ contains
     !-------------------------------------------------------
     implicit none
     !
-    complex, intent(in), dimension(nkeep,nsplit,nn) :: xt
+    !complex, intent(in), dimension(nkeep,nsplit,nn) :: xt
+    complex, intent(in), dimension(nkeep*nsplit*nn) :: xt
     complex, intent(inout), dimension(nkeep,nexch) :: x_out
     complex, dimension(nkeep,nsplit*nn) :: x
     !
     integer :: j
     integer :: ierr
+    integer :: source, dest, tag, icount, ip, irequest
+    integer :: request_list(nsproc+nsproc)
+    logical :: isok
     !-------------------------------------------------------
 
-    call MPI_ALLTOALL(xt, &
-         nkeep*nsplit, &
-         MPI_DOUBLE_COMPLEX, &
-         x, &
-         nkeep*nsplit, &
-         MPI_DOUBLE_COMPLEX, &
-         slib_comm, &
-         ierr)
+    isok = (nsproc <= nn)
+    if (.not.isok) then
+       print 9020,isproc,nkeep,nsplit,nexch,nn
+9020   format('parallel_slib_r: invalid nn, isproc=',i5,                  &
+            ' nkeep=',i5,' nsplit=',i5,' nexch=',i5,' nn=',i5)
+    endif
+    call assert(isok,'parallel_slib_r: invalid nn=',nn)
 
-!$omp  parallel do if (size(x) >= default_size) default(none) &
-!$omp& shared(nexch) &
-!$omp& private(j) &
-!$omp& shared(x) &
-!$omp& shared(x_out)
-    do j=1,nexch
-       x_out(:,j) = x(:,j)
-    enddo
+    if (use_alltoall_slib_r) then
 
+       call MPI_ALLTOALL(xt, &
+            nkeep*nsplit, &
+            MPI_DOUBLE_COMPLEX, &
+            x, &
+            nkeep*nsplit, &
+            MPI_DOUBLE_COMPLEX, &
+            slib_comm, &
+            ierr)
+
+       do j=1,nexch
+          x_out(:,j) = x(:,j)
+       enddo
+
+    else
+
+       !   --------------
+       !   post MPI_Irecv
+       !   --------------
+
+       do j=1,nsproc
+          source = (j-1)
+          dest = isproc
+          tag = mod(source + dest*nsproc,TAG_UB)
+          ip = 1 + (j-1)*nsplit
+          icount = nkeep*nsplit
+          call MPI_Irecv( x(1,ip),icount, MPI_DOUBLE_COMPLEX,                &
+               source, tag, slib_comm, irequest, ierr )
+          call assert(ierr.eq.MPI_SUCCESS,                                   &
+               'parallel_slib_r: MPI_Irecv return ierr',ierr)
+          request_list(j) = irequest
+       enddo
+
+       !   --------------
+       !   post MPI_Isend
+       !   --------------
+
+       do j=1,nsproc
+          source = isproc
+          dest = (j-1)
+          tag = mod(source + dest*nsproc,TAG_UB)
+          icount = nkeep*nsplit
+          ip = 1 + (j-1)*(nkeep*nsplit)
+          call MPI_Isend( xt(ip),icount,MPI_DOUBLE_COMPLEX,                 &
+               dest, tag, slib_comm, irequest, ierr)
+          call assert(ierr.eq.MPI_SUCCESS,                                  &
+               'parallel_slib_r: MPI_Isend return ierr',ierr)
+
+          request_list(nsproc+j) = irequest
+       enddo
+
+       call MPI_Waitall(2*nsproc,request_list,MPI_STATUSES_IGNORE,ierr)
+       call assert(ierr.eq.MPI_SUCCESS,                                      &
+            'parallel_slib_r: MPI_Waitall return ierr',ierr)
+       do j=1,nexch
+          x_out(:,j) = x(:,j)
+       enddo
+
+    endif
   end subroutine parallel_slib_r
 
 end module parallel_lib

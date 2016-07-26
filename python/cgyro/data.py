@@ -28,7 +28,6 @@ class cgyrodata:
         self.t      = data[:,0]
         self.error  = data[:,1]
         self.n_time = len(self.t)   
-        print
         print "INFO: (data.py) Read time vector in out.cgyro.time."
         #-----------------------------------------------------------------
 
@@ -88,6 +87,18 @@ class cgyrodata:
         #-----------------------------------------------------------------
 
         #-----------------------------------------------------------------
+        # Equil file
+        #
+        try:
+            data = np.fromfile(self.dir+'out.cgyro.equil',dtype='float',sep=" ")
+            self.equil = data
+            print "INFO: (data.py) Read data in out.cgyro.equil."
+        except:
+            pass
+
+        #-----------------------------------------------------------------
+
+        #-----------------------------------------------------------------
         # Read ballooning potentials
         #
         try:
@@ -130,6 +141,39 @@ class cgyrodata:
         #-----------------------------------------------------------------
 
         #-----------------------------------------------------------------
+        # Compressed particle and energy fluxes
+        #
+        nd = self.n_species*nt
+        try:
+            start = time.time()
+            data = np.loadtxt(self.dir+'out.cgyro.flux_n',dtype='float')
+            end = time.time()
+            self.flux_n = np.transpose(data[:,1:])
+            print "INFO: (data.py) Read data in out.cgyro.flux_n."
+        except:
+            pass
+
+        try:
+            start = time.time()
+            data = np.loadtxt(self.dir+'out.cgyro.flux_e',dtype='float')
+            end = time.time()
+            self.flux_e = np.transpose(data[:,1:])
+            print "INFO: (data.py) Read data in out.cgyro.flux_e."
+        except:
+            pass 
+        #-----------------------------------------------------------------
+
+    def getbigflux(self):
+
+        """Larger flux files"""
+
+        import numpy as np
+        import time
+
+        # Convenience definition
+        nt = self.n_time
+
+        #-----------------------------------------------------------------
         # Particle and energy fluxes
         #
         nd = self.n_radial*self.n_species*self.n_n*nt
@@ -137,7 +181,7 @@ class cgyrodata:
             start = time.time()
             data = np.fromfile(self.dir+'out.cgyro.kxky_flux_n',dtype='float',sep=" ")
             end = time.time()
-            self.flux_n = np.reshape(data[0:nd],(self.n_radial,self.n_species,self.n_n,nt),'F')
+            self.kxky_flux_n = np.reshape(data[0:nd],(self.n_radial,self.n_species,self.n_n,nt),'F')
             print "INFO: (data.py) Read data in out.cgyro.kxky_flux_n. TIME = "+str(end-start)
         except:
             pass
@@ -146,16 +190,16 @@ class cgyrodata:
             start = time.time()
             data = np.fromfile(self.dir+'out.cgyro.kxky_flux_e',dtype='float',sep=" ")
             end = time.time()
-            self.flux_e = np.reshape(data[0:nd],(self.n_radial,self.n_species,self.n_n,nt),'F')
+            self.kxky_flux_e = np.reshape(data[0:nd],(self.n_radial,self.n_species,self.n_n,nt),'F')
             print "INFO: (data.py) Read data in out.cgyro.kxky_flux_e. TIME = "+str(end-start)
         except:
             pass 
         #-----------------------------------------------------------------
 
 
-    def getbig(self):
+    def getbigfield(self):
 
-        """Larger files"""
+        """Larger field files"""
 
         import numpy as np
         import time
@@ -170,8 +214,8 @@ class cgyrodata:
             start = time.time()
             data = np.fromfile(self.dir+'out.cgyro.kxky_phi',dtype='float',sep=" ")
             end = time.time()
-            self.phi = np.reshape(data,(2,self.n_radial,self.n_n,nt),'F')
-            self.phisq = self.phi[0,:,:,:]**2+self.phi[1,:,:,:]**2
+            self.kxky_phi = np.reshape(data,(2,self.n_radial,self.n_n,nt),'F')
+            self.phisq = self.kxky_phi[0,:,:,:]**2+self.kxky_phi[1,:,:,:]**2
             print "INFO: (data.py) Read data in out.cgyro.kxky_phi. TIME = "+str(end-start)
         except:
             pass

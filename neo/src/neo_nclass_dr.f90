@@ -528,6 +528,8 @@ contains
           neo_nclass_out(is,2) = eflux_nc(is)
           neo_nclass_out(is,3) = vpol_nc(is)
           neo_nclass_out(is,4) = vtor_nc(is)
+          neo_nclass_out(is,5) = ymu_s(1,1,is) / (mass_deuterium * 1e-27 &
+            * dens_norm(ir) * 1e19 * vth_norm(ir))
        enddo
        neo_nclass_1d_out = jbs_nc 
     endif

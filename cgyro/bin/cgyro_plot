@@ -3,7 +3,7 @@
 # cgyro_plot
 #
 # PURPOSE:
-#  Plotting/listing routines for GYRO output.
+#  Plotting/listing routines for CGYRO output.
 #==============================================================================
 
 #==============================================================================
@@ -17,54 +17,78 @@ then
   echo "Usage:    cgyro_plot [options]"
   echo
   echo "          -p <path>"
-  echo "          Set optional path to simulation directory."
-  echo "          [The default path is the current directory]"
+  echo "           Set optional path to simulation directory."
+  echo "           [The default path is the current directory]"
   echo
   echo "          -e <simdir>"
-  echo "          Use data in <simdir>."
+  echo "           Use data in <simdir>."
   echo 
   echo "          -ext <filetype>"
-  echo "          Output file type."
-  echo "           <filetype>=emf, eps, pdf, png, ps, raw, rgba, svg, svgz, dump"
+  echo "           Output file type."
+  echo "           <filetype>=eps, pdf, png, svg, dump"
   echo 
   echo "          -species <value>"
-  echo "          Specify species to be plotted: [0,n_species-1]."
+  echo "           Specify species to be plotted: [0,n_species-1]."
   echo
   echo "          -field <value>"
-  echo "          Specify field to be plotted: [0,n_field-1]."
+  echo "           Specify field to be plotted: [0,n_field-1]."
   echo
   echo "          -moment <value>"
-  echo "          Specify moment to be plotted [n,e,m,s]."
+  echo "           Specify moment to be plotted [n,e,m,s]."
   echo
-  echo "          -t <value>"
-  echo "          Specify integer time index (-1 is last time)."
+  echo "          -w <float>"
+  echo "           Width of time-average window (1.0 is entire time history)."
   echo
-  echo "          -tmax <float>"
-  echo "          Maximum value of ballooning angle."
+  echo "          -plot <type>"
+  echo "           Function to plot."
+  echo "           <type> = text     (text summary of fluxes)"
+  echo "                  = freq     (frequency versus time),"
+  echo "                  = ball     (ballooning modes)"
+  echo "                  = hb       (2D ballooning distribution)"
+  echo "                  = hbcut    (1D ballooning distribution line plots),"
+  echo "                  = geo      (geometry arrays)"
+  echo "                  = zf       (zonal flow potential plot vs. time),"
+  echo "                  = error    (time-integration error)"
+  echo "                  = flux     (time-trace of fluxes for all species)"
+  echo "                  = ky_flux  (bar plot of flux versus ky)"
+  echo "                  = phi      (time-dependent ZF vs. finite-n intensities)"
+  echo "                  = ky_phi   (time-dependent ky-phi intensities)"
+  echo "                  = kxky_phi (kx-ky spectra of ave(|phi|))"
+  echo "                  = note     (notebook)"
   echo
-  echo "          -theta <value>"
-  echo "          Value of theta/pi used in hbcut"
+  echo " OPTIONS: flux, ky_flux"
   echo
   echo "          -ymax <float>"
   echo "          Maximum value of vertical axis (where applicable)."
   echo
-  echo "          -w <float>"
-  echo "          Width of time-average window (1.0 is entire time history)."
+  echo " OPTIONS: hbcut"
   echo
-  echo "          -plot <type>"
-  echo 
-  echo "              <type> = text   (text summary of fluxes)"
-  echo "                     = freq   (frequency versus time),"
-  echo "                     = ball   (ballooning modes)"
-  echo "                     = hb     (2D ballooning distribution)"
-  echo "                     = hbcut  (1D ballooning distribution line plots),"
-  echo "                     = geo    (geometry arrays)"
-  echo "                     = zf     (zonal flow potential plot vs. time),"
-  echo "                     = fluxt  (time-trace of fluxes for all species)"
-  echo "                     = fluxn  (bar plot of flux versus n)"
-  echo "                     = pwr    (time dependent field intensities)"
-  echo "                     = pwr_np (n-p spectra at final time)"
-  echo "                     = note   (notebook)"
+  echo "          -theta <value>"
+  echo "          Value of theta/pi used in hbcut"
+  echo
+  echo " OPTIONS: ball, hb, hbcut"
+  echo
+  echo "          -tmax <float>"
+  echo "          Maximum value of ballooning angle."
+  echo
+  echo "          -t <value>"
+  echo "          Specify integer time index (-1 is last time)."
+  echo
+  echo
+  echo " LINEAR EXAMPLES:"
+  echo "  $ cgyro_plot -e . -plot freq           [frequency versus time]"
+  echo "  $ cgyro_plot -e . -plot ball -field 0  [phi versus ballooning angle]"
+  echo "  $ cgyro_plot -e . -plot zf             [zf phi versus time]"
+  echo
+  echo
+  echo " NONLINEAR EXAMPLES:"
+  echo "  $ cgyro_plot -e . -plot flux           [energy flux versus time]"
+  echo "  $ cgyro_plot -e . -plot flux -ext png  [... above to PNG file]"
+  echo "  $ cgyro_plot -e . -plot flux -ext dump [... above to datafile]"
+  echo "  $ cgyro_plot -e . -plot flux -moment n [particle flux versus time]"
+  echo "  $ cgyro_plot -e . -plot ky_flux        [energy flux versus ky]"
+  echo "  $ cgyro_plot -e . -plot phi            [n=0 and n>0 potentials versus time]"
+
 
   exit 1
 fi
@@ -154,20 +178,29 @@ case "$PLOT_TYPE" in
    freq)  
 	python $PYROOT/plot_freq.py $FTYPE ;;
 
-   fluxn)  
-	python $PYROOT/plot_flux_n.py $FTYPE $W $MOMENT ;;
+   error)  
+	python $PYROOT/plot_error.py $FTYPE ;;
 
-   fluxt)  
-	python $PYROOT/plot_flux_t.py $FTYPE $W $MOMENT $YMAX ;;
+   ky_flux)  
+	python $PYROOT/plot_ky_flux.py $FTYPE $W $MOMENT $YMAX ;;
 
-   pwr)  
-	python $PYROOT/plot_pwr.py $FTYPE $FIELD ;;
+   flux)  
+	if [ "$FTYPE" == "dump" ]
+        then
+	   python $PYROOT/dump_flux.py 
+        else
+	   python $PYROOT/plot_flux.py $FTYPE $W $MOMENT $YMAX 
+        fi
+        ;;
 
-   pwr_np)  
-	python $PYROOT/plot_pwr_np.py $FTYPE $W $FIELD ;;
+   phi)  
+	python $PYROOT/plot_phi.py $FTYPE $FIELD ;;
 
-   pwr_zf)  
-	python $PYROOT/plot_pwr_zf.py $FTYPE $W $FIELD ;;
+   ky_phi)  
+	python $PYROOT/plot_ky_phi.py $FTYPE $FIELD ;;
+
+   kxky_phi)  
+	python $PYROOT/plot_kxky_phi.py $FTYPE $W $FIELD ;;
 
    zf)  
 	python $PYROOT/plot_zf.py $FTYPE $W $FIELD ;;

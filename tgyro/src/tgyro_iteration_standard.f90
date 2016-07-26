@@ -99,34 +99,7 @@ subroutine tgyro_iteration_standard
      x_vec = x_vec0
 
      ! Reset profiles to be consistent with gradient.
-     ! NOTE: This corrects an error (pre July 2010).
-
-     p = 0
-     do i=2,n_r
-        if (loc_ti_feedback_flag == 1) then
-           p = p+1
-           dlntidr(therm_vec(:),i) = x_vec(p)
-           ! therm_vec is just list of thermal ions, for example: (1,2)
-        endif
-        if (loc_te_feedback_flag == 1) then
-           p = p+1
-           dlntedr(i) = x_vec(p)
-        endif
-        if (loc_ne_feedback_flag == 1) then
-           p = p+1
-           dlnnedr(i) = x_vec(p)
-           ! Set dlnnidr(1,i) according to quasineutrality
-           call tgyro_quasigrad(ne(i),dlnnedr(i),ni(:,i),dlnnidr(:,i),zi_vec(:),loc_n_ion)
-        endif
-        if (loc_er_feedback_flag == 1) then
-           p = p+1
-           f_rot(i) = x_vec(p)
-        endif
-        if (loc_he_feedback_flag == 1) then
-           p = p+1
-           dlnnidr(i_ash,i) = x_vec(p)
-        endif
-     enddo
+     call tgyro_profile_set(x_vec,0.0,0)
 
      call tgyro_profile_functions 
      !----------------------------------------------
@@ -159,73 +132,17 @@ subroutine tgyro_iteration_standard
 
         jf(:,:) = 0.0
 
-        ip = -1
-
         call tgyro_write_jacobian(1)
 
-        if (loc_ti_feedback_flag == 1) then
-
-           ip = ip+1
-           call tgyro_flux_vector(x_vec,f_vec,dx,1)
+        do ip=0,n_evolve-1
+           call tgyro_flux_vector(x_vec,f_vec,dx,evolve_indx(ip+1))
            do p=1,p_max,n_evolve
               do pp=0,n_evolve-1
                  jf(p+pp,p+ip) = (f_vec(p+pp)-f_vec0(p+pp))/dx
               enddo
            enddo
            call tgyro_write_jacobian(0)
-        endif
-
-        if (loc_te_feedback_flag == 1) then
-
-           ip = ip+1
-           call tgyro_flux_vector(x_vec,f_vec,dx,2)
-           do p=1,p_max,n_evolve
-              do pp=0,n_evolve-1
-                 jf(p+pp,p+ip) = (f_vec(p+pp)-f_vec0(p+pp))/dx
-              enddo
-           enddo
-           call tgyro_write_jacobian(0)
-
-        endif
-
-        if (loc_ne_feedback_flag == 1) then
-
-           ip = ip+1
-           call tgyro_flux_vector(x_vec,f_vec,dx,3)
-           do p=1,p_max,n_evolve
-              do pp=0,n_evolve-1
-                 jf(p+pp,p+ip) = (f_vec(p+pp)-f_vec0(p+pp))/dx
-              enddo
-           enddo
-           call tgyro_write_jacobian(0)
-
-        endif
-
-        if (loc_er_feedback_flag == 1) then
-
-           ip = ip+1
-           call tgyro_flux_vector(x_vec,f_vec,dx,4)
-           do p=1,p_max,n_evolve
-              do pp=0,n_evolve-1
-                 jf(p+pp,p+ip) = (f_vec(p+pp)-f_vec0(p+pp))/dx
-              enddo
-           enddo
-           call tgyro_write_jacobian(0)
-
-        endif
-
-        if (loc_he_feedback_flag == 1) then
-
-           ip = ip+1
-           call tgyro_flux_vector(x_vec,f_vec,dx,5)
-           do p=1,p_max,n_evolve
-              do pp=0,n_evolve-1
-                 jf(p+pp,p+ip) = (f_vec(p+pp)-f_vec0(p+pp))/dx
-              enddo
-           enddo
-           call tgyro_write_jacobian(0)
-
-        endif
+        enddo
         !
         !----------------------------------------------
 

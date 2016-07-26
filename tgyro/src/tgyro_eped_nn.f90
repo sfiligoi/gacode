@@ -50,9 +50,9 @@ subroutine tgyro_eped_nn
        ip_in      ,&
        kappa_in   ,&
        m_in       ,&
-       neped_in   ,&
-       r_in       ,&
-       zeffped_in 
+       neped_in   ,& ! at ped
+       r_in       ,& 
+       zeffped_in    ! at ped
   close(1)
   !
   ! Execute the NN
@@ -70,7 +70,9 @@ subroutine tgyro_eped_nn
   ! Correct n
   nn_vec(nx_nn,2) = 2*nn_vec(nx_nn-1,2)-nn_vec(nx_nn-2,2)
   
-  ! Temporary -- need to read this
-  nn_w_ped = 0.05
+  ! NOTE:  w_ped currently fixed so that psi_top = 0.9 = 1-2.5*w_ped
+  !        OR w_ped = 0.1/2.5
+
+  nn_w_ped = 0.1/2.5
   
 end subroutine tgyro_eped_nn

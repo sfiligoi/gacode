@@ -3,24 +3,17 @@
 !
 ! PURPOSE:
 !  Evaluate blending function basis vectors.  
-!
-! REVISIONS
-! 14 Jan 01: jeff.candy@gat.com
-!  Created.
-! 05 Sept 01: jc
-!  Renamed.
 !------------------------------------------------------
 
-complex function BLEND_F(m,x,p_IN) result (f)
+complex function BLEND_F(m,x,p_IN)
 
   use BLEND_private
 
   implicit none
 
-  complex, intent(in) :: p_IN
-
-  real, intent(in) :: x
   integer, intent(in) :: m
+  real, intent(in) :: x
+  complex, intent(in) :: p_IN
 
   real :: t
   real :: a
@@ -40,27 +33,15 @@ complex function BLEND_F(m,x,p_IN) result (f)
 
   case (2)
 
-     f = BLEND_f2(m-n,t)+p_IN*BLEND_f2(m-n+n_fit,t)
+     BLEND_F = BLEND_f2(m-n,t)+p_IN*BLEND_f2(m-n+n_fit,t)
 
   case (3)
 
-     f = BLEND_f3(m-n,t)+p_IN*BLEND_f3(m-n+n_fit,t)
+     BLEND_F = BLEND_f3(m-n,t)+p_IN*BLEND_f3(m-n+n_fit,t)
 
   case (4)
 
-     f = BLEND_f4(m-n,t)+p_IN*BLEND_f4(m-n+n_fit,t)
-
-  case default
-
-     ! This code is meant to cause GYRO to fail.
-     ! This is done, rather than simply calling 
-     ! catch_error(), as a workaround to enable
-     ! the X1 to vectorize.
-
-     a = 0.0
-     a = 1.0/a
-     t = 1.0/a
-     f = a*t
+     BLEND_F = BLEND_f4(m-n,t)+p_IN*BLEND_f4(m-n+n_fit,t)
 
   end select
 

@@ -253,8 +253,8 @@ module neo_globals
   real, dimension(7)   :: neo_th_out=0.0
 
   ! nclass (n_species_max, transport coeff)
-  ! transport coeff: 1-> gamma, 2-> Q, 3-> vpol,  4-> vtor
-  real, dimension(11,4) :: neo_nclass_out=0.0
+  ! transport coeff: 1-> gamma, 2-> Q, 3-> vpol,  4-> vtor, 5-> visc coeff
+  real, dimension(11,5) :: neo_nclass_out=0.0
 
   ! species-independent transport coeff (currently just jpar)
   real                 :: neo_nclass_1d_out= 0.0

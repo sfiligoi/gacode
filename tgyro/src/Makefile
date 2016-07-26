@@ -27,7 +27,6 @@ OBJECTS +=	tgyro_globals.o \
 		tgyro_init_profiles_axis.o \
 		tgyro_iteration_driver.o \
 		tgyro_iteration_standard.o \
-		tgyro_iteration_pppl.o \
 		tgyro_iteration_serial.o \
 		tgyro_iteration_parallel.o \
 		tgyro_iteration_simplerelax.o \
@@ -35,6 +34,7 @@ OBJECTS +=	tgyro_globals.o \
 		tgyro_neo_map.o \
 		tgyro_profile_functions.o \
 		tgyro_profile_reintegrate.o \
+		tgyro_profile_set.o \
 		tgyro_quasineutral.o \
 		tgyro_quasigrad.o \
 		tgyro_read_input.o \
@@ -42,7 +42,6 @@ OBJECTS +=	tgyro_globals.o \
 		tgyro_residual.o \
 		tgyro_restart.o \
 		tgyro_source.o \
-		tgyro_stab_driver.o \
 		tgyro_target_vector.o \
 		tgyro_tglf_map.o \
 		tgyro_glf23_map.o \

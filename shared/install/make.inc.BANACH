@@ -18,7 +18,7 @@ F77	= mpif77 -I $(GACODE_ROOT)/modules
 FOMP    = -fopenmp
 FMATH	= -fdefault-real-8 -J $(GACODE_ROOT)/modules
 FOPT	= -Ofast
-FDEBUG	= -Wall -fcheck=all -O -W -finit-real=nan -fbounds-check -ffpe-trap=invalid,zero,overflow
+FDEBUG	= -Wall -fcheck=mem,bounds -O -W -finit-real=nan -ffpe-trap=invalid,zero,overflow
 
 # System math libraries
 

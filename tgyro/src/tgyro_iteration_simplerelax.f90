@@ -90,51 +90,14 @@ subroutine tgyro_iteration_simplerelax
      ! dz/z = -loc_relax*(Q_tot - Qtarget)/max(Qtarget,Qtot)
      p = 0
      do i=2,n_r
-        if (loc_ti_feedback_flag == 1) then
-           p = p+1
+        do p=1,n_evolve
            simpledz = loc_relax*(f_vec(p) - g_vec(p))/&
                 max(max(abs(f_vec(p)),abs(g_vec(p))),1.0)
            if (abs(simpledz) > loc_dx_max) then
               simpledz = loc_dx_max*(simpledz/abs(simpledz))
            endif
            x_vec(p) = x_vec(p)*(1.0-simpledz)
-        endif
-        if (loc_te_feedback_flag == 1) then
-           p = p+1
-           simpledz = loc_relax*(f_vec(p) - g_vec(p))/&
-                max(max(abs(f_vec(p)),abs(g_vec(p))),1.0)
-           if (abs(simpledz) > loc_dx_max) then
-              simpledz = loc_dx_max*(simpledz/abs(simpledz))
-           endif
-           x_vec(p) = x_vec(p)*(1.0-simpledz)
-        endif
-        if (loc_ne_feedback_flag == 1) then
-           p = p+1
-           simpledz = loc_relax*(f_vec(p) - g_vec(p))/&
-                max(max(abs(f_vec(p)),abs(g_vec(p))),1.0)
-           if (abs(simpledz) > loc_dx_max) then
-              simpledz = loc_dx_max*(simpledz/abs(simpledz))
-           endif
-           x_vec(p) = x_vec(p)*(1.0-simpledz)
-        endif
-        if (loc_er_feedback_flag == 1) then
-           p = p+1
-           simpledz = loc_relax*(f_vec(p) - g_vec(p))/&
-                max(max(abs(f_vec(p)),abs(g_vec(p))),1.0)
-           if (abs(simpledz) > loc_dx_max) then
-              simpledz = loc_dx_max*(simpledz/abs(simpledz))
-           endif
-           x_vec(p) = x_vec(p)*(1.0-simpledz)
-        endif
-        if (loc_he_feedback_flag == 1) then
-           p = p+1
-           simpledz = loc_relax*(f_vec(p) - g_vec(p))/&
-                max(max(abs(f_vec(p)),abs(g_vec(p))),1.0)
-           if (abs(simpledz) > loc_dx_max) then
-              simpledz = loc_dx_max*(simpledz/abs(simpledz))
-           endif
-           x_vec(p) = x_vec(p)*(1.0-simpledz)
-        endif
+        enddo
      enddo
 
      !----------------------------------------------

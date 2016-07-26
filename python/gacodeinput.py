@@ -150,7 +150,10 @@ class ProfileInput:
             # vector data:
             if 'SHOT' in line:
                 x = string.splitfields(line,':')[1]
-                file_temp.write('SHOT='+string.strip(x)+'\n')
+                x = string.strip(x) 
+                if len(x) == 0:
+                    x = '0'
+                file_temp.write('SHOT='+x+'\n')
 
             if (len(line) > 0) and (line[0] != '#'):                
                 if string.find(line,'=') > -1:

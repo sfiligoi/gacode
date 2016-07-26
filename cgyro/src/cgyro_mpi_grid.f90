@@ -196,6 +196,16 @@ subroutine cgyro_mpi_grid
      iv_locv(iv) = iv_loc
   enddo
 !$acc enter data copyin(ic_locv,iv_locv)
+
+ ! Settings for parallel library
+ if (use_alltoall == 1) then
+    use_alltoall_slib_f = .true.
+    use_alltoall_slib_r = .true.
+ else
+    use_alltoall_slib_f = .false.
+    use_alltoall_slib_r = .false.
+ endif
+
 end subroutine cgyro_mpi_grid
 
 subroutine gcd(m,n,d)

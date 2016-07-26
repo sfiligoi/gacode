@@ -9,14 +9,15 @@ moment = sys.argv[3]
 ymax = sys.argv[4]
 
 sim = cgyrodata('./')
+sim.getbigflux()
 
 ns = sim.n_species
-t = sim.t
+t  = sim.t
 
 #======================================
 # Set figure size and axes
 fig = plt.figure(figsize=(12,6))
-fig.subplots_adjust(left=0.05,right=0.95,top=0.92,bottom=0.12)
+fig.subplots_adjust(left=0.05,right=0.96,top=0.92,bottom=0.12)
 ax = fig.add_subplot(111)
 ax.grid(which="majorminor",ls=":")
 ax.grid(which="major",ls=":")
@@ -28,11 +29,19 @@ color = ['k','m','b','c','g','r']
 if moment == 'n':
     mtag = '\Gamma'
     ttag = 'G'
-    y = np.sum(sim.flux_n,axis=(0,2))
+    ftag = 'flux_n'
+    if hasattr(sim,'kxky_flux_n'):
+        y = np.sum(sim.kxky_flux_n,axis=(0,2))
+    else:
+        y = sim.flux_n
 elif moment == 'e':
     mtag = 'Q'
     ttag = 'Q'
-    y = np.sum(sim.flux_e,axis=(0,2))
+    ftag = 'flux_e'
+    if hasattr(sim,'kxky_flux_e'):
+        y = np.sum(sim.kxky_flux_e,axis=(0,2))
+    else:
+        y = sim.flux_e
 elif moment == 'm':
     print 'm not implemented.'
     sys.exit()
@@ -40,7 +49,7 @@ elif moment == 's':
     print 's not implemented.'
     sys.exit()
 else:
-    print 'ERROR (plot_flux_t.py) Invalid moment.'
+    print 'ERROR (plot_flux_time.py) Invalid moment.'
     sys.exit()
 
 # Determine tmin
@@ -64,7 +73,7 @@ ax.legend(loc=2)
 if ymax != 'auto':
     ax.set_ylim([0,float(ymax)])
 
-fname = 'out.cgyro.fluxt.'+ttag+'.'
+fname = 'out.cgyro.'+ftag
 
 if ftype == 'screen':
    plt.show()
@@ -74,10 +83,9 @@ elif ftype == 'dump':
     for ispec in range(1,ns,1):
         head = head+'       '+ttag+'_'+str(ispec+1)+'/'+ttag+'_GB'
         data = np.column_stack((data,y[ispec,:]))
-    fname = fname+'txt'
     np.savetxt(fname,data,fmt='%.8e',header=head)
-    print 'INFO: (plot_flux_t) Created '+fname
+    print 'INFO: (plot_flux) Created '+fname
 else:
-   fname = fname+ftype
-   print 'INFO: (plot_flux_t) Created '+fname
+   fname = fname+'.'+ftype
+   print 'INFO: (plot_flux) Created '+fname
    plt.savefig(fname)

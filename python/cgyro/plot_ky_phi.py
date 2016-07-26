@@ -15,7 +15,7 @@ ax = fig.add_subplot(111)
 ax.grid(which="majorminor",ls=":")
 ax.grid(which="major",ls=":")
 ax.set_xlabel(r'$(c_s/a)\, t$')
-ax.set_ylabel(r'$\Phi$')
+ax.set_ylabel(r'$\left| \Phi \right|$')
 ax.set_yscale('log')
 
 y = np.sum(sim.phisq,axis=0)

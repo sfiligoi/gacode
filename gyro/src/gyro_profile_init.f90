@@ -231,6 +231,7 @@ subroutine gyro_profile_init
            box_multiplier = 1.0
            ! rho_star < 0 if btccw = 1.
            rho_star = abs(l_y*r0/(n_ref*q_s(ir_norm)))*(-btccw)
+           lambda_debye = lambda_debye/rhosda_s(ir_norm)*rho_star
            rhosda_s(:) = rho_star
         endif
 

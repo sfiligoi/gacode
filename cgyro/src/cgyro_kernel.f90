@@ -87,10 +87,13 @@ subroutine cgyro_kernel
      ! Spectral ExB shear
      select case(shear_method)
      case(1)
+        ! Discrete shift (Hammett) 
         call cgyro_shear
      case(2)
+        ! Spectral rotation (unphysical)
         call cgyro_shear_dft
      case(3)
+        ! Linear shift (more accurate than discrete shift)
         call cgyro_shear_pt
      end select
 

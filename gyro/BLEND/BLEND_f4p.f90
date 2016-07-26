@@ -6,12 +6,13 @@
 !  function derivative (see BLEND_f4.f90).
 !---------------------------------------------
 
-real function BLEND_f4p(m,t0) result (f)
+real function BLEND_f4p(m,t0)
 
   implicit none
 
   real, intent(in) :: t0
   integer, intent(in) :: m
+  real :: f
 
   real :: t
 
@@ -31,6 +32,6 @@ real function BLEND_f4p(m,t0) result (f)
 
   ! Rescale to reflect unit normalization.
 
-  f = (2.0/3.0)*f
+  BLEND_f4p = (2.0/3.0)*f
 
 end function BLEND_f4p

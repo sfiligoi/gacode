@@ -29,27 +29,6 @@ module tgyro_iteration_variables
   !------------------------------------------------------
 
   !------------------------------------------------------
-  ! PPPL Iteration Variables
-  !
-  integer :: correct_num
-  integer :: correct_max = 10
-
-  real, parameter :: newton_tol = 1.0e-40
-  real, parameter :: golden_ratio = 1.618033988
-
-  real :: sum_res0, sum_res, sum_res_c, sum_res_best
-  real :: nu, lambda, lambda_old, lambda_a, lambda_b, lambda_c, lambda_best
-  !
-  ! To be allocated in tgyro_iteration_pppl:
-  !
-  real, dimension(:,:), allocatable :: jfg_transpose
-  real, dimension(:), allocatable :: bfull
-  real, dimension(:), allocatable :: x_best
-  real, dimension(:), allocatable :: f_best
-  real, dimension(:), allocatable :: res_best
-  !------------------------------------------------------
-
-  !------------------------------------------------------
   ! Blocked serial/parallel variables:
   !
   integer :: i_worker

@@ -132,7 +132,7 @@ subroutine cgyro_make_profiles
      ! Debye length (from NRL plasma formulary):
      ! Use input lambda_debye as scaling parameter
 
-     lambda_debye = 7.43 * sqrt((1e3*temp_norm)/(1e13*dens_norm))/a_meters 
+     lambda_star = 7.43 * sqrt((1e3*temp_norm)/(1e13*dens_norm))/rhos
 
      ! Normalize
      do is=1,n_species
@@ -165,7 +165,7 @@ subroutine cgyro_make_profiles
      beta_star = beta_star * betae_unit
 
      ! Re-scaling
-     lambda_debye = lambda_debye * lambda_debye_scale
+     lambda_star  = lambda_star * lambda_star_scale
      gamma_e      = gamma_e      * gamma_e_scale
      gamma_p      = gamma_p      * gamma_p_scale
      mach         = mach         * mach_scale
@@ -284,6 +284,8 @@ subroutine cgyro_make_profiles
      call cgyro_info('No ExB shear.') 
   endif
   !------------------------------------------------------------------------
+
+  lambda_debye = lambda_star*rho
 
   !-------------------------------------------------------------
   ! Fourier index mapping

@@ -40,5 +40,5 @@ ax.set_xlim([0,max(sim.t)])
 if ftype == 'screen':
     plt.show()
 else:
-    outfile = 'freq.'+ftype
+    outfile = 'out.cgyro.freq.'+ftype
     plt.savefig(outfile)

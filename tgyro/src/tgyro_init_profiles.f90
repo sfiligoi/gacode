@@ -19,6 +19,7 @@ subroutine tgyro_init_profiles
   integer :: n
   real :: arho
   real :: p_ave
+  real :: x0(1),y0(1)
 
   !------------------------------------------------------
   ! PHYSICAL CONSTANTS
@@ -420,6 +421,19 @@ subroutine tgyro_init_profiles
   allocate(exp_ne(n_exp))
   allocate(exp_ti(loc_n_ion,n_exp))
   allocate(exp_ni(loc_n_ion,n_exp))
+  !
+  ! Pedestal density
+  if (tgyro_neped < 0.0) then
+     ! Set pedestal density to ne at psi_norm=0.9
+     x0(1) = 0.9
+     call cub_spline(psi_exp,EXPRO_rmin(:)/r_min,n_exp,x0,y0,1)
+     !if (i_proc_global == 0) print *,'r_ped/a = ',y0(1)     
+     call cub_spline(psi_exp,EXPRO_ne(:),n_exp,x0,y0,1)
+     tgyro_neped = y0(1)
+  endif
+  !if (i_proc_global == 0) print *,'ne_ped=',tgyro_neped
+  !call MPI_FINALIZE(ierr)
+  !stop
   !
   call tgyro_pedestal
   !-----------------------------------------------------------------

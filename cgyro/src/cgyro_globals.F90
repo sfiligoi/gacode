@@ -59,9 +59,10 @@ module cgyro_globals
   real :: dlntdre_ade   ! used only for experimental profiles
   real :: dlnndre_ade   ! used only for experimental profiles
   real :: masse_ade
-  real :: lambda_debye
+  real :: lambda_star
   integer :: test_flag
   integer :: h_print_flag
+  integer :: moment_print_flag
   real :: amp0
   real :: amp
   real :: gamma_e
@@ -106,9 +107,10 @@ module cgyro_globals
   real, dimension(6) :: dlntdr
 
   integer :: subroutine_flag  ! only used for cgyro_read_input
+  integer :: use_alltoall
 
   ! Re-scaling parameters for experimental profiles
-  real :: lambda_debye_scale
+  real :: lambda_star_scale
   real :: gamma_e_scale
   real :: gamma_p_scale
   real :: mach_scale
@@ -122,6 +124,9 @@ module cgyro_globals
   real :: nu_ee_scale
   real, dimension(6) :: dlnndr_scale
   real, dimension(6) :: dlntdr_scale
+
+  real :: lambda_debye
+  real :: rhos
 
   !---------------------------------------------------------------
 
@@ -189,6 +194,7 @@ module cgyro_globals
   character(len=18) :: runfile_freq    = 'out.cgyro.freq'
   character(len=18) :: runfile_kxky_phi = 'out.cgyro.kxky_phi'
   character(len=18) :: runfile_kxky_n   = 'out.cgyro.kxky_n'
+  character(len=18) :: runfile_kxky_e   = 'out.cgyro.kxky_e'
   character(len=15), dimension(3)  :: runfile_fieldb = &
        (/'out.cgyro.phib ','out.cgyro.aparb','out.cgyro.bparb'/)
   character(len=21), dimension(2)  :: runfile_kxky_flux = &
@@ -284,8 +290,8 @@ module cgyro_globals
   complex, dimension(:,:), allocatable :: field_old
   complex, dimension(:,:), allocatable :: field_old2
   complex, dimension(:,:), allocatable :: field_old3
-  complex, dimension(:,:), allocatable :: moment_loc
-  complex, dimension(:,:), allocatable :: moment
+  complex, dimension(:,:,:), allocatable :: moment_loc
+  complex, dimension(:,:,:), allocatable :: moment
   !
   ! Nonlinear fluxes 
   real, dimension(:,:,:), allocatable :: flux_loc
