@@ -168,7 +168,7 @@ subroutine tgyro_profile_functions
 
   !----------------------------------------------------------------------
   ! Acquire pivot boundary conditions from pedestal model
-
+  !
   ! Repeat calculation of beta from tgyro_init_profiles
   ! betan [%] = betat/In*100 where In = Ip/(a Bt) 
   ! Average pressure [Pa]

@@ -260,30 +260,6 @@ subroutine tgyro_flux
         enddo
 
      endif
-  
-  case (5)
-
-     ! Map TGYRO parameters to TGLF_NN
-     call tgyro_tglf_map
-
-     call tglf_run_mpi
-
-     call tgyro_trap_component_error(tglf_error_status,tglf_error_message)
-
-     pflux_e_tur(i_r) = tglf_elec_pflux_out
-     eflux_e_tur(i_r) = tglf_elec_eflux_out
-     mflux_e_tur(i_r) = -tglf_sign_It_in*tglf_elec_mflux_out
-     expwd_e_tur(i_r) = tglf_elec_expwd_out
-
-     pflux_i_tur(1:loc_n_ion,i_r) = tglf_ion_pflux_out(1:loc_n_ion)
-     eflux_i_tur(1:loc_n_ion,i_r) = tglf_ion_eflux_out(1:loc_n_ion)
-     mflux_i_tur(1:loc_n_ion,i_r) = -tglf_sign_It_in*tglf_ion_mflux_out(1:loc_n_ion)
-     expwd_i_tur(1:loc_n_ion,i_r) = tglf_ion_expwd_out(1:loc_n_ion)
-
-     if (tglf_q_low_flag == 1) then
-        eflux_e_tur(i_r) = tglf_elec_eflux_low_out
-        eflux_i_tur(1:loc_n_ion,i_r) = tglf_ion_eflux_low_out(1:loc_n_ion)
-     endif
       
   case default
 

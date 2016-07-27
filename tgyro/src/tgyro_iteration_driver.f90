@@ -16,6 +16,7 @@ subroutine tgyro_iteration_driver
   use mpi
   use tgyro_globals
   use tgyro_iteration_variables
+  use tgyro_ped
   use EXPRO_interface
 
   implicit none
@@ -57,25 +58,12 @@ subroutine tgyro_iteration_driver
   !
   if (tgyro_noturb_flag == 1) then
 
-     flux_method = 5
-
-  else if (lpath(1:3) == "FUN") then
-
-     flux_method = 6
-     dx = loc_dx/r_min
+     flux_method = 0
 
   else if (lpath(1:3) == "IFS") then
 
      ! IFS-PPPL
      flux_method = 1
-
-     ! Step-length for Jacobian
-     dx = loc_dx/r_min
-
-  else if (lpath(1:7) == "TGLF_NN") then
-
-     ! TGLF_NN
-     flux_method = 5
 
      ! Step-length for Jacobian
      dx = loc_dx/r_min
@@ -208,12 +196,13 @@ subroutine tgyro_iteration_driver
      call EXPRO_palloc(MPI_COMM_WORLD,'./',1) 
      call EXPRO_pread
 
-     call tgyro_profile_reintegrate( &
-          EXPRO_ptot,&
-          EXPRO_ne,&
-          EXPRO_te,&
-          EXPRO_ni(1:loc_n_ion,:),&
-          EXPRO_ti(1:loc_n_ion,:))
+     call tgyro_profile_reintegrate
+     EXPRO_ptot = ptot_exp
+     EXPRO_ne   = exp_ne*1e-13
+     EXPRO_te   = exp_te*1e-3
+     EXPRO_ni(1:loc_n_ion,:) = exp_ni(1:loc_n_ion,:)*1e-13
+     EXPRO_ti(1:loc_n_ion,:) = exp_ti(1:loc_n_ion,:)*1e-3
+     EXPRO_ptot = ptot_exp ! already in Pa
 
      if (i_proc_global == 0) then
 

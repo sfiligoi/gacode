@@ -86,14 +86,18 @@ contains
     !
     if (i_proc_global == 0) then
 
+       print *,'P0',ptot_exp(1)
+
        ! Inputs stored in interface
        call tgyro_eped_nn
+
+       print *,'P1',nn_vec(1,3)
 
        !psi_top(1) = 1.0-1.5*nn_w_ped
        psi_top(1) = 0.9
 
     endif
-
+ 
     ! Communicated needed data from output.avg
     call MPI_BCAST(nn_vec,size(nn_vec),MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
     call MPI_BCAST(psi_top,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
@@ -106,11 +110,13 @@ contains
     ! FORMULA: P = 2nkT 
 
     ! t_top [eV]
-    t_top = p_top/(2*n_top*k) 
+    t_top = (10.0*p_top)/(2*n_top*k) 
+
+    if (i_proc_global == 0) print *,'TOP:',n_top*1e-13,p_top,t_top*1e-3
 
     ! n', T':
     call bound_deriv(n_p,nn_vec(:,2),nn_vec(:,1),nx_nn)
-    t_vec = nn_vec(:,3)/(2*nn_vec(:,2)*k)
+    t_vec = (10.0*nn_vec(:,3))/(2*nn_vec(:,2)*k)
     call bound_deriv(t_p,t_vec,nn_vec(:,1),nx_nn)
 
     ! n_top', t_top'
