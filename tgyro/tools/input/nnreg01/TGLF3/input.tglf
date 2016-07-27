@@ -1,0 +1,13 @@
+USE_MHD_RULE=True
+USE_BPER=False
+USE_BPAR=False
+SAT_RULE=0
+NMODES=2
+NKY=12
+KYGRID_MODEL=1
+ETG_FACTOR=1.25
+ALPHA_ZF=0.0
+ALPHA_MACH=0
+ALPHA_E=1.0
+
+# -- Begin overlay [Add parameters above this line]
