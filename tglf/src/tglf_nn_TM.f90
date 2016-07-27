@@ -116,10 +116,10 @@
          tmp(j)=0
      ENDDO
 
-    if ( (tglf_mass_in(2) .ne. 1) .or. &
-         (tglf_zs_in(2)   .ne. 1) .or. &
-         (tglf_mass_in(3) .ne. 6) .or. &
-         (tglf_zs_in(3)   .ne. 6) ) then
+    if ( (nint(tglf_mass_in(2)) .ne. 1) .or. &
+         (nint(tglf_zs_in(2))   .ne. 1) .or. &
+         (nint(tglf_mass_in(3)) .ne. 6) .or. &
+         (nint(tglf_zs_in(3))   .ne. 6) ) then
         write(*,*)'A',tglf_mass_in(:tglf_ns_in)
         write(*,*)'Z',tglf_zs_in(:tglf_ns_in)
         write (*,*)'NN trained only with D C ions'
