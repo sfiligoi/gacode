@@ -25,8 +25,8 @@
 !
      real :: OUT_ENERGY_FLUX_1_RNG, OUT_ENERGY_FLUX_i_RNG
      real :: OUT_PARTICLE_FLUX_1_RNG, OUT_STRESS_TOR_i_RNG
-     real*4 :: INPUT_PARAMETERS(23)
-     real*4 :: OUTPUT_PARAMETERS(4)
+     real(4) :: INPUT_PARAMETERS(23)
+     real(4) :: OUTPUT_PARAMETERS(4)
 !     real :: start, finish
      integer :: n, i
 

@@ -9,8 +9,8 @@ subroutine tgyro_eped_nn
   character(len=1) :: dummy
 
   character(len=1000) :: epednn_model
-  real*4 :: INPUT_PARAMETERS(10)
-  real*4 :: OUTPUT_PARAMETERS(5)
+  real(4) :: INPUT_PARAMETERS(10)
+  real(4) :: OUTPUT_PARAMETERS(5)
   integer :: ierr
   CHARACTER NUL
   PARAMETER(NUL = CHAR(0))
