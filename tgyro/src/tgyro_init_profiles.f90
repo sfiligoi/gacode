@@ -424,8 +424,8 @@ subroutine tgyro_init_profiles
   !
   ! Pedestal density
   if (tgyro_neped < 0.0) then
-     ! Set pedestal density to ne at psi_norm=0.9
-     x0(1) = 0.9
+     ! Set pedestal density to ne at psi_norm
+     x0(1) = -tgyro_neped
      call cub_spline(psi_exp,EXPRO_rmin(:)/r_min,n_exp,x0,y0,1)
      !if (i_proc_global == 0) print *,'r_ped/a = ',y0(1)     
      call cub_spline(psi_exp,EXPRO_ne(:),n_exp,x0,y0,1)

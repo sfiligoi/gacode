@@ -99,10 +99,8 @@ subroutine tgyro_eped_nn
   ierr=run_anns()
   ierr=get_anns_avg_array(OUTPUT_PARAMETERS)
 
-  nn_w_ped = OUTPUT_PARAMETERS(2)
+  nn_w_ped = OUTPUT_PARAMETERS(2)*2
   nn_p_ped = OUTPUT_PARAMETERS(4)*1E6
-
-  neped_in = 2.2 !<-----------------
 
   nn_t_ped = nn_p_ped/neped_in/1.6022/20.
   nn_n_cor = neped_in * 1.5
@@ -122,10 +120,10 @@ subroutine tgyro_eped_nn
         nexpin, nexpout, texpin, texpout
 
   call toq_profiles( &
-        nn_vec(:,1), nx_nn, nn_w_ped, &
-        neped_in, nn_t_ped,           &
-        nn_n_cor, nn_t_cor,           &
-        nn_n_edg, nn_t_edg,           &
+        nn_vec(:,1), nx_nn, nn_w_ped/2.,  &
+        neped_in, nn_t_ped,               &
+        nn_n_cor, nn_t_cor,               &
+        nn_n_edg, nn_t_edg,               &
         nexpin, nexpout, texpin, texpout, &
         nn_vec(:,3), nn_vec(:,2))
 
