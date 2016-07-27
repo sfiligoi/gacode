@@ -30,7 +30,7 @@ module tgyro_ped
 
   ! EPED_NN outputs
   integer, parameter :: nx_nn=1001
-  real :: nn_vec(nx_nn,3) 
+  real :: nn_vec(nx_nn,3)
   real :: nn_w_ped
 
   ! Derivatives wrt psi
@@ -98,11 +98,9 @@ contains
     call MPI_BCAST(nn_vec,size(nn_vec),MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
     call MPI_BCAST(psi_top,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
 
-    ! n_top: convert to 1/cm^3 from 1/m^3
-    nn_vec(:,2) = nn_vec(:,2)*1e-6
+    ! n_top: in 1/cm^3
     call cub_spline(nn_vec(:,1),nn_vec(:,2),nx_nn,psi_top,n_top,1)
-    ! p_top: convert to Ba from Pa 
-    nn_vec(:,3) = nn_vec(:,3)*10.0
+    ! p_top: in Pa
     call cub_spline(nn_vec(:,1),nn_vec(:,3),nx_nn,psi_top,p_top,1) 
 
     ! FORMULA: P = 2nkT 

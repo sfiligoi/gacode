@@ -13,8 +13,8 @@ EXEC = tgyro_main
 OBJECTS +=	tgyro_globals.o \
 		tgyro_iteration_variables.o \
 		tgyro_allocate_globals.o \
-                tgyro_ped.o \
-                tgyro_eped_nn.o \
+        tgyro_ped.o \
+        tgyro_eped_nn.o \
 		tgyro_catch_error.o \
 		tgyro_comm_setup.o \
 		tgyro_comm_sync.o \
