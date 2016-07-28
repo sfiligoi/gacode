@@ -382,23 +382,27 @@ subroutine tgyro_init_profiles
   endif
 
   !-----------------------------------------------------------------
-  ! Capture additional parameters for pedestal model [Not in CGS]
+  ! Parameters for EPED pedestal model 
+  ! ** BEWARE: these are NOT all in CGS units.
   !
-  ! exp_n* and exp_t* in TGYRO CGS units: n [1/cm^3], T [eV]
   allocate(exp_te(n_exp))
   allocate(exp_ne(n_exp))
   allocate(exp_ti(loc_n_ion,n_exp))
   allocate(exp_ni(loc_n_ion,n_exp))
+  ! exp_ne, exp_ni: [1/cm^3]
   exp_ne = EXPRO_ne*1e13
-  exp_te = EXPRO_te*1e3
   exp_ni(1:loc_n_ion,:) = EXPRO_ni(1:loc_n_ion,:)*1e13
+  ! exp_te, exp_ti: [eV]
+  exp_te = EXPRO_te*1e3
   exp_ti(1:loc_n_ion,:) = EXPRO_ti(1:loc_n_ion,:)*1e3
 
-  ! Average pressure [Pa]
   allocate(volp_exp(n_exp))
   volp_exp = EXPRO_volp
   allocate(ptot_exp(n_exp))
+ 
+  ! Pressure [Pa] (approximate using twice electron pressure)
   ptot_exp = 2*exp_ne*exp_te*k/10.0
+  ! Volume average
   p_ave = sum(volp_exp*ptot_exp)/sum(volp_exp) 
   !
   ! a [m]

@@ -118,8 +118,6 @@ module tgyro_globals
   real, dimension(:), allocatable :: q_gb
   real, dimension(:), allocatable :: s_gb
 
-  real, dimension(:), allocatable :: q_tgb
-
   ! Collision frequencies
   real, dimension(:), allocatable :: nue
   real, dimension(:,:), allocatable :: nui

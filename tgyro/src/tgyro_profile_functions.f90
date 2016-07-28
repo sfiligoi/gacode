@@ -1,3 +1,11 @@
+!---------------------------------------------------------------
+! tgyro_profile_functions.f90
+!
+! PURPOSE:
+!  This routine manages calculation of basic physics quantities
+!  required by TGYRO and other modules.  
+!--------------------------------------------------------------
+
 subroutine tgyro_profile_functions
 
   use tgyro_globals
@@ -132,7 +140,7 @@ subroutine tgyro_profile_functions
   enddo
   frac_ae(:) = 1.0-frac_ai(:)
 
-  ! Total pressure (Ba) and beta (dimensionless) 
+  ! Total pressure [Ba] and beta [dimensionless]
   pr(:) = pext(:)+ne(:)*k*te(:)
   do i_ion=1,loc_n_ion
     pr(:) = pr(:)+ni(i_ion,:)*k*ti(i_ion,:)
@@ -146,10 +154,10 @@ subroutine tgyro_profile_functions
     dlnpdr(:) = dlnpdr(:)+&
       ni(i_ion,:)*k*ti(i_ion,:)*(dlnnidr(i_ion,:)+dlntidr(i_ion,:))/pr(:)
   enddo
-  !----------------------------------
-  ! Functions connected with rotation
-  !---------------------------------- 
 
+  !--------------------------------------
+  ! Functions connected with rotation
+  !
   ! u00 (note that mach = u00/cs)
   u00(:) = r_maj(:)*w0(:)
   !
@@ -158,13 +166,8 @@ subroutine tgyro_profile_functions
   !
   ! gamma_p (1/s)
   gamma_p(:)  = -r_maj(:)*w0p(:)
+  !-------------------------------------- 
 
-  !----------------------------------------------------------------------
-  ! Trinity gyroBohm factor
-  !
-  q_tgb(:) = ni(1,:)*k*ti(1,:)*(sqrt(2.0)*v_i(:))*&
-       (sqrt(2.0)*rho_i(:)*b_unit(:)/b_ref/r_min)**2
-  !----------------------------------------------------------------------
 
   !----------------------------------------------------------------------
   ! Acquire pivot boundary conditions from pedestal model
