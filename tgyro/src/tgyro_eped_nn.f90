@@ -120,7 +120,7 @@
    !     nexpin, nexpout, texpin, texpout
 
    call toq_profiles( &
-        nn_vec(:,1), nx_nn, nn_w_ped/2.0,  &
+        nn_vec(:,1), nx_nn, nn_w_ped/2.0, &
         neped_in, nn_t_ped,               &
         nn_n_cor, nn_t_cor,               &
         nn_n_edg, nn_t_edg,               &
@@ -134,6 +134,7 @@
    !   nn_vec(:,1) -> psi_norm
    !   nn_vec(:,2) -> ne [1/cm^3]
    !   nn_vec(:,3) -> P [Pa]
+
 
    !if (i_proc_global == 0) then
    !   do i=1,nx_nn

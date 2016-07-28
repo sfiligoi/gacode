@@ -384,7 +384,7 @@ subroutine tgyro_init_profiles
   !-----------------------------------------------------------------
   ! Capture additional parameters for pedestal model [Not in CGS]
   !
-  ! exp_n* and exp_t* in TGYRO CGS units
+  ! exp_n* and exp_t* in TGYRO CGS units: n [1/cm^3], T [eV]
   allocate(exp_te(n_exp))
   allocate(exp_ne(n_exp))
   allocate(exp_ti(loc_n_ion,n_exp))
@@ -405,7 +405,7 @@ subroutine tgyro_init_profiles
   a_in = r_min
   ! Bt on axis [T]
   bt_in = EXPRO_bt0(1)
-  ! Plasma current Ip[Ma]
+  ! Plasma current Ip [Ma]
   ip_in = abs(1e-6*EXPRO_ip(n_exp-3))
   ! betan [%] = betat/In*100 where In = Ip/(a Bt) 
   betan_in = ( p_ave/(0.5*bt_in**2/mu_0) ) / ( ip_in/(a_in*bt_in) ) * 100.0
@@ -429,10 +429,8 @@ subroutine tgyro_init_profiles
   !
   ! Pedestal density
   if (tgyro_neped < 0.0) then
-     ! Set pedestal density to ne at psi_norm
+     ! Here, x0 will be x0=psi_norm_ped
      x0(1) = -tgyro_neped
-     call cub_spline(psi_exp,EXPRO_rmin(:)/r_min,n_exp,x0,y0,1)
-     !if (i_proc_global == 0) print *,'r_ped/a = ',y0(1)     
      call cub_spline(psi_exp,EXPRO_ne(:),n_exp,x0,y0,1)
      tgyro_neped = y0(1)
   endif

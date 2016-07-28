@@ -35,7 +35,8 @@ subroutine tgyro_expro_map(r,z,n_r,r_exp,p_exp,n_exp)
 
   do i_exp=n_exp,2,-1
      ! Start the integration at the first i_exp past r(n_r)
-     if (r_exp(i_exp-1) < r(n_r)) then
+     ! ISSUE: This check is sensitive to mesh alignment (need =)
+     if (r_exp(i_exp-1) <= r(n_r)) then
         p_exp(i_exp-1) = p_exp(i_exp)*exp(0.5*(z_exp(i_exp)+z_exp(i_exp-1))* &
              (r_exp(i_exp)-r_exp(i_exp-1)))
      endif

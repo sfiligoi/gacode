@@ -86,18 +86,14 @@ contains
     !
     if (i_proc_global == 0) then
 
-       print *,'P0',ptot_exp(1)
-
        ! Inputs stored in interface
        call tgyro_eped_nn
-
-       print *,'P1',nn_vec(1,3)
 
        !psi_top(1) = 1.0-1.5*nn_w_ped
        psi_top(1) = 0.9
 
     endif
- 
+
     ! Communicated needed data from output.avg
     call MPI_BCAST(nn_vec,size(nn_vec),MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
     call MPI_BCAST(psi_top,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
@@ -111,8 +107,6 @@ contains
 
     ! t_top [eV]
     t_top = (10.0*p_top)/(2*n_top*k) 
-
-    if (i_proc_global == 0) print *,'TOP:',n_top*1e-13,p_top,t_top*1e-3
 
     ! n', T':
     call bound_deriv(n_p,nn_vec(:,2),nn_vec(:,1),nx_nn)
@@ -165,16 +159,18 @@ contains
 
     ! 1. Scale-length interpolation over NML (r_star < r < r_top)
     !                    zb                         za
-    ! f(r) = f(rb)*exp[ ---- ( dr^2 - (r-ra)^2 ) - ---- ( rb-r )^2 ]
+    ! f(r) = f(rb)*exp[ ---- ( dr^2 - (r-ra)^2 ) + ---- ( rb-r )^2 ]
     !                   2 dr                       2 dr
     !
     i_star = 0
     do i_exp=2,n_exp
        x0 = rmin_exp(i_exp)
        if (x0 > r(n_r) .and. x0 <= r_top(1)) then 
+          ! Calculate i_star [first i_exp such that r > r(n_r)]
           if (i_star == 0) i_star = i_exp
           f_exp(i_exp) = f_top*exp(&
-               0.5*z_top/dr_nml*(dr_nml**2-(x0-r(n_r))**2)+0.5*z_star/dr_nml*(r_top(1)-x0)**2)
+               0.5*z_top/dr_nml*(dr_nml**2-(x0-r(n_r))**2)+&
+               0.5*z_star/dr_nml*(r_top(1)-x0)**2)
        endif
        if (x0 > r_top(1)) then
           i0 = i_exp
