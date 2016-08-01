@@ -42,7 +42,8 @@
       bz2=0.0
       kyetg=1.28
       cnorm=14.21
-      cz1=0.48*czf
+!      cz1=0.48*czf
+      cz1 = 0.48
       cz2=1.0*czf
       ax=0.0
       ay=0.0
@@ -62,7 +63,8 @@
         cky=3.0
         sqcky=SQRT(cky)
         cnorm = 14.29
-        cz1=0.48*czf
+!        cz1=0.48*czf
+        cz1 = 0.48
         cz2=0.92*czf  
         if(USE_TTF)then
            bz1=0.12
