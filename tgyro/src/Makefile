@@ -20,6 +20,7 @@ OBJECTS +=	tgyro_globals.o \
 		tgyro_comm_sync.o \
 		tgyro_expro_map.o \
 		tgyro_flux.o \
+		tgyro_flux_set.o \
 		tgyro_flux_vector.o \
 		tgyro_flux_vector_dense.o \
 		tgyro_gyro_map.o \

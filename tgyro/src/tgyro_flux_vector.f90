@@ -21,38 +21,8 @@ subroutine tgyro_flux_vector(x_vec,f_vec,dx,index)
   real, intent(in) :: dx
 
   call tgyro_profile_set(x_vec,dx,index)
-
   call tgyro_flux
   call tgyro_comm_sync
-
-  p = 0
-  do i=2,n_r
-
-     if (loc_ti_feedback_flag == 1) then
-        p = p+1
-        f_vec(p) = eflux_i_tot(i)
-     endif
-
-     if (loc_te_feedback_flag == 1) then
-        p = p+1
-        f_vec(p) = eflux_e_tot(i)
-     endif
-
-     if (loc_ne_feedback_flag == 1) then
-        p = p+1
-        f_vec(p) = pflux_e_tot(i)
-     endif
-
-     if (loc_er_feedback_flag == 1) then
-        p = p+1
-        f_vec(p) = mflux_tot(i)
-     endif
-
-     if (loc_he_feedback_flag == 1) then
-        p = p+1
-        f_vec(p) = pflux_he_tot(i)
-     endif
-
-  enddo
+  call tgyro_flux_set(f_vec)
 
 end subroutine tgyro_flux_vector
