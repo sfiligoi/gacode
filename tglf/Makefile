@@ -20,3 +20,4 @@ ${harvest_lib}:
 
 ${brainfuse_lib}:
 	cd ${GACODE_ROOT}/shared/neural ; make
+

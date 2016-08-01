@@ -9,7 +9,9 @@ all:
 	cd profiles_gen ; make "OPT=${OPT}"
 	cd nclass ; make "OPT=${OPT}"
 	cd harvest_client; make
+ifdef FANN_ROOT
 	cd neural; make
+endif
 
 clean:
 	cd math ; make clean

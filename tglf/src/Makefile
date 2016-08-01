@@ -71,3 +71,6 @@ tglf_run_mpi.o : tglf_run.F90
 clean:
 	rm -f *.o *.lst $(LLIB).a $(EXEC1) $(EXEC2) $(EXEC3)
 	rm -f ${GACODE_ROOT}/modules/tglf*.mod 
+
+#-include ../install/make.ext.${GACODE_PLATFORM}
+
