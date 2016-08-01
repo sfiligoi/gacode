@@ -176,7 +176,7 @@ subroutine tgyro_profile_functions
   ! betan [%] = betat/In*100 where In = Ip/(a Bt) 
   ! Average pressure [Pa]
   call tgyro_profile_reintegrate
-  p_ave = sum(volp_exp*ptot_exp)/sum(volp_exp)
+  call tgyro_volume_ave(ptot_exp,rmin_exp,volp_exp,p_ave,n_exp)
   betan_in = ( p_ave/(0.5*bt_in**2/mu_0) ) / ( ip_in/(a_in*bt_in) ) * 100.0
   call tgyro_pedestal
   !----------------------------------------------------------------------

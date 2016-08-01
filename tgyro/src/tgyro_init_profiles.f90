@@ -20,6 +20,7 @@ subroutine tgyro_init_profiles
   real :: arho
   real :: p_ave
   real :: x0(1),y0(1)
+  real, external :: bval
 
   !------------------------------------------------------
   ! PHYSICAL CONSTANTS
@@ -399,18 +400,22 @@ subroutine tgyro_init_profiles
   allocate(volp_exp(n_exp))
   volp_exp = EXPRO_volp
   allocate(ptot_exp(n_exp))
- 
-  ! Pressure [Pa] (approximate using twice electron pressure)
-  ptot_exp = 2*exp_ne*exp_te*k/10.0
-  ! Volume average
-  p_ave = sum(volp_exp*ptot_exp)/sum(volp_exp) 
+  ! Pressure [Pa] 
+  ptot_exp = exp_ne*exp_te
+  do i_ion=1,loc_n_ion
+     ptot_exp = ptot_exp + exp_ni(i_ion,:)*exp_ti(i_ion,:)
+  enddo
+  ! Convert to Pa: n[1/cm^3]*(kT[ev])/10  
+  ptot_exp = ptot_exp*k/10.0
+  ! Volume average (p_ave)
+  call tgyro_volume_ave(ptot_exp,EXPRO_rmin,volp_exp,p_ave,n_exp)
   !
   ! a [m]
   a_in = r_min
   ! Bt on axis [T]
   bt_in = EXPRO_bt0(1)
   ! Plasma current Ip [Ma]
-  ip_in = abs(1e-6*EXPRO_ip(n_exp-3))
+  ip_in = abs(1e-6*bval(EXPRO_rmin,EXPRO_ip,n_exp))
   ! betan [%] = betat/In*100 where In = Ip/(a Bt) 
   betan_in = ( p_ave/(0.5*bt_in**2/mu_0) ) / ( ip_in/(a_in*bt_in) ) * 100.0
   ! Triangularity [-]
@@ -421,6 +426,12 @@ subroutine tgyro_init_profiles
   m_in = mi_vec(1)
   ! R0(a) [m]
   r_in = EXPRO_rmaj(n_exp-3)
+
+  !print *,'Betan',betan_in
+  !print *,'pave',p_ave
+  !print *,'bt',bt_in
+  !print *,'ip',ip_in
+  
 
   allocate(rmin_exp(n_exp))
   rmin_exp = EXPRO_rmin*100.0
@@ -478,3 +489,20 @@ subroutine tgyro_init_profiles
 
 
 end subroutine tgyro_init_profiles
+
+real function bval(x,f,n)
+
+   integer, intent(in) :: n
+   real, intent(in), dimension(n) :: x,f
+   real :: x1,x2,f1,f2,xs
+
+   xs = x(n)
+   x2 = x(n-7)
+   f2 = f(n-7)
+   x1 = x(n-9)
+   f1 = f(n-9) 
+    
+   bval = (xs-x1)/(x2-x1)*f2+(xs-x2)/(x1-x2)*f1
+ 
+end function bval
+
