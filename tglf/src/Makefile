@@ -50,11 +50,19 @@ OBJECTS = tglf_isnan.o      \
 
 all: $(LLIB).a $(EXEC1) $(EXEC2) Makefile
 
+ifdef FANN_ROOT
 $(EXEC1): $(LLIB).a $(EXEC1).o $(EXTRA_LIBS)
 	$(FC) $(FFLAGS) -o $(EXEC1) $(EXEC1).o $(LLIB).a $(EXTRA_LIBS) $(LMATH) -I$(GACODE_ROOT)/shared/harvest_client/ -L$(GACODE_ROOT)/shared/harvest_client/ -I$(GACODE_ROOT)/shared/neural/ -L$(GACODE_ROOT)/shared/neural/ -lbrainfuse -lharvest -lfann
 
 $(EXEC2): $(LLIB).a $(EXEC2).o $(EXTRA_LIBS)
 	$(FC) $(FFLAGS) -o $(EXEC2) $(EXEC2).o $(LLIB).a $(EXTRA_LIBS) $(LMATH) -I$(GACODE_ROOT)/shared/harvest_client/ -L$(GACODE_ROOT)/shared/harvest_client/ -I$(GACODE_ROOT)/shared/neural/ -L$(GACODE_ROOT)/shared/neural/ -lbrainfuse -lharvest -lfann
+else
+$(EXEC1): $(LLIB).a $(EXEC1).o $(EXTRA_LIBS)
+	$(FC) $(FFLAGS) -o $(EXEC1) $(EXEC1).o $(LLIB).a $(EXTRA_LIBS) $(LMATH) -I$(GACODE_ROOT)/shared/harvest_client/ -L$(GACODE_ROOT)/shared/harvest_client/ -lharvest
+
+$(EXEC2): $(LLIB).a $(EXEC2).o $(EXTRA_LIBS)
+	$(FC) $(FFLAGS) -o $(EXEC2) $(EXEC2).o $(LLIB).a $(EXTRA_LIBS) $(LMATH) -I$(GACODE_ROOT)/shared/harvest_client/ -L$(GACODE_ROOT)/shared/harvest_client/ -lharvest
+endif
 
 $(LLIB).a: $(OBJECTS)
 	$(ARCH) $(LLIB).a $(OBJECTS)
@@ -62,11 +70,20 @@ $(LLIB).a: $(OBJECTS)
 tglf_run_mpi.o : tglf_run.F90
 	$(FC) -o tglf_run_mpi.o $(FMATH) $(FFLAGS) -DMPI_TGLF=1 -c $<
 
+ifdef FANN_ROOT
 .f90.o :
 	$(FC) $(FMATH) $(FFLAGS) -c $< -I$(GACODE_ROOT)/shared/harvest_client/ -L$(GACODE_ROOT)/shared/harvest_client/ -I$(GACODE_ROOT)/shared/neural/ -L$(GACODE_ROOT)/shared/neural/ -lbrainfuse -lharvest -lfann
 
 .F90.o :
 	$(FC) $(FMATH) $(FFLAGS) -c $< -I$(GACODE_ROOT)/shared/harvest_client/ -L$(GACODE_ROOT)/shared/harvest_client/ -I$(GACODE_ROOT)/shared/neural/ -L$(GACODE_ROOT)/shared/neural/ -lbrainfuse -lharvest -lfann
+else
+.f90.o :
+	$(FC) $(FMATH) $(FFLAGS) -c $< -I$(GACODE_ROOT)/shared/harvest_client/ -L$(GACODE_ROOT)/shared/harvest_client/ -lharvest 
+
+.F90.o :
+	$(FC) $(FMATH) $(FFLAGS) -c $< -I$(GACODE_ROOT)/shared/harvest_client/ -L$(GACODE_ROOT)/shared/harvest_client/ -lharvest
+endif
+
 
 clean:
 	rm -f *.o *.lst $(LLIB).a $(EXEC1) $(EXEC2) $(EXEC3)
