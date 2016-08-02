@@ -178,21 +178,33 @@ subroutine prgen_write
   case (0)
      EXPRO_b_ref = -btccw*abs(null_bref)
      EXPRO_arho  = null_arho
+     EXPRO_rvbv  = 0.0
+     EXPRO_ip_exp = 0.0
   case (1)
      EXPRO_b_ref = -btccw*abs(onetwo_Btor)
      EXPRO_arho  = onetwo_rho_grid(nx)
+     EXPRO_rvbv  = onetwo_R0*onetwo_Btor
+     EXPRO_ip_exp = ip_tot
   case (2)
      EXPRO_b_ref = -btccw*abs(plst_b_axis_vac)
      EXPRO_arho  = sqrt(plst_phit(nx)/plst_b_axis_vac/pi)
+     EXPRO_rvbv  = 0.0
+     EXPRO_ip_exp = 0.0
   case (3)
      EXPRO_b_ref = -btccw*abs(peqdsk_bref)
      EXPRO_arho  = peqdsk_arho
+     EXPRO_rvbv  = 0.0
+     EXPRO_ip_exp = 0.0
   case (5)
      EXPRO_b_ref = -btccw*abs(corsica_bref)
      EXPRO_arho  = corsica_arho
+     EXPRO_rvbv  = 0.0
+     EXPRO_ip_exp = 0.0
   case (6)
      EXPRO_b_ref = -btccw*abs(ufile_bref)
      EXPRO_arho  = ufile_arho
+     EXPRO_rvbv  = 0.0
+     EXPRO_ip_exp = 0.0
   end select
 
   write(1,20) '# '
@@ -208,6 +220,8 @@ subroutine prgen_write
      write(1,25) 'N_EXP=',EXPRO_n_exp
   endif
   write(1,'(a,sp,1pe14.7)') 'BT_EXP=',EXPRO_b_ref
+  write(1,60) 'IP_EXP=',EXPRO_ip_exp
+  write(1,60) 'RVBV=',abs(EXPRO_rvbv)
   write(1,60) 'ARHO_EXP=',EXPRO_arho
 
   !-------------------------------------------------------------------------------------

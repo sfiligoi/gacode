@@ -90,7 +90,7 @@ module prgen_globals
   real :: quasi_err
   real :: pow_e_err
   real :: pow_i_err
-
+  real :: ip_tot
   !---------------------------------------------------------
   ! ONETWO variables
   !

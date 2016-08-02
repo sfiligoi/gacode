@@ -97,8 +97,6 @@
    INPUT_PARAMETERS( 9) = r_in
    INPUT_PARAMETERS(10) = zeffped_in
 
-   WRITE(*,*) 'betan_in,neped_in',INPUT_PARAMETERS(2), INPUT_PARAMETERS(8)
-
    call get_environment_variable('EPEDNN_MODEL_DIR',epednn_model)
    !write(*,*) TRIM(epednn_model)
    ierr=load_anns(1, TRIM(epednn_model)//NUL,'brainfuse'//NUL)

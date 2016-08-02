@@ -65,6 +65,8 @@ module EXPRO_interface
   integer :: EXPRO_n_ion=0
   integer :: EXPRO_n_exp=0
   real    :: EXPRO_b_ref
+  real    :: EXPRO_ip_exp
+  real    :: EXPRO_rvbv
   real    :: EXPRO_arho
 
   ! Fundamental input.profiles arrays

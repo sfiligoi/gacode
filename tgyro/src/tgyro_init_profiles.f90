@@ -413,9 +413,9 @@ subroutine tgyro_init_profiles
   ! a [m]
   a_in = r_min
   ! Bt on axis [T]
-  bt_in = EXPRO_bt0(1)
+  bt_in = EXPRO_rvbv/EXPRO_rmaj(n_exp)
   ! Plasma current Ip [Ma]
-  ip_in = abs(1e-6*bval(EXPRO_rmin,EXPRO_ip,n_exp))
+  ip_in = 1e-6*EXPRO_ip_exp
   ! betan [%] = betat/In*100 where In = Ip/(a Bt) 
   betan_in = ( p_ave/(0.5*bt_in**2/mu_0) ) / ( ip_in/(a_in*bt_in) ) * 100.0
   ! Triangularity [-]
@@ -425,13 +425,13 @@ subroutine tgyro_init_profiles
   ! Main ion mass [mp]
   m_in = mi_vec(1)
   ! R0(a) [m]
-  r_in = EXPRO_rmaj(n_exp-3)
+  r_in = EXPRO_rmaj(n_exp)
 
-  !print *,'Betan',betan_in
-  !print *,'pave',p_ave
-  !print *,'bt',bt_in
-  !print *,'ip',ip_in
-  
+  print *,'Betan',betan_in
+  print *,'pave',p_ave
+  print *,'bt',bt_in
+  print *,'ip',ip_in
+  stop
 
   allocate(rmin_exp(n_exp))
   rmin_exp = EXPRO_rmin*100.0

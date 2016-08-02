@@ -45,7 +45,7 @@ subroutine prgen_read_iterdb
   read(1,*) t ; read(1,*) onetwo_volo
   read(1,*) t ; read(1,*) onetwo_cxareao
   read(1,*) t ; read(1,*) onetwo_Btor
-  read(1,*) t ; read(1,*) x
+  read(1,*) t ; read(1,*) ip_tot
   read(1,*) t ; read(1,*) x
   read(1,*) t ; read(1,*) x
   read(1,*) t ; read(1,*) x

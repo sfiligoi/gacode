@@ -32,6 +32,8 @@ subroutine EXPRO_pread
   call MPI_BCAST(EXPRO_n_ion,1,MPI_INTEGER,0,comm,ierr)
   call MPI_BCAST(EXPRO_n_exp,1,MPI_INTEGER,0,comm,ierr)
   call MPI_BCAST(EXPRO_b_ref,1,MPI_DOUBLE_PRECISION,0,comm,ierr)
+  call MPI_BCAST(EXPRO_ip_exp,1,MPI_DOUBLE_PRECISION,0,comm,ierr)
+  call MPI_BCAST(EXPRO_rvbv,1,MPI_DOUBLE_PRECISION,0,comm,ierr)
   call MPI_BCAST(EXPRO_arho,1,MPI_DOUBLE_PRECISION,0,comm,ierr)
   
   ! 1-5
