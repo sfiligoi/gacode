@@ -44,6 +44,8 @@
 N_ION=3
 N_EXP=201
 BT_EXP=2.1047001
+IP_EXP=1156067
+RVBV=3.56851904469
 ARHO_EXP=0.74071791
 #
 #rho(-)          rmin(m)         polflux(Wb/rad) q(-)            omega0(1/s)    
