@@ -427,12 +427,6 @@ subroutine tgyro_init_profiles
   ! R0(a) [m]
   r_in = EXPRO_rmaj(n_exp)
 
-  print *,'Betan',betan_in
-  print *,'pave',p_ave
-  print *,'bt',bt_in
-  print *,'ip',ip_in
-  stop
-
   allocate(rmin_exp(n_exp))
   rmin_exp = EXPRO_rmin*100.0
   allocate(psi_exp(n_exp))

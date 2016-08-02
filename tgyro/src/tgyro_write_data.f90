@@ -481,9 +481,9 @@ subroutine tgyro_write_data(i_print)
 
   if (tgyro_ped_model > 1) then
      open(unit=1,file='out.tgyro.ped',status='old',position='append')
-     write(1,20) 'r_top','psi_top','n_top','t_top','p_top','zn_top','zt_top','betan'
-     write(1,20) '[cm]','[-]','[1/cm^3]','[keV]','[Pa]','[1/cm]','[1/cm]','%'
-     write(1,10) r_top(1),psi_top(1),n_top,t_top/1e3,p_top,zn_top,zt_top,betan_in
+     write(1,20) 'r_*/a','r_top/a','psi_top','n_top','t_top','p_top','zn_top','zt_top','betan'
+     write(1,20) '[-]','[-]','[-]','[1/cm^3]','[keV]','[Pa]','[1/cm]','[1/cm]','%'
+     write(1,10) r(n_r)/r_min,r_top(1)/r_min,psi_top(1),n_top,t_top/1e3,p_top,zn_top,zt_top,betan_in
      close(1)
   endif
 
