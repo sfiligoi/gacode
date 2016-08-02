@@ -431,7 +431,6 @@ subroutine tgyro_init_profiles
   print *,'pave',p_ave
   print *,'bt',bt_in
   print *,'ip',ip_in
-  stop
 
   allocate(rmin_exp(n_exp))
   rmin_exp = EXPRO_rmin*100.0
