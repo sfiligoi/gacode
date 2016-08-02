@@ -91,6 +91,7 @@ x.add('TGYRO_PTOT_FLAG','0')
 x.add('TGYRO_PED_MODEL','1')
 x.add('TGYRO_NEPED','-1.0')
 x.add('TGYRO_ZEFFPED','2.07')
+x.add('TGYRO_TGLF_NN_MAX_ERROR','-1')
 x.add('TGYRO_MULTI_CODE','gyro')
 
 # Deprecated parameters

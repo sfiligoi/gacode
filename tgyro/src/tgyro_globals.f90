@@ -118,8 +118,6 @@ module tgyro_globals
   real, dimension(:), allocatable :: q_gb
   real, dimension(:), allocatable :: s_gb
 
-  real, dimension(:), allocatable :: q_tgb
-
   ! Collision frequencies
   real, dimension(:), allocatable :: nue
   real, dimension(:,:), allocatable :: nui
@@ -321,6 +319,7 @@ module tgyro_globals
   integer :: tgyro_ped_model
   real :: tgyro_neped
   real :: tgyro_zeffped
+  real :: tgyro_tglf_nn_max_error
   character(len=5) :: tgyro_multi_code
   !
   ! Iteration variables (global)

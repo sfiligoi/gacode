@@ -10,7 +10,6 @@ subroutine tgyro_target_vector(x_vec,g_vec)
   real, intent(inout), dimension(p_max) :: g_vec
 
   call tgyro_profile_set(x_vec,0.0,0)
-
   call tgyro_profile_functions
   call tgyro_source
 

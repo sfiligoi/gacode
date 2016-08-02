@@ -266,7 +266,7 @@ subroutine tgyro_tglf_map
   !----------------------------------------------------------------
 
   !----------------------------------------------------------------
-  ! New TGLF settings
+  ! NEW TGLF SETTINGS
   !
   select case (tgyro_tglf_revision)
 
@@ -300,18 +300,27 @@ subroutine tgyro_tglf_map
   end select
 
   !----------------------------------------------------------------
-
-  ! Dump parameters
+  ! DUMP PARAMETERS
+  !
   if (tgyro_tglf_dump_flag == 0) then
      tglf_dump_flag_in   = .false.
   else
      tglf_dump_flag_in = .true.
   endif
 
+  !----------------------------------------------------------------
+  ! VERBOSITY
+  !
   tglf_quiet_flag_in = .true.
-  
-  ! Harvest targets and gyro-bohm normalizations
-  
+
+  !----------------------------------------------------------------
+  ! TGLFNN ACTIVATION THRESHOLD
+  !
+  tglf_nn_max_error_in=tgyro_tglf_nn_max_error
+
+  !----------------------------------------------------------------
+  ! HARVEST: NEO AND TARGET FLUXES, GYRO-BOHM NORMALIZATIONS, SHOT
+  !
   if (i_tran == 0) then
     ! Initialization
     tglf_harvest_extra_in = NUL
@@ -338,6 +347,9 @@ subroutine tgyro_tglf_map
 
     ! Indication of thermal ions
     harvest_err=set_harvest_payload_int_array(tglf_harvest_extra_in,'tgyro_therm_vec'//NUL,therm_vec(:),size(therm_vec))
+
+    ! Experimental shot
+    harvest_err=set_harvest_payload_int(tglf_harvest_extra_in,'shot'//NUL,shot)
   endif
 
 end subroutine tgyro_tglf_map

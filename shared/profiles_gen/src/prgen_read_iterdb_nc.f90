@@ -84,6 +84,9 @@ subroutine prgen_read_iterdb_nc
   err = nf90_inq_varid(ncid,trim('btor'),varid)
   err = nf90_get_var(ncid,varid,onetwo_Btor)
 
+  err = nf90_inq_varid(ncid,trim('tot_cur'),varid)
+  err = nf90_get_var(ncid,varid,ip_tot)
+
   nx = nx
 
   call allocate_internals

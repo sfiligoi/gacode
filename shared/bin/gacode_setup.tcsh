@@ -3,28 +3,32 @@
 #--------------------------------------------
 #!/bin/tcsh
 
-setenv PATH ${PATH}:$GACODE_ROOT/tgyro/bin
-setenv PATH ${PATH}:$GACODE_ROOT/gyro/bin
-setenv PATH ${PATH}:$GACODE_ROOT/cgyro/bin
-setenv PATH ${PATH}:$GACODE_ROOT/neo/bin
-setenv PATH ${PATH}:$GACODE_ROOT/vgen/bin
-setenv PATH ${PATH}:$GACODE_ROOT/tglf/bin
-setenv PATH ${PATH}:$GACODE_ROOT/glf23/bin
-setenv PATH ${PATH}:$GACODE_ROOT/le3/bin
-setenv PATH ${PATH}:$GACODE_ROOT/shared/bin
+setenv PATH $GACODE_ROOT/tgyro/bin:${PATH}
+setenv PATH $GACODE_ROOT/gyro/bin:${PATH}
+setenv PATH $GACODE_ROOT/cgyro/bin:${PATH}
+setenv PATH $GACODE_ROOT/neo/bin:${PATH}
+setenv PATH $GACODE_ROOT/vgen/bin:${PATH}
+setenv PATH $GACODE_ROOT/tglf/bin:${PATH}
+setenv PATH $GACODE_ROOT/glf23/bin:${PATH}
+setenv PATH $GACODE_ROOT/le3/bin:${PATH}
+setenv PATH $GACODE_ROOT/shared/bin:${PATH}
 
 if ( $?GACODE_ADD_ROOT ) then
-   setenv PATH ${PATH}:$GACODE_ADD_ROOT/freya/bin
+   setenv PATH $GACODE_ADD_ROOT/freya/bin:${PATH}
+   setenv PATH $GACODE_ADD_ROOT/prefreya/bin:${PATH}
 endif
 
 if ( $?PYTHONPATH ) then
-   setenv PYTHONPATH ${PYTHONPATH}:$GACODE_ROOT/python
+   setenv PYTHONPATH $GACODE_ROOT/python:${PYTHONPATH}
 else
    setenv PYTHONPATH $GACODE_ROOT/python
 endif
 
 if ( $?IDL_PATH ) then
-   setenv IDL_PATH ${IDL_PATH}:$GACODE_ROOT/gyro/vugyro
+   setenv IDL_PATH $GACODE_ROOT/gyro/vugyro:${IDL_PATH}
 else
    setenv IDL_PATH $GACODE_ROOT/gyro/vugyro
 endif
+
+setenv EPEDNN_MODEL_DIR $GACODE_ROOT/shared/neural/eped1nn/models/EPED1_ALL/
+setenv TGLFNN_MODEL_DIR $GACODE_ROOT/shared/neural/tglfnn/models/DIIID_ion_stiffness_60_rotation/

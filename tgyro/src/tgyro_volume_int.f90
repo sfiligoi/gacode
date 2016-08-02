@@ -89,3 +89,23 @@ subroutine tgyro_volume_int(s,p)
   endif
 
 end subroutine tgyro_volume_int
+
+subroutine tgyro_volume_ave(f,r,volp,fave,n)
+
+  implicit none
+
+  integer :: i
+  integer, intent(in) :: n
+  real, intent(in), dimension(n) :: f,r,volp
+  real, intent(inout) :: fave
+  real :: vol
+
+  fave = 0.0
+  vol  = 0.0
+  do i=2,n
+     fave = fave+0.5*(f(i-1)*volp(i-1)+f(i)*volp(i))*(r(i)-r(i-1))
+     vol  = vol+0.5*(volp(i-1)+volp(i))*(r(i)-r(i-1))
+  enddo
+  fave = fave/vol
+
+end subroutine tgyro_volume_ave

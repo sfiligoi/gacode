@@ -20,6 +20,7 @@ subroutine tgyro_init_profiles
   real :: arho
   real :: p_ave
   real :: x0(1),y0(1)
+  real, external :: bval
 
   !------------------------------------------------------
   ! PHYSICAL CONSTANTS
@@ -382,21 +383,39 @@ subroutine tgyro_init_profiles
   endif
 
   !-----------------------------------------------------------------
-  ! Capture additional parameters for pedestal model [Not in CGS]
+  ! Parameters for EPED pedestal model 
+  ! ** BEWARE: these are NOT all in CGS units.
   !
-  ! Average pressure [Pa]
+  allocate(exp_te(n_exp))
+  allocate(exp_ne(n_exp))
+  allocate(exp_ti(loc_n_ion,n_exp))
+  allocate(exp_ni(loc_n_ion,n_exp))
+  ! exp_ne, exp_ni: [1/cm^3]
+  exp_ne = EXPRO_ne*1e13
+  exp_ni(1:loc_n_ion,:) = EXPRO_ni(1:loc_n_ion,:)*1e13
+  ! exp_te, exp_ti: [eV]
+  exp_te = EXPRO_te*1e3
+  exp_ti(1:loc_n_ion,:) = EXPRO_ti(1:loc_n_ion,:)*1e3
+
   allocate(volp_exp(n_exp))
   volp_exp = EXPRO_volp
   allocate(ptot_exp(n_exp))
-  ptot_exp = EXPRO_ptot
-  p_ave = sum(volp_exp*ptot_exp)/sum(volp_exp)
+  ! Pressure [Pa] 
+  ptot_exp = exp_ne*exp_te
+  do i_ion=1,loc_n_ion
+     ptot_exp = ptot_exp + exp_ni(i_ion,:)*exp_ti(i_ion,:)
+  enddo
+  ! Convert to Pa: n[1/cm^3]*(kT[ev])/10  
+  ptot_exp = ptot_exp*k/10.0
+  ! Volume average (p_ave)
+  call tgyro_volume_ave(ptot_exp,EXPRO_rmin,volp_exp,p_ave,n_exp)
   !
   ! a [m]
   a_in = r_min
   ! Bt on axis [T]
-  bt_in = EXPRO_bt0(1)
-  ! Plasma current Ip[Ma]
-  ip_in = abs(1e-6*EXPRO_ip(n_exp-3))
+  bt_in = EXPRO_rvbv/EXPRO_rmaj(n_exp)
+  ! Plasma current Ip [Ma]
+  ip_in = 1e-6*EXPRO_ip_exp
   ! betan [%] = betat/In*100 where In = Ip/(a Bt) 
   betan_in = ( p_ave/(0.5*bt_in**2/mu_0) ) / ( ip_in/(a_in*bt_in) ) * 100.0
   ! Triangularity [-]
@@ -406,7 +425,7 @@ subroutine tgyro_init_profiles
   ! Main ion mass [mp]
   m_in = mi_vec(1)
   ! R0(a) [m]
-  r_in = EXPRO_rmaj(n_exp-3)
+  r_in = EXPRO_rmaj(n_exp)
 
   allocate(rmin_exp(n_exp))
   rmin_exp = EXPRO_rmin*100.0
@@ -417,23 +436,13 @@ subroutine tgyro_init_profiles
   ! d (Psi_norm)/dr in units of 1/cm
   dpsidr_exp = EXPRO_bunit*EXPRO_rmin/EXPRO_q/EXPRO_polflux(n_exp)/100.0
   !
-  allocate(exp_te(n_exp))
-  allocate(exp_ne(n_exp))
-  allocate(exp_ti(loc_n_ion,n_exp))
-  allocate(exp_ni(loc_n_ion,n_exp))
-  !
   ! Pedestal density
   if (tgyro_neped < 0.0) then
-     ! Set pedestal density to ne at psi_norm=0.9
-     x0(1) = 0.9
-     call cub_spline(psi_exp,EXPRO_rmin(:)/r_min,n_exp,x0,y0,1)
-     !if (i_proc_global == 0) print *,'r_ped/a = ',y0(1)     
+     ! Here, x0 will be x0=psi_norm_ped
+     x0(1) = -tgyro_neped
      call cub_spline(psi_exp,EXPRO_ne(:),n_exp,x0,y0,1)
      tgyro_neped = y0(1)
   endif
-  !if (i_proc_global == 0) print *,'ne_ped=',tgyro_neped
-  !call MPI_FINALIZE(ierr)
-  !stop
   !
   call tgyro_pedestal
   !-----------------------------------------------------------------
@@ -472,4 +481,22 @@ subroutine tgyro_init_profiles
   ! Axis boundary conditions
   call tgyro_init_profiles_axis
 
+
 end subroutine tgyro_init_profiles
+
+real function bval(x,f,n)
+
+   integer, intent(in) :: n
+   real, intent(in), dimension(n) :: x,f
+   real :: x1,x2,f1,f2,xs
+
+   xs = x(n)
+   x2 = x(n-7)
+   f2 = f(n-7)
+   x1 = x(n-9)
+   f1 = f(n-9) 
+    
+   bval = (xs-x1)/(x2-x1)*f2+(xs-x2)/(x1-x2)*f1
+ 
+end function bval
+

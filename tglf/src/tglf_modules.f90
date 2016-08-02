@@ -36,6 +36,7 @@
 !
       IMPLICIT NONE
       SAVE
+    
 ! global constants
       REAL :: pi
       REAL :: pi_2
@@ -241,6 +242,11 @@
       INTEGER :: nmodes_out
       INTEGER :: nfields_out
       character (len=80) :: error_msg='null' 
+! NN activation parameters (thresholds)  
+      REAL :: nn_max_error_in = -1.0
+      LOGICAL :: valid_nn = .FALSE.
+    
+     
 !
       END MODULE tglf_global
 !------------------------------------------------- 

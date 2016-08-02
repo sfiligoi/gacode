@@ -13,13 +13,14 @@ EXEC = tgyro_main
 OBJECTS +=	tgyro_globals.o \
 		tgyro_iteration_variables.o \
 		tgyro_allocate_globals.o \
-                tgyro_ped.o \
-                tgyro_eped_nn.o \
+        tgyro_ped.o \
+        tgyro_eped_nn.o \
 		tgyro_catch_error.o \
 		tgyro_comm_setup.o \
 		tgyro_comm_sync.o \
 		tgyro_expro_map.o \
 		tgyro_flux.o \
+		tgyro_flux_set.o \
 		tgyro_flux_vector.o \
 		tgyro_flux_vector_dense.o \
 		tgyro_gyro_map.o \
@@ -56,10 +57,10 @@ OBJECTS +=	tgyro_globals.o \
 .SUFFIXES : .o .f90
 
 all: $(OBJECTS) $(EXTRA_LIBS)
-	$(FC) $(FFLAGS) -o $(EXEC) $(OBJECTS) $(EXTRA_LIBS) $(LMATH)
+	$(FC) $(FFLAGS) -o $(EXEC) $(OBJECTS) $(EXTRA_LIBS) $(LMATH) -L$(GACODE_ROOT)/shared/harvest_client/ -I$(GACODE_ROOT)/shared/harvest_client/ -I$(GACODE_ROOT)/shared/neural/ -L$(GACODE_ROOT)/shared/neural/ -lbrainfuse -lharvest -lfann
 
 .f90.o :
-	$(FC) $(FMATH) $(FFLAGS) -I$(GACODE_ROOT)/shared/harvest_client/ -c $<
+	$(FC) $(FMATH) $(FFLAGS) -I$(GACODE_ROOT)/shared/harvest_client/ -L$(GACODE_ROOT)/shared/harvest_client/ -I$(GACODE_ROOT)/shared/neural/ -L$(GACODE_ROOT)/shared/neural/ -c $<  -lbrainfuse -lharvest -lfann
 
 clean:
 	rm -f $(EXEC)

@@ -481,17 +481,9 @@ subroutine tgyro_write_data(i_print)
 
   if (tgyro_ped_model > 1) then
      open(unit=1,file='out.tgyro.ped',status='old',position='append')
-     write(1,50) 'PEDESTAL PARAMETERS ---------------------'
-     write(1,50) 'n_top [1/cm^3]',n_top
-     write(1,50) 't_top     [eV]',t_top
-     write(1,50) 'p_top     [Ba]',p_top
-     write(1,50) 'zn_top  [1/cm]',zn_top
-     write(1,50) 'dlnnedr [1/cm]',dlnnedr(n_r)
-     write(1,50) 'zt_top  [1/cm]',zt_top
-     write(1,50) 'dlntedr [1/cm]',dlntedr(n_r)
-     write(1,50) 'psi_top [-]',psi_top(1)
-     write(1,50) ' r_top [cm]',r_top(1)
-     write(1,50) 'r(n_r) [cm]',r(n_r)
+     write(1,20) 'r_*/a','r_top/a','psi_top','n_top','t_top','p_top','zn_top','zt_top','betan'
+     write(1,20) '[-]','[-]','[-]','[1/cm^3]','[keV]','[Pa]','[1/cm]','[1/cm]','%'
+     write(1,10) r(n_r)/r_min,r_top(1)/r_min,psi_top(1),n_top,t_top/1e3,p_top,zn_top,zt_top,betan_in
      close(1)
   endif
 

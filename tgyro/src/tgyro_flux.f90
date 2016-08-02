@@ -18,7 +18,7 @@ subroutine tgyro_flux
   use glf23_interface
 
   implicit none
-
+  
   integer :: i_ion
   integer :: i1,i2
   integer :: n_12
@@ -148,6 +148,10 @@ subroutine tgyro_flux
 
   select case (flux_method)
 
+  case (0)
+
+     ! No fluxes (tgyro_noturb_flag=1)
+
   case (1) 
 
      call ifs_pppl(r_maj(i_r)*dlntidr(1,i_r),&
@@ -207,7 +211,6 @@ subroutine tgyro_flux
         eflux_i_tur(1:loc_n_ion,i_r) = tglf_ion_eflux_low_out(1:loc_n_ion)
      endif
 
-
   case(3)  ! Map TGYRO parameters to GLF23
 
      call tgyro_glf23_map
@@ -257,11 +260,7 @@ subroutine tgyro_flux
         enddo
 
      endif
-
-  case (5)
-
-     ! No fluxes (tgyro_noturb_flag=1)
-
+      
   case default
 
      call tgyro_catch_error('ERROR: (TGYRO) No matching flux method in tgyro_flux.')
