@@ -270,12 +270,13 @@ module tgyro_globals
   integer :: loc_evolve_grad_only_flag
   integer :: loc_restart_flag
   integer :: loc_scenario
-  integer :: tgyro_quasineutral_flag
   integer :: loc_neo_method
   integer :: loc_n_ion
   real, dimension(n_ion_max) :: zi_vec
   real, dimension(n_ion_max) :: mi_vec
   integer, dimension(n_ion_max) :: therm_flag
+  integer, dimension(0:n_ion_max) :: evo_e
+  real, dimension(0:n_ion_max) :: evo_c
   real :: loc_betae_scale
   integer :: loc_chang_hinton
   real :: loc_me_multiplier
@@ -312,7 +313,6 @@ module tgyro_globals
   integer :: tgyro_use_rho
   integer :: tgyro_dt_method
   integer :: tgyro_gyro_restart_flag
-  integer :: tgyro_fix_concentration_flag
   integer :: tgyro_write_profiles_flag
   integer :: tgyro_neo_n_theta
   integer :: tgyro_ptot_flag
