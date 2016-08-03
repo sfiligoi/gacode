@@ -5,7 +5,7 @@ subroutine tgyro_write_input
 
   implicit none
 
-  integer :: i_ion
+  integer :: i_ion,is
   character(len=7) :: ttext
 
   !----------------------------------------------------------------
@@ -35,11 +35,10 @@ subroutine tgyro_write_input
   ! - Need to set at least one profile to evolve, even for zero iterations, just to 
   !   define a residual error.
   !  
-  if (loc_er_feedback_flag+&
-       loc_ne_feedback_flag+&
-       loc_te_feedback_flag+&
-       loc_ti_feedback_flag+&
-       loc_he_feedback_flag == 0) then
+  if (loc_er_feedback_flag == 0 .and. &
+       loc_te_feedback_flag == 0 .and. &
+       loc_ti_feedback_flag == 0 .and. &
+       maxval(evo_e) == 0) then
      error_flag = 1
      error_msg = 'ERROR: (TGYRO) Must set one profile to evolve, even if running for 0 iterations.'
   endif
@@ -185,51 +184,6 @@ subroutine tgyro_write_input
      !--------------------------------------------------------
 
      !--------------------------------------------------------
-     select case (loc_ne_feedback_flag)
-
-     case (0)
-
-        write(1,10) 'LOC_NE_FEEDBACK_FLAG','ne evolution OFF'
-
-     case (1)
-
-        write(1,10) 'LOC_NE_FEEDBACK_FLAG','ne evolution ON'
-
-        if (loc_residual_method == 1) then
-           error_flag = 1
-           error_msg = 'Error: LOC_RESIDUAL_METHOD=1 not compatible with LOC_NE_FEEDBACK_FLAG=1.'
-        endif
-
-        select case (loc_pflux_method)
-
-        case (1)
-
-           write(1,10) 'LOC_PFLUX_METHOD','gamma=0'
-
-        case (2)
-
-           write(1,10) 'LOC_PFLUX_METHOD','gamma=beam'
-
-        case (3)
-
-           write(1,10) 'LOC_PFLUX_METHOD','gamma=beam+wall'
-
-        case default
-
-           error_flag = 1
-           error_msg = 'Error: LOC_PFLUX_METHOD'
-
-        end select
-
-     case default
-
-        error_flag = 1
-        error_msg = 'Error: LOC_NE_FEEDBACK_FLAG'
-
-     end select
-     !--------------------------------------------------------
-
-     !--------------------------------------------------------
      select case (loc_er_feedback_flag)
 
      case (0)
@@ -248,24 +202,9 @@ subroutine tgyro_write_input
      end select
      !--------------------------------------------------------
 
-     !--------------------------------------------------------
-     select case (loc_he_feedback_flag)
-
-     case (0)
-
-        write(1,10) 'LOC_HE_FEEDBACK_FLAG','He evolution OFF'
-
-     case (1)
-
-        write(1,10) 'LOC_HE_FEEDBACK_FLAG','He evolution ON'
-
-     case default
-
-        error_flag = 1
-        error_msg = 'Error: LOC_HE_FEEDBACK_FLAG'
-
-     end select
-     !--------------------------------------------------------
+     do is=0,loc_n_ion
+        write(1,'(t2,a,i2,2x,i2,2x,f4.2)') 'ion',is,evo_e(is),evo_c(is)
+     enddo
 
      !--------------------------------------------------------
      select case (TGYRO_EXPWD_FLAG)

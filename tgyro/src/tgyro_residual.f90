@@ -33,18 +33,6 @@ subroutine tgyro_residual(f,g,res,n,method)
      ! BALANCED
      res = (f-g)**2/MAX((f**2+g**2),1.0)
 
-  case (5)
-
-     ! WEIGHTED
-     res(:) = 0.0
-     do p=1,n
-        if (quant(p) == 'ne') then 
-           res(p) = 0.005*(f(p)-g(p))**2
-        else
-           res(p) = 0.5*(f(p)-g(p))**2
-        endif
-     enddo
-
   case default
 
      print *,'Error in tgyro_residual'

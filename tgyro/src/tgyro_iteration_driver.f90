@@ -20,6 +20,7 @@ subroutine tgyro_iteration_driver
   use EXPRO_interface
 
   implicit none
+  integer :: i_ion
 
   n_r   = n_inst+1
   p_max = n_evolve*(n_r-1)
@@ -36,7 +37,6 @@ subroutine tgyro_iteration_driver
   allocate(x_vec0(p_max)) 
   allocate(f_vec0(p_max))
   allocate(g_vec0(p_max))
-  allocate(quant(p_max))
   allocate(b(p_max))
 
   call tgyro_allocate_globals
@@ -129,37 +129,34 @@ subroutine tgyro_iteration_driver
         p  = p+1
         ip = ip+1
         pmap(i,ip) = p
-        quant(p) = 'ti'
         x_vec(p) = dlntidr(1,i)
      endif
      if (loc_te_feedback_flag == 1) then
         p  = p+1
         ip = ip+1
         pmap(i,ip) = p
-        quant(p) = 'te'
         x_vec(p) = dlntedr(i)
-     endif
-     if (loc_ne_feedback_flag == 1) then
-        p  = p+1
-        ip = ip+1
-        pmap(i,ip) = p
-        quant(p) = 'ne'
-        x_vec(p) = dlnnedr(i)
      endif
      if (loc_er_feedback_flag == 1) then
         p  = p+1
         ip = ip+1
         pmap(i,ip) = p
-        quant(p) = 'er'
         x_vec(p) = f_rot(i)
      endif
-     if (loc_he_feedback_flag == 1) then
+     if (evo_e(0) == 1) then
         p  = p+1
         ip = ip+1
         pmap(i,ip) = p
-        quant(p) = 'he'
-        x_vec(p) = dlnnidr(i_ash,i)
+        x_vec(p) = dlnnedr(i)
      endif
+     do i_ion=1,loc_n_ion
+        if (evo_e(i_ion) == 1) then
+           p  = p+1
+           ip = ip+1
+           pmap(i,ip) = p
+           x_vec(p) = dlnnidr(i_ion,i)
+        endif
+     enddo
   enddo
 
   ! Make some resets if we are in test mode

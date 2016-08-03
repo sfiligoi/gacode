@@ -10,9 +10,8 @@ subroutine tgyro_allocate_globals
   allocate(pflux_e_tur(n_r))
   allocate(pflux_i_tur(loc_n_ion,n_r))
   allocate(pflux_e_tot(n_r))
-  allocate(pflux_i_tot(n_r))
+  allocate(pflux_i_tot(loc_n_ion,n_r))
   allocate(pflux_e_target(n_r))
-  allocate(pflux_he_tot(n_r))
   allocate(pflux_he_target(n_r))
 
   ! momentum fluxes

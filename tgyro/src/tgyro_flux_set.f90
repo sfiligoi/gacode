@@ -13,7 +13,7 @@ subroutine tgyro_flux_set(f_vec)
 
   integer :: i
   integer :: p
-  integer :: is
+  integer :: i_ion
 
   real, intent(inout), dimension(p_max) :: f_vec
 
@@ -35,17 +35,17 @@ subroutine tgyro_flux_set(f_vec)
         f_vec(p) = mflux_tot(i)
      endif
 
-     do is=0,loc_n_ion
-        if (evo_e(is) == 1) then
+     if (evo_e(0) == 1) then
+        p = p+1
+        f_vec(p) = pflux_e_tot(i)
+     endif
+
+     do i_ion=1,loc_n_ion
+        if (evo_e(i_ion) == 1) then
            p = p+1
-           f_vec(p) = pflux_e_tot(i)*evo_c(is)
+           f_vec(p) = pflux_i_tot(i_ion,i)
         endif
      enddo
-
-     !     if (loc_he_feedback_flag == 1) then
-     !        p = p+1
-     !        f_vec(p) = pflux_he_tot(i)
-     !     endif
 
   enddo
 
