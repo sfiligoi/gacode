@@ -116,7 +116,7 @@ subroutine tgyro_init_profiles
   !----------------------------------------------
 
   EXPRO_ctrl_n_ion = loc_n_ion
-  EXPRO_ctrl_quasineutral_flag = tgyro_quasineutral_flag
+  EXPRO_ctrl_quasineutral_flag = 0
   EXPRO_ctrl_z = 0.0
   EXPRO_ctrl_z(1:loc_n_ion) = zi_vec(1:loc_n_ion)
   EXPRO_ctrl_numeq_flag = loc_num_equil_flag
@@ -222,16 +222,10 @@ subroutine tgyro_init_profiles
   !
   if (loc_lock_profile_flag == 0) then
 
-     ! Overwrite main ion(s) density and gradient(s) with corrected values 
-     !
-     ! There are 2 options for quasineurality: see TGYRO_FIX_CONCENTRATION_FLAG
-
-     do i=1,n_r
-        call tgyro_quasigrad(ne(i),dlnnedr(i),ni(:,i),dlnnidr(:,i),zi_vec(:),loc_n_ion)
-     enddo
-
+     ! Update some species (evo_e=1) based on quasineutrality
+     call tgyro_quasigrad
+ 
      ! Reintegrate density profiles
-
      do i_ion=1,loc_n_ion
         ! ni in 1/cm^3
         call logint(ni(i_ion,:),dlnnidr(i_ion,:),r,n_r,i_bc)

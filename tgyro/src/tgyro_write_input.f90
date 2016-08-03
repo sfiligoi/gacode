@@ -467,41 +467,6 @@ subroutine tgyro_write_input
      end select
      !--------------------------------------------------------
      !--------------------------------------------------------
-     select case (tgyro_quasineutral_flag)
-
-     case (0)
-
-        write(1,10) 'TGYRO_QUASINEUTRAL_FLAG','Never change ion density to enforce quasineutrality.'
-
-     case (1)
-
-        write(1,10) 'TGYRO_QUASINEUTRAL_FLAG','Ion densities modified according to TGYRO_FIX_CONCENTRATION_FLAG.'
-
-        select case (tgyro_fix_concentration_flag)
-
-        case (0)
-
-           write(1,10) 'TGYRO_FIX_CONCENTRATION_FLAG','Enforce quasineutrality on main ions during iteration.'
-
-        case (1)
-
-           write(1,10) 'TGYRO_FIX_CONCENTRATION_FLAG','Fix ratio of all ion densities while enforcing quasineutrality.'
-
-        case default
-
-           error_flag = 1
-           error_msg = 'ERROR: (TGYRO) Bad value for TGYRO_FIX_CONCENTRATION_FLAG'
-
-        end select
-
-     case default
-
-        error_flag = 1
-        error_msg = 'Error: (TGYRO) TGYRO_QUASINEUTRAL_FLAG.'
-
-     end select
-     !--------------------------------------------------------
-     !--------------------------------------------------------
      select case (loc_lock_profile_flag)
 
      case (0)
