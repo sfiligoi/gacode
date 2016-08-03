@@ -82,8 +82,7 @@ module tgyro_globals
   real, dimension(:), allocatable   :: pflux_e_tur
   real, dimension(:,:), allocatable :: pflux_i_tur
   real, dimension(:), allocatable   :: pflux_e_tot
-  real, dimension(:), allocatable   :: pflux_i_tot
-  real, dimension(:), allocatable   :: pflux_he_tot
+  real, dimension(:,:), allocatable :: pflux_i_tot
   real, dimension(:), allocatable   :: pflux_e_target
   real, dimension(:), allocatable   :: pflux_he_target
 
@@ -287,7 +286,6 @@ module tgyro_globals
   integer :: tgyro_glf23_dump_flag
   integer :: loc_ti_feedback_flag
   integer :: loc_te_feedback_flag
-  integer :: loc_ne_feedback_flag
   integer :: loc_er_feedback_flag
   integer :: loc_he_feedback_flag
   integer :: loc_zeff_flag

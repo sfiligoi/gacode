@@ -64,23 +64,25 @@ subroutine tgyro_comm_sync
 
   ! sync pflux_i
 
-  call MPI_ALLGATHER(pflux_i_tot(i_r),&
-       1,&
-       MPI_DOUBLE_PRECISION,&
-       collect,&
-       1,&
-       MPI_DOUBLE_PRECISION,&
-       gyro_adj,&
-       ierr)
+  do i_ion=1,loc_n_ion
+     call MPI_ALLGATHER(pflux_i_tot(i_ion,i_r),&
+          1,&
+          MPI_DOUBLE_PRECISION,&
+          collect,&
+          1,&
+          MPI_DOUBLE_PRECISION,&
+          gyro_adj,&
+          ierr)
 
-  pflux_i_tot(2:n_r) = collect(:)
+     pflux_i_tot(i_ion,2:n_r) = collect(:)
 
-  call MPI_BCAST(pflux_i_tot(2:n_r),&
-       n_r-1,&
-       MPI_DOUBLE_PRECISION,&
-       0,&
-       gyro_comm,&
-       ierr)
+     call MPI_BCAST(pflux_i_tot(i_ion,2:n_r),&
+          n_r-1,&
+          MPI_DOUBLE_PRECISION,&
+          0,&
+          gyro_comm,&
+          ierr)
+  enddo
 
   ! sync pflux_e
 
@@ -116,26 +118,6 @@ subroutine tgyro_comm_sync
   mflux_tot(2:n_r) = collect(:)
 
   call MPI_BCAST(mflux_tot(2:n_r),&
-       n_r-1,&
-       MPI_DOUBLE_PRECISION,&
-       0,&
-       gyro_comm,&
-       ierr)
-
-  ! sync pflux_he
-
-  call MPI_ALLGATHER(pflux_he_tot(i_r),&
-       1,&
-       MPI_DOUBLE_PRECISION,&
-       collect,&
-       1,&
-       MPI_DOUBLE_PRECISION,&
-       gyro_adj,&
-       ierr)
-
-  pflux_he_tot(2:n_r) = collect(:)
-
-  call MPI_BCAST(pflux_he_tot(2:n_r),&
        n_r-1,&
        MPI_DOUBLE_PRECISION,&
        0,&

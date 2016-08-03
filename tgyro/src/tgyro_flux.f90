@@ -274,20 +274,17 @@ subroutine tgyro_flux
   !
   ! NOTE: therm_vec here ensures ion sum is only over thermal species
   !
+  ! Particle flux for every species
   pflux_e_tot(i_r) = pflux_e_neo(i_r)+pflux_e_tur(i_r)
-  pflux_i_tot(i_r) = sum(pflux_i_neo(therm_vec(:),i_r)+pflux_i_tur(therm_vec(:),i_r))
+  pflux_i_tot(:,i_r) = pflux_i_neo(:,i_r)+pflux_i_tur(:,i_r)
 
+  ! Energy fluxes for electrons and summed thermal ions
   eflux_e_tot(i_r) = eflux_e_neo(i_r)+eflux_e_tur(i_r)
   eflux_i_tot(i_r) = sum(eflux_i_neo(therm_vec(:),i_r)+eflux_i_tur(therm_vec(:),i_r))
 
+  ! Momentum flux
   mflux_tot(i_r) = mflux_e_neo(i_r)+mflux_e_tur(i_r)+&
        sum(mflux_i_neo(therm_vec(:),i_r)+mflux_i_tur(therm_vec(:),i_r))
-
-  if (loc_he_feedback_flag == 1) then
-     pflux_he_tot(i_r) = pflux_i_neo(i_ash,i_r)+pflux_i_tur(i_ash,i_r)
-  else
-     pflux_he_tot(i_r) = 0.0
-  endif
   !-------------------------------------------------------------------
 
 end subroutine tgyro_flux

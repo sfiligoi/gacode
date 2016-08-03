@@ -19,7 +19,7 @@ subroutine tgyro_write_data(i_print)
   integer :: i
   integer :: ip
   integer :: i_print
-  integer :: i_ion
+  integer :: is,i_ion
   integer :: p
   real, dimension(2:n_r,n_evolve_max) :: res2,relax2
 
@@ -236,8 +236,8 @@ subroutine tgyro_write_data(i_print)
           pflux_e_target(i),&
           mflux_tot(i),&
           mflux_target(i),&
-          pflux_he_tot(i),&
-          pflux_he_target(i)
+          pflux_e_tot(i),&
+          pflux_e_target(i)
   enddo
 
   close(1)
@@ -447,21 +447,18 @@ subroutine tgyro_write_data(i_print)
         res2(i,2) = res(p)
         relax2(i,2) = relax(p)
      endif
-     if (loc_ne_feedback_flag == 1) then
+     if (loc_er_feedback_flag == 1) then
         p  = p+1
         res2(i,3) = res(p)
         relax2(i,3) = relax(p)
      endif
-     if (loc_er_feedback_flag == 1) then
-        p  = p+1
-        res2(i,4) = res(p)
-        relax2(i,4) = relax(p)
-     endif
-     if (loc_he_feedback_flag == 1) then
-        p  = p+1
-        res2(i,5) = res(p)
-        relax2(i,5) = relax(p)
-     endif
+     do is=0,loc_n_ion
+        if (evo_e(is) == 1) then
+           p  = p+1
+           res2(i,4+is) = res(p)
+           relax2(i,4+is) = relax(p)
+        endif
+     enddo
      write(1,40) &
           r(i)/r_min,(res2(i,ip),relax2(i,ip),ip=1,5)
   enddo
