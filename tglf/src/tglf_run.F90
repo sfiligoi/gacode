@@ -23,10 +23,7 @@ subroutine tglf_run()
 
   implicit none
 
-  ! randomize input parameters (use for data harvesting)
   integer :: i_ion,n
-  real :: rvar,rv
-  rvar=0.0
 
   call put_signs(tglf_sign_Bt_in,tglf_sign_It_in)
 
@@ -144,120 +141,6 @@ subroutine tglf_run()
 
   if (tglf_use_transport_model_in) then
 
-         if (rvar.gt.0.0) then
-
-            call init_random_seed()
-
-            !== RMIN_LOC ==!
-            call random_number(rv)
-            !write(*,*)'rmin_loc',rmin_loc,rmin_loc*(1.0+rvar*(rv-0.5))
-            rmin_loc=rmin_loc*(1.0+rvar*(rv-0.5))
-
-            !== RMAJ_LOC ==!
-            call random_number(rv)
-            !write(*,*)'rmaj_loc',rmaj_loc,rmaj_loc*(1.0+rvar*(rv-0.5))
-            rmaj_loc=rmaj_loc*(1.0+rvar*(rv-0.5))
-
-            !== ZMAJ_LOC ==!
-            call random_number(rv)
-            !write(*,*)'zmaj_loc',zmaj_loc,zmaj_loc*(1.0+rvar*(rv-0.5))
-            zmaj_loc=zmaj_loc*(1.0+rvar*(rv-0.5))
-
-            !== Q_LOC ==!
-            call random_number(rv)
-            !write(*,*)'q_loc',q_loc,q_loc*(1.0+rvar*(rv-0.5))
-            q_loc=q_loc*(1.0+rvar*(rv-0.5))
-
-            !== Q_IN ==!
-            call random_number(rv)
-            !write(*,*)'q_in',q_in,q_in*(1.0+rvar*(rv-0.5))
-            q_in=q_in*(1.0+rvar*(rv-0.5))
-
-            !== P_PRIME_LOC ==!
-            call random_number(rv)
-            !write(*,*)'p_prime_loc',p_prime_loc,p_prime_loc*(1.0+rvar*(rv-0.5))
-            p_prime_loc=p_prime_loc*(1.0+rvar*(rv-0.5))
-
-            !== Q_PRIME_LOC ==!
-            call random_number(rv)
-            !write(*,*)'q_prime_loc',q_prime_loc,q_prime_loc*(1.0+rvar*(rv-0.5))
-            q_prime_loc=q_prime_loc*(1.0+rvar*(rv-0.5))
-
-            !== KAPPA_LOC ==!
-            call random_number(rv)
-            !write(*,*)'kappa_loc',kappa_loc,kappa_loc*(1.0+rvar*(rv-0.5))
-            kappa_loc=kappa_loc*(1.0+rvar*(rv-0.5))
-
-            !== S_KAPPA_LOC ==!
-            call random_number(rv)
-            !write(*,*)'s_kappa_loc',s_kappa_loc,s_kappa_loc*(1.0+rvar*(rv-0.5))
-            s_kappa_loc=s_kappa_loc*(1.0+rvar*(rv-0.5))
-
-            !== DELTA_LOC ==!
-            call random_number(rv)
-            !write(*,*)'delta_loc',delta_loc,delta_loc*(1.0+rvar*(rv-0.5))
-            delta_loc=delta_loc*(1.0+rvar*(rv-0.5))
-
-            !== S_DELTA_LOC ==!
-            call random_number(rv)
-            !write(*,*)'s_delta_loc',s_delta_loc,s_delta_loc*(1.0+rvar*(rv-0.5))
-            s_delta_loc=s_delta_loc*(1.0+rvar*(rv-0.5))
-
-            !== ZETA_LOC ==!
-            call random_number(rv)
-            !write(*,*)'zeta_loc',zeta_loc,zeta_loc*(1.0+rvar*(rv-0.5))
-            zeta_loc=zeta_loc*(1.0+rvar*(rv-0.5))
-
-            !== S_ZETA_LOC ==!
-            call random_number(rv)
-            !write(*,*)'s_zeta_loc',s_zeta_loc,s_zeta_loc*(1.0+rvar*(rv-0.5))
-            s_zeta_loc=s_zeta_loc*(1.0+rvar*(rv-0.5))
-
-            !== VEXB_SHEAR_IN ==!
-            call random_number(rv)
-            !write(*,*)'vexb_shear_in',vexb_shear_in,vexb_shear_in*(1.0+rvar*(rv-0.5))
-            vexb_shear_in=vexb_shear_in*(1.0+rvar*(rv-0.5))
-
-            !== BETAE_IN ==!
-            call random_number(rv)
-            !write(*,*)'betae_in',betae_in,betae_in*(1.0+rvar*(rv-0.5))
-            betae_in=betae_in*(1.0+rvar*(rv-0.5))
-
-            !== XNUE_IN ==!
-            call random_number(rv)
-            !write(*,*)'xnue_in',xnue_in,xnue_in*(1.0+rvar*(rv-0.5))
-            xnue_in=xnue_in*(1.0+rvar*(rv-0.5))
-
-            !== ZEFF_IN ==!
-            call random_number(rv)
-            !write(*,*)'zeff_in',zeff_in,zeff_in*(1.0+rvar*(rv-0.5))
-            zeff_in=zeff_in*(1.0+rvar*(rv-0.5))
-
-            !== DEBYE_IN ==!
-            call random_number(rv)
-            !write(*,*)'debye_in',debye_in,debye_in*(1.0+rvar*(rv-0.5))
-            debye_in=debye_in*(1.0+rvar*(rv-0.5))
-
-            do i_ion=1,ns_in
-                !== TGLF_RLNS_IN(I_ION) ==!
-                call random_number(rv)
-                !write(*,*)'tglf_rlns_in(i_ion)',tglf_rlns_in(i_ion),tglf_rlns_in(i_ion)*(1.0+rvar*(rv-0.5))
-                tglf_rlns_in(i_ion)=tglf_rlns_in(i_ion)*(1.0+rvar*(rv-0.5))
-
-                !== TGLF_RLTS_IN(I_ION) ==!
-                call random_number(rv)
-                !write(*,*)'tglf_rlts_in(i_ion)',tglf_rlts_in(i_ion),tglf_rlts_in(i_ion)*(1.0+rvar*(rv-0.5))
-                tglf_rlts_in(i_ion)=tglf_rlts_in(i_ion)*(1.0+rvar*(rv-0.5))
-
-                !== TGLF_VPAR_SHEAR_IN(I_ION) ==!
-                call random_number(rv)
-                !write(*,*)'tglf_vpar_shear_in(i_ion)',tglf_vpar_shear_in(i_ion),tglf_vpar_shear_in(i_ion)*(1.0+rvar*(rv-0.5))
-                tglf_vpar_shear_in(i_ion)=tglf_vpar_shear_in(i_ion)*(1.0+rvar*(rv-0.5))
-
-            enddo
-
-         endif
-
      ! Call the NN or TGLF if the NN is not accurate
 #ifdef MPI_TGLF
          ! Check proper processor setup
@@ -372,20 +255,3 @@ end subroutine tglf_run_mpi
 #else
 end subroutine tglf_run
 #endif
-
-
-
-SUBROUTINE init_random_seed()
-  INTEGER :: i, n, clock
-  INTEGER, DIMENSION(:), ALLOCATABLE :: seed
-
-  CALL RANDOM_SEED(size = n)
-  ALLOCATE(seed(n))
-
-  CALL SYSTEM_CLOCK(COUNT=clock)
-
-  seed = clock + 37 * (/ (i - 1, i = 1, n) /)
-  CALL RANDOM_SEED(PUT = seed)
-
-  DEALLOCATE(seed)
-END SUBROUTINE
