@@ -10,11 +10,19 @@ FC += ${FOMP}
 
 EXEC = tgyro_main
 
-OBJECTS +=	tgyro_globals.o \
+ifdef FANN_ROOT
+TGYRO_NN=tgyro_eped_nn.fann
+TGYRO_LIBS=-L$(GACODE_ROOT)/shared/harvest_client/ -I$(GACODE_ROOT)/shared/harvest_client/ -I$(GACODE_ROOT)/shared/neural/ -L$(GACODE_ROOT)/shared/neural/ -lbrainfuse -lharvest -lfann
+EXTRA_LIBS += $(GACODE_ROOT)/shared/neural/libbrainfuse.
+else
+TGYRO_NN=tgyro_eped_nn
+TGYRO_LIBS=-L$(GACODE_ROOT)/shared/harvest_client/ -I$(GACODE_ROOT)/shared/harvest_client/ -lharvest
+endif
+
+OBJECTS += 	tgyro_globals.o \
 		tgyro_iteration_variables.o \
 		tgyro_allocate_globals.o \
-        tgyro_ped.o \
-        tgyro_eped_nn.o \
+	        tgyro_ped.o \
 		tgyro_catch_error.o \
 		tgyro_comm_setup.o \
 		tgyro_comm_sync.o \
@@ -52,15 +60,16 @@ OBJECTS +=	tgyro_globals.o \
 		tgyro_write_intermediate.o \
 		tgyro_write_data.o \
 		tgyro_write_jacobian.o \
+		$(TGYRO_NN).o \
 		$(EXEC).o
 
 .SUFFIXES : .o .f90
 
 all: $(OBJECTS) $(EXTRA_LIBS)
-	$(FC) $(FFLAGS) -o $(EXEC) $(OBJECTS) $(EXTRA_LIBS) $(LMATH) -L$(GACODE_ROOT)/shared/harvest_client/ -I$(GACODE_ROOT)/shared/harvest_client/ -I$(GACODE_ROOT)/shared/neural/ -L$(GACODE_ROOT)/shared/neural/ -lbrainfuse -lharvest -lfann
+	$(FC) $(FFLAGS) -o $(EXEC) $(OBJECTS) $(EXTRA_LIBS) $(LMATH) $(TGYRO_LIBS)
 
 .f90.o :
-	$(FC) $(FMATH) $(FFLAGS) -I$(GACODE_ROOT)/shared/harvest_client/ -L$(GACODE_ROOT)/shared/harvest_client/ -I$(GACODE_ROOT)/shared/neural/ -L$(GACODE_ROOT)/shared/neural/ -c $<  -lbrainfuse -lharvest -lfann
+	$(FC) $(FMATH) $(FFLAGS) $(TGYRO_LIBS) -c $<  
 
 clean:
 	rm -f $(EXEC)
