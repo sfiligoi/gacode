@@ -15,7 +15,6 @@ subroutine tglf_run()
   use tglf_pkg
   use tglf_interface
   use tglf_global
-  use,intrinsic :: ISO_Fortran_env
   
 #ifdef MPI_TGLF
   use tglf_mpi

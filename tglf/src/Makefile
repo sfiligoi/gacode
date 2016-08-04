@@ -52,10 +52,10 @@ OBJECTS = tglf_isnan.o      \
 
 all: $(LLIB).a $(EXEC1) $(EXEC2) Makefile
 
-$(EXEC1): $(LLIB).a $(EXEC1).o $(EXTRA_LIBS)
-	$(FC) $(FFLAGS) -o $(EXEC1) $(EXEC1).o $(LLIB).a $(EXTRA_LIBS) $(LMATH) $(TGLF_LIBS)
-$(EXEC2): $(LLIB).a $(EXEC2).o $(EXTRA_LIBS)
-	$(FC) $(FFLAGS) -o $(EXEC2) $(EXEC2).o $(LLIB).a $(EXTRA_LIBS) $(LMATH) $(TGLF_LIBS)
+$(EXEC1): $(LLIB).a $(EXEC1).o
+	$(FC) $(FFLAGS) -o $(EXEC1) $(EXEC1).o $(LLIB).a $(LMATH) $(TGLF_LIBS)
+$(EXEC2): $(LLIB).a $(EXEC2).o
+	$(FC) $(FFLAGS) -o $(EXEC2) $(EXEC2).o $(LLIB).a $(LMATH) $(TGLF_LIBS)
 
 $(LLIB).a: $(OBJECTS)
 	$(ARCH) $(LLIB).a $(OBJECTS)
