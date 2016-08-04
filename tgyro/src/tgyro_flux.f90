@@ -23,7 +23,6 @@ subroutine tgyro_flux
   integer :: i1,i2
   integer :: n_12
   real, dimension(8) :: x_out
-  real, external :: tgyro_funflux
 
   !-------------------------------------------
   ! IFS-PPPL parameters

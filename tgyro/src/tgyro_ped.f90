@@ -179,7 +179,7 @@ contains
     enddo
 
     ! 2. Direct spline interpolation over pedestal (r_top < r < a)
-    call cub_spline(nn_vec(:,1),p_vec,nx_nn,psi_exp(i0:n_exp),f_exp(i0:n_exp),n_exp-i0+1) 
+    call cub_spline(nn_vec(:,1),p_vec,nx_nmake clen,psi_exp(i0:n_exp),f_exp(i0:n_exp),n_exp-i0+1) 
 
   end subroutine tgyro_pedestal_map
 
