@@ -52,6 +52,7 @@ OBJECTS +=	tgyro_globals.o \
 		tgyro_write_intermediate.o \
 		tgyro_write_data.o \
 		tgyro_write_jacobian.o \
+		tgyro_harvest.o \
 		$(EXEC).o
 
 .SUFFIXES : .o .f90

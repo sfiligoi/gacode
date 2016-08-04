@@ -218,10 +218,6 @@ subroutine tglf_run()
 
      call get_error_status(tglf_error_message,tglf_error_status)
 
-     if ((tglf_error_status.EQ.0) .and. (.not. valid_nn)) then
-        CALL tglf_harvest_local
-     endif
-
   else
 
      ! Run single-ky linear stability
