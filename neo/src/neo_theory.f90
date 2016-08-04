@@ -334,7 +334,6 @@ contains
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   subroutine compute_CH(ir,efluxi)
     use neo_globals
-    use neo_equilibrium, only: I_div_psip, Bmag2_avg, Bmag2inv_avg
     implicit none
     integer, intent (in) :: ir
     real, intent (out) :: efluxi
@@ -381,7 +380,7 @@ contains
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   subroutine compute_TG(ir,efluxi)
     use neo_globals
-    use neo_equilibrium, only: I_div_psip, Bmag2_avg, Bmag2inv_avg, ftrap
+    use neo_equilibrium, only: ftrap
     implicit none
     integer, intent (in) :: ir
     real, intent (out) :: efluxi

@@ -529,8 +529,6 @@ subroutine write_zf(datafile,fn)
   character (len=*), intent(in) :: datafile
   complex, intent(in) :: fn(n_radial,n_theta)
   complex :: ftmp(n_radial,n_theta)
-  !
-  integer :: ir,jr,it,np
   integer :: i_dummy
   !------------------------------------------------------
 
