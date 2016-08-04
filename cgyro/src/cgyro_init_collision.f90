@@ -9,7 +9,6 @@ subroutine cgyro_init_collision
   real, dimension(:,:,:), allocatable :: nu_d, nu_s, nu_par, nu_par_deriv
   real, dimension(:,:), allocatable :: rs
   real, dimension(:,:,:,:), allocatable :: rsvec, rsvect 
-  integer :: test_constnu_flag = 1
 
   real :: arg
   real :: xa, xb, tauinv_ab
