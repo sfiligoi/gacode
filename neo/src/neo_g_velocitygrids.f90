@@ -8,7 +8,6 @@ contains
 
   subroutine g_energy(ir)
     use neo_globals
-    use neo_equilibrium, only : w_theta
     use neo_energy_grid
     implicit none
     integer, intent(in) :: ir

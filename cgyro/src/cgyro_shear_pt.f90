@@ -20,8 +20,8 @@ subroutine cgyro_shear_pt
 
   implicit none
 
-  integer :: ir,it,is,ie,ix
-  real :: a,arg
+  integer :: ir,it
+  real :: a
   complex, dimension(n_theta,nv_loc) :: a1
 
   if (i_time == 1) then

@@ -539,7 +539,6 @@ contains
 
   subroutine TRANSP_write(ir)
     use neo_globals
-    use neo_equilibrium, only: bigR_th0, Btor_th0, I_div_psip
     use neo_rotation
     implicit none
     integer, intent (in) :: ir
