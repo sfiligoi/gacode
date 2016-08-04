@@ -13,10 +13,9 @@ LLIB=tglf_lib
 
 ifdef FANN_ROOT
 TGLF_NN=tglf_nn_TM.fann
-TGLF_LIBS=-I$(GACODE_ROOT)/shared/harvest_client/ -L$(GACODE_ROOT)/shared/harvest_client/ -I$(GACODE_ROOT)/shared/neural/ -L$(GACODE_ROOT)/shared/neural/ -lbrainfuse -lharvest -lfann
+TGLF_LIBS=-I$(GACODE_ROOT)/shared/neural/ -L$(GACODE_ROOT)/shared/neural/ -lbrainfuse -lfann
 else
 TGLF_NN=tglf_nn_TM
-TGLF_LIBS=-I$(GACODE_ROOT)/shared/harvest_client/ -L$(GACODE_ROOT)/shared/harvest_client/ -lharvest
 endif
 
 OBJECTS = tglf_isnan.o      \
@@ -45,17 +44,16 @@ OBJECTS = tglf_isnan.o      \
           tglf_init_mpi.o   \
           tglf_run_mpi.o    \
           tglf_TM_mpi.o     \
-          tglf_harvest.o    \
-          $(TGLF_NN).o      
+          $(TGLF_NN).o
 
 .SUFFIXES : .o .f90 .F90
 
 all: $(LLIB).a $(EXEC1) $(EXEC2) Makefile
 
-$(EXEC1): $(LLIB).a $(EXEC1).o $(EXTRA_LIBS)
-	$(FC) $(FFLAGS) -o $(EXEC1) $(EXEC1).o $(LLIB).a $(EXTRA_LIBS) $(LMATH) $(TGLF_LIBS)
-$(EXEC2): $(LLIB).a $(EXEC2).o $(EXTRA_LIBS)
-	$(FC) $(FFLAGS) -o $(EXEC2) $(EXEC2).o $(LLIB).a $(EXTRA_LIBS) $(LMATH) $(TGLF_LIBS)
+$(EXEC1): $(LLIB).a $(EXEC1).o
+	$(FC) $(FFLAGS) -o $(EXEC1) $(EXEC1).o $(LLIB).a $(LMATH) $(TGLF_LIBS)
+$(EXEC2): $(LLIB).a $(EXEC2).o
+	$(FC) $(FFLAGS) -o $(EXEC2) $(EXEC2).o $(LLIB).a $(LMATH) $(TGLF_LIBS)
 
 $(LLIB).a: $(OBJECTS)
 	$(ARCH) $(LLIB).a $(OBJECTS)

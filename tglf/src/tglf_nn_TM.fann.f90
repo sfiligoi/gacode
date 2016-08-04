@@ -139,9 +139,9 @@
          (OUT_PARTICLE_FLUX_1_RNG < tglf_nn_max_error_in) .and. &
          (OUT_STRESS_TOR_i_RNG    < tglf_nn_max_error_in)) then
         valid_nn = .TRUE.
-        write(*,*) '============>    NN    RUNNING    <=============='
+        !write(*,*) '============>    NN    RUNNING    <=============='
      else
-        write(*,*) '------------>   TGLF    RUNNING   <--------------'
+        !write(*,*) '------------>   TGLF    RUNNING   <--------------'
      endif
 !
 !     call cpu_time(finish)
