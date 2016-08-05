@@ -1,3 +1,0 @@
-tglf_nn_TM.o : tglf_nn_TM.fann.f90
-	$(FC) $(FMATH) $(FFLAGS) -I$(GACODE_ROOT)/shared/harvest_client/ -L$(GACODE_ROOT)/shared/harvest_client/ -I$(GACODE_ROOT)/shared/neural/ -L$(GACODE_ROOT)/shared/neural/ -lbrainfuse -lharvest -lfann -o tglf_nn_TM.o -c tglf_nn_TM.fann.f90
-
