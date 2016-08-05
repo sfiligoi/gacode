@@ -67,7 +67,7 @@ module tgyro_globals
   integer, parameter :: n_evolve_max = 5
   character(len=14) :: runfile='out.tgyro.run'
   character(len=1), dimension(n_ion_max) :: &
-       ion_tag=(/' ','2','3','4','5','6','7','8','9'/)
+       ion_tag=(/'1','2','3','4','5','6','7','8','9'/)
   !
   ! Component fluxes
   !
