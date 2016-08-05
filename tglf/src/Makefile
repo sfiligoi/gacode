@@ -12,10 +12,12 @@ EXEC2=tglf_mpi
 LLIB=tglf_lib
 
 ifdef FANN_ROOT
-TGLF_NN=tglf_nn_TM.fann
-TGLF_LIBS=-I$(GACODE_ROOT)/shared/neural/ -L$(GACODE_ROOT)/shared/neural/ -lbrainfuse -lfann
+   # neural-net file
+   TGLF_NN=tglf_nn_TM.fann
+   TGLF_LIBS=-I$(GACODE_ROOT)/shared/neural/ -L$(GACODE_ROOT)/shared/neural/ -lbrainfuse -lfann
 else
-TGLF_NN=tglf_nn_TM
+   # stub file
+   TGLF_NN=tglf_nn_TM
 endif
 
 OBJECTS = tglf_isnan.o      \
@@ -58,12 +60,12 @@ $(EXEC2): $(LLIB).a $(EXEC2).o
 $(LLIB).a: $(OBJECTS)
 	$(ARCH) $(LLIB).a $(OBJECTS)
 
-tglf_run_mpi.o : tglf_run.F90
+tglf_run_mpi.o: tglf_run.F90
 	$(FC) -o tglf_run_mpi.o $(FMATH) $(FFLAGS) -DMPI_TGLF=1 -c $<
 
-.f90.o :
+.f90.o:
 	$(FC) $(FMATH) $(FFLAGS) -c $< $(TGLF_LIBS)
-.F90.o :
+.F90.o:
 	$(FC) $(FMATH) $(FFLAGS) -c $< $(TGLF_LIBS)
 
 clean:
