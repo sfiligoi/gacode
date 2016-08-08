@@ -157,29 +157,33 @@ class TGYROData:
 
         fn = 'out.tgyro.residual'
         data = open(self.dirname+'/'+fn,'r').readlines()
-        
-        # Data dimensions 
+
+        # Data dimensions
         nr = self.n_radial
         nb = self.n_iterations+1
         # 11 = 1+2*n_evolve, where n_evolve=5 (ti,te,ne,er,he)
         nc = 11
-        
+
         numdata = np.zeros((nc,nb,nr-1),dtype=float)
-        
+        cdata = np.zeros((nb),dtype=float)
+
+        self.data['convergence']=[]
         for ib in range(nb):
             try:
                 tags=string.split(data[ib*nr]) # Contains overall residual
+                cdata[ib]=float(tags[3])
             except:
                 print "WARNING: (data.py) out.tgyro.residual shorter than expected."
                 return 0
-               
+
             for ir in range(nr-1):
                 row=string.split(data[ib*nr+ir+1])
                 for ic in range(nc):
                     numdata[ic,ib,ir] = row[ic]
 
+        self.data['convergence'] = cdata
         self.data['residual'] = numdata
-        
+
     #---------------------------------------------------------------------------#
 
     def read_stab_file(self, file_name):
