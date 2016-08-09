@@ -444,6 +444,14 @@ subroutine tgyro_init_profiles
      tgyro_neped = y0(1)
   endif
   !
+  ! Pedestal zeff
+  if (tgyro_zeffped < 0.0) then
+     ! Here, x0 will be x0=psi_norm_ped
+     x0(1) = -tgyro_zeffped
+     call cub_spline(psi_exp,EXPRO_z_eff(:),n_exp,x0,y0,1)
+     tgyro_zeffped = y0(1)
+  endif
+  !
   call tgyro_pedestal
   !-----------------------------------------------------------------
 
