@@ -119,6 +119,7 @@ subroutine tgyro_read_input
   call tgyro_readbc_int(tgyro_neo_n_theta)
   call tgyro_readbc_int(tgyro_ptot_flag)
   call tgyro_readbc_int(tgyro_ped_model)
+  call tgyro_readbc_real(tgyro_rped)
   call tgyro_readbc_real(tgyro_neped)
   call tgyro_readbc_real(tgyro_zeffped)
   call tgyro_readbc_real(tgyro_tglf_nn_max_error)

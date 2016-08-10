@@ -317,6 +317,7 @@ module tgyro_globals
   integer :: tgyro_neo_n_theta
   integer :: tgyro_ptot_flag
   integer :: tgyro_ped_model
+  real :: tgyro_rped
   real :: tgyro_neped
   real :: tgyro_zeffped
   real :: tgyro_tglf_nn_max_error
