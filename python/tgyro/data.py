@@ -170,8 +170,8 @@ class TGYROData:
         self.data['convergence']=[]
         for ib in range(nb):
             try:
-                tags=string.split(data[ib*nr]) # Contains overall residual
-                cdata[ib]=float(tags[3])
+                tags=data[ib*nr].split(':')[1].split() # Contains overall residual
+                cdata[ib]=float(tags[1])
             except:
                 print "WARNING: (data.py) out.tgyro.residual shorter than expected."
                 return 0
