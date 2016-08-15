@@ -104,10 +104,10 @@
    ierr=run_anns()
    ierr=get_anns_avg_array(OUTPUT_PARAMETERS)
 
-   nn_w_ped = OUTPUT_PARAMETERS(2)*2
-   nn_p_ped = OUTPUT_PARAMETERS(4)*1E6
+   nn_w_ped = OUTPUT_PARAMETERS(3)*2
+   nn_p_ped = OUTPUT_PARAMETERS(1)*1E6
 
-   nn_t_ped = nn_p_ped/neped_in/1.6022/20.
+   nn_t_ped = nn_p_ped/neped_in/1.6022/2.
    nn_n_cor = neped_in * 1.5
    nn_t_cor = te(1)
    nn_n_edg = neped_in * 0.25
@@ -143,8 +143,10 @@
 
    !if (i_proc_global == 0) then
    !   do i=1,nx_nn
-   !      write(*,*) nn_vec(i,1),nn_vec(i,2),nn_vec(i,3),nn_vec(i,3)/nn_vec(i,2)/1.6022/20.*1E13
+   !      write(*,*) nn_vec(i,1),nn_vec(i,2),nn_vec(i,3),nn_vec(i,3)/nn_vec(i,2)/1.6022/2.*1E13
    !   enddo
+   !   call MPI_finalize(i)
+   !   stop
    !endif
  
    ! WRITE(*,*) OUTPUT_PARAMETERS
