@@ -54,6 +54,7 @@ then
   echo "          If this keyword is omitted, data will be listed to the screen."
   echo "           <type> = freq,"
   echo "                    zf,"
+  echo "                    phi_n0,"
   echo "                    gbflux,"
   echo "                    gbflux_i,"
   echo "                    gbflux_n,"
@@ -193,6 +194,9 @@ case "$PLOT_TYPE" in
 
    zf)  
 	python $INTERACTIVE  $PYROOT/zf.py $SIMDIR $WINDOW $FTYPE $DATAFILE ;;
+
+   phi_n0)  
+	python $INTERACTIVE  $PYROOT/phi_n0.py $SIMDIR $FTYPE $DATAFILE $LX $LY $TITLE $YMAX ;;
 
    gbflux)  
        python $INTERACTIVE  $PYROOT/gbflux.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE \
