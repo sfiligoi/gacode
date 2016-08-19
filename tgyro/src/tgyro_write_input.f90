@@ -302,10 +302,6 @@ subroutine tgyro_write_input
 
         write(1,10) 'LOC_SCENARIO','Reactor with input aux. power'
 
-     case (4)
-
-        write(1,10) 'LOC_SCENARIO','Reactor with model aux. power'
-
      case default
 
         error_flag = 1
@@ -315,26 +311,30 @@ subroutine tgyro_write_input
      !--------------------------------------------------------
 
      !--------------------------------------------------------
-     select case (tgyro_dt_method)
+     if (loc_scenario > 2) then
 
-     case (1)
+        select case (tgyro_dt_method)
 
-        write(1,10) 'TGYRO_DT_METHOD','Reaction cross section <n1*n2> (use with separate D and T)'
-        if (loc_n_ion == 1) then
+        case (1)
+
+           write(1,10) 'TGYRO_DT_METHOD','Reaction cross section <n1*n2> (use with separate D and T)'
+           if (loc_n_ion == 1) then
+              error_flag = 1
+              error_msg = 'ERROR: (tgyro) Need LOC_N_ION > 1 for D-T reaction cross-section'
+           endif
+
+        case (2)
+
+           write(1,10) 'TGYRO_DT_METHOD','Reaction cross section <n1*n1>/4 (use with single main ion)'
+
+        case default
+
            error_flag = 1
-           error_msg = 'ERROR: (tgyro) Need LOC_N_ION > 1 for D-T reaction cross-section'
-        endif
+           error_msg = 'Error: TGYRO_DT_METHOD'
 
-     case (2)
+        end select
 
-        write(1,10) 'TGYRO_DT_METHOD','Reaction cross section <n1*n1>/4 (use with single main ion)'
-
-     case default
-
-        error_flag = 1
-        error_msg = 'Error: TGYRO_DT_METHOD'
-
-     end select
+     endif
      !--------------------------------------------------------
 
      !--------------------------------------------------------

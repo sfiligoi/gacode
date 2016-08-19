@@ -222,9 +222,10 @@ subroutine tgyro_init_profiles
   !
   if (loc_lock_profile_flag == 0) then
 
-     ! Update some species (evo_e=1) based on quasineutrality
-     call tgyro_quasigrad
- 
+     do i=1,n_r
+        call tgyro_quasigrad(ne(i),dlnnedr(i),ni(:,i),dlnnidr(:,i),zi_vec(1:loc_n_ion),loc_n_ion)
+     enddo
+
      ! Reintegrate density profiles
      do i_ion=1,loc_n_ion
         ! ni in 1/cm^3
@@ -293,7 +294,7 @@ subroutine tgyro_init_profiles
      z_eff = 1.0
   endif
   !------------------------------------------------------------------------------------------
-
+ 
   !------------------------------------------------------------------------------------------
   ! SOURCES:
   !
@@ -431,7 +432,7 @@ subroutine tgyro_init_profiles
   dpsidr_exp = EXPRO_bunit*EXPRO_rmin/EXPRO_q/EXPRO_polflux(n_exp)/100.0
   !
   ! Pedestal density
-  if (tgyro_neped < 0.0) then
+  if (tgyro_neped < 0.0 .and. tgyro_ped_model > 1) then
      ! Here, x0 will be x0=psi_norm_ped
      x0(1) = -tgyro_neped
      call cub_spline(psi_exp,EXPRO_ne(:),n_exp,x0,y0,1)
@@ -467,6 +468,7 @@ subroutine tgyro_init_profiles
   ! w0_norm = c_s/R_maj at r=0.
   !
   w0_norm = sqrt(k*te(1)/mi(1))/r_maj(1)
+  if (i_proc_global == 0) print *,w0_norm
   !
   f_rot(:) = w0p(:)/w0_norm
   !----------------------------------------------------------

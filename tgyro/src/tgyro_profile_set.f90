@@ -48,7 +48,7 @@ subroutine tgyro_profile_set(x_vec,dx,index)
            dlnnedr(i) = x_vec(p)
         endif
         ! Set dlnnidr for all ions at given radius according to quasineutrality
-        call tgyro_quasigrad(ne(i),dlnnedr(i),ni(:,i),dlnnidr(:,i),zi_vec(:),loc_n_ion)
+        call tgyro_quasigrad(ne(i),dlnnedr(i),ni(:,i),dlnnidr(:,i),zi_vec(1:loc_n_ion),loc_n_ion)
      endif
 
      if (loc_er_feedback_flag == 1) then

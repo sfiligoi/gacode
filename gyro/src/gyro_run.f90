@@ -50,11 +50,11 @@ subroutine gyro_run(&
   !       behavior
 
   ! Set Tz = Ti for all ion species
-  if (gyro_ni_over_ne_2_in == 0.0) then
+  if (gyro_ni_over_ne_2_in <= tiny(0.0)) then
      gyro_dlntdr_2_in = gyro_dlntdr_in
      gyro_ti_over_te_2_in = gyro_ti_over_te_in
   endif
-  if (gyro_ni_over_ne_3_in == 0.0) then
+  if (gyro_ni_over_ne_3_in <= tiny(0.0)) then
      gyro_dlntdr_3_in = gyro_dlntdr_in
      gyro_ti_over_te_3_in = gyro_ti_over_te_in
   endif

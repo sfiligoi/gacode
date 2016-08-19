@@ -504,6 +504,5 @@ subroutine tgyro_write_data(i_print)
 30 format(t2,a,i3,1pe12.5,2x,'[',i6,']')
   ! Residuals
 40 format(t2,f8.6,5(2x,2(1pe10.3,1x)))
-50 format(a,1pe12.5)
 
 end subroutine tgyro_write_data
