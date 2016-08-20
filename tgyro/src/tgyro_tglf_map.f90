@@ -321,7 +321,7 @@ subroutine tgyro_tglf_map
   !----------------------------------------------------------------
   ! HARVEST: NEO AND TARGET FLUXES, GYRO-BOHM NORMALIZATIONS, SHOT
   !
-  if (i_tran == 0) then
+  if (i_tran == 0 .and. 0==1) then
     ! Initialization
     tglf_harvest_extra_in = NUL
     harvest_err=set_harvest_verbose(0)
