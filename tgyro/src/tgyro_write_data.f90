@@ -149,7 +149,7 @@ subroutine tgyro_write_data(i_print)
 
   open(unit=1,file='out.tgyro.nu_rho',status='old',position='append')
 
-  write(1,20) 'r/a','(a/cs)/t_ii','(a/cs)/t_ee','1/nue_star','(a/cs)nu_exch','rho_i/a','rho_s/a','frac_ae'
+  write(1,20) 'r/a','(a/cs)/t_ii','(a/cs)/t_ee','nue_star','(a/cs)nu_exch','rho_i/a','rho_s/a','frac_ae'
   do i=1,n_r
      write(1,10) r(i)/r_min,&
           nui(1,i)*r_min/c_s(i),&

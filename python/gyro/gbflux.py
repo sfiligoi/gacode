@@ -47,7 +47,7 @@ ax.set_xlabel(r'$(c_s/a) t$',fontsize=GFONTSIZE)
 ax.set_ylabel(r'$'+mtag+' \;('+ftag+')$',color='k',fontsize=GFONTSIZE)
 #=====================================
 
-color = ['k','m','b','c','g','r']
+cvec = ['k','m','b','c','g']
 
 # Determine tmin
 for i in range(len(t)):
@@ -61,19 +61,27 @@ if datafile == 'none':
     # Plot data to screen or image file.
     for i in range(n_kinetic):
         ave   = average(flux0[i,i_moment,:],t,w)
-        stag  = sim.tagspec[i]
-        label = stag+': '+str(round(ave,3))
+        if i > n_kinetic-2 and sim.profile['electron_method'] > 1:
+            stag = r'$e'
+            color = 'r'
+        else:
+            stag = r'$i_'+str(i+1)
+            color = cvec[i]
+
+        label = stag+' : '+str(round(ave,3))+'$'
         y     = ave*np.ones(len(t))
-        ax.plot(t[imin:],y[imin:],'--',color=color[i])
-        ax.plot(t,flux0[i,i_moment,:],label=label,color=color[i])
+        ax.plot(t[imin:],y[imin:],'--',color=color)
+        ax.plot(t,flux0[i,i_moment,:],label=label,color=color)
 else:
     # Write data to datafile
     print 'INFO: (gyro_plot) Output to datafile not supported.  Use raw out.gyro.gbflux.'
 
+ax.set_xlim([0,t[-1]])
+
 if ymax > 0:
     ax.set_ylim([0,ymax])
         
-ax.legend()
+ax.legend(loc=1)
 
 if plotfile == 'screen':
     plt.show()

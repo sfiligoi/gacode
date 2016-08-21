@@ -25,22 +25,20 @@ subroutine tgyro_source
   !
   do i=1,n_r
 
-     !-------------------------------------------------------
-     ! Alpha power
-     !  - sigv in cm^3/s
-
-     if (tgyro_dt_method == 1) then
-        ! Assume D and T given by ion 1 and ion 2 
-        ! (order doesn't matter)
-        n_d = ni(1,i)
-        n_t = ni(2,i)
-     else
-        ! Assume ion 1 is DT hybrid.
-        n_d = 0.5*ni(1,i)
-        n_t = 0.5*ni(1,i)
-     endif
-
-     if (loc_scenario == 3) then
+     if (loc_scenario > 2) then
+        !-------------------------------------------------------
+        ! Alpha power
+        !  - sigv in cm^3/s
+        if (tgyro_dt_method == 1) then
+           ! Assume D and T given by ion 1 and ion 2 
+           ! (order doesn't matter)
+           n_d = ni(1,i)
+           n_t = ni(2,i)
+        else
+           ! Assume ion 1 is DT hybrid.
+           n_d = 0.5*ni(1,i)
+           n_t = 0.5*ni(1,i)
+        endif
         ! Alpha particle source and power 
         ! - Can use 'hively' or 'bosch' formulae.
         sn_alpha(i) = n_d*n_t*sigv(ti(1,i)/1e3,'bosch')
@@ -200,14 +198,14 @@ subroutine tgyro_source
   mflux_target(1) = 0.0 
   mflux_target(2:n_r) = mf_in(2:n_r)/volp(2:n_r)
   !------------------------------------------------
-  
+
   !------------------------------------------------
   ! Target He ash flux in 1/s/cm^2
   !
   pflux_he_target(1) = 0.0
   pflux_he_target(2:n_r) = f_he_fus(2:n_r)/volp(2:n_r)
   !------------------------------------------------
-   
+
   !------------------------------------------------
   ! Target fluxes in GB units
   eflux_i_target(:)  = eflux_i_target(:)/q_gb(:)

@@ -265,21 +265,19 @@ subroutine tgyro_init_profiles
   !------------------------------------------------------------------------------------------
 
   !------------------------------------------------------------------------------------------
-  ! Apply rescaling factors if starting a new simulation
+  ! Apply rescaling factors 
   !
-  if (loc_restart_flag == 0) then
-     ne(:) = tgyro_input_den_scale*ne(:)
-     te(:) = tgyro_input_te_scale*te(:)
-     do i_ion=1,loc_n_ion
-        ni(i_ion,:) = tgyro_input_den_scale*ni(i_ion,:)
-        ti(i_ion,:) = tgyro_input_ti_scale*ti(i_ion,:)
-     enddo
-     w0(:) = tgyro_input_w0_scale*w0(:)
-     w0p(:) = tgyro_input_w0_scale*w0p(:)
+  ne(:) = tgyro_input_den_scale*ne(:)
+  te(:) = tgyro_input_te_scale*te(:)
+  do i_ion=1,loc_n_ion
+     ni(i_ion,:) = tgyro_input_den_scale*ni(i_ion,:)
+     ti(i_ion,:) = tgyro_input_ti_scale*ti(i_ion,:)
+  enddo
+  w0(:) = tgyro_input_w0_scale*w0(:)
+  w0p(:) = tgyro_input_w0_scale*w0p(:)
 
-     dlntedr(:)   = dlntedr(:)  *tgyro_input_dlntdr_scale
-     dlntidr(:,:) = dlntidr(:,:)*tgyro_input_dlntdr_scale
-  endif
+  dlntedr(:)   = dlntedr(:)  *tgyro_input_dlntdr_scale
+  dlntidr(:,:) = dlntidr(:,:)*tgyro_input_dlntdr_scale
   !------------------------------------------------------------------------------------------
 
   !------------------------------------------------------------------------------------------
@@ -404,23 +402,6 @@ subroutine tgyro_init_profiles
   ! Volume average (p_ave)
   call tgyro_volume_ave(ptot_exp,EXPRO_rmin,volp_exp,p_ave,n_exp)
   !
-  ! a [m]
-  a_in = r_min
-  ! Bt on axis [T]
-  bt_in = EXPRO_rvbv/EXPRO_rmaj(n_exp)
-  ! Plasma current Ip [Ma]
-  ip_in = 1e-6*EXPRO_ip_exp
-  ! betan [%] = betat/In*100 where In = Ip/(a Bt) 
-  betan_in = ( p_ave/(0.5*bt_in**2/mu_0) ) / ( ip_in/(a_in*bt_in) ) * 100.0
-  ! Triangularity [-]
-  delta_in = EXPRO_delta(n_exp-3)  
-  ! Elongation [-]
-  kappa_in = EXPRO_kappa(n_exp-3) 
-  ! Main ion mass [mp]
-  m_in = mi_vec(1)
-  ! R0(a) [m]
-  r_in = EXPRO_rmaj(n_exp)
-
   allocate(rmin_exp(n_exp))
   rmin_exp = EXPRO_rmin*100.0
   allocate(psi_exp(n_exp))
@@ -429,24 +410,43 @@ subroutine tgyro_init_profiles
   allocate(dpsidr_exp(n_exp))
   ! d (Psi_norm)/dr in units of 1/cm
   dpsidr_exp = EXPRO_bunit*EXPRO_rmin/EXPRO_q/EXPRO_polflux(n_exp)/100.0
-  !
-  ! Pedestal density
-  if (tgyro_neped < 0.0) then
-     ! Here, x0 will be x0=psi_norm_ped
-     x0(1) = -tgyro_neped
-     call cub_spline(psi_exp,EXPRO_ne(:),n_exp,x0,y0,1)
-     tgyro_neped = y0(1)
+
+  if (tgyro_ped_model > 1) then
+     ! a [m]
+     a_in = r_min
+     ! Bt on axis [T]
+     bt_in = EXPRO_rvbv/EXPRO_rmaj(n_exp)
+     ! Plasma current Ip [Ma]
+     ip_in = 1e-6*EXPRO_ip_exp
+     ! betan [%] = betat/In*100 where In = Ip/(a Bt) 
+     betan_in = ( p_ave/(0.5*bt_in**2/mu_0) ) / ( ip_in/(a_in*bt_in) ) * 100.0
+     ! Triangularity [-]
+     delta_in = EXPRO_delta(n_exp-3)  
+     ! Elongation [-]
+     kappa_in = EXPRO_kappa(n_exp-3) 
+     ! Main ion mass [mp]
+     m_in = mi_vec(1)
+     ! R0(a) [m]
+     r_in = EXPRO_rmaj(n_exp)
+     !
+     ! Pedestal density
+     if (tgyro_neped < 0.0) then
+        ! Here, x0 will be x0=psi_norm_ped
+        x0(1) = -tgyro_neped
+        call cub_spline(psi_exp,EXPRO_ne(:),n_exp,x0,y0,1)
+        tgyro_neped = y0(1)
+     endif
+     !
+     ! Pedestal zeff
+     if (tgyro_zeffped < 0.0) then
+        ! Here, x0 will be x0=psi_norm_ped
+        x0(1) = -tgyro_zeffped
+        call cub_spline(psi_exp,EXPRO_z_eff(:),n_exp,x0,y0,1)
+        tgyro_zeffped = y0(1)
+     endif
+     !
+     call tgyro_pedestal
   endif
-  !
-  ! Pedestal zeff
-  if (tgyro_zeffped < 0.0) then
-     ! Here, x0 will be x0=psi_norm_ped
-     x0(1) = -tgyro_zeffped
-     call cub_spline(psi_exp,EXPRO_z_eff(:),n_exp,x0,y0,1)
-     tgyro_zeffped = y0(1)
-  endif
-  !
-  call tgyro_pedestal
   !-----------------------------------------------------------------
 
   call EXPRO_palloc(MPI_COMM_WORLD,'./',0)

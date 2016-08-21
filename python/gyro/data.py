@@ -418,9 +418,21 @@ class GYROData:
             raise IOError('ERROR (GYROData): '+self.dirname+
               '/out.gyro.kxkyspec too small. ')
             
-        
         self.kxkyspec = kxkyspec.reshape((n_x,n_n,nt),order='F')
         self.loaded.append('kxkyspec')
+
+    #---------------------------------------------------------------------------#
+    def read_field_rms(self):
+
+        nt = self.n
+
+        try:
+            field_rms = np.fromfile(self.dirname+'/out.gyro.field_rms',dtype=float,sep=" ")
+        except:
+            raise IOError("ERROR (GYROData): out.gyro.field_rms not found.")
+            
+        self.field_rms = field_rms.reshape((2,nt),order='F')
+        self.loaded.append('field_rms')
 
     #---------------------------------------------------------------------------#
 

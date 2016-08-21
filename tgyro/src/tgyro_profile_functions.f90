@@ -143,7 +143,7 @@ subroutine tgyro_profile_functions
   ! Total pressure [Ba] and beta [dimensionless]
   pr(:) = pext(:)+ne(:)*k*te(:)
   do i_ion=1,loc_n_ion
-    pr(:) = pr(:)+ni(i_ion,:)*k*ti(i_ion,:)
+     pr(:) = pr(:)+ni(i_ion,:)*k*ti(i_ion,:)
   enddo
   beta_unit(:)  = 8*pi*pr(:)/b_unit**2
   betae_unit(:) = beta_unit(:)*ne(:)*k*te(:)/pr(:)
@@ -151,8 +151,8 @@ subroutine tgyro_profile_functions
   ! Pressure gradient inverse scale length (1/cm)
   dlnpdr(:) = dpext(:)/pr(:)+ne(:)*k*te(:)*(dlnnedr(:)+dlntedr(:))/pr(:)
   do i_ion=1,loc_n_ion
-    dlnpdr(:) = dlnpdr(:)+&
-      ni(i_ion,:)*k*ti(i_ion,:)*(dlnnidr(i_ion,:)+dlntidr(i_ion,:))/pr(:)
+     dlnpdr(:) = dlnpdr(:)+&
+          ni(i_ion,:)*k*ti(i_ion,:)*(dlnnidr(i_ion,:)+dlntidr(i_ion,:))/pr(:)
   enddo
 
   !--------------------------------------
@@ -176,9 +176,11 @@ subroutine tgyro_profile_functions
   ! betan [%] = betat/In*100 where In = Ip/(a Bt) 
   ! Average pressure [Pa]
   call tgyro_profile_reintegrate
-  call tgyro_volume_ave(ptot_exp,rmin_exp,volp_exp,p_ave,n_exp)
-  betan_in = ( p_ave/(0.5*bt_in**2/mu_0) ) / ( ip_in/(a_in*bt_in) ) * 100.0
-  call tgyro_pedestal
+  if (tgyro_ped_model > 1) then
+     call tgyro_volume_ave(ptot_exp,rmin_exp,volp_exp,p_ave,n_exp)
+     betan_in = ( p_ave/(0.5*bt_in**2/mu_0) ) / ( ip_in/(a_in*bt_in) ) * 100.0
+     call tgyro_pedestal
+  endif
   !----------------------------------------------------------------------
 
 end subroutine tgyro_profile_functions

@@ -16,7 +16,6 @@ complex function BLEND_F(m,x,p_IN)
   complex, intent(in) :: p_IN
 
   real :: t
-  real :: a
 
   real, external :: BLEND_f2
   real, external :: BLEND_f3
