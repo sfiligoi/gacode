@@ -21,10 +21,13 @@ subroutine tgyro_write_data(i_print)
   integer :: i_print
   integer :: is,i_ion
   integer :: p
-  real, dimension(2:n_r,n_evolve_max) :: res2,relax2
+  real, dimension(2:n_r,loc_n_ion+4) :: res2,relax2
 
   if (i_proc_global > 0) return
 
+  !------------------------------------------------------------------------------------------
+  ! Initialization:
+  !
   if (i_print == 0) then
 
      open(unit=1,file='out.tgyro.geometry.1',status='replace')
@@ -101,8 +104,13 @@ subroutine tgyro_write_data(i_print)
      return
 
   endif
+  !------------------------------------------------------------------------------------------
 
+  !------------------------------------------------------------------------------------------
+
+  !====================================================
   ! Geometry 1 [** constant **]
+  !====================================================
 
   open(unit=1,file='out.tgyro.geometry.1',status='old',position='append')
 
@@ -124,7 +132,9 @@ subroutine tgyro_write_data(i_print)
 
   close(1)
 
+  !====================================================
   ! Geometry 2 [** constant **]
+  !====================================================
 
   open(unit=1,file='out.tgyro.geometry.2',status='old',position='append')
 
@@ -145,11 +155,14 @@ subroutine tgyro_write_data(i_print)
 
   close(1)
 
+  !====================================================
   ! Collision rates and gyroradii
+  !====================================================
 
   open(unit=1,file='out.tgyro.nu_rho',status='old',position='append')
 
   write(1,20) 'r/a','(a/cs)/t_ii','(a/cs)/t_ee','nue_star','(a/cs)nu_exch','rho_i/a','rho_s/a','frac_ae'
+  write(1,20) '','','','','','','',''
   do i=1,n_r
      write(1,10) r(i)/r_min,&
           nui(1,i)*r_min/c_s(i),&
@@ -163,7 +176,9 @@ subroutine tgyro_write_data(i_print)
 
   close(1)
 
+  !====================================================
   ! Electron powers (erg/s = 1e-7 W = 1e-7*1e-6 MW)
+  !====================================================
 
   open(unit=1,file='out.tgyro.power_e',status='old',position='append')
 
@@ -184,7 +199,9 @@ subroutine tgyro_write_data(i_print)
 
   close(1) 
 
+  !====================================================
   ! Ion powers (erg/s = 1e-7 W = 1e-7*1e-6 MW)
+  !====================================================
 
   open(unit=1,file='out.tgyro.power_i',status='old',position='append')
 
@@ -202,7 +219,9 @@ subroutine tgyro_write_data(i_print)
 
   close(1) 
 
+  !====================================================
   ! Alpha parameters (out.tgyro.alpha) (erg/s = 1e-7 W = 1e-7*1e-6 MW)
+  !====================================================
 
   open(unit=1,file='out.tgyro.alpha',status='old',position='append')
 
@@ -221,7 +240,9 @@ subroutine tgyro_write_data(i_print)
 
   close(1) 
 
+  !====================================================
   ! gyroBohm factors in physical units
+  !====================================================
 
   open(unit=1,file='out.tgyro.gyrobohm',status='old',position='append')
 
@@ -238,7 +259,9 @@ subroutine tgyro_write_data(i_print)
 
   close(1)
 
+  !====================================================
   ! Electron particle and energy fluxes (out.tgyro.flux_e)
+  !====================================================
 
   open(unit=1,file='out.tgyro.flux_e',status='old',position='append')
 
@@ -258,7 +281,9 @@ subroutine tgyro_write_data(i_print)
 
   close(1)
 
+  !====================================================
   ! Electron temperature and density profiles
+  !====================================================
 
   open(unit=1,file='out.tgyro.profile_e',status='old',position='append')
 
@@ -277,7 +302,9 @@ subroutine tgyro_write_data(i_print)
 
   do i_ion=1,loc_n_ion
 
+     !====================================================
      ! Ion particle and energy fluxes
+     !====================================================
 
      open(unit=1,&
           file='out.tgyro.flux_i'//trim(ion_tag(i_ion)),&
@@ -299,7 +326,9 @@ subroutine tgyro_write_data(i_print)
 
      close(1)
 
+     !====================================================
      ! Impurity profiles
+     !====================================================
 
      open(unit=1,&
           file='out.tgyro.profile_i'//trim(ion_tag(i_ion)),&
@@ -320,8 +349,12 @@ subroutine tgyro_write_data(i_print)
 
   enddo ! i_ion
 
+  !====================================================
   ! Ti evolution
+  !====================================================
+
   open(unit=1,file='out.tgyro.evo_ti',status='old',position='append')
+
   write(1,20) 'r/a','eflux_i_tot','eflux_i_target'
   write(1,20) '','(GB)','(GB)'
   do i=1,n_r
@@ -331,8 +364,12 @@ subroutine tgyro_write_data(i_print)
   enddo
   close(1)
 
+  !====================================================
   ! Te evolution
+  !====================================================
+
   open(unit=1,file='out.tgyro.evo_te',status='old',position='append')
+
   write(1,20) 'r/a','eflux_e_tot','eflux_e_target'
   write(1,20) '','(GB)','(GB)'
   do i=1,n_r
@@ -342,8 +379,12 @@ subroutine tgyro_write_data(i_print)
   enddo
   close(1)
 
+  !====================================================
   ! Er evolution
+  !====================================================
+
   open(unit=1,file='out.tgyro.evo_er',status='old',position='append')
+
   write(1,20) 'r/a','mflux_tot','mflux_target'
   write(1,20) '','(GB)','(GB)'
   do i=1,n_r
@@ -353,8 +394,12 @@ subroutine tgyro_write_data(i_print)
   enddo
   close(1)
 
+  !====================================================
   ! Density evolution
+  !====================================================
+
   open(unit=1,file='out.tgyro.evo_ne',status='old',position='append')
+
   write(1,20) 'r/a','pflux_e_tot','pflux_e_target'
   write(1,20) '','(GB)','(GB)'
   do i=1,n_r
@@ -363,6 +408,7 @@ subroutine tgyro_write_data(i_print)
           pflux_e_target(i)*evo_c(0)
   enddo
   close(1)
+
   do i_ion=1,loc_n_ion
      open(unit=1,file='out.tgyro.evo_n'//trim(ion_tag(i_ion)),status='old',position='append')
      write(1,20) 'r/a','pflux_i_tot','pflux_i_target'
@@ -375,7 +421,9 @@ subroutine tgyro_write_data(i_print)
      close(1)
   enddo
 
+  !====================================================
   ! Additional profiles
+  !====================================================
 
   open(unit=1,file='out.tgyro.profile',status='old',position='append')
 
@@ -396,10 +444,17 @@ subroutine tgyro_write_data(i_print)
   ! If we are in test mode, there is no point in going further
   if (gyrotest_flag == 1) return
 
+  !====================================================
   ! Residuals
+  !====================================================
 
   open(unit=1,file='out.tgyro.residual',status='old',position='append')
 
+  if (loc_n_ion == 1) then
+     write(1,50) 'r/a','E(eflux_i)','R1','E(eflux_e)','R2','E(mflux)','R3','E(pflux_e)','R4','E(pflux_i1)','R5'
+  else
+     write(1,50) 'r/a','E(eflux_i)','R1','E(eflux_e)','R2','E(mflux)','R3','E(pflux_e)','R4','E(pflux_i1)','R5','E(pflux_i2)','R6'
+  endif
   if (tgyro_relax_iterations == 0) then
      write(1,30) 'ITERATION*: ',i_tran,sum(res)/size(res),flux_counter*n_worker*n_inst
   else 
@@ -410,6 +465,7 @@ subroutine tgyro_write_data(i_print)
   relax2(:,:) = 0.0 
 
   p = 0
+  write(1,40) (0.0,ip=0,2*(loc_n_ion+4))
   do i=2,n_r
      if (loc_ti_feedback_flag == 1) then
         p  = p+1
@@ -434,21 +490,22 @@ subroutine tgyro_write_data(i_print)
         endif
      enddo
      write(1,40) &
-          r(i)/r_min,(res2(i,ip),relax2(i,ip),ip=1,5)
+          r(i)/r_min,(res2(i,ip),relax2(i,ip),ip=1,loc_n_ion+4)
   enddo
 
   close(1)
 
-  ! Control (control.out)
-
-  open(unit=1,file='out.tgyro.control',status='old',position='append')
-  backspace(1)
-  write(1,*) i_tran
-  close(1)
+  !====================================================
+  ! Precision 
+  !====================================================
 
   open(unit=1,file='out.tgyro.prec',status='old',position='append')
   write(1,*) sum(abs(eflux_i_tot(:))+abs(eflux_e_tot(:)))
   close(1)
+
+  !====================================================
+  ! Pedestal
+  !====================================================
 
   if (tgyro_ped_model > 1) then
      open(unit=1,file='out.tgyro.ped',status='old',position='append')
@@ -458,6 +515,17 @@ subroutine tgyro_write_data(i_print)
      close(1)
   endif
 
+  !====================================================
+  ! Control (control.out)
+  !====================================================
+
+  open(unit=1,file='out.tgyro.control',status='old',position='append')
+  backspace(1)
+  write(1,*) i_tran
+  close(1)
+  !-------------------------------------------------------------------------------------------
+
+  !-------------------------------------------------------------------------------------------
   ! Write progress to screen
   if (i_tran < 10) then
      print '(a,i1,a,1pe10.3,a)', 'INFO: (TGYRO) Finished iteration ',i_tran,' [',sum(res)/size(res),']'
@@ -466,6 +534,7 @@ subroutine tgyro_write_data(i_print)
   else
      print '(a,i3,a,1pe10.3,a)', 'INFO: (TGYRO) Finished iteration ',i_tran,' [',sum(res)/size(res),']'
   endif
+  !-------------------------------------------------------------------------------------------
 
   ! Data
 10 format(t1,11(1pe13.6,2x))
@@ -474,6 +543,7 @@ subroutine tgyro_write_data(i_print)
   ! Residual header
 30 format(t2,a,i3,1pe12.5,2x,'[',i6,']')
   ! Residuals
-40 format(t2,f8.6,5(2x,2(1pe10.3,1x)))
+40 format(t2,f8.6,8(1x,2(1pe10.3,1x)))
+50 format(t2,a,t12,a,t26,a,t35,a,t49,a,t58,a,t72,a,t81,a,t95,a,t104,a,t118,a,t127,a,t141,a)
 
 end subroutine tgyro_write_data

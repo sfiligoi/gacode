@@ -8,7 +8,7 @@ class cgyrodata:
 
     def __init__(self, sim_directory):
 
-        """Constructor reads in all simulation data."""
+        """Constructor reads in basic (not all) simulation data."""
 
         self.dir = sim_directory
         self.getdata()

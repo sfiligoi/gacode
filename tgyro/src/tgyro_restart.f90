@@ -21,7 +21,7 @@ subroutine tgyro_restart
 
   character(len=1) :: dummy
   real, dimension(1+2*n_evolve_max) :: x_read
-  real, dimension(2:n_r,n_evolve_max) :: res2,relax2
+  real, dimension(2:n_r,loc_n_ion+4) :: res2,relax2
 
 
   if (i_proc_global == 0) then

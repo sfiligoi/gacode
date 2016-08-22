@@ -67,7 +67,6 @@ UNITS=0
 DOTS=0
 FTYPE=screen
 FUNC=null
-INTERACTIVE=
 #==============================================================================
 
 #==============================================================================
@@ -90,8 +89,6 @@ while [ $# -gt 0 ] ; do
 
   -dots) DOTS=1 ;;
   
-  -i) INTERACTIVE=-i ;;
-
   *) echo "ERROR: incorrect tgyro_plot syntax." ; exit 1 ;;
 
   esac
@@ -110,7 +107,7 @@ cd $SIMDIR
 PYROOT=$GACODE_ROOT/python/tgyro
 
 #==============================================================================
-# Display diff if -ldiff set, then exit.
+# 
 #
 case "$PLOT_TYPE" in
 
@@ -128,6 +125,9 @@ case "$PLOT_TYPE" in
 
    one)  
 	python $INTERACTIVE $PYROOT/oneplot.py $SIMDIR $FUNC $FTYPE  ;;
+
+   check)  
+	python $PYROOT/datacheck.py $SIMDIR  ;;
 
    null)
         echo "Please specify a plot type via -plot." ;;
