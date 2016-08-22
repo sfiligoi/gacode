@@ -213,13 +213,6 @@ subroutine neo_do
 
   do ir=1, n_radial
 
-     if(silent_flag == 0 .and. i_proc == 0) then
-        open(unit=io_neoout,file=trim(path)//runfile_neoout,status='old',position='append')
-        write(io_neoout,*) 'ir = ', ir
-        write(io_neoout,*) 'Begin matrix set-up'
-        close(io_neoout)
-     endif
-
      if(collision_model == 3) then
         do is=2, n_species
            if(abs(temp(is,ir)-temp(1,ir)) > 1e-3) then
@@ -457,7 +450,7 @@ subroutine neo_do
         if(silent_flag == 0 .and. i_proc == 0) then
            open(unit=io_neoout,file=trim(path)//runfile_neoout,&
                 status='old',position='append')
-           write(io_neoout,*) 'Estimated memory (GB) = ', 2*8.0*(asize+n_max)/1.0e9
+           write(io_neoout,'(t2,a,e12.5)') 'Estimated memory (GB) = ', 2*8.0*(asize+n_max)/1.0e9
            close(io_neoout)
         endif
         if(allocated(amat))       deallocate(amat)
@@ -485,9 +478,9 @@ subroutine neo_do
            open(unit=io_neoout,file=trim(path)//runfile_neoout,&
                 status='old',position='append')
            if(ifac == 1) then
-              write(io_neoout,*) 'Begin matrix factor'
+              write(io_neoout,'(t2,a)') 'Begin matrix factor'
            else
-              write(io_neoout,*) 'Re-trying matrix factorization'
+              write(io_neoout,'(t2,a)') 'Re-trying matrix factorization'
            endif
            close(io_neoout)
         endif
@@ -507,7 +500,7 @@ subroutine neo_do
      if(silent_flag == 0 .and. i_proc == 0) then
         open(unit=io_neoout,file=trim(path)//runfile_neoout,&
              status='old',position='append')
-        write(io_neoout,*) 'Done matrix factor'
+        write(io_neoout,'(t2,a)') 'Done matrix factor'
         close(io_neoout)
      endif
 
@@ -518,14 +511,14 @@ subroutine neo_do
      if(silent_flag == 0 .and. i_proc == 0) then
         open(unit=io_neoout,file=trim(path)//runfile_neoout,&
              status='old',position='append')
-        write(io_neoout,*) 'Begin matrix solve'
+        write(io_neoout,'(t2,a)') 'Begin matrix solve'
         close(io_neoout)
      endif
      call SOLVE_do
      if(silent_flag == 0 .and. i_proc == 0) then
         open(unit=io_neoout,file=trim(path)//runfile_neoout,&
              status='old',position='append')
-        write(io_neoout,*) 'Done matrix solve'
+        write(io_neoout,'(t2,a)') 'Done matrix solve'
         close(io_neoout)
      endif
 
