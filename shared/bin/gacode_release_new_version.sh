@@ -5,6 +5,7 @@ then
   echo "Usage: $0 <new_version> <from_branch>"
   echo ""
   echo "Merge <from_branch> into stable to make <new_version>"
+  echo "Last tag:" `git tag | tail -1`
   exit 1
 fi
 cd $GACODE_ROOT
