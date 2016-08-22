@@ -18,18 +18,21 @@ sim.read_field_rms()
 
 #======================================
 fig = plt.figure(figsize=(lx,ly))
-fig.subplots_adjust(left=0.1,right=0.95,top=0.92,bottom=0.12)
+fig.subplots_adjust(left=0.1,right=0.96,top=0.93,bottom=0.13)
 ax = fig.add_subplot(111)
 ax.grid(which="majorminor",ls=":")
 ax.grid(which="major",ls=":")
 ax.set_xlabel(r'$(c_s/a) t$',fontsize=GFONTSIZE)
-ax.set_ylabel(r'$\langle \phi \rangle $',color='k',fontsize=GFONTSIZE)
+ax.set_ylabel(r'$\langle e \phi/T_e \rangle/\rho_\star $',color='k',fontsize=GFONTSIZE)
 #=====================================
+
+# rho_* for normalization
+x=np.average(sim.profile['rho_s'])
 
 if datafile == 'none':
     # Plot data to screen or image file.
-    ax.plot(t,sim.field_rms[0,:],color='k',label=r'$n=0$')
-    ax.plot(t,sim.field_rms[1,:],color='purple',label=r'$n>0$')
+    ax.plot(t,sim.field_rms[0,:]/x,color='k',label=r'$n=0$')
+    ax.plot(t,sim.field_rms[1,:]/x,color='purple',label=r'$n>0$')
 else:
     # Write data to datafile
     print 'INFO: (gyro_plot) Output to datafile not supported.  Use raw out.gyro.gbflux.'
