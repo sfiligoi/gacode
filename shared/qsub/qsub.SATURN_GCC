@@ -8,6 +8,6 @@ echo "#PBS -e $SIMDIR/batch.err" >> $bfile
 echo "#PBS -V" >> $bfile
 # echo "#PBS -q $QUEUE" >> $bfile
 echo "#PBS -l walltime=$WALLTIME" >> $bfile
-echo "#PBS -l nodes=$nodes_requested:ppn=$CORES_PER_NODE" >> $bfile
+echo "#PBS -l procs=$nmpi" >> $bfile
 # echo "module load python" >> $bfile
 echo "$CODE -e $LOCDIR -n $nmpi -nomp $nomp -numa $numa -mpinuma $mpinuma -p $SIMROOT" >> $bfile

@@ -12,7 +12,7 @@ subroutine neo_error(message)
   if(silent_flag == 0 .and. i_proc == 0) then
      open(unit=io_neoout,file=trim(path)//runfile_neoout,&
           status='old',position='append')
-        write(io_neoout,'(a)') message
+        write(io_neoout,'(t2,a)') message
         close(io_neoout)
   endif
 
