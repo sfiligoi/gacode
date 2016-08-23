@@ -17,7 +17,6 @@ class tgyrodata:
     
         self.dir = sim_directory
         self.getcontrol()
-        #self.getresidual()
         self.getdata()
 
     #---------------------------------------------------------------------------#
@@ -80,40 +79,7 @@ class tgyrodata:
         self.n_r = int(data[0])
         self.n_evolve     = int(data[1])
         self.n_iterations = int(data[2])
-
-    #---------------------------------------------------------------------------#
-
-    def getresidual(self):
-        """Read out.tgyro.residual
-        """
-        import string
-        import numpy as np
-
-        fn = 'out.tgyro.residual'
-        data = open(self.dir+'/'+fn,'r').readlines()
-        
-        # Data dimensions 
-        nr = self.n_r
-        nb = self.n_iterations+1
-        # 11 = 1+2*n_evolve, where n_evolve=5 (ti,te,ne,er,he)
-        nc = 11
-        
-        numdata = np.zeros((nc,nb,nr-1),dtype=float)
-        
-        for ib in range(nb):
-            try:
-                tags=string.split(data[ib*nr]) # Contains overall residual
-            except:
-                print "WARNING: (data.py) out.tgyro.residual shorter than expected."
-                return 0
-               
-            for ir in range(nr-1):
-                row=string.split(data[ib*nr+ir+1])
-                for ic in range(nc):
-                    numdata[ic,ib,ir] = row[ic]
-
-        self.data['residual'] = numdata
-        
+   
     #---------------------------------------------------------------------------#
 
     def fileparser(self,file):
@@ -129,8 +95,6 @@ class tgyrodata:
         nc = len(string.split(data[0]))
         nb = self.n_iterations+1
 
-        print nc
-
         numdata = np.zeros((nc,nb,self.n_r))
         for ib in range(nb):
             try:
@@ -142,7 +106,6 @@ class tgyrodata:
             for ir in range(self.n_r):
                 row = string.split(data[ib*nr+ir+2])
                 numdata[:,ib,ir] = row[:]
-                print row[:]
 
         # Populate data list
         for ic in range(nc):

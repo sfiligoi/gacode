@@ -22,6 +22,8 @@ subroutine tgyro_write_data(i_print)
   integer :: is,i_ion
   integer :: p
   real, dimension(2:n_r,loc_n_ion+4) :: res2,relax2
+  character(len=2) :: itag
+  character(len=6) :: ntag,ttag
 
   if (i_proc_global > 0) return
 
@@ -302,16 +304,19 @@ subroutine tgyro_write_data(i_print)
 
   do i_ion=1,loc_n_ion
 
+     itag = 'i'//trim(ion_tag(i_ion))     
+
      !====================================================
      ! Ion particle and energy fluxes
      !====================================================
 
-     open(unit=1,&
-          file='out.tgyro.flux_i'//trim(ion_tag(i_ion)),&
-          status='old',position='append')
+     open(unit=1,file='out.tgyro.flux_'//itag,status='old',position='append')
 
-     write(1,20) 'r/a','pflux_i_neo','pflux_i_tur','eflux_i_neo',&
-          'eflux_i_tur','mflux_i_neo','mflux_i_tur','expwd_i_tur'
+     ttag = itag//'_tur'     
+     ntag = itag//'_neo'
+
+     write(1,20) 'r/a','pflux_'//ntag,'pflux_'//ttag,'eflux_'//ntag,&
+          'eflux_'//ttag,'mflux_'//ntag,'mflux_'//ttag,'expwd_'//ttag
      write(1,20) '','(GB)','(GB)','(GB)','(GB)','(GB)','(GB)','(GB)'
      do i=1,n_r
         write(1,10) r(i)/r_min,&
@@ -327,14 +332,12 @@ subroutine tgyro_write_data(i_print)
      close(1)
 
      !====================================================
-     ! Impurity profiles
+     ! Ion profiles
      !====================================================
 
-     open(unit=1,&
-          file='out.tgyro.profile_i'//trim(ion_tag(i_ion)),&
-          status='old',position='append')
+     open(unit=1,file='out.tgyro.profile_'//itag,status='old',position='append')
 
-     write(1,20) 'r/a','ni','a/Lni','Ti','a/LTi','betai_unit'
+     write(1,20) 'r/a','n'//itag,'a/Ln'//itag,'T'//itag,'a/LT'//itag,'beta'//itag//'_unit'
      write(1,20) '','(1/cm^3)','','(keV)','',''
      do i=1,n_r
         write(1,10) r(i)/r_min,&
@@ -410,8 +413,9 @@ subroutine tgyro_write_data(i_print)
   close(1)
 
   do i_ion=1,loc_n_ion
+     itag = 'i'//trim(ion_tag(i_ion))     
      open(unit=1,file='out.tgyro.evo_n'//trim(ion_tag(i_ion)),status='old',position='append')
-     write(1,20) 'r/a','pflux_i_tot','pflux_i_target'
+     write(1,20) 'r/a','pflux_'//itag//'_tot','pflux_'//itag//'_target'
      write(1,20) '','(GB)','(GB)'
      do i=1,n_r
         write(1,10) r(i)/r_min,&
@@ -450,11 +454,18 @@ subroutine tgyro_write_data(i_print)
 
   open(unit=1,file='out.tgyro.residual',status='old',position='append')
 
-  if (loc_n_ion == 1) then
-     write(1,50) 'r/a','E(eflux_i)','R1','E(eflux_e)','R2','E(mflux)','R3','E(pflux_e)','R4','E(pflux_i1)','R5'
-  else
-     write(1,50) 'r/a','E(eflux_i)','R1','E(eflux_e)','R2','E(mflux)','R3','E(pflux_e)','R4','E(pflux_i1)','R5','E(pflux_i2)','R6'
-  endif
+  write(1,50,advance='no') 'r/a','E(eflux_i)','R1','E(eflux_e)','R2','E(mflux)','R3','E(pflux_e)','R4','E(pflux_i1)','R5'
+  select case(loc_n_ion)
+  case(2)
+     write(1,55) 'E(pflux_i2)','R6'
+  case(3)
+     write(1,55) 'E(pflux_i2)','R6','E(pflux_i3)','R7'
+  case(4)
+     write(1,55) 'E(pflux_i2)','R6','E(pflux_i3)','R7','E(pflux_i4)','R8'
+  case(5)
+     write(1,55) 'E(pflux_i2)','R6','E(pflux_i3)','R7','E(pflux_i4)','R8','E(pflux_i4)','R9'
+  end select
+
   if (tgyro_relax_iterations == 0) then
      write(1,30) 'ITERATION*: ',i_tran,sum(res)/size(res),flux_counter*n_worker*n_inst
   else 
@@ -544,6 +555,7 @@ subroutine tgyro_write_data(i_print)
 30 format(t2,a,i3,1pe12.5,2x,'[',i6,']')
   ! Residuals
 40 format(t2,f8.6,8(1x,2(1pe10.3,1x)))
-50 format(t2,a,t12,a,t26,a,t35,a,t49,a,t58,a,t72,a,t81,a,t95,a,t104,a,t118,a,t127,a,t141,a)
+50 format(t2,a,t12,a,t26,a,t35,a,t49,a,t58,a,t72,a,t81,a,t95,a,t104,a,t118,a)
+55 format(3(7x,a,3x,a))
 
 end subroutine tgyro_write_data

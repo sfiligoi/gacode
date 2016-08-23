@@ -23,9 +23,7 @@ then
   echo "          -e <simdir>"
   echo "          Use data in <simdir>."
   echo 
-  echo "          -f <filetype>"
-  echo "          Output file type."
-  echo "           <filetype>=emf, eps, pdf, png, ps, raw, rgba, svg, svgz"
+  echo "         -ext <plot extension=screen,pdf,png,dump (default screen)>"
   echo 
   echo "          -u <units>"
   echo "          Plot units (0=GB,1=Physical)."
@@ -61,11 +59,11 @@ fi
 #
 # Default simulation directory
 LOCDIR=.
+EXT=screen
 SIMROOT=$PWD
 PLOT_TYPE=null
 UNITS=0
 DOTS=0
-FTYPE=screen
 FUNC=null
 #==============================================================================
 
@@ -81,7 +79,7 @@ while [ $# -gt 0 ] ; do
 
   -p) shift ; SIMROOT=$1 ;;
 
-  -f) shift ; FTYPE=$1 ;;
+  -ext) shift ; EXT=$1 ;;
 
   -func) shift ; FUNC=$1 ;;
 
@@ -112,22 +110,25 @@ PYROOT=$GACODE_ROOT/python/tgyro
 case "$PLOT_TYPE" in
 
    flux)  
-	python $INTERACTIVE $PYROOT/flux.py $SIMDIR $UNITS $FTYPE  ;;
+	python $INTERACTIVE $PYROOT/flux.py $SIMDIR $UNITS $EXT  ;;
 
    flux_tot)  
-	python $INTERACTIVE $PYROOT/flux_tot.py $SIMDIR $UNITS $FTYPE  ;;
+	python $INTERACTIVE $PYROOT/flux_tot.py $SIMDIR $UNITS $EXT  ;;
 
    profile)  
-	python $INTERACTIVE $PYROOT/profile.py $SIMDIR $FTYPE  ;;
+	python $INTERACTIVE $PYROOT/profile.py $SIMDIR $EXT  ;;
 
    profile_smooth)  
-	python $INTERACTIVE $PYROOT/profile_smooth.py $SIMDIR $FTYPE $DOTS ;;
+	python $INTERACTIVE $PYROOT/profile_smooth.py $SIMDIR $EXT $DOTS ;;
 
    one)  
-	python $INTERACTIVE $PYROOT/oneplot.py $SIMDIR $FUNC $FTYPE  ;;
+	python $INTERACTIVE $PYROOT/oneplot.py $SIMDIR $FUNC $EXT  ;;
 
    check)  
 	python $PYROOT/datacheck.py $SIMDIR  ;;
+
+   notebook)  
+	python $PYROOT/notebook.py $SIMDIR $UNITS $EXT ;;
 
    null)
         echo "Please specify a plot type via -plot." ;;
