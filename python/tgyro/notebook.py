@@ -71,8 +71,7 @@ def plot_gen(ax,tag):
             ax.plot(x,sim.data['pflux_e_target'][n]*ggb,label='target')
             ax.set_ylabel('$\Gamma_e [10^{19}/m^2/s]$',color='k',fontsize=GFONTSIZE)
         ax.legend(loc=2)
-     
-        
+            
     for i in range(n_ion):
         pstr = 'pflux_i'+str(i+1)
         if tag == pstr+'_target':
@@ -85,6 +84,16 @@ def plot_gen(ax,tag):
                 ax.plot(x,sim.data[pstr+'_target'][n]*ggb,label='target')
                 ax.set_ylabel('$\Gamma_{i'+str(i+1)+'} [10^{19}/m^2/s]$',color='k',fontsize=GFONTSIZE)
             ax.legend(loc=2)
+
+    if tag == 'ne':
+        # Smooth curves
+        xf,pf = smooth_pro(sim.data['r/a'][0],sim.data['a/Lne'][0],sim.data['ne'][0],64)
+        ax.plot(xf,pf,color='black')
+        xf,pf = smooth_pro(sim.data['r/a'][0],sim.data['a/Lne'][n],sim.data['ne'][0],64)
+        ax.plot(xf,pf,color='magenta')
+        # Dots
+        ax.plot(sim.data['r/a'][0],sim.data['ne'][0],'o',color='k')
+        ax.plot(sim.data['r/a'][0],sim.data['ne'][n],'o',color='k')
 
 #-------------------------------------------------------------------------------------
 
@@ -133,6 +142,10 @@ class DemoFrame(wx.Frame):
             tab.draw('pflux_i'+str(i+1)+'_target')
             notebook.AddPage(tab,'*pflux_i'+str(i+1))
            
+        tab = TabPanel(notebook)
+        tab.draw('ne')
+        notebook.AddPage(tab,'ne')
+
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(notebook, 1, wx.ALL|wx.EXPAND, 5)
         panel.SetSizer(sizer)
@@ -156,7 +169,7 @@ if __name__ == "__main__":
 
     # Generate plots
 
-    list=['eflux_e_target','eflux_i_target','pflux_e_target']
+    list=['eflux_e_target','eflux_i_target','pflux_e_target','ne']
     for i in range(n_ion):
         list.append('pflux_i'+str(i+1)+'_target')
 

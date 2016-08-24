@@ -59,4 +59,31 @@ def average_n(f,t,window,n):
 
     return ave
 #---------------------------------------------------------------
+#---------------------------------------------------------------
+def smooth_pro(x,z,p,n):
 
+    import numpy as np
+
+    nx = len(x)
+    xf = np.zeros((nx-1)*n+1)
+    zf = np.zeros((nx-1)*n+1)
+    pf = np.zeros((nx-1)*n+1)
+    j = 0
+    for i in range(nx-1):
+        for m in range(n):
+            u = m/(1.0*n)
+            xf[j] = x[i]*(1-u)+x[i+1]*u
+            zf[j] = z[i]*(1-u)+z[i+1]*u
+            j = j+1
+
+    xf[j] = x[nx-1]
+    zf[j] = z[nx-1]
+    pf[j] = p[nx-1]
+
+    # Exponential integration to obtain smooth profiles
+    for i in np.arange(j,0,-1):
+        pf[i-1] = pf[i]*np.exp(0.5*(xf[i]-xf[i-1])*(zf[i]+zf[i-1]))
+
+
+    return xf,pf
+#---------------------------------------------------------------
