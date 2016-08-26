@@ -3,11 +3,16 @@ subroutine tgyro_profile_reintegrate
   use tgyro_globals
   use tgyro_ped
 
+  use mpi
+  use tgyro_iteration_variables
+  use EXPRO_interface
+
   implicit none
 
   integer :: i_ion
   integer :: i_star  
 
+  CHARACTER(LEN=6) :: NUM
 
   if (tgyro_ped_model > 1) then
 
@@ -49,5 +54,30 @@ subroutine tgyro_profile_reintegrate
 
   ! Convert to Pa: n[1/cm^3]*(kT[ev])/10  
   ptot_exp = ptot_exp*k/10.0
+
+  if ((tgyro_write_profiles_flag==-1) .and. (i_tran.ge.2) .and. (i_tran_old .ne. i_tran)) then
+     call EXPRO_palloc(MPI_COMM_WORLD,'./',1)
+     call EXPRO_pread
+
+     EXPRO_ptot = ptot_exp
+     EXPRO_ne   = exp_ne*1e-13
+     EXPRO_te   = exp_te*1e-3
+     EXPRO_ni(1:loc_n_ion,:) = exp_ni(1:loc_n_ion,:)*1e-13
+     EXPRO_ti(1:loc_n_ion,:) = exp_ti(1:loc_n_ion,:)*1e-3
+     EXPRO_ptot = ptot_exp ! already in Pa
+
+     if (i_proc_global == 0) then
+        ! Write data to file
+        write(NUM,'(i0)')i_tran-1
+        write(*,*)'write input.profiles.'//trim(NUM)
+        call EXPRO_write_original(&
+             1,'input.profiles',&
+             2,'input.profiles.'//trim(NUM),&
+             'Profiles modified by TGYRO')
+     endif
+
+     call EXPRO_palloc(MPI_COMM_WORLD,'./',0)
+     i_tran_old=i_tran
+  endif
 
 end subroutine tgyro_profile_reintegrate
