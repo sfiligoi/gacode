@@ -145,7 +145,11 @@ subroutine tglf_run()
         call tglf_nn_tm
      endif
      if (.not. valid_nn) then
+#ifdef MPI_TGLF
         call tglf_tm_mpi
+#else
+        call tglf_tm
+#endif
      endif
      
      !---------------------------------------------
