@@ -139,19 +139,19 @@ subroutine tgyro_iteration_driver
         quant(p) = 'te'
         x_vec(p) = dlntedr(i)
      endif
-     if (loc_ne_feedback_flag == 1) then
-        p  = p+1
-        ip = ip+1
-        pmap(i,ip) = p
-        quant(p) = 'ne'
-        x_vec(p) = dlnnedr(i)
-     endif
      if (loc_er_feedback_flag == 1) then
         p  = p+1
         ip = ip+1
         pmap(i,ip) = p
         quant(p) = 'er'
         x_vec(p) = f_rot(i)
+     endif
+     if (loc_ne_feedback_flag == 1) then
+        p  = p+1
+        ip = ip+1
+        pmap(i,ip) = p
+        quant(p) = 'ne'
+        x_vec(p) = dlnnedr(i)
      endif
      if (loc_he_feedback_flag == 1) then
         p  = p+1

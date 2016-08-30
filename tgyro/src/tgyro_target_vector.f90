@@ -25,13 +25,13 @@ subroutine tgyro_target_vector(x_vec,g_vec)
         p = p+1
         g_vec(p) = eflux_e_target(i)
      endif
-     if (loc_ne_feedback_flag == 1) then
-        p = p+1
-        g_vec(p) = pflux_e_target(i)
-     endif
      if (loc_er_feedback_flag == 1) then
         p = p+1
         g_vec(p) = mflux_target(i)
+     endif
+     if (loc_ne_feedback_flag == 1) then
+        p = p+1
+        g_vec(p) = pflux_e_target(i)
      endif
      if (loc_he_feedback_flag == 1) then
         p = p+1

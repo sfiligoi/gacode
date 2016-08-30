@@ -29,14 +29,14 @@ subroutine tgyro_flux_set(f_vec)
         f_vec(p) = eflux_e_tot(i)
      endif
 
-     if (loc_ne_feedback_flag == 1) then
-        p = p+1
-        f_vec(p) = pflux_e_tot(i)
-     endif
-
      if (loc_er_feedback_flag == 1) then
         p = p+1
         f_vec(p) = mflux_tot(i)
+     endif
+
+     if (loc_ne_feedback_flag == 1) then
+        p = p+1
+        f_vec(p) = pflux_e_tot(i)
      endif
 
      if (loc_he_feedback_flag == 1) then
