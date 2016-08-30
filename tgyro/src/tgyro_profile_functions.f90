@@ -168,19 +168,18 @@ subroutine tgyro_profile_functions
   gamma_p(:)  = -r_maj(:)*w0p(:)
   !-------------------------------------- 
 
-
   !----------------------------------------------------------------------
   ! Acquire pivot boundary conditions from pedestal model
   !
   ! Repeat calculation of beta from tgyro_init_profiles
   ! betan [%] = betat/In*100 where In = Ip/(a Bt) 
   ! Average pressure [Pa]
-  call tgyro_profile_reintegrate
   if (tgyro_ped_model > 1) then
      call tgyro_volume_ave(ptot_exp,rmin_exp,volp_exp,p_ave,n_exp)
      betan_in = ( p_ave/(0.5*bt_in**2/mu_0) ) / ( ip_in/(a_in*bt_in) ) * 100.0
      call tgyro_pedestal
   endif
+  call tgyro_profile_reintegrate
   !----------------------------------------------------------------------
 
 end subroutine tgyro_profile_functions
