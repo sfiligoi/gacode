@@ -445,8 +445,6 @@ subroutine tgyro_init_profiles
         call cub_spline(psi_exp,EXPRO_z_eff(:),n_exp,x0,y0,1)
         tgyro_zeffped = y0(1)
      endif
-     !
-     call tgyro_pedestal
   endif
   !-----------------------------------------------------------------
 
