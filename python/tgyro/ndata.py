@@ -24,7 +24,7 @@ class tgyrodata:
     def getdata(self):
         """Read all tgyro-format datafiles"""
         
-        self.n_ion = int(self.get_tag_value("TGYRO_N_ION"))
+        self.n_ion = int(self.get_tag_value("LOC_N_ION"))
 
         self.fileparser('out.tgyro.alpha')
         self.fileparser('out.tgyro.evo_er')

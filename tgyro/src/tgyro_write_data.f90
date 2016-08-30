@@ -289,7 +289,7 @@ subroutine tgyro_write_data(i_print)
 
   open(unit=1,file='out.tgyro.profile_e',status='old',position='append')
 
-  write(1,20) 'r/a','ne','a/Lne', 'te','a/LTe','betae_unit'
+  write(1,20) 'r/a','ne','a/Lne', 'te','a/Lte','betae_unit'
   write(1,20) '','(1/cm^3)','','(keV)','',''
   do i=1,n_r
      write(1,10) r(i)/r_min,&
@@ -337,7 +337,7 @@ subroutine tgyro_write_data(i_print)
 
      open(unit=1,file='out.tgyro.profile_'//itag,status='old',position='append')
 
-     write(1,20) 'r/a','n'//itag,'a/Ln'//itag,'T'//itag,'a/LT'//itag,'beta'//itag//'_unit'
+     write(1,20) 'r/a','n'//itag,'a/Ln'//itag,'t'//itag,'a/Lt'//itag,'beta'//itag//'_unit'
      write(1,20) '','(1/cm^3)','','(keV)','',''
      do i=1,n_r
         write(1,10) r(i)/r_min,&

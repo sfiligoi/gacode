@@ -84,9 +84,27 @@ def plot_gen(ax,tag):
                 ax.plot(x,sim.data[pstr+'_target'][n]*ggb,label='target')
                 ax.set_ylabel('$\Gamma_{i'+str(i+1)+'} [10^{19}/m^2/s]$',color='k',fontsize=GFONTSIZE)
             ax.legend(loc=2)
+            break
 
-    if tag == 'ne':
-        # Smooth curves
+    # Smooth curves
+
+    if tag == 'te':
+        xf,pf = smooth_pro(sim.data['r/a'][0],sim.data['a/Lte'][0],sim.data['te'][0],64)
+        ax.plot(xf,pf,color='black')
+        xf,pf = smooth_pro(sim.data['r/a'][0],sim.data['a/Lte'][n],sim.data['te'][0],64)
+        ax.plot(xf,pf,color='magenta')
+        # Dots
+        ax.plot(sim.data['r/a'][0],sim.data['te'][0],'o',color='k')
+        ax.plot(sim.data['r/a'][0],sim.data['te'][n],'o',color='k')
+    elif tag == 'ti':
+        xf,pf = smooth_pro(sim.data['r/a'][0],sim.data['a/Lti1'][0],sim.data['ti1'][0],64)
+        ax.plot(xf,pf,color='black')
+        xf,pf = smooth_pro(sim.data['r/a'][0],sim.data['a/Lti1'][n],sim.data['ti1'][0],64)
+        ax.plot(xf,pf,color='magenta')
+        # Dots
+        ax.plot(sim.data['r/a'][0],sim.data['ti1'][0],'o',color='k')
+        ax.plot(sim.data['r/a'][0],sim.data['ti1'][n],'o',color='k')
+    elif tag == 'ne':
         xf,pf = smooth_pro(sim.data['r/a'][0],sim.data['a/Lne'][0],sim.data['ne'][0],64)
         ax.plot(xf,pf,color='black')
         xf,pf = smooth_pro(sim.data['r/a'][0],sim.data['a/Lne'][n],sim.data['ne'][0],64)
@@ -94,6 +112,17 @@ def plot_gen(ax,tag):
         # Dots
         ax.plot(sim.data['r/a'][0],sim.data['ne'][0],'o',color='k')
         ax.plot(sim.data['r/a'][0],sim.data['ne'][n],'o',color='k')
+
+    for i in range(n_ion):
+        if tag == 'ni'+str(i+1):
+            xf,pf = smooth_pro(sim.data['r/a'][0],sim.data['a/L'+tag][0],sim.data[tag][0],64)
+            ax.plot(xf,pf,color='black')
+            xf,pf = smooth_pro(sim.data['r/a'][0],sim.data['a/L'+tag][n],sim.data[tag][0],64)
+            ax.plot(xf,pf,color='magenta')
+            # Dots
+            ax.plot(sim.data['r/a'][0],sim.data[tag][0],'o',color='k')
+            ax.plot(sim.data['r/a'][0],sim.data[tag][n],'o',color='k')
+            break
 
 #-------------------------------------------------------------------------------------
 
@@ -143,8 +172,21 @@ class DemoFrame(wx.Frame):
             notebook.AddPage(tab,'*pflux_i'+str(i+1))
            
         tab = TabPanel(notebook)
+        tab.draw('te')
+        notebook.AddPage(tab,'Te')
+
+        tab = TabPanel(notebook)
+        tab.draw('ti')
+        notebook.AddPage(tab,'Ti')
+
+        tab = TabPanel(notebook)
         tab.draw('ne')
         notebook.AddPage(tab,'ne')
+
+        for i in range(n_ion):
+            tab = TabPanel(notebook)
+            tab.draw('ni'+str(i+1))
+            notebook.AddPage(tab,'ni'+str(i+1))
 
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(notebook, 1, wx.ALL|wx.EXPAND, 5)
@@ -169,9 +211,12 @@ if __name__ == "__main__":
 
     # Generate plots
 
-    list=['eflux_e_target','eflux_i_target','pflux_e_target','ne']
+    list=['eflux_e_target','eflux_i_target','pflux_e_target']
     for i in range(n_ion):
         list.append('pflux_i'+str(i+1)+'_target')
+    list=list+['te','ti','ne']
+    for i in range(n_ion):
+        list.append('ni'+str(i+1)+'_target')
 
     for x in list:
         figure = plt.figure(figsize=(9,6))
