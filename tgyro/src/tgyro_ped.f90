@@ -89,8 +89,8 @@ contains
        ! Inputs stored in interface
        call tgyro_eped_nn
 
-       if (tgyro_rped < 0) then
-            psi_top(1) = 1.0 - 1.5*nn_w_ped * abs(tgyro_rped)
+       if (tgyro_rped < 0.0) then
+            psi_top(1) = 1.0 - 1.5*nn_w_ped*abs(tgyro_rped)
        else
             psi_top(1) = tgyro_rped
        endif

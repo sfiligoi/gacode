@@ -44,7 +44,7 @@ subroutine tgyro_comm_setup
      ! Local Transport
      !-----------------------------
 
-     ! Mange which profiles to evolve (1,2,3,4,5)=(ti,te,ne,er,he)
+     ! Mange which profiles to evolve (1,2,3,4,5)=(ti,te,er,ne,he)
 
      ip = 0
      if (loc_ti_feedback_flag == 1) then
