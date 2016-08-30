@@ -20,11 +20,11 @@ subroutine tgyro_quasigrad
 
   ! Compute density offset that needs to be corrected
   delta_n = 0.0
-  if (evo_e(0) > 0) then
+  if (evo_e(0) > -1) then
      delta_n(:) = delta_n(:) - ne(:)*dlnnedr(:)
   endif
   do is=1,loc_n_ion
-     if (evo_e(is) > 0) then
+     if (evo_e(is) > -1) then
         delta_n(:) = delta_n(:) + zi_vec(is)*ni(is,:)*dlnnidr(is,:)
      endif
   enddo
