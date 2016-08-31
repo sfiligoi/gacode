@@ -9,7 +9,7 @@
 !  Outputs: r_exp, p_exp, n_exp
 !-----------------------------------------------------------------
 
-subroutine tgyro_expro_map(r,z,n_r,r_exp,p_exp,n_exp)
+subroutine tgyro_expro_map(r,z,n_r,r_exp,p_exp,n_exp,mode)
 
   implicit none
 
@@ -21,6 +21,7 @@ subroutine tgyro_expro_map(r,z,n_r,r_exp,p_exp,n_exp)
   real :: dr
   integer :: i
   integer :: i_exp
+  character(len=3) :: mode
 
   ! Compute z's on exp grid
   z_exp(:) = 0.0
@@ -33,13 +34,17 @@ subroutine tgyro_expro_map(r,z,n_r,r_exp,p_exp,n_exp)
      endif
   enddo
 
+  ! Start the integration at the first i_exp past r(n_r)
+  ! ISSUE: This check is sensitive to mesh alignment (need =)
   do i_exp=n_exp,2,-1
-     ! Start the integration at the first i_exp past r(n_r)
-     ! ISSUE: This check is sensitive to mesh alignment (need =)
-     if (r_exp(i_exp-1) <= r(n_r)) then
-        p_exp(i_exp-1) = p_exp(i_exp)*exp(0.5*(z_exp(i_exp)+z_exp(i_exp-1))* &
-             (r_exp(i_exp)-r_exp(i_exp-1)))
-     endif
+     if (r_exp(i_exp-1) <= r(n_r)) exit
   enddo
 
+  if (mode == 'log') then
+     call logint(p_exp(1:i_exp),z_exp(1:i_exp),r_exp(1:i_exp),i_exp,i_exp)
+  else
+     call linint(p_exp(1:i_exp),z_exp(1:i_exp),r_exp(1:i_exp),i_exp,i_exp)
+  endif
+
 end subroutine tgyro_expro_map
+
