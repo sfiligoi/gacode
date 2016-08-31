@@ -198,6 +198,7 @@ subroutine tgyro_iteration_driver
      EXPRO_te   = exp_te*1e-3
      EXPRO_ni(1:loc_n_ion,:) = exp_ni(1:loc_n_ion,:)*1e-13
      EXPRO_ti(1:loc_n_ion,:) = exp_ti(1:loc_n_ion,:)*1e-3
+     EXPRO_w0   = exp_w0
      EXPRO_ptot = ptot_exp ! already in Pa
 
      if (i_proc_global == 0) then

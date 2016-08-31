@@ -382,6 +382,7 @@ subroutine tgyro_init_profiles
   allocate(exp_ne(n_exp))
   allocate(exp_ti(loc_n_ion,n_exp))
   allocate(exp_ni(loc_n_ion,n_exp))
+  allocate(exp_w0(n_exp))
   ! exp_ne, exp_ni: [1/cm^3]
   exp_ne = EXPRO_ne*1e13
   exp_ni(1:loc_n_ion,:) = EXPRO_ni(1:loc_n_ion,:)*1e13
