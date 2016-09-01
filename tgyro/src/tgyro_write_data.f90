@@ -308,14 +308,15 @@ subroutine tgyro_write_data(i_print)
 
   open(unit=1,file='out.tgyro.gyrobohm',status='old',position='append')
 
-  write(1,20) 'r/a','Chi_GB','Q_GB','Gamma_GB','Pi_GB','c_s'
-  write(1,20) '','m^2/s','MW/m^2','10^19/m^2/s','J/m^2','m/s'
+  write(1,20) 'r/a','Chi_GB','Q_GB','Gamma_GB','Pi_GB','S_GB','c_s'
+  write(1,20) '','m^2/s','MW/m^2','10^19/m^2/s','J/m^2','MW/m^3','m/s'
   do i=1,n_r
      write(1,10) r(i)/r_min,&
           chi_gb(i)*1e-4,&
           q_gb(i)*1e-7*1e-6/1e-4,&
           gamma_gb(i)*1e-19/1e-4,&
           pi_gb(i)*1e-7/1e-4,&
+          s_gb(i)*1e-7*1e-6/1e-6,&
           c_s(i)/100.0
   enddo
 
