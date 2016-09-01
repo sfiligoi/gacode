@@ -328,6 +328,7 @@ module tgyro_globals
   integer :: i_r
   integer :: n_r
   integer :: flux_method
+  integer, dimension(:), allocatable :: flux_method_vec
   integer :: i_tran
   integer :: i_bc
   integer :: flux_counter

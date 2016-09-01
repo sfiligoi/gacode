@@ -94,6 +94,8 @@ subroutine tgyro_iteration_driver
 
   endif
   !---------------------------------------------
+  allocate(flux_method_vec(n_inst))
+  call MPI_ALLGATHER(flux_method,1,MPI_INTEGER,flux_method_vec,1,MPI_INTEGER,MPI_COMM_WORLD,ierr)
 
   call tgyro_write_input
 

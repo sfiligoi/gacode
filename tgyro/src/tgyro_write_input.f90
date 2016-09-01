@@ -137,74 +137,15 @@ subroutine tgyro_write_input
      !--------------------------------------------------------
 
      write(1,20) 'LOC_DX (Jacobian dx)',loc_dx
-     write(1,20) 'LOC_DX_GYRO (GYRO Jacobian dx)',loc_dx_gyro
+     if (maxval(flux_method_vec) == 4) then
+        write(1,20) 'LOC_DX_GYRO (GYRO Jacobian dx)',loc_dx_gyro
+     endif
      write(1,20) 'LOC_DX_MAX (maximum dx)',loc_dx_max
      write(1,20) 'LOC_RELAX (conv. relaxation)',loc_relax
 
      write(1,*)
      write(1,*) 'Scenario control'
      write(1,*) 
-
-     !--------------------------------------------------------
-     select case (loc_ti_feedback_flag)
-
-     case (0)
-
-        write(1,10) 'LOC_TI_FEEDBACK_FLAG','Ti evolution OFF'
-
-     case (1)
-
-        write(1,10) 'LOC_TI_FEEDBACK_FLAG','Ti evolution ON'
-
-     case default
-
-        error_flag = 1
-        error_msg = 'Error: LOC_TI_FEEDBACK_FLAG'
-
-     end select
-     !--------------------------------------------------------
-
-     !--------------------------------------------------------
-     select case (loc_te_feedback_flag)
-
-     case (0)
-
-        write(1,10) 'LOC_TE_FEEDBACK_FLAG','Te evolution OFF'
-
-     case (1)
-
-        write(1,10) 'LOC_TE_FEEDBACK_FLAG','Te evolution ON'
-
-     case default
-
-        error_flag = 1
-        error_msg = 'Error: LOC_TE_FEEDBACK_FLAG'
-
-     end select
-     !--------------------------------------------------------
-
-     !--------------------------------------------------------
-     select case (loc_er_feedback_flag)
-
-     case (0)
-
-        write(1,10) 'LOC_ER_FEEDBACK_FLAG','Er evolution OFF'
-
-     case (1)
-
-        write(1,10) 'LOC_ER_FEEDBACK_FLAG','Er evolution ON'
-
-     case default
-
-        error_flag = 1
-        error_msg = 'Error: LOC_ER_FEEDBACK_FLAG'
-
-     end select
-     !--------------------------------------------------------
-
-     do is=0,loc_n_ion
-        write(1,'(t2,a,i2,2x,i2,2x,f4.2)') 'ion',is,evo_e(is),evo_c(is)
-     enddo
 
      !--------------------------------------------------------
      select case (TGYRO_EXPWD_FLAG)
@@ -348,6 +289,84 @@ subroutine tgyro_write_input
 
      end select
      !--------------------------------------------------------
+
+     !---------------------------------------------------------------------------------------------------
+
+     write(1,*) 
+     write(1,*) 'Profile evolution settings'
+     write(1,*) 
+
+     select case (loc_ti_feedback_flag)
+
+     case (0)
+        write(1,10) 'LOC_TI_FEEDBACK_FLAG','Ti evolution OFF'
+
+     case (1)
+        write(1,10) 'LOC_TI_FEEDBACK_FLAG','Ti evolution ON'
+
+     case default
+        error_flag = 1
+        error_msg = 'Error: LOC_TI_FEEDBACK_FLAG'
+
+     end select
+
+     select case (loc_te_feedback_flag)
+
+     case (0)
+        write(1,10) 'LOC_TE_FEEDBACK_FLAG','Te evolution OFF'
+
+     case (1)
+        write(1,10) 'LOC_TE_FEEDBACK_FLAG','Te evolution ON'
+
+     case default
+        error_flag = 1
+        error_msg = 'Error: LOC_TE_FEEDBACK_FLAG'
+
+     end select
+
+     select case (loc_er_feedback_flag)
+
+     case (0)
+        write(1,10) 'LOC_ER_FEEDBACK_FLAG','Er evolution OFF'
+
+     case (1)
+        write(1,10) 'LOC_ER_FEEDBACK_FLAG','Er evolution ON'
+
+     case default
+        error_flag = 1
+        error_msg = 'Error: LOC_ER_FEEDBACK_FLAG'
+
+     end select
+
+     select case (evo_e(0))
+
+     case (-1)
+        write(1,10) 'TGYRO_EVO_E(0)','ne profile set using quasineutrality'
+     case (0)
+        write(1,10) 'TGYRO_EVO_E(0)','ne profile fixed'
+     case (1)
+        write(1,10) 'TGYRO_EVO_E(0)','ne evolution ON'
+     case default
+        error_flag = 1
+        error_msg = 'Error: TGYRO_EVO_E(0)'
+     end select
+
+     do is=1,loc_n_ion
+        select case (evo_e(is))
+
+        case (-1)
+           write(1,10) 'TGYRO_EVO_E(-)','ni profile set using quasineutrality'
+        case (0)
+           write(1,10) 'TGYRO_EVO_E(-)','ni profile fixed'
+        case (1)
+           write(1,10) 'TGYRO_EVO_E(-)','ni evolution ON'
+        case default
+           error_flag = 1
+           error_msg = 'Error: TGYRO_EVO_E(-)'
+        end select
+     enddo
+
+     !---------------------------------------------------------------------------------------------------
 
      write(1,*)
      write(1,*) 'Physics parameters'

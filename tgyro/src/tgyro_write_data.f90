@@ -362,9 +362,7 @@ subroutine tgyro_write_data(i_print)
   write(1,20) 'r/a','eflux_i_tot','eflux_i_target'
   write(1,20) '','(GB)','(GB)'
   do i=1,n_r
-     write(1,10) r(i)/r_min,&
-          eflux_i_tot(i),&
-          eflux_i_target(i)
+     write(1,10) r(i)/r_min,eflux_i_tot(i),eflux_i_target(i)
   enddo
   close(1)
 
@@ -377,9 +375,7 @@ subroutine tgyro_write_data(i_print)
   write(1,20) 'r/a','eflux_e_tot','eflux_e_target'
   write(1,20) '','(GB)','(GB)'
   do i=1,n_r
-     write(1,10) r(i)/r_min,&
-          eflux_e_tot(i),&
-          eflux_e_target(i)
+     write(1,10) r(i)/r_min,eflux_e_tot(i),eflux_e_target(i)
   enddo
   close(1)
 
@@ -392,9 +388,7 @@ subroutine tgyro_write_data(i_print)
   write(1,20) 'r/a','mflux_tot','mflux_target'
   write(1,20) '','(GB)','(GB)'
   do i=1,n_r
-     write(1,10) r(i)/r_min,&
-          mflux_tot(i),&
-          mflux_target(i)
+     write(1,10) r(i)/r_min,mflux_tot(i),mflux_target(i)
   enddo
   close(1)
 
@@ -407,9 +401,7 @@ subroutine tgyro_write_data(i_print)
   write(1,20) 'r/a','pflux_e_tot','pflux_e_target'
   write(1,20) '','(GB)','(GB)'
   do i=1,n_r
-     write(1,10) r(i)/r_min,&
-          pflux_e_tot(i),&
-          pflux_e_target(i)*evo_c(0)
+     write(1,10) r(i)/r_min,pflux_e_tot(i),pflux_e_target(i)*evo_c(0)
   enddo
   close(1)
 
@@ -419,9 +411,11 @@ subroutine tgyro_write_data(i_print)
      write(1,20) 'r/a','pflux_'//itag//'_tot','pflux_'//itag//'_target'
      write(1,20) '','(GB)','(GB)'
      do i=1,n_r
-        write(1,10) r(i)/r_min,&
-             pflux_i_tot(i_ion,i),&
-             pflux_e_target(i)*evo_c(i_ion)
+        if (evo_e(i_ion) == 2) then
+           write(1,10) r(i)/r_min,pflux_i_tot(i_ion,i),pflux_he_target(i)
+        else
+           write(1,10) r(i)/r_min,pflux_i_tot(i_ion,i),pflux_e_target(i)*evo_c(i_ion)
+        endif
      enddo
      close(1)
   enddo
