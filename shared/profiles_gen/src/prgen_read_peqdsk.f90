@@ -12,6 +12,7 @@ subroutine prgen_read_peqdsk
   implicit none
 
   integer, parameter :: ncol=3
+  integer, parameter :: npsi=200
   integer :: i, num
   real    :: y1, y2, y3
   logical :: ierr
@@ -33,7 +34,11 @@ subroutine prgen_read_peqdsk
   allocate(xv(ncol,i))
   read(1,*) i
   read(1,*) xv
-  peqdsk_psi(:) = xv(1,:)
+  ! Replace old assignment of peqdsk_psi to fixed, uniform mesh
+  !  peqdsk_psi(:) = xv(1,:)
+  do i=1,npsi
+     peqdsk_psi(i) = (i-1.0)/(npsi-1)
+  enddo
   peqdsk_ne(:)  = xv(2,:)
   deallocate(xv)
   close(1)

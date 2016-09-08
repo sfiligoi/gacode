@@ -200,7 +200,6 @@ subroutine ufile_mapper(file,x,y,nx,neg_protect)
   real, dimension(:), allocatable :: x0
   real, dimension(:), allocatable :: y0
   real :: ya,yb
-  integer :: nx0
   integer :: ierr
 
   open(unit=1,file='out.dim',status='old')
