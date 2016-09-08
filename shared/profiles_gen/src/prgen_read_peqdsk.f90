@@ -12,7 +12,7 @@ subroutine prgen_read_peqdsk
   implicit none
 
   integer, parameter :: ncol=3
-  integer, parameter :: npsi=200
+  integer, parameter :: npsi=201
   integer :: i, num
   real    :: y1, y2, y3
   logical :: ierr
