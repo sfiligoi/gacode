@@ -27,24 +27,24 @@
  TGYRO_GLOBAL_NEWTON_FLAG       : Block-diagonal flux Jacobian
  LOC_RESIDUAL_METHOD            : (f-g)^2
  LOC_DX (Jacobian dx)           :   0.0200
- LOC_DX_GYRO (GYRO Jacobian dx) :   0.2000
  LOC_DX_MAX (maximum dx)        :   4.0000
  LOC_RELAX (conv. relaxation)   :   2.0000
 
  Scenario control
 
- LOC_TI_FEEDBACK_FLAG           : Ti evolution ON
- LOC_TE_FEEDBACK_FLAG           : Te evolution ON
- LOC_NE_FEEDBACK_FLAG           : ne evolution OFF
- LOC_ER_FEEDBACK_FLAG           : Er evolution OFF
- LOC_HE_FEEDBACK_FLAG           : He evolution OFF
  TGYRO_EXPWD_FLAG               : Turbulent exchange OFF
  LOC_SCENARIO                   : Experimental, dynamic exchange
- TGYRO_DT_METHOD                : Reaction cross section <n1*n1>/4 (use with single main ion)
- LOC_SAWTOOTH_MODEL             : No corrections for sawteeth
  LOC_NEO_METHOD                 : Hinton-Hazeltine theory
  TGYRO_TGLF_REVISION            : in development
  TGYRO_GLF23_REVISION           : retuned GLF23 v1.61
+
+ Profile evolution settings
+
+ LOC_TI_FEEDBACK_FLAG           : Ti evolution ON
+ LOC_TE_FEEDBACK_FLAG           : Te evolution ON
+ LOC_ER_FEEDBACK_FLAG           : Er evolution OFF
+ TGYRO_EVO_E(0)                 : ne profile fixed
+ TGYRO_EVO_E(-)                 : ni profile fixed
 
  Physics parameters
 
@@ -54,12 +54,15 @@
  LOC_NU_SCALE                   :   1.0000
  LOC_BETAE_SCALE                :   1.0000
  -> Fluctuations                : Electromagnetic
+ -> Pressure                    : Using pressure (beta) computed by summing over included species.
  LOC_ZEFF_FLAG                  : Z_eff from data
  LOC_NUM_EQUIL_FLAG             : Using Miller model equilibrium in TGLF/GYRO/NEO.
- TGYRO_QUASINEUTRAL_FLAG        : Ion densities modified according to TGYRO_FIX_CONCENTRATION_FLAG.
- TGYRO_FIX_CONCENTRATION_FLAG   : Enforce quasineutrality on main ions during iteration.
  LOC_LOCK_PROFILE_FLAG          : Initial profiles from gradients
  LOC_EVOLVE_GRAD_ONLY_FLAG      : Self-consistently evolve profiles with gradients
+
+ Pedestal parameters
+
+ TGYRO_PED_MODEL                : No pedestal.  Use fixed pivot.
 
  Ion parameters
 
@@ -70,7 +73,6 @@
 
  Rotation and field orientation
 
- TGYRO_ROTATION_THEORY_METHOD   : Candy method
  TGYRO_ROTATION_FLAG            : Rotation effects ON
  IPCCW                          :    1
  BTCCW                          :   -1
