@@ -137,7 +137,7 @@ subroutine prgen_read_ufile
   ! Now compress m/z
   i=1
   do ix=1,8
-     if (ufile_m(i) == 0) then
+     if (int(ufile_m(i)) == 0) then
         do j=i+1,8
            ufile_m(j-1) = ufile_m(j)
            ufile_z(j-1) = ufile_z(j)
@@ -239,7 +239,7 @@ subroutine ufile_mapper(file,x,y,nx,neg_protect)
      y0(0) = ya
      y0(nx0+1) = yb
      call cub_spline(x0,y0,nx0+2,x,y,nx)
-  else if (x0(1) > 0.0 .and. x0(nx0) == 1.0) then
+  else if (x0(1) > 0.0 .and. abs(x0(nx0)-1.0) <= epsilon(0.0)) then
      ! Extrapolate to 0 only
      x0(0) = 0.0
      call bound_extrap(ya,yb,y0(0:nx0),x0(0:nx0),nx0+1)
