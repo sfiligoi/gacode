@@ -36,7 +36,7 @@ subroutine fluxfit_minmax(x,y,n,x0,y_x0,mode)
   y2 = y(i)
   y3 = y(ip)
 
-  if (x1 == x2 .and. x2 == x3) then
+  if (abs(x1-x2) <= epsilon(0.0) .and. abs(x2-x3) <= epsilon(0.0)) then
      print '(10(1pe13.6,1x))',x(:)
      print '(a)','ERROR: (fluxfit_minmax) x1=x2=x3 error.'
      stop
