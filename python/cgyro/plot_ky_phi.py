@@ -7,7 +7,7 @@ ftype = sys.argv[1]
 field = sys.argv[2]
 
 sim = cgyrodata('./')
-sim.getbig()
+sim.getbigfield()
 
 fig = plt.figure(figsize=(12,6))
 
