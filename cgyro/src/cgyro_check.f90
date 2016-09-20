@@ -25,7 +25,7 @@ subroutine cgyro_check
   endif
 
   if (n_radial < box_size .and. zf_test_flag == 0) then
-     call cgyro_error('RESOLUTION ERROR -- n_radial < box_size.')
+     call cgyro_info('SEVERE RESOLUTION WARNING -- n_radial < box_size.')
      return
   endif
 

@@ -76,6 +76,12 @@ then
   echo "          -title <mult>"
   echo "          Plot title"
   echo
+  echo "          -x1 <val>"
+  echo "          Min x to shade"
+  echo
+  echo "          -x2 <val>"
+  echo "          Max x to shade"
+  echo
   echo "          -i"
   echo "          Use python in interactive mode.  Useful if matplotlibrc has interactive:True"
   echo
@@ -107,8 +113,11 @@ TMAX=-1.0
 LX=12
 LY=6
 INTERACTIVE=
-TITLE=`basename $PWD`
+#TITLE=`basename $PWD`
+TITLE=null
 YMAX=-1.0
+X1=-1.0
+X2=-1.0
 #==============================================================================
 
 #==============================================================================
@@ -147,6 +156,9 @@ while [ $# -gt 0 ] ; do
   -title) shift ; TITLE=$1 ;;
 
   -ymax) shift ; YMAX=$1 ;;
+
+  -x1) shift ; X1=$1 ;;
+  -x2) shift ; X2=$1 ;;
   
   *) echo "ERROR: incorrect gyro_plot syntax." ; exit 1 ;;
 
@@ -196,11 +208,11 @@ case "$PLOT_TYPE" in
 	python $INTERACTIVE  $PYROOT/zf.py $SIMDIR $WINDOW $FTYPE $DATAFILE ;;
 
    phi_n0)  
-	python $INTERACTIVE  $PYROOT/phi_n0.py $SIMDIR $FTYPE $DATAFILE $LX $LY $TITLE $YMAX ;;
+	python $INTERACTIVE  $PYROOT/phi_n0.py $SIMDIR $FTYPE $DATAFILE $LX $LY $TITLE $YMAX $X1 $X2 ;;
 
    gbflux)  
        python $INTERACTIVE  $PYROOT/gbflux.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE \
-	      $DATAFILE $LX $LY $TITLE $YMAX ;;
+	      $DATAFILE $LX $LY $TITLE $YMAX $X1 $X2;;
 
    gbflux_n) 
         python $INTERACTIVE  $PYROOT/gbflux_n.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE $DATAFILE ;;

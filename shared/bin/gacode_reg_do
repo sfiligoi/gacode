@@ -4,10 +4,10 @@
 #  gacode_reg_do <n_proc> <n_omp> <reset_flag> <code> <tol>
 #
 # PURPOSE:
-#  Run through full suite of GYRO regression tests
+#  Run through full suite of regression tests defined for <code>
 #
 # EXAMPLE:
-#  gacode_reg_do 2 1 0 gyro 1e-5
+#  gacode_reg_do 2 1 0 neo 1e-5
 #----------------------------------------------------
 
 n=$#
@@ -29,7 +29,20 @@ tol=${5}
 echo "REGRESSION TESTING: $code"
 
 testdir=$PWD/${code}_regression_test
-compdir=$GACODE_ROOT/$code/tools/input
+
+# Is data in GACODE
+
+if [ -d "$GACODE_ROOT/$code/tools/input" ]
+then
+   compdir=$GACODE_ROOT/$code/tools/input
+fi
+
+# Is data in GACODE_ADD
+if [ -d "$GACODE_ADD_ROOT/$code/tools/input" ]
+then
+   compdir=$GACODE_ADD_ROOT/$code/tools/input
+fi
+
 precfile=out.$code.prec
 
 list=`cat $compdir/reg_list`
@@ -51,8 +64,6 @@ do
    then
       # Overwrite regression data with current data
       echo "$sim/out.$code.prec -> $GACODE_ROOT/$code/tools/input/$sim"
-      cp $sim/out.$code.prec $GACODE_ROOT/$code/tools/input/$sim
-      #echo "$sim/out.$code.run -> $GACODE_ROOT/$code/tools/input/$sim"
-      #cp $sim/out.$code.run  $GACODE_ROOT/$code/tools/input/$sim
+      cp $sim/out.$code.prec $compdir/$sim
    fi
 done

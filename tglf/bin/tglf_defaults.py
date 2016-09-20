@@ -40,7 +40,7 @@ def set_defaults() :
      t.add('NXGRID','16')
      t.add('NKY','12')
      t.add('ADIABATIC_ELEC','.false.')
-     t.add('ALPHA_MACH','1.0')
+     t.add('ALPHA_MACH','0.0')
      t.add('ALPHA_E','1.0')
      t.add('ALPHA_P','1.0')
      t.add('ALPHA_QUENCH','0.0')

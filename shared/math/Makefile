@@ -14,7 +14,6 @@ OBJECTS = math_constants.o \
           cub_spline.o \
           cub_spline_deriv.o \
           cub_spline_deriv2.o \
-          curtis_rad.o \
           energy_integral.o \
           erf.o \
           gacode_system.o \
