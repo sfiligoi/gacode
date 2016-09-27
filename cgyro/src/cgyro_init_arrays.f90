@@ -9,15 +9,16 @@ subroutine cgyro_init_arrays
 
   real :: arg
   real :: efac
+  real :: u
   integer :: ir,it,is,ie,ix
   integer :: jr,jt,id, ccw_fac
-  complex :: thfac, carg
+  complex :: thfac,carg
   real, dimension(nc) :: sum_loc
   real, dimension(n_species,nc) :: res_loc
   real, dimension(nv_loc) :: vfac
-  real, dimension(n_radial) :: u
   real, dimension(:,:), allocatable :: jloc_c
   real, dimension(:), allocatable :: pb11,pb12,pb21,pb22
+  real, external :: spectraldiss
 
   !-------------------------------------------------------------------------
   ! Distributed Bessel-function Gyroaverages
@@ -416,33 +417,6 @@ subroutine cgyro_init_arrays
      uderiv(3)  =  -1.0 / (60.0 * d_theta)
 
   end select
-
-  allocate(spec_uderiv(n_radial))
-  u(:) = (2.0*pi/n_radial)*px(:)
-
-  select case(nup_radial)
-
-  case (1)
-
-     ! 2nd order spectral dissipation
-     spec_uderiv(:) = 1-cos(u)
-
-  case (2)
-
-     ! 4th order spectral dissipation
-     spec_uderiv(:) = (3-4*cos(u)+cos(2*u))/6
-
-  case (3)
-
-     ! 6th order spectral dissipation
-     spec_uderiv(:) = (20-30*cos(u)+12*cos(2*u)-2*cos(3*u))/60
-
-  case (4)
-
-     ! 8th order spectral dissipation
-     spec_uderiv(:) = (70-112*cos(u)+56*cos(2*u)-16*cos(3*u)+2*cos(4*u))/280
-
-  end select
   !-------------------------------------------------------------------------
 
   !-------------------------------------------------------------------------
@@ -490,9 +464,17 @@ subroutine cgyro_init_arrays
         ir = ir_c(ic) 
         it = it_c(ic)
 
+        u = (pi/n_toroidal)*n
+
         ! omega_dalpha
         omega_cap_h(ic,iv_loc) = &
-             -omega_adrift(it,is)*energy(ie)*(1.0+xi(ix)**2)*i_c*k_theta
+             -omega_adrift(it,is)*energy(ie)*(1.0+xi(ix)**2)*&
+             (n_toroidal*q/pi/rmin)*(i_c*u)
+
+        ! omega_dalpha [UPWIND: iu -> spectraldiss]
+        omega_h(ic,iv_loc) = &
+             -abs(omega_adrift(it,is))*energy(ie)*(1.0+xi(ix)**2)*&
+             (n_toroidal*q/pi/rmin)*spectraldiss(u,nup_alpha)*up_alpha
 
         ! omega_dalpha - pressure component
         omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
@@ -502,15 +484,17 @@ subroutine cgyro_init_arrays
         omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
              -omega_cdrift(it,is)*vel(ie)*xi(ix)*i_c*k_theta
 
+        u = (2.0*pi/n_radial)*px(ir)
+
         ! omega_rdrift
         omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) & 
-             -omega_rdrift(it,is)*energy(ie)*&
-             (1.0 + xi(ix)**2)*(2.0*pi*i_c*px(ir)/length) 
+             -omega_rdrift(it,is)*energy(ie)*(1.0+xi(ix)**2)*&
+             (n_radial/length)*(i_c*u) 
 
-        ! radial upwind
-        omega_h(ic,iv_loc) = &
-             -abs(omega_rdrift(it,is))*energy(ie)*(1.0 + xi(ix)**2) &
-             *up_radial *(n_radial/length) * spec_uderiv(ir)
+        ! omega_rdrift [UPWIND: iu -> spectraldiss]
+        omega_h(ic,iv_loc) = omega_h(ic,iv_loc) &
+             -abs(omega_rdrift(it,is))*energy(ie)*(1.0+xi(ix)**2)* &
+             (n_radial/length)*spectraldiss(u,nup_radial)*up_radial
 
         ! omega_star and rotation shearing
         carg = -i_c*k_theta*rho*(dlnndr(is)+dlntdr(is)*(energy(ie)-1.5)) &
@@ -522,5 +506,40 @@ subroutine cgyro_init_arrays
      enddo
   enddo
 !$acc enter data copyin(omega_cap_h,omega_h,omega_s)
- 
+  !-------------------------------------------------------------------------
+
 end subroutine cgyro_init_arrays
+
+! Spectral dissipation function
+
+real function spectraldiss(u,n)
+
+  implicit none
+  real, intent(in) :: u
+  integer, intent(in) :: n
+
+  select case(n)
+
+  case (1)
+
+     ! 2nd order spectral dissipation
+     spectraldiss = 1-cos(u)
+
+  case (2)
+
+     ! 4th order spectral dissipation
+     spectraldiss = (3-4*cos(u)+cos(2*u))/6.0
+
+  case (3)
+
+     ! 6th order spectral dissipation
+     spectraldiss = (20-30*cos(u)+12*cos(2*u)-2*cos(3*u))/60.0
+
+  case (4)
+
+     ! 8th order spectral dissipation
+     spectraldiss = (70-112*cos(u)+56*cos(2*u)-16*cos(3*u)+2*cos(4*u))/280.0
+
+  end select
+
+end function spectraldiss
