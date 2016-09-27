@@ -32,10 +32,11 @@ module cgyro_globals
   real    :: freq_tol
   integer :: restart_mode
   real    :: up_radial
-  integer :: up_radial_n
   real    :: up_theta
-  integer :: nup_theta
+  real    :: up_alpha
   integer :: nup_radial
+  integer :: nup_theta
+  integer :: nup_alpha
   integer :: implicit_flag
   integer :: constant_stream_flag
   real    :: ky
