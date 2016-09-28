@@ -88,6 +88,7 @@ else:
         ax.set_ylabel(r'$'+mtag+'_'+stag+'$',color='k')
         ax.set_title(r'$'+str(sim.t[imin])+' < (c_s/a) t < '+str(sim.t[-1])+'$')
         ax.bar(ky-dk/2.0,ave[:,ispec],width=dk/1.1,color=color[ispec],alpha=0.5,edgecolor='black')
+        ax.set_xlim([0,ky[-1]+dk])
         if ymax != 'auto':
             ax.set_ylim([0,float(ymax)])
 
