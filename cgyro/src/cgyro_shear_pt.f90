@@ -29,11 +29,9 @@ subroutine cgyro_shear_pt
      allocate(gcoef0(n_field,nc))
      allocate(omega_s0(n_field,nc,nv_loc))
      allocate(omega_cap_h0(nc,nv_loc))
-     allocate(jvec_c0(n_field,nc,nv_loc))
      fcoef0     = fcoef
      gcoef0     = gcoef
      omega_s0   = omega_s
-     jvec_c0    = jvec_c
      omega_cap_h0 = omega_cap_h
   endif
 

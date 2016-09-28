@@ -143,8 +143,8 @@ subroutine cgyro_rhs(ij)
   rhs(:,:,ij) = rhs_ij(:,:)
 
   ! TRAPPING TERM
-  if (shear_method == 3 .or. collision_model == 5) then
-  call cgyro_rhs_trap(ij)
+  if (collision_model == 5) then
+     call cgyro_rhs_trap(ij)
   endif
 
   call timer_lib_out('str')

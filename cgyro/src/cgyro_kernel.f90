@@ -72,7 +72,7 @@ subroutine cgyro_kernel
      call cgyro_step_implicit_gk
 
      ! Collision step: returns new h_x, cap_h_x, fields
-     if (shear_method /= 3) call cgyro_step_collision
+     call cgyro_step_collision
      !------------------------------------------------------------
 
      !------------------------------------------------------------

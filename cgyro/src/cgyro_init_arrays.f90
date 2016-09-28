@@ -67,6 +67,7 @@ subroutine cgyro_init_arrays
   call parallel_lib_rtrans_real(jvec_c(1,:,:),jvec_v(1,:,:))
   if (n_field > 1) call parallel_lib_rtrans_real(jvec_c(2,:,:),jvec_v(2,:,:))
   if (n_field > 2) call parallel_lib_rtrans_real(jvec_c(3,:,:),jvec_v(3,:,:))
+  jvec_c0 = jvec_c
   !-------------------------------------------------------------------------
 
   !-------------------------------------------------------------------------
