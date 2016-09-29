@@ -274,9 +274,11 @@ subroutine cgyro_make_profiles
      omega_eb = k_theta*length*gamma_e/(2*pi)
      select case (shear_method)
      case (1)
-        call cgyro_info('Integer-shift (Hammett) ExB shear method.') 
+        call cgyro_info('Hammett discrete-shift ExB shear method.') 
      case (2)
-        call cgyro_info('Continuous-shift ExB shear method.') 
+        call cgyro_info('DFT shear method.  DO NOT USE!') 
+     case (3)
+        call cgyro_info('Linear-time ExB shear method.') 
      end select
   else
      omega_eb = 0.0

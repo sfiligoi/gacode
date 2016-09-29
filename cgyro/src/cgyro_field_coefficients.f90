@@ -2,7 +2,6 @@ subroutine cgyro_field_coefficients
 
   use mpi
   use cgyro_globals
-!  use parallel_lib
 
   implicit none
 
