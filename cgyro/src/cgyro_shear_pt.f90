@@ -15,10 +15,7 @@ subroutine cgyro_shear_pt
   use cgyro_shear_interface
 
   use cgyro_globals
-  use timer_lib
-  use GEO_interface
   use parallel_lib
-  use mpi
 
   implicit none
 
@@ -26,18 +23,17 @@ subroutine cgyro_shear_pt
   real :: a,fac
   complex, dimension(n_theta,nv_loc) :: a1
 
+  
   if (i_time == 1) then
-     allocate(fcoef0(n_field,nc))
-     allocate(gcoef0(n_field,nc))
      allocate(omega_s0(n_field,nc,nv_loc))
      allocate(omega_cap_h0(nc,nv_loc))
-     fcoef0     = fcoef
-     gcoef0     = gcoef
-     omega_s0   = omega_s
+     allocate(jvec_c0(n_field,nc,nv_loc))
+     omega_s0     = omega_s
      omega_cap_h0 = omega_cap_h
+     jvec_c0 = jvec_c
   endif
 
-  a     = omega_eb*delta_t
+  a = omega_eb*delta_t
   gtime = gtime+a
 
   ! Forward shearing
@@ -53,6 +49,7 @@ subroutine cgyro_shear_pt
 
      h_x(ic_c(n_radial,:),:) = a1*gamma_e_decay
 
+     ! Not needed?
      call cgyro_field_c
 
   endif
@@ -61,8 +58,6 @@ subroutine cgyro_shear_pt
      ir = ir_c(ic) 
      if (ir < n_radial) then 
         it = it_c(ic)
-!        fcoef(:,ic) = fcoef0(:,ic_c(ir,it))*(1-gtime) + fcoef0(:,ic_c(ir+1,it))*gtime
-        gcoef(:,ic) = gcoef0(:,ic_c(ir,it))*(1-gtime) + gcoef0(:,ic_c(ir+1,it))*gtime
         omega_cap_h(ic,:) = omega_cap_h0(ic_c(ir,it),:)*(1-gtime) &
              +omega_cap_h0(ic_c(ir+1,it),:)*gtime
         omega_s(:,ic,:) = omega_s0(:,ic_c(ir,it),:)*(1-gtime) &
@@ -73,29 +68,10 @@ subroutine cgyro_shear_pt
   enddo
 
   call parallel_lib_rtrans_real(jvec_c(1,:,:),jvec_v(1,:,:))
+  if (n_field > 1) call parallel_lib_rtrans_real(jvec_c(2,:,:),jvec_v(2,:,:))
+  if (n_field > 2) call parallel_lib_rtrans_real(jvec_c(3,:,:),jvec_v(3,:,:))
 
-  do iv=nv1,nv2
-     iv_loc = iv-nv1+1
-     is = is_v(iv)
-     ix = ix_v(iv)
-     ie = ie_v(iv)
-
-     do ic=1,nc
-        fac = w_xi(ix)*w_e(ie)*z(is)**2/temp(is)*dens(is)
-        field_loc(1,ic) = field_loc(1,ic)+(1-jvec_c(1,ic,iv_loc)**2)*fac
-     enddo
-  enddo
-
-  call MPI_ALLREDUCE(field_loc(1,:),&
-       gcoef(1,:),&
-       size(field(1,:)),&
-       MPI_DOUBLE_COMPLEX,&
-       MPI_SUM,&
-       NEW_COMM_1,&
-       i_err)
-
-  gcoef = 1.0/gcoef
-
+  call cgyro_field_coefficients
   call cgyro_field_c
 
 end subroutine cgyro_shear_pt

@@ -730,18 +730,19 @@ subroutine write_timers(datafile)
   !
   character (len=*), intent(in) :: datafile
   integer :: i_dummy
-  real, dimension(10) :: dummy
+  real, dimension(11) :: dummy
   character (len=1) :: sdummy
   !-------------------------------------------------
 
   if (io_control == 1 .or. io_control == 3) then
      ! Timer initialization (starts at timer 3)
-     call timer_lib_init('field_h')
      call timer_lib_init('str')
      call timer_lib_init('str_comm')
      call timer_lib_init('nl')
      call timer_lib_init('nl_comm')
+     call timer_lib_init('field_h')
      call timer_lib_init('field_H')
+     call timer_lib_init('shear')
      call timer_lib_init('coll')
      call timer_lib_init('coll_comm')
      call timer_lib_init('io')
@@ -763,7 +764,7 @@ subroutine write_timers(datafile)
         write(io,'(1x,9(a11,1x))') timer_cpu_tag(1:2)
         write(io,'(9(1pe10.3,2x))') timer_lib_time('str_init'),timer_lib_time('coll_init')
         write(io,'(a)') 'Run time'
-        write(io,'(1x,9(a10,1x))') timer_cpu_tag(3:11)
+        write(io,'(1x,11(a10,1x))') timer_cpu_tag(3:13)
         close(io)
      endif
 
@@ -773,13 +774,14 @@ subroutine write_timers(datafile)
      ! Print timers
      if (i_proc == 0) then
         open(unit=io,file=datafile,status='old',position='append')
-        write(io,'(10(1pe10.3,1x))') &
-             timer_lib_time('field_h'),&
+        write(io,'(11(1pe10.3,1x))') &
              timer_lib_time('str'),& 
              timer_lib_time('str_comm'),& 
              timer_lib_time('nl'),& 
              timer_lib_time('nl_comm'),&
+             timer_lib_time('field_h'),&
              timer_lib_time('field_H'),&
+             timer_lib_time('shear'),&
              timer_lib_time('coll'),&
              timer_lib_time('coll_comm'),&
              timer_lib_time('io'),& 

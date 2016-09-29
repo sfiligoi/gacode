@@ -15,7 +15,6 @@
 subroutine cgyro_shear_dft
 
   use cgyro_globals
-  use timer_lib
 
   implicit none
 

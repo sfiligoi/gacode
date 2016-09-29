@@ -152,7 +152,6 @@ subroutine cgyro_init_manager
      allocate(omega_h(nc,nv_loc))
      allocate(omega_s(n_field,nc,nv_loc))
      allocate(jvec_c(n_field,nc,nv_loc))
-     allocate(jvec_c0(n_field,nc,nv_loc))
      allocate(jvec_v(n_field,nc_loc,nv))
 
      ! Real-space distributed arrays
@@ -327,5 +326,5 @@ subroutine cgyro_init_manager
 
   endif
 
-  !$acc enter data copyin(energy,xi,vel)
+!$acc enter data copyin(energy,xi,vel)
 end subroutine cgyro_init_manager

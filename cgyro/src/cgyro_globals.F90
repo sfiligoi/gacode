@@ -363,10 +363,12 @@ module cgyro_globals
   ! Field solve variables
   real :: sum_den_h
   real, dimension(:), allocatable :: sum_den_x, sum_cur_x
+  real, dimension(:), allocatable :: vfac
+
   !
   ! n=0 test variables
   real, dimension(:,:,:), allocatable :: hzf, xzf 
-  real, dimension(:), allocatable :: pvec_in, pvec_outr, pvec_outi
+  real, dimension(:), allocatable :: pvec_outr, pvec_outi
   !
   ! Collision operator
   real, dimension(:,:,:), allocatable :: cmat
