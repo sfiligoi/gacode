@@ -1,9 +1,10 @@
 !---------------------------------------------------------
-! cgyro_shear.f90
+! cgyro_shear_hammett.f90
 !
 ! PURPOSE:
-!  Spectral shear algorithm.  Wavenumbers are shifted
-!  to the left or right depending upon sign of omega_eb.
+!  Spectral shear algorithm using the Hammet discrete shift method.
+!  Wavenumbers are shifted to the left or right at selected time 
+!  intervals depending upon sign of omega_eb.
 !
 ! NOTE:
 !                       k_theta*length*gamma_e
@@ -11,7 +12,7 @@
 !                               2 pi
 !---------------------------------------------------------
 
-subroutine cgyro_shear
+subroutine cgyro_shear_hammett
 
   use cgyro_globals
 
@@ -57,4 +58,4 @@ subroutine cgyro_shear
 
   endif
 
-end subroutine cgyro_shear
+end subroutine cgyro_shear_hammett

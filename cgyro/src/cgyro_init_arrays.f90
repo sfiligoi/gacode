@@ -10,7 +10,8 @@ subroutine cgyro_init_arrays
   real :: efac
   real :: u
   integer :: ir,it,is,ie,ix
-  integer :: jr,jt,id, ccw_fac
+  integer :: jr,jt,id,ccw_fac
+  integer :: i_field
   complex :: thfac,carg
   real, dimension(n_species,nc) :: res_loc
   real, dimension(:,:), allocatable :: jloc_c
@@ -60,9 +61,9 @@ subroutine cgyro_init_arrays
 
   enddo
   deallocate(jloc_c)
-  call parallel_lib_rtrans_real(jvec_c(1,:,:),jvec_v(1,:,:))
-  if (n_field > 1) call parallel_lib_rtrans_real(jvec_c(2,:,:),jvec_v(2,:,:))
-  if (n_field > 2) call parallel_lib_rtrans_real(jvec_c(3,:,:),jvec_v(3,:,:))
+  do i_field=1,n_field
+     call parallel_lib_rtrans_real(jvec_c(i_field,:,:),jvec_v(i_field,:,:))
+  enddo
   !-------------------------------------------------------------------------
 
   !-------------------------------------------------------------------------
@@ -121,7 +122,7 @@ subroutine cgyro_init_arrays
 
   allocate(sum_den_x(nc))
   if (n_field > 1) allocate(sum_cur_x(nc))
-  
+
   call cgyro_field_coefficients
   !------------------------------------------------------------------------------
 
@@ -276,12 +277,12 @@ subroutine cgyro_init_arrays
         enddo
      enddo
   enddo
-!$acc enter data copyin(dtheta,dtheta_up,icd_c)
+  !$acc enter data copyin(dtheta,dtheta_up,icd_c)
 
   ! Streaming coefficients (for speed optimization)
 
-!$omp parallel do collapse(2) &
-!$omp& private(iv,ic,iv_loc,is,ix,ie,ir,it,carg)
+  !$omp parallel do collapse(2) &
+  !$omp& private(iv,ic,iv_loc,is,ix,ie,ir,it,carg)
   do iv=nv1,nv2
      do ic=1,nc
 
@@ -333,7 +334,7 @@ subroutine cgyro_init_arrays
 
      enddo
   enddo
-!$acc enter data copyin(omega_cap_h,omega_h,omega_s)
+  !$acc enter data copyin(omega_cap_h,omega_h,omega_s)
   !-------------------------------------------------------------------------
 
 end subroutine cgyro_init_arrays

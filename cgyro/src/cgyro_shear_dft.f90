@@ -6,6 +6,8 @@
 !  continuously to the left or right depending upon 
 !  sign of omega_eb.
 !
+! WARNING: this is an unphysical method
+!
 ! NOTE:
 !                       k_theta*length*gamma_e
 !           omega_eb  = ---------------------- 

@@ -90,13 +90,13 @@ subroutine cgyro_kernel
      select case(shear_method)
      case (1)
         ! Discrete shift (Hammett) 
-        call cgyro_shear
+        call cgyro_shear_hammett
      case (2)
-        ! Spectral rotation (unphysical)
+        ! Spectral rotation (unphysical -- don't use)
         call cgyro_shear_dft
      case (3)
         ! Linear shift (more accurate than discrete shift)
-        call cgyro_shear_pt
+        call cgyro_shear_linear
      end select
      call timer_lib_out('shear')
 
