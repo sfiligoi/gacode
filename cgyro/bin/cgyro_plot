@@ -73,8 +73,8 @@ then
   echo "          *Affects: ball, hb, hbcut"
   echo
   echo "          -n <value>"
-  echo "          Specify values of n"
-  echo "          *Affects: ball, hb, hbcut"
+  echo "          Specify values of n (toroidal mode index)"
+  echo "          *Affects: ky_phi"
   echo
   echo
   echo " LINEAR EXAMPLES:"
@@ -90,6 +90,7 @@ then
   echo "  $ cgyro_plot -e . -plot flux -moment n [particle flux versus time]"
   echo "  $ cgyro_plot -e . -plot ky_flux        [energy flux versus ky]"
   echo "  $ cgyro_plot -e . -plot phi            [n=0 and n>0 potentials versus time]"
+  echo "  $ cgyro_plot -e . -plot ky_phi -n 0,2,4-8 [n=0 and n>0 potentials versus time]"
 
 
   exit 1
@@ -113,6 +114,7 @@ W=0.5
 MOMENT=e
 INDX=1
 THETA=0.0
+N=null
 #==============================================================================
 
 #==============================================================================
@@ -144,6 +146,8 @@ while [ $# -gt 0 ] ; do
   -ymax) shift ; YMAX=$1 ;;
 
   -w) shift ; W=$1 ;;
+
+  -n) shift ; N=$1 ;;
 
   -h) shift ; cat $GACODE_ROOT/cgyro/bin/FILE_FORMAT ; exit 0 ;;
 
@@ -199,7 +203,7 @@ case "$PLOT_TYPE" in
 	python $PYROOT/plot_phi.py $FTYPE $FIELD ;;
 
    ky_phi)  
-	python $PYROOT/plot_ky_phi.py $FTYPE $FIELD ;;
+	python $PYROOT/plot_ky_phi.py $FTYPE $FIELD $N ;;
 
    kxky_phi)  
 	python $PYROOT/plot_kxky_phi.py $FTYPE $W $FIELD ;;
