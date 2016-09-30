@@ -56,23 +56,25 @@ then
   echo "                  = kxky_phi (kx-ky spectra of ave(|phi|))"
   echo "                  = note     (notebook)"
   echo
-  echo " OPTIONS: flux, ky_flux"
-  echo
   echo "          -ymax <float>"
   echo "          Maximum value of vertical axis (where applicable)."
-  echo
-  echo " OPTIONS: hbcut"
+  echo "          *Affects: flux, ky_flux"
   echo
   echo "          -theta <value>"
   echo "          Value of theta/pi used in hbcut"
-  echo
-  echo " OPTIONS: ball, hb, hbcut"
-  echo
+  echo "          *Affects: hbcut"
+  echo 
   echo "          -tmax <float>"
   echo "          Maximum value of ballooning angle."
+  echo "          *Affects: ball, hb, hbcut"
   echo
   echo "          -t <value>"
   echo "          Specify integer time index (-1 is last time)."
+  echo "          *Affects: ball, hb, hbcut"
+  echo
+  echo "          -n <value>"
+  echo "          Specify values of n"
+  echo "          *Affects: ball, hb, hbcut"
   echo
   echo
   echo " LINEAR EXAMPLES:"

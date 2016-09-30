@@ -113,15 +113,27 @@ class cgyrodata:
             self.zmag        = float(data[11])
             self.dzmag       = float(data[12])
             self.rho         = float(data[13])
-            self.ky          = float(data[14])
+            self.ky0         = float(data[14])
             self.betae_unit  = float(data[15])
             self.beta_star   = float(data[16])
             self.lambda_star = float(data[17])
             self.gamma_e     = float(data[18])
             self.gamma_p     = float(data[19])
             self.mach        = float(data[20])
+            self.dens   = np.zeros(self.n_species)
+            self.temp   = np.zeros(self.n_species)
+            self.dlnndr = np.zeros(self.n_species)
+            self.dlntdr = np.zeros(self.n_species)
+            self.nu     = np.zeros(self.n_species)
+            for i in range(self.n_species):
+                self.dens[i]   = float(data[21+5*i])
+                self.temp[i]   = float(data[22+5*i])
+                self.dlnndr[i] = float(data[23+5*i])
+                self.dlntdr[i] = float(data[24+5*i])
+                self.nu[i]     = float(data[25+5*i])
             print "INFO: (data.py) Read data in out.cgyro.equilibrium."
         except:
+            print "WARNING: (data.py) Could not read out.cgyro.equilibrium."
             pass
 
         #-----------------------------------------------------------------
