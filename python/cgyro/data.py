@@ -96,9 +96,31 @@ class cgyrodata:
         # Equil file
         #
         try:
-            data = np.fromfile(self.dir+'out.cgyro.equil',dtype='float',sep=" ")
-            self.equil = data
-            print "INFO: (data.py) Read data in out.cgyro.equil."
+            #data = np.fromfile(self.dir+'out.cgyro.equil',dtype='float',sep=" ")
+            #self.equil = data
+            data = np.loadtxt(self.dir+'out.cgyro.equilibrium')
+            self.rmin        = float(data[0])
+            self.rmaj        = float(data[1])
+            self.q           = float(data[2])
+            self.shear       = float(data[3])
+            self.shift       = float(data[4])
+            self.kappa       = float(data[5])
+            self.s_kappa     = float(data[6])
+            self.delta       = float(data[7])
+            self.s_delta     = float(data[8])
+            self.zeta        = float(data[9])
+            self.s_zeta      = float(data[10])
+            self.zmag        = float(data[11])
+            self.dzmag       = float(data[12])
+            self.rho         = float(data[13])
+            self.ky          = float(data[14])
+            self.betae_unit  = float(data[15])
+            self.beta_star   = float(data[16])
+            self.lambda_star = float(data[17])
+            self.gamma_e     = float(data[18])
+            self.gamma_p     = float(data[19])
+            self.mach        = float(data[20])
+            print "INFO: (data.py) Read data in out.cgyro.equilibrium."
         except:
             pass
 

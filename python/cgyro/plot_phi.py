@@ -21,7 +21,7 @@ ax.set_ylabel(r'$\left| \Phi \right|$')
 ax.set_yscale('log')
 #======================================
 
-p2 = np.sum(sim.phisq,axis=0)/sim.equil[4]**2
+p2 = np.sum(sim.phisq,axis=0)/sim.rho**2
 
 # n=0 intensity
 y0 = p2[0,:]

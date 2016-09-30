@@ -107,34 +107,35 @@ subroutine cgyro_write_initdata
   !
   if (silent_flag == 0 .and. i_proc == 0) then
 
-     open(unit=io,file=trim(path)//'out.cgyro.equil',status='replace')
-     write (io,fmtstr,advance='no') rmin
-     write (io,fmtstr,advance='no') rmaj
-     write (io,fmtstr,advance='no') q
-     write (io,fmtstr,advance='no') s
-     write (io,fmtstr,advance='no') rho
-     write (io,fmtstr,advance='no') ky
+     open(unit=io,file=trim(path)//'out.cgyro.equilibrium',status='replace')
+     write (io,fmtstr) rmin
+     write (io,fmtstr) rmaj
+     write (io,fmtstr) q
+     write (io,fmtstr) s
+     write (io,fmtstr) shift
+     write (io,fmtstr) kappa
+     write (io,fmtstr) s_kappa
+     write (io,fmtstr) delta
+     write (io,fmtstr) s_delta
+     write (io,fmtstr) zeta
+     write (io,fmtstr) s_zeta
+     write (io,fmtstr) zmag
+     write (io,fmtstr) dzmag
+     write (io,fmtstr) rho
+     write (io,fmtstr) ky
+     write (io,fmtstr) betae_unit
+     write (io,fmtstr) beta_star
+     write (io,fmtstr) lambda_star
+     write (io,fmtstr) gamma_e
+     write (io,fmtstr) gamma_p
+     write (io,fmtstr) mach
      do is=1,n_species
-        write (io,fmtstr,advance='no') dens(is)
-        write (io,fmtstr,advance='no') temp(is)
-        write (io,fmtstr,advance='no') dlnndr(is)
-        write (io,fmtstr,advance='no') dlntdr(is)
-        write (io,fmtstr,advance='no') nu(is)
+        write (io,fmtstr) dens(is)
+        write (io,fmtstr) temp(is)
+        write (io,fmtstr) dlnndr(is)
+        write (io,fmtstr) dlntdr(is)
+        write (io,fmtstr) nu(is)
      enddo
-     write (io,*)
-     close(io)
-
-  endif
-
-  if (silent_flag == 0 .and. i_proc == 0 .and. profile_model == 2) then
-
-     open(unit=io,file=trim(path)//'out.cgyro.expnorm',status='replace')
-     write (io,fmtstr,advance='no') a_meters
-     write (io,fmtstr,advance='no') b_unit
-     write (io,fmtstr,advance='no') dens_norm
-     write (io,fmtstr,advance='no') temp_norm
-     write (io,fmtstr,advance='no') vth_norm
-     write (io,*)
      close(io)
 
   endif
