@@ -68,6 +68,12 @@ class cgyrodata:
         mark = mark+self.n_theta*(self.n_radial/self.m_box)
         self.ky = np.array(data[mark:mark+self.n_n])
 
+        mark = mark+self.n_n
+        self.alphadiss = np.array(data[mark:mark+self.n_n])
+
+        mark = mark+self.n_n
+        self.radialdiss = np.array(data[mark:mark+self.n_radial])
+
         print "INFO: (data.py) Read grid data in out.cgyro.grids."
         #-----------------------------------------------------------------
 

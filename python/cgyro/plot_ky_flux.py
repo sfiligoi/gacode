@@ -37,7 +37,7 @@ elif moment == 's':
     print 's not implemented.'
     sys.exit()
 else:
-    print 'ERROR (plot_flux_n.py) Invalid moment.'
+    print 'ERROR (plot_ky_flux.py) Invalid moment.'
     sys.exit()
 
 # Determine tmin
@@ -91,6 +91,7 @@ else:
         ax.set_xlim([0,ky[-1]+dk])
         if ymax != 'auto':
             ax.set_ylim([0,float(ymax)])
+        ax.plot(ky,sim.alphadiss*ax.get_ylim()[1]*0.5,linewidth=2,color='k',alpha=0.2)
 
 
 if ftype == 'screen':
