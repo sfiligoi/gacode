@@ -7,18 +7,6 @@ ftype = sys.argv[1]
 field = sys.argv[2]
 nstr  = sys.argv[3]
 
-#------------------------------------------------------
-# Construct an explicit integer list based on string
-nvec = []
-for i in nstr.split(','):
-    if '-' in i:
-        v = i.split('-')
-        for j in range(int(v[0]),int(v[1])+1):
-            nvec.append(j)
-    else:
-        nvec.append(int(i))
-#------------------------------------------------------
-
 sim = cgyrodata('./')
 sim.getbigfield()
 
@@ -35,7 +23,9 @@ y = np.sum(sim.phisq,axis=0)
 
 if nstr == 'null':
     nvec = range(sim.n_n)
-
+else:
+    nvec = str2list(nstr)
+    
 for n in nvec:
     num = r'$n='+str(n)+'$'
     if n==0:
@@ -44,7 +34,6 @@ for n in nvec:
         ax.plot(sim.t,np.sqrt(y[n,:]),label=num)
 
 ax.set_xlim([0,max(sim.t)])
-
 
 
 if sim.n_n > 16:

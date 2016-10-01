@@ -3,10 +3,10 @@ import numpy as np
 from gacodeplotdefs import *
 from cgyro.data import cgyrodata
 
-ftype = sys.argv[1]
+ftype  = sys.argv[1]
 w = float(sys.argv[2])
 moment = sys.argv[3]
-ymax = sys.argv[4]
+ymax   = sys.argv[4]
 
 sim = cgyrodata('./')
 sim.getbigflux()
@@ -41,10 +41,7 @@ else:
     sys.exit()
 
 # Determine tmin
-imin=0
-for i in range(len(sim.t)):
-    if sim.t[i] < (1.0-w)*sim.t[len(sim.t)-1]:
-        imin = i+1
+imin=iwindow(sim.t,w)
 
 if ftype == 'dump':
     # Datafile output

@@ -59,4 +59,30 @@ def average_n(f,t,window,n):
 
     return ave
 #---------------------------------------------------------------
+#---------------------------------------------------------------
+# Determine index imin for time-averaging window
+def iwindow(t,window):
+ 
+    imin=0
+    for i in range(len(t)):
+        if t[i] < (1.0-window)*t[-1]:
+            imin = i+1
 
+    return imin
+#---------------------------------------------------------------
+
+#------------------------------------------------------
+# Construct an explicit integer list based on string
+def str2list(str):
+
+    nvec = []
+    for i in str.split(','):
+        if '-' in i:
+            v = i.split('-')
+            for j in range(int(v[0]),int(v[1])+1):
+                nvec.append(j)
+        else:
+            nvec.append(int(i))
+
+    return nvec
+#------------------------------------------------------

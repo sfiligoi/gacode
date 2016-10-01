@@ -96,8 +96,6 @@ class cgyrodata:
         # Equil file
         #
         try:
-            #data = np.fromfile(self.dir+'out.cgyro.equil',dtype='float',sep=" ")
-            #self.equil = data
             data = np.loadtxt(self.dir+'out.cgyro.equilibrium')
             self.rmin        = float(data[0])
             self.rmaj        = float(data[1])

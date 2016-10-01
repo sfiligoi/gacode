@@ -53,6 +53,7 @@ then
   echo "                  = ky_flux  (bar plot of flux versus ky)"
   echo "                  = phi      (time-dependent ZF vs. finite-n intensities)"
   echo "                  = ky_phi   (time-dependent ky-phi intensities)"
+  echo "                  = kx_phi   (average kx-phi intensities)"
   echo "                  = kxky_phi (kx-ky spectra of ave(|phi|))"
   echo "                  = note     (notebook)"
   echo
@@ -204,6 +205,9 @@ case "$PLOT_TYPE" in
 
    ky_phi)  
 	python $PYROOT/plot_ky_phi.py $FTYPE $FIELD $N ;;
+
+   kx_phi)  
+	python $PYROOT/plot_kx_phi.py $FTYPE $W $YMAX $N ;;
 
    kxky_phi)  
 	python $PYROOT/plot_kxky_phi.py $FTYPE $W $FIELD ;;

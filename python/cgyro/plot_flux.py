@@ -52,10 +52,8 @@ else:
     print 'ERROR (plot_flux_time.py) Invalid moment.'
     sys.exit()
 
-# Determine tmin
-for i in range(len(t)):
-    if t[i] < (1.0-w)*t[len(t)-1]:
-        imin = i
+# Get index for average window
+imin=iwindow(t,w)
 
 ax.set_title(r'$'+str(t[imin])+' < (c_s/a) t < '+str(t[-1])+'$')
 
