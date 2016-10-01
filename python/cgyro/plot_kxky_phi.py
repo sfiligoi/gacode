@@ -8,7 +8,7 @@ w     = float(sys.argv[2])
 field = sys.argv[3]
 
 sim = cgyrodata('./')
-sim.getbig()
+sim.getbigfield()
 
 #-----------------------------------------------------------------
 # Note array structure
@@ -25,7 +25,7 @@ for i in np.arange(imin,n):
     f = f+sim.phisq[:,:,i]
 
 f = 1e-12+f/(n-imin)
-f = np.log10(f)
+f = np.log(f)
 #-----------------------------------------------------------------
 
 fig = plt.figure(figsize=(10,8))
@@ -38,7 +38,7 @@ ax.set_ylabel(r'$k_x \rho_s$',fontsize=GFONTSIZE)
 ax.set_title(r'$'+str(sim.t[imin])+' < (c_s/a) t < '+str(sim.t[-1])+'$')
 
 fmax = f.max()
-fmin = f.max()-5
+fmin = f.max()-12
 
 d = (fmax-fmin)/200.0
 levels = np.arange(fmin-d,fmax+d,d)
