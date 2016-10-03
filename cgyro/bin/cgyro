@@ -22,34 +22,34 @@ then
   echo
   echo "TEST MODE"
   echo
-  echo "         -t <simdir>"  
+  echo "         -t <simdir>"
   echo "         Sanity test for INPUT data in <simdir>."
   echo
   echo "EXECUTE MODE"
   echo
-  echo "         -e <simdir>" 
+  echo "         -e <simdir>"
   echo "         Run CGYRO using INPUT data in <simdir>."
   echo
-  echo "         -n <MPI tasks>" 
+  echo "         -n <MPI tasks>"
   echo "         Number of MPI tasks."
   echo
-  echo "         -nomp <threads>" 
+  echo "         -nomp <threads>"
   echo "         Number of OpenMP threads per MPI task."
   echo
-  echo "         -numa <n>" 
+  echo "         -numa <n>"
   echo "         NUMAs active per node."
   echo
-  echo "         -mpinuma <n>" 
+  echo "         -mpinuma <n>"
   echo "         MPI tasks per active NUMA."
   echo
   echo "REGRESSION TESTING"
   echo
   echo "         -r"
   echo "         Run full regression suite."
-  echo 
+  echo
   echo "         -reset"
   echo "         Reset regression data."
-  echo 
+  echo
   echo "TEMPLATE GENERATION"
   echo
   echo "         -g"
@@ -59,20 +59,20 @@ then
   echo "         Copy <template> into simulation path."
   echo
   echo "UTILITIES"
-  echo 
-  echo "         -h" 
+  echo
+  echo "         -h"
   echo "         Version and platform information."
   echo
-  echo "         -clean" 
+  echo "         -clean"
   echo "         Clean simulation directory."
   echo
-  echo "         -compress" 
+  echo "         -compress"
   echo "         Compress simulation directory."
 
   exit 1
 fi
 #=============================================================
- 
+
 #=============================================================
 # Define variables for flag capture
 #
@@ -130,7 +130,7 @@ while [ $# -gt 0 ] ; do
   -compress) COMPRESS_FLAG=1 ;;
 
   *) echo "ERROR (cgyro script): unknown option $1." ; exit 1 ;;
- 
+
   esac
   shift
 done
@@ -294,10 +294,19 @@ fi
 #===========================================================
 # RUN CGYRO
 #
-# Version stamp:
-echo `gacode_getversion` > out.cgyro.version 
-echo $GACODE_PLATFORM >> out.cgyro.version
-date >> out.cgyro.version
+# Version stamp 
+# NOTE: log all starts and restarts, but NOT test mode
+if [ $TEST_FLAG -eq 0 ]
+then
+   # If there is no restart file, its safe to overwrite the log file
+   if [ ! -f out.cgyro.restart ]
+   then
+      > out.cgyro.version
+   fi
+   date_tag=`date`
+   version_tag=`gacode_getversion`
+   echo "$date_tag [$version_tag][$GACODE_PLATFORM]" >> out.cgyro.version
+fi
 
 gacode_printversion CGYRO
   
