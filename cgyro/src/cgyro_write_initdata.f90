@@ -129,6 +129,11 @@ subroutine cgyro_write_initdata
      write (io,fmtstr) gamma_e
      write (io,fmtstr) gamma_p
      write (io,fmtstr) mach
+     write (io,fmtstr) a_meters
+     write (io,fmtstr) b_unit
+     write (io,fmtstr) dens_norm
+     write (io,fmtstr) temp_norm
+     write (io,fmtstr) vth_norm
      do is=1,n_species
         write (io,fmtstr) dens(is)
         write (io,fmtstr) temp(is)

@@ -188,6 +188,12 @@ subroutine cgyro_make_profiles
 
   else
 
+     a_meters  = 1.0
+     b_unit    = 1.0
+     dens_norm = 1.0
+     temp_norm = 1.0
+     vth_norm  = 1.0
+     
      q = abs(q)*(ipccw)*(btccw)
 
      if (ae_flag == 1) then
