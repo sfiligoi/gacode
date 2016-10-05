@@ -1,9 +1,9 @@
 include ${GACODE_ROOT}/shared/install/make.inc.${GACODE_PLATFORM}
 
 ifeq ($(OPT),debug)
-   FFLAGS=${FDEBUG}
+   FFLAGS=${FDEBUG} -I${FFTW_INC}
 else
-   FFLAGS=${FOPT}
+   FFLAGS=${FOPT} -I${FFTW_INC}
 endif
 
 FC += ${FOMP}
@@ -149,7 +149,7 @@ OBJECTS += gyro_globals.o \
 lib: $(OBJECTS)
 	$(ARCH) $(LLIB).a $(OBJECTS)
 
-.f90.o .f08.o .F90.o:
+.f90.o .F90.o:
 	$(FC) $(FMATH) $(FFLAGS) -c $<
 
 clean:

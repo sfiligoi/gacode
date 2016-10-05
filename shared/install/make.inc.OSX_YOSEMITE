@@ -1,11 +1,11 @@
 #---------------------------------------------------
-# OSX Mountain Lion (10.8.x)
+# OSX Yosemite
 #---------------------------------------------------
 
 # Compilers and flags
 
-FC	= mpif90-mpich-gcc5 -I$(GACODE_ROOT)/modules -J$(GACODE_ROOT)/modules -I/opt/local/include
-F77	= mpif90-mpich-gcc5
+FC  = mpif90-mpich-gcc5 -I$(GACODE_ROOT)/modules -J$(GACODE_ROOT)/modules
+F77 = mpif90-mpich-gcc5
 
 FOMP    = -fopenmp
 FMATH	= -fdefault-real-8
@@ -15,6 +15,7 @@ FDEBUG  = -Wall -fcheck=all -ffpe-trap=invalid,zero,overflow
 # System math libraries
 
 LMATH = -framework Accelerate /opt/local/lib/libfftw3.a
+FFTW_INC = /opt/local/include 
 
 # NetCDF libraries
 
