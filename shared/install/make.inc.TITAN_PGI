@@ -12,17 +12,17 @@ NUMAS_PER_NODE=2
 # Compilers and flags
 
 # Fortran 90/95 compiler
-FC = ftn  -module  ${GACODE_ROOT}/modules -Mpreprocess -DUSE_INLINE
+FC = ftn -module ${GACODE_ROOT}/modules -Mpreprocess -DUSE_INLINE
 
 # Fortran 77 compiler
 F77 = ${FC} 
 
 # Compiler options/flags
-FOMP   =  -mp  -Mstack_arrays
+FOMP   = -mp -Mstack_arrays
 FMATH  = -r8 -Mr8 -Mr8intrinsics
 FDEBUG = -g -Kieee -Ktrap=divz  -Mbounds
 FACC   = -acc -Minfo=accel -Mcuda=kepler,nollvm,keepgpu 
-FOPT   = -fast -fastsse  -Mvect -Minfo=all ${FMATH} ${FOMP} ${FACC}
+FOPT   = -fast -fastsse -Mvect -Minfo=all ${FMATH} ${FOMP} ${FACC}
 
 # System math libraries
 #LMATH = -L/opt/fftw/3.3.0.1/x86_64/lib -Wl,-rpath=/opt/fftw/3.3.0.1/x86_64/lib \
