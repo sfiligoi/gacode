@@ -277,12 +277,12 @@ subroutine cgyro_init_arrays
         enddo
      enddo
   enddo
-  !$acc enter data copyin(dtheta,dtheta_up,icd_c)
+!$acc enter data copyin(dtheta,dtheta_up,icd_c)
 
   ! Streaming coefficients (for speed optimization)
 
-  !$omp parallel do collapse(2) &
-  !$omp& private(iv,ic,iv_loc,is,ix,ie,ir,it,carg)
+!$omp parallel do collapse(2) &
+!$omp& private(iv,ic,iv_loc,is,ix,ie,ir,it,carg)
   do iv=nv1,nv2
      do ic=1,nc
 
@@ -334,7 +334,7 @@ subroutine cgyro_init_arrays
 
      enddo
   enddo
-  !$acc enter data copyin(omega_cap_h,omega_h,omega_s)
+!$acc enter data copyin(omega_cap_h,omega_h,omega_s)
   !-------------------------------------------------------------------------
 
 end subroutine cgyro_init_arrays
@@ -368,6 +368,12 @@ real function spectraldiss(u,n)
 
      ! 8th order spectral dissipation
      spectraldiss = (70-112*cos(u)+56*cos(2*u)-16*cos(3*u)+2*cos(4*u))/280.0
+
+  case default
+
+     print *,'Order out of range in spectraldiss'
+     spectraldiss = 0.0
+     stop
 
   end select
 
