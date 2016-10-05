@@ -1,9 +1,13 @@
 include ${GACODE_ROOT}/shared/install/make.inc.${GACODE_PLATFORM}
 
 ifeq ($(OPT),debug)
-   FFLAGS=${FDEBUG} -I${FFTW_INC}
+   FFLAGS=${FDEBUG}
 else
-   FFLAGS=${FOPT} -I${FFTW_INC}
+   FFLAGS=${FOPT}
+endif
+
+ifdef FFTW_INC
+   FFLAGS += -I${FFTW_INC}
 endif
 
 FC += ${FOMP}

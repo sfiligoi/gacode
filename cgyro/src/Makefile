@@ -1,9 +1,13 @@
 include ${GACODE_ROOT}/shared/install/make.inc.${GACODE_PLATFORM}
 
 ifeq ($(OPT),debug)
-   FFLAGS=${FDEBUG} -I${FFTW_INC}
+   FFLAGS=${FDEBUG}
 else
-   FFLAGS=${FOPT} -I${FFTW_INC}
+   FFLAGS=${FOPT}
+endif
+
+ifdef FFTW_INC
+   FFLAGS += -I${FFTW_INC}
 endif
 
 FC += ${FOMP}
@@ -54,9 +58,9 @@ OBJECTS = cgyro_globals.o \
 .SUFFIXES : .o .f90 .F90
 
 all: cgyro_lib.a $(EXEC).o $(EXTRA_LIBS)
-	$(FC) $(FFLAGS) -o $(EXEC) $(EXEC).o cgyro_lib.a $(EXTRA_LIBS) $(LMATH) 
+	$(FC) $(FFLAGS) -o $(EXEC) $(EXEC).o cgyro_lib.a $(EXTRA_LIBS) $(LMATH)
 
-stub: 
+stub:
 	$(FC) $(FFLAGS) -c cgyro_stub.f90
 	$(ARCH) cgyro_lib.a cgyro_stub.o
 
@@ -66,7 +70,7 @@ cgyro_lib.a: $(OBJECTS)
 .f90.o .F90.o :
 	$(FC) $(FMATH) $(FFLAGS) -c $<
 
-clean:  
+clean:
 	rm -rf *.o cgyro_lib.a $(EXEC) *~ *.cub *.ptx
 
 -include ../install/make.ext.${GACODE_PLATFORM}
