@@ -26,9 +26,7 @@ subroutine cgyro_upwind
   complex, dimension(n_species,nc) :: res_loc 
   complex, dimension(n_species,nc) :: res
 
-!$omp workshare
   res_loc(:,:) = (0.0,0.0)
-!$omp end workshare
 
 !$omp parallel private(ic,iv_loc,is,ix,ie,fac)
 !$omp do reduction(+:res_loc)
@@ -54,18 +52,19 @@ subroutine cgyro_upwind
        NEW_COMM_1,&
        i_err)
 
+!$omp parallel private(ic,iv_loc,is,ix,ie,fac)
+!$omp do reduction(+:res_loc)
   do iv=nv1,nv2
-     do ic=1,nc
-
         iv_loc = iv-nv1+1
         is = is_v(iv)
         ix = ix_v(iv)
         ie = ie_v(iv)
-
+     do ic=1,nc
         g_x(ic,iv_loc) = abs(xi(ix))*vel(ie)*g_x(ic,iv_loc) &
              -jvec_c(1,ic,iv_loc)*res(is,ic)/res_norm(is,ic)
-
      enddo
   enddo
+!$omp end do
+!$omp end parallel
 
 end subroutine cgyro_upwind
