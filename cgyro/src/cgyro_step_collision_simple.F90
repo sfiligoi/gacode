@@ -109,7 +109,7 @@ subroutine cgyro_step_collision_simple
   ! Compute H given h and [phi(h), apar(h)]
 
 !$omp parallel do &
-!$omp& private(iv,iv_loc,is,ix,ie,ic)
+!$omp& private(iv_loc,is,ic)
   do iv=nv1,nv2
      iv_loc = iv-nv1+1
      is = is_v(iv)
