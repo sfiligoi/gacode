@@ -25,6 +25,7 @@ module parallel_lib
   integer, private :: slib_comm
 
   integer, private, parameter :: default_size = 1024*1024*32
+
 contains
 
   !=========================================================
@@ -76,18 +77,17 @@ contains
 
     complex, intent(in), dimension(ni_loc,nj) :: f
     complex, intent(inout), dimension(nj_loc,ni) :: ft
-    integer :: ierr,i_loc,i,j,k, i1,i2
+    integer :: ierr,i_loc,i,j,k,i1,i2
 
+    i1 = 1+iproc*ni_loc
+    i2 = (1+iproc)*ni_loc
 
-
-!$omp  parallel do if (size(fsendf) >= default_size) default(none) &
-!$omp& shared(nproc,iproc,ni_loc,nj_loc) &
-!$omp& private(k,i,i_loc,j,i1,i2) &
-!$omp& shared(f) &
-!$omp& shared(fsendf)
+!!$omp parallel do if (size(fsendf) >= default_size) default(none) &
+!$omp parallel do default(none) &
+!$omp& shared(nproc,i1,i2,nj_loc) &
+!$omp& private(i,i_loc,j) &
+!$omp& shared(f,fsendf)
     do k=1,nproc
-       i1 = 1+iproc*ni_loc
-       i2 = (1+iproc)*ni_loc
        do i=i1,i2
           i_loc = i-i1+1 
           do j=1,nj_loc
@@ -117,16 +117,17 @@ contains
 
     complex, intent(in), dimension(nj_loc,ni) :: ft
     complex, intent(inout), dimension(ni_loc,nj) :: f
-    integer :: ierr,j_loc,i,j,k, j1,j2
+    integer :: ierr,j_loc,i,j,k,j1,j2
 
-!$omp  parallel do if (size(fsendr) >= default_size) default(none) &
-!$omp& shared(nproc,iproc,nj_loc,ni_loc) &
-!$omp& private(k,j,j_loc,i,j1,j2) &
-!$omp& shared(ft) &
-!$omp& shared(fsendr)
+    j1 = 1+iproc*nj_loc
+    j2 = (1+iproc)*nj_loc
+
+!!$omp  parallel do if (size(fsendr) >= default_size) default(none) &
+!$omp parallel do default(none) &
+!$omp& shared(nproc,j1,j2,ni_loc) &
+!$omp& private(j,j_loc,i) &
+!$omp& shared(ft,fsendr)
     do k=1,nproc
-       j1 = 1+iproc*nj_loc
-       j2 = (1+iproc)*nj_loc
        do j=j1,j2
           j_loc = j-j1+1 
           do i=1,ni_loc
@@ -156,16 +157,17 @@ contains
 
     complex, intent(in), dimension(:,:) :: fin
     complex, intent(inout), dimension(ni_loc,nj) :: f
-    integer :: ierr,j_loc,i,j,k, j1,j2
+    integer :: ierr,j_loc,i,j,k,j1,j2
 
-!$omp  parallel do if (size(fsendr) >= default_size) default(none) &
-!$omp& shared(nproc,iproc,nj_loc,ni_loc) &
-!$omp& private(k,j,j_loc,i,j1,j2) &
-!$omp& shared(fin) &
-!$omp& shared(fsendr)
+    j1 = 1+iproc*nj_loc
+    j2 = (1+iproc)*nj_loc
+
+!!$omp parallel do if (size(fsendr) >= default_size) default(none) &
+!$omp parallel do default(none) &
+!$omp& shared(nproc,j1,j2,ni_loc) &
+!$omp& private(j,j_loc,i) &
+!$omp& shared(fin,fsendr)
     do k=1,nproc
-       j1 = 1+iproc*nj_loc
-       j2 = (1+iproc)*nj_loc
        do j=j1,j2
           j_loc = j-j1+1 
           do i=1,ni_loc
@@ -197,14 +199,15 @@ contains
     real, intent(inout), dimension(ni_loc,nj) :: f
     integer :: ierr,j_loc,i,j,k,j1,j2
 
-!$omp  parallel do if (size(fsendr_real) >= default_size) default(none) &
-!$omp& shared(nproc,iproc,nj_loc,ni_loc) &
-!$omp& private(k,j,j_loc,i,j1,j2) &
-!$omp& shared(ft) &
-!$omp& shared(fsendr_real)
+    j1 = 1+iproc*nj_loc
+    j2 = (1+iproc)*nj_loc
+
+!!$omp  parallel do if (size(fsendr_real) >= default_size) default(none) &
+!$omp  parallel do default(none) &
+!$omp& shared(nproc,j1,j2,ni_loc) &
+!$omp& private(j,j_loc,i) &
+!$omp& shared(ft,fsendr_real)
     do k=1,nproc
-       j1 = 1+iproc*nj_loc
-       j2 = (1+iproc)*nj_loc
        do j=j1,j2
           j_loc = j-j1+1
           do i=1,ni_loc
@@ -234,14 +237,15 @@ contains
     real, intent(inout), dimension(ni_loc,nj) :: f
     integer :: ierr,j_loc,i,j,k,j1,j2
 
-!$omp  parallel do if (size(fsendr_real) >= default_size) default(none) &
-!$omp& shared(nproc,iproc,nj_loc,ni_loc) &
-!$omp& private(k,j,j_loc,i,j1,j2) &
-!$omp& shared(fin) &
-!$omp& shared(fsendr_real)
+    j1 = 1+iproc*nj_loc
+    j2 = (1+iproc)*nj_loc
+
+!!$omp  parallel do if (size(fsendr_real) >= default_size) default(none) &
+!$omp  parallel do default(none) &
+!$omp& shared(nproc,j1,j2,ni_loc) &
+!$omp& private(j,j_loc,i) &
+!$omp& shared(fin,fsendr_real)
     do k=1,nproc
-       j1 = 1+iproc*nj_loc
-       j2 = (1+iproc)*nj_loc
        do j=j1,j2
           j_loc = j-j1+1
           do i=1,ni_loc
