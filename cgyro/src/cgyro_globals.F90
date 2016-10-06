@@ -75,8 +75,6 @@ module cgyro_globals
   integer :: hiprec_flag
   integer :: udsymmetry_flag
   integer :: shear_method
-  integer :: shear_pad
-  real :: dshift
   !
   ! Geometry input
   !
@@ -301,10 +299,6 @@ module cgyro_globals
   type(C_PTR) :: plan_r2c
   type(C_PTR) :: plan_c2r
   !
-  ! Shear plans
-  type(C_PTR) :: plan_j2p
-  type(C_PTR) :: plan_p2j
-  !
   ! GPU-FFTW plans
 #ifdef _OPENACC
   integer(c_int) :: cu_plan_r2c_many
@@ -328,10 +322,6 @@ module cgyro_globals
   complex, dimension(:,:),allocatable :: fy
   complex, dimension(:,:),allocatable :: gx
   complex, dimension(:,:),allocatable :: gy
-  !
-  ! 1D FFT work arrays
-  complex, dimension(:), allocatable :: fp
-  complex, dimension(:), allocatable :: fj
   !
   ! Work arrays
   complex, dimension(:,:), allocatable :: f_balloon

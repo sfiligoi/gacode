@@ -85,20 +85,10 @@ subroutine cgyro_kernel
      call cgyro_error_estimate
      !------------------------------------------------------------
 
+     !------------------------------------------------------------
      ! Spectral ExB shear
-     call timer_lib_in('shear')
-     select case(shear_method)
-     case (1)
-        ! Discrete shift (Hammett) 
-        call cgyro_shear_hammett
-     case (2)
-        ! Spectral rotation (unphysical -- don't use)
-        call cgyro_shear_dft
-     case (3)
-        ! Linear shift (more accurate than discrete shift)
-        call cgyro_shear_linear
-     end select
-     call timer_lib_out('shear')
+     call cgyro_shear
+     !------------------------------------------------------------
 
      !---------------------------------------
      ! IO

@@ -214,15 +214,6 @@ subroutine cgyro_init_manager
   call cgyro_init_h
   call timer_lib_out('str_init')
 
-  !---------------------------------------------------------------
-  ! 1D FFT for ExB shear
-  allocate(fj(0:n_radial-1+2*shear_pad))
-  allocate(fp(0:n_radial-1+2*shear_pad))
-
-  plan_j2p = fftw_plan_dft_1d(n_radial+2*shear_pad,fj,fp,FFTW_FORWARD,FFTW_PATIENT)
-  plan_p2j = fftw_plan_dft_1d(n_radial+2*shear_pad,fp,fj,FFTW_BACKWARD,FFTW_PATIENT)
-  !---------------------------------------------------------------
-
   ! Initialize nonlinear dimensions and arrays 
   if (nonlinear_method == 1) then
 

@@ -100,7 +100,7 @@ subroutine cgyro_rhs(ij)
 
 
 #ifdef _OPENACC
-!$acc  parallel  loop gang vector collapse(2) & 
+!$acc  parallel loop gang vector collapse(2) & 
 !$acc& private(iv,ic,iv_loc,is,ix,ie,rval,rhs_stream,id,jc)
 #else
 !$omp  parallel do &
