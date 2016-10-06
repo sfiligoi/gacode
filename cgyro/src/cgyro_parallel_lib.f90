@@ -82,7 +82,8 @@ contains
     i1 = 1+iproc*ni_loc
     i2 = (1+iproc)*ni_loc
 
-!$omp parallel do if (size(fsendf) >= default_size) default(none) &
+!!$omp parallel do if (size(fsendf) >= default_size) default(none) &
+!$omp parallel do default(none) &
 !$omp& shared(nproc,i1,i2,nj_loc) &
 !$omp& private(i,i_loc,j) &
 !$omp& shared(f,fsendf)
@@ -121,7 +122,8 @@ contains
     j1 = 1+iproc*nj_loc
     j2 = (1+iproc)*nj_loc
 
-!$omp  parallel do if (size(fsendr) >= default_size) default(none) &
+!!$omp parallel do if (size(fsendr) >= default_size) default(none) &
+!$omp parallel do default(none) &
 !$omp& shared(nproc,j1,j2,ni_loc) &
 !$omp& private(j,j_loc,i) &
 !$omp& shared(ft,fsendr)
@@ -160,7 +162,8 @@ contains
     j1 = 1+iproc*nj_loc
     j2 = (1+iproc)*nj_loc
 
-!$omp parallel do if (size(fsendr) >= default_size) default(none) &
+!!$omp parallel do if (size(fsendr) >= default_size) default(none) &
+!$omp parallel do default(none) &
 !$omp& shared(nproc,j1,j2,ni_loc) &
 !$omp& private(j,j_loc,i) &
 !$omp& shared(fin,fsendr)
@@ -199,7 +202,8 @@ contains
     j1 = 1+iproc*nj_loc
     j2 = (1+iproc)*nj_loc
 
-!$omp  parallel do if (size(fsendr_real) >= default_size) default(none) &
+!!$omp parallel do if (size(fsendr_real) >= default_size) default(none) &
+!$omp parallel do default(none) &
 !$omp& shared(nproc,j1,j2,ni_loc) &
 !$omp& private(j,j_loc,i) &
 !$omp& shared(ft,fsendr_real)
@@ -236,7 +240,8 @@ contains
     j1 = 1+iproc*nj_loc
     j2 = (1+iproc)*nj_loc
 
-!$omp  parallel do if (size(fsendr_real) >= default_size) default(none) &
+!!$omp parallel do if (size(fsendr_real) >= default_size) default(none) &
+!$omp parallel do default(none) &
 !$omp& shared(nproc,j1,j2,ni_loc) &
 !$omp& private(j,j_loc,i) &
 !$omp& shared(fin,fsendr_real)
@@ -317,19 +322,10 @@ contains
     integer :: ierr
     !-------------------------------------------------------
 
-!$omp  parallel do if (size(x) >= default_size) default(none) &
-!$omp& shared(nexch) &
-!$omp& private(j) &
-!$omp& shared(x_in) &
-!$omp& shared(x)
     do j=1,nexch
        x(:,j) = x_in(:,j)
     enddo
 
-!$omp  parallel do if (size(x) >= default_size) default(none) &
-!$omp& shared(nexch,nsplit,nn) &
-!$omp& private(j) &
-!$omp& shared(x)
     do j=nexch+1,nsplit*nn
        x(:,j) = (0.0,0.0)
     enddo
@@ -371,11 +367,6 @@ contains
          slib_comm, &
          ierr)
 
-!$omp  parallel do if (size(x) >= default_size) default(none) &
-!$omp& shared(nexch) &
-!$omp& private(j) &
-!$omp& shared(x) &
-!$omp& shared(x_out)
     do j=1,nexch
        x_out(:,j) = x(:,j)
     enddo

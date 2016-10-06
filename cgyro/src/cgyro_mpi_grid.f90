@@ -40,15 +40,17 @@ subroutine cgyro_mpi_grid
      write(io,'(a,i5)') '         nc: ',nc
      write(io,'(a,i5)') ' GCD(nv,nc): ',d
      write(io,*)
-     write(io,*) '          [coll]     [str]      [NL]'
-     write(io,*) ' n_MPI    nc_loc    nv_loc   n_split'
-     write(io,*) '------    ------    ------   -------'
+     write(io,*) '          [coll]     [str]      [NL]      [NL]      [NL]'
+     write(io,*) ' n_MPI    nc_loc    nv_loc   n_split  atoa[MB] atoa proc'
+     write(io,*) '------    ------    ------   -------  -------- ---------'
      do it=1,d*n_toroidal
         if (mod(d*n_toroidal,it) == 0 .and. mod(it,n_toroidal) == 0) then
            n_proc_1 = it/n_toroidal
            nc_loc = nc/n_proc_1           
            nv_loc = nv/n_proc_1           
-           write(io,'(t2,4(i6,4x))') it,nc_loc,nv_loc,1+(nv_loc*n_theta-1)/n_toroidal
+           nsplit = 1+(nv_loc*n_theta-1)/n_toroidal
+           write(io,'(t2,4(i6,4x),f5.2,4x,i6)') &
+                it,nc_loc,nv_loc,nsplit,16.0*n_radial*nsplit/1e6,n_toroidal
         endif
      enddo
      close(io)
@@ -99,7 +101,7 @@ subroutine cgyro_mpi_grid
      nsplit = nv_loc*n_theta/n_toroidal
      return
   endif
-  
+
   !-------------------------------------------------------------
   ! Check that n_proc is a multiple of n_toroidal
   !
@@ -184,7 +186,7 @@ subroutine cgyro_mpi_grid
 
   allocate(ic_locv(nc1:nc2))
   allocate(iv_locv(nv1:nv2))
-  
+
   ic_loc = 0
   do ic=nc1,nc2
      ic_loc = ic_loc+1

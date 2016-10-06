@@ -317,5 +317,4 @@ subroutine cgyro_init_manager
 
   endif
 
-!$acc enter data copyin(energy,xi,vel)
 end subroutine cgyro_init_manager

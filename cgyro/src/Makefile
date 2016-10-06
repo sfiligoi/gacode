@@ -15,6 +15,7 @@ FC += ${FOMP}
 EXEC = cgyro
 
 OBJECTS = cgyro_globals.o \
+          cgyro_parallel_lib.o \
           cgyro_io.o \
           cgyro_equilibrium.o \
           cgyro_check.o \
