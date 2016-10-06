@@ -15,6 +15,7 @@ nomp=${5}
 numa=${6}
 mpinuma=${7}
 nidle=${8}
+w=${9}
 
 # nmpi = MPI tasks
 # nomp = OpenMP threads per MPI task

@@ -15,6 +15,7 @@ nomp=${5}
 numa=${6}
 mpinuma=${7}
 nidle=${8}
+w=${9}
 
 # nmpi = MPI tasks
 # nomp = OpenMP threads per MPI task
@@ -35,28 +36,14 @@ echo "MPI tasks/node (-N)          : $mpinode"
 echo "OpenMP threads/MPI task(-d)  : $nomp"
 echo "MPI tasks per numa node (-S) : $mpinuma"
 echo
-echo "[0] debug (10 min)"
-echo "[1] debug (30 min)"
-echo "[2] debug  (1 hour)" 
-echo "[3] batch  (1 hour)" 
-echo "[4] batch ( 2 hours)" 
-echo "[5] batch ( 6 hours) >= 2000 cores" 
-echo "[6] batch ( 8 hours) >= 5008 cores" 
-echo "[7] batch (12 hours) >= 5008 cores" 
-echo "[8] batch (24 hours) >= 60000 cores" 
+echo "[0] debug (adjust time with -w ; default 00:30:00)"
+echo "[1] batch (adjust time with -w ; default 00:30:00)"
 
-read -p "Select a queue [0-9] " queue_num
+read -p "Select a queue [0-1] " queue_num
 
 case "$queue_num" in
-  0) queue="debug" ; limit="0:10:00" ;;
-  1) queue="debug" ; limit="0:30:00" ;;
-  2) queue="debug" ; limit="1:00:00" ;;
-  3) queue="batch" ; limit="1:00:00" ;;
-  4) queue="batch" ; limit="2:00:00" ;;
-  5) queue="batch" ; limit="6:00:00" ;;
-  6) queue="batch" ; limit="8:00:00" ;;
-  7) queue="batch" ; limit="12:00:00" ;;
-  8) queue="batch" ; limit="24:00:00" ;;
+  0) queue="debug" ; limit="$w" ;;
+  1) queue="batch" ; limit="$w" ;;
 esac
 
 bfile=$simpath/$sim/batch.src
