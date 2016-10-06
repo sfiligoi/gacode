@@ -82,8 +82,7 @@ contains
     i1 = 1+iproc*ni_loc
     i2 = (1+iproc)*ni_loc
 
-!!$omp parallel do if (size(fsendf) >= default_size) default(none) &
-!$omp parallel do default(none) &
+!$omp parallel do if (size(fsendf) >= default_size) default(none) &
 !$omp& shared(nproc,i1,i2,nj_loc) &
 !$omp& private(i,i_loc,j) &
 !$omp& shared(f,fsendf)
@@ -122,8 +121,8 @@ contains
     j1 = 1+iproc*nj_loc
     j2 = (1+iproc)*nj_loc
 
-!!$omp  parallel do if (size(fsendr) >= default_size) default(none) &
-!$omp parallel do default(none) &
+!$omp  parallel do if (size(fsendr) >= default_size) default(none) &
+!!$omp parallel do default(none) &
 !$omp& shared(nproc,j1,j2,ni_loc) &
 !$omp& private(j,j_loc,i) &
 !$omp& shared(ft,fsendr)
@@ -162,8 +161,7 @@ contains
     j1 = 1+iproc*nj_loc
     j2 = (1+iproc)*nj_loc
 
-!!$omp parallel do if (size(fsendr) >= default_size) default(none) &
-!$omp parallel do default(none) &
+!$omp parallel do if (size(fsendr) >= default_size) default(none) &
 !$omp& shared(nproc,j1,j2,ni_loc) &
 !$omp& private(j,j_loc,i) &
 !$omp& shared(fin,fsendr)
@@ -202,8 +200,7 @@ contains
     j1 = 1+iproc*nj_loc
     j2 = (1+iproc)*nj_loc
 
-!!$omp  parallel do if (size(fsendr_real) >= default_size) default(none) &
-!$omp  parallel do default(none) &
+!$omp  parallel do if (size(fsendr_real) >= default_size) default(none) &
 !$omp& shared(nproc,j1,j2,ni_loc) &
 !$omp& private(j,j_loc,i) &
 !$omp& shared(ft,fsendr_real)
@@ -240,8 +237,7 @@ contains
     j1 = 1+iproc*nj_loc
     j2 = (1+iproc)*nj_loc
 
-!!$omp  parallel do if (size(fsendr_real) >= default_size) default(none) &
-!$omp  parallel do default(none) &
+!$omp  parallel do if (size(fsendr_real) >= default_size) default(none) &
 !$omp& shared(nproc,j1,j2,ni_loc) &
 !$omp& private(j,j_loc,i) &
 !$omp& shared(fin,fsendr_real)

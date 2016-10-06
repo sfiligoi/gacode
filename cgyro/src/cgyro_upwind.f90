@@ -53,7 +53,7 @@ subroutine cgyro_upwind
        i_err)
 
 !$omp parallel do &
-!$omp& private(iv_loc,is,ix,ie,ic,rhs_stream,id,jc)
+!$omp& private(iv_loc,is,ix,ie,ic)
   do iv=nv1,nv2
      iv_loc = iv-nv1+1
      is = is_v(iv)
