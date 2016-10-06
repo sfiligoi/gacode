@@ -122,7 +122,6 @@ contains
     j2 = (1+iproc)*nj_loc
 
 !$omp  parallel do if (size(fsendr) >= default_size) default(none) &
-!!$omp parallel do default(none) &
 !$omp& shared(nproc,j1,j2,ni_loc) &
 !$omp& private(j,j_loc,i) &
 !$omp& shared(ft,fsendr)
