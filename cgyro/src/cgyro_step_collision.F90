@@ -38,11 +38,11 @@ subroutine cgyro_step_collision
   call timer_lib_in('coll')
 
 #ifdef _OPENACC
-!$acc  data present(cmat) &
+!$acc data present(cmat) &
 !$acc& pcreate(bvec,cvec)  pcopy(cap_h_v)
 
-!$acc  parallel 
-!$acc  loop gang private(ic_loc,ivp,iv,cvec_re,cvec_im)
+!$acc parallel 
+!$acc loop gang private(ic_loc,ivp,iv,cvec_re,cvec_im)
 #else
 !$omp parallel private(ic_loc,ivp,iv,cvec_re,cvec_im)
 !$omp do
@@ -64,9 +64,9 @@ subroutine cgyro_step_collision
 
      ! This is a key loop for performance
      do ivp=1,nv
-        cvec_re = real(cvec(ivp,ic),kind=kind(cmat))
+        cvec_re = real(cvec(ivp,ic))
         cvec_im = aimag(cvec(ivp,ic))
-!$acc   loop vector
+!$acc loop vector
         do iv=1,nv
            bvec(iv,ic) = bvec(iv,ic)+ &
                  cmplx(cmat(iv,ivp,ic_loc)*cvec_re, &

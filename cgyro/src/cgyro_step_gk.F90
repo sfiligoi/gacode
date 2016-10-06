@@ -64,12 +64,13 @@ subroutine cgyro_rhs(ij)
   complex :: rhs_ij(nc,nv_loc)
 
   ! Prepare suitable distribution (g, not h) for conservative upwind method
+
 !$omp workshare
   g_x(:,:) = h_x(:,:)
 !$omp end workshare
   if (n_field > 1) then
 !$omp  parallel do  &
-!$omp& private(iv,ic,iv_loc,is,ir,it)
+!$omp& private(iv_loc,is,ic)
      do iv=nv1,nv2
         iv_loc = iv-nv1+1
         is = is_v(iv)
@@ -101,10 +102,10 @@ subroutine cgyro_rhs(ij)
 
 #ifdef _OPENACC
 !$acc  parallel loop gang vector collapse(2) & 
-!$acc& private(iv,ic,iv_loc,is,ix,ie,rval,rhs_stream,id,jc)
+!$acc& private(ic,iv_loc,is,ix,ie,rval,rhs_stream,id,jc)
 #else
 !$omp  parallel do &
-!$omp& private(iv,ic,iv_loc,is,ix,ie,rval,rhs_stream,id,jc)
+!$omp& private(ic,iv_loc,is,ix,ie,rval,rval2,rhs_stream,id,jc)
 #endif
   do iv=nv1,nv2
      do ic=1,nc
