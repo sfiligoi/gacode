@@ -65,7 +65,7 @@ bfile=$simpath/$sim/batch.src
 
 echo "#!/bin/bash -l" > $bfile
 echo "#PBS -N $sim" >> $bfile
-echo "#PBS -A fus108" >> $bfile
+echo "#PBS -A fus115" >> $bfile
 echo "#PBS -o $simpath/$sim/batch.out" >> $bfile
 echo "#PBS -e $simpath/$sim/batch.err" >> $bfile
 echo "#PBS -q $queue" >> $bfile
