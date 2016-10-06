@@ -282,7 +282,7 @@ subroutine cgyro_init_arrays
   ! Streaming coefficients (for speed optimization)
 
 !$omp parallel do collapse(2) &
-!$omp& private(iv,ic,iv_loc,is,ix,ie,ir,it,carg)
+!$omp& private(iv,ic,iv_loc,is,ix,ie,ir,it,carg,u)
   do iv=nv1,nv2
      do ic=1,nc
 
