@@ -52,19 +52,17 @@ subroutine cgyro_upwind
        NEW_COMM_1,&
        i_err)
 
-!$omp parallel private(ic,iv_loc,is,ix,ie,fac)
-!$omp do reduction(+:res_loc)
+!$omp parallel do &
+!$omp& private(iv_loc,is,ix,ie,ic,rhs_stream,id,jc)
   do iv=nv1,nv2
-        iv_loc = iv-nv1+1
-        is = is_v(iv)
-        ix = ix_v(iv)
-        ie = ie_v(iv)
+     iv_loc = iv-nv1+1
+     is = is_v(iv)
+     ix = ix_v(iv)
+     ie = ie_v(iv)
      do ic=1,nc
         g_x(ic,iv_loc) = abs(xi(ix))*vel(ie)*g_x(ic,iv_loc) &
              -jvec_c(1,ic,iv_loc)*res(is,ic)/res_norm(is,ic)
      enddo
   enddo
-!$omp end do
-!$omp end parallel
 
 end subroutine cgyro_upwind
