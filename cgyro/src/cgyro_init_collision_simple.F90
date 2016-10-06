@@ -87,14 +87,14 @@ subroutine cgyro_init_collision_simple
               
               
                  ! Trapping 
-                 !cmat_simple(ix,jx,is,ie,it) = cmat_simple(ix,jx,is,ie,it) &
-                 !     + (0.5*delta_t) * omega_trap(it,is) &
-                 !     * vel(ie) * (1.0 - xi(ix)**2) &
-                 !     * xi_deriv_mat(ix,jx) 
-                 !amat(ix,jx) = amat(ix,jx) &
-                 !     - (0.5*delta_t) * omega_trap(it,is) &
-                 !     * vel(ie) * (1.0 - xi(ix)**2) &
-                 !     * xi_deriv_mat(ix,jx)
+                 cmat_simple(ix,jx,is,ie,it) = cmat_simple(ix,jx,is,ie,it) &
+                      + (0.5*delta_t) * omega_trap(it,is) &
+                      * vel(ie) * (1.0 - xi(ix)**2) &
+                      * xi_deriv_mat(ix,jx) 
+                 amat(ix,jx) = amat(ix,jx) &
+                      - (0.5*delta_t) * omega_trap(it,is) &
+                      * vel(ie) * (1.0 - xi(ix)**2) &
+                      * xi_deriv_mat(ix,jx)
 
                  ! constant part
                  if(ix == jx) then

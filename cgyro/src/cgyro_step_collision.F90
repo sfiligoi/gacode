@@ -115,6 +115,10 @@ subroutine cgyro_step_collision
      enddo
   enddo
 
+  if (collision_field_model == 0) then
+     call cgyro_field_c
+  endif
+  
   call timer_lib_out('coll')
 
 end subroutine cgyro_step_collision

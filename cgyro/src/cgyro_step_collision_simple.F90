@@ -115,6 +115,8 @@ subroutine cgyro_step_collision_simple
      enddo
   enddo
 
+  call cgyro_field_c
+  
   call timer_lib_out('coll')
 
 end subroutine cgyro_step_collision_simple
