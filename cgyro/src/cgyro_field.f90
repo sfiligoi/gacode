@@ -34,8 +34,8 @@ subroutine cgyro_field_v
 
   ! Poisson and Ampere RHS integrals of H
 
-!$omp parallel do    &
-!$omp& private(ic,ic_loc,iv,is,ix,ie,fac)
+!$omp parallel private(ic_loc,iv,is,ix,ie,fac)
+!$omp do reduction(+:field_loc)
   do ic=nc1,nc2
      ic_loc = ic-nc1+1
      do iv=1,nv
@@ -46,6 +46,8 @@ subroutine cgyro_field_v
         field_loc(:,ic) = field_loc(:,ic)+fac*jvec_v(:,ic_loc,iv) 
      enddo
   enddo
+!$omp end do
+!$omp end parallel
 
   call MPI_ALLREDUCE(field_loc(:,:),&
        field(:,:),&
@@ -197,7 +199,7 @@ subroutine cgyro_field_c
   endif
 
 !$omp parallel do  &
-!$omp& private(iv,iv_loc,is,ix,ie,ic)
+!$omp& private(iv,iv_loc,ic,is)
   do iv=nv1,nv2
      iv_loc = iv-nv1+1
      is = is_v(iv)

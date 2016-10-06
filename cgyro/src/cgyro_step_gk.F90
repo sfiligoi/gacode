@@ -184,6 +184,9 @@ subroutine cgyro_filter
 
 end subroutine cgyro_filter
 
+!==========================================================================
+! NOTE: The routine below is NOT used.
+
 subroutine cgyro_rhs_trap(ij)
 
   use parallel_lib
@@ -236,8 +239,7 @@ subroutine cgyro_rhs_trap(ij)
 
         val = omega_trap(it,is)*sqrt(energy(ie))*(1.0-xi(ix)**2) 
 
-        rhs(ic,iv_loc,ij) = rhs(ic,iv_loc,ij) &
-             -val*cap_h_c(ic,iv_loc)
+        rhs(ic,iv_loc,ij) = rhs(ic,iv_loc,ij)-val*cap_h_c(ic,iv_loc)
      enddo
   enddo
 
