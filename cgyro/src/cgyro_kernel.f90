@@ -73,7 +73,11 @@ subroutine cgyro_kernel
      call cgyro_step_implicit_gk
 
      ! Collision step: returns new h_x, cap_h_x, fields
-     call cgyro_step_collision
+     if (collision_model == 5) then
+        call cgyro_step_collision_simple
+     else
+        call cgyro_step_collision
+     endif
      !------------------------------------------------------------
 
      !------------------------------------------------------------

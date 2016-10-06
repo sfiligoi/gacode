@@ -19,14 +19,8 @@ subroutine cgyro_step_collision
 
   integer :: is,ie,ix
   integer :: ivp
-  complex, dimension(size(cap_h_v,2),nc1:nc2) :: cvec
-  complex, dimension(size(cap_h_v,2),nc1:nc2) :: bvec
+  complex, dimension(:,:), allocatable :: bvec,cvec
   real :: cvec_re,cvec_im
-
-  if (collision_model == 5) then
-     call cgyro_step_collision_simple
-     return
-  endif
 
   !----------------------------------------------------------------
   ! Perform data tranpose from _c to _v data layouts:
@@ -37,14 +31,17 @@ subroutine cgyro_step_collision
 
   call timer_lib_in('coll')
 
+  allocate(bvec(nv,nc1:nc2))
+  allocate(cvec(nv,nc1:nc2))
+
 #ifdef _OPENACC
 !$acc data present(cmat) &
-!$acc& pcreate(bvec,cvec)  pcopy(cap_h_v)
+!$acc& pcreate(bvec,cvec) pcopy(cap_h_v)
 
 !$acc parallel 
 !$acc loop gang private(ic_loc,ivp,iv,cvec_re,cvec_im)
 #else
-!$omp parallel private(ic_loc,ivp,iv,cvec_re,cvec_im)
+!$omp  parallel private(ic_loc,ivp,iv,cvec_re,cvec_im)
 !$omp do
 #endif
   do ic=nc1,nc2
@@ -88,6 +85,8 @@ subroutine cgyro_step_collision
 !$omp end parallel
 #endif
 
+  deallocate(bvec,cvec)
+
   call timer_lib_out('coll')
 
   ! Compute the new phi
@@ -105,7 +104,7 @@ subroutine cgyro_step_collision
   ! Compute H given h and [phi(h), apar(h)]
 
 !$omp parallel do &
-!$omp& private(iv,iv_loc,is,ix,ie,ic)
+!$omp& private(iv,iv_loc,is,ic)
   do iv=nv1,nv2
      iv_loc = iv-nv1+1
      is = is_v(iv)
@@ -115,10 +114,10 @@ subroutine cgyro_step_collision
      enddo
   enddo
 
+  call timer_lib_out('coll')
+
   if (collision_field_model == 0) then
      call cgyro_field_c
   endif
   
-  call timer_lib_out('coll')
-
 end subroutine cgyro_step_collision

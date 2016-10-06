@@ -19,8 +19,7 @@ subroutine cgyro_step_collision_simple
 
   integer :: is,ie,ix,jx,it,ir
   integer :: ivp
-  complex, dimension(n_xi,n_energy,n_species) :: cvec
-  complex, dimension(n_xi,n_energy,n_species) :: bvec
+  complex, dimension(:,:,:),allocatable :: bvec,cvec
   real :: cvec_re,cvec_im
 
   !----------------------------------------------------------------
@@ -32,14 +31,17 @@ subroutine cgyro_step_collision_simple
 
   call timer_lib_in('coll')
 
+  allocate(bvec(n_xi,n_energy,n_species))
+  allocate(cvec(n_xi,n_energy,n_species))
+
 #ifdef _OPENACC
 !$acc  data present(cmat_simple) &
 !$acc& pcopy(cap_h_v)
 
-!$acc  parallel 
-!$acc  loop gang private(ic_loc,ivp,iv,is,ix,jx,ie,ir,it,cvec_re,cvec_im,bvec,cvec)
+!$acc parallel 
+!$acc loop gang private(ic_loc,ivp,iv,is,ix,jx,ie,ir,it,cvec_re,cvec_im,bvec,cvec)
 #else
-!$omp parallel private(ic_loc,ivp,iv,is,ix,jx,ie,ir,it,cvec_re,cvec_im,bvec,cvec)
+!$omp  parallel private(ic_loc,ivp,iv,is,ix,jx,ie,ir,it,cvec_re,cvec_im,bvec,cvec)
 !$omp do
 #endif
   do ic=nc1,nc2
@@ -93,6 +95,8 @@ subroutine cgyro_step_collision_simple
 !$omp end parallel
 #endif
 
+  deallocate(bvec,cvec)
+
   call timer_lib_out('coll')
 
   call timer_lib_in('coll_comm')
@@ -115,8 +119,8 @@ subroutine cgyro_step_collision_simple
      enddo
   enddo
 
-  call cgyro_field_c
-  
   call timer_lib_out('coll')
 
+  call cgyro_field_c
+  
 end subroutine cgyro_step_collision_simple
