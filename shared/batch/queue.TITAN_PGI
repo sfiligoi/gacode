@@ -61,7 +61,7 @@ echo "#PBS -l nodes=$nodes" >> $bfile
 echo " " >> $bfile
 
 echo "module load python" >> $bfile
-echo "export MPICH_MAX_THREAD_SAFETY=serialized" >> $bfile
+echo "export MPICH_MAX_THREAD_SAFETY=funneled" >> $bfile
 #echo "export MPICH_COLL_OPT_OFF=alltoall" >> $bfile
 #echo "export MPICH_GNI_DYNAMIC_CONN=disabled" >> $bfile
 
