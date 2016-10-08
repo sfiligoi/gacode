@@ -96,44 +96,49 @@ class cgyrodata:
         # Equil file
         #
         try:
-            data = np.loadtxt(self.dir+'out.cgyro.equilibrium')
-            self.rmin        = float(data[0])
-            self.rmaj        = float(data[1])
-            self.q           = float(data[2])
-            self.shear       = float(data[3])
-            self.shift       = float(data[4])
-            self.kappa       = float(data[5])
-            self.s_kappa     = float(data[6])
-            self.delta       = float(data[7])
-            self.s_delta     = float(data[8])
-            self.zeta        = float(data[9])
-            self.s_zeta      = float(data[10])
-            self.zmag        = float(data[11])
-            self.dzmag       = float(data[12])
-            self.rho         = float(data[13])
-            self.ky0         = float(data[14])
-            self.betae_unit  = float(data[15])
-            self.beta_star   = float(data[16])
-            self.lambda_star = float(data[17])
-            self.gamma_e     = float(data[18])
-            self.gamma_p     = float(data[19])
-            self.mach        = float(data[20])
-            self.a_meters    = float(data[21])
-            self.b_unit      = float(data[22])
-            self.dens_norm   = float(data[23])
-            self.temp_norm   = float(data[24])
-            self.vth_norm    = float(data[25])
+            data = np.fromfile(self.dir+'out.cgyro.equilibrium',dtype='float',sep=" ")
+            self.rmin        = data[0]
+            self.rmaj        = data[1]
+            self.q           = data[2]
+            self.shear       = data[3]
+            self.shift       = data[4]
+            self.kappa       = data[5]
+            self.s_kappa     = data[6]
+            self.delta       = data[7]
+            self.s_delta     = data[8]
+            self.zeta        = data[9]
+            self.s_zeta      = data[10]
+            self.zmag        = data[11]
+            self.dzmag       = data[12]
+            self.rho         = data[13]
+            self.ky0         = data[14]
+            self.betae_unit  = data[15]
+            self.beta_star   = data[16]
+            self.lambda_star = data[17]
+            self.gamma_e     = data[18]
+            self.gamma_p     = data[19]
+            self.mach        = data[20]
+            self.a_meters    = data[21]
+            self.b_unit      = data[22]
+            self.dens_norm   = data[23]
+            self.temp_norm   = data[24]
+            self.vth_norm    = data[25]
+            # Define species vectors
+            self.z      = np.zeros(self.n_species)
+            self.mass   = np.zeros(self.n_species)
             self.dens   = np.zeros(self.n_species)
             self.temp   = np.zeros(self.n_species)
             self.dlnndr = np.zeros(self.n_species)
             self.dlntdr = np.zeros(self.n_species)
             self.nu     = np.zeros(self.n_species)
             for i in range(self.n_species):
-                self.dens[i]   = float(data[26+5*i])
-                self.temp[i]   = float(data[27+5*i])
-                self.dlnndr[i] = float(data[28+5*i])
-                self.dlntdr[i] = float(data[29+5*i])
-                self.nu[i]     = float(data[30+5*i])
+                self.z[i]      = data[26+7*i]
+                self.mass[i]   = data[27+7*i]
+                self.dens[i]   = data[28+7*i]
+                self.temp[i]   = data[29+7*i]
+                self.dlnndr[i] = data[30+7*i]
+                self.dlntdr[i] = data[31+7*i]
+                self.nu[i]     = data[32+7*i]
             print "INFO: (data.py) Read data in out.cgyro.equilibrium."
         except:
             print "WARNING: (data.py) Could not read out.cgyro.equilibrium."

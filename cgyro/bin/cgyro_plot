@@ -57,6 +57,10 @@ then
   echo "                  = kxky_phi (kx-ky spectra of ave(|phi|))"
   echo "                  = note     (notebook)"
   echo
+  echo "          -ymin <float>"
+  echo "          Minimumvalue of vertical axis (where applicable)."
+  echo "          *Affects: flux, ky_flux"
+  echo
   echo "          -ymax <float>"
   echo "          Maximum value of vertical axis (where applicable)."
   echo "          *Affects: flux, ky_flux"
@@ -110,6 +114,7 @@ FTYPE=screen
 PLOT_TYPE=field
 TIME=-1
 TMAX=-1.0
+YMIN=auto
 YMAX=auto
 W=0.5
 MOMENT=e
@@ -145,6 +150,7 @@ while [ $# -gt 0 ] ; do
   -theta) shift ; THETA=$1 ;;
 
   -ymax) shift ; YMAX=$1 ;;
+  -ymin) shift ; YMIN=$1 ;;
 
   -w) shift ; W=$1 ;;
 
@@ -189,14 +195,14 @@ case "$PLOT_TYPE" in
 	python $PYROOT/plot_error.py $FTYPE ;;
 
    ky_flux)  
-	python $PYROOT/plot_ky_flux.py $FTYPE $W $MOMENT $YMAX ;;
+	python $PYROOT/plot_ky_flux.py $FTYPE $W $MOMENT $YMIN $YMAX ;;
 
    flux)  
 	if [ "$FTYPE" == "dump" ]
         then
 	   python $PYROOT/dump_flux.py 
         else
-	   python $PYROOT/plot_flux.py $FTYPE $W $MOMENT $YMAX 
+	   python $PYROOT/plot_flux.py $FTYPE $W $MOMENT $YMIN $YMAX 
         fi
         ;;
 
@@ -204,10 +210,10 @@ case "$PLOT_TYPE" in
 	python $PYROOT/plot_phi.py $FTYPE $FIELD ;;
 
    ky_phi)  
-	python $PYROOT/plot_ky_phi.py $FTYPE $FIELD $N ;;
+	python $PYROOT/plot_ky_phi.py $FTYPE $FIELD $YMIN $YMAX $N ;;
 
    kx_phi)  
-	python $PYROOT/plot_kx_phi.py $FTYPE $W $YMAX $N ;;
+	python $PYROOT/plot_kx_phi.py $FTYPE $W $YMIN $YMAX $N ;;
 
    kxky_phi)  
 	python $PYROOT/plot_kxky_phi.py $FTYPE $W $FIELD ;;

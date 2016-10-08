@@ -8,14 +8,14 @@
 #  SimpleInput  : input.gyro, input.neo, input.tglf input.glf23
 #  ProfileInput : input.profiles
 #  ManagerInput : input.tgyro [see tgyro/bin/tgyro_parse.py]
-#
-# AUTHOR(S): 
-#  Jeff Candy
 #----------------------------------------------------------------------
 
 import string
 import os
 
+#--------------------------------------------------------------------
+# PARSER FOR input.cgyro, etc.
+#--------------------------------------------------------------------
 class SimpleInput:
     """Input parser for simple input.* files"""
     def __init__(self):
@@ -87,6 +87,9 @@ class SimpleInput:
                 f.write(self.data_dict[x]+'  '+x+'\n')
         
 
+#--------------------------------------------------------------------
+# PARSER FOR input.profiles
+#--------------------------------------------------------------------
 class ProfileInput:
     """Input parser for input.profiles"""
     def __init__(self):
@@ -191,6 +194,10 @@ class ProfileInput:
         # Clean up temporary file
         os.system('rm parse_temp')
 
+
+#--------------------------------------------------------------------
+# PARSER FOR input.tgyro
+#--------------------------------------------------------------------
 class ManagerInput:
     """Input parser for input.tgyro"""
     def __init__(self):
@@ -344,10 +351,10 @@ class ManagerInput:
         # extra parameters onto GYRO, TGLF or GLF23 input files.
         #
         # NOTE:
-        #  - GYRO directories must be of the form GYRO*
-        #  - IFS directories must be of the form IFS*
-        #  - TGLF directories must be of the form TGLF*
+        #  - IFS   directories must be of the form IFS*
+        #  - TGLF  directories must be of the form TGLF*
         #  - GLF23 directories must be of the form GLF*
+        #  - otherwise, CGYRO and GYRO directories are autodetected.
 
         for p in range(len(self.slavepath)):
             self.sum_proc = self.sum_proc + int(self.slaveproc[p])

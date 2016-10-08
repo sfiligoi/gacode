@@ -28,6 +28,7 @@ fig = plt.figure(figsize=(10,6))
 
 #======================================
 ax = fig.add_subplot(111)
+fig.subplots_adjust(left=0.13,right=0.96,top=0.92,bottom=0.12)
 ax.grid(which="majorminor",ls=":")
 ax.grid(which="major",ls=":")
 ax.set_xlabel(r'$\theta_*/\pi$')
@@ -59,5 +60,6 @@ elif ftype == 'dump':
     np.savetxt('out.cgyro.dump',data,fmt='%.8e')
     print 'INFO: (plot_ball) Created out.cgyro.dump'
 else:
-    outfile = 'ball.'+str(ifield)+'.'+ftype
+    outfile = 'out.cgyro.ball.'+str(ifield)+'.'+ftype
+    print 'INFO: (plot_ball) Created '+outfile
     plt.savefig(outfile)

@@ -135,6 +135,8 @@ subroutine cgyro_write_initdata
      write (io,fmtstr) temp_norm
      write (io,fmtstr) vth_norm
      do is=1,n_species
+        write (io,fmtstr) 1.0*z(is)
+        write (io,fmtstr) mass(is)
         write (io,fmtstr) dens(is)
         write (io,fmtstr) temp(is)
         write (io,fmtstr) dlnndr(is)

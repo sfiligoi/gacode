@@ -2,22 +2,19 @@
 
 import sys
 import numpy as np
-from gacodeplotdefs import *
+from gacodefuncs import *
 from cgyro.data import cgyrodata
-
 
 w = float(sys.argv[1])
 ext = sys.argv[2]
 
 sim = cgyrodata('./')
+sim.getbigflux()
 
 nt = sim.n_time
 
-# Determine tmin
-imin=0
-for i in range(nt):
-    if sim.t[i] < (1.0-w)*sim.t[-1]:
-        imin = i+1
+# Determine imin
+imin=iwindow(sim.t,w)
 
 if imin == nt-1:
     print "Averaging Window too small." 
@@ -54,13 +51,13 @@ else:
     b = np.zeros([sim.n_species])
 
     for ispec in range(sim.n_species):
-        y = np.sum(sim.flux_n,axis=(0,2))
+        y = np.sum(sim.kxky_flux_n,axis=(0,2))
         b[ispec] = average(y[ispec,:],sim.t,w)
 
     print 'GAMMA [GB]  ',b
     
     for ispec in range(sim.n_species):
-        y = np.sum(sim.flux_e,axis=(0,2))
+        y = np.sum(sim.kxky_flux_e,axis=(0,2))
         b[ispec] = average(y[ispec,:],sim.t,w)
 
     print 'Q     [GB]  ',b
