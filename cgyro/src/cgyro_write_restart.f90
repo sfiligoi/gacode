@@ -67,7 +67,7 @@ subroutine cgyro_write_restart
   !---------------------------------------------------------
   ! Dump restart parameters to ASCII file.
   !
-  call cgyro_info('Writing MPI-IO restart data.')
+  !call cgyro_info('Writing MPI-IO restart data.')
 
   if (i_proc == 0) then
 

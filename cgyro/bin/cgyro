@@ -303,9 +303,17 @@ then
    then
       > out.cgyro.version
    fi
-   date_tag=`date`
+   # Date with custom formatting
+   date_tag=`date +"%y-%b-%d %T"`
    version_tag=`gacode_getversion`
-   echo "$date_tag [$version_tag][$GACODE_PLATFORM]" >> out.cgyro.version
+   if [ -f out.cgyro.tag ]
+   then
+      simtime=`tail -1 out.cgyro.tag`
+      simtime=`echo $simtime` 
+   else
+      simtime=0.0
+   fi
+   echo "$date_tag [$version_tag][$GACODE_PLATFORM][$simtime]" >> out.cgyro.version
 fi
 
 gacode_printversion CGYRO
