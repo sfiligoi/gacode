@@ -45,7 +45,7 @@ then
   echo "         Queue name"
   echo
   echo "         -w"
-  echo "         Wallclock limit (default 1:00:00)"
+  echo "         Wallclock limit (default 0:59:00)"
   echo
   echo "         -repo"
   echo "         Repository name"
@@ -62,7 +62,7 @@ user=`whoami`
 CODE=null_code
 SUB_FLAG=0
 QUEUE=null_queue
-WALLTIME=1:00:00
+WALLTIME=0:59:00
 if hash getnim 2> /dev/null; then
    # NERSC
    x=`getnim -U $user -D`
@@ -167,11 +167,13 @@ if [ $SUB_FLAG -eq 0 ] ; then
        echo "Your repositories"
        getnim -U $user
     elif hash showusage 2> /dev/null; then
+       echo
+       echo "Your repositories"
        x=`showusage`
        for item in $x
        do
           if [[ $item == *"fus"* ]] ; then
-             REPO=$item
+             echo $item
           fi
        done
     fi
