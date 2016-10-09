@@ -6,6 +6,7 @@
 #---------------------------------------------------
 
 # FIXED Hardware parameters
+IDENTITY="Titan Cray XK7"
 CORES_PER_NODE=16
 NUMAS_PER_NODE=2
 
