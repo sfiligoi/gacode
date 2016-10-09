@@ -38,7 +38,7 @@ subroutine cgyro_init_collision_simple
                  nu_d(ie,is,js) = tauinv_ab * (1.0/xa**3)
               endif
            endif
-           
+
         enddo
      enddo
   enddo
@@ -69,25 +69,25 @@ subroutine cgyro_init_collision_simple
 
   ! set-up the collision matrix
 
-  do is=1,n_species
-     do ie=1,n_energy
-        do it=1,n_theta
+  do it=1,n_theta
+     do is=1,n_species
+        do ie=1,n_energy
 
-           cmat_simple(:,:,is,ie,it) = 0.0
+           cmat_simple(:,:,ie,is,it) = 0.0
            amat(:,:) = 0.0
 
-           do ix=1,n_xi
-              do jx=1,n_xi
+           do jx=1,n_xi
+              do ix=1,n_xi
 
                  ! Collision component: Test particle
-                 cmat_simple(ix,jx,is,ie,it) = cmat_simple(ix,jx,is,ie,it) &
+                 cmat_simple(ix,jx,ie,is,it) = cmat_simple(ix,jx,ie,is,it) &
                       - (0.5*delta_t) * ctest(is,ie,ix,jx)
                  amat(ix,jx) = amat(ix,jx) &
                       + (0.5*delta_t) * ctest(is,ie,ix,jx)
-              
-              
+
+
                  ! Trapping 
-                 cmat_simple(ix,jx,is,ie,it) = cmat_simple(ix,jx,is,ie,it) &
+                 cmat_simple(ix,jx,ie,is,it) = cmat_simple(ix,jx,ie,is,it) &
                       + (0.5*delta_t) * omega_trap(it,is) &
                       * vel(ie) * (1.0 - xi(ix)**2) &
                       * xi_deriv_mat(ix,jx) 
@@ -97,8 +97,8 @@ subroutine cgyro_init_collision_simple
                       * xi_deriv_mat(ix,jx)
 
                  ! constant part
-                 if(ix == jx) then
-                    cmat_simple(ix,jx,is,ie,it) = cmat_simple(ix,jx,is,ie,it) &
+                 if (ix == jx) then
+                    cmat_simple(ix,jx,ie,is,it) = cmat_simple(ix,jx,ie,is,it) &
                          + 1.0
                     amat(ix,jx) = amat(ix,jx) + 1.0
                  endif
@@ -111,7 +111,7 @@ subroutine cgyro_init_collision_simple
            call DGESV(n_xi,n_xi,cmat_simple(:,:,is,ie,it),size(cmat_simple,1),&
                 i_piv,amat,size(amat,1),info)
            cmat_simple(:,:,is,ie,it) = amat(:,:)
-           
+
         enddo
      enddo
   enddo

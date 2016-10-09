@@ -34,16 +34,8 @@ subroutine cgyro_step_collision_simple
   allocate(bvec(n_xi,n_energy,n_species))
   allocate(cvec(n_xi,n_energy,n_species))
 
-#ifdef _OPENACC
-!$acc  data present(cmat_simple) &
-!$acc& pcopy(cap_h_v)
-
-!$acc parallel 
-!$acc loop gang private(ic_loc,ivp,iv,is,ix,jx,ie,ir,it,cvec_re,cvec_im,bvec,cvec)
-#else
 !$omp  parallel private(ic_loc,ivp,iv,is,ix,jx,ie,ir,it,cvec_re,cvec_im,bvec,cvec)
 !$omp do
-#endif
   do ic=nc1,nc2
      ic_loc = ic-nc1+1
      ir = ir_c(ic)
@@ -51,7 +43,6 @@ subroutine cgyro_step_collision_simple
 
      ! Set-up the RHS: H = f + ze/T G phi
 
-!$acc loop vector
      do iv=1,nv
         cvec(ix_v(iv),ie_v(iv),is_v(iv)) = cap_h_v(ic_loc,iv)
      enddo
@@ -63,7 +54,6 @@ subroutine cgyro_step_collision_simple
 
         bvec = 0.0
 
-!$acc loop vector
         do is=1,n_species
            do ie=1,n_energy              
               do jx=1,n_xi
@@ -73,27 +63,21 @@ subroutine cgyro_step_collision_simple
 
                  do ix=1,n_xi
                     bvec(ix,ie,is) = bvec(ix,ie,is)+ &
-                         cmplx(cmat_simple(ix,jx,is,ie,it)*cvec_re, &
-                         cmat_simple(ix,jx,is,ie,it)*cvec_im)
+                         cmplx(cmat_simple(ix,jx,ie,is,it)*cvec_re, &
+                         cmat_simple(ix,jx,ie,is,it)*cvec_im)
                  enddo
               enddo
            enddo
         enddo
      endif
 
-!$acc loop vector
      do iv=1,nv
         cap_h_v(ic_loc,iv) = bvec(ix_v(iv),ie_v(iv),is_v(iv))
      enddo
 
   enddo
-#ifdef _OPENACC
-!$acc end parallel
-!$acc end data
-#else
 !$omp end do
 !$omp end parallel
-#endif
 
   deallocate(bvec,cvec)
 

@@ -169,8 +169,8 @@ subroutine cgyro_init_manager
         endif
      endif
 
-     if(collision_model == 5) then
-        allocate(cmat_simple(n_xi,n_xi,n_species,n_energy,n_theta))
+     if (collision_model == 5) then
+        allocate(cmat_simple(n_xi,n_xi,n_energy,n_species,n_theta))
      else
         allocate(cmat(nv,nv,nc_loc))
      endif
