@@ -14,6 +14,8 @@ modules/*.mod
 */*/*.pyc
 */*/*/*.pyc
 */*/*/*/*.pyc
+cgyro/src/*.gpu
+cgyro/src/*.h
 
 # Old directory structure
 neo/tools/vgen/

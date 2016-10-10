@@ -78,7 +78,7 @@ subroutine cgyro_field_c
 
   integer :: is,ie,ix
   complex, dimension(nc) :: tmp
-  complex :: fac
+  real :: fac
   
   call timer_lib_in('field_h')
 

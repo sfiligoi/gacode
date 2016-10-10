@@ -13,7 +13,7 @@ NUMAS_PER_NODE=2
 # Compilers and flags
 
 # Fortran 90/95 compiler
-FC = ftn -module ${GACODE_ROOT}/modules -Mpreprocess -DUSE_INLINE
+FC = ftn -module ${GACODE_ROOT}/modules -Mpreprocess -DUSE_INLINE 
 
 # Fortran 77 compiler
 F77 = ${FC} 
@@ -31,7 +31,7 @@ FOPT   = -fast -fastsse -Mvect -Minfo=all ${FMATH} ${FOMP} ${FACC}
 LMATH=-I$FFTW_INC -L$FFTW_DIR \
          -lfftw3_threads -lfftw3f_threads -lfftw3f -lfftw3 \
          -lfftw3_threads -lfftw3f_threads -lfftw3f -lfftw3   \
-        -lcufft
+         -lcufft
 
 
 # NetCDF
