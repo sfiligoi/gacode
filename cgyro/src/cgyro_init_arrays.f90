@@ -13,7 +13,7 @@ subroutine cgyro_init_arrays
   integer :: jr,jt,id,ccw_fac
   integer :: i_field
   complex :: thfac,carg
-  real, dimension(n_species,nc) :: res_loc
+  real, dimension(nc,n_species) :: res_loc
   real, dimension(:,:), allocatable :: jloc_c
   real, external :: spectraldiss
 
@@ -69,19 +69,23 @@ subroutine cgyro_init_arrays
   !-------------------------------------------------------------------------
   ! Conservative upwind factor
   !
-  allocate(res_norm(n_species,nc))
+  allocate(res_norm(nc,n_species))
 
   res_loc(:,:) = 0.0
 
+!$omp parallel private(ic,iv_loc,is,ix,ie)
+!$omp do reduction(+:res_loc)
   do iv=nv1,nv2
      iv_loc = iv-nv1+1
      is = is_v(iv)
      ix = ix_v(iv)
      ie = ie_v(iv)
      do ic=1,nc
-        res_loc(is,ic) = res_loc(is,ic)+w_xi(ix)*w_e(ie)*jvec_c(1,ic,iv_loc)**2 
+        res_loc(ic,is) = res_loc(ic,is)+w_xi(ix)*w_e(ie)*jvec_c(1,ic,iv_loc)**2 
      enddo
   enddo
+!$omp end do
+!$omp end parallel
 
   call MPI_ALLREDUCE(res_loc,&
        res_norm,&
@@ -90,6 +94,20 @@ subroutine cgyro_init_arrays
        MPI_SUM,&
        NEW_COMM_1,&
        i_err)
+
+!$omp parallel do private(iv_loc,is,ix,ie,ic)
+  do iv=nv1,nv2
+     iv_loc = iv-nv1+1
+     is = is_v(iv)
+     ix = ix_v(iv)
+     ie = ie_v(iv)
+     do ic=1,nc
+        fvec_c(:,ic,iv_loc) = w_e(ie)*w_xi(ix)*z(is)*dens(is)*jvec_c(:,ic,iv_loc)
+        upfac1(ic,iv_loc) = w_e(ie)*w_xi(ix)*abs(xi(ix))*vel(ie)*jvec_c(1,ic,iv_loc)
+        upfac2(ic,iv_loc) = jvec_c(1,ic,iv_loc)/res_norm(ic,is)
+     enddo
+  enddo
+
   !------------------------------------------------------------------------------
 
   !------------------------------------------------------------------------------

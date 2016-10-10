@@ -21,7 +21,7 @@ subroutine cgyro_shear_linear
 
   implicit none
 
-  integer :: ir,it,i_field
+  integer :: ir,i_field
   integer :: ica,icb
   complex, dimension(n_theta,nv_loc) :: a1
 
@@ -52,17 +52,11 @@ subroutine cgyro_shear_linear
      h_x(ic_c(n_radial,:),:) = a1*gamma_e_decay
 
   endif
-
+ 
+!$omp parallel do private(ica,icb)
   do ic=1,nc
-     ir = ir_c(ic) 
-     it = it_c(ic)
-     if (ir < n_radial) then
-        ica = ic_c(ir,it)
-        icb = ic_c(ir+1,it)
-     else
-        ica = ic_c(ir,it)
-        icb = ic_c(1,it)        
-     endif
+     ica = ica_c(ic)
+     icb = icb_c(ic)
      ! Linear interpolation of kx-dependent arrays
      omega_cap_h(ic,:) = omega_cap_h0(ica,:)*(1-gtime)+omega_cap_h0(icb,:)*gtime
      omega_s(:,ic,:)   =   omega_s0(:,ica,:)*(1-gtime)  +omega_s0(:,icb,:)*gtime

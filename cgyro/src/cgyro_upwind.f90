@@ -23,22 +23,18 @@ subroutine cgyro_upwind
 
   integer :: is,ie,ix
   complex :: fac
-  complex, dimension(n_species,nc) :: res_loc 
-  complex, dimension(n_species,nc) :: res
+  complex, dimension(nc,n_species) :: res_loc 
+  complex, dimension(nc,n_species) :: res
 
   res_loc(:,:) = (0.0,0.0)
 
-!$omp parallel private(ic,iv_loc,is,ix,ie,fac)
+!$omp parallel private(iv_loc,ic,is)
 !$omp do reduction(+:res_loc)
   do iv=nv1,nv2
      iv_loc = iv-nv1+1
      is = is_v(iv)
-     ix = ix_v(iv)
-     ie = ie_v(iv)
-
      do ic=1,nc
-        fac = w_e(ie)*w_xi(ix)*abs(xi(ix))*vel(ie)*g_x(ic,iv_loc)
-        res_loc(is,ic) = res_loc(is,ic)+jvec_c(1,ic,iv_loc)*fac
+        res_loc(ic,is) = res_loc(ic,is)+upfac1(ic,iv_loc)*g_x(ic,iv_loc)
      enddo
   enddo
 !$omp end do
@@ -52,8 +48,7 @@ subroutine cgyro_upwind
        NEW_COMM_1,&
        i_err)
 
-!$omp parallel do &
-!$omp& private(iv_loc,is,ix,ie,ic)
+!$omp parallel do private(iv_loc,is,ix,ie,ic)
   do iv=nv1,nv2
      iv_loc = iv-nv1+1
      is = is_v(iv)
@@ -61,7 +56,7 @@ subroutine cgyro_upwind
      ie = ie_v(iv)
      do ic=1,nc
         g_x(ic,iv_loc) = abs(xi(ix))*vel(ie)*g_x(ic,iv_loc) &
-             -jvec_c(1,ic,iv_loc)*res(is,ic)/res_norm(is,ic)
+             -upfac2(ic,iv_loc)*res(ic,is)
      enddo
   enddo
 

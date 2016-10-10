@@ -13,12 +13,16 @@ subroutine cgyro_field_coefficients
   ! Field equation prefactors, sums.
   !
   sum_loc(:) = 0.0
+!$omp parallel private(iv_loc,ic)
+!$omp do reduction(+:sum_loc)
   do iv=nv1,nv2
      iv_loc = iv-nv1+1
      do ic=1,nc
         sum_loc(ic) = sum_loc(ic)+vfac(iv_loc)*(1.0-jvec_c(1,ic,iv_loc)**2) 
      enddo
   enddo
+!$omp end do
+!$omp end parallel
 
   call MPI_ALLREDUCE(sum_loc,&
        sum_den_x,&
@@ -50,12 +54,16 @@ subroutine cgyro_field_coefficients
   if (n_field > 1) then
 
      sum_loc(:) = 0.0
+!$omp parallel private(iv_loc,ic)
+!$omp do reduction(+:sum_loc)
      do iv=nv1,nv2
         iv_loc = iv-nv1+1
         do ic=1,nc
            sum_loc(ic) = sum_loc(ic)+vfac(iv_loc)*jvec_c(2,ic,iv_loc)**2
         enddo
      enddo
+!$omp end do
+!$omp end parallel
 
      call MPI_ALLREDUCE(sum_loc,&
           sum_cur_x,&

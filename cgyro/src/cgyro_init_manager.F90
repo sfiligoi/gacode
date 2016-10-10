@@ -35,7 +35,6 @@ subroutine cgyro_init_manager
   integer, parameter :: irank = 2
   integer, dimension(irank) :: ndim,inembed,onembed
   integer :: idist,odist,istride,ostride
-
 #endif
 
   if (hiprec_flag == 1) then
@@ -51,6 +50,7 @@ subroutine cgyro_init_manager
   !------------------------------------------------------
   call timer_lib_init('str_init')
   call timer_lib_init('coll_init')
+  call timer_lib_init('io_init')
 
   !----------------------------------------------------
   ! Initialize GLOBAL arrays
@@ -153,6 +153,9 @@ subroutine cgyro_init_manager
      allocate(omega_s(n_field,nc,nv_loc))
      allocate(jvec_c(n_field,nc,nv_loc))
      allocate(jvec_v(n_field,nc_loc,nv))
+     allocate(fvec_c(n_field,nc,nv_loc))
+     allocate(upfac1(nc,nv_loc))
+     allocate(upfac2(nc,nv_loc))
 
      ! Real-space distributed arrays
      allocate(cap_h_v(nc_loc,nv))
@@ -177,7 +180,6 @@ subroutine cgyro_init_manager
 
   endif
 
-
   ! Compute equilibrium quantities (even in test mode)
   GEO_model_in    = geo_numeq_flag
   GEO_ntheta_in   = geo_ntheta
@@ -189,12 +191,10 @@ subroutine cgyro_init_manager
 
      call cgyro_init_arrays
      call cgyro_init_implicit_gk
-
      call timer_lib_out('str_init')
+
      call timer_lib_in('coll_init')
-
      call cgyro_init_collision
-
      call timer_lib_out('coll_init')
 
   endif
@@ -202,7 +202,10 @@ subroutine cgyro_init_manager
   call cgyro_check_memory(trim(path)//runfile_memory)
 
   ! Write initial data
+
+  call timer_lib_in('io_init')
   call cgyro_write_initdata
+  call timer_lib_out('io_init')
 
   if (test_flag == 1) then
      call MPI_FINALIZE(i_err)
@@ -264,7 +267,6 @@ subroutine cgyro_init_manager
 !!$acc enter data create(fxmany,fymany,gxmany,gymany)
 !!$acc enter data create(uxmany,uymany,vxmany,vymany)
 !!$acc enter data create(uvmany)
-
 
      !   -------------------------------------
      ! 2D

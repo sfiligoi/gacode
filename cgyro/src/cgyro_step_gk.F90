@@ -65,12 +65,10 @@ subroutine cgyro_rhs(ij)
 
   ! Prepare suitable distribution (g, not h) for conservative upwind method
 
-!$omp workshare
   g_x(:,:) = h_x(:,:)
-!$omp end workshare
+
   if (n_field > 1) then
-!$omp  parallel do  &
-!$omp& private(iv_loc,is,ic)
+!$omp parallel do private(iv_loc,is,ic)
      do iv=nv1,nv2
         iv_loc = iv-nv1+1
         is = is_v(iv)
@@ -95,10 +93,24 @@ subroutine cgyro_rhs(ij)
 !$acc& present(omega_stream,xi,vel) &
 !$acc& present(dtheta,dtheta_up,icd_c)
 
-!$acc kernels
-   rhs_ij(:,:) = (0.0,0.0)
-!$acc end kernels
+  if (implicit_flag == 1) then
 
+     ! IMPLICIT advance 
+
+!$omp parallel do private(ic)
+     do iv_loc=1,nv2-nv1+1
+        do ic=1,nc
+           ! Diagonal terms
+           rhs_ij(ic,iv_loc) = &
+                omega_cap_h(ic,iv_loc)*cap_h_c(ic,iv_loc)+&
+                omega_h(ic,iv_loc)*h_x(ic,iv_loc)+&
+                sum(omega_s(:,ic,iv_loc)*field(:,ic))
+        enddo
+     enddo
+
+  else
+
+     ! EXPLICIT advance 
 
 #ifdef _OPENACC
 !$acc  parallel loop gang vector collapse(2) & 
@@ -107,26 +119,25 @@ subroutine cgyro_rhs(ij)
 !$omp  parallel do &
 !$omp& private(iv,ic,iv_loc,is,ix,ie,rval,rval2,rhs_stream,id,jc)
 #endif
-  do iv=nv1,nv2
-     do ic=1,nc
+     do iv=nv1,nv2
+        do ic=1,nc
 
-        iv_loc = iv-nv1+1
-        is = is_v(iv)
-        ix = ix_v(iv)
-        ie = ie_v(iv)
+           iv_loc = iv-nv1+1
+           is = is_v(iv)
+           ix = ix_v(iv)
+           ie = ie_v(iv)
 
-        ! Diagonal terms
-        rhs_ij(ic,iv_loc) = rhs_ij(ic,iv_loc)+&
-             omega_cap_h(ic,iv_loc)*cap_h_c(ic,iv_loc)+&
-             omega_h(ic,iv_loc)*h_x(ic,iv_loc)+&
-             sum(omega_s(:,ic,iv_loc)*field(:,ic))
+           ! Diagonal terms
+           rhs_ij(ic,iv_loc) = &
+                omega_cap_h(ic,iv_loc)*cap_h_c(ic,iv_loc)+&
+                omega_h(ic,iv_loc)*h_x(ic,iv_loc)+&
+                sum(omega_s(:,ic,iv_loc)*field(:,ic))
 
-        if (implicit_flag == 0) then
            ! Parallel streaming with upwind dissipation 
            rval  = omega_stream(it_c(ic),is)*vel(ie)*xi(ix)
            rval2 = abs(omega_stream(it_c(ic),is))
-           rhs_stream = 0.0
 
+           rhs_stream = 0.0
            do id=-nup_theta,nup_theta
               jc = icd_c(ic,id)
               rhs_stream = rhs_stream &
@@ -136,31 +147,26 @@ subroutine cgyro_rhs(ij)
 
            rhs_ij(ic,iv_loc) = rhs_ij(ic,iv_loc)+rhs_stream
 
-        endif
+        enddo
      enddo
-  enddo
+     endif
 !$acc end data
 
-  rhs(:,:,ij) = rhs_ij(:,:)
+     rhs(:,:,ij) = rhs_ij(:,:)
 
-  ! TRAPPING TERM
-  !if (collision_model == 5) then
-  !   call cgyro_rhs_trap(ij)
-  !endif
+     call timer_lib_out('str')
 
-  call timer_lib_out('str')
+     ! Nonlinear evaluation [f,g]
 
-  ! Nonlinear evaluation [f,g]
-
-  if (nonlinear_flag == 1) then     
-     if (nonlinear_method == 1) then
-        call cgyro_nl_direct(ij)
-     else
-        call cgyro_nl_fftw(ij)
+     if (nonlinear_flag == 1) then     
+        if (nonlinear_method == 1) then
+           call cgyro_nl_direct(ij)
+        else
+           call cgyro_nl_fftw(ij)
+        endif
      endif
-  endif
 
-end subroutine cgyro_rhs
+   end subroutine cgyro_rhs
 
 !==========================================================================
 

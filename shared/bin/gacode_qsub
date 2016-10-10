@@ -59,7 +59,7 @@ fi
 # Define variables for flag capture with defaults
 #
 user=`whoami`
-CODE=null_code
+CODE=cgyro
 SUB_FLAG=0
 QUEUE=null_queue
 WALLTIME=0:59:00

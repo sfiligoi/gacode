@@ -76,8 +76,7 @@ subroutine cgyro_field_c
 
   implicit none
 
-  integer :: is,ie,ix
-  real :: fac
+  integer :: is
   complex, dimension(nc) :: tmp
 
   call timer_lib_in('field_h')
@@ -86,16 +85,11 @@ subroutine cgyro_field_c
 
   ! Poisson and Ampere RHS integrals of h
 
-!$omp parallel private(iv,ic,iv_loc,is,ix,ie,fac)
+!$omp parallel private(ic)
 !$omp do reduction(+:field_loc)
-  do iv=nv1,nv2
-     iv_loc = iv-nv1+1
-     is = is_v(iv)
-     ix = ix_v(iv)
-     ie = ie_v(iv)
-     fac = w_e(ie)*w_xi(ix)*z(is)*dens(is)
+  do iv_loc=1,nv2-nv1+1
      do ic=1,nc
-        field_loc(:,ic) = field_loc(:,ic)+(fac*jvec_c(:,ic,iv_loc))*h_x(ic,iv_loc)
+        field_loc(:,ic) = field_loc(:,ic)+fvec_c(:,ic,iv_loc)*h_x(ic,iv_loc)
      enddo
   enddo
 !$omp end do

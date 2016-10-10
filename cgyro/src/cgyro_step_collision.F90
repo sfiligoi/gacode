@@ -17,8 +17,7 @@ subroutine cgyro_step_collision
 
   implicit none
 
-  integer :: is,ie,ix
-  integer :: ivp
+  integer :: is,ivp
   complex, dimension(:,:), allocatable :: bvec,cvec
   real :: cvec_re,cvec_im
 

@@ -495,10 +495,10 @@ subroutine write_balloon(datafile,fn)
         enddo
      enddo
 
-      if (ipccw*btccw < 0) then
-         f_balloon = f_balloon*exp(2*pi*i_c*abs(k_theta)*rmin)
-      endif
-         
+     if (ipccw*btccw < 0) then
+        f_balloon = f_balloon*exp(2*pi*i_c*abs(k_theta)*rmin)
+     endif
+
      write(io,fmtstr) transpose(f_balloon(:,:))
      close(io)
 
@@ -735,7 +735,7 @@ subroutine write_timers(datafile)
   !-------------------------------------------------
 
   if (io_control == 1 .or. io_control == 3) then
-     ! Timer initialization (starts at timer 3)
+     ! Timer initialization (starts at timer 4)
      call timer_lib_init('str')
      call timer_lib_init('str_comm')
      call timer_lib_init('nl')
@@ -761,10 +761,11 @@ subroutine write_timers(datafile)
      if (i_proc == 0) then
         open(unit=io,file=datafile,status='replace')
         write(io,'(a)') 'Setup time'
-        write(io,'(1x,9(a11,1x))') timer_cpu_tag(1:2)
-        write(io,'(9(1pe10.3,2x))') timer_lib_time('str_init'),timer_lib_time('coll_init')
+        write(io,'(1x,9(a11,1x))') timer_cpu_tag(1:3)
+        write(io,'(9(1pe10.3,2x))') &
+             timer_lib_time('str_init'),timer_lib_time('coll_init'),timer_lib_time('io_init')
         write(io,'(a)') 'Run time'
-        write(io,'(1x,11(a10,1x))') timer_cpu_tag(3:13)
+        write(io,'(1x,11(a10,1x))') timer_cpu_tag(4:14)
         close(io)
      endif
 

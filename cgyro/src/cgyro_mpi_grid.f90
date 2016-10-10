@@ -94,6 +94,24 @@ subroutine cgyro_mpi_grid
   enddo
 !$acc enter data copyin(ir_c,it_c,ic_c)
 
+  ! Shear pointers
+  allocate(ica_c(nc))
+  allocate(icb_c(nc))
+  ic = 0
+  do ir=1,n_radial
+     do it=1,n_theta
+        ic = ic+1
+        if (ir < n_radial) then
+           ica_c(ic) = ic_c(ir,it)
+           icb_c(ic) = ic_c(ir+1,it)
+        else
+           ica_c(ic) = ic_c(ir,it)
+           icb_c(ic) = ic_c(1,it)
+        endif
+     enddo
+  enddo
+
+  
   if (test_flag == 1) then
      ! Set dimensions for calculation of memory in test mode
      nv_loc = nv
