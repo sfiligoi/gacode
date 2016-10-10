@@ -76,25 +76,31 @@ subroutine cgyro_field_c
 
   implicit none
 
-  integer :: is
+  integer :: is,ie,ix
   complex, dimension(nc) :: tmp
-
+  complex :: fac
+  
   call timer_lib_in('field_h')
 
   field_loc(:,:) = (0.0,0.0)
 
   ! Poisson and Ampere RHS integrals of h
 
-!$omp parallel private(ic)
+!$omp parallel private(iv,ic,iv_loc,is,ix,ie,fac)
 !$omp do reduction(+:field_loc)
-  do iv_loc=1,nv2-nv1+1
+  do iv=nv1,nv2
+     iv_loc = iv-nv1+1
+     is = is_v(iv)
+     ix = ix_v(iv)
+     ie = ie_v(iv)
+     fac = w_e(ie)*w_xi(ix)*z(is)*dens(is)
      do ic=1,nc
-        field_loc(:,ic) = field_loc(:,ic)+fvec_c(:,ic,iv_loc)*h_x(ic,iv_loc)
+        field_loc(:,ic) = field_loc(:,ic)+(fac*jvec_c(:,ic,iv_loc))*h_x(ic,iv_loc)
      enddo
   enddo
 !$omp end do
 !$omp end parallel
-
+  
   call MPI_ALLREDUCE(field_loc(:,:),&
        field(:,:),&
        size(field(:,:)),&
@@ -112,12 +118,16 @@ subroutine cgyro_field_c
     call cgyro_field_ae('c')
   else
      if (n_field > 2) then
+!$omp workshare 
         tmp(:) = field(1,:)
         field(1,:) = gcoef(1,:)*field(1,:)+gcoef(4,:)*field(3,:)
         field(2,:) = gcoef(2,:)*field(2,:)
         field(3,:) = gcoef(3,:)*field(3,:)+gcoef(5,:)*tmp(:)
+!$omp end workshare
      else
+!$omp workshare
         field(:,:) = gcoef(:,:)*field(:,:)
+!$omp end workshare
      endif
   endif
 

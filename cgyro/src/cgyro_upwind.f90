@@ -22,7 +22,6 @@ subroutine cgyro_upwind
   implicit none
 
   integer :: is,ie,ix
-  complex :: fac
   complex, dimension(nc,n_species) :: res_loc 
   complex, dimension(nc,n_species) :: res
 

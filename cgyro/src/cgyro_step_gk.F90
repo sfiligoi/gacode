@@ -64,7 +64,8 @@ subroutine cgyro_rhs(ij)
   complex :: rhs_ij(nc,nv_loc)
 
   ! Prepare suitable distribution (g, not h) for conservative upwind method
-
+  rhs_ij = 0.0
+  
   g_x(:,:) = h_x(:,:)
 
   if (n_field > 1) then
@@ -149,24 +150,24 @@ subroutine cgyro_rhs(ij)
 
         enddo
      enddo
-     endif
+  endif
 !$acc end data
 
-     rhs(:,:,ij) = rhs_ij(:,:)
+  rhs(:,:,ij) = rhs_ij(:,:)
 
-     call timer_lib_out('str')
+  call timer_lib_out('str')
 
-     ! Nonlinear evaluation [f,g]
+  ! Nonlinear evaluation [f,g]
 
-     if (nonlinear_flag == 1) then     
-        if (nonlinear_method == 1) then
-           call cgyro_nl_direct(ij)
-        else
-           call cgyro_nl_fftw(ij)
-        endif
+  if (nonlinear_flag == 1) then     
+     if (nonlinear_method == 1) then
+        call cgyro_nl_direct(ij)
+     else
+        call cgyro_nl_fftw(ij)
      endif
+  endif
 
-   end subroutine cgyro_rhs
+end subroutine cgyro_rhs
 
 !==========================================================================
 

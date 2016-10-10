@@ -278,7 +278,6 @@ module cgyro_globals
   complex, dimension(:,:), allocatable :: cap_h_v
   complex, dimension(:,:), allocatable :: cap_h_v_prime
   real, dimension(:,:,:), allocatable :: jvec_c
-  real, dimension(:,:,:), allocatable :: fvec_c
   real, dimension(:,:,:), allocatable :: jvec_v
   real, dimension(:,:), allocatable :: upfac1,upfac2
   !

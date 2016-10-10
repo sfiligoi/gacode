@@ -102,7 +102,6 @@ subroutine cgyro_init_arrays
      ix = ix_v(iv)
      ie = ie_v(iv)
      do ic=1,nc
-        fvec_c(:,ic,iv_loc) = w_e(ie)*w_xi(ix)*z(is)*dens(is)*jvec_c(:,ic,iv_loc)
         upfac1(ic,iv_loc) = w_e(ie)*w_xi(ix)*abs(xi(ix))*vel(ie)*jvec_c(1,ic,iv_loc)
         upfac2(ic,iv_loc) = jvec_c(1,ic,iv_loc)/res_norm(ic,is)
      enddo

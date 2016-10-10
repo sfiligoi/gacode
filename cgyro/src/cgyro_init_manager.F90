@@ -153,10 +153,8 @@ subroutine cgyro_init_manager
      allocate(omega_s(n_field,nc,nv_loc))
      allocate(jvec_c(n_field,nc,nv_loc))
      allocate(jvec_v(n_field,nc_loc,nv))
-     allocate(fvec_c(n_field,nc,nv_loc))
      allocate(upfac1(nc,nv_loc))
      allocate(upfac2(nc,nv_loc))
-
      ! Real-space distributed arrays
      allocate(cap_h_v(nc_loc,nv))
      allocate(cap_h_v_prime(nc_loc,nv))

@@ -41,6 +41,7 @@ subroutine cgyro_kernel
 
   ! 4. Array initialization and construction
   !    NOTE: On exit, field_old = field 
+ 
   call cgyro_init_manager
 
   !---------------------------------------------------------------------------
@@ -58,7 +59,6 @@ subroutine cgyro_kernel
   call cgyro_write_timedata
   call timer_lib_in('io_init')
   io_control = 2*(1-silent_flag)
-
   do i_time=1,n_time
 
      call timer_lib_in('TOTAL')
