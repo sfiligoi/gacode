@@ -1,0 +1,548 @@
+#include "cuda_runtime.h"
+#include "pgi_cuda_runtime.h"
+#include "cgyro_nl_fftw.gpu.n001.h"
+extern "C" __global__ __launch_bounds__(128) void
+cgyro_nl_fftw_68_gpu(
+    int tc19,
+    int tc18,
+    int tc17,
+    signed char* p20,
+    signed char* p22,
+    signed char* p24,
+    signed char* p26,
+    int x3,
+    int x5,
+    int x7,
+    int x10,
+    int x11,
+    int x12,
+    int x16,
+    int x17,
+    int x18,
+    int x25,
+    int x26,
+    int x27,
+    int x34,
+    int x35,
+    int x36)
+{
+int _i_1, _i_2, _i_3, _i_4, _i_5;
+int i77s;
+int i81s;
+int e87;
+int e89;
+int e91;
+int e92;
+int e94;
+int e95;
+int e96;
+int e98;
+int e99;
+int e100;
+int e102;
+int e103;
+int e104;
+int j261;
+int j260;
+int j259;
+int j258;
+int j257;
+int j256;
+tc18;
+e87 = ((int)threadIdx.x)*(16);
+i77s = 0;
+_i_1 = ((int)threadIdx.y)+(x5);
+e91 = ((x10)*(_i_1))*(16);
+e89 = ((x12)*(16))+(e87);
+e95 = ((x16)*(_i_1))*(16);
+e94 = ((x18)*(16))+(e87);
+e99 = ((x25)*(_i_1))*(16);
+e98 = ((x27)*(16))+(e87);
+e103 = ((x34)*(_i_1))*(16);
+e102 = ((x36)*(16))+(e87);
+j261 = 0;
+_BB_19: ;
+_i_1 = (x7)*(16);
+_i_2 = ((x3)+((int)blockIdx.x))+(i77s);
+e104 = ((e102)+(_i_1))+(((_i_2)*(x35))*(16));
+e100 = ((e98)+(_i_1))+(((_i_2)*(x26))*(16));
+e96 = ((e94)+(_i_1))+(((_i_2)*(x17))*(16));
+e92 = ((e89)+(_i_1))+(((_i_2)*(x11))*(16));
+if( (((((int)blockIdx.x)-(tc17))+(j261))>=0)) goto _BB_20;
+j256 = 0;
+j257 = 0;
+j258 = 0;
+j259 = 0;
+j260 = 0;
+_BB_35: ;
+if( (((((int)threadIdx.y)-(tc18))+(j256))>=0)) goto _BB_33;
+i81s = 0;
+_BB_49: ;
+if( ((((int)threadIdx.x)+(i81s))>=(tc19)))  goto _BB_46;
+_i_1 = (i81s)*(16);
+_i_2 = (((e91)+(e92))+(j260))+(_i_1);
+*( double*)((p20)+((long long)((_i_2)+(-16)))) = (0.00000000000000000E+0);
+*( double*)((((p20)+(-16))+((long long)(_i_2)))+(8)) = (0.00000000000000000E+0);
+_i_3 = (((e95)+(e96))+(j259))+(_i_1);
+*( double*)((p22)+((long long)((_i_3)+(-16)))) = (0.00000000000000000E+0);
+*( double*)((((p22)+(-16))+((long long)(_i_3)))+(8)) = (0.00000000000000000E+0);
+_i_4 = (((e99)+(e100))+(j258))+(_i_1);
+*( double*)((p24)+((long long)((_i_4)+(-16)))) = (0.00000000000000000E+0);
+*( double*)((((p24)+(-16))+((long long)(_i_4)))+(8)) = (0.00000000000000000E+0);
+_i_5 = (((e103)+(e104))+(j257))+(_i_1);
+*( double*)((p26)+((long long)((_i_5)+(-16)))) = (0.00000000000000000E+0);
+*( double*)((((p26)+(-16))+((long long)(_i_5)))+(8)) = (0.00000000000000000E+0);
+_BB_46: ;
+i81s = (32)+(i81s);
+if( ((i81s)<(tc19)))  goto _BB_49;
+_BB_33: ;
+j256 = (j256)+(4);
+j257 = (j257)+((x34)*(64));
+j258 = (j258)+((x25)*(64));
+j259 = (j259)+((x16)*(64));
+j260 = (j260)+((x10)*(64));
+if( (((j256)-(tc18))<0)) goto _BB_35;
+_BB_20: ;
+i77s = ((int)gridDim.x)+(i77s);
+j261 = (j261)+((int)gridDim.x);
+if( (((j261)-(tc17))<0)) goto _BB_19;
+}
+extern "C" __global__ __launch_bounds__(128) void
+cgyro_nl_fftw_84_gpu(
+    int tc16,
+    int tc15,
+    int tc14,
+    int f162,
+    signed char* __restrict__ p17,
+    signed char* __restrict__ p19,
+    signed char* p20,
+    signed char* p22,
+    signed char* p24,
+    signed char* p26,
+    int x5,
+    int x9,
+    int x10,
+    int x11,
+    int x18,
+    int x19,
+    int x20,
+    int x27,
+    int x28,
+    int x29,
+    int x36,
+    int x37,
+    int x38,
+    int x45,
+    int x46,
+    int x47,
+    int x54,
+    int x55,
+    int x56)
+{
+int _i_1, _i_2, _i_3, _i_4, _i_5, _i_6, _i_7;
+double _d_1, _d_2, _d_3, _d_4, _d_5, _d_6, _d_7, _d_8, _d_9, _d_10, _d_11, _d_12;
+int i100s;
+int i102s;
+int y104;
+dcmplx2 y107;
+dcmplx2 y108;
+int e111;
+int e114;
+int e115;
+int e117;
+int e120;
+int e121;
+int e122;
+int e128;
+int e130;
+int e132;
+int e134;
+int j332;
+int j331;
+int j330;
+int j329;
+int j328;
+int j327;
+int j321;
+int j320;
+int j319;
+int j318;
+int e152;
+int e153;
+int e154;
+int e155;
+signed char* rb156;
+extern  __shared__ double S157[];
+signed char* e158;
+rb156 = (signed char*)(&S157);
+e158 = rb156;
+rb156 = (rb156)+((long long)(((int)blockDim.y)*(4)));
+_i_1 = (1)+((int)blockIdx.x);
+tc15;
+tc16;
+_i_2 = (1)+((int)threadIdx.x);
+e111 = ((int)threadIdx.y)*(16);
+i100s = 0;
+e114 = ((x20)*(16))+(e111);
+e117 = ((x19)*(_i_2))*(16);
+e120 = ((x11)*(16))+(e111);
+e122 = ((x10)*(_i_2))*(16);
+e155 = ((x28)*((int)gridDim.x))*(16);
+e128 = ((x28)*(_i_1))*(16);
+e154 = ((x37)*((int)gridDim.x))*(16);
+e130 = ((x37)*(_i_1))*(16);
+e153 = ((x46)*((int)gridDim.x))*(16);
+e132 = ((x46)*(_i_1))*(16);
+e152 = ((x55)*((int)gridDim.x))*(16);
+e134 = ((x55)*(_i_1))*(16);
+j328 = 0;
+j329 = 0;
+j330 = 0;
+j331 = 0;
+j332 = 0;
+_BB_19: ;
+_i_1 = (((int)blockIdx.x)+(i100s))+(1);
+e121 = (e120)+(((_i_1)*(x9))*(16));
+e115 = (e114)+(((_i_1)*(x18))*(16));
+if( (((((int)blockIdx.x)-(tc14))+(j328))>=0)) goto _BB_20;
+i102s = 0;
+j327 = 0;
+_BB_35: ;
+if( (((((int)threadIdx.y)-(tc15))+(j327))>=0)) goto _BB_33;
+if( (((int)threadIdx.x)!=0)) goto _BB_10;
+y104 = ((f162)+((int)threadIdx.y))+(j327);
+if( ((y104)>=0)) goto _BB_11;
+y104 = (((f162)+(x5))+((int)threadIdx.y))+(j327);
+_BB_11: ;
+(( int*)e158)[(int)threadIdx.y] = y104;
+__threadfence_block();
+_BB_10: ;
+__pgi_vbarrier();
+y104 = (( int*)e158)[(int)threadIdx.y];
+j318 = 0;
+j319 = 0;
+j320 = 0;
+j321 = 0;
+_BB_51: ;
+if( (((((int)threadIdx.x)-(tc16))+(j319))>=0)) goto _BB_48;
+_i_1 = (i102s)*(16);
+_i_2 = ((e122)+((e121)+(_i_1)))+(j320);
+_d_1 = (*( double*)((p17)+((long long)(_i_2))));
+_d_2 = (*( double*)(((p17)+((long long)((_i_2)+(16))))+(-8LL)));
+_d_7 = (_d_1*(1.00000000000000000E+0))+(_d_2*(0.00000000000000000E+0));
+y107.r = (_d_1*(0.00000000000000000E+0))-(_d_2*(1.00000000000000000E+0));
+y107.i = _d_7;
+_i_3 = ((e117)+((e115)+(_i_1)))+(j321);
+_d_3 = (*( double*)((p19)+((long long)(_i_3))));
+_d_4 = (*( double*)(((p19)+((long long)((_i_3)+(16))))+(-8LL)));
+_d_8 = (_d_3*(1.00000000000000000E+0))+(_d_4*(0.00000000000000000E+0));
+y108.r = (_d_3*(0.00000000000000000E+0))-(_d_4*(1.00000000000000000E+0));
+y108.i = _d_8;
+_d_5 = (double)(((f162)+((int)threadIdx.y))+(j327));
+_d_9 = ((y107.r)*(0.00000000000000000E+0))+((y107.i)*(_d_5));
+_i_4 = ((((((x29)+((int)threadIdx.x))*(16))+(e128))+(((y104)*(x27))*(16)))+(j332))+(j318);
+*( double*)((p20)+((long long)((_i_4)+(-16)))) = ((y107.r)*(_d_5))-((y107.i)*(0.00000000000000000E+0));
+*( double*)((((p20)+(-16))+((long long)(_i_4)))+(8)) = _d_9;
+_d_10 = ((y108.r)*(0.00000000000000000E+0))+((y108.i)*(_d_5));
+_i_5 = ((((((x38)+((int)threadIdx.x))*(16))+(e130))+(((y104)*(x36))*(16)))+(j331))+(j318);
+*( double*)((p22)+((long long)((_i_5)+(-16)))) = ((y108.r)*(_d_5))-((y108.i)*(0.00000000000000000E+0));
+*( double*)((((p22)+(-16))+((long long)(_i_5)))+(8)) = _d_10;
+_d_6 = (double)(((int)threadIdx.x)+(j319));
+_d_11 = ((y107.r)*(0.00000000000000000E+0))+((y107.i)*(_d_6));
+_i_6 = ((((((x47)+((int)threadIdx.x))*(16))+(e132))+(((y104)*(x45))*(16)))+(j330))+(j318);
+*( double*)((p24)+((long long)((_i_6)+(-16)))) = ((y107.r)*(_d_6))-((y107.i)*(0.00000000000000000E+0));
+*( double*)((((p24)+(-16))+((long long)(_i_6)))+(8)) = _d_11;
+_d_12 = ((y108.r)*(0.00000000000000000E+0))+((y108.i)*(_d_6));
+_i_7 = ((((((x56)+((int)threadIdx.x))*(16))+(e134))+(((y104)*(x54))*(16)))+(j329))+(j318);
+*( double*)((p26)+((long long)((_i_7)+(-16)))) = ((y108.r)*(_d_6))-((y108.i)*(0.00000000000000000E+0));
+*( double*)((((p26)+(-16))+((long long)(_i_7)))+(8)) = _d_12;
+_BB_48: ;
+j318 = (j318)+(512);
+j319 = (j319)+(32);
+j320 = (j320)+((x10)*(512));
+j321 = (j321)+((x19)*(512));
+if( (((j319)-(tc16))<0)) goto _BB_51;
+_BB_33: ;
+i102s = (4)+(i102s);
+j327 = (j327)+(4);
+if( (((j327)-(tc15))<0)) goto _BB_35;
+_BB_20: ;
+i100s = ((int)gridDim.x)+(i100s);
+j328 = (j328)+((int)gridDim.x);
+j329 = (j329)+(e152);
+j330 = (j330)+(e153);
+j331 = (j331)+(e154);
+j332 = (j332)+(e155);
+if( (((j328)-(tc14))<0)) goto _BB_19;
+}
+extern "C" __global__ __launch_bounds__(128) void
+cgyro_nl_fftw_110_gpu(
+    int tc13,
+    int tc12,
+    signed char* p11,
+    signed char* p13,
+    signed char* p15,
+    signed char* p17,
+    int x4,
+    int x7,
+    int x8,
+    int x9,
+    int x10,
+    int x11,
+    int x17,
+    int x18,
+    int x19,
+    int x26,
+    int x27,
+    int x28,
+    int x35,
+    int x36,
+    int x37)
+{
+int _i_1, _i_2, _i_3, _i_4, _i_5, _i_6, _i_7;
+int i73s;
+int j133;
+int j132;
+int j131;
+int j130;
+int j129;
+int e82;
+int e83;
+int e84;
+int e85;
+e85 = ((x8)*((int)gridDim.x))*(16);
+e84 = ((x18)*((int)gridDim.x))*(16);
+e83 = ((x27)*((int)gridDim.x))*(16);
+e82 = ((x36)*((int)gridDim.x))*(16);
+j129 = 0;
+j130 = 0;
+j131 = 0;
+j132 = 0;
+j133 = 0;
+_BB_22: ;
+if( (((((int)blockIdx.x)-(tc12))+(j129))>=0)) goto _BB_20;
+i73s = 0;
+_BB_36: ;
+if( ((((int)threadIdx.x)+(i73s))>=(tc13)))  goto _BB_33;
+_i_1 = (x10)-((x11)/(2));
+_i_2 = (1)+((int)blockIdx.x);
+_i_3 = (i73s)*(16);
+_i_4 = (((((((x7)+((x9)*(_i_1)))+(x4))+((x8)*(_i_2)))+((int)threadIdx.x))*(16))+(j133))+(_i_3);
+*( double*)((p11)+((long long)((_i_4)+(-16)))) = (0.00000000000000000E+0);
+*( double*)((((p11)+(-16))+((long long)(_i_4)))+(8)) = (0.00000000000000000E+0);
+_i_5 = (((((((x17)+((x19)*(_i_1)))+(x4))+((x18)*(_i_2)))+((int)threadIdx.x))*(16))+(j132))+(_i_3);
+*( double*)((p13)+((long long)((_i_5)+(-16)))) = (0.00000000000000000E+0);
+*( double*)((((p13)+(-16))+((long long)(_i_5)))+(8)) = (0.00000000000000000E+0);
+_i_6 = (((((((x26)+((x28)*(_i_1)))+(x4))+((x27)*(_i_2)))+((int)threadIdx.x))*(16))+(j131))+(_i_3);
+*( double*)((p15)+((long long)((_i_6)+(-16)))) = (0.00000000000000000E+0);
+*( double*)((((p15)+(-16))+((long long)(_i_6)))+(8)) = (0.00000000000000000E+0);
+_i_7 = (((((((x35)+((x37)*(_i_1)))+(x4))+((x36)*(_i_2)))+((int)threadIdx.x))*(16))+(j130))+(_i_3);
+*( double*)((p17)+((long long)((_i_7)+(-16)))) = (0.00000000000000000E+0);
+*( double*)((((p17)+(-16))+((long long)(_i_7)))+(8)) = (0.00000000000000000E+0);
+_BB_33: ;
+i73s = (128)+(i73s);
+if( ((i73s)<(tc13)))  goto _BB_36;
+_BB_20: ;
+j129 = (j129)+((int)gridDim.x);
+j130 = (j130)+(e82);
+j131 = (j131)+(e83);
+j132 = (j132)+(e84);
+j133 = (j133)+(e85);
+if( (((j129)-(tc12))<0)) goto _BB_22;
+}
+extern "C" __global__ __launch_bounds__(128) void
+cgyro_nl_fftw_145_gpu(
+    int tc11,
+    int tc10,
+    int tc9,
+    signed char* __restrict__ p18,
+    signed char* __restrict__ p20,
+    signed char* __restrict__ p22,
+    signed char* __restrict__ p24,
+    signed char* p25,
+    int x4,
+    int x6,
+    int x10,
+    int x11,
+    int x12,
+    int x19,
+    int x20,
+    int x21,
+    int x28,
+    int x29,
+    int x30,
+    int x37,
+    int x38,
+    int x39,
+    double x43,
+    int x46,
+    int x47,
+    int x48)
+{
+int _i_1, _i_2;
+int i87s;
+int i91s;
+int e97;
+int e99;
+int e101;
+int e102;
+int e104;
+int e105;
+int e106;
+int e108;
+int e109;
+int e110;
+int e112;
+int e113;
+int e114;
+int e116;
+int e117;
+int e118;
+int j225;
+int j224;
+int j126;
+int j105;
+int j85;
+int j65;
+int j45;
+tc10;
+e97 = ((int)threadIdx.x)*(8);
+i87s = 0;
+_i_1 = ((int)threadIdx.y)+(x4);
+e101 = ((x10)*(_i_1))*(8);
+e99 = ((x12)*(8))+(e97);
+e105 = ((x19)*(_i_1))*(8);
+e104 = ((x21)*(8))+(e97);
+e109 = ((x28)*(_i_1))*(8);
+e108 = ((x30)*(8))+(e97);
+e113 = ((x37)*(_i_1))*(8);
+e112 = ((x39)*(8))+(e97);
+e117 = ((x46)*(_i_1))*(8);
+e116 = ((x48)*(8))+(e97);
+j225 = 0;
+_BB_19: ;
+_i_1 = (x6)*(8);
+_i_2 = (((int)blockIdx.x)+(i87s))+(1);
+e118 = ((e116)+(_i_1))+(((_i_2)*(x47))*(8));
+e114 = ((e112)+(_i_1))+(((_i_2)*(x38))*(8));
+e110 = ((e108)+(_i_1))+(((_i_2)*(x29))*(8));
+e106 = ((e104)+(_i_1))+(((_i_2)*(x20))*(8));
+e102 = ((e99)+(_i_1))+(((_i_2)*(x11))*(8));
+if( (((((int)blockIdx.x)-(tc9))+(j225))>=0)) goto _BB_20;
+j45 = (e102)+(e101);
+j65 = (e106)+(e105);
+j85 = (e110)+(e109);
+j105 = (e114)+(e113);
+j126 = (e118)+(e117);
+j224 = 0;
+_BB_35: ;
+if( (((((int)threadIdx.y)-(tc10))+(j224))>=0)) goto _BB_33;
+i91s = 0;
+_BB_49: ;
+if( ((((int)threadIdx.x)+(i91s))>=(tc11)))  goto _BB_46;
+_i_1 = (i91s)*(8);
+*( double*)((p25)+((long long)(((j126)+(_i_1))+(-8)))) = (((*( double*)((p18)+((long long)(((j45)+(_i_1))+(-8)))))*(*( double*)((p20)+((long long)(((j65)+(_i_1))+(-8))))))-((*( double*)((p22)+((long long)(((j85)+(_i_1))+(-8)))))*(*( double*)((p24)+((long long)(((j105)+(_i_1))+(-8)))))))*(x43);
+_BB_46: ;
+i91s = (32)+(i91s);
+if( ((i91s)<(tc11)))  goto _BB_49;
+_BB_33: ;
+j45 = (j45)+((x10)*(32));
+j65 = (j65)+((x19)*(32));
+j85 = (j85)+((x28)*(32));
+j105 = (j105)+((x37)*(32));
+j126 = (j126)+((x46)*(32));
+j224 = (j224)+(4);
+if( (((j224)-(tc10))<0)) goto _BB_35;
+_BB_20: ;
+i87s = ((int)gridDim.x)+(i87s);
+j225 = (j225)+((int)gridDim.x);
+if( (((j225)-(tc9))<0)) goto _BB_19;
+}
+extern "C" __global__ __launch_bounds__(128) void
+cgyro_nl_fftw_173_gpu(
+    int tc8,
+    int tc7,
+    int tc6,
+    signed char* __restrict__ p13,
+    signed char* p14,
+    int x4,
+    int x5,
+    int x9,
+    int x10,
+    int x11,
+    int x18,
+    int x19,
+    int x20)
+{
+int _i_1, _i_2;
+double _d_1;
+int i52s;
+int i54s;
+int y56;
+int i57s;
+int e63;
+int e66;
+int e68;
+int e69;
+int j128;
+int j127;
+int j126;
+int j125;
+int e75;
+signed char* rb76;
+extern  __shared__ double S77[];
+signed char* e78;
+rb76 = (signed char*)(&S77);
+e78 = rb76;
+rb76 = (rb76)+((long long)(((int)blockDim.y)*(4)));
+_i_1 = (1)+((int)blockIdx.x);
+tc7;
+e66 = ((int)threadIdx.y)*(16);
+i52s = 0;
+e75 = ((x10)*((int)gridDim.x))*(16);
+e63 = ((x10)*(_i_1))*(16);
+e68 = ((x20)*(16))+(e66);
+j127 = 0;
+j128 = 0;
+_BB_19: ;
+e69 = (e68)+((((((int)blockIdx.x)+(i52s))+(1))*(x18))*(16));
+if( (((((int)blockIdx.x)-(tc6))+(j127))>=0)) goto _BB_20;
+i54s = 0;
+j125 = 0;
+j126 = 0;
+_BB_35: ;
+if( (((((int)threadIdx.y)-(tc7))+(j126))>=0)) goto _BB_33;
+if( (((int)threadIdx.x)!=0)) goto _BB_10;
+_i_2 = ((int)threadIdx.y)+(j126);
+_i_1 = (x4)/(2);
+y56 = (((int)threadIdx.y)-(_i_1))+(i54s);
+if( ((_i_2)>=(_i_1)))  goto _BB_11;
+y56 = ((((int)threadIdx.y)-((x4)/(2)))+(i54s))+(x5);
+_BB_11: ;
+(( int*)e78)[(int)threadIdx.y] = y56;
+__threadfence_block();
+_BB_10: ;
+__pgi_vbarrier();
+y56 = (( int*)e78)[(int)threadIdx.y];
+i57s = 0;
+_BB_51: ;
+if( ((((int)threadIdx.x)+(i57s))>=(tc8)))  goto _BB_48;
+_i_1 = ((((((x11)+((int)threadIdx.x))*(16))+(e63))+(((y56)*(x9))*(16)))+(j128))+((i57s)*(16));
+_d_1 = (*( double*)(((p13)+((long long)(_i_1)))+(-8LL)));
+_i_2 = (((((int)threadIdx.x)+(i57s))+(1))*(x19))*(16);
+*( double*)((p14)+((long long)((((e68)+((((((int)blockIdx.x)+(i52s))+(1))*(x18))*(16)))+(j125))+(_i_2)))) = (*( double*)((p13)+((long long)((_i_1)+(-16)))));
+*( double*)((((p14)+(-16))+((long long)((((e69)+(j125))+(_i_2))+(16))))+(8)) = _d_1;
+_BB_48: ;
+i57s = (32)+(i57s);
+if( ((i57s)<(tc8)))  goto _BB_51;
+_BB_33: ;
+i54s = (4)+(i54s);
+j125 = (j125)+(64);
+j126 = (j126)+(4);
+if( (((j126)-(tc7))<0)) goto _BB_35;
+_BB_20: ;
+i52s = ((int)gridDim.x)+(i52s);
+j127 = (j127)+((int)gridDim.x);
+j128 = (j128)+(e75);
+if( (((j127)-(tc6))<0)) goto _BB_19;
+}
