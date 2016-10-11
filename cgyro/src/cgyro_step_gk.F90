@@ -115,14 +115,13 @@ subroutine cgyro_rhs(ij)
 !$acc  parallel loop gang vector collapse(2) & 
 !$acc& private(iv,ic,iv_loc,is,rval,rval2,rhs_stream,id,jc)
 #else
-!$omp parallel do &
+!$omp parallel do collapse(2) &
 !$omp& private(iv,ic,iv_loc,is,rval,rval2,rhs_stream,id,jc) 
 #endif
      do iv=nv1,nv2
         do ic=1,nc
            iv_loc = iv-nv1+1
            is = is_v(iv)
-           vpar = vel(ie_v(iv))*xi(ix_v(iv))
            ! Diagonal terms
            rhs_ij(ic,iv_loc) = &
                 omega_cap_h(ic,iv_loc)*cap_h_c(ic,iv_loc)+&
@@ -130,7 +129,7 @@ subroutine cgyro_rhs(ij)
                 sum(omega_s(:,ic,iv_loc)*field(:,ic))
 
            ! Parallel streaming with upwind dissipation 
-           rval  = omega_stream(it_c(ic),is)*vpar
+           rval  = omega_stream(it_c(ic),is)*vel(ie_v(iv))*xi(ix_v(iv))
            rval2 = abs(omega_stream(it_c(ic),is))
 
            rhs_stream = 0.0
