@@ -34,8 +34,7 @@ subroutine cgyro_step_collision_simple
   allocate(bvec(n_xi,n_energy,n_species))
   allocate(cvec(n_xi,n_energy,n_species))
 
-!$omp  parallel private(ic_loc,ivp,iv,is,ix,jx,ie,ir,it,cvec_re,cvec_im,bvec,cvec)
-!$omp do
+!$omp parallel do private(ic_loc,ivp,iv,is,ix,jx,ie,ir,it,cvec_re,cvec_im,bvec,cvec)
   do ic=nc1,nc2
      ic_loc = ic-nc1+1
      ir = ir_c(ic)
@@ -76,8 +75,6 @@ subroutine cgyro_step_collision_simple
      enddo
 
   enddo
-!$omp end do
-!$omp end parallel
 
   deallocate(bvec,cvec)
 
@@ -92,8 +89,7 @@ subroutine cgyro_step_collision_simple
 
   ! Compute H given h and [phi(h), apar(h)]
 
-!$omp parallel do &
-!$omp& private(iv_loc,is,ic)
+!$omp parallel do private(iv_loc,is,ic)
   do iv=nv1,nv2
      iv_loc = iv-nv1+1
      is = is_v(iv)

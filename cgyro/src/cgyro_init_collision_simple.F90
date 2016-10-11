@@ -47,7 +47,7 @@ subroutine cgyro_init_collision_simple
   allocate(amat(n_xi,n_xi))
 
   ! Collision test particle component
-  ctest   = 0.0
+  ctest = 0.0
 
   ! Lorentz
   do is=1,n_species
@@ -108,14 +108,14 @@ subroutine cgyro_init_collision_simple
 
            ! H_bar = (1 - dt/2 C)^(-1) * (1 + dt/2 C) H
            ! Lapack factorization and inverse of LHS
-           call DGESV(n_xi,n_xi,cmat_simple(:,:,is,ie,it),size(cmat_simple,1),&
+           call DGESV(n_xi,n_xi,cmat_simple(:,:,ie,is,it),size(cmat_simple,1),&
                 i_piv,amat,size(amat,1),info)
-           cmat_simple(:,:,is,ie,it) = amat(:,:)
+           cmat_simple(:,:,ie,is,it) = amat(:,:)
 
         enddo
      enddo
   enddo
-!$acc  enter data copyin(cmat_simple)
+!$acc enter data copyin(cmat_simple)
 
   deallocate(amat)
   deallocate(i_piv)
