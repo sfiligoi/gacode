@@ -59,13 +59,11 @@ subroutine cgyro_rhs(ij)
   integer, intent(in) :: ij
   integer :: is,ie,ix
   integer :: id,jc
-  real :: rval,rval2
+  real :: rval,rval2,vpar
   complex :: rhs_stream
   complex :: rhs_ij(nc,nv_loc)
 
   ! Prepare suitable distribution (g, not h) for conservative upwind method
-  rhs_ij = 0.0
-  
   g_x(:,:) = h_x(:,:)
 
   if (n_field > 1) then
@@ -115,19 +113,16 @@ subroutine cgyro_rhs(ij)
 
 #ifdef _OPENACC
 !$acc  parallel loop gang vector collapse(2) & 
-!$acc& private(iv,ic,iv_loc,is,ix,ie,rval,rval2,rhs_stream,id,jc)
+!$acc& private(iv,ic,iv_loc,is,rval,rval2,rhs_stream,id,jc)
 #else
-!$omp  parallel do &
-!$omp& private(iv,ic,iv_loc,is,ix,ie,rval,rval2,rhs_stream,id,jc)
+!$omp parallel do &
+!$omp& private(iv,ic,iv_loc,is,rval,rval2,rhs_stream,id,jc) 
 #endif
      do iv=nv1,nv2
         do ic=1,nc
-
            iv_loc = iv-nv1+1
            is = is_v(iv)
-           ix = ix_v(iv)
-           ie = ie_v(iv)
-
+           vpar = vel(ie_v(iv))*xi(ix_v(iv))
            ! Diagonal terms
            rhs_ij(ic,iv_loc) = &
                 omega_cap_h(ic,iv_loc)*cap_h_c(ic,iv_loc)+&
@@ -135,7 +130,7 @@ subroutine cgyro_rhs(ij)
                 sum(omega_s(:,ic,iv_loc)*field(:,ic))
 
            ! Parallel streaming with upwind dissipation 
-           rval  = omega_stream(it_c(ic),is)*vel(ie)*xi(ix)
+           rval  = omega_stream(it_c(ic),is)*vpar
            rval2 = abs(omega_stream(it_c(ic),is))
 
            rhs_stream = 0.0
