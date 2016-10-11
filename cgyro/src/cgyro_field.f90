@@ -30,8 +30,7 @@ subroutine cgyro_field_v
 
   ! Poisson and Ampere RHS integrals of H
 
-!$omp parallel private(ic_loc,iv,is,ix,ie,fac)
-!$omp do reduction(+:field_loc)
+!$omp parallel do private(ic_loc,iv,is,ix,ie,fac)
   do ic=nc1,nc2
      ic_loc = ic-nc1+1
      do iv=1,nv
@@ -42,8 +41,6 @@ subroutine cgyro_field_v
         field_loc(:,ic) = field_loc(:,ic)+fac*jvec_v(:,ic_loc,iv) 
      enddo
   enddo
-!$omp end do
-!$omp end parallel
 
   call MPI_ALLREDUCE(field_loc(:,:),&
        field(:,:),&
@@ -76,9 +73,8 @@ subroutine cgyro_field_c
 
   implicit none
 
-  integer :: is,ie,ix
+  integer :: is
   complex, dimension(nc) :: tmp
-  real :: fac
   
   call timer_lib_in('field_h')
 
@@ -86,21 +82,16 @@ subroutine cgyro_field_c
 
   ! Poisson and Ampere RHS integrals of h
 
-!$omp parallel private(iv,ic,iv_loc,is,ix,ie,fac)
+!$omp parallel private(ic)
 !$omp do reduction(+:field_loc)
-  do iv=nv1,nv2
-     iv_loc = iv-nv1+1
-     is = is_v(iv)
-     ix = ix_v(iv)
-     ie = ie_v(iv)
-     fac = w_e(ie)*w_xi(ix)*z(is)*dens(is)
+  do iv_loc=1,nv_loc
      do ic=1,nc
-        field_loc(:,ic) = field_loc(:,ic)+(fac*jvec_c(:,ic,iv_loc))*h_x(ic,iv_loc)
+        field_loc(:,ic) = field_loc(:,ic)+(dvfac(iv_loc)*jvec_c(:,ic,iv_loc))*h_x(ic,iv_loc)
      enddo
   enddo
 !$omp end do
 !$omp end parallel
-  
+
   call MPI_ALLREDUCE(field_loc(:,:),&
        field(:,:),&
        size(field(:,:)),&

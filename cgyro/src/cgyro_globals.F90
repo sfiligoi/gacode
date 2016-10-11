@@ -252,6 +252,7 @@ module cgyro_globals
   real, dimension(:), allocatable :: xi, w_xi
   real, dimension(:,:), allocatable :: xi_deriv_mat, xi_lor_mat
   real, dimension(:,:), allocatable :: e_deriv1_mat, e_deriv2_mat
+  real, dimension(:), allocatable :: dvfac
   !
   ! Parallel streaming
   real, dimension(:), allocatable :: theta
