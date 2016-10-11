@@ -1,5 +1,5 @@
 !-----------------------------------------------------------------
-! cgyro_nl_fftw.gpu.f90 [GPU version]
+! cgyro_nl_fftw.gpu.f90 [GPU (acc-cuFFT) version]
 !
 ! PURPOSE:
 !  Evaluate nonlinear bracket with dealiased FFT.  It is natural 
@@ -29,8 +29,6 @@ subroutine cgyro_nl_fftw(ij)
   complex :: f0,g0
   complex, dimension(:,:), allocatable :: fpack
   complex, dimension(:,:), allocatable :: gpack
-! complex :: fpack(n_radial,nv_loc*n_theta)
-! complex :: gpack(n_radial,nv_loc*n_theta)
 
   real :: inv_nxny
 
@@ -41,7 +39,6 @@ subroutine cgyro_nl_fftw(ij)
   allocate(fpack(n_radial,nv_loc*n_theta))
   allocate(gpack(n_radial,nv_loc*n_theta))
 
-  iexch = 0
 !$omp parallel do private(it,ir,iexch,ic_loc)
   do iv_loc=1,nv_loc
      do it=1,n_theta
@@ -87,39 +84,39 @@ subroutine cgyro_nl_fftw(ij)
 
    ! Array mapping
 !$acc loop worker private(p,ix)
-    do ir=1,n_radial
+     do ir=1,n_radial
 
-           p  = ir-1-nx0/2
-           ix = p
-           if (ix < 0) ix = ix+nx  
+        p  = ir-1-nx0/2
+        ix = p
+        if (ix < 0) ix = ix+nx  
 !$acc   loop vector private(iy,f0,g0)
-           do in=1,n_toroidal
-              iy = in-1
-              f0 = i_c*f_nl(ir,j,in)
-              g0 = i_c*g_nl(ir,j,in)
-              fxmany(iy,ix,j) = p*f0
-              gxmany(iy,ix,j) = p*g0
-              fymany(iy,ix,j) = iy*f0
-              gymany(iy,ix,j) = iy*g0
-           enddo
+        do in=1,n_toroidal
+           iy = in-1
+           f0 = i_c*f_nl(ir,j,in)
+           g0 = i_c*g_nl(ir,j,in)
+           fxmany(iy,ix,j) = p*f0
+           gxmany(iy,ix,j) = p*g0
+           fymany(iy,ix,j) = iy*f0
+           gymany(iy,ix,j) = iy*g0
         enddo
      enddo
+  enddo
 !$acc end parallel
 
-  if (kxfilter_flag == 1) then
+     if (kxfilter_flag == 1) then
 !$acc  parallel
 !$acc  loop gang
-     do j=1,nsplit
+        do j=1,nsplit
 !$acc  loop vector
-        do iy=lbound(fxmany,1),ubound(fxmany,1)
-           fxmany(iy,-nx0/2+nx,j) = 0.0
-           fymany(iy,-nx0/2+nx,j) = 0.0
-           gxmany(iy,-nx0/2+nx,j) = 0.0
-           gymany(iy,-nx0/2+nx,j) = 0.0
+           do iy=lbound(fxmany,1),ubound(fxmany,1)
+              fxmany(iy,-nx0/2+nx,j) = 0.0
+              fymany(iy,-nx0/2+nx,j) = 0.0
+              gxmany(iy,-nx0/2+nx,j) = 0.0
+              gymany(iy,-nx0/2+nx,j) = 0.0
+           enddo
         enddo
-     enddo
 !$acc  end parallel
-  endif
+     endif
 
      ! --------------------------------------
      ! perform many Fourier Transforms at once
@@ -129,10 +126,11 @@ subroutine cgyro_nl_fftw(ij)
 !$acc& use_device(fxmany,fymany,gxmany,gymany) &
 !$acc& use_device(uxmany,uymany,vxmany,vymany)
 
-        call cufftExecZ2D(cu_plan_c2r_many,fxmany,uxmany)
-        call cufftExecZ2D(cu_plan_c2r_many,fymany,uymany)
-        call cufftExecZ2D(cu_plan_c2r_many,gxmany,vxmany)
-        call cufftExecZ2D(cu_plan_c2r_many,gymany,vymany)
+  call cufftExecZ2D(cu_plan_c2r_many,fxmany,uxmany)
+  call cufftExecZ2D(cu_plan_c2r_many,fymany,uymany)
+  call cufftExecZ2D(cu_plan_c2r_many,gxmany,vxmany)
+  call cufftExecZ2D(cu_plan_c2r_many,gymany,vymany)
+
 !$acc wait
 !$acc end host_data
 !$acc wait
@@ -140,20 +138,20 @@ subroutine cgyro_nl_fftw(ij)
   ! Poisson bracket in real space
   ! uv = (ux*vy-uy*vx)/(nx*ny)
 
-  inv_nxny = dble(1)/dble(nx*ny)
+  inv_nxny = 1.0/(nx*ny)
 
 !$acc  parallel 
 !$acc loop gang
-     do j=1,nsplit
+  do j=1,nsplit
 !$acc loop worker
-        do ix=lbound(uvmany,2),ubound(uvmany,2)
+     do ix=lbound(uvmany,2),ubound(uvmany,2)
 !$acc loop vector
-           do iy=lbound(uvmany,1),ubound(uvmany,1)
-              uvmany(iy,ix,j) = (uxmany(iy,ix,j)*vymany(iy,ix,j)- &
-                   uymany(iy,ix,j)*vxmany(iy,ix,j))*inv_nxny
-           enddo
+        do iy=lbound(uvmany,1),ubound(uvmany,1)
+           uvmany(iy,ix,j) = (uxmany(iy,ix,j)*vymany(iy,ix,j)- &
+                uymany(iy,ix,j)*vxmany(iy,ix,j))*inv_nxny
         enddo
      enddo
+  enddo
 !$acc  end parallel
 
   ! ------------------
@@ -162,7 +160,7 @@ subroutine cgyro_nl_fftw(ij)
 
 !$acc wait
 !$acc host_data use_device(uvmany,fxmany)
-        call cufftExecD2Z(cu_plan_r2c_many,uvmany,fxmany)
+  call cufftExecD2Z(cu_plan_r2c_many,uvmany,fxmany)
 !$acc wait
 !$acc end host_data
 !$acc wait
@@ -172,30 +170,29 @@ subroutine cgyro_nl_fftw(ij)
 
 !$acc parallel  
 !$acc loop gang
-     do j=1,nsplit
+  do j=1,nsplit
 !$acc loop worker private(ix)
-        do ir=1,n_radial 
-           ix = ir-1-nx0/2
-           if (ix < 0) ix = ix+nx
-
-!$acc   loop vector private(iy)
-           do in=1,n_toroidal
-              iy = in-1
-              g_nl(ir,j,in) = fxmany(iy,ix,j)
-           enddo
+     do ir=1,n_radial 
+        ix = ir-1-nx0/2
+        if (ix < 0) ix = ix+nx
+!$acc loop vector private(iy)
+        do in=1,n_toroidal
+           iy = in-1
+           g_nl(ir,j,in) = fxmany(iy,ix,j)
         enddo
      enddo
+  enddo
 !$acc end parallel
-!$acc wait
 
+!$acc wait
 !$acc end data
 !$acc wait
+
   call timer_lib_out('nl')
 
   call timer_lib_in('nl_comm')
   call parallel_slib_r(g_nl,gpack)
 
-  iexch = 0
 !$omp parallel do private(it,ir,iexch,ic_loc)
   do iv_loc=1,nv_loc
      do it=1,n_theta

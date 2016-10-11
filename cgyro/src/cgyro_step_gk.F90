@@ -84,14 +84,6 @@ subroutine cgyro_rhs(ij)
 
   call timer_lib_in('str')
 
-!$acc data  &
-!$acc& pcopyout(rhs_ij) &
-!$acc& pcopyin(g_x,h_x,field,cap_h_c) &
-!$acc& present(is_v,ix_v,ie_v,it_c) &
-!$acc& present(omega_cap_h,omega_h,omega_s) &
-!$acc& present(omega_stream,xi,vel) &
-!$acc& present(dtheta,dtheta_up,icd_c)
-
   if (implicit_flag == 1) then
 
      ! IMPLICIT advance 
@@ -110,6 +102,14 @@ subroutine cgyro_rhs(ij)
   else
 
      ! EXPLICIT advance 
+
+!$acc data  &
+!$acc& pcopyout(rhs_ij) &
+!$acc& pcopyin(g_x,h_x,field,cap_h_c) &
+!$acc& present(is_v,ix_v,ie_v,it_c) &
+!$acc& present(omega_cap_h,omega_h,omega_s) &
+!$acc& present(omega_stream,xi,vel) &
+!$acc& present(dtheta,dtheta_up,icd_c)
 
 #ifdef _OPENACC
 !$acc  parallel loop gang vector collapse(2) & 
