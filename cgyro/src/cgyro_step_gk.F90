@@ -144,8 +144,8 @@ subroutine cgyro_rhs(ij)
 
         enddo
      enddo
-  endif
 !$acc end data
+  endif
 
   rhs(:,:,ij) = rhs_ij(:,:)
 
