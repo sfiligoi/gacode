@@ -122,8 +122,7 @@ subroutine cgyro_field_c
      endif
   endif
 
-!$omp parallel do  &
-!$omp& private(iv,iv_loc,ic,is)
+!$omp parallel do private(iv,iv_loc,ic,is)
   do iv=nv1,nv2
      iv_loc = iv-nv1+1
      is = is_v(iv)

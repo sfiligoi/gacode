@@ -27,8 +27,8 @@ subroutine cgyro_init_collision_simple
                 * dens(js)/dens(is)
 
            ! Only ee,ei Connor-like Lorentz
-           if(is == is_ele) then
-              if(is == js) then
+           if (is == is_ele) then
+              if (is == js) then
                  ! e-e
                  nu_d(ie,is,js) = tauinv_ab * (1.0/xa**3) &
                       * (exp(-xb*xb)/(xb*sqrt(pi)) &
@@ -76,6 +76,12 @@ subroutine cgyro_init_collision_simple
            cmat_simple(:,:,ie,is,it) = 0.0
            amat(:,:) = 0.0
 
+                 ! constant part
+           do ix=1,n_xi
+              cmat_simple(ix,ix,ie,is,it) = 1.0
+              amat(ix,ix) = 1.0
+           enddo
+
            do jx=1,n_xi
               do ix=1,n_xi
 
@@ -84,7 +90,6 @@ subroutine cgyro_init_collision_simple
                       - (0.5*delta_t) * ctest(is,ie,ix,jx)
                  amat(ix,jx) = amat(ix,jx) &
                       + (0.5*delta_t) * ctest(is,ie,ix,jx)
-
 
                  ! Trapping 
                  cmat_simple(ix,jx,ie,is,it) = cmat_simple(ix,jx,ie,is,it) &
@@ -96,20 +101,13 @@ subroutine cgyro_init_collision_simple
                       * vel(ie) * (1.0 - xi(ix)**2) &
                       * xi_deriv_mat(ix,jx)
 
-                 ! constant part
-                 if (ix == jx) then
-                    cmat_simple(ix,jx,ie,is,it) = cmat_simple(ix,jx,ie,is,it) &
-                         + 1.0
-                    amat(ix,jx) = amat(ix,jx) + 1.0
-                 endif
-
               enddo
            enddo
 
            ! H_bar = (1 - dt/2 C)^(-1) * (1 + dt/2 C) H
            ! Lapack factorization and inverse of LHS
-           call DGESV(n_xi,n_xi,cmat_simple(:,:,ie,is,it),size(cmat_simple,1),&
-                i_piv,amat,size(amat,1),info)
+           call DGESV(n_xi,n_xi,cmat_simple(:,:,ie,is,it),n_xi,&
+                i_piv,amat,n_xi,info)
            cmat_simple(:,:,ie,is,it) = amat(:,:)
 
         enddo
