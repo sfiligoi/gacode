@@ -20,6 +20,7 @@ subroutine cgyro_init_manager
   use GEO_interface
 
 #ifdef _OPENACC
+  use cgyro_io
   use precision_m, only : singlePrecision
   use cufft_m, only : cufftPlanMany, &
        CUFFT_C2R,CUFFT_Z2D,CUFFT_R2C,CUFFT_D2Z
