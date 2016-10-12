@@ -139,14 +139,13 @@ subroutine cgyro_init_collision
   if (collision_model == 4 .and. collision_kperp == 1 .and. &
        (collision_mom_restore == 1 .or. collision_ene_restore == 1)) then
      allocate(bessel(n_species,n_xi,n_energy,nc_loc,0:1))
-     ic_loc = 0
+!$omp parallel do private(ic_loc,it,ie,ix,is,arg)
      do ic=nc1,nc2
-        ic_loc = ic_loc+1
+        ic_loc = ic-nc1+1
         it = it_c(ic)
-        ir = ir_c(ic)
-        do is=1,n_species   
+        do ie=1,n_energy
            do ix=1,n_xi
-              do ie=1,n_energy
+              do is=1,n_species   
                  arg = k_perp(ic)*rho*vth(is)*mass(is)&
                       /(z(is)*bmag(it)) *sqrt(2.0*energy(ie)) &
                       *sqrt(1.0-xi(ix)**2)
@@ -211,6 +210,7 @@ subroutine cgyro_init_collision
 
   ! Diffusion
   if (collision_model == 4 .and. collision_ene_diffusion == 1) then
+!$omp parallel do collapse(5) private(is,ix,ie,js,je,jx)
      do is=1,n_species 
         do ix=1,n_xi
            do ie=1,n_energy

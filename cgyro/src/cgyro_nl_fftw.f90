@@ -76,13 +76,6 @@ subroutine cgyro_nl_fftw(ij)
         enddo
      enddo
 
-     if (kxfilter_flag == 1) then
-        fx(:,-nx0/2+nx) = 0.0
-        fy(:,-nx0/2+nx) = 0.0
-        gx(:,-nx0/2+nx) = 0.0
-        gy(:,-nx0/2+nx) = 0.0
-     endif
-
      call fftw_execute_dft_c2r(plan_c2r,fx,ux)
      call fftw_execute_dft_c2r(plan_c2r,fy,uy)
      call fftw_execute_dft_c2r(plan_c2r,gx,vx)

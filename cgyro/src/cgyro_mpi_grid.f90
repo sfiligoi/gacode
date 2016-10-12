@@ -111,7 +111,7 @@ subroutine cgyro_mpi_grid
      enddo
   enddo
 
-  
+
   if (test_flag == 1) then
      ! Set dimensions for calculation of memory in test mode
      nv_loc = nv
@@ -124,26 +124,33 @@ subroutine cgyro_mpi_grid
   ! Check that n_proc is a multiple of n_toroidal
   !
   if (modulo(n_proc,n_toroidal) /= 0) then
-     call cgyro_error('ERROR: (CGYRO) Number of processors must be a multiple of N_TOROIDAL.')
+     call cgyro_error('Number of processors must be a multiple of N_TOROIDAL.')
      return
   endif
 
-  ! Assign subgroup dimensions:
+  ! Assign subgroup dimensions: n_proc = n_proc_1 * n_proc_2
 
-  n_proc_2 = n_toroidal
   n_proc_1 = n_proc/n_toroidal
+  n_proc_2 = n_toroidal
 
   ! Check that nv and nc are multiples of the local processor count
 
   if (modulo(nv,n_proc_1) /= 0 .or. modulo(nc,n_proc_1) /= 0) then
-     call cgyro_error('ERROR: (CGYRO) nv or nc not a multiple of the local processor count.')
+     call cgyro_error('nv or nc not a multiple of the local processor count.')
      return
   endif
 
   ! Local group indices:
 
-  i_group_1 = i_proc/n_proc_1
-  i_group_2 = modulo(i_proc,n_proc_1)
+  if (mpi_rank_order == 1) then
+     i_group_1 = i_proc/n_proc_1
+     i_group_2 = modulo(i_proc,n_proc_1)
+     call cgyro_info('MPI rank alignment 1')
+  else
+     i_group_1 = modulo(i_proc,n_proc_2)
+     i_group_2 = i_proc/n_proc_2
+     call cgyro_info('MPI rank alignment 2')
+  endif
   !------------------------------------------------
 
   !-----------------------------------------------------------

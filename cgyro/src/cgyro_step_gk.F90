@@ -57,9 +57,9 @@ subroutine cgyro_rhs(ij)
   implicit none
 
   integer, intent(in) :: ij
-  integer :: is,ie,ix
+  integer :: is
   integer :: id,jc
-  real :: rval,rval2,vpar
+  real :: rval,rval2
   complex :: rhs_stream
   complex :: rhs_ij(nc,nv_loc)
 

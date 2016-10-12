@@ -70,7 +70,7 @@ module cgyro_globals
   real :: gamma_p
   real :: mach
   real :: error_tol
-  integer :: kxfilter_flag
+  integer :: mpi_rank_order
   real :: gamma_e_decay
   integer :: hiprec_flag
   integer :: udsymmetry_flag

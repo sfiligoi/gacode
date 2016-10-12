@@ -24,9 +24,8 @@ subroutine cgyro_init_manager
   use cufft_m, only : cufftPlanMany, &
        CUFFT_C2R,CUFFT_Z2D,CUFFT_R2C,CUFFT_D2Z
 #endif
-  implicit none
 
-  real :: b
+  implicit none
 
   include 'fftw3.f03'
 
@@ -38,9 +37,9 @@ subroutine cgyro_init_manager
 #endif
 
   if (hiprec_flag == 1) then
-     fmtstr    ='(es16.9)'
-     fmtstr2   ='(2(es16.9,1x))'
-     fmtstrn   ='(10(es16.9,1x))'
+     fmtstr  = '(es16.9)'
+     fmtstr2 = '(2(es16.9,1x))'
+     fmtstrn = '(10(es16.9,1x))'
   endif
 
   !------------------------------------------------------
@@ -84,7 +83,7 @@ subroutine cgyro_init_manager
   ! Correction factor for missing energy interval to ensure sum(w)=1.0
   ! NOTE: without this we have poor grid-convergence for small e_max
   !
-  b = sqrt(e_max)
+  !b = sqrt(e_max)
   !w_e(n_energy) = w_e(n_energy)+2.0*exp(-e_max)*b/sqrt(pi)+erfc(b)
   !----------------------------------------------------------------------
 
@@ -251,6 +250,7 @@ subroutine cgyro_init_manager
      plan_r2c = fftw_plan_dft_r2c_2d(nx,ny,ux,fx,FFTW_PATIENT)
 
 #ifdef _OPENACC
+     call cgyro_info('GPU-aware code triggered.')
      howmany = nsplit
      allocate( fxmany(0:ny/2,0:nx-1,howmany) )
      allocate( fymany(0:ny/2,0:nx-1,howmany) )
@@ -262,18 +262,15 @@ subroutine cgyro_init_manager
      allocate( vxmany(0:ny-1,0:nx-1,howmany) )
      allocate( vymany(0:ny-1,0:nx-1,howmany) )
      allocate( uvmany(0:ny-1,0:nx-1,howmany) )
-!!$acc enter data create(fxmany,fymany,gxmany,gymany)
-!!$acc enter data create(uxmany,uymany,vxmany,vymany)
-!!$acc enter data create(uvmany)
 
-     !   -------------------------------------
+     !-------------------------------------------------------------------
      ! 2D
-     !   input[ b*idist + (x * inembed[1] + y) * istride ]
+     !   input[  b*idist + (x * inembed[1] + y)*istride ]
      !   output[ b*odist + (x * onembed[1] + y)*ostride ]
      !   isign is the sign of the exponent in the formula that defines
      !   Fourier transform  -1 == FFTW_FORWARD
      !                       1 == FFTW_BACKWARD
-     !   -------------------------------------
+     !-------------------------------------------------------------------
 
      ndim(1) = nx
      ndim(2) = ny

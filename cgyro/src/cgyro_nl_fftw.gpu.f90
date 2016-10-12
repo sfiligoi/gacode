@@ -103,21 +103,6 @@ subroutine cgyro_nl_fftw(ij)
   enddo
 !$acc end parallel
 
-     if (kxfilter_flag == 1) then
-!$acc  parallel
-!$acc  loop gang
-        do j=1,nsplit
-!$acc  loop vector
-           do iy=lbound(fxmany,1),ubound(fxmany,1)
-              fxmany(iy,-nx0/2+nx,j) = 0.0
-              fymany(iy,-nx0/2+nx,j) = 0.0
-              gxmany(iy,-nx0/2+nx,j) = 0.0
-              gymany(iy,-nx0/2+nx,j) = 0.0
-           enddo
-        enddo
-!$acc  end parallel
-     endif
-
      ! --------------------------------------
      ! perform many Fourier Transforms at once
      ! --------------------------------------

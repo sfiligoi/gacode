@@ -63,7 +63,7 @@ subroutine cgyro_read_input
   call cgyro_readbc_real(gamma_p)
   call cgyro_readbc_real(mach)
   call cgyro_readbc_real(error_tol)
-  call cgyro_readbc_int(kxfilter_flag)
+  call cgyro_readbc_int(mpi_rank_order)
   call cgyro_readbc_real(gamma_e_decay)
   call cgyro_readbc_int(hiprec_flag)
   call cgyro_readbc_int(udsymmetry_flag)
