@@ -50,17 +50,23 @@ else:
 
     b = np.zeros([sim.n_species])
 
-    for ispec in range(sim.n_species):
-        y = np.sum(sim.kxky_flux_n,axis=(0,2))
-        b[ispec] = average(y[ispec,:],sim.t,w)
+    try:
+        for ispec in range(sim.n_species):
+	    y = np.sum(sim.kxky_flux_n,axis=(0,2))
+            b[ispec] = average(y[ispec,:],sim.t,w)
+        print 'GAMMA [GB]  ',b
+    except:
+        pass
+            
 
-    print 'GAMMA [GB]  ',b
-    
-    for ispec in range(sim.n_species):
-        y = np.sum(sim.kxky_flux_e,axis=(0,2))
-        b[ispec] = average(y[ispec,:],sim.t,w)
+    try:
+        for ispec in range(sim.n_species):
+            y = np.sum(sim.kxky_flux_e,axis=(0,2))
+            b[ispec] = average(y[ispec,:],sim.t,w)
+        print 'Q     [GB]  ',b
+    except:
+        pass
 
-    print 'Q     [GB]  ',b
 
 
     
