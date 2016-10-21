@@ -10,7 +10,7 @@ subroutine cgyro_make_profiles
   integer :: j
   integer :: num_ele
 
-  real :: cc, loglam
+  real :: cc,loglam
 
   !-------------------------------------------------------------
   ! Manage electrons
@@ -27,14 +27,12 @@ subroutine cgyro_make_profiles
      ! Adiabatic electrons
      ae_flag = 1
      call cgyro_info('Using adiabatic electron model.')
-
   else if (num_ele == 1) then
      ! GK electrons
      ae_flag = 0
      call cgyro_info('Using gyrokinetic electrons.')
-
   else
-     call cgyro_error('ERROR: (CGYRO) Only one electron species allowed.')
+     call cgyro_error('Only one electron species allowed.')
      return
   endif
 
@@ -96,8 +94,8 @@ subroutine cgyro_make_profiles
 
 
      ! Normalizing quantities
-     dens_norm       = dens_ele
-     temp_norm       = temp_ele
+     dens_norm = dens_ele
+     temp_norm = temp_ele
 
      ! Compute vth (m/s) using dimensional quantities.  
      ! mass(i) is thus measured in units of deuterium mass.
@@ -115,8 +113,8 @@ subroutine cgyro_make_profiles
           * 1.0 / (sqrt(mass_deuterium) * temp_norm_fac**1.5) &
           * 1e9
 
-     loglam = 24.0 - log(sqrt(dens_ele*1e13)/(temp_ele*1000))
-     nu_ee  = cc * loglam * dens_ele / (sqrt(mass_ele) * temp_ele**1.5) &
+     loglam = 24.0 - log(sqrt(dens_ele*1e13)/(temp_ele*1e3))
+     nu_ee  = cc * loglam * dens_ele / (sqrt(mass_ele)*temp_ele**1.5) &
           / (vth_norm/a_meters) 
 
      ! beta calculation in CGS:
@@ -154,16 +152,9 @@ subroutine cgyro_make_profiles
              * sqrt(mass_ele/mass(is)) * (temp_ele/temp(is))**1.5
      enddo
 
-     beta_star = 0.0
-     do is=1,n_species
-        beta_star =  beta_star + dens(is) * temp(is) / (dens_ele * temp_ele) &
-             * (dlnndr(is) + dlntdr(is))
-     enddo
-     if(ae_flag == 1) then
-        beta_star = beta_star + (dlnndre_ade + dlntdre_ade)
-     endif
-     beta_star = beta_star * betae_unit
-
+     ! Always compute beta_* consistently
+     call set_betastar
+     
      ! Re-scaling
      lambda_star  = lambda_star * lambda_star_scale
      gamma_e      = gamma_e      * gamma_e_scale
@@ -218,6 +209,9 @@ subroutine cgyro_make_profiles
 
      enddo
 
+     ! Compute beta_* if negative initially
+     if (beta_star < 0.0) call set_betastar
+     
   endif
 
   !-------------------------------------------------------------
@@ -310,3 +304,23 @@ subroutine cgyro_make_profiles
   !-------------------------------------------------------------
 
 end subroutine cgyro_make_profiles
+
+subroutine set_betastar
+
+  use cgyro_globals
+
+  implicit none
+
+  integer :: is
+
+  beta_star = 0.0
+  do is=1,n_species
+     beta_star = beta_star+dens(is)*temp(is)/(dens_ele*temp_ele) &
+          *(dlnndr(is)+dlntdr(is))
+  enddo
+  if (ae_flag == 1) then
+     beta_star = beta_star + (dlnndre_ade + dlntdre_ade)
+  endif
+  beta_star = beta_star*betae_unit
+
+end subroutine set_betastar

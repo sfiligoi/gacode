@@ -187,43 +187,6 @@ contains
 
   !=========================================================
 
-  subroutine parallel_lib_r_real(ft,f)
-
-    use mpi
-
-    implicit none
-
-    real, intent(in), dimension(nj_loc,ni) :: ft
-    real, intent(inout), dimension(ni_loc,nj) :: f
-    integer :: ierr,j_loc,i,j,k,j1,j2
-
-    j1 = 1+iproc*nj_loc
-    j2 = (1+iproc)*nj_loc
-
-!$omp parallel do if (size(fsendr_real) >= default_size) default(none) &
-!$omp& shared(nproc,j1,j2,ni_loc) &
-!$omp& private(j,j_loc,i) &
-!$omp& shared(ft,fsendr_real)
-    do k=1,nproc
-       do j=j1,j2
-          j_loc = j-j1+1
-          do i=1,ni_loc
-             fsendr_real(i,j_loc,k) = ft(j_loc,i+(k-1)*ni_loc) 
-          enddo
-       enddo
-    enddo
-
-    call MPI_ALLTOALL(fsendr_real, &
-         nsend, &
-         MPI_DOUBLE_PRECISION,&
-         f, &
-         nsend, &
-         MPI_DOUBLE_PRECISION, &
-         lib_comm, &
-         ierr)
-
-  end subroutine parallel_lib_r_real
-
   subroutine parallel_lib_rtrans_real(fin,f)
 
     use mpi
