@@ -90,6 +90,9 @@ subroutine tgyro_iteration_driver
   ! Generate ALL radial profiles.
   call tgyro_init_profiles
 
+  ! Step-length for Jacobian
+  dx = loc_dx/r_min
+
   !----------------------------------------------
   ! Choose flux_method based on path information.
   !
@@ -107,31 +110,22 @@ subroutine tgyro_iteration_driver
      ! IFS-PPPL
      flux_method = 1
 
-     ! Step-length for Jacobian
-     dx = loc_dx/r_min
-
   else if (lpath(1:4) == "TGLF") then
 
      ! TGLF
      flux_method = 2
-
-     ! Step-length for Jacobian
-     dx = loc_dx/r_min
 
   else if (lpath(1:3) == "GLF") then
 
      ! GLF23
      flux_method = 3
 
-     ! Step-length for Jacobian
-     dx = loc_dx/r_min
-
   else
 
      ! GYRO
      flux_method = 4
 
-     ! Step-length for Jacobian
+     ! Reset step-length for Jacobian
      dx = loc_dx_gyro/r_min
 
   endif
