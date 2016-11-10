@@ -57,7 +57,7 @@ subroutine cgyro_rhs(ij)
   implicit none
 
   integer, intent(in) :: ij
-  integer :: is
+  integer :: is,ir,irp,it
   integer :: id,jc
   real :: rval,rval2
   complex :: rhs_stream
@@ -145,6 +145,31 @@ subroutine cgyro_rhs(ij)
         enddo
      enddo
 !$acc end data
+  endif
+
+  ! Shear
+
+  if (shear_method == 2) then
+
+     do iv=nv1,nv2
+        iv_loc = iv-nv1+1
+        do it=1,n_theta
+           gw(:,it) = h_x(ic_c(:,it),iv_loc)
+        enddo
+        do ir=1,n_radial
+           fw(ir,:) = 0.0
+           do irp=1,n_radial
+              if (ir-irp > 0 .and. ir+irp <= n_radial) then
+                 fw(ir,:) = fw(ir,:)+(gw(ir-irp,:)-gw(ir+irp,:))/irp
+              endif
+           enddo
+        enddo
+        do it=1,n_theta
+           rhs_ij(ic_c(:,it),iv_loc) = rhs_ij(ic_c(:,it),iv_loc)+&
+                omega_eb*fw(:,it)
+        enddo
+     enddo
+
   endif
 
   rhs(:,:,ij) = rhs_ij(:,:)

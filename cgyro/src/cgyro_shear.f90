@@ -23,8 +23,7 @@ subroutine cgyro_shear
      call cgyro_shear_hammett
   case (2)
      ! Spectral rotation
-     !call cgyro_shear_dft
-     call cgyro_error('SHIFT_METHOD=2 unsupported.')
+     !call cgyro_shear_convolve
   case (3)
      ! Linear shift (more accurate than discrete shift)
      call cgyro_shear_linear
