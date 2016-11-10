@@ -62,6 +62,7 @@ subroutine cgyro_rhs(ij)
   real :: rval,rval2
   complex :: rhs_stream
   complex :: rhs_ij(nc,nv_loc)
+  complex, dimension(n_radial,n_theta) :: fw,gw
 
   ! Prepare suitable distribution (g, not h) for conservative upwind method
   g_x(:,:) = h_x(:,:)
