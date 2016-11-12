@@ -157,12 +157,12 @@ subroutine cgyro_rhs(ij)
         do it=1,n_theta
            gw(:,it) = h_x(ic_c(:,it),iv_loc)
         enddo
-        do ir=1,n_radial
-           fw(ir,:) = 0.0
-           do irp=1,n_radial
-              if (ir-irp > 0 .and. ir+irp <= n_radial) then
+        fw(:,:) = 0.0
+        do p=-n_radial/3,n_radial/3
+              ir = p+1+n_radial/2
+           do pp=-n_radial/3,n_radial/3
+              irp = pp+1+n_radial/2
                  fw(ir,:) = fw(ir,:)+(gw(ir-irp,:)-gw(ir+irp,:))/irp
-              endif
            enddo
         enddo
         do it=1,n_theta
