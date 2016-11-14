@@ -16,16 +16,17 @@ fig.subplots_adjust(left=0.09,right=0.96,top=0.92,bottom=0.12)
 ax = fig.add_subplot(111)
 ax.grid(which="majorminor",ls=":")
 ax.grid(which="major",ls=":")
-ax.set_xlabel(r'$(c_s/a)\, t$')
+ax.set_xlabel(TIME)
 ax.set_ylabel(r'$\left| \Phi \right|$')
 ax.set_yscale('log')
+ax.set_title(r'$\mathrm{Fluctuation~intensity} \quad k_\theta = nq/r$')
 #======================================
 
-p2 = np.sum(sim.phisq,axis=0)/sim.equil[4]**2
+p2 = np.sum(sim.phisq,axis=0)/sim.rho**2
 
 # n=0 intensity
 y0 = p2[0,:]
-ax.plot(sim.t,np.sqrt(y0),label=r'$n=0$')
+ax.plot(sim.t,np.sqrt(y0),label=r'$n=0$',linewidth=2)
 
 # finite-n intensity
 yn = p2[1,:]

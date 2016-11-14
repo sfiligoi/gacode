@@ -27,8 +27,8 @@ subroutine cgyro_init_collision_simple
                 * dens(js)/dens(is)
 
            ! Only ee,ei Connor-like Lorentz
-           if(is == is_ele) then
-              if(is == js) then
+           if (is == is_ele) then
+              if (is == js) then
                  ! e-e
                  nu_d(ie,is,js) = tauinv_ab * (1.0/xa**3) &
                       * (exp(-xb*xb)/(xb*sqrt(pi)) &
@@ -38,7 +38,7 @@ subroutine cgyro_init_collision_simple
                  nu_d(ie,is,js) = tauinv_ab * (1.0/xa**3)
               endif
            endif
-           
+
         enddo
      enddo
   enddo
@@ -47,7 +47,7 @@ subroutine cgyro_init_collision_simple
   allocate(amat(n_xi,n_xi))
 
   ! Collision test particle component
-  ctest   = 0.0
+  ctest = 0.0
 
   ! Lorentz
   do is=1,n_species
@@ -69,53 +69,51 @@ subroutine cgyro_init_collision_simple
 
   ! set-up the collision matrix
 
-  do is=1,n_species
-     do ie=1,n_energy
-        do it=1,n_theta
+  do it=1,n_theta
+     do is=1,n_species
+        do ie=1,n_energy
 
-           cmat_simple(:,:,is,ie,it) = 0.0
+           cmat_simple(:,:,ie,is,it) = 0.0
            amat(:,:) = 0.0
 
+                 ! constant part
            do ix=1,n_xi
-              do jx=1,n_xi
+              cmat_simple(ix,ix,ie,is,it) = 1.0
+              amat(ix,ix) = 1.0
+           enddo
+
+           do jx=1,n_xi
+              do ix=1,n_xi
 
                  ! Collision component: Test particle
-                 cmat_simple(ix,jx,is,ie,it) = cmat_simple(ix,jx,is,ie,it) &
+                 cmat_simple(ix,jx,ie,is,it) = cmat_simple(ix,jx,ie,is,it) &
                       - (0.5*delta_t) * ctest(is,ie,ix,jx)
                  amat(ix,jx) = amat(ix,jx) &
                       + (0.5*delta_t) * ctest(is,ie,ix,jx)
-              
-              
-                 ! Trapping 
-                 !cmat_simple(ix,jx,is,ie,it) = cmat_simple(ix,jx,is,ie,it) &
-                 !     + (0.5*delta_t) * omega_trap(it,is) &
-                 !     * vel(ie) * (1.0 - xi(ix)**2) &
-                 !     * xi_deriv_mat(ix,jx) 
-                 !amat(ix,jx) = amat(ix,jx) &
-                 !     - (0.5*delta_t) * omega_trap(it,is) &
-                 !     * vel(ie) * (1.0 - xi(ix)**2) &
-                 !     * xi_deriv_mat(ix,jx)
 
-                 ! constant part
-                 if(ix == jx) then
-                    cmat_simple(ix,jx,is,ie,it) = cmat_simple(ix,jx,is,ie,it) &
-                         + 1.0
-                    amat(ix,jx) = amat(ix,jx) + 1.0
-                 endif
+                 ! Trapping 
+                 cmat_simple(ix,jx,ie,is,it) = cmat_simple(ix,jx,ie,is,it) &
+                      + (0.5*delta_t) * omega_trap(it,is) &
+                      * vel(ie) * (1.0 - xi(ix)**2) &
+                      * xi_deriv_mat(ix,jx) 
+                 amat(ix,jx) = amat(ix,jx) &
+                      - (0.5*delta_t) * omega_trap(it,is) &
+                      * vel(ie) * (1.0 - xi(ix)**2) &
+                      * xi_deriv_mat(ix,jx)
 
               enddo
            enddo
 
            ! H_bar = (1 - dt/2 C)^(-1) * (1 + dt/2 C) H
            ! Lapack factorization and inverse of LHS
-           call DGESV(n_xi,n_xi,cmat_simple(:,:,is,ie,it),size(cmat_simple,1),&
-                i_piv,amat,size(amat,1),info)
-           cmat_simple(:,:,is,ie,it) = amat(:,:)
-           
+           call DGESV(n_xi,n_xi,cmat_simple(:,:,ie,is,it),n_xi,&
+                i_piv,amat,n_xi,info)
+           cmat_simple(:,:,ie,is,it) = amat(:,:)
+
         enddo
      enddo
   enddo
-!$acc  enter data copyin(cmat_simple)
+!$acc enter data copyin(cmat_simple)
 
   deallocate(amat)
   deallocate(i_piv)

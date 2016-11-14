@@ -8,22 +8,22 @@ CORES_PER_NODE=12
 NUMAS_PER_NODE=1
 
 FFTWDIR=/usr/lib/x86_64-linux-gnu
-ROOT=/home/SOFTWARE
 
 # Compilers
 
-FC	= mpif90 -std=f2008 -I $(GACODE_ROOT)/modules -I /usr/include
+FC	= mpif90 -std=f2008 -I $(GACODE_ROOT)/modules
 F77	= mpif77 -I $(GACODE_ROOT)/modules
 
 FOMP    = -fopenmp
 FMATH	= -fdefault-real-8 -J $(GACODE_ROOT)/modules
 FOPT	= -Ofast
-FDEBUG	= -Wall -fcheck=mem,bounds -O -W -finit-real=zero -ffpe-trap=invalid,zero,overflow
+FDEBUG	= -Wall -W -fcheck=mem,bounds -g -fbacktrace -ffpe-trap=invalid,zero,overflow
 
 # System math libraries
 
-LMATH = $(ROOT)/OpenBLAS/libopenblas.a $(FFTWDIR)/libfftw3.a $(FFTWDIR)/libfftw3_omp.a
-        
+LMATH=/home/SOFTWARE/OpenBLAS/libopenblas.a $(FFTWDIR)/libfftw3.a $(FFTWDIR)/libfftw3_omp.a
+FFTW_INC=/usr/include
+
 # NetCDF:
 NETCDF=-L/usr/lib -lnetcdff -lnetcdf
 NETCDF_INC=/usr/include

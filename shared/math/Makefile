@@ -32,7 +32,6 @@ OBJECTS = math_constants.o \
           poly2diff.o \
           proc_time.o \
           p32.o \
-          parallel_lib.o \
           pseudospec_lib.o \
           remap_grid.o \
           rjbesl.o \
@@ -56,7 +55,6 @@ lib: $(OBJECTS)
 clean:
 	rm -f *.o $(LLIB).a *.mod
 	rm -f ${GACODE_ROOT}/modules/math_constants.mod
-	rm -f ${GACODE_ROOT}/modules/parallel_lib.mod
 	rm -f ${GACODE_ROOT}/modules/timer_lib.mod
 
 -include install/make.ext.${GACODE_PLATFORM}

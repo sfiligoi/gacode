@@ -22,34 +22,37 @@ then
   echo
   echo "TEST MODE"
   echo
-  echo "         -t <simdir>"  
+  echo "         -t <simdir>"
   echo "         Sanity test for INPUT data in <simdir>."
   echo
   echo "EXECUTE MODE"
   echo
-  echo "         -e <simdir>" 
+  echo "         -e <simdir>"
   echo "         Run CGYRO using INPUT data in <simdir>."
   echo
-  echo "         -n <MPI tasks>" 
+  echo "         -n <MPI tasks>"
   echo "         Number of MPI tasks."
   echo
-  echo "         -nomp <threads>" 
+  echo "         -nomp <threads>"
   echo "         Number of OpenMP threads per MPI task."
   echo
-  echo "         -numa <n>" 
+  echo "         -numa <n>"
   echo "         NUMAs active per node."
   echo
-  echo "         -mpinuma <n>" 
+  echo "         -mpinuma <n>"
   echo "         MPI tasks per active NUMA."
+  echo
+  echo "         -new"
+  echo "         Clean any existing data and start anew"
   echo
   echo "REGRESSION TESTING"
   echo
   echo "         -r"
   echo "         Run full regression suite."
-  echo 
+  echo
   echo "         -reset"
   echo "         Reset regression data."
-  echo 
+  echo
   echo "TEMPLATE GENERATION"
   echo
   echo "         -g"
@@ -59,20 +62,20 @@ then
   echo "         Copy <template> into simulation path."
   echo
   echo "UTILITIES"
-  echo 
-  echo "         -h" 
+  echo
+  echo "         -h"
   echo "         Version and platform information."
   echo
-  echo "         -clean" 
+  echo "         -clean"
   echo "         Clean simulation directory."
   echo
-  echo "         -compress" 
+  echo "         -compress"
   echo "         Compress simulation directory."
 
   exit 1
 fi
 #=============================================================
- 
+
 #=============================================================
 # Define variables for flag capture
 #
@@ -91,6 +94,7 @@ REGRESS_FLAG=0
 CLEAN_FLAG=0
 COMPRESS_FLAG=0
 RESET=0
+NEW_FLAG=0
 #=============================================================
 
 #=============================================================
@@ -127,10 +131,12 @@ while [ $# -gt 0 ] ; do
 
   -clean) CLEAN_FLAG=1 ;;
 
+  -new) NEW_FLAG=1 ;;
+
   -compress) COMPRESS_FLAG=1 ;;
 
   *) echo "ERROR (cgyro script): unknown option $1." ; exit 1 ;;
- 
+
   esac
   shift
 done
@@ -152,15 +158,6 @@ if [ $FLAG_SUM -gt 1 ]
 then
    echo "ERROR: Can only specify one of -e, -t, -g, -r"
    exit 1
-fi
-#============================================================
-
-#============================================================
-# Clean option
-if [ $CLEAN_FLAG -eq 1 ]
-then
-    rm -f out.* batch.out batch.err *~ *gen
-    exit 1
 fi
 #============================================================
 
@@ -241,6 +238,16 @@ cd $SIMDIR
 #============================================================
 
 #============================================================
+# Clean option
+if [ $CLEAN_FLAG -eq 1 ]
+then
+    rm -f out.* batch.out batch.err *~ *gen
+    echo "INFO: (cgyro) Cleaned directory." 
+    exit 1
+fi
+#============================================================
+
+#============================================================
 # Test mode
 if [ $TEST_FLAG -eq 1 ]
 then
@@ -294,10 +301,32 @@ fi
 #===========================================================
 # RUN CGYRO
 #
-# Version stamp:
-echo `gacode_getversion` > out.cgyro.version 
-echo $GACODE_PLATFORM >> out.cgyro.version
-date >> out.cgyro.version
+# Version stamp 
+# NOTE: log all starts and restarts, but NOT test mode
+if [ $TEST_FLAG -eq 0 ]
+then
+   if [ $NEW_FLAG -eq 1 ]
+   then
+      rm -f out.cgyro.*
+   fi
+    
+   # If there is no restart file, its safe to overwrite the log file
+   if [ ! -f out.cgyro.restart ]
+   then
+      > out.cgyro.version
+   fi
+   # Date with custom formatting
+   date_tag=`date +"%y-%b-%d %T"`
+   version_tag=`gacode_getversion`
+   if [ -f out.cgyro.tag ]
+   then
+      simtime=`tail -1 out.cgyro.tag`
+      simtime=`echo $simtime` 
+   else
+      simtime=0.0
+   fi
+   echo "$date_tag [$version_tag][$GACODE_PLATFORM][$simtime]" >> out.cgyro.version
+fi
 
 gacode_printversion CGYRO
   

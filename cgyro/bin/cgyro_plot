@@ -53,26 +53,33 @@ then
   echo "                  = ky_flux  (bar plot of flux versus ky)"
   echo "                  = phi      (time-dependent ZF vs. finite-n intensities)"
   echo "                  = ky_phi   (time-dependent ky-phi intensities)"
+  echo "                  = kx_phi   (average kx-phi intensities)"
   echo "                  = kxky_phi (kx-ky spectra of ave(|phi|))"
   echo "                  = note     (notebook)"
   echo
-  echo " OPTIONS: flux, ky_flux"
+  echo "          -ymin <float>"
+  echo "          Minimumvalue of vertical axis (where applicable)."
+  echo "          *Affects: flux, ky_flux"
   echo
   echo "          -ymax <float>"
   echo "          Maximum value of vertical axis (where applicable)."
-  echo
-  echo " OPTIONS: hbcut"
+  echo "          *Affects: flux, ky_flux"
   echo
   echo "          -theta <value>"
   echo "          Value of theta/pi used in hbcut"
-  echo
-  echo " OPTIONS: ball, hb, hbcut"
-  echo
+  echo "          *Affects: hbcut"
+  echo 
   echo "          -tmax <float>"
   echo "          Maximum value of ballooning angle."
+  echo "          *Affects: ball, hb, hbcut"
   echo
   echo "          -t <value>"
   echo "          Specify integer time index (-1 is last time)."
+  echo "          *Affects: ball, hb, hbcut"
+  echo
+  echo "          -n <value>"
+  echo "          Specify values of n (toroidal mode index)"
+  echo "          *Affects: ky_phi"
   echo
   echo
   echo " LINEAR EXAMPLES:"
@@ -88,6 +95,7 @@ then
   echo "  $ cgyro_plot -e . -plot flux -moment n [particle flux versus time]"
   echo "  $ cgyro_plot -e . -plot ky_flux        [energy flux versus ky]"
   echo "  $ cgyro_plot -e . -plot phi            [n=0 and n>0 potentials versus time]"
+  echo "  $ cgyro_plot -e . -plot ky_phi -n 0,2,4-8 [n=0 and n>0 potentials versus time]"
 
 
   exit 1
@@ -106,11 +114,13 @@ FTYPE=screen
 PLOT_TYPE=field
 TIME=-1
 TMAX=-1.0
+YMIN=auto
 YMAX=auto
 W=0.5
 MOMENT=e
 INDX=1
 THETA=0.0
+N=null
 #==============================================================================
 
 #==============================================================================
@@ -140,8 +150,11 @@ while [ $# -gt 0 ] ; do
   -theta) shift ; THETA=$1 ;;
 
   -ymax) shift ; YMAX=$1 ;;
+  -ymin) shift ; YMIN=$1 ;;
 
   -w) shift ; W=$1 ;;
+
+  -n) shift ; N=$1 ;;
 
   -h) shift ; cat $GACODE_ROOT/cgyro/bin/FILE_FORMAT ; exit 0 ;;
 
@@ -182,14 +195,14 @@ case "$PLOT_TYPE" in
 	python $PYROOT/plot_error.py $FTYPE ;;
 
    ky_flux)  
-	python $PYROOT/plot_ky_flux.py $FTYPE $W $MOMENT $YMAX ;;
+	python $PYROOT/plot_ky_flux.py $FTYPE $W $MOMENT $YMIN $YMAX ;;
 
    flux)  
 	if [ "$FTYPE" == "dump" ]
         then
 	   python $PYROOT/dump_flux.py 
         else
-	   python $PYROOT/plot_flux.py $FTYPE $W $MOMENT $YMAX 
+	   python $PYROOT/plot_flux.py $FTYPE $W $MOMENT $YMIN $YMAX 
         fi
         ;;
 
@@ -197,7 +210,10 @@ case "$PLOT_TYPE" in
 	python $PYROOT/plot_phi.py $FTYPE $FIELD ;;
 
    ky_phi)  
-	python $PYROOT/plot_ky_phi.py $FTYPE $FIELD ;;
+	python $PYROOT/plot_ky_phi.py $FTYPE $FIELD $YMIN $YMAX $N ;;
+
+   kx_phi)  
+	python $PYROOT/plot_kx_phi.py $FTYPE $W $YMIN $YMAX $N ;;
 
    kxky_phi)  
 	python $PYROOT/plot_kxky_phi.py $FTYPE $W $FIELD ;;

@@ -1,6 +1,5 @@
 subroutine cgyro_init_arrays
 
-  use timer_lib
   use mpi
   use cgyro_globals
   use parallel_lib
@@ -11,13 +10,11 @@ subroutine cgyro_init_arrays
   real :: efac
   real :: u
   integer :: ir,it,is,ie,ix
-  integer :: jr,jt,id, ccw_fac
+  integer :: jr,jt,id,ccw_fac
+  integer :: i_field
   complex :: thfac,carg
-  real, dimension(nc) :: sum_loc
-  real, dimension(n_species,nc) :: res_loc
-  real, dimension(nv_loc) :: vfac
+  real, dimension(nc,n_species) :: res_loc
   real, dimension(:,:), allocatable :: jloc_c
-  real, dimension(:), allocatable :: pb11,pb12,pb21,pb22
   real, external :: spectraldiss
 
   !-------------------------------------------------------------------------
@@ -64,14 +61,60 @@ subroutine cgyro_init_arrays
 
   enddo
   deallocate(jloc_c)
-  call parallel_lib_rtrans_real(jvec_c(1,:,:),jvec_v(1,:,:))
-  if (n_field > 1) call parallel_lib_rtrans_real(jvec_c(2,:,:),jvec_v(2,:,:))
-  if (n_field > 2) call parallel_lib_rtrans_real(jvec_c(3,:,:),jvec_v(3,:,:))
+  do i_field=1,n_field
+     call parallel_lib_rtrans_real(jvec_c(i_field,:,:),jvec_v(i_field,:,:))
+  enddo
   !-------------------------------------------------------------------------
 
   !-------------------------------------------------------------------------
-  ! Field equation prefactors, sums.
+  ! Conservative upwind factor
   !
+  allocate(res_norm(nc,n_species))
+  allocate(dvfac(nv_loc))
+
+  res_loc(:,:) = 0.0
+
+!$omp parallel private(ic,iv_loc,is,ix,ie)
+!$omp do reduction(+:res_loc)
+  do iv=nv1,nv2
+     iv_loc = iv-nv1+1
+     is = is_v(iv)
+     ix = ix_v(iv)
+     ie = ie_v(iv)
+     do ic=1,nc
+        res_loc(ic,is) = res_loc(ic,is)+w_xi(ix)*w_e(ie)*jvec_c(1,ic,iv_loc)**2 
+     enddo
+  enddo
+!$omp end do
+!$omp end parallel
+
+  call MPI_ALLREDUCE(res_loc,&
+       res_norm,&
+       size(res_norm),&
+       MPI_DOUBLE_PRECISION,&
+       MPI_SUM,&
+       NEW_COMM_1,&
+       i_err)
+
+!$omp parallel do private(iv_loc,is,ix,ie,ic)
+  do iv=nv1,nv2
+     iv_loc = iv-nv1+1
+     is = is_v(iv)
+     ix = ix_v(iv)
+     ie = ie_v(iv)
+     dvfac(iv_loc) = w_e(ie)*w_xi(ix)*z(is)*dens(is)
+     do ic=1,nc
+        upfac1(ic,iv_loc) = w_e(ie)*w_xi(ix)*abs(xi(ix))*vel(ie)*jvec_c(1,ic,iv_loc)
+        upfac2(ic,iv_loc) = jvec_c(1,ic,iv_loc)/res_norm(ic,is)
+     enddo
+  enddo
+
+  !------------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------------
+  ! Coefficient setup
+  !
+  allocate(vfac(nv_loc))
   do iv=nv1,nv2
 
      iv_loc = iv-nv1+1
@@ -97,205 +140,10 @@ subroutine cgyro_init_arrays
   endif
 
   allocate(sum_den_x(nc))
-  sum_loc(:) = 0.0
+  if (n_field > 1) allocate(sum_cur_x(nc))
 
-  do iv=nv1,nv2
-     iv_loc = iv-nv1+1
-     do ic=1,nc
-        sum_loc(ic) = sum_loc(ic)+vfac(iv_loc)*(1.0-jvec_c(1,ic,iv_loc)**2) 
-     enddo
-  enddo
-
-  call MPI_ALLREDUCE(sum_loc,&
-       sum_den_x,&
-       size(sum_den_x),&
-       MPI_DOUBLE_PRECISION,&
-       MPI_SUM,&
-       NEW_COMM_1,&
-       i_err)
-
-  if (ae_flag == 1) then
-     sum_den_x(:) = sum_den_x(:)+dens_ele/temp_ele
-  endif
+  call cgyro_field_coefficients
   !------------------------------------------------------------------------------
-
-  !-------------------------------------------------------------------------
-  ! Conservative upwind factor
-  !
-  allocate(res_norm(n_species,nc))
-
-  res_loc(:,:) = 0.0
-
-  do iv=nv1,nv2
-     iv_loc = iv-nv1+1
-     is = is_v(iv)
-     ix = ix_v(iv)
-     ie = ie_v(iv)
-     do ic=1,nc
-        res_loc(is,ic) = res_loc(is,ic)+w_xi(ix)*w_e(ie)*jvec_c(1,ic,iv_loc)**2 
-     enddo
-  enddo
-
-  call MPI_ALLREDUCE(res_loc,&
-       res_norm,&
-       size(res_norm),&
-       MPI_DOUBLE_PRECISION,&
-       MPI_SUM,&
-       NEW_COMM_1,&
-       i_err)
-  !------------------------------------------------------------------------------
-
-  !-----------------------------------------------------------------------
-  ! Field-solve coefficients (i.e., final numerical factors).
-  !
-  do ic=1,nc
-     ir = ir_c(ic) 
-     it = it_c(ic)
-     if (n == 0 .and. (px(ir) == 0 .or. ir == 1) .and. zf_test_flag == 0) then
-        fcoef(:,ic) = 0.0
-     else
-        fcoef(1,ic) = 1.0/(k_perp(ic)**2*lambda_debye**2*dens_ele/temp_ele+sum_den_h)
-        if (n_field > 1) fcoef(2,ic) = 1.0/(-2.0*k_perp(ic)**2* &
-             rho**2/betae_unit*dens_ele*temp_ele)
-        if (n_field > 2) fcoef(3,ic) = -betae_unit/(2.0*dens_ele*temp_ele)
-     endif
-  enddo
-
-  if (n_field > 1) then
-
-     allocate(sum_cur_x(nc))
-     sum_loc(:) = 0.0
-
-     iv_loc = 0
-     do iv=nv1,nv2
-        iv_loc = iv_loc+1
-        do ic=1,nc
-           sum_loc(ic) = sum_loc(ic)+vfac(iv_loc)*jvec_c(2,ic,iv_loc)**2
-        enddo
-     enddo
-
-     call MPI_ALLREDUCE(sum_loc,&
-          sum_cur_x,&
-          size(sum_cur_x),&
-          MPI_DOUBLE_PRECISION,&
-          MPI_SUM,&
-          NEW_COMM_1,&
-          i_err)
-
-  endif
-
-  if (n_field == 1 .or. n_field == 2) then
-     do ic=1,nc
-        if (k_perp(ic) > 0.0) then
-           gcoef(1,ic) = 1.0/(k_perp(ic)**2*lambda_debye**2*&
-                dens_ele/temp_ele+sum_den_x(ic))
-        endif
-     enddo
-  endif
-
-  if (n_field > 1) then
-     do ic=1,nc
-        if (k_perp(ic) > 0.0) then
-           gcoef(2,ic) = 1.0/(-2.0*k_perp(ic)**2*&
-                rho**2/betae_unit*dens_ele*temp_ele-sum_cur_x(ic))
-        endif
-     enddo
-  endif
-
-  if (n_field > 2) then
-     allocate(pb11(nc))
-     allocate(pb12(nc))
-     allocate(pb21(nc))
-     allocate(pb22(nc))
-
-     do ic=1,nc
-        pb11(ic) = k_perp(ic)**2*lambda_debye**2* &
-             dens_ele/temp_ele+sum_den_x(ic)
-     enddo
-
-     sum_loc(:)  = 0.0
-     do iv=nv1,nv2
-        iv_loc = iv-nv1+1
-        is = is_v(iv)
-        ix = ix_v(iv)
-        ie = ie_v(iv)
-        do ic=1,nc
-           ir = ir_c(ic) 
-           it = it_c(ic)
-           sum_loc(ic) = sum_loc(ic)-w_xi(ix)*w_e(ie)*dens(is) &
-                *z(is)*jvec_c(1,ic,iv_loc)*jvec_c(3,ic,iv_loc) &
-                *z(is)/temp(is)
-        enddo
-     enddo
-
-     call MPI_ALLREDUCE(sum_loc,&
-          pb12,&
-          size(pb12),&
-          MPI_DOUBLE_PRECISION,&
-          MPI_SUM,&
-          NEW_COMM_1,&
-          i_err)
-
-     pb21(:) = pb12(:)*betae_unit/(-2*dens_ele*temp_ele)
-
-     sum_loc(:)  = 0.0
-     iv_loc = 0
-     do iv=nv1,nv2
-        iv_loc = iv_loc+1
-        is = is_v(iv)
-        ix = ix_v(iv)
-        ie = ie_v(iv)
-        do ic=1,nc
-           ir = ir_c(ic) 
-           it = it_c(ic)
-           sum_loc(ic) = sum_loc(ic)+w_xi(ix)*w_e(ie)*dens(is) &
-                *temp(is)*jvec_c(3,ic,iv_loc)**2 &
-                *(z(is)/temp(is))**2
-        enddo
-     enddo
-     call MPI_ALLREDUCE(sum_loc,&
-          pb22,&
-          size(pb22),&
-          MPI_DOUBLE_PRECISION,&
-          MPI_SUM,&
-          NEW_COMM_1,&
-          i_err)
-
-     pb22(:) = 1.0-pb22(:)*betae_unit/(-2*dens_ele*temp_ele) 
-
-     ! Determinant
-     do ic=1,nc
-        if (k_perp(ic) > 0.0) then
-           sum_loc(ic) = pb11(ic)*pb22(ic)-pb12(ic)*pb21(ic)
-        else
-           sum_loc(ic) = 1.0
-        endif
-     enddo
-
-     pb11 = pb11/sum_loc
-     pb12 = pb12/sum_loc
-     pb21 = pb21/sum_loc
-     pb22 = pb22/sum_loc
-
-     gcoef(3,:) = pb11
-     gcoef(1,:) = pb22
-     gcoef(4,:) = -pb12
-     gcoef(5,:) = -pb21
-
-     deallocate(pb11)
-     deallocate(pb12)
-     deallocate(pb21)
-     deallocate(pb22)
-  endif
-
-  ! Set selected zeros
-  do ic=1,nc
-     ir = ir_c(ic) 
-     if (n == 0 .and. (px(ir) == 0 .or. ir == 1) .and. zf_test_flag == 0) then
-        gcoef(:,ic) = 0.0
-     endif
-  enddo
-  !-------------------------------------------------------------------------
 
   !-------------------------------------------------------------------------
   ! Zonal flow with adiabatic electrons:
@@ -346,7 +194,7 @@ subroutine cgyro_init_arrays
      deallocate(i_piv)
      deallocate(work)
 
-     allocate(pvec_in(n_theta))
+     ! Need to allocate these for future use
      allocate(pvec_outr(n_theta))
      allocate(pvec_outi(n_theta))
 
@@ -453,7 +301,7 @@ subroutine cgyro_init_arrays
   ! Streaming coefficients (for speed optimization)
 
 !$omp parallel do collapse(2) &
-!$omp& private(iv,ic,iv_loc,is,ix,ie,ir,it,carg)
+!$omp& private(iv,ic,iv_loc,is,ix,ie,ir,it,carg,u)
   do iv=nv1,nv2
      do ic=1,nc
 
@@ -539,6 +387,12 @@ real function spectraldiss(u,n)
 
      ! 8th order spectral dissipation
      spectraldiss = (70-112*cos(u)+56*cos(2*u)-16*cos(3*u)+2*cos(4*u))/280.0
+
+  case default
+
+     print *,'Order out of range in spectraldiss'
+     spectraldiss = 0.0
+     stop
 
   end select
 

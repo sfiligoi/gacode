@@ -68,6 +68,12 @@ class cgyrodata:
         mark = mark+self.n_theta*(self.n_radial/self.m_box)
         self.ky = np.array(data[mark:mark+self.n_n])
 
+        mark = mark+self.n_n
+        self.alphadiss = np.array(data[mark:mark+self.n_n])
+
+        mark = mark+self.n_n
+        self.radialdiss = np.array(data[mark:mark+self.n_radial])
+
         print "INFO: (data.py) Read grid data in out.cgyro.grids."
         #-----------------------------------------------------------------
 
@@ -90,10 +96,52 @@ class cgyrodata:
         # Equil file
         #
         try:
-            data = np.fromfile(self.dir+'out.cgyro.equil',dtype='float',sep=" ")
-            self.equil = data
-            print "INFO: (data.py) Read data in out.cgyro.equil."
+            data = np.fromfile(self.dir+'out.cgyro.equilibrium',dtype='float',sep=" ")
+            self.rmin        = data[0]
+            self.rmaj        = data[1]
+            self.q           = data[2]
+            self.shear       = data[3]
+            self.shift       = data[4]
+            self.kappa       = data[5]
+            self.s_kappa     = data[6]
+            self.delta       = data[7]
+            self.s_delta     = data[8]
+            self.zeta        = data[9]
+            self.s_zeta      = data[10]
+            self.zmag        = data[11]
+            self.dzmag       = data[12]
+            self.rho         = data[13]
+            self.ky0         = data[14]
+            self.betae_unit  = data[15]
+            self.beta_star   = data[16]
+            self.lambda_star = data[17]
+            self.gamma_e     = data[18]
+            self.gamma_p     = data[19]
+            self.mach        = data[20]
+            self.a_meters    = data[21]
+            self.b_unit      = data[22]
+            self.dens_norm   = data[23]
+            self.temp_norm   = data[24]
+            self.vth_norm    = data[25]
+            # Define species vectors
+            self.z      = np.zeros(self.n_species)
+            self.mass   = np.zeros(self.n_species)
+            self.dens   = np.zeros(self.n_species)
+            self.temp   = np.zeros(self.n_species)
+            self.dlnndr = np.zeros(self.n_species)
+            self.dlntdr = np.zeros(self.n_species)
+            self.nu     = np.zeros(self.n_species)
+            for i in range(self.n_species):
+                self.z[i]      = data[26+7*i]
+                self.mass[i]   = data[27+7*i]
+                self.dens[i]   = data[28+7*i]
+                self.temp[i]   = data[29+7*i]
+                self.dlnndr[i] = data[30+7*i]
+                self.dlntdr[i] = data[31+7*i]
+                self.nu[i]     = data[32+7*i]
+            print "INFO: (data.py) Read data in out.cgyro.equilibrium."
         except:
+            print "WARNING: (data.py) Could not read out.cgyro.equilibrium."
             pass
 
         #-----------------------------------------------------------------

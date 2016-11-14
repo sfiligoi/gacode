@@ -128,10 +128,10 @@ subroutine cgyro_equilibrium
      enddo
 
   enddo
+!$acc enter data copyin(energy,xi,vel,omega_stream)
 
   w_theta(:) = w_theta(:)/sum(w_theta) 
 
-!$acc enter data copyin(omega_stream)
 end subroutine cgyro_equilibrium
 
 

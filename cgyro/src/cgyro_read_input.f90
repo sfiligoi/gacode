@@ -63,13 +63,11 @@ subroutine cgyro_read_input
   call cgyro_readbc_real(gamma_p)
   call cgyro_readbc_real(mach)
   call cgyro_readbc_real(error_tol)
-  call cgyro_readbc_int(kxfilter_flag)
+  call cgyro_readbc_int(mpi_rank_order)
   call cgyro_readbc_real(gamma_e_decay)
   call cgyro_readbc_int(hiprec_flag)
   call cgyro_readbc_int(udsymmetry_flag)
   call cgyro_readbc_int(shear_method)
-  call cgyro_readbc_int(shear_pad)
-  call cgyro_readbc_real(dshift)
 
   call cgyro_readbc_real(rmin)
   call cgyro_readbc_real(rmaj)
@@ -87,7 +85,6 @@ subroutine cgyro_read_input
   call cgyro_readbc_real(beta_star)
   call cgyro_readbc_real(betae_unit)
   call cgyro_readbc_int(subroutine_flag)
-  call cgyro_readbc_int(use_alltoall)
   call cgyro_readbc_int(n_species)
 
   call cgyro_readbc_real(nu_ee)

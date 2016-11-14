@@ -20,6 +20,8 @@ subroutine cgyro_kernel
 
   implicit none
 
+  i_time = 0
+
   ! Need to initialize the info runfile very early
   if (silent_flag == 0 .and. i_proc == 0) then
      open(unit=io,file=trim(path)//runfile_info,status='replace')
@@ -39,22 +41,24 @@ subroutine cgyro_kernel
 
   ! 4. Array initialization and construction
   !    NOTE: On exit, field_old = field 
+ 
   call cgyro_init_manager
 
   !---------------------------------------------------------------------------
   !
   ! Time-stepping
   n_time = nint(max_time/delta_t)
-  i_time = 0
   
   if (restart_flag == 0) then
      io_control = 1*(1-silent_flag)
   else
      io_control = 3*(1-silent_flag)
   endif
+  
+  call timer_lib_in('io_init')
   call cgyro_write_timedata
+  call timer_lib_in('io_init')
   io_control = 2*(1-silent_flag)
-
   do i_time=1,n_time
 
      call timer_lib_in('TOTAL')
@@ -72,7 +76,11 @@ subroutine cgyro_kernel
      call cgyro_step_implicit_gk
 
      ! Collision step: returns new h_x, cap_h_x, fields
-     if (shear_method /= 3) call cgyro_step_collision
+     if (collision_model == 5) then
+        call cgyro_step_collision_simple
+     else
+        call cgyro_step_collision
+     endif
      !------------------------------------------------------------
 
      !------------------------------------------------------------
@@ -84,18 +92,10 @@ subroutine cgyro_kernel
      call cgyro_error_estimate
      !------------------------------------------------------------
 
+     !------------------------------------------------------------
      ! Spectral ExB shear
-     select case(shear_method)
-     case(1)
-        ! Discrete shift (Hammett) 
-        call cgyro_shear
-     case(2)
-        ! Spectral rotation (unphysical)
-        call cgyro_shear_dft
-     case(3)
-        ! Linear shift (more accurate than discrete shift)
-        call cgyro_shear_pt
-     end select
+     call cgyro_shear
+     !------------------------------------------------------------
 
      !---------------------------------------
      ! IO
@@ -161,7 +161,6 @@ subroutine cgyro_kernel
   if(allocated(f_balloon))     deallocate(f_balloon)
   if(allocated(hzf))           deallocate(hzf)
   if(allocated(xzf))           deallocate(xzf)
-  if(allocated(pvec_in))       deallocate(pvec_in)
   if(allocated(pvec_outr))     deallocate(pvec_outr)
   if(allocated(pvec_outi))     deallocate(pvec_outi)
 

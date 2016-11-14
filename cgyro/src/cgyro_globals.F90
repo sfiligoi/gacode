@@ -70,13 +70,11 @@ module cgyro_globals
   real :: gamma_p
   real :: mach
   real :: error_tol
-  integer :: kxfilter_flag
+  integer :: mpi_rank_order
   real :: gamma_e_decay
   integer :: hiprec_flag
   integer :: udsymmetry_flag
   integer :: shear_method
-  integer :: shear_pad
-  real :: dshift
   !
   ! Geometry input
   !
@@ -108,7 +106,6 @@ module cgyro_globals
   real, dimension(6) :: dlntdr
 
   integer :: subroutine_flag  ! only used for cgyro_read_input
-  integer :: use_alltoall
 
   ! Re-scaling parameters for experimental profiles
   real :: lambda_star_scale
@@ -165,6 +162,7 @@ module cgyro_globals
   integer, dimension(:), allocatable :: it_c
   integer, dimension(:,:), allocatable :: ic_c
   integer, dimension(:,:,:), allocatable :: iv_v
+  integer, dimension(:), allocatable :: ica_c,icb_c
   !
   integer :: n
   !---------------------------------------------------------------
@@ -254,6 +252,7 @@ module cgyro_globals
   real, dimension(:), allocatable :: xi, w_xi
   real, dimension(:,:), allocatable :: xi_deriv_mat, xi_lor_mat
   real, dimension(:,:), allocatable :: e_deriv1_mat, e_deriv2_mat
+  real, dimension(:), allocatable :: dvfac
   !
   ! Parallel streaming
   real, dimension(:), allocatable :: theta
@@ -281,6 +280,7 @@ module cgyro_globals
   complex, dimension(:,:), allocatable :: cap_h_v_prime
   real, dimension(:,:,:), allocatable :: jvec_c
   real, dimension(:,:,:), allocatable :: jvec_v
+  real, dimension(:,:), allocatable :: upfac1,upfac2
   !
   ! Fields
   real, dimension(:,:), allocatable :: fcoef
@@ -301,10 +301,6 @@ module cgyro_globals
   ! Nonlinear plans
   type(C_PTR) :: plan_r2c
   type(C_PTR) :: plan_c2r
-  !
-  ! Shear plans
-  type(C_PTR) :: plan_j2p
-  type(C_PTR) :: plan_p2j
   !
   ! GPU-FFTW plans
 #ifdef _OPENACC
@@ -329,10 +325,6 @@ module cgyro_globals
   complex, dimension(:,:),allocatable :: fy
   complex, dimension(:,:),allocatable :: gx
   complex, dimension(:,:),allocatable :: gy
-  !
-  ! 1D FFT work arrays
-  complex, dimension(:), allocatable :: fp
-  complex, dimension(:), allocatable :: fj
   !
   ! Work arrays
   complex, dimension(:,:), allocatable :: f_balloon
@@ -363,10 +355,12 @@ module cgyro_globals
   ! Field solve variables
   real :: sum_den_h
   real, dimension(:), allocatable :: sum_den_x, sum_cur_x
+  real, dimension(:), allocatable :: vfac
+
   !
   ! n=0 test variables
   real, dimension(:,:,:), allocatable :: hzf, xzf 
-  real, dimension(:), allocatable :: pvec_in, pvec_outr, pvec_outi
+  real, dimension(:), allocatable :: pvec_outr, pvec_outi
   !
   ! Collision operator
   real, dimension(:,:,:), allocatable :: cmat

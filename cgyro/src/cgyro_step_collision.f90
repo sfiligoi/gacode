@@ -17,16 +17,9 @@ subroutine cgyro_step_collision
 
   implicit none
 
-  integer :: is,ie,ix
-  integer :: ivp
-  complex, dimension(size(cap_h_v,2),nc1:nc2) :: cvec
-  complex, dimension(size(cap_h_v,2),nc1:nc2) :: bvec
+  integer :: is,ivp
+  complex, dimension(nv) :: bvec,cvec
   real :: cvec_re,cvec_im
-
-  if (collision_model == 5) then
-     call cgyro_step_collision_simple
-     return
-  endif
 
   !----------------------------------------------------------------
   ! Perform data tranpose from _c to _v data layouts:
@@ -37,56 +30,33 @@ subroutine cgyro_step_collision
 
   call timer_lib_in('coll')
 
-#ifdef _OPENACC
-!$acc  data present(cmat) &
-!$acc& pcreate(bvec,cvec)  pcopy(cap_h_v)
-
-!$acc  parallel 
-!$acc  loop gang private(ic_loc,ivp,iv,cvec_re,cvec_im)
-#else
-!$omp parallel private(ic_loc,ivp,iv,cvec_re,cvec_im)
-!$omp do
-#endif
-  do ic=nc1,nc2
-     ic_loc = ic-nc1+1
+!$omp parallel do private(iv,ivp,cvec,bvec,cvec_re,cvec_im)
+  do ic_loc=1,nc2-nc1+1
 
      ! Set-up the RHS: H = f + ze/T G phi
 
-!$acc loop vector
      do iv=1,nv
-       cvec(iv,ic) = cap_h_v(ic_loc,iv)
+        cvec(iv) = cap_h_v(ic_loc,iv)
      enddo
 
-!$acc loop vector
-     do iv=1,nv
-       bvec(iv,ic) = (0.0,0.0)
-     enddo
+     bvec(:) = (0.0,0.0)
 
      ! This is a key loop for performance
      do ivp=1,nv
-        cvec_re = real(cvec(ivp,ic),kind=kind(cmat))
-        cvec_im = aimag(cvec(ivp,ic))
-!$acc   loop vector
+        cvec_re = real(cvec(ivp))
+        cvec_im = aimag(cvec(ivp))
         do iv=1,nv
-           bvec(iv,ic) = bvec(iv,ic)+ &
-                 cmplx(cmat(iv,ivp,ic_loc)*cvec_re, &
-                       cmat(iv,ivp,ic_loc)*cvec_im)
+           bvec(iv) = bvec(iv)+ &
+                cmplx(cmat(iv,ivp,ic_loc)*cvec_re, &
+                cmat(iv,ivp,ic_loc)*cvec_im)
         enddo
      enddo
 
-!$acc loop vector
      do iv=1,nv
-       cap_h_v(ic_loc,iv) = bvec(iv,ic)
+        cap_h_v(ic_loc,iv) = bvec(iv)
      enddo
 
   enddo
-#ifdef _OPENACC
-!$acc end parallel
-!$acc end data
-#else
-!$omp end do
-!$omp end parallel
-#endif
 
   call timer_lib_out('coll')
 
@@ -104,8 +74,7 @@ subroutine cgyro_step_collision
 
   ! Compute H given h and [phi(h), apar(h)]
 
-!$omp parallel do &
-!$omp& private(iv,iv_loc,is,ix,ie,ic)
+!$omp parallel do private(iv_loc,is,ic)
   do iv=nv1,nv2
      iv_loc = iv-nv1+1
      is = is_v(iv)
@@ -116,5 +85,9 @@ subroutine cgyro_step_collision
   enddo
 
   call timer_lib_out('coll')
+
+  if (collision_field_model == 0) then
+     call cgyro_field_c
+  endif
 
 end subroutine cgyro_step_collision

@@ -48,6 +48,7 @@ echo "[9] premium (12 hours) up to 2048 nodes"
 
 read -p "Select a queue [0-9] " queue_num
 
+qos="normal"
 case "$queue_num" in
   0) queue="debug"   ; limit="0:10:00" ;;
   1) queue="debug"   ; limit="0:30:00" ;;
@@ -58,7 +59,7 @@ case "$queue_num" in
   6) queue="regular" ; limit="16:00:00" ;;
   7) queue="regular" ; limit="24:00:00" ;;
   8) queue="low"     ; limit="12:00:00" ;;
-  9) queue="premium" ; limit="12:00:00" ;;
+  9) queue="regular" ; qos="premium" ; limit="12:00:00" ;;
 esac
 
 bfile=$simpath/$sim/batch.src
@@ -73,9 +74,11 @@ read -p "Specify a repository [0 for default] " repo
 echo "#!/bin/bash -l" > $bfile
 echo "#SBATCH -J $sim" >> $bfile
 echo "#SBATCH -A $repo" >> $bfile
+echo "#SBATCH -C haswell" >> $bfile
 echo "#SBATCH -o $simpath/$sim/batch.out" >> $bfile
 echo "#SBATCH -e $simpath/$sim/batch.err" >> $bfile
 echo "#SBATCH -p $queue" >> $bfile
+echo "#SBATCH --qos=$qos" >> $bfile
 echo "#SBATCH -t $limit" >> $bfile
 echo "#SBATCH -N $nodes" >> $bfile
 echo " " >> $bfile

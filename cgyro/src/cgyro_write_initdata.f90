@@ -13,8 +13,9 @@ subroutine cgyro_write_initdata
   
   implicit none
 
-  integer :: in,is
+  integer :: p,in,is
   real :: kymax,z_eff
+  real, external ::spectraldiss
 
   !----------------------------------------------------------------------------
   ! Runfile to give complete summary to user
@@ -106,34 +107,42 @@ subroutine cgyro_write_initdata
   !
   if (silent_flag == 0 .and. i_proc == 0) then
 
-     open(unit=io,file=trim(path)//'out.cgyro.equil',status='replace')
-     write (io,fmtstr,advance='no') rmin
-     write (io,fmtstr,advance='no') rmaj
-     write (io,fmtstr,advance='no') q
-     write (io,fmtstr,advance='no') s
-     write (io,fmtstr,advance='no') rho
-     write (io,fmtstr,advance='no') ky
+     open(unit=io,file=trim(path)//'out.cgyro.equilibrium',status='replace')
+     write (io,fmtstr) rmin
+     write (io,fmtstr) rmaj
+     write (io,fmtstr) q
+     write (io,fmtstr) s
+     write (io,fmtstr) shift
+     write (io,fmtstr) kappa
+     write (io,fmtstr) s_kappa
+     write (io,fmtstr) delta
+     write (io,fmtstr) s_delta
+     write (io,fmtstr) zeta
+     write (io,fmtstr) s_zeta
+     write (io,fmtstr) zmag
+     write (io,fmtstr) dzmag
+     write (io,fmtstr) rho
+     write (io,fmtstr) ky
+     write (io,fmtstr) betae_unit
+     write (io,fmtstr) beta_star
+     write (io,fmtstr) lambda_star
+     write (io,fmtstr) gamma_e
+     write (io,fmtstr) gamma_p
+     write (io,fmtstr) mach
+     write (io,fmtstr) a_meters
+     write (io,fmtstr) b_unit
+     write (io,fmtstr) dens_norm
+     write (io,fmtstr) temp_norm
+     write (io,fmtstr) vth_norm
      do is=1,n_species
-        write (io,fmtstr,advance='no') dens(is)
-        write (io,fmtstr,advance='no') temp(is)
-        write (io,fmtstr,advance='no') dlnndr(is)
-        write (io,fmtstr,advance='no') dlntdr(is)
-        write (io,fmtstr,advance='no') nu(is)
+        write (io,fmtstr) 1.0*z(is)
+        write (io,fmtstr) mass(is)
+        write (io,fmtstr) dens(is)
+        write (io,fmtstr) temp(is)
+        write (io,fmtstr) dlnndr(is)
+        write (io,fmtstr) dlntdr(is)
+        write (io,fmtstr) nu(is)
      enddo
-     write (io,*)
-     close(io)
-
-  endif
-
-  if (silent_flag == 0 .and. i_proc == 0 .and. profile_model == 2) then
-
-     open(unit=io,file=trim(path)//'out.cgyro.expnorm',status='replace')
-     write (io,fmtstr,advance='no') a_meters
-     write (io,fmtstr,advance='no') b_unit
-     write (io,fmtstr,advance='no') dens_norm
-     write (io,fmtstr,advance='no') temp_norm
-     write (io,fmtstr,advance='no') vth_norm
-     write (io,*)
      close(io)
 
   endif
@@ -183,6 +192,8 @@ subroutine cgyro_write_initdata
      write(io,'(1pe12.5)') xi(:)
      write(io,'(1pe12.5)') transpose(thetab(:,:))
      write(io,'(1pe12.5)') (rho*q/rmin*in,in=0,n_toroidal-1)
+     write(io,'(1pe12.5)') (spectraldiss((pi/n_toroidal)*in,nup_alpha),in=0,n_toroidal-1)
+     write(io,'(1pe12.5)') (spectraldiss((2*pi/n_radial)*p,nup_radial),p=-n_radial/2,n_radial/2-1)
      close(io)
 
   endif

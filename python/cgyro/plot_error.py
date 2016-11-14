@@ -14,7 +14,7 @@ fig.subplots_adjust(left=0.09,right=0.96,top=0.92,bottom=0.12)
 ax = fig.add_subplot(111)
 ax.grid(which="majorminor",ls=":")
 ax.grid(which="major",ls=":")
-ax.set_xlabel(r'$(c_s/a)\, t$')
+ax.set_xlabel(TIME)
 ax.set_ylabel(r'$\mathrm{Integration~Error}$')
 ax.set_yscale('log')
 #======================================
