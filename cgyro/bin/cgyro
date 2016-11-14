@@ -42,6 +42,9 @@ then
   echo "         -mpinuma <n>"
   echo "         MPI tasks per active NUMA."
   echo
+  echo "         -new"
+  echo "         Clean any existing data and start anew"
+  echo
   echo "REGRESSION TESTING"
   echo
   echo "         -r"
@@ -91,6 +94,7 @@ REGRESS_FLAG=0
 CLEAN_FLAG=0
 COMPRESS_FLAG=0
 RESET=0
+NEW_FLAG=0
 #=============================================================
 
 #=============================================================
@@ -127,6 +131,8 @@ while [ $# -gt 0 ] ; do
 
   -clean) CLEAN_FLAG=1 ;;
 
+  -new) NEW_FLAG=1 ;;
+
   -compress) COMPRESS_FLAG=1 ;;
 
   *) echo "ERROR (cgyro script): unknown option $1." ; exit 1 ;;
@@ -152,15 +158,6 @@ if [ $FLAG_SUM -gt 1 ]
 then
    echo "ERROR: Can only specify one of -e, -t, -g, -r"
    exit 1
-fi
-#============================================================
-
-#============================================================
-# Clean option
-if [ $CLEAN_FLAG -eq 1 ]
-then
-    rm -f out.* batch.out batch.err *~ *gen
-    exit 1
 fi
 #============================================================
 
@@ -241,6 +238,16 @@ cd $SIMDIR
 #============================================================
 
 #============================================================
+# Clean option
+if [ $CLEAN_FLAG -eq 1 ]
+then
+    rm -f out.* batch.out batch.err *~ *gen
+    echo "INFO: (cgyro) Cleaned directory." 
+    exit 1
+fi
+#============================================================
+
+#============================================================
 # Test mode
 if [ $TEST_FLAG -eq 1 ]
 then
@@ -298,6 +305,11 @@ fi
 # NOTE: log all starts and restarts, but NOT test mode
 if [ $TEST_FLAG -eq 0 ]
 then
+   if [ $NEW_FLAG -eq 1 ]
+   then
+      rm -f out.cgyro.*
+   fi
+    
    # If there is no restart file, its safe to overwrite the log file
    if [ ! -f out.cgyro.restart ]
    then

@@ -11,7 +11,7 @@
 #---------------------------------------------------
 
 IDENTITY="GA saturn or iris cluster"
-CORES_PER_NODE=16
+CORES_PER_NODE=1
 NUMAS_PER_NODE=1
 
 FC  = mpif90 -std=f2008 -I$(GACODE_ROOT)/modules
