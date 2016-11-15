@@ -1,5 +1,18 @@
 #---------------------------------------------------
 # OSX Yosemite
+#
+# macport installation instructions for new Mac 
+# running Sierra, assuming OMFIT being installed as
+# well. YMMV.
+#
+# 1) install OMFIT via macports- gets initial 
+#    dependencies
+# 2) sudo port install mpich-gcc5
+# 3) sudo port install netcdf-fortran
+# 4) determine local host name via uname -n
+#    add following line to /etc/hosts
+#    127.0.0.1    <local host name>
+#
 #---------------------------------------------------
 
 # Compilers and flags
