@@ -14,6 +14,7 @@ import numpy as np
 matplotlib.use('WXAgg')
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
 from gacodeplotdefs import *
+from gacodefuncs import *
 from tgyro.ndata import tgyrodata
 
 simdir = sys.argv[1]
