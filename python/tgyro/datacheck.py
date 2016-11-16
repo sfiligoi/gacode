@@ -3,7 +3,7 @@
 import sys
 import numpy as np
 from gacodeplotdefs import *
-from tgyro.ndata import tgyrodata
+from tgyro.data import tgyrodata
 
 sim = tgyrodata(sys.argv[1])
 
