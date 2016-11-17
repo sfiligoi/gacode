@@ -34,7 +34,7 @@ subroutine tgyro_target_vector(x_vec,g_vec)
            p = p+1
            g_vec(p) = pflux_e_target(i)*evo_c(is)
         else if (evo_e(is) == 2) then
-           ! Helium ash evolution
+           ! Helium ash evolution [add wiki documentation]
            p = p+1
            g_vec(p) = pflux_he_target(i)
         endif

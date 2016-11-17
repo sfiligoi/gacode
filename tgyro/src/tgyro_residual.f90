@@ -35,7 +35,7 @@ subroutine tgyro_residual(f,g,res,n,method)
 
   case default
 
-     print *,'Error in tgyro_residual'
+     print '(a)','ERROR: (tgyro_residual) Invalid choice of residual function.'
      stop
 
   end select

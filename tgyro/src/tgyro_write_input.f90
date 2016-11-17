@@ -7,7 +7,8 @@ subroutine tgyro_write_input
 
   integer :: i_ion,is
   character(len=7) :: ttext
-
+  character(len=1) :: itag
+  
   !----------------------------------------------------------------
   ! Trap miscellaneous errors
   !
@@ -341,28 +342,29 @@ subroutine tgyro_write_input
      select case (evo_e(0))
 
      case (-1)
-        write(1,10) 'TGYRO_EVO_E(0)','ne profile set using quasineutrality'
+        write(1,10) 'TGYRO_DEN_METHOD0','ne profile set using quasineutrality'
      case (0)
-        write(1,10) 'TGYRO_EVO_E(0)','ne profile fixed'
+        write(1,10) 'TGYRO_DEN_METHOD0','ne profile fixed'
      case (1)
-        write(1,10) 'TGYRO_EVO_E(0)','ne evolution ON'
+        write(1,10) 'TGYRO_DEN_METHOD0','ne evolution ON'
      case default
         error_flag = 1
         error_msg = 'Error: TGYRO_EVO_E(0)'
      end select
 
      do is=1,loc_n_ion
+        itag = trim(ion_tag(is))
         select case (evo_e(is))
 
         case (-1)
-           write(1,10) 'TGYRO_EVO_E(-)','ni profile set using quasineutrality'
+           write(1,10) 'TGYRO_DEN_METHOD'//itag,'ni'//itag//' profile set using quasineutrality'
         case (0)
-           write(1,10) 'TGYRO_EVO_E(-)','ni profile fixed'
+           write(1,10) 'TGYRO_DEN_METHOD'//itag,'ni'//itag//' profile fixed'
         case (1)
-           write(1,10) 'TGYRO_EVO_E(-)','ni evolution ON'
+           write(1,10) 'TGYRO_DEN_METHOD'//itag,'ni'//itag//' evolution ON'
         case default
            error_flag = 1
-           error_msg = 'Error: TGYRO_EVO_E(-)'
+           error_msg = 'Error: TGYRO_DEN_METHOD'//itag//': invalid value.'
         end select
      enddo
 
