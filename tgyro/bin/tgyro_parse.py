@@ -124,6 +124,8 @@ x.dep('TGYRO_BTCCW','Value now inferred from input.profiles')
 x.dep('NEO_GV_FLAG','Renamed to TGYRO_NEO_GV_FLAG')
 x.dep('LOC_CIRC_FLAG','Removed this functionality.')
 x.dep('LOC_QUASINEUTRAL_FLAG','New parameter (with slightly different effect) is TGYRO_QUASINEUTRAL_FLAG.')
+x.dep('TGYRO_QUASINEUTRAL_FLAG','Quasineutrality now implemented with ion variables TGYRO_EVO_E*.')
+x.dep('TGYRO_FIX_CONCENTRATION_FLAG','This option no longer exists -- see TGYRO_EVO_E* variables.')
 
 x.read_input('input.tgyro',gyro_start)
 x.write_proc('proc')
