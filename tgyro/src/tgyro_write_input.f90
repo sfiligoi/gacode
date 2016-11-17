@@ -39,7 +39,7 @@ subroutine tgyro_write_input
   if (loc_er_feedback_flag == 0 .and. &
        loc_te_feedback_flag == 0 .and. &
        loc_ti_feedback_flag == 0 .and. &
-       maxval(evo_e) == 0) then
+       maxval(evo_e) <= 0) then
      error_flag = 1
      error_msg = 'ERROR: (TGYRO) Must set one profile to evolve, even if running for 0 iterations.'
   endif
