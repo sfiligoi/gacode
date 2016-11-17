@@ -835,7 +835,7 @@ subroutine print_scrdata()
      return
   else
      if (i_proc == 0) then
-        print '(a,1pe9.3,a,1pe10.3,1pe10.3,a,1pe9.3,a,5(1pe9.3,1x))',&
+        print '(a,1pe9.3,a,1pe10.3,1x,1pe10.3,a,1pe9.3,a,1pe9.3)',&
              '[t = ',t_current,&
              '][w = ',freq,&
              '][dw = ',abs(freq_err),&
