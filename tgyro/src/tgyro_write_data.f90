@@ -451,6 +451,8 @@ subroutine tgyro_write_data(i_print)
 
   write(1,50,advance='no') 'r/a','E(eflux_i)','R1','E(eflux_e)','R2','E(mflux)','R3','E(pflux_e)','R4','E(pflux_i1)','R5'
   select case(loc_n_ion)
+  case(1)
+     write(1,55) ''
   case(2)
      write(1,55) 'E(pflux_i2)','R6'
   case(3)
