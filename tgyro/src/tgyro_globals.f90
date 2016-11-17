@@ -62,6 +62,7 @@ module tgyro_globals
   !===============================================================
   ! Variables for LOCAL transport mode
   !
+  integer :: shot
   integer, parameter :: n_ion_max = 9
   integer, parameter :: n_evolve_max = 5
   character(len=14) :: runfile='out.tgyro.run'
@@ -116,8 +117,6 @@ module tgyro_globals
   real, dimension(:), allocatable :: pi_gb
   real, dimension(:), allocatable :: q_gb
   real, dimension(:), allocatable :: s_gb
-
-  real, dimension(:), allocatable :: q_tgb
 
   ! Collision frequencies
   real, dimension(:), allocatable :: nue
@@ -297,15 +296,8 @@ module tgyro_globals
   integer :: tgyro_neo_gv_flag
   integer :: tglf_q_low_flag
   integer :: tgyro_global_newton_flag
-  integer :: tgyro_backtrack_method
   integer :: tgyro_iteration_method
-  real :: lm_boost
-  real :: lm_drop
   integer :: tgyro_rotation_flag
-  integer :: tgyro_stab_nsearch
-  integer :: tgyro_stab_nky
-  real :: tgyro_stab_kymin
-  real :: tgyro_stab_deltaky
   real :: tgyro_rmin
   real :: tgyro_rmax
   integer :: tgyro_expwd_flag
@@ -325,8 +317,10 @@ module tgyro_globals
   integer :: tgyro_neo_n_theta
   integer :: tgyro_ptot_flag
   integer :: tgyro_ped_model
+  real :: tgyro_rped
   real :: tgyro_neped
   real :: tgyro_zeffped
+  real :: tgyro_tglf_nn_max_error
   character(len=5) :: tgyro_multi_code
   !
   ! Iteration variables (global)
@@ -340,6 +334,7 @@ module tgyro_globals
   integer :: i_bc
   integer :: flux_counter
   integer :: i_ash
+  integer :: evolve_indx(5)
   !
   ! Global TGYRO variables
   integer :: igmin

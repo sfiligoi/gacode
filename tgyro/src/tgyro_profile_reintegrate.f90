@@ -8,16 +8,14 @@ subroutine tgyro_profile_reintegrate
   integer :: i_ion
   integer :: i_star  
 
-  ! Map data inside r < r(n_r)
 
   if (tgyro_ped_model > 1) then
-     ! Map data past r(n_r)
+
+     ! Map data over r(n_r) < r < a
+
      call tgyro_pedestal_map(dlnnedr(n_r),zn_top,n_top(1),nn_vec(:,2),i_star,exp_ne)
-     exp_ne(i_star:n_exp) = exp_ne(i_star:n_exp)*1e-13
      call tgyro_pedestal_map(dlntedr(n_r),zt_top,t_top(1),t_vec(:),i_star,exp_te)
-     exp_te(i_star:n_exp) = exp_te(i_star:n_exp)*1e-3
      call tgyro_pedestal_map(dlntidr(1,n_r),zt_top,t_top(1),t_vec(:),i_star,exp_ti(1,:))
-     exp_ti(1,i_star:n_exp) = exp_ti(1,i_star:n_exp)*1e-3
 
      ! Set ion densities
      exp_ni(1,i_star:n_exp) = exp_ne(i_star:n_exp)
@@ -33,19 +31,24 @@ subroutine tgyro_profile_reintegrate
      enddo
   endif
 
-  call tgyro_expro_map(r,dlnnedr,n_r,rmin_exp,exp_ne,n_exp)
-  call tgyro_expro_map(r,dlntedr,n_r,rmin_exp,exp_te,n_exp)
+  ! Map data inside r < r(n_r)
+
+  call tgyro_expro_map(r,dlnnedr,n_r,rmin_exp,exp_ne,n_exp,'log')
+  call tgyro_expro_map(r,dlntedr,n_r,rmin_exp,exp_te,n_exp,'log')
   do i_ion=1,loc_n_ion
      if (therm_flag(i_ion) == 1) then
-        call tgyro_expro_map(r,dlnnidr(i_ion,:),n_r,rmin_exp,exp_ni(i_ion,:),n_exp)
-        call tgyro_expro_map(r,dlntidr(i_ion,:),n_r,rmin_exp,exp_ti(i_ion,:),n_exp)
+        call tgyro_expro_map(r,dlnnidr(i_ion,:),n_r,rmin_exp,exp_ni(i_ion,:),n_exp,'log')
+        call tgyro_expro_map(r,dlntidr(i_ion,:),n_r,rmin_exp,exp_ti(i_ion,:),n_exp,'log')
      endif
   enddo
+  call tgyro_expro_map(r,w0p,n_r,rmin_exp,exp_w0,n_exp,'lin')
+
   ptot_exp = exp_ne*exp_te
   do i_ion=1,loc_n_ion
      ptot_exp = ptot_exp + exp_ni(i_ion,:)*exp_ti(i_ion,:)
   enddo
-  ! Convert to Pa (10^13 n)*(kT * 1e3)/10  
-  ptot_exp = 1e15*ptot_exp*k 
+
+  ! Convert to Pa: n[1/cm^3]*(kT[ev])/10  
+  ptot_exp = ptot_exp*k/10.0
 
 end subroutine tgyro_profile_reintegrate

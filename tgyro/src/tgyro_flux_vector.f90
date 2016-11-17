@@ -20,89 +20,9 @@ subroutine tgyro_flux_vector(x_vec,f_vec,dx,index)
   real, intent(inout), dimension(p_max) :: f_vec
   real, intent(in) :: dx
 
-  p = 0
-  do i=2,n_r
-
-     if (loc_ti_feedback_flag == 1) then
-        p = p+1
-        if (index == 1) then
-           dlntidr(therm_vec(:),i) = x_vec(p)+dx
-        else
-           dlntidr(therm_vec(:),i) = x_vec(p)
-        endif
-     endif
-
-     if (loc_te_feedback_flag == 1) then
-        p = p+1
-        if (index == 2) then
-           dlntedr(i) = x_vec(p)+dx
-        else
-           dlntedr(i) = x_vec(p)
-        endif
-     endif
-
-     if (loc_ne_feedback_flag == 1) then 
-        p = p+1
-        if (index == 3) then
-           dlnnedr(i) = x_vec(p)+dx
-        else
-           dlnnedr(i) = x_vec(p)
-        endif
-        ! Set dlnnidr for all ions at given radius according to quasineutrality
-        call tgyro_quasigrad(ne(i),dlnnedr(i),ni(:,i),dlnnidr(:,i),zi_vec(:),loc_n_ion)
-     endif
-
-     if (loc_er_feedback_flag == 1) then
-        p = p+1
-        if (index == 4) then
-           f_rot(i) = x_vec(p)+dx
-        else
-           f_rot(i) = x_vec(p)
-        endif
-     endif
-
-     if (loc_he_feedback_flag == 1) then
-        p = p+1
-        if (index == 5) then
-           dlnnidr(i_ash,i) = x_vec(p)+dx
-        else
-           dlnnidr(i_ash,i) = x_vec(p)
-        endif
-     endif
-
-  enddo
-
+  call tgyro_profile_set(x_vec,dx,index)
   call tgyro_flux
   call tgyro_comm_sync
-
-  p = 0
-  do i=2,n_r
-
-     if (loc_ti_feedback_flag == 1) then
-        p = p+1
-        f_vec(p) = eflux_i_tot(i)
-     endif
-
-     if (loc_te_feedback_flag == 1) then
-        p = p+1
-        f_vec(p) = eflux_e_tot(i)
-     endif
-
-     if (loc_ne_feedback_flag == 1) then
-        p = p+1
-        f_vec(p) = pflux_e_tot(i)
-     endif
-
-     if (loc_er_feedback_flag == 1) then
-        p = p+1
-        f_vec(p) = mflux_tot(i)
-     endif
-
-     if (loc_he_feedback_flag == 1) then
-        p = p+1
-        f_vec(p) = pflux_he_tot(i)
-     endif
-
-  enddo
+  call tgyro_flux_set(f_vec)
 
 end subroutine tgyro_flux_vector

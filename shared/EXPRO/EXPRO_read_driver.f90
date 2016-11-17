@@ -25,11 +25,14 @@ subroutine EXPRO_read_driver
        status='old',&
        iostat=ierr)
 
+  read(io,*) EXPRO_shot
   read(io,*) EXPRO_n_ion
   read(io,*) EXPRO_n_exp
   read(io,*) EXPRO_b_ref
+  read(io,*) EXPRO_ip_exp
+  read(io,*) EXPRO_rvbv
   read(io,*) EXPRO_arho
-
+  
   allocate(dummy(EXPRO_n_exp))
 
   ! 1-5

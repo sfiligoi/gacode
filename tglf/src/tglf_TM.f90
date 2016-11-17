@@ -30,7 +30,7 @@
 !
 ! initialize fluxes
 !
-      do is=ns0,ns
+      do is=1,ns
         do j=1,3 
           particle_flux_out(is,j) = 0.0
           energy_flux_out(is,j) = 0.0

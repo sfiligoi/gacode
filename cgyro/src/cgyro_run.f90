@@ -21,9 +21,6 @@ subroutine cgyro_run(test_flag_in)
   ! Input parameters (IN) - REQUIRED
   integer, intent(in) :: test_flag_in
 
-  ! Local variables
-  integer :: err
-
   ! Set corresponding global variables
   test_flag = test_flag_in
 

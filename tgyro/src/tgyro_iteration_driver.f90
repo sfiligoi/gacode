@@ -16,6 +16,7 @@ subroutine tgyro_iteration_driver
   use mpi
   use tgyro_globals
   use tgyro_iteration_variables
+  use tgyro_ped
   use EXPRO_interface
 
   implicit none
@@ -49,44 +50,6 @@ subroutine tgyro_iteration_driver
   b_flag(:) = ' ' 
   !---------------------------------------
 
-  ! Mapping function from radius/field to p
-  if (tgyro_mode /= 2) then
-     p = 0
-     do i=2,n_r
-        ip = 0
-        if (loc_ti_feedback_flag == 1) then
-           p  = p+1
-           ip = ip+1
-           pmap(i,ip) = p
-           quant(p) = 'ti'
-        endif
-        if (loc_te_feedback_flag == 1) then
-           p  = p+1
-           ip = ip+1
-           pmap(i,ip) = p
-           quant(p) = 'te'
-        endif
-        if (loc_ne_feedback_flag == 1) then
-           p  = p+1
-           ip = ip+1
-           pmap(i,ip) = p
-           quant(p) = 'ne'
-        endif
-        if (loc_er_feedback_flag == 1) then
-           p  = p+1
-           ip = ip+1
-           pmap(i,ip) = p
-           quant(p) = 'er'
-        endif
-        if (loc_he_feedback_flag == 1) then
-           p  = p+1
-           ip = ip+1
-           pmap(i,ip) = p
-           quant(p) = 'he'
-        endif
-     enddo
-  endif
-
   ! Generate ALL radial profiles.
   call tgyro_init_profiles
 
@@ -98,12 +61,7 @@ subroutine tgyro_iteration_driver
   !
   if (tgyro_noturb_flag == 1) then
 
-     flux_method = 5
-
-  else if (lpath(1:3) == "FUN") then
-
-     flux_method = 6
-     dx = loc_dx/r_min
+     flux_method = 0
 
   else if (lpath(1:3) == "IFS") then
 
@@ -135,18 +93,11 @@ subroutine tgyro_iteration_driver
 
   ! NOTE: See gyro/src/gyro_globals.f90 for definition of transport_method
 
-  if (tgyro_mode == 2) then
-     ! Branch off to stability calculation
-     transport_method = 1
-     call tgyro_stab_driver
-     return
+  ! Standard transport calculation
+  if (tgyro_gyro_restart_flag == 0) then
+     transport_method = 2
   else
-     ! Standard transport calculation
-     if (tgyro_gyro_restart_flag == 0) then
-        transport_method = 2
-     else
-        transport_method = 3
-     endif
+     transport_method = 3
   endif
 
   if (loc_restart_flag == 0) then
@@ -155,7 +106,6 @@ subroutine tgyro_iteration_driver
      ! Initialize relaxation parameters to starting value.
      relax(:) = 1.0
   endif
-  call MPI_BARRIER(MPI_COMM_WORLD,ierr)
   if (i_proc_global == 0) then
      open(unit=1,file=trim(runfile),position='append')
      write(1,'(t2,a)') 'INFO: (TGYRO) Survived initialization and starting iterations'
@@ -164,27 +114,43 @@ subroutine tgyro_iteration_driver
 
   correct_flag = 0
 
+  ! Mapping function from radius/field to p
   p = 0
   do i=2,n_r
+     ip = 0
      if (loc_ti_feedback_flag == 1) then
-        p = p+1
-        ! Assume 1 represents the thermal ion temperature
+        p  = p+1
+        ip = ip+1
+        pmap(i,ip) = p
+        quant(p) = 'ti'
         x_vec(p) = dlntidr(1,i)
      endif
      if (loc_te_feedback_flag == 1) then
-        p = p+1
+        p  = p+1
+        ip = ip+1
+        pmap(i,ip) = p
+        quant(p) = 'te'
         x_vec(p) = dlntedr(i)
      endif
-     if (loc_ne_feedback_flag == 1) then
-        p = p+1
-        x_vec(p) = dlnnedr(i)
-     endif
      if (loc_er_feedback_flag == 1) then
-        p = p+1
+        p  = p+1
+        ip = ip+1
+        pmap(i,ip) = p
+        quant(p) = 'er'
         x_vec(p) = f_rot(i)
      endif
+     if (loc_ne_feedback_flag == 1) then
+        p  = p+1
+        ip = ip+1
+        pmap(i,ip) = p
+        quant(p) = 'ne'
+        x_vec(p) = dlnnedr(i)
+     endif
      if (loc_he_feedback_flag == 1) then
-        p = p+1
+        p  = p+1
+        ip = ip+1
+        pmap(i,ip) = p
+        quant(p) = 'he'
         x_vec(p) = dlnnidr(i_ash,i)
      endif
   enddo
@@ -201,10 +167,6 @@ subroutine tgyro_iteration_driver
   case (1) 
 
      call tgyro_iteration_standard
-
-  case (2,3) 
-
-     call tgyro_iteration_pppl
 
   case (4) 
 
@@ -227,12 +189,14 @@ subroutine tgyro_iteration_driver
      call EXPRO_palloc(MPI_COMM_WORLD,'./',1) 
      call EXPRO_pread
 
-     call tgyro_profile_reintegrate( &
-          EXPRO_ptot,&
-          EXPRO_ne,&
-          EXPRO_te,&
-          EXPRO_ni(1:loc_n_ion,:),&
-          EXPRO_ti(1:loc_n_ion,:))
+     call tgyro_profile_reintegrate
+     EXPRO_ptot = ptot_exp
+     EXPRO_ne   = exp_ne*1e-13
+     EXPRO_te   = exp_te*1e-3
+     EXPRO_ni(1:loc_n_ion,:) = exp_ni(1:loc_n_ion,:)*1e-13
+     EXPRO_ti(1:loc_n_ion,:) = exp_ti(1:loc_n_ion,:)*1e-3
+     EXPRO_w0   = exp_w0
+     EXPRO_ptot = ptot_exp ! already in Pa
 
      if (i_proc_global == 0) then
 

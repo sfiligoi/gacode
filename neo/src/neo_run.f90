@@ -80,6 +80,7 @@ subroutine neo_run()
      neo_efluxtot_nclass_out(is) = neo_nclass_out(is,2)    ! Q_is/Q_norm total
      neo_vpol_nclass_out(is)     = neo_nclass_out(is,3)    ! v_theta/vt_norm (at theta=0)
      neo_vtor_nclass_out(is)     = neo_nclass_out(is,4)    ! v_phi/vt_norm (at theta=0)
+     neo_nclassvis_out(is)       = neo_nclass_out(is,5)    ! ymu_s(1,1) / (m_norm*dens_norm*vth_norm/a_norm)
   enddo
   neo_jpar_nclass_out = neo_nclass_1d_out                  ! <j B> / j_norm
  

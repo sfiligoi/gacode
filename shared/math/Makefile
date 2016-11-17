@@ -14,7 +14,6 @@ OBJECTS = math_constants.o \
           cub_spline.o \
           cub_spline_deriv.o \
           cub_spline_deriv2.o \
-          curtis_rad.o \
           energy_integral.o \
           erf.o \
           gacode_system.o \
@@ -27,16 +26,15 @@ OBJECTS = math_constants.o \
           j0y0.o \
           linint.o \
           logint.o \
-	  parallel_dim.o \
+          parallel_dim.o \
           pascal.o \
           polydiff.o \
           poly2diff.o \
           proc_time.o \
           p32.o \
-          parallel_lib.o \
           pseudospec_lib.o \
           remap_grid.o \
-	  rjbesl.o \
+          rjbesl.o \
           sigv.o \
           sivukhin.o \
           timer_lib.o
@@ -57,7 +55,6 @@ lib: $(OBJECTS)
 clean:
 	rm -f *.o $(LLIB).a *.mod
 	rm -f ${GACODE_ROOT}/modules/math_constants.mod
-	rm -f ${GACODE_ROOT}/modules/parallel_lib.mod
 	rm -f ${GACODE_ROOT}/modules/timer_lib.mod
 
 -include install/make.ext.${GACODE_PLATFORM}

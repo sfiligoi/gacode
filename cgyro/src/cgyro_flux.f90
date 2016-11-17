@@ -14,10 +14,12 @@ subroutine cgyro_flux
   implicit none
 
   integer :: ie,ix,is,it,ir
-  real :: dv,c_n,c_t
+  real :: dv
+  real :: c_n,c_n0
+  real :: c_t,c_t0
 
   flux_loc(:,:,:) = 0.0
-  moment_loc(:,:) = 0.0
+  moment_loc(:,:,:) = 0.0
 
   iv_loc = 0
   do iv=nv1,nv2
@@ -28,9 +30,18 @@ subroutine cgyro_flux
      ix = ix_v(iv)
      ie = ie_v(iv)
 
+     ! Integration weight
      dv  = w_xi(ix)*w_e(ie)
-     c_n = dens(is)*                    dv*k_theta*rho
-     c_t = dens(is)*temp(is)*energy(ie)*dv*k_theta*rho
+
+     ! Density moment weight
+     c_n = dv*dens(is)
+
+     ! Energy moment weight
+     c_t = dv*dens(is)*temp(is)*energy(ie)
+
+     ! Adiabatic coefficient
+     c_n0 = z(is)*dens(is)/temp(is)
+     c_t0 = 1.5*temp(is)*c_n0
 
      do ic=1,nc
 
@@ -38,26 +49,33 @@ subroutine cgyro_flux
         it = it_c(ic)
 
         ! Density flux: Gamma_a
-        flux_loc(ir,is,1) = flux_loc(ir,is,1)-&
-             c_n*aimag(2.0*cap_h_c(ic,iv_loc)*conjg(psi(ic,iv_loc)))*w_theta(it)
+        flux_loc(ir,is,1) = flux_loc(ir,is,1) &
+             -c_n*aimag(2.0*cap_h_c(ic,iv_loc)*conjg(psi(ic,iv_loc)))*w_theta(it)
 
-        ! Energy flux: Q_a
-        flux_loc(ir,is,2) = flux_loc(ir,is,2)-&
-             c_t*aimag(2.0*cap_h_c(ic,iv_loc)*conjg(psi(ic,iv_loc)))*w_theta(it)
+        ! Energy flux : Q_a
+        flux_loc(ir,is,2) = flux_loc(ir,is,2) &
+             -c_t*aimag(2.0*cap_h_c(ic,iv_loc)*conjg(psi(ic,iv_loc)))*w_theta(it)
 
-        ! Density moment: delta n_a
         if (it == it0) then
-           moment_loc(ir,is) = moment_loc(ir,is)+dens(is)*dv*cap_h_c(ic,iv_loc)
+           ! Density moment: (delta n_a)/(n_norm rho_norm)
+           moment_loc(ir,is,1) = moment_loc(ir,is,1)-c_n0*field(1,ic) &
+                +c_n*cap_h_c(ic,iv_loc)*jvec_c(1,ic,iv_loc)
+           ! Energy moment : (delta E_a)/(n_norm T_norm rho_norm)
+           moment_loc(ir,is,2) = moment_loc(ir,is,2)-c_t0*field(1,ic) &
+                +c_t*cap_h_c(ic,iv_loc)*jvec_c(1,ic,iv_loc)
         endif
 
      enddo
 
   enddo
 
-  ! GyroBohm normalization
-  flux_loc = flux_loc/rho**2
+  ! Complete definition of fluxes
+  flux_loc = flux_loc*k_theta*rho
+
+  ! GyroBohm normalizations
+  flux_loc   = flux_loc/rho**2
   moment_loc = moment_loc/rho
-  
+
   ! Reduced real flux(kx,ky), below, is still distributed over n 
 
   call MPI_ALLREDUCE(flux_loc(:,:,:), &
@@ -70,8 +88,8 @@ subroutine cgyro_flux
 
   ! Reduced complex moment(kx,ky), below, is still distributed over n 
 
-  call MPI_ALLREDUCE(moment_loc(:,:), &
-       moment(:,:), &
+  call MPI_ALLREDUCE(moment_loc(:,:,:), &
+       moment(:,:,:), &
        size(moment), &
        MPI_DOUBLE_COMPLEX, &
        MPI_SUM, &

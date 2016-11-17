@@ -36,6 +36,7 @@
 !
       IMPLICIT NONE
       SAVE
+    
 ! global constants
       REAL :: pi
       REAL :: pi_2
@@ -98,7 +99,7 @@
       REAL :: alpha_kx_t_in=0.0
 ! Input model paramaters
       LOGICAL :: adiabatic_elec_in=.FALSE.
-      REAL :: alpha_mach_in=1.0
+      REAL :: alpha_mach_in=0.0
       REAL :: alpha_p_in=1.0
       REAL :: alpha_e_in=1.0
       REAL :: alpha_n_in =0.0
@@ -241,6 +242,11 @@
       INTEGER :: nmodes_out
       INTEGER :: nfields_out
       character (len=80) :: error_msg='null' 
+! NN activation parameters (thresholds)  
+      REAL :: nn_max_error_in = -1.0
+      LOGICAL :: valid_nn = .FALSE.
+    
+     
 !
       END MODULE tglf_global
 !------------------------------------------------- 
@@ -736,7 +742,7 @@
       REAL :: vexb_tg
       REAL :: alpha_quench_tg=0.0
       REAL :: alpha_zf_tg=1.0
-      REAL :: alpha_mach_tg=1.0
+      REAL :: alpha_mach_tg=0.0
       REAL :: alpha_p_tg=1.0
       REAL :: alpha_e_tg=1.0
       REAL :: alpha_n_tg=0.0

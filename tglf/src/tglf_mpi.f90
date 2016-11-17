@@ -20,7 +20,7 @@ program tglf
   call MPI_COMM_SIZE(iCommTglf,nProcTglf,ierr)
 
   call tglf_read_input()
-  call tglf_run_mpi() 
+  call tglf_run_mpi()
 
   if (iProcTglf == iProc0Tglf) then
 

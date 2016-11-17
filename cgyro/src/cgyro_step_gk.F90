@@ -57,19 +57,19 @@ subroutine cgyro_rhs(ij)
   implicit none
 
   integer, intent(in) :: ij
-  integer :: is, ir, it, ie, ix
-  integer :: id, jc
+  integer :: is,ir,irp,it
+  integer :: id,jc
+  integer :: p,pp,pm
   real :: rval,rval2
   complex :: rhs_stream
   complex :: rhs_ij(nc,nv_loc)
+  complex, dimension(n_radial,n_theta) :: fw,gw
 
   ! Prepare suitable distribution (g, not h) for conservative upwind method
-!$omp workshare
   g_x(:,:) = h_x(:,:)
-!$omp end workshare
+
   if (n_field > 1) then
-!$omp  parallel do  &
-!$omp& private(iv,ic,iv_loc,is,ir,it)
+!$omp parallel do private(iv_loc,is,ic)
      do iv=nv1,nv2
         iv_loc = iv-nv1+1
         is = is_v(iv)
@@ -86,46 +86,55 @@ subroutine cgyro_rhs(ij)
 
   call timer_lib_in('str')
 
+  if (implicit_flag == 1) then
+
+     ! IMPLICIT advance 
+
+!$omp parallel do private(ic)
+     do iv_loc=1,nv2-nv1+1
+        do ic=1,nc
+           ! Diagonal terms
+           rhs_ij(ic,iv_loc) = &
+                omega_cap_h(ic,iv_loc)*cap_h_c(ic,iv_loc)+&
+                omega_h(ic,iv_loc)*h_x(ic,iv_loc)+&
+                sum(omega_s(:,ic,iv_loc)*field(:,ic))
+        enddo
+     enddo
+
+  else
+
+     ! EXPLICIT advance 
+
 !$acc data  &
 !$acc& pcopyout(rhs_ij) &
-!$acc& pcopyin(h_x,field,cap_h_c) &
+!$acc& pcopyin(g_x,h_x,field,cap_h_c) &
 !$acc& present(is_v,ix_v,ie_v,it_c) &
 !$acc& present(omega_cap_h,omega_h,omega_s) &
-!$acc& present(omega_stream,energy,xi,vel) &
+!$acc& present(omega_stream,xi,vel) &
 !$acc& present(dtheta,dtheta_up,icd_c)
 
-!$acc kernels
-   rhs_ij(:,:) = (0.0,0.0)
-!$acc end kernels
-
-
 #ifdef _OPENACC
-!$acc  parallel  loop gang vector collapse(2) & 
-!$acc& private(iv,ic,iv_loc,is,ix,ie,rval,rhs_stream,id,jc)
+!$acc  parallel loop gang vector collapse(2) & 
+!$acc& private(iv,ic,iv_loc,is,rval,rval2,rhs_stream,id,jc)
 #else
-!$omp  parallel do &
-!$omp& private(iv,ic,iv_loc,is,ix,ie,rval,rhs_stream,id,jc)
+!$omp parallel do collapse(2) &
+!$omp& private(iv,ic,iv_loc,is,rval,rval2,rhs_stream,id,jc) 
 #endif
-  do iv=nv1,nv2
-     do ic=1,nc
+     do iv=nv1,nv2
+        do ic=1,nc
+           iv_loc = iv-nv1+1
+           is = is_v(iv)
+           ! Diagonal terms
+           rhs_ij(ic,iv_loc) = &
+                omega_cap_h(ic,iv_loc)*cap_h_c(ic,iv_loc)+&
+                omega_h(ic,iv_loc)*h_x(ic,iv_loc)+&
+                sum(omega_s(:,ic,iv_loc)*field(:,ic))
 
-        iv_loc = iv-nv1+1
-        is = is_v(iv)
-        ix = ix_v(iv)
-        ie = ie_v(iv)
-
-        ! Diagonal terms
-        rhs_ij(ic,iv_loc) = rhs_ij(ic,iv_loc)+&
-             omega_cap_h(ic,iv_loc)*cap_h_c(ic,iv_loc)+&
-             omega_h(ic,iv_loc)*h_x(ic,iv_loc)+&
-             sum(omega_s(:,ic,iv_loc)*field(:,ic))
-
-        if (implicit_flag == 0) then
            ! Parallel streaming with upwind dissipation 
-           rval  = omega_stream(it_c(ic),is)*vel(ie)*xi(ix)
+           rval  = omega_stream(it_c(ic),is)*vel(ie_v(iv))*xi(ix_v(iv))
            rval2 = abs(omega_stream(it_c(ic),is))
-           rhs_stream = 0.0
 
+           rhs_stream = 0.0
            do id=-nup_theta,nup_theta
               jc = icd_c(ic,id)
               rhs_stream = rhs_stream &
@@ -135,17 +144,43 @@ subroutine cgyro_rhs(ij)
 
            rhs_ij(ic,iv_loc) = rhs_ij(ic,iv_loc)+rhs_stream
 
-        endif
+        enddo
      enddo
-  enddo
 !$acc end data
+  endif
+
+  ! Dealiased shear 
+
+  if (shear_method == 2) then
+
+     do iv=nv1,nv2
+        iv_loc = iv-nv1+1
+        do it=1,n_theta
+           gw(:,it) = h_x(ic_c(:,it),iv_loc)
+        enddo
+        fw(:,:) = 0.0
+        do p=-n_radial/3,n_radial/3
+           ir = p+1+n_radial/2
+           do id=1,n_radial/3
+              pp = p+id
+              pm = p-id
+              if (abs(pm) <= n_radial/3) then
+                 fw(ir,:) = fw(ir,:)+gw(pm+1+n_radial/2,:)/id
+              endif
+              if (abs(pp) <= n_radial/3) then
+                 fw(ir,:) = fw(ir,:)-gw(pp+1+n_radial/2,:)/id
+              endif
+           enddo
+        enddo
+        do it=1,n_theta
+           rhs_ij(ic_c(:,it),iv_loc) = rhs_ij(ic_c(:,it),iv_loc)+&
+                omega_eb*fw(:,it)
+        enddo
+     enddo
+
+  endif
 
   rhs(:,:,ij) = rhs_ij(:,:)
-
-  ! TRAPPING TERM
-  if (shear_method == 3) then
-  call cgyro_rhs_trap(ij)
-  endif
 
   call timer_lib_out('str')
 
@@ -182,6 +217,9 @@ subroutine cgyro_filter
   endif
 
 end subroutine cgyro_filter
+
+!==========================================================================
+! NOTE: The routine below is NOT used.
 
 subroutine cgyro_rhs_trap(ij)
 
@@ -235,8 +273,7 @@ subroutine cgyro_rhs_trap(ij)
 
         val = omega_trap(it,is)*sqrt(energy(ie))*(1.0-xi(ix)**2) 
 
-        rhs(ic,iv_loc,ij) = rhs(ic,iv_loc,ij) &
-             -val*cap_h_c(ic,iv_loc)
+        rhs(ic,iv_loc,ij) = rhs(ic,iv_loc,ij)-val*cap_h_c(ic,iv_loc)
      enddo
   enddo
 

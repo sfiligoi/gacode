@@ -173,7 +173,7 @@ subroutine gyro_write_input
      write(1,20) '.MACH',mach_s(ir_norm)
      write(1,20) '.PGAMMA',gamma_p_s(ir_norm)
      write(1,20) '.GAMMA_E',gamma_e_s(ir_norm)
-     write(1,20) '.LAMBDA_DEBYE',lambda_debye
+!     write(1,20) '.LAMBDA_DEBYE',lambda_debye
      write(1,20) '.NU_EI',nu_s(indx_e,ir_norm)
      write(1,20) '.NU_I_KROOK',nu_i_krook
      write(1,20) '.IPCCW',ipccw
@@ -246,6 +246,7 @@ subroutine gyro_write_input
      write(1,20) 'betae_unit_norm',betae_unit_norm
      write(1,20) 'beta_*',beta_star_s(ir_norm)
      write(1,20) 'alpha_MHD',q_norm**2*rmaj_s(ir_norm)*beta_star_s(ir_norm)
+     write(1,20) 'lambda_*',lambda_debye/rhos_norm
      write(1,20) 'volume (1/a^3)',GEO_volume
      write(1,20) 'omega_00 (c_s/a)',w0_s(ir_norm)
      write(1,*) '* Note that f = f_sim exp(i n omega0[r0] t)'

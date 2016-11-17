@@ -40,6 +40,9 @@ then
   echo "         -mpinuma <n>" 
   echo "         MPI tasks per active NUMA."
   echo
+  echo "         -w <hh:mm:ss>" 
+  echo "         Wallclock time"
+  echo
   echo "See https://fusion.gat.com/theory/Gyroplatforms for help"
   echo " choosing -numa and -mpinuma flags."
   echo
@@ -62,6 +65,7 @@ NUMA=0
 MPINUMA=0
 NIDLE=0
 START=new
+W=00:59:00
 #=============================================================
 
 #=============================================================
@@ -86,6 +90,8 @@ while [ $# -gt 0 ] ; do
 
   -start) shift ; START=$1 ;;
 
+  -w) shift ; W=$1 ;;
+
    *) echo "ERROR: incorrect gyro_bat syntax." ; exit 1 ;;
  
   esac
@@ -108,6 +114,6 @@ CODE="$CODE -start $START"
 
 # Pass control to platform-specific script
 $GACODE_ROOT/shared/batch/queue.${GACODE_PLATFORM} \
- $NPROC $LOCDIR $SIMROOT "$CODE" $NOMP $NUMA $MPINUMA $NIDLE
+ $NPROC $LOCDIR $SIMROOT "$CODE" $NOMP $NUMA $MPINUMA $NIDLE $W
 
 exit 0

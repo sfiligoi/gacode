@@ -98,15 +98,8 @@ subroutine tgyro_read_input
   call tgyro_readbc_int(tgyro_neo_gv_flag)
   call tgyro_readbc_int(tglf_q_low_flag)
   call tgyro_readbc_int(tgyro_global_newton_flag)
-  call tgyro_readbc_int(tgyro_backtrack_method)
   call tgyro_readbc_int(tgyro_iteration_method)
-  call tgyro_readbc_real(lm_boost)
-  call tgyro_readbc_real(lm_drop)
   call tgyro_readbc_int(tgyro_rotation_flag)
-  call tgyro_readbc_int(tgyro_stab_nsearch)
-  call tgyro_readbc_int(tgyro_stab_nky)
-  call tgyro_readbc_real(tgyro_stab_kymin)
-  call tgyro_readbc_real(tgyro_stab_deltaky)
   call tgyro_readbc_real(tgyro_rmin)
   call tgyro_readbc_real(tgyro_rmax)
   call tgyro_readbc_int(tgyro_expwd_flag)
@@ -126,10 +119,12 @@ subroutine tgyro_read_input
   call tgyro_readbc_int(tgyro_neo_n_theta)
   call tgyro_readbc_int(tgyro_ptot_flag)
   call tgyro_readbc_int(tgyro_ped_model)
+  call tgyro_readbc_real(tgyro_rped)
   call tgyro_readbc_real(tgyro_neped)
   call tgyro_readbc_real(tgyro_zeffped)
+  call tgyro_readbc_real(tgyro_tglf_nn_max_error)
   call tgyro_readbc_char(tgyro_multi_code)
- ! ** END input read; ADD NEW PARAMETERS ABOVE HERE!!
+  ! ** END input read; ADD NEW PARAMETERS ABOVE HERE!!
   call tgyro_readbc_int(n_inst)
   !-------------------------------------------------------
 

@@ -42,7 +42,7 @@ subroutine cgyro_equilibrium
      x(it) = y(it)
   enddo
 
-  if (constant_wind_flag == 1) then
+  if (constant_stream_flag == 1) then
 
      call GEO_interp(0.0)
      gtheta_ave = GEO_g_theta
@@ -88,12 +88,12 @@ subroutine cgyro_equilibrium
 
      do is=1,n_species
 
-        if (constant_wind_flag == 0) then
+        if (constant_stream_flag == 0) then
            omega_stream(it,is) = sqrt(2.0)*vth(is)/(q*rmaj*GEO_g_theta)
         else
            omega_stream(it,is) = sqrt(2.0)*vth(is)/(q*rmaj*gtheta_ave)
         endif
-
+ 
         omega_trap(it,is) = -0.5*sqrt(2.0)*vth(is) &
              *(GEO_dbdt/GEO_b)/(q*rmaj*GEO_g_theta) 
 
@@ -110,6 +110,9 @@ subroutine cgyro_equilibrium
         omega_cdrift(it,is) = -2.0*sqrt(2.0)*rho*vth(is) &
              * mass(is)/(Z(is)*GEO_b)*GEO_gq/rmaj &
              *(GEO_ucos+GEO_captheta*GEO_usin)*mach
+
+        omega_crdrift(it,is) = -2.0*sqrt(2.0)*rho*vth(is) &
+             * mass(is)/(Z(is)*GEO_b)*GEO_grad_r/rmaj*GEO_usin*mach
 
      enddo
 
@@ -128,10 +131,10 @@ subroutine cgyro_equilibrium
      enddo
 
   enddo
+!$acc enter data copyin(energy,xi,vel,omega_stream)
 
   w_theta(:) = w_theta(:)/sum(w_theta) 
 
-!$acc enter data copyin(omega_stream)
 end subroutine cgyro_equilibrium
 
 

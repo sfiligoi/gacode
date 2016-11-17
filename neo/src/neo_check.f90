@@ -6,7 +6,7 @@ subroutine neo_check
 
   integer :: ir, is, flag
 
-  if(silent_flag == 0 .and. i_proc == 0) then
+  if (silent_flag == 0 .and. i_proc == 0) then
      open(unit=io_neoout,file=trim(path)//runfile_neoout,&
           status='old',position='append')
   endif
@@ -19,12 +19,12 @@ subroutine neo_check
      return
   endif
   !
-  if(n_species > 6) then
+  if (n_species > 6) then
      call neo_error('ERROR: (NEO) max n_species is 6')
      return
   endif
 
-  if(rho_in < 0) then
+  if (rho_in < 0) then
      call neo_error('ERROR: (NEO) rho_unit must be positive')
      return
   endif
@@ -142,44 +142,46 @@ subroutine neo_check
   !------------------------------------------------------------
   ! Equilibrium model
   !
-  select case (equilibrium_model)  
+  if(profile_model == 1) then
+     select case (equilibrium_model)  
 
 
-  case (0) 
+     case (0) 
 
-     if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_neoout,30) 'equilibrium_model','S-ALPHA'
-     end if
+        if(silent_flag == 0 .and. i_proc == 0) then
+           write(io_neoout,30) 'equilibrium_model','S-ALPHA'
+        end if
 
-  case (1) 
+     case (1) 
 
-     if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_neoout,30) 'equilibrium_model','LARGE-ASPECT-RATIO'
-     end if
+        if(silent_flag == 0 .and. i_proc == 0) then
+           write(io_neoout,30) 'equilibrium_model','LARGE-ASPECT-RATIO'
+        end if
 
-  case (2) 
+     case (2) 
 
-     if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_neoout,30) 'equilibrium_model','MILLER'
-     end if
+        if(silent_flag == 0 .and. i_proc == 0) then
+           write(io_neoout,30) 'equilibrium_model','MILLER'
+        end if
 
-  case (3) 
+     case (3) 
 
-     if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_neoout,30) 'equilibrium_model','GENERAL'
-     end if
+        if(silent_flag == 0 .and. i_proc == 0) then
+           write(io_neoout,30) 'equilibrium_model','GENERAL'
+        end if
 
-     if(geo_ny <= 0) then
-        call neo_error('ERROR: (NEO) geometry coefficients missing')
+        if(geo_ny <= 0) then
+           call neo_error('ERROR: (NEO) geometry coefficients missing')
+           return
+        endif
+
+     case default
+
+        call neo_error('ERROR: (NEO) equilibrium_model invalid')
         return
-     endif
 
-  case default
-
-     call neo_error('ERROR: (NEO) equilibrium_model invalid')
-     return
-
-  end select
+     end select
+  endif
   !------------------------------------------------------------
 
   !------------------------------------------------------------
@@ -193,43 +195,43 @@ subroutine neo_check
      endif
      ir=1
      do is=1,n_species
-        if(dens(is,ir) <= 0.0) then
+        if (dens(is,ir) <= 0.0) then
            call neo_error('ERROR: (NEO) density must be positive')
            return
-        end if
-        if(temp(is,ir) <= 0.0) then
+        endif
+        if (temp(is,ir) <= 0.0) then
            call neo_error('ERROR: (NEO) temperature must be positive')
            return
-        end if
-        if(nu(is,ir) <= 0.0) then
+        endif
+        if (nu(is,ir) <= 0.0) then
            call neo_error('ERROR: (NEO) collision frequency must be positive')
            return
-        end if
-        if(z(is) == 0.0) then
+        endif
+        if (int(z(is)) == 0) then
            call neo_error('ERROR: (NEO) charge must be non-zero')
            return
-        end if
+        endif
      enddo
 
-     if(silent_flag == 0 .and. i_proc == 0) then
+     if (silent_flag == 0 .and. i_proc == 0) then
         write(io_neoout,30) 'profile_model','LOCAL'
-     end if
+     endif
 
   case (2) 
 
-     if(silent_flag == 0 .and. i_proc == 0) then
+     if (silent_flag == 0 .and. i_proc == 0) then
         write(io_neoout,30) 'profile_model','GLOBAL PROFILE'
-     end if
+     endif
 
      select case (profile_erad0_model)
      case(0)
-        if(silent_flag == 0 .and. i_proc == 0) then
-           write(io_neoout,*) 'GLOBAL PROFILE profile_erad0_model: ERAD0 NOT INCLUDED'
-        end if
+        if (silent_flag == 0 .and. i_proc == 0) then
+           write(io_neoout,30) 'profile_erad0_model','ERAD0 NOT INCLUDED'
+        endif
      case (1)
-        if(silent_flag == 0 .and. i_proc == 0) then
-           write(io_neoout,*) 'GLOBAL PROFILE profile_erad0_model: ERAD0 INCLUDED'
-        end if
+        if (silent_flag == 0 .and. i_proc == 0) then
+           write(io_neoout,30) 'profile_erad0_model','ERAD0 INCLUDED'
+        endif
      case default
         call neo_error('ERROR: (NEO) invalid profile_erad0_model')
         return
@@ -237,77 +239,77 @@ subroutine neo_check
 
      select case (profile_equilibrium_model)
      case(0)
-        if(silent_flag == 0 .and. i_proc == 0) then
-           write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: WITH S-ALPHA GEOMETRY'
+        if (silent_flag == 0 .and. i_proc == 0) then
+           write(io_neoout,30) 'profile_equilibrium_model','WITH S-ALPHA GEOMETRY'
         end if
      case (1)
-        if(silent_flag == 0 .and. i_proc == 0) then
-           write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: WITH MILLER GEOMETRY'
+        if (silent_flag == 0 .and. i_proc == 0) then
+           write(io_neoout,30) 'profile_equilibrium_model','WITH MILLER GEOMETRY'
            if(abs(profile_delta_scale-1.0) > epsilon(0.) ) then
-              write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DELTA AND S_DELTA ARE RE-SCALED'
+              write(io_neoout,30) 'profile_equilibrium_model','DELTA AND S_DELTA ARE RE-SCALED'
            endif
            if(abs(profile_zeta_scale-1.0) > epsilon(0.) ) then
-              write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: ZETA AND S_ZETA ARE RE-SCALED'
+              write(io_neoout,30) 'profile_equilibrium_model','ZETA AND S_ZETA ARE RE-SCALED'
            endif
            if(abs(profile_zmag_scale-1.0) > epsilon(0.) ) then
-              write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: ZMAG AND S_MAG ARE RE-SCALED'
+              write(io_neoout,30) 'profile_equilibrium_model','ZMAG AND S_MAG ARE RE-SCALED'
            endif
         end if
      case (2)
-        if(silent_flag == 0 .and. i_proc == 0) then
-           write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: WITH GENERAL GEOMETRY'
+        if (silent_flag == 0 .and. i_proc == 0) then
+           write(io_neoout,30) 'profile_equilibrium_model','WITH GENERAL GEOMETRY'
         endif
      case default
         call neo_error('ERROR: (NEO) invalid profile_equilibrium_model')
         return
      end select
 
-     if(n_species >= 1) then
+     if (n_species >= 1) then
         if(abs(profile_dlnndr_scale(1)-1.0) > epsilon(0.) ) then
-           write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNNDR_1 IS RE-SCALED'
+           write(io_neoout,30) 'profile_equilibrium_model','DLNNDR_1 IS RE-SCALED'
         endif
         if(abs(profile_dlntdr_scale(1)-1.0) > epsilon(0.) ) then
-           write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNTDR_1 IS RE-SCALED'
+           write(io_neoout,30) 'profile_equilibrium_model','DLNTDR_1 IS RE-SCALED'
         endif
      endif
-     if(n_species >= 2) then
+     if (n_species >= 2) then
         if(abs(profile_dlnndr_scale(2)-1.0) > epsilon(0.) ) then
-           write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNNDR_2 IS RE-SCALED'
+           write(io_neoout,30) 'profile_equilibrium_model','DLNNDR_2 IS RE-SCALED'
         endif
         if(abs(profile_dlntdr_scale(2)-1.0) > epsilon(0.) ) then
-           write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNTDR_2 IS RE-SCALED'
+           write(io_neoout,30) 'profile_equilibrium_model','DLNTDR_2 IS RE-SCALED'
         endif
      endif
-     if(n_species >= 3) then
+     if (n_species >= 3) then
         if(abs(profile_dlnndr_scale(3)-1.0) > epsilon(0.) ) then
-           write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNNDR_3 IS RE-SCALED'
+           write(io_neoout,30) 'profile_equilibrium_model','DLNNDR_3 IS RE-SCALED'
         endif
         if(abs(profile_dlntdr_scale(3)-1.0) > epsilon(0.) ) then
-           write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNTDR_3 IS RE-SCALED'
+           write(io_neoout,30) 'profile_equilibrium_model','DLNTDR_3 IS RE-SCALED'
         endif
      endif
-     if(n_species >= 4) then
+     if (n_species >= 4) then
         if(abs(profile_dlnndr_scale(4)-1.0) > epsilon(0.) ) then
-           write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNNDR_4 IS RE-SCALED'
+           write(io_neoout,30) 'profile_equilibrium_model','DLNNDR_4 IS RE-SCALED'
         endif
         if(abs(profile_dlntdr_scale(4)-1.0) > epsilon(0.) ) then
-           write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNTDR_4 IS RE-SCALED'
+           write(io_neoout,30) 'profile_equilibrium_model','DLNTDR_4 IS RE-SCALED'
         endif
      endif
-     if(n_species >= 5) then
+     if (n_species >= 5) then
         if(abs(profile_dlnndr_scale(5)-1.0) > epsilon(0.) ) then
-           write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNNDR_5 IS RE-SCALED'
+           write(io_neoout,30) 'profile_equilibrium_model','DLNNDR_5 IS RE-SCALED'
         endif
         if(abs(profile_dlntdr_scale(5)-1.0) > epsilon(0.) ) then
-           write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNTDR_5 IS RE-SCALED'
+           write(io_neoout,30) 'profile_equilibrium_model','DLNTDR_5 IS RE-SCALED'
         endif
      endif
-     if(n_species >= 6) then
+     if (n_species >= 6) then
         if(abs(profile_dlnndr_scale(6)-1.0) > epsilon(0.) ) then
-           write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNNDR_6 IS RE-SCALED'
+           write(io_neoout,30) 'profile_equilibrium_model','DLNNDR_6 IS RE-SCALED'
         endif
         if(abs(profile_dlntdr_scale(6)-1.0) > epsilon(0.) ) then
-           write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNTDR_6 IS RE-SCALED'
+           write(io_neoout,30) 'profile_equilibrium_model','DLNTDR_6 IS RE-SCALED'
         endif
      endif
 
@@ -320,25 +322,25 @@ subroutine neo_check
 
   !-----------------------------------------------------------
   ! Sign of B checks
-  if(sign_q > 0.0) then
+  if (sign_q > 0.0) then
      if(silent_flag == 0 .and. i_proc == 0) then
         write(io_neoout,30) 'sign_q','POSITIVE'
-     end if
+     endif
   else
      if(silent_flag == 0 .and. i_proc == 0) then
         write(io_neoout,30) 'sign_q','NEGATIVE'
-     end if
-  end if
+     endif
+  endif
 
-  if(sign_bunit > 0.0) then
+  if (sign_bunit > 0.0) then
      if(silent_flag == 0 .and. i_proc == 0) then
         write(io_neoout,30) 'sign_bunit','POSITIVE (BT CW)'
-     end if
+     endif
   else
-     if(silent_flag == 0 .and. i_proc == 0) then
+     if (silent_flag == 0 .and. i_proc == 0) then
         write(io_neoout,30) 'sign_bunit','NEGATIVE (BT CCW)'
-     end if
-  end if
+     endif
+  endif
 
 
   !-----------------------------------------------------------
@@ -348,11 +350,11 @@ subroutine neo_check
   case (1)
      if(silent_flag == 0 .and. i_proc == 0) then
         write(io_neoout,30) 'rotation model','ROTATION EFFECTS NOT INCLUDED'
-     end if
+     endif
   case (2)
      if(silent_flag == 0 .and. i_proc == 0) then
         write(io_neoout,30) 'rotation model','ROTATION EFFECTS INCLUDED'
-     end if
+     endif
   case default
      call neo_error('ERROR: (NEO) invalid rotation_model')
      return
@@ -360,13 +362,13 @@ subroutine neo_check
 
   select case (spitzer_model)
   case(0)
-     if(silent_flag == 0 .and. i_proc == 0) then
+     if (silent_flag == 0 .and. i_proc == 0) then
         write(io_neoout,30) 'spitzer_model:','OFF (NEOCLASSICAL TRANSPORT)'
-     end if
+     endif
   case (1)
-     if(silent_flag == 0 .and. i_proc == 0) then
+     if (silent_flag == 0 .and. i_proc == 0) then
         write(io_neoout,30) 'spitzer_model:','ON (SOLVE SPITZER PROBLEM)'
-     end if
+     endif
   case default
      call neo_error('ERROR: (NEO) invalid spitzer_model')
      return
@@ -374,26 +376,26 @@ subroutine neo_check
 
   select case(threed_model)
   case(0)
-     if(silent_flag == 0 .and. i_proc == 0) then
+     if (silent_flag == 0 .and. i_proc == 0) then
         write(io_neoout,30) 'threed_model:','AXISYMMETRIC EQUILIBRIUM'
-     end if
+     endif
   case (1)
-     if(silent_flag == 0 .and. i_proc == 0) then
+     if (silent_flag == 0 .and. i_proc == 0) then
         write(io_neoout,30) 'threed_model:','NON-AXISYMMETRIC EQUILIBRIUM (LE3)'
-     end if
+     endif
      if(profile_model == 2) then
         call neo_error('ERROR: (NEO) threed_model not available with global profiles')
      endif
 
      select case(threed_exb_model)
      case(0)
-        if(silent_flag == 0 .and. i_proc == 0) then
+        if (silent_flag == 0 .and. i_proc == 0) then
            write(io_neoout,30) 'threed_exb_model:','NO HIGHER-ORDER V_EXB DRIFT'
-        end if
+        endif
      case (1)
-        if(silent_flag == 0 .and. i_proc == 0) then
+        if (silent_flag == 0 .and. i_proc == 0) then
            write(io_neoout,30) 'threed_exb_model:','HIGHER-ORDER V_EXB DRIFT'
-        end if
+        endif
      case default
         call neo_error('ERROR: (NEO) invalid threed_exb_model')
         return
@@ -401,13 +403,13 @@ subroutine neo_check
 
      select case(threed_drift_model)
      case(0)
-        if(silent_flag == 0 .and. i_proc == 0) then
+        if (silent_flag == 0 .and. i_proc == 0) then
            write(io_neoout,30) 'threed_drift_model:','NO HIGHER-ORDER V_DRIFT'
-        end if
+        endif
      case (1)
-        if(silent_flag == 0 .and. i_proc == 0) then
+        if (silent_flag == 0 .and. i_proc == 0) then
            write(io_neoout,30) 'threed_drift_model:','HIGHER-ORDER V_DRIFT'
-        end if
+        endif
      case default
         call neo_error('ERROR: (NEO) invalid threed_drift_model')
         return
@@ -433,19 +435,19 @@ subroutine neo_check
      end select
   enddo
 
-  if(flag == 1) then
-     if(profile_model == 2) then
+  if (flag == 1) then
+     if (profile_model == 2) then
         call neo_error('ERROR: (NEO) aniso_model not available with global profiles')
      endif
-     if(rotation_model == 1) then
+     if (rotation_model == 1) then
         call neo_error('ERROR: (NEO) aniso_model requires rotation_model=2')
      endif
 
-     if(silent_flag == 0 .and. i_proc == 0) then
+     if (silent_flag == 0 .and. i_proc == 0) then
         write(io_neoout,30) 'aniso model:','ANISOTROPIC SPECIES INCLUDED (with poloidal asymmetry)'
      endif
   endif
-  
+
   !------------------------------------------------------------
 
   if (silent_flag == 0 .and. i_proc == 0) then
@@ -465,57 +467,65 @@ subroutine neo_check
         write(io_neoout,"(t2,a,t19,': ',i5)") 'n_row',n_row
      endif
 
+     write(io_neoout,*)
+     write(io_neoout,*) 'PHYSICS PARAMETERS'
+     write(io_neoout,*) '------------------'
      do ir=1,n_radial
-        write(io_neoout,*) 
-        write(io_neoout,*) 'PHYSICS PARAMETERS'
-        write(io_neoout,*) '------------------'
-        write(io_neoout,20) 'r/R',r(ir)/rmaj(ir)
-        write(io_neoout,20) 'dphi0/dr',dphi0dr(ir)
-        write(io_neoout,20) 'omega_rot',omega_rot(ir)
-        write(io_neoout,20) 'omega_rot_deriv',omega_rot_deriv(ir)
-        write(io_neoout,20) 'q',q(ir)
-        write(io_neoout,20) 's',shear(ir)
-        write(io_neoout,20) 'shift',shift(ir)
-        write(io_neoout,20) 'kappa',kappa(ir)
-        write(io_neoout,20) 's_kappa',s_kappa(ir)
-        write(io_neoout,20) 'delta',delta(ir)
-        write(io_neoout,20) 's_delta',s_delta(ir)
-        write(io_neoout,20) 'zeta',zeta(ir)
-        write(io_neoout,20) 's_zeta',s_zeta(ir)
-        write(io_neoout,20) 'zmag',zmag(ir)
-        write(io_neoout,20) 's_zmag',s_zmag(ir)
+        write(io_neoout,20) '      r/a:',r(ir)
+        write(io_neoout,20) '      R/a:',rmaj(ir), '    shift:',shift(ir)
+        write(io_neoout,20) '        q:',q(ir),    '        s:',shear(ir)
+        write(io_neoout,20) '    kappa:',kappa(ir),'  s_kappa:',s_kappa(ir)
+        write(io_neoout,20) '    delta:',delta(ir),'  s_delta:',s_delta(ir)
+        write(io_neoout,20) '     zeta:',zeta(ir), '   s_zeta:',s_zeta(ir)
+        write(io_neoout,20) '     zmag:',zmag(ir), '    dzmag:',s_zmag(ir)
 
+        write(io_neoout,*)
+        write(io_neoout,20) ' dphi0/dr:',dphi0dr(ir)
+        write(io_neoout,20) '    omega:',omega_rot(ir), &
+             'domega/dr:',omega_rot_deriv(ir)
+        write(io_neoout,20) '    epar0:',epar0(ir)
+
+        write(io_neoout,*)
+        write(io_neoout,'(a)') &
+             'indx  z     n/n_norm     T/T_norm     m/m_norm      a/Ln         a/Lt         nu'
         do is=1,n_species
-           write(io_neoout,*) 
-           write(io_neoout,'(t2,a,i1)') 'Species ',is
-           write(io_neoout,*) '----------'
-           write(io_neoout,10) 'Z',z(is)
-           write(io_neoout,20) 'dens',dens(is,ir)
-           write(io_neoout,20) 'temp',temp(is,ir)
-           write(io_neoout,20) 'mass',mass(is)
-           write(io_neoout,20) 'a/Ln',dlnndr(is,ir)
-           write(io_neoout,20) 'a/LT',dlntdr(is,ir)
-           write(io_neoout,20) 'nu',nu(is,ir)
+           write(io_neoout,'(t2,i2,2x,i2,2x,6(1pe11.4,2x))') &
+                is,Z(is),dens(is,ir),temp(is,ir),mass(is),dlnndr(is,ir),dlntdr(is,ir),nu(is,ir)
+        enddo
+
+        flag = 0
+        do is=1,n_species
            if (aniso_model(is) >= 2) then
-              write(io_neoout,'(t2,a)') 'this species is anisotropic'
-              write(io_neoout,20) 'temp_para', temp_para(is,ir)
-              write(io_neoout,20) 'a/LTpara',  dlntdr_para(is,ir)
-              write(io_neoout,20) 'temp_perp', temp_perp(is,ir)
-              write(io_neoout,20) 'a/LTperp',  dlntdr_perp(is,ir)
+              flag = 1
            endif
         enddo
-     enddo
+        if (flag == 1) then
+           write(io_neoout,*)
+           write(io_neoout,'(a)') 'Anisotropic Species'
+           write(io_neoout,'(a)') &
+                'indx  z   Tpar/T_norm  Tperp/T_norm a/Lt_par     a/Lt_perp'
+           do is=1,n_species
+              if (aniso_model(is) >= 2) then
+                 write(io_neoout,'(t2,i2,2x,i2,2x,4(1pe11.4,2x))') &
+                      is,Z(is),temp_para(is,ir),temp_perp(is,ir), &
+                      dlntdr_para(is,ir),dlntdr_perp(is,ir)
+              endif
+           enddo
+        endif
 
+        write(io_neoout,*) '------------------'
+
+     enddo
      write(io_neoout,*)
 
   endif
 
-  if(silent_flag == 0 .and. i_proc == 0) then
+  if (silent_flag == 0 .and. i_proc == 0) then
      close(io_neoout)
   endif
 
 10 format(t2,a,t19,': ',i3)
-20 format(t2,a,t19,':',1pe12.4) 
-30 format(t2,a,t22,': ',a)
+20 format(t2,2(a,1x,1pe11.4,4x))
+30 format(t2,a,t32,': ',a)
 
 end subroutine neo_check

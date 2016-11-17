@@ -51,7 +51,7 @@ subroutine cgyro_error_estimate
 
   if (error_tol > 0.0) then
      if (field_error > error_tol .and. i_time > 2) then
-        call cgyro_error('Integration error > 1.0')
+        call cgyro_error('Integration error exceeded limit.')
      endif
   endif
 

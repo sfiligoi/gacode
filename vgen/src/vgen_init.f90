@@ -15,7 +15,7 @@
     
     neo_n_radial_in = 1
     neo_profile_model_in = 1
-    neo_sim_model_in = 1
+    !neo_sim_model_in = 1
     
     zfac(:) = 0
     do j=1,neo_n_species_in

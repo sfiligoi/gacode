@@ -28,7 +28,6 @@ class cgyrodata:
         self.t      = data[:,0]
         self.error  = data[:,1]
         self.n_time = len(self.t)   
-        print
         print "INFO: (data.py) Read time vector in out.cgyro.time."
         #-----------------------------------------------------------------
 
@@ -69,6 +68,12 @@ class cgyrodata:
         mark = mark+self.n_theta*(self.n_radial/self.m_box)
         self.ky = np.array(data[mark:mark+self.n_n])
 
+        mark = mark+self.n_n
+        self.alphadiss = np.array(data[mark:mark+self.n_n])
+
+        mark = mark+self.n_n
+        self.radialdiss = np.array(data[mark:mark+self.n_radial])
+
         print "INFO: (data.py) Read grid data in out.cgyro.grids."
         #-----------------------------------------------------------------
 
@@ -88,17 +93,77 @@ class cgyrodata:
         #-----------------------------------------------------------------
 
         #-----------------------------------------------------------------
+        # Equil file
+        #
+        try:
+            data = np.fromfile(self.dir+'out.cgyro.equilibrium',dtype='float',sep=" ")
+            self.rmin        = data[0]
+            self.rmaj        = data[1]
+            self.q           = data[2]
+            self.shear       = data[3]
+            self.shift       = data[4]
+            self.kappa       = data[5]
+            self.s_kappa     = data[6]
+            self.delta       = data[7]
+            self.s_delta     = data[8]
+            self.zeta        = data[9]
+            self.s_zeta      = data[10]
+            self.zmag        = data[11]
+            self.dzmag       = data[12]
+            self.rho         = data[13]
+            self.ky0         = data[14]
+            self.betae_unit  = data[15]
+            self.beta_star   = data[16]
+            self.lambda_star = data[17]
+            self.gamma_e     = data[18]
+            self.gamma_p     = data[19]
+            self.mach        = data[20]
+            self.a_meters    = data[21]
+            self.b_unit      = data[22]
+            self.dens_norm   = data[23]
+            self.temp_norm   = data[24]
+            self.vth_norm    = data[25]
+            # Define species vectors
+            self.z      = np.zeros(self.n_species)
+            self.mass   = np.zeros(self.n_species)
+            self.dens   = np.zeros(self.n_species)
+            self.temp   = np.zeros(self.n_species)
+            self.dlnndr = np.zeros(self.n_species)
+            self.dlntdr = np.zeros(self.n_species)
+            self.nu     = np.zeros(self.n_species)
+            for i in range(self.n_species):
+                self.z[i]      = data[26+7*i]
+                self.mass[i]   = data[27+7*i]
+                self.dens[i]   = data[28+7*i]
+                self.temp[i]   = data[29+7*i]
+                self.dlnndr[i] = data[30+7*i]
+                self.dlntdr[i] = data[31+7*i]
+                self.nu[i]     = data[32+7*i]
+            print "INFO: (data.py) Read data in out.cgyro.equilibrium."
+        except:
+            print "WARNING: (data.py) Could not read out.cgyro.equilibrium."
+            pass
+
+        #-----------------------------------------------------------------
+
+        #-----------------------------------------------------------------
         # Read ballooning potentials
         #
         try:
             data = np.fromfile(self.dir+'out.cgyro.phib',dtype='float',sep=" ")
-            self.phib = np.reshape(data,(2,self.n_theta*self.n_radial/self.m_box,nt),'F')
+            if self.n_radial == 1:
+                self.phib = np.reshape(data,(2,self.n_theta,nt),'F')
+            else:
+                self.phib = np.reshape(data,(2,self.n_theta*self.n_radial/self.m_box,nt),'F')
             print "INFO: (data.py) Read data in out.cgyro.phib."
         except:
             pass
         try:
             data = np.fromfile(self.dir+'out.cgyro.aparb',dtype='float',sep=" ")
-            self.aparb = np.reshape(data,(2,self.n_theta*self.n_radial/self.m_box,nt),'F')
+            if self.n_radial == 1:
+                self.aparb = np.reshape(data,(2,self.n_theta,nt),'F')
+            else:
+                self.aparb = np.reshape(data,(2,self.n_theta*self.n_radial/self.m_box,nt),'F')
             print "INFO: (data.py) Read data in out.cgyro.aparb."
         except:
             pass
@@ -124,6 +189,39 @@ class cgyrodata:
         #-----------------------------------------------------------------
 
         #-----------------------------------------------------------------
+        # Compressed particle and energy fluxes
+        #
+        nd = self.n_species*nt
+        try:
+            start = time.time()
+            data = np.loadtxt(self.dir+'out.cgyro.flux_n',dtype='float')
+            end = time.time()
+            self.flux_n = np.transpose(data[:,1:])
+            print "INFO: (data.py) Read data in out.cgyro.flux_n."
+        except:
+            pass
+
+        try:
+            start = time.time()
+            data = np.loadtxt(self.dir+'out.cgyro.flux_e',dtype='float')
+            end = time.time()
+            self.flux_e = np.transpose(data[:,1:])
+            print "INFO: (data.py) Read data in out.cgyro.flux_e."
+        except:
+            pass 
+        #-----------------------------------------------------------------
+
+    def getbigflux(self):
+
+        """Larger flux files"""
+
+        import numpy as np
+        import time
+
+        # Convenience definition
+        nt = self.n_time
+
+        #-----------------------------------------------------------------
         # Particle and energy fluxes
         #
         nd = self.n_radial*self.n_species*self.n_n*nt
@@ -131,7 +229,7 @@ class cgyrodata:
             start = time.time()
             data = np.fromfile(self.dir+'out.cgyro.kxky_flux_n',dtype='float',sep=" ")
             end = time.time()
-            self.flux_n = np.reshape(data[0:nd],(self.n_radial,self.n_species,self.n_n,nt),'F')
+            self.kxky_flux_n = np.reshape(data[0:nd],(self.n_radial,self.n_species,self.n_n,nt),'F')
             print "INFO: (data.py) Read data in out.cgyro.kxky_flux_n. TIME = "+str(end-start)
         except:
             pass
@@ -140,16 +238,16 @@ class cgyrodata:
             start = time.time()
             data = np.fromfile(self.dir+'out.cgyro.kxky_flux_e',dtype='float',sep=" ")
             end = time.time()
-            self.flux_e = np.reshape(data[0:nd],(self.n_radial,self.n_species,self.n_n,nt),'F')
+            self.kxky_flux_e = np.reshape(data[0:nd],(self.n_radial,self.n_species,self.n_n,nt),'F')
             print "INFO: (data.py) Read data in out.cgyro.kxky_flux_e. TIME = "+str(end-start)
         except:
             pass 
         #-----------------------------------------------------------------
 
 
-    def getbig(self):
+    def getbigfield(self):
 
-        """Larger files"""
+        """Larger field files"""
 
         import numpy as np
         import time
@@ -164,8 +262,8 @@ class cgyrodata:
             start = time.time()
             data = np.fromfile(self.dir+'out.cgyro.kxky_phi',dtype='float',sep=" ")
             end = time.time()
-            self.phi = np.reshape(data,(2,self.n_radial,self.n_n,nt),'F')
-            self.phisq = self.phi[0,:,:,:]**2+self.phi[1,:,:,:]**2
+            self.kxky_phi = np.reshape(data,(2,self.n_radial,self.n_n,nt),'F')
+            self.phisq = self.kxky_phi[0,:,:,:]**2+self.kxky_phi[1,:,:,:]**2
             print "INFO: (data.py) Read data in out.cgyro.kxky_phi. TIME = "+str(end-start)
         except:
             pass
@@ -197,7 +295,7 @@ class cgyrodata:
         #
         try:
             data = np.fromfile(self.dir+'out.cgyro.geo',dtype='float',sep=" ")
-            self.geo = np.reshape(data,(self.n_theta,11),'F')
+            self.geo = np.reshape(data,(self.n_theta,12),'F')
             print "INFO: (data.py) Read data in out.cgyro.geo."
             self.geotag.append('\theta')
             self.geotag.append('w_\\theta')
@@ -208,6 +306,7 @@ class cgyrodata:
             self.geotag.append('\omega_\mathrm{adrift}')
             self.geotag.append('\omega_\mathrm{aprdrift}')
             self.geotag.append('\omega_\mathrm{cdrift}')
+            self.geotag.append('\omega_\mathrm{crdrift}')
             self.geotag.append('\omega_\mathrm{gammap')
             self.geotag.append('k_\perp')
         except:

@@ -165,6 +165,8 @@ subroutine cgyro_experimental_profiles
 
   mach_exp(:)    = EXPRO_w0(:) * (a_meters * rmaj_exp(:))
 
+  rhos_exp(:)    = EXPRO_rhos(:)
+
   call EXPRO_palloc(CGYRO_COMM_WORLD,path,0)
 
 end subroutine cgyro_experimental_profiles

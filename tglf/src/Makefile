@@ -1,17 +1,24 @@
 include ${GACODE_ROOT}/shared/install/make.inc.${GACODE_PLATFORM}
 
--include ../install/make.ext.${GACODE_PLATFORM}
-
 ifeq ($(OPT),debug)
    FFLAGS=${FDEBUG}
 else
    FFLAGS=${FOPT}
 endif
 
-EXEC1=tglf_mpi
-EXEC2=tglf
+EXEC1=tglf
+EXEC2=tglf_mpi
 
 LLIB=tglf_lib
+
+ifdef FANN_ROOT
+   # neural-net file
+   TGLF_NN=tglf_nn_TM.fann
+   TGLF_LIBS=-I$(GACODE_ROOT)/shared/neural/ -L$(GACODE_ROOT)/shared/neural/ -lbrainfuse -lfann
+else
+   # stub file
+   TGLF_NN=tglf_nn_TM
+endif
 
 OBJECTS = tglf_isnan.o      \
           tglf_modules.o    \
@@ -38,26 +45,31 @@ OBJECTS = tglf_isnan.o      \
           tglf_TM.o         \
           tglf_init_mpi.o   \
           tglf_run_mpi.o    \
-          tglf_TM_mpi.o \
-          tglf_harvest.o
+          tglf_TM_mpi.o     \
+          $(TGLF_NN).o
 
+.SUFFIXES : .o .f90 .F90
 
-.SUFFIXES : .o .f90
+all: $(LLIB).a $(EXEC1) $(EXEC2) Makefile
 
-all: $(LLIB).a $(EXEC1) $(EXEC2)
-
-$(EXEC1): $(LLIB).a $(EXEC1).o $(EXTRA_LIBS)
-	$(FC) $(FFLAGS) -o $(EXEC1) $(EXEC1).o $(LLIB).a $(EXTRA_LIBS) $(LMATH)
-
-$(EXEC2): $(LLIB).a $(EXEC2).o $(EXTRA_LIBS)
-	$(FC) $(FFLAGS) -o $(EXEC2) $(EXEC2).o $(LLIB).a $(EXTRA_LIBS) $(LMATH)
+$(EXEC1): $(LLIB).a $(EXEC1).o
+	$(FC) $(FFLAGS) -o $(EXEC1) $(EXEC1).o $(LLIB).a $(LMATH) $(TGLF_LIBS)
+$(EXEC2): $(LLIB).a $(EXEC2).o
+	$(FC) $(FFLAGS) -o $(EXEC2) $(EXEC2).o $(LLIB).a $(LMATH) $(TGLF_LIBS)
 
 $(LLIB).a: $(OBJECTS)
 	$(ARCH) $(LLIB).a $(OBJECTS)
 
-.f90.o :
-	$(FC) $(FMATH) $(FFLAGS) -c $<
+tglf_run_mpi.o: tglf_run.F90
+	$(FC) -o tglf_run_mpi.o $(FMATH) $(FFLAGS) -DMPI_TGLF=1 -c $<
+
+.f90.o:
+	$(FC) $(FMATH) $(FFLAGS) -c $< $(TGLF_LIBS)
+.F90.o:
+	$(FC) $(FMATH) $(FFLAGS) -c $< $(TGLF_LIBS)
 
 clean:
 	rm -f *.o *.lst $(LLIB).a $(EXEC1) $(EXEC2)
 	rm -f ${GACODE_ROOT}/modules/tglf*.mod 
+
+-include ../install/make.ext.${GACODE_PLATFORM}

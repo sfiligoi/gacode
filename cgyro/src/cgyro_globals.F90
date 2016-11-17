@@ -32,12 +32,13 @@ module cgyro_globals
   real    :: freq_tol
   integer :: restart_mode
   real    :: up_radial
-  integer :: up_radial_n
   real    :: up_theta
-  integer :: nup_theta
+  real    :: up_alpha
   integer :: nup_radial
+  integer :: nup_theta
+  integer :: nup_alpha
   integer :: implicit_flag
-  integer :: constant_wind_flag
+  integer :: constant_stream_flag
   real    :: ky
   integer :: box_size
   real    :: ipccw
@@ -59,22 +60,21 @@ module cgyro_globals
   real :: dlntdre_ade   ! used only for experimental profiles
   real :: dlnndre_ade   ! used only for experimental profiles
   real :: masse_ade
-  real :: lambda_debye
+  real :: lambda_star
   integer :: test_flag
   integer :: h_print_flag
+  integer :: moment_print_flag
   real :: amp0
   real :: amp
   real :: gamma_e
   real :: gamma_p
   real :: mach
   real :: error_tol
-  integer :: kxfilter_flag
+  integer :: mpi_rank_order
   real :: gamma_e_decay
   integer :: hiprec_flag
   integer :: udsymmetry_flag
   integer :: shear_method
-  integer :: shear_pad
-  real :: dshift
   !
   ! Geometry input
   !
@@ -108,7 +108,7 @@ module cgyro_globals
   integer :: subroutine_flag  ! only used for cgyro_read_input
 
   ! Re-scaling parameters for experimental profiles
-  real :: lambda_debye_scale
+  real :: lambda_star_scale
   real :: gamma_e_scale
   real :: gamma_p_scale
   real :: mach_scale
@@ -122,6 +122,9 @@ module cgyro_globals
   real :: nu_ee_scale
   real, dimension(6) :: dlnndr_scale
   real, dimension(6) :: dlntdr_scale
+
+  real :: lambda_debye
+  real :: rhos
 
   !---------------------------------------------------------------
 
@@ -159,6 +162,7 @@ module cgyro_globals
   integer, dimension(:), allocatable :: it_c
   integer, dimension(:,:), allocatable :: ic_c
   integer, dimension(:,:,:), allocatable :: iv_v
+  integer, dimension(:), allocatable :: ica_c,icb_c
   !
   integer :: n
   !---------------------------------------------------------------
@@ -189,6 +193,7 @@ module cgyro_globals
   character(len=18) :: runfile_freq    = 'out.cgyro.freq'
   character(len=18) :: runfile_kxky_phi = 'out.cgyro.kxky_phi'
   character(len=18) :: runfile_kxky_n   = 'out.cgyro.kxky_n'
+  character(len=18) :: runfile_kxky_e   = 'out.cgyro.kxky_e'
   character(len=15), dimension(3)  :: runfile_fieldb = &
        (/'out.cgyro.phib ','out.cgyro.aparb','out.cgyro.bparb'/)
   character(len=21), dimension(2)  :: runfile_kxky_flux = &
@@ -247,6 +252,7 @@ module cgyro_globals
   real, dimension(:), allocatable :: xi, w_xi
   real, dimension(:,:), allocatable :: xi_deriv_mat, xi_lor_mat
   real, dimension(:,:), allocatable :: e_deriv1_mat, e_deriv2_mat
+  real, dimension(:), allocatable :: dvfac
   !
   ! Parallel streaming
   real, dimension(:), allocatable :: theta
@@ -274,6 +280,7 @@ module cgyro_globals
   complex, dimension(:,:), allocatable :: cap_h_v_prime
   real, dimension(:,:,:), allocatable :: jvec_c
   real, dimension(:,:,:), allocatable :: jvec_v
+  real, dimension(:,:), allocatable :: upfac1,upfac2
   !
   ! Fields
   real, dimension(:,:), allocatable :: fcoef
@@ -284,8 +291,8 @@ module cgyro_globals
   complex, dimension(:,:), allocatable :: field_old
   complex, dimension(:,:), allocatable :: field_old2
   complex, dimension(:,:), allocatable :: field_old3
-  complex, dimension(:,:), allocatable :: moment_loc
-  complex, dimension(:,:), allocatable :: moment
+  complex, dimension(:,:,:), allocatable :: moment_loc
+  complex, dimension(:,:,:), allocatable :: moment
   !
   ! Nonlinear fluxes 
   real, dimension(:,:,:), allocatable :: flux_loc
@@ -294,10 +301,6 @@ module cgyro_globals
   ! Nonlinear plans
   type(C_PTR) :: plan_r2c
   type(C_PTR) :: plan_c2r
-  !
-  ! Shear plans
-  type(C_PTR) :: plan_j2p
-  type(C_PTR) :: plan_p2j
   !
   ! GPU-FFTW plans
 #ifdef _OPENACC
@@ -322,10 +325,6 @@ module cgyro_globals
   complex, dimension(:,:),allocatable :: fy
   complex, dimension(:,:),allocatable :: gx
   complex, dimension(:,:),allocatable :: gy
-  !
-  ! 1D FFT work arrays
-  complex, dimension(:), allocatable :: fp
-  complex, dimension(:), allocatable :: fj
   !
   ! Work arrays
   complex, dimension(:,:), allocatable :: f_balloon
@@ -356,10 +355,12 @@ module cgyro_globals
   ! Field solve variables
   real :: sum_den_h
   real, dimension(:), allocatable :: sum_den_x, sum_cur_x
+  real, dimension(:), allocatable :: vfac
+
   !
   ! n=0 test variables
   real, dimension(:,:,:), allocatable :: hzf, xzf 
-  real, dimension(:), allocatable :: pvec_in, pvec_outr, pvec_outi
+  real, dimension(:), allocatable :: pvec_outr, pvec_outi
   !
   ! Collision operator
   real, dimension(:,:,:), allocatable :: cmat
@@ -378,6 +379,7 @@ module cgyro_globals
   real, dimension(:,:), allocatable :: omega_adrift
   real, dimension(:,:), allocatable :: omega_aprdrift
   real, dimension(:,:), allocatable :: omega_cdrift
+  real, dimension(:,:), allocatable :: omega_crdrift
   real, dimension(:),   allocatable :: omega_gammap
   !
   ! Number of gridpoints for Miller geometry integration grid

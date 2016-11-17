@@ -3,23 +3,26 @@
 #--------------------------------------------
 #!/bin/bash
 
-export PATH=${PATH}:$GACODE_ROOT/tgyro/bin
-export PATH=${PATH}:$GACODE_ROOT/gyro/bin
-export PATH=${PATH}:$GACODE_ROOT/cgyro/bin
-export PATH=${PATH}:$GACODE_ROOT/neo/bin
-export PATH=${PATH}:$GACODE_ROOT/vgen/bin
-export PATH=${PATH}:$GACODE_ROOT/tglf/bin
-export PATH=${PATH}:$GACODE_ROOT/le3/bin
-export PATH=${PATH}:$GACODE_ROOT/glf23/bin
-export PATH=${PATH}:$GACODE_ROOT/shared/bin
+export PATH=$GACODE_ROOT/tgyro/bin:${PATH}
+export PATH=$GACODE_ROOT/gyro/bin:${PATH}
+export PATH=$GACODE_ROOT/cgyro/bin:${PATH}
+export PATH=$GACODE_ROOT/neo/bin:${PATH}
+export PATH=$GACODE_ROOT/vgen/bin:${PATH}
+export PATH=$GACODE_ROOT/tglf/bin:${PATH}
+export PATH=$GACODE_ROOT/le3/bin:${PATH}
+export PATH=$GACODE_ROOT/glf23/bin:${PATH}
+export PATH=$GACODE_ROOT/shared/bin:${PATH}
 
 if [ -d $GACODE_ADD_ROOT ] 
 then
-   export PATH=${PATH}:$GACODE_ADD_ROOT/freya/bin
-   export PATH=${PATH}:$GACODE_ADD_ROOT/prefreya/bin
+   export PATH=$GACODE_ADD_ROOT/freya/bin:${PATH}
+   export PATH=$GACODE_ADD_ROOT/prefreya/bin:${PATH}
 fi
 
-export PYTHONPATH=${PYTHONPATH}:$GACODE_ROOT/python
+export PYTHONPATH=$GACODE_ROOT/python:${PYTHONPATH}
 
-export IDL_PATH=${IDL_PATH}:$GACODE_ROOT/gyro/vugyro
+export IDL_PATH=$GACODE_ROOT/gyro/vugyro:${IDL_PATH}
+
+export EPEDNN_MODEL_DIR=$GACODE_ROOT/shared/neural/eped1nn/models/EPED1_H_superH/
+export TGLFNN_MODEL_DIR=$GACODE_ROOT/shared/neural/tglfnn/models/DIIID_ion_stiffness_60_rotation/
 

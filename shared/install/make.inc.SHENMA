@@ -9,17 +9,21 @@ NUMAS_PER_NODE=1
 
 # Compilers
 
-FC	= mpif90 -std=f2008 -I $(GACODE_ROOT)/modules
+FC	= mpif90 -I $(GACODE_ROOT)/modules
 F77	= mpif77 -I $(GACODE_ROOT)/modules
 
 FOMP    = -fopenmp
-FMATH	= -fdefault-real-8 -J $(GACODE_ROOT)/modules -I $(FFTW_DIR)/include
+FMATH	= -fdefault-real-8 -J $(GACODE_ROOT)/modules
 FOPT	= -O2
 FDEBUG	= -Wall -fcheck=all -O -W -finit-real=nan -fbounds-check
 
 # System math libraries
 
-LMATH = /pkg/GotoBLAS2/libgoto2.a $(FFTW_DIR)/lib/libfftw3.a
+LMATH = /usr/lib64/liblapack.a /usr/lib64/libblas.a $(FFTW_DIR)/lib/libfftw3.a
+FFTW_INC=$(FFTW_DIR)/include
+
+# GotoBLAS2 gives incorrect results
+#LMATH = /pkg/GotoBLAS2/libgoto2.a $(FFTW_DIR)/lib/libfftw3.a
         
 # NetCDF:
 NETCDF=-L$(NETCDF_DIR)/lib -lnetcdff -lnetcdf

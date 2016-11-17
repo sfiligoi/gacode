@@ -1,6 +1,7 @@
 import sys
 import numpy as np
 from gacodeplotdefs import *
+from gacodefuncs import *
 from gyro.data import GYROData
 
 sim       = GYROData(sys.argv[1])

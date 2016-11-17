@@ -411,6 +411,19 @@ subroutine pseudo_rec_legendre(n,x,p,q)
 
 end subroutine pseudo_rec_legendre
 
+real function p_legendre(n,x)
+
+  implicit none
+
+  integer, intent(in) :: n
+  real, intent(in) :: x
+  real :: p,q
+
+  call pseudo_rec_legendre(n,x,p,q)
+
+  p_legendre = p
+
+end function p_legendre
 
 !-------------------------------------------------------
 ! p -> Poly(n,x)

@@ -266,7 +266,7 @@ subroutine tgyro_tglf_map
   !----------------------------------------------------------------
 
   !----------------------------------------------------------------
-  ! New TGLF settings
+  ! NEW TGLF SETTINGS
   !
   select case (tgyro_tglf_revision)
 
@@ -300,19 +300,28 @@ subroutine tgyro_tglf_map
   end select
 
   !----------------------------------------------------------------
-
-  ! Dump parameters
+  ! DUMP PARAMETERS
+  !
   if (tgyro_tglf_dump_flag == 0) then
      tglf_dump_flag_in   = .false.
   else
      tglf_dump_flag_in = .true.
   endif
 
+  !----------------------------------------------------------------
+  ! VERBOSITY
+  !
   tglf_quiet_flag_in = .true.
-  
-  ! Harvest targets and gyro-bohm normalizations
-  
-  if (i_tran == 0) then
+
+  !----------------------------------------------------------------
+  ! TGLFNN ACTIVATION THRESHOLD
+  !
+  tglf_nn_max_error_in=tgyro_tglf_nn_max_error
+
+  !----------------------------------------------------------------
+  ! HARVEST: NEO AND TARGET FLUXES, GYRO-BOHM NORMALIZATIONS, SHOT
+  !
+  if (i_tran == 0 .and. 0==1) then
     ! Initialization
     tglf_harvest_extra_in = NUL
     harvest_err=set_harvest_verbose(0)
@@ -331,6 +340,9 @@ subroutine tgyro_tglf_map
     harvest_err=set_harvest_payload_dbl(tglf_harvest_extra_in,'tgyro_sum_mflux_i_neo'//NUL,&
     & sum(mflux_i_neo(therm_vec(:),i_r)))
 
+    ! Turbulent fluxes interface
+    CALL tglf_harvest_local
+
     ! Gyrobohm normalizations
     harvest_err=set_harvest_payload_dbl(tglf_harvest_extra_in,'tgyro_q_gb'//NUL,q_gb(i_r))
     harvest_err=set_harvest_payload_dbl(tglf_harvest_extra_in,'tgyro_pi_gb'//NUL,pi_gb(i_r))
@@ -338,6 +350,9 @@ subroutine tgyro_tglf_map
 
     ! Indication of thermal ions
     harvest_err=set_harvest_payload_int_array(tglf_harvest_extra_in,'tgyro_therm_vec'//NUL,therm_vec(:),size(therm_vec))
+
+    ! Experimental shot
+    harvest_err=set_harvest_payload_int(tglf_harvest_extra_in,'shot'//NUL,shot)
   endif
 
 end subroutine tgyro_tglf_map

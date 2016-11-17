@@ -62,7 +62,7 @@ subroutine EXPRO_compute_derived
   !
   allocate(rho(EXPRO_n_exp))
   allocate(dummy(EXPRO_n_exp))
-
+  
   rho(:) = EXPRO_arho*EXPRO_rho(:)
 
   ! b_unit

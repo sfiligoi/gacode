@@ -13,8 +13,9 @@ subroutine cgyro_write_initdata
   
   implicit none
 
-  integer :: in,is
+  integer :: p,in,is
   real :: kymax,z_eff
+  real, external ::spectraldiss
 
   !----------------------------------------------------------------------------
   ! Runfile to give complete summary to user
@@ -64,13 +65,11 @@ subroutine cgyro_write_initdata
      write(io,20) '  kappa:',kappa,'s_kappa:',s_kappa
      write(io,20) '  delta:',delta,'s_delta:',s_delta
      write(io,20) '   zeta:',zeta, ' s_zeta:',s_zeta
-     write(io,20) '   zmag:',zmag, ' dzmag:',dzmag
+     write(io,20) '   zmag:',zmag, '  dzmag:',dzmag
      write(io,*)
-     write(io,20) '  betae:',betae_unit, ' beta_*:',beta_star
-
+     write(io,20) '  betae:',betae_unit, ' beta_*:',beta_star,'lambda_*:',lambda_star
      write(io,*)
-     write(io,20) 'gamma_e:', gamma_e,'   mach:', mach
-     write(io,20) 'gamma_p:', gamma_p
+     write(io,20) 'gamma_e:', gamma_e,   'gamma_p:', gamma_p, '    mach:', mach
 
      z_eff = 0.0
      do is=1,n_species
@@ -91,10 +90,8 @@ subroutine cgyro_write_initdata
 
      if (profile_model == 2) then
         write(io,*)
-        write(io,20) ' a_meters:',a_meters
-        write(io,20) '   b_unit:',b_unit
-        write(io,20) 'dens_norm:',dens_norm
-        write(io,20) 'temp_norm:',temp_norm
+        write(io,20) ' a_meters:',a_meters, '   b_unit:',b_unit
+        write(io,20) 'dens_norm:',dens_norm,'temp_norm:',temp_norm
         write(io,20) ' vth_norm:',vth_norm
      endif
 
@@ -110,34 +107,42 @@ subroutine cgyro_write_initdata
   !
   if (silent_flag == 0 .and. i_proc == 0) then
 
-     open(unit=io,file=trim(path)//'out.cgyro.equil',status='replace')
-     write (io,fmtstr,advance='no') rmin
-     write (io,fmtstr,advance='no') rmaj
-     write (io,fmtstr,advance='no') q
-     write (io,fmtstr,advance='no') s
-     write (io,fmtstr,advance='no') rho
-     write (io,fmtstr,advance='no') ky
+     open(unit=io,file=trim(path)//'out.cgyro.equilibrium',status='replace')
+     write (io,fmtstr) rmin
+     write (io,fmtstr) rmaj
+     write (io,fmtstr) q
+     write (io,fmtstr) s
+     write (io,fmtstr) shift
+     write (io,fmtstr) kappa
+     write (io,fmtstr) s_kappa
+     write (io,fmtstr) delta
+     write (io,fmtstr) s_delta
+     write (io,fmtstr) zeta
+     write (io,fmtstr) s_zeta
+     write (io,fmtstr) zmag
+     write (io,fmtstr) dzmag
+     write (io,fmtstr) rho
+     write (io,fmtstr) ky
+     write (io,fmtstr) betae_unit
+     write (io,fmtstr) beta_star
+     write (io,fmtstr) lambda_star
+     write (io,fmtstr) gamma_e
+     write (io,fmtstr) gamma_p
+     write (io,fmtstr) mach
+     write (io,fmtstr) a_meters
+     write (io,fmtstr) b_unit
+     write (io,fmtstr) dens_norm
+     write (io,fmtstr) temp_norm
+     write (io,fmtstr) vth_norm
      do is=1,n_species
-        write (io,fmtstr,advance='no') dens(is)
-        write (io,fmtstr,advance='no') temp(is)
-        write (io,fmtstr,advance='no') dlnndr(is)
-        write (io,fmtstr,advance='no') dlntdr(is)
-        write (io,fmtstr,advance='no') nu(is)
+        write (io,fmtstr) 1.0*z(is)
+        write (io,fmtstr) mass(is)
+        write (io,fmtstr) dens(is)
+        write (io,fmtstr) temp(is)
+        write (io,fmtstr) dlnndr(is)
+        write (io,fmtstr) dlntdr(is)
+        write (io,fmtstr) nu(is)
      enddo
-     write (io,*)
-     close(io)
-
-  endif
-
-  if (silent_flag == 0 .and. i_proc == 0 .and. profile_model == 2) then
-
-     open(unit=io,file=trim(path)//'out.cgyro.expnorm',status='replace')
-     write (io,fmtstr,advance='no') a_meters
-     write (io,fmtstr,advance='no') b_unit
-     write (io,fmtstr,advance='no') dens_norm
-     write (io,fmtstr,advance='no') temp_norm
-     write (io,fmtstr,advance='no') vth_norm
-     write (io,*)
      close(io)
 
   endif
@@ -159,6 +164,7 @@ subroutine cgyro_write_initdata
      write(io,fmtstr) omega_adrift(:,1)
      write(io,fmtstr) omega_aprdrift(:,1)
      write(io,fmtstr) omega_cdrift(:,1)
+     write(io,fmtstr) omega_crdrift(:,1)
      write(io,fmtstr) omega_gammap(:)
      write(io,fmtstr) k_perp(ic_c(n_radial/2+1,:))
      close(io)
@@ -187,11 +193,13 @@ subroutine cgyro_write_initdata
      write(io,'(1pe12.5)') xi(:)
      write(io,'(1pe12.5)') transpose(thetab(:,:))
      write(io,'(1pe12.5)') (rho*q/rmin*in,in=0,n_toroidal-1)
+     write(io,'(1pe12.5)') (spectraldiss((pi/n_toroidal)*in,nup_alpha),in=0,n_toroidal-1)
+     write(io,'(1pe12.5)') (spectraldiss((2*pi/n_radial)*p,nup_radial),p=-n_radial/2,n_radial/2-1)
      close(io)
 
   endif
   !----------------------------------------------------------------------------
 
-20 format(t2,2(a,1x,1pe11.4,4x)) 
+20 format(t2,3(a,1x,1pe11.4,4x)) 
 
 end subroutine cgyro_write_initdata

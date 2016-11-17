@@ -3,6 +3,13 @@
 !
 ! PURPOSE:
 !  Manage dynamic pedestal interface including no-man's-land (NML).
+!
+! CRITICAL RADII:
+!  Let w be the pedestal width in psi_norm:
+!
+!  top -> 1-2.5*w
+!  ped -> 1-2.0*w
+!  sym -> 1-1.0*w
 !-------------------------------------------------------------------
 
 module tgyro_ped
@@ -23,7 +30,7 @@ module tgyro_ped
 
   ! EPED_NN outputs
   integer, parameter :: nx_nn=1001
-  real :: nn_vec(nx_nn,3) 
+  real :: nn_vec(nx_nn,3)
   real :: nn_w_ped
 
   ! Derivatives wrt psi
@@ -43,6 +50,7 @@ module tgyro_ped
   real, dimension(:), allocatable :: exp_te
   real, dimension(:,:), allocatable :: exp_ni
   real, dimension(:,:), allocatable :: exp_ti
+  real, dimension(:), allocatable :: exp_w0
 
   ! Pedestal top scale lengths
   real :: zn_top,zt_top
@@ -68,7 +76,7 @@ contains
     if (tgyro_ped_model == 1) return
 
     !-------------------------------------------------------------------------
-    ! 1. Initializations
+    ! 1. Initializations (not used)
     !
     neped_in   = tgyro_neped
     zeffped_in = tgyro_zeffped
@@ -82,7 +90,11 @@ contains
        ! Inputs stored in interface
        call tgyro_eped_nn
 
-       psi_top(1) = 1.0-1.5*nn_w_ped
+       if (tgyro_rped < 0.0) then
+            psi_top(1) = 1.0 - 1.5*nn_w_ped*abs(tgyro_rped)
+       else
+            psi_top(1) = tgyro_rped
+       endif
 
     endif
 
@@ -90,21 +102,19 @@ contains
     call MPI_BCAST(nn_vec,size(nn_vec),MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
     call MPI_BCAST(psi_top,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
 
-    ! n_top: convert to 1/cm^3 from 1/m^3
-    nn_vec(:,2) = nn_vec(:,2)*1e-6
+    ! n_top: in 1/cm^3
     call cub_spline(nn_vec(:,1),nn_vec(:,2),nx_nn,psi_top,n_top,1)
-    ! p_top: convert to Ba from Pa 
-    nn_vec(:,3) = nn_vec(:,3)*10.0
+    ! p_top: in Pa
     call cub_spline(nn_vec(:,1),nn_vec(:,3),nx_nn,psi_top,p_top,1) 
 
     ! FORMULA: P = 2nkT 
 
     ! t_top [eV]
-    t_top = p_top/(2*n_top*k) 
+    t_top = (10.0*p_top)/(2*n_top*k) 
 
     ! n', T':
     call bound_deriv(n_p,nn_vec(:,2),nn_vec(:,1),nx_nn)
-    t_vec = nn_vec(:,3)/(2*nn_vec(:,2)*k)
+    t_vec = (10.0*nn_vec(:,3))/(2*nn_vec(:,2)*k)
     call bound_deriv(t_p,t_vec,nn_vec(:,1),nx_nn)
 
     ! n_top', t_top'
@@ -153,16 +163,18 @@ contains
 
     ! 1. Scale-length interpolation over NML (r_star < r < r_top)
     !                    zb                         za
-    ! f(r) = f(rb)*exp[ ---- ( dr^2 - (r-ra)^2 ) - ---- ( rb-r )^2 ]
+    ! f(r) = f(rb)*exp[ ---- ( dr^2 - (r-ra)^2 ) + ---- ( rb-r )^2 ]
     !                   2 dr                       2 dr
     !
     i_star = 0
     do i_exp=2,n_exp
        x0 = rmin_exp(i_exp)
        if (x0 > r(n_r) .and. x0 <= r_top(1)) then 
+          ! Calculate i_star [first i_exp such that r > r(n_r)]
           if (i_star == 0) i_star = i_exp
           f_exp(i_exp) = f_top*exp(&
-               0.5*z_top/dr_nml*(dr_nml**2-(x0-r(n_r))**2)+0.5*z_star/dr_nml*(r_top(1)-x0)**2)
+               0.5*z_top/dr_nml*(dr_nml**2-(x0-r(n_r))**2)+&
+               0.5*z_star/dr_nml*(r_top(1)-x0)**2)
        endif
        if (x0 > r_top(1)) then
           i0 = i_exp

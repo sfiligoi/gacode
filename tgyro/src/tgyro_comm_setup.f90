@@ -32,7 +32,7 @@ subroutine tgyro_comm_setup
   integer, dimension(n_proc_global) :: adjointvec
   integer, dimension(n_proc_global) :: workeradjvec
 
-  
+
   ! Determine the number of "workers" at each radius
 
   select case (tgyro_mode)
@@ -43,15 +43,30 @@ subroutine tgyro_comm_setup
      ! Local Transport
      !-----------------------------
 
-     ! The number of workers is related to the number of profiles 
-     ! to evolve.
+     ! Mange which profiles to evolve (1,2,3,4,5)=(ti,te,er,ne,he)
 
-     n_evolve = &
-          loc_ti_feedback_flag+&
-          loc_te_feedback_flag+&
-          loc_ne_feedback_flag+&
-          loc_er_feedback_flag+&
-          loc_he_feedback_flag
+     ip = 0
+     if (loc_ti_feedback_flag == 1) then
+        ip = ip+1
+        evolve_indx(ip) = 1 
+     endif
+     if (loc_te_feedback_flag == 1) then
+        ip = ip+1
+        evolve_indx(ip) = 2
+     endif
+     if (loc_er_feedback_flag == 1) then
+        ip = ip+1
+        evolve_indx(ip) = 3
+     endif
+     if (loc_ne_feedback_flag == 1) then
+        ip = ip+1
+        evolve_indx(ip) = 4 
+     endif
+     if (loc_he_feedback_flag == 1) then
+        ip = ip+1
+        evolve_indx(ip) = 5 
+     endif
+     n_evolve = ip
 
      if (tgyro_iteration_method == 5) then
 
@@ -68,36 +83,6 @@ subroutine tgyro_comm_setup
 
      endif
 
-  case (2) 
-
-     !-----------------------------
-     ! Linear stability 
-     !-----------------------------
-
-     ! Linear stability mode requires that only TGLF or GYRO is used 
-     ! at all radii.
-
-     lpath = paths(1)
-     if (lpath(1:4) == "TGLF") then
-
-        ! TGLF: number of workers is one
-
-        n_worker = 1
-
-     else
-
-        ! GYRO: number of workers is the number of search frequencies.
-
-        n_worker = tgyro_stab_nsearch
-
-        if (sum(procs) < n_worker*n_inst) then
-           call tgyro_catch_error(&
-                'ERROR: (TGYRO) Ensure CPUs on each DIR line is a multiple of TGYRO_STAB_NSEARCH')
-        endif
-
-
-     endif
-
   case (3)
 
      !-----------------------------
@@ -107,21 +92,6 @@ subroutine tgyro_comm_setup
      ! 1 worker; each DIR line specifies exact number of cores to GYRO
 
      n_worker = 1
-
-  case (4)
-
-     !-----------------------------
-     ! Global transport
-     !-----------------------------
-
-     n_worker = 1
-
-     n_evolve = &
-          loc_ti_feedback_flag+&
-          loc_te_feedback_flag+&
-          loc_ne_feedback_flag+&
-          loc_er_feedback_flag+&
-          loc_he_feedback_flag
 
   end select
 
@@ -221,27 +191,9 @@ subroutine tgyro_comm_setup
         gyro_restart_method = 2
      endif
 
-     ip = 0
-     if (loc_ti_feedback_flag == 1) then
-        ip = ip+1
-        if (worker == ip) worker_index=1
-     endif
-     if (loc_te_feedback_flag == 1) then
-        ip = ip+1
-        if (worker == ip) worker_index=2
-     endif
-     if (loc_ne_feedback_flag == 1) then
-        ip = ip+1
-        if (worker == ip) worker_index=3
-     endif
-     if (loc_er_feedback_flag == 1) then
-        ip = ip+1
-        if (worker == ip) worker_index=4
-     endif
-     if (loc_he_feedback_flag == 1) then
-        ip = ip+1
-        if (worker == ip) worker_index=5
-     endif
+     do ip=1,n_evolve
+        if (worker == ip) worker_index = evolve_indx(ip)
+     enddo
 
   endif
 

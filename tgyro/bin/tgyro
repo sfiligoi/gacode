@@ -212,7 +212,7 @@ fi
 #
 if [ $REGRESS_FLAG -eq 1 ] 
 then 
-   gacode_reg_do $NPROC $NOMP $REGRESS_RESET tgyro 1e-5
+   gacode_reg_do $NPROC $NOMP $REGRESS_RESET tgyro 1e-1
    exit 0
 fi
 #============================================================
@@ -249,12 +249,17 @@ then
       cp -av $i $target
    done
 
-   gyrodirs=`cat $SIMDIR/input.tgyro | awk '/DIR/ { print $2 }'`
+   dirs=`cat $SIMDIR/input.tgyro | awk '/DIR/ { print $2 }'`
 
-   for i in $gyrodirs
+   for i in $dirs
    do
       # Use gyro -s to copy GYRO dir contents.
-      gyro -s $i
+      if [ -f $i/input.cgyro ]
+      then
+         cgyro -compress -e $i
+      else
+         gyro -s $i
+      fi
       mv ${i}-s $target/$i
    done
    exit 0

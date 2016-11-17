@@ -31,15 +31,15 @@ subroutine tgyro_write_jacobian(init)
         vary(ipt) = 'dQe/'
         varx(ipt) = 'dzTe'
      endif
-     if (loc_ne_feedback_flag == 1) then
-        ipt = ipt+1
-        vary(ipt) = 'dGe/'
-        varx(ipt) = 'dzne'
-     endif
      if (loc_er_feedback_flag == 1) then
         ipt = ipt+1
         vary(ipt) = 'dPi/'
         varx(ipt) = 'dw0'
+     endif
+     if (loc_ne_feedback_flag == 1) then
+        ipt = ipt+1
+        vary(ipt) = 'dGe/'
+        varx(ipt) = 'dzne'
      endif
      if (loc_he_feedback_flag == 1) then
         ipt = ipt+1

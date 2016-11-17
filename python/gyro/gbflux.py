@@ -1,6 +1,7 @@
 import sys
 import numpy as np
 from gacodeplotdefs import *
+from gacodefuncs import *
 from gyro.data import GYROData
 
 sim       = GYROData(sys.argv[1])
@@ -13,6 +14,8 @@ lx        = float(sys.argv[7])
 ly        = float(sys.argv[8])
 title     = sys.argv[9]
 ymax      = float(sys.argv[10])
+xspan1    = float(sys.argv[11])
+xspan2    = float(sys.argv[12])
 
 n_field   = int(sim.profile['n_field'])
 n_kinetic = int(sim.profile['n_kinetic'])
@@ -47,33 +50,47 @@ ax.set_xlabel(r'$(c_s/a) t$',fontsize=GFONTSIZE)
 ax.set_ylabel(r'$'+mtag+' \;('+ftag+')$',color='k',fontsize=GFONTSIZE)
 #=====================================
 
-color = ['k','m','b','c','g','r']
+cvec = ['k','m','b','c','g']
 
 # Determine tmin
 for i in range(len(t)):
     if t[i] < (1.0-w)*t[len(t)-1]:
         imin = i
 
-ax.set_title(r'$'+str(t[imin])+' < (c_s/a) t < '+str(t[-1])+'$')
-
+if title=='null':
+    ax.set_title(r'$'+str(t[imin])+' < (c_s/a) t < '+str(t[-1])+'$')
+else:
+    ax.set_title(r'$\mathrm{'+title+'}$')
+    
 # Loop over species
 if datafile == 'none':
     # Plot data to screen or image file.
     for i in range(n_kinetic):
         ave   = average(flux0[i,i_moment,:],t,w)
-        stag  = sim.tagspec[i]
-        label = stag+': '+str(round(ave,3))
+        if i > n_kinetic-2 and sim.profile['electron_method'] > 1:
+            stag = r'$e'
+            color = 'r'
+        else:
+            stag = r'$i_'+str(i+1)
+            color = cvec[i]
+
+        label = stag+' : '+str(round(ave,3))+'$'
         y     = ave*np.ones(len(t))
-        ax.plot(t[imin:],y[imin:],'--',color=color[i])
-        ax.plot(t,flux0[i,i_moment,:],label=label,color=color[i])
+        ax.plot(t[imin:],y[imin:],'--',color=color)
+        ax.plot(t,flux0[i,i_moment,:],label=label,color=color)
 else:
     # Write data to datafile
     print 'INFO: (gyro_plot) Output to datafile not supported.  Use raw out.gyro.gbflux.'
 
+if xspan1 > 0.0:
+    ax.axvspan(xspan1,xspan2,facecolor='g',alpha=0.1)
+
+ax.set_xlim([0,t[-1]])
+
 if ymax > 0:
     ax.set_ylim([0,ymax])
         
-ax.legend()
+ax.legend(loc=1)
 
 if plotfile == 'screen':
     plt.show()

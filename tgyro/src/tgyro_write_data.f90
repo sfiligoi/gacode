@@ -21,14 +21,7 @@ subroutine tgyro_write_data(i_print)
   integer :: i_print
   integer :: i_ion
   integer :: p
-  integer, parameter :: trinity_flag=0
   real, dimension(2:n_r,n_evolve_max) :: res2,relax2
-
-  !--------------------------------------------------------------------------------
-  ! First, generate and write TGLF linear growth rates
-  ! (commenting out because not used as of 24 June 2015)
-  !call tgyro_stab_driver
-  !--------------------------------------------------------------------------------
 
   if (i_proc_global > 0) return
 
@@ -84,11 +77,6 @@ subroutine tgyro_write_data(i_print)
 
      open(unit=1,file='out.tgyro.profile',status='replace')
      close(1)
-
-     if (trinity_flag == 1) then
-        open(unit=1,file='out.tgyro.trinity.eflux.out',status='replace')
-        close(1)
-     endif
 
      if (tgyro_ped_model > 1) then
         open(unit=1,file='out.tgyro.ped',status='replace')
@@ -159,7 +147,7 @@ subroutine tgyro_write_data(i_print)
 
   open(unit=1,file='out.tgyro.nu_rho',status='old',position='append')
 
-  write(1,20) 'r/a','(a/cs)/t_ii','(a/cs)/t_ee','1/nue_star','(a/cs)nu_exch','rho_i/a','rho_s/a','frac_ae'
+  write(1,20) 'r/a','(a/cs)/t_ii','(a/cs)/t_ee','nue_star','(a/cs)nu_exch','rho_i/a','rho_s/a','frac_ae'
   do i=1,n_r
      write(1,10) r(i)/r_min,&
           nui(1,i)*r_min/c_s(i),&
@@ -320,14 +308,15 @@ subroutine tgyro_write_data(i_print)
 
   open(unit=1,file='out.tgyro.gyrobohm',status='old',position='append')
 
-  write(1,20) 'r/a','Chi_GB','Q_GB','Gamma_GB','Pi_GB','c_s'
-  write(1,20) '','m^2/s','MW/m^2','10^19/m^2/s','J/m^2','m/s'
+  write(1,20) 'r/a','Chi_GB','Q_GB','Gamma_GB','Pi_GB','S_GB','c_s'
+  write(1,20) '','m^2/s','MW/m^2','10^19/m^2/s','J/m^2','MW/m^3','m/s'
   do i=1,n_r
      write(1,10) r(i)/r_min,&
           chi_gb(i)*1e-4,&
           q_gb(i)*1e-7*1e-6/1e-4,&
           gamma_gb(i)*1e-19/1e-4,&
           pi_gb(i)*1e-7/1e-4,&
+          s_gb(i)*1e-7*1e-6/1e-6,&
           c_s(i)/100.0
   enddo
 
@@ -491,39 +480,11 @@ subroutine tgyro_write_data(i_print)
   write(1,*) sum(abs(eflux_i_tot(:))+abs(eflux_e_tot(:)))
   close(1)
 
-  !--------------------------------------------------------------------------------
-  ! Trinity-type fluxes
-  ! Electron particle and energy fluxes (flux_e.out)
-
-  if (trinity_flag == 1) then
-     open(unit=1,file='out.tgyro.trinity.eflux.out',status='old',position='append')
-
-     write(1,20) 'r/a','eflux_i_neo','eflux_e_neo','eflux_i_tur','eflux_e_tur'
-     write(1,20) '','(TGB)','(TGB)','(TGB)','(TGB)'
-     do i=1,n_r
-        write(1,10) r(i)/r_min,&
-             eflux_i_neo(1,i)*q_gb(i)/q_tgb(i),&
-             eflux_e_neo(i)*q_gb(i)/q_tgb(i),&
-             eflux_i_tur(1,i)*q_gb(i)/q_tgb(i),&
-             eflux_e_tur(i)*q_gb(i)/q_tgb(i)
-     enddo
-     close(1)
-  endif
-  !--------------------------------------------------------------------------------
-
   if (tgyro_ped_model > 1) then
      open(unit=1,file='out.tgyro.ped',status='old',position='append')
-     write(1,50) 'PEDESTAL PARAMETERS ---------------------'
-     write(1,50) 'n_top [1/cm^3]',n_top
-     write(1,50) 't_top     [eV]',t_top
-     write(1,50) 'p_top     [Ba]',p_top
-     write(1,50) 'zn_top  [1/cm]',zn_top
-     write(1,50) 'dlnnedr [1/cm]',dlnnedr(n_r)
-     write(1,50) 'zt_top  [1/cm]',zt_top
-     write(1,50) 'dlntedr [1/cm]',dlntedr(n_r)
-     write(1,50) 'psi_top [-]',psi_top(1)
-     write(1,50) ' r_top [cm]',r_top(1)
-     write(1,50) 'r(n_r) [cm]',r(n_r)
+     write(1,20) 'r_*/a','r_top/a','psi_top','n_top','t_top','p_top','zn_top','zt_top','betan'
+     write(1,20) '[-]','[-]','[-]','[1/cm^3]','[keV]','[Pa]','[1/cm]','[1/cm]','%'
+     write(1,10) r(n_r)/r_min,r_top(1)/r_min,psi_top(1),n_top,t_top/1e3,p_top,zn_top,zt_top,betan_in
      close(1)
   endif
 
@@ -544,6 +505,5 @@ subroutine tgyro_write_data(i_print)
 30 format(t2,a,i3,1pe12.5,2x,'[',i6,']')
   ! Residuals
 40 format(t2,f8.6,5(2x,2(1pe10.3,1x)))
-50 format(a,1pe12.5)
 
 end subroutine tgyro_write_data
