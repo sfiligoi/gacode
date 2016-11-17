@@ -111,6 +111,9 @@ subroutine cgyro_equilibrium
              * mass(is)/(Z(is)*GEO_b)*GEO_gq/rmaj &
              *(GEO_ucos+GEO_captheta*GEO_usin)*mach
 
+        omega_crdrift(it,is) = -2.0*sqrt(2.0)*rho*vth(is) &
+             * mass(is)/(Z(is)*GEO_b)*GEO_grad_r/rmaj*GEO_usin*mach
+
      enddo
 
      ! Rotation shear (GAMMA_P)

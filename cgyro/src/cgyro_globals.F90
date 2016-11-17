@@ -379,6 +379,7 @@ module cgyro_globals
   real, dimension(:,:), allocatable :: omega_adrift
   real, dimension(:,:), allocatable :: omega_aprdrift
   real, dimension(:,:), allocatable :: omega_cdrift
+  real, dimension(:,:), allocatable :: omega_crdrift
   real, dimension(:),   allocatable :: omega_gammap
   !
   ! Number of gridpoints for Miller geometry integration grid

@@ -134,6 +134,7 @@ subroutine cgyro_kernel
   if(allocated(omega_adrift))   deallocate(omega_adrift)
   if(allocated(omega_aprdrift)) deallocate(omega_aprdrift)
   if(allocated(omega_cdrift))   deallocate(omega_cdrift)
+  if(allocated(omega_crdrift))  deallocate(omega_crdrift)
   if(allocated(omega_gammap))   deallocate(omega_gammap)
 
   if(allocated(indx_xi))       deallocate(indx_xi)

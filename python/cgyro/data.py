@@ -295,7 +295,7 @@ class cgyrodata:
         #
         try:
             data = np.fromfile(self.dir+'out.cgyro.geo',dtype='float',sep=" ")
-            self.geo = np.reshape(data,(self.n_theta,11),'F')
+            self.geo = np.reshape(data,(self.n_theta,12),'F')
             print "INFO: (data.py) Read data in out.cgyro.geo."
             self.geotag.append('\theta')
             self.geotag.append('w_\\theta')
@@ -306,6 +306,7 @@ class cgyrodata:
             self.geotag.append('\omega_\mathrm{adrift}')
             self.geotag.append('\omega_\mathrm{aprdrift}')
             self.geotag.append('\omega_\mathrm{cdrift}')
+            self.geotag.append('\omega_\mathrm{crdrift}')
             self.geotag.append('\omega_\mathrm{gammap')
             self.geotag.append('k_\perp')
         except:

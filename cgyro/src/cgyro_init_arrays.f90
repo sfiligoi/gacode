@@ -344,6 +344,11 @@ subroutine cgyro_init_arrays
              -abs(omega_rdrift(it,is))*energy(ie)*(1.0+xi(ix)**2)* &
              (n_radial/length)*spectraldiss(u,nup_radial)*up_radial
 
+        ! omega_crdrift from Mach
+        omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) & 
+             -omega_crdrift(it,is)*vel(ie)*xi(ix)*&
+             (n_radial/length)*(i_c*u) 
+        
         ! omega_star and rotation shearing
         carg = -i_c*k_theta*rho*(dlnndr(is)+dlntdr(is)*(energy(ie)-1.5)) &
              -i_c*k_theta*rho*(sqrt(2.0*energy(ie))*xi(ix)/vth(is) &

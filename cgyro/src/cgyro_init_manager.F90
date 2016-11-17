@@ -107,6 +107,7 @@ subroutine cgyro_init_manager
   allocate(omega_adrift(n_theta,n_species))
   allocate(omega_aprdrift(n_theta,n_species))
   allocate(omega_cdrift(n_theta,n_species))
+  allocate(omega_crdrift(n_theta,n_species))
   allocate(omega_gammap(n_theta))
 
   if (test_flag == 0) then
