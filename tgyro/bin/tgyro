@@ -212,7 +212,7 @@ fi
 #
 if [ $REGRESS_FLAG -eq 1 ] 
 then 
-   gacode_reg_do $NPROC $NOMP $REGRESS_RESET tgyro 1e-5
+   gacode_reg_do $NPROC $NOMP $REGRESS_RESET tgyro 1e-1
    exit 0
 fi
 #============================================================
