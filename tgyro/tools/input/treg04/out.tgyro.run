@@ -43,8 +43,8 @@
  LOC_TI_FEEDBACK_FLAG           : Ti evolution ON
  LOC_TE_FEEDBACK_FLAG           : Te evolution ON
  LOC_ER_FEEDBACK_FLAG           : Er evolution OFF
- TGYRO_EVO_E(0)                 : ne profile fixed
- TGYRO_EVO_E(-)                 : ni profile fixed
+ TGYRO_DEN_METHOD0              : ne profile fixed
+ TGYRO_DEN_METHOD1              : ni1 profile fixed
 
  Physics parameters
 
