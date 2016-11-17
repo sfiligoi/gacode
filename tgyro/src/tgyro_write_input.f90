@@ -43,6 +43,12 @@ subroutine tgyro_write_input
      error_flag = 1
      error_msg = 'ERROR: (TGYRO) Must set one profile to evolve, even if running for 0 iterations.'
   endif
+  if (maxval(evo_e) == -1) then
+     error_flag = 1
+     error_msg = 'ERROR: (TGYRO) All species densities cannot be simultaneously floated.'
+  endif
+
+
   !----------------------------------------------------------------
 
   if (i_proc_global == 0) then
