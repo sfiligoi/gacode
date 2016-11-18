@@ -198,6 +198,7 @@ module cgyro_globals
        (/'out.cgyro.phib ','out.cgyro.aparb','out.cgyro.bparb'/)
   character(len=21), dimension(2)  :: runfile_kxky_flux = &
        (/'out.cgyro.kxky_flux_n','out.cgyro.kxky_flux_e'/)
+  character(len=18) :: runfile_gflux   = 'out.cgyro.gflux'
   integer, parameter :: io=1
   !
   ! error checking
@@ -297,6 +298,8 @@ module cgyro_globals
   ! Nonlinear fluxes 
   real, dimension(:,:,:), allocatable :: flux_loc
   real, dimension(:,:,:), allocatable :: flux
+  complex, dimension(:,:), allocatable :: gflux_loc
+  complex, dimension(:,:), allocatable :: gflux
   !
   ! Nonlinear plans
   type(C_PTR) :: plan_r2c

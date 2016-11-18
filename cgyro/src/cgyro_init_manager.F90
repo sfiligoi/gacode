@@ -132,8 +132,10 @@ subroutine cgyro_init_manager
      allocate(field_old3(n_field,nc))
      allocate(    moment(n_radial,n_species,2))
      allocate(moment_loc(n_radial,n_species,2))
-     allocate(    flux(n_radial,n_species,2))
-     allocate(flux_loc(n_radial,n_species,2))
+     allocate(     flux(n_radial,n_species,2))
+     allocate( flux_loc(n_radial,n_species,2))
+     allocate(    gflux(0:4,n_species))
+     allocate(gflux_loc(0:4,n_species))
      allocate(f_balloon(n_radial/box_size,n_theta))
      allocate(recv_status(MPI_STATUS_SIZE))
 

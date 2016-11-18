@@ -122,7 +122,11 @@ subroutine cgyro_equilibrium
      bmag(it) = GEO_b
 
      ! flux-surface average weights
-     w_theta(it) = GEO_g_theta/GEO_b
+     if (constant_stream_flag == 0) then
+        w_theta(it) = GEO_g_theta/GEO_b
+     else
+        w_theta(it) = gtheta_ave/GEO_b
+     endif
 
      do ir=1,n_radial
         k_perp(ic_c(ir,it)) = sqrt((2.0*pi*px(ir)*GEO_grad_r/length &
