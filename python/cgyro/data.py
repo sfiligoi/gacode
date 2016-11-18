@@ -47,8 +47,10 @@ class cgyrodata:
         self.n_xi      = int(data[6])
         self.m_box     = int(data[7])
         self.length    = float(data[8])
+        self.n_global  = int(data[9])
+        self.eps_global= float(data[10])
         # Set l to last data index plus one.
-        l=9
+        l=11
 
         self.p = np.array(data[l:l+self.n_radial],dtype=int)
         self.kx = 2*np.pi*self.p/self.length
@@ -240,6 +242,40 @@ class cgyrodata:
             end = time.time()
             self.kxky_flux_e = np.reshape(data[0:nd],(self.n_radial,self.n_species,self.n_n,nt),'F')
             print "INFO: (data.py) Read data in out.cgyro.kxky_flux_e. TIME = "+str(end-start)
+        except:
+            pass 
+        #-----------------------------------------------------------------
+
+    def getgflux(self):
+
+        """Global flux files"""
+
+        import numpy as np
+        import time
+
+        # Convenience definition
+        nt = self.n_time
+
+        #-----------------------------------------------------------------
+        # Particle and energy fluxes
+        #
+        ng = self.n_global+1
+        nd = ng*self.n_species*self.n_n*nt
+        try:
+            start = time.time()
+            data = np.fromfile(self.dir+'out.cgyro.lky_flux_n',dtype='float',sep=" ")
+            end = time.time()
+            self.lky_flux_n = np.reshape(data[0:nd],(ng,self.n_species,self.n_n,nt),'F')
+            print "INFO: (data.py) Read data in out.cgyro.lky_flux_n. TIME = "+str(end-start)
+        except:
+            pass
+
+        try:
+            start = time.time()
+            data = np.fromfile(self.dir+'out.cgyro.lky_flux_e',dtype='float',sep=" ")
+            end = time.time()
+            self.lky_flux_e = np.reshape(data[0:nd],(ng,self.n_species,self.n_n,nt),'F')
+            print "INFO: (data.py) Read data in out.cgyro.lky_flux_e. TIME = "+str(end-start)
         except:
             pass 
         #-----------------------------------------------------------------
