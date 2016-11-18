@@ -64,6 +64,8 @@ subroutine cgyro_rhs(ij)
   complex :: rhs_stream
   complex :: rhs_ij(nc,nv_loc)
   complex, dimension(n_radial,n_theta) :: fw,gw
+  real :: cp(0:4)
+  integer :: l
 
   ! Prepare suitable distribution (g, not h) for conservative upwind method
   g_x(:,:) = h_x(:,:)
@@ -153,22 +155,29 @@ subroutine cgyro_rhs(ij)
 
   if (shear_method == 2) then
 
+     ! e=0.15
+     cp(0) = 0.0
+     cp(1) = 0.913945578263
+     cp(2) = 0.343465365026
+     cp(3) = 0.132636799641
+     cp(4) = 0.0344651453431
+
      do iv=nv1,nv2
         iv_loc = iv-nv1+1
         do it=1,n_theta
            gw(:,it) = h_x(ic_c(:,it),iv_loc)
         enddo
         fw(:,:) = 0.0
-        do p=-n_radial/3,n_radial/3
-           ir = p+1+n_radial/2
-           do id=1,n_radial/3
-              pp = p+id
-              pm = p-id
-              if (abs(pm) <= n_radial/3) then
-                 fw(ir,:) = fw(ir,:)+gw(pm+1+n_radial/2,:)/id
+        do ir=1,n_radial
+           p = px(ir)
+           do l=1,4
+              pp = p+l
+              pm = p-l
+              if (abs(pm) < n_radial/2) then
+                 fw(ir,:) = fw(ir,:)+gw(pm+1+n_radial/2,:)*cp(l)
               endif
-              if (abs(pp) <= n_radial/3) then
-                 fw(ir,:) = fw(ir,:)-gw(pp+1+n_radial/2,:)/id
+              if (abs(pp) < n_radial/2) then
+                 fw(ir,:) = fw(ir,:)-gw(pp+1+n_radial/2,:)*cp(l)
               endif
            enddo
         enddo
