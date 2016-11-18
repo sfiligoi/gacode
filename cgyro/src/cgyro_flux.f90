@@ -51,11 +51,11 @@ subroutine cgyro_flux
 
         ! Density flux: Gamma_a
         flux_loc(ir,is,1) = flux_loc(ir,is,1) &
-             -c_n*aimag(2.0*cap_h_c(ic,iv_loc)*conjg(psi(ic,iv_loc)))*w_theta(it)
+             -c_n*aimag(cap_h_c(ic,iv_loc)*conjg(psi(ic,iv_loc)))*w_theta(it)
 
         ! Energy flux : Q_a
         flux_loc(ir,is,2) = flux_loc(ir,is,2) &
-             -c_t*aimag(2.0*cap_h_c(ic,iv_loc)*conjg(psi(ic,iv_loc)))*w_theta(it)
+             -c_t*aimag(cap_h_c(ic,iv_loc)*conjg(psi(ic,iv_loc)))*w_theta(it)
 
         if (it == it0) then
            ! Density moment: (delta n_a)/(n_norm rho_norm)
@@ -66,24 +66,24 @@ subroutine cgyro_flux
                 +c_t*cap_h_c(ic,iv_loc)*jvec_c(1,ic,iv_loc)
         endif
 
-        ! Global fluxes
+        ! Global fluxes (complex)
         do l=0,4
            if (ir-l > 0) then
               gflux_loc(l,is) = gflux_loc(l,is) &
-                   -c_t*aimag(2.0*cap_h_c(ic,iv_loc)*conjg(psi(ic_c(ir-l,it),iv_loc)))*w_theta(it)
+                   +c_t*i_c*cap_h_c(ic,iv_loc)*conjg(psi(ic_c(ir-l,it),iv_loc))*w_theta(it)
            endif
         enddo
-
+ 
      enddo
 
   enddo
 
   ! Complete definition of fluxes
-  flux_loc = flux_loc*k_theta*rho
-  gflux_loc = gflux_loc*k_theta*rho
+  flux_loc  =  flux_loc*(2*k_theta*rho)
+  gflux_loc = gflux_loc*(2*k_theta*rho)
 
   ! GyroBohm normalizations
-  flux_loc   = flux_loc/rho**2
+  flux_loc   =  flux_loc/rho**2
   gflux_loc  = gflux_loc/rho**2
   moment_loc = moment_loc/rho
 
