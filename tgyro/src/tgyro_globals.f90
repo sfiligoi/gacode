@@ -67,7 +67,7 @@ module tgyro_globals
   integer, parameter :: n_evolve_max = 5
   character(len=14) :: runfile='out.tgyro.run'
   character(len=1), dimension(n_ion_max) :: &
-       ion_tag=(/' ','2','3','4','5','6','7','8','9'/)
+       ion_tag=(/'1','2','3','4','5','6','7','8','9'/)
   !
   ! Component fluxes
   !
@@ -82,8 +82,7 @@ module tgyro_globals
   real, dimension(:), allocatable   :: pflux_e_tur
   real, dimension(:,:), allocatable :: pflux_i_tur
   real, dimension(:), allocatable   :: pflux_e_tot
-  real, dimension(:), allocatable   :: pflux_i_tot
-  real, dimension(:), allocatable   :: pflux_he_tot
+  real, dimension(:,:), allocatable :: pflux_i_tot
   real, dimension(:), allocatable   :: pflux_e_target
   real, dimension(:), allocatable   :: pflux_he_target
 
@@ -270,12 +269,13 @@ module tgyro_globals
   integer :: loc_evolve_grad_only_flag
   integer :: loc_restart_flag
   integer :: loc_scenario
-  integer :: tgyro_quasineutral_flag
   integer :: loc_neo_method
   integer :: loc_n_ion
   real, dimension(n_ion_max) :: zi_vec
   real, dimension(n_ion_max) :: mi_vec
   integer, dimension(n_ion_max) :: therm_flag
+  integer, dimension(0:n_ion_max) :: evo_e
+  real, dimension(0:n_ion_max) :: evo_c
   real :: loc_betae_scale
   integer :: loc_chang_hinton
   real :: loc_me_multiplier
@@ -286,7 +286,6 @@ module tgyro_globals
   integer :: tgyro_glf23_dump_flag
   integer :: loc_ti_feedback_flag
   integer :: loc_te_feedback_flag
-  integer :: loc_ne_feedback_flag
   integer :: loc_er_feedback_flag
   integer :: loc_he_feedback_flag
   integer :: loc_zeff_flag
@@ -312,7 +311,6 @@ module tgyro_globals
   integer :: tgyro_use_rho
   integer :: tgyro_dt_method
   integer :: tgyro_gyro_restart_flag
-  integer :: tgyro_fix_concentration_flag
   integer :: tgyro_write_profiles_flag
   integer :: tgyro_neo_n_theta
   integer :: tgyro_ptot_flag
@@ -330,6 +328,7 @@ module tgyro_globals
   integer :: i_r
   integer :: n_r
   integer :: flux_method
+  integer, dimension(:), allocatable :: flux_method_vec
   integer :: i_tran
   integer :: i_bc
   integer :: flux_counter
