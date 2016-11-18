@@ -75,6 +75,8 @@ module cgyro_globals
   integer :: hiprec_flag
   integer :: udsymmetry_flag
   integer :: shear_method
+  integer :: n_global
+  real    :: eps_global
   !
   ! Geometry input
   !
@@ -198,7 +200,8 @@ module cgyro_globals
        (/'out.cgyro.phib ','out.cgyro.aparb','out.cgyro.bparb'/)
   character(len=21), dimension(2)  :: runfile_kxky_flux = &
        (/'out.cgyro.kxky_flux_n','out.cgyro.kxky_flux_e'/)
-  character(len=18) :: runfile_gflux   = 'out.cgyro.gflux'
+  character(len=20), dimension(2)  :: runfile_lky_flux = &
+       (/'out.cgyro.lky_flux_n','out.cgyro.lky_flux_e'/)
   integer, parameter :: io=1
   !
   ! error checking
@@ -298,8 +301,8 @@ module cgyro_globals
   ! Nonlinear fluxes 
   real, dimension(:,:,:), allocatable :: flux_loc
   real, dimension(:,:,:), allocatable :: flux
-  complex, dimension(:,:), allocatable :: gflux_loc
-  complex, dimension(:,:), allocatable :: gflux
+  complex, dimension(:,:,:), allocatable :: gflux_loc
+  complex, dimension(:,:,:), allocatable :: gflux
   !
   ! Nonlinear plans
   type(C_PTR) :: plan_r2c

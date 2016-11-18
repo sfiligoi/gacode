@@ -44,11 +44,16 @@ subroutine cgyro_write_timedata
           trim(path)//runfile_kxky_flux(2),&
           size(flux(:,:,2)),&
           flux(:,:,2))
+     ! Global density flux for all species
+     call cgyro_write_distributed_complex(&
+          trim(path)//runfile_lky_flux(1),&
+          size(gflux(:,:,1)),&
+          gflux(:,:,1))
      ! Global energy flux for all species
      call cgyro_write_distributed_complex(&
-          trim(path)//runfile_gflux,&
-          size(gflux(:,:)),&
-          gflux(:,:))
+          trim(path)//runfile_lky_flux(2),&
+          size(gflux(:,:,2)),&
+          gflux(:,:,2))
 
      if (moment_print_flag == 1) then
         ! Density moment for all species at theta=0

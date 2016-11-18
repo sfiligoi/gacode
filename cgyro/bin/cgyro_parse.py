@@ -62,6 +62,8 @@ x.add('GAMMA_E_DECAY','1e-12')
 x.add('HIPREC_FLAG','0')
 x.add('UDSYMMETRY_FLAG','1')
 x.add('SHEAR_METHOD','1')
+x.add('N_GLOBAL','0')
+x.add('EPS_GLOBAL','0.15')
 
 x.add('RMIN','0.5')
 x.add('RMAJ','3.0')

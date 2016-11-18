@@ -20,7 +20,7 @@ subroutine cgyro_flux
 
   flux_loc(:,:,:) = 0.0
   moment_loc(:,:,:) = 0.0
-  gflux_loc(:,:) = 0.0
+  gflux_loc(:,:,:) = 0.0
 
   iv_loc = 0
   do iv=nv1,nv2
@@ -67,9 +67,11 @@ subroutine cgyro_flux
         endif
 
         ! Global fluxes (complex)
-        do l=0,4
+        do l=0,n_global
            if (ir-l > 0) then
-              gflux_loc(l,is) = gflux_loc(l,is) &
+              gflux_loc(l,is,1) = gflux_loc(l,is,1) &
+                   +c_n*i_c*cap_h_c(ic,iv_loc)*conjg(psi(ic_c(ir-l,it),iv_loc))*w_theta(it)
+              gflux_loc(l,is,2) = gflux_loc(l,is,2) &
                    +c_t*i_c*cap_h_c(ic,iv_loc)*conjg(psi(ic_c(ir-l,it),iv_loc))*w_theta(it)
            endif
         enddo
@@ -109,8 +111,8 @@ subroutine cgyro_flux
 
   ! Global complex gflux(l,ky), below, is still distributed over n 
 
-  call MPI_ALLREDUCE(gflux_loc(:,:), &
-       gflux(:,:), &
+  call MPI_ALLREDUCE(gflux_loc(:,:,:), &
+       gflux(:,:,:), &
        size(gflux), &
        MPI_DOUBLE_COMPLEX, &
        MPI_SUM, &
