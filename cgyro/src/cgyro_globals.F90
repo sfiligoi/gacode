@@ -298,8 +298,8 @@ module cgyro_globals
   ! Nonlinear fluxes 
   real, dimension(:,:,:), allocatable :: flux_loc
   real, dimension(:,:,:), allocatable :: flux
-  complex, dimension(:,:), allocatable :: gflux_loc
-  complex, dimension(:,:), allocatable :: gflux
+  real, dimension(:,:), allocatable :: gflux_loc
+  real, dimension(:,:), allocatable :: gflux
   !
   ! Nonlinear plans
   type(C_PTR) :: plan_r2c

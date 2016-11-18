@@ -45,7 +45,7 @@ subroutine cgyro_write_timedata
           size(flux(:,:,2)),&
           flux(:,:,2))
      ! Global energy flux for all species
-     call cgyro_write_distributed_complex(&
+     call cgyro_write_distributed_real(&
           trim(path)//runfile_gflux,&
           size(gflux(:,:)),&
           gflux(:,:))

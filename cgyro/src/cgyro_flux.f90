@@ -80,9 +80,11 @@ subroutine cgyro_flux
 
   ! Complete definition of fluxes
   flux_loc = flux_loc*k_theta*rho
+  gflux_loc = gflux_loc*k_theta*rho
 
   ! GyroBohm normalizations
   flux_loc   = flux_loc/rho**2
+  gflux_loc  = gflux_loc/rho**2
   moment_loc = moment_loc/rho
 
   ! Reduced real flux(kx,ky), below, is still distributed over n 
