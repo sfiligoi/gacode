@@ -13,6 +13,7 @@ subroutine tgyro_profile_set(x_vec,dx,index)
   implicit none
 
   integer :: i
+  integer :: i_ion
   integer :: p
   integer, intent(in) :: index
 
@@ -49,26 +50,29 @@ subroutine tgyro_profile_set(x_vec,dx,index)
         endif
      endif
 
-     if (loc_ne_feedback_flag == 1) then 
+     if (evo_e(0) == 1) then 
         p = p+1
         if (index == 4) then
            dlnnedr(i) = x_vec(p)+dx
         else
            dlnnedr(i) = x_vec(p)
         endif
-        ! Set dlnnidr for all ions at given radius according to quasineutrality
-        call tgyro_quasigrad(ne(i),dlnnedr(i),ni(:,i),dlnnidr(:,i),zi_vec(1:loc_n_ion),loc_n_ion)
      endif
 
-     if (loc_he_feedback_flag == 1) then
-        p = p+1
-        if (index == 5) then
-           dlnnidr(i_ash,i) = x_vec(p)+dx
-        else
-           dlnnidr(i_ash,i) = x_vec(p)
+     do i_ion=1,loc_n_ion
+        if (evo_e(i_ion) == 1) then 
+           p = p+1
+           if (index == 4+i_ion) then
+              dlnnidr(i_ion,i) = x_vec(p)+dx
+           else
+              dlnnidr(i_ion,i) = x_vec(p)
+           endif
         endif
-     endif
+     enddo
 
   enddo
+
+  ! Update some species (evo_e=1) based on quasineutrality
+  call tgyro_quasigrad
 
 end subroutine tgyro_profile_set

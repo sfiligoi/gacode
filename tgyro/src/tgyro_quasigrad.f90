@@ -9,59 +9,43 @@
 ! according to different rules.
 !------------------------------------------------------------
 
-subroutine tgyro_quasigrad(ne,dlnnedr,ni,dlnnidr,zi,n_ion)
+subroutine tgyro_quasigrad
 
-  use tgyro_globals, only : &
-       tgyro_quasineutral_flag, &
-       tgyro_fix_concentration_flag, &
-       loc_he_feedback_flag, &
-       i_ash
+  use tgyro_globals
 
   implicit none
+  integer :: is
+  integer :: n_off
+  real, dimension(n_r) :: delta_n
 
-  integer, intent(in) :: n_ion
-  real, intent(in) :: ne
-  real, intent(in) :: dlnnedr
-  real, dimension(n_ion), intent(in) :: zi
-  real, dimension(n_ion), intent(inout) :: ni
-  real, dimension(n_ion), intent(inout) :: dlnnidr
-
-  integer :: i
-
-  if (tgyro_quasineutral_flag == 0) return
-
-  if (n_ion == 1) then
-
-     dlnnidr(1) = dlnnedr
-
-  else
-
-     if (tgyro_fix_concentration_flag == 0) then
-
-        ! Adjust ion 1 gradient to enforce quasineutrality.
-
-        ! Temporary storage 
-        dlnnidr(1) = ne*dlnnedr 
-
-        do i=2,n_ion
-           dlnnidr(1) = dlnnidr(1)-zi(i)*ni(i)*dlnnidr(i)
-        enddo
-
-        dlnnidr(1) = dlnnidr(1)/ni(1)
-
-     else
-
-        ! Adjust all ion gradients at fixed concentration ratios (n2/n1, n3/n1, etc)
-
-        ! Some algebra shows that this implies all gradient scale lengths are equal
-        do i=1,n_ion
-           if (i /= i_ash .or. loc_he_feedback_flag == 0) dlnnidr(i) = dlnnedr 
-        enddo
-     
-     endif
-
+  ! Compute density offset that needs to be corrected
+  delta_n = 0.0
+  if (evo_e(0) > -1) then
+     delta_n(:) = delta_n(:) - ne(:)*dlnnedr(:)
   endif
+  do is=1,loc_n_ion
+     if (evo_e(is) > -1) then
+        delta_n(:) = delta_n(:) + zi_vec(is)*ni(is,:)*dlnnidr(is,:)
+     endif
+  enddo
 
+  ! Number of species to offset
+  n_off = 0
+  do is=0,loc_n_ion
+     if (evo_e(is) == -1) then
+        n_off = n_off+1
+     endif
+  enddo
+
+  ! Perform offsets
+  if (evo_e(0) == -1) then
+     dlnnedr(:) = delta_n(:)/(ne(:)*n_off)
+  endif
+  do is=1,loc_n_ion
+     if (evo_e(is) == -1) then
+        dlnnidr(is,:) = -delta_n(:)/(zi_vec(is)*ni(is,:)*n_off)
+     endif
+  enddo
 
 end subroutine tgyro_quasigrad
 

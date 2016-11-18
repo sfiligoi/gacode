@@ -12,8 +12,6 @@ subroutine tgyro_flux_vector(x_vec,f_vec,dx,index)
 
   implicit none
 
-  integer :: i
-  integer :: p
   integer, intent(in) :: index
 
   real, intent(in), dimension(p_max) :: x_vec

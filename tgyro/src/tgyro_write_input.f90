@@ -5,9 +5,10 @@ subroutine tgyro_write_input
 
   implicit none
 
-  integer :: i_ion
+  integer :: i_ion,is
   character(len=7) :: ttext
-
+  character(len=1) :: itag
+  
   !----------------------------------------------------------------
   ! Trap miscellaneous errors
   !
@@ -35,14 +36,19 @@ subroutine tgyro_write_input
   ! - Need to set at least one profile to evolve, even for zero iterations, just to 
   !   define a residual error.
   !  
-  if (loc_er_feedback_flag+&
-       loc_ne_feedback_flag+&
-       loc_te_feedback_flag+&
-       loc_ti_feedback_flag+&
-       loc_he_feedback_flag == 0) then
+  if (loc_er_feedback_flag == 0 .and. &
+       loc_te_feedback_flag == 0 .and. &
+       loc_ti_feedback_flag == 0 .and. &
+       maxval(evo_e) <= 0) then
      error_flag = 1
      error_msg = 'ERROR: (TGYRO) Must set one profile to evolve, even if running for 0 iterations.'
   endif
+  if (maxval(evo_e(0:loc_n_ion)) == -1) then
+     error_flag = 1
+     error_msg = 'ERROR: (TGYRO) All species densities cannot be simultaneously floated.'
+  endif
+
+
   !----------------------------------------------------------------
 
   if (i_proc_global == 0) then
@@ -138,134 +144,15 @@ subroutine tgyro_write_input
      !--------------------------------------------------------
 
      write(1,20) 'LOC_DX (Jacobian dx)',loc_dx
-     write(1,20) 'LOC_DX_GYRO (GYRO Jacobian dx)',loc_dx_gyro
+     if (maxval(flux_method_vec) == 4) then
+        write(1,20) 'LOC_DX_GYRO (GYRO Jacobian dx)',loc_dx_gyro
+     endif
      write(1,20) 'LOC_DX_MAX (maximum dx)',loc_dx_max
      write(1,20) 'LOC_RELAX (conv. relaxation)',loc_relax
 
      write(1,*)
      write(1,*) 'Scenario control'
      write(1,*) 
-
-     !--------------------------------------------------------
-     select case (loc_ti_feedback_flag)
-
-     case (0)
-
-        write(1,10) 'LOC_TI_FEEDBACK_FLAG','Ti evolution OFF'
-
-     case (1)
-
-        write(1,10) 'LOC_TI_FEEDBACK_FLAG','Ti evolution ON'
-
-     case default
-
-        error_flag = 1
-        error_msg = 'Error: LOC_TI_FEEDBACK_FLAG'
-
-     end select
-     !--------------------------------------------------------
-
-     !--------------------------------------------------------
-     select case (loc_te_feedback_flag)
-
-     case (0)
-
-        write(1,10) 'LOC_TE_FEEDBACK_FLAG','Te evolution OFF'
-
-     case (1)
-
-        write(1,10) 'LOC_TE_FEEDBACK_FLAG','Te evolution ON'
-
-     case default
-
-        error_flag = 1
-        error_msg = 'Error: LOC_TE_FEEDBACK_FLAG'
-
-     end select
-     !--------------------------------------------------------
-
-     !--------------------------------------------------------
-     select case (loc_ne_feedback_flag)
-
-     case (0)
-
-        write(1,10) 'LOC_NE_FEEDBACK_FLAG','ne evolution OFF'
-
-     case (1)
-
-        write(1,10) 'LOC_NE_FEEDBACK_FLAG','ne evolution ON'
-
-        if (loc_residual_method == 1) then
-           error_flag = 1
-           error_msg = 'Error: LOC_RESIDUAL_METHOD=1 not compatible with LOC_NE_FEEDBACK_FLAG=1.'
-        endif
-
-        select case (loc_pflux_method)
-
-        case (1)
-
-           write(1,10) 'LOC_PFLUX_METHOD','gamma=0'
-
-        case (2)
-
-           write(1,10) 'LOC_PFLUX_METHOD','gamma=beam'
-
-        case (3)
-
-           write(1,10) 'LOC_PFLUX_METHOD','gamma=beam+wall'
-
-        case default
-
-           error_flag = 1
-           error_msg = 'Error: LOC_PFLUX_METHOD'
-
-        end select
-
-     case default
-
-        error_flag = 1
-        error_msg = 'Error: LOC_NE_FEEDBACK_FLAG'
-
-     end select
-     !--------------------------------------------------------
-
-     !--------------------------------------------------------
-     select case (loc_er_feedback_flag)
-
-     case (0)
-
-        write(1,10) 'LOC_ER_FEEDBACK_FLAG','Er evolution OFF'
-
-     case (1)
-
-        write(1,10) 'LOC_ER_FEEDBACK_FLAG','Er evolution ON'
-
-     case default
-
-        error_flag = 1
-        error_msg = 'Error: LOC_ER_FEEDBACK_FLAG'
-
-     end select
-     !--------------------------------------------------------
-
-     !--------------------------------------------------------
-     select case (loc_he_feedback_flag)
-
-     case (0)
-
-        write(1,10) 'LOC_HE_FEEDBACK_FLAG','He evolution OFF'
-
-     case (1)
-
-        write(1,10) 'LOC_HE_FEEDBACK_FLAG','He evolution ON'
-
-     case default
-
-        error_flag = 1
-        error_msg = 'Error: LOC_HE_FEEDBACK_FLAG'
-
-     end select
-     !--------------------------------------------------------
 
      !--------------------------------------------------------
      select case (TGYRO_EXPWD_FLAG)
@@ -410,6 +297,85 @@ subroutine tgyro_write_input
      end select
      !--------------------------------------------------------
 
+     !---------------------------------------------------------------------------------------------------
+
+     write(1,*) 
+     write(1,*) 'Profile evolution settings'
+     write(1,*) 
+
+     select case (loc_ti_feedback_flag)
+
+     case (0)
+        write(1,10) 'LOC_TI_FEEDBACK_FLAG','Ti evolution OFF'
+
+     case (1)
+        write(1,10) 'LOC_TI_FEEDBACK_FLAG','Ti evolution ON'
+
+     case default
+        error_flag = 1
+        error_msg = 'Error: LOC_TI_FEEDBACK_FLAG'
+
+     end select
+
+     select case (loc_te_feedback_flag)
+
+     case (0)
+        write(1,10) 'LOC_TE_FEEDBACK_FLAG','Te evolution OFF'
+
+     case (1)
+        write(1,10) 'LOC_TE_FEEDBACK_FLAG','Te evolution ON'
+
+     case default
+        error_flag = 1
+        error_msg = 'Error: LOC_TE_FEEDBACK_FLAG'
+
+     end select
+
+     select case (loc_er_feedback_flag)
+
+     case (0)
+        write(1,10) 'LOC_ER_FEEDBACK_FLAG','Er evolution OFF'
+
+     case (1)
+        write(1,10) 'LOC_ER_FEEDBACK_FLAG','Er evolution ON'
+
+     case default
+        error_flag = 1
+        error_msg = 'Error: LOC_ER_FEEDBACK_FLAG'
+
+     end select
+
+     select case (evo_e(0))
+
+     case (-1)
+        write(1,10) 'TGYRO_DEN_METHOD0','ne profile set using quasineutrality'
+     case (0)
+        write(1,10) 'TGYRO_DEN_METHOD0','ne profile fixed'
+     case (1)
+        write(1,10) 'TGYRO_DEN_METHOD0','ne evolution ON'
+     case default
+        error_flag = 1
+        error_msg = 'Error: TGYRO_EVO_E(0)'
+     end select
+
+     do is=1,loc_n_ion
+        itag = trim(ion_tag(is))
+        select case (evo_e(is))
+
+        case (-1)
+           write(1,10) 'TGYRO_DEN_METHOD'//itag,'ni'//itag//' profile set using quasineutrality'
+        case (0)
+           write(1,10) 'TGYRO_DEN_METHOD'//itag,'ni'//itag//' profile fixed'
+        case (1)
+           write(1,10) 'TGYRO_DEN_METHOD'//itag,'ni'//itag//' evolution ON'
+        case default
+           error_flag = 1
+           error_msg = 'Error: TGYRO_DEN_METHOD'//itag//': invalid value.'
+        end select
+     enddo
+
+     !---------------------------------------------------------------------------------------------------
+
      write(1,*)
      write(1,*) 'Physics parameters'
      write(1,*) 
@@ -463,41 +429,6 @@ subroutine tgyro_write_input
 
         error_flag = 1
         error_msg = 'Error: LOC_NUM_EQUIL_FLAG'
-
-     end select
-     !--------------------------------------------------------
-     !--------------------------------------------------------
-     select case (tgyro_quasineutral_flag)
-
-     case (0)
-
-        write(1,10) 'TGYRO_QUASINEUTRAL_FLAG','Never change ion density to enforce quasineutrality.'
-
-     case (1)
-
-        write(1,10) 'TGYRO_QUASINEUTRAL_FLAG','Ion densities modified according to TGYRO_FIX_CONCENTRATION_FLAG.'
-
-        select case (tgyro_fix_concentration_flag)
-
-        case (0)
-
-           write(1,10) 'TGYRO_FIX_CONCENTRATION_FLAG','Enforce quasineutrality on main ions during iteration.'
-
-        case (1)
-
-           write(1,10) 'TGYRO_FIX_CONCENTRATION_FLAG','Fix ratio of all ion densities while enforcing quasineutrality.'
-
-        case default
-
-           error_flag = 1
-           error_msg = 'ERROR: (TGYRO) Bad value for TGYRO_FIX_CONCENTRATION_FLAG'
-
-        end select
-
-     case default
-
-        error_flag = 1
-        error_msg = 'Error: (TGYRO) TGYRO_QUASINEUTRAL_FLAG.'
 
      end select
      !--------------------------------------------------------
