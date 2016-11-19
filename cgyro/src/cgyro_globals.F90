@@ -184,6 +184,7 @@ module cgyro_globals
   character(len=80) :: path
   character(len=18) :: runfile_info    = 'out.cgyro.info'
   character(len=18) :: runfile_mpi     = 'out.cgyro.mpi'
+  character(len=18) :: runfile_extend  = 'out.cgyro.extend'
   character(len=18) :: runfile_memory  = 'out.cgyro.memory'
   character(len=18) :: runfile_restart = 'out.cgyro.restart'
   character(len=18) :: runfile_restart_tag = 'out.cgyro.tag'
@@ -362,7 +363,6 @@ module cgyro_globals
   real :: sum_den_h
   real, dimension(:), allocatable :: sum_den_x, sum_cur_x
   real, dimension(:), allocatable :: vfac
-
   !
   ! n=0 test variables
   real, dimension(:,:,:), allocatable :: hzf, xzf 
@@ -387,6 +387,7 @@ module cgyro_globals
   real, dimension(:,:), allocatable :: omega_cdrift
   real, dimension(:,:), allocatable :: omega_crdrift
   real, dimension(:),   allocatable :: omega_gammap
+  complex, dimension(:),allocatable :: cg
   !
   ! Number of gridpoints for Miller geometry integration grid
   integer, parameter :: geo_ntheta=1001 

@@ -109,7 +109,8 @@ subroutine cgyro_init_manager
   allocate(omega_cdrift(n_theta,n_species))
   allocate(omega_crdrift(n_theta,n_species))
   allocate(omega_gammap(n_theta))
-
+  allocate(cg(-n_global:n_global))
+    
   if (test_flag == 0) then
 
      !----------------------------------------------------
@@ -187,7 +188,8 @@ subroutine cgyro_init_manager
   GEO_nfourier_in = geo_ny
   call GEO_alloc(1)
   call cgyro_equilibrium
-
+  call cgyro_fourier_extend
+  
   if (test_flag == 0) then
 
      call cgyro_init_arrays

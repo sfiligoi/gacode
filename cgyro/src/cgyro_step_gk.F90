@@ -59,12 +59,11 @@ subroutine cgyro_rhs(ij)
   integer, intent(in) :: ij
   integer :: is,ir,irp,it
   integer :: id,jc
-  integer :: p,pp,pm
+  integer :: p
   real :: rval,rval2
   complex :: rhs_stream
   complex :: rhs_ij(nc,nv_loc)
   complex, dimension(n_radial,n_theta) :: fw,gw
-  real :: cp(0:n_global)
   integer :: l
 
   ! Prepare suitable distribution (g, not h) for conservative upwind method
@@ -151,16 +150,9 @@ subroutine cgyro_rhs(ij)
 !$acc end data
   endif
 
-  ! Dealiased shear 
+  ! Extended-domain shear algoroithm
 
   if (shear_method == 2) then
-
-     ! e=0.15
-     cp(0) = 0.0
-     cp(1) = 0.913945578263
-     cp(2) = 0.343465365026
-     cp(3) = 0.132636799641
-     cp(4) = 0.0344651453431
 
      do iv=nv1,nv2
         iv_loc = iv-nv1+1
@@ -170,20 +162,15 @@ subroutine cgyro_rhs(ij)
         fw(:,:) = 0.0
         do ir=1,n_radial
            p = px(ir)
-           do l=1,n_global
-              pm = p-l
-              pp = p+l
-              if (abs(pm) < n_radial/2) then
-                 fw(ir,:) = fw(ir,:)+gw(ir-1,:)*cp(l)
-              endif
-              if (abs(pp) < n_radial/2) then
-                 fw(ir,:) = fw(ir,:)-gw(ir+1,:)*cp(l)
+           do l=-n_global,n_global
+              if (abs(p+l) < n_radial/2) then
+                 fw(ir,:) = fw(ir,:)+gw(ir+l,:)*cg(l)
               endif
            enddo
         enddo
         do it=1,n_theta
-           rhs_ij(ic_c(:,it),iv_loc) = rhs_ij(ic_c(:,it),iv_loc)+&
-                omega_eb*fw(:,it)
+           rhs_ij(ic_c(:,it),iv_loc) = rhs_ij(ic_c(:,it),iv_loc) & 
+                -i_c*omega_eb*fw(:,it)
         enddo
      enddo
 
