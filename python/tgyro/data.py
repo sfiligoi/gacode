@@ -22,7 +22,7 @@ class tgyrodata:
         self.n_ion = int(self.get_tag_value("LOC_N_ION"))
         self.getcontrol()
 
-        # Manage old data
+        # Manage new (or old) data output formats
         if os.path.isfile(self.dir+'/out.tgyro.profile_i1'):
             print "INFO: (data.py) Detected new multi-ion version of TGYRO [GOOD]."
             self.getdata()
@@ -51,15 +51,29 @@ class tgyrodata:
         self.fileparser('out.tgyro.mflux_e')
         self.fileparser('out.tgyro.mflux_i')
         self.fileparser('out.tgyro.profile')
+        self.data['ni1'] = self.data['ni']
+        self.data['a/Lni1'] = self.data['a/Lni']
+        self.data['ti1'] = self.data['ti']
+        self.data['a/Lti1'] = self.data['a/LTi']
+        self.data['pflux_i1_neo'] = self.data['pflux_i_neo']
+        self.data['pflux_i1_tur'] = self.data['pflux_i_tur']
         self.data['pflux_i1_tot'] = self.data['pflux_i_neo']+self.data['pflux_i_tur']
         self.data['pflux_i1_target'] = 0.0*self.data['pflux_i_neo']
-        for i in np.arange(1,self.n_ion):
-            self.data['pflux_i'+str(i)+'_tot'] = 0.0
+        self.data['eflux_i1_neo'] = self.data['eflux_i_neo']
+        self.data['eflux_i1_tur'] = self.data['eflux_i_tur']
+        for i in range(2,self.n_ion+1):
+            self.fileparser('out.tgyro.profile'+str(i))
+            self.data['ni'+str(i)] = self.data['ni']
+            self.data['a/Lni'+str(i)] = self.data['a/Lni']
+            self.fileparser('out.tgyro.flux_i'+str(i))
+            self.fileparser('out.tgyro.mflux_i'+str(i))
+            self.data['pflux_i'+str(i)+'_neo'] = self.data['pflux_i_neo']
+            self.data['pflux_i'+str(i)+'_tur'] = self.data['pflux_i_tur']
+            self.data['eflux_i'+str(i)+'_neo'] = self.data['eflux_i_neo']
+            self.data['eflux_i'+str(i)+'_tur'] = self.data['eflux_i_tur']
+            self.data['pflux_i'+str(i)+'_tot'] = 0.0*self.data['pflux_i_neo']
+            self.data['pflux_i'+str(i)+'_target'] = 0.0*self.data['pflux_i_neo']
         self.data['a/Lte']  = self.data['a/LTe']
-        self.data['a/Lti1'] = self.data['a/LTi']
-        self.data['ti1'] = self.data['ti']
-        self.data['a/Lni1'] = self.data['a/Lni']
-        self.data['ni1'] = self.data['ni']
 
     def getdata(self):
         """Read all tgyro-format datafiles"""
