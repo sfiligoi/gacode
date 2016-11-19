@@ -25,7 +25,6 @@ subroutine cgyro_fourier_extend
 
   integer,parameter :: nxi=512
   integer :: l,i
-  complex, dimension(-n_global:n_global) :: cc
   real, dimension(:), allocatable :: x,f
   real, external :: gl_f,gl_fp
   real :: u,a,b,c,d
@@ -68,7 +67,7 @@ subroutine cgyro_fourier_extend
 
   ! Project complex Fourier coefficients cc(l)
   do l=-n_global,n_global
-     cc(l) = sum(f(:)*exp(i_c*l*x(:)))/nxi
+     cg(l) = sum(f(:)*exp(i_c*l*x(:)))/nxi
   enddo
   deallocate(x,f)
 
@@ -80,7 +79,7 @@ subroutine cgyro_fourier_extend
      write(io,*)
      write(io,'(a)') '  l     Re(c_l)       Im(c_l)' 
      do l=-n_global,n_global
-        write(io,'(i3,2x,2(1pe13.6,1x))') l,cc(l)
+        write(io,'(i3,2x,2(1pe13.6,1x))') l,cg(l)
      enddo
      close(io)
   endif
