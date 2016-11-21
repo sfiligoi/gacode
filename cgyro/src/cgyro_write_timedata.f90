@@ -32,7 +32,7 @@ subroutine cgyro_write_timedata
 
   call cgyro_flux
 
-  if (nonlinear_flag == 1) then
+  if (n_toroidal > 1) then
 
      ! Density flux for all species
      call cgyro_write_distributed_real(&
