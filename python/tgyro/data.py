@@ -8,14 +8,14 @@ class tgyrodata:
     #---------------------------------------------------------------------------#
     # Methods
 
-    def __init__(self, sim_directory):
+    def __init__(self, sim_directory, verbose=True):
         """Constructor reads data from sim_directory"""
 
-        
+        self.verbose      = verbose
         self.loc_n_ion    = 0
         self.n_iterations = 0
         self.n_fields     = 0
-        self.n_radial     = 0
+        self.n_r          = 0
         self.data         = {}
     
         self.dir = sim_directory
@@ -24,11 +24,11 @@ class tgyrodata:
 
         # Manage new (or old) data output formats
         if os.path.isfile(self.dir+'/out.tgyro.profile_i1'):
-            print "INFO: (data.py) Detected new multi-ion version of TGYRO [GOOD]."
+            if self.verbose: print "INFO: (data.py) Detected new multi-ion version of TGYRO [GOOD]."
             self.getdata()
         else:
-            print "INFO: (data.py) Detected old static ion version of TGYRO."
-            print "      --------> Using getolddata function ..."
+            if self.verbose: print "INFO: (data.py) Detected old static ion version of TGYRO."
+            if self.verbose: print "      --------> Using getolddata function ..."
             self.getolddata() 
         
     #---------------------------------------------------------------------------#
@@ -100,7 +100,7 @@ class tgyrodata:
             for root in ['evo_n','flux_i','profile_i']:
                 self.fileparser('out.tgyro.'+root+str(i+1))
 
-        print self.data.keys()
+        if self.verbose: print self.data.keys()
 
     #---------------------------------------------------------------------------#
 
@@ -117,7 +117,7 @@ class tgyrodata:
                 if line.split()[1] == tag:
                     return float(line.split()[0])
             except IndexError:
-                print "Cannot find specified input parameter: ", tag
+                print "WARNING: Cannot find specified input parameter: ", tag
                 return 0
 
     #---------------------------------------------------------------------------#
@@ -170,5 +170,5 @@ class tgyrodata:
         for ic in range(nc):
             self.data[tags[ic]] = numdata[ic,:,:]
         
-        print 'INFO: (data.py) Read data in '+file
+        if self.verbose: print 'INFO: (data.py) Read data in '+file
 
