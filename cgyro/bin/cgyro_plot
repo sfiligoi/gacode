@@ -55,6 +55,7 @@ then
   echo "                  = ky_phi   (time-dependent ky-phi intensities)"
   echo "                  = kx_phi   (average kx-phi intensities)"
   echo "                  = kxky_phi (kx-ky spectra of ave(|phi|))"
+  echo "                  = ex_flux  (radial profile of fluxes for all species)"
   echo "                  = note     (notebook)"
   echo
   echo "          -ymin <float>"
@@ -196,6 +197,9 @@ case "$PLOT_TYPE" in
 
    ky_flux)  
 	python $PYROOT/plot_ky_flux.py $FTYPE $W $MOMENT $YMIN $YMAX ;;
+
+   ex_flux)  
+	python $PYROOT/plot_ex_flux.py $FTYPE $W $MOMENT $YMIN $YMAX ;;
 
    flux)  
 	if [ "$FTYPE" == "dump" ]

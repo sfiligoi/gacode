@@ -246,7 +246,7 @@ class cgyrodata:
             pass 
         #-----------------------------------------------------------------
 
-    def getgflux(self):
+    def getexflux(self):
 
         """Global flux files"""
 
@@ -260,12 +260,12 @@ class cgyrodata:
         # Particle and energy fluxes
         #
         ng = self.n_global+1
-        nd = ng*self.n_species*self.n_n*nt
+        nd = 2*ng*self.n_species*self.n_n*nt
         try:
             start = time.time()
             data = np.fromfile(self.dir+'out.cgyro.lky_flux_n',dtype='float',sep=" ")
             end = time.time()
-            self.lky_flux_n = np.reshape(data[0:nd],(ng,self.n_species,self.n_n,nt),'F')
+            self.lky_flux_n = np.reshape(data[0:nd],(2,ng,self.n_species,self.n_n,nt),'F')
             print "INFO: (data.py) Read data in out.cgyro.lky_flux_n. TIME = "+str(end-start)
         except:
             pass
@@ -274,7 +274,7 @@ class cgyrodata:
             start = time.time()
             data = np.fromfile(self.dir+'out.cgyro.lky_flux_e',dtype='float',sep=" ")
             end = time.time()
-            self.lky_flux_e = np.reshape(data[0:nd],(ng,self.n_species,self.n_n,nt),'F')
+            self.lky_flux_e = np.reshape(data[0:nd],(2,ng,self.n_species,self.n_n,nt),'F')
             print "INFO: (data.py) Read data in out.cgyro.lky_flux_e. TIME = "+str(end-start)
         except:
             pass 
