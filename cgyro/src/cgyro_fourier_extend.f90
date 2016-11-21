@@ -40,24 +40,28 @@ subroutine cgyro_fourier_extend
   ! Scale fraction to domain (0,2pi)
   e = eps_global*2*pi
 
-  ! Function and derivative conditions
-  f0 = gl_f(e)
-  f1 = gl_fp(e)
-  g0 = gl_f(2*pi-e)
-  g1 = gl_fp(2*pi-e)
+  if (e > 0.0) then
 
-  ! Polynomial coefficients
-  c = (f1-g1)/(4*e)
-  a = (f0+g0)/2-c*e**2
-  d = (e*(f1+g1)-(f0-g0))/(4*e**3)
-  b = ((f0-g0)-2*d*e**3)/(2*e)
+     ! Function and derivative conditions
+     f0 = gl_f(e)
+     f1 = gl_fp(e)
+     g0 = gl_f(2*pi-e)
+     g1 = gl_fp(2*pi-e)
+
+     ! Polynomial coefficients
+     c = (f1-g1)/(4*e)
+     a = (f0+g0)/2-c*e**2
+     d = (e*(f1+g1)-(f0-g0))/(4*e**3)
+     b = ((f0-g0)-2*d*e**3)/(2*e)
+
+  endif
 
   ! Definition of extended function 
   do i=1,nxi
-     if (x(i) <= e) then
+     if (x(i) < e) then
         u = x(i)
         f(i) = a+b*u+c*u**2+d*u**3
-     else if (x(i) >= 2*pi-e) then
+     else if (x(i) > 2*pi-e) then
         u = x(i)-2*pi
         f(i) = a+b*u+c*u**2+d*u**3
      else
@@ -91,7 +95,8 @@ real function gl_f(x)
   real, intent(in) :: x
   real, parameter :: pi = 3.1415926535897932
 
-  gl_f = x-pi
+  !gl_f = x-pi
+  gl_f = sin(x)
 
 end function gl_f
 
@@ -99,7 +104,8 @@ real function gl_fp(x)
 
   real, intent(in) :: x
 
-  gl_fp = 1.0
+!  gl_fp = 1.0
+  gl_fp = cos(x)
 
 end function gl_fp
 
