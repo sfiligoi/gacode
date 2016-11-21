@@ -104,7 +104,7 @@ program prgen
      format_type = 3
 
      call prgen_read_peqdsk
-
+     
   else if (trim(raw_data_type) == 'CORSICA') then
 
      ! corsica format
@@ -141,7 +141,7 @@ program prgen
 
   endif
   !------------------------------------------------------------------
-
+  
   !---------------------------------------------------
   ! Read the GATO file for "better" geometry.  At this
   ! point, GATO has already run and we are just reading 

@@ -36,8 +36,8 @@ subroutine prgen_read_peqdsk
   read(1,*) xv
   ! Replace old assignment of peqdsk_psi to fixed, uniform mesh
   !  peqdsk_psi(:) = xv(1,:)
-  do i=1,npsi
-     peqdsk_psi(i) = (i-1.0)/(npsi-1)
+  do i=1,nx
+     peqdsk_psi(i) = (i-1.0)/(nx-1)
   enddo
   peqdsk_ne(:)  = xv(2,:)
   deallocate(xv)
@@ -233,5 +233,5 @@ subroutine prgen_read_peqdsk
   zmag(:)   = 0.0
   zeta(:)   = 0.0
   omega0(:) = 0.0
-
+  
 end subroutine prgen_read_peqdsk
