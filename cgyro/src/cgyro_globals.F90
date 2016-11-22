@@ -77,6 +77,7 @@ module cgyro_globals
   integer :: shear_method
   integer :: n_global
   real    :: eps_global
+  integer :: psym_flag
   !
   ! Geometry input
   !

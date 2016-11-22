@@ -190,6 +190,16 @@ subroutine cgyro_rhs(ij)
      endif
   endif
 
+  ! Remove p=-M
+  if (psym_flag == 1) then
+     do ic=1,nc
+        ir = ir_c(ic) 
+        if (ir == 1) then
+           rhs(ic,:,ij) = 0.0
+        endif
+     enddo
+  endif
+
 end subroutine cgyro_rhs
 
 !==========================================================================

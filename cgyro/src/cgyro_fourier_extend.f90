@@ -95,8 +95,8 @@ real function gl_f(x)
   real, intent(in) :: x
   real, parameter :: pi = 3.1415926535897932
 
-  !gl_f = x-pi
-  gl_f = sin(x)
+  gl_f = x-pi
+!  gl_f = sin(x)
 
 end function gl_f
 
@@ -104,8 +104,8 @@ real function gl_fp(x)
 
   real, intent(in) :: x
 
-!  gl_fp = 1.0
-  gl_fp = cos(x)
+  gl_fp = 1.0
+!  gl_fp = cos(x)
 
 end function gl_fp
 
