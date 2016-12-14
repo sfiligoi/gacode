@@ -140,10 +140,19 @@ class tgyrodata:
     def fileparser(self,file,onerow=False):
         """Generic parser for standard TGYRO iteration-based file format"""
 
+        import os
         import string
         import numpy as np
 
+        if not os.path.exists(self.dir+'/'+file) :
+            print "WARNING: (data.py) "+file+" does not exist."
+            return 0
+
         data = open(self.dir+'/'+file,'r').readlines()
+
+        if not len(''.join(data).strip()):
+            print "WARNING: (data.py) "+file+" is empty."
+            return 0
 
         # Data dimensions
         if onerow == False:
