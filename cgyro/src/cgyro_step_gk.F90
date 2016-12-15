@@ -37,10 +37,12 @@ subroutine cgyro_step_gk
 
   ! Stage 4
   call cgyro_rhs(4)
-  h_x = h0_x + delta_t/6.0 * &
-       (rhs(:,:,1)+2.0*rhs(:,:,2)+2.0*rhs(:,:,3)+rhs(:,:,4))  
+  h_x = h0_x+delta_t*(rhs(:,:,1)+2*rhs(:,:,2)+2*rhs(:,:,3)+rhs(:,:,4))/6  
   call cgyro_field_c
 
+  ! rhs(1) = 3rd-order error estimate
+  rhs(:,:,1) = h0_x+delta_t*(rhs(:,:,2)+2*rhs(:,:,3))/3-h_x
+  
   ! Filter special spectral components
   call cgyro_filter
   
