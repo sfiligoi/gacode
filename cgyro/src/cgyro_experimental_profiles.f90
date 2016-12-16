@@ -42,11 +42,11 @@ subroutine cgyro_experimental_profiles
 
   if (ae_flag == 0) then
      n_species_exp = n_species
-  else
      if (z(n_species) /= -1) then
         call cgyro_error('ERROR: (CGYRO) For exp. profiles, electron species must be n_species')
         return
      endif
+  else
      n_species_exp = n_species + 1
   endif
 

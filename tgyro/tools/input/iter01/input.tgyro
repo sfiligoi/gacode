@@ -20,7 +20,7 @@ LOC_NEO_METHOD=2
 
 #-----------------------------------------------------
 # Profile control
-LOC_NE_FEEDBACK_FLAG=1
+TGYRO_DEN_METHOD0=1
 LOC_TE_FEEDBACK_FLAG=1
 LOC_TI_FEEDBACK_FLAG=1
 

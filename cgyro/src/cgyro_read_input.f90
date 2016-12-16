@@ -68,6 +68,9 @@ subroutine cgyro_read_input
   call cgyro_readbc_int(hiprec_flag)
   call cgyro_readbc_int(udsymmetry_flag)
   call cgyro_readbc_int(shear_method)
+  call cgyro_readbc_int(n_global)
+  call cgyro_readbc_real(eps_global)
+  call cgyro_readbc_int(psym_flag)
 
   call cgyro_readbc_real(rmin)
   call cgyro_readbc_real(rmaj)

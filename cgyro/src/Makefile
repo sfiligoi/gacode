@@ -24,6 +24,7 @@ OBJECTS = cgyro_globals.o \
           cgyro_field.o \
           cgyro_field_coefficients.o \
           cgyro_flux.o \
+          cgyro_fourier_extend.o \
           cgyro_freq.o \
           cgyro_upwind.o \
           cgyro_init.o \
@@ -54,7 +55,7 @@ OBJECTS = cgyro_globals.o \
           cgyro_write_initdata.o \
           cgyro_read_restart.o \
           cgyro_write_restart.o \
-          cgyro_write_timedata.o
+          cgyro_write_timedata.o 
 
 .SUFFIXES : .o .f90 .F90
 

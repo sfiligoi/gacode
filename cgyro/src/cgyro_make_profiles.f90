@@ -276,7 +276,7 @@ subroutine cgyro_make_profiles
      case (1)
         call cgyro_info('Hammett discrete-shift ExB shear method.') 
      case (2)
-        call cgyro_info('DFT shear method.  DO NOT USE!') 
+        call cgyro_info('Extended-domain shear method.') 
      case (3)
         call cgyro_info('Linear-time ExB shear method.') 
      end select

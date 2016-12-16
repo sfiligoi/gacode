@@ -187,9 +187,5 @@ if [ $SUB_FLAG -eq 0 ] ; then
     
 else
     # Submit batch file
-    qsub $bfile
+    sbatch $bfile || (echo 'Using qsub to submit';qsub $bfile)
 fi
-    
-
-    
-

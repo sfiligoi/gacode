@@ -222,10 +222,9 @@ subroutine tgyro_init_profiles
   !
   if (loc_lock_profile_flag == 0) then
 
-     do i=1,n_r
-        call tgyro_quasigrad(ne(i),dlnnedr(i),ni(:,i),dlnnidr(:,i),zi_vec(1:loc_n_ion),loc_n_ion)
-     enddo
-
+     ! Update some species (evo_e=1) based on quasineutrality
+     call tgyro_quasigrad
+ 
      ! Reintegrate density profiles
      do i_ion=1,loc_n_ion
         ! ni in 1/cm^3

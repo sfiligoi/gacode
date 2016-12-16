@@ -75,6 +75,9 @@ module cgyro_globals
   integer :: hiprec_flag
   integer :: udsymmetry_flag
   integer :: shear_method
+  integer :: n_global
+  real    :: eps_global
+  integer :: psym_flag
   !
   ! Geometry input
   !
@@ -182,6 +185,7 @@ module cgyro_globals
   character(len=80) :: path
   character(len=18) :: runfile_info    = 'out.cgyro.info'
   character(len=18) :: runfile_mpi     = 'out.cgyro.mpi'
+  character(len=18) :: runfile_extend  = 'out.cgyro.extend'
   character(len=18) :: runfile_memory  = 'out.cgyro.memory'
   character(len=18) :: runfile_restart = 'out.cgyro.restart'
   character(len=18) :: runfile_restart_tag = 'out.cgyro.tag'
@@ -198,6 +202,8 @@ module cgyro_globals
        (/'out.cgyro.phib ','out.cgyro.aparb','out.cgyro.bparb'/)
   character(len=21), dimension(2)  :: runfile_kxky_flux = &
        (/'out.cgyro.kxky_flux_n','out.cgyro.kxky_flux_e'/)
+  character(len=20), dimension(2)  :: runfile_lky_flux = &
+       (/'out.cgyro.lky_flux_n','out.cgyro.lky_flux_e'/)
   integer, parameter :: io=1
   !
   ! error checking
@@ -297,6 +303,8 @@ module cgyro_globals
   ! Nonlinear fluxes 
   real, dimension(:,:,:), allocatable :: flux_loc
   real, dimension(:,:,:), allocatable :: flux
+  complex, dimension(:,:,:), allocatable :: gflux_loc
+  complex, dimension(:,:,:), allocatable :: gflux
   !
   ! Nonlinear plans
   type(C_PTR) :: plan_r2c
@@ -356,7 +364,6 @@ module cgyro_globals
   real :: sum_den_h
   real, dimension(:), allocatable :: sum_den_x, sum_cur_x
   real, dimension(:), allocatable :: vfac
-
   !
   ! n=0 test variables
   real, dimension(:,:,:), allocatable :: hzf, xzf 
@@ -381,6 +388,7 @@ module cgyro_globals
   real, dimension(:,:), allocatable :: omega_cdrift
   real, dimension(:,:), allocatable :: omega_crdrift
   real, dimension(:),   allocatable :: omega_gammap
+  complex, dimension(:),allocatable :: cg
   !
   ! Number of gridpoints for Miller geometry integration grid
   integer, parameter :: geo_ntheta=1001 

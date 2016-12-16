@@ -32,7 +32,7 @@ subroutine cgyro_write_timedata
 
   call cgyro_flux
 
-  if (nonlinear_flag == 1) then
+  if (n_toroidal > 1) then
 
      ! Density flux for all species
      call cgyro_write_distributed_real(&
@@ -44,6 +44,16 @@ subroutine cgyro_write_timedata
           trim(path)//runfile_kxky_flux(2),&
           size(flux(:,:,2)),&
           flux(:,:,2))
+     ! Global density flux for all species
+     call cgyro_write_distributed_complex(&
+          trim(path)//runfile_lky_flux(1),&
+          size(gflux(:,:,1)),&
+          gflux(:,:,1))
+     ! Global energy flux for all species
+     call cgyro_write_distributed_complex(&
+          trim(path)//runfile_lky_flux(2),&
+          size(gflux(:,:,2)),&
+          gflux(:,:,2))
 
      if (moment_print_flag == 1) then
         ! Density moment for all species at theta=0
@@ -835,7 +845,7 @@ subroutine print_scrdata()
      return
   else
      if (i_proc == 0) then
-        print '(a,1pe9.3,a,1pe10.3,1pe10.3,a,1pe9.3,a,5(1pe9.3,1x))',&
+        print '(a,1pe9.3,a,1pe10.3,1x,1pe10.3,a,1pe9.3,a,1pe9.3)',&
              '[t = ',t_current,&
              '][w = ',freq,&
              '][dw = ',abs(freq_err),&

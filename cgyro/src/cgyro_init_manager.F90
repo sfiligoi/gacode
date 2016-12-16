@@ -109,7 +109,8 @@ subroutine cgyro_init_manager
   allocate(omega_cdrift(n_theta,n_species))
   allocate(omega_crdrift(n_theta,n_species))
   allocate(omega_gammap(n_theta))
-
+  allocate(cg(-n_global:n_global))
+    
   if (test_flag == 0) then
 
      !----------------------------------------------------
@@ -132,8 +133,10 @@ subroutine cgyro_init_manager
      allocate(field_old3(n_field,nc))
      allocate(    moment(n_radial,n_species,2))
      allocate(moment_loc(n_radial,n_species,2))
-     allocate(    flux(n_radial,n_species,2))
-     allocate(flux_loc(n_radial,n_species,2))
+     allocate(     flux(n_radial,n_species,2))
+     allocate( flux_loc(n_radial,n_species,2))
+     allocate(    gflux(0:n_global,n_species,2))
+     allocate(gflux_loc(0:n_global,n_species,2))
      allocate(f_balloon(n_radial/box_size,n_theta))
      allocate(recv_status(MPI_STATUS_SIZE))
 
@@ -185,7 +188,8 @@ subroutine cgyro_init_manager
   GEO_nfourier_in = geo_ny
   call GEO_alloc(1)
   call cgyro_equilibrium
-
+  call cgyro_fourier_extend
+  
   if (test_flag == 0) then
 
      call cgyro_init_arrays

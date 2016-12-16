@@ -6,4 +6,5 @@ echo "#SBATCH -o $SIMDIR/batch.out" >> $bfile
 echo "#SBATCH -e $SIMDIR/batch.err" >> $bfile
 echo "#SBATCH -t $WALLTIME" >> $bfile
 echo "#SBATCH -n $cores_used" >> $bfile
+echo "#SBATCH -p short,medium" >> $bfile
 echo "$CODE -e $LOCDIR -n $nmpi -nomp $nomp -numa $numa -mpinuma $mpinuma -p $SIMROOT" >> $bfile

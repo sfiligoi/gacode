@@ -37,10 +37,12 @@ subroutine cgyro_step_gk
 
   ! Stage 4
   call cgyro_rhs(4)
-  h_x = h0_x + delta_t/6.0 * &
-       (rhs(:,:,1)+2.0*rhs(:,:,2)+2.0*rhs(:,:,3)+rhs(:,:,4))  
+  h_x = h0_x+delta_t*(rhs(:,:,1)+2*rhs(:,:,2)+2*rhs(:,:,3)+rhs(:,:,4))/6  
   call cgyro_field_c
 
+  ! rhs(1) = 3rd-order error estimate
+  rhs(:,:,1) = h0_x+delta_t*(rhs(:,:,2)+2*rhs(:,:,3))/3-h_x
+  
   ! Filter special spectral components
   call cgyro_filter
   
@@ -59,11 +61,12 @@ subroutine cgyro_rhs(ij)
   integer, intent(in) :: ij
   integer :: is,ir,irp,it
   integer :: id,jc
-  integer :: p,pp,pm
+  integer :: p
   real :: rval,rval2
   complex :: rhs_stream
   complex :: rhs_ij(nc,nv_loc)
   complex, dimension(n_radial,n_theta) :: fw,gw
+  integer :: l
 
   ! Prepare suitable distribution (g, not h) for conservative upwind method
   g_x(:,:) = h_x(:,:)
@@ -149,7 +152,7 @@ subroutine cgyro_rhs(ij)
 !$acc end data
   endif
 
-  ! Dealiased shear 
+  ! Extended-domain shear algoroithm
 
   if (shear_method == 2) then
 
@@ -159,22 +162,17 @@ subroutine cgyro_rhs(ij)
            gw(:,it) = h_x(ic_c(:,it),iv_loc)
         enddo
         fw(:,:) = 0.0
-        do p=-n_radial/3,n_radial/3
-           ir = p+1+n_radial/2
-           do id=1,n_radial/3
-              pp = p+id
-              pm = p-id
-              if (abs(pm) <= n_radial/3) then
-                 fw(ir,:) = fw(ir,:)+gw(pm+1+n_radial/2,:)/id
-              endif
-              if (abs(pp) <= n_radial/3) then
-                 fw(ir,:) = fw(ir,:)-gw(pp+1+n_radial/2,:)/id
+        do ir=1,n_radial
+           p = px(ir)
+           do l=-n_global,n_global
+              if (abs(p+l) < n_radial/2) then
+                 fw(ir,:) = fw(ir,:)+gw(ir+l,:)*cg(l)
               endif
            enddo
         enddo
         do it=1,n_theta
-           rhs_ij(ic_c(:,it),iv_loc) = rhs_ij(ic_c(:,it),iv_loc)+&
-                omega_eb*fw(:,it)
+           rhs_ij(ic_c(:,it),iv_loc) = rhs_ij(ic_c(:,it),iv_loc) & 
+                -i_c*omega_eb*fw(:,it)
         enddo
      enddo
 
@@ -192,6 +190,16 @@ subroutine cgyro_rhs(ij)
      else
         call cgyro_nl_fftw(ij)
      endif
+  endif
+
+  ! Remove p=-M
+  if (psym_flag == 1) then
+     do ic=1,nc
+        ir = ir_c(ic) 
+        if (ir == 1) then
+           rhs(ic,:,ij) = 0.0
+        endif
+     enddo
   endif
 
 end subroutine cgyro_rhs
