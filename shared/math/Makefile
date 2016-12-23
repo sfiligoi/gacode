@@ -26,6 +26,8 @@ OBJECTS = math_constants.o \
           j0y0.o \
           linint.o \
           logint.o \
+          logint1.o \
+          linint1.o \
           parallel_dim.o \
           pascal.o \
           polydiff.o \

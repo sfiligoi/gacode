@@ -389,7 +389,9 @@ subroutine tgyro_init_profiles
   ! exp_te, exp_ti: [eV]
   exp_te = EXPRO_te*1e3
   exp_ti(1:loc_n_ion,:) = EXPRO_ti(1:loc_n_ion,:)*1e3
-
+  ! exp_w0 [1/s]
+  exp_w0 = EXPRO_w0
+  
   allocate(volp_exp(n_exp))
   volp_exp = EXPRO_volp
   allocate(ptot_exp(n_exp))
