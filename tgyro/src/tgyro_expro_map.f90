@@ -26,11 +26,7 @@ subroutine tgyro_expro_map(r,z,n_r,ps,r_exp,p_exp,n_exp,mode)
 
   do i_exp=1,n_exp
      if (r_exp(i_exp) <= r(n_r)) then
-        if (mode == 'log') then
-           call logint1(z,r,n_r,ps,r_exp(i_exp),p_exp(i_exp))
-        else
-           call linint1(z,r,n_r,ps,r_exp(i_exp),p_exp(i_exp))
-        endif
+       call math_scaleint(z,r,n_r,ps,r_exp(i_exp),p_exp(i_exp),mode)
      endif
   enddo
 

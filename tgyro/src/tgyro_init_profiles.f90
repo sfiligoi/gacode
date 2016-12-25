@@ -228,7 +228,7 @@ subroutine tgyro_init_profiles
      ! Reintegrate density profiles
      do i_ion=1,loc_n_ion
         ! ni in 1/cm^3
-        call logint(ni(i_ion,:),dlnnidr(i_ion,:),r,n_r,i_bc)
+        call math_scaleintv(dlnnidr(i_ion,:),r,n_r,ni(i_ion,:),'log')
      enddo
 
   endif
