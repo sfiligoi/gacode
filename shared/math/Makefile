@@ -5,7 +5,7 @@ ifeq ($(OPT),debug)
 else
    FFLAGS=${FOPT}
 endif
-      
+
 LLIB=math_lib
 
 OBJECTS = math_constants.o \
@@ -24,8 +24,6 @@ OBJECTS = math_constants.o \
           invert_p32.o \
           i0.o \
           j0y0.o \
-          linint.o \
-          logint.o \
           parallel_dim.o \
           pascal.o \
           polydiff.o \
@@ -33,8 +31,9 @@ OBJECTS = math_constants.o \
           proc_time.o \
           p32.o \
           pseudospec_lib.o \
-          remap_grid.o \
           rjbesl.o \
+          math_scaleint.o \
+          math_scaleintv.o \
           sigv.o \
           sivukhin.o \
           timer_lib.o

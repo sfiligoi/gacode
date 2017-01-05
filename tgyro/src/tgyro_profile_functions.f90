@@ -31,16 +31,16 @@ subroutine tgyro_profile_functions
      !
      do i_ion=1,loc_n_ion
         ! ni in 1/cm^3
-        call logint(ni(i_ion,:),dlnnidr(i_ion,:),r,n_r,i_bc)
+        call math_scaleintv(dlnnidr(i_ion,:),r,n_r,ni(i_ion,:),'log')
         ! ti in eV
-        call logint(ti(i_ion,:),dlntidr(i_ion,:),r,n_r,i_bc)
+        call math_scaleintv(dlntidr(i_ion,:),r,n_r,ti(i_ion,:),'log')
      enddo
      !
      ! ne in 1/cm^3
-     call logint(ne,dlnnedr,r,n_r,i_bc)
+     call math_scaleintv(dlnnedr,r,n_r,ne,'log')
      !
      ! te in eV
-     call logint(te,dlntedr,r,n_r,i_bc)
+     call math_scaleintv(dlntedr,r,n_r,te,'log')
 
      ! w0 in rad/s
      if (loc_er_feedback_flag == 1) then
@@ -63,7 +63,7 @@ subroutine tgyro_profile_functions
      ! w0_norm = c_s/R_maj at r=r_bc (pivot).
 
      w0p(:) = f_rot(:)*w0_norm
-     call linint(w0,w0p,r,n_r,i_bc)
+     call math_scaleintv(w0p,r,n_r,w0,'lin')
      !-------------------------------------------
 
   endif

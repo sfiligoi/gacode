@@ -215,7 +215,7 @@ subroutine create_set
               a(j) = EXPRO_dlntedr(j)
            endif
         enddo
-        call logint(EXPRO_te(:),a(:),EXPRO_rmin(:),EXPRO_n_exp,exm_pivot)
+        call math_scaleintv(a(:),EXPRO_rmin(:),EXPRO_n_exp,EXPRO_te,'log')
         print '(a)', 'INFO: (create) Increased Te gradient.'
      case default
         print '(a)', 'ERROR: (create) TE_MODEL must be 1-5.'
@@ -250,7 +250,7 @@ subroutine create_set
                  a(j) = EXPRO_dlntidr(1,j)
               endif
            enddo
-           call logint(EXPRO_ti(i,:),a(:),EXPRO_rmin(:),EXPRO_n_exp,exm_pivot)
+           call math_scaleintv(a(:),EXPRO_rmin(:),EXPRO_n_exp,EXPRO_ti(i,:),'log')
            print '(a)', 'INFO: (create) Increased Ti gradient.'
         case default
            print '(a)', 'ERROR: (create) TI_MODEL must be 1-4.'
