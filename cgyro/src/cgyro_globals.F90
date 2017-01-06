@@ -69,6 +69,7 @@ module cgyro_globals
   real :: gamma_e
   real :: gamma_p
   real :: mach
+  integer :: cf_flag
   real :: error_tol
   integer :: mpi_rank_order
   real :: gamma_e_decay
@@ -376,19 +377,33 @@ module cgyro_globals
   ! Equilibrium/geometry arrays
   integer :: it0
   real :: d_theta
+  real :: bigR_th0
+  real :: bigR_r_th0
   real, dimension(:,:), allocatable   :: thetab
   real, dimension(:), allocatable   :: w_theta
+  real, dimension(:), allocatable   :: g_theta
   real, dimension(:), allocatable :: k_perp    
   real, dimension(:), allocatable   :: bmag
+  real, dimension(:), allocatable   :: bigR
   real, dimension(:,:), allocatable :: omega_stream
   real, dimension(:,:), allocatable :: omega_trap
   real, dimension(:,:), allocatable :: omega_rdrift
   real, dimension(:,:), allocatable :: omega_adrift
   real, dimension(:,:), allocatable :: omega_aprdrift
   real, dimension(:,:), allocatable :: omega_cdrift
-  real, dimension(:,:), allocatable :: omega_crdrift
+  real, dimension(:,:), allocatable :: omega_cdrift_r
   real, dimension(:),   allocatable :: omega_gammap
   complex, dimension(:),allocatable :: cg
+  ! for centrifugal rotation
+  real, dimension(:,:), allocatable :: lambda_rot
+  real, dimension(:,:), allocatable :: dlambda_rot
+  real, dimension(:,:), allocatable :: dens_rot
+  real, dimension(:,:), allocatable :: omega_rot_trap
+  real, dimension(:,:), allocatable :: omega_rot_u
+  real, dimension(:,:), allocatable :: omega_rot_drift
+  real, dimension(:,:), allocatable :: omega_rot_drift_r
+  real, dimension(:,:), allocatable :: omega_rot_star
+  real, dimension(:,:), allocatable :: omega_rot_drift_e
   !
   ! Number of gridpoints for Miller geometry integration grid
   integer, parameter :: geo_ntheta=1001 

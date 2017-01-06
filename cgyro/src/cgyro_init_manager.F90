@@ -99,18 +99,30 @@ subroutine cgyro_init_manager
   allocate(theta(n_theta))
   allocate(thetab(n_radial/box_size,n_theta))
   allocate(w_theta(n_theta))
+  allocate(g_theta(n_theta))
   allocate(bmag(n_theta))
   allocate(k_perp(nc))
+  allocate(bigR(n_theta))
   allocate(omega_stream(n_theta,n_species))
   allocate(omega_trap(n_theta,n_species))
   allocate(omega_rdrift(n_theta,n_species))
   allocate(omega_adrift(n_theta,n_species))
   allocate(omega_aprdrift(n_theta,n_species))
   allocate(omega_cdrift(n_theta,n_species))
-  allocate(omega_crdrift(n_theta,n_species))
+  allocate(omega_cdrift_r(n_theta,n_species))
   allocate(omega_gammap(n_theta))
   allocate(cg(-n_global:n_global))
-    
+
+  allocate(lambda_rot(n_theta,n_species))
+  allocate(dlambda_rot(n_theta,n_species))
+  allocate(dens_rot(n_theta,n_species))
+  allocate(omega_rot_trap(n_theta,n_species))
+  allocate(omega_rot_u(n_theta,n_species))
+  allocate(omega_rot_drift(n_theta,n_species))
+  allocate(omega_rot_drift_r(n_theta,n_species))
+  allocate(omega_rot_star(n_theta,n_species))
+  allocate(omega_rot_drift_e(n_theta,n_species))
+  
   if (test_flag == 0) then
 
      !----------------------------------------------------

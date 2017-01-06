@@ -123,8 +123,10 @@ subroutine cgyro_kernel
   if(allocated(theta))          deallocate(theta)
   if(allocated(thetab))         deallocate(thetab)
   if(allocated(w_theta))        deallocate(w_theta)
+  if(allocated(g_theta))        deallocate(g_theta)
   if(allocated(bmag))           deallocate(bmag)
   if(allocated(k_perp))         deallocate(k_perp)
+  if(allocated(bigR))           deallocate(bigR)
   if(allocated(omega_stream))   then
 !$acc exit data delete(omega_stream)
       deallocate(omega_stream)
@@ -134,9 +136,19 @@ subroutine cgyro_kernel
   if(allocated(omega_adrift))   deallocate(omega_adrift)
   if(allocated(omega_aprdrift)) deallocate(omega_aprdrift)
   if(allocated(omega_cdrift))   deallocate(omega_cdrift)
-  if(allocated(omega_crdrift))  deallocate(omega_crdrift)
+  if(allocated(omega_cdrift_r)) deallocate(omega_cdrift_r)
   if(allocated(omega_gammap))   deallocate(omega_gammap)
 
+  if(allocated(lambda_rot))        deallocate(lambda_rot)
+  if(allocated(dlambda_rot))       deallocate(dlambda_rot)
+  if(allocated(dens_rot))          deallocate(dens_rot)
+  if(allocated(omega_rot_trap))    deallocate(omega_rot_trap)
+  if(allocated(omega_rot_u))       deallocate(omega_rot_u)
+  if(allocated(omega_rot_drift))   deallocate(omega_rot_drift)
+  if(allocated(omega_rot_drift_r)) deallocate(omega_rot_drift_r)
+  if(allocated(omega_rot_star))    deallocate(omega_rot_star)
+  if(allocated(omega_rot_drift_e)) deallocate(omega_rot_drift_e)
+  
   if(allocated(indx_xi))       deallocate(indx_xi)
   if(allocated(px))            deallocate(px)
   if(allocated(energy))        then
