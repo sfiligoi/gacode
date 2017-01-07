@@ -123,9 +123,10 @@ subroutine cgyro_equilibrium
         ! Partial Finite-Mach centrifugal terms
         ! These are re-set to 0 in cgyro_init_rot if cf_flag=0
 
+        ! bhat dot grad lambda
         ! Add phi_rot term in cgyro_init_rotation
         dlambda_rot(it,is) = - (mach / rmaj /vth(is))**2 * GEO_bigr &
-             * GEO_bigr_t / GEO_g_theta
+             * GEO_bigr_t / (q*rmaj*GEO_g_theta)
 
         omega_rot_drift(it,is) = (mach/rmaj)**2 * GEO_bigr * rho &
              * mass(is)/(z(is)*GEO_b) * GEO_gq &
@@ -140,6 +141,22 @@ subroutine cgyro_equilibrium
              * (GEO_bigr**2 - bigR_th0**2)/rmaj**2) &
              - mach*gamma_p/vth(is)**2 * (GEO_bigr**2 - bigR_th0**2)/rmaj**2 &
              + (mach/vth(is))**2 * bigR_th0/rmaj**2 * bigR_r_th0
+
+        ! Multiply pressure theta derivative in cgyro_init_rotation
+        omega_rot_prdrift(it,is) = -betae_unit * rho*vth(is)**2 &
+             *mass(is)/(Z(is)*GEO_b) * GEO_bt/GEO_bp/GEO_b * GEO_captheta &
+             / GEO_grad_r 
+
+        ! Multiply pressure theta derivative in cgyro_init_rotation
+        omega_rot_prdrift_r(it,is) = -betae_unit * rho*vth(is)**2 &
+             *mass(is)/(Z(is)*GEO_b) * GEO_bt/GEO_b**2 *q*rmaj/rmin 
+
+        ! Multiply phi_rot theta derivative in cgyro_init_rotation
+        omega_rot_edrift(it,is) = -rho * GEO_bt/GEO_bp &
+             * GEO_captheta / GEO_grad_r 
+
+        ! Multiply phi_rot theta derivative in cgyro_init_rotation
+        omega_rot_edrift_r(it,is) = -rho/GEO_b * GEO_bt*q*rmaj/rmin 
         
      enddo
 

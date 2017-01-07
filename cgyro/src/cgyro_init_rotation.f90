@@ -6,7 +6,7 @@ subroutine cgyro_init_rotation
   
   implicit none
 
-  real, dimension(:), allocatable :: phi_rot, phi_rot_deriv
+  real, dimension(:), allocatable :: phi_rot, phi_rot_deriv, sum_pressure_t
   real :: phi_rot_avg
   integer, dimension(:), allocatable :: thcyc
   real, dimension(:), allocatable :: thcderiv
@@ -16,6 +16,7 @@ subroutine cgyro_init_rotation
 
   allocate(phi_rot(n_theta))
   allocate(phi_rot_deriv(n_theta))
+  allocate(sum_pressure_t(n_theta))
 
   if(cf_flag == 0) then
      dens_rot(:,:) = 1.0
@@ -27,8 +28,11 @@ subroutine cgyro_init_rotation
      omega_rot_u(:,:) = 0.0
      omega_rot_drift(:,:) = 0.0
      omega_rot_drift_r(:,:) = 0.0
+     omega_rot_prdrift(:,:) = 0.0
+     omega_rot_prdrift_r(:,:) = 0.0
      omega_rot_star(:,:) = 0.0
-     omega_rot_drift_e(:,:) = 0.0
+     omega_rot_edrift(:,:) = 0.0
+     omega_rot_edrift_r(:,:) = 0.0
      return
   endif
 
@@ -118,7 +122,8 @@ subroutine cgyro_init_rotation
   enddo
   deallocate(thcyc)
   deallocate(thcderiv)
-  
+
+  sum_pressure_t(:) = 0.0
   do is=1,n_species
      do it=1,n_theta
 
@@ -127,25 +132,46 @@ subroutine cgyro_init_rotation
         
         lambda_rot(it,is) = z(is)/temp(is) * (phi_rot(it) - phi_rot_avg) &
              - 0.5 * (mach * bigR(it) / rmaj / vth(is))**2
-        
+
+        ! bhat dot grad lambda
         dlambda_rot(it,is) = dlambda_rot(it,is) &
-             + z(is)/temp(is) * phi_rot_deriv(it) / g_theta(it) 
+             + z(is)/temp(is) * phi_rot_deriv(it) / (q*rmaj*g_theta(it)) 
            
         omega_rot_trap(it,is) = -0.5*sqrt(2.0)*vth(is) &
              /(q*rmaj)*dlambda_rot(it,is)
 
-        omega_rot_u(it,is) = -vth(is)/(sqrt(2.0)*q*rmaj) *dlambda_rot(it,is)
+        omega_rot_u(it,is) = -vth(is)/sqrt(2.0)*dlambda_rot(it,is)
 
         omega_rot_star(it,is) = omega_rot_star(it,is) &
              + dlntdr(is)*z(is)/temp(is)*phi_rot(it) 
 
-        omega_rot_drift_e(it,is) = 0.0  ! EAB: NOT YET SURE ABOUT THIS
+        omega_rot_edrift(it,is) =  omega_rot_edrift(it,is) &
+             * phi_rot_deriv(it) / (q*rmaj*g_theta(it)) 
+
+        omega_rot_edrift_r(it,is) = omega_rot_edrift_r(it,is) &
+             * phi_rot_deriv(it) / (q*rmaj*g_theta(it))
         
+        ! bhat dot grad pressure
+        sum_pressure_t(it) = sum_pressure_t(it) - dens(is)*temp(is) &
+             * dlambda_rot(it,is)
+     enddo
+  enddo  
+
+  ! 1/(ne(0)Te) bhat dot grad pressure
+  sum_pressure_t(:) = sum_pressure_t(:)/(dens_ele*temp_ele)
+  
+  do is=1,n_species
+     do it=1,n_theta
+        omega_rot_prdrift(it,is) = omega_rot_prdrift(it,is) &
+             * sum_pressure_t(it)
         
+        omega_rot_prdrift_r(it,is) = omega_rot_prdrift_r(it,is) &
+             * sum_pressure_t(it)
      enddo
   enddo
-
+        
   deallocate(phi_rot)
   deallocate(phi_rot_deriv)
+  deallocate(sum_pressure_t)
   
 end subroutine cgyro_init_rotation

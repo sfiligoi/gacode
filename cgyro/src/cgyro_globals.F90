@@ -402,8 +402,11 @@ module cgyro_globals
   real, dimension(:,:), allocatable :: omega_rot_u
   real, dimension(:,:), allocatable :: omega_rot_drift
   real, dimension(:,:), allocatable :: omega_rot_drift_r
+  real, dimension(:,:), allocatable :: omega_rot_prdrift
+  real, dimension(:,:), allocatable :: omega_rot_prdrift_r
+  real, dimension(:,:), allocatable :: omega_rot_edrift
+  real, dimension(:,:), allocatable :: omega_rot_edrift_r
   real, dimension(:,:), allocatable :: omega_rot_star
-  real, dimension(:,:), allocatable :: omega_rot_drift_e
   !
   ! Number of gridpoints for Miller geometry integration grid
   integer, parameter :: geo_ntheta=1001 

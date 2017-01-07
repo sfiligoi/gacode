@@ -331,10 +331,6 @@ subroutine cgyro_init_arrays
         ! omega_cdrift - mach component
         omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
              -omega_cdrift(it,is)*vel(ie)*xi(ix)*i_c*k_theta
-
-        ! omega_cdrift - cf mach component
-        omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
-             -omega_rot_drift(it,is)*i_c*k_theta
         
         u = (2.0*pi/n_radial)*px(ir)
 
@@ -351,20 +347,50 @@ subroutine cgyro_init_arrays
         ! omega_cdrift_r from mach
         omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) & 
              -omega_cdrift_r(it,is)*vel(ie)*xi(ix)*&
-             (n_radial/length)*(i_c*u) 
-
-        ! omega_rot_drift_r from cf mach
-        omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) & 
-             -omega_rot_drift_r(it,is)*(n_radial/length)*(i_c*u) 
+             (n_radial/length)*(i_c*u)  
         
-        ! omega_star and rotation shearing and cf rotation
+        ! omega_star and rotation shearing 
         carg = -i_c*k_theta*rho*(dlnndr(is)+dlntdr(is)*(energy(ie)-1.5)) &
              -i_c*k_theta*rho*(sqrt(2.0*energy(ie))*xi(ix)/vth(is) &
-             *omega_gammap(it)) &
-             -i_c*k_theta*rho*omega_rot_star(it,is)
+             *omega_gammap(it)) 
 
         omega_s(:,ic,iv_loc) = carg*jvec_c(:,ic,iv_loc)
 
+        ! centrifugal (cf) components
+        if(cf_flag == 1) then
+           
+           ! omega_rot_drift (i ktheta) from cf mach 
+           omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
+                -omega_rot_drift(it,is)*i_c*k_theta
+           
+           ! omega_rot_drift_r (d/dr) from cf mach
+           omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) & 
+                -omega_rot_drift_r(it,is)*(n_radial/length)*(i_c*u)
+
+           ! omega_rot_prdrift dp/dtheta (ktheta) from cf mach 
+           omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
+                -omega_rot_prdrift(it,is)*i_c*k_theta &
+                *energy(ie)*xi(ix)**2
+           
+           ! omega_rot_prdrift_r dp/dtheta (d/dr) from cf mach
+           omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
+                -omega_rot_prdrift_r(it,is)*(n_radial/length)*(i_c*u) &
+                *energy(ie)*xi(ix)**2
+
+           ! omega_rot_edrift dphi/dtheta (ktheta) from cf mach 
+           omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
+                -omega_rot_edrift(it,is)*i_c*k_theta
+           
+           ! omega_rot_edrift_r dphi/dtheta (d/dr) from cf mach
+           omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
+                -omega_rot_edrift_r(it,is)*(n_radial/length)*(i_c*u) 
+           
+           ! omega_star from cf mach
+           carg = -i_c*k_theta*rho*omega_rot_star(it,is)
+           omega_s(:,ic,iv_loc) = carg*jvec_c(:,ic,iv_loc)
+           
+        endif
+           
      enddo
   enddo
 !$acc enter data copyin(omega_cap_h,omega_h,omega_s)

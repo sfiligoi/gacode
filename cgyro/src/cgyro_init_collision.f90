@@ -116,10 +116,6 @@ subroutine cgyro_init_collision
                       * (2.0*exp(-xb*xb)/(xb**2*sqrt(pi)) &
                       + 2.0*exp(-xb*xb)/sqrt(pi) - erf(xb)/xb**3))
               endif
-
-           case(6)
-              ! Const nu(energy)
-              nu_d(ie,is,js) = tauinv_ab
               
            end select
 
@@ -248,7 +244,7 @@ subroutine cgyro_init_collision
 
   select case (collision_model)
 
-  case(1,2,3,6)
+  case(1,2,3)
      if (collision_mom_restore == 1) then
         do is=1,n_species
            do js=1,n_species
@@ -365,7 +361,6 @@ subroutine cgyro_init_collision
                     jx = ix_v(jv)
                     je = ie_v(jv)
 
-                    ! EAB: 07/08/16 fixed bug, had (vtb/vta)**2
                     if (abs(rs(is,js)) > epsilon(0.)) then 
                        cmat(iv,jv,ic_loc) &
                             = cmat(iv,jv,ic_loc) &
@@ -444,12 +439,6 @@ subroutine cgyro_init_collision
                     je = ie_v(jv)
 
                     if (abs(rs(is,js)) > epsilon(0.0)) then
-                       !cmat(iv,jv,ic_loc) &
-                       !     = cmat(iv,jv,ic_loc) &
-                       !     - temp(js)/temp(is) * dens(js) &
-                       !     * rsvec(is,js,ix,ie) &
-                       !     / rs(is,js) * rsvec(js,is,jx,je) &
-                       !     * w_xi(jx)*w_e(je)
                        cmat(iv,jv,ic_loc) &
                             = cmat(iv,jv,ic_loc) &
                             - temp(js)/temp(is) * dens(js) &
@@ -495,13 +484,6 @@ subroutine cgyro_init_collision
                     je = ie_v(jv)
 
                     if (abs(rs(is,js)) > epsilon(0.0)) then
-                       !cmat(iv,jv,ic_loc) &
-                       !     = cmat(iv,jv,ic_loc) &
-                       !     - temp(js)/temp(is) * dens(js) &
-                       !     * rsvec(is,js,ix,ie) &
-                       !     * bessel(is,ix,ie,ic_loc,0) / rs(is,js) &
-                       !     * rsvec(js,is,jx,je) * bessel(js,jx,je,ic_loc,0) &
-                       !     * w_xi(jx)*w_e(je)
                        cmat(iv,jv,ic_loc) &
                             = cmat(iv,jv,ic_loc) &
                             - temp(js)/temp(is) * dens(js) &
@@ -535,6 +517,7 @@ subroutine cgyro_init_collision
 !$omp& shared(betae_unit,sum_den_h) &
 !$omp& shared(it_c,ir_c,px,is_v,ix_v,ie_v,ctest,xi_deriv_mat) &
 !$omp& shared(temp,jvec_v,omega_trap,dens,energy,vel) &
+!$omp& shared(omega_rot_trap,omega_rot_u,e_deriv1_mat,e_max) &
 !$omp& shared(k_perp,vth,mass,z,bmag,nu_d,xi,nu_par,w_e,w_xi) &
 !$omp& private(ic,ic_loc,it,ir,info) &
 !$omp& private(iv,is,ix,ie,jv,js,jx,je,ks) &
@@ -586,20 +569,30 @@ subroutine cgyro_init_collision
                  enddo
               endif
 
-              ! Trapping (not part of collision operator but contains xi-derivative)
-              if (collision_model /= 6) then
-                 if (is == js .and. ie == je) then
-                    cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
-                         + (0.5*delta_t) * omega_trap(it,is) &
-                         * vel(ie) * (1.0 - xi(ix)**2) &
-                         * xi_deriv_mat(ix,jx) 
-                    amat(iv,jv) = amat(iv,jv) &
-                         - (0.5*delta_t) * omega_trap(it,is) &
-                         * vel(ie) * (1.0 - xi(ix)**2) &
-                         * xi_deriv_mat(ix,jx) 
-                 endif
+              ! Trapping 
+              ! (not part of collision operator but contains xi-derivative)
+              if (is == js .and. ie == je) then
+                 cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
+                      + (0.5*delta_t) * (omega_trap(it,is) * vel(ie) &
+                      + omega_rot_trap(it,is) / vel(ie)) &
+                      * (1.0 - xi(ix)**2) * xi_deriv_mat(ix,jx) 
+                 amat(iv,jv) = amat(iv,jv) &
+                      - (0.5*delta_t) * (omega_trap(it,is) * vel(ie) &
+                      + omega_rot_trap(it,is) / vel(ie)) &
+                      * (1.0 - xi(ix)**2) * xi_deriv_mat(ix,jx) 
               endif
 
+              ! Rotation energy derivative
+              ! (not part of collision operator but contains e-derivative)
+              if (is == js .and. ix == jx) then
+                 cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
+                      + (0.5*delta_t) * omega_rot_u(it,is) * xi(ix) &
+                      * e_deriv1_mat(ie,je)/sqrt(1.0*e_max)
+                 amat(iv,jv) = amat(iv,jv) &
+                      - (0.5*delta_t) * omega_rot_u(it,is) * xi(ix) &
+                      * e_deriv1_mat(ie,je)/sqrt(1.0*e_max)
+              endif
+              
               ! Finite-kperp test particle corrections 
               if (collision_model == 4 .and. collision_kperp == 1) then
                  if (is == js .and. jx == ix .and. je == ie) then
