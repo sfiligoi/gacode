@@ -225,9 +225,8 @@ subroutine cgyro_check
         call cgyro_error('Collision frequencies must be non-negative.')
         return
      endif
-     if (z(is) == 0) then
-        call cgyro_error('Charge must be non-zero.')
-        return
+     if (abs(z(is)) < epsilon(0.0)) then
+        call cgyro_error('Charges must be non-zero.')
      endif
   enddo
   !------------------------------------------------------------------------

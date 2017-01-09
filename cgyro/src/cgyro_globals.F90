@@ -102,7 +102,7 @@ module cgyro_globals
   !
   integer :: n_species
   real :: nu_ee
-  integer, dimension(6) :: z
+  real, dimension(6) :: z
   real, dimension(6) :: mass
   real, dimension(6) :: dens
   real, dimension(6) :: temp

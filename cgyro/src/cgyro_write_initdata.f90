@@ -82,9 +82,9 @@ subroutine cgyro_write_initdata
 
      write(io,*)
      write(io,'(a)') &
-          'indx  z     n/n_norm     T/T_norm     m/m_norm      a/Ln         a/Lt         nu'
+          'indx    z      n/n_norm     T/T_norm     m/m_norm      a/Ln         a/Lt         nu'
      do is=1,n_species
-        write(io,'(t2,i2,2x,i2,2x,6(1pe11.4,2x))') &
+        write(io,'(t2,i2,2x,f5.1,2x,6(1pe11.4,2x))') &
              is,z(is),dens(is),temp(is),mass(is),dlnndr(is),dlntdr(is),nu(is)
      enddo
 
@@ -135,7 +135,7 @@ subroutine cgyro_write_initdata
      write (io,fmtstr) temp_norm
      write (io,fmtstr) vth_norm
      do is=1,n_species
-        write (io,fmtstr) 1.0*z(is)
+        write (io,fmtstr) z(is)
         write (io,fmtstr) mass(is)
         write (io,fmtstr) dens(is)
         write (io,fmtstr) temp(is)

@@ -23,7 +23,7 @@ subroutine cgyro_init_collision_simple
 
            xa = vel(ie)
            xb = xa * vth(is) / vth(js)
-           tauinv_ab = nu(is) * (1.0*z(js))**2 / (1.0*z(is))**2 &
+           tauinv_ab = nu(is) * z(js)**2 / z(is)**2 &
                 * dens(js)/dens(is)
 
            ! Only ee,ei Connor-like Lorentz

@@ -17,7 +17,7 @@ subroutine cgyro_make_profiles
   !
   num_ele = 0
   do is=1,n_species
-     if (z(is) == -1) then
+     if (z(is) < 0) then
         num_ele = num_ele + 1
         is_ele = is
      endif
@@ -147,7 +147,7 @@ subroutine cgyro_make_profiles
      mach     = mach/vth_norm
 
      do is=1,n_species
-        nu(is) = nu_ee *(1.0*z(is))**4 &
+        nu(is) = nu_ee *z(is)**4 &
              * dens(is) / dens_ele &
              * sqrt(mass_ele/mass(is)) * (temp_ele/temp(is))**1.5
      enddo
@@ -203,7 +203,7 @@ subroutine cgyro_make_profiles
         vth(is) = sqrt(temp(is)/mass(is))
 
         ! collision frequency
-        nu(is) = nu_ee *(1.0*z(is))**4 &
+        nu(is) = nu_ee *z(is)**4 &
              * dens(is) / dens_ele &
              * sqrt(mass_ele/mass(is)) * (temp_ele/temp(is))**1.5
 

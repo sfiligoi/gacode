@@ -94,7 +94,7 @@ subroutine cgyro_read_input
   call cgyro_readbc_real(nu_ee)
 
   do is=1,6
-     call cgyro_readbc_int(xint) ; z(is) = xint
+     call cgyro_readbc_real(x)   ; z(is) = x
      call cgyro_readbc_real(x)   ; mass(is) = x
      call cgyro_readbc_real(x)   ; dens(is) = x
      call cgyro_readbc_real(x)   ; temp(is) = x
