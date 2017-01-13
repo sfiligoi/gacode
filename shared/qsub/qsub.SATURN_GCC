@@ -6,5 +6,10 @@ echo "#SBATCH -o $SIMDIR/batch.out" >> $bfile
 echo "#SBATCH -e $SIMDIR/batch.err" >> $bfile
 echo "#SBATCH -t $WALLTIME" >> $bfile
 echo "#SBATCH -n $cores_used" >> $bfile
-echo "#SBATCH -p short,medium" >> $bfile
+if [ "$QUEUE" -eq "null_queue" ]
+then
+  echo "#SBATCH -p medium" >> $bfile
+else
+  echo "#SBATCH -p $QUEUE" >> $bfile
+fi
 echo "$CODE -e $LOCDIR -n $nmpi -nomp $nomp -numa $numa -mpinuma $mpinuma -p $SIMROOT" >> $bfile
