@@ -391,7 +391,7 @@ subroutine cgyro_init_arrays
            
            ! omega_star from cf mach
            carg = -i_c*k_theta*rho*omega_rot_star(it,is)
-           omega_s(:,ic,iv_loc) = carg*jvec_c(:,ic,iv_loc)
+           omega_s(:,ic,iv_loc) = omega_s(:,ic,iv_loc)+carg*jvec_c(:,ic,iv_loc)
            
         endif
            
