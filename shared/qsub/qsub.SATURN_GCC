@@ -6,7 +6,7 @@ echo "#SBATCH -o $SIMDIR/batch.out" >> $bfile
 echo "#SBATCH -e $SIMDIR/batch.err" >> $bfile
 echo "#SBATCH -t $WALLTIME" >> $bfile
 echo "#SBATCH -n $cores_used" >> $bfile
-if [ "$QUEUE" -eq "null_queue" ]
+if [ "$QUEUE" = "null_queue" ]
 then
   echo "#SBATCH -p medium" >> $bfile
 else
