@@ -20,7 +20,7 @@ subroutine cgyro_field_v
 
   implicit none
 
-  integer :: is,ie,ix
+  integer :: is,ie,ix,it
   complex :: fac
 
   
@@ -30,14 +30,15 @@ subroutine cgyro_field_v
 
   ! Poisson and Ampere RHS integrals of H
 
-!$omp parallel do private(ic_loc,iv,is,ix,ie,fac)
+!$omp parallel do private(ic_loc,iv,is,ix,ie,fac,it)
   do ic=nc1,nc2
      ic_loc = ic-nc1+1
+     it = it_c(ic)
      do iv=1,nv
         is = is_v(iv)
         ix = ix_v(iv)
         ie = ie_v(iv)
-        fac = w_e(ie)*w_xi(ix)*z(is)*dens(is)*cap_h_v(ic_loc,iv)
+        fac = w_e(ie)*w_xi(ix)*z(is)*dens(is)*dens_rot(it,is)*cap_h_v(ic_loc,iv)
         field_loc(:,ic) = field_loc(:,ic)+fac*jvec_v(:,ic_loc,iv) 
      enddo
   enddo
@@ -73,7 +74,7 @@ subroutine cgyro_field_c
 
   implicit none
 
-  integer :: is
+  integer :: is,it
   complex, dimension(nc) :: tmp
   
   call timer_lib_in('field_h')
@@ -84,9 +85,13 @@ subroutine cgyro_field_c
 
 !$omp parallel private(ic)
 !$omp do reduction(+:field_loc)
-  do iv_loc=1,nv_loc
+  do iv=nv1,nv2
+     iv_loc = iv-nv1+1
+     is = is_v(iv)
      do ic=1,nc
-        field_loc(:,ic) = field_loc(:,ic)+(dvfac(iv_loc)*jvec_c(:,ic,iv_loc))*h_x(ic,iv_loc)
+        it = it_c(ic)
+        field_loc(:,ic) = field_loc(:,ic)+(dvfac(iv_loc)*jvec_c(:,ic,iv_loc))&
+             *dens_rot(it,is)*h_x(ic,iv_loc)
      enddo
   enddo
 !$omp end do

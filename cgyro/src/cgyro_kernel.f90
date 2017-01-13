@@ -142,6 +142,7 @@ subroutine cgyro_kernel
   if(allocated(lambda_rot))          deallocate(lambda_rot)
   if(allocated(dlambda_rot))         deallocate(dlambda_rot)
   if(allocated(dens_rot))            deallocate(dens_rot)
+  if(allocated(dens_ele_rot))        deallocate(dens_ele_rot)
   if(allocated(omega_rot_trap))      deallocate(omega_rot_trap)
   if(allocated(omega_rot_u))         deallocate(omega_rot_u)
   if(allocated(omega_rot_drift))     deallocate(omega_rot_drift)

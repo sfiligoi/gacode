@@ -362,7 +362,7 @@ module cgyro_globals
   integer :: gksp_nelem, gksp_nmax
   !
   ! Field solve variables
-  real :: sum_den_h
+  real, dimension(:), allocatable :: sum_den_h
   real, dimension(:), allocatable :: sum_den_x, sum_cur_x
   real, dimension(:), allocatable :: vfac
   !
@@ -398,6 +398,7 @@ module cgyro_globals
   real, dimension(:,:), allocatable :: lambda_rot
   real, dimension(:,:), allocatable :: dlambda_rot
   real, dimension(:,:), allocatable :: dens_rot
+  real, dimension(:),   allocatable :: dens_ele_rot
   real, dimension(:,:), allocatable :: omega_rot_trap
   real, dimension(:,:), allocatable :: omega_rot_u
   real, dimension(:,:), allocatable :: omega_rot_drift

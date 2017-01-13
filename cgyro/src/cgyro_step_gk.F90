@@ -59,7 +59,7 @@ subroutine cgyro_rhs(ij)
   implicit none
 
   integer, intent(in) :: ij
-  integer :: is,ir,irp,it
+  integer :: is,ir,it
   integer :: id,jc
   integer :: p
   real :: rval,rval2

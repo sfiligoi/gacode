@@ -258,7 +258,8 @@ subroutine cgyro_init_collision
         ic_loc = 0
         do ic=nc1,nc2
            ic_loc = ic_loc+1
-
+           it = it_c(ic)
+           
            do iv=1,nv  
               is = is_v(iv)
               ix = ix_v(iv)
@@ -272,7 +273,8 @@ subroutine cgyro_init_collision
                  if (abs(rs(is,js)) > epsilon(0.0)) then
                     cmat(iv,jv,ic_loc) = &
                          cmat(iv,jv,ic_loc) &
-                         + 3.0 * (mass(js)/mass(is)) * (dens(js)/dens(is)) &
+                         + 3.0 * (mass(js)/mass(is)) &
+                         * (dens(js)/dens(is)) * dens_rot(it,js) &
                          * (vth(js)/vth(is)) * nu_s(ie,is,js) &
                          * vel(ie) * xi(ix) &
                          * nu_s(je,js,is) * sqrt(energy(je)) &
@@ -321,7 +323,8 @@ subroutine cgyro_init_collision
            ic_loc = 0
            do ic=nc1,nc2
               ic_loc = ic_loc+1
-
+              it = it_c(ic)
+              
               do iv=1,nv  
                  is = is_v(iv)
                  ix = ix_v(iv)
@@ -335,7 +338,8 @@ subroutine cgyro_init_collision
                     if (abs(rs(is,js))>epsilon(0.0)) then
                        cmat(iv,jv,ic_loc) &
                             = cmat(iv,jv,ic_loc) &
-                            - mass(js)/mass(is) * (dens(js)/dens(is)) &
+                            - mass(js)/mass(is) &
+                            * (dens(js)/dens(is)) * dens_rot(it,js) &
                             * (vth(js)/vth(is)) * rsvec(is,js,ix,ie) &
                             / rs(is,js) * rsvec(js,is,jx,je) &
                             * w_e(je)*w_xi(jx)
@@ -364,14 +368,16 @@ subroutine cgyro_init_collision
                     if (abs(rs(is,js)) > epsilon(0.)) then 
                        cmat(iv,jv,ic_loc) &
                             = cmat(iv,jv,ic_loc) &
-                            - mass(js)/mass(is) * (dens(js)/dens(is)) &
+                            - mass(js)/mass(is) &
+                            * (dens(js)/dens(is)) * dens_rot(it,js) &
                             * (vth(js)/vth(is)) * rsvec(is,js,ix,ie) &
                             * bessel(is,ix,ie,ic_loc,0) / rs(is,js) &
                             * rsvec(js,is,jx,je) * bessel(js,jx,je,ic_loc,0) &
                             * w_xi(jx)*w_e(je)
                        cmat(iv,jv,ic_loc) &
                             = cmat(iv,jv,ic_loc) &
-                            - mass(js)/mass(is) * (dens(js)/dens(is)) &
+                            - mass(js)/mass(is) &
+                            * (dens(js)/dens(is)) * dens_rot(it,js) &
                             * (vth(js)/vth(is)) * rsvec(is,js,ix,ie) &
                             * bessel(is,ix,ie,ic_loc,1) &
                             * sqrt(1.0-xi(ix)**2)/xi(ix) / rs(is,js) &
@@ -427,7 +433,8 @@ subroutine cgyro_init_collision
            ic_loc = 0
            do ic=nc1,nc2
               ic_loc = ic_loc+1
-
+              it = it_c(ic)
+              
               do iv=1,nv  
                  is = is_v(iv)
                  ix = ix_v(iv)
@@ -441,7 +448,7 @@ subroutine cgyro_init_collision
                     if (abs(rs(is,js)) > epsilon(0.0)) then
                        cmat(iv,jv,ic_loc) &
                             = cmat(iv,jv,ic_loc) &
-                            - temp(js)/temp(is) * dens(js) &
+                            - temp(js)/temp(is) * dens(js) * dens_rot(it,js) &
                             * rsvec(is,js,ix,ie) &
                             / rs(is,js) * rsvect(js,is,jx,je) 
                     endif
@@ -486,7 +493,7 @@ subroutine cgyro_init_collision
                     if (abs(rs(is,js)) > epsilon(0.0)) then
                        cmat(iv,jv,ic_loc) &
                             = cmat(iv,jv,ic_loc) &
-                            - temp(js)/temp(is) * dens(js) &
+                            - temp(js)/temp(is) * dens(js) * dens_rot(it,js) &
                             * rsvec(is,js,ix,ie) &
                             * bessel(is,ix,ie,ic_loc,0) / rs(is,js) &
                             * rsvect(js,is,jx,je)
@@ -513,7 +520,7 @@ subroutine cgyro_init_collision
 !$omp  parallel do  default(none) &
 !$omp& shared(nc1,nc2,nv,n,delta_t,n_species,rho,is_ele,n_field) &
 !$omp& shared(collision_model,collision_kperp,collision_field_model) &
-!$omp& shared(ae_flag,lambda_debye,dens_ele,temp_ele) &
+!$omp& shared(ae_flag,lambda_debye,dens_ele,temp_ele,dens_rot) &
 !$omp& shared(betae_unit,sum_den_h) &
 !$omp& shared(it_c,ir_c,px,is_v,ix_v,ie_v,ctest,xi_deriv_mat) &
 !$omp& shared(temp,jvec_v,omega_trap,dens,energy,vel) &
@@ -563,9 +570,11 @@ subroutine cgyro_init_collision
               if (is == js) then
                  do ks=1,n_species
                     cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
-                         - (0.5*delta_t) * ctest(is,ks,ix,jx,ie,je)
+                         - (0.5*delta_t) * ctest(is,ks,ix,jx,ie,je) &
+                         * dens_rot(it,ks)
                     amat(iv,jv) = amat(iv,jv) &
-                         + (0.5*delta_t) * ctest(is,ks,ix,jx,ie,je)
+                         + (0.5*delta_t) * ctest(is,ks,ix,jx,ie,je) &
+                         * dens_rot(it,ks)
                  enddo
               endif
 
@@ -626,14 +635,14 @@ subroutine cgyro_init_collision
                     cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
                          - z(is)/temp(is) * jvec_v(1,ic_loc,iv) &
                          / (k_perp(ic)**2 * lambda_debye**2 &
-                         * dens_ele / temp_ele + sum_den_h) &
-                         * z(js)*dens(js) &
+                         * dens_ele / temp_ele + sum_den_h(it)) &
+                         * z(js)*dens(js)*dens_rot(it,js) &
                          * jvec_v(1,ic_loc,jv) * w_e(je) * w_xi(jx) 
                     amat(iv,jv) = amat(iv,jv) &
                          - z(is)/temp(is) * jvec_v(1,ic_loc,iv) &
                          / (k_perp(ic)**2 * lambda_debye**2 &
-                         * dens_ele / temp_ele + sum_den_h) &
-                         * z(js)*dens(js) &
+                         * dens_ele / temp_ele + sum_den_h(it)) &
+                         * z(js)*dens(js)*dens_rot(it,js) &
                          * jvec_v(1,ic_loc,jv) * w_e(je) * w_xi(jx) 
                  endif
 

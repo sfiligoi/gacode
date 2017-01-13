@@ -6,7 +6,6 @@ subroutine cgyro_read_input
   implicit none
 
   integer :: is
-  integer :: xint
   real :: x
   character (len=1) :: cdummy
 

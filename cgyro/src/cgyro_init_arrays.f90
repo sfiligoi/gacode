@@ -126,17 +126,21 @@ subroutine cgyro_init_arrays
 
   enddo
 
-  sum_den_h = 0.0
+  allocate(sum_den_h(n_theta))
+  sum_den_h(:) = 0.0
   do is=1,n_species
      do ie=1,n_energy
         do ix=1,n_xi
-           sum_den_h = sum_den_h+w_xi(ix)*w_e(ie)*z(is)**2/temp(is)*dens(is)
+           do it=1,n_theta
+              sum_den_h(it) = sum_den_h(it) + w_xi(ix)*w_e(ie) &
+                   *z(is)**2/temp(is)*dens(is)*dens_rot(it,is)
+           enddo
         enddo
      enddo
   enddo
 
   if (ae_flag == 1) then
-     sum_den_h = sum_den_h+dens_ele/temp_ele
+     sum_den_h(:) = sum_den_h(:) + dens_ele*dens_ele_rot(:)/temp_ele
   endif
 
   allocate(sum_den_x(nc))
@@ -155,10 +159,10 @@ subroutine cgyro_init_arrays
      do ir=1,n_radial
         do it=1,n_theta
            hzf(ir,it,it) = k_perp(ic_c(ir,it))**2 * lambda_debye**2 &
-                * dens_ele/temp_ele + sum_den_h
+                * dens_ele/temp_ele + sum_den_h(it)
            do jt=1,n_theta
               hzf(ir,it,jt) = hzf(ir,it,jt) &
-                   - dens_ele/temp_ele*w_theta(jt)
+                   - dens_ele*dens_ele_rot(it)/temp_ele*w_theta(jt)
            enddo
         enddo
      enddo
@@ -180,7 +184,7 @@ subroutine cgyro_init_arrays
                 * dens_ele/temp_ele+sum_den_x(ic_c(ir,it))
            do jt=1,n_theta
               xzf(ir,it,jt) = xzf(ir,it,jt) &
-                   - dens_ele/temp_ele*w_theta(jt)
+                   - dens_ele*dens_ele_rot(it)/temp_ele*w_theta(jt)
            enddo
         enddo
      enddo

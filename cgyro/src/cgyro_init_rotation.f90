@@ -20,6 +20,7 @@ subroutine cgyro_init_rotation
 
   if(cf_flag == 0) then
      dens_rot(:,:) = 1.0
+     dens_ele_rot(:) = 1.0
      phi_rot(:)  = 0.0
      phi_rot_deriv(:)  = 0.0
      lambda_rot(:,:) = 0.0
@@ -35,7 +36,7 @@ subroutine cgyro_init_rotation
      omega_rot_edrift_r(:,:) = 0.0
      return
   endif
-
+  
   ! solve the quasi-neutrality relation for poloidal part of phi
 
   ! partial component of n/n(theta0) 
@@ -46,7 +47,14 @@ subroutine cgyro_init_rotation
              * (bigR(it)**2 - bigR_th0**2) / rmaj**2) 
      enddo
   enddo
-  
+
+  if(ae_flag == 1) then
+     dens_ele_rot(:) = 1.0
+  else
+     dens_ele_rot(:) = exp(0.5 * (mach/vth(is_ele))**2 &
+          * (bigR(:)**2 - bigR_th0**2) / rmaj**2)
+  endif
+     
   phi_rot_avg = 0.0
   x = 0.05          ! initial guess for phi_rot(1)
   do it=1,n_theta
@@ -157,6 +165,8 @@ subroutine cgyro_init_rotation
      enddo
   enddo  
 
+  dens_ele_rot(:) = dens_ele_rot(:) * exp(1.0/temp_ele*phi_rot(:))
+  
   ! 1/(ne(0)Te) bhat dot grad pressure
   sum_pressure_t(:) = sum_pressure_t(:)/(dens_ele*temp_ele)
   
