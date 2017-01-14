@@ -61,7 +61,7 @@ subroutine cgyro_read_input
   call cgyro_readbc_real(gamma_e)
   call cgyro_readbc_real(gamma_p)
   call cgyro_readbc_real(mach)
-  call cgyro_readbc_int(cf_flag)
+  call cgyro_readbc_int(cf_model)
   call cgyro_readbc_real(error_tol)
   call cgyro_readbc_int(mpi_rank_order)
   call cgyro_readbc_real(gamma_e_decay)

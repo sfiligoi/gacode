@@ -14,15 +14,9 @@ subroutine cgyro_init_rotation
   integer :: is, it, j, id, jt
   integer, parameter :: jmax = 200
 
-  allocate(phi_rot(n_theta))
-  allocate(phi_rot_deriv(n_theta))
-  allocate(sum_pressure_t(n_theta))
-
-  if(cf_flag == 0) then
+  if(cf_model == 0) then
      dens_rot(:,:) = 1.0
      dens_ele_rot(:) = 1.0
-     phi_rot(:)  = 0.0
-     phi_rot_deriv(:)  = 0.0
      lambda_rot(:,:) = 0.0
      dlambda_rot(:,:) = 0.0
      omega_rot_trap(:,:) = 0.0
@@ -36,6 +30,10 @@ subroutine cgyro_init_rotation
      omega_rot_edrift_r(:,:) = 0.0
      return
   endif
+
+  allocate(phi_rot(n_theta))
+  allocate(phi_rot_deriv(n_theta))
+  allocate(sum_pressure_t(n_theta))
   
   ! solve the quasi-neutrality relation for poloidal part of phi
 
@@ -122,7 +120,7 @@ subroutine cgyro_init_rotation
   
   do it=1,n_theta
      phi_rot_deriv(it) = 0.0
-     do id=-nup_theta,nup_theta
+     do id=-2,2
         jt = thcyc(it+id)
         phi_rot_deriv(it) = phi_rot_deriv(it) &
              + phi_rot(jt) * thcderiv(id) 
@@ -179,7 +177,41 @@ subroutine cgyro_init_rotation
              * sum_pressure_t(it)
      enddo
   enddo
-        
+
+  ! just cf trapping (no coriolis and no cf drift)
+  if(cf_model == 2) then
+
+     omega_cdrift(:,:) = 0.0
+     omega_cdrift_r(:,:) = 0.0
+     
+     omega_rot_drift(:,:) = 0.0
+     omega_rot_drift_r(:,:) = 0.0
+     
+  endif
+
+  ! just cf drift (no coriolis and no cf trap)
+  if(cf_model == 3) then
+
+     omega_cdrift(:,:) = 0.0
+     omega_cdrift_r(:,:) = 0.0
+     
+     dens_rot(:,:) = 1.0
+     dens_ele_rot(:) = 1.0
+     phi_rot(:)  = 0.0
+     phi_rot_deriv(:)  = 0.0
+     lambda_rot(:,:) = 0.0
+     dlambda_rot(:,:) = 0.0
+     omega_rot_trap(:,:) = 0.0
+     omega_rot_u(:,:) = 0.0
+     omega_rot_prdrift(:,:) = 0.0
+     omega_rot_prdrift_r(:,:) = 0.0
+     omega_rot_star(:,:) = 0.0
+     omega_rot_edrift(:,:) = 0.0
+     omega_rot_edrift_r(:,:) = 0.0
+     
+  endif
+  
+  
   deallocate(phi_rot)
   deallocate(phi_rot_deriv)
   deallocate(sum_pressure_t)

@@ -212,13 +212,7 @@ subroutine cgyro_check
   !------------------------------------------------------------------------
   ! Rotation model
   !
-  select case (cf_flag)
-
-  case(0)
-     call cgyro_info('Rotation model: No centrifugal effects')
-     
-  case(1)
-     call cgyro_info('Rotation model: With centrifugal effects')
+  if(cf_model > 0) then
      if(n_field > 1) then
         call cgyro_error('Electromagentic effects not available with cf_flag=1')
         return
@@ -227,9 +221,22 @@ subroutine cgyro_check
         call cgyro_error('Implicit method not available with cf_flag=1')
         return
      endif
+  endif
+  
+  select case (cf_model)
+
+  case(0)
+     call cgyro_info('Centrifugal model: none')
+     
+  case(1)
+     call cgyro_info('Centrifugal model: included (all)')
+  case(2)
+     call cgyro_info('Centrifugal model: only cf trap (no coriolis)')
+  case(3)
+     call cgyro_info('Centrifugal model: only cf drift (no coriolis)') 
         
   case default
-     call cgyro_error('Invalid value for cf_flag')
+     call cgyro_error('Invalid value for cf_model')
      return
 
   end select

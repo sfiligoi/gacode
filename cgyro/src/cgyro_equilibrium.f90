@@ -112,7 +112,7 @@ subroutine cgyro_equilibrium
         omega_aprdrift(it,is) = 2.0*rho*vth(is)**2 &
              *mass(is)/(Z(is)*GEO_b)*GEO_gq/rmaj*GEO_gcos2
 
-        ! Finite-Mach drift (MACH)
+        ! Finite-Mach drift (Coriolis)
         omega_cdrift(it,is) = -2.0*sqrt(2.0)*rho*vth(is) &
              * mass(is)/(Z(is)*GEO_b)*GEO_gq/rmaj &
              *(GEO_ucos+GEO_captheta*GEO_usin)*mach
@@ -121,7 +121,7 @@ subroutine cgyro_equilibrium
              * mass(is)/(Z(is)*GEO_b)*GEO_grad_r/rmaj*GEO_usin*mach
 
         ! Partial Finite-Mach centrifugal terms
-        ! These are re-set to 0 in cgyro_init_rot if cf_flag=0
+        ! These are re-set to 0 in cgyro_init_rot if cf_model=0
 
         ! bhat dot grad lambda
         ! Add phi_rot term in cgyro_init_rotation
