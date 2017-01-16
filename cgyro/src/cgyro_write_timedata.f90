@@ -81,7 +81,7 @@ subroutine cgyro_write_timedata
 
   !------------------------------------------------------------------
   ! Ballooning mode (or ZF) output for linear runs with a single mode
-  !
+  ! (can both be plotted with cgyro_plot -plot ball)
   if (n_toroidal == 1) then
      do i_field=1,n_field
 

@@ -43,7 +43,7 @@ then
   echo "           Function to plot."
   echo "           <type> = text     (text summary of fluxes)"
   echo "                  = freq     (frequency versus time),"
-  echo "                  = ball     (ballooning modes)"
+  echo "                  = ball     (ballooning modes OR ZF test)"
   echo "                  = hb       (2D ballooning distribution)"
   echo "                  = hbcut    (1D ballooning distribution line plots),"
   echo "                  = geo      (geometry arrays)"
