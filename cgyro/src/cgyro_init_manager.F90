@@ -204,7 +204,6 @@ subroutine cgyro_init_manager
   GEO_nfourier_in = geo_ny
   call GEO_alloc(1)
   call cgyro_equilibrium
-  call cgyro_fourier_extend
   
   if (test_flag == 0) then
 

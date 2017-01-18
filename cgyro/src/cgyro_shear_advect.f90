@@ -24,10 +24,13 @@ subroutine cgyro_shear_advect
 
      kp(:,:) = h_x(ic_c(:,j),:)
 
-     do ir=1,n_radial-1
-        kpp(ir,:) = kp(ir,:)+wdt*(kp(ir+1,:)-kp(ir,:))
+     do ir=1,n_radial-2
+        kpp(ir,:) = kp(ir,:)+wdt*0.5*(-kp(ir+2,:)+4*kp(ir+1,:)-3*kp(ir,:))
      enddo
-     kpp(n_radial,:) = 0.0
+     ir = n_radial-1
+     kpp(ir,:) = kp(ir,:)+wdt*0.5*(4*kp(ir+1,:)-3*kp(ir,:))
+     ir = n_radial
+     kpp(ir,:) = 0.0
 
      h_x(ic_c(:,j),:) = kpp(:,:)
 

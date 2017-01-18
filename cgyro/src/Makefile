@@ -25,7 +25,6 @@ OBJECTS = cgyro_globals.o \
           cgyro_field.o \
           cgyro_field_coefficients.o \
           cgyro_flux.o \
-          cgyro_fourier_extend.o \
           cgyro_freq.o \
           cgyro_upwind.o \
           cgyro_init.o \
