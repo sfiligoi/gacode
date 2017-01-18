@@ -32,7 +32,7 @@ subroutine cgyro_shear_advect
         a(:,:) = 0.0
         do ir=1,n_radial
            a(ir,ir) = 1.0
-           s0(ir) = 1.0
+           s0(ir) = h0(ir)
            if (ir > 1) a(ir,ir-1) = eps
            if (ir < n_radial) a(ir,ir+1) = -eps
            if (ir > 1) s0(ir) = s0(ir)-eps*h0(ir-1)
