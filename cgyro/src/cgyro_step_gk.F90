@@ -152,32 +152,6 @@ subroutine cgyro_rhs(ij)
 !$acc end data
   endif
 
-  ! Extended-domain shear algoroithm
-
-  if (shear_method == 2) then
-
-     do iv=nv1,nv2
-        iv_loc = iv-nv1+1
-        do it=1,n_theta
-           gw(:,it) = h_x(ic_c(:,it),iv_loc)
-        enddo
-        fw(:,:) = 0.0
-        do ir=1,n_radial
-           p = px(ir)
-           do l=-n_global,n_global
-              if (abs(p+l) < n_radial/2) then
-                 fw(ir,:) = fw(ir,:)+gw(ir+l,:)*cg(l)
-              endif
-           enddo
-        enddo
-        do it=1,n_theta
-           rhs_ij(ic_c(:,it),iv_loc) = rhs_ij(ic_c(:,it),iv_loc) & 
-                -i_c*omega_eb*fw(:,it)
-        enddo
-     enddo
-
-  endif
-
   rhs(:,:,ij) = rhs_ij(:,:)
 
   call timer_lib_out('str')
