@@ -15,8 +15,8 @@ subroutine cgyro_shear_advect
 
   integer :: j,ir
   real :: wdt
-  complex, dimension(n_radial,n_theta) :: kp
-  complex, dimension(n_radial,n_theta) :: kpp
+  complex, dimension(n_radial,nv_loc) :: kp
+  complex, dimension(n_radial,nv_loc) :: kpp
 
   wdt = omega_eb*delta_t
 
