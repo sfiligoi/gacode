@@ -15,24 +15,21 @@ subroutine cgyro_shear_advect
 
   integer :: j,ir
   real :: wdt
-  complex, dimension(n_radial,nv_loc) :: kp
+  complex, dimension(0:n_radial+2,nv_loc) :: kp
   complex, dimension(n_radial,nv_loc) :: kpp
 
   wdt = omega_eb*delta_t
 
   do j=1,n_theta
 
-     kp(:,:) = h_x(ic_c(:,j),:)
-
-     do ir=1,n_radial-2
-        kpp(ir,:) = kp(ir,:)+wdt*0.5*(-kp(ir+2,:)+4*kp(ir+1,:)-3*kp(ir,:))
+     kp(:,:) = 0.0
+     kp(1:n_radial,:) = h_x(ic_c(:,j),:)
+     
+     do ir=1,n_radial
+        kpp(ir,:) = kp(ir,:)+wdt*(-kp(ir+2,:)+6*kp(ir+1,:)-3*kp(ir,:)-2*kp(ir-1,:))/6
      enddo
-     ir = n_radial-1
-     kpp(ir,:) = kp(ir,:)+wdt*0.5*(4*kp(ir+1,:)-3*kp(ir,:))
-     ir = n_radial
-     kpp(ir,:) = 0.0
 
-     h_x(ic_c(:,j),:) = kpp(:,:)
+     h_x(ic_c(:,j),:) = kpp(1:n_radial,:)
 
   enddo
 
