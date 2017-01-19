@@ -46,6 +46,7 @@ subroutine cgyro_read_input
   call cgyro_readbc_int(collision_ene_diffusion)
   call cgyro_readbc_int(collision_kperp)
   call cgyro_readbc_int(collision_field_model)
+  call cgyro_readbc_int(collision_ion_model)
   call cgyro_readbc_int(zf_test_flag)
   call cgyro_readbc_int(nonlinear_flag)
   call cgyro_readbc_int(nonlinear_method)

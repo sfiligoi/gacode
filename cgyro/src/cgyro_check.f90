@@ -175,6 +175,18 @@ subroutine cgyro_check
      end select
   endif
 
+  if (collision_model /= 5 .or. collision_model /= 1) then
+     select case (collision_ion_model)
+     case(0)
+        call cgyro_info('Collisional ions: on')
+     case(1)
+        call cgyro_info('Collisional ions: off')
+     case default
+        call cgyro_error('Invalid value for collision_ion_model')
+        return
+     end select
+  endif
+  
   !
   !------------------------------------------------------------------------
 

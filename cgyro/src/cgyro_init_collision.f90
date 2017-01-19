@@ -123,6 +123,19 @@ subroutine cgyro_init_collision
      enddo
   enddo
 
+  if(collision_ion_model == 1) then
+     do is=1,n_species
+        if(is /= is_ele) then
+           do js=1,n_species
+              nu_d(:,is,js) = 0.0
+              nu_s(:,is,js) = 0.0
+              nu_par(:,is,js) = 0.0
+              nu_par_deriv(:,is,js) = 0.0
+           enddo
+        endif
+     enddo
+  endif
+  
   ! Printout used for CGYRO paper.
   !if (i_proc == 0) then
   !   do ie=1,n_energy
