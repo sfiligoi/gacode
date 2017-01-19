@@ -14,23 +14,36 @@ subroutine cgyro_shear_advect
   implicit none
 
   integer :: j,ir
-  real :: wdt
-  complex, dimension(0:n_radial+2,nv_loc) :: kp
-  complex, dimension(n_radial,nv_loc) :: kpp
+  real :: eps
+  complex, dimension(n_radial,n_radial) :: a
+  complex, dimension(n_radial) :: h0
+  complex, dimension(n_radial) :: s0
+  integer, dimension(n_radial) :: ipiv
 
-  wdt = omega_eb*delta_t
+  eps = 0.25*omega_eb*delta_t
 
-  do j=1,n_theta
+  do iv_loc=1,nv_loc
+     do j=1,n_theta
 
-     kp(:,:) = 0.0
-     kp(1:n_radial,:) = h_x(ic_c(:,j),:)
-     
-     do ir=1,n_radial
-        kpp(ir,:) = kp(ir,:)+wdt*(-kp(ir+2,:)+6*kp(ir+1,:)-3*kp(ir,:)-2*kp(ir-1,:))/6
+        ! Solve A x = s
+
+        h0(:) = h_x(ic_c(:,j),iv_loc)
+        s0(:) = h0(:)     
+        a(:,:) = 0.0
+        do ir=1,n_radial
+           a(ir,ir) = 1.0
+           s0(ir) = h0(ir)
+           if (ir > 1)        a(ir,ir-1) = eps
+           if (ir < n_radial) a(ir,ir+1) = -eps
+           if (ir > 1)        s0(ir) = s0(ir)-eps*h0(ir-1)
+           if (ir < n_radial) s0(ir) = s0(ir)+eps*h0(ir+1)
+        enddo
+
+        call ZGESV(n_radial,1,a,n_radial,ipiv,s0,n_radial,info)
+
+        h_x(ic_c(:,j),iv_loc) = s0(:)
+
      enddo
-
-     h_x(ic_c(:,j),:) = kpp(1:n_radial,:)
-
   enddo
 
   call cgyro_field_c
