@@ -17,7 +17,7 @@ subroutine cgyro_shear_advect
   real :: eps
   complex, dimension(n_radial,n_radial) :: a
   complex, dimension(n_radial) :: h0
-  complex, dimension(n_radial) :: s0,cwork
+  complex, dimension(n_radial) :: s0
   integer, dimension(n_radial) :: ipiv
 
   eps = 0.25*omega_eb*delta_t
@@ -28,18 +28,18 @@ subroutine cgyro_shear_advect
         ! Solve A x = s
 
         h0(:) = h_x(ic_c(:,j),iv_loc)
-        s0(:) = 0.0      
+        s0(:) = h0(:)     
         a(:,:) = 0.0
         do ir=1,n_radial
            a(ir,ir) = 1.0
            s0(ir) = h0(ir)
-           if (ir > 1) a(ir,ir-1) = eps
+           if (ir > 1)        a(ir,ir-1) = eps
            if (ir < n_radial) a(ir,ir+1) = -eps
-           if (ir > 1) s0(ir) = s0(ir)-eps*h0(ir-1)
+           if (ir > 1)        s0(ir) = s0(ir)-eps*h0(ir-1)
            if (ir < n_radial) s0(ir) = s0(ir)+eps*h0(ir+1)
         enddo
 
-        call ZSYSV('U',n_radial,1,a,n_radial,ipiv,s0,n_radial,cwork,n_radial,info)
+        call ZGESV(n_radial,1,a,n_radial,ipiv,s0,n_radial,info)
 
         h_x(ic_c(:,j),iv_loc) = s0(:)
 
