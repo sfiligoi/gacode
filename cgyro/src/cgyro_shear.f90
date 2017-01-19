@@ -23,7 +23,7 @@ subroutine cgyro_shear
      call cgyro_shear_hammett
   case (2)
      ! Spectral advection
-     call cgyro_shear_advect
+     !call cgyro_shear_advect
   case (3)
      ! Linear shift (more accurate than discrete shift)
      call cgyro_shear_linear

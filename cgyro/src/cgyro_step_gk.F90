@@ -60,19 +60,18 @@ subroutine cgyro_rhs(ij)
 
   integer, intent(in) :: ij
   integer :: is,ir,it
-  integer :: id,jc
+  integer :: id,jc,j
   integer :: p
   real :: rval,rval2
   complex :: rhs_stream
   complex :: rhs_ij(nc,nv_loc)
-  complex, dimension(n_radial,n_theta) :: fw,gw
-  integer :: l
+  complex, dimension(0:n_radial+1) :: h0
 
   ! Prepare suitable distribution (g, not h) for conservative upwind method
   g_x(:,:) = h_x(:,:)
 
   if (n_field > 1) then
-!$omp parallel do private(iv_loc,is,ic)
+     !$omp parallel do private(iv_loc,is,ic)
      do iv=nv1,nv2
         iv_loc = iv-nv1+1
         is = is_v(iv)
@@ -93,7 +92,7 @@ subroutine cgyro_rhs(ij)
 
      ! IMPLICIT advance 
 
-!$omp parallel do private(ic)
+     !$omp parallel do private(ic)
      do iv_loc=1,nv2-nv1+1
         do ic=1,nc
            ! Diagonal terms
@@ -108,20 +107,20 @@ subroutine cgyro_rhs(ij)
 
      ! EXPLICIT advance 
 
-!$acc data  &
-!$acc& pcopyout(rhs_ij) &
-!$acc& pcopyin(g_x,h_x,field,cap_h_c) &
-!$acc& present(is_v,ix_v,ie_v,it_c) &
-!$acc& present(omega_cap_h,omega_h,omega_s) &
-!$acc& present(omega_stream,xi,vel) &
-!$acc& present(dtheta,dtheta_up,icd_c)
+     !$acc data  &
+     !$acc& pcopyout(rhs_ij) &
+     !$acc& pcopyin(g_x,h_x,field,cap_h_c) &
+     !$acc& present(is_v,ix_v,ie_v,it_c) &
+     !$acc& present(omega_cap_h,omega_h,omega_s) &
+     !$acc& present(omega_stream,xi,vel) &
+     !$acc& present(dtheta,dtheta_up,icd_c)
 
 #ifdef _OPENACC
-!$acc  parallel loop gang vector collapse(2) & 
-!$acc& private(iv,ic,iv_loc,is,rval,rval2,rhs_stream,id,jc)
+     !$acc  parallel loop gang vector collapse(2) & 
+     !$acc& private(iv,ic,iv_loc,is,rval,rval2,rhs_stream,id,jc)
 #else
-!$omp parallel do collapse(2) &
-!$omp& private(iv,ic,iv_loc,is,rval,rval2,rhs_stream,id,jc) 
+     !$omp parallel do collapse(2) &
+     !$omp& private(iv,ic,iv_loc,is,rval,rval2,rhs_stream,id,jc) 
 #endif
      do iv=nv1,nv2
         do ic=1,nc
@@ -149,7 +148,7 @@ subroutine cgyro_rhs(ij)
 
         enddo
      enddo
-!$acc end data
+     !$acc end data
   endif
 
   rhs(:,:,ij) = rhs_ij(:,:)
@@ -166,6 +165,22 @@ subroutine cgyro_rhs(ij)
      endif
   endif
 
+  if (shear_method == 2) then
+     do iv_loc=1,nv_loc
+        do j=1,n_theta
+
+           h0(0) = 0.0
+           h0(1:n_radial) = h_x(ic_c(:,j),iv_loc)
+           h0(n_radial+1) = 0.0
+           do ir=1,n_radial
+              rhs(ic_c(ir,j),iv_loc,ij) = rhs(ic_c(ir,j),iv_loc,ij)+ &
+                   omega_eb*0.5*(h0(ir+1)-h0(ir-1))
+           enddo
+
+        enddo
+     enddo
+  endif
+
   ! Remove p=-M
   if (psym_flag == 1) then
      do ic=1,nc
@@ -175,6 +190,7 @@ subroutine cgyro_rhs(ij)
         endif
      enddo
   endif
+
 
 end subroutine cgyro_rhs
 
