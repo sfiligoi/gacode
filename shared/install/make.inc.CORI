@@ -6,8 +6,8 @@
 # - 2 CPUs per node, 16 cores/CPU.
 #---------------------------------------------------
 
-IDENTITY="NERSC Cori Phase 1"
-CORES_PER_NODE=32
+IDENTITY="NERSC Cori Phase 2"
+CORES_PER_NODE=64
 NUMAS_PER_NODE=2
 
 # Compilers and flags

@@ -24,8 +24,13 @@ nidle=${8}
 . $GACODE_ROOT/shared/bin/gacode_mpi_tool
 
 echo "----------------------------------"
-echo " Cray XC40 (Cori) [32 cores/node] "   
-echo "NOTE: numa=2, max(mpinuma)=16     "   
+echo " Cray XC40 (Cori) [32 cores/node, 2 hyperthreads/core] "   
+echo
+echo " EXAMPLES:"
+echo " Fully packed job with 32 mpi tasks and 2 OMP threads [will use 1 node]"
+echo "  -n 32 -nomp 2 -numa 2"  
+echo " Non-hyperthreaded job with 32 mpi tasks and 2 OMP threads [will use 2 nodes]"
+echo "  -n 32 -nomp 2 -numa 1" 
 echo "----------------------------------"
 echo
 echo "Cores requested (mppwidth)   : $cores_requested"
@@ -34,6 +39,8 @@ echo "Total MPI tasks (-n)         : $nmpi"
 echo "MPI tasks/node (-N)          : $mpinode"
 echo "OpenMP threads/MPI task(-d)  : $nomp"
 echo "MPI tasks per numa node (-S) : $mpinuma"
+echo
+echo "[srun --propagate=ALL -n $nmpi -c $nomp]"
 echo
 echo "[0] debug   (10 min)   up to 512 nodes"
 echo "[1] debug   (30 min)   up to 512 nodes"
