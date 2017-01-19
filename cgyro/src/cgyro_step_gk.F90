@@ -92,7 +92,7 @@ subroutine cgyro_rhs(ij)
 
      ! IMPLICIT advance 
 
-     !$omp parallel do private(ic)
+!$omp parallel do private(ic)
      do iv_loc=1,nv2-nv1+1
         do ic=1,nc
            ! Diagonal terms
@@ -107,20 +107,20 @@ subroutine cgyro_rhs(ij)
 
      ! EXPLICIT advance 
 
-     !$acc data  &
-     !$acc& pcopyout(rhs_ij) &
-     !$acc& pcopyin(g_x,h_x,field,cap_h_c) &
-     !$acc& present(is_v,ix_v,ie_v,it_c) &
-     !$acc& present(omega_cap_h,omega_h,omega_s) &
-     !$acc& present(omega_stream,xi,vel) &
-     !$acc& present(dtheta,dtheta_up,icd_c)
+!$acc data  &
+!$acc& pcopyout(rhs_ij) &
+!$acc& pcopyin(g_x,h_x,field,cap_h_c) &
+!$acc& present(is_v,ix_v,ie_v,it_c) &
+!$acc& present(omega_cap_h,omega_h,omega_s) &
+!$acc& present(omega_stream,xi,vel) &
+!$acc& present(dtheta,dtheta_up,icd_c)
 
 #ifdef _OPENACC
-     !$acc  parallel loop gang vector collapse(2) & 
-     !$acc& private(iv,ic,iv_loc,is,rval,rval2,rhs_stream,id,jc)
+!$acc  parallel loop gang vector collapse(2) & 
+!$acc& private(iv,ic,iv_loc,is,rval,rval2,rhs_stream,id,jc)
 #else
-     !$omp parallel do collapse(2) &
-     !$omp& private(iv,ic,iv_loc,is,rval,rval2,rhs_stream,id,jc) 
+!$omp parallel do collapse(2) &
+!$omp& private(iv,ic,iv_loc,is,rval,rval2,rhs_stream,id,jc) 
 #endif
      do iv=nv1,nv2
         do ic=1,nc
@@ -148,7 +148,7 @@ subroutine cgyro_rhs(ij)
 
         enddo
      enddo
-     !$acc end data
+!$acc end data
   endif
 
   rhs(:,:,ij) = rhs_ij(:,:)
