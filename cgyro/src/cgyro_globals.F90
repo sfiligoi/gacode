@@ -282,7 +282,7 @@ module cgyro_globals
   complex, dimension(:,:,:), allocatable :: g_nl
   complex, dimension(:,:), allocatable :: omega_cap_h
   complex, dimension(:,:), allocatable :: omega_h
-  complex, dimension(:,:,:), allocatable :: omega_s
+  complex, dimension(:,:,:), allocatable :: omega_s,omega_ss
   complex, dimension(:,:), allocatable :: cap_h_c
   complex, dimension(:,:), allocatable :: cap_h_ct
   complex, dimension(:,:), allocatable :: cap_h_v

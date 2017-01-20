@@ -151,6 +151,32 @@ subroutine cgyro_rhs(ij)
 !$acc end data
   endif
 
+  if (shear_method == 2) then
+     h0(0) = 0.0
+     h0(n_radial+1) = 0.0
+     do iv=nv1,nv2
+        iv_loc = iv-nv1+1
+        do j=1,n_theta
+
+           h0(1:n_radial) = h_x(ic_c(:,j),iv_loc)
+           
+           do ir=1,n_radial
+              rhs_ij(ic_c(ir,j),iv_loc) = rhs_ij(ic_c(ir,j),iv_loc)+ &
+                   omega_eb*0.5*(h0(ir+1)-h0(ir-1))
+           enddo
+
+           do ir=1,n_radial
+              h0(ir) = sum(omega_ss(:,ic_c(ir,j),iv_loc)*field(:,ic_c(ir,j)))
+           enddo
+           do ir=1,n_radial
+              rhs_ij(ic_c(ir,j),iv_loc) = rhs_ij(ic_c(ir,j),iv_loc)+ &
+                   0.5*(h0(ir+1)-h0(ir-1))
+           enddo
+
+        enddo
+     enddo
+  endif
+
   rhs(:,:,ij) = rhs_ij(:,:)
 
   call timer_lib_out('str')
@@ -163,22 +189,6 @@ subroutine cgyro_rhs(ij)
      else
         call cgyro_nl_fftw(ij)
      endif
-  endif
-
-  if (shear_method == 2) then
-     do iv_loc=1,nv_loc
-        do j=1,n_theta
-
-           h0(0) = 0.0
-           h0(1:n_radial) = h_x(ic_c(:,j),iv_loc)
-           h0(n_radial+1) = 0.0
-           do ir=1,n_radial
-              rhs(ic_c(ir,j),iv_loc,ij) = rhs(ic_c(ir,j),iv_loc,ij)+ &
-                   omega_eb*0.5*(h0(ir+1)-h0(ir-1))
-           enddo
-
-        enddo
-     enddo
   endif
 
   ! Remove p=-M

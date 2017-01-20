@@ -92,7 +92,6 @@ subroutine cgyro_make_profiles
         mass_ele = mass(is_ele)
      endif
 
-
      ! Normalizing quantities
      dens_norm = dens_ele
      temp_norm = temp_ele
@@ -274,11 +273,11 @@ subroutine cgyro_make_profiles
      omega_eb = k_theta*length*gamma_e/(2*pi)
      select case (shear_method)
      case (1)
-        call cgyro_info('Hammett discrete-shift ExB shear method.') 
+        call cgyro_info('Hammett discrete-shift ExB shear.') 
      case (2)
-        call cgyro_info('Wavenumber advection method.') 
+        call cgyro_info('Wavenumber advection ExB shear.') 
      case (3)
-        call cgyro_info('Linear-time ExB shear method.') 
+        call cgyro_info('Linear-time ExB shear.') 
      end select
   else
      omega_eb = 0.0

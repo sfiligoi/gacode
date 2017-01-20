@@ -360,7 +360,13 @@ subroutine cgyro_init_arrays
 
         omega_s(:,ic,iv_loc) = carg*jvec_c(:,ic,iv_loc)
 
-        ! centrifugal (cf) components
+        ! Profile curvature via wavenumber advection
+        carg = k_theta*rho*(sdlnndr(is)+sdlntdr(is)*(energy(ie)-1.5))*length/(2*pi)
+        
+        omega_ss(:,ic,iv_loc) = carg*jvec_c(:,ic,iv_loc)
+
+
+           ! centrifugal (cf) components
         if(cf_model > 0) then
            
            ! omega_rot_drift (i ktheta) from cf drift 
