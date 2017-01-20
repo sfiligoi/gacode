@@ -70,7 +70,6 @@ subroutine cgyro_read_input
   call cgyro_readbc_int(udsymmetry_flag)
   call cgyro_readbc_int(shear_method)
   call cgyro_readbc_int(n_global)
-  call cgyro_readbc_real(eps_global)
   call cgyro_readbc_int(psym_flag)
 
   call cgyro_readbc_real(rmin)
@@ -100,6 +99,8 @@ subroutine cgyro_read_input
      call cgyro_readbc_real(x)   ; temp(is) = x
      call cgyro_readbc_real(x)   ; dlnndr(is) = x
      call cgyro_readbc_real(x)   ; dlntdr(is) = x
+     call cgyro_readbc_real(x)   ; sdlnndr(is) = x
+     call cgyro_readbc_real(x)   ; sdlntdr(is) = x
   enddo
 
   call cgyro_readbc_real(lambda_star_scale)

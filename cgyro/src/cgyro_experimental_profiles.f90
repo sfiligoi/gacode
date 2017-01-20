@@ -127,21 +127,26 @@ subroutine cgyro_experimental_profiles
 
   temp_exp(n_species_exp,:)   = EXPRO_te(:)
   dlntdr_exp(n_species_exp,:) = EXPRO_dlntedr(:) * a_meters 
+  sdlntdr_exp(n_species_exp,:) = EXPRO_sdlntedr(:) * a_meters**2 
+
   dens_exp(n_species_exp,:)   = EXPRO_ne(:)
   dlnndr_exp(n_species_exp,:) = EXPRO_dlnnedr(:) * a_meters 
+  sdlnndr_exp(n_species_exp,:) = EXPRO_sdlnnedr(:) * a_meters**2 
 
   do i_ion=1,n_species_exp-1
      ! ion temps should be equal, but not enforced 
      temp_exp(i_ion,:)   = EXPRO_ti(i_ion,:)
      dlntdr_exp(i_ion,:) = EXPRO_dlntidr(i_ion,:) * a_meters 
+     sdlntdr_exp(i_ion,:) = EXPRO_sdlntidr(i_ion,:) * a_meters**2 
 
-     ! first species density is re-set by quasi-neutrality
+     ! first species density is re-set by quasi-neutrality [JC: do we want this?]
      if(i_ion == 1) then
         dens_exp(i_ion,:)   = EXPRO_ni_new(:)
         dlnndr_exp(i_ion,:) = EXPRO_dlnnidr_new(:) * a_meters
      else
         dens_exp(i_ion,:)   = EXPRO_ni(i_ion,:)
         dlnndr_exp(i_ion,:) = EXPRO_dlnnidr(i_ion,:) * a_meters
+        sdlnndr_exp(i_ion,:) = EXPRO_sdlnnidr(i_ion,:) * a_meters**2
      endif
   enddo
 

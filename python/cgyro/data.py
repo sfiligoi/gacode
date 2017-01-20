@@ -48,9 +48,8 @@ class cgyrodata:
         self.m_box     = int(data[7])
         self.length    = float(data[8])
         self.n_global  = int(data[9])
-        self.eps_global= float(data[10])
         # Set l to last data index plus one.
-        l=11
+        l=10
 
         self.p = np.array(data[l:l+self.n_radial],dtype=int)
         self.kx = 2*np.pi*self.p/self.length

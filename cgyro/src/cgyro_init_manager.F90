@@ -111,7 +111,6 @@ subroutine cgyro_init_manager
   allocate(omega_cdrift(n_theta,n_species))
   allocate(omega_cdrift_r(n_theta,n_species))
   allocate(omega_gammap(n_theta))
-  allocate(cg(-n_global:n_global))
 
   allocate(lambda_rot(n_theta,n_species))
   allocate(dlambda_rot(n_theta,n_species))

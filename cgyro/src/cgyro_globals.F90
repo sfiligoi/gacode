@@ -78,7 +78,6 @@ module cgyro_globals
   integer :: udsymmetry_flag
   integer :: shear_method
   integer :: n_global
-  real    :: eps_global
   integer :: psym_flag
   !
   ! Geometry input
@@ -109,6 +108,8 @@ module cgyro_globals
   real, dimension(6) :: temp
   real, dimension(6) :: dlnndr
   real, dimension(6) :: dlntdr
+  real, dimension(6) :: sdlnndr
+  real, dimension(6) :: sdlntdr
 
   integer :: subroutine_flag  ! only used for cgyro_read_input
 
@@ -394,7 +395,6 @@ module cgyro_globals
   real, dimension(:,:), allocatable :: omega_cdrift
   real, dimension(:,:), allocatable :: omega_cdrift_r
   real, dimension(:),   allocatable :: omega_gammap
-  complex, dimension(:),allocatable :: cg
   ! for centrifugal rotation
   real, dimension(:,:), allocatable :: lambda_rot
   real, dimension(:,:), allocatable :: dlambda_rot
