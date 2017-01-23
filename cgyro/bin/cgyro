@@ -178,6 +178,7 @@ then
     cp $SIMDIR/input.cgyro.gen $SDIR/input.cgyro.gen.original
     cp $SIMDIR/out.cgyro.version $SDIR
     cp $SIMDIR/out.cgyro.grids $SDIR
+    cp $SIMDIR/out.cgyro.equilibrium $SDIR
     cp $SIMDIR/out.cgyro.time $SDIR
     cp $SIMDIR/out.cgyro.info $SDIR
     if grep -q NONLINEAR_FLAG=1 $SDIR/input.cgyro
