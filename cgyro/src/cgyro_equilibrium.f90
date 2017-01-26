@@ -160,11 +160,20 @@ subroutine cgyro_equilibrium
         
      enddo
 
+     ! Used in cgyro_init_rotation
+     omega_rot_edrift_0(it) = (mach/rmaj)**2 * (GEO_bigr * GEO_bigr_r &
+          - bigR_th0 * bigR_r_th0) + (mach/rmaj) * (-gamma_p/rmaj) &
+          * (GEO_bigr**2 - bigR_th0**2)
+     
      ! Rotation shear (GAMMA_P)
      omega_gammap(it) = GEO_bt/GEO_b*GEO_bigr/rmaj*gamma_p
 
      bmag(it) = GEO_b
 
+     ! 1/sqrt(g) (dsqrt(g)/dr), where sqrt(g) = R^2/I
+     jacob_r(it) = 2.0/GEO_bigr*GEO_bigR_r &
+          - 1.0/GEO_bt * rmin/(q*GEO_bigr) * GEO_ffprime/GEO_f
+     
      ! flux-surface average weights
      w_theta(it) = g_theta(it)/GEO_b
 

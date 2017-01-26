@@ -6,7 +6,9 @@ subroutine cgyro_init_rotation
   
   implicit none
 
-  real, dimension(:), allocatable :: phi_rot, phi_rot_deriv, sum_pressure_t
+  real, dimension(:), allocatable :: phi_rot, phi_rot_tderiv, phi_rot_rderiv
+  real :: phi_rot_avg_rderiv
+  real, dimension(:), allocatable :: sum_pressure_t
   real :: phi_rot_avg
   integer, dimension(:), allocatable :: thcyc
   real, dimension(:), allocatable :: thcderiv
@@ -28,11 +30,13 @@ subroutine cgyro_init_rotation
      omega_rot_star(:,:) = 0.0
      omega_rot_edrift(:,:) = 0.0
      omega_rot_edrift_r(:,:) = 0.0
+     omega_rot_edrift_0(:) = 0.0
      return
   endif
 
   allocate(phi_rot(n_theta))
-  allocate(phi_rot_deriv(n_theta))
+  allocate(phi_rot_tderiv(n_theta))
+  allocate(phi_rot_rderiv(n_theta))
   allocate(sum_pressure_t(n_theta))
   
   ! solve the quasi-neutrality relation for poloidal part of phi
@@ -99,8 +103,6 @@ subroutine cgyro_init_rotation
      phi_rot_avg = phi_rot_avg + w_theta(it) * phi_rot(it)
 
   enddo
-
-  ! d phi_rot/d_theta
   
   ! cyclic index (for theta-periodicity)
   allocate(thcyc(1-n_theta:2*n_theta))
@@ -117,31 +119,37 @@ subroutine cgyro_init_rotation
   thcderiv(0)  =  0.0 / (12.0 * d_theta)
   thcderiv(1)  =  8.0 / (12.0 * d_theta)
   thcderiv(2)  = -1.0 / (12.0 * d_theta)
-  
+
+  ! d phi_rot / d theta
+  phi_rot_tderiv(:) = 0.0
   do it=1,n_theta
-     phi_rot_deriv(it) = 0.0
      do id=-2,2
         jt = thcyc(it+id)
-        phi_rot_deriv(it) = phi_rot_deriv(it) &
+        phi_rot_tderiv(it) = phi_rot_tderiv(it) &
              + phi_rot(jt) * thcderiv(id) 
      enddo
   enddo
   deallocate(thcyc)
   deallocate(thcderiv)
 
+  ! n(theta)/n(theta0)
+  do is=1,n_species
+     do it=1,n_theta
+        dens_rot(it,is) = dens_rot(it,is) * exp(-z(is)/temp(is)*phi_rot(it))
+     enddo
+  enddo
+  dens_ele_rot(:) = dens_ele_rot(:) * exp(1.0/temp_ele*phi_rot(:))
+  
   sum_pressure_t(:) = 0.0
   do is=1,n_species
      do it=1,n_theta
 
-        ! n(theta)/n(theta0)
-        dens_rot(it,is) = dens_rot(it,is) * exp(-z(is)/temp(is)*phi_rot(it))
-        
         lambda_rot(it,is) = z(is)/temp(is) * (phi_rot(it) - phi_rot_avg) &
              - 0.5 * (mach * bigR(it) / rmaj / vth(is))**2
 
         ! bhat dot grad lambda
         dlambda_rot(it,is) = dlambda_rot(it,is) &
-             + z(is)/temp(is) * phi_rot_deriv(it) / (q*rmaj*g_theta(it)) 
+             + z(is)/temp(is) * phi_rot_tderiv(it) / (q*rmaj*g_theta(it)) 
            
         omega_rot_trap(it,is) = -0.5*sqrt(2.0)*vth(is) &
              /(q*rmaj)*dlambda_rot(it,is)
@@ -152,18 +160,16 @@ subroutine cgyro_init_rotation
              + dlntdr(is)*z(is)/temp(is)*phi_rot(it) 
 
         omega_rot_edrift(it,is) =  omega_rot_edrift(it,is) &
-             * phi_rot_deriv(it) / (q*rmaj*g_theta(it)) 
+             * phi_rot_tderiv(it) / (q*rmaj*g_theta(it)) 
 
         omega_rot_edrift_r(it,is) = omega_rot_edrift_r(it,is) &
-             * phi_rot_deriv(it) / (q*rmaj*g_theta(it))
+             * phi_rot_tderiv(it) / (q*rmaj*g_theta(it))
         
         ! bhat dot grad pressure
         sum_pressure_t(it) = sum_pressure_t(it) - dens(is)*temp(is) &
              * dlambda_rot(it,is)
      enddo
   enddo  
-
-  dens_ele_rot(:) = dens_ele_rot(:) * exp(1.0/temp_ele*phi_rot(:))
   
   ! 1/(ne(0)Te) bhat dot grad pressure
   sum_pressure_t(:) = sum_pressure_t(:)/(dens_ele*temp_ele)
@@ -178,6 +184,61 @@ subroutine cgyro_init_rotation
      enddo
   enddo
 
+  ! Solve d/dr of QN to get d phi_rot / dr
+  phi_rot_rderiv(:) = 0.0
+
+  do it=1,n_theta
+     
+     ! sum_a z^2/T n(theta)
+     sum_zn = 0.0
+     do is=1,n_species
+        sum_zn = sum_zn + z(is)*z(is)/temp(is)*dens(is)*dens_rot(it,is)
+     enddo
+     if(ae_flag == 1) then
+        sum_zn = sum_zn + dens_ele*dens_ele_rot(it)
+     endif
+     
+     do is=1,n_species
+        phi_rot_rderiv(it) = phi_rot_rderiv(it) &
+             + z(is)*dens(is)*dens_rot(it,is)*(-dlnndr(is) &
+             - dlntdr(is)*(z(is)/temp(is)*phi_rot(it) &
+             - 0.5*(mach/rmaj/vth(is))**2 * (bigR(it)**2 - bigR_th0**2)) &
+             + omega_rot_edrift_0(it)/vth(is)**2)
+     enddo
+     if(ae_flag == 1) then
+        phi_rot_rderiv(it) = phi_rot_rderiv(it) &
+             - dens_ele*dens_ele_rot(it)*(-dlnndr_ele &
+             + dlntdr_ele/temp_ele*phi_rot(it))
+     endif
+     
+     phi_rot_rderiv(it) = phi_rot_rderiv(it) / sum_zn
+     
+  enddo
+
+  ! d<phi_rot>/dr
+  phi_rot_avg_rderiv = 0.0
+  ! first get <d phi_rot>/dr... 
+  do it=1,n_theta
+     phi_rot_avg_rderiv = phi_rot_avg_rderiv + w_theta(it)*phi_rot_rderiv(it)
+  enddo
+  ! ... + <phi_*/sqrt(g)(dsqrt(g)/dr)> ...
+  fac=0.0
+  do it=1,n_theta
+     fac = fac + w_theta(it) * jacob_r(it) * phi_rot(it)
+  enddo
+  phi_rot_avg_rderiv = phi_rot_avg_rderiv + fac
+  ! ... - <phi_*><1/sqrt(g)(dsqrt(g)/dr)>
+  fac=0.0
+  do it=1,n_theta
+     fac = fac + w_theta(it) * jacob_r(it) * phi_rot(it)
+  enddo
+  phi_rot_avg_rderiv = phi_rot_avg_rderiv - fac * phi_rot_avg
+
+  ! rho * d(phi_tilde)/dr = rho * d(phi_* - <phi_*>)/dr
+  do it=1,n_theta
+     omega_rot_edrift_0(it) = rho*(phi_rot_rderiv(it)-phi_rot_avg_rderiv)
+  enddo
+     
   ! just cf trapping (no coriolis and no cf drift)
   if(cf_model == 2) then
 
@@ -198,7 +259,8 @@ subroutine cgyro_init_rotation
      dens_rot(:,:) = 1.0
      dens_ele_rot(:) = 1.0
      phi_rot(:)  = 0.0
-     phi_rot_deriv(:)  = 0.0
+     phi_rot_tderiv(:)  = 0.0
+     phi_rot_rderiv(:)  = 0.0
      lambda_rot(:,:) = 0.0
      dlambda_rot(:,:) = 0.0
      omega_rot_trap(:,:) = 0.0
@@ -208,12 +270,14 @@ subroutine cgyro_init_rotation
      omega_rot_star(:,:) = 0.0
      omega_rot_edrift(:,:) = 0.0
      omega_rot_edrift_r(:,:) = 0.0
+     omega_rot_edrift_0(:) = 0.0
      
   endif
   
   
   deallocate(phi_rot)
-  deallocate(phi_rot_deriv)
+  deallocate(phi_rot_tderiv)
+  deallocate(phi_rot_rderiv)
   deallocate(sum_pressure_t)
   
 end subroutine cgyro_init_rotation

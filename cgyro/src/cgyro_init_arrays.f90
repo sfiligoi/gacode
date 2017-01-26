@@ -387,6 +387,10 @@ subroutine cgyro_init_arrays
                 -omega_rot_prdrift_r(it,is)*(n_radial/length)*(i_c*u) &
                 *energy(ie)*xi(ix)**2
 
+           ! omega_rot_edrift_0  dphi/dr (i ktheta) from cf drift 
+           omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
+                -omega_rot_edrift_0(it)*i_c*k_theta
+           
            ! omega_rot_edrift dphi/dtheta (ktheta) from cf 
            omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
                 -omega_rot_edrift(it,is)*i_c*k_theta

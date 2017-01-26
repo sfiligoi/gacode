@@ -103,6 +103,7 @@ subroutine cgyro_init_manager
   allocate(bmag(n_theta))
   allocate(k_perp(nc))
   allocate(bigR(n_theta))
+  allocate(jacob_r(n_theta))
   allocate(omega_stream(n_theta,n_species))
   allocate(omega_trap(n_theta,n_species))
   allocate(omega_rdrift(n_theta,n_species))
@@ -124,6 +125,7 @@ subroutine cgyro_init_manager
   allocate(omega_rot_prdrift_r(n_theta,n_species))
   allocate(omega_rot_edrift(n_theta,n_species))
   allocate(omega_rot_edrift_r(n_theta,n_species))
+  allocate(omega_rot_edrift_0(n_theta))
   allocate(omega_rot_star(n_theta,n_species))
   
   if (test_flag == 0) then

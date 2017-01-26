@@ -53,6 +53,8 @@ subroutine cgyro_read_input
   call cgyro_readbc_real(te_ade)
   call cgyro_readbc_real(ne_ade)
   call cgyro_readbc_real(masse_ade)
+  call cgyro_readbc_real(dlntdre_ade)
+  call cgyro_readbc_real(dlnndre_ade)
   call cgyro_readbc_real(lambda_star)
   call cgyro_readbc_int(test_flag)
   call cgyro_readbc_int(h_print_flag)

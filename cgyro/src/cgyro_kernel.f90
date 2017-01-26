@@ -127,6 +127,7 @@ subroutine cgyro_kernel
   if(allocated(bmag))           deallocate(bmag)
   if(allocated(k_perp))         deallocate(k_perp)
   if(allocated(bigR))           deallocate(bigR)
+  if(allocated(jacob_r))        deallocate(jacob_r)
   if(allocated(omega_stream))   then
 !$acc exit data delete(omega_stream)
       deallocate(omega_stream)
@@ -151,6 +152,7 @@ subroutine cgyro_kernel
   if(allocated(omega_rot_prdrift_r)) deallocate(omega_rot_prdrift_r)
   if(allocated(omega_rot_edrift))    deallocate(omega_rot_edrift)
   if(allocated(omega_rot_edrift_r))  deallocate(omega_rot_edrift_r)
+  if(allocated(omega_rot_edrift_0))  deallocate(omega_rot_edrift_0)
   if(allocated(omega_rot_star))      deallocate(omega_rot_star)
   
   if(allocated(indx_xi))       deallocate(indx_xi)
