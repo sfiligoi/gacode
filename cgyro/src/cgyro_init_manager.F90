@@ -99,18 +99,35 @@ subroutine cgyro_init_manager
   allocate(theta(n_theta))
   allocate(thetab(n_radial/box_size,n_theta))
   allocate(w_theta(n_theta))
+  allocate(g_theta(n_theta))
   allocate(bmag(n_theta))
   allocate(k_perp(nc))
+  allocate(bigR(n_theta))
+  allocate(jacob_r(n_theta))
   allocate(omega_stream(n_theta,n_species))
   allocate(omega_trap(n_theta,n_species))
   allocate(omega_rdrift(n_theta,n_species))
   allocate(omega_adrift(n_theta,n_species))
   allocate(omega_aprdrift(n_theta,n_species))
   allocate(omega_cdrift(n_theta,n_species))
-  allocate(omega_crdrift(n_theta,n_species))
+  allocate(omega_cdrift_r(n_theta,n_species))
   allocate(omega_gammap(n_theta))
-  allocate(cg(-n_global:n_global))
-    
+
+  allocate(lambda_rot(n_theta,n_species))
+  allocate(dlambda_rot(n_theta,n_species))
+  allocate(dens_rot(n_theta,n_species))
+  allocate(dens_ele_rot(n_theta))
+  allocate(omega_rot_trap(n_theta,n_species))
+  allocate(omega_rot_u(n_theta,n_species))
+  allocate(omega_rot_drift(n_theta,n_species))
+  allocate(omega_rot_drift_r(n_theta,n_species))
+  allocate(omega_rot_prdrift(n_theta,n_species))
+  allocate(omega_rot_prdrift_r(n_theta,n_species))
+  allocate(omega_rot_edrift(n_theta,n_species))
+  allocate(omega_rot_edrift_r(n_theta,n_species))
+  allocate(omega_rot_edrift_0(n_theta))
+  allocate(omega_rot_star(n_theta,n_species))
+  
   if (test_flag == 0) then
 
      !----------------------------------------------------
@@ -155,6 +172,7 @@ subroutine cgyro_init_manager
      allocate(omega_cap_h(nc,nv_loc))
      allocate(omega_h(nc,nv_loc))
      allocate(omega_s(n_field,nc,nv_loc))
+     allocate(omega_ss(n_field,nc,nv_loc))
      allocate(jvec_c(n_field,nc,nv_loc))
      allocate(jvec_v(n_field,nc_loc,nv))
      allocate(upfac1(nc,nv_loc))
@@ -188,7 +206,6 @@ subroutine cgyro_init_manager
   GEO_nfourier_in = geo_ny
   call GEO_alloc(1)
   call cgyro_equilibrium
-  call cgyro_fourier_extend
   
   if (test_flag == 0) then
 

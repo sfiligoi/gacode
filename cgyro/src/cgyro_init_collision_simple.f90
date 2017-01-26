@@ -23,7 +23,7 @@ subroutine cgyro_init_collision_simple
 
            xa = vel(ie)
            xb = xa * vth(is) / vth(js)
-           tauinv_ab = nu(is) * (1.0*z(js))**2 / (1.0*z(is))**2 &
+           tauinv_ab = nu(is) * z(js)**2 / z(is)**2 &
                 * dens(js)/dens(is)
 
            ! Only ee,ei Connor-like Lorentz
@@ -93,13 +93,15 @@ subroutine cgyro_init_collision_simple
 
                  ! Trapping 
                  cmat_simple(ix,jx,ie,is,it) = cmat_simple(ix,jx,ie,is,it) &
-                      + (0.5*delta_t) * omega_trap(it,is) &
-                      * vel(ie) * (1.0 - xi(ix)**2) &
-                      * xi_deriv_mat(ix,jx) 
+                      + (0.5*delta_t) * (omega_trap(it,is) * vel(ie) &
+                      + omega_rot_trap(it,is) / vel(ie)) &
+                      * (1.0 - xi(ix)**2) * xi_deriv_mat(ix,jx) 
+                       
                  amat(ix,jx) = amat(ix,jx) &
-                      - (0.5*delta_t) * omega_trap(it,is) &
-                      * vel(ie) * (1.0 - xi(ix)**2) &
-                      * xi_deriv_mat(ix,jx)
+                      - (0.5*delta_t) * (omega_trap(it,is) * vel(ie) &
+                      + omega_rot_trap(it,is) / vel(ie)) &
+                      * (1.0 - xi(ix)**2) * xi_deriv_mat(ix,jx)
+                      
 
               enddo
            enddo

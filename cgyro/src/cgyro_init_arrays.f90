@@ -126,17 +126,21 @@ subroutine cgyro_init_arrays
 
   enddo
 
-  sum_den_h = 0.0
+  allocate(sum_den_h(n_theta))
+  sum_den_h(:) = 0.0
   do is=1,n_species
      do ie=1,n_energy
         do ix=1,n_xi
-           sum_den_h = sum_den_h+w_xi(ix)*w_e(ie)*z(is)**2/temp(is)*dens(is)
+           do it=1,n_theta
+              sum_den_h(it) = sum_den_h(it) + w_xi(ix)*w_e(ie) &
+                   *z(is)**2/temp(is)*dens(is)*dens_rot(it,is)
+           enddo
         enddo
      enddo
   enddo
 
   if (ae_flag == 1) then
-     sum_den_h = sum_den_h+dens_ele/temp_ele
+     sum_den_h(:) = sum_den_h(:) + dens_ele*dens_ele_rot(:)/temp_ele
   endif
 
   allocate(sum_den_x(nc))
@@ -155,10 +159,10 @@ subroutine cgyro_init_arrays
      do ir=1,n_radial
         do it=1,n_theta
            hzf(ir,it,it) = k_perp(ic_c(ir,it))**2 * lambda_debye**2 &
-                * dens_ele/temp_ele + sum_den_h
+                * dens_ele/temp_ele + sum_den_h(it)
            do jt=1,n_theta
               hzf(ir,it,jt) = hzf(ir,it,jt) &
-                   - dens_ele/temp_ele*w_theta(jt)
+                   - dens_ele*dens_ele_rot(it)/temp_ele*w_theta(jt)
            enddo
         enddo
      enddo
@@ -180,7 +184,7 @@ subroutine cgyro_init_arrays
                 * dens_ele/temp_ele+sum_den_x(ic_c(ir,it))
            do jt=1,n_theta
               xzf(ir,it,jt) = xzf(ir,it,jt) &
-                   - dens_ele/temp_ele*w_theta(jt)
+                   - dens_ele*dens_ele_rot(it)/temp_ele*w_theta(jt)
            enddo
         enddo
      enddo
@@ -328,10 +332,10 @@ subroutine cgyro_init_arrays
         omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
              -omega_aprdrift(it,is)*energy(ie)*xi(ix)**2*i_c*k_theta
 
-        ! omega_cdrift - mach component
+        ! omega_cdrift - coriolis component
         omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
              -omega_cdrift(it,is)*vel(ie)*xi(ix)*i_c*k_theta
-
+        
         u = (2.0*pi/n_radial)*px(ir)
 
         ! omega_rdrift
@@ -344,18 +348,63 @@ subroutine cgyro_init_arrays
              -abs(omega_rdrift(it,is))*energy(ie)*(1.0+xi(ix)**2)* &
              (n_radial/length)*spectraldiss(u,nup_radial)*up_radial
 
-        ! omega_crdrift from Mach
+        ! omega_cdrift_r from coriolis
         omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) & 
-             -omega_crdrift(it,is)*vel(ie)*xi(ix)*&
-             (n_radial/length)*(i_c*u) 
+             -omega_cdrift_r(it,is)*vel(ie)*xi(ix)*&
+             (n_radial/length)*(i_c*u)  
         
-        ! omega_star and rotation shearing
+        ! omega_star and rotation shearing 
         carg = -i_c*k_theta*rho*(dlnndr(is)+dlntdr(is)*(energy(ie)-1.5)) &
              -i_c*k_theta*rho*(sqrt(2.0*energy(ie))*xi(ix)/vth(is) &
-             *omega_gammap(it))
+             *omega_gammap(it)) 
 
         omega_s(:,ic,iv_loc) = carg*jvec_c(:,ic,iv_loc)
 
+        ! Profile curvature via wavenumber advection
+        carg = k_theta*rho*(sdlnndr(is)+sdlntdr(is)*(energy(ie)-1.5))*length/(2*pi)
+        
+        omega_ss(:,ic,iv_loc) = carg*jvec_c(:,ic,iv_loc)
+
+
+           ! centrifugal (cf) components
+        if(cf_model > 0) then
+           
+           ! omega_rot_drift (i ktheta) from cf drift 
+           omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
+                -omega_rot_drift(it,is)*i_c*k_theta
+           
+           ! omega_rot_drift_r (d/dr) from cf drift
+           omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) & 
+                -omega_rot_drift_r(it,is)*(n_radial/length)*(i_c*u)
+
+           ! omega_rot_prdrift dp/dtheta (ktheta) from cf 
+           omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
+                -omega_rot_prdrift(it,is)*i_c*k_theta &
+                *energy(ie)*xi(ix)**2
+           
+           ! omega_rot_prdrift_r dp/dtheta (d/dr) from cf 
+           omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
+                -omega_rot_prdrift_r(it,is)*(n_radial/length)*(i_c*u) &
+                *energy(ie)*xi(ix)**2
+
+           ! omega_rot_edrift_0  dphi/dr (i ktheta) from cf drift 
+           omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
+                -omega_rot_edrift_0(it)*i_c*k_theta
+           
+           ! omega_rot_edrift dphi/dtheta (ktheta) from cf 
+           omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
+                -omega_rot_edrift(it,is)*i_c*k_theta
+           
+           ! omega_rot_edrift_r dphi/dtheta (d/dr) from cf 
+           omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
+                -omega_rot_edrift_r(it,is)*(n_radial/length)*(i_c*u) 
+           
+           ! omega_star from cf
+           carg = -i_c*k_theta*rho*omega_rot_star(it,is)
+           omega_s(:,ic,iv_loc) = omega_s(:,ic,iv_loc)+carg*jvec_c(:,ic,iv_loc)
+           
+        endif
+           
      enddo
   enddo
 !$acc enter data copyin(omega_cap_h,omega_h,omega_s)

@@ -22,11 +22,11 @@ then
   echo
   echo "          -e <simdir>"
   echo "           Use data in <simdir>."
-  echo 
+  echo
   echo "          -ext <filetype>"
   echo "           Output file type."
   echo "           <filetype>=eps, pdf, png, svg, dump"
-  echo 
+  echo
   echo "          -species <value>"
   echo "           Specify species to be plotted: [0,n_species-1]."
   echo
@@ -43,7 +43,7 @@ then
   echo "           Function to plot."
   echo "           <type> = text     (text summary of fluxes)"
   echo "                  = freq     (frequency versus time),"
-  echo "                  = ball     (ballooning modes)"
+  echo "                  = ball     (ballooning modes OR ZF test)"
   echo "                  = hb       (2D ballooning distribution)"
   echo "                  = hbcut    (1D ballooning distribution line plots),"
   echo "                  = geo      (geometry arrays)"
@@ -55,7 +55,7 @@ then
   echo "                  = ky_phi   (time-dependent ky-phi intensities)"
   echo "                  = kx_phi   (average kx-phi intensities)"
   echo "                  = kxky_phi (kx-ky spectra of ave(|phi|))"
-  echo "                  = ex_flux  (radial profile of fluxes for all species)"
+  echo "                  = xflux    (radial profile of fluxes for all species)"
   echo "                  = note     (notebook)"
   echo
   echo "          -ymin <float>"
@@ -69,7 +69,7 @@ then
   echo "          -theta <value>"
   echo "          Value of theta/pi used in hbcut"
   echo "          *Affects: hbcut"
-  echo 
+  echo
   echo "          -tmax <float>"
   echo "          Maximum value of ballooning angle."
   echo "          *Affects: ball, hb, hbcut"
@@ -180,28 +180,28 @@ PYROOT=$GACODE_ROOT/python/cgyro
 
 case "$PLOT_TYPE" in
 
-   ball)  
+   ball)
 	python $PYROOT/plot_ball.py $FTYPE $TIME $FIELD $TMAX ;;
 
-   hb)  
+   hb)
 	python $PYROOT/plot_hb.py $FTYPE $TIME $SPECIES $TMAX ;;
 
-   hbcut)  
+   hbcut)
 	python $PYROOT/plot_hbcut.py $FTYPE $TIME $SPECIES $TMAX $THETA ;;
 
-   freq)  
+   freq)
 	python $PYROOT/plot_freq.py $FTYPE ;;
 
-   error)  
+   error)
 	python $PYROOT/plot_error.py $FTYPE ;;
 
-   ky_flux)  
+   ky_flux)
 	python $PYROOT/plot_ky_flux.py $FTYPE $W $MOMENT $YMIN $YMAX ;;
 
-   ex_flux)  
+   xflux)
 	python $PYROOT/plot_ex_flux.py $FTYPE $W $MOMENT $YMIN $YMAX ;;
 
-   flux)  
+   flux)
 	if [ "$FTYPE" == "dump" ]
         then
 	   python $PYROOT/dump_flux.py 
@@ -210,19 +210,19 @@ case "$PLOT_TYPE" in
         fi
         ;;
 
-   phi)  
+   phi)
 	python $PYROOT/plot_phi.py $FTYPE $FIELD ;;
 
-   ky_phi)  
+   ky_phi)
 	python $PYROOT/plot_ky_phi.py $FTYPE $FIELD $YMIN $YMAX $N ;;
 
-   kx_phi)  
+   kx_phi)
 	python $PYROOT/plot_kx_phi.py $FTYPE $W $YMIN $YMAX $N ;;
 
-   kxky_phi)  
+   kxky_phi)
 	python $PYROOT/plot_kxky_phi.py $FTYPE $W $FIELD ;;
 
-   zf)  
+   zf)
 	python $PYROOT/plot_zf.py $FTYPE $W $FIELD ;;
 
    geo)

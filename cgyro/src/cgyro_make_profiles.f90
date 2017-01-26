@@ -17,7 +17,7 @@ subroutine cgyro_make_profiles
   !
   num_ele = 0
   do is=1,n_species
-     if (z(is) == -1) then
+     if (z(is) < 0) then
         num_ele = num_ele + 1
         is_ele = is
      endif
@@ -86,12 +86,15 @@ subroutine cgyro_make_profiles
         dens_ele = ne_ade
         temp_ele = te_ade
         mass_ele = masse_ade
+        dlnndr_ele = dlnndre_ade
+        dlntdr_ele = dlntdre_ade
      else 
         dens_ele = dens(is_ele)
         temp_ele = temp(is_ele)
         mass_ele = mass(is_ele)
+        dlnndr_ele = dlnndr(is_ele)
+        dlntdr_ele = dlntdr(is_ele)
      endif
-
 
      ! Normalizing quantities
      dens_norm = dens_ele
@@ -147,7 +150,7 @@ subroutine cgyro_make_profiles
      mach     = mach/vth_norm
 
      do is=1,n_species
-        nu(is) = nu_ee *(1.0*z(is))**4 &
+        nu(is) = nu_ee *z(is)**4 &
              * dens(is) / dens_ele &
              * sqrt(mass_ele/mass(is)) * (temp_ele/temp(is))**1.5
      enddo
@@ -191,10 +194,14 @@ subroutine cgyro_make_profiles
         dens_ele = ne_ade
         temp_ele = te_ade
         mass_ele = masse_ade
+        dlnndr_ele = dlnndre_ade
+        dlntdr_ele = dlntdre_ade
      else 
         dens_ele = dens(is_ele)
         temp_ele = temp(is_ele)
         mass_ele = mass(is_ele)
+        dlnndr_ele = dlnndr(is_ele)
+        dlntdr_ele = dlntdr(is_ele)
      endif
 
      do is=1,n_species
@@ -203,7 +210,7 @@ subroutine cgyro_make_profiles
         vth(is) = sqrt(temp(is)/mass(is))
 
         ! collision frequency
-        nu(is) = nu_ee *(1.0*z(is))**4 &
+        nu(is) = nu_ee *z(is)**4 &
              * dens(is) / dens_ele &
              * sqrt(mass_ele/mass(is)) * (temp_ele/temp(is))**1.5
 
@@ -274,11 +281,11 @@ subroutine cgyro_make_profiles
      omega_eb = k_theta*length*gamma_e/(2*pi)
      select case (shear_method)
      case (1)
-        call cgyro_info('Hammett discrete-shift ExB shear method.') 
+        call cgyro_info('Hammett discrete-shift ExB shear.') 
      case (2)
-        call cgyro_info('Extended-domain shear method.') 
+        call cgyro_info('Wavenumber advection ExB shear.') 
      case (3)
-        call cgyro_info('Linear-time ExB shear method.') 
+        call cgyro_info('Linear-time ExB shear.') 
      end select
   else
      omega_eb = 0.0

@@ -17,6 +17,7 @@ EXEC = cgyro
 OBJECTS = cgyro_globals.o \
           cgyro_parallel_lib.o \
           cgyro_io.o \
+	  cgyro_init_rotation.o \
           cgyro_equilibrium.o \
           cgyro_check.o \
 	  cgyro_check_memory.o \
@@ -24,7 +25,6 @@ OBJECTS = cgyro_globals.o \
           cgyro_field.o \
           cgyro_field_coefficients.o \
           cgyro_flux.o \
-          cgyro_fourier_extend.o \
           cgyro_freq.o \
           cgyro_upwind.o \
           cgyro_init.o \
@@ -49,6 +49,7 @@ OBJECTS = cgyro_globals.o \
           cgyro_run.o \
           cgyro_shear.o \
           cgyro_shear_interface.o \
+          cgyro_shear_advect.o \
           cgyro_shear_hammett.o \
           cgyro_shear_linear.o \
 	  cgyro_step_gk.o \

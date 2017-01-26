@@ -6,7 +6,7 @@ from cgyro.data import cgyrodata
 
 ftype  = sys.argv[1]
 w      = float(sys.argv[2])
-ifield = sys.argv[3]
+ifield = int(sys.argv[3])
 
 sim = cgyrodata('./')
 

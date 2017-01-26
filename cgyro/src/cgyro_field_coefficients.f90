@@ -17,8 +17,11 @@ subroutine cgyro_field_coefficients
 !$omp do reduction(+:sum_loc)
   do iv=nv1,nv2
      iv_loc = iv-nv1+1
+     is = is_v(iv)
      do ic=1,nc
-        sum_loc(ic) = sum_loc(ic)+vfac(iv_loc)*(1.0-jvec_c(1,ic,iv_loc)**2) 
+        it = it_c(ic)
+        sum_loc(ic) = sum_loc(ic)+vfac(iv_loc)*dens_rot(it,is) &
+             *(1.0-jvec_c(1,ic,iv_loc)**2) 
      enddo
   enddo
 !$omp end do
@@ -32,8 +35,13 @@ subroutine cgyro_field_coefficients
        NEW_COMM_1,&
        i_err)
 
-  if (ae_flag == 1) sum_den_x(:) = sum_den_x(:)+dens_ele/temp_ele
-  !------------------------------------------------------------------------------
+  if (ae_flag == 1) then
+     do ic=1,nc
+        it = it_c(ic)
+        sum_den_x(ic) = sum_den_x(ic)+dens_ele*dens_ele_rot(it)/temp_ele
+     enddo
+  endif
+  !----------------------------------------------------------------------
 
   !-----------------------------------------------------------------------
   ! Field-solve coefficients (i.e., final numerical factors).
@@ -44,7 +52,8 @@ subroutine cgyro_field_coefficients
      if (n == 0 .and. (px(ir) == 0 .or. ir == 1) .and. zf_test_flag == 0) then
         fcoef(:,ic) = 0.0
      else
-        fcoef(1,ic) = 1.0/(k_perp(ic)**2*lambda_debye**2*dens_ele/temp_ele+sum_den_h)
+        fcoef(1,ic) = 1.0/(k_perp(ic)**2*lambda_debye**2*dens_ele/temp_ele &
+             + sum_den_h(it))
         if (n_field > 1) fcoef(2,ic) = 1.0/(-2.0*k_perp(ic)**2* &
              rho**2/betae_unit*dens_ele*temp_ele)
         if (n_field > 2) fcoef(3,ic) = -betae_unit/(2.0*dens_ele*temp_ele)

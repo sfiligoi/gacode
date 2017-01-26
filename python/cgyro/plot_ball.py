@@ -34,10 +34,13 @@ ax.grid(which="major",ls=":")
 ax.set_xlabel(r'$\theta_*/\pi$')
 ax.set_ylabel(ytag)
 
+
 if sim.n_radial == 1:
+    # Manage n=0 (ZF) case
     x = sim.theta/np.pi
     ax.set_xlim([-1,1])
 else:
+    # Assume n > 0 (ballooning mode) if n_radial > 1
     x = sim.thetab/np.pi
     if tmax < 0.0:
         ax.set_xlim([1-sim.n_radial,-1+sim.n_radial])

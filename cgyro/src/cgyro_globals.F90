@@ -52,13 +52,14 @@ module cgyro_globals
   integer :: collision_ene_diffusion
   integer :: collision_kperp
   integer :: collision_field_model
+  integer :: collision_ion_model
   integer :: zf_test_flag 
   integer :: nonlinear_flag 
   integer :: nonlinear_method
   real :: te_ade
   real :: ne_ade
-  real :: dlntdre_ade   ! used only for experimental profiles
-  real :: dlnndre_ade   ! used only for experimental profiles
+  real :: dlntdre_ade   
+  real :: dlnndre_ade   
   real :: masse_ade
   real :: lambda_star
   integer :: test_flag
@@ -69,6 +70,7 @@ module cgyro_globals
   real :: gamma_e
   real :: gamma_p
   real :: mach
+  integer :: cf_model
   real :: error_tol
   integer :: mpi_rank_order
   real :: gamma_e_decay
@@ -76,7 +78,6 @@ module cgyro_globals
   integer :: udsymmetry_flag
   integer :: shear_method
   integer :: n_global
-  real    :: eps_global
   integer :: psym_flag
   !
   ! Geometry input
@@ -101,12 +102,14 @@ module cgyro_globals
   !
   integer :: n_species
   real :: nu_ee
-  integer, dimension(6) :: z
+  real, dimension(6) :: z
   real, dimension(6) :: mass
   real, dimension(6) :: dens
   real, dimension(6) :: temp
   real, dimension(6) :: dlnndr
   real, dimension(6) :: dlntdr
+  real, dimension(6) :: sdlnndr
+  real, dimension(6) :: sdlntdr
 
   integer :: subroutine_flag  ! only used for cgyro_read_input
 
@@ -240,6 +243,8 @@ module cgyro_globals
   real :: dens_ele
   real :: temp_ele
   real :: mass_ele
+  real :: dlnndr_ele
+  real :: dlntdr_ele
   !
   real, dimension(6) :: vth  
   real, dimension(6) :: nu
@@ -279,7 +284,7 @@ module cgyro_globals
   complex, dimension(:,:,:), allocatable :: g_nl
   complex, dimension(:,:), allocatable :: omega_cap_h
   complex, dimension(:,:), allocatable :: omega_h
-  complex, dimension(:,:,:), allocatable :: omega_s
+  complex, dimension(:,:,:), allocatable :: omega_s,omega_ss
   complex, dimension(:,:), allocatable :: cap_h_c
   complex, dimension(:,:), allocatable :: cap_h_ct
   complex, dimension(:,:), allocatable :: cap_h_v
@@ -361,7 +366,7 @@ module cgyro_globals
   integer :: gksp_nelem, gksp_nmax
   !
   ! Field solve variables
-  real :: sum_den_h
+  real, dimension(:), allocatable :: sum_den_h
   real, dimension(:), allocatable :: sum_den_x, sum_cur_x
   real, dimension(:), allocatable :: vfac
   !
@@ -376,19 +381,38 @@ module cgyro_globals
   ! Equilibrium/geometry arrays
   integer :: it0
   real :: d_theta
-  real, dimension(:,:), allocatable   :: thetab
+  real :: bigR_th0
+  real :: bigR_r_th0
+  real, dimension(:,:), allocatable :: thetab
   real, dimension(:), allocatable   :: w_theta
-  real, dimension(:), allocatable :: k_perp    
+  real, dimension(:), allocatable   :: g_theta
+  real, dimension(:), allocatable   :: k_perp    
   real, dimension(:), allocatable   :: bmag
+  real, dimension(:), allocatable   :: bigR
+  real, dimension(:), allocatable   :: jacob_r
   real, dimension(:,:), allocatable :: omega_stream
   real, dimension(:,:), allocatable :: omega_trap
   real, dimension(:,:), allocatable :: omega_rdrift
   real, dimension(:,:), allocatable :: omega_adrift
   real, dimension(:,:), allocatable :: omega_aprdrift
   real, dimension(:,:), allocatable :: omega_cdrift
-  real, dimension(:,:), allocatable :: omega_crdrift
+  real, dimension(:,:), allocatable :: omega_cdrift_r
   real, dimension(:),   allocatable :: omega_gammap
-  complex, dimension(:),allocatable :: cg
+  ! for centrifugal rotation
+  real, dimension(:,:), allocatable :: lambda_rot
+  real, dimension(:,:), allocatable :: dlambda_rot
+  real, dimension(:,:), allocatable :: dens_rot
+  real, dimension(:),   allocatable :: dens_ele_rot
+  real, dimension(:,:), allocatable :: omega_rot_trap
+  real, dimension(:,:), allocatable :: omega_rot_u
+  real, dimension(:,:), allocatable :: omega_rot_drift
+  real, dimension(:,:), allocatable :: omega_rot_drift_r
+  real, dimension(:,:), allocatable :: omega_rot_prdrift
+  real, dimension(:,:), allocatable :: omega_rot_prdrift_r
+  real, dimension(:,:), allocatable :: omega_rot_edrift
+  real, dimension(:,:), allocatable :: omega_rot_edrift_r
+  real, dimension(:),   allocatable :: omega_rot_edrift_0
+  real, dimension(:,:), allocatable :: omega_rot_star
   !
   ! Number of gridpoints for Miller geometry integration grid
   integer, parameter :: geo_ntheta=1001 

@@ -82,12 +82,22 @@ subroutine cgyro_write_initdata
 
      write(io,*)
      write(io,'(a)') &
-          'indx  z     n/n_norm     T/T_norm     m/m_norm      a/Ln         a/Lt         nu'
+          'indx    z      n/n_norm     T/T_norm     m/m_norm      a/Ln         a/Lt         nu'
      do is=1,n_species
-        write(io,'(t2,i2,2x,i2,2x,6(1pe11.4,2x))') &
+        write(io,'(t2,i2,2x,f5.1,2x,6(1pe11.4,2x))') &
              is,z(is),dens(is),temp(is),mass(is),dlnndr(is),dlntdr(is),nu(is)
      enddo
 
+     write(io,*)
+     write(io,'(a)') &
+          'indx      s_n         s_t'
+     do is=1,n_species
+        write(io,'(t2,i2,2x,6(1pe11.4,2x))') &
+             is,sdlnndr(is),sdlntdr(is)
+     enddo
+
+     
+     
      if (profile_model == 2) then
         write(io,*)
         write(io,20) ' a_meters:',a_meters, '   b_unit:',b_unit
@@ -135,7 +145,7 @@ subroutine cgyro_write_initdata
      write (io,fmtstr) temp_norm
      write (io,fmtstr) vth_norm
      do is=1,n_species
-        write (io,fmtstr) 1.0*z(is)
+        write (io,fmtstr) z(is)
         write (io,fmtstr) mass(is)
         write (io,fmtstr) dens(is)
         write (io,fmtstr) temp(is)
@@ -164,7 +174,7 @@ subroutine cgyro_write_initdata
      write(io,fmtstr) omega_adrift(:,1)
      write(io,fmtstr) omega_aprdrift(:,1)
      write(io,fmtstr) omega_cdrift(:,1)
-     write(io,fmtstr) omega_crdrift(:,1)
+     write(io,fmtstr) omega_cdrift_r(:,1)
      write(io,fmtstr) omega_gammap(:)
      write(io,fmtstr) k_perp(ic_c(n_radial/2+1,:))
      close(io)
@@ -188,7 +198,6 @@ subroutine cgyro_write_initdata
      write(io,'(i4)') box_size
      write(io,'(1pe12.5)') length/rho
      write(io,'(i4)') n_global
-     write(io,'(1pe12.5)') eps_global
      write(io,'(i4)') px(:)
      write(io,'(1pe12.5)') theta(:)
      write(io,'(1pe12.5)') energy(:)

@@ -6,7 +6,6 @@ subroutine cgyro_read_input
   implicit none
 
   integer :: is
-  integer :: xint
   real :: x
   character (len=1) :: cdummy
 
@@ -47,12 +46,15 @@ subroutine cgyro_read_input
   call cgyro_readbc_int(collision_ene_diffusion)
   call cgyro_readbc_int(collision_kperp)
   call cgyro_readbc_int(collision_field_model)
+  call cgyro_readbc_int(collision_ion_model)
   call cgyro_readbc_int(zf_test_flag)
   call cgyro_readbc_int(nonlinear_flag)
   call cgyro_readbc_int(nonlinear_method)
   call cgyro_readbc_real(te_ade)
   call cgyro_readbc_real(ne_ade)
   call cgyro_readbc_real(masse_ade)
+  call cgyro_readbc_real(dlntdre_ade)
+  call cgyro_readbc_real(dlnndre_ade)
   call cgyro_readbc_real(lambda_star)
   call cgyro_readbc_int(test_flag)
   call cgyro_readbc_int(h_print_flag)
@@ -62,6 +64,7 @@ subroutine cgyro_read_input
   call cgyro_readbc_real(gamma_e)
   call cgyro_readbc_real(gamma_p)
   call cgyro_readbc_real(mach)
+  call cgyro_readbc_int(cf_model)
   call cgyro_readbc_real(error_tol)
   call cgyro_readbc_int(mpi_rank_order)
   call cgyro_readbc_real(gamma_e_decay)
@@ -69,7 +72,6 @@ subroutine cgyro_read_input
   call cgyro_readbc_int(udsymmetry_flag)
   call cgyro_readbc_int(shear_method)
   call cgyro_readbc_int(n_global)
-  call cgyro_readbc_real(eps_global)
   call cgyro_readbc_int(psym_flag)
 
   call cgyro_readbc_real(rmin)
@@ -93,12 +95,14 @@ subroutine cgyro_read_input
   call cgyro_readbc_real(nu_ee)
 
   do is=1,6
-     call cgyro_readbc_int(xint) ; z(is) = xint
+     call cgyro_readbc_real(x)   ; z(is) = x
      call cgyro_readbc_real(x)   ; mass(is) = x
      call cgyro_readbc_real(x)   ; dens(is) = x
      call cgyro_readbc_real(x)   ; temp(is) = x
      call cgyro_readbc_real(x)   ; dlnndr(is) = x
      call cgyro_readbc_real(x)   ; dlntdr(is) = x
+     call cgyro_readbc_real(x)   ; sdlnndr(is) = x
+     call cgyro_readbc_real(x)   ; sdlntdr(is) = x
   enddo
 
   call cgyro_readbc_real(lambda_star_scale)

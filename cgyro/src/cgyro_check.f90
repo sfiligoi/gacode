@@ -117,9 +117,6 @@ subroutine cgyro_check
   case(5)
      call cgyro_info('Collision model 5: Simple Lorentz ee+ei')
 
-  case(6)
-     call cgyro_info('Collision model 6: Test model (const nu)')
-
   case default
      call cgyro_error('Invalid value for collision_model')
      return
@@ -178,6 +175,18 @@ subroutine cgyro_check
      end select
   endif
 
+  if (collision_model /= 5 .or. collision_model /= 1) then
+     select case (collision_ion_model)
+     case(0)
+        call cgyro_info('Collisional ions: on')
+     case(1)
+        call cgyro_info('Collisional ions: off')
+     case default
+        call cgyro_error('Invalid value for collision_ion_model')
+        return
+     end select
+  endif
+  
   !
   !------------------------------------------------------------------------
 
@@ -213,6 +222,42 @@ subroutine cgyro_check
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
+  ! Rotation model
+  !
+  if(cf_model > 0) then
+     if(n_field > 1) then
+        call cgyro_error('Electromagentic effects not available with cf_flag > 0')
+        return
+     endif
+     if(implicit_flag == 1) then
+        call cgyro_error('Implicit method not available with cf_flag > 0')
+        return
+     endif
+     if(collision_model == 5) then
+        call cgyro_error('Simple collisions not available with cf_flag > 0')
+        return
+     endif
+  endif
+  
+  select case (cf_model)
+
+  case(0)
+     call cgyro_info('Centrifugal model: none')
+     
+  case(1)
+     call cgyro_info('Centrifugal model: included (all)')
+  case(2)
+     call cgyro_info('Centrifugal model: only cf trap (no coriolis)')
+  case(3)
+     call cgyro_info('Centrifugal model: only cf drift (no coriolis)') 
+        
+  case default
+     call cgyro_error('Invalid value for cf_model')
+     return
+
+  end select
+     
+  !------------------------------------------------------------------------
   ! Check profile parameters
   !
   do is=1,n_species
@@ -228,9 +273,8 @@ subroutine cgyro_check
         call cgyro_error('Collision frequencies must be non-negative.')
         return
      endif
-     if (z(is) == 0) then
-        call cgyro_error('Charge must be non-zero.')
-        return
+     if (abs(z(is)) < epsilon(0.0)) then
+        call cgyro_error('Charges must be non-zero.')
      endif
   enddo
   !------------------------------------------------------------------------

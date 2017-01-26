@@ -59,20 +59,19 @@ subroutine cgyro_rhs(ij)
   implicit none
 
   integer, intent(in) :: ij
-  integer :: is,ir,irp,it
-  integer :: id,jc
+  integer :: is,ir,it
+  integer :: id,jc,j
   integer :: p
   real :: rval,rval2
   complex :: rhs_stream
   complex :: rhs_ij(nc,nv_loc)
-  complex, dimension(n_radial,n_theta) :: fw,gw
-  integer :: l
+  complex, dimension(0:n_radial+1) :: h0
 
   ! Prepare suitable distribution (g, not h) for conservative upwind method
   g_x(:,:) = h_x(:,:)
 
   if (n_field > 1) then
-!$omp parallel do private(iv_loc,is,ic)
+     !$omp parallel do private(iv_loc,is,ic)
      do iv=nv1,nv2
         iv_loc = iv-nv1+1
         is = is_v(iv)
@@ -152,30 +151,30 @@ subroutine cgyro_rhs(ij)
 !$acc end data
   endif
 
-  ! Extended-domain shear algoroithm
-
   if (shear_method == 2) then
-
+     h0(0) = 0.0
+     h0(n_radial+1) = 0.0
      do iv=nv1,nv2
         iv_loc = iv-nv1+1
-        do it=1,n_theta
-           gw(:,it) = h_x(ic_c(:,it),iv_loc)
-        enddo
-        fw(:,:) = 0.0
-        do ir=1,n_radial
-           p = px(ir)
-           do l=-n_global,n_global
-              if (abs(p+l) < n_radial/2) then
-                 fw(ir,:) = fw(ir,:)+gw(ir+l,:)*cg(l)
-              endif
+        do j=1,n_theta
+
+           h0(1:n_radial) = h_x(ic_c(:,j),iv_loc)
+           
+           do ir=1,n_radial
+              rhs_ij(ic_c(ir,j),iv_loc) = rhs_ij(ic_c(ir,j),iv_loc)+ &
+                   omega_eb*0.5*(h0(ir+1)-h0(ir-1))
            enddo
-        enddo
-        do it=1,n_theta
-           rhs_ij(ic_c(:,it),iv_loc) = rhs_ij(ic_c(:,it),iv_loc) & 
-                -i_c*omega_eb*fw(:,it)
+
+           do ir=1,n_radial
+              h0(ir) = sum(omega_ss(:,ic_c(ir,j),iv_loc)*field(:,ic_c(ir,j)))
+           enddo
+           do ir=1,n_radial
+              rhs_ij(ic_c(ir,j),iv_loc) = rhs_ij(ic_c(ir,j),iv_loc)+ &
+                   0.5*(h0(ir+1)-h0(ir-1))
+           enddo
+
         enddo
      enddo
-
   endif
 
   rhs(:,:,ij) = rhs_ij(:,:)
@@ -201,6 +200,7 @@ subroutine cgyro_rhs(ij)
         endif
      enddo
   endif
+
 
 end subroutine cgyro_rhs
 

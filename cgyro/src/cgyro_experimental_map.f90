@@ -41,13 +41,15 @@ subroutine cgyro_experimental_map
   call cub_spline(rmin_exp,ne_ade_exp,n_grid_exp,rmin,ne_ade,1)
   call cub_spline(rmin_exp,dlntdre_ade_exp,n_grid_exp,rmin,dlntdre_ade,1)
   call cub_spline(rmin_exp,dlnndre_ade_exp,n_grid_exp,rmin,dlnndre_ade,1)
-
+ 
   do i=1,n_species
      ! Note: maping is only done for n_species (not n_species_exp)
      call cub_spline(rmin_exp,dens_exp(i,:),n_grid_exp,rmin,dens(i),1)
      call cub_spline(rmin_exp,temp_exp(i,:),n_grid_exp,rmin,temp(i),1)
      call cub_spline(rmin_exp,dlntdr_exp(i,:),n_grid_exp,rmin,dlntdr(i),1)
      call cub_spline(rmin_exp,dlnndr_exp(i,:),n_grid_exp,rmin,dlnndr(i),1)
+     call cub_spline(rmin_exp,sdlntdr_exp(i,:),n_grid_exp,rmin,sdlntdr(i),1)
+     call cub_spline(rmin_exp,sdlnndr_exp(i,:),n_grid_exp,rmin,sdlnndr(i),1)
   enddo
 
   if (geo_numeq_flag == 1) then
