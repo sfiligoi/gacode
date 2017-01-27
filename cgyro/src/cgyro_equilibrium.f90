@@ -128,11 +128,11 @@ subroutine cgyro_equilibrium
         dlambda_rot(it,is) = - (mach / rmaj /vth(is))**2 * GEO_bigr &
              * GEO_bigr_t / (q*rmaj*GEO_g_theta)
 
-        omega_rot_drift(it,is) = (mach/rmaj)**2 * GEO_bigr * rho &
+        omega_rot_drift(it,is) = -(mach/rmaj)**2 * GEO_bigr * rho &
              * mass(is)/(z(is)*GEO_b) * GEO_gq &
-             * (GEO_captheta*GEO_usin*GEO_bt/GEO_b - GEO_ucos*GEO_b/GEO_bt)
+             * (GEO_captheta*GEO_usin*GEO_bt/GEO_b + GEO_ucos*GEO_b/GEO_bt)
         
-        omega_rot_drift_r(it,is) = (mach/rmaj)**2 * GEO_bigr * rho &
+        omega_rot_drift_r(it,is) = -(mach/rmaj)**2 * GEO_bigr * rho &
              * mass(is)/(z(is)*GEO_b) * GEO_usin * GEO_grad_r &
              * GEO_bt / GEO_b
 
