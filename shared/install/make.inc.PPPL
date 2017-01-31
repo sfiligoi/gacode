@@ -5,6 +5,11 @@
 # L. Peterson (jpeterso@pppl.gov)
 # D. Mikkelsen (mikk@pppl.gov)
 
+IDENTITY="PPPL cluster"
+CORES_PER_NODE=1
+NUMAS_PER_NODE=1
+
+
 # Compilers (intel) and flags 
 
 FC	= mpif90 -mod $(GACODE_ROOT)/modules -I $(GACODE_ROOT)/modules
