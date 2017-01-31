@@ -68,8 +68,8 @@ subroutine GEO_interp(theta_0)
      GEO_l_t    = 0.0 ! check with NEO usage
      GEO_nsin   = 0.0 ! check with NEO usage
      GEO_bigr   = GEO_rmaj_in/GEO_b
-     GEO_bigr_r = 0.0 ! check with NEO usage
-     GEO_bigr_t = 0.0 ! check with NEO usage
+     GEO_bigr_r = cos(theta_0)
+     GEO_bigr_t = -GEO_rmin_in*sin(theta_0)
      GEO_theta_nc = theta_0
      return
   endif

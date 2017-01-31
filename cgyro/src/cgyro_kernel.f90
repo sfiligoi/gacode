@@ -127,7 +127,6 @@ subroutine cgyro_kernel
   if(allocated(bmag))           deallocate(bmag)
   if(allocated(k_perp))         deallocate(k_perp)
   if(allocated(bigR))           deallocate(bigR)
-  if(allocated(jacob_r))        deallocate(jacob_r)
   if(allocated(omega_stream))   then
 !$acc exit data delete(omega_stream)
       deallocate(omega_stream)

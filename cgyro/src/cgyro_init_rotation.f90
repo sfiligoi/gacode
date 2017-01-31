@@ -7,7 +7,6 @@ subroutine cgyro_init_rotation
   implicit none
 
   real, dimension(:), allocatable :: phi_rot, phi_rot_tderiv, phi_rot_rderiv
-  real :: phi_rot_avg_rderiv
   real, dimension(:), allocatable :: sum_pressure_t
   real :: phi_rot_avg
   integer, dimension(:), allocatable :: thcyc
@@ -151,8 +150,7 @@ subroutine cgyro_init_rotation
         dlambda_rot(it,is) = dlambda_rot(it,is) &
              + z(is)/temp(is) * phi_rot_tderiv(it) / (q*rmaj*g_theta(it)) 
            
-        omega_rot_trap(it,is) = -0.5*sqrt(2.0)*vth(is) &
-             /(q*rmaj)*dlambda_rot(it,is)
+        omega_rot_trap(it,is) = -0.5*sqrt(2.0)*vth(is) *dlambda_rot(it,is)
 
         omega_rot_u(it,is) = -vth(is)/sqrt(2.0)*dlambda_rot(it,is)
 
@@ -185,7 +183,6 @@ subroutine cgyro_init_rotation
   enddo
 
   ! Solve d/dr of QN to get d phi_rot / dr
-  phi_rot_rderiv(:) = 0.0
 
   do it=1,n_theta
      
@@ -195,9 +192,10 @@ subroutine cgyro_init_rotation
         sum_zn = sum_zn + z(is)*z(is)/temp(is)*dens(is)*dens_rot(it,is)
      enddo
      if(ae_flag == 1) then
-        sum_zn = sum_zn + dens_ele*dens_ele_rot(it)
+        sum_zn = sum_zn + 1.0/temp_ele*dens_ele*dens_ele_rot(it)
      endif
-     
+
+     phi_rot_rderiv(it) = 0.0
      do is=1,n_species
         phi_rot_rderiv(it) = phi_rot_rderiv(it) &
              + z(is)*dens(is)*dens_rot(it,is)*(-dlnndr(is) &
@@ -215,30 +213,11 @@ subroutine cgyro_init_rotation
      
   enddo
 
-  ! d<phi_rot>/dr
-  phi_rot_avg_rderiv = 0.0
-  ! first get <d phi_rot>/dr... 
+  ! rho * dphi_*/dr
   do it=1,n_theta
-     phi_rot_avg_rderiv = phi_rot_avg_rderiv + w_theta(it)*phi_rot_rderiv(it)
+     omega_rot_edrift_0(it) = rho*phi_rot_rderiv(it)
   enddo
-  ! ... + <phi_*/sqrt(g)(dsqrt(g)/dr)> ...
-  fac=0.0
-  do it=1,n_theta
-     fac = fac + w_theta(it) * jacob_r(it) * phi_rot(it)
-  enddo
-  phi_rot_avg_rderiv = phi_rot_avg_rderiv + fac
-  ! ... - <phi_*><1/sqrt(g)(dsqrt(g)/dr)>
-  fac=0.0
-  do it=1,n_theta
-     fac = fac + w_theta(it) * jacob_r(it) * phi_rot(it)
-  enddo
-  phi_rot_avg_rderiv = phi_rot_avg_rderiv - fac * phi_rot_avg
-
-  ! rho * d(phi_tilde)/dr = rho * d(phi_* - <phi_*>)/dr
-  do it=1,n_theta
-     omega_rot_edrift_0(it) = rho*(phi_rot_rderiv(it)-phi_rot_avg_rderiv)
-  enddo
-     
+  
   ! just cf trapping (no coriolis and no cf drift)
   if(cf_model == 2) then
 
@@ -273,7 +252,6 @@ subroutine cgyro_init_rotation
      omega_rot_edrift_0(:) = 0.0
      
   endif
-  
   
   deallocate(phi_rot)
   deallocate(phi_rot_tderiv)

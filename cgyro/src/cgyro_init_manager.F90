@@ -103,7 +103,6 @@ subroutine cgyro_init_manager
   allocate(bmag(n_theta))
   allocate(k_perp(nc))
   allocate(bigR(n_theta))
-  allocate(jacob_r(n_theta))
   allocate(omega_stream(n_theta,n_species))
   allocate(omega_trap(n_theta,n_species))
   allocate(omega_rdrift(n_theta,n_species))

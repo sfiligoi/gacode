@@ -156,7 +156,7 @@ subroutine cgyro_equilibrium
              * GEO_captheta / GEO_grad_r 
 
         ! Multiply phi_rot theta derivative in cgyro_init_rotation
-        omega_rot_edrift_r(it,is) = -rho/GEO_b * GEO_bt*q*rmaj/rmin 
+        omega_rot_edrift_r(it,is) = -rho * GEO_bt/GEO_b * q * GEO_bigR/rmin 
         
      enddo
 
@@ -170,10 +170,6 @@ subroutine cgyro_equilibrium
 
      bmag(it) = GEO_b
 
-     ! 1/sqrt(g) (dsqrt(g)/dr), where sqrt(g) = R^2/I
-     jacob_r(it) = 2.0/GEO_bigr*GEO_bigR_r &
-          - 1.0/GEO_bt * rmin/(q*GEO_bigr) * GEO_ffprime/GEO_f
-     
      ! flux-surface average weights
      w_theta(it) = g_theta(it)/GEO_b
 
@@ -187,7 +183,7 @@ subroutine cgyro_equilibrium
 !$acc enter data copyin(energy,xi,vel,omega_stream)
 
   w_theta(:) = w_theta(:)/sum(w_theta) 
-
+  
   call cgyro_init_rotation
   
 end subroutine cgyro_equilibrium

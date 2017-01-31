@@ -389,7 +389,6 @@ module cgyro_globals
   real, dimension(:), allocatable   :: k_perp    
   real, dimension(:), allocatable   :: bmag
   real, dimension(:), allocatable   :: bigR
-  real, dimension(:), allocatable   :: jacob_r
   real, dimension(:,:), allocatable :: omega_stream
   real, dimension(:,:), allocatable :: omega_trap
   real, dimension(:,:), allocatable :: omega_rdrift
