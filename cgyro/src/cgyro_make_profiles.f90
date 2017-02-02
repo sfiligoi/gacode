@@ -277,7 +277,7 @@ subroutine cgyro_make_profiles
   !------------------------------------------------------------------------
   ! ExB shear
   !
-  if (abs(gamma_e) > 1e-10) then
+  if (abs(gamma_e) > 1e-10 .and. nonlinear_flag > 0) then
      omega_eb = k_theta*length*gamma_e/(2*pi)
      select case (shear_method)
      case (1)

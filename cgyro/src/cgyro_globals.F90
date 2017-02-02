@@ -79,6 +79,7 @@ module cgyro_globals
   integer :: shear_method
   integer :: n_global
   integer :: psym_flag
+  integer :: profile_shear_flag
   !
   ! Geometry input
   !

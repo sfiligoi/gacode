@@ -73,6 +73,7 @@ subroutine cgyro_read_input
   call cgyro_readbc_int(shear_method)
   call cgyro_readbc_int(n_global)
   call cgyro_readbc_int(psym_flag)
+  call cgyro_readbc_int(profile_shear_flag)
 
   call cgyro_readbc_real(rmin)
   call cgyro_readbc_real(rmaj)
