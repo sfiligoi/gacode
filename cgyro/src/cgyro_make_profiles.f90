@@ -86,10 +86,14 @@ subroutine cgyro_make_profiles
         dens_ele = ne_ade
         temp_ele = te_ade
         mass_ele = masse_ade
+        dlnndr_ele = dlnndre_ade
+        dlntdr_ele = dlntdre_ade
      else 
         dens_ele = dens(is_ele)
         temp_ele = temp(is_ele)
         mass_ele = mass(is_ele)
+        dlnndr_ele = dlnndr(is_ele)
+        dlntdr_ele = dlntdr(is_ele)
      endif
 
      ! Normalizing quantities
@@ -190,10 +194,14 @@ subroutine cgyro_make_profiles
         dens_ele = ne_ade
         temp_ele = te_ade
         mass_ele = masse_ade
+        dlnndr_ele = dlnndre_ade
+        dlntdr_ele = dlntdre_ade
      else 
         dens_ele = dens(is_ele)
         temp_ele = temp(is_ele)
         mass_ele = mass(is_ele)
+        dlnndr_ele = dlnndr(is_ele)
+        dlntdr_ele = dlntdr(is_ele)
      endif
 
      do is=1,n_species

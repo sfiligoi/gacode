@@ -58,8 +58,8 @@ module cgyro_globals
   integer :: nonlinear_method
   real :: te_ade
   real :: ne_ade
-  real :: dlntdre_ade   ! used only for experimental profiles
-  real :: dlnndre_ade   ! used only for experimental profiles
+  real :: dlntdre_ade   
+  real :: dlnndre_ade   
   real :: masse_ade
   real :: lambda_star
   integer :: test_flag
@@ -243,6 +243,8 @@ module cgyro_globals
   real :: dens_ele
   real :: temp_ele
   real :: mass_ele
+  real :: dlnndr_ele
+  real :: dlntdr_ele
   !
   real, dimension(6) :: vth  
   real, dimension(6) :: nu
@@ -381,10 +383,10 @@ module cgyro_globals
   real :: d_theta
   real :: bigR_th0
   real :: bigR_r_th0
-  real, dimension(:,:), allocatable   :: thetab
+  real, dimension(:,:), allocatable :: thetab
   real, dimension(:), allocatable   :: w_theta
   real, dimension(:), allocatable   :: g_theta
-  real, dimension(:), allocatable :: k_perp    
+  real, dimension(:), allocatable   :: k_perp    
   real, dimension(:), allocatable   :: bmag
   real, dimension(:), allocatable   :: bigR
   real, dimension(:,:), allocatable :: omega_stream
@@ -408,6 +410,7 @@ module cgyro_globals
   real, dimension(:,:), allocatable :: omega_rot_prdrift_r
   real, dimension(:,:), allocatable :: omega_rot_edrift
   real, dimension(:,:), allocatable :: omega_rot_edrift_r
+  real, dimension(:),   allocatable :: omega_rot_edrift_0
   real, dimension(:,:), allocatable :: omega_rot_star
   !
   ! Number of gridpoints for Miller geometry integration grid

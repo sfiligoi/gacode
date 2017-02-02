@@ -226,11 +226,15 @@ subroutine cgyro_check
   !
   if(cf_model > 0) then
      if(n_field > 1) then
-        call cgyro_error('Electromagentic effects not available with cf_flag=1')
+        call cgyro_error('Electromagentic effects not available with cf_flag > 0')
         return
      endif
      if(implicit_flag == 1) then
-        call cgyro_error('Implicit method not available with cf_flag=1')
+        call cgyro_error('Implicit method not available with cf_flag > 0')
+        return
+     endif
+     if(collision_model == 5) then
+        call cgyro_error('Simple collisions not available with cf_flag > 0')
         return
      endif
   endif

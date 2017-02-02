@@ -124,6 +124,7 @@ subroutine cgyro_init_manager
   allocate(omega_rot_prdrift_r(n_theta,n_species))
   allocate(omega_rot_edrift(n_theta,n_species))
   allocate(omega_rot_edrift_r(n_theta,n_species))
+  allocate(omega_rot_edrift_0(n_theta))
   allocate(omega_rot_star(n_theta,n_species))
   
   if (test_flag == 0) then

@@ -369,31 +369,17 @@ subroutine cgyro_init_arrays
            ! centrifugal (cf) components
         if(cf_model > 0) then
            
-           ! omega_rot_drift (i ktheta) from cf drift 
+           ! (i ktheta) components from cf drifts
            omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
-                -omega_rot_drift(it,is)*i_c*k_theta
+                - i_c*k_theta * (omega_rot_drift(it,is) &
+                + omega_rot_prdrift(it,is) * energy(ie)* xi(ix)**2 &
+                + omega_rot_edrift(it,is) + omega_rot_edrift_0(it))
            
-           ! omega_rot_drift_r (d/dr) from cf drift
+           ! (d/dr) components from cf drifts
            omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) & 
-                -omega_rot_drift_r(it,is)*(n_radial/length)*(i_c*u)
-
-           ! omega_rot_prdrift dp/dtheta (ktheta) from cf 
-           omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
-                -omega_rot_prdrift(it,is)*i_c*k_theta &
-                *energy(ie)*xi(ix)**2
-           
-           ! omega_rot_prdrift_r dp/dtheta (d/dr) from cf 
-           omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
-                -omega_rot_prdrift_r(it,is)*(n_radial/length)*(i_c*u) &
-                *energy(ie)*xi(ix)**2
-
-           ! omega_rot_edrift dphi/dtheta (ktheta) from cf 
-           omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
-                -omega_rot_edrift(it,is)*i_c*k_theta
-           
-           ! omega_rot_edrift_r dphi/dtheta (d/dr) from cf 
-           omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
-                -omega_rot_edrift_r(it,is)*(n_radial/length)*(i_c*u) 
+                - (n_radial/length)*(i_c*u) * (omega_rot_drift_r(it,is) &
+                + omega_rot_prdrift_r(it,is) * energy(ie) * xi(ix)**2 &
+                + omega_rot_edrift_r(it,is))
            
            ! omega_star from cf
            carg = -i_c*k_theta*rho*omega_rot_star(it,is)

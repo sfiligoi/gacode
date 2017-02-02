@@ -128,11 +128,11 @@ subroutine cgyro_equilibrium
         dlambda_rot(it,is) = - (mach / rmaj /vth(is))**2 * GEO_bigr &
              * GEO_bigr_t / (q*rmaj*GEO_g_theta)
 
-        omega_rot_drift(it,is) = (mach/rmaj)**2 * GEO_bigr * rho &
+        omega_rot_drift(it,is) = -(mach/rmaj)**2 * GEO_bigr * rho &
              * mass(is)/(z(is)*GEO_b) * GEO_gq &
-             * (GEO_captheta*GEO_usin*GEO_bt/GEO_b - GEO_ucos*GEO_b/GEO_bt)
+             * (GEO_captheta*GEO_usin*GEO_bt/GEO_b + GEO_ucos*GEO_b/GEO_bt)
         
-        omega_rot_drift_r(it,is) = (mach/rmaj)**2 * GEO_bigr * rho &
+        omega_rot_drift_r(it,is) = -(mach/rmaj)**2 * GEO_bigr * rho &
              * mass(is)/(z(is)*GEO_b) * GEO_usin * GEO_grad_r &
              * GEO_bt / GEO_b
 
@@ -156,10 +156,15 @@ subroutine cgyro_equilibrium
              * GEO_captheta / GEO_grad_r 
 
         ! Multiply phi_rot theta derivative in cgyro_init_rotation
-        omega_rot_edrift_r(it,is) = -rho/GEO_b * GEO_bt*q*rmaj/rmin 
+        omega_rot_edrift_r(it,is) = -rho * GEO_bt/GEO_b * q * GEO_bigR/rmin 
         
      enddo
 
+     ! Used in cgyro_init_rotation
+     omega_rot_edrift_0(it) = (mach/rmaj)**2 * (GEO_bigr * GEO_bigr_r &
+          - bigR_th0 * bigR_r_th0) + (mach/rmaj) * (-gamma_p/rmaj) &
+          * (GEO_bigr**2 - bigR_th0**2)
+     
      ! Rotation shear (GAMMA_P)
      omega_gammap(it) = GEO_bt/GEO_b*GEO_bigr/rmaj*gamma_p
 
@@ -178,7 +183,7 @@ subroutine cgyro_equilibrium
 !$acc enter data copyin(energy,xi,vel,omega_stream)
 
   w_theta(:) = w_theta(:)/sum(w_theta) 
-
+  
   call cgyro_init_rotation
   
 end subroutine cgyro_equilibrium

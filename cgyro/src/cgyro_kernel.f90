@@ -151,6 +151,7 @@ subroutine cgyro_kernel
   if(allocated(omega_rot_prdrift_r)) deallocate(omega_rot_prdrift_r)
   if(allocated(omega_rot_edrift))    deallocate(omega_rot_edrift)
   if(allocated(omega_rot_edrift_r))  deallocate(omega_rot_edrift_r)
+  if(allocated(omega_rot_edrift_0))  deallocate(omega_rot_edrift_0)
   if(allocated(omega_rot_star))      deallocate(omega_rot_star)
   
   if(allocated(indx_xi))       deallocate(indx_xi)
