@@ -75,7 +75,7 @@ subroutine cgyro_init_rotation
         enddo
         
         if(ae_flag == 1) then
-           fac = -dens_ele * exp(x/temp_ele)
+           fac = -dens_ele * dens_ele_rot(it) * exp(x/temp_ele)
            sum_zn  = sum_zn  + fac
            dsum_zn = dsum_zn + fac/temp_ele 
         endif
@@ -130,7 +130,7 @@ subroutine cgyro_init_rotation
   enddo
   deallocate(thcyc)
   deallocate(thcderiv)
-
+  
   ! n(theta)/n(theta0)
   do is=1,n_species
      do it=1,n_theta
@@ -212,12 +212,23 @@ subroutine cgyro_init_rotation
      phi_rot_rderiv(it) = phi_rot_rderiv(it) / sum_zn
      
   enddo
-
+  
   ! rho * dphi_*/dr
   do it=1,n_theta
      omega_rot_edrift_0(it) = rho*phi_rot_rderiv(it)
   enddo
-  
+
+
+  ! print out some diagnostics
+  if (silent_flag == 0 .and. i_proc == 0) then
+     open(unit=io,file=trim(path)//'out.cgyro.rotation',status='replace')
+     do it=1,n_theta
+        write(io,'(4(es16.9,1x))') theta(it), phi_rot(it), &
+             phi_rot_tderiv(it), phi_rot_rderiv(it)
+     enddo
+     close(io)
+  endif
+     
   ! just cf trapping (no coriolis and no cf drift)
   if(cf_model == 2) then
 
@@ -226,7 +237,7 @@ subroutine cgyro_init_rotation
      
      omega_rot_drift(:,:) = 0.0
      omega_rot_drift_r(:,:) = 0.0
-     
+
   endif
 
   ! just cf drift (no coriolis and no cf trap)
