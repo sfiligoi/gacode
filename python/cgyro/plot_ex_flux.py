@@ -90,9 +90,9 @@ t = 2*np.pi*np.arange(0.0,1.0,0.001)
 
 ax.set_title(r'$\mathrm{'+ntag+'} \quad $'+windowtxt)
 
-e=sim.eps_global
-a1 = 2*np.pi*e
-a2 = 2*np.pi*(1-e)
+e=0.0
+a1 = 0.0
+a2 = 2*np.pi
 
 for ispec in range(ns):
     stag = str(ispec)
