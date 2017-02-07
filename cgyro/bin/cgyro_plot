@@ -58,6 +58,9 @@ then
   echo "                  = xflux    (radial profile of fluxes for all species)"
   echo "                  = note     (notebook)"
   echo
+  echo "          -mesh"
+  echo "          Add mesh to hb plot."
+  echo
   echo "          -ymin <float>"
   echo "          Minimumvalue of vertical axis (where applicable)."
   echo "          *Affects: flux, ky_flux"
@@ -122,6 +125,7 @@ MOMENT=e
 INDX=1
 THETA=0.0
 N=null
+MESH=0
 #==============================================================================
 
 #==============================================================================
@@ -157,6 +161,8 @@ while [ $# -gt 0 ] ; do
 
   -n) shift ; N=$1 ;;
 
+  -mesh) MESH=1 ;;
+
   -h) shift ; cat $GACODE_ROOT/cgyro/bin/FILE_FORMAT ; exit 0 ;;
 
   *) echo "ERROR: incorrect syntax." ; exit 1 ;;
@@ -184,7 +190,7 @@ case "$PLOT_TYPE" in
 	python $PYROOT/plot_ball.py $FTYPE $TIME $FIELD $TMAX ;;
 
    hb)
-	python $PYROOT/plot_hb.py $FTYPE $TIME $SPECIES $TMAX ;;
+	python $PYROOT/plot_hb.py $FTYPE $TIME $SPECIES $TMAX $MESH ;;
 
    hbcut)
 	python $PYROOT/plot_hbcut.py $FTYPE $TIME $SPECIES $TMAX $THETA ;;

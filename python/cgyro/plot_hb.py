@@ -8,6 +8,7 @@ ftype = sys.argv[1]
 itime = int(sys.argv[2])
 ispec = int(sys.argv[3])
 tmax = float(sys.argv[4])
+mesh = int(sys.argv[5])
 
 sim = cgyrodata('./')
 
@@ -17,6 +18,12 @@ if itime > sim.n_time-1:
 fig = plt.figure(figsize=(14,12))
 fig.subplots_adjust(left=0.1,right=0.95,top=0.94,bottom=0.06,wspace=0.25,hspace=0.32)
 fig.suptitle(r'${\rm species}='+str(ispec)+'$')
+
+# Compute index for theta value in pitch angle and energy plots
+i0 = int(round((1.0+float(theta))*sim.n_theta/2.0))
+if i0 > sim.n_theta-1:
+    i0 = sim.n_theta-1
+n0 = (sim.n_radial/2)*sim.n_theta+i0
 
 p = 0
 for row in range(3):
@@ -38,6 +45,8 @@ for row in range(3):
     ax.set_ylabel(r'$\xi = v_\parallel/v$')
 
     hp = np.transpose(np.array(sim.hb[0,:,ispec,:,ie,itime]))
+    h_norm = 0.5*(hp[n0,sim.n_xi/2-1]+hp[n0,sim.n_xi/2])
+    hp = hp/h_norm
     hmin = hp.min()
     hmax = hp.max()
     dh = (hmax-hmin)/100.0
@@ -51,7 +60,7 @@ for row in range(3):
         ax.set_xlim([-tmax,tmax])
 
     # Plot dots for mesh points
-    if (row == 1):
+    if row == 1 .and. mesh == 1:
         for i in range(sim.n_theta*sim.n_radial):
             for j in range(sim.n_xi):
                 ax.plot([sim.thetab[i]/np.pi],[sim.xi[j]],marker='.',color='k',markersize=4)
