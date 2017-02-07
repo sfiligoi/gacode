@@ -10,6 +10,8 @@ ispec = int(sys.argv[3])
 tmax = float(sys.argv[4])
 mesh = int(sys.argv[5])
 
+theta=0.0
+
 sim = cgyrodata('./')
 
 if itime > sim.n_time-1:
@@ -45,7 +47,7 @@ for row in range(3):
     ax.set_ylabel(r'$\xi = v_\parallel/v$')
 
     hp = np.transpose(np.array(sim.hb[0,:,ispec,:,ie,itime]))
-    h_norm = 0.5*(hp[n0,sim.n_xi/2-1]+hp[n0,sim.n_xi/2])
+    h_norm = 0.5*(hp[sim.n_xi/2-1,n0]+hp[sim.n_xi/2,n0])
     hp = hp/h_norm
     hmin = hp.min()
     hmax = hp.max()
@@ -60,7 +62,7 @@ for row in range(3):
         ax.set_xlim([-tmax,tmax])
 
     # Plot dots for mesh points
-    if row == 1 .and. mesh == 1:
+    if row == 1 and mesh == 1:
         for i in range(sim.n_theta*sim.n_radial):
             for j in range(sim.n_xi):
                 ax.plot([sim.thetab[i]/np.pi],[sim.xi[j]],marker='.',color='k',markersize=4)
