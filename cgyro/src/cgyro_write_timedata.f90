@@ -32,7 +32,7 @@ subroutine cgyro_write_timedata
 
   call cgyro_flux
 
-  if (nonlinear_flag == 1) then
+  if (n_toroidal > 1) then
 
      ! Density flux for all species
      call cgyro_write_distributed_real(&
@@ -44,6 +44,16 @@ subroutine cgyro_write_timedata
           trim(path)//runfile_kxky_flux(2),&
           size(flux(:,:,2)),&
           flux(:,:,2))
+     ! Global density flux for all species
+     call cgyro_write_distributed_complex(&
+          trim(path)//runfile_lky_flux(1),&
+          size(gflux(:,:,1)),&
+          gflux(:,:,1))
+     ! Global energy flux for all species
+     call cgyro_write_distributed_complex(&
+          trim(path)//runfile_lky_flux(2),&
+          size(gflux(:,:,2)),&
+          gflux(:,:,2))
 
      if (moment_print_flag == 1) then
         ! Density moment for all species at theta=0
@@ -71,7 +81,7 @@ subroutine cgyro_write_timedata
 
   !------------------------------------------------------------------
   ! Ballooning mode (or ZF) output for linear runs with a single mode
-  !
+  ! (can both be plotted with cgyro_plot -plot ball)
   if (n_toroidal == 1) then
      do i_field=1,n_field
 
@@ -495,10 +505,10 @@ subroutine write_balloon(datafile,fn)
         enddo
      enddo
 
-      if (ipccw*btccw < 0) then
-         f_balloon = f_balloon*exp(2*pi*i_c*abs(k_theta)*rmin)
-      endif
-         
+     if (ipccw*btccw < 0) then
+        f_balloon = f_balloon*exp(2*pi*i_c*abs(k_theta)*rmin)
+     endif
+
      write(io,fmtstr) transpose(f_balloon(:,:))
      close(io)
 
@@ -730,18 +740,19 @@ subroutine write_timers(datafile)
   !
   character (len=*), intent(in) :: datafile
   integer :: i_dummy
-  real, dimension(10) :: dummy
+  real, dimension(11) :: dummy
   character (len=1) :: sdummy
   !-------------------------------------------------
 
   if (io_control == 1 .or. io_control == 3) then
-     ! Timer initialization (starts at timer 3)
-     call timer_lib_init('field_h')
+     ! Timer initialization (starts at timer 4)
      call timer_lib_init('str')
      call timer_lib_init('str_comm')
      call timer_lib_init('nl')
      call timer_lib_init('nl_comm')
+     call timer_lib_init('field_h')
      call timer_lib_init('field_H')
+     call timer_lib_init('shear')
      call timer_lib_init('coll')
      call timer_lib_init('coll_comm')
      call timer_lib_init('io')
@@ -760,10 +771,11 @@ subroutine write_timers(datafile)
      if (i_proc == 0) then
         open(unit=io,file=datafile,status='replace')
         write(io,'(a)') 'Setup time'
-        write(io,'(1x,9(a11,1x))') timer_cpu_tag(1:2)
-        write(io,'(9(1pe10.3,2x))') timer_lib_time('str_init'),timer_lib_time('coll_init')
+        write(io,'(1x,9(a11,1x))') timer_cpu_tag(1:3)
+        write(io,'(9(1pe10.3,2x))') &
+             timer_lib_time('str_init'),timer_lib_time('coll_init'),timer_lib_time('io_init')
         write(io,'(a)') 'Run time'
-        write(io,'(1x,9(a10,1x))') timer_cpu_tag(3:11)
+        write(io,'(1x,11(a10,1x))') timer_cpu_tag(4:14)
         close(io)
      endif
 
@@ -773,13 +785,14 @@ subroutine write_timers(datafile)
      ! Print timers
      if (i_proc == 0) then
         open(unit=io,file=datafile,status='old',position='append')
-        write(io,'(10(1pe10.3,1x))') &
-             timer_lib_time('field_h'),&
+        write(io,'(11(1pe10.3,1x))') &
              timer_lib_time('str'),& 
              timer_lib_time('str_comm'),& 
              timer_lib_time('nl'),& 
              timer_lib_time('nl_comm'),&
+             timer_lib_time('field_h'),&
              timer_lib_time('field_H'),&
+             timer_lib_time('shear'),&
              timer_lib_time('coll'),&
              timer_lib_time('coll_comm'),&
              timer_lib_time('io'),& 
@@ -832,7 +845,7 @@ subroutine print_scrdata()
      return
   else
      if (i_proc == 0) then
-        print '(a,1pe9.3,a,1pe10.3,1pe10.3,a,1pe9.3,a,5(1pe9.3,1x))',&
+        print '(a,1pe9.3,a,1pe10.3,1x,1pe10.3,a,1pe9.3,a,1pe9.3)',&
              '[t = ',t_current,&
              '][w = ',freq,&
              '][dw = ',abs(freq_err),&

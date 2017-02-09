@@ -36,6 +36,9 @@ then
   echo "         -mpinuma <n>" 
   echo "         MPI tasks per active NUMA."
   echo
+  echo "         -w <hh:mm:ss>" 
+  echo "         Wallclock time"
+  echo
   echo "GYRO STARTUP CONTROL [TGYRO_MODE=3]"
   echo
   echo "         -start <mode>"  
@@ -68,6 +71,7 @@ NUMA=0
 MPINUMA=0
 NIDLE=0
 START=new
+W=null
 #=============================================================
 
 #=============================================================
@@ -90,7 +94,9 @@ while [ $# -gt 0 ] ; do
 
   -start) shift ; START=$1 ;;
 
-   *) echo "ERROR: incorrect tgyro_bat syntax." ; exit 1 ;;
+  -w) shift ; W=$1 ;;
+
+  *) echo "ERROR: incorrect tgyro_bat syntax." ; exit 1 ;;
  
   esac
   shift
@@ -112,6 +118,6 @@ CODE="$CODE -start $START"
 
 # Pass control to platform-specific script
 $GACODE_ROOT/shared/batch/queue.${GACODE_PLATFORM} \
- $NPROC $LOCDIR $SIMROOT "$CODE" $NOMP $NUMA $MPINUMA $NIDLE
+ $NPROC $LOCDIR $SIMROOT "$CODE" $NOMP $NUMA $MPINUMA $NIDLE $W
 
 exit 0

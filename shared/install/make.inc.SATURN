@@ -20,6 +20,7 @@ FDEBUG	= -g -Ktrap=fp -Mbounds -Minform,inform
 
 LMATH=/fusion/usc/opt/pgi/linux86-64/13.2/lib/liblapack.a \
       /fusion/usc/opt/pgi/linux86-64/13.2/lib/libblas.a
+
 # NetCDF
 NETCDF_DIR = /fusion/usc/opt/netcdf/netcdf-4.3.3.1-netcdff-4.4.2-gxx-4.4.7-pgf-13.2
 NETCDF =  -L$(NETCDF_DIR)/lib -lnetcdff -lnetcdf -Wl,-rpath,$(NETCDF_DIR)/lib

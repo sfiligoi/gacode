@@ -38,15 +38,16 @@ subroutine tgyro_profile_reintegrate
 
   ! Map data inside r < r(n_r)
 
-  call tgyro_expro_map(r,dlnnedr,n_r,rmin_exp,exp_ne,n_exp)
-  call tgyro_expro_map(r,dlntedr,n_r,rmin_exp,exp_te,n_exp)
+  call tgyro_expro_map(r,dlnnedr,n_r,ne(n_r),rmin_exp,exp_ne,n_exp,'log')
+  call tgyro_expro_map(r,dlntedr,n_r,te(n_r),rmin_exp,exp_te,n_exp,'log')
   do i_ion=1,loc_n_ion
      if (therm_flag(i_ion) == 1) then
-        call tgyro_expro_map(r,dlnnidr(i_ion,:),n_r,rmin_exp,exp_ni(i_ion,:),n_exp)
-        call tgyro_expro_map(r,dlntidr(i_ion,:),n_r,rmin_exp,exp_ti(i_ion,:),n_exp)
+        call tgyro_expro_map(r,dlnnidr(i_ion,:),n_r,ni(i_ion,n_r),rmin_exp,exp_ni(i_ion,:),n_exp,'log')
+        call tgyro_expro_map(r,dlntidr(i_ion,:),n_r,ti(i_ion,n_r),rmin_exp,exp_ti(i_ion,:),n_exp,'log')
      endif
   enddo
-  
+  call tgyro_expro_map(r,w0p,n_r,w0(n_r),rmin_exp,exp_w0,n_exp,'lin')
+
   ptot_exp = exp_ne*exp_te
   do i_ion=1,loc_n_ion
      ptot_exp = ptot_exp + exp_ni(i_ion,:)*exp_ti(i_ion,:)

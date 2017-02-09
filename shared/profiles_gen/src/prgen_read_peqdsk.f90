@@ -12,6 +12,7 @@ subroutine prgen_read_peqdsk
   implicit none
 
   integer, parameter :: ncol=3
+  integer, parameter :: npsi=201
   integer :: i, num
   real    :: y1, y2, y3
   logical :: ierr
@@ -27,14 +28,18 @@ subroutine prgen_read_peqdsk
   call allocate_internals
   call allocate_peqdsk_vars
   close(1)
+  ! Replace old assignment of peqdsk_psi to fixed, uniform mesh
+  !  peqdsk_psi(:) = xv(1,:)
+  do i=1,nx
+     peqdsk_psi(i) = (i-1.0)/(nx-1)
+  enddo
 
   ! psi_norm and ne(10^20/m^3)
   open(unit=1,file='pfile.ne',status='old')
-  allocate(xv(ncol,i))
   read(1,*) i
+  allocate(xv(ncol,i))
   read(1,*) xv
-  peqdsk_psi(:) = xv(1,:)
-  peqdsk_ne(:)  = xv(2,:)
+  call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_ne,nx)
   deallocate(xv)
   close(1)
 
@@ -228,5 +233,5 @@ subroutine prgen_read_peqdsk
   zmag(:)   = 0.0
   zeta(:)   = 0.0
   omega0(:) = 0.0
-
+  
 end subroutine prgen_read_peqdsk

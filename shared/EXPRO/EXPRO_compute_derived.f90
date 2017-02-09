@@ -107,18 +107,32 @@ subroutine EXPRO_compute_derived
   ! 1/L_Te = -dln(Te)/dr (1/m)
   call bound_deriv(EXPRO_dlntedr,-log(EXPRO_te),EXPRO_rmin,EXPRO_n_exp)
 
+  ! 1/L_ne = -(1/ne)d^2ne/dr^2 (1/m^2)
+  call bound_deriv(EXPRO_sdlnnedr,EXPRO_ne*EXPRO_dlnnedr,EXPRO_rmin,EXPRO_n_exp)
+  EXPRO_sdlnnedr = EXPRO_sdlnnedr/EXPRO_ne
+
+  ! 1/L_Te = -dln(Te)/dr (1/m)
+  call bound_deriv(EXPRO_sdlntedr,EXPRO_te*EXPRO_dlntedr,EXPRO_rmin,EXPRO_n_exp)
+  EXPRO_sdlntedr = EXPRO_sdlntedr/EXPRO_te
+
   EXPRO_dlnnidr = 0.0
   EXPRO_dlntidr = 0.0
 
   do is=1,EXPRO_n_ion
      if (minval(EXPRO_ni(is,:)) > 0.0) then
         ! 1/L_ni = -dln(ni)/dr (1/m)
-        call bound_deriv(EXPRO_dlnnidr(is,:),-log(EXPRO_ni(is,:)),&
-             EXPRO_rmin,EXPRO_n_exp)
+        call bound_deriv(EXPRO_dlnnidr(is,:),-log(EXPRO_ni(is,:)),EXPRO_rmin,EXPRO_n_exp)
 
         ! 1/L_Ti = -dln(Ti)/dr (1/m)
-        call bound_deriv(EXPRO_dlntidr(is,:),-log(EXPRO_ti(is,:)),&
-             EXPRO_rmin,EXPRO_n_exp)
+        call bound_deriv(EXPRO_dlntidr(is,:),-log(EXPRO_ti(is,:)),EXPRO_rmin,EXPRO_n_exp)
+
+        ! sni = -ni''/ni (1/m^2)
+        call bound_deriv(EXPRO_sdlnnidr(is,:),EXPRO_ni(is,:)*EXPRO_dlnnidr(is,:),EXPRO_rmin,EXPRO_n_exp)
+        EXPRO_sdlnnidr(is,:) = EXPRO_sdlnnidr(is,:)/EXPRO_ni(is,:)
+
+        ! sTi = -Ti''/Ti (1/m^2)
+        call bound_deriv(EXPRO_sdlntidr(is,:),EXPRO_ti(is,:)*EXPRO_dlntidr(is,:),EXPRO_rmin,EXPRO_n_exp)
+        EXPRO_sdlntidr(is,:) = EXPRO_sdlntidr(is,:)/EXPRO_ti(is,:)
      endif
   enddo
 

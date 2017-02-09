@@ -11,8 +11,8 @@ file=`which git`
 
 if [ -e "$file" ] && [ -d "$GACODE_ROOT/.git" ] 
 then
-   cd $GACODE_ROOT 
-   VERSION=`git describe --abbrev=4 --always`
+   cd $GACODE_ROOT
+   VERSION=`git log --pretty=format:'%h' -n 1`
 else
    # Git not available.  That's bad.
    VERSION="Version not available."

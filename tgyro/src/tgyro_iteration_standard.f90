@@ -109,8 +109,6 @@ subroutine tgyro_iteration_standard
 
         jf(:,:) = 0.0
 
-        call tgyro_write_jacobian(1)
-
         do ip=0,n_evolve-1
            call tgyro_flux_vector(x_vec,f_vec,dx,evolve_indx(ip+1))
            do p=1,p_max,n_evolve
@@ -118,7 +116,6 @@ subroutine tgyro_iteration_standard
                  jf(p+pp,p+ip) = (f_vec(p+pp)-f_vec0(p+pp))/dx
               enddo
            enddo
-           call tgyro_write_jacobian(0)
         enddo
         !
         !----------------------------------------------

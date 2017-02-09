@@ -22,6 +22,9 @@ clean:
 	cd profiles_gen ; make clean
 	cd nclass ; make clean
 	cd harvest_client; make clean
+ifdef FANN_ROOT
+	cd neural; make clean
+endif
 
 distclean:
 	cd math ; make clean

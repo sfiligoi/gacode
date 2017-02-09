@@ -4,11 +4,12 @@
 #  queue.PPPL
 #
 # FUNCTION:
-#  Batch script generator; PPPL Linux PBS for dawson, kite, kruskal
+#  Batch script generator; PPPL Linux SLURM for dawson, kite, kruskal
 #
 # AUTHORS:
 #  David Mikkelsen <mikk@pppl.gov>
 #  Luc Peterson <jpeterso@pppl.gov>
+#     adapted to SLURM by Sterling Smith <smithsp@fusion.gat.com>
 
 #------------------------------------
 # Functions:
@@ -26,7 +27,7 @@ fi
 # Main script follows
 #-------------------------------------
 
-echo "PPPL Linux PBS queue choices:"
+echo "PPPL Linux SLURM partition choices: (may need revision)"
 echo
 echo "[1] dawson   ( up to 192 cores ) 8 cores/node"
 echo "[2] kite     ( up to 48 cores )  2 cores/node"
@@ -89,25 +90,30 @@ bfile=$simpath/$sim/batch.src
 echo "Output written to $bfile"
 
 echo "#!/bin/sh" > $bfile
-echo "#PBS -l nodes=${node_spec},walltime=$time_limit" >> $bfile
-echo "#PBS -l mem=${mem_spec}" >> $bfile
-echo "#PBS -N $sim" >> $bfile
-echo "#PBS -e $simpath/$sim/batch.err" >> $bfile
-echo "#PBS -o $simpath/$sim/batch.out" >> $bfile
-echo "#PBS -m aeb" >> $bfile
-echo "#PBS -M $USER@pppl.gov" >> $bfile
-echo "#PBS -r n" >> $bfile
-echo "#PBS -q $queue_sub" >> $bfile
+echo "#SLURM -t $time_limit"
+echo "#SLURM -N ${n_nodes}"
+echo "#SLURM -n ${nmpi}"
+#echo "#SLURM --mem=${mem_spec}" >> $bfile  # Need to verify mem_spec is correct
+					    # and needed
+echo "#SLURM -J $sim" >> $bfile
+echo "#SLURM -e $simpath/$sim/batch.err" >> $bfile
+echo "#SLURM -o $simpath/$sim/batch.out" >> $bfile
+echo "#SLURM --mail-type=ALL" >> $bfile
+echo "#SLURM --mail-user=$USER@pppl.gov" >> $bfile
+echo "#SLURM --export=ALL"
+#echo "#SLURM --no-requeue" >> $bfile  # Need to verify this is desired
+echo "#SLURM -p $queue_sub" >> $bfile
 echo "# Batch execution commands start here" >> $bfile
 
 
 echo 'echo The master node of this job is `hostname`' >> $bfile
-echo 'echo The working directory is `echo $PBS_O_WORKDIR`' >> $bfile
-echo 'NPROCS=`wc -l < $PBS_NODEFILE`' >> $bfile
-echo 'echo This job has allocated $NPROCS nodes' >> $bfile
-echo '# Sort the PBS generated machine file for cleanup later' >> $bfile
-echo "PBS_SORT=$simpath/$sim/pbs.nodes" >> $bfile
-echo 'sort -u $PBS_NODEFILE > $PBS_SORT' >> $bfile
+# Need to adapt this section to SLURM if desired
+#echo 'echo The working directory is `echo $PBS_O_WORKDIR`' >> $bfile
+#echo 'NPROCS=`wc -l < $PBS_NODEFILE`' >> $bfile
+#echo 'echo This job has allocated $NPROCS nodes' >> $bfile
+#echo '# Sort the PBS generated machine file for cleanup later' >> $bfile
+#echo "PBS_SORT=$simpath/$sim/pbs.nodes" >> $bfile
+#echo 'sort -u $PBS_NODEFILE > $PBS_SORT' >> $bfile
 
 # added "sleep 5" to cure an NFS problem:
 echo 'sleep 5' >> $bfile

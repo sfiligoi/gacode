@@ -58,6 +58,8 @@ real function sigv(ti,type)
   case default
 
      print '(a)','ERROR: (sigv) Unknown reactivity type.'
+     sigv = 0.0
+     stop
 
   end select
 

@@ -40,7 +40,7 @@ subroutine prgen_read_gato
   read(1,'(a)') efit_header
   close(1) 
   !--------------------------------------------------
-
+  
   !---------------------------------------------------
   ! Read flux-surface data in GATO's grid.dat file
   !
@@ -103,11 +103,11 @@ subroutine prgen_read_gato
      ! Case 2: typical case 
      dpsi_data = dpsi(nx)
      dpsi_efit = gato_psi(nsurf)
-
+     
      ! Ensure max(dpsi) = max(gato_psi) 
      dpsi(:)  = dpsi(:)*dpsi_efit/dpsi_data
      ! Extra insurance against roundoff
-     dpsi(nx) = dpsi_efit 
+     dpsi(nx) = dpsi_efit
   endif
   !----------------------------------------------------------------
 

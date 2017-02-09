@@ -26,7 +26,7 @@ contains
   end subroutine cgyro_info
 
   !-----------------------------------------------------------
-  ! cgyro_info.f90
+  ! cgyro_error.f90
   !
   ! PURPOSE:
   !  Routine to write line to error file.

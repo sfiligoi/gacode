@@ -10,14 +10,14 @@ subroutine cgyro_make_profiles
   integer :: j
   integer :: num_ele
 
-  real :: cc, loglam
+  real :: cc,loglam
 
   !-------------------------------------------------------------
   ! Manage electrons
   !
   num_ele = 0
   do is=1,n_species
-     if (z(is) == -1) then
+     if (z(is) < 0) then
         num_ele = num_ele + 1
         is_ele = is
      endif
@@ -27,14 +27,12 @@ subroutine cgyro_make_profiles
      ! Adiabatic electrons
      ae_flag = 1
      call cgyro_info('Using adiabatic electron model.')
-
   else if (num_ele == 1) then
      ! GK electrons
      ae_flag = 0
      call cgyro_info('Using gyrokinetic electrons.')
-
   else
-     call cgyro_error('ERROR: (CGYRO) Only one electron species allowed.')
+     call cgyro_error('Only one electron species allowed.')
      return
   endif
 
@@ -88,16 +86,19 @@ subroutine cgyro_make_profiles
         dens_ele = ne_ade
         temp_ele = te_ade
         mass_ele = masse_ade
+        dlnndr_ele = dlnndre_ade
+        dlntdr_ele = dlntdre_ade
      else 
         dens_ele = dens(is_ele)
         temp_ele = temp(is_ele)
         mass_ele = mass(is_ele)
+        dlnndr_ele = dlnndr(is_ele)
+        dlntdr_ele = dlntdr(is_ele)
      endif
 
-
      ! Normalizing quantities
-     dens_norm       = dens_ele
-     temp_norm       = temp_ele
+     dens_norm = dens_ele
+     temp_norm = temp_ele
 
      ! Compute vth (m/s) using dimensional quantities.  
      ! mass(i) is thus measured in units of deuterium mass.
@@ -115,8 +116,8 @@ subroutine cgyro_make_profiles
           * 1.0 / (sqrt(mass_deuterium) * temp_norm_fac**1.5) &
           * 1e9
 
-     loglam = 24.0 - log(sqrt(dens_ele*1e13)/(temp_ele*1000))
-     nu_ee  = cc * loglam * dens_ele / (sqrt(mass_ele) * temp_ele**1.5) &
+     loglam = 24.0 - log(sqrt(dens_ele*1e13)/(temp_ele*1e3))
+     nu_ee  = cc * loglam * dens_ele / (sqrt(mass_ele)*temp_ele**1.5) &
           / (vth_norm/a_meters) 
 
      ! beta calculation in CGS:
@@ -149,21 +150,14 @@ subroutine cgyro_make_profiles
      mach     = mach/vth_norm
 
      do is=1,n_species
-        nu(is) = nu_ee *(1.0*z(is))**4 &
+        nu(is) = nu_ee *z(is)**4 &
              * dens(is) / dens_ele &
              * sqrt(mass_ele/mass(is)) * (temp_ele/temp(is))**1.5
      enddo
 
-     beta_star = 0.0
-     do is=1,n_species
-        beta_star =  beta_star + dens(is) * temp(is) / (dens_ele * temp_ele) &
-             * (dlnndr(is) + dlntdr(is))
-     enddo
-     if(ae_flag == 1) then
-        beta_star = beta_star + (dlnndre_ade + dlntdre_ade)
-     endif
-     beta_star = beta_star * betae_unit
-
+     ! Always compute beta_* consistently
+     call set_betastar
+     
      ! Re-scaling
      lambda_star  = lambda_star * lambda_star_scale
      gamma_e      = gamma_e      * gamma_e_scale
@@ -188,16 +182,26 @@ subroutine cgyro_make_profiles
 
   else
 
+     a_meters  = 1.0
+     b_unit    = 1.0
+     dens_norm = 1.0
+     temp_norm = 1.0
+     vth_norm  = 1.0
+     
      q = abs(q)*(ipccw)*(btccw)
 
      if (ae_flag == 1) then
         dens_ele = ne_ade
         temp_ele = te_ade
         mass_ele = masse_ade
+        dlnndr_ele = dlnndre_ade
+        dlntdr_ele = dlntdre_ade
      else 
         dens_ele = dens(is_ele)
         temp_ele = temp(is_ele)
         mass_ele = mass(is_ele)
+        dlnndr_ele = dlnndr(is_ele)
+        dlntdr_ele = dlntdr(is_ele)
      endif
 
      do is=1,n_species
@@ -206,12 +210,15 @@ subroutine cgyro_make_profiles
         vth(is) = sqrt(temp(is)/mass(is))
 
         ! collision frequency
-        nu(is) = nu_ee *(1.0*z(is))**4 &
+        nu(is) = nu_ee *z(is)**4 &
              * dens(is) / dens_ele &
              * sqrt(mass_ele/mass(is)) * (temp_ele/temp(is))**1.5
 
      enddo
 
+     ! Compute beta_* if negative initially
+     if (beta_star < 0.0) call set_betastar
+     
   endif
 
   !-------------------------------------------------------------
@@ -270,13 +277,15 @@ subroutine cgyro_make_profiles
   !------------------------------------------------------------------------
   ! ExB shear
   !
-  if (abs(gamma_e) > 1e-10) then
+  if (abs(gamma_e) > 1e-10 .and. nonlinear_flag > 0) then
      omega_eb = k_theta*length*gamma_e/(2*pi)
      select case (shear_method)
      case (1)
-        call cgyro_info('Integer-shift (Hammett) ExB shear method.') 
+        call cgyro_info('Hammett discrete-shift ExB shear.') 
      case (2)
-        call cgyro_info('Continuous-shift ExB shear method.') 
+        call cgyro_info('Wavenumber advection ExB shear.') 
+     case (3)
+        call cgyro_info('Linear-time ExB shear.') 
      end select
   else
      omega_eb = 0.0
@@ -302,3 +311,23 @@ subroutine cgyro_make_profiles
   !-------------------------------------------------------------
 
 end subroutine cgyro_make_profiles
+
+subroutine set_betastar
+
+  use cgyro_globals
+
+  implicit none
+
+  integer :: is
+
+  beta_star = 0.0
+  do is=1,n_species
+     beta_star = beta_star+dens(is)*temp(is)/(dens_ele*temp_ele) &
+          *(dlnndr(is)+dlntdr(is))
+  enddo
+  if (ae_flag == 1) then
+     beta_star = beta_star + (dlnndre_ade + dlntdre_ade)
+  endif
+  beta_star = beta_star*betae_unit
+
+end subroutine set_betastar

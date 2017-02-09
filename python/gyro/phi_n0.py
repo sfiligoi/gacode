@@ -10,6 +10,8 @@ lx        = float(sys.argv[4])
 ly        = float(sys.argv[5])
 title     = sys.argv[6]
 ymax      = float(sys.argv[7])
+xspan1    = float(sys.argv[8])
+xspan2    = float(sys.argv[9])
 
 t = sim.t['(c_s/a)t']
 
@@ -37,8 +39,14 @@ else:
     # Write data to datafile
     print 'INFO: (gyro_plot) Output to datafile not supported.  Use raw out.gyro.gbflux.'
 
+if xspan1 > 0.0:
+    ax.axvspan(xspan1,xspan2,facecolor='g',alpha=0.1)
+    
 ax.set_xlim([0,t[-1]])
 
+if title != 'null':
+    ax.set_title(r'$\mathrm{'+title+'}$')
+ 
 if ymax > 0:
     ax.set_ylim([0,ymax])
 

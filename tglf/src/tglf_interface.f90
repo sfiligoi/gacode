@@ -79,7 +79,7 @@ module tglf_interface
 
   ! Data passed to: put_model_parameters
   logical :: tglf_adiabatic_elec_in = .false.
-  real    :: tglf_alpha_mach_in     = 1.0
+  real    :: tglf_alpha_mach_in     = 0.0
   real    :: tglf_alpha_e_in        = 1.0
   real    :: tglf_alpha_p_in        = 1.0
   real    :: tglf_alpha_quench_in   = 0.0

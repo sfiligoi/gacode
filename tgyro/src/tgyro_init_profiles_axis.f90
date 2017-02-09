@@ -46,14 +46,13 @@ subroutine tgyro_init_profiles_axis
   mflux_i_neo(:,1) = 0.0
   mflux_i_tur(:,1) = 0.0
 
-  pflux_i_tot(1) = 0.0
   pflux_e_tot(1) = 0.0
+  pflux_i_tot(:,1) = 0.0
 
-  eflux_i_tot(1) = 0.0
   eflux_e_tot(1) = 0.0
+  eflux_i_tot(1) = 0.0
 
   mflux_tot(1) = 0.0
-  pflux_he_tot(1) = 0.0
 
   eflux_i_target(1) = 0.0
   eflux_e_target(1) = 0.0

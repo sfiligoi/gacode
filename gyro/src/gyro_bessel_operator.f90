@@ -187,7 +187,7 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
      ! ORIGINAL METHOD
 
      ! Enforce reality if n=0:
-     if (u == 0.0) then
+     if (abs(u) <= epsilon(0.0)) then
         if (i_gyro /= 1) then
 
            ! Correct truncated gyroaverage
@@ -234,7 +234,7 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
      !-----------------------------------------------------------
 
      ! Enforce reality if n=0:
-     if (u == 0.0) g = real(g)
+     if (abs(u) <= epsilon(0.0)) g = real(g)
 
   endif
 

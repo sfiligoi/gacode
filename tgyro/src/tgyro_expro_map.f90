@@ -9,11 +9,12 @@
 !  Outputs: r_exp, p_exp, n_exp
 !-----------------------------------------------------------------
 
-subroutine tgyro_expro_map(r,z,n_r,r_exp,p_exp,n_exp)
+subroutine tgyro_expro_map(r,z,n_r,ps,r_exp,p_exp,n_exp,mode)
 
   implicit none
 
   integer, intent(in) :: n_r,n_exp
+  real, intent(in) :: ps
   real, intent(in), dimension(n_r) :: r,z
   real, intent(in), dimension(n_exp) :: r_exp
   real, intent(inout), dimension(n_exp) :: p_exp
@@ -21,25 +22,13 @@ subroutine tgyro_expro_map(r,z,n_r,r_exp,p_exp,n_exp)
   real :: dr
   integer :: i
   integer :: i_exp
+  character(len=3) :: mode
 
-  ! Compute z's on exp grid
-  z_exp(:) = 0.0
-  i = 1
-  do i_exp=2,n_exp
+  do i_exp=1,n_exp
      if (r_exp(i_exp) <= r(n_r)) then
-        if (r(i+1) < r_exp(i_exp)) i = i+1
-        dr = r(i+1)-r(i)
-        z_exp(i_exp) = z(i+1)*(r_exp(i_exp)-r(i))/dr + z(i)*(r(i+1)-r_exp(i_exp))/dr
-     endif
-  enddo
-
-  do i_exp=n_exp,2,-1
-     ! Start the integration at the first i_exp past r(n_r)
-     ! ISSUE: This check is sensitive to mesh alignment (need =)
-     if (r_exp(i_exp-1) <= r(n_r)) then
-        p_exp(i_exp-1) = p_exp(i_exp)*exp(0.5*(z_exp(i_exp)+z_exp(i_exp-1))* &
-             (r_exp(i_exp)-r_exp(i_exp-1)))
+       call math_scaleint(z,r,n_r,ps,r_exp(i_exp),p_exp(i_exp),mode)
      endif
   enddo
 
 end subroutine tgyro_expro_map
+

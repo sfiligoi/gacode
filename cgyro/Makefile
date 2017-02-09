@@ -12,7 +12,10 @@ export EXTRA_LIBS = \
 
 all:
 	gacode_getversion > .VERSION
-	cd ${GACODE_ROOT}/shared ; make
+	cd ${GACODE_ROOT}/shared/math ; make
+	cd ${GACODE_ROOT}/shared/GEO ; make
+	cd ${GACODE_ROOT}/shared/EXPRO ; make
+	cd ${GACODE_ROOT}/shared/UMFPACK ; make
 	cd src ; make
 
 stub:

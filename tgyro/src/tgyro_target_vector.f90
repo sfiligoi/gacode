@@ -4,7 +4,7 @@ subroutine tgyro_target_vector(x_vec,g_vec)
 
   implicit none
 
-  integer :: i,p
+  integer :: i,p,is
 
   real, intent(in), dimension(p_max) :: x_vec
   real, intent(inout), dimension(p_max) :: g_vec
@@ -25,18 +25,20 @@ subroutine tgyro_target_vector(x_vec,g_vec)
         p = p+1
         g_vec(p) = eflux_e_target(i)
      endif
-     if (loc_ne_feedback_flag == 1) then
-        p = p+1
-        g_vec(p) = pflux_e_target(i)
-     endif
      if (loc_er_feedback_flag == 1) then
         p = p+1
         g_vec(p) = mflux_target(i)
      endif
-     if (loc_he_feedback_flag == 1) then
-        p = p+1
-        g_vec(p) = pflux_he_target(i)
-     endif
+     do is=0,loc_n_ion
+        if (evo_e(is) == 1) then
+           p = p+1
+           g_vec(p) = pflux_e_target(i)*evo_c(is)
+        else if (evo_e(is) == 2) then
+           ! Helium ash evolution [add wiki documentation]
+           p = p+1
+           g_vec(p) = pflux_he_target(i)
+        endif
+     enddo
   enddo
 
 end subroutine tgyro_target_vector

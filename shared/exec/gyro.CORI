@@ -25,5 +25,5 @@ nidle=${7}
 cd $simdir
 
 export OMP_NUM_THREADS=$nomp
-echo "> srun -n $nmpi -c $nomp $exec"
-srun -n $nmpi -c $nomp $exec
+echo "> srun --propagate=ALL -n $nmpi -c $nomp $exec"
+srun --propagate=ALL -n $nmpi -c $nomp $exec

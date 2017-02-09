@@ -6,7 +6,7 @@ subroutine cgyro_experimental_alloc(flag)
   implicit none
   integer, intent (in) :: flag  ! flag=1: allocate; else deallocate
   
-  if(flag == 1) then
+  if (flag == 1) then
 
      allocate(rmin_exp(n_grid_exp))
      allocate(rmaj_exp(n_grid_exp))
@@ -31,6 +31,8 @@ subroutine cgyro_experimental_alloc(flag)
      allocate(dens_exp(n_species_exp,n_grid_exp))
      allocate(dlntdr_exp(n_species_exp,n_grid_exp))
      allocate(dlnndr_exp(n_species_exp,n_grid_exp))
+     allocate(sdlntdr_exp(n_species_exp,n_grid_exp))
+     allocate(sdlnndr_exp(n_species_exp,n_grid_exp))
 
      allocate(b_unit_exp(n_grid_exp))
      allocate(gamma_e_exp(n_grid_exp))

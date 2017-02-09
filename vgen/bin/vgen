@@ -23,7 +23,7 @@ then
   echo "EXECUTE MODE"
   echo
   echo "         -e <simdir>" 
-  echo "         Run CGYRO using INPUT data in <simdir>."
+  echo "         Run VGEN using INPUT data in <simdir>."
   echo
   echo "         -n <MPI tasks>" 
   echo "         Number of MPI tasks."
@@ -72,6 +72,10 @@ while [ $# -gt 0 ] ; do
 
   -nomp) shift ; NOMP=$1 ;;
 
+  -numa) shift ; NUMA=$1 ;;
+
+  -mpinuma) shift ; MPINUMA=$1 ;;
+
   -clean) CLEAN_FLAG=1 ;;
 
   *) echo "ERROR (vgen script): incorrect vgen syntax." ; exit 1 ;;
@@ -84,9 +88,11 @@ done
 if [ "$LOCDIR" == "." ]
 then
    SIMDIR=$PWD
-   cd .. ; LOCDIR=$PWD
+   LOCDIR=$(basename $PWD)
+   cd .. ; SIMROOT=$PWD
 else
    SIMDIR=$SIMROOT/$LOCDIR
+   cd $SIMROOT
 fi
 
 RUN_FILE=$SIMDIR/out.vgen.run

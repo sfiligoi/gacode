@@ -105,9 +105,9 @@
    ierr=get_anns_avg_array(OUTPUT_PARAMETERS)
 
    nn_w_ped = OUTPUT_PARAMETERS(3)*2
-   nn_p_ped = OUTPUT_PARAMETERS(1)*1E6
+   nn_p_ped = OUTPUT_PARAMETERS(1)*1e6
 
-   nn_t_ped = nn_p_ped/neped_in/1.6022/2.
+   nn_t_ped = nn_p_ped/neped_in/1.6022/2.0
    nn_n_cor = neped_in * 1.5
    nn_t_cor = te(1)
    nn_n_edg = neped_in * 0.25

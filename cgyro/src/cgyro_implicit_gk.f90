@@ -348,7 +348,7 @@ subroutine cgyro_init_implicit_gk
      it = it_c(ic)
      fieldmat(id,id) = fieldmat(id,id) &
           + (k_perp(ic)**2*lambda_debye**2* &
-          dens_ele/temp_ele+sum_den_h)
+          dens_ele/temp_ele+sum_den_h(it))
   enddo
 
   if(n_field > 1) then

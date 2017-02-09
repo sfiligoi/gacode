@@ -50,6 +50,7 @@ module tgyro_ped
   real, dimension(:), allocatable :: exp_te
   real, dimension(:,:), allocatable :: exp_ni
   real, dimension(:,:), allocatable :: exp_ti
+  real, dimension(:), allocatable :: exp_w0
 
   ! Pedestal top scale lengths
   real :: zn_top,zt_top
@@ -89,8 +90,8 @@ contains
        ! Inputs stored in interface
        call tgyro_eped_nn
 
-       if (tgyro_rped < 0) then
-            psi_top(1) = 1.0 - 1.5*nn_w_ped * abs(tgyro_rped)
+       if (tgyro_rped < 0.0) then
+            psi_top(1) = 1.0 - 1.5*nn_w_ped*abs(tgyro_rped)
        else
             psi_top(1) = tgyro_rped
        endif
