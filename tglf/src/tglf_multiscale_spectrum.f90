@@ -28,7 +28,7 @@
       REAL :: cnorm, phinorm, kylow, czf, cz1, cz2, kyetg
       REAL :: cky,sqcky,delta,ax,ay,kx
       REAL :: mix1,mix2,mixnorm,gamma_ave
-      REAL :: vzf,dvzf,vzf1,vzf2,bz1,bz2
+      REAL :: vzf,dvzf,vzf1,vzf2,bz
       REAL,DIMENSION(nkym) :: gamma_net=0.0
       REAL,DIMENSION(nkym) :: gamma=0.0
       REAL,DIMENSION(nkym) :: gamma_mix=0.0
@@ -37,9 +37,9 @@
       ! model fit parameters
       ! need to set alpha_zf_in = 1.0
       ! Miller geometry values igeo=1
+      If(xnu_model_in.eq.3)USE_TTF=.TRUE.
       czf = alpha_zf_in
-      bz1=0.0
-      bz2=0.0
+      bz=0.0
       kyetg=1.28
       cnorm=14.21
 !      cz1=0.48*czf
@@ -67,12 +67,11 @@
         cz1 = 0.48
         cz2=0.92*czf  
         if(USE_TTF)then
-           bz1=0.12
-           bz2=0.12
-           cz2=1.2*czf
-           kyetg=1.0
-           cky=2.0
-          sqcky=SQRT(cky)
+           bz=0.18
+           cz2=1.35*czf*(1.5638/q_in)**2
+           kyetg=2.4
+           cky=3.0
+           sqcky=SQRT(cky)
         endif  
       endif    
       kyetg = kyetg*ABS(zs(2))/SQRT(taus(2)*mass(2))
@@ -168,19 +167,25 @@
       vzf2 = gammamax2/kymax2
       dvzf = MAX(vzf2-vzf1,0.0)
 !      write(*,*)"dvzf = ",dvzf," vzf1 = ",vzf1," vzf2 = ",vzf2
-      vzf = vzf1 + bz1*dvzf
+      vzf = vzf1 
       do j=1,nky
 ! include zonal flow effects on growthrate model
 !          gamma=0.0
           gamma0 = gamma_net(j)
           ky0=ky_spectrum(j)
-          if(ky0.lt.kymax1)then
-            gamma(j) = Max(gamma0 + bz2*dvzf*kymax1  - cz1*(kymax1 - ky0)*vzf,0.0)
-          elseif(USE_TTF)then
-            gamma(j) = gammamax1 + bz2*dvzf*kymax1  +  Max(gamma0 - cz2*vzf*ky0,0.0)
+          if(USE_TTF)then
+            if(ky0.lt.kymax1)then
+              gamma(j) = Max(gamma0 + bz*dvzf*kymax1  - cz1*(kymax1 - ky0)*vzf,0.0)
+            else
+              gamma(j) = gammamax1  + bz*dvzf*kymax1 +  Max(gamma0 - cz2*vzf*ky0,0.0)          
+            endif 
           else
-            gamma(j) = cz2*gammamax1  +  Max(gamma0 - cz2*vzf*ky0,0.0)          
-          endif 
+            if(ky0.lt.kymax1)then
+              gamma(j) = Max(gamma0  - cz1*(kymax1 - ky0)*vzf,0.0)
+            else
+              gamma(j) = cz2*gammamax1  +  Max(gamma0 - cz2*vzf*ky0,0.0)          
+            endif 
+          endif
           gamma_mix(j) = gamma(j)
       enddo
     if(USE_MIX)then
@@ -211,7 +216,11 @@
         do i=1,nmodes_in
           gammaeff = 0.0
           if(gamma0.gt.small)gammaeff = gamma_mix(j)*(eigenvalue_spectrum_out(1,j,i)/gamma0)**2
-          if(ky0.gt.kyetg)gammaeff = gammaeff*SQRT(ky0/kyetg)
+          if(USE_TTF)then
+            if(ky0.gt.kyetg)gammaeff = gammaeff*(ky0/kyetg)
+          else
+            if(ky0.gt.kyetg)gammaeff = gammaeff*SQRT(ky0/kyetg)
+          endif
           field_spectrum_out(2,j,i) = (cnorm*gammaeff*gammaeff/ky0**4)/(1.0+ay*kx**2)**2
         enddo
      enddo
