@@ -139,7 +139,7 @@ subroutine cgyro_equilibrium
         ! Add phi_rot term in cgyro_init_rotation
         omega_rot_star(it,is) = -dlntdr(is) * (0.5*(mach/vth(is))**2 &
              * (GEO_bigr**2 - bigR_th0**2)/rmaj**2)  &
-             - mach*gamma_p/vth(is)**2 * (GEO_bigr**2 - bigR_th0**2)/rmaj**2 &
+             + mach*gamma_p/vth(is)**2 * (GEO_bigr**2 - bigR_th0**2)/rmaj**2 &
              + (mach/vth(is))**2 * bigR_th0/rmaj**2 * bigR_r_th0 
         
         ! Multiply pressure theta derivative in cgyro_init_rotation
