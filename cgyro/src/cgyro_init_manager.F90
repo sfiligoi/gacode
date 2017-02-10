@@ -20,13 +20,13 @@ subroutine cgyro_init_manager
   use GEO_interface
 
 #ifdef _OPENACC
+  use cgyro_io
   use precision_m, only : singlePrecision
   use cufft_m, only : cufftPlanMany, &
        CUFFT_C2R,CUFFT_Z2D,CUFFT_R2C,CUFFT_D2Z
 #endif
-  implicit none
 
-  real :: b
+  implicit none
 
   include 'fftw3.f03'
 
@@ -35,13 +35,12 @@ subroutine cgyro_init_manager
   integer, parameter :: irank = 2
   integer, dimension(irank) :: ndim,inembed,onembed
   integer :: idist,odist,istride,ostride
-
 #endif
 
   if (hiprec_flag == 1) then
-     fmtstr    ='(es16.9)'
-     fmtstr2   ='(2(es16.9,1x))'
-     fmtstrn   ='(10(es16.9,1x))'
+     fmtstr  = '(es16.9)'
+     fmtstr2 = '(2(es16.9,1x))'
+     fmtstrn = '(10(es16.9,1x))'
   endif
 
   !------------------------------------------------------
@@ -51,6 +50,7 @@ subroutine cgyro_init_manager
   !------------------------------------------------------
   call timer_lib_init('str_init')
   call timer_lib_init('coll_init')
+  call timer_lib_init('io_init')
 
   !----------------------------------------------------
   ! Initialize GLOBAL arrays
@@ -84,7 +84,7 @@ subroutine cgyro_init_manager
   ! Correction factor for missing energy interval to ensure sum(w)=1.0
   ! NOTE: without this we have poor grid-convergence for small e_max
   !
-  b = sqrt(e_max)
+  !b = sqrt(e_max)
   !w_e(n_energy) = w_e(n_energy)+2.0*exp(-e_max)*b/sqrt(pi)+erfc(b)
   !----------------------------------------------------------------------
 
@@ -99,16 +99,34 @@ subroutine cgyro_init_manager
   allocate(theta(n_theta))
   allocate(thetab(n_radial/box_size,n_theta))
   allocate(w_theta(n_theta))
+  allocate(g_theta(n_theta))
   allocate(bmag(n_theta))
   allocate(k_perp(nc))
+  allocate(bigR(n_theta))
   allocate(omega_stream(n_theta,n_species))
   allocate(omega_trap(n_theta,n_species))
   allocate(omega_rdrift(n_theta,n_species))
   allocate(omega_adrift(n_theta,n_species))
   allocate(omega_aprdrift(n_theta,n_species))
   allocate(omega_cdrift(n_theta,n_species))
+  allocate(omega_cdrift_r(n_theta,n_species))
   allocate(omega_gammap(n_theta))
 
+  allocate(lambda_rot(n_theta,n_species))
+  allocate(dlambda_rot(n_theta,n_species))
+  allocate(dens_rot(n_theta,n_species))
+  allocate(dens_ele_rot(n_theta))
+  allocate(omega_rot_trap(n_theta,n_species))
+  allocate(omega_rot_u(n_theta,n_species))
+  allocate(omega_rot_drift(n_theta,n_species))
+  allocate(omega_rot_drift_r(n_theta,n_species))
+  allocate(omega_rot_prdrift(n_theta,n_species))
+  allocate(omega_rot_prdrift_r(n_theta,n_species))
+  allocate(omega_rot_edrift(n_theta,n_species))
+  allocate(omega_rot_edrift_r(n_theta,n_species))
+  allocate(omega_rot_edrift_0(n_theta))
+  allocate(omega_rot_star(n_theta,n_species))
+  
   if (test_flag == 0) then
 
      !----------------------------------------------------
@@ -131,8 +149,10 @@ subroutine cgyro_init_manager
      allocate(field_old3(n_field,nc))
      allocate(    moment(n_radial,n_species,2))
      allocate(moment_loc(n_radial,n_species,2))
-     allocate(    flux(n_radial,n_species,2))
-     allocate(flux_loc(n_radial,n_species,2))
+     allocate(     flux(n_radial,n_species,2))
+     allocate( flux_loc(n_radial,n_species,2))
+     allocate(    gflux(0:n_global,n_species,2))
+     allocate(gflux_loc(0:n_global,n_species,2))
      allocate(f_balloon(n_radial/box_size,n_theta))
      allocate(recv_status(MPI_STATUS_SIZE))
 
@@ -151,9 +171,11 @@ subroutine cgyro_init_manager
      allocate(omega_cap_h(nc,nv_loc))
      allocate(omega_h(nc,nv_loc))
      allocate(omega_s(n_field,nc,nv_loc))
+     allocate(omega_ss(n_field,nc,nv_loc))
      allocate(jvec_c(n_field,nc,nv_loc))
      allocate(jvec_v(n_field,nc_loc,nv))
-
+     allocate(upfac1(nc,nv_loc))
+     allocate(upfac2(nc,nv_loc))
      ! Real-space distributed arrays
      allocate(cap_h_v(nc_loc,nv))
      allocate(cap_h_v_prime(nc_loc,nv))
@@ -169,14 +191,13 @@ subroutine cgyro_init_manager
         endif
      endif
 
-     if(collision_model == 5) then
-        allocate(cmat_simple(n_xi,n_xi,n_species,n_energy,n_theta))
+     if (collision_model == 5) then
+        allocate(cmat_simple(n_xi,n_xi,n_energy,n_species,n_theta))
      else
         allocate(cmat(nv,nv,nc_loc))
      endif
 
   endif
-
 
   ! Compute equilibrium quantities (even in test mode)
   GEO_model_in    = geo_numeq_flag
@@ -184,17 +205,15 @@ subroutine cgyro_init_manager
   GEO_nfourier_in = geo_ny
   call GEO_alloc(1)
   call cgyro_equilibrium
-
+  
   if (test_flag == 0) then
 
      call cgyro_init_arrays
      call cgyro_init_implicit_gk
-
      call timer_lib_out('str_init')
+
      call timer_lib_in('coll_init')
-
      call cgyro_init_collision
-
      call timer_lib_out('coll_init')
 
   endif
@@ -202,7 +221,10 @@ subroutine cgyro_init_manager
   call cgyro_check_memory(trim(path)//runfile_memory)
 
   ! Write initial data
+
+  call timer_lib_in('io_init')
   call cgyro_write_initdata
+  call timer_lib_out('io_init')
 
   if (test_flag == 1) then
      call MPI_FINALIZE(i_err)
@@ -213,15 +235,6 @@ subroutine cgyro_init_manager
   call timer_lib_in('str_init')
   call cgyro_init_h
   call timer_lib_out('str_init')
-
-  !---------------------------------------------------------------
-  ! 1D FFT for ExB shear
-  allocate(fj(0:n_radial-1+2*shear_pad))
-  allocate(fp(0:n_radial-1+2*shear_pad))
-
-  plan_j2p = fftw_plan_dft_1d(n_radial+2*shear_pad,fj,fp,FFTW_FORWARD,FFTW_PATIENT)
-  plan_p2j = fftw_plan_dft_1d(n_radial+2*shear_pad,fp,fj,FFTW_BACKWARD,FFTW_PATIENT)
-  !---------------------------------------------------------------
 
   ! Initialize nonlinear dimensions and arrays 
   if (nonlinear_method == 1) then
@@ -259,6 +272,7 @@ subroutine cgyro_init_manager
      plan_r2c = fftw_plan_dft_r2c_2d(nx,ny,ux,fx,FFTW_PATIENT)
 
 #ifdef _OPENACC
+     call cgyro_info('GPU-aware code triggered.')
      howmany = nsplit
      allocate( fxmany(0:ny/2,0:nx-1,howmany) )
      allocate( fymany(0:ny/2,0:nx-1,howmany) )
@@ -270,19 +284,15 @@ subroutine cgyro_init_manager
      allocate( vxmany(0:ny-1,0:nx-1,howmany) )
      allocate( vymany(0:ny-1,0:nx-1,howmany) )
      allocate( uvmany(0:ny-1,0:nx-1,howmany) )
-!!$acc enter data create(fxmany,fymany,gxmany,gymany)
-!!$acc enter data create(uxmany,uymany,vxmany,vymany)
-!!$acc enter data create(uvmany)
 
-
-     !   -------------------------------------
+     !-------------------------------------------------------------------
      ! 2D
-     !   input[ b*idist + (x * inembed[1] + y) * istride ]
+     !   input[  b*idist + (x * inembed[1] + y)*istride ]
      !   output[ b*odist + (x * onembed[1] + y)*ostride ]
      !   isign is the sign of the exponent in the formula that defines
      !   Fourier transform  -1 == FFTW_FORWARD
      !                       1 == FFTW_BACKWARD
-     !   -------------------------------------
+     !-------------------------------------------------------------------
 
      ndim(1) = nx
      ndim(2) = ny
@@ -326,5 +336,4 @@ subroutine cgyro_init_manager
 
   endif
 
-  !$acc enter data copyin(energy,xi,vel)
 end subroutine cgyro_init_manager

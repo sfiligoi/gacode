@@ -40,15 +40,17 @@ subroutine cgyro_mpi_grid
      write(io,'(a,i5)') '         nc: ',nc
      write(io,'(a,i5)') ' GCD(nv,nc): ',d
      write(io,*)
-     write(io,*) '          [coll]     [str]      [NL]'
-     write(io,*) ' n_MPI    nc_loc    nv_loc   n_split'
-     write(io,*) '------    ------    ------   -------'
+     write(io,*) '          [coll]     [str]      [NL]      [NL]      [NL]'
+     write(io,*) ' n_MPI    nc_loc    nv_loc   n_split  atoa[MB] atoa proc'
+     write(io,*) '------    ------    ------   -------  -------- ---------'
      do it=1,d*n_toroidal
         if (mod(d*n_toroidal,it) == 0 .and. mod(it,n_toroidal) == 0) then
            n_proc_1 = it/n_toroidal
            nc_loc = nc/n_proc_1           
            nv_loc = nv/n_proc_1           
-           write(io,'(t2,4(i6,4x))') it,nc_loc,nv_loc,1+(nv_loc*n_theta-1)/n_toroidal
+           nsplit = 1+(nv_loc*n_theta-1)/n_toroidal
+           write(io,'(t2,4(i6,4x),f5.2,4x,i6)') &
+                it,nc_loc,nv_loc,nsplit,16.0*n_radial*nsplit/1e6,n_toroidal
         endif
      enddo
      close(io)
@@ -92,6 +94,24 @@ subroutine cgyro_mpi_grid
   enddo
 !$acc enter data copyin(ir_c,it_c,ic_c)
 
+  ! Shear pointers
+  allocate(ica_c(nc))
+  allocate(icb_c(nc))
+  ic = 0
+  do ir=1,n_radial
+     do it=1,n_theta
+        ic = ic+1
+        if (ir < n_radial) then
+           ica_c(ic) = ic_c(ir,it)
+           icb_c(ic) = ic_c(ir+1,it)
+        else
+           ica_c(ic) = ic_c(ir,it)
+           icb_c(ic) = ic_c(1,it)
+        endif
+     enddo
+  enddo
+
+
   if (test_flag == 1) then
      ! Set dimensions for calculation of memory in test mode
      nv_loc = nv
@@ -99,31 +119,38 @@ subroutine cgyro_mpi_grid
      nsplit = nv_loc*n_theta/n_toroidal
      return
   endif
-  
+
   !-------------------------------------------------------------
   ! Check that n_proc is a multiple of n_toroidal
   !
   if (modulo(n_proc,n_toroidal) /= 0) then
-     call cgyro_error('ERROR: (CGYRO) Number of processors must be a multiple of N_TOROIDAL.')
+     call cgyro_error('Number of processors must be a multiple of N_TOROIDAL.')
      return
   endif
 
-  ! Assign subgroup dimensions:
+  ! Assign subgroup dimensions: n_proc = n_proc_1 * n_proc_2
 
-  n_proc_2 = n_toroidal
   n_proc_1 = n_proc/n_toroidal
+  n_proc_2 = n_toroidal
 
   ! Check that nv and nc are multiples of the local processor count
 
   if (modulo(nv,n_proc_1) /= 0 .or. modulo(nc,n_proc_1) /= 0) then
-     call cgyro_error('ERROR: (CGYRO) nv or nc not a multiple of the local processor count.')
+     call cgyro_error('nv or nc not a multiple of the local processor count.')
      return
   endif
 
   ! Local group indices:
 
-  i_group_1 = i_proc/n_proc_1
-  i_group_2 = modulo(i_proc,n_proc_1)
+  if (mpi_rank_order == 1) then
+     i_group_1 = i_proc/n_proc_1
+     i_group_2 = modulo(i_proc,n_proc_1)
+     call cgyro_info('MPI rank alignment 1')
+  else
+     i_group_1 = modulo(i_proc,n_proc_2)
+     i_group_2 = i_proc/n_proc_2
+     call cgyro_info('MPI rank alignment 2')
+  endif
   !------------------------------------------------
 
   !-----------------------------------------------------------
@@ -184,7 +211,7 @@ subroutine cgyro_mpi_grid
 
   allocate(ic_locv(nc1:nc2))
   allocate(iv_locv(nv1:nv2))
-  
+
   ic_loc = 0
   do ic=nc1,nc2
      ic_loc = ic_loc+1
@@ -196,15 +223,6 @@ subroutine cgyro_mpi_grid
      iv_locv(iv) = iv_loc
   enddo
 !$acc enter data copyin(ic_locv,iv_locv)
-
- ! Settings for parallel library
- if (use_alltoall == 1) then
-    use_alltoall_slib_f = .true.
-    use_alltoall_slib_r = .true.
- else
-    use_alltoall_slib_f = .false.
-    use_alltoall_slib_r = .false.
- endif
 
 end subroutine cgyro_mpi_grid
 

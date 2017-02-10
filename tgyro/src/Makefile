@@ -64,7 +64,6 @@ OBJECTS += tgyro_globals.o \
            tgyro_write_input.o \
            tgyro_write_intermediate.o \
            tgyro_write_data.o \
-           tgyro_write_jacobian.o \
            $(TGYRO_NN).o \
            $(EXEC).o
 

@@ -14,7 +14,7 @@ subroutine prgen_write
   implicit none
   !
   integer :: i,ip
-  character (len=3) :: iname ! 3 character ion string
+  character (len=6) :: iname ! 6 character ion string
   character(len=46) :: header = '#                 IONS :  Name       Z    Mass'
   !---------------------------------------------------------------
 

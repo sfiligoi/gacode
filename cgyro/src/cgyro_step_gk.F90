@@ -37,10 +37,12 @@ subroutine cgyro_step_gk
 
   ! Stage 4
   call cgyro_rhs(4)
-  h_x = h0_x + delta_t/6.0 * &
-       (rhs(:,:,1)+2.0*rhs(:,:,2)+2.0*rhs(:,:,3)+rhs(:,:,4))  
+  h_x = h0_x+delta_t*(rhs(:,:,1)+2*rhs(:,:,2)+2*rhs(:,:,3)+rhs(:,:,4))/6  
   call cgyro_field_c
 
+  ! rhs(1) = 3rd-order error estimate
+  rhs(:,:,1) = h0_x+delta_t*(rhs(:,:,2)+2*rhs(:,:,3))/3-h_x
+  
   ! Filter special spectral components
   call cgyro_filter
   
@@ -57,19 +59,22 @@ subroutine cgyro_rhs(ij)
   implicit none
 
   integer, intent(in) :: ij
-  integer :: is, ir, it, ie, ix
-  integer :: id, jc
+  integer :: is,ir,it
+  integer :: id,jc,j
+  integer :: p
   real :: rval,rval2
   complex :: rhs_stream
   complex :: rhs_ij(nc,nv_loc)
+  complex, dimension(0:n_radial+1) :: h0
+
+  ! Zero work array
+  h0 = 0.0
 
   ! Prepare suitable distribution (g, not h) for conservative upwind method
-!$omp workshare
   g_x(:,:) = h_x(:,:)
-!$omp end workshare
+
   if (n_field > 1) then
-!$omp  parallel do  &
-!$omp& private(iv,ic,iv_loc,is,ir,it)
+     !$omp parallel do private(iv_loc,is,ic)
      do iv=nv1,nv2
         iv_loc = iv-nv1+1
         is = is_v(iv)
@@ -86,46 +91,55 @@ subroutine cgyro_rhs(ij)
 
   call timer_lib_in('str')
 
+  if (implicit_flag == 1) then
+
+     ! IMPLICIT advance 
+
+!$omp parallel do private(ic)
+     do iv_loc=1,nv2-nv1+1
+        do ic=1,nc
+           ! Diagonal terms
+           rhs_ij(ic,iv_loc) = &
+                omega_cap_h(ic,iv_loc)*cap_h_c(ic,iv_loc)+&
+                omega_h(ic,iv_loc)*h_x(ic,iv_loc)+&
+                sum(omega_s(:,ic,iv_loc)*field(:,ic))
+        enddo
+     enddo
+
+  else
+
+     ! EXPLICIT advance 
+
 !$acc data  &
 !$acc& pcopyout(rhs_ij) &
-!$acc& pcopyin(h_x,field,cap_h_c) &
+!$acc& pcopyin(g_x,h_x,field,cap_h_c) &
 !$acc& present(is_v,ix_v,ie_v,it_c) &
 !$acc& present(omega_cap_h,omega_h,omega_s) &
-!$acc& present(omega_stream,energy,xi,vel) &
+!$acc& present(omega_stream,xi,vel) &
 !$acc& present(dtheta,dtheta_up,icd_c)
 
-!$acc kernels
-   rhs_ij(:,:) = (0.0,0.0)
-!$acc end kernels
-
-
 #ifdef _OPENACC
-!$acc  parallel  loop gang vector collapse(2) & 
-!$acc& private(iv,ic,iv_loc,is,ix,ie,rval,rhs_stream,id,jc)
+!$acc  parallel loop gang vector collapse(2) & 
+!$acc& private(iv,ic,iv_loc,is,rval,rval2,rhs_stream,id,jc)
 #else
-!$omp  parallel do &
-!$omp& private(iv,ic,iv_loc,is,ix,ie,rval,rhs_stream,id,jc)
+!$omp parallel do collapse(2) &
+!$omp& private(iv,ic,iv_loc,is,rval,rval2,rhs_stream,id,jc) 
 #endif
-  do iv=nv1,nv2
-     do ic=1,nc
+     do iv=nv1,nv2
+        do ic=1,nc
+           iv_loc = iv-nv1+1
+           is = is_v(iv)
+           ! Diagonal terms
+           rhs_ij(ic,iv_loc) = &
+                omega_cap_h(ic,iv_loc)*cap_h_c(ic,iv_loc)+&
+                omega_h(ic,iv_loc)*h_x(ic,iv_loc)+&
+                sum(omega_s(:,ic,iv_loc)*field(:,ic))
 
-        iv_loc = iv-nv1+1
-        is = is_v(iv)
-        ix = ix_v(iv)
-        ie = ie_v(iv)
-
-        ! Diagonal terms
-        rhs_ij(ic,iv_loc) = rhs_ij(ic,iv_loc)+&
-             omega_cap_h(ic,iv_loc)*cap_h_c(ic,iv_loc)+&
-             omega_h(ic,iv_loc)*h_x(ic,iv_loc)+&
-             sum(omega_s(:,ic,iv_loc)*field(:,ic))
-
-        if (implicit_flag == 0) then
            ! Parallel streaming with upwind dissipation 
-           rval  = omega_stream(it_c(ic),is)*vel(ie)*xi(ix)
+           rval  = omega_stream(it_c(ic),is)*vel(ie_v(iv))*xi(ix_v(iv))
            rval2 = abs(omega_stream(it_c(ic),is))
-           rhs_stream = 0.0
 
+           rhs_stream = 0.0
            do id=-nup_theta,nup_theta
               jc = icd_c(ic,id)
               rhs_stream = rhs_stream &
@@ -135,17 +149,42 @@ subroutine cgyro_rhs(ij)
 
            rhs_ij(ic,iv_loc) = rhs_ij(ic,iv_loc)+rhs_stream
 
-        endif
+        enddo
      enddo
-  enddo
 !$acc end data
+  endif
+
+  ! Wavenumber advection ExB shear
+  if (shear_method == 2) then
+     do iv=nv1,nv2
+        iv_loc = iv-nv1+1
+        do j=1,n_theta
+           h0(1:n_radial) = h_x(ic_c(:,j),iv_loc)
+           do ir=1,n_radial
+              rhs_ij(ic_c(ir,j),iv_loc) = rhs_ij(ic_c(ir,j),iv_loc)+ &
+                   omega_eb*0.5*(h0(ir+1)-h0(ir-1))
+           enddo
+        enddo
+     enddo
+  endif
+
+  ! Wavenumber advection profile shear
+  if (profile_shear_flag == 1) then
+     do iv=nv1,nv2
+        iv_loc = iv-nv1+1
+        do j=1,n_theta
+           do ir=1,n_radial
+              h0(ir) = sum(omega_ss(:,ic_c(ir,j),iv_loc)*field(:,ic_c(ir,j)))
+           enddo
+           do ir=1,n_radial
+              rhs_ij(ic_c(ir,j),iv_loc) = rhs_ij(ic_c(ir,j),iv_loc)+ &
+                   0.5*(h0(ir+1)-h0(ir-1))
+           enddo
+        enddo
+     enddo
+  endif
 
   rhs(:,:,ij) = rhs_ij(:,:)
-
-  ! TRAPPING TERM
-  if (shear_method == 3 .or. collision_model == 5) then
-  call cgyro_rhs_trap(ij)
-  endif
 
   call timer_lib_out('str')
 
@@ -158,6 +197,17 @@ subroutine cgyro_rhs(ij)
         call cgyro_nl_fftw(ij)
      endif
   endif
+
+  ! Remove p=-M
+  if (psym_flag == 1) then
+     do ic=1,nc
+        ir = ir_c(ic) 
+        if (ir == 1) then
+           rhs(ic,:,ij) = 0.0
+        endif
+     enddo
+  endif
+
 
 end subroutine cgyro_rhs
 
@@ -182,6 +232,9 @@ subroutine cgyro_filter
   endif
 
 end subroutine cgyro_filter
+
+!==========================================================================
+! NOTE: The routine below is NOT used.
 
 subroutine cgyro_rhs_trap(ij)
 
@@ -235,8 +288,7 @@ subroutine cgyro_rhs_trap(ij)
 
         val = omega_trap(it,is)*sqrt(energy(ie))*(1.0-xi(ix)**2) 
 
-        rhs(ic,iv_loc,ij) = rhs(ic,iv_loc,ij) &
-             -val*cap_h_c(ic,iv_loc)
+        rhs(ic,iv_loc,ij) = rhs(ic,iv_loc,ij)-val*cap_h_c(ic,iv_loc)
      enddo
   enddo
 

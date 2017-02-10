@@ -1,6 +1,0 @@
-Jacobian matrix parsers and plotters
-T_ie.rb - reads in temperature profiles and dumps output that is easily plottable
-jac.rb - parses jacobian 
-vec.rb - parses vectors and fluxes 
-
-python scripts all plot parsed output using matplotlib.

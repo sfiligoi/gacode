@@ -4,9 +4,6 @@ subroutine tgyro_flux_vector_dense(x_vec,f_vec)
 
   implicit none
 
-  integer :: i
-  integer :: p
-
   real, intent(in), dimension(p_max) :: x_vec
   real, intent(inout), dimension(p_max) :: f_vec
 

@@ -281,15 +281,17 @@ subroutine gyro_profile_init
         if (eps_dlntdr_vec(is) /= 0.0) then
            call send_message_real('INFO: (GYRO) Ti gradient RESCALED by: ',1.0-eps_dlntdr_vec(is))
            if (reintegrate_flag == 1) then
-              call logint(tem_s(is,:),dlntdr_s(is,:),r_s,n_x,ir_norm)
-              call send_message('INFO: (GYRO) Ti profile REINTEGRATRED')
+              !call logint(tem_s(is,:),dlntdr_s(is,:),r_s,n_x,ir_norm)
+              !call send_message('INFO: (GYRO) Ti profile REINTEGRATRED')
+              call catch_error('ERROR: (GYRO) REINTEGRATE_FLAG no longer supported')
            endif
         endif
         if (eps_dlnndr_vec(is) /= 0.0) then
            call send_message_real('INFO: (GYRO) ni gradient RESCALED by: ',1.0-eps_dlnndr_vec(is))
            if (reintegrate_flag == 1) then
-              call logint(den_s(is,:),dlntdr_s(is,:),r_s,n_x,ir_norm)
-              call send_message('INFO: (GYRO) ni profile REINTEGRATRED')
+              !call logint(den_s(is,:),dlntdr_s(is,:),r_s,n_x,ir_norm)
+              !call send_message('INFO: (GYRO) ni profile REINTEGRATRED')
+              call catch_error('ERROR: (GYRO) REINTEGRATE_FLAG no longer supported')
            endif
         endif
      enddo
@@ -299,15 +301,17 @@ subroutine gyro_profile_init
      if (eps_dlntdr_vec(0) /= 0.0) then
         call send_message_real('INFO: (GYRO) Te gradient RESCALED by: ',1.0-eps_dlntdr_vec(0))
         if (reintegrate_flag == 1) then
-           call logint(tem_s(n_spec,:),dlntdr_s(n_spec,:),r_s,n_x,ir_norm)
-           call send_message('INFO: (GYRO) Te profile REINTEGRATRED')
+           !call logint(tem_s(n_spec,:),dlntdr_s(n_spec,:),r_s,n_x,ir_norm)
+           !call send_message('INFO: (GYRO) Te profile REINTEGRATRED')
+           call catch_error('ERROR: (GYRO) REINTEGRATE_FLAG no longer supported')
         endif
      endif
      if (eps_dlnndr_vec(0) /= 0.0) then
         call send_message_real('INFO: (GYRO) ne gradient RESCALED by: ',1.0-eps_dlnndr_vec(0))
         if (reintegrate_flag == 1) then
-           call logint(den_s(n_spec,:),dlnndr_s(n_spec,:),r_s,n_x,ir_norm)
-           call send_message('INFO: (GYRO) ne profile REINTEGRATRED')
+           !call logint(den_s(n_spec,:),dlnndr_s(n_spec,:),r_s,n_x,ir_norm)
+           !call send_message('INFO: (GYRO) ne profile REINTEGRATRED')
+           call catch_error('ERROR: (GYRO) REINTEGRATE_FLAG no longer supported')
         endif
      endif
      !

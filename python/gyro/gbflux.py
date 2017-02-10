@@ -1,6 +1,7 @@
 import sys
 import numpy as np
 from gacodeplotdefs import *
+from gacodefuncs import *
 from gyro.data import GYROData
 
 sim       = GYROData(sys.argv[1])
@@ -13,6 +14,8 @@ lx        = float(sys.argv[7])
 ly        = float(sys.argv[8])
 title     = sys.argv[9]
 ymax      = float(sys.argv[10])
+xspan1    = float(sys.argv[11])
+xspan2    = float(sys.argv[12])
 
 n_field   = int(sim.profile['n_field'])
 n_kinetic = int(sim.profile['n_kinetic'])
@@ -54,8 +57,11 @@ for i in range(len(t)):
     if t[i] < (1.0-w)*t[len(t)-1]:
         imin = i
 
-ax.set_title(r'$'+str(t[imin])+' < (c_s/a) t < '+str(t[-1])+'$')
-
+if title=='null':
+    ax.set_title(r'$'+str(t[imin])+' < (c_s/a) t < '+str(t[-1])+'$')
+else:
+    ax.set_title(r'$\mathrm{'+title+'}$')
+    
 # Loop over species
 if datafile == 'none':
     # Plot data to screen or image file.
@@ -75,6 +81,9 @@ if datafile == 'none':
 else:
     # Write data to datafile
     print 'INFO: (gyro_plot) Output to datafile not supported.  Use raw out.gyro.gbflux.'
+
+if xspan1 > 0.0:
+    ax.axvspan(xspan1,xspan2,facecolor='g',alpha=0.1)
 
 ax.set_xlim([0,t[-1]])
 

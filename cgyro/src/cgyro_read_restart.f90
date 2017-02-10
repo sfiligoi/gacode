@@ -25,12 +25,11 @@ subroutine cgyro_read_restart
   integer(kind=MPI_OFFSET_KIND) :: offset1
   !---------------------------------------------------
 
-  call cgyro_info('Reading MPI-IO restart data.')
+  !call cgyro_info('Reading MPI-IO restart data.')
 
   !---------------------------------------------------------
   ! Read restart parameters from ASCII file.
   !
-  call cgyro_info('Writing MPI-IO restart data.')
   if (i_proc == 0) then
 
      open(unit=io,&

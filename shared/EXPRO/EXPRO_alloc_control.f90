@@ -163,11 +163,19 @@ subroutine EXPRO_alloc_control(i_proc,flag)
      EXPRO_dlnnedr(:)=0.0
      allocate(EXPRO_dlntedr(EXPRO_n_exp))
      EXPRO_dlntedr(:)=0.0
+     allocate(EXPRO_sdlnnedr(EXPRO_n_exp))
+     EXPRO_sdlnnedr(:)=0.0
+     allocate(EXPRO_sdlntedr(EXPRO_n_exp))
+     EXPRO_sdlntedr(:)=0.0
 
      allocate(EXPRO_dlnnidr(EXPRO_n_ion_max,EXPRO_n_exp))
      EXPRO_dlnnidr(:,:)=0.0
      allocate(EXPRO_dlntidr(EXPRO_n_ion_max,EXPRO_n_exp))
      EXPRO_dlntidr(:,:)=0.0
+     allocate(EXPRO_sdlnnidr(EXPRO_n_ion_max,EXPRO_n_exp))
+     EXPRO_sdlnnidr(:,:)=0.0
+     allocate(EXPRO_sdlntidr(EXPRO_n_ion_max,EXPRO_n_exp))
+     EXPRO_sdlntidr(:,:)=0.0
 
      allocate(EXPRO_vol(EXPRO_n_exp))
      EXPRO_vol(:)=0.0
@@ -269,9 +277,13 @@ subroutine EXPRO_alloc_control(i_proc,flag)
      deallocate(EXPRO_szeta)
      deallocate(EXPRO_dlnnedr)
      deallocate(EXPRO_dlntedr)
+     deallocate(EXPRO_sdlnnedr)
+     deallocate(EXPRO_sdlntedr)
 
      deallocate(EXPRO_dlnnidr)
      deallocate(EXPRO_dlntidr)
+     deallocate(EXPRO_sdlnnidr)
+     deallocate(EXPRO_sdlntidr)
 
      deallocate(EXPRO_vol)
      deallocate(EXPRO_volp)

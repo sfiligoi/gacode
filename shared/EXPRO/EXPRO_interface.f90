@@ -229,6 +229,10 @@ module EXPRO_interface
   real, dimension(:),allocatable :: EXPRO_dlntedr
   real, dimension(:,:),allocatable :: EXPRO_dlnnidr
   real, dimension(:,:),allocatable :: EXPRO_dlntidr
+  real, dimension(:),allocatable :: EXPRO_sdlnnedr
+  real, dimension(:),allocatable :: EXPRO_sdlntedr
+  real, dimension(:,:),allocatable :: EXPRO_sdlnnidr
+  real, dimension(:,:),allocatable :: EXPRO_sdlntidr
   real, dimension(:),allocatable :: EXPRO_dlnptotdr
 
   real, dimension(:),allocatable :: EXPRO_w0p
