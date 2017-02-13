@@ -14,7 +14,7 @@ LLIB=tglf_lib
 ifdef FANN_ROOT
    # neural-net file
    TGLF_NN=tglf_nn_TM.fann
-   TGLF_LIBS=-I$(GACODE_ROOT)/shared/neural/ -L$(GACODE_ROOT)/shared/neural/ -lbrainfuse -lfann
+   TGLF_LIBS=-I$(GACODE_ROOT)/shared/neural/ -L$(GACODE_ROOT)/shared/neural/ -lbrainfuse -L${FANN_ROOT}/lib -lfann
 else
    # stub file
    TGLF_NN=tglf_nn_TM

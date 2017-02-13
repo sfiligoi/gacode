@@ -330,6 +330,7 @@ module tgyro_globals
   integer :: flux_method
   integer, dimension(:), allocatable :: flux_method_vec
   integer :: i_tran
+  integer :: i_tran_old
   integer :: i_bc
   integer :: flux_counter
   integer :: i_ash
