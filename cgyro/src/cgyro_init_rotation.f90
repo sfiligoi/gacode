@@ -228,7 +228,7 @@ subroutine cgyro_init_rotation
      enddo
      close(io)
   endif
-     
+
   ! just cf trapping (no coriolis and no cf drift)
   if(cf_model == 2) then
 
@@ -262,6 +262,16 @@ subroutine cgyro_init_rotation
      omega_rot_edrift_r(:,:) = 0.0
      omega_rot_edrift_0(:) = 0.0
      
+  endif
+
+  ! just cf mach^2 terms (no coriolis and no parallel velocity shear)
+  if(cf_model == 4) then
+
+     omega_cdrift(:,:) = 0.0
+     omega_cdrift_r(:,:) = 0.0
+     
+     omega_gammap(:) = 0.0
+
   endif
   
   deallocate(phi_rot)

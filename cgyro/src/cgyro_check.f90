@@ -247,10 +247,12 @@ subroutine cgyro_check
   case(1)
      call cgyro_info('Centrifugal model: included (all)')
   case(2)
-     call cgyro_info('Centrifugal model: only cf trap (no coriolis)')
+     call cgyro_info('Centrifugal model: only cf trap (no coriolis or cf drift)')
   case(3)
-     call cgyro_info('Centrifugal model: only cf drift (no coriolis)') 
-        
+     call cgyro_info('Centrifugal model: only cf drift (no coriolis or cf trap)') 
+  case(4)
+      call cgyro_info('Centrifugal model: only cf trap+drift (no coriolis or gammap)')   
+
   case default
      call cgyro_error('Invalid value for cf_model')
      return
