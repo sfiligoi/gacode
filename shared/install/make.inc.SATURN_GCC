@@ -34,5 +34,5 @@ NETCDF_INC = $(NETCDF_DIR)/include
 
 ARCH = ar cr
 
-#FANN_ROOT=$(FANN_DIR)
-#CFLAGS=-I$(FANN_DIR)/include
+FANN_ROOT=$(FANN_DIR)
+CFLAGS=-I$(FANN_DIR)/include
