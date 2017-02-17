@@ -17,6 +17,7 @@ subroutine cgyro_flux
   real :: dv
   real :: c_n,c_n0
   real :: c_t,c_t0
+  real :: c_tr
 
   flux_loc(:,:,:) = 0.0
   moment_loc(:,:,:) = 0.0
@@ -40,6 +41,9 @@ subroutine cgyro_flux
      ! Energy moment weight
      c_t = dv*dens(is)*temp(is)*energy(ie)
 
+     ! Energy moment weight (rotation)
+     c_tr = dv*dens(is)*temp(is)
+
      ! Adiabatic coefficient
      c_n0 = z(is)*dens(is)/temp(is)
      c_t0 = 1.5*temp(is)*c_n0
@@ -51,28 +55,36 @@ subroutine cgyro_flux
 
         ! Density flux: Gamma_a
         flux_loc(ir,is,1) = flux_loc(ir,is,1) &
-             -c_n*aimag(cap_h_c(ic,iv_loc)*conjg(psi(ic,iv_loc)))*w_theta(it)
+             -c_n*aimag(cap_h_c(ic,iv_loc)*conjg(psi(ic,iv_loc)))*w_theta(it) &
+             * dens_rot(it,is)
 
         ! Energy flux : Q_a
         flux_loc(ir,is,2) = flux_loc(ir,is,2) &
-             -c_t*aimag(cap_h_c(ic,iv_loc)*conjg(psi(ic,iv_loc)))*w_theta(it)
+             -aimag(cap_h_c(ic,iv_loc)*conjg(psi(ic,iv_loc)))*w_theta(it) &
+             * dens_rot(it,is) * (c_t + c_tr * lambda_rot(it,is))
 
         if (it == it0) then
            ! Density moment: (delta n_a)/(n_norm rho_norm)
-           moment_loc(ir,is,1) = moment_loc(ir,is,1)-c_n0*field(1,ic) &
-                +c_n*cap_h_c(ic,iv_loc)*jvec_c(1,ic,iv_loc)
+           moment_loc(ir,is,1) = moment_loc(ir,is,1) &
+                - c_n0*field(1,ic)*dens_rot(it,is) &
+                + c_n*cap_h_c(ic,iv_loc)*jvec_c(1,ic,iv_loc)*dens_rot(it,is)
            ! Energy moment : (delta E_a)/(n_norm T_norm rho_norm)
-           moment_loc(ir,is,2) = moment_loc(ir,is,2)-c_t0*field(1,ic) &
-                +c_t*cap_h_c(ic,iv_loc)*jvec_c(1,ic,iv_loc)
+           moment_loc(ir,is,2) = moment_loc(ir,is,2) &
+                - c_t0*field(1,ic)*dens_rot(it,is) &
+                + cap_h_c(ic,iv_loc)*jvec_c(1,ic,iv_loc)*dens_rot(it,is) &
+                * (c_t + c_tr * lambda_rot(it,is))
         endif
 
         ! Global fluxes (complex)
         do l=0,n_global
            if (ir-l > 0) then
               gflux_loc(l,is,1) = gflux_loc(l,is,1) &
-                   +c_n*i_c*cap_h_c(ic,iv_loc)*conjg(psi(ic_c(ir-l,it),iv_loc))*w_theta(it)
+                   +c_n*i_c*cap_h_c(ic,iv_loc)*conjg(psi(ic_c(ir-l,it),iv_loc))&
+                   * w_theta(it)* dens_rot(it,is)
               gflux_loc(l,is,2) = gflux_loc(l,is,2) &
-                   +c_t*i_c*cap_h_c(ic,iv_loc)*conjg(psi(ic_c(ir-l,it),iv_loc))*w_theta(it)
+                   +i_c*cap_h_c(ic,iv_loc)*conjg(psi(ic_c(ir-l,it),iv_loc)) &
+                   * w_theta(it)* dens_rot(it,is) &
+                   * (c_t + c_tr * lambda_rot(it,is))
            endif
         enddo
  
