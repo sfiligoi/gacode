@@ -112,8 +112,10 @@ subroutine cgyro_write_timedata
   vfreq(2) = aimag(freq)
   call cgyro_write_distributed_real(trim(path)//runfile_freq,size(vfreq),vfreq)
 
-  if (n_toroidal == 1) call print_scrdata()
+  ! Output to screen
+  call print_scrdata()
 
+  ! Output to files
   call write_time(trim(path)//runfile_time)
   call write_timers(trim(path)//runfile_timers)
 
@@ -616,14 +618,8 @@ subroutine write_time(datafile)
 
      ! Append
 
-     if (n_toroidal > 1) then
-        print '(a,1pe9.3,a,5(1pe9.3,1x))',&
-             '[t = ',t_current,&
-             '] t_err: ',field_error
-     endif
-
      open(unit=io,file=datafile,status='old',position='append')
-     write(io,fmtstr2) t_current,field_error
+     write(io,fmtstrn) t_current,integration_error(:)
      close(io)
 
      !-------------------------------------------------------
@@ -839,18 +835,23 @@ subroutine print_scrdata()
   implicit none
   !------------------------------------------------------
 
+  ! Lots of immediate return conditions
   if (restart_flag == 1 .and. i_time == 0) return
-  
-  if (io_control == 0) then
-     return
+  if (io_control == 0 .or. i_proc > 0) return
+
+  ! Different output for 1-mode (linear) or multiple-mode runs
+
+  if (n_toroidal > 1) then
+     print '(a,1pe9.3,a,1pe9.3,1x,1pe9.3,a)',&
+          '[t: ',t_current,&
+          '][e: ',integration_error(:),']'
   else
-     if (i_proc == 0) then
-        print '(a,1pe9.3,a,1pe10.3,1x,1pe10.3,a,1pe9.3,a,1pe9.3)',&
-             '[t = ',t_current,&
-             '][w = ',freq,&
-             '][dw = ',abs(freq_err),&
-             '] t_err: ',field_error
-     endif
+     print '(a,1pe9.3,a,1pe10.3,1x,1pe10.3,a,1pe10.3,a,1pe9.3,1x,1pe9.3,a)',&
+          '[t: ',t_current,&
+          '][w: ',freq,&
+          '][dw:',abs(freq_err),&
+          '][e: ',integration_error(:),']'
+
   endif
 
 end subroutine print_scrdata

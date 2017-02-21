@@ -342,7 +342,7 @@ module cgyro_globals
   !
   ! Work arrays
   complex, dimension(:,:), allocatable :: f_balloon
-  real :: field_error
+  real, dimension(2) :: integration_error
   !
   ! LAPACK work arrays 
   real, dimension(:), allocatable :: work  

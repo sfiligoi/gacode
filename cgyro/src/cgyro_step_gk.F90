@@ -74,7 +74,7 @@ subroutine cgyro_rhs(ij)
   g_x(:,:) = h_x(:,:)
 
   if (n_field > 1) then
-     !$omp parallel do private(iv_loc,is,ic)
+!$omp parallel do private(iv_loc,is,ic)
      do iv=nv1,nv2
         iv_loc = iv-nv1+1
         is = is_v(iv)
