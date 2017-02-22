@@ -75,7 +75,6 @@ subroutine cgyro_kernel
         call cgyro_step_gk
         call cgyro_step_gk
         delta_t = 2*delta_t
-        !print *,'adapt'
      else
         ! Normal timestep
         call cgyro_step_gk
