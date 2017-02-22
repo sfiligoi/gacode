@@ -3,7 +3,7 @@ subroutine le3_geometry
   use le3_globals
 
   implicit none
-  integer :: i,j,k,its,ips,ip,kt,kp
+  integer :: i,j,k,its,ips,ip
 
   print '(a,1pe12.5)','INFO: (le3) Root accuracy ->',sum(abs(yfunc))/size(yfunc)
 

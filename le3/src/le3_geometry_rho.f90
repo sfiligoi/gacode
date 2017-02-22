@@ -14,7 +14,6 @@ subroutine le3_geometry_rho
   real :: ysinuv
   real :: up,pp,pt
   real :: d0,eta
-  real :: theta
 
   real, dimension(:,:), allocatable :: s1a,s1b
   real, dimension(:,:), allocatable :: s2a,s2b
@@ -25,8 +24,6 @@ subroutine le3_geometry_rho
   real, dimension(:,:), allocatable :: sys_m
   real, dimension(:), allocatable :: sys_b
   integer, dimension(:), allocatable :: i_piv
-
-  integer, parameter :: n_theta=512
 
   ! Since this is a 2x2 system, define new matsize
   nrow = 2*matsize
