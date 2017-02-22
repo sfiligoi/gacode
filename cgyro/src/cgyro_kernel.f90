@@ -41,20 +41,20 @@ subroutine cgyro_kernel
 
   ! 4. Array initialization and construction
   !    NOTE: On exit, field_old = field 
- 
+
   call cgyro_init_manager
 
   !---------------------------------------------------------------------------
   !
   ! Time-stepping
   n_time = nint(max_time/delta_t)
-  
+
   if (restart_flag == 0) then
      io_control = 1*(1-silent_flag)
   else
      io_control = 3*(1-silent_flag)
   endif
-  
+
   call timer_lib_in('io_init')
   call cgyro_write_timedata
   call timer_lib_in('io_init')
@@ -62,15 +62,25 @@ subroutine cgyro_kernel
   do i_time=1,n_time
 
      call timer_lib_in('TOTAL')
-     
+
      !------------------------------------------------------------
      ! Time advance
      !
      t_current = t_current+delta_t
 
      ! Collisionless step: returns new h_x, cap_h_x, fields 
-     call cgyro_step_gk
-        
+     if (integration_error(2) > adapt_tol) then
+        ! Trigger adaptive step
+        delta_t = delta_t/2
+        call cgyro_step_gk
+        call cgyro_step_gk
+        delta_t = 2*delta_t
+        !print *,'adapt'
+     else
+        ! Normal timestep
+        call cgyro_step_gk
+     endif
+
      ! Collisionless implicit streaming term step
      ! : returns new h_x, cap_h_x, fields 
      call cgyro_step_implicit_gk
@@ -128,8 +138,8 @@ subroutine cgyro_kernel
   if(allocated(k_perp))         deallocate(k_perp)
   if(allocated(bigR))           deallocate(bigR)
   if(allocated(omega_stream))   then
-!$acc exit data delete(omega_stream)
-      deallocate(omega_stream)
+     !$acc exit data delete(omega_stream)
+     deallocate(omega_stream)
   endif
   if(allocated(omega_trap))     deallocate(omega_trap)
   if(allocated(omega_rdrift))   deallocate(omega_rdrift)
@@ -153,19 +163,19 @@ subroutine cgyro_kernel
   if(allocated(omega_rot_edrift_r))  deallocate(omega_rot_edrift_r)
   if(allocated(omega_rot_edrift_0))  deallocate(omega_rot_edrift_0)
   if(allocated(omega_rot_star))      deallocate(omega_rot_star)
-  
+
   if(allocated(indx_xi))       deallocate(indx_xi)
   if(allocated(px))            deallocate(px)
   if(allocated(energy))        then
-!$acc exit data delete(energy)
-    deallocate(energy)
+     !$acc exit data delete(energy)
+     deallocate(energy)
   endif
   if(allocated(w_e))           deallocate(w_e)
   if(allocated(e_deriv1_mat))  deallocate(e_deriv1_mat)
   if(allocated(e_deriv2_mat))  deallocate(e_deriv2_mat)
   if(allocated(xi))            then
-!$acc exit data delete(xi)
-    deallocate(xi)
+     !$acc exit data delete(xi)
+     deallocate(xi)
   endif
   if(allocated(w_xi))          deallocate(w_xi)
   if(allocated(xi_lor_mat))    deallocate(xi_lor_mat)
@@ -183,8 +193,8 @@ subroutine cgyro_kernel
   if(allocated(pvec_outi))     deallocate(pvec_outi)
 
   if(allocated(cmat))       then
-!$acc exit data delete(cmat)
-    deallocate(cmat)
+     !$acc exit data delete(cmat)
+     deallocate(cmat)
   endif
 
   call GEO_alloc(0)

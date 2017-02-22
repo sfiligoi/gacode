@@ -15,9 +15,10 @@ subroutine cgyro_error_estimate
 
   implicit none
 
-  real, dimension(2) :: norm
-  real, dimension(2) :: norm_loc
+  real, dimension(2) :: norm_loc,norm
+  real, dimension(2) :: pair_loc,pair
   real, dimension(2) :: error_loc
+  
 
   ! 1. Estimate of total (field) error via quadratic interpolation
 
@@ -29,9 +30,21 @@ subroutine cgyro_error_estimate
 
   ! 2. Estimate of collisionless error via 3rd-order linear estimate
 
-  norm_loc(2)  = sum(abs(h_x))
-  error_loc(2) = sum(abs(rhs(:,:,1)))
+  pair_loc(1) = sum(abs(h_x))
+  pair_loc(2) = sum(abs(rhs(:,:,1)))
 
+  ! sum over velocity space
+  call MPI_ALLREDUCE(pair_loc,&
+       pair,&
+       2,&
+       MPI_DOUBLE_PRECISION,&
+       MPI_SUM,&
+       NEW_COMM_1,&
+       i_err)
+
+  norm_loc(2) = pair(1)
+  error_loc(2) = pair(2)
+  
   ! Get sum of all errors
   call MPI_ALLREDUCE(error_loc, &
        integration_error, &

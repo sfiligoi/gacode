@@ -73,13 +73,13 @@ module cgyro_globals
   integer :: cf_model
   real :: error_tol
   integer :: mpi_rank_order
-  real :: gamma_e_decay
   integer :: hiprec_flag
   integer :: udsymmetry_flag
   integer :: shear_method
   integer :: n_global
   integer :: psym_flag
   integer :: profile_shear_flag
+  real :: adapt_tol
   !
   ! Geometry input
   !
