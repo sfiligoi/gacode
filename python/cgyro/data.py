@@ -243,6 +243,15 @@ class cgyrodata:
             print "INFO: (data.py) Read data in out.cgyro.kxky_flux_e. TIME = "+str(end-start)
         except:
             pass 
+
+        try:
+            start = time.time()
+            data = np.fromfile(self.dir+'out.cgyro.kxky_flux_v',dtype='float',sep=" ")
+            end = time.time()
+            self.kxky_flux_v = np.reshape(data[0:nd],(self.n_radial,self.n_species,self.n_n,nt),'F')
+            print "INFO: (data.py) Read data in out.cgyro.kxky_flux_v. TIME = "+str(end-start)
+        except:
+            pass
         #-----------------------------------------------------------------
 
     def getexflux(self):

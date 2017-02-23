@@ -34,6 +34,15 @@ elif moment == 'e':
         y = np.sum(sim.kxky_flux_e,axis=(0,2))
     else:
         y = sim.flux_e
+elif moment == 'v':
+    ntag = 'Momentum~flux'
+    mtag = '\Pi'
+    ttag = 'Pi'
+    ftag = 'flux_v'
+    if hasattr(sim,'kxky_flux_v'):
+        y = np.sum(sim.kxky_flux_v,axis=(0,2))
+    else:
+        y = sim.flux_v
 else:
     print 'ERROR (plot_flux_time.py) Invalid moment.'
     sys.exit()
