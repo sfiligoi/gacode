@@ -74,10 +74,10 @@ subroutine cgyro_init_arrays
 
      endif
 
-     ! chi factors: -chi (kx/kperp^2)/rho
+     ! chi factors
      do ic=1,nc
         it = it_c(ic)
-        fac = rho * temp(is)*mass(is)/(z(is) * bmag(it))**2 &
+        fac = rho * temp(is)/(z(is) * bmag(it)) * bpol(it)/bmag(it) &
              * 2.0 * energy(ie)*(1-xi(ix)**2) * k_x(ic)
         
         jxvec_c(1,:,iv_loc) =  fac * (bmag(it) * jloc_c(2,:))
@@ -87,9 +87,7 @@ subroutine cgyro_init_arrays
            jxvec_c(2,:,iv_loc) = efac * fac * (bmag(it) * jloc_c(2,:))
            
            if(n_field > 2) then
-              jxvec_c(3,:,iv_loc) = fac * z(is)*bmag(it)/mass(is) &
-                   / (k_perp(ic) * rho)**2 &
-                   * (bmag(it) * jloc_c(2,:) - jloc_c(1,:))
+              jxvec_c(3,:,iv_loc) = 0.0 ! Bpar not yet implemented
            endif
            
            ! Add rotation correction to Apar (Bpar not yet implemented)
