@@ -60,13 +60,9 @@ x.add('GAMMA_E','0.0')
 x.add('GAMMA_P','0.0')
 x.add('MACH','0.0')
 x.add('CF_MODEL','0')
-<<<<<<< HEAD
+x.add('CF_EM_FLAG','0')
 x.add('ERROR_TOL','5e-2')
 x.add('ADAPT_TOL','5e-3')
-=======
-x.add('CF_EM_FLAG','0')
-x.add('ERROR_TOL','10.0')
->>>>>>> 1dece8f... Added momentum flux and rotation correction to psi
 x.add('MPI_RANK_ORDER','1')
 x.add('HIPREC_FLAG','0')
 x.add('UDSYMMETRY_FLAG','1')
