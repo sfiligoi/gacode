@@ -65,11 +65,12 @@ subroutine cgyro_flux
 
         ! Momentum flux: Pi_a
         flux_loc(ir,is,3) = flux_loc(ir,is,3) &
-             -aimag(cap_h_c(ic,iv_loc)*conjg(psi(ic,iv_loc)))*w_theta(it) &
+             -(aimag(cap_h_c(ic,iv_loc)*conjg(psi(ic,iv_loc))) &
              * (mach*bigR(it)/rmaj + btor(it)/bmag(it)*vth(is) &
              * sqrt(2.0)*vel(ie)*xi(ix)) * mass(is) * bigR(it) &
-             -aimag(cap_h_c(ic,iv_loc)*conjg(i_c*chi(ic,iv_loc)))*w_theta(it) &
-             * z(is) * bigR(it) * bpol(it)
+             +aimag(cap_h_c(ic,iv_loc)*conjg(i_c*chi(ic,iv_loc))) &
+             * z(is) * bigR(it) * bpol(it)) &
+             * dv*dens(is)*dens_rot(it,is)*w_theta(it)
         
         if (it == it0) then
            ! Density moment: (delta n_a)/(n_norm rho_norm)
