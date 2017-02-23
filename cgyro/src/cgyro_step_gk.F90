@@ -64,10 +64,6 @@ subroutine cgyro_rhs(ij)
   real :: rval,rval2
   complex :: rhs_stream
   complex :: rhs_ij(nc,nv_loc)
-  complex, dimension(0:n_radial+1) :: h0
-
-  ! Zero work array
-  h0 = 0.0
 
   ! Prepare suitable distribution (g, not h) for conservative upwind method
   g_x(:,:) = h_x(:,:)
@@ -153,37 +149,10 @@ subroutine cgyro_rhs(ij)
 !$acc end data
   endif
 
-  ! Wavenumber advection ExB shear
-  if (shear_method == 2) then
-     do iv=nv1,nv2
-        iv_loc = iv-nv1+1
-        do j=1,n_theta
-           h0(1:n_radial) = h_x(ic_c(:,j),iv_loc)
-           do ir=1,n_radial
-              rhs_ij(ic_c(ir,j),iv_loc) = rhs_ij(ic_c(ir,j),iv_loc)+ &
-                   omega_eb*0.5*(h0(ir+1)-h0(ir-1))
-           enddo
-        enddo
-     enddo
-  endif
-
-  ! Wavenumber advection profile shear
-  if (profile_shear_flag == 1) then
-     do iv=nv1,nv2
-        iv_loc = iv-nv1+1
-        do j=1,n_theta
-           do ir=1,n_radial
-              h0(ir) = sum(omega_ss(:,ic_c(ir,j),iv_loc)*field(:,ic_c(ir,j)))
-           enddo
-           do ir=1,n_radial
-              rhs_ij(ic_c(ir,j),iv_loc) = rhs_ij(ic_c(ir,j),iv_loc)+ &
-                   0.5*(h0(ir+1)-h0(ir-1))
-           enddo
-        enddo
-     enddo
-  endif
-
   rhs(:,:,ij) = rhs_ij(:,:)
+
+  ! Wavenumber advection shear terms
+  call cgyro_advect_wavenumber
 
   call timer_lib_out('str')
 
@@ -206,7 +175,6 @@ subroutine cgyro_rhs(ij)
         endif
      enddo
   endif
-
 
 end subroutine cgyro_rhs
 

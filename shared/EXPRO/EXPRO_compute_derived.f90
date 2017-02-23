@@ -107,17 +107,20 @@ subroutine EXPRO_compute_derived
   ! 1/L_Te = -dln(Te)/dr (1/m)
   call bound_deriv(EXPRO_dlntedr,-log(EXPRO_te),EXPRO_rmin,EXPRO_n_exp)
 
-  ! 1/L_ne = -(1/ne)d^2ne/dr^2 (1/m^2)
+  ! sne = -ne''/ne (1/m^2)
   call bound_deriv(EXPRO_sdlnnedr,EXPRO_ne*EXPRO_dlnnedr,EXPRO_rmin,EXPRO_n_exp)
   EXPRO_sdlnnedr = EXPRO_sdlnnedr/EXPRO_ne
 
-  ! 1/L_Te = -dln(Te)/dr (1/m)
+  ! sTe = -Te''/Te (1/m^2)
   call bound_deriv(EXPRO_sdlntedr,EXPRO_te*EXPRO_dlntedr,EXPRO_rmin,EXPRO_n_exp)
   EXPRO_sdlntedr = EXPRO_sdlntedr/EXPRO_te
 
   EXPRO_dlnnidr = 0.0
   EXPRO_dlntidr = 0.0
+  EXPRO_sdlnnidr = 0.0
+  EXPRO_sdlntidr = 0.0
 
+  print *,'HERE'
   do is=1,EXPRO_n_ion
      if (minval(EXPRO_ni(is,:)) > 0.0) then
         ! 1/L_ni = -dln(ni)/dr (1/m)
