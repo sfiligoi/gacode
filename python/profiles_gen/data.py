@@ -17,13 +17,19 @@ vars_input_profiles = [
 ]
 
 vars_input_profiles_extra = [
-    'bunit', 's', 'drmaj', 'dzmag', 'sdelta', 'skappa', 'szeta', 'dlnnedr', 'dlntedr',
+    'bunit', 's', 'drmaj', 'dzmag', 'sdelta', 'skappa', 'szeta', 
+    'dlnnedr', 'dlntedr',
     'dlnnidr_1', 'dlnnidr_2', 'dlnnidr_3', 'dlnnidr_4', 'dlnnidr_5',
     'dlnnidr_6', 'dlnnidr_7', 'dlnnidr_8', 'dlnnidr_9', 'dlnnidr_10',
     'dlntidr_1', 'dlntidr_2', 'dlntidr_3', 'dlntidr_4', 'dlntidr_5',
     'dlntidr_6', 'dlntidr_7', 'dlntidr_8', 'dlntidr_9', 'dlntidr_10',
     'dlnptotdr', 'drdrho', 'w0p', 'vol', 'volp', 'cs', 'rhos', 'ni_new', 'dlnnidr_new',
-    'grad_r0', 'ave_grad_r', 'bp0', 'bt0', 'gamma_e', 'gamma_p', 'mach', 'ip'
+    'grad_r0', 'ave_grad_r', 'bp0', 'bt0', 'gamma_e', 'gamma_p', 'mach', 'ip',
+    'sdlnnedr', 'sdlntedr',
+    'sdlnnidr_1', 'sdlnnidr_2', 'sdlnnidr_3', 'sdlnnidr_4', 'sdlnnidr_5',
+    'sdlnnidr_6', 'sdlnnidr_7', 'sdlnnidr_8', 'sdlnnidr_9', 'sdlnnidr_10',
+    'sdlntidr_1', 'sdlntidr_2', 'sdlntidr_3', 'sdlntidr_4', 'sdlntidr_5',
+    'sdlntidr_6', 'sdlntidr_7', 'sdlntidr_8', 'sdlntidr_9', 'sdlntidr_10',
 ]
 
 vars_input_profiles_jbs = ['expro_rho', 'jbs_err', 'jbs_neo', 'jbs_sauter', 'jbs_nclass', 'jbs_koh']
@@ -88,6 +94,8 @@ fancyNames = \
               'gamma_p'    : ('R_0 d(\\omega_0)/dr'       ,'1/s'          ,''),
               'mach'       : ('R_0 \\omega_0/c_s'         ,''             ,''),
               'ip'         : ('I_p'                       ,'A'            ,''),
+              'sdlnnedr'   : ("-n_e''/n_e"                ,'1/m^2'        ,''),
+              'sdlntedr'   : ("-T_e''/T_e"                ,'1/m^2'        ,''),
               #jbs
               'expro_rho'  : ('\\rho'                     ,''             ,''),
               'jbs_err'    : ('j_\mathrm{bs,err}'         ,'MA/m^2'       ,''),
@@ -98,12 +106,14 @@ fancyNames = \
               }
 
 for _k in range(1, 11):
-    fancyNames['ni_%d'%_k]     =('n_{i,%d}'%_k          ,'10^{19}/m^3'  ,'ni_%d(10^19/m^3)'%_k)
-    fancyNames['Ti_%d'%_k]     =('T_{i,%d}'%_k          ,'keV'          ,'Ti_%d(keV)'%_k)
-    fancyNames['vtor_%d'%_k]   =('v_{\\varphi,%d}'%_k   ,'m/s'          ,'vtor_%d(m/s)'%_k)
-    fancyNames['vpol_%d'%_k]   =('v_{\\theta,%d}'%_k    ,'m/s'          ,'vpol_%d(m/s)'%_k)
-    fancyNames['dlntidr_%d'%_k]=('-dln(T_{i,%d})/dr'%_k ,'1/m'          ,'')
-    fancyNames['dlnnidr_%d'%_k]=('-dln(n_{i,%d})/dr'%_k ,'1/m'          ,'')
+    fancyNames['ni_%d'%_k]      =('n_{i,%d}'%_k            ,'10^{19}/m^3'  ,'ni_%d(10^19/m^3)'%_k)
+    fancyNames['Ti_%d'%_k]      =('T_{i,%d}'%_k            ,'keV'          ,'Ti_%d(keV)'%_k)
+    fancyNames['vtor_%d'%_k]    =('v_{\\varphi,%d}'%_k     ,'m/s'          ,'vtor_%d(m/s)'%_k)
+    fancyNames['vpol_%d'%_k]    =('v_{\\theta,%d}'%_k      ,'m/s'          ,'vpol_%d(m/s)'%_k)
+    fancyNames['dlntidr_%d'%_k] =('-dln(T_{i,%d})/dr'%_k   ,'1/m'          ,'')
+    fancyNames['dlnnidr_%d'%_k] =('-dln(n_{i,%d})/dr'%_k   ,'1/m'          ,'')
+    fancyNames['sdlntidr_%d'%_k]=("-T_{i,%d}''/T_{i,%d}"%(_k,_k)  ,'1/m^2'        ,'')
+    fancyNames['sdlnnidr_%d'%_k]=("-n_{i,%d}''/n_{i,%d}"%(_k,_k)  ,'1/m^2'        ,'')
 
 definition = \
              {'NULL' : 'Empty Column',
@@ -145,7 +155,6 @@ for _k in range(1, 11):
     definition['Ti_%d'%_k] = 'Ion %d temperature in keV'%_k
     definition['vtor_%d'%_k] = 'Ion %d toroidal velocity (m/s)'%_k
     definition['vpol_%d'%_k] = 'Ion %d poloidal velocity (m/s)'%_k
-
 
 
 
