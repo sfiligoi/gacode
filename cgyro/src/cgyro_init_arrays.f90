@@ -9,6 +9,7 @@ subroutine cgyro_init_arrays
   real :: arg
   real :: efac
   real :: u
+  real :: fac
   integer :: ir,it,is,ie,ix
   integer :: jr,jt,id,ccw_fac
   integer :: i_field
@@ -34,6 +35,7 @@ subroutine cgyro_init_arrays
      do ic=1,nc
 
         it = it_c(ic)
+        ir = ir_c(ic)
 
         arg = k_perp(ic)*rho*vth(is)*mass(is)/(z(is)*bmag(it)) &
              *sqrt(2.0*energy(ie))*sqrt(1.0-xi(ix)**2)
@@ -48,18 +50,58 @@ subroutine cgyro_init_arrays
 
      enddo
 
+     ! psi factors
      efac = 1.0
      jvec_c(1,:,iv_loc) = efac*jloc_c(1,:)
+     
      if (n_field > 1) then
         efac = -xi(ix)*sqrt(2.0*energy(ie))*vth(is)
         jvec_c(2,:,iv_loc) = efac*jloc_c(1,:)
+        
         if (n_field > 2) then
            efac = 2.0*energy(ie)*(1-xi(ix)**2)*temp(is)/z(is)
            jvec_c(3,:,iv_loc) = efac*jloc_c(2,:)
         endif
+
+        ! Add rotation correction to Apar (Bpar not yet implemented)
+        if(cf_em_flag == 1) then
+           do ic=1,nc
+              it = it_c(ic)
+              jvec_c(2,ic,iv_loc) = jvec_c(2,ic,iv_loc) &
+                   - mach*bigR(it)/rmaj*btor(it)/bmag(it) * jloc_c(1,ic)
+           enddo
+        endif
+
      endif
 
+     ! chi factors: -chi (kx/kperp^2)/rho
+     do ic=1,nc
+        it = it_c(ic)
+        fac = rho * temp(is)*mass(is)/(z(is) * bmag(it))**2 &
+             * 2.0 * energy(ie)*(1-xi(ix)**2) * k_x(ic)
+        
+        jxvec_c(1,:,iv_loc) =  fac * (bmag(it) * jloc_c(2,:))
+        
+        if(n_field > 1) then
+           efac = -xi(ix)*sqrt(2.0*energy(ie))*vth(is)
+           jxvec_c(2,:,iv_loc) = efac * fac * (bmag(it) * jloc_c(2,:))
+           
+           if(n_field > 2) then
+              jxvec_c(3,:,iv_loc) = fac * z(is)*bmag(it)/mass(is) &
+                   / (k_perp(ic) * rho)**2 &
+                   * (bmag(it) * jloc_c(2,:) - jloc_c(1,:))
+           endif
+           
+           ! Add rotation correction to Apar (Bpar not yet implemented)
+           if(cf_em_flag == 1) then
+              jxvec_c(2,:,iv_loc) = jxvec_c(2,:,iv_loc) &
+                   - mach*bigR(it)/rmaj*btor(it)/bmag(it) &
+                   * fac * (bmag(it) * jloc_c(2,:))
+           endif
+        endif
+     enddo
   enddo
+  
   deallocate(jloc_c)
   do i_field=1,n_field
      call parallel_lib_rtrans_real(jvec_c(i_field,:,:),jvec_v(i_field,:,:))

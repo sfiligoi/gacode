@@ -71,6 +71,7 @@ module cgyro_globals
   real :: gamma_p
   real :: mach
   integer :: cf_model
+  integer :: cf_em_flag
   real :: error_tol
   integer :: mpi_rank_order
   integer :: hiprec_flag
@@ -204,10 +205,10 @@ module cgyro_globals
   character(len=18) :: runfile_kxky_e   = 'out.cgyro.kxky_e'
   character(len=15), dimension(3)  :: runfile_fieldb = &
        (/'out.cgyro.phib ','out.cgyro.aparb','out.cgyro.bparb'/)
-  character(len=21), dimension(2)  :: runfile_kxky_flux = &
-       (/'out.cgyro.kxky_flux_n','out.cgyro.kxky_flux_e'/)
-  character(len=20), dimension(2)  :: runfile_lky_flux = &
-       (/'out.cgyro.lky_flux_n','out.cgyro.lky_flux_e'/)
+  character(len=21), dimension(3)  :: runfile_kxky_flux = &
+       (/'out.cgyro.kxky_flux_n','out.cgyro.kxky_flux_e','out.cgyro.kxky_flux_v'/)
+  character(len=20), dimension(3)  :: runfile_lky_flux = &
+       (/'out.cgyro.lky_flux_n','out.cgyro.lky_flux_e','out.cgyro.lky_flux_v'/)
   integer, parameter :: io=1
   !
   ! error checking
@@ -281,6 +282,7 @@ module cgyro_globals
   complex, dimension(:,:), allocatable :: g_x
   complex, dimension(:,:), allocatable :: h0_x
   complex, dimension(:,:), allocatable :: psi
+  complex, dimension(:,:), allocatable :: chi
   complex, dimension(:,:,:), allocatable :: f_nl
   complex, dimension(:,:,:), allocatable :: g_nl
   complex, dimension(:,:), allocatable :: omega_cap_h
@@ -292,6 +294,7 @@ module cgyro_globals
   complex, dimension(:,:), allocatable :: cap_h_v_prime
   real, dimension(:,:,:), allocatable :: jvec_c
   real, dimension(:,:,:), allocatable :: jvec_v
+  real, dimension(:,:,:), allocatable :: jxvec_c
   real, dimension(:,:), allocatable :: upfac1,upfac2
   !
   ! Fields
@@ -387,8 +390,11 @@ module cgyro_globals
   real, dimension(:,:), allocatable :: thetab
   real, dimension(:), allocatable   :: w_theta
   real, dimension(:), allocatable   :: g_theta
-  real, dimension(:), allocatable   :: k_perp    
+  real, dimension(:), allocatable   :: k_perp
+  real, dimension(:), allocatable   :: k_x
   real, dimension(:), allocatable   :: bmag
+  real, dimension(:), allocatable   :: btor
+  real, dimension(:), allocatable   :: bpol
   real, dimension(:), allocatable   :: bigR
   real, dimension(:,:), allocatable :: omega_stream
   real, dimension(:,:), allocatable :: omega_trap

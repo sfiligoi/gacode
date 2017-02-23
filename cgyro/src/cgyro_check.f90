@@ -224,20 +224,6 @@ subroutine cgyro_check
   !------------------------------------------------------------------------
   ! Rotation model
   !
-  if(cf_model > 0) then
-     if(n_field > 1) then
-        call cgyro_error('Electromagentic effects not available with cf_flag > 0')
-        return
-     endif
-     if(implicit_flag == 1) then
-        call cgyro_error('Implicit method not available with cf_flag > 0')
-        return
-     endif
-     if(collision_model == 5) then
-        call cgyro_error('Simple collisions not available with cf_flag > 0')
-        return
-     endif
-  endif
   
   select case (cf_model)
 
@@ -258,7 +244,28 @@ subroutine cgyro_check
      return
 
   end select
-     
+
+  if(cf_model > 0) then
+     if(implicit_flag == 1) then
+        call cgyro_error('Implicit method not available with cf_flag > 0')
+        return
+     endif
+     if(collision_model == 5) then
+        call cgyro_error('Simple collisions not available with cf_flag > 0')
+        return
+     endif
+  endif
+
+  select case (cf_em_flag)
+  case(0)
+     call cgyro_info('Rotation EM model: no rot effects in EM fields')
+  case(1)
+     call cgyro_info('Rotation EM model: rot effects included for Apar')
+  case default
+     call cgyro_error('Invalid value for cf_em_flag')
+     return
+  end select
+  
   !------------------------------------------------------------------------
   ! Check profile parameters
   !

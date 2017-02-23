@@ -134,7 +134,10 @@ subroutine cgyro_kernel
   if(allocated(w_theta))        deallocate(w_theta)
   if(allocated(g_theta))        deallocate(g_theta)
   if(allocated(bmag))           deallocate(bmag)
+  if(allocated(btor))           deallocate(btor)
+  if(allocated(bpol))           deallocate(bpol)
   if(allocated(k_perp))         deallocate(k_perp)
+  if(allocated(k_x))            deallocate(k_x)
   if(allocated(bigR))           deallocate(bigR)
   if(allocated(omega_stream))   then
      !$acc exit data delete(omega_stream)

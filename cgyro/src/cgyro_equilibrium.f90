@@ -90,6 +90,9 @@ subroutine cgyro_equilibrium
      call GEO_interp(theta(it))     
 
      bigR(it)   = GEO_bigr
+     bmag(it)   = GEO_b
+     btor(it)   = GEO_bt
+     bpol(it)   = GEO_bp
      
      do is=1,n_species
 
@@ -168,15 +171,15 @@ subroutine cgyro_equilibrium
      ! Rotation shear (GAMMA_P)
      omega_gammap(it) = GEO_bt/GEO_b*GEO_bigr/rmaj*gamma_p
 
-     bmag(it) = GEO_b
-
      ! flux-surface average weights
      w_theta(it) = g_theta(it)/GEO_b
 
      do ir=1,n_radial
         k_perp(ic_c(ir,it)) = sqrt((2.0*pi*px(ir)*GEO_grad_r/length &
              + k_theta*GEO_gq*GEO_captheta)**2 &
-             + (k_theta*GEO_gq)**2) 
+             + (k_theta*GEO_gq)**2)
+        k_x(ic_c(ir,it)) = 2.0*pi*px(ir)*GEO_grad_r/length &
+             + k_theta*GEO_gq*GEO_captheta
      enddo
 
   enddo

@@ -101,6 +101,7 @@ subroutine cgyro_check_memory(datafile)
      call cgyro_alloc_add(io,nc*nv_loc*16.0,'cap_h_ct')
      call cgyro_alloc_add(io,n_field*nc*nv_loc*8.0,'jvec_c')
      call cgyro_alloc_add(io,n_field*nc_loc*nv*8.0,'jvec_v')
+     call cgyro_alloc_add(io,n_field*nc*nv_loc*8.0,'jxvec_c')
      call cgyro_alloc_add(io,nc_loc*nv*16.0,'cap_h_v')
      call cgyro_alloc_add(io,nc_loc*nv*16.0,'cap_h_v_prime')
 

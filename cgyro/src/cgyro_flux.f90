@@ -22,7 +22,7 @@ subroutine cgyro_flux
   flux_loc(:,:,:) = 0.0
   moment_loc(:,:,:) = 0.0
   gflux_loc(:,:,:) = 0.0
-
+  
   iv_loc = 0
   do iv=nv1,nv2
 
@@ -63,6 +63,14 @@ subroutine cgyro_flux
              -aimag(cap_h_c(ic,iv_loc)*conjg(psi(ic,iv_loc)))*w_theta(it) &
              * dens_rot(it,is) * (c_t + c_tr * lambda_rot(it,is))
 
+        ! Momentum flux: Pi_a
+        flux_loc(ir,is,3) = flux_loc(ir,is,3) &
+             -aimag(cap_h_c(ic,iv_loc)*conjg(psi(ic,iv_loc)))*w_theta(it) &
+             * (mach*bigR(it)/rmaj + btor(it)/bmag(it)*vth(is) &
+             * sqrt(2.0)*vel(ie)*xi(ix)) * mass(is) * bigR(it) &
+             -aimag(cap_h_c(ic,iv_loc)*conjg(i_c*chi(ic,iv_loc)))*w_theta(it) &
+             * z(is) * bigR(it) * bpol(it)
+        
         if (it == it0) then
            ! Density moment: (delta n_a)/(n_norm rho_norm)
            moment_loc(ir,is,1) = moment_loc(ir,is,1) &
@@ -85,6 +93,7 @@ subroutine cgyro_flux
                    +i_c*cap_h_c(ic,iv_loc)*conjg(psi(ic_c(ir-l,it),iv_loc)) &
                    * w_theta(it)* dens_rot(it,is) &
                    * (c_t + c_tr * lambda_rot(it,is))
+              ! Global momentum flux not yet implemented
            endif
         enddo
  

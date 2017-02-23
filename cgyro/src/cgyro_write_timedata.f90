@@ -44,6 +44,11 @@ subroutine cgyro_write_timedata
           trim(path)//runfile_kxky_flux(2),&
           size(flux(:,:,2)),&
           flux(:,:,2))
+     ! Momentum flux for all species
+     call cgyro_write_distributed_real(&
+          trim(path)//runfile_kxky_flux(3),&
+          size(flux(:,:,3)),&
+          flux(:,:,3))
      ! Global density flux for all species
      call cgyro_write_distributed_complex(&
           trim(path)//runfile_lky_flux(1),&
@@ -54,7 +59,12 @@ subroutine cgyro_write_timedata
           trim(path)//runfile_lky_flux(2),&
           size(gflux(:,:,2)),&
           gflux(:,:,2))
-
+     ! Global energy flux for all species
+     call cgyro_write_distributed_complex(&
+          trim(path)//runfile_lky_flux(3),&
+          size(gflux(:,:,3)),&
+          gflux(:,:,3))
+     
      if (moment_print_flag == 1) then
         ! Density moment for all species at theta=0
         call cgyro_write_distributed_complex(&
@@ -77,7 +87,7 @@ subroutine cgyro_write_timedata
 
   ! Checksum for regression testing
   ! Note that value is a distributed real scalar
-  call write_precision(trim(path)//runfile_prec,sum(abs(flux))+sum(abs(moment)))
+  call write_precision(trim(path)//runfile_prec,sum(abs(flux(:,:,1:2)))+sum(abs(moment(:,:,1:2))))
 
   !------------------------------------------------------------------
   ! Ballooning mode (or ZF) output for linear runs with a single mode
