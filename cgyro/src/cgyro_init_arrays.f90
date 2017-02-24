@@ -63,15 +63,6 @@ subroutine cgyro_init_arrays
            jvec_c(3,:,iv_loc) = efac*jloc_c(2,:)
         endif
 
-        ! Add rotation correction to Apar (Bpar not yet implemented)
-        if(cf_em_flag == 1) then
-           do ic=1,nc
-              it = it_c(ic)
-              jvec_c(2,ic,iv_loc) = jvec_c(2,ic,iv_loc) &
-                   - mach*bigR(it)/rmaj*btor(it)/bmag(it) * jloc_c(1,ic)
-           enddo
-        endif
-
      endif
 
      ! chi factors
@@ -90,12 +81,6 @@ subroutine cgyro_init_arrays
               jxvec_c(3,ic,iv_loc) = 0.0 ! Bpar not yet implemented
            endif
            
-           ! Add rotation correction to Apar (Bpar not yet implemented)
-           if(cf_em_flag == 1) then
-              jxvec_c(2,ic,iv_loc) = jxvec_c(2,ic,iv_loc) &
-                   - mach*bigR(it)/rmaj*btor(it)/bmag(it) &
-                   * fac * (bmag(it) * jloc_c(2,ic))
-           endif
         endif
      enddo
   enddo

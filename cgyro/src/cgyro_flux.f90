@@ -17,6 +17,7 @@ subroutine cgyro_flux
   real :: dv
   real :: c_n,c_n0
   real :: c_t,c_t0
+  real :: c_v, c_vpar
   real :: c_tr
 
   flux_loc(:,:,:) = 0.0
@@ -44,6 +45,10 @@ subroutine cgyro_flux
      ! Energy moment weight (rotation)
      c_tr = dv*dens(is)*temp(is)
 
+     ! Momentum weights
+     c_v = dv*dens(is)*mass(is)
+     c_vpar = vth(is) * sqrt(2.0)*vel(ie)*xi(ix)
+     
      ! Adiabatic coefficient
      c_n0 = z(is)*dens(is)/temp(is)
      c_t0 = 1.5*temp(is)*c_n0
@@ -66,10 +71,9 @@ subroutine cgyro_flux
         ! Momentum flux: Pi_a
         flux_loc(ir,is,3) = flux_loc(ir,is,3) &
              -(aimag(cap_h_c(ic,iv_loc)*conjg(psi(ic,iv_loc))) &
-             * (mach*bigR(it)/rmaj + btor(it)/bmag(it)*vth(is) &
-             * sqrt(2.0)*vel(ie)*xi(ix))  &
+             * (mach*bigR(it)/rmaj + btor(it)/bmag(it)*c_vpar)  &
              + aimag(cap_h_c(ic,iv_loc)*conjg(i_c*chi(ic,iv_loc)))) &
-             * mass(is) * bigR(it) * dv*dens(is)*dens_rot(it,is)*w_theta(it)
+             * c_v * bigR(it) * dens_rot(it,is)*w_theta(it)
         
         if (it == it0) then
            ! Density moment: (delta n_a)/(n_norm rho_norm)

@@ -255,16 +255,6 @@ subroutine cgyro_check
         return
      endif
   endif
-
-  select case (cf_em_flag)
-  case(0)
-     call cgyro_info('Rotation EM model: no rot effects in EM fields')
-  case(1)
-     call cgyro_info('Rotation EM model: rot effects included for Apar')
-  case default
-     call cgyro_error('Invalid value for cf_em_flag')
-     return
-  end select
   
   !------------------------------------------------------------------------
   ! Check profile parameters
