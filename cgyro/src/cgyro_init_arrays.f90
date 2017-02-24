@@ -80,21 +80,21 @@ subroutine cgyro_init_arrays
         fac = rho * temp(is)/(z(is) * bmag(it)) * bpol(it)/bmag(it) &
              * 2.0 * energy(ie)*(1-xi(ix)**2) * k_x(ic)
         
-        jxvec_c(1,:,iv_loc) =  fac * (bmag(it) * jloc_c(2,:))
+        jxvec_c(1,ic,iv_loc) =  fac * (bmag(it) * jloc_c(2,ic))
         
         if(n_field > 1) then
            efac = -xi(ix)*sqrt(2.0*energy(ie))*vth(is)
-           jxvec_c(2,:,iv_loc) = efac * fac * (bmag(it) * jloc_c(2,:))
+           jxvec_c(2,ic,iv_loc) = efac * fac * (bmag(it) * jloc_c(2,ic))
            
            if(n_field > 2) then
-              jxvec_c(3,:,iv_loc) = 0.0 ! Bpar not yet implemented
+              jxvec_c(3,ic,iv_loc) = 0.0 ! Bpar not yet implemented
            endif
            
            ! Add rotation correction to Apar (Bpar not yet implemented)
            if(cf_em_flag == 1) then
-              jxvec_c(2,:,iv_loc) = jxvec_c(2,:,iv_loc) &
+              jxvec_c(2,ic,iv_loc) = jxvec_c(2,ic,iv_loc) &
                    - mach*bigR(it)/rmaj*btor(it)/bmag(it) &
-                   * fac * (bmag(it) * jloc_c(2,:))
+                   * fac * (bmag(it) * jloc_c(2,ic))
            endif
         endif
      enddo
