@@ -64,7 +64,7 @@ subroutine cgyro_init_arrays
         endif
 
      endif
-
+     
      ! chi factors
      do ic=1,nc
         it = it_c(ic)
@@ -78,7 +78,13 @@ subroutine cgyro_init_arrays
            jxvec_c(2,ic,iv_loc) = efac * fac * (bmag(it) * jloc_c(2,ic))
            
            if(n_field > 2) then
-              jxvec_c(3,ic,iv_loc) = 0.0 ! Bpar not yet implemented
+              if(n==0) then
+                 jxvec_c(3,ic,iv_loc) = 0.0
+              else
+                 jxvec_c(3,ic,iv_loc) = fac * z(is)*bmag(it) &
+                      /(k_perp(ic)*rho)**2 &
+                      * (bmag(it) * jloc_c(2,ic) - jloc_c(1,ic))
+              endif
            endif
            
         endif
