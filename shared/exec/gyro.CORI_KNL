@@ -25,6 +25,6 @@ nidle=${7}
 cd $simdir
 
 export OMP_NUM_THREADS=$nomp
-export OMP_PLACES=cores"($nomp)"
-echo "> srun -- -cpu_bind=cores -n $nmpi -c $nomp $exec"
-srun --cpu_bind=cores -n $nmpi -c $nomp $exec
+export OMP_PLACES=threads
+echo "> srun --cpu_bind=cores -n $nmpi -c $(($CORES_PER_NODE/$mpinode)) $exec"
+srun --cpu_bind=cores -n $nmpi -c $(($CORES_PER_NODE/$mpinode)) $exec

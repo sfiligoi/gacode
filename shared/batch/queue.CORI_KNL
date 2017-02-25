@@ -40,8 +40,6 @@ echo "MPI tasks/node              : $mpinode"
 echo "OpenMP threads/MPI task     : $nomp"
 echo "MPI tasks per numa node     : $mpinuma"
 echo
-echo "[srun --propagate=ALL -n $nmpi -c $nomp]"
-echo
 echo "[0] debug   (10 min)   up to 512 nodes"
 echo "[1] debug   (30 min)   up to 512 nodes"
 echo "[2] regular (1 hours)  up to 6100 nodes" 
