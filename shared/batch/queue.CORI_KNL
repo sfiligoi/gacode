@@ -24,13 +24,14 @@ nidle=${8}
 . $GACODE_ROOT/shared/bin/gacode_mpi_tool
 
 echo "----------------------------------"
-echo " Cray XC40 (Cori) [32 cores/node, 2 hyperthreads/core] "   
+echo " Cray XC40 KNL [64 cores/node or 256 hypercores/node] "   
 echo
 echo " EXAMPLES:"
-echo " Fully packed job with 32 mpi tasks and 2 OMP threads [will use 1 node]"
-echo "  -n 32 -nomp 2 -numa 2"  
-echo " Non-hyperthreaded job with 32 mpi tasks and 2 OMP threads [will use 2 nodes]"
-echo "  -n 32 -nomp 2 -numa 1" 
+echo " 1. Hyperthreaded with 64 mpi tasks and 4 OMP threads [will use 256 logical cores]"
+echo "  -n 64 -nomp 4 -numa 4 -mpinuma 32"
+echo  
+echo " 2. Real cores with 32 mpi tasks and 2 OMP threads [will use 64 real cores, no hyperthreading]"
+echo "  -n 32 -nomp 2 -numa 1 -mpinuma 32" 
 echo "----------------------------------"
 echo
 echo "Cores requested (mppwidth)  : $cores_requested"
