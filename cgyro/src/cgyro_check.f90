@@ -64,6 +64,37 @@ subroutine cgyro_check
   !-----------------------------------------------------------------------
 
   !------------------------------------------------------------------------
+  ! Equilibrium model
+  !
+  select case (equilibrium_model)  
+
+  case (1) 
+     call cgyro_info('Equilibrium: s-alpha')
+     if (profile_model == 2) then
+        call cgyro_error('s-alpha equilibrium model not valid with experimental profiles')
+        return
+     endif
+
+  case (2) 
+     call cgyro_info('Equilibrium: Miller')
+
+  case (3) 
+     call cgyro_info('Equilibrium: General (Fourier)')
+
+     if (geo_ny <= 0) then
+        call cgyro_error('Fourier geometry coefficients missing.')
+        return
+     endif
+
+  case default
+
+     call cgyro_error('Invalid value for equilibrium_model')
+     return
+
+  end select
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
   ! Field consistency checks
   if (n_field > 1) then
      if (abs(betae_unit) < epsilon(0.0)) then
@@ -188,37 +219,6 @@ subroutine cgyro_check
   endif
 
   !
-  !------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  ! Equilibrium model
-  !
-  select case (equilibrium_model)  
-
-  case (1) 
-     call cgyro_info('Equilibrium model 1: s-alpha')
-     if (profile_model == 2) then
-        call cgyro_error('s-alpha equilibrium model not valid with experimental profiles')
-        return
-     endif
-
-  case (2) 
-     call cgyro_info('Equilibrium model 2: Miller')
-
-  case (3) 
-     call cgyro_info('Equilibrium model 3: General (Fourier)')
-
-     if (geo_ny <= 0) then
-        call cgyro_error('Fourier geometry coefficients missing.')
-        return
-     endif
-
-  case default
-
-     call cgyro_error('Invalid value for equilibrium_model')
-     return
-
-  end select
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
