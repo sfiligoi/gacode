@@ -7,6 +7,7 @@ subroutine cgyro_check
 
   integer :: is
   logical :: lfe
+  character(len=1), dimension(7) :: ctag
 
   !-----------------------------------------------------------------------
   ! Grid parameter checks
@@ -125,29 +126,27 @@ subroutine cgyro_check
      call cgyro_error('Invalid value for n_field')
      return
   end select
-
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   ! Collision model and settings
   !
+  ctag(:) = ' '
+  ctag(1) = 'x' 
+
   select case (collision_model)  
 
   case (1) 
      call cgyro_info('Collision model: Lorentz ee+ei')
-
   case (2) 
      call cgyro_info('Collision model: Connor')
-
   case (3) 
      call cgyro_info('Collision model: Reduced Hirshman-Sigmar')
-
   case (4) 
      call cgyro_info('Collision model: Sugama')
-
+     ctag(2) = 'x'
   case(5)
      call cgyro_info('Collision model: Simple Lorentz ee+ei')
-
   case default
      call cgyro_error('Invalid value for collision_model')
      return
@@ -157,9 +156,10 @@ subroutine cgyro_check
   if (collision_model /= 5) then
      select case (collision_mom_restore)
      case(0)
-        call cgyro_info('Collision momentum restoring: off')
+ !       call cgyro_info('Collision momentum restoring: off')       
      case(1)
-        call cgyro_info('Collision momentum restoring: on')
+ !       call cgyro_info('Collision momentum restoring: on')
+        ctag(3)= 'x'
      case default
         call cgyro_error('Invalid value for collision_mom_restore')
         return
@@ -167,9 +167,10 @@ subroutine cgyro_check
 
      select case (collision_field_model)
      case(0)
-        call cgyro_info('Collision field corrections : off')
+ !       call cgyro_info('Collision field corrections : off')
      case (1)
-        call cgyro_info('Collision field corrections : on')
+ !       call cgyro_info('Collision field corrections : on')
+        ctag(7) = 'x'
      case default
         call cgyro_error('Invalid value for collision_field_model')
         return
@@ -177,54 +178,69 @@ subroutine cgyro_check
   endif
 
   if (collision_model == 4) then
+
      select case (collision_ene_diffusion)
      case(0)
-        call cgyro_info('Collision energy diffusion  : off')
+ !       call cgyro_info('Collision energy diffusion  : off')
      case(1)
-        call cgyro_info('Collision energy diffusion  : on')
+ !       call cgyro_info('Collision energy diffusion  : on')
+        ctag(2) = 'x'
      case default
         call cgyro_error('Invalid value for collision_ene_diffusion')
         return
      end select
+
      select case (collision_ene_restore)
      case(0)
-        call cgyro_info('Collision energy restoring  : off')
+ !       call cgyro_info('Collision energy restoring  : off')
      case(1)
-        call cgyro_info('Collision energy restoring  : on')
+ !       call cgyro_info('Collision energy restoring  : on')
+        ctag(4) = 'x'
      case default
         call cgyro_error('Invalid value for collision_ene_restore')
         return
      end select
+
      select case (collision_kperp)
      case(0)
-        call cgyro_info('Collision kperp corrections : off')
+ !       call cgyro_info('Collision kperp corrections : off')
      case(1)
-        call cgyro_info('Collision kperp corrections : on')
+ !       call cgyro_info('Collision kperp corrections : on')
+        ctag(5) = 'x'
      case default
         call cgyro_error('Invalid value for collision_kperp')
         return
      end select
+
   endif
 
   if (collision_model /= 5 .and. collision_model /= 1) then
      select case (collision_ion_model)
      case(0)
-        call cgyro_info('Collisional ions: on')
+ !       call cgyro_info('Collisional ions: on')
+        ctag(6) = 'x'
      case(1)
-        call cgyro_info('Collisional ions: off')
+ !       call cgyro_info('Collisional ions: off')
      case default
         call cgyro_error('Invalid value for collision_ion_model')
         return
      end select
   endif
-
-  !
   !------------------------------------------------------------------------
+
+  call cgyro_info('Collision terms: L D Rm Re kp ions field')
+  call cgyro_info('               '// &
+       '  '//ctag(1)// &
+       ' '//ctag(2)// &
+       ' '//ctag(3)// &
+       '  '//ctag(4)// &
+       '  '//ctag(5)// &
+       '   '//ctag(6)// &
+       '     '//ctag(7))
 
   !------------------------------------------------------------------------
   ! Rotation model
   !
-
   select case (cf_model)
 
   case(0)
