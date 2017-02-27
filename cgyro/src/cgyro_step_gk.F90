@@ -60,7 +60,7 @@ subroutine cgyro_rhs(ij)
 
   integer, intent(in) :: ij
   integer :: is,ir
-  integer :: id,jc,j
+  integer :: id,jc
   real :: rval,rval2
   complex :: rhs_stream
   complex :: rhs_ij(nc,nv_loc)
@@ -152,7 +152,7 @@ subroutine cgyro_rhs(ij)
   rhs(:,:,ij) = rhs_ij(:,:)
 
   ! Wavenumber advection shear terms
-  call cgyro_advect_wavenumber
+  call cgyro_advect_wavenumber(ij)
 
   call timer_lib_out('str')
 

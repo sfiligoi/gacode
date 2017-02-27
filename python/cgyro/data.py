@@ -25,8 +25,9 @@ class cgyrodata:
         # Read time vector.
         #
         data = np.loadtxt(self.dir+'out.cgyro.time')
-        self.t      = data[:,0]
-        self.error  = data[:,1]
+        self.t    = data[:,0]
+        self.err1 = data[:,1]
+        self.err2 = data[:,2]
         self.n_time = len(self.t)   
         print "INFO: (data.py) Read time vector in out.cgyro.time."
         #-----------------------------------------------------------------
