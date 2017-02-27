@@ -32,8 +32,8 @@ subroutine cgyro_check
   if (n_species > 6) then
      call cgyro_error('n_species <= 6.')
      return
-  endif 
- !------------------------------------------------------------------------
+  endif
+  !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   ! Time integration
@@ -51,10 +51,10 @@ subroutine cgyro_check
   select case(profile_model)
 
   case (1)
-     call cgyro_info('Profile model 1: local input (input.cgyro)')
+     call cgyro_info('Profile model: local input (input.cgyro)')
 
   case (2)
-     call cgyro_info('Profile model 2: experimental (input.profiles)')
+     call cgyro_info('Profile model: experimental (input.profiles)')
 
   case default
      call cgyro_error('Invalid value for profile_model')
@@ -91,7 +91,7 @@ subroutine cgyro_check
      call cgyro_info('Transverse and compressional EM fluctuations (Phi,A_par,B_par)')
 
   case default
-     call cgyro_error('Invalid value for n_field.')
+     call cgyro_error('Invalid value for n_field')
      return
   end select
 
@@ -103,19 +103,19 @@ subroutine cgyro_check
   select case (collision_model)  
 
   case (1) 
-     call cgyro_info('Collision model 1: Lorentz ee+ei')
+     call cgyro_info('Collision model: Lorentz ee+ei')
 
   case (2) 
-     call cgyro_info('Collision model 2: Connor')
+     call cgyro_info('Collision model: Connor')
 
   case (3) 
-     call cgyro_info('Collision model 3: Reduced Hirshman-Sigmar')
+     call cgyro_info('Collision model: Reduced Hirshman-Sigmar')
 
   case (4) 
-     call cgyro_info('Collision model 4: Sugama')
+     call cgyro_info('Collision model: Sugama')
 
   case(5)
-     call cgyro_info('Collision model 5: Simple Lorentz ee+ei')
+     call cgyro_info('Collision model: Simple Lorentz ee+ei')
 
   case default
      call cgyro_error('Invalid value for collision_model')
@@ -175,7 +175,7 @@ subroutine cgyro_check
      end select
   endif
 
-  if (collision_model /= 5 .or. collision_model /= 1) then
+  if (collision_model /= 5 .and. collision_model /= 1) then
      select case (collision_ion_model)
      case(0)
         call cgyro_info('Collisional ions: on')
@@ -186,7 +186,7 @@ subroutine cgyro_check
         return
      end select
   endif
-  
+
   !
   !------------------------------------------------------------------------
 
@@ -224,20 +224,19 @@ subroutine cgyro_check
   !------------------------------------------------------------------------
   ! Rotation model
   !
-  
+
   select case (cf_model)
 
   case(0)
-     call cgyro_info('Centrifugal model: none')
-     
+     call cgyro_info('Centrifugal terms: none')
   case(1)
-     call cgyro_info('Centrifugal model: included (all)')
+     call cgyro_info('Centrifugal terms: all (trapping, Coriolis, drift)')
   case(2)
-     call cgyro_info('Centrifugal model: only cf trap (no coriolis or cf drift)')
+     call cgyro_info('Centrifugal terms: trapping')
   case(3)
-     call cgyro_info('Centrifugal model: only cf drift (no coriolis or cf trap)') 
+     call cgyro_info('Centrifugal terms: drift') 
   case(4)
-      call cgyro_info('Centrifugal model: only cf trap+drift (no coriolis or gammap)')   
+     call cgyro_info('Centrifugal terms: trapping, drift')   
 
   case default
      call cgyro_error('Invalid value for cf_model')
@@ -255,7 +254,7 @@ subroutine cgyro_check
         return
      endif
   endif
-  
+
   !------------------------------------------------------------------------
   ! Check profile parameters
   !
@@ -318,6 +317,30 @@ subroutine cgyro_check
 
   case default
      call cgyro_error('Invalid value for nup_radial')
+     return
+
+  end select
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  ! Alpha/toroidal dissipation
+  !
+  select case (nup_alpha)  
+
+  case (1) 
+     call cgyro_info('Toroidal dissipation: 2nd order')
+
+  case (2) 
+     call cgyro_info('Toroidal dissipation: 4th order')
+
+  case (3) 
+     call cgyro_info('Toroidal dissipation: 6th order')
+
+  case (4) 
+     call cgyro_info('Toroidal dissipation: 8th order')
+
+  case default
+     call cgyro_error('Invalid value for nup_alpha')
      return
 
   end select

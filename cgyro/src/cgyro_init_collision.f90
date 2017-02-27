@@ -123,7 +123,7 @@ subroutine cgyro_init_collision
      enddo
   enddo
 
-  if(collision_ion_model == 1) then
+  if (collision_ion_model == 1) then
      do is=1,n_species
         if(is /= is_ele) then
            do js=1,n_species

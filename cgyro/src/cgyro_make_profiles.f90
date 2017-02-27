@@ -26,13 +26,13 @@ subroutine cgyro_make_profiles
   if (num_ele == 0) then
      ! Adiabatic electrons
      ae_flag = 1
-     call cgyro_info('Using adiabatic electron model.')
+     call cgyro_info('Using adiabatic electrons')
   else if (num_ele == 1) then
      ! GK electrons
      ae_flag = 0
-     call cgyro_info('Using gyrokinetic electrons.')
+     call cgyro_info('Using gyrokinetic electrons')
   else
-     call cgyro_error('Only one electron species allowed.')
+     call cgyro_error('Only one electron species allowed')
      return
   endif
 
@@ -234,7 +234,7 @@ subroutine cgyro_make_profiles
 
      k_theta = 0
 
-     call cgyro_info('Triggered zonal flow test.')
+     call cgyro_info('Triggered zonal flow test')
 
      if (n_radial /= 1) then
         call cgyro_error('ERROR: (CGYRO) For zonal flow test, set n_radial=1.')
@@ -253,7 +253,7 @@ subroutine cgyro_make_profiles
 
      n = 1
 
-     call cgyro_info('Single-mode linear analysis.')
+     call cgyro_info('Single-mode linear analysis')
 
   else
 
@@ -269,7 +269,7 @@ subroutine cgyro_make_profiles
 
      k_theta = n*k_theta
 
-     call cgyro_info('Multiple toroidal harmonics.')
+     call cgyro_info('Multiple toroidal harmonics')
 
   endif
   !-------------------------------------------------------------
@@ -281,16 +281,16 @@ subroutine cgyro_make_profiles
      omega_eb = k_theta*length*gamma_e/(2*pi)
      select case (shear_method)
      case (1)
-        call cgyro_info('Hammett discrete-shift ExB shear.') 
+        call cgyro_info('Hammett discrete-shift ExB shear') 
      case (2)
-        call cgyro_info('Wavenumber advection ExB shear.') 
+        call cgyro_info('Wavenumber advection ExB shear') 
      case (3)
-        call cgyro_info('Linear-time ExB shear.') 
+        call cgyro_info('Linear-time ExB shear') 
      end select
   else
      omega_eb = 0.0
      shear_method = 0
-     call cgyro_info('No ExB shear.') 
+     call cgyro_info('No ExB shear') 
   endif
   !------------------------------------------------------------------------
 
