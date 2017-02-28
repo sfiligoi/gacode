@@ -80,10 +80,6 @@ subroutine cgyro_kernel
         call cgyro_step_gk
      endif
 
-     ! Collisionless implicit streaming term step
-     ! : returns new h_x, cap_h_x, fields 
-     call cgyro_step_implicit_gk
-
      ! Collision step: returns new h_x, cap_h_x, fields
      if (collision_model == 5) then
         call cgyro_step_collision_simple
@@ -200,8 +196,6 @@ subroutine cgyro_kernel
   endif
 
   call GEO_alloc(0)
-
-  call cgyro_clean_implicit_gk
 
 end subroutine cgyro_kernel
 

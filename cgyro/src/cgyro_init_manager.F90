@@ -214,7 +214,6 @@ subroutine cgyro_init_manager
   if (test_flag == 0) then
 
      call cgyro_init_arrays
-     call cgyro_init_implicit_gk
      call timer_lib_out('str_init')
 
      call timer_lib_in('coll_init')

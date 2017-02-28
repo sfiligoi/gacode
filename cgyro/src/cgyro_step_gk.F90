@@ -86,24 +86,7 @@ subroutine cgyro_rhs(ij)
 
   call timer_lib_in('str')
 
-  if (implicit_flag == 1) then
-
-     ! IMPLICIT advance 
-
-!$omp parallel do private(ic)
-     do iv_loc=1,nv2-nv1+1
-        do ic=1,nc
-           ! Diagonal terms
-           rhs_ij(ic,iv_loc) = &
-                omega_cap_h(ic,iv_loc)*cap_h_c(ic,iv_loc)+&
-                omega_h(ic,iv_loc)*h_x(ic,iv_loc)+&
-                sum(omega_s(:,ic,iv_loc)*field(:,ic))
-        enddo
-     enddo
-
-  else
-
-     ! EXPLICIT advance 
+  ! EXPLICIT advance 
 
 !$acc data  &
 !$acc& pcopyout(rhs_ij) &
@@ -146,8 +129,7 @@ subroutine cgyro_rhs(ij)
 
         enddo
      enddo
-!$acc end data
-  endif
+!$acc end data	  
 
   rhs(:,:,ij) = rhs_ij(:,:)
 

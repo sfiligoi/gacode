@@ -36,16 +36,6 @@ subroutine cgyro_check
   endif
   !------------------------------------------------------------------------
 
-  !------------------------------------------------------------------------
-  ! Time integration
-  !
-  if (implicit_flag == 0) then
-     call cgyro_info('Integration: RK4 + Implicit C')
-  else
-     call cgyro_info('Integration: Implicit streaming + RK4 + Implicit C')
-  endif
-  !------------------------------------------------------------------------
-
   !-----------------------------------------------------------------------
   ! Profile checks
   !
@@ -261,15 +251,9 @@ subroutine cgyro_check
 
   end select
 
-  if(rotation_model > 1) then
-     if(implicit_flag == 1) then
-        call cgyro_error('Implicit method not available with rotation_model > 1')
-        return
-     endif
-     if(collision_model == 5) then
-        call cgyro_error('Simple collisions not available with rotation_model > 1')
-        return
-     endif
+  if(rotation_model > 1 .and. collision_model == 5) then
+     call cgyro_error('Simple collisions not available with rotation_model > 1')
+     return
   endif
 
   !------------------------------------------------------------------------
