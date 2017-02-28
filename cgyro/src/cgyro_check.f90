@@ -242,32 +242,32 @@ subroutine cgyro_check
   !------------------------------------------------------------------------
   ! Rotation model
   !
-  select case (cf_model)
+  select case (rotation_model)
 
-  case(0)
-     call cgyro_info('Centrifugal terms: none')
   case(1)
-     call cgyro_info('Centrifugal terms: all (trapping, Coriolis, drift)')
+     call cgyro_info('Rotation model: O(mach) only (traditional GYRO)')
   case(2)
-     call cgyro_info('Centrifugal terms: trapping')
+     call cgyro_info('Rotation model: O(mach + mach^2) (full Sugama rotation)')
   case(3)
-     call cgyro_info('Centrifugal terms: drift') 
+     call cgyro_info('Rotation model: O(mach^2) only (isolated centrifugal for testing)')
   case(4)
-     call cgyro_info('Centrifugal terms: trapping, drift')   
+     call cgyro_info('Rotation model: O(mach^2) GKW CF TRAP term only (for testing)') 
+  case(5)
+     call cgyro_info('Rotation model: O(mach^2) GKW CF DRIFT term only (for testing)')   
 
   case default
-     call cgyro_error('Invalid value for cf_model')
+     call cgyro_error('Invalid value for rotation_model')
      return
 
   end select
 
-  if(cf_model > 0) then
+  if(rotation_model > 1) then
      if(implicit_flag == 1) then
-        call cgyro_error('Implicit method not available with cf_flag > 0')
+        call cgyro_error('Implicit method not available with rotation_model > 1')
         return
      endif
      if(collision_model == 5) then
-        call cgyro_error('Simple collisions not available with cf_flag > 0')
+        call cgyro_error('Simple collisions not available with rotation_model > 1')
         return
      endif
   endif

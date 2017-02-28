@@ -124,7 +124,7 @@ subroutine cgyro_equilibrium
              * mass(is)/(Z(is)*GEO_b)*GEO_grad_r/rmaj*GEO_usin*mach
 
         ! Partial Finite-Mach centrifugal terms
-        ! These are re-set to 0 in cgyro_init_rot if cf_model=0
+        ! These are re-set to 0 in cgyro_init_rot if rotation_model=1
 
         ! bhat dot grad lambda
         ! Add phi_rot term in cgyro_init_rotation

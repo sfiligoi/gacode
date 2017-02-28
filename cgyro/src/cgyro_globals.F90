@@ -70,7 +70,7 @@ module cgyro_globals
   real :: gamma_e
   real :: gamma_p
   real :: mach
-  integer :: cf_model
+  integer :: rotation_model
   real :: error_tol
   integer :: mpi_rank_order
   integer :: hiprec_flag

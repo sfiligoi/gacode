@@ -15,7 +15,8 @@ subroutine cgyro_init_rotation
   integer :: is, it, j, id, jt
   integer, parameter :: jmax = 200
 
-  if(cf_model == 0) then
+  ! O(mach) terms only
+  if(rotation_model == 1) then
      dens_rot(:,:) = 1.0
      dens_ele_rot(:) = 1.0
      lambda_rot(:,:) = 0.0
@@ -181,6 +182,9 @@ subroutine cgyro_init_rotation
              * sum_pressure_t(it)
      enddo
   enddo
+  ! EAB: beta_prime cf correction not yet implemented
+  omega_rot_prdrift(:,:)    = 0.0
+   omega_rot_prdrift_r(:,:) = 0.0
 
   ! Solve d/dr of QN to get d phi_rot / dr
 
@@ -229,23 +233,35 @@ subroutine cgyro_init_rotation
      close(io)
   endif
 
-  ! just cf trapping (no coriolis and no cf drift)
-  if(cf_model == 2) then
+  ! O(mach^2) terms only 
+  ! no O(mach) terms
+  if(rotation_model == 3) then
+     omega_cdrift(:,:)   = 0.0
+     omega_cdrift_r(:,:) = 0.0  
+     omega_gammap(:)     = 0.0
+  endif
 
-     omega_cdrift(:,:) = 0.0
+  ! O(mach^2) terms from "GKW CF TRAP" only
+  ! no O(mach) terms and no "GKW CF DRIFT" term
+  if(rotation_model == 4) then
+
+     omega_cdrift(:,:)   = 0.0
      omega_cdrift_r(:,:) = 0.0
+     omega_gammap(:)     = 0.0
      
      omega_rot_drift(:,:) = 0.0
      omega_rot_drift_r(:,:) = 0.0
 
   endif
 
-  ! just cf drift (no coriolis and no cf trap)
-  if(cf_model == 3) then
+  ! O(mach^2) terms from "GKW CF DRIFT" only
+  ! no O(mach) terms and no "GKW CF TRAP" term
+  if(rotation_model == 5) then
 
-     omega_cdrift(:,:) = 0.0
+     omega_cdrift(:,:)   = 0.0
      omega_cdrift_r(:,:) = 0.0
-     
+     omega_gammap(:)     = 0.0
+
      dens_rot(:,:) = 1.0
      dens_ele_rot(:) = 1.0
      phi_rot(:)  = 0.0
@@ -262,16 +278,6 @@ subroutine cgyro_init_rotation
      omega_rot_edrift_r(:,:) = 0.0
      omega_rot_edrift_0(:) = 0.0
      
-  endif
-
-  ! just cf mach^2 terms (no coriolis and no parallel velocity shear)
-  if(cf_model == 4) then
-
-     omega_cdrift(:,:) = 0.0
-     omega_cdrift_r(:,:) = 0.0
-     
-     omega_gammap(:) = 0.0
-
   endif
   
   deallocate(phi_rot)
