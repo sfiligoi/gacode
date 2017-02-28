@@ -6,7 +6,7 @@ subroutine cgyro_init_collision
 
   implicit none
 
-  real, dimension(:,:,:), allocatable :: nu_d, nu_s, nu_par, nu_par_deriv
+  real, dimension(:,:,:), allocatable :: nu_d, nu_par, nu_par_deriv
   real, dimension(:,:), allocatable :: rs
   real, dimension(:,:,:,:), allocatable :: rsvec, rsvect 
 
@@ -25,11 +25,9 @@ subroutine cgyro_init_collision
   endif
 
   allocate(nu_d(n_energy,n_species,n_species))
-  allocate(nu_s(n_energy,n_species,n_species))
   allocate(nu_par(n_energy,n_species,n_species))
   allocate(nu_par_deriv(n_energy,n_species,n_species))
   nu_d(:,:,:) = 0.0
-  nu_s(:,:,:) = 0.0
   nu_par(:,:,:) = 0.0
   nu_par_deriv(:,:,:) = 0.0
 
@@ -75,23 +73,9 @@ subroutine cgyro_init_collision
 
               else
                  ! case 3: ion-ele and imp(heavy)-ion collisions
-
                  nu_d(ie,is,js) = tauinv_ab * 4.0/(3.0*sqrt(pi)) &
                       * sqrt(mass(js)/mass(is)) * (temp(is)/temp(js))**1.5
               endif
-              nu_s(ie,is,js) = nu_d(ie,is,js)
-
-           case (3)
-
-              ! Reduced Hirshman-Sigmar model
-              ! (Fix for underflow)
-              nu_d(ie,is,js) = tauinv_ab * (1.0/xa**3) &
-                   * (exp(-xb*xb)/(xb*sqrt(pi)) &
-                   + (1.0-1.0/(2.0*xb*xb)) * erf(xb))
-              nu_s(ie,is,js) = tauinv_ab * (1.0/xa) &
-                   * (-exp(-xb*xb)/(xb*sqrt(pi)) &
-                   + (1.0/(2.0*xb*xb)) * erf(xb)) &
-                   * (2.0*temp(is)/temp(js))*(1.0+mass(js)/mass(is))
 
            case(4)
 
@@ -128,7 +112,6 @@ subroutine cgyro_init_collision
         if(is /= is_ele) then
            do js=1,n_species
               nu_d(:,is,js) = 0.0
-              nu_s(:,is,js) = 0.0
               nu_par(:,is,js) = 0.0
               nu_par_deriv(:,is,js) = 0.0
            enddo
@@ -198,25 +181,6 @@ subroutine cgyro_init_collision
      enddo
   enddo
 
-  ! U factor for HS0
-  if (collision_model == 3 .and. collision_mom_restore == 1) then
-     do is=1,n_species
-        do ix=1,n_xi
-           do ie=1,n_energy
-              do js=1,n_species
-                 do jx=1,n_xi
-                    je = ie
-                    ctest(is,js,ix,jx,ie,je) &
-                         = ctest(is,js,ix,jx,ie,je) &
-                         + (nu_d(ie,is,js)-nu_s(ie,is,js)) &
-                         * 3.0 * xi(ix) * xi(jx) * w_xi(jx)
-                 enddo
-              enddo
-           enddo
-        enddo
-     enddo
-  endif
-
   ! Diffusion
   if (collision_model == 4 .and. collision_ene_diffusion == 1) then
 !$omp parallel do collapse(5) private(is,ix,ie,js,je,jx)
@@ -257,13 +221,13 @@ subroutine cgyro_init_collision
 
   select case (collision_model)
 
-  case(1,2,3)
+  case(2)
      if (collision_mom_restore == 1) then
         do is=1,n_species
            do js=1,n_species
               rs(is,js) = 0.0
               do ie=1,n_energy
-                 rs(is,js) = rs(is,js) + w_e(ie)*nu_s(ie,is,js)*energy(ie)
+                 rs(is,js) = rs(is,js) + w_e(ie)*nu_d(ie,is,js)*energy(ie)
               enddo
            enddo
         enddo
@@ -288,9 +252,9 @@ subroutine cgyro_init_collision
                          cmat(iv,jv,ic_loc) &
                          + 3.0 * (mass(js)/mass(is)) &
                          * (dens(js)/dens(is)) * dens_rot(it,js) &
-                         * (vth(js)/vth(is)) * nu_s(ie,is,js) &
+                         * (vth(js)/vth(is)) * nu_d(ie,is,js) &
                          * vel(ie) * xi(ix) &
-                         * nu_s(je,js,is) * sqrt(energy(je)) &
+                         * nu_d(je,js,is) * sqrt(energy(je)) &
                          * xi(jx) * w_e(je) * w_xi(jx) / rs(is,js)
                  endif
               enddo
@@ -714,7 +678,6 @@ subroutine cgyro_init_collision
   deallocate(amat)
   deallocate(i_piv)
   deallocate(nu_d)
-  deallocate(nu_s)
   deallocate(nu_par)
   deallocate(nu_par_deriv)
   deallocate(rs)

@@ -140,8 +140,6 @@ subroutine cgyro_check
      call cgyro_info('Collision model: Lorentz ee+ei')
   case (2) 
      call cgyro_info('Collision model: Connor')
-  case (3) 
-     call cgyro_info('Collision model: Reduced Hirshman-Sigmar')
   case (4) 
      call cgyro_info('Collision model: Sugama')
      ctag(2) = 'x'
@@ -154,16 +152,19 @@ subroutine cgyro_check
   end select
 
   if (collision_model /= 5) then
-     select case (collision_mom_restore)
-     case(0)
- !       call cgyro_info('Collision momentum restoring: off')       
-     case(1)
- !       call cgyro_info('Collision momentum restoring: on')
-        ctag(3)= 'x'
-     case default
-        call cgyro_error('Invalid value for collision_mom_restore')
-        return
-     end select
+
+     if(collision_model /= 1) then
+        select case (collision_mom_restore)
+        case(0)
+           !       call cgyro_info('Collision momentum restoring: off')       
+        case(1)
+           !       call cgyro_info('Collision momentum restoring: on')
+           ctag(3)= 'x'
+        case default
+           call cgyro_error('Invalid value for collision_mom_restore')
+           return
+        end select
+     endif
 
      select case (collision_field_model)
      case(0)
