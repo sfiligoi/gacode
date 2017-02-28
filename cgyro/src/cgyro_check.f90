@@ -251,7 +251,7 @@ subroutine cgyro_check
 
   end select
 
-  if(rotation_model > 1 .and. collision_model == 5) then
+  if (rotation_model > 1 .and. collision_model == 5) then
      call cgyro_error('Simple collisions not available with rotation_model > 1')
      return
   endif
@@ -284,14 +284,11 @@ subroutine cgyro_check
   select case (nup_theta)  
 
   case (1) 
-     call cgyro_info('Theta dissipation : 2nd order')
-
+     ctag(1) = '2'
   case (2) 
-     call cgyro_info('Theta dissipation : 4th order')
-
+     ctag(1) = '4'
   case (3) 
-     call cgyro_info('Theta dissipation : 6th order')
-
+     ctag(1) = '6'
   case default
      call cgyro_error('Invalid value for nup_theta')
      return
@@ -305,17 +302,13 @@ subroutine cgyro_check
   select case (nup_radial)  
 
   case (1) 
-     call cgyro_info('Radial dissipation: 2nd order')
-
+     ctag(2) = '2'
   case (2) 
-     call cgyro_info('Radial dissipation: 4th order')
-
+     ctag(2) = '4'
   case (3) 
-     call cgyro_info('Radial dissipation: 6th order')
-
+     ctag(2) = '6'
   case (4) 
-     call cgyro_info('Radial dissipation: 8th order')
-
+     ctag(2) = '8'
   case default
      call cgyro_error('Invalid value for nup_radial')
      return
@@ -329,23 +322,22 @@ subroutine cgyro_check
   select case (nup_alpha)  
 
   case (1) 
-     call cgyro_info('Toroidal dissipation: 2nd order')
-
+     ctag(3) = '2'
   case (2) 
-     call cgyro_info('Toroidal dissipation: 4th order')
-
+     ctag(3) = '4'
   case (3) 
-     call cgyro_info('Toroidal dissipation: 6th order')
-
+     ctag(3) = '6'
   case (4) 
-     call cgyro_info('Toroidal dissipation: 8th order')
-
+     ctag(3) = '8'
   case default
      call cgyro_error('Invalid value for nup_alpha')
      return
 
   end select
   !------------------------------------------------------------------------
+
+  call cgyro_info('Dissipation order: (theta,radial,alpha)=('&
+       //ctag(1)//','//ctag(2)//','//ctag(3)//')')
 
   !------------------------------------------------------------------------
   ! Check for existence of restart file
