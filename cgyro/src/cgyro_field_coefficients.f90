@@ -67,8 +67,11 @@ subroutine cgyro_field_coefficients
 !$omp do reduction(+:sum_loc)
      do iv=nv1,nv2
         iv_loc = iv-nv1+1
+        is = is_v(iv)
         do ic=1,nc
-           sum_loc(ic) = sum_loc(ic)+vfac(iv_loc)*jvec_c(2,ic,iv_loc)**2
+           it = it_c(ic)
+           sum_loc(ic) = sum_loc(ic)+vfac(iv_loc)*dens_rot(it,is) &
+                *jvec_c(2,ic,iv_loc)**2 
         enddo
      enddo
 !$omp end do
@@ -124,7 +127,7 @@ subroutine cgyro_field_coefficients
            it = it_c(ic)
            sum_loc(ic) = sum_loc(ic)-w_xi(ix)*w_e(ie)*dens(is) &
                 *z(is)*jvec_c(1,ic,iv_loc)*jvec_c(3,ic,iv_loc) &
-                *z(is)/temp(is)
+                *z(is)/temp(is)*dens_rot(it,is)
         enddo
      enddo
 
@@ -150,7 +153,7 @@ subroutine cgyro_field_coefficients
            it = it_c(ic)
            sum_loc(ic) = sum_loc(ic)+w_xi(ix)*w_e(ie)*dens(is) &
                 *temp(is)*jvec_c(3,ic,iv_loc)**2 &
-                *(z(is)/temp(is))**2
+                *(z(is)/temp(is))**2 * dens_rot(it,is)
         enddo
      enddo
      call MPI_ALLREDUCE(sum_loc,&
