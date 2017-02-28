@@ -58,6 +58,15 @@ subroutine cgyro_write_initdata
 
      endif
 
+     ! Dissipation information
+     write(io,*)
+     write(io,'(t2,3(a,1x,i2,3x),t48,a)') &
+          ' D-theta:',2*nup_theta, ' D-radial:',2*nup_radial,' D-alpha:',2*nup_alpha,&
+          '[dissipation order]'
+     write(io,'(t2,3(a,1x,f3.1,2x),t48,a)') &
+          'up_theta:',up_theta , 'up_radial:',up_radial ,'up_alpha:',up_alpha,&
+          '[dissipation strength]'
+
      write(io,*) 
      write(io,20) '    r/a:',rmin
      write(io,20) '    R/a:',rmaj, '  shift:',shift,  '  betae:',betae_unit
@@ -65,8 +74,6 @@ subroutine cgyro_write_initdata
      write(io,20) '  kappa:',kappa,'s_kappa:',s_kappa,' lamb_*:',lambda_star
      write(io,20) '  delta:',delta,'s_delta:',s_delta,'gamma_e:',gamma_e
      write(io,20) '   zeta:',zeta, ' s_zeta:',s_zeta, 'gamma_p:',gamma_p
-     write(io,*)
-     write(io,10) 'D-theta:',up_theta, 'D-radial:',up_radial,'D-alpha:',up_alpha
 
      write(io,*)
      write(io,20) '[rho/a]:',rho,'[z_eff]:',z_eff
@@ -195,7 +202,7 @@ subroutine cgyro_write_initdata
   endif
   !----------------------------------------------------------------------------
 
-10 format(t2,4(a,1x,1pe9.3,2x)) 
+10 format(t2,4(a,1x,1pe9.3,2x))  
 20 format(t2,4(a,1x,1pe10.3,2x)) 
 
 end subroutine cgyro_write_initdata

@@ -119,6 +119,29 @@ subroutine cgyro_check
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
+  ! Rotation model
+  !
+  select case (rotation_model)
+
+  case(1)
+     call cgyro_info('Rotation terms: O(mach) only (traditional GYRO)')
+  case(2)
+     call cgyro_info('Rotation terms: O(mach + mach^2) (full Sugama rotation)')
+  case(3)
+     call cgyro_info('Rotation terms: O(mach^2) only (isolated centrifugal for testing)')
+  case(4)
+     call cgyro_info('Rotation terms: O(mach^2) GKW CF TRAP term only (for testing)') 
+  case(5)
+     call cgyro_info('Rotation terms: O(mach^2) GKW CF DRIFT term only (for testing)')   
+
+  case default
+     call cgyro_error('Invalid value for rotation_model')
+     return
+
+  end select
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
   ! Collision model and settings
   !
   ctag(:) = ' '
@@ -217,7 +240,6 @@ subroutine cgyro_check
         return
      end select
   endif
-  !------------------------------------------------------------------------
 
   call cgyro_info('Collision terms: L D Rm Re kp ions field')
   call cgyro_info('               '// &
@@ -228,28 +250,8 @@ subroutine cgyro_check
        '  '//ctag(5)// &
        '   '//ctag(6)// &
        '     '//ctag(7))
-
   !------------------------------------------------------------------------
-  ! Rotation model
-  !
-  select case (rotation_model)
 
-  case(1)
-     call cgyro_info('Rotation model: O(mach) only (traditional GYRO)')
-  case(2)
-     call cgyro_info('Rotation model: O(mach + mach^2) (full Sugama rotation)')
-  case(3)
-     call cgyro_info('Rotation model: O(mach^2) only (isolated centrifugal for testing)')
-  case(4)
-     call cgyro_info('Rotation model: O(mach^2) GKW CF TRAP term only (for testing)') 
-  case(5)
-     call cgyro_info('Rotation model: O(mach^2) GKW CF DRIFT term only (for testing)')   
-
-  case default
-     call cgyro_error('Invalid value for rotation_model')
-     return
-
-  end select
 
   if (rotation_model > 1 .and. collision_model == 5) then
      call cgyro_error('Simple collisions not available with rotation_model > 1')
@@ -279,65 +281,21 @@ subroutine cgyro_check
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
-  ! Theta dissipation
+  ! Dissipation checks
   !
-  select case (nup_theta)  
-
-  case (1) 
-     ctag(1) = '2'
-  case (2) 
-     ctag(1) = '4'
-  case (3) 
-     ctag(1) = '6'
-  case default
+  if (nup_theta < 1 .or. nup_theta > 3) then
      call cgyro_error('Invalid value for nup_theta')
      return
-
-  end select
-  !------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  ! Radial dissipation
-  !
-  select case (nup_radial)  
-
-  case (1) 
-     ctag(2) = '2'
-  case (2) 
-     ctag(2) = '4'
-  case (3) 
-     ctag(2) = '6'
-  case (4) 
-     ctag(2) = '8'
-  case default
+  endif
+  if (nup_radial < 1 .or. nup_theta > 4) then
      call cgyro_error('Invalid value for nup_radial')
      return
-
-  end select
-  !------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  ! Alpha/toroidal dissipation
-  !
-  select case (nup_alpha)  
-
-  case (1) 
-     ctag(3) = '2'
-  case (2) 
-     ctag(3) = '4'
-  case (3) 
-     ctag(3) = '6'
-  case (4) 
-     ctag(3) = '8'
-  case default
+  endif
+  if (nup_alpha < 1 .or. nup_alpha > 4) then
      call cgyro_error('Invalid value for nup_alpha')
      return
-
-  end select
+  endif
   !------------------------------------------------------------------------
-
-  call cgyro_info('Dissipation order: (theta,radial,alpha)=('&
-       //ctag(1)//','//ctag(2)//','//ctag(3)//')')
 
   !------------------------------------------------------------------------
   ! Check for existence of restart file
