@@ -13,7 +13,8 @@ subroutine cgyro_write_timedata
   implicit none
 
   complex :: a_norm
-  integer :: i_field,ir,it
+  integer :: i_field,i_moment
+  integer :: ir,it
   logical :: lfe
   real :: vfreq(2)
   complex :: ftemp(n_radial,n_theta)
@@ -32,51 +33,35 @@ subroutine cgyro_write_timedata
 
   call cgyro_flux
 
-  if (n_toroidal > 1) then
+  do i_moment=1,3
 
-     ! Density flux for all species
+     ! Density, momentum and energy flux for all species
      call cgyro_write_distributed_real(&
-          trim(path)//runfile_kxky_flux(1),&
-          size(flux(:,:,1)),&
-          flux(:,:,1))
-     ! Energy flux for all species
-     call cgyro_write_distributed_real(&
-          trim(path)//runfile_kxky_flux(2),&
-          size(flux(:,:,2)),&
-          flux(:,:,2))
-     ! Momentum flux for all species
-     call cgyro_write_distributed_real(&
-          trim(path)//runfile_kxky_flux(3),&
-          size(flux(:,:,3)),&
-          flux(:,:,3))
-     ! Global density flux for all species
-     call cgyro_write_distributed_complex(&
-          trim(path)//runfile_lky_flux(1),&
-          size(gflux(:,:,1)),&
-          gflux(:,:,1))
-     ! Global energy flux for all species
-     call cgyro_write_distributed_complex(&
-          trim(path)//runfile_lky_flux(2),&
-          size(gflux(:,:,2)),&
-          gflux(:,:,2))
-     ! Global energy flux for all species
-     call cgyro_write_distributed_complex(&
-          trim(path)//runfile_lky_flux(3),&
-          size(gflux(:,:,3)),&
-          gflux(:,:,3))
-     
-     if (moment_print_flag == 1) then
-        ! Density moment for all species at theta=0
+          trim(path)//runfile_kxky_flux(i_moment),&
+          size(flux(:,:,i_moment)),&
+          flux(:,:,i_moment))
+
+     ! Global fluxes for all species
+     if (nonlinear_flag == 1) then
         call cgyro_write_distributed_complex(&
-             trim(path)//runfile_kxky_n,&
-             size(moment(:,:,1)),&
-             moment(:,:,1))
-        ! Energy moment for all species at theta=0
-        call cgyro_write_distributed_complex(&
-             trim(path)//runfile_kxky_e,&
-             size(moment(:,:,2)),&
-             moment(:,:,2))
+             trim(path)//runfile_lky_flux(i_moment),&
+             size(gflux(:,:,i_moment)),&
+             gflux(:,:,i_moment))
      endif
+
+  enddo
+
+  if (nonlinear_flag == 1 .and. moment_print_flag == 1) then
+     ! Density moment for all species at theta=0
+     call cgyro_write_distributed_complex(&
+          trim(path)//runfile_kxky_n,&
+          size(moment(:,:,1)),&
+          moment(:,:,1))
+     ! Energy moment for all species at theta=0
+     call cgyro_write_distributed_complex(&
+          trim(path)//runfile_kxky_e,&
+          size(moment(:,:,2)),&
+          moment(:,:,2))
   endif
 
   ! Complex potential at theta=0 

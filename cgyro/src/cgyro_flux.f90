@@ -17,13 +17,14 @@ subroutine cgyro_flux
   real :: dv
   real :: c_n,c_n0
   real :: c_t,c_t0
-  real :: c_v, c_vpar
+  real :: c_v,c_vpar
   real :: c_tr
+  real :: flux_norm
 
   flux_loc(:,:,:) = 0.0
   moment_loc(:,:,:) = 0.0
   gflux_loc(:,:,:) = 0.0
-  
+
   iv_loc = 0
   do iv=nv1,nv2
 
@@ -34,7 +35,7 @@ subroutine cgyro_flux
      ie = ie_v(iv)
 
      ! Integration weight
-     dv  = w_xi(ix)*w_e(ie)
+     dv = w_xi(ix)*w_e(ie)
 
      ! Density moment weight
      c_n = dv*dens(is)
@@ -48,7 +49,7 @@ subroutine cgyro_flux
      ! Momentum weights
      c_v = dv*dens(is)*mass(is)
      c_vpar = vth(is) * sqrt(2.0)*vel(ie)*xi(ix)
-     
+
      ! Adiabatic coefficient
      c_n0 = z(is)*dens(is)/temp(is)
      c_t0 = 1.5*temp(is)*c_n0
@@ -61,12 +62,12 @@ subroutine cgyro_flux
         ! Density flux: Gamma_a
         flux_loc(ir,is,1) = flux_loc(ir,is,1) &
              -c_n*aimag(cap_h_c(ic,iv_loc)*conjg(psi(ic,iv_loc)))*w_theta(it) &
-             * dens_rot(it,is)
+             *dens_rot(it,is)
 
         ! Energy flux : Q_a
         flux_loc(ir,is,2) = flux_loc(ir,is,2) &
              -aimag(cap_h_c(ic,iv_loc)*conjg(psi(ic,iv_loc)))*w_theta(it) &
-             * dens_rot(it,is) * (c_t + c_tr * lambda_rot(it,is))
+             *dens_rot(it,is)*(c_t+c_tr*lambda_rot(it,is))
 
         ! Momentum flux: Pi_a
         flux_loc(ir,is,3) = flux_loc(ir,is,3) &
@@ -74,7 +75,7 @@ subroutine cgyro_flux
              * (mach*bigR(it)/rmaj + btor(it)/bmag(it)*c_vpar)  &
              + aimag(cap_h_c(ic,iv_loc)*conjg(i_c*chi(ic,iv_loc)))) &
              * c_v * bigR(it) * dens_rot(it,is)*w_theta(it)
-        
+
         if (it == it0) then
            ! Density moment: (delta n_a)/(n_norm rho_norm)
            moment_loc(ir,is,1) = moment_loc(ir,is,1) &
@@ -97,21 +98,40 @@ subroutine cgyro_flux
                    +i_c*cap_h_c(ic,iv_loc)*conjg(psi(ic_c(ir-l,it),iv_loc)) &
                    * w_theta(it)* dens_rot(it,is) &
                    * (c_t + c_tr * lambda_rot(it,is))
-              ! Global momentum flux not yet implemented
+              ! gflux_loc(l,is,3) = [ADD FLUX HERE!]
            endif
         enddo
- 
+
      enddo
 
   enddo
 
-  ! Complete definition of fluxes
-  flux_loc  =  flux_loc*(2*k_theta*rho)
-  gflux_loc = gflux_loc*(2*k_theta*rho)
+  if (nonlinear_flag == 0) then
 
-  ! GyroBohm normalizations
-  flux_loc   =  flux_loc/rho**2
-  gflux_loc  = gflux_loc/rho**2
+     ! Quasilinear normalization (divide by |phi|^2)
+     flux_norm = 0.0
+     do ir=1,n_radial
+        flux_norm = flux_norm+sum(abs(field(1,ic_c(ir,:)))**2*w_theta(:))
+     enddo
+    
+     ! Correct for sign of q
+     flux_norm = flux_norm*q/abs(q)
+
+     flux_loc  = flux_loc/flux_norm
+     gflux_loc = gflux_loc/flux_norm 
+
+  else
+
+     ! Complete definition of fluxes
+     flux_loc  =  flux_loc*(2*k_theta*rho)
+     gflux_loc = gflux_loc*(2*k_theta*rho)
+
+     ! GyroBohm normalizations
+     flux_loc   =  flux_loc/rho**2
+     gflux_loc  = gflux_loc/rho**2
+
+  endif
+
   moment_loc = moment_loc/rho
 
   ! Reduced real flux(kx,ky), below, is still distributed over n 
