@@ -237,7 +237,7 @@ subroutine cgyro_make_profiles
      call cgyro_info('Triggered zonal flow test')
 
      if (n_radial /= 1) then
-        call cgyro_error('ERROR: (CGYRO) For zonal flow test, set n_radial=1.')
+        call cgyro_error('For zonal flow test, set n_radial=1.')
         return
      endif
 
@@ -275,22 +275,26 @@ subroutine cgyro_make_profiles
   !-------------------------------------------------------------
 
   !------------------------------------------------------------------------
-  ! ExB shear
+  ! ExB and profile shear
   !
   if (abs(gamma_e) > 1e-10 .and. nonlinear_flag > 0) then
      omega_eb = k_theta*length*gamma_e/(2*pi)
      select case (shear_method)
      case (1)
-        call cgyro_info('Hammett discrete-shift ExB shear') 
+        call cgyro_info('ExB shear: Hammett discrete shift') 
      case (2)
-        call cgyro_info('Wavenumber advection ExB shear') 
+        call cgyro_info('ExB shear: Wavenumber advection') 
      case (3)
-        call cgyro_info('Linear-time ExB shear') 
+        call cgyro_info('ExB shear: Linearized Hammett shift') 
      end select
   else
      omega_eb = 0.0
      shear_method = 0
-     call cgyro_info('No ExB shear') 
+     call cgyro_info('ExB shear: OFF') 
+  endif
+
+  if (profile_shear_flag == 1) then
+     call cgyro_info('Profile shear: Continuous wavenumber advection') 
   endif
   !------------------------------------------------------------------------
 
