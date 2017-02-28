@@ -156,9 +156,9 @@ subroutine cgyro_check
      if(collision_model /= 1) then
         select case (collision_mom_restore)
         case(0)
-           !       call cgyro_info('Collision momentum restoring: off')       
+           ! Collision momentum restoring: off       
         case(1)
-           !       call cgyro_info('Collision momentum restoring: on')
+           ! Collision momentum restoring: on
            ctag(3)= 'x'
         case default
            call cgyro_error('Invalid value for collision_mom_restore')
@@ -168,9 +168,9 @@ subroutine cgyro_check
 
      select case (collision_field_model)
      case(0)
- !       call cgyro_info('Collision field corrections : off')
+        ! Collision field corrections : off
      case (1)
- !       call cgyro_info('Collision field corrections : on')
+        ! Collision field corrections : on
         ctag(7) = 'x'
      case default
         call cgyro_error('Invalid value for collision_field_model')
@@ -182,9 +182,9 @@ subroutine cgyro_check
 
      select case (collision_ene_diffusion)
      case(0)
- !       call cgyro_info('Collision energy diffusion  : off')
+        ! Collision energy diffusion  : off
      case(1)
- !       call cgyro_info('Collision energy diffusion  : on')
+        ! Collision energy diffusion  : on
         ctag(2) = 'x'
      case default
         call cgyro_error('Invalid value for collision_ene_diffusion')
@@ -193,9 +193,9 @@ subroutine cgyro_check
 
      select case (collision_ene_restore)
      case(0)
- !       call cgyro_info('Collision energy restoring  : off')
+        ! Collision energy restoring  : off
      case(1)
- !       call cgyro_info('Collision energy restoring  : on')
+        ! Collision energy restoring  : on
         ctag(4) = 'x'
      case default
         call cgyro_error('Invalid value for collision_ene_restore')
@@ -204,9 +204,9 @@ subroutine cgyro_check
 
      select case (collision_kperp)
      case(0)
- !       call cgyro_info('Collision kperp corrections : off')
+        ! Collision kperp corrections : off
      case(1)
- !       call cgyro_info('Collision kperp corrections : on')
+        ! Collision kperp corrections : on
         ctag(5) = 'x'
      case default
         call cgyro_error('Invalid value for collision_kperp')
@@ -218,10 +218,10 @@ subroutine cgyro_check
   if (collision_model /= 5 .and. collision_model /= 1) then
      select case (collision_ion_model)
      case(0)
- !       call cgyro_info('Collisional ions: on')
+        ! Collisional ions: on
         ctag(6) = 'x'
      case(1)
- !       call cgyro_info('Collisional ions: off')
+        ! Collisional ions: off
      case default
         call cgyro_error('Invalid value for collision_ion_model')
         return
