@@ -8,6 +8,8 @@ ftype = sys.argv[1]
 moment = sys.argv[2]
 ymin = sys.argv[3]
 ymax = sys.argv[4]
+nx = int(sys.argv[5])
+ny = int(sys.argv[6])
 
 sim = cgyrodata('./')
 nt = sim.n_time
@@ -36,10 +38,6 @@ for line in open('out.cgyro.kxky_n'):
 a = np.reshape(a,(2,nr,ns,nn),'F')
 c = a[0,:,i_spec,:]+1j*a[1,:,i_spec,:]
 #c[nr,nn]
-
-# Plotting points
-nx = 512
-ny = 512
 
 f = np.zeros([nx,ny])
 epx = np.zeros([nx,nr],dtype=np.complex64)
