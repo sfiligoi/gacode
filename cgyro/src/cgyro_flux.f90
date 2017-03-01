@@ -51,8 +51,8 @@ subroutine cgyro_flux
      c_vpar = vth(is) * sqrt(2.0)*vel(ie)*xi(ix)
 
      ! Adiabatic coefficient
-     c_n0 = z(is)*dens(is)/temp(is)
-     c_t0 = 1.5*temp(is)*c_n0
+     c_n0 = dv*z(is)*dens(is)/temp(is)
+     c_t0 = temp(is)*c_n0*energy(ie)
 
      do ic=1,nc
 
