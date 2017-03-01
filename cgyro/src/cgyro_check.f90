@@ -34,6 +34,11 @@ subroutine cgyro_check
      call cgyro_error('n_species <= 6.')
      return
   endif
+
+  if (box_size > 1 .and. h_print_flag == 1) then
+     call cgyro_error('Distribution output not available for box_size > 1')
+     return
+  endif
   !------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------

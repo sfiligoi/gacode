@@ -384,6 +384,7 @@ subroutine cgyro_write_distributed_real(datafile,n_fn,fn)
 
 end subroutine cgyro_write_distributed_real
 
+
 !------------------------------------------------------
 ! write_precision.f90
 !
@@ -451,6 +452,14 @@ subroutine write_precision(datafile,fn)
 
 end subroutine write_precision
 
+
+!------------------------------------------------------
+! write_balloon.f90
+!
+! PURPOSE:
+!  Manage IO of ballooning potentials
+!------------------------------------------------------
+
 subroutine write_balloon(datafile,fn)
 
   use cgyro_globals
@@ -461,7 +470,6 @@ subroutine write_balloon(datafile,fn)
   character (len=*), intent(in) :: datafile
   complex, intent(in) :: fn(n_radial,n_theta)
   !
-  integer :: ir,jr,it,np
   integer :: i_dummy
   !------------------------------------------------------
 
@@ -487,24 +495,7 @@ subroutine write_balloon(datafile,fn)
      open(unit=io,file=datafile,status='old',position='append')
 
      ! Construct ballooning-space form of field
-
-     np = n_radial/2/box_size
-
-     do ir=-np,np-1
-        do it=1,n_theta
-           if(ipccw*btccw > 0) then
-              jr = box_size*ir+n_radial/2+1
-           else
-              jr = -box_size*ir+n_radial/2
-           endif
-           f_balloon(ir+np+1,it) = fn(jr,it) &
-                *exp(-2*pi*i_c*ir*k_theta*rmin)
-        enddo
-     enddo
-
-     if (ipccw*btccw < 0) then
-        f_balloon = f_balloon*exp(2*pi*i_c*abs(k_theta)*rmin)
-     endif
+     call extended_ang(fn,f_balloon)
 
      write(io,fmtstr) transpose(f_balloon(:,:))
      close(io)
@@ -525,6 +516,53 @@ subroutine write_balloon(datafile,fn)
   end select
 
 end subroutine write_balloon
+
+
+!----------------------------------------------------------------
+! extended_ang.f90
+!
+! PURPOSE:
+!
+! Map from (r,theta) to extended angle (f2d -> f1d)
+!----------------------------------------------------------------
+
+subroutine extended_ang(f2d,f1d)
+
+  use cgyro_globals    
+
+  implicit none
+
+  integer :: ir,jr,it,np
+  complex, intent(in), dimension(n_radial,n_theta) :: f2d
+  complex, intent(inout), dimension(n_radial,n_theta) :: f1d 
+
+  np = n_radial/2/box_size
+
+  do ir=-np,np-1
+     do it=1,n_theta
+        ! Manage positive/negative q
+        if (ipccw*btccw > 0) then
+           jr = box_size*ir+n_radial/2+1
+        else
+           jr = -box_size*ir+n_radial/2
+        endif
+        f1d(ir+np+1,it) = f2d(jr,it)*exp(-2*pi*i_c*ir*k_theta*rmin)
+     enddo
+  enddo
+
+  if (ipccw*btccw < 0) then
+     f1d = f1d*exp(2*pi*i_c*abs(k_theta)*rmin)
+  endif
+
+end subroutine extended_ang
+
+
+!----------------------------------------------------------------
+! write_zf.f90
+!
+! PURPOSE:
+!
+!----------------------------------------------------------------
 
 subroutine write_zf(datafile,fn)
 
@@ -559,13 +597,9 @@ subroutine write_zf(datafile,fn)
      ! Append
 
      open(unit=io,file=datafile,status='old',position='append')
-
-     ! Construct ballooning-space form of field
-         
+    
      write(io,fmtstr) fn(:,:)
      close(io)
-
-     !-------------------------------------------------------
 
   case(3)
 
@@ -581,6 +615,13 @@ subroutine write_zf(datafile,fn)
   end select
 
 end subroutine write_zf
+
+!----------------------------------------------------------------
+! write_time.f90
+!
+! PURPOSE:
+!
+!----------------------------------------------------------------
 
 subroutine write_time(datafile)
 
@@ -617,8 +658,6 @@ subroutine write_time(datafile)
      write(io,fmtstrn) t_current,integration_error(:)
      close(io)
 
-     !-------------------------------------------------------
-
   case(3)
 
      ! Rewind
@@ -635,8 +674,6 @@ subroutine write_time(datafile)
 end subroutine write_time
 
 
-!====================================================================================
-
 subroutine write_distribution(datafile)
 
   use mpi
@@ -646,7 +683,9 @@ subroutine write_distribution(datafile)
   implicit none
   !
   character (len=*), intent(in) :: datafile
+  integer :: ir,it
   complex, dimension(:,:), allocatable :: h_x_glob
+  complex :: ftemp(n_radial,n_theta)
   !------------------------------------------------------
 
   select case (io_control)
@@ -686,14 +725,12 @@ subroutine write_distribution(datafile)
 
      if (i_proc == 0) then
         do iv=1,nv
-           if (box_size == 1) then 
-              do ic=1,nc
-                 f_balloon(ir_c(ic),it_c(ic)) = h_x_glob(ic,iv) &
-                      *exp(-2*pi*i_c*px(ir_c(ic))*k_theta*rmin)
+           do ir=1,n_radial
+              do it=1,n_theta
+                 ftemp(ir,it) = h_x_glob(ic_c(ir,it),iv)
               enddo
-           else
-              f_balloon(:,:) = 0.0
-           endif
+           enddo
+           call extended_ang(ftemp,f_balloon)
            write(io,fmtstr) transpose(f_balloon(:,:))
         enddo
         close(io)
@@ -708,8 +745,6 @@ subroutine write_distribution(datafile)
   end select
 
 end subroutine write_distribution
-
-!====================================================================================
 
 !----------------------------------------------------------------
 ! write_timers.f90
@@ -820,7 +855,6 @@ subroutine write_timers(datafile)
 
 end subroutine write_timers
 
-!====================================================================================
 
 subroutine print_scrdata()
 
