@@ -220,7 +220,7 @@ case "$PLOT_TYPE" in
 	python $PYROOT/plot_ex_flux.py $FTYPE $W $MOMENT $YMIN $YMAX ;;
 
    fluct)
-	python $PYROOT/plot_fluct.py $FTYPE $MOMENT $YMIN $YMAX $NX $NY ;;
+	python $PYROOT/plot_fluct.py $FTYPE $MOMENT $SPECIES $YMIN $YMAX $NX $NY $TIME ;;
 
    flux)
 	if [ "$FTYPE" == "dump" ]

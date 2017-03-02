@@ -41,7 +41,7 @@ subroutine cgyro_flux
      c_n = dv*dens(is)
 
      ! Energy moment weight
-     c_t = dv*dens(is)*temp(is)*energy(ie)
+     c_t = c_n*temp(is)*energy(ie)
 
      ! Energy moment weight (rotation)
      c_tr = dv*dens(is)*temp(is)
@@ -52,7 +52,7 @@ subroutine cgyro_flux
 
      ! Adiabatic coefficient
      c_n0 = dv*z(is)*dens(is)/temp(is)
-     c_t0 = temp(is)*c_n0*energy(ie)
+     c_t0 = c_n0*temp(is)*energy(ie)
 
      do ic=1,nc
 
@@ -72,20 +72,20 @@ subroutine cgyro_flux
         ! Momentum flux: Pi_a
         flux_loc(ir,is,3) = flux_loc(ir,is,3) &
              -(aimag(cap_h_c(ic,iv_loc)*conjg(psi(ic,iv_loc))) &
-             * (mach*bigR(it)/rmaj + btor(it)/bmag(it)*c_vpar)  &
+             *(mach*bigR(it)/rmaj+btor(it)/bmag(it)*c_vpar)  &
              + aimag(cap_h_c(ic,iv_loc)*conjg(i_c*chi(ic,iv_loc)))) &
-             * c_v * bigR(it) * dens_rot(it,is)*w_theta(it)
+             *c_v*bigR(it)*dens_rot(it,is)*w_theta(it)
 
         if (it == it0) then
            ! Density moment: (delta n_a)/(n_norm rho_norm)
            moment_loc(ir,is,1) = moment_loc(ir,is,1) &
-                - c_n0*field(1,ic)*dens_rot(it,is) &
-                + c_n*cap_h_c(ic,iv_loc)*jvec_c(1,ic,iv_loc)*dens_rot(it,is)
+                -c_n0*field(1,ic)*dens_rot(it,is) &
+                +c_n*cap_h_c(ic,iv_loc)*jvec_c(1,ic,iv_loc)*dens_rot(it,is)
            ! Energy moment : (delta E_a)/(n_norm T_norm rho_norm)
            moment_loc(ir,is,2) = moment_loc(ir,is,2) &
-                - c_t0*field(1,ic)*dens_rot(it,is) &
-                + cap_h_c(ic,iv_loc)*jvec_c(1,ic,iv_loc)*dens_rot(it,is) &
-                * (c_t + c_tr * lambda_rot(it,is))
+                -c_t0*field(1,ic)*dens_rot(it,is) &
+                +cap_h_c(ic,iv_loc)*jvec_c(1,ic,iv_loc)*dens_rot(it,is) &
+                *(c_t+c_tr*lambda_rot(it,is))
         endif
 
         ! Global fluxes (complex)
