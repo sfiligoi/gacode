@@ -85,9 +85,9 @@ subroutine cgyro_init_collision
                    * (exp(-xb*xb)/(xb*sqrt(pi)) &
                    + (1.0-1.0/(2.0*xb*xb)) * erf(xb))
               ! No i-e Lorentz
-              if (is /= is_ele .and. js == is_ele) then
-                 nu_d(ie,is,js) = 0.0
-              endif
+              !if (is /= is_ele .and. js == is_ele) then
+              !   nu_d(ie,is,js) = 0.0
+              !endif
 
               ! Only ii, ee Diffusion
               if(is == js) then
