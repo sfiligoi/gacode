@@ -80,7 +80,7 @@ then
   echo
   echo "          -t <value>"
   echo "          Specify integer time index (-1 is last time)."
-  echo "          *Affects: ball, hb, hbcut"
+  echo "          *Affects: ball, hb, hbcut, fluct"
   echo
   echo "          -n <value>"
   echo "          Specify values of n (toroidal mode index)"

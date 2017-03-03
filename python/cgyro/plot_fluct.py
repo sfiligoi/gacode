@@ -13,7 +13,7 @@ ymin = sys.argv[4]
 ymax = sys.argv[5]
 nx = int(sys.argv[6])
 ny = int(sys.argv[7])
-i_time = int(sys.argv[8])
+istr = sys.argv[8]
 fmin = sys.argv[9]
 fmax = sys.argv[10]
 
@@ -66,6 +66,10 @@ def maptoreal(nr,nn,nx,ny,c):
     return f,str(end-start)
 #-----------------------------------------------------------------------
 
+if istr == '-1':
+    ivec = range(nt)
+else:
+    ivec = str2list(istr)
 
 # Set filename and title
 if (moment == 'n'):
@@ -88,7 +92,7 @@ n_chunk = 2*nr*ns*nn
 m = 0
 i = 0
 
-i_spec = 0
+print sim.ky
 
 aa = np.zeros([n_chunk])
 for line in open(fdata):
@@ -98,9 +102,9 @@ for line in open(fdata):
         i = i+1
         m = 0
         print 'INFO: (plot_fluct) Time index '+str(i) 
-        if i == i_time or i_time == -1:
+        if i in ivec:
             a = np.reshape(aa,(2,nr,ns,nn),'F')
-            c = a[0,:,i_spec,:]+1j*a[1,:,i_spec,:]
+            c = a[0,:,species,:]+1j*a[1,:,species,:]
             f,t = maptoreal(nr,nn,nx,ny,c)
             if fmin == 'auto':
                 f0=np.min(f)
@@ -113,11 +117,11 @@ for line in open(fdata):
             fig.subplots_adjust(left=0.08,right=0.96,top=0.94,bottom=0.08)
             ax = fig.add_subplot(111)
             ax.set_title(title,fontsize=16)
-            ax.set_xlabel(r'$x/2\pi$',fontsize=16)
-            ax.set_ylabel(r'$y/2\pi$',fontsize=16)
+            ax.set_xlabel(r'$x/\rho_s$',fontsize=16)
+            ax.set_ylabel(r'$y/\rho_s$',fontsize=16)
         
             levels = np.arange(f0,f1,(f1-f0)/128)
-            ax.contourf(x/2/np.pi,y/2/np.pi,np.transpose(f),levels,cmap=plt.cm.jet)
+            ax.contourf(x/2/np.pi*sim.length,y/sim.ky[1],np.transpose(f),levels,cmap=plt.cm.jet)
             print 'INFO: (plot_fluct) min,max = ',f0,f1
 
             if ftype == 'screen':
@@ -129,7 +133,7 @@ for line in open(fdata):
                 # Close each time to prevent memory accumulation
                 plt.close()
 
-            if (i == i_time):
+            if i == max(ivec):
                 sys.exit()
 
 

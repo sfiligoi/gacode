@@ -57,7 +57,8 @@ class cgyrodata:
 
         self.p = np.array(data[l:l+self.n_radial],dtype=int)
         self.kx = 2*np.pi*self.p/self.length
-        
+    
+        print self.p
         mark = l+self.n_radial
         self.theta = np.array(data[mark:mark+self.n_theta])
         
