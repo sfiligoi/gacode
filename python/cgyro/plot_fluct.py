@@ -16,6 +16,7 @@ ny = int(sys.argv[7])
 istr = sys.argv[8]
 fmin = sys.argv[9]
 fmax = sys.argv[10]
+colormap = sys.argv[11]
 
 sim = cgyrodata('./')
 nt = sim.n_time
@@ -92,8 +93,6 @@ n_chunk = 2*nr*ns*nn
 m = 0
 i = 0
 
-print sim.ky
-
 aa = np.zeros([n_chunk])
 for line in open(fdata):
     aa[m] = float(line)
@@ -103,8 +102,13 @@ for line in open(fdata):
         m = 0
         print 'INFO: (plot_fluct) Time index '+str(i) 
         if i in ivec:
-            a = np.reshape(aa,(2,nr,ns,nn),'F')
-            c = a[0,:,species,:]+1j*a[1,:,species,:]
+            if (moment == 'phi'):
+                a = np.reshape(aa,(2,nr,nn),'F')
+                c = a[0,:,:]+1j*a[1,:,:]
+            else:
+                a = np.reshape(aa,(2,nr,ns,nn),'F')
+                c = a[0,:,species,:]+1j*a[1,:,species,:]
+                
             f,t = maptoreal(nr,nn,nx,ny,c)
             if fmin == 'auto':
                 f0=np.min(f)
@@ -121,7 +125,7 @@ for line in open(fdata):
             ax.set_ylabel(r'$y/\rho_s$',fontsize=16)
         
             levels = np.arange(f0,f1,(f1-f0)/256)
-            ax.contourf(x/2/np.pi*sim.length,y/sim.ky[1],np.transpose(f),levels,cmap=plt.cm.hsv)
+            ax.contourf(x/2/np.pi*sim.length,y/sim.ky[1],np.transpose(f),levels,cmap=plt.get_cmap(colormap))
             print 'INFO: (plot_fluct) min,max = ',f0,f1
 
             if ftype == 'screen':
