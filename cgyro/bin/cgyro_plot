@@ -94,6 +94,12 @@ then
   echo "          -ny <int>"
   echo "           Number of alpha interpolation points (default 128)"
   echo
+  echo "          -fmin <float>"
+  echo "           Minimum value for contour plot"
+  echo
+  echo "          -fmax <float>"
+  echo "           Maximum value for contout plot"
+  echo
   echo " LINEAR EXAMPLES:"
   echo "  $ cgyro_plot -e . -plot freq           [frequency versus time]"
   echo "  $ cgyro_plot -e . -plot ball -field 0  [phi versus ballooning angle]"
@@ -136,6 +142,8 @@ N=null
 MESH=0
 NX=128
 NY=128
+FMIN=auto
+FMAX=auto
 #==============================================================================
 
 #==============================================================================
@@ -172,6 +180,8 @@ while [ $# -gt 0 ] ; do
   -n) shift ; N=$1 ;;
   -nx) shift ; NX=$1 ;;
   -ny) shift ; NY=$1 ;;
+  -fmin) shift ; FMIN=$1 ;;
+  -fmax) shift ; FMAX=$1 ;;
 
   -mesh) MESH=1 ;;
 
@@ -220,7 +230,7 @@ case "$PLOT_TYPE" in
 	python $PYROOT/plot_ex_flux.py $FTYPE $W $MOMENT $YMIN $YMAX ;;
 
    fluct)
-	python $PYROOT/plot_fluct.py $FTYPE $MOMENT $SPECIES $YMIN $YMAX $NX $NY $TIME ;;
+	python $PYROOT/plot_fluct.py $FTYPE $MOMENT $SPECIES $YMIN $YMAX $NX $NY $TIME $FMIN $FMAX ;;
 
    flux)
 	if [ "$FTYPE" == "dump" ]

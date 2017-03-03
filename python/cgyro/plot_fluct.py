@@ -1,5 +1,7 @@
 import sys
 import numpy as np
+import os.path
+
 from gacodeplotdefs import *
 from gacodefuncs import *
 from cgyro.data import cgyrodata
@@ -12,6 +14,8 @@ ymax = sys.argv[5]
 nx = int(sys.argv[6])
 ny = int(sys.argv[7])
 i_time = int(sys.argv[8])
+fmin = sys.argv[9]
+fmax = sys.argv[10]
 
 sim = cgyrodata('./')
 nt = sim.n_time
@@ -24,6 +28,9 @@ eny = np.zeros([ny,nn],dtype=np.complex)
 x = np.zeros([nx])
 y = np.zeros([ny])
 
+#------------------------------------------------------------------------
+# Fourier arrays
+#
 for i in range(nx):
     x[i] = i*2*np.pi/(nx-1)
     for p in range(nr):    
@@ -36,7 +43,11 @@ for j in range(ny):
 
 # factor of 1/2 for n=0
 eny[:,0] = 0.5*eny[:,0]
+#------------------------------------------------------------------------
 
+#------------------------------------------------------------------------
+# Real-space field resonstruction
+#
 def maptoreal(nr,nn,nx,ny,c):
 
     import numpy as np
@@ -53,8 +64,10 @@ def maptoreal(nr,nn,nx,ny,c):
     end = time.time()
   
     return f,str(end-start)
+#-----------------------------------------------------------------------
 
 
+# Set filename and title
 if (moment == 'n'):
     fdata = 'out.cgyro.kxky_n'
     title = r'$\delta \mathrm{n}$'
@@ -64,6 +77,11 @@ elif (moment == 'e'):
 elif (moment == 'phi'):
     fdata = 'out.cgyro.kxky_phi'
     title = r'$\delta\phi$'
+
+# Check to see if it exists
+if not os.path.isfile(fdata):
+    print fdata+' does not exist.  Try -moment phi'
+    sys.exit()
 
 #(2,n_radial,n_species,n_n,nt)
 n_chunk = 2*nr*ns*nn
@@ -79,13 +97,17 @@ for line in open(fdata):
     if m == n_chunk:
         i = i+1
         m = 0
-        print i
+        print 'INFO: (plot_fluct) Time index '+str(i) 
         if i == i_time or i_time == -1:
             a = np.reshape(aa,(2,nr,ns,nn),'F')
             c = a[0,:,i_spec,:]+1j*a[1,:,i_spec,:]
             f,t = maptoreal(nr,nn,nx,ny,c)
-            f0=np.min(f)
-            f1=np.max(f)
+            if fmin == 'auto':
+                f0=np.min(f)
+                f1=np.max(f)
+            else:
+                f0=float(fmin)
+                f1=float(fmax)
 
             fig = plt.figure(figsize=(10,10))
             fig.subplots_adjust(left=0.08,right=0.96,top=0.94,bottom=0.08)
@@ -96,12 +118,19 @@ for line in open(fdata):
         
             levels = np.arange(f0,f1,(f1-f0)/128)
             ax.contourf(x/2/np.pi,y/2/np.pi,np.transpose(f),levels,cmap=plt.cm.jet)
+            print 'INFO: (plot_fluct) min,max = ',f0,f1
 
             if ftype == 'screen':
                 plt.show()
             else:
                 fname = fdata+str(i_time)
-                plt.savefig(str(i)+'.png')
+                # Filename uses number padded with zeros
+                plt.savefig(str(i).zfill(3)+'.png')
+                # Close each time to prevent memory accumulation
+                plt.close()
+
+            if (i == i_time):
+                sys.exit()
 
 
 
