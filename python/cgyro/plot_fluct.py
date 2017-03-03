@@ -120,14 +120,14 @@ for line in open(fdata):
             ax.set_xlabel(r'$x/\rho_s$',fontsize=16)
             ax.set_ylabel(r'$y/\rho_s$',fontsize=16)
         
-            levels = np.arange(f0,f1,(f1-f0)/128)
-            ax.contourf(x/2/np.pi*sim.length,y/sim.ky[1],np.transpose(f),levels,cmap=plt.cm.jet)
+            levels = np.arange(f0,f1,(f1-f0)/256)
+            ax.contourf(x/2/np.pi*sim.length,y/sim.ky[1],np.transpose(f),levels,cmap=plt.cm.hsv)
             print 'INFO: (plot_fluct) min,max = ',f0,f1
 
             if ftype == 'screen':
                 plt.show()
             else:
-                fname = fdata+str(i_time)
+                fname = fdata+str(i)
                 # Filename uses number padded with zeros
                 plt.savefig(str(i).zfill(3)+'.png')
                 # Close each time to prevent memory accumulation
