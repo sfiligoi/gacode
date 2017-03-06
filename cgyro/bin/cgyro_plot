@@ -57,7 +57,7 @@ then
   echo "                  = kxky_phi (kx-ky spectra of ave(|phi|))"
   echo "                  = xflux    (radial profile of fluxes for all species)"
   echo "                  = fluct    (fluctuations)"
-  echo "                  = note     (notebook)"
+  echo "                  = vid      (create video from png files)"
   echo
   echo "          -mesh"
   echo "          Add mesh to hb plot."
@@ -85,6 +85,9 @@ then
   echo "          -n <value>"
   echo "          Specify values of n (toroidal mode index)"
   echo "          *Affects: ky_phi"
+  echo
+  echo "          -cmap <value>"
+  echo "          Name of colormap (jet,hsv,brg,...)"  
   echo
   echo " OPTIONS FOR -plot fluct"
   echo
@@ -144,6 +147,7 @@ NX=128
 NY=128
 FMIN=auto
 FMAX=auto
+CMAP=jet
 #==============================================================================
 
 #==============================================================================
@@ -182,6 +186,7 @@ while [ $# -gt 0 ] ; do
   -ny) shift ; NY=$1 ;;
   -fmin) shift ; FMIN=$1 ;;
   -fmax) shift ; FMAX=$1 ;;
+  -cmap) shift ; CMAP=$1 ;;
 
   -mesh) MESH=1 ;;
 
@@ -230,7 +235,7 @@ case "$PLOT_TYPE" in
 	python $PYROOT/plot_ex_flux.py $FTYPE $W $MOMENT $YMIN $YMAX ;;
 
    fluct)
-	python $PYROOT/plot_fluct.py $FTYPE $MOMENT $SPECIES $YMIN $YMAX $NX $NY $TIME $FMIN $FMAX ;;
+	python $PYROOT/plot_fluct.py $FTYPE $MOMENT $SPECIES $YMIN $YMAX $NX $NY $TIME $FMIN $FMAX $CMAP ;;
 
    flux)
 	if [ "$FTYPE" == "dump" ]
@@ -262,8 +267,8 @@ case "$PLOT_TYPE" in
    text)
    	python $PYROOT/text.py $W $FTYPE ;;
 
-   note)
-   	python $PYROOT/plot_notebook.py $W $FTYPE $SPECIES ;;
+   vid)
+   	$PYROOT/avconv_wrapper ;;
 
    *)
         echo "Unrecognized argument to -plot" ; exit 1 ;;

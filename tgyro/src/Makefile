@@ -29,6 +29,7 @@ OBJECTS += tgyro_globals.o \
            tgyro_iteration_variables.o \
            tgyro_allocate_globals.o \
 	   tgyro_ped.o \
+           tgyro_auxiliary_routines.o \
            tgyro_catch_error.o \
            tgyro_comm_setup.o \
            tgyro_comm_sync.o \
@@ -39,6 +40,7 @@ OBJECTS += tgyro_globals.o \
            tgyro_flux_vector_dense.o \
            tgyro_gyro_map.o \
            tgyro_harvest.o \
+           tgyro_ifs_pppl.o \
            tgyro_init_profiles.o \
            tgyro_init_profiles_axis.o \
            tgyro_iteration_driver.o \
