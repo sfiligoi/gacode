@@ -78,15 +78,9 @@ subroutine cgyro_init_manager
           e_deriv2_mat,&
           trim(path)//'out.cgyro.egrid')
   endif
+  ! Correct weights for infinite domain
   vel(:) = sqrt(energy(:))
-
-  !----------------------------------------------------------------------
-  ! Correction factor for missing energy interval to ensure sum(w)=1.0
-  ! NOTE: without this we have poor grid-convergence for small e_max
-  !
-  !b = sqrt(e_max)
-  !w_e(n_energy) = w_e(n_energy)+2.0*exp(-e_max)*b/sqrt(pi)+erfc(b)
-  !----------------------------------------------------------------------
+  !call domain_renorm(vel,w_e,n_energy)
 
   allocate(xi(n_xi))
   allocate(w_xi(n_xi))
