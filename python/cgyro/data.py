@@ -27,7 +27,10 @@ class cgyrodata:
         data = np.loadtxt(self.dir+'out.cgyro.time')
         self.t    = data[:,0]
         self.err1 = data[:,1]
-        self.err2 = data[:,2]
+        try:
+            self.err2 = data[:,2]
+        except:
+            self.err2 = data[:,1]
         self.n_time = len(self.t)   
         print "INFO: (data.py) Read time vector in out.cgyro.time."
         #-----------------------------------------------------------------
@@ -54,7 +57,7 @@ class cgyrodata:
 
         self.p = np.array(data[l:l+self.n_radial],dtype=int)
         self.kx = 2*np.pi*self.p/self.length
-        
+    
         mark = l+self.n_radial
         self.theta = np.array(data[mark:mark+self.n_theta])
         

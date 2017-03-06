@@ -37,7 +37,6 @@ module cgyro_globals
   integer :: nup_radial
   integer :: nup_theta
   integer :: nup_alpha
-  integer :: implicit_flag
   integer :: constant_stream_flag
   real    :: ky
   integer :: box_size
@@ -70,7 +69,7 @@ module cgyro_globals
   real :: gamma_e
   real :: gamma_p
   real :: mach
-  integer :: cf_model
+  integer :: rotation_model
   real :: error_tol
   integer :: mpi_rank_order
   integer :: hiprec_flag
@@ -350,23 +349,6 @@ module cgyro_globals
   real, dimension(:), allocatable :: work  
   integer, dimension(:), allocatable :: i_piv
   integer :: info
-  !
-  ! Implicit streaming gk/field matrices
-  complex, dimension(:,:), allocatable   :: gkvec
-  complex, dimension(:,:), allocatable   :: fieldmat
-  integer, dimension(:,:), allocatable   :: idfield
-  integer, dimension(:),   allocatable   :: i_piv_field
-  complex, dimension(:),   allocatable   :: fieldvec, fieldvec_loc
-  !
-  ! UMFPACK arrays
-  real,    dimension(:,:), allocatable :: gksp_cntl
-  integer, dimension(:,:), allocatable :: gksp_icntl, gksp_keep
-  real,    dimension(20) ::  gksp_rinfo
-  integer, dimension(40) ::  gksp_uinfo
-  complex, dimension(:,:), allocatable :: gksp_mat
-  integer, dimension(:,:), allocatable :: gksp_indx
-  complex, dimension(:), allocatable   :: gksvec, gkwvec 
-  integer :: gksp_nelem, gksp_nmax
   !
   ! Field solve variables
   real, dimension(:), allocatable :: sum_den_h

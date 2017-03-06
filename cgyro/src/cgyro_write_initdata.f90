@@ -10,7 +10,7 @@ subroutine cgyro_write_initdata
   use mpi
   use cgyro_globals
   use cgyro_experimental_globals
-  
+
   implicit none
 
   integer :: p,in,is
@@ -26,7 +26,7 @@ subroutine cgyro_write_initdata
 
      open(unit=io,file=trim(path)//runfile_info,status='old',position='append')
 
-  
+
      write(io,*)
      write(io,'(a)') ' n_theta | n_species | n_energy | n_xi '
      write(io,'(t4,i3,t16,i1,t26,i2,t36,i2)') n_theta,n_species,n_energy,n_xi
@@ -58,60 +58,51 @@ subroutine cgyro_write_initdata
 
      endif
 
+     ! Dissipation information
+     write(io,*)
+     write(io,'(t2,3(a,1x,i2,3x),t48,a)') &
+          ' D-theta:',2*nup_theta, ' D-radial:',2*nup_radial,' D-alpha:',2*nup_alpha,&
+          '[dissipation order]'
+     write(io,'(t2,3(a,1x,f3.1,2x),t48,a)') &
+          'up_theta:',up_theta , 'up_radial:',up_radial ,'up_alpha:',up_alpha,&
+          '[dissipation strength]'
+
      write(io,*) 
      write(io,20) '    r/a:',rmin
-     write(io,20) '    R/a:',rmaj, '  shift:',shift
-     write(io,20) '      q:',q,    '      s:',s
-     write(io,20) '  kappa:',kappa,'s_kappa:',s_kappa
-     write(io,20) '  delta:',delta,'s_delta:',s_delta
-     write(io,20) '   zeta:',zeta, ' s_zeta:',s_zeta
-     write(io,20) '   zmag:',zmag, '  dzmag:',dzmag
-     write(io,*)
-     write(io,20) '  betae:',betae_unit, ' beta_*:',beta_star,'lambda_*:',lambda_star
-     write(io,*)
-     write(io,20) 'gamma_e:', gamma_e,   'gamma_p:', gamma_p, '    mach:', mach
+     write(io,20) '    R/a:',rmaj, '  shift:',shift,  '  betae:',betae_unit
+     write(io,20) '      q:',q,    '      s:',s,      ' beta_*:',beta_star
+     write(io,20) '  kappa:',kappa,'s_kappa:',s_kappa,' lamb_*:',lambda_star
+     write(io,20) '  delta:',delta,'s_delta:',s_delta,'gamma_e:',gamma_e
+     write(io,20) '   zeta:',zeta, ' s_zeta:',s_zeta, 'gamma_p:',gamma_p
 
+     write(io,*)
+     write(io,20) '[rho/a]:',rho,'[z_eff]:',z_eff
+     write(io,*)
+     write(io,'(a)') &
+          ' i  z  n/n_norm   T/T_norm   m/m_norm     a/Ln       a/Lt       nu         s_n        s_t'
+     do is=1,n_species
+        write(io,'(t1,i2,1x,i2,3(2x,1pe9.3),2(1x,1pe10.3),(2x,1pe9.3),2(1x,1pe10.3))') &
+             is,int(z(is)),dens(is),temp(is),mass(is),dlnndr(is),dlntdr(is),nu(is),sdlnndr(is),sdlntdr(is)
+     enddo
+
+     if (profile_model == 2) then
+        write(io,*)
+        write(io,10) '           a[m]:',a_meters, '  b_unit[T]:',b_unit
+        write(io,10) 'n_norm[e19/m^3]:',dens_norm,'v_norm[m/s]:',vth_norm,'T_norm[keV]:',temp_norm
+     endif
+     write(io,*)
      z_eff = 0.0
      do is=1,n_species
         if (z(is) > 0.0) then 
            z_eff = z_eff+dens(is)*z(is)**2/dens_ele
         endif
      enddo
-     write(io,*)
-     write(io,20) '    rho:',rho,'  z_eff:',z_eff
-
-     write(io,*)
-     write(io,'(a)') &
-          'indx    z      n/n_norm     T/T_norm     m/m_norm      a/Ln         a/Lt         nu'
-     do is=1,n_species
-        write(io,'(t2,i2,2x,f5.1,2x,6(1pe11.4,2x))') &
-             is,z(is),dens(is),temp(is),mass(is),dlnndr(is),dlntdr(is),nu(is)
-     enddo
-
-     write(io,*)
-     write(io,'(a)') &
-          'indx      s_n         s_t'
-     do is=1,n_species
-        write(io,'(t2,i2,2x,6(1pe11.4,2x))') &
-             is,sdlnndr(is),sdlntdr(is)
-     enddo
-
-     
-     
-     if (profile_model == 2) then
-        write(io,*)
-        write(io,20) ' a_meters:',a_meters, '   b_unit:',b_unit
-        write(io,20) 'dens_norm:',dens_norm,'temp_norm:',temp_norm
-        write(io,20) ' vth_norm:',vth_norm
-     endif
-
-     write(io,*)
 
      close(io)
 
   endif
   !----------------------------------------------------------------------------
-  
+
   !----------------------------------------------------------------------------
   ! Write the initial equilibrium data
   !
@@ -211,6 +202,7 @@ subroutine cgyro_write_initdata
   endif
   !----------------------------------------------------------------------------
 
-20 format(t2,3(a,1x,1pe11.4,4x)) 
+10 format(t2,4(a,1x,1pe9.3,2x))  
+20 format(t2,4(a,1x,1pe10.3,2x)) 
 
 end subroutine cgyro_write_initdata
