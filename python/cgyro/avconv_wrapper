@@ -12,6 +12,7 @@ QUALITY=19
 OUT=movie.mp4
 
 avconv -framerate $FRAMERATE \
+    -start_number $1 \
     -i $BASENAME \
     -c:v libx264 \
     -profile:v high \

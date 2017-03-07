@@ -89,7 +89,7 @@ then
   echo "          -cmap <value>"
   echo "          Name of colormap (jet,hsv,brg,...)"  
   echo
-  echo " OPTIONS FOR -plot fluct"
+  echo " OPTIONS FOR -plot fluct/vid"
   echo
   echo "          -nx <int>"
   echo "           Number of radial interpolation points (default 128)"
@@ -102,6 +102,9 @@ then
   echo
   echo "          -fmax <float>"
   echo "           Maximum value for contout plot"
+  echo
+  echo "          -start <int>"
+  echo "           First frame for encoding"
   echo
   echo " LINEAR EXAMPLES:"
   echo "  $ cgyro_plot -e . -plot freq           [frequency versus time]"
@@ -148,6 +151,7 @@ NY=128
 FMIN=auto
 FMAX=auto
 CMAP=jet
+START=1
 #==============================================================================
 
 #==============================================================================
@@ -180,6 +184,8 @@ while [ $# -gt 0 ] ; do
   -ymin) shift ; YMIN=$1 ;;
 
   -w) shift ; W=$1 ;;
+
+  -start) shift ; START=$1 ;;
 
   -n) shift ; N=$1 ;;
   -nx) shift ; NX=$1 ;;
@@ -268,7 +274,7 @@ case "$PLOT_TYPE" in
    	python $PYROOT/text.py $W $FTYPE ;;
 
    vid)
-   	$PYROOT/avconv_wrapper ;;
+   	$PYROOT/avconv_wrapper $START ;;
 
    *)
         echo "Unrecognized argument to -plot" ; exit 1 ;;
