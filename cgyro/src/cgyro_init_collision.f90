@@ -20,7 +20,7 @@ subroutine cgyro_init_collision
   real, dimension(:,:), allocatable :: amat
   real, dimension(:,:,:,:,:,:), allocatable :: ctest
   real, dimension(:,:,:,:,:), allocatable :: bessel
-  integer :: test_flag = 0
+  integer :: test_coll_flag = 0
 
   if (collision_model == 5) then
      call cgyro_init_collision_simple
@@ -520,7 +520,7 @@ subroutine cgyro_init_collision
      
   end select
 
-  if(test_flag == 1) then
+  if(test_coll_flag == 1) then
      !Ausgabe eines sinnvollen Testwerts:
      !if (it_c(0) == 0) then
      !if (i_proc==1) then
