@@ -20,7 +20,7 @@ subroutine cgyro_init_collision
   real, dimension(:,:), allocatable :: amat
   real, dimension(:,:,:,:,:,:), allocatable :: ctest
   real, dimension(:,:,:,:,:), allocatable :: bessel
-  integer :: test_coll_flag = 1
+  integer :: test_coll_flag = 0
 
   if (collision_model == 5) then
      call cgyro_init_collision_simple
