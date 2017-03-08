@@ -193,5 +193,11 @@ if [ $SUB_FLAG -eq 0 ] ; then
     
 else
     # Submit batch file
-    sbatch $bfile || (echo 'Using qsub to submit'; qsub $bfile)
+    if hash sbatch 2> /dev/null ; then
+       sbatch $bfile 
+    elif hash qsub 2> /dev/null ; then
+       qsub $bfile
+    else
+       echo "ERROR: (gacode_qsub) No batch command recognized."
+    fi 
 fi
