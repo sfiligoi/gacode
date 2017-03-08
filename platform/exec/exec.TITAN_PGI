@@ -1,0 +1,36 @@
+#! /usr/bin/env bash
+#
+# SCRIPT:
+#  gyro.TITAN_PGI
+#
+# FUNCTION:
+#  Parallel execution script
+#---------------------------------------------------
+
+simdir=${1}
+nmpi=${2}
+exec=${3}
+nomp=${4}
+numa=${5}
+mpinuma=${6}
+nidle=${7}
+
+# nmpi = MPI tasks
+# nomp = OpenMP threads per MPI task
+# numa = NUMAs active per node
+# mpinuma = MPI tasks per active NUMA 
+
+. $GACODE_ROOT/shared/bin/gacode_mpi_tool
+
+cd $simdir
+
+echo "export OMP_STACKSIZE=100M" >> $bfile
+echo "export MPICH_MAX_THREAD_SAFETY=funneled" >> $bfile
+#echo "export MPICH_USE_DMAPP_COLL=1" >> $bfile
+#echo "export MPICH_GNI_MAX_EAGER_MSG_SIZE=65536" >> $bfile
+#echo "export MPICH_GNI_MAX_VSHORT_MSG_SIZE=8192" >> $bfile
+#echo "export MPICH_COLL_OPT_OFF=alltoall" >> $bfile
+#echo "export MPICH_GNI_DYNAMIC_CONN=disabled" >> $bfile
+export OMP_NUM_THREADS=$nomp
+echo "> aprun -cc numa_node -n $nmpi -d $nomp -S $mpinuma -sn $numa -ss $exec"
+aprun -cc numa_node -n $nmpi -d $nomp -S $mpinuma -sn $numa -ss $exec
