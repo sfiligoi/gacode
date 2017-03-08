@@ -104,7 +104,9 @@ subroutine cgyro_init_collision
                       + (1.0/(2.0*xb*xb)) * erf(xb)) + vth(is)/vth(js) &
                       * (2.0*exp(-xb*xb)/(xb**2*sqrt(pi)) &
                       + 2.0*exp(-xb*xb)/sqrt(pi) - erf(xb)/xb**3))
-                 kperp_fac(is,js) = 1.0
+                 if(collision_kperp == 1) then
+                    kperp_fac(is,js) = 1.0
+                 endif
               endif
               
            end select
