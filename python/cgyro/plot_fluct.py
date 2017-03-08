@@ -133,7 +133,7 @@ for line in open(fdata):
             else:
                 fname = fdata+str(i)
                 # Filename uses number padded with zeros
-                plt.savefig(str(i).zfill(3)+'.png')
+                plt.savefig(str(i)+'.png')
                 # Close each time to prevent memory accumulation
                 plt.close()
 
