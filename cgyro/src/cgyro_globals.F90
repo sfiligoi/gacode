@@ -52,6 +52,7 @@ module cgyro_globals
   integer :: collision_kperp
   integer :: collision_field_model
   integer :: collision_ion_model
+  real    :: collision_ele_scale
   integer :: zf_test_flag 
   integer :: nonlinear_flag 
   integer :: nonlinear_method

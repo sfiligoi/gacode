@@ -20,7 +20,7 @@ subroutine cgyro_init_collision
   real, dimension(:,:), allocatable :: amat
   real, dimension(:,:,:,:,:,:), allocatable :: ctest
   real, dimension(:,:,:,:,:), allocatable :: bessel
-  integer :: test_coll_flag = 0
+  integer :: test_coll_flag = 1
 
   if (collision_model == 5) then
      call cgyro_init_collision_simple
@@ -46,7 +46,11 @@ subroutine cgyro_init_collision
            xb = xa * vth(is) / vth(js)
            tauinv_ab = nu(is) * z(js)**2 / z(is)**2 &
                 * dens(js)/dens(is)
-
+           ! re-scale only electron collisions (ee,ei,ie)
+           if(is == is_ele .or. js == is_ele) then
+              tauinv_ab = tauinv_ab * collision_ele_scale
+           endif
+              
            select case (collision_model)
 
            case (1)
