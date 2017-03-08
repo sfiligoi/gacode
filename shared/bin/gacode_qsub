@@ -164,7 +164,7 @@ echo " MPI tasks/node          : $mpinode"
 echo " OpenMP threads/MPI task : $nomp"
 echo " MPI tasks per numa node : $mpinuma"
 echo
-. $GACODE_ROOT/shared/qsub/qsub.$GACODE_PLATFORM
+. $GACODE_ROOT/platform/qsub/qsub.$GACODE_PLATFORM
 
 if [ $SUB_FLAG -eq 0 ] ; then
     # Query NERSC/ORNL repositories
