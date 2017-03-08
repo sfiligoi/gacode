@@ -767,7 +767,7 @@ subroutine write_timers(datafile)
   character (len=*), intent(in) :: datafile
   integer :: i_dummy
   real, dimension(11) :: dummy
-  character (len=1) :: sdummy
+  character (len=2) :: sdummy
   !-------------------------------------------------
 
   if (io_control == 1 .or. io_control == 3) then
@@ -842,9 +842,9 @@ subroutine write_timers(datafile)
         read(io,'(a)') sdummy
         read(io,'(a)') sdummy
         do i_dummy=1,i_current
-           read(io,*) dummy(:)
+           read(io,*) dummy(1)
         enddo
-        endfile(io)
+        endfile(io,iostat=i_dummy)
         close(io)
      endif
 
