@@ -9,7 +9,7 @@ subroutine cgyro_init_collision
   real, dimension(:,:,:), allocatable :: nu_d, nu_par, nu_par_deriv
   real, dimension(:,:), allocatable :: rs
   real, dimension(:,:,:,:), allocatable :: rsvec, rsvect0, rsvect1
-  real, dimension(:,:), allocatable :: kperp_fac
+  real, dimension(:,:), allocatable :: klor_fac, kdiff_fac
 
   real :: arg
   real :: xa, xb, tauinv_ab
@@ -30,12 +30,14 @@ subroutine cgyro_init_collision
   allocate(nu_d(n_energy,n_species,n_species))
   allocate(nu_par(n_energy,n_species,n_species))
   allocate(nu_par_deriv(n_energy,n_species,n_species))
-  allocate(kperp_fac(n_species,n_species))
+  allocate(klor_fac(n_species,n_species))
+  allocate(kdiff_fac(n_species,n_species))
   nu_d(:,:,:) = 0.0
   nu_par(:,:,:) = 0.0
   nu_par_deriv(:,:,:) = 0.0
-  kperp_fac(:,:) = 0.0
-
+  klor_fac(:,:) = 0.0
+  kdiff_fac(:,:) = 0.0
+  
   do ie=1,n_energy
      do is=1,n_species
         do js=1,n_species
@@ -93,6 +95,9 @@ subroutine cgyro_init_collision
               !if (is /= is_ele .and. js == is_ele) then
               !   nu_d(ie,is,js) = 0.0
               !endif
+              if(collision_kperp == 1) then
+                 klor_fac(is,js) = 1.0
+              endif
 
               ! Only ii, ee Diffusion
               if(is == js) then
@@ -105,7 +110,7 @@ subroutine cgyro_init_collision
                       * (2.0*exp(-xb*xb)/(xb**2*sqrt(pi)) &
                       + 2.0*exp(-xb*xb)/sqrt(pi) - erf(xb)/xb**3))
                  if(collision_kperp == 1) then
-                    kperp_fac(is,js) = 1.0
+                    kdiff_fac(is,js) = 1.0
                  endif
               endif
               
@@ -537,11 +542,20 @@ subroutine cgyro_init_collision
            do ix=1,n_xi
               do ie=1,n_energy
                  mo1=mo1+mass(is)*dens(is)*vth(is)*vel(ie)*xi(ix)*w_xi(ix)*w_e(ie)*dens_rot(it_c(1),is) &
-                      * (ctest(is,js,ix,4,ie,4)-kperp_fac(is,js)*0.25*(k_perp(1)*rho*vth(is)*mass(is)/ (z(is)*bmag(it_c(1))))**2 &
-                      * 2.0*energy(ie) * (nu_d(ie,is,js) * (1+xi(ix)**2) + nu_par(ie,is,js) * (1-xi(ix)**2)))
-                 en1=en1+temp(is)*dens(is)*energy(ie)*w_xi(ix)*w_e(ie)*dens_rot(it_c(1),is) &
-                      *(ctest(is,js,ix,4,ie,4)-kperp_fac(is,js)*0.25*(k_perp(1)*rho*vth(is)*mass(is)/ (z(is)*bmag(it_c(1))))**2 &
-                      * 2.0*energy(ie) * (nu_d(ie,is,js) * (1+xi(ix)**2) + nu_par(ie,is,js) * (1-xi(ix)**2)))
+                      * (ctest(is,js,ix,4,ie,4) &
+                      -0.25*(k_perp(1)*rho*vth(is)*mass(is) &
+                      / (z(is)*bmag(it_c(1))))**2 &
+                      * 2.0*energy(ie) &
+                      * (klor_fac(is,js)*nu_d(ie,is,js) * (1+xi(ix)**2) &
+                      + kdiff_fac(is,js)*nu_par(ie,is,js) * (1-xi(ix)**2)))
+                 en1=en1+temp(is)*dens(is)*energy(ie)*w_xi(ix)*w_e(ie) &
+                      *dens_rot(it_c(1),is) &
+                      *(ctest(is,js,ix,4,ie,4) &
+                      -0.25*(k_perp(1)*rho*vth(is)*mass(is) &
+                      / (z(is)*bmag(it_c(1))))**2 &
+                      * 2.0*energy(ie) &
+                      * (klor_fac(is,js)*nu_d(ie,is,js) * (1+xi(ix)**2) &
+                      + kdiff_fac(is,js)*nu_par(ie,is,js) * (1-xi(ix)**2)))
                  jv=iv_v(4,4,is)
                  iv=iv_v(ie,ix,js)
                  mo2=mo2+mass(js)*dens(js)*vth(js)*cmat(iv,jv,it_c(1))*vel(ie)*xi(ix)*w_xi(ix)*w_e(ie)*dens_rot(it_c(1),js)
@@ -582,7 +596,8 @@ subroutine cgyro_init_collision
 !$omp& shared(it_c,ir_c,px,is_v,ix_v,ie_v,ctest,xi_deriv_mat) &
 !$omp& shared(temp,jvec_v,omega_trap,dens,energy,vel) &
 !$omp& shared(omega_rot_trap,omega_rot_u,e_deriv1_mat,e_max) &
-!$omp& shared(k_perp,vth,mass,z,bmag,nu_d,xi,nu_par,w_e,w_xi,kperp_fac) &
+!$omp& shared(k_perp,vth,mass,z,bmag,nu_d,xi,nu_par,w_e,w_xi) &
+!$omp& shared(klor_fac,kdiff_fac) &
 !$omp& private(ic,ic_loc,it,ir,info) &
 !$omp& private(iv,is,ix,ie,jv,js,jx,je,ks) &
 !$omp& private(amat,i_piv) &
@@ -664,17 +679,17 @@ subroutine cgyro_init_collision
                  if (is == js .and. jx == ix .and. je == ie) then
                     do ks=1,n_species
                        cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
-                            - (0.5*delta_t) * kperp_fac(is,ks) &
+                            - (0.5*delta_t) &
                             * (-0.25*(k_perp(ic)*rho*vth(is)*mass(is) &
                             / (z(is)*bmag(it)))**2 * 2.0*energy(ie) &
-                            * (nu_d(ie,is,ks) * (1+xi(ix)**2) &
-                            + nu_par(ie,is,ks) * (1-xi(ix)**2)) )
+                            * (klor_fac(is,ks)*nu_d(ie,is,ks) * (1+xi(ix)**2) &
+                            + kdiff_fac(is,ks)*nu_par(ie,is,ks)* (1-xi(ix)**2)))
                        amat(iv,jv) = amat(iv,jv) &
-                            + (0.5*delta_t) * kperp_fac(is,ks) &
+                            + (0.5*delta_t) &
                             * (-0.25*(k_perp(ic)*rho*vth(is)*mass(is) &
                             / (z(is)*bmag(it)))**2 * 2.0*energy(ie) &
-                            * (nu_d(ie,is,ks) * (1+xi(ix)**2) &
-                            + nu_par(ie,is,ks) * (1-xi(ix)**2)) )
+                            * (klor_fac(is,ks)*nu_d(ie,is,ks)* (1+xi(ix)**2) &
+                            + kdiff_fac(is,ks)*nu_par(ie,is,ks)* (1-xi(ix)**2)))
                     enddo
                  endif
               endif
