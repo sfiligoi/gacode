@@ -335,3 +335,47 @@ subroutine cgyro_init_manager
   endif
 
 end subroutine cgyro_init_manager
+
+!---------------------------------------------------
+! Calculate weight correction to integrate function
+! over interval [0,inf] instead of [0,b]
+!
+! Do this by calculating offsets to match
+!
+! Int[1/u^2], Int[1/u], Int[1], Int[u], ...
+!
+! We start from 1/u^2 not 1 since these are the
+! total polynomials of the original scheme without
+! u^2 weighting.
+!----------------------------------------------------
+
+subroutine domain_renorm(u,w,n)
+
+  implicit none
+
+  integer, intent(in) :: n
+  real, intent(in), dimension(n) :: u
+  real, intent(inout), dimension(n) :: w
+  integer, dimension(:), allocatable :: i_piv
+  real, dimension(:,:), allocatable :: a
+  real, dimension(:), allocatable :: b
+  real :: pi
+  integer :: info,m,i
+
+  pi = 4*atan(1.0)
+
+  allocate(i_piv(n))
+  allocate(b(n))
+  allocate(a(n,n))
+  do m=0,n-1
+     b(m+1) = 2*gamma((1+m)/2.0)/sqrt(pi)-sum(w*u**(m-2))    
+     do i=1,n
+        a(m+1,i) = u(i)**(m-2)
+     enddo
+  enddo
+
+  call DGESV(n,1,a,n,i_piv,b,n,info)
+
+  w = w+b
+
+end subroutine domain_renorm
