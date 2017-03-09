@@ -418,8 +418,16 @@ subroutine tgyro_init_profiles
      ! a [m]
      a_in = r_min
      ! Bt on axis [T]
+     if (EXPRO_rvbv == 0) then
+        write(*,*)'EXPRO_rvbv is zero! Pedestal calculation cannot proceed. Check input.profiles'
+        STOP
+     endif
      bt_in = EXPRO_rvbv/EXPRO_rmaj(n_exp)
      ! Plasma current Ip [Ma]
+     if (EXPRO_ip_exp == 0) then
+        write(*,*)'EXPRO_ip_exp is zero! Pedestal calculation cannot proceed. Check input.profiles'
+        STOP
+     endif
      ip_in = 1e-6*EXPRO_ip_exp
      ! betan [%] = betat/In*100 where In = Ip/(a Bt) 
      betan_in = ( p_ave/(0.5*bt_in**2/mu_0) ) / ( ip_in/(a_in*bt_in) ) * 100.0
