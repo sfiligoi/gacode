@@ -43,10 +43,10 @@ lib: $(OBJECTS)
 
 .f90.o :
 	$(FC) $(FMATH) $(FFLAGS) -c $<
- 
+
 clean:
 	rm -f *.o $(LLIB).a *.mod
 	rm -f ${GACODE_ROOT}/modules/math_constants.mod
 	rm -f ${GACODE_ROOT}/modules/timer_lib.mod
 
--include install/make.ext.${GACODE_PLATFORM}
+-include ${GACODE_ROOT}/platform/build/make.inc.${GACODE_PLATFORM}

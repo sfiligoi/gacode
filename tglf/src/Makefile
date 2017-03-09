@@ -72,4 +72,4 @@ clean:
 	rm -f *.o *.lst $(LLIB).a $(EXEC1) $(EXEC2)
 	rm -f ${GACODE_ROOT}/modules/tglf*.mod 
 
--include ../install/make.ext.${GACODE_PLATFORM}
+-include ${GACODE_ROOT}/platform/build/make.inc.${GACODE_PLATFORM}
