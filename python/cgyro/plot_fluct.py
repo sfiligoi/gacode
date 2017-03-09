@@ -89,7 +89,11 @@ if not os.path.isfile(fdata):
     sys.exit()
 
 #(2,n_radial,n_species,n_n,nt)
-n_chunk = 2*nr*ns*nn
+if (moment == 'phi'):
+    n_chunk = 2*nr*nn
+else:
+    n_chunk = 2*nr*ns*nn
+    
 m = 0
 i = 0
 
