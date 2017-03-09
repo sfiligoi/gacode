@@ -1,6 +1,3 @@
-#===========================================
-#Environment for HOPPER_CRAY GACODE_PLATFORM
-#===========================================
 #!/bin/tcsh
 
 # We can just source the bash version for now because it only has module 
