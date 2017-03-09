@@ -30,10 +30,10 @@ tgyro/math
 shared
 shared/batch
 shared/bin
-shared/exec
 shared/EXPRO
 shared/GEO
 platform/build
+platform/exec
 shared/math
 shared/profile_gen/astra
 shared/profile_gen/modinput
