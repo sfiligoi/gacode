@@ -33,7 +33,7 @@ shared/bin
 shared/exec
 shared/EXPRO
 shared/GEO
-shared/install
+platform/build
 shared/math
 shared/profile_gen/astra
 shared/profile_gen/modinput
