@@ -1,6 +1,14 @@
+!---------------------------------------------------------
+! cgyro_advect_wavenumber.f90
+!
+! PURPOSE:
+!  Manage shearing by wavenumber advection.
+!---------------------------------------------------------
+
 subroutine cgyro_advect_wavenumber(ij)
 
   use cgyro_globals
+  use timer_lib
 
   implicit none
 
@@ -8,6 +16,8 @@ subroutine cgyro_advect_wavenumber(ij)
   integer :: ir,ip,j
   complex, dimension(1-nup_wave:n_radial+nup_wave) :: h0
   complex :: dh
+
+  call timer_lib_in('shear')
 
   ! Zero work array including zero boundary regions
   h0 = 0.0
@@ -48,5 +58,7 @@ subroutine cgyro_advect_wavenumber(ij)
         enddo
      enddo
   endif
+
+  call timer_lib_out('shear')
 
 end subroutine cgyro_advect_wavenumber

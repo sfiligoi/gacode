@@ -133,13 +133,12 @@ subroutine cgyro_rhs(ij)
 
   rhs(:,:,ij) = rhs_ij(:,:)
 
+  call timer_lib_out('str')
+
   ! Wavenumber advection shear terms
   call cgyro_advect_wavenumber(ij)
 
-  call timer_lib_out('str')
-
   ! Nonlinear evaluation [f,g]
-
   if (nonlinear_flag == 1) then     
      if (nonlinear_method == 1) then
         call cgyro_nl_direct(ij)

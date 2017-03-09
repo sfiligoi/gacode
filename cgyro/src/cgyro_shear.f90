@@ -9,7 +9,6 @@ subroutine cgyro_shear
 
   use cgyro_globals
   use timer_lib
-  use cgyro_io
 
   implicit none
 
