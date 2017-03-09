@@ -236,70 +236,21 @@ subroutine cgyro_init_arrays
   endif
   !-------------------------------------------------------------------------
 
-
   !-------------------------------------------------------------------------
-  ! Derivative and dissipation stencils
+  ! Parallel derivative and dissipation stencils
   !
   allocate(cderiv(-nup_theta:nup_theta))
   allocate(uderiv(-nup_theta:nup_theta))
+  call advect_schemes(d_theta,nup_theta,cderiv,uderiv)
+  !-------------------------------------------------------------------------
 
-  select case (nup_theta)
-
-  case (1)
-
-     ! 1st-order UPWIND
-
-     ! 2nd-order centered derivative
-     cderiv(-1) = -1.0 / (2.0 * d_theta)
-     cderiv(0)  =  0.0 / (2.0 * d_theta)
-     cderiv(1)  =  1.0 / (2.0 * d_theta)
-
-     ! 2nd-derivative filter
-     uderiv(-1) = -1.0 / (2.0 * d_theta)
-     uderiv(0)  =  2.0 / (2.0 * d_theta)
-     uderiv(1)  = -1.0 / (2.0 * d_theta)
-
-  case (2)
-
-     ! 3rd-order UPWIND
-
-     ! 4th-order centered derivative
-     cderiv(-2) =  1.0 / (12.0 * d_theta)
-     cderiv(-1) = -8.0 / (12.0 * d_theta)
-     cderiv(0)  =  0.0 / (12.0 * d_theta)
-     cderiv(1)  =  8.0 / (12.0 * d_theta)
-     cderiv(2)  = -1.0 / (12.0 * d_theta)
-
-     ! 4th-derivative filter 
-     uderiv(-2) =  1.0 / (12.0 * d_theta)
-     uderiv(-1) = -4.0 / (12.0 * d_theta)
-     uderiv(0)  =  6.0 / (12.0 * d_theta)
-     uderiv(1)  = -4.0 / (12.0 * d_theta)
-     uderiv(2)  =  1.0 / (12.0 * d_theta)
-
-  case (3)
-
-     ! 5th-order UPWIND
-
-     ! 6th-order centered derivative
-     cderiv(-3) =  -1.0 / (60.0 * d_theta)
-     cderiv(-2) =   9.0 / (60.0 * d_theta)
-     cderiv(-1) = -45.0 / (60.0 * d_theta)
-     cderiv(0)  =   0.0 / (60.0 * d_theta)
-     cderiv(1)  =  45.0 / (60.0 * d_theta)
-     cderiv(2)  =  -9.0 / (60.0 * d_theta)
-     cderiv(3)  =   1.0 / (60.0 * d_theta)
-
-     ! 6th-derivative filter 
-     uderiv(-3) =  -1.0 / (60.0 * d_theta)
-     uderiv(-2) =   6.0 / (60.0 * d_theta)
-     uderiv(-1) = -15.0 / (60.0 * d_theta)
-     uderiv(0)  =  20.0 / (60.0 * d_theta)
-     uderiv(1)  = -15.0 / (60.0 * d_theta)
-     uderiv(2)  =   6.0 / (60.0 * d_theta)
-     uderiv(3)  =  -1.0 / (60.0 * d_theta)
-
-  end select
+  !-------------------------------------------------------------------------
+  ! Wavenumber derivative and dissipation stencils
+  !
+  allocate(der_wave(-nup_wave:nup_wave))
+  allocate(dis_wave(-nup_wave:nup_wave))
+  ! Wavenumber spacing (dx) is 1.0
+  call advect_schemes(1.0,nup_wave,der_wave,dis_wave)
   !-------------------------------------------------------------------------
 
   !-------------------------------------------------------------------------
@@ -446,3 +397,70 @@ real function spectraldiss(u,n)
   end select
 
 end function spectraldiss
+
+subroutine advect_schemes(dx,n,d,f)
+
+  implicit none
+  real, intent(in) :: dx
+  integer, intent(in) :: n
+  real, intent(inout), dimension(-n:n) :: d,f
+
+  select case(n)
+
+  case (1)
+
+     ! 1st-order UPWIND
+
+     ! 2nd-order centered derivative
+     d(-1) = -1.0/(2.0*dx)
+     d(0)  =  0.0/(2.0*dx)
+     d(1)  =  1.0/(2.0*dx)
+
+     ! 2nd-derivative filter
+     f(-1) = -1.0/(2.0*dx)
+     f(0)  =  2.0/(2.0*dx)
+     f(1)  = -1.0/(2.0*dx)
+
+  case (2)
+
+     ! 3rd-order UPWIND
+
+     ! 4th-order centered derivative
+     d(-2) =  1.0/(12.0*dx)
+     d(-1) = -8.0/(12.0*dx)
+     d(0)  =  0.0/(12.0*dx)
+     d(1)  =  8.0/(12.0*dx)
+     d(2)  = -1.0/(12.0*dx)
+
+     ! 4th-derivative filter 
+     f(-2) =  1.0/(12.0*dx)
+     f(-1) = -4.0/(12.0*dx)
+     f(0)  =  6.0/(12.0*dx)
+     f(1)  = -4.0/(12.0*dx)
+     f(2)  =  1.0/(12.0*dx)
+
+  case (3)
+
+     ! 5th-order UPWIND
+
+     ! 6th-order centered derivative
+     d(-3) =  -1.0/(60.0*dx)
+     d(-2) =   9.0/(60.0*dx)
+     d(-1) = -45.0/(60.0*dx)
+     d(0)  =   0.0/(60.0*dx)
+     d(1)  =  45.0/(60.0*dx)
+     d(2)  =  -9.0/(60.0*dx)
+     d(3)  =   1.0/(60.0*dx)
+
+     ! 6th-derivative filter 
+     f(-3) =  -1.0/(60.0*dx)
+     f(-2) =   6.0/(60.0*dx)
+     f(-1) = -15.0/(60.0*dx)
+     f(0)  =  20.0/(60.0*dx)
+     f(1)  = -15.0/(60.0*dx)
+     f(2)  =   6.0/(60.0*dx)
+     f(3)  =  -1.0/(60.0*dx)
+
+  end select
+
+end subroutine advect_schemes

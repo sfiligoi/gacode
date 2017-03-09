@@ -34,9 +34,11 @@ module cgyro_globals
   real    :: up_radial
   real    :: up_theta
   real    :: up_alpha
+  real    :: up_wave
   integer :: nup_radial
   integer :: nup_theta
   integer :: nup_alpha
+  integer :: nup_wave
   integer :: constant_stream_flag
   real    :: ky
   integer :: box_size
@@ -266,13 +268,17 @@ module cgyro_globals
   real, dimension(:), allocatable :: dvfac
   !
   ! Parallel streaming
+  real :: d_theta
   real, dimension(:), allocatable :: theta
   real, dimension(:), allocatable :: uderiv
   real, dimension(:), allocatable :: cderiv
-  real, dimension(:), allocatable :: spec_uderiv
   integer, dimension(:,:), allocatable :: icd_c
   complex, dimension(:,:), allocatable :: dtheta
   complex, dimension(:,:), allocatable :: dtheta_up
+  !
+  ! Wavenumber advection
+  real, dimension(:), allocatable :: der_wave
+  real, dimension(:), allocatable :: dis_wave
   !
   ! Distributions
   complex, dimension(:,:,:), allocatable :: rhs
@@ -365,7 +371,6 @@ module cgyro_globals
   ! 
   ! Equilibrium/geometry arrays
   integer :: it0
-  real :: d_theta
   real :: bigR_th0
   real :: bigR_r_th0
   real, dimension(:,:), allocatable :: thetab

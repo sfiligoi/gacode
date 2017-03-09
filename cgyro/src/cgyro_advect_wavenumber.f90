@@ -5,10 +5,11 @@ subroutine cgyro_advect_wavenumber(ij)
   implicit none
 
   integer, intent(in) :: ij
-  integer :: ir,j
-  complex, dimension(0:n_radial+1) :: h0
+  integer :: ir,ip,j
+  complex, dimension(1-nup_wave:n_radial+nup_wave) :: h0
+  complex :: dh,fh
 
-  ! Zero work array
+  ! Zero work array including zero boundary regions
   h0 = 0.0
 
   ! Wavenumber advection ExB shear
@@ -18,8 +19,14 @@ subroutine cgyro_advect_wavenumber(ij)
         do j=1,n_theta
            h0(1:n_radial) = h_x(ic_c(:,j),iv_loc)
            do ir=1,n_radial
+              dh = 0.0
+              fh = 0.0
+              do ip=-nup_wave,nup_wave
+                 dh = dh+der_wave(ip)*h0(ir+ip)
+                 fh = fh+dis_wave(ip)*h0(ir+ip)
+              enddo
               rhs(ic_c(ir,j),iv_loc,ij) = rhs(ic_c(ir,j),iv_loc,ij)+ &
-                   omega_eb*0.5*(h0(ir+1)-h0(ir-1))
+                   omega_eb*dh-abs(omega_eb)*fh
            enddo
         enddo
      enddo
@@ -34,8 +41,11 @@ subroutine cgyro_advect_wavenumber(ij)
               h0(ir) = sum(omega_ss(:,ic_c(ir,j),iv_loc)*field(:,ic_c(ir,j)))
            enddo
            do ir=1,n_radial
-              rhs(ic_c(ir,j),iv_loc,ij) = rhs(ic_c(ir,j),iv_loc,ij)+ &
-                   0.5*(h0(ir+1)-h0(ir-1))
+              dh = 0.0
+              do ip=-nup_wave,nup_wave
+                 dh = dh+der_wave(ip)*h0(ir+ip)
+              enddo
+              rhs(ic_c(ir,j),iv_loc,ij) = rhs(ic_c(ir,j),iv_loc,ij)+dh
            enddo
         enddo
      enddo
