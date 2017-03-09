@@ -71,10 +71,12 @@ subroutine cgyro_kernel
      ! Collisionless step: returns new h_x, cap_h_x, fields 
      if (integration_error(2) > adapt_tol .and. nonlinear_flag == 1) then
         ! Trigger adaptive step
-        delta_t = delta_t/2
+        delta_t = delta_t/4
         call cgyro_step_gk
         call cgyro_step_gk
-        delta_t = 2*delta_t
+        call cgyro_step_gk
+        call cgyro_step_gk
+        delta_t = 4*delta_t
      else
         ! Normal timestep
         call cgyro_step_gk

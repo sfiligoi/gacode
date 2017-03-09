@@ -58,6 +58,14 @@ subroutine cgyro_write_initdata
 
      endif
 
+     ! Compute Z_eff (diagnostic only)
+     z_eff = 0.0
+     do is=1,n_species
+        if (z(is) > 0.0) then 
+           z_eff = z_eff+dens(is)*z(is)**2/dens_ele
+        endif
+     enddo
+
      ! Dissipation information
      write(io,*)
      write(io,'(t2,3(a,1x,i2,3x),t48,a)') &
@@ -91,13 +99,6 @@ subroutine cgyro_write_initdata
         write(io,10) 'n_norm[e19/m^3]:',dens_norm,'v_norm[m/s]:',vth_norm,'T_norm[keV]:',temp_norm
      endif
      write(io,*)
-     z_eff = 0.0
-     do is=1,n_species
-        if (z(is) > 0.0) then 
-           z_eff = z_eff+dens(is)*z(is)**2/dens_ele
-        endif
-     enddo
-
      close(io)
 
   endif
