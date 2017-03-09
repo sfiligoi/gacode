@@ -49,7 +49,6 @@ OBJECTS = cgyro_globals.o \
           cgyro_run.o \
           cgyro_shear.o \
           cgyro_shear_interface.o \
-          cgyro_shear_advect.o \
           cgyro_shear_hammett.o \
           cgyro_shear_linear.o \
 	  cgyro_step_gk.o \

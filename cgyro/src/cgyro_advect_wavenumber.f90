@@ -7,7 +7,7 @@ subroutine cgyro_advect_wavenumber(ij)
   integer, intent(in) :: ij
   integer :: ir,ip,j
   complex, dimension(1-nup_wave:n_radial+nup_wave) :: h0
-  complex :: dh,fh
+  complex :: dh
 
   ! Zero work array including zero boundary regions
   h0 = 0.0
@@ -20,13 +20,11 @@ subroutine cgyro_advect_wavenumber(ij)
            h0(1:n_radial) = h_x(ic_c(:,j),iv_loc)
            do ir=1,n_radial
               dh = 0.0
-              fh = 0.0
               do ip=-nup_wave,nup_wave
                  dh = dh+der_wave(ip)*h0(ir+ip)
-                 fh = fh+dis_wave(ip)*h0(ir+ip)
               enddo
               rhs(ic_c(ir,j),iv_loc,ij) = rhs(ic_c(ir,j),iv_loc,ij)+ &
-                   omega_eb*dh-abs(omega_eb)*fh
+                   omega_eb*dh
            enddo
         enddo
      enddo
