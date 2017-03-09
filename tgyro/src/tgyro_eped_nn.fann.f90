@@ -101,8 +101,10 @@
    !write(*,*) TRIM(epednn_model)
    ierr=load_anns(1, TRIM(epednn_model)//NUL,'brainfuse'//NUL)
    ierr=load_anns_inputs(INPUT_PARAMETERS)
+   !write(*,*) 'INPUT_PARAMETERS',INPUT_PARAMETERS
    ierr=run_anns()
    ierr=get_anns_avg_array(OUTPUT_PARAMETERS)
+   !write(*,*) 'OUTPUT_PARAMETERS',OUTPUT_PARAMETERS
 
    nn_w_ped = OUTPUT_PARAMETERS(3)*2
    nn_p_ped = OUTPUT_PARAMETERS(1)*1e6
