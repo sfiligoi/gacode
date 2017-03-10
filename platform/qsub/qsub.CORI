@@ -1,5 +1,8 @@
 #!/bin/bash
 
+echo "-queue options: debug, regular"
+echo "  -qos options: normal, premium, low, scavenger"
+
 bfile=$SIMDIR/batch.src
 
 echo "#!/bin/bash -l" > $bfile
