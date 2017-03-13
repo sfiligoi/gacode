@@ -24,13 +24,14 @@ nidle=${7}
 
 cd $simdir
 
-echo "export OMP_STACKSIZE=100M" >> $bfile
-echo "export MPICH_MAX_THREAD_SAFETY=funneled" >> $bfile
-#echo "export MPICH_USE_DMAPP_COLL=1" >> $bfile
-#echo "export MPICH_GNI_MAX_EAGER_MSG_SIZE=65536" >> $bfile
-#echo "export MPICH_GNI_MAX_VSHORT_MSG_SIZE=8192" >> $bfile
-#echo "export MPICH_COLL_OPT_OFF=alltoall" >> $bfile
-#echo "export MPICH_GNI_DYNAMIC_CONN=disabled" >> $bfile
+export OMP_STACKSIZE=100M
+export MPICH_MAX_THREAD_SAFETY=funneled
+#export MPICH_USE_DMAPP_COLL=1
+#export MPICH_GNI_MAX_EAGER_MSG_SIZE=65536
+#export MPICH_GNI_MAX_VSHORT_MSG_SIZE=8192
+#export MPICH_COLL_OPT_OFF=alltoall
+#export MPICH_GNI_DYNAMIC_CONN=disabled
+
 export OMP_NUM_THREADS=$nomp
 echo "> aprun -cc numa_node -n $nmpi -d $nomp -S $mpinuma -sn $numa -ss $exec"
 aprun -cc numa_node -n $nmpi -d $nomp -S $mpinuma -sn $numa -ss $exec
