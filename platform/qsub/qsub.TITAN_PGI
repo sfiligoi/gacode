@@ -1,5 +1,11 @@
-# 1. Queues
-echo " queue choices: debug, batch"
+#!/bin/bash
+
+echo "-queue: debug, batch"
+
+# Default queue
+if [ "$QUEUE" == "null_queue" ] ; then
+   QUEUE=debug
+fi
 
 bfile=$SIMDIR/batch.src
 echo "#!/bin/bash -l" > $bfile
