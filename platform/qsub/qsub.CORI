@@ -1,7 +1,12 @@
 #!/bin/bash
 
-echo "-queue options: debug, regular"
-echo "  -qos options: normal, premium, low, scavenger"
+echo "-queue: debug, regular"
+echo "  -qos: normal, premium, low, scavenger"
+
+# Default queue
+if [ "$QUEUE" == "null_queue" ] ; then
+   QUEUE=debug
+fi
 
 bfile=$SIMDIR/batch.src
 
