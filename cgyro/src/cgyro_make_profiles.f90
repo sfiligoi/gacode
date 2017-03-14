@@ -237,8 +237,7 @@ subroutine cgyro_make_profiles
      call cgyro_info('Triggered zonal flow test')
 
      if (n_radial /= 1) then
-        call cgyro_error('For zonal flow test, set n_radial=1.')
-        return
+        call cgyro_info('Zonal flow test with n_radial>1')
      endif
 
      n = 0
@@ -308,10 +307,17 @@ subroutine cgyro_make_profiles
      indx_xi(ix) = ix-1
   enddo
   allocate(px(n_radial))
-  do ir=1,n_radial
-     px(ir) = -n_radial/2 + (ir-1)
-  enddo
-  if (zf_test_flag == 1) px(1) = 1
+  if (zf_test_flag == 1) then
+     do ir=1,n_radial
+        px(ir) = ir
+        ! only need positive k_r Fourier coefficients.
+     enddo
+  else
+     do ir=1,n_radial
+        px(ir) = -n_radial/2 + (ir-1)
+     enddo
+  endif
+
   !-------------------------------------------------------------
 
 end subroutine cgyro_make_profiles

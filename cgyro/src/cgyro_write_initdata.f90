@@ -53,8 +53,13 @@ subroutine cgyro_write_initdata
              n_toroidal,q/rmin*rho,kymax,2*pi/ky
 
      else
-
-        write(io,*) ' kx*rho:',2*pi*rho/length
+        if (n_radial==1) then
+           write(io,*) ' kx*rho:',2*pi*rho/length
+        else
+           write(io,*) '          n          Delta            Max           L/rho'
+           write(io,'(a,i4,2x,2(g0.8,2x),2x,g0.8)') ' kx*rho:',&
+                n_radial,2*pi*rho/length,2*pi*rho*(n_radial/2-1)/length,length/rho
+        endif
 
      endif
 
