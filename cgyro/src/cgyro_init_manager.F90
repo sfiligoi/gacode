@@ -94,6 +94,7 @@ subroutine cgyro_init_manager
   allocate(thetab(n_radial/box_size,n_theta))
   allocate(w_theta(n_theta))
   allocate(g_theta(n_theta))
+  allocate(g_theta_geo(n_theta))
   allocate(bmag(n_theta))
   allocate(btor(n_theta))
   allocate(bpol(n_theta))
