@@ -89,7 +89,7 @@ subroutine cgyro_write_initdata
      write(io,20) '   zeta:',zeta, ' s_zeta:',s_zeta, 'gamma_p:',gamma_p
 
      write(io,*)
-     write(io,20) '[rho/a]:',rho,'[z_eff]:',z_eff
+     write(io,20) '[rho/a]:',rho,'[z_eff]:',z_eff,'[w_E*dt]',(n_toroidal-1)*q/rmin*length*gamma_e/(2*pi)*delta_t
      write(io,*)
      write(io,'(a)') &
           ' i  z  n/n_norm   T/T_norm   m/m_norm     a/Ln       a/Lt       nu         s_n        s_t'
@@ -104,6 +104,7 @@ subroutine cgyro_write_initdata
         write(io,10) 'n_norm[e19/m^3]:',dens_norm,'v_norm[m/s]:',vth_norm,'T_norm[keV]:',temp_norm
      endif
      write(io,*)
+    
      close(io)
 
   endif
