@@ -123,6 +123,7 @@ subroutine cgyro_equilibrium
            ! Constant by construction
            g_theta(it) = gtheta_ave
         endif
+        g_theta_geo(it) = GEO_g_theta
 
         omega_stream(it,is) = sqrt(2.0)*vth(is)/(q*rmaj*g_theta(it))
 

@@ -131,6 +131,7 @@ subroutine cgyro_kernel
   if(allocated(thetab))         deallocate(thetab)
   if(allocated(w_theta))        deallocate(w_theta)
   if(allocated(g_theta))        deallocate(g_theta)
+  if(allocated(g_theta_geo))    deallocate(g_theta_geo)
   if(allocated(bmag))           deallocate(bmag)
   if(allocated(btor))           deallocate(btor)
   if(allocated(bpol))           deallocate(bpol)
