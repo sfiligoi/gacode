@@ -31,7 +31,8 @@ subroutine GEO_do()
        ucos => GEOV_ucos, &
        bigr => GEOV_bigr, &
        bigr_r => GEOV_bigr_r, &
-       bigr_t => GEOV_bigr_t
+       bigr_t => GEOV_bigr_t, &
+       bigz_r => GEOV_bigz_r
 
   !-----------------------------------------------------------
   implicit none
@@ -51,7 +52,6 @@ subroutine GEO_do()
   real :: x
   real :: bigr_tt
   real :: bigz_tt
-  real :: bigz_r
   real :: g_tt
   real :: f
   real :: f_prime
@@ -195,11 +195,11 @@ subroutine GEO_do()
         ! dZ/dr
         ! dZ/dtheta
         ! d^2Z/dtheta^2
-        bigz(i) = GEO_zmag_in+GEO_kappa_in*GEO_rmin_in*sin(a)
-        bigz_r  = GEO_dzmag_in+GEO_kappa_in*(1.0+GEO_s_kappa_in)*sin(a)+&
+        bigz(i)   = GEO_zmag_in+GEO_kappa_in*GEO_rmin_in*sin(a)
+        bigz_r(i) = GEO_dzmag_in+GEO_kappa_in*(1.0+GEO_s_kappa_in)*sin(a)+&
              GEO_kappa_in*GEO_s_zeta_in*cos(a)*sin(2*theta)
         bigz_t(i) = GEO_kappa_in*GEO_rmin_in*cos(a)*a_t
-        bigz_tt = -GEO_kappa_in*GEO_rmin_in*sin(a)*a_t**2+&
+        bigz_tt   = -GEO_kappa_in*GEO_rmin_in*sin(a)*a_t**2+&
              GEO_kappa_in*GEO_rmin_in*cos(a)*a_tt
 
      else
@@ -220,21 +220,21 @@ subroutine GEO_do()
         enddo
 
         bigz(i)  = 0.5*a_Z(0)
-        bigz_r   = 0.5*a_Zp(0)
+        bigz_r(i)= 0.5*a_Zp(0)
         bigz_t(i) = 0.0
         bigz_tt   = 0.0
         do n=1,ny
-           bigz(i) = bigz(i)+a_Z(n)*cos(n*theta)+b_Z(n)*sin(n*theta)        
-           bigz_r  = bigz_r+a_Zp(n)*cos(n*theta)+b_Zp(n)*sin(n*theta)        
-           bigz_t(i)  = bigz_t(i)-n*a_Z(n)*sin(n*theta)+n*b_Z(n)*cos(n*theta) 
-           bigz_tt = bigz_tt-n*n*(a_Z(n)*cos(n*theta)+b_Z(n)*sin(n*theta)) 
+           bigz(i)   = bigz(i)+a_Z(n)*cos(n*theta)+b_Z(n)*sin(n*theta)        
+           bigz_r(i) = bigz_r(i)+a_Zp(n)*cos(n*theta)+b_Zp(n)*sin(n*theta)        
+           bigz_t(i) = bigz_t(i)-n*a_Z(n)*sin(n*theta)+n*b_Z(n)*cos(n*theta) 
+           bigz_tt   = bigz_tt-n*n*(a_Z(n)*cos(n*theta)+b_Z(n)*sin(n*theta)) 
         enddo
 
      endif
 
      g_tt = bigr_t(i)**2+bigz_t(i)**2
 
-     jac_r(i) = bigr(i)*(bigr_r(i)*bigz_t(i)-bigr_t(i)*bigz_r)
+     jac_r(i) = bigr(i)*(bigr_r(i)*bigz_t(i)-bigr_t(i)*bigz_r(i))
 
      grad_r(i) = bigr(i)*sqrt(g_tt)/jac_r(i)
 
@@ -246,7 +246,7 @@ subroutine GEO_do()
      ! cos(u)
      bigz_l(i) = bigz_t(i)/l_t(i)
 
-     nsin(i) = (bigr_r(i)*bigr_t(i)+bigz_r*bigz_t(i))/l_t(i)
+     nsin(i) = (bigr_r(i)*bigr_t(i)+bigz_r(i)*bigz_t(i))/l_t(i)
 
   enddo
   !------------------------------------------------------------------
