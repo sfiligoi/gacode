@@ -81,7 +81,7 @@ subroutine cgyro_init_arrays
               if(n==0) then
                  jxvec_c(3,ic,iv_loc) = 0.0
               else
-                 jxvec_c(3,ic,iv_loc) = fac * z(is)*bmag(it) &
+                 jxvec_c(3,ic,iv_loc) = fac * z(is)*bmag(it)/mass(is) &
                       /(k_perp(ic)*rho)**2 &
                       * (bmag(it) * jloc_c(2,ic) - jloc_c(1,ic))
               endif

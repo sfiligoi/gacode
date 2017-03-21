@@ -384,6 +384,7 @@ module cgyro_globals
   real, dimension(:), allocatable   :: btor
   real, dimension(:), allocatable   :: bpol
   real, dimension(:), allocatable   :: bigR
+  real, dimension(:), allocatable   :: bigR_r
   real, dimension(:,:), allocatable :: omega_stream
   real, dimension(:,:), allocatable :: omega_trap
   real, dimension(:,:), allocatable :: omega_rdrift
