@@ -109,6 +109,7 @@ subroutine cgyro_equilibrium
      call GEO_interp(theta(it))     
 
      bigR(it)   = GEO_bigr
+     bigR_r(it) = GEO_bigr_r
      bmag(it)   = GEO_b
      btor(it)   = GEO_bt
      bpol(it)   = GEO_bp
@@ -186,11 +187,6 @@ subroutine cgyro_equilibrium
         omega_rot_edrift_r(it,is) = -rho * GEO_bt/GEO_b * q * GEO_bigR/rmin 
 
      enddo
-
-     ! Used in cgyro_init_rotation
-     omega_rot_edrift_0(it) = (mach/rmaj)**2 * (GEO_bigr * GEO_bigr_r &
-          - bigR_th0 * bigR_r_th0) + (mach/rmaj) * (-gamma_p/rmaj) &
-          * (GEO_bigr**2 - bigR_th0**2)
 
      ! Rotation shear (GAMMA_P)
      omega_gammap(it) = GEO_bt/GEO_b*GEO_bigr/rmaj*gamma_p

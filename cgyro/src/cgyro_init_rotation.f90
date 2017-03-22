@@ -185,20 +185,33 @@ subroutine cgyro_init_rotation
      phi_rot_rderiv(it) = 0.0
      sum_pressure_r(it) = 0.0
      do is=1,n_species
-        fac = dens(is)*dens_rot(it,is)*(-dlnndr(is) &
+
+        phi_rot_rderiv(it) = phi_rot_rderiv(it) &
+             + z(is)*dens(is)*dens_rot(it,is)*(-dlnndr(is) &
              - dlntdr(is)*(z(is)/temp(is)*phi_rot(it) &
              - 0.5*(mach/rmaj/vth(is))**2 * (bigR(it)**2 - bigR_th0**2)) &
-             + omega_rot_edrift_0(it)/vth(is)**2)
-        phi_rot_rderiv(it) = phi_rot_rderiv(it) + z(is)*fac
-        sum_pressure_r(it) = sum_pressure_r(it) + fac*temp(is) &
-             -dlntdr(is)*dens(is)*dens_rot(it,is)*temp(is)
+             + (mach/rmaj/vth(is))**2 * (bigR(it) * bigR_r(it) &
+             - bigR_th0 * bigR_r_th0) + (mach/rmaj)/vth(is)**2 &
+             * (-gamma_p/rmaj) * (bigR(it)**2 - bigR_th0**2))
+
+        sum_pressure_r(it) = sum_pressure_r(it) &
+             + temp(is)*dens(is)*dens_rot(it,is)*(-dlnndr(is) &
+             - dlntdr(is)*(1.0 + z(is)/temp(is)*phi_rot(it) &
+             - 0.5*(mach/rmaj/vth(is))**2 * (bigR(it)**2 - bigR_th0**2)) &
+             - (mach/rmaj/vth(is))**2 * (bigR_th0 * bigR_r_th0) &
+             + (mach/rmaj)/vth(is)**2 &
+             * (-gamma_p/rmaj) * (bigR(it)**2 - bigR_th0**2))
+
      enddo
      if(ae_flag == 1) then
-        fac = dens_ele*dens_ele_rot(it)*(-dlnndr_ele &
+      
+        phi_rot_rderiv(it) = phi_rot_rderiv(it) &
+             - dens_ele*dens_ele_rot(it)*(-dlnndr_ele &
              + dlntdr_ele/temp_ele*phi_rot(it))
-        phi_rot_rderiv(it) = phi_rot_rderiv(it) - fac
-        sum_pressure_r(it) = sum_pressure_r(it) + fac*temp_ele &
-             -dlntdr_ele*dens_ele*dens_ele_rot(it)*temp_ele
+        
+        sum_pressure_r(it) = sum_pressure_r(it) &
+             + temp_ele*dens_ele*dens_ele_rot(it)*(-dlnndr_ele - dlntdr_ele)
+             
      endif
 
      phi_rot_rderiv(it) = phi_rot_rderiv(it) / sum_zn
@@ -211,19 +224,17 @@ subroutine cgyro_init_rotation
   enddo
 
   ! EAB: beta_prime cf correction not yet fully implemented
-  ! dp/dr (theta)
-  do it=1,n_theta
-     do is=1,n_species
-        sum_pressure_r(it) = sum_pressure_r(it) &
-             - dens(is)*dens_rot(it,is)*temp(is) &
-             * z(is)/temp(is)*phi_rot_rderiv(it)
-     enddo
-     if(ae_flag == 1) then
-        sum_pressure_r(it) = sum_pressure_r(it) &
-             + dens_ele*dens_ele_rot(it)*phi_rot_rderiv(it)
-     endif
+  ! "dp/dr" -> dp/dr (theta) - 0.5*omega^2*dR^2/dr sum_a m_a n_a
+  ! beta_star = beta_star_theta0 * "dp/dr"/ (dp/dr)(theta0)
+  fac = 0.0
+  do is=1,n_species
+     fac = fac - temp(is)*dens(is)*(dlnndr(is) + dlntdr(is))
   enddo
-  ! Compute projections of dp/dr
+  if(ae_flag == 1) then
+     fac = fac - temp_ele*dens_ele*(dlnndr_ele + dlntdr_ele)
+  endif
+  sum_pressure_r(:) = sum_pressure_r(:)*beta_star/fac
+  ! Compute projections of beta_star
   beta_star_cos(:) = 0.0
   beta_star_sin(:) = 0.0
   do it=1,n_theta

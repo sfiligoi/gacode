@@ -101,6 +101,7 @@ subroutine cgyro_init_manager
   allocate(k_perp(nc))
   allocate(k_x(nc))
   allocate(bigR(n_theta))
+  allocate(bigR_r(n_theta))
   allocate(omega_stream(n_theta,n_species))
   allocate(omega_trap(n_theta,n_species))
   allocate(omega_rdrift(n_theta,n_species))
