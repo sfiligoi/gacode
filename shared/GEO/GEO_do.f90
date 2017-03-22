@@ -76,6 +76,7 @@ subroutine GEO_do()
   real, dimension(:), allocatable :: a_R,b_R,a_Z,b_Z
   real, dimension(:), allocatable :: a_Rp,b_Rp,a_Zp,b_Zp
   real, dimension(:), allocatable :: r_sc
+  real, dimension(:), allocatable :: beta_star
   !
   !-----------------------------------------------------------
 
@@ -136,6 +137,7 @@ subroutine GEO_do()
   allocate(ei(n_theta,4))
   allocate(loop(4))
   allocate(r_sc(n_theta))
+  allocate(beta_star(n_theta))
   !-----------------------------------------------------------
 
   pi_2 = 8.0*atan(1.0)
@@ -248,6 +250,11 @@ subroutine GEO_do()
 
      nsin(i) = (bigr_r(i)*bigr_t(i)+bigz_r(i)*bigz_t(i))/l_t(i)
 
+     ! beta_star(theta)
+     beta_star(i) = GEO_beta_star_in + &
+          GEO_beta_star_1_in*(1.0-cos(theta)) + &
+          GEO_beta_star_2_in*(1.0-cos(2*theta)) 
+
   enddo
   !------------------------------------------------------------------
 
@@ -308,7 +315,8 @@ subroutine GEO_do()
      dbdt2(i) = (-b5+16.0*b4-30.0*b3+16.0*b2-b1)/(12.0*d_theta**2)
      gsin(i)  = bt(i)*GEO_rmaj_in*dbdl(i)/b(i)**2
      gcos1(i) = (bt(i)**2/bigr(i)*bigz_l(i)+bp(i)**2/r_c(i))*GEO_rmaj_in/b(i)**2
-     gcos2(i) = 0.5*(GEO_rmaj_in/b(i)**2)*grad_r(i)*(-GEO_beta_star_in)
+     gcos2(i) = 0.5*(GEO_rmaj_in/b(i)**2)*grad_r(i)*(-beta_star(i))
+
      g_theta(i) = bigr(i)*b(i)*l_t(i)/(GEO_rmin_in*GEO_rmaj_in*grad_r(i))
      gq(i)    = GEO_rmin_in*b(i)/(GEO_q_in*bigr(i)*bp(i))
 
@@ -321,11 +329,13 @@ subroutine GEO_do()
   !------------------------------------------------------------------
   ! Compute integrands for E1,E2,E3 and E4=nu
   !
+  ! NOTE: E3 now contains beta_star(theta)
+  !
   do i=1,n_theta
      c = d_theta*l_t(i)/(bigr(i)*grad_r(i))
      ei(i,1) = c*2.0*bt(i)/bp(i)*(GEO_rmin_in/r_c(i)-GEO_rmin_in*bigz_l(i)/bigr(i))
      ei(i,2) = c*b(i)**2/bp(i)**2
-     ei(i,3) = c*grad_r(i)*0.5/bp(i)**2*(bt(i)/bp(i))     
+     ei(i,3) = c*grad_r(i)*0.5/bp(i)**2*(bt(i)/bp(i))*beta_star(i)     
      ei(i,4) = -c*grad_r(i)*(bt(i)/bp(i))     
   enddo
   !------------------------------------------------------------------
@@ -349,13 +359,12 @@ subroutine GEO_do()
   !
   loop(:) = e(n_theta,:)-e(1,:)
   !
-  f_prime = (pi_2*GEO_q_in*GEO_s_in/GEO_rmin_in-loop(1)/GEO_rmin_in-&
-       loop(3)*(-GEO_beta_star_in))/loop(2)
+  f_prime = (pi_2*GEO_q_in*GEO_s_in/GEO_rmin_in-loop(1)/GEO_rmin_in+loop(3))/loop(2)
 
   do i=1,n_theta
-     nu(i)    = e(i,4)
+     nu(i) = e(i,4)
      captheta(i) = bp(i)/b(i)*grad_r(i)*bigr(i)* & 
-          (e(i,1)/GEO_rmin_in+e(i,2)*f_prime+e(i,3)*(-GEO_beta_star_in))
+          (e(i,1)/GEO_rmin_in+e(i,2)*f_prime-e(i,3))
   enddo
   !------------------------------------------------------------------
 
@@ -388,10 +397,9 @@ subroutine GEO_do()
 
   ! theta(i) = 0 for i = n_theta/2+1
 
-  GEO_grad_r0   = grad_r(n_theta/2+1)
-  GEO_ffprime   = f*f_prime
-  GEO_beta_star = GEO_beta_star_in
-  GEO_f         = f
+  GEO_grad_r0 = grad_r(n_theta/2+1)
+  GEO_ffprime = f*f_prime
+  GEO_f       = f
   !
   ! pre-factor of 0.5 comes from triangular element in phi-direction:
   ! dV = (0.5*R*dphi)*(R*dZ) 

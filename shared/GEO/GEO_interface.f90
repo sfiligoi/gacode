@@ -48,8 +48,16 @@
 !  GEO_s_delta_in
 !  GEO_zeta_in
 !  GEO_s_zeta_in
-!  GEO_beta_star_in -> beta_unit*dlnpdr 
+!  GEO_beta_star_in    
+!  GEO_beta_star_1_in 
+!  GEO_beta_star_2_in 
 !  GEO_fourier_in(8,GEO_nfourier_in)
+!
+! NOTE:
+!  beta_star(t) = beta_star + beta_star_1 [ 1-cos(t) ] + beta_star_2 [ 1-2cos(t) ]  
+!               = (8 pi)/(B_unit^2) dp(t)/dr
+!
+!  beta_star_1 > 0 and beta_star_2 > 0 only for strong rotation. 
 !
 ! OUTPUT:
 !
@@ -95,6 +103,8 @@ module GEO_interface
   real :: GEO_zeta_in
   real :: GEO_s_zeta_in
   real :: GEO_beta_star_in
+  real :: GEO_beta_star_1_in
+  real :: GEO_beta_star_2_in
 
   integer :: GEO_ntheta_in=1001
   integer :: GEO_nfourier_in=0
@@ -167,7 +177,6 @@ module GEO_interface
 
   real :: GEO_f
   real :: GEO_ffprime
-  real :: GEO_beta_star
   real :: GEO_volume_prime
   real :: GEO_volume
   real :: GEO_fluxsurfave_grad_r2

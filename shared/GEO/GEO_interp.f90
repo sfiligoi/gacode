@@ -35,7 +35,6 @@ subroutine GEO_interp(theta_0)
      GEO_grad_r0 = 1.0
 
      GEO_ffprime   = 0.0
-     GEO_beta_star = GEO_beta_star_in
      GEO_f         = GEO_rmaj_in
 
      GEO_volume       = 2*pi**2*GEO_rmin_in**2*GEO_rmaj_in
