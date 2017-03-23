@@ -269,9 +269,10 @@ subroutine cgyro_init_rotation
         
      enddo
 
-     omega_rot_edrift(it) =  -rho * GEO_bt/GEO_bp * GEO_captheta &
-          / GEO_grad_r * phi_rot_tderiv(it) / (q*rmaj*g_theta(it)) &
-          + rho*phi_rot_rderiv(it)
+     omega_rot_edrift(it) =  rho*phi_rot_rderiv(it) &
+          - rho * phi_rot_tderiv(it) / (q*rmaj*g_theta(it)) &
+          * (GEO_bt/GEO_bp * GEO_captheta / GEO_grad_r &
+          + GEO_l_r * GEO_b/GEO_bp)
      
      omega_rot_edrift_r(it) = -rho * GEO_bt/GEO_bp/GEO_b * GEO_grad_r &
           * phi_rot_tderiv(it) / (q*rmaj*g_theta(it))
