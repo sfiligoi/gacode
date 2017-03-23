@@ -14,22 +14,22 @@ subroutine cgyro_init_rotation
   integer, dimension(:), allocatable :: thcyc
   real, dimension(:), allocatable :: thcderiv
   real :: x, x0, fac, sum_zn, dsum_zn
-  integer :: is, it, j, id, jt
+  integer :: is, it, j, id, jt, ir
   integer, parameter :: jmax = 200
   
-  ! O(mach) terms only
   if(rotation_model == 1) then
-     dens_rot(:,:) = 1.0
-     dens_ele_rot(:) = 1.0
-     lambda_rot(:,:) = 0.0
-     dlambda_rot(:,:) = 0.0
-     omega_rot_trap(:,:) = 0.0
-     omega_rot_u(:,:) = 0.0
-     omega_rot_drift(:,:) = 0.0
+     ! O(mach) terms only
+     dens_rot(:,:)          = 1.0
+     dens_ele_rot(:)        = 1.0
+     lambda_rot(:,:)        = 0.0
+     dlambda_rot(:,:)       = 0.0
+     omega_rot_trap(:,:)    = 0.0
+     omega_rot_u(:,:)       = 0.0
+     omega_rot_drift(:,:)   = 0.0
      omega_rot_drift_r(:,:) = 0.0
-     omega_rot_star(:,:) = 0.0
-     omega_rot_edrift(:) = 0.0
-     omega_rot_edrift_r(:) = 0.0
+     omega_rot_star(:,:)    = 0.0
+     omega_rot_edrift(:)    = 0.0
+     omega_rot_edrift_r(:)  = 0.0
      return
   endif
 
@@ -164,7 +164,8 @@ subroutine cgyro_init_rotation
              + (mach/rmaj/vth(is))**2 * (bigR(it) * bigR_r(it) &
              - bigR_th0 * bigR_r_th0) + (mach/rmaj)/vth(is)**2 &
              * (-gamma_p/rmaj) * (bigR(it)**2 - bigR_th0**2))
-
+        
+        ! effective pressure gradient
         pr_r(it) = pr_r(it) &
              + temp(is)*dens(is)*dens_rot(it,is)*(-dlnndr(is) &
              - dlntdr(is)*(1.0 + z(is)/temp(is)*phi_rot(it) &
@@ -189,7 +190,16 @@ subroutine cgyro_init_rotation
      
   enddo
 
-
+  ! print out some diagnostics
+  if (silent_flag == 0 .and. i_proc == 0) then
+     open(unit=io,file=trim(path)//'out.cgyro.rotation',status='replace')
+     do it=1,n_theta
+        write(io,'(4(es16.9,1x))') theta(it), phi_rot(it), &
+             phi_rot_tderiv(it), phi_rot_rderiv(it)
+     enddo
+     close(io)
+  endif
+  
   ! beta_star drift
   ! dp/dr -> dp/dr - sum_a n_a m_a omega^2 R dR/dr
   ! Compute projections of beta_star
@@ -212,18 +222,17 @@ subroutine cgyro_init_rotation
      beta_star(j) = -bstar(j)
      beta_star(0) = beta_star(0) + bstar(j)
   enddo
-  beta_star(:) = beta_star*beta_star_scale
-  
-  ! print out some diagnostics
-  if (silent_flag == 0 .and. i_proc == 0) then
-     open(unit=io,file=trim(path)//'out.cgyro.rotation',status='replace')
-     do it=1,n_theta
-        write(io,'(4(es16.9,1x))') theta(it), phi_rot(it), &
-             phi_rot_tderiv(it), phi_rot_rderiv(it)
-     enddo
-     close(io)
+  beta_star(:) = beta_star(:) * beta_star_fac
+
+  ! Put rotation in equilibrium only if Mach^2 effects are included
+  if(rotation_model == 2 .or. rotation_model == 3) then
+     GEO_beta_star_in   = beta_star(0)
+     GEO_beta_star_1_in = beta_star(1)
+     GEO_beta_star_2_in = beta_star(2)
   endif
 
+  ! Set rotation-related geometry terms
+  
   call GEO_do()
   
   do it=1,n_theta
@@ -257,9 +266,6 @@ subroutine cgyro_init_rotation
         omega_rot_drift_r(it,is) = -(mach/rmaj)**2 * GEO_bigr * rho &
              * mass(is)/(z(is)*GEO_b) * GEO_usin * GEO_grad_r &
              * GEO_bt / GEO_b 
-      
-        omega_aprdrift(it,is) = 2.0*rho*vth(is)**2 &
-             *mass(is)/(Z(is)*GEO_b)*GEO_gq/rmaj*GEO_gcos2
         
      enddo
 
@@ -269,50 +275,42 @@ subroutine cgyro_init_rotation
      
      omega_rot_edrift_r(it) = -rho * GEO_bt/GEO_bp/GEO_b * GEO_grad_r &
           * phi_rot_tderiv(it) / (q*rmaj*g_theta(it))
-
      
   enddo  
   
-  ! O(mach^2) terms only 
-  ! no O(mach) terms
+
   if(rotation_model == 3) then
-     omega_cdrift(:,:)   = 0.0
-     omega_cdrift_r(:,:) = 0.0  
-     omega_gammap(:)     = 0.0
+     ! O(mach^2) terms only 
+     ! no O(mach) terms
+     mach_one_fac = 0.0
   endif
 
-  ! O(mach^2) terms from "GKW CF TRAP" only
-  ! no O(mach) terms and no "GKW CF DRIFT" term
   if(rotation_model == 4) then
-
-     omega_cdrift(:,:)   = 0.0
-     omega_cdrift_r(:,:) = 0.0
-     omega_gammap(:)     = 0.0
+     ! O(mach^2) terms from "GKW CF TRAP" only
+     ! no O(mach) terms and no "GKW CF DRIFT" term
+     mach_one_fac = 0.0
      
-     omega_rot_drift(:,:) = 0.0
+     omega_rot_drift(:,:)   = 0.0
      omega_rot_drift_r(:,:) = 0.0
 
   endif
 
-  ! O(mach^2) terms from "GKW CF DRIFT" only
-  ! no O(mach) terms and no "GKW CF TRAP" term
   if(rotation_model == 5) then
-
-     omega_cdrift(:,:)   = 0.0
-     omega_cdrift_r(:,:) = 0.0
-     omega_gammap(:)     = 0.0
-
-     dens_rot(:,:) = 1.0
-     dens_ele_rot(:) = 1.0
-     phi_rot(:)  = 0.0
-     phi_rot_tderiv(:)  = 0.0
-     phi_rot_rderiv(:)  = 0.0
-     lambda_rot(:,:) = 0.0
-     dlambda_rot(:,:) = 0.0
-     omega_rot_trap(:,:) = 0.0
-     omega_rot_u(:,:) = 0.0
-     omega_rot_star(:,:) = 0.0
-     omega_rot_edrift(:) = 0.0
+     ! O(mach^2) terms from "GKW CF DRIFT" only
+     ! no O(mach) terms and no "GKW CF TRAP" term
+     mach_one_fac = 0.0
+     
+     dens_rot(:,:)         = 1.0
+     dens_ele_rot(:)       = 1.0
+     phi_rot(:)            = 0.0
+     phi_rot_tderiv(:)     = 0.0
+     phi_rot_rderiv(:)     = 0.0
+     lambda_rot(:,:)       = 0.0
+     dlambda_rot(:,:)      = 0.0
+     omega_rot_trap(:,:)   = 0.0
+     omega_rot_u(:,:)      = 0.0
+     omega_rot_star(:,:)   = 0.0
+     omega_rot_edrift(:)   = 0.0
      omega_rot_edrift_r(:) = 0.0
      
   endif

@@ -394,6 +394,8 @@ module cgyro_globals
   real, dimension(:),   allocatable :: omega_gammap
   integer, parameter                :: n_beta_star=2
   real, dimension(0:n_beta_star)    :: beta_star
+  real                              :: beta_star_fac
+  real                              :: mach_one_fac
   ! for centrifugal rotation
   real, dimension(:,:), allocatable :: lambda_rot
   real, dimension(:,:), allocatable :: dlambda_rot

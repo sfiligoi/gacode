@@ -344,6 +344,8 @@ subroutine set_betastar
   if (ae_flag == 1) then
      beta_star(0) = beta_star(0) + (dlnndre_ade + dlntdre_ade)
   endif
-  beta_star(0) = beta_star(0)*betae_unit
+  beta_star(0)  = beta_star(0)*betae_unit
+  ! 8pi/Bunit^2 * scaling factor
+  beta_star_fac = -betae_unit/(dens_ele*temp_ele)*beta_star_scale  
   
 end subroutine set_betastar

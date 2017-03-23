@@ -43,10 +43,6 @@ subroutine cgyro_equilibrium
      x(it) = y(it)
   enddo
 
-  call GEO_interp(0.0)
-  bigR_th0   = GEO_bigr
-  bigR_r_th0 = GEO_bigr_r
-
   if (constant_stream_flag == 1) then
 
      ! At the end of this process, theta will NOT be equally-spaced, 
@@ -77,7 +73,7 @@ subroutine cgyro_equilibrium
      ! used for finite-difference stencils.
 
   endif
-
+  
   ! This theta grid is:
   !
   ! 1. NOT EQUALLY SPACED if constant_stream_flag == 1
@@ -104,6 +100,10 @@ subroutine cgyro_equilibrium
      enddo
   enddo
 
+  call GEO_interp(0.0)
+  bigR_th0   = GEO_bigr
+  bigR_r_th0 = GEO_bigr_r
+  
   do it=1,n_theta
 
      call GEO_interp(theta(it))     
@@ -114,47 +114,62 @@ subroutine cgyro_equilibrium
      btor(it)   = GEO_bt
      bpol(it)   = GEO_bp
 
+     ! Define modified G_theta
+     if (constant_stream_flag == 0) then
+        ! Theta-dependent
+        g_theta(it) = GEO_g_theta
+     else
+        ! Constant by construction
+        g_theta(it) = gtheta_ave
+     endif
+     g_theta_geo(it) = GEO_g_theta
+
+     ! flux-surface average weights
+     w_theta(it) = g_theta(it)/GEO_b
+
+  enddo
+!$acc enter data copyin(energy,xi,vel,omega_stream)
+
+  w_theta(:) = w_theta(:)/sum(w_theta) 
+
+  mach_one_fac = 1.0
+  
+  ! Compute rotation (M^2) terms
+  ! Note that this changes beta_star and thus GEO
+  ! (which affects gcos2 and captheta)
+  call cgyro_init_rotation
+
+  do it=1,n_theta
+
+     call GEO_interp(theta(it))
+
      do is=1,n_species
-
-        ! Define modified G_theta
-        if (constant_stream_flag == 0) then
-           ! Theta-dependent
-           g_theta(it) = GEO_g_theta
-        else
-           ! Constant by construction
-           g_theta(it) = gtheta_ave
-        endif
-        g_theta_geo(it) = GEO_g_theta
-
+  
         omega_stream(it,is) = sqrt(2.0)*vth(is)/(q*rmaj*g_theta(it))
-
+        
         omega_trap(it,is) = -0.5*sqrt(2.0)*vth(is) &
              *(GEO_dbdt/GEO_b)/(q*rmaj*GEO_g_theta) 
-
+        
         omega_rdrift(it,is) = -rho*vth(is)**2*mass(is)/(Z(is)*GEO_b) &
              *GEO_grad_r/rmaj*GEO_gsin 
 
         omega_adrift(it,is) = -rho*vth(is)**2*mass(is)/(Z(is)*GEO_b) &
-             *GEO_gq/rmaj*(GEO_gcos1+GEO_gcos2+GEO_captheta*GEO_gsin) 
+             *GEO_gq/rmaj*(GEO_gcos1+GEO_gcos2+GEO_captheta*GEO_gsin)
 
         omega_aprdrift(it,is) = 2.0*rho*vth(is)**2 &
              *mass(is)/(Z(is)*GEO_b)*GEO_gq/rmaj*GEO_gcos2
-
-        ! Finite-Mach drift (Coriolis)
+        
         omega_cdrift(it,is) = -2.0*sqrt(2.0)*rho*vth(is) &
              * mass(is)/(Z(is)*GEO_b)*GEO_gq/rmaj &
-             *(GEO_ucos+GEO_captheta*GEO_usin)*mach
-
+             *(GEO_ucos+GEO_captheta*GEO_usin)*mach*mach_one_fac
+        
         omega_cdrift_r(it,is) = -2.0*sqrt(2.0)*rho*vth(is) &
-             * mass(is)/(Z(is)*GEO_b)*GEO_grad_r/rmaj*GEO_usin*mach
-
+             * mass(is)/(Z(is)*GEO_b)*GEO_grad_r/rmaj*GEO_usin &
+             * mach*mach_one_fac
+ 
      enddo
      
-     ! Rotation shear (GAMMA_P)
-     omega_gammap(it) = GEO_bt/GEO_b*GEO_bigr/rmaj*gamma_p
-
-     ! flux-surface average weights
-     w_theta(it) = g_theta(it)/GEO_b
+     omega_gammap(it) = GEO_bt/GEO_b*GEO_bigr/rmaj*gamma_p*mach_one_fac
 
      do ir=1,n_radial
         k_perp(ic_c(ir,it)) = sqrt((2.0*pi*px(ir)*GEO_grad_r/length &
@@ -163,14 +178,9 @@ subroutine cgyro_equilibrium
         k_x(ic_c(ir,it)) = 2.0*pi*px(ir)*GEO_grad_r/length &
              + k_theta*GEO_gq*GEO_captheta
      enddo
-
+     
   enddo
-  !$acc enter data copyin(energy,xi,vel,omega_stream)
-
-  w_theta(:) = w_theta(:)/sum(w_theta) 
-
-  call cgyro_init_rotation
-
+  
 end subroutine cgyro_equilibrium
 
 
