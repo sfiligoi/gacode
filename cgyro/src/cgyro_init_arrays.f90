@@ -315,8 +315,7 @@ subroutine cgyro_init_arrays
         omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
              - i_c * k_theta * (omega_aprdrift(it,is)*energy(ie)*xi(ix)**2 &
              + omega_cdrift(it,is)*vel(ie)*xi(ix) + omega_rot_drift(it,is) &
-             + omega_rot_prdrift(it,is) * energy(ie)* xi(ix)**2 &
-             + omega_rot_edrift(it,is) + omega_rot_edrift_0(it))
+             + omega_rot_edrift(it))
         
         u = (2.0*pi/n_radial)*px(ir)
 
@@ -327,8 +326,7 @@ subroutine cgyro_init_arrays
              * (omega_rdrift(it,is)*energy(ie)*(1.0+xi(ix)**2) &
              + omega_cdrift_r(it,is)*vel(ie)*xi(ix) &
              + omega_rot_drift_r(it,is) &
-             + omega_rot_prdrift_r(it,is) * energy(ie) * xi(ix)**2 &
-             + omega_rot_edrift_r(it,is))
+             + omega_rot_edrift_r(it))
         
         ! (d/dr) upwind components from drifts [UPWIND: iu -> spectraldiss]
         omega_h(ic,iv_loc) = omega_h(ic,iv_loc) &
@@ -336,8 +334,7 @@ subroutine cgyro_init_arrays
              * (abs(omega_rdrift(it,is))*energy(ie)*(1.0+xi(ix)**2) &
              + abs(omega_cdrift_r(it,is)*xi(ix))*vel(ie) &
              + abs(omega_rot_drift_r(it,is)) &
-             + abs(omega_rot_prdrift_r(it,is)) * energy(ie) * xi(ix)**2 &
-             + abs(omega_rot_edrift_r(it,is)))          
+             + abs(omega_rot_edrift_r(it)))          
              
         ! omega_star 
         carg = -i_c*k_theta*rho*(dlnndr(is)+dlntdr(is)*(energy(ie)-1.5)) &

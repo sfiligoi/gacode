@@ -98,7 +98,6 @@ module cgyro_globals
   real :: s_zeta
   real :: zmag
   real :: dzmag
-  real :: beta_star
   real :: betae_unit
   !
   ! Species parameters
@@ -393,6 +392,8 @@ module cgyro_globals
   real, dimension(:,:), allocatable :: omega_cdrift
   real, dimension(:,:), allocatable :: omega_cdrift_r
   real, dimension(:),   allocatable :: omega_gammap
+  integer, parameter                :: n_beta_star=2
+  real, dimension(0:n_beta_star)    :: beta_star
   ! for centrifugal rotation
   real, dimension(:,:), allocatable :: lambda_rot
   real, dimension(:,:), allocatable :: dlambda_rot
@@ -402,11 +403,8 @@ module cgyro_globals
   real, dimension(:,:), allocatable :: omega_rot_u
   real, dimension(:,:), allocatable :: omega_rot_drift
   real, dimension(:,:), allocatable :: omega_rot_drift_r
-  real, dimension(:,:), allocatable :: omega_rot_prdrift
-  real, dimension(:,:), allocatable :: omega_rot_prdrift_r
-  real, dimension(:,:), allocatable :: omega_rot_edrift
-  real, dimension(:,:), allocatable :: omega_rot_edrift_r
-  real, dimension(:),   allocatable :: omega_rot_edrift_0
+  real, dimension(:),   allocatable :: omega_rot_edrift
+  real, dimension(:),   allocatable :: omega_rot_edrift_r
   real, dimension(:,:), allocatable :: omega_rot_star
   !
   ! Number of gridpoints for Miller geometry integration grid

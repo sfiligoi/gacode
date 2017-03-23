@@ -85,7 +85,6 @@ x.add('ZETA','0.0')
 x.add('S_ZETA','0.0')
 x.add('ZMAG','0.0')
 x.add('DZMAG','0.0')
-x.add('BETA_STAR','0.0')
 x.add('BETAE_UNIT','0.0')
 x.add('SUBROUTINE_FLAG','0')
 
@@ -171,6 +170,7 @@ x.add('DLNTDR_6_SCALE','1.0')
 
 # Deprecated parameters
 x.dep('X1','never really existed')
+x.dep('BETA_STAR','use BETA_STAR_SCALE')
 
 # Perform the parsing
 x.read_input('input.cgyro')

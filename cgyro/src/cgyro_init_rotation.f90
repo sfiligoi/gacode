@@ -3,20 +3,20 @@ subroutine cgyro_init_rotation
   use timer_lib
   use cgyro_globals
   use cgyro_io
+  use GEO_interface
   
   implicit none
 
   real, dimension(:), allocatable :: phi_rot, phi_rot_tderiv, phi_rot_rderiv
-  real, dimension(:), allocatable :: sum_pressure_r
-  real, dimension(:), allocatable :: beta_star_cos, beta_star_sin
-  integer :: n_beta_star = 5
+  real, dimension(:), allocatable :: pr_r
+  real, dimension(:), allocatable :: bstar
   real :: phi_rot_avg
   integer, dimension(:), allocatable :: thcyc
   real, dimension(:), allocatable :: thcderiv
   real :: x, x0, fac, sum_zn, dsum_zn
   integer :: is, it, j, id, jt
   integer, parameter :: jmax = 200
-
+  
   ! O(mach) terms only
   if(rotation_model == 1) then
      dens_rot(:,:) = 1.0
@@ -27,21 +27,17 @@ subroutine cgyro_init_rotation
      omega_rot_u(:,:) = 0.0
      omega_rot_drift(:,:) = 0.0
      omega_rot_drift_r(:,:) = 0.0
-     omega_rot_prdrift(:,:) = 0.0
-     omega_rot_prdrift_r(:,:) = 0.0
      omega_rot_star(:,:) = 0.0
-     omega_rot_edrift(:,:) = 0.0
-     omega_rot_edrift_r(:,:) = 0.0
-     omega_rot_edrift_0(:) = 0.0
+     omega_rot_edrift(:) = 0.0
+     omega_rot_edrift_r(:) = 0.0
      return
   endif
 
   allocate(phi_rot(n_theta))
   allocate(phi_rot_tderiv(n_theta))
   allocate(phi_rot_rderiv(n_theta))
-  allocate(sum_pressure_r(n_theta))
-  allocate(beta_star_cos(0:n_beta_star))
-  allocate(beta_star_sin(1:n_beta_star))
+  allocate(pr_r(n_theta))
+  allocate(bstar(0:n_beta_star))
   
   ! solve the quasi-neutrality relation for poloidal part of phi
 
@@ -143,31 +139,6 @@ subroutine cgyro_init_rotation
      enddo
   enddo
   dens_ele_rot(:) = dens_ele_rot(:) * exp(1.0/temp_ele*phi_rot(:))
-  
-  do is=1,n_species
-     do it=1,n_theta
-
-        lambda_rot(it,is) = z(is)/temp(is) * (phi_rot(it) - phi_rot_avg) &
-             - 0.5 * (mach * bigR(it) / rmaj / vth(is))**2
-
-        ! bhat dot grad lambda
-        dlambda_rot(it,is) = dlambda_rot(it,is) &
-             + z(is)/temp(is) * phi_rot_tderiv(it) / (q*rmaj*g_theta(it)) 
-           
-        omega_rot_trap(it,is) = -0.5*sqrt(2.0)*vth(is) *dlambda_rot(it,is)
-
-        omega_rot_u(it,is) = -vth(is)/sqrt(2.0)*dlambda_rot(it,is)
-
-        omega_rot_star(it,is) = omega_rot_star(it,is) &
-             + dlntdr(is)*z(is)/temp(is)*phi_rot(it) 
-
-        omega_rot_edrift(it,is) =  omega_rot_edrift(it,is) &
-             * phi_rot_tderiv(it) / (q*rmaj*g_theta(it)) 
-
-        omega_rot_edrift_r(it,is) = omega_rot_edrift_r(it,is) &
-             * phi_rot_tderiv(it) / (q*rmaj*g_theta(it))
-     enddo
-  enddo  
 
   ! Solve d/dr of QN to get d phi_rot / dr
 
@@ -183,7 +154,7 @@ subroutine cgyro_init_rotation
      endif
 
      phi_rot_rderiv(it) = 0.0
-     sum_pressure_r(it) = 0.0
+     pr_r(it) = 0.0
      do is=1,n_species
 
         phi_rot_rderiv(it) = phi_rot_rderiv(it) &
@@ -194,7 +165,7 @@ subroutine cgyro_init_rotation
              - bigR_th0 * bigR_r_th0) + (mach/rmaj)/vth(is)**2 &
              * (-gamma_p/rmaj) * (bigR(it)**2 - bigR_th0**2))
 
-        sum_pressure_r(it) = sum_pressure_r(it) &
+        pr_r(it) = pr_r(it) &
              + temp(is)*dens(is)*dens_rot(it,is)*(-dlnndr(is) &
              - dlntdr(is)*(1.0 + z(is)/temp(is)*phi_rot(it) &
              - 0.5*(mach/rmaj/vth(is))**2 * (bigR(it)**2 - bigR_th0**2)) &
@@ -209,7 +180,7 @@ subroutine cgyro_init_rotation
              - dens_ele*dens_ele_rot(it)*(-dlnndr_ele &
              + dlntdr_ele/temp_ele*phi_rot(it))
         
-        sum_pressure_r(it) = sum_pressure_r(it) &
+        pr_r(it) = pr_r(it) &
              + temp_ele*dens_ele*dens_ele_rot(it)*(-dlnndr_ele - dlntdr_ele)
              
      endif
@@ -217,46 +188,32 @@ subroutine cgyro_init_rotation
      phi_rot_rderiv(it) = phi_rot_rderiv(it) / sum_zn
      
   enddo
-  
-  ! rho * dphi_*/dr
-  do it=1,n_theta
-     omega_rot_edrift_0(it) = rho*phi_rot_rderiv(it)
-  enddo
 
-  ! EAB: beta_prime cf correction not yet fully implemented
-  ! "dp/dr" -> dp/dr (theta) - 0.5*omega^2*dR^2/dr sum_a m_a n_a
-  ! beta_star = beta_star_theta0 * "dp/dr"/ (dp/dr)(theta0)
-  fac = 0.0
-  do is=1,n_species
-     fac = fac - temp(is)*dens(is)*(dlnndr(is) + dlntdr(is))
-  enddo
-  if(ae_flag == 1) then
-     fac = fac - temp_ele*dens_ele*(dlnndr_ele + dlntdr_ele)
-  endif
-  sum_pressure_r(:) = sum_pressure_r(:)*beta_star/fac
+
+  ! beta_star drift
+  ! dp/dr -> dp/dr - sum_a n_a m_a omega^2 R dR/dr
   ! Compute projections of beta_star
-  beta_star_cos(:) = 0.0
-  beta_star_sin(:) = 0.0
-  do it=1,n_theta
-     beta_star_cos(0) = beta_star_cos(0)+sum_pressure_r(it)/n_theta &
-          *g_theta_geo(it)/g_theta(it)
-  enddo
-  do j=1,n_beta_star
+  bstar(:) = 0.0
+  do j=0,n_beta_star
      do it=1,n_theta
-        fac = sum_pressure_r(it)*2.0/n_theta*g_theta_geo(it)/g_theta(it)
-        beta_star_cos(j) = beta_star_cos(j)+ cos(j*theta(it))*fac
-        beta_star_sin(j) = beta_star_sin(j)+ sin(j*theta(it))*fac
+        bstar(j) = bstar(j) + cos(j*theta(it)) * pr_r(it) &
+             * g_theta_geo(it)/g_theta(it)
      enddo
+     if (j == 0) then
+        bstar(j) = bstar(j)/n_theta
+     else
+        bstar(j) = bstar(j)*2.0/n_theta
+     endif
   enddo
-  !print *, 0, beta_star_cos(0)
-  !do j=1,n_beta_star
-  !   print *, j, beta_star_cos(j), beta_star_sin(j)
-  !enddo
+  ! beta_star(theta) = beta_star_0 + beta_star_1 * (1-cos(th))
+  !                    + beta_star_1 * (1-cos(2*th))
+  beta_star(0) = bstar(0)
+  do j=1,n_beta_star
+     beta_star(j) = -bstar(j)
+     beta_star(0) = beta_star(0) + bstar(j)
+  enddo
+  beta_star(:) = beta_star*beta_star_scale
   
-  omega_rot_prdrift(:,:)    = 0.0
-  omega_rot_prdrift_r(:,:) = 0.0
-  
-
   ! print out some diagnostics
   if (silent_flag == 0 .and. i_proc == 0) then
      open(unit=io,file=trim(path)//'out.cgyro.rotation',status='replace')
@@ -267,6 +224,55 @@ subroutine cgyro_init_rotation
      close(io)
   endif
 
+  call GEO_do()
+  
+  do it=1,n_theta
+
+     call GEO_interp(theta(it)) 
+     
+     do is=1,n_species
+     
+        lambda_rot(it,is) = z(is)/temp(is) * (phi_rot(it) - phi_rot_avg) &
+             - 0.5 * (mach * bigR(it) / rmaj / vth(is))**2
+
+        ! bhat dot grad lambda
+        dlambda_rot(it,is) = z(is)/temp(is) * phi_rot_tderiv(it) &
+             / (q*rmaj*g_theta(it)) &
+             - (mach / rmaj /vth(is))**2 * GEO_bigr &
+             * GEO_bigr_t / (q*rmaj*GEO_g_theta)
+           
+        omega_rot_trap(it,is) = -0.5*sqrt(2.0)*vth(is) *dlambda_rot(it,is)
+
+        omega_rot_u(it,is) = -vth(is)/sqrt(2.0)*dlambda_rot(it,is)
+        
+        omega_rot_star(it,is) = dlntdr(is) * (z(is)/temp(is)*phi_rot(it) &
+             - 0.5*(mach/vth(is))**2 * (GEO_bigr**2 - bigR_th0**2)/rmaj**2)  &
+             + mach*gamma_p/vth(is)**2 * (GEO_bigr**2 - bigR_th0**2)/rmaj**2 &
+             + (mach/vth(is))**2 * bigR_th0/rmaj**2 * bigR_r_th0 
+
+        omega_rot_drift(it,is) = -(mach/rmaj)**2 * GEO_bigr * rho &
+             * mass(is)/(z(is)*GEO_b) * GEO_gq &
+             * (GEO_captheta*GEO_usin*GEO_bt/GEO_b + GEO_ucos*GEO_b/GEO_bt)
+
+        omega_rot_drift_r(it,is) = -(mach/rmaj)**2 * GEO_bigr * rho &
+             * mass(is)/(z(is)*GEO_b) * GEO_usin * GEO_grad_r &
+             * GEO_bt / GEO_b 
+      
+        omega_aprdrift(it,is) = 2.0*rho*vth(is)**2 &
+             *mass(is)/(Z(is)*GEO_b)*GEO_gq/rmaj*GEO_gcos2
+        
+     enddo
+
+     omega_rot_edrift(it) =  -rho * GEO_bt/GEO_bp * GEO_captheta &
+          / GEO_grad_r * phi_rot_tderiv(it) / (q*rmaj*g_theta(it)) &
+          + rho*phi_rot_rderiv(it)
+     
+     omega_rot_edrift_r(it) = -rho * GEO_bt/GEO_bp/GEO_b * GEO_grad_r &
+          * phi_rot_tderiv(it) / (q*rmaj*g_theta(it))
+
+     
+  enddo  
+  
   ! O(mach^2) terms only 
   ! no O(mach) terms
   if(rotation_model == 3) then
@@ -305,20 +311,16 @@ subroutine cgyro_init_rotation
      dlambda_rot(:,:) = 0.0
      omega_rot_trap(:,:) = 0.0
      omega_rot_u(:,:) = 0.0
-     omega_rot_prdrift(:,:) = 0.0
-     omega_rot_prdrift_r(:,:) = 0.0
      omega_rot_star(:,:) = 0.0
-     omega_rot_edrift(:,:) = 0.0
-     omega_rot_edrift_r(:,:) = 0.0
-     omega_rot_edrift_0(:) = 0.0
+     omega_rot_edrift(:) = 0.0
+     omega_rot_edrift_r(:) = 0.0
      
   endif
   
   deallocate(phi_rot)
   deallocate(phi_rot_tderiv)
   deallocate(phi_rot_rderiv)
-  deallocate(sum_pressure_r)
-  deallocate(beta_star_cos)
-  deallocate(beta_star_sin)
+  deallocate(pr_r)
+  deallocate(bstar)
   
 end subroutine cgyro_init_rotation

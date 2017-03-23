@@ -159,21 +159,21 @@ subroutine cgyro_make_profiles
      call set_betastar
      
      ! Re-scaling
-     lambda_star  = lambda_star * lambda_star_scale
-     gamma_e      = gamma_e      * gamma_e_scale
-     gamma_p      = gamma_p      * gamma_p_scale
-     mach         = mach         * mach_scale
-     q            = q            * q_scale
-     s            = s            * s_scale
-     shift        = shift        * shift_scale
-     kappa        = kappa        * kappa_scale
-     delta        = delta        * delta_scale
-     zeta         = zeta         * zeta_scale
-     s_kappa      = s_kappa      * s_kappa_scale
-     s_delta      = s_delta      * s_delta_scale
-     s_zeta       = s_zeta       * s_zeta_scale
-     beta_star    = beta_star    * beta_star_scale
-     betae_unit   = betae_unit   * betae_unit_scale
+     lambda_star      = lambda_star * lambda_star_scale
+     gamma_e          = gamma_e      * gamma_e_scale
+     gamma_p          = gamma_p      * gamma_p_scale
+     mach             = mach         * mach_scale
+     q                = q            * q_scale
+     s                = s            * s_scale
+     shift            = shift        * shift_scale
+     kappa            = kappa        * kappa_scale
+     delta            = delta        * delta_scale
+     zeta             = zeta         * zeta_scale
+     s_kappa          = s_kappa      * s_kappa_scale
+     s_delta          = s_delta      * s_delta_scale
+     s_zeta           = s_zeta       * s_zeta_scale
+     beta_star(0)     = beta_star(0) * beta_star_scale
+     betae_unit       = betae_unit   * betae_unit_scale
      do is=1,n_species
         dlnndr(is) = dlnndr(is)  * dlnndr_scale(is) 
         dlntdr(is) = dlntdr(is)  * dlntdr_scale(is)  
@@ -216,11 +216,13 @@ subroutine cgyro_make_profiles
 
      enddo
 
-     ! Compute beta_* if negative initially
-     if (beta_star < 0.0) call set_betastar
+     ! Always compute beta_* consistently
+     call set_betastar
+     beta_star(0) = beta_star(0)*beta_star_scale
      
   endif
 
+  
   !-------------------------------------------------------------
   ! Manage simulation type (n=0,linear,nonlinear)
   !
@@ -330,14 +332,18 @@ subroutine set_betastar
 
   integer :: is
 
-  beta_star = 0.0
+  ! This is dp/dr at theta=0
+  ! Note that in rotation, this will be overwritten as dp_eff/dr (theta=0)
+  
+  beta_star(:) = 0.0
   do is=1,n_species
-     beta_star = beta_star+dens(is)*temp(is)/(dens_ele*temp_ele) &
+     beta_star(0) = beta_star(0) &
+          + dens(is)*temp(is)/(dens_ele*temp_ele) &
           *(dlnndr(is)+dlntdr(is))
   enddo
   if (ae_flag == 1) then
-     beta_star = beta_star + (dlnndre_ade + dlntdre_ade)
+     beta_star(0) = beta_star(0) + (dlnndre_ade + dlntdre_ade)
   endif
-  beta_star = beta_star*betae_unit
-
+  beta_star(0) = beta_star(0)*betae_unit
+  
 end subroutine set_betastar

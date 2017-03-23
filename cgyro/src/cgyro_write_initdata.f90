@@ -83,7 +83,7 @@ subroutine cgyro_write_initdata
      write(io,*) 
      write(io,20) '    r/a:',rmin
      write(io,20) '    R/a:',rmaj, '  shift:',shift,  '  betae:',betae_unit
-     write(io,20) '      q:',q,    '      s:',s,      ' beta_*:',beta_star
+     write(io,20) '      q:',q,    '      s:',s,      ' beta_*:',beta_star(0)
      write(io,20) '  kappa:',kappa,'s_kappa:',s_kappa,' lamb_*:',lambda_star
      write(io,20) '  delta:',delta,'s_delta:',s_delta,'gamma_e:',gamma_e
      write(io,20) '   zeta:',zeta, ' s_zeta:',s_zeta, 'gamma_p:',gamma_p
@@ -132,7 +132,7 @@ subroutine cgyro_write_initdata
      write (io,fmtstr) rho
      write (io,fmtstr) ky
      write (io,fmtstr) betae_unit
-     write (io,fmtstr) beta_star
+     write (io,fmtstr) beta_star(0)
      write (io,fmtstr) lambda_star
      write (io,fmtstr) gamma_e
      write (io,fmtstr) gamma_p

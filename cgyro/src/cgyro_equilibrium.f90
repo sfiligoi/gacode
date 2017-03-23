@@ -28,7 +28,7 @@ subroutine cgyro_equilibrium
   GEO_s_delta_in   = s_delta
   GEO_zeta_in      = zeta
   GEO_s_zeta_in    = s_zeta
-  GEO_beta_star_in = beta_star
+  GEO_beta_star_in = beta_star(0)
   GEO_fourier_in(:,:) = geo_yin(:,:)
 
   call GEO_do()  
@@ -148,46 +148,8 @@ subroutine cgyro_equilibrium
         omega_cdrift_r(it,is) = -2.0*sqrt(2.0)*rho*vth(is) &
              * mass(is)/(Z(is)*GEO_b)*GEO_grad_r/rmaj*GEO_usin*mach
 
-        ! Partial Finite-Mach centrifugal terms
-        ! These are re-set to 0 in cgyro_init_rot if rotation_model=1
-
-        ! bhat dot grad lambda
-        ! Add phi_rot term in cgyro_init_rotation
-        dlambda_rot(it,is) = - (mach / rmaj /vth(is))**2 * GEO_bigr &
-             * GEO_bigr_t / (q*rmaj*GEO_g_theta)
-
-        omega_rot_drift(it,is) = -(mach/rmaj)**2 * GEO_bigr * rho &
-             * mass(is)/(z(is)*GEO_b) * GEO_gq &
-             * (GEO_captheta*GEO_usin*GEO_bt/GEO_b + GEO_ucos*GEO_b/GEO_bt)
-
-        omega_rot_drift_r(it,is) = -(mach/rmaj)**2 * GEO_bigr * rho &
-             * mass(is)/(z(is)*GEO_b) * GEO_usin * GEO_grad_r &
-             * GEO_bt / GEO_b
-
-        ! Add phi_rot term in cgyro_init_rotation
-        omega_rot_star(it,is) = -dlntdr(is) * (0.5*(mach/vth(is))**2 &
-             * (GEO_bigr**2 - bigR_th0**2)/rmaj**2)  &
-             + mach*gamma_p/vth(is)**2 * (GEO_bigr**2 - bigR_th0**2)/rmaj**2 &
-             + (mach/vth(is))**2 * bigR_th0/rmaj**2 * bigR_r_th0 
-
-        ! Multiply pressure theta derivative in cgyro_init_rotation
-        omega_rot_prdrift(it,is) = -betae_unit * rho*vth(is)**2 &
-             *mass(is)/(Z(is)*GEO_b) * GEO_bt/GEO_bp/GEO_b * GEO_captheta &
-             / GEO_grad_r 
-
-        ! Multiply pressure theta derivative in cgyro_init_rotation
-        omega_rot_prdrift_r(it,is) = -betae_unit * rho*vth(is)**2 &
-             *mass(is)/(Z(is)*GEO_b) * GEO_bt/GEO_b**2 *q*rmaj/rmin 
-
-        ! Multiply phi_rot theta derivative in cgyro_init_rotation
-        omega_rot_edrift(it,is) = -rho * GEO_bt/GEO_bp &
-             * GEO_captheta / GEO_grad_r 
-
-        ! Multiply phi_rot theta derivative in cgyro_init_rotation
-        omega_rot_edrift_r(it,is) = -rho * GEO_bt/GEO_b * q * GEO_bigR/rmin 
-
      enddo
-
+     
      ! Rotation shear (GAMMA_P)
      omega_gammap(it) = GEO_bt/GEO_b*GEO_bigr/rmaj*gamma_p
 
