@@ -64,12 +64,12 @@ subroutine GEO_interp(theta_0)
      GEO_captheta  = GEO_s_in*theta_0-&
           GEO_q_in**2*GEO_rmaj_in*GEO_beta_star_in*sin(theta_0) 
      GEO_nu     = -GEO_q_in*theta_0
-     GEO_l_t    = 0.0 ! check with NEO usage
-     GEO_nsin   = 0.0 ! check with NEO usage
-     GEO_bigr   = GEO_rmaj_in/GEO_b
+     GEO_l_r = 0.0
+     GEO_l_t = 0.0
+     GEO_nsin = 0.0 ! check with NEO usage
+     GEO_bigr = GEO_rmaj_in/GEO_b
      GEO_bigr_r = cos(theta_0)
      GEO_bigr_t = -GEO_rmin_in*sin(theta_0)
-     GEO_bigz_r = sin(theta_0)
      GEO_theta_nc = theta_0
      return
   endif
@@ -137,13 +137,13 @@ subroutine GEO_interp(theta_0)
   GEO_captheta = GEOV_captheta(i1)+(GEOV_captheta(i2)-GEOV_captheta(i1))*z
   GEO_nu       = GEOV_nu(i1)+(GEOV_nu(i2)-GEOV_nu(i1))*z
   GEO_bigr     = GEOV_bigr(i1)+(GEOV_bigr(i2)-GEOV_bigr(i1))*z
+  GEO_l_r      = GEOV_l_r(i1)+(GEOV_l_r(i2)-GEOV_l_r(i1))*z
   GEO_l_t      = GEOV_l_t(i1)+(GEOV_l_t(i2)-GEOV_l_t(i1))*z
   GEO_nsin     = GEOV_nsin(i1)+(GEOV_nsin(i2)-GEOV_nsin(i1))*z
   GEO_usin     = GEOV_usin(i1)+(GEOV_usin(i2)-GEOV_usin(i1))*z
   GEO_ucos     = GEOV_ucos(i1)+(GEOV_ucos(i2)-GEOV_ucos(i1))*z
   GEO_bigr_r   = GEOV_bigr_r(i1)+(GEOV_bigr_r(i2)-GEOV_bigr_r(i1))*z
   GEO_bigr_t   = GEOV_bigr_t(i1)+(GEOV_bigr_t(i2)-GEOV_bigr_t(i1))*z
-  GEO_bigz_r   = GEOV_bigz_r(i1)+(GEOV_bigz_r(i2)-GEOV_bigz_r(i1))*z
   GEO_theta_nc = GEOV_theta_nc(i1)+(GEOV_theta_nc(i2)-GEOV_theta_nc(i1))*z
   GEO_theta_s  = GEOV_theta_s(i1)+(GEOV_theta_s(i2)-GEOV_theta_s(i1))*z
   GEO_chi2     = GEOV_chi2(i1)+(GEOV_chi2(i2)-GEOV_chi2(i1))*z

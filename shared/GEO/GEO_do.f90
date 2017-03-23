@@ -25,14 +25,14 @@ subroutine GEO_do()
        captheta => GEOV_captheta, &
        nu => GEOV_nu, &
        thetav => GEOV_theta, &
+       l_r => GEOV_l_r, &
        l_t => GEOV_l_t, &
        nsin => GEOV_nsin, &
        usin => GEOV_usin, &
        ucos => GEOV_ucos, &
        bigr => GEOV_bigr, &
        bigr_r => GEOV_bigr_r, &
-       bigr_t => GEOV_bigr_t, &
-       bigz_r => GEOV_bigz_r
+       bigr_t => GEOV_bigr_t
 
   !-----------------------------------------------------------
   implicit none
@@ -66,17 +66,18 @@ subroutine GEO_do()
   real :: b5
   !
   real, dimension(:), allocatable :: bigz
+  real, dimension(:), allocatable :: bigz_r
   real, dimension(:), allocatable :: bigz_t
-  real, dimension(:), allocatable :: r_c
   real, dimension(:), allocatable :: bigz_l
+  real, dimension(:), allocatable :: r_c
+  real, dimension(:), allocatable :: r_sc
   real, dimension(:), allocatable :: dbdl
   real, dimension(:,:), allocatable :: e
   real, dimension(:,:), allocatable :: ei
   real, dimension(:), allocatable :: loop
+  real, dimension(:), allocatable :: beta_star
   real, dimension(:), allocatable :: a_R,b_R,a_Z,b_Z
   real, dimension(:), allocatable :: a_Rp,b_Rp,a_Zp,b_Zp
-  real, dimension(:), allocatable :: r_sc
-  real, dimension(:), allocatable :: beta_star
   !
   !-----------------------------------------------------------
 
@@ -127,16 +128,18 @@ subroutine GEO_do()
   !
   n_theta = GEO_ntheta_in
   !
-  allocate(bigz(n_theta))
-  allocate(bigz_t(n_theta))
-  allocate(r_c(n_theta))
-  allocate(dbdl(n_theta))
-  allocate(bigz_l(n_theta))
-  allocate(e(n_theta,4))
   allocate(ic(2-n_theta:2*n_theta-2))
+  !
+  allocate(bigz(n_theta))
+  allocate(bigz_r(n_theta))
+  allocate(bigz_t(n_theta))
+  allocate(bigz_l(n_theta))
+  allocate(r_c(n_theta))
+  allocate(r_sc(n_theta))
+  allocate(dbdl(n_theta))
+  allocate(e(n_theta,4))
   allocate(ei(n_theta,4))
   allocate(loop(4))
-  allocate(r_sc(n_theta))
   allocate(beta_star(n_theta))
   !-----------------------------------------------------------
 
@@ -453,16 +456,19 @@ subroutine GEO_do()
   !-----------------------------------------------------------
   ! Deallocate internal variables
   !
+  deallocate(ic)
+  !
   deallocate(bigz)
+  deallocate(bigz_r)
   deallocate(bigz_t)
+  deallocate(bigz_l)
   deallocate(r_c)
   deallocate(r_sc)
   deallocate(dbdl)
-  deallocate(bigz_l)
   deallocate(e)
-  deallocate(ic)
   deallocate(ei)
   deallocate(loop)
+  deallocate(beta_star)
   !
   deallocate(a_R)
   deallocate(b_R)

@@ -74,6 +74,7 @@
 !  GEO_gq       : G_q
 !  GEO_captheta : Theta
 !  GEO_nu       : eikonal function nu(r,theta)
+!  GEO_l_r      : dl/dr = cos u dZ/dr - sin u dR/dr
 !  GEO_l_t      : dl/dt
 !  GEO_nsin     : neoclassical sine (Rr Rt - Zr Zt)/(dl/dt)
 !  GEO_usin     : Coriolis drift sine
@@ -81,7 +82,6 @@
 !  GEO_bigr     : R
 !  GEO_bigr_r   : dR/dr
 !  GEO_bigr_t   : dR/dtheta
-!  GEO_bigz_r   : dZ/dr
 !  GEO_theta_nc : theta_nc (GS2/NCLASS fieldline angle)
 !  GEO_theta_s  : theta_s (straight fieldline angle)
 !-----------------------------------------------------
@@ -132,6 +132,7 @@ module GEO_interface
   real, dimension(:), allocatable :: GEOV_gq
   real, dimension(:), allocatable :: GEOV_captheta
   real, dimension(:), allocatable :: GEOV_nu
+  real, dimension(:), allocatable :: GEOV_l_r
   real, dimension(:), allocatable :: GEOV_l_t
   real, dimension(:), allocatable :: GEOV_nsin
   real, dimension(:), allocatable :: GEOV_usin
@@ -139,7 +140,6 @@ module GEO_interface
   real, dimension(:), allocatable :: GEOV_bigr
   real, dimension(:), allocatable :: GEOV_bigr_r
   real, dimension(:), allocatable :: GEOV_bigr_t
-  real, dimension(:), allocatable :: GEOV_bigz_r
   real, dimension(:), allocatable :: GEOV_theta_nc
   real, dimension(:), allocatable :: GEOV_theta_s
   real, dimension(:), allocatable :: GEOV_chi2
@@ -161,6 +161,7 @@ module GEO_interface
   real :: GEO_gq
   real :: GEO_captheta
   real :: GEO_nu
+  real :: GEO_l_r
   real :: GEO_l_t
   real :: GEO_nsin
   real :: GEO_usin
@@ -168,7 +169,6 @@ module GEO_interface
   real :: GEO_bigr
   real :: GEO_bigr_r
   real :: GEO_bigr_t
-  real :: GEO_bigz_r
   real :: GEO_theta_nc
   real :: GEO_theta_s
   real :: GEO_chi2
