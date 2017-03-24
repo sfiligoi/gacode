@@ -227,7 +227,7 @@ module tgyro_globals
   integer, dimension(:), allocatable :: therm_vec
 
   real, dimension(n_ion_max) :: mi
-  real, dimension(n_ion_max) :: n_ratio
+  real, dimension(n_ion_max) :: n_ratio,t_ratio
 
   ! Physical constants
   real :: pi

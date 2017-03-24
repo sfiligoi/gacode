@@ -8,30 +8,35 @@ subroutine tgyro_profile_reintegrate
 
   integer :: i_ion
   integer :: i_star  
+  real :: w
 
   if (tgyro_ped_model > 1) then
 
      ! Map data over r(n_r) < r < a
 
-     call tgyro_pedestal_map(dlnnedr(n_r),zn_top,n_top(1),nn_vec(:,2),i_star,exp_ne)
-     call tgyro_pedestal_map(dlntedr(n_r),zt_top,t_top(1),t_vec(:),i_star,exp_te)
-     call tgyro_pedestal_map(dlntidr(1,n_r),zt_top,t_top(1),t_vec(:),i_star,exp_ti(1,:))
+     w = t_ratio(1)
+
+     call tgyro_pedestal_map(dlnnedr(n_r),zn_top,n_top(1),nn_vec(:,2),&
+          i_star,exp_ne)
+     call tgyro_pedestal_map(dlntedr(n_r),zt_top,t_top(1),t_vec(:),&
+          i_star,exp_te)
+     call tgyro_pedestal_map(dlntidr(1,n_r),zt_top,w*t_top(1),w*t_vec(:),&
+          i_star,exp_ti(1,:))
 
      ! Map ion densities
      ! NOTE: Assumption is that ion profiles are 
      !
      !    ni(j,r) = ne(r)*ratio(j) for r > r(n_r)
      !
-     ! where ratio(j) is the pivot density ratio at t=0.
+     ! where ratio(j) is the pivot density ratio at t=0 (see tgyro_pedestal).
      !
-     do i_ion=1,loc_n_ion
-        exp_ni(i_ion,i_star:n_exp) = exp_ne(i_star:n_exp)*n_ratio(i_ion)
-     enddo
-     
-     ! Set thermal ion temperatures
      do i_ion=2,loc_n_ion
-        if (therm_flag(i_ion) == 1) exp_ti(i_ion,i_star:n_exp) = exp_ti(1,i_star:n_exp)
+        if (therm_flag(i_ion) == 1) then
+           exp_ni(i_ion,i_star:n_exp) = exp_ne(i_star:n_exp)*n_ratio(i_ion)
+           exp_ti(i_ion,i_star:n_exp) = exp_ti(1,i_star:n_exp)
+        endif
      enddo
+
   endif
 
   ! Map data inside r < r(n_r)

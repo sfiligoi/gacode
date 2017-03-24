@@ -189,6 +189,7 @@ subroutine tgyro_init_profiles
      call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_dlntidr(i_ion,:)/100.0,n_exp,r,dlntidr(i_ion,:),n_r)
      call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_dlnnidr(i_ion,:)/100.0,n_exp,r,dlnnidr(i_ion,:),n_r)
      n_ratio(i_ion) = ni(i_ion,n_r)/ne(n_r)
+     t_ratio(i_ion) = ti(i_ion,n_r)/te(n_r)
   enddo
 
   if (tgyro_ptot_flag == 1) then

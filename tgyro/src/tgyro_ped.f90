@@ -72,6 +72,8 @@ contains
     ! Parameters interpolated at top of pedestal
     real, dimension(1) :: n_p_top,t_p_top
     real, dimension(1) :: dpsidr_top
+    real :: ntsum
+    integer :: i_ion
 
     if (tgyro_ped_model == 1) return
 
@@ -111,14 +113,19 @@ contains
     ! p_top: in Pa
     call cub_spline(nn_vec(:,1),nn_vec(:,3),nx_nn,psi_top,p_top,1) 
 
-    ! FORMULA: P = 2nkT 
+    ! Pressure formula based on pivot assumption (includes tiny fast ion bits):
+    ! 
+    ! P/k = ne Te + Sum_i ni Ti
+    !     = ne Te [ 1 + Sum_i n_ratio(i) t_ratio(i) ]
+
+    ntsum = 1.0+sum(n_ratio(1:loc_n_ion)*t_ratio(1:loc_n_ion))
 
     ! t_top [eV]
-    t_top = (10.0*p_top)/(2*n_top*k) 
+    t_top = (10.0*p_top)/(ntsum*n_top*k) 
 
     ! Calculate n' (n_p) and T' (t_p):
     call bound_deriv(n_p,nn_vec(:,2),nn_vec(:,1),nx_nn)
-    t_vec = (10.0*nn_vec(:,3))/(2*nn_vec(:,2)*k)
+    t_vec = (10.0*nn_vec(:,3))/(ntsum*nn_vec(:,2)*k)
     call bound_deriv(t_p,t_vec,nn_vec(:,1),nx_nn)
 
     ! n_top', t_top'
@@ -144,12 +151,17 @@ contains
 
     ! Integration backward from r_top to r_star
     dr_nml = r_top(1)-r(n_r)
-    ti(:,n_r) = t_top(1)*exp(0.5*(dlntidr(:,n_r)+zt_top)*dr_nml)
-    te(n_r)   = t_top(1)*exp(0.5*(dlntedr(n_r)  +zt_top)*dr_nml)
     ne(n_r)   = n_top(1)*exp(0.5*(dlnnedr(n_r)  +zn_top)*dr_nml)
+    te(n_r)   = t_top(1)*exp(0.5*(dlntedr(n_r)  +zt_top)*dr_nml)
+    ti(1,n_r) = t_top(1)*exp(0.5*(dlntidr(1,n_r)+zt_top)*dr_nml)*t_ratio(1)
 
     ! Self-similar ion values (fixed pivot assumption; see tgyro_profile_regenerate)
-    ni(1:loc_n_ion,n_r) = ne(n_r)*n_ratio(1:loc_n_ion) 
+    do i_ion=2,loc_n_ion
+       if (therm_flag(i_ion) == 1) then
+          ti(i_ion,n_r) = ti(1,n_r) 
+          ni(i_ion,n_r) = ne(n_r)*n_ratio(i_ion) 
+       endif
+    enddo
     !-------------------------------------------------------------------------
 
   end subroutine tgyro_pedestal
