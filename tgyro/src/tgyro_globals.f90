@@ -227,6 +227,7 @@ module tgyro_globals
   integer, dimension(:), allocatable :: therm_vec
 
   real, dimension(n_ion_max) :: mi
+  real, dimension(n_ion_max) :: n_ratio
 
   ! Physical constants
   real :: pi
@@ -294,7 +295,6 @@ module tgyro_globals
   integer :: loc_num_equil_flag
   integer :: tgyro_neo_gv_flag
   integer :: tglf_q_low_flag
-  integer :: tgyro_global_newton_flag
   integer :: tgyro_iteration_method
   integer :: tgyro_rotation_flag
   real :: tgyro_rmin
@@ -330,7 +330,6 @@ module tgyro_globals
   integer :: flux_method
   integer, dimension(:), allocatable :: flux_method_vec
   integer :: i_tran
-  integer :: i_tran_old
   integer :: i_bc
   integer :: flux_counter
   integer :: i_ash

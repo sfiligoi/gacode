@@ -87,18 +87,22 @@ contains
     !
     if (i_proc_global == 0) then
 
-       ! Inputs stored in interface
+       ! Inputs stored in interface  
        call tgyro_eped_nn
+       ! Outputs (nx_nn is large, fixed number of radial points)
+       !  nn_vec(1:nx_nn,1) -> psi_norm
+       !  nn_vec(1:nx_nn,2) -> ne [1/cm^3]
+       !  nn_vec(1:nx_nn,3) -> P [Pa]
 
        if (tgyro_rped < 0.0) then
-            psi_top(1) = 1.0 - 1.5*nn_w_ped*abs(tgyro_rped)
+          psi_top(1) = 1.0 - 1.5*nn_w_ped*abs(tgyro_rped)
        else
-            psi_top(1) = tgyro_rped
+          psi_top(1) = tgyro_rped
        endif
 
     endif
 
-    ! Communicated needed data from output.avg
+    ! Broadcast needed data from single-task call above 
     call MPI_BCAST(nn_vec,size(nn_vec),MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
     call MPI_BCAST(psi_top,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
 
@@ -112,7 +116,7 @@ contains
     ! t_top [eV]
     t_top = (10.0*p_top)/(2*n_top*k) 
 
-    ! n', T':
+    ! Calculate n' (n_p) and T' (t_p):
     call bound_deriv(n_p,nn_vec(:,2),nn_vec(:,1),nx_nn)
     t_vec = (10.0*nn_vec(:,3))/(2*nn_vec(:,2)*k)
     call bound_deriv(t_p,t_vec,nn_vec(:,1),nx_nn)
@@ -136,13 +140,16 @@ contains
     !-------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------
-    ! 4. Integrate to obtain TGYRO pivot
+    ! 4. Integrate to obtain TGYRO pivot values
 
     ! Integration backward from r_top to r_star
     dr_nml = r_top(1)-r(n_r)
     ti(:,n_r) = t_top(1)*exp(0.5*(dlntidr(:,n_r)+zt_top)*dr_nml)
     te(n_r)   = t_top(1)*exp(0.5*(dlntedr(n_r)  +zt_top)*dr_nml)
     ne(n_r)   = n_top(1)*exp(0.5*(dlnnedr(n_r)  +zn_top)*dr_nml)
+
+    ! Self-similar ion values (fixed pivot assumption; see tgyro_profile_regenerate)
+    ni(1:loc_n_ion,n_r) = ne(n_r)*n_ratio(1:loc_n_ion) 
     !-------------------------------------------------------------------------
 
   end subroutine tgyro_pedestal

@@ -106,12 +106,6 @@ subroutine tgyro_write_input
 
      end select
 
-     if (tgyro_global_newton_flag == 0) then
-        write(1,10) 'TGYRO_GLOBAL_NEWTON_FLAG','Block-diagonal flux Jacobian'
-     else
-        write(1,10) 'TGYRO_GLOBAL_NEWTON_FLAG','Exact flux Jacobian'
-     endif
-
      !--------------------------------------------------------
      select case (loc_residual_method)
 

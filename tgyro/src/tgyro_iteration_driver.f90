@@ -13,11 +13,10 @@
 
 subroutine tgyro_iteration_driver
 
-  use mpi
   use tgyro_globals
   use tgyro_iteration_variables
   use tgyro_ped
-  use EXPRO_interface
+  use mpi
 
   implicit none
   integer :: i_ion
@@ -180,38 +179,5 @@ subroutine tgyro_iteration_driver
      call tgyro_iteration_simplerelax
 
   end select
-
-  !--------------------------------------------------------------------------------
-  ! Rewrite input.profiles (to input.profiles.new) if flag set
-  !
-  if (tgyro_write_profiles_flag .ne. 0) then
-     call EXPRO_palloc(MPI_COMM_WORLD,'./',1) 
-     call EXPRO_pread
-
-     call tgyro_profile_reintegrate
-     EXPRO_ptot = ptot_exp
-     EXPRO_ne   = exp_ne*1e-13
-     EXPRO_te   = exp_te*1e-3
-     EXPRO_ni(1:loc_n_ion,:) = exp_ni(1:loc_n_ion,:)*1e-13
-     EXPRO_ti(1:loc_n_ion,:) = exp_ti(1:loc_n_ion,:)*1e-3
-     EXPRO_w0   = exp_w0
-     EXPRO_ptot = ptot_exp ! already in Pa
-
-     if (i_proc_global == 0) then
-
-        ! Write data to file
-        call EXPRO_write_original(&
-             1,'input.profiles',&
-             2,'input.profiles.new',&
-             'Profiles modified by TGYRO')
-        call EXPRO_compute_derived
-        call EXPRO_write_derived(1,'input.profiles.extra')
-
-     endif
-
-     call EXPRO_palloc(MPI_COMM_WORLD,'./',0) 
-
-  endif
-  !--------------------------------------------------------------------------------
 
 end subroutine tgyro_iteration_driver

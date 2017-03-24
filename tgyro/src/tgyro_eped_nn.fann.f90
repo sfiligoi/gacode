@@ -98,13 +98,11 @@
    INPUT_PARAMETERS(10) = zeffped_in
 
    call get_environment_variable('EPEDNN_MODEL_DIR',epednn_model)
-   !write(*,*) TRIM(epednn_model)
-   ierr=load_anns(1, TRIM(epednn_model)//NUL,'brainfuse'//NUL)
-   ierr=load_anns_inputs(INPUT_PARAMETERS)
-   !write(*,*) 'INPUT_PARAMETERS',INPUT_PARAMETERS
-   ierr=run_anns()
-   ierr=get_anns_avg_array(OUTPUT_PARAMETERS)
-   !write(*,*) 'OUTPUT_PARAMETERS',OUTPUT_PARAMETERS
+
+   ierr = load_anns(1, TRIM(epednn_model)//NUL,'brainfuse'//NUL)
+   ierr = load_anns_inputs(INPUT_PARAMETERS)
+   ierr = run_anns()
+   ierr = get_anns_avg_array(OUTPUT_PARAMETERS)
 
    nn_w_ped = OUTPUT_PARAMETERS(3)*2
    nn_p_ped = OUTPUT_PARAMETERS(1)*1e6
@@ -119,12 +117,6 @@
    do i=0,nx_nn-1
       nn_vec(i+1,1) = i/(nx_nn-1.0)
    enddo
-
-   !write(*,*)nn_w_ped, &
-   !     neped_in, nn_t_ped,           &
-   !     nn_n_cor, nn_t_cor,           &
-   !     nn_n_edg, nn_t_edg,           &
-   !     nexpin, nexpout, texpin, texpout
 
    call toq_profiles( &
         nn_vec(:,1), nx_nn, nn_w_ped/2.0, &
@@ -141,16 +133,5 @@
    !   nn_vec(:,1) -> psi_norm
    !   nn_vec(:,2) -> ne [1/cm^3]
    !   nn_vec(:,3) -> P [Pa]
-
-
-   !if (i_proc_global == 0) then
-   !   do i=1,nx_nn
-   !      write(*,*) nn_vec(i,1),nn_vec(i,2),nn_vec(i,3),nn_vec(i,3)/nn_vec(i,2)/1.6022/2.*1E13
-   !   enddo
-   !   call MPI_finalize(i)
-   !   stop
-   !endif
- 
-   ! WRITE(*,*) OUTPUT_PARAMETERS
 
  end subroutine tgyro_eped_nn

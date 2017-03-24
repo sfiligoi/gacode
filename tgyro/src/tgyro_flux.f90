@@ -43,7 +43,6 @@ subroutine tgyro_flux
   call MPI_BARRIER(MPI_COMM_WORLD,ierr)
   if (i_proc_global == 0) then
      open(unit=1,file=trim(runfile),position='append')
-     write(1,'(t2,a)') 'INFO: (TGYRO) Entered tgyro_flux'
      close(1)
   endif
 

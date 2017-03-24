@@ -37,7 +37,6 @@ OBJECTS += tgyro_globals.o \
            tgyro_flux.o \
            tgyro_flux_set.o \
            tgyro_flux_vector.o \
-           tgyro_flux_vector_dense.o \
            tgyro_gyro_map.o \
            tgyro_harvest.o \
            tgyro_ifs_pppl.o \

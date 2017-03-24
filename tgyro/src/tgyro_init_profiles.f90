@@ -188,6 +188,7 @@ subroutine tgyro_init_profiles
      call cub_spline(EXPRO_rmin(:)/r_min,1e13*EXPRO_ni(i_ion,:),n_exp,r,ni(i_ion,:),n_r)
      call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_dlntidr(i_ion,:)/100.0,n_exp,r,dlntidr(i_ion,:),n_r)
      call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_dlnnidr(i_ion,:)/100.0,n_exp,r,dlnnidr(i_ion,:),n_r)
+     n_ratio(i_ion) = ni(i_ion,n_r)/ne(n_r)
   enddo
 
   if (tgyro_ptot_flag == 1) then
@@ -418,15 +419,13 @@ subroutine tgyro_init_profiles
      ! a [m]
      a_in = r_min
      ! Bt on axis [T]
-     if (EXPRO_rvbv == 0) then
-        write(*,*)'EXPRO_rvbv is zero! Pedestal calculation cannot proceed. Check input.profiles'
-        STOP
+     if (EXPRO_rvbv == 0.0) then
+        call tgyro_catch_error('EXPRO_rvbv = 0.  Check input.profiles')
      endif
      bt_in = EXPRO_rvbv/EXPRO_rmaj(n_exp)
      ! Plasma current Ip [Ma]
-     if (EXPRO_ip_exp == 0) then
-        write(*,*)'EXPRO_ip_exp is zero! Pedestal calculation cannot proceed. Check input.profiles'
-        STOP
+     if (EXPRO_ip_exp == 0.0) then
+        call tgyro_catch_error('EXPRO_ip_exp = 0. Check input.profiles')
      endif
      ip_in = 1e-6*EXPRO_ip_exp
      ! betan [%] = betat/In*100 where In = Ip/(a Bt) 
