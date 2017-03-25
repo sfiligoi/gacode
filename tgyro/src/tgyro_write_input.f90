@@ -125,10 +125,6 @@ subroutine tgyro_write_input
 
         write(1,10) 'LOC_RESIDUAL_METHOD','(f-g)^2/MAX(1,(f^2+g^2))'
 
-     case (5)
-
-        write(1,10) 'LOC_RESIDUAL_METHOD','WEIGHTED'
-
      case default
 
         error_flag = 1
