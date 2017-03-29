@@ -101,7 +101,6 @@ subroutine cgyro_init_arrays
   ! Conservative upwind factor
   !
   allocate(res_norm(nc,n_species))
-  allocate(dvfac(nv_loc))
 
   res_loc(:,:) = 0.0
 
@@ -133,7 +132,6 @@ subroutine cgyro_init_arrays
      is = is_v(iv)
      ix = ix_v(iv)
      ie = ie_v(iv)
-     dvfac(iv_loc) = w_e(ie)*w_xi(ix)*z(is)*dens(is)
      do ic=1,nc
         upfac1(ic,iv_loc) = w_e(ie)*w_xi(ix)*abs(xi(ix))*vel(ie)*jvec_c(1,ic,iv_loc)
         upfac2(ic,iv_loc) = jvec_c(1,ic,iv_loc)/res_norm(ic,is)

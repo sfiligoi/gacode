@@ -198,6 +198,30 @@ subroutine cgyro_field_coefficients
         gcoef(:,ic) = 0.0
      endif
   enddo
+
+  ! Arrays to speed up velocity integrals in Maxwell equations
+  do iv=nv1,nv2
+     iv_loc = iv-nv1+1
+     is = is_v(iv)
+     ie = ie_v(iv)
+     ix = ix_v(iv)
+     do ic=1,nc
+        it = it_c(ic)
+        dvjvec_c(:,ic,iv_loc) = dens_rot(it,is)*w_e(ie)*w_xi(ix)*z(is)*dens(is)* &
+             jvec_c(:,ic,iv_loc)
+     enddo
+  enddo
+  do ic=nc1,nc2
+     ic_loc = ic-nc1+1
+     it = it_c(ic)
+     do iv=1,nv
+        is = is_v(iv)
+        ix = ix_v(iv)
+        ie = ie_v(iv)
+        dvjvec_v(:,ic_loc,iv) = dens_rot(it,is)*w_e(ie)*w_xi(ix)*z(is)*dens(is)* &
+             jvec_v(:,ic_loc,iv)
+     enddo
+  enddo
   !-------------------------------------------------------------------------
 
 end subroutine cgyro_field_coefficients

@@ -171,6 +171,8 @@ subroutine cgyro_init_manager
      allocate(omega_ss(n_field,nc,nv_loc))
      allocate(jvec_c(n_field,nc,nv_loc))
      allocate(jvec_v(n_field,nc_loc,nv))
+     allocate(dvjvec_c(n_field,nc,nv_loc))
+     allocate(dvjvec_v(n_field,nc_loc,nv))
      allocate(jxvec_c(n_field,nc,nv_loc))
      allocate(upfac1(nc,nv_loc))
      allocate(upfac2(nc,nv_loc))

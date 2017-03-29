@@ -264,7 +264,6 @@ module cgyro_globals
   real, dimension(:), allocatable :: xi, w_xi
   real, dimension(:,:), allocatable :: xi_deriv_mat, xi_lor_mat
   real, dimension(:,:), allocatable :: e_deriv1_mat, e_deriv2_mat
-  real, dimension(:), allocatable :: dvfac
   !
   ! Parallel streaming
   real :: d_theta
@@ -297,6 +296,8 @@ module cgyro_globals
   complex, dimension(:,:), allocatable :: cap_h_v_prime
   real, dimension(:,:,:), allocatable :: jvec_c
   real, dimension(:,:,:), allocatable :: jvec_v
+  real, dimension(:,:,:), allocatable :: dvjvec_c
+  real, dimension(:,:,:), allocatable :: dvjvec_v
   real, dimension(:,:,:), allocatable :: jxvec_c
   real, dimension(:,:), allocatable :: upfac1,upfac2
   !
