@@ -128,7 +128,6 @@ subroutine cgyro_equilibrium
      w_theta(it) = g_theta(it)/GEO_b
 
   enddo
-!$acc enter data copyin(energy,xi,vel,omega_stream)
 
   w_theta(:) = w_theta(:)/sum(w_theta) 
 
@@ -180,6 +179,7 @@ subroutine cgyro_equilibrium
      enddo
      
   enddo
+!$acc enter data copyin(xi,vel,omega_stream)
   
 end subroutine cgyro_equilibrium
 
