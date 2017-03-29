@@ -86,8 +86,7 @@ subroutine cgyro_rhs(ij)
 
   call timer_lib_in('str')
 
-  ! EXPLICIT advance 
-
+#ifdef _OPENACC
 !$acc data  &
 !$acc& pcopyout(rhs_ij) &
 !$acc& pcopyin(g_x,h_x,field,cap_h_c) &
@@ -95,8 +94,7 @@ subroutine cgyro_rhs(ij)
 !$acc& present(omega_cap_h,omega_h,omega_s) &
 !$acc& present(omega_stream,xi,vel) &
 !$acc& present(dtheta,dtheta_up,icd_c)
-
-#ifdef _OPENACC
+  
 !$acc  parallel loop gang vector collapse(2) & 
 !$acc& private(iv,ic,iv_loc,is,rval,rval2,rhs_stream,id,jc)
 #else

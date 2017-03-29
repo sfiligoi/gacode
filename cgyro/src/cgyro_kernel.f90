@@ -140,7 +140,7 @@ subroutine cgyro_kernel
   if(allocated(bigR))           deallocate(bigR)
   if(allocated(bigR_r))         deallocate(bigR_r)
   if(allocated(omega_stream))   then
-     !$acc exit data delete(omega_stream)
+!$acc exit data delete(omega_stream)
      deallocate(omega_stream)
   endif
   if(allocated(omega_trap))     deallocate(omega_trap)
@@ -166,14 +166,14 @@ subroutine cgyro_kernel
   if(allocated(indx_xi))       deallocate(indx_xi)
   if(allocated(px))            deallocate(px)
   if(allocated(energy))        then
-     !$acc exit data delete(energy)
+!$acc exit data delete(energy)
      deallocate(energy)
   endif
   if(allocated(w_e))           deallocate(w_e)
   if(allocated(e_deriv1_mat))  deallocate(e_deriv1_mat)
   if(allocated(e_deriv2_mat))  deallocate(e_deriv2_mat)
   if(allocated(xi))            then
-     !$acc exit data delete(xi)
+!$acc exit data delete(xi)
      deallocate(xi)
   endif
   if(allocated(w_xi))          deallocate(w_xi)
@@ -192,7 +192,6 @@ subroutine cgyro_kernel
   if(allocated(pvec_outi))     deallocate(pvec_outi)
 
   if(allocated(cmat))       then
-     !$acc exit data delete(cmat)
      deallocate(cmat)
   endif
 
