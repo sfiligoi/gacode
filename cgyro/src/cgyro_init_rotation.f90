@@ -194,8 +194,12 @@ subroutine cgyro_init_rotation
   if (silent_flag == 0 .and. i_proc == 0) then
      open(unit=io,file=trim(path)//'out.cgyro.rotation',status='replace')
      do it=1,n_theta
-        write(io,'(4(es16.9,1x))') theta(it), phi_rot(it), &
-             phi_rot_tderiv(it), phi_rot_rderiv(it)
+        write(io,'(es16.9,1x)') phi_rot(it)
+     enddo
+     do is=1,n_species
+        do it=1,n_theta
+           write(io,'(es16.9,1x)') dens(is)*dens_rot(it,is)
+        enddo
      enddo
      close(io)
   endif
