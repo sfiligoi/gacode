@@ -119,12 +119,12 @@ subroutine cgyro_field_c
      endif
   endif
 
-!$omp parallel do private(iv,iv_loc,ic,is)
+!$omp parallel do private(iv_loc,is,ic)
   do iv=nv1,nv2
      iv_loc = iv-nv1+1
      is = is_v(iv)
      do ic=1,nc
-        psi(ic,iv_loc) = sum(jvec_c(:,ic,iv_loc)*field(:,ic))
+        psi(ic,iv_loc) = sum( jvec_c(:,ic,iv_loc)*field(:,ic))
         chi(ic,iv_loc) = sum(jxvec_c(:,ic,iv_loc)*field(:,ic))
         cap_h_c(ic,iv_loc) = h_x(ic,iv_loc)+psi(ic,iv_loc)*z(is)/temp(is)
      enddo
