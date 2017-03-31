@@ -209,7 +209,7 @@ subroutine tgyro_flux
         eflux_i_tur(1:loc_n_ion,i_r) = tglf_ion_eflux_low_out(1:loc_n_ion)
      endif
 
-  case(3)  ! Map TGYRO parameters to GLF23
+  case (3)  ! Map TGYRO parameters to GLF23
 
      call tgyro_glf23_map
 

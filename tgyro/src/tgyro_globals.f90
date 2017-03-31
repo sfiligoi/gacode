@@ -45,9 +45,11 @@ module tgyro_globals
   character(len=80), dimension(:), allocatable :: paths
   integer, dimension(:), allocatable :: procs
   real, dimension(:), allocatable :: inputrads
+  character(len=5), dimension(:), allocatable :: code
   !
   character(80) :: lpath, linput
   integer :: lproc
+  character(len=5) :: lcode
   !
   ! Control variables
   !
@@ -319,7 +321,6 @@ module tgyro_globals
   real :: tgyro_neped
   real :: tgyro_zeffped
   real :: tgyro_tglf_nn_max_error
-  character(len=5) :: tgyro_multi_code
   !
   ! Iteration variables (global)
   !

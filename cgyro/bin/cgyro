@@ -95,6 +95,7 @@ CLEAN_FLAG=0
 COMPRESS_FLAG=0
 RESET=0
 NEW_FLAG=0
+INIT_FLAG=0
 #=============================================================
 
 #=============================================================
@@ -110,6 +111,8 @@ while [ $# -gt 0 ] ; do
   -e) shift ; LOCDIR=$1 ;;
 
   -t) shift ; LOCDIR=$1 ; TEST_FLAG=1 ;;
+
+  -i) shift ; LOCDIR=$1 ; INIT_FLAG=1 ;;
 
   -n) shift ; NPROC=$1 ;;
 
@@ -153,10 +156,10 @@ fi
 #============================================================
 # Check for inconsistent flags:
 FLAG_SUM=$[ $EXEC_FLAG + $TEST_FLAG + $GENERATE_FLAG 
-                       + $REGRESS_FLAG]
+                       + $REGRESS_FLAG + $INIT_FLAG ]
 if [ $FLAG_SUM -gt 1 ]
 then
-   echo "ERROR: Can only specify one of -e, -t, -g, -r"
+   echo "ERROR: Can only specify one of -e, -t, -i, -g, -r"
    exit 1
 fi
 #============================================================
@@ -245,6 +248,15 @@ then
     rm -f out.* batch.out batch.err *~ *gen
     echo "INFO: (cgyro) Cleaned directory." 
     exit 1
+fi
+#============================================================
+
+#============================================================
+# Init mode
+if [ $INIT_FLAG -eq 1 ]
+then
+   python $CGYRO_DIR/bin/cgyro_parse.py
+   exit 0
 fi
 #============================================================
 

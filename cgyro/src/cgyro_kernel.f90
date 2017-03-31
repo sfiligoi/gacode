@@ -43,6 +43,7 @@ subroutine cgyro_kernel
   !    NOTE: On exit, field_old = field 
 
   call cgyro_init_manager
+  if (test_flag == 1) return
 
   !---------------------------------------------------------------------------
   !
@@ -59,6 +60,7 @@ subroutine cgyro_kernel
   call cgyro_write_timedata
   call timer_lib_in('io_init')
   io_control = 2*(1-silent_flag)
+
   do i_time=1,n_time
 
      call timer_lib_in('TOTAL')

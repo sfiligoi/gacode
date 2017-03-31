@@ -1,8 +1,6 @@
 from gacodeinput import *
 import sys
 
-gyro_start = sys.argv[1]
-
 x = ManagerInput()
 
 x.set_extension('.gen')
@@ -109,7 +107,6 @@ x.add('TGYRO_RPED','0.9')
 x.add('TGYRO_NEPED','-1.0')
 x.add('TGYRO_ZEFFPED','2.07')
 x.add('TGYRO_TGLF_NN_MAX_ERROR','-1')
-x.add('TGYRO_MULTI_CODE','gyro')
 
 # Deprecated parameters
 x.dep('LOC_N_FEEDBACK','new parameter is LOC_NE_FEEDBACK_FLAG')
@@ -127,7 +124,7 @@ x.dep('TGYRO_QUASINEUTRAL_FLAG','Quasineutrality now implemented with ion variab
 x.dep('TGYRO_FIX_CONCENTRATION_FLAG','This option no longer exists -- see TGYRO_EVO_E* variables.')
 x.dep('TGYRO_GLOBAL_NEWTON_FLAG','This option no longer exists.')
 
-x.read_input('input.tgyro',gyro_start)
+x.read_input('input.tgyro')
 x.write_proc('proc')
 x.printmsg()
 

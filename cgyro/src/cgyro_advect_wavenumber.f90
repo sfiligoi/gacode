@@ -19,8 +19,6 @@ subroutine cgyro_advect_wavenumber(ij)
 
   call timer_lib_in('shear')
 
-  ! Zero work array including zero boundary regions
-
   ! Wavenumber advection ExB shear
   if (shear_method == 2) then
 !$omp parallel do private(j,h0,ir,dh,ip)

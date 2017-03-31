@@ -62,17 +62,17 @@ subroutine tgyro_iteration_driver
 
      flux_method = 0
 
-  else if (lpath(1:3) == "IFS") then
+  else if (lcode == "ifs") then
 
      ! IFS-PPPL
      flux_method = 1
 
-  else if (lpath(1:4) == "TGLF") then
+  else if (lcode == "tglf") then
 
      ! TGLF
      flux_method = 2
 
-  else if (lpath(1:3) == "GLF") then
+  else if (lcode == "glf23") then
 
      ! GLF23
      flux_method = 3

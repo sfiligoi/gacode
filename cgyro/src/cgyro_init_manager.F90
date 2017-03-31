@@ -225,10 +225,7 @@ subroutine cgyro_init_manager
   call cgyro_write_initdata
   call timer_lib_out('io_init')
 
-  if (test_flag == 1) then
-     call MPI_FINALIZE(i_err)
-     stop
-  endif
+  if (test_flag == 1) return
 
   ! Initialize h (via restart or analytic IC)
   call timer_lib_in('str_init')
