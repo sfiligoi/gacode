@@ -139,7 +139,7 @@ contains
     ! zn_top = -(1/n) dn/dr 
     ! zt_top = -(1/T) dT/dr 
     !
-    call cub_spline(psi_exp,rmin_exp    ,n_exp,psi_top,r_top,1)
+    call cub_spline(psi_exp,rmin_exp  ,n_exp,psi_top,     r_top,1)
     call cub_spline(psi_exp,dpsidr_exp,n_exp,psi_top,dpsidr_top,1)
 
     zn_top = -n_p_top(1)/n_top(1)*dpsidr_top(1)
@@ -153,13 +153,12 @@ contains
     dr_nml = r_top(1)-r(n_r)
     ne(n_r)   = n_top(1)*exp(0.5*(dlnnedr(n_r)  +zn_top)*dr_nml)
     te(n_r)   = t_top(1)*exp(0.5*(dlntedr(n_r)  +zt_top)*dr_nml)
-    ti(1,n_r) = t_top(1)*exp(0.5*(dlntidr(1,n_r)+zt_top)*dr_nml)*t_ratio(1)
 
-    ! Self-similar ion values (fixed pivot assumption; see tgyro_profile_regenerate)
-    do i_ion=2,loc_n_ion
+    ! Self-similar ion values (fixed pivot assumption; see tgyro_profile_reintegrate)
+    do i_ion=1,loc_n_ion
        if (therm_flag(i_ion) == 1) then
-          ti(i_ion,n_r) = ti(1,n_r) 
-          ni(i_ion,n_r) = ne(n_r)*n_ratio(i_ion) 
+          ti(i_ion,n_r) = t_top(1)*exp(0.5*(dlntidr(i_ion,n_r)+zt_top)*dr_nml)*t_ratio(i_ion)
+          ni(i_ion,n_r) = n_top(1)*exp(0.5*(dlnnidr(i_ion,n_r)+zn_top)*dr_nml)*n_ratio(i_ion)
        endif
     enddo
     !-------------------------------------------------------------------------

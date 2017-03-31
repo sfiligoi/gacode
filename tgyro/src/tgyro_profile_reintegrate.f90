@@ -14,14 +14,11 @@ subroutine tgyro_profile_reintegrate
 
      ! Map data over r(n_r) < r < a
 
-     w = t_ratio(1)
 
      call tgyro_pedestal_map(dlnnedr(n_r),zn_top,n_top(1),nn_vec(:,2),&
           i_star,exp_ne)
      call tgyro_pedestal_map(dlntedr(n_r),zt_top,t_top(1),t_vec(:),&
           i_star,exp_te)
-     call tgyro_pedestal_map(dlntidr(1,n_r),zt_top,w*t_top(1),w*t_vec(:),&
-          i_star,exp_ti(1,:))
 
      ! Map ion densities
      ! NOTE: Assumption is that ion profiles are 
@@ -30,10 +27,14 @@ subroutine tgyro_profile_reintegrate
      !
      ! where ratio(j) is the pivot density ratio at t=0 (see tgyro_pedestal).
      !
-     do i_ion=2,loc_n_ion
+     do i_ion=1,loc_n_ion
         if (therm_flag(i_ion) == 1) then
-           exp_ni(i_ion,i_star:n_exp) = exp_ne(i_star:n_exp)*n_ratio(i_ion)
-           exp_ti(i_ion,i_star:n_exp) = exp_ti(1,i_star:n_exp)
+           w = t_ratio(i_ion)
+           call tgyro_pedestal_map(dlntidr(i_ion,n_r),zt_top,w*t_top(1),w*t_vec(:),&
+                i_star,exp_ti(i_ion,:))
+           w = n_ratio(i_ion)
+           call tgyro_pedestal_map(dlnnidr(i_ion,n_r),zn_top,w*n_top(1),w*nn_vec(:,2),&
+                i_star,exp_ni(i_ion,:))
         endif
      enddo
 
