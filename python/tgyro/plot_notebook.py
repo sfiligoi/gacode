@@ -42,74 +42,79 @@ def plot_gen(ax,tag):
     ax.grid(which="minor",ls=":",alpha=0.4)
     ax.set_xlabel('$r/a$',fontsize=GFONTSIZE)
  
+    tot=r'$\mathbf{total}$'
+    tar=r'$\mathbf{target}$'
+
     if tag == 'eflux_e_target':
         if units == 0:
-            ax.plot(x,sim.data['eflux_e_tot'][n],label='total')
-            ax.plot(x,sim.data['eflux_e_target'][n],label='target')
+            ax.plot(x,sim.data['eflux_e_tot'][n],label=tot)
+            ax.plot(x,sim.data['eflux_e_target'][n],label=tar)
             ax.set_ylabel('$Q_e/Q_{GB}$',color='k',fontsize=GFONTSIZE)
         else:
-            ax.plot(x,sim.data['eflux_e_tot'][n]*qgb,label='total')
-            ax.plot(x,sim.data['eflux_e_target'][n]*qgb,label='target')
+            ax.plot(x,sim.data['eflux_e_tot'][n]*qgb,label=tot)
+            ax.plot(x,sim.data['eflux_e_target'][n]*qgb,label=tar)
             ax.set_ylabel('$Q_e [MW/m^2]$',color='k',fontsize=GFONTSIZE)
-        ax.legend(loc=2)
     elif tag == 'eflux_i_target':
         if units == 0:
-            ax.plot(x,sim.data['eflux_i_tot'][n],label='total')
-            ax.plot(x,sim.data['eflux_i_target'][n],label='target')
+            ax.plot(x,sim.data['eflux_i_tot'][n],label=tot)
+            ax.plot(x,sim.data['eflux_i_target'][n],label=tar)
             ax.set_ylabel('$Q_i/Q_{GB}$',color='k',fontsize=GFONTSIZE)
         else:
-            ax.plot(x,sim.data['eflux_i_tot'][n]*qgb,label='total')
-            ax.plot(x,sim.data['eflux_i_target'][n]*qgb,label='target')
-            ax.set_ylabel('$Q_i [MW/m^2]$',color='k',fontsize=GFONTSIZE)
-        ax.legend(loc=2)
+            ax.plot(x,sim.data['eflux_i_tot'][n]*qgb,label=tot)
+            ax.plot(x,sim.data['eflux_i_target'][n]*qgb,label=tar)
+            ax.set_ylabel('$Q_i~[MW/m^2]$',color='k',fontsize=GFONTSIZE)
     elif tag == 'pflux_e_target':
         if units == 0:
-            ax.plot(x,sim.data['pflux_e_tot'][n],label='total')
-            ax.plot(x,sim.data['pflux_e_target'][n],label='target')
+            ax.plot(x,sim.data['pflux_e_tot'][n],label=tot)
+            ax.plot(x,sim.data['pflux_e_target'][n],label=tar)
             ax.set_ylabel('$\Gamma_e/\Gamma_{GB}$',color='k',fontsize=GFONTSIZE)
         else:
-            ax.plot(x,sim.data['pflux_e_tot'][n]*ggb,label='total')
-            ax.plot(x,sim.data['pflux_e_target'][n]*ggb,label='target')
-            ax.set_ylabel('$\Gamma_e [10^{19}/m^2/s]$',color='k',fontsize=GFONTSIZE)
-        ax.legend(loc=2)
+            ax.plot(x,sim.data['pflux_e_tot'][n]*ggb,label=tot)
+            ax.plot(x,sim.data['pflux_e_target'][n]*ggb,label=tar)
+            ax.set_ylabel('$\Gamma_e~[10^{19}/m^2/s]$',color='k',fontsize=GFONTSIZE)
             
     for i in range(n_ion):
         pstr = 'pflux_i'+str(i+1)
         if tag == pstr+'_target':
             if units == 0:
-                ax.plot(x,sim.data[pstr+'_tot'][n],label='total')
-                ax.plot(x,sim.data[pstr+'_target'][n],label='target')
+                ax.plot(x,sim.data[pstr+'_tot'][n],label=tot)
+                ax.plot(x,sim.data[pstr+'_target'][n],label=tar)
                 ax.set_ylabel('$\Gamma_{i'+str(i+1)+'}/\Gamma_{GB}$',color='k',fontsize=GFONTSIZE)
             else:
-                ax.plot(x,sim.data[pstr+'_tot'][n]*ggb,label='total')
-                ax.plot(x,sim.data[pstr+'_target'][n]*ggb,label='target')
-                ax.set_ylabel('$\Gamma_{i'+str(i+1)+'} [10^{19}/m^2/s]$',color='k',fontsize=GFONTSIZE)
-            ax.legend(loc=2)
+                ax.plot(x,sim.data[pstr+'_tot'][n]*ggb,label=tot)
+                ax.plot(x,sim.data[pstr+'_target'][n]*ggb,label=tar)
+                ax.set_ylabel('$\Gamma_{i'+str(i+1)+'}~[10^{19}/m^2/s]$',color='k',fontsize=GFONTSIZE)
             break
 
     # Smooth curves
 
+    init=r'$\mathbf{initial}$'
+    fin=r'$\mathbf{final}$'
+
     if tag == 'te':
         xf,pf = smooth_pro(sim.data['r/a'][0],sim.data['a/Lte'][0],sim.data['te'][0],64)
-        ax.plot(xf,pf,color='black')
-        xf,pf = smooth_pro(sim.data['r/a'][0],sim.data['a/Lte'][n],sim.data['te'][0],64)
-        ax.plot(xf,pf,color='magenta')
+        ax.plot(xf,pf,color='black',label=init)
+        xf,pf = smooth_pro(sim.data['r/a'][0],sim.data['a/Lte'][n],sim.data['te'][n],64)
+        ax.plot(xf,pf,color='magenta',label=fin)
+        ax.set_ylabel(r'$\mathrm{T_e~[keV]}$')
         # Dots
         ax.plot(sim.data['r/a'][0],sim.data['te'][0],'o',color='k')
         ax.plot(sim.data['r/a'][0],sim.data['te'][n],'o',color='k')
     elif tag == 'ti':
         xf,pf = smooth_pro(sim.data['r/a'][0],sim.data['a/Lti1'][0],sim.data['ti1'][0],64)
-        ax.plot(xf,pf,color='black')
-        xf,pf = smooth_pro(sim.data['r/a'][0],sim.data['a/Lti1'][n],sim.data['ti1'][0],64)
-        ax.plot(xf,pf,color='magenta')
+        ax.plot(xf,pf,color='black',label=init)
+        xf,pf = smooth_pro(sim.data['r/a'][0],sim.data['a/Lti1'][n],sim.data['ti1'][n],64)
+        ax.plot(xf,pf,color='magenta',label=fin)
+        ax.set_ylabel(r'$\mathrm{T_i~[keV]}$')
         # Dots
         ax.plot(sim.data['r/a'][0],sim.data['ti1'][0],'o',color='k')
         ax.plot(sim.data['r/a'][0],sim.data['ti1'][n],'o',color='k')
     elif tag == 'ne':
         xf,pf = smooth_pro(sim.data['r/a'][0],sim.data['a/Lne'][0],sim.data['ne'][0],64)
-        ax.plot(xf,pf,color='black')
-        xf,pf = smooth_pro(sim.data['r/a'][0],sim.data['a/Lne'][n],sim.data['ne'][0],64)
-        ax.plot(xf,pf,color='magenta')
+        ax.plot(xf,pf,color='black',label=init)
+        xf,pf = smooth_pro(sim.data['r/a'][0],sim.data['a/Lne'][n],sim.data['ne'][n],64)
+        ax.plot(xf,pf,color='magenta',label=fin)
+        ax.set_ylabel(r'$\mathrm{n_e~[10^19/m^3]}$')
         # Dots
         ax.plot(sim.data['r/a'][0],sim.data['ne'][0],'o',color='k')
         ax.plot(sim.data['r/a'][0],sim.data['ne'][n],'o',color='k')
@@ -117,13 +122,19 @@ def plot_gen(ax,tag):
     for i in range(n_ion):
         if tag == 'ni'+str(i+1):
             xf,pf = smooth_pro(sim.data['r/a'][0],sim.data['a/L'+tag][0],sim.data[tag][0],64)
-            ax.plot(xf,pf,color='black')
-            xf,pf = smooth_pro(sim.data['r/a'][0],sim.data['a/L'+tag][n],sim.data[tag][0],64)
-            ax.plot(xf,pf,color='magenta')
+            ax.plot(xf,pf,color='black',label=init)
+            xf,pf = smooth_pro(sim.data['r/a'][0],sim.data['a/L'+tag][n],sim.data[tag][n],64)
+            ax.plot(xf,pf,color='magenta',label=fin)
+            ax.set_ylabel(r'$\mathrm{n_i~[10^19/m^3]}$')
             # Dots
             ax.plot(sim.data['r/a'][0],sim.data[tag][0],'o',color='k')
             ax.plot(sim.data['r/a'][0],sim.data[tag][n],'o',color='k')
             break
+    
+    if 'flux' in tag:
+        ax.legend(loc=2)
+    else:
+        ax.legend(loc=1)
 
 #-------------------------------------------------------------------------------------
 

@@ -14,7 +14,6 @@ subroutine tgyro_profile_reintegrate
 
      ! Map data over r(n_r) < r < a
 
-
      call tgyro_pedestal_map(dlnnedr(n_r),zn_top,n_top(1),nn_vec(:,2),&
           i_star,exp_ne)
      call tgyro_pedestal_map(dlntedr(n_r),zt_top,t_top(1),t_vec(:),&

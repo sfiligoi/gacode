@@ -108,6 +108,9 @@ contains
     call MPI_BCAST(nn_vec,size(nn_vec),MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
     call MPI_BCAST(psi_top,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
 
+    ! NOTE: Below, n_top means ne_top
+    !              t_top means Te_top 
+
     ! n_top: in 1/cm^3
     call cub_spline(nn_vec(:,1),nn_vec(:,2),nx_nn,psi_top,n_top,1)
     ! p_top: in Pa
@@ -116,11 +119,13 @@ contains
     ! Pressure formula based on pivot assumption (includes tiny fast ion bits):
     ! 
     ! P/k = ne Te + Sum_i ni Ti
-    !     = ne Te [ 1 + Sum_i n_ratio(i) t_ratio(i) ]
+    !     = n_top t_top [ 1 + Sum_i n_ratio(i) t_ratio(i) ]
+    !     = n_top t_top ntsum
+    !     = p_top/k
 
     ntsum = 1.0+sum(n_ratio(1:loc_n_ion)*t_ratio(1:loc_n_ion))
 
-    ! t_top [eV]
+    ! t_top [eV] 
     t_top = (10.0*p_top)/(ntsum*n_top*k) 
 
     ! Calculate n' (n_p) and T' (t_p):
@@ -164,6 +169,25 @@ contains
     !-------------------------------------------------------------------------
 
   end subroutine tgyro_pedestal
+
+  !---------------------------------------------------------------------------
+  ! tgyro_pededtal_map.f90
+  !
+  ! PURPOSE:
+  !  Perform critical profile interpolation from core to edge.
+  !
+  ! Inputs
+  !
+  !  z_star : scale length at r_star (pivot)
+  !  z_top  : scale length at r_top  (pedestal top)
+  !  f_top  : function at r_top
+  !  p_vec  : profile vector from pedestal top to edge (r_star < r < a)
+  !
+  ! Outputs
+  !
+  ! i_star : first i_exp such that r > r_star
+  ! f_exp  : Global profile on experimental (input.profiles) grid 
+  !---------------------------------------------------------------------------
 
   subroutine tgyro_pedestal_map(z_star,z_top,f_top,p_vec,i_star,f_exp)
 
