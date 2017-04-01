@@ -52,6 +52,7 @@ OBJECTS += tgyro_globals.o \
            tgyro_profile_functions.o \
            tgyro_profile_reintegrate.o \
            tgyro_profile_set.o \
+           tgyro_pressure.o \
            tgyro_quasigrad.o \
            tgyro_read_input.o \
            tgyro_read_routines.o \

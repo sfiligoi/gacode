@@ -20,7 +20,6 @@ subroutine tgyro_init_profiles
   real :: arho
   real :: p_ave
   real :: x0(1),y0(1)
-  real, external :: bval
 
   !------------------------------------------------------
   ! PHYSICAL CONSTANTS
@@ -339,6 +338,7 @@ subroutine tgyro_init_profiles
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_flow_mom(:)*1e7,n_exp,r,mf_in,n_r)
   !------------------------------------------------------------------------------------------
 
+  !------------------------------------------------------------------------------------------
   ! Fourier coefficients for plasma shape
   if (EXPRO_nfourier > 0) then
 
@@ -379,6 +379,7 @@ subroutine tgyro_init_profiles
      loc_num_equil_flag = 0
 
   endif
+  !------------------------------------------------------------------------------------------
 
   !-----------------------------------------------------------------
   ! Parameters for EPED pedestal model 
@@ -401,13 +402,10 @@ subroutine tgyro_init_profiles
   allocate(volp_exp(n_exp))
   volp_exp = EXPRO_volp
   allocate(ptot_exp(n_exp))
-  ! Pressure [Pa] 
-  ptot_exp = exp_ne*exp_te
-  do i_ion=1,loc_n_ion
-     ptot_exp = ptot_exp + exp_ni(i_ion,:)*exp_ti(i_ion,:)
-  enddo
-  ! Convert to Pa: n[1/cm^3]*(kT[ev])/10  
-  ptot_exp = ptot_exp*k/10.0
+
+  ! Compute pressure: ptot_exp
+  call tgyro_pressure
+  
   ! Volume average (p_ave)
   call tgyro_volume_ave(ptot_exp,EXPRO_rmin,volp_exp,p_ave,n_exp)
   !
@@ -498,20 +496,3 @@ subroutine tgyro_init_profiles
 
 
 end subroutine tgyro_init_profiles
-
-real function bval(x,f,n)
-
-   integer, intent(in) :: n
-   real, intent(in), dimension(n) :: x,f
-   real :: x1,x2,f1,f2,xs
-
-   xs = x(n)
-   x2 = x(n-7)
-   f2 = f(n-7)
-   x1 = x(n-9)
-   f1 = f(n-9) 
-    
-   bval = (xs-x1)/(x2-x1)*f2+(xs-x2)/(x1-x2)*f1
- 
-end function bval
-
