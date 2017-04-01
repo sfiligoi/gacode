@@ -17,6 +17,7 @@ class tgyrodata:
         self.n_fields     = 0
         self.n_r          = 0
         self.data         = {}
+        self.pedflag      = 0
     
         self.dir = sim_directory
         self.n_ion = int(self.get_tag_value("LOC_N_ION"))
@@ -96,7 +97,7 @@ class tgyrodata:
         self.fileparser('out.tgyro.evo_ne')
         self.fileparser('out.tgyro.flux_e')
         self.fileparser('out.tgyro.profile_e')
-        self.fileparser('out.tgyro.ped',ped=True)
+        self.pedflag = self.fileparser('out.tgyro.ped',ped=True)
         for i in range(self.n_ion):
             for root in ['evo_n','flux_i','profile_i']:
                 self.fileparser('out.tgyro.'+root+str(i+1))
@@ -187,4 +188,4 @@ class tgyrodata:
             self.data[tags[ic]] = numdata[ic,:,:]
         
         if self.verbose: print 'INFO: (data.py) Read data in '+file
-
+        return 1

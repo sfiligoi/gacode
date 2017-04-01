@@ -27,6 +27,8 @@ module tgyro_ped
   real :: neped_in
   real :: r_in
   real :: zeffped_in
+  
+  real :: te_toq
 
   ! EPED_NN outputs
   integer, parameter :: nx_nn=1001
@@ -123,6 +125,8 @@ contains
     !     = n_top t_top ntsum
     !     = p_top/k
 
+    if (i_proc_global == 1) print *,p_top
+ 
     ntsum = 1.0+sum(n_ratio(1:loc_n_ion)*t_ratio(1:loc_n_ion))
 
     ! t_top [eV] 

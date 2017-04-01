@@ -107,6 +107,7 @@ x.add('TGYRO_RPED','0.9')
 x.add('TGYRO_NEPED','-1.0')
 x.add('TGYRO_ZEFFPED','2.07')
 x.add('TGYRO_TGLF_NN_MAX_ERROR','-1')
+x.add('TGYRO_T_RATIO','-1.0')
 
 # Deprecated parameters
 x.dep('LOC_N_FEEDBACK','new parameter is LOC_NE_FEEDBACK_FLAG')

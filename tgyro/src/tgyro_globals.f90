@@ -321,6 +321,7 @@ module tgyro_globals
   real :: tgyro_neped
   real :: tgyro_zeffped
   real :: tgyro_tglf_nn_max_error
+  real :: tgyro_t_ratio
   !
   ! Iteration variables (global)
   !

@@ -73,9 +73,9 @@
    real(4) :: INPUT_PARAMETERS(10)
    real(4) :: OUTPUT_PARAMETERS(5)
 
-   real    :: nn_p_ped, nn_t_ped
-   real    :: nn_t_edg, nn_n_edg
-   real    :: nn_t_cor, nn_n_cor
+   real :: nn_p_ped, nn_t_ped
+   real :: nn_t_edg, nn_n_edg
+   real :: nn_t_cor, nn_n_cor
 
    integer :: i
 
@@ -109,7 +109,7 @@
 
    nn_t_ped = nn_p_ped/neped_in/1.6022/2.0
    nn_n_cor = neped_in * 1.5
-   nn_t_cor = te(1)
+   nn_t_cor = te_toq
    nn_n_edg = neped_in * 0.25
    nn_t_edg = 75.
 

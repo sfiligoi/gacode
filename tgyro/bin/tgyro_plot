@@ -67,7 +67,7 @@ SIMROOT=$PWD
 PLOT_TYPE=null
 UNITS=0
 DOTS=0
-F=null
+F=ne
 RVAR=r/a
 LOC=1
 #==============================================================================
@@ -122,7 +122,7 @@ case "$PLOT_TYPE" in
 	python $PYROOT/plot_notebook.py $SIMDIR $UNITS $EXT ;;
 
    glob)  
-	python $PYROOT/plot_global.py $SIMDIR $F $EXT $RVAR $LOC ;;
+	python $PYROOT/plot_global.py $SIMDIR $F $EXT $RVAR $LOC $DOTS ;;
 
    null)
         echo "Please specify a plot type via -plot." ;;

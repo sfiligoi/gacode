@@ -189,7 +189,11 @@ subroutine tgyro_init_profiles
      call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_dlntidr(i_ion,:)/100.0,n_exp,r,dlntidr(i_ion,:),n_r)
      call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_dlnnidr(i_ion,:)/100.0,n_exp,r,dlnnidr(i_ion,:),n_r)
      n_ratio(i_ion) = ni(i_ion,n_r)/ne(n_r)
-     t_ratio(i_ion) = ti(i_ion,n_r)/te(n_r)
+     if (tgyro_t_ratio < 0.0) then
+        t_ratio(i_ion) = ti(i_ion,n_r)/te(n_r)
+     else
+        t_ratio(i_ion) = tgyro_t_ratio
+     endif
   enddo
 
   if (tgyro_ptot_flag == 1) then
@@ -226,7 +230,7 @@ subroutine tgyro_init_profiles
 
      ! Update some species (evo_e=1) based on quasineutrality
      call tgyro_quasigrad
- 
+
      ! Reintegrate density profiles
      do i_ion=1,loc_n_ion
         ! ni in 1/cm^3
@@ -393,7 +397,7 @@ subroutine tgyro_init_profiles
   exp_ti(1:loc_n_ion,:) = EXPRO_ti(1:loc_n_ion,:)*1e3
   ! exp_w0 [1/s]
   exp_w0 = EXPRO_w0
-  
+
   allocate(volp_exp(n_exp))
   volp_exp = EXPRO_volp
   allocate(ptot_exp(n_exp))
