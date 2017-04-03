@@ -124,8 +124,6 @@ contains
     !     = n_top t_top [ 1 + Sum_i n_ratio(i) t_ratio(i) ]
     !     = n_top t_top ntsum
     !     = p_top/k
-
-    if (i_proc_global == 1) print *,p_top
  
     ntsum = 1.0+sum(n_ratio(1:loc_n_ion)*t_ratio(1:loc_n_ion))
 

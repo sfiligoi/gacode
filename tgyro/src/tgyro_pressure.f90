@@ -22,21 +22,21 @@ subroutine tgyro_pressure
      endif
   enddo
 
-  ! Mean thermal temperature on axis.  Need this for input 
-  ! in tgyro_eped_nn
-  !
-  !            p_thermal
-  ! Te_TOQ = ------------
-  !            n_thermal
-
-  te_toq = ptot_exp(1)/(exp_ne(1)+sum(exp_ni(therm_vec,1)))
-
   ! Now add fast ions
   do i_ion=1,loc_n_ion
      if (therm_flag(i_ion) == 0) then
         ptot_exp = ptot_exp + exp_ni(i_ion,:)*exp_ti(i_ion,:)
      endif
   enddo
+
+  ! Mean temperature on axis.  Need this for input 
+  ! in tgyro_eped_nn
+  !
+  !           p_tot
+  ! Te_TOQ = -------
+  !           n_tot
+
+  te_toq = ptot_exp(1)/(exp_ne(1)+sum(exp_ni(1:loc_n_ion,1)))
 
   ! Convert to Pa: n[1/cm^3]*(kT[ev])/10  
   ptot_exp = ptot_exp*k/10.0

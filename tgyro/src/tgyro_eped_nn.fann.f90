@@ -111,7 +111,7 @@
    nn_n_cor = neped_in * 1.5
    nn_t_cor = te_toq
    nn_n_edg = neped_in * 0.25
-   nn_t_edg = 75.
+   nn_t_edg = 75.0
 
    nn_vec=0.0
    do i=0,nx_nn-1
