@@ -14,6 +14,9 @@ subroutine tgyro_pressure
   implicit none
   integer :: i_ion
  
+  ! exp_ni [1/cm^3]
+  ! exp_ti [eV]
+
   ! First compute thermal pressure
   ptot_exp = exp_ne*exp_te
   do i_ion=1,loc_n_ion
