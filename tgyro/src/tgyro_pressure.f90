@@ -38,8 +38,6 @@ subroutine tgyro_pressure
 
   te_toq = ptot_exp(1)/(exp_ne(1)+sum(exp_ni(1:loc_n_ion,1)))
 
-  print *,te_toq
-
   ! Convert to Pa: n[1/cm^3]*(kT[ev])/10  
   ptot_exp = ptot_exp*k/10.0
 
