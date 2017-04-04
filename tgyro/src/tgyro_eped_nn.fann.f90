@@ -104,19 +104,19 @@
    ierr = run_anns()
    ierr = get_anns_avg_array(OUTPUT_PARAMETERS)
 
-   nn_w_ped = OUTPUT_PARAMETERS(3)*sqrt(tgyro_ped_scale)
+   nn_w_ped = OUTPUT_PARAMETERS(3)*2
 
    ! nn_p* -> Pa
    ! nn_t* -> eV
    ! nn_n* -> 10^13/cm^3 
 
-   nn_p_ped = OUTPUT_PARAMETERS(1)*1e6*tgyro_ped_scale
-   nn_t_ped = (10*nn_p_ped)/(2*(1e13*nped_in)*k)
+   nn_p_ped = OUTPUT_PARAMETERS(1)*1e6
+   nn_t_ped = (10*nn_p_ped)/(2*(1e13*neped_in)*k)
 
-   nn_n_cor = nped_in*1.5
-   nn_t_cor = t_axis
+   nn_n_cor = neped_in*1.5
+   nn_t_cor = te_toq
 
-   nn_n_edg = nped_in*0.25
+   nn_n_edg = neped_in*0.25
    nn_t_edg = 75.0
 
    nn_vec=0.0
