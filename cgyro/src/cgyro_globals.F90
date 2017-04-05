@@ -67,6 +67,7 @@ module cgyro_globals
   integer :: test_flag
   integer :: h_print_flag
   integer :: moment_print_flag
+  integer :: globalflux_print_flag
   real :: amp0
   real :: amp
   real :: gamma_e
@@ -200,14 +201,14 @@ module cgyro_globals
   character(len=18) :: runfile_timers  = 'out.cgyro.timing'
   character(len=18) :: runfile_freq    = 'out.cgyro.freq'
   character(len=18) :: runfile_kxky_phi = 'out.cgyro.kxky_phi'
-  character(len=18) :: runfile_kxky_n   = 'out.cgyro.kxky_n'
-  character(len=18) :: runfile_kxky_e   = 'out.cgyro.kxky_e'
+  character(len=21) :: runfile_kxky_flux = 'out.cgyro.kxky_flux_e'
+  character(len=19) :: runfile_ky_flux = 'out.cgyro.ky_flux'
   character(len=15), dimension(3)  :: runfile_fieldb = &
        (/'out.cgyro.phib ','out.cgyro.aparb','out.cgyro.bparb'/)
-  character(len=21), dimension(3)  :: runfile_kxky_flux = &
-       (/'out.cgyro.kxky_flux_n','out.cgyro.kxky_flux_e','out.cgyro.kxky_flux_v'/)
-  character(len=20), dimension(3)  :: runfile_lky_flux = &
-       (/'out.cgyro.lky_flux_n','out.cgyro.lky_flux_e','out.cgyro.lky_flux_v'/)
+  character(len=16), dimension(2)  :: runfile_kxky = &
+       (/'out.cgyro.kxky_n','out.cgyro.kxky_e'/)
+  character(len=20), dimension(2)  :: runfile_lky_flux = &
+       (/'out.cgyro.lky_flux_n','out.cgyro.lky_flux_e'/)
   integer, parameter :: io=1
   !
   ! error checking
@@ -314,8 +315,10 @@ module cgyro_globals
   complex, dimension(:,:,:), allocatable :: moment
   !
   ! Nonlinear fluxes 
-  real, dimension(:,:,:), allocatable :: flux_loc
-  real, dimension(:,:,:), allocatable :: flux
+  real, dimension(:,:), allocatable :: flux_loc
+  real, dimension(:,:), allocatable :: flux
+  real, dimension(:,:,:), allocatable :: fflux_loc
+  real, dimension(:,:,:), allocatable :: fflux
   complex, dimension(:,:,:), allocatable :: gflux_loc
   complex, dimension(:,:,:), allocatable :: gflux
   !

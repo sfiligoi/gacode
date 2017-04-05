@@ -39,6 +39,9 @@ then
   echo "          -w <float>"
   echo "           Width of time-average window (1.0 is entire time history)."
   echo
+  echo "          -fc"
+  echo "           Toggle plotting of field breakdown of fluxes."
+  echo
   echo "          -plot <type>"
   echo "           Function to plot."
   echo "           <type> = text     (text summary of fluxes)"
@@ -134,6 +137,7 @@ LOCDIR=.
 SIMROOT=$PWD
 SPECIES=0
 FIELD=0
+FC=0
 FTYPE=screen
 PLOT_TYPE=field
 TIME=-1
@@ -169,6 +173,8 @@ while [ $# -gt 0 ] ; do
   -species) shift ; SPECIES=$1 ;;
 
   -field) shift ; FIELD=$1 ;;
+
+  -fc) FC=1 ;;
 
   -moment) shift ; MOMENT=$1 ;;
 
@@ -248,7 +254,7 @@ case "$PLOT_TYPE" in
         then
 	   python $PYROOT/dump_flux.py 
         else
-	   python $PYROOT/plot_flux.py $FTYPE $W $MOMENT $YMIN $YMAX 
+	   python $PYROOT/plot_flux.py $FTYPE $W $MOMENT $YMIN $YMAX $FIELD $FC
         fi
         ;;
 
