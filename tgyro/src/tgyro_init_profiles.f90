@@ -18,6 +18,7 @@ subroutine tgyro_init_profiles
   integer :: i
   integer :: n
   real :: arho
+  real :: tmp_ped
   real :: p_ave
   real :: x0(1),y0(1)
 
@@ -187,12 +188,9 @@ subroutine tgyro_init_profiles
      call cub_spline(EXPRO_rmin(:)/r_min,1e13*EXPRO_ni(i_ion,:),n_exp,r,ni(i_ion,:),n_r)
      call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_dlntidr(i_ion,:)/100.0,n_exp,r,dlntidr(i_ion,:),n_r)
      call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_dlnnidr(i_ion,:)/100.0,n_exp,r,dlnnidr(i_ion,:),n_r)
+     ! Define default ratios (these will change if tgyro_ped_ratio < 0.0)
      n_ratio(i_ion) = ni(i_ion,n_r)/ne(n_r)
-     if (tgyro_t_ratio < 0.0) then
-        t_ratio(i_ion) = ti(i_ion,n_r)/te(n_r)
-     else
-        t_ratio(i_ion) = tgyro_t_ratio
-     endif
+     t_ratio(i_ion) = ti(i_ion,n_r)/te(n_r)
   enddo
 
   if (tgyro_ptot_flag == 1) then
@@ -405,7 +403,7 @@ subroutine tgyro_init_profiles
 
   ! Compute pressure: ptot_exp
   call tgyro_pressure
-  
+
   ! Volume average (p_ave)
   call tgyro_volume_ave(ptot_exp,EXPRO_rmin,volp_exp,p_ave,n_exp)
   !
@@ -444,7 +442,7 @@ subroutine tgyro_init_profiles
      !
      ! Pedestal density
      if (tgyro_neped < 0.0) then
-        ! Here, x0 will be x0=psi_norm_ped
+        ! Set neped to ne(psi_0), where psi_0=-tgyro_neped
         x0(1) = -tgyro_neped
         call cub_spline(psi_exp,EXPRO_ne(:),n_exp,x0,y0,1)
         tgyro_neped = y0(1)
@@ -452,11 +450,33 @@ subroutine tgyro_init_profiles
      !
      ! Pedestal zeff
      if (tgyro_zeffped < 0.0) then
-        ! Here, x0 will be x0=psi_norm_ped
+        ! Set zeffped to zeff(psi_0), where psi_0=-tgyro_zeffped
         x0(1) = -tgyro_zeffped
         call cub_spline(psi_exp,EXPRO_z_eff(:),n_exp,x0,y0,1)
         tgyro_zeffped = y0(1)
      endif
+
+     ! Pedestal density/temperature ratios 
+     if (tgyro_ped_ratio < 0.0) then
+        do i_ion=1,loc_n_ion
+           x0(1) = -tgyro_ped_ratio
+
+           call cub_spline(psi_exp,EXPRO_ne(:),n_exp,x0,y0,1)
+           tmp_ped = y0(1)
+           call cub_spline(psi_exp,EXPRO_ni(i_ion,:),n_exp,x0,y0,1)
+           n_ratio(i_ion) = y0(1)/tmp_ped
+
+           call cub_spline(psi_exp,EXPRO_te(:),n_exp,x0,y0,1)
+           tmp_ped = y0(1)
+           call cub_spline(psi_exp,EXPRO_ti(i_ion,:),n_exp,x0,y0,1)
+           t_ratio(i_ion) = y0(1)/tmp_ped
+        enddo
+     endif
+
+     ! Quantities used to compute (ne,ni,Te,Ti) from <n>, <T>.
+     n_frac = 2.0/(1.0+sum(n_ratio(1:loc_n_ion)))
+     t_frac = (1.0+sum(n_ratio(1:loc_n_ion)))/(1.0+sum(n_ratio(1:loc_n_ion)*t_ratio(1:loc_n_ion)))
+
   endif
   !-----------------------------------------------------------------
 
