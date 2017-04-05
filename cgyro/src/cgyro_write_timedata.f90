@@ -39,11 +39,13 @@ subroutine cgyro_write_timedata
        size(fflux(:,:,:)),&
        fflux(:,:,:))
  
-  ! kxky energy flux for all species
-  call cgyro_write_distributed_real(&
-       trim(path)//runfile_kxky_flux,&
-       size(flux(:,:)),&
-       flux(:,:))
+  if (nonlinear_flag == 1 .and. kxkyflux_print_flag == 1) then
+     ! kxky energy flux for all species
+     call cgyro_write_distributed_real(&
+          trim(path)//runfile_kxky_flux,&
+          size(flux(:,:)),&
+          flux(:,:))
+  endif
 
   if (nonlinear_flag == 1 .and. globalflux_print_flag == 1) then
      ! Global (n,e) fluxes for all species

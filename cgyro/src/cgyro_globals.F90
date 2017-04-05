@@ -67,6 +67,7 @@ module cgyro_globals
   integer :: test_flag
   integer :: h_print_flag
   integer :: moment_print_flag
+  integer :: kxkyflux_print_flag
   integer :: globalflux_print_flag
   real :: amp0
   real :: amp
