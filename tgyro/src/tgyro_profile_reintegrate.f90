@@ -14,9 +14,9 @@ subroutine tgyro_profile_reintegrate
 
      ! Map data over r(n_r) < r < a
 
-     call tgyro_pedestal_map(dlnnedr(n_r),zn_top,n_top(1),nn_vec(:,2),&
+     call tgyro_pedestal_map(dlnnedr(n_r),zn_top,n_top(1)*n_frac,nn_vec(:,2)*n_frac,&
           i_star,exp_ne)
-     call tgyro_pedestal_map(dlntedr(n_r),zt_top,t_top(1),t_vec(:),&
+     call tgyro_pedestal_map(dlntedr(n_r),zt_top,t_top(1)*t_frac,t_vec(:)*t_frac,&
           i_star,exp_te)
 
      ! Map ion densities
@@ -28,12 +28,12 @@ subroutine tgyro_profile_reintegrate
      !
      do i_ion=1,loc_n_ion
         if (therm_flag(i_ion) == 1) then
-           w = t_ratio(i_ion)
-           call tgyro_pedestal_map(dlntidr(i_ion,n_r),zt_top,w*t_top(1),w*t_vec(:),&
-                i_star,exp_ti(i_ion,:))
-           w = n_ratio(i_ion)
+           w = n_ratio(i_ion)*n_frac
            call tgyro_pedestal_map(dlnnidr(i_ion,n_r),zn_top,w*n_top(1),w*nn_vec(:,2),&
                 i_star,exp_ni(i_ion,:))
+           w = t_ratio(i_ion)*t_frac
+           call tgyro_pedestal_map(dlntidr(i_ion,n_r),zt_top,w*t_top(1),w*t_vec(:),&
+                i_star,exp_ti(i_ion,:))
         endif
      enddo
 
@@ -53,5 +53,5 @@ subroutine tgyro_profile_reintegrate
 
   ! Compute pressure: ptot_exp
   call tgyro_pressure
-  
+
 end subroutine tgyro_profile_reintegrate

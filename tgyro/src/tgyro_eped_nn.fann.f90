@@ -93,7 +93,7 @@
    INPUT_PARAMETERS( 5) = ip_in
    INPUT_PARAMETERS( 6) = kappa_in
    INPUT_PARAMETERS( 7) = m_in
-   INPUT_PARAMETERS( 8) = neped_in
+   INPUT_PARAMETERS( 8) = nped_in
    INPUT_PARAMETERS( 9) = r_in
    INPUT_PARAMETERS(10) = zeffped_in
 
@@ -111,12 +111,12 @@
    ! nn_n* -> 10^13/cm^3 
 
    nn_p_ped = OUTPUT_PARAMETERS(1)*1e6
-   nn_t_ped = (10*nn_p_ped)/(2*(1e13*neped_in)*k)
+   nn_t_ped = (10*nn_p_ped)/(2*(1e13*nped_in)*k)
 
-   nn_n_cor = neped_in*1.5
-   nn_t_cor = te_toq
+   nn_n_cor = nped_in*1.5
+   nn_t_cor = t_axis
 
-   nn_n_edg = neped_in*0.25
+   nn_n_edg = nped_in*0.25
    nn_t_edg = 75.0
 
    nn_vec=0.0
@@ -126,7 +126,7 @@
 
    call toq_profiles( &
         nn_vec(:,1), nx_nn, nn_w_ped/2.0, &
-        neped_in, nn_t_ped,               &
+        nped_in, nn_t_ped,               &
         nn_n_cor, nn_t_cor,               &
         nn_n_edg, nn_t_edg,               &
         nexpin, nexpout, texpin, texpout, &
@@ -137,7 +137,7 @@
 
    ! At this point: 
    !   nn_vec(:,1) -> psi_norm
-   !   nn_vec(:,2) -> ne [1/cm^3]
-   !   nn_vec(:,3) -> P [Pa]
+   !   nn_vec(:,2) -> <n> [1/cm^3]
+   !   nn_vec(:,3) -> P   [Pa]
 
  end subroutine tgyro_eped_nn

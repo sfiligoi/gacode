@@ -1,3 +1,4 @@
+import os
 import sys
 import string
 import numpy as np
@@ -11,6 +12,11 @@ ext  = sys.argv[3]
 rvar = sys.argv[4]
 loc  = int(sys.argv[5])
 dots = int(sys.argv[6])
+
+# Test for required input.profiles data
+if not os.path.isfile('input.profiles.0'):
+    print 'ERROR: Need to run tgyro with TGYRO_WRITE_PROFILES_FLAG=-1'
+    sys.exit(1)
 
 fig = plt.figure(figsize=(14,8))
 fig.subplots_adjust(left=0.07,right=0.96,top=0.94,bottom=0.09)
