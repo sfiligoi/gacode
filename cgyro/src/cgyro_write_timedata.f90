@@ -33,35 +33,36 @@ subroutine cgyro_write_timedata
 
   call cgyro_flux
 
-  do i_moment=1,3
+  ! ky flux for all species with field breakdown
+   call cgyro_write_distributed_real(&
+       trim(path)//runfile_ky_flux,&
+       size(fflux(:,:,:)),&
+       fflux(:,:,:))
+ 
+  ! kxky energy flux for all species
+  call cgyro_write_distributed_real(&
+       trim(path)//runfile_kxky_flux,&
+       size(flux(:,:)),&
+       flux(:,:))
 
-     ! Density, momentum and energy flux for all species
-     call cgyro_write_distributed_real(&
-          trim(path)//runfile_kxky_flux(i_moment),&
-          size(flux(:,:,i_moment)),&
-          flux(:,:,i_moment))
-
-     ! Global fluxes for all species
-     if (nonlinear_flag == 1) then
+  if (nonlinear_flag == 1 .and. globalflux_print_flag == 1) then
+     ! Global (n,e) fluxes for all species
+     do i_moment=1,2
         call cgyro_write_distributed_complex(&
              trim(path)//runfile_lky_flux(i_moment),&
              size(gflux(:,:,i_moment)),&
              gflux(:,:,i_moment))
-     endif
-
-  enddo
-
+     enddo
+  endif
+  
   if (nonlinear_flag == 1 .and. moment_print_flag == 1) then
-     ! Density moment for all species at theta=0
-     call cgyro_write_distributed_complex(&
-          trim(path)//runfile_kxky_n,&
-          size(moment(:,:,1)),&
-          moment(:,:,1))
-     ! Energy moment for all species at theta=0
-     call cgyro_write_distributed_complex(&
-          trim(path)//runfile_kxky_e,&
-          size(moment(:,:,2)),&
-          moment(:,:,2))
+     ! (n,e) moment for all species at theta=0
+     do i_moment=1,2
+        call cgyro_write_distributed_complex(&
+             trim(path)//runfile_kxky(i_moment),&
+             size(moment(:,:,i_moment)),&
+             moment(:,:,i_moment))
+     enddo
   endif
 
   ! Complex potential at theta=0 
@@ -72,7 +73,7 @@ subroutine cgyro_write_timedata
 
   ! Checksum for regression testing
   ! Note that value is a distributed real scalar
-  call write_precision(trim(path)//runfile_prec,sum(abs(flux(:,:,1:2)))+sum(abs(moment(:,:,1:2))))
+  call write_precision(trim(path)//runfile_prec,sum(abs(fflux)))
 
   !------------------------------------------------------------------
   ! Ballooning mode (or ZF) output for linear runs with a single mode
