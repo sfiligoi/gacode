@@ -24,11 +24,11 @@ module tgyro_ped
   real :: ip_in
   real :: kappa_in
   real :: m_in
-  real :: neped_in
+  real :: nped_in
   real :: r_in
   real :: zeffped_in
   
-  real :: te_toq
+  real :: t_axis
 
   ! EPED_NN outputs
   integer, parameter :: nx_nn=1001
@@ -56,12 +56,11 @@ module tgyro_ped
 
   ! Pedestal top scale lengths
   real :: zn_top,zt_top
-  real :: n_top(1),t_top(1)
-  real :: r_top(1)
   real :: dr_nml
-  real, dimension(1) :: psi_top
-  real, dimension(1) :: p_top
-
+  real, dimension(1) :: r_top,psi_top
+  real, dimension(1) :: n_top,t_top,p_top
+  real :: n_frac,t_frac
+  
 contains
 
   subroutine tgyro_pedestal
@@ -80,9 +79,10 @@ contains
     if (tgyro_ped_model == 1) return
 
     !-------------------------------------------------------------------------
-    ! 1. Initializations (not used)
+    ! 1. Initializations 
     !
-    neped_in   = tgyro_neped
+    ! nped_in = <n>
+    nped_in    = tgyro_neped*(1.0+sum(n_ratio(1:loc_n_ion)))/2.0
     zeffped_in = tgyro_zeffped
     !-------------------------------------------------------------------------
 
@@ -104,7 +104,7 @@ contains
           psi_top(1) = tgyro_rped
        endif
 
-    endif
+  endif
 
     ! Broadcast needed data from single-task call above 
     call MPI_BCAST(nn_vec,size(nn_vec),MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
@@ -125,14 +125,14 @@ contains
     !     = n_top t_top ntsum
     !     = p_top/k
  
-    ntsum = 1.0+sum(n_ratio(1:loc_n_ion)*t_ratio(1:loc_n_ion))
+    !ntsum = 1.0+sum(n_ratio(1:loc_n_ion)*t_ratio(1:loc_n_ion))
 
     ! t_top [eV] 
-    t_top = (10.0*p_top)/(ntsum*n_top*k) 
+    t_top = (10.0*p_top)/(2*n_top*k) 
 
     ! Calculate n' (n_p) and T' (t_p):
     call bound_deriv(n_p,nn_vec(:,2),nn_vec(:,1),nx_nn)
-    t_vec = (10.0*nn_vec(:,3))/(ntsum*nn_vec(:,2)*k)
+    t_vec = (10.0*nn_vec(:,3))/(2*nn_vec(:,2)*k)
     call bound_deriv(t_p,t_vec,nn_vec(:,1),nx_nn)
 
     ! n_top', t_top'
@@ -155,17 +155,17 @@ contains
 
     !-------------------------------------------------------------------------
     ! 4. Integrate to obtain TGYRO pivot values
-
+    
     ! Integration backward from r_top to r_star
     dr_nml = r_top(1)-r(n_r)
-    ne(n_r)   = n_top(1)*exp(0.5*(dlnnedr(n_r)  +zn_top)*dr_nml)
-    te(n_r)   = t_top(1)*exp(0.5*(dlntedr(n_r)  +zt_top)*dr_nml)
+    ne(n_r)   = n_top(1)*exp(0.5*(dlnnedr(n_r)  +zn_top)*dr_nml)*n_frac
+    te(n_r)   = t_top(1)*exp(0.5*(dlntedr(n_r)  +zt_top)*dr_nml)*t_frac
 
     ! Self-similar ion values (fixed pivot assumption; see tgyro_profile_reintegrate)
     do i_ion=1,loc_n_ion
        if (therm_flag(i_ion) == 1) then
-          ti(i_ion,n_r) = t_top(1)*exp(0.5*(dlntidr(i_ion,n_r)+zt_top)*dr_nml)*t_ratio(i_ion)
-          ni(i_ion,n_r) = n_top(1)*exp(0.5*(dlnnidr(i_ion,n_r)+zn_top)*dr_nml)*n_ratio(i_ion)
+          ni(i_ion,n_r) = n_top(1)*exp(0.5*(dlnnidr(i_ion,n_r)+zn_top)*dr_nml)*n_ratio(i_ion)*n_frac
+          ti(i_ion,n_r) = t_top(1)*exp(0.5*(dlntidr(i_ion,n_r)+zt_top)*dr_nml)*t_ratio(i_ion)*t_frac
        endif
     enddo
     !-------------------------------------------------------------------------

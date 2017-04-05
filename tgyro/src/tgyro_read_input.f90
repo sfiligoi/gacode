@@ -137,8 +137,8 @@ subroutine tgyro_read_input
   call tgyro_readbc_real(tgyro_rped)
   call tgyro_readbc_real(tgyro_neped)
   call tgyro_readbc_real(tgyro_zeffped)
+  call tgyro_readbc_real(tgyro_ped_ratio)
   call tgyro_readbc_real(tgyro_tglf_nn_max_error)
-  call tgyro_readbc_real(tgyro_t_ratio)
   ! ** END input read; ADD NEW PARAMETERS ABOVE HERE!!
   call tgyro_readbc_int(n_inst)
   !-------------------------------------------------------
