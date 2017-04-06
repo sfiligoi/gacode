@@ -6,6 +6,9 @@ IDENTITY="GA drop cluster"
 CORES_PER_NODE=12
 NUMAS_PER_NODE=1
 
+PATH:=/act/mvapich2-1.8/intel/bin:$(PATH)
+LD_LIBRARY_PATH:=/act/mvapich2-1.8/intel/lib:$(LD_LIBRARY_PATH)
+
 FFTWDIR=/opt/fftw-3.3.3-intel
 NCDIR=/opt/netcdf-4.1.3-intel
 
@@ -30,4 +33,5 @@ NETCDF_INC=$(NCDIR)/include
 
 ARCH = ar cr
 
-
+FANN_ROOT=$(FANN_DIR)
+CFLAGS=-I$(FANN_DIR)/include
