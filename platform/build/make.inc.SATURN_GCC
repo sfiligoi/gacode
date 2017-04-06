@@ -33,5 +33,3 @@ NETCDF_INC = $(NETCDF_DIR)/include
 # Archive
 
 ARCH = ar cr
-
-FANN_ROOT=$(FANN_DIR)
