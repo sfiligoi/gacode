@@ -81,6 +81,10 @@ subroutine cgyro_check
         call cgyro_error('Fourier geometry coefficients missing.')
         return
      endif
+     if (udsymmetry_flag == 1) then
+        call cgyro_error('Cannot have UDSYMMETRY_FLAG=1 with general geometry.')
+        return
+     endif
 
   case default
 

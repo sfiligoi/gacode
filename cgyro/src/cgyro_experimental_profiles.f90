@@ -90,7 +90,7 @@ subroutine cgyro_experimental_profiles
   s_delta_exp(:) = EXPRO_sdelta(:) 
   zeta_exp(:)    = EXPRO_zeta(:)
   s_zeta_exp(:)  = EXPRO_szeta(:)
-  if (udsymmetry_flag == 1) then
+  if (udsymmetry_flag == 1 .and. equilibrium_model /= 3) then
      zmag_exp(:)    = 0.0   
      dzmag_exp(:)   = 0.0
   else
