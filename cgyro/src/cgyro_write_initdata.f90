@@ -87,6 +87,7 @@ subroutine cgyro_write_initdata
      write(io,20) '  kappa:',kappa,'s_kappa:',s_kappa,' lamb_*:',lambda_star
      write(io,20) '  delta:',delta,'s_delta:',s_delta,'gamma_e:',gamma_e
      write(io,20) '   zeta:',zeta, ' s_zeta:',s_zeta, 'gamma_p:',gamma_p
+     write(io,20) '   zmag:',zmag, '  dzmag:',dzmag,  '   mach:',mach
 
      write(io,*)
      write(io,20) '[rho/a]:',rho,'[z_eff]:',z_eff,'[w_E*dt]',(n_toroidal-1)*q/rmin*length*gamma_e/(2*pi)*delta_t
