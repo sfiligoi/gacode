@@ -18,7 +18,7 @@ subroutine tgyro_flux
   use glf23_interface
 
   implicit none
-  
+
   integer :: i_ion
   integer :: i1,i2
   integer :: n_12
@@ -86,7 +86,10 @@ subroutine tgyro_flux
 
   case (1)
 
-     ! Call NEO analytic theory
+     ! NEO analytic theory: Hinton-Hazeltine
+     !  
+     ! NOTE: impurities have zero flux in this case
+
      call neo_run
 
      pflux_i_neo(1,i_r) = neo_pflux_thHH_out/Gamma_neo_GB
@@ -95,9 +98,8 @@ subroutine tgyro_flux
      else
         eflux_i_neo(1,i_r) = neo_eflux_thHHi_out/Q_neo_GB
      endif
-
-     pflux_e_neo(i_r) = neo_pflux_thHH_out /Gamma_neo_GB 
-     eflux_e_neo(i_r) = neo_eflux_thHHe_out /Q_neo_GB
+     pflux_e_neo(i_r)   = neo_pflux_thHH_out /Gamma_neo_GB 
+     eflux_e_neo(i_r)   = neo_eflux_thHHe_out /Q_neo_GB
 
   case (2)
 
@@ -125,6 +127,25 @@ subroutine tgyro_flux
              tgyro_neo_gv_flag*neo_efluxncv_gv_out(i_ion+1))/Q_neo_GB
         mflux_i_neo(i_ion,i_r) = (neo_mflux_dke_out(i_ion+1) + &
              tgyro_neo_gv_flag*neo_mflux_gv_out(i_ion+1))/Pi_neo_GB
+     enddo
+
+  case (3)
+
+     ! NEO analytic theory: Hirshman-Sigmar
+     !  
+     ! NOTE: impurities have zero flux in this case
+
+     call neo_run
+
+     pflux_i_neo(1,i_r) = neo_pflux_thHS_out(1)/Gamma_neo_GB
+     eflux_i_neo(1,i_r) = neo_eflux_thHS_out(1)/Q_neo_GB
+
+     pflux_e_neo(i_r)   = neo_pflux_thHS_out(2)/Gamma_neo_GB 
+     eflux_e_neo(i_r)   = neo_eflux_thHS_out(2)/Q_neo_GB
+
+     do i_ion=2,loc_n_ion
+        pflux_i_neo(i_ion,i_r) = neo_pflux_thHS_out(i_ion)/Gamma_neo_GB
+        eflux_i_neo(i_ion,i_r) = neo_eflux_thHS_out(i_ion)/Q_neo_GB
      enddo
 
   end select
@@ -258,7 +279,7 @@ subroutine tgyro_flux
         enddo
 
      endif
-      
+
   case default
 
      call tgyro_catch_error('ERROR: (TGYRO) No matching flux method in tgyro_flux.')
