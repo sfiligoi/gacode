@@ -7,6 +7,7 @@
 !  questions  should be addressed to
 !  Gary Staebler 858-455-3466  or email: gary.staebler@gat.com
 !***********************************************************************
+!
 !  TGLF multiscale saturation rule: sat_rule_in = 1 option
 !
 !***********************************************************************
