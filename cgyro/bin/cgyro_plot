@@ -61,6 +61,7 @@ then
   echo "                  = xflux    (radial profile of fluxes for all species)"
   echo "                  = fluct    (fluctuations)"
   echo "                  = vid      (create video from png files)"
+  echo "                  = fix      (fix old simulation directory)"
   echo
   echo "          -mesh"
   echo "          Add mesh to hb plot."
@@ -278,6 +279,9 @@ case "$PLOT_TYPE" in
 
    text)
    	python $PYROOT/text.py $W $FTYPE ;;
+
+   fix)
+   	python $PYROOT/fix.py ;;
 
    vid)
    	$PYROOT/avconv_wrapper $START ;;
