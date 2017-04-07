@@ -18,17 +18,28 @@ sim.getflux()
 ns = sim.n_species
 t  = sim.t
 
-if fc == 0:
-    ys = np.sum(sim.ky_flux,axis=(2,3))
-    field_tag = '\mathrm{Total}'
-else:
-    ys = np.sum(sim.ky_flux[:,:,field,:,:],axis=2)
-    if field == 0:
-        field_tag = '\phi'
-    elif field == 1:
-        field_tag = 'A_\parallel'
+field_tag = '\mathrm{Total}'
+
+if hasattr(sim,'ky_flux'):
+    # New flux format
+    if fc == 0:
+        ys = np.sum(sim.ky_flux,axis=(2,3))
     else:
-        field_tag = 'B_\parallel'
+        ys = np.sum(sim.ky_flux[:,:,field,:,:],axis=2)
+        if field == 0:
+            field_tag = '\phi'
+        elif field == 1:
+            field_tag = 'A_\parallel'
+        else:
+            field_tag = 'B_\parallel'
+else:
+    # Old/large flux format
+    sim.getbigflux()          
+    ys = np.zeros([ns,3,sim.n_time])
+    if moment == 'n':
+        ys[:,0,:] = np.sum(sim.kxky_flux_n,axis=(0,2))
+    if moment == 'e':
+        ys[:,1,:] = np.sum(sim.kxky_flux_e,axis=(0,2))
 
 # Now, ys -> {n_species,3,nt}
 

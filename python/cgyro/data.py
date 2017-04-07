@@ -334,15 +334,15 @@ class cgyrodata:
         except:
             pass
 
-        #try:
-        #    start = time.time()
-        #    data = np.fromfile(self.dir+'out.cgyro.kxky_e',dtype='float',sep=" ")
-        #    end = time.time()
-        #    self.e = np.reshape(data,(2,self.n_radial,self.n_species,self.n_n,nt),'F')
-        #    self.esq = self.e[0,:,:,:,:]**2+self.e[1,:,:,:,:]**2
-        #    print "INFO: (data.py) Read data in out.cgyro.kxky_e. TIME = "+str(end-start)
-        #except:
-        #    pass
+        try:
+            start = time.time()
+            data = np.fromfile(self.dir+'out.cgyro.kxky_e',dtype='float',sep=" ")
+            end = time.time()
+            self.e = np.reshape(data,(2,self.n_radial,self.n_species,self.n_n,nt),'F')
+            self.esq = self.e[0,:,:,:,:]**2+self.e[1,:,:,:,:]**2
+            print "INFO: (data.py) Read data in out.cgyro.kxky_e. TIME = "+str(end-start)
+        except:
+            pass
         #-----------------------------------------------------------------
 
     def getgeo(self):
