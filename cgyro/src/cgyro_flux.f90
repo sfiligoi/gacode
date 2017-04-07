@@ -106,13 +106,13 @@ subroutine cgyro_flux
         it = it_c(ic)
 
         fprod(:)  = aimag(cap_h_c(ic,iv_loc)*conjg( jvec_c(:,ic,iv_loc)*field(:,ic)))
-        fprod2(:) = aimag(cap_h_c(ic,iv_loc)*conjg(jxvec_c(:,ic,iv_loc)*field(:,ic)))
+        fprod2(:) = aimag(cap_h_c(ic,iv_loc)*conjg(i_c*jxvec_c(:,ic,iv_loc)*field(:,ic)))
 
         dvr  = w_theta(it)*dens_rot(it,is)*dens(is)*dv
         erot = (energy(ie)+lambda_rot(it,is))*temp(is)
 
         ! Density flux: Gamma_a
-        fflux_loc(is,1,:) = fflux_loc(is,1,:)-prod*dvr
+        fflux_loc(is,1,:) = fflux_loc(is,1,:)-fprod(:)*dvr
 
         ! Energy flux : Q_a
         fflux_loc(is,2,:) = fflux_loc(is,2,:)-fprod(:)*dvr*erot
