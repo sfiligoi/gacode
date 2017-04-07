@@ -186,16 +186,16 @@ then
     cp $SIMDIR/out.cgyro.timing $SDIR
     cp $SIMDIR/out.cgyro.info $SDIR
     cp $SIMDIR/out.cgyro.geo $SDIR
-    if [ -f $SIMDIR/out.cgyro.kxky_flux_e ]
-    then
-	cgyro_plot -plot fix -e $SIMDIR
-    else
-	cp $SIMDIR/out.cgyro.ky_flux $SDIR
-    fi
     if ! grep -q NONLINEAR_FLAG=1 $SDIR/input.cgyro
     then
        cp $SIMDIR/out.cgyro.freq $SDIR
     fi
+    if [ -f $SIMDIR/out.cgyro.kxky_flux_e ]
+    then
+	cd $SIMDIR
+	cgyro_plot -plot fix
+    fi
+    cp $SIMDIR/out.cgyro.ky_flux $SDIR
     exit 1
 fi
 #============================================================
