@@ -18,9 +18,6 @@ subroutine tgyro_expro_map(r,z,n_r,ps,r_exp,p_exp,n_exp,mode)
   real, intent(in), dimension(n_r) :: r,z
   real, intent(in), dimension(n_exp) :: r_exp
   real, intent(inout), dimension(n_exp) :: p_exp
-  real, dimension(n_exp) :: z_exp
-  real :: dr
-  integer :: i
   integer :: i_exp
   character(len=3) :: mode
 

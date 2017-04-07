@@ -13,7 +13,8 @@ subroutine cgyro_write_timedata
   implicit none
 
   complex :: a_norm
-  integer :: i_field,ir,it
+  integer :: i_field,i_moment
+  integer :: ir,it
   logical :: lfe
   real :: vfreq(2)
   complex :: ftemp(n_radial,n_theta)
@@ -32,41 +33,38 @@ subroutine cgyro_write_timedata
 
   call cgyro_flux
 
-  if (n_toroidal > 1) then
-
-     ! Density flux for all species
+  ! ky flux for all species with field breakdown
+   call cgyro_write_distributed_real(&
+       trim(path)//runfile_ky_flux,&
+       size(fflux(:,:,:)),&
+       fflux(:,:,:))
+ 
+  if (nonlinear_flag == 1 .and. kxkyflux_print_flag == 1) then
+     ! kxky energy flux for all species
      call cgyro_write_distributed_real(&
-          trim(path)//runfile_kxky_flux(1),&
-          size(flux(:,:,1)),&
-          flux(:,:,1))
-     ! Energy flux for all species
-     call cgyro_write_distributed_real(&
-          trim(path)//runfile_kxky_flux(2),&
-          size(flux(:,:,2)),&
-          flux(:,:,2))
-     ! Global density flux for all species
-     call cgyro_write_distributed_complex(&
-          trim(path)//runfile_lky_flux(1),&
-          size(gflux(:,:,1)),&
-          gflux(:,:,1))
-     ! Global energy flux for all species
-     call cgyro_write_distributed_complex(&
-          trim(path)//runfile_lky_flux(2),&
-          size(gflux(:,:,2)),&
-          gflux(:,:,2))
+          trim(path)//runfile_kxky_flux,&
+          size(flux(:,:)),&
+          flux(:,:))
+  endif
 
-     if (moment_print_flag == 1) then
-        ! Density moment for all species at theta=0
+  if (nonlinear_flag == 1 .and. globalflux_print_flag == 1) then
+     ! Global (n,e) fluxes for all species
+     do i_moment=1,2
         call cgyro_write_distributed_complex(&
-             trim(path)//runfile_kxky_n,&
-             size(moment(:,:,1)),&
-             moment(:,:,1))
-        ! Energy moment for all species at theta=0
+             trim(path)//runfile_lky_flux(i_moment),&
+             size(gflux(:,:,i_moment)),&
+             gflux(:,:,i_moment))
+     enddo
+  endif
+  
+  if (nonlinear_flag == 1 .and. moment_print_flag == 1) then
+     ! (n,e) moment for all species at theta=0
+     do i_moment=1,2
         call cgyro_write_distributed_complex(&
-             trim(path)//runfile_kxky_e,&
-             size(moment(:,:,2)),&
-             moment(:,:,2))
-     endif
+             trim(path)//runfile_kxky(i_moment),&
+             size(moment(:,:,i_moment)),&
+             moment(:,:,i_moment))
+     enddo
   endif
 
   ! Complex potential at theta=0 
@@ -76,8 +74,8 @@ subroutine cgyro_write_timedata
        field(1,ic_c(:,it0)))
 
   ! Checksum for regression testing
-  ! Note that value is a distributed real scalar
-  call write_precision(trim(path)//runfile_prec,sum(abs(flux))+sum(abs(moment)))
+  ! Note that checksum is a distributed real scalar
+  call write_precision(trim(path)//runfile_prec,sum(abs(fflux)))
 
   !------------------------------------------------------------------
   ! Ballooning mode (or ZF) output for linear runs with a single mode
@@ -112,8 +110,10 @@ subroutine cgyro_write_timedata
   vfreq(2) = aimag(freq)
   call cgyro_write_distributed_real(trim(path)//runfile_freq,size(vfreq),vfreq)
 
-  if (n_toroidal == 1) call print_scrdata()
+  ! Output to screen
+  call print_scrdata()
 
+  ! Output to files
   call write_time(trim(path)//runfile_time)
   call write_timers(trim(path)//runfile_timers)
 
@@ -387,6 +387,7 @@ subroutine cgyro_write_distributed_real(datafile,n_fn,fn)
 
 end subroutine cgyro_write_distributed_real
 
+
 !------------------------------------------------------
 ! write_precision.f90
 !
@@ -454,6 +455,14 @@ subroutine write_precision(datafile,fn)
 
 end subroutine write_precision
 
+
+!------------------------------------------------------
+! write_balloon.f90
+!
+! PURPOSE:
+!  Manage IO of ballooning potentials
+!------------------------------------------------------
+
 subroutine write_balloon(datafile,fn)
 
   use cgyro_globals
@@ -464,7 +473,6 @@ subroutine write_balloon(datafile,fn)
   character (len=*), intent(in) :: datafile
   complex, intent(in) :: fn(n_radial,n_theta)
   !
-  integer :: ir,jr,it,np
   integer :: i_dummy
   !------------------------------------------------------
 
@@ -490,24 +498,7 @@ subroutine write_balloon(datafile,fn)
      open(unit=io,file=datafile,status='old',position='append')
 
      ! Construct ballooning-space form of field
-
-     np = n_radial/2/box_size
-
-     do ir=-np,np-1
-        do it=1,n_theta
-           if(ipccw*btccw > 0) then
-              jr = box_size*ir+n_radial/2+1
-           else
-              jr = -box_size*ir+n_radial/2
-           endif
-           f_balloon(ir+np+1,it) = fn(jr,it) &
-                *exp(-2*pi*i_c*ir*k_theta*rmin)
-        enddo
-     enddo
-
-     if (ipccw*btccw < 0) then
-        f_balloon = f_balloon*exp(2*pi*i_c*abs(k_theta)*rmin)
-     endif
+     call extended_ang(fn,f_balloon)
 
      write(io,fmtstr) transpose(f_balloon(:,:))
      close(io)
@@ -528,6 +519,53 @@ subroutine write_balloon(datafile,fn)
   end select
 
 end subroutine write_balloon
+
+
+!----------------------------------------------------------------
+! extended_ang.f90
+!
+! PURPOSE:
+!
+! Map from (r,theta) to extended angle (f2d -> f1d)
+!----------------------------------------------------------------
+
+subroutine extended_ang(f2d,f1d)
+
+  use cgyro_globals    
+
+  implicit none
+
+  integer :: ir,jr,it,np
+  complex, intent(in), dimension(n_radial,n_theta) :: f2d
+  complex, intent(inout), dimension(n_radial,n_theta) :: f1d 
+
+  np = n_radial/2/box_size
+
+  do ir=-np,np-1
+     do it=1,n_theta
+        ! Manage positive/negative q
+        if (ipccw*btccw > 0) then
+           jr = box_size*ir+n_radial/2+1
+        else
+           jr = -box_size*ir+n_radial/2
+        endif
+        f1d(ir+np+1,it) = f2d(jr,it)*exp(-2*pi*i_c*ir*k_theta*rmin)
+     enddo
+  enddo
+
+  if (ipccw*btccw < 0) then
+     f1d = f1d*exp(2*pi*i_c*abs(k_theta)*rmin)
+  endif
+
+end subroutine extended_ang
+
+
+!----------------------------------------------------------------
+! write_zf.f90
+!
+! PURPOSE:
+!
+!----------------------------------------------------------------
 
 subroutine write_zf(datafile,fn)
 
@@ -562,13 +600,9 @@ subroutine write_zf(datafile,fn)
      ! Append
 
      open(unit=io,file=datafile,status='old',position='append')
-
-     ! Construct ballooning-space form of field
-         
+    
      write(io,fmtstr) fn(:,:)
      close(io)
-
-     !-------------------------------------------------------
 
   case(3)
 
@@ -584,6 +618,13 @@ subroutine write_zf(datafile,fn)
   end select
 
 end subroutine write_zf
+
+!----------------------------------------------------------------
+! write_time.f90
+!
+! PURPOSE:
+!
+!----------------------------------------------------------------
 
 subroutine write_time(datafile)
 
@@ -616,17 +657,9 @@ subroutine write_time(datafile)
 
      ! Append
 
-     if (n_toroidal > 1) then
-        print '(a,1pe9.3,a,5(1pe9.3,1x))',&
-             '[t = ',t_current,&
-             '] t_err: ',field_error
-     endif
-
      open(unit=io,file=datafile,status='old',position='append')
-     write(io,fmtstr2) t_current,field_error
+     write(io,fmtstrn) t_current,integration_error(:)
      close(io)
-
-     !-------------------------------------------------------
 
   case(3)
 
@@ -644,8 +677,6 @@ subroutine write_time(datafile)
 end subroutine write_time
 
 
-!====================================================================================
-
 subroutine write_distribution(datafile)
 
   use mpi
@@ -655,7 +686,9 @@ subroutine write_distribution(datafile)
   implicit none
   !
   character (len=*), intent(in) :: datafile
+  integer :: ir,it
   complex, dimension(:,:), allocatable :: h_x_glob
+  complex :: ftemp(n_radial,n_theta)
   !------------------------------------------------------
 
   select case (io_control)
@@ -695,14 +728,12 @@ subroutine write_distribution(datafile)
 
      if (i_proc == 0) then
         do iv=1,nv
-           if (box_size == 1) then 
-              do ic=1,nc
-                 f_balloon(ir_c(ic),it_c(ic)) = h_x_glob(ic,iv) &
-                      *exp(-2*pi*i_c*px(ir_c(ic))*k_theta*rmin)
+           do ir=1,n_radial
+              do it=1,n_theta
+                 ftemp(ir,it) = h_x_glob(ic_c(ir,it),iv)
               enddo
-           else
-              f_balloon(:,:) = 0.0
-           endif
+           enddo
+           call extended_ang(ftemp,f_balloon)
            write(io,fmtstr) transpose(f_balloon(:,:))
         enddo
         close(io)
@@ -717,8 +748,6 @@ subroutine write_distribution(datafile)
   end select
 
 end subroutine write_distribution
-
-!====================================================================================
 
 !----------------------------------------------------------------
 ! write_timers.f90
@@ -741,7 +770,7 @@ subroutine write_timers(datafile)
   character (len=*), intent(in) :: datafile
   integer :: i_dummy
   real, dimension(11) :: dummy
-  character (len=1) :: sdummy
+  character (len=2) :: sdummy
   !-------------------------------------------------
 
   if (io_control == 1 .or. io_control == 3) then
@@ -816,9 +845,9 @@ subroutine write_timers(datafile)
         read(io,'(a)') sdummy
         read(io,'(a)') sdummy
         do i_dummy=1,i_current
-           read(io,*) dummy(:)
+           read(io,*) dummy(1)
         enddo
-        endfile(io)
+        endfile(io,iostat=i_dummy)
         close(io)
      endif
 
@@ -829,7 +858,6 @@ subroutine write_timers(datafile)
 
 end subroutine write_timers
 
-!====================================================================================
 
 subroutine print_scrdata()
 
@@ -839,18 +867,23 @@ subroutine print_scrdata()
   implicit none
   !------------------------------------------------------
 
+  ! Lots of immediate return conditions
   if (restart_flag == 1 .and. i_time == 0) return
-  
-  if (io_control == 0) then
-     return
+  if (io_control == 0 .or. i_proc > 0) return
+
+  ! Different output for 1-mode (linear) or multiple-mode runs
+
+  if (n_toroidal > 1) then
+     print '(a,1pe9.3,a,1pe9.3,1x,1pe9.3,a)',&
+          '[t: ',t_current,&
+          '][e: ',integration_error(:),']'
   else
-     if (i_proc == 0) then
-        print '(a,1pe9.3,a,1pe10.3,1x,1pe10.3,a,1pe9.3,a,1pe9.3)',&
-             '[t = ',t_current,&
-             '][w = ',freq,&
-             '][dw = ',abs(freq_err),&
-             '] t_err: ',field_error
-     endif
+     print '(a,1pe9.3,a,1pe10.3,1x,1pe10.3,a,1pe10.3,a,1pe9.3,1x,1pe9.3,a)',&
+          '[t: ',t_current,&
+          '][w: ',freq,&
+          '][dw:',abs(freq_err),&
+          '][e: ',integration_error(:),']'
+
   endif
 
 end subroutine print_scrdata

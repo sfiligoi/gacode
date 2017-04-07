@@ -1,4 +1,4 @@
-include ${GACODE_ROOT}/shared/install/make.inc.${GACODE_PLATFORM}
+include ${GACODE_ROOT}/platform/build/make.inc.${GACODE_PLATFORM}
 
 ifeq ($(OPT),debug)
    FFLAGS=${FDEBUG}
@@ -14,7 +14,7 @@ LLIB=tglf_lib
 ifdef FANN_ROOT
    # neural-net file
    TGLF_NN=tglf_nn_TM.fann
-   TGLF_LIBS=-I$(GACODE_ROOT)/shared/neural/ -L$(GACODE_ROOT)/shared/neural/ -lbrainfuse -lfann
+   TGLF_LIBS=-I$(GACODE_ROOT)/shared/neural/ -L$(GACODE_ROOT)/shared/neural/ -lbrainfuse -L${FANN_ROOT}/lib -lfann
 else
    # stub file
    TGLF_NN=tglf_nn_TM
@@ -72,4 +72,4 @@ clean:
 	rm -f *.o *.lst $(LLIB).a $(EXEC1) $(EXEC2)
 	rm -f ${GACODE_ROOT}/modules/tglf*.mod 
 
--include ../install/make.ext.${GACODE_PLATFORM}
+-include ${GACODE_ROOT}/platform/build/make.inc.${GACODE_PLATFORM}

@@ -24,8 +24,7 @@ subroutine tgyro_tglf_map
   
   CHARACTER NUL
   PARAMETER(NUL = CHAR(0))
-  
-  
+    
   q_abs = abs(q(i_r))
 
   ! Initialize TGLF

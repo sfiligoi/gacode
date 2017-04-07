@@ -1,4 +1,4 @@
-include ${GACODE_ROOT}/shared/install/make.inc.${GACODE_PLATFORM}
+include ${GACODE_ROOT}/platform/build/make.inc.${GACODE_PLATFORM}
 
 ifeq ($(OPT),debug)
    FFLAGS=${FDEBUG}
@@ -16,7 +16,8 @@ ifdef FANN_ROOT
               -I$(GACODE_ROOT)/shared/harvest_client/ \
               -L$(GACODE_ROOT)/shared/neural/ \
               -I$(GACODE_ROOT)/shared/neural/ \
-              -lbrainfuse -lharvest -lfann
+              -lbrainfuse -lharvest \
+              -L$(FANN_ROOT)/lib -lfann
 else
    TGYRO_NN=tgyro_eped_nn
    TGYRO_LIBS=-L$(GACODE_ROOT)/shared/harvest_client/ \
@@ -28,6 +29,7 @@ OBJECTS += tgyro_globals.o \
            tgyro_iteration_variables.o \
            tgyro_allocate_globals.o \
 	   tgyro_ped.o \
+           tgyro_auxiliary_routines.o \
            tgyro_catch_error.o \
            tgyro_comm_setup.o \
            tgyro_comm_sync.o \
@@ -35,9 +37,9 @@ OBJECTS += tgyro_globals.o \
            tgyro_flux.o \
            tgyro_flux_set.o \
            tgyro_flux_vector.o \
-           tgyro_flux_vector_dense.o \
            tgyro_gyro_map.o \
            tgyro_harvest.o \
+           tgyro_ifs_pppl.o \
            tgyro_init_profiles.o \
            tgyro_init_profiles_axis.o \
            tgyro_iteration_driver.o \
@@ -50,6 +52,7 @@ OBJECTS += tgyro_globals.o \
            tgyro_profile_functions.o \
            tgyro_profile_reintegrate.o \
            tgyro_profile_set.o \
+           tgyro_pressure.o \
            tgyro_quasigrad.o \
            tgyro_read_input.o \
            tgyro_read_routines.o \

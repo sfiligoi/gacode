@@ -49,7 +49,7 @@ subroutine cgyro_shear_linear
      do ir=2,n_radial
         h_x(ic_c(ir-1,:),:) = h_x(ic_c(ir,:),:)
      enddo
-     h_x(ic_c(n_radial,:),:) = a1*gamma_e_decay
+     h_x(ic_c(n_radial,:),:) = 0.0
 
   endif
  

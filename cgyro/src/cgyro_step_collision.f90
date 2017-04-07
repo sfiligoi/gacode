@@ -80,6 +80,7 @@ subroutine cgyro_step_collision
      is = is_v(iv)
      do ic=1,nc
         psi(ic,iv_loc) = sum(jvec_c(:,ic,iv_loc)*field(:,ic))
+        chi(ic,iv_loc) = sum(jxvec_c(:,ic,iv_loc)*field(:,ic))
         h_x(ic,iv_loc) = cap_h_c(ic,iv_loc)-psi(ic,iv_loc)*(z(is)/temp(is))
      enddo
   enddo

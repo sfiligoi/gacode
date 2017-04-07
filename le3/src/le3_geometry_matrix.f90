@@ -2,7 +2,7 @@ subroutine le3_geometry_matrix
 
   use le3_globals
   implicit none
-  integer :: i,j,k,its,ips,ip,kt,kp
+  integer :: i,j,its,ips,kt,kp
   
   real, dimension(:), allocatable :: vec_vdriftx
   real, dimension(:), allocatable :: vec_flux
@@ -456,9 +456,5 @@ subroutine le3_geometry_matrix
   deallocate(vec_bmag)
   deallocate(vec_thetabar)
   deallocate(vec_ntv)
-
-10 format('(',i2,'):',2x,2(1pe14.7,1x))
-20 format('(',i2,',',i2,'):',2x,4(1pe14.7,1x))
-30 format(t15,4(a,9x))
 
 end subroutine le3_geometry_matrix

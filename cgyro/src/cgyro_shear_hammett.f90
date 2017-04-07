@@ -35,7 +35,7 @@ subroutine cgyro_shear_hammett
         h_x(ic_c(ir-1,:),:) = h_x(ic_c(ir,:),:)
      enddo
 
-     h_x(ic_c(n_radial,:),:) = a1*gamma_e_decay
+     h_x(ic_c(n_radial,:),:) = 0.0
 
      call cgyro_field_c
 
@@ -52,7 +52,7 @@ subroutine cgyro_shear_hammett
         h_x(ic_c(ir+1,:),:) = h_x(ic_c(ir,:),:)
      enddo
 
-     h_x(ic_c(1,:),:) = a1*gamma_e_decay
+     h_x(ic_c(1,:),:) = 0.0
 
      call cgyro_field_c
 

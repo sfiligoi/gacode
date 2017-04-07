@@ -45,6 +45,10 @@ subroutine EXPRO_write_derived(io,datafile)
   write(io,'(a)') '# 44    EXPRO_gamma_p(:)       R_0 d(w0)/dr (1/s)'
   write(io,'(a)') '# 45    EXPRO_mach(:)          R_0 w0/cs'
   write(io,'(a)') '# 46    EXPRO_ip(:)            Plasma current (A) = mu Int[Bp dl]'
+  write(io,'(a)') "# 47    EXPRO_adlnnedr(:)      -ne''/ne (1/m^2)"
+  write(io,'(a)') "# 48    EXPRO_adlntedr(:)      -Te''/Te (1/m^2)"
+  write(io,'(a)') "# 49-58 EXPRO_sdlnnidr(1:10,:) -ni''/ni (1/m^2)"
+  write(io,'(a)') "# 59-68 EXPRO_sdlntidr(1:10,:) -Ti''/Ti (1/m^2)"
   write(io,'(a)') '#'
   write(io,'(a,i3)') '# Each vector has length ',EXPRO_n_exp
   write(io,'(a)') '#'
@@ -77,6 +81,10 @@ subroutine EXPRO_write_derived(io,datafile)
   write(io,10) EXPRO_gamma_p(:)  ! 44
   write(io,10) EXPRO_mach(:)     ! 45
   write(io,10) EXPRO_ip(:)       ! 46
+  write(io,10) EXPRO_sdlnnedr(:) ! 47
+  write(io,10) EXPRO_sdlntedr(:) ! 48
+  write(io,10) transpose(EXPRO_sdlnnidr(:,:)) ! 49-58
+  write(io,10) transpose(EXPRO_sdlntidr(:,:)) ! 59-68
 
   close(io)
 

@@ -9,6 +9,7 @@ subroutine cgyro_init_arrays
   real :: arg
   real :: efac
   real :: u
+  real :: fac
   integer :: ir,it,is,ie,ix
   integer :: jr,jt,id,ccw_fac
   integer :: i_field
@@ -34,6 +35,7 @@ subroutine cgyro_init_arrays
      do ic=1,nc
 
         it = it_c(ic)
+        ir = ir_c(ic)
 
         arg = k_perp(ic)*rho*vth(is)*mass(is)/(z(is)*bmag(it)) &
              *sqrt(2.0*energy(ie))*sqrt(1.0-xi(ix)**2)
@@ -48,18 +50,47 @@ subroutine cgyro_init_arrays
 
      enddo
 
+     ! psi factors
      efac = 1.0
      jvec_c(1,:,iv_loc) = efac*jloc_c(1,:)
+     
      if (n_field > 1) then
         efac = -xi(ix)*sqrt(2.0*energy(ie))*vth(is)
         jvec_c(2,:,iv_loc) = efac*jloc_c(1,:)
+        
         if (n_field > 2) then
            efac = 2.0*energy(ie)*(1-xi(ix)**2)*temp(is)/z(is)
            jvec_c(3,:,iv_loc) = efac*jloc_c(2,:)
         endif
-     endif
 
+     endif
+     
+     ! chi factors
+     do ic=1,nc
+        it = it_c(ic)
+        fac = rho * temp(is)/(z(is) * bmag(it)) * bpol(it)/bmag(it) &
+             * 2.0 * energy(ie)*(1-xi(ix)**2) * k_x(ic)
+        
+        jxvec_c(1,ic,iv_loc) =  fac * (bmag(it) * jloc_c(2,ic))
+        
+        if(n_field > 1) then
+           efac = -xi(ix)*sqrt(2.0*energy(ie))*vth(is)
+           jxvec_c(2,ic,iv_loc) = efac * fac * (bmag(it) * jloc_c(2,ic))
+           
+           if(n_field > 2) then
+              if(n==0) then
+                 jxvec_c(3,ic,iv_loc) = 0.0
+              else
+                 jxvec_c(3,ic,iv_loc) = fac * z(is)*bmag(it)/mass(is) &
+                      /(k_perp(ic)*rho)**2 &
+                      * (bmag(it) * jloc_c(2,ic) - jloc_c(1,ic))
+              endif
+           endif
+           
+        endif
+     enddo
   enddo
+  
   deallocate(jloc_c)
   do i_field=1,n_field
      call parallel_lib_rtrans_real(jvec_c(i_field,:,:),jvec_v(i_field,:,:))
@@ -70,7 +101,6 @@ subroutine cgyro_init_arrays
   ! Conservative upwind factor
   !
   allocate(res_norm(nc,n_species))
-  allocate(dvfac(nv_loc))
 
   res_loc(:,:) = 0.0
 
@@ -102,7 +132,6 @@ subroutine cgyro_init_arrays
      is = is_v(iv)
      ix = ix_v(iv)
      ie = ie_v(iv)
-     dvfac(iv_loc) = w_e(ie)*w_xi(ix)*z(is)*dens(is)
      do ic=1,nc
         upfac1(ic,iv_loc) = w_e(ie)*w_xi(ix)*abs(xi(ix))*vel(ie)*jvec_c(1,ic,iv_loc)
         upfac2(ic,iv_loc) = jvec_c(1,ic,iv_loc)/res_norm(ic,is)
@@ -205,70 +234,21 @@ subroutine cgyro_init_arrays
   endif
   !-------------------------------------------------------------------------
 
-
   !-------------------------------------------------------------------------
-  ! Derivative and dissipation stencils
+  ! Parallel derivative and dissipation stencils
   !
   allocate(cderiv(-nup_theta:nup_theta))
   allocate(uderiv(-nup_theta:nup_theta))
+  call advect_schemes(d_theta,nup_theta,cderiv,uderiv)
+  !-------------------------------------------------------------------------
 
-  select case (nup_theta)
-
-  case (1)
-
-     ! 1st-order UPWIND
-
-     ! 2nd-order centered derivative
-     cderiv(-1) = -1.0 / (2.0 * d_theta)
-     cderiv(0)  =  0.0 / (2.0 * d_theta)
-     cderiv(1)  =  1.0 / (2.0 * d_theta)
-
-     ! 2nd-derivative filter
-     uderiv(-1) = -1.0 / (2.0 * d_theta)
-     uderiv(0)  =  2.0 / (2.0 * d_theta)
-     uderiv(1)  = -1.0 / (2.0 * d_theta)
-
-  case (2)
-
-     ! 3rd-order UPWIND
-
-     ! 4th-order centered derivative
-     cderiv(-2) =  1.0 / (12.0 * d_theta)
-     cderiv(-1) = -8.0 / (12.0 * d_theta)
-     cderiv(0)  =  0.0 / (12.0 * d_theta)
-     cderiv(1)  =  8.0 / (12.0 * d_theta)
-     cderiv(2)  = -1.0 / (12.0 * d_theta)
-
-     ! 4th-derivative filter 
-     uderiv(-2) =  1.0 / (12.0 * d_theta)
-     uderiv(-1) = -4.0 / (12.0 * d_theta)
-     uderiv(0)  =  6.0 / (12.0 * d_theta)
-     uderiv(1)  = -4.0 / (12.0 * d_theta)
-     uderiv(2)  =  1.0 / (12.0 * d_theta)
-
-  case (3)
-
-     ! 5th-order UPWIND
-
-     ! 6th-order centered derivative
-     cderiv(-3) =  -1.0 / (60.0 * d_theta)
-     cderiv(-2) =   9.0 / (60.0 * d_theta)
-     cderiv(-1) = -45.0 / (60.0 * d_theta)
-     cderiv(0)  =   0.0 / (60.0 * d_theta)
-     cderiv(1)  =  45.0 / (60.0 * d_theta)
-     cderiv(2)  =  -9.0 / (60.0 * d_theta)
-     cderiv(3)  =   1.0 / (60.0 * d_theta)
-
-     ! 6th-derivative filter 
-     uderiv(-3) =  -1.0 / (60.0 * d_theta)
-     uderiv(-2) =   6.0 / (60.0 * d_theta)
-     uderiv(-1) = -15.0 / (60.0 * d_theta)
-     uderiv(0)  =  20.0 / (60.0 * d_theta)
-     uderiv(1)  = -15.0 / (60.0 * d_theta)
-     uderiv(2)  =   6.0 / (60.0 * d_theta)
-     uderiv(3)  =  -1.0 / (60.0 * d_theta)
-
-  end select
+  !-------------------------------------------------------------------------
+  ! Wavenumber derivative and dissipation stencils
+  !
+  allocate(der_wave(-nup_wave:nup_wave))
+  allocate(dis_wave(-nup_wave:nup_wave))
+  ! Wavenumber spacing (dx) is 1.0
+  call advect_schemes(1.0,nup_wave,der_wave,dis_wave)
   !-------------------------------------------------------------------------
 
   !-------------------------------------------------------------------------
@@ -333,8 +313,7 @@ subroutine cgyro_init_arrays
         omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
              - i_c * k_theta * (omega_aprdrift(it,is)*energy(ie)*xi(ix)**2 &
              + omega_cdrift(it,is)*vel(ie)*xi(ix) + omega_rot_drift(it,is) &
-             + omega_rot_prdrift(it,is) * energy(ie)* xi(ix)**2 &
-             + omega_rot_edrift(it,is) + omega_rot_edrift_0(it))
+             + omega_rot_edrift(it))
         
         u = (2.0*pi/n_radial)*px(ir)
 
@@ -345,8 +324,7 @@ subroutine cgyro_init_arrays
              * (omega_rdrift(it,is)*energy(ie)*(1.0+xi(ix)**2) &
              + omega_cdrift_r(it,is)*vel(ie)*xi(ix) &
              + omega_rot_drift_r(it,is) &
-             + omega_rot_prdrift_r(it,is) * energy(ie) * xi(ix)**2 &
-             + omega_rot_edrift_r(it,is))
+             + omega_rot_edrift_r(it))
         
         ! (d/dr) upwind components from drifts [UPWIND: iu -> spectraldiss]
         omega_h(ic,iv_loc) = omega_h(ic,iv_loc) &
@@ -354,8 +332,7 @@ subroutine cgyro_init_arrays
              * (abs(omega_rdrift(it,is))*energy(ie)*(1.0+xi(ix)**2) &
              + abs(omega_cdrift_r(it,is)*xi(ix))*vel(ie) &
              + abs(omega_rot_drift_r(it,is)) &
-             + abs(omega_rot_prdrift_r(it,is)) * energy(ie) * xi(ix)**2 &
-             + abs(omega_rot_edrift_r(it,is)))          
+             + abs(omega_rot_edrift_r(it)))          
              
         ! omega_star 
         carg = -i_c*k_theta*rho*(dlnndr(is)+dlntdr(is)*(energy(ie)-1.5)) &
@@ -415,3 +392,70 @@ real function spectraldiss(u,n)
   end select
 
 end function spectraldiss
+
+subroutine advect_schemes(dx,n,d,f)
+
+  implicit none
+  real, intent(in) :: dx
+  integer, intent(in) :: n
+  real, intent(inout), dimension(-n:n) :: d,f
+
+  select case(n)
+
+  case (1)
+
+     ! 1st-order UPWIND
+
+     ! 2nd-order centered derivative
+     d(-1) = -1.0/(2.0*dx)
+     d(0)  =  0.0/(2.0*dx)
+     d(1)  =  1.0/(2.0*dx)
+
+     ! 2nd-derivative filter
+     f(-1) = -1.0/(2.0*dx)
+     f(0)  =  2.0/(2.0*dx)
+     f(1)  = -1.0/(2.0*dx)
+
+  case (2)
+
+     ! 3rd-order UPWIND
+
+     ! 4th-order centered derivative
+     d(-2) =  1.0/(12.0*dx)
+     d(-1) = -8.0/(12.0*dx)
+     d(0)  =  0.0/(12.0*dx)
+     d(1)  =  8.0/(12.0*dx)
+     d(2)  = -1.0/(12.0*dx)
+
+     ! 4th-derivative filter 
+     f(-2) =  1.0/(12.0*dx)
+     f(-1) = -4.0/(12.0*dx)
+     f(0)  =  6.0/(12.0*dx)
+     f(1)  = -4.0/(12.0*dx)
+     f(2)  =  1.0/(12.0*dx)
+
+  case (3)
+
+     ! 5th-order UPWIND
+
+     ! 6th-order centered derivative
+     d(-3) =  -1.0/(60.0*dx)
+     d(-2) =   9.0/(60.0*dx)
+     d(-1) = -45.0/(60.0*dx)
+     d(0)  =   0.0/(60.0*dx)
+     d(1)  =  45.0/(60.0*dx)
+     d(2)  =  -9.0/(60.0*dx)
+     d(3)  =   1.0/(60.0*dx)
+
+     ! 6th-derivative filter 
+     f(-3) =  -1.0/(60.0*dx)
+     f(-2) =   6.0/(60.0*dx)
+     f(-1) = -15.0/(60.0*dx)
+     f(0)  =  20.0/(60.0*dx)
+     f(1)  = -15.0/(60.0*dx)
+     f(2)  =   6.0/(60.0*dx)
+     f(3)  =  -1.0/(60.0*dx)
+
+  end select
+
+end subroutine advect_schemes
