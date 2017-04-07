@@ -241,7 +241,7 @@ case "$PLOT_TYPE" in
 	python $PYROOT/plot_error.py $FTYPE ;;
 
    ky_flux)
-	python $PYROOT/plot_ky_flux.py $FTYPE $W $MOMENT $YMIN $YMAX ;;
+	python $PYROOT/plot_ky_flux.py $FTYPE $W $MOMENT $YMIN $YMAX $FIELD $FC ;;
 
    xflux)
 	python $PYROOT/plot_ex_flux.py $FTYPE $W $MOMENT $YMIN $YMAX ;;
