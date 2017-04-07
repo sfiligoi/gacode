@@ -183,14 +183,17 @@ then
     cp $SIMDIR/out.cgyro.grids $SDIR
     cp $SIMDIR/out.cgyro.equilibrium $SDIR
     cp $SIMDIR/out.cgyro.time $SDIR
+    cp $SIMDIR/out.cgyro.timing $SDIR
     cp $SIMDIR/out.cgyro.info $SDIR
-    if grep -q NONLINEAR_FLAG=1 $SDIR/input.cgyro
+    cp $SIMDIR/out.cgyro.geo $SDIR
+    if [ -f $SIMDIR/out.cgyro.kxky_flux_e ]
     then
-       cgyro_plot -plot flux -e $LOCDIR -ext dump
-       mv $SIMDIR/out.cgyro.flux* $SDIR
-       cgyro_plot -plot phi -e $LOCDIR -ext dump
-       mv $SIMDIR/out.cgyro.phi $SDIR
+	cgyro_plot -plot fix -e $SIMDIR
     else
+	cp $SIMDIR/out.cgyro.ky_flux $SDIR
+    fi
+    if ! grep -q NONLINEAR_FLAG=1 $SDIR/input.cgyro
+    then
        cp $SIMDIR/out.cgyro.freq $SDIR
     fi
     exit 1
