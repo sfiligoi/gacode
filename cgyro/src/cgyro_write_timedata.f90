@@ -74,7 +74,7 @@ subroutine cgyro_write_timedata
        field(1,ic_c(:,it0)))
 
   ! Checksum for regression testing
-  ! Note that value is a distributed real scalar
+  ! Note that checksum is a distributed real scalar
   call write_precision(trim(path)//runfile_prec,sum(abs(fflux)))
 
   !------------------------------------------------------------------
