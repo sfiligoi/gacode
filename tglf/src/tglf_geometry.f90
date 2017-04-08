@@ -957,7 +957,7 @@ SUBROUTINE mercier_luc
   ! p_prime_zero forces grad-B-curvature to zero to compensates
   ! for b_par =0
   !
-  p_prime_zero_s = 1.0
+  p_prime_zero_s = -1.0
   if(use_mhd_rule_in)p_prime_zero_s = 0.0
   !
   ! write(*,*)"debug p_prime_zero",p_prime_zero_s
