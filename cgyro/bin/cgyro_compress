@@ -17,20 +17,20 @@ echo "INFO: (cgyro) Compressing $2 -> $2-s"
 
 # Basic content
 mkdir $SDIR
-cp $1/input.cgyro $SDIR
-cp $1/input.cgyro.gen $SDIR/input.cgyro.gen.original
-cp $1/out.cgyro.grids $SDIR
-cp $1/out.cgyro.equilibrium $SDIR
-cp $1/out.cgyro.time $SDIR
-cp $1/out.cgyro.timing $SDIR
-cp $1/out.cgyro.info $SDIR
-cp $1/out.cgyro.geo $SDIR
+cp -p $1/input.cgyro $SDIR
+cp -p $1/input.cgyro.gen $SDIR/input.cgyro.gen.original
+cp -p $1/out.cgyro.grids $SDIR
+cp -p $1/out.cgyro.equilibrium $SDIR
+cp -p $1/out.cgyro.time $SDIR
+cp -p $1/out.cgyro.timing $SDIR
+cp -p $1/out.cgyro.info $SDIR
+cp -p  $1/out.cgyro.geo $SDIR
 
 # Linear data
 if ! grep -q NONLINEAR_FLAG=1 $SDIR/input.cgyro
 then
-    cp $1/out.cgyro.freq $SDIR
-    cp $1/out.cgyro.phib $SDIR
+    cp -p $1/out.cgyro.freq $SDIR
+    cp -p $1/out.cgyro.phib $SDIR
 fi
 
 # Compress old energy flux file into new all-flux format
@@ -40,10 +40,10 @@ then
     cgyro_plot -plot fix
 fi
 
-cp $1/out.cgyro.ky_flux $SDIR
+cp -p $1/out.cgyro.ky_flux $SDIR
 
 # We will have a version if NOT run through TGYRO
 if [ -f $1/out.cgyro.version ]
 then
-    cp $1/out.cgyro.version $SDIR
+    cp -p  $1/out.cgyro.version $SDIR
 fi
