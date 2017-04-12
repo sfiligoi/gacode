@@ -21,7 +21,7 @@ subroutine cgyro_advect_wavenumber(ij)
 
   ! Wavenumber advection ExB shear
   if (shear_method == 2) then
-!$omp parallel do private(j,h0,ir,dh,ip)
+!$omp parallel do private(j,h0,ir,dh,uh,ip,ic)
      do iv_loc=1,nv_loc
         h0 = 0.0
         do j=1,n_theta
@@ -31,10 +31,11 @@ subroutine cgyro_advect_wavenumber(ij)
               uh = 0.0
               do ip=-nup_wave,nup_wave
                  dh = dh+der_wave(ip)*h0(ir+ip)
-                 uh = uh+dis_wave(ip)*h0(ir+ip)*up_wave
+                 uh = uh+dis_wave(ip)*h0(ir+ip)
               enddo
               ic = ic_c(ir,j)
-              rhs(ic,iv_loc,ij) = rhs(ic,iv_loc,ij)+omega_eb*dh-abs(omega_eb)*uh
+              rhs(ic,iv_loc,ij) = rhs(ic,iv_loc,ij)+&
+                   omega_eb*dh-abs(omega_eb)*uh*up_wave
            enddo
         enddo
      enddo
