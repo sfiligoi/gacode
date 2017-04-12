@@ -168,34 +168,7 @@ fi
 # Compress option
 if [ $COMPRESS_FLAG -eq 1 ]
 then
-    if [ -d $SIMDIR-s ] 
-    then
-       echo "WARNING: Removed old directory $SIMDIR-s."
-       rm -r $SIMDIR-s
-    fi
-    SDIR=$SIMDIR-s
-    echo "INFO: (cgyro) Compressing $LOCDIR -> $LOCDIR-s"
-    # Basic content
-    mkdir $SDIR
-    cp $SIMDIR/input.cgyro $SDIR
-    cp $SIMDIR/input.cgyro.gen $SDIR/input.cgyro.gen.original
-    cp $SIMDIR/out.cgyro.version $SDIR
-    cp $SIMDIR/out.cgyro.grids $SDIR
-    cp $SIMDIR/out.cgyro.equilibrium $SDIR
-    cp $SIMDIR/out.cgyro.time $SDIR
-    cp $SIMDIR/out.cgyro.timing $SDIR
-    cp $SIMDIR/out.cgyro.info $SDIR
-    cp $SIMDIR/out.cgyro.geo $SDIR
-    if ! grep -q NONLINEAR_FLAG=1 $SDIR/input.cgyro
-    then
-       cp $SIMDIR/out.cgyro.freq $SDIR
-    fi
-    if [ -f $SIMDIR/out.cgyro.kxky_flux_e ]
-    then
-	cd $SIMDIR
-	cgyro_plot -plot fix
-    fi
-    cp $SIMDIR/out.cgyro.ky_flux $SDIR
+    cgyro_compress $SIMDIR $LOCDIR
     exit 1
 fi
 #============================================================
