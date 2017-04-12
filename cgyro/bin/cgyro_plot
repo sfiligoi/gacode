@@ -117,13 +117,14 @@ then
   echo
   echo
   echo " NONLINEAR EXAMPLES:"
-  echo "  $ cgyro_plot -e . -plot flux           [energy flux versus time]"
-  echo "  $ cgyro_plot -e . -plot flux -ext png  [... above to PNG file]"
-  echo "  $ cgyro_plot -e . -plot flux -ext dump [... above to datafile]"
-  echo "  $ cgyro_plot -e . -plot flux -moment n [particle flux versus time]"
-  echo "  $ cgyro_plot -e . -plot ky_flux        [energy flux versus ky]"
-  echo "  $ cgyro_plot -e . -plot phi            [n=0 and n>0 potentials versus time]"
-  echo "  $ cgyro_plot -e . -plot ky_phi -n 0,2,4-8 [n=0 and n>0 potentials versus time]"
+  echo "  $ cgyro_plot -e . -plot flux              [energy flux versus time]"
+  echo "  $ cgyro_plot -e . -plot flux -ext png     [... above to PNG file]"
+  echo "  $ cgyro_plot -e . -plot flux -ext dump    [... above to datafile]"
+  echo "  $ cgyro_plot -e . -plot flux -moment n    [particle flux versus time]"
+  echo "  $ cgyro_plot -e . -plot flux -fc -field 1 [A_par energy flux versus time]"
+  echo "  $ cgyro_plot -e . -plot ky_flux           [energy flux versus ky]"
+  echo "  $ cgyro_plot -e . -plot phi               [phi(t) for n=0 and n>0]"
+  echo "  $ cgyro_plot -e . -plot ky_phi -n 0,2,4-8 [phi harmonics versus time]"
 
 
   exit 1
