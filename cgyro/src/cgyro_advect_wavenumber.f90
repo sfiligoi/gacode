@@ -15,7 +15,7 @@ subroutine cgyro_advect_wavenumber(ij)
   integer, intent(in) :: ij
   integer :: ir,ip,j
   complex, dimension(1-nup_wave:n_radial+nup_wave) :: h0
-  complex :: dh
+  complex :: dh,uh
 
   call timer_lib_in('shear')
 
@@ -28,11 +28,13 @@ subroutine cgyro_advect_wavenumber(ij)
            h0(1:n_radial) = h_x(ic_c(:,j),iv_loc)
            do ir=1,n_radial
               dh = 0.0
+              uh = 0.0
               do ip=-nup_wave,nup_wave
                  dh = dh+der_wave(ip)*h0(ir+ip)
+                 uh = uh+dis_wave(ip)*h0(ir+ip)*up_wave
               enddo
               ic = ic_c(ir,j)
-              rhs(ic,iv_loc,ij) = rhs(ic,iv_loc,ij)+omega_eb*dh
+              rhs(ic,iv_loc,ij) = rhs(ic,iv_loc,ij)+omega_eb*dh-abs(omega_eb)*uh
            enddo
         enddo
      enddo
