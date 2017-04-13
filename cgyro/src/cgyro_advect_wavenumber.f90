@@ -63,7 +63,7 @@ subroutine cgyro_advect_wavenumber(ij)
            do j=1,n_theta
               h0(1:n_radial) = h_x(ic_c(:,j),iv_loc)
               do ir=1,n_radial
-                 b(ir,j) = 7/3.0*(h0(ir+1)-h0(ir-1))*1/12.0*(h0(ir+2)-h0(ir-2))
+                 b(ir,j) = 7/3.0*(h0(ir+1)-h0(ir-1))+1/12.0*(h0(ir+2)-h0(ir-2))
               enddo
            enddo
            al(:) = 1.0
