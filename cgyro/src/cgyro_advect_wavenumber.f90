@@ -14,13 +14,17 @@ subroutine cgyro_advect_wavenumber(ij)
 
   integer, intent(in) :: ij
   integer :: ir,ip,j
-  complex, dimension(1-nup_wave:n_radial+nup_wave) :: h0
+  complex, dimension(:),allocatable :: h0
   complex :: dh,uh
+  complex, dimension(n_radial-1) :: al,au
+  complex, dimension(n_radial) :: ad
+  complex, dimension(n_radial,n_theta) :: b
 
   call timer_lib_in('shear')
 
   ! Wavenumber advection ExB shear
   if (shear_method == 2) then
+     allocate(h0(1-nup_wave:n_radial+nup_wave))
 !$omp parallel do private(j,h0,ir,dh,uh,ip,ic)
      do iv_loc=1,nv_loc
         h0 = 0.0
@@ -39,7 +43,30 @@ subroutine cgyro_advect_wavenumber(ij)
            enddo
         enddo
      enddo
+     deallocate(h0)
+  else
+     allocate(h0(n_radial))
+     do iv_loc=1,nv_loc
+        do j=1,n_theta
+           h0(:) = h_x(ic_c(:,j),iv_loc)
+           b(1,j) = 3*h0(2)
+           do ir=2,n_radial-1
+              b(ir,j) = 3*(h0(ir+1)-h0(ir-1)) 
+           enddo
+           b(n_radial,j) = -3*h0(n_radial-1)
+        enddo
+        al(:) = 1.0
+        ad(:) = 4.0
+        au(:) = 1.0
+        call ZGTSV(n_radial,n_theta,al,ad,au,b,n_radial,info)
+        do j=1,n_theta
+           rhs(ic_c(:,j),iv_loc,ij) = rhs(ic_c(:,j),iv_loc,ij)+omega_eb*b(:,j)
+        enddo
+     enddo
+     deallocate(h0)
   endif
+
+  !-------------------------------------------------------------------------
 
   ! Wavenumber advection profile shear
   if (profile_shear_flag == 1) then
