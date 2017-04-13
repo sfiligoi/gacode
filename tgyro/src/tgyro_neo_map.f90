@@ -4,9 +4,9 @@ subroutine tgyro_neo_map
   use neo_interface
 
   implicit none
-  real :: mu1
-  real :: gamma_p0,u000
-  integer :: is
+  real :: gamma_p0, u000
+  integer :: is, i0
+  real :: m_norm, t_norm, n_norm
 
   ! Initialize NEO
   call neo_init(paths(i_r-1),gyro_comm)
@@ -48,41 +48,44 @@ subroutine tgyro_neo_map
 
   neo_rho_star_in  = 0.001
 
-  neo_n_species_in = loc_n_ion+1
+  if (tgyro_quickfast_flag == 1) then
+     neo_n_species_in = sum(therm_flag(1:loc_n_ion))+1
+  else
+     neo_n_species_in = loc_n_ion+1
+  endif
   if (loc_n_ion > 9) then
      call tgyro_catch_error('ERROR: (TGYRO) n_ion > 9 not supported in NEO interface.') 
   endif
 
-  ! Assuming NEO m_norm = mi(1) (first ion)
-  mu1 = sqrt(mi(1)/(me*loc_me_multiplier))
+  ! Assuming NEO mass and temp norm based on first ion
+  ! dens norm based on electrons
+  m_norm = mi(1)
+  t_norm = ti(1,i_r)
+  n_norm = ne(i_r)
   
   ! Electrons
-  neo_z_in(2)      = -1
-  neo_mass_in(2)   = 1.0/mu1**2
-  neo_dens_in(2)   = 1.0
-  neo_temp_in(2)   = 1.0/(ti(1,i_r)/te(i_r))
-  neo_dlnndr_in(2) = r_min*dlnnedr(i_r)
-  neo_dlntdr_in(2) = r_min*dlntedr(i_r)
+  neo_z_in(1)      = -1
+  neo_mass_in(1)   = me*loc_me_multiplier/m_norm
+  neo_dens_in(1)   = 1.0
+  neo_temp_in(1)   = te(i_r)/t_norm
+  neo_dlnndr_in(1) = r_min*dlnnedr(i_r)
+  neo_dlntdr_in(1) = r_min*dlntedr(i_r)
 
-  ! Main ions
-  neo_z_in(1)      = int(zi_vec(1))
-  neo_mass_in(1)   = 1.0
-  neo_dens_in(1)   = ni(1,i_r)/ne(i_r)
-  neo_temp_in(1)   = 1.0
-  neo_dlnndr_in(1) = r_min*dlnnidr(1,i_r)
-  neo_dlntdr_in(1) = r_min*dlntidr(1,i_r)
-  neo_nu_1_in      = nui(1,i_r)*r_min/c_s(i_r)/sqrt(ti(1,i_r)/te(i_r))
+  neo_nu_1_in      = nui(1,i_r)*r_min/c_s(i_r)/sqrt(t_norm/te(i_r)) &
+       * ne(i_r)/ni(1,i_r) * sqrt(mi(1)/(me*loc_me_multiplier)) &
+       * (ti(1,i_r)/te(i_r))**1.5 / (1.0*zi_vec(1))**4
 
-  ! Ion #2
-  do is=2,neo_n_species_in
-
-     neo_z_in(is+1)      = int(zi_vec(is))
-     neo_mass_in(is+1)   = 1.0/sqrt(mi(1)/mi(is))**2
-     neo_dens_in(is+1)   = ni(is,i_r)/ne(i_r)
-     neo_temp_in(is+1)   = ti(is,i_r)/ti(1,i_r)
-     neo_dlnndr_in(is+1) = r_min*dlnnidr(is,i_r)
-     neo_dlntdr_in(is+1) = r_min*dlntidr(is,i_r)
-
+  ! Ions
+  i0 = 1
+  do is=1,neo_n_species_in
+     if (therm_flag(is) == 0 .and. tgyro_quickfast_flag == 1) cycle
+     i0 = i0 + 1
+     neo_z_in(i0)      = int(zi_vec(is))
+     neo_mass_in(i0)   = mi(is)/m_norm
+     neo_dens_in(i0)   = ni(is,i_r)/n_norm
+     neo_temp_in(i0)   = ti(is,i_r)/t_norm
+     neo_dlnndr_in(i0) = r_min*dlnnidr(is,i_r)
+     neo_dlntdr_in(i0) = r_min*dlntidr(is,i_r)
   enddo
 
   ! Rotation is always *on* in NEO.
@@ -96,9 +99,9 @@ subroutine tgyro_neo_map
 
   neo_rotation_model_in = 2
   neo_omega_rot_in = u000 * r_min / r_maj(i_r) &
-       / (c_s(i_r) * sqrt(ti(1,i_r)/te(i_r)))
+       / (c_s(i_r) * sqrt(t_norm/te(i_r)))
   neo_omega_rot_deriv_in = -gamma_p0 * r_min**2 / r_maj(i_r) &
-       / (c_s(i_r) * sqrt(ti(1,i_r)/te(i_r)))
+       / (c_s(i_r) * sqrt(t_norm/te(i_r)))
 
   ! Parameter only used for global runs.
   neo_rmin_over_a_2_in = neo_rmin_over_a_in
