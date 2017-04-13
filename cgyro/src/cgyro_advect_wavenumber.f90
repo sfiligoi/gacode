@@ -45,19 +45,32 @@ subroutine cgyro_advect_wavenumber(ij)
      enddo
      deallocate(h0)
   else
-     allocate(h0(n_radial))
+     allocate(h0(-1:n_radial+2))
      do iv_loc=1,nv_loc
-        do j=1,n_theta
-           h0(:) = h_x(ic_c(:,j),iv_loc)
-           b(1,j) = 3*h0(2)
-           do ir=2,n_radial-1
-              b(ir,j) = 3*(h0(ir+1)-h0(ir-1)) 
+
+        h0 = 0.0
+        if (nup_wave == 2) then   
+           do j=1,n_theta
+              h0(1:n_radial) = h_x(ic_c(:,j),iv_loc)
+              do ir=1,n_radial
+                 b(ir,j) = 3*(h0(ir+1)-h0(ir-1)) 
+              enddo
            enddo
-           b(n_radial,j) = -3*h0(n_radial-1)
-        enddo
-        al(:) = 1.0
-        ad(:) = 4.0
-        au(:) = 1.0
+           al(:) = 1.0
+           ad(:) = 4.0
+           au(:) = 1.0
+        else
+           do j=1,n_theta
+              h0(1:n_radial) = h_x(ic_c(:,j),iv_loc)
+              do ir=1,n_radial
+                 b(ir,j) = 7/3.0*(h0(ir+1)-h0(ir-1))*1/12.0*(h0(ir+2)-h0(ir-2))
+              enddo
+           enddo
+           al(:) = 1.0
+           ad(:) = 3.0
+           au(:) = 1.0
+        endif
+
         call ZGTSV(n_radial,n_theta,al,ad,au,b,n_radial,info)
         do j=1,n_theta
            rhs(ic_c(:,j),iv_loc,ij) = rhs(ic_c(:,j),iv_loc,ij)+omega_eb*b(:,j)
