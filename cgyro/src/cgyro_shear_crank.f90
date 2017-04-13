@@ -23,10 +23,6 @@ subroutine cgyro_shear_crank
 
   s0 = omega_eb*delta_t/2
 
-  al(:) = -s0
-  ad(:) = 1.0
-  au(:) = s0
-
   do iv_loc=1,nv_loc
      do j=1,n_theta
         h0(:) = h_x(ic_c(:,j),iv_loc)
@@ -35,6 +31,9 @@ subroutine cgyro_shear_crank
            b(ir) = h0(ir)+s0*(h0(ir-1)-h0(ir+1)) 
         enddo
         b(n_radial) = h0(n_radial)+s0*h0(n_radial-1)
+        al(:) = -s0
+        ad(:) = 1.0
+        au(:) = s0
         call ZGTSV(n_radial,1,al,ad,au,b,n_radial,info)
         h_x(ic_c(:,j),iv_loc) = b
      enddo
