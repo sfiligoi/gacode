@@ -78,9 +78,9 @@ subroutine tgyro_flux
   ! where
   ! c_s    = sqrt(T_0e/m_i)
   ! rho_se = c_s/Omega_ci
-  Gamma_neo_GB = neo_dens_2_in * neo_temp_2_in**1.5 * neo_rho_star_in**2
-  Q_neo_GB     = neo_dens_2_in * neo_temp_2_in**2.5 * neo_rho_star_in**2
-  Pi_neo_GB    = neo_dens_2_in * neo_temp_2_in**2   * neo_rho_star_in**2
+  Gamma_neo_GB = neo_dens_in(2) * neo_temp_in(2)**1.5 * neo_rho_star_in**2
+  Q_neo_GB     = neo_dens_in(2) * neo_temp_in(2)**2.5 * neo_rho_star_in**2
+  Pi_neo_GB    = neo_dens_in(2) * neo_temp_in(2)**2   * neo_rho_star_in**2
 
   select case (loc_neo_method) 
 
