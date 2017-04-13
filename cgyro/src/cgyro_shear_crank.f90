@@ -21,9 +21,9 @@ subroutine cgyro_shear_crank
   complex, dimension(n_radial-1) :: al,au
   complex, dimension(n_radial) :: ad,h0,b
 
-  s0 = omega_eb*delta_t
+  s0 = omega_eb*delta_t/2
 
-  al(:) = s0
+  al(:) = -s0
   ad(:) = 1.0
   au(:) = s0
 
@@ -31,7 +31,7 @@ subroutine cgyro_shear_crank
      do j=1,n_theta
         h0(:) = h_x(ic_c(:,j),iv_loc)
         b(1) = h0(1)-s0*h0(2)
-        do ir=2,n_radial
+        do ir=2,n_radial-1
            b(ir) = h0(ir)+s0*(h0(ir-1)-h0(ir+1)) 
         enddo
         b(n_radial) = h0(n_radial)+s0*h0(n_radial-1)
