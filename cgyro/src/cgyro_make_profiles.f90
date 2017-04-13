@@ -284,9 +284,11 @@ subroutine cgyro_make_profiles
      case (1)
         call cgyro_info('ExB shear: Hammett discrete shift') 
      case (2)
-        call cgyro_info('ExB shear: Wavenumber advection') 
+        call cgyro_info('ExB shear: Explicit wavenumber advection') 
      case (3)
         call cgyro_info('ExB shear: Linearized Hammett shift') 
+     case (4)
+        call cgyro_info('ExB shear: Implicit wavenumber advection') 
      end select
   else
      omega_eb = 0.0
