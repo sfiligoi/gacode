@@ -44,12 +44,30 @@ subroutine cgyro_advect_wavenumber(ij)
         enddo
      enddo
      deallocate(h0)
-  else
+  endif
+
+  if (shear_method == 5) then
      allocate(h0(-1:n_radial+2))
      do iv_loc=1,nv_loc
 
         h0 = 0.0
-        if (nup_wave == 2) then   
+        select case (nup_wave)
+        case (1)
+
+           ! Lele 4th order compact
+           do j=1,n_theta
+              h0(1:n_radial) = h_x(ic_c(:,j),iv_loc)
+              do ir=1,n_radial
+                 b(ir,j) = 11.0*(h0(ir+1)-h0(ir-1))+0.5*(h0(ir+2)-h0(ir-2))
+              enddo
+           enddo
+           al(:) = 5.0
+           ad(:) = 14.0
+           au(:) = 5.0
+       
+        case (2)
+           
+           ! 4th order compact
            do j=1,n_theta
               h0(1:n_radial) = h_x(ic_c(:,j),iv_loc)
               do ir=1,n_radial
@@ -59,8 +77,10 @@ subroutine cgyro_advect_wavenumber(ij)
            al(:) = 1.0
            ad(:) = 4.0
            au(:) = 1.0
-        else
-           do j=1,n_theta
+
+        case (3)
+         ! 6th order compact
+          do j=1,n_theta
               h0(1:n_radial) = h_x(ic_c(:,j),iv_loc)
               do ir=1,n_radial
                  b(ir,j) = 7/3.0*(h0(ir+1)-h0(ir-1))+1/12.0*(h0(ir+2)-h0(ir-2))
@@ -69,7 +89,7 @@ subroutine cgyro_advect_wavenumber(ij)
            al(:) = 1.0
            ad(:) = 3.0
            au(:) = 1.0
-        endif
+        end select
 
         call ZGTSV(n_radial,n_theta,al,ad,au,b,n_radial,info)
         do j=1,n_theta
