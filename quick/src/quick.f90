@@ -19,7 +19,7 @@ program quick
   EXPRO_ctrl_z(1:n_ion) = z(1:n_ion)
   EXPRO_ctrl_numeq_flag = 0
 
-  ! Read input.profiles.gen
+  ! Read input.profiles.gen (i.e., call EXPRO)
   call EXPRO_alloc('./',1)
   call EXPRO_read
 
