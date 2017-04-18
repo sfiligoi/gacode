@@ -27,7 +27,8 @@ subroutine cgyro_advect_wavenumber(ij)
      allocate(h0(1-nup_wave:n_radial+nup_wave))
 !$omp parallel do private(j,h0,ir,dh,uh,ip,ic)
      do iv_loc=1,nv_loc
-        h0 = 0.0
+        h0(1-nup_wave:0) = h_x(ic_c(1,j),iv_loc)
+        h0(n_radial+1:n_radial+nup_wave) = h_x(ic_c(n_radial,j),iv_loc)
         do j=1,n_theta
            h0(1:n_radial) = h_x(ic_c(:,j),iv_loc)
            do ir=1,n_radial
