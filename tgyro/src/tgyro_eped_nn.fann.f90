@@ -104,7 +104,7 @@
    ierr = run_anns()
    ierr = get_anns_avg_array(OUTPUT_PARAMETERS)
 
-   nn_w_ped = OUTPUT_PARAMETERS(3)*2
+   nn_w_ped = OUTPUT_PARAMETERS(3)
 
    ! nn_p* -> Pa
    ! nn_t* -> eV
@@ -126,7 +126,7 @@
 
    call toq_profiles( &
         nn_vec(:,1), nx_nn, nn_w_ped/2.0, &
-        nped_in, nn_t_ped,               &
+        nped_in, nn_t_ped,                &
         nn_n_cor, nn_t_cor,               &
         nn_n_edg, nn_t_edg,               &
         nexpin, nexpout, texpin, texpout, &
