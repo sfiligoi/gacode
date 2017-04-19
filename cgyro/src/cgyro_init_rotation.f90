@@ -211,7 +211,7 @@ subroutine cgyro_init_rotation
   do j=0,n_beta_star
      do it=1,n_theta
         bstar(j) = bstar(j) + cos(j*theta(it)) * pr_r(it) &
-             * g_theta_geo(it)/g_theta(it)
+             * g_theta(it)/g_theta_geo(it)
      enddo
      if (j == 0) then
         bstar(j) = bstar(j)/n_theta
@@ -228,6 +228,12 @@ subroutine cgyro_init_rotation
   enddo
   beta_star(:) = beta_star(:) * beta_star_fac
 
+  !do it=1,n_theta
+  !   print *, theta(it), beta_star(0) &
+  !        + beta_star(1)*(1-cos(theta(it))) &
+  !        + beta_star(2)*(1-cos(2.0*theta(it)))
+  !enddo
+  
   ! Put rotation in equilibrium only if Mach^2 effects are included
   if(rotation_model == 2 .or. rotation_model == 3) then
      GEO_beta_star_in   = beta_star(0)
