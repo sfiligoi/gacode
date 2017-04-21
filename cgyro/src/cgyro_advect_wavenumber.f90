@@ -30,7 +30,7 @@ subroutine cgyro_advect_wavenumber(ij)
         do j=1,n_theta
            h0(1:n_radial) = h_x(ic_c(:,j),iv_loc)
            h0(1-nup_wave:0) = h0(1)
-           h0(n_radial+1) = h0(n_radial)
+           h0(n_radial+1:n_radial+nup_wave) = 0.0
            do ir=1,n_radial
               dh = 0.0
               uh = 0.0
@@ -58,6 +58,7 @@ subroutine cgyro_advect_wavenumber(ij)
            ! Lele 4th order compact
            do j=1,n_theta
               h0(1:n_radial) = h_x(ic_c(:,j),iv_loc)
+              h0(-1:0) = h0(1)
               do ir=1,n_radial
                  b(ir,j) = 11.0*(h0(ir+1)-h0(ir-1))+0.5*(h0(ir+2)-h0(ir-2))
               enddo
@@ -71,6 +72,7 @@ subroutine cgyro_advect_wavenumber(ij)
            ! 4th order compact
            do j=1,n_theta
               h0(1:n_radial) = h_x(ic_c(:,j),iv_loc)
+              h0(-1:0) = h0(1)
               do ir=1,n_radial
                  b(ir,j) = 3*(h0(ir+1)-h0(ir-1)) 
               enddo
@@ -83,6 +85,7 @@ subroutine cgyro_advect_wavenumber(ij)
          ! 6th order compact
           do j=1,n_theta
               h0(1:n_radial) = h_x(ic_c(:,j),iv_loc)
+              h0(-1:0) = h0(1)
               do ir=1,n_radial
                  b(ir,j) = 7/3.0*(h0(ir+1)-h0(ir-1))+1/12.0*(h0(ir+2)-h0(ir-2))
               enddo
