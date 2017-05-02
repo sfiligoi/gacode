@@ -73,6 +73,7 @@ x.add('SHEAR_METHOD','1')
 x.add('N_GLOBAL','0')
 x.add('PSYM_FLAG','0')
 x.add('PROFILE_SHEAR_FLAG','0')
+x.add('THETA_PLOT','1')
 
 x.add('RMIN','0.5')
 x.add('RMAJ','3.0')

@@ -285,7 +285,8 @@ case "$PLOT_TYPE" in
    	python $PYROOT/fix.py ;;
 
    vid)
-   	$PYROOT/avconv_wrapper $START ;;
+	FRAMERATE=20
+   	$PYROOT/avconv_wrapper $START $FRAMERATE ;;
 
    *)
         echo "Unrecognized argument to -plot" ; exit 1 ;;
