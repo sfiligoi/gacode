@@ -24,6 +24,9 @@ subroutine cgyro_shear
   case (4)
      ! Linear shift (more accurate than discrete shift)
      call cgyro_shear_crank
+  case (6)
+     ! Linear shift (more accurate than discrete shift)
+     call cgyro_shear_cip
   end select
   call timer_lib_out('shear')
 
