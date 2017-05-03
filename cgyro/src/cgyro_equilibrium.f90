@@ -5,7 +5,7 @@ subroutine cgyro_equilibrium
 
   implicit none
 
-  integer :: it,ir,is
+  integer :: it,ir,is,r
   real :: gtheta_ave,gtheta0,err
   real, dimension(n_theta+1) :: x,y
 
@@ -81,12 +81,25 @@ subroutine cgyro_equilibrium
   !
   theta(:) = y(1:n_theta)
 
-  ! Theta location of field output:
+  !--------------------------------------------------------
+  ! Manage subset of theta-values for plotting output
+  !
   if (zf_test_flag == 0) then
      ! Location of theta=0
      it0 = n_theta/2+1
   else
      it0 = n_theta/3+1
+  endif
+
+  r = n_theta/theta_plot
+
+  itp(:) = 0
+  if (theta_plot == 1) then
+     itp(it0) = 1
+  else
+     do it=1,n_theta
+        if (modulo(it,r) == 1) itp(it) = it/r+1
+     enddo
   endif
   !-----------------------------------------------------------------
 

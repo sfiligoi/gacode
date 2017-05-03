@@ -42,8 +42,10 @@ windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[-1])+']$'
 ax.set_title(r'$\mathrm{Average~radial~correlation} \quad $'+windowtxt)
 ax.set_xlabel(xlabel)
 
+itheta=0
+
 #y = np.sum(sim.phisq,axis=1)
-y = np.sum(sim.phisq[:,1:,:],axis=1)
+y = np.sum(sim.phisq[:,itheta,1:,:],axis=1)
 for j in range(sim.n_radial):
   ave[j] = average(y[j,:],sim.t,w)
 #corr = np.zeros(sim.n_radial)

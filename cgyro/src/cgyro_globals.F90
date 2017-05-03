@@ -76,6 +76,7 @@ module cgyro_globals
   real :: mach
   integer :: rotation_model
   real :: error_tol
+  real :: adapt_tol
   integer :: mpi_rank_order
   integer :: hiprec_flag
   integer :: udsymmetry_flag
@@ -83,7 +84,7 @@ module cgyro_globals
   integer :: n_global
   integer :: psym_flag
   integer :: profile_shear_flag
-  real :: adapt_tol
+  integer :: theta_plot
   !
   ! Geometry input
   !
@@ -375,6 +376,7 @@ module cgyro_globals
   ! 
   ! Equilibrium/geometry arrays
   integer :: it0
+  integer, dimension(:), allocatable :: itp
   real :: bigR_th0
   real :: bigR_r_th0
   real, dimension(:,:), allocatable :: thetab
