@@ -324,34 +324,37 @@ class cgyrodata:
         # Read complex fields
         #
         try:
-            start = time.time()
-            data = np.fromfile(self.dir+'out.cgyro.kxky_phi',dtype='float',sep=" ")
-            end = time.time()
-            self.kxky_phi = np.reshape(data,(2,self.n_radial,self.theta_plot,self.n_n,nt),'F')
-            self.phisq = self.kxky_phi[0,:,:,:,:]**2+self.kxky_phi[1,:,:,:,:]**2
-            print "INFO: (data.py) Read data in out.cgyro.kxky_phi. TIME = "+str(end-start)
+           nd = 2*self.n_radial*self.theta_plot*self.n_n*nt
+           start = time.time()
+           data = np.fromfile(self.dir+'out.cgyro.kxky_phi',dtype='float',sep=" ")
+           end = time.time()
+           self.kxky_phi = np.reshape(data[0:nd],(2,self.n_radial,self.theta_plot,self.n_n,nt),'F')
+           self.phisq = self.kxky_phi[0,:,:,:,:]**2+self.kxky_phi[1,:,:,:,:]**2
+           print "INFO: (data.py) Read data in out.cgyro.kxky_phi. TIME = "+str(end-start)
         except:
-            pass
+           pass
         
-        try:
-            start = time.time()
-            data = np.fromfile(self.dir+'out.cgyro.kxky_n',dtype='float',sep=" ")
-            end = time.time()
-            self.n = np.reshape(data,(2,self.n_radial,self.theta_plot,self.n_species,self.n_n,nt),'F')
-            self.nsq = self.n[0,:,:,:,:,:]**2+self.n[1,:,:,:,:,:]**2
-            print "INFO: (data.py) Read data in out.cgyro.kxky_n. TIME = "+str(end-start)
-        except:
-            pass
+        nd = 2*self.n_radial*self.theta_plot*self.n_species*self.n_n*nt
 
         try:
-            start = time.time()
-            data = np.fromfile(self.dir+'out.cgyro.kxky_e',dtype='float',sep=" ")
-            end = time.time()
-            self.e = np.reshape(data,(2,self.n_radial,self.theta_plot,self.n_species,self.n_n,nt),'F')
-            self.esq = self.e[0,:,:,:,:,:]**2+self.e[1,:,:,:,:,:]**2
-            print "INFO: (data.py) Read data in out.cgyro.kxky_e. TIME = "+str(end-start)
+           start = time.time()
+           data = np.fromfile(self.dir+'out.cgyro.kxky_n',dtype='float',sep=" ")
+           end = time.time()
+           self.n = np.reshape(data[0:nd],(2,self.n_radial,self.theta_plot,self.n_species,self.n_n,nt),'F')
+           self.nsq = self.n[0,:,:,:,:,:]**2+self.n[1,:,:,:,:,:]**2
+           print "INFO: (data.py) Read data in out.cgyro.kxky_n. TIME = "+str(end-start)
         except:
-            pass
+           pass
+
+        try:
+           start = time.time()
+           data = np.fromfile(self.dir+'out.cgyro.kxky_e',dtype='float',sep=" ")
+           end = time.time()
+           self.e = np.reshape(data[0:nd],(2,self.n_radial,self.theta_plot,self.n_species,self.n_n,nt),'F')
+           self.esq = self.e[0,:,:,:,:,:]**2+self.e[1,:,:,:,:,:]**2
+           print "INFO: (data.py) Read data in out.cgyro.kxky_e. TIME = "+str(end-start)
+        except:
+           pass
         #-----------------------------------------------------------------
 
     def getgeo(self):
