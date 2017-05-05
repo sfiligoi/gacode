@@ -30,7 +30,7 @@ subroutine cgyro_shear_cip
 
         h0(:) = h_x(ic_c(:,j),iv_loc)
 
-        fc(0)          = 0.0
+        fc(0)          = h0(1)
         fc(1:n_radial) = h0(1:n_radial)
         fc(n_radial+1) = h0(n_radial)
 
