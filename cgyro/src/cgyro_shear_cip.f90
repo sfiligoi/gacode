@@ -18,7 +18,7 @@ subroutine cgyro_shear_cip
 
   real :: z0,dx
   integer :: ir,j,iup
-  complex, dimension(n_radial) :: h0,fp
+  complex, dimension(n_radial) :: h0
   complex, dimension(0:n_radial+1) :: fc,gc
   complex :: a,b
 
@@ -30,7 +30,7 @@ subroutine cgyro_shear_cip
 
         h0(:) = h_x(ic_c(:,j),iv_loc)
 
-        fc(0)          = h0(1)
+        fc(0)          = 0.0
         fc(1:n_radial) = h0(1:n_radial)
         fc(n_radial+1) = h0(n_radial)
 
@@ -43,10 +43,10 @@ subroutine cgyro_shear_cip
            iup = ir-1
            a   = (gc(ir)+gc(iup))/dx**2-2*(fc(ir)-fc(iup))/dx**3
            b   = 3*(fc(iup)-fc(ir))/dx**2+(2*gc(ir)+gc(iup))/dx
-           fp(ir) = a*z0**3+b*z0**2+gc(ir)*z0+fc(ir)
+           h0(ir) = a*z0**3+b*z0**2+gc(ir)*z0+fc(ir)
         enddo
 
-        h_x(ic_c(:,j),iv_loc) = fp(:)
+        h_x(ic_c(:,j),iv_loc) = h0(:)
 
      enddo
   enddo
