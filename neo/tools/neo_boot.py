@@ -3,7 +3,8 @@ import numpy as np
 import sys
 import string
 
-workdir='bdir'
+workdir = 'bdir'
+tools   = os.environ['GACODE_ROOT']+'/neo/tools/'
 
 if len(sys.argv) < 6:
    print "python neo_boot.py <rmin> <rmaj> <q> <nuee> <tau>"
@@ -18,7 +19,7 @@ tau  = sys.argv[5]
 # Prepare simulation directory
 os.system('rm -rf '+workdir)
 os.system('mkdir '+workdir)
-os.system('cp input.neo.neo_boot '+workdir+'/input.neo')
+os.system('cp '+tools+'input.neo.neo_boot '+workdir+'/input.neo')
 
 list = ['DLNNDR_1',
         'DLNNDR_2',
