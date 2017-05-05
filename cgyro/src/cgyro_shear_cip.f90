@@ -34,12 +34,10 @@ subroutine cgyro_shear_cip
         fc(1:n_radial) = h0(1:n_radial)
         fc(n_radial+1) = h0(n_radial)
 
-        do ir=2,n_radial-1
-           gc(ir) = (h0(ir+1)-h0(ir-1))/(2*dx)
+        gc(:) = 0.0
+        do ir=1,n_radial
+           gc(ir) = (fc(ir+1)-fc(ir-1))/(2*dx)
         enddo
-
-        gc(0:1)  = 0.0
-        gc(n_radial:n_radial+1) = 0.0
 
         do ir=1,n_radial
            iup = ir-1
