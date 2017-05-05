@@ -6,31 +6,34 @@ import string
 workdir = 'bdir'
 tools   = os.environ['GACODE_ROOT']+'/neo/tools/'
 
-if len(sys.argv) < 12:
-   print "python neo_boot.py <rmin> <rmaj> <q> <nuee> <ni1/ne> <zi1> <mi1/mD> <ti1/te> <zi2> <mi2/mD> <ti2/te>"
+if len(sys.argv) < 11:
+   print "python neo_boot.py <rmin> <q> <nuee> <ni1/ne> <zi1> <mi1/mD> <ti1/te> <zi2> <mi2/mD> <ti2/te>"
    sys.exit()
 
 # EXAMPLE:
-# python $GACODE_ROOT/neo/tools/neo_boot.py 0.5 3.0 2.0 0.1 0.9 1 1.0 1.0 6 6.0 1.0
-   
-# Normalizations in input.neo assumed to be:
-# a = minor radius of LCFS
-# T_norm = T_e
+# python $GACODE_ROOT/neo/tools/neo_boot.py 0.17 2.0 0.1 0.9 1 1.0 1.0 6 6.0 1.0
+
+# In the input.neo, there are 3 species:
+# electrons are species 1, main ions are species 2,
+# and impurity ions are species 3
+#
+# Normalizations in the input.neo assumed to be:
+# a = rmaj (the major radius), i.e. RMAJ_OVER_A=1.0
+# T_norm = T_e, i.e. TEMP_1=1.0
 # m_norm = m_deuterium
 # v_norm = sqrt(T_norm/m_norm) = c_s
 
 rmin  = sys.argv[1]  # r/a (Minor radius divided by minor radius of LCFS) 
-rmaj  = sys.argv[2]  # R_0/a (Major radius divided by minor radius of LCFS)
-q     = sys.argv[3]  # safety factor
-nuee  = sys.argv[4]  # electron collision frequency/(c_s/a)
-ni1   = sys.argv[5]  # main ion density: n_i1/n_e
+q     = sys.argv[2]  # safety factor
+nuee  = sys.argv[3]  # electron collision frequency/(c_s/a)
+ni1   = sys.argv[4]  # main ion density: n_i1/n_e
                      # (note: n_i2/n_e computed from quasi-neutrality)
-zi1  = sys.argv[6]   # main ion charge (integer)
-mi1  = sys.argv[7]   # main ion mass: m_i/m_deuterium
-ti1  = sys.argv[8]   # main ion temperature: t_i/t_e
-zi2  = sys.argv[9]   # impurity ion charge (integer)
-mi2  = sys.argv[10]  # impurity ion mass: m_i2/m_deuterium
-ti2  = sys.argv[11]  # impurity ion temperature: t_i2/t_e
+zi1  = sys.argv[5]   # main ion charge (integer)
+mi1  = sys.argv[6]   # main ion mass: m_i/m_deuterium
+ti1  = sys.argv[7]   # main ion temperature: t_i/t_e
+zi2  = sys.argv[8]   # impurity ion charge (integer)
+mi2  = sys.argv[9]   # impurity ion mass: m_i2/m_deuterium
+ti2  = sys.argv[10]  # impurity ion temperature: t_i2/t_e
 
 # Prepare simulation directory
 os.system('rm -rf '+workdir)
@@ -50,9 +53,6 @@ neoin = open(workdir+'/input.neo','a')
 
 # Set input: r_min
 neoin.write('RMIN_OVER_A='+rmin+'\n')
-
-# Set input: r_maj
-neoin.write('RMAJ_OVER_A='+rmaj+'\n')
 
 # Set input: q
 neoin.write('Q='+q+'\n')
