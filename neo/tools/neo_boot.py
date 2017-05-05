@@ -50,7 +50,8 @@ neoin.write('TEMP_3='+tau+'\n')
 
 neoin.close()
 
-c = []
+cneo = []
+csauter = []
 
 # Run NEO
 for i in range(6):
@@ -83,7 +84,9 @@ for i in range(6):
    print 'jsauter     '+str(jsauter)
    print 'I*Psi*rho_* '+str(ipsi*rhostar)
 
-   c.append(jneo/(ipsi*rhostar))
+   cneo.append(jneo/(ipsi*rhostar))
+   csauter.append(jsauter/(ipsi*rhostar))
 
 print list
-print c
+print cneo
+print csauter
