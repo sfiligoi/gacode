@@ -5,16 +5,20 @@ import string
 
 workdir='bdir'
 
-if len(sys.argv) < 3:
-   print "python neo_boot.py <tau> <rmin>"
+if len(sys.argv) < 6:
+   print "python neo_boot.py <rmin> <rmaj> <q> <nuee> <tau>"
    sys.exit()
 
-tau  = sys.argv[1]
-rmin = sys.argv[2]
+rmin = sys.argv[1]
+rmaj = sys.argv[2]
+q    = sys.argv[3]
+nuee = sys.argv[4]
+tau  = sys.argv[5]
 
 # Prepare simulation directory
 os.system('rm -rf '+workdir)
-os.system('neo -g imp_c4 ; mv imp_c4 '+workdir)
+os.system('mkdir '+workdir)
+os.system('cp input.neo.neo_boot '+workdir+'/input.neo')
 
 list = ['DLNNDR_1',
         'DLNNDR_2',
@@ -24,15 +28,25 @@ list = ['DLNNDR_1',
         'DLNTDR_3']
 
 # Open input.neo, append parameters, close
+# T_norm=T_e (species 1), m_norm=m_i (species 2)
 neoin = open(workdir+'/input.neo','a') 
-neoin.write('EQUILIBRIUM_MODEL=2\n')
-
-# Set input: tau
-neoin.write('TEMP_1='+tau+'\n')
-neoin.write('TEMP_3='+tau+'\n')
 
 # Set input: r_min
 neoin.write('RMIN_OVER_A='+rmin+'\n')
+
+# Set input: r_maj
+neoin.write('RMAJ_OVER_A='+rmaj+'\n')
+
+# Set input: q
+neoin.write('Q='+q+'\n')
+
+# Set input: nu_ee/(cs/a)
+neoin.write('NU_1='+nuee+'\n')
+
+# Set input: tau=Ti/Te
+neoin.write('TEMP_2='+tau+'\n')
+neoin.write('TEMP_3='+tau+'\n')
+
 neoin.close()
 
 c = []
