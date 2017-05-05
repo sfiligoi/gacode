@@ -19,9 +19,10 @@ if len(sys.argv) < 11:
 #
 # Normalizations in the input.neo assumed to be:
 # a = rmaj (the major radius), i.e. RMAJ_OVER_A=1.0
-# T_norm = T_e, i.e. TEMP_1=1.0
+# T_norm = T_e (electron temperature), i.e. TEMP_1=1.0
+# n_norm = n_e (electron density), i.e. DENS_1=1.0
 # m_norm = m_deuterium
-# v_norm = sqrt(T_norm/m_norm) = c_s
+# v_norm = sqrt(T_norm/m_norm) = c_s (sound speed)
 
 rmin  = sys.argv[1]  # r/a (Minor radius divided by minor radius of LCFS) 
 q     = sys.argv[2]  # safety factor
