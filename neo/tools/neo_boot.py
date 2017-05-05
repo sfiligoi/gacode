@@ -6,15 +6,31 @@ import string
 workdir = 'bdir'
 tools   = os.environ['GACODE_ROOT']+'/neo/tools/'
 
-if len(sys.argv) < 6:
-   print "python neo_boot.py <rmin> <rmaj> <q> <nuee> <tau>"
+if len(sys.argv) < 12:
+   print "python neo_boot.py <rmin> <rmaj> <q> <nuee> <ni1/ne> <zi1> <mi1/mD> <ti1/te> <zi2> <mi2/mD> <ti2/te>"
    sys.exit()
 
-rmin = sys.argv[1]
-rmaj = sys.argv[2]
-q    = sys.argv[3]
-nuee = sys.argv[4]
-tau  = sys.argv[5]
+# EXAMPLE:
+# python $GACODE_ROOT/neo/tools/neo_boot.py 0.5 3.0 2.0 0.1 0.9 1 1.0 1.0 6 6.0 1.0
+   
+# Normalizations in input.neo assumed to be:
+# a = minor radius of LCFS
+# T_norm = T_e
+# m_norm = m_deuterium
+# v_norm = sqrt(T_norm/m_norm) = c_s
+
+rmin  = sys.argv[1]  # r/a (Minor radius divided by minor radius of LCFS) 
+rmaj  = sys.argv[2]  # R_0/a (Major radius divided by minor radius of LCFS)
+q     = sys.argv[3]  # safety factor
+nuee  = sys.argv[4]  # electron collision frequency/(c_s/a)
+ni1   = sys.argv[5]  # main ion density: n_i1/n_e
+                     # (note: n_i2/n_e computed from quasi-neutrality)
+zi1  = sys.argv[6]   # main ion charge (integer)
+mi1  = sys.argv[7]   # main ion mass: m_i/m_deuterium
+ti1  = sys.argv[8]   # main ion temperature: t_i/t_e
+zi2  = sys.argv[9]   # impurity ion charge (integer)
+mi2  = sys.argv[10]  # impurity ion mass: m_i2/m_deuterium
+ti2  = sys.argv[11]  # impurity ion temperature: t_i2/t_e
 
 # Prepare simulation directory
 os.system('rm -rf '+workdir)
@@ -29,7 +45,7 @@ list = ['DLNNDR_1',
         'DLNTDR_3']
 
 # Open input.neo, append parameters, close
-# T_norm=T_e (species 1), m_norm=m_i (species 2)
+
 neoin = open(workdir+'/input.neo','a') 
 
 # Set input: r_min
@@ -44,9 +60,20 @@ neoin.write('Q='+q+'\n')
 # Set input: nu_ee/(cs/a)
 neoin.write('NU_1='+nuee+'\n')
 
-# Set input: tau=Ti/Te
-neoin.write('TEMP_2='+tau+'\n')
-neoin.write('TEMP_3='+tau+'\n')
+# Set input: main ion charge, mass, temperature, density
+neoin.write('Z_2='+zi1+'\n')
+neoin.write('MASS_2='+mi1+'\n')
+neoin.write('TEMP_2='+ti1+'\n')
+neoin.write('DENS_2='+ni1+'\n')
+
+# Set input: impurity ion charge, mass, temperature, density
+neoin.write('Z_3='+zi2+'\n')
+neoin.write('MASS_3='+mi2+'\n')
+neoin.write('TEMP_3='+ti2+'\n')
+# compute ni2/ne from quasi-neutrality
+ni2 = (1.0-float(zi1)*float(ni1))/(1.0*float(zi2))
+ni2 = str(ni2)
+neoin.write('DENS_3='+ni2+'\n')
 
 neoin.close()
 
