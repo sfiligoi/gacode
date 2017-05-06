@@ -114,15 +114,15 @@ subroutine cgyro_equilibrium
   enddo
 
   call GEO_interp(0.0)
-  bigR_th0   = GEO_bigr
-  bigR_r_th0 = GEO_bigr_r
+  bigr_th0   = GEO_bigr
+  bigr_r_th0 = GEO_bigr_r
   
   do it=1,n_theta
 
      call GEO_interp(theta(it))     
 
-     bigR(it)   = GEO_bigr
-     bigR_r(it) = GEO_bigr_r
+     bigr(it)   = GEO_bigr
+     bigr_r(it) = GEO_bigr_r
      bmag(it)   = GEO_b
      btor(it)   = GEO_bt
      bpol(it)   = GEO_bp

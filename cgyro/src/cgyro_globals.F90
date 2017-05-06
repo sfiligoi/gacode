@@ -377,8 +377,8 @@ module cgyro_globals
   ! Equilibrium/geometry arrays
   integer :: it0
   integer, dimension(:), allocatable :: itp
-  real :: bigR_th0
-  real :: bigR_r_th0
+  real :: bigr_th0
+  real :: bigr_r_th0
   real, dimension(:,:), allocatable :: thetab
   real, dimension(:), allocatable   :: w_theta
   real, dimension(:), allocatable   :: g_theta
@@ -388,8 +388,8 @@ module cgyro_globals
   real, dimension(:), allocatable   :: bmag
   real, dimension(:), allocatable   :: btor
   real, dimension(:), allocatable   :: bpol
-  real, dimension(:), allocatable   :: bigR
-  real, dimension(:), allocatable   :: bigR_r
+  real, dimension(:), allocatable   :: bigr
+  real, dimension(:), allocatable   :: bigr_r
   real, dimension(:,:), allocatable :: omega_stream
   real, dimension(:,:), allocatable :: omega_trap
   real, dimension(:,:), allocatable :: omega_rdrift

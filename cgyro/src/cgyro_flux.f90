@@ -118,10 +118,10 @@ subroutine cgyro_flux
         ! Energy flux : Q_a
         fflux_loc(is,2,:) = fflux_loc(is,2,:)-fprod(:)*dvr*erot
 
-        fprod(:) = fprod(:)*(mach*bigR(it)/rmaj+btor(it)/bmag(it)*vpar)+fprod2(:)
+        fprod(:) = fprod(:)*(mach*bigr(it)/rmaj+btor(it)/bmag(it)*vpar)+fprod2(:)
 
         ! Momentum flux: Pi_a
-        fflux_loc(is,3,:) = fflux_loc(is,3,:)-fprod(:)*dvr*bigR(it)*mass(is)
+        fflux_loc(is,3,:) = fflux_loc(is,3,:)-fprod(:)*dvr*bigr(it)*mass(is)
 
      enddo
 
