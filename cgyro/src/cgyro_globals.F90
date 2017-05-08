@@ -34,11 +34,10 @@ module cgyro_globals
   real    :: up_radial
   real    :: up_theta
   real    :: up_alpha
-  real    :: up_wave
   integer :: nup_radial
   integer :: nup_theta
   integer :: nup_alpha
-  integer :: nup_wave
+  integer :: n_wave
   integer :: constant_stream_flag
   real    :: ky
   integer :: box_size
@@ -278,8 +277,7 @@ module cgyro_globals
   complex, dimension(:,:), allocatable :: dtheta_up
   !
   ! Wavenumber advection
-  real, dimension(:), allocatable :: der_wave
-  real, dimension(:), allocatable :: dis_wave
+  real, dimension(:), allocatable :: c_wave
   !
   ! Distributions
   complex, dimension(:,:,:), allocatable :: rhs
