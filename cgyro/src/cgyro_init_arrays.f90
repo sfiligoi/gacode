@@ -74,11 +74,11 @@ subroutine cgyro_init_arrays
         
         jxvec_c(1,ic,iv_loc) =  fac * (bmag(it) * jloc_c(2,ic))
         
-        if(n_field > 1) then
+        if (n_field > 1) then
            efac = -xi(ix)*sqrt(2.0*energy(ie))*vth(is)
            jxvec_c(2,ic,iv_loc) = efac * fac * (bmag(it) * jloc_c(2,ic))
            
-           if(n_field > 2) then
+           if (n_field > 2) then
               if(n==0) then
                  jxvec_c(3,ic,iv_loc) = 0.0
               else
