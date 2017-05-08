@@ -13,6 +13,7 @@ subroutine cgyro_init_arrays
   integer :: ir,it,is,ie,ix
   integer :: jr,jt,id,ccw_fac
   integer :: i_field
+  integer :: l,ll
   complex :: thfac,carg
   real, dimension(nc,n_species) :: res_loc
   real, dimension(:,:), allocatable :: jloc_c
@@ -243,12 +244,13 @@ subroutine cgyro_init_arrays
   !-------------------------------------------------------------------------
 
   !-------------------------------------------------------------------------
-  ! Wavenumber derivative and dissipation stencils
+  ! Wavenumber advection stencil
   !
-  allocate(der_wave(-nup_wave:nup_wave))
-  allocate(dis_wave(-nup_wave:nup_wave))
-  ! Wavenumber spacing (dx) is 1.0
-  call advect_schemes(1.0,nup_wave,der_wave,dis_wave)
+  allocate(c_wave(n_wave))
+  do l=1,n_wave
+     ll = 2*l-1
+     c_wave(l) = 2.0/pi/ll**2*(-1)**(l-1)
+  enddo
   !-------------------------------------------------------------------------
 
   !-------------------------------------------------------------------------
