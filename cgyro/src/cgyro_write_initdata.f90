@@ -15,7 +15,7 @@ subroutine cgyro_write_initdata
 
   integer :: p,in,is
   real :: kymax,z_eff
-  real, external ::spectraldiss
+  real, external :: spectraldiss
 
   !----------------------------------------------------------------------------
   ! Runfile to give complete summary to user

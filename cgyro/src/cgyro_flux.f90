@@ -16,7 +16,7 @@ subroutine cgyro_flux
   integer :: ie,ix,is,it,ir,l
   real :: dv,cn
   real :: vpar
-  real :: prod,prod2
+  real :: prod
   real, dimension(n_field) :: fprod,fprod2
   real :: dvr
   real :: erot
