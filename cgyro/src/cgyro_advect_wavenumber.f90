@@ -24,7 +24,7 @@ subroutine cgyro_advect_wavenumber(ij)
      allocate(h0(1-2*n_wave:n_radial+2*n_wave))
      ! Zero wavenumber (probably causes boundary reflection)
      h0 = 0.0
-!$omp parallel do private(j,h0,ir,dh,l,ll,ic)
+!$omp parallel do private(j,h0,ir,dh,l,ll,ic,c_wave)
      do iv_loc=1,nv_loc
         do j=1,n_theta
            h0(1:n_radial) = h_x(ic_c(:,j),iv_loc)
@@ -49,7 +49,7 @@ subroutine cgyro_advect_wavenumber(ij)
      allocate(h0(1-2*n_wave:n_radial+2*n_wave))
      ! Zero wavenumber (probably causes boundary reflection)
      h0 = 0.0
-!$omp parallel do private(j,h0,ir,dh,l,ll,ic)
+!$omp parallel do private(j,h0,ir,dh,l,ll,ic,c_wave)
      do iv_loc=1,nv_loc
         do j=1,n_theta
            do ir=1,n_radial
