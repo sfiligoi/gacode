@@ -118,6 +118,7 @@ module cgyro_globals
   integer :: subroutine_flag  ! only used for cgyro_read_input
 
   ! Re-scaling parameters for experimental profiles
+  integer :: quasineutral_flag
   real :: lambda_star_scale
   real :: gamma_e_scale
   real :: gamma_p_scale

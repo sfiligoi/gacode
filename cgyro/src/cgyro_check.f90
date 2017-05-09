@@ -64,6 +64,18 @@ subroutine cgyro_check
   end select
   !-----------------------------------------------------------------------
 
+  if(profile_model == 2) then
+     select case(quasineutral_flag)
+     case(0)
+        call cgyro_info('QN flag: Not enforcing quasi-neutrality')
+     case(1)
+        call cgyro_info('QN flag: Enforcing quasi-neutrality')
+     case default
+        call cgyro_error('Invalid value for quasineutral_flag')
+        return
+     end select
+  endif
+  
   !------------------------------------------------------------------------
   ! Equilibrium model
   !
