@@ -143,6 +143,7 @@ subroutine cgyro_experimental_profiles
      if(i_ion == 1) then
         dens_exp(i_ion,:)   = EXPRO_ni_new(:)
         dlnndr_exp(i_ion,:) = EXPRO_dlnnidr_new(:) * a_meters
+        sdlnndr_exp(i_ion,:) = EXPRO_sdlnnidr_new(:) * a_meters**2
      else
         dens_exp(i_ion,:)   = EXPRO_ni(i_ion,:)
         dlnndr_exp(i_ion,:) = EXPRO_dlnnidr(i_ion,:) * a_meters
