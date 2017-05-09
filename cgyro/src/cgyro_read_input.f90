@@ -109,6 +109,7 @@ subroutine cgyro_read_input
      call cgyro_readbc_real(x)   ; sdlntdr(is) = x
   enddo
 
+  call cgyro_readbc_int(quasineutral_flag)
   call cgyro_readbc_real(lambda_star_scale)
   call cgyro_readbc_real(gamma_e_scale)
   call cgyro_readbc_real(gamma_p_scale)

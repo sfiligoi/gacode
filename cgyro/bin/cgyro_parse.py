@@ -141,7 +141,8 @@ x.add('DLNTDR_6','1.0')
 x.add('SDLNNDR_6','0.0')
 x.add('SDLNTDR_6','0.0')
 
-x.add('LAMBDA_STAR_SCALE','0.0');
+x.add('QUASINEUTRAL_FLAG','1')
+x.add('LAMBDA_STAR_SCALE','0.0')
 x.add('GAMMA_E_SCALE','1.0')
 x.add('GAMMA_P_SCALE','1.0')
 x.add('MACH_SCALE','1.0')
