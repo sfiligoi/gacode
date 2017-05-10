@@ -113,6 +113,8 @@ for ispec in range(ns):
 if ymax != 'auto':
     ax.set_ylim([float(ymin),float(ymax)])
 
+ax.axvspan(0.25,0.75,facecolor='g',alpha=0.1)
+
 ax.legend(loc=2)
 
 if ftype == 'screen':
