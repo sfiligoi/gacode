@@ -49,8 +49,8 @@ subroutine cgyro_write_timedata
   endif
 
   if (nonlinear_flag == 1 .and. globalflux_print_flag == 1) then
-     ! Global (n,e) fluxes for all species
-     do i_moment=1,2
+     ! Global (n,e,v) fluxes for all species
+     do i_moment=1,3
         call cgyro_write_distributed_complex(&
              trim(path)//runfile_lky_flux(i_moment),&
              size(gflux(:,:,i_moment)),&

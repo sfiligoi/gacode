@@ -21,7 +21,7 @@ subroutine cgyro_flux
   real :: dvr
   real :: erot
   real :: flux_norm
-  complex :: cprod
+  complex :: cprod, cprod2
 
   !-----------------------------------------------------
   ! 1. Compute kx-ky fluxes (no field breakdown)
@@ -44,6 +44,9 @@ subroutine cgyro_flux
      ! Integration weight
      dv = w_xi(ix)*w_e(ie)
 
+     ! Parallel velocity
+     vpar = vth(is)*sqrt(2.0)*vel(ie)*xi(ix)
+     
      do ic=1,nc
 
         ir = ir_c(ic)
@@ -71,10 +74,14 @@ subroutine cgyro_flux
         ! Global fluxes (complex)
         do l=0,n_global
            if (ir-l > 0) then
-              cprod = i_c*cap_h_c(ic,iv_loc)*conjg(psi(ic_c(ir-l,it),iv_loc))
-
+              cprod  = i_c*cap_h_c(ic,iv_loc)*conjg(psi(ic_c(ir-l,it),iv_loc))
+              cprod2 = i_c*cap_h_c(ic,iv_loc)*conjg(i_c*chi(ic_c(ir-l,it),iv_loc))
+              
               gflux_loc(l,is,1) = gflux_loc(l,is,1)+cprod*dvr
-              gflux_loc(l,is,2) = gflux_loc(l,is,2)+cprod*dvr*erot 
+              gflux_loc(l,is,2) = gflux_loc(l,is,2)+cprod*dvr*erot
+              
+              cprod = cprod*(mach*bigr(it)/rmaj+btor(it)/bmag(it)*vpar)+cprod2
+              gflux_loc(l,is,3) = gflux_loc(l,is,3)+cprod*dvr*bigr(it)*mass(is)
            endif
         enddo
 

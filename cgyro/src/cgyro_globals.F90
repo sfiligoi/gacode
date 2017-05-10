@@ -209,8 +209,8 @@ module cgyro_globals
        (/'out.cgyro.phib ','out.cgyro.aparb','out.cgyro.bparb'/)
   character(len=16), dimension(2)  :: runfile_kxky = &
        (/'out.cgyro.kxky_n','out.cgyro.kxky_e'/)
-  character(len=20), dimension(2)  :: runfile_lky_flux = &
-       (/'out.cgyro.lky_flux_n','out.cgyro.lky_flux_e'/)
+  character(len=20), dimension(3)  :: runfile_lky_flux = &
+       (/'out.cgyro.lky_flux_n','out.cgyro.lky_flux_e','out.cgyro.lky_flux_v'/)
   integer, parameter :: io=1
   !
   ! error checking
