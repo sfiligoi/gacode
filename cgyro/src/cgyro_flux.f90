@@ -83,10 +83,7 @@ subroutine cgyro_flux
               gflux_loc(l,is,1) = gflux_loc(l,is,1)+cprod*dvr
               gflux_loc(l,is,2) = gflux_loc(l,is,2)+cprod*dvr*erot
 
-              ! Note: This is the total momentum flux, but just use simple vpar
-              ! part for now
-              !cprod = cprod*(mach*bigr(it)/rmaj+btor(it)/bmag(it)*vpar)+cprod2
-              cprod = cprod*btor(it)/bmag(it)*vpar
+              cprod = cprod*(mach*bigr(it)/rmaj+btor(it)/bmag(it)*vpar)+cprod2
               
               gflux_loc(l,is,3) = gflux_loc(l,is,3)+cprod*dvr*bigr(it)*mass(is)
            endif
