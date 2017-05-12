@@ -11,7 +11,6 @@ export EXTRA_LIBS = \
 	${GACODE_ROOT}/shared/math/math_lib.a
 
 all:
-	cd ${GACODE_ROOT}/cgyro ; make
 	cd src ; make
 
 clean:
