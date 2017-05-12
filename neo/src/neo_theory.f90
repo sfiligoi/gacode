@@ -97,7 +97,7 @@ contains
     do is=1, n_species
        if(Z(is) > 0 .and. dens(is,ir) > d_max) then
           is_ion = is
-          d_max  = dens(is,ir)
+          d_max  = dens(is,ir) 
        endif
     enddo
     if(is_ion == -1) then

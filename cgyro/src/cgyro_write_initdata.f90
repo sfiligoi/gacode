@@ -15,7 +15,7 @@ subroutine cgyro_write_initdata
 
   integer :: p,in,is
   real :: kymax,z_eff
-  real, external ::spectraldiss
+  real, external :: spectraldiss
 
   !----------------------------------------------------------------------------
   ! Runfile to give complete summary to user
@@ -197,12 +197,17 @@ subroutine cgyro_write_initdata
      write(io,'(i4)') box_size
      write(io,'(1pe12.5)') length/rho
      write(io,'(i4)') n_global
+     write(io,'(i4)') theta_plot
      write(io,'(i4)') px(:)
      write(io,'(1pe12.5)') theta(:)
      write(io,'(1pe12.5)') energy(:)
      write(io,'(1pe12.5)') xi(:)
      write(io,'(1pe12.5)') transpose(thetab(:,:))
-     write(io,'(1pe12.5)') (rho*q/rmin*in,in=0,n_toroidal-1)
+     if (n_toroidal > 1) then
+        write(io,'(1pe12.5)') (rho*q/rmin*in,in=0,n_toroidal-1)
+     else
+        write(io,'(1pe12.5)') rho*q/rmin
+     endif
      write(io,'(1pe12.5)') (spectraldiss((pi/n_toroidal)*in,nup_alpha),in=0,n_toroidal-1)
      write(io,'(1pe12.5)') (spectraldiss((2*pi/n_radial)*p,nup_radial),p=-n_radial/2,n_radial/2-1)
      close(io)
