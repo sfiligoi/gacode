@@ -13,8 +13,8 @@ datafile  = sys.argv[6]
 lx        = float(sys.argv[7])
 ly        = float(sys.argv[8])
 title     = sys.argv[9]
-ymin      = float(sys.argv[10])
-ymax      = float(sys.argv[11])
+ymin      = sys.argv[10]
+ymax      = sys.argv[11]
 xspan1    = float(sys.argv[12])
 xspan2    = float(sys.argv[13])
 
