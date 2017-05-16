@@ -628,6 +628,7 @@ fi
 #=============================================================
 # If file is GACODE, parse it.
 if [ "$itype" == "GACODE" ] ; then
+  cp -f input.profiles input.profiles.save
   python $GACODE_ROOT/shared/bin/profile_parse.py $FILE
 fi
 #=============================================================
@@ -1109,6 +1110,7 @@ else
    echo "0" >> $CONFIG
 fi 
 #==============================================================
+
 #==============================================================
 # More ion parameters for sanitize mode
 #

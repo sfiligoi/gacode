@@ -25,4 +25,7 @@ subroutine prgen_read_inputprofiles
 
   call allocate_internals
 
+  rmin(:) = EXPRO_rmin(:)
+  rmaj(:) = EXPRO_rmaj(:)
+
 end subroutine prgen_read_inputprofiles
