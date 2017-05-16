@@ -15,7 +15,8 @@ subroutine prgen_read_inputprofiles
   EXPRO_ctrl_quasineutral_flag = 0
   EXPRO_ctrl_z(1:3) = 1.0 
   EXPRO_ctrl_numeq_flag = 0 
-
+  EXPRO_ctrl_n_ion = 10
+  
   call EXPRO_alloc('./',1) 
   call EXPRO_read
 
