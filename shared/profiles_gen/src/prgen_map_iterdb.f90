@@ -282,7 +282,7 @@ subroutine prgen_map_iterdb
         ion_z(i)    = onetwo_z(ip)             
 
         call prgen_ion_name(nint(ion_mass(i)),ion_z(i),ion_name(i))     
-
+    
      endif
   enddo
   !---------------------------------------------------------
@@ -325,7 +325,7 @@ subroutine onetwo_ion_zmass(iname,z,m)
 
   implicit none
   
-  character(len=6) :: iname
+  character(len=2) :: iname
   integer :: z
   real :: m
   
