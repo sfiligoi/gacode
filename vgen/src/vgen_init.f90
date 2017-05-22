@@ -27,7 +27,7 @@
     num_ele = 0
     indx_ele = 0
     do j=1,neo_n_species_in
-       if (zfac(j) == -1) then
+       if (zfac(j) < 0.0) then
           num_ele  = num_ele + 1
           indx_ele = j
        endif
@@ -78,7 +78,7 @@
   EXPRO_ctrl_z(:) = 0.0
   EXPRO_ctrl_n_ion = 0
   do j=1,neo_n_species_in
-     if (zfac(j) /= -1) then
+     if (zfac(j) > 0.0) then
         EXPRO_ctrl_z(j) = 1.0*zfac(j)
         EXPRO_ctrl_n_ion = EXPRO_ctrl_n_ion+1
      endif

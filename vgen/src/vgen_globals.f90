@@ -23,7 +23,7 @@ module vgen_globals
   
   real :: dens_norm, temp_norm, mass_norm, vth_norm, jbs_norm
 
-  integer, dimension(11) :: zfac
+  real, dimension(11) :: zfac
 
   real, dimension(:), allocatable :: vtor_measured
 
