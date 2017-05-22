@@ -51,7 +51,7 @@ module neo_globals
   real :: dlntdre_ade_in
   real :: dlnndre_ade_in
   !
-  integer, dimension(11) :: z_in 
+  real, dimension(11) :: z_in 
   real, dimension(11) :: mass_in
   real, dimension(11) :: dens_in
   real, dimension(11) :: temp_in
@@ -135,7 +135,7 @@ module neo_globals
   !---------------------------------------------------------------
   ! Charge and mass
   !
-  integer, dimension(:), allocatable :: z     ! charge (ns)
+  real, dimension(:), allocatable :: z        ! charge (ns)
   real, dimension(:), allocatable :: mass     ! m/m_0  (ns)
   !---------------------------------------------------------------
 

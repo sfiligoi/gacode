@@ -97,7 +97,7 @@ subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, &
   
   ! Species 2
   do is=2,neo_n_species_in
-     if(neo_z_in(is) /= -1) then
+     if(neo_z_in(is) > 0.0) then
         neo_dens_in(is)   = EXPRO_ni(is,i) / dens_norm
         neo_dlnndr_in(is) = EXPRO_dlnnidr(is,i) * EXPRO_rmin(EXPRO_n_exp)
         neo_temp_in(is)   = EXPRO_ti(is,i) / temp_norm 
