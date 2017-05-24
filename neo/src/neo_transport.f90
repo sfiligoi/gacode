@@ -370,10 +370,10 @@ contains
        write(io_neoout,'(t2,a,t21,e14.5)') 'r/a = ', r(ir)
        write(io_neoout,'(t2,a,t21,e14.5)') 'jpar = ', jpar
        write(io_neoout,'(t2,a,t21,e14.5)') 'sum Z_s Gamma_s = ', fac
-       write(io_neoout,'(t3,a,t7,a,t21,a,t35,a)') &
+       write(io_neoout,'(t3,a,t11,a,t25,a,t39,a)') &
             'Z', 'pflux', 'eflux', 'mflux'
        do is=1,n_species
-          write (io_neoout,'(i3,3(e14.5))') &
+          write (io_neoout,'(f7.3,3(e14.5))') &
                Z(is),pflux(is),eflux(is),mflux(is)
        enddo
        write(io_neoout,*) '------------------'
@@ -671,7 +671,7 @@ contains
     ! fluxes in GB units
     if(adiabatic_ele_model == 0) then
        do is=1, n_species
-          if(Z(is) == -1) then
+          if(Z(is) < 0.0) then
              is_ele = is
              exit
           endif
@@ -687,34 +687,34 @@ contains
     mgb = dens_ele * rho(ir)**2 * temp_ele**2
     open(io,file=trim(path)//runfile_flux,status='old',position='append')
     write (io,'(a,e16.8)') '# r/a=', r(ir)
-    write(io,'(a,t3,a,t7,a,t21,a,t35,a)') &
+    write(io,'(a,t3,a,t11,a,t25,a,t39,a)') &
          '#', 'Z', 'pflux_dke', 'eflux_dke', 'mflux_dke'
-    write(io,'(a,t7,a,t21,a,t35,a)') &
+    write(io,'(a,t11,a,t25,a,t39,a)') &
          '#','(GB)', '(GB)', '(GB)'
     do is=1,n_species
-       write (io,'(i3)',advance='no') Z(is)
+       write (io,'(f7.3)',advance='no') Z(is)
        write (io,'(e14.5)',advance='no') pflux(is)/pgb
        write (io,'(e14.5)',advance='no') eflux(is)/egb
        write (io,'(e14.5)',advance='no') mflux(is)/mgb
        write (io,*)
     enddo
-    write(io,'(a, t3,a,t7,a,t21,a,t35,a)') &
+    write(io,'(a, t3,a,t11,a,t25,a,t39,a)') &
          '#', 'Z', 'pflux_gv', 'eflux_gv', 'mflux_gv'
-     write(io,'(a,t7,a,t21,a,t35,a)') &
+     write(io,'(a,t11,a,t25,a,t39,a)') &
          '#', '(GB)', '(GB)', '(GB)'
     do is=1,n_species
-       write (io,'(i3)',advance='no') Z(is)
+       write (io,'(f7.3)',advance='no') Z(is)
        write (io,'(e14.5)',advance='no') pflux_gv(is)/pgb
        write (io,'(e14.5)',advance='no') eflux_gv(is)/egb
        write (io,'(e14.5)',advance='no') mflux_gv(is)/mgb
        write(io,*)
     enddo
-    write(io,'(a, t3,a,t7,a,t21,a,t35,a)') &
+    write(io,'(a, t3,a,t11,a,t25,a,t39,a)') &
          '#', 'Z', 'pflux_tgyro', 'eflux_tgyro', 'mflux_tgyro'
-     write(io,'(a,t7,a,t21,a,t35,a)') &
+     write(io,'(a,t11,a,t25,a,t39,a)') &
          '#', '(GB)', '(GB)', '(GB)'
     do is=1,n_species
-       write (io,'(i3)',advance='no') Z(is)
+       write (io,'(f7.3)',advance='no') Z(is)
        write (io,'(e14.5)',advance='no') (pflux(is)+pflux_gv(is))/pgb
        write (io,'(e14.5)',advance='no') (eflux(is)+eflux_gv(is) &
             -omega_rot(ir)*mflux(is)-omega_rot(ir)*mflux_gv(is))/egb

@@ -35,7 +35,7 @@ contains
        if(initialized) return
        if(adiabatic_ele_model == 0) then
           do is=1, n_species
-             if(Z(is) == -1) then
+             if(Z(is) < 0.0) then
                 is_ele = is
                 exit
              endif
