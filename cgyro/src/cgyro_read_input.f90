@@ -78,6 +78,7 @@ subroutine cgyro_read_input
   call cgyro_readbc_int(psym_flag)
   call cgyro_readbc_int(profile_shear_flag)
   call cgyro_readbc_int(theta_plot)
+  call cgyro_readbc_int(px0)
 
   call cgyro_readbc_real(rmin)
   call cgyro_readbc_real(rmaj)
