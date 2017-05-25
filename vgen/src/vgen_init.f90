@@ -108,12 +108,16 @@
   allocate(jbs_sauter(EXPRO_n_exp))
   allocate(jbs_koh(EXPRO_n_exp))
   allocate(jbs_nclass(EXPRO_n_exp))
+  allocate(jtor_neo(EXPRO_n_exp))
+  allocate(jtor_sauter(EXPRO_n_exp))
   allocate(pflux_sum(EXPRO_n_exp))
-  jbs_neo(:)    = 0.0
-  jbs_sauter(:) = 0.0
-  jbs_koh(:)    = 0.0
-  jbs_nclass(:) = 0.0
-  pflux_sum(:)  = 0.0
+  jbs_neo(:)     = 0.0
+  jbs_sauter(:)  = 0.0
+  jbs_koh(:)     = 0.0
+  jbs_nclass(:)  = 0.0
+  jtor_neo(:)    = 0.0
+  jtor_sauter(:) = 0.0
+  pflux_sum(:)   = 0.0
   
   do j=1,10
      if (j == erspecies_indx) then
