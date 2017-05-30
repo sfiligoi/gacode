@@ -81,6 +81,7 @@ module cgyro_globals
   integer :: udsymmetry_flag
   integer :: shear_method
   integer :: n_global
+  real    :: nu_global
   integer :: psym_flag
   integer :: profile_shear_flag
   integer :: theta_plot
