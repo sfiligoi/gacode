@@ -48,7 +48,7 @@ subroutine cgyro_write_timedata
           flux(:,:))
   endif
 
-  if (nonlinear_flag == 1 .and. globalflux_print_flag == 1) then
+  if (n_global > 0) then
      ! Global (n,e,v) fluxes for all species
      do i_moment=1,3
         call cgyro_write_distributed_complex(&
