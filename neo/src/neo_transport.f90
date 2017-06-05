@@ -13,7 +13,8 @@ module neo_transport
   real, dimension(:), allocatable :: klittle_upar ! (ns): upar coefficient
   real, dimension(:), allocatable :: kbig_upar    ! (ns): upar coefficient
   real, dimension(:), allocatable :: pvisc        ! (ns): B dot del dot Pi
-  real                            :: jpar          ! sum(Z*upar*B*n)
+  real                            :: jpar         ! <sum(Z*upar*B*n)>
+  real                            :: jtor         ! <sum(Z*utor*n/R)>/<1/R>
 
   ! Sugama gyro-viscosity "H" fluxes
   real, dimension(:), allocatable :: pflux_gv      ! (ns): gamma/(n0*vt0)
@@ -359,6 +360,20 @@ contains
     ! Poloidal and Toroidal Velocity
     call compute_velocity(ir)
 
+    ! Toroidal component of Bootstrap current = sum <Z*n*utor/R>/<1/R>
+    jtor = 0.0
+    do is=1, n_species
+       do it=1,n_theta
+          jtor = jtor + Z(is) * dens(is,ir) * dens_fac(is,it) * vtor(is,it) &
+               * w_theta(it) / bigR(it)
+       enddo
+    enddo
+    fac = 0.0
+    do it=1,n_theta
+       fac = fac + w_theta(it) / bigR(it)
+    enddo
+    jtor = jtor/fac
+    
     if(silent_flag == 0 .and. i_proc == 0) then
        open(unit=io_neoout,file=trim(path)//runfile_neoout,&
             status='old',position='append')

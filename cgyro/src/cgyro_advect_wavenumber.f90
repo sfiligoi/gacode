@@ -27,17 +27,8 @@ subroutine cgyro_advect_wavenumber(ij)
      do j=1,n_theta
         h0 = 0.0
         do ir=1,n_radial
-           h0(:,ir) = h_x(ic_c(ir,j),:)
+           h0(:,ir) = omega_eb*h_x(ic_c(ir,j),:)
         enddo
-        if (c_wave(1)*omega_eb > 0.0) then
-           do iv_loc=1,nv_loc
-              h0(iv_loc,1-2*n_wave:0) = h0(iv_loc,1)
-           enddo
-        else
-           do iv_loc=1,nv_loc
-              h0(iv_loc,n_radial+1:n_radial+2*n_wave) = h0(iv_loc,n_radial)
-           enddo
-        endif
         do ir=1,n_radial
            dh(:) = 0.0
            do l=1,n_wave
@@ -45,7 +36,7 @@ subroutine cgyro_advect_wavenumber(ij)
               dh(:) = dh(:)+c_wave(l)*(h0(:,ir+ll)-h0(:,ir-ll))
            enddo
            ic = ic_c(ir,j)
-           rhs(ic,:,ij) = rhs(ic,:,ij)+omega_eb*dh(:)
+           rhs(ic,:,ij) = rhs(ic,:,ij)+dh(:)
         enddo
      enddo
      deallocate(h0)

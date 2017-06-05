@@ -67,7 +67,6 @@ module cgyro_globals
   integer :: h_print_flag
   integer :: moment_print_flag
   integer :: kxkyflux_print_flag
-  integer :: globalflux_print_flag
   real :: amp0
   real :: amp
   real :: gamma_e
@@ -81,6 +80,7 @@ module cgyro_globals
   integer :: udsymmetry_flag
   integer :: shear_method
   integer :: n_global
+  real    :: nu_global
   integer :: psym_flag
   integer :: profile_shear_flag
   integer :: theta_plot

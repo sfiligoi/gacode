@@ -101,6 +101,7 @@ module neo_interface
   real    :: neo_jpar_thS_out    = 0.0
   real    :: neo_jpar_thK_out    = 0.0
   real    :: neo_jpar_thN_out    = 0.0
+  real    :: neo_jtor_thS_out    = 0.0
   ! drift-kinetic soln
   real, dimension(11) :: neo_pflux_dke_out    = 0.0
   real, dimension(11) :: neo_efluxtot_dke_out = 0.0
@@ -108,7 +109,8 @@ module neo_interface
   real, dimension(11) :: neo_mflux_dke_out    = 0.0
   real, dimension(11) :: neo_vpol_dke_out     = 0.0
   real, dimension(11) :: neo_vtor_dke_out     = 0.0
-  real               :: neo_jpar_dke_out     = 0.0
+  real                :: neo_jpar_dke_out     = 0.0
+  real                :: neo_jtor_dke_out     = 0.0
   ! gyro-viscosity
   real, dimension(11) :: neo_pflux_gv_out  = 0.0
   real, dimension(11) :: neo_efluxtot_gv_out  = 0.0

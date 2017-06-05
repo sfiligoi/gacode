@@ -35,7 +35,9 @@ module vgen_globals
   real, dimension(:), allocatable :: jbs_koh
   real, dimension(:), allocatable :: jbs_nclass
   real, dimension(:), allocatable :: pflux_sum
-
+  real, dimension(:), allocatable :: jtor_neo
+  real, dimension(:), allocatable :: jtor_sauter
+  
   integer :: n_ions
 
   integer, parameter :: timing_flag = 0
