@@ -822,6 +822,9 @@ subroutine write_timers(datafile)
 
      !---------------------------------------------------------------------------
      ! Print timers
+
+     call MPI_barrier(CGYRO_COMM_WORLD,i_err)
+
      if (i_proc == 0) then
         open(unit=io,file=datafile,status='old',position='append')
         write(io,'(11(1pe10.3,1x))') &
