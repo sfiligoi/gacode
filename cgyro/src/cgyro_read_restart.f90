@@ -60,7 +60,7 @@ subroutine cgyro_read_restart
   do j=1,n_chunk
 
      if (n_chunk > 1) then
-        i_tag = achar(j-1+iachar("0"))
+        i_tag = achar(j+iachar("0"))
      else
         i_tag = ''
      endif
