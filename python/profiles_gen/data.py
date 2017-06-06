@@ -23,7 +23,7 @@ vars_input_profiles_extra = [
     'dlnnidr_6', 'dlnnidr_7', 'dlnnidr_8', 'dlnnidr_9', 'dlnnidr_10',
     'dlntidr_1', 'dlntidr_2', 'dlntidr_3', 'dlntidr_4', 'dlntidr_5',
     'dlntidr_6', 'dlntidr_7', 'dlntidr_8', 'dlntidr_9', 'dlntidr_10',
-    'dlnptotdr', 'drdrho', 'w0p', 'vol', 'volp', 'cs', 'rhos', 'ni_new', 'dlnnidr_new',
+    'dlnptotdr', 'drdrho', 'w0p', 'vol', 'volp', 'cs', 'rhos', 'nuee', 'ni_new', 'dlnnidr_new',
     'grad_r0', 'ave_grad_r', 'bp0', 'bt0', 'gamma_e', 'gamma_p', 'mach', 'ip',
     'sdlnnedr', 'sdlntedr',
     'sdlnnidr_1', 'sdlnnidr_2', 'sdlnnidr_3', 'sdlnnidr_4', 'sdlnnidr_5',
