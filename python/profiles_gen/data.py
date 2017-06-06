@@ -23,13 +23,14 @@ vars_input_profiles_extra = [
     'dlnnidr_6', 'dlnnidr_7', 'dlnnidr_8', 'dlnnidr_9', 'dlnnidr_10',
     'dlntidr_1', 'dlntidr_2', 'dlntidr_3', 'dlntidr_4', 'dlntidr_5',
     'dlntidr_6', 'dlntidr_7', 'dlntidr_8', 'dlntidr_9', 'dlntidr_10',
-    'dlnptotdr', 'drdrho', 'w0p', 'vol', 'volp', 'cs', 'rhos', 'nuee', 'ni_new', 'dlnnidr_new',
+    'dlnptotdr', 'drdrho', 'w0p', 'vol', 'volp', 'cs', 'rhos', 'ni_new', 'dlnnidr_new',
     'grad_r0', 'ave_grad_r', 'bp0', 'bt0', 'gamma_e', 'gamma_p', 'mach', 'ip',
     'sdlnnedr', 'sdlntedr',
     'sdlnnidr_1', 'sdlnnidr_2', 'sdlnnidr_3', 'sdlnnidr_4', 'sdlnnidr_5',
     'sdlnnidr_6', 'sdlnnidr_7', 'sdlnnidr_8', 'sdlnnidr_9', 'sdlnnidr_10',
     'sdlntidr_1', 'sdlntidr_2', 'sdlntidr_3', 'sdlntidr_4', 'sdlntidr_5',
     'sdlntidr_6', 'sdlntidr_7', 'sdlntidr_8', 'sdlntidr_9', 'sdlntidr_10',
+    'nuee'
 ]
 
 vars_input_profiles_jbs = ['expro_rho', 'jbs_err', 'jbs_neo', 'jbs_sauter', 'jbs_nclass', 'jbs_koh']
