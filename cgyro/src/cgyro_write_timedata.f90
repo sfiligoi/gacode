@@ -85,7 +85,11 @@ subroutine cgyro_write_timedata
 
   ! Checksum for regression testing
   ! Note that checksum is a distributed real scalar
-  call write_precision(trim(path)//runfile_prec,sum(abs(fflux)))
+  if (zf_test_flag == 0) then
+     call write_precision(trim(path)//runfile_prec,sum(abs(fflux)))
+  else
+     call write_precision(trim(path)//runfile_prec,sum(abs(field)))
+  endif
 
   !------------------------------------------------------------------
   ! Ballooning mode (or ZF) output for linear runs with a single mode
