@@ -10,7 +10,7 @@ then
 fi
 cd $GACODE_ROOT
 git checkout $2
-git pull
+git pull --rebase=false
 git checkout stable
 git pull
 git merge $2
