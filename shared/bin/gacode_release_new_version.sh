@@ -19,6 +19,6 @@ git tag -a $1
 git push
 git push --tags
 git checkout master
-git pull
+git pull --rebase=false
 #git merge stable
 #git push
