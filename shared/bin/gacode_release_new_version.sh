@@ -10,7 +10,7 @@ then
 fi
 cd $GACODE_ROOT
 git checkout $2
-git pull
+git pull --rebase=false
 git checkout stable
 git pull
 git merge $2
@@ -19,6 +19,6 @@ git tag -a $1
 git push
 git push --tags
 git checkout master
-git pull
+git pull --rebase=false
 #git merge stable
 #git push
