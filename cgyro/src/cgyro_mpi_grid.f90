@@ -208,10 +208,15 @@ subroutine cgyro_mpi_grid
   ! OMP code
   n_omp = omp_get_max_threads()
 
-  ! Restart file chunking logic (max_filesize is 16.0 GB)
+  ! Restart file chunking logic 
+  ! MPI-IO limit seems to be 24GB, so set max_filesize to 16.0 GB
   max_filesize = 16.0e9
   n_chunk = 1+int(16.0*n_toroidal*nc*nv/max_filesize)
   
+  if (n_chunk > 9) then
+     call cgyro_error('ERROR: (CGYRO) Case too large -- too many MPI-IO restart files.')
+  endif
+
 end subroutine cgyro_mpi_grid
 
 subroutine gcd(m,n,d)
