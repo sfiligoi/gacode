@@ -208,10 +208,10 @@ subroutine cgyro_mpi_grid
   ! OMP code
   n_omp = omp_get_max_threads()
 
-  ! Restart file chunking logic (max_filesize is 8.0 GB)
-  max_filesize = 8.0e9
+  ! Restart file chunking logic (max_filesize is 16.0 GB)
+  max_filesize = 16.0e9
   n_chunk = 1+int(16.0*n_toroidal*nc*nv/max_filesize)
-
+  
 end subroutine cgyro_mpi_grid
 
 subroutine gcd(m,n,d)
