@@ -213,6 +213,9 @@ module cgyro_globals
   character(len=20), dimension(3)  :: runfile_lky_flux = &
        (/'out.cgyro.lky_flux_n','out.cgyro.lky_flux_e','out.cgyro.lky_flux_v'/)
   integer, parameter :: io=1
+  ! Restart tags
+  character(len=8) :: fmt='(I2.2)' 
+  character(len=2), dimension(100) :: rtag
   !
   ! error checking
   integer :: error_status = 0

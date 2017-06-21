@@ -21,7 +21,6 @@ subroutine cgyro_write_restart
   integer :: finfo
   integer :: fhv
   integer :: fstatus(MPI_STATUS_SIZE)
-  character (len=1) :: i_tag
   integer(kind=MPI_OFFSET_KIND) :: disp
   integer(kind=MPI_OFFSET_KIND) :: offset1
   !
@@ -48,16 +47,10 @@ subroutine cgyro_write_restart
 
   do j=1,n_chunk
 
-     if (n_chunk > 1) then
-        i_tag = achar(j+iachar("0"))
-     else
-        i_tag = ''
-     endif
-
      call MPI_INFO_CREATE(finfo,i_err)
 
      call MPI_FILE_OPEN(CGYRO_COMM_WORLD,&
-          trim(path)//runfile_restart//i_tag,&
+          trim(path)//runfile_restart//rtag(j),&
           filemode,&
           finfo,&
           fhv,&
