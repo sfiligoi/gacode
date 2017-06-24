@@ -14,11 +14,12 @@ git pull --rebase=false
 git checkout stable
 git pull
 git merge $2
+git submodule update
 python shared/bin/gacode_regression.py -clean
 git tag -a $1
 git push
 git push --tags
 git checkout master
 git pull --rebase=false
-#git merge stable
-#git push
+git merge stable
+git push
