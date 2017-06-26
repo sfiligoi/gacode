@@ -191,7 +191,7 @@ subroutine cgyro_equilibrium
         if (px0 < 0) then 
            pxx = px(ir)
         else
-           pxx = px(ir)+px0*n/(box_size/2)
+           pxx = px(ir)+mx0*px0*n/(box_size/2)
         endif
         k_perp(ic_c(ir,it)) = sqrt((2.0*pi*pxx*GEO_grad_r/length &
              + k_theta*GEO_gq*GEO_captheta)**2 &
