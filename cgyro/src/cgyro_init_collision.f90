@@ -685,16 +685,14 @@ subroutine cgyro_init_collision
                       * e_deriv1_mat(ie,je)/sqrt(1.0*e_max)
               endif
 
-              ! Global dissipation for n=0, p=+/-1,L=1
+              ! Global dissipation for n=0, p=+/-1, L=1
               if (n==0 .and. is == js .and. ie == je) then
-                 if (px(ir) == 1 .or. px(ir) == -1) then
-                    scale = nu_global*abs(gamma_e)
+                 if (abs(px(ir)) == 1) then
+                    scale = 3*nu_global*abs(gamma_e)
                     cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
-                         +(0.5*delta_t)*3*scale*xi(ix)*w_xi(jx)*xi(jx) &
-                         +(0.5*delta_t)*scale*w_xi(jx) 
+                         +(0.5*delta_t)*scale*xi(ix)*w_xi(jx)*xi(jx) 
                     amat(iv,jv) = amat(iv,jv) &
-                         -(0.5*delta_t)*3*scale*xi(ix)*w_xi(jx)*xi(jx) &
-                        -(0.5*delta_t)*scale*w_xi(jx)
+                         -(0.5*delta_t)*scale*xi(ix)*w_xi(jx)*xi(jx)
                  endif
               endif
 
