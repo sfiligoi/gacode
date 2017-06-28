@@ -6,12 +6,12 @@ import string
 workdir = 'bdir'
 tools   = os.environ['GACODE_ROOT']+'/neo/tools/'
 
-if len(sys.argv) < 13:
-   print "python neo_boot.py <rmin> <q> <nuee> <ni1/ne> <zi1> <mi1/mD> <ti1/te> <zi2> <mi2/mD> <ti2/te> <delta> <kappa>"
+if len(sys.argv) < 15:
+   print "python neo_boot.py <rmin> <q> <nuee> <ni1/ne> <zi1> <mi1/mD> <ti1/te> <zi2> <mi2/mD> <ti2/te> <delta> <kappa> <sdelta> <skappa>"
    sys.exit()
 
 # EXAMPLE:
-# python $GACODE_ROOT/neo/tools/neo_boot.py 0.17 2.0 0.1 0.9 1 1.0 1.0 6 6.0 1.0 0.1 1.0
+# python $GACODE_ROOT/neo/tools/neo_boot.py 0.17 2.0 0.1 0.9 1 1.0 1.0 6 6.0 1.0 0.1 1.0 0.0 0.0
 
 # In the input.neo, there are 3 species:
 # electrons are species 1, main ions are species 2,
@@ -35,8 +35,10 @@ ti1    = sys.argv[7]   # main ion temperature: t_i/t_e
 zi2    = sys.argv[8]   # impurity ion charge (integer)
 mi2    = sys.argv[9]   # impurity ion mass: m_i2/m_deuterium
 ti2    = sys.argv[10]  # impurity ion temperature: t_i2/t_e
-delta  = sys.argv[11]  # triangularity
-kappa  = sys.argv[12]  # elongation
+delta  = sys.argv[11]  # triangularity (dimensionless)
+kappa  = sys.argv[12]  # elongation (dimensionless)
+sdelta = sys.argv[13]  # triangularity radial derivative (dimensionless)
+skappa = sys.argv[14]  # elongation radial derivative (dimensionless)
 
 # Prepare simulation directory
 os.system('rm -rf '+workdir)
@@ -68,6 +70,12 @@ neoin.write('DELTA='+delta+'\n')
 
 # Set input: kappa
 neoin.write('KAPPA='+kappa+'\n')
+
+# Set input: sdelta
+neoin.write('S_DELTA='+sdelta+'\n')
+
+# Set input: skappa
+neoin.write('S_KAPPA='+skappa+'\n')
 
 # Set input: main ion charge, mass, temperature, density
 neoin.write('Z_2='+zi1+'\n')
