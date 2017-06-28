@@ -184,9 +184,8 @@ subroutine tgyro_tglf_map
   ! Linear mode selection
   !
   ! i_branch_tg = -1: use nmodes_tg modes (default for transport)
-  ! i_branch_tg =  0: most unstable mode
-  ! i_branch_tg =  1: most unstable electron mode
-  ! i_branch_tg =  2: most unstable ion mode
+  ! i_branch_tg =  0: most unstable electron mode (1) and ion mode (2)
+  !
   tglf_ibranch_in = -1
   !
   ! Number of modes in transport calculation;
@@ -225,14 +224,9 @@ subroutine tgyro_tglf_map
   !----------------------------------------------------------------
   ! CONTROL PARAMETERS
   !
-  ! Include B_parallal
-  tglf_use_bpar_in = .false.
-  !
-  ! Include A_parallel (B_perp)
-  if (loc_betae_scale > 0.0) then
-     tglf_use_bper_in = .true.
-  else
-     tglf_use_bper_in = .false.
+  if (loc_betae_scale == 0.0) then
+    tglf_use_bper_in = .false.
+    tglf_use_bpar_in = .false.
   endif
   !
   ! Use adiabatic electrons
