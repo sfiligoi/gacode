@@ -89,6 +89,8 @@ subroutine tgyro_tglf_map
      tglf_taus_in(i0) = ti(i_ion,i_r)/te(i_r)
   enddo
   !----------------------------------------------------------------
+  !   debye length/rhos   te in ev, rho_s in cm ne in 10^13/cm^3
+  tglf_debye_in = 7.43D2*SQRT(te(i_r)/(ne(i_r)*1.D13))/rho_s(i_r)
 
   !----------------------------------------------------------------
   ! TGLF-specific quantities
@@ -148,7 +150,6 @@ subroutine tgyro_tglf_map
   ! Electron beta used for electromagnetic calculations
   tglf_betae_in = betae_unit(i_r)*loc_betae_scale
   !----------------------------------------------------------------
-
   !----------------------------------------------------------------
   ! Collisions:
   !
@@ -237,7 +238,7 @@ subroutine tgyro_tglf_map
   !----------------------------------------------------------------
 
   !----------------------------------------------------------------
-  ! OTHER DEFAULT PARAMETERS
+  ! OTHER DEFAULT CONTROL PARAMETERS
   !
   !  tglf_find_width_in    = .true.
   !  tglf_iflux_in         = .true.
@@ -245,7 +246,6 @@ subroutine tgyro_tglf_map
   !  tglf_xnu_factor_in    = 1.0
   !  tglf_debye_factor_in  = 1.0
   !  tglf_filter_in        = 2.0
-  !  tglf_debye_in         = 0.0
   !----------------------------------------------------------------
 
   !----------------------------------------------------------------
