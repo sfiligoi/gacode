@@ -1328,8 +1328,8 @@ REAL FUNCTION get_intensity_spectrum_out(itype,ispec,iky,imode)
   !
   error=0
   get_intensity_spectrum_out = 0.0
-  if(itype.lt.1.or.itype.gt.2)then
-     write(*,*)"ntype out of bounds",1,2
+  if(itype.lt.1.or.itype.gt.4)then
+     write(*,*)"ntype out of bounds",1,4
      error=1
   elseif(ispec.lt.1.or.ispec.gt.nsm)then
      write(*,*)"ispec out of bounds",1,nsm
@@ -1360,7 +1360,7 @@ REAL FUNCTION get_field_spectrum_out(itype,iky,imode)
   !
   error = 0
   get_field_spectrum_out = 0.0
-  if(itype.lt.1.or.itype.gt.2)then
+  if(itype.lt.1.or.itype.gt.4)then
      write(*,*)"itype out of bounds",1,2
      error=1
   elseif(iky.lt.1.or.iky.gt.nkym)then
@@ -1854,7 +1854,7 @@ SUBROUTINE write_tglf_temperature_spectrum
 END SUBROUTINE write_tglf_temperature_spectrum
 !-----------------------------------------------------------------
 
-SUBROUTINE write_tglf_potential_spectrum
+SUBROUTINE write_tglf_field_spectrum
   !
   USE tglf_dimensions
   USE tglf_global
@@ -1862,31 +1862,34 @@ SUBROUTINE write_tglf_potential_spectrum
   USE tglf_kyspectrum
   !   
   IMPLICIT NONE
-  CHARACTER(27) :: fluxfile="out.tglf.potential_spectrum"
+  CHARACTER(27) :: fluxfile="out.tglf.field_spectrum"
   INTEGER :: i,n
-  REAL :: phi
+  REAL :: phi,a_par,b_par
   !
   if(new_start)then
-     write(*,*)"error: tglf_TM must be called before write_tglf_potential_spectrum"
+     write(*,*)"error: tglf_TM must be called before write_tglf_field_spectrum"
      write(*,*)"       NN doesn't compute spectra -> if needed set tglf_nn_max_error_in=-1"
   endif
   !
   OPEN(unit=33,file=fluxfile,status='replace')
 !
-  write(33,*)"gyro-bohm normalized potential fluctuation amplitude spectra"
-  write(33,*)"ky,potential"
+  write(33,*)"gyro-bohm normalized field fluctuation intensity spectra"
+  write(33,*)"ky,potential,A_par,B_par"
   do i=1,nky
     phi = 0.0
+    a_par=0.0
+    b_par=0.0
     do n = 1,nmodes_in
       phi = phi + field_spectrum_out(2,i,n)
+      if(use_bper_in)a_par = a_par + field_spectrum_out(3,i,n)
+      if(use_bpar_in)b_par = b_par + field_spectrum_out(4,i,n)
     enddo
-    phi = SQRT(phi)
-    write(33,*)ky_spectrum(i),phi
+    write(33,*)ky_spectrum(i),phi,a_par,b_par
   enddo
 !
   CLOSE(33)
 !
-END SUBROUTINE write_tglf_potential_spectrum
+END SUBROUTINE write_tglf_field_spectrum
 !-----------------------------------------------------------------
 
 SUBROUTINE write_tglf_eigenvalue_spectrum
