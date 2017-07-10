@@ -78,7 +78,7 @@ program tglf
      CALL write_tglf_temperature_spectrum
 
      ! write potential fluctuation amplitude spectrum to file out.tglf.potential_spectrum
-     CALL write_tglf_potential_spectrum
+     CALL write_tglf_field_spectrum
 
      ! write eigenvalue spectrum to file out.tglf.eigenvalue_spectrum
      CALL write_tglf_eigenvalue_spectrum
