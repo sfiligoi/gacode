@@ -1854,6 +1854,50 @@ SUBROUTINE write_tglf_temperature_spectrum
 END SUBROUTINE write_tglf_temperature_spectrum
 !-----------------------------------------------------------------
 
+SUBROUTINE write_tglf_intensity_spectrum
+  !
+  USE tglf_dimensions
+  USE tglf_global
+  USE tglf_species
+  USE tglf_kyspectrum
+  !   
+  IMPLICIT NONE
+  CHARACTER(27) :: fluxfile="out.tglf.intensity_spectrum"
+  INTEGER :: i,is,n
+  REAL :: den,tem, u_par, q_tot
+  !
+  if(new_start)then
+     write(*,*)"error: tglf_TM must be called before write_tglf_intensity_spectrum"
+     write(*,*)"       NN doesn't compute spectra -> if needed set tglf_nn_max_error_in=-1"
+  endif
+  !
+  OPEN(unit=33,file=fluxfile,status='replace')
+!
+  write(33,*)"gyro-bohm normalized intensity fluctuation amplitude spectra"
+  write(33,*)"ky,density,temperature,parallel velocity, parallel energy"
+  do is=ns0,ns
+    write(33,*)"species ",is
+    do i=1,nky
+      den = 0.0
+      tem = 0.0
+      u_par = 0.0
+      q_tot = 0.0
+      do n = 1,nmodes_in
+        den = den + intensity_spectrum_out(1,is,i,n)
+        tem = tem + intensity_spectrum_out(2,is,i,n)
+        u_par = u_par + intensity_spectrum_out(3,is,i,n)
+        q_tot = q_tot + intensity_spectrum_out(4,is,i,n)
+      enddo
+      write(33,*)ky_spectrum(i),den,tem,u_par,q_tot
+    enddo
+  enddo
+!
+  CLOSE(33)
+!
+END SUBROUTINE write_tglf_intensity_spectrum
+
+!-----------------------------------------------------------------
+
 SUBROUTINE write_tglf_field_spectrum
   !
   USE tglf_dimensions

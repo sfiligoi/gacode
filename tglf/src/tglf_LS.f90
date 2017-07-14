@@ -318,8 +318,10 @@
           a_par_bar_out(imax) = v2_bar*a_par_QL_out(imax)
           b_par_bar_out(imax) = v2_bar*b_par_QL_out(imax)
           do is=ns0,ns
-            n_bar_out(imax,is)=v2_bar*N_QL_out(imax,is)
-            t_bar_out(imax,is)=v2_bar*T_QL_out(imax,is)
+            N_bar_out(imax,is)=v2_bar*N_QL_out(imax,is)
+            T_bar_out(imax,is)=v2_bar*T_QL_out(imax,is)
+            U_bar_out(imax,is)=v2_bar*U_QL_out(imax,is)
+            Q_bar_out(imax,is)=v2_bar*Q_QL_out(imax,is)
           enddo
          endif
         enddo

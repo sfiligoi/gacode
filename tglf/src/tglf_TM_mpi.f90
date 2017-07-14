@@ -325,10 +325,10 @@
 ! save intensity_spectrum_out
          do is=ns0,ns
           do imax=1,nmodes_out
-            intensity_spectrum_save(1,is,i,imax) = n_bar_out(imax,is)
-            intensity_spectrum_save(2,is,i,imax) = t_bar_out(imax,is)
-            intensity_spectrum_save(3,is,i,imax) = u_bar_out(imax,is)
-            intensity_spectrum_save(4,is,i,imax) = q_bar_out(imax,is)
+            intensity_spectrum_save(1,is,i,imax) = N_bar_out(imax,is)
+            intensity_spectrum_save(2,is,i,imax) = T_bar_out(imax,is)
+            intensity_spectrum_save(3,is,i,imax) = U_bar_out(imax,is)
+            intensity_spectrum_save(4,is,i,imax) = Q_bar_out(imax,is)
            enddo !imax
          enddo  ! is
 ! save flux_spectrum_out 
