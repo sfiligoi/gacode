@@ -90,7 +90,7 @@ subroutine tgyro_tglf_map
   enddo
   !----------------------------------------------------------------
   !   debye length/rhos   te in ev, rho_s in cm ne in 10^13/cm^3
-  tglf_debye_in = 7.43D2*SQRT(te(i_r)/(ne(i_r)*1.D13))/rho_s(i_r)
+  tglf_debye_in = 7.43D2*SQRT(te(i_r)/(ne(i_r)*1.D13))/ABS(rho_s(i_r))
 
   !----------------------------------------------------------------
   ! TGLF-specific quantities
