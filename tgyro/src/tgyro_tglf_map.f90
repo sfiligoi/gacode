@@ -13,7 +13,7 @@ subroutine tgyro_tglf_map
   implicit none
 
   ! Local variables
-  integer :: i_ion,i0 
+  integer :: i_ion,i0
   integer :: harvest_err
   real :: q_abs
   real :: q_prime
@@ -88,6 +88,12 @@ subroutine tgyro_tglf_map
      tglf_rlts_in(i0) = r_min*dlntidr(i_ion,i_r)
      tglf_taus_in(i0) = ti(i_ion,i_r)/te(i_r)
   enddo
+  
+  ! Setting density gradient artificially to zero to compute D and v
+  if (tgyro_zero_dens_grad_flag /= 0) then
+     tglf_rlns_in(tgyro_zero_dens_grad_flag) = 0
+  endif
+  
   !----------------------------------------------------------------
   !   debye length/rhos   te in ev, rho_s in cm ne in 10^13/cm^3
   tglf_debye_in = 7.43D2*SQRT(te(i_r)/(ne(i_r)*1.D13))/rho_s(i_r)
