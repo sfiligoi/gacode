@@ -1,4 +1,3 @@
-
 !-----------------------------------------------------------
 ! gyro_rhs_total.f90
 !
@@ -28,10 +27,8 @@ subroutine gyro_rhs_total
   allocate(cap_h(n_stack,i1_buffer:i2_buffer,n_nek_loc_1,n_kinetic))
   allocate(lit_h(n_stack,i1_buffer:i2_buffer,n_nek_loc_1,n_kinetic))
 
-!$omp parallel
-  rhs(:,ibeg:iend,:,:)    = (0.0,0.0)
-  rhs_dr(:,ibeg:iend,:,:) = 0.0
-!$omp end parallel
+  rhs(:,:,:,:)    = (0.0,0.0)
+  rhs_dr(:,:,:,:) = 0.0
 
   !---------------------------------------------
   if (n_substep == 0) then
@@ -52,30 +49,30 @@ subroutine gyro_rhs_total
   ! Derivative-friendly functions which have array elements outside
   ! the region 1:n_x.                       
   !
-  cap_h(:,i1_buffer:0,:,:) = (0.0,0.0)
-  lit_h(:,i1_buffer:0,:,:) = (0.0,0.0)
-  cap_h(:,n_x+1:i2_buffer,:,:) = (0.0,0.0)
-  lit_h(:,n_x+1:i2_buffer,:,:) = (0.0,0.0)
+  cap_h(:,:,:,:) = (0.0,0.0)
+  lit_h(:,:,:,:) = (0.0,0.0)
 
-!$omp parallel private(z_der,z_dis)
+!$omp parallel do private(p_nek_loc,i,m) collapse(3)
   do is=1,n_kinetic
      do p_nek_loc=1,n_nek_loc_1
-        do i = ibeg, iend
-           cap_h(:,i,p_nek_loc,is) = (0.0,0.0)
-           lit_h(:,i,p_nek_loc,is) = (0.0,0.0)
+        do i=1,n_x
            do m=1,n_stack
               lit_h(m,i,p_nek_loc,is) = h(m,i,p_nek_loc,is)
               cap_h(m,i,p_nek_loc,is) = h(m,i,p_nek_loc,is)+&
                    z(is)*alpha_s(is,i)*gyro_u(m,i,p_nek_loc,is)
            enddo
         enddo
-!$omp barrier  ! ensure all cap_h, lit_h values are available
+     enddo
+  enddo
   !----------------------------------------------------------------------
 
   !----------------------------------------------------------------------
   ! Drift (finite-kx) plus upwind dissipation
   !
-        do i = ibeg, iend
+!$omp parallel do private(is,p_nek_loc,i,m,z_der,z_dis,i_diff) collapse(3)
+  do is=1,n_kinetic
+     do p_nek_loc=1,n_nek_loc_1
+        do i=1,n_x
            do m=1,n_stack
               z_der = 0.0
               z_dis = 0.0
@@ -106,18 +103,21 @@ subroutine gyro_rhs_total
            enddo
         enddo !i
 
+     enddo !p_nek_loc
+  enddo !is
+
   !----------------------------------------------------------------------
   ! Buffer damping
   !
   if (boundary_method == 2) then
-     do i = ibeg, iend
-        rhs(:,i,p_nek_loc,is) = rhs(:,i,p_nek_loc,is)-explicit_damp_vec(is,i)*cap_h(:,i,p_nek_loc,is)
+!$omp parallel do private(is,i) collapse(2)
+     do is=1,n_kinetic
+        do i=1,n_x
+           rhs(:,i,:,is) = rhs(:,i,:,is)-explicit_damp_vec(is,i)*cap_h(:,i,:,is)
+        enddo
      enddo
   endif
   !----------------------------------------------------------------------
-     enddo !p_nek_loc
-  enddo !is
-!$omp end parallel
 
   !----------------------------------------------------------------------
   ! Adaptive source
@@ -126,7 +126,6 @@ subroutine gyro_rhs_total
 
      call gyro_adaptive_source
 
-!$omp parallel private(p_nek_loc,ie)
      do is=1,n_kinetic
 
         p_nek_loc = 0
@@ -137,7 +136,7 @@ subroutine gyro_rhs_total
 
            ie = nek_e(p_nek)  
 
-           do i = ibeg, iend
+           do i=1,n_x
 
               ! In this expression, nu_source = 0 if n > 0.
               ! (see gyro_radial_operators).
@@ -149,7 +148,6 @@ subroutine gyro_rhs_total
         enddo ! p_nek
 
      enddo ! is
-!$omp end parallel
 
   endif
   !----------------------------------------------------------------------
@@ -157,11 +155,10 @@ subroutine gyro_rhs_total
   !---------------------------------------------------------
   ! Er shear
   !
-!$omp parallel
-   do i = ibeg, iend
-      rhs(:,i,:,:) = rhs(:,i,:,:)-i_c*omega_eb_s(i)*h(:,i,:,:)
-   enddo 
-!$omp end parallel
+!$omp parallel do 
+  do i=1,n_x
+     rhs(:,i,:,:) = rhs(:,i,:,:)-i_c*omega_eb_s(i)*h(:,i,:,:)
+  enddo
   !---------------------------------------------------------
 
   !---------------------------------------------------------
@@ -169,11 +166,9 @@ subroutine gyro_rhs_total
   !
   if (krook_flag == 1) then
      call gyro_collision_krook
-!$omp parallel
-     do i = ibeg, iend
+     do i=1,n_x
         rhs(:,i,:,1) = rhs(:,i,:,1)+rhs_krook(:,i,:)
-     end do
-!$omp end parallel
+     enddo
   endif
   !---------------------------------------------------------
 

@@ -21,18 +21,17 @@ subroutine gyro_timestep_error
   !---------------------------------------------------
   rk_error_loc(:,:) = 0.0
 
-!$omp parallel reduction(+:rk_error_loc)
-  do is=1,n_kinetic
+!$omp parallel do private(p_nek_loc,m,is) collapse(3) reduction(+:rk_error_loc)
+  do i=1,n_x
      do p_nek_loc=1,n_nek_loc_1
-        do i = ibeg, iend
-           do m=1,n_stack
+        do m=1,n_stack
+           do is=1,n_kinetic
               rk_error_loc(is,1) = rk_error_loc(is,1) + abs(h_err(m,i,p_nek_loc,is))
               rk_error_loc(is,2) = rk_error_loc(is,2) + abs(h(m,i,p_nek_loc,is))
            enddo
         enddo
      enddo
   enddo
-!$omp end parallel
 
   call MPI_ALLREDUCE(rk_error_loc,&
        rk_error,&

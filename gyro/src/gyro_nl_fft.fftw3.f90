@@ -56,8 +56,6 @@ subroutine gyro_nl_fft
         ! fn, gn and fgp have ip indices; 
         ! must be zeroed.
 
-!$omp parallel private(fn_r,gn_r,fn_p,gn_p)
-!$omp single
         do i=i1_buffer,0
            fn(:,i)  = (0.0,0.0)
            gn(:,i)  = (0.0,0.0)
@@ -68,20 +66,19 @@ subroutine gyro_nl_fft
            gn(:,i)  = (0.0,0.0)
            fgp(:,i) = (0.0,0.0)
         enddo
-!$omp end single
-        do i = ibeg, iend
+
+        do i=1,n_x
            do nn=0,n_max
               gn(nn,i) = h_tran(i,i_split,i_p(nn),is)
               fn(nn,i) = gyro_u_tran(i,i_split,i_p(nn),is)
            enddo ! nn
         enddo ! i
-!$omp barrier  ! wait for all fn, gn to be available
 
         !------------------------------------------------
         !
-        !
-        do i = ibeg, iend
-           v_fft3(:,i,:) = 0.0
+        v_fft3(:,:,:) = 0.0
+!$omp parallel do private(nn,fn_r,gn_r,fn_p,gn_p) collapse(2)
+        do i=1,n_x
            do nn=0,n_max
               fn_r = (0.0,0.0)
               gn_r = (0.0,0.0)
@@ -120,7 +117,6 @@ subroutine gyro_nl_fft
 
            enddo ! nn
         enddo ! i
-!$omp end parallel
 
         !---------------------------------------------------
         ! Backward FFT
@@ -130,8 +126,8 @@ subroutine gyro_nl_fft
         !---------------------------------------------------------------
         ! Real space multiplications
         !
-!$omp parallel private(fg_r,gf_r,gf_p,fg_p,f_pg_r,f_rg_p)
-        do i = ibeg, iend
+!$omp parallel do private(nn,fg_r,gf_r,gf_p,fg_p,f_pg_r,f_rg_p) collapse(2)
+        do i=1,n_x
            do nn=0,n_fft-1
               !f dg/dr
               fg_r   =  vt_fft3(nn,i,1)*vt_fft3(nn,i,6)
@@ -162,7 +158,6 @@ subroutine gyro_nl_fft
               vt_fft3(nn,i,6) = f_rg_p   
            enddo !nn
         enddo
-!$omp end parallel
         !---------------------------------------------------------------
 
         !---------------------------------------------------------------
@@ -174,9 +169,10 @@ subroutine gyro_nl_fft
         ! Re-Construction of complex arrays
         ! 
         !--------------------------------------------------
-        !  g df/dp - f dg/dp, 
-!$omp parallel private(fgp_r,fg_r_c,gf_r_c,f_pg_r_c,f_rg_p_c,fgr,fg2,fgr_p)
-        do i = ibeg, iend
+        !  g df/dp - f dg/dp,
+ 
+!$omp parallel do private(nn)
+        do i=1,n_x
            fgp(0,i) = (cmplx(v_fft3(0,i,3),0.0) - &
                        cmplx(v_fft3(0,i,4),0.0))/n_fft
            do nn=1,n_max
@@ -184,11 +180,11 @@ subroutine gyro_nl_fft
                            cmplx(v_fft3(nn,i,4),v_fft3(n_fft-nn,i,4)))/n_fft
            enddo ! nn 
         enddo ! i
-!$omp barrier   ! ensure all fgp values are available
         !--------------------------------------------------
 
         !---------------------------------------------------------------
-        do i = ibeg, iend
+!$omp parallel do private(nn,fgp_r,fg_r_c,gf_r_c,f_pg_r_c,f_rg_p_c,fgr,fg2,fgr_p) collapse(2)
+        do i=1,n_x
            do nn=0,n_max
               !---------------------------------------------------------------
               ! d/dr (g df/dp - f dg/dp)
@@ -239,7 +235,6 @@ subroutine gyro_nl_fft
 
            enddo
         enddo
-!$omp end parallel
 
      enddo ! i_split 
   enddo ! is
