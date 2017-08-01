@@ -161,4 +161,4 @@ clean:
 	rm -f *.o *.gpu *.h $(LLIB).a gyro
 	rm -f ${GACODE_ROOT}/modules/gyro*.mod ${GACODE_ROOT}/modules/ompdata.mod
 
-include ../install/make.ext.${GACODE_PLATFORM}
+-include ../install/make.ext.${GACODE_PLATFORM}
