@@ -20,9 +20,9 @@ F77 = ${FC}
 
 # Compiler options/flags
 FACC   =-acc -Minfo=accel -Mcuda=kepler,nollvm,keepgpu
-FOMP   =-mp 
+FOMP   =-mp -Mstack_arrays ${FACC}
 FMATH  =-r8
-FOPT   =-Mbounds -Minfo=all
+FOPT   =-fast -fastsse -Mvect -Minfo=all
 FDEBUG =-g -Kieee -Ktrap=fp,divz -Mbounds -Mchkptr -Mchkstk -traceback -Minform=inform
 
 # System math libraries
