@@ -56,7 +56,7 @@ subroutine gyro_nl_fft
         ! fn, gn and fgp have ip indices; 
         ! must be zeroed.
 
-!$omp parallel private(fn_r,gn_r,fn_p,gn_p)
+!$omp parallel private(fn_r,gn_r,fn_p,gn_p,i,nn,i_diff)
 !$omp single
         do i=i1_buffer,0
            fn(:,i)  = (0.0,0.0)
