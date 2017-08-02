@@ -52,7 +52,7 @@ subroutine gyro_rhs_total
   cap_h(:,:,:,:) = (0.0,0.0)
   lit_h(:,:,:,:) = (0.0,0.0)
 
-!$omp parallel do private(p_nek_loc,i,m) collapse(3)
+!$omp parallel private(z_der,z_dis,is,p_nek_loc,i,m,i_diff)
   do is=1,n_kinetic
      do p_nek_loc=1,n_nek_loc_1
         do i=1,n_x
@@ -126,6 +126,7 @@ subroutine gyro_rhs_total
 
      call gyro_adaptive_source
 
+!$omp parallel private(p_nek_loc,ie,is,p_nek,i)
      do is=1,n_kinetic
 
         p_nek_loc = 0
@@ -155,10 +156,11 @@ subroutine gyro_rhs_total
   !---------------------------------------------------------
   ! Er shear
   !
-!$omp parallel do 
-  do i=1,n_x
-     rhs(:,i,:,:) = rhs(:,i,:,:)-i_c*omega_eb_s(i)*h(:,i,:,:)
-  enddo
+!$omp parallel private(i)
+   do i = ibeg, iend
+      rhs(:,i,:,:) = rhs(:,i,:,:)-i_c*omega_eb_s(i)*h(:,i,:,:)
+   enddo 
+!$omp end parallel
   !---------------------------------------------------------
 
   !---------------------------------------------------------
@@ -166,7 +168,8 @@ subroutine gyro_rhs_total
   !
   if (krook_flag == 1) then
      call gyro_collision_krook
-     do i=1,n_x
+!$omp parallel private(i)
+     do i = ibeg, iend
         rhs(:,i,:,1) = rhs(:,i,:,1)+rhs_krook(:,i,:)
      enddo
   endif
