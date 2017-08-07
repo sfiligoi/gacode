@@ -15,23 +15,28 @@ then
    echo "       <base> is the basename"
    echo "          <n> is the number of replications"
    echo " "
-   echo "NOTE: data is copied from base1"
+   echo "NOTE: data is copied from base0 if it exists, base1 if not"
    exit 1
 fi
 
 # Set basename
 base=$1
-j=1
 
+j=0
 if [ ! -d "$base$j" ]
 then
-   echo "error: $base$j does not exist"
-   exit 1
+   echo "INFO: $base$j does not exist; trying ${base}1"
+   j=1
+   if [ ! -d "$base$j" ]
+   then
+      echo "ERROR: $base$j does not exist.  Exiting."
+      exit 1
+   fi
 fi
 
 # Set number of replications
 n=$2
-i=2
+i=$(($j+1))
 
 # Make the copies
 while [ $i -le $n ] ; do
