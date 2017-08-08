@@ -686,15 +686,15 @@ subroutine cgyro_init_collision
               endif
 
               ! Global dissipation for n=0, p=+/-1, L=1
-              if (n==0 .and. is == js .and. ie == je) then
-                 if (abs(px(ir)) == 1) then
-                    scale = nu_global*abs(gamma_e)
-                    cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
-                         +(0.5*delta_t)*scale*xi(ix)*w_xi(jx)*xi(jx) 
-                    amat(iv,jv) = amat(iv,jv) &
-                         -(0.5*delta_t)*scale*xi(ix)*w_xi(jx)*xi(jx)
-                 endif
-              endif
+              !if (n==0 .and. is == js .and. ie == je) then
+              !   if (abs(px(ir)) == 1) then
+              !      scale = nu_global*abs(gamma_e)
+              !      cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
+              !           +(0.5*delta_t)*scale*xi(ix)*w_xi(jx)*xi(jx) 
+              !      amat(iv,jv) = amat(iv,jv) &
+              !           -(0.5*delta_t)*scale*xi(ix)*w_xi(jx)*xi(jx)
+              !   endif
+              !endif
 
               ! Finite-kperp test particle corrections 
               if (collision_model == 4 .and. collision_kperp == 1) then

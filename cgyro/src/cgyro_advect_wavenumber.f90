@@ -13,9 +13,10 @@ subroutine cgyro_advect_wavenumber(ij)
   implicit none
 
   integer, intent(in) :: ij
-  integer :: ir,l,ll,j
+  integer :: ir,l,ll,j,irp
   complex, dimension(:,:),allocatable :: h0
   complex, dimension(nv_loc) :: dh
+  real :: scale
 
   call timer_lib_in('shear')
 
@@ -39,6 +40,25 @@ subroutine cgyro_advect_wavenumber(ij)
            rhs(ic,:,ij) = rhs(ic,:,ij)+dh(:)
         enddo
      enddo
+
+     if (n == 0) then
+     scale = nu_global*abs(gamma_e)/3.0
+     do j=1,n_theta
+        h0 = 0.0
+        do ir=1,n_radial
+           h0(:,ir) = h_x(ic_c(ir,j),:)
+        enddo
+        do ir=1,n_radial
+           if (abs(px(ir)) == 1) then
+              irp = -px(ir)+1+n_radial/2
+              dh(:) = -scale*(h0(:,ir)-h0(:,irp))
+              ic = ic_c(ir,j)
+              rhs(ic,:,ij) = rhs(ic,:,ij)+dh(:)
+           endif
+        enddo
+     enddo
+     endif
+
      deallocate(h0)
   endif
 
