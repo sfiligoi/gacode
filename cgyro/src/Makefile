@@ -72,6 +72,6 @@ cgyro_lib.a: $(OBJECTS)
 	$(FC) $(FMATH) $(FFLAGS) -c $<
 
 clean:
-	rm -rf *.o cgyro_lib.a $(EXEC) *~ *.cub *.ptx *.gpu *.h
+	rm -rf *.o cgyro_lib.a $(EXEC) *~ *.cub *.ptx *.gpu *.h *lst
 
 -include ../install/make.ext.${GACODE_PLATFORM}

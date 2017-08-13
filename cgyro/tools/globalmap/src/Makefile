@@ -26,4 +26,4 @@ all: $(OBJECTS) $(EXTRA_LIBS)
 	$(FC) $(FMATH) $(FFLAGS) -c $<
 
 clean:
-	rm -f *.o $(EXEC) ${GACODE_ROOT}/modules/globalmap_globals.mod
+	rm -f *.o *.lst $(EXEC) ${GACODE_ROOT}/modules/globalmap_globals.mod
