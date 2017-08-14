@@ -69,7 +69,7 @@ subroutine cgyro_rhs(ij)
   g_x(:,:) = h_x(:,:)
 
   if (n_field > 1) then
-!$omp parallel do private(iv_loc,is,ic)
+!$omp parallel do private(iv_loc,is,ic) schedule(dynamic, 1)
      do iv=nv1,nv2
         iv_loc = iv-nv1+1
         is = is_v(iv)
@@ -98,7 +98,7 @@ subroutine cgyro_rhs(ij)
 !$acc  parallel loop gang vector collapse(2) & 
 !$acc& private(iv,ic,iv_loc,is,rval,rval2,rhs_stream,id,jc)
 #else
-!$omp parallel do collapse(2) &
+!$omp parallel do schedule(dynamic,1)&
 !$omp& private(iv,ic,iv_loc,is,rval,rval2,rhs_stream,id,jc) 
 #endif
      do iv=nv1,nv2
