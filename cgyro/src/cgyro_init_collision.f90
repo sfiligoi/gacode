@@ -242,6 +242,7 @@ subroutine cgyro_init_collision
   ! Collision field particle component
   amat(:,:)   = 0.0
   cmat(:,:,:) = 0.0
+  cmat_diff(:,:,:) = 0.0
 
   select case (collision_model)
 
@@ -790,8 +791,20 @@ subroutine cgyro_init_collision
      cmat(:,:,ic_loc) = amat(:,:)
 
   enddo
-
   deallocate(amat)
+
+         ic_loc = 0
+           do ic=nc1,nc2
+              ic_loc = ic_loc+1
+
+              do iv=1,nv
+
+                 do jv=1,nv
+                    cmat_diff(jv,iv,ic_loc) = cmat(jv,iv,ic_loc)  - cmat(jv,iv,1); 
+                 enddo
+              enddo
+           enddo
+
   deallocate(i_piv)
   deallocate(nu_d)
   deallocate(nu_par)

@@ -20,6 +20,7 @@ subroutine cgyro_step_collision
   integer :: is,ivp
   complex, dimension(nv) :: bvec,cvec
   real :: cvec_re,cvec_im
+  real :: cval
 
   !----------------------------------------------------------------
   ! Perform data tranpose from _c to _v data layouts:
@@ -30,7 +31,7 @@ subroutine cgyro_step_collision
 
   call timer_lib_in('coll')
 
-!$omp parallel do private(iv,ivp,cvec,bvec,cvec_re,cvec_im)
+!$omp parallel do private(iv,ivp,cvec,bvec,cvec_re,cvec_im,cval)
   do ic_loc=1,nc2-nc1+1
 
      ! Set-up the RHS: H = f + ze/T G phi
@@ -46,9 +47,10 @@ subroutine cgyro_step_collision
         cvec_re = real(cvec(ivp))
         cvec_im = aimag(cvec(ivp))
         do iv=1,nv
+           cval = cmat(iv,ivp,1) + cmat_diff(iv,ivp,ic_loc)
            bvec(iv) = bvec(iv)+ &
-                cmplx(cmat(iv,ivp,ic_loc)*cvec_re, &
-                cmat(iv,ivp,ic_loc)*cvec_im)
+                cmplx(cval*cvec_re, &
+                cval*cvec_im)
         enddo
      enddo
 

@@ -378,6 +378,7 @@ module cgyro_globals
   !
   ! Collision operator
   real, dimension(:,:,:), allocatable :: cmat
+  real(kind=4) , dimension(:,:,:), allocatable :: cmat_diff
   real, dimension(:,:,:,:,:), allocatable :: cmat_simple
   ! 
   ! Equilibrium/geometry arrays

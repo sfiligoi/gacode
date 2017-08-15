@@ -198,6 +198,7 @@ subroutine cgyro_init_manager
         allocate(cmat_simple(n_xi,n_xi,n_energy,n_species,n_theta))
      else
         allocate(cmat(nv,nv,nc_loc))
+        allocate(cmat_diff(nv,nv,nc_loc))
      endif
 
   endif
