@@ -33,10 +33,11 @@ subroutine cgyro_nl_fftw(ij)
 
   allocate(fpack(n_radial,nv_loc*n_theta))
   allocate(gpack(n_radial,nv_loc*n_theta))
-  fpack = 0.0
-  gpack = 0.0
-  iexch = 0
+  ! fpack = 0.0
+  ! gpack = 0.0
+!$omp parallel do private(iv_loc,it,iexch,ir)
   do iv_loc=1,nv_loc
+     iexch = (iv_loc-1)*n_theta
      do it=1,n_theta
         iexch = iexch+1
         do ir=1,n_radial
@@ -52,7 +53,7 @@ subroutine cgyro_nl_fftw(ij)
   call timer_lib_in('nl')
 
 !$omp parallel private(fx,gx,fy,gy,in,iy,ir,p,ix,f0,g0,uv,ux,uy,vx,vy)
-!$omp do
+!$omp do schedule(dynamic,1)
   do j=1,nsplit
 
      fx = 0.0
@@ -107,8 +108,9 @@ subroutine cgyro_nl_fftw(ij)
 
   call timer_lib_in('nl_comm')
   call parallel_slib_r(g_nl,gpack)
-  iexch = 0
+!$omp parallel do private(iv_loc,it,iexch,ir)
   do iv_loc=1,nv_loc
+     iexch = (iv_loc-1)*n_theta
      do it=1,n_theta
         iexch = iexch+1
         do ir=1,n_radial

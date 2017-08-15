@@ -23,4 +23,4 @@ lib: $(OBJECTS)
 	$(FC) $(FMATH) $(FFLAGS) -c $<
 
 clean:
-	rm -f *.o $(LLIB).a ${GACODE_ROOT}/modules/geo_interface.mod
+	rm -f *.o *.lst $(LLIB).a ${GACODE_ROOT}/modules/geo_interface.mod

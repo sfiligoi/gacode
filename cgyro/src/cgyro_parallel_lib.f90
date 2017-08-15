@@ -281,6 +281,7 @@ contains
     integer :: ierr
     !-------------------------------------------------------
 
+!$omp parallel do private(j)
     do j=1,nexch
        x(:,j) = x_in(:,j)
     enddo
@@ -326,6 +327,7 @@ contains
          slib_comm, &
          ierr)
 
+!$omp parallel do private(j)
     do j=1,nexch
        x_out(:,j) = x(:,j)
     enddo

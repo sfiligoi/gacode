@@ -537,7 +537,7 @@ subroutine cgyro_init_collision
      
   end select
 
-  if(test_coll_flag == 1) then
+  if (test_coll_flag == 1) then
      !Ausgabe eines sinnvollen Testwerts:
      !if (it_c(0) == 0) then
      !if (i_proc==1) then
@@ -606,7 +606,7 @@ subroutine cgyro_init_collision
 !$omp& shared(it_c,ir_c,px,is_v,ix_v,ie_v,ctest,xi_deriv_mat) &
 !$omp& shared(temp,jvec_v,omega_trap,dens,energy,vel) &
 !$omp& shared(omega_rot_trap,omega_rot_u,e_deriv1_mat,e_max) &
-!$omp& shared(scale,nu_global,gamma_e,xi_lor_mat) &
+!$omp& shared(xi_lor_mat) &
 !$omp& shared(k_perp,vth,mass,z,bmag,nu_d,xi,nu_par,w_e,w_xi) &
 !$omp& shared(klor_fac,kdiff_fac) &
 !$omp& private(ic,ic_loc,it,ir,info) &
@@ -683,17 +683,6 @@ subroutine cgyro_init_collision
                  amat(iv,jv) = amat(iv,jv) &
                       - (0.5*delta_t) * omega_rot_u(it,is) * xi(ix) &
                       * e_deriv1_mat(ie,je)/sqrt(1.0*e_max)
-              endif
-
-              ! Global dissipation for n=0, p=+/-1, L=1
-              if (n==0 .and. is == js .and. ie == je) then
-                 if (abs(px(ir)) == 1) then
-                    scale = nu_global*abs(gamma_e)
-                    cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
-                         +(0.5*delta_t)*scale*xi(ix)*w_xi(jx)*xi(jx) 
-                    amat(iv,jv) = amat(iv,jv) &
-                         -(0.5*delta_t)*scale*xi(ix)*w_xi(jx)*xi(jx)
-                 endif
               endif
 
               ! Finite-kperp test particle corrections 
