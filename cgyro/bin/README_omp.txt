@@ -15,4 +15,8 @@ into your .bashrc
 ulimit -s 32768
 (must be set on all the nodes running CGYRO)
 
+Moreover, for platform that do not use the 
+system stack limit for OpenMP threads, also set
+export OMP_STACKSIZE=32M
+
 This should be sufficient for at least 128 omp threads.
