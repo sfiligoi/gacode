@@ -796,11 +796,12 @@ subroutine cgyro_init_collision
          ic_loc = 0
            do ic=nc1,nc2
               ic_loc = ic_loc+1
+              it = it_c(ic)
 
               do iv=1,nv
 
                  do jv=1,nv
-                    cmat_diff(jv,iv,ic_loc) = cmat(jv,iv,ic_loc)  - cmat(jv,iv,1); 
+                    cmat_diff(jv,iv,ic_loc) = cmat(jv,iv,ic_loc)  - cmat(jv,iv,it); 
                  enddo
               enddo
            enddo
