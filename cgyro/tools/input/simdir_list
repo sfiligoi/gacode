@@ -17,3 +17,12 @@ nl01:  16x96-mode nl performance optimization case
 nl01p: 32x192-mode nl performance optimization case
 nl02:  64x512-mode nl performance optimization case
 nl03: 384x1024-mode nl performance optimization case
+
+s: 16x96
+m: 32x192
+l: 32x256
+w1 
+w2
+w3
+w4
+s2
