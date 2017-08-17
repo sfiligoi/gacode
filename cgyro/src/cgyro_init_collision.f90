@@ -243,7 +243,6 @@ subroutine cgyro_init_collision
   ! Collision field particle component
   amat(:,:)   = 0.0
   cmat(:,:,:) = 0.0
-  cmat_diff(:,:,:) = 0.0
 
   select case (collision_model)
 
