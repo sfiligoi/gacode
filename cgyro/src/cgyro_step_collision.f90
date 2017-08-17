@@ -47,16 +47,16 @@ subroutine cgyro_step_collision
      bvec(:) = (0.0,0.0)
 
      ! This is a key loop for performance
-     !if (collision_model == 6) then
-     !   do ivp=1,nv
-     !      cvec_re = real(cvec(ivp))
-     !      cvec_im = aimag(cvec(ivp))
-     !      do iv=1,nv
-     !        cval = cmat_base(iv,ivp,it) + cmat_diff(iv,ivp,ic_loc)
-     !        bvec(iv) = bvec(iv)+ cmplx(cval*cvec_re, cval*cvec_im)
-     !      enddo
-     !   enddo
-     !else
+     if (collision_model == 6) then
+        do ivp=1,nv
+           cvec_re = real(cvec(ivp))
+           cvec_im = aimag(cvec(ivp))
+           do iv=1,nv
+             cval = cmat_base(iv,ivp,it) + cmat_diff(iv,ivp,ic_loc)
+             bvec(iv) = bvec(iv)+ cmplx(cval*cvec_re, cval*cvec_im)
+           enddo
+        enddo
+     else
        do ivp=1,nv
            cvec_re = real(cvec(ivp))
            cvec_im = aimag(cvec(ivp))
@@ -65,7 +65,7 @@ subroutine cgyro_step_collision
              bvec(iv) = bvec(iv)+ cmplx(cval*cvec_re, cval*cvec_im)
            enddo
         enddo
-     !endif
+     endif
 
      do iv=1,nv
         cap_h_v(ic_loc,iv) = bvec(iv)
