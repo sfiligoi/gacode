@@ -16,12 +16,13 @@ subroutine cgyro_init_collision
   real :: mo1,mo2,en1,en2 ! von mir
   integer :: jv
   integer :: is,ir,it,ix,ie,js,je,jx,ks
+  logical, dimension(:), allocatable :: cmat_base_set
   ! parameters for matrix solve
   real, dimension(:,:), allocatable :: amat
   real, dimension(:,:,:,:,:,:), allocatable :: ctest
   real, dimension(:,:,:,:,:), allocatable :: bessel
   integer :: test_coll_flag = 0
-
+  
   if (collision_model == 5) then
      call cgyro_init_collision_simple
      return
@@ -242,7 +243,6 @@ subroutine cgyro_init_collision
   ! Collision field particle component
   amat(:,:)   = 0.0
   cmat(:,:,:) = 0.0
-  cmat_diff(:,:,:) = 0.0
 
   select case (collision_model)
 
@@ -785,10 +785,17 @@ subroutine cgyro_init_collision
   deallocate(amat)
 
   if (collision_model == 6) then
-!$omp parallel do private(ic, ic_loc,it,iv,jv) shared(it_c,cmat_diff,cmat)
-     do it=1,n_theta
-       cmat_base(:,:,it) = cmat(:,:,it)
+     allocate(cmat_base_set(n_theta))
+     cmat_base_set(:) = .false.
+     do ic=nc1,nc2
+        ic_loc = ic-nc1+1
+        it = it_c(ic)
+        if (cmat_base_set(it) .eqv. .false.) then
+          cmat_base(:,:,it) = cmat(:,:,ic_loc)
+          cmat_base_set(it)=.true.
+        endif
      enddo
+     deallocate(cmat_base_set)
 
      ! Note: Ideally we would want to avoid creating the big cmat matrix
      !       But it would have required too much refactoring of the code
