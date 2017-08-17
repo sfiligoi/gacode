@@ -14,9 +14,9 @@ NUMAS_PER_NODE=4
 FC     = ftn -gen-interfaces -module ${GACODE_ROOT}/modules
 F77    = ${FC}
 
-FOMP   = 
+FOMP   = -qopenmp
 FMATH  = -real-size 64
-FOPT   = -qopenmp -Ofast
+FOPT   = -Ofast
 FDEBUG = -eD -Ktrap=fp -m 1
 
 # System math libraries
