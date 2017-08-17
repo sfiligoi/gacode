@@ -196,9 +196,11 @@ subroutine cgyro_init_manager
 
      if (collision_model == 5) then
         allocate(cmat_simple(n_xi,n_xi,n_energy,n_species,n_theta))
-     else
+     elseif (collision_model == 6) then
         allocate(cmat(nv,nv,nc_loc))
         allocate(cmat_diff(nv,nv,nc_loc))
+     else
+        allocate(cmat(nv,nv,nc_loc))
      endif
 
   endif

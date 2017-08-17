@@ -31,7 +31,7 @@ subroutine cgyro_step_collision
 
   call timer_lib_in('coll')
 
-!$omp parallel do private(ic,ic_loc, it, iv,ivp,cvec,bvec,cvec_re,cvec_im,cval)
+!$omp parallel do private(ic,ic_loc, it, iv,ivp,cvec,bvec,cvec_re,cvec_im,cval) firstprivate(collision_model)
   do ic=nc1,nc2
 
      ic_loc = ic-nc1+1
@@ -47,16 +47,25 @@ subroutine cgyro_step_collision
      bvec(:) = (0.0,0.0)
 
      ! This is a key loop for performance
-     do ivp=1,nv
-        cvec_re = real(cvec(ivp))
-        cvec_im = aimag(cvec(ivp))
-        do iv=1,nv
-           cval = cmat(iv,ivp,it) + cmat_diff(iv,ivp,ic_loc)
-           bvec(iv) = bvec(iv)+ &
-                cmplx(cval*cvec_re, &
-                cval*cvec_im)
+     if (collision_model == 6) then
+        do ivp=1,nv
+           cvec_re = real(cvec(ivp))
+           cvec_im = aimag(cvec(ivp))
+           do iv=1,nv
+             cval = cmat(iv,ivp,it) + cmat_diff(iv,ivp,ic_loc)
+             bvec(iv) = bvec(iv)+ cmplx(cval*cvec_re, cval*cvec_im)
+           enddo
         enddo
-     enddo
+     else
+       do ivp=1,nv
+           cvec_re = real(cvec(ivp))
+           cvec_im = aimag(cvec(ivp))
+           do iv=1,nv
+             cval = cmat(iv,ivp,ic_loc)
+             bvec(iv) = bvec(iv)+ cmplx(cval*cvec_re, cval*cvec_im)
+           enddo
+        enddo
+     endif
 
      do iv=1,nv
         cap_h_v(ic_loc,iv) = bvec(iv)
