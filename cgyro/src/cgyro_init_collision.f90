@@ -801,7 +801,7 @@ subroutine cgyro_init_collision
      do ic=nc1,nc2
         ic_loc = ic-nc1+1
         it = it_c(ic)
-        if (cmat_base_set(it)==.false.) then
+        if (cmat_base_set(it) .eqv. .false.) then
           cmat_base(:,:,it) = cmat(:,:,ic_loc)
           cmat_base_set(it)=.true.
         endif
