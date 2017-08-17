@@ -66,7 +66,7 @@ x.add('MACH','0.0')
 x.add('ROTATION_MODEL','1')
 x.add('ERROR_TOL','5e-2')
 x.add('ADAPT_TOL','5e-3')
-x.add('MPI_RANK_ORDER','2')
+x.add('MPI_RANK_ORDER','1')
 x.add('HIPREC_FLAG','0')
 x.add('UDSYMMETRY_FLAG','0')
 x.add('SHEAR_METHOD','1')
@@ -182,7 +182,7 @@ x.dep('BETA_STAR','use BETA_STAR_SCALE')
 # Perform the parsing
 x.read_input('input.cgyro')
 
-x.printmsg()        
+x.printmsg()
 
 sys.exit(x.error)
 
