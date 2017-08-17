@@ -797,17 +797,27 @@ subroutine cgyro_init_collision
 
   if (collision_model == 6) then
 !$omp parallel do private(ic, ic_loc,it,iv,jv) shared(it_c,cmat_diff,cmat)
-           do ic=nc1,nc2
-              ic_loc = ic-nc1+1
-              it = it_c(ic)
+     do it=1,n_theta
+       cmat_base(:,:,it) = cmat(:,:,it)
+     enddo
 
-              do iv=1,nv
+     ! Note: Ideally we would want to avoid creating the big cmat matrix
+     !       But it would have required too much refactoring of the code
+     !       Something to consider for future memory optimization
 
-                 do jv=1,nv
-                    cmat_diff(jv,iv,ic_loc) = cmat(jv,iv,ic_loc)  - cmat(jv,iv,it); 
-                 enddo
-              enddo
+!$omp parallel do private(ic, ic_loc,it,iv,jv) shared(it_c,cmat_diff,cmat_base, cmat)
+     do ic=nc1,nc2
+        ic_loc = ic-nc1+1
+        it = it_c(ic)
+
+        do iv=1,nv
+           do jv=1,nv
+              cmat_diff(jv,iv,ic_loc) = cmat(jv,iv,ic_loc)  - cmat_base(jv,iv,it); 
            enddo
+        enddo
+     enddo
+    
+     deallocate(cmat)
   endif
 
   deallocate(i_piv)

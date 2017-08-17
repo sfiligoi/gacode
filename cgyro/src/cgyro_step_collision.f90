@@ -52,7 +52,7 @@ subroutine cgyro_step_collision
            cvec_re = real(cvec(ivp))
            cvec_im = aimag(cvec(ivp))
            do iv=1,nv
-             cval = cmat(iv,ivp,it) + cmat_diff(iv,ivp,ic_loc)
+             cval = cmat_base(iv,ivp,it) + cmat_diff(iv,ivp,ic_loc)
              bvec(iv) = bvec(iv)+ cmplx(cval*cvec_re, cval*cvec_im)
            enddo
         enddo
