@@ -15,7 +15,6 @@ subroutine cgyro_init_manager
 
   use mpi
   use timer_lib
-
   use cgyro_globals
   use GEO_interface
 
@@ -123,7 +122,7 @@ subroutine cgyro_init_manager
   allocate(omega_rot_edrift(n_theta))
   allocate(omega_rot_edrift_r(n_theta))
   allocate(omega_rot_star(n_theta,n_species))
-  
+
   if (test_flag == 0) then
 
      !----------------------------------------------------
@@ -196,7 +195,7 @@ subroutine cgyro_init_manager
 
      if (collision_model == 5) then
         allocate(cmat_simple(n_xi,n_xi,n_energy,n_species,n_theta))
-     elseif (collision_model == 6) then
+     else if (collision_model == 6) then
         allocate(cmat_diff(nv,nv,nc_loc))
         allocate(cmat_base(nv,nv,n_theta))
         allocate(cmat(nv,nv,nc_loc)) ! will be dealocated once cmat_diff and cmat_base are populated
@@ -212,7 +211,7 @@ subroutine cgyro_init_manager
   GEO_nfourier_in = geo_ny
   call GEO_alloc(1)
   call cgyro_equilibrium
-  
+
   if (test_flag == 0) then
 
      call cgyro_init_arrays
@@ -258,7 +257,8 @@ subroutine cgyro_init_manager
      ! 3/2-rule for dealiasing the nonlinear product
      nx = (3*nx0)/2
      ny = (3*ny0)/2
-     ! Allocate and deallocate these every time.
+
+#ifndef _OPENACC
      allocate(fx(0:ny/2,0:nx-1))
      allocate(gx(0:ny/2,0:nx-1))
      allocate(fy(0:ny/2,0:nx-1))
@@ -273,50 +273,52 @@ subroutine cgyro_init_manager
      ! Create plans once and for all, with global arrays fx,ux
      plan_c2r = fftw_plan_dft_c2r_2d(nx,ny,fx,ux,FFTW_PATIENT)
      plan_r2c = fftw_plan_dft_r2c_2d(nx,ny,ux,fx,FFTW_PATIENT)
+#endif
 
 #ifdef _OPENACC
      call cgyro_info('GPU-aware code triggered.')
-     howmany = nsplit
-     allocate( fxmany(0:ny/2,0:nx-1,howmany) )
-     allocate( fymany(0:ny/2,0:nx-1,howmany) )
-     allocate( gxmany(0:ny/2,0:nx-1,howmany) )
-     allocate( gymany(0:ny/2,0:nx-1,howmany) )
 
-     allocate( uxmany(0:ny-1,0:nx-1,howmany) )
-     allocate( uymany(0:ny-1,0:nx-1,howmany) )
-     allocate( vxmany(0:ny-1,0:nx-1,howmany) )
-     allocate( vymany(0:ny-1,0:nx-1,howmany) )
-     allocate( uvmany(0:ny-1,0:nx-1,howmany) )
+     allocate( fxmany(0:ny/2,0:nx-1,nsplit) )
+     allocate( fymany(0:ny/2,0:nx-1,nsplit) )
+     allocate( gxmany(0:ny/2,0:nx-1,nsplit) )
+     allocate( gymany(0:ny/2,0:nx-1,nsplit) )
+
+     allocate( uxmany(0:ny-1,0:nx-1,nsplit) )
+     allocate( uymany(0:ny-1,0:nx-1,nsplit) )
+     allocate( vxmany(0:ny-1,0:nx-1,nsplit) )
+     allocate( vymany(0:ny-1,0:nx-1,nsplit) )
+     allocate( uvmany(0:ny-1,0:nx-1,nsplit) )
 
      !-------------------------------------------------------------------
      ! 2D
-     !   input[  b*idist + (x * inembed[1] + y)*istride ]
-     !   output[ b*odist + (x * onembed[1] + y)*ostride ]
-     !   isign is the sign of the exponent in the formula that defines
-     !   Fourier transform  -1 == FFTW_FORWARD
-     !                       1 == FFTW_BACKWARD
+     !   input[ b*idist + (x * inembed[1] + y)*istride ]
+     !  output[ b*odist + (x * onembed[1] + y)*ostride ]
+     !  isign is the sign of the exponent in the formula that defines
+     !  Fourier transform  -1 == FFTW_FORWARD
+     !                      1 == FFTW_BACKWARD
      !-------------------------------------------------------------------
 
      ndim(1) = nx
      ndim(2) = ny
-     idist = size( fxmany,1)*size(fxmany,2)
-     odist = size( uxmany,1)*size(uxmany,2)
+     idist = size(fxmany,1)*size(fxmany,2)
+     odist = size(uxmany,1)*size(uxmany,2)
      istride = 1
      ostride = 1
      inembed = size(fxmany,1)
      onembed = size(uxmany,1)
 
-     istatus = cufftPlanMany( cu_plan_c2r_many,                         &
-          &                                    irank,                         &
-          &                                    ndim,                          &
-          &                                    inembed,                       &
-          &                                    istride,                       &
-          &                                    idist,                         &
-          &                                    onembed,                       &
-          &                                    ostride,                       &
-          &                                    odist,                         &
-          &  merge(CUFFT_C2R,CUFFT_Z2D,kind(uxmany).eq.singlePrecision),      &
-          &                                    howmany )
+     istatus = cufftPlanMany(&
+          cu_plan_c2r_many, &
+          irank, &
+          ndim, &
+          inembed, &
+          istride, &
+          idist, &
+          onembed, &
+          ostride, &
+          odist, &
+          merge(CUFFT_C2R,CUFFT_Z2D,kind(uxmany) == singlePrecision), &
+          nsplit)
 
      idist = size(uxmany,1)*size(uxmany,2)
      odist = size(fxmany,1)*size(fxmany,2)
@@ -324,17 +326,18 @@ subroutine cgyro_init_manager
      onembed = size(fxmany,1) 
      istride = 1
      ostride = 1
-     istatus = cufftPlanMany( cu_plan_r2c_many,                         &
-          &                     irank,                                        &
-          &                     ndim,                                         &
-          &                     inembed,                                      &
-          &                     istride,                                      &
-          &                     idist,                                        &
-          &                     onembed,                                      &
-          &                     ostride,                                      &
-          &                     odist,                                        &
-          & merge(CUFFT_R2C,CUFFT_D2Z,kind(uxmany).eq.singlePrecision),       &
-          &                     howmany )
+     istatus = cufftPlanMany(&
+          cu_plan_r2c_many, &
+          irank, &
+          ndim, &
+          inembed, &
+          istride, &
+          idist, &
+          onembed, &
+          ostride, &
+          odist, &
+          merge(CUFFT_R2C,CUFFT_D2Z,kind(uxmany) == singlePrecision), &
+          nsplit)
 #endif
 
   endif
