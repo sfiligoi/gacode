@@ -210,8 +210,8 @@ subroutine cgyro_mpi_grid
 
   !----------------------------------------------------------------------------
   ! Restart file chunking logic 
-  ! MPI-IO limit seems to be 24GB, so set max_filesize to 16.0 GB
-  max_filesize = 16.0e9
+  ! MPI-IO limit seems to be 24GB, so set max_filesize to mpiio_max_gb GB
+  max_filesize = mpiio_max_gb*1e9
   n_chunk = 1+int(16.0*n_toroidal*nc*nv/max_filesize)
   
   ! Obscure definition of number tags 
