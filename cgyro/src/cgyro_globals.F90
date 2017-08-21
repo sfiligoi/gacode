@@ -86,8 +86,6 @@ module cgyro_globals
   integer :: psym_flag
   integer :: profile_shear_flag
   integer :: theta_plot
-  integer :: px0
-  integer :: mx0
   !
   ! Geometry input
   !
