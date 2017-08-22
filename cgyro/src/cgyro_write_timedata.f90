@@ -169,7 +169,6 @@ subroutine cgyro_write_distributed_complex(datafile,n_fn,fn)
   complex, intent(in) :: fn(n_fn)
   !
   integer :: i_group_send
-  integer :: i_send
   integer :: in
   integer :: i_dummy
   !
@@ -208,27 +207,25 @@ subroutine cgyro_write_distributed_complex(datafile,n_fn,fn)
 
         if (i_group_send /= 0) then
 
-           i_send = i_group_send*n_proc_1
-
-           if (i_proc == 0) then
+           if (i_proc_2 == 0) then
 
               call MPI_RECV(fn_recv,&
                    n_fn,&
                    MPI_DOUBLE_COMPLEX,&
-                   i_send,&
+                   i_group_send,&
                    in,&
-                   CGYRO_COMM_WORLD,&
+                   NEW_COMM_2,&
                    recv_status,&
                    i_err)
 
-           else if (i_proc == i_send) then
+           else if (i_proc_2 == i_group_send) then
 
               call MPI_SEND(fn,&
                    n_fn,&
                    MPI_DOUBLE_COMPLEX,&
                    0,&
                    in,&
-                   CGYRO_COMM_WORLD,&
+                   NEW_COMM_2,&
                    i_err)
 
            endif
@@ -296,7 +293,6 @@ subroutine cgyro_write_distributed_real(datafile,n_fn,fn)
   real, intent(in) :: fn(n_fn)
   !
   integer :: i_group_send
-  integer :: i_send
   integer :: in
   integer :: i_dummy
   !
@@ -334,27 +330,25 @@ subroutine cgyro_write_distributed_real(datafile,n_fn,fn)
 
         if (i_group_send /= 0) then
 
-           i_send = i_group_send*n_proc_1
-
-           if (i_proc == 0) then
+           if (i_proc_2 == 0) then
 
               call MPI_RECV(fn_recv,&
                    n_fn,&
                    MPI_DOUBLE_PRECISION,&
-                   i_send,&
+                   i_group_send,&
                    in,&
-                   CGYRO_COMM_WORLD,&
+                   NEW_COMM_2,&
                    recv_status,&
                    i_err)
 
-           else if (i_proc == i_send) then
+           else if (i_proc_2 == i_group_send) then
 
               call MPI_SEND(fn,&
                    n_fn,&
                    MPI_DOUBLE_PRECISION,&
                    0,&
                    in,&
-                   CGYRO_COMM_WORLD,&
+                   NEW_COMM_2,&
                    i_err)
 
            endif
