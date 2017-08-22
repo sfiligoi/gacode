@@ -18,7 +18,7 @@ subroutine cgyro_mpi_grid
 
   integer :: ie,ix,is,ir,it
   integer :: d
-  integer :: splitkey
+  integer :: splitkey, mpiio_procs
   integer, external :: parallel_dim
 
   integer, external :: omp_get_max_threads, omp_get_thread_num
@@ -215,17 +215,44 @@ subroutine cgyro_mpi_grid
   n_omp = omp_get_max_threads()
 
   !----------------------------------------------------------------------------
-  ! Restart file chunking logic 
-  ! MPI-IO limit set to 16 GB (should be removed).
+  ! Restart file chunking logic for v1
+  ! MPI-IO limit set to 16 GB (for historical reasons)
   max_filesize = 16.0*1e9
   n_chunk = 1+int(16.0*n_toroidal*nc*nv/max_filesize)
   
-  ! Obscure definition of number tags 
+  ! We need strings to write file names
+  ! so we pre-compute them here
   do ix=1,100
      write (rtag(ix),fmt) ix-1
+     write (rtag_v2(ix),fmt_v2) "_v2_",ix-1
   enddo
 
-  if (n_chunk == 1) rtag(1) = ''
+  if (mpiio_num_files>1) then ! no comm neded if a single file
+     mpiio_procs = n_proc/mpiio_num_files
+     if (modulo(n_proc,mpiio_num_files)/=0) then
+       mpiio_procs= mpiio_procs + 1 ! round up
+     endif
+
+     i_group_restart_io = i_proc/mpiio_procs + 1
+     call MPI_COMM_SPLIT(CGYRO_COMM_WORLD,&
+       i_group_restart_io,&
+       i_proc,&
+       NEW_COMM_RESTART_IO, &
+       i_err)
+     if (i_err /= 0) then
+        call cgyro_error('ERROR: (CGYRO) NEW_COMM_RESTART_IO not created')
+        return
+     endif
+
+     call MPI_COMM_RANK(NEW_COMM_RESTART_IO,i_proc_restart_io,i_err)
+     call MPI_COMM_SIZE(NEW_COMM_RESTART_IO,n_proc_restart_io,i_err)
+  endif
+
+  write (mpiio_stripe_str,"(I3.3)") mpiio_stripe_factor
+
+  ! TODO Hardcoded for now, may become an input parameter eventually
+  restart_format = 2
+
   !----------------------------------------------------------------------------
 
 end subroutine cgyro_mpi_grid

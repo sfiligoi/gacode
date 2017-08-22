@@ -9,6 +9,10 @@ subroutine cgyro_init_h
   integer :: ir,it,is,ie,ix
   real :: arg, ang
 
+  ! set it to an invalid value by default
+  ! will be updated if there is a restart file read
+  input_restart_format = 0
+
   !---------------------------------------------------------------------
   ! Check to see if we have restart data available
   !
