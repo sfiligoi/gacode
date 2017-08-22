@@ -6,7 +6,7 @@ from gyro.data import GYROData
 
 #---------------------------------------------------------------------------#
 class gyrodata_plot(data.GYROData):
-    def plot_freq(self, sim='.', window=0.5, fig=None):
+    def plot_freq(self, window=0.5, fig=None):
         """Plot frequency vs time"""
         """window = avg. window fraction"""
         
@@ -14,10 +14,10 @@ class gyrodata_plot(data.GYROData):
         if (fig is None):
             fig = plt.figure()
         
-        t    = sim.t['(c_s/a)t']
+        t    = self.t['(c_s/a)t']
 
         # Read freq data
-        sim.read_freq()
+        self.read_freq()
 
         # Determine tmin
         for i in range(len(t)):
@@ -25,7 +25,8 @@ class gyrodata_plot(data.GYROData):
                 imin = i
 
         color = ['k','m','b','c']
-        tor_n = self.n0 + self.dn*arange(0,self.n_n)
+        tor_n = self.profile['n0'] + \
+                self.profile['d_n']*np.arange(0,self.profile['n_n'])
         #======================================
         ax = fig.add_subplot(121)
         ax.grid(which="majorminor",ls=":")
@@ -35,8 +36,8 @@ class gyrodata_plot(data.GYROData):
         #=====================================
 
         #Gamma 
-        for i in range(sim.profile['n_n']):
-            ax.plot(t[imin:],sim.freq['(a/c_s)gamma'][i,imin:],color=color[i],
+        for i in range(self.profile['n_n']):
+            ax.plot(t[imin:],self.freq['(a/c_s)gamma'][i,imin:],color=color[i],
                     label='gamma_n%d'%tor_n[i])
 
         #======================================
@@ -48,7 +49,7 @@ class gyrodata_plot(data.GYROData):
         #=====================================
 
         #Omega
-        for i in range(sim.profile['n_n']):
-            ax.plot(t[imin:],sim.freq['(a/c_s)w'][i,imin:],color=color[i],
+        for i in range(self.profile['n_n']):
+            ax.plot(t[imin:],self.freq['(a/c_s)w'][i,imin:],color=color[i],
                     label='omega_n%d'%tor_n[i])
 

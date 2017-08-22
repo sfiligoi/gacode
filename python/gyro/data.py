@@ -817,3 +817,4 @@ class GYROData:
             sim[tg] = gbflux_m[ti]*fac_gyro
             sim[tg+'_uncertainty'] = gbflux_u[ti]*fac_gyro
         return (xp,sim)
+
