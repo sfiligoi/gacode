@@ -86,7 +86,6 @@ module cgyro_globals
   integer :: psym_flag
   integer :: profile_shear_flag
   integer :: theta_plot
-  real :: mpiio_max_gb
   !
   ! Geometry input
   !
