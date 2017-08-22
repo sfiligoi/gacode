@@ -1,12 +1,12 @@
 #----------------------------------------------------------
-# Cray XC40 (cori.nersc.gov) [KNL nodes]
+# Cray XC40 (cori.nersc.gov) [Haswell nodes]
 #
 # - 64 cores * 4 hyperthreads (assign hypethreads to numas)
 #----------------------------------------------------------
 
-IDENTITY="NERSC Cori KNL (ifort)"
+IDENTITY="NERSC Cori Haswell (ifort)"
 CORES_PER_NODE=64
-NUMAS_PER_NODE=4
+NUMAS_PER_NODE=2
 
 # Compilers and flags
 FC     = ftn -gen-interfaces -module ${GACODE_ROOT}/modules
