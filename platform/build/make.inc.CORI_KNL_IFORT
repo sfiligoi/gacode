@@ -14,16 +14,17 @@ NUMAS_PER_NODE=4
 FC     = ftn -gen-interfaces -module ${GACODE_ROOT}/modules
 F77    = ${FC}
 
-FOMP   = 
+FOMP   = -qopenmp
 FMATH  = -real-size 64
-FOPT   = -qopenmp -Ofast
+FOPT   = -Ofast
 FDEBUG = -eD -Ktrap=fp -m 1
 
 # System math libraries
 LMATH = -lfftw3_threads -lfftw3f_threads -lfftw3 -lfftw3f 
 
 # NetCDF
-NETCDF = ${NETCDF_DIR}/lib/libnetcdff.a ${NETCDF_DIR}/lib/libnetcdf.a
+NETCDF=-L/opt/cray/pe/netcdf/4.4.1.1.3/INTEL/16.0/lib -lnetcdff -L/opt/cray/hdf5-parallel/1.10.0.3/GNU/4.9/lib -lnetcdf
+#NETCDF=-L/global/common/cori/software/netcdf/4.3.2/hsw/intel/lib -lnetcdff -L/global/common/cori/software/netcdf/4.3.2/hsw/intel/lib -lnetcdf -lnetcdf
 NETCDF_INC = ${NETCDF_DIR}/include
 
 # Archive 

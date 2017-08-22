@@ -86,8 +86,6 @@ module cgyro_globals
   integer :: psym_flag
   integer :: profile_shear_flag
   integer :: theta_plot
-  integer :: px0
-  integer :: mx0
   !
   ! Geometry input
   !
@@ -226,6 +224,7 @@ module cgyro_globals
   integer :: signal
   integer :: restart_flag
   integer :: n_chunk
+  character(len=2) :: mpiio_stripe='32'
   real :: max_filesize
   !
   ! Standard precision for IO (there are optionally reset to higher precision later)

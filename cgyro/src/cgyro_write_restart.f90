@@ -43,11 +43,13 @@ subroutine cgyro_write_restart
   n_remain = nc-n_loc*n_chunk
   allocate(h_chunk(n_loc+n_remain,nv_loc))
 
-  offset1 = size(h_chunk)*i_proc
+  offset1 = size(h_chunk,kind=8)*i_proc
 
   do j=1,n_chunk
 
      call MPI_INFO_CREATE(finfo,i_err)
+
+     call MPI_INFO_SET(finfo,"striping_factor",mpiio_stripe,i_err)
 
      call MPI_FILE_OPEN(CGYRO_COMM_WORLD,&
           trim(path)//runfile_restart//rtag(j),&

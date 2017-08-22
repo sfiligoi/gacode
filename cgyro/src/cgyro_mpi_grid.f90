@@ -182,6 +182,12 @@ subroutine cgyro_mpi_grid
   !
   call MPI_COMM_RANK(NEW_COMM_1,i_proc_1,i_err)
   call MPI_COMM_RANK(NEW_COMM_2,i_proc_2,i_err)
+
+  !if (i_proc == 0) print *,'         i_proc   i_group_1   i_proc_1   i_group_2   i_proc_2'
+  !print *,i_proc,i_group_1,i_proc_1,i_group_2,i_proc_2
+  !call MPI_FINALIZE(i_err)
+  !stop
+
   !
   !-----------------------------------------------------------
 
@@ -210,8 +216,8 @@ subroutine cgyro_mpi_grid
 
   !----------------------------------------------------------------------------
   ! Restart file chunking logic 
-  ! MPI-IO limit seems to be 24GB, so set max_filesize to 16.0 GB
-  max_filesize = 16.0e9
+  ! MPI-IO limit set to 16 GB (should be removed).
+  max_filesize = 16.0*1e9
   n_chunk = 1+int(16.0*n_toroidal*nc*nv/max_filesize)
   
   ! Obscure definition of number tags 
