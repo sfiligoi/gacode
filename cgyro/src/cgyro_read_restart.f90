@@ -67,6 +67,8 @@ subroutine cgyro_read_restart
 
      call MPI_INFO_CREATE(finfo,i_err)
 
+     call MPI_INFO_SET(finfo,"striping_factor",mpiio_stripe,i_err)
+
      call MPI_FILE_OPEN(CGYRO_COMM_WORLD,&
           trim(path)//runfile_restart//rtag(j),&
           filemode,&
