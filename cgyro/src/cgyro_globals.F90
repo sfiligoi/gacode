@@ -86,6 +86,9 @@ module cgyro_globals
   integer :: psym_flag
   integer :: profile_shear_flag
   integer :: theta_plot
+  integer :: mpiio_stripe_factor
+  integer :: mpiio_num_files
+  integer :: restart_format
   !
   ! Geometry input
   !
@@ -150,14 +153,18 @@ module cgyro_globals
   integer :: i_proc
   integer :: i_proc_1
   integer :: i_proc_2
+  integer :: i_proc_restart_io
   integer :: n_proc
   integer :: n_proc_1
   integer :: n_proc_2
+  integer :: n_proc_restart_io
   integer :: i_group_1
   integer :: i_group_2
+  integer :: i_group_restart_io
   integer :: CGYRO_COMM_WORLD
   integer :: NEW_COMM_1
   integer :: NEW_COMM_2
+  integer :: NEW_COMM_RESTART_IO
   integer :: nv1,nv2,nc1,nc2
   integer :: nsplit
   integer, dimension(:), allocatable :: recv_status
@@ -196,6 +203,7 @@ module cgyro_globals
   character(len=16) :: runfile_memory  = 'out.cgyro.memory'
   character(len=17) :: runfile_restart = 'out.cgyro.restart'
   character(len=13) :: runfile_restart_tag = 'out.cgyro.tag'
+  character(len=17) :: runfile_restart_tag_version = 'out.cgyro.res_ver'
   character(len=12) :: runfile_hb      = 'out.cgyro.hb'
   character(len=15) :: runfile_grids   = 'out.cgyro.grids'
   character(len=14) :: runfile_prec    = 'out.cgyro.prec'
@@ -215,6 +223,8 @@ module cgyro_globals
   ! Restart tags
   character(len=8) :: fmt='(I2.2)' 
   character(len=2), dimension(100) :: rtag
+  character(len=8) :: fmt_v2='(A,I2.2)'
+  character(len=6), dimension(100) :: rtag_v2
   !
   ! error checking
   integer :: error_status = 0
@@ -223,9 +233,10 @@ module cgyro_globals
   integer :: io_control
   integer :: signal
   integer :: restart_flag
-  integer :: n_chunk
-  character(len=2) :: mpiio_stripe='32'
-  real :: max_filesize
+  integer :: input_restart_format
+  character(len=3) :: mpiio_stripe_str
+  integer :: n_chunk      ! used in v1, for historical reasons
+  real :: max_filesize    ! used in v1, for historical reasons
   !
   ! Standard precision for IO (there are optionally reset to higher precision later)
   character(len=8)  :: fmtstr    ='(es11.4)'
