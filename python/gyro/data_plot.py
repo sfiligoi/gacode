@@ -9,11 +9,11 @@ class gyrodata_plot(data.GYROData):
     def plot_freq(self, window=0.5, fig=None):
         """Plot frequency vs time"""
         """window = avg. window fraction"""
-        
+
         GFONTSIZE=16
         if (fig is None):
             fig = plt.figure()
-        
+
         t    = self.t['(c_s/a)t']
 
         # Read freq data
@@ -35,7 +35,7 @@ class gyrodata_plot(data.GYROData):
         ax.set_ylabel(r'$(a/c_s)\gamma$',color='k',fontsize=GFONTSIZE)
         #=====================================
 
-        #Gamma 
+        #Gamma
         for i in range(self.profile['n_n']):
             ax.plot(t[imin:],self.freq['(a/c_s)gamma'][i,imin:],color=color[i],
                     label='gamma_n%d'%tor_n[i])
@@ -53,3 +53,61 @@ class gyrodata_plot(data.GYROData):
             ax.plot(t[imin:],self.freq['(a/c_s)w'][i,imin:],color=color[i],
                     label='omega_n%d'%tor_n[i])
 
+    def plot_balloon(self, index='phi',tmax=-1, fig=None):
+        '''
+        Plot the ballooning mode structure
+
+        index - One of 'phi','a','aperp' or an integer
+        '''
+        self.read_balloon()
+
+        if index == 'phi':
+            key = 'balloon_phi'
+            index = self.balloon.keys().index(key)
+        elif index == 'a':
+            key = 'balloon_a'
+            index = self.balloon.keys().index(key)
+        elif index == 'aperp':
+            key = 'balloon_aperp'
+            index = self.balloon.keys().index(key)
+        else:
+            index = int(index)
+
+        key = self.balloon.keys()[index]
+
+        ytitle = '\\begin{verbatim}'+key+'\\end{verbatim}'
+
+        if key == 'balloon_a':
+            ytitle = r'$\delta A_\parallel$'
+        if key == 'balloon_phi':
+            ytitle = r'$\delta \phi$'
+        if key == 'balloon_aperp':
+            ytitle = r'$\delta B_\parallel$'
+        if key == 'balloon_epar':
+            ytitle = r'$\delta E_\parallel$'
+
+        #======================================
+        if fig is None:
+            fig = plt.figure(figsize=(10,6))
+        ax = fig.add_subplot(111)
+        ax.grid(which="majorminor",ls=":")
+        ax.grid(which="major",ls=":")
+        ax.set_xlabel(r'$\theta_*/\pi$')
+        ax.set_ylabel(ytitle)
+        #=====================================
+
+        n_p   = self.profile['n_x']/self.profile['box_multiplier']
+        n_ang = self.profile['n_theta_plot']*n_p
+
+        x = -(1.0+n_p)+2.0*n_p*np.arange(n_ang)/float(n_ang)
+
+        ax.plot(x,np.real(self.balloon[key][:,0,-1]),color='k',label='Re')
+        ax.plot(x,np.imag(self.balloon[key][:,0,-1]),color='m',label='Im')
+
+        if tmax < 0.0:
+            ax.set_xlim([1-n_p,-1+n_p])
+        else:
+            ax.set_xlim([-tmax,tmax])
+
+        ax.legend()
+        return key
