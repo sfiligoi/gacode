@@ -5,7 +5,7 @@ from gacodeplotdefs import *
 from gyro.data import GYROData
 
 #---------------------------------------------------------------------------#
-class GYRO_data_plot(data.GYROData):
+class gyrodata_plot(data.GYROData):
     def plot_freq(self, sim='.', window=0.5, fig=None):
         """Plot frequency vs time"""
         """window = avg. window fraction"""
