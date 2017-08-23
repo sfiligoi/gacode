@@ -203,13 +203,13 @@ case "$PLOT_TYPE" in
 	python $PYROOT/fluctuation2d.py $SIMDIR $I_MOMENT $FTYPE $DATAFILE ;;
 
    freq)
-	python $PYROOT/freq.py $SIMDIR $WINDOW $FTYPE ;;
+	python $PYROOT/data_plot_single.py $PLOT_TYPE $SIMDIR $WINDOW $FTYPE ;;
 
    zf)
-	python $PYROOT/zf.py $SIMDIR $WINDOW $FTYPE $DATAFILE ;;
+	python $PYROOT/data_plot_single.py $PLOT_TYPE $SIMDIR $WINDOW $FTYPE ;;
 
    phi_n0)
-	python $PYROOT/phi_n0.py $SIMDIR $FTYPE $DATAFILE $LX $LY $TITLE $YMAX $X1 $X2 ;;
+	python $PYROOT/data_plot_single.py $PLOT_TYPE $SIMDIR $LX $LY $YMAX $X1 $X2 $FTYPE ;;
 
    gbflux)
        python $PYROOT/gbflux.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE \
@@ -228,7 +228,7 @@ case "$PLOT_TYPE" in
         python $PYROOT/gbflux_exc.py $SIMDIR $WINDOW $FTYPE $DATAFILE ;;
 
    balloon)
-        python $PYROOT/balloon.py $SIMDIR $I_MOMENT $FTYPE $TMAX ;;
+        python $PYROOT/data_plot_single.py $PLOT_TYPE $SIMDIR $I_MOMENT $FTYPE $TMAX ;;
 
    *)
         echo 'ERROR: (gyro_plot) Unrecognized argument to -plot.' ;;
