@@ -302,3 +302,138 @@ class gyrodata_plot(data.GYROData):
         
             ax.legend(loc=1)
 
+    def plot_gbflux_i(self,field='s',i_moment=0,w=0.5,ymin='0.0',ymax='auto',fig=None):
+        '''
+        Plot the n=0 AND n>0 potentials versus time.
+
+        ARGUMENTS:        
+         lx   : width of figure 
+         ly   : height of figure 
+         ymax : max vertical plot range
+         span1: left end of axvspan
+         span2: right end of avxspan
+        '''
+
+        if fig is None:
+            fig = plt.figure(figsize=(12,8))
+
+        n_field   = int(self.profile['n_field'])
+        n_kinetic = int(self.profile['n_kinetic'])
+
+        t = self.t['(c_s/a)t']
+
+        # Read data in gbflux_i
+        self.read_gbflux_i()
+
+        flux = self.gbflux_i
+
+        # Manage field
+        if field == 's':
+           flux0 = np.sum(flux,axis=1)
+           ftag  = self.tagfield[3]
+        else:
+           i_field = int(field)
+           flux0 = flux[:,i_field,:,:,:]
+           ftag  = self.tagfield[i_field]
+
+        # Manage moment
+        mtag = self.tagmom[i_moment]
+
+        # Determine tmin
+        for i in range(len(t)):
+           if t[i] < (1.0-w)*t[len(t)-1]:
+              imin = i
+
+        #======================================
+        ax = fig.add_subplot(111)
+        ax.grid(which="majorminor",ls=":")
+        ax.grid(which="major",ls=":")
+        ax.set_xlabel(r'$r/a$')
+        ax.set_ylabel(r'$'+mtag+' \;('+ftag+')$',color='k')
+        ax.set_title(r'$'+str(t[imin])+' < (c_s/a) t < '+str(t[-1])+'$')
+        #=====================================
+
+        color = ['k','m','b','c']
+
+        n_x = self.profile['n_x']
+        ave = np.zeros(n_x)
+
+        # Loop over species
+        for i in range(n_kinetic):
+           stag = self.tagspec[i]
+           ave[:] = average_n(flux0[i,i_moment,:,:],t,w,n_x)
+           ax.plot(self.profile['r'],ave[:],label=stag,color=color[i])
+
+        if ymax != 'auto':
+           ax.set_ylim([float(ymin),float(ymax)])
+
+        ax.legend()
+
+    def plot_moment_zero(self,i_moment=0,w=0.5,fig=None):
+        '''
+        Plot the n=0 AND n>0 potentials versus time.
+
+        ARGUMENTS:        
+         lx   : width of figure 
+         ly   : height of figure 
+         ymax : max vertical plot range
+         span1: left end of axvspan
+         span2: right end of avxspan
+        '''
+
+        if fig is None:
+           fig = plt.figure(figsize=(7*3,6))
+
+        n_field   = self.profile['n_field']
+        n_kinetic = self.profile['n_kinetic']
+        n_x       = self.profile['n_x']
+
+        t = self.t['(c_s/a)t']
+
+        # Read data in gbflux_i
+        self.read_moment_zero()
+
+        delta_n = np.empty([n_x,n_kinetic])
+        delta_e = np.empty([n_x,n_kinetic])
+        delta_t = np.empty([n_x,n_kinetic])
+
+        # [n_x,n_kinetic,n_time]
+        for i in range(n_kinetic):
+           f   = np.array(self.moment_zero[:,i,0,:])
+           delta_n[:,i] = average_n(f,t,w,n_x)
+           f   = np.array(self.moment_zero[:,i,1,:])
+           delta_e[:,i] = average_n(f,t,w,n_x)
+           delta_t[:,i] = (delta_e[:,i]-1.5*self.profile['tem_s'][i]*delta_n[:,i])/(1.5*self.profile['den_s'][i])
+
+        # Determine tmin
+        for i in range(len(t)):
+           if t[i] < (1.0-w)*t[len(t)-1]:
+              imin = i
+
+        color = ['k','m','b','c']
+
+        f = np.empty([n_x,n_kinetic])
+
+        for j in range(3):
+           ax = fig.add_subplot(1,3,j+1)
+           ax.grid(which="majorminor",ls=":")
+           ax.grid(which="major",ls=":")
+           ax.set_xlabel(r'$r/a$')
+           ax.set_title(r'$'+str(t[imin])+' < (c_s/a) t < '+str(t[-1])+'$')
+
+           if j == 0:
+              f = delta_n
+              ax.set_ylabel(r'$\delta n$',color='k')
+           if j == 1:
+              f = delta_e
+              ax.set_ylabel(r'$\delta E$',color='k')
+           if j == 2:
+              f = delta_t
+              ax.set_ylabel(r'$\delta T$',color='k')
+
+           for i in range(n_kinetic):
+              stag = self.tagspec[i]
+              ax.plot(self.profile['r'],f[:,i],label=stag,color=color[i])
+
+        ax.legend()
+
