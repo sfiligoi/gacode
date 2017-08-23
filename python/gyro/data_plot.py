@@ -173,9 +173,8 @@ class gyrodata_plot(data.GYROData):
                 label=r'$\mathrm{RH \; theory}$',alpha=0.3,linewidth=4)
 
         ax.legend()
-        return ax
 
-    def plot_phi_n0(self,lx=10,ly=6,ymax='auto',span1=-1.0,span2=-1.0,fig=None):
+    def plot_phi_n0(self,lx=10,ly=6,ymax='auto',span1=-1.0,span2=-1.0):
         '''
         Plot the n=0 AND n>0 potentials versus time.
 
@@ -186,8 +185,8 @@ class gyrodata_plot(data.GYROData):
          span1: left end of axvspan
          span2: right end of avxspan
         '''
-        if fig is None:
-            fig = plt.figure(figsize=(lx,ly))
+
+        fig = plt.figure(figsize=(lx,ly))
         fig.subplots_adjust(left=0.1,right=0.96,top=0.93,bottom=0.13)
 
         t = self.t['(c_s/a)t']
@@ -218,3 +217,88 @@ class gyrodata_plot(data.GYROData):
            ax.set_ylim([0,float(ymax)])
 
         ax.legend()
+
+    def plot_gbflux(self,field='s',i_moment=0,w=0.5,lx=12,ly=6,
+                    title='',ymin='0.0',ymax='auto',span1=-1.0,span2=-1.0):
+        '''
+        Plot the n=0 AND n>0 potentials versus time.
+
+        ARGUMENTS:        
+         lx   : width of figure 
+         ly   : height of figure 
+         ymax : max vertical plot range
+         span1: left end of axvspan
+         span2: right end of avxspan
+        '''
+
+        n_field   = int(self.profile['n_field'])
+        n_kinetic = int(self.profile['n_kinetic'])
+
+        t = self.t['(c_s/a)t']
+
+        # Read data in gbflux_i and make gbflux
+        self.read_gbflux_i()
+        self.make_gbflux()
+
+        flux = self.gbflux
+
+        # Manage field
+        if field == 's':
+            flux0 = np.sum(flux,axis=1)
+            ftag  = self.tagfield[3]
+        else:
+            i_field = int(field)
+            flux0   = flux[:,i_field,:,:]
+            ftag    = self.tagfield[i_field]
+
+        # Manage moment
+        mtag = self.tagmom[i_moment]
+
+        #======================================
+        fig = plt.figure(figsize=(lx,ly))
+        fig.subplots_adjust(left=0.1,right=0.95,top=0.92,bottom=0.12)
+        ax = fig.add_subplot(111)
+        ax.grid(which="majorminor",ls=":")
+        ax.grid(which="major",ls=":")
+        ax.set_xlabel(r'$(c_s/a) t$')
+        ax.set_ylabel(r'$'+mtag+' \;('+ftag+')$',color='k')
+        #=====================================
+
+        cvec = ['k','m','b','c','g']
+
+        # Determine tmin
+        for i in range(len(t)):
+            if t[i] < (1.0-w)*t[len(t)-1]:
+                imin = i
+
+        if title=='null':
+            ax.set_title(r'$'+str(t[imin])+' < (c_s/a) t < '+str(t[-1])+'$')
+        else:
+            ax.set_title(r'$\mathrm{'+title+'}$')
+    
+
+        # Plot data to screen or image file.
+        for i in range(n_kinetic):
+            ave   = average(flux0[i,i_moment,:],t,w)
+            if i > n_kinetic-2 and self.profile['electron_method'] > 1:
+                stag = r'$e'
+                color = 'r'
+            else:
+                stag = r'$i_'+str(i+1)
+                color = cvec[i]
+
+            label = stag+' : '+str(round(ave,3))+'$'
+            y     = ave*np.ones(len(t))
+            ax.plot(t[imin:],y[imin:],'--',color=color)
+            ax.plot(t,flux0[i,i_moment,:],label=label,color=color)
+
+        if span1 > 0.0:
+            ax.axvspan(span1,span2,facecolor='g',alpha=0.1)
+
+        ax.set_xlim([0,t[-1]])
+
+        if ymax != 'auto':
+            ax.set_ylim([float(ymin),float(ymax)])
+        
+            ax.legend(loc=1)
+

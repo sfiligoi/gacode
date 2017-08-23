@@ -212,8 +212,8 @@ case "$PLOT_TYPE" in
 	python $PYROOT/data_plot_single.py $PLOT_TYPE $SIMDIR $LX $LY $YMAX $X1 $X2 $FTYPE ;;
 
    gbflux)
-       python $PYROOT/gbflux.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE \
-	      $DATAFILE $LX $LY $TITLE $YMIN $YMAX $X1 $X2;;
+       python $PYROOT/data_plot_single.py $PLOT_TYPE $SIMDIR $I_FIELD $I_MOMENT $WINDOW \
+	      $LX $LY $TITLE $YMIN $YMAX $X1 $X2 $FTYPE;;
 
    gbflux_n)
         python $PYROOT/gbflux_n.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE $DATAFILE ;;
