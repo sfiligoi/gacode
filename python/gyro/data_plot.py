@@ -1,7 +1,7 @@
 import data
 import sys
 import numpy as np
-from gacodeplotdefs import *
+import matplotlib.pyplot as plt
 from gacodefuncs import *
 from gyro.data import GYROData
 
@@ -161,8 +161,8 @@ class gyrodata_plot(data.GYROData):
         ax = fig.add_subplot(111)
         ax.grid(which="majorminor",ls=":")
         ax.grid(which="major",ls=":")
-        ax.set_xlabel(r'$(c_s/a)\, t$',fontsize=GFONTSIZE)
-        ax.set_ylabel(r'$\Phi/\Phi_0$',fontsize=GFONTSIZE)
+        ax.set_xlabel(r'$(c_s/a)\, t$')
+        ax.set_ylabel(r'$\Phi/\Phi_0$')
 
         ax.plot(t,y,color='k')
         ax.plot(t[imin:],ave_vec[imin:],color='b',
@@ -173,6 +173,7 @@ class gyrodata_plot(data.GYROData):
                 label=r'$\mathrm{RH \; theory}$',alpha=0.3,linewidth=4)
 
         ax.legend()
+        return ax
 
     def plot_phi_n0(self,lx=10,ly=6,ymax='auto',span1=-1.0,span2=-1.0,fig=None):
         '''
@@ -185,8 +186,8 @@ class gyrodata_plot(data.GYROData):
          span1: left end of axvspan
          span2: right end of avxspan
         '''
-
-        fig = plt.figure(figsize=(lx,ly))
+        if fig is None:
+            fig = plt.figure(figsize=(lx,ly))
         fig.subplots_adjust(left=0.1,right=0.96,top=0.93,bottom=0.13)
 
         t = self.t['(c_s/a)t']
@@ -198,8 +199,8 @@ class gyrodata_plot(data.GYROData):
         ax = fig.add_subplot(111)
         ax.grid(which="majorminor",ls=":")
         ax.grid(which="major",ls=":")
-        ax.set_xlabel(r'$(c_s/a) t$',fontsize=GFONTSIZE)
-        ax.set_ylabel(r'$\langle e \phi/T_e \rangle/\rho_\star $',color='k',fontsize=GFONTSIZE)
+        ax.set_xlabel(r'$(c_s/a) t$')
+        ax.set_ylabel(r'$\langle e \phi/T_e \rangle/\rho_\star $',color='k')
         #=====================================
 
         # rho_* for normalization
@@ -210,9 +211,9 @@ class gyrodata_plot(data.GYROData):
 
         if span1 > 0.0:
            ax.axvspan(span1,span2,facecolor='g',alpha=0.1)
-    
+
         ax.set_xlim([0,t[-1]])
- 
+
         if ymax != 'auto':
            ax.set_ylim([0,float(ymax)])
 
