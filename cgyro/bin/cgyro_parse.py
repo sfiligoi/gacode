@@ -75,6 +75,8 @@ x.add('NU_GLOBAL','0.4')
 x.add('PSYM_FLAG','0')
 x.add('PROFILE_SHEAR_FLAG','0')
 x.add('THETA_PLOT','1')
+x.add('MPIIO_STRIPE_FACTOR','32')
+x.add('MPIIO_NUM_FILES','1')
 
 x.add('RMIN','0.5')
 x.add('RMAJ','3.0')

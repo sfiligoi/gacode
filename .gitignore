@@ -5,6 +5,7 @@
 
 # Gyro build stuff
 modules/*.mod
+modules/*genmod*
 */*.o
 */*/*.a
 */*/*.o
