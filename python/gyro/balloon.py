@@ -2,9 +2,13 @@ import sys
 from gacodeplotdefs import *
 from gyro.data_plot import gyrodata_plot
 
-sim    = gyrodata_plot(sys.argv[1])
-key = sim.plot_balloon(index=sys.argv[2], tmax=float(sys.argv[5]))
+# Command-line args
+simdir = sys.argv[1]
+index  = sys.argv[2]
 ftype  = sys.argv[3]
+tmax   = float(sys.argv[4])
+
+key = gyrodata_plot(simdir).plot_balloon(index=index,tmax=tmax)
 
 if ftype == 'screen':
     plt.show()
