@@ -32,7 +32,9 @@ elif plot_type == 'zf':
    w      = float(sys.argv[3])
    ftype  = sys.argv[4]
    
-   gyrodata_plot(simdir).plot_zf(w=w)
+   ax = gyrodata_plot(simdir).plot_zf(w=w)
+   ax.set_xlabel(r'$(c_s/a)\, t$',fontsize=GFONTSIZE)
+   ax.set_ylabel(r'$\Phi/\Phi_0$',fontsize=GFONTSIZE)
 
    outfile = 'zf.'+ftype
 
@@ -46,7 +48,10 @@ elif plot_type == 'phi_n0':
    span2  = float(sys.argv[7])
    ftype  = sys.argv[8]
 
-   gyrodata_plot(simdir).plot_phi_n0(lx=lx,ly=ly,ymax=ymax,span1=span1,span2=span2)
+   ax = gyrodata_plot(simdir).plot_phi_n0(lx=lx,ly=ly,ymax=ymax,span1=span1,span2=span2)
+   
+   ax.set_xlabel(r'$(c_s/a) t$',fontsize=GFONTSIZE)
+   ax.set_ylabel(r'$\langle e \phi/T_e \rangle/\rho_\star $',color='k',fontsize=GFONTSIZE)
 
    outfile = 'phi_n0.'+ftype
   
