@@ -386,6 +386,9 @@ class gyrodata_plot(data.GYROData):
         n_kinetic = int(self.profile['n_kinetic'])
         n_n       = int(self.profile['n_n'])
 
+        if fig is None:
+           fig = plt.figure(figsize=(7*n_kinetic,6))
+
         # Need to read gbflux_n data
         self.read_gbflux_n()
 
@@ -403,9 +406,6 @@ class gyrodata_plot(data.GYROData):
 
         # Manage moment
         mtag = self.tagmom[i_moment]
-
-        if fig is None:
-           fig = plt.figure(figsize=(7*n_kinetic,6))
 
         color = ['k','m','b','c','g','r']
 
@@ -454,6 +454,63 @@ class gyrodata_plot(data.GYROData):
            np.savetxt(fid,arr,fmt='%.5e')
            fid.close()
         
+    def plot_gbflux_rt(self,field='s',i_moment=0,w=0.5,fig=None):
+        '''
+        Plot the n=0 AND n>0 potentials versus time.
+
+        ARGUMENTS:        
+         lx   : width of figure 
+         ly   : height of figure 
+         ymax : max vertical plot range
+         span1: left end of axvspan
+         span2: right end of avxspan
+        '''
+
+        n_field   = int(self.profile['n_field'])
+        n_kinetic = int(self.profile['n_kinetic'])
+
+        if fig is None:
+           fig = plt.figure(figsize=(7*n_kinetic,6))
+
+        t = self.t['(c_s/a)t']
+
+        # Read data in gbflux_i and make gbflux
+        self.read_gbflux_i()
+        self.make_gbflux()
+
+        flux = self.gbflux_i
+
+        # Manage field
+        if field == 's':
+           flux0 = np.sum(flux,axis=1)
+           ftag  = self.tagfield[3]
+        else:
+           i_field = int(field)
+           flux0 = flux[:,i_field,:,:,:]
+           ftag  = self.tagfield[i_field]
+
+        # Manage moment
+        mtag = self.tagmom[i_moment]
+
+        # Determine tmin
+        for i in range(len(t)):
+           if t[i] < (1.0-w)*t[len(t)-1]:
+              imin = i
+
+        color = ['k','m','b','c']
+
+        # Loop over species
+        for i in range(n_kinetic):
+           stag  = self.tagspec[i]
+           ax = fig.add_subplot(1,n_kinetic,i+1)
+           ax.set_xlabel(r'$(c_s/a)t$')
+           ax.set_ylabel(r'$r/a$')
+           ax.set_title(r'$'+mtag+' \;('+ftag+'\,\mathrm{'+stag+'})$',color='k')
+           ax.contourf(t[imin:],self.profile['r'],flux0[i,i_moment,:,imin:],cmap=plt.cm.jet,nlevels=128)
+           ax.set_xlim([t[imin],t[-1]])
+           ax.set_ylim([self.profile['r'][0],self.profile['r'][-1]])
+
+
     def plot_moment_zero(self,i_moment=0,w=0.5,fig=None):
         '''
         Plot the n=0 AND n>0 potentials versus time.

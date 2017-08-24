@@ -212,7 +212,7 @@ case "$PLOT_TYPE" in
         python $PLT $PLOT_TYPE $SIMDIR $I_FIELD $I_MOMENT $WINDOW $DATAFILE $FTYPE ;;
 
    gbflux_rt)
-        python $PYROOT/gbflux_rt.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE $DATAFILE ;;
+        python $PLT $PLOT_TYPE $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE ;;
 
    gbflux_exc)
         python $PYROOT/gbflux_exc.py $SIMDIR $WINDOW $FTYPE $DATAFILE ;;

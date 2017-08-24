@@ -85,6 +85,18 @@ elif plot_type == 'gbflux_n':
 
    outfile = 'gbflux_n.'+ftype
 
+elif plot_type == 'gbflux_rt':
+
+   simdir   = sys.argv[2]
+   field    = sys.argv[3]
+   i_moment = int(sys.argv[4])
+   w        = float(sys.argv[5])
+   ftype    = sys.argv[6]
+   
+   gyrodata_plot(simdir).plot_gbflux_rt(field=field,i_moment=i_moment,w=w)
+
+   outfile = 'gbflux_rt.'+ftype
+
 elif plot_type == 'phi_n0':
 
    simdir = sys.argv[2]
