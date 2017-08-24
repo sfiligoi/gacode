@@ -454,6 +454,57 @@ class gyrodata_plot(data.GYROData):
            np.savetxt(fid,arr,fmt='%.5e')
            fid.close()
         
+    def plot_gbflux_exc(self,w=0.5,fig=None):
+        '''
+        Plot the n=0 AND n>0 potentials versus time.
+
+        ARGUMENTS:        
+         lx   : width of figure 
+         ly   : height of figure 
+         ymax : max vertical plot range
+         span1: left end of axvspan
+         span2: right end of avxspan
+        '''
+
+        if fig is None:
+            fig = plt.figure(figsize=(12,8))
+
+        n_kinetic = int(self.profile['n_kinetic'])
+
+        t = self.t['(c_s/a)t']
+
+        # Read data in gbflux_i and make gbflux
+        self.read_gbflux_exc()
+
+        flux = self.gbflux_exc
+
+        #======================================
+        ax = fig.add_subplot(111)
+        ax.grid(which="majorminor",ls=":")
+        ax.grid(which="major",ls=":")
+        ax.set_xlabel('$(c_s/a) t$')
+        #=====================================
+
+        # Determine tmin
+        for i in range(len(t)):
+            if t[i] < (1.0-w)*t[len(t)-1]:
+                imin = i
+
+        color = ['k','m','b','c']
+
+        # Loop over species
+        for i in range(n_kinetic):
+            for j in range(2):
+                ave   = average(flux[i,j,:],t,w)
+                stag  = self.tagspec[i]
+                label = stag+': '+str(round(ave,3))
+                y     = ave*np.ones(len(t))
+                ax.plot(t[imin:],y[imin:],'--',color=color[i])
+                ax.plot(t,flux[i,j,:],label=label,color=color[i])
+
+        ax.legend()
+
+        
     def plot_gbflux_rt(self,field='s',i_moment=0,w=0.5,fig=None):
         '''
         Plot the n=0 AND n>0 potentials versus time.
