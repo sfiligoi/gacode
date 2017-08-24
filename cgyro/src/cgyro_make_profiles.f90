@@ -99,7 +99,7 @@ subroutine cgyro_make_profiles
      ! Normalizing quantities
      dens_norm = dens_ele       ! ne e19/m3
      temp_norm = temp_ele       ! Te keV
-     mass_norm = mass_deuterium ! mD e-27/kg
+     mass_norm = mass_deuterium ! mD e-27 kg
 
      ! Compute vth (m/s) using dimensional quantities.  
      ! mass(i) is thus measured in units of deuterium mass.
@@ -190,16 +190,16 @@ subroutine cgyro_make_profiles
 
   else
 
-     a_meters      = 1.0
-     b_unit        = 1.0
-     dens_norm     = 1.0
-     temp_norm     = 1.0
-     vth_norm      = 1.0
-     mass_norm     = 1.0
-     rho_star_norm = 1.0
-     gamma_gb_norm = 1.0
-     q_gb_norm     = 1.0
-     pi_gb_norm    = 1.0
+     a_meters      = 0.0
+     b_unit        = 0.0
+     dens_norm     = 0.0
+     temp_norm     = 0.0
+     vth_norm      = 0.0
+     mass_norm     = 0.0
+     rho_star_norm = 0.0
+     gamma_gb_norm = 0.0
+     q_gb_norm     = 0.0
+     pi_gb_norm    = 0.0
      
      q = abs(q)*(ipccw)*(btccw)
 
