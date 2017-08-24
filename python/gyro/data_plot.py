@@ -369,6 +369,91 @@ class gyrodata_plot(data.GYROData):
 
         ax.legend()
 
+
+    def plot_gbflux_n(self,field='s',i_moment=0,w=0.5,datafile='none',fig=None):
+        '''
+        Plot the n=0 AND n>0 potentials versus time.
+
+        ARGUMENTS:        
+         lx   : width of figure 
+         ly   : height of figure 
+         ymax : max vertical plot range
+         span1: left end of axvspan
+         span2: right end of avxspan
+        '''
+
+        n_field   = int(self.profile['n_field'])
+        n_kinetic = int(self.profile['n_kinetic'])
+        n_n       = int(self.profile['n_n'])
+
+        # Need to read gbflux_n data
+        self.read_gbflux_n()
+
+        t    = self.t['(c_s/a)t']
+        flux = self.gbflux_n
+
+        # Manage field
+        if field == 's':
+           flux0 = np.sum(flux,axis=1)
+           ftag  = self.tagfield[3]
+        else:
+           i_field = int(field)
+           flux0 = flux[:,i_field,:,:,:]
+           ftag  = self.tagfield[i_field]
+
+        # Manage moment
+        mtag = self.tagmom[i_moment]
+
+        if fig is None:
+           fig = plt.figure(figsize=(7*n_kinetic,6))
+
+        color = ['k','m','b','c','g','r']
+
+        k   = self.profile['kt_rho']
+        dk  = k[1]-k[0]
+        ave = np.zeros((n_n))
+
+        # Determine tmin
+        imin=0
+        for i in range(len(t)):
+           if t[i] < (1.0-w)*t[len(t)-1]:
+              imin = i+1
+
+        if datafile == 'none':
+
+           # Plot data to screen or image file.
+
+           for i in range(n_kinetic):
+              ax = fig.add_subplot(1,n_kinetic,i+1)
+              ax.set_xlabel(r'$k_\theta \rho_s$')
+              ax.set_ylabel(r'$'+mtag+' \;('+ftag+')$',color='k')
+              stag = self.tagspec[i]
+              for j in range(n_n):
+                 ave[j] = average(flux0[i,i_moment,j,:],t,w)
+                 ax.set_title(stag+r': $'+str(t[imin])+' < (c_s/a) t < '+str(t[-1])+'$')
+                 ax.bar(k-dk/2.0,ave,width=dk/1.1,color=color[i],alpha=0.4,edgecolor='black')
+
+        else:
+
+           # Write data to datafile
+
+           arr = np.zeros([len(k),n_kinetic+1])
+           arr[:,0] = k
+           stag = '# (k_y rho_s'
+           for i in range(n_kinetic):
+              for j in range(n_n):
+                 ave[j] = average(flux0[i,i_moment,j,:],t,w)
+              arr[:,i+1] = ave
+              stag = stag+' , '+sim.tagspec[i]
+            
+           fid = open(datafile,'w')
+           fid.write('# Moment  : '+mtag+'\n')
+           fid.write('# Field   : '+ftag+'\n')
+           fid.write('# Time    : '+str(t[imin])+' < (c_s/a) t < '+str(t[-1])+'\n')
+           fid.write(stag+')\n')
+           np.savetxt(fid,arr,fmt='%.5e')
+           fid.close()
+        
     def plot_moment_zero(self,i_moment=0,w=0.5,fig=None):
         '''
         Plot the n=0 AND n>0 potentials versus time.
