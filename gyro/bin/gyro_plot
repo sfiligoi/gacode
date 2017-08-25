@@ -174,7 +174,6 @@ cd $SIMDIR
 PYROOT=$GACODE_ROOT/python/gyro
 
 #==============================================================================
-#
 PLT=$PYROOT/data_plot_single.py
 
 case "$PLOT_TYPE" in
@@ -192,7 +191,7 @@ case "$PLOT_TYPE" in
 	python $PYROOT/fluctuation2d.py $SIMDIR $I_MOMENT $FTYPE $DATAFILE ;;
 
    freq)
-	python $PLT $PLOT_TYPE $SIMDIR $WINDOW $FTYPE ;;
+	python $PLT $PLOT_TYPE $WINDOW $FTYPE ;;
 
    zf)
 	python $PLT $PLOT_TYPE $SIMDIR $WINDOW $FTYPE ;;

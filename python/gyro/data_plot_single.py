@@ -1,17 +1,20 @@
 import sys
 import numpy as np
-from gacodeplotdefs import *
+import matplotlib.pyplot as plt
+from matplotlib import rc
 from gyro.data_plot import gyrodata_plot
+
+rc('text',usetex=True)
+rc('font',size=18)
 
 plot_type = sys.argv[1]
 
 if plot_type == 'freq':
 
-   simdir = sys.argv[2]
-   w      = float(sys.argv[3])
-   ftype  = sys.argv[4]
+   w      = float(sys.argv[2])
+   ftype  = sys.argv[3]
 
-   gyrodata_plot(simdir).plot_freq(w=w)
+   gyrodata_plot('./').plot_freq(w=w)
 
    outfile = 'freq.'+ftype
 

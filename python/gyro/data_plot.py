@@ -17,6 +17,7 @@ class gyrodata_plot(data.GYROData):
 
         if fig is None:
             fig = plt.figure(figsize=(12,6))
+            fig.subplots_adjust(left=0.085,right=0.97,top=0.92,bottom=0.12)
 
         t = self.t['(c_s/a)t']
 
@@ -24,9 +25,7 @@ class gyrodata_plot(data.GYROData):
         self.read_freq()
 
         # Determine tmin
-        for i in range(len(t)):
-            if t[i] < (1.0-w)*t[len(t)-1]:
-                imin = i
+        imin = iwindow(t,w)
 
         color = ['k','m','b','c']
         tor_n = self.profile['n0'] + \
@@ -35,7 +34,7 @@ class gyrodata_plot(data.GYROData):
         ax = fig.add_subplot(121)
         ax.grid(which="majorminor",ls=":")
         ax.grid(which="major",ls=":")
-        ax.set_xlabel(r'$(c_s/a) t$')
+        ax.set_xlabel(TIME)
         ax.set_ylabel(r'$(a/c_s)\gamma$',color='k')
         #=====================================
 
@@ -48,7 +47,7 @@ class gyrodata_plot(data.GYROData):
         ax = fig.add_subplot(122)
         ax.grid(which="majorminor",ls=":")
         ax.grid(which="major",ls=":")
-        ax.set_xlabel(r'$(c_s/a) t$')
+        ax.set_xlabel(TIME)
         ax.set_ylabel(r'$(a/c_s)\omega$',color='k')
         #=====================================
 
@@ -130,7 +129,7 @@ class gyrodata_plot(data.GYROData):
 
         if fig is None:
             fig = plt.figure(figsize=(10,6))
-        fig.subplots_adjust(left=0.1,right=0.95,top=0.95,bottom=0.12)
+            fig.subplots_adjust(left=0.1,right=0.95,top=0.95,bottom=0.12)
 
         # Read freq data
         self.read_moment_u()
@@ -146,12 +145,8 @@ class gyrodata_plot(data.GYROData):
         #----------------------------------------------------
         # Average calculations
 
-        # Determine tmin
-        for i in range(len(t)):
-            if t[i] < (1.0-w)*t[len(t)-1]:
-                imin = i
-
-        ave = average(y[:],t,w)
+        imin = iwindow(t,w)
+        ave  = average(y[:],t,w)
         print 'INFO: (plot_zf) Integral time-average = %.6f' % ave
         print 'INFO: (plot_zf) (nx,ntheta)=',nx,ntheta
 
@@ -161,7 +156,7 @@ class gyrodata_plot(data.GYROData):
         ax = fig.add_subplot(111)
         ax.grid(which="majorminor",ls=":")
         ax.grid(which="major",ls=":")
-        ax.set_xlabel(r'$(c_s/a)\, t$')
+        ax.set_xlabel(TIME)
         ax.set_ylabel(r'$\Phi/\Phi_0$')
 
         ax.plot(t,y,color='k')
@@ -198,7 +193,7 @@ class gyrodata_plot(data.GYROData):
         ax = fig.add_subplot(111)
         ax.grid(which="majorminor",ls=":")
         ax.grid(which="major",ls=":")
-        ax.set_xlabel(r'$(c_s/a) t$')
+        ax.set_xlabel(TIME)
         ax.set_ylabel(r'$\langle e \phi/T_e \rangle/\rho_\star $',color='k')
         #=====================================
 
@@ -260,7 +255,7 @@ class gyrodata_plot(data.GYROData):
         ax = fig.add_subplot(111)
         ax.grid(which="majorminor",ls=":")
         ax.grid(which="major",ls=":")
-        ax.set_xlabel(r'$(c_s/a) t$')
+        ax.set_xlabel(TIME)
         ax.set_ylabel(r'$'+mtag+' \;('+ftag+')$',color='k')
         #=====================================
 
@@ -339,10 +334,7 @@ class gyrodata_plot(data.GYROData):
         # Manage moment
         mtag = self.tagmom[i_moment]
 
-        # Determine tmin
-        for i in range(len(t)):
-           if t[i] < (1.0-w)*t[len(t)-1]:
-              imin = i
+        imin = iwindow(t,w)
 
         #======================================
         ax = fig.add_subplot(111)
@@ -482,7 +474,7 @@ class gyrodata_plot(data.GYROData):
         ax = fig.add_subplot(111)
         ax.grid(which="majorminor",ls=":")
         ax.grid(which="major",ls=":")
-        ax.set_xlabel('$(c_s/a) t$')
+        ax.set_xlabel(TIME)
         #=====================================
 
         # Determine tmin
@@ -543,10 +535,7 @@ class gyrodata_plot(data.GYROData):
         # Manage moment
         mtag = self.tagmom[i_moment]
 
-        # Determine tmin
-        for i in range(len(t)):
-           if t[i] < (1.0-w)*t[len(t)-1]:
-              imin = i
+        imin = iwindow(t,w)
 
         color = ['k','m','b','c']
 
@@ -597,12 +586,8 @@ class gyrodata_plot(data.GYROData):
            f   = np.array(self.moment_zero[:,i,1,:])
            delta_e[:,i] = average_n(f,t,w,n_x)
            delta_t[:,i] = (delta_e[:,i]-1.5*self.profile['tem_s'][i]*delta_n[:,i])/(1.5*self.profile['den_s'][i])
-
-        # Determine tmin
-        for i in range(len(t)):
-           if t[i] < (1.0-w)*t[len(t)-1]:
-              imin = i
-
+        imin = iwindow(t,w)
+           
         color = ['k','m','b','c']
 
         f = np.empty([n_x,n_kinetic])
