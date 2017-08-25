@@ -207,6 +207,63 @@ class cgyrodata_plot(data.cgyrodata):
       print 'INFO: (data_plot.py) l_corr = ',l_corr
 
 
+   def plot_zf(self,w=0.5,field=0,fig=None):
+
+      if fig is None:
+         fig = plt.figure(figsize=(10,6))
+         fig.subplots_adjust(left=0.1,right=0.95,top=0.95,bottom=0.12)
+
+      if self.n_n > 1:
+         print "ERROR: (plot_zf.py) This plot option valid for ZF test only."
+         sys.exit()
+      elif field > 0:
+         print "ERROR: (plot_zf.py) Only Phi can be plotted."
+      else:
+         self.getbigfield()
+
+      t    = self.t
+      phic = self.kxky_phi[0,0,0,0,:]
+      kx   = self.kx
+      y    = phic[:]*1e6*(1-np.i0(kx[0]**2)*np.exp(-kx[0]**2))/(np.i0(kx[0]**2)*np.exp(-kx[0]**2))
+      
+      #initialization in code is with 1e-6*besselj0 # phic[0]
+
+      #----------------------------------------------------
+      # Average calculations
+      imin=iwindow(t,w)
+
+      ave = average(y[:],t,w)
+      print 'INFO: (plot_zf) Integral time-average = %.6f' % ave
+
+      ave_vec = ave*np.ones(len(t))
+      #----------------------------------------------------
+
+      ax = fig.add_subplot(111)
+      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="major",ls=":")
+      ax.set_xlabel(TIME)
+      ax.set_ylabel(r'$\mathrm{Re}\left( \Phi/\Phi_0 \right)$')
+
+      gfactor = 1e6*(1-np.i0(kx[:]**2)*np.exp(-kx[:]**2))/(np.i0(kx[:]**2)*np.exp(-kx[:]**2))
+      
+      for i in range(self.n_radial):
+         ax.plot(t,self.kxky_phi[0,i,0,0,:]*gfactor[i],
+                 label=r'$k_x=%.3g$' % self.kx[i])
+    
+         ax.plot(t[imin:],ave_vec[imin:],color='b',
+                 label=r'$\mathrm{Average}$',linewidth=1)
+
+         theory = 1.0/(1.0+1.6*self.q**2/np.sqrt(self.rmin/self.rmaj))
+         ax.plot([0,max(t)],[theory,theory],color='grey',
+                 label=r'$\mathrm{RH \; theory}$',alpha=0.3,linewidth=4)
+
+         theory2 = 1./(1.0+2.*self.q**2)
+         ax.plot([0,max(t)],[theory2,theory2],color='m',
+                 label=r'$\mathrm{fluid \; theory}$',alpha=0.3,linewidth=4)
+
+      ax.legend(loc=1,prop={'size':10})
+
+
    def plot_geo(self,fig=None):
 
       self.getgeo()
@@ -229,6 +286,76 @@ class cgyrodata_plot(data.cgyrodata):
          ax.plot(theta,y)
          ax.set_xlim([-1,1])
 
+         
+   def plot_error(self,fig=None):
+
+      if fig is None:
+         fig = plt.figure(figsize=(12,6))
+         fig.subplots_adjust(left=0.09,right=0.96,top=0.92,bottom=0.12)
+
+
+      ax = fig.add_subplot(111)
+      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="major",ls=":")
+      ax.set_xlabel(TIME)
+      ax.set_ylabel(r'$\mathrm{Integration~Error}$')
+      ax.set_yscale('log')
+
+      ax.plot(self.t[2:],self.err1[2:],label=r'$\mathrm{Total~error}$')
+      ax.plot(self.t[2:],self.err2[2:],label=r'$\mathrm{RK4~error}$')
+      ax.set_xlim([0,self.t[-1]])
+
+      ax.legend()
+
+   def plot_ball(self,itime=-1,field=0,tmax=-1.0,fig=None):
+
+      if fig is None:
+         fig = plt.figure(figsize=(10,6))
+         fig.subplots_adjust(left=0.13,right=0.96,top=0.92,bottom=0.12)
+
+      if itime > self.n_time-1:
+         itime = self.n_time-1
+
+      # Construct complex eigenfunction at selected time
+      if field == 0:
+         f = self.phib[0,:,itime]+1j*self.phib[1,:,itime]
+         ytag = r'$\delta\phi$'
+      elif field == 1:
+         f = self.aparb[0,:,itime]+1j*self.aparb[1,:,itime]
+         ytag = r'$\delta A_\parallel$'
+      elif field == 2:
+         f = self.bparb[0,:,itime]+1j*self.bparb[1,:,itime]
+         ytag = r'$\delta B_\parallel$'
+
+
+      ax = fig.add_subplot(111)
+      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="major",ls=":")
+      ax.set_xlabel(r'$\theta_*/\pi$')
+      ax.set_ylabel(ytag)
+
+      if self.n_radial == 1:
+         # Manage n=0 (ZF) case
+         x = self.theta/np.pi
+         ax.set_xlim([-1,1])
+      else:
+         # Assume n > 0 (ballooning mode) if n_radial > 1
+         x = self.thetab/np.pi
+         if tmax < 0.0:
+            ax.set_xlim([1-self.n_radial,-1+self.n_radial])
+         else:
+            ax.set_xlim([-tmax,tmax])
+
+      y1 = np.real(f)
+      y2 = np.imag(f)
+
+      ax.plot(x,y1,'-o',color='black',markersize=2,label=r'$\mathrm{Re}$')
+      ax.plot(x,y2,'-o',color='red',markersize=2,label=r'$\mathrm{Im}$')
+
+      ax.legend()
+
+      return x,y1,y2
+         
    def plot_flux(self,w=0.5,field=0,moment='e',ymin='auto',ymax='auto',fc=0,fig=None):
 
       if fig is None:

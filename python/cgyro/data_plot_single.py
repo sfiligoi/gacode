@@ -56,6 +56,35 @@ elif plot_type == 'geo':
 
    outfile = 'out.cgyro.geo.'+ftype
 
+elif plot_type == 'error':
+   
+   ftype = sys.argv[2]
+
+   cgyrodata_plot('./').plot_error()
+
+   outfile = 'out.cgyro.error.'+ftype
+
+elif plot_type == 'ball':
+
+   itime = int(sys.argv[2])
+   field = int(sys.argv[3])
+   tmax  = float(sys.argv[4])
+   ftype = sys.argv[5]
+
+   x,y1,y2 = cgyrodata_plot('./').plot_ball(itime=itime,field=field,tmax=tmax)
+   
+   outfile = 'out.cgyro.ball.'+ftype
+
+elif plot_type == 'zf':
+
+   w     = float(sys.argv[2])
+   field = int(sys.argv[3])
+   ftype = sys.argv[4]
+
+   cgyrodata_plot('./').plot_zf(w=w,field=field)
+   
+   outfile = 'out.cgyro.ball.'+ftype
+
 elif plot_type == 'flux':
 
    w      = float(sys.argv[2])
@@ -74,7 +103,13 @@ elif plot_type == 'flux':
 # Plot to screen or to image file
 if ftype == 'screen':
     plt.show()
+elif ftype == 'dump':
+    data = np.column_stack((x,y1,y2))
+    np.savetxt(outfile,data,fmt='%.8e')
 else:
-    print 'INFO: (data_plot_single) Created '+outfile
     plt.savefig(outfile)
+
+if ftype != 'screen':
+       print 'INFO: (data_plot_single) Created '+outfile
 #---------------------------------------------------------------
+
