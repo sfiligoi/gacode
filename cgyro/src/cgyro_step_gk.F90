@@ -107,12 +107,12 @@ subroutine cgyro_rhs(ij)
            ! Diagonal terms
            rhs_ij(ic,iv_loc) = &
                 omega_cap_h(ic,iv_loc)*cap_h_c(ic,iv_loc)+&
-                omega_h(ic,iv_loc)*h_x(ic,iv_loc)+&
-                sum(omega_s(:,ic,iv_loc)*field(:,ic))
+                omega_h(ic,iv_loc)*h_x(ic,iv_loc)
 #ifndef _OPENACC
         enddo ! cpus vectorize better if separate loop
 
         do ic=1,nc
+           ! don't need to recompute iv_loc, still valid from previous loop
 #endif
            is = is_v(iv)
            ! Parallel streaming with upwind dissipation 
@@ -126,6 +126,9 @@ subroutine cgyro_rhs(ij)
                    -rval*dtheta(id, ic)*cap_h_c(jc,iv_loc)  &
                    -rval2*dtheta_up(id, ic)*g_x(jc,iv_loc) 
            enddo
+
+           rhs_ij(ic,iv_loc) = rhs_ij(ic,iv_loc) + &
+                sum(omega_s(:,ic,iv_loc)*field(:,ic))
 
 #ifdef _OPENACC
            rhs_ij(ic,iv_loc) = rhs_ij(ic,iv_loc)+rhs_stream
