@@ -339,10 +339,11 @@ then
    fi
     
    # If there are no restart files, its safe to overwrite the log file
-   if [ ! -f out.cgyro.restar* ]
-   then
+   PATTERN=(out.cgyro.restar*)
+   if [ ! -r ${PATTERN[0]} ]; then
       > out.cgyro.version
    fi
+
    # Date with custom formatting
    date_tag=`date +"%y-%b-%d %T"`
    version_tag=`gacode_getversion`
