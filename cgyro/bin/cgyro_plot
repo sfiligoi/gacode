@@ -248,8 +248,6 @@ case "$PLOT_TYPE" in
    error)
 	python $PLT $PLOT_TYPE $FTYPE ;;
 
-   ky_flux)
-	python $PYROOT/plot_ky_flux.py $FTYPE $W $MOMENT $YMIN $YMAX $FIELD $FC ;;
 
    xflux)
 	python $PYROOT/plot_xflux.py $FTYPE $W $MOMENT $YMIN $YMAX ;;
@@ -258,16 +256,13 @@ case "$PLOT_TYPE" in
 	python $PYROOT/plot_fluct.py $FTYPE $MOMENT $SPECIES $YMIN $YMAX $NX $NY $TIME $FMIN $FMAX $CMAP ;;
 
    flux)
-	if [ "$FTYPE" == "dump" ]
-        then
-	   python $PYROOT/dump_flux.py 
-        else
-	   python $PLT $PLOT_TYPE $W $FIELD $MOMENT $YMIN $YMAX $FC $FTYPE
-        fi
-        ;;
+        python $PLT $PLOT_TYPE $W $FIELD $MOMENT $YMIN $YMAX $FC $FTYPE ;;
+
+   ky_flux)
+	python $PLT $PLOT_TYPE $W $FIELD $MOMENT $YMIN $YMAX $FC $FTYPE ;;
 
    phi)
-	python $PYROOT/plot_phi.py $FTYPE $FIELD ;;
+	python $PLT $PLOT_TYPE $FIELD $FTYPE ;;
 
    ky_phi)
 	python $PLT $PLOT_TYPE $FIELD $YMIN $YMAX $N $FTYPE ;;

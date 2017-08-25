@@ -206,6 +206,46 @@ class cgyrodata_plot(data.cgyrodata):
 
       print 'INFO: (data_plot.py) l_corr = ',l_corr
 
+   def plot_phi(self,field=0,fig=None):
+
+      if fig is None:
+         fig = plt.figure(figsize=(12,6))
+         fig.subplots_adjust(left=0.09,right=0.96,top=0.92,bottom=0.12)
+
+      self.getbigfield()
+
+      #======================================
+      # Set figure size and axes
+      ax = fig.add_subplot(111)
+      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="major",ls=":")
+      ax.set_xlabel(TIME)
+      ax.set_ylabel(r'$\left| \Phi \right|$')
+      ax.set_yscale('log')
+      ax.set_title(r'$\mathrm{Fluctuation~intensity} \quad k_\theta = nq/r$')
+      #======================================
+
+      p2 = np.sum(self.phisq,axis=0)/self.rho**2
+      itheta=0
+
+      # n=0 intensity
+      y0 = p2[itheta,0,:]
+      ax.plot(self.t,np.sqrt(y0),label=r'$n=0$',linewidth=2)
+
+      # finite-n intensity
+      yn = p2[itheta,1,:]
+      for n in range(2,self.n_n):
+         yn = yn+p2[itheta,n,:]
+
+      ax.plot(self.t,np.sqrt(yn),label=r'$n>0$')
+        
+      ax.set_xlim([0,max(self.t)])
+
+      ax.legend(loc=4)
+
+      head = '(cs/a) t     Phi_0/rho_*    Phi_n/rho_*'
+      
+      return head,self.t,np.sqrt(y0),np.sqrt(yn)
 
    def plot_zf(self,w=0.5,field=0,fig=None):
 
@@ -354,7 +394,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       ax.legend()
 
-      return x,y1,y2
+      return 'ang  Re(f)  Im(f)',x,y1,y2
          
    def plot_flux(self,w=0.5,field=0,moment='e',ymin='auto',ymax='auto',fc=0,fig=None):
 
@@ -434,3 +474,87 @@ class cgyrodata_plot(data.cgyrodata):
 
       if ymax != 'auto':
          ax.set_ylim([0,float(ymax)])
+
+   def plot_ky_flux(self,w=0.5,field=0,moment='e',ymin='auto',ymax='auto',fc=0,fig=None):
+
+      ns = self.n_species
+      t  = self.t
+
+      if fig is None:
+         fig = plt.figure(figsize=(6*ns,6))
+         fig.subplots_adjust(left=0.06,right=0.96,top=0.92,bottom=0.12)
+
+      self.getflux()
+
+      ky  = self.ky
+      ave = np.zeros((self.n_n,ns))
+
+      field_tag = '\mathrm{Total}'
+
+      if fc == 0:
+         ys = np.sum(self.ky_flux,axis=(2))
+      else:
+         ys = self.ky_flux[:,:,field,:,:]
+         if field == 0:
+            field_tag = '\phi'
+         elif field == 1:
+            field_tag = 'A_\parallel'
+         else:
+            field_tag = 'B_\parallel'
+
+      if moment == 'n':
+         ntag = 'Density~flux'
+         mtag = '\Gamma'
+         ttag = 'G'
+         ftag = 'flux_n'
+         y = ys[:,0,:,:]
+      elif moment == 'e':
+         ntag = 'Energy~flux'
+         mtag = 'Q'
+         ttag = 'Q'
+         ftag = 'flux_e'
+         y = ys[:,1,:,:]
+      elif moment == 'v':
+         ntag = 'Momentum~flux'
+         mtag = '\Pi'
+         ttag = 'Pi'
+         ftag = 'flux_v'
+         y = ys[:,2,:,:]
+      else:
+         print 'ERROR (plot_ky_flux.py) Invalid moment.'
+         sys.exit()
+
+      # Determine tmin
+      imin=iwindow(t,w)
+
+      color = ['m','k','b','c']
+
+      windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[-1])+']$'
+
+      if ky[1] < 0.0:
+         ky = -ky
+         xlabel=r'$-k_\theta \rho_s$'
+      else:
+         xlabel=r'$k_\theta \rho_s$'
+    
+      dk = ky[1]-ky[0]
+    
+      for ispec in range(ns):
+         for j in range(self.n_n):
+            ave[j,ispec] = average(y[ispec,j,:],self.t,w)
+
+      for ispec in range(ns):
+         stag = str(ispec)
+         ax = fig.add_subplot(1,ns,ispec+1)
+         ax.set_xlabel(xlabel)
+         u = specmap(self.mass[ispec],self.z[ispec])
+         ax.set_ylabel(r'$'+mtag+'_'+u+'$',color='k')
+         ax.set_title(windowtxt)
+         ax.bar(ky-dk/2.0,ave[:,ispec],width=dk/1.1,color=color[ispec],alpha=0.5,edgecolor='black')
+         
+      ax.set_xlim([0,ky[-1]+dk])
+      if ymax != 'auto':
+         ax.set_ylim([0,float(ymax)])
+
+      # Dissipation curve             
+      ax.plot(ky,self.alphadiss*ax.get_ylim()[1]*0.5,linewidth=2,color='k',alpha=0.2)

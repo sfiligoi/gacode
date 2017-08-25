@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import rc
 from cgyro.data_plot import cgyrodata_plot
+from cgyro.data_dump import cgyrodata_dump
 
 rc('text',usetex=True)
 rc('font',size=18)
@@ -71,7 +72,7 @@ elif plot_type == 'ball':
    tmax  = float(sys.argv[4])
    ftype = sys.argv[5]
 
-   x,y1,y2 = cgyrodata_plot('./').plot_ball(itime=itime,field=field,tmax=tmax)
+   head,x,y1,y2 = cgyrodata_plot('./').plot_ball(itime=itime,field=field,tmax=tmax)
    
    outfile = 'out.cgyro.ball.'+ftype
 
@@ -83,7 +84,16 @@ elif plot_type == 'zf':
 
    cgyrodata_plot('./').plot_zf(w=w,field=field)
    
-   outfile = 'out.cgyro.ball.'+ftype
+   outfile = 'out.cgyro.zf.'+ftype
+
+elif plot_type == 'phi':
+
+   field = int(sys.argv[2])
+   ftype = sys.argv[3]
+
+   head,x,y1,y2 = cgyrodata_plot('./').plot_phi(field=field)
+   
+   outfile = 'out.cgyro.phi.'+ftype
 
 elif plot_type == 'flux':
 
@@ -95,9 +105,31 @@ elif plot_type == 'flux':
    fc     = int(sys.argv[7])
    ftype  = sys.argv[8]
 
-   cgyrodata_plot('./').plot_flux(w=w,field=field,moment=moment,ymin=ymin,ymax=ymax,fc=fc)
+   if ftype == 'dump':
+      cgyrodata_dump('./').dump_flux(fc=fc)
+      sys.exit()
+   else:
+      cgyrodata_plot('./').plot_flux(w=w,field=field,moment=moment,ymin=ymin,ymax=ymax,fc=fc)
 
    outfile = 'out.cgyro.flux.'+ftype
+
+elif plot_type == 'ky_flux':
+
+   w      = float(sys.argv[2])
+   field  = int(sys.argv[3])
+   moment = sys.argv[4]
+   ymin   = sys.argv[5]
+   ymax   = sys.argv[6]
+   fc     = int(sys.argv[7])
+   ftype  = sys.argv[8]
+
+   if ftype == 'dump':
+      cgyrodata_dump('./').dump_ky_flux(w=w,field=field,moment=moment,fc=fc)
+      sys.exit()
+   else:
+      cgyrodata_plot('./').plot_ky_flux(w=w,field=field,moment=moment,ymin=ymin,ymax=ymax,fc=fc)
+
+   outfile = 'out.cgyro.ky_flux.'+ftype
 
 #---------------------------------------------------------------
 # Plot to screen or to image file
@@ -105,7 +137,7 @@ if ftype == 'screen':
     plt.show()
 elif ftype == 'dump':
     data = np.column_stack((x,y1,y2))
-    np.savetxt(outfile,data,fmt='%.8e')
+    np.savetxt(outfile,data,fmt='%.8e',header=head)
 else:
     plt.savefig(outfile)
 
