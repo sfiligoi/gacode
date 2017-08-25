@@ -131,6 +131,28 @@ elif plot_type == 'ky_flux':
 
    outfile = 'out.cgyro.ky_flux.'+ftype
 
+elif plot_type == 'kxky_phi':
+
+   w     = float(sys.argv[2])
+   ftype = sys.argv[3]
+
+   cgyrodata_plot('./').plot_kxky_phi(w=w)
+   
+   outfile = 'out.cgyro.kxky_phi.'+ftype
+
+elif plot_type == 'kx_phi':
+
+   w     = float(sys.argv[2])
+   ymin  = sys.argv[3]
+   ymax  = sys.argv[4]
+   nstr  = sys.argv[5]
+   ftype = sys.argv[6]
+
+   cgyrodata_plot('./').plot_kx_phi(w=w,ymin=ymin,ymax=ymax,nstr=nstr)
+   
+   outfile = 'out.cgyro.kx_phi.'+ftype
+
+   
 #---------------------------------------------------------------
 # Plot to screen or to image file
 if ftype == 'screen':

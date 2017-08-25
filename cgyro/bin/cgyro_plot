@@ -268,10 +268,10 @@ case "$PLOT_TYPE" in
 	python $PLT $PLOT_TYPE $FIELD $YMIN $YMAX $N $FTYPE ;;
 
    kx_phi)
-	python $PYROOT/plot_kx_phi.py $FTYPE $W $YMIN $YMAX $N ;;
+	python $PLT $PLOT_TYPE $W $YMIN $YMAX $N $FTYPE ;;
 
    kxky_phi)
-	python $PYROOT/plot_kxky_phi.py $FTYPE $W $FIELD ;;
+	python $PLT $PLOT_TYPE $W $FTYPE ;;
 
    rcorr_phi)
         python $PLT $PLOT_TYPE $W $FTYPE ;;
