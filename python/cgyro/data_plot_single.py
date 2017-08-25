@@ -152,6 +152,34 @@ elif plot_type == 'kx_phi':
    
    outfile = 'out.cgyro.kx_phi.'+ftype
 
+elif plot_type == 'hb':
+
+   itime = int(sys.argv[2])
+   spec  = int(sys.argv[3])
+   tmax  = float(sys.argv[4])
+   mesh  = int(sys.argv[5])
+   ftype = sys.argv[6]
+
+   cgyrodata_plot('./').plot_hb(itime=itime,spec=spec,tmax=tmax,mesh=mesh)
+   
+   outfile = 'out.cgyro.hb.'+ftype
+
+elif plot_type == 'hbcut':
+
+   itime = int(sys.argv[2])
+   spec  = int(sys.argv[3])
+   tmax  = float(sys.argv[4])
+   theta = sys.argv[5]
+   ftype = sys.argv[6]
+
+   cgyrodata_plot('./').plot_hbcut(itime=itime,spec=spec,tmax=tmax,theta=theta)
+   
+   outfile = 'out.cgyro.hbcut.'+ftype
+
+
+else:
+
+   print 'ERROR: (data_plot_single) Plot type not found'
    
 #---------------------------------------------------------------
 # Plot to screen or to image file

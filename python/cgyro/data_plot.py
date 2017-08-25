@@ -655,7 +655,11 @@ class cgyrodata_plot(data.cgyrodata):
             for j in range(self.n_radial):
                ave[j] = average(self.phisq[j,0,n,:],self.t,w)
             ax.plot(kx+dk/2,np.sqrt(ave[:]),ls='steps',label=num)
-            
+            if self.n_n > 16:
+               ax.legend(loc=4, ncol=5, prop={'size':12})
+            else:
+               ax.legend(loc=4, ncol=6, prop={'size':12})
+
       ax.set_xlim([-x0,x0])
       ax.set_yscale('log')
 
@@ -665,7 +669,185 @@ class cgyrodata_plot(data.cgyrodata):
       # Dissipation curve             
       ax.plot(kx,self.radialdiss*ax.get_ylim()[1]*0.5,linewidth=2,color='k',alpha=0.2)
 
-      if self.n_n > 16:
-         ax.legend(loc=4, ncol=5, prop={'size':12})
-      else:
-         ax.legend(loc=4, ncol=6, prop={'size':12})
+
+   def plot_hb(self,itime=-1,spec=0,tmax=-1.0,mesh=0,fig=None):
+            
+      import matplotlib.cm as cm
+
+      if fig is None:
+         fig = plt.figure(figsize=(14,12))
+         fig.subplots_adjust(left=0.1,right=0.95,top=0.94,bottom=0.06,wspace=0.25,hspace=0.32)
+         fig.suptitle(r'${\rm species}='+str(spec)+'$')
+
+      theta=0.0
+
+      if itime > self.n_time-1:
+         itime = self.n_time-1
+
+      # Compute index for theta value in pitch angle and energy plots
+      i0 = int(round((1.0+float(theta))*self.n_theta/2.0))
+      if i0 > self.n_theta-1:
+         i0 = self.n_theta-1
+      n0 = (self.n_radial/2)*self.n_theta+i0
+
+      p = 0
+      for row in range(3):
+
+         p = p+1
+
+         if row == 0:
+            ie = 0
+         if row == 1:
+            ie = self.n_energy/2
+         if row == 2:
+            ie = self.n_energy-1
+
+         #======================================
+         ax = fig.add_subplot(3,2,p)
+
+         ax.set_title(r'${\rm Re}(h) \quad {\rm ie}='+str(ie)+'$')
+         ax.set_xlabel(r'$\theta/\pi$')
+         ax.set_ylabel(r'$\xi = v_\parallel/v$')
+
+         hp = np.transpose(np.array(self.hb[0,:,spec,:,ie,itime]))
+         h_norm = 0.5*(hp[self.n_xi/2-1,n0]+hp[self.n_xi/2,n0])
+         hp = hp/h_norm
+         hmin = hp.min()
+         hmax = hp.max()
+         dh = (hmax-hmin)/100.0
+
+         levels = np.arange(hmin-dh,hmax+dh,dh)
+
+         ax.contourf(self.thetab/np.pi,self.xi,hp,levels,cmap=cm.jet,origin='lower')
+         if tmax < 0.0:
+            ax.set_xlim([1-self.n_radial,-1+self.n_radial])
+         else:
+            ax.set_xlim([-tmax,tmax])
+
+         # Plot dots for mesh points
+         if row == 1 and mesh == 1:
+            for i in range(self.n_theta*self.n_radial):
+               for j in range(self.n_xi):
+                  ax.plot([self.thetab[i]/np.pi],[self.xi[j]],marker='.',color='k',markersize=4)
+
+         #======================================
+         p = p+1
+         #======================================
+         ax = fig.add_subplot(3,2,p)
+
+    
+         ax.set_title(r'${\rm Im}(h) \quad {\rm ie}='+str(ie)+'$')
+         ax.set_xlabel(r'$\theta/\pi$')
+         ax.set_ylabel(r'$\xi = v_\parallel/v$')
+
+         hp = np.transpose(np.array(self.hb[1,:,spec,:,ie,itime]))
+         hmin = hp.min()
+         hmax = hp.max()
+         dh = (hmax-hmin)/100.0
+
+         levels = np.arange(hmin-dh,hmax+dh,dh)
+
+         ax.contourf(self.thetab/np.pi,self.xi,hp,levels,cmap=cm.jet,origin='lower')
+         if tmax < 0.0:
+            ax.set_xlim([1-self.n_radial,-1+self.n_radial])
+         else:
+            ax.set_xlim([-tmax,tmax])
+         #======================================
+
+
+   def plot_hbcut(self,itime=-1,spec=0,tmax=-1.0,theta="0.0",fig=None):
+
+      if fig is None:
+         fig = plt.figure(figsize=(12,12))
+         fig.subplots_adjust(left=0.07,right=0.95,top=0.94,bottom=0.06,
+                             wspace=0.25,hspace=0.32)
+         fig.suptitle(r'${\rm species}='+str(spec)+'$')
+      
+      if itime > self.n_time-1:
+         itime = self.n_time-1
+
+      func = self.hb
+
+      # Compute index for theta value in pitch angle and energy plots
+      i0 = int(round((1.0+float(theta))*self.n_theta/2.0))
+      if i0 > self.n_theta-1:
+         i0 = self.n_theta-1
+
+      p = 0
+      for row in range(3):
+
+         p = p+1
+
+         if row == 0:
+            ie = 0
+            ix = 0
+         if row == 1:
+            ie = self.n_energy/2
+            ix = self.n_xi/2
+         if row == 2:
+            ie = self.n_energy-1
+            ix = self.n_xi-1
+
+         #========================================================
+         ax = fig.add_subplot(3,3,p)
+         ax.grid(which="majorminor",ls=":")
+         ax.grid(which="major",ls=":")
+
+         ax.set_title(r'$\xi=0 \quad {\rm ie}='+str(ie)+'$')
+         ax.set_xlabel(r'$\theta/\pi$')
+
+         if self.n_xi%2 == 0:
+            hp = np.array(func[:,:,spec,self.n_xi/2,ie,itime]+
+                          func[:,:,spec,self.n_xi/2-1,ie,itime])*0.5
+         else:
+            hp = np.array(func[:,:,spec,self.n_xi/2,ie,itime])
+            
+         ax.plot(self.thetab/np.pi,hp[0,:],'-o',color='black',markersize=2)
+         ax.plot(self.thetab/np.pi,hp[1,:],'-o',color='blue',markersize=2)
+
+         if self.n_radial > 1:
+            if tmax < 0.0:
+               ax.set_xlim([1-self.n_radial,-1+self.n_radial])
+            else:
+               ax.set_xlim([-tmax,tmax])
+         else:
+            ax.set_xlim([1,3])
+
+         #========================================================
+
+         p = p+1
+
+         #========================================================
+         ax = fig.add_subplot(3,3,p)
+         ax.grid(which="majorminor",ls=":")
+         ax.grid(which="major",ls=":")
+
+         ax.set_title(r'$\theta/\pi='+theta+' \quad \mathrm{ie}='+str(ie)+'$')
+         ax.set_xlabel(r'$\xi = v_\parallel/v$')
+
+         n0 = (self.n_radial/2)*self.n_theta+i0
+         
+         hp = np.array(func[0,:,spec,:,ie,itime])
+         ax.plot(self.xi,hp[n0,:],'-o',color='black',markersize=2)
+         hp = np.array(func[1,:,spec,:,ie,itime])
+         ax.plot(self.xi,hp[n0,:],'-o',color='blue',markersize=2)
+         ax.set_xlim([-1,1])
+         #========================================================
+
+         p = p+1
+
+         #========================================================
+         ax = fig.add_subplot(3,3,p)
+         ax.grid(which="majorminor",ls=":")
+         ax.grid(which="major",ls=":")
+
+         ax.set_title(r'$\theta/\pi='+theta+' \quad \mathrm{ix}='+str(ix)+'$')
+         ax.set_xlabel(r'$x=\sqrt{\varepsilon}$')
+
+         n0 = (self.n_radial/2)*self.n_theta+i0
+
+         hp = np.array(func[0,:,spec,ix,:,itime])
+         ax.plot(np.sqrt(self.energy),hp[n0,:],'-o',color='black',markersize=2)
+         hp = np.array(func[1,:,spec,ix,:,itime])
+         ax.plot(np.sqrt(self.energy),hp[n0,:],'-o',color='blue',markersize=2)
+         #========================================================

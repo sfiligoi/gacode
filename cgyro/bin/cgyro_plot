@@ -234,10 +234,10 @@ case "$PLOT_TYPE" in
 	python $PLT $PLOT_TYPE $TIME $FIELD $TMAX $FTYPE ;;
 
    hb)
-	python $PYROOT/plot_hb.py $FTYPE $TIME $SPECIES $TMAX $MESH ;;
+	python $PLT $PLOT_TYPE $TIME $SPECIES $TMAX $MESH $FTYPE ;;
 
    hbcut)
-	python $PYROOT/plot_hbcut.py $FTYPE $TIME $SPECIES $TMAX $THETA ;;
+	python $PLT $PLOT_TYPE $TIME $SPECIES $TMAX $THETA $FTYPE ;;
 
    freq)
 	python $PLT $PLOT_TYPE $W $FTYPE ;;
