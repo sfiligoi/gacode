@@ -121,10 +121,10 @@ subroutine cgyro_rhs(ij)
 
            rhs_stream = 0.0
            do id=-nup_theta,nup_theta
-              jc = icd_c(ic,id)
+              jc = icd_c(id, ic)
               rhs_stream = rhs_stream &
-                   -rval*dtheta(ic,id)*cap_h_c(jc,iv_loc)  &
-                   -rval2*dtheta_up(ic,id)*g_x(jc,iv_loc) 
+                   -rval*dtheta(id, ic)*cap_h_c(jc,iv_loc)  &
+                   -rval2*dtheta_up(id, ic)*g_x(jc,iv_loc) 
            enddo
 
 #ifdef _OPENACC
