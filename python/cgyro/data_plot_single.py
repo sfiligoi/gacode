@@ -131,6 +131,18 @@ elif plot_type == 'ky_flux':
 
    outfile = 'out.cgyro.ky_flux.'+ftype
 
+elif plot_type == 'xflux':
+
+   w      = float(sys.argv[2])
+   moment = sys.argv[3]
+   ymin   = sys.argv[4]
+   ymax   = sys.argv[5]
+   ftype  = sys.argv[6]
+
+   cgyrodata_plot('./').plot_xflux(w=w,moment=moment,ymin=ymin,ymax=ymax)
+
+   outfile = 'out.cgyro.xflux.'+ftype
+
 elif plot_type == 'kxky_phi':
 
    w     = float(sys.argv[2])

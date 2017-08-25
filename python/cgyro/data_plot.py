@@ -475,6 +475,100 @@ class cgyrodata_plot(data.cgyrodata):
       if ymax != 'auto':
          ax.set_ylim([0,float(ymax)])
 
+   def plot_xflux(self,w=0.5,moment='e',ymin='auto',ymax='auto',fig=None):
+
+      if fig is None:
+         fig = plt.figure(figsize=(12,6))
+         fig.subplots_adjust(left=0.05,right=0.96,top=0.92,bottom=0.12)
+
+      self.getxflux()
+
+      ns = self.n_species
+      nl = self.n_global+1
+      t  = self.t
+
+      ky  = self.ky
+      ave = np.zeros((self.n_n,ns))
+
+      # NOTE: lky_flux_* -> [ 2, nl , ns , n_n , nt ]
+      #                       0  1    2     3    4 
+
+      if moment == 'n':
+         ntag = 'Density~flux'
+         mtag = '\Gamma'
+         z = np.sum(self.lky_flux_n,axis=3)
+         ftag = 'xflux_n'
+      elif moment == 'e':
+         ntag = 'Energy~flux'
+         mtag = 'Q'
+         z = np.sum(self.lky_flux_e,axis=3)
+         ftag = 'xflux_e'
+      elif moment == 'v':
+         ntag = 'Momentum~flux'
+         mtag = '\Pi'
+         z = np.sum(self.lky_flux_v,axis=3)
+         ftag = 'xflux_v'
+      else:
+         print 'ERROR (plot_xflux.py) Invalid moment.'
+         sys.exit()
+
+      xr = np.zeros((ns,nl))
+      xi = np.zeros((ns,nl))
+      for ispec in range(ns):
+         for l in range(nl):
+            xr[ispec,l] = average(z[0,l,ispec,:],self.t,w)
+            xi[ispec,l] = average(z[1,l,ispec,:],self.t,w)
+
+      # Determine tmin
+      imin=iwindow(t,w)
+
+      #============================================================
+      # Otherwise plot
+      ax = fig.add_subplot(111)
+      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="major",ls=":")
+      ax.set_xlabel(r'$r/L_x$')
+
+      color = ['k','m','b','c','g','r']
+
+      windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[-1])+']$'
+
+      ax.set_title(r'$\mathrm{'+ntag+'} \quad $'+windowtxt)
+    
+      t = -np.pi+2*np.pi*np.arange(0.0,1.0,0.001)
+
+      e = 0.2
+      for ispec in range(ns):
+         # Flux curve
+         g = np.zeros(len(t))
+         g = xr[ispec,0] 
+         for l in range(1,nl):
+            g = g+2*(np.cos(l*t)*xr[ispec,l]-np.sin(l*t)*xi[ispec,l])
+         ax.plot(t/(2*np.pi),g)
+
+         # Flux partial average
+         g0 = xr[ispec,0]
+         for l in range(1,nl):
+            z = 2*np.pi*l*e
+            g0 = g0+2*np.sin(z)*xr[ispec,l]/z
+         ax.plot([-e,e],[g0,g0],'o-',color='red')
+
+         u     = specmap(self.mass[ispec],self.z[ispec])
+         label = r'$'+mtag+'_'+u+'/'+mtag+'_\mathrm{GB}: '+str(round(g0,3))+'$'
+
+         # Flux partial average
+         g0 = xr[ispec,0]
+         ax.plot([-0.5,0.5],[g0,g0],label=label)
+
+         if ymax != 'auto':
+            ax.set_ylim([float(ymin),float(ymax)])
+
+         ax.axvspan(-0.25,0.25,facecolor='g',alpha=0.1)
+         ax.set_xlim([-0.5,0.5])
+
+         ax.legend(loc=2)
+
+
    def plot_ky_flux(self,w=0.5,field=0,moment='e',ymin='auto',ymax='auto',fc=0,fig=None):
 
       ns = self.n_species

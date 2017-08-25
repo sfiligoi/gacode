@@ -250,7 +250,7 @@ case "$PLOT_TYPE" in
 
 
    xflux)
-	python $PYROOT/plot_xflux.py $FTYPE $W $MOMENT $YMIN $YMAX ;;
+	python $PLT $PLOT_TYPE $W $MOMENT $YMIN $YMAX $FTYPE ;;
 
    fluct)
 	python $PYROOT/plot_fluct.py $FTYPE $MOMENT $SPECIES $YMIN $YMAX $NX $NY $TIME $FMIN $FMAX $CMAP ;;
