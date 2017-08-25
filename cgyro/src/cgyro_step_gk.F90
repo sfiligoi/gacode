@@ -104,32 +104,45 @@ subroutine cgyro_rhs(ij)
      do iv=nv1,nv2
         do ic=1,nc
            iv_loc = iv-nv1+1
-           is = is_v(iv)
            ! Diagonal terms
            rhs_ij(ic,iv_loc) = &
                 omega_cap_h(ic,iv_loc)*cap_h_c(ic,iv_loc)+&
-                omega_h(ic,iv_loc)*h_x(ic,iv_loc)+&
-                sum(omega_s(:,ic,iv_loc)*field(:,ic))
+                omega_h(ic,iv_loc)*h_x(ic,iv_loc)
+#ifndef _OPENACC
+        enddo ! cpus vectorize better if separate loop
 
+        do ic=1,nc
+           ! don't need to recompute iv_loc, still valid from previous loop
+#endif
+           is = is_v(iv)
            ! Parallel streaming with upwind dissipation 
            rval  = omega_stream(it_c(ic),is)*vel(ie_v(iv))*xi(ix_v(iv))
            rval2 = abs(omega_stream(it_c(ic),is))
 
            rhs_stream = 0.0
            do id=-nup_theta,nup_theta
-              jc = icd_c(ic,id)
+              jc = icd_c(id, ic)
               rhs_stream = rhs_stream &
-                   -rval*dtheta(ic,id)*cap_h_c(jc,iv_loc)  &
-                   -rval2*dtheta_up(ic,id)*g_x(jc,iv_loc) 
+                   -rval*dtheta(id, ic)*cap_h_c(jc,iv_loc)  &
+                   -rval2*dtheta_up(id, ic)*g_x(jc,iv_loc) 
            enddo
 
-           rhs_ij(ic,iv_loc) = rhs_ij(ic,iv_loc)+rhs_stream
+           rhs_ij(ic,iv_loc) = rhs_ij(ic,iv_loc) + &
+                sum(omega_s(:,ic,iv_loc)*field(:,ic))
 
+#ifdef _OPENACC
+           rhs_ij(ic,iv_loc) = rhs_ij(ic,iv_loc)+rhs_stream
+#else
+           rhs(ic,iv_loc,ij) = rhs_ij(ic,iv_loc)+rhs_stream
+#endif
         enddo
      enddo
-!$acc end data	  
 
+#ifdef _OPENACC
+!$acc end data	  
+  ! gpus work better on small rhs_ij
   rhs(:,:,ij) = rhs_ij(:,:)
+#endif
 
   call timer_lib_out('str')
 
