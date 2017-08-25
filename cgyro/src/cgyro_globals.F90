@@ -342,6 +342,10 @@ module cgyro_globals
   complex, dimension(:,:,:), allocatable :: gflux_loc
   complex, dimension(:,:,:), allocatable :: gflux
   !
+  ! Nonlinear async requests
+  integer :: f_com_req
+  integer :: g_com_req
+  !
   ! Nonlinear plans
   type(C_PTR) :: plan_r2c
   type(C_PTR) :: plan_c2r

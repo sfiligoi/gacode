@@ -36,18 +36,34 @@ subroutine cgyro_nl_fftw(ij)
         iexch = iexch+1
         do ir=1,n_radial
            fpack(ir,iexch) = h_x(ic_c(ir,it),iv_loc)
-           gpack(ir,iexch) = psi(ic_c(ir,it),iv_loc)
         enddo
      enddo
   enddo
 
   do iexch=nv_loc*n_theta+1,nsplit*n_toroidal
      fpack(:,iexch) = (0.0,0.0)
+  enddo
+
+  call parallel_slib_f_i_start(fpack,f_nl,f_com_req)
+
+!$omp parallel do private(iv_loc,it,iexch,ir)
+  do iv_loc=1,nv_loc
+     iexch = (iv_loc-1)*n_theta
+     do it=1,n_theta
+        iexch = iexch+1
+        do ir=1,n_radial
+           gpack(ir,iexch) = psi(ic_c(ir,it),iv_loc)
+        enddo
+     enddo
+  enddo
+
+  do iexch=nv_loc*n_theta+1,nsplit*n_toroidal
      gpack(:,iexch) = (0.0,0.0)
   enddo
 
-  call parallel_slib_f(fpack,f_nl)
-  call parallel_slib_f(gpack,g_nl)
+
+  call parallel_slib_f_i_start(gpack,g_nl,g_com_req)
+  call parallel_slib_f_i_complete2(f_com_req,g_com_req)
   call timer_lib_out('nl_comm')
 
   call timer_lib_in('nl')
