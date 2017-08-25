@@ -558,3 +558,114 @@ class cgyrodata_plot(data.cgyrodata):
 
       # Dissipation curve             
       ax.plot(ky,self.alphadiss*ax.get_ylim()[1]*0.5,linewidth=2,color='k',alpha=0.2)
+
+
+   def plot_kxky_phi(self,w=0.5,fig=None):
+
+      from mpl_toolkits.mplot3d import Axes3D
+
+      x0 = max(abs(self.kx))*0.25
+      y0 = max(abs(self.ky))
+
+      asp=y0/(2*x0)
+
+      if fig is None:
+         fig = plt.figure(figsize=(15,17*asp))
+         fig.subplots_adjust(left=0.05,right=0.96,top=0.91,bottom=0.14)
+ 
+      self.getbigfield()
+
+      #-----------------------------------------------------------------
+      # Note array structure
+      # self.phi = np.reshape(data,(2,self.n_radial,self.n_n,nt),'F')
+
+      t = self.t
+      nx=self.n_radial
+      ny=self.n_n
+
+      f = np.zeros([nx-1,ny])
+      n = self.n_time
+
+      itheta=0
+
+      imin = int((1.0-w)*n)
+      for i in np.arange(imin,n):
+         f = f+self.phisq[1:,itheta,:,i]
+
+      # Fix (0,0)
+      i0 = nx/2-1
+      f[i0,0] = 1e-6
+
+      # Reverse y order for image plotting
+      f = f[:,::-1]
+
+      # Scale data
+      f = np.log(f)
+
+      ax = fig.add_subplot(111)
+
+      windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[-1])+']$'
+
+      ax.set_xlabel(r'$k_x \rho_s/4$')
+      ax.set_ylabel(r'$k_y \rho_s$')
+      ax.set_title(r'$\mathrm{Average~fluctuation~intensity} \quad $'+windowtxt)
+
+      ax.imshow(np.transpose(f),extent=[-x0,x0,0,y0],interpolation='none')
+   
+   def plot_kx_phi(self,w=0.5,ymin='auto',ymax='auto',nstr='null',fig=None):
+
+      if fig is None:
+         fig = plt.figure(figsize=(12,6))
+         fig.subplots_adjust(left=0.08,right=0.96,top=0.92,bottom=0.12)
+
+      self.getbigfield()
+
+      t   = self.t
+      kx  = self.kx
+      ave = np.zeros(self.n_radial)
+
+      imin=iwindow(self.t,w)
+    
+      dk = kx[1]-kx[0]
+      x0 = kx[-1]+dk
+
+      ax = fig.add_subplot(1,1,1)
+
+      color = ['m','k','b','c']
+      xlabel=r'$k_x \rho_s$'
+      windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[-1])+']$'
+
+      ax.set_title(r'$\mathrm{Average~fluctuation~intensity} \quad $'+windowtxt)
+      ax.set_xlabel(xlabel)
+
+      if nstr == 'null':
+         y = np.sum(self.phisq[:,0,:,:],axis=1)
+         for j in range(self.n_radial):
+            ave[j] = average(y[j,:],self.t,w)
+         ax.set_ylabel(r'$\overline{\delta \phi_\mathrm{total}}$',color='k')
+         ax.plot(kx,np.sqrt(ave[:]),color=color[0],ls='steps')
+      else:
+         y = np.zeros([self.n_radial,self.n_time])
+         nvec = str2list(nstr)
+         print 'INFO: (plot_kx_phi) n = '+str(nvec)
+         ax.set_ylabel(r'$\overline{\Phi_n}$',color='k')
+         for n in nvec:
+            num = r'$n='+str(n)+'$'
+            y[:] = self.phisq[:,0,n,:]
+            for j in range(self.n_radial):
+               ave[j] = average(self.phisq[j,0,n,:],self.t,w)
+            ax.plot(kx+dk/2,np.sqrt(ave[:]),ls='steps',label=num)
+            
+      ax.set_xlim([-x0,x0])
+      ax.set_yscale('log')
+
+      ymin,ymax=setlimits(ax.get_ylim(),ymin,ymax)
+      ax.set_ylim([ymin,ymax])
+
+      # Dissipation curve             
+      ax.plot(kx,self.radialdiss*ax.get_ylim()[1]*0.5,linewidth=2,color='k',alpha=0.2)
+
+      if self.n_n > 16:
+         ax.legend(loc=4, ncol=5, prop={'size':12})
+      else:
+         ax.legend(loc=4, ncol=6, prop={'size':12})
