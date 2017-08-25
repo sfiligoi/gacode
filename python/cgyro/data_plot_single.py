@@ -55,7 +55,21 @@ elif plot_type == 'geo':
    cgyrodata_plot('./').plot_geo()
 
    outfile = 'out.cgyro.geo.'+ftype
-   
+
+elif plot_type == 'flux':
+
+   w      = float(sys.argv[2])
+   field  = int(sys.argv[3])
+   moment = sys.argv[4]
+   ymin   = sys.argv[5]
+   ymax   = sys.argv[6]
+   fc     = int(sys.argv[7])
+   ftype  = sys.argv[8]
+
+   cgyrodata_plot('./').plot_flux(w=w,field=field,moment=moment,ymin=ymin,ymax=ymax,fc=fc)
+
+   outfile = 'out.cgyro.flux.'+ftype
+
 #---------------------------------------------------------------
 # Plot to screen or to image file
 if ftype == 'screen':

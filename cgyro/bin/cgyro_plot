@@ -33,14 +33,14 @@ then
   echo "          -field <value>"
   echo "           Specify field to be plotted: [0,n_field-1]."
   echo
+  echo "          -fc"
+  echo "           Toggle plotting of field breakdown of fluxes."
+  echo
   echo "          -moment <value>"
   echo "           Specify moment to be plotted [n,e,m,s]."
   echo
   echo "          -w <float>"
   echo "           Width of time-average window (1.0 is entire time history)."
-  echo
-  echo "          -fc"
-  echo "           Toggle plotting of field breakdown of fluxes."
   echo
   echo "          -plot <type>"
   echo "           Function to plot."
@@ -262,7 +262,7 @@ case "$PLOT_TYPE" in
         then
 	   python $PYROOT/dump_flux.py 
         else
-	   python $PYROOT/plot_flux.py $FTYPE $W $MOMENT $YMIN $YMAX $FIELD $FC
+	   python $PLT $PLOT_TYPE $W $FIELD $MOMENT $YMIN $YMAX $FC $FTYPE
         fi
         ;;
 
