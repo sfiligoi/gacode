@@ -16,7 +16,7 @@ subroutine cgyro_nl_direct(ij)
   implicit none
 
   integer, intent(in) :: ij
-  integer :: ix,ixp,iy,iyp
+  integer :: ix,ixp,iy,iyp,iexch
   integer :: ixpp,iypp
   integer :: ir,it,j,in
   integer, dimension(:), allocatable :: pcyc
@@ -46,8 +46,38 @@ subroutine cgyro_nl_direct(ij)
   allocate(fg(-nx:nx,-ny:ny) )
 
   call timer_lib_in('nl_comm')
-  call parallel_slib_f(h_x,f_nl)
-  call parallel_slib_f(psi,g_nl)
+  if ((nv_loc*n_theta) /= nsplit*n_toroidal) then
+!$omp parallel do private(iexch)
+     do iexch=1,nv_loc*n_theta
+        fpack(:,iexch) = h_x(:,iexch)
+     enddo
+
+     do iexch=nv_loc*n_theta+1,nsplit*n_toroidal
+        fpack(:,iexch) = (0.0,0.0)
+     enddo
+
+     call parallel_slib_f_i_start(fpack,f_nl,f_com_req)
+  else
+     call parallel_slib_f_i_start(h_x,f_nl,f_com_req)
+  endif
+
+  if ((nv_loc*n_theta) /= nsplit*n_toroidal) then
+!$omp parallel do private(iexch)
+     do iexch=1,nv_loc*n_theta
+        gpack(:,iexch) = psi(:,iexch)
+     enddo
+
+     do iexch=nv_loc*n_theta+1,nsplit*n_toroidal
+        gpack(:,iexch) = (0.0,0.0)
+     enddo
+
+     call parallel_slib_f_i_start(gpack,g_nl,g_com_req)
+  else
+     call parallel_slib_f_i_start(psi,g_nl,g_com_req)
+  endif
+
+  call parallel_slib_f_i_complete2(f_com_req,g_com_req)
+
   call timer_lib_out('nl_comm')
 
   call timer_lib_in('nl')
@@ -107,7 +137,15 @@ subroutine cgyro_nl_direct(ij)
   call timer_lib_out('nl')
 
   call timer_lib_in('nl_comm')
-  call parallel_slib_r(g_nl,psi)
+  if ((nv_loc*n_theta) /= nsplit*n_toroidal) then
+    call parallel_slib_r_nc(g_nl,gpack)
+!$omp parallel do private(iexch)
+     do iexch=1,nv_loc*n_theta
+        psi(:,iexch) = gpack(:,iexch)
+     enddo
+  else
+    call parallel_slib_r_nc(g_nl,psi)
+  endif
   call timer_lib_out('nl_comm')
 
   deallocate( f)
