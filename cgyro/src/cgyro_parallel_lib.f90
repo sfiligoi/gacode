@@ -266,6 +266,30 @@ contains
 
 !=========================================================
 
+  subroutine parallel_slib_f_nc(x,xt)
+
+    use mpi
+
+    !-------------------------------------------------------
+    implicit none
+    !
+    complex, intent(in), dimension(nkeep,nsplit*nn) :: x
+    complex, intent(inout), dimension(nkeep,nsplit,nn) :: xt
+    !
+    integer :: ierr
+    !-------------------------------------------------------
+
+    call MPI_ALLTOALL(x, &
+         nkeep*nsplit, &
+         MPI_DOUBLE_COMPLEX, &
+         xt, &
+         nkeep*nsplit, &
+         MPI_DOUBLE_COMPLEX, &
+         slib_comm, &
+         ierr)
+
+  end subroutine parallel_slib_f_nc
+
   subroutine parallel_slib_f(x_in,xt)
 
     use mpi
@@ -290,18 +314,35 @@ contains
        x(:,j) = (0.0,0.0)
     enddo
 
-    call MPI_ALLTOALL(x, &
+    call parallel_slib_f_nc(x,xt)
+
+  end subroutine parallel_slib_f
+
+ !=========================================================
+
+  subroutine parallel_slib_r_nc (xt,x)
+
+    use mpi
+
+    !-------------------------------------------------------
+    implicit none
+    !
+    complex, intent(in), dimension(nkeep,nsplit,nn) :: xt
+    complex, intent(inout), dimension(nkeep,nsplit*nn) :: x
+    !
+    integer :: ierr
+    !-------------------------------------------------------
+
+    call MPI_ALLTOALL(xt, &
          nkeep*nsplit, &
          MPI_DOUBLE_COMPLEX, &
-         xt, &
+         x, &
          nkeep*nsplit, &
          MPI_DOUBLE_COMPLEX, &
          slib_comm, &
          ierr)
 
-  end subroutine parallel_slib_f
-
- !=========================================================
+  end subroutine parallel_slib_r_nc
 
   subroutine parallel_slib_r(xt,x_out)
 
@@ -318,14 +359,7 @@ contains
     integer :: ierr
     !-------------------------------------------------------
 
-    call MPI_ALLTOALL(xt, &
-         nkeep*nsplit, &
-         MPI_DOUBLE_COMPLEX, &
-         x, &
-         nkeep*nsplit, &
-         MPI_DOUBLE_COMPLEX, &
-         slib_comm, &
-         ierr)
+    call parallel_slib_r_nc(xt,x)
 
 !$omp parallel do private(j)
     do j=1,nexch

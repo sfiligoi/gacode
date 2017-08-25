@@ -24,17 +24,11 @@ subroutine cgyro_nl_fftw(ij)
   integer :: j,p,iexch
 
   complex :: f0,g0
-  complex, dimension(:,:), allocatable :: fpack
-  complex, dimension(:,:), allocatable :: gpack
 
   include 'fftw3.f03'
 
   call timer_lib_in('nl_comm')
 
-  allocate(fpack(n_radial,nv_loc*n_theta))
-  allocate(gpack(n_radial,nv_loc*n_theta))
-  ! fpack = 0.0
-  ! gpack = 0.0
 !$omp parallel do private(iv_loc,it,iexch,ir)
   do iv_loc=1,nv_loc
      iexch = (iv_loc-1)*n_theta
@@ -46,6 +40,12 @@ subroutine cgyro_nl_fftw(ij)
         enddo
      enddo
   enddo
+
+  do iexch=nv_loc*n_theta+1,nsplit*n_toroidal
+     fpack(:,iexch) = (0.0,0.0)
+     gpack(:,iexch) = (0.0,0.0)
+  enddo
+
   call parallel_slib_f(fpack,f_nl)
   call parallel_slib_f(gpack,g_nl)
   call timer_lib_out('nl_comm')
@@ -107,7 +107,7 @@ subroutine cgyro_nl_fftw(ij)
   call timer_lib_out('nl')
 
   call timer_lib_in('nl_comm')
-  call parallel_slib_r(g_nl,gpack)
+  call parallel_slib_r_nc(g_nl,gpack)
 !$omp parallel do private(iv_loc,it,iexch,ir)
   do iv_loc=1,nv_loc
      iexch = (iv_loc-1)*n_theta
@@ -118,8 +118,6 @@ subroutine cgyro_nl_fftw(ij)
         enddo
      enddo
   enddo
-  deallocate(fpack)
-  deallocate(gpack)
   call timer_lib_out('nl_comm')
 
   ! RHS -> -[f,g] = [f,g]_{r,-alpha}

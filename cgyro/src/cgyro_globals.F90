@@ -306,6 +306,8 @@ module cgyro_globals
   complex, dimension(:,:), allocatable :: chi
   complex, dimension(:,:,:), allocatable :: f_nl
   complex, dimension(:,:,:), allocatable :: g_nl
+  complex, dimension(:,:), allocatable :: fpack
+  complex, dimension(:,:), allocatable :: gpack
   complex, dimension(:,:), allocatable :: omega_cap_h
   complex, dimension(:,:), allocatable :: omega_h
   complex, dimension(:,:,:), allocatable :: omega_s,omega_ss
