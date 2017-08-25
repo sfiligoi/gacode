@@ -266,6 +266,30 @@ contains
 
 !=========================================================
 
+  subroutine parallel_slib_f_nc(x,xt)
+
+    use mpi
+
+    !-------------------------------------------------------
+    implicit none
+    !
+    complex, intent(in), dimension(nkeep,nsplit*nn) :: x
+    complex, intent(inout), dimension(nkeep,nsplit,nn) :: xt
+    !
+    integer :: ierr
+    !-------------------------------------------------------
+
+    call MPI_ALLTOALL(x, &
+         nkeep*nsplit, &
+         MPI_DOUBLE_COMPLEX, &
+         xt, &
+         nkeep*nsplit, &
+         MPI_DOUBLE_COMPLEX, &
+         slib_comm, &
+         ierr)
+
+  end subroutine parallel_slib_f_nc
+
   subroutine parallel_slib_f(x_in,xt)
 
     use mpi
@@ -290,18 +314,95 @@ contains
        x(:,j) = (0.0,0.0)
     enddo
 
-    call MPI_ALLTOALL(x, &
+    call parallel_slib_f_nc(x,xt)
+
+  end subroutine parallel_slib_f
+
+  ! Note: x must be of the right size, no padding as in parallel_slib_f
+  ! x and xt must be valid until parallel_slib_f_i_complete is called
+  subroutine parallel_slib_f_i_start(x,xt,req)
+
+    use mpi
+
+    !-------------------------------------------------------
+    implicit none
+    !
+    complex, intent(in), dimension(nkeep,nsplit*nn) :: x
+    complex, intent(inout), dimension(nkeep,nsplit,nn) :: xt
+    integer, intent(inout) :: req
+    !
+    integer :: ierr
+    !-------------------------------------------------------
+
+    call MPI_IALLTOALL(x, &
          nkeep*nsplit, &
          MPI_DOUBLE_COMPLEX, &
          xt, &
          nkeep*nsplit, &
          MPI_DOUBLE_COMPLEX, &
          slib_comm, &
+         req, &
          ierr)
 
-  end subroutine parallel_slib_f
+  end subroutine parallel_slib_f_i_start
 
- !=========================================================
+  subroutine parallel_slib_f_i_complete(req)
+
+    use mpi
+
+    !-------------------------------------------------------
+    implicit none
+    !
+    integer, intent(inout) :: req
+    !
+    integer :: ierr
+    !-------------------------------------------------------
+
+    call MPI_WAIT(req, MPI_STATUS_IGNORE, ierr)
+
+  end subroutine parallel_slib_f_i_complete
+
+  subroutine parallel_slib_f_i_complete2(req1,req2)
+
+    use mpi
+
+    !-------------------------------------------------------
+    implicit none
+    !
+    integer, intent(inout) :: req1,req2
+    !-------------------------------------------------------
+
+    ! just call the two single waits... to be better optimized in the future
+    call parallel_slib_f_i_complete(req1)
+    call parallel_slib_f_i_complete(req2)
+
+  end subroutine parallel_slib_f_i_complete2
+ 
+!=========================================================
+
+  subroutine parallel_slib_r_nc (xt,x)
+
+    use mpi
+
+    !-------------------------------------------------------
+    implicit none
+    !
+    complex, intent(in), dimension(nkeep,nsplit,nn) :: xt
+    complex, intent(inout), dimension(nkeep,nsplit*nn) :: x
+    !
+    integer :: ierr
+    !-------------------------------------------------------
+
+    call MPI_ALLTOALL(xt, &
+         nkeep*nsplit, &
+         MPI_DOUBLE_COMPLEX, &
+         x, &
+         nkeep*nsplit, &
+         MPI_DOUBLE_COMPLEX, &
+         slib_comm, &
+         ierr)
+
+  end subroutine parallel_slib_r_nc
 
   subroutine parallel_slib_r(xt,x_out)
 
@@ -318,14 +419,7 @@ contains
     integer :: ierr
     !-------------------------------------------------------
 
-    call MPI_ALLTOALL(xt, &
-         nkeep*nsplit, &
-         MPI_DOUBLE_COMPLEX, &
-         x, &
-         nkeep*nsplit, &
-         MPI_DOUBLE_COMPLEX, &
-         slib_comm, &
-         ierr)
+    call parallel_slib_r_nc(xt,x)
 
 !$omp parallel do private(j)
     do j=1,nexch

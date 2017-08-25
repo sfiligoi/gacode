@@ -97,18 +97,26 @@ subroutine cgyro_make_profiles
      endif
 
      ! Normalizing quantities
-     dens_norm = dens_ele
-     temp_norm = temp_ele
+     dens_norm = dens_ele       ! ne e19/m3
+     temp_norm = temp_ele       ! Te keV
+     mass_norm = mass_deuterium ! mD e-27 kg
 
      ! Compute vth (m/s) using dimensional quantities.  
      ! mass(i) is thus measured in units of deuterium mass.
      do is=1,n_species
-        vth(is) = sqrt(temp(is) * temp_norm_fac &
-             / (mass(is) * mass_deuterium)) * 1.0e4 
+        vth(is) = sqrt(temp(is) * temp_norm_fac / (mass(is) * mass_norm)) &
+             * 1.0e4 
      enddo
-     vth_norm  = sqrt(temp_ele * temp_norm_fac &
-          / (mass_deuterium)) * 1.0e4
+     vth_norm  = sqrt(temp_norm * temp_norm_fac / mass_norm) * 1.0e4 ! c_s (m/s)
 
+     ! Normalizing rho_star and GB flux factors
+     rho_star_norm = sqrt(temp_norm * temp_norm_fac * mass_deuterium) &
+          / (charge_norm_fac * b_unit) * 1.0e-4 / a_meters   ! rho_s/a
+     gamma_gb_norm = dens_norm * vth_norm * rho_star_norm**2 ! e19 m-2 s-1
+     q_gb_norm     = gamma_gb_norm * temp_norm * temp_norm_fac / 1.0e6 ! MW/m2
+     pi_gb_norm    = dens_norm * temp_norm * temp_norm_fac * a_meters &
+          * rho_star_norm**2 ! N/m
+     
      ! Compute collision frequency
 
      cc = sqrt(2.0) * pi * charge_norm_fac**4 &
@@ -182,11 +190,16 @@ subroutine cgyro_make_profiles
 
   else
 
-     a_meters  = 1.0
-     b_unit    = 1.0
-     dens_norm = 1.0
-     temp_norm = 1.0
-     vth_norm  = 1.0
+     a_meters      = 0.0
+     b_unit        = 0.0
+     dens_norm     = 0.0
+     temp_norm     = 0.0
+     vth_norm      = 0.0
+     mass_norm     = 0.0
+     rho_star_norm = 0.0
+     gamma_gb_norm = 0.0
+     q_gb_norm     = 0.0
+     pi_gb_norm    = 0.0
      
      q = abs(q)*(ipccw)*(btccw)
 

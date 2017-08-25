@@ -306,6 +306,8 @@ module cgyro_globals
   complex, dimension(:,:), allocatable :: chi
   complex, dimension(:,:,:), allocatable :: f_nl
   complex, dimension(:,:,:), allocatable :: g_nl
+  complex, dimension(:,:), allocatable :: fpack
+  complex, dimension(:,:), allocatable :: gpack
   complex, dimension(:,:), allocatable :: omega_cap_h
   complex, dimension(:,:), allocatable :: omega_h
   complex, dimension(:,:,:), allocatable :: omega_s,omega_ss
@@ -339,6 +341,10 @@ module cgyro_globals
   real, dimension(:,:,:), allocatable :: fflux
   complex, dimension(:,:,:), allocatable :: gflux_loc
   complex, dimension(:,:,:), allocatable :: gflux
+  !
+  ! Nonlinear async requests
+  integer :: f_com_req
+  integer :: g_com_req
   !
   ! Nonlinear plans
   type(C_PTR) :: plan_r2c

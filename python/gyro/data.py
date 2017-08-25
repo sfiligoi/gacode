@@ -391,14 +391,14 @@ class GYROData:
         except:
             raise IOError("ERROR (GYROData): out.gyro.gbflux_exc not found.")
 
-        nt = len(gbflux_exc)/(n_kinetic*4)
+        nt = len(gbflux_exc)/(n_kinetic*2)
 
         if self.n > nt:
             raise IOError('ERROR (GYROData): '+self.dirname+
               '/out.gyro.gbflux_exc too small. ')
 
 
-        self.gbflux_exc = gbflux_exc.reshape((n_kinetic,4,nt),order='F')
+        self.gbflux_exc = gbflux_exc.reshape((n_kinetic,2,nt),order='F')
         self.loaded.append('gbflux_exc')
 
         #---------------------------------------------------------------------------#

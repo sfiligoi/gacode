@@ -70,7 +70,6 @@ subroutine cgyro_write_restart_one
   integer(kind=MPI_OFFSET_KIND) :: offset1
   !----------------------------------------------
 
-
   !-----------------------------------------------
   ! Dump h and blending coefficients:
   !

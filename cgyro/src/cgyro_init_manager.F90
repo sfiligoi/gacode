@@ -187,9 +187,13 @@ subroutine cgyro_init_manager
         if (nonlinear_method == 1) then
            allocate(f_nl(nc,nsplit,n_toroidal))
            allocate(g_nl(nc,nsplit,n_toroidal))
+           allocate(fpack(nc,nsplit*n_toroidal))
+           allocate(gpack(nc,nsplit*n_toroidal))
         else
            allocate(f_nl(n_radial,nsplit,n_toroidal))
            allocate(g_nl(n_radial,nsplit,n_toroidal))
+           allocate(fpack(n_radial,nsplit*n_toroidal))
+           allocate(gpack(n_radial,nsplit*n_toroidal))
         endif
      endif
 

@@ -182,13 +182,6 @@ subroutine cgyro_mpi_grid
   !
   call MPI_COMM_RANK(NEW_COMM_1,i_proc_1,i_err)
   call MPI_COMM_RANK(NEW_COMM_2,i_proc_2,i_err)
-
-  !if (i_proc == 0) print *,'         i_proc   i_group_1   i_proc_1   i_group_2   i_proc_2'
-  !print *,i_proc,i_group_1,i_proc_1,i_group_2,i_proc_2
-  !call MPI_FINALIZE(i_err)
-  !stop
-
-  !
   !-----------------------------------------------------------
 
   ! Linear parallelization dimensions

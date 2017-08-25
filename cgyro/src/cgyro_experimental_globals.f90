@@ -7,7 +7,8 @@ module cgyro_experimental_globals
   real, parameter :: temp_norm_fac   = 1602.2
   real, parameter :: charge_norm_fac = 1.6022
 
-  real :: dens_norm, temp_norm, vth_norm
+  real :: dens_norm, temp_norm, vth_norm, mass_norm, rho_star_norm
+  real :: gamma_gb_norm, q_gb_norm, pi_gb_norm
 
   real    :: a_meters
   real    :: b_unit
