@@ -50,33 +50,20 @@ subroutine cgyro_nl_direct(ij)
 !$omp parallel do private(iexch)
      do iexch=1,nv_loc*n_theta
         fpack(:,iexch) = h_x(:,iexch)
-     enddo
-
-     do iexch=nv_loc*n_theta+1,nsplit*n_toroidal
-        fpack(:,iexch) = (0.0,0.0)
-     enddo
-
-     call parallel_slib_f_i_start(fpack,f_nl,f_com_req)
-  else
-     call parallel_slib_f_i_start(h_x,f_nl,f_com_req)
-  endif
-
-  if ((nv_loc*n_theta) /= nsplit*n_toroidal) then
-!$omp parallel do private(iexch)
-     do iexch=1,nv_loc*n_theta
         gpack(:,iexch) = psi(:,iexch)
      enddo
 
      do iexch=nv_loc*n_theta+1,nsplit*n_toroidal
+        fpack(:,iexch) = (0.0,0.0)
         gpack(:,iexch) = (0.0,0.0)
      enddo
 
-     call parallel_slib_f_i_start(gpack,g_nl,g_com_req)
+     call parallel_slib_f_nc(fpack,f_nl)
+     call parallel_slib_f_nc(gpack,g_nl)
   else
-     call parallel_slib_f_i_start(psi,g_nl,g_com_req)
+     call parallel_slib_f_nc(h_x,f_nl)
+     call parallel_slib_f_nc(psi,g_nl)
   endif
-
-  call parallel_slib_f_i_complete2(f_com_req,g_com_req)
 
   call timer_lib_out('nl_comm')
 
