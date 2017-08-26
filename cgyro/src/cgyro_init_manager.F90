@@ -154,9 +154,9 @@ subroutine cgyro_init_manager
      allocate(f_balloon(n_radial/box_size,n_theta))
      allocate(recv_status(MPI_STATUS_SIZE))
 
-     allocate(icd_c(nc,-nup_theta:nup_theta))
-     allocate(dtheta(nc,-nup_theta:nup_theta))
-     allocate(dtheta_up(nc,-nup_theta:nup_theta))
+     allocate(icd_c(-nup_theta:nup_theta, nc))
+     allocate(dtheta(-nup_theta:nup_theta, nc))
+     allocate(dtheta_up(-nup_theta:nup_theta, nc))
 
      ! Velocity-distributed arrays
      allocate(rhs(nc,nv_loc,4))

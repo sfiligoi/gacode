@@ -231,13 +231,13 @@ PLT=$PYROOT/data_plot_single.py
 case "$PLOT_TYPE" in
 
    ball)
-	python $PYROOT/plot_ball.py $FTYPE $TIME $FIELD $TMAX ;;
+	python $PLT $PLOT_TYPE $TIME $FIELD $TMAX $FTYPE ;;
 
    hb)
-	python $PYROOT/plot_hb.py $FTYPE $TIME $SPECIES $TMAX $MESH ;;
+	python $PLT $PLOT_TYPE $TIME $SPECIES $TMAX $MESH $FTYPE ;;
 
    hbcut)
-	python $PYROOT/plot_hbcut.py $FTYPE $TIME $SPECIES $TMAX $THETA ;;
+	python $PLT $PLOT_TYPE $TIME $SPECIES $TMAX $THETA $FTYPE ;;
 
    freq)
 	python $PLT $PLOT_TYPE $W $FTYPE ;;
@@ -246,46 +246,40 @@ case "$PLOT_TYPE" in
 	python $PLT $PLOT_TYPE $W $FTYPE ;;
 
    error)
-	python $PYROOT/plot_error.py $FTYPE ;;
-
-   ky_flux)
-	python $PYROOT/plot_ky_flux.py $FTYPE $W $MOMENT $YMIN $YMAX $FIELD $FC ;;
+	python $PLT $PLOT_TYPE $FTYPE ;;
 
    xflux)
-	python $PYROOT/plot_xflux.py $FTYPE $W $MOMENT $YMIN $YMAX ;;
-
-   fluct)
-	python $PYROOT/plot_fluct.py $FTYPE $MOMENT $SPECIES $YMIN $YMAX $NX $NY $TIME $FMIN $FMAX $CMAP ;;
+	python $PLT $PLOT_TYPE $W $MOMENT $YMIN $YMAX $FTYPE ;;
 
    flux)
-	if [ "$FTYPE" == "dump" ]
-        then
-	   python $PYROOT/dump_flux.py 
-        else
-	   python $PLT $PLOT_TYPE $W $FIELD $MOMENT $YMIN $YMAX $FC $FTYPE
-        fi
-        ;;
+        python $PLT $PLOT_TYPE $W $FIELD $MOMENT $YMIN $YMAX $FC $FTYPE ;;
+
+   ky_flux)
+	python $PLT $PLOT_TYPE $W $FIELD $MOMENT $YMIN $YMAX $FC $FTYPE ;;
 
    phi)
-	python $PYROOT/plot_phi.py $FTYPE $FIELD ;;
+	python $PLT $PLOT_TYPE $FIELD $FTYPE ;;
 
    ky_phi)
 	python $PLT $PLOT_TYPE $FIELD $YMIN $YMAX $N $FTYPE ;;
 
    kx_phi)
-	python $PYROOT/plot_kx_phi.py $FTYPE $W $YMIN $YMAX $N ;;
+	python $PLT $PLOT_TYPE $W $YMIN $YMAX $N $FTYPE ;;
 
    kxky_phi)
-	python $PYROOT/plot_kxky_phi.py $FTYPE $W $FIELD ;;
+	python $PLT $PLOT_TYPE $W $FTYPE ;;
 
    rcorr_phi)
         python $PLT $PLOT_TYPE $W $FTYPE ;;
 
    zf)
-	python $PYROOT/plot_zf.py $FTYPE $W $FIELD ;;
+	python $PLT $PLOT_TYPE $W $FIELD $FTYPE ;;
 
    geo)
-	python $PLT $PLOT_TYPE $FTYPE ;;
+       python $PLT $PLOT_TYPE $FTYPE ;;
+
+   fluct)
+       python $PYROOT/plot_fluct.py $FTYPE $MOMENT $SPECIES $YMIN $YMAX $NX $NY $TIME $FMIN $FMAX $CMAP ;;
 
    text)
    	python $PYROOT/text.py $W $FTYPE ;;
