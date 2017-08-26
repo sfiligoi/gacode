@@ -248,12 +248,8 @@ case "$PLOT_TYPE" in
    error)
 	python $PLT $PLOT_TYPE $FTYPE ;;
 
-
    xflux)
 	python $PLT $PLOT_TYPE $W $MOMENT $YMIN $YMAX $FTYPE ;;
-
-   fluct)
-	python $PYROOT/plot_fluct.py $FTYPE $MOMENT $SPECIES $YMIN $YMAX $NX $NY $TIME $FMIN $FMAX $CMAP ;;
 
    flux)
         python $PLT $PLOT_TYPE $W $FIELD $MOMENT $YMIN $YMAX $FC $FTYPE ;;
@@ -280,7 +276,10 @@ case "$PLOT_TYPE" in
 	python $PLT $PLOT_TYPE $W $FIELD $FTYPE ;;
 
    geo)
-	python $PLT $PLOT_TYPE $FTYPE ;;
+       python $PLT $PLOT_TYPE $FTYPE ;;
+
+   fluct)
+       python $PYROOT/plot_fluct.py $FTYPE $MOMENT $SPECIES $YMIN $YMAX $NX $NY $TIME $FMIN $FMAX $CMAP ;;
 
    text)
    	python $PYROOT/text.py $W $FTYPE ;;
