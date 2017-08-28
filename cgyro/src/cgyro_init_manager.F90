@@ -44,8 +44,8 @@ subroutine cgyro_init_manager
 
   !------------------------------------------------------
   ! Initialize startup timers 
-  !  NOTE: All "runtime" timers are initialized 
-  !        in cgyro_write_timedata
+  !  NOTE: "Runtime" timers are initialized in cgyro_write_timedata,
+  !  and input timer is initialized by read_input.
   !------------------------------------------------------
   call timer_lib_init('str_init')
   call timer_lib_init('coll_init')

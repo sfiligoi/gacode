@@ -808,11 +808,11 @@ subroutine write_timers(datafile)
      if (i_proc == 0) then
         open(unit=io,file=datafile,status='replace')
         write(io,'(a)') 'Setup time'
-        write(io,'(1x,9(a11,1x))') timer_cpu_tag(1:3)
+        write(io,'(1x,9(a11,1x))') timer_cpu_tag(1:4)
         write(io,'(9(1pe10.3,2x))') &
-             timer_lib_time('str_init'),timer_lib_time('coll_init'),timer_lib_time('io_init')
+             timer_lib_time('input'),timer_lib_time('str_init'),timer_lib_time('coll_init'),timer_lib_time('io_init')
         write(io,'(a)') 'Run time'
-        write(io,'(1x,11(a10,1x))') timer_cpu_tag(4:14)
+        write(io,'(1x,11(a10,1x))') timer_cpu_tag(5:15)
         close(io)
      endif
 
