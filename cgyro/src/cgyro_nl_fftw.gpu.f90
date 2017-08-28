@@ -51,8 +51,8 @@ subroutine cgyro_nl_fftw(ij)
      gpack(:,iexch) = (0.0,0.0)
   enddo
 
-  call parallel_slib_f(fpack,f_nl)
-  call parallel_slib_f(gpack,g_nl)
+  call parallel_slib_f_nc(fpack,f_nl)
+  call parallel_slib_f_nc(gpack,g_nl)
   call timer_lib_out('nl_comm')
 
   call timer_lib_in('nl')
