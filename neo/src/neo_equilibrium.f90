@@ -31,7 +31,7 @@ module neo_equilibrium
   real                            :: Bmag_th0_rderiv  ! (dB/dr) (a/Bunit) th=0
   real                            :: ftrap       ! frac of trapped particles
   real, dimension(:), allocatable :: theta_nc    ! NCLASS theta grid
-
+  
   ! radial deriv of the volume enclosed by a flux surface
   real, dimension(:), allocatable :: v_prime_g  ! (nr)
   
@@ -335,6 +335,45 @@ contains
        write(1,'(1pe16.8)') bigR_th0
        write(1,'(1pe16.8)') bigR_th0_rderiv
        close(1)
+       !!!
+       open(unit=1,file=trim(path)//'out.neo.diagnostic_geo2',status='replace')
+       write(1,'(1pe16.8)') I_div_psip
+       write(1,'(1pe16.8)') ftrap
+       write(1,'(1pe16.8)') Bmag2_avg         ! <B^2>
+       write(1,'(1pe16.8)') Bmag2inv_avg      ! <1/B^2>
+       write(1,'(1pe16.8)') gradpar_Bmag2_avg ! <(bhat dot grad B)^2>
+       sum = 0.0
+       do it=1,n_theta
+          sum = sum + w_theta(it)*gradpar_Bmag(it)**2/Bmag(it)**2
+       enddo
+       write(1,'(1pe16.8)') sum                ! <(bhat dot grad B)^2/B^2>
+       sum = 0.0
+       do it=1,n_theta
+          sum = sum + w_theta(it)*Btor(it)**2
+       enddo
+       write(1,'(1pe16.8)') sum                ! <Btor^2>
+       sum = 0.0
+       do it=1,n_theta
+          sum = sum + w_theta(it)*Bpol(it)**2
+       enddo
+       write(1,'(1pe16.8)') sum                ! <Bpol^2>
+       sum = 0.0
+       do it=1,n_theta
+          sum = sum + w_theta(it)*gradr(it)**2
+       enddo
+       write(1,'(1pe16.8)') sum                ! <|grad r|^2>
+       sum = 0.0
+       do it=1,n_theta
+          sum = sum + w_theta(it)*gradr(it)**2/Bmag(it)**2
+       enddo
+       write(1,'(1pe16.8)') sum                ! <|grad r|^2/B^2>
+       sum = 0.0
+       do it=1,n_theta
+          sum = sum + w_theta(it)*v_drift_x(it)*rmaj(ir)/rho(ir)
+       enddo
+       write(1,'(1pe16.8)') sum                ! <-grad_r * gsin/B>
+       close(1)
+          
     endif
 
   end subroutine EQUIL_DO
