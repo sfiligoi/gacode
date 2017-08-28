@@ -349,6 +349,10 @@ contains
        write(1,'(1pe16.8)') sum                ! <(bhat dot grad B)^2/B^2>
        sum = 0.0
        do it=1,n_theta
+          sum = sum + w_theta(it)*(k_par(it) * q(ir) * rmaj(ir))**2
+       enddo
+       write(1,'(1pe16.8)') sum                ! <(qR/Jpsi B)^2>
+       do it=1,n_theta
           sum = sum + w_theta(it)*Btor(it)**2
        enddo
        write(1,'(1pe16.8)') sum                ! <Btor^2>
@@ -373,7 +377,7 @@ contains
        enddo
        write(1,'(1pe16.8)') sum                ! <-grad_r * gsin/B>
        close(1)
-          
+ 
     endif
 
   end subroutine EQUIL_DO
