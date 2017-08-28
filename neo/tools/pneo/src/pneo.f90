@@ -32,9 +32,11 @@ program pneo
   do i=1,ni
      do j=1,nj
 
+        neo_q_in = 2.0
         print *,i,j
         call neo_run()
-
+        print *, neo_jpar_dke_out
+        
      enddo
   enddo
 
