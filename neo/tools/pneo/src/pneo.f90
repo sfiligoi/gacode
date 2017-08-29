@@ -7,8 +7,8 @@ program pneo
 
   implicit none
 
-  integer :: p, i1,i2,i3,i4,i5,i6,i7,i8
-  integer :: ni1=4, ni2=4, ni3=4, ni4=4, ni5=4, ni6=4, ni7=4, ni8=4
+  integer :: p, k, i1,i2,i3,i4,i5,i6,i7,i8
+  integer :: ni1=4, ni2=4, ni3=1, ni4=1, ni5=1, ni6=1, ni7=1, ni8=1
   real, dimension(4) :: rmin_over_rmaj = (/ 0.1,0.2,0.3,0.4 /)
   real, dimension(4) :: q = (/ 1.0,2.0,3.0,4.0 /)
   real, dimension(4) :: nu_ee = (/ 1.0e-4,1.0e-3,1.0e-2,1.0e-1 /)
@@ -44,6 +44,8 @@ program pneo
   allocate(ic8(ntot))
   allocate(indata_vec(8,ntot))
   allocate(indata_tot(8,ntot))
+  allocate(ingeodata_vec(12,ntot))
+  allocate(ingeodata_tot(12,ntot))
   allocate(outdata_vec(6,ntot))
   allocate(outdata_tot(6,ntot))
 
@@ -136,42 +138,57 @@ program pneo
      indata_vec(6,p) = neo_delta_in
      indata_vec(7,p) = neo_s_delta_in
      indata_vec(8,p) = neo_s_kappa_in
+
+     neo_sim_model_in = 0
      
      ! Cne
      neo_dlnndr_in(:) = 0.0; neo_dlnndr_in(1) = 1.0
-     !call neo_run()
-     outdata_vec(1,p) = neo_jpar_dke_out
+     call neo_run()
+     outdata_vec(1,p) = neo_jpar_dke_out/(abs(neo_z_in(1))*neo_dens_in(1))
      ! CTe
      neo_dlnndr_in(:) = 0.0; neo_dlntdr_in(1) = 1.0 
-     !call neo_run()
-     outdata_vec(2,p) = neo_jpar_dke_out
+     call neo_run()
+     outdata_vec(2,p) = neo_jpar_dke_out/(abs(neo_z_in(1))*neo_dens_in(1))
      ! Cni1
      neo_dlnndr_in(:) = 0.0; neo_dlnndr_in(2) = 1.0 
-     !call neo_run()
-     outdata_vec(3,p) = neo_jpar_dke_out
+     call neo_run()
+     outdata_vec(3,p) = neo_jpar_dke_out/(abs(neo_z_in(2))*neo_dens_in(2))
      ! CTi1
      neo_dlnndr_in(:) = 0.0; neo_dlntdr_in(2) = 1.0      
-     !call neo_run()
-     outdata_vec(4,p) = neo_jpar_dke_out
+     call neo_run()
+     outdata_vec(4,p) = neo_jpar_dke_out/(abs(neo_z_in(2))*neo_dens_in(2))
      ! Cni2
      neo_dlnndr_in(:) = 0.0; neo_dlnndr_in(3) = 1.0 
-     !call neo_run()
-     outdata_vec(5,p) = neo_jpar_dke_out
+     call neo_run()
+     outdata_vec(5,p) = neo_jpar_dke_out/(abs(neo_z_in(3))*neo_dens_in(3))
      ! CTi2 
      neo_dlnndr_in(:) = 0.0; neo_dlntdr_in(3) = 1.0    
-     !call neo_run()
-     outdata_vec(6,p) = neo_jpar_dke_out
+     call neo_run()
+     outdata_vec(6,p) = neo_jpar_dke_out/(abs(neo_z_in(3))*neo_dens_in(3))
+
+     ! store geometry parameters
+     do k=1,12
+        ingeodata_vec(k,p) = neo_geoparams_out(k)
+     enddo
+
+     ! renormalize the coefficients by 1/I_div_psiprime/rho_star
+     outdata_vec(:,p) = outdata_vec(:,p) &
+          / (neo_geoparams_out(1)*neo_rho_star_in)
      
   enddo
 
   ! Collect all data 
   call MPI_ALLREDUCE(indata_vec,indata_tot,size(indata_tot), &
        MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,i_err)
+  call MPI_ALLREDUCE(ingeodata_vec,ingeodata_tot,size(ingeodata_tot), &
+       MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,i_err)
   call MPI_ALLREDUCE(outdata_vec,outdata_tot,size(outdata_tot), &
        MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,i_err)
 
   if (i_proc == 0) then
-     print *,indata_tot(8,:)
+     do p=1,ntot
+        print *, p, indata_vec(1,p), indata_vec(2,p)
+     enddo
   endif
 
   call MPI_finalize(i_err)
