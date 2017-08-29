@@ -6,4 +6,10 @@ module pneo_globals
   integer :: n_proc
   integer :: i_err
 
+  integer :: ntot
+  integer :: ni,nj
+  integer, dimension(:), allocatable :: ic,jc
+  real, dimension(:,:), allocatable :: data_vec
+  real, dimension(:,:), allocatable :: data_tot
+
 end module pneo_globals
