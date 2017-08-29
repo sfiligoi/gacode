@@ -246,6 +246,8 @@ subroutine cgyro_mpi_grid
   ! TODO Hardcoded for now, may become an input parameter eventually
   restart_format = 2
 
+  ! save hostname configuration
+  call cgyro_write_hosts
   !----------------------------------------------------------------------------
 
 end subroutine cgyro_mpi_grid
