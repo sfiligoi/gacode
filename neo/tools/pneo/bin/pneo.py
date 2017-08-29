@@ -17,14 +17,30 @@ n = len(indata)/8
 indata = np.reshape(indata,(8,n),'F')
 
 # Geometry inputs
-#  ingeodata(1) = 
+#  ingeodata(1)  = I/psiprime
+#  ingeodata(2)  = ftrap
+#  ingeodata(3)  = <B^2>
+#  ingeodata(4)  = <1/B^2>
+#  ingeodata(5)  = <(b dot grad B)^2>
+#  ingeodata(6)  = <(b dot grad B)^2/B^2>
+#  ingeodata(7)  = <q R0 / Jpsi B>
+#  ingeodata(8)  = <Btor^2>
+#  ingeodata(9)  = <Bpol^2>
+#  ingeodata(10) = <|grad r|^2>
+#  ingeodata(11) = <|grad r|^2/B^2>
+#  ingeodata(12) = <-grad_r * gsin/B>
 
 ingeodata = np.fromfile('ingeodata.dat',dtype='float',sep=" ")
 n = len(ingeodata)/12
 ingeodata = np.reshape(ingeodata,(12,n),'F')
 
 # Outputs
-#  outdata(1) = 
+#  outdata(1) = Cne
+#  outdata(2) = CTe
+#  outdata(3) = Cni1
+#  outdata(4) = CTi1
+#  outdata(5) = Cni2
+#  outdata(6) = CTi2
 
 outdata = np.fromfile('outdata.dat',dtype='float',sep=" ")
 n = len(indata)/6
