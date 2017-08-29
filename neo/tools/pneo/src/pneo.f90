@@ -9,14 +9,14 @@ program pneo
 
   integer :: p, k, i1,i2,i3,i4,i5,i6,i7,i8
   integer,parameter :: n1=3, n2=3, n3=4, n4=2, n5=2, n6=2, n7=2, n8=2
-  real, dimension(4) :: rmin_over_rmaj = (/ 0.1,0.2,0.3 /)
-  real, dimension(4) :: q = (/ 1.0,2.0,4.0 /)
-  real, dimension(4) :: nu_ee = (/ 1.0e-4,1.0e-3,1.0e-2,1.0e-1 /)
-  real, dimension(4) :: ni_over_ne = (/ 0.8,1.0 /)
-  real, dimension(4) :: ti_over_te  = (/ 1.0,1.5 /)
-  real, dimension(4) :: delta   = (/ 0.0,0.2 /)
-  real, dimension(4) :: s_delta = (/ 0.0,0.2 /)
-  real, dimension(4) :: s_kappa = (/ 0.0,0.2 /)
+  real, dimension(n1) :: rmin_over_rmaj = (/ 0.1,0.2,0.3 /)
+  real, dimension(n2) :: q = (/ 1.0,2.0,4.0 /)
+  real, dimension(n3) :: nu_ee = (/ 1.0e-4,1.0e-3,1.0e-2,1.0e-1 /)
+  real, dimension(n4) :: ni_over_ne = (/ 0.8,1.0 /)
+  real, dimension(n5) :: ti_over_te  = (/ 1.0,1.5 /)
+  real, dimension(n6) :: delta   = (/ 0.0,0.2 /)
+  real, dimension(n7) :: s_delta = (/ 0.0,0.2 /)
+  real, dimension(n8) :: s_kappa = (/ 0.0,0.2 /)
 
   !---------------------------------------------------------------------
   ! Initialize MPI_COMM_WORLD communicator.
