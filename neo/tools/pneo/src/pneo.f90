@@ -8,16 +8,16 @@ program pneo
   implicit none
 
   integer :: p, k, i1,i2,i3,i4,i5,i6,i7,i8
-  integer,parameter :: n1=4, n2=4, n3=1, n4=1, n5=1, n6=1, n7=1, n8=1
-  real, dimension(4) :: rmin_over_rmaj = (/ 0.1,0.2,0.3,0.4 /)
-  real, dimension(4) :: q = (/ 1.0,2.0,3.0,4.0 /)
+  integer,parameter :: n1=3, n2=3, n3=4, n4=2, n5=2, n6=2, n7=2, n8=2
+  real, dimension(4) :: rmin_over_rmaj = (/ 0.1,0.2,0.3 /)
+  real, dimension(4) :: q = (/ 1.0,2.0,4.0 /)
   real, dimension(4) :: nu_ee = (/ 1.0e-4,1.0e-3,1.0e-2,1.0e-1 /)
-  real, dimension(4) :: ni_over_ne = (/ 0.25,0.5,0.75,1.0 /)
-  real, dimension(4) :: ti_over_te  = (/ 0.75,1.0,1.5,2.0 /)
-  real, dimension(4) :: delta   = (/ 0.0,0.1,0.2,0.3 /)
-  real, dimension(4) :: s_delta = (/ 0.0,0.1,0.2,0.3 /)
-  real, dimension(4) :: s_kappa = (/ 0.0,0.1,0.2,0.3 /)
-  
+  real, dimension(4) :: ni_over_ne = (/ 0.8,1.0 /)
+  real, dimension(4) :: ti_over_te  = (/ 1.0,1.5 /)
+  real, dimension(4) :: delta   = (/ 0.0,0.2 /)
+  real, dimension(4) :: s_delta = (/ 0.0,0.2 /)
+  real, dimension(4) :: s_kappa = (/ 0.0,0.2 /)
+
   !---------------------------------------------------------------------
   ! Initialize MPI_COMM_WORLD communicator.
   !
@@ -32,7 +32,7 @@ program pneo
   call neo_init_serial(path)
 
   ! pointers
-  
+
   ntot = n1*n2*n3*n4*n5*n6*n7*n8
   allocate(ic1(ntot))
   allocate(ic2(ntot))
@@ -58,7 +58,7 @@ program pneo
                  do i6=1,n6
                     do i7=1,n7
                        do i8=1,n8
-                      
+
                           p = p+1
                           ic1(p) = i1
                           ic2(p) = i2
@@ -75,7 +75,7 @@ program pneo
            enddo
         enddo
      enddo
-  enddo              
+  enddo
 
   ! Fixed NEO subroutine inputs
   neo_silent_flag_in = 1
@@ -93,7 +93,7 @@ program pneo
   neo_s_zeta_in = 0.0
   neo_zmag_over_a_in = 0.0
   neo_s_zmag_in = 0.0
-  
+
   ! 3 species: ele + D + C
   neo_n_species_in = 3
   ! electrons
@@ -108,11 +108,13 @@ program pneo
   neo_z_in(3)     = 6
   neo_mass_in(3)  = 6.0
 
-  !!!!!! FOR TESTING, USE THEORY sim_model=0; else use sim_model=1
-  neo_sim_model_in = 0
-  !!!!!!
-  
+!!!!!! FOR TESTING, USE THEORY sim_model=0; else use sim_model=1
+!  neo_sim_model_in = 0
+!!!!!!
+
   do p=1+i_proc,ntot,n_proc
+
+     print *,p
 
      i1 = ic1(p) 
      i2 = ic2(p)
@@ -122,7 +124,7 @@ program pneo
      i6 = ic6(p)
      i7 = ic7(p) 
      i8 = ic8(p)
-     
+
      neo_rmin_over_a_in = rmin_over_rmaj(i1)
      neo_q_in       = q(i2)
      neo_nu_1_in    = nu_ee(i3)
@@ -142,7 +144,7 @@ program pneo
      indata_loc(6,p) = neo_delta_in
      indata_loc(7,p) = neo_s_delta_in
      indata_loc(8,p) = neo_s_kappa_in
-     
+
      ! Cne
      neo_dlnndr_in(:) = 0.0; neo_dlnndr_in(1) = 1.0
      call neo_run()
@@ -176,7 +178,7 @@ program pneo
      ! renormalize the coefficients by 1/I_div_psiprime/rho_star
      outdata_loc(:,p) = outdata_loc(:,p) &
           / (neo_geoparams_out(1)*neo_rho_star_in)
-     
+
   enddo
 
   ! Collect all data 
@@ -188,11 +190,25 @@ program pneo
        MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,i_err)
 
   if (i_proc == 0) then
-     do p=1,ntot
-        print *, p, indata(1,p), ingeodata(2,p)
-     enddo
+
+     print *,'NTOT=',ntot
+
+     open(unit=1,file='indata.dat',status='replace')
+     write(1,10) indata(:,:)
+     close(1)
+
+     open(unit=1,file='ingeodata.dat',status='replace')
+     write(1,10) ingeodata(:,:)
+     close(1)
+
+     open(unit=1,file='outdata.dat',status='replace')
+     write(1,10) outdata(:,:)
+     close(1)
+
   endif
 
   call MPI_finalize(i_err)
+
+10 format(1pe12.5)
 
 end program pneo
