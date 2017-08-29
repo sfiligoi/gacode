@@ -2,19 +2,28 @@ import os
 import numpy as np
 import sys
 
+d = {}
+
 # Inputs
 #  indata(1) = neo_rmin_over_a_in
 #  indata(2) = neo_q_in
 #  indata(3) = neo_nu_1_in
 #  indata(4) = neo_dens_in(2)
 #  indata(5) = neo_temp_in(2)
+#----
 #  indata(6) = neo_delta_in
 #  indata(7) = neo_s_delta_in
 #  indata(8) = neo_s_kappa_in
 
+tag_in = ['rmin_over_a','q','nu_1','dens_2','temp_2','delta','s_delta','s_kappa']
+
 indata = np.fromfile('indata.dat',dtype='float',sep=" ")
 n = len(indata)/8
 indata = np.reshape(indata,(8,n),'F')
+
+# Basic 5 inputs
+for i in range(5):
+   d[tag_in[i]] = indata[i,:]
 
 # Geometry inputs
 #  ingeodata(1)  = I/psiprime
@@ -34,6 +43,9 @@ ingeodata = np.fromfile('ingeodata.dat',dtype='float',sep=" ")
 n = len(ingeodata)/12
 ingeodata = np.reshape(ingeodata,(12,n),'F')
 
+# Magic 6th parameter
+d['magic'] = ingeodata[9,:]
+
 # Outputs
 #  outdata(1) = Cne
 #  outdata(2) = CTe
@@ -42,8 +54,14 @@ ingeodata = np.reshape(ingeodata,(12,n),'F')
 #  outdata(5) = Cni2
 #  outdata(6) = CTi2
 
+tag_out = ['cne','cte','cni1','cti1','cni2','cti2']
+
 outdata = np.fromfile('outdata.dat',dtype='float',sep=" ")
-n = len(indata)/6
+n = len(outdata)/6
 outdata = np.reshape(outdata,(6,n),'F')
 
+# 6 outputs
+for i in range(6):
+   d[tag_out[i]] = outdata[i,:]
 
+print d['rmin_over_a']
