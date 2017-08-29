@@ -8,12 +8,12 @@ module pneo_globals
 
   integer :: ntot
   integer, dimension(:), allocatable :: ic1,ic2,ic3,ic4,ic5,ic6,ic7,ic8
-  real, dimension(:,:), allocatable :: indata_vec
-  real, dimension(:,:), allocatable :: indata_tot
-  real, dimension(:,:), allocatable :: ingeodata_vec
-  real, dimension(:,:), allocatable :: ingeodata_tot
-  real, dimension(:,:), allocatable :: outdata_vec
-  real, dimension(:,:), allocatable :: outdata_tot
+  real, dimension(:,:), allocatable :: indata_loc
+  real, dimension(:,:), allocatable :: indata
+  real, dimension(:,:), allocatable :: ingeodata_loc
+  real, dimension(:,:), allocatable :: ingeodata
+  real, dimension(:,:), allocatable :: outdata_loc
+  real, dimension(:,:), allocatable :: outdata
 
 
 end module pneo_globals

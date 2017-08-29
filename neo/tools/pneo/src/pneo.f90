@@ -8,7 +8,7 @@ program pneo
   implicit none
 
   integer :: p, k, i1,i2,i3,i4,i5,i6,i7,i8
-  integer :: ni1=4, ni2=4, ni3=1, ni4=1, ni5=1, ni6=1, ni7=1, ni8=1
+  integer,parameter :: n1=4, n2=4, n3=1, n4=1, n5=1, n6=1, n7=1, n8=1
   real, dimension(4) :: rmin_over_rmaj = (/ 0.1,0.2,0.3,0.4 /)
   real, dimension(4) :: q = (/ 1.0,2.0,3.0,4.0 /)
   real, dimension(4) :: nu_ee = (/ 1.0e-4,1.0e-3,1.0e-2,1.0e-1 /)
@@ -33,7 +33,7 @@ program pneo
 
   ! pointers
   
-  ntot = ni1*ni2*ni3*ni4*ni5*ni6*ni7*ni8
+  ntot = n1*n2*n3*n4*n5*n6*n7*n8
   allocate(ic1(ntot))
   allocate(ic2(ntot))
   allocate(ic3(ntot))
@@ -42,22 +42,22 @@ program pneo
   allocate(ic6(ntot))
   allocate(ic7(ntot))
   allocate(ic8(ntot))
-  allocate(indata_vec(8,ntot))
-  allocate(indata_tot(8,ntot))
-  allocate(ingeodata_vec(12,ntot))
-  allocate(ingeodata_tot(12,ntot))
-  allocate(outdata_vec(6,ntot))
-  allocate(outdata_tot(6,ntot))
+  allocate(indata_loc(8,ntot))
+  allocate(indata(8,ntot))
+  allocate(ingeodata_loc(12,ntot))
+  allocate(ingeodata(12,ntot))
+  allocate(outdata_loc(6,ntot))
+  allocate(outdata(6,ntot))
 
   p = 0
-  do i1=1,ni1
-     do i2=1,ni2
-        do i3=1,ni3
-           do i4=1,ni4
-              do i5=1,ni5
-                 do i6=1,ni6
-                    do i7=1,ni7
-                       do i8=1,ni8
+  do i1=1,n1
+     do i2=1,n2
+        do i3=1,n3
+           do i4=1,n4
+              do i5=1,n5
+                 do i6=1,n6
+                    do i7=1,n7
+                       do i8=1,n8
                       
                           p = p+1
                           ic1(p) = i1
@@ -107,6 +107,10 @@ program pneo
   ! C
   neo_z_in(3)     = 6
   neo_mass_in(3)  = 6.0
+
+  !!!!!! FOR TESTING, USE THEORY sim_model=0; else use sim_model=1
+  neo_sim_model_in = 0
+  !!!!!!
   
   do p=1+i_proc,ntot,n_proc
 
@@ -130,64 +134,62 @@ program pneo
      neo_s_delta_in = s_delta(i7)
      neo_s_kappa_in = s_kappa(i8)
 
-     indata_vec(1,p) = neo_rmin_over_a_in
-     indata_vec(2,p) = neo_q_in
-     indata_vec(3,p) = neo_nu_1_in
-     indata_vec(4,p) = neo_dens_in(2)
-     indata_vec(5,p) = neo_temp_in(2)
-     indata_vec(6,p) = neo_delta_in
-     indata_vec(7,p) = neo_s_delta_in
-     indata_vec(8,p) = neo_s_kappa_in
-
-     neo_sim_model_in = 0
+     indata_loc(1,p) = neo_rmin_over_a_in
+     indata_loc(2,p) = neo_q_in
+     indata_loc(3,p) = neo_nu_1_in
+     indata_loc(4,p) = neo_dens_in(2)
+     indata_loc(5,p) = neo_temp_in(2)
+     indata_loc(6,p) = neo_delta_in
+     indata_loc(7,p) = neo_s_delta_in
+     indata_loc(8,p) = neo_s_kappa_in
      
      ! Cne
      neo_dlnndr_in(:) = 0.0; neo_dlnndr_in(1) = 1.0
      call neo_run()
-     outdata_vec(1,p) = neo_jpar_dke_out/(abs(neo_z_in(1))*neo_dens_in(1))
+     outdata_loc(1,p) = neo_jpar_dke_out/(abs(neo_z_in(1))*neo_dens_in(1))
      ! CTe
      neo_dlnndr_in(:) = 0.0; neo_dlntdr_in(1) = 1.0 
      call neo_run()
-     outdata_vec(2,p) = neo_jpar_dke_out/(abs(neo_z_in(1))*neo_dens_in(1))
+     outdata_loc(2,p) = neo_jpar_dke_out/(abs(neo_z_in(1))*neo_dens_in(1))
      ! Cni1
      neo_dlnndr_in(:) = 0.0; neo_dlnndr_in(2) = 1.0 
      call neo_run()
-     outdata_vec(3,p) = neo_jpar_dke_out/(abs(neo_z_in(2))*neo_dens_in(2))
+     outdata_loc(3,p) = neo_jpar_dke_out/(abs(neo_z_in(2))*neo_dens_in(2))
      ! CTi1
      neo_dlnndr_in(:) = 0.0; neo_dlntdr_in(2) = 1.0      
      call neo_run()
-     outdata_vec(4,p) = neo_jpar_dke_out/(abs(neo_z_in(2))*neo_dens_in(2))
+     outdata_loc(4,p) = neo_jpar_dke_out/(abs(neo_z_in(2))*neo_dens_in(2))
      ! Cni2
      neo_dlnndr_in(:) = 0.0; neo_dlnndr_in(3) = 1.0 
      call neo_run()
-     outdata_vec(5,p) = neo_jpar_dke_out/(abs(neo_z_in(3))*neo_dens_in(3))
+     outdata_loc(5,p) = neo_jpar_dke_out/(abs(neo_z_in(3))*neo_dens_in(3))
      ! CTi2 
      neo_dlnndr_in(:) = 0.0; neo_dlntdr_in(3) = 1.0    
      call neo_run()
-     outdata_vec(6,p) = neo_jpar_dke_out/(abs(neo_z_in(3))*neo_dens_in(3))
+     outdata_loc(6,p) = neo_jpar_dke_out/(abs(neo_z_in(3))*neo_dens_in(3))
 
      ! store geometry parameters
      do k=1,12
-        ingeodata_vec(k,p) = neo_geoparams_out(k)
+        ingeodata_loc(k,p) = neo_geoparams_out(k)
      enddo
 
      ! renormalize the coefficients by 1/I_div_psiprime/rho_star
-     outdata_vec(:,p) = outdata_vec(:,p) &
+     outdata_loc(:,p) = outdata_loc(:,p) &
           / (neo_geoparams_out(1)*neo_rho_star_in)
      
   enddo
 
   ! Collect all data 
-  call MPI_ALLREDUCE(indata_vec,indata_tot,size(indata_tot), &
+  call MPI_ALLREDUCE(indata_loc,indata,size(indata), &
        MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,i_err)
-  call MPI_ALLREDUCE(ingeodata_vec,ingeodata_tot,size(ingeodata_tot), &
+  call MPI_ALLREDUCE(ingeodata_loc,ingeodata,size(ingeodata), &
        MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,i_err)
-  call MPI_ALLREDUCE(outdata_vec,outdata_tot,size(outdata_tot), &
+  call MPI_ALLREDUCE(outdata_loc,outdata,size(outdata), &
        MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,i_err)
 
   if (i_proc == 0) then
      do p=1,ntot
-        print *, p, indata_vec(1,p), indata_vec(2,p)
+        print *, p, indata(1,p), ingeodata(2,p)
      enddo
   endif
 
