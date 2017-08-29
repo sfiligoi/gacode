@@ -75,7 +75,7 @@ class GYROData:
         import sys
         from os.path import expanduser, expandvars
         import sys
-        path = '$GACODE_ROOT/shared/python/pyrats'
+        path = '$GACODE_ROOT/python'
         sys.path.append(expanduser(expandvars(path)))
 
     #---------------------------------------------------------------------------#
@@ -169,9 +169,8 @@ class GYROData:
 
         fn = self.dirname+'/input.profiles'
         if os.path.exists(fn):
-            import pyrats.profiles_gen.data
-            reload(pyrats.profiles_gen.data)
-            self.input_profile = pyrats.profiles_gen.data.profiles_genData(fn)
+            import profiles_gen.data
+            self.input_profile = profiles_gen.data.profiles_genData(fn)
             self.loaded.append('input.profiles')
             fn = fn+'.extra'
             if os.path.exists(fn):
