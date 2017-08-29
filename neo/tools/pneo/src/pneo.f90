@@ -12,7 +12,7 @@ program pneo
   real, dimension(n1) :: rmin_over_rmaj = (/ 0.1,0.2,0.3 /)
   real, dimension(n2) :: q = (/ 1.0,2.0,4.0 /)
   real, dimension(n3) :: nu_ee = (/ 1.0e-4,1.0e-3,1.0e-2,1.0e-1 /)
-  real, dimension(n4) :: ni_over_ne = (/ 0.8,1.0 /)
+  real, dimension(n4) :: ni_over_ne = (/ 0.8,0.99 /)
   real, dimension(n5) :: ti_over_te  = (/ 1.0,1.5 /)
   real, dimension(n6) :: delta   = (/ 0.0,0.2 /)
   real, dimension(n7) :: s_delta = (/ 0.0,0.2 /)
