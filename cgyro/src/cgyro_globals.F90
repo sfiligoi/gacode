@@ -219,6 +219,7 @@ module cgyro_globals
        (/'out.cgyro.kxky_n','out.cgyro.kxky_e'/)
   character(len=20), dimension(3)  :: runfile_lky_flux = &
        (/'out.cgyro.lky_flux_n','out.cgyro.lky_flux_e','out.cgyro.lky_flux_v'/)
+  character(len=15) :: runfile_hosts = 'out.cgyro.hosts'
   integer, parameter :: io=1
   ! Restart tags
   character(len=8) :: fmt='(I2.2)' 
