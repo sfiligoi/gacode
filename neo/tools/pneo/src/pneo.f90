@@ -146,27 +146,27 @@ program pneo
      indata_loc(8,p) = neo_s_kappa_in
 
      ! Cne
-     neo_dlnndr_in(:) = 0.0; neo_dlnndr_in(1) = 1.0
+     neo_dlnndr_in(:) = 0.0; neo_dlntdr_in(:) = 0.0; neo_dlnndr_in(1) = 1.0
      call neo_run()
      outdata_loc(1,p) = neo_jpar_dke_out/(abs(neo_z_in(1))*neo_dens_in(1))
      ! CTe
-     neo_dlnndr_in(:) = 0.0; neo_dlntdr_in(1) = 1.0 
+     neo_dlnndr_in(:) = 0.0;  neo_dlntdr_in(:) = 0.0; neo_dlntdr_in(1) = 1.0 
      call neo_run()
      outdata_loc(2,p) = neo_jpar_dke_out/(abs(neo_z_in(1))*neo_dens_in(1))
      ! Cni1
-     neo_dlnndr_in(:) = 0.0; neo_dlnndr_in(2) = 1.0 
+     neo_dlnndr_in(:) = 0.0;  neo_dlntdr_in(:) = 0.0; neo_dlnndr_in(2) = 1.0 
      call neo_run()
      outdata_loc(3,p) = neo_jpar_dke_out/(abs(neo_z_in(2))*neo_dens_in(2))
      ! CTi1
-     neo_dlnndr_in(:) = 0.0; neo_dlntdr_in(2) = 1.0      
+     neo_dlnndr_in(:) = 0.0;  neo_dlntdr_in(:) = 0.0; neo_dlntdr_in(2) = 1.0  
      call neo_run()
      outdata_loc(4,p) = neo_jpar_dke_out/(abs(neo_z_in(2))*neo_dens_in(2))
      ! Cni2
-     neo_dlnndr_in(:) = 0.0; neo_dlnndr_in(3) = 1.0 
+     neo_dlnndr_in(:) = 0.0;  neo_dlntdr_in(:) = 0.0; neo_dlnndr_in(3) = 1.0 
      call neo_run()
      outdata_loc(5,p) = neo_jpar_dke_out/(abs(neo_z_in(3))*neo_dens_in(3))
      ! CTi2 
-     neo_dlnndr_in(:) = 0.0; neo_dlntdr_in(3) = 1.0    
+     neo_dlnndr_in(:) = 0.0;  neo_dlntdr_in(:) = 0.0; neo_dlntdr_in(3) = 1.0    
      call neo_run()
      outdata_loc(6,p) = neo_jpar_dke_out/(abs(neo_z_in(3))*neo_dens_in(3))
 
