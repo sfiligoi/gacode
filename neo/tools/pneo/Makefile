@@ -13,7 +13,6 @@ export EXTRA_LIBS = \
 	${GACODE_ROOT}/shared/UMFPACK/UMFPACK_lib.a 
 
 all:
-	cd ${GACODE_ROOT}/neo ; make
 	cd src ; make
 
 clean:
