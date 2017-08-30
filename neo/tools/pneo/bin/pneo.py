@@ -15,7 +15,8 @@ d = {}
 #  indata(7) = neo_s_delta_in
 #  indata(8) = neo_s_kappa_in
 
-tag_in = ['rmin_over_a','q','nu_1','dens_2','temp_2','delta','s_delta','s_kappa']
+tag_in = ['in_eps','in_q','in_nu','in_n2','in_t2','in_delta','in_sdelta','in_skappa']
+
 
 indata = np.fromfile('indata.dat',dtype='float',sep=" ")
 n = len(indata)/8
@@ -40,11 +41,10 @@ for i in range(5):
 #  ingeodata(12) = <-grad_r * gsin/B>
 
 ingeodata = np.fromfile('ingeodata.dat',dtype='float',sep=" ")
-n = len(ingeodata)/12
 ingeodata = np.reshape(ingeodata,(12,n),'F')
 
 # Magic 6th parameter
-d['magic'] = ingeodata[9,:]
+d['in_magic'] = ingeodata[9,:]
 
 # Outputs
 #  outdata(1) = Cne
@@ -57,11 +57,11 @@ d['magic'] = ingeodata[9,:]
 tag_out = ['cne','cte','cni1','cti1','cni2','cti2']
 
 outdata = np.fromfile('outdata.dat',dtype='float',sep=" ")
-n = len(outdata)/6
 outdata = np.reshape(outdata,(6,n),'F')
 
 # 6 outputs
 for i in range(6):
    d[tag_out[i]] = outdata[i,:]
 
-print d['rmin_over_a']
+for key in sorted(d.keys()):
+   print key,d[key][0]

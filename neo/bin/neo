@@ -56,6 +56,9 @@ then
   echo 
   echo "         -h" 
   echo "         Version and platform information."
+  echo 
+  echo "         -pneo" 
+  echo "         Run parallel neo"
 
   exit 1
 fi
@@ -76,6 +79,7 @@ EXEC_FLAG=0
 GENERATE_FLAG=0
 REGRESS=0
 REGRESS_RESET=0
+PNEO_FLAG=0
 #=============================================================
 
 #=============================================================
@@ -99,6 +103,8 @@ while [ $# -gt 0 ] ; do
   -rc) shift ; LOCDIR=$1 ; REGRESS=2 ;;
 
   -reset) REGRESS_RESET=1 ;;
+
+  -pneo) PNEO_FLAG=1 ;;
 
   *) echo "ERROR: incorrect neo syntax." ; exit 1 ;;
  
@@ -128,6 +134,18 @@ if [ $FLAG_SUM -gt 1 ]
 then
    echo "ERROR: Can only specify one of -e, -t, -g, -r"
    exit 1
+fi
+#============================================================
+
+#============================================================
+# Generate simdir if -g set, then exit.
+#
+if [ $PNEO_FLAG -eq 1 ]
+then
+  $GACODE_ROOT/platform/exec/exec.$GACODE_PLATFORM \
+      $SIMDIR $NPROC $NEO_DIR/tools/pneo/src/pneo $NOMP $NUMA $MPINUMA
+  
+    exit 0
 fi
 #============================================================
 
