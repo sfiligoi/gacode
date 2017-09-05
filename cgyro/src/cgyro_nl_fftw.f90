@@ -22,8 +22,11 @@ subroutine cgyro_nl_fftw(ij)
   integer :: ix,iy
   integer :: ir,it,in
   integer :: j,p,iexch
+  integer :: i_omp
 
   complex :: f0,g0
+
+  integer, external :: omp_get_thread_num
 
   include 'fftw3.f03'
 
@@ -52,14 +55,15 @@ subroutine cgyro_nl_fftw(ij)
 
   call timer_lib_in('nl')
 
-!$omp parallel private(fx,gx,fy,gy,in,iy,ir,p,ix,f0,g0,uv,ux,uy,vx,vy)
+!$omp parallel private(in,iy,ir,p,ix,f0,g0,i_omp,j)
 !$omp do schedule(dynamic,1)
   do j=1,nsplit
+     i_omp = omp_get_thread_num()+1
 
-     fx = 0.0
-     gx = 0.0
-     fy = 0.0
-     gy = 0.0
+     fx(:,:,i_omp) = 0.0
+     gx(:,:,i_omp) = 0.0
+     fy(:,:,i_omp) = 0.0
+     gy(:,:,i_omp) = 0.0
 
      ! Array mapping
      do ir=1,n_radial
@@ -70,23 +74,23 @@ subroutine cgyro_nl_fftw(ij)
            iy = in-1
            f0 = i_c*f_nl(ir,j,in)
            g0 = i_c*g_nl(ir,j,in)
-           fx(iy,ix) = p*f0
-           gx(iy,ix) = p*g0
-           fy(iy,ix) = iy*f0
-           gy(iy,ix) = iy*g0
+           fx(iy,ix,i_omp) = p*f0
+           gx(iy,ix,i_omp) = p*g0
+           fy(iy,ix,i_omp) = iy*f0
+           gy(iy,ix,i_omp) = iy*g0
         enddo
      enddo
 
-     call fftw_execute_dft_c2r(plan_c2r,fx,ux)
-     call fftw_execute_dft_c2r(plan_c2r,fy,uy)
-     call fftw_execute_dft_c2r(plan_c2r,gx,vx)
-     call fftw_execute_dft_c2r(plan_c2r,gy,vy)
+     call fftw_execute_dft_c2r(plan_c2r,fx(:,:,i_omp),ux(:,:,i_omp))
+     call fftw_execute_dft_c2r(plan_c2r,fy(:,:,i_omp),uy(:,:,i_omp))
+     call fftw_execute_dft_c2r(plan_c2r,gx(:,:,i_omp),vx(:,:,i_omp))
+     call fftw_execute_dft_c2r(plan_c2r,gy(:,:,i_omp),vy(:,:,i_omp))
 
      ! Poisson bracket in real space
 
-     uv = (ux*vy-uy*vx)/(nx*ny)
+     uv(:,:,i_omp) = (ux(:,:,i_omp)*vy(:,:,i_omp)-uy(:,:,i_omp)*vx(:,:,i_omp))/(nx*ny)
 
-     call fftw_execute_dft_r2c(plan_r2c,uv,fx)
+     call fftw_execute_dft_r2c(plan_r2c,uv(:,:,i_omp),fx(:,:,i_omp))
 
      ! NOTE: The FFT will generate an unwanted n=0,p=-nr/2 component
      ! that will be filtered in the main time-stepping loop
@@ -96,7 +100,7 @@ subroutine cgyro_nl_fftw(ij)
         if (ix < 0) ix = ix+nx
         do in=1,n_toroidal
            iy = in-1
-           g_nl(ir,j,in) = fx(iy,ix)
+           g_nl(ir,j,in) = fx(iy,ix,i_omp)
         enddo
      enddo
 
