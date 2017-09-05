@@ -361,15 +361,17 @@ module cgyro_globals
   integer :: nx0,ny0
   !
   ! 2D FFT work arrays
-  real, dimension(:,:), allocatable :: ux
-  real, dimension(:,:), allocatable :: uy
-  real, dimension(:,:), allocatable :: vx
-  real, dimension(:,:), allocatable :: vy
-  real, dimension(:,:), allocatable :: uv
-  complex, dimension(:,:),allocatable :: fx
-  complex, dimension(:,:),allocatable :: fy
-  complex, dimension(:,:),allocatable :: gx
-  complex, dimension(:,:),allocatable :: gy
+ #ifndef _OPENACC
+  real, dimension(:,:,:), allocatable :: ux
+  real, dimension(:,:,:), allocatable :: uy
+  real, dimension(:,:,:), allocatable :: vx
+  real, dimension(:,:,:), allocatable :: vy
+  real, dimension(:,:,:), allocatable :: uv
+  complex, dimension(:,:,:),allocatable :: fx
+  complex, dimension(:,:,:),allocatable :: fy
+  complex, dimension(:,:,:),allocatable :: gx
+  complex, dimension(:,:,:),allocatable :: gy
+#endif
   !
   ! Work arrays
   complex, dimension(:,:), allocatable :: f_balloon

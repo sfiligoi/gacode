@@ -1,11 +1,13 @@
 subroutine cgyro_check_memory(datafile)
 
+  use mpi
   use cgyro_globals
 
   implicit none
 
   character (len=*), intent(in) :: datafile
   integer :: mult
+  integer :: n_omp
   
   if (i_proc == 0) then
 
@@ -50,19 +52,20 @@ subroutine cgyro_check_memory(datafile)
         write(io,*)
         ! nsplit * n_toroidal = nv_loc * n_theta
         if (nonlinear_method /= 1) then
+           n_omp = omp_get_max_threads()
            nx0 = n_radial
            ny0 = 2*n_toroidal-1
            nx = (3*nx0)/2
            ny = (3*ny0)/2
-           call cgyro_alloc_add(io,(ny/2+1)*nx*16.0,'fx')
-           call cgyro_alloc_add(io,(ny/2+1)*nx*16.0,'gx')
-           call cgyro_alloc_add(io,(ny/2+1)*nx*16.0,'fy')
-           call cgyro_alloc_add(io,(ny/2+1)*nx*16.0,'gy')
-           call cgyro_alloc_add(io,ny*nx*8.0,'ux')
-           call cgyro_alloc_add(io,ny*nx*8.0,'vx')
-           call cgyro_alloc_add(io,ny*nx*8.0,'uy')
-           call cgyro_alloc_add(io,ny*nx*8.0,'vy')
-           call cgyro_alloc_add(io,ny*nx*8.0,'uv')
+           call cgyro_alloc_add(io,(ny/2+1)*nx*16.0*n_omp,'fx')
+           call cgyro_alloc_add(io,(ny/2+1)*nx*16.0*n_omp,'gx')
+           call cgyro_alloc_add(io,(ny/2+1)*nx*16.0*n_omp,'fy')
+           call cgyro_alloc_add(io,(ny/2+1)*nx*16.0*n_omp,'gy')
+           call cgyro_alloc_add(io,ny*nx*8.0*n_omp,'ux')
+           call cgyro_alloc_add(io,ny*nx*8.0*n_omp,'vx')
+           call cgyro_alloc_add(io,ny*nx*8.0*n_omp,'uy')
+           call cgyro_alloc_add(io,ny*nx*8.0*n_omp,'vy')
+           call cgyro_alloc_add(io,ny*nx*8.0*n_omp,'uv')
         endif
      endif
 
