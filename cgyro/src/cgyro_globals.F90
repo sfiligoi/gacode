@@ -361,7 +361,7 @@ module cgyro_globals
   integer :: nx0,ny0
   !
   ! 2D FFT work arrays
- #ifndef _OPENACC
+#ifndef _OPENACC
   real, dimension(:,:,:), allocatable :: ux
   real, dimension(:,:,:), allocatable :: uy
   real, dimension(:,:,:), allocatable :: vx

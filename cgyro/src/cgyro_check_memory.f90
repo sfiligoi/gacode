@@ -7,7 +7,6 @@ subroutine cgyro_check_memory(datafile)
 
   character (len=*), intent(in) :: datafile
   integer :: mult
-  integer :: n_omp
   
   if (i_proc == 0) then
 
@@ -52,7 +51,6 @@ subroutine cgyro_check_memory(datafile)
         write(io,*)
         ! nsplit * n_toroidal = nv_loc * n_theta
         if (nonlinear_method /= 1) then
-           n_omp = omp_get_max_threads()
            nx0 = n_radial
            ny0 = 2*n_toroidal-1
            nx = (3*nx0)/2

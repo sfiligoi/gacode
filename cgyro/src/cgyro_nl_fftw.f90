@@ -26,6 +26,8 @@ subroutine cgyro_nl_fftw(ij)
 
   complex :: f0,g0
 
+  integer, external :: omp_get_thread_num
+
   include 'fftw3.f03'
 
   call timer_lib_in('nl_comm')

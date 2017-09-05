@@ -34,8 +34,6 @@ subroutine cgyro_init_manager
   integer, parameter :: irank = 2
   integer, dimension(irank) :: ndim,inembed,onembed
   integer :: idist,odist,istride,ostride
-#else
-  integer :: n_omp
 #endif
 
   if (hiprec_flag == 1) then
@@ -265,8 +263,6 @@ subroutine cgyro_init_manager
      ny = (3*ny0)/2
 
 #ifndef _OPENACC
-     n_omp = omp_get_max_threads()
-
      allocate(fx(0:ny/2,0:nx-1,n_omp))
      allocate(gx(0:ny/2,0:nx-1,n_omp))
      allocate(fy(0:ny/2,0:nx-1,n_omp))
