@@ -9,15 +9,15 @@ program pneo
 
   integer :: p,k
   integer :: i1,i2,i3,i4,i5,i6,i7,i8
-  integer,parameter :: n1=4, n2=3, n3=5, n4=2, n5=2, n6=2, n7=2, n8=2
+  integer,parameter :: n1=4, n2=4, n3=5, n4=2, n5=2, n6=2, n7=3, n8=3
   real, dimension(n1) :: rmin_over_rmaj = (/ 0.06,0.12,0.24,0.36 /)
-  real, dimension(n2) :: q = (/ 1.0,2.0,4.0 /)
+  real, dimension(n2) :: q = (/ 1.0,2.0,4.0,6.0 /)
   real, dimension(n3) :: nu_ee = (/ 5e-4,5e-3,5e-2,5e-1,5e0 /)
   real, dimension(n4) :: ni_over_ne = (/ 0.8,0.99 /)
   real, dimension(n5) :: ti_over_te  = (/ 1.0,2.0 /)
   real, dimension(n6) :: delta   = (/ 0.0,0.4/)
-  real, dimension(n7) :: s_delta = (/ 0.0,1.0 /)
-  real, dimension(n8) :: s_kappa = (/ 0.0,1.0 /)
+  real, dimension(n7) :: s_delta = (/ 0.0,0.5,1.5 /)
+  real, dimension(n8) :: s_kappa = (/ 0.0,0.5,1.5 /)
 
   !---------------------------------------------------------------------
   ! Initialize MPI_COMM_WORLD communicator.
@@ -89,7 +89,7 @@ program pneo
   ! geometry
   neo_equilibrium_model_in = 2 ! Miller equilibrium
   neo_rmaj_over_a_in = 1.0     ! anorm = rmaj
-  neo_kappa_in = 1.0
+  neo_kappa_in = 1.5
   neo_zeta_in  = 0.0
   neo_s_zeta_in = 0.0
   neo_zmag_over_a_in = 0.0
