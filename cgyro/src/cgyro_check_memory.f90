@@ -1,6 +1,5 @@
 subroutine cgyro_check_memory(datafile)
 
-  use mpi
   use cgyro_globals
 
   implicit none
