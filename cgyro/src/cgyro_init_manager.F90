@@ -263,20 +263,20 @@ subroutine cgyro_init_manager
      ny = (3*ny0)/2
 
 #ifndef _OPENACC
-     allocate(fx(0:ny/2,0:nx-1))
-     allocate(gx(0:ny/2,0:nx-1))
-     allocate(fy(0:ny/2,0:nx-1))
-     allocate(gy(0:ny/2,0:nx-1))
+     allocate(fx(0:ny/2,0:nx-1,n_omp))
+     allocate(gx(0:ny/2,0:nx-1,n_omp))
+     allocate(fy(0:ny/2,0:nx-1,n_omp))
+     allocate(gy(0:ny/2,0:nx-1,n_omp))
 
-     allocate(ux(0:ny-1,0:nx-1))
-     allocate(vx(0:ny-1,0:nx-1))
-     allocate(uy(0:ny-1,0:nx-1))
-     allocate(vy(0:ny-1,0:nx-1))
-     allocate(uv(0:ny-1,0:nx-1))
+     allocate(ux(0:ny-1,0:nx-1,n_omp))
+     allocate(vx(0:ny-1,0:nx-1,n_omp))
+     allocate(uy(0:ny-1,0:nx-1,n_omp))
+     allocate(vy(0:ny-1,0:nx-1,n_omp))
+     allocate(uv(0:ny-1,0:nx-1,n_omp))
 
      ! Create plans once and for all, with global arrays fx,ux
-     plan_c2r = fftw_plan_dft_c2r_2d(nx,ny,fx,ux,FFTW_PATIENT)
-     plan_r2c = fftw_plan_dft_r2c_2d(nx,ny,ux,fx,FFTW_PATIENT)
+     plan_c2r = fftw_plan_dft_c2r_2d(nx,ny,fx(:,:,1),ux(:,:,1),FFTW_PATIENT)
+     plan_r2c = fftw_plan_dft_r2c_2d(nx,ny,ux(:,:,1),fx(:,:,1),FFTW_PATIENT)
 #endif
 
 #ifdef _OPENACC
