@@ -307,8 +307,8 @@ subroutine cgyro_write_distributed_real(datafile,n_fn,fn)
   integer(kind=MPI_OFFSET_KIND) :: disp
   integer(kind=MPI_OFFSET_KIND) :: offset1
   !
-  character(len=12*n_fn) :: fnstr
-  character(len=12) :: tmpstr
+  character(len=fmtstr_len*n_fn) :: fnstr
+  character(len=fmtstr_len) :: tmpstr
   !------------------------------------------------------
 
   if (i_proc_1 /= 0) then
@@ -338,18 +338,18 @@ subroutine cgyro_write_distributed_real(datafile,n_fn,fn)
      ! Do it in one shot, to minimize IO
      do in=1,n_fn
         write(tmpstr, fmtstr) fn(in)
-        fnstr((in-1)*12+1:in*12-1) = tmpstr(1:11)
-        fnstr(in*12:in*12) = NEW_LINE('A')
+        fnstr((in-1)*fmtstr_len+1:in*fmtstr_len-1) = tmpstr(1:11)
+        fnstr(in*fmtstr_len:in*fmtstr_len) = NEW_LINE('A')
      enddo
 
      ! now write in parallel to the common file
      filemode = MPI_MODE_WRONLY
      disp     = i_current
      disp     = disp * n_proc_2
-     disp = disp * 12 * n_fn
+     disp = disp * fmtstr_len * n_fn
 
      offset1 = i_proc_2
-     offset1 = offset1 * 12 * n_fn
+     offset1 = offset1 * fmtstr_len * n_fn
 
      call MPI_INFO_CREATE(finfo,i_err)
 
@@ -370,17 +370,10 @@ subroutine cgyro_write_distributed_real(datafile,n_fn,fn)
           finfo,&
           i_err)
 
-     do in=1,n_fn
-        write(tmpstr, fmtstr) fn(in)
-        fnstr((in-1)*12+1:in*12-1) = tmpstr(1:11)
-        fnstr(in*12:in*12) = NEW_LINE('A')
-     enddo
-
-
      call MPI_FILE_WRITE_AT(fh,&
           offset1,&
           fnstr,&
-          n_fn*12,&
+          n_fn*fmtstr_len,&
           MPI_CHAR,&
           fstatus,&
           i_err)
