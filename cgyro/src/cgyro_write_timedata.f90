@@ -292,11 +292,7 @@ subroutine cgyro_write_distributed_real(datafile,n_fn,fn)
   integer, intent(in) :: n_fn
   real, intent(in) :: fn(n_fn)
   !
-  integer :: i_group_send
   integer :: in
-  integer :: i_dummy
-  !
-  real :: fn_recv(n_fn)
   !
   ! Required for MPI-IO:
   !
@@ -388,15 +384,12 @@ subroutine cgyro_write_distributed_real(datafile,n_fn,fn)
 
      if (i_proc == 0) then
 
+        disp     = i_current
+        disp     = disp * n_proc_2
+        disp = disp * fmtstr_len * n_fn
+
         open(unit=io,file=datafile,status='old')
-        do i_dummy=1,i_current
-
-           do in=1,n_toroidal
-              read(io,fmtstr) fn_recv(:)
-           enddo
-
-        enddo
-
+        call fseek(io,0,disp) !SEEK_SET=0
         endfile(io)
         close(io)
 
