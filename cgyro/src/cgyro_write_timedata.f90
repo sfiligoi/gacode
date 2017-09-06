@@ -305,6 +305,7 @@ subroutine cgyro_write_distributed_real(datafile,n_fn,fn)
   !
   character(len=fmtstr_len*n_fn) :: fnstr
   character(len=fmtstr_len) :: tmpstr
+  character :: c
   !------------------------------------------------------
 
   if (i_proc_1 /= 0) then
@@ -388,8 +389,10 @@ subroutine cgyro_write_distributed_real(datafile,n_fn,fn)
         disp     = disp * n_proc_2
         disp = disp * fmtstr_len * n_fn
 
-        open(unit=io,file=datafile,status='old')
-        call fseek(io,0,disp) !SEEK_SET=0
+        open(unit=io,file=datafile,status='old',access="STREAM")
+        if (disp>0) then
+         read(io,pos=disp-1) c
+        endif
         endfile(io)
         close(io)
 
