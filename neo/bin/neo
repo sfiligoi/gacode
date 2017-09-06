@@ -94,7 +94,7 @@ while [ $# -gt 0 ] ; do
 
   -n) shift ; NPROC=$1 ;;
 
-  -n) shift ; NPROC=$1 ;;
+  -g) shift ; LOCDIR=$1 ; GENERATE_FLAG=1 ;;
 
   -nomp) shift ; NOMP=$1 ;;
 
