@@ -79,8 +79,6 @@ subroutine cgyro_make_profiles
      ! Experimental profiles
 
      call cgyro_experimental_profiles
-     call cgyro_experimental_map
-     call cgyro_experimental_alloc(0)
 
      if (ae_flag == 1) then
         dens_ele = ne_ade
