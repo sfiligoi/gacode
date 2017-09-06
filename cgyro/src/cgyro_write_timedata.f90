@@ -297,7 +297,22 @@ subroutine cgyro_write_distributed_real(datafile,n_fn,fn)
   integer :: i_dummy
   !
   real :: fn_recv(n_fn)
+  !
+  ! Required for MPI-IO:
+  !
+  integer :: filemode
+  integer :: finfo
+  integer :: fstatus(MPI_STATUS_SIZE)
+  integer(kind=MPI_OFFSET_KIND) :: disp
+  integer(kind=MPI_OFFSET_KIND) :: offset1
+  !
+  character(len=12*n_fn) :: fnstr
+  character(len=12) :: tmpstr
   !------------------------------------------------------
+
+  if (i_proc_1 /= 0) then
+    return
+  endif
 
   select case (io_control)
 
@@ -317,59 +332,50 @@ subroutine cgyro_write_distributed_real(datafile,n_fn,fn)
   case(2)
 
      ! Append
+     do in=1,n_fn
+        write(tmpstr, fmtstr) fn(in)
+        tmpstr(12:12) = NEW_LINE('A')
+        fnstr((in-1)*12+1:in*12) = tmpstr
+     enddo
 
-     if (i_proc == 0) &
-          open(unit=io,file=datafile,status='old',position='append')
+     filemode = MPI_MODE_WRONLY
+     disp     = i_current
+     disp     = disp * n_proc_2
+     disp = disp * 12 * n_fn
 
-     do in=1,n_toroidal
+     offset1 = i_proc_2
+     offset1 = offset1 * 12 * n_fn
 
-        !-----------------------------------------
-        ! Subgroup collector:
-        !
-        i_group_send = in-1
+     call MPI_INFO_CREATE(finfo,i_err)
 
-        if (i_group_send /= 0) then
+     call MPI_INFO_SET(finfo,"striping_factor", "8",i_err)
 
-           if (i_proc_2 == 0) then
+     call MPI_FILE_OPEN(NEW_COMM_2,&
+          datafile,&
+          filemode,&
+          finfo,&
+          io,&
+          i_err)
 
-              call MPI_RECV(fn_recv,&
-                   n_fn,&
-                   MPI_DOUBLE_PRECISION,&
-                   i_group_send,&
-                   in,&
-                   NEW_COMM_2,&
-                   recv_status,&
-                   i_err)
+     call MPI_FILE_SET_VIEW(io,&
+          disp,&
+          MPI_CHAR,&
+          MPI_CHAR,&
+          'native',&
+          finfo,&
+          i_err)
 
-           else if (i_proc_2 == i_group_send) then
+     call MPI_FILE_WRITE_AT(io,&
+          offset1,&
+          fnstr,&
+          n_fn*12,&
+          MPI_CHAR,&
+          fstatus,&
+          i_err)
 
-              call MPI_SEND(fn,&
-                   n_fn,&
-                   MPI_DOUBLE_PRECISION,&
-                   0,&
-                   in,&
-                   NEW_COMM_2,&
-                   i_err)
-
-           endif
-
-        else
-
-           fn_recv(:) = fn(:)
-
-        endif
-        !
-        !-----------------------------------------
-
-        if (i_proc == 0) then
-
-           write(io,fmtstr) fn_recv(:)
-
-        endif
-
-     enddo ! in
-
-     if (i_proc == 0) close(io)
+     call MPI_FILE_SYNC(io,i_err)
+     call MPI_FILE_CLOSE(io,i_err)
+     call MPI_INFO_FREE(finfo,i_err)
 
   case(3)
 
