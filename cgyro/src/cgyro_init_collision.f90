@@ -11,7 +11,7 @@ subroutine cgyro_init_collision
   real, dimension(:,:,:,:), allocatable :: rsvec, rsvect0, rsvect1
   real, dimension(:,:), allocatable :: klor_fac, kdiff_fac
 
-  real :: arg, scale
+  real :: arg
   real :: xa, xb, tauinv_ab
   real :: mo1,mo2,en1,en2 ! von mir
   integer :: jv

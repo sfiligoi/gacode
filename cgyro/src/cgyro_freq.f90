@@ -11,7 +11,6 @@ subroutine cgyro_freq
 
   implicit none
 
-  integer :: mc
   real :: total_weight,dfr,dfi
   real, dimension(nc) :: mode_weight
   complex, dimension(nc) :: freq_loc

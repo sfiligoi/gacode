@@ -12,64 +12,48 @@
 !  INPUT_profiles by scripts. 
 !----------------------------------------------------------------
 
-subroutine cgyro_experimental_profiles
+subroutine cgyro_experimental_profiles(path,comm,numeq_flag,udsymmetry_flag,n_species,z,btccw,ipccw)
 
-  use cgyro_globals
-  use cgyro_io
+  use cgyro_globals, only : ae_flag,geo_yin,geo_ny,rmin, &
+       dlnndr,dlntdr,sdlnndr,sdlntdr,dens,temp,&
+       dlnndre_ade,dlntdre_ade,ne_ade,te_ade,is_ele
+   
   use cgyro_experimental_globals
+  use cgyro_io
   use EXPRO_interface
 
   implicit none
 
-  integer :: i, j,is, i_ion
-
+  character(len=*), intent(in) :: path 
+  integer, intent(in) :: comm
+  integer, intent(in) :: numeq_flag
+  integer, intent(in) :: udsymmetry_flag
+  integer, intent(in) :: n_species
+  real, dimension(n_species) :: z
+  real, intent(inout) :: btccw,ipccw
+  
+  integer :: i,j,is,i_ion
+  
+  n_species_exp = n_species+ae_flag
+  
   !--------------------------------------------------------------
   ! use EXPRO routines to read data:
   !
-  call EXPRO_palloc(CGYRO_COMM_WORLD,path,1)
+  call EXPRO_palloc(comm,path,1)
   EXPRO_ctrl_quasineutral_flag = 1  ! quasi-neutrality density flag
+  EXPRO_ctrl_numeq_flag = numeq_flag
 
-  if (equilibrium_model == 3) then
-     EXPRO_ctrl_numeq_flag = 1
-  else
-     EXPRO_ctrl_numeq_flag = 0
-  endif
-
-  ! Determine if electrons are to be included in the 
-  ! simulation.  Electron profiles are read even if not 
-  ! to be included in the simulation (needed to re-scale 
-  ! ion density/temp is not quasi-neutral).
-
-  if (ae_flag == 0) then
-     n_species_exp = n_species
-     if (z(n_species) > 0.0) then
-        call cgyro_error('For exp. profiles, electron species must be n_species')
-        return
-     endif
-  else
-     n_species_exp = n_species + 1
-  endif
-
-  ! charge of ion species
+  ! Number and charge of ion species
   EXPRO_ctrl_z(:) = 0.0
-  EXPRO_ctrl_n_ion = 0
-  if(ae_flag == 1) then
-     do is=1,n_species
-        EXPRO_ctrl_z(is) = z(is)
-        EXPRO_ctrl_n_ion = EXPRO_ctrl_n_ion + 1
-     enddo
-  else
-     do is=1,n_species-1
-        EXPRO_ctrl_z(is) = z(is)
-        EXPRO_ctrl_n_ion = EXPRO_ctrl_n_ion + 1
-     enddo
-  endif
+  EXPRO_ctrl_n_ion = n_species
+  do is=1,n_species
+     EXPRO_ctrl_z(is) = z(is)
+  enddo
 
   call EXPRO_pread
 
   n_grid_exp = EXPRO_n_exp
   call cgyro_experimental_alloc(1)
-
   !--------------------------------------------------------------
 
   !--------------------------------------------------------------
@@ -90,7 +74,7 @@ subroutine cgyro_experimental_profiles
   s_delta_exp(:) = EXPRO_sdelta(:) 
   zeta_exp(:)    = EXPRO_zeta(:)
   s_zeta_exp(:)  = EXPRO_szeta(:)
-  if (udsymmetry_flag == 1 .and. equilibrium_model /= 3) then
+  if (udsymmetry_flag == 1) then
      zmag_exp(:)    = 0.0   
      dzmag_exp(:)   = 0.0
   else
@@ -105,12 +89,11 @@ subroutine cgyro_experimental_profiles
   rmaj_exp(:) = rmaj_exp(:)/a_meters
   zmag_exp(:) = zmag_exp(:)/a_meters
 
-  if (equilibrium_model == 3) then
+  if (numeq_flag == 1) then
      if (EXPRO_nfourier <= 0) then
         call cgyro_error('Geometry coefficients missing')
         return
      endif
-     geo_numeq_flag = 1
      deallocate(geo_yin_exp)
      deallocate(geo_yin)
      geo_ny = EXPRO_nfourier
@@ -125,22 +108,22 @@ subroutine cgyro_experimental_profiles
   dlntdre_ade_exp(:) = EXPRO_dlntedr(:) * a_meters
   dlnndre_ade_exp(:) = EXPRO_dlnnedr(:) * a_meters
 
-  temp_exp(n_species_exp,:)   = EXPRO_te(:)
-  dlntdr_exp(n_species_exp,:) = EXPRO_dlntedr(:) * a_meters 
-  sdlntdr_exp(n_species_exp,:) = EXPRO_sdlntedr(:) * a_meters**2 
+  temp_exp(is_ele,:)   = EXPRO_te(:)
+  dlntdr_exp(is_ele,:) = EXPRO_dlntedr(:) * a_meters 
+  sdlntdr_exp(is_ele,:) = EXPRO_sdlntedr(:) * a_meters**2 
 
-  dens_exp(n_species_exp,:)   = EXPRO_ne(:)
-  dlnndr_exp(n_species_exp,:) = EXPRO_dlnnedr(:) * a_meters 
-  sdlnndr_exp(n_species_exp,:) = EXPRO_sdlnnedr(:) * a_meters**2 
-
+  dens_exp(is_ele,:)   = EXPRO_ne(:)
+  dlnndr_exp(is_ele,:) = EXPRO_dlnnedr(:) * a_meters 
+  sdlnndr_exp(is_ele,:) = EXPRO_sdlnnedr(:) * a_meters**2 
+  
   do i_ion=1,n_species_exp-1
      ! ion temps should be equal, but not enforced 
      temp_exp(i_ion,:)   = EXPRO_ti(i_ion,:)
      dlntdr_exp(i_ion,:) = EXPRO_dlntidr(i_ion,:) * a_meters 
      sdlntdr_exp(i_ion,:) = EXPRO_sdlntidr(i_ion,:) * a_meters**2 
 
-     ! first species density is re-set by quasi-neutrality [JC: do we want this?]
-     if(quasineutral_flag == 1 .and. i_ion == 1) then
+     ! First species density is re-set by quasi-neutrality [always 1 ?]
+     if (EXPRO_ctrl_quasineutral_flag == 1 .and. i_ion == 1) then
         dens_exp(i_ion,:)   = EXPRO_ni_new(:)
         dlnndr_exp(i_ion,:) = EXPRO_dlnnidr_new(:) * a_meters
         sdlnndr_exp(i_ion,:) = EXPRO_sdlnnidr_new(:) * a_meters**2
@@ -176,29 +159,29 @@ subroutine cgyro_experimental_profiles
 
   rhos_exp(:)    = EXPRO_rhos(:)
 
-  call EXPRO_palloc(CGYRO_COMM_WORLD,path,0)
+  call EXPRO_palloc(comm,path,0)
 
   !------------------------------------------------------------------
   ! Use local cubic spline interpolation to get simulation 
   ! profiles from experimental (_exp) ones.
   ! 
-  call cub_spline(rmin_exp,rmaj_exp,n_grid_exp,rmin,rmaj,1)
-  call cub_spline(rmin_exp,q_exp,n_grid_exp,rmin,q,1)
-  call cub_spline(rmin_exp,s_exp,n_grid_exp,rmin,s,1)
-  call cub_spline(rmin_exp,shift_exp,n_grid_exp,rmin,shift,1)
-  call cub_spline(rmin_exp,kappa_exp,n_grid_exp,rmin,kappa,1)
-  call cub_spline(rmin_exp,s_kappa_exp,n_grid_exp,rmin,s_kappa,1)
-  call cub_spline(rmin_exp,delta_exp,n_grid_exp,rmin,delta,1)
-  call cub_spline(rmin_exp,s_delta_exp,n_grid_exp,rmin,s_delta,1)
-  call cub_spline(rmin_exp,zeta_exp,n_grid_exp,rmin,zeta,1)
-  call cub_spline(rmin_exp,s_zeta_exp,n_grid_exp,rmin,s_zeta,1)
-  call cub_spline(rmin_exp,zmag_exp,n_grid_exp,rmin,zmag,1)
-  call cub_spline(rmin_exp,dzmag_exp,n_grid_exp,rmin,dzmag,1)
-  call cub_spline(rmin_exp,gamma_e_exp,n_grid_exp,rmin,gamma_e,1)
-  call cub_spline(rmin_exp,gamma_p_exp,n_grid_exp,rmin,gamma_p,1)
-  call cub_spline(rmin_exp,mach_exp,n_grid_exp,rmin,mach,1)
-  call cub_spline(rmin_exp,rhos_exp,n_grid_exp,rmin,rhos,1)
-  call cub_spline(rmin_exp,z_eff_exp,n_grid_exp,rmin,z_eff,1)
+  call cub_spline(rmin_exp,rmaj_exp,n_grid_exp,rmin,rmaj_loc,1)
+  call cub_spline(rmin_exp,q_exp,n_grid_exp,rmin,q_loc,1)
+  call cub_spline(rmin_exp,s_exp,n_grid_exp,rmin,s_loc,1)
+  call cub_spline(rmin_exp,shift_exp,n_grid_exp,rmin,shift_loc,1)
+  call cub_spline(rmin_exp,kappa_exp,n_grid_exp,rmin,kappa_loc,1)
+  call cub_spline(rmin_exp,s_kappa_exp,n_grid_exp,rmin,s_kappa_loc,1)
+  call cub_spline(rmin_exp,delta_exp,n_grid_exp,rmin,delta_loc,1)
+  call cub_spline(rmin_exp,s_delta_exp,n_grid_exp,rmin,s_delta_loc,1)
+  call cub_spline(rmin_exp,zeta_exp,n_grid_exp,rmin,zeta_loc,1)
+  call cub_spline(rmin_exp,s_zeta_exp,n_grid_exp,rmin,s_zeta_loc,1)
+  call cub_spline(rmin_exp,zmag_exp,n_grid_exp,rmin,zmag_loc,1)
+  call cub_spline(rmin_exp,dzmag_exp,n_grid_exp,rmin,dzmag_loc,1)
+  call cub_spline(rmin_exp,gamma_e_exp,n_grid_exp,rmin,gamma_e_loc,1)
+  call cub_spline(rmin_exp,gamma_p_exp,n_grid_exp,rmin,gamma_p_loc,1)
+  call cub_spline(rmin_exp,mach_exp,n_grid_exp,rmin,mach_loc,1)
+  call cub_spline(rmin_exp,rhos_exp,n_grid_exp,rmin,rhos_loc,1)
+  call cub_spline(rmin_exp,z_eff_exp,n_grid_exp,rmin,z_eff_loc,1)
   call cub_spline(rmin_exp,b_unit_exp,n_grid_exp,rmin,b_unit,1)
 
   call cub_spline(rmin_exp,te_ade_exp,n_grid_exp,rmin,te_ade,1)
@@ -207,7 +190,7 @@ subroutine cgyro_experimental_profiles
   call cub_spline(rmin_exp,dlnndre_ade_exp,n_grid_exp,rmin,dlnndre_ade,1)
 
   do i=1,n_species
-     ! Note: maping is only done for n_species (not n_species_exp)
+     ! Note: mapping is only done for n_species (not n_species_exp)
      call cub_spline(rmin_exp,dens_exp(i,:),n_grid_exp,rmin,dens(i),1)
      call cub_spline(rmin_exp,temp_exp(i,:),n_grid_exp,rmin,temp(i),1)
      call cub_spline(rmin_exp,dlntdr_exp(i,:),n_grid_exp,rmin,dlntdr(i),1)
@@ -216,7 +199,7 @@ subroutine cgyro_experimental_profiles
      call cub_spline(rmin_exp,sdlnndr_exp(i,:),n_grid_exp,rmin,sdlnndr(i),1)
   enddo
 
-  if (geo_numeq_flag == 1) then
+  if (numeq_flag == 1) then
      do i=1,8
         do j=0,geo_ny
            call cub_spline(rmin_exp,geo_yin_exp(i,j,:),n_grid_exp,rmin, &

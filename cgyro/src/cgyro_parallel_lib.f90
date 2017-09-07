@@ -302,7 +302,6 @@ contains
     complex, intent(inout), dimension(nkeep,nsplit,nn) :: xt
     !
     integer :: j
-    integer :: ierr
     !-------------------------------------------------------
 
 !$omp parallel do private(j)
@@ -356,7 +355,6 @@ contains
     complex, dimension(nkeep,nsplit*nn) :: x
     !
     integer :: j
-    integer :: ierr
     !-------------------------------------------------------
 
     call parallel_slib_r_nc(xt,x)
