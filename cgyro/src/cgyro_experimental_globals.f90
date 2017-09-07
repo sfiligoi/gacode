@@ -2,7 +2,7 @@ module cgyro_experimental_globals
 
   integer :: n_grid_exp
   integer :: n_species_exp
-
+  
   real, parameter :: mass_deuterium  = 3.3452
   real, parameter :: temp_norm_fac   = 1602.2
   real, parameter :: charge_norm_fac = 1.6022
@@ -10,8 +10,8 @@ module cgyro_experimental_globals
   real :: dens_norm, temp_norm, vth_norm, mass_norm, rho_star_norm
   real :: gamma_gb_norm, q_gb_norm, pi_gb_norm
 
-  real    :: a_meters
-  real    :: b_unit
+  real :: a_meters
+  real :: b_unit
 
   real, dimension(:), allocatable :: rmin_exp
   real, dimension(:), allocatable :: rmaj_exp
@@ -48,6 +48,26 @@ module cgyro_experimental_globals
   real, dimension(:), allocatable :: rhos_exp
 
   real, dimension(:,:,:), allocatable :: geo_yin_exp
+
+  ! Local values
+
+  real :: shift_loc
+  real :: q_loc
+  real :: s_loc
+  real :: kappa_loc
+  real :: delta_loc
+  real :: zeta_loc
+  real :: s_kappa_loc
+  real :: s_delta_loc
+  real :: s_zeta_loc
+  real :: zmag_loc
+  real :: dzmag_loc
+  real :: gamma_e_loc
+  real :: gamma_p_loc
+  real :: mach_loc
+  real :: rmaj_loc
+  real :: rhos_loc
+  real :: z_eff_loc
 
 end module cgyro_experimental_globals
 

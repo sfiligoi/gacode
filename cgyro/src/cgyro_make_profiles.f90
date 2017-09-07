@@ -26,6 +26,7 @@ subroutine cgyro_make_profiles
   if (num_ele == 0) then
      ! Adiabatic electrons
      ae_flag = 1
+     is_ele = n_species+1
      call cgyro_info('Using adiabatic electrons')
   else if (num_ele == 1) then
      ! GK electrons
@@ -78,8 +79,42 @@ subroutine cgyro_make_profiles
 
      ! Experimental profiles
 
-     call cgyro_experimental_profiles
+     ! Determine if electrons are to be included in the 
+     ! simulation.  Electron profiles are read even if not 
+     ! to be included in the simulation (needed to re-scale 
+     ! ion density/temp is not quasi-neutral).
+     if (ae_flag == 0 .and. z(n_species) > 0.0) then
+        call cgyro_error('For exp. profiles, electron species must be n_species')
+        return
+     endif
 
+     call cgyro_experimental_profiles(path,&
+          CGYRO_COMM_WORLD,&
+          geo_numeq_flag,&
+          udsymmetry_flag,&
+          n_species,&
+          z(1:n_species),&
+          btccw,&
+          ipccw)
+
+     shift   = shift_loc
+     kappa   = kappa_loc
+     delta   = delta_loc
+     zeta    = zeta_loc
+     s_kappa = s_kappa_loc
+     s_delta = s_delta_loc
+     s_zeta  = s_zeta_loc
+     q       = q_loc
+     s       = s_loc
+     zmag    = zmag_loc
+     dzmag   = dzmag_loc
+     gamma_e = gamma_e_loc
+     gamma_p = gamma_p_loc
+     mach    = mach_loc
+     rmaj    = rmaj_loc
+     rhos    = rhos_loc
+     z_eff   = z_eff_loc
+     
      if (ae_flag == 1) then
         dens_ele = ne_ade
         temp_ele = te_ade
@@ -114,7 +149,7 @@ subroutine cgyro_make_profiles
      q_gb_norm     = gamma_gb_norm * temp_norm * temp_norm_fac / 1.0e6 ! MW/m2
      pi_gb_norm    = dens_norm * temp_norm * temp_norm_fac * a_meters &
           * rho_star_norm**2 ! N/m
-     
+
      ! Compute collision frequency
 
      cc = sqrt(2.0) * pi * charge_norm_fac**4 &
@@ -163,7 +198,7 @@ subroutine cgyro_make_profiles
 
      ! Always compute beta_* consistently
      call set_betastar
-     
+
      ! Re-scaling
      lambda_star      = lambda_star * lambda_star_scale
      gamma_e          = gamma_e      * gamma_e_scale
@@ -198,7 +233,7 @@ subroutine cgyro_make_profiles
      gamma_gb_norm = 0.0
      q_gb_norm     = 0.0
      pi_gb_norm    = 0.0
-     
+
      q = abs(q)*(ipccw)*(btccw)
 
      if (ae_flag == 1) then
@@ -230,7 +265,7 @@ subroutine cgyro_make_profiles
      ! Always compute beta_* consistently
      call set_betastar
      beta_star(0) = beta_star(0)*beta_star_scale
-     
+
   endif
 
   ! z_eff -- only use value from input.cgyro or input.profiles
@@ -245,7 +280,7 @@ subroutine cgyro_make_profiles
         endif
      enddo
   endif
-  
+
   !-------------------------------------------------------------
   ! Manage simulation type (n=0,linear,nonlinear)
   !
