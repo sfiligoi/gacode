@@ -1,4 +1,4 @@
-module EXPRO_locsim_globals
+module EXPRO_locsim_interface
 
   integer :: n_species_exp
   
@@ -50,4 +50,4 @@ module EXPRO_locsim_globals
   integer :: geo_ny_loc
   real, dimension(:,:), allocatable :: geo_yin_loc
 
-end module EXPRO_locsim_globals
+end module EXPRO_locsim_interface
