@@ -272,7 +272,7 @@ subroutine cgyro_write_distributed_complex(datafile,n_fn,fn)
 
         open(unit=io,file=datafile,status='old',access="STREAM")
         if (disp>0) then
-         read(io,pos=disp-1) c
+         read(io,pos=disp) c
         endif
         endfile(io)
         close(io)
@@ -402,7 +402,7 @@ subroutine cgyro_write_distributed_real(datafile,n_fn,fn)
 
         open(unit=io,file=datafile,status='old',access="STREAM")
         if (disp>0) then
-         read(io,pos=disp-1) c
+         read(io,pos=disp) c
         endif
         endfile(io)
         close(io)
