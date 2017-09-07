@@ -142,6 +142,12 @@ module cgyro_globals
   real :: lambda_debye
   real :: rhos
 
+  ! Global conversion variables
+  real :: b_unit
+  real :: a_meters
+  real :: dens_norm, temp_norm, vth_norm, mass_norm, rho_star_norm
+  real :: gamma_gb_norm, q_gb_norm, pi_gb_norm
+
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------

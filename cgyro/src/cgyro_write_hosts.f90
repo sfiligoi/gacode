@@ -14,13 +14,11 @@ subroutine cgyro_write_hosts
 
   !----------------------------------------------
   implicit none
-
+  !
   character(kind=C_CHAR) :: hostnameraw(128)
   character(LEN=128) :: hostname
   character(LEN=192) :: line
-  character :: c
   integer :: i,j
-
   !
   ! Required for MPI-IO: 
   !

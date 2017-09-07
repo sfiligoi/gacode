@@ -2,7 +2,7 @@ subroutine cgyro_make_profiles
 
   use cgyro_globals
   use cgyro_io
-  use cgyro_experimental_globals
+  use EXPRO_locsim_globals
 
   implicit none
 
@@ -84,18 +84,21 @@ subroutine cgyro_make_profiles
      ! to be included in the simulation (needed to re-scale 
      ! ion density/temp is not quasi-neutral).
      if (ae_flag == 0 .and. z(n_species) > 0.0) then
-        call cgyro_error('For exp. profiles, electron species must be n_species')
+        call cgyro_error('For exp. profiles, electron index must be n_species')
         return
      endif
 
-     call cgyro_experimental_profiles(path,&
+     call EXPRO_locsim_profiles(path,&
           CGYRO_COMM_WORLD,&
           geo_numeq_flag,&
           udsymmetry_flag,&
-          n_species,&
+          quasineutral_flag,&
+          n_species+ae_flag,&
           z(1:n_species),&
+          rmin,&
           btccw,&
-          ipccw)
+          ipccw,&
+          a_meters)
 
      shift   = shift_loc
      kappa   = kappa_loc
@@ -114,19 +117,27 @@ subroutine cgyro_make_profiles
      rmaj    = rmaj_loc
      rhos    = rhos_loc
      z_eff   = z_eff_loc
-     
-     if (ae_flag == 1) then
-        dens_ele = ne_ade
-        temp_ele = te_ade
-        mass_ele = masse_ade
-        dlnndr_ele = dlnndre_ade
-        dlntdr_ele = dlntdre_ade
-     else 
-        dens_ele = dens(is_ele)
-        temp_ele = temp(is_ele)
-        mass_ele = mass(is_ele)
-        dlnndr_ele = dlnndr(is_ele)
-        dlntdr_ele = dlntdr(is_ele)
+     b_unit  = b_unit_loc
+
+     dens(1:n_species) = dens_loc(1:n_species)     
+     temp(1:n_species) = temp_loc(1:n_species)     
+     dlnndr(1:n_species) = dlnndr_loc(1:n_species)     
+     dlntdr(1:n_species) = dlntdr_loc(1:n_species)     
+     sdlnndr(1:n_species) = sdlnndr_loc(1:n_species)     
+     sdlntdr(1:n_species) = sdlntdr_loc(1:n_species)     
+
+     dens_ele = dens_loc(is_ele)
+     temp_ele = temp_loc(is_ele)
+     mass_ele = mass(is_ele)
+     dlnndr_ele = dlnndr_loc(is_ele)
+     dlntdr_ele = dlntdr_loc(is_ele)
+
+     ! Get interpolated geometry coefficients
+     if (geo_numeq_flag == 1) then
+        geo_ny = geo_ny_loc
+        deallocate(geo_yin)
+        allocate(geo_yin(8,0:geo_ny))
+        geo_yin = geo_yin_loc
      endif
 
      ! Normalizing quantities
@@ -400,7 +411,7 @@ subroutine set_betastar
           *(dlnndr(is)+dlntdr(is))
   enddo
   if (ae_flag == 1) then
-     beta_star(0) = beta_star(0) + (dlnndre_ade + dlntdre_ade)
+     beta_star(0) = beta_star(0) + (dlnndr_ele + dlntdr_ele)
   endif
   beta_star(0)  = beta_star(0)*betae_unit
   ! 8pi/Bunit^2 * scaling factor
