@@ -86,6 +86,7 @@ module cgyro_globals
   integer :: psym_flag
   integer :: profile_shear_flag
   integer :: theta_plot
+  integer :: mpiio_small_stripe_factor
   integer :: mpiio_stripe_factor
   integer :: mpiio_num_files
   integer :: restart_format
@@ -235,6 +236,7 @@ module cgyro_globals
   integer :: signal
   integer :: restart_flag
   integer :: input_restart_format
+  character(len=2) :: mpiio_small_stripe_str
   character(len=3) :: mpiio_stripe_str
   integer :: n_chunk      ! used in v1, for historical reasons
   real :: max_filesize    ! used in v1, for historical reasons

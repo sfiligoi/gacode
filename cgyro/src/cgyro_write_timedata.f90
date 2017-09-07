@@ -231,7 +231,7 @@ subroutine cgyro_write_distributed_complex(datafile,n_fn,fn)
 
      call MPI_INFO_CREATE(finfo,i_err)
 
-     call MPI_INFO_SET(finfo,"striping_factor", "8",i_err)
+     call MPI_INFO_SET(finfo,"striping_factor", mpiio_small_stripe_str,i_err)
 
      call MPI_FILE_OPEN(NEW_COMM_2,&
           datafile,&
@@ -361,7 +361,7 @@ subroutine cgyro_write_distributed_real(datafile,n_fn,fn)
 
      call MPI_INFO_CREATE(finfo,i_err)
 
-     call MPI_INFO_SET(finfo,"striping_factor", "8",i_err)
+     call MPI_INFO_SET(finfo,"striping_factor", mpiio_small_stripe_str,i_err)
 
      call MPI_FILE_OPEN(NEW_COMM_2,&
           datafile,&
