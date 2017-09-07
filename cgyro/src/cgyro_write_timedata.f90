@@ -222,7 +222,7 @@ subroutine cgyro_write_distributed_complex(datafile,n_fn,fn)
 
      ! now write in parallel to the common file
      filemode = MPI_MODE_WRONLY
-     disp     = i_current
+     disp     = i_current-1
      disp     = disp * n_proc_2
      disp = disp * fmtstr_len * 2 * n_fn
 
@@ -352,7 +352,7 @@ subroutine cgyro_write_distributed_real(datafile,n_fn,fn)
 
      ! now write in parallel to the common file
      filemode = MPI_MODE_WRONLY
-     disp     = i_current
+     disp     = i_current-1
      disp     = disp * n_proc_2
      disp = disp * fmtstr_len * n_fn
 
