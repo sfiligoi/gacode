@@ -98,6 +98,10 @@ while [ $# -gt 0 ] ; do
 
   -nomp) shift ; NOMP=$1 ;;
 
+  -numa) shift ; NUMA=$1 ;;
+
+  -mpinuma) shift ; MPINUMA=$1 ;;
+
   -h) gacode_printversion NEO ; exit 0 ;;
 
   -r) shift ; REGRESS=1 ;;
