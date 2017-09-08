@@ -74,6 +74,7 @@ NPROC=1
 NOMP=1
 NUMA=0
 MPINUMA=0
+NIDLE=0
 # Execute/test mode flags
 EXEC_FLAG=0
 GENERATE_FLAG=0
