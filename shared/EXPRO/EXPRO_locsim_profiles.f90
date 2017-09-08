@@ -5,9 +5,47 @@
 !  Read experimental profiles and generate local profile 
 !  parameters at rmin = r/a.
 !
-! NOTES: 
-!  See http://fusion.gat.com/theory/INPUT_profiles for a 
-!  complete description of the input.profiles file structure. 
+! INPUTS:
+!  path              : path to data
+!  comm              : MPI communicator
+!  numeq_flag        : Fourier series equilibrium (0=no,1=yes)
+!  udsymmetry_flag   : enforce up-down symmetry (0=no,1=yes)
+!  quasineutral_flag : enforce quasineutrality (0=no,1=yes)
+!  n_species_in      : total species (e+i)
+!  z                 : vector of charges (length n_species_in-1)
+!  rmin              : r/a
+!
+! OUTPUTS:
+!  btccw             : (+1 or -1) 
+!  ipccw             : (+1 or -1)
+!  a_meters          : minor radius i metres
+!
+! OUTPUTS (interface):
+!  real :: shift_loc
+!  real :: q_loc
+!  real :: s_loc
+!  real :: kappa_loc
+!  real :: delta_loc
+!  real :: zeta_loc
+!  real :: s_kappa_loc
+!  real :: s_delta_loc
+!  real :: s_zeta_loc
+!  real :: zmag_loc
+!  real :: dzmag_loc
+!  real :: gamma_e_loc
+!  real :: gamma_p_loc
+!  real :: mach_loc
+!  real :: rmaj_loc
+!  real :: rhos_loc [m]
+!  real :: z_eff_loc
+!  real :: b_unit_loc
+!
+!  real, dimension(9) :: dens_loc
+!  real, dimension(9) :: temp_loc
+!  real, dimension(9) :: dlnndr_loc
+!  real, dimension(9) :: dlntdr_loc
+!  real, dimension(9) :: sdlnndr_loc
+!  real, dimension(9) :: sdlntdr_loc
 !----------------------------------------------------------------
 
 subroutine EXPRO_locsim_profiles(&
@@ -23,7 +61,7 @@ subroutine EXPRO_locsim_profiles(&
      ipccw,&
      a_meters)
 
-  use EXPRO_locsim_globals
+  use EXPRO_locsim_interface
   use EXPRO_interface
 
   implicit none
@@ -89,18 +127,18 @@ subroutine EXPRO_locsim_profiles(&
   ! Pack ions from the bottom
   do i_ion=1,n_species_exp-1
      ! ion temps should be equal, but not enforced 
-     temp_exp(i_ion,:)   = EXPRO_ti(i_ion,:)
-     dlntdr_exp(i_ion,:) = EXPRO_dlntidr(i_ion,:)*a_meters 
+     temp_exp(i_ion,:)    = EXPRO_ti(i_ion,:)
+     dlntdr_exp(i_ion,:)  = EXPRO_dlntidr(i_ion,:)*a_meters 
      sdlntdr_exp(i_ion,:) = EXPRO_sdlntidr(i_ion,:)*a_meters**2 
 
-     ! First species density is re-set by quasi-neutrality [always 1 ?]
+     ! First species density is reset by quasi-neutrality
      if (quasineutral_flag == 1 .and. i_ion == 1) then
-        dens_exp(i_ion,:)   = EXPRO_ni_new(:)
-        dlnndr_exp(i_ion,:) = EXPRO_dlnnidr_new(:)*a_meters
+        dens_exp(i_ion,:)    = EXPRO_ni_new(:)
+        dlnndr_exp(i_ion,:)  = EXPRO_dlnnidr_new(:)*a_meters
         sdlnndr_exp(i_ion,:) = EXPRO_sdlnnidr_new(:)*a_meters**2
      else
-        dens_exp(i_ion,:)   = EXPRO_ni(i_ion,:)
-        dlnndr_exp(i_ion,:) = EXPRO_dlnnidr(i_ion,:)*a_meters
+        dens_exp(i_ion,:)    = EXPRO_ni(i_ion,:)
+        dlnndr_exp(i_ion,:)  = EXPRO_dlnnidr(i_ion,:)*a_meters
         sdlnndr_exp(i_ion,:) = EXPRO_sdlnnidr(i_ion,:)*a_meters**2
      endif
   enddo

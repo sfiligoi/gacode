@@ -1,6 +1,6 @@
 subroutine EXPRO_locsim_alloc(flag)
 
-  use EXPRO_locsim_globals
+  use EXPRO_locsim_interface
   use EXPRO_interface
 
   implicit none
@@ -40,6 +40,5 @@ subroutine EXPRO_locsim_alloc(flag)
      if(allocated(geo_yin_exp))     deallocate(geo_yin_exp)
 
   endif
-
 
 end subroutine EXPRO_locsim_alloc

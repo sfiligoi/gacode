@@ -41,12 +41,14 @@ module EXPRO_locsim_interface
   real :: rhos_loc
   real :: z_eff_loc
   real :: b_unit_loc
+
   real, dimension(9) :: dens_loc
   real, dimension(9) :: temp_loc
   real, dimension(9) :: dlnndr_loc
   real, dimension(9) :: dlntdr_loc
   real, dimension(9) :: sdlnndr_loc
   real, dimension(9) :: sdlntdr_loc
+
   integer :: geo_ny_loc
   real, dimension(:,:), allocatable :: geo_yin_loc
 
