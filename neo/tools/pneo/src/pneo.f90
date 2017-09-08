@@ -7,18 +7,59 @@ program pneo
 
   implicit none
 
+  !real, dimension(n1) :: rmin_over_rmaj = (/ 0.06,0.12,0.24,0.36 /)
+  !real, dimension(n2) :: q = (/ 1.0,2.0,4.0,6.0 /)
+  !real, dimension(n3) :: nu_ee = (/ 5e-4,5e-3,5e-2,5e-1,5e0 /)
+  !real, dimension(n4) :: ni_over_ne = (/ 0.8,0.99 /)
+  !real, dimension(n5) :: ti_over_te  = (/ 1.0,2.0 /)
+  !real, dimension(n6) :: delta   = (/ 0.0,0.4/)
+  !real, dimension(n7) :: s_delta = (/ 0.0,0.5,1.5 /)
+  !real, dimension(n8) :: kappa   = (/ 1.5/)
+  !real, dimension(n9) :: s_kappa = (/ 0.0,0.5,1.5 /)
+
   integer :: p,k
   integer :: i1,i2,i3,i4,i5,i6,i7,i8,i9
-  integer,parameter :: n1=4, n2=4, n3=5, n4=2, n5=2, n6=2, n7=3, n8=1,n9=3
-  real, dimension(n1) :: rmin_over_rmaj = (/ 0.06,0.12,0.24,0.36 /)
-  real, dimension(n2) :: q = (/ 1.0,2.0,4.0,6.0 /)
-  real, dimension(n3) :: nu_ee = (/ 5e-4,5e-3,5e-2,5e-1,5e0 /)
-  real, dimension(n4) :: ni_over_ne = (/ 0.8,0.99 /)
-  real, dimension(n5) :: ti_over_te  = (/ 1.0,2.0 /)
-  real, dimension(n6) :: delta   = (/ 0.0,0.4/)
-  real, dimension(n7) :: s_delta = (/ 0.0,0.5,1.5 /)
-  real, dimension(n8) :: kappa   = (/ 1.5/)
-  real, dimension(n9) :: s_kappa = (/ 0.0,0.5,1.5 /)
+  integer :: n1,n2,n3,n4,n5,n6,n7,n8,n9
+  real, dimension(:), allocatable :: rmin_over_rmaj
+  real, dimension(:), allocatable :: q
+  real, dimension(:), allocatable :: nu_ee
+  real, dimension(:), allocatable :: ni_over_ne
+  real, dimension(:), allocatable :: ti_over_te
+  real, dimension(:), allocatable :: delta
+  real, dimension(:), allocatable :: s_delta
+  real, dimension(:), allocatable :: kappa
+  real, dimension(:), allocatable :: s_kappa
+
+  allocate(rmin_over_rmaj(9))
+  allocate(q(9))
+  allocate(nu_ee(9))
+  allocate(ni_over_ne(9))
+  allocate(ti_over_te(9))
+  allocate(delta(9))
+  allocate(s_delta(9))
+  allocate(kappa(9))
+  allocate(s_kappa(9))
+
+  open(unit=1,file='input.dat',status='old')
+  read(1,*) n1
+  read(1,*) rmin_over_rmaj(1:n1)
+  read(1,*) n2
+  read(1,*) q(1:n2)
+  read(1,*) n3
+  read(1,*) nu_ee(1:n3)
+  read(1,*) n4
+  read(1,*) ni_over_ne(1:n4)
+  read(1,*) n5
+  read(1,*) ti_over_te(1:n5)
+  read(1,*) n6
+  read(1,*) delta(1:n6)
+  read(1,*) n7
+  read(1,*) s_delta(1:n7)
+  read(1,*) n8
+  read(1,*) kappa(1:n8)
+  read(1,*) n9
+  read(1,*) s_kappa(1:n9)
+  close(1)
 
   !---------------------------------------------------------------------
   ! Initialize MPI_COMM_WORLD communicator.
@@ -117,9 +158,11 @@ program pneo
 !  neo_sim_model_in = 0
 !!!!!!
 
+  if (i_proc == 0) print '(a,i5)','NTOT = ',ntot
+
   do p=1+i_proc,ntot,n_proc
 
-     print *,p
+     if (i_proc == 0) print '(i5,a,i5)',p,' - ',p+n_proc-1
 
      i1 = ic1(p) 
      i2 = ic2(p)
@@ -198,8 +241,6 @@ program pneo
        MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,i_err)
 
   if (i_proc == 0) then
-
-     print *,'NTOT=',ntot
 
      open(unit=1,file='indata.dat',status='replace')
      write(1,10) indata(:,:)
