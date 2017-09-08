@@ -242,6 +242,7 @@ subroutine cgyro_mpi_grid
   endif
 
   write (mpiio_stripe_str,"(I3.3)") mpiio_stripe_factor
+  write (mpiio_small_stripe_str,"(I2.2)") mpiio_small_stripe_factor
 
   ! TODO Hardcoded for now, may become an input parameter eventually
   restart_format = 2
