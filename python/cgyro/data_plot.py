@@ -50,7 +50,7 @@ class cgyrodata_plot(data.cgyrodata):
       
    def plot_ky_freq(self,w=0.5,fig=None):
       '''
-      Plot gamma and omega vs ky
+      Plot mode frequency versus ky
 
       ARGUMENTS:
       w: fractional width of time window
@@ -90,10 +90,12 @@ class cgyrodata_plot(data.cgyrodata):
     
    def plot_ky_phi(self,field=0,ymin='0',ymax='auto',nstr='null',fig=None):
       '''
-      Plot gamma and omega vs ky
+      Plot fields versus time for particular values of ky
 
       ARGUMENTS:
-      w: fractional width of time window
+      ymin: plot range (min y)
+      ymax: plot range (max y)
+      nstr: string for toroidal mode selection (example: nstr='0,1-4,6')
       '''
 
       if fig is None:
@@ -138,7 +140,7 @@ class cgyrodata_plot(data.cgyrodata):
 
    def plot_rcorr_phi(self,w=0.5,fig=None):
       '''
-      Plot gamma and omega vs ky
+      Plot radial correlation 
 
       ARGUMENTS:
       w: fractional width of time window
@@ -570,6 +572,15 @@ class cgyrodata_plot(data.cgyrodata):
 
 
    def plot_ky_flux(self,w=0.5,field=0,moment='e',ymin='auto',ymax='auto',fc=0,fig=None):
+      '''
+      Plot fluxes versus ky
+
+      ARGUMENTS:
+      field: if fc=1, field to select 
+      ymin : plot range (min y)
+      ymax : plot range (max y)
+      fc   : select components (phi,Ap,Bp) of flux rather than total
+      '''
 
       ns = self.n_species
       t  = self.t
@@ -637,6 +648,7 @@ class cgyrodata_plot(data.cgyrodata):
          for j in range(self.n_n):
             ave[j,ispec] = average(y[ispec,j,:],self.t,w)
 
+      # One plot per species
       for ispec in range(ns):
          stag = str(ispec)
          ax = fig.add_subplot(1,ns,ispec+1)
@@ -645,14 +657,14 @@ class cgyrodata_plot(data.cgyrodata):
          ax.set_ylabel(r'$'+mtag+'_'+u+'$',color='k')
          ax.set_title(windowtxt)
          ax.bar(ky-dk/2.0,ave[:,ispec],width=dk/1.1,color=color[ispec],alpha=0.5,edgecolor='black')
-         
-      ax.set_xlim([0,ky[-1]+dk])
-      if ymax != 'auto':
-         ax.set_ylim([0,float(ymax)])
 
-      # Dissipation curve             
-      ax.plot(ky,self.alphadiss*ax.get_ylim()[1]*0.5,linewidth=2,color='k',alpha=0.2)
+         # Dissipation curve             
+         ax.plot(ky,self.alphadiss*ax.get_ylim()[1]*0.5,linewidth=2,color='k',alpha=0.2)
 
+         # Set axis ranges
+         ax.set_xlim([0,ky[-1]+dk])
+         if ymax != 'auto':
+            ax.set_ylim([0,float(ymax)])
 
    def plot_kxky_phi(self,w=0.5,fig=None):
 
