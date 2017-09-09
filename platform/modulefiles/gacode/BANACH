@@ -5,7 +5,6 @@
 module add gacode_base
 
 setenv GACODE_PLATFORM [lrange [file split ${ModulesCurrentModulefile}]	end end]
-set GACODE_PLATFORM $::env(GACODE_PLATFORM)
-puts stderr "Use GACODE_PLATFORM: ${GACODE_PLATFORM}"
-
 setenv FANN_ROOT /home/SOFTWARE/fann
+
+puts stderr "GACODE_PLATFORM=$::env(GACODE_PLATFORM) ; GACODE_ROOT=$::env(GACODE_ROOT)"

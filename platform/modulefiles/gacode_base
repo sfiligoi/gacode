@@ -9,7 +9,7 @@ module-whatis gacode
 
 setenv GACODE_ROOT [file dirname [file dirname  [file dirname ${ModulesCurrentModulefile}]]]
 set GACODE_ROOT $::env(GACODE_ROOT)
-puts stderr "Use GACODE from: ${GACODE_ROOT}"
+#puts stderr "Use GACODE from: ${GACODE_ROOT}"
 
 proc ModulesHelp { } {
         puts stderr "This modulefile sets the GACODE environmental variables once the $GACODE_ROOT environmental variable is set "

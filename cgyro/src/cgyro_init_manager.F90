@@ -38,6 +38,7 @@ subroutine cgyro_init_manager
 
   if (hiprec_flag == 1) then
      fmtstr  = '(es16.9)'
+     fmtstr_len = 17
      fmtstr2 = '(2(es16.9,1x))'
      fmtstrn = '(10(es16.9,1x))'
   endif

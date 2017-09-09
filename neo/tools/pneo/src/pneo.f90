@@ -7,17 +7,59 @@ program pneo
 
   implicit none
 
+  !real, dimension(n1) :: rmin_over_rmaj = (/ 0.06,0.12,0.24,0.36 /)
+  !real, dimension(n2) :: q = (/ 1.0,2.0,4.0,6.0 /)
+  !real, dimension(n3) :: nu_ee = (/ 5e-4,5e-3,5e-2,5e-1,5e0 /)
+  !real, dimension(n4) :: ni_over_ne = (/ 0.8,0.99 /)
+  !real, dimension(n5) :: ti_over_te  = (/ 1.0,2.0 /)
+  !real, dimension(n6) :: delta   = (/ 0.0,0.4/)
+  !real, dimension(n7) :: s_delta = (/ 0.0,0.5,1.5 /)
+  !real, dimension(n8) :: kappa   = (/ 1.5/)
+  !real, dimension(n9) :: s_kappa = (/ 0.0,0.5,1.5 /)
+
   integer :: p,k
-  integer :: i1,i2,i3,i4,i5,i6,i7,i8
-  integer,parameter :: n1=4, n2=3, n3=5, n4=2, n5=2, n6=2, n7=2, n8=2
-  real, dimension(n1) :: rmin_over_rmaj = (/ 0.06,0.12,0.24,0.36 /)
-  real, dimension(n2) :: q = (/ 1.0,2.0,4.0 /)
-  real, dimension(n3) :: nu_ee = (/ 5e-4,5e-3,5e-2,5e-1,5e0 /)
-  real, dimension(n4) :: ni_over_ne = (/ 0.8,0.99 /)
-  real, dimension(n5) :: ti_over_te  = (/ 1.0,2.0 /)
-  real, dimension(n6) :: delta   = (/ 0.0,0.4/)
-  real, dimension(n7) :: s_delta = (/ 0.0,1.0 /)
-  real, dimension(n8) :: s_kappa = (/ 0.0,1.0 /)
+  integer :: i1,i2,i3,i4,i5,i6,i7,i8,i9
+  integer :: n1,n2,n3,n4,n5,n6,n7,n8,n9
+  real, dimension(:), allocatable :: rmin_over_rmaj
+  real, dimension(:), allocatable :: q
+  real, dimension(:), allocatable :: nu_ee
+  real, dimension(:), allocatable :: ni_over_ne
+  real, dimension(:), allocatable :: ti_over_te
+  real, dimension(:), allocatable :: delta
+  real, dimension(:), allocatable :: s_delta
+  real, dimension(:), allocatable :: kappa
+  real, dimension(:), allocatable :: s_kappa
+
+  allocate(rmin_over_rmaj(9))
+  allocate(q(9))
+  allocate(nu_ee(9))
+  allocate(ni_over_ne(9))
+  allocate(ti_over_te(9))
+  allocate(delta(9))
+  allocate(s_delta(9))
+  allocate(kappa(9))
+  allocate(s_kappa(9))
+
+  open(unit=1,file='input.dat',status='old')
+  read(1,*) n1
+  read(1,*) rmin_over_rmaj(1:n1)
+  read(1,*) n2
+  read(1,*) q(1:n2)
+  read(1,*) n3
+  read(1,*) nu_ee(1:n3)
+  read(1,*) n4
+  read(1,*) ni_over_ne(1:n4)
+  read(1,*) n5
+  read(1,*) ti_over_te(1:n5)
+  read(1,*) n6
+  read(1,*) delta(1:n6)
+  read(1,*) n7
+  read(1,*) s_delta(1:n7)
+  read(1,*) n8
+  read(1,*) kappa(1:n8)
+  read(1,*) n9
+  read(1,*) s_kappa(1:n9)
+  close(1)
 
   !---------------------------------------------------------------------
   ! Initialize MPI_COMM_WORLD communicator.
@@ -34,7 +76,7 @@ program pneo
 
   ! pointers
 
-  ntot = n1*n2*n3*n4*n5*n6*n7*n8
+  ntot = n1*n2*n3*n4*n5*n6*n7*n8*n9
   allocate(ic1(ntot))
   allocate(ic2(ntot))
   allocate(ic3(ntot))
@@ -43,8 +85,9 @@ program pneo
   allocate(ic6(ntot))
   allocate(ic7(ntot))
   allocate(ic8(ntot))
-  allocate(indata_loc(8,ntot))
-  allocate(indata(8,ntot))
+  allocate(ic9(ntot))
+  allocate(indata_loc(9,ntot))
+  allocate(indata(9,ntot))
   allocate(ingeodata_loc(12,ntot))
   allocate(ingeodata(12,ntot))
   allocate(outdata_loc(6,ntot))
@@ -59,16 +102,19 @@ program pneo
                  do i6=1,n6
                     do i7=1,n7
                        do i8=1,n8
+                          do i9=1,n9
 
-                          p = p+1
-                          ic1(p) = i1
-                          ic2(p) = i2
-                          ic3(p) = i3
-                          ic4(p) = i4
-                          ic5(p) = i5
-                          ic6(p) = i6
-                          ic7(p) = i7
-                          ic8(p) = i8
+                             p = p+1
+                             ic1(p) = i1
+                             ic2(p) = i2
+                             ic3(p) = i3
+                             ic4(p) = i4
+                             ic5(p) = i5
+                             ic6(p) = i6
+                             ic7(p) = i7
+                             ic8(p) = i8
+                             ic9(p) = i9
+                          enddo
                        enddo
                     enddo
                  enddo
@@ -89,7 +135,6 @@ program pneo
   ! geometry
   neo_equilibrium_model_in = 2 ! Miller equilibrium
   neo_rmaj_over_a_in = 1.0     ! anorm = rmaj
-  neo_kappa_in = 1.0
   neo_zeta_in  = 0.0
   neo_s_zeta_in = 0.0
   neo_zmag_over_a_in = 0.0
@@ -113,9 +158,11 @@ program pneo
 !  neo_sim_model_in = 0
 !!!!!!
 
+  if (i_proc == 0) print '(a,i5)','NTOT = ',ntot
+
   do p=1+i_proc,ntot,n_proc
 
-     print *,p
+     if (i_proc == 0) print '(i5,a,i5)',p,' - ',p+n_proc-1
 
      i1 = ic1(p) 
      i2 = ic2(p)
@@ -125,26 +172,29 @@ program pneo
      i6 = ic6(p)
      i7 = ic7(p) 
      i8 = ic8(p)
+     i9 = ic9(p)
 
      neo_rmin_over_a_in = rmin_over_rmaj(i1)
-     neo_q_in       = q(i2)
-     neo_nu_1_in    = nu_ee(i3)
-     neo_dens_in(2) = ni_over_ne(i4)
-     neo_dens_in(3) = (1.0-neo_z_in(2)*neo_dens_in(2))/(1.0*neo_z_in(3))
-     neo_temp_in(2) = ti_over_te(i5)
-     neo_temp_in(3) = ti_over_te(i5)
-     neo_delta_in   = delta(i6)
-     neo_s_delta_in = s_delta(i7)
-     neo_s_kappa_in = s_kappa(i8)
+     neo_q_in           = q(i2)
+     neo_nu_1_in        = nu_ee(i3)
+     neo_dens_in(2)     = ni_over_ne(i4)
+     neo_dens_in(3)     = (1.0-neo_z_in(2)*neo_dens_in(2))/(1.0*neo_z_in(3))
+     neo_temp_in(2)     = ti_over_te(i5)
+     neo_temp_in(3)     = ti_over_te(i5)
+     neo_delta_in       = delta(i6)
+     neo_s_delta_in     = s_delta(i7)
+     neo_kappa_in       = kappa(i8)  
+     neo_s_kappa_in     = s_kappa(i9)
 
      indata_loc(1,p) = neo_rmin_over_a_in
      indata_loc(2,p) = neo_q_in
-     indata_loc(3,p) = neo_nu_1_in
+     indata_loc(3,p) = log10(neo_nu_1_in)
      indata_loc(4,p) = neo_dens_in(2)
      indata_loc(5,p) = neo_temp_in(2)
      indata_loc(6,p) = neo_delta_in
      indata_loc(7,p) = neo_s_delta_in
-     indata_loc(8,p) = neo_s_kappa_in
+     indata_loc(8,p) = neo_kappa_in
+     indata_loc(9,p) = neo_s_kappa_in
 
      ! Cne
      neo_dlnndr_in(:) = 0.0; neo_dlntdr_in(:) = 0.0; neo_dlnndr_in(1) = 1.0
@@ -191,8 +241,6 @@ program pneo
        MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,i_err)
 
   if (i_proc == 0) then
-
-     print *,'NTOT=',ntot
 
      open(unit=1,file='indata.dat',status='replace')
      write(1,10) indata(:,:)
