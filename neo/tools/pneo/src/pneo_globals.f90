@@ -7,7 +7,7 @@ module pneo_globals
   integer :: i_err
 
   integer :: ntot
-  integer, dimension(:), allocatable :: ic1,ic2,ic3,ic4,ic5,ic6,ic7,ic8
+  integer, dimension(:), allocatable :: ic1,ic2,ic3,ic4,ic5,ic6,ic7,ic8,ic9
   real, dimension(:,:), allocatable :: indata_loc
   real, dimension(:,:), allocatable :: indata
   real, dimension(:,:), allocatable :: ingeodata_loc

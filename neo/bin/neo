@@ -74,6 +74,7 @@ NPROC=1
 NOMP=1
 NUMA=0
 MPINUMA=0
+NIDLE=0
 # Execute/test mode flags
 EXEC_FLAG=0
 GENERATE_FLAG=0
@@ -94,9 +95,13 @@ while [ $# -gt 0 ] ; do
 
   -n) shift ; NPROC=$1 ;;
 
-  -n) shift ; NPROC=$1 ;;
+  -g) shift ; LOCDIR=$1 ; GENERATE_FLAG=1 ;;
 
   -nomp) shift ; NOMP=$1 ;;
+
+  -numa) shift ; NUMA=$1 ;;
+
+  -mpinuma) shift ; MPINUMA=$1 ;;
 
   -h) gacode_printversion NEO ; exit 0 ;;
 

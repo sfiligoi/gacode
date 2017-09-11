@@ -2,7 +2,7 @@ subroutine cgyro_make_profiles
 
   use cgyro_globals
   use cgyro_io
-  use cgyro_experimental_globals
+  use EXPRO_locsim_interface
 
   implicit none
 
@@ -26,6 +26,7 @@ subroutine cgyro_make_profiles
   if (num_ele == 0) then
      ! Adiabatic electrons
      ae_flag = 1
+     is_ele = n_species+1
      call cgyro_info('Using adiabatic electrons')
   else if (num_ele == 1) then
      ! GK electrons
@@ -78,22 +79,65 @@ subroutine cgyro_make_profiles
 
      ! Experimental profiles
 
-     call cgyro_experimental_profiles
-     call cgyro_experimental_map
-     call cgyro_experimental_alloc(0)
+     ! Determine if electrons are to be included in the 
+     ! simulation.  Electron profiles are read even if not 
+     ! to be included in the simulation (needed to re-scale 
+     ! ion density/temp is not quasi-neutral).
+     if (ae_flag == 0 .and. z(n_species) > 0.0) then
+        call cgyro_error('For exp. profiles, electron index must be n_species')
+        return
+     endif
 
-     if (ae_flag == 1) then
-        dens_ele = ne_ade
-        temp_ele = te_ade
-        mass_ele = masse_ade
-        dlnndr_ele = dlnndre_ade
-        dlntdr_ele = dlntdre_ade
-     else 
-        dens_ele = dens(is_ele)
-        temp_ele = temp(is_ele)
-        mass_ele = mass(is_ele)
-        dlnndr_ele = dlnndr(is_ele)
-        dlntdr_ele = dlntdr(is_ele)
+     call EXPRO_locsim_profiles(path,&
+          CGYRO_COMM_WORLD,&
+          geo_numeq_flag,&
+          udsymmetry_flag,&
+          quasineutral_flag,&
+          n_species+ae_flag,&
+          z(1:n_species),&
+          rmin,&
+          btccw,&
+          ipccw,&
+          a_meters)
+
+     shift   = shift_loc
+     kappa   = kappa_loc
+     delta   = delta_loc
+     zeta    = zeta_loc
+     s_kappa = s_kappa_loc
+     s_delta = s_delta_loc
+     s_zeta  = s_zeta_loc
+     q       = q_loc
+     s       = s_loc
+     zmag    = zmag_loc
+     dzmag   = dzmag_loc
+     gamma_e = gamma_e_loc
+     gamma_p = gamma_p_loc
+     mach    = mach_loc
+     rmaj    = rmaj_loc
+     rhos    = rhos_loc
+     z_eff   = z_eff_loc
+     b_unit  = b_unit_loc
+
+     dens(1:n_species) = dens_loc(1:n_species)     
+     temp(1:n_species) = temp_loc(1:n_species)     
+     dlnndr(1:n_species) = dlnndr_loc(1:n_species)     
+     dlntdr(1:n_species) = dlntdr_loc(1:n_species)     
+     sdlnndr(1:n_species) = sdlnndr_loc(1:n_species)     
+     sdlntdr(1:n_species) = sdlntdr_loc(1:n_species)     
+
+     dens_ele = dens_loc(is_ele)
+     temp_ele = temp_loc(is_ele)
+     mass_ele = mass(is_ele)
+     dlnndr_ele = dlnndr_loc(is_ele)
+     dlntdr_ele = dlntdr_loc(is_ele)
+
+     ! Get interpolated geometry coefficients
+     if (geo_numeq_flag == 1) then
+        geo_ny = geo_ny_loc
+        deallocate(geo_yin)
+        allocate(geo_yin(8,0:geo_ny))
+        geo_yin = geo_yin_loc
      endif
 
      ! Normalizing quantities
@@ -116,7 +160,7 @@ subroutine cgyro_make_profiles
      q_gb_norm     = gamma_gb_norm * temp_norm * temp_norm_fac / 1.0e6 ! MW/m2
      pi_gb_norm    = dens_norm * temp_norm * temp_norm_fac * a_meters &
           * rho_star_norm**2 ! N/m
-     
+
      ! Compute collision frequency
 
      cc = sqrt(2.0) * pi * charge_norm_fac**4 &
@@ -165,7 +209,7 @@ subroutine cgyro_make_profiles
 
      ! Always compute beta_* consistently
      call set_betastar
-     
+
      ! Re-scaling
      lambda_star      = lambda_star * lambda_star_scale
      gamma_e          = gamma_e      * gamma_e_scale
@@ -200,7 +244,7 @@ subroutine cgyro_make_profiles
      gamma_gb_norm = 0.0
      q_gb_norm     = 0.0
      pi_gb_norm    = 0.0
-     
+
      q = abs(q)*(ipccw)*(btccw)
 
      if (ae_flag == 1) then
@@ -232,7 +276,7 @@ subroutine cgyro_make_profiles
      ! Always compute beta_* consistently
      call set_betastar
      beta_star(0) = beta_star(0)*beta_star_scale
-     
+
   endif
 
   ! z_eff -- only use value from input.cgyro or input.profiles
@@ -247,7 +291,7 @@ subroutine cgyro_make_profiles
         endif
      enddo
   endif
-  
+
   !-------------------------------------------------------------
   ! Manage simulation type (n=0,linear,nonlinear)
   !
@@ -367,7 +411,7 @@ subroutine set_betastar
           *(dlnndr(is)+dlntdr(is))
   enddo
   if (ae_flag == 1) then
-     beta_star(0) = beta_star(0) + (dlnndre_ade + dlntdre_ade)
+     beta_star(0) = beta_star(0) + (dlnndr_ele + dlntdr_ele)
   endif
   beta_star(0)  = beta_star(0)*betae_unit
   ! 8pi/Bunit^2 * scaling factor
