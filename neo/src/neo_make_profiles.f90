@@ -238,8 +238,8 @@ subroutine neo_make_profiles
         omega_rot_deriv(ir) = -gamma_p_loc/(rmaj(ir)*a_meters)
         dphi0dr(ir)         = -omega_rot(ir)* b_unit(ir)*(r(ir)*a_meters)/q(ir)
         
-        rhoN_torflux(ir)  = rhon_loc
-        psiN_polflux(ir)  = psin_loc
+        rhoN_torflux(ir)  = rho_norm_loc
+        psiN_polflux(ir)  = psi_norm_loc
         psiN_polflux_a    = psi_a_loc
      
         if (geo_numeq_flag == 1) then

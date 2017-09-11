@@ -24,9 +24,6 @@ subroutine EXPRO_locsim_alloc(flag)
      allocate(gamma_p_exp(EXPRO_n_exp))
      allocate(mach_exp(EXPRO_n_exp))
 
-     allocate(rhon_exp(EXPRO_n_exp))
-     allocate(psin_exp(EXPRO_n_exp))
-
   else
 
      if(allocated(rmin_exp))        deallocate(rmin_exp)
@@ -41,9 +38,6 @@ subroutine EXPRO_locsim_alloc(flag)
      if(allocated(gamma_e_exp))     deallocate(gamma_e_exp)
      if(allocated(gamma_p_exp))     deallocate(gamma_p_exp)
      if(allocated(mach_exp))        deallocate(mach_exp)
-
-     if(allocated(rhon_exp))        deallocate(rhon_exp)
-     if(allocated(psin_exp))        deallocate(psin_exp)
      
      if(allocated(geo_yin_exp))     deallocate(geo_yin_exp)
 
