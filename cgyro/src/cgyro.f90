@@ -14,14 +14,15 @@ program cgyro
   !
   n_omp = omp_get_max_threads()
   !-----------------------------------------------------------------
+  write (*,*) "Igor version"
 
   !-----------------------------------------------------------------
   ! Initialize MPI_COMM_WORLD communicator, including support for 
   ! funneled threading (needed if OpenMP is enabled).
   !
   if (n_omp > 1) then
-     call MPI_INIT_THREAD(MPI_THREAD_SERIALIZED,supported,i_err)
-     if (supported < MPI_THREAD_SERIALIZED) then
+     call MPI_INIT_THREAD(MPI_THREAD_FUNNELED,supported,i_err)
+     if (supported < MPI_THREAD_FUNNELED) then
         call cgyro_error('Multi-threaded MPI not supported.')
      endif
   else 
