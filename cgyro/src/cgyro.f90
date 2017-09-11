@@ -20,8 +20,8 @@ program cgyro
   ! funneled threading (needed if OpenMP is enabled).
   !
   if (n_omp > 1) then
-     call MPI_INIT_THREAD(MPI_THREAD_FUNNELED,supported,i_err)
-     if (supported < MPI_THREAD_FUNNELED) then
+     call MPI_INIT_THREAD(MPI_THREAD_SERIALIZED,supported,i_err)
+     if (supported < MPI_THREAD_SERIALIZED) then
         call cgyro_error('Multi-threaded MPI not supported.')
      endif
   else 

@@ -84,6 +84,12 @@ subroutine cgyro_rhs(ij)
   call cgyro_upwind
   call timer_lib_out('str_comm')
 
+  if ( (nonlinear_flag == 1) .and. (nonlinear_method /= 1) .and. (modulo(i_proc_1,2) == 0)) then ! stagger comm1, to load ballance network traffic
+    call timer_lib_in('nl_comm')
+    call cgyro_nl_fftw_comm1
+    call timer_lib_out('nl_comm')
+  endif
+
   call timer_lib_in('str')
 
 #ifdef _OPENACC
@@ -146,8 +152,16 @@ subroutine cgyro_rhs(ij)
 
   call timer_lib_out('str')
 
+
   ! Wavenumber advection shear terms
   call cgyro_advect_wavenumber(ij)
+
+  if ( (nonlinear_flag == 1) .and. (nonlinear_method /= 1) .and. (modulo(i_proc_1,2) /= 0)) then ! stagger comm1, to load ballance network traffic
+    call timer_lib_in('nl_comm')
+    call cgyro_nl_fftw_comm1
+    call timer_lib_out('nl_comm')
+  endif
+
 
   ! Nonlinear evaluation [f,g]
   if (nonlinear_flag == 1) then     

@@ -10,6 +10,35 @@
 ! NOTE: Need to be careful with (p=-nr/2,n=0) component.
 !-----------------------------------------------------------------
 
+! NOTE: call cgyro_nl_fftw_comm1 before cgyro_nl_fftw
+subroutine cgyro_nl_fftw_comm1
+  use timer_lib
+  use parallel_lib
+  use cgyro_globals
+
+  implicit none
+
+  integer :: ir,it,iv_loc_m,ic_loc_m
+  integer :: iexch
+
+!$omp parallel do private(it,ir,iexch,ic_loc_m,iv_loc_m)
+  do iv_loc_m=1,nv_loc
+     do it=1,n_theta
+        iexch = it + (iv_loc_m-1)*n_theta
+        do ir=1,n_radial
+           ic_loc_m = it + (ir-1)*n_theta
+           fpack(ir,iexch) = h_x(ic_loc_m,iv_loc_m)
+        enddo
+     enddo
+  enddo
+
+  do iexch=nv_loc*n_theta+1,nsplit*n_toroidal
+     fpack(:,iexch) = (0.0,0.0)
+  enddo
+
+  call parallel_slib_f_nc(fpack,f_nl)
+end subroutine cgyro_nl_fftw_comm1
+
 subroutine cgyro_nl_fftw(ij)
 
   use precision_m
@@ -40,18 +69,15 @@ subroutine cgyro_nl_fftw(ij)
         iexch = it + (iv_loc-1)*n_theta
         do ir=1,n_radial
            ic_loc = it + (ir-1)*n_theta
-           fpack(ir,iexch) = h_x(ic_loc,iv_loc)
            gpack(ir,iexch) = psi(ic_loc,iv_loc)
         enddo
      enddo
   enddo
 
   do iexch=nv_loc*n_theta+1,nsplit*n_toroidal
-     fpack(:,iexch) = (0.0,0.0)
      gpack(:,iexch) = (0.0,0.0)
   enddo
 
-  call parallel_slib_f_nc(fpack,f_nl)
   call parallel_slib_f_nc(gpack,g_nl)
   call timer_lib_out('nl_comm')
 

@@ -371,8 +371,8 @@ module cgyro_globals
   !
   ! 2D FFT work arrays
 #ifndef _OPENACC
-  real, dimension(:,:,:), allocatable :: ux
-  real, dimension(:,:,:), allocatable :: uy
+  real, dimension(:,:,:), allocatable :: uxmany
+  real, dimension(:,:,:), allocatable :: uymany
   real, dimension(:,:,:), allocatable :: vx
   real, dimension(:,:,:), allocatable :: vy
   real, dimension(:,:,:), allocatable :: uv
