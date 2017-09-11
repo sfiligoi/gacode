@@ -75,7 +75,7 @@ module neo_globals
   integer :: n_xi
   integer :: n_theta
   integer :: n_radial
-
+  integer :: is_ele
   integer :: matsz_scalefac
   !---------------------------------------------------------------
 
@@ -211,14 +211,13 @@ module neo_globals
   ! driftx   = vdrift dot grad r
 
   ! normalizations for experimental profiles
-  real  :: temp_norm_fac, charge_norm_fac
   real  :: a_meters
   real, dimension(:), allocatable :: dens_norm
   real, dimension(:), allocatable :: temp_norm
   real, dimension(:), allocatable :: vth_norm
   real, dimension(:), allocatable :: b_unit
-  real, parameter :: mass_deuterium = 3.3452   ! (x 10-27 kg)
 
+  real, dimension(:), allocatable :: rhoN_torflux
   real, dimension(:), allocatable :: psiN_polflux
   real :: psiN_polflux_a
 
