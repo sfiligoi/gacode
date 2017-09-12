@@ -175,6 +175,7 @@ module cgyro_globals
   integer :: nv1,nv2,nc1,nc2
   integer :: nsplit
   integer, dimension(:), allocatable :: recv_status
+  logical :: is_staggered_comm_2
   !
   ! Pointers
   integer :: nv,iv

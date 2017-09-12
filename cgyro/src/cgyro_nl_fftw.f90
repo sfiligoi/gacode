@@ -87,7 +87,7 @@ subroutine cgyro_nl_fftw(ij)
 
   include 'fftw3.f03'
 
-  if (modulo(i_proc_1,2) == 0) then ! stagger comm2, to load ballance network traffic
+  if (is_staggered_comm_2) then ! stagger comm2, to load ballance network traffic
     call timer_lib_in('nl_comm')
     call cgyro_nl_fftw_comm2
     call timer_lib_out('nl_comm')
@@ -124,7 +124,7 @@ subroutine cgyro_nl_fftw(ij)
 
   call timer_lib_out('nl')
 
-  if (modulo(i_proc_1,2) /= 0) then ! stagger comm2, to load ballance network traffic
+  if (.not. is_staggered_comm_2) then ! stagger comm2, to load ballance network traffic
     call timer_lib_in('nl_comm')
     call cgyro_nl_fftw_comm2
     call timer_lib_out('nl_comm')
