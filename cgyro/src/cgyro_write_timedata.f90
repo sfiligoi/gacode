@@ -35,11 +35,11 @@ subroutine cgyro_write_timedata
   call cgyro_flux
 
   ! ky flux for all species with field breakdown
-   call cgyro_write_distributed_real(&
+  call cgyro_write_distributed_real(&
        trim(path)//runfile_ky_flux,&
        size(fflux(:,:,:)),&
        fflux(:,:,:))
- 
+
   if (nonlinear_flag == 1 .and. kxkyflux_print_flag == 1) then
      ! kxky energy flux for all species
      call cgyro_write_distributed_real(&
@@ -57,7 +57,7 @@ subroutine cgyro_write_timedata
              gflux(:,:,i_moment))
      enddo
   endif
-  
+
   if (nonlinear_flag == 1 .and. moment_print_flag == 1) then
      ! (n,e) moment for all species at selected thetas.
      do i_moment=1,2
@@ -76,7 +76,7 @@ subroutine cgyro_write_timedata
         field_plot(ir,itp(it)) = field(1,ic)
      endif
   enddo
-        
+
   ! Complex potential at selected thetas
   call cgyro_write_distributed_complex(&
        trim(path)//runfile_kxky_phi,&
@@ -129,7 +129,6 @@ subroutine cgyro_write_timedata
 
   ! Output to files
   call write_time(trim(path)//runfile_time)
-  call write_timers(trim(path)//runfile_timers)
 
   ! Check for manual halt signal
   if (i_proc == 0) then
