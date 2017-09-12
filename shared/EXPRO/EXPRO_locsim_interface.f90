@@ -18,7 +18,7 @@ module EXPRO_locsim_interface
   real, dimension(:), allocatable :: gamma_e_exp
   real, dimension(:), allocatable :: gamma_p_exp
   real, dimension(:), allocatable :: mach_exp
-
+  
   real, dimension(:,:,:), allocatable :: geo_yin_exp
 
   ! Local values
@@ -41,7 +41,10 @@ module EXPRO_locsim_interface
   real :: rhos_loc
   real :: z_eff_loc
   real :: b_unit_loc
-
+  real :: rho_norm_loc
+  real :: psi_norm_loc
+  real :: psi_a_loc
+  
   real, dimension(9) :: dens_loc
   real, dimension(9) :: temp_loc
   real, dimension(9) :: dlnndr_loc

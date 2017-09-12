@@ -39,6 +39,9 @@
 !  real :: rhos_loc [m]
 !  real :: z_eff_loc
 !  real :: b_unit_loc
+!  real :: rho_norm_loc
+!  real :: psi_norm_loc
+!  real :: psi_a_loc
 !
 !  real, dimension(9) :: dens_loc
 !  real, dimension(9) :: temp_loc
@@ -178,7 +181,11 @@ subroutine EXPRO_locsim_profiles(&
   call cub_spline(rmin_exp,EXPRO_rhos,EXPRO_n_exp,rmin,rhos_loc,1)
   call cub_spline(rmin_exp,EXPRO_z_eff,EXPRO_n_exp,rmin,z_eff_loc,1)
   call cub_spline(rmin_exp,EXPRO_bunit,EXPRO_n_exp,rmin,b_unit_loc,1)
-
+  call cub_spline(rmin_exp,EXPRO_rho,EXPRO_n_exp,rmin,rho_norm_loc,1)
+  call cub_spline(rmin_exp,EXPRO_polflux,EXPRO_n_exp,rmin,psi_norm_loc,1)
+  psi_norm_loc  = psi_norm_loc/EXPRO_polflux(EXPRO_n_exp)
+  psi_a_loc = EXPRO_polflux(EXPRO_n_exp)
+  
   do i=1,n_species_exp
      ! Note: mapping is only done for n_species (not n_species_exp)
      call cub_spline(rmin_exp,dens_exp(i,:),EXPRO_n_exp,rmin,dens_loc(i),1)
@@ -198,6 +205,7 @@ subroutine EXPRO_locsim_profiles(&
 
      geo_ny_loc = EXPRO_nfourier
      allocate(geo_yin_exp(8,0:geo_ny_loc,EXPRO_n_exp))
+     if(allocated(geo_yin_loc)) deallocate(geo_yin_loc)
      allocate(geo_yin_loc(8,0:geo_ny_loc))
      geo_yin_exp(1:4,:,:) = EXPRO_geo(:,:,:)/a_meters
      geo_yin_exp(5:8,:,:) = EXPRO_dgeo(:,:,:)

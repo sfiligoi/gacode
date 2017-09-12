@@ -238,10 +238,6 @@ subroutine neo_check
      end select
 
      select case (profile_equilibrium_model)
-     case(0)
-        if (silent_flag == 0 .and. i_proc == 0) then
-           write(io_neoout,30) 'profile_equilibrium_model','WITH S-ALPHA GEOMETRY'
-        end if
      case (1)
         if (silent_flag == 0 .and. i_proc == 0) then
            write(io_neoout,30) 'profile_equilibrium_model','WITH MILLER GEOMETRY'
