@@ -6,7 +6,7 @@
 
 IDENTITY="NERSC Cori KNL (ifort)"
 CORES_PER_NODE=64
-NUMAS_PER_NODE=4
+NUMAS_PER_NODE=1
 
 # Compilers and flags
 FC     = ftn -gen-interfaces -module ${GACODE_ROOT}/modules
