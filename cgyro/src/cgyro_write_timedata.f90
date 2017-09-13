@@ -167,7 +167,6 @@ subroutine cgyro_write_distributed_complex(datafile,n_fn,fn)
   integer, intent(in) :: n_fn
   complex, intent(in) :: fn(n_fn)
   !
-  integer :: i_group_send
   integer :: in
   !
   ! Required for MPI-IO:

@@ -1,13 +1,12 @@
 subroutine cgyro_rhs(ij)
 
   use timer_lib
-
   use cgyro_globals
 
   implicit none
 
   integer, intent(in) :: ij
-  integer :: is,ir
+  integer :: is
   integer :: id,jc
   real :: rval,rval2
   complex :: rhs_stream
@@ -54,11 +53,11 @@ subroutine cgyro_rhs(ij)
         rhs_ij(ic,iv_loc) = &
              omega_cap_h(ic,iv_loc)*cap_h_c(ic,iv_loc)+&
              omega_h(ic,iv_loc)*h_x(ic,iv_loc)
-     enddo ! cpus vectorize better if separate loop
+     enddo 
 
+     ! CPUs vectorize better if separate loop
      do ic=1,nc
-        ! don't need to recompute iv_loc, still valid from previous loop
-
+        ! Don't need to recompute iv_loc, still valid from previous loop
         is = is_v(iv)
         ! Parallel streaming with upwind dissipation 
         rval  = omega_stream(it_c(ic),is)*vel(ie_v(iv))*xi(ix_v(iv))
