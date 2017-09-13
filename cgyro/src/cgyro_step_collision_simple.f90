@@ -20,6 +20,7 @@ subroutine cgyro_step_collision_simple
   integer :: is,ie,ix,jx,it,ir
   integer :: ivp
   complex, dimension(:,:,:),allocatable :: bvec,cvec
+  complex :: bvec_flat(nv)
   real :: cvec_re,cvec_im
 
   !----------------------------------------------------------------
@@ -34,7 +35,7 @@ subroutine cgyro_step_collision_simple
   allocate(bvec(n_xi,n_energy,n_species))
   allocate(cvec(n_xi,n_energy,n_species))
 
-!$omp parallel do private(ic_loc,ivp,iv,is,ix,jx,ie,ir,it,cvec_re,cvec_im,bvec,cvec)
+!$omp parallel do private(ic_loc,ivp,iv,is,ix,jx,ie,ir,it,cvec_re,cvec_im,bvec,cvec,nv)
   do ic=nc1,nc2
      ic_loc = ic-nc1+1
      ir = ir_c(ic)
@@ -71,8 +72,9 @@ subroutine cgyro_step_collision_simple
      endif
 
      do iv=1,nv
-        cap_h_v(ic_loc,iv) = bvec(ix_v(iv),ie_v(iv),is_v(iv))
+        bvec_flat(iv) = bvec(ix_v(iv),ie_v(iv),is_v(iv))
      enddo
+    call parallel_lib_f_i_set(ic_loc, bvec_flat) 
 
   enddo
 
@@ -81,7 +83,7 @@ subroutine cgyro_step_collision_simple
   call timer_lib_out('coll')
 
   call timer_lib_in('coll_comm')
-  call parallel_lib_f(cap_h_v,cap_h_ct)
+  call parallel_lib_f_i_do(cap_h_ct)
   call timer_lib_out('coll_comm')
 
   call timer_lib_in('coll')
