@@ -107,6 +107,44 @@ contains
 
   end subroutine parallel_lib_f
 
+  ! inline version, set one row
+  subroutine parallel_lib_f_i_set(i_loc,bv)
+
+    implicit none
+
+    integer, intent(in) :: i_loc
+    complex, intent(in), dimension(nj) :: bv
+    integer :: j,k
+
+    do k=1,nproc
+          do j=1,nj_loc
+             fsendf(j,i_loc,k) = bv(j+(k-1)*nj_loc)
+          enddo
+    enddo
+
+  end subroutine parallel_lib_f_i_set
+
+  ! inline vesion, just execute
+  subroutine parallel_lib_f_i_do(ft)
+
+    use mpi
+
+    implicit none
+
+    complex, intent(inout), dimension(nj_loc,ni) :: ft
+    integer :: ierr
+
+    call MPI_ALLTOALL(fsendf, &
+         nsend, &
+         MPI_DOUBLE_COMPLEX, &
+         ft, &
+         nsend, &
+         MPI_DOUBLE_COMPLEX, &
+         lib_comm, &
+         ierr)
+
+  end subroutine parallel_lib_f_i_do
+
   !=========================================================
 
   subroutine parallel_lib_r(ft,f)

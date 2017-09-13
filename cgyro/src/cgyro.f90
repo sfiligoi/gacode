@@ -22,6 +22,7 @@ program cgyro
   if (n_omp > 1) then
      call MPI_INIT_THREAD(MPI_THREAD_FUNNELED,supported,i_err)
      if (supported < MPI_THREAD_FUNNELED) then
+        write (*,*) "ERROR: Multi-threaded MPI not supported." 
         call cgyro_error('Multi-threaded MPI not supported.')
      endif
   else 

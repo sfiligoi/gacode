@@ -65,6 +65,8 @@ subroutine cgyro_rhs(ij)
   complex :: rhs_stream
   complex :: rhs_ij(nc,nv_loc)
 
+  call timer_lib_in('str')
+
   ! Prepare suitable distribution (g, not h) for conservative upwind method
   g_x(:,:) = h_x(:,:)
 
@@ -80,9 +82,17 @@ subroutine cgyro_rhs(ij)
      enddo
   endif
 
+  call timer_lib_out('str')
+
   call timer_lib_in('str_comm')
   call cgyro_upwind
   call timer_lib_out('str_comm')
+
+  if ( (nonlinear_flag == 1) .and. (nonlinear_method /= 1) .and. is_staggered_comm_2) then ! stagger comm1, to load ballance network traffic
+    call timer_lib_in('nl_comm')
+    call cgyro_nl_fftw_comm1
+    call timer_lib_out('nl_comm')
+  endif
 
   call timer_lib_in('str')
 
@@ -146,8 +156,16 @@ subroutine cgyro_rhs(ij)
 
   call timer_lib_out('str')
 
+
   ! Wavenumber advection shear terms
   call cgyro_advect_wavenumber(ij)
+
+  if ( (nonlinear_flag == 1) .and. (nonlinear_method /= 1) .and. (.not. is_staggered_comm_2)) then ! stagger comm1, to load ballance network traffic
+    call timer_lib_in('nl_comm')
+    call cgyro_nl_fftw_comm1
+    call timer_lib_out('nl_comm')
+  endif
+
 
   ! Nonlinear evaluation [f,g]
   if (nonlinear_flag == 1) then     
