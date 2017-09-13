@@ -67,10 +67,13 @@ subroutine cgyro_step_collision
         enddo
      endif
 
-     do iv=1,nv
-        cap_h_v(ic_loc,iv) = bvec(iv)
-     enddo
-
+     call parallel_lib_f_i_set(ic_loc, bvec)
+     if (collision_field_model == 1) then
+       ! cap_h_v not re-used else
+       do iv=1,nv
+          cap_h_v(ic_loc,iv) = bvec(iv)
+        enddo
+     endif
   enddo
 
   call timer_lib_out('coll')
@@ -81,21 +84,25 @@ subroutine cgyro_step_collision
   endif
 
   call timer_lib_in('coll_comm')
-  call parallel_lib_f(cap_h_v,cap_h_ct)
-  cap_h_c = transpose(cap_h_ct)
+  call parallel_lib_f_i_do(cap_h_ct)
   call timer_lib_out('coll_comm')
 
   call timer_lib_in('coll')
 
   ! Compute H given h and [phi(h), apar(h)]
 
-!$omp parallel do private(iv_loc,is,ic)
+!$omp parallel do private(iv_loc,is,ic,iv)
   do iv=nv1,nv2
      iv_loc = iv-nv1+1
-     is = is_v(iv)
      do ic=1,nc
         psi(ic,iv_loc) = sum(jvec_c(:,ic,iv_loc)*field(:,ic))
         chi(ic,iv_loc) = sum(jxvec_c(:,ic,iv_loc)*field(:,ic))
+     enddo
+     do ic=1,nc
+        cap_h_c(ic,iv_loc) = cap_h_ct(iv_loc,ic)
+     enddo
+     is = is_v(iv)
+     do ic=1,nc
         h_x(ic,iv_loc) = cap_h_c(ic,iv_loc)-psi(ic,iv_loc)*(z(is)/temp(is))
      enddo
   enddo
