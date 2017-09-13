@@ -175,6 +175,7 @@ module cgyro_globals
   integer :: nv1,nv2,nc1,nc2
   integer :: nsplit
   integer, dimension(:), allocatable :: recv_status
+  logical :: is_staggered_comm_2
   !
   ! Pointers
   integer :: nv,iv
@@ -371,8 +372,8 @@ module cgyro_globals
   !
   ! 2D FFT work arrays
 #ifndef _OPENACC
-  real, dimension(:,:,:), allocatable :: ux
-  real, dimension(:,:,:), allocatable :: uy
+  real, dimension(:,:,:), allocatable :: uxmany
+  real, dimension(:,:,:), allocatable :: uymany
   real, dimension(:,:,:), allocatable :: vx
   real, dimension(:,:,:), allocatable :: vy
   real, dimension(:,:,:), allocatable :: uv
