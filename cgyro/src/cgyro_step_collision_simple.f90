@@ -35,7 +35,7 @@ subroutine cgyro_step_collision_simple
   allocate(bvec(n_xi,n_energy,n_species))
   allocate(cvec(n_xi,n_energy,n_species))
 
-!$omp parallel do private(ic_loc,ivp,iv,is,ix,jx,ie,ir,it,cvec_re,cvec_im,bvec,cvec,nv)
+!$omp parallel do private(ic_loc,ivp,iv,is,ix,jx,ie,ir,it,cvec_re,cvec_im,bvec,cvec,bvec_flat)
   do ic=nc1,nc2
      ic_loc = ic-nc1+1
      ir = ir_c(ic)
