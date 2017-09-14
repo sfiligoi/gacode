@@ -15,33 +15,22 @@ subroutine cgyro_write_restart
   ! Print this data on restart steps only; otherwise exit now
   if (mod(i_time,restart_step*print_step) /= 0) return
 
-  if (restart_format==2) then
-    if (mpiio_num_files==1) then
-       call cgyro_write_restart_one
-    else
-       call cgyro_write_restart_v2
-    endif
+  ! Write to single or multiple files
+  if (mpiio_num_files == 1) then
+     call cgyro_write_restart_one
   else
-    call cgyro_error('ERROR: (CGYRO) Invalid restart_format found.')
+     call cgyro_write_restart_many
   endif
+
+  ! Write restart tag
+  if (i_proc == 0) then
+     open(unit=io,file=trim(path)//runfile_restart_tag,status='replace')
+     write(io,*) i_current
+     write(io,fmtstr) t_current
+     close(io)
+  endif
+
 end subroutine cgyro_write_restart
-
-! Dump restart parameters to ASCII file.
-subroutine cgyro_write_restart_tag
-  use mpi
-  use cgyro_globals
-  use cgyro_io
-
-  open(unit=io,file=trim(path)//runfile_restart_tag,status='replace')
-  write(io,*) i_current
-  write(io,fmtstr) t_current
-  close(io)
-
-  open(unit=io,file=trim(path)//runfile_restart_tag_version,status='replace')
-  write(io,*) restart_format
-  close(io)
-
-end subroutine cgyro_write_restart_tag
 
 subroutine cgyro_write_restart_one
 
@@ -101,6 +90,7 @@ subroutine cgyro_write_restart_one
           MPI_COMPLEX16,&
           fstatus,&
           i_err)
+
   if (i_err /= 0) then
      call cgyro_error('ERROR: (CGYRO) MPI_FILE_WRITE_AT in cgyro_write_restart_one failed')
      return
@@ -110,18 +100,9 @@ subroutine cgyro_write_restart_one
   call MPI_FILE_CLOSE(fhv,i_err)
   call MPI_INFO_FREE(finfo,i_err)
 
-  !---------------------------------------------------------
-  ! Dump restart parameters to ASCII file.
-  !
-  if (i_proc == 0) then
-     call cgyro_write_restart_tag
-  endif
-  !---------------------------------------------------------
-
 end subroutine cgyro_write_restart_one
 
-
-subroutine cgyro_write_restart_v2
+subroutine cgyro_write_restart_many
 
   use mpi
   use cgyro_globals
@@ -140,7 +121,6 @@ subroutine cgyro_write_restart_v2
   integer(kind=MPI_OFFSET_KIND) :: offset1
   !----------------------------------------------
 
-
   !-----------------------------------------------
   ! Dump h and blending coefficients:
   !
@@ -148,8 +128,7 @@ subroutine cgyro_write_restart_v2
   disp     = 0
 
   offset1 = size(h_x,kind=MPI_OFFSET_KIND)*i_proc_restart_io
-
-  if (offset1<0) then
+  if (offset1 < 0) then
      call cgyro_error('ERROR: (CGYRO) overflow detected in cgyro_write_restart_v2')
      return
   endif
@@ -159,7 +138,7 @@ subroutine cgyro_write_restart_v2
   call MPI_INFO_SET(finfo,"striping_factor",mpiio_stripe_str,i_err)
 
   call MPI_FILE_OPEN(NEW_COMM_RESTART_IO,&
-          trim(path)//runfile_restart//rtag_v2(i_group_restart_io),&
+          trim(path)//runfile_restart//rtag(i_group_restart_io),&
           filemode,&
           finfo,&
           fhv,&
@@ -180,6 +159,7 @@ subroutine cgyro_write_restart_v2
           MPI_COMPLEX16,&
           fstatus,&
           i_err)
+
   if (i_err /= 0) then
      call cgyro_error('ERROR: (CGYRO) MPI_FILE_WRITE_AT in cgyro_write_restart_v2 failed')
      return
@@ -189,16 +169,7 @@ subroutine cgyro_write_restart_v2
   call MPI_FILE_CLOSE(fhv,i_err)
   call MPI_INFO_FREE(finfo,i_err)
 
-  !---------------------------------------------------------
   ! Wait for all groups to finish
   call MPI_Barrier(CGYRO_COMM_WORLD,i_err)
 
-  !---------------------------------------------------------
-  ! Dump restart parameters to ASCII file.
-  !
-  if (i_proc == 0) then
-     call cgyro_write_restart_tag
-  endif
-  !---------------------------------------------------------
-
-end subroutine cgyro_write_restart_v2
+end subroutine cgyro_write_restart_many

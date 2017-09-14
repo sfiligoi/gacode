@@ -31,9 +31,8 @@ subroutine cgyro_rhs(ij)
 
   call timer_lib_out('str')
 
-  call timer_lib_in('str_comm')
+  ! Correct g_x for number conservation
   call cgyro_upwind
-  call timer_lib_out('str_comm')
 
   if ( (nonlinear_flag == 1) .and. (nonlinear_method /= 1) .and. is_staggered_comm_2) then 
      ! stagger comm1, to load ballance network traffic

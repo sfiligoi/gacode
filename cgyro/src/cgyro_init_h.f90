@@ -9,11 +9,7 @@ subroutine cgyro_init_h
   integer :: ir,it,is,ie,ix
   real :: arg, ang
 
-  ! set it to an invalid value by default
-  ! will be updated if there is a restart file read
-  input_restart_format = 0
-
-  !---------------------------------------------------------------------
+  !---------------------------------------------------------------------------
   ! Check to see if we have restart data available
   !
   if (i_proc == 0) then
@@ -32,7 +28,7 @@ subroutine cgyro_init_h
   endif
 
   call MPI_BCAST(restart_flag,1,MPI_DOUBLE_PRECISION,0,CGYRO_COMM_WORLD,i_err)
-  !---------------------------------------------------------------------
+  !---------------------------------------------------------------------------
 
   if (restart_flag == 1) then
 
@@ -121,7 +117,7 @@ subroutine cgyro_init_h
 
            else 
 
-              ! Finite-n initial conditoin
+              ! Finite-n initial condition
 
               if (amp > 0.0) then
                  h_x(ic,:) = amp*rho

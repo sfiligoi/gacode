@@ -803,8 +803,8 @@ subroutine write_timers(datafile)
      call timer_lib_init('str_comm')
      call timer_lib_init('nl')
      call timer_lib_init('nl_comm')
-     call timer_lib_init('field_h')
-     call timer_lib_init('field_H')
+     call timer_lib_init('field')
+     call timer_lib_init('field_com')
      call timer_lib_init('shear')
      call timer_lib_init('coll')
      call timer_lib_init('coll_comm')
@@ -846,8 +846,8 @@ subroutine write_timers(datafile)
              timer_lib_time('str_comm'),& 
              timer_lib_time('nl'),& 
              timer_lib_time('nl_comm'),&
-             timer_lib_time('field_h'),&
-             timer_lib_time('field_H'),&
+             timer_lib_time('field'),&
+             timer_lib_time('field_com'),&
              timer_lib_time('shear'),&
              timer_lib_time('coll'),&
              timer_lib_time('coll_comm'),&

@@ -25,19 +25,6 @@ subroutine cgyro_read_restart
      read(io,fmtstr) t_current
      close(io)
 
-     open(unit=io,&
-          file=trim(path)//runfile_restart_tag_version,&
-          iostat=i_err,&
-          status='old')
-
-     if (i_err==0) then
-          read(io,*) input_restart_format
-          close(io)
-     else
-          call cgyro_error('Restart version not found')
-          return
-     endif
-
   endif
 
   ! Broadcast to all cores.
@@ -51,16 +38,12 @@ subroutine cgyro_read_restart
   call MPI_BCAST(input_restart_format,&
        1,MPI_INTEGER,0,CGYRO_COMM_WORLD,i_err)
 
-  !---------------------------------------------------------
+  ! Read data in single or multiple-file format
 
-  if (input_restart_format==2) then
-    if (mpiio_num_files==1) then
-       call cgyro_read_restart_one
-    else
-       call cgyro_read_restart_v2
-    endif
+  if (mpiio_num_files == 1) then
+     call cgyro_read_restart_one
   else
-    call cgyro_error('ERROR: (CGYRO) Invalid restart_format found.')
+     call cgyro_read_restart_many
   endif
 
 end subroutine cgyro_read_restart
@@ -88,7 +71,7 @@ subroutine cgyro_read_restart_one
   disp     = 0
 
   offset1 = size(h_x,kind=MPI_OFFSET_KIND)*i_proc
-  if (offset1<0) then
+  if (offset1 < 0) then
      call cgyro_error('ERROR: (CGYRO) overflow detected in cgyro_read_restart_one')
      return
   endif
@@ -101,6 +84,7 @@ subroutine cgyro_read_restart_one
           finfo,&
           fhv,&
           i_err)
+
   if (i_err /= 0) then
      call cgyro_error('ERROR: (CGYRO) MPI_FILE_OPEN in cgyro_read_restart_one failed')
      return
@@ -121,6 +105,7 @@ subroutine cgyro_read_restart_one
           MPI_COMPLEX16,&
           fstatus,&
           i_err)
+
   if (i_err /= 0) then
      call cgyro_error('ERROR: (CGYRO) MPI_FILE_READ_AT in cgyro_read_restart_one failed')
      return
@@ -131,7 +116,7 @@ subroutine cgyro_read_restart_one
 
 end subroutine cgyro_read_restart_one
 
-subroutine cgyro_read_restart_v2
+subroutine cgyro_read_restart_many
 
   use mpi
   use cgyro_globals
@@ -155,7 +140,7 @@ subroutine cgyro_read_restart_v2
 
   offset1 = size(h_x,kind=MPI_OFFSET_KIND)*i_proc_restart_io
 
-  if (offset1<0) then
+  if (offset1 < 0) then
      call cgyro_error('ERROR: (CGYRO) overflow detected in cgyro_read_restart_v2')
      return
   endif
@@ -163,13 +148,14 @@ subroutine cgyro_read_restart_v2
   call MPI_INFO_CREATE(finfo,i_err)
 
   call MPI_FILE_OPEN(NEW_COMM_RESTART_IO,&
-          trim(path)//runfile_restart//rtag_v2(i_group_restart_io),&
+          trim(path)//runfile_restart//rtag(i_group_restart_io),&
           filemode,&
           finfo,&
           fhv,&
           i_err)
+
   if (i_err /= 0) then
-     call cgyro_error('ERROR: (CGYRO) MPI_FILE_OPEN in cgyro_read_restart_v2 failed')
+     call cgyro_error('ERROR: (CGYRO) MPI_FILE_OPEN in cgyro_read_restart_many failed')
      return
   endif
 
@@ -188,13 +174,14 @@ subroutine cgyro_read_restart_v2
           MPI_COMPLEX16,&
           fstatus,&
           i_err)
+
   if (i_err /= 0) then
-     call cgyro_error('ERROR: (CGYRO) MPI_FILE_READ_AT in cgyro_read_restart_v2 failed')
+     call cgyro_error('ERROR: (CGYRO) MPI_FILE_READ_AT in cgyro_read_restart_many failed')
      return
   endif
 
   call MPI_FILE_CLOSE(fhv,i_err)
   call MPI_INFO_FREE(finfo,i_err)
 
-end subroutine cgyro_read_restart_v2
+end subroutine cgyro_read_restart_many
 
