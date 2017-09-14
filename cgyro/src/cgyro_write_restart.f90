@@ -202,19 +202,3 @@ subroutine cgyro_write_restart_v2
   !---------------------------------------------------------
 
 end subroutine cgyro_write_restart_v2
-
-subroutine cgyro_del_restart_v2
-  use mpi
-  use cgyro_globals
-  use cgyro_io
-
-  integer :: j
-  integer :: stat
-
-  do j=1,mpiio_num_files
-    open(unit=io,file=trim(path)//runfile_restart//rtag_v2(j),iostat=stat,status='old')
-    if (stat == 0) close(io, status='delete')
-  enddo
-end subroutine cgyro_del_restart_v2
-
-
