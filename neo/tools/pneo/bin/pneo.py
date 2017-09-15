@@ -2,6 +2,7 @@ import os
 import numpy as np
 import sys
 from scipy.interpolate import Rbf
+import tarfile
 
 d = {}
 
@@ -19,7 +20,10 @@ d = {}
 fulltag_in = ['in1_eps','in2_q','in3_nu','in4_ni1','in5_ti1',
               'in7_delta','in8_sdelta','in9_kappa','in10_skappa']
 
-indata = np.fromfile('indata.dat',dtype='float',sep=" ")
+tar = tarfile.open("circle3.tar.gz")
+root='circle3/'
+
+indata = np.fromfile(root+'indata.dat',dtype='float',sep=" ")
 n = len(indata)/9
 indata = np.reshape(indata,(9,n),'F')
 
@@ -43,7 +47,7 @@ for i in range(5):
 #  ingeodata(10) = <|grad r|^2/B^2>
 #  ingeodata(11) = <-grad_r * gsin/B>
 
-ingeodata = np.fromfile('ingeodata.dat',dtype='float',sep=" ")
+ingeodata = np.fromfile(root+'ingeodata.dat',dtype='float',sep=" ")
 ingeodata = np.reshape(ingeodata,(12,n),'F')
 
 # Magic 6th parameter
@@ -60,7 +64,7 @@ tag_in[5] = 'in6_geo'
 
 tag_out = ['cne','cte','cni1','cti1','cni2','cti2']
 
-outdata = np.fromfile('outdata.dat',dtype='float',sep=" ")
+outdata = np.fromfile(root+'outdata.dat',dtype='float',sep=" ")
 outdata = np.reshape(outdata,(6,n),'F')
 
 # 6 outputs
@@ -70,7 +74,6 @@ for i in range(6):
 for key in sorted(d.keys()):
 #   print key,d[key][0]
    print key
-
    
 in_mins = np.zeros(6)
 in_maxs = np.zeros(6)
@@ -86,31 +89,20 @@ for i in range(6):
 print 'in_mins: ', in_mins
 print 'in_maxs: ', in_maxs
 
-rbf_cne = Rbf(dscale['in1_eps']*4,dscale['in2_q']*4,dscale['in3_nu']*5,
-           dscale['in4_ni1']*3,dscale['in5_ti1']*2,dscale['in6_geo']*4,
-           d['cne'],function='cubic',epsilon=1.0)
-rbf_cte = Rbf(dscale['in1_eps']*4,dscale['in2_q']*4,dscale['in3_nu']*5,
-           dscale['in4_ni1']*3,dscale['in5_ti1']*2,dscale['in6_geo']*4,
-           d['cte'],function='cubic',epsilon=1.0)
-rbf_cni1 = Rbf(dscale['in1_eps']*4,dscale['in2_q']*4,dscale['in3_nu']*5,
-           dscale['in4_ni1']*3,dscale['in5_ti1']*2,dscale['in6_geo']*4,
-           d['cni1'],function='cubic',epsilon=1.0)
-rbf_cti1 = Rbf(dscale['in1_eps']*4,dscale['in2_q']*4,dscale['in3_nu']*5,
-           dscale['in4_ni1']*3,dscale['in5_ti1']*2,dscale['in6_geo']*4,
-           d['cti1'],function='cubic',epsilon=1.0)
-rbf_cni2 = Rbf(dscale['in1_eps']*4,dscale['in2_q']*4,dscale['in3_nu']*5,
-           dscale['in4_ni1']*3,dscale['in5_ti1']*2,dscale['in6_geo']*4,
-           d['cni2'],function='cubic',epsilon=1.0)
-rbf_cti2 = Rbf(dscale['in1_eps']*4,dscale['in2_q']*4,dscale['in3_nu']*5,
-           dscale['in4_ni1']*3,dscale['in5_ti1']*2,dscale['in6_geo']*4,
-           d['cti2'],function='cubic',epsilon=1.0)
-
+# Test point
 eps=0.3391239
 q=4.4351
 lnu=np.log10(0.798065)
 ni1=0.741015
 ti1=1.564186
 geo=0.757284526
+
+n1 = 6
+n2 = 4
+n3 = 4
+n4 = 3
+n5 = 3
+n6 = 6
 
 myin = [eps,q,lnu,ni1,ti1,geo]
 myinscale = np.zeros(6)
@@ -122,15 +114,14 @@ for i in range(6):
 
 print 'myin: ', myin      
 print 'myinscale: ', myinscale
-print rbf_cne(myinscale[0]*4,myinscale[1]*4,myinscale[2]*5,
-           myinscale[3]*3,myinscale[4]*2,myinscale[5]*4)
-print rbf_cte(myinscale[0]*4,myinscale[1]*4,myinscale[2]*5,
-           myinscale[3]*3,myinscale[4]*2,myinscale[5]*4)
-print rbf_cni1(myinscale[0]*4,myinscale[1]*4,myinscale[2]*5,
-           myinscale[3]*3,myinscale[4]*2,myinscale[5]*4)
-print rbf_cti1(myinscale[0]*4,myinscale[1]*4,myinscale[2]*5,
-           myinscale[3]*3,myinscale[4]*2,myinscale[5]*4)
-print rbf_cni2(myinscale[0]*4,myinscale[1]*4,myinscale[2]*5,
-           myinscale[3]*3,myinscale[4]*2,myinscale[5]*4)
-print rbf_cti2(myinscale[0]*4,myinscale[1]*4,myinscale[2]*5,
-           myinscale[3]*3,myinscale[4]*2,myinscale[5]*4)
+
+for x in tag_out:
+   rbf = Rbf(dscale['in1_eps']*n1,dscale['in2_q']*n2,dscale['in3_nu']*n3,
+             dscale['in4_ni1']*n4,dscale['in5_ti1']*n5,dscale['in6_geo']*n6,
+             d[x],function='cubic',epsilon=1.0)
+
+   np.savetxt('node_'+x,rbf.nodes,fmt='%.12e',newline=os.linesep)
+ 
+   print x,rbf(myinscale[0]*n1,myinscale[1]*n2,myinscale[2]*n3,
+               myinscale[3]*n4,myinscale[4]*n5,myinscale[5]*n6)
+
