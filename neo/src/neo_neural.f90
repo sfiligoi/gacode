@@ -58,7 +58,7 @@ contains
     integer :: is_i1, is_i2
     real    :: d_max
     real, dimension(6)  :: nn_in
-    real, dimension(12) :: nn_out
+    real, dimension(6) :: nn_out
     real :: CTi2_neo, CTi1_neo, CTe_neo, CNi2_neo, CNi1_neo, CNe_neo
     real :: CTi2_sau, CTi1_sau, CTe_sau, CNi2_sau, CNi1_sau, CNe_sau
     
