@@ -4,8 +4,8 @@ subroutine neo_rbf(x0,c0)
 
   real, dimension(6), intent (in) :: x0
   real, dimension(6), intent (out) :: c0
-  
-  integer :: p,k
+
+  integer :: p,q,k
   integer, dimension(9) :: n
 
   integer :: ntot
@@ -16,8 +16,12 @@ subroutine neo_rbf(x0,c0)
   real, dimension(:), allocatable :: w
   real, dimension(16) :: dum
   real, dimension(6) :: xmin,xmax,xs0
-  character(len=10), dimension(6) :: file
   integer :: stat
+
+  real, dimension(:,:), allocatable :: a
+  real, dimension(:,:), allocatable :: b
+  integer, dimension(:), allocatable :: ipiv
+  integer :: info
 
   open(unit=1,file='input.dat',status='old',iostat=stat)
   if (stat /= 0) then
@@ -100,29 +104,25 @@ subroutine neo_rbf(x0,c0)
      xs0(k) = (x0(k)-xmin(k))/(xmax(k)-xmin(k))*n(k)
   enddo
 
-  file(1) = 'node_cne'
-  file(2) = 'node_cte'
-  file(3) = 'node_cni1'
-  file(4) = 'node_cti1'
-  file(5) = 'node_cni2'
-  file(6) = 'node_cti2'
+  allocate(ipiv(ntot))
+  allocate(b(ntot,6))
+  allocate(a(ntot,ntot))
+
+  do p=1,ntot
+     do q=1,ntot
+        a(p,q) = sqrt( sum((x(:,q)-x(:,p))**2) )**3
+     enddo
+  enddo
+  b(:,:) = transpose(outdata(:,:))
+  call DGESV(ntot,6,a,ntot,ipiv,b,ntot,info) 
 
   do k=1,6
-     open(unit=1,file=trim(file(k)),status='old',iostat=stat)
-     if (stat /= 0) then
-        call neo_error('ERROR: (NEO) RBF files not available')
-        return
-     endif
-     do p=1,ntot
-        read(1,*) w(p)
-     enddo
-     close(1) 
 
      c0(k) = 0.0
      do p=1,ntot
-        c0(k) = c0(k)+w(p)*sqrt( sum((xs0(:)-x(:,p))**2) )**3
+        c0(k) = c0(k)+b(p,k)*sqrt( sum((xs0(:)-x(:,p))**2) )**3
      enddo
-     !print *,file(k),c0(k)
+
   enddo
 
 10 format(1pe12.5)
