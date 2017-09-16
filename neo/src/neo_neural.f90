@@ -122,7 +122,7 @@ contains
     nn_in(4) = dens(is_i1,ir)/dens(is_ele,ir)      ! ni1/ne
     nn_in(5) = temp(is_i1,ir)/temp(is_ele,ir)      ! Ti1/Te
     nn_in(6) = geo_param(ir,2)                    ! geo param
-    print *, nn_in(:)
+    !print *, nn_in(:)
     
     ! Run the NN
     call neo_rbf(nn_in,nn_out)
@@ -135,7 +135,7 @@ contains
     CTi1_neo  = nn_out(4)
     CNi2_neo  = nn_out(5)
     CTi2_neo  = nn_out(6)
-    print *, nn_out(:)
+    !print *, nn_out(:)
     
     ! Reconstruct jpar from NEO NN and Sauter NN
     

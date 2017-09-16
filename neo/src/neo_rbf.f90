@@ -25,7 +25,7 @@ subroutine neo_rbf(x0,c0)
 
   open(unit=1,file='input.dat',status='old',iostat=stat)
   if (stat /= 0) then
-     call neo_error('ERROR: (NEO) RBF files not available')
+     call neo_error('ERROR: (NEO) RBF input.dat not available')
      return
   endif
   do k=1,9
@@ -43,17 +43,17 @@ subroutine neo_rbf(x0,c0)
 
   open(unit=1,file='indata.dat',status='old',iostat=stat)
   if (stat /= 0) then
-     call neo_error('ERROR: (NEO) RBF files not available')
+     call neo_error('ERROR: (NEO) RBF indata.dat not available')
      return
   endif
   open(unit=2,file='ingeodata.dat',status='old',iostat=stat)
   if (stat /= 0) then
-     call neo_error('ERROR: (NEO) RBF files not available')
+     call neo_error('ERROR: (NEO) RBF ingeodata.dat not available')
      return
   endif
   open(unit=3,file='outdata.dat',status='old',iostat=stat)
   if (stat /= 0) then
-     call neo_error('ERROR: (NEO) RBF files not available')
+     call neo_error('ERROR: (NEO) RBF outdata.dat not available')
      return
   endif
 
@@ -94,7 +94,7 @@ subroutine neo_rbf(x0,c0)
   !x0(5)=1.564186
   !x0(6)=0.757284526
 
-  print *,n(1:6)
+  !print *,n(1:6)
 
   ! Rescale data
   do k=1,6

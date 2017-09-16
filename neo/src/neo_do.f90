@@ -556,7 +556,7 @@ subroutine neo_do
      ! Compute the neo transport coefficients
      call TRANSP_do(ir)
      call TRANSP_write(ir)
-
+        
      ! re-construct the energy dependence
      ! call g_energy(ir)
 
@@ -570,6 +570,8 @@ subroutine neo_do
      call  THEORY_do(ir)
      if(error_status > 0) goto 100
 
+     ! EAB: Temporarily print the jbs coeff
+     !print *, jpar/geo_param(ir,1)/rho(ir), jpar_S/geo_param(ir,1)/rho(ir)
 
      ! Store the local neo transport values at ir=1 in neo_x_out
      ! (n_species_max, transport coeff)

@@ -177,7 +177,8 @@ cp ../input.vgen.gen vgen.dat
 
 # Move NN data
 if [ -f "../indata.dat" ]
-then 
+then
+   echo "copying rbf files"
    cp ../indata.dat .
    cp ../ingeodata.dat .
    cp ../outdata.dat .
