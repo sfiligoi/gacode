@@ -1,10 +1,17 @@
 subroutine neo_rbf(x0,c0)
 
+  use neo_globals
+
   implicit none
 
-  real, dimension(6), intent(in) :: x0
-  real, dimension(6), intent(out) :: c0
-  real, dimension(6) :: xs0
+  ! Number of inputs (hypercube dimensions)
+  integer, parameter :: n_in = 6
+  ! NUmber of outputs (gradient coefficients)
+  integer, parameter :: n_out = 6
+
+  real, dimension(n_in), intent(in) :: x0
+  real, dimension(n_out), intent(out) :: c0
+  real, dimension(n_in) :: xs0
 
   integer :: p,k
   integer :: stat
@@ -13,13 +20,13 @@ subroutine neo_rbf(x0,c0)
   real, dimension(:,:), allocatable :: x
   real, dimension(:,:), allocatable :: b
 
-  real, dimension(2,6) :: s
+  real, dimension(2,n_in) :: s
 
   character(len=255) :: data
-  character(len=234) :: root
+  character(len=218) :: root
 
   call get_environment_variable('GACODE_ROOT',root)
-  data = trim(root)//'/neo/tools/pneo/data/'
+  data = trim(root)//'/neo/tools/pneo/data/'//trim(rbf_dir)
 
   open(unit=1,file=trim(data)//'out.pneo.scale',status='old',iostat=stat)
   if (stat /= 0) then
@@ -27,13 +34,13 @@ subroutine neo_rbf(x0,c0)
      return
   endif
   read(1,*) ntot
-  do k=1,6
+  do k=1,n_in
      read(1,*) s(:,k)  
   enddo
   close(1)
 
-  allocate(x(6,ntot))
-  allocate(b(ntot,6))
+  allocate(x(n_in,ntot))
+  allocate(b(ntot,n_out))
   
   open(unit=1,file=trim(data)//'out.pneo.rbf',status='old',iostat=stat)
   if (stat /= 0) then
@@ -45,11 +52,11 @@ subroutine neo_rbf(x0,c0)
   close(1)
 
   ! Rescale data
-  do k=1,6
+  do k=1,n_in
      xs0(k) = s(1,k)*x0(k)+s(2,k)
   enddo
 
- do k=1,6
+ do k=1,n_out
      c0(k) = 0.0
      do p=1,ntot
         c0(k) = c0(k)+b(p,k)*sqrt( sum((xs0(:)-x(:,p))**2) )**3

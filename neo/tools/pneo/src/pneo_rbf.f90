@@ -2,6 +2,11 @@ program pneo_rbf
 
   implicit none
 
+  ! Number of inputs (hypercube dimensions)
+  integer, parameter :: n_in = 6
+  ! NUmber of outputs (gradient coefficients)
+  integer, parameter :: n_out = 6
+
   integer :: p,q,k
   integer, dimension(9) :: n
 
@@ -10,7 +15,6 @@ program pneo_rbf
   real, dimension(:,:), allocatable :: ingeodata
   real, dimension(:,:), allocatable :: outdata
   real, dimension(:,:), allocatable :: x
-  real, dimension(:), allocatable :: w
   real, dimension(16) :: dum
   real, dimension(6) :: xmin,xmax
   integer :: stat
@@ -35,8 +39,8 @@ program pneo_rbf
   allocate(indata(9,ntot))
   allocate(ingeodata(12,ntot))
   allocate(outdata(6,ntot))
-  allocate(w(ntot))
-  allocate(x(6,ntot))
+!  allocate(w(ntot))
+  allocate(x(n_in,ntot))
 
   open(unit=1,file='out.pneo.indata',status='old',iostat=stat)
   if (stat /= 0) then
@@ -78,18 +82,18 @@ program pneo_rbf
   ! Magic geo is eps
   n(6) = n(1)
 
-  do k=1,6
+  do k=1,n_in
      xmin(k) = minval(x(k,:))
      xmax(k) = maxval(x(k,:))
   enddo
 
   ! Rescale data
-  do k=1,6
+  do k=1,n_in
      x(k,:) = (x(k,:)-xmin(k))/(xmax(k)-xmin(k))*n(k)
   enddo
 
   allocate(ipiv(ntot))
-  allocate(b(ntot,6))
+  allocate(b(ntot,n_out))
   allocate(a(ntot,ntot))
 
   do p=1,ntot
@@ -98,7 +102,7 @@ program pneo_rbf
      enddo
   enddo
   b(:,:) = transpose(outdata(:,:))
-  call DGESV(ntot,6,a,ntot,ipiv,b,ntot,info) 
+  call DGESV(ntot,n_out,a,ntot,ipiv,b,ntot,info) 
 
   open(unit=1,file='out.pneo.rbf',status='replace')
   write(1,10) x(:,:)
@@ -108,7 +112,7 @@ program pneo_rbf
   open(unit=1,file='out.pneo.scale',status='replace')
   ! Write (a,b) such that xscale = a*x0+b
   write(1,*) ntot
-  do k=1,6
+  do k=1,n_in
      write(1,20) n(k)/(xmax(k)-xmin(k)),-n(k)*xmin(k)/(xmax(k)-xmin(k))
   enddo
   close(1)
