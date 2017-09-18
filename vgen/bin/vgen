@@ -175,16 +175,6 @@ python $GACODE_ROOT/shared/bin/profile_parse.py input.profiles
 # Construct vgen.dat
 cp ../input.vgen.gen vgen.dat
 
-# Move NN data
-if [ -f "../indata.dat" ]
-then
-   echo "copying rbf files"
-   cp ../indata.dat .
-   cp ../ingeodata.dat .
-   cp ../outdata.dat .
-   cp ../input.dat .
-fi
-
 # Launch parallel vgen executable
 $GACODE_ROOT/platform/exec/exec.$GACODE_PLATFORM \
     $SIMDIR/vgen $NPROC $VGEN_DIR/src/vgen $NOMP $NUMA $MPINUMA

@@ -741,17 +741,7 @@ then
 
    python $NEO_DIR/bin/neo_parse.py
    python $GACODE_ROOT/shared/bin/profile_parse.py input.profiles 
-
-   # Move NN data
-   if [ -f "../indata.dat" ]
-   then
-       echo "copying rbf files"
-       cp ../indata.dat .
-       cp ../ingeodata.dat .
-       cp ../outdata.dat .
-       cp ../input.dat .
-   fi
-   
+  
    # Construct vgen.dat
    echo "$VGEN_ER"  > vgen.dat
    echo "$VGEN_VEL" >> vgen.dat

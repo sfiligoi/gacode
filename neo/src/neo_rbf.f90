@@ -14,11 +14,17 @@ subroutine neo_rbf(x0,c0)
   real, dimension(:,:), allocatable :: b
 
   real, dimension(2,6) :: s
- 
+
+  character(len=255) :: data
+  character(len=234) :: root
+
+  call get_environment_variable('GACODE_ROOT',root)
+  data = root//'/neo/tools/pneo/data/'
+
   allocate(x(6,ntot))
   allocate(b(ntot,6))
 
-  open(unit=1,file='out.pneo.scale',status='old',iostat=stat)
+  open(unit=1,file=trim(data)//'out.pneo.scale',status='old',iostat=stat)
   if (stat /= 0) then
      call neo_error('ERROR: (neo_rbf) out.pneo.scale not available')
      return
@@ -29,7 +35,7 @@ subroutine neo_rbf(x0,c0)
   enddo
   close(1)
 
-  open(unit=1,file='out.pneo.rbf',status='old',iostat=stat)
+  open(unit=1,file=trim(data)//'out.pneo.rbf',status='old',iostat=stat)
   if (stat /= 0) then
      call neo_error('ERROR: (neo_rbf) out.pneo.rbf not available')
      return
