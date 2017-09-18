@@ -163,7 +163,7 @@ fi
 #============================================================
 
 #============================================================
-# Control parallel execution of pneo 
+# Generate RBF weights
 #
 if [ $RBF_FLAG -eq 1 ]
 then
