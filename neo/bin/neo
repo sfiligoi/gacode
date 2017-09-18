@@ -59,6 +59,9 @@ then
   echo 
   echo "         -pneo" 
   echo "         Run parallel neo"
+  echo 
+  echo "         -rbf" 
+  echo "         Generate RBF weights and scale factors based on pneo output."
 
   exit 1
 fi
@@ -81,6 +84,7 @@ GENERATE_FLAG=0
 REGRESS=0
 REGRESS_RESET=0
 PNEO_FLAG=0
+RBF_FLAG=0
 #=============================================================
 
 #=============================================================
@@ -112,6 +116,8 @@ while [ $# -gt 0 ] ; do
   -reset) REGRESS_RESET=1 ;;
 
   -pneo) PNEO_FLAG=1 ;;
+
+  -rbf) RBF_FLAG=1 ;;
 
   *) echo "ERROR: incorrect neo syntax." ; exit 1 ;;
  
@@ -145,7 +151,7 @@ fi
 #============================================================
 
 #============================================================
-# Generate simdir if -g set, then exit.
+# Control parallel execution of pneo 
 #
 if [ $PNEO_FLAG -eq 1 ]
 then
@@ -153,6 +159,16 @@ then
       $SIMDIR $NPROC $NEO_DIR/tools/pneo/src/pneo $NOMP $NUMA $MPINUMA
   
     exit 0
+fi
+#============================================================
+
+#============================================================
+# Control parallel execution of pneo 
+#
+if [ $RBF_FLAG -eq 1 ]
+then
+  $NEO_DIR/tools/pneo/src/pneo_rbf 
+  exit 0
 fi
 #============================================================
 

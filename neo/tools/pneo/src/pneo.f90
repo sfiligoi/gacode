@@ -7,16 +7,6 @@ program pneo
 
   implicit none
 
-  !real, dimension(n1) :: rmin_over_rmaj = (/ 0.06,0.12,0.24,0.36 /)
-  !real, dimension(n2) :: q = (/ 1.0,2.0,4.0,6.0 /)
-  !real, dimension(n3) :: nu_ee = (/ 5e-4,5e-3,5e-2,5e-1,5e0 /)
-  !real, dimension(n4) :: ni_over_ne = (/ 0.8,0.99 /)
-  !real, dimension(n5) :: ti_over_te  = (/ 1.0,2.0 /)
-  !real, dimension(n6) :: delta   = (/ 0.0,0.4/)
-  !real, dimension(n7) :: s_delta = (/ 0.0,0.5,1.5 /)
-  !real, dimension(n8) :: kappa   = (/ 1.5/)
-  !real, dimension(n9) :: s_kappa = (/ 0.0,0.5,1.5 /)
-
   integer :: p,k
   integer :: i1,i2,i3,i4,i5,i6,i7,i8,i9
   integer :: n1,n2,n3,n4,n5,n6,n7,n8,n9
@@ -40,7 +30,7 @@ program pneo
   allocate(kappa(9))
   allocate(s_kappa(9))
 
-  open(unit=1,file='input.dat',status='old')
+  open(unit=1,file='input.pneo',status='old')
   read(1,*) n1
   read(1,*) rmin_over_rmaj(1:n1)
   read(1,*) n2
@@ -242,15 +232,15 @@ program pneo
 
   if (i_proc == 0) then
 
-     open(unit=1,file='indata.dat',status='replace')
+     open(unit=1,file='out.pneo.indata',status='replace')
      write(1,10) indata(:,:)
      close(1)
 
-     open(unit=1,file='ingeodata.dat',status='replace')
+     open(unit=1,file='out.pneo.ingeo',status='replace')
      write(1,10) ingeodata(:,:)
      close(1)
 
-     open(unit=1,file='outdata.dat',status='replace')
+     open(unit=1,file='out.pneo.c',status='replace')
      write(1,10) outdata(:,:)
      close(1)
 
@@ -258,6 +248,6 @@ program pneo
 
   call MPI_finalize(i_err)
 
-10 format(1pe12.5)
+10 format(1pe17.10)
 
 end program pneo

@@ -53,7 +53,6 @@ contains
     implicit none
     
     integer, intent (in) :: ir
-    integer :: ierr
     integer :: is
     integer :: is_i1, is_i2
     real    :: d_max
