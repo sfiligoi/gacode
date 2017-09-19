@@ -24,6 +24,9 @@ program pneo_rbf
   integer, dimension(:), allocatable :: ipiv
   integer :: info
 
+  character(len=8), parameter :: rbf_type='gaussian'
+  real, parameter :: rbf_eps=0.5
+
   open(unit=1,file='input.pneo',status='old',iostat=stat)
   if (stat /= 0) then
      print '(a)','ERROR: (pneo_rbf) input.pneo not available'
@@ -39,7 +42,6 @@ program pneo_rbf
   allocate(indata(9,ntot))
   allocate(ingeodata(12,ntot))
   allocate(outdata(6,ntot))
-!  allocate(w(ntot))
   allocate(x(n_in,ntot))
 
   open(unit=1,file='out.pneo.indata',status='old',iostat=stat)
@@ -96,11 +98,20 @@ program pneo_rbf
   allocate(b(ntot,n_out))
   allocate(a(ntot,ntot))
 
+  if (trim(rbf_type) == 'cubic') then
   do p=1,ntot
      do q=1,ntot
         a(p,q) = sqrt( sum((x(:,q)-x(:,p))**2) )**3
      enddo
   enddo
+  else
+  do p=1,ntot
+     do q=1,ntot
+        a(p,q) = exp(-sum((x(:,q)-x(:,p))**2)/rbf_eps**2 )
+     enddo
+  enddo
+  endif
+
   b(:,:) = transpose(outdata(:,:))
   call DGESV(ntot,n_out,a,ntot,ipiv,b,ntot,info) 
 
@@ -111,6 +122,8 @@ program pneo_rbf
 
   open(unit=1,file='out.pneo.scale',status='replace')
   ! Write (a,b) such that xscale = a*x0+b
+  write(1,*) rbf_type
+  write(1,*) rbf_eps
   write(1,*) ntot
   do k=1,n_in
      write(1,20) n(k)/(xmax(k)-xmin(k)),-n(k)*xmin(k)/(xmax(k)-xmin(k))
