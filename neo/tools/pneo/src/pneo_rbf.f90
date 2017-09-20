@@ -24,8 +24,9 @@ program pneo_rbf
   integer, dimension(:), allocatable :: ipiv
   integer :: info
 
-  character(len=8), parameter :: rbf_type='gaussian'
-  real, parameter :: rbf_eps=0.5
+  !character(len=8), parameter :: rbf_type='gaussian'
+  character(len=8), parameter :: rbf_type='cubic'
+  real, parameter :: rbf_eps=1.0
 
   open(unit=1,file='input.pneo',status='old',iostat=stat)
   if (stat /= 0) then
