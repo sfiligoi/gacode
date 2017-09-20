@@ -127,6 +127,9 @@ program pneo_rbf
   write(1,*) rbf_eps
   write(1,*) ntot
   do k=1,n_in
+     write(1,20) xmin(k), xmax(k)
+  enddo
+  do k=1,n_in
      write(1,20) n(k)/(xmax(k)-xmin(k)),-n(k)*xmin(k)/(xmax(k)-xmin(k))
   enddo
   close(1)

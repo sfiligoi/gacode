@@ -9,10 +9,12 @@ subroutine neo_rbf(x0,c0)
   ! NUmber of outputs (gradient coefficients)
   integer, parameter :: n_out = 6
 
-  real, dimension(n_in), intent(in) :: x0
+  real, dimension(n_in), intent(inout) :: x0
   real, dimension(n_out), intent(out) :: c0
   real, dimension(n_in) :: xs0
-
+  real, dimension(n_in) :: xmin, xmax
+  real :: cscale_nu
+  
   integer :: p,k
   integer :: stat
 
@@ -40,10 +42,30 @@ subroutine neo_rbf(x0,c0)
   read(1,*) rbf_eps
   read(1,*) ntot
   do k=1,n_in
+     read(1,*) xmin(k), xmax(k)
+  enddo
+  do k=1,n_in
      read(1,*) s(:,k)  
   enddo
   close(1)
 
+  ! Re-scale x0 if out-of-range of training data
+  ! For now, do not re-scale for epsilon and ftrap
+  cscale_nu = 1.0
+  do k=2,n_in-1
+     if(x0(k) > xmax(k))  then
+        x0(k) = xmax(k)
+        !print *, 'max rescaling ', k
+        if(k == 3) then
+           cscale_nu = 10.0**xmax(k)/10.0**x0(k)
+        endif
+     endif
+     if(x0(k) < xmin(k))  then
+        x0(k) = xmin(k)
+        !print *, 'min rescaling ', k
+     endif
+  enddo
+  
   allocate(x(n_in,ntot))
   allocate(b(ntot,n_out))
   
@@ -77,4 +99,7 @@ subroutine neo_rbf(x0,c0)
      enddo
   endif
 
+  ! Rescaling
+  c0(:) = c0(:) * cscale_nu
+  
 end subroutine neo_rbf
