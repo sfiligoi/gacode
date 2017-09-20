@@ -138,8 +138,6 @@ subroutine neo_do
            neo_gv_out(:,:)   = 0.0
            neo_th_out(:)     = 0.0
            neo_thHS_out(:,:) = 0.0
-           neo_th_out(5)     = jpar_nn_sau
-           neo_th_out(8)     = jtor_nn_sau
            neo_dke_1d_out(1) = jpar_nn_neo
            neo_dke_1d_out(2) = jtor_nn_neo
         endif

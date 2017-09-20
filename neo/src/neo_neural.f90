@@ -3,7 +3,7 @@ module neo_neural
   implicit none
 
   public :: NEURAL_alloc, NEURAL_do, NEURAL_write
-  real :: jpar_nn_neo, jtor_nn_neo, jpar_nn_sau, jtor_nn_sau
+  real :: jpar_nn_neo, jtor_nn_neo
   character(len=80),private :: runfile_nn = 'out.neo.transport_nn'
   integer, parameter, private :: io=1
   logical, private :: initialized = .false.
@@ -136,7 +136,7 @@ contains
     CTi2_neo  = nn_out(6)
     !print *, nn_out(:)
     
-    ! Reconstruct jpar from NEO NN and Sauter NN
+    ! Reconstruct jpar from NEO NN 
     
     jpar_nn_neo = I_div_psip * rho(ir) * temp(is_ele,ir) &
          * (abs(Z(is_ele))*dens(is_ele,ir) &
@@ -146,26 +146,14 @@ contains
          + abs(Z(is_i2))*dens(is_i2,ir) &
          * (CTi2_neo*dlntdr(is_i2,ir) + Cni2_neo*dlnndr(is_i2,ir)))
     
-    jpar_nn_sau = I_div_psip * rho(ir) * temp(is_ele,ir) &
-         * (abs(Z(is_ele))*dens(is_ele,ir) &
-         * (CTe_sau*dlntdr(is_ele,ir) + Cne_sau*dlnndr(is_ele,ir)) &
-         + abs(Z(is_i1))*dens(is_i1,ir) &
-         * (CTi1_sau*dlntdr(is_i1,ir) + Cni1_sau*dlnndr(is_i1,ir)) &
-         + abs(Z(is_i2))*dens(is_i2,ir) &
-         * (CTi2_sau*dlntdr(is_i2,ir) + Cni2_sau*dlnndr(is_i2,ir)))
-    
     ! Toroidal component of Bootstrap current = sum <Z*n*utor/R>/<1/R>
     
     jtor_nn_neo = jpar_nn_neo*Btor2_avg/Bmag2_avg
-    jtor_nn_sau = jpar_nn_sau*Btor2_avg/Bmag2_avg
     do is=1, n_species
        jtor_nn_neo = jtor_nn_neo + rho(ir)*I_div_psip*dens(is,ir)*temp(is,ir) &
             * (dlnndr(is,ir) + dlntdr(is,ir))*(1.0-Btor2_avg/Bmag2_avg)
-       jtor_nn_sau = jtor_nn_sau + rho(ir)*I_div_psip*dens(is,ir)*temp(is,ir) &
-            * (dlnndr(is,ir) + dlntdr(is,ir))*(1.0-Btor2_avg/Bmag2_avg)
     enddo
     jtor_nn_neo = jtor_nn_neo/(Btor_th0*bigR_th0*bigRinv_avg)
-    jtor_nn_sau = jtor_nn_sau/(Btor_th0*bigR_th0*bigRinv_avg)
     
   end subroutine compute_nn_jpar
   
@@ -178,7 +166,6 @@ contains
        open(io,file=trim(path)//runfile_nn,status='old',position='append')
        write(io,'(e16.8)',advance='no') r(ir)
        write(io,'(e16.8)',advance='no') jpar_nn_neo
-       write(io,'(e16.8)',advance='no') jpar_nn_sau
     endif
     
   end subroutine NEURAL_write
