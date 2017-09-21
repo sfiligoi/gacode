@@ -14,7 +14,7 @@ subroutine neo_rbf(x0,c0)
   real, dimension(n_in) :: xs0
   real, dimension(n_in) :: xmin, xmax
   real :: cscale_nu
-  
+
   integer :: p,k
   integer :: stat
 
@@ -32,7 +32,7 @@ subroutine neo_rbf(x0,c0)
 
   call get_environment_variable('GACODE_ROOT',root)
   data = trim(root)//'/neo/tools/pneo/data/'//trim(rbf_dir)
-  
+
   open(unit=1,file=trim(data)//'/out.pneo.scale',status='old',iostat=stat)
   if (stat /= 0) then
      call neo_error('ERROR: (neo_rbf) out.pneo.scale not available')
@@ -65,10 +65,10 @@ subroutine neo_rbf(x0,c0)
         !print *, 'min rescaling ', k
      endif
   enddo
-  
+
   allocate(x(n_in,ntot))
   allocate(b(ntot,n_out))
-  
+
   open(unit=1,file=trim(data)//'/out.pneo.rbf',status='old',iostat=stat)
   if (stat /= 0) then
      call neo_error('ERROR: (neo_rbf) out.pneo.rbf not available')
@@ -83,23 +83,35 @@ subroutine neo_rbf(x0,c0)
      xs0(k) = s(1,k)*x0(k)+s(2,k)
   enddo
 
-  if (trim(rbf_type) == 'cubic') then
+  select case (trim(rbf_type))
+
+  case ('linear') 
+     do k=1,n_out
+        c0(k) = 0.0
+        do p=1,ntot
+           c0(k) = c0(k)+b(p,k)*sqrt( sum((xs0(:)-x(:,p))**2) )
+        enddo
+     enddo
+
+  case ('cubic') 
      do k=1,n_out
         c0(k) = 0.0
         do p=1,ntot
            c0(k) = c0(k)+b(p,k)*sqrt( sum((xs0(:)-x(:,p))**2) )**3
         enddo
      enddo
-  else
+
+  case ('gaussian')
      do k=1,n_out
         c0(k) = 0.0
         do p=1,ntot
            c0(k) = c0(k)+b(p,k)*exp(-sum((xs0(:)-x(:,p))**2)/rbf_eps**2)
         enddo
      enddo
-  endif
+
+  end select
 
   ! Rescaling
   c0(:) = c0(:) * cscale_nu
-  
+
 end subroutine neo_rbf

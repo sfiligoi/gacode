@@ -99,19 +99,33 @@ program pneo_rbf
   allocate(b(ntot,n_out))
   allocate(a(ntot,ntot))
 
-  if (trim(rbf_type) == 'cubic') then
-  do p=1,ntot
-     do q=1,ntot
-        a(p,q) = sqrt( sum((x(:,q)-x(:,p))**2) )**3
+  select case (trim(rbf_type))
+
+  case ('linear') 
+
+     do p=1,ntot
+        do q=1,ntot
+           a(p,q) = sqrt( sum((x(:,q)-x(:,p))**2) )
+        enddo
      enddo
-  enddo
-  else
-  do p=1,ntot
-     do q=1,ntot
-        a(p,q) = exp(-sum((x(:,q)-x(:,p))**2)/rbf_eps**2 )
+
+  case ('cubic') 
+
+     do p=1,ntot
+        do q=1,ntot
+           a(p,q) = sqrt( sum((x(:,q)-x(:,p))**2) )**3
+        enddo
      enddo
-  enddo
-  endif
+
+  case ('gaussian')
+
+     do p=1,ntot
+        do q=1,ntot
+           a(p,q) = exp(-sum((x(:,q)-x(:,p))**2)/rbf_eps**2 )
+        enddo
+     enddo
+
+  end select
 
   b(:,:) = transpose(outdata(:,:))
   call DGESV(ntot,n_out,a,ntot,ipiv,b,ntot,info) 
