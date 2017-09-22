@@ -5,6 +5,9 @@
 #  Functions used for computing averages, manipulating strings, etc.
 #----------------------------------------------------------------------
 
+# Useful labels
+TIME=r'$(c_s/a)\,t$'
+
 #---------------------------------------------------------------
 def average(f,t,window):
  
@@ -100,7 +103,7 @@ def setlimits(a,fmin,fmax):
 def specmap(m_in,z_in):
  
   # Assume Deuterium normalization
-  m = int(m_in)*2
+  m = int(m_in*2)
   z = int(z_in)
 
   if z < 0:

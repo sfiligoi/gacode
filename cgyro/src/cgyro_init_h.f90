@@ -9,7 +9,7 @@ subroutine cgyro_init_h
   integer :: ir,it,is,ie,ix
   real :: arg, ang
 
-  !---------------------------------------------------------------------
+  !---------------------------------------------------------------------------
   ! Check to see if we have restart data available
   !
   if (i_proc == 0) then
@@ -28,7 +28,7 @@ subroutine cgyro_init_h
   endif
 
   call MPI_BCAST(restart_flag,1,MPI_DOUBLE_PRECISION,0,CGYRO_COMM_WORLD,i_err)
-  !---------------------------------------------------------------------
+  !---------------------------------------------------------------------------
 
   if (restart_flag == 1) then
 
@@ -44,15 +44,64 @@ subroutine cgyro_init_h
 
      !-------------------------------------------------------------------------
      ! Generate analytic initial conditions
-     !
-     h_x(:,:) = (0.0,0.0)
-     !
-     do iv=nv1,nv2
+     !-------------------------------------------------------------------------
 
-        iv_loc = iv-nv1+1
-        is = is_v(iv)
-        ix = ix_v(iv)
-        ie = ie_v(iv)
+     h_x(:,:) = (0.0,0.0)
+
+     if (zf_test_flag == 1) then
+
+        ! 1. ZONAL-FLOW TEST
+
+        do iv=nv1,nv2
+
+           iv_loc = iv-nv1+1
+           is = is_v(iv)
+           ix = ix_v(iv)
+           ie = ie_v(iv)
+
+           do ic=1,nc
+
+              ir = ir_c(ic) 
+              it = it_c(ic)
+
+              if (is == 1 .and. px(ir) /= 0) then
+                 arg = k_perp(ic)*rho*vth(is)*mass(is)/(z(is)*bmag(it)) &
+                      *sqrt(2.0*energy(ie))*sqrt(1.0-xi(ix)**2)
+                 h_x(ic,iv_loc) = 1e-6*bessel_j0(abs(arg))
+
+                 ! J0 here for the ions is equivalent to having
+                 ! the electrons deviate in density.
+                 ! Alternatively this is the result of instantaneous
+                 ! gyroaveraging after the deposition of particles in
+                 ! a certain k_radial mode.
+
+              endif
+           enddo
+        enddo
+
+     else if (n_toroidal == 1 .and. n > 0) then
+
+        ! 2. LINEAR n>0 SIMULATION
+
+        do iv=nv1,nv2
+
+           iv_loc = iv-nv1+1
+           is = is_v(iv)
+
+           if (is == 1) then
+              do ic=1,nc
+                 ir = ir_c(ic) 
+                 it = it_c(ic)
+                 ang = theta(it)+2*pi*px(ir)
+                 h_x(ic,iv_loc) = rho/(1.0+ang**4) 
+              enddo
+           endif
+
+        enddo
+
+     else
+
+        ! 3. GENERAL CASE
 
         do ic=1,nc
 
@@ -63,65 +112,24 @@ subroutine cgyro_init_h
 
               ! Zonal-flow initial condition
 
-              if (zf_test_flag == 1) then
-                 if (is == 1 .and. px(ir) /= 0) then
-                    arg = k_perp(ic)*rho*vth(is)*mass(is)/(z(is)*bmag(it)) &
-                         *sqrt(2.0*energy(ie))*sqrt(1.0-xi(ix)**2)
-                    h_x(ic,iv_loc) = 1e-6*bessel_j0(abs(arg))
-                    ! J0 here for the ions is equivalent to having
-                    ! the electrons deviate in density.
-                    ! Alternatively this is the result of instantaneous
-                    ! gyroaveraging after the deposition of particles in
-                    ! a certain k_radial mode.
-                 endif
-              else
-                 arg = abs(px(ir))/real(n_radial)
-                 h_x(ic,iv_loc) = amp0*rho*exp(-arg)
-              endif
+              arg = abs(px(ir))/real(n_radial)
+              h_x(ic,:) = amp0*rho*exp(-arg)
 
            else 
 
-              ! Exponential in ballooning angle.
+              ! Finite-n initial condition
 
-              if (n_toroidal == 1) then
-                 if (is == 1) then
-                    ang = theta(it)+2*pi*px(ir)
-                    h_x(ic,iv_loc) = rho/(1.0+ang**4) 
-                 endif
+              if (amp > 0.0) then
+                 h_x(ic,:) = amp*rho
               else
-                 if (amp > 0.0) then
-                    h_x(ic,iv_loc) = amp*rho
-                 else
-                    h_x(ic,iv_loc) = amp*rho/n**2
-                 endif
-              endif
-
-              if (px0 >= 0) then
-
-                 if (amp > 0) then
-
-                    ! px0 > 0  initial condition to isolate theta_0’s
-                    ! theta_0 = pi*px0/(n*box_size/2) with px0 = 0,1,2,...,box_size/2 
-
-                    h_x(ic,iv_loc) = 0.0
-
-                    if (px(ir_c(ic)) == n*(px0+box_size)) then
-                       h_x(ic,iv_loc) = amp*rho/n**2
-                    endif
-                    if (px(ir_c(ic)) == n*(px0-box_size)) then
-                       h_x(ic,iv_loc) = amp*rho/n**2
-                    endif
-                 else
-                    h_x(ic,iv_loc) = amp*rho
-                 endif
-
+                 h_x(ic,:) = amp*rho/n**2
               endif
 
            endif
 
         enddo
-     enddo
 
+     endif
   endif
 
   call cgyro_filter

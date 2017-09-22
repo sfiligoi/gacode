@@ -6,20 +6,23 @@ IDENTITY="newt 4-core Fedora workstation"
 CORES_PER_NODE=4
 NUMAS_PER_NODE=1
 
+FFTWDIR=/usr/lib/x86_64-linux-gnu
+
 ROOT=/home/candy/SOFTWARE
 
 # Compilers
 
 FC	= mpif90 -std=f2008 -I $(GACODE_ROOT)/modules
 F77	= mpif77
-FOMP    = -fopenmp
+#FOMP    = -fopenmp -fopt-info
+FOMP    = -fopenmp 
 FMATH	= -fdefault-real-8 -J $(GACODE_ROOT)/modules
-FOPT	= -Ofast
-#FDEBUG	= -Wall -fcheck=all -Wunderflow -finit-real=nan -fbounds-check -ffpe-trap=invalid,zero,overflow
+FOPT	= -Ofast 
 FDEBUG	= -Wall -W -fcheck=mem,bounds -g -fbacktrace -ffpe-trap=invalid,zero,overflow
 
 # System math libraries
-LMATH = ${ROOT}/OpenBLAS/libopenblas.a -lfftw3
+LMATH = ${ROOT}/OpenBLAS/libopenblas.a $(FFTWDIR)/libfftw3.a $(FFTWDIR)/libfftw3_omp.a
+FFTW_INC=/usr/include
 
 # OPTIONAL NetCDF:
 NETCDF=-L/usr/local/lib -lnetcdff -lnetcdf -lm

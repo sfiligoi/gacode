@@ -16,7 +16,7 @@ program globalmap
 
   integer :: supported
   integer :: ir,it
-  real :: rho_star,dr,ri,lr
+  real :: dr,ri,lr
 
   !-----------------------------------------------------------------
   ! Initialize MPI_COMM_WORLD communicator

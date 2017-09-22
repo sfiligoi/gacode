@@ -22,33 +22,12 @@ subroutine cgyro_freq
 
   else
 
-     if (px0 < 0) then
+     !--------------------------------------------------
+     ! Standard method: sum all wavenumbers at a given n
+     !--------------------------------------------------
 
-        !--------------------------------------------------
-        ! Standard method: sum all wavenumbers at a given n
-        !--------------------------------------------------
-
-        ! Use potential to compute frequency
-        mode_weight(:) = abs(field_old(1,:))
-
-     else
-
-        !--------------------------------------------------
-        ! Alternate method: use fixed wavenumber
-        !--------------------------------------------------
-
-        mode_weight = 0.0        
-
-        do ic=1,nc
-           if (px(ir_c(ic)) == n*(px0+box_size)) then
-              mode_weight(ic) = abs(field_old(1,ic))
-           endif
-           if (px(ir_c(ic)) == n*(px0-box_size)) then
-              mode_weight(ic) = abs(field_old(1,ic))
-           endif
-        enddo
-
-     endif
+     ! Use potential to compute frequency
+     mode_weight(:) = abs(field_old(1,:))
 
      ! Define local frequencies
      do ic=1,nc

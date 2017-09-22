@@ -5,6 +5,7 @@
 
 # Gyro build stuff
 modules/*.mod
+modules/*genmod*
 */*.o
 */*/*.a
 */*/*.o
@@ -41,12 +42,13 @@ cgyro/tools/globalmap/src/globalmap
 le3/src/le3
 le3/profiles_3d/profiles_3d
 neo/src/neo
+neo/tools/pneo/src/pneo
 vgen/src/vgen
-shared/profiles_gen/src/prgen
-shared/profiles_gen/locpargen/locpargen
-shared/profiles_gen/exprotools/exprodump
-shared/profiles_gen/exprotools/create
-shared/profiles_gen/exprotools/expromake
+profiles_gen/src/prgen
+profiles_gen/locpargen/locpargen
+profiles_gen/exprotools/exprodump
+profiles_gen/exprotools/create
+profiles_gen/exprotools/expromake
 tglf/src/tglf
 tglf/src/tglf_mpi
 tglf/src/tglf_driver_mpi
