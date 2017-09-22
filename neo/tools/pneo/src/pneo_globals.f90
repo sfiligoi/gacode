@@ -14,6 +14,8 @@ module pneo_globals
   real, dimension(:,:), allocatable :: ingeodata
   real, dimension(:,:), allocatable :: outdata_loc
   real, dimension(:,:), allocatable :: outdata
+  real, dimension(:,:), allocatable :: outsaudata_loc
+  real, dimension(:,:), allocatable :: outsaudata
 
 
 end module pneo_globals

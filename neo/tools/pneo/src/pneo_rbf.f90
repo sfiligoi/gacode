@@ -24,8 +24,9 @@ program pneo_rbf
   integer, dimension(:), allocatable :: ipiv
   integer :: info
 
-  !character(len=8), parameter :: rbf_type='gaussian'
   character(len=8), parameter :: rbf_type='cubic'
+  !character(len=8), parameter :: rbf_type='gaussian'
+  !character(len=8), parameter :: rbf_type='linear'
   real, parameter :: rbf_eps=1.0
 
   open(unit=1,file='input.pneo',status='old',iostat=stat)
@@ -92,7 +93,9 @@ program pneo_rbf
 
   ! Rescale data
   do k=1,n_in
-     x(k,:) = (x(k,:)-xmin(k))/(xmax(k)-xmin(k))*n(k)
+     if(xmax(k)-xmin(k) > 0.0) then
+        x(k,:) = (x(k,:)-xmin(k))/(xmax(k)-xmin(k))*n(k)
+     endif
   enddo
 
   allocate(ipiv(ntot))
@@ -144,7 +147,11 @@ program pneo_rbf
      write(1,20) xmin(k), xmax(k)
   enddo
   do k=1,n_in
-     write(1,20) n(k)/(xmax(k)-xmin(k)),-n(k)*xmin(k)/(xmax(k)-xmin(k))
+     if(xmax(k)-xmin(k) > 0.0) then
+        write(1,20) n(k)/(xmax(k)-xmin(k)),-n(k)*xmin(k)/(xmax(k)-xmin(k))
+     else
+        write(1,20) 1.0,0.0
+     endif
   enddo
   close(1)
 
