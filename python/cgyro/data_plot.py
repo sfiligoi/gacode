@@ -556,14 +556,15 @@ class cgyrodata_plot(data.cgyrodata):
          for l in range(1,nl):
             z = 2*np.pi*l*e
             g0 = g0+2*np.sin(z)*xr[ispec,l]/z
-         #ax.plot([-e,e],[g0,g0],'o-',color='red')
-         print 'Alternative average '+u+' : '+str(g0)
+         ax.plot([-e,e],[g0,g0],'o-',color='red')
+
+         label = r'$'+mtag+'_'+u+'/'+mtag+'_\mathrm{GB}: '+str(round(g0,3))+'$'
 
          # Flux spectral average
          g0 = xr[ispec,0]+2*np.pi/4*xr[ispec,1]
-         ax.plot([-0.25,0.25],[g0,g0],'o-',color='red')
-
-         label = r'$'+mtag+'_'+u+'/'+mtag+'_\mathrm{GB}: '+str(round(g0,3))+'$'
+         if moment == 'v':
+            print 'Alternative average '+u+' : '+str(g0)
+         #ax.plot([-0.25,0.25],[g0,g0],'o-',color='red')
 
          # Flux domain average
          g0 = xr[ispec,0]
