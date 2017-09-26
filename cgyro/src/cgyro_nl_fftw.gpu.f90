@@ -91,13 +91,14 @@ subroutine cgyro_nl_fftw(ij)
 
   include 'fftw3.f03'
 
-  call timer_lib_in('nl_comm')
-  call cgyro_nl_fftw_comm2
-  call timer_lib_out('nl_comm')
+  if (is_staggered_comm_2) then ! stagger comm2, to load ballance network traffic
+     call timer_lib_in('nl_comm')
+     call cgyro_nl_fftw_comm2
+     call timer_lib_out('nl_comm')
+  endif
 
   call timer_lib_in('nl')
-
-!$acc  data pcopyin(f_nl) pcopy(g_nl)   &
+!$acc  data pcopyin(f_nl)   &
 !$acc& pcreate(fxmany,fymany,gxmany,gymany) &
 !$acc& pcreate(uxmany,uymany,vxmany,vymany) &
 !$acc& pcreate(uvmany)
@@ -133,11 +134,8 @@ subroutine cgyro_nl_fftw(ij)
         do in=1,n_toroidal
            iy = in-1
            f0 = i_c*f_nl(ir,j,in)
-           g0 = i_c*g_nl(ir,j,in)
            fxmany(iy,ix,j) = p*f0
-           gxmany(iy,ix,j) = p*g0
            fymany(iy,ix,j) = iy*f0
-           gymany(iy,ix,j) = iy*g0
         enddo
      enddo
   enddo
@@ -148,16 +146,57 @@ subroutine cgyro_nl_fftw(ij)
      ! --------------------------------------
 !$acc wait
 !$acc  host_data &
-!$acc& use_device(fxmany,fymany,gxmany,gymany) &
-!$acc& use_device(uxmany,uymany,vxmany,vymany)
+!$acc& use_device(fxmany,fymany) &
+!$acc& use_device(uxmany,uymany)
 
   call cufftExecZ2D(cu_plan_c2r_many,fxmany,uxmany)
   call cufftExecZ2D(cu_plan_c2r_many,fymany,uymany)
+
+!$acc wait
+!$acc end host_data
+  if (.not. is_staggered_comm_2) then ! stagger comm2, to load ballance network traffic
+     call timer_lib_in('nl_comm')
+     call cgyro_nl_fftw_comm2
+     call timer_lib_out('nl_comm')
+  endif
+
+!$acc data copyin(g_nl)  
+
+!$acc parallel 
+!$acc loop gang
+  do j=1,nsplit
+
+   ! Array mapping
+!$acc loop worker private(p,ix)
+     do ir=1,n_radial
+
+        p  = ir-1-nx0/2
+        ix = p
+        if (ix < 0) ix = ix+nx
+!$acc   loop vector private(iy,f0,g0)
+        do in=1,n_toroidal
+           iy = in-1
+           g0 = i_c*g_nl(ir,j,in)
+           gxmany(iy,ix,j) = p*g0
+           gymany(iy,ix,j) = iy*g0
+        enddo
+     enddo
+  enddo
+!$acc end parallel
+
+!$acc end data
+
+!$acc wait
+!$acc  host_data &
+!$acc& use_device(gxmany,gymany) &
+!$acc& use_device(vxmany,vymany)
+
   call cufftExecZ2D(cu_plan_c2r_many,gxmany,vxmany)
   call cufftExecZ2D(cu_plan_c2r_many,gymany,vymany)
 
 !$acc wait
 !$acc end host_data
+
 !$acc wait
 
   ! Poisson bracket in real space
