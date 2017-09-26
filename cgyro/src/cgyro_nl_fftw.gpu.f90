@@ -91,6 +91,7 @@ subroutine cgyro_nl_fftw(ij)
 
   include 'fftw3.f03'
 
+
   if (is_staggered_comm_2) then ! stagger comm2, to load ballance network traffic
      call timer_lib_in('nl_comm')
      call cgyro_nl_fftw_comm2
@@ -155,9 +156,11 @@ subroutine cgyro_nl_fftw(ij)
 !$acc wait
 !$acc end host_data
   if (.not. is_staggered_comm_2) then ! stagger comm2, to load ballance network traffic
+     call timer_lib_out('nl')
      call timer_lib_in('nl_comm')
      call cgyro_nl_fftw_comm2
      call timer_lib_out('nl_comm')
+     call timer_lib_in('nl')
   endif
 
 !$acc data copyin(g_nl)  
