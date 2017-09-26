@@ -539,8 +539,10 @@ class cgyrodata_plot(data.cgyrodata):
     
       t = -np.pi+2*np.pi*np.arange(0.0,1.0,0.001)
 
-      e = 0.2
       for ispec in range(ns):
+
+         u = specmap(self.mass[ispec],self.z[ispec])
+
          # Flux curve
          g = np.zeros(len(t))
          g = xr[ispec,0] 
@@ -548,17 +550,22 @@ class cgyrodata_plot(data.cgyrodata):
             g = g+2*(np.cos(l*t)*xr[ispec,l]-np.sin(l*t)*xi[ispec,l])
          ax.plot(t/(2*np.pi),g)
 
-         # Flux partial average
+         # Flux partial average (not used) over [-e,e]
+         e = 0.2
          g0 = xr[ispec,0]
          for l in range(1,nl):
             z = 2*np.pi*l*e
             g0 = g0+2*np.sin(z)*xr[ispec,l]/z
-         ax.plot([-e,e],[g0,g0],'o-',color='red')
+         #ax.plot([-e,e],[g0,g0],'o-',color='red')
+         print 'Alternative average '+u+' : '+str(g0)
 
-         u     = specmap(self.mass[ispec],self.z[ispec])
+         # Flux spectral average
+         g0 = xr[ispec,0]+2*np.pi/4*xr[ispec,1]
+         ax.plot([-0.25,0.25],[g0,g0],'o-',color='red')
+
          label = r'$'+mtag+'_'+u+'/'+mtag+'_\mathrm{GB}: '+str(round(g0,3))+'$'
 
-         # Flux partial average
+         # Flux domain average
          g0 = xr[ispec,0]
          ax.plot([-0.5,0.5],[g0,g0],label=label)
 
