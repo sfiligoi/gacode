@@ -22,6 +22,8 @@ OBJECTS = neo_globals.o \
           neo_3d_driver.o \
           neo_check.o \
           neo_compute_fcoll.o \
+	  neo_rbf.o \
+	  neo_neural.o \
           neo_do.o \
           neo_error.o \
           neo_init.o \

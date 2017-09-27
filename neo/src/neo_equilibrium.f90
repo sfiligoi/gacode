@@ -42,6 +42,7 @@ module neo_equilibrium
   real :: Btor2_avg     ! <(Btor/Bunit)^2>
   real :: bigRinv_avg   ! <a/R> 
   real :: gradpar_Bmag2_avg ! <(bhat dot grad/aBmag/Bunit)^2>
+  real, dimension(:,:), allocatable :: geo_param
   
   logical, private :: initialized = .false.
   
@@ -76,7 +77,8 @@ contains
        allocate(theta_nc(n_theta))
        allocate(jacobln_rderiv(n_theta))
        allocate(v_prime_g(n_radial))
-
+       allocate(geo_param(n_radial,12))
+       
        d_theta = 2*pi/n_theta
        do it=1,n_theta
           theta(it) = -pi+(it-1)*d_theta
@@ -113,7 +115,8 @@ contains
        deallocate(theta_nc)
        deallocate(jacobln_rderiv)
        deallocate(v_prime_g)
-
+       deallocate(geo_param)
+       
        if (equilibrium_model == 2 .or. equilibrium_model == 3) then
           call GEO_alloc(0)
        endif
@@ -385,6 +388,8 @@ contains
        enddo
     endif
 
+    geo_param(ir,:) = neo_geo_out(:)
+    
   end subroutine EQUIL_DO
   
 

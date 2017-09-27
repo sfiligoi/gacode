@@ -204,31 +204,31 @@ subroutine cgyro_mpi_grid
      call parallel_slib_init(n_toroidal,nv_loc*n_theta,n_radial,nsplit,NEW_COMM_2)
   endif
 
-  ! Stagger COMM2 communication based on i_poc_1
+  ! Stagger COMM2 communication based on i_proc_1
   ! Get the first half together, and second half together
-  ! This makes it more likely to have obth types on all nodes
+  ! This makes it more likely to have both types on all nodes
   is_staggered_comm_2 = (modulo((i_proc_1*2)/n_proc_1,2) == 0)
 
   ! OMP code
   n_omp = omp_get_max_threads()
 
   !----------------------------------------------------------------------------
-  ! Restart file chunking logic for v1
-  ! MPI-IO limit set to 16 GB (for historical reasons)
-  max_filesize = 16.0*1e9
-  n_chunk = 1+int(16.0*n_toroidal*nc*nv/max_filesize)
-  
-  ! We need strings to write file names
-  ! so we pre-compute them here
-  do ix=1,100
-     write (rtag(ix),fmt) ix-1
-     write (rtag_v2(ix),fmt_v2) "_v2_",ix-1
-  enddo
+  ! Restart communication setup
 
-  if (mpiio_num_files>1) then ! no comm neded if a single file
+  ! No communicator splitting needed if a single file
+  if (mpiio_num_files > 1) then 
+
+     ! Strings for mpiio restart filenames (out.cgyro.restartXX)
+
+     do ix=1,100
+        write (rtag(ix),fmt) ix-1
+     enddo
+
      mpiio_procs = n_proc/mpiio_num_files
-     if (modulo(n_proc,mpiio_num_files)/=0) then
-       mpiio_procs= mpiio_procs + 1 ! round up
+
+     if (modulo(n_proc,mpiio_num_files) /= 0) then
+       ! Round up
+       mpiio_procs = mpiio_procs + 1 
      endif
 
      i_group_restart_io = i_proc/mpiio_procs + 1
@@ -237,6 +237,7 @@ subroutine cgyro_mpi_grid
        i_proc,&
        NEW_COMM_RESTART_IO, &
        i_err)
+
      if (i_err /= 0) then
         call cgyro_error('ERROR: (CGYRO) NEW_COMM_RESTART_IO not created')
         return
@@ -248,9 +249,6 @@ subroutine cgyro_mpi_grid
 
   write (mpiio_stripe_str,"(I3.3)") mpiio_stripe_factor
   write (mpiio_small_stripe_str,"(I2.2)") mpiio_small_stripe_factor
-
-  ! TODO Hardcoded for now, may become an input parameter eventually
-  restart_format = 2
 
   ! save hostname configuration
   call cgyro_write_hosts

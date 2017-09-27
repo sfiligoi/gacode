@@ -211,7 +211,6 @@ module cgyro_globals
   character(len=16) :: runfile_memory  = 'out.cgyro.memory'
   character(len=17) :: runfile_restart = 'out.cgyro.restart'
   character(len=13) :: runfile_restart_tag = 'out.cgyro.tag'
-  character(len=17) :: runfile_restart_tag_version = 'out.cgyro.res_ver'
   character(len=12) :: runfile_hb      = 'out.cgyro.hb'
   character(len=15) :: runfile_grids   = 'out.cgyro.grids'
   character(len=14) :: runfile_prec    = 'out.cgyro.prec'
@@ -230,10 +229,8 @@ module cgyro_globals
   character(len=15) :: runfile_hosts = 'out.cgyro.hosts'
   integer, parameter :: io=1
   ! Restart tags
-  character(len=8) :: fmt='(I2.2)' 
-  character(len=2), dimension(100) :: rtag
-  character(len=8) :: fmt_v2='(A,I2.2)'
-  character(len=6), dimension(100) :: rtag_v2
+  character(len=8) :: fmt='(I2.2)'
+  character(len=6), dimension(100) :: rtag
   !
   ! error checking
   integer :: error_status = 0
@@ -242,11 +239,8 @@ module cgyro_globals
   integer :: io_control
   integer :: signal
   integer :: restart_flag
-  integer :: input_restart_format
   character(len=2) :: mpiio_small_stripe_str
   character(len=3) :: mpiio_stripe_str
-  integer :: n_chunk      ! used in v1, for historical reasons
-  real :: max_filesize    ! used in v1, for historical reasons
   !
   ! Standard precision for IO (there are optionally reset to higher precision later)
   character(len=8)  :: fmtstr    ='(es11.4)'
