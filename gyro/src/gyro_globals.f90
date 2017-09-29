@@ -13,6 +13,7 @@ module gyro_globals
   !
   ! Real
   character(len=8) :: fmtstr='(es11.4)'
+  integer, parameter :: fmtstr_len = 12
   ! Complex
   character(len=14) :: fmtstr2='(2(es11.4,1x))'
   !----------------------------------------------------
@@ -107,7 +108,6 @@ module gyro_globals
   !---------------------------------------------------------
   ! Newline characters:
   !
-  character(len=*), parameter :: new_line = char(13)//char(10)
   character(len=*), parameter :: separator = &
        '-----------------------------------------------'
   !---------------------------------------------------------
@@ -208,7 +208,6 @@ module gyro_globals
   integer :: ic_method
   integer :: zf_test_flag
   integer :: lock_ti_flag
-  integer :: huge_restart
   !---------------------------------------------------------
 
   !-----------------------------------------------------------------------------------

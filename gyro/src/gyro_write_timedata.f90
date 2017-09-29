@@ -47,7 +47,7 @@ subroutine gyro_write_timedata
 
      ! POTENTIALS
 
-     call write_distributed_complex(&
+     call gyro_write_distributed_complex(&
           trim(path)//'out.gyro.moment_u',&
           10,&
           size(phi_plot(:,:,1:n_field)),&
@@ -59,7 +59,7 @@ subroutine gyro_write_timedata
 
      ! PARALLEL ELECTRIC FIELD
 
-     call write_distributed_complex(&
+     call gyro_write_distributed_complex(&
           trim(path)//'out.gyro.moment_epar',&
           10,&
           size(phi_plot(:,:,n_field+1)),&
@@ -71,7 +71,7 @@ subroutine gyro_write_timedata
 
      ! DENSITY
 
-     call write_distributed_complex(&
+     call gyro_write_distributed_complex(&
           trim(path)//'out.gyro.moment_n',&
           10,&
           size(n_plot),&
@@ -83,7 +83,7 @@ subroutine gyro_write_timedata
 
      ! ENERGY
 
-     call write_distributed_complex(&
+     call gyro_write_distributed_complex(&
           trim(path)//'out.gyro.moment_e',&
           10,&
           size(e_plot),&
@@ -95,7 +95,7 @@ subroutine gyro_write_timedata
 
      ! PARALLEL VELOCITY
 
-     call write_distributed_complex(&
+     call gyro_write_distributed_complex(&
           trim(path)//'out.gyro.moment_v',&
           10,&
           size(v_plot),&
@@ -506,36 +506,38 @@ end subroutine write_distributed_real
 !  Control merged output of complex distributed array.
 !------------------------------------------------------
 
-subroutine write_distributed_complex(datafile,io,n_fn,fn)
+subroutine gyro_write_distributed_complex(datafile,io,n_fn,fn)
 
   use mpi
-  use gyro_globals, only : &
-       n_n,&
-       n_n_1,&
-       n_proc_1,&
-       recv_status,&
-       data_step,&
-       GYRO_COMM_WORLD,&
-       i_proc,&
-       i_err, &
-       io_control, &
-       fmtstr
+  use gyro_globals
 
   !------------------------------------------------------
   implicit none
   !
   character (len=*), intent(in) :: datafile
-  integer, intent(in) :: io
   integer, intent(in) :: n_fn
   complex, intent(in) :: fn(n_fn)
   !
-  integer :: data_loop
-  integer :: i_group_send
-  integer :: i_send
-  integer :: in
+  integer, intent(in) :: io
   !
-  complex :: fn_recv(n_fn)
+  ! Required for MPI-IO:
+  !
+  integer :: im
+  integer :: filemode
+  integer :: finfo
+  integer :: fh
+  integer :: fstatus(MPI_STATUS_SIZE)
+  integer(kind=MPI_OFFSET_KIND) :: disp
+  integer(kind=MPI_OFFSET_KIND) :: offset1
+  !
+  character(len=fmtstr_len*n_fn*2) :: fnstr
+  character(len=fmtstr_len) :: tmpstr
+  character :: c
   !------------------------------------------------------
+
+  if (i_proc_1 /= 0) then
+     return
+  endif
 
 
   select case (io_control)
@@ -557,60 +559,56 @@ subroutine write_distributed_complex(datafile,io,n_fn,fn)
 
      ! Append
 
-     if (i_proc == 0) &
-          open(unit=io,file=datafile,status='old',position='append')
+     ! Create human readable string ready to be written
+     ! Do it in one shot, to minimize IO
+     do im=1,n_fn
+        write(tmpstr, fmtstr) real(fn(im))
+        fnstr((im-1)*fmtstr_len*2+1:(im-1)*fmtstr_len*2+fmtstr_len-1) = tmpstr(1:11)
+        fnstr((im-1)*fmtstr_len*2+fmtstr_len:(im-1)*fmtstr_len*2+fmtstr_len) = NEW_LINE('A')
+        write(tmpstr, fmtstr) aimag(fn(im))
+        fnstr((im-1)*fmtstr_len*2+fmtstr_len+1:im*fmtstr_len*2-1) = tmpstr(1:11)
+        fnstr(im*fmtstr_len*2:im*fmtstr_len*2) = NEW_LINE('A')
+     enddo
 
-     do in=1,n_n
+     ! now write in parallel to the common file
+     filemode = MPI_MODE_WRONLY
+     disp     = data_step
+     disp     = disp * n_proc_2
+     disp = disp * fmtstr_len * 2 * n_fn
 
-        !-----------------------------------------
-        ! Subgroup collector:
-        !
-        i_group_send = (in-1)/n_n_1
+     offset1 = i_proc_2
+     offset1 = offset1 * fmtstr_len * 2 * n_fn
 
-        if (i_group_send /= 0) then
+     call MPI_INFO_CREATE(finfo,i_err)
 
-           i_send = i_group_send*n_proc_1
+     call MPI_INFO_SET(finfo,"striping_factor","4",i_err)
 
-           if (i_proc == 0) then
+     call MPI_FILE_OPEN(NEW_COMM_2,&
+          datafile,&
+          filemode,&
+          finfo,&
+          fh,&
+          i_err)
 
-              call MPI_RECV(fn_recv,&
-                   n_fn,&
-                   MPI_DOUBLE_COMPLEX,&
-                   i_send,&
-                   in,&
-                   GYRO_COMM_WORLD,&
-                   recv_status,&
-                   i_err)
+     call MPI_FILE_SET_VIEW(fh,&
+          disp,&
+          MPI_CHAR,&
+          MPI_CHAR,&
+          'native',&
+          finfo,&
+          i_err)
 
-           else if (i_proc == i_send) then
+     call MPI_FILE_WRITE_AT(fh,&
+          offset1,&
+          fnstr,&
+          n_fn*fmtstr_len*2,&
+          MPI_CHAR,&
+          fstatus,&
+          i_err)
 
-              call MPI_SEND(fn,&
-                   n_fn,&
-                   MPI_DOUBLE_COMPLEX,&
-                   0,&
-                   in,&
-                   GYRO_COMM_WORLD,&
-                   i_err)
-
-           endif
-
-        else
-
-           fn_recv(:) = fn(:)
-
-        endif
-        !
-        !-----------------------------------------
-
-        if (i_proc == 0) then
-
-           write(io,fmtstr) fn_recv(:)
-
-        endif
-
-     enddo ! in
-
-     if (i_proc == 0) close(io)
+     call MPI_FILE_SYNC(fh,i_err)
+     call MPI_FILE_CLOSE(fh,i_err)
+     call MPI_INFO_FREE(finfo,i_err)
 
   case(3)
 
@@ -618,15 +616,14 @@ subroutine write_distributed_complex(datafile,io,n_fn,fn)
 
      if (i_proc == 0) then
 
-        open(unit=io,file=datafile,status='old')
-        do data_loop=0,data_step
+        disp     = data_step+1
+        disp     = disp * n_proc_2
+        disp = disp * fmtstr_len * 2 * n_fn
 
-           do in=1,n_n
-              read(io,fmtstr) fn_recv(:)
-           enddo
-
-        enddo ! data_loop
-
+        open(unit=io,file=datafile,status='old',access="STREAM")
+        if (disp>0) then
+           read(io,pos=disp) c
+        endif
         endfile(io)
         close(io)
 
@@ -634,7 +631,7 @@ subroutine write_distributed_complex(datafile,io,n_fn,fn)
 
   end select
 
-end subroutine write_distributed_complex
+end subroutine gyro_write_distributed_complex
 
 !------------------------------------------------------
 ! write_local_real.f90

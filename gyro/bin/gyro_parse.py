@@ -174,7 +174,6 @@ x.add('POISSON_Z_EFF_FLAG','1')
 x.add('Z_EFF_METHOD','1')
 x.add('TRUNCATION_METHOD','1')
 x.add('FLUXAVE_WINDOW','0.9')
-x.add('HUGE_RESTART','0')
 
 x.add('GKEIGEN_PROC_MULT','1')
 x.add('GKEIGEN_METHOD','1')
@@ -223,7 +222,8 @@ x.dep('ROTATION_METHOD','use ROTATION_THEORY_METHOD.')
 x.dep('COLLISION_METHOD','Deprecated.  You no longer have a choice of method.')
 x.dep('FIELD_R0_FLAG','Deprecated.  Functionality removed.')
 x.dep('FIELD_R0_GRID','Deprecated.  Functionality removed.')
-  
+x.dep('HUGE_RESTART','This option no longer available.')
+
 # Perform the parsing
 x.read_input('input.gyro')
 

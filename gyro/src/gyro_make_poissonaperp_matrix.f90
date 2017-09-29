@@ -52,7 +52,7 @@ subroutine gyro_make_poissonaperp_matrix
 
   lindx(4)  = 2*n_poissonaperp
   lvalue(4) = n_poissonaperp
-
+ 
   allocate(m_poissonaperp(lvalue(4)))
   allocate(indx_poissonaperp(lindx(4)))
 
