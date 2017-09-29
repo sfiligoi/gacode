@@ -25,6 +25,9 @@ nidle=${7}
 cd $simdir
 
 export OMP_NUM_THREADS=$nomp
-export KMP_AFFINITY=compact
-echo "> srun -n $nmpi -c $nomp $exec"
-srun -n $nmpi -c $nomp $exec
+export OMP_PROC_BIND=true
+export OMP_PLACES=cores
+export FORT_BUFFERED=yes
+
+echo "> srun -n $nmpi -c $nomp --cpu_bind=verbose,cores $exec"
+srun -n $nmpi -c $nomp --cpu_bind=verbose,cores $exec
