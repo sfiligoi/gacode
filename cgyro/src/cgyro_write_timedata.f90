@@ -220,12 +220,12 @@ subroutine cgyro_write_distributed_complex(datafile,n_fn,fn)
 
      ! now write in parallel to the common file
      filemode = MPI_MODE_WRONLY
-     disp     = i_current-1
-     disp     = disp * n_proc_2
-     disp = disp * fmtstr_len * 2 * n_fn
+     disp = i_current-1
+     disp = disp*n_proc_2
+     disp = disp*fmtstr_len*2*n_fn
 
      offset1 = i_proc_2
-     offset1 = offset1 * fmtstr_len * 2 * n_fn
+     offset1 = offset1*fmtstr_len*2*n_fn
 
      call MPI_INFO_CREATE(finfo,i_err)
 
@@ -264,12 +264,12 @@ subroutine cgyro_write_distributed_complex(datafile,n_fn,fn)
 
      if (i_proc == 0) then
 
-        disp     = i_current
-        disp     = disp * n_proc_2
-        disp = disp * fmtstr_len * 2 * n_fn
+        disp = i_current
+        disp = disp*n_proc_2
+        disp = disp*fmtstr_len*2*n_fn
 
-        open(unit=io,file=datafile,status='old',access="STREAM")
-        if (disp>0) then
+        open(unit=io,file=datafile,status='old',access='STREAM')
+        if (disp > 0) then
          read(io,pos=disp) c
         endif
         endfile(io)
@@ -317,17 +317,15 @@ subroutine cgyro_write_distributed_real(datafile,n_fn,fn)
   character :: c
   !------------------------------------------------------
 
-  if (i_proc_1 /= 0) then
-    return
-  endif
+  if (i_proc_1 /= 0) return
 
   select case (io_control)
 
-  case(0)
+  case (0)
 
      return
 
-  case(1)
+  case (1)
 
      ! Open
 
@@ -336,7 +334,7 @@ subroutine cgyro_write_distributed_real(datafile,n_fn,fn)
         close(io)
      endif
 
-  case(2)
+  case (2)
 
      ! Append
 
@@ -350,12 +348,12 @@ subroutine cgyro_write_distributed_real(datafile,n_fn,fn)
 
      ! now write in parallel to the common file
      filemode = MPI_MODE_WRONLY
-     disp     = i_current-1
-     disp     = disp * n_proc_2
-     disp = disp * fmtstr_len * n_fn
+     disp = i_current-1
+     disp = disp*n_proc_2
+     disp = disp*fmtstr_len*n_fn
 
      offset1 = i_proc_2
-     offset1 = offset1 * fmtstr_len * n_fn
+     offset1 = offset1*fmtstr_len*n_fn
 
      call MPI_INFO_CREATE(finfo,i_err)
 
@@ -394,12 +392,12 @@ subroutine cgyro_write_distributed_real(datafile,n_fn,fn)
 
      if (i_proc == 0) then
 
-        disp     = i_current
-        disp     = disp * n_proc_2
-        disp = disp * fmtstr_len * n_fn
+        disp = i_current
+        disp = disp*n_proc_2
+        disp = disp*fmtstr_len*n_fn
 
-        open(unit=io,file=datafile,status='old',access="STREAM")
-        if (disp>0) then
+        open(unit=io,file=datafile,status='old',access='STREAM')
+        if (disp > 0) then
          read(io,pos=disp) c
         endif
         endfile(io)
