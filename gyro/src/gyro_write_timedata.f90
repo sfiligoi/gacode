@@ -434,7 +434,7 @@ subroutine write_distributed_real(datafile,io,n_fn,fn)
      disp = disp*fmtstr_len*n_fn
 
      offset1 = i_proc_2
-     offset1 = offset1*fmtstr_len*2*n_fn
+     offset1 = offset1*fmtstr_len*n_fn
 
      call MPI_INFO_CREATE(finfo,i_err)
 
