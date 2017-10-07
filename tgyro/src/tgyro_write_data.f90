@@ -26,6 +26,10 @@ subroutine tgyro_write_data(i_print)
   real, dimension(2:n_r,loc_n_ion+4) :: res2,relax2
   character(len=2) :: itag
   character(len=6) :: ntag,ttag
+  logical :: converged
+
+  ! Convergence status
+  converged = sum(res)/size(res) < tgyro_residual_tol
 
   !====================================================
   ! input.profiles
@@ -57,7 +61,7 @@ subroutine tgyro_write_data(i_print)
                 'Profiles modified by TGYRO')
         endif
 
-        if (i_tran_loop == tgyro_relax_iterations) then
+        if (i_tran_loop == tgyro_relax_iterations .or. converged) then
            ! Output for last iteration
            call EXPRO_write_original(&
                 1,'input.profiles',&
@@ -596,7 +600,7 @@ subroutine tgyro_write_data(i_print)
   endif
 
   ! Exit if residual less than tolerance
-  if (sum(res)/size(res) < tgyro_residual_tol .and. i_tran_loop > 1) then
+  if (converged .and. i_tran_loop > 1) then
      call MPI_FINALIZE(ierr)
      stop
   endif

@@ -33,12 +33,12 @@ then
   echo "           <type> = note (notebook plot of quantities for r <= r_*),"
   echo "                    glob (global data from input.profiles)"
   echo 
-  echo " OPTIONS FOR -note"
+  echo " OPTIONS FOR <type>=note"
   echo
   echo "          -dots"
   echo "          Toggle dot overlay."
   echo
-  echo " OPTIONS FOR -glob"
+  echo " OPTIONS FOR <type>=glob"
   echo
   echo "          -f <func>"
   echo "          <f> = quantity to plot (Te, Ti_1, etc)"
