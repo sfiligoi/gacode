@@ -41,6 +41,18 @@ pgb = sim.data['Pi_GB'][n]
 
 n_ion = sim.n_ion
 
+def plot_input_profiles(ax,tag):
+
+   color='black' ; width=5 ; alpha = 0.2 ; label='input.profiles'
+   prof = profiles_genData('input.profiles.'+str(0))
+   xp = prof.data['rmin']
+   xp = xp/max(xp)
+   ax.plot(xp,prof.data[tag],color=color,alpha=alpha,linewidth=width,
+           label=r'$\mathbf{'+label+'}$')
+   prof = profiles_genData('input.profiles.'+str(n))
+   ax.plot(xp,prof.data[tag],color=color,alpha=alpha,linewidth=width,
+           label=r'$\mathbf{'+label+'}$')
+
 def plot_gen(ax,tag):
 
     ax.grid(which="major",ls="-",alpha=0.4)
@@ -105,12 +117,7 @@ def plot_gen(ax,tag):
         # Dots
         ax.plot(sim.data['r/a'][0],sim.data['te'][0],'o',color='k')
         ax.plot(sim.data['r/a'][0],sim.data['te'][n],'o',color='k')
-        prof = profiles_genData('input.profiles.'+str(0))
-        xp = prof.data['rmin']
-        xp = xp/max(xp)
-        color='black' ; width=5 ; alpha = 0.2 ; label='input.profiles'
-        ax.plot(xp,prof.data['Te'],color=color,alpha=alpha,linewidth=width,
-                label=r'$\mathbf{'+label+'}$')
+        plot_input_profiles(ax,'Te')
 
     elif tag == 'ti':
         xf,pf = smooth_pro(sim.data['r/a'][0],sim.data['a/Lti1'][0],sim.data['ti1'][0],64)
@@ -121,27 +128,29 @@ def plot_gen(ax,tag):
         # Dots
         ax.plot(sim.data['r/a'][0],sim.data['ti1'][0],'o',color='k')
         ax.plot(sim.data['r/a'][0],sim.data['ti1'][n],'o',color='k')
+        plot_input_profiles(ax,'Ti_1')
 
     elif tag == 'ne':
         xf,pf = smooth_pro(sim.data['r/a'][0],sim.data['a/Lne'][0],sim.data['ne'][0],64)
-        ax.plot(xf,pf,color='black',label=init)
+        ax.plot(xf,pf/1e13,color='black',label=init)
         xf,pf = smooth_pro(sim.data['r/a'][0],sim.data['a/Lne'][n],sim.data['ne'][n],64)
-        ax.plot(xf,pf,color='magenta',label=fin)
-        ax.set_ylabel(r'$\mathrm{n_e~[10^19/m^3]}$')
+        ax.plot(xf,pf/1e13,color='magenta',label=fin)
+        ax.set_ylabel(r'$\mathrm{n_e~[10^{19}/m^3]}$')
         # Dots
-        ax.plot(sim.data['r/a'][0],sim.data['ne'][0],'o',color='k')
-        ax.plot(sim.data['r/a'][0],sim.data['ne'][n],'o',color='k')
+        ax.plot(sim.data['r/a'][0],sim.data['ne'][0]/1e13,'o',color='k')
+        ax.plot(sim.data['r/a'][0],sim.data['ne'][n]/1e13,'o',color='k')
+        plot_input_profiles(ax,'ne')
 
     for i in range(n_ion):
         if tag == 'ni'+str(i+1):
             xf,pf = smooth_pro(sim.data['r/a'][0],sim.data['a/L'+tag][0],sim.data[tag][0],64)
-            ax.plot(xf,pf,color='black',label=init)
+            ax.plot(xf,pf/1e13,color='black',label=init)
             xf,pf = smooth_pro(sim.data['r/a'][0],sim.data['a/L'+tag][n],sim.data[tag][n],64)
-            ax.plot(xf,pf,color='magenta',label=fin)
-            ax.set_ylabel(r'$\mathrm{n_i~[10^19/m^3]}$')
+            ax.plot(xf,pf/1e13,color='magenta',label=fin)
+            ax.set_ylabel(r'$\mathrm{n_i~[10^{19}/m^3]}$')
             # Dots
-            ax.plot(sim.data['r/a'][0],sim.data[tag][0],'o',color='k')
-            ax.plot(sim.data['r/a'][0],sim.data[tag][n],'o',color='k')
+            ax.plot(sim.data['r/a'][0],sim.data[tag][0]/1e13,'o',color='k')
+            ax.plot(sim.data['r/a'][0],sim.data[tag][n]/1e13,'o',color='k')
             break
     
     if 'flux' in tag:
