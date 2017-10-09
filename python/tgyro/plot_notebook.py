@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt
 from matplotlib import rc
 from gacodefuncs import *
 from tgyro.data import tgyrodata
+from profiles_gen.data import profiles_genData
 
 rc('text',usetex=True)
 rc('font',size=18)
@@ -104,6 +105,13 @@ def plot_gen(ax,tag):
         # Dots
         ax.plot(sim.data['r/a'][0],sim.data['te'][0],'o',color='k')
         ax.plot(sim.data['r/a'][0],sim.data['te'][n],'o',color='k')
+        prof = profiles_genData('input.profiles.'+str(0))
+        xp = prof.data['rmin']
+        xp = xp/max(xp)
+        color='black' ; width=5 ; alpha = 0.2 ; label='input.profiles'
+        ax.plot(xp,prof.data['Te'],color=color,alpha=alpha,linewidth=width,
+                label=r'$\mathbf{'+label+'}$')
+
     elif tag == 'ti':
         xf,pf = smooth_pro(sim.data['r/a'][0],sim.data['a/Lti1'][0],sim.data['ti1'][0],64)
         ax.plot(xf,pf,color='black',label=init)
@@ -113,6 +121,7 @@ def plot_gen(ax,tag):
         # Dots
         ax.plot(sim.data['r/a'][0],sim.data['ti1'][0],'o',color='k')
         ax.plot(sim.data['r/a'][0],sim.data['ti1'][n],'o',color='k')
+
     elif tag == 'ne':
         xf,pf = smooth_pro(sim.data['r/a'][0],sim.data['a/Lne'][0],sim.data['ne'][0],64)
         ax.plot(xf,pf,color='black',label=init)
