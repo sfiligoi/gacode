@@ -8,17 +8,15 @@ endif
 
 EXEC = neo
 
-ifdef FANN_ROOT
+#ifdef FANN_ROOT
     # neural-net file
-    NEONN=neo_neural.fann
-    NEONN_LIBS=-L$(GACODE_ROOT)/../neural/ \
-		-I$(GACODE_ROOT)/../neural/ \
-		-lbrainfuse \
-		-L$(FANN_ROOT)/lib -lfann
-else
+#    NN=neo_neural.fann
+#    NN_LIB=$(GACODE_ROOT)/../neural/libbrainfuse.a $(FANN_ROOT)/src/libfloatfann.a
+#    NN_INC=$(GACODE_ROOT)/../neural/ 
+#else
     #stub file
-    NEONN=neo_neural
-endif
+NN=neo_neural
+#endif
 
 OBJECTS = neo_globals.o \
           neo_energy_grid.o \
@@ -34,7 +32,7 @@ OBJECTS = neo_globals.o \
           neo_3d_driver.o \
           neo_check.o \
           neo_compute_fcoll.o \
-	  $(NEONN).o \
+	  $(NN).o \
           neo_do.o \
           neo_error.o \
           neo_init.o \
@@ -47,13 +45,13 @@ OBJECTS = neo_globals.o \
 .SUFFIXES : .o .f90
 
 all: neo_lib.a $(EXEC).o $(EXTRA_LIBS)
-	$(FC) $(FFLAGS) -o $(EXEC) $(EXEC).o neo_lib.a $(EXTRA_LIBS) $(LMATH) $(NEONN_LIBS)
+	$(FC) $(FFLAGS) -o $(EXEC) $(EXEC).o neo_lib.a $(EXTRA_LIBS) $(LMATH)
 
 neo_lib.a: $(OBJECTS)
-	$(ARCH) neo_lib.a $(OBJECTS)
+	$(ARCH) neo_lib.a $(OBJECTS) $(NN_LIB)
 
 .f90.o :
-	$(FC) $(FMATH) $(FFLAGS) -c $< $(NEONN_LIBS)
+	$(FC) $(FMATH) $(FFLAGS) -c $< 
 
 clean:  
 	rm -rf *.o neo_lib.a $(EXEC) *~

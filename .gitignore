@@ -1,5 +1,7 @@
 *~
 
+shared/neural
+
 # Object files and modules
 modules/*.mod
 modules/*genmod*
