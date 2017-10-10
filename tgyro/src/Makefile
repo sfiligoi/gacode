@@ -14,8 +14,8 @@ ifdef FANN_ROOT
    TGYRO_NN=tgyro_eped_nn.fann
    TGYRO_LIBS=-L$(GACODE_ROOT)/shared/harvest_client/ \
               -I$(GACODE_ROOT)/shared/harvest_client/ \
-              -L$(GACODE_ROOT)/shared/neural/ \
-              -I$(GACODE_ROOT)/shared/neural/ \
+              -L$(GACODE_ROOT)/../neural/ \
+              -I$(GACODE_ROOT)/../neural/ \
               -lbrainfuse -lharvest \
               -L$(FANN_ROOT)/lib -lfann
 else
