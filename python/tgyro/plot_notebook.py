@@ -151,6 +151,7 @@ def plot_gen(ax,tag):
             # Dots
             ax.plot(sim.data['r/a'][0],sim.data[tag][0]/1e13,'o',color='k')
             ax.plot(sim.data['r/a'][0],sim.data[tag][n]/1e13,'o',color='k')
+            plot_input_profiles(ax,'ni_'+str(i+1))
             break
     
     if 'flux' in tag:
