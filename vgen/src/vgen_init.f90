@@ -15,7 +15,6 @@
     
     neo_n_radial_in = 1
     neo_profile_model_in = 1
-    !neo_sim_model_in = 1
     
     zfac(:) = 0
     do j=1,neo_n_species_in
@@ -92,6 +91,19 @@
      EXPRO_ctrl_numeq_flag = 0
   endif
 
+  ! Set nn option for neoclassical solution
+  if(nn_flag == 1) then
+     neo_sim_model_in = 4
+     ! Presently only computes jpar
+     if(er_method /= 4) then
+        if (i_proc == 0) then
+           print '(a)','ERROR: (VGEN) NEO NN requires er_method=4'
+        endif
+        call MPI_finalize(i_err)
+        stop
+     endif
+  endif
+  
   call EXPRO_pread
 
   if(EXPRO_error == 1) then

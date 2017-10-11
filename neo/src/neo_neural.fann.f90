@@ -59,7 +59,9 @@ contains
     real(4), dimension(6)  :: nn_in
     real(4), dimension(6) :: nn_out
     real :: CTi2_neo, CTi1_neo, CTe_neo, CNi2_neo, CNi1_neo, CNe_neo
+    ! min NN training inputs
     real, dimension(5) :: xmin = (/ 0.05,1.0,-2.0,0.6,1.0 /)
+    ! max NN training outputs
     real, dimension(5) :: xmax = (/ 0.35,10.0,1.0,0.99,3.0 /)
     real :: cscale_nu
     character(len=218) :: root
@@ -146,8 +148,9 @@ contains
     call get_environment_variable('GACODE_ROOT',root)
     data = trim(root)//'/../neural/neonn/jbsnn/'
     ierr=load_anns(0, trim(data)//char(0),'brainfuse'//char(0))
-    if(ierr > 0) then
-       call neo_error('ERROR: (NEO) Neural network failed.')
+    if(ierr == 0) then
+       ! returns number of brainfuse files
+       call neo_error('ERROR: (NEO) Neural network loading failed.')
        return
     endif
     ierr=load_anns_inputs(nn_in)
