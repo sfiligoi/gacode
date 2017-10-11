@@ -11,19 +11,14 @@ FC += ${FOMP}
 EXEC = tgyro_main
 
 ifdef FANN_ROOT
-   TGYRO_NN=tgyro_eped_nn.fann
-   TGYRO_LIBS=-L$(GACODE_ROOT)/shared/harvest_client/ \
-              -I$(GACODE_ROOT)/shared/harvest_client/ \
-              -L$(GACODE_ROOT)/../neural/ \
-              -I$(GACODE_ROOT)/../neural/ \
-              -lbrainfuse -lharvest \
-              -L$(FANN_ROOT)/lib -lfann
+   NN=tgyro_eped_nn.fann
 else
-   TGYRO_NN=tgyro_eped_nn
-   TGYRO_LIBS=-L$(GACODE_ROOT)/shared/harvest_client/ \
-              -I$(GACODE_ROOT)/shared/harvest_client/ \
-              -lharvest
+   NN=tgyro_eped_nn
 endif
+
+HARVEST=-L$(GACODE_ROOT)/shared/harvest_client/ \
+        -I$(GACODE_ROOT)/shared/harvest_client/ \
+        -lharvest
 
 OBJECTS += tgyro_globals.o \
            tgyro_iteration_variables.o \
@@ -67,17 +62,17 @@ OBJECTS += tgyro_globals.o \
            tgyro_write_input.o \
            tgyro_write_intermediate.o \
            tgyro_write_data.o \
-           $(TGYRO_NN).o \
+           $(NN).o \
            $(EXEC).o
 
 .SUFFIXES : .o .f90
 
 all: $(OBJECTS) $(EXTRA_LIBS)
-	$(FC) $(FFLAGS) -o $(EXEC) $(OBJECTS) $(EXTRA_LIBS) $(LMATH) $(TGYRO_LIBS)
+	$(FC) $(FFLAGS) -o $(EXEC) $(OBJECTS) $(EXTRA_LIBS) $(LMATH) $(NN_LIB) $(HARVEST)
 
-tgyro_read_input.o: $(GACODE_ROOT)/tgyro/bin/tgyro_parse.py
 .f90.o :
-	$(FC) $(FMATH) $(FFLAGS) $(TGYRO_LIBS) -c $<  
+	$(FC) $(FMATH) $(FFLAGS) $(NN_LIB) $(HARVEST) -c $<  
+
 clean:
 	rm -f $(EXEC)
 	rm -f *.o ${GACODE_ROOT}/modules/tgyro*.mod

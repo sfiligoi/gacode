@@ -5,7 +5,7 @@ ifeq ($(OPT),debug)
 else
    FFLAGS=${FOPT}
 endif
-      
+
 EXEC = vgen
 
 OBJECTS = vgen_globals.o \
@@ -18,7 +18,7 @@ OBJECTS = vgen_globals.o \
 .SUFFIXES : .o .f90
 
 all: $(OBJECTS) $(EXTRA_LIBS)
-	$(FC) $(FFLAGS) -o $(EXEC) $(OBJECTS) $(EXTRA_LIBS) $(LMATH)
+	$(FC) $(FFLAGS) -o $(EXEC) $(OBJECTS) $(EXTRA_LIBS) $(LMATH) $(NN_LIB)
 
 .f90.o :
 	$(FC) $(FMATH) $(FFLAGS) -c $<

@@ -13,11 +13,10 @@ LLIB=tglf_lib
 
 ifdef FANN_ROOT
    # neural-net file
-   TGLF_NN=tglf_nn_TM.fann
-   TGLF_LIBS=-I$(GACODE_ROOT)/../neural/ -L$(GACODE_ROOT)/../neural/ -lbrainfuse -L${FANN_ROOT}/lib -lfann
+   NN=tglf_nn_TM.fann
 else
    # stub file
-   TGLF_NN=tglf_nn_TM
+   NN=tglf_nn_TM
 endif
 
 OBJECTS = tglf_isnan.o      \
@@ -46,16 +45,16 @@ OBJECTS = tglf_isnan.o      \
           tglf_init_mpi.o   \
           tglf_run_mpi.o    \
           tglf_TM_mpi.o     \
-          $(TGLF_NN).o
+          $(NN).o
 
 .SUFFIXES : .o .f90 .F90
 
 all: $(LLIB).a $(EXEC1) $(EXEC2) Makefile
 
 $(EXEC1): $(LLIB).a $(EXEC1).o
-	$(FC) $(FFLAGS) -o $(EXEC1) $(EXEC1).o $(LLIB).a $(LMATH) $(TGLF_LIBS)
+	$(FC) $(FFLAGS) -o $(EXEC1) $(EXEC1).o $(LLIB).a $(LMATH) $(NN_LIB)
 $(EXEC2): $(LLIB).a $(EXEC2).o
-	$(FC) $(FFLAGS) -o $(EXEC2) $(EXEC2).o $(LLIB).a $(LMATH) $(TGLF_LIBS)
+	$(FC) $(FFLAGS) -o $(EXEC2) $(EXEC2).o $(LLIB).a $(LMATH) $(NN_LIB)
 
 $(LLIB).a: $(OBJECTS)
 	$(ARCH) $(LLIB).a $(OBJECTS)
@@ -64,9 +63,9 @@ tglf_run_mpi.o: tglf_run.F90
 	$(FC) -o tglf_run_mpi.o $(FMATH) $(FFLAGS) -DMPI_TGLF=1 -c $<
 
 .f90.o:
-	$(FC) $(FMATH) $(FFLAGS) -c $< $(TGLF_LIBS)
+	$(FC) $(FMATH) $(FFLAGS) $(NN_LIB) -c $< 
 .F90.o:
-	$(FC) $(FMATH) $(FFLAGS) -c $< $(TGLF_LIBS)
+	$(FC) $(FMATH) $(FFLAGS) $(NN_LIB) -c $< 
 
 clean:
 	rm -f *.o *.lst $(LLIB).a $(EXEC1) $(EXEC2)
