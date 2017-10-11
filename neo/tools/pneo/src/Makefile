@@ -5,7 +5,7 @@ ifeq ($(OPT),debug)
 else
    FFLAGS=${FOPT}
 endif
-      
+
 EXEC1 = pneo
 EXEC2 = pneo_rbf
 
@@ -16,10 +16,11 @@ OBJECTS = pneo_globals.o \
 
 all: exec1 exec2
 
-exec1: $(OBJECTS) $(EXTRA_LIBS)
-	$(FC) $(FFLAGS) -o $(EXEC1) $(OBJECTS) $(EXTRA_LIBS) $(LMATH)
+exec1: $(OBJECTS)
+	$(FC) $(FFLAGS) -o $(EXEC1) $(OBJECTS) ${GACODE_ROOT}/neo/src/neo_lib.a $(EXTRA_LIBS) $(LMATH) $(NN_LIB) 
 
-exec2: $(OBJECTS) $(EXEC2).o
+
+exec2: $(OBJECTS) $(EXEC2).o 
 	$(FC) $(FFLAGS) -o $(EXEC2) $(EXEC2).o $(LMATH)
 
 .f90.o :

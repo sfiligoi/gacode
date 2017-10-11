@@ -11,6 +11,11 @@ export EXTRA_LIBS = \
        ${GACODE_ROOT}/shared/UMFPACK/UMFPACK_lib.a \
        ${GACODE_ROOT}/shared/nclass/nclass_lib.a
 
+ifdef FANN_ROOT
+   # neural net libraries
+   export NN_LIB=-L$(GACODE_ROOT)/../neural/ -I$(GACODE_ROOT)/../neural/ -lbrainfuse -lfann
+endif
+
 all:
 	gacode_getversion > .VERSION
 	cd ${GACODE_ROOT}/shared ; make
