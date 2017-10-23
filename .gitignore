@@ -1,9 +1,8 @@
 *~
-.DS_Store
-.idea
-\#*\#
 
-# Gyro build stuff
+shared/neural
+
+# Object files and modules
 modules/*.mod
 modules/*genmod*
 */*.o
@@ -19,11 +18,11 @@ modules/*genmod*
 cgyro/src/*.gpu
 cgyro/src/*.h
 
-# Old directory structure
-neo/tools/vgen/
-
-# OSX build stuff
+# OSX garbage
 *.dSYM/
+.DS_Store
+.idea
+\#*\#
 
 # Version tags
 gyro/.VERSION
@@ -39,10 +38,9 @@ glf23/src/glf23
 gyro/src/gyro
 cgyro/src/cgyro
 cgyro/tools/globalmap/src/globalmap
-le3/src/le3
-le3/profiles_3d/profiles_3d
 neo/src/neo
 neo/tools/pneo/src/pneo
+neo/tools/pneo/src/pneo_rbf
 vgen/src/vgen
 profiles_gen/src/prgen
 profiles_gen/locpargen/locpargen

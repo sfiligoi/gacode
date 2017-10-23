@@ -12,7 +12,8 @@ reg09: sug+cem+ nl+ie +loc+mil+nrot
 reg10: sug+cem+lin+ie +loc+mil+nrot [high-k]
 reg11: lor+es +lin+ie +loc+mil+nrot [simple lor]
 reg12: sug+es +zf +ie +loc+mil+nrot
-reg13: lor+es +lin+i  +loc+mil+ rot
+reg13: lor+es +lin+i  +pro+mil+ rot
+reg14: lor+es +lin+ie +pro+mil+frot
 
 Performance testing and scaling templates:
 

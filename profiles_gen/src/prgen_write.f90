@@ -190,31 +190,37 @@ subroutine prgen_write
   select case (format_type)
 
   case (0)
+     ! (nothing but gfile)
      EXPRO_b_ref = -btccw*abs(null_bref)
      EXPRO_arho  = null_arho
      EXPRO_rvbv  = 0.0
      EXPRO_ip_exp = 0.0
   case (1)
+     ! onetwo statefile
      EXPRO_b_ref = -btccw*abs(onetwo_Btor)
      EXPRO_arho  = onetwo_rho_grid(nx)
      EXPRO_rvbv  = onetwo_R0*onetwo_Btor
      EXPRO_ip_exp = ip_tot
   case (2)
+     ! plasmastate 
      EXPRO_b_ref = -btccw*abs(plst_b_axis_vac)
      EXPRO_arho  = sqrt(plst_phit(nx)/plst_b_axis_vac/pi)
      EXPRO_rvbv  = 0.0
      EXPRO_ip_exp = 0.0
   case (3)
+     ! pfile
      EXPRO_b_ref = -btccw*abs(peqdsk_bref)
      EXPRO_arho  = peqdsk_arho
      EXPRO_rvbv  = 0.0
      EXPRO_ip_exp = 0.0
   case (5)
+     ! corsica
      EXPRO_b_ref = -btccw*abs(corsica_bref)
      EXPRO_arho  = corsica_arho
      EXPRO_rvbv  = 0.0
      EXPRO_ip_exp = 0.0
   case (6)
+     ! ufile
      EXPRO_b_ref = -btccw*abs(ufile_bref)
      EXPRO_arho  = ufile_arho
      EXPRO_rvbv  = 0.0

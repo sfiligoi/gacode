@@ -6,11 +6,11 @@ all:
 	cd EXPRO ; make "OPT=${OPT}"
 	cd fluxfit ; make "OPT=${OPT}"
 	cd harvest_client ; make
-ifdef FANN_ROOT
-	cd neural; make
-endif
 	cd nclass ; make "OPT=${OPT}"
 	cd UMFPACK ; make "OPT=${OPT}"
+ifdef FANN_ROOT
+	cd ${GACODE_ROOT}/../neural; make
+endif
 
 clean:
 	cd math ; make clean
@@ -18,11 +18,11 @@ clean:
 	cd EXPRO ; make clean
 	cd fluxfit ; make clean
 	cd harvest_client ; make clean
-ifdef FANN_ROOT
-	cd neural; make clean
-endif
 	cd nclass ; make clean
 	cd UMFPACK ; make clean
+ifdef FANN_ROOT
+	cd ${GACODE_ROOT}/../neural; make clean
+endif
 
 distclean:
 	cd math ; make clean

@@ -1,16 +1,10 @@
-#----------------------------
-# Toplevel makefile for vgen
-#----------------------------
+#---------------------------------------------------------------
+# Toplevel makefile for pneo: must be executed from gacode/neo
+#---------------------------------------------------------------
 
 include ${GACODE_ROOT}/platform/build/make.inc.${GACODE_PLATFORM}
 
-export EXTRA_LIBS = \
-	${GACODE_ROOT}/neo/src/neo_lib.a \
-	${GACODE_ROOT}/shared/nclass/nclass_lib.a \
-	${GACODE_ROOT}/shared/EXPRO/EXPRO_lib.a \
-	${GACODE_ROOT}/shared/math/math_lib.a \
-	${GACODE_ROOT}/shared/GEO/GEO_lib.a \
-	${GACODE_ROOT}/shared/UMFPACK/UMFPACK_lib.a 
+# NOTE: $EXTRA_LIBS already exported by neo/Makefile
 
 all:
 	cd src ; make

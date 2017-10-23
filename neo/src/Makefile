@@ -8,6 +8,14 @@ endif
 
 EXEC = neo
 
+ifdef FANN_ROOT
+   # neural net libraries
+   NN=neo_neural.fann
+else
+   #stub file
+   NN=neo_neural
+endif
+
 OBJECTS = neo_globals.o \
           neo_energy_grid.o \
           neo_interface.o \
@@ -22,8 +30,7 @@ OBJECTS = neo_globals.o \
           neo_3d_driver.o \
           neo_check.o \
           neo_compute_fcoll.o \
-	  neo_rbf.o \
-	  neo_neural.o \
+	  $(NN).o \
           neo_do.o \
           neo_error.o \
           neo_init.o \
@@ -36,13 +43,13 @@ OBJECTS = neo_globals.o \
 .SUFFIXES : .o .f90
 
 all: neo_lib.a $(EXEC).o $(EXTRA_LIBS)
-	$(FC) $(FFLAGS) -o $(EXEC) $(EXEC).o neo_lib.a $(EXTRA_LIBS) $(LMATH)
+	$(FC) $(FFLAGS) -o $(EXEC) $(EXEC).o neo_lib.a $(EXTRA_LIBS) $(LMATH) $(NN_LIB)
 
 neo_lib.a: $(OBJECTS)
 	$(ARCH) neo_lib.a $(OBJECTS)
 
 .f90.o :
-	$(FC) $(FMATH) $(FFLAGS) -c $<
+	$(FC) $(FMATH) $(FFLAGS) $(NN_LIB) -c $< 
 
 clean:  
 	rm -rf *.o neo_lib.a $(EXEC) *~

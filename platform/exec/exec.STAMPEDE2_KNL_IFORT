@@ -1,7 +1,7 @@
-#! /usr/bin/env bash
+#! /usr/bin/env bash 
 #
 # SCRIPT:
-#  gyro.EDISON_CRAY
+#  gyro.CORI_KNL
 #
 # FUNCTION:
 #  Parallel execution script
@@ -25,9 +25,8 @@ nidle=${7}
 cd $simdir
 
 export OMP_NUM_THREADS=$nomp
-export OMP_PROC_BIND=true
-export OMP_PLACES=cores
-export FORT_BUFFERED=yes
-
-echo "> srun -n $nmpi -c $nomp --cpu_bind=verbose,cores $exec"
-srun -n $nmpi -c $nomp --cpu_bind=verbose,cores $exec
+export KMP_AFFINITY=spread
+export KMP_HW_SUBSET=1t
+export OMP_STACKSIZE=32M
+echo ibrun $exec
+ibrun $exec

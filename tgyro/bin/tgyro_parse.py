@@ -111,6 +111,7 @@ x.add('TGYRO_PED_SCALE','1.0')
 x.add('TGYRO_TGLF_NN_MAX_ERROR','-1')
 x.add('TGYRO_QUICKFAST_FLAG','0')
 x.add('TGYRO_ZERO_DENS_GRAD_FLAG','0')
+x.add('TGYRO_RESIDUAL_TOL','0.0')
 
 # Deprecated parameters
 x.dep('LOC_N_FEEDBACK','new parameter is LOC_NE_FEEDBACK_FLAG')

@@ -11,18 +11,22 @@ FFTWDIR=/usr/lib/x86_64-linux-gnu
 
 # Compilers
 
-FC	= mpif90 -std=f2008 -I $(GACODE_ROOT)/modules
-F77	= mpif77 -I $(GACODE_ROOT)/modules
+FC    = mpif90 -std=f2008 -I $(GACODE_ROOT)/modules
+F77   = mpif77 -I $(GACODE_ROOT)/modules
 
-FOMP    = -fopenmp
-FMATH	= -fdefault-real-8 -J $(GACODE_ROOT)/modules
-FOPT	= -Ofast
-FDEBUG	= -Wall -W -fcheck=mem,bounds -g -fbacktrace -ffpe-trap=invalid,zero,overflow
+FOMP  =-fopenmp
+FMATH =-fdefault-real-8 -J $(GACODE_ROOT)/modules
+FOPT  =-Ofast
+FDEBUG=-Wall -W -fcheck=mem,bounds -g -fbacktrace -ffpe-trap=invalid,zero,overflow
 
 # System math libraries
-
 LMATH=/home/SOFTWARE/OpenBLAS/libopenblas.a $(FFTWDIR)/libfftw3.a $(FFTWDIR)/libfftw3_omp.a
 FFTW_INC=/usr/include
+
+ifdef FANN_ROOT
+   # neural net libraries
+   NN_LIB=-L$(GACODE_ROOT)/../neural/ -I$(GACODE_ROOT)/../neural/ -lbrainfuse -lfann
+endif
 
 # NetCDF:
 NETCDF=-L/usr/lib -lnetcdff -lnetcdf

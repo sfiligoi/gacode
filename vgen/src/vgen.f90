@@ -58,6 +58,7 @@ program vgen
   read(1,*) erspecies_indx
   read(1,*) nth_min
   read(1,*) nth_max
+  read(1,*) nn_flag
   close(1)
 
   select case(er_method)
@@ -98,6 +99,14 @@ program vgen
      stop
   end select
 
+  if (i_proc == 0) then
+     if(nn_flag == 1) then
+        print '(a)','INFO: (VGEN) Using NEO NN for bootstrap current'
+     else
+        print '(a)','INFO: (VGEN) Using NEO DKE for bootstrap current'
+     endif
+  endif
+  
   if (i_proc == 0) then
      print '(a,i2,a,i2)','INFO: (VGEN) Using NEO Theta Resolution: ',nth_min,'-',nth_max
      print '(a,i2)','INFO: (VGEN) MPI tasks: ',n_proc

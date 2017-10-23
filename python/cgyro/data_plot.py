@@ -398,7 +398,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       return 'ang  Re(f)  Im(f)',x,y1,y2
          
-   def plot_flux(self,w=0.5,field=0,moment='e',ymin='auto',ymax='auto',fc=0,fig=None):
+   def plot_flux(self,w=0.5,field=0,moment='e',ymin='auto',ymax='auto',fc=0,fig=None,nscale=0):
 
       if fig is None:
          fig = plt.figure(figsize=(12,6))
@@ -447,6 +447,15 @@ class cgyrodata_plot(data.cgyrodata):
          print 'ERROR: (plot_flux.py) Invalid moment.'
          sys.exit()
 
+  
+      # Normalizations
+      if nscale == 0:
+         norm_vec = np.ones(ns)
+         mnorm = ''
+      else:
+         norm_vec = 1.0/self.dens
+         mnorm = '^\mathrm{norm}'
+
       # Get index for average window
       imin=iwindow(t,w)
 
@@ -463,14 +472,15 @@ class cgyrodata_plot(data.cgyrodata):
       ax.set_title(r'$\mathrm{'+ntag+'} \quad '+windowtxt+'\quad ['+field_tag+']$')
 
       for ispec in range(ns):
-         ave = average(y[ispec,:],t,w)
-         y_ave = ave*np.ones(len(t))
+         y_norm = y[ispec,:]*norm_vec[ispec]
+         ave    = average(y_norm,t,w)
+         y_ave  = ave*np.ones(len(t))
          u = specmap(self.mass[ispec],self.z[ispec])
-         label = r'$'+mtag+'_'+u+'/'+mtag+'_\mathrm{GB}: '+str(round(ave,3))+'$'
+         label = r'$'+mtag+mnorm+'_'+u+'/'+mtag+'_\mathrm{GB}: '+str(round(ave,3))+'$'
          # Average
          ax.plot(t[imin:],y_ave[imin:],'--',color=color[ispec])
          # Time trace
-         ax.plot(self.t,y[ispec,:],label=label,color=color[ispec])
+         ax.plot(self.t,y_norm,label=label,color=color[ispec])
 
       ax.legend(loc=2)
 
