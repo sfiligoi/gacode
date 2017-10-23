@@ -76,6 +76,10 @@ then
   echo "          Maximum value of vertical axis (where applicable)."
   echo "          *Affects: flux, ky_flux"
   echo
+  echo "          -nscale"
+  echo "          Scale the fluxes with ne/ni factor"
+  echo "          *Affects: flux"
+  echo
   echo "          -theta <value>"
   echo "          Value of theta/pi used in hbcut"
   echo "          *Affects: hbcut"
@@ -160,6 +164,7 @@ FMIN=auto
 FMAX=auto
 CMAP=jet
 START=1
+NSCALE=0
 #==============================================================================
 
 #==============================================================================
@@ -203,6 +208,7 @@ while [ $# -gt 0 ] ; do
   -fmin) shift ; FMIN=$1 ;;
   -fmax) shift ; FMAX=$1 ;;
   -cmap) shift ; CMAP=$1 ;;
+  -nscale) NSCALE=1 ;;
 
   -mesh) MESH=1 ;;
 
@@ -252,7 +258,7 @@ case "$PLOT_TYPE" in
 	python $PLT $PLOT_TYPE $W $MOMENT $YMIN $YMAX $FTYPE ;;
 
    flux)
-        python $PLT $PLOT_TYPE $W $FIELD $MOMENT $YMIN $YMAX $FC $FTYPE ;;
+        python $PLT $PLOT_TYPE $W $FIELD $MOMENT $YMIN $YMAX $FC $FTYPE $NSCALE;;
 
    ky_flux)
 	python $PLT $PLOT_TYPE $W $FIELD $MOMENT $YMIN $YMAX $FC $FTYPE ;;
