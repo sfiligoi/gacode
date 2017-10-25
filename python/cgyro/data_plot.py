@@ -398,7 +398,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       return 'ang  Re(f)  Im(f)',x,y1,y2
          
-   def plot_flux(self,w=0.5,field=0,moment='e',ymin='auto',ymax='auto',fc=0,fig=None,nscale=0):
+   def plot_flux(self,w=0.5,field=0,moment='e',ymin='auto',ymax='auto',fc=0,fig=None,loc=2,nscale=0):
 
       if fig is None:
          fig = plt.figure(figsize=(12,6))
@@ -482,10 +482,10 @@ class cgyrodata_plot(data.cgyrodata):
          # Time trace
          ax.plot(self.t,y_norm,label=label,color=color[ispec])
 
-      ax.legend(loc=2)
+      ax.legend(loc=loc)
 
       if ymax != 'auto':
-         ax.set_ylim([0,float(ymax)])
+         ax.set_ylim([float(ymin),float(ymax)])
 
    def plot_xflux(self,w=0.5,moment='e',ymin='auto',ymax='auto',fig=None):
 
