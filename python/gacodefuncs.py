@@ -99,7 +99,7 @@ def setlimits(a,fmin,fmax):
 #------------------------------------------------------
 
 #---------------------------------------------------------------
-# Determine index imin for time-averaging window
+# Determine species name (returnval) from mass and charge
 def specmap(m_in,z_in):
  
   # Assume Deuterium normalization
@@ -134,6 +134,7 @@ def specmap(m_in,z_in):
 
   return name
 #---------------------------------------------------------------
+
 #---------------------------------------------------------------
 def smooth_pro(x,z,p,n):
 
