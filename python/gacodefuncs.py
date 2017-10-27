@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------
-# gacodeplotfuncs.py
+# gacodefuncs.py
 #
 # PURPOSE:
 #  Functions used for computing averages, manipulating strings, etc.
@@ -134,6 +134,7 @@ def specmap(m_in,z_in):
 
   return name
 #---------------------------------------------------------------
+
 #---------------------------------------------------------------
 def smooth_pro(x,z,p,n):
 
@@ -161,4 +162,45 @@ def smooth_pro(x,z,p,n):
 
 
     return xf,pf
+#---------------------------------------------------------------
+
+#---------------------------------------------------------------
+def extract(d,sd,key,w,spec,moment,norm=False,verbose=False):
+
+   import os
+   import re
+   import string
+   import numpy as np
+   from cgyro.data import cgyrodata
+
+   # d   = directory
+   # sd  = prefix of subdirectory ('a' for a1,a2,a3)
+   # key = key to scan (for example, 'GAMMA_P') 
+
+   x = []
+   f = []
+   for i in range(20):
+      ddir = d+'/'+sd+str(i)+'/'
+      if os.path.isdir(ddir) == True:
+         # If this is a directory, get the key value
+         for line in open(ddir+'input.cgyro').readlines():
+            if re.match(key,line):
+               x.append(float(string.splitfields(line,'=')[1]))
+         # Get the corresponding flux
+         sim = cgyrodata(ddir)
+         sim.getflux()
+         y = np.sum(sim.ky_flux,axis=(2,3))
+         # Energy flux of species k
+         f.append(average(y[spec,moment,:],sim.t,w))
+         print 'INFO: (extract) Processed data in '+ddir
+      else:
+         if verbose:
+            print 'INFO: (extract) Checked for but cannot find '+ddir
+
+   if norm == True:
+      return np.array(x),np.array(f)*sim.dens[1]/sim.dens[spec]
+   else:
+      return np.array(x),np.array(f)
+      
+   
 #---------------------------------------------------------------
