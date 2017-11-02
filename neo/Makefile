@@ -4,18 +4,6 @@
 
 include ${GACODE_ROOT}/platform/build/make.inc.${GACODE_PLATFORM}
 
-#--------------------------------------------------------------------
-# SOLVER_OPT can be set to any one of the following:
-#     -- umf   : UMFPACK
-#     -- slu   : SuperLU serial version
-#     -- slumt : SuperLU multi-threaded version
-# If SOLVER_OPT is not set to anything, the default option is 'umf'
-#--------------------------------------------------------------------
-export SOLVER_OPT ?= umf
-ifeq ($(SOLVER_OPT),)
-    export SOLVER_OPT := umf
-endif
-
 export EXTRA_LIBS = \
        ${GACODE_ROOT}/shared/EXPRO/EXPRO_lib.a \
        ${GACODE_ROOT}/shared/math/math_lib.a \
@@ -23,16 +11,28 @@ export EXTRA_LIBS = \
        ${GACODE_ROOT}/shared/UMFPACK/UMFPACK_lib.a \
        ${GACODE_ROOT}/shared/nclass/nclass_lib.a
 
-export SUPERLU_ROOT := ${GACODE_ROOT}/shared/SUPERLU
+#--------------------------------------------------------------------
+# SOLVER_OPT can be set to any one of the following:
+#     -- umf   : UMFPACK
+#     -- slu   : SuperLU serial version
+#     -- slumt : SuperLU multi-threaded version
+# If SOLVER_OPT is not set to anything, the default option is 'umf'
+#--------------------------------------------------------------------
+SOLVER_OPT_DEFAULT = umf
 ifeq ($(SOLVER_OPT),slu)
-   EXTRA_LIBS += ${SUPERLU_ROOT}/SuperLU/libsuperlu.a
+  BUILD_SUPERLU += slu
+  EXTRA_LIBS += ${GACODE_ROOT}/shared/SUPERLU/SuperLU/libsuperlu.a
 else ifeq ($(SOLVER_OPT),slumt)
-   EXTRA_LIBS += ${SUPERLU_ROOT}/SuperLU_MT/libsuperlu_mt.a
+  BUILD_SUPERLU += slumt
+  EXTRA_LIBS += ${GACODE_ROOT}/shared/SUPERLU/SuperLU_MT/libsuperlu_mt.a
+else
+  export SOLVER_OPT := ${SOLVER_OPT_DEFAULT}
 endif
 
 all:
 	gacode_getversion > .VERSION
 	cd ${GACODE_ROOT}/shared ; make
+	cd ${GACODE_ROOT}/shared/SUPERLU ; make ${BUILD_SUPERLU}
 	cd src ; make
 	cd ${GACODE_ROOT}/neo/tools/pneo ; make
 

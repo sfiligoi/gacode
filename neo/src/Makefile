@@ -51,10 +51,12 @@ ifeq ($(SOLVER_OPT),umf)
    FFLAGS += -DUSE_UMFPACK
 else ifeq ($(SOLVER_OPT),slu)
    FFLAGS += -DUSE_SUPERLU
-   EXTRA_HEADERS += -I${SUPERLU_ROOT}/SuperLU 
+   EXTRA_HEADERS += -I${GACODE_ROOT}/shared/SUPERLU/SuperLU 
 else ifeq ($(SOLVER_OPT),slumt)
    FFLAGS += -DUSE_SUPERLU_MT
-   EXTRA_HEADERS += -I${SUPERLU_ROOT}/SuperLU_MT
+   EXTRA_HEADERS += -I${GACODE_ROOT}/shared/SUPERLU/SuperLU_MT
+else
+   $(error 'Invalid SOLVER_OPT value ', ${SOLVER_OPT})
 endif
 
 all: neo_lib.a $(EXEC).o $(EXTRA_LIBS)

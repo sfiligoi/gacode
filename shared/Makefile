@@ -8,7 +8,6 @@ all:
 	cd harvest_client ; make
 	cd nclass ; make "OPT=${OPT}"
 	cd UMFPACK ; make "OPT=${OPT}"
-	cd SUPERLU ; make "OPT=${OPT}"
 ifdef FANN_ROOT
 	cd ${GACODE_ROOT}/../neural; make
 endif
@@ -31,3 +30,4 @@ distclean:
 	cd GEO ; make clean
 	cd EXPRO ; make clean
 	cd harvest_client; make clean
+	cd SUPERLU ; make clean
