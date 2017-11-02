@@ -40,7 +40,7 @@ contains
     integer, dimension(:), allocatable :: colindx
 
     integer :: iopt, n, nnz, nrhs=1
-    integer*8 factors
+    integer(KIND=8):: factors
 
      !Get the number of non-zero elements in compressed column format
      call st_to_cc_size ( n_elem, a_iindx, a_jindx, nnz )
