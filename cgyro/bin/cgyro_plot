@@ -99,6 +99,9 @@ then
   echo "          -cmap <value>"
   echo "          Name of colormap (jet,hsv,brg,...)"  
   echo
+  echo "          -loc <loc>"
+  echo "          Legend location (1-4)"  
+  echo
   echo " OPTIONS FOR -plot fluct/vid"
   echo
   echo "          -nx <int>"
@@ -165,6 +168,7 @@ FMAX=auto
 CMAP=jet
 START=1
 NSCALE=0
+LOC=2
 #==============================================================================
 
 #==============================================================================
@@ -199,6 +203,7 @@ while [ $# -gt 0 ] ; do
   -ymin) shift ; YMIN=$1 ;;
 
   -w) shift ; W=$1 ;;
+  -loc) shift ; LOC=$1 ;;
 
   -start) shift ; START=$1 ;;
 
@@ -255,10 +260,10 @@ case "$PLOT_TYPE" in
 	python $PLT $PLOT_TYPE $FTYPE ;;
 
    xflux)
-	python $PLT $PLOT_TYPE $W $MOMENT $YMIN $YMAX $FTYPE ;;
+	python $PLT $PLOT_TYPE $W $MOMENT $YMIN $YMAX $FTYPE $NSCALE ;;
 
    flux)
-        python $PLT $PLOT_TYPE $W $FIELD $MOMENT $YMIN $YMAX $FC $FTYPE $NSCALE;;
+        python $PLT $PLOT_TYPE $W $FIELD $MOMENT $YMIN $YMAX $FC $FTYPE $LOC $NSCALE;;
 
    ky_flux)
 	python $PLT $PLOT_TYPE $W $FIELD $MOMENT $YMIN $YMAX $FC $FTYPE ;;

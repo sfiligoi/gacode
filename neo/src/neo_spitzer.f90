@@ -7,7 +7,7 @@ subroutine neo_spitzer
 
   use neo_globals
   use neo_energy_grid
-  use neo_sparse_solve
+  use neo_umfpack
   implicit none
   integer :: io_sp=60
   integer :: is_ion

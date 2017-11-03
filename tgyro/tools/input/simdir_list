@@ -15,7 +15,8 @@ Linear stability mode:
 
 Multi-run mode:
 
-    mreg01:
+    mreg01: 
+    embed : Embedded turbulence strong scaling case 
 
 Neural network:
 
