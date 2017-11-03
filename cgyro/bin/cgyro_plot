@@ -260,7 +260,7 @@ case "$PLOT_TYPE" in
 	python $PLT $PLOT_TYPE $FTYPE ;;
 
    xflux)
-	python $PLT $PLOT_TYPE $W $MOMENT $YMIN $YMAX $FTYPE ;;
+	python $PLT $PLOT_TYPE $W $MOMENT $YMIN $YMAX $FTYPE $NSCALE ;;
 
    flux)
         python $PLT $PLOT_TYPE $W $FIELD $MOMENT $YMIN $YMAX $FC $FTYPE $LOC $NSCALE;;

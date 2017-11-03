@@ -487,7 +487,7 @@ class cgyrodata_plot(data.cgyrodata):
       if ymax != 'auto':
          ax.set_ylim([float(ymin),float(ymax)])
 
-   def plot_xflux(self,w=0.5,moment='e',ymin='auto',ymax='auto',fig=None):
+   def plot_xflux(self,w=0.5,moment='e',ymin='auto',ymax='auto',fig=None,nscale=0):
 
       if fig is None:
          fig = plt.figure(figsize=(12,6))
@@ -524,12 +524,23 @@ class cgyrodata_plot(data.cgyrodata):
          print 'ERROR (plot_xflux.py) Invalid moment.'
          sys.exit()
 
+      # Find ne
+      for ispec in range(ns):
+         if self.z[ispec] < 0.0:
+            ne = self.dens[ispec]            
+
       xr = np.zeros((ns,nl))
       xi = np.zeros((ns,nl))
       for ispec in range(ns):
          for l in range(nl):
             xr[ispec,l] = average(z[0,l,ispec,:],self.t,w)
             xi[ispec,l] = average(z[1,l,ispec,:],self.t,w)
+
+      # Rescale with density ratio
+      if nscale == 1:
+         for ispec in range(ns):
+            xr[ispec,:] = xr[ispec,:]*ne/self.dens[ispec]
+            xi[ispec,:] = xi[ispec,:]*ne/self.dens[ispec]
 
       # Determine tmin
       imin=iwindow(t,w)
@@ -558,15 +569,15 @@ class cgyrodata_plot(data.cgyrodata):
          g = xr[ispec,0] 
          for l in range(1,nl):
             g = g+2*(np.cos(l*t)*xr[ispec,l]-np.sin(l*t)*xi[ispec,l])
-         ax.plot(t/(2*np.pi),g)
+         ax.plot(t/(2*np.pi),g,color=color[ispec])
 
-         # Flux partial average (not used) over [-e,e]
+         # Flux partial average over [-e,e]
          e = 0.2
          g0 = xr[ispec,0]
          for l in range(1,nl):
             z = 2*np.pi*l*e
             g0 = g0+2*np.sin(z)*xr[ispec,l]/z
-         ax.plot([-e,e],[g0,g0],'o-',color='red')
+         ax.plot([-e,e],[g0,g0],'o-',color=color[ispec],alpha=0.2,linewidth=3)
 
          label = r'$'+mtag+'_'+u+'/'+mtag+'_\mathrm{GB}: '+str(round(g0,3))+'$'
 
@@ -578,7 +589,7 @@ class cgyrodata_plot(data.cgyrodata):
 
          # Flux domain average
          g0 = xr[ispec,0]
-         ax.plot([-0.5,0.5],[g0,g0],label=label)
+         ax.plot([-0.5,0.5],[g0,g0],label=label,color=color[ispec],alpha=0.5)
 
          if ymax != 'auto':
             ax.set_ylim([float(ymin),float(ymax)])

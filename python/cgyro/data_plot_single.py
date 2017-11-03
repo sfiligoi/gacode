@@ -141,8 +141,9 @@ elif plot_type == 'xflux':
    ymin   = sys.argv[4]
    ymax   = sys.argv[5]
    ftype  = sys.argv[6]
+   nscale = int(sys.argv[7])
 
-   cgyrodata_plot('./').plot_xflux(w=w,moment=moment,ymin=ymin,ymax=ymax)
+   cgyrodata_plot('./').plot_xflux(w=w,moment=moment,ymin=ymin,ymax=ymax,nscale=nscale)
 
    outfile = 'out.cgyro.xflux.'+ftype
 
