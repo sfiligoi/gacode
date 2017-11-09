@@ -104,12 +104,15 @@ elif plot_type == 'flux':
    ymax   = sys.argv[6]
    fc     = int(sys.argv[7])
    ftype  = sys.argv[8]
+   loc    = int(sys.argv[9])
+   nscale = int(sys.argv[10])
 
    if ftype == 'dump':
       cgyrodata_dump('./').dump_flux(fc=fc)
       sys.exit()
    else:
-      cgyrodata_plot('./').plot_flux(w=w,field=field,moment=moment,ymin=ymin,ymax=ymax,fc=fc)
+      cgyrodata_plot('./').plot_flux(w=w,field=field,moment=moment,
+                                     ymin=ymin,ymax=ymax,fc=fc,loc=loc,nscale=nscale)
 
    outfile = 'out.cgyro.flux.'+ftype
 
@@ -138,8 +141,9 @@ elif plot_type == 'xflux':
    ymin   = sys.argv[4]
    ymax   = sys.argv[5]
    ftype  = sys.argv[6]
+   nscale = int(sys.argv[7])
 
-   cgyrodata_plot('./').plot_xflux(w=w,moment=moment,ymin=ymin,ymax=ymax)
+   cgyrodata_plot('./').plot_xflux(w=w,moment=moment,ymin=ymin,ymax=ymax,nscale=nscale)
 
    outfile = 'out.cgyro.xflux.'+ftype
 

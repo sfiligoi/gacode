@@ -35,7 +35,6 @@ subroutine neo_do
   real, dimension(:), allocatable :: a
   integer, dimension(:), allocatable :: a_iindx
   integer, dimension(:), allocatable :: a_jindx
-  integer :: ifac, matfac_err, max_ifac=5
 
   ! kinetic equation terms: 
   real :: stream, trap, rotkin
@@ -468,88 +467,12 @@ subroutine neo_do
         enddo ! ie
      enddo ! is
 
-     ! Factor the Matrix -- uses a(:) and a_indx(:)
-
-     n_elem = k
-     n_max = n_elem*matsz_scalefac
-     matfac_err = 0
-
-     do ifac = 1, max_ifac
-
-        if(silent_flag == 0 .and. i_proc == 0) then
-           open(unit=io_neoout,file=trim(path)//runfile_neoout,&
-                status='old',position='append')
-           write(io_neoout,'(t2,a,e12.5)') 'Estimated memory (GB) = ', 2*8.0*(asize+n_max)/1.0e9
-           close(io_neoout)
-        endif
-        if(allocated(amat))       deallocate(amat)
-        allocate(amat(n_max),stat=ierr)
-        if(ierr /= 0) then
-           call neo_error('ERROR: (NEO) Array allocation failed')
-           goto 100
-        end if
-        if(allocated(amat_indx))  deallocate(amat_indx)
-        allocate(amat_indx(2*n_max),stat=ierr)
-        if(ierr /= 0) then
-           call neo_error('ERROR: (NEO) Array allocation failed')
-           goto 100
-        end if
-
-        amat(:) = 0.0
-        amat_indx(:) = 0
-        do k=1,n_elem
-           amat(k) = a(k)
-           amat_indx(k) = a_iindx(k)
-           amat_indx(n_elem+k) = a_jindx(k)
-        enddo
-
-        if(silent_flag == 0 .and. i_proc == 0) then
-           open(unit=io_neoout,file=trim(path)//runfile_neoout,&
-                status='old',position='append')
-           if(ifac == 1) then
-              write(io_neoout,'(t2,a)') 'Begin matrix factor'
-           else
-              write(io_neoout,'(t2,a)') 'Re-trying matrix factorization'
-           endif
-           close(io_neoout)
-        endif
-        call SOLVE_factor(n_elem)
-        if(error_status > 0) then
-           error_status = 0
-           n_max = n_max * 2
-        else
-           matfac_err = 1
-           exit
-        endif
-     enddo
-     if(matfac_err == 0) then
-        call neo_error('ERROR: (NEO) Matrix factorization failed. Try increasing MATSZ_SCALEFAC.')
-        goto 100
-     endif
-     if(silent_flag == 0 .and. i_proc == 0) then
-        open(unit=io_neoout,file=trim(path)//runfile_neoout,&
-             status='old',position='append')
-        write(io_neoout,'(t2,a)') 'Done matrix factor'
-        close(io_neoout)
-     endif
-
      ! Set the RHS source 
      call set_RHS_source
 
-     ! Matrix solve -- uses g(:), a(:), and a_indx(:)
-     if(silent_flag == 0 .and. i_proc == 0) then
-        open(unit=io_neoout,file=trim(path)//runfile_neoout,&
-             status='old',position='append')
-        write(io_neoout,'(t2,a)') 'Begin matrix solve'
-        close(io_neoout)
-     endif
-     call SOLVE_do
-     if(silent_flag == 0 .and. i_proc == 0) then
-        open(unit=io_neoout,file=trim(path)//runfile_neoout,&
-             status='old',position='append')
-        write(io_neoout,'(t2,a)') 'Done matrix solve'
-        close(io_neoout)
-     endif
+     ! Factor and Solve the Matrix 
+     call SOLVE_sparse(k, asize, a, a_iindx, a_jindx)
+     if(error_status > 0) goto 100
 
      ! Compute the neo transport coefficients
      call TRANSP_do(ir)
