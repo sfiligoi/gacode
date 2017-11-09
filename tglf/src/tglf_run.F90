@@ -58,6 +58,7 @@ subroutine tglf_run()
        tglf_use_bpar_in, &
        tglf_use_mhd_rule_in, &
        tglf_use_bisection_in, &
+       tglf_use_inboard_detrapped_in, &
        tglf_ibranch_in, &
        tglf_nmodes_in, &
        tglf_nbasis_max_in, &

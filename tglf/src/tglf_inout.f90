@@ -240,13 +240,14 @@ END SUBROUTINE put_averages
 !-----------------------------------------------------------------
 !
 SUBROUTINE put_switches(iflux,use_bper,use_bpar,use_mhd_rule,use_bisection, &
-     ibranch,nmodes,nb_max,nb_min,nxgrid,nkys)
+     use_inboard_detrapped,ibranch,nmodes,nb_max,nb_min,nxgrid,nkys)
   !
   USE tglf_global
   USE tglf_dimensions
   !
   IMPLICIT NONE
   LOGICAL :: iflux,use_bper,use_bpar,use_mhd_rule,use_bisection
+  LOGICAL :: use_inboard_detrapped
   INTEGER :: ibranch,nmodes,nb_max,nb_min
   INTEGER :: nxgrid,nkys
   !
@@ -262,7 +263,6 @@ SUBROUTINE put_switches(iflux,use_bper,use_bpar,use_mhd_rule,use_bisection, &
   if(nxgrid.lt.1.or.2*nxgrid-1.gt.nxm)nxgrid=MIN((nxm+1)/2,nxgrid_in)
   if(nmodes.lt.1.or.nmodes.gt.maxmodes)nmodes=nmodes_in
   if(nkys.lt.2.or.nkys.gt.nkym)nkys=nky_in
-
   !      write(*,*)nb_max,nb_min,ibranch,nxgrid,nmodes,nkys
   !
   ! check for changes and update flow controls
@@ -284,6 +284,7 @@ SUBROUTINE put_switches(iflux,use_bper,use_bpar,use_mhd_rule,use_bisection, &
   nbasis_min_in = nb_min
   nxgrid_in = nxgrid
   nky_in = nkys
+  use_inboard_detrapped_in = use_inboard_detrapped
   !
 END SUBROUTINE put_switches
 !

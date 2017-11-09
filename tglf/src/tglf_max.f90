@@ -258,8 +258,10 @@
          call tglf_LS
          if(ibranch_in.eq.-1)then
 ! check for inward ballooning modes
+!         write(*,*) ky_in,use_inboard_detrapped_in
 !         write(*,*)"modB_test = ",modB_test
-           if(inboard_detrapped_in.ne.0.and.ft_test.gt.modB_test)then
+!         write(*,*)"ft_test = ",ft_test
+           if(use_inboard_detrapped_in.and.ft_test.gt.modB_test)then
              ft =  0.0
 !           write(*,*)"changed ft",ft
              new_geometry = .FALSE.

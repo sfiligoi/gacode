@@ -58,14 +58,13 @@
       INTEGER,DIMENSION(8) :: trace_path=0
       LOGICAL,EXTERNAL :: tglf_isnan
       LOGICAL,EXTERNAL :: tglf_isinf
-! Input global variables
-      LOGICAL :: find_width_in=.TRUE.
-      INTEGER :: nwidth_in=21
+! Input Gaussian width
       REAL :: width_in=1.65
       REAL :: width_min_in=0.3
+      INTEGER :: nwidth_in=21
+      LOGICAL :: find_width_in=.TRUE.
+! Input kys
       REAL :: ky_in=0.3
-      INTEGER :: nky_in=12
-      INTEGER :: nmodes_in=2
 ! Input species 
       INTEGER :: ns_in=2
       REAL,DIMENSION(nsm) :: mass_in
@@ -76,15 +75,15 @@
       LOGICAL :: use_bpar_in=.FALSE.
       LOGICAL :: use_mhd_rule_in=.TRUE.
       LOGICAL :: use_bisection_in=.TRUE.
+      LOGICAL :: use_inboard_detrapped_in=.FALSE.
       INTEGER :: ibranch_in=-1
+      INTEGER :: nmodes_in=2
       INTEGER :: nbasis_max_in=4
       INTEGER :: nbasis_min_in=2
       INTEGER :: nxgrid_in=16
-      REAL :: damp_psi_in = 0.0
-      REAL :: damp_sig_in = 0.0
+      INTEGER :: nky_in=12
 ! input rare switches
-      REAL :: alpha_quench_in=0.0
-      REAL :: alpha_zf_in = 1.0
+      REAL :: theta_trapped_in=0.7
       REAL :: park_in=1.0
       REAL :: ghat_in=1.0
       REAL :: gchat_in=1.0
@@ -92,27 +91,29 @@
       REAL :: Linsker_factor_in=0.0
       REAL :: gradB_factor_in=0.0
       REAL :: filter_in=2.0
-      INTEGER :: sat_rule_in=0
-      REAL :: alpha_kx_e_in=0.0
-      REAL :: alpha_kx_p_in=0.0
-      REAL :: alpha_kx_n_in=0.0
-      REAL :: alpha_kx_t_in=0.0
+      REAL :: damp_psi_in = 0.0
+      REAL :: damp_sig_in = 0.0
+      REAL :: alpha_kx_e_in=0.0  !not used
+      REAL :: alpha_kx_p_in=0.0  !not used
+      REAL :: alpha_kx_n_in=0.0  !not used
+      REAL :: alpha_kx_t_in=0.0  !not used
 ! Input model paramaters
       LOGICAL :: adiabatic_elec_in=.FALSE.
-      REAL :: alpha_mach_in=0.0
-      REAL :: alpha_p_in=1.0
       REAL :: alpha_e_in=1.0
-      REAL :: alpha_n_in =0.0
-      REAL :: alpha_t_in =0.0
-      REAL :: theta_trapped_in=0.7
-      REAL :: inboard_detrapped_in=0.0
+      REAL :: alpha_p_in=1.0
+      REAL :: alpha_mach_in=0.0
+      REAL :: alpha_quench_in=0.0
+      REAL :: alpha_zf_in = 1.0
       REAL :: xnu_factor_in=1.0
       REAL :: debye_factor_in=1.0
       REAL :: etg_factor_in=1.25
+      INTEGER :: sat_rule_in=0
       INTEGER :: kygrid_model_in=1
       INTEGER :: xnu_model_in=2
       INTEGER :: vpar_model_in=0
       INTEGER :: vpar_shear_model_in=0
+      REAL :: alpha_n_in =0.0  !not used
+      REAL :: alpha_t_in =0.0  !not used
 ! Input signs
       REAL :: sign_Bt_in = 1.0
       REAL :: sign_It_in = 1.0
@@ -729,6 +730,7 @@
       LOGICAL :: use_bpar_tg=.FALSE.
       LOGICAL :: use_mhd_rule_tg=.TRUE.
       LOGICAL :: use_bisection_tg=.TRUE.
+      LOGICAL :: use_inboard_detrapped_tg=.FALSE.
       LOGICAL :: find_width_tg=.TRUE.
       LOGICAL :: adiabatic_elec_tg=.FALSE.
       LOGICAL :: new_eikonal_tg=.TRUE.
@@ -844,7 +846,8 @@
         nky_tg,etg_factor_tg,use_TM_tg,kygrid_model_tg,xnu_model_tg, &
         sat_rule_tg,alpha_kx_e_tg,alpha_kx_p_tg,alpha_kx_n_tg, alpha_kx_t_tg, &
         vpar_shear_model_tg, j_surface_tg,vpar_model_tg,sign_Bt_tg,sign_It_tg, &
-        vns_shear_tg,vts_shear_tg, nfourier_tg,fourier_tg,vexb_tg,kx0_tg
+        vns_shear_tg,vts_shear_tg, nfourier_tg,fourier_tg,vexb_tg,kx0_tg, &
+        use_inboard_detrapped_tg
 !
       END MODULE tglf_tg
 !______________________________________________________
