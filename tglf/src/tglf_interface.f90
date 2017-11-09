@@ -73,7 +73,7 @@ module tglf_interface
   integer :: tglf_ibranch_in        = -1
   integer :: tglf_nmodes_in         = 2
   integer :: tglf_nbasis_max_in     = 4
-  integer :: tglf_nbasis_min_in     = 1
+  integer :: tglf_nbasis_min_in     = 2
   integer :: tglf_nxgrid_in         = 16
   integer :: tglf_nky_in            = 12
 

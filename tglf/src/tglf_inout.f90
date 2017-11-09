@@ -253,9 +253,11 @@ SUBROUTINE put_switches(iflux,use_bper,use_bpar,use_mhd_rule,use_bisection, &
   ! validaty checks
   ! reset to defaults if invlaid
   !
-  if(nb_max.lt.0.or.nb_max.gt.nb)nb_max=nbasis_max_in
-  if(nb_min.lt.0.or.nb_min.gt.nb)nb_min=nbasis_min_in
+  if(nb_max.lt.2.or.nb_max.gt.nb)nb_max=nbasis_max_in
+  if(nb_min.lt.2.or.nb_min.gt.nb)nb_min=nbasis_min_in
   if(nb_max.lt.nb_min)nb_max=nb_min
+  if(2*(nb_max/2).ne.nb_max)nb_max = 2*(nb_max/2)  ! must be even
+  if(2*(nb_min/2).ne.nb_min)nb_min = 2*(nb_min/2)  ! must be even
   if(ibranch.lt.-1.or.ibranch.gt.0)ibranch=ibranch_in
   if(nxgrid.lt.1.or.2*nxgrid-1.gt.nxm)nxgrid=MIN((nxm+1)/2,nxgrid_in)
   if(nmodes.lt.1.or.nmodes.gt.maxmodes)nmodes=nmodes_in

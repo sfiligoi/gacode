@@ -78,7 +78,7 @@
       LOGICAL :: use_bisection_in=.TRUE.
       INTEGER :: ibranch_in=-1
       INTEGER :: nbasis_max_in=4
-      INTEGER :: nbasis_min_in=1
+      INTEGER :: nbasis_min_in=2
       INTEGER :: nxgrid_in=16
       REAL :: damp_psi_in = 0.0
       REAL :: damp_sig_in = 0.0
@@ -738,7 +738,7 @@
       INTEGER :: ns_tg=2
       INTEGER :: igeo_tg=1
       INTEGER :: nbasis_max_tg=4
-      INTEGER :: nbasis_min_tg=1
+      INTEGER :: nbasis_min_tg=2
       INTEGER :: nxgrid_tg=16
       INTEGER :: nwidth_tg=21 
       INTEGER :: b_model_tg=0
