@@ -3,7 +3,7 @@
 !
 ! col 1: rho (root of normalized toroidal flux)
 ! col 2: Ti (keV)
-! col 3: nc (10^20/m^3) 
+! col 3: nc (10^19/m^3) 
 ! col 4: vpolc (km/s)
 ! col 5: vtorc (km/s)
 ! col 6: Er (kV/m)
