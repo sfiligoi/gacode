@@ -41,6 +41,7 @@ subroutine tglf_read_input
   read(1,*) tglf_use_bpar_in
   read(1,*) tglf_use_mhd_rule_in
   read(1,*) tglf_use_bisection_in
+  read(1,*) tglf_use_inboard_detrapped_in
   read(1,*) tglf_ibranch_in
   read(1,*) tglf_nmodes_in
   read(1,*) tglf_nbasis_max_in
