@@ -26,6 +26,7 @@ subroutine tgyro_write_data(i_print)
   real, dimension(2:n_r,loc_n_ion+4) :: res2,relax2
   character(len=2) :: itag
   character(len=6) :: ntag,ttag
+  character(len=50) :: msg_str,date_str,time_str
   logical :: converged
 
   ! Convergence status
@@ -52,21 +53,22 @@ subroutine tgyro_write_data(i_print)
 
      if (i_proc_global == 0) then
 
+        call date_and_time(DATE=date_str,TIME=time_str)
+        msg_str = 'Profiles modified by TGYRO '//trim(date_str)//' '//trim(time_str)
+        
         if (tgyro_write_profiles_flag == -1) then
            ! Output for each iteration
            write(ntag,'(i0)') i_tran
            call EXPRO_write_original(&
                 1,'input.profiles',&
-                2,'input.profiles.'//trim(ntag),&
-                'Profiles modified by TGYRO')
+                2,'input.profiles.'//trim(ntag),trim(msg_str))
         endif
 
         if (i_tran_loop == tgyro_relax_iterations .or. converged) then
            ! Output for last iteration
            call EXPRO_write_original(&
                 1,'input.profiles',&
-                2,'input.profiles.new',&
-                'Profiles modified by TGYRO')
+                2,'input.profiles.new',trim(msg_str))
 
            call EXPRO_compute_derived
            call EXPRO_write_derived(1,'input.profiles.extra')

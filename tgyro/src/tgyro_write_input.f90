@@ -140,6 +140,12 @@ subroutine tgyro_write_input
      write(1,20) 'LOC_DX_MAX (maximum dx)',loc_dx_max
      write(1,20) 'LOC_RELAX (conv. relaxation)',loc_relax
 
+     if (tgyro_consistent_flag == 0) then
+        write(1,10) 'TGYRO_CONSISTENT_FLAG','Consistent gradients *not* computed from input.profiles'
+     else
+        write(1,10) 'TGYRO_CONSISTENT_FLAG','Consistent gradients computed from input.profiles (exact when gridpoints overlap)'
+     endif        
+     
      write(1,*)
      write(1,*) 'Scenario control'
      write(1,*) 

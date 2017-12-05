@@ -1,5 +1,5 @@
 #---------------------------------------------------
-# Intel 4-core Workstation (fedora)
+# Linux mint
 #---------------------------------------------------
 
 IDENTITY="newt 4-core Fedora workstation"
@@ -22,6 +22,11 @@ FDEBUG =-Wall -W -fcheck=mem,bounds -g -fbacktrace -ffpe-trap=invalid,zero,overf
 # System math libraries
 LMATH = ${ROOT}/OpenBLAS/libopenblas.a $(FFTWDIR)/libfftw3.a $(FFTWDIR)/libfftw3_omp.a
 FFTW_INC=/usr/include
+
+ifdef FANN_ROOT
+   # neural net libraries
+   NN_LIB=-L$(GACODE_ROOT)/../neural/ -I$(GACODE_ROOT)/../neural/ -lbrainfuse -lfann
+endif
 
 # OPTIONAL NetCDF:
 NETCDF=-L/usr/local/lib -lnetcdff -lnetcdf -lm
