@@ -73,7 +73,6 @@ contains
     ! Parameters interpolated at top of pedestal
     real, dimension(1) :: n_p_top,t_p_top
     real, dimension(1) :: dpsidr_top
-    real :: ntsum
     integer :: i_ion
 
     if (tgyro_ped_model == 1) return

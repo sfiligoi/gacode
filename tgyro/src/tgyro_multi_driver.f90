@@ -13,12 +13,14 @@ subroutine tgyro_multi_driver
 
   implicit none
 
-  gyro_restart_method = 1
-
-  ! See gyro/src/gyro_globals.f90 for definition of transport_method
-  transport_method = 1
 
   if (lcode == 'gyro') then
+
+     ! See gyro/src/gyro_globals.f90 for definition of transport_method
+     transport_method = 1
+
+     ! Try to restart, if not this will fall back to fresh startup
+     gyro_restart_method = 1
 
      ! Initialize GYRO
      call gyro_init(lpath,gyro_comm)
@@ -26,7 +28,10 @@ subroutine tgyro_multi_driver
      ! Run GYRO
      call gyro_run(gyrotest_flag,gyro_restart_method,transport_method)
 
-  else 
+     ! These error variables part of gyro_interface
+     call tgyro_trap_component_error(gyro_error_status_out,gyro_error_message_out)
+
+else 
 
      ! Initialize CGYRO
      call cgyro_init(lpath,gyro_comm)
@@ -36,9 +41,6 @@ subroutine tgyro_multi_driver
 
   endif
 
-  ! Artificially trigger error to print message
-  gyro_error_status_out = 1
-  call tgyro_trap_component_error(gyro_error_status_out,gyro_error_message_out)
 
 end subroutine tgyro_multi_driver
 

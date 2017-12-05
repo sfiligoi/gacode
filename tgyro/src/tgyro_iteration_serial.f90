@@ -48,11 +48,12 @@ subroutine tgyro_iteration_serial
      ! BEGIN FLUX JACOBIAN: dQ/dz
      !-----------------------------------------------------------
 
+     ! Reset gradients
      x_vec = x_vec0
+     
      call tgyro_target_vector(x_vec,g_vec)
-     gyro_restart_method=1
      call tgyro_flux_vector(x_vec,f_vec,0.0,0)
-     gyro_restart_method=2
+     
      f_vec0 = f_vec
 
      call tgyro_residual(f_vec,g_vec,res,p_max,loc_residual_method)

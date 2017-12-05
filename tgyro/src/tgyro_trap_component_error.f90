@@ -40,8 +40,8 @@ subroutine tgyro_trap_component_error(status,message)
   ! (Required for GYRO runs, not NEO or TGLF):
   call MPI_BCAST(status_vec,n_inst,MPI_INTEGER,0,gyro_comm,ierr)
   call MPI_BCAST(message_vec,80*n_inst,MPI_CHARACTER,0,gyro_comm,ierr)
-
-  ! Serial logic from here onward
+  
+ ! Serial logic from here onward
 
   if (sum(status_vec) > 0) then
      if (i_proc_global == 0) then
@@ -51,8 +51,6 @@ subroutine tgyro_trap_component_error(status,message)
         enddo
         close(1)
      endif
-     call MPI_finalize(ierr)
-     stop
   endif
 
 end subroutine tgyro_trap_component_error

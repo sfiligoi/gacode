@@ -5,6 +5,7 @@
 #  Notebook plotter to see tgyro results.
 #-------------------------------------------------------------
 
+import os.path
 import wx
 import matplotlib
 import string
@@ -43,15 +44,25 @@ n_ion = sim.n_ion
 
 def plot_input_profiles(ax,tag):
 
+   f0 = 'input.profiles.'+str(0)
+   fn = 'input.profiles.'+str(n)
+   
    color='black' ; width=5 ; alpha = 0.2 ; label='input.profiles'
-   prof = profiles_genData('input.profiles.'+str(0))
+
+   if os.path.isfile(f0):
+      prof = profiles_genData(f0)
+   else:
+      prof = profiles_genData('input.profiles')
+      
    xp = prof.data['rmin']
    xp = xp/max(xp)
    ax.plot(xp,prof.data[tag],color=color,alpha=alpha,linewidth=width,
            label=r'$\mathbf{'+label+'}$')
-   prof = profiles_genData('input.profiles.'+str(n))
-   ax.plot(xp,prof.data[tag],color=color,alpha=alpha,linewidth=width,
-           label=r'$\mathbf{'+label+'}$')
+
+   if os.path.isfile(fn):
+      prof = profiles_genData(fn)
+      ax.plot(xp,prof.data[tag],color=color,alpha=alpha,linewidth=width,
+              label=r'$\mathbf{'+label+'}$')
 
 def plot_gen(ax,tag):
 

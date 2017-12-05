@@ -186,9 +186,6 @@ subroutine tgyro_comm_setup
 
      if (worker == 0) then 
         worker_index = 0
-        gyro_restart_method = 1
-     else
-        gyro_restart_method = 2
      endif
 
      do ip=1,n_evolve

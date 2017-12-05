@@ -10,7 +10,6 @@ subroutine tgyro_residual(f,g,res,n,method)
   real, intent(in), dimension(n) :: g
   real, intent(inout), dimension(n) :: res
 
-
   select case (method)
 
   case (1) 
@@ -21,7 +20,7 @@ subroutine tgyro_residual(f,g,res,n,method)
   case (2)
 
      ! SIMPLE NORM:
-     res = abs(f-g)
+     res = abs(f-g)*weight
 
   case (3)
 

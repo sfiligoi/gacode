@@ -352,7 +352,11 @@ subroutine tgyro_write_input
      case (0)
         write(1,10) 'TGYRO_DEN_METHOD0','ne profile fixed'
      case (1)
-        write(1,10) 'TGYRO_DEN_METHOD0','ne evolution ON'
+        if (loc_pflux_method == 1) then
+        write(1,10) 'TGYRO_DEN_METHOD0','ne evolution ON (zero source)'
+     else
+        write(1,10) 'TGYRO_DEN_METHOD0','ne evolution ON (with particle source)'
+     endif
      case default
         error_flag = 1
         error_msg = 'Error: TGYRO_EVO_E(0)'

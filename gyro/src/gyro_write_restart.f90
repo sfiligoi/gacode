@@ -1,5 +1,5 @@
 !------------------------------------------------
-! gyro_write_restart.mpiio.f90
+! gyro_write_restart.f90
 !
 ! PURPOSE:
 !  This is the master file controlling output of
@@ -21,7 +21,6 @@ subroutine gyro_write_restart
   integer :: data_step_old
   integer :: n_proc_old
   integer :: i_restart_old
-  character (len=1) :: i_tag
   !
   ! Required for MPI-IO: 
   !

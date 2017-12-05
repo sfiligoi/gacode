@@ -1,5 +1,5 @@
 !------------------------------------------------------
-! gyro_read_restart.mpiio.f90
+! gyro_read_restart.f90
 !
 ! PURPOSE:
 !  This is the master file controlling the restart
@@ -19,7 +19,6 @@ subroutine gyro_read_restart
   !
   integer :: n_proc_old
   integer :: io
-  character (len=1) :: i_tag
   !
   ! Required for MPI-IO: 
   !
@@ -62,7 +61,7 @@ subroutine gyro_read_restart
 
   ! Ensure sync.
   call MPI_BCAST(restart_method,1,MPI_DOUBLE_PRECISION,0,GYRO_COMM_WORLD,i_err)
-
+  
   select case(restart_method)
 
   case (-1)

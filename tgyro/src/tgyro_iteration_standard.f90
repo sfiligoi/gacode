@@ -32,14 +32,11 @@ subroutine tgyro_iteration_standard
   call tgyro_target_vector(x_vec,g_vec)
   if (loc_restart_flag == 0 .or. tgyro_relax_iterations == 0) then
      ! Need to determine initial fluxes
-     gyro_restart_method = 1
      call tgyro_flux_vector(x_vec,f_vec,0.0,0)
-     gyro_restart_method = 2
   else
      ! Initial fluxes already computed
      call tgyro_flux_set(f_vec)
      ! GYRO restart data available
-     gyro_restart_method = 2
   endif
   res0 = 0.0
   if (gyrotest_flag == 0) call tgyro_residual(f_vec,g_vec,res,p_max,loc_residual_method)
@@ -60,9 +57,10 @@ subroutine tgyro_iteration_standard
      f_vec0 = f_vec
      res0   = res
 
-     !----------------------------------------------
-     ! Build dQ^T/dz (dense matrix)
-     !
+     !-----------------------------------------------------------
+     ! BEGIN TARGET (SOURCE) JACOBIAN: dQ^T/dz
+     !-----------------------------------------------------------
+
      do p=1,p_max
 
         x_vec(:) = x_vec0(:)
@@ -72,6 +70,14 @@ subroutine tgyro_iteration_standard
         jg(:,p) = (g_vec(:)-g_vec0(:))/dx
 
      enddo
+
+     !-----------------------------------------------------------
+     ! END TARGET (SOURCE) JACOBIAN
+     !-----------------------------------------------------------
+
+     !-----------------------------------------------------------
+     ! BEGIN FLUX JACOBIAN: dQ/dz
+     !-----------------------------------------------------------
 
      ! Reset gradients
      x_vec = x_vec0
@@ -175,9 +181,7 @@ subroutine tgyro_iteration_standard
 
         ! Recompute solution
         call tgyro_target_vector(x_vec,g_vec)
-        gyro_restart_method = 1
         call tgyro_flux_vector(x_vec,f_vec,0.0,0)
-        gyro_restart_method = 2
 
         ! Recompute residual
         call tgyro_residual(f_vec,g_vec,res,p_max,loc_residual_method)
