@@ -296,7 +296,7 @@ module tgyro_globals
   integer :: loc_residual_method
   integer :: loc_num_equil_flag
   integer :: tgyro_neo_gv_flag
-  integer :: tglf_q_low_flag
+  integer :: tgyro_consistent_flag
   integer :: tgyro_iteration_method
   integer :: tgyro_rotation_flag
   real :: tgyro_rmin

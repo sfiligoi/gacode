@@ -193,6 +193,16 @@ subroutine tgyro_init_profiles
      t_ratio(i_ion) = ti(i_ion,n_r)/te(n_r)
   enddo
 
+  if (tgyro_consistent_flag == 1) then
+     ! Exact recovery of TGYRO-grid gradients
+     call math_zfind(n_r,te,r*(100*r_min),dlntedr)
+     call math_zfind(n_r,ne,r*(100*r_min),dlnnedr)
+     do i_ion=1,loc_n_ion
+        call math_zfind(n_r,ti(i_ion,:),r*(100*r_min),dlntidr(i_ion,:))
+        call math_zfind(n_r,ni(i_ion,:),r*(100*r_min),dlnnidr(i_ion,:))
+     enddo
+  endif
+
   if (tgyro_ptot_flag == 1) then
 
      ! Total pressure correction from included species
@@ -516,3 +526,26 @@ subroutine tgyro_init_profiles
 
 
 end subroutine tgyro_init_profiles
+
+subroutine math_zfind(n,p,r,z)
+
+  implicit none
+
+  integer, intent(in) :: n
+  real, intent(in) :: p(n)
+  real, intent(in) :: r(n)
+  real, intent(inout) :: z(n)
+  
+  real, dimension(n) :: rat
+
+  integer :: i
+  
+  rat = log(p/p(n))
+  z(1) = 0.0
+  do i=2,n
+     z(i) = 2*(rat(i)-rat(i-1))/(r(i)-r(i-1))-z(i-1)
+  enddo
+  z = -z
+  
+end subroutine math_zfind
+ 
