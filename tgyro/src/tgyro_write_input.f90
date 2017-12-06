@@ -138,11 +138,11 @@ subroutine tgyro_write_input
      write(1,20) 'LOC_RELAX (conv. relaxation)',loc_relax
 
      if (tgyro_consistent_flag == 0) then
-        write(1,10) 'TGYRO_CONSISTENT_FLAG','Consistent gradients *not* computed from input.profiles'
+        write(1,10) 'TGYRO_CONSISTENT_FLAG','Finite-difference gradients used from input.profiles'
      else
-        write(1,10) 'TGYRO_CONSISTENT_FLAG','Consistent gradients computed from input.profiles (exact when gridpoints overlap)'
-     endif        
-     
+        write(1,10) 'TGYRO_CONSISTENT_FLAG','Profile-consistent gradients used from input.profiles'
+     endif
+
      write(1,*)
      write(1,*) 'Scenario control'
      write(1,*) 
@@ -274,24 +274,26 @@ subroutine tgyro_write_input
      end select
      !--------------------------------------------------------
 
-     select case(tgyro_glf23_revision)
-     case (1)
+     if (lcode == 'glf23') then
+        select case(tgyro_glf23_revision)
+        case (1)
 
-        write(1,10) 'TGYRO_GLF23_REVISION','Original GLF23'
+           write(1,10) 'TGYRO_GLF23_REVISION','Original GLF23'
 
-     case (2)
+        case (2)
 
-        write(1,10) 'TGYRO_GLF23_REVISION','retuned GLF23 v1.61'
+           write(1,10) 'TGYRO_GLF23_REVISION','retuned GLF23 v1.61'
 
-     case(3)
+        case(3)
 
-        write(1,10) 'TGYRO_GLF23_REVISION','renormed GLF23'
-     case default
+           write(1,10) 'TGYRO_GLF23_REVISION','renormed GLF23'
+        case default
 
-        error_flag = 1
-        error_msg = 'Error: TGYRO_GLF23_REVISION'
+           error_flag = 1
+           error_msg = 'Error: TGYRO_GLF23_REVISION'
 
-     end select
+        end select
+     endif
      !--------------------------------------------------------
 
      !---------------------------------------------------------------------------------------------------
@@ -350,10 +352,10 @@ subroutine tgyro_write_input
         write(1,10) 'TGYRO_DEN_METHOD0','ne profile fixed'
      case (1)
         if (loc_pflux_method == 1) then
-        write(1,10) 'TGYRO_DEN_METHOD0','ne evolution ON (zero source)'
-     else
-        write(1,10) 'TGYRO_DEN_METHOD0','ne evolution ON (with particle source)'
-     endif
+           write(1,10) 'TGYRO_DEN_METHOD0','ne evolution ON (zero source)'
+        else
+           write(1,10) 'TGYRO_DEN_METHOD0','ne evolution ON (with particle source)'
+        endif
      case default
         error_flag = 1
         error_msg = 'Error: TGYRO_EVO_E(0)'

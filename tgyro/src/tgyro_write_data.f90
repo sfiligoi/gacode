@@ -28,9 +28,26 @@ subroutine tgyro_write_data(i_print)
   character(len=6) :: ntag,ttag
   character(len=50) :: msg_str,date_str,time_str
   logical :: converged
+  real :: res_norm(p_max)
+  
+  ! Renormalize residuals so the error estimates are comparable
+  
+  select case (loc_residual_method) 
+
+  case (2)
+
+     ! ABSOLUTE VALUE NORM
+     res_norm = res
+
+  case (3)
+
+     ! SQUARE RESIDUAL
+     res_norm = sqrt(res)
+
+  end select
 
   ! Convergence status
-  converged = sum(res)/size(res) < tgyro_residual_tol
+  converged = sum(res_norm)/size(res_norm) < tgyro_residual_tol
 
   !====================================================
   ! input.profiles
@@ -519,9 +536,9 @@ subroutine tgyro_write_data(i_print)
      end select
 
      if (tgyro_relax_iterations == 0) then
-        write(1,30) 'ITERATION*: ',i_tran,sum(res)/size(res),flux_counter*n_worker*n_inst
+        write(1,30) 'ITERATION*: ',i_tran,sum(res_norm)/size(res_norm),flux_counter*n_worker*n_inst
      else 
-        write(1,30) 'ITERATION : ',i_tran,sum(res)/size(res),flux_counter*n_worker*n_inst
+        write(1,30) 'ITERATION : ',i_tran,sum(res_norm)/size(res_norm),flux_counter*n_worker*n_inst
      endif
 
      res2(:,:)   = 0.0
@@ -532,23 +549,23 @@ subroutine tgyro_write_data(i_print)
      do i=2,n_r
         if (loc_ti_feedback_flag == 1) then
            p  = p+1
-           res2(i,1) = res(p)
+           res2(i,1) = res_norm(p)
            relax2(i,1) = relax(p)
         endif
         if (loc_te_feedback_flag == 1) then
            p  = p+1
-           res2(i,2) = res(p)
+           res2(i,2) = res_norm(p)
            relax2(i,2) = relax(p)
         endif
         if (loc_er_feedback_flag == 1) then
            p  = p+1
-           res2(i,3) = res(p)
+           res2(i,3) = res_norm(p)
            relax2(i,3) = relax(p)
         endif
         do is=0,loc_n_ion
            if (evo_e(is) == 1) then
               p  = p+1
-              res2(i,4+is) = res(p)
+              res2(i,4+is) = res_norm(p)
               relax2(i,4+is) = relax(p)
            endif
         enddo
@@ -591,11 +608,11 @@ subroutine tgyro_write_data(i_print)
      !-------------------------------------------------------------------------------------------
      ! Write progress to screen
      if (i_tran < 10) then
-        print '(a,i1,a,1pe10.3,a)', 'INFO: (TGYRO) Finished iteration ',i_tran,' [',sum(res)/size(res),']'
+        print '(a,i1,a,1pe10.3,a)', 'INFO: (TGYRO) Finished iteration ',i_tran,' [',sum(res_norm)/size(res),']'
      else if (i_tran < 100) then
-        print '(a,i2,a,1pe10.3,a)', 'INFO: (TGYRO) Finished iteration ',i_tran,' [',sum(res)/size(res),']'
+        print '(a,i2,a,1pe10.3,a)', 'INFO: (TGYRO) Finished iteration ',i_tran,' [',sum(res_norm)/size(res),']'
      else
-        print '(a,i3,a,1pe10.3,a)', 'INFO: (TGYRO) Finished iteration ',i_tran,' [',sum(res)/size(res),']'
+        print '(a,i3,a,1pe10.3,a)', 'INFO: (TGYRO) Finished iteration ',i_tran,' [',sum(res_norm)/size(res),']'
      endif
      !-------------------------------------------------------------------------------------------
 

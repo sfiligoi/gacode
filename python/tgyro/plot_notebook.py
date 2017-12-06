@@ -5,7 +5,7 @@
 #  Notebook plotter to see tgyro results.
 #-------------------------------------------------------------
 
-import os.path
+import os
 import wx
 import matplotlib
 import string
@@ -41,6 +41,8 @@ qgb = sim.data['Q_GB'][n]
 pgb = sim.data['Pi_GB'][n]
 
 n_ion = sim.n_ion
+
+wdir = os.path.realpath(simdir)
 
 def plot_input_profiles(ax,tag):
 
@@ -194,7 +196,7 @@ class DemoFrame(wx.Frame):
   def __init__(self):
         """Constructor"""        
         wx.Frame.__init__(self, None, wx.ID_ANY, 
-                          "TGYRO plotting notebook",
+                          'TGYRO plotting notebook -- '+wdir,
                           size=(1100,600))
         panel = wx.Panel(self)
  

@@ -63,17 +63,17 @@ subroutine tgyro_iteration_driver
 
      flux_method = 0
 
-  else if (lcode == "ifs") then
+  else if (lcode == 'ifs') then
 
      ! IFS-PPPL
      flux_method = 1
 
-  else if (lcode == "tglf") then
+  else if (lcode == 'tglf') then
 
      ! TGLF
      flux_method = 2
 
-  else if (lcode == "glf23") then
+  else if (lcode == 'glf23') then
 
      ! GLF23
      flux_method = 3
@@ -143,7 +143,7 @@ subroutine tgyro_iteration_driver
         ip = ip+1
         pmap(i,ip) = p
         x_vec(p) = dlnnedr(i)
-        weight(p) = tgyro_residual_weight
+        weight(p) = tgyro_search_weight
      endif
      do i_ion=1,loc_n_ion
         if (evo_e(i_ion) == 1) then
@@ -182,5 +182,5 @@ subroutine tgyro_iteration_driver
      call tgyro_iteration_simplerelax
 
   end select
-
+    
 end subroutine tgyro_iteration_driver

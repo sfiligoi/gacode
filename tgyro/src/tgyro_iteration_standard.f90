@@ -139,7 +139,7 @@ subroutine tgyro_iteration_standard
      enddo
 
      ! Update gradient using Newton step
-     x_vec(:) = x_vec0(:)+b(:)
+     x_vec(:) = x_vec0(:)+b(:)*weight(:)
 
      !-----------------------------------------------------
      ! Correction step:
