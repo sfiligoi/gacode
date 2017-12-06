@@ -134,9 +134,6 @@ subroutine tgyro_write_input
      !--------------------------------------------------------
 
      write(1,20) 'LOC_DX (Jacobian dx)',loc_dx
-     if (maxval(flux_method_vec) == 4) then
-        write(1,20) 'LOC_DX_GYRO (GYRO Jacobian dx)',loc_dx_gyro
-     endif
      write(1,20) 'LOC_DX_MAX (maximum dx)',loc_dx_max
      write(1,20) 'LOC_RELAX (conv. relaxation)',loc_relax
 

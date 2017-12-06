@@ -85,9 +85,7 @@ subroutine tgyro_iteration_standard
      ! Reset profiles to be consistent with gradient.
      call tgyro_profile_set(x_vec,0.0,0)
      call tgyro_profile_functions 
-     !----------------------------------------------
-
-     !----------------------------------------------
+ 
      ! Build dQ/dz (block diagonal matrix)
      !
      ! (p  ,p) (p  ,p+1) (p  ,p+2)
@@ -104,8 +102,10 @@ subroutine tgyro_iteration_standard
            enddo
         enddo
      enddo
-     !
-     !----------------------------------------------
+ 
+     !-----------------------------------------------------------
+     ! END FLUX JACOBIAN
+     !-----------------------------------------------------------
 
      !----------------------------------------------
      ! Total Jacobian: (dQ/dz-dQ^T/dz)
@@ -113,12 +113,12 @@ subroutine tgyro_iteration_standard
      jfg(:,:) = jf(:,:)-jg(:,:)
      !----------------------------------------------
 
-     !----------------------------------------------------
-     ! Compute target.  Relaxation is added to move less
+     !---------------------------------------------------------
+     ! Compute actual-target.  Relaxation is added to move less
      ! aggressively to target solution, f0=g0.
      !
      b(:) = -(f_vec0(:)-g_vec0(:))*relax(:)
-     !----------------------------------------------------
+     !---------------------------------------------------------
 
      ! LAPACK matrix factorization into L/U components
      call DGETRF(p_max,p_max,jfg,p_max,ipiv,ierr) 
@@ -127,7 +127,7 @@ subroutine tgyro_iteration_standard
      call DGETRS('N',p_max,1,jfg,p_max,ipiv,b,p_max,ierr)
 
      if (ierr < 0) then
-        call tgyro_catch_error('ERROR: DGETRS failed in tgyro_iteration_standard')
+        call tgyro_catch_error('ERROR: (tgyro_iteration_standard) DGETRS failed.')
      endif
 
      ! Check to see if step length exceeds maximum 
@@ -138,11 +138,8 @@ subroutine tgyro_iteration_standard
         endif
      enddo
 
-     !----------------------------------------------------
-     ! Update gradient using Newton-step.
-     !
+     ! Update gradient using Newton step
      x_vec(:) = x_vec0(:)+b(:)
-     !----------------------------------------------------
 
      !-----------------------------------------------------
      ! Correction step:
@@ -156,6 +153,7 @@ subroutine tgyro_iteration_standard
      call tgyro_write_intermediate(0,res)
      !
      do p=1,p_max
+        ! Test to see if LOCAL residual increased
         if (res0(p) < res(p) .and. loc_relax > 1.0) then
 
            correct_flag = 1
@@ -171,7 +169,7 @@ subroutine tgyro_iteration_standard
            endif
         else
 
-           ! Reset relaxation
+           ! Reset relaxation since local residual was reduced
            relax(p) = 1.0
 
         endif

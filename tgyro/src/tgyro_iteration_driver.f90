@@ -83,9 +83,6 @@ subroutine tgyro_iteration_driver
      ! GYRO
      flux_method = 4
 
-     ! Reset step-length for Jacobian
-     dx = loc_dx_gyro/r_min
-
   endif
   !---------------------------------------------
   allocate(flux_method_vec(n_inst))
@@ -146,7 +143,7 @@ subroutine tgyro_iteration_driver
         ip = ip+1
         pmap(i,ip) = p
         x_vec(p) = dlnnedr(i)
-        weight(p) = 1.0
+        weight(p) = tgyro_residual_weight
      endif
      do i_ion=1,loc_n_ion
         if (evo_e(i_ion) == 1) then
@@ -154,7 +151,7 @@ subroutine tgyro_iteration_driver
            ip = ip+1
            pmap(i,ip) = p
            x_vec(p) = dlnnidr(i_ion,i)
-           weight(p) = 10.0
+           weight(p) = 1.0
         endif
      enddo
   enddo

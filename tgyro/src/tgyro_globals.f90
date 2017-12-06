@@ -265,7 +265,7 @@ module tgyro_globals
   integer :: tgyro_relax_iterations
   real :: loc_nu_scale
   real :: loc_dx
-  real :: loc_dx_gyro
+  real :: tgyro_residual_weight
   real :: loc_dx_max
   real :: loc_relax
   integer :: loc_lock_profile_flag

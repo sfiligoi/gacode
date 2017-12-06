@@ -70,8 +70,7 @@ subroutine tgyro_iteration_serial
      endif
      !-------------------------------------------------------------
 
-     !----------------------------------------------
-     ! Block diagonal matrix
+     !  Build dQ/dz (block diagonal matrix)
      !
      ! (p  ,p) (p  ,p+1) (p  ,p+2)
      ! (p+1,p) (p+1,p+1) (p+1,p+2)
@@ -87,8 +86,6 @@ subroutine tgyro_iteration_serial
            enddo
         enddo
      enddo
-     !
-     !----------------------------------------------
 
      !-----------------------------------------------------------
      ! END FLUX JACOBIAN
@@ -101,8 +98,9 @@ subroutine tgyro_iteration_serial
      !----------------------------------------------
 
      !----------------------------------------------------
-     ! Compute actual-target: Relaxation is added to move 
-     ! less aggressively to target solution, f0=g0.
+     ! Compute actual-target. Later a search vector will
+     ! be applied to the solultions so as to move less
+     ! than a full Newron step.
      !
      b(:) = -(f_vec0(:)-g_vec0(:))
      !----------------------------------------------------
@@ -129,19 +127,24 @@ subroutine tgyro_iteration_serial
 
      correct_flag = 0
      do i_worker=1,n_evolve+1
+
+        ! Update gradient using search vector
         x_vec1(:) = x_vec0(:)+b(:)*search(i_worker,search_index)
         call tgyro_target_vector(x_vec1,g_vec1)
         call tgyro_flux_vector(x_vec1,f_vec1,0.0,0)
         call tgyro_residual(f_vec1,g_vec1,res1,p_max,loc_residual_method)
         call tgyro_write_intermediate(i_worker,res1)
+
+        ! Test to see if GLOBAL residual is reduced
         if (sum(res1) < sum(res)) then
-           res = res1
+           res   = res1
            x_vec = x_vec1
            f_vec = f_vec1
            call tgyro_target_vector(x_vec,g_vec)
            correct_flag = 1
            relax(:) = search(i_worker,search_index)
         endif
+        
      enddo
 
      if (correct_flag == 1) then
@@ -152,7 +155,7 @@ subroutine tgyro_iteration_serial
         search_index = search_index+1
         if (search_index > search_max) then
            error_flag = 1
-           error_msg  = 'ERROR: convergence failure'
+           error_msg  = 'ERROR: (tgyro_iteration_serial) convergence failure'
         else
            relax(:) = 0.0
         endif
