@@ -77,7 +77,7 @@ subroutine tgyro_neo_map
 
   ! Ions
   i0 = 1
-  do is=1,neo_n_species_in
+  do is=1,loc_n_ion
      if (therm_flag(is) == 0 .and. tgyro_quickfast_flag == 1) cycle
      i0 = i0 + 1
      neo_z_in(i0)      = zi_vec(is)
