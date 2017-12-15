@@ -543,6 +543,14 @@ subroutine tgyro_write_input
 
      write(1,*)'-----------------------------------------------------------------'
 
+     !--------------------------------------------------------
+     write(1,*)
+     write(1,*) 'Fusion reactivity rescaling factor'
+     write(1,*) 
+     write(1,20) 'TGYRO_INPUT_FUSION_SCALE',tgyro_input_fusion_scale
+
+     write(1,*)'-----------------------------------------------------------------'
+
      close(1)
 
   endif

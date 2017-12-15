@@ -41,7 +41,7 @@ subroutine tgyro_source
         endif
         ! Alpha particle source and power 
         ! - Can use 'hively' or 'bosch' formulae.
-        sn_alpha(i) = n_d*n_t*sigv(ti(1,i)/1e3,'bosch')
+        sn_alpha(i) = n_d*n_t*sigv(ti(1,i)/1e3,'bosch') * tgyro_input_fusion_scale
 
         s_alpha      = sn_alpha(i)*e_alpha
         s_alpha_i(i) = s_alpha*frac_ai(i)
