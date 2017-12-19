@@ -578,6 +578,8 @@ class cgyrodata_plot(data.cgyrodata):
             z = 2*np.pi*l*e
             g0 = g0+2*np.sin(z)*xr[ispec,l]/z
          ax.plot([-e,e],[g0,g0],'o-',color=color[ispec],alpha=0.2,linewidth=3)
+         if moment == 'v':
+            print 'Partial-domain average '+u+' : '+str(g0)
 
          label = r'$'+mtag+'_'+u+'/'+mtag+'_\mathrm{GB}: '+str(round(g0,3))+'$'
 
