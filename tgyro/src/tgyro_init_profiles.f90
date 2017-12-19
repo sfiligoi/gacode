@@ -427,9 +427,11 @@ subroutine tgyro_init_profiles
   dpsidr_exp = EXPRO_bunit*EXPRO_rmin/EXPRO_q/EXPRO_polflux(n_exp)/100.0
 
   ! Check for sanity of psi_exp profile
-  if (abs(psi_exp(n_exp)-psi_exp(n_exp-1)) < 1e-8) then
-     call tgyro_catch_error('ERROR: (tgyro_init_profiles) Poloidal flux profile (polflux) has bogus edge value.')
-  endif
+  do i=2,n_exp
+     if (abs(psi_exp(i)-psi_exp(i-1)) < 1e-8) then
+        call tgyro_catch_error('ERROR: (tgyro_init_profiles) Poloidal flux profile (polflux) has two equal values.')
+     endif
+  enddo
   
   if (tgyro_ped_model > 1) then
      ! a [m]
