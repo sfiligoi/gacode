@@ -426,6 +426,11 @@ subroutine tgyro_init_profiles
   ! d (Psi_norm)/dr in units of 1/cm
   dpsidr_exp = EXPRO_bunit*EXPRO_rmin/EXPRO_q/EXPRO_polflux(n_exp)/100.0
 
+  ! Check for sanity of psi_exp profile
+  if (abs(psi_exp(n_exp)-psi_exp(n_exp-1)) < 1e-8) then
+     call tgyro_catch_error('ERROR: (tgyro_init_profiles) Poloidal flux profile (polflux) has bogus edge value.')
+  endif
+  
   if (tgyro_ped_model > 1) then
      ! a [m]
      a_in = r_min
