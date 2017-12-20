@@ -35,6 +35,7 @@ module prgen_globals
   integer, dimension(:), allocatable :: lump_vec
   integer :: n_ion_sanitize
   character(len=2), dimension(:), allocatable :: ion_sanitize
+  integer :: ntop
   !----------------------------------------------------------
 
   ! Internal physics variables
@@ -200,8 +201,11 @@ module prgen_globals
   real, dimension(:), allocatable :: plst_nb
   real, dimension(:), allocatable :: plst_nmini
   real, dimension(:), allocatable :: plst_nfusi
-  real, dimension(:), allocatable :: plst_eperpb
-  real, dimension(:), allocatable :: plst_eparb
+  real, dimension(:), allocatable :: plst_tb
+  real, dimension(:), allocatable :: plst_tmini
+  real, dimension(:), allocatable :: plst_tfusi
+  real, dimension(:), allocatable :: plst_eperp
+  real, dimension(:), allocatable :: plst_epar
   real, dimension(:), allocatable :: plst_vol
   real, dimension(:), allocatable :: plst_rho
   real, dimension(:), allocatable :: plst_grho1

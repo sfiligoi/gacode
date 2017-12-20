@@ -13,7 +13,7 @@ subroutine prgen_map_plasmastate
 
   use prgen_globals
   use EXPRO_interface
-   
+
   implicit none
 
   integer :: i,j
@@ -144,28 +144,17 @@ subroutine prgen_map_plasmastate
   enddo
 
   print '(a)','INFO: (prgen) Found these ion species:'
+  do i=2,plst_dp1_nspec_all
+     print '(t6,i2,1x,a)', i-1,trim(plst_all_name(i))
+  enddo
+
   f1_fast(:) = 0.0
   f2_fast(:) = 0.0
   f3_fast(:) = 0.0
-  do i=2,plst_dp1_nspec_all
-
-     print '(t6,i2,1x,a)', i-1,trim(plst_all_name(i))
-
-     if (index(plst_all_name(i),'mi') > 0) then
-        f1_fast(:) = f1_fast(:)+plst_nmini(:)*plst_q_all(i)/1.6022e-19 
-        f2_fast(:) = f2_fast(:)+plst_nmini(:)*(plst_q_all(i)/1.6022e-19)**2
-        f3_fast(:) = f3_fast(:)+plst_nmini(:)*plst_m_all(i)*plst_q_all(i)/1.6022e-19
-     endif
-     if (index(plst_all_name(i),'beam') > 0) then
-        f1_fast(:) = f1_fast(:)+plst_nb(:)*plst_q_all(i)/1.6022e-19 
-        f2_fast(:) = f2_fast(:)+plst_nb(:)*(plst_q_all(i)/1.6022e-19)**2
-        f3_fast(:) = f3_fast(:)+plst_nb(:)*plst_m_all(i)*plst_q_all(i)/1.6022e-19
-     endif
-     if (index(plst_all_name(i),'fusn') > 0) then
-        f1_fast(:) = f1_fast(:)+plst_nfusi(:)*plst_q_all(i)/1.6022e-19 
-        f2_fast(:) = f2_fast(:)+plst_nfusi(:)*(plst_q_all(i)/1.6022e-19)**2
-        f3_fast(:) = f3_fast(:)+plst_nfusi(:)*plst_m_all(i)*plst_q_all(i)/1.6022e-19
-     endif
+  do i=plst_dp1_nspec_th+1,ntop
+     f1_fast(:) = f1_fast(:)+plst_ns(:,i)*plst_q_all(i)/1.6022e-19 
+     f2_fast(:) = f2_fast(:)+plst_ns(:,i)*(plst_q_all(i)/1.6022e-19)**2
+     f3_fast(:) = f3_fast(:)+plst_ns(:,i)*plst_m_all(i)*plst_q_all(i)/1.6022e-19
   enddo
 
   ! Lump main ions
@@ -195,17 +184,15 @@ subroutine prgen_map_plasmastate
      plst_m_all(lump_vec(1))    = m_eff_lump  
      plst_all_name(lump_vec(1)) = '[lumped]'
 
-     ! Definition of effective mass (is this sensible?)
+     ! Definition of effective mass (JC: is this sensible?)
      ! sum_i (ni*mi)/(ni*Zi)
 
      ! Remove others and restack 
      do j=2,n_lump
         ix = lump_vec(j)-j+2
         do i=ix+1,plst_dp1_nspec_all
-           if (i <= plst_dp1_nspec_th) then 
-              plst_ns(:,i-1)  = plst_ns(:,i)
-              plst_ts(:,i-1)  = plst_ts(:,i)
-           endif
+           plst_ns(:,i-1)  = plst_ns(:,i)
+           plst_ts(:,i-1)  = plst_ts(:,i)
            plst_q_all(i-1) = plst_q_all(i)
            plst_m_all(i-1) = plst_m_all(i)
            plst_all_name(i-1) = plst_all_name(i)
@@ -283,23 +270,14 @@ subroutine prgen_map_plasmastate
   ! COORDINATES: This poloidal flux has correct sign (see above).
   EXPRO_polflux = dpsi(:)
 
-  ! ni,ti
-  do i=1,n_ion_max
+  ! ni,ti,vphi
+  do i=1,plst_dp1_nspec_all
      ip = reorder_vec(i)
-     if (ip < plst_dp1_nspec_th+1) then
-        EXPRO_ni(i,:) = plst_ns(:,ip+1)*1e-19
-        EXPRO_ti(i,:) = plst_ts(:,ip+1)
-     endif
-  enddo
-
-  ! vphi
-  do i=1,n_ion_max
-     ip = reorder_vec(i)
-     if (ip < plst_dp1_nspec_th+1) then
-        if (trim(plst_all_name(ip+1)) == 'C') then
-           ! COORDINATES: -ipccw accounts for plasmastate toroidal angle convention
-           EXPRO_vtor(i,:) = -ipccw*plst_omegat(:)*(rmaj(:)+rmin(:))
-        endif
+     EXPRO_ni(i,:) = plst_ns(:,ip+1)*1e-19
+     EXPRO_ti(i,:) = plst_ts(:,ip+1)
+     if (trim(plst_all_name(ip+1)) == 'C') then
+        ! COORDINATES: -ipccw accounts for plasmastate toroidal angle convention
+        EXPRO_vtor(i,:) = -ipccw*plst_omegat(:)*(rmaj(:)+rmin(:))
      endif
   enddo
 
@@ -312,17 +290,12 @@ subroutine prgen_map_plasmastate
      allocate(vtorc_exp(nx))
      call prgen_read_cer
      EXPRO_w0 = omega0(:)
-!CH hack- should be fixed at some point
-     print '(a)','WARNING: (prgen) Assuming thermal C is 2nd species for recording CER velocities!'
-     print '(a)','WARNING: (prgen) User should confirm magnitude and signs of vtor_2 and vpol_2 are correct!'
-     EXPRO_vtor(2,:) = vtorc_exp(:)
-     EXPRO_vpol(2,:) = vpolc_exp(:)
-!     do i=1,n_ion_max
-!        if (reorder_vec(i) == onetwo_nprim+1) then
-!           EXPRO_vtor(i,:) = vtorc_exp(:)
-!           EXPRO_vpol(i,:) = vpolc_exp(:)
-!        endif
-!     enddo
+     do i=1,plst_dp1_nspec_all
+        if (trim(plst_all_name(ip+1)) == 'C') then
+           EXPRO_vtor(i,:) = vtorc_exp(:)
+           EXPRO_vpol(i,:) = vpolc_exp(:)
+        endif
+     enddo
   endif
   !---------------------------------------------------
 
