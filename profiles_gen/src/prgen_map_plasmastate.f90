@@ -270,8 +270,11 @@ subroutine prgen_map_plasmastate
   ! COORDINATES: This poloidal flux has correct sign (see above).
   EXPRO_polflux = dpsi(:)
 
+  EXPRO_ni = 0.0
+  EXPRO_ti = 0.0
+  
   ! ni,ti,vphi
-  do i=1,plst_dp1_nspec_all
+  do i=1,plst_dp1_nspec_all-1
      ip = reorder_vec(i)
      EXPRO_ni(i,:) = plst_ns(:,ip+1)*1e-19
      EXPRO_ti(i,:) = plst_ts(:,ip+1)
