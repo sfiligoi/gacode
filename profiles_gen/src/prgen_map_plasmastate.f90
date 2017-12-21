@@ -19,14 +19,9 @@ subroutine prgen_map_plasmastate
   integer :: i,j
   integer :: ip,ix
   real, dimension(nx) :: dphidpsi
-  real, dimension(:), allocatable :: f1_therm
-  real, dimension(:), allocatable :: f1_fast
-  real, dimension(:), allocatable :: f1_lump
-  real, dimension(:), allocatable :: f2_therm
-  real, dimension(:), allocatable :: f2_fast
-  real, dimension(:), allocatable :: f3_fast
-  real, dimension(:), allocatable :: f2_lump
-  real, dimension(:), allocatable :: f3_lump
+  real, dimension(:), allocatable :: f1_therm,f2_therm
+  real, dimension(:), allocatable :: f1_lump,f2_lump,f3_lump
+  real, dimension(:), allocatable :: f1_fast,f2_fast,f3_fast,f4_fast
   real :: z_eff_lump
   real :: m_eff_lump
 
@@ -135,6 +130,7 @@ subroutine prgen_map_plasmastate
   allocate(f2_lump(nx))
   allocate(f3_fast(nx))
   allocate(f3_lump(nx))
+  allocate(f4_fast(nx))
   !
   f1_therm(:) = 0.0
   f2_therm(:) = 0.0
@@ -151,12 +147,14 @@ subroutine prgen_map_plasmastate
   f1_fast(:) = 0.0
   f2_fast(:) = 0.0
   f3_fast(:) = 0.0
+  f4_fast(:) = 0.0
   do i=plst_dp1_nspec_th+1,ntop
      f1_fast(:) = f1_fast(:)+plst_ns(:,i)*plst_q_all(i)/1.6022e-19 
      f2_fast(:) = f2_fast(:)+plst_ns(:,i)*(plst_q_all(i)/1.6022e-19)**2
      f3_fast(:) = f3_fast(:)+plst_ns(:,i)*plst_m_all(i)*plst_q_all(i)/1.6022e-19
+     f4_fast(:) = f4_fast(:)+plst_ns(:,i)*plst_ts(:,i)*plst_q_all(i)/1.6022e-19
   enddo
-
+  
   ! Lump main ions
   if (n_lump > 1) then
 
@@ -172,10 +170,13 @@ subroutine prgen_map_plasmastate
         f1_lump(:) = f1_lump(:)+plst_ns(:,i)*plst_q_all(i)/1.6022e-19
         ! f2 = sum_i ni*Zi^2
         f2_lump(:) = f2_lump(:)+plst_ns(:,i)*(plst_q_all(i)/1.6022e-19)**2
-        ! f2 = sum_i ni*mi
+        ! f3 = sum_i ni*mi*Zi
         f3_lump(:) = f3_lump(:)+plst_ns(:,i)*plst_m_all(i)*plst_q_all(i)/1.6022e-19
      enddo
+
      z_eff_lump = nint(sum(f2_lump(:)/f1_lump(:))/nx)
+
+     ! Charge-density-weighted effective mass: sum_i (ni*mi*Zi)/(ni*Zi)
      m_eff_lump = sum(f3_lump(:)/f1_lump(:))/nx
 
      ! Replace first lumped species with lumped density
@@ -183,9 +184,6 @@ subroutine prgen_map_plasmastate
      plst_q_all(lump_vec(1))    = z_eff_lump*1.6022e-19  
      plst_m_all(lump_vec(1))    = m_eff_lump  
      plst_all_name(lump_vec(1)) = '[lumped]'
-
-     ! Definition of effective mass (JC: is this sensible?)
-     ! sum_i (ni*mi)/(ni*Zi)
 
      ! Remove others and restack 
      do j=2,n_lump
@@ -215,16 +213,19 @@ subroutine prgen_map_plasmastate
   if (lump_fast_flag == 1) then
 
      z_eff_lump = nint(sum(f2_fast(:)/f1_fast(:))/nx)
+     ! Charge-density-weighted effective mass: sum_i (ni*mi*Zi)/(ni*Zi)
      m_eff_lump = sum(f3_fast(:)/f1_fast(:))/nx
 
      ! Replace first lumped species with lumped density
      ix = plst_dp1_nspec_th+1 
      plst_ns(:,ix)     = f1_fast(:)/z_eff_lump 
+     ! Charge-density-weighted effective temp: sum_i (ni*Ti*Zi)/(ni*Zi)
+     plst_ts(:,ix)     = f4_fast(:)/f1_fast(:)
      plst_q_all(ix)    = z_eff_lump*1.6022e-19  
      plst_m_all(ix)    = m_eff_lump
      plst_all_name(ix) = '[fast]'
 
-     plst_dp1_nspec_all = plst_dp1_nspec_th+1
+     plst_dp1_nspec_all = ix
 
   endif
 
@@ -239,6 +240,9 @@ subroutine prgen_map_plasmastate
   enddo
   quasi_err = abs(quasi_err/sum(-plst_ns(:,1)*plst_q_all(1))-1.0)
 
+  deallocate(f1_therm,f2_therm)
+  deallocate(f1_lump,f2_lump,f3_lump)
+  deallocate(f1_fast,f2_fast,f3_fast,f4_fast)
   !-------------------------------------------------------------------------------
 
   !---------------------------------------------------------
