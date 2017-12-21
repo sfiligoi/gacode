@@ -326,6 +326,7 @@ module tgyro_globals
   integer :: tgyro_quickfast_flag
   integer :: tgyro_zero_dens_grad_flag
   real :: tgyro_residual_tol
+  real :: tgyro_input_fusion_scale
   !
   ! Iteration variables (global)
   !
