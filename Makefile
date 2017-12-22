@@ -10,6 +10,7 @@ all:
 	cd gyro ; make 
 	cd tgyro ; make
 	cd profiles_gen ; make
+	@echo "GACODE build done"
 
 clean:
 	cd shared ; make clean
