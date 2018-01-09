@@ -27,7 +27,7 @@ FOMP	= -fopenmp
 
 LMATH = -framework Accelerate -L/opt/local/lib -lfftw3
 
-NETCDF = -L/opt/local/lib -lnetcdff -lnetcdf 
+NETCDF = -L${NETCDF_PATH}/lib -lnetcdff -lnetcdf 
 NETCDF_INC =${NETCDF_PATH}/include
 
 # Archive
