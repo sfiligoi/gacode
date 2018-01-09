@@ -9,7 +9,7 @@ all:
 	cd nclass ; make "OPT=${OPT}"
 	cd UMFPACK ; make "OPT=${OPT}"
 ifdef FANN_ROOT
-	cd ${GACODE_ROOT}/../neural; make
+	cd ${GACODE_ROOT}/../neural && make
 endif
 
 clean:
@@ -22,7 +22,7 @@ clean:
 	cd UMFPACK ; make clean
 	cd SUPERLU ; make clean
 ifdef FANN_ROOT
-	cd ${GACODE_ROOT}/../neural; make clean
+	cd ${GACODE_ROOT}/../neural && make clean
 endif
 
 distclean:
