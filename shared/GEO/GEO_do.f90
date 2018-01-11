@@ -153,6 +153,11 @@ subroutine GEO_do()
 
   d_theta = pi_2/(n_theta-1)
 
+  if (abs(GEO_delta_in) > 1.0) then
+     print '(a)','ERROR: (GEO_do) |GEO_delta_in| > 1.'
+     stop
+  endif
+  
   !------------------------------------------------------------------
   ! Compute fundamental geometric quantities (basic derivatives
   ! like dl/dt) and metric elements (g_tt).
