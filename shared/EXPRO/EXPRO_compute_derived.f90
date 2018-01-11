@@ -66,7 +66,7 @@ subroutine EXPRO_compute_derived
   !
   allocate(rho(EXPRO_n_exp))
   allocate(dummy(EXPRO_n_exp))
-  
+
   rho(:) = EXPRO_arho*EXPRO_rho(:)
 
   ! b_unit
@@ -111,11 +111,13 @@ subroutine EXPRO_compute_derived
   ! 1/L_Te = -dln(Te)/dr (1/m)
   call bound_deriv(EXPRO_dlntedr,-log(EXPRO_te),EXPRO_rmin,EXPRO_n_exp)
 
-  ! sne = -ne''/ne (1/m^2)
+  ! NOTE: EXPRO_sdln* will be renormalized after calculation of rhos later
+
+  ! sne = -ne''/ne (1/m^2) [not fully normalized yet]
   call bound_deriv(EXPRO_sdlnnedr,EXPRO_ne*EXPRO_dlnnedr,EXPRO_rmin,EXPRO_n_exp)
   EXPRO_sdlnnedr = EXPRO_sdlnnedr/EXPRO_ne
 
-  ! sTe = -Te''/Te (1/m^2)
+  ! sTe = -Te''/Te (1/m^2) [not fully normalized yet]
   call bound_deriv(EXPRO_sdlntedr,EXPRO_te*EXPRO_dlntedr,EXPRO_rmin,EXPRO_n_exp)
   EXPRO_sdlntedr = EXPRO_sdlntedr/EXPRO_te
 
@@ -132,11 +134,11 @@ subroutine EXPRO_compute_derived
         ! 1/L_Ti = -dln(Ti)/dr (1/m)
         call bound_deriv(EXPRO_dlntidr(is,:),-log(EXPRO_ti(is,:)),EXPRO_rmin,EXPRO_n_exp)
 
-        ! sni = -ni''/ni (1/m^2)
+        ! sni = -ni''/ni (1/m^2) [not fully normalized yet]
         call bound_deriv(EXPRO_sdlnnidr(is,:),EXPRO_ni(is,:)*EXPRO_dlnnidr(is,:),EXPRO_rmin,EXPRO_n_exp)
         EXPRO_sdlnnidr(is,:) = EXPRO_sdlnnidr(is,:)/EXPRO_ni(is,:)
 
-        ! sTi = -Ti''/Ti (1/m^2)
+        ! sTi = -Ti''/Ti (1/m^2) [not fully normalized yet]
         call bound_deriv(EXPRO_sdlntidr(is,:),EXPRO_ti(is,:)*EXPRO_dlntidr(is,:),EXPRO_rmin,EXPRO_n_exp)
         EXPRO_sdlntidr(is,:) = EXPRO_sdlntidr(is,:)/EXPRO_ti(is,:)
      endif
@@ -242,7 +244,7 @@ subroutine EXPRO_compute_derived
 
      ! Plasma current [A] I = (1/mu0) Int[Bp dl] 
      EXPRO_ip(i) = 7.958e5*(GEO_bl*r_min*EXPRO_bunit(i))
-     
+
   enddo
 
   !--------------------------------------------------------------
@@ -283,18 +285,31 @@ subroutine EXPRO_compute_derived
   !-----------------------------------------------------------------
 
   !-----------------------------------------------------------------
+  ! Renormalize shearing parameters
+  !
+  ! sn = -n''/n*rhos (1/m) 
+  ! sT = -T''/T*rhos (1/m)
+  EXPRO_sdlnnedr = EXPRO_sdlnnedr*EXPRO_rhos(:)
+  EXPRO_sdlntedr = EXPRO_sdlntedr*EXPRO_rhos(:)
+  do is=1,EXPRO_n_ion
+     EXPRO_sdlnnidr(is,:) = EXPRO_sdlnnidr(is,:)*EXPRO_rhos(:)
+     EXPRO_sdlntidr(is,:) = EXPRO_sdlntidr(is,:)*EXPRO_rhos(:)
+  enddo
+  !-----------------------------------------------------------------
+
+  !-----------------------------------------------------------------
   ! Compute the electron-electron collision frequency (1/s)
   allocate(cc(EXPRO_n_exp))
   allocate(loglam(EXPRO_n_exp))
   cc(:) = sqrt(2.0) * pi * 1.6022**4 * 1.0 / (4.0 * pi * 8.8542)**2 &
-          * 1.0 / (sqrt(3.3452) * 1602.2**1.5) * 1e9
+       * 1.0 / (sqrt(3.3452) * 1602.2**1.5) * 1e9
   loglam(:) = 24.0 - log(sqrt(EXPRO_ne(:)*1e13)/(EXPRO_te(:)*1e3))
   EXPRO_nuee(:) = cc(:) * loglam(:) * EXPRO_ne(:) &
        / (sqrt(me) * EXPRO_te(:)**1.5)
   deallocate(cc)
   deallocate(loglam)
   !-----------------------------------------------------------------
-  
+
   !--------------------------------------------------------------
   ! Compute w0p, gamma_e, gamma_p and mach:
   !
@@ -325,8 +340,8 @@ subroutine EXPRO_compute_derived
 
      ! sni = -ni''/ni (1/m^2)
      call bound_deriv(EXPRO_sdlnnidr_new(:),EXPRO_ni_new(:)*EXPRO_dlnnidr_new(:),EXPRO_rmin,EXPRO_n_exp)
-     EXPRO_sdlnnidr_new(:) = EXPRO_sdlnnidr_new(:)/EXPRO_ni_new(:)
-     
+     EXPRO_sdlnnidr_new(:) = EXPRO_sdlnnidr_new(:)/EXPRO_ni_new(:)*EXPRO_rhos(:)
+
      if (minval(EXPRO_ni_new(:)) <= 0.0) then
         EXPRO_error = 1
      endif
@@ -346,6 +361,6 @@ subroutine EXPRO_compute_derived
         EXPRO_error=1
      endif
   enddo
- 
+
 end subroutine EXPRO_compute_derived
  

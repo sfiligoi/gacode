@@ -122,27 +122,27 @@ subroutine EXPRO_locsim_profiles(&
   ! Pack electrons into top of species vector.
   temp_exp(n_species_exp,:)    = EXPRO_te(:)
   dlntdr_exp(n_species_exp,:)  = EXPRO_dlntedr(:)*a_meters 
-  sdlntdr_exp(n_species_exp,:) = EXPRO_sdlntedr(:)*a_meters**2 
+  sdlntdr_exp(n_species_exp,:) = EXPRO_sdlntedr(:)*a_meters
   dens_exp(n_species_exp,:)    = EXPRO_ne(:)
   dlnndr_exp(n_species_exp,:)  = EXPRO_dlnnedr(:)*a_meters 
-  sdlnndr_exp(n_species_exp,:) = EXPRO_sdlnnedr(:)*a_meters**2 
+  sdlnndr_exp(n_species_exp,:) = EXPRO_sdlnnedr(:)*a_meters
 
   ! Pack ions from the bottom
   do i_ion=1,n_species_exp-1
      ! ion temps should be equal, but not enforced 
      temp_exp(i_ion,:)    = EXPRO_ti(i_ion,:)
      dlntdr_exp(i_ion,:)  = EXPRO_dlntidr(i_ion,:)*a_meters 
-     sdlntdr_exp(i_ion,:) = EXPRO_sdlntidr(i_ion,:)*a_meters**2 
+     sdlntdr_exp(i_ion,:) = EXPRO_sdlntidr(i_ion,:)*a_meters 
 
      ! First species density is reset by quasi-neutrality
      if (quasineutral_flag == 1 .and. i_ion == 1) then
         dens_exp(i_ion,:)    = EXPRO_ni_new(:)
         dlnndr_exp(i_ion,:)  = EXPRO_dlnnidr_new(:)*a_meters
-        sdlnndr_exp(i_ion,:) = EXPRO_sdlnnidr_new(:)*a_meters**2
+        sdlnndr_exp(i_ion,:) = EXPRO_sdlnnidr_new(:)*a_meters
      else
         dens_exp(i_ion,:)    = EXPRO_ni(i_ion,:)
         dlnndr_exp(i_ion,:)  = EXPRO_dlnnidr(i_ion,:)*a_meters
-        sdlnndr_exp(i_ion,:) = EXPRO_sdlnnidr(i_ion,:)*a_meters**2
+        sdlnndr_exp(i_ion,:) = EXPRO_sdlnnidr(i_ion,:)*a_meters
      endif
   enddo
 
