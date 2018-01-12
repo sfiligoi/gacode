@@ -106,7 +106,7 @@ subroutine tgyro_source
 
   ! Get integrated collisional exchange power
   call tgyro_volume_int(s_exch,p_exch)
-
+  
   ! Get integrated anomalous exchange power
   call tgyro_volume_int(s_expwd,p_expwd)
 

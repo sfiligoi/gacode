@@ -47,8 +47,6 @@ subroutine tgyro_write_input
      error_flag = 1
      error_msg = 'ERROR: (TGYRO) All species densities cannot be simultaneously floated.'
   endif
-
-
   !----------------------------------------------------------------
 
   if (i_proc_global == 0) then
@@ -80,6 +78,11 @@ subroutine tgyro_write_input
      write(1,*)
      write(1,*) 'Iteration control'
      write(1,*) 
+
+     if (use_trap == 1) then
+        write(1,'(a)') ' WARNING: (TGYRO) Highly nonuniform grid.  Using trapezoidal source integration.'
+        write(1,'(a)')
+     endif
 
      select case (tgyro_iteration_method)
 
@@ -533,20 +536,13 @@ subroutine tgyro_write_input
 
      !--------------------------------------------------------
      write(1,*)
-     write(1,*) 'Input profile rescaling factors'
+     write(1,*) 'Rescaling factors'
      write(1,*) 
      write(1,20) 'TGYRO_INPUT_DEN_SCALE',tgyro_input_den_scale
      write(1,20) 'TGYRO_INPUT_TE_SCALE',tgyro_input_te_scale
      write(1,20) 'TGYRO_INPUT_TI_SCALE',tgyro_input_ti_scale
      write(1,20) 'TGYRO_INPUT_W0_SCALE',tgyro_input_w0_scale
      write(1,20) 'TGYRO_INPUT_PAUX_SCALE',tgyro_input_paux_scale
-
-     write(1,*)'-----------------------------------------------------------------'
-
-     !--------------------------------------------------------
-     write(1,*)
-     write(1,*) 'Fusion reactivity rescaling factor'
-     write(1,*) 
      write(1,20) 'TGYRO_INPUT_FUSION_SCALE',tgyro_input_fusion_scale
 
      write(1,*)'-----------------------------------------------------------------'

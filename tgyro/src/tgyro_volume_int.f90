@@ -17,7 +17,7 @@
 
 subroutine tgyro_volume_int(s,p)
 
-  use tgyro_globals, only : n_r,r,volp
+  use tgyro_globals, only : n_r,r,volp,use_trap
 
   implicit none
 
@@ -28,12 +28,10 @@ subroutine tgyro_volume_int(s,p)
 
   real, dimension(n_r), intent(in) :: s 
   real, dimension(n_r), intent(inout) :: p 
- 
-  integer, parameter :: itrap=0
 
   ! Integrated power in erg/s
 
-  if (n_r <= 2 .or. itrap == 1) then
+  if (use_trap == 1) then
 
      ! Integration using trapezoidal rule
 

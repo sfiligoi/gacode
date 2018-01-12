@@ -342,11 +342,7 @@ module tgyro_globals
   integer :: i_ash
   integer :: evolve_indx(5)
   !
-  ! Global TGYRO variables
-  integer :: igmin
-  integer :: igmax
-  real :: length
-  real :: dlength
+  integer :: use_trap
   !---------------------------------------------------------
 
 end module tgyro_globals

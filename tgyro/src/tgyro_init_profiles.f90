@@ -21,6 +21,7 @@ subroutine tgyro_init_profiles
   real :: tmp_ped
   real :: p_ave
   real :: x0(1),y0(1)
+  real :: dx,dx_min,dx_max
 
   !------------------------------------------------------
   ! PHYSICAL CONSTANTS
@@ -109,6 +110,23 @@ subroutine tgyro_init_profiles
   endif
   !----------------------------------------------
 
+  !----------------------------------------------
+  ! Check for highly-nonuniform grid
+  !
+  dx_min = 1.0
+  dx_max = 0.0
+  do i=2,n_r
+     dx = r(i)-r(i-1) 
+     if (dx < dx_min) dx_min = dx
+     if (dx > dx_max) dx_max = dx
+  enddo
+  if (dx_max/dx_min > 10.0) then
+     use_trap = 1
+  else
+     use_trap = 0
+  endif
+  !----------------------------------------------
+  
   !----------------------------------------------
   ! Radius where profiles will be matched.
   !
