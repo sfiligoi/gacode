@@ -12,10 +12,15 @@ module pneo_globals
   real, dimension(:,:), allocatable :: indata
   real, dimension(:,:), allocatable :: ingeodata_loc
   real, dimension(:,:), allocatable :: ingeodata
-  real, dimension(:,:), allocatable :: outdata_loc
-  real, dimension(:,:), allocatable :: outdata
-  real, dimension(:,:), allocatable :: outsaudata_loc
-  real, dimension(:,:), allocatable :: outsaudata
-
+  real, dimension(:,:), allocatable :: outdata_j_loc
+  real, dimension(:,:), allocatable :: outdata_j
+  real, dimension(:,:), allocatable :: outdata_ke_loc
+  real, dimension(:,:), allocatable :: outdata_ke
+  real, dimension(:,:), allocatable :: outdata_ki_loc
+  real, dimension(:,:), allocatable :: outdata_ki
+  real, dimension(:,:), allocatable :: outdata_kc_loc
+  real, dimension(:,:), allocatable :: outdata_kc
+  
+  
 
 end module pneo_globals
