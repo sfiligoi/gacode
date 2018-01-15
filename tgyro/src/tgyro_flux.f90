@@ -315,4 +315,7 @@ subroutine tgyro_flux
        sum(mflux_i_neo(therm_vec(:),i_r)+mflux_i_tur(therm_vec(:),i_r))
   !-------------------------------------------------------------------
 
+  ! Harvest various fluxes
+  call tgyro_harvest
+  
 end subroutine tgyro_flux
