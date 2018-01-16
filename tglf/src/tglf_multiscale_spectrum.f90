@@ -36,6 +36,7 @@
       REAL :: mix1,mix2,mixnorm,gamma_ave
       REAL :: vzf,dvzf,vzf1,vzf2,vzf3,vzf4
       REAL :: bz1,bz2
+      REAL :: etg_streamer
       REAL,DIMENSION(nkym) :: gamma_net=0.0
       REAL,DIMENSION(nkym) :: gamma=0.0
       REAL,DIMENSION(nkym) :: gamma_mix=0.0
@@ -74,7 +75,9 @@
 !original         cz2=0.92*czf  
 ! retuned June 22,2017
         cz2 = 1.0*czf  
-        kyetg=1.05*ABS(zs(2))/SQRT(taus(2)*mass(2))  ! fixed to ion gyroradius
+        etg_streamer=1.05
+        if(alpha_quench_in .ne. 0.0)etg_streamer=2.1
+        kyetg=etg_streamer*ABS(zs(2))/SQRT(taus(2)*mass(2))  ! fixed to ion gyroradius
         if(USE_X3)then
            bz1=1.0
            bz2=0.18
