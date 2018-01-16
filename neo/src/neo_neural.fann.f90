@@ -168,14 +168,14 @@ contains
     ki2_nn_neo = 0.0
     do k=1,6
        ke_nn_neo  = ke_nn_neo + geo_param(ir,1) * rho(ir) * temp(is_ele,ir) &
-            dens(is_ele,ir) * C_ke(k)*C_ln(k)
+            * dens(is_ele,ir) * C_ke(k)*C_ln(k)
        ki1_nn_neo = ki1_nn_neo + geo_param(ir,1) * rho(ir) * temp(is_ele,ir) &
-            dens(is_i1,ir) * C_ki1(k)*C_ln(k)
+            * dens(is_i1,ir) * C_ki1(k)*C_ln(k)
        ki2_nn_neo = ki2_nn_neo + geo_param(ir,1) * rho(ir) * temp(is_ele,ir) &
-            dens(is_i2,ir) * C_ki2(k)*C_ln(k)
+            * dens(is_i2,ir) * C_ki2(k)*C_ln(k)
        print *, C_ki2(k)
     enddo
-    print *, ke_nn_neo,ki1_nn_neo,ki2_nn_neo
+    !print *, ke_nn_neo,ki1_nn_neo,ki2_nn_neo
     
     ! Reconstruct jpar from NEO NN 
     jpar_nn_neo = 0.0
