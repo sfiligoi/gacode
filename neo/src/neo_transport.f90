@@ -560,6 +560,7 @@ contains
   subroutine TRANSP_write(ir)
     use neo_globals
     use neo_rotation
+    use neo_equilibrium
     use EXPRO_locsim_interface
     implicit none
     integer, intent (in) :: ir
@@ -568,6 +569,9 @@ contains
 
     if(silent_flag > 0 .or. i_proc > 0) return
 
+    print *, kbig_upar(3)/geo_param(ir,1)/rho/dens(3,ir)
+    print *, vpol_th0(3)/geo_param(ir,4)/geo_param(ir,1)/rho
+    
     ! transport coefficients (normalized)
     open(io,file=trim(path)//runfile_transp,status='old',position='append')
     write (io,'(e16.8)',advance='no') r(ir)

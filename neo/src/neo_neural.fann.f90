@@ -3,7 +3,7 @@ module neo_neural
   implicit none
 
   public :: NEURAL_alloc, NEURAL_do, NEURAL_write
-  real :: jpar_nn_neo, jtor_nn_neo
+  real :: jpar_nn_neo, jtor_nn_neo, ke_nn_neo, ki1_nn_neo, ki2_nn_neo
   character(len=80),private :: runfile_nn = 'out.neo.transport_nn'
   integer, parameter, private :: io=1
   logical, private :: initialized = .false.
@@ -39,14 +39,14 @@ contains
     implicit none
     integer, intent (in) :: ir
     
-    call compute_nn_jpar(ir)
+    call compute_nn_flow(ir)
     if(error_status > 0) return
     
   end subroutine NEURAL_do
 
   ! The NN for the bootstrap current presently assumes 2 ion species
   ! (D + C) and kinetic electrons.  Strong rotation effects are not included.
-  subroutine compute_nn_jpar(ir)
+  subroutine compute_nn_flow(ir)
     use mpi
     use neo_globals
     use neo_equilibrium
@@ -57,13 +57,8 @@ contains
     integer :: is_i1, is_i2
     real    :: d_max
     real(4), dimension(6)  :: nn_in
-    real(4), dimension(6) :: nn_out
-    real :: CTi2_neo, CTi1_neo, CTe_neo, CNi2_neo, CNi1_neo, CNe_neo
-    ! min NN training inputs
-    real, dimension(5) :: xmin = (/ 0.05,1.0,-2.0,0.6,1.0 /)
-    ! max NN training outputs
-    real, dimension(5) :: xmax = (/ 0.35,10.0,1.0,0.99,3.0 /)
-    real :: cscale_nu
+    real(4), dimension(18) :: nn_out
+    real, dimension(6) :: C_ln, C_ke, C_ki1, C_ki2
     character(len=218) :: root
     character(len=255) :: data
     
@@ -122,31 +117,23 @@ contains
     endif
     
     ! Set the input parameters for the NN
-    nn_in(1) = r(ir)/rmaj(ir)                      ! r/R
-    nn_in(2) = abs(q(ir))                          ! q
+    ! epsilon=r/R
+    nn_in(1) = r(ir)/rmaj(ir)
+    ! f_trap
+    nn_in(2) = geo_param(ir,2)
+    ! |q|
+    nn_in(3) = abs(q(ir))                        
     ! log(nuee/cs/R)
-    nn_in(3) = log10(nu(is_ele,ir)*rmaj(ir)/sqrt(temp(is_ele,ir)))
-    nn_in(4) = dens(is_i1,ir)/dens(is_ele,ir)      ! ni1/ne
-    nn_in(5) = temp(is_i1,ir)/temp(is_ele,ir)      ! Ti1/Te
-    nn_in(6) = geo_param(ir,2)                     ! geo param: ftrap
-
-    ! Re-scale nn_in if out-of-range of training data
-    cscale_nu = 1.0
-    do k=2,5
-       if(nn_in(k) > xmax(k))  then
-          nn_in(k) = xmax(k)
-          if(k == 3) then
-             cscale_nu = 10.0**xmax(k)/10.0**nn_in(k)
-          endif
-       endif
-       if(nn_in(k) < xmin(k))  then
-          nn_in(k) = xmin(k)
-       endif
-    enddo
+    nn_in(4) = log10(nu(is_ele,ir)*rmaj(ir)/sqrt(temp(is_ele,ir)))
+    ! n_i1/ne
+    nn_in(5) = dens(is_i1,ir)/dens(is_ele,ir)
+    ! T_i1/Te
+    nn_in(6) = temp(is_i1,ir)/temp(is_ele,ir)      
+    print *, nn_in
 
     ! Run the NN
     call get_environment_variable('GACODE_ROOT',root)
-    data = trim(root)//'/../neural/neonn/jbsnn/'
+    data = trim(root)//'/../neural/neonn/flownn/'
     ierr=load_anns(0, trim(data)//char(0),'brainfuse'//char(0))
     if(ierr == 0) then
        ! returns number of brainfuse files
@@ -162,23 +149,44 @@ contains
     endif
     
     ! Get coeffcients computed by the NN
-    CNe_neo  = nn_out(1)*cscale_nu
-    CNi1_neo = nn_out(2)*cscale_nu
-    CNi2_neo = nn_out(3)*cscale_nu
-    CTe_neo  = nn_out(4)*cscale_nu
-    CTi1_neo = nn_out(5)*cscale_nu
-    CTi2_neo = nn_out(6)*cscale_nu
+    ! (1) Cne, (2) Cni1, (3) Cni2, (4) Cte, (5) Cti1, (6) Cti2
+    C_ln(1) = dlnndr(is_ele,ir)
+    C_ln(2) = dlnndr(is_i1,ir)
+    C_ln(3) = dlnndr(is_i2,ir)
+    C_ln(4) = dlntdr(is_ele,ir)
+    C_ln(5) = dlntdr(is_i1,ir)
+    C_ln(6) = dlntdr(is_i2,ir)
+    do k=1,6
+       C_ke(k)   = nn_out(k)
+       C_ki1(k)  = nn_out(k+6)
+       C_ki2(k)  = nn_out(k+12)
+    enddo
+
+    ! Reconstruct the flow coefficients from NEO NN: K_a B_unit/(v_norm n_norm)
+    ke_nn_neo  = 0.0
+    ki1_nn_neo = 0.0
+    ki2_nn_neo = 0.0
+    do k=1,6
+       ke_nn_neo  = ke_nn_neo + geo_param(ir,1) * rho(ir) * temp(is_ele,ir) &
+            dens(is_ele,ir) * C_ke(k)*C_ln(k)
+       ki1_nn_neo = ki1_nn_neo + geo_param(ir,1) * rho(ir) * temp(is_ele,ir) &
+            dens(is_i1,ir) * C_ki1(k)*C_ln(k)
+       ki2_nn_neo = ki2_nn_neo + geo_param(ir,1) * rho(ir) * temp(is_ele,ir) &
+            dens(is_i2,ir) * C_ki2(k)*C_ln(k)
+       print *, C_ki2(k)
+    enddo
+    print *, ke_nn_neo,ki1_nn_neo,ki2_nn_neo
     
     ! Reconstruct jpar from NEO NN 
-    
-    jpar_nn_neo = geo_param(ir,1) * rho(ir) * temp(is_ele,ir) &
-         * (abs(Z(is_ele))*dens(is_ele,ir) &
-         * (CTe_neo*dlntdr(is_ele,ir) + Cne_neo*dlnndr(is_ele,ir)) &
-         + abs(Z(is_i1))*dens(is_i1,ir) &
-         * (CTi1_neo*dlntdr(is_i1,ir) + Cni1_neo*dlnndr(is_i1,ir)) &
-         +  abs(Z(is_i2))*dens(is_i2,ir) &
-            * (CTi2_neo*dlntdr(is_i2,ir) + Cni2_neo*dlnndr(is_i2,ir)))
-    
+    jpar_nn_neo = 0.0
+    do is=1,n_species
+       ! diamagnetic component
+       jpar_nn_neo = jpar_nn_neo + geo_param(ir,1) * rho(ir) &
+            * dens(is,ir)*temp(is,ir)* (dlnndr(is,ir) + dlntdr(is,ir))
+    enddo
+    ! neoclassical flow component -- EAB NOT DONE!!
+    jpar_nn_neo = jpar_nn_neo + geo_param(ir,3) * Z(is_ele) * 0.0
+       
     ! Toroidal component of Bootstrap current = sum <Z*n*utor/R>/<1/R>
     
     jtor_nn_neo = jpar_nn_neo*Btor2_avg/Bmag2_avg
@@ -189,7 +197,7 @@ contains
     enddo
     jtor_nn_neo = jtor_nn_neo/(Btor_th0*bigR_th0*bigRinv_avg)
     
-  end subroutine compute_nn_jpar
+  end subroutine compute_nn_flow
   
   subroutine NEURAL_write(ir)
     use neo_globals
@@ -200,6 +208,9 @@ contains
        open(io,file=trim(path)//runfile_nn,status='old',position='append')
        write(io,'(e16.8)',advance='no') r(ir)
        write(io,'(e16.8)',advance='no') jpar_nn_neo
+       write(io,'(e16.8)',advance='no') ke_nn_neo
+       write(io,'(e16.8)',advance='no') ki1_nn_neo
+       write(io,'(e16.8)',advance='no') ki2_nn_neo
     endif
     
   end subroutine NEURAL_write

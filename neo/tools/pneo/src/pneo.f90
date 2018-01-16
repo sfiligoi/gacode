@@ -180,44 +180,44 @@ program pneo
      ! Cne
      neo_dlnndr_in(:) = 0.0; neo_dlntdr_in(:) = 0.0; neo_dlnndr_in(1) = 1.0
      call neo_run()
-     outdata_loc(1,p)  = neo_vpol_dke_out(1)/neo_dens_in(1)
-     outdata_loc(7,p)  = neo_vpol_dke_out(2)/neo_dens_in(2)
-     outdata_loc(13,p) = neo_vpol_dke_out(3)/neo_dens_in(3)
+     outdata_loc(1,p)  = neo_vpol_dke_out(1)/neo_dens_in(1)**2
+     outdata_loc(7,p)  = neo_vpol_dke_out(2)/neo_dens_in(2)**2
+     outdata_loc(13,p) = neo_vpol_dke_out(3)/neo_dens_in(3)**2
      
      ! CTe
      neo_dlnndr_in(:) = 0.0;  neo_dlntdr_in(:) = 0.0; neo_dlntdr_in(1) = 1.0 
      call neo_run()
-     outdata_loc(2,p)  = neo_vpol_dke_out(1)/neo_dens_in(1)
-     outdata_loc(8,p)  = neo_vpol_dke_out(2)/neo_dens_in(2)
-     outdata_loc(14,p) = neo_vpol_dke_out(3)/neo_dens_in(3)
+     outdata_loc(2,p)  = neo_vpol_dke_out(1)/neo_dens_in(1)**2
+     outdata_loc(8,p)  = neo_vpol_dke_out(2)/neo_dens_in(2)**2
+     outdata_loc(14,p) = neo_vpol_dke_out(3)/neo_dens_in(3)**2
      
      ! Cni1
      neo_dlnndr_in(:) = 0.0;  neo_dlntdr_in(:) = 0.0; neo_dlnndr_in(2) = 1.0 
      call neo_run()
-     outdata_loc(3,p)  = neo_vpol_dke_out(1)/neo_dens_in(1)
-     outdata_loc(9,p)  = neo_vpol_dke_out(2)/neo_dens_in(2)
-     outdata_loc(15,p) = neo_vpol_dke_out(3)/neo_dens_in(3)
+     outdata_loc(3,p)  = neo_vpol_dke_out(1)/neo_dens_in(1)**2
+     outdata_loc(9,p)  = neo_vpol_dke_out(2)/neo_dens_in(2)**2
+     outdata_loc(15,p) = neo_vpol_dke_out(3)/neo_dens_in(3)**2
      
      ! CTi1
      neo_dlnndr_in(:) = 0.0;  neo_dlntdr_in(:) = 0.0; neo_dlntdr_in(2) = 1.0  
      call neo_run()
-     outdata_loc(4,p)  = neo_vpol_dke_out(1)/neo_dens_in(1)
-     outdata_loc(10,p) = neo_vpol_dke_out(2)/neo_dens_in(2)
-     outdata_loc(16,p) = neo_vpol_dke_out(3)/neo_dens_in(3)
+     outdata_loc(4,p)  = neo_vpol_dke_out(1)/neo_dens_in(1)**2
+     outdata_loc(10,p) = neo_vpol_dke_out(2)/neo_dens_in(2)**2
+     outdata_loc(16,p) = neo_vpol_dke_out(3)/neo_dens_in(3)**2
      
      ! Cni2
      neo_dlnndr_in(:) = 0.0;  neo_dlntdr_in(:) = 0.0; neo_dlnndr_in(3) = 1.0 
      call neo_run()
-     outdata_loc(5,p)  = neo_vpol_dke_out(1)/neo_dens_in(1)
-     outdata_loc(11,p) = neo_vpol_dke_out(2)/neo_dens_in(2)
-     outdata_loc(17,p) = neo_vpol_dke_out(3)/neo_dens_in(3)
+     outdata_loc(5,p)  = neo_vpol_dke_out(1)/neo_dens_in(1)**2
+     outdata_loc(11,p) = neo_vpol_dke_out(2)/neo_dens_in(2)**2
+     outdata_loc(17,p) = neo_vpol_dke_out(3)/neo_dens_in(3)**2
      
      ! CTi2 
      neo_dlnndr_in(:) = 0.0;  neo_dlntdr_in(:) = 0.0; neo_dlntdr_in(3) = 1.0
      call neo_run()
-     outdata_loc(6,p)  = neo_vpol_dke_out(1)/neo_dens_in(1)
-     outdata_loc(12,p) = neo_vpol_dke_out(2)/neo_dens_in(2)
-     outdata_loc(18,p) = neo_vpol_dke_out(3)/neo_dens_in(3)
+     outdata_loc(6,p)  = neo_vpol_dke_out(1)/neo_dens_in(1)**2
+     outdata_loc(12,p) = neo_vpol_dke_out(2)/neo_dens_in(2)**2
+     outdata_loc(18,p) = neo_vpol_dke_out(3)/neo_dens_in(3)**2
      
      ! renormalize the coefficients by 1/I_div_psiprime/rho_star/Bp(th0)
      outdata_loc(:,p) = outdata_loc(:,p) &

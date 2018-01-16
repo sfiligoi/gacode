@@ -344,7 +344,7 @@ contains
     neo_geo_out(2)  = ftrap
     neo_geo_out(3)  = Bmag2_avg
     neo_geo_out(4)  = Bpol_th0
-
+    
     if(silent_flag == 0 .and. i_proc == 0) then
        open(unit=1,file=trim(path)//'out.neo.diagnostic_geo2',status='replace')
        do it=1,4
