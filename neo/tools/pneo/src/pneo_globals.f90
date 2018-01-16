@@ -10,17 +10,7 @@ module pneo_globals
   integer, dimension(:), allocatable :: ic1,ic2,ic3,ic4,ic5,ic6,ic7,ic8,ic9
   real, dimension(:,:), allocatable :: indata_loc
   real, dimension(:,:), allocatable :: indata
-  real, dimension(:,:), allocatable :: ingeodata_loc
-  real, dimension(:,:), allocatable :: ingeodata
-  real, dimension(:,:), allocatable :: outdata_j_loc
-  real, dimension(:,:), allocatable :: outdata_j
-  real, dimension(:,:), allocatable :: outdata_ke_loc
-  real, dimension(:,:), allocatable :: outdata_ke
-  real, dimension(:,:), allocatable :: outdata_ki_loc
-  real, dimension(:,:), allocatable :: outdata_ki
-  real, dimension(:,:), allocatable :: outdata_kc_loc
-  real, dimension(:,:), allocatable :: outdata_kc
-  
-  
+  real, dimension(:,:), allocatable :: outdata_loc
+  real, dimension(:,:), allocatable :: outdata
 
 end module pneo_globals
