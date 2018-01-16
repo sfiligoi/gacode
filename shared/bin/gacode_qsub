@@ -44,9 +44,6 @@ then
   echo "         -queue"
   echo "         Queue name"
   echo
-  echo "         -qos"
-  echo "         Quality of service (Cori Haswell only)"
-  echo
   echo "         -w"
   echo "         Wallclock limit (default 0:59:00)"
   echo
@@ -65,7 +62,6 @@ user=`whoami`
 CODE=cgyro
 SUB_FLAG=0
 QUEUE=null_queue
-QOS=normal
 WALLTIME=0:59:00
 if hash getnim 2> /dev/null; then
    # NERSC
@@ -122,8 +118,6 @@ while [ $# -gt 0 ] ; do
   -start) shift ; START=$1 ;;
 
   -queue) shift ; QUEUE=$1 ;;
-
-  -qos) shift ; QOS=$1 ;;
 
   -w) shift ; WALLTIME=$1 ;;
 
