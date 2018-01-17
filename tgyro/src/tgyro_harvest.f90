@@ -1,5 +1,6 @@
 subroutine tgyro_harvest
 
+  use tglf_pkg
   use tgyro_globals
   use tglf_interface
   
@@ -68,6 +69,7 @@ subroutine tglf_harvest_local()
   ! _dbl : double
 
   use tglf_interface
+  use tglf_pkg
 
   integer :: ierr, i, j, nky
   character(LEN=65507) :: harvest_sendline
@@ -80,8 +82,6 @@ subroutine tglf_harvest_local()
   integer, dimension(10) :: ions_order
 
   real, dimension(:), allocatable :: spectrum
-
-  real, external :: get_nky_out
 
   if (.not.tglf_use_transport_model_in) then
      write(1,*) 'HARVEST ONLY WHEN `TRANSPORT_MODEL=.TRUE.`' !only when computing fluxes
@@ -292,7 +292,6 @@ subroutine tglf_harvest_local()
   !    Spectra
   !   ---------------------------------------------------
   nky = get_nky_out()
-
   allocate(spectrum(nky))
 
   do i=1,nky
