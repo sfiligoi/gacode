@@ -11,6 +11,7 @@ module neo_neural
 contains
 
   subroutine NEURAL_alloc(flag)
+    use neo_globals
     implicit none
     integer, intent (in) :: flag  ! flag=1: allocate; else deallocate
     if(flag == 1) then
