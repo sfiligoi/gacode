@@ -125,6 +125,10 @@ program pneo
   ! geometry
   neo_equilibrium_model_in = 2 ! Miller equilibrium
   neo_rmaj_over_a_in = 1.0     ! anorm = rmaj
+
+  ! for shaping test:
+  !neo_n_xi_in     = 27
+  !neo_n_theta_in  = 57
   !neo_shift_in = -0.26850
   !neo_zeta_in  = -4.2304e-2
   !neo_s_zeta_in = -2.2832e-1
@@ -145,7 +149,9 @@ program pneo
   neo_z_in(3)     = 6
   neo_mass_in(3)  = 6.0
 
-  !!!!!! FOR TESTING, USE THEORY sim_model=0; else use sim_model=1
+  ! For testing, use THEORY sim_model=0;
+  ! For nn, use sim_model=4;
+  ! else use NEO sim_model=1
   !neo_sim_model_in = 4
   !!!!!!
 
