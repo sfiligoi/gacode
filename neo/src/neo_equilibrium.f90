@@ -77,7 +77,7 @@ contains
        allocate(theta_nc(n_theta))
        allocate(jacobln_rderiv(n_theta))
        allocate(v_prime_g(n_radial))
-       allocate(geo_param(n_radial,12))
+       allocate(geo_param(n_radial,4))
        
        d_theta = 2*pi/n_theta
        do it=1,n_theta

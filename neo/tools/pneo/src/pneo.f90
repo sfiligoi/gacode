@@ -146,7 +146,7 @@ program pneo
   neo_mass_in(3)  = 6.0
 
   !!!!!! FOR TESTING, USE THEORY sim_model=0; else use sim_model=1
-  ! neo_sim_model_in = 0
+  !neo_sim_model_in = 4
   !!!!!!
 
   if (i_proc == 0) print '(a,i5)','NTOT = ',ntot
@@ -242,15 +242,15 @@ program pneo
   if (i_proc == 0) then
 
      open(unit=1,file='out.pneo.indata',status='replace')
-     write(1,'(a)') '# 6 inputs: eps,ft,q,log10(nuee),ni,Ti'
+     !write(1,'(a)') '# 6 inputs: eps,ft,q,log10(nuee),ni,Ti'
      write(1,10) indata(:,:)
      close(1)
 
      open(unit=1,file='out.pneo.c',status='replace')
-     write(1,'(a)') '# K_e/K_e_norm : Cne, Cte, Cni1, Cti1, Cni2, Cti2'
-     write(1,'(a)') '# K_i1/K_i_norm: Cne, Cte, Cni1, Cti1, Cni2, Cti2'
-     write(1,'(a)') '# K_i2/K_i2_norm: Cne, Cte, Cni1, Cti1, Cni2, Cti2'
-     write(1,'(a)') '# K_a_norm = -(c_s n_e / B_unit)*(rho_s/a)*(I/psi_p)*(n_a/n_e)'
+     !write(1,'(a)') '# K_e/K_e_norm : Cne, Cte, Cni1, Cti1, Cni2, Cti2'
+     !write(1,'(a)') '# K_i1/K_i_norm: Cne, Cte, Cni1, Cti1, Cni2, Cti2'
+     !write(1,'(a)') '# K_i2/K_i2_norm: Cne, Cte, Cni1, Cti1, Cni2, Cti2'
+     !write(1,'(a)') '# K_a_norm = -(c_s n_e / B_unit)*(rho_s/a)*(I/psi_p)*(n_a/n_e)'
      write(1,10) outdata(:,:)
      close(1)
      

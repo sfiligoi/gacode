@@ -139,6 +139,9 @@ subroutine neo_do
            neo_thHS_out(:,:) = 0.0
            neo_dke_1d_out(1) = jpar_nn_neo
            neo_dke_1d_out(2) = jtor_nn_neo
+           do is=1,n_species
+              neo_dke_out(is,5) = vpol_th0_nn_neo(is)
+           enddo
         endif
      enddo
      call NEURAL_alloc(0)

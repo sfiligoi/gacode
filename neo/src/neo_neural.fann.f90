@@ -3,7 +3,8 @@ module neo_neural
   implicit none
 
   public :: NEURAL_alloc, NEURAL_do, NEURAL_write
-  real :: jpar_nn_neo, jtor_nn_neo, ke_nn_neo, ki1_nn_neo, ki2_nn_neo
+  real :: jpar_nn_neo, jtor_nn_neo
+  real, dimension(:), allocatable :: kbig_upar_nn_neo, vpol_th0_nn_neo
   character(len=80),private :: runfile_nn = 'out.neo.transport_nn'
   integer, parameter, private :: io=1
   logical, private :: initialized = .false.
@@ -17,7 +18,10 @@ contains
 
     if(flag == 1) then
        if(initialized) return
-
+      
+       allocate(kbig_upar_nn_neo(n_species))
+       allocate(vpol_th0_nn_neo(n_species))
+       
        if(silent_flag == 0 .and. i_proc == 0) then
           open(unit=io,file=trim(path)//runfile_nn,status='replace')
           close(io)
@@ -27,7 +31,8 @@ contains
 
     else
        if(.NOT. initialized) return
-
+       deallocate(kbig_upar_nn_neo)
+       deallocate(vpol_th0_nn_neo)
        initialized = .false.
 
     endif
@@ -163,32 +168,32 @@ contains
     enddo
 
     ! Reconstruct the flow coefficients from NEO NN: K_a B_unit/(v_norm n_norm)
-    ke_nn_neo  = 0.0
-    ki1_nn_neo = 0.0
-    ki2_nn_neo = 0.0
+    kbig_upar_nn_neo(:)  = 0.0
     do k=1,6
-       ke_nn_neo  = ke_nn_neo + geo_param(ir,1) * rho(ir) * temp(is_ele,ir) &
+       kbig_upar_nn_neo(is_ele)  = kbig_upar_nn_neo(is_ele) &
+            + geo_param(ir,1) * rho(ir) * temp(is_ele,ir) &
             * dens(is_ele,ir) * C_ke(k)*C_ln(k)
-       ki1_nn_neo = ki1_nn_neo + geo_param(ir,1) * rho(ir) * temp(is_ele,ir) &
+       kbig_upar_nn_neo(is_i1) = kbig_upar_nn_neo(is_i1) &
+            + geo_param(ir,1) * rho(ir) * temp(is_ele,ir) &
             * dens(is_i1,ir) * C_ki1(k)*C_ln(k)
-       ki2_nn_neo = ki2_nn_neo + geo_param(ir,1) * rho(ir) * temp(is_ele,ir) &
+       kbig_upar_nn_neo(is_i2) = kbig_upar_nn_neo(is_i2) &
+            + geo_param(ir,1) * rho(ir) * temp(is_ele,ir) &
             * dens(is_i2,ir) * C_ki2(k)*C_ln(k)
-       print *, C_ki2(k)
     enddo
-    !print *, ke_nn_neo,ki1_nn_neo,ki2_nn_neo
+    !print *, kbig_upar_nn_neo(:)
+    vpol_th0_nn_neo(:) = kbig_upar_nn_neo(:)/dens(:,ir)*geo_param(ir,4)
     
     ! Reconstruct jpar from NEO NN 
     jpar_nn_neo = 0.0
     do is=1,n_species
-       ! diamagnetic component
+       ! diamagnetic component and neoclassical flow component 
        jpar_nn_neo = jpar_nn_neo + geo_param(ir,1) * rho(ir) &
-            * dens(is,ir)*temp(is,ir)* (dlnndr(is,ir) + dlntdr(is,ir))
+            * dens(is,ir)*temp(is,ir)* (dlnndr(is,ir) + dlntdr(is,ir)) &
+            + geo_param(ir,3) * Z(is)*kbig_upar_nn_neo(is)
     enddo
-    ! neoclassical flow component -- EAB NOT DONE!!
-    jpar_nn_neo = jpar_nn_neo + geo_param(ir,3) * Z(is_ele) * 0.0
-       
-    ! Toroidal component of Bootstrap current = sum <Z*n*utor/R>/<1/R>
+    !print *, jpar_nn_neo
     
+    ! Toroidal component of Bootstrap current = sum <Z*n*utor/R>/<1/R>   
     jtor_nn_neo = jpar_nn_neo*Btor2_avg/Bmag2_avg
     do is=1, n_species
        jtor_nn_neo = jtor_nn_neo + rho(ir)*geo_param(ir,1) &
@@ -203,14 +208,16 @@ contains
     use neo_globals
     implicit none
     integer, intent (in) :: ir
+    integer :: is
     
     if(silent_flag == 0 .and. i_proc == 0) then
        open(io,file=trim(path)//runfile_nn,status='old',position='append')
        write(io,'(e16.8)',advance='no') r(ir)
        write(io,'(e16.8)',advance='no') jpar_nn_neo
-       write(io,'(e16.8)',advance='no') ke_nn_neo
-       write(io,'(e16.8)',advance='no') ki1_nn_neo
-       write(io,'(e16.8)',advance='no') ki2_nn_neo
+       do is=1,n_species
+          write(io,'(e16.8)',advance='no') kbig_upar_nn_neo(is)
+          write(io,'(e16.8)',advance='no') vpol_th0_nn_neo(is)
+       enddo
     endif
     
   end subroutine NEURAL_write
