@@ -127,7 +127,7 @@ program pneo
   neo_rmaj_over_a_in = 1.0     ! anorm = rmaj
 
   ! for shaping test:
-  !neo_n_xi_in     = 27
+  ! neo_n_xi_in     = 27
   !neo_n_theta_in  = 57
   !neo_shift_in = -0.26850
   !neo_zeta_in  = -4.2304e-2
@@ -152,7 +152,7 @@ program pneo
   ! For testing, use THEORY sim_model=0;
   ! For nn, use sim_model=4;
   ! else use NEO sim_model=1
-  !neo_sim_model_in = 4
+  ! neo_sim_model_in = 4
   !!!!!!
 
   if (i_proc == 0) print '(a,i5)','NTOT = ',ntot
@@ -227,7 +227,7 @@ program pneo
      
      ! renormalize the coefficients by 1/I_div_psiprime/rho_star/Bp(th0)
      outdata_loc(:,p) = outdata_loc(:,p) &
-          / (neo_geoparams_out(1)*neo_rho_star_in*neo_geoparams_out(4))
+          *neo_geoparams_out(1)/(neo_rho_star_in*neo_geoparams_out(4))
 
      ! 6 inputs: eps,ft,q,log10(nuee),ni,Ti
      indata_loc(1,p) = neo_rmin_over_a_in

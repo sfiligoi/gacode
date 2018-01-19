@@ -134,7 +134,7 @@ contains
     nn_in(5) = dens(is_i1,ir)/dens(is_ele,ir)
     ! T_i1/Te
     nn_in(6) = temp(is_i1,ir)/temp(is_ele,ir)      
-    print *, nn_in
+    !print *, nn_in
 
     ! Run the NN
     call get_environment_variable('GACODE_ROOT',root)
@@ -171,17 +171,18 @@ contains
     kbig_upar_nn_neo(:)  = 0.0
     do k=1,6
        kbig_upar_nn_neo(is_ele)  = kbig_upar_nn_neo(is_ele) &
-            + geo_param(ir,1) * rho(ir) * temp(is_ele,ir) &
+            + 1.0/geo_param(ir,1) * rho(ir) * temp(is_ele,ir) &
             * dens(is_ele,ir) * C_ke(k)*C_ln(k)
        kbig_upar_nn_neo(is_i1) = kbig_upar_nn_neo(is_i1) &
-            + geo_param(ir,1) * rho(ir) * temp(is_ele,ir) &
+            + 1.0/geo_param(ir,1) * rho(ir) * temp(is_ele,ir) &
             * dens(is_i1,ir) * C_ki1(k)*C_ln(k)
        kbig_upar_nn_neo(is_i2) = kbig_upar_nn_neo(is_i2) &
-            + geo_param(ir,1) * rho(ir) * temp(is_ele,ir) &
+            + 1.0/geo_param(ir,1) * rho(ir) * temp(is_ele,ir) &
             * dens(is_i2,ir) * C_ki2(k)*C_ln(k)
     enddo
     !print *, kbig_upar_nn_neo(:)
     vpol_th0_nn_neo(:) = kbig_upar_nn_neo(:)/dens(:,ir)*geo_param(ir,4)
+    !print *, kbig_upar_nn_neo(:)
     
     ! Reconstruct jpar from NEO NN 
     jpar_nn_neo = 0.0
