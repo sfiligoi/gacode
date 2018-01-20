@@ -63,7 +63,10 @@ contains
     real    :: d_max
     real(4), dimension(6)  :: nn_in
     real(4), dimension(18) :: nn_out
+    real, dimension(6) :: xmin = (/ 0.05,0.322,1.0,-2.0,0.6,1.0 /)
+    real, dimension(6) :: xmax = (/ 0.35,0.766,10.0,1.0,0.99,3.0 /)
     real, dimension(6) :: C_ln, C_ke, C_ki1, C_ki2
+    real :: ke, ki1, ki2
     character(len=218) :: root
     character(len=255) :: data
     
@@ -134,8 +137,18 @@ contains
     nn_in(5) = dens(is_i1,ir)/dens(is_ele,ir)
     ! T_i1/Te
     nn_in(6) = temp(is_i1,ir)/temp(is_ele,ir)      
-    !print *, nn_in
 
+
+    ! Re-scale nn_in if out-of-range of training data
+    do k=1,6
+       if(nn_in(k) > xmax(k))  then
+          nn_in(k) = xmax(k)
+       endif
+       if(nn_in(k) < xmin(k))  then
+          nn_in(k) = xmin(k)
+       endif
+    enddo
+    
     ! Run the NN
     call get_environment_variable('GACODE_ROOT',root)
     data = trim(root)//'/../neural/neonn/flownn/'
@@ -168,21 +181,19 @@ contains
     enddo
 
     ! Reconstruct the flow coefficients from NEO NN: K_a B_unit/(v_norm n_norm)
-    kbig_upar_nn_neo(:)  = 0.0
+    kbig_upar_nn_neo(:) = 0.0
     do k=1,6
        kbig_upar_nn_neo(is_ele)  = kbig_upar_nn_neo(is_ele) &
-            + 1.0/geo_param(ir,1) * rho(ir) * temp(is_ele,ir) &
+            + geo_param(ir,1) * rho(ir) / geo_param(ir,3) * temp(is_ele,ir) &
             * dens(is_ele,ir) * C_ke(k)*C_ln(k)
        kbig_upar_nn_neo(is_i1) = kbig_upar_nn_neo(is_i1) &
-            + 1.0/geo_param(ir,1) * rho(ir) * temp(is_ele,ir) &
+            + geo_param(ir,1) * rho(ir) / geo_param(ir,3) * temp(is_ele,ir) &
             * dens(is_i1,ir) * C_ki1(k)*C_ln(k)
        kbig_upar_nn_neo(is_i2) = kbig_upar_nn_neo(is_i2) &
-            + 1.0/geo_param(ir,1) * rho(ir) * temp(is_ele,ir) &
+            + geo_param(ir,1) * rho(ir) / geo_param(ir,3) * temp(is_ele,ir) &
             * dens(is_i2,ir) * C_ki2(k)*C_ln(k)
     enddo
-    !print *, kbig_upar_nn_neo(:)
     vpol_th0_nn_neo(:) = kbig_upar_nn_neo(:)/dens(:,ir)*geo_param(ir,4)
-    !print *, kbig_upar_nn_neo(:)
     
     ! Reconstruct jpar from NEO NN 
     jpar_nn_neo = 0.0

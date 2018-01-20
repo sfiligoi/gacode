@@ -152,7 +152,7 @@ program pneo
   ! For testing, use THEORY sim_model=0;
   ! For nn, use sim_model=4;
   ! else use NEO sim_model=1
-  ! neo_sim_model_in = 4
+  !neo_sim_model_in = 4
   !!!!!!
 
   if (i_proc == 0) print '(a,i5)','NTOT = ',ntot
@@ -224,10 +224,12 @@ program pneo
      outdata_loc(6,p)  = neo_vpol_dke_out(1)
      outdata_loc(12,p) = neo_vpol_dke_out(2)
      outdata_loc(18,p) = neo_vpol_dke_out(3)
-     
-     ! renormalize the coefficients by 1/I_div_psiprime/rho_star/Bp(th0)
+
+     ! K_a/n_a ~ Vpol / Bpol
+     ! <B^2/Bunit^2> K Bunit/(n_a c_s) ~ rho (I/psip) C 1/L
      outdata_loc(:,p) = outdata_loc(:,p) &
-          *neo_geoparams_out(1)/(neo_rho_star_in*neo_geoparams_out(4))
+          * neo_geoparams_out(3) / neo_geoparams_out(4) &
+          / (neo_geoparams_out(1)*neo_rho_star_in)
 
      ! 6 inputs: eps,ft,q,log10(nuee),ni,Ti
      indata_loc(1,p) = neo_rmin_over_a_in
@@ -248,15 +250,10 @@ program pneo
   if (i_proc == 0) then
 
      open(unit=1,file='out.pneo.indata',status='replace')
-     !write(1,'(a)') '# 6 inputs: eps,ft,q,log10(nuee),ni,Ti'
      write(1,10) indata(:,:)
      close(1)
 
      open(unit=1,file='out.pneo.c',status='replace')
-     !write(1,'(a)') '# K_e/K_e_norm : Cne, Cte, Cni1, Cti1, Cni2, Cti2'
-     !write(1,'(a)') '# K_i1/K_i_norm: Cne, Cte, Cni1, Cti1, Cni2, Cti2'
-     !write(1,'(a)') '# K_i2/K_i2_norm: Cne, Cte, Cni1, Cti1, Cni2, Cti2'
-     !write(1,'(a)') '# K_a_norm = -(c_s n_e / B_unit)*(rho_s/a)*(I/psi_p)*(n_a/n_e)'
      write(1,10) outdata(:,:)
      close(1)
      
