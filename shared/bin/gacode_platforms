@@ -1,0 +1,19 @@
+#!/bin/bash
+#
+# SCRIPT:
+#  gacode_platforms
+#
+# FUNCTION:
+#  List platforms and identity
+#------------------------------
+
+loc="$(dirname "$0")"
+cd $loc/../../platform/build
+
+list=`ls -1`
+
+for x in $list
+do
+    u=`grep IDENTITY $x`
+    cut -f1,2 -d"=" $u
+done
