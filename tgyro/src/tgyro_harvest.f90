@@ -73,7 +73,6 @@ subroutine tglf_harvest_local()
 
   integer :: ierr, i, j, nky
   character(LEN=65507) :: harvest_sendline
-  character(LEN=255) :: harvest_tag
   character(LEN=2) :: NUM
   character NUL
   parameter(NUL = char(0))
@@ -98,10 +97,11 @@ subroutine tglf_harvest_local()
      return
   endif
 
-  ierr=init_harvest('TGLF_spectrum_3'//NUL,harvest_sendline,len(harvest_sendline))
+  !table is set according to HARVEST_TABLE environmental variable
+  ierr=init_harvest(NUL,harvest_sendline,len(harvest_sendline))
 
   !no underscore to allow different versions of the same run
-  ierr=set_harvest_payload_str(harvest_sendline,'VERSION'//NUL,'APS15_1'//NUL) 
+  ierr=set_harvest_payload_str(harvest_sendline,'VERSION'//NUL,'db9432992b7d457b91bebb0d5237f5cc5551dde0'//NUL) 
 
   !   ---------------------------------------------------
   !    Plasma parameters
@@ -319,13 +319,9 @@ subroutine tglf_harvest_local()
   deallocate(spectrum)
 
   !   ---------------------------------------------------
-  !    Additional entries only if an harvest_tag is set
+  !    Additional entries
   !   ---------------------------------------------------
-  harvest_tag = NUL
-  ierr = get_harvest_tag(harvest_tag,len(harvest_tag))
-  if (len_trim(harvest_tag) > 1) then
-     ierr=set_harvest_payload_raw(harvest_sendline,trim(tglf_harvest_extra_in)//NUL)
-  endif
+  ierr=set_harvest_payload_raw(harvest_sendline,trim(tglf_harvest_extra_in)//NUL)
 
   !   ---------------------------------------------------
   !    Send data
