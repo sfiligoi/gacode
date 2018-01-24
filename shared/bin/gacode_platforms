@@ -12,8 +12,19 @@ cd $loc/../../platform/build
 
 list=`ls -1`
 
+> /tmp/tmplist
+
+echo "Platform : Description" >> /tmp/tmplist
+echo "-------- : -----------" >> /tmp/tmplist
+
 for x in $list
 do
+    # Extract platform string
+    IFS='.'; plat=($x); unset IFS
+    # Extract identity string
     u=`grep IDENTITY $x`
-    cut -f1,2 -d"=" $u
+    IFS='='; tag=($u); unset IFS
+    echo "${plat[2]} : ${tag[1]}" >> /tmp/tmplist
 done
+
+column -s ":" -t /tmp/tmplist

@@ -1,8 +1,8 @@
 #---------------------------------------------------
-# Linux mint
+# Linux Mint 
 #---------------------------------------------------
 
-IDENTITY="Linux Mint"
+IDENTITY="Linux Mint gfortran+mpich+OpenBLAS (/usr)"
 CORES_PER_NODE=4
 NUMAS_PER_NODE=1
 

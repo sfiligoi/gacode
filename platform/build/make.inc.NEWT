@@ -1,8 +1,8 @@
 #---------------------------------------------------
-# Linux mint
+# Linux Mint
 #---------------------------------------------------
 
-IDENTITY="newt 4-core Fedora workstation"
+IDENTITY="Linux Mint gfortran+mpich (/usr/local)"
 CORES_PER_NODE=4
 NUMAS_PER_NODE=1
 
