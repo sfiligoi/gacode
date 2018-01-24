@@ -117,8 +117,8 @@ program pneo
   ! Fixed NEO subroutine inputs
   neo_silent_flag_in = 1
   neo_n_energy_in = 6
-  neo_n_xi_in     = 17
-  neo_n_theta_in  = 17
+  neo_n_xi_in     = 31
+  neo_n_theta_in  = 31
   neo_collision_model_in = 4   ! Full FP collisions
   neo_rho_star_in = 0.001      ! arbitrary
 

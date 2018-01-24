@@ -2,6 +2,7 @@
 # JAC {Portland Group}  
 #---------------------------------------------------
 
+IDENTITY="JET analysis cluster PGI+mpich (outdated)"
 # Compilers and flags
 
 FC	= mpif90 -module $(GACODE_ROOT)/modules
@@ -20,7 +21,7 @@ FDEBUG	= -g -Ktrap=fp -Mbounds -Minform=warn
 LMATH = /usr/local/depot/PGI/pgi-12.4/linux86/12.4/lib/liblapack.a \
         /usr/local/depot/PGI/pgi-12.4/linux86/12.4/lib/libblas.a
 
-# netCDF (not optional any more)
+# netCDF 
 
 NETCDF = /usr/local/depot/netcdf-4.0.1/lib/libnetcdf.a
 NETCDF_INC = /usr/local/depot/netcdf-4.0.1/include

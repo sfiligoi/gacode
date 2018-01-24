@@ -3,6 +3,7 @@
 # sudo port install openmpi netcdf-fortran 
 # sudo port install fftw-3 +openmpi
 #---------------------------------------------------
+IDENTITY="OSX gfortran+openmpi from MacPorts"
 
 MAKE = make
 
