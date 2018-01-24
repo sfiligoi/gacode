@@ -12,6 +12,7 @@ exec=${3}
 nomp=${4}
 numa=${5}
 mpinuma=${6}
+
 cd $simdir
-export OMP_NUM_THREADS=$nomp ; /afs/.ipp/tok/soft/omfit/conda/bin/mpirun -np $nmpi $exec
+export OMP_NUM_THREADS=$nomp ; mpirun -np $nmpi $exec
 
