@@ -21,7 +21,7 @@ LMATH = ${LAPACK}/lapack_amd64.a ${LAPACK}/blas_amd64.a ${FFTDIR}/lib/libfftw3.a
 FFTW_INC=${FFTDIR}/include
 
 # NetCDF
-NETCDF=-L${NETCDF_HOME}/lib -lnetcdff -L/afs/@cell/common/soft/hdf5/1.8.12/@sys/intel/14.0/impi-4.1.3/lib -lnetcdf /lib64/libz.so.1
+NETCDF=-L${NETCDF_HOME}/lib -lnetcdff -L/afs/@cell/common/soft/hdf5/1.8.12/@sys/intel/14.0/impi-4.1.3/lib -lnetcdf /lib64/libz.so.1 -Wl,-rpath,${NETCDF_HOME}/lib
 NETCDF_INC=${NETCDF_HOME}/include
 
 # Archive 
