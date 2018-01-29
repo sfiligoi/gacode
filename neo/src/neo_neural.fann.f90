@@ -141,11 +141,13 @@ contains
 
     ! Re-scale nn_in if out-of-range of training data
     do k=1,6
-       if(nn_in(k) > xmax(k))  then
-          nn_in(k) = xmax(k)
-       endif
-       if(nn_in(k) < xmin(k))  then
-          nn_in(k) = xmin(k)
+       if(k /= 2) then
+          if(nn_in(k) > xmax(k))  then
+             nn_in(k) = xmax(k)
+          endif
+          if(nn_in(k) < xmin(k))  then
+             nn_in(k) = xmin(k)
+          endif
        endif
     enddo
     
@@ -179,8 +181,10 @@ contains
        C_ki1(k)  = nn_out(k+6)
        C_ki2(k)  = nn_out(k+12)
     enddo
-
+    
     ! Reconstruct the flow coefficients from NEO NN: K_a B_unit/(v_norm n_norm)
+    ! The NN output is <B^2/Bunit^2> K_a B_unit/(c_s n_a)
+    ! ~ - (I/psip) rho_s sum_b (Cnb dlnnb/dr + Ctb dlntb/dr)
     kbig_upar_nn_neo(:) = 0.0
     do k=1,6
        kbig_upar_nn_neo(is_ele)  = kbig_upar_nn_neo(is_ele) &
@@ -203,7 +207,6 @@ contains
             * dens(is,ir)*temp(is,ir)* (dlnndr(is,ir) + dlntdr(is,ir)) &
             + geo_param(ir,3) * Z(is)*kbig_upar_nn_neo(is)
     enddo
-    !print *, jpar_nn_neo
     
     ! Toroidal component of Bootstrap current = sum <Z*n*utor/R>/<1/R>   
     jtor_nn_neo = jpar_nn_neo*Btor2_avg/Bmag2_avg

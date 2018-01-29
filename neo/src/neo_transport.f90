@@ -320,7 +320,7 @@ contains
     do is=1, n_species
        jpar = jpar + Z(is) * uparBN(is) 
     enddo
-
+    
     ! U_parallel coefficient
     do is=1, n_species
        ! <B^2 / n_0a>
@@ -560,6 +560,7 @@ contains
   subroutine TRANSP_write(ir)
     use neo_globals
     use neo_rotation
+    use neo_equilibrium
     use EXPRO_locsim_interface
     implicit none
     integer, intent (in) :: ir
