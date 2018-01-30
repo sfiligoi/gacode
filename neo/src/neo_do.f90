@@ -140,6 +140,8 @@ subroutine neo_do
            neo_dke_1d_out(1) = jpar_nn_neo
            neo_dke_1d_out(2) = jtor_nn_neo
            do is=1,n_species
+              neo_dke_out(is,1) = pflux_nn_neo(is)
+              neo_dke_out(is,2) = eflux_nn_neo(is)
               neo_dke_out(is,5) = vpol_th0_nn_neo(is)
            enddo
         endif
