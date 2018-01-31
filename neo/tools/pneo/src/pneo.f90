@@ -163,7 +163,7 @@ program pneo
   ! For testing, use THEORY sim_model=0;
   ! For nn, use sim_model=4;
   ! else use NEO sim_model=1
-  ! neo_sim_model_in = 4
+  neo_sim_model_in = 4
   !!!!!!
 
   if (i_proc == 0) print '(a,i5)','NTOT = ',ntot
@@ -272,12 +272,14 @@ program pneo
           * neo_geoparams_out(3) / neo_geoparams_out(4) &
           / (neo_rho_star_in * neo_geoparams_out(1))
   
-     ! Gamma_a/(n_e c_s) ~ n_a/n_e nu_aa rho_a^2 (I/psip)^2  C 1/L
+     ! Gamma_a/(n_e c_s) ~ n_a/n_e nu_aa rho_a^2 (I/psip)^2  <Bunit/B>^2 C 1/L
      outdata_g_loc(:,p) = outdata_g_loc(:,p) &
+          * neo_geoparams_out(3)**2 &
           / (neo_rho_star_in * neo_geoparams_out(1))**2 / neo_nu_1_in
 
-     ! Q_a/(n_e c_s T_e) ~ n_a/n_e nu_aa rho_a^2 (I/psip)^2  C 1/L
+     ! Q_a/(n_e c_s T_e) ~ n_a/n_e nu_aa rho_a^2 (I/psip)^2  <Bunit/B>^2 C 1/L
      outdata_q_loc(:,p) = outdata_q_loc(:,p) &
+          * neo_geoparams_out(3)**2 &
           / (neo_rho_star_in * neo_geoparams_out(1))**2 / neo_nu_1_in
      
      ! 6 inputs: eps,ft,q,log10(nuee),ni,Ti
