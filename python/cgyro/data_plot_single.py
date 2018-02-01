@@ -8,6 +8,11 @@ from cgyro.data_dump import cgyrodata_dump
 rc('text',usetex=True)
 rc('font',size=18)
 
+# Strip first two 
+lx = int(sys.argv[1])
+ly = int(sys.argv[2])
+sys.argv = sys.argv[2:]
+
 plot_type = sys.argv[1]
 
 if plot_type == 'freq':
@@ -15,7 +20,7 @@ if plot_type == 'freq':
    w     = float(sys.argv[2])
    ftype = sys.argv[3]
 
-   cgyrodata_plot('./').plot_freq(w=w)
+   cgyrodata_plot('./').plot_freq(lx=lx,ly=ly,w=w)
 
    outfile = 'out.cgyro.freq.'+ftype
 
@@ -111,7 +116,7 @@ elif plot_type == 'flux':
       cgyrodata_dump('./').dump_flux(fc=fc)
       sys.exit()
    else:
-      cgyrodata_plot('./').plot_flux(w=w,field=field,moment=moment,
+      cgyrodata_plot('./').plot_flux(lx=lx,ly=ly,w=w,field=field,moment=moment,
                                      ymin=ymin,ymax=ymax,fc=fc,loc=loc,nscale=nscale)
 
    outfile = 'out.cgyro.flux.'+ftype
@@ -164,7 +169,7 @@ elif plot_type == 'kx_phi':
    nstr  = sys.argv[5]
    ftype = sys.argv[6]
 
-   cgyrodata_plot('./').plot_kx_phi(w=w,ymin=ymin,ymax=ymax,nstr=nstr)
+   cgyrodata_plot('./').plot_kx_phi(lx=lx,ly=ly,w=w,ymin=ymin,ymax=ymax,nstr=nstr)
    
    outfile = 'out.cgyro.kx_phi.'+ftype
 

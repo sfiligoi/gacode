@@ -7,7 +7,7 @@ from cgyro.data import cgyrodata
 
 class cgyrodata_plot(data.cgyrodata):
 
-   def plot_freq(self,w=0.5,fig=None):
+   def plot_freq(self,lx=12,ly=6,w=0.5,fig=None):
       '''
       Plot gamma and omega vs time
 
@@ -16,7 +16,7 @@ class cgyrodata_plot(data.cgyrodata):
       '''
 
       if fig is None:
-         fig = plt.figure(figsize=(12,6))
+         fig = plt.figure(figsize=(lx,ly))
          fig.subplots_adjust(left=0.085,right=0.97,top=0.92,bottom=0.12)
 
       #======================================
@@ -398,11 +398,11 @@ class cgyrodata_plot(data.cgyrodata):
 
       return 'ang  Re(f)  Im(f)',x,y1,y2
          
-   def plot_flux(self,w=0.5,field=0,moment='e',ymin='auto',ymax='auto',fc=0,fig=None,loc=2,nscale=0):
+   def plot_flux(self,lx=12,ly=6,w=0.5,field=0,moment='e',ymin='auto',ymax='auto',fc=0,fig=None,loc=2,nscale=0):
 
       if fig is None:
-         fig = plt.figure(figsize=(12,6))
-         fig.subplots_adjust(left=0.05,right=0.96,top=0.92,bottom=0.12)
+         fig = plt.figure(figsize=(lx,ly))
+         fig.subplots_adjust(left=0.05*12/lx,right=0.96,top=0.92,bottom=0.12)
 
       self.getflux()
 
@@ -749,11 +749,11 @@ class cgyrodata_plot(data.cgyrodata):
 
       ax.imshow(np.transpose(f),extent=[-x0,x0,0,y0],interpolation='none')
    
-   def plot_kx_phi(self,w=0.5,ymin='auto',ymax='auto',nstr='null',fig=None):
+   def plot_kx_phi(self,lx=12,ly=6,w=0.5,ymin='auto',ymax='auto',nstr='null',fig=None):
 
       if fig is None:
-         fig = plt.figure(figsize=(12,6))
-         fig.subplots_adjust(left=0.08,right=0.96,top=0.92,bottom=0.12)
+         fig = plt.figure(figsize=(lx,ly))
+         fig.subplots_adjust(left=0.08*12/lx,right=0.96,top=0.92,bottom=0.12)
 
       self.getbigfield()
 
