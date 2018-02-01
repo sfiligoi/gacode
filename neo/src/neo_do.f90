@@ -50,12 +50,12 @@ subroutine neo_do
      nb    = (n_energy+1)*n_species*n_theta
      n_row = (n_xi+1)*nb
   endif
-
+  
   call neo_make_profiles
   if(error_status > 0) goto 100
   call neo_check
   if(error_status > 0) goto 100
-
+  
   if(spitzer_model==1) then
      call neo_spitzer
      goto 100
@@ -140,6 +140,8 @@ subroutine neo_do
            neo_dke_1d_out(1) = jpar_nn_neo
            neo_dke_1d_out(2) = jtor_nn_neo
            do is=1,n_species
+              neo_dke_out(is,1) = pflux_nn_neo(is)
+              neo_dke_out(is,2) = eflux_nn_neo(is)
               neo_dke_out(is,5) = vpol_th0_nn_neo(is)
            enddo
         endif
@@ -493,9 +495,6 @@ subroutine neo_do
      end if
      call  THEORY_do(ir)
      if(error_status > 0) goto 100
-
-     ! EAB: Temporarily print the jbs coeff
-     !print *, jpar/geo_param(ir,1)/rho(ir), jpar_S/geo_param(ir,1)/rho(ir)
 
      ! Store the local neo transport values at ir=1 in neo_x_out
      ! (n_species_max, transport coeff)
