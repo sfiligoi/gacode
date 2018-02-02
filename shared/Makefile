@@ -20,7 +20,6 @@ clean:
 	cd harvest_client ; make clean
 	cd nclass ; make clean
 	cd UMFPACK ; make clean
-	cd SUPERLU ; make clean
 ifdef FANN_ROOT
 	cd ${GACODE_ROOT}/../neural && make clean
 endif
@@ -30,4 +29,3 @@ distclean:
 	cd GEO ; make clean
 	cd EXPRO ; make clean
 	cd harvest_client; make clean
-	cd SUPERLU ; make clean

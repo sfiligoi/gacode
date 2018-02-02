@@ -23,7 +23,6 @@ OBJECTS = neo_globals.o \
           neo_interface.o \
           neo_allocate_profile.o \
           neo_umfpack.o \
-          neo_superlu.o \
           neo_sparse_solve.o \
           neo_equilibrium.o \
           neo_g_velocitygrids.o \
@@ -45,19 +44,18 @@ OBJECTS = neo_globals.o \
           neo_spitzer.o \
           st_to_cc.o
 
-.SUFFIXES : .o .f90 .F90
-
-ifeq ($(SOLVER_OPT),umf)
-   FFLAGS += -DUSE_UMFPACK
-else ifeq ($(SOLVER_OPT),slu)
-   FFLAGS += -DUSE_SUPERLU
-   EXTRA_HEADERS += -I${GACODE_ROOT}/shared/SUPERLU/SuperLU 
-else ifeq ($(SOLVER_OPT),slumt)
-   FFLAGS += -DUSE_SUPERLU_MT
-   EXTRA_HEADERS += -I${GACODE_ROOT}/shared/SUPERLU/SuperLU_MT
+#-------------------------------------------------
+# NEO_SOLVER can be set in platform Makefiles to:
+#     slu   : SuperLU sparse solver library
+#     petsc : PETSc library suite
+#-------------------------------------------------
+ifeq ($(NEO_SOLVER),slu)
+   OBJECTS += neo_superlu.o
 else
-   $(error 'Invalid SOLVER_OPT value ', ${SOLVER_OPT})
+   OBJECTS += neo_superlu_stub.o
 endif
+
+.SUFFIXES : .o .f90 .F90
 
 all: neo_lib.a $(EXEC).o $(EXTRA_LIBS)
 	$(FC) $(FFLAGS) -o $(EXEC) $(EXEC).o neo_lib.a $(EXTRA_LIBS) $(LMATH) $(NN_LIB)

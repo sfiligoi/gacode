@@ -1,11 +1,12 @@
 module neo_globals
 
   !---------------------------------------------------------------
-  ! local MPI variables
+  ! local MPI and OpenMP variables
   ! 
   integer :: i_proc
   integer :: n_proc
   integer :: NEO_COMM_WORLD
+  integer :: n_omp
   !---------------------------------------------------------------
 
   real, parameter :: pi=3.1415926535897932
@@ -100,6 +101,7 @@ module neo_globals
   integer :: subroutine_flag  ! only used for neo_read_input
   integer :: laguerre_method
   integer :: write_cmoments_flag
+  integer :: use_slu ! use the SuperLU solver
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------
