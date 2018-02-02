@@ -77,10 +77,13 @@ then
   echo "          *Affects: flux, ky_flux"
   echo
   echo "          -lx <float>"
-  echo "          Plot width."
+  echo "          Plot width (default 12)"
   echo
   echo "          -ly <float>"
-  echo "          Plot height."
+  echo "          Plot height (default 6)."
+  echo
+  echo "          -fontsize <float>"
+  echo "          Font size (default 18)."
   echo
   echo "          -nscale"
   echo "          Scale the fluxes with ne/ni factor"
@@ -153,6 +156,7 @@ fi
 LOCDIR=.
 SIMROOT=$PWD
 
+FONTSIZE=18
 LX=12
 LY=6
 
@@ -213,6 +217,7 @@ while [ $# -gt 0 ] ; do
   -ymin) shift ; YMIN=$1 ;;
   -lx) shift ; LX=$1 ;;
   -ly) shift ; LY=$1 ;;
+  -fontsize) shift ; FONTSIZE=$1 ;;
 
   -w) shift ; W=$1 ;;
   -loc) shift ; LOC=$1 ;;
@@ -249,7 +254,7 @@ cd $SIMDIR
 PYROOT=$GACODE_ROOT/python/cgyro
 
 #==============================================================================
-PLT="$PYROOT/data_plot_single.py $LX $LY"
+PLT="$PYROOT/data_plot_single.py $FONTSIZE $LX $LY"
 
 case "$PLOT_TYPE" in
 
