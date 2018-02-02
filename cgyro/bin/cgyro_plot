@@ -76,6 +76,12 @@ then
   echo "          Maximum value of vertical axis (where applicable)."
   echo "          *Affects: flux, ky_flux"
   echo
+  echo "          -lx <float>"
+  echo "          Plot width."
+  echo
+  echo "          -ly <float>"
+  echo "          Plot height."
+  echo
   echo "          -nscale"
   echo "          Scale the fluxes with ne/ni factor"
   echo "          *Affects: flux"
@@ -146,6 +152,10 @@ fi
 # Default simulation directory
 LOCDIR=.
 SIMROOT=$PWD
+
+LX=12
+LY=6
+
 SPECIES=0
 FIELD=0
 FC=0
@@ -201,6 +211,8 @@ while [ $# -gt 0 ] ; do
 
   -ymax) shift ; YMAX=$1 ;;
   -ymin) shift ; YMIN=$1 ;;
+  -lx) shift ; LX=$1 ;;
+  -ly) shift ; LY=$1 ;;
 
   -w) shift ; W=$1 ;;
   -loc) shift ; LOC=$1 ;;
@@ -237,7 +249,7 @@ cd $SIMDIR
 PYROOT=$GACODE_ROOT/python/cgyro
 
 #==============================================================================
-PLT=$PYROOT/data_plot_single.py
+PLT="$PYROOT/data_plot_single.py $LX $LY"
 
 case "$PLOT_TYPE" in
 
