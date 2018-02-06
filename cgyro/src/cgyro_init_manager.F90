@@ -276,8 +276,8 @@ subroutine cgyro_init_manager
      allocate(uv(0:ny-1,0:nx-1,n_omp))
 
      ! Create plans once and for all, with global arrays fx,ux
-     plan_c2r = fftw_plan_dft_c2r_2d(nx,ny,gx(:,:,1),vx(:,:,1),FFTW_PATIENT)
-     plan_r2c = fftw_plan_dft_r2c_2d(nx,ny,uv(:,:,1),fx(:,:,1),FFTW_PATIENT)
+     plan_c2r = fftw_plan_dft_c2r_2d(ny,nx,gx(:,:,1),vx(:,:,1),FFTW_PATIENT)
+     plan_r2c = fftw_plan_dft_r2c_2d(ny,nx,uv(:,:,1),fx(:,:,1),FFTW_PATIENT)
 #endif
 
 #ifdef _OPENACC
@@ -303,8 +303,8 @@ subroutine cgyro_init_manager
      !                      1 == FFTW_BACKWARD
      !-------------------------------------------------------------------
 
-     ndim(1) = nx
-     ndim(2) = ny
+     ndim(1) = ny
+     ndim(2) = nx
      idist = size(fxmany,1)*size(fxmany,2)
      odist = size(uxmany,1)*size(uxmany,2)
      istride = 1
