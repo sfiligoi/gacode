@@ -121,14 +121,16 @@ subroutine cgyro_nl_fftw(ij)
   integer, external :: omp_get_thread_num
 
   include 'fftw3.f03'
-
-  force_early_comm2 = (n_omp>=(4*nsplit)) ! no staggering, will need all threads for FFTW in one pass
+  
+  ! no staggering, will need all threads for FFTW in one pass
+  force_early_comm2 = (n_omp>=(4*nsplit)) 
   one_pass_fft = force_early_comm2
 
-  if (is_staggered_comm_2 .or. force_early_comm2) then ! stagger comm2, to load ballance network traffic
-    call timer_lib_in('nl_comm')
-    call cgyro_nl_fftw_comm2
-    call timer_lib_out('nl_comm')
+  if (is_staggered_comm_2 .or. force_early_comm2) then
+     ! stagger comm2, to load ballance network traffic
+     call timer_lib_in('nl_comm')
+     call cgyro_nl_fftw_comm2
+     call timer_lib_out('nl_comm')
   endif
 
   call timer_lib_in('nl')
@@ -136,123 +138,130 @@ subroutine cgyro_nl_fftw(ij)
   if (n_omp<=nsplit) then
 !$omp parallel private(in,iy,ir,p,ix,f0,i_omp,j)
 !$omp do schedule(dynamic,1)
-   do j=1,nsplit
-     i_omp = omp_get_thread_num()+1
+     do j=1,nsplit
+        i_omp = omp_get_thread_num()+1
 
-     fx(:,:,i_omp) = 0.0
-     fy(:,:,i_omp) = 0.0
+        fx(:,:,i_omp) = 0.0
+        fy(:,:,i_omp) = 0.0
 
-     ! Array mapping
-     do ir=1,n_radial
-        p  = ir-1-nx0/2
-        ix = p
-        if (ix < 0) ix = ix+nx
-        do in=1,n_toroidal
-           iy = in-1
-           f0 = i_c*f_nl(ir,j,in)
-           fx(iy,ix,i_omp) = p*f0
-           fy(iy,ix,i_omp) = iy*f0
+        ! Array mapping
+        do ir=1,n_radial
+           p  = ir-1-nx0/2
+           ix = p
+           if (ix < 0) ix = ix+nx
+           do in=1,n_toroidal
+              iy = in-1
+              f0 = i_c*f_nl(ir,j,in)
+              fx(iy,ix,i_omp) = p*f0
+              fy(iy,ix,i_omp) = iy*f0
+           enddo
         enddo
-     enddo
 
-     call fftw_execute_dft_c2r(plan_c2r,fx(:,:,i_omp),uxmany(:,:,j))
-     call fftw_execute_dft_c2r(plan_c2r,fy(:,:,i_omp),uymany(:,:,j))
-   enddo ! j
+        call cleanx(fx(0,:,i_omp),nx)
+        call fftw_execute_dft_c2r(plan_c2r,fx(:,:,i_omp),uxmany(:,:,j))
+        call cleanx(fy(0,:,i_omp),nx)
+        call fftw_execute_dft_c2r(plan_c2r,fy(:,:,i_omp),uymany(:,:,j))
+     enddo ! j
 !$omp end do
 !$omp end parallel
   else ! (n_omp>nsplit), increase parallelism
-   num_one_pass = 2
-   if (one_pass_fft) then
-     num_one_pass = 4
-   endif
+     num_one_pass = 2
+     if (one_pass_fft) then
+        num_one_pass = 4
+     endif
 !$omp parallel private(in,iy,ir,p,ix,f0,i_omp,j,o)
 !$omp do schedule(dynamic,1) collapse(2)
-   do j=1,nsplit
-    do o=1,num_one_pass
-     i_omp = j ! j<n_omp in this branch
+     do j=1,nsplit
+        do o=1,num_one_pass
+           i_omp = j ! j<n_omp in this branch
 
-     select case(o)
-     case (1)
-      fx(:,:,i_omp) = 0.0
+           select case(o)
+           case (1)
+              fx(:,:,i_omp) = 0.0
 
-      ! Array mapping
-      do ir=1,n_radial
-        p  = ir-1-nx0/2
-        ix = p
-        if (ix < 0) ix = ix+nx
-        do in=1,n_toroidal
-           iy = in-1
-           f0 = i_c*f_nl(ir,j,in)
-           fx(iy,ix,i_omp) = p*f0
-        enddo
-      enddo
+              ! Array mapping
+              do ir=1,n_radial
+                 p  = ir-1-nx0/2
+                 ix = p
+                 if (ix < 0) ix = ix+nx
+                 do in=1,n_toroidal
+                    iy = in-1
+                    f0 = i_c*f_nl(ir,j,in)
+                    fx(iy,ix,i_omp) = p*f0
+                 enddo
+              enddo
 
-      call fftw_execute_dft_c2r(plan_c2r,fx(:,:,i_omp),uxmany(:,:,j))
+              call cleanx(fx(0,:,i_omp),nx)
+              call fftw_execute_dft_c2r(plan_c2r,fx(:,:,i_omp),uxmany(:,:,j))
 
-     case (2)
-      fy(:,:,i_omp) = 0.0
+           case (2)
+              fy(:,:,i_omp) = 0.0
 
-      ! Array mapping
-      do ir=1,n_radial
-        p  = ir-1-nx0/2
-        ix = p
-        if (ix < 0) ix = ix+nx
-        do in=1,n_toroidal
-           iy = in-1
-           f0 = i_c*f_nl(ir,j,in)
-           fy(iy,ix,i_omp) = iy*f0
-        enddo
-      enddo
+              ! Array mapping
+              do ir=1,n_radial
+                 p  = ir-1-nx0/2
+                 ix = p
+                 if (ix < 0) ix = ix+nx
+                 do in=1,n_toroidal
+                    iy = in-1
+                    f0 = i_c*f_nl(ir,j,in)
+                    fy(iy,ix,i_omp) = iy*f0
+                 enddo
+              enddo
 
-      call fftw_execute_dft_c2r(plan_c2r,fy(:,:,i_omp),uymany(:,:,j))
+              call cleanx(fy(0,:,i_omp),nx)
+              call fftw_execute_dft_c2r(plan_c2r,fy(:,:,i_omp),uymany(:,:,j))
 
-     case (3)
-       gx(:,:,i_omp) = 0.0
+           case (3)
+              gx(:,:,i_omp) = 0.0
 
-       ! Array mapping
-       do ir=1,n_radial
-        p  = ir-1-nx0/2
-        ix = p
-        if (ix < 0) ix = ix+nx
-        do in=1,n_toroidal
-           iy = in-1
-           g0 = i_c*g_nl(ir,j,in)
-           gx(iy,ix,i_omp) = p*g0
-        enddo
-       enddo
+              ! Array mapping
+              do ir=1,n_radial
+                 p  = ir-1-nx0/2
+                 ix = p
+                 if (ix < 0) ix = ix+nx
+                 do in=1,n_toroidal
+                    iy = in-1
+                    g0 = i_c*g_nl(ir,j,in)
+                    gx(iy,ix,i_omp) = p*g0
+                 enddo
+              enddo
 
-       call fftw_execute_dft_c2r(plan_c2r,gx(:,:,i_omp),vx(:,:,i_omp))
-      
-     case (4)
-       gy(:,:,i_omp) = 0.0
+              call cleanx(gx(0,:,i_omp),nx)
+              call fftw_execute_dft_c2r(plan_c2r,gx(:,:,i_omp),vx(:,:,i_omp))
 
-       ! Array mapping
-       do ir=1,n_radial
-        p  = ir-1-nx0/2
-        ix = p
-        if (ix < 0) ix = ix+nx
-        do in=1,n_toroidal
-           iy = in-1
-           g0 = i_c*g_nl(ir,j,in)
-           gy(iy,ix,i_omp) = iy*g0
-        enddo
-       enddo
+           case (4)
+              gy(:,:,i_omp) = 0.0
 
-       call fftw_execute_dft_c2r(plan_c2r,gy(:,:,i_omp),vy(:,:,i_omp))
-    
-     end select
-    enddo ! o
-   enddo ! j
+              ! Array mapping
+              do ir=1,n_radial
+                 p  = ir-1-nx0/2
+                 ix = p
+                 if (ix < 0) ix = ix+nx
+                 do in=1,n_toroidal
+                    iy = in-1
+                    g0 = i_c*g_nl(ir,j,in)
+                    gy(iy,ix,i_omp) = iy*g0
+                 enddo
+              enddo
+
+              call cleanx(gy(0,:,i_omp),nx)
+              call fftw_execute_dft_c2r(plan_c2r,gy(:,:,i_omp),vy(:,:,i_omp))
+
+           end select
+        enddo ! o
+     enddo ! j
 !$omp end do
 !$omp end parallel
   endif
 
   call timer_lib_out('nl')
-
-  if (.not. (is_staggered_comm_2 .or. force_early_comm2)) then ! stagger comm2, to load ballance network traffic
-    call timer_lib_in('nl_comm')
-    call cgyro_nl_fftw_comm2
-    call timer_lib_out('nl_comm')
+  
+  ! stagger comm2, to load ballance network traffic
+  if (.not. (is_staggered_comm_2 .or. force_early_comm2)) then 
+     call timer_lib_in('nl_comm')
+     call cgyro_nl_fftw_comm2
+     call timer_lib_out('nl_comm')
   endif
 
   call timer_lib_in('nl')
@@ -260,84 +269,88 @@ subroutine cgyro_nl_fftw(ij)
   if (n_omp<=nsplit) then
 !$omp parallel private(in,iy,ir,p,ix,g0,i_omp,j)
 !$omp do schedule(dynamic,1)
-   do j=1,nsplit
-     i_omp = omp_get_thread_num()+1
+     do j=1,nsplit
+        i_omp = omp_get_thread_num()+1
 
-     gx(:,:,i_omp) = 0.0
-     gy(:,:,i_omp) = 0.0
+        gx(:,:,i_omp) = 0.0
+        gy(:,:,i_omp) = 0.0
 
-     ! Array mapping
-     do ir=1,n_radial
-        p  = ir-1-nx0/2
-        ix = p
-        if (ix < 0) ix = ix+nx  
-        do in=1,n_toroidal
-           iy = in-1
-           g0 = i_c*g_nl(ir,j,in)
-           gx(iy,ix,i_omp) = p*g0
-           gy(iy,ix,i_omp) = iy*g0
+        ! Array mapping
+        do ir=1,n_radial
+           p  = ir-1-nx0/2
+           ix = p
+           if (ix < 0) ix = ix+nx  
+           do in=1,n_toroidal
+              iy = in-1
+              g0 = i_c*g_nl(ir,j,in)
+              gx(iy,ix,i_omp) = p*g0
+              gy(iy,ix,i_omp) = iy*g0
+           enddo
         enddo
-     enddo
 
-     call fftw_execute_dft_c2r(plan_c2r,gx(:,:,i_omp),vx(:,:,i_omp))
-     call fftw_execute_dft_c2r(plan_c2r,gy(:,:,i_omp),vy(:,:,i_omp))
+        call cleanx(gx(0,:,i_omp),nx)
+        call fftw_execute_dft_c2r(plan_c2r,gx(:,:,i_omp),vx(:,:,i_omp))
+        call cleanx(gy(0,:,i_omp),nx)
+        call fftw_execute_dft_c2r(plan_c2r,gy(:,:,i_omp),vy(:,:,i_omp))
 
-     call cgyro_nl_fftw_stepr(j, i_omp)
-   enddo ! j
+        call cgyro_nl_fftw_stepr(j, i_omp)
+     enddo ! j
 !$omp end do
 !$omp end parallel
   else ! n_omp>nsplit
-   if (.not. one_pass_fft) then
+     if (.not. one_pass_fft) then
 !$omp parallel private(in,iy,ir,p,ix,g0,i_omp,j)
 !$omp do schedule(dynamic,1) collapse(2)
-    do j=1,nsplit
-     do o=1,2
-      i_omp = j ! j<n_omp in this branch, so we can do it
+        do j=1,nsplit
+           do o=1,2
+              i_omp = j ! j<n_omp in this branch, so we can do it
 
-      if (o==1) then
-       gx(:,:,i_omp) = 0.0
+              if (o==1) then
+                 gx(:,:,i_omp) = 0.0
 
-       ! Array mapping
-       do ir=1,n_radial
-        p  = ir-1-nx0/2
-        ix = p
-        if (ix < 0) ix = ix+nx
-        do in=1,n_toroidal
-           iy = in-1
-           g0 = i_c*g_nl(ir,j,in)
-           gx(iy,ix,i_omp) = p*g0
-        enddo
-       enddo
+                 ! Array mapping
+                 do ir=1,n_radial
+                    p  = ir-1-nx0/2
+                    ix = p
+                    if (ix < 0) ix = ix+nx
+                    do in=1,n_toroidal
+                       iy = in-1
+                       g0 = i_c*g_nl(ir,j,in)
+                       gx(iy,ix,i_omp) = p*g0
+                    enddo
+                 enddo
 
-       call fftw_execute_dft_c2r(plan_c2r,gx(:,:,i_omp),vx(:,:,i_omp))
-      else
-       gy(:,:,i_omp) = 0.0
+                 call cleanx(gx(0,:,i_omp),nx)
+                 call fftw_execute_dft_c2r(plan_c2r,gx(:,:,i_omp),vx(:,:,i_omp))
+              else
+                 gy(:,:,i_omp) = 0.0
 
-       ! Array mapping
-       do ir=1,n_radial
-        p  = ir-1-nx0/2
-        ix = p
-        if (ix < 0) ix = ix+nx
-        do in=1,n_toroidal
-           iy = in-1
-           g0 = i_c*g_nl(ir,j,in)
-           gy(iy,ix,i_omp) = iy*g0
-        enddo
-       enddo
+                 ! Array mapping
+                 do ir=1,n_radial
+                    p  = ir-1-nx0/2
+                    ix = p
+                    if (ix < 0) ix = ix+nx
+                    do in=1,n_toroidal
+                       iy = in-1
+                       g0 = i_c*g_nl(ir,j,in)
+                       gy(iy,ix,i_omp) = iy*g0
+                    enddo
+                 enddo
 
-       call fftw_execute_dft_c2r(plan_c2r,gy(:,:,i_omp),vy(:,:,i_omp))
-      endif
-     enddo ! o
-    enddo ! j
+                 call cleanx(gy(0,:,i_omp),nx)
+                 call fftw_execute_dft_c2r(plan_c2r,gy(:,:,i_omp),vy(:,:,i_omp))
+              endif
+           enddo ! o
+        enddo ! j
 !$omp end do
 !$omp end parallel
-   endif
+     endif
 
 !$omp parallel private(j)
 !$omp do schedule(dynamic,1)
-   do j=1,nsplit
-     call cgyro_nl_fftw_stepr(j, j) ! we used i_omp=j in the g section
-   enddo ! j
+     do j=1,nsplit
+        call cgyro_nl_fftw_stepr(j, j) ! we used i_omp=j in the g section
+     enddo ! j
 !$omp end do
 !$omp end parallel
 
@@ -364,3 +377,17 @@ subroutine cgyro_nl_fftw(ij)
   rhs(:,:,ij) = rhs(:,:,ij)+(q*rho/rmin)*(2*pi/length)*psi(:,:)
 
 end subroutine cgyro_nl_fftw
+
+subroutine cleanx(f,n)
+
+  implicit none
+  integer, intent(in) :: n
+  complex, intent(inout) :: f(n)
+
+  integer :: i
+
+  do i=1,n/2-1
+     f(1+i) = conjg(f(1-i+n))
+  enddo
+
+end subroutine cleanx

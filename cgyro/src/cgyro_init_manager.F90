@@ -262,7 +262,7 @@ subroutine cgyro_init_manager
      ! 3/2-rule for dealiasing the nonlinear product
      nx = (3*nx0)/2
      ny = (3*ny0)/2
-
+     
 #ifndef _OPENACC
      allocate(fx(0:ny/2,0:nx-1,n_omp))
      allocate(gx(0:ny/2,0:nx-1,n_omp))

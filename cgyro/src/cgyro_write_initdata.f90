@@ -34,6 +34,10 @@ subroutine cgyro_write_initdata
         write(io,'(a)') ' nc_loc | nv_loc | nsplit | n_MPI | n_OMP'
         write(io,'(t3,i4,t12,i4,t21,i4,t29,i4,t36,i4)') nc_loc,nv_loc,nsplit,n_proc,n_omp
      endif
+ 
+     ! 3/2-rule for dealiasing the nonlinear product
+     write(io,*)
+     write(io,'(a,i4,3x,a,i4)') ' nx_fft: ',(3*n_radial)/2,'ny_fft: ',(3*(2*n_toroidal-1))/2
 
      if (zf_test_flag == 0) then
 
