@@ -34,13 +34,9 @@ subroutine cgyro_write_initdata
         write(io,'(a)') ' nc_loc | nv_loc | nsplit | n_MPI | n_OMP'
         write(io,'(t3,i4,t12,i4,t21,i4,t29,i4,t36,i4)') nc_loc,nv_loc,nsplit,n_proc,n_omp
      endif
- 
-     ! 3/2-rule for dealiasing the nonlinear product
-     write(io,*)
-     write(io,'(a,i4,3x,a,i4)') ' nx_fft: ',(3*n_radial)/2,'ny_fft: ',(3*(2*n_toroidal-1))/2
 
      if (zf_test_flag == 0) then
-
+        
         ! Compute kymax
         if (n_toroidal == 1) then
            kymax = q/rmin*rho
@@ -48,14 +44,28 @@ subroutine cgyro_write_initdata
            kymax = q/rmin*(n_toroidal-1)*rho
         endif
 
-        write(io,*)
-        write(io,*) '          n    Delta      Max     L/rho'
-        write(io,'(a,i4,2x,2(f7.3,2x),2x,f6.2)') ' kx*rho:',&
-             n_radial,2*pi*rho/length,2*pi*rho*(n_radial/2-1)/length,length/rho
-        write(io,'(a,i4,2x,2(f7.3,2x),2x,f6.2)') ' ky*rho:',&
-             n_toroidal,q/rmin*rho,kymax,2*pi/ky
+        if (nonlinear_flag == 0) then
+           write(io,*)
+           write(io,*) '          n    Delta      Max     L/rho'
+           write(io,'(a,i4,2x,2(f7.3,2x),2x,f6.2)') ' kx*rho:',&
+                n_radial,2*pi*rho/length,2*pi*rho*(n_radial/2-1)/length,length/rho
+           write(io,'(a,i4,2x,2(f7.3,2x),2x,f6.2)') ' ky*rho:',&
+                n_toroidal,q/rmin*rho,kymax,2*pi/ky
+        else
+
+           write(io,*)
+           write(io,*) '          n    Delta      Max     L/rho    n_fft'
+           write(io,'(a,i4,2x,2(f7.3,2x),2x,f6.2,5x,i4)') ' kx*rho:',&
+                n_radial,2*pi*rho/length,2*pi*rho*(n_radial/2-1)/length,length/rho,&
+                (3*n_radial)/2
+           write(io,'(a,i4,2x,2(f7.3,2x),2x,f6.2,5x,i4)') ' ky*rho:',&
+                n_toroidal,q/rmin*rho,kymax,2*pi/ky,(3*(2*n_toroidal-1))/2
+        endif
 
      else
+
+        ! ZONAL FLOW TEST ONLY
+        
         if (n_radial==1) then
            write(io,*) ' kx*rho:',2*pi*rho/length
         else
@@ -101,7 +111,7 @@ subroutine cgyro_write_initdata
         write(io,10) 'n_norm[e19/m^3]:',dens_norm,'v_norm[m/s]:',vth_norm,'T_norm[keV]:',temp_norm
      endif
      write(io,*)
-    
+
      close(io)
 
   endif
@@ -215,7 +225,7 @@ subroutine cgyro_write_initdata
 
   endif
   !----------------------------------------------------------------------------
-  
+
 10 format(t2,4(a,1x,1pe9.3,2x))  
 20 format(t2,4(a,1x,1pe10.3,2x)) 
 
