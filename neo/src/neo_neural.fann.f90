@@ -66,10 +66,10 @@ contains
     integer :: is, k, ierr
     integer :: is_i1, is_i2
     real    :: d_max
-    real(4), dimension(6)  :: nn_in
+    real(4), dimension(5)  :: nn_in
     real(4), dimension(18) :: nn_out
-    real, dimension(6) :: xmin = (/ 0.05,0.322,1.0,-2.0,0.6,1.0 /)
-    real, dimension(6) :: xmax = (/ 0.35,0.766,10.0,1.0,0.99,3.0 /)
+    real, dimension(5) :: xmin = (/ 0.05,1.0,-2.0,0.6,1.0 /)
+    real, dimension(5) :: xmax = (/ 0.35,10.0,1.0,0.99,3.0 /)
     real, dimension(6) :: C_ln, C_ke, C_ki1, C_ki2
     real :: ke, ki1, ki2
     character(len=218) :: root
@@ -132,26 +132,22 @@ contains
     ! Set the input parameters for the NN
     ! epsilon=r/R
     nn_in(1) = r(ir)/rmaj(ir)
-    ! f_trap
-    nn_in(2) = geo_param(ir,2)
     ! |q|
-    nn_in(3) = abs(q(ir))                        
+    nn_in(2) = abs(q(ir))                        
     ! log(nuee/cs/R)
-    nn_in(4) = log10(nu(is_ele,ir)*rmaj(ir)/sqrt(temp(is_ele,ir)))
+    nn_in(3) = log10(nu(is_ele,ir)*rmaj(ir)/sqrt(temp(is_ele,ir)))
     ! n_i1/ne
-    nn_in(5) = dens(is_i1,ir)/dens(is_ele,ir)
+    nn_in(4) = dens(is_i1,ir)/dens(is_ele,ir)
     ! T_i1/Te
-    nn_in(6) = temp(is_i1,ir)/temp(is_ele,ir)      
+    nn_in(5) = temp(is_i1,ir)/temp(is_ele,ir)      
 
     ! Re-scale nn_in if out-of-range of training data (except for f_trap)
-    do k=1,6
-       if(k /= 2) then
-          if(nn_in(k) > xmax(k))  then
-             nn_in(k) = xmax(k)
-          endif
-          if(nn_in(k) < xmin(k))  then
-             nn_in(k) = xmin(k)
-          endif
+    do k=1,5
+       if(nn_in(k) > xmax(k))  then
+          nn_in(k) = xmax(k)
+       endif
+       if(nn_in(k) < xmin(k))  then
+          nn_in(k) = xmin(k)
        endif
     enddo
     
@@ -166,7 +162,7 @@ contains
     call get_environment_variable('GACODE_ROOT',root)
 
     ! flow K
-    data = trim(root)//'/../neural/neonn/flownn/'
+    data = trim(root)//'/../neural/neonn/flownn_2/'
     ierr=load_anns(2, trim(data)//char(0),'brainfuse'//char(0))
     if(ierr == 0) then
        call neo_error('ERROR: (NEO) Neural network loading failed.')
@@ -220,7 +216,7 @@ contains
     jtor_nn_neo = jtor_nn_neo/(Btor_th0*bigR_th0*bigRinv_avg)
 
     ! Particle Flux
-    data = trim(root)//'/../neural/neonn/pfluxnn/'
+    data = trim(root)//'/../neural/neonn/pfluxnn_2/'
     ierr=load_anns(3, trim(data)//char(0),'brainfuse'//char(0))
     if(ierr == 0) then
        call neo_error('ERROR: (NEO) Neural network loading failed.')
@@ -241,21 +237,21 @@ contains
     pflux_nn_neo(:) = 0.0
     do k=1,6
        pflux_nn_neo(is_ele) = pflux_nn_neo(is_ele) &
-            + (geo_param(ir,1) * rho(ir))**2 &
+            + (geo_param(ir,1) * rho(ir))**2 / geo_param(ir,3) &
             * dens(is_ele,ir) * temp(is_ele,ir) * mass(is_ele) / z(is_ele)**2 &
             * nu(is_ele,ir) * C_ke(k)*C_ln(k)
        pflux_nn_neo(is_i1) = pflux_nn_neo(is_i1) &
-            + (geo_param(ir,1) * rho(ir))**2 &
+            + (geo_param(ir,1) * rho(ir))**2 / geo_param(ir,3) &
             * dens(is_i1,ir) * temp(is_i1,ir) * mass(is_i1) / z(is_i1)**2 &
             * nu(is_i1,ir) * C_ki1(k)*C_ln(k)
        pflux_nn_neo(is_i2) = pflux_nn_neo(is_i2) &
-            + (geo_param(ir,1) * rho(ir))**2 &
+            + (geo_param(ir,1) * rho(ir))**2 / geo_param(ir,3) &
             * dens(is_i2,ir) * temp(is_i2,ir) * mass(is_i2) / z(is_i2)**2 &
             * nu(is_i2,ir) * C_ki2(k)*C_ln(k)
     enddo
 
     ! Energy Flux
-    data = trim(root)//'/../neural/neonn/efluxnn/'
+    data = trim(root)//'/../neural/neonn/efluxnn_2/'
     ierr=load_anns(4, trim(data)//char(0),'brainfuse'//char(0))
     if(ierr == 0) then
        call neo_error('ERROR: (NEO) Neural network loading failed.')
@@ -276,15 +272,15 @@ contains
     eflux_nn_neo(:) = 0.0
     do k=1,6
        eflux_nn_neo(is_ele) = eflux_nn_neo(is_ele) &
-            + (geo_param(ir,1) * rho(ir))**2 &
+            + (geo_param(ir,1) * rho(ir))**2 / geo_param(ir,3) &
             * dens(is_ele,ir) * temp(is_ele,ir) * mass(is_ele) / z(is_ele)**2 &
             * nu(is_ele,ir) * C_ke(k)*C_ln(k)
        eflux_nn_neo(is_i1) = eflux_nn_neo(is_i1) &
-            + (geo_param(ir,1) * rho(ir))**2 &
+            + (geo_param(ir,1) * rho(ir))**2 / geo_param(ir,3) &
             * dens(is_i1,ir) * temp(is_i1,ir) * mass(is_i1) / z(is_i1)**2 &
             * nu(is_i1,ir) * C_ki1(k)*C_ln(k)
        eflux_nn_neo(is_i2) = eflux_nn_neo(is_i2) &
-            + (geo_param(ir,1) * rho(ir))**2 &
+            + (geo_param(ir,1) * rho(ir))**2 / geo_param(ir,3) &
             * dens(is_i2,ir) * temp(is_i2,ir) * mass(is_i2) / z(is_i2)**2 &
             * nu(is_i2,ir) * C_ki2(k)*C_ln(k)
     enddo
