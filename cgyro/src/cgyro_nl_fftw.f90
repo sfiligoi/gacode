@@ -266,7 +266,7 @@ subroutine cgyro_nl_fftw(ij)
 
   call timer_lib_in('nl')
 
-  if (n_omp<=nsplit) then
+  if (n_omp <= nsplit) then
 !$omp parallel private(in,iy,ir,p,ix,g0,i_omp,j)
 !$omp do schedule(dynamic,1)
      do j=1,nsplit
@@ -305,7 +305,7 @@ subroutine cgyro_nl_fftw(ij)
            do o=1,2
               i_omp = j ! j<n_omp in this branch, so we can do it
 
-              if (o==1) then
+              if (o == 1) then
                  gx(:,:,i_omp) = 0.0
 
                  ! Array mapping
@@ -382,12 +382,27 @@ subroutine cleanx(f,n)
 
   implicit none
   integer, intent(in) :: n
-  complex, intent(inout) :: f(n)
+  complex, intent(inout) :: f(0:n-1)
 
   integer :: i
 
+  ! Average elements so as to ensure
+  !
+  !   f(kx,ky=0) = f(-kx,jy=0)^*
+  !
+  ! This symmetry is required for complex input to the FFTW
+  ! c2r transform 
+  
   do i=1,n/2-1
-     f(1+i) = conjg(f(1-i+n))
+     f(i)   = 0.5*( f(i)+conjg(f(n-i)) )
+     f(n-i) = conjg(f(i)) 
   enddo
+
+  !do i=-n/2,-1
+  !   print *,i,f(i+n)
+  !enddo
+  !do i=0,n/2-1
+  !   print *,i,f(i)
+  !enddo
 
 end subroutine cleanx
