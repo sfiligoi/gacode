@@ -240,27 +240,29 @@ END SUBROUTINE put_averages
 !-----------------------------------------------------------------
 !
 SUBROUTINE put_switches(iflux,use_bper,use_bpar,use_mhd_rule,use_bisection, &
-     ibranch,nmodes,nb_max,nb_min,nxgrid,nkys)
+     use_inboard_detrapped,ibranch,nmodes,nb_max,nb_min,nxgrid,nkys)
   !
   USE tglf_global
   USE tglf_dimensions
   !
   IMPLICIT NONE
   LOGICAL :: iflux,use_bper,use_bpar,use_mhd_rule,use_bisection
+  LOGICAL :: use_inboard_detrapped
   INTEGER :: ibranch,nmodes,nb_max,nb_min
   INTEGER :: nxgrid,nkys
   !
   ! validaty checks
   ! reset to defaults if invlaid
   !
-  if(nb_max.lt.0.or.nb_max.gt.nb)nb_max=nbasis_max_in
-  if(nb_min.lt.0.or.nb_min.gt.nb)nb_min=nbasis_min_in
+  if(nb_max.lt.2.or.nb_max.gt.nb)nb_max=nbasis_max_in
+  if(nb_min.lt.2.or.nb_min.gt.nb)nb_min=nbasis_min_in
   if(nb_max.lt.nb_min)nb_max=nb_min
+  if(2*(nb_max/2).ne.nb_max)nb_max = 2*(nb_max/2)  ! must be even
+  if(2*(nb_min/2).ne.nb_min)nb_min = 2*(nb_min/2)  ! must be even
   if(ibranch.lt.-1.or.ibranch.gt.0)ibranch=ibranch_in
   if(nxgrid.lt.1.or.2*nxgrid-1.gt.nxm)nxgrid=MIN((nxm+1)/2,nxgrid_in)
   if(nmodes.lt.1.or.nmodes.gt.maxmodes)nmodes=nmodes_in
   if(nkys.lt.2.or.nkys.gt.nkym)nkys=nky_in
-
   !      write(*,*)nb_max,nb_min,ibranch,nxgrid,nmodes,nkys
   !
   ! check for changes and update flow controls
@@ -282,6 +284,7 @@ SUBROUTINE put_switches(iflux,use_bper,use_bpar,use_mhd_rule,use_bisection, &
   nbasis_min_in = nb_min
   nxgrid_in = nxgrid
   nky_in = nkys
+  use_inboard_detrapped_in = use_inboard_detrapped
   !
 END SUBROUTINE put_switches
 !

@@ -7,7 +7,7 @@ program pneo
 
   implicit none
 
-  integer :: p,k
+  integer :: p,k, is
   integer :: i1,i2,i3,i4,i5,i6,i7,i8,i9
   integer :: n1,n2,n3,n4,n5,n6,n7,n8,n9
   real, dimension(:), allocatable :: rmin_over_rmaj
@@ -19,7 +19,8 @@ program pneo
   real, dimension(:), allocatable :: s_delta
   real, dimension(:), allocatable :: kappa
   real, dimension(:), allocatable :: s_kappa
-
+  real, dimension(:), allocatable :: jfac, gfac, qfac
+  
   allocate(rmin_over_rmaj(9))
   allocate(q(9))
   allocate(nu_ee(9))
@@ -76,15 +77,19 @@ program pneo
   allocate(ic7(ntot))
   allocate(ic8(ntot))
   allocate(ic9(ntot))
-  allocate(indata_loc(9,ntot))
-  allocate(indata(9,ntot))
-  allocate(ingeodata_loc(12,ntot))
-  allocate(ingeodata(12,ntot))
-  allocate(outdata_loc(6,ntot))
-  allocate(outdata(6,ntot))
-  allocate(outsaudata_loc(6,ntot))
-  allocate(outsaudata(6,ntot))
+  
+  allocate(indata_loc(6,ntot))
+  allocate(indata(6,ntot))
 
+  allocate(outdata_j_loc(6,ntot))
+  allocate(outdata_j(6,ntot))
+  allocate(outdata_u_loc(18,ntot))
+  allocate(outdata_u(18,ntot))
+  allocate(outdata_g_loc(18,ntot))
+  allocate(outdata_g(18,ntot))
+  allocate(outdata_q_loc(18,ntot))
+  allocate(outdata_q(18,ntot))
+  
   p = 0
   do i1=1,n1
      do i2=1,n2
@@ -127,6 +132,10 @@ program pneo
   ! geometry
   neo_equilibrium_model_in = 2 ! Miller equilibrium
   neo_rmaj_over_a_in = 1.0     ! anorm = rmaj
+
+  ! for shaping test:
+  !neo_n_xi_in     = 27
+  !neo_n_theta_in  = 57
   !neo_shift_in = -0.26850
   !neo_zeta_in  = -4.2304e-2
   !neo_s_zeta_in = -2.2832e-1
@@ -147,10 +156,14 @@ program pneo
   neo_z_in(3)     = 6
   neo_mass_in(3)  = 6.0
 
-  !!!!!! FOR TESTING, USE THEORY sim_model=0; else use sim_model=1
-  !  neo_sim_model_in = 0
-  !neo_sim_model_in = 4
-  !neo_rbf_dir_in   = 'd3d_6'
+  allocate(jfac(neo_n_species_in))
+  allocate(gfac(neo_n_species_in))
+  allocate(qfac(neo_n_species_in))
+  
+  ! For testing, use THEORY sim_model=0;
+  ! For nn, use sim_model=4;
+  ! else use NEO sim_model=1
+  neo_sim_model_in = 4
   !!!!!!
 
   if (i_proc == 0) print '(a,i5)','NTOT = ',ntot
@@ -170,7 +183,7 @@ program pneo
      i9 = ic9(p)
 
      neo_rmin_over_a_in = rmin_over_rmaj(i1)
-     neo_q_in           = q(i2)
+     neo_q_in           = abs(q(i2))
      neo_nu_1_in        = nu_ee(i3)
      neo_dens_in(2)     = ni_over_ne(i4)
      neo_dens_in(3)     = (1.0-neo_z_in(2)*neo_dens_in(2))/(1.0*neo_z_in(3))
@@ -181,87 +194,138 @@ program pneo
      neo_kappa_in       = kappa(i8)  
      neo_s_kappa_in     = s_kappa(i9)
 
-     indata_loc(1,p) = neo_rmin_over_a_in
-     indata_loc(2,p) = neo_q_in
-     indata_loc(3,p) = log10(neo_nu_1_in)
-     indata_loc(4,p) = neo_dens_in(2)
-     indata_loc(5,p) = neo_temp_in(2)
-     indata_loc(6,p) = neo_delta_in
-     indata_loc(7,p) = neo_s_delta_in
-     indata_loc(8,p) = neo_kappa_in
-     indata_loc(9,p) = neo_s_kappa_in
-
+     do is=1,neo_n_species_in
+        jfac(is) = neo_dens_in(is) * abs(neo_z_in(is))
+        ! n_a/n_norm rho_a^2/rho_s^2 nu_aa/nu_ee
+        gfac(is) = neo_dens_in(is) * (neo_temp_in(is)*neo_mass_in(is) &
+             / neo_z_in(is)**2) * neo_z_in(is)**4 * neo_dens_in(is) &
+             * sqrt(neo_mass_in(1)/neo_mass_in(is)) &
+             * (neo_temp_in(1)/neo_temp_in(is))**1.5
+        qfac(is) = gfac(is)
+     enddo
+     
      ! Cne
      neo_dlnndr_in(:) = 0.0; neo_dlntdr_in(:) = 0.0; neo_dlnndr_in(1) = 1.0
      call neo_run()
-     outdata_loc(1,p)    = neo_jpar_dke_out/(abs(neo_z_in(1))*neo_dens_in(1))
-     outsaudata_loc(1,p) = neo_jpar_thS_out/(abs(neo_z_in(1))*neo_dens_in(1))
+     outdata_j_loc(1,p) = neo_jpar_dke_out/jfac(1)
+     do is=1,neo_n_species_in
+        outdata_u_loc(1+6*(is-1),p)  = neo_vpol_dke_out(is)
+        outdata_g_loc(1+6*(is-1),p)  = neo_pflux_dke_out(is)/gfac(is)
+        outdata_q_loc(1+6*(is-1),p)  = neo_efluxtot_dke_out(is)/qfac(is)
+     enddo
+     
      ! CTe
      neo_dlnndr_in(:) = 0.0;  neo_dlntdr_in(:) = 0.0; neo_dlntdr_in(1) = 1.0 
      call neo_run()
-     outdata_loc(2,p)    = neo_jpar_dke_out/(abs(neo_z_in(1))*neo_dens_in(1))
-     outsaudata_loc(2,p) = neo_jpar_thS_out/(abs(neo_z_in(1))*neo_dens_in(1))
+     outdata_j_loc(2,p) = neo_jpar_dke_out/jfac(1)
+     do is=1,neo_n_species_in
+        outdata_u_loc(2+6*(is-1),p)  = neo_vpol_dke_out(is)
+        outdata_g_loc(2+6*(is-1),p)  = neo_pflux_dke_out(is)/gfac(is)
+        outdata_q_loc(2+6*(is-1),p)  = neo_efluxtot_dke_out(is)/qfac(is)
+     enddo
+     
      ! Cni1
      neo_dlnndr_in(:) = 0.0;  neo_dlntdr_in(:) = 0.0; neo_dlnndr_in(2) = 1.0 
      call neo_run()
-     outdata_loc(3,p)    = neo_jpar_dke_out/(abs(neo_z_in(2))*neo_dens_in(2))
-     outsaudata_loc(3,p) = neo_jpar_thS_out/(abs(neo_z_in(2))*neo_dens_in(2))
+     outdata_j_loc(3,p) = neo_jpar_dke_out/jfac(2)
+     do is=1,neo_n_species_in
+        outdata_u_loc(3+6*(is-1),p)  = neo_vpol_dke_out(is)
+        outdata_g_loc(3+6*(is-1),p)  = neo_pflux_dke_out(is)/gfac(is)
+        outdata_q_loc(3+6*(is-1),p)  = neo_efluxtot_dke_out(is)/qfac(is)
+     enddo
+     
      ! CTi1
      neo_dlnndr_in(:) = 0.0;  neo_dlntdr_in(:) = 0.0; neo_dlntdr_in(2) = 1.0  
      call neo_run()
-     outdata_loc(4,p)    = neo_jpar_dke_out/(abs(neo_z_in(2))*neo_dens_in(2))
-     outsaudata_loc(4,p) = neo_jpar_thS_out/(abs(neo_z_in(2))*neo_dens_in(2))
+     outdata_j_loc(4,p) = neo_jpar_dke_out/jfac(2)
+     do is=1,neo_n_species_in
+        outdata_u_loc(4+6*(is-1),p)  = neo_vpol_dke_out(is)
+        outdata_g_loc(4+6*(is-1),p)  = neo_pflux_dke_out(is)/gfac(is)
+        outdata_q_loc(4+6*(is-1),p)  = neo_efluxtot_dke_out(is)/qfac(is)
+     enddo
+     
      ! Cni2
      neo_dlnndr_in(:) = 0.0;  neo_dlntdr_in(:) = 0.0; neo_dlnndr_in(3) = 1.0 
      call neo_run()
-     outdata_loc(5,p)    = neo_jpar_dke_out/(abs(neo_z_in(3))*neo_dens_in(3))
-     outsaudata_loc(5,p) = neo_jpar_thS_out/(abs(neo_z_in(3))*neo_dens_in(3))
+     outdata_j_loc(5,p) = neo_jpar_dke_out/jfac(3)
+     do is=1,neo_n_species_in
+        outdata_u_loc(5+6*(is-1),p)  = neo_vpol_dke_out(is)
+        outdata_g_loc(5+6*(is-1),p)  = neo_pflux_dke_out(is)/gfac(is)
+        outdata_q_loc(5+6*(is-1),p)  = neo_efluxtot_dke_out(is)/qfac(is)
+     enddo
+     
      ! CTi2 
      neo_dlnndr_in(:) = 0.0;  neo_dlntdr_in(:) = 0.0; neo_dlntdr_in(3) = 1.0
      call neo_run()
-     outdata_loc(6,p)    = neo_jpar_dke_out/(abs(neo_z_in(3))*neo_dens_in(3))
-     outsaudata_loc(6,p) = neo_jpar_thS_out/(abs(neo_z_in(3))*neo_dens_in(3))
-
-     ! store geometry parameters
-     do k=1,12
-        ingeodata_loc(k,p) = neo_geoparams_out(k)
+     outdata_j_loc(6,p) = neo_jpar_dke_out/jfac(3)
+     do is=1,neo_n_species_in
+        outdata_u_loc(6+6*(is-1),p)  = neo_vpol_dke_out(is)
+        outdata_g_loc(6+6*(is-1),p)  = neo_pflux_dke_out(is)/gfac(is)
+        outdata_q_loc(6+6*(is-1),p)  = neo_efluxtot_dke_out(is)/qfac(is)
      enddo
 
-     ! renormalize the coefficients by 1/I_div_psiprime/rho_star
-     outdata_loc(:,p) = outdata_loc(:,p) &
-          / (neo_geoparams_out(1)*neo_rho_star_in)
-      outsaudata_loc(:,p) = outsaudata_loc(:,p) &
-          / (neo_geoparams_out(1)*neo_rho_star_in)
+     ! <jpar B>/Bunit j_s ~ rho (I/psip) sum_s |z_a| n_a C_a 1/L_a
+     
+     ! K_a/n_a ~ Vpol / Bpol
+     ! <B^2/Bunit^2> K_a Bunit/(n_a c_s) ~ rho (I/psip) C 1/L
+     outdata_u_loc(:,p) = outdata_u_loc(:,p) &
+          * neo_geoparams_out(3) / neo_geoparams_out(4) &
+          / (neo_rho_star_in * neo_geoparams_out(1))
+  
+     ! Gamma_a/(n_e c_s) ~ n_a/n_e nu_aa rho_a^2 (I/psip)^2  <Bunit^2/B^2> C 1/L
+     outdata_g_loc(:,p) = outdata_g_loc(:,p) &
+          * neo_geoparams_out(3) &
+          / (neo_rho_star_in * neo_geoparams_out(1))**2 / neo_nu_1_in
+
+     ! Q_a/(n_e c_s T_e) ~ n_a/n_e nu_aa rho_a^2 (I/psip)^2  <Bunit^2/B^2> C 1/L
+     outdata_q_loc(:,p) = outdata_q_loc(:,p) &
+          * neo_geoparams_out(3) &
+          / (neo_rho_star_in * neo_geoparams_out(1))**2 / neo_nu_1_in
+     
+     ! 6 inputs: eps,ft,q,log10(nuee),ni,Ti
+     indata_loc(1,p) = neo_rmin_over_a_in
+     indata_loc(2,p) = neo_geoparams_out(2)
+     indata_loc(3,p) = neo_q_in
+     indata_loc(4,p) = log10(neo_nu_1_in)
+     indata_loc(5,p) = neo_dens_in(2)
+     indata_loc(6,p) = neo_temp_in(2)
+     
   enddo
 
   ! Collect all data 
   call MPI_ALLREDUCE(indata_loc,indata,size(indata), &
        MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,i_err)
-  call MPI_ALLREDUCE(ingeodata_loc,ingeodata,size(ingeodata), &
+  call MPI_ALLREDUCE(outdata_j_loc,outdata_j,size(outdata_j), &
        MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,i_err)
-  call MPI_ALLREDUCE(outdata_loc,outdata,size(outdata), &
+  call MPI_ALLREDUCE(outdata_u_loc,outdata_u,size(outdata_u), &
        MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,i_err)
-   call MPI_ALLREDUCE(outsaudata_loc,outsaudata,size(outsaudata), &
+  call MPI_ALLREDUCE(outdata_g_loc,outdata_g,size(outdata_g), &
        MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,i_err)
-
+  call MPI_ALLREDUCE(outdata_q_loc,outdata_q,size(outdata_q), &
+       MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,i_err)
+  
   if (i_proc == 0) then
 
      open(unit=1,file='out.pneo.indata',status='replace')
      write(1,10) indata(:,:)
      close(1)
 
-     open(unit=1,file='out.pneo.ingeo',status='replace')
-     write(1,10) ingeodata(:,:)
+     open(unit=1,file='out.pneo.c_j',status='replace')
+     write(1,10) outdata_j(:,:)
      close(1)
 
-     open(unit=1,file='out.pneo.c',status='replace')
-     write(1,10) outdata(:,:)
+     open(unit=1,file='out.pneo.c_u',status='replace')
+     write(1,10) outdata_u(:,:)
      close(1)
 
-      open(unit=1,file='out.pneo.csau',status='replace')
-     write(1,10) outsaudata(:,:)
+     open(unit=1,file='out.pneo.c_g',status='replace')
+     write(1,10) outdata_g(:,:)
      close(1)
 
+     open(unit=1,file='out.pneo.c_q',status='replace')
+     write(1,10) outdata_q(:,:)
+     close(1)
+     
   endif
 
   call MPI_finalize(i_err)

@@ -33,6 +33,7 @@ def set_defaults() :
      t.add('USE_BPAR','.false.')
      t.add('USE_MHD_RULE','.true.')
      t.add('USE_BISECTION','.true.')
+     t.add('USE_INBOARD_DETRAPPED','.false')
      t.add('IBRANCH','-1')
      t.add('NMODES','2')
      t.add('NBASIS_MAX','4')

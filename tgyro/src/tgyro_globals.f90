@@ -265,7 +265,7 @@ module tgyro_globals
   integer :: tgyro_relax_iterations
   real :: loc_nu_scale
   real :: loc_dx
-  real :: loc_dx_gyro
+  real :: tgyro_search_weight
   real :: loc_dx_max
   real :: loc_relax
   integer :: loc_lock_profile_flag
@@ -296,7 +296,7 @@ module tgyro_globals
   integer :: loc_residual_method
   integer :: loc_num_equil_flag
   integer :: tgyro_neo_gv_flag
-  integer :: tglf_q_low_flag
+  integer :: tgyro_consistent_flag
   integer :: tgyro_iteration_method
   integer :: tgyro_rotation_flag
   real :: tgyro_rmin
@@ -326,6 +326,7 @@ module tgyro_globals
   integer :: tgyro_quickfast_flag
   integer :: tgyro_zero_dens_grad_flag
   real :: tgyro_residual_tol
+  real :: tgyro_input_fusion_scale
   !
   ! Iteration variables (global)
   !
@@ -341,11 +342,7 @@ module tgyro_globals
   integer :: i_ash
   integer :: evolve_indx(5)
   !
-  ! Global TGYRO variables
-  integer :: igmin
-  integer :: igmax
-  real :: length
-  real :: dlength
+  integer :: use_trap
   !---------------------------------------------------------
 
 end module tgyro_globals

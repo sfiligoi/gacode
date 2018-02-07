@@ -320,7 +320,7 @@ contains
     do is=1, n_species
        jpar = jpar + Z(is) * uparBN(is) 
     enddo
-
+    
     ! U_parallel coefficient
     do is=1, n_species
        ! <B^2 / n_0a>
@@ -560,6 +560,7 @@ contains
   subroutine TRANSP_write(ir)
     use neo_globals
     use neo_rotation
+    use neo_equilibrium
     use EXPRO_locsim_interface
     implicit none
     integer, intent (in) :: ir
@@ -567,7 +568,7 @@ contains
     real :: pgb, egb, mgb, dens_ele, temp_ele
 
     if(silent_flag > 0 .or. i_proc > 0) return
-
+    
     ! transport coefficients (normalized)
     open(io,file=trim(path)//runfile_transp,status='old',position='append')
     write (io,'(e16.8)',advance='no') r(ir)

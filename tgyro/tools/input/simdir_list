@@ -8,11 +8,6 @@ Transport mode:
     treg04: [t+ th+ne1+te1+ti1] * DIII-D 128913 Benchmark case
     iter01: TGLF-ITER recalibration case
 
-Linear stability mode:
-
-    sreg01: GYRO stability analysis (needs 128 cores)
-    sreg02: TGLF stability analysis (needs 8 cores)
-
 Multi-run mode:
 
     mreg01: 

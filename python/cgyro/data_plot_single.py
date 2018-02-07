@@ -5,8 +5,16 @@ from matplotlib import rc
 from cgyro.data_plot import cgyrodata_plot
 from cgyro.data_dump import cgyrodata_dump
 
+data_in = cgyrodata_plot('./')
+
+# Use first 3 args to define plot and font size 
 rc('text',usetex=True)
-rc('font',size=18)
+rc('font',size=int(sys.argv[1]))
+data_in.lx = int(sys.argv[2])
+data_in.ly = int(sys.argv[3])
+
+# Shift list by 3
+sys.argv = sys.argv[3:]
 
 plot_type = sys.argv[1]
 
@@ -15,7 +23,7 @@ if plot_type == 'freq':
    w     = float(sys.argv[2])
    ftype = sys.argv[3]
 
-   cgyrodata_plot('./').plot_freq(w=w)
+   data_in.plot_freq(w=w)
 
    outfile = 'out.cgyro.freq.'+ftype
 
@@ -24,7 +32,7 @@ elif plot_type == 'ky_freq':
    w     = float(sys.argv[2])
    ftype = sys.argv[3]
 
-   cgyrodata_plot('./').plot_ky_freq(w=w)
+   data_in.plot_ky_freq(w=w)
 
    outfile = 'out.cgyro.ky_freq.'+ftype
 
@@ -36,7 +44,7 @@ elif plot_type == 'ky_phi':
    nstr  = sys.argv[5]
    ftype = sys.argv[6]
 
-   cgyrodata_plot('./').plot_ky_phi(field=field,ymin=ymin,ymax=ymax,nstr=nstr)
+   data_in.plot_ky_phi(field=field,ymin=ymin,ymax=ymax,nstr=nstr)
 
    outfile = 'out.cgyro.ky_phi.'+ftype
 
@@ -45,7 +53,7 @@ elif plot_type == 'rcorr_phi':
    w     = float(sys.argv[2])
    ftype = sys.argv[3]
 
-   cgyrodata_plot('./').plot_rcorr_phi(w=w)
+   data_in.plot_rcorr_phi(w=w)
 
    outfile = 'out.cgyro.rcorr_phi.'+ftype
 
@@ -53,7 +61,7 @@ elif plot_type == 'geo':
    
    ftype = sys.argv[2]
 
-   cgyrodata_plot('./').plot_geo()
+   data_in.plot_geo()
 
    outfile = 'out.cgyro.geo.'+ftype
 
@@ -61,7 +69,7 @@ elif plot_type == 'error':
    
    ftype = sys.argv[2]
 
-   cgyrodata_plot('./').plot_error()
+   data_in.plot_error()
 
    outfile = 'out.cgyro.error.'+ftype
 
@@ -72,7 +80,7 @@ elif plot_type == 'ball':
    tmax  = float(sys.argv[4])
    ftype = sys.argv[5]
 
-   head,x,y1,y2 = cgyrodata_plot('./').plot_ball(itime=itime,field=field,tmax=tmax)
+   head,x,y1,y2 = data_in.plot_ball(itime=itime,field=field,tmax=tmax)
    
    outfile = 'out.cgyro.ball.'+ftype
 
@@ -82,7 +90,7 @@ elif plot_type == 'zf':
    field = int(sys.argv[3])
    ftype = sys.argv[4]
 
-   cgyrodata_plot('./').plot_zf(w=w,field=field)
+   data_in.plot_zf(w=w,field=field)
    
    outfile = 'out.cgyro.zf.'+ftype
 
@@ -91,7 +99,7 @@ elif plot_type == 'phi':
    field = int(sys.argv[2])
    ftype = sys.argv[3]
 
-   head,x,y1,y2 = cgyrodata_plot('./').plot_phi(field=field)
+   head,x,y1,y2 = data_in.plot_phi(field=field)
    
    outfile = 'out.cgyro.phi.'+ftype
 
@@ -111,8 +119,7 @@ elif plot_type == 'flux':
       cgyrodata_dump('./').dump_flux(fc=fc)
       sys.exit()
    else:
-      cgyrodata_plot('./').plot_flux(w=w,field=field,moment=moment,
-                                     ymin=ymin,ymax=ymax,fc=fc,loc=loc,nscale=nscale)
+      data_in.plot_flux(w=w,field=field,moment=moment,ymin=ymin,ymax=ymax,fc=fc,loc=loc,nscale=nscale)
 
    outfile = 'out.cgyro.flux.'+ftype
 
@@ -130,7 +137,7 @@ elif plot_type == 'ky_flux':
       cgyrodata_dump('./').dump_ky_flux(w=w,field=field,moment=moment,fc=fc)
       sys.exit()
    else:
-      cgyrodata_plot('./').plot_ky_flux(w=w,field=field,moment=moment,ymin=ymin,ymax=ymax,fc=fc)
+      data_in.plot_ky_flux(w=w,field=field,moment=moment,ymin=ymin,ymax=ymax,fc=fc)
 
    outfile = 'out.cgyro.ky_flux.'+ftype
 
@@ -143,7 +150,7 @@ elif plot_type == 'xflux':
    ftype  = sys.argv[6]
    nscale = int(sys.argv[7])
 
-   cgyrodata_plot('./').plot_xflux(w=w,moment=moment,ymin=ymin,ymax=ymax,nscale=nscale)
+   data_in.plot_xflux(w=w,moment=moment,ymin=ymin,ymax=ymax,nscale=nscale)
 
    outfile = 'out.cgyro.xflux.'+ftype
 
@@ -152,7 +159,7 @@ elif plot_type == 'kxky_phi':
    w     = float(sys.argv[2])
    ftype = sys.argv[3]
 
-   cgyrodata_plot('./').plot_kxky_phi(w=w)
+   data_in.plot_kxky_phi(w=w)
    
    outfile = 'out.cgyro.kxky_phi.'+ftype
 
@@ -164,7 +171,7 @@ elif plot_type == 'kx_phi':
    nstr  = sys.argv[5]
    ftype = sys.argv[6]
 
-   cgyrodata_plot('./').plot_kx_phi(w=w,ymin=ymin,ymax=ymax,nstr=nstr)
+   data_in.plot_kx_phi(w=w,ymin=ymin,ymax=ymax,nstr=nstr)
    
    outfile = 'out.cgyro.kx_phi.'+ftype
 
@@ -176,7 +183,7 @@ elif plot_type == 'hb':
    mesh  = int(sys.argv[5])
    ftype = sys.argv[6]
 
-   cgyrodata_plot('./').plot_hb(itime=itime,spec=spec,tmax=tmax,mesh=mesh)
+   data_in.plot_hb(itime=itime,spec=spec,tmax=tmax,mesh=mesh)
    
    outfile = 'out.cgyro.hb.'+ftype
 
@@ -188,7 +195,7 @@ elif plot_type == 'hbcut':
    theta = sys.argv[5]
    ftype = sys.argv[6]
 
-   cgyrodata_plot('./').plot_hbcut(itime=itime,spec=spec,tmax=tmax,theta=theta)
+   data_in.plot_hbcut(itime=itime,spec=spec,tmax=tmax,theta=theta)
    
    outfile = 'out.cgyro.hbcut.'+ftype
 
@@ -199,6 +206,7 @@ else:
    
 #---------------------------------------------------------------
 # Plot to screen or to image file
+
 if ftype == 'screen':
     plt.show()
 elif ftype == 'dump':

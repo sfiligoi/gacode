@@ -37,6 +37,7 @@ subroutine tgyro_iteration_driver
   allocate(f_vec0(p_max))
   allocate(g_vec0(p_max))
   allocate(b(p_max))
+  allocate(weight(p_max))
 
   call tgyro_allocate_globals
 
@@ -62,17 +63,17 @@ subroutine tgyro_iteration_driver
 
      flux_method = 0
 
-  else if (lcode == "ifs") then
+  else if (lcode == 'ifs') then
 
      ! IFS-PPPL
      flux_method = 1
 
-  else if (lcode == "tglf") then
+  else if (lcode == 'tglf') then
 
      ! TGLF
      flux_method = 2
 
-  else if (lcode == "glf23") then
+  else if (lcode == 'glf23') then
 
      ! GLF23
      flux_method = 3
@@ -81,9 +82,6 @@ subroutine tgyro_iteration_driver
 
      ! GYRO
      flux_method = 4
-
-     ! Reset step-length for Jacobian
-     dx = loc_dx_gyro/r_min
 
   endif
   !---------------------------------------------
@@ -124,24 +122,28 @@ subroutine tgyro_iteration_driver
         ip = ip+1
         pmap(i,ip) = p
         x_vec(p) = dlntidr(1,i)
+        weight(p) = 1.0
      endif
      if (loc_te_feedback_flag == 1) then
         p  = p+1
         ip = ip+1
         pmap(i,ip) = p
         x_vec(p) = dlntedr(i)
+        weight(p) = 1.0
      endif
      if (loc_er_feedback_flag == 1) then
         p  = p+1
         ip = ip+1
         pmap(i,ip) = p
         x_vec(p) = f_rot(i)
+        weight(p) = 1.0
      endif
      if (evo_e(0) == 1) then
         p  = p+1
         ip = ip+1
         pmap(i,ip) = p
         x_vec(p) = dlnnedr(i)
+        weight(p) = tgyro_search_weight
      endif
      do i_ion=1,loc_n_ion
         if (evo_e(i_ion) == 1) then
@@ -149,6 +151,7 @@ subroutine tgyro_iteration_driver
            ip = ip+1
            pmap(i,ip) = p
            x_vec(p) = dlnnidr(i_ion,i)
+           weight(p) = 1.0
         endif
      enddo
   enddo
@@ -179,5 +182,5 @@ subroutine tgyro_iteration_driver
      call tgyro_iteration_simplerelax
 
   end select
-
+    
 end subroutine tgyro_iteration_driver

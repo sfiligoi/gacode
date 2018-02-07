@@ -21,6 +21,7 @@ subroutine tgyro_init_profiles
   real :: tmp_ped
   real :: p_ave
   real :: x0(1),y0(1)
+  real :: dx,dx_min,dx_max
 
   !------------------------------------------------------
   ! PHYSICAL CONSTANTS
@@ -110,6 +111,23 @@ subroutine tgyro_init_profiles
   !----------------------------------------------
 
   !----------------------------------------------
+  ! Check for highly-nonuniform grid
+  !
+  dx_min = 1.0
+  dx_max = 0.0
+  do i=2,n_r
+     dx = r(i)-r(i-1) 
+     if (dx < dx_min) dx_min = dx
+     if (dx > dx_max) dx_max = dx
+  enddo
+  if (dx_max/dx_min > 10.0) then
+     use_trap = 1
+  else
+     use_trap = 0
+  endif
+  !----------------------------------------------
+  
+  !----------------------------------------------
   ! Radius where profiles will be matched.
   !
   i_bc = n_r-loc_bc_offset
@@ -192,6 +210,16 @@ subroutine tgyro_init_profiles
      n_ratio(i_ion) = ni(i_ion,n_r)/ne(n_r)
      t_ratio(i_ion) = ti(i_ion,n_r)/te(n_r)
   enddo
+
+  if (tgyro_consistent_flag == 1) then
+     ! Exact recovery of TGYRO-grid gradients
+     call math_zfind(n_r,te,r*(100*r_min),dlntedr)
+     call math_zfind(n_r,ne,r*(100*r_min),dlnnedr)
+     do i_ion=1,loc_n_ion
+        call math_zfind(n_r,ti(i_ion,:),r*(100*r_min),dlntidr(i_ion,:))
+        call math_zfind(n_r,ni(i_ion,:),r*(100*r_min),dlnnidr(i_ion,:))
+     enddo
+  endif
 
   if (tgyro_ptot_flag == 1) then
 
@@ -416,6 +444,13 @@ subroutine tgyro_init_profiles
   ! d (Psi_norm)/dr in units of 1/cm
   dpsidr_exp = EXPRO_bunit*EXPRO_rmin/EXPRO_q/EXPRO_polflux(n_exp)/100.0
 
+  ! Check for sanity of psi_exp profile
+  do i=2,n_exp
+     if (abs(psi_exp(i)-psi_exp(i-1)) < 1e-8) then
+        call tgyro_catch_error('ERROR: (tgyro_init_profiles) Poloidal flux profile (polflux) has two equal values.')
+     endif
+  enddo
+  
   if (tgyro_ped_model > 1) then
      ! a [m]
      a_in = r_min
@@ -516,3 +551,26 @@ subroutine tgyro_init_profiles
 
 
 end subroutine tgyro_init_profiles
+
+subroutine math_zfind(n,p,r,z)
+
+  implicit none
+
+  integer, intent(in) :: n
+  real, intent(in) :: p(n)
+  real, intent(in) :: r(n)
+  real, intent(inout) :: z(n)
+  
+  real, dimension(n) :: rat
+
+  integer :: i
+  
+  rat = log(p/p(n))
+  z(1) = 0.0
+  do i=2,n
+     z(i) = 2*(rat(i)-rat(i-1))/(r(i)-r(i-1))-z(i-1)
+  enddo
+  z = -z
+  
+end subroutine math_zfind
+ 

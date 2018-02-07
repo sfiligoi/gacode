@@ -6,6 +6,12 @@ program neo
   implicit none
 
   integer :: ierr
+  integer, external :: omp_get_max_threads
+
+  !----------------------------------------------------------------
+  ! Query OpenMP for threads
+  !
+  n_omp = omp_get_max_threads()
 
   call MPI_INIT(ierr)
 

@@ -3,6 +3,7 @@
 # sudo port install openmpi netcdf-fortran 
 # sudo port install fftw-3 +openmpi
 #---------------------------------------------------
+IDENTITY="OSX gfortran+openmpi from MacPorts"
 
 MAKE = make
 
@@ -27,9 +28,14 @@ FOMP	= -fopenmp
 
 LMATH = -framework Accelerate -L/opt/local/lib -lfftw3
 
-NETCDF = -L/opt/local/lib -lnetcdff -lnetcdf 
+NETCDF = -L${NETCDF_PATH}/lib -lnetcdff -lnetcdf 
 NETCDF_INC =${NETCDF_PATH}/include
 
 # Archive
 
 ARCH = ar cr
+
+ifdef FANN_ROOT
+   # neural net libraries
+   NN_LIB=-L$(GACODE_ROOT)/../neural/ -I$(GACODE_ROOT)/../neural/ -lbrainfuse -lfann
+endif

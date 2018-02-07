@@ -209,6 +209,8 @@ x.add('LAGUERRE_METHOD','1')
 x.add('WRITE_CMOMENTS_FLAG','0')
 x.add('THREED_HYPERXI','0')
        	
+x.add('USE_SLU','0')
+
 # Deprecated parameters
 x.dep('NU_2','Only NU_1 is input now.  NU for other species is computed internally.')
 x.dep('NU_3','Only NU_1 is input now.  NU for other species is computed internally.')

@@ -15,6 +15,6 @@ subroutine gyro_set_exit_status(message,stat)
   integer, intent(in) :: stat
 
   gyro_exit_status  = stat
-  gyro_exit_message = message
+  gyro_exit_message = trim(message)
 
 end subroutine gyro_set_exit_status

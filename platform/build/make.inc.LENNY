@@ -1,8 +1,8 @@
 #---------------------------------------------------
-# AMD A8 4-core Workstation (fedora)
+# Linux Mint
 #---------------------------------------------------
 
-IDENTITY="newt 4-core Fedora workstation"
+IDENTITY="Linux Mint gfortran+mpich (system BLAS)"
 CORES_PER_NODE=4
 NUMAS_PER_NODE=1
 

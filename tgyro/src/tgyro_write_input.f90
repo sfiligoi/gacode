@@ -47,8 +47,6 @@ subroutine tgyro_write_input
      error_flag = 1
      error_msg = 'ERROR: (TGYRO) All species densities cannot be simultaneously floated.'
   endif
-
-
   !----------------------------------------------------------------
 
   if (i_proc_global == 0) then
@@ -80,6 +78,11 @@ subroutine tgyro_write_input
      write(1,*)
      write(1,*) 'Iteration control'
      write(1,*) 
+
+     if (use_trap == 1) then
+        write(1,'(a)') ' WARNING: (TGYRO) Highly nonuniform grid.  Using trapezoidal source integration.'
+        write(1,'(a)')
+     endif
 
      select case (tgyro_iteration_method)
 
@@ -134,11 +137,14 @@ subroutine tgyro_write_input
      !--------------------------------------------------------
 
      write(1,20) 'LOC_DX (Jacobian dx)',loc_dx
-     if (maxval(flux_method_vec) == 4) then
-        write(1,20) 'LOC_DX_GYRO (GYRO Jacobian dx)',loc_dx_gyro
-     endif
      write(1,20) 'LOC_DX_MAX (maximum dx)',loc_dx_max
      write(1,20) 'LOC_RELAX (conv. relaxation)',loc_relax
+
+     if (tgyro_consistent_flag == 0) then
+        write(1,10) 'TGYRO_CONSISTENT_FLAG','Finite-difference gradients used from input.profiles'
+     else
+        write(1,10) 'TGYRO_CONSISTENT_FLAG','Profile-consistent gradients used from input.profiles'
+     endif
 
      write(1,*)
      write(1,*) 'Scenario control'
@@ -271,24 +277,26 @@ subroutine tgyro_write_input
      end select
      !--------------------------------------------------------
 
-     select case(tgyro_glf23_revision)
-     case (1)
+     if (lcode == 'glf23') then
+        select case(tgyro_glf23_revision)
+        case (1)
 
-        write(1,10) 'TGYRO_GLF23_REVISION','Original GLF23'
+           write(1,10) 'TGYRO_GLF23_REVISION','Original GLF23'
 
-     case (2)
+        case (2)
 
-        write(1,10) 'TGYRO_GLF23_REVISION','retuned GLF23 v1.61'
+           write(1,10) 'TGYRO_GLF23_REVISION','retuned GLF23 v1.61'
 
-     case(3)
+        case(3)
 
-        write(1,10) 'TGYRO_GLF23_REVISION','renormed GLF23'
-     case default
+           write(1,10) 'TGYRO_GLF23_REVISION','renormed GLF23'
+        case default
 
-        error_flag = 1
-        error_msg = 'Error: TGYRO_GLF23_REVISION'
+           error_flag = 1
+           error_msg = 'Error: TGYRO_GLF23_REVISION'
 
-     end select
+        end select
+     endif
      !--------------------------------------------------------
 
      !---------------------------------------------------------------------------------------------------
@@ -346,7 +354,11 @@ subroutine tgyro_write_input
      case (0)
         write(1,10) 'TGYRO_DEN_METHOD0','ne profile fixed'
      case (1)
-        write(1,10) 'TGYRO_DEN_METHOD0','ne evolution ON'
+        if (loc_pflux_method == 1) then
+           write(1,10) 'TGYRO_DEN_METHOD0','ne evolution ON (zero source)'
+        else
+           write(1,10) 'TGYRO_DEN_METHOD0','ne evolution ON (with particle source)'
+        endif
      case default
         error_flag = 1
         error_msg = 'Error: TGYRO_EVO_E(0)'
@@ -524,13 +536,14 @@ subroutine tgyro_write_input
 
      !--------------------------------------------------------
      write(1,*)
-     write(1,*) 'Input profile rescaling factors'
+     write(1,*) 'Rescaling factors'
      write(1,*) 
      write(1,20) 'TGYRO_INPUT_DEN_SCALE',tgyro_input_den_scale
      write(1,20) 'TGYRO_INPUT_TE_SCALE',tgyro_input_te_scale
      write(1,20) 'TGYRO_INPUT_TI_SCALE',tgyro_input_ti_scale
      write(1,20) 'TGYRO_INPUT_W0_SCALE',tgyro_input_w0_scale
      write(1,20) 'TGYRO_INPUT_PAUX_SCALE',tgyro_input_paux_scale
+     write(1,20) 'TGYRO_INPUT_FUSION_SCALE',tgyro_input_fusion_scale
 
      write(1,*)'-----------------------------------------------------------------'
 

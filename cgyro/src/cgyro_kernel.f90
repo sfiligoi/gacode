@@ -92,11 +92,14 @@ subroutine cgyro_kernel
      else
         call cgyro_step_collision
      endif
-     !------------------------------------------------------------
 
-     !------------------------------------------------------------
-     ! Spectral ExB shear
-     call cgyro_shear
+     ! Hammett method for ExB shear
+     if (shear_method == 1) then
+        ! Discrete shift (Hammett) 
+        call timer_lib_in('shear')
+        call cgyro_shear_hammett
+        call timer_lib_out('shear')
+     endif
      !------------------------------------------------------------
 
      !------------------------------------------------------------

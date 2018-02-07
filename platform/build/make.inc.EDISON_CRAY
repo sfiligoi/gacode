@@ -1,5 +1,5 @@
 # FIXED Hardware parameters
-IDENTITY="Cray XC30 (edison)"
+IDENTITY="Cray XC30 (edison), Cray compiler"
 CORES_PER_NODE=24
 NUMAS_PER_NODE=2
 

@@ -18,6 +18,7 @@ subroutine tgyro_catch_error(message)
      open(unit=1,file=trim(runfile),status='old',position='append')
      write(1,10) message
      close(1)
+     print '(a)','** TGYRO HALTED ON ERROR ** (see out.tgyro.run)'
   endif
 
   call MPI_finalize(ierr)

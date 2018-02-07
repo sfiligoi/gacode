@@ -52,6 +52,10 @@ subroutine prgen_read_plasmastate
   err = nf90_inq_dimid(ncid,trim(plst_tag),varid)
   err = nf90_Inquire_Dimension(ncid,varid,len=plst_dp1_nspec_all)
   if (verbose_flag == 1) print *,err,plst_tag,plst_dp1_nspec_all
+  if (plst_dp1_nspec_all > n_ion_max) then
+     print '(a)','ERROR: (prgen_read_plasmastate) Too many ions in plasmastate file.'
+     stop
+  endif
 
   ! Number of species (thermal + fast, abridged)
   plst_tag = 'dp1_nspec_alla'
@@ -71,7 +75,7 @@ subroutine prgen_read_plasmastate
   err = nf90_Inquire_Dimension(ncid,varid,len=plst_dim_nrho_eq_geo)
   if (verbose_flag == 1) print *,err,plst_tag,plst_dim_nrho_eq_geo
   if (plst_dim_nrho_eq_geo /= plst_dim_nrho) then
-     print *,'ERROR: plst_dim_nrho_eq_geo /= plst_dim_nrho'
+     print '(a)','ERROR: (prgen_read_plasmastate) plst_dim_nrho_eq_geo /= plst_dim_nrho'
      stop
   endif
 
@@ -186,57 +190,87 @@ subroutine prgen_read_plasmastate
   err = nf90_inq_varid(ncid,trim('ns_bdy'),varid)
   err = nf90_get_var(ncid,varid,plst_ns(nx,1:plst_dp1_nspec_th)) 
 
-  ! Beam density
+  ! Fast-ion handling ...
+
+  ntop = plst_dp1_nspec_th
+  !------------------------------------------------------------------
+  ! 1. Beams
   err = nf90_inq_varid(ncid,trim('nbeami'),varid)
   if (err == 0) then
+     ! density
      err = nf90_get_var(ncid,varid,plst_nb(1:nx-1))
      plst_nb(nx) = plst_nb(nx-1)
+     ! perpendicular energy
+     err = nf90_inq_varid(ncid,trim('eperp_beami'),varid)
+     err = nf90_get_var(ncid,varid,plst_eperp(1:nx-1))
+     ! parallel energy
+     err = nf90_inq_varid(ncid,trim('epll_beami'),varid)
+     err = nf90_get_var(ncid,varid,plst_epar(1:nx-1))
+
+     plst_tb(1:nx-1) = 2.0/3.0*(plst_epar(1:nx-1) + plst_eperp(1:nx-1))
+     plst_tb(nx)     = plst_tb(nx-1)
+
+     ntop = ntop+1
+     plst_ns(:,ntop) = plst_nb(:)
+     plst_ts(:,ntop) = plst_tb(:)
   else
      plst_nb = 0.0
+     plst_tb = 0.0
   endif
+  !------------------------------------------------------------------
 
-  ! Minority ion density
+  !------------------------------------------------------------------
+  ! 2. Minority ions 
   err = nf90_inq_varid(ncid,trim('nmini'),varid)
   if (err == 0) then
      err = nf90_get_var(ncid,varid,plst_nmini(1:nx-1))
      plst_nmini(nx) = plst_nmini(nx-1)
+     ! perpendicular energy
+     err = nf90_inq_varid(ncid,trim('eperp_mini'),varid)
+     err = nf90_get_var(ncid,varid,plst_eperp(1:nx-1))
+     ! parallel energy
+     err = nf90_inq_varid(ncid,trim('epll_mini'),varid)
+     err = nf90_get_var(ncid,varid,plst_epar(1:nx-1))
+
+     plst_tmini(1:nx-1) = 2.0/3.0*(plst_epar(1:nx-1) + plst_eperp(1:nx-1))
+     plst_tmini(nx)     = plst_tmini(nx-1)
+
+     ntop = ntop+1
+     plst_ns(:,ntop) = plst_nmini(:)
+     plst_ts(:,ntop) = plst_tmini(:)
   else
      plst_nmini = 0.0
+     plst_tmini = 0.0
   endif
+  !------------------------------------------------------------------
 
-  ! Fusion ion (alpha) density
+  !------------------------------------------------------------------
+  ! 3. Fusion alphas
   err = nf90_inq_varid(ncid,trim('nfusi'),varid)
   if (err == 0) then
      err = nf90_get_var(ncid,varid,plst_nfusi(1:nx-1))
      plst_nfusi(nx) = plst_nfusi(nx-1)
+     ! perpendicular energy
+     err = nf90_inq_varid(ncid,trim('eperp_fusi'),varid)
+     err = nf90_get_var(ncid,varid,plst_eperp(1:nx-1))
+     ! parallel energy
+     err = nf90_inq_varid(ncid,trim('epll_fusi'),varid)
+     err = nf90_get_var(ncid,varid,plst_epar(1:nx-1))
+
+     plst_tfusi(1:nx-1) = 2.0/3.0*(plst_epar(1:nx-1) + plst_eperp(1:nx-1))
+     plst_tfusi(nx)     = plst_tfusi(nx-1)
+
+     ntop = ntop+1
+     plst_ns(:,ntop) = plst_nfusi(:)
+     plst_ts(:,ntop) = plst_tfusi(:)
   else
      plst_nfusi = 0.0
   endif
-
-  ! Beam perpendicular energy
-  err = nf90_inq_varid(ncid,trim('eperp_beami'),varid)
-  err = nf90_get_var(ncid,varid,plst_eperpb(1:nx-1))
-
-  ! Beam parallel energy
-  err = nf90_inq_varid(ncid,trim('epll_beami'),varid)
-  err = nf90_get_var(ncid,varid,plst_eparb(1:nx-1))
-
-  ! Set the n+1 density/temperature to the beam values
-  plst_ns(1:nx-1,plst_dp1_nspec_th+1) = plst_nb(1:nx-1)
-  plst_ts(1:nx-1,plst_dp1_nspec_th+1) = 2.0/3.0*(plst_eparb(1:nx-1) + plst_eperpb(1:nx-1))
-
-  plst_ns(nx,plst_dp1_nspec_th+1) = plst_ns(nx-1,plst_dp1_nspec_th+1)
-  plst_ts(nx,plst_dp1_nspec_th+1) = plst_ts(nx-1,plst_dp1_nspec_th+1)
+  !------------------------------------------------------------------
 
   ! Total plasma pressure, thermal + fast ions
   err = nf90_inq_varid(ncid,trim('P_eq'),varid)
   err = nf90_get_var(ncid,varid,p_tot)
-
-  ! NOTE: Fast-ion handling: 
-  !
-  ! Historically, we retained the beams as the n_thermal+1 species.  Now, we have
-  ! the option to lump all the fast ions into an effective fast ion population and
-  ! put that in the N+1 slot.
 
   ! Radial electrostatic (equilibrium) potential (kV not keV!) 
   err = nf90_inq_varid(ncid,trim('Epot'),varid)

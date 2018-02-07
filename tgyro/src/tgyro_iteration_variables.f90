@@ -25,6 +25,7 @@ module tgyro_iteration_variables
   real, dimension(:), allocatable :: f_vec0
   real, dimension(:), allocatable :: g_vec0
   real, dimension(:), allocatable :: b
+  real, dimension(:), allocatable :: weight
   !------------------------------------------------------
 
   !------------------------------------------------------
@@ -34,11 +35,16 @@ module tgyro_iteration_variables
   integer :: search_index=1 
   integer :: search_max=4
   real, dimension(6,4) :: search
+  ! Idea for searching is to try
+  ! full Newton -> 1.0
+  ! tiny step   -> 0.1
+  ! larger      -> 0.75
+  ! smaller     -> 0.5, etc.
   data search/&
-       1.0,0.1,0.75,0.5,0.25,0.5,&
+        1.0, 0.1, 0.75, 0.5, 0.25, 0.5,&
        -1.0,-0.1,-0.75,-0.5,-0.25,-0.5,&
-       2.0,0.2,1.5,1.1,0.6,1.1,&
-       -2.0,-0.2,-1.5,-1.1,-0.6,-1.1/
+        2.0, 0.2, 1.50, 1.1, 0.60, 1.1,&
+       -2.0,-0.2,-1.50,-1.1,-0.60,-1.1/
   !
   ! To be allocated in tgyro_iteration_serial:
   !

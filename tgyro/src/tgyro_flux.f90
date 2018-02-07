@@ -108,7 +108,7 @@ subroutine tgyro_flux
      do i_ion=1,loc_n_ion
         if (therm_flag(i_ion) == 0 .and. tgyro_quickfast_flag == 1) cycle
         i0 = i0+1
-        if(i0 == is_ion) exit
+        if (i0 == is_ion) exit
      enddo
      
      pflux_i_neo(i_ion,i_r) = neo_pflux_thHH_out/Gamma_neo_GB
@@ -227,11 +227,7 @@ subroutine tgyro_flux
      call tgyro_trap_component_error(tglf_error_status,tglf_error_message)
 
      pflux_e_tur(i_r) = tglf_elec_pflux_out
-     if (tglf_q_low_flag == 1) then
-        eflux_e_tur(i_r) = tglf_elec_eflux_low_out
-     else
-        eflux_e_tur(i_r) = tglf_elec_eflux_out
-     endif
+     eflux_e_tur(i_r) = tglf_elec_eflux_out
      mflux_e_tur(i_r) = -tglf_sign_It_in*tglf_elec_mflux_out
      expwd_e_tur(i_r) = tglf_elec_expwd_out
 
@@ -240,11 +236,7 @@ subroutine tgyro_flux
         if (therm_flag(i_ion) == 0 .and. tgyro_quickfast_flag == 1) cycle
         i0 = i0+1 
         pflux_i_tur(i_ion,i_r) = tglf_ion_pflux_out(i0)
-        if (tglf_q_low_flag == 1) then
-           eflux_i_tur(i_ion,i_r) = tglf_ion_eflux_low_out(i0)
-        else
-           eflux_i_tur(i_ion,i_r) = tglf_ion_eflux_out(i0)
-        endif
+        eflux_i_tur(i_ion,i_r) = tglf_ion_eflux_out(i0)
         mflux_i_tur(i_ion,i_r) = -tglf_sign_It_in*tglf_ion_mflux_out(i0)
         expwd_i_tur(i_ion,i_r) = tglf_ion_expwd_out(i0)
      enddo
@@ -254,8 +246,6 @@ subroutine tgyro_flux
      call tgyro_glf23_map
 
      if (gyrotest_flag == 0) call glf23_run
-
-     !     call tgyro_trap_component_error(glf23_error_status,glf23_error_message)
 
      pflux_e_tur(i_r) = glf23_elec_pflux_out
      eflux_e_tur(i_r) = glf23_elec_eflux_out

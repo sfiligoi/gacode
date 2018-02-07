@@ -48,7 +48,7 @@ program cgyro
   call timer_lib_in('input')
   call cgyro_read_input
   call timer_lib_out('input')
-  
+
   call cgyro_kernel
 
   call MPI_FINALIZE(i_err)

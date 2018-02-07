@@ -156,7 +156,7 @@ fi
 if [ $PNEO_FLAG -eq 1 ]
 then
   $GACODE_ROOT/platform/exec/exec.$GACODE_PLATFORM \
-      $SIMDIR $NPROC $NEO_DIR/tools/pneo/src/pneo $NOMP $NUMA $MPINUMA
+      $SIMDIR $NPROC $NEO_DIR/tools/pneo/src/pneo $NOMP $NUMA $MPINUMA $NIDLE
   
     exit 0
 fi
@@ -250,7 +250,7 @@ then
   #==========================================================
 
   $GACODE_ROOT/platform/exec/exec.$GACODE_PLATFORM \
-    $SIMDIR $NPROC $NEO_DIR/src/neo $NOMP $NUMA $MPINUMA
+    $SIMDIR $NPROC $NEO_DIR/src/neo $NOMP $NUMA $MPINUMA $NIDLE
 
 fi
 #===========================================================

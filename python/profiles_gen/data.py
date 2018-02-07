@@ -188,15 +188,17 @@ class profiles_genData:
             self.n_exp = tmp.n_exp
             print('(INFO): (profiles_genData) ' + infile + ' found.')
         except Exception as E:
-            raise (IOError('(ERROR): (profiles_genData) ' + infile + ' not found: ' + str(E)))
-
+            #raise (IOError('(ERROR): (profiles_genData) ' + infile + ' not found: ' + str(E)))
+           pass
+           
         # OPTIONAL: Read input.profiles.extra if it exists
         try:
             self.data.update(profiles_gen_extra(infile + '.extra').data)
             print('(INFO): (profiles_genData) ' + infile + '.extra found.')
         except Exception as E:
-            print('(INFO): (profiles_genData) ' + infile + '.extra NOT loaded: ' + str(E))
-
+            #print('(INFO): (profiles_genData) ' + infile + '.extra NOT loaded: ' + str(E))
+           pass
+        
         # OPTIONAL: Read input.profiles.geo if it exists
         try:
             tmp = profiles_gen_geo(infile + '.geo')
@@ -204,15 +206,17 @@ class profiles_genData:
             self.nfourier = tmp.nfourier
             print('(INFO): (profiles_genData) ' + infile + '.geo found.')
         except Exception as E:
-            print('(INFO): (profiles_genData) ' + infile + '.geo NOT loaded: ' + str(E))
-
+            #print('(INFO): (profiles_genData) ' + infile + '.geo NOT loaded: ' + str(E))
+           pass
+           
         # OPTIONAL: Read input.profiles.jbs if it exists
         try:
             self.data.update(profiles_gen_jbs(infile + '.jbs').data)
             print('(INFO): (profiles_genData) ' + infile + '.jbs found.')
         except Exception as E:
-            print('(INFO): (profiles_genData) ' + infile + '.jbs NOT loaded: ' + str(E))
-
+            #print('(INFO): (profiles_genData) ' + infile + '.jbs NOT loaded: ' + str(E))
+           pass
+           
 class profiles_gen:
     def __init__(self, infile):
         import numpy as np

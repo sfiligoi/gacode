@@ -344,7 +344,7 @@ subroutine cgyro_init_arrays
         omega_s(:,ic,iv_loc) = carg*jvec_c(:,ic,iv_loc)
 
         ! Profile curvature via wavenumber advection
-        carg = k_theta*rho*(sdlnndr(is)+sdlntdr(is)*(energy(ie)-1.5))*length/(2*pi)
+        carg = k_theta*length*(sdlnndr(is)+sdlntdr(is)*(energy(ie)-1.5))/(2*pi)
         
         omega_ss(:,ic,iv_loc) = carg*jvec_c(:,ic,iv_loc)
 

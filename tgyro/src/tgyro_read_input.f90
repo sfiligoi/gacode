@@ -40,7 +40,7 @@ subroutine tgyro_read_input
   call tgyro_readbc_int(tgyro_relax_iterations)
   call tgyro_readbc_real(loc_nu_scale) 
   call tgyro_readbc_real(loc_dx)  
-  call tgyro_readbc_real(loc_dx_gyro) 
+  call tgyro_readbc_real(tgyro_search_weight) 
   call tgyro_readbc_real(loc_dx_max) 
   call tgyro_readbc_real(loc_relax) 
   call tgyro_readbc_int(loc_lock_profile_flag) 
@@ -113,7 +113,7 @@ subroutine tgyro_read_input
   call tgyro_readbc_int(loc_residual_method)
   call tgyro_readbc_int(loc_num_equil_flag)
   call tgyro_readbc_int(tgyro_neo_gv_flag)
-  call tgyro_readbc_int(tglf_q_low_flag)
+  call tgyro_readbc_int(tgyro_consistent_flag)
   call tgyro_readbc_int(tgyro_iteration_method)
   call tgyro_readbc_int(tgyro_rotation_flag)
   call tgyro_readbc_real(tgyro_rmin)
@@ -143,6 +143,7 @@ subroutine tgyro_read_input
   call tgyro_readbc_int(tgyro_quickfast_flag)
   call tgyro_readbc_int(tgyro_zero_dens_grad_flag)
   call tgyro_readbc_real(tgyro_residual_tol)
+  call tgyro_readbc_real(tgyro_input_fusion_scale)
   ! ** END input read; ADD NEW PARAMETERS ABOVE HERE!!
   call tgyro_readbc_int(n_inst)
   !-------------------------------------------------------

@@ -16,8 +16,7 @@ class cgyrodata_plot(data.cgyrodata):
       '''
 
       if fig is None:
-         fig = plt.figure(figsize=(12,6))
-         fig.subplots_adjust(left=0.085,right=0.97,top=0.92,bottom=0.12)
+         fig = plt.figure(figsize=(self.lx,self.ly))
 
       #======================================
       # Omega
@@ -47,6 +46,7 @@ class cgyrodata_plot(data.cgyrodata):
       ax.set_xlim([0,self.t[-1]])
       #======================================
 
+      fig.tight_layout(pad=0.3)
       
    def plot_ky_freq(self,w=0.5,fig=None):
       '''
@@ -57,8 +57,7 @@ class cgyrodata_plot(data.cgyrodata):
       '''
 
       if fig is None:
-         fig = plt.figure(figsize=(12,6))
-         fig.subplots_adjust(left=0.085,right=0.97,top=0.92,bottom=0.12)
+         fig = plt.figure(figsize=(self.lx,self.ly))
 
       #======================================
       # Omega
@@ -87,7 +86,9 @@ class cgyrodata_plot(data.cgyrodata):
       if len(self.ky) > 1:
          ax.set_xlim([0,self.ky[-1]])
       #======================================
-    
+
+      fig.tight_layout(pad=0.3)
+
    def plot_ky_phi(self,field=0,ymin='0',ymax='auto',nstr='null',fig=None):
       '''
       Plot fields versus time for particular values of ky
@@ -99,8 +100,7 @@ class cgyrodata_plot(data.cgyrodata):
       '''
 
       if fig is None:
-         fig = plt.figure(figsize=(12,6))
-         fig.subplots_adjust(left=0.08,right=0.96,top=0.92,bottom=0.12)
+         fig = plt.figure(figsize=(self.lx,self.ly))
 
       self.getbigfield()
 
@@ -137,6 +137,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       ax.set_ylim([ymin,ymax])
 
+      fig.tight_layout(pad=0.3)
 
    def plot_rcorr_phi(self,w=0.5,fig=None):
       '''
@@ -154,8 +155,7 @@ class cgyrodata_plot(data.cgyrodata):
          return np.exp(-np.abs(x)/tau)
 
       if fig is None:
-         fig = plt.figure(figsize=(12,6))
-         fig.subplots_adjust(left=0.08,right=0.96,top=0.92,bottom=0.12)
+         fig = plt.figure(figsize=(self.lx,self.ly))
 
       self.getbigfield()
 
@@ -206,13 +206,14 @@ class cgyrodata_plot(data.cgyrodata):
       ax.set_xlim([np.min(delta_r),np.max(delta_r)])
       ax.set_ylim(-1,1)
 
+      fig.tight_layout(pad=0.3)
+
       print 'INFO: (data_plot.py) l_corr = ',l_corr
 
    def plot_phi(self,field=0,fig=None):
 
       if fig is None:
-         fig = plt.figure(figsize=(12,6))
-         fig.subplots_adjust(left=0.09,right=0.96,top=0.92,bottom=0.12)
+         fig = plt.figure(figsize=(self.lx,self.ly))
 
       self.getbigfield()
 
@@ -246,14 +247,15 @@ class cgyrodata_plot(data.cgyrodata):
       ax.legend(loc=4)
 
       head = '(cs/a) t     Phi_0/rho_*    Phi_n/rho_*'
-      
+
+      fig.tight_layout(pad=0.3)
+
       return head,self.t,np.sqrt(y0),np.sqrt(yn)
 
    def plot_zf(self,w=0.5,field=0,fig=None):
 
       if fig is None:
-         fig = plt.figure(figsize=(10,6))
-         fig.subplots_adjust(left=0.1,right=0.95,top=0.95,bottom=0.12)
+         fig = plt.figure(figsize=(self.lx,self.ly))
 
       if self.n_n > 1:
          print "ERROR: (plot_zf.py) This plot option valid for ZF test only."
@@ -305,14 +307,14 @@ class cgyrodata_plot(data.cgyrodata):
 
       ax.legend(loc=1,prop={'size':10})
 
+      fig.tight_layout(pad=0.3)
 
    def plot_geo(self,fig=None):
 
       self.getgeo()
 
       if fig is None:
-         fig = plt.figure(figsize=(15,9))
-         fig.subplots_adjust(left=0.07,right=0.95,top=0.94,bottom=0.06,wspace=0.25,hspace=0.32)
+         fig = plt.figure(figsize=(self.lx,self.ly))
 
       theta = self.geo[:,0]/np.pi
 
@@ -328,13 +330,12 @@ class cgyrodata_plot(data.cgyrodata):
          ax.plot(theta,y)
          ax.set_xlim([-1,1])
 
-         
+      fig.tight_layout(pad=0.3)
+
    def plot_error(self,fig=None):
 
       if fig is None:
-         fig = plt.figure(figsize=(12,6))
-         fig.subplots_adjust(left=0.09,right=0.96,top=0.92,bottom=0.12)
-
+         fig = plt.figure(figsize=(self.lx,self.ly))
 
       ax = fig.add_subplot(111)
       ax.grid(which="majorminor",ls=":")
@@ -349,11 +350,12 @@ class cgyrodata_plot(data.cgyrodata):
 
       ax.legend()
 
+      fig.tight_layout(pad=0.3)
+
    def plot_ball(self,itime=-1,field=0,tmax=-1.0,fig=None):
 
       if fig is None:
-         fig = plt.figure(figsize=(10,6))
-         fig.subplots_adjust(left=0.13,right=0.96,top=0.92,bottom=0.12)
+         fig = plt.figure(figsize=(self.lx,self.ly))
 
       if itime > self.n_time-1:
          itime = self.n_time-1
@@ -368,7 +370,6 @@ class cgyrodata_plot(data.cgyrodata):
       elif field == 2:
          f = self.bparb[0,:,itime]+1j*self.bparb[1,:,itime]
          ytag = r'$\delta B_\parallel$'
-
 
       ax = fig.add_subplot(111)
       ax.grid(which="majorminor",ls=":")
@@ -396,13 +397,14 @@ class cgyrodata_plot(data.cgyrodata):
 
       ax.legend()
 
+      fig.tight_layout(pad=0.3)
+
       return 'ang  Re(f)  Im(f)',x,y1,y2
          
    def plot_flux(self,w=0.5,field=0,moment='e',ymin='auto',ymax='auto',fc=0,fig=None,loc=2,nscale=0):
 
       if fig is None:
-         fig = plt.figure(figsize=(12,6))
-         fig.subplots_adjust(left=0.05,right=0.96,top=0.92,bottom=0.12)
+         fig = plt.figure(figsize=(self.lx,self.ly))
 
       self.getflux()
 
@@ -487,11 +489,12 @@ class cgyrodata_plot(data.cgyrodata):
       if ymax != 'auto':
          ax.set_ylim([float(ymin),float(ymax)])
 
+      fig.tight_layout(pad=0.3)
+
    def plot_xflux(self,w=0.5,moment='e',ymin='auto',ymax='auto',fig=None,nscale=0):
 
       if fig is None:
-         fig = plt.figure(figsize=(12,6))
-         fig.subplots_adjust(left=0.05,right=0.96,top=0.92,bottom=0.12)
+         fig = plt.figure(figsize=(self.lx,self.ly))
 
       self.getxflux()
 
@@ -578,6 +581,8 @@ class cgyrodata_plot(data.cgyrodata):
             z = 2*np.pi*l*e
             g0 = g0+2*np.sin(z)*xr[ispec,l]/z
          ax.plot([-e,e],[g0,g0],'o-',color=color[ispec],alpha=0.2,linewidth=3)
+         if moment == 'v':
+            print 'Partial-domain average '+u+' : '+str(g0)
 
          label = r'$'+mtag+'_'+u+'/'+mtag+'_\mathrm{GB}: '+str(round(g0,3))+'$'
 
@@ -599,6 +604,7 @@ class cgyrodata_plot(data.cgyrodata):
 
          ax.legend(loc=2)
 
+      fig.tight_layout(pad=0.3)
 
    def plot_ky_flux(self,w=0.5,field=0,moment='e',ymin='auto',ymax='auto',fc=0,fig=None):
       '''
@@ -615,8 +621,7 @@ class cgyrodata_plot(data.cgyrodata):
       t  = self.t
 
       if fig is None:
-         fig = plt.figure(figsize=(6*ns,6))
-         fig.subplots_adjust(left=0.06,right=0.96,top=0.92,bottom=0.12)
+         fig = plt.figure(figsize=(self.ly*ns,self.ly))
 
       self.getflux()
 
@@ -695,6 +700,8 @@ class cgyrodata_plot(data.cgyrodata):
          if ymax != 'auto':
             ax.set_ylim([0,float(ymax)])
 
+      fig.tight_layout(pad=0.3)
+
    def plot_kxky_phi(self,w=0.5,fig=None):
 
       from mpl_toolkits.mplot3d import Axes3D
@@ -705,8 +712,7 @@ class cgyrodata_plot(data.cgyrodata):
       asp=y0/(2*x0)
 
       if fig is None:
-         fig = plt.figure(figsize=(15,17*asp))
-         fig.subplots_adjust(left=0.05,right=0.96,top=0.91,bottom=0.14)
+         fig = plt.figure(figsize=(self.lx,self.lx*asp))
  
       self.getbigfield()
 
@@ -746,12 +752,13 @@ class cgyrodata_plot(data.cgyrodata):
       ax.set_title(r'$\mathrm{Average~fluctuation~intensity} \quad $'+windowtxt)
 
       ax.imshow(np.transpose(f),extent=[-x0,x0,0,y0],interpolation='none')
-   
+
+      fig.tight_layout(pad=0.3)
+
    def plot_kx_phi(self,w=0.5,ymin='auto',ymax='auto',nstr='null',fig=None):
 
       if fig is None:
-         fig = plt.figure(figsize=(12,6))
-         fig.subplots_adjust(left=0.08,right=0.96,top=0.92,bottom=0.12)
+         fig = plt.figure(figsize=(self.lx,self.ly))
 
       self.getbigfield()
 
@@ -804,15 +811,16 @@ class cgyrodata_plot(data.cgyrodata):
       # Dissipation curve             
       ax.plot(kx,self.radialdiss*ax.get_ylim()[1]*0.5,linewidth=2,color='k',alpha=0.2)
 
+      fig.tight_layout(pad=0.3)
 
    def plot_hb(self,itime=-1,spec=0,tmax=-1.0,mesh=0,fig=None):
             
       import matplotlib.cm as cm
+      
+      u = specmap(self.mass[spec],self.z[spec])
 
       if fig is None:
-         fig = plt.figure(figsize=(14,12))
-         fig.subplots_adjust(left=0.1,right=0.95,top=0.94,bottom=0.06,wspace=0.25,hspace=0.32)
-         fig.suptitle(r'${\rm species}='+str(spec)+'$')
+         fig = plt.figure(figsize=(self.lx,self.lx))
 
       theta=0.0
 
@@ -840,7 +848,7 @@ class cgyrodata_plot(data.cgyrodata):
          #======================================
          ax = fig.add_subplot(3,2,p)
 
-         ax.set_title(r'${\rm Re}(h) \quad {\rm ie}='+str(ie)+'$')
+         ax.set_title(r'${\rm Re} \, h_'+u+' \quad \mathrm{ie}='+str(ie)+'$')
          ax.set_xlabel(r'$\theta/\pi$')
          ax.set_ylabel(r'$\xi = v_\parallel/v$')
 
@@ -870,8 +878,7 @@ class cgyrodata_plot(data.cgyrodata):
          #======================================
          ax = fig.add_subplot(3,2,p)
 
-    
-         ax.set_title(r'${\rm Im}(h) \quad {\rm ie}='+str(ie)+'$')
+         ax.set_title(r'${\rm Im} \, h_'+u+' \quad \mathrm{ie}='+str(ie)+'$')
          ax.set_xlabel(r'$\theta/\pi$')
          ax.set_ylabel(r'$\xi = v_\parallel/v$')
 
@@ -889,15 +896,15 @@ class cgyrodata_plot(data.cgyrodata):
             ax.set_xlim([-tmax,tmax])
          #======================================
 
+      fig.tight_layout(pad=0.3)
 
    def plot_hbcut(self,itime=-1,spec=0,tmax=-1.0,theta="0.0",fig=None):
 
+      u = specmap(self.mass[spec],self.z[spec])
+
       if fig is None:
-         fig = plt.figure(figsize=(12,12))
-         fig.subplots_adjust(left=0.07,right=0.95,top=0.94,bottom=0.06,
-                             wspace=0.25,hspace=0.32)
-         fig.suptitle(r'${\rm species}='+str(spec)+'$')
-      
+         fig = plt.figure(figsize=(self.lx,self.lx))
+       
       if itime > self.n_time-1:
          itime = self.n_time-1
 
@@ -928,7 +935,7 @@ class cgyrodata_plot(data.cgyrodata):
          ax.grid(which="majorminor",ls=":")
          ax.grid(which="major",ls=":")
 
-         ax.set_title(r'$\xi=0 \quad {\rm ie}='+str(ie)+'$')
+         ax.set_title(r'$'+u+': \\xi=0 \quad \mathrm{ie}='+str(ie)+'$')
          ax.set_xlabel(r'$\theta/\pi$')
 
          if self.n_xi%2 == 0:
@@ -957,7 +964,7 @@ class cgyrodata_plot(data.cgyrodata):
          ax.grid(which="majorminor",ls=":")
          ax.grid(which="major",ls=":")
 
-         ax.set_title(r'$\theta/\pi='+theta+' \quad \mathrm{ie}='+str(ie)+'$')
+         ax.set_title(r'$'+u+': \\theta/\pi='+theta+' \quad \mathrm{ie}='+str(ie)+'$')
          ax.set_xlabel(r'$\xi = v_\parallel/v$')
 
          n0 = (self.n_radial/2)*self.n_theta+i0
@@ -976,7 +983,7 @@ class cgyrodata_plot(data.cgyrodata):
          ax.grid(which="majorminor",ls=":")
          ax.grid(which="major",ls=":")
 
-         ax.set_title(r'$\theta/\pi='+theta+' \quad \mathrm{ix}='+str(ix)+'$')
+         ax.set_title(r'$'+u+': \\theta/\pi='+theta+' \quad \mathrm{ix}='+str(ix)+'$')
          ax.set_xlabel(r'$x=\sqrt{\varepsilon}$')
 
          n0 = (self.n_radial/2)*self.n_theta+i0
@@ -986,3 +993,5 @@ class cgyrodata_plot(data.cgyrodata):
          hp = np.array(func[1,:,spec,ix,:,itime])
          ax.plot(np.sqrt(self.energy),hp[n0,:],'-o',color='blue',markersize=2)
          #========================================================
+
+      fig.tight_layout(pad=0.3)
