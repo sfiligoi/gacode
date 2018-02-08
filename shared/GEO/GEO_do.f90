@@ -264,8 +264,6 @@ subroutine GEO_do()
      ! l_r = cos(u) dZ/dr - sin(u) dR/dr
      l_r(i) = bigz_l(i)*bigz_r(i)+bigr_l(i)*bigr_r(i)
 
-     print *,l_r(i)
-     
      nsin(i) = (bigr_r(i)*bigr_t(i)+bigz_r(i)*bigz_t(i))/l_t(i)
 
      ! beta_star(theta)
