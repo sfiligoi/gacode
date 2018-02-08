@@ -310,8 +310,7 @@ subroutine cgyro_init_arrays
              -abs(omega_adrift(it,is))*energy(ie)*(1.0+xi(ix)**2)*&
              (n_toroidal*q/pi/rmin)*spectraldiss(u,nup_alpha)*up_alpha
 
-        ! (i ktheta) components from drifts
-        
+        ! (i ktheta) components from drifts        
         omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
              - i_c * k_theta * (omega_aprdrift(it,is)*energy(ie)*xi(ix)**2 &
              + omega_cdrift(it,is)*vel(ie)*xi(ix) + omega_rot_drift(it,is) &
@@ -345,7 +344,8 @@ subroutine cgyro_init_arrays
 
         ! Profile curvature via wavenumber advection
         carg = k_theta*length*(sdlnndr(is)+sdlntdr(is)*(energy(ie)-1.5))/(2*pi)
-        
+
+        ! This array *not* used by OpenACC
         omega_ss(:,ic,iv_loc) = carg*jvec_c(:,ic,iv_loc)
 
      enddo

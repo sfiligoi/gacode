@@ -69,6 +69,7 @@ subroutine GEO_do()
   real, dimension(:), allocatable :: bigz_r
   real, dimension(:), allocatable :: bigz_t
   real, dimension(:), allocatable :: bigz_l
+  real, dimension(:), allocatable :: bigr_l
   real, dimension(:), allocatable :: r_c
   real, dimension(:), allocatable :: r_sc
   real, dimension(:), allocatable :: dbdl
@@ -134,6 +135,7 @@ subroutine GEO_do()
   allocate(bigz_r(n_theta))
   allocate(bigz_t(n_theta))
   allocate(bigz_l(n_theta))
+  allocate(bigr_l(n_theta))
   allocate(r_c(n_theta))
   allocate(r_sc(n_theta))
   allocate(dbdl(n_theta))
@@ -256,6 +258,14 @@ subroutine GEO_do()
      ! cos(u)
      bigz_l(i) = bigz_t(i)/l_t(i)
 
+     ! -sin(u)
+     bigr_l(i) = bigr_t(i)/l_t(i)
+
+     ! l_r = cos(u) dZ/dr - sin(u) dR/dr
+     l_r(i) = bigz_l(i)*bigz_r(i)+bigr_l(i)*bigr_r(i)
+
+     print *,l_r(i)
+     
      nsin(i) = (bigr_r(i)*bigr_t(i)+bigz_r(i)*bigz_t(i))/l_t(i)
 
      ! beta_star(theta)
@@ -467,6 +477,7 @@ subroutine GEO_do()
   deallocate(bigz_r)
   deallocate(bigz_t)
   deallocate(bigz_l)
+  deallocate(bigr_l)
   deallocate(r_c)
   deallocate(r_sc)
   deallocate(dbdl)

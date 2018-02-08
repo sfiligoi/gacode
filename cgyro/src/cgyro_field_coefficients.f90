@@ -13,7 +13,7 @@ subroutine cgyro_field_coefficients
   ! Field equation prefactors, sums.
   !
   sum_loc(:) = 0.0
-!$omp parallel private(iv_loc,ic)
+!$omp parallel private(iv_loc,is,ic,it)
 !$omp do reduction(+:sum_loc)
   do iv=nv1,nv2
      iv_loc = iv-nv1+1
@@ -63,7 +63,7 @@ subroutine cgyro_field_coefficients
   if (n_field > 1) then
 
      sum_loc(:) = 0.0
-!$omp parallel private(iv_loc,ic)
+!$omp parallel private(iv,iv_loc,is,ic,it)
 !$omp do reduction(+:sum_loc)
      do iv=nv1,nv2
         iv_loc = iv-nv1+1
