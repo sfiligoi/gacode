@@ -18,7 +18,7 @@ F77    = mpif77
 FOMP   =-fopenmp
 FMATH  =-fdefault-real-8 -J $(GACODE_ROOT)/modules
 FOPT   =-Ofast
-FDEBUG =-Wall -W -fcheck=mem,bounds -g -fbacktrace -ffpe-trap=invalid,zero,overflow
+FDEBUG =-Wall -W -fcheck=all -g -fbacktrace -ffpe-trap=invalid,zero,overflow
 
 # System math libraries
 LMATH = ${ROOT}/OpenBLAS/libopenblas.a $(FFTWDIR)/libfftw3.a $(FFTWDIR)/libfftw3_omp.a
