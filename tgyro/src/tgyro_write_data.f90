@@ -522,18 +522,10 @@ subroutine tgyro_write_data(i_print)
      open(unit=1,file='out.tgyro.residual',status='old',position='append')
 
      write(1,50,advance='no') 'r/a','E(eflux_i)','R1','E(eflux_e)','R2','E(mflux)','R3','E(pflux_e)','R4','E(pflux_i1)','R5'
-     select case(loc_n_ion)
-     case(1)
-        write(1,55) ''
-     case(2)
-        write(1,55) 'E(pflux_i2)','R6'
-     case(3)
-        write(1,55) 'E(pflux_i2)','R6','E(pflux_i3)','R7'
-     case(4)
-        write(1,55) 'E(pflux_i2)','R6','E(pflux_i3)','R7','E(pflux_i4)','R8'
-     case(5)
-        write(1,55) 'E(pflux_i2)','R6','E(pflux_i3)','R7','E(pflux_i4)','R8','E(pflux_i5)','R9'
-     end select
+     do i=2,loc_n_ion
+        write(1,55,advance='no') 'E(pflux_i',i,')','R',i+4
+     enddo
+     write(1,*) '' ! Get new line
 
      if (tgyro_relax_iterations == 0) then
         write(1,30) 'ITERATION*: ',i_tran,sum(res_norm)/size(res_norm),flux_counter*n_worker*n_inst
@@ -631,8 +623,8 @@ subroutine tgyro_write_data(i_print)
   ! Residual header
 30 format(t2,a,i3,1pe12.5,2x,'[',i6,']')
   ! Residuals
-40 format(t2,f8.6,9(1x,2(1pe10.3,1x)))
+40 format(t2,f8.6,14(1x,2(1pe10.3,1x)))
 50 format(t2,a,t12,a,t26,a,t35,a,t49,a,t58,a,t72,a,t81,a,t95,a,t104,a,t118,a)
-55 format(4(7x,a,3x,a))
+55 format(7x,a,i0,a,3x,a,i0)
 
 end subroutine tgyro_write_data
