@@ -1,10 +1,20 @@
 #---------------------------------------------------
-# PPPL Systems (kestrel, kite and kruskal) 
-#               with Intel Compuler and OpenMPI
+# PPPL Systems (ellis, dawson, kestrel, kite and kruskal) 
+#               with Intel Compiler and OpenMPI
 #---------------------------------------------------
 # L. Peterson (jpeterso@pppl.gov)
 # D. Mikkelsen (mikk@pppl.gov)
 # N. Ferraro (nferraro@pppl.gov)
+# B.A. Grierson (bgriers@pppl.gov)
+#
+# Need the following modules, in this order:
+# module load intel/2015.u1
+# module load openmpi/1.8.4
+# module load acml/5.3.1/ifort64
+# module load hdf5-parallel/1.8.14
+# module load netcdf
+# module load fftw/3.3.6-pl1
+
 
 IDENTITY="PPPL cluster"
 CORES_PER_NODE=1
@@ -22,25 +32,16 @@ FMATH	= -r8
 FOPT	= -qopt-report=0 -qopt-report-phase=vec -shared-intel
 FDEBUG	= -warn all -shared-intel -check all -g
 
-# Need the following modules, in this order:
-# module load intel/2015.u1
-# module load openmpi/1.8.4
-# module load acml
-# module load hdf5-parallel/1.8.14
-# module load netcdf
-
 # System math libraries
 
-# FFTW paths are hard-coded here because 
-# both fftw3 and fftw are required, but modules conflict
+# FFTW 
 FFTW3HOME=/usr/pppl/intel/2015-pkgs/openmpi-1.8-pkgs/fftw-3.3.6-pl1
-FFTW2HOME=/usr/pppl/intel/2015-pkgs/openmpi-1.8-pkgs/fftw-2.1.5
 
-LAPACK = ${ACML_HOME}/ifort64/lib/libacml.a
+LAPACK = ${ACML_HOME}/lib/libacml.a
+
 LMATH = $(LAPACK) \
-      -L${FFTW3HOME}/lib -lfftw3 \
-      -L${FFTW2HOME}/lib -lrfftw -lfftw \
-      ${ACML_HOME}/ifort64/lib/libimf.a
+      -L${FFTW3HOME}/lib -lfftw3 -lfftw3_threads
+
 FFTW_INC = ${FFTW3HOME}/include
 
 NETCDF = ${NETCDFHOME}/lib/libnetcdff.a ${NETCDFHOME}/lib/libnetcdf.a -L${HDF5_HOME}/lib -lhdf5_hl -lhdf5 -lz
