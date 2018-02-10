@@ -61,3 +61,5 @@ quick/src/quick
 
 # local working files not to be shared
 tmp.py
+
+*.optrpt
