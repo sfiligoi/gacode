@@ -136,7 +136,7 @@ subroutine tgyro_tglf_map
 
      tglf_rmin_loc_in    = r(i_r)/r_min
      tglf_rmaj_loc_in    = r_maj(i_r)/r_min
-     tglf_zmaj_loc_in    = zmag(i_r)
+     tglf_zmaj_loc_in    = zmag(i_r)/r_min
      tglf_drmajdx_loc_in = shift(i_r)
      tglf_dzmajdx_loc_in = dzmag(i_r)
      tglf_kappa_loc_in   = kappa(i_r)
