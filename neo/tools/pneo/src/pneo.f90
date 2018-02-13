@@ -19,7 +19,7 @@ program pneo
   real, dimension(:), allocatable :: s_delta
   real, dimension(:), allocatable :: kappa
   real, dimension(:), allocatable :: s_kappa
-  real, dimension(:), allocatable :: jfac, gfac, qfac
+  real, dimension(:), allocatable :: jfac
   
   allocate(rmin_over_rmaj(9))
   allocate(q(9))
@@ -157,13 +157,11 @@ program pneo
   neo_mass_in(3)  = 6.0
 
   allocate(jfac(neo_n_species_in))
-  allocate(gfac(neo_n_species_in))
-  allocate(qfac(neo_n_species_in))
   
   ! For testing, use THEORY sim_model=0;
   ! For nn, use sim_model=4;
   ! else use NEO sim_model=1
-  neo_sim_model_in = 4
+  !neo_sim_model_in = 4
   !!!!!!
 
   if (i_proc == 0) print '(a,i5)','NTOT = ',ntot
@@ -196,12 +194,6 @@ program pneo
 
      do is=1,neo_n_species_in
         jfac(is) = neo_dens_in(is) * abs(neo_z_in(is))
-        ! n_a/n_norm rho_a^2/rho_s^2 nu_aa/nu_ee
-        gfac(is) = neo_dens_in(is) * (neo_temp_in(is)*neo_mass_in(is) &
-             / neo_z_in(is)**2) * neo_z_in(is)**4 * neo_dens_in(is) &
-             * sqrt(neo_mass_in(1)/neo_mass_in(is)) &
-             * (neo_temp_in(1)/neo_temp_in(is))**1.5
-        qfac(is) = gfac(is)
      enddo
      
      ! Cne
@@ -210,8 +202,8 @@ program pneo
      outdata_j_loc(1,p) = neo_jpar_dke_out/jfac(1)
      do is=1,neo_n_species_in
         outdata_u_loc(1+6*(is-1),p)  = neo_vpol_dke_out(is)
-        outdata_g_loc(1+6*(is-1),p)  = neo_pflux_dke_out(is)/gfac(is)
-        outdata_q_loc(1+6*(is-1),p)  = neo_efluxtot_dke_out(is)/qfac(is)
+        outdata_g_loc(1+6*(is-1),p)  = neo_pflux_dke_out(is)
+        outdata_q_loc(1+6*(is-1),p)  = neo_efluxtot_dke_out(is)
      enddo
      
      ! CTe
@@ -220,8 +212,8 @@ program pneo
      outdata_j_loc(2,p) = neo_jpar_dke_out/jfac(1)
      do is=1,neo_n_species_in
         outdata_u_loc(2+6*(is-1),p)  = neo_vpol_dke_out(is)
-        outdata_g_loc(2+6*(is-1),p)  = neo_pflux_dke_out(is)/gfac(is)
-        outdata_q_loc(2+6*(is-1),p)  = neo_efluxtot_dke_out(is)/qfac(is)
+        outdata_g_loc(2+6*(is-1),p)  = neo_pflux_dke_out(is)
+        outdata_q_loc(2+6*(is-1),p)  = neo_efluxtot_dke_out(is)
      enddo
      
      ! Cni1
@@ -230,8 +222,8 @@ program pneo
      outdata_j_loc(3,p) = neo_jpar_dke_out/jfac(2)
      do is=1,neo_n_species_in
         outdata_u_loc(3+6*(is-1),p)  = neo_vpol_dke_out(is)
-        outdata_g_loc(3+6*(is-1),p)  = neo_pflux_dke_out(is)/gfac(is)
-        outdata_q_loc(3+6*(is-1),p)  = neo_efluxtot_dke_out(is)/qfac(is)
+        outdata_g_loc(3+6*(is-1),p)  = neo_pflux_dke_out(is)
+        outdata_q_loc(3+6*(is-1),p)  = neo_efluxtot_dke_out(is)
      enddo
      
      ! CTi1
@@ -240,8 +232,8 @@ program pneo
      outdata_j_loc(4,p) = neo_jpar_dke_out/jfac(2)
      do is=1,neo_n_species_in
         outdata_u_loc(4+6*(is-1),p)  = neo_vpol_dke_out(is)
-        outdata_g_loc(4+6*(is-1),p)  = neo_pflux_dke_out(is)/gfac(is)
-        outdata_q_loc(4+6*(is-1),p)  = neo_efluxtot_dke_out(is)/qfac(is)
+        outdata_g_loc(4+6*(is-1),p)  = neo_pflux_dke_out(is)
+        outdata_q_loc(4+6*(is-1),p)  = neo_efluxtot_dke_out(is)
      enddo
      
      ! Cni2
@@ -250,8 +242,8 @@ program pneo
      outdata_j_loc(5,p) = neo_jpar_dke_out/jfac(3)
      do is=1,neo_n_species_in
         outdata_u_loc(5+6*(is-1),p)  = neo_vpol_dke_out(is)
-        outdata_g_loc(5+6*(is-1),p)  = neo_pflux_dke_out(is)/gfac(is)
-        outdata_q_loc(5+6*(is-1),p)  = neo_efluxtot_dke_out(is)/qfac(is)
+        outdata_g_loc(5+6*(is-1),p)  = neo_pflux_dke_out(is)
+        outdata_q_loc(5+6*(is-1),p)  = neo_efluxtot_dke_out(is)
      enddo
      
      ! CTi2 
@@ -260,8 +252,8 @@ program pneo
      outdata_j_loc(6,p) = neo_jpar_dke_out/jfac(3)
      do is=1,neo_n_species_in
         outdata_u_loc(6+6*(is-1),p)  = neo_vpol_dke_out(is)
-        outdata_g_loc(6+6*(is-1),p)  = neo_pflux_dke_out(is)/gfac(is)
-        outdata_q_loc(6+6*(is-1),p)  = neo_efluxtot_dke_out(is)/qfac(is)
+        outdata_g_loc(6+6*(is-1),p)  = neo_pflux_dke_out(is)
+        outdata_q_loc(6+6*(is-1),p)  = neo_efluxtot_dke_out(is)
      enddo
 
      ! <jpar B>/Bunit j_s ~ rho (I/psip) sum_s |z_a| n_a C_a 1/L_a
@@ -272,15 +264,30 @@ program pneo
           * neo_geoparams_out(3) / neo_geoparams_out(4) &
           / (neo_rho_star_in * neo_geoparams_out(1))
   
-     ! Gamma_a/(n_e c_s) ~ n_a/n_e nu_aa rho_a^2 (I/psip)^2  <Bunit^2/B^2> C 1/L
+     ! Gamma_a/(n_e c_s) ~ nu_ee rho_s^2 (I/psip)^2  <Bunit^2/B^2> C 1/L
      outdata_g_loc(:,p) = outdata_g_loc(:,p) &
           * neo_geoparams_out(3) &
           / (neo_rho_star_in * neo_geoparams_out(1))**2 / neo_nu_1_in
 
-     ! Q_a/(n_e c_s T_e) ~ n_a/n_e nu_aa rho_a^2 (I/psip)^2  <Bunit^2/B^2> C 1/L
+     ! Q_a/(n_e c_s T_e) ~ nu_ee rho_a^2 (I/psip)^2  <Bunit^2/B^2> C 1/L
      outdata_q_loc(:,p) = outdata_q_loc(:,p) &
           * neo_geoparams_out(3) &
           / (neo_rho_star_in * neo_geoparams_out(1))**2 / neo_nu_1_in
+
+     do is=1,neo_n_species_in
+        outdata_g_loc(2+6*(is-1),p) = outdata_g_loc(2+6*(is-1),p) &
+             + 1.5*outdata_g_loc(1+6*(is-1),p)
+        outdata_g_loc(4+6*(is-1),p) = outdata_g_loc(4+6*(is-1),p) &
+             + 1.5*outdata_g_loc(3+6*(is-1),p)
+        outdata_g_loc(6+6*(is-1),p) = outdata_g_loc(6+6*(is-1),p) &
+             + 1.5*outdata_g_loc(5+6*(is-1),p)
+        outdata_q_loc(2+6*(is-1),p) = outdata_q_loc(2+6*(is-1),p) &
+             + 1.5*outdata_q_loc(1+6*(is-1),p)
+        outdata_q_loc(4+6*(is-1),p) = outdata_q_loc(4+6*(is-1),p) &
+             + 1.5*outdata_q_loc(3+6*(is-1),p)
+        outdata_q_loc(6+6*(is-1),p) = outdata_q_loc(6+6*(is-1),p) &
+             + 1.5*outdata_q_loc(5+6*(is-1),p)
+     enddo
      
      ! 6 inputs: eps,ft,q,log10(nuee),ni,Ti
      indata_loc(1,p) = neo_rmin_over_a_in
