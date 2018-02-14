@@ -13,7 +13,7 @@ MDIR=/etc/alternatives
 FC	= mpif90 -std=f2008 -I $(GACODE_ROOT)/modules
 F77	= mpif77
 FOMP    = -fopenmp
-FMATH	= -fdefault-real-8 -J $(GACODE_ROOT)/modules -I/usr/include
+FMATH	= -fdefault-real-8 -fPIC -J $(GACODE_ROOT)/modules -I/usr/include
 FOPT	= -Ofast
 FDEBUG	= -Wall -fcheck=all -Wunderflow -finit-real=nan -fbounds-check -ffpe-trap=invalid,zero,overflow
 

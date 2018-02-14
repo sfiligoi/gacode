@@ -25,7 +25,7 @@ ifeq ($(GOMPTEST),0)
   FOMP  = -fopenmp
 endif
 
-FMATH	= -fdefault-real-8
+FMATH	= -fdefault-real-8 -fPIC
 FOPT	= -O3
 FDEBUG  = -Wall -fcheck=all -ffpe-trap=invalid,zero,overflow
 

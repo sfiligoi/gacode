@@ -16,7 +16,7 @@ ROOT=${HOME}/GIT
 FC     = mpif90 -std=f2008 -I $(GACODE_ROOT)/modules
 F77    = mpif77
 FOMP   =-fopenmp
-FMATH  =-fdefault-real-8 -J $(GACODE_ROOT)/modules
+FMATH  =-fdefault-real-8 -fPIC -J $(GACODE_ROOT)/modules
 FOPT   =-Ofast
 FDEBUG =-Wall -W -fcheck=all -g -fbacktrace -ffpe-trap=invalid,zero,overflow
 

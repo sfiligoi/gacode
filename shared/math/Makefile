@@ -3,7 +3,7 @@ include ${GACODE_ROOT}/platform/build/make.inc.${GACODE_PLATFORM}
 ifeq ($(OPT),debug)
    FFLAGS=${FDEBUG}
 else
-   FFLAGS=${FOPT}
+   FFLAGS=${FOPT} -fPIC
 endif
 
 LLIB=math_lib
