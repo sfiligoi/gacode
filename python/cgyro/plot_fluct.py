@@ -1,8 +1,16 @@
 import sys
 import numpy as np
 import os.path
+from matplotlib import rc
+import matplotlib.pyplot as plt
 from gacodefuncs import *
 from cgyro.data import cgyrodata
+
+# Use first 3 args to define plot and font size 
+rc('text',usetex=True)
+rc('font',size=int(sys.argv[12]))
+#data_in.lx = int(sys.argv[2])
+#data_in.ly = int(sys.argv[3])
 
 ftype = sys.argv[1]
 moment = sys.argv[2]
@@ -125,17 +133,17 @@ for line in open(fdata):
             aspect = max(yp)/max(xp)
 
             fig = plt.figure(figsize=(10,10*aspect))
-            fig.subplots_adjust(left=0.08,right=0.96,top=0.94,bottom=0.1)
             ax = fig.add_subplot(111)
-            ax.set_title(title,fontsize=16)
-            ax.set_xlabel(r'$x/\rho_s$',fontsize=16)
-            ax.set_ylabel(r'$y/\rho_s$',fontsize=16)
+            ax.set_title(title)
+            ax.set_xlabel(r'$x/\rho_s$')
+            ax.set_ylabel(r'$y/\rho_s$')
             ax.set_aspect('equal')
         
             levels = np.arange(f0,f1,(f1-f0)/256)
             ax.contourf(xp,yp,np.transpose(f),levels,cmap=plt.get_cmap(colormap))
             print 'INFO: (plot_fluct) min,max = ',f0,f1
 
+            fig.tight_layout(pad=0.5)
             if ftype == 'screen':
                 plt.show()
             else:

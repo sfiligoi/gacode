@@ -307,7 +307,7 @@ case "$PLOT_TYPE" in
        python $PLT $PLOT_TYPE $FTYPE ;;
 
    fluct)
-       python $PYROOT/plot_fluct.py $FTYPE $MOMENT $SPECIES $YMIN $YMAX $NX $NY $TIME $FMIN $FMAX $CMAP ;;
+       python $PYROOT/plot_fluct.py $FTYPE $MOMENT $SPECIES $YMIN $YMAX $NX $NY $TIME $FMIN $FMAX $CMAP $FONTSIZE ;;
 
    text)
    	python $PYROOT/text.py $W $FTYPE ;;
