@@ -5,6 +5,7 @@ from matplotlib import rc
 import matplotlib.pyplot as plt
 from gacodefuncs import *
 from cgyro.data import cgyrodata
+import gapy
 
 # Use first 3 args to define plot and font size 
 rc('text',usetex=True)
@@ -34,44 +35,6 @@ epx = np.zeros([nx,nr],dtype=np.complex)
 eny = np.zeros([ny,nn],dtype=np.complex)
 x = np.zeros([nx])
 y = np.zeros([ny])
-
-#------------------------------------------------------------------------
-# Fourier arrays
-#
-for i in range(nx):
-    x[i] = i*2*np.pi/(nx-1)
-    for p in range(nr):    
-        epx[i,p]=np.exp(1j*(p-nr/2)*x[i])
-
-for j in range(ny):
-    y[j] = j*2*np.pi/(ny-1)
-    for n in range(nn):    
-        eny[j,n]=np.exp(-1j*n*y[j])
-
-# factor of 1/2 for n=0
-eny[:,0] = 0.5*eny[:,0]
-#------------------------------------------------------------------------
-
-#------------------------------------------------------------------------
-# Real-space field resonstruction
-#
-def maptoreal(nr,nn,nx,ny,c):
-
-    import numpy as np
-    import time
-
-    start = time.time()
-
-    # This needs to be fast, so we use numpy.outer
-    f = np.zeros([nx,ny])
-    for p in range(nr):
-        for n in range(nn):
-            f[:,:] = f[:,:]+np.real(c[p,n]*np.outer(epx[:,p],eny[:,n]))
-    
-    end = time.time()
-  
-    return f,str(end-start)
-#-----------------------------------------------------------------------
 
 if istr == '-1':
     ivec = range(nt)
@@ -114,13 +77,14 @@ for line in open(fdata):
         print 'INFO: (plot_fluct) Time index '+str(i) 
         if i in ivec:
             if (moment == 'phi'):
-                a = np.reshape(aa,(2,nr,nn),'F')
+                a = np.reshape(aa,(2,nr,nn),order='F')
                 c = a[0,:,:]+1j*a[1,:,:]
             else:
-                a = np.reshape(aa,(2,nr,ns,nn),'F')
+                a = np.reshape(aa,(2,nr,ns,nn),order='F')
                 c = a[0,:,species,:]+1j*a[1,:,species,:]
                 
-            f,t = maptoreal(nr,nn,nx,ny,c)
+            f = np.zeros([nx,ny],order='F')
+            gapy.realfluct(c,f)
             if fmin == 'auto':
                 f0=np.min(f)
                 f1=np.max(f)
@@ -148,7 +112,7 @@ for line in open(fdata):
                 plt.show()
             else:
                 fname = fdata+str(i)
-                # Filename uses number padded with zeros
+                # Filename uses frame number 
                 plt.savefig(str(i)+'.png')
                 # Close each time to prevent memory accumulation
                 plt.close()
