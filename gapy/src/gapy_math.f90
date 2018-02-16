@@ -1,3 +1,24 @@
+subroutine p_cub_spline(x,y,n,xi,yi,ni)
+
+  integer, intent(in) :: n
+  double precision, intent(in), dimension(n) :: x,y
+
+  integer, intent(in) :: ni
+  double precision, intent(in), dimension(ni) :: xi
+  double precision, intent(inout), dimension(ni) :: yi
+ 
+!f2py intent(in) n
+!f2py intent(in) x
+!f2py intent(in) y
+
+!f2py intent(in) ni
+!f2py intent(in) xi
+!f2py intent(in,out) yi
+
+  call cub_spline(x,y,n,xi,yi,ni)
+  
+end subroutine p_cub_spline
+
 subroutine p_cub_spline_deriv(x,y,n,yp)
 
   integer, intent(in) :: n
