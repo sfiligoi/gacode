@@ -6,11 +6,11 @@ subroutine realfluct(nr,nn,nx,ny,c,f)
   double complex, intent(in) :: c(0:nr-1,0:nn-1)
   double precision, intent(inout) :: f(0:nx-1,0:ny-1)
 
-  double complex :: epx(0:nx-1,0:nr-1)
-  double complex :: eny(0:ny-1,0:nn-1)
+  double complex :: epx(0:nr-1,0:nx-1)
+  double complex :: eny(0:nn-1,0:ny-1)
 
   integer :: i,j,n,p
-  double precision :: pi,xi,yj
+  double precision :: pi,xi,yj,fsum
   double complex :: ic
 
 ! f2py intent(in) nr
@@ -26,28 +26,32 @@ subroutine realfluct(nr,nn,nx,ny,c,f)
   do i=0,nx-1
      xi = i*2*pi/(nx-1)
      do p=0,nr-1    
-        epx(i,p) = exp(ic*(p-nr/2)*xi)
+        epx(p,i) = exp(ic*(p-nr/2)*xi)
      enddo
   enddo
 
   do j=0,ny-1
      yj = j*2*pi/(ny-1)
      do n=0,nn-1    
-        eny(j,n) = exp(-ic*n*yj)
+        eny(n,j) = exp(-ic*n*yj)
      enddo
   enddo
 
   ! factor of 1/2 for n=0
-  eny(:,0) = 0.5*eny(:,0)
-
+  eny(0,:) = 0.5*eny(0,:)
+ 
   f = 0.0
-  do n=0,nn-1
-     do p=0,nr-1 
-        do j=0,ny-1
-           do i=0,nx-1
-              f(i,j) = f(i,j)+real(c(p,n)*epx(i,p)*eny(j,n))
+  
+!$omp parallel do private(j,i,fsum,n,p)
+  do j=0,ny-1
+     do i=0,nx-1
+        fsum = 0.0
+        do n=0,nn-1
+           do p=0,nr-1
+              fsum = fsum+real(c(p,n)*epx(p,i)*eny(n,j))
            enddo
         enddo
+        f(i,j) = fsum
      enddo
   enddo
 
