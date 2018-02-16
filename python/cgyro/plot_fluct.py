@@ -1,12 +1,16 @@
 import sys
 import numpy as np
-import os.path
+import os
 from matplotlib import rc
 import matplotlib.pyplot as plt
 from gacodefuncs import *
 from cgyro.data import cgyrodata
-import gapy
-
+try:
+   import gapy
+except:
+   print 'Please build gapy.so library.'
+   sys.exit()
+   
 # Use first 3 args to define plot and font size 
 rc('text',usetex=True)
 rc('font',size=int(sys.argv[12]))
@@ -36,6 +40,17 @@ eny = np.zeros([ny,nn],dtype=np.complex)
 x = np.zeros([nx])
 y = np.zeros([ny])
 
+#------------------------------------------------------------------------
+# Meshpoints
+#
+for i in range(nx):
+    x[i] = i*2*np.pi/(nx-1)
+
+for j in range(ny):
+    y[j] = j*2*np.pi/(ny-1)
+
+#------------------------------------------------------------------------
+
 if istr == '-1':
     ivec = range(nt)
 else:
@@ -52,7 +67,9 @@ elif (moment == 'phi'):
     fdata = 'out.cgyro.kxky_phi'
     title = r'$\delta\phi$'
 
-# Check to see if it exists
+# ERROR CHECKS
+
+# Check to see if data exists
 if not os.path.isfile(fdata):
     print fdata+' does not exist.  Try -moment phi'
     sys.exit()

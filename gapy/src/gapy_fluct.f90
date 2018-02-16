@@ -1,35 +1,3 @@
-subroutine p_cub_spline_deriv(x,y,n,yp)
-
-  integer, intent(in) :: n
-  double precision, intent(in), dimension(n) :: x,y
-  double precision, intent(inout), dimension(n) :: yp
-  
-!f2py intent(in) n
-!f2py intent(in) x
-!f2py intent(in) y
-!f2py intent(out) yp
-
-  call cub_spline_deriv(x,y,n,yp)
-  
-end subroutine p_cub_spline_deriv
-
-subroutine p_bound_deriv(df,f,r,n)
-
-  integer, intent(in) :: n
-
-  double precision, intent(inout), dimension(n) :: df
-  double precision, intent(in), dimension(n) :: f
-  double precision, intent(in),dimension(n) :: r
-
-!f2py intent(in) n
-!f2py intent(in) f
-!f2py intent(in) r
-!f2py intent(out) df
-
-  call bound_deriv(df,f,r,n)
-  
-end subroutine p_bound_deriv
-
 subroutine realfluct(nr,nn,nx,ny,c,f)
 
   implicit none
@@ -45,12 +13,12 @@ subroutine realfluct(nr,nn,nx,ny,c,f)
   double precision :: pi,xi,yj
   double complex :: ic
 
-  ! f2py intent(in) nr
-  ! f2py intent(in) nn
-  ! f2py intent(in) nx
-  ! f2py intent(in) ny
-  ! f2py intent(in) c
-  ! f2py intent(in,out) f
+! f2py intent(in) nr
+! f2py intent(in) nn
+! f2py intent(in) nx
+! f2py intent(in) ny
+! f2py intent(in) c
+! f2py intent(in,out) f
 
   ic = (0d0,1d0)
   pi = atan(1d0)*4d0
