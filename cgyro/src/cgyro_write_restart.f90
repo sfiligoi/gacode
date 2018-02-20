@@ -161,7 +161,7 @@ subroutine cgyro_write_restart_many
           i_err)
 
   if (i_err /= 0) then
-     call cgyro_error('ERROR: (CGYRO) MPI_FILE_WRITE_AT in cgyro_write_restart_v2 failed')
+     call cgyro_error('ERROR: (CGYRO) MPI_FILE_WRITE_AT in cgyro_write_restart')
      return
   endif
 

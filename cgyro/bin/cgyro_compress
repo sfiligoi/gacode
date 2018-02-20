@@ -24,7 +24,7 @@ cp -p $1/out.cgyro.equilibrium $SDIR
 cp -p $1/out.cgyro.time $SDIR
 cp -p $1/out.cgyro.timing $SDIR
 cp -p $1/out.cgyro.info $SDIR
-cp -p  $1/out.cgyro.geo $SDIR
+cp -p $1/out.cgyro.geo $SDIR
 
 # Linear data
 if ! grep -q NONLINEAR_FLAG=1 $SDIR/input.cgyro
@@ -41,7 +41,10 @@ then
 fi
 
 cp -p $1/out.cgyro.ky_flux $SDIR
-cp -p $1/out.cgyro.lky_flux* $SDIR
+if [-f $1/out.cgyro.lky_flux_n ]
+then
+    cp -p $1/out.cgyro.lky_flux* $SDIR
+fi
 
 # We will have a version if NOT run through TGYRO
 if [ -f $1/out.cgyro.version ]

@@ -281,6 +281,114 @@ subroutine cgyro_write_distributed_complex(datafile,n_fn,fn)
 
 end subroutine cgyro_write_distributed_complex
 
+subroutine cgyro_write_distbin_complex(datafile,n_fn,fn)
+
+  use mpi
+  use cgyro_globals
+
+  !------------------------------------------------------
+  implicit none
+  !
+  character (len=*), intent(in) :: datafile
+  integer, intent(in) :: n_fn
+  complex, intent(in) :: fn(n_fn)
+  !
+  integer :: in
+  !
+  ! Required for MPI-IO:
+  !
+  integer :: filemode
+  integer :: finfo
+  integer :: fh
+  integer :: fstatus(MPI_STATUS_SIZE)
+  integer(kind=MPI_OFFSET_KIND) :: disp
+  integer(kind=MPI_OFFSET_KIND) :: offset1
+  complex :: c
+  !------------------------------------------------------
+
+  if (i_proc_1 /= 0) return
+
+  select case (io_control)
+
+  case(0)
+
+     return
+
+  case(1)
+
+     ! Open
+
+     if (i_proc == 0) then
+        open(unit=io,file=datafile,status='replace')
+        close(io)
+     endif
+
+  case(2)
+
+     ! Append
+
+     ! now write in parallel to the common file
+     filemode = MPI_MODE_WRONLY
+     disp = i_current-1
+     disp = disp*n_proc_2
+     disp = disp*size(fn,kind=MPI_OFFSET_KIND)
+
+     offset1 = size(fn,kind=MPI_OFFSET_KIND)*i_proc_2
+
+     call MPI_INFO_CREATE(finfo,i_err)
+
+     call MPI_INFO_SET(finfo,"striping_factor", mpiio_small_stripe_str,i_err)
+
+     call MPI_FILE_OPEN(NEW_COMM_2,&
+          datafile,&
+          filemode,&
+          finfo,&
+          fh,&
+          i_err)
+
+     call MPI_FILE_SET_VIEW(fh,&
+          disp,&
+          MPI_COMPLEX16,&
+          MPI_COMPLEX16,&
+          'native',&
+          finfo,&
+          i_err)
+
+     call MPI_FILE_WRITE_AT(fh,&
+          offset1,&
+          fn,&
+          size(fn),&
+          MPI_COMPLEX16,&
+          fstatus,&
+          i_err)
+
+     call MPI_FILE_SYNC(fh,i_err)
+     call MPI_FILE_CLOSE(fh,i_err)
+     call MPI_INFO_FREE(finfo,i_err)
+
+  case(3)
+
+     ! Rewind
+
+     if (i_proc == 0) then
+
+        disp = i_current
+        disp = disp*n_proc_2
+        disp = disp*size(fn)
+
+        open(unit=io,file=datafile,status='old',access='STREAM')
+        if (disp > 0) then
+           read(io,pos=disp) c
+        endif
+        endfile(io)
+        close(io)
+
+     endif
+
+  end select
+
+end subroutine cgyro_write_distbin_complex
+
 
 !------------------------------------------------------
 ! cgyro_write_distributed_real.f90
