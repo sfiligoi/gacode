@@ -61,10 +61,17 @@ subroutine cgyro_write_timedata
   if (nonlinear_flag == 1 .and. moment_print_flag == 1) then
      ! (n,e) moment for all species at selected thetas.
      do i_moment=1,2
-        call cgyro_write_distributed_complex(&
-             trim(path)//runfile_kxky(i_moment),&
-             size(moment(:,:,:,i_moment)),&
-             moment(:,:,:,i_moment))
+        if (use_bin == 1) then
+           call cgyro_write_distbin_complex(&
+                trim(path)//binfile_kxky(i_moment),&
+                size(moment(:,:,:,i_moment)),&
+                moment(:,:,:,i_moment))
+        else
+           call cgyro_write_distributed_complex(&
+                trim(path)//runfile_kxky(i_moment),&
+                size(moment(:,:,:,i_moment)),&
+                moment(:,:,:,i_moment))
+        endif
      enddo
   endif
 
@@ -78,11 +85,18 @@ subroutine cgyro_write_timedata
   enddo
 
   ! Complex potential at selected thetas
-  call cgyro_write_distributed_complex(&
-       trim(path)//runfile_kxky_phi,&
-       size(field_plot),&
-       field_plot)
-
+  if (use_bin == 1) then
+     call cgyro_write_distbin_complex(&
+          trim(path)//binfile_kxky_phi,&
+          size(field_plot),&
+          field_plot)
+  else
+     call cgyro_write_distributed_complex(&
+          trim(path)//runfile_kxky_phi,&
+          size(field_plot),&
+          field_plot)
+  endif
+  
   ! Checksum for regression testing
   ! Note that checksum is a distributed real scalar
   if (zf_test_flag == 0) then
@@ -270,7 +284,7 @@ subroutine cgyro_write_distributed_complex(datafile,n_fn,fn)
 
         open(unit=io,file=datafile,status='old',access='STREAM')
         if (disp > 0) then
-         read(io,pos=disp) c
+           read(io,pos=disp) c
         endif
         endfile(io)
         close(io)
@@ -293,8 +307,6 @@ subroutine cgyro_write_distbin_complex(datafile,n_fn,fn)
   integer, intent(in) :: n_fn
   complex, intent(in) :: fn(n_fn)
   !
-  integer :: in
-  !
   ! Required for MPI-IO:
   !
   integer :: filemode
@@ -303,7 +315,7 @@ subroutine cgyro_write_distbin_complex(datafile,n_fn,fn)
   integer :: fstatus(MPI_STATUS_SIZE)
   integer(kind=MPI_OFFSET_KIND) :: disp
   integer(kind=MPI_OFFSET_KIND) :: offset1
-  complex :: c
+  complex :: c(n_fn)
   !------------------------------------------------------
 
   if (i_proc_1 /= 0) return
@@ -314,7 +326,7 @@ subroutine cgyro_write_distbin_complex(datafile,n_fn,fn)
 
      return
 
-  case(1)
+  case (1)
 
      ! Open
 
@@ -323,11 +335,11 @@ subroutine cgyro_write_distbin_complex(datafile,n_fn,fn)
         close(io)
      endif
 
-  case(2)
+  case (2)
 
      ! Append
 
-     ! now write in parallel to the common file
+     ! Write in parallel to the binary datafile
      filemode = MPI_MODE_WRONLY
      disp = i_current-1
      disp = disp*n_proc_2
@@ -366,17 +378,19 @@ subroutine cgyro_write_distbin_complex(datafile,n_fn,fn)
      call MPI_FILE_CLOSE(fh,i_err)
      call MPI_INFO_FREE(finfo,i_err)
 
-  case(3)
+  case (3)
 
      ! Rewind
 
      if (i_proc == 0) then
 
-        disp = i_current
+        disp = i_current-1
         disp = disp*n_proc_2
-        disp = disp*size(fn)
+        disp = disp*size(fn,kind=MPI_OFFSET_KIND)*8
 
-        open(unit=io,file=datafile,status='old',access='STREAM')
+        print *,i_current
+        
+        open(unit=io,file=datafile,status='old',access='STREAM',form='unformatted')
         if (disp > 0) then
            read(io,pos=disp) c
         endif
@@ -506,7 +520,7 @@ subroutine cgyro_write_distributed_real(datafile,n_fn,fn)
 
         open(unit=io,file=datafile,status='old',access='STREAM')
         if (disp > 0) then
-         read(io,pos=disp) c
+           read(io,pos=disp) c
         endif
         endfile(io)
         close(io)

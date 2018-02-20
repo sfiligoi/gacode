@@ -75,6 +75,9 @@ then
   echo "         -compress"
   echo "         Compress simulation directory."
   echo
+  echo "         -bin"
+  echo "         Map old-style ASCII data to binary files."
+  echo
   echo "         -globalmap"
   echo "         Create global data mapping file."
   echo "         NOTE: requries setting -rhos <rho/a>"
@@ -100,6 +103,7 @@ GENERATE_FLAG=0
 REGRESS_FLAG=0
 CLEAN_FLAG=0
 COMPRESS_FLAG=0
+BIN_FLAG=0
 RESET=0
 NEW_FLAG=0
 INIT_FLAG=0
@@ -150,6 +154,8 @@ while [ $# -gt 0 ] ; do
 
   -compress) COMPRESS_FLAG=1 ;;
 
+  -bin) BIN_FLAG=1 ;;
+
   -globalmap) GLOBALMAP_FLAG=1 ;;
 
   -rhos) shift ; RHOS=$1 ;;
@@ -185,6 +191,18 @@ fi
 if [ $COMPRESS_FLAG -eq 1 ]
 then
     cgyro_compress $SIMDIR $LOCDIR
+    exit 1
+fi
+#============================================================
+
+#============================================================
+# Binary option
+if [ $BIN_FLAG -eq 1 ]
+then
+    EXEC="python $GACODE_ROOT/cgyro/bin/cgyro_t2b.py"
+    $EXEC out.cgyro.kxky_phi bin.cgyro.kxky_phi
+    $EXEC out.cgyro.kxky_n   bin.cgyro.kxky_n
+    $EXEC out.cgyro.kxky_e   bin.cgyro.kxky_e
     exit 1
 fi
 #============================================================
