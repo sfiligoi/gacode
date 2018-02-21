@@ -56,7 +56,7 @@ subroutine cgyro_write_restart_one
 
   offset1 = size(h_x,kind=MPI_OFFSET_KIND)*i_proc
   if (offset1 < 0) then
-     call cgyro_error('ERROR: (CGYRO) overflow detected in cgyro_write_restart_one')
+     call cgyro_error('ERROR: (CGYRO) overflow in cgyro_write_restart')
      return
   endif
 
@@ -89,7 +89,7 @@ subroutine cgyro_write_restart_one
           i_err)
 
   if (i_err /= 0) then
-     call cgyro_error('ERROR: (CGYRO) MPI_FILE_WRITE_AT in cgyro_write_restart_one failed')
+     call cgyro_error('ERROR: (CGYRO) MPI_FILE_WRITE_AT in cgyro_write_restart failed')
      return
   endif
 

@@ -6,8 +6,7 @@ subroutine realfluct(nr,nn,nx,ny,c,f)
   double complex, intent(in) :: c(0:nr-1,0:nn-1)
   double precision, intent(inout) :: f(0:nx-1,0:ny-1)
 
-  double complex :: epx(0:nr-1,0:nx-1)
-  double complex :: eny(0:nn-1,0:ny-1)
+  double complex, dimension(:,:), allocatable :: epx,eny
 
   integer :: i,j,n,p
   double precision :: pi,xi,yj,fsum
@@ -20,6 +19,9 @@ subroutine realfluct(nr,nn,nx,ny,c,f)
 ! f2py intent(in) c
 ! f2py intent(in,out) f
 
+  allocate(epx(0:nr-1,0:nx-1))
+  allocate(eny(0:nn-1,0:ny-1))
+  
   ic = (0d0,1d0)
   pi = atan(1d0)*4d0
 
@@ -55,4 +57,6 @@ subroutine realfluct(nr,nn,nx,ny,c,f)
      enddo
   enddo
 
+  deallocate(epx,eny)
+  
 end subroutine realfluct

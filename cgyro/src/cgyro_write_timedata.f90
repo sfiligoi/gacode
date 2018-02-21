@@ -62,7 +62,7 @@ subroutine cgyro_write_timedata
      ! (n,e) moment for all species at selected thetas.
      do i_moment=1,2
         if (use_bin == 1) then
-           call cgyro_write_distbin_complex(&
+           call cgyro_write_distributed_bcomplex(&
                 trim(path)//binfile_kxky(i_moment),&
                 size(moment(:,:,:,i_moment)),&
                 moment(:,:,:,i_moment))
@@ -86,7 +86,7 @@ subroutine cgyro_write_timedata
 
   ! Complex potential at selected thetas
   if (use_bin == 1) then
-     call cgyro_write_distbin_complex(&
+     call cgyro_write_distributed_bcomplex(&
           trim(path)//binfile_kxky_phi,&
           size(field_plot),&
           field_plot)
@@ -197,18 +197,16 @@ subroutine cgyro_write_distributed_complex(datafile,n_fn,fn)
   character :: c
   !------------------------------------------------------
 
-  if (i_proc_1 /= 0) then
-    return
-  endif
+  if (i_proc_1 /= 0) return
 
-
+  
   select case (io_control)
 
-  case(0)
+  case (0)
 
      return
 
-  case(1)
+  case (1)
 
      ! Open
 
@@ -217,7 +215,7 @@ subroutine cgyro_write_distributed_complex(datafile,n_fn,fn)
         close(io)
      endif
 
-  case(2)
+  case (2)
 
      ! Append
 
@@ -243,7 +241,7 @@ subroutine cgyro_write_distributed_complex(datafile,n_fn,fn)
 
      call MPI_INFO_CREATE(finfo,i_err)
 
-     call MPI_INFO_SET(finfo,"striping_factor", mpiio_small_stripe_str,i_err)
+     call MPI_INFO_SET(finfo,"striping_factor",mpiio_small_stripe_str,i_err)
 
      call MPI_FILE_OPEN(NEW_COMM_2,&
           datafile,&
@@ -272,7 +270,7 @@ subroutine cgyro_write_distributed_complex(datafile,n_fn,fn)
      call MPI_FILE_CLOSE(fh,i_err)
      call MPI_INFO_FREE(finfo,i_err)
 
-  case(3)
+  case (3)
 
      ! Rewind
 
@@ -295,7 +293,7 @@ subroutine cgyro_write_distributed_complex(datafile,n_fn,fn)
 
 end subroutine cgyro_write_distributed_complex
 
-subroutine cgyro_write_distbin_complex(datafile,n_fn,fn)
+subroutine cgyro_write_distributed_bcomplex(datafile,n_fn,fn)
 
   use mpi
   use cgyro_globals
@@ -315,14 +313,13 @@ subroutine cgyro_write_distbin_complex(datafile,n_fn,fn)
   integer :: fstatus(MPI_STATUS_SIZE)
   integer(kind=MPI_OFFSET_KIND) :: disp
   integer(kind=MPI_OFFSET_KIND) :: offset1
-  complex :: c(n_fn)
   !------------------------------------------------------
 
   if (i_proc_1 /= 0) return
 
   select case (io_control)
 
-  case(0)
+  case (0)
 
      return
 
@@ -342,14 +339,13 @@ subroutine cgyro_write_distbin_complex(datafile,n_fn,fn)
      ! Write in parallel to the binary datafile
      filemode = MPI_MODE_WRONLY
      disp = i_current-1
-     disp = disp*n_proc_2
-     disp = disp*size(fn,kind=MPI_OFFSET_KIND)
-
-     offset1 = size(fn,kind=MPI_OFFSET_KIND)*i_proc_2
-
+     disp = disp*n_proc_2*size(fn)*16
+     
+     offset1 = i_proc_2*size(fn)
+     
      call MPI_INFO_CREATE(finfo,i_err)
 
-     call MPI_INFO_SET(finfo,"striping_factor", mpiio_small_stripe_str,i_err)
+     call MPI_INFO_SET(finfo,"striping_factor",mpiio_small_stripe_str,i_err)
 
      call MPI_FILE_OPEN(NEW_COMM_2,&
           datafile,&
@@ -369,7 +365,7 @@ subroutine cgyro_write_distbin_complex(datafile,n_fn,fn)
      call MPI_FILE_WRITE_AT(fh,&
           offset1,&
           fn,&
-          size(fn),&
+          n_fn,&
           MPI_COMPLEX16,&
           fstatus,&
           i_err)
@@ -377,23 +373,18 @@ subroutine cgyro_write_distbin_complex(datafile,n_fn,fn)
      call MPI_FILE_SYNC(fh,i_err)
      call MPI_FILE_CLOSE(fh,i_err)
      call MPI_INFO_FREE(finfo,i_err)
-
+  
   case (3)
 
      ! Rewind
 
      if (i_proc == 0) then
 
-        disp = i_current-1
-        disp = disp*n_proc_2
-        disp = disp*size(fn,kind=MPI_OFFSET_KIND)*8
-
-        print *,i_current
+        disp = i_current
+        disp = disp*n_proc_2*size(fn)*16
         
-        open(unit=io,file=datafile,status='old',access='STREAM',form='unformatted')
-        if (disp > 0) then
-           read(io,pos=disp) c
-        endif
+        open(unit=io,file=datafile,status='old',access='stream')
+        read(io,pos=disp) 
         endfile(io)
         close(io)
 
@@ -401,7 +392,7 @@ subroutine cgyro_write_distbin_complex(datafile,n_fn,fn)
 
   end select
 
-end subroutine cgyro_write_distbin_complex
+end subroutine cgyro_write_distributed_bcomplex
 
 
 !------------------------------------------------------
