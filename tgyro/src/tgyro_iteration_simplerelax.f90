@@ -118,7 +118,7 @@ subroutine tgyro_iteration_simplerelax
         do i_ion=1,loc_n_ion
            if (evo_e(i_ion) == 1) then
               p = p+1 
-              simpledz = loc_relax*(f_vec(p) - g_vec(p))
+              simpledz = relax(p)*(f_vec(p) - g_vec(p))
               if (abs(simpledz) > loc_dx_max) then
                   simpledz = loc_dx_max*(simpledz/abs(simpledz))
               endif
