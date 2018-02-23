@@ -14,6 +14,9 @@ module cgyro_globals
 
   use, intrinsic :: iso_c_binding
 
+  ! Data output precision setting
+  integer, parameter :: BYTE=4 ! Change to 8 for double precision
+  
   !---------------------------------------------------------------
   ! Input parameters:
   !
@@ -217,7 +220,9 @@ module cgyro_globals
   character(len=16) :: runfile_timers  = 'out.cgyro.timing'
   character(len=14) :: runfile_freq    = 'out.cgyro.freq'
   character(len=21) :: runfile_kxky_flux = 'out.cgyro.kxky_flux_e'
+  character(len=21) :: binfile_kxky_flux = 'bin.cgyro.kxky_flux_e'
   character(len=17) :: runfile_ky_flux = 'out.cgyro.ky_flux'
+  character(len=17) :: binfile_ky_flux = 'bin.cgyro.ky_flux'
   character(len=15), dimension(3)  :: runfile_fieldb = &
        (/'out.cgyro.phib ','out.cgyro.aparb','out.cgyro.bparb'/)
   character(len=16), dimension(2)  :: runfile_kxky = &
@@ -228,6 +233,8 @@ module cgyro_globals
   character(len=18) :: binfile_kxky_phi = 'bin.cgyro.kxky_phi'
   character(len=20), dimension(3)  :: runfile_lky_flux = &
        (/'out.cgyro.lky_flux_n','out.cgyro.lky_flux_e','out.cgyro.lky_flux_v'/)
+  character(len=20), dimension(3)  :: binfile_lky_flux = &
+       (/'bin.cgyro.lky_flux_n','bin.cgyro.lky_flux_e','bin.cgyro.lky_flux_v'/)
   character(len=15) :: runfile_hosts = 'out.cgyro.hosts'
   integer, parameter :: io=1
   ! Restart tags

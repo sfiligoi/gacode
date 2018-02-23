@@ -12,7 +12,9 @@ try:
 except:
    print ' BAD: (plot_fluct) Please build gapy.so library!'
    hasgapy = False
-   
+
+PREC='f' ; BIT=4  
+
 # Use first 3 args to define plot and font size 
 rc('text',usetex=True)
 rc('font',size=int(sys.argv[12]))
@@ -189,7 +191,7 @@ if hasbin:
 
    while work:
       try:
-         aa = struct.unpack('d'*n_chunk,fbin.read(8*n_chunk))
+         aa = struct.unpack(PREC*n_chunk,fbin.read(BIT*n_chunk))
       except:
          sys.exit()
       

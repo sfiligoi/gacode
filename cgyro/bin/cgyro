@@ -200,9 +200,14 @@ fi
 if [ $BIN_FLAG -eq 1 ]
 then
     EXEC="python $GACODE_ROOT/cgyro/bin/cgyro_t2b.py"
-    $EXEC out.cgyro.kxky_phi bin.cgyro.kxky_phi
-    $EXEC out.cgyro.kxky_n   bin.cgyro.kxky_n
-    $EXEC out.cgyro.kxky_e   bin.cgyro.kxky_e
+    $EXEC out.cgyro.kxky_phi    bin.cgyro.kxky_phi
+    $EXEC out.cgyro.kxky_n      bin.cgyro.kxky_n
+    $EXEC out.cgyro.kxky_e      bin.cgyro.kxky_e
+    $EXEC out.cgyro.kxky_flux_e bin.cgyro.kxky_flux_e
+    $EXEC out.cgyro.ky_flux     bin.cgyro.ky_flux
+    $EXEC out.cgyro.lky_flux_n  bin.cgyro.lky_flux_n
+    $EXEC out.cgyro.lky_flux_e  bin.cgyro.lky_flux_e
+    $EXEC out.cgyro.lky_flux_v  bin.cgyro.lky_flux_v
     exit 1
 fi
 #============================================================

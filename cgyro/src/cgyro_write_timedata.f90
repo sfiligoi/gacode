@@ -35,26 +35,48 @@ subroutine cgyro_write_timedata
   call cgyro_flux
 
   ! ky flux for all species with field breakdown
-  call cgyro_write_distributed_real(&
-       trim(path)//runfile_ky_flux,&
-       size(fflux(:,:,:)),&
-       fflux(:,:,:))
+  if (use_bin == 1) then
+     call cgyro_write_distributed_breal(&
+          trim(path)//binfile_ky_flux,&
+          size(fflux(:,:,:)),&
+          fflux(:,:,:))
+  else
+     call cgyro_write_distributed_real(&
+          trim(path)//runfile_ky_flux,&
+          size(fflux(:,:,:)),&
+          fflux(:,:,:))
+  endif
 
   if (nonlinear_flag == 1 .and. kxkyflux_print_flag == 1) then
      ! kxky energy flux for all species
-     call cgyro_write_distributed_real(&
-          trim(path)//runfile_kxky_flux,&
-          size(flux(:,:)),&
-          flux(:,:))
+     if (use_bin == 1) then
+        call cgyro_write_distributed_breal(&
+             trim(path)//binfile_kxky_flux,&
+             size(flux(:,:)),&
+             flux(:,:))
+
+     else
+        call cgyro_write_distributed_real(&
+             trim(path)//runfile_kxky_flux,&
+             size(flux(:,:)),&
+             flux(:,:))
+     endif
   endif
 
   if (n_global > 0) then
      ! Global (n,e,v) fluxes for all species
      do i_moment=1,3
-        call cgyro_write_distributed_complex(&
-             trim(path)//runfile_lky_flux(i_moment),&
-             size(gflux(:,:,i_moment)),&
-             gflux(:,:,i_moment))
+        if (use_bin == 1) then
+           call cgyro_write_distributed_bcomplex(&
+                trim(path)//binfile_lky_flux(i_moment),&
+                size(gflux(:,:,i_moment)),&
+                gflux(:,:,i_moment))
+        else
+           call cgyro_write_distributed_complex(&
+                trim(path)//runfile_lky_flux(i_moment),&
+                size(gflux(:,:,i_moment)),&
+                gflux(:,:,i_moment))
+        endif
      enddo
   endif
 
@@ -96,7 +118,7 @@ subroutine cgyro_write_timedata
           size(field_plot),&
           field_plot)
   endif
-  
+
   ! Checksum for regression testing
   ! Note that checksum is a distributed real scalar
   if (zf_test_flag == 0) then
@@ -313,6 +335,7 @@ subroutine cgyro_write_distributed_bcomplex(datafile,n_fn,fn)
   integer :: fstatus(MPI_STATUS_SIZE)
   integer(kind=MPI_OFFSET_KIND) :: disp
   integer(kind=MPI_OFFSET_KIND) :: offset1
+  complex(kind=4) :: f8(n_fn)
   !------------------------------------------------------
 
   if (i_proc_1 /= 0) return
@@ -339,10 +362,10 @@ subroutine cgyro_write_distributed_bcomplex(datafile,n_fn,fn)
      ! Write in parallel to the binary datafile
      filemode = MPI_MODE_WRONLY
      disp = i_current-1
-     disp = disp*n_proc_2*size(fn)*16
-     
+     disp = disp*n_proc_2*size(fn)*BYTE*2
+
      offset1 = i_proc_2*size(fn)
-     
+
      call MPI_INFO_CREATE(finfo,i_err)
 
      call MPI_INFO_SET(finfo,"striping_factor",mpiio_small_stripe_str,i_err)
@@ -354,26 +377,48 @@ subroutine cgyro_write_distributed_bcomplex(datafile,n_fn,fn)
           fh,&
           i_err)
 
-     call MPI_FILE_SET_VIEW(fh,&
-          disp,&
-          MPI_COMPLEX16,&
-          MPI_COMPLEX16,&
-          'native',&
-          finfo,&
-          i_err)
+     if (BYTE == 4) then
 
-     call MPI_FILE_WRITE_AT(fh,&
-          offset1,&
-          fn,&
-          n_fn,&
-          MPI_COMPLEX16,&
-          fstatus,&
-          i_err)
+        ! Single (default) 
+        f8 = fn
+        call MPI_FILE_SET_VIEW(fh,&
+             disp,&
+             MPI_COMPLEX8,&
+             MPI_COMPLEX8,&
+             'native',&
+             finfo,&
+             i_err)
+
+        call MPI_FILE_WRITE_AT(fh,&
+             offset1,&
+             f8,&
+             n_fn,&
+             MPI_COMPLEX8,&
+             fstatus,&
+             i_err)
+     else
+
+        call MPI_FILE_SET_VIEW(fh,&
+             disp,&
+             MPI_COMPLEX16,&
+             MPI_COMPLEX16,&
+             'native',&
+             finfo,&
+             i_err)
+
+        call MPI_FILE_WRITE_AT(fh,&
+             offset1,&
+             fn,&
+             n_fn,&
+             MPI_COMPLEX16,&
+             fstatus,&
+             i_err)
+     endif
 
      call MPI_FILE_SYNC(fh,i_err)
      call MPI_FILE_CLOSE(fh,i_err)
      call MPI_INFO_FREE(finfo,i_err)
-  
+
   case (3)
 
      ! Rewind
@@ -381,8 +426,8 @@ subroutine cgyro_write_distributed_bcomplex(datafile,n_fn,fn)
      if (i_proc == 0) then
 
         disp = i_current
-        disp = disp*n_proc_2*size(fn)*16
-        
+        disp = disp*n_proc_2*size(fn)*BYTE*2
+
         open(unit=io,file=datafile,status='old',access='stream')
         read(io,pos=disp) 
         endfile(io)
@@ -522,6 +567,134 @@ subroutine cgyro_write_distributed_real(datafile,n_fn,fn)
 
 end subroutine cgyro_write_distributed_real
 
+subroutine cgyro_write_distributed_breal(datafile,n_fn,fn)
+
+  use mpi
+  use cgyro_globals
+
+  !------------------------------------------------------
+  implicit none
+  !
+  character (len=*), intent(in) :: datafile
+  integer, intent(in) :: n_fn
+  real, intent(in) :: fn(n_fn)
+  !
+  integer :: in
+  !
+  ! Required for MPI-IO:
+  !
+  integer :: filemode
+  integer :: finfo
+  integer :: fh
+  integer :: fstatus(MPI_STATUS_SIZE)
+  integer(kind=MPI_OFFSET_KIND) :: disp
+  integer(kind=MPI_OFFSET_KIND) :: offset1
+  !
+  character(len=fmtstr_len*n_fn) :: fnstr
+  character(len=fmtstr_len) :: tmpstr
+  real(kind=4) :: f4(n_fn)
+  !------------------------------------------------------
+
+  if (i_proc_1 /= 0) return
+
+  select case (io_control)
+
+  case (0)
+
+     return
+
+  case (1)
+
+     ! Open
+
+     if (i_proc == 0) then
+        open(unit=io,file=datafile,status='replace')
+        close(io)
+     endif
+
+  case (2)
+
+     ! Append
+
+     ! Write in parallel to the binary datafile
+     filemode = MPI_MODE_WRONLY
+     disp = i_current-1
+     disp = disp*n_proc_2*size(fn)*BYTE
+
+     offset1 = i_proc_2*size(fn)
+
+     call MPI_INFO_CREATE(finfo,i_err)
+
+     call MPI_INFO_SET(finfo,"striping_factor",mpiio_small_stripe_str,i_err)
+
+     call MPI_FILE_OPEN(NEW_COMM_2,&
+          datafile,&
+          filemode,&
+          finfo,&
+          fh,&
+          i_err)
+
+     if (BYTE == 4) then
+
+        ! Single (default) 
+        f4 = fn
+        call MPI_FILE_SET_VIEW(fh,&
+             disp,&
+             MPI_REAL4,&
+             MPI_REAL4,&
+             'native',&
+             finfo,&
+             i_err)
+
+        call MPI_FILE_WRITE_AT(fh,&
+             offset1,&
+             f4,&
+             n_fn,&
+             MPI_REAL4,&
+             fstatus,&
+             i_err)
+     else
+        
+        call MPI_FILE_SET_VIEW(fh,&
+             disp,&
+             MPI_REAL8,&
+             MPI_REAL8,&
+             'native',&
+             finfo,&
+             i_err)
+
+        call MPI_FILE_WRITE_AT(fh,&
+             offset1,&
+             fn,&
+             n_fn,&
+             MPI_REAL8,&
+             fstatus,&
+             i_err)
+     endif
+
+     call MPI_FILE_SYNC(fh,i_err)
+     call MPI_FILE_CLOSE(fh,i_err)
+     call MPI_INFO_FREE(finfo,i_err)
+
+  case (3)
+
+     ! Rewind
+
+     if (i_proc == 0) then
+
+        disp = i_current
+        disp = disp*n_proc_2*size(fn)*BYTE
+
+        open(unit=io,file=datafile,status='old',access='STREAM')
+        read(io,pos=disp)
+        endfile(io)
+        close(io)
+
+     endif
+
+  end select
+
+end subroutine cgyro_write_distributed_breal
 
 !------------------------------------------------------
 ! write_precision.f90

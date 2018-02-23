@@ -14,7 +14,7 @@ if not os.path.isfile(afile):
     sys.exit()
     
 
-arr = np.fromfile(afile,dtype='float',sep=' ')
+arr = np.fromfile(afile,dtype='float32',sep=' ')
 
 print "INFO: (cgyro_t2b) Read ASCII data in "+afile
 

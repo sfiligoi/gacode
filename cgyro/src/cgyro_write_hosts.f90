@@ -55,10 +55,6 @@ subroutine cgyro_write_hosts
   write (line, "(A,I8,A,I6,A,I6,A,A)") "RANK G ",i_proc," C1 ",i_proc_1," C2 ",i_proc_2," Host ",hostname
   line(192:192) = NEW_LINE('A')
 
-
-  !-----------------------------------------------
-  ! Dump h and blending coefficients:
-  !
   filemode = IOR(MPI_MODE_WRONLY,MPI_MODE_CREATE)
   disp     = 0
 

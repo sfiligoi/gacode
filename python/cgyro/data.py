@@ -2,6 +2,8 @@ import os
 import numpy as np
 import sys
 
+BYTE='float32'
+
 class cgyrodata:
 
     """CGYRO output data class."""
@@ -13,7 +15,23 @@ class cgyrodata:
         self.dir = sim_directory
         self.getdata()
    
+    def extract(self,f):
 
+       import os
+       import numpy as np
+       import time
+       
+       start = time.time()
+       if os.path.isfile(self.dir+'bin'+f):
+          fmt = 'bin'
+          data = np.fromfile(self.dir+'bin'+f,dtype=BYTE)
+       else:
+          fmt = 'out'
+          data = np.fromfile(self.dir+'out'+f,dtype='float',sep=" ")
+       t = 'TIME = '+"{:.3e}".format(time.time()-start)+' s.'
+       return t,fmt,data
+       
+            
     def getdata(self):
 
         """Initialize smaller data objects (don't load larger ones)"""
@@ -234,16 +252,9 @@ class cgyrodata:
         # Particle and energy fluxes
         #
         nd = self.n_species*3*self.n_field*self.n_n*nt
-
-        try:
-            start = time.time()
-            data = np.fromfile(self.dir+'out.cgyro.ky_flux',dtype='float',sep=" ")
-            end = time.time()
-            self.ky_flux = np.reshape(data[0:nd],(self.n_species,3,self.n_field,self.n_n,nt),'F')
-            print "INFO: (data.py) Read data in out.cgyro.ky_flux. TIME = "+str(end-start)
-        except:
-            pass 
-
+        t,fmt,data = self.extract('.cgyro.ky_flux')
+        self.ky_flux = np.reshape(data[0:nd],(self.n_species,3,self.n_field,self.n_n,nt),'F')
+        print "INFO: (data.py) Read data in "+fmt+".cgyro.ky_flux. "+t 
         #-----------------------------------------------------------------
 
     def getbigflux(self):
@@ -260,24 +271,9 @@ class cgyrodata:
         # Particle and energy fluxes
         #
         nd = self.n_radial*self.n_species*self.n_n*nt
-
-        try:
-            start = time.time()
-            data = np.fromfile(self.dir+'out.cgyro.kxky_flux_e',dtype='float',sep=" ")
-            end = time.time()
-            self.kxky_flux_e = np.reshape(data[0:nd],(self.n_radial,self.n_species,self.n_n,nt),'F')
-            print "INFO: (data.py) Read data in out.cgyro.kxky_flux_e. TIME = "+str(end-start)
-        except:
-            pass
-
-        try:
-            start = time.time()
-            data = np.fromfile(self.dir+'out.cgyro.kxky_flux_n',dtype='float',sep=" ")
-            end = time.time()
-            self.kxky_flux_n = np.reshape(data[0:nd],(self.n_radial,self.n_species,self.n_n,nt),'F')
-            print "INFO: (data.py) Read data in out.cgyro.kxky_flux_n. TIME = "+str(end-start)
-        except:
-            pass 
+        t,fmt,data = self.extract('.cgyro.kxky_flux_e')
+        self.kxky_flux_e = np.reshape(data[0:nd],(self.n_radial,self.n_species,self.n_n,nt),'F')
+        print "INFO: (data.py) Read data in "+fmt+".cgyro.kxky_flux_e. "+t
         #-----------------------------------------------------------------
 
     def getxflux(self):
@@ -295,33 +291,20 @@ class cgyrodata:
         #
         ng = self.n_global+1
         nd = 2*ng*self.n_species*self.n_n*nt
-        try:
-            start = time.time()
-            data = np.fromfile(self.dir+'out.cgyro.lky_flux_n',dtype='float',sep=" ")
-            end = time.time()
-            self.lky_flux_n = np.reshape(data[0:nd],(2,ng,self.n_species,self.n_n,nt),'F')
-            print "INFO: (data.py) Read data in out.cgyro.lky_flux_n. TIME = "+str(end-start)
-        except:
-            pass
 
-        try:
-            start = time.time()
-            data = np.fromfile(self.dir+'out.cgyro.lky_flux_e',dtype='float',sep=" ")
-            end = time.time()
-            self.lky_flux_e = np.reshape(data[0:nd],(2,ng,self.n_species,self.n_n,nt),'F')
-            print "INFO: (data.py) Read data in out.cgyro.lky_flux_e. TIME = "+str(end-start)
-        except:
-            pass 
+        t,fmt,data = self.extract('.cgyro.lky_flux_n')
+        self.lky_flux_n = np.reshape(data[0:nd],(2,ng,self.n_species,self.n_n,nt),'F')
+        print "INFO: (data.py) Read data in "+fmt+".cgyro.lky_flux_n. "+t
 
-        try:
-            start = time.time()
-            data = np.fromfile(self.dir+'out.cgyro.lky_flux_v',dtype='float',sep=" ")
-            end = time.time()
-            self.lky_flux_v = np.reshape(data[0:nd],(2,ng,self.n_species,self.n_n,nt),'F')
-            print "INFO: (data.py) Read data in out.cgyro.lky_flux_v. TIME = "+str(end-start)
-        except:
-            pass 
-        #-----------------------------------------------------------------
+        t,fmt,data = self.extract('.cgyro.lky_flux_e')
+        self.lky_flux_e = np.reshape(data[0:nd],(2,ng,self.n_species,self.n_n,nt),'F')
+        print "INFO: (data.py) Read data in "+fmt+".cgyro.lky_flux_e. "+t
+
+        t,fmt,data = self.extract('.cgyro.lky_flux_v')
+        self.lky_flux_v = np.reshape(data[0:nd],(2,ng,self.n_species,self.n_n,nt),'F')
+        print "INFO: (data.py) Read data in "+fmt+".cgyro.lky_flux_v. "+t
+            
+      #-----------------------------------------------------------------
 
     def getbigfield(self):
 
@@ -340,48 +323,25 @@ class cgyrodata:
         
         # 1. kxky_phi
         nd = 2*self.n_radial*self.theta_plot*self.n_n*nt
-        start = time.time()
-        if os.path.isfile(self.dir+'bin.cgyro.kxky_phi'):
-            fmt = 'bin'
-            data = np.fromfile(self.dir+'bin.cgyro.kxky_phi',dtype='float64')
-        else:
-            fmt = 'out'
-            data = np.fromfile(self.dir+'out.cgyro.kxky_phi',dtype='float',sep=" ")
-            
-        end = time.time()
-        print 'INFO: (data.py) Read data in '+fmt+'.cgyro.kxky_phi. TIME = '+str(end-start)
+        t,fmt,data = self.extract('.cgyro.kxky_phi')
+        
+        print 'INFO: (data.py) Read data in '+fmt+'.cgyro.kxky_phi. '+t
         self.kxky_phi = np.reshape(data[0:nd],(2,self.n_radial,self.theta_plot,self.n_n,nt),'F')
         self.phisq = self.kxky_phi[0,:,:,:,:]**2+self.kxky_phi[1,:,:,:,:]**2
        
         # 2. kxky_n
         nd = 2*self.n_radial*self.theta_plot*self.n_species*self.n_n*nt
-
-        start = time.time()
-        if os.path.isfile(self.dir+'bin.cgyro.kxky_n'):
-            fmt = 'bin'
-            data = np.fromfile(self.dir+'bin.cgyro.kxky_n',dtype='float64')
-        else:
-            fmt = 'out'
-            data = np.fromfile(self.dir+'out.cgyro.kxky_n',dtype='float',sep=" ")
-            
-        end = time.time()
-        print 'INFO: (data.py) Read data in '+fmt+'.cgyro.kxky_n. TIME = '+str(end-start)
+        t,fmt,data = self.extract('.cgyro.kxky_n')
+           
+        print 'INFO: (data.py) Read data in '+fmt+'.cgyro.kxky_n.   '+t
         self.n = np.reshape(data[0:nd],(2,self.n_radial,self.theta_plot,self.n_species,self.n_n,nt),'F')
         self.nsq = self.n[0,:,:,:,:,:]**2+self.n[1,:,:,:,:,:]**2
 
-        # 2. kxky_e
+        # 3. kxky_e
         nd = 2*self.n_radial*self.theta_plot*self.n_species*self.n_n*nt
+        t,fmt,data = self.extract('.cgyro.kxky_e')
 
-        start = time.time()
-        if os.path.isfile(self.dir+'bin.cgyro.kxky_e'):
-            fmt = 'bin'
-            data = np.fromfile(self.dir+'bin.cgyro.kxky_e',dtype='float64')
-        else:
-            fmt = 'out'
-            data = np.fromfile(self.dir+'out.cgyro.kxky_e',dtype='float',sep=" ")
-            
-        end = time.time()
-        print 'INFO: (data.py) Read data in '+fmt+'.cgyro.kxky_e. TIME = '+str(end-start)
+        print 'INFO: (data.py) Read data in '+fmt+'.cgyro.kxky_e.   '+t
         self.e = np.reshape(data[0:nd],(2,self.n_radial,self.theta_plot,self.n_species,self.n_n,nt),'F')
         self.esq = self.e[0,:,:,:,:,:]**2+self.e[1,:,:,:,:,:]**2
 
