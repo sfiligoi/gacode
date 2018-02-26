@@ -63,3 +63,6 @@ quick/src/quick
 tmp.py
 
 *.optrpt
+
+# Legacy directories
+shared/profiles_gen
