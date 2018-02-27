@@ -275,6 +275,12 @@ program pneo
           / (neo_rho_star_in * neo_geoparams_out(1))**2 / neo_nu_1_in
 
      do is=1,neo_n_species_in
+        outdata_u_loc(2+6*(is-1),p) = outdata_u_loc(2+6*(is-1),p) &
+             + 1.5*outdata_u_loc(1+6*(is-1),p)
+        outdata_u_loc(4+6*(is-1),p) = outdata_u_loc(4+6*(is-1),p) &
+             + 1.5*outdata_u_loc(3+6*(is-1),p)
+        outdata_u_loc(6+6*(is-1),p) = outdata_u_loc(6+6*(is-1),p) &
+             + 1.5*outdata_u_loc(5+6*(is-1),p)
         outdata_g_loc(2+6*(is-1),p) = outdata_g_loc(2+6*(is-1),p) &
              + 1.5*outdata_g_loc(1+6*(is-1),p)
         outdata_g_loc(4+6*(is-1),p) = outdata_g_loc(4+6*(is-1),p) &
