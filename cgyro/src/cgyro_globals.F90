@@ -53,6 +53,7 @@ module cgyro_globals
   integer :: collision_mom_restore
   integer :: collision_ene_restore
   integer :: collision_ene_diffusion
+  integer :: collision_self_adjoint
   integer :: collision_kperp
   integer :: collision_field_model
   integer :: collision_ion_model
@@ -406,8 +407,6 @@ module cgyro_globals
   !
   ! Collision operator
   real, dimension(:,:,:), allocatable :: cmat
-  real, dimension(:,:,:), allocatable :: cmat_base ! only used in collision_mode=6
-  real(kind=4) , dimension(:,:,:), allocatable :: cmat_diff ! only used in collision_mode=6
   real, dimension(:,:,:,:,:), allocatable :: cmat_simple ! only used in collision_mode=5
   ! 
   ! Equilibrium/geometry arrays
