@@ -257,19 +257,21 @@ program pneo
      enddo
 
      ! <jpar B>/Bunit j_s ~ rho (I/psip) sum_s |z_a| n_a C_a 1/L_a
-     
+     outdata_j_loc(:,p) = outdata_j_loc(:,p) &
+           / (neo_rho_star_in * neo_geoparams_out(1))
+          
      ! K_a/n_a ~ Vpol / Bpol
      ! <B^2/Bunit^2> K_a Bunit/(n_a c_s) ~ rho (I/psip) C 1/L
      outdata_u_loc(:,p) = outdata_u_loc(:,p) &
           * neo_geoparams_out(3) / neo_geoparams_out(4) &
           / (neo_rho_star_in * neo_geoparams_out(1))
   
-     ! Gamma_a/(n_e c_s) ~ nu_ee rho_s^2 (I/psip)^2  <Bunit^2/B^2> C 1/L
+     ! Gamma_a/(n_e c_s) ~ nu_ee rho_s^2 (I/psip)^2 / <B^2/Bunit^2> C 1/L
      outdata_g_loc(:,p) = outdata_g_loc(:,p) &
           * neo_geoparams_out(3) &
           / (neo_rho_star_in * neo_geoparams_out(1))**2 / neo_nu_1_in
 
-     ! Q_a/(n_e c_s T_e) ~ nu_ee rho_a^2 (I/psip)^2  <Bunit^2/B^2> C 1/L
+     ! Q_a/(n_e c_s T_e) ~ nu_ee rho_a^2 (I/psip)^2  <B^2/Bunit^2> C 1/L
      outdata_q_loc(:,p) = outdata_q_loc(:,p) &
           * neo_geoparams_out(3) &
           / (neo_rho_star_in * neo_geoparams_out(1))**2 / neo_nu_1_in
