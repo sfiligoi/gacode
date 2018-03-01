@@ -2,29 +2,54 @@ from mpmath import mp
 import numpy as np
 import sys
 
+# usage:
+#
+# python gauss_exp_quad2.py <b=emax> <m=n_energy> <type=s0,s1,s2> <imom=0,1,2> 
+
 b0   = mp.sqrt(mp.mpf(sys.argv[1]))
 m    = int(sys.argv[2])
 type = sys.argv[3]
 imom = int(sys.argv[4])
 
+# Set precision to huge value
 mp.dps = 50
 
+#----------------------------------
+# Node-related values
+
+# Moments
 mu = mp.matrix(2*m,1)
+
+# Recursion variables
 a = mp.matrix(m,1)
 b = mp.matrix(m,1)
+
+# q2 = int(Q_n^2) and q2x = int(x Q_n^2)
 q2  = mp.matrix(m,1)
 q2x = mp.matrix(m,1)
-p = mp.matrix(m+1,1)
 
+# Monomial cooefficients
 c = mp.matrix(m+1,m+1)
 
+# temporary scalars
 cx = mp.mpf(1)
 cb = mp.mpf(1)
 
-if type == 'leg':
-   for i in range(2*m):
-      mu[i] = mp.mpf(1.0)/(i+1)
-elif type == 'lag':
+# Coefficients of node polynomial
+p = mp.matrix(m+1,1)
+#----------------------------------
+
+#----------------------------------
+# Weight-related variables
+mat = mp.matrix(m,m)
+d1 = mp.matrix(m,m)
+d2 = mp.matrix(m,m)
+
+# weights
+w = mp.matrix(m,1)
+#----------------------------------
+
+if type == 'lag':
    for i in range(2*m):
       mu[i] = mp.gamma((i+1)/mp.mpf(2))/2 
 elif type == 's0':
@@ -69,25 +94,19 @@ for n in range(m):
       else:
          cb = mp.mpf(0.0)
 
+      # Recursion for monomial coefficients
       c[i,n+1] = cx-a[n]*c[i,n]-b[n]*cb
 
    c[n+1,n+1] = mp.mpf(1.0)
 
-# Reverse
+# Reverse order for call to polyroots
 for n in range(m+1):
    p[n] = c[m-n,m]
-   
+
+# Find polynomial roots with extra precision
 x = mp.matrix(mp.polyroots(p,maxsteps=1000,extraprec=200))
 
-# Nodes
-if type == 'leg':
-   x = b0*x
-   
-mat = mp.matrix(m,m)
-d1 = mp.matrix(m,m)
-d2 = mp.matrix(m,m)
-w = mp.matrix(m,1)
-
+# Define polynomial and derivative matrices
 for i in range(m):
    for j in range(m):
       mat[i,j] = x[i]**j
@@ -99,7 +118,7 @@ mi = mat**(-1)
 d1 = d1*mi
 d2 = d2*mi
 
-# True weight function (v^2) for any previous orthogonal poly nodes
+# Weight function (v^imom) for infinite integration weights
 mom = mp.matrix(m,1)
 for i in range(m):
    mom[i] = mp.gamma((i+1+imom)/mp.mpf(2))/mp.mpf(2)
@@ -109,7 +128,7 @@ for i in range(m):
    for j in range(m):
       w[i] = w[i]+mom[j]*mi[j,i]
 
-# WEIGHTS
+# Final weights (with added factor v^(2-imom) to give total v^2)
 for i in range(m):
    w[i] = w[i]*4/mp.sqrt(mp.pi)*x[i]**(2-imom)
 

@@ -27,7 +27,7 @@ class cgyrodata:
          data = np.fromfile(self.dir+'bin'+f,dtype=BYTE)
       elif os.path.isfile(self.dir+'out'+f):
          fmt = 'out'
-         data = np.fromfile(self.dir+'out'+f,dtype='float',sep=" ")
+         data = np.fromfile(self.dir+'out'+f,dtype='float',sep=' ')
       else:
          fmt  = 'null'
          data = []
@@ -213,14 +213,13 @@ class cgyrodata:
       #-----------------------------------------------------------------
       # Ballooning distribution
       #
-      try:
-         data = np.fromfile(self.dir+'out.cgyro.hb',dtype='float',sep=" ")
+      nd = 2*self.n_radial*self.n_theta/self.m_box*self.n_species*self.n_xi*self.n_energy*nt
+      t,fmt,data = self.extract('.cgyro.hb')
+      if fmt != 'null':
          self.hb = np.reshape(data,(2,self.n_radial*self.n_theta/self.m_box,
                                        self.n_species,self.n_xi,self.n_energy,nt),'F')
+         print "INFO: (data.py) Read data in "+fmt+".cgyro.hb. "+t 
          self.hb = self.hb/np.max(self.hb)
-         print "INFO: (data.py) Read data in out.cgyro.hb."
-      except:
-         pass
       #-----------------------------------------------------------------
 
       #-----------------------------------------------------------------

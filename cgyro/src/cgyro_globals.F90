@@ -214,7 +214,7 @@ module cgyro_globals
   character(len=16) :: runfile_memory  = 'out.cgyro.memory'
   character(len=17) :: runfile_restart = 'out.cgyro.restart'
   character(len=13) :: runfile_restart_tag = 'out.cgyro.tag'
-  character(len=12) :: runfile_hb      = 'out.cgyro.hb'
+  character(len=12) :: binfile_hb      = 'bin.cgyro.hb'
   character(len=15) :: runfile_grids   = 'out.cgyro.grids'
   character(len=14) :: runfile_prec    = 'out.cgyro.prec'
   character(len=14) :: runfile_time    = 'out.cgyro.time'

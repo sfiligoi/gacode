@@ -790,7 +790,7 @@ class cgyrodata_plot(data.cgyrodata):
          y = np.zeros([self.n_radial,self.n_time])
          nvec = str2list(nstr)
          print 'INFO: (plot_kx_phi) n = '+str(nvec)
-         ax.set_ylabel(r'$\overline{\Phi_n}$',color='k')
+         ax.set_ylabel(r'$\overline{\delta \phi_n}$',color='k')
          for n in nvec:
             num = r'$n='+str(n)+'$'
             y[:] = self.phisq[:,0,n,:]
