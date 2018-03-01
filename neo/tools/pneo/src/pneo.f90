@@ -78,8 +78,8 @@ program pneo
   allocate(ic8(ntot))
   allocate(ic9(ntot))
   
-  allocate(indata_loc(6,ntot))
-  allocate(indata(6,ntot))
+  allocate(indata_loc(7,ntot))
+  allocate(indata(7,ntot))
 
   allocate(outdata_j_loc(6,ntot))
   allocate(outdata_j(6,ntot))
@@ -297,13 +297,14 @@ program pneo
              + 1.5*outdata_q_loc(5+6*(is-1),p)
      enddo
      
-     ! 6 inputs: eps,ft,q,log10(nuee),ni,Ti
+     ! 7 inputs: eps,ft,q,log10(nuee),ni,Ti, <B^2><1/B^2>-1
      indata_loc(1,p) = neo_rmin_over_a_in
      indata_loc(2,p) = neo_geoparams_out(2)
      indata_loc(3,p) = neo_q_in
      indata_loc(4,p) = log10(neo_nu_1_in)
      indata_loc(5,p) = neo_dens_in(2)
      indata_loc(6,p) = neo_temp_in(2)
+     indata_loc(7,p) = neo_geoparams_out(5)
      
   enddo
 
