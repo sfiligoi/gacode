@@ -80,7 +80,9 @@ subroutine cgyro_init_manager
   endif
   ! Correct weights for infinite domain
   vel(:) = sqrt(energy(:))
-  call domain_renorm(vel,w_e,n_energy)
+  if (e_method < 3) then
+     call domain_renorm(vel,w_e,n_energy)
+  endif
 
   allocate(xi(n_xi))
   allocate(w_xi(n_xi))
