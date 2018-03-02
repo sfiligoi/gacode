@@ -9,6 +9,7 @@ endif
 all:
 	${F2PY} -m gapy -h sgn.pyf gapy_math.f90 gapy_fluct.f90
 	${F2PY} -lgomp --f90flags='${FOMP}' -c sgn.pyf gapy_math.f90 gapy_fluct.f90 ${GACODE_ROOT}/shared/math/math_lib.a ${LMATH}
+
 	rm -f ${DESTLIB}
 	ln -s ${GACODE_ROOT}/gapy/src/gapy.so ${DESTLIB}
 
