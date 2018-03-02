@@ -793,7 +793,7 @@ subroutine write_time(datafile)
 
      open(unit=io,file=datafile,status='old')
      do i_dummy=1,i_current
-        read(io,fmtstr2) dummy,dummy
+        read(io,fmtstr) dummy
      enddo
      endfile(io)
      close(io)

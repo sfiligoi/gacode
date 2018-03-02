@@ -118,10 +118,8 @@ for k in range(n-1):
     for kp in range(n-1):
         z[k,kp]   = pa[kp]
         zp[k,kp]  = qa[kp]
-        zpp[k,kp] = ra[kp]
       
 zp  = zp*mp.powm(z,-1)*b
-zpp = zpp*mp.powm(z,-1)*b*b
 
 # Redefine weight and renormalize last element
 wg = mp.matrix(n-1,1)
@@ -139,10 +137,6 @@ for k in range(n-1):
 for k in range(n-1):
     for kp in range(n-1):
         fout.write(mp.nstr(zp[k,kp],17)+' ')
-    fout.write('\n')
-for k in range(n-1):
-    for kp in range(n-1):
-        fout.write(mp.nstr(zpp[k,kp],17)+' ')
     fout.write('\n')
     
 fout.close()

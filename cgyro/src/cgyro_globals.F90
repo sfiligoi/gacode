@@ -253,7 +253,6 @@ module cgyro_globals
   ! Standard precision for IO (there are optionally reset to higher precision later)
   character(len=8)  :: fmtstr    ='(es11.4)'
   integer           :: fmtstr_len = 12
-  character(len=14) :: fmtstr2   ='(2(es11.4,1x))'
   character(len=15) :: fmtstrn   ='(10(es11.4,1x))'
   character(len=9)  :: fmtstr_hi ='(es18.12)'
   !----------------------------------------------------
@@ -292,11 +291,11 @@ module cgyro_globals
   ! Numerical/work arrays and dimensions
   !
   ! Velocity space 
-  integer, dimension(:), allocatable :: indx_xi, px
+  integer, dimension(:), allocatable :: px
   real, dimension(:), allocatable :: energy, vel, w_e
   real, dimension(:), allocatable :: xi, w_xi
   real, dimension(:,:), allocatable :: xi_deriv_mat, xi_lor_mat
-  real, dimension(:,:), allocatable :: e_deriv1_mat, e_deriv2_mat
+  real, dimension(:,:), allocatable :: e_deriv1_mat
   !
   ! Parallel streaming
   real :: d_theta
@@ -386,7 +385,6 @@ module cgyro_globals
 #endif
   !
   ! Work arrays
-  complex, dimension(:,:), allocatable :: f_balloon
   real, dimension(2) :: integration_error
   !
   ! LAPACK work arrays 
@@ -401,11 +399,10 @@ module cgyro_globals
   !
   ! n=0 test variables
   real, dimension(:,:,:), allocatable :: hzf, xzf 
-  real, dimension(:), allocatable :: pvec_outr, pvec_outi
   !
   ! Collision operator
   real, dimension(:,:,:), allocatable :: cmat
-  real, dimension(:,:,:,:,:), allocatable :: cmat_simple ! only used in collision_mode=5
+  real, dimension(:,:,:,:,:), allocatable :: cmat_simple ! only used in collision_model=5
   ! 
   ! Equilibrium/geometry arrays
   integer :: it0

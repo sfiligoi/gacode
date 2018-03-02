@@ -93,7 +93,6 @@ end subroutine pseudo_legendre
 ! e(n)    -> nodes 
 ! w(n)    -> weights with Sum(w)=1.0
 ! d1(n,n) -> d/dx
-! d2(n,n) -> d^2/dx^2
 !
 ! where e = emax x^2.
 !
@@ -104,7 +103,7 @@ end subroutine pseudo_legendre
 !                0
 !----------------------------------------------------
 
-subroutine pseudo_maxwell_new(n,emax,e,w,d1,d2,datafile)
+subroutine pseudo_maxwell_new(n,emax,e,w,d1,datafile)
 
   use math_constants
 
@@ -119,7 +118,6 @@ subroutine pseudo_maxwell_new(n,emax,e,w,d1,d2,datafile)
   real, intent(out) :: e(n)
   real, intent(out) :: w(n)
   real, intent(out) :: d1(n,n)
-  real, intent(out) :: d2(n,n)
 
   open(unit=1,file=trim(datafile),status='old')
   do i=1,n
@@ -127,9 +125,6 @@ subroutine pseudo_maxwell_new(n,emax,e,w,d1,d2,datafile)
   enddo
   do i=1,n
      read(1,*) d1(i,:)
-  enddo
-  do i=1,n
-     read(1,*) d2(i,:)
   enddo
   close(1)
 
