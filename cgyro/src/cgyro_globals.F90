@@ -53,7 +53,6 @@ module cgyro_globals
   integer :: collision_mom_restore
   integer :: collision_ene_restore
   integer :: collision_ene_diffusion
-  integer :: collision_self_adjoint
   integer :: collision_kperp
   integer :: collision_field_model
   integer :: collision_ion_model
