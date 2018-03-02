@@ -327,13 +327,19 @@ emethod=(${IN// / })
 
 if [ $emethod -eq 2 ]
 then
-   python $GACODE_ROOT/shared/math/gauss_exp_quad.py $emax $ne 
+   PREC=0
+   python $GACODE_ROOT/shared/math/gauss_exp_quad.py $emax $ne $PREC
    echo "INFO: (cgyro) Generated energy mesh data"
-fi
-if [ $emethod -eq 3 ]
-then
-    python $GACODE_ROOT/shared/math/gauss_exp_quad2.py $emax $ne s0 0
-    echo "INFO: (cgyro) Generated energy mesh2 data"
+else
+   data=$GACODE_ROOT/cgyro/tools/egrid/egrid.$ne.${emax%.*}
+   if [ -f $data ]
+   then
+      cp $data out.cgyro.egrid
+   else
+      echo "ERROR: (cgyro) No energy mesh data exists for this resolution."
+      echo $data
+      exit 1
+   fi
 fi
 	
 #============================================================
