@@ -283,12 +283,17 @@ fi
 #============================================================
 
 #============================================================
-# Clean option
-if [ $CLEAN_FLAG -eq 1 ]
-then
-    rm -f out.* batch.out batch.err *~ *gen
+# Clean/new options
+
+CFILES="out.* bin.* batch.out batch.err *~ *gen"
+
+if [ $CLEAN_FLAG -eq 1 ] ; then
+    rm -f $CFILES
     echo "INFO: (cgyro) Cleaned directory." 
     exit 1
+fi
+if [ $NEW_FLAG -eq 1 ] ; then
+   rm -f $CFILES
 fi
 #============================================================
 
@@ -371,11 +376,6 @@ fi
 # NOTE: log all starts and restarts, but NOT test mode
 if [ $TEST_FLAG -eq 0 ]
 then
-   if [ $NEW_FLAG -eq 1 ]
-   then
-      rm -f out.cgyro.*
-   fi
-    
    # If there are no restart files, its safe to overwrite the log file
    PATTERN=(out.cgyro.restar*)
    if [ ! -r ${PATTERN[0]} ]; then
