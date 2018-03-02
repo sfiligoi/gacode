@@ -403,8 +403,6 @@ subroutine cgyro_init_collision
      ! Energy Restoring
 
      if (collision_ene_restore == 1) then
-
-        ! Only ii, ee Diffusion
               
         ! C_test_ab(u_a^2 f0a,f0b) and w_e u_a^2 C_test_ab(H_a)
         rsvec  = 0.0
@@ -412,27 +410,28 @@ subroutine cgyro_init_collision
         rs(:,:) = 0.0
 
         do is=1,n_species
-           js=is
-           do ix=1,n_xi
-              do jx=1,n_xi
-                 do ie=1,n_energy
-                    do je=1,n_energy
-                       rsvec(is,js,ix,ie) = rsvec(is,js,ix,ie) &
-                            + ctest(is,js,ix,jx,ie,je) * energy(je)
-                       rsvect0(is,js,ix,ie) = rsvect0(is,js,ix,ie) &
-                            + ctest(is,js,jx,ix,je,ie) * energy(je) &
-                            * w_e(je)*w_xi(jx)
+           do js=1,n_species
+              do ix=1,n_xi
+                 do jx=1,n_xi
+                    do ie=1,n_energy
+                       do je=1,n_energy
+                          rsvec(is,js,ix,ie) = rsvec(is,js,ix,ie) &
+                               + ctest(is,js,ix,jx,ie,je) * energy(je)
+                          rsvect0(is,js,ix,ie) = rsvect0(is,js,ix,ie) &
+                               + ctest(is,js,jx,ix,je,ie) * energy(je) &
+                               * w_e(je)*w_xi(jx)
+                       enddo
                     enddo
                  enddo
               enddo
-           enddo
            
-           ! int v^2 C_test_ab(u_a^2 f0a,f0b) 
-           
-           do ix=1,n_xi
-              do ie=1,n_energy
-                 rs(is,js) = rs(is,js) + w_e(ie)*w_xi(ix) &
-                      * dens(is) * rsvec(is,js,ix,ie) * energy(ie) 
+              ! int v^2 C_test_ab(u_a^2 f0a,f0b) 
+              
+              do ix=1,n_xi
+                 do ie=1,n_energy
+                    rs(is,js) = rs(is,js) + w_e(ie)*w_xi(ix) &
+                         * dens(is) * rsvec(is,js,ix,ie) * energy(ie) 
+                 enddo
               enddo
            enddo
         enddo
@@ -473,21 +472,22 @@ subroutine cgyro_init_collision
 
               rsvect0(:,:,:,:) = 0.0
               do is=1,n_species
-                 js=is
-                 do ix=1,n_xi
-                    do jx=1,n_xi
-                       do ie=1,n_energy
-                          do je=1,n_energy
-                             rsvect0(is,js,ix,ie) = rsvect0(is,js,ix,ie) &
-                                  + ctest(is,js,jx,ix,je,ie) * energy(je) &
-                                  * w_e(je)*w_xi(jx) &
-                                  * bessel(is,ix,ie,ic_loc,0) 
+                 do js=1,n_species
+                    do ix=1,n_xi
+                       do jx=1,n_xi
+                          do ie=1,n_energy
+                             do je=1,n_energy
+                                rsvect0(is,js,ix,ie) = rsvect0(is,js,ix,ie) &
+                                     + ctest(is,js,jx,ix,je,ie) * energy(je) &
+                                     * w_e(je)*w_xi(jx) &
+                                     * bessel(is,ix,ie,ic_loc,0) 
+                             enddo
                           enddo
                        enddo
                     enddo
                  enddo
               enddo
-           
+              
               do iv=1,nv  
                  is = is_v(iv)
                  ix = ix_v(iv)
