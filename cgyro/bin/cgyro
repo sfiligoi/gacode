@@ -78,6 +78,9 @@ then
   echo "         -bin"
   echo "         Map old-style ASCII data to binary files."
   echo
+  echo "         -cbin"
+  echo "         Remove old-style ASCII files."
+  echo
   echo "         -globalmap"
   echo "         Create global data mapping file."
   echo "         NOTE: requries setting -rhos <rho/a>"
@@ -155,6 +158,7 @@ while [ $# -gt 0 ] ; do
   -compress) COMPRESS_FLAG=1 ;;
 
   -bin) BIN_FLAG=1 ;;
+  -cbin) CBIN_FLAG=1 ;;
 
   -globalmap) GLOBALMAP_FLAG=1 ;;
 
@@ -211,7 +215,23 @@ then
     $EXEC out.cgyro.phib        bin.cgyro.phib
     $EXEC out.cgyro.aparb       bin.cgyro.aparb
     $EXEC out.cgyro.bparb       bin.cgyro.bparb
-    exit 1
+    exit 0
+fi
+if [ $CBIN_FLAG -eq 1 ]
+then
+    EXEC="$GACODE_ROOT/cgyro/bin/cgyro_trm"
+    $EXEC cgyro.kxky_phi   
+    $EXEC cgyro.kxky_n      
+    $EXEC cgyro.kxky_e     
+    $EXEC cgyro.kxky_flux_e
+    $EXEC cgyro.ky_flux
+    $EXEC cgyro.lky_flux_n  
+    $EXEC cgyro.lky_flux_e  
+    $EXEC cgyro.lky_flux_v 
+    $EXEC cgyro.phib
+    $EXEC cgyro.aparb
+    $EXEC cgyro.bparb 
+    exit 0
 fi
 #============================================================
 
