@@ -208,6 +208,9 @@ then
     $EXEC out.cgyro.lky_flux_n  bin.cgyro.lky_flux_n
     $EXEC out.cgyro.lky_flux_e  bin.cgyro.lky_flux_e
     $EXEC out.cgyro.lky_flux_v  bin.cgyro.lky_flux_v
+    $EXEC out.cgyro.phib        bin.cgyro.phib
+    $EXEC out.cgyro.aparb       bin.cgyro.aparb
+    $EXEC out.cgyro.bparb       bin.cgyro.bparb
     exit 1
 fi
 #============================================================
