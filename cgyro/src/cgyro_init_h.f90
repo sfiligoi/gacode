@@ -48,7 +48,7 @@ subroutine cgyro_init_h
 
      h_x(:,:) = (0.0,0.0)
 
-     if (zf_test_flag == 1) then
+     if (zf_test_mode == 1) then
 
         ! 1. ZONAL-FLOW TEST
 

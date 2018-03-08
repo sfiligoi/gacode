@@ -35,7 +35,7 @@ subroutine cgyro_write_initdata
         write(io,'(t3,i4,t12,i4,t21,i4,t29,i4,t36,i4)') nc_loc,nv_loc,nsplit,n_proc,n_omp
      endif
 
-     if (zf_test_flag == 0) then
+     if (zf_test_mode == 0) then
         
         ! Compute kymax
         if (n_toroidal == 1) then

@@ -17,15 +17,15 @@ subroutine cgyro_check
      return
   endif
 
-  if (zf_test_flag == 0 .and. modulo(n_radial,box_size) /= 0) then 
+  if (zf_test_mode == 0 .and. modulo(n_radial,box_size) /= 0) then 
      call cgyro_info('RESOLUTION WARNING -- n_radial not a multiple of box_size.')
   endif
 
-  if (n_radial < (n_toroidal-1)*box_size .and. zf_test_flag == 0) then
+  if (zf_test_mode == 0 .and. n_radial < (n_toroidal-1)*box_size) then
      call cgyro_info('RESOLUTION WARNING -- n_radial < n*box_size.')
   endif
 
-  if (n_radial < box_size .and. zf_test_flag == 0) then
+  if (zf_test_mode == 0 .and. n_radial < box_size) then
      call cgyro_info('SEVERE RESOLUTION WARNING -- n_radial < box_size.')
      return
   endif

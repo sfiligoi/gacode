@@ -59,7 +59,7 @@ module cgyro_globals
   real    :: collision_ele_scale
   real    :: z_eff
   integer :: z_eff_method
-  integer :: zf_test_flag 
+  integer :: zf_test_mode 
   integer :: nonlinear_flag 
   integer :: nonlinear_method
   real :: te_ade
