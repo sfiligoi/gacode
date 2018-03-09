@@ -44,10 +44,6 @@ subroutine cgyro_check
      call cgyro_error('Distribution output not available for box_size > 1')
      return
   endif
-  
-  if (use_bin == 0) then
-     call cgyro_info('PLEASE set USE_BIN=1 for future simulations.')
-  endif
   !------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------

@@ -110,12 +110,11 @@ class cgyrodata:
       #-----------------------------------------------------------------
       # Linear frequency
       #
-      try:
-         data = np.fromfile(self.dir+'out.cgyro.freq',dtype='float',sep=' ')
+      nd = 2*self.n_n*nt
+      t,fmt,data = self.extract('.cgyro.freq')
+      if fmt != 'null':  
          self.freq = np.reshape(data,(2,self.n_n,nt),'F')
-         print "INFO: (data.py) Read data in out.cgyro.freq."
-      except:
-         pass
+         print "INFO: (data.py) Read data in "+fmt+".cgyro.freq. "+t 
       #-----------------------------------------------------------------
 
       #-----------------------------------------------------------------
@@ -315,7 +314,7 @@ class cgyrodata:
       if fmt != 'null':  
          print 'INFO: (data.py) Read data in '+fmt+'.cgyro.kxky_phi. '+t
          self.kxky_phi = np.reshape(data[0:nd],(2,self.n_radial,self.theta_plot,self.n_n,nt),'F')
-         self.phisq = self.kxky_phi[0,:,:,:,:]**2+self.kxky_phi[1,:,:,:,:]**2
+         self.kxky_phi_abs = np.sqrt(self.kxky_phi[0,:,:,:,:]**2+self.kxky_phi[1,:,:,:,:]**2)
        
       # 2. kxky_n
       nd = 2*self.n_radial*self.theta_plot*self.n_species*self.n_n*nt
@@ -323,8 +322,7 @@ class cgyrodata:
            
       if fmt != 'null':  
          print 'INFO: (data.py) Read data in '+fmt+'.cgyro.kxky_n.   '+t
-         self.n = np.reshape(data[0:nd],(2,self.n_radial,self.theta_plot,self.n_species,self.n_n,nt),'F')
-         self.nsq = self.n[0,:,:,:,:,:]**2+self.n[1,:,:,:,:,:]**2
+         self.kxky_n = np.reshape(data[0:nd],(2,self.n_radial,self.theta_plot,self.n_species,self.n_n,nt),'F')
 
       # 3. kxky_e
       nd = 2*self.n_radial*self.theta_plot*self.n_species*self.n_n*nt
@@ -332,8 +330,7 @@ class cgyrodata:
 
       if fmt != 'null':  
          print 'INFO: (data.py) Read data in '+fmt+'.cgyro.kxky_e.   '+t
-         self.e = np.reshape(data[0:nd],(2,self.n_radial,self.theta_plot,self.n_species,self.n_n,nt),'F')
-         self.esq = self.e[0,:,:,:,:,:]**2+self.e[1,:,:,:,:,:]**2
+         self.kxky_e = np.reshape(data[0:nd],(2,self.n_radial,self.theta_plot,self.n_species,self.n_n,nt),'F')
       #-----------------------------------------------------------------
 
    def getgeo(self):

@@ -72,6 +72,7 @@ module cgyro_globals
   integer :: h_print_flag
   integer :: moment_print_flag
   integer :: kxkyflux_print_flag
+  integer :: field_print_flag
   real :: amp0
   real :: amp
   real :: gamma_e
@@ -91,7 +92,6 @@ module cgyro_globals
   integer :: theta_plot
   integer :: mpiio_small_stripe_factor
   integer :: mpiio_stripe_factor
-  integer :: use_bin
   !
   ! Geometry input
   !
@@ -210,6 +210,7 @@ module cgyro_globals
   character(len=14) :: runfile_info    = 'out.cgyro.info'
   character(len=13) :: runfile_mpi     = 'out.cgyro.mpi'
   character(len=16) :: runfile_memory  = 'out.cgyro.memory'
+  character(len=15) :: runfile_hosts   = 'out.cgyro.hosts'
   character(len=17) :: runfile_restart = 'out.cgyro.restart'
   character(len=13) :: runfile_restart_tag = 'out.cgyro.tag'
   character(len=12) :: binfile_hb      = 'bin.cgyro.hb'
@@ -217,24 +218,17 @@ module cgyro_globals
   character(len=14) :: runfile_prec    = 'out.cgyro.prec'
   character(len=14) :: runfile_time    = 'out.cgyro.time'
   character(len=16) :: runfile_timers  = 'out.cgyro.timing'
-  character(len=14) :: runfile_freq    = 'out.cgyro.freq'
-  character(len=21) :: runfile_kxky_flux = 'out.cgyro.kxky_flux_e'
+  character(len=14) :: binfile_freq    = 'bin.cgyro.freq'
   character(len=21) :: binfile_kxky_flux = 'bin.cgyro.kxky_flux_e'
-  character(len=17) :: runfile_ky_flux = 'out.cgyro.ky_flux'
   character(len=17) :: binfile_ky_flux = 'bin.cgyro.ky_flux'
-  character(len=15), dimension(3)  :: binfile_fieldb = &
+  character(len=15), dimension(3) :: binfile_fieldb = &
        (/'bin.cgyro.phib ','bin.cgyro.aparb','bin.cgyro.bparb'/)
-  character(len=16), dimension(2)  :: runfile_kxky = &
-       (/'out.cgyro.kxky_n','out.cgyro.kxky_e'/)
-  character(len=18) :: runfile_kxky_phi = 'out.cgyro.kxky_phi'
-  character(len=16), dimension(2)  :: binfile_kxky = &
+  character(len=16), dimension(2) :: binfile_kxky = &
        (/'bin.cgyro.kxky_n','bin.cgyro.kxky_e'/)
-  character(len=18) :: binfile_kxky_phi = 'bin.cgyro.kxky_phi'
-  character(len=20), dimension(3)  :: runfile_lky_flux = &
-       (/'out.cgyro.lky_flux_n','out.cgyro.lky_flux_e','out.cgyro.lky_flux_v'/)
-  character(len=20), dimension(3)  :: binfile_lky_flux = &
+  character(len=19), dimension(3) :: binfile_kxky_field = &
+       (/'bin.cgyro.kxky_phi ','bin.cgyro.kxky_apar','bin.cgyro.kxky_bpar'/)
+  character(len=20), dimension(3) :: binfile_lky_flux = &
        (/'bin.cgyro.lky_flux_n','bin.cgyro.lky_flux_e','bin.cgyro.lky_flux_v'/)
-  character(len=15) :: runfile_hosts = 'out.cgyro.hosts'
   integer, parameter :: io=1
   ! Restart tags
   character(len=8) :: fmt='(I2.2)'

@@ -15,6 +15,7 @@ subroutine cgyro_write_timedata
   complex :: a_norm
   integer :: i_field,i_moment
   integer :: ir,it
+  integer :: p_field
   real :: vfreq(2)
   complex :: ftemp(n_theta,n_radial)
   complex :: field_plot(n_radial,theta_plot)
@@ -34,89 +35,61 @@ subroutine cgyro_write_timedata
   call cgyro_flux
 
   ! ky flux for all species with field breakdown
-  if (use_bin == 1) then
-     call cgyro_write_distributed_breal(&
-          trim(path)//binfile_ky_flux,&
-          size(fflux(:,:,:)),&
-          fflux(:,:,:))
-  else
-     call cgyro_write_distributed_real(&
-          trim(path)//runfile_ky_flux,&
-          size(fflux(:,:,:)),&
-          fflux(:,:,:))
-  endif
+  call cgyro_write_distributed_breal(&
+       trim(path)//binfile_ky_flux,&
+       size(fflux(:,:,:)),&
+       fflux(:,:,:))
 
   if (nonlinear_flag == 1 .and. kxkyflux_print_flag == 1) then
      ! kxky energy flux for all species
-     if (use_bin == 1) then
-        call cgyro_write_distributed_breal(&
-             trim(path)//binfile_kxky_flux,&
-             size(flux(:,:)),&
-             flux(:,:))
-
-     else
-        call cgyro_write_distributed_real(&
-             trim(path)//runfile_kxky_flux,&
-             size(flux(:,:)),&
-             flux(:,:))
-     endif
+     call cgyro_write_distributed_breal(&
+          trim(path)//binfile_kxky_flux,&
+          size(flux(:,:)),&
+          flux(:,:))
   endif
 
   if (n_global > 0) then
      ! Global (n,e,v) fluxes for all species
      do i_moment=1,3
-        if (use_bin == 1) then
-           call cgyro_write_distributed_bcomplex(&
-                trim(path)//binfile_lky_flux(i_moment),&
-                size(gflux(:,:,i_moment)),&
-                gflux(:,:,i_moment))
-        else
-           call cgyro_write_distributed_complex(&
-                trim(path)//runfile_lky_flux(i_moment),&
-                size(gflux(:,:,i_moment)),&
-                gflux(:,:,i_moment))
-        endif
+        call cgyro_write_distributed_bcomplex(&
+             trim(path)//binfile_lky_flux(i_moment),&
+             size(gflux(:,:,i_moment)),&
+             gflux(:,:,i_moment))
      enddo
   endif
 
   if (nonlinear_flag == 1 .and. moment_print_flag == 1) then
      ! (n,e) moment for all species at selected thetas.
      do i_moment=1,2
-        if (use_bin == 1) then
-           call cgyro_write_distributed_bcomplex(&
-                trim(path)//binfile_kxky(i_moment),&
-                size(moment(:,:,:,i_moment)),&
-                moment(:,:,:,i_moment))
-        else
-           call cgyro_write_distributed_complex(&
-                trim(path)//runfile_kxky(i_moment),&
-                size(moment(:,:,:,i_moment)),&
-                moment(:,:,:,i_moment))
-        endif
+        call cgyro_write_distributed_bcomplex(&
+             trim(path)//binfile_kxky(i_moment),&
+             size(moment(:,:,:,i_moment)),&
+             moment(:,:,:,i_moment))
      enddo
   endif
 
-  ! Sort out subset of theta values for plotting
-  do ic=1,nc
-     ir = ir_c(ic)
-     it = it_c(ic)
-     if (itp(it) > 0) then
-        field_plot(ir,itp(it)) = field(1,ic)
-     endif
-  enddo
-
-  ! Complex potential at selected thetas
-  if (use_bin == 1) then
-     call cgyro_write_distributed_bcomplex(&
-          trim(path)//binfile_kxky_phi,&
-          size(field_plot),&
-          field_plot)
+  if (field_print_flag == 1) then
+     p_field = 3
   else
-     call cgyro_write_distributed_complex(&
-          trim(path)//runfile_kxky_phi,&
+     p_field = 1
+  endif
+  
+  do i_field=1,p_field
+     ! Sort out subset of theta values for plotting
+     do ic=1,nc
+        ir = ir_c(ic)
+        it = it_c(ic)
+        if (itp(it) > 0) then
+           field_plot(ir,itp(it)) = field(i_field,ic)
+        endif
+     enddo
+
+     ! Complex potentials at selected thetas
+     call cgyro_write_distributed_bcomplex(&
+          trim(path)//binfile_kxky_field(i_field),&
           size(field_plot),&
           field_plot)
-  endif
+  enddo
 
   ! Checksum for regression testing
   ! Note that checksum is a distributed real scalar
@@ -154,7 +127,7 @@ subroutine cgyro_write_timedata
   call cgyro_freq
   vfreq(1) = real(freq) 
   vfreq(2) = aimag(freq)
-  call cgyro_write_distributed_real(trim(path)//runfile_freq,size(vfreq),vfreq)
+  call cgyro_write_distributed_breal(trim(path)//binfile_freq,size(vfreq),vfreq)
 
   ! Output to screen
   call print_scrdata()
@@ -171,135 +144,11 @@ end subroutine cgyro_write_timedata
 !===============================================================================
 
 !------------------------------------------------------
-! cgyro_write_distributed_complex.f90
+! cgyro_write_distributed_bcomplex.f90
 !
 ! PURPOSE:
 !  Control merged output of complex distributed array.
 !------------------------------------------------------
-
-subroutine cgyro_write_distributed_complex(datafile,n_fn,fn)
-
-  use mpi
-  use cgyro_globals
-
-  !------------------------------------------------------
-  implicit none
-  !
-  character (len=*), intent(in) :: datafile
-  integer, intent(in) :: n_fn
-  complex, intent(in) :: fn(n_fn)
-  !
-  integer :: in
-  !
-  ! Required for MPI-IO:
-  !
-  integer :: filemode
-  integer :: finfo
-  integer :: fh
-  integer :: fstatus(MPI_STATUS_SIZE)
-  integer(kind=MPI_OFFSET_KIND) :: disp
-  integer(kind=MPI_OFFSET_KIND) :: offset1
-  !
-  character(len=fmtstr_len*n_fn*2) :: fnstr
-  character(len=fmtstr_len) :: tmpstr
-  character :: c
-  !------------------------------------------------------
-
-  if (i_proc_1 /= 0) return
-
-  
-  select case (io_control)
-
-  case (0)
-
-     return
-
-  case (1)
-
-     ! Open
-
-     if (i_proc == 0) then
-        open(unit=io,file=datafile,status='replace')
-        close(io)
-     endif
-
-  case (2)
-
-     ! Append
-
-     ! Create human readable string ready to be written
-     ! Do it in one shot, to minimize IO
-     do in=1,n_fn
-        write(tmpstr, fmtstr) real(fn(in))
-        fnstr((in-1)*fmtstr_len*2+1:(in-1)*fmtstr_len*2+fmtstr_len-1) = tmpstr(1:11)
-        fnstr((in-1)*fmtstr_len*2+fmtstr_len:(in-1)*fmtstr_len*2+fmtstr_len) = NEW_LINE('A')
-        write(tmpstr, fmtstr) aimag(fn(in))
-        fnstr((in-1)*fmtstr_len*2+fmtstr_len+1:in*fmtstr_len*2-1) = tmpstr(1:11)
-        fnstr(in*fmtstr_len*2:in*fmtstr_len*2) = NEW_LINE('A')
-     enddo
-
-     ! now write in parallel to the common file
-     filemode = MPI_MODE_WRONLY
-     disp = i_current-1
-     disp = disp*n_proc_2
-     disp = disp*fmtstr_len*2*n_fn
-
-     offset1 = i_proc_2
-     offset1 = offset1*fmtstr_len*2*n_fn
-
-     call MPI_INFO_CREATE(finfo,i_err)
-
-     call MPI_INFO_SET(finfo,"striping_factor",mpiio_small_stripe_str,i_err)
-
-     call MPI_FILE_OPEN(NEW_COMM_2,&
-          datafile,&
-          filemode,&
-          finfo,&
-          fh,&
-          i_err)
-
-     call MPI_FILE_SET_VIEW(fh,&
-          disp,&
-          MPI_CHAR,&
-          MPI_CHAR,&
-          'native',&
-          finfo,&
-          i_err)
-
-     call MPI_FILE_WRITE_AT(fh,&
-          offset1,&
-          fnstr,&
-          n_fn*fmtstr_len*2,&
-          MPI_CHAR,&
-          fstatus,&
-          i_err)
-
-     call MPI_FILE_SYNC(fh,i_err)
-     call MPI_FILE_CLOSE(fh,i_err)
-     call MPI_INFO_FREE(finfo,i_err)
-
-  case (3)
-
-     ! Rewind
-
-     if (i_proc == 0) then
-
-        disp = i_current
-        disp = disp*n_proc_2
-        disp = disp*fmtstr_len*2*n_fn
-
-        open(unit=io,file=datafile,status='old',access='stream')
-        if (disp > 0) then
-           read(io,pos=disp) c
-        endif
-        endfile(io)
-        close(io)
-
-     endif
-
-  end select
-
-end subroutine cgyro_write_distributed_complex
 
 subroutine cgyro_write_distributed_bcomplex(datafile,n_fn,fn)
 
@@ -427,131 +276,11 @@ end subroutine cgyro_write_distributed_bcomplex
 
 
 !------------------------------------------------------
-! cgyro_write_distributed_real.f90
+! cgyro_write_distributed_breal.f90
 !
 ! PURPOSE:
 !  Control merged output of real distributed array.
 !------------------------------------------------------
-
-subroutine cgyro_write_distributed_real(datafile,n_fn,fn)
-
-  use mpi
-  use cgyro_globals
-
-  !------------------------------------------------------
-  implicit none
-  !
-  character (len=*), intent(in) :: datafile
-  integer, intent(in) :: n_fn
-  real, intent(in) :: fn(n_fn)
-  !
-  integer :: in
-  !
-  ! Required for MPI-IO:
-  !
-  integer :: filemode
-  integer :: finfo
-  integer :: fh
-  integer :: fstatus(MPI_STATUS_SIZE)
-  integer(kind=MPI_OFFSET_KIND) :: disp
-  integer(kind=MPI_OFFSET_KIND) :: offset1
-  !
-  character(len=fmtstr_len*n_fn) :: fnstr
-  character(len=fmtstr_len) :: tmpstr
-  character :: c
-  !------------------------------------------------------
-
-  if (i_proc_1 /= 0) return
-
-  select case (io_control)
-
-  case (0)
-
-     return
-
-  case (1)
-
-     ! Open
-
-     if (i_proc == 0) then
-        open(unit=io,file=datafile,status='replace')
-        close(io)
-     endif
-
-  case (2)
-
-     ! Append
-
-     ! Create human readable string ready to be written
-     ! Do it in one shot, to minimize IO
-     do in=1,n_fn
-        write(tmpstr, fmtstr) fn(in)
-        fnstr((in-1)*fmtstr_len+1:in*fmtstr_len-1) = tmpstr(1:11)
-        fnstr(in*fmtstr_len:in*fmtstr_len) = NEW_LINE('A')
-     enddo
-
-     ! now write in parallel to the common file
-     filemode = MPI_MODE_WRONLY
-     disp = i_current-1
-     disp = disp*n_proc_2
-     disp = disp*fmtstr_len*n_fn
-
-     offset1 = i_proc_2
-     offset1 = offset1*fmtstr_len*n_fn
-
-     call MPI_INFO_CREATE(finfo,i_err)
-
-     call MPI_INFO_SET(finfo,"striping_factor", mpiio_small_stripe_str,i_err)
-
-     call MPI_FILE_OPEN(NEW_COMM_2,&
-          datafile,&
-          filemode,&
-          finfo,&
-          fh,&
-          i_err)
-
-     call MPI_FILE_SET_VIEW(fh,&
-          disp,&
-          MPI_CHAR,&
-          MPI_CHAR,&
-          'native',&
-          finfo,&
-          i_err)
-
-     call MPI_FILE_WRITE_AT(fh,&
-          offset1,&
-          fnstr,&
-          n_fn*fmtstr_len,&
-          MPI_CHAR,&
-          fstatus,&
-          i_err)
-
-     call MPI_FILE_SYNC(fh,i_err)
-     call MPI_FILE_CLOSE(fh,i_err)
-     call MPI_INFO_FREE(finfo,i_err)
-
-  case(3)
-
-     ! Rewind
-
-     if (i_proc == 0) then
-
-        disp = i_current
-        disp = disp*n_proc_2
-        disp = disp*fmtstr_len*n_fn
-
-        open(unit=io,file=datafile,status='old',access='stream')
-        if (disp > 0) then
-           read(io,pos=disp) c
-        endif
-        endfile(io)
-        close(io)
-
-     endif
-
-  end select
-
-end subroutine cgyro_write_distributed_real
 
 subroutine cgyro_write_distributed_breal(datafile,n_fn,fn)
 

@@ -112,7 +112,8 @@ class cgyrodata_plot(data.cgyrodata):
       ax.set_yscale('log')
       ax.set_title(r'$\mathrm{Fluctuation~intensity} \quad k_\theta = nq/r$')
 
-      p2 = np.sum(self.phisq[:,0,:,:],axis=0)/self.rho**2
+      # Create p2[n,t] by setting theta=0, sum over kx
+      p2 = np.sum(self.kxky_phi_abs[:,0,:,:],axis=0)/self.rho
 
       if nstr == 'null':
          nvec = range(self.n_n)
@@ -178,7 +179,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       itheta=0
 
-      y = np.sum(self.phisq[:,itheta,1:,:],axis=1)
+      y = np.sum(self.kxky_phi_abs[:,itheta,1:,:],axis=1)
       for j in range(self.n_radial):
          ave[j] = average(y[j,:],self.t,w)
 
@@ -228,7 +229,7 @@ class cgyrodata_plot(data.cgyrodata):
       ax.set_title(r'$\mathrm{Fluctuation~intensity} \quad k_\theta = nq/r$')
       #======================================
 
-      p2 = np.sum(self.phisq,axis=0)/self.rho**2
+      p2 = np.sum(self.kxky_phi_abs,axis=0)/self.rho
       itheta=0
 
       # n=0 intensity
@@ -731,7 +732,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       imin = int((1.0-w)*n)
       for i in np.arange(imin,n):
-         f = f+self.phisq[1:,itheta,:,i]
+         f = f+self.kxky_phi_abs[1:,itheta,:,i]
 
       # Fix (0,0)
       i0 = nx/2-1
@@ -781,7 +782,7 @@ class cgyrodata_plot(data.cgyrodata):
       ax.set_xlabel(xlabel)
 
       if nstr == 'null':
-         y = np.sum(self.phisq[:,0,:,:],axis=1)
+         y = np.sum(self.kxky_phi_abs[:,0,:,:],axis=1)
          for j in range(self.n_radial):
             ave[j] = average(y[j,:],self.t,w)
          ax.set_ylabel(r'$\overline{\delta \phi_\mathrm{total}}$',color='k')
@@ -793,9 +794,9 @@ class cgyrodata_plot(data.cgyrodata):
          ax.set_ylabel(r'$\overline{\delta \phi_n}$',color='k')
          for n in nvec:
             num = r'$n='+str(n)+'$'
-            y[:] = self.phisq[:,0,n,:]
+            y[:] = self.kxky_phi_abs[:,0,n,:]
             for j in range(self.n_radial):
-               ave[j] = average(self.phisq[j,0,n,:],self.t,w)
+               ave[j] = average(self.kxky_phi_abs[j,0,n,:],self.t,w)
             ax.plot(kx+dk/2,np.sqrt(ave[:]),ls='steps',label=num)
             if self.n_n > 16:
                ax.legend(loc=4, ncol=5, prop={'size':12})
