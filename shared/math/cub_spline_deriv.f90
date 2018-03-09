@@ -10,7 +10,7 @@
 !
 !  INPUT  : x(1:n),y(1:n),n
 !
-!  OUTPUT : yp(1:ni)
+!  OUTPUT : yp(1:n)
 !----------------------------------------------------------------
 
 subroutine cub_spline_deriv(x,y,n,yp)
@@ -18,12 +18,12 @@ subroutine cub_spline_deriv(x,y,n,yp)
   !-------------------------------------------------------------
   implicit none
   !
-  integer :: i,ii
-  real :: x0 
-  !
   integer, intent(in) :: n
   real, intent(in), dimension(n) :: x,y
   real, intent(inout), dimension(n) :: yp
+  !
+  integer :: i,ii
+  real :: x0 
   !
   ! LAPACK working variables
   !

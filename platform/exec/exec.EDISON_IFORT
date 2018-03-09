@@ -29,5 +29,5 @@ export OMP_PROC_BIND=true
 export OMP_PLACES=cores
 export FORT_BUFFERED=yes
 
-echo "> srun -n $nmpi -c $nomp --cpu_bind=verbose,cores $exec"
-srun -n $nmpi -c $nomp --cpu_bind=verbose,cores $exec
+echo "> srun -n $nmpi -c $nomp --cpu_bind=cores $exec"
+srun -n $nmpi -c $nomp --cpu_bind=cores $exec

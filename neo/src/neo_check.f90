@@ -19,7 +19,7 @@ subroutine neo_check
      return
   endif
   !
-  if (n_species > 6) then
+  if (n_species > 11) then
      call neo_error('ERROR: (NEO) max n_species is 6')
      return
   endif

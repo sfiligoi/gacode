@@ -34,11 +34,14 @@ subroutine tgyro_iteration_simplerelax
   call tgyro_target_vector(x_vec,g_vec)
   if (loc_restart_flag == 0 .or. tgyro_relax_iterations == 0) then
      ! Need to determine initial fluxes
+     gyro_restart_method = 1
      call tgyro_flux_vector(x_vec,f_vec,0.0,0)
+     gyro_restart_method = 2
   else
      ! Initial fluxes already computed
      call tgyro_flux_set(f_vec)
      ! GYRO restart data available
+     gyro_restart_method = 2
   endif
   res0 = 0.0
   call tgyro_residual(f_vec,g_vec,res,p_max,loc_residual_method)
@@ -62,15 +65,65 @@ subroutine tgyro_iteration_simplerelax
      !----------------------------------------------
      ! Relax based on (flux-target)/max(target,1)
      ! dz/z = -loc_relax*(Q_tot - Qtarget)/max(Qtarget,Qtot)
-     p = 0
+
+     if(i_tran_loop==1)then 
+        relax(:)=loc_relax
+        do p=1,p_max
+           relax(p)=loc_relax/abs(g_vec(p))
+        enddo
+     endif
+     p=0
      do i=2,n_r
-        do p=1,n_evolve
-           simpledz = loc_relax*(f_vec(p) - g_vec(p))/&
-                max(max(abs(f_vec(p)),abs(g_vec(p))),1.0)
+        
+        if (loc_ti_feedback_flag == 1) then
+           p = p+1
+           simpledz = relax(p)*(f_vec(p) - g_vec(p))            
            if (abs(simpledz) > loc_dx_max) then
               simpledz = loc_dx_max*(simpledz/abs(simpledz))
            endif
            x_vec(p) = x_vec(p)*(1.0-simpledz)
+
+        endif
+
+        if (loc_te_feedback_flag == 1) then
+           p = p+1
+           simpledz = relax(p)*(f_vec(p) - g_vec(p))
+           if (abs(simpledz) > loc_dx_max) then
+              simpledz = loc_dx_max*(simpledz/abs(simpledz))
+           endif
+           x_vec(p) = x_vec(p)*(1.0-simpledz)
+      
+        endif
+
+        if (loc_er_feedback_flag == 1) then
+           p = p+1
+           simpledz = -relax(p)*(f_vec(p) - g_vec(p))           
+           if (abs(simpledz) > loc_dx_max) then
+              simpledz = loc_dx_max*(simpledz/abs(simpledz))
+           endif
+           x_vec(p) = x_vec(p)*(1.0-simpledz)
+         
+        endif
+
+        if (evo_e(0) == 1) then
+           p = p+1
+           simpledz = relax(p)*(f_vec(p) - g_vec(p))             
+           if (abs(simpledz) > loc_dx_max) then
+              simpledz = loc_dx_max*(simpledz/abs(simpledz))
+           endif
+           x_vec(p) = x_vec(p)*(1.0-simpledz)
+                 
+        endif
+
+        do i_ion=1,loc_n_ion
+           if (evo_e(i_ion) == 1) then
+              p = p+1 
+              simpledz = relax(p)*(f_vec(p) - g_vec(p))
+              if (abs(simpledz) > loc_dx_max) then
+                  simpledz = loc_dx_max*(simpledz/abs(simpledz))
+              endif
+              x_vec(p) = x_vec(p)*(1.0-simpledz)
+           endif
         enddo
      enddo
 

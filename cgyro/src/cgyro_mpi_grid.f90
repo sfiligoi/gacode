@@ -18,7 +18,7 @@ subroutine cgyro_mpi_grid
 
   integer :: ie,ix,is,ir,it
   integer :: d
-  integer :: splitkey, mpiio_procs
+  integer :: splitkey
   integer, external :: parallel_dim
 
   integer, external :: omp_get_max_threads, omp_get_thread_num
@@ -214,38 +214,6 @@ subroutine cgyro_mpi_grid
 
   !----------------------------------------------------------------------------
   ! Restart communication setup
-
-  ! No communicator splitting needed if a single file
-  if (mpiio_num_files > 1) then 
-
-     ! Strings for mpiio restart filenames (out.cgyro.restartXX)
-
-     do ix=1,100
-        write (rtag(ix),fmt) ix-1
-     enddo
-
-     mpiio_procs = n_proc/mpiio_num_files
-
-     if (modulo(n_proc,mpiio_num_files) /= 0) then
-       ! Round up
-       mpiio_procs = mpiio_procs + 1 
-     endif
-
-     i_group_restart_io = i_proc/mpiio_procs + 1
-     call MPI_COMM_SPLIT(CGYRO_COMM_WORLD,&
-       i_group_restart_io,&
-       i_proc,&
-       NEW_COMM_RESTART_IO, &
-       i_err)
-
-     if (i_err /= 0) then
-        call cgyro_error('ERROR: (CGYRO) NEW_COMM_RESTART_IO not created')
-        return
-     endif
-
-     call MPI_COMM_RANK(NEW_COMM_RESTART_IO,i_proc_restart_io,i_err)
-     call MPI_COMM_SIZE(NEW_COMM_RESTART_IO,n_proc_restart_io,i_err)
-  endif
 
   write (mpiio_stripe_str,"(I3.3)") mpiio_stripe_factor
   write (mpiio_small_stripe_str,"(I2.2)") mpiio_small_stripe_factor

@@ -6,7 +6,7 @@ subroutine cgyro_init_collision
 
   implicit none
 
-  real, dimension(:,:,:), allocatable :: nu_d, nu_par, nu_par_deriv
+  real, dimension(:,:,:), allocatable :: nu_d, nu_par
   real, dimension(:,:), allocatable :: rs
   real, dimension(:,:,:,:), allocatable :: rsvec, rsvect0, rsvect1
   real, dimension(:,:), allocatable :: klor_fac, kdiff_fac
@@ -16,7 +16,6 @@ subroutine cgyro_init_collision
   real :: mo1,mo2,en1,en2 ! von mir
   integer :: jv
   integer :: is,ir,it,ix,ie,js,je,jx,ks
-  logical, dimension(:), allocatable :: cmat_base_set
   ! parameters for matrix solve
   real, dimension(:,:), allocatable :: amat
   real, dimension(:,:,:,:,:,:), allocatable :: ctest
@@ -30,12 +29,10 @@ subroutine cgyro_init_collision
 
   allocate(nu_d(n_energy,n_species,n_species))
   allocate(nu_par(n_energy,n_species,n_species))
-  allocate(nu_par_deriv(n_energy,n_species,n_species))
   allocate(klor_fac(n_species,n_species))
   allocate(kdiff_fac(n_species,n_species))
   nu_d(:,:,:) = 0.0
   nu_par(:,:,:) = 0.0
-  nu_par_deriv(:,:,:) = 0.0
   klor_fac(:,:) = 0.0
   kdiff_fac(:,:) = 0.0
   
@@ -95,7 +92,7 @@ subroutine cgyro_init_collision
                       * sqrt(mass(js)/mass(is)) * (temp(is)/temp(js))**1.5
               endif
 
-           case(4,6)
+           case(4)
 
               ! Ad hoc op
               ! (Fix for underflow)
@@ -110,19 +107,12 @@ subroutine cgyro_init_collision
                  klor_fac(is,js) = 1.0
               endif
 
-              ! Only ii, ee Diffusion
-              if(is == js) then
-                 nu_par(ie,is,js) = tauinv_ab * (2.0/xa**3) &
-                      * (-exp(-xb*xb)/(xb*sqrt(pi)) &
-                      + (1.0/(2.0*xb*xb)) * erf(xb))
-                 nu_par_deriv(ie,is,js) = tauinv_ab * (2.0/xa**3) &
-                      * (-3/xa * (-exp(-xb*xb)/(xb*sqrt(pi)) &
-                      + (1.0/(2.0*xb*xb)) * erf(xb)) + vth(is)/vth(js) &
-                      * (2.0*exp(-xb*xb)/(xb**2*sqrt(pi)) &
-                      + 2.0*exp(-xb*xb)/sqrt(pi) - erf(xb)/xb**3))
-                 if(collision_kperp == 1) then
-                    kdiff_fac(is,js) = 1.0
-                 endif
+              ! Diffusion 
+              nu_par(ie,is,js) = tauinv_ab * (2.0/xa**3) &
+                   * (-exp(-xb*xb)/(xb*sqrt(pi)) &
+                   + (1.0/(2.0*xb*xb)) * erf(xb))
+              if(collision_kperp == 1) then
+                 kdiff_fac(is,js) = 1.0
               endif
               
            end select
@@ -137,7 +127,6 @@ subroutine cgyro_init_collision
            do js=1,n_species
               nu_d(:,is,js) = 0.0
               nu_par(:,is,js) = 0.0
-              nu_par_deriv(:,is,js) = 0.0
            enddo
         endif
      enddo
@@ -152,7 +141,7 @@ subroutine cgyro_init_collision
   !   print *,sum(w_e)
   !endif
 
-  if ( ((collision_model == 4) .or. (collision_model == 6)) .and. collision_kperp == 1 .and. &
+  if ( collision_model == 4 .and. collision_kperp == 1 .and. &
        (collision_mom_restore == 1 .or. collision_ene_restore == 1)) then
      allocate(bessel(n_species,n_xi,n_energy,nc_loc,0:1))
 !$omp parallel do private(ic_loc,it,ie,ix,is,arg)
@@ -165,18 +154,11 @@ subroutine cgyro_init_collision
                  arg = k_perp(ic)*rho*vth(is)*mass(is)&
                       /(z(is)*bmag(it)) *sqrt(2.0*energy(ie)) &
                       *sqrt(1.0-xi(ix)**2)
-                 bessel(is,ix,ie,ic_loc,0) = bessel_j0(abs(arg))
-                 bessel(is,ix,ie,ic_loc,1) = bessel_j1(abs(arg))
+                 bessel(is,ix,ie,ic_loc,0) = bessel_j0(arg)
+                 bessel(is,ix,ie,ic_loc,1) = bessel_j1(arg)
               enddo
            enddo
         enddo
-     enddo
-     ! asymptotic limits for electrons
-     do is=1,n_species
-        if (is == is_ele) then
-           bessel(is,:,:,:,0) = 1.0
-           bessel(is,:,:,:,1) = 0.0
-        endif
      enddo
   endif
 
@@ -207,32 +189,27 @@ subroutine cgyro_init_collision
   enddo
 
   ! Diffusion
-  if (((collision_model == 4) .or. (collision_model == 6)) .and. collision_ene_diffusion == 1) then
-!$omp parallel do collapse(5) private(is,ix,ie,js,je,jx)
+  if (collision_model == 4 .and. collision_ene_diffusion == 1) then
+!$omp parallel do collapse(5) private(is,ix,ie,js,je,jx)     
      do is=1,n_species 
         do ix=1,n_xi
            do ie=1,n_energy
               do js=1,n_species
                  do je=1,n_energy
-                    jx = ix                       
-                    if (ie == je) then
-                       ctest(is,js,ix,jx,ie,je) &
-                            = ctest(is,js,ix,jx,ie,je) &
-                            + (1.0-temp(is)/temp(js)) &
-                            * (-nu_par_deriv(ie,is,js) * energy(ie)**1.5 & 
-                            + nu_par(ie,is,js) & 
-                            * (2.0*energy(ie)**2 - 5.0*energy(ie)))
-                    endif
-                    ctest(is,js,ix,jx,ie,je) &
-                         = ctest(is,js,ix,jx,ie,je) &
-                         + nu_par(ie,is,js) * 0.5 *energy(ie) &
-                         * e_deriv2_mat(ie,je) / e_max
-                    ctest(is,js,ix,jx,ie,je) &
-                         = ctest(is,js,ix,jx,ie,je) &
-                         + e_deriv1_mat(ie,je)/sqrt(1.0*e_max) &
-                         * (nu_par_deriv(ie,is,js) * 0.5*energy(ie) &
-                         + nu_par(ie,is,js) * (2.0*vel(ie) &
-                         + (temp(is)/temp(js)-2.0) * energy(ie)**1.5))
+                    jx = ix
+                    ! From K. Hallatschek
+                    ! self-adjoint part of ctest written self-adjointly
+                    ctest(is,js,ix,jx,ie,je) = ctest(is,js,ix,jx,ie,je) &
+                         -0.5 / w_e(ie) &
+                         *sum(w_e(:)*e_deriv1_mat(:,ie)*energy(:) &
+                         *nu_par(:,is,js) *e_deriv1_mat(:,je))/(1.0*e_max)
+                    ! non-self-adjoint part proportional 1-Ta/Tb written
+                    ! in a way that supports inherent particle number 
+                    ! conservation for small kperp
+                    ctest(is,js,ix,jx,ie,je) = ctest(is,js,ix,jx,ie,je) &
+                         + (1-temp(is)/temp(js)) / sqrt(1.0*e_max)/w_e(ie) &
+                         * w_e(je)*e_deriv1_mat(je,ie) &
+                         * nu_par(je,is,js)*energy(je)**1.5
                  enddo
               enddo
            enddo
@@ -288,7 +265,7 @@ subroutine cgyro_init_collision
 
      endif
 
-  case(4,6)
+  case(4)
 
      ! Momentum Restoring
 
@@ -426,8 +403,6 @@ subroutine cgyro_init_collision
      ! Energy Restoring
 
      if (collision_ene_restore == 1) then
-
-        ! Only ii, ee Diffusion
               
         ! C_test_ab(u_a^2 f0a,f0b) and w_e u_a^2 C_test_ab(H_a)
         rsvec  = 0.0
@@ -435,27 +410,28 @@ subroutine cgyro_init_collision
         rs(:,:) = 0.0
 
         do is=1,n_species
-           js=is
-           do ix=1,n_xi
-              do jx=1,n_xi
-                 do ie=1,n_energy
-                    do je=1,n_energy
-                       rsvec(is,js,ix,ie) = rsvec(is,js,ix,ie) &
-                            + ctest(is,js,ix,jx,ie,je) * energy(je)
-                       rsvect0(is,js,ix,ie) = rsvect0(is,js,ix,ie) &
-                            + ctest(is,js,jx,ix,je,ie) * energy(je) &
-                            * w_e(je)*w_xi(jx)
+           do js=1,n_species
+              do ix=1,n_xi
+                 do jx=1,n_xi
+                    do ie=1,n_energy
+                       do je=1,n_energy
+                          rsvec(is,js,ix,ie) = rsvec(is,js,ix,ie) &
+                               + ctest(is,js,ix,jx,ie,je) * energy(je)
+                          rsvect0(is,js,ix,ie) = rsvect0(is,js,ix,ie) &
+                               + ctest(is,js,jx,ix,je,ie) * energy(je) &
+                               * w_e(je)*w_xi(jx)
+                       enddo
                     enddo
                  enddo
               enddo
-           enddo
            
-           ! int v^2 C_test_ab(u_a^2 f0a,f0b) 
-           
-           do ix=1,n_xi
-              do ie=1,n_energy
-                 rs(is,js) = rs(is,js) + w_e(ie)*w_xi(ix) &
-                      * dens(is) * rsvec(is,js,ix,ie) * energy(ie) 
+              ! int v^2 C_test_ab(u_a^2 f0a,f0b) 
+              
+              do ix=1,n_xi
+                 do ie=1,n_energy
+                    rs(is,js) = rs(is,js) + w_e(ie)*w_xi(ix) &
+                         * dens(is) * rsvec(is,js,ix,ie) * energy(ie) 
+                 enddo
               enddo
            enddo
         enddo
@@ -496,21 +472,22 @@ subroutine cgyro_init_collision
 
               rsvect0(:,:,:,:) = 0.0
               do is=1,n_species
-                 js=is
-                 do ix=1,n_xi
-                    do jx=1,n_xi
-                       do ie=1,n_energy
-                          do je=1,n_energy
-                             rsvect0(is,js,ix,ie) = rsvect0(is,js,ix,ie) &
-                                  + ctest(is,js,jx,ix,je,ie) * energy(je) &
-                                  * w_e(je)*w_xi(jx) &
-                                  * bessel(is,ix,ie,ic_loc,0) 
+                 do js=1,n_species
+                    do ix=1,n_xi
+                       do jx=1,n_xi
+                          do ie=1,n_energy
+                             do je=1,n_energy
+                                rsvect0(is,js,ix,ie) = rsvect0(is,js,ix,ie) &
+                                     + ctest(is,js,jx,ix,je,ie) * energy(je) &
+                                     * w_e(je)*w_xi(jx) &
+                                     * bessel(is,ix,ie,ic_loc,0) 
+                             enddo
                           enddo
                        enddo
                     enddo
                  enddo
               enddo
-           
+              
               do iv=1,nv  
                  is = is_v(iv)
                  ix = ix_v(iv)
@@ -589,7 +566,7 @@ subroutine cgyro_init_collision
      !endif
   endif
   
-  if (((collision_model == 4) .or. (collision_model == 6)) .and. collision_kperp == 1 .and. &
+  if (collision_model == 4 .and. collision_kperp == 1 .and. &
        (collision_mom_restore == 1 .or. collision_ene_restore == 1)) then
      deallocate(bessel)
   end if
@@ -688,7 +665,7 @@ subroutine cgyro_init_collision
               endif
 
               ! Finite-kperp test particle corrections 
-              if (((collision_model == 4) .or. (collision_model == 6)) .and. collision_kperp == 1) then
+              if (collision_model == 4 .and. collision_kperp == 1) then
                  if (is == js .and. jx == ix .and. je == ie) then
                     do ks=1,n_species
                        cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
@@ -783,43 +760,9 @@ subroutine cgyro_init_collision
   enddo
 
   deallocate(amat)
-
-  if (collision_model == 6) then
-     allocate(cmat_base_set(n_theta))
-     cmat_base_set(:) = .false.
-     do ic=nc1,nc2
-        ic_loc = ic-nc1+1
-        it = it_c(ic)
-        if (cmat_base_set(it) .eqv. .false.) then
-          cmat_base(:,:,it) = cmat(:,:,ic_loc)
-          cmat_base_set(it)=.true.
-        endif
-     enddo
-     deallocate(cmat_base_set)
-
-     ! Note: Ideally we would want to avoid creating the big cmat matrix
-     !       But it would have required too much refactoring of the code
-     !       Something to consider for future memory optimization
-
-!$omp parallel do private(ic, ic_loc,it,iv,jv) shared(it_c,cmat_diff,cmat_base, cmat)
-     do ic=nc1,nc2
-        ic_loc = ic-nc1+1
-        it = it_c(ic)
-
-        do iv=1,nv
-           do jv=1,nv
-              cmat_diff(jv,iv,ic_loc) = cmat(jv,iv,ic_loc)  - cmat_base(jv,iv,it); 
-           enddo
-        enddo
-     enddo
-    
-     deallocate(cmat)
-  endif
-
   deallocate(i_piv)
   deallocate(nu_d)
   deallocate(nu_par)
-  deallocate(nu_par_deriv)
   deallocate(rs)
   deallocate(rsvec)
   deallocate(rsvect0)

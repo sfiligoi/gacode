@@ -8,13 +8,13 @@ FC	= mpif90 -I$(GACODE_ROOT)/modules -J$(GACODE_ROOT)/modules
 F77	= mpif90
 
 FOMP    = -fopenmp
-FMATH	= -fdefault-real-8
-FOPT	= -O3
+FMATH	= -fdefault-real-8 -fPIC
+FOPT	= -O3 -framework Accelerate
 FDEBUG  = -Wall -fcheck=all -ffpe-trap=invalid,zero,overflow
 
 # System math libraries
 
-LMATH = -framework Accelerate
+LMATH = 
 
 # NetCDF libraries
 

@@ -113,6 +113,9 @@ then
   echo
   echo " OPTIONS FOR -plot fluct/vid"
   echo
+  echo "          -nomp <threads>"
+  echo "           Number of OpenMP threads per MPI task."
+  echo
   echo "          -nx <int>"
   echo "           Number of radial interpolation points (default 128)"
   echo
@@ -177,6 +180,7 @@ N=null
 MESH=0
 NX=128
 NY=128
+NOMP=1
 FMIN=auto
 FMAX=auto
 CMAP=jet
@@ -206,6 +210,8 @@ while [ $# -gt 0 ] ; do
   -moment) shift ; MOMENT=$1 ;;
 
   -ext) shift ; FTYPE=$1 ;;
+
+  -nomp) shift ; NOMP=$1 ;;
 
   -t) shift ; TIME=$1 ;;
 
@@ -307,7 +313,7 @@ case "$PLOT_TYPE" in
        python $PLT $PLOT_TYPE $FTYPE ;;
 
    fluct)
-       python $PYROOT/plot_fluct.py $FTYPE $MOMENT $SPECIES $YMIN $YMAX $NX $NY $TIME $FMIN $FMAX $CMAP ;;
+       export OMP_NUM_THREADS=$NOMP ; python $PYROOT/plot_fluct.py $FTYPE $MOMENT $SPECIES $YMIN $YMAX $NX $NY $TIME $FMIN $FMAX $CMAP $FONTSIZE ;;
 
    text)
    	python $PYROOT/text.py $W $FTYPE ;;

@@ -295,7 +295,7 @@ subroutine cgyro_make_profiles
   !-------------------------------------------------------------
   ! Manage simulation type (n=0,linear,nonlinear)
   !
-  if (zf_test_flag == 1) then
+  if (zf_test_mode == 1) then
 
      ! Zonal flow (n=0) test
 
@@ -373,15 +373,11 @@ subroutine cgyro_make_profiles
   !-------------------------------------------------------------
   ! Fourier index mapping
   !
-  allocate(indx_xi(n_xi))
-  do ix=1,n_xi
-     indx_xi(ix) = ix-1
-  enddo
   allocate(px(n_radial))
-  if (zf_test_flag == 1) then
+  if (zf_test_mode > 0) then
+     ! Need positive k_r Fourier coefficients only
      do ir=1,n_radial
         px(ir) = ir
-        ! only need positive k_r Fourier coefficients.
      enddo
   else
      do ir=1,n_radial

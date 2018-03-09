@@ -14,6 +14,9 @@ module cgyro_globals
 
   use, intrinsic :: iso_c_binding
 
+  ! Data output precision setting
+  integer, parameter :: BYTE=4 ! Change to 8 for double precision
+  
   !---------------------------------------------------------------
   ! Input parameters:
   !
@@ -56,7 +59,7 @@ module cgyro_globals
   real    :: collision_ele_scale
   real    :: z_eff
   integer :: z_eff_method
-  integer :: zf_test_flag 
+  integer :: zf_test_mode 
   integer :: nonlinear_flag 
   integer :: nonlinear_method
   real :: te_ade
@@ -69,6 +72,7 @@ module cgyro_globals
   integer :: h_print_flag
   integer :: moment_print_flag
   integer :: kxkyflux_print_flag
+  integer :: field_print_flag
   real :: amp0
   real :: amp
   real :: gamma_e
@@ -88,8 +92,6 @@ module cgyro_globals
   integer :: theta_plot
   integer :: mpiio_small_stripe_factor
   integer :: mpiio_stripe_factor
-  integer :: mpiio_num_files
-  integer :: restart_format
   !
   ! Geometry input
   !
@@ -207,26 +209,26 @@ module cgyro_globals
   character(len=80) :: path
   character(len=14) :: runfile_info    = 'out.cgyro.info'
   character(len=13) :: runfile_mpi     = 'out.cgyro.mpi'
-  character(len=16) :: runfile_extend  = 'out.cgyro.extend'
   character(len=16) :: runfile_memory  = 'out.cgyro.memory'
+  character(len=15) :: runfile_hosts   = 'out.cgyro.hosts'
   character(len=17) :: runfile_restart = 'out.cgyro.restart'
   character(len=13) :: runfile_restart_tag = 'out.cgyro.tag'
-  character(len=12) :: runfile_hb      = 'out.cgyro.hb'
+  character(len=12) :: binfile_hb      = 'bin.cgyro.hb'
   character(len=15) :: runfile_grids   = 'out.cgyro.grids'
   character(len=14) :: runfile_prec    = 'out.cgyro.prec'
   character(len=14) :: runfile_time    = 'out.cgyro.time'
   character(len=16) :: runfile_timers  = 'out.cgyro.timing'
-  character(len=14) :: runfile_freq    = 'out.cgyro.freq'
-  character(len=18) :: runfile_kxky_phi = 'out.cgyro.kxky_phi'
-  character(len=21) :: runfile_kxky_flux = 'out.cgyro.kxky_flux_e'
-  character(len=17) :: runfile_ky_flux = 'out.cgyro.ky_flux'
-  character(len=15), dimension(3)  :: runfile_fieldb = &
-       (/'out.cgyro.phib ','out.cgyro.aparb','out.cgyro.bparb'/)
-  character(len=16), dimension(2)  :: runfile_kxky = &
-       (/'out.cgyro.kxky_n','out.cgyro.kxky_e'/)
-  character(len=20), dimension(3)  :: runfile_lky_flux = &
-       (/'out.cgyro.lky_flux_n','out.cgyro.lky_flux_e','out.cgyro.lky_flux_v'/)
-  character(len=15) :: runfile_hosts = 'out.cgyro.hosts'
+  character(len=14) :: binfile_freq    = 'bin.cgyro.freq'
+  character(len=21) :: binfile_kxky_flux = 'bin.cgyro.kxky_flux_e'
+  character(len=17) :: binfile_ky_flux = 'bin.cgyro.ky_flux'
+  character(len=15), dimension(3) :: binfile_fieldb = &
+       (/'bin.cgyro.phib ','bin.cgyro.aparb','bin.cgyro.bparb'/)
+  character(len=16), dimension(2) :: binfile_kxky = &
+       (/'bin.cgyro.kxky_n','bin.cgyro.kxky_e'/)
+  character(len=19), dimension(3) :: binfile_kxky_field = &
+       (/'bin.cgyro.kxky_phi ','bin.cgyro.kxky_apar','bin.cgyro.kxky_bpar'/)
+  character(len=20), dimension(3) :: binfile_lky_flux = &
+       (/'bin.cgyro.lky_flux_n','bin.cgyro.lky_flux_e','bin.cgyro.lky_flux_v'/)
   integer, parameter :: io=1
   ! Restart tags
   character(len=8) :: fmt='(I2.2)'
@@ -245,7 +247,6 @@ module cgyro_globals
   ! Standard precision for IO (there are optionally reset to higher precision later)
   character(len=8)  :: fmtstr    ='(es11.4)'
   integer           :: fmtstr_len = 12
-  character(len=14) :: fmtstr2   ='(2(es11.4,1x))'
   character(len=15) :: fmtstrn   ='(10(es11.4,1x))'
   character(len=9)  :: fmtstr_hi ='(es18.12)'
   !----------------------------------------------------
@@ -284,11 +285,11 @@ module cgyro_globals
   ! Numerical/work arrays and dimensions
   !
   ! Velocity space 
-  integer, dimension(:), allocatable :: indx_xi, px
+  integer, dimension(:), allocatable :: px
   real, dimension(:), allocatable :: energy, vel, w_e
   real, dimension(:), allocatable :: xi, w_xi
   real, dimension(:,:), allocatable :: xi_deriv_mat, xi_lor_mat
-  real, dimension(:,:), allocatable :: e_deriv1_mat, e_deriv2_mat
+  real, dimension(:,:), allocatable :: e_deriv1_mat
   !
   ! Parallel streaming
   real :: d_theta
@@ -378,7 +379,6 @@ module cgyro_globals
 #endif
   !
   ! Work arrays
-  complex, dimension(:,:), allocatable :: f_balloon
   real, dimension(2) :: integration_error
   !
   ! LAPACK work arrays 
@@ -393,13 +393,10 @@ module cgyro_globals
   !
   ! n=0 test variables
   real, dimension(:,:,:), allocatable :: hzf, xzf 
-  real, dimension(:), allocatable :: pvec_outr, pvec_outi
   !
   ! Collision operator
   real, dimension(:,:,:), allocatable :: cmat
-  real, dimension(:,:,:), allocatable :: cmat_base ! only used in collision_mode=6
-  real(kind=4) , dimension(:,:,:), allocatable :: cmat_diff ! only used in collision_mode=6
-  real, dimension(:,:,:,:,:), allocatable :: cmat_simple ! only used in collision_mode=5
+  real, dimension(:,:,:,:,:), allocatable :: cmat_simple ! only used in collision_model=5
   ! 
   ! Equilibrium/geometry arrays
   integer :: it0

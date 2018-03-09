@@ -60,7 +60,7 @@ subroutine gyro_write_restart
 
   call MPI_INFO_CREATE(finfo,i_err)
 
-  call MPI_INFO_SET(finfo,'striping_factor','32',i_err)
+  call MPI_INFO_SET(finfo,'striping_factor','16',i_err)
 
   call MPI_FILE_OPEN(GYRO_COMM_WORLD,&
        trim(path)//file_restart(i_restart),&

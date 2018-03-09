@@ -17,12 +17,15 @@ modules/*genmod*
 */*/*/*/*.pyc
 cgyro/src/*.gpu
 cgyro/src/*.h
+*.so
+*.pyf
 
 # OSX garbage
 *.dSYM/
 .DS_Store
 .idea
 \#*\#
+.\#*
 
 # Version tags
 gyro/.VERSION
@@ -61,3 +64,8 @@ quick/src/quick
 
 # local working files not to be shared
 tmp.py
+
+*.optrpt
+
+# Legacy directories
+shared/profiles_gen
