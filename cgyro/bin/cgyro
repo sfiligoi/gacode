@@ -216,6 +216,7 @@ then
     $EXEC out.cgyro.phib        bin.cgyro.phib
     $EXEC out.cgyro.aparb       bin.cgyro.aparb
     $EXEC out.cgyro.bparb       bin.cgyro.bparb
+    $EXEC out.cgyro.freq        bin.cgyro.freq
     exit 0
 fi
 if [ $CBIN_FLAG -eq 1 ]
@@ -232,7 +233,8 @@ then
     $EXEC cgyro.phib
     $EXEC cgyro.aparb
     $EXEC cgyro.bparb 
-    exit 0
+    $EXEC cgyro.freq
+ exit 0
 fi
 #============================================================
 
