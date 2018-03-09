@@ -134,11 +134,11 @@ subroutine cgyro_write_timedata
   if (n_toroidal > 1) then
      if (nonlinear_flag == 0) then
         vec(1) = real(freq) ; vec(2) = aimag(freq)
-        call cgyro_write_distributed_breal(trim(path)//binfile_freq,size(vec),vec)
+        call cgyro_write_distributed_breal(trim(path)//binfile_freq,2,vec(1:2))
      endif
   else 
      vec(1) = real(freq) ; vec(2) = aimag(freq)
-     call write_ascii(trim(path)//runfile_freq,vec(1:2),2)
+     call write_ascii(trim(path)//runfile_freq,2,vec(1:2))
   endif
 
   ! Output to screen
@@ -146,7 +146,7 @@ subroutine cgyro_write_timedata
 
   ! Output to files
   vec(1) = t_current ; vec(2:3) = integration_error(:)
-  call write_ascii(trim(path)//runfile_time,vec(1:3),3)
+  call write_ascii(trim(path)//runfile_time,3,vec(1:3))
 
   call MPI_BCAST(signal,1,MPI_INTEGER,0,CGYRO_COMM_WORLD,i_err)
 
@@ -493,7 +493,7 @@ end subroutine write_precision
 !  ASCII output of vector of reals 
 !----------------------------------------------------------------
 
-subroutine write_ascii(datafile,fn,n_fn)
+subroutine write_ascii(datafile,n_fn,fn)
 
   use cgyro_globals
 
