@@ -274,23 +274,28 @@ class cgyrodata_plot(data.cgyrodata):
       if self.n_n > 1:
          print "ERROR: (plot_zf.py) This plot option valid for ZF test only."
          sys.exit()
-      elif field > 0:
-         print "ERROR: (plot_zf.py) Only Phi can be plotted."
+
+      t  = self.t
+      k0 = self.kx[0]
+
+      print "INFO: (plot_zf.py) Using index theta index n_theta/3+1"
+      if field == 0:
+         f = self.phib[0,self.n_theta/3,:]
+      elif field == 1:
+         f = self.aparb[0,self.n_theta/3,:]
       else:
-         self.getbigfield()
+         f = self.bparb[0,self.n_theta/3,:]
 
-      t    = self.t
-      phic = self.kxky_phi[0,0,0,0,:]
-      kx   = self.kx
-      y    = phic[:]*1e6*(1-np.i0(kx[0]**2)*np.exp(-kx[0]**2))/(np.i0(kx[0]**2)*np.exp(-kx[0]**2))
+
+      # Initialization in CGYRO is with 1e-6*besselj0 # phic[0]
+      gfactor = 1e6*(1-np.i0(k0**2)*np.exp(-k0**2))/(np.i0(k0**2)*np.exp(-k0**2))
+
+      y = f*gfactor
       
-      #initialization in code is with 1e-6*besselj0 # phic[0]
-
       #----------------------------------------------------
       # Average calculations
-      imin=iwindow(t,w)
-
-      ave = average(y[:],t,w)
+      imin = iwindow(t,w)
+      ave  = average(y[:],t,w)
       print 'INFO: (plot_zf) Integral time-average = %.6f' % ave
 
       ave_vec = ave*np.ones(len(t))
@@ -300,26 +305,22 @@ class cgyrodata_plot(data.cgyrodata):
       ax.grid(which="majorminor",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(TIME)
-      ax.set_ylabel(r'$\mathrm{Re}\left( \Phi/\Phi_0 \right)$')
+      ax.set_ylabel(r'$\mathrm{Re}\left( \delta\phi/\delta\phi_0 \right)$')
 
-      gfactor = 1e6*(1-np.i0(kx[:]**2)*np.exp(-kx[:]**2))/(np.i0(kx[:]**2)*np.exp(-kx[:]**2))
-      
-      for i in range(self.n_radial):
-         ax.plot(t,self.kxky_phi[0,i,0,0,:]*gfactor[i],
-                 label=r'$k_x=%.3g$' % self.kx[i])
+      ax.plot(t,y,label=r'$k_x=%.3g$' % k0)
     
-         ax.plot(t[imin:],ave_vec[imin:],color='b',
-                 label=r'$\mathrm{Average}$',linewidth=1)
+      ax.plot(t[imin:],ave_vec[imin:],color='b',
+              label=r'$\mathrm{Average}$',linewidth=1)
 
-         theory = 1.0/(1.0+1.6*self.q**2/np.sqrt(self.rmin/self.rmaj))
-         ax.plot([0,max(t)],[theory,theory],color='grey',
-                 label=r'$\mathrm{RH \; theory}$',alpha=0.3,linewidth=4)
+      theory = 1.0/(1.0+1.6*self.q**2/np.sqrt(self.rmin/self.rmaj))
+      ax.plot([0,max(t)],[theory,theory],color='grey',
+              label=r'$\mathrm{RH \; theory}$',alpha=0.3,linewidth=4)
 
-         theory2 = 1./(1.0+2.*self.q**2)
-         ax.plot([0,max(t)],[theory2,theory2],color='m',
-                 label=r'$\mathrm{fluid \; theory}$',alpha=0.3,linewidth=4)
+      theory2 = 1./(1.0+2.*self.q**2)
+      ax.plot([0,max(t)],[theory2,theory2],color='m',
+              label=r'$\mathrm{fluid \; theory}$',alpha=0.3,linewidth=4)
 
-      ax.legend(loc=1,prop={'size':10})
+      ax.legend(loc=1,prop={'size':14})
 
       fig.tight_layout(pad=0.3)
 

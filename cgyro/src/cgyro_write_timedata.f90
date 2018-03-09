@@ -12,14 +12,15 @@ subroutine cgyro_write_timedata
 
   implicit none
 
-  complex :: a_norm
   integer :: i_field,i_moment
   integer :: ir,it
   integer :: p_field
   real :: vfreq(2)
+  complex :: a_norm
   complex :: ftemp(n_theta,n_radial)
   complex :: field_plot(n_radial,theta_plot)
-
+  logical :: has_zf, has_balloon
+  
   ! Print this data on print steps only; otherwise exit now
   if (mod(i_time,print_step) /= 0) return
 
@@ -103,7 +104,9 @@ subroutine cgyro_write_timedata
   ! Ballooning mode (or ZF) output for linear runs with a single mode
   ! (can both be plotted with cgyro_plot -plot ball)
   !
-  if (n_toroidal == 1 .and. box_size == 1) then
+  has_balloon = (n_toroidal == 1) .and. ((n > 0)  .and. (box_size == 1))
+  has_zf      = zf_test_mode > 0
+  if (has_zf .or. has_balloon) then
      do i_field=1,n_field
 
         do ir=1,n_radial
@@ -112,10 +115,13 @@ subroutine cgyro_write_timedata
            enddo
         enddo
 
-        if (i_field == 1) a_norm = ftemp(n_theta/2+1,n_radial/2+1) 
-
-        if (n > 0) call extended_ang(ftemp)
-
+        if (has_balloon) then
+           if (i_field == 1) a_norm = ftemp(n_theta/2+1,n_radial/2+1) 
+           call extended_ang(ftemp)    
+        else
+           a_norm = 1.0
+        endif
+           
         call write_binary(trim(path)//binfile_fieldb(i_field),&
              ftemp(:,:)/a_norm,size(ftemp))
 
