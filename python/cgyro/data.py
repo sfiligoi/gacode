@@ -17,6 +17,7 @@ class cgyrodata:
         
    def extract(self,f):
 
+      import sys
       import os
       import numpy as np
       import time
@@ -32,7 +33,11 @@ class cgyrodata:
          fmt  = 'null'
          data = []
          
-      t = 'TIME = '+"{:.3e}".format(time.time()-start)+' s.'
+      if int(sys.version_info[2]) > 6:
+         t = 'TIME = '+"{:.3e}".format(time.time()-start)+' s.'
+      else:        
+         t = 'TIME = '+str(time.time()-start)
+ 
 
       return t,fmt,data
        
