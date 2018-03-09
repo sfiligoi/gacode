@@ -7,6 +7,10 @@ from cgyro.data import cgyrodata
 
 class cgyrodata_plot(data.cgyrodata):
 
+   TEXPHI  = r'{\delta\phi}'
+   TEXAPAR = r'\delta {A_\parallel}'
+   TEXBPAR = r'\delta {B_\parallel}'
+
    def plot_freq(self,w=0.5,fig=None):
       '''
       Plot gamma and omega vs time
@@ -104,17 +108,25 @@ class cgyrodata_plot(data.cgyrodata):
 
       self.getbigfield()
 
+      # Create p2[n,t] by setting theta=0, sum over kx
+      if field == 0:
+         p2 = np.sum(self.kxky_phi_abs[:,0,:,:],axis=0)/self.rho
+         ft = self.TEXPHI
+      elif field == 1:
+         p2 = np.sum(self.kxky_phi_abs[:,0,:,:],axis=0)/self.rho
+         ft = self.TEXAPAR
+      else:
+         p2 = np.sum(self.kxky_phi_abs[:,0,:,:],axis=0)/self.rho
+         ft = self.TEXBPAR
+
       ax = fig.add_subplot(111)
       ax.grid(which="majorminor",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(TIME)
-      ax.set_ylabel(r'$\left| \delta\phi_n \right|$')
+      ax.set_ylabel(r'$\left| '+ft+'_n \\right|$')
       ax.set_yscale('log')
       ax.set_title(r'$\mathrm{Fluctuation~intensity} \quad k_\theta = nq/r$')
-
-      # Create p2[n,t] by setting theta=0, sum over kx
-      p2 = np.sum(self.kxky_phi_abs[:,0,:,:],axis=0)/self.rho
-
+        
       if nstr == 'null':
          nvec = range(self.n_n)
       else:

@@ -69,7 +69,7 @@ subroutine cgyro_write_timedata
   endif
 
   if (field_print_flag == 1) then
-     p_field = 3
+     p_field = n_field
   else
      p_field = 1
   endif
