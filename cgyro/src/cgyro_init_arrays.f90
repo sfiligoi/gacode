@@ -43,12 +43,12 @@ subroutine cgyro_init_arrays
 
         ! Need this for (Phi, A_parallel) terms in GK and field equations
 
-        jloc_c(1,ic) = bessel_j0(abs(arg))
+        jloc_c(1,ic) = bessel_j0(arg)
 
         ! Needed for B_parallel in GK and field equations
 
-        jloc_c(2,ic) = 0.5*(jloc_c(1,ic) + bessel_jn(2,abs(arg)))/bmag(it)
-
+        jloc_c(2,ic) = 0.5*(jloc_c(1,ic) + bessel_jn(2,arg))/bmag(it)
+        
      enddo
 
      ! Psi factors: 
