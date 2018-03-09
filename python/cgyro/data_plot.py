@@ -152,6 +152,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       fig.tight_layout(pad=0.3)
 
+      
    def plot_rcorr_phi(self,w=0.5,fig=None):
       '''
       Plot radial correlation 
@@ -376,19 +377,19 @@ class cgyrodata_plot(data.cgyrodata):
       # Construct complex eigenfunction at selected time
       if field == 0:
          f = self.phib[0,:,itime]+1j*self.phib[1,:,itime]
-         ytag = r'$\delta\phi$'
+         ytag = self.TEXPHI
       elif field == 1:
          f = self.aparb[0,:,itime]+1j*self.aparb[1,:,itime]
-         ytag = r'$\delta A_\parallel$'
+         ytag = self.TEXAPAR
       elif field == 2:
          f = self.bparb[0,:,itime]+1j*self.bparb[1,:,itime]
-         ytag = r'$\delta B_\parallel$'
+         ytag = self.TEXBPAR
 
       ax = fig.add_subplot(111)
       ax.grid(which="majorminor",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(r'$\theta_*/\pi$')
-      ax.set_ylabel(ytag)
+      ax.set_ylabel(r'$'+ytag+'$')
 
       if self.n_radial == 1:
          # Manage n=0 (ZF) case
