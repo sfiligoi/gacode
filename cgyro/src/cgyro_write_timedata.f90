@@ -131,13 +131,10 @@ subroutine cgyro_write_timedata
 
   ! Linear frequency diagnostics for every value of n
   call cgyro_freq
+  vec(1) = real(freq) ; vec(2) = aimag(freq)
   if (n_toroidal > 1) then
-     if (nonlinear_flag == 0) then
-        vec(1) = real(freq) ; vec(2) = aimag(freq)
-        call cgyro_write_distributed_breal(trim(path)//binfile_freq,2,vec(1:2))
-     endif
+     call cgyro_write_distributed_breal(trim(path)//binfile_freq,2,vec(1:2))
   else 
-     vec(1) = real(freq) ; vec(2) = aimag(freq)
      call write_ascii(trim(path)//runfile_freq,2,vec(1:2))
   endif
 
