@@ -431,6 +431,6 @@ $GACODE_ROOT/platform/exec/exec.$GACODE_PLATFORM \
 # Print runfile if test case
 if [ $TEST_FLAG -eq 1 ]
 then
-   more -100 out.cgyro.info
+   cat out.cgyro.info
 fi
 #============================================================
