@@ -405,13 +405,14 @@ fi
 gacode_printversion CGYRO
 
 $GACODE_ROOT/platform/exec/exec.$GACODE_PLATFORM \
-  $SIMDIR $NPROC "$CGYRO_DIR/src/cgyro $TEST_FLAG" $NOMP $NUMA $MPINUMA 
+    $SIMDIR $NPROC "$CGYRO_DIR/src/cgyro $TEST_FLAG" $NOMP $NUMA $MPINUMA
+
 #===========================================================
 
 #============================================================
 # Print runfile if test case
 if [ $TEST_FLAG -eq 1 ]
 then
-   cat out.cgyro.info
+    awk '{print}' out.cgyro.info
 fi
 #============================================================
