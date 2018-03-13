@@ -406,13 +406,12 @@ gacode_printversion CGYRO
 
 $GACODE_ROOT/platform/exec/exec.$GACODE_PLATFORM \
     $SIMDIR $NPROC "$CGYRO_DIR/src/cgyro $TEST_FLAG" $NOMP $NUMA $MPINUMA
-
 #===========================================================
 
 #============================================================
 # Print runfile if test case
 if [ $TEST_FLAG -eq 1 ]
 then
-    awk '{print}' out.cgyro.info
+    python $GACODE_ROOT/shared/bin/osxlist.py out.cgyro.info
 fi
 #============================================================
