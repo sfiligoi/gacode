@@ -208,6 +208,7 @@ then
     $EXEC out.cgyro.kxky_n      bin.cgyro.kxky_n
     $EXEC out.cgyro.kxky_e      bin.cgyro.kxky_e
     $EXEC out.cgyro.kxky_flux_e bin.cgyro.kxky_flux_e
+    $EXEC out.cgyro.kxky_flux_n bin.cgyro.kxky_flux_n
     $EXEC out.cgyro.ky_flux     bin.cgyro.ky_flux
     $EXEC out.cgyro.lky_flux_n  bin.cgyro.lky_flux_n
     $EXEC out.cgyro.lky_flux_e  bin.cgyro.lky_flux_e
@@ -216,6 +217,7 @@ then
     $EXEC out.cgyro.aparb       bin.cgyro.aparb
     $EXEC out.cgyro.bparb       bin.cgyro.bparb
     $EXEC out.cgyro.freq        bin.cgyro.freq
+    $EXEC out.cgyro.geo         bin.cgyro.geo
     exit 0
 fi
 if [ $CBIN_FLAG -eq 1 ]
@@ -225,6 +227,7 @@ then
     $EXEC cgyro.kxky_n      
     $EXEC cgyro.kxky_e     
     $EXEC cgyro.kxky_flux_e
+    $EXEC cgyro.kxky_flux_n
     $EXEC cgyro.ky_flux
     $EXEC cgyro.lky_flux_n  
     $EXEC cgyro.lky_flux_e  
@@ -233,7 +236,8 @@ then
     $EXEC cgyro.aparb
     $EXEC cgyro.bparb 
     $EXEC cgyro.freq
- exit 0
+    $EXEC cgyro.geo
+    exit 0
 fi
 #============================================================
 

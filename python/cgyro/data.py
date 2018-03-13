@@ -267,6 +267,12 @@ class cgyrodata:
       if fmt != 'null':  
          self.kxky_flux_e = np.reshape(data[0:nd],(self.n_radial,self.n_species,self.n_n,nt),'F')
          print "INFO: (data.py) Read data in "+fmt+".cgyro.kxky_flux_e. "+t
+      #
+      nd = self.n_radial*self.n_species*self.n_n*nt
+      t,fmt,data = self.extract('.cgyro.kxky_flux_n')
+      if fmt != 'null':  
+         self.kxky_flux_n = np.reshape(data[0:nd],(self.n_radial,self.n_species,self.n_n,nt),'F')
+         print "INFO: (data.py) Read data in "+fmt+".cgyro.kxky_flux_n. "+t
       #-----------------------------------------------------------------
 
    def getxflux(self):
