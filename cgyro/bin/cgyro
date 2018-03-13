@@ -369,7 +369,7 @@ fi
 
 if [ -f input.profiles ]
 then 
-   python $GACODE_ROOT/shared/bin/profile_parse.py input.profiles
+   python $GACODE_ROOT/profiles_gen/bin/profile_parse.py input.profiles
 fi
 #==========================================================
 
