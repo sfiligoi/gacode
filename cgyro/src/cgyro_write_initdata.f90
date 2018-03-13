@@ -14,6 +14,7 @@ subroutine cgyro_write_initdata
 
   integer :: p,in,is
   real :: kymax
+  real(kind=4) :: f4vec(n_theta) 
   real, external :: spectraldiss
 
   !----------------------------------------------------------------------------
@@ -36,7 +37,7 @@ subroutine cgyro_write_initdata
      endif
 
      if (zf_test_mode == 0) then
-        
+
         ! Compute kymax
         if (n_toroidal == 1) then
            kymax = q/rmin*rho
@@ -65,7 +66,7 @@ subroutine cgyro_write_initdata
      else
 
         ! ZONAL FLOW TEST ONLY
-        
+
         if (n_radial==1) then
            write(io,*) ' kx*rho:',2*pi*rho/length
         else
@@ -174,19 +175,31 @@ subroutine cgyro_write_initdata
   !
   if (silent_flag == 0 .and. i_proc == 0) then
 
-     open(unit=io,file=trim(path)//'out.cgyro.geo',status='replace')
-     write(io,fmtstr) theta(:)
-     write(io,fmtstr) w_theta(:)
-     write(io,fmtstr) bmag(:)
-     write(io,fmtstr) omega_stream(:,1)
-     write(io,fmtstr) omega_trap(:,1)
-     write(io,fmtstr) omega_rdrift(:,1)
-     write(io,fmtstr) omega_adrift(:,1)
-     write(io,fmtstr) omega_aprdrift(:,1)
-     write(io,fmtstr) omega_cdrift(:,1)
-     write(io,fmtstr) omega_cdrift_r(:,1)
-     write(io,fmtstr) omega_gammap(:)
-     write(io,fmtstr) k_perp(ic_c(n_radial/2+1,:))
+     open(unit=io,file=trim(path)//'bin.cgyro.geo',status='replace',access='stream')
+     f4vec = theta
+     write(io) f4vec
+     f4vec = w_theta
+     write(io) f4vec
+     f4vec = bmag
+     write(io) f4vec
+     f4vec = omega_stream(:,1)
+     write(io) f4vec
+     f4vec = omega_trap(:,1)
+     write(io) f4vec
+     f4vec = omega_rdrift(:,1)
+     write(io) f4vec
+     f4vec = omega_adrift(:,1) 
+     write(io) f4vec
+     f4vec = omega_aprdrift(:,1)
+     write(io) f4vec
+     f4vec = omega_cdrift(:,1)
+     write(io) f4vec
+     f4vec = omega_cdrift_r(:,1)
+     write(io) f4vec
+     f4vec = omega_gammap(:)
+     write(io) f4vec
+     f4vec = k_perp(ic_c(n_radial/2+1,:))
+     write(io) f4vec
      close(io)
 
   endif

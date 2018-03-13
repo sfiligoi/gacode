@@ -385,14 +385,14 @@ fi
 #===========================================================
 # RUN GYRO
 #
-if [ $INIT_FLAG -ne 1 ] 
+if [ $INIT_FLAG -ne 1 ]
 then
   $GACODE_ROOT/platform/exec/exec.$GACODE_PLATFORM \
     $SIMDIR $NPROC $GYRO_DIR/src/gyro $NOMP $NUMA $MPINUMA $NIDLE
 fi
 
 if [ $TEST_FLAG -eq 1 ] ; then
-   cat $RUNBASE 
+   python $GACODE_ROOT/shared/bin/osxlist.py $RUNBASE
    cat out.expro.run
 fi
 #===========================================================

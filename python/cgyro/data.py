@@ -359,14 +359,12 @@ class cgyrodata:
 
       import numpy as np
 
-      self.geotag = []
-
-      #-----------------------------------------------------------------
-      #
-      try:
-         data = np.fromfile(self.dir+'out.cgyro.geo',dtype='float32',sep=' ')
+      t,fmt,data = self.extract('.cgyro.geo')
+      if fmt != 'null':
+         print 'INFO: (data.py) Read data in '+fmt+'.cgyro.geo   '+t
          self.geo = np.reshape(data,(self.n_theta,12),'F')
-         print "INFO: (data.py) Read data in out.cgyro.geo."
+
+         self.geotag = []
          self.geotag.append('\theta')
          self.geotag.append('w_\\theta')
          self.geotag.append('|B|')
@@ -379,7 +377,4 @@ class cgyrodata:
          self.geotag.append('\omega_\mathrm{crdrift}')
          self.geotag.append('\omega_\mathrm{gammap')
          self.geotag.append('k_\perp')
-      except:
-         print "INFO: (data.py) Missing out.cgyro.geo."
-         pass
-      #-----------------------------------------------------------------
+ 
