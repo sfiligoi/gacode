@@ -1,10 +1,5 @@
 #!/bin/sh
-#
-# SCRIPT:
-#  gyro.DELPHI
-#
-# FUNCTION:
-#  Parallel execution script
+# GACODE Parallel execution script (JAC)
 
 simdir=${1}
 nmpi=${2}

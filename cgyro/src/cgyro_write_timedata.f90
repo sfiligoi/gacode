@@ -15,12 +15,12 @@ subroutine cgyro_write_timedata
   integer :: i_field,i_moment
   integer :: ir,it
   integer :: p_field
-  real :: vfreq(2)
+  real :: vec(3)
   complex :: a_norm
   complex :: ftemp(n_theta,n_radial)
   complex :: field_plot(n_radial,theta_plot)
   logical :: has_zf, has_balloon
-  
+
   ! Print this data on print steps only; otherwise exit now
   if (mod(i_time,print_step) /= 0) return
 
@@ -74,7 +74,7 @@ subroutine cgyro_write_timedata
   else
      p_field = 1
   endif
-  
+
   do i_field=1,p_field
      ! Sort out subset of theta values for plotting
      do ic=1,nc
@@ -121,7 +121,7 @@ subroutine cgyro_write_timedata
         else
            a_norm = 1.0
         endif
-           
+
         call write_binary(trim(path)//binfile_fieldb(i_field),&
              ftemp(:,:)/a_norm,size(ftemp))
 
@@ -131,15 +131,19 @@ subroutine cgyro_write_timedata
 
   ! Linear frequency diagnostics for every value of n
   call cgyro_freq
-  vfreq(1) = real(freq) 
-  vfreq(2) = aimag(freq)
-  call cgyro_write_distributed_breal(trim(path)//binfile_freq,size(vfreq),vfreq)
+  vec(1) = real(freq) ; vec(2) = aimag(freq)
+  if (n_toroidal > 1) then
+     call cgyro_write_distributed_breal(trim(path)//binfile_freq,2,vec(1:2))
+  else 
+     call write_ascii(trim(path)//runfile_freq,2,vec(1:2))
+  endif
 
   ! Output to screen
   call print_scrdata()
 
   ! Output to files
-  call write_time(trim(path)//runfile_time)
+  vec(1) = t_current ; vec(2:3) = integration_error(:)
+  call write_ascii(trim(path)//runfile_time,3,vec(1:3))
 
   call MPI_BCAST(signal,1,MPI_INTEGER,0,CGYRO_COMM_WORLD,i_err)
 
@@ -279,7 +283,6 @@ subroutine cgyro_write_distributed_bcomplex(datafile,n_fn,fn)
   end select
 
 end subroutine cgyro_write_distributed_bcomplex
-
 
 !------------------------------------------------------
 ! cgyro_write_distributed_breal.f90
@@ -431,7 +434,7 @@ subroutine write_precision(datafile,fn)
   character (len=*), intent(in) :: datafile
   real, intent(in) :: fn
   real :: fn_sum
-  integer :: i_dummy
+  integer :: i
   !------------------------------------------------------
 
   call MPI_ALLREDUCE(fn, &
@@ -470,7 +473,7 @@ subroutine write_precision(datafile,fn)
      ! Rewind
 
      open(unit=io,file=datafile,status='old')
-     do i_dummy=1,i_current
+     do i=1,i_current
         read(io,fmtstr_hi) fn_sum
      enddo
      endfile(io)
@@ -481,13 +484,13 @@ subroutine write_precision(datafile,fn)
 end subroutine write_precision
 
 !----------------------------------------------------------------
-! write_time.f90
+! write_ascii.f90
 !
 ! PURPOSE:
-!  Simple but fundamental time-data: TIME, ERROR1, ERROR2   
+!  ASCII output of vector of reals 
 !----------------------------------------------------------------
 
-subroutine write_time(datafile)
+subroutine write_ascii(datafile,n_fn,fn)
 
   use cgyro_globals
 
@@ -495,8 +498,9 @@ subroutine write_time(datafile)
   implicit none
   !
   character (len=*), intent(in) :: datafile
-  integer :: i_dummy
-  real :: dummy
+  integer, intent(in) :: n_fn
+  real, intent(inout), dimension(n_fn) :: fn
+  integer :: i
   !------------------------------------------------------
 
   if (i_proc > 0) return
@@ -518,8 +522,8 @@ subroutine write_time(datafile)
 
      ! Append
 
-     open(unit=io,file=datafile,status='old',position='append')
-     write(io,fmtstrn) t_current,integration_error(:)
+     open(unit=io,file=datafile,position='append')
+     write(io,fmtstrn) fn(:)  
      close(io)
 
   case(3)
@@ -527,16 +531,15 @@ subroutine write_time(datafile)
      ! Rewind
 
      open(unit=io,file=datafile,status='old')
-     do i_dummy=1,i_current
-        read(io,fmtstr) dummy
+     do i=1,i_current
+        read(io,fmtstr) fn(1)
      enddo
      endfile(io)
      close(io)
 
   end select
 
-end subroutine write_time
-
+end subroutine write_ascii
 
 subroutine write_distribution(datafile)
 

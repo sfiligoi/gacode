@@ -267,6 +267,12 @@ class cgyrodata:
       if fmt != 'null':  
          self.kxky_flux_e = np.reshape(data[0:nd],(self.n_radial,self.n_species,self.n_n,nt),'F')
          print "INFO: (data.py) Read data in "+fmt+".cgyro.kxky_flux_e. "+t
+      #
+      nd = self.n_radial*self.n_species*self.n_n*nt
+      t,fmt,data = self.extract('.cgyro.kxky_flux_n')
+      if fmt != 'null':  
+         self.kxky_flux_n = np.reshape(data[0:nd],(self.n_radial,self.n_species,self.n_n,nt),'F')
+         print "INFO: (data.py) Read data in "+fmt+".cgyro.kxky_flux_n. "+t
       #-----------------------------------------------------------------
 
    def getxflux(self):
@@ -312,11 +318,10 @@ class cgyrodata:
       #-----------------------------------------------------------------
       # Read complex fields
       #
-        
       # 1a. kxky_phi
       nd = 2*self.n_radial*self.theta_plot*self.n_n*nt
       t,fmt,data = self.extract('.cgyro.kxky_phi')
-      if fmt != 'null':  
+      if fmt != 'null':
          print 'INFO: (data.py) Read data in '+fmt+'.cgyro.kxky_phi. '+t
          self.kxky_phi = np.reshape(data[0:nd],(2,self.n_radial,self.theta_plot,self.n_n,nt),'F')
          self.kxky_phi_abs = np.sqrt(self.kxky_phi[0,:,:,:,:]**2+self.kxky_phi[1,:,:,:,:]**2)
@@ -324,7 +329,7 @@ class cgyrodata:
       # 1b. kxky_apar
       nd = 2*self.n_radial*self.theta_plot*self.n_n*nt
       t,fmt,data = self.extract('.cgyro.kxky_apar')
-      if fmt != 'null':  
+      if fmt != 'null':
          print 'INFO: (data.py) Read data in '+fmt+'.cgyro.kxky_apar. '+t
          self.kxky_apar = np.reshape(data[0:nd],(2,self.n_radial,self.theta_plot,self.n_n,nt),'F')
          self.kxky_apar_abs = np.sqrt(self.kxky_apar[0,:,:,:,:]**2+self.kxky_apar[1,:,:,:,:]**2)
@@ -332,16 +337,16 @@ class cgyrodata:
       # 1c. kxky_bpar
       nd = 2*self.n_radial*self.theta_plot*self.n_n*nt
       t,fmt,data = self.extract('.cgyro.kxky_bpar')
-      if fmt != 'null':  
+      if fmt != 'null':
          print 'INFO: (data.py) Read data in '+fmt+'.cgyro.kxky_bpar. '+t
          self.kxky_bpar = np.reshape(data[0:nd],(2,self.n_radial,self.theta_plot,self.n_n,nt),'F')
          self.kxky_bpar_abs = np.sqrt(self.kxky_bpar[0,:,:,:,:]**2+self.kxky_bpar[1,:,:,:,:]**2)
-       
+
       # 2. kxky_n
       nd = 2*self.n_radial*self.theta_plot*self.n_species*self.n_n*nt
       t,fmt,data = self.extract('.cgyro.kxky_n')
-           
-      if fmt != 'null':  
+
+      if fmt != 'null':
          print 'INFO: (data.py) Read data in '+fmt+'.cgyro.kxky_n.   '+t
          self.kxky_n = np.reshape(data[0:nd],(2,self.n_radial,self.theta_plot,self.n_species,self.n_n,nt),'F')
 
@@ -349,29 +354,23 @@ class cgyrodata:
       nd = 2*self.n_radial*self.theta_plot*self.n_species*self.n_n*nt
       t,fmt,data = self.extract('.cgyro.kxky_e')
 
-      if fmt != 'null':  
+      if fmt != 'null':
          print 'INFO: (data.py) Read data in '+fmt+'.cgyro.kxky_e.   '+t
          self.kxky_e = np.reshape(data[0:nd],(2,self.n_radial,self.theta_plot,self.n_species,self.n_n,nt),'F')
       #-----------------------------------------------------------------
 
    def getgeo(self):
 
-      """Read geometry arrays"""
+      """Read theta-dependent geometry functions"""
 
       import numpy as np
 
-      # Convenience definition
-      nt = self.n_time
-
-      self.geotag = []
-
-      #-----------------------------------------------------------------
-      # Read powers
-      #
-      try:
-         data = np.fromfile(self.dir+'out.cgyro.geo',dtype='float32',sep=' ')
+      t,fmt,data = self.extract('.cgyro.geo')
+      if fmt != 'null':
+         print 'INFO: (data.py) Read data in '+fmt+'.cgyro.geo   '+t
          self.geo = np.reshape(data,(self.n_theta,12),'F')
-         print "INFO: (data.py) Read data in out.cgyro.geo."
+
+         self.geotag = []
          self.geotag.append('\theta')
          self.geotag.append('w_\\theta')
          self.geotag.append('|B|')
@@ -384,7 +383,4 @@ class cgyrodata:
          self.geotag.append('\omega_\mathrm{crdrift}')
          self.geotag.append('\omega_\mathrm{gammap')
          self.geotag.append('k_\perp')
-      except:
-         print "INFO: (data.py) Missing out.cgyro.geo."
-         pass
-      #-----------------------------------------------------------------
+ 

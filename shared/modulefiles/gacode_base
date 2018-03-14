@@ -32,9 +32,10 @@ prepend-path PATH ${GACODE_ROOT}/cgyro/bin
 prepend-path PATH ${GACODE_ROOT}/neo/bin
 prepend-path PATH ${GACODE_ROOT}/vgen/bin
 prepend-path PATH ${GACODE_ROOT}/tglf/bin
-prepend-path PATH ${GACODE_ROOT}/glf23/bin
+#prepend-path PATH ${GACODE_ROOT}/glf23/bin
 prepend-path PATH ${GACODE_ROOT}/le3/bin
 prepend-path PATH ${GACODE_ROOT}/shared/bin
+prepend-path PATH ${GACODE_ROOT}/profiles_gen/bin
 
 prepend-path PYTHONPATH ${GACODE_ROOT}/python
 
