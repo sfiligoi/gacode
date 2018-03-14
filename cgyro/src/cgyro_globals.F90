@@ -5,14 +5,13 @@
 !  CGYRO global variables.  The idea is to have a primary, large
 !  module containing all essential CGYRO arrays and scalars.
 !-----------------------------------------------------------------
-#ifdef _OPENACC
-#include "precision_m.f90"
-#include "cufft_m.f90"
-#endif
 
 module cgyro_globals
 
   use, intrinsic :: iso_c_binding
+#ifdef _OPENACC
+  use cuFFT
+#endif
 
   ! Data output precision setting
   integer, parameter :: BYTE=4 ! Change to 8 for double precision
