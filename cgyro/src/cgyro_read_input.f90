@@ -59,7 +59,6 @@ subroutine cgyro_read_input
   call cgyro_readbc_real(dlntdre_ade)
   call cgyro_readbc_real(dlnndre_ade)
   call cgyro_readbc_real(lambda_star)
-  call cgyro_readbc_int(test_flag)
   call cgyro_readbc_int(h_print_flag)
   call cgyro_readbc_int(moment_print_flag)
   call cgyro_readbc_int(kxkyflux_print_flag)
