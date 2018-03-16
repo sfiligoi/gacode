@@ -295,7 +295,7 @@ subroutine cgyro_make_profiles
   !-------------------------------------------------------------
   ! Manage simulation type (n=0,linear,nonlinear)
   !
-  if (zf_test_mode == 1) then
+  if (zf_test_mode > 0) then
 
      ! Zonal flow (n=0) test
 

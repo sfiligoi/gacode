@@ -107,6 +107,7 @@ subroutine cgyro_write_timedata
   has_balloon = (n_toroidal == 1) .and. ((n > 0)  .and. (box_size == 1))
   has_zf      = zf_test_mode > 0
   if (has_zf .or. has_balloon) then
+
      do i_field=1,n_field
 
         do ir=1,n_radial
@@ -124,7 +125,6 @@ subroutine cgyro_write_timedata
            
         call write_binary(trim(path)//binfile_fieldb(i_field),&
              ftemp(:,:)/a_norm,size(ftemp))
-
      enddo
   endif
   !---------------------------------------------------------------
