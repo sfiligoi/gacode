@@ -68,7 +68,8 @@ subroutine cgyro_write_initdata
         ! ZONAL FLOW TEST ONLY
 
         if (n_radial==1) then
-           write(io,*) ' kx*rho:',2*pi*rho/length
+           write(io,*)
+           write(io,'(t2,a,1pe10.3)') ' kx*rho: ',2*pi*rho/length
         else
            write(io,*) '          n          Delta            Max           L/rho'
            write(io,'(a,i4,2x,2(g0.8,2x),2x,g0.8)') ' kx*rho:',&

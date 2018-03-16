@@ -27,7 +27,7 @@ FDEBUG =-g -Kieee -Ktrap=fp,divz -Mbounds -Mchkptr -Mchkstk -traceback -Minform=
 F2PY   = f2py --fcompiler=pg
 
 # System math libraries
-LMATH=-lfftw3_threads -lfftw3f_threads -lfftw3f -lfftw3 -lcufft
+LMATH=-lfftw3_threads -lfftw3f_threads -lfftw3f -lfftw3
 
 # NetCDF
 NETCDF =-L${NETCDF_DIR}/lib -lnetcdff -lnetcdf -L${NETCDF_DIR}/lib -L${NETCDF_DIR}/lib -lz -lm
