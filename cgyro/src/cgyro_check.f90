@@ -40,8 +40,10 @@ subroutine cgyro_check
      return
   endif
 
-  if (box_size > 1 .and. h_print_flag == 1) then
-     call cgyro_error('Distribution output not available for box_size > 1')
+  if (h_print_flag == 1) then
+     if (box_size > 1 .and. zf_test_mode == 0) then
+        call cgyro_error('Distribution output not available for box_size > 1')
+     endif
      return
   endif
   !------------------------------------------------------------------------
