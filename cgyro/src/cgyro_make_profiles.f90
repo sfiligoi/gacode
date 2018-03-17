@@ -297,6 +297,13 @@ subroutine cgyro_make_profiles
   !
   if (zf_test_mode > 0) then
 
+     if (zf_test_mode > 2) then
+        ! The Apar and Bpar initial conditions could later be
+        ! ZF_TEST_MODE = 3 and 4.  Currently these are not available.
+        call cgyro_error('ZF_TEST_MODE > 2 is not available')
+        return
+     endif
+
      ! Zonal flow (n=0) test
 
      k_theta = q/rmin

@@ -846,7 +846,19 @@ class cgyrodata_plot(data.cgyrodata):
       i0 = int(round((1.0+float(theta))*self.n_theta/2.0))
       if i0 > self.n_theta-1:
          i0 = self.n_theta-1
-      n0 = (self.n_radial/2)*self.n_theta+i0
+
+      if self.n_radial > 1:
+         n0 = (self.n_radial/2)*self.n_theta+i0
+         x = self.thetab/np.pi
+      else:
+         n0 = self.n_theta/3
+         x = self.theta/np.pi
+        
+      if tmax < 0.0:
+         if self.n_radial == 1:
+            tmax = 1.0
+         else:
+            tmax = self.n_radial-1
 
       p = 0
       for row in range(3):
@@ -876,11 +888,8 @@ class cgyrodata_plot(data.cgyrodata):
 
          levels = np.arange(hmin-dh,hmax+dh,dh)
 
-         ax.contourf(self.thetab/np.pi,self.xi,hp,levels,cmap=cm.jet,origin='lower')
-         if tmax < 0.0:
-            ax.set_xlim([1-self.n_radial,-1+self.n_radial])
-         else:
-            ax.set_xlim([-tmax,tmax])
+         ax.contourf(x,self.xi,hp,levels,cmap=cm.jet,origin='lower')
+         ax.set_xlim([-tmax,tmax])
 
          # Plot dots for mesh points
          if row == 1 and mesh == 1:
@@ -904,11 +913,9 @@ class cgyrodata_plot(data.cgyrodata):
 
          levels = np.arange(hmin-dh,hmax+dh,dh)
 
-         ax.contourf(self.thetab/np.pi,self.xi,hp,levels,cmap=cm.jet,origin='lower')
-         if tmax < 0.0:
-            ax.set_xlim([1-self.n_radial,-1+self.n_radial])
-         else:
-            ax.set_xlim([-tmax,tmax])
+         ax.contourf(x,self.xi,hp,levels,cmap=cm.jet,origin='lower')
+         ax.set_xlim([-tmax,tmax])
+         
          #======================================
 
       fig.tight_layout(pad=0.3)
@@ -929,6 +936,17 @@ class cgyrodata_plot(data.cgyrodata):
       i0 = int(round((1.0+float(theta))*self.n_theta/2.0))
       if i0 > self.n_theta-1:
          i0 = self.n_theta-1
+
+      if self.n_radial > 1:
+         x = self.thetab/np.pi
+      else:
+         x = self.theta/np.pi
+
+      if tmax < 0.0:
+         if self.n_radial == 1:
+            tmax = 1.0
+         else:
+            tmax = self.n_radial-1
 
       p = 0
       for row in range(3):
@@ -959,16 +977,9 @@ class cgyrodata_plot(data.cgyrodata):
          else:
             hp = np.array(func[:,:,spec,self.n_xi/2,ie,itime])
             
-         ax.plot(self.thetab/np.pi,hp[0,:],'-o',color='black',markersize=2)
-         ax.plot(self.thetab/np.pi,hp[1,:],'-o',color='blue',markersize=2)
-
-         if self.n_radial > 1:
-            if tmax < 0.0:
-               ax.set_xlim([1-self.n_radial,-1+self.n_radial])
-            else:
-               ax.set_xlim([-tmax,tmax])
-         else:
-            ax.set_xlim([1,3])
+         ax.plot(x,hp[0,:],'-o',color='black',markersize=2)
+         ax.plot(x,hp[1,:],'-o',color='blue',markersize=2)
+         ax.set_xlim([-tmax,tmax])
 
          #========================================================
 

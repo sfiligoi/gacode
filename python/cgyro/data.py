@@ -98,9 +98,9 @@ class cgyrodata:
       self.xi   = np.array(data[mark:mark+self.n_xi])
 
       mark = mark+self.n_xi
-      self.thetab = np.array(data[mark:mark+self.n_theta*(self.n_radial/self.m_box)])        
+      self.thetab = np.array(data[mark:mark+self.n_theta*self.n_radial])        
          
-      mark = mark+self.n_theta*(self.n_radial/self.m_box)
+      mark = mark+self.n_theta*(self.n_radial)
       self.ky = np.array(data[mark:mark+self.n_n])
 
       mark = mark+self.n_n
@@ -209,8 +209,8 @@ class cgyrodata:
       #
       t,fmt,data = self.extract('.cgyro.hb')
       if fmt != 'null':
-         self.hb = np.reshape(data,(2,self.n_radial*self.n_theta/self.m_box,
-                                       self.n_species,self.n_xi,self.n_energy,nt),'F')
+         self.hb = np.reshape(data,(2,self.n_radial*self.n_theta,
+                                    self.n_species,self.n_xi,self.n_energy,nt),'F')
          print "INFO: (data.py) Read data in "+fmt+".cgyro.hb. "+t 
          self.hb = self.hb/np.max(self.hb)
       #-----------------------------------------------------------------

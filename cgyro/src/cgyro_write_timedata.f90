@@ -553,7 +553,7 @@ subroutine write_distribution(datafile)
   integer :: ir,it
   complex, dimension(:,:), allocatable :: h_x_glob
   complex :: ftemp(n_theta,n_radial)
-  complex(kind=4) :: f8(n_theta,n_radial/box_size)
+  complex(kind=4) :: f8(n_theta,n_radial)
   !------------------------------------------------------
 
   select case (io_control)
@@ -598,7 +598,7 @@ subroutine write_distribution(datafile)
                  ftemp(it,ir) = h_x_glob(ic_c(ir,it),iv)
               enddo
            enddo
-           call extended_ang(ftemp)
+           if (zf_test_mode == 0) call extended_ang(ftemp)
            f8 = ftemp
            write(io) f8
         enddo
