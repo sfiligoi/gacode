@@ -98,9 +98,9 @@ class cgyrodata:
       self.xi   = np.array(data[mark:mark+self.n_xi])
 
       mark = mark+self.n_xi
-      self.thetab = np.array(data[mark:mark+self.n_theta*self.n_radial])        
+      self.thetab = np.array(data[mark:mark+self.n_theta*self.n_radial/self.m_box])  
          
-      mark = mark+self.n_theta*(self.n_radial)
+      mark = mark+self.n_theta*(self.n_radial/self.m_box)
       self.ky = np.array(data[mark:mark+self.n_n])
 
       mark = mark+self.n_n
