@@ -18,8 +18,6 @@ PREC='f' ; BIT=4
 # Use first 3 args to define plot and font size 
 rc('text',usetex=True)
 rc('font',size=int(sys.argv[12]))
-#data_in.lx = int(sys.argv[2])
-#data_in.ly = int(sys.argv[3])
 
 ftype = sys.argv[1]
 moment = sys.argv[2]
@@ -96,15 +94,24 @@ else:
     ivec = str2list(istr)
 
 # Set filename root and title
+isfield = True
 if (moment == 'n'):
     fdata = '.cgyro.kxky_n'
     title = r'$\delta \mathrm{n}$'
+    isfield = False
 elif (moment == 'e'):
     fdata = '.cgyro.kxky_e'
     title = r'$\delta \mathrm{E}$'
+    isfield = False
 elif (moment == 'phi'):
     fdata = '.cgyro.kxky_phi'
     title = r'$\delta\phi$'
+elif (moment == 'apar'):
+    fdata = '.cgyro.kxky_apar'
+    title = r'$\delta A_\parallel$'
+elif (moment == 'bpar'):
+    fdata = '.cgyro.kxky_bpar'
+    title = r'$\delta B_\parallel$'
 
 # ERROR CHECKS
 
@@ -122,7 +129,7 @@ else:
     sys.exit()
 
 # **WARNING** Assumes theta_plot=1 
-if (moment == 'phi'):
+if isfield:
     n_chunk = 2*nr*nn
 else:
     n_chunk = 2*nr*ns*nn
@@ -131,7 +138,7 @@ else:
 def frame():
 
    if i in ivec:
-      if (moment == 'phi'):
+      if isfield:
          a = np.reshape(aa,(2,nr,nn),order='F')
          c = a[0,:,:]+1j*a[1,:,:]
       else:
