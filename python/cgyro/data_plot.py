@@ -645,7 +645,11 @@ class cgyrodata_plot(data.cgyrodata):
       fc   : select components (phi,Ap,Bp) of flux rather than total
       '''
 
-      ns = self.n_species
+      if self.n_n == 1:
+         print 'ERROR (plot_ky_flux.py) Plot not available with a single mode.'
+         sys.exit()
+
+         ns = self.n_species
       t  = self.t
 
       if fig is None:
@@ -698,7 +702,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[-1])+']$'
 
-      if ky[1] < 0.0:
+      if ky[-1] < 0.0:
          ky = -ky
          xlabel=r'$-k_\theta \rho_s$'
       else:
@@ -775,11 +779,12 @@ class cgyrodata_plot(data.cgyrodata):
 
       ax = fig.add_subplot(111)
 
-      windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[-1])+']$'
+      #windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[-1])+']$'
+      windowtxt = ''
 
       ax.set_xlabel(r'$k_x \rho_s/4$')
       ax.set_ylabel(r'$k_y \rho_s$')
-      ax.set_title(r'$\mathrm{Average~'+ft+'~intensity} \quad $'+windowtxt)
+      ax.set_title(r'$\mathrm{Time}$-$\mathrm{averaged~'+ft+'~intensity} \quad $'+windowtxt)
 
       ax.imshow(np.transpose(f),extent=[-x0,x0,0,y0],interpolation='none')
 
