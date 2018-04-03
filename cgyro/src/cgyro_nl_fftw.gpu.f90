@@ -68,6 +68,41 @@ subroutine cgyro_nl_fftw_comm2
 
 end subroutine cgyro_nl_fftw_comm2
 
+subroutine cgyro_nl_fftw_zero4(sz,v1,v2,v3,v4)
+  implicit none
+
+  integer, intent(in) :: sz
+  complex, dimension(*), intent(inout) :: v1,v2,v3,v4
+
+  integer :: i
+
+!$acc parallel loop independent present(v1,v2,v3,v4) private(i)
+  do i=1,sz
+    v1(i) = 0.0
+    v2(i) = 0.0
+    v3(i) = 0.0
+    v4(i) = 0.0
+  enddo
+
+end subroutine
+
+subroutine cgyro_nl_fftw_mul(sz,uvm,uxm,vym,uym,vxm,inv_nxny)
+  implicit none
+
+  integer, intent(in) :: sz
+  real, dimension(*),intent(out) :: uvm
+  real, dimension(*),intent(in) :: uxm,vym,uym,vxm
+  real, intent(in) :: inv_nxny
+
+  integer :: i
+
+!$acc parallel loop independent present(uvm,uxm,vym,uym,vxm) private(i)
+  do i=1,sz
+    uvm(i) = (uxm(i)*vym(i)- &
+                uym(i)*vxm(i))*inv_nxny
+  enddo
+
+end subroutine
 
 subroutine cgyro_nl_fftw(ij)
 
@@ -103,12 +138,8 @@ subroutine cgyro_nl_fftw(ij)
 !$acc& pcreate(uxmany,uymany,vxmany,vymany) &
 !$acc& pcreate(uvmany)
 
-!$acc kernels
-  fxmany(:,:,:) = 0.0
-  fymany(:,:,:) = 0.0
-  gxmany(:,:,:) = 0.0
-  gymany(:,:,:) = 0.0
-!$acc end kernels
+  call cgyro_nl_fftw_zero4(size(fxmany,1)*size(fxmany,2)*size(fxmany,3), &
+                           fxmany,fymany,gxmany,gymany)
 
 !$acc parallel loop independent collapse(3) private(j,ir,p,ix,in,iy,f0,g0)
   do j=1,nsplit
@@ -180,10 +211,8 @@ subroutine cgyro_nl_fftw(ij)
 
   inv_nxny = 1.0/(nx*ny)
 
-!$acc kernels copyin(inv_nxny)
-  uvmany(:,:,:) = (uxmany(:,:,:)*vymany(:,:,:)- &
-                uymany(:,:,:)*vxmany(:,:,:))*inv_nxny
-!$acc end kernels
+  call cgyro_nl_fftw_mul(size(uvmany,1)*size(uvmany,2)*size(uvmany,3), &
+                         uvmany,uxmany,vymany,uymany,vxmany,inv_nxny)
 
   ! ------------------
   ! Transform uv to fx
