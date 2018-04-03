@@ -98,7 +98,7 @@ subroutine cgyro_nl_fftw(ij)
   endif
 
   call timer_lib_in('nl')
-!$acc  data pcopyin(f_nl) pcopyout(g_nl)  &
+!$acc  data pcopyin(f_nl)  &
 !$acc& pcreate(fxmany,fymany,gxmany,gymany) &
 !$acc& pcreate(uxmany,uymany,vxmany,vymany) &
 !$acc& pcreate(uvmany)
@@ -147,7 +147,7 @@ subroutine cgyro_nl_fftw(ij)
      call timer_lib_in('nl')
   endif
 
-!$acc data copyin(g_nl)  
+!$acc data copy(g_nl)  
 
 !$acc parallel loop independent collapse(3) private(j,ir,p,ix,in,iy,f0,g0)
   do j=1,nsplit
@@ -165,9 +165,6 @@ subroutine cgyro_nl_fftw(ij)
      enddo
   enddo
 
-!$acc end data
-
-!$acc wait
 !$acc  host_data &
 !$acc& use_device(gxmany,gymany) &
 !$acc& use_device(vxmany,vymany)
@@ -214,8 +211,12 @@ subroutine cgyro_nl_fftw(ij)
         enddo
      enddo
   enddo
+
+  ! end data g_nl
 !$acc end data
-!$acc wait
+
+  ! end data f_nl
+!$acc end data
 
   call timer_lib_out('nl')
 
