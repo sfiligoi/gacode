@@ -93,15 +93,17 @@ if istr == '-1':
 else:
     ivec = str2list(istr)
 
+u=specmap(sim.mass[species],sim.z[species])
+
 # Set filename root and title
 isfield = True
 if (moment == 'n'):
     fdata = '.cgyro.kxky_n'
-    title = r'$\delta \mathrm{n}$'
+    title = r'${\delta \mathrm{n}}_'+u+'$'
     isfield = False
 elif (moment == 'e'):
     fdata = '.cgyro.kxky_e'
-    title = r'$\delta \mathrm{E}$'
+    title = r'${\delta \mathrm{E}}_'+u+'$'
     isfield = False
 elif (moment == 'phi'):
     fdata = '.cgyro.kxky_phi'
@@ -162,7 +164,7 @@ def frame():
       yp = y/sim.ky[1]
       aspect = max(yp)/max(xp)
 
-      fig = plt.figure(figsize=(10,10*aspect))
+      fig = plt.figure(figsize=(8,8*aspect))
       ax = fig.add_subplot(111)
       ax.set_title(title)
       ax.set_xlabel(r'$x/\rho_s$')
@@ -173,13 +175,14 @@ def frame():
       ax.contourf(xp,yp,np.transpose(f),levels,cmap=plt.get_cmap(colormap))
       print 'INFO: (plot_fluct) min,max = ',f0,f1
 
-      fig.tight_layout(pad=0.5)
+      fig.tight_layout(pad=0.3)
+      plt.subplots_adjust(top=0.94)
       if ftype == 'screen':
          plt.show()
       else:
          fname = fdata+str(i)
          # Filename uses frame number 
-         plt.savefig(str(i)+'.png')
+         plt.savefig(str(i)+'.'+ftype)
          # Close each time to prevent memory accumulation
          plt.close()
             

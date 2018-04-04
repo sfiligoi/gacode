@@ -649,7 +649,7 @@ class cgyrodata_plot(data.cgyrodata):
          print 'ERROR (plot_ky_flux.py) Plot not available with a single mode.'
          sys.exit()
 
-         ns = self.n_species
+      ns = self.n_species
       t  = self.t
 
       if fig is None:
