@@ -21,6 +21,8 @@ subroutine cgyro_nl_fftw_comm1
   integer :: ir,it,iv_loc_m
   integer :: iexch
 
+  call timer_lib_in('nl_comm')
+
 !$omp parallel do private(iv_loc,it,iexch,ir)
   do iv_loc_m=1,nv_loc
      iexch = (iv_loc_m-1)*n_theta
@@ -38,6 +40,8 @@ subroutine cgyro_nl_fftw_comm1
 
   call parallel_slib_f_nc(fpack,f_nl)
 
+  call timer_lib_out('nl_comm')
+
 end subroutine cgyro_nl_fftw_comm1
 
 subroutine cgyro_nl_fftw_comm2
@@ -50,6 +54,8 @@ subroutine cgyro_nl_fftw_comm2
 
   integer :: ir,it,iv_loc_m
   integer :: iexch
+
+  call timer_lib_in('nl_comm')
 
 !$omp parallel do private(iv_loc,it,iexch,ir)
   do iv_loc_m=1,nv_loc
@@ -67,6 +73,8 @@ subroutine cgyro_nl_fftw_comm2
   enddo
 
   call parallel_slib_f_nc(gpack,g_nl)
+
+  call timer_lib_out('nl_comm')
 
 end subroutine cgyro_nl_fftw_comm2
 
@@ -133,9 +141,7 @@ subroutine cgyro_nl_fftw(ij)
 
   if (is_staggered_comm_2 .or. force_early_comm2) then
      ! stagger comm2, to load ballance network traffic
-     call timer_lib_in('nl_comm')
      call cgyro_nl_fftw_comm2
-     call timer_lib_out('nl_comm')
   endif
 
   call timer_lib_in('nl')
@@ -264,9 +270,7 @@ subroutine cgyro_nl_fftw(ij)
   
   ! stagger comm2, to load ballance network traffic
   if (.not. (is_staggered_comm_2 .or. force_early_comm2)) then 
-     call timer_lib_in('nl_comm')
      call cgyro_nl_fftw_comm2
-     call timer_lib_out('nl_comm')
   endif
 
   call timer_lib_in('nl')
