@@ -642,6 +642,7 @@ subroutine write_timers(datafile)
   if (io_control == 1 .or. io_control == 3) then
      ! Timer initialization (starts at timer 4)
      call timer_lib_init('str')
+     call timer_lib_init('str_mem')
      call timer_lib_init('str_comm')
      call timer_lib_init('nl')
      call timer_lib_init('nl_mem')
@@ -674,7 +675,7 @@ subroutine write_timers(datafile)
              timer_lib_time('coll_init'),&
              timer_lib_time('io_init')
         write(io,'(a)') 'Run time'
-        write(io,'(1x,12(a10,1x))') timer_cpu_tag(5:16)
+        write(io,'(1x,13(a10,1x))') timer_cpu_tag(5:17)
         close(io)
      endif
 
@@ -687,8 +688,9 @@ subroutine write_timers(datafile)
 
      if (i_proc == 0) then
         open(unit=io,file=datafile,status='old',position='append')
-        write(io,'(12(1pe10.3,1x))') &
+        write(io,'(13(1pe10.3,1x))') &
              timer_lib_time('str'),& 
+             timer_lib_time('str_mem'),&
              timer_lib_time('str_comm'),& 
              timer_lib_time('nl'),& 
              timer_lib_time('nl_mem'),&
