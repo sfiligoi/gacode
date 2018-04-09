@@ -68,6 +68,41 @@ subroutine cgyro_nl_fftw_comm2
 
 end subroutine cgyro_nl_fftw_comm2
 
+subroutine cgyro_nl_fftw_zero4(sz,v1,v2,v3,v4)
+  implicit none
+
+  integer, intent(in) :: sz
+  complex, dimension(*), intent(inout) :: v1,v2,v3,v4
+
+  integer :: i
+
+!$acc parallel loop independent present(v1,v2,v3,v4) private(i)
+  do i=1,sz
+    v1(i) = 0.0
+    v2(i) = 0.0
+    v3(i) = 0.0
+    v4(i) = 0.0
+  enddo
+
+end subroutine
+
+subroutine cgyro_nl_fftw_mul(sz,uvm,uxm,vym,uym,vxm,inv_nxny)
+  implicit none
+
+  integer, intent(in) :: sz
+  real, dimension(*),intent(out) :: uvm
+  real, dimension(*),intent(in) :: uxm,vym,uym,vxm
+  real, intent(in) :: inv_nxny
+
+  integer :: i
+
+!$acc parallel loop independent present(uvm,uxm,vym,uym,vxm) private(i)
+  do i=1,sz
+    uvm(i) = (uxm(i)*vym(i)- &
+                uym(i)*vxm(i))*inv_nxny
+  enddo
+
+end subroutine
 
 subroutine cgyro_nl_fftw(ij)
 
@@ -98,40 +133,22 @@ subroutine cgyro_nl_fftw(ij)
   endif
 
   call timer_lib_in('nl')
-!$acc  data pcopyin(f_nl)   &
+!$acc  data pcopyin(f_nl)  &
 !$acc& pcreate(fxmany,fymany,gxmany,gymany) &
 !$acc& pcreate(uxmany,uymany,vxmany,vymany) &
 !$acc& pcreate(uvmany)
 
-!$acc parallel
-!$acc loop gang
-  do  j=lbound(fxmany,3),ubound(fxmany,3)
-!$acc loop worker
-     do ix=lbound(fxmany,2),ubound(fxmany,2)
-!$acc loop vector
-        do iy=lbound(fxmany,1),ubound(fxmany,1)
-           fxmany(iy,ix,j) = 0.0
-           fymany(iy,ix,j) = 0.0
-           gxmany(iy,ix,j) = 0.0
-           gymany(iy,ix,j) = 0.0
-        enddo
-     enddo
-  enddo
-!$acc end parallel
+  call cgyro_nl_fftw_zero4(size(fxmany,1)*size(fxmany,2)*size(fxmany,3), &
+                           fxmany,fymany,gxmany,gymany)
 
-!$acc parallel 
-!$acc loop gang
+!$acc parallel loop independent collapse(3) private(j,ir,p,ix,in,iy,f0,g0)
   do j=1,nsplit
-
-   ! Array mapping
-!$acc loop worker private(p,ix)
      do ir=1,n_radial
-
-        p  = ir-1-nx0/2
-        ix = p
-        if (ix < 0) ix = ix+nx  
-!$acc   loop vector private(iy,f0,g0)
         do in=1,n_toroidal
+           p  = ir-1-nx0/2
+           ix = p
+           if (ix < 0) ix = ix+nx
+
            iy = in-1
            f0 = i_c*f_nl(ir,j,in)
            fxmany(iy,ix,j) = p*f0
@@ -139,7 +156,6 @@ subroutine cgyro_nl_fftw(ij)
         enddo
      enddo
   enddo
-!$acc end parallel
 
      ! --------------------------------------
      ! perform many Fourier Transforms at once
@@ -162,21 +178,16 @@ subroutine cgyro_nl_fftw(ij)
      call timer_lib_in('nl')
   endif
 
-!$acc data copyin(g_nl)  
+!$acc data copy(g_nl)  
 
-!$acc parallel 
-!$acc loop gang
+!$acc parallel loop independent collapse(3) private(j,ir,p,ix,in,iy,f0,g0)
   do j=1,nsplit
-
-   ! Array mapping
-!$acc loop worker private(p,ix)
      do ir=1,n_radial
-
-        p  = ir-1-nx0/2
-        ix = p
-        if (ix < 0) ix = ix+nx
-!$acc   loop vector private(iy,f0,g0)
         do in=1,n_toroidal
+           p  = ir-1-nx0/2
+           ix = p
+           if (ix < 0) ix = ix+nx
+
            iy = in-1
            g0 = i_c*g_nl(ir,j,in)
            gxmany(iy,ix,j) = p*g0
@@ -184,11 +195,7 @@ subroutine cgyro_nl_fftw(ij)
         enddo
      enddo
   enddo
-!$acc end parallel
 
-!$acc end data
-
-!$acc wait
 !$acc  host_data &
 !$acc& use_device(gxmany,gymany) &
 !$acc& use_device(vxmany,vymany)
@@ -199,26 +206,13 @@ subroutine cgyro_nl_fftw(ij)
 !$acc wait
 !$acc end host_data
 
-!$acc wait
-
   ! Poisson bracket in real space
   ! uv = (ux*vy-uy*vx)/(nx*ny)
 
   inv_nxny = 1.0/(nx*ny)
 
-!$acc  parallel 
-!$acc loop gang
-  do j=1,nsplit
-!$acc loop worker
-     do ix=lbound(uvmany,2),ubound(uvmany,2)
-!$acc loop vector
-        do iy=lbound(uvmany,1),ubound(uvmany,1)
-           uvmany(iy,ix,j) = (uxmany(iy,ix,j)*vymany(iy,ix,j)- &
-                uymany(iy,ix,j)*vxmany(iy,ix,j))*inv_nxny
-        enddo
-     enddo
-  enddo
-!$acc  end parallel
+  call cgyro_nl_fftw_mul(size(uvmany,1)*size(uvmany,2)*size(uvmany,3), &
+                         uvmany,uxmany,vymany,uymany,vxmany,inv_nxny)
 
   ! ------------------
   ! Transform uv to fx
@@ -234,25 +228,24 @@ subroutine cgyro_nl_fftw(ij)
   ! NOTE: The FFT will generate an unwanted n=0,p=-nr/2 component
   ! that will be filtered in the main time-stepping loop
 
-!$acc parallel  
-!$acc loop gang
+!$acc parallel loop independent collapse(3) private(j,ir,in,ix,iy)
   do j=1,nsplit
-!$acc loop worker private(ix)
      do ir=1,n_radial 
-        ix = ir-1-nx0/2
-        if (ix < 0) ix = ix+nx
-!$acc loop vector private(iy)
         do in=1,n_toroidal
+           ix = ir-1-nx0/2
+           if (ix < 0) ix = ix+nx
+
            iy = in-1
            g_nl(ir,j,in) = fxmany(iy,ix,j)
         enddo
      enddo
   enddo
-!$acc end parallel
 
-!$acc wait
+  ! end data g_nl
 !$acc end data
-!$acc wait
+
+  ! end data f_nl
+!$acc end data
 
   call timer_lib_out('nl')
 
