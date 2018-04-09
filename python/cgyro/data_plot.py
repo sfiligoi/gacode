@@ -525,7 +525,7 @@ class cgyrodata_plot(data.cgyrodata):
          fig = plt.figure(figsize=(self.lx,self.ly))
 
       self.getxflux()
-
+      
       ns = self.n_species
       nl = self.n_global+1
       t  = self.t
@@ -555,6 +555,7 @@ class cgyrodata_plot(data.cgyrodata):
          print 'ERROR (plot_xflux.py) Invalid moment.'
          sys.exit()
 
+
       # Find ne
       for ispec in range(ns):
          if self.z[ispec] < 0.0:
@@ -564,8 +565,8 @@ class cgyrodata_plot(data.cgyrodata):
       xi = np.zeros((ns,nl))
       for ispec in range(ns):
          for l in range(nl):
-            xr[ispec,l] = average(z[0,l,ispec,:],self.t,w)
-            xi[ispec,l] = average(z[1,l,ispec,:],self.t,w)
+            xr[ispec,l] = average(z[0,l,ispec,:],t,w)
+            xi[ispec,l] = average(z[1,l,ispec,:],t,w)
 
       # Rescale with density ratio
       if nscale == 1:
@@ -591,6 +592,10 @@ class cgyrodata_plot(data.cgyrodata):
     
       t = -np.pi+2*np.pi*np.arange(0.0,1.0,0.001)
 
+      # Call routine for domain average
+      e = 0.2
+      self.xfluxave(w,moment,e=e)
+
       for ispec in range(ns):
 
          u = specmap(self.mass[ispec],self.z[ispec])
@@ -602,27 +607,33 @@ class cgyrodata_plot(data.cgyrodata):
             g = g+2*(np.cos(l*t)*xr[ispec,l]-np.sin(l*t)*xi[ispec,l])
          ax.plot(t/(2*np.pi),g,color=color[ispec])
 
+         #---------------------------------
          # Flux partial average over [-e,e]
-         e = 0.2
-         g0 = xr[ispec,0]
-         for l in range(1,nl):
-            z = 2*np.pi*l*e
-            g0 = g0+2*np.sin(z)*xr[ispec,l]/z
-         ax.plot([-e,e],[g0,g0],'o-',color=color[ispec],alpha=0.2,linewidth=3)
-         if moment == 'v':
-            print 'Partial-domain average '+u+' : '+str(g0)
-
+         g0 = self.lky_flux_ave[ispec,0]
          label = r'$'+mtag+'_'+u+'/'+mtag+'_\mathrm{GB}: '+str(round(g0,3))+'$'
+         ax.plot([-e,e],[g0,g0],'o-',color=color[ispec],alpha=0.2,linewidth=3,label=label)
+         print 'INFO: (plot_xflux) Partial-domain average '+u+' : '+str(g0)
+         #---------------------------------
 
+         #---------------------------------
+         # Flux partial average over "negative" interval
+         g1 = self.lky_flux_ave[ispec,1]
+         ax.plot([0.5-e,0.5],[g1,g1],'o--',color=color[ispec],alpha=0.2,linewidth=3)
+         ax.plot([-0.5,-0.5+e],[g1,g1],'o--',color=color[ispec],alpha=0.2,linewidth=3)
+         print 'INFO: (plot_xflux) Negative-domain average '+u+' : '+str(g1)
+         #---------------------------------
+
+         #---------------------------------
          # Flux spectral average
          g0 = xr[ispec,0]+2*np.pi/4*xr[ispec,1]
-         if moment == 'v':
-            print 'Alternative average '+u+' : '+str(g0)
-         #ax.plot([-0.25,0.25],[g0,g0],'o-',color='red')
+         print 'INFO: (plot_xflux)    Alternative average '+u+' : '+str(g0)
+         #---------------------------------
 
+         #---------------------------------
          # Flux domain average
          g0 = xr[ispec,0]
-         ax.plot([-0.5,0.5],[g0,g0],label=label,color=color[ispec],alpha=0.5)
+         ax.plot([-0.5,0.5],[g0,g0],color=color[ispec],alpha=0.5)
+         #---------------------------------
 
          if ymax != 'auto':
             ax.set_ylim([float(ymin),float(ymax)])

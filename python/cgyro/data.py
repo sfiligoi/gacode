@@ -307,6 +307,50 @@ class cgyrodata:
          print "INFO: (data.py) Read data in "+fmt+".cgyro.lky_flux_v. "+t      
       #-----------------------------------------------------------------
 
+   def xfluxave(self,w,moment,e=0.2):
+
+      """
+      Do complicated spatial averages for xflux
+      RESULT: self.lky_flux_ave
+      """
+
+      import numpy as np
+      from gacodefuncs import *
+
+
+      if moment == 'n':
+         z = np.sum(self.lky_flux_n,axis=3)
+      elif moment == 'e':
+         z = np.sum(self.lky_flux_e,axis=3)
+      elif moment == 'v':
+         z = np.sum(self.lky_flux_v,axis=3)
+      else:
+         print 'ERROR (xfluxave) Invalid moment.'
+         sys.exit()
+
+      ns = self.n_species
+      nl = self.n_global+1
+
+      xr = np.zeros((ns,nl))
+      xi = np.zeros((ns,nl))
+      self.lky_flux_ave = np.zeros((ns,2))
+      for ispec in range(ns):
+         for l in range(nl):
+            xr[ispec,l] = average(z[0,l,ispec,:],self.t,w)
+            xi[ispec,l] = average(z[1,l,ispec,:],self.t,w)
+
+         # Flux partial average over [-e,e]
+         g0 = xr[ispec,0]
+         g1 = xr[ispec,0]
+         for l in range(1,nl):
+            z = 2*np.pi*l*e
+            g0 = g0+2*np.sin(z)*xr[ispec,l]/z
+            g1 = g1+2*np.sin(z)*xr[ispec,l]/z*(-1)**l
+
+         self.lky_flux_ave[ispec,0] = g0
+         self.lky_flux_ave[ispec,1] = g1
+     
+      
    def getbigfield(self):
 
       """Larger field files"""
