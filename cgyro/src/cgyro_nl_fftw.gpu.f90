@@ -21,7 +21,7 @@ subroutine cgyro_nl_fftw_comm1
   integer :: ir,it,iv_loc_m,ic_loc_m
   integer :: iexch
 
-  call timer_lib_in('nl_comm')
+  call timer_lib_in('nl_mem')
 
 !$omp parallel do private(it,ir,iexch,ic_loc_m,iv_loc_m)
   do iv_loc_m=1,nv_loc
@@ -37,6 +37,9 @@ subroutine cgyro_nl_fftw_comm1
   do iexch=nv_loc*n_theta+1,nsplit*n_toroidal
      fpack(:,iexch) = (0.0,0.0)
   enddo
+
+  call timer_lib_out('nl_mem')
+  call timer_lib_in('nl_comm')
 
   call parallel_slib_f_nc(fpack,f_nl)
 
@@ -54,7 +57,7 @@ subroutine cgyro_nl_fftw_comm2
   integer :: ir,it,iv_loc_m,ic_loc_m
   integer :: iexch
 
-  call timer_lib_in('nl_comm')
+  call timer_lib_in('nl_mem')
 
 !$omp parallel do private(it,ir,iexch,ic_loc_m,iv_loc_m)
   do iv_loc_m=1,nv_loc
@@ -70,6 +73,9 @@ subroutine cgyro_nl_fftw_comm2
   do iexch=nv_loc*n_theta+1,nsplit*n_toroidal
      gpack(:,iexch) = (0.0,0.0)
   enddo
+
+  call timer_lib_out('nl_mem')
+  call timer_lib_in('nl_comm')
 
   call parallel_slib_f_nc(gpack,g_nl)
 
@@ -139,11 +145,15 @@ subroutine cgyro_nl_fftw(ij)
      call cgyro_nl_fftw_comm2
   endif
 
-  call timer_lib_in('nl')
+  call timer_lib_in('nl_mem')
 !$acc  data pcopyin(f_nl)  &
 !$acc& pcreate(fxmany,fymany,gxmany,gymany) &
 !$acc& pcreate(uxmany,uymany,vxmany,vymany) &
 !$acc& pcreate(uvmany)
+
+  call timer_lib_out('nl_mem')
+
+  call timer_lib_in('nl')
 
   call cgyro_nl_fftw_zero4(size(fxmany,1)*size(fxmany,2)*size(fxmany,3), &
                            fxmany,fymany,gxmany,gymany)
@@ -177,13 +187,18 @@ subroutine cgyro_nl_fftw(ij)
 
 !$acc wait
 !$acc end host_data
+  call timer_lib_out('nl')
+
   if (.not. is_staggered_comm_2) then ! stagger comm2, to load ballance network traffic
-     call timer_lib_out('nl')
      call cgyro_nl_fftw_comm2
-     call timer_lib_in('nl')
   endif
 
+  call timer_lib_in('nl_mem')
 !$acc data copy(g_nl)  
+
+  call timer_lib_out('nl_mem')
+  call timer_lib_in('nl')
+
 
 !$acc parallel loop independent collapse(3) private(j,ir,p,ix,in,iy,f0,g0)
   do j=1,nsplit
@@ -230,6 +245,9 @@ subroutine cgyro_nl_fftw(ij)
 !$acc end host_data
 !$acc wait
 
+  call timer_lib_out('nl')
+  call timer_lib_in('nl_mem')
+
   ! NOTE: The FFT will generate an unwanted n=0,p=-nr/2 component
   ! that will be filtered in the main time-stepping loop
 
@@ -252,10 +270,13 @@ subroutine cgyro_nl_fftw(ij)
   ! end data f_nl
 !$acc end data
 
-  call timer_lib_out('nl')
+  call timer_lib_out('nl_mem')
 
   call timer_lib_in('nl_comm')
   call parallel_slib_r_nc(g_nl,gpack)
+  call timer_lib_out('nl_comm')
+
+  call timer_lib_in('nl_mem')
 
 !$omp parallel do private(it,ir,iexch,ic_loc)
   do iv_loc=1,nv_loc
@@ -268,12 +289,14 @@ subroutine cgyro_nl_fftw(ij)
      enddo
   enddo
 
-  call timer_lib_out('nl_comm')
+  call timer_lib_out('nl_mem')
 
   ! RHS -> -[f,g] = [f,g]_{r,-alpha}
 
+  call timer_lib_in('nl')
 !$omp workshare 
   rhs(:,:,ij) = rhs(:,:,ij)+((q*rho/rmin)*(2*pi/length))*psi(:,:)
 !$omp end workshare
+  call timer_lib_out('nl')
 
 end subroutine cgyro_nl_fftw
