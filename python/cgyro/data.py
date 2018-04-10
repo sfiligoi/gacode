@@ -238,12 +238,10 @@ class cgyrodata:
 
       import numpy as np
 
-      # Convenience definition
-      nt = self.n_time
-
       #-----------------------------------------------------------------
       # Particle and energy fluxes
       #
+      nt = self.n_time
       nd = self.n_species*3*self.n_field*self.n_n*nt
       t,fmt,data = self.extract('.cgyro.ky_flux')
       if fmt != 'null':  
@@ -257,12 +255,10 @@ class cgyrodata:
 
       import numpy as np
 
-      # Convenience definition
-      nt = self.n_time
-
       #-----------------------------------------------------------------
       # Particle and energy fluxes
       #
+      nt = self.n_time
       nd = self.n_radial*self.n_species*self.n_n*nt
       t,fmt,data = self.extract('.cgyro.kxky_flux_e')
       if fmt != 'null':  
@@ -282,12 +278,10 @@ class cgyrodata:
 
       import numpy as np
 
-      # Convenience definition
-      nt = self.n_time
-
       #-----------------------------------------------------------------
       # Particle and energy fluxes
       #
+      nt = self.n_time
       ng = self.n_global+1
       nd = 2*ng*self.n_species*self.n_n*nt
 
@@ -329,23 +323,21 @@ class cgyrodata:
          sys.exit()
 
       ns = self.n_species
-      nl = self.n_global+1
+      ng = self.n_global+1
 
-      xr = np.zeros((ns,nl))
-      xi = np.zeros((ns,nl))
+      xr = np.zeros([ns,ng])
       self.lky_flux_ave = np.zeros((ns,2))
       for ispec in range(ns):
-         for l in range(nl):
+         for l in range(ng):
             xr[ispec,l] = average(z[0,l,ispec,:],self.t,w)
-            xi[ispec,l] = average(z[1,l,ispec,:],self.t,w)
 
          # Flux partial average over [-e,e]
          g0 = xr[ispec,0]
          g1 = xr[ispec,0]
-         for l in range(1,nl):
-            z = 2*np.pi*l*e
-            g0 = g0+2*np.sin(z)*xr[ispec,l]/z
-            g1 = g1+2*np.sin(z)*xr[ispec,l]/z*(-1)**l
+         for l in range(1,ng):
+            u = 2*np.pi*l*e
+            g0 = g0+2*np.sin(u)*xr[ispec,l]/u
+            g1 = g1+2*np.sin(u)*xr[ispec,l]/u*(-1)**l
 
          self.lky_flux_ave[ispec,0] = g0
          self.lky_flux_ave[ispec,1] = g1
@@ -357,12 +349,12 @@ class cgyrodata:
 
       import numpy as np
 
-      # Convenience definition
-      nt = self.n_time
-
       #-----------------------------------------------------------------
       # Read complex fields
       #
+
+      nt = self.n_time
+
       # 1a. kxky_phi
       nd = 2*self.n_radial*self.theta_plot*self.n_n*nt
       t,fmt,data = self.extract('.cgyro.kxky_phi')
