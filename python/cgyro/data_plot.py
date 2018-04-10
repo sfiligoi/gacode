@@ -556,20 +556,15 @@ class cgyrodata_plot(data.cgyrodata):
          sys.exit()
 
 
-      # Find ne
-      for ispec in range(ns):
-         if self.z[ispec] < 0.0:
-            ne = self.dens[ispec]            
-
       # Call routine for domain average
       e = 0.2
-      self.xfluxave(w,moment,e=e)
+      self.xfluxave(w,moment,e=e,nscale=nscale)
 
       # Rescale with density ratio
       if nscale == 1:
-         for ispec in range(ns):
-            self.lky_xr[ispec,:] = self.lky_xr[ispec,:]*ne/self.dens[ispec]
-            self.lky_xi[ispec,:] = self.lky_xi[ispec,:]*ne/self.dens[ispec]
+         mnorm = '^\mathrm{norm}'
+      else:
+         mnorm = ''
 
       # Determine tmin
       imin=iwindow(t,w)
@@ -589,7 +584,6 @@ class cgyrodata_plot(data.cgyrodata):
     
       t = -np.pi+2*np.pi*np.arange(0.0,1.0,0.001)
 
-
       for ispec in range(ns):
 
          u = specmap(self.mass[ispec],self.z[ispec])
@@ -604,7 +598,7 @@ class cgyrodata_plot(data.cgyrodata):
          #---------------------------------
          # Flux partial average over [-e,e]
          g0 = self.lky_flux_ave[ispec,0]
-         label = r'$'+mtag+'_'+u+'/'+mtag+'_\mathrm{GB}: '+str(round(g0,3))+'$'
+         label = r'$'+mtag+mnorm+'_'+u+'/'+mtag+'_\mathrm{GB}: '+str(round(g0,3))+'$'
          ax.plot([-e,e],[g0,g0],'o-',color=color[ispec],alpha=0.2,linewidth=3,label=label)
          print 'INFO: (plot_xflux) Partial-domain average '+u+' : '+str(g0)
          #---------------------------------

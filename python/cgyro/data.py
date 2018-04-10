@@ -301,7 +301,7 @@ class cgyrodata:
          print "INFO: (data.py) Read data in "+fmt+".cgyro.lky_flux_v. "+t      
       #-----------------------------------------------------------------
 
-   def xfluxave(self,w,moment,e=0.2):
+   def xfluxave(self,w,moment,e=0.2,nscale=0):
 
       """
       Do complicated spatial averages for xflux
@@ -311,6 +311,18 @@ class cgyrodata:
       import numpy as np
       from gacodefuncs import *
 
+      ns = self.n_species
+      ng = self.n_global+1
+
+      sc = np.zeros(ns)
+      if nscale == 1:
+         # Find ne
+         for ispec in range(ns):
+            if self.z[ispec] < 0.0:
+               ne = self.dens[ispec]            
+         sc[:] = ne/self.dens[:]
+      else:
+         sc[:] = 1.0
 
       if moment == 'n':
          z = np.sum(self.lky_flux_n,axis=3)
@@ -322,18 +334,18 @@ class cgyrodata:
          print 'ERROR (xfluxave) Invalid moment.'
          sys.exit()
 
-      ns = self.n_species
-      ng = self.n_global+1
 
-      # Useful arrays
+      #--------------------------------------------
+      # Useful arrays required outside this routine
       self.lky_xr = np.zeros((ns,ng))
       self.lky_xi = np.zeros((ns,ng))
       self.lky_flux_ave = np.zeros((ns,2))
+      #--------------------------------------------
 
       for ispec in range(ns):
          for l in range(ng):
-            self.lky_xr[ispec,l] = average(z[0,l,ispec,:],self.t,w)
-            self.lky_xi[ispec,l] = average(z[1,l,ispec,:],self.t,w)
+            self.lky_xr[ispec,l] = average(z[0,l,ispec,:],self.t,w)*sc[ispec]
+            self.lky_xi[ispec,l] = average(z[1,l,ispec,:],self.t,w)*sc[ispec]
 
          # Flux partial average over [-e,e]
          g0 = self.lky_xr[ispec,0]
