@@ -561,18 +561,15 @@ class cgyrodata_plot(data.cgyrodata):
          if self.z[ispec] < 0.0:
             ne = self.dens[ispec]            
 
-      xr = np.zeros((ns,nl))
-      xi = np.zeros((ns,nl))
-      for ispec in range(ns):
-         for l in range(nl):
-            xr[ispec,l] = average(z[0,l,ispec,:],t,w)
-            xi[ispec,l] = average(z[1,l,ispec,:],t,w)
+      # Call routine for domain average
+      e = 0.2
+      self.xfluxave(w,moment,e=e)
 
       # Rescale with density ratio
       if nscale == 1:
          for ispec in range(ns):
-            xr[ispec,:] = xr[ispec,:]*ne/self.dens[ispec]
-            xi[ispec,:] = xi[ispec,:]*ne/self.dens[ispec]
+            self.lky_xr[ispec,:] = self.lky_xr[ispec,:]*ne/self.dens[ispec]
+            self.lky_xi[ispec,:] = self.lky_xi[ispec,:]*ne/self.dens[ispec]
 
       # Determine tmin
       imin=iwindow(t,w)
@@ -592,9 +589,6 @@ class cgyrodata_plot(data.cgyrodata):
     
       t = -np.pi+2*np.pi*np.arange(0.0,1.0,0.001)
 
-      # Call routine for domain average
-      e = 0.2
-      self.xfluxave(w,moment,e=e)
 
       for ispec in range(ns):
 
@@ -602,9 +596,9 @@ class cgyrodata_plot(data.cgyrodata):
 
          # Flux curve
          g = np.zeros(len(t))
-         g = xr[ispec,0] 
+         g = self.lky_xr[ispec,0] 
          for l in range(1,nl):
-            g = g+2*(np.cos(l*t)*xr[ispec,l]-np.sin(l*t)*xi[ispec,l])
+            g = g+2*(np.cos(l*t)*self.lky_xr[ispec,l]-np.sin(l*t)*self.lky_xi[ispec,l])
          ax.plot(t/(2*np.pi),g,color=color[ispec])
 
          #---------------------------------
@@ -625,13 +619,13 @@ class cgyrodata_plot(data.cgyrodata):
 
          #---------------------------------
          # Flux spectral average
-         g0 = xr[ispec,0]+2*np.pi/4*xr[ispec,1]
+         g0 = self.lky_xr[ispec,0]+2*np.pi/4*self.lky_xr[ispec,1]
          print 'INFO: (plot_xflux)    Alternative average '+u+' : '+str(g0)
          #---------------------------------
 
          #---------------------------------
          # Flux domain average
-         g0 = xr[ispec,0]
+         g0 = self.lky_xr[ispec,0]
          ax.plot([-0.5,0.5],[g0,g0],color=color[ispec],alpha=0.5)
          #---------------------------------
 

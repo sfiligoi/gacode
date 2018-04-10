@@ -325,23 +325,26 @@ class cgyrodata:
       ns = self.n_species
       ng = self.n_global+1
 
-      xr = np.zeros([ns,ng])
+      # Useful arrays
+      self.lky_xr = np.zeros((ns,ng))
+      self.lky_xi = np.zeros((ns,ng))
       self.lky_flux_ave = np.zeros((ns,2))
+
       for ispec in range(ns):
          for l in range(ng):
-            xr[ispec,l] = average(z[0,l,ispec,:],self.t,w)
+            self.lky_xr[ispec,l] = average(z[0,l,ispec,:],self.t,w)
+            self.lky_xi[ispec,l] = average(z[1,l,ispec,:],self.t,w)
 
          # Flux partial average over [-e,e]
-         g0 = xr[ispec,0]
-         g1 = xr[ispec,0]
+         g0 = self.lky_xr[ispec,0]
+         g1 = g0
          for l in range(1,ng):
             u = 2*np.pi*l*e
-            g0 = g0+2*np.sin(u)*xr[ispec,l]/u
-            g1 = g1+2*np.sin(u)*xr[ispec,l]/u*(-1)**l
+            g0 = g0+2*np.sin(u)*self.lky_xr[ispec,l]/u
+            g1 = g1+2*np.sin(u)*self.lky_xr[ispec,l]/u*(-1)**l
 
          self.lky_flux_ave[ispec,0] = g0
          self.lky_flux_ave[ispec,1] = g1
-     
       
    def getbigfield(self):
 
