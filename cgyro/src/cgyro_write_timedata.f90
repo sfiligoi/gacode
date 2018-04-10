@@ -651,6 +651,7 @@ subroutine write_timers(datafile)
      call timer_lib_init('field_com')
      call timer_lib_init('shear')
      call timer_lib_init('coll')
+     call timer_lib_init('coll_mem')
      call timer_lib_init('coll_comm')
      call timer_lib_init('io')
      call timer_lib_init('TOTAL')
@@ -675,7 +676,7 @@ subroutine write_timers(datafile)
              timer_lib_time('coll_init'),&
              timer_lib_time('io_init')
         write(io,'(a)') 'Run time'
-        write(io,'(1x,13(a10,1x))') timer_cpu_tag(5:17)
+        write(io,'(1x,14(a10,1x))') timer_cpu_tag(5:18)
         close(io)
      endif
 
@@ -688,7 +689,7 @@ subroutine write_timers(datafile)
 
      if (i_proc == 0) then
         open(unit=io,file=datafile,status='old',position='append')
-        write(io,'(13(1pe10.3,1x))') &
+        write(io,'(14(1pe10.3,1x))') &
              timer_lib_time('str'),& 
              timer_lib_time('str_mem'),&
              timer_lib_time('str_comm'),& 
@@ -699,6 +700,7 @@ subroutine write_timers(datafile)
              timer_lib_time('field_com'),&
              timer_lib_time('shear'),&
              timer_lib_time('coll'),&
+             timer_lib_time('coll_mem'),&
              timer_lib_time('coll_comm'),&
              timer_lib_time('io'),& 
              timer_lib_time('TOTAL') 
