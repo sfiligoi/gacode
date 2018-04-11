@@ -83,14 +83,15 @@ subroutine cgyro_rhs(ij)
   enddo
 
   call timer_lib_out('str')
-  call timer_lib_in('str_mem')
-
-!$acc end data	  
-
-  call timer_lib_out('str_mem')
 
   ! Wavenumber advection shear terms
   call cgyro_advect_wavenumber(ij)
+
+  call timer_lib_in('str_mem')
+
+!$acc end data    
+
+  call timer_lib_out('str_mem')
 
   if ( (nonlinear_flag == 1) .and. (nonlinear_method /= 1) .and. (.not. is_staggered_comm_2)) then 
      ! stagger comm1, to load ballance network traffic
