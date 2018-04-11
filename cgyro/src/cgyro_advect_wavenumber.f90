@@ -13,36 +13,69 @@ subroutine cgyro_advect_wavenumber(ij)
   implicit none
 
   integer, intent(in) :: ij
-  integer :: ir,l,ll,j
+  integer :: ir,l,ll,j,icc,in
   integer :: irp,irm
   complex, dimension(:,:),allocatable :: h0
+  complex, dimension(:,:,:),allocatable :: he
   complex, dimension(nv_loc) :: dh
   real :: scale
 
 
   call timer_lib_in('shear')
   allocate(h0(nv_loc,1-2*n_wave:n_radial+2*n_wave))
+  allocate(he(n_theta,nv_loc,1-2*n_wave:n_radial+2*n_wave))
 
   ! Wavenumber advection ExB shear
 
   if (shear_method == 2) then
-!$omp parallel do private(j,ir,h0,dh,l,ll,ic)
-     do j=1,n_theta
-        ! Zero wavenumbers 
-        h0 = 0.0
-        do ir=1,n_radial
-           h0(:,ir) = omega_eb*h_x(ic_c(ir,j),:)
+    !ic_c(ir,j) = j + (ir-1)*n_theta
+
+!$omp parallel 
+
+!$omp do private(j,ir,in,icc)
+    do ir=1,n_radial
+      !icc =ic_c(ir,1)-1
+      icc = (ir-1)*n_theta
+      do in=1,nv_loc
+        do j=1,n_theta
+           he(j,in,ir) = omega_eb*h_x(icc+j,in)
         enddo
-        do ir=1,n_radial
-           dh(:) = 0.0
+      enddo
+    enddo
+!$omp end do nowait
+
+   ! Zero wavenumbers outside n_radial
+!$omp do private(l,ll)
+    do l=n_wave,1,-1
+      ll = 1-2*l
+      he(:,:,ll:ll+1) = 0.0
+    enddo
+!$omp end do nowait
+
+!$omp do private(l,ll)
+    do l=1,n_wave
+      ll = n_radial+2*l
+      he(:,:,ll-1:ll) = 0.0
+    enddo
+!$omp end do
+  ! here is an implicit barrier
+
+!$omp do private(j,ir,in,icc,ll,l)
+     do ir=1,n_radial
+        !icc =ic_c(ir,1)-1
+        icc = (ir-1)*n_theta
+        do in=1,nv_loc
            do l=1,n_wave
               ll = 2*l-1
-              dh(:) = dh(:)+c_wave(l)*(h0(:,ir+ll)-h0(:,ir-ll))
+              do j=1,n_theta
+                 rhs(icc+j,in,ij) = rhs(icc+j,in,ij)+c_wave(l)*(he(j,in,ir+ll)-he(j,in,ir-ll))
+              enddo
            enddo
-           ic = ic_c(ir,j)
-           rhs(ic,:,ij) = rhs(ic,:,ij)+dh(:)
         enddo
      enddo
+!$omp end do
+
+!$omp end parallel 
   endif
 
   ! Wavenumber advection profile shear
@@ -98,6 +131,7 @@ subroutine cgyro_advect_wavenumber(ij)
      endif
   endif
 
+  deallocate(he)
   deallocate(h0)
   call timer_lib_out('shear')
 
