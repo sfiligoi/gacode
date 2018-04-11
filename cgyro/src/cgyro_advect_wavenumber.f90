@@ -81,24 +81,54 @@ subroutine cgyro_advect_wavenumber(ij)
   ! Wavenumber advection profile shear
 
   if (profile_shear_flag == 1) then
-!$omp parallel do private(j,ir,iv_loc,h0,dh,l,ll,ic)
-     do j=1,n_theta
-        h0 = 0.0
-        do ir=1,n_radial
-           do iv_loc=1,nv_loc
-              h0(iv_loc,ir) = sum(omega_ss(:,ic_c(ir,j),iv_loc)*field(:,ic_c(ir,j)))
-           enddo
+    !ic_c(ir,j) = j + (ir-1)*n_theta
+
+!$omp parallel 
+
+!$omp do private(j,ir,in,icc)
+    do ir=1,n_radial
+      !icc =ic_c(ir,1)-1
+      icc = (ir-1)*n_theta
+      do in=1,nv_loc
+        do j=1,n_theta
+           he(j,in,ir) = sum(omega_ss(:,icc+j,in)*field(:,icc+j))
         enddo
-        do ir=1,n_radial
-           dh(:) = 0.0
+      enddo
+    enddo
+!$omp end do nowait
+
+   ! Zero wavenumbers outside n_radial
+!$omp do private(l,ll)
+    do l=n_wave,1,-1
+      ll = 1-2*l
+      he(:,:,ll:ll+1) = 0.0
+    enddo
+!$omp end do nowait
+
+!$omp do private(l,ll)
+    do l=1,n_wave
+      ll = n_radial+2*l
+      he(:,:,ll-1:ll) = 0.0
+    enddo
+!$omp end do
+  ! here is an implicit barrier
+
+!$omp do private(j,ir,in,icc,ll,l)
+     do ir=1,n_radial
+        !icc =ic_c(ir,1)-1
+        icc = (ir-1)*n_theta
+        do in=1,nv_loc
            do l=1,n_wave
               ll = 2*l-1
-              dh(:) = dh(:)+c_wave(l)*(h0(:,ir+ll)-h0(:,ir-ll))
+              do j=1,n_theta
+                 rhs(icc+j,in,ij) = rhs(icc+j,in,ij)+c_wave(l)*(he(j,in,ir+ll)-he(j,in,ir-ll))
+              enddo
            enddo
-           ic = ic_c(ir,j)
-           rhs(ic,:,ij) = rhs(ic,:,ij)+dh(:)
         enddo
      enddo
+!$omp end do
+
+!$omp end parallel 
   endif
 
   ! Zonal damping (to reduce box-size correlation)
