@@ -14,15 +14,13 @@ subroutine cgyro_advect_wavenumber(ij)
 
   integer, intent(in) :: ij
   integer :: ir,l,ll,j,icc,in
-  integer :: irp,irm
-  complex, dimension(:,:),allocatable :: h0
+  integer :: irp,irm,irpc,irmc
   complex, dimension(:,:,:),allocatable :: he
-  complex, dimension(nv_loc) :: dh
+  complex :: dh
   real :: scale
 
 
   call timer_lib_in('shear')
-  allocate(h0(nv_loc,1-2*n_wave:n_radial+2*n_wave))
   allocate(he(n_theta,nv_loc,1-2*n_wave:n_radial+2*n_wave))
 
   ! Wavenumber advection ExB shear
@@ -135,34 +133,29 @@ subroutine cgyro_advect_wavenumber(ij)
 
   if (profile_shear_flag == 1 .or. shear_method == 2) then
      if (n == 0) then
-        irp = +1+1+n_radial/2
-        irm = -1+1+n_radial/2
         scale = nu_global*abs(gamma_e)/2.0
-!$omp parallel do private(j,h0,dh,ic)
-        do j=1,n_theta
 
-           ! p = +1
-           h0(:,irp) = h_x(ic_c(irp,j),:)
+        irm = -1+1+n_radial/2
+        irp = irm+2
+        !irmc = ic_c(irm,j)-1
+        !irpc = ic_c(irp,j)-1
+        irmc = (irm-1)*n_theta
+        irpc = irmc + 2*n_theta
 
-           ! p = -1
-           h0(:,irm) = h_x(ic_c(irm,j),:)
-
-           ! p = +1
-           dh(:) = -scale*(h0(:,irp)-h0(:,irm))
-           ic = ic_c(irp,j)
-           rhs(ic,:,ij) = rhs(ic,:,ij)+dh(:)
-
-           ! p = -1
-           dh(:) = -scale*(h0(:,irm)-h0(:,irp))
-           ic = ic_c(irm,j)
-           rhs(ic,:,ij) = rhs(ic,:,ij)+dh(:)
-
+!$omp parallel do private(in,j,dh)
+        do in=1,nv_loc
+           do j=1,n_theta
+             dh = scale*(h_x(irpc+j,in)-h_x(irmc+j,in))
+             ! p = +1
+             rhs(irpc+j,in,ij) = rhs(irpc+j,in,ij)-dh
+             ! p = -1
+             rhs(irmc+j,in,ij) = rhs(irmc+j,in,ij)+dh
+            enddo
         enddo
      endif
   endif
 
   deallocate(he)
-  deallocate(h0)
   call timer_lib_out('shear')
 
 end subroutine cgyro_advect_wavenumber
