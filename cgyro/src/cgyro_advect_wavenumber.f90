@@ -23,7 +23,8 @@ subroutine cgyro_advect_wavenumber(ij)
      call timer_lib_in('shear')
      allocate(he(n_theta,1-2*n_wave:n_radial+2*n_wave))
 
-!$omp parallel do private(j,ir,in,icc,l,ll,he)
+!$omp parallel do private(j,ir,in,icc,l,ll,he) &
+!$omp&            private(scale,irm,irp,irmc,irpc,dh)
      do in=1,nv_loc
        he(:,1-2*n_wave:0) =0.0
        he(:,n_radial+1:n_radial+2*n_wave) =0.0
