@@ -92,8 +92,15 @@ subroutine prgen_map_plasmastate
 
   enddo
   !
-  pow_e_aux(:) = pow_e_ohm+pow_e_nb+pow_e_rf
-  pow_i_aux(:) =          +pow_i_nb+pow_i_rf
+  if (true_aux_flag == 1) then
+     pow_e_aux(:) = pow_e_ohm+pow_e_nb+pow_e_rf
+     pow_i_aux(:) =          +pow_i_nb+pow_i_rf
+     print '(a)','INFO: (prgen) Setting aux. power as ohmic+NB+RF.'
+  else
+     pow_e_aux(:) = pow_e-(pow_e_fus-pow_ei-pow_e_sync-pow_e_brem-pow_e_line)
+     pow_i_aux(:) = pow_i-(pow_i_fus+pow_ei)
+     print '(a)','INFO: (prgen) Setting aux. power as total-fus-rad.'
+  endif
   !
   pow_e_err = abs(1.0-(pow_e_fus(nx)+pow_e_aux(nx)-pow_ei(nx)- &
        pow_e_sync(nx)-pow_e_brem(nx)-pow_e_line(nx))/pow_e(nx))
@@ -154,7 +161,7 @@ subroutine prgen_map_plasmastate
      f3_fast(:) = f3_fast(:)+plst_ns(:,i)*plst_m_all(i)*plst_q_all(i)/1.6022e-19
      f4_fast(:) = f4_fast(:)+plst_ns(:,i)*plst_ts(:,i)*plst_q_all(i)/1.6022e-19
   enddo
-  
+
   ! Lump main ions
   if (n_lump > 1) then
 
@@ -276,7 +283,7 @@ subroutine prgen_map_plasmastate
 
   EXPRO_ni = 0.0
   EXPRO_ti = 0.0
-  
+
   ! ni,ti,vphi
   do i=1,plst_dp1_nspec_all-1
      ip = reorder_vec(i)
