@@ -91,7 +91,19 @@ subroutine prgen_map_plasmastate
      flow_beam(i) = flow_beam(i-1)+plst_sn_trans(i-1)/0.624e22
 
   enddo
-  !
+
+  ! Check radiated powers
+  if (minval(pow_e_sync) < 0.0) then
+     print '(a)','WARNING: (prgen) Found negative sync radiation.'
+  endif
+  if (minval(pow_e_brem) < 0.0) then
+     print '(a)','WARNING: (prgen) Found negative brem radiation.'
+  endif
+  if (minval(pow_e_line) < 0.0) then
+     print '(a)','WARNING: (prgen) Found negative line radiation.'
+  endif
+
+  ! Manage auxiliary powers
   if (true_aux_flag == 1) then
      pow_e_aux(:) = pow_e_ohm+pow_e_nb+pow_e_rf
      pow_i_aux(:) =          +pow_i_nb+pow_i_rf
