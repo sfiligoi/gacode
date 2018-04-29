@@ -378,6 +378,7 @@ Z2=6.0
 Z3=2.0
 Z4=1.0
 Z5=1.0
+HASGEO=0
 
 # DUMP MODE variables
 DUMP_FLAG=0
@@ -627,6 +628,10 @@ then
      echo "ERROR: (profiles_gen) You need to build the locpargen executable."
      exit 1
   fi
+  if [ -f input.profiles.geo ]
+  then
+      HASGEO=1
+  fi
   python $PRGEN_BIN/profile_parse.py $FILE
   cp $FILE.gen temp
   mv temp input.profiles.gen
@@ -638,6 +643,7 @@ then
   echo $Z3 >> input.locpargen
   echo $Z4 >> input.locpargen
   echo $Z5 >> input.locpargen
+  echo $HASGEO >> input.locpargen
   $LOCPARGEN
   rm input.locpargen
   if [ $PLOT_FLAG -eq 1 ]
