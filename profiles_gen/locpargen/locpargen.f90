@@ -214,6 +214,14 @@ program locpargen
   call cub_spline(x_vec,EXPRO_gamma_e*a/EXPRO_cs,EXPRO_n_exp,x,y,1)
   print 10,'GAMMA_E=',y(1)
 
+  ! GAMMA_P
+  call cub_spline(x_vec,EXPRO_gamma_p*a/EXPRO_cs,EXPRO_n_exp,x,y,1)
+  print 10,'GAMMA_P=',y(1)
+
+  ! GAMMA_E
+  call cub_spline(x_vec,EXPRO_mach,EXPRO_n_exp,x,y,1)
+  print 10,'MACH=',y(1)
+
   ! RHO_STAR
   call cub_spline(x_vec,EXPRO_rhos/a,EXPRO_n_exp,x,y,1)
   print 10,'RHO_STAR=',y(1)
