@@ -559,13 +559,14 @@ contains
 
   end subroutine geo_do
 
-  subroutine geo_interp(n,theta_in)
+  subroutine geo_interp(n,theta_in,new_flag)
 
     !-------------------------------------
     implicit none
     !
     integer, intent(in) :: n
     double precision, intent(in), dimension(n) :: theta_in
+    logical, intent(in) :: new_flag
     double precision :: theta_0
     !
     integer :: n_theta
@@ -580,17 +581,16 @@ contains
     double precision, parameter :: pi=3.141592653589793
     double precision, parameter :: tol=1e-6
     !-------------------------------------
+    
+    if (allocated(geo_b)) call geo_salloc(n,0)
 
-    ! Compute coefficients on equal mesh
-    if (allocated(geo_b)) then
-       call geo_salloc(n,0)
-       call geo_alloc(0)
+    if (new_flag) then
+       if (allocated(geov_b)) call geo_alloc(0)
+       call geo_alloc(1)
+       call geo_do
     endif
-
-    call geo_alloc(1)
-    call geo_do
+    
     call geo_salloc(n,1)
-    !print *,geo_ntheta_in,n
     
     do itheta=1,n
 

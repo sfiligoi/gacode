@@ -6,7 +6,7 @@ program test
 
   theta(1) = 0.1
   
-  call geo_interp(1,theta)
+  call geo_interp(1,theta,.true.)
   
   print *,geo_b
   

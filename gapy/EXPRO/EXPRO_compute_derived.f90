@@ -213,13 +213,13 @@ subroutine EXPRO_compute_derived
      if (EXPRO_ctrl_numeq_flag == 0) then
         ! Call GEO with model shape
         GEO_model_in = 0
-        call GEO_interp(1,theta)
+        call GEO_interp(1,theta,.true.)
      else
         ! Call GEO with general (numerical) shape
         GEO_model_in = 1
         GEO_fourier_in(1:4,0:GEO_nfourier_in) = EXPRO_geo(:,:,i)/r_min
         GEO_fourier_in(5:8,0:GEO_nfourier_in) = EXPRO_dgeo(:,:,i)
-        call GEO_interp(1,theta)
+        call GEO_interp(1,theta,.true.)
         if (minval(GEOV_jac_r) <= 0.0) then
            print '(a,i3,a)','WARNING: (EXPRO) Negative GEO Jacobian for i =',i,' in input.profiles'
         endif
