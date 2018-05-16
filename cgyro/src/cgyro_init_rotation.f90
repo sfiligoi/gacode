@@ -241,9 +241,8 @@ subroutine cgyro_init_rotation
      GEO_beta_star_2_in = beta_star(2)
   endif
 
-  ! Set rotation-related geometry terms
-
-  call geo_interp(n_theta,theta)
+  ! Need to recompute interpolation since GEO_beta_star now set
+  call geo_interp(n_theta,theta,.true.)
   
   do it=1,n_theta
  

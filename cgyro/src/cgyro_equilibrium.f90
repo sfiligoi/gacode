@@ -43,9 +43,9 @@ subroutine cgyro_equilibrium
   GEO_beta_star_in = beta_star(0)
   GEO_fourier_in(:,0:GEO_nfourier_in) = geo_yin(:,:)
 
-  ! Get R,dR/dr at theta=0
+  ! Get initial geo solution, then set R,dR/dr at theta=0 
   ttmp(1) = 0.0
-  call geo_interp(1,ttmp)
+  call geo_interp(1,ttmp,.true.)
   bigr_th0   = GEO_bigr(1)
   bigr_r_th0 = GEO_bigr_r(1)
 
@@ -78,7 +78,7 @@ subroutine cgyro_equilibrium
         do it=1,n_theta
            ttmp(it) = 0.5*(y(it)+y(it+1))
         enddo
-        call geo_interp(n_theta,ttmp)
+        call geo_interp(n_theta,ttmp,.false.)
         do it=1,n_theta
            x(it+1) = x(it)+d_theta/GEO_g_theta(it)
         enddo
@@ -125,7 +125,7 @@ subroutine cgyro_equilibrium
      enddo
   enddo
 
-  call geo_interp(n_theta,theta)     
+  call geo_interp(n_theta,theta,.false.)     
 
   do it=1,n_theta
 

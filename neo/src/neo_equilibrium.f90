@@ -49,8 +49,9 @@ module neo_equilibrium
 contains
   
   subroutine EQUIL_alloc(flag)
+
     use neo_globals
-    use geo
+  
     implicit none
     integer, intent (in) :: flag  ! flag=1: allocate; else deallocate
     integer :: it
@@ -161,7 +162,7 @@ contains
        GEO_nfourier_in = geo_ny
        GEO_model_in    = geo_numeq_flag
 
-       call geo_interp(n_theta,theta)
+       call geo_interp(n_theta,theta,.true.)
        
        do it=1,n_theta
           k_par(it) = 1.0 / (q(ir) * rmaj(ir) * GEO_g_theta(it))
@@ -191,7 +192,8 @@ contains
        I_div_psip = GEO_f * q(ir) / r(ir)
 
        ! values at theta=0
-       call geo_interp(1,ttmp)
+       ttmp(1) = 0.0
+       call geo_interp(1,ttmp,.false.)
        bigR_th0        = GEO_bigr(1)
        bigR_th0_rderiv = GEO_bigr_r(1)
        gradr_th0       = GEO_grad_r(1)

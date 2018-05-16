@@ -581,7 +581,7 @@ contains
     double precision, parameter :: pi=3.141592653589793
     double precision, parameter :: tol=1e-6
     !-------------------------------------
-    
+
     if (allocated(geo_b)) call geo_salloc(n,0)
 
     if (new_flag) then
@@ -589,35 +589,35 @@ contains
        call geo_alloc(1)
        call geo_do
     endif
-    
+
     call geo_salloc(n,1)
-    
-    do itheta=1,n
 
-       theta_0 = theta_in(itheta)
+    !----------------------------------------------------------
+    ! If we are only using s-alpha, set functions now and exit
+    !
+    if (GEO_model_in == -1) then
 
-       if (abs(theta_0) > pi+tol) then
-          print *,'ERROR in GEO: theta_0 out of bounds in GEO_interp.'
-       endif
+       ! Theta-independent functions
 
-       !----------------------------------------------------------
-       ! If we are only using s-alpha, set functions now and exit
-       !
-       if (GEO_model_in == -1) then
+       GEO_fluxsurfave_grad_r  = 1.0
+       GEO_fluxsurfave_grad_r2 = 1.0
+       GEO_grad_r0 = 1.0
 
-          ! Theta-independent functions
+       GEO_ffprime   = 0.0
+       GEO_f         = GEO_rmaj_in
 
-          GEO_fluxsurfave_grad_r  = 1.0
-          GEO_fluxsurfave_grad_r2 = 1.0
-          GEO_grad_r0 = 1.0
+       GEO_volume       = 2*pi**2*GEO_rmin_in**2*GEO_rmaj_in
+       GEO_volume_prime = 4*pi**2*GEO_rmin_in*GEO_rmaj_in
 
-          GEO_ffprime   = 0.0
-          GEO_f         = GEO_rmaj_in
+       ! Theta-dependent functions (some are set to zero for now)
 
-          GEO_volume       = 2*pi**2*GEO_rmin_in**2*GEO_rmaj_in
-          GEO_volume_prime = 4*pi**2*GEO_rmin_in*GEO_rmaj_in
+       do itheta=1,n
+          
+          theta_0 = theta_in(itheta)
 
-          ! Theta-dependent functions (some are set to zero for now)
+          if (abs(theta_0) > pi+tol) then
+             print *,'ERROR in GEO: theta_0 out of bounds in GEO_interp.'
+          endif
 
           GEO_b(itheta)     = 1.0/(1.0+GEO_rmin_in/GEO_rmaj_in*cos(theta_0))
           GEO_dbdt(itheta)  = (GEO_rmin_in/GEO_rmaj_in)*sin(theta_0)
@@ -649,20 +649,26 @@ contains
           GEO_bigr_t(itheta) = -GEO_rmin_in*sin(theta_0)
           GEO_theta_nc(itheta) = theta_0
 
-       else
+       enddo
 
-          !----------------------------------------------------------
-          ! General case:
-          !
-          ! To illustrate what's happening, let assume:
-          !  - n_theta = 3 
-          !  - theta_0 = pi+eps
-          !
-          !                *              
-          !  x------x------x
-          ! -pi     0      pi
+    else
 
-          n_theta = size(GEOV_theta)
+       !----------------------------------------------------------
+       ! General case:
+       !
+       ! To illustrate what's happening, let assume:
+       !  - n_theta = 3 
+       !  - theta_0 = pi+eps
+       !
+       !                *              
+       !  x------x------x
+       ! -pi     0      pi
+
+       n_theta = size(GEOV_theta)
+
+       do itheta=1,n
+          
+          theta_0 = theta_in(itheta)
 
           ! n_theta = 3
 
@@ -723,9 +729,10 @@ contains
           GEO_theta_nc(itheta) = GEOV_theta_nc(i1)+(GEOV_theta_nc(i2)-GEOV_theta_nc(i1))*z
           GEO_theta_s(itheta)  = GEOV_theta_s(i1)+(GEOV_theta_s(i2)-GEOV_theta_s(i1))*z
           GEO_chi2(itheta)     = GEOV_chi2(i1)+(GEOV_chi2(i2)-GEOV_chi2(i1))*z
-       endif
 
-    enddo
+       enddo
+
+    endif
 
   end subroutine geo_interp
 

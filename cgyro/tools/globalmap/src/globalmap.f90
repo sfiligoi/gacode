@@ -81,7 +81,7 @@ program globalmap
 
      print '(3(1pe12.5,1x))',ri,GEO_q_in,GEO_rmaj_in
 
-     call geo_interp(n_theta,theta)
+     call geo_interp(n_theta,theta,.true.)
 
      do it=1,n_theta
         write(1,10) GEO_bigr(it)
