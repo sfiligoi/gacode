@@ -584,13 +584,14 @@ contains
     ! Compute coefficients on equal mesh
     if (allocated(geo_b)) then
        call geo_salloc(n,0)
-    else
-       call geo_alloc(1)
+       call geo_alloc(0)
     endif
 
+    call geo_alloc(1)
     call geo_do
     call geo_salloc(n,1)
-
+    !print *,geo_ntheta_in,n
+    
     do itheta=1,n
 
        theta_0 = theta_in(itheta)
