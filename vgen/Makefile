@@ -9,8 +9,8 @@ export EXTRA_LIBS = \
 	${GACODE_ROOT}/shared/nclass/nclass_lib.a \
 	${GACODE_ROOT}/gapy/EXPRO/EXPRO_lib.a \
 	${GACODE_ROOT}/shared/math/math_lib.a \
-	${GACODE_ROOT}/gapy/GEO/geo_lib.a \
-	${GACODE_ROOT}/shared/UMFPACK/UMFPACK_lib.a 
+	${GACODE_ROOT}/gapy/src/geo_lib.a \
+	${GACODE_ROOT}/shared/UMFPACK/UMFPACK_lib.a
 
 all:
 	cd ${GACODE_ROOT}/neo ; make

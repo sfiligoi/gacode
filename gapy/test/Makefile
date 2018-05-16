@@ -10,11 +10,11 @@ FC += ${FOMP}
 
 .SUFFIXES : .o .f90
 
-geo_lib.a: gapy_geo.o
-	$(ARCH) geo_lib.a gapy_geo.o
+test: test.o
+	$(FC) -o test test.o ../src/geo_lib.a
 
 .f90.o :
 	$(FC) $(FFLAGS) $(FMATH) -c $<
 
 clean:
-	rm -f *.o *.a *.mod
+	rm -f *.o test
