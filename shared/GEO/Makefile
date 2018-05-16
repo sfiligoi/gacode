@@ -11,10 +11,9 @@ LLIB=GEO_lib
 OBJECTS = GEO_interface.o \
           GEO_alloc.o \
           GEO_do.o \
-          GEO_interp.o \
-          GEO_write.o
+          GEO_interp.o
 
-.SUFFIXES : .o .f90 
+.SUFFIXES : .o .f90
 
 lib: $(OBJECTS)
 	$(ARCH) $(LLIB).a $(OBJECTS)

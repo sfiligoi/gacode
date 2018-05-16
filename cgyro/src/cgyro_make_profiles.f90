@@ -6,7 +6,7 @@ subroutine cgyro_make_profiles
 
   implicit none
 
-  integer :: is,ir,ix 
+  integer :: is,ir
   integer :: j
   integer :: num_ele
 

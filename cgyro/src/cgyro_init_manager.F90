@@ -16,7 +16,6 @@ subroutine cgyro_init_manager
   use mpi
   use timer_lib
   use cgyro_globals
-  use GEO_interface
 
 #ifdef _OPENACC
   use cgyro_io
@@ -193,11 +192,6 @@ subroutine cgyro_init_manager
 
   endif
 
-  ! Compute equilibrium quantities (even in test mode)
-  GEO_model_in    = geo_numeq_flag
-  GEO_ntheta_in   = geo_ntheta
-  GEO_nfourier_in = geo_ny
-  call GEO_alloc(1)
   call cgyro_equilibrium
 
   if (test_flag == 0) then

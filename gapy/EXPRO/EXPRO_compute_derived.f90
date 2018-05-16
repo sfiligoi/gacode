@@ -8,8 +8,8 @@
 
 subroutine EXPRO_compute_derived
 
-  use geo
   use EXPRO_interface
+  use geo
 
   implicit none
 
@@ -217,8 +217,6 @@ subroutine EXPRO_compute_derived
      else
         ! Call GEO with general (numerical) shape
         GEO_model_in = 1
-        call geo_set
-        print *,GEO_fourier_in
         GEO_fourier_in(1:4,0:GEO_nfourier_in) = EXPRO_geo(:,:,i)/r_min
         GEO_fourier_in(5:8,0:GEO_nfourier_in) = EXPRO_dgeo(:,:,i)
         call GEO_interp(1,theta)
