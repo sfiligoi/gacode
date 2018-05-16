@@ -199,7 +199,7 @@ then
    echo
    echo "OMFIT mapper control options"
    echo 
-   echo "             -omfit <parameter=val,parameter=val,...>"
+   echo "             -omfit"
    echo "             Toggle OMFIT mapper instead of default GATO mapper."
    echo
    echo "             -omfitres <resolution>"
@@ -985,25 +985,20 @@ then
 fi
 
 # Use OMFIT:
-if [ $EFIT_METHOD -eq 3 ]
-then
-    # OMFIT mapper options
-    # uniform -> points around separatrix
-    # levels -> flux surfaces
-    # resolution -> in mm
+if [ $EFIT_METHOD -eq 3 ] ; then
+   # OMFIT mapper options
+   # uniform -> points around separatrix
+   # levels -> flux surfaces
+   # resolution -> in mm
    cp $GFILE gfile
    case "$OMFIT_RES" in
       low)    RES="resolution=0.003 uniform=500 levels=128" ;;
       medium) RES="resolution=0.002 uniform=750 levels=256" ;;
       high)   RES="resolution=0.001 uniform=1000 levels=512" ;;
    esac
-   echo "INFO: (omfit) Running with parameters $RES"
-   OMFIT_OPT="rhoVSpsi='rho'
-              averages=0
-              namelist=0
-              fluxsurfaces=1
-              maxPSI=0.9999
-              gfiles='$GFILE'"
+   OMFIT_OPT="rhoVSpsi='rho' averages=0 namelist=0 fluxsurfaces=1 maxPSI=0.9999 gfiles='$GFILE'"
+   echo "INFO: (omfit) Running with parameters: $RES"
+   echo "INFO: (omfit) Fixed mapper parameters: $OMFIT_OPT"
    python $OMFIT fluxSurfaceTracer $RES $OMFIT_OPT >& out.omfit.info
    if ls flux_* 1> /dev/null 2>&1
    then
