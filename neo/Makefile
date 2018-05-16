@@ -15,7 +15,6 @@ all:
 	gacode_getversion > .VERSION
 	cd ${GACODE_ROOT}/shared ; make
 	cd ${GACODE_ROOT}/gapy ; make
-	cd ${GACODE_ROOT}/gapy/EXPRO ; make
 	cd src ; make
 	cd ${GACODE_ROOT}/neo/tools/pneo ; make
 

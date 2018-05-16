@@ -24,38 +24,8 @@ module geo
 
   double precision, dimension(8,0:32) :: GEO_fourier_in
 
-  ! Vector-valued functions:
-  !
-  ! Defined over interval theta=(-pi,pi)
-
-  double precision, dimension(:), allocatable :: GEOV_theta
-
-  double precision, dimension(:), allocatable :: GEOV_b 
-  double precision, dimension(:), allocatable :: GEOV_dbdt
-  double precision, dimension(:), allocatable :: GEOV_dbdt2
-  double precision, dimension(:), allocatable :: GEOV_bp
-  double precision, dimension(:), allocatable :: GEOV_bt
-  double precision, dimension(:), allocatable :: GEOV_gsin
-  double precision, dimension(:), allocatable :: GEOV_gcos1
-  double precision, dimension(:), allocatable :: GEOV_gcos2
-  double precision, dimension(:), allocatable :: GEOV_g_theta
-  double precision, dimension(:), allocatable :: GEOV_jac_r
-  double precision, dimension(:), allocatable :: GEOV_grad_r
-  double precision, dimension(:), allocatable :: GEOV_gq
-  double precision, dimension(:), allocatable :: GEOV_captheta
-  double precision, dimension(:), allocatable :: GEOV_nu
-  double precision, dimension(:), allocatable :: GEOV_l_r
-  double precision, dimension(:), allocatable :: GEOV_l_t
-  double precision, dimension(:), allocatable :: GEOV_nsin
-  double precision, dimension(:), allocatable :: GEOV_usin
-  double precision, dimension(:), allocatable :: GEOV_ucos
-  double precision, dimension(:), allocatable :: GEOV_bigr
-  double precision, dimension(:), allocatable :: GEOV_bigr_r
-  double precision, dimension(:), allocatable :: GEOV_bigr_t
-  double precision, dimension(:), allocatable :: GEOV_theta_nc
-  double precision, dimension(:), allocatable :: GEOV_theta_s
-  double precision, dimension(:), allocatable :: GEOV_chi2
-
+  ! Values interpolated at input vector locations
+  
   double precision, dimension(:), allocatable :: GEO_b 
   double precision, dimension(:), allocatable :: GEO_dbdt
   double precision, dimension(:), allocatable :: GEO_dbdt2
@@ -93,8 +63,219 @@ module geo
   double precision :: GEO_thetascale
   double precision :: GEO_bl
 
+  ! INTERNAL vector-valued functions used for interpolation
+  !
+  ! Defined over interval theta=(-pi,pi)
+
+  double precision, dimension(:), allocatable :: GEOV_theta
+  double precision, dimension(:), allocatable :: GEOV_b 
+  double precision, dimension(:), allocatable :: GEOV_dbdt
+  double precision, dimension(:), allocatable :: GEOV_dbdt2
+  double precision, dimension(:), allocatable :: GEOV_bp
+  double precision, dimension(:), allocatable :: GEOV_bt
+  double precision, dimension(:), allocatable :: GEOV_gsin
+  double precision, dimension(:), allocatable :: GEOV_gcos1
+  double precision, dimension(:), allocatable :: GEOV_gcos2
+  double precision, dimension(:), allocatable :: GEOV_g_theta
+  double precision, dimension(:), allocatable :: GEOV_jac_r
+  double precision, dimension(:), allocatable :: GEOV_grad_r
+  double precision, dimension(:), allocatable :: GEOV_gq
+  double precision, dimension(:), allocatable :: GEOV_captheta
+  double precision, dimension(:), allocatable :: GEOV_nu
+  double precision, dimension(:), allocatable :: GEOV_l_r
+  double precision, dimension(:), allocatable :: GEOV_l_t
+  double precision, dimension(:), allocatable :: GEOV_nsin
+  double precision, dimension(:), allocatable :: GEOV_usin
+  double precision, dimension(:), allocatable :: GEOV_ucos
+  double precision, dimension(:), allocatable :: GEOV_bigr
+  double precision, dimension(:), allocatable :: GEOV_bigr_r
+  double precision, dimension(:), allocatable :: GEOV_bigr_t
+  double precision, dimension(:), allocatable :: GEOV_theta_nc
+  double precision, dimension(:), allocatable :: GEOV_theta_s
+  double precision, dimension(:), allocatable :: GEOV_chi2
+
+
 contains
+
+  ! ** Main callable routine **
   
+  subroutine geo_interp(n,theta_in,new_flag)
+
+    !-------------------------------------
+    implicit none
+    !
+    integer, intent(in) :: n
+    double precision, intent(in), dimension(n) :: theta_in
+    logical, intent(in) :: new_flag
+    double precision :: theta_0
+    !
+    integer :: n_theta
+    integer :: i1
+    integer :: i2
+    integer :: itheta
+    !
+    double precision :: x0
+    double precision :: x1
+    double precision :: dx
+    double precision :: z
+    double precision, parameter :: pi=3.141592653589793
+    double precision, parameter :: tol=1e-6
+    !-------------------------------------
+
+    if (allocated(geo_b)) call geo_salloc(n,0)
+
+    if (new_flag) then
+       if (allocated(geov_b)) call geo_alloc(0)
+       call geo_alloc(1)
+       call geo_do
+    endif
+
+    call geo_salloc(n,1)
+
+    !----------------------------------------------------------
+    ! If we are only using s-alpha, set functions now and exit
+    !
+    if (GEO_model_in == -1) then
+
+       ! Theta-independent functions
+
+       GEO_fluxsurfave_grad_r  = 1.0
+       GEO_fluxsurfave_grad_r2 = 1.0
+       GEO_grad_r0 = 1.0
+
+       GEO_ffprime   = 0.0
+       GEO_f         = GEO_rmaj_in
+
+       GEO_volume       = 2*pi**2*GEO_rmin_in**2*GEO_rmaj_in
+       GEO_volume_prime = 4*pi**2*GEO_rmin_in*GEO_rmaj_in
+
+       ! Theta-dependent functions (some are set to zero for now)
+
+       do itheta=1,n
+          
+          theta_0 = theta_in(itheta)
+
+          if (abs(theta_0) > pi+tol) then
+             print *,'ERROR in GEO: theta_0 out of bounds in GEO_interp.'
+          endif
+
+          GEO_b(itheta)     = 1.0/(1.0+GEO_rmin_in/GEO_rmaj_in*cos(theta_0))
+          GEO_dbdt(itheta)  = (GEO_rmin_in/GEO_rmaj_in)*sin(theta_0)
+          GEO_dbdt2(itheta) = 0.0 ! check with NEO usage
+          GEO_bp(itheta) = GEO_b(itheta)*GEO_rmin_in/GEO_rmaj_in/GEO_q_in
+          GEO_bt(itheta) = GEO_b(itheta)
+
+          ! Added extra B here to make proper connection
+          ! to s-alpha without having to artificially remove 
+          ! the B in the denominator of the drift.
+
+          GEO_gsin(itheta)   = sin(theta_0)*GEO_b(itheta) 
+          GEO_gcos1(itheta)  = cos(theta_0)*GEO_b(itheta)
+          GEO_gcos2(itheta)  = -GEO_rmaj_in*GEO_beta_star_in
+          GEO_usin(itheta)   = sin(theta_0)*GEO_b(itheta)
+          GEO_ucos(itheta)   = cos(theta_0)*GEO_b(itheta)
+
+          GEO_g_theta(itheta) = 1.0
+          GEO_grad_r(itheta)  = 1.0
+          GEO_gq(itheta)      = 1.0
+          GEO_captheta(itheta)  = GEO_s_in*theta_0-&
+               GEO_q_in**2*GEO_rmaj_in*GEO_beta_star_in*sin(theta_0) 
+          GEO_nu(itheta)     = -GEO_q_in*theta_0
+          GEO_l_r(itheta) = 0.0
+          GEO_l_t(itheta) = 0.0
+          GEO_nsin(itheta) = 0.0 ! check with NEO usage
+          GEO_bigr(itheta) = GEO_rmaj_in/GEO_b(itheta)
+          GEO_bigr_r(itheta) = cos(theta_0)
+          GEO_bigr_t(itheta) = -GEO_rmin_in*sin(theta_0)
+          GEO_theta_nc(itheta) = theta_0
+
+       enddo
+
+    else
+
+       !----------------------------------------------------------
+       ! General case:
+       !
+       ! To illustrate what's happening, let assume:
+       !  - n_theta = 3 
+       !  - theta_0 = pi+eps
+       !
+       !                *              
+       !  x------x------x
+       ! -pi     0      pi
+
+       n_theta = size(GEOV_theta)
+
+       do itheta=1,n
+          
+          theta_0 = theta_in(itheta)
+
+          ! n_theta = 3
+
+          x0 = theta_0-GEOV_theta(1)
+
+          ! x0 = 2*pi in this case
+
+          dx = GEOV_theta(2)-GEOV_theta(1)
+
+          ! dx = pi
+
+          i1 = int(x0/dx)+1
+
+          ! i1 = 3
+
+          i2 = i1+1
+
+          ! i2 = 4 (out of bounds)
+
+          x1 = (i1-1)*dx 
+
+          ! x1 = 2*pi
+
+          z  = (x0-x1)/dx
+
+          ! z = 0.0
+
+          !---------------------------------------------
+          ! Catch the error associated with the special 
+          ! case documented above.
+          !
+          if (i2 > n_theta) then  
+             i2 = n_theta
+          endif
+          !---------------------------------------------
+
+          GEO_b(itheta)     = GEOV_b(i1)+(GEOV_b(i2)-GEOV_b(i1))*z
+          GEO_dbdt(itheta)  = GEOV_dbdt(i1)+(GEOV_dbdt(i2)-GEOV_dbdt(i1))*z
+          GEO_dbdt2(itheta) = GEOV_dbdt2(i1)+(GEOV_dbdt2(i2)-GEOV_dbdt2(i1))*z
+          GEO_bp(itheta)    = GEOV_bp(i1)+(GEOV_bp(i2)-GEOV_bp(i1))*z
+          GEO_bt(itheta)    = GEOV_bt(i1)+(GEOV_bt(i2)-GEOV_bt(i1))*z
+          GEO_gsin(itheta)     = GEOV_gsin(i1)+(GEOV_gsin(i2)-GEOV_gsin(i1))*z
+          GEO_gcos1(itheta)    = GEOV_gcos1(i1)+(GEOV_gcos1(i2)-GEOV_gcos1(i1))*z
+          GEO_gcos2(itheta)    = GEOV_gcos2(i1)+(GEOV_gcos2(i2)-GEOV_gcos2(i1))*z
+          GEO_g_theta(itheta)  = GEOV_g_theta(i1)+(GEOV_g_theta(i2)-GEOV_g_theta(i1))*z
+          GEO_grad_r(itheta)   = GEOV_grad_r(i1)+(GEOV_grad_r(i2)-GEOV_grad_r(i1))*z
+          GEO_gq(itheta)       = GEOV_gq(i1)+(GEOV_gq(i2)-GEOV_gq(i1))*z
+          GEO_captheta(itheta) = GEOV_captheta(i1)+(GEOV_captheta(i2)-GEOV_captheta(i1))*z
+          GEO_nu(itheta)       = GEOV_nu(i1)+(GEOV_nu(i2)-GEOV_nu(i1))*z
+          GEO_bigr(itheta)     = GEOV_bigr(i1)+(GEOV_bigr(i2)-GEOV_bigr(i1))*z
+          GEO_l_r(itheta)      = GEOV_l_r(i1)+(GEOV_l_r(i2)-GEOV_l_r(i1))*z
+          GEO_l_t(itheta)      = GEOV_l_t(i1)+(GEOV_l_t(i2)-GEOV_l_t(i1))*z
+          GEO_nsin(itheta)     = GEOV_nsin(i1)+(GEOV_nsin(i2)-GEOV_nsin(i1))*z
+          GEO_usin(itheta)     = GEOV_usin(i1)+(GEOV_usin(i2)-GEOV_usin(i1))*z
+          GEO_ucos(itheta)     = GEOV_ucos(i1)+(GEOV_ucos(i2)-GEOV_ucos(i1))*z
+          GEO_bigr_r(itheta)   = GEOV_bigr_r(i1)+(GEOV_bigr_r(i2)-GEOV_bigr_r(i1))*z
+          GEO_bigr_t(itheta)   = GEOV_bigr_t(i1)+(GEOV_bigr_t(i2)-GEOV_bigr_t(i1))*z
+          GEO_theta_nc(itheta) = GEOV_theta_nc(i1)+(GEOV_theta_nc(i2)-GEOV_theta_nc(i1))*z
+          GEO_theta_s(itheta)  = GEOV_theta_s(i1)+(GEOV_theta_s(i2)-GEOV_theta_s(i1))*z
+          GEO_chi2(itheta)     = GEOV_chi2(i1)+(GEOV_chi2(i2)-GEOV_chi2(i1))*z
+
+       enddo
+
+    endif
+
+  end subroutine geo_interp
+
   subroutine geo_do
 
     !-----------------------------------------------------------
@@ -558,183 +739,6 @@ contains
     !-----------------------------------------------------------
 
   end subroutine geo_do
-
-  subroutine geo_interp(n,theta_in,new_flag)
-
-    !-------------------------------------
-    implicit none
-    !
-    integer, intent(in) :: n
-    double precision, intent(in), dimension(n) :: theta_in
-    logical, intent(in) :: new_flag
-    double precision :: theta_0
-    !
-    integer :: n_theta
-    integer :: i1
-    integer :: i2
-    integer :: itheta
-    !
-    double precision :: x0
-    double precision :: x1
-    double precision :: dx
-    double precision :: z
-    double precision, parameter :: pi=3.141592653589793
-    double precision, parameter :: tol=1e-6
-    !-------------------------------------
-
-    if (allocated(geo_b)) call geo_salloc(n,0)
-
-    if (new_flag) then
-       if (allocated(geov_b)) call geo_alloc(0)
-       call geo_alloc(1)
-       call geo_do
-    endif
-
-    call geo_salloc(n,1)
-
-    !----------------------------------------------------------
-    ! If we are only using s-alpha, set functions now and exit
-    !
-    if (GEO_model_in == -1) then
-
-       ! Theta-independent functions
-
-       GEO_fluxsurfave_grad_r  = 1.0
-       GEO_fluxsurfave_grad_r2 = 1.0
-       GEO_grad_r0 = 1.0
-
-       GEO_ffprime   = 0.0
-       GEO_f         = GEO_rmaj_in
-
-       GEO_volume       = 2*pi**2*GEO_rmin_in**2*GEO_rmaj_in
-       GEO_volume_prime = 4*pi**2*GEO_rmin_in*GEO_rmaj_in
-
-       ! Theta-dependent functions (some are set to zero for now)
-
-       do itheta=1,n
-          
-          theta_0 = theta_in(itheta)
-
-          if (abs(theta_0) > pi+tol) then
-             print *,'ERROR in GEO: theta_0 out of bounds in GEO_interp.'
-          endif
-
-          GEO_b(itheta)     = 1.0/(1.0+GEO_rmin_in/GEO_rmaj_in*cos(theta_0))
-          GEO_dbdt(itheta)  = (GEO_rmin_in/GEO_rmaj_in)*sin(theta_0)
-          GEO_dbdt2(itheta) = 0.0 ! check with NEO usage
-          GEO_bp(itheta) = GEO_b(itheta)*GEO_rmin_in/GEO_rmaj_in/GEO_q_in
-          GEO_bt(itheta) = GEO_b(itheta)
-
-          ! Added extra B here to make proper connection
-          ! to s-alpha without having to artificially remove 
-          ! the B in the denominator of the drift.
-
-          GEO_gsin(itheta)   = sin(theta_0)*GEO_b(itheta) 
-          GEO_gcos1(itheta)  = cos(theta_0)*GEO_b(itheta)
-          GEO_gcos2(itheta)  = -GEO_rmaj_in*GEO_beta_star_in
-          GEO_usin(itheta)   = sin(theta_0)*GEO_b(itheta)
-          GEO_ucos(itheta)   = cos(theta_0)*GEO_b(itheta)
-
-          GEO_g_theta(itheta) = 1.0
-          GEO_grad_r(itheta)  = 1.0
-          GEO_gq(itheta)      = 1.0
-          GEO_captheta(itheta)  = GEO_s_in*theta_0-&
-               GEO_q_in**2*GEO_rmaj_in*GEO_beta_star_in*sin(theta_0) 
-          GEO_nu(itheta)     = -GEO_q_in*theta_0
-          GEO_l_r(itheta) = 0.0
-          GEO_l_t(itheta) = 0.0
-          GEO_nsin(itheta) = 0.0 ! check with NEO usage
-          GEO_bigr(itheta) = GEO_rmaj_in/GEO_b(itheta)
-          GEO_bigr_r(itheta) = cos(theta_0)
-          GEO_bigr_t(itheta) = -GEO_rmin_in*sin(theta_0)
-          GEO_theta_nc(itheta) = theta_0
-
-       enddo
-
-    else
-
-       !----------------------------------------------------------
-       ! General case:
-       !
-       ! To illustrate what's happening, let assume:
-       !  - n_theta = 3 
-       !  - theta_0 = pi+eps
-       !
-       !                *              
-       !  x------x------x
-       ! -pi     0      pi
-
-       n_theta = size(GEOV_theta)
-
-       do itheta=1,n
-          
-          theta_0 = theta_in(itheta)
-
-          ! n_theta = 3
-
-          x0 = theta_0-GEOV_theta(1)
-
-          ! x0 = 2*pi in this case
-
-          dx = GEOV_theta(2)-GEOV_theta(1)
-
-          ! dx = pi
-
-          i1 = int(x0/dx)+1
-
-          ! i1 = 3
-
-          i2 = i1+1
-
-          ! i2 = 4 (out of bounds)
-
-          x1 = (i1-1)*dx 
-
-          ! x1 = 2*pi
-
-          z  = (x0-x1)/dx
-
-          ! z = 0.0
-
-          !---------------------------------------------
-          ! Catch the error associated with the special 
-          ! case documented above.
-          !
-          if (i2 > n_theta) then  
-             i2 = n_theta
-          endif
-          !---------------------------------------------
-
-          GEO_b(itheta)     = GEOV_b(i1)+(GEOV_b(i2)-GEOV_b(i1))*z
-          GEO_dbdt(itheta)  = GEOV_dbdt(i1)+(GEOV_dbdt(i2)-GEOV_dbdt(i1))*z
-          GEO_dbdt2(itheta) = GEOV_dbdt2(i1)+(GEOV_dbdt2(i2)-GEOV_dbdt2(i1))*z
-          GEO_bp(itheta)    = GEOV_bp(i1)+(GEOV_bp(i2)-GEOV_bp(i1))*z
-          GEO_bt(itheta)    = GEOV_bt(i1)+(GEOV_bt(i2)-GEOV_bt(i1))*z
-          GEO_gsin(itheta)     = GEOV_gsin(i1)+(GEOV_gsin(i2)-GEOV_gsin(i1))*z
-          GEO_gcos1(itheta)    = GEOV_gcos1(i1)+(GEOV_gcos1(i2)-GEOV_gcos1(i1))*z
-          GEO_gcos2(itheta)    = GEOV_gcos2(i1)+(GEOV_gcos2(i2)-GEOV_gcos2(i1))*z
-          GEO_g_theta(itheta)  = GEOV_g_theta(i1)+(GEOV_g_theta(i2)-GEOV_g_theta(i1))*z
-          GEO_grad_r(itheta)   = GEOV_grad_r(i1)+(GEOV_grad_r(i2)-GEOV_grad_r(i1))*z
-          GEO_gq(itheta)       = GEOV_gq(i1)+(GEOV_gq(i2)-GEOV_gq(i1))*z
-          GEO_captheta(itheta) = GEOV_captheta(i1)+(GEOV_captheta(i2)-GEOV_captheta(i1))*z
-          GEO_nu(itheta)       = GEOV_nu(i1)+(GEOV_nu(i2)-GEOV_nu(i1))*z
-          GEO_bigr(itheta)     = GEOV_bigr(i1)+(GEOV_bigr(i2)-GEOV_bigr(i1))*z
-          GEO_l_r(itheta)      = GEOV_l_r(i1)+(GEOV_l_r(i2)-GEOV_l_r(i1))*z
-          GEO_l_t(itheta)      = GEOV_l_t(i1)+(GEOV_l_t(i2)-GEOV_l_t(i1))*z
-          GEO_nsin(itheta)     = GEOV_nsin(i1)+(GEOV_nsin(i2)-GEOV_nsin(i1))*z
-          GEO_usin(itheta)     = GEOV_usin(i1)+(GEOV_usin(i2)-GEOV_usin(i1))*z
-          GEO_ucos(itheta)     = GEOV_ucos(i1)+(GEOV_ucos(i2)-GEOV_ucos(i1))*z
-          GEO_bigr_r(itheta)   = GEOV_bigr_r(i1)+(GEOV_bigr_r(i2)-GEOV_bigr_r(i1))*z
-          GEO_bigr_t(itheta)   = GEOV_bigr_t(i1)+(GEOV_bigr_t(i2)-GEOV_bigr_t(i1))*z
-          GEO_theta_nc(itheta) = GEOV_theta_nc(i1)+(GEOV_theta_nc(i2)-GEOV_theta_nc(i1))*z
-          GEO_theta_s(itheta)  = GEOV_theta_s(i1)+(GEOV_theta_s(i2)-GEOV_theta_s(i1))*z
-          GEO_chi2(itheta)     = GEOV_chi2(i1)+(GEOV_chi2(i2)-GEOV_chi2(i1))*z
-
-       enddo
-
-    endif
-
-  end subroutine geo_interp
 
   subroutine geo_alloc(flag)
 

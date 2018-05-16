@@ -12,8 +12,8 @@ EXEC=gyro
 
 export EXTRA_LIBS = \
        ${GACODE_ROOT}/gapy/EXPRO/EXPRO_lib.a \
-       ${GACODE_ROOT}/shared/math/math_lib.a \
        ${GACODE_ROOT}/gapy/src/geo_lib.a \
+       ${GACODE_ROOT}/shared/math/math_lib.a \
        ${GACODE_ROOT}/shared/UMFPACK/UMFPACK_lib.a \
        ${GACODE_ROOT}/gyro/BLEND/BLEND_lib.a \
        ${GACODE_ROOT}/gyro/TRANSPOSE/TRANSP_lib.a \
@@ -24,10 +24,9 @@ all:
 	gacode_getversion > .VERSION
 	cd ${GACODE_ROOT}/shared ; make
 	cd ${GACODE_ROOT}/gapy ; make
-	cd ${GACODE_ROOT}/gapy/EXPRO ; make
-	cd BLEND ; make 
-	cd TRANSPOSE ; make 
-	cd SSUB ; make 
+	cd BLEND ; make
+	cd TRANSPOSE ; make
+	cd SSUB ; make
 	cd src ; make
 	cd GKEIGEN ; make
 	cd src ; $(FC) $(FFLAGS) -o $(EXEC) $(EXEC).o gyro_lib.a ${EXTRA_LIBS} $(LMATH)

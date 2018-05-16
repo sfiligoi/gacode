@@ -12,19 +12,18 @@ export EXTRA_LIBS = \
        ${GACODE_ROOT}/gyro/src/gyro_lib.a \
        ${GACODE_ROOT}/gyro/BLEND/BLEND_lib.a \
        ${GACODE_ROOT}/cgyro/src/cgyro_lib.a \
-       ${GACODE_ROOT}/gapy/EXPRO/EXPRO_lib.a \
-       ${GACODE_ROOT}/shared/math/math_lib.a \
        ${GACODE_ROOT}/gyro/TRANSPOSE/TRANSP_lib.a \
        ${GACODE_ROOT}/gyro/GKEIGEN/GKEIGEN_lib.a \
        ${GACODE_ROOT}/gyro/SSUB/SSUB_lib.a \
-       ${GACODE_ROOT}/gapy/GEO/geo_lib.a \
+       ${GACODE_ROOT}/gapy/EXPRO/EXPRO_lib.a \
+       ${GACODE_ROOT}/gapy/src/geo_lib.a \
+       ${GACODE_ROOT}/shared/math/math_lib.a \
        ${GACODE_ROOT}/shared/UMFPACK/UMFPACK_lib.a
 
 all:
 	gacode_getversion > .VERSION
 	cd ${GACODE_ROOT}/shared ; make
-	cd ${GACODE_ROOT}/gapy/GEO ; make
-	cd ${GACODE_ROOT}/gapy/EXPRO ; make
+	cd ${GACODE_ROOT}/gapy ; make
 	cd ${GACODE_ROOT}/neo ; make
 	cd ${GACODE_ROOT}/tglf ; make
 	cd ${GACODE_ROOT}/glf23 ; make

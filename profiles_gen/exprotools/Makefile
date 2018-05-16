@@ -9,7 +9,7 @@ endif
 EXEC = exprodump
 
 EXTRA_LIBS = ${GACODE_ROOT}/gapy/EXPRO/EXPRO_lib.a \
-             ${GACODE_ROOT}/gapy/GEO/geo_lib.a  \
+             ${GACODE_ROOT}/gapy/src/geo_lib.a  \
              ${GACODE_ROOT}/shared/math/math_lib.a
 
 .SUFFIXES : .o .f90

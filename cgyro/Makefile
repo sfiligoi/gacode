@@ -13,8 +13,6 @@ all:
 	gacode_getversion > .VERSION
 	cd ${GACODE_ROOT}/shared/math ; make
 	cd ${GACODE_ROOT}/gapy ; make
-	cd ${GACODE_ROOT}/gapy/f2py ; make
-	cd ${GACODE_ROOT}/gapy/EXPRO ; make
 	cd src ; make
 	cd ${GACODE_ROOT}/cgyro/tools/globalmap ; make
 
@@ -26,8 +24,6 @@ clean:
 deepclean:
 	cd ${GACODE_ROOT}/shared/math ; make clean
 	cd ${GACODE_ROOT}/gapy ; make clean
-	cd ${GACODE_ROOT}/gapy/f2py ; make
-	cd ${GACODE_ROOT}/gapy/EXPRO ; make clean
 	cd ${GACODE_ROOT}/modules ; rm -f cgyro*.mod
 	cd src ; make clean
 	cd ${GACODE_ROOT}/cgyro/tools/globalmap ; make clean

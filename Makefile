@@ -11,7 +11,6 @@ all:
 	cd tgyro ; make
 	cd profiles_gen ; make
 	cd gapy ; make
-	cd gapy/EXPRO ; make
 	@echo "GACODE build done"
 
 clean:
@@ -27,7 +26,6 @@ clean:
 	cd tgyro ; make clean
 	cd profiles_gen ; make clean
 	cd gapy ; make clean
-	cd gapy/EXPRO ; make clean
 	rm -f python/*/*.pyc
 	rm -f python/*.pyc
 	rm -f modules/*genmod*
@@ -43,7 +41,6 @@ distclean:
 	cd tgyro ; make clean
 	cd profiles_gen ; make clean
 	cd gapy ; make clean
-	cd gapy/EXPRO ; make clean
 	rm -f python/*/*.pyc
 	rm -f python/*.pyc
 	rm -f modules/*genmod*
