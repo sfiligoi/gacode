@@ -138,8 +138,6 @@ subroutine cgyro_nl_fftw(ij)
 
   real :: inv_nxny
 
-  include 'fftw3.f03'
-
 
   if (is_staggered_comm_2) then ! stagger comm2, to load ballance network traffic
      call cgyro_nl_fftw_comm2
