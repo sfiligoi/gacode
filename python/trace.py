@@ -11,8 +11,8 @@ rc('font',size=18)
 
 gfile=''          # list of g-files to trace the flux-surfaces of
 resolution=0.002  # change resolution with bicubic-spline interpolation (default 0)
-uniform=200        # uniform number of points in theta angle (default 0)
-levels=16          # number of flux surfaces (default 0, same as gfile psi grid)
+uniform=200       # uniform number of points in theta angle (default 0)
+levels=16         # number of flux surfaces (default 0, same as gfile psi grid)
 maxPSI=0.9999     # normalized PSI/RHO at which to place the separatrix
 rhoVSpsi='psi'    # levels are specified in `rho` or `psi` (default `psi`)
 filetype='none'   # dump flux surfaces traces to file `flux_xxx` (default 1)

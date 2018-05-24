@@ -20,7 +20,7 @@ contains
     integer, intent(in) :: n_psi,n_arc
     double precision, intent(in), dimension(n_psi,n_arc) :: r_in,z_in
 
-    
+
     integer :: i,ix,p
     integer :: n1,m1,n2,m2,s
     double precision, dimension(:), allocatable :: dl,ur,uz,l
@@ -29,7 +29,7 @@ contains
     !-------------------------------------
 
     pi = 4.0*atan(1.0)
-    
+
     allocate(r(n_arc))
     allocate(z(n_arc))
     allocate(dl(n_arc))
@@ -47,12 +47,9 @@ contains
     allocate(sz(nf))
     allocate(cr(0:nf))
     allocate(cz(0:nf))
-   
+
     r = r_in(iselect,:)
     z = z_in(iselect,:)
-
-    r = r(n_arc:1:-1)
-    z = z(n_arc:1:-1)
 
     ! Pointwise Extrema ------------------------------
     n1 = maxloc(z,1) ; m1 = minloc(z,1)
@@ -70,6 +67,12 @@ contains
     z(1:n_arc-1) = cshift(z(1:n_arc-1),s)
     r(n_arc) = r(1)
     z(n_arc) = z(1)
+
+    if (z(2) < z(1)) then
+       ! Reverse order (may be needed)
+       r = r(n_arc:1:-1)
+       z = z(n_arc:1:-1)
+    endif
 
     ! Compute arc lengths
     do i=1,n_arc-1
@@ -104,7 +107,7 @@ contains
     vz = vz-x
     vr(n_arc) = vr(1)
     vz(n_arc) = vz(1)
-     
+
     cr = 0.0 ; cz = 0.0
     cr(0) = moment(n_arc,vr,x*0.0+1,dl)
     cz(0) = moment(n_arc,vz,x*0.0+1,dl)
@@ -125,7 +128,7 @@ contains
 
     rp = rmaj+rmin*cos(x+pr)
     zp = zmaj+zmin*sin(x+pz)
-    
+
   end subroutine surfpar_do
 
   double precision function moment(n,f,w,d)
