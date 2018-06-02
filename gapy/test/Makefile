@@ -1,20 +1,13 @@
-include ${GACODE_ROOT}/platform/build/make.inc.${GACODE_PLATFORM}
+#---------------------------
+# Toplevel makefile for gapy
+#---------------------------
 
-ifeq ($(OPT),debug)
-   FFLAGS=${FDEBUG}
-else
-   FFLAGS=${FOPT}
-endif
-
-FC += ${FOMP}
-
-.SUFFIXES : .o .f90
-
-test: test.o
-	$(FC) -o test test.o ../src/geo_lib.a
-
-.f90.o :
-	$(FC) $(FFLAGS) $(FMATH) -c $<
+all:
+	cd test_geo  ; make
+	cd test_vpro  ; make
 
 clean:
-	rm -f *.o test
+	cd test_geo ; make clean
+	cd test_vpro ; make clean
+
+.IGNORE:
