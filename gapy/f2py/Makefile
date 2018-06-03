@@ -1,7 +1,12 @@
 include ${GACODE_ROOT}/platform/build/make.inc.${GACODE_PLATFORM}
 
 DESTLIB=${GACODE_ROOT}/python/gapy.so
-SRC=../src/gapy_realfluct.f90 ../src/gapy_geo.f90 ../src/gapy_surfpar.f90 ../src/gapy_vpro.f90
+
+SRC=	../src/gapy_realfluct.f90 \
+	../src/gapy_geo.f90 \
+	../src/gapy_surfpar.f90 \
+	../src/gapy_util.f90 \
+	../src/gapy_vpro.f90
 
 F2PYM:=$(filter-out --fcompiler=pg,$(F2PY))
 

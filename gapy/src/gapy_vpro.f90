@@ -3,6 +3,8 @@ module vpro
   integer, parameter :: ntag = 38
   integer :: nt
 
+  ! Fundamental input
+  
   character*10, dimension(ntag) :: tag = (/&
        'nexp      ',& !1
        'nion      ',& !2
@@ -90,6 +92,12 @@ module vpro
        vpol,&
        vtor
 
+  ! Derived
+  
+  double precision, dimension(:), allocatable :: &
+       bunit,&
+       s
+  
 contains
 
   subroutine vpro_read
@@ -273,6 +281,14 @@ contains
        ti = 0.0
        vpol = 0.0
        vtor = 0.0
+
+       ! Derived
+       
+       allocate(bunit(nexp))
+       allocate(s(nexp))
+
+       bunit = 0.0
+       s      = 0.0
        
     else
 
@@ -310,6 +326,10 @@ contains
       
        deallocate(ni,ti,vpol,vtor)
 
+       ! Derived
+       
+       deallocate(bunit,s)
+       
     endif
 
   end subroutine vpro_init
@@ -538,4 +558,24 @@ contains
 
   end subroutine vpro_read_legacy
 
+  subroutine vpro_compute_derived
+
+    use util
+    
+    implicit none
+
+    double precision :: rhod(nexp)
+    
+    rhod(:) = arho_exp*rho(:)
+
+    ! b_unit
+    call util_bound_deriv(bunit,rhod**2,rmin**2,nexp)
+    bunit(:) = bt_exp*bunit
+
+    ! s
+    call util_bound_deriv(s,q,rmin,nexp)
+    s(:) = (rmin(:)/q(:))*s(:)
+
+  end subroutine vpro_compute_derived
+  
 end module vpro
