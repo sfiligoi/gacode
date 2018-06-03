@@ -1,6 +1,11 @@
 import gapy
 import numpy as np
 
+gapy.vpro.vpro_read_legacy()
+
+gapy.vpro.vpro_write()
+gapy.vpro.vpro_init(0)
+
 gapy.vpro.vpro_read()
 
 print 'nexp    ',gapy.vpro.nexp
