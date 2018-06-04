@@ -11,14 +11,7 @@ subroutine cgyro_rhs(ij)
   real :: rval,rval2
   complex :: rhs_stream
 
-  call timer_lib_in('str_mem')
-
   ! Prepare suitable distribution (g, not h) for conservative upwind method
-  g_x(:,:) = h_x(:,:)
-
-  call timer_lib_out('str_mem')
-
-
   if (n_field > 1) then
      call timer_lib_in('str')
 
@@ -27,11 +20,15 @@ subroutine cgyro_rhs(ij)
         iv_loc = iv-nv1+1
         is = is_v(iv)
         do ic=1,nc
-           g_x(ic,iv_loc) = g_x(ic,iv_loc)+ & 
+           g_x(ic,iv_loc) = h_x(ic,iv_loc)+ & 
                 (z(is)/temp(is))*jvec_c(2,ic,iv_loc)*field(2,ic)
         enddo
      enddo
      call timer_lib_out('str')
+  else
+    call timer_lib_in('str_mem')
+    g_x(:,:) = h_x(:,:)
+    call timer_lib_out('str_mem')
   endif
 
   call cgyro_upwind
