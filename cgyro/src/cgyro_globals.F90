@@ -122,6 +122,8 @@ module cgyro_globals
   real, dimension(6) :: sdlnndr
   real, dimension(6) :: sdlntdr
 
+!$acc declare create(z,temp)
+
   integer :: subroutine_flag  ! only used for cgyro_read_input
 
   ! Re-scaling parameters for experimental profiles

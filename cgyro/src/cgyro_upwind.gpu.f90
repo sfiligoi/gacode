@@ -29,7 +29,7 @@ subroutine cgyro_upwind
 
   call timer_lib_in('str')
 
-!$acc data create(res_loc,res) copy(g_x)
+!$acc data create(res_loc,res) present(g_x)
 
 !$acc parallel loop collapse(2) gang &
 !$acc&         private(res_loc_one,iv) present(upfac1,is_v) default(none) 

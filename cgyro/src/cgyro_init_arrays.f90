@@ -143,7 +143,7 @@ subroutine cgyro_init_arrays
      enddo
   enddo
 
-!$acc enter data copyin(upfac1,upfac2)
+!$acc enter data copyin(upfac1,upfac2,jvec_c)
 
   !------------------------------------------------------------------------------
 
