@@ -1,0 +1,30 @@
+#!/bin/bash
+
+echo "-queue: debug, batch"
+
+# Default queue
+if [ "$QUEUE" == "null_queue" ] ; then
+   QUEUE=debug
+fi
+
+bfile=$SIMDIR/batch.src
+echo "#!/bin/bash " > $bfile
+echo "#SBATCH --exclusive" >> $bfile
+echo "#SBATCH --nodes=$nodes" >> $bfile
+echo "#SBATCH --ntasks=$nmpi" >> $bfile
+echo "#SBATCH --cpus-per-task=$nomp" >> $bfile
+echo "#SBATCH --time=$WALLTIME" >> $bfile
+echo "#SBATCH --output=$SIMDIR/batch.out" >> $bfile
+echo "#SBATCH --error=$SIMDIR/batch.err" >>$bfile
+
+#echo "#PBS -N $LOCDIR" >> $bfile
+#echo "#PBS -A $REPO" >> $bfile
+#echo "#PBS -o $SIMDIR/batch.out" >> $bfile
+#echo "#PBS -e $SIMDIR/batch.err" >> $bfile
+#echo "#PBS -q $QUEUE" >> $bfile
+#echo "#PBS -l walltime=$WALLTIME" >> $bfile
+#echo "#PBS -l nodes=$nodes" >> $bfile
+#echo "module load python" >> $bfile
+
+echo "source /home/sfiligoii/gacode.source"
+echo "$CODE -e $LOCDIR -n $nmpi -nomp $nomp -numa $numa -mpinuma $mpinuma -p $SIMROOT" >> $bfile
