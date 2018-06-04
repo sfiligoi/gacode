@@ -1,5 +1,5 @@
 #! /usr/bin/env bash
-# GACODE Parallel execution script (TITAN_PGI)
+# GACODE Parallel execution script (DENVER_PGI)
 
 simdir=${1}
 nmpi=${2}
