@@ -40,6 +40,8 @@ subroutine cgyro_step_collision
 
   call timer_lib_in('coll')
 
+  call parallel_lib_nj_loc(nj_loc)
+
 !$acc parallel loop gang private(bvec, cvec) &
 !$acc& present(cmat)
   do ic=nc1,nc2
