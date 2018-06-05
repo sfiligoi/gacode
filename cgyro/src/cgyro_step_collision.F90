@@ -17,7 +17,8 @@ subroutine cgyro_step_collision
 
   implicit none
 
-  integer :: is,ivp,it,j,k
+  integer :: j,k
+  integer :: is,ivp,nj_loc
 
 #ifdef _OPENACC
   integer, parameter :: NVMAX = 758
