@@ -42,52 +42,93 @@ subroutine cgyro_step_collision
 
   call parallel_lib_nj_loc(nj_loc)
 
-!$acc parallel loop gang private(bvec, cvec) &
+  if (gpu_bigmem_flag == 1) then
+
+!$acc parallel loop gang private(bvec,cvec) &
 !$acc& present(cmat) 
-  do ic=nc1,nc2
+     do ic=nc1,nc2
 !$acc cache(bvec,cvec)
 
-     ic_loc = ic-nc1+1
+        ic_loc = ic-nc1+1
 
-     it = it_c(ic)
+        ! Set-up the RHS: H = f + ze/T G phi
 
-     ! Set-up the RHS: H = f + ze/T G phi
-
-!$acc loop vector
-     do iv=1,nv
-        bvec(iv) = (0.0,0.0)
-        cvec(iv) = cap_h_v(ic_loc,iv)
-     enddo
-
-     ! This is a key loop for performance
-!$acc loop seq
-     do ivp=1,nv
-        cvec_re = real(cvec(ivp))
-        cvec_im = aimag(cvec(ivp))
 !$acc loop vector
         do iv=1,nv
-           cval = cmat(iv,ivp,ic_loc)
-           bvec(iv) = bvec(iv)+ cmplx(cval*cvec_re,cval*cvec_im)
+           bvec(iv) = (0.0,0.0)
+           cvec(iv) = cap_h_v(ic_loc,iv)
         enddo
+
+        ! This is a key loop for performance
+!$acc loop seq
+        do ivp=1,nv
+           cvec_re = real(cvec(ivp))
+           cvec_im = aimag(cvec(ivp))
+!$acc loop vector
+           do iv=1,nv
+              cval = cmat(iv,ivp,ic_loc)
+              bvec(iv) = bvec(iv)+ cmplx(cval*cvec_re,cval*cvec_im)
+           enddo
+        enddo
+
+        ! pack communication array while bvec still in cache
+        do k=1,nproc
+!$acc loop vector
+           do j=1,nj_loc
+              fsendf(j,ic_loc,k) = bvec(j+(k-1)*nj_loc)
+           enddo
+        enddo
+
+        if (collision_field_model == 1) then
+!$acc loop vector
+           do iv=1,nv
+              cap_h_v(ic_loc,iv) = bvec(iv)
+           enddo
+        endif
+     enddo
+!$acc end parallel
+
+  else
+
+!$omp parallel do private(ic_loc,iv,ivp,cvec,bvec,cvec_re,cvec_im,cval)
+     do ic=nc1,nc2
+
+        ic_loc = ic-nc1+1
+
+        ! Set-up the RHS: H = f + ze/T G phi
+
+        do iv=1,nv
+           cvec(iv) = cap_h_v(ic_loc,iv)
+        enddo
+
+        bvec(:) = (0.0,0.0)
+
+        ! This is a key loop for performance
+        do ivp=1,nv
+           cvec_re = real(cvec(ivp))
+           cvec_im = aimag(cvec(ivp))
+           do iv=1,nv
+              cval = cmat(iv,ivp,ic_loc)
+              bvec(iv) = bvec(iv)+ cmplx(cval*cvec_re,cval*cvec_im)
+           enddo
+        enddo
+
+        ! Pack communication array while bvec still in cache
+        do k=1,nproc
+           do j=1,nj_loc
+              fsendf(j,ic_loc,k) = bvec(j+(k-1)*nj_loc)
+           enddo
+        enddo
+
+        if (collision_field_model == 1) then
+           ! cap_h_v not re-used else
+           do iv=1,nv
+              cap_h_v(ic_loc,iv) = bvec(iv)
+           enddo
+        endif
      enddo
 
-    ! pack communication array while bvec still in cache
-    do k=1,nproc
-!$acc loop vector
-       do j=1,nj_loc
-          fsendf(j,ic_loc,k) = bvec(j+(k-1)*nj_loc)
-       enddo
-    enddo
-
-    if (collision_field_model == 1) then
-       ! cap_h_v not re-used else
-!$acc loop vector
-       do iv=1,nv
-          cap_h_v(ic_loc,iv) = bvec(iv)
-       enddo
-     endif
-  enddo
-!$acc end parallel
+  endif
 
   call timer_lib_out('coll')
 
@@ -111,7 +152,7 @@ subroutine cgyro_step_collision
         psi(ic,iv_loc) = sum(jvec_c(:,ic,iv_loc)*field(:,ic))
         chi(ic,iv_loc) = sum(jxvec_c(:,ic,iv_loc)*field(:,ic))
      enddo
-     ! this should be coll_mem timer, but not easy with OMP
+     ! this should be in coll_mem timer, but not easy with OMP
      do ic=1,nc
         cap_h_c(ic,iv_loc) = cap_h_ct(iv_loc,ic)
      enddo
