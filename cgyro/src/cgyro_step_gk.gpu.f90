@@ -20,7 +20,10 @@ subroutine cgyro_step_gk
   ! Bpar -> field(3)
 
   call timer_lib_in('str_mem')
-!$omp parallel do collapse(2)
+!$acc update device(field,psi,cap_h_c,chi)
+
+!$acc update device(h_x)
+!$acc parallel loop collapse(2) independent present(h0_x,h_x)
   do iv_loc=1,nv_loc
      do ic_loc=1,nc
        h0_x(ic_loc,iv_loc) = h_x(ic_loc,iv_loc)
@@ -33,43 +36,43 @@ subroutine cgyro_step_gk
   ! Stage 1
   call cgyro_rhs(1)
   call timer_lib_in('str')
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs(:,:,1))
   do iv_loc=1,nv_loc
      do ic_loc=1,nc
        h_x(ic_loc,iv_loc) = h0_x(ic_loc,iv_loc) + 0.5 * delta_t * rhs(ic_loc,iv_loc,1)
      enddo
   enddo
   call timer_lib_out('str')
-  call cgyro_field_c
+  call cgyro_field_c_gpu
 
   ! Stage 2
   call cgyro_rhs(2)
   call timer_lib_in('str')
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs(:,:,2))
   do iv_loc=1,nv_loc
      do ic_loc=1,nc
        h_x(ic_loc,iv_loc) = h0_x(ic_loc,iv_loc) + 0.5 * delta_t * rhs(ic_loc,iv_loc,2)
      enddo
   enddo
   call timer_lib_out('str')
-  call cgyro_field_c
+  call cgyro_field_c_gpu
 
   ! Stage 3
   call cgyro_rhs(3)
   call timer_lib_in('str')
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs(:,:,3))
   do iv_loc=1,nv_loc
      do ic_loc=1,nc
         h_x(ic_loc,iv_loc) = h0_x(ic_loc,iv_loc) + delta_t * rhs(ic_loc,iv_loc,3)
      enddo
   enddo
   call timer_lib_out('str')
-  call cgyro_field_c
+  call cgyro_field_c_gpu
 
   ! Stage 4
   call cgyro_rhs(4)
   call timer_lib_in('str')
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs)
   do iv_loc=1,nv_loc
      do ic_loc=1,nc
        h_x(ic_loc,iv_loc) = h0_x(ic_loc,iv_loc) &
@@ -78,11 +81,11 @@ subroutine cgyro_step_gk
      enddo
   enddo
   call timer_lib_out('str')
-  call cgyro_field_c
+  call cgyro_field_c_gpu
 
   ! rhs(1) = 3rd-order error estimate
   call timer_lib_in('str')
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs)
   do iv_loc=1,nv_loc
      do ic_loc=1,nc
        rhs(ic_loc,iv_loc,1) = h0_x(ic_loc,iv_loc) &
@@ -91,7 +94,12 @@ subroutine cgyro_step_gk
      enddo
   enddo
   call timer_lib_out('str')
-  
+
+ call timer_lib_in('str_mem')
+!$acc update host(h_x,rhs(:,:,1))
+!$acc update host(field,psi,cap_h_c,chi)
+  call timer_lib_out('str_mem')
+
   ! Filter special spectral components
   call cgyro_filter
   

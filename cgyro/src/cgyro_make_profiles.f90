@@ -394,6 +394,8 @@ subroutine cgyro_make_profiles
 
   !-------------------------------------------------------------
 
+!$acc update device(temp)
+
 end subroutine cgyro_make_profiles
 
 subroutine set_betastar
