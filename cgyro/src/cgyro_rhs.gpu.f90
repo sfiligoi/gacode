@@ -14,7 +14,7 @@ subroutine cgyro_rhs(ij)
   call timer_lib_in('str_mem')
 
 !$acc data present(h_x,g_x,psi,rhs) copyin(field)
-!$acc update device(h_x,psi)
+!$acc update device(psi)
 
   call timer_lib_out('str_mem')
 
@@ -113,7 +113,7 @@ subroutine cgyro_rhs(ij)
 
  call timer_lib_in('str_mem')
 
-!$acc update host(psi,rhs(:,:,ij))
+!$acc update host(psi)
 
 !$acc end data    
 
