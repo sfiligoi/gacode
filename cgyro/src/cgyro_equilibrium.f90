@@ -204,7 +204,7 @@ subroutine cgyro_equilibrium
      
   enddo
 !$acc enter data copyin(xi,vel,omega_stream)
-  
+    
 end subroutine cgyro_equilibrium
 
 
