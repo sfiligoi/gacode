@@ -148,6 +148,8 @@ subroutine cgyro_init_manager
      allocate(dtheta(-nup_theta:nup_theta, nc))
      allocate(dtheta_up(-nup_theta:nup_theta, nc))
 
+!$acc enter data create(fcoef,gcoef,field,field_loc)
+
      ! Velocity-distributed arrays
      allocate(rhs(nc,nv_loc,4))
      allocate(h_x(nc,nv_loc))
@@ -172,7 +174,7 @@ subroutine cgyro_init_manager
      allocate(cap_h_v(nc_loc,nv))
      allocate(cap_h_v_prime(nc_loc,nv))
 
-!$acc enter data create(rhs,h_x,g_x,psi,h0_x)
+!$acc enter data create(rhs,h_x,g_x,psi,chi,h0_x,cap_h_c,dvjvec_c,jxvec_c)
 
      ! Nonlinear arrays
      if (nonlinear_flag == 1) then
