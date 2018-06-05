@@ -13,8 +13,7 @@ subroutine cgyro_rhs(ij)
 
   call timer_lib_in('str_mem')
 
-!$acc data present(h_x,g_x,psi,rhs) copyin(field)
-!$acc update device(psi)
+!$acc data present(h_x,g_x,psi,rhs,field)
 
   call timer_lib_out('str_mem')
 
@@ -38,9 +37,13 @@ subroutine cgyro_rhs(ij)
      call timer_lib_out('str')
   else
      call timer_lib_in('str_mem')
-!$acc kernels
-     g_x(:,:) = h_x(:,:)
-!$acc end kernels
+!$acc parallel loop collapse(2) independent present(g_x,h_x)
+     do iv_loc=1,nv_loc
+        do ic_loc=1,nc
+          g_x(:,:) = h_x(:,:)
+        enddo
+      enddo
+
      call timer_lib_out('str_mem')
   endif
 
@@ -112,8 +115,6 @@ subroutine cgyro_rhs(ij)
   endif
 
  call timer_lib_in('str_mem')
-
-!$acc update host(psi)
 
 !$acc end data    
 

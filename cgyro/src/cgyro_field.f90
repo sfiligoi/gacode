@@ -148,6 +148,104 @@ subroutine cgyro_field_c
 
 end subroutine cgyro_field_c
 
+#ifdef _OPENACC
+subroutine cgyro_field_c_gpu
+  use mpi
+  use timer_lib
+  use cgyro_globals
+  implicit none
+  integer :: is,i_f
+  complex :: tmp,field_loc_l
+
+
+  call timer_lib_in('field')
+!$acc data present(h_x,psi,chi,cap_h_c)
+
+!$acc data present(field,field_loc)
+
+  ! Poisson and Ampere RHS integrals of h
+
+!$acc parallel loop collapse(2) independent private(field_loc_l) &
+!$acc&         present(dvjvec_c) default(none)
+  do ic=1,nc
+    do i_f=1,n_field
+      field_loc_l = (0.0,0.0)    
+!$acc loop seq private(iv_loc)
+      do iv=nv1,nv2
+         iv_loc = iv-nv1+1
+         field_loc_l = field_loc_l+dvjvec_c(i_f,ic,iv_loc)*h_x(ic,iv_loc)
+      enddo
+      field_loc(i_f,ic) = field_loc_l
+    enddo
+  enddo
+  call timer_lib_out('field')
+  call timer_lib_in('field_com')
+
+!$acc host_data use_device(field_loc,field)
+  call MPI_ALLREDUCE(field_loc(:,:),&
+       field(:,:),&
+       size(field(:,:)),&
+       MPI_DOUBLE_COMPLEX,&
+       MPI_SUM,&
+       NEW_COMM_1,&
+       i_err)
+!$acc end host_data
+
+  call timer_lib_out('field_com')
+  call timer_lib_in('field')
+  if (n_field > 2) then
+!$acc parallel loop independent private(tmp) present(fcoef) default(none)
+     do ic=1,nc
+       field(3,ic) = field(3,ic)*fcoef(3,ic)
+     enddo
+  endif
+  ! Poisson LHS factors
+  if (n == 0 .and. ae_flag == 1) then
+    ! Note: Called rarely, use the CPu version
+!$acc update host(field)
+    call cgyro_field_ae('c')
+!$acc update device(field)
+  else
+     if (n_field > 2) then
+!$acc parallel loop independent private(tmp) present(gcoef) default(none)
+        do ic=1,nc
+          tmp = field(1,ic)
+          field(1,ic) = gcoef(1,ic)*field(1,ic)+gcoef(4,ic)*field(3,ic)
+          field(2,ic) = gcoef(2,ic)*field(2,ic)
+          field(3,ic) = gcoef(3,ic)*field(3,ic)+gcoef(5,ic)*tmp
+        enddo
+     else
+!$acc parallel loop collapse(2) independent present(gcoef) default(none)
+        do ic=1,nc
+          do i_f=1,n_field
+            field(i_f,ic) = gcoef(i_f,ic)*field(i_f,ic)
+          enddo
+        enddo
+     endif
+  endif
+
+!$acc parallel loop collapse(2) gang vector private(iv_loc,is) &
+!$acc&         present(jvec_c,jxvec_c,z,temp,is_v) default(none)
+  do iv=nv1,nv2
+     do ic=1,nc
+        iv_loc = iv-nv1+1
+        is = is_v(iv)
+        psi(ic,iv_loc) = sum( jvec_c(:,ic,iv_loc)*field(:,ic))
+        chi(ic,iv_loc) = sum(jxvec_c(:,ic,iv_loc)*field(:,ic))
+        cap_h_c(ic,iv_loc) = h_x(ic,iv_loc)+psi(ic,iv_loc)*z(is)/temp(is)
+     enddo
+  enddo
+
+!$acc end data
+
+!$acc end data
+
+  call timer_lib_out('field')
+end subroutine cgyro_field_c_gpu
+
+#endif
+
+
 !-----------------------------------------------------------------
 ! Adiabatic electron field solves for n=0
 !-----------------------------------------------------------------
