@@ -4,16 +4,17 @@ module parallel_lib
 
   ! lib
 
-  integer, private :: nproc,iproc
+  integer :: nproc,iproc
   integer, private :: ni,nj
   integer, private :: ni_loc
   integer, private :: nj_loc
   integer, private :: lib_comm
   integer, private :: nsend
-
-  complex, dimension(:,:,:), allocatable, private :: fsendf
-  complex, dimension(:,:,:), allocatable, private :: fsendr
   real, dimension(:,:,:), allocatable, private :: fsendr_real
+
+  ! (expose these)
+  complex, dimension(:,:,:), allocatable :: fsendf
+  complex, dimension(:,:,:), allocatable :: fsendr
 
   ! slib
 
@@ -107,22 +108,6 @@ contains
 
   end subroutine parallel_lib_f
 
-  ! inline version, set one row
-  subroutine parallel_lib_f_i_set(i_loc,bv)
-
-    implicit none
-
-    integer, intent(in) :: i_loc
-    complex, intent(in), dimension(nj) :: bv
-    integer :: j,k
-
-    do k=1,nproc
-          do j=1,nj_loc
-             fsendf(j,i_loc,k) = bv(j+(k-1)*nj_loc)
-          enddo
-    enddo
-
-  end subroutine parallel_lib_f_i_set
 
   ! inline vesion, just execute
   subroutine parallel_lib_f_i_do(ft)
@@ -490,4 +475,13 @@ contains
 
   end subroutine parallel_slib_r
 
+  subroutine parallel_lib_nj_loc(nj_loc_in)
+
+    integer, intent(inout) :: nj_loc_in
+
+    nj_loc_in = nj_loc
+    
+  end subroutine parallel_lib_nj_loc
+
 end module parallel_lib
+

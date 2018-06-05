@@ -4,4 +4,6 @@ cgyro_rhs.o : cgyro_rhs.gpu.f90
 	$(FC) $(FMATH) $(FFLAGS) -o cgyro_rhs.o -c cgyro_rhs.gpu.f90
 cgyro_advect_wavenumber.o : cgyro_advect_wavenumber.gpu.f90
 	$(FC) $(FMATH) $(FFLAGS) -o cgyro_advect_wavenumber.o -c cgyro_advect_wavenumber.gpu.f90
+cgyro_upwind.o : cgyro_upwind.gpu.f90
+	$(FC) $(FMATH) $(FFLAGS) -o cgyro_upwind.o -c cgyro_upwind.gpu.f90
 

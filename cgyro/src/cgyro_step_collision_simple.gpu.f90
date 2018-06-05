@@ -40,32 +40,53 @@ subroutine cgyro_step_collision_simple
 
   call parallel_lib_nj_loc(nj_loc)
 
-!$omp parallel do private(ic_loc,ivp,iv,is,ix,jx,ie,ir,it,cvec_re,cvec_im,bvec,cvec,bvec_flat)
+!$acc data copyin(cap_h_v,px) present(ix_v,ie_v,is_v,ir_c,it_c,cmat_simple)
+
+!$acc parallel num_workers(4) vector_length(32)
+!$acc loop gang private(bvec,cvec,bvec_flat)
   do ic=nc1,nc2
+
      ic_loc = ic-nc1+1
      ir = ir_c(ic)
      it = it_c(ic)
 
      ! Set-up the RHS: H = f + ze/T G phi
 
+!$acc loop worker vector
      do iv=1,nv
         cvec(ix_v(iv),ie_v(iv),is_v(iv)) = cap_h_v(ic_loc,iv)
      enddo
 
      ! Avoid singularity of n=0,p=0:
      if (px(ir) == 0 .and. n == 0) then
-        bvec = cvec
-     else
 
-        bvec = 0.0
-
+!$acc loop worker collapse(2)
         do is=1,n_species
            do ie=1,n_energy              
+!$acc loop vector
+             do ix=1,n_xi
+               bvec(ix,ie,is) = cvec(ix,ie,is)
+             enddo
+           enddo
+        enddo
+     else
+
+!$acc loop worker collapse(2)
+        do is=1,n_species
+           do ie=1,n_energy              
+
+!$acc loop vector
+              do ix=1,n_xi
+                 bvec(ix,ie,is) = 0.0
+              enddo
+
+!$acc loop seq
               do jx=1,n_xi
 
                  cvec_re = real(cvec(jx,ie,is))
                  cvec_im = aimag(cvec(jx,ie,is))
 
+!$acc loop vector
                  do ix=1,n_xi
                     bvec(ix,ie,is) = bvec(ix,ie,is)+ &
                          cmplx(cmat_simple(ix,jx,ie,is,it)*cvec_re, &
@@ -76,17 +97,22 @@ subroutine cgyro_step_collision_simple
         enddo
      endif
 
+!$acc loop worker vector
      do iv=1,nv
         bvec_flat(iv) = bvec(ix_v(iv),ie_v(iv),is_v(iv))
      enddo
 
+!$acc loop worker
      do k=1,nproc
+!$acc loop vector
         do j=1,nj_loc
            fsendf(j,ic_loc,k) = bvec_flat(j+(k-1)*nj_loc)
         enddo
      enddo
 
   enddo
+!$acc end parallel
+!$acc end data
 
   deallocate(bvec,cvec)
 
@@ -100,17 +126,20 @@ subroutine cgyro_step_collision_simple
 
   ! Compute H given h and [phi(h), apar(h)]
 
-!$omp parallel do private(iv_loc,is,ic,iv)
+!$omp parallel do private(iv_loc,is,ic)
   do iv=nv1,nv2
      iv_loc = iv-nv1+1
+
      do ic=1,nc
         psi(ic,iv_loc) = sum(jvec_c(:,ic,iv_loc)*field(:,ic))
      enddo
-     ! this should be coll_mem timer , but not easy with OMP
+
      do ic=1,nc
         cap_h_c(ic,iv_loc) = cap_h_ct(iv_loc,ic)
      enddo
+
      is = is_v(iv)
+
      do ic=1,nc
         h_x(ic,iv_loc) = cap_h_c(ic,iv_loc)-psi(ic,iv_loc)*(z(is)/temp(is))
      enddo
