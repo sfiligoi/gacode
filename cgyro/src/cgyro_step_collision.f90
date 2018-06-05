@@ -6,9 +6,6 @@
 !  matrix.  Effectively, we compute the new collisional cap_H: 
 !
 !                       H = h + ze/T G phi
-! NOTE:
-!  Both a GPU version (triggered by GPU_BIGMEM_FLAG=1) and an OMP
-!  version are implemented below.
 !------------------------------------------------------------------------------
 
 subroutine cgyro_step_collision
@@ -23,12 +20,7 @@ subroutine cgyro_step_collision
   integer :: j,k
   integer :: is,ivp,nj_loc
 
-#ifdef _OPENACC
-  integer, parameter :: NVMAX = 758
-  complex, dimension(NVMAX) :: bvec,cvec
-#else
   complex, dimension(nv) :: bvec,cvec
-#endif
   real :: cvec_re,cvec_im
   real :: cval
 
@@ -46,12 +38,13 @@ subroutine cgyro_step_collision
 
   call parallel_lib_nj_loc(nj_loc)
 
+  ! Note that if GPU is absent, gpu_bibmem_flag will be reset to 0
+
   if (gpu_bigmem_flag == 1) then
 
 !$acc parallel loop gang private(bvec,cvec) &
 !$acc& present(cmat) 
      do ic=nc1,nc2
-!$acc cache(bvec,cvec)
 
         ic_loc = ic-nc1+1
 

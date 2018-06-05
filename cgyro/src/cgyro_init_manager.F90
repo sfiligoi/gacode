@@ -206,6 +206,10 @@ subroutine cgyro_init_manager
   call GEO_alloc(1)
   call cgyro_equilibrium
 
+#ifndef _OPENACC
+  gpu_bigmem_flag = 0
+#endif
+
   if (test_flag == 0) then
 
      call cgyro_init_arrays

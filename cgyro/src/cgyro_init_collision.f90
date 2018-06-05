@@ -760,10 +760,6 @@ subroutine cgyro_init_collision
   enddo
 !$acc enter data copyin(cmat) if (gpu_bigmem_flag == 1)
 
-#ifndef _OPENACC
-  gpu_bigmem_flag == 0
-#endif
-
   deallocate(amat)
   deallocate(i_piv)
   deallocate(nu_d)
