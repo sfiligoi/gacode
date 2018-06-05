@@ -342,6 +342,35 @@ contains
 
   end subroutine parallel_slib_f_nc
 
+#ifdef _OPENACC
+  subroutine parallel_slib_f_nc_gpu(x,xt)
+    use mpi
+    !-------------------------------------------------------
+    implicit none
+    !
+    complex, intent(in), dimension(nkeep,nsplit*nn) :: x
+    complex, intent(inout), dimension(nkeep,nsplit,nn) :: xt
+    !
+    integer :: ierr
+    !-------------------------------------------------------
+!$acc data present(x,xt)
+
+!$acc host_data use_device(x,xt) 
+   call MPI_ALLTOALL(x, &
+         nkeep*nsplit, &
+         MPI_DOUBLE_COMPLEX, &
+         xt, &
+         nkeep*nsplit, &
+         MPI_DOUBLE_COMPLEX, &
+         slib_comm, &
+         ierr)
+!$acc end host_data
+
+!$acc end data
+
+  end subroutine parallel_slib_f_nc_gpu
+#endif
+
   subroutine parallel_slib_f(x_in,xt)
 
     use mpi
@@ -394,6 +423,34 @@ contains
          ierr)
 
   end subroutine parallel_slib_r_nc
+
+  subroutine parallel_slib_r_nc_gpu (xt,x)
+    use mpi
+    !-------------------------------------------------------
+    implicit none
+    !
+    complex, intent(in), dimension(nkeep,nsplit,nn) :: xt
+    complex, intent(inout), dimension(nkeep,nsplit*nn) :: x
+    !
+    integer :: ierr
+    !-------------------------------------------------------
+
+!$acc data present(xt,x)
+!$acc host_data use_device(xt,x)
+
+    call MPI_ALLTOALL(xt, &
+         nkeep*nsplit, &
+         MPI_DOUBLE_COMPLEX, &
+         x, &
+         nkeep*nsplit, &
+         MPI_DOUBLE_COMPLEX, &
+         slib_comm, &
+         ierr)
+
+!$acc end host_data
+!$acc end data
+
+  end subroutine parallel_slib_r_nc_gpu
 
   subroutine parallel_slib_r(xt,x_out)
 

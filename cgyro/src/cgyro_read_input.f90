@@ -161,6 +161,8 @@ subroutine cgyro_read_input
      call MPI_BCAST(geo_yin_in,size(geo_yin_in),MPI_DOUBLE_PRECISION,0,CGYRO_COMM_WORLD,i_err)
   endif
 
+!$acc update device(z,temp)
+
 end subroutine cgyro_read_input
 
 !------------------------------------------------------------

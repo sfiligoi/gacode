@@ -172,6 +172,8 @@ subroutine cgyro_init_manager
      allocate(cap_h_v(nc_loc,nv))
      allocate(cap_h_v_prime(nc_loc,nv))
 
+!$acc enter data create(rhs,h_x,g_x,psi,h0_x)
+
      ! Nonlinear arrays
      if (nonlinear_flag == 1) then
         if (nonlinear_method == 1) then
@@ -185,6 +187,8 @@ subroutine cgyro_init_manager
            allocate(fpack(n_radial,nsplit*n_toroidal))
            allocate(gpack(n_radial,nsplit*n_toroidal))
         endif
+
+!$acc enter data create(fpack,gpack,f_nl,g_nl)
      endif
 
      if (collision_model == 5) then
@@ -278,6 +282,9 @@ subroutine cgyro_init_manager
      allocate( vxmany(0:ny-1,0:nx-1,nsplit) )
      allocate( vymany(0:ny-1,0:nx-1,nsplit) )
      allocate( uvmany(0:ny-1,0:nx-1,nsplit) )
+
+!$acc enter data create(fxmany,fymany,gxmany,gymany) &
+!$acc&           create(uxmany,uymany,vxmany,vymany,uvmany)
 
      !-------------------------------------------------------------------
      ! 2D
