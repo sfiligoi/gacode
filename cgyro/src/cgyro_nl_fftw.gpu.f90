@@ -299,9 +299,12 @@ subroutine cgyro_nl_fftw(ij)
 
   call timer_lib_in('nl')
 
-!$acc kernels present(rhs(:,:,ij),psi)
-  rhs(:,:,ij) = rhs(:,:,ij)+((q*rho/rmin)*(2*pi/length))*psi(:,:)
-!$acc end kernels
+!$acc parallel loop collapse(2) independent present(rhs(:,:,ij),psi)
+  do iv_loc=1,nv_loc
+     do ic_loc=1,nc
+        rhs(ic_loc,iv_loc,ij) = rhs(ic_loc,iv_loc,ij)+((q*rho/rmin)*(2*pi/length))*psi(ic_loc,iv_loc)
+     enddo
+  enddo
 
   call timer_lib_out('nl')
 
