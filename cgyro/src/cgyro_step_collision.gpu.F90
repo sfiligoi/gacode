@@ -43,9 +43,9 @@ subroutine cgyro_step_collision
   call parallel_lib_nj_loc(nj_loc)
 
 !$acc parallel loop gang private(bvec, cvec) &
-!$acc& present(cmat)
+!$acc& present(cmat) 
   do ic=nc1,nc2
-!$acc cache(bvec, cvec)
+!$acc cache(bvec,cvec)
 
      ic_loc = ic-nc1+1
 
@@ -67,10 +67,11 @@ subroutine cgyro_step_collision
 !$acc loop vector
         do iv=1,nv
            cval = cmat(iv,ivp,ic_loc)
-           bvec(iv) = bvec(iv)+ cmplx(cval*cvec_re, cval*cvec_im)
+           bvec(iv) = bvec(iv)+ cmplx(cval*cvec_re,cval*cvec_im)
         enddo
      enddo
 
+    ! pack communication array while bvec still in cache
     do k=1,nproc
 !$acc loop vector
        do j=1,nj_loc

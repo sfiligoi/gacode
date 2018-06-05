@@ -1,5 +1,5 @@
 !------------------------------------------------------------------------------
-! cgyro_step_collision.F90
+! cgyro_step_collision.f90
 !
 ! PURPOSE:
 !  Take an implicit collision step using the pre-computed collision 
@@ -57,20 +57,21 @@ subroutine cgyro_step_collision
         cvec_im = aimag(cvec(ivp))
         do iv=1,nv
            cval = cmat(iv,ivp,ic_loc)
-           bvec(iv) = bvec(iv)+ cmplx(cval*cvec_re, cval*cvec_im)
+           bvec(iv) = bvec(iv)+ cmplx(cval*cvec_re,cval*cvec_im)
         enddo
      enddo
 
-    do k=1,nproc
-       do j=1,nj_loc
-          fsendf(j,ic_loc,k) = bvec(j+(k-1)*nj_loc)
-       enddo
-    enddo
+     ! Pack communication array while bvec still in cache
+     do k=1,nproc
+        do j=1,nj_loc
+           fsendf(j,ic_loc,k) = bvec(j+(k-1)*nj_loc)
+        enddo
+     enddo
 
      if (collision_field_model == 1) then
-       ! cap_h_v not re-used else
-       do iv=1,nv
-          cap_h_v(ic_loc,iv) = bvec(iv)
+        ! cap_h_v not re-used else
+        do iv=1,nv
+           cap_h_v(ic_loc,iv) = bvec(iv)
         enddo
      endif
   enddo
@@ -97,7 +98,7 @@ subroutine cgyro_step_collision
         psi(ic,iv_loc) = sum(jvec_c(:,ic,iv_loc)*field(:,ic))
         chi(ic,iv_loc) = sum(jxvec_c(:,ic,iv_loc)*field(:,ic))
      enddo
-     ! this should be coll_mem timer , but not easy with OMP
+     ! this should be coll_mem timer, but not easy with OMP
      do ic=1,nc
         cap_h_c(ic,iv_loc) = cap_h_ct(iv_loc,ic)
      enddo
