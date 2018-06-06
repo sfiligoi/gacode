@@ -40,7 +40,7 @@ subroutine cgyro_step_collision_simple
 
   call parallel_lib_nj_loc(nj_loc)
 
-!$acc data copyin(cap_h_v,px) present(ix_v,ie_v,is_v,ir_c,it_c,cmat_simple)
+!$acc data copyin(cap_h_v) present(ix_v,ie_v,is_v,ir_c,it_c,px,cmat_simple)
 
 !$acc parallel num_workers(4) vector_length(32)
 !$acc loop gang private(bvec,cvec,bvec_flat)
