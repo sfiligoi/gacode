@@ -38,7 +38,7 @@ subroutine cgyro_step_collision
 
   call parallel_lib_nj_loc(nj_loc)
 
-  ! Note that if GPU is absent, gpu_bibmem_flag will be reset to 0
+  ! Note that if GPU is absent, gpu_bigmem_flag will be reset to 0
 
   if (gpu_bigmem_flag == 1) then
 
