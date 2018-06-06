@@ -194,7 +194,7 @@ subroutine cgyro_field_c_gpu
   call timer_lib_out('field_com')
   call timer_lib_in('field')
   if (n_field > 2) then
-!$acc parallel loop independent private(tmp) present(fcoef) default(none)
+!$acc parallel loop independent present(fcoef) default(none)
      do ic=1,nc
        field(3,ic) = field(3,ic)*fcoef(3,ic)
      enddo
