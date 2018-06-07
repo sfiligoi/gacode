@@ -36,10 +36,10 @@ subroutine cgyro_step_collision
 
   call parallel_lib_nj_loc(nj_loc)
 
-!$omp parallel do private(ic,ic_loc, it, iv,ivp,cvec,bvec,cvec_re,cvec_im,cval) firstprivate(collision_model)
   do ic=nc1,nc2
 
      ic_loc = ic-nc1+1
+     ! Set-up the RHS: H = f + ze/T G phi
 
      it = it_c(ic)
 
