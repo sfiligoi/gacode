@@ -224,6 +224,6 @@ subroutine cgyro_field_coefficients
   enddo
   !-------------------------------------------------------------------------
 
-!$acc update device(fcoef,gcoef,dvjvec_c)
+!$acc update device(fcoef,gcoef,dvjvec_c,dvjvec_v)
 
 end subroutine cgyro_field_coefficients

@@ -67,6 +67,8 @@ contains
     allocate(fsendr(ni_loc,nj_loc,nproc))
     allocate(fsendr_real(ni_loc,nj_loc,nproc))
 
+!$acc enter data create(fsendf,fsendr)
+
   end subroutine parallel_lib_init
 
   !=========================================================
@@ -130,6 +132,38 @@ contains
 
   end subroutine parallel_lib_f_i_do
 
+  subroutine parallel_lib_f_i_do_gpu(ft)
+
+    use mpi
+
+    implicit none
+
+    complex, intent(inout), dimension(nj_loc,ni) :: ft
+    integer :: ierr
+
+#ifdef DISABLE_GPUDIRECT_MPI
+!$acc update host(fsendf)
+#else
+!$acc host_data use_device(fsendf,ft)
+#endif
+
+    call MPI_ALLTOALL(fsendf, &
+         nsend, &
+         MPI_DOUBLE_COMPLEX, &
+         ft, &
+         nsend, &
+         MPI_DOUBLE_COMPLEX, &
+         lib_comm, &
+         ierr)
+
+#ifdef DISABLE_GPUDIRECT_MPI
+!$acc update device(ft)
+#else
+!$acc end host_data
+#endif
+
+  end subroutine parallel_lib_f_i_do_gpu
+
   !=========================================================
 
   subroutine parallel_lib_r_do(f)
@@ -151,6 +185,38 @@ contains
          ierr)
 
   end subroutine parallel_lib_r_do
+
+  subroutine parallel_lib_r_do_gpu(f)
+
+    use mpi
+
+    implicit none
+
+    complex, intent(inout), dimension(ni_loc,nj) :: f
+
+    integer :: ierr
+
+#ifdef DISABLE_GPUDIRECT_MPI
+!$acc update host(fsendr)
+#else
+!$acc host_data use_device(fsendr,f)
+#endif
+
+    call MPI_ALLTOALL(fsendr, &
+         nsend, &
+         MPI_DOUBLE_COMPLEX, &
+         f, &
+         nsend, &
+         MPI_DOUBLE_COMPLEX, &
+         lib_comm, &
+         ierr)
+#ifdef DISABLE_GPUDIRECT_MPI
+!$acc update device(f)
+#else
+!$acc end host_data
+#endif
+
+  end subroutine parallel_lib_r_do_gpu
 
   subroutine parallel_lib_r_pack(ft)
 
@@ -220,6 +286,33 @@ contains
     enddo
 
   end subroutine parallel_lib_rtrans_pack
+
+  subroutine parallel_lib_rtrans_pack_gpu(fin)
+! -----------------------------------------
+! transpose version of parallel_lib_r_pack(fin)
+! -----------------------------------------
+
+    use mpi
+
+    implicit none
+
+    complex, intent(in), dimension(:,:) :: fin
+    integer :: j_loc,i,j,k,j1,j2
+
+    j1 = 1+iproc*nj_loc
+    j2 = (1+iproc)*nj_loc
+!$acc parallel loop collapse(3) independent private(j_loc) &
+!$acc&         present(fsendr,fin) default(none)
+    do k=1,nproc
+       do j=j1,j2
+          do i=1,ni_loc
+             j_loc = j-j1+1
+             fsendr(i,j_loc,k) = fin(i+(k-1)*ni_loc,j_loc)
+          enddo
+       enddo
+    enddo
+
+  end subroutine parallel_lib_rtrans_pack_gpu
 
   subroutine parallel_lib_rtrans(fin,f)
 ! -----------------------------------------
@@ -355,7 +448,12 @@ contains
     !-------------------------------------------------------
 !$acc data present(x,xt)
 
-!$acc host_data use_device(x,xt) 
+#ifdef DISABLE_GPUDIRECT_MPI
+!$acc update host(x)
+#else
+!$acc host_data use_device(x,xt)
+#endif
+ 
    call MPI_ALLTOALL(x, &
          nkeep*nsplit, &
          MPI_DOUBLE_COMPLEX, &
@@ -364,7 +462,11 @@ contains
          MPI_DOUBLE_COMPLEX, &
          slib_comm, &
          ierr)
+#ifdef DISABLE_GPUDIRECT_MPI
+!$acc update device(xt)
+#else
 !$acc end host_data
+#endif
 
 !$acc end data
 
@@ -436,7 +538,11 @@ contains
     !-------------------------------------------------------
 
 !$acc data present(xt,x)
+#ifdef DISABLE_GPUDIRECT_MPI
+!$acc update host(xt)
+#else
 !$acc host_data use_device(xt,x)
+#endif
 
     call MPI_ALLTOALL(xt, &
          nkeep*nsplit, &
@@ -447,7 +553,11 @@ contains
          slib_comm, &
          ierr)
 
+#ifdef DISABLE_GPUDIRECT_MPI
+!$acc update device(x)
+#else
 !$acc end host_data
+#endif
 !$acc end data
 
   end subroutine parallel_slib_r_nc_gpu

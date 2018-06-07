@@ -393,6 +393,7 @@ subroutine cgyro_make_profiles
   endif
 
   !-------------------------------------------------------------
+!$acc enter data copyin(px)
 
 !$acc update device(temp)
 

@@ -26,10 +26,10 @@ subroutine cgyro_step_collision_simple
   !----------------------------------------------------------------
   ! Perform data tranpose from _c to _v data layouts:
   call timer_lib_in('coll_mem')
-  call parallel_lib_rtrans_pack(cap_h_c)
+  call parallel_lib_rtrans_pack_gpu(cap_h_c)
   call timer_lib_out('coll_mem')
   call timer_lib_in('coll_comm')
-  call parallel_lib_r_do(cap_h_v)
+  call parallel_lib_r_do_gpu(cap_h_v)
   call timer_lib_out('coll_comm')
   !----------------------------------------------------------------
 
@@ -40,10 +40,10 @@ subroutine cgyro_step_collision_simple
 
   call parallel_lib_nj_loc(nj_loc)
 
-!$acc data copyin(cap_h_v,px) present(ix_v,ie_v,is_v,ir_c,it_c,cmat_simple)
-
-!$acc parallel num_workers(4) vector_length(32)
-!$acc loop gang private(bvec,cvec,bvec_flat)
+!$acc parallel loop gang num_workers(4) vector_length(32) &
+!$acc&         present(ix_v,ie_v,is_v,ir_c,it_c,px,cap_h_v,cmat_simple,fsendf) &
+!$acc&         private(bvec,cvec,bvec_flat) &
+!$acc&         private(ic_loc,ir,it) default(none)
   do ic=nc1,nc2
 
      ic_loc = ic-nc1+1
@@ -111,42 +111,35 @@ subroutine cgyro_step_collision_simple
      enddo
 
   enddo
-!$acc end parallel
-!$acc end data
 
   deallocate(bvec,cvec)
 
   call timer_lib_out('coll')
 
   call timer_lib_in('coll_comm')
-  call parallel_lib_f_i_do(cap_h_ct)
+  call parallel_lib_f_i_do_gpu(cap_h_ct)
   call timer_lib_out('coll_comm')
 
   call timer_lib_in('coll')
 
   ! Compute H given h and [phi(h), apar(h)]
 
-!$omp parallel do private(iv_loc,is,ic)
+!$acc parallel loop collapse(2) gang vector private(iv_loc,is) &
+!$acc&         present(is_v,psi,cap_h_c,cap_h_ct,cap_h_c,jvec_c,field,z,temp,h_x) &
+!$acc&         default(none)
   do iv=nv1,nv2
-     iv_loc = iv-nv1+1
-
      do ic=1,nc
+        iv_loc = iv-nv1+1
+        is = is_v(iv)
         psi(ic,iv_loc) = sum(jvec_c(:,ic,iv_loc)*field(:,ic))
-     enddo
-
-     do ic=1,nc
         cap_h_c(ic,iv_loc) = cap_h_ct(iv_loc,ic)
-     enddo
-
-     is = is_v(iv)
-
-     do ic=1,nc
         h_x(ic,iv_loc) = cap_h_c(ic,iv_loc)-psi(ic,iv_loc)*(z(is)/temp(is))
      enddo
   enddo
 
+
   call timer_lib_out('coll')
 
-  call cgyro_field_c
+  call cgyro_field_c_gpu
 
 end subroutine cgyro_step_collision_simple

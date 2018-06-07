@@ -53,7 +53,13 @@ subroutine cgyro_upwind
   call timer_lib_out('str')
 
   call timer_lib_in('str_comm')
+
+#ifdef DISABLE_GPUDIRECT_MPI
+!$acc update host(res_loc)
+#else
 !$acc host_data use_device(res_loc,res)
+#endif
+
   call MPI_ALLREDUCE(res_loc(:,:),&
        res(:,:),&
        size(res(:,:)),&
@@ -61,7 +67,13 @@ subroutine cgyro_upwind
        MPI_SUM,&
        NEW_COMM_1,&
        i_err)
+
+#ifdef DISABLE_GPUDIRECT_MPI
+!$acc update device(res)
+#else
 !$acc end host_data
+#endif
+
   call timer_lib_out('str_comm')
 
   call timer_lib_in('str')
