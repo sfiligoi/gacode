@@ -174,7 +174,7 @@ subroutine cgyro_init_manager
      allocate(cap_h_v(nc_loc,nv))
      allocate(cap_h_v_prime(nc_loc,nv))
 
-!$acc enter data create(rhs,h_x,g_x,psi,chi,h0_x,cap_h_c,dvjvec_c,jxvec_c)
+!$acc enter data create(rhs,h_x,g_x,psi,chi,h0_x,cap_h_c,cap_h_ct,cap_h_v,dvjvec_c,dvjvec_v,jxvec_c)
 
      ! Nonlinear arrays
      if (nonlinear_flag == 1) then

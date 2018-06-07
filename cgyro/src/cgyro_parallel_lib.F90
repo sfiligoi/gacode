@@ -67,6 +67,8 @@ contains
     allocate(fsendr(ni_loc,nj_loc,nproc))
     allocate(fsendr_real(ni_loc,nj_loc,nproc))
 
+!$acc enter data create(fsendf,fsendr)
+
   end subroutine parallel_lib_init
 
   !=========================================================
@@ -130,6 +132,28 @@ contains
 
   end subroutine parallel_lib_f_i_do
 
+  subroutine parallel_lib_f_i_do_gpu(ft)
+
+    use mpi
+
+    implicit none
+
+    complex, intent(inout), dimension(nj_loc,ni) :: ft
+    integer :: ierr
+
+!$acc host_data use_device(fsendf,ft)
+    call MPI_ALLTOALL(fsendf, &
+         nsend, &
+         MPI_DOUBLE_COMPLEX, &
+         ft, &
+         nsend, &
+         MPI_DOUBLE_COMPLEX, &
+         lib_comm, &
+         ierr)
+!$acc end host_data
+
+  end subroutine parallel_lib_f_i_do_gpu
+
   !=========================================================
 
   subroutine parallel_lib_r_do(f)
@@ -151,6 +175,29 @@ contains
          ierr)
 
   end subroutine parallel_lib_r_do
+
+  subroutine parallel_lib_r_do_gpu(f)
+
+    use mpi
+
+    implicit none
+
+    complex, intent(inout), dimension(ni_loc,nj) :: f
+
+    integer :: ierr
+
+!$acc host_data use_device(fsendr,f)
+    call MPI_ALLTOALL(fsendr, &
+         nsend, &
+         MPI_DOUBLE_COMPLEX, &
+         f, &
+         nsend, &
+         MPI_DOUBLE_COMPLEX, &
+         lib_comm, &
+         ierr)
+!$acc end host_data
+
+  end subroutine parallel_lib_r_do_gpu
 
   subroutine parallel_lib_r_pack(ft)
 
@@ -220,6 +267,33 @@ contains
     enddo
 
   end subroutine parallel_lib_rtrans_pack
+
+  subroutine parallel_lib_rtrans_pack_gpu(fin)
+! -----------------------------------------
+! transpose version of parallel_lib_r_pack(fin)
+! -----------------------------------------
+
+    use mpi
+
+    implicit none
+
+    complex, intent(in), dimension(:,:) :: fin
+    integer :: j_loc,i,j,k,j1,j2
+
+    j1 = 1+iproc*nj_loc
+    j2 = (1+iproc)*nj_loc
+!$acc parallel loop collapse(3) independent private(j_loc) &
+!$acc&         present(fsendr,fin) default(none)
+    do k=1,nproc
+       do j=j1,j2
+          do i=1,ni_loc
+             j_loc = j-j1+1
+             fsendr(i,j_loc,k) = fin(i+(k-1)*ni_loc,j_loc)
+          enddo
+       enddo
+    enddo
+
+  end subroutine parallel_lib_rtrans_pack_gpu
 
   subroutine parallel_lib_rtrans(fin,f)
 ! -----------------------------------------

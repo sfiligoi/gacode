@@ -20,9 +20,7 @@ subroutine cgyro_step_gk
   ! Bpar -> field(3)
 
   call timer_lib_in('str_mem')
-!$acc update device(field,psi,cap_h_c,chi)
 
-!$acc update device(h_x)
 !$acc parallel loop collapse(2) independent present(h0_x,h_x)
   do iv_loc=1,nv_loc
      do ic_loc=1,nc
@@ -98,10 +96,6 @@ subroutine cgyro_step_gk
   call cgyro_filter_gpu
   
   call timer_lib_out('str')
-  call timer_lib_in('str_mem')
-!$acc update host(h_x,rhs(:,:,1))
-!$acc update host(field,psi,cap_h_c,chi)
-  call timer_lib_out('str_mem')
 
 end subroutine cgyro_step_gk
   

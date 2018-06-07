@@ -62,6 +62,82 @@ subroutine cgyro_field_v
 
 end subroutine cgyro_field_v
 
+subroutine cgyro_field_v_gpu
+  use mpi
+  use timer_lib
+  use cgyro_globals
+
+  implicit none
+
+  integer :: i_f
+  complex :: field_loc_l 
+
+  call timer_lib_in('field')
+!$acc data present(cap_h_v)
+!$acc data present(field,field_loc)
+
+
+  ! Poisson and Ampere RHS integrals of H
+
+!$acc parallel loop collapse(2) independent default(none)
+   do ic=1,nc
+       do i_f=1,n_field
+        field_loc(i_f,ic) = (0.0,0.0)
+       enddo
+   enddo
+
+!$acc parallel loop collapse(2) gang private(ic_loc,field_loc_l) &
+!$acc&         present(dvjvec_v,cap_h_v,field_loc) default(none)
+  do ic=nc1,nc2
+    do i_f=1,n_field
+      ic_loc = ic-nc1+1
+      field_loc_l = (0.0,0.0)
+!$acc loop vector reduction(+:field_loc_l)
+      do iv=1,nv
+        field_loc_l = field_loc_l+dvjvec_v(i_f,ic_loc,iv)*cap_h_v(ic_loc,iv)
+     enddo
+     field_loc(i_f,ic) = field_loc_l
+    enddo
+  enddo
+
+  call timer_lib_out('field')
+
+  call timer_lib_in('field_com')
+
+!$acc host_data use_device(field_loc,field)
+  call MPI_ALLREDUCE(field_loc(:,:),&
+       field(:,:),&
+       size(field(:,:)),&
+       MPI_DOUBLE_COMPLEX,&
+       MPI_SUM,&
+       NEW_COMM_1,&
+       i_err)
+!$acc end host_data
+
+  call timer_lib_out('field_com')
+
+  call timer_lib_in('field')
+  ! Poisson LHS factors
+  if (n == 0 .and. ae_flag == 1) then
+    ! Note: Called rarely, use the CPU version
+!$acc update host(field)
+     call cgyro_field_ae('v')
+!$acc update device(field)
+  else
+!$acc parallel loop collapse(2) independent present(fcoef) default(none)
+     do ic=1,nc
+       do i_f=1,n_field
+        field(i_f,ic) = fcoef(i_f,ic)*field(i_f,ic)
+       enddo
+     enddo
+  endif
+
+!$acc end data
+!$acc end data
+
+  call timer_lib_out('field')
+
+end subroutine cgyro_field_v_gpu
 
 !-----------------------------------------------------------------
 ! Configuration (velocity-distributed) field solve
