@@ -21,7 +21,7 @@ then
    export PATH=$GACODE_ADD_ROOT/prefreya/bin:${PATH}
 fi
 
-export PYTHONPATH=$GACODE_ROOT/python:$OMFIT_ROOT:${PYTHONPATH}
+export PYTHONPATH=$GACODE_ROOT/python:${PYTHONPATH}
 
 export IDL_PATH=$GACODE_ROOT/gyro/vugyro:${IDL_PATH}
 
