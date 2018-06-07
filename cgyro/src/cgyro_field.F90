@@ -104,7 +104,12 @@ subroutine cgyro_field_v_gpu
 
   call timer_lib_in('field_com')
 
+#ifdef DISABLE_GPUDIRECT_MPI
+!$acc update host(field_loc)
+#else
 !$acc host_data use_device(field_loc,field)
+#endif
+
   call MPI_ALLREDUCE(field_loc(:,:),&
        field(:,:),&
        size(field(:,:)),&
@@ -112,7 +117,12 @@ subroutine cgyro_field_v_gpu
        MPI_SUM,&
        NEW_COMM_1,&
        i_err)
+
+#ifdef DISABLE_GPUDIRECT_MPI
+!$acc update device(field)
+#else
 !$acc end host_data
+#endif
 
   call timer_lib_out('field_com')
 
@@ -257,7 +267,12 @@ subroutine cgyro_field_c_gpu
   call timer_lib_out('field')
   call timer_lib_in('field_com')
 
+#ifdef DISABLE_GPUDIRECT_MPI
+!$acc update host(field_loc)
+#else
 !$acc host_data use_device(field_loc,field)
+#endif
+
   call MPI_ALLREDUCE(field_loc(:,:),&
        field(:,:),&
        size(field(:,:)),&
@@ -265,7 +280,12 @@ subroutine cgyro_field_c_gpu
        MPI_SUM,&
        NEW_COMM_1,&
        i_err)
+
+#ifdef DISABLE_GPUDIRECT_MPI
+!$acc update device(field)
+#else
 !$acc end host_data
+#endif
 
   call timer_lib_out('field_com')
   call timer_lib_in('field')
