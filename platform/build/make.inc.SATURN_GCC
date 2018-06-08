@@ -51,3 +51,8 @@ ifdef PETSC_DIR
   PETSC_LIB += -Wl,-rpath,$(PETSC_DIR)/lib -L$(PETSC_DIR)/lib -lpetsc -lsuperlu
   PETSC_INC += -I$(PETSC_DIR)/include
 endif
+
+ifdef CUDA_DIR
+  CUDA_LIB += -L$(CUDA_DIR)/lib64 -lcusolver -lcudart -lcusparse
+  CUDA_INC += -I$(CUDA_DIR)/include
+endif
