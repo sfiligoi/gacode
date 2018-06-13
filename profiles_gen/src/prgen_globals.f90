@@ -20,7 +20,6 @@ module prgen_globals
   integer :: noq_flag
   integer :: nop_flag
   integer :: verbose_flag
-  integer :: gmerge_flag
   character (len=70) :: efit_header
   integer :: ipccw
   integer :: btccw
