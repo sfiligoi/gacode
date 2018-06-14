@@ -213,7 +213,7 @@ class NEOData:
         import numpy as np
 
         try:
-            data = np.loadtxt(self.dirname+'/out.neo.transport_exp')
+            data = np.atleast_2d(np.loadtxt(self.dirname+'/out.neo.transport_exp'))
         except:
             if self.verbose:
                 print "ERROR (NEOData): Fatal error!  Missing out.neo.transport_exp."
