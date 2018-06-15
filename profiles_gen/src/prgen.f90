@@ -41,7 +41,6 @@ program prgen
   read(1,*) noq_flag
   read(1,*) nop_flag
   read(1,*) verbose_flag
-  read(1,*) gmerge_flag
   read(1,*) ipccw
   read(1,*) btccw
   read(1,*) nfourier
@@ -142,7 +141,6 @@ program prgen
   endif
   !------------------------------------------------------------------
 
-
   !---------------------------------------------------
   ! Read the GATO file for "better" geometry.  At this
   ! point, GATO has already run and we are just reading 
@@ -155,15 +153,12 @@ program prgen
   case (2)
      ! Use GATO-EFIT mapper
      call prgen_read_gato
-     print '(a)','INFO: (prgen) Wrote input.profiles.geo.'
   case (3)
      ! Use OMFIT-EFIT mapper
      call prgen_read_omfit
-     print '(a)','INFO: (prgen) Wrote input.profiles.geo'
   case (4,5)
      ! Use DSKGATO data
      call prgen_read_dskgato
-     print '(a)','INFO: (prgen) Wrote input.profiles.geo'
   end select
   !---------------------------------------------------
 
@@ -185,14 +180,7 @@ program prgen
      call prgen_map_inputprofiles
   end select
 
-  ! Handle special case of generating input.profiles.extra
-  if (format_type == 7 .and. gmerge_flag == 0) then
-     call EXPRO_write_derived(1,'input.profiles.extra')
-     print '(a)','INFO: (prgen) Wrote input.profiles.extra.'
-     call prgen_write
-  else
-     call prgen_write
-  endif
+  call prgen_write
   call EXPRO_alloc('./',0)
 
   ! Successful completion

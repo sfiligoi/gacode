@@ -114,9 +114,6 @@ subroutine prgen_write
 
   case (7)
 
-     if (gmerge_flag == 1) then
-        write(1,40) '#          SHOT NUMBER : [DATA MODIFIED WITH GMERGE]'
-     endif
      write(1,20) '#'
      write(1,'(a)') '#'
      write(1,'(a)') header
@@ -248,7 +245,7 @@ subroutine prgen_write
   !
   call EXPRO_write(1)
   close(1)
-  print '(a)','INFO: (prgen) Wrote input.profiles.'
+  print '(a)','INFO: (prgen_write) Wrote input.profiles.'
   !-------------------------------------------------------------------------------------
 
   !-----------------------------------------------------------
@@ -267,7 +264,7 @@ subroutine prgen_write
   !
   call EXPRO_compute_derived
   call EXPRO_write_derived(1,'input.profiles.extra')
-  print '(a)','INFO: (prgen) Wrote input.profiles.extra.'
+  print '(a)','INFO: (prgen_write) Wrote input.profiles.extra.'
   !-----------------------------------------------------------------------------------
 
 20 format(5(a))
