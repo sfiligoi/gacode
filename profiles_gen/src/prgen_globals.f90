@@ -183,6 +183,8 @@ module prgen_globals
   !
   integer :: plst_shot_number
   character (len=32) :: plst_tokamak_id
+  integer :: plst_btccw
+  integer :: plst_ipccw
   integer :: plst_dim_nrho
   integer :: plst_dim_nrho_eq_geo
   integer :: plst_dp1_nspec_th

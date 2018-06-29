@@ -50,7 +50,7 @@ program prgen
   read(1,*) n_lump
   allocate(lump_vec(n_lump))
   read(1,*) lump_vec(:)
- close(1)
+  close(1)
   !--------------------------------------------------
 
   !------------------------------------------------------------------
@@ -162,6 +162,16 @@ program prgen
   end select
   !---------------------------------------------------
 
+  !--------------------------------------------------
+  ! Set ipccw and btccw if not defined at input
+  if(ipccw == 0) then
+     ipccw = 1
+  endif
+  if(btccw == 0) then
+     btccw = -1
+  endif
+  !---------------------------------------------------
+  
   select case (format_type)
 
   case (0)

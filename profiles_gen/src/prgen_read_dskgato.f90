@@ -108,9 +108,13 @@ subroutine prgen_read_dskgato
   if (psi(nsurf) < 0.0) then
      ! Flux negative
      psi(:) = -psi(:)
-     ipccw  = 1
+     if(ipccw == 0) then
+        ipccw  = 1
+     endif
   else
-     ipccw = -1
+     if(ipccw == 0) then
+        ipccw = -1
+     endif
   endif
   !----------------------------------------------------
 

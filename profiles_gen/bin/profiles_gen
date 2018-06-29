@@ -328,8 +328,8 @@ LUMP_FAST_FLAG=0
 # Number of points for -i null option
 N_NULL=40
 
-IPCCW=1
-BTCCW=-1
+IPCCW=0
+BTCCW=0
 NFOURIER=24
 
 # GATO variables

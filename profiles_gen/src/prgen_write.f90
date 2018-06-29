@@ -196,7 +196,7 @@ subroutine prgen_write
      EXPRO_b_ref = -btccw*abs(onetwo_Btor)
      EXPRO_arho  = onetwo_rho_grid(nx)
      EXPRO_rvbv  = onetwo_R0*onetwo_Btor
-     EXPRO_ip_exp = ip_tot
+     EXPRO_ip_exp = -ipccw*abs(ip_tot)
   case (2)
      ! plasmastate 
      EXPRO_b_ref = -btccw*abs(plst_b_axis_vac)
