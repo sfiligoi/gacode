@@ -272,6 +272,6 @@ subroutine prgen_write
 25 format(a,i2)
 30 format(a,i3)
 40 format(a,i6)
-60 format(a,1pe13.7)
+60 format(a,1pe14.7)
 
 end subroutine prgen_write
