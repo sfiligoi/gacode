@@ -124,6 +124,8 @@ subroutine cgyro_kernel
 
      ! Error estimate
      call cgyro_error_estimate
+     ! Exit if error too large
+     if (error_status > 0) exit
      !------------------------------------------------------------
 
      !---------------------------------------
@@ -145,8 +147,8 @@ subroutine cgyro_kernel
      ! Don't wrap timer output in a timer
      if (mod(i_time,print_step) == 0) call write_timers(trim(path)//runfile_timers)
 
-     ! Trap error or convergence
-     if (error_status > 0 .or. signal == 1) exit
+     ! Exit if convergenced
+     if (signal == 1) exit
 
   enddo
   !---------------------------------------------------------------------------
