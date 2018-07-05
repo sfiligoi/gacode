@@ -113,6 +113,12 @@
    nn_p_ped = OUTPUT_PARAMETERS(1)*1e6*tgyro_ped_scale
    nn_t_ped = (10*nn_p_ped)/(2*(1e13*nped_in)*k)
 
+   if ((nn_w_ped .le.0.0).or.(nn_p_ped.le.0.0)) then
+      write(*,*)'ERROR: EPED1-NN pedestal height is ',nn_p_ped
+      write(*,*)'ERROR: EPED1-NN pedestal width is ',nn_w_ped
+      stop
+   endif
+
    nn_n_cor = nped_in*1.5
    nn_t_cor = t_axis
 
