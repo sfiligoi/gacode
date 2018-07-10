@@ -88,9 +88,9 @@
 
    INPUT_PARAMETERS( 1) = a_in
    INPUT_PARAMETERS( 2) = betan_in
-   INPUT_PARAMETERS( 3) = bt_in
+   INPUT_PARAMETERS( 3) = abs(bt_in)
    INPUT_PARAMETERS( 4) = delta_in
-   INPUT_PARAMETERS( 5) = ip_in
+   INPUT_PARAMETERS( 5) = abs(ip_in)
    INPUT_PARAMETERS( 6) = kappa_in
    INPUT_PARAMETERS( 7) = m_in
    INPUT_PARAMETERS( 8) = nped_in
