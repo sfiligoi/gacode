@@ -111,7 +111,7 @@
       INTEGER :: kygrid_model_in=1
       INTEGER :: xnu_model_in=2
       INTEGER :: vpar_model_in=0
-      INTEGER :: vpar_shear_model_in=0
+      INTEGER :: vpar_shear_model_in=1    
       REAL :: alpha_n_in =0.0  !not used
       REAL :: alpha_t_in =0.0  !not used
 ! Input signs

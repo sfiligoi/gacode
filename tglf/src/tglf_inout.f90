@@ -337,8 +337,8 @@ SUBROUTINE put_model_parameters(adi_elec,alpha_e,alpha_p,alpha_mach,  &
   if(kygrid_model.lt.0.or.kygrid_model.gt.5)kygrid_model = kygrid_model_in
   if(xnu_model.lt.0.or.xnu_model.gt.3)xnu_model = xnu_model_in
   if(sat_rule.lt.0.or.sat_rule.gt.1)sat_rule=sat_rule_in
-  if(vpar_model.lt.-1.or.vpar_model.gt.1)vpar_model=vpar_model_in
-  if(vpar_shear_model.lt.0.or.vpar_shear_model.gt.1)vpar_shear_model=vpar_shear_model_in
+  !if(vpar_model.lt.-1.or.vpar_model.gt.1)vpar_model=vpar_model_in
+  !if(vpar_shear_model.lt.0.or.vpar_shear_model.gt.1)vpar_shear_model=vpar_shear_model_in
   !
   ! transfer values
   !
@@ -354,8 +354,8 @@ SUBROUTINE put_model_parameters(adi_elec,alpha_e,alpha_p,alpha_mach,  &
   sat_rule_in = sat_rule
   xnu_model_in = xnu_model
   kygrid_model_in = kygrid_model
-  vpar_model_in = vpar_model
-  vpar_shear_model_in = vpar_shear_model
+  !vpar_model_in = vpar_model      depreciated input switches
+  !vpar_shear_model_in = vpar_shear_model    depreciated input switches
   !
   if(alpha_quench_in .ne.0.0)then
      ! turn off spectral shift and model and only use Waltz quench rule
