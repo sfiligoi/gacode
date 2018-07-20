@@ -35,7 +35,7 @@ subroutine cgyro_write_restart_one
   use cgyro_globals
   use cgyro_io
 #ifdef __INTEL_COMPILER
-  ! ifort need ifport module to use rename()
+  ! ifort defined rename in the ifport module
   use ifport
 #endif
 
@@ -51,6 +51,10 @@ subroutine cgyro_write_restart_one
   integer(kind=MPI_OFFSET_KIND) :: disp
   integer(kind=MPI_OFFSET_KIND) :: offset1
   !----------------------------------------------
+
+#ifndef __INTEL_COMPILER
+  integer :: rename
+#endif
 
   !-----------------------------------------------
   ! Dump h and blending coefficients:
