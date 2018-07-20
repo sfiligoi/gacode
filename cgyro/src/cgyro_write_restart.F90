@@ -34,7 +34,10 @@ subroutine cgyro_write_restart_one
   use mpi
   use cgyro_globals
   use cgyro_io
+#ifdef __INTEL_COMPILER
+  ! ifort need ifport module to use rename()
   use ifport
+#endif
 
   !----------------------------------------------
   implicit none
