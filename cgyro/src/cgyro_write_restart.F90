@@ -34,6 +34,10 @@ subroutine cgyro_write_restart_one
   use mpi
   use cgyro_globals
   use cgyro_io
+#ifdef __INTEL_COMPILER
+  ! ifort defined rename in the ifport module
+  use ifport
+#endif
 
   !----------------------------------------------
   implicit none
@@ -47,6 +51,10 @@ subroutine cgyro_write_restart_one
   integer(kind=MPI_OFFSET_KIND) :: disp
   integer(kind=MPI_OFFSET_KIND) :: offset1
   !----------------------------------------------
+
+#ifndef __INTEL_COMPILER
+  integer :: rename
+#endif
 
   !-----------------------------------------------
   ! Dump h and blending coefficients:
@@ -63,14 +71,19 @@ subroutine cgyro_write_restart_one
   ! TODO Error handling
   call MPI_INFO_CREATE(finfo,i_err)
 
+  ! write to a temp file name first, so we don't end up with partially written files
   call MPI_INFO_SET(finfo,"striping_factor",mpiio_stripe_str,i_err)
 
   call MPI_FILE_OPEN(CGYRO_COMM_WORLD,&
-          trim(path)//runfile_restart,&
+          trim(path)//runfile_restart//".part",&
           filemode,&
           finfo,&
           fhv,&
           i_err)
+  if (i_err /= 0) then
+     call cgyro_error('ERROR: (CGYRO) MPI_FILE_OPEN in cgyro_write_restart failed')
+     return
+  endif
 
   call MPI_FILE_SET_VIEW(fhv,&
           disp,&
@@ -94,7 +107,30 @@ subroutine cgyro_write_restart_one
   endif
 
   call MPI_FILE_SYNC(fhv,i_err)
+  if (i_err /= 0) then
+     call cgyro_error('ERROR: (CGYRO) MPI_FILE_SYNC in cgyro_write_restart failed')
+     return
+  endif
+
   call MPI_FILE_CLOSE(fhv,i_err)
+  if (i_err /= 0) then
+     call cgyro_error('ERROR: (CGYRO) MPI_FILE_CLOSE in cgyro_write_restart failed')
+     return
+  endif
+
   call MPI_INFO_FREE(finfo,i_err)
+
+  ! now that we know things worked well, move the file in its final location
+  if (i_proc == 0) then 
+    ! but first try to save any existing file
+    i_err = RENAME(trim(path)//runfile_restart, trim(path)//runfile_restart//".old")
+    ! NOTE: We will not check if it succeeded... not important, may not even exist (yet)
+
+    i_err = RENAME(trim(path)//runfile_restart//".part", trim(path)//runfile_restart)
+    if (i_err /= 0) then
+       call cgyro_error('ERROR: (CGYRO) Final rename in cgyro_write_restart failed')
+       return
+    endif
+  endif
 
 end subroutine cgyro_write_restart_one
