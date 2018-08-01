@@ -37,6 +37,9 @@ nr = sim.n_radial
 nn = sim.n_n
 ns = sim.n_species
 
+nx = nr
+ny = 2*nn-1
+
 epx = np.zeros([nx,nr],dtype=np.complex)
 eny = np.zeros([ny,nn],dtype=np.complex)
 x = np.zeros([nx])
@@ -80,6 +83,41 @@ def maptoreal(nr,nn,nx,ny,c):
     for p in range(nr):
         for n in range(nn):
             f[:,:] = f[:,:]+np.real(c[p,n]*np.outer(epx[:,p],eny[:,n]))
+    
+    end = time.time()
+  
+    return f,str(end-start)
+#------------------------------------------------------------------------
+
+# FFT version
+def maptoreal_fft(nr,nn,c):
+
+    import numpy as np
+    import time
+
+    d = np.zeros([nr,2*nn-1],dtype=np.complex)
+    d[0:nr,0:nn] = c[:,:]
+    for iy in range(nn):
+       for ix in range(-nr/2+1,nr/2-1):
+          # d[ ix,-iy] = c[-ix,iy]^* 
+          i  = ix
+          im = -ix
+          n  = iy
+          nm = -iy
+          if ix < 0:
+             i = ix+nr
+          if iy < 0:
+             n = iy+2*nn-1
+          if -ix < 0:
+             im = -ix+nr
+          if -iy < 0:
+             nm = -iy+2*nn-1
+          
+          d[i,nm] = np.conj(c[im,n])
+          
+    start = time.time()
+
+    f = np.real(np.fft.fft2(d))
     
     end = time.time()
   
@@ -152,6 +190,7 @@ def frame():
          gapy.realfluct(c,f)
       else:
          f,t = maptoreal(nr,nn,nx,ny,c)
+         #f,t = maptoreal_fft(nr,nn,c)
          
       if fmin == 'auto':
          f0=np.min(f)
