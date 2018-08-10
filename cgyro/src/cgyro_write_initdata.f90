@@ -14,9 +14,8 @@ subroutine cgyro_write_initdata
 
   integer :: p,in,is
   real :: kymax
-  real(kind=4) :: f4vec(n_theta) 
   real, external :: spectraldiss
-
+  
   !----------------------------------------------------------------------------
   ! Runfile to give complete summary to user
   ! 
@@ -95,7 +94,11 @@ subroutine cgyro_write_initdata
      write(io,20) '    R/a:',rmaj, '  shift:',shift,  '  betae:',betae_unit
      write(io,20) '      q:',q,    '      s:',s,      ' beta_*:',beta_star(0)
      write(io,20) '  kappa:',kappa,'s_kappa:',s_kappa,' lamb_*:',lambda_star
-     write(io,20) '  delta:',delta,'s_delta:',s_delta,'gamma_e:',gamma_e
+     if (nonlinear_flag == 1) then
+        write(io,20) '  delta:',delta,'s_delta:',s_delta,'gamma_e:',gamma_e
+     else
+        write(io,20) '  delta:',delta,'s_delta:',s_delta,'gamma_e:',gamma_e,'[OFF]'
+     endif
      write(io,20) '   zeta:',zeta, ' s_zeta:',s_zeta, 'gamma_p:',gamma_p
      write(io,20) '   zmag:',zmag, '  dzmag:',dzmag,  '   mach:',mach
 
@@ -180,30 +183,18 @@ subroutine cgyro_write_initdata
   if (silent_flag == 0 .and. i_proc == 0) then
 
      open(unit=io,file=trim(path)//'bin.cgyro.geo',status='replace',access='stream')
-     f4vec = theta
-     write(io) f4vec
-     f4vec = w_theta
-     write(io) f4vec
-     f4vec = bmag
-     write(io) f4vec
-     f4vec = omega_stream(:,1)
-     write(io) f4vec
-     f4vec = omega_trap(:,1)
-     write(io) f4vec
-     f4vec = omega_rdrift(:,1)
-     write(io) f4vec
-     f4vec = omega_adrift(:,1) 
-     write(io) f4vec
-     f4vec = omega_aprdrift(:,1)
-     write(io) f4vec
-     f4vec = omega_cdrift(:,1)
-     write(io) f4vec
-     f4vec = omega_cdrift_r(:,1)
-     write(io) f4vec
-     f4vec = omega_gammap(:)
-     write(io) f4vec
-     f4vec = k_perp(ic_c(n_radial/2+1,:))
-     write(io) f4vec
+     write(io) real(theta,kind=4)
+     write(io) real(w_theta,kind=4)
+     write(io) real(bmag,kind=4)
+     write(io) real(omega_stream(:,1),kind=4)
+     write(io) real(omega_trap(:,1),kind=4)
+     write(io) real(omega_rdrift(:,1),kind=4)
+     write(io) real(omega_adrift(:,1),kind=4)
+     write(io) real(omega_aprdrift(:,1),kind=4)
+     write(io) real(omega_cdrift(:,1),kind=4)
+     write(io) real(omega_cdrift_r(:,1),kind=4)
+     write(io) real(omega_gammap(:),kind=4)
+     write(io) real(k_perp(ic_c(n_radial/2+1,:)),kind=4)
      close(io)
 
   endif
