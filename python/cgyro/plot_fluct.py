@@ -215,7 +215,8 @@ def frame():
          f1=float(fmax)
 
       xp = x/(2*np.pi)*sim.length
-      yp = y/sim.ky[1]
+      # ky[1] < 0 is possible
+      yp = y/np.abs(sim.ky[1])
       aspect = max(yp)/max(xp)
 
       fig = plt.figure(figsize=(8,8*aspect))
