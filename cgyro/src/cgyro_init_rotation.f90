@@ -419,7 +419,7 @@ subroutine cgyro_init_rotation
         enddo
         if (silent_flag == 0 .and. i_proc == 0) then
            open(unit=io,file=trim(path)//'out.cgyro.rotation_2',status='old',position='append')
-           write(io,'(es16.9,1x)') (dlnndr(is)*dens(is)*sum1*sum_j+sum2+sum3)/sum4-sum_jr/sum_j
+           write(io,'(es16.9,2x)') sum1, (dlnndr(is)*dens(is)*sum1*sum_j+sum2+sum3)/sum4-sum_jr/sum_j
            close(io)
            !print *, (sum2+sum3)/sum4-sum_jr/sum_j, (1e-5*sum_j+sum2+sum3)/sum4-sum_jr/sum_j
         endif
