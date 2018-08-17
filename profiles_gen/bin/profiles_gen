@@ -973,7 +973,7 @@ if [ $EFIT_METHOD -eq 3 ] ; then
       medium) RES="resolution=0.002 uniform=750 levels=256" ;;
       high)   RES="resolution=0.001 uniform=1000 levels=512" ;;
    esac
-   OMFIT_OPT="rhoVSpsi='rho' averages=0 namelist=0 fluxsurfaces=1 maxPSI=0.9999 gfiles='$GFILE'"
+   OMFIT_OPT="rhoVSpsi='rho' maxPSI=0.9999 gfiles='$GFILE'"
    echo "INFO: (omfit) Running with parameters: $RES"
    echo "INFO: (omfit) Fixed mapper parameters: $OMFIT_OPT"
    python $OMFIT fluxSurfaceTracer $RES $OMFIT_OPT >& out.omfit.info
