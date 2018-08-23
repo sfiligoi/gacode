@@ -206,29 +206,29 @@ subroutine cgyro_write_initdata
   if (silent_flag == 0 .and. i_proc == 0) then
 
      open(unit=io,file=trim(path)//runfile_grids,status='replace')
-     write(io,'(i4)') n_toroidal
-     write(io,'(i4)') n_species
-     write(io,'(i4)') n_field
-     write(io,'(i4)') n_radial
-     write(io,'(i4)') n_theta
-     write(io,'(i4)') n_energy
-     write(io,'(i4)') n_xi
-     write(io,'(i4)') box_size
-     write(io,'(1pe12.5)') length/rho
-     write(io,'(i4)') n_global
-     write(io,'(i4)') theta_plot
-     write(io,'(i4)') px(:)
-     write(io,'(1pe12.5)') theta(:)
-     write(io,'(1pe12.5)') energy(:)
-     write(io,'(1pe12.5)') xi(:)
-     write(io,'(1pe12.5)') transpose(thetab(:,:))
+     write(io,'(i0)') n_toroidal
+     write(io,'(i0)') n_species
+     write(io,'(i0)') n_field
+     write(io,'(i0)') n_radial
+     write(io,'(i0)') n_theta
+     write(io,'(i0)') n_energy
+     write(io,'(i0)') n_xi
+     write(io,'(i0)') box_size
+     write(io,'(1pe13.6)') length/rho
+     write(io,'(i0)') n_global
+     write(io,'(i0)') theta_plot
+     write(io,'(i0)') px(:)
+     write(io,'(1pe13.6)') theta(:)
+     write(io,'(1pe13.6)') energy(:)
+     write(io,'(1pe13.6)') xi(:)
+     write(io,'(1pe13.6)') transpose(thetab(:,:))
      if (n_toroidal > 1) then
-        write(io,'(1pe12.5)') (rho*q/rmin*in,in=0,n_toroidal-1)
+        write(io,'(1pe13.6)') (rho*q/rmin*in,in=0,n_toroidal-1)
      else
-        write(io,'(1pe12.5)') rho*q/rmin
+        write(io,'(1pe13.6)') rho*q/rmin
      endif
-     write(io,'(1pe12.5)') (spectraldiss((pi/n_toroidal)*in,nup_alpha),in=0,n_toroidal-1)
-     write(io,'(1pe12.5)') (spectraldiss((2*pi/n_radial)*p,nup_radial),p=-n_radial/2,n_radial/2-1)
+     write(io,'(1pe13.6)') (spectraldiss((pi/n_toroidal)*in,nup_alpha),in=0,n_toroidal-1)
+     write(io,'(1pe13.6)') (spectraldiss((2*pi/n_radial)*p,nup_radial),p=-n_radial/2,n_radial/2-1)
      close(io)
 
   endif

@@ -77,6 +77,7 @@ module neo_globals
   integer :: n_xi
   integer :: n_theta
   integer :: n_radial
+  integer :: constant_stream_flag
   integer :: is_ele
   integer :: matsz_scalefac
   !---------------------------------------------------------------
