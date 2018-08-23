@@ -346,8 +346,9 @@ subroutine cgyro_init_arrays
 
         omega_s(:,ic,iv_loc) = carg*jvec_c(:,ic,iv_loc)
 
-        ! Profile curvature via wavenumber advection
-        carg = k_theta*length*(sdlnndr(is)+sdlntdr(is)*(energy(ie)-1.5))/(2*pi)
+        ! Profile curvature via wavenumber advection (ix -> d/dp)
+        ! See whiteboard notes 
+        carg = -k_theta*length*(sdlnndr(is)+sdlntdr(is)*(energy(ie)-1.5))/(2*pi)
 
         ! This array *not* used by OpenACC
         omega_ss(:,ic,iv_loc) = carg*jvec_c(:,ic,iv_loc)

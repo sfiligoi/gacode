@@ -201,6 +201,7 @@
       REAL :: midplane_shear=1.0
       REAL :: kx0_factor=1.0
 ! output
+      COMPLEX,DIMENSION(3,nb) :: field_weight_QL_out=0.0
       COMPLEX,DIMENSION(maxmodes,3,nb) :: field_weight_out=0.0
       COMPLEX,DIMENSION(maxmodes,3,max_plot) :: plot_field_out=0.0
       REAL,DIMENSION(max_plot) :: plot_angle_out=0.0
