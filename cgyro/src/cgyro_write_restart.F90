@@ -56,6 +56,17 @@ subroutine cgyro_write_restart_one
   integer :: rename
 #endif
 
+  character(8)  :: sdate
+  character(10) :: stime
+  character(5)  :: szone
+  integer(KIND=8) :: start_time,cp_time
+  integer(KIND=8) :: count_rate, count_max
+  real :: cp_dt
+  integer :: statusfd
+
+  ! use system_clock to be consistent with cgyro_kernel
+  call system_clock(start_time,count_rate,count_max)
+
   !-----------------------------------------------
   ! Dump h and blending coefficients:
   !
@@ -131,6 +142,21 @@ subroutine cgyro_write_restart_one
        call cgyro_error('ERROR: (CGYRO) Final rename in cgyro_write_restart failed')
        return
     endif
+  endif
+
+  call system_clock(cp_time,count_rate,count_max)
+  if (cp_time.gt.start_time) then
+    cp_dt = (cp_time-start_time)/real(count_rate)
+  else
+    cp_dt = (cp_time-start_time+count_max)/real(count_rate)
+  endif
+
+  if (i_proc == 0) then
+    call date_and_time(sdate,stime,szone);
+    open(NEWUNIT=statusfd,FILE=trim(path)//runfile_startups,action="write",access="append",status="unknown")
+    write(statusfd, '(a,a,a,a,a,a,a,a,a,a,a,a,a,1pe10.3)') sdate(1:4),"/",sdate(5:6),"/",sdate(7:8)," ", &
+                    stime(1:2),":",stime(3:4),":",stime(5:10), szone, ' [CHECKPOINTED] Checkpoint time: ', cp_dt
+    close(statusfd)
   endif
 
 end subroutine cgyro_write_restart_one

@@ -217,6 +217,7 @@ module cgyro_globals
   character(len=14) :: runfile_prec    = 'out.cgyro.prec'
   character(len=14) :: runfile_time    = 'out.cgyro.time'
   character(len=16) :: runfile_timers  = 'out.cgyro.timing'
+  character(len=18) :: runfile_startups= 'out.cgyro.startups'
   character(len=14) :: runfile_freq    = 'out.cgyro.freq'
   character(len=14) :: binfile_freq    = 'bin.cgyro.freq'
   character(len=12) :: binfile_hb      = 'bin.cgyro.hb'
