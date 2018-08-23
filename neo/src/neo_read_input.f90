@@ -13,6 +13,7 @@ subroutine neo_read_input
   read(1,*) n_xi
   read(1,*) n_theta
   read(1,*) n_radial
+  read(1,*) constant_stream_flag
   read(1,*) matsz_scalefac
   read(1,*) rmin_1_in
   read(1,*) rmin_2_in

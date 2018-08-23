@@ -27,7 +27,7 @@ endif
 
 FMATH	= -fdefault-real-8 -fdefault-double-8
 FOPT	= -O3 -framework Accelerate
-FDEBUG  = -Wall -fcheck=all -ffpe-trap=invalid,zero,overflow
+FDEBUG  = -Wall -fcheck=all -ffpe-trap=invalid,zero,overflow -O3 -framework Accelerate
 F2PY    = f2py
 
 # System math libraries
