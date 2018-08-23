@@ -22,9 +22,13 @@ subroutine cgyro_kernel
 
   character(len=30) :: final_msg
 
-  integer(KIND=8) :: start_time,aftermpi_time, beforetotal_time
+  character(8)  :: date
+  character(10) :: time
+  character(5)  :: zone
+  integer(KIND=8) :: start_time,aftermpi_time, beforetotal_time,exit_time
   integer(KIND=8) :: count_rate, count_max
-  real :: mpi_dt, init_dt
+  real :: mpi_dt, init_dt,exit_dt
+  integer :: statusfd
 
   ! the time_lib relies on MPI being initalized, so need to use lower level functions for this
   call system_clock(start_time,count_rate,count_max)
@@ -87,7 +91,11 @@ subroutine cgyro_kernel
   endif
 
   if (i_proc == 0) then
-    print '(a,1pe9.3,a,1pe9.3,a)', 'Startup time: ', init_dt, " (mpi init: ", mpi_dt, ")"
+    call date_and_time(date,time,zone);
+    open(NEWUNIT=statusfd,FILE=trim(path)//runfile_startups,action="write",access="append",status="unknown")
+    write(statusfd, '(a,a,a,a,a,a,a,a,a,a,a,a,a,1pe10.3,a,1pe10.3,a)') date(1:4),"/",date(5:6),"/",date(7:8)," ", &
+                    time(1:2),":",time(3:4),":",time(5:10), zone, ' [STARTED] Initialization time: ', init_dt, " (mpi init: ", mpi_dt, ")"
+    close(statusfd)
   endif
 
   do i_time=1,n_time
@@ -259,6 +267,21 @@ subroutine cgyro_kernel
   if(allocated(xzf))           deallocate(xzf)
 
   if (allocated(cmat)) deallocate(cmat)
+
+  call system_clock(exit_time,count_rate,count_max)
+  if (exit_time.gt.start_time) then
+    exit_dt = (exit_time-start_time)/real(count_rate)
+  else
+    exit_dt = (exit_time-start_time+count_max)/real(count_rate)
+  endif
+
+  if (i_proc == 0) then
+    call date_and_time(date,time,zone);
+    open(NEWUNIT=statusfd,FILE=trim(path)//runfile_startups,action="write",access="append",status="unknown")
+    write(statusfd, '(a,a,a,a,a,a,a,a,a,a,a,a,a,1pe10.3)') date(1:4),"/",date(5:6),"/",date(7:8)," ", &
+                    time(1:2),":",time(3:4),":",time(5:10), zone, ' [EXIT] After ', exit_dt
+    close(statusfd)
+  endif
 
 end subroutine cgyro_kernel
 
