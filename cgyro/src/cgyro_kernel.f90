@@ -22,6 +22,13 @@ subroutine cgyro_kernel
 
   character(len=30) :: final_msg
 
+  integer(KIND=8) :: start_time,aftermpi_time, beforetotal_time
+  integer(KIND=8) :: count_rate, count_max
+  real :: mpi_dt, init_dt
+
+  ! the time_lib relies on MPI being initalized, so need to use lower level functions for this
+  call system_clock(start_time,count_rate,count_max)
+
   i_time = 0
 
   ! Need to initialize the info runfile very early
@@ -32,6 +39,13 @@ subroutine cgyro_kernel
   ! 1. MPI setup
   call cgyro_mpi_grid
   if (error_status > 0) goto 100
+
+  call system_clock(aftermpi_time,count_rate,count_max)
+  if (aftermpi_time.gt.start_time) then
+    mpi_dt = (aftermpi_time-start_time)/real(count_rate)
+  else
+    mpi_dt = (aftermpi_time-start_time+count_max)/real(count_rate)
+  endif
 
   ! 2. Profile setup
   call cgyro_make_profiles
@@ -64,6 +78,17 @@ subroutine cgyro_kernel
   call write_timers(trim(path)//runfile_timers)
 
   io_control = 2*(1-silent_flag)
+
+  call system_clock(beforetotal_time,count_rate,count_max)
+  if (beforetotal_time.gt.start_time) then
+    init_dt = (beforetotal_time-start_time)/real(count_rate)
+  else
+    init_dt = (beforetotal_time-start_time+count_max)/real(count_rate)
+  endif
+
+  if (i_proc == 0) then
+    print '(a,1pe9.3,a,1pe9.3,a)', 'Startup time: ', init_dt, " (mpi init: ", mpi_dt, ")"
+  endif
 
   do i_time=1,n_time
 
