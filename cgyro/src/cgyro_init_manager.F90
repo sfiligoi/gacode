@@ -49,6 +49,7 @@ subroutine cgyro_init_manager
   !  and input timer is initialized by read_input.
   !------------------------------------------------------
   call timer_lib_init('str_init')
+  call timer_lib_init('nl_init')
   call timer_lib_init('coll_init')
   call timer_lib_init('io_init')
 
@@ -56,6 +57,7 @@ subroutine cgyro_init_manager
   ! Initialize GLOBAL arrays
   !----------------------------------------------------
 
+  call timer_lib_in('str_init')
   allocate(energy(n_energy))
   allocate(vel(n_energy))
   allocate(w_e(n_energy))
@@ -118,8 +120,6 @@ subroutine cgyro_init_manager
      !----------------------------------------------------
      ! Initialize DISTRIBUTED arrays
      !----------------------------------------------------
-
-     call timer_lib_in('str_init')
 
      ! Global (undistributed) arrays
      allocate(fcoef(n_field,nc))
@@ -215,9 +215,12 @@ subroutine cgyro_init_manager
      call cgyro_init_collision
      call timer_lib_out('coll_init')
 
+     call timer_lib_in('str_init')
   endif
 
   call cgyro_check_memory(trim(path)//runfile_memory)
+
+  call timer_lib_out('str_init')
 
   ! Write initial data
 
@@ -233,6 +236,7 @@ subroutine cgyro_init_manager
   call timer_lib_out('str_init')
 
   ! Initialize nonlinear dimensions and arrays 
+  call timer_lib_in('nl_init')
   if (nonlinear_method == 1) then
 
      ! Direct convolution
@@ -338,6 +342,7 @@ subroutine cgyro_init_manager
 #endif
 
   endif
+  call timer_lib_out('nl_init')
 
 end subroutine cgyro_init_manager
 
