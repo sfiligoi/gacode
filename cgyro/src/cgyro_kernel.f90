@@ -92,7 +92,7 @@ subroutine cgyro_kernel
 
   if (i_proc == 0) then
     call date_and_time(date,time,zone);
-    open(NEWUNIT=statusfd,FILE=trim(path)//runfile_startups,action="write",access="append",status="unknown")
+    open(NEWUNIT=statusfd,FILE=trim(path)//runfile_startups,action="write",status="unknown",position='append')
     write(statusfd, '(a,a,a,a,a,a,a,a,a,a,a,a,a,1pe10.3,a,1pe10.3,a)') date(1:4),"/",date(5:6),"/",date(7:8)," ", &
                     time(1:2),":",time(3:4),":",time(5:10), zone, ' [STARTED] Initialization time: ', init_dt, " (mpi init: ", mpi_dt, ")"
     close(statusfd)
@@ -277,7 +277,7 @@ subroutine cgyro_kernel
 
   if (i_proc == 0) then
     call date_and_time(date,time,zone);
-    open(NEWUNIT=statusfd,FILE=trim(path)//runfile_startups,action="write",access="append",status="unknown")
+    open(NEWUNIT=statusfd,FILE=trim(path)//runfile_startups,action="write",status="unknown",position='append')
     write(statusfd, '(a,a,a,a,a,a,a,a,a,a,a,a,a,1pe10.3)') date(1:4),"/",date(5:6),"/",date(7:8)," ", &
                     time(1:2),":",time(3:4),":",time(5:10), zone, ' [EXIT] After ', exit_dt
     close(statusfd)
