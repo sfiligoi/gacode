@@ -28,7 +28,6 @@ subroutine cgyro_kernel
   integer(KIND=8) :: start_time,aftermpi_time, beforetotal_time,exit_time
   integer(KIND=8) :: count_rate, count_max
   real :: mpi_dt, init_dt,exit_dt
-  real :: start_mtime
   integer :: statusfd
 
   ! the time_lib relies on MPI being initalized, so need to use lower level functions for this
@@ -52,9 +51,6 @@ subroutine cgyro_kernel
     mpi_dt = (aftermpi_time-start_time+count_max)/real(count_rate)
   endif
 
-  ! earliest point where I can use MPI_Wtime
-  start_mtime = MPI_Wtime()
-
   ! 2. Profile setup
   call cgyro_make_profiles
   if (error_status > 0) goto 100
@@ -68,11 +64,6 @@ subroutine cgyro_kernel
 
   call cgyro_init_manager
   if (test_flag == 1) return
-
-  ! init here, so it is after the timers created in cgyro_init_manager
-  call timer_lib_init('total_init')
-  ! equivalent to running timer_lib_in('total_init') above
-  timer_cpu_in(timer_cpu_maxindx) = start_mtime
 
   !---------------------------------------------------------------------------
   !
@@ -88,9 +79,6 @@ subroutine cgyro_kernel
   call timer_lib_in('io_init')
   call cgyro_write_timedata
   call timer_lib_out('io_init')
-
-  call timer_lib_out('total_init')
-
   call write_timers(trim(path)//runfile_timers)
 
   io_control = 2*(1-silent_flag)
