@@ -84,7 +84,7 @@ subroutine cgyro_kernel
   io_control = 2*(1-silent_flag)
 
   call system_clock(beforetotal_time,count_rate,count_max)
-  if (beforetotal_time.gt.start_time) then
+  if (beforetotal_time > start_time) then
     init_dt = (beforetotal_time-start_time)/real(count_rate)
   else
     init_dt = (beforetotal_time-start_time+count_max)/real(count_rate)
@@ -92,9 +92,12 @@ subroutine cgyro_kernel
 
   if (i_proc == 0) then
     call date_and_time(date,time,zone);
-    open(NEWUNIT=statusfd,FILE=trim(path)//runfile_startups,action="write",status="unknown",position='append')
-    write(statusfd, '(a,a,a,a,a,a,a,a,a,a,a,a,a,1pe10.3,a,1pe10.3,a)') date(1:4),"/",date(5:6),"/",date(7:8)," ", &
-                    time(1:2),":",time(3:4),":",time(5:10), zone, ' [STARTED] Initialization time: ', init_dt, " (mpi init: ", mpi_dt, ")"
+    open(NEWUNIT=statusfd,FILE=trim(path)//runfile_startups,&
+         action="write",status="unknown",position='append')
+    write(statusfd, '(a,a,a,a,a,a,a,a,a,a,a,a,a,1pe10.3,a,1pe10.3,a)') &
+         date(1:4),"/",date(5:6),"/",date(7:8)," ", &
+         time(1:2),":",time(3:4),":",time(5:10), &
+         zone, ' [STARTED] Initialization time: ', init_dt, " (mpi init: ", mpi_dt, ")"
     close(statusfd)
   endif
 
