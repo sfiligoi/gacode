@@ -14,7 +14,7 @@ ROOT=${HOME}/GIT
 # Compilers
 
 FC     = mpif90 -std=f2008 -fall-intrinsics -I $(GACODE_ROOT)/modules -J $(GACODE_ROOT)/modules -fPIC
-F77    = mpif77
+F77    = mpif77 
 FOMP   =-fopenmp
 FMATH  =-fdefault-real-8 -fdefault-double-8
 FOPT   =-Ofast 
