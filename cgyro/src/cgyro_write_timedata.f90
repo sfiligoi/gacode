@@ -164,6 +164,7 @@ subroutine cgyro_write_distributed_bcomplex(datafile,n_fn,fn)
 
   use mpi
   use cgyro_globals
+  use cgyro_io, only: cgyro_error
 
   !------------------------------------------------------
   implicit none
@@ -181,6 +182,7 @@ subroutine cgyro_write_distributed_bcomplex(datafile,n_fn,fn)
   integer(kind=MPI_OFFSET_KIND) :: disp
   integer(kind=MPI_OFFSET_KIND) :: offset1
   complex(kind=4) :: f8(n_fn)
+  character :: cdummy
   !------------------------------------------------------
 
   if (i_proc_1 /= 0) return
@@ -273,8 +275,19 @@ subroutine cgyro_write_distributed_bcomplex(datafile,n_fn,fn)
         disp = i_current
         disp = disp*n_proc_2*size(fn)*BYTE*2
 
-        open(unit=io,file=datafile,status='old',access='stream')
-        read(io,pos=disp+1) 
+        open(unit=io,file=datafile,status='old',access='stream',iostat=i_err)
+        if (i_err/=0) then
+          call cgyro_error('ERROR: (CGYRO) [REWIND] Failed to open '//datafile)
+          return
+        endif
+        if (disp>0) then
+          read(io,pos=disp, iostat=i_err) cdummy
+          if (i_err/=0) then
+            call cgyro_error('ERROR: (CGYRO) [REWIND] Failed to rewind '//datafile)
+            close(io)
+            return
+          endif
+        endif
         endfile(io)
         close(io)
 
@@ -295,6 +308,7 @@ subroutine cgyro_write_distributed_breal(datafile,n_fn,fn)
 
   use mpi
   use cgyro_globals
+  use cgyro_io, only: cgyro_error
 
   !------------------------------------------------------
   implicit none
@@ -313,6 +327,7 @@ subroutine cgyro_write_distributed_breal(datafile,n_fn,fn)
   integer(kind=MPI_OFFSET_KIND) :: offset1
   !
   real(kind=4) :: f4(n_fn)
+  character :: cdummy
   !------------------------------------------------------
 
   if (i_proc_1 /= 0) return
@@ -405,8 +420,19 @@ subroutine cgyro_write_distributed_breal(datafile,n_fn,fn)
         disp = i_current
         disp = disp*n_proc_2*size(fn)*BYTE
 
-        open(unit=io,file=datafile,status='old',access='stream')
-        read(io,pos=disp+1)
+        open(unit=io,file=datafile,status='old',access='stream',iostat=i_err)
+        if (i_err/=0) then
+          call cgyro_error('ERROR: (CGYRO) [REWIND] Failed to open '//datafile)
+          return
+        endif
+        if (disp>0) then
+          read(io,pos=disp, iostat=i_err) cdummy
+          if (i_err/=0) then
+            call cgyro_error('ERROR: (CGYRO) [REWIND] Failed to rewind '//datafile)
+            close(io)
+            return
+          endif
+        endif
         endfile(io)
         close(io)
 
@@ -769,6 +795,7 @@ end subroutine print_scrdata
 subroutine write_binary(datafile,fn,n_fn)
 
   use cgyro_globals
+  use cgyro_io, only: cgyro_error
 
   !------------------------------------------------------
   implicit none
@@ -778,6 +805,7 @@ subroutine write_binary(datafile,fn,n_fn)
   complex, intent(in) :: fn(n_fn)
   complex(kind=4) :: fn8(n_fn)
   integer :: disp
+  character :: cdummy
   !------------------------------------------------------
 
   if (i_proc > 0) return
@@ -812,8 +840,19 @@ subroutine write_binary(datafile,fn,n_fn)
      disp = i_current
      disp = disp*size(fn)*BYTE*2
 
-     open(unit=io,file=datafile,status='old',access='stream')
-     read(io,pos=disp+1) 
+     open(unit=io,file=datafile,status='old',access='stream', iostat=i_err)
+     if (i_err/=0) then
+       call cgyro_error('ERROR: (CGYRO) [REWIND] Failed to open '//datafile)
+       return
+     endif
+     if (disp>0) then
+       read(io,pos=disp, iostat=i_err) cdummy
+       if (i_err/=0) then
+         call cgyro_error('ERROR: (CGYRO) [REWIND] Failed to rewind '//datafile)
+         close(io)
+         return
+       endif
+     endif
      endfile(io)
      close(io)
 
