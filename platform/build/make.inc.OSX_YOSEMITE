@@ -18,7 +18,7 @@
 # Compilers and flags
 
 FC  = mpif90-mpich-gcc5 -I$(GACODE_ROOT)/modules -J$(GACODE_ROOT)/modules -fPIC -framework Accelerate
-F77 = ${FC}
+F77 = mpif77
 CC  = ${FC}
 
 GOMPTEST := $(shell ${CC} -v 2>&1 | grep " version " | grep gcc >/dev/null; echo $$?)
