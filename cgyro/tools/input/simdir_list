@@ -16,6 +16,10 @@ reg13: c1+f1+lin+i  +pro+mil+ rot
 reg14: c1+f1+lin+ie +pro+mil+frot
 reg15: c4+f2+lin+ie +loc+mil+frot [GPU_BIGMEM]
 
+Tiny nonlinear test case:
+
+nl00: GA standard case adiabatic electons
+
 Performance testing and scaling templates:
 
 nl01:   16x96   24(16,8,2) nl timing  (Sugama)
