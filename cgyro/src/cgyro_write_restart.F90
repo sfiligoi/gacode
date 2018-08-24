@@ -153,7 +153,7 @@ subroutine cgyro_write_restart_one
 
   if (i_proc == 0) then
     call date_and_time(sdate,stime,szone);
-    open(NEWUNIT=statusfd,FILE=trim(path)//runfile_startups,action="write",access="append",status="unknown")
+    open(NEWUNIT=statusfd,FILE=trim(path)//runfile_startups,action="write",status="unknown",position='append')
     write(statusfd, '(a,a,a,a,a,a,a,a,a,a,a,a,a,1pe10.3)') sdate(1:4),"/",sdate(5:6),"/",sdate(7:8)," ", &
                     stime(1:2),":",stime(3:4),":",stime(5:10), szone, ' [CHECKPOINTED] Checkpoint time: ', cp_dt
     close(statusfd)
