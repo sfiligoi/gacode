@@ -19,7 +19,8 @@ FDEBUG = -eD -Ktrap=fp -m 1
 F2PY   = f2py
 
 # System math libraries
-LMATH = -lfftw3_threads -lfftw3f_threads -lfftw3 -lfftw3f 
+LMATH = -mkl
+FFTW_INC=${MKLROOT}/include/fftw/
 
 # NetCDF
 NETCDF=-L${NETCDF_DIR}/lib -lnetcdff -L/opt/cray/hdf5-parallel/1.10.0.3/GNU/4.9/lib -lnetcdf
