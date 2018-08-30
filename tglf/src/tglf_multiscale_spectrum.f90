@@ -55,7 +55,7 @@
       kyetg=1.28
       cnorm=14.21
       if(USE_SUB1)then
-        cnorm=12.12
+        cnorm=12.12*SAT_geo0_out
         expsub=1
       endif
       cz1=0.48*czf
@@ -78,7 +78,7 @@
         cky=3.0
         sqcky=SQRT(cky)
         cnorm = 14.29
-        if(USE_SUB1)cnorm=12.12
+        if(USE_SUB1)cnorm=12.12*SAT_geo0_out
         cz1=0.48*czf
 !original         cz2=0.92*czf  
 ! retuned June 22,2017

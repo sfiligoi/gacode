@@ -148,7 +148,6 @@ SUBROUTINE xgrid_functions_sa
   B_ave_out = B_ave_out/pi_2
   Bt_ave_out = Bt_ave_out/pi_2
   Grad_r_ave_out = 1.0
-  InvGrad_r2_ave_out=1.0
   !
   ! poloidal magnetic field at outboard midplane
   !
@@ -384,7 +383,7 @@ SUBROUTINE xgrid_functions_geo
   B_ave_out = 0.0
   Bt_ave_out = 0.0
   Grad_r_ave_out = 0.0
-  InvGrad_r2_ave_out=0.0
+  SAT_geo_ave_out=0.0
   norm_ave=0.0
   do i=1,ms
      dlp = s_p(i)*ds*(0.5/Bp(i)+0.5/Bp(i-1))
@@ -398,7 +397,7 @@ SUBROUTINE xgrid_functions_geo
      B_ave_out = B_ave_out + dlp*(b_geo(i-1)+b_geo(i))/2.0
      Bt_ave_out = Bt_ave_out + dlp*(f/b_geo(i-1)+f/b_geo(i))/(2.0*Rmaj_s)
      Grad_r_ave_out = Grad_r_ave_out + dlp*0.5*((R(i-1)*Bp(i-1))+(R(i)*Bp(i)))*(q_s/rmin_s)
-     InvGrad_r2_ave_out = InvGrad_r2_ave_out + dlp*0.5*(1.0/(R(i-1)*Bp(i-1))**2+1.0/(R(i)*Bp(i))**2)*(rmin_s/q_s)**2
+     SAT_geo_ave_out = SAT_geo_ave_out + dlp*0.5*(B_geo(i-1)/qrat_geo(i-1)**3+B_geo(i)/qrat_geo(i)**3)
  enddo
   R2_ave_out = R2_ave_out/norm_ave
   B2_ave_out = B2_ave_out/norm_ave
@@ -406,17 +405,19 @@ SUBROUTINE xgrid_functions_geo
   B_ave_out = B_ave_out/norm_ave
   Bt_ave_out = Bt_ave_out/norm_ave
   Grad_r_ave_out = Grad_r_ave_out/norm_ave
-  InvGrad_r2_ave_out = InvGrad_r2_ave_out/norm_ave
+  SAT_geo_ave_out = SAT_geo_ave_out/norm_ave
   !
   ! poloidal magnetic field on outboard midplane
   !
   Bp0_out = Bp(0)/B_unit
+  SAT_geo0_out = B_geo(0)/qrat_geo(0)**3
   !
   ! write(*,*)"R2_ave_out=",R2_ave_out
   ! write(*,*)"B2_ave_out=",B2_ave_out
   ! write(*,*)"B_ave_out=",B_ave_out
   ! write(*,*)"Bt_ave_out=",Bt_ave_out
-  ! write(*,*)"InvGrad_r2_ave_out=",InvGrad_r2_ave_out
+  ! write(*,*)"SAT_geo_ave_out=",SAT_geo_ave_out
+  ! write(*,*)"SAT_geo0_out=",SAT_geo0_out
   !
   ! do m=0,ms
   ! write(*,*)m,s_prime(ms-m),s_prime(ms)-s_prime(m)
