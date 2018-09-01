@@ -416,8 +416,13 @@ fi
 
 gacode_printversion CGYRO
 
-$GACODE_ROOT/platform/exec/exec.$GACODE_PLATFORM \
-    $SIMDIR $NPROC "$CGYRO_DIR/src/cgyro $TEST_FLAG" $NOMP $NUMA $MPINUMA
+if [ -f $CGYRO_DIR/src/cgyro ] ; then
+   $GACODE_ROOT/platform/exec/exec.$GACODE_PLATFORM \
+      $SIMDIR $NPROC "$CGYRO_DIR/src/cgyro $TEST_FLAG" $NOMP $NUMA $MPINUMA
+else
+   echo "ERROR: CGYRO excutable not found."
+   exit 1
+fi
 #===========================================================
 
 #============================================================
