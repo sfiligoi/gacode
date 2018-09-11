@@ -8,7 +8,6 @@ module neo_equilibrium
   real :: d_theta                                 ! delta theta
   ! local (th)
   real, dimension(:), allocatable :: k_par        ! bhat dot grad/a
-  real, dimension(:), allocatable :: k_par_geo    ! theta-dependent k_par
   real, dimension(:), allocatable :: v_drift_x    ! radial curvature drift vel
   real, dimension(:), allocatable :: v_drift_th   ! theta  curvature drift vel
   real, dimension(:), allocatable :: gradr        ! | grad r|
@@ -62,7 +61,6 @@ contains
        
        allocate(theta(n_theta))
        allocate(k_par(n_theta))
-       allocate(k_par_geo(n_theta))
        allocate(v_drift_x(n_theta))
        allocate(v_drift_th(n_theta))
        allocate(gradr(n_theta))
@@ -80,7 +78,12 @@ contains
        allocate(jacobln_rderiv(n_theta))
        allocate(v_prime_g(n_radial))
        allocate(geo_param(n_radial,5))
-      
+
+       d_theta = (2*pi/n_theta)
+       do it=1,n_theta
+          theta(it) = -pi+(it-1)*d_theta
+       enddo
+       
        initialized = .true.
        
     else
@@ -88,7 +91,6 @@ contains
        
        deallocate(theta)
        deallocate(k_par)
-       deallocate(k_par_geo)
        deallocate(v_drift_x)
        deallocate(v_drift_th)
        deallocate(gradr)
@@ -119,11 +121,8 @@ contains
     implicit none
     integer, intent(in) :: ir
     integer :: it, jt, id, is
-    real :: sum, err
-    real, dimension(n_theta+1) :: x,y
-    real,dimension(n_theta) :: ttmp
-    real, parameter :: tol=1e-14
-    real :: g_theta, gtheta_ave, g_theta_geo, gtheta0
+    real :: sum
+    real :: ttmp(1)
     
     sum=0.0
 
@@ -174,86 +173,24 @@ contains
        Bmag_th0        = GEO_b(1)
        Bmag_th0_rderiv = -GEO_b(1)/(rmaj(ir)*GEO_grad_r(1)) &
                * (GEO_gcos1(1) + GEO_gcos2(1))
-
-       !-----------------------------------------------------------------
-       ! Generate theta-grid (equally-spaced or constant-wind-speed)
-       !
-       !
-       d_theta = (2*pi/n_theta)
-       do it=1,n_theta+1
-          y(it) = -pi+(it-1)*d_theta
-          x(it) = y(it)
-       enddo
-
-       if (constant_stream_flag == 1) then
-          
-          ! At the end of this process, theta will NOT be equally-spaced, 
-          ! and the parallel motion is 
-          !
-          !       1       d         1          d
-          ! ----------- ------ = -------- ---------- 
-          ! GEO_g_theta dtheta   g_theta   dtheta_eq
-          !
-          ! However, theta_eq never appears explicitly EXCEPT for this
-          ! derivative, so stencils are for the equally-spaced theta_eq grid.
-       
-          err = 1e4
-          gtheta_ave = GEO_g_theta(1)
-
-          do while (err > tol)
-             do it=1,n_theta
-                ttmp(it) = 0.5*(y(it)+y(it+1))
-             enddo
-             call geo_interp(n_theta,ttmp,.false.)
-             do it=1,n_theta
-                x(it+1) = x(it)+d_theta/GEO_g_theta(it)
-             enddo
-             gtheta0 = gtheta_ave
-             gtheta_ave  = (2*pi)/(x(n_theta+1)-x(1))
-             y   = (x-x(1))*gtheta_ave-pi
-             err = abs((gtheta_ave-gtheta0)/gtheta_ave)
-          enddo
-          
-          ! Now, d_theta is really a constant (dtheta_eq).  This is only ever 
-          ! used for finite-difference stencils.
-          
-       endif
-       
-       ! This theta grid is:
-       !
-       ! 1. NOT EQUALLY SPACED if constant_stream_flag == 1
-       ! 2. Actually the real theta.
-       !
-       theta(:) = y(1:n_theta)
-          
+                   
        call geo_interp(n_theta,theta,.false.)
        
        do it=1,n_theta
           
-          ! Define modified G_theta
-          if (constant_stream_flag == 0) then
-             ! Theta-dependent
-             g_theta = GEO_g_theta(it)
-          else
-             ! Constant by construction
-             g_theta = gtheta_ave
-          endif
-          g_theta_geo = GEO_g_theta(it)
-          
-          k_par(it)     = 1.0 / (q(ir) * rmaj(ir) * g_theta)
-          k_par_geo(it) = 1.0 / (q(ir) * rmaj(ir) * g_theta_geo)
-          w_theta(it) = g_theta / GEO_b(it)
+          k_par(it)     = 1.0 / (q(ir) * rmaj(ir) * GEO_g_theta(it))
+          w_theta(it) = GEO_g_theta(it) / GEO_b(it)
           sum = sum + w_theta(it)
           
           bigR(it) = GEO_bigr(it)
           bigR_rderiv(it) = GEO_bigr_r(it)
-          gradpar_bigR(it) = k_par_geo(it) * GEO_bigr_t(it) 
+          gradpar_bigR(it) = k_par(it) * GEO_bigr_t(it) 
           Bmag(it)  = GEO_b(it)
           Btor(it)  = GEO_bt(it)
           Bpol(it)  = GEO_bp(it)
           Bmag_rderiv(it)  = -GEO_b(it)/(rmaj(ir)*GEO_grad_r(it)) &
                * (GEO_gcos1(it) + GEO_gcos2(it))
-          gradpar_Bmag(it) = k_par_geo(it) * GEO_dbdt(it)
+          gradpar_Bmag(it) = k_par(it) * GEO_dbdt(it)
           gradr(it)        = GEO_grad_r(it)
           v_drift_x(it)  = -rho(ir)/(rmaj(ir) * Bmag(it)) * &
                GEO_grad_r(it) * GEO_gsin(it)
@@ -282,11 +219,6 @@ contains
        enddo
        
     else
-
-       d_theta = 2*pi/n_theta
-       do it=1,n_theta
-          theta(it) = -pi+(it-1)*d_theta
-       enddo
        
        ! concentric circular geometry
        shift(ir)   = 0.0
@@ -297,10 +229,9 @@ contains
 
        do it=1,n_theta
           k_par(it)       = 1.0 / (q(ir) * rmaj(ir)) * sign_bunit
-          k_par_geo(it)   = k_par(it)
           bigR(it)        = rmaj(ir) + r(ir) * cos(theta(it))
           bigR_rderiv(it) = cos(theta(it))
-          gradpar_bigR(it) = -r(ir) * sin(theta(it)) * k_par_geo(it)
+          gradpar_bigR(it) = -r(ir) * sin(theta(it)) * k_par(it)
           jacobln_rderiv(it) = 2.0/bigR(it) * bigR_rderiv(it)
           gradr(it)          = 1.0
           gradpar_gradr(it)  = 0.0
@@ -320,7 +251,7 @@ contains
              Bpol(it) = r(ir) / (q(ir)*rmaj(ir)) &
                   * (1.0 - (r(ir)/rmaj(ir)) * cos(theta(it)))
              Bmag_rderiv(it) = - 1.0/rmaj(ir) * cos(theta(it)) * sign_bunit
-             gradpar_Bmag(it) = k_par_geo(it) * (r(ir)/rmaj(ir)) &
+             gradpar_Bmag(it) = k_par(it) * (r(ir)/rmaj(ir)) &
                   * sin(theta(it)) * sign_bunit
              v_drift_x(it) = -rho(ir)/rmaj(ir) * sin(theta(it)) &
                   / (1.0 - (r(ir)/rmaj(ir)) * cos(theta(it)))**2
@@ -344,7 +275,7 @@ contains
              Bmag_rderiv(it) = (1.0 / (1.0 &
                   + (r(ir)/rmaj(ir))* cos(theta(it)))**2) &
                   * sign_bunit * (-1.0/rmaj(ir) * cos(theta(it)))
-             gradpar_Bmag(it) = k_par_geo(it) * (r(ir)/rmaj(ir)) &
+             gradpar_Bmag(it) = k_par(it) * (r(ir)/rmaj(ir)) &
                   * sin(theta(it)) / (1.0 + (r(ir)/rmaj(ir)) &
                   * cos(theta(it)))**2 * sign_bunit
              v_drift_x(it)  = -rho(ir)/rmaj(ir) * sin(theta(it))

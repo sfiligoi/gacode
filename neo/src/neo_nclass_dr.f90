@@ -229,7 +229,7 @@ contains
     !  inverse of theta-avg of 1/(bhat dot grad theta)
     p_ngrth = 0.0
     do it=1,n_theta
-       p_ngrth = p_ngrth + 1.0/(2.0*pi)  * 1.0 / (k_par_geo(it) / a_meters) &
+       p_ngrth = p_ngrth + 1.0/(2.0*pi)  * 1.0 / (k_par(it) / a_meters) &
             * 2.0 * pi / n_theta
     enddo
     p_ngrth = 1.0 / p_ngrth

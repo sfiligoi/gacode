@@ -20,7 +20,6 @@ module neo_interface
   integer :: neo_n_xi_in = 17
   integer :: neo_n_theta_in = 17
   integer :: neo_n_radial_in = 1
-  integer :: neo_constant_stream_flag = 0
   integer :: neo_matsz_scalefac_in = 50
   real    :: neo_rmin_over_a_in = 0.5
   real    :: neo_rmin_over_a_2_in = 0.6
@@ -144,7 +143,6 @@ contains
     neo_n_xi_in = n_xi
     neo_n_theta_in = n_theta
     neo_n_radial_in = n_radial
-    neo_constant_stream_flag = constant_stream_flag
     neo_matsz_scalefac_in = matsz_scalefac
     neo_rmin_over_a_in = rmin_1_in
     neo_rmin_over_a_2_in = rmin_2_in
@@ -227,7 +225,6 @@ contains
     n_xi = neo_n_xi_in
     n_theta = neo_n_theta_in
     n_radial = neo_n_radial_in
-    constant_stream_flag = neo_constant_stream_flag
     matsz_scalefac = neo_matsz_scalefac_in
     rmin_1_in = neo_rmin_over_a_in
     rmin_2_in = neo_rmin_over_a_2_in
@@ -324,7 +321,6 @@ contains
     write(1,20) 'N_XI=',neo_n_xi_in
     write(1,20) 'N_THETA=',neo_n_theta_in
     write(1,20) 'N_RADIAL=',neo_n_radial_in
-    write(1,20) 'CONSTANT_STREAM_FLAG=',neo_constant_stream_flag
     write(1,20) 'MATSZ_SCALEFAC=',neo_matsz_scalefac_in
     write(1,30) 'RMIN_OVER_A=',neo_rmin_over_a_in
     write(1,30) 'RMAJ_OVER_A=',neo_rmaj_over_a_in
