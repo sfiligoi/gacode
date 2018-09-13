@@ -122,7 +122,7 @@ contains
     integer, intent(in) :: ir
     integer :: it, jt, id, is
     real :: sum
-    real :: ttmp(1)
+    real, dimension(:), allocatable :: ttmp
     
     sum=0.0
 
@@ -163,8 +163,10 @@ contains
        GEO_model_in    = geo_numeq_flag
 
        ! Get initial geo solution, then set geo params at theta=0
+       allocate(ttmp(1))
        ttmp(1) = 0.0
        call geo_interp(1,ttmp,.true.)
+       deallocate(ttmp)
        bigR_th0        = GEO_bigr(1)
        bigR_th0_rderiv = GEO_bigr_r(1)
        gradr_th0       = GEO_grad_r(1)
@@ -173,13 +175,13 @@ contains
        Bmag_th0        = GEO_b(1)
        Bmag_th0_rderiv = -GEO_b(1)/(rmaj(ir)*GEO_grad_r(1)) &
                * (GEO_gcos1(1) + GEO_gcos2(1))
-                   
+            
        call geo_interp(n_theta,theta,.false.)
-       
+
        do it=1,n_theta
           
           k_par(it)     = 1.0 / (q(ir) * rmaj(ir) * GEO_g_theta(it))
-          w_theta(it) = GEO_g_theta(it) / GEO_b(it)
+          w_theta(it)   = GEO_g_theta(it) / GEO_b(it)
           sum = sum + w_theta(it)
           
           bigR(it) = GEO_bigr(it)
@@ -217,6 +219,21 @@ contains
           enddo
           gradpar_gradr(it) = gradpar_gradr(it) * k_par(it)
        enddo
+
+       ! 1/J dJ/dr
+       allocate(ttmp(n_theta))
+       ttmp(:) = theta(:)
+       GEO_rmin_in = r(ir) + 0.001
+       call geo_interp(n_theta,ttmp,.true.)
+       do it=1,n_theta
+          ttmp(it) = GEO_g_theta(it)/GEO_b(it)
+       enddo
+       jacobln_rderiv(:) = 0.0
+       do it=1,n_theta
+          jacobln_rderiv(it) = (ttmp(it) - w_theta(it))/0.001
+       enddo
+       jacobln_rderiv(:) = jacobln_rderiv(:) / w_theta(:)
+       deallocate(ttmp)
        
     else
        
@@ -232,7 +249,6 @@ contains
           bigR(it)        = rmaj(ir) + r(ir) * cos(theta(it))
           bigR_rderiv(it) = cos(theta(it))
           gradpar_bigR(it) = -r(ir) * sin(theta(it)) * k_par(it)
-          jacobln_rderiv(it) = 2.0/bigR(it) * bigR_rderiv(it)
           gradr(it)          = 1.0
           gradpar_gradr(it)  = 0.0
           theta_nc(it)    = theta(it)
@@ -282,6 +298,9 @@ contains
              v_drift_th(it) = -rho(ir)/rmaj(ir) * cos(theta(it))
           endif
 
+          ! 1/J dJ/dr
+          jacobln_rderiv(it) = -(1.0/Bmag(it))*Bmag_rderiv(it)
+          
           ! flux-surface average weights
           w_theta(it) = 1.0 * sign_bunit / Bmag(it)
           sum = sum + w_theta(it)
@@ -311,7 +330,7 @@ contains
        Btor2_avg = Btor2_avg + w_theta(it)*Btor(it)**2
        bigRinv_avg =  bigRinv_avg + w_theta(it) / bigR(it)
     enddo
-
+    
     call compute_fractrap(ftrap)
 
     if(silent_flag == 0 .and. i_proc == 0) then
