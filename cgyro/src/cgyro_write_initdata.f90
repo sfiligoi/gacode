@@ -12,7 +12,7 @@ subroutine cgyro_write_initdata
 
   implicit none
 
-  integer :: p,in,is
+  integer :: p,in,is,it
   real :: kymax
   real, external :: spectraldiss
   
@@ -199,6 +199,25 @@ subroutine cgyro_write_initdata
 
   endif
   !----------------------------------------------------------------------------
+
+  !----------------------------------------------------------------------------
+  ! Write the initial rotation data
+  !
+  if (silent_flag == 0 .and. i_proc == 0) then
+     open(unit=io,file=trim(path)//'out.cgyro.rotation',status='replace')
+     do is=1,n_species
+        write (io,fmtstr) dens_avg_rot(is)
+     enddo
+     do is=1,n_species
+        write (io,fmtstr) dlnndr_avg_rot(is)
+     enddo
+     do is=1,n_species
+        do it=1,n_theta
+           write (io,fmtstr) dens(is)*dens_rot(it,is)
+        enddo
+     enddo
+     close(io)
+  endif
 
   !----------------------------------------------------------------------------
   ! Write the initial grid data 

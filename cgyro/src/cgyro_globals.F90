@@ -433,6 +433,8 @@ module cgyro_globals
   real, dimension(:,:), allocatable :: dlambda_rot
   real, dimension(:,:), allocatable :: dens_rot
   real, dimension(:),   allocatable :: dens_ele_rot
+  real, dimension(:),   allocatable :: dens_avg_rot
+  real, dimension(:),   allocatable :: dlnndr_avg_rot
   real, dimension(:,:), allocatable :: omega_rot_trap
   real, dimension(:,:), allocatable :: omega_rot_u
   real, dimension(:,:), allocatable :: omega_rot_drift
