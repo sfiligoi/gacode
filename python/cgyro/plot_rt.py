@@ -19,7 +19,7 @@ species = int(sys.argv[3])
 ymin = sys.argv[4]
 ymax = sys.argv[5]
 nx = int(sys.argv[6])
-ny = int(sys.argv[7])
+nd = int(sys.argv[7])
 istr = sys.argv[8]
 fmin = sys.argv[9]
 fmax = sys.argv[10]
@@ -50,7 +50,7 @@ else:
    # Fourier arrays
    for i in range(nx):
       x[i] = i*2*np.pi/(nx-1)
-      for p in range(nr):    
+      for p in range(nr):
          epx[i,p]=np.exp(1j*(p-nr/2)*x[i])
       
 #------------------------------------------------------------------------
@@ -162,12 +162,14 @@ for i in range(nt):
       a = np.reshape(aa,(2,nr,ns,nn),order='F')
       c = a[0,:,species,0]+1j*a[1,:,species,0]
 
+   # Derivative (d/dx)**nd   
+   for p in range(-nr/2,nr/2):
+      c[p+nr/2] = c[p+nr/2]*(1j*p)**nd
+      
    ff = np.zeros([nx],order='F')
    if usefft:
-      print 'FFT'
       ff,t = maptoreal_fft(nr,nx,c)
    else:
-      print 'PYTHON'
       ff,t = maptoreal(nr,nx,c)
 
    f[i,:] = ff[:]

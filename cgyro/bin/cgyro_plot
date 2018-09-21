@@ -182,6 +182,7 @@ N=null
 MESH=0
 NX=-1
 NY=-1
+ND=0
 NOMP=1
 FMIN=auto
 FMAX=auto
@@ -235,6 +236,7 @@ while [ $# -gt 0 ] ; do
   -n) shift ; N=$1 ;;
   -nx) shift ; NX=$1 ;;
   -ny) shift ; NY=$1 ;;
+  -nd) shift ; ND=$1 ;;
   -fmin) shift ; FMIN=$1 ;;
   -fmax) shift ; FMAX=$1 ;;
   -cmap) shift ; CMAP=$1 ;;
@@ -318,7 +320,7 @@ case "$PLOT_TYPE" in
        export OMP_NUM_THREADS=$NOMP ; python $PYROOT/plot_fluct.py $FTYPE $MOMENT $SPECIES $YMIN $YMAX $NX $NY $TIME $FMIN $FMAX $CMAP $FONTSIZE ;;
 
    rt)
-       export OMP_NUM_THREADS=$NOMP ; python $PYROOT/plot_rt.py $FTYPE $MOMENT $SPECIES $YMIN $YMAX $NX $NY $TIME $FMIN $FMAX $CMAP $FONTSIZE ;;
+       export OMP_NUM_THREADS=$NOMP ; python $PYROOT/plot_rt.py $FTYPE $MOMENT $SPECIES $YMIN $YMAX $NX $ND $TIME $FMIN $FMAX $CMAP $FONTSIZE ;;
 
    text)
    	python $PYROOT/text.py $W $FTYPE ;;
