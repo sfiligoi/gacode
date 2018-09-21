@@ -79,7 +79,7 @@ else:
    eny[:,0] = 0.5*eny[:,0] 
       
 #------------------------------------------------------------------------
-# Real-space field resonstruction (if no gapy)
+# Real-space field reconstruction (if no gapy)
 def maptoreal(nr,nn,nx,ny,c):
 
     import numpy as np
@@ -201,6 +201,7 @@ def frame():
       f = np.zeros([nx,ny],order='F')
       if hasgapy:
          gapy.realfluct(c,f)
+         t = 0.0
       else:
          if usefft:
             f,t = maptoreal_fft(nr,nn,nx,ny,c)

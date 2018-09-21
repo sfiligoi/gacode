@@ -317,6 +317,9 @@ case "$PLOT_TYPE" in
    fluct)
        export OMP_NUM_THREADS=$NOMP ; python $PYROOT/plot_fluct.py $FTYPE $MOMENT $SPECIES $YMIN $YMAX $NX $NY $TIME $FMIN $FMAX $CMAP $FONTSIZE ;;
 
+   rt)
+       export OMP_NUM_THREADS=$NOMP ; python $PYROOT/plot_rt.py $FTYPE $MOMENT $SPECIES $YMIN $YMAX $NX $NY $TIME $FMIN $FMAX $CMAP $FONTSIZE ;;
+
    text)
    	python $PYROOT/text.py $W $FTYPE ;;
 
