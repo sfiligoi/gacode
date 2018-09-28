@@ -883,20 +883,18 @@ subroutine extended_ang(f2d)
 
   do ir=-np,np-1
      do it=1,n_theta
-        ! Manage positive/negative q
-        if (sign_qs > 0) then
-           jr = ir+np+1
-        else
-           jr = -ir+np
-        endif
-        f1d(it,ir+np+1) = f2d(it,jr)*exp(-2*pi*i_c*ir*k_theta*rmin)
+        jr = ir+np+1
+        f1d(it,jr) = f2d(it,jr)*exp(-2*pi*i_c*ir*k_theta*rmin)
      enddo
   enddo
 
   if (sign_qs < 0) then
-     f1d = f1d*exp(2*pi*i_c*abs(k_theta)*rmin)
+     ! Reverse output direction
+     do ir=1,n_radial
+        f2d(:,ir) = f1d(:,n_radial-ir+1)
+     enddo
+  else
+     f2d = f1d
   endif
-
-  f2d = f1d
   
 end subroutine extended_ang

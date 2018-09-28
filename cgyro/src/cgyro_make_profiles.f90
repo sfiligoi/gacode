@@ -283,7 +283,7 @@ subroutine cgyro_make_profiles
   ! z_eff -- only use value from input.cgyro or input.profiles
   ! if simple electron Lorentz collisions (1,5) and z_eff_method=1
   ! else compute z_eff from the input ions' densities and charges
-  if(.not. (z_eff_method == 1 .and. &
+  if (.not. (z_eff_method == 1 .and. &
        (collision_model==1 .or. collision_model==5))) then
      z_eff = 0.0
      do is=1,n_species

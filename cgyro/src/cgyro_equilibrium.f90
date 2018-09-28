@@ -116,13 +116,12 @@ subroutine cgyro_equilibrium
   !-----------------------------------------------------------------
 
   do ir=1,n_radial/box_size
-     do it=1,n_theta
-        if (sign_qs > 0) then
-           thetab(ir,it) = theta(it)+2*pi*(ir-1-n_radial/2/box_size)
-        else
-           thetab(ir,it) = -theta(it)+2*pi*(-ir+n_radial/2/box_size)
-        endif
-     enddo
+     if (sign_qs > 0) then
+        thetab(:,ir) = theta(:)+2*pi*(ir-1-n_radial/2/box_size)
+     else
+        ! Reverse output direction (see extended_ang)
+        thetab(:,n_radial-ir+1) = theta(:)-2*pi*(ir-1-n_radial/2/box_size)
+     endif
   enddo
 
   call geo_interp(n_theta,theta,.false.)     
