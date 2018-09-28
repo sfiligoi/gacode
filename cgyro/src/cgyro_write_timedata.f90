@@ -884,7 +884,7 @@ subroutine extended_ang(f2d)
   do ir=-np,np-1
      do it=1,n_theta
         ! Manage positive/negative q
-        if (ipccw*btccw > 0) then
+        if (sign_qs > 0) then
            jr = ir+np+1
         else
            jr = -ir+np
@@ -893,7 +893,7 @@ subroutine extended_ang(f2d)
      enddo
   enddo
 
-  if (ipccw*btccw < 0) then
+  if (sign_qs < 0) then
      f1d = f1d*exp(2*pi*i_c*abs(k_theta)*rmin)
   endif
 

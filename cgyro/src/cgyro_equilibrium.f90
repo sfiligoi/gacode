@@ -117,7 +117,7 @@ subroutine cgyro_equilibrium
 
   do ir=1,n_radial/box_size
      do it=1,n_theta
-        if (ipccw*btccw > 0) then
+        if (sign_qs > 0) then
            thetab(ir,it) = theta(it)+2*pi*(ir-1-n_radial/2/box_size)
         else
            thetab(ir,it) = -theta(it)+2*pi*(-ir+n_radial/2/box_size)
