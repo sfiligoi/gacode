@@ -125,7 +125,7 @@ subroutine cgyro_equilibrium
         thetab(:,ir) = theta(:)+2*pi*px(ir)
      else
         ! Reverse output direction (see extended_ang)
-        thetab(:,n_radial-ir+1) = theta(:)-2*pi*px(ir)
+        thetab(:,n_radial/box_size-ir+1) = theta(:)-2*pi*px(ir)
      endif
   enddo
   !-----------------------------------------------------------------
