@@ -19,10 +19,9 @@ subroutine tgyro_flux
 
   implicit none
 
-  integer :: i_ion,i0, is, is_ion
+  integer :: i_ion,i0
   integer :: i1,i2
   integer :: n_12
-  real :: d_max
   real, dimension(8) :: x_out
 
   !-------------------------------------------
@@ -83,44 +82,39 @@ subroutine tgyro_flux
   Q_neo_GB     = neo_dens_in(1) * neo_temp_in(1)**2.5 * neo_rho_star_in**2
   Pi_neo_GB    = neo_dens_in(1) * neo_temp_in(1)**2   * neo_rho_star_in**2
 
-  select case (loc_neo_method) 
+  select case (tgyro_neo_method) 
+
+  case (0)
+
+     ! Zero neoclassical flux
+     
+     pflux_e_neo(i_r) = 0.0
+     eflux_e_neo(i_r) = 0.0
+
+     pflux_i_neo(:,i_r) = 0.0
+     eflux_i_neo(:,i_r) = 0.0
 
   case (1)
 
-     ! NEO analytic theory: Hinton-Hazeltine
-     !  
-     ! NOTE: impurities have zero flux in this case
+     ! NEO analytic theory: Hirshman-Sigmar
 
      call neo_run
 
-     pflux_e_neo(i_r)   = neo_pflux_thHH_out /Gamma_neo_GB 
-     eflux_e_neo(i_r)   = neo_eflux_thHHe_out /Q_neo_GB
+     pflux_e_neo(i_r)   = neo_pflux_thHS_out(1)/Gamma_neo_GB 
+     eflux_e_neo(i_r)   = neo_eflux_thHS_out(1)/Q_neo_GB
 
-     is_ion = -1
-     d_max = -1.0
-     do is=2, neo_n_species_in
-        if(neo_z_in(is) > 0 .and. neo_dens_in(is) > d_max) then
-           is_ion = is
-           d_max  = neo_dens_in(is)
-        endif
-     enddo
      i0 = 1
      do i_ion=1,loc_n_ion
-        if (therm_flag(i_ion) == 0 .and. tgyro_quickfast_flag == 1) cycle
-        i0 = i0+1
-        if (i0 == is_ion) exit
+        if (calc_flag(i_ion) == 0) cycle
+        i0 = i0+1 
+        pflux_i_neo(i_ion,i_r) = neo_pflux_thHS_out(i0)/Gamma_neo_GB
+        eflux_i_neo(i_ion,i_r) = neo_eflux_thHS_out(i0)/Q_neo_GB
      enddo
-     
-     pflux_i_neo(i_ion,i_r) = neo_pflux_thHH_out/Gamma_neo_GB
-     if (loc_chang_hinton == 1) then
-        eflux_i_neo(i_ion,i_r) = neo_eflux_thCHi_out/Q_neo_GB
-     else
-        eflux_i_neo(i_ion,i_r) = neo_eflux_thHHi_out/Q_neo_GB
-     endif
-     
+
   case (2)
 
      ! Call NEO kinetic calculation
+
      if (gyrotest_flag == 0) call neo_run
 
      pflux_e_neo(i_r) = (neo_pflux_dke_out(1)+tgyro_neo_gv_flag*neo_pflux_gv_out(1)) &
@@ -132,7 +126,7 @@ subroutine tgyro_flux
 
      i0 = 1
      do i_ion=1,loc_n_ion
-        if (therm_flag(i_ion) == 0 .and. tgyro_quickfast_flag == 1) cycle
+        if (calc_flag(i_ion) == 0) cycle
         i0 = i0+1 
         pflux_i_neo(i_ion,i_r) = (neo_pflux_dke_out(i0) + &
              tgyro_neo_gv_flag*neo_pflux_gv_out(i0))/Gamma_neo_GB 
@@ -140,23 +134,6 @@ subroutine tgyro_flux
              tgyro_neo_gv_flag*neo_efluxncv_gv_out(i0))/Q_neo_GB
         mflux_i_neo(i_ion,i_r) = (neo_mflux_dke_out(i0) + &
              tgyro_neo_gv_flag*neo_mflux_gv_out(i0))/Pi_neo_GB
-     enddo
-
-  case (3)
-
-     ! NEO analytic theory: Hirshman-Sigmar
-
-     call neo_run
-
-     pflux_e_neo(i_r)   = neo_pflux_thHS_out(1)/Gamma_neo_GB 
-     eflux_e_neo(i_r)   = neo_eflux_thHS_out(1)/Q_neo_GB
-
-     i0 = 1
-     do i_ion=1,loc_n_ion
-        if (therm_flag(i_ion) == 0 .and. tgyro_quickfast_flag == 1) cycle
-        i0 = i0+1 
-        pflux_i_neo(i_ion,i_r) = neo_pflux_thHS_out(i0)/Gamma_neo_GB
-        eflux_i_neo(i_ion,i_r) = neo_eflux_thHS_out(i0)/Q_neo_GB
      enddo
 
   end select
@@ -233,7 +210,7 @@ subroutine tgyro_flux
 
      i0 = 0
      do i_ion=1,loc_n_ion
-        if (therm_flag(i_ion) == 0 .and. tgyro_quickfast_flag == 1) cycle
+        if (calc_flag(i_ion) == 0) cycle
         i0 = i0+1 
         pflux_i_tur(i_ion,i_r) = tglf_ion_pflux_out(i0)
         eflux_i_tur(i_ion,i_r) = tglf_ion_eflux_out(i0)
