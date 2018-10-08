@@ -100,7 +100,7 @@ subroutine neo_do
            neo_th_out(1)     = pflux_HH
            neo_th_out(2)     = efluxi_HH
            do is=1, n_species
-              if(Z(is) == -1) then
+              if(Z(is) < 0.0) then
                  neo_th_out(3) = efluxe_HH
               endif
            enddo
@@ -522,7 +522,7 @@ subroutine neo_do
         neo_th_out(1) = pflux_HH
         neo_th_out(2) = efluxi_HH
         do is=1, n_species
-           if(Z(is) == -1) then
+           if(Z(is) < 0.0) then
               neo_th_out(3) = efluxe_HH
            endif
         enddo
