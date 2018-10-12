@@ -94,7 +94,6 @@ subroutine cgyro_make_profiles
           udsymmetry_flag,&
           quasineutral_flag,&
           n_species+ae_flag,&
-          z(1:n_species),&
           rmin,&
           btccw,&
           ipccw,&

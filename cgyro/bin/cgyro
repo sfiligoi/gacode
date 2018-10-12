@@ -319,7 +319,7 @@ fi
 #============================================================
 # Clean/new options
 
-CFILES="out.* bin.* batch.out batch.err *~ *gen"
+CFILES="out.* bin.* batch.out batch.err *~ *gen *header"
 
 if [ $CLEAN_FLAG -eq 1 ] ; then
     rm -f $CFILES

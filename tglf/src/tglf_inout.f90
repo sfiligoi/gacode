@@ -1995,5 +1995,51 @@ SUBROUTINE write_tglf_nete_crossphase_spectrum
   CLOSE(33)
 !
 END SUBROUTINE write_tglf_nete_crossphase_spectrum
+!-----------------------------------------------------------------
+!
+ SUBROUTINE write_tglf_QL_weight_spectrum
+!
+  USE tglf_dimensions
+  USE tglf_global
+  USE tglf_species
+  USE tglf_kyspectrum
+! 
+  IMPLICIT NONE
+  CHARACTER(33) :: fluxfile="out.tglf.QL_weight_spectrum"
+  INTEGER :: i,j,k,is
+  REAL :: phinorm
+  REAL,PARAMETER :: small=1.0E-10
+  !
+  if(new_start)then
+     write(*,*)"error: tglf_TM must be called before write_tglf_QL_weight_spectrum"
+     write(*,*)"       NN doesn't compute spectra -> if needed set tglf_nn_max_error_in=-1"
+  endif
+  !
+  OPEN(unit=33,file=fluxfile,status='replace')
+!
+  write(33,*)"QL weights per mode:"
+  write(33,*)"type: 1=particle,2=energy,3=toroidal stress,4=parallel stress,5=exchange"
+  write(33,*)"index limits: nky,nmodes,ns,field,type"
+  write(33,*)nky,nmodes_in,ns,3,5
+!
+      ! renormalize the fluxes and intensities to the phi-norm from the v-norm
+      do j=1,nky
+         do i=1,nmodes_in
+            phinorm=1.0
+            if(ABS(field_spectrum_out(2,j,i)).gt.small)phinorm=field_spectrum_out(2,j,i)
+            do is=1,ns
+               do k=1,3
+                  write(33,*)flux_spectrum_out(1,is,k,j,i)/phinorm
+                  write(33,*)flux_spectrum_out(2,is,k,j,i)/phinorm
+                  write(33,*)flux_spectrum_out(3,is,k,j,i)/phinorm
+                  write(33,*)flux_spectrum_out(4,is,k,j,i)/phinorm
+                  write(33,*)flux_spectrum_out(5,is,k,j,i)/phinorm
+              enddo
+           enddo
+        enddo
+      enddo
+  CLOSE(33)
+!
+ END SUBROUTINE write_tglf_QL_weight_spectrum
 
 
