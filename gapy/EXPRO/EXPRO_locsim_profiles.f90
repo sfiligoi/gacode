@@ -58,7 +58,6 @@ subroutine EXPRO_locsim_profiles(&
      udsymmetry_flag,&
      quasineutral_flag,&
      n_species_in,&
-     z,&
      rmin,&
      btccw,&
      ipccw,&
@@ -75,11 +74,10 @@ subroutine EXPRO_locsim_profiles(&
   integer, intent(in) :: udsymmetry_flag
   integer, intent(in) :: quasineutral_flag
   integer, intent(in) :: n_species_in
-  real, intent(in), dimension(n_species_in-1) :: z
   real, intent(in) :: rmin
   real, intent(inout) :: btccw,ipccw,a_meters
 
-  integer :: i,j,is,i_ion
+  integer :: i,j,i_ion
 
   n_species_exp = n_species_in
 
@@ -89,13 +87,7 @@ subroutine EXPRO_locsim_profiles(&
   call EXPRO_palloc(comm,path,1)
   EXPRO_ctrl_quasineutral_flag = 1  ! quasi-neutrality density flag
   EXPRO_ctrl_numeq_flag = numeq_flag
-
-  ! Number and charge of ion species
-  EXPRO_ctrl_z(:) = 0.0
   EXPRO_ctrl_n_ion = n_species_exp-1
-  do is=1,EXPRO_ctrl_n_ion
-     EXPRO_ctrl_z(is) = z(is)
-  enddo
 
   call EXPRO_pread
   call EXPRO_locsim_alloc(1)

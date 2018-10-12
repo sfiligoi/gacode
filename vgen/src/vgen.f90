@@ -170,7 +170,7 @@ program vgen
            endif
            er_exp(i) = (grad_p * EXPRO_grad_r0(i) &
                 * EXPRO_ti(erspecies_indx,i)*temp_norm_fac &
-                / (EXPRO_ctrl_z(erspecies_indx) * charge_norm_fac) & 
+                / (EXPRO_z(erspecies_indx) * charge_norm_fac) & 
                 + EXPRO_vtor(erspecies_indx,i) * EXPRO_bp0(i) &
                 - EXPRO_vpol(erspecies_indx,i) * EXPRO_bt0(i)) &
                 / 1000
@@ -178,7 +178,7 @@ program vgen
            write(1,'(e16.8)',advance='no') EXPRO_rho(i)
            write(1,'(e16.8)',advance='no') grad_p * EXPRO_grad_r0(i) &
                 * EXPRO_ti(erspecies_indx,i)*temp_norm_fac &
-                / (EXPRO_ctrl_z(erspecies_indx) * charge_norm_fac) / 1000
+                / (EXPRO_z(erspecies_indx) * charge_norm_fac) / 1000
            write(1,'(e16.8)',advance='no') EXPRO_vtor(erspecies_indx,i) * EXPRO_bp0(i)/1000
            write(1,'(e16.8)',advance='no') -EXPRO_vpol(erspecies_indx,i) * EXPRO_bt0(i)/1000
            write(1,*) 

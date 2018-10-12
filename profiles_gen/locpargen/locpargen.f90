@@ -29,18 +29,11 @@ program locpargen
   open(unit=1,file='input.locpargen',status='old')
   read(1,*) r0
   read(1,*) rho0
-  read(1,*) psi0 
-  read(1,*) z(1)
-  read(1,*) z(2)
-  read(1,*) z(3)
-  read(1,*) z(4)
-  read(1,*) z(5)
+  read(1,*) psi0
   read(1,*) hasgeo
   close(1)
 
-  EXPRO_ctrl_n_ion = 5
   EXPRO_ctrl_quasineutral_flag = 0
-  EXPRO_ctrl_z(1:5) = z(1:5)
   ! We don't need the numerical eq. flag set for this routine.
   EXPRO_ctrl_numeq_flag = hasgeo
 
