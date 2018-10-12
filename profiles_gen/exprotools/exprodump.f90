@@ -14,7 +14,6 @@ program exprodump
 
   character(len=20) :: var,x
   integer :: i
-  real, dimension(5) :: z
   integer :: density_method
 
 
