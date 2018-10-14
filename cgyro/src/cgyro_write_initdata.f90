@@ -106,11 +106,11 @@ subroutine cgyro_write_initdata
      write(io,20) '[rho/a]:',rho,'[z_eff]:',z_eff,'[w_E*dt]',(n_toroidal-1)*q/rmin*length*gamma_e/(2*pi)*delta_t
      write(io,*)
      write(io,'(a)') &
-          ' i  z  n/n_norm   T/T_norm   m/m_norm     a/Ln       a/Lt       nu        d(a/Ln)    d(a/Lt)'
+          ' i  z  n/n_norm   T/T_norm   m/m_norm     a/Ln       a/Lt       nu        s(a/Ln)    s(a/Lt)'
      do is=1,n_species
         write(io,'(t1,i2,1x,i2,3(2x,1pe9.3),2(1x,1pe10.3),(2x,1pe9.3),2(1x,1pe10.3))') &
              is,int(z(is)),dens(is),temp(is),mass(is),dlnndr(is),dlntdr(is),nu(is),&
-             sdlnndr(is)*length/rho*0.25,sdlntdr(is)*length/rho*0.25
+             sdlnndr(is),sdlntdr(is)
      enddo
 
      if (profile_model == 2) then

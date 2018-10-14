@@ -46,6 +46,9 @@ program locpargen
   ! Minor radius
   a = EXPRO_rmin(EXPRO_n_exp)
 
+  ! Electron index
+  ise = EXPRO_n_ion+1
+
   if (rho0 > 0.0) then
 
      ! Use local rho
@@ -83,6 +86,8 @@ program locpargen
        ipccw,&
        a)
 
+  print 10,'# rhos/a=',rhos_loc/a
+
   print 10,'RMIN=',r0
   print 10,'RMAJ=',rmaj_loc
 
@@ -104,22 +109,6 @@ program locpargen
   print 10,'GAMMA_P=',gamma_p_loc*a/cs_loc
   print 10,'MACH=',mach_loc/cs_loc
 
-  print *
-  ise = EXPRO_n_ion+1
-  print 11,'N_SPECIES=',ise
-
-  tag(:) = (/'1','2','3','4','5'/)
-  do is=1,ise
-     print *
-     print 11,'Z_'//tag(is)//'=',int(z_loc(is))
-     ! Deuteron mass normalization
-     print 10,'MASS_'//tag(is)//'=',mass_loc(is)/2.0
-     print 10,'DENS_'//tag(is)//'=',dens_loc(is)/dens_loc(ise)
-     print 10,'TEMP_'//tag(is)//'=',temp_loc(is)/temp_loc(ise)
-     print 10,'DLNNDR_'//tag(is)//'=',dlnndr_loc(is)
-     print 10,'DLNTDR_'//tag(is)//'=',dlntdr_loc(is)
-  enddo
-
   ! Compute collision frequency
   !
   !          4 pi ne e^4 ne ln(Lambda)
@@ -138,6 +127,26 @@ program locpargen
 
   betae_unit = 4.027e-3*dens_loc(ise)*temp_loc(ise)/b_unit_loc**2
   print 10,'BETAE_UNIT=',betae_unit
+
+  !---------------------------------------------------------
+  ! Species data
+  
+  print *
+  print 11,'N_SPECIES=',ise
+
+  tag(:) = (/'1','2','3','4','5'/)
+  do is=1,ise
+     print *
+     print 11,'Z_'//tag(is)//'=',int(z_loc(is))
+     ! Deuteron mass normalization
+     print 10,'MASS_'//tag(is)//'=',mass_loc(is)/2.0
+     print 10,'DENS_'//tag(is)//'=',dens_loc(is)/dens_loc(ise)
+     print 10,'TEMP_'//tag(is)//'=',temp_loc(is)/temp_loc(ise)
+     print 10,'DLNNDR_'//tag(is)//'=',dlnndr_loc(is)
+     print 10,'DLNTDR_'//tag(is)//'=',dlntdr_loc(is)
+     print 10,'SDLNNDR_'//tag(is)//'=',sdlnndr_loc(is)
+     print 10,'SDLNTDR_'//tag(is)//'=',sdlntdr_loc(is)
+  enddo
 
 10 format(a,sp,1pe12.5)
 11 format(a,i0)
