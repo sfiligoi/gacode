@@ -218,7 +218,7 @@ def frame():
       xp = x/(2*np.pi)*sim.length
       # ky[1] < 0 is possible
       yp = y/np.abs(sim.ky[1])
-      aspect = max(yp)/max(xp)
+      aspect = max(abs(yp))/max(abs(xp))
 
       fig = plt.figure(figsize=(8,8*aspect))
       ax = fig.add_subplot(111)
