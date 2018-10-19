@@ -20,9 +20,9 @@ font=16
 ftype = 'screen'
 moment = 'phi'
 species = 0
-nx = 128
-ny = 128
-istr = "39"
+nx = 256
+ny = 256
+istr = "79"
 fmin = 'auto'
 fmax = 'auto'
 colormap = 'gist_rainbow'
@@ -38,8 +38,6 @@ nn = sim.n_n
 ns = sim.n_species
 nth = sim.theta_plot
 
-print sim.q
-print sim.m_box
 x = np.zeros([nx])
 y = np.zeros([ny])
 
@@ -57,8 +55,9 @@ zp = np.zeros([nx,ny])
 
 for i in range(nx):
    for j in range(ny):
-      xp[i,j] = x[i]/(2*np.pi)*sim.length
-      yp[i,j] = y[j]/np.abs(sim.ky[1])
+      r = 0.5+x[i]/(4*np.pi)
+      xp[i,j] = 1.0+r*np.cos(y[j])
+      yp[i,j] = r*np.sin(y[j])
       zp[i,j] = 0.0
 
 aspect = np.max(yp)/np.max(xp)

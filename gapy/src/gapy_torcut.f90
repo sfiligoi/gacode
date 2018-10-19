@@ -16,15 +16,15 @@ subroutine torcut(nr,nth,nn,nx,ny,c,f)
   double precision :: pi,fsum
   double complex :: ic
 
-! f2py intent(in) nr
-! f2py intent(in) nth
-! f2py intent(in) nn
-! f2py intent(in) nx
-! f2py intent(in) ny
-! f2py intent(in) c
-! f2py intent(in,out) f
-! f2py intent(in) q
-! f2py intent(in) m
+  ! f2py intent(in) nr
+  ! f2py intent(in) nth
+  ! f2py intent(in) nn
+  ! f2py intent(in) nx
+  ! f2py intent(in) ny
+  ! f2py intent(in) c
+  ! f2py intent(in,out) f
+  ! f2py intent(in) q
+  ! f2py intent(in) m
 
   allocate(epx(0:nr-1,0:nx-1))
   allocate(eny(0:nn-1,0:ny-1))
@@ -33,7 +33,7 @@ subroutine torcut(nr,nth,nn,nx,ny,c,f)
   allocate(th(0:nth))
   allocate(cj(0:nr-1,0:nn-1))
   allocate(cx(0:nr-1,0:nth,0:nn-1))
-  
+
   ic = (0d0,1d0)
   pi = atan(1d0)*4d0
 
@@ -64,28 +64,23 @@ subroutine torcut(nr,nth,nn,nx,ny,c,f)
         cx(p,nth,n) = c(pp,0,n)*exp(-2*pi*ic*n*q)
      enddo
   enddo
-  
+
   ! factor of 1/2 for n=0
   eny(0,:) = 0.5*eny(0,:)
- 
+
   f = 0.0
 
-  jc = 0
-!$omp parallel do private(j,i,fsum,n,p)
+!!$omp parallel do private(j,i,fsum,n,p)
   do j=0,ny-1
-     
-     if (yj(j) >= th(jc) .and. yj(j) <= th(jc+1)) then 
-        cj(:,:) = (cx(:,jc,:)*(yj(j)-th(jc))+cx(:,jc+1,:)*(th(jc+1)-yj(j)))/(th(1)-th(0))
-        if (jc+1 > nth) print *,'ERROR1' 
-     else
-        if (jc+1 == nth) then
-           print *,'ERROR2' 
-           print *,th(jc),yj(j),th(jc+1)
-        else
-           jc = jc+1
+
+     do jc=0,nth-1
+        if (yj(j) >= th(jc) .and. yj(j) <= th(jc+1)) then 
+           cj(:,:) = (cx(:,jc+1,:)*(yj(j)-th(jc))+cx(:,jc,:)*(th(jc+1)-yj(j)))/(th(1)-th(0))
+           if (jc+1 > nth) print *,'ERROR1' 
+           exit
         endif
-     endif
-     
+     enddo
+
      do i=0,nx-1
         fsum = 0.0
         do n=0,nn-1
@@ -99,5 +94,5 @@ subroutine torcut(nr,nth,nn,nx,ny,c,f)
   enddo
 
   deallocate(epx,eny,xi,yj,th,cj)
-  
+
 end subroutine torcut
