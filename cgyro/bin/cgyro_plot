@@ -288,10 +288,10 @@ case "$VIS_TYPE" in
 	python $PYROOT/vis_slices.py ;;
 	
    torcut)
-	python $PYROOT/vis_torcut.py ;;
+	python $PYROOT/vis_torcut.py $FTYPE $MOMENT $SPECIES $NX $NY $TIME $FMIN $FMAX $CMAP $FONTSIZE ;;
 	   
     *)
-        echo "Unrecognized argument to -plot" ; exit 1 ;;
+        echo "Unrecognized argument to -vis" ; exit 1 ;;
 esac
 
 case "$PLOT_TYPE" in
@@ -353,13 +353,13 @@ case "$PLOT_TYPE" in
        export OMP_NUM_THREADS=$NOMP ; python $PYROOT/plot_rt.py $FTYPE $MOMENT $SPECIES $YMIN $YMAX $NX $ND $TIME $FMIN $FMAX $CMAP $FONTSIZE ;;
 
    text)
-   	python $PYROOT/text.py $W $FTYPE ;;
+   	python $PYROOT/plot_text.py $W $FTYPE ;;
 
    fix)
    	python $PYROOT/fix.py ;;
 
    template)
-   	cp $PYROOT/template.py . ;;
+   	cp $PYROOT/plot_template.py . ;;
 
    vid)
 	FRAMERATE=20

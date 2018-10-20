@@ -1,9 +1,9 @@
-subroutine torcut(nr,nth,nn,nx,ny,c,f)
+subroutine torcut(m,q,nr,nth,nn,nx,ny,c,f)
 
   implicit none
 
-  double precision :: q=2.0
-  integer :: m=8
+  integer, intent(in) :: m
+  double precision, intent(in) :: q
   integer, intent(in) :: nr,nn,nth,nx,ny
   double complex, intent(in) :: c(0:nr-1,0:nth-1,0:nn-1)
   double precision, intent(inout) :: f(0:nx-1,0:ny-1)
@@ -16,6 +16,8 @@ subroutine torcut(nr,nth,nn,nx,ny,c,f)
   double precision :: pi,fsum
   double complex :: ic
 
+  ! f2py intent(in) m
+  ! f2py intent(in) q
   ! f2py intent(in) nr
   ! f2py intent(in) nth
   ! f2py intent(in) nn
@@ -23,8 +25,6 @@ subroutine torcut(nr,nth,nn,nx,ny,c,f)
   ! f2py intent(in) ny
   ! f2py intent(in) c
   ! f2py intent(in,out) f
-  ! f2py intent(in) q
-  ! f2py intent(in) m
 
   allocate(epx(0:nr-1,0:nx-1))
   allocate(eny(0:nn-1,0:ny-1))
@@ -38,7 +38,7 @@ subroutine torcut(nr,nth,nn,nx,ny,c,f)
   pi = atan(1d0)*4d0
 
   do j=0,nth
-     th(j) = j*2*pi/nth
+     th(j) = j*2*pi/nth-pi
   enddo
 
   do i=0,nx-1
@@ -49,7 +49,7 @@ subroutine torcut(nr,nth,nn,nx,ny,c,f)
   enddo
 
   do j=0,ny-1
-     yj(j) = j*2*pi/(ny-1)
+     yj(j) = j*2*pi/(ny-1)-pi
      do n=0,nn-1    
         eny(n,j) = exp(ic*n*q*yj(j))
      enddo

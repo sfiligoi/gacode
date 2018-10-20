@@ -2,8 +2,8 @@ import struct
 import sys
 import numpy as np
 import os
-from matplotlib import rc
 import matplotlib.pyplot as plt
+from matplotlib import rc
 from gacodefuncs import *
 from cgyro.data import cgyrodata
 from mayavi import mlab 
@@ -11,21 +11,21 @@ try:
    import gapy
    hasgapy = True
 except:
-   print ' BAD: (plot_viz) Please build gapy.so library!'
+   print 'ERROR: (vis_torcut) Please build gapy.so library!'
    sys.exit()
    
 PREC='f' ; BIT=4
 
-font=16
-ftype = 'screen'
-moment = 'phi'
-species = 0
-nx = 256
-ny = 256
-istr = "79"
-fmin = 'auto'
-fmax = 'auto'
-colormap = 'gist_rainbow'
+ftype = sys.argv[1]
+moment = sys.argv[2]
+species = int(sys.argv[3])
+nx = int(sys.argv[4])
+ny = int(sys.argv[5])
+istr = sys.argv[6]
+fmin = sys.argv[7]
+fmax = sys.argv[8]
+colormap = sys.argv[9]
+font=int(sys.argv[10])
 
 # Define plot and font size 
 rc('text',usetex=True)
@@ -37,6 +37,12 @@ nr = sim.n_radial
 nn = sim.n_n
 ns = sim.n_species
 nth = sim.theta_plot
+if nth == 1:
+   print 'WARNING: (vis_torcut) Should use THETA_PLOT > 1 in CGYRO.'
+
+if nx < 0 or ny < 0:
+   nx = nr+1
+   ny = 2*nn-1
 
 x = np.zeros([nx])
 y = np.zeros([ny])
@@ -55,7 +61,7 @@ zp = np.zeros([nx,ny])
 
 for i in range(nx):
    for j in range(ny):
-      r = 0.5+x[i]/(4*np.pi)
+      r = 0.1+x[i]/(4*np.pi)
       xp[i,j] = 1.0+r*np.cos(y[j])
       yp[i,j] = r*np.sin(y[j])
       zp[i,j] = 0.0
@@ -68,36 +74,15 @@ if istr == '-1':
 else:
     ivec = str2list(istr)
 
-u=specmap(sim.mass[species],sim.z[species])
+# Get filename and tags 
+fdata,title,isfield = tag_helper(sim.mass[species],sim.z[species],moment)
 
-# Set filename root and title
-isfield = True
-if (moment == 'n'):
-    fdata = '.cgyro.kxky_n'
-    title = r'${\delta \mathrm{n}}_'+u+'$'
-    isfield = False
-elif (moment == 'e'):
-    fdata = '.cgyro.kxky_e'
-    title = r'${\delta \mathrm{E}}_'+u+'$'
-    isfield = False
-elif (moment == 'phi'):
-    fdata = '.cgyro.kxky_phi'
-    title = r'$\delta\phi$'
-elif (moment == 'apar'):
-    fdata = '.cgyro.kxky_apar'
-    title = r'$\delta A_\parallel$'
-elif (moment == 'bpar'):
-    fdata = '.cgyro.kxky_bpar'
-    title = r'$\delta B_\parallel$'
-
-# ERROR CHECKS
-
-# Check to see if data exists (try binary data first)
+# Check to see if data exists 
 if os.path.isfile('bin'+fdata):
     fdata = 'bin'+fdata
-    print 'INFO: (plot_viz) Found binary data in '+fdata 
+    print 'INFO: (vis_torcut) Found binary data in '+fdata 
 else:
-    print 'ERROR: (plot_viz) No data for -moment '+moment+' exists.  Try -moment phi'
+    print 'ERROR: (vis_torcut) No data for -moment '+moment+' exists.  Try -moment phi'
     sys.exit()
 
 if isfield:
@@ -121,8 +106,7 @@ def frame():
       c = a[0,:,:,species,:]+1j*a[1,:,:,species,:]
                 
    f = np.zeros([nx,ny],order='F')
-   
-   gapy.torcut(c,f)
+   gapy.torcut(sim.m_box,sim.q,c,f)
           
    if fmin == 'auto':
       f0=np.min(f)
@@ -132,16 +116,17 @@ def frame():
       f1=float(fmax)
 
    mlab.mesh(xp,yp,zp,scalars=f,colormap=colormap,vmin=f0,vmax=f1,opacity=0.4)
-   print 'INFO: (plot_torcut) min=%e , max=%e  (t=%e)' % (f0,f1,t)
+   mlab.view(azimuth=0, elevation=180)
+   print 'INFO: (vis_torcut) min=%e , max=%e  (t=%e)' % (f0,f1,t)
 
    if ftype == 'screen':
       mlab.show()
    else:
       fname = fdata+str(i)
       # Filename uses frame number 
-      plt.savefig(str(i)+'.'+ftype)
+      mlab.savefig(str(i)+'.'+ftype)
       # Close each time to prevent memory accumulation
-      plt.close()
+      mlab.close()
                 
 i = 0
 
@@ -156,7 +141,7 @@ while work:
       sys.exit()
       
    i = i+1
-   print 'INFO: (plot_viz) Time index '+str(i) 
+   print 'INFO: (vis_torcut) Time index '+str(i) 
    if i in ivec:
       frame()
    if i == max(ivec):
