@@ -1,10 +1,11 @@
-subroutine torcut(m,q,nr,nth,nn,nx,ny,c,f)
+subroutine torcut(m,q,nr,nth,nn,nx,ny,g1,g2,c,f)
 
   implicit none
 
   integer, intent(in) :: m
   double precision, intent(in) :: q
   integer, intent(in) :: nr,nn,nth,nx,ny
+  double precision, intent(in) :: g1(0:ny-1),g2(0:ny-1)
   double complex, intent(in) :: c(0:nr-1,0:nth-1,0:nn-1)
   double precision, intent(inout) :: f(0:nx-1,0:ny-1)
 
@@ -13,7 +14,7 @@ subroutine torcut(m,q,nr,nth,nn,nx,ny,c,f)
   double precision, dimension(:), allocatable :: xi,yj,th
 
   integer :: i,j,n,p,jc,pp
-  double precision :: pi,fsum
+  double precision :: pi,fsum,x0
   double complex :: ic
 
   ! f2py intent(in) m
@@ -51,7 +52,7 @@ subroutine torcut(m,q,nr,nth,nn,nx,ny,c,f)
   do j=0,ny-1
      yj(j) = j*2*pi/(ny-1)-pi
      do n=0,nn-1    
-        eny(n,j) = exp(ic*n*q*yj(j))
+        eny(n,j) = exp(ic*n*g1(j))
      enddo
   enddo
 
@@ -66,26 +67,27 @@ subroutine torcut(m,q,nr,nth,nn,nx,ny,c,f)
   enddo
 
   ! factor of 1/2 for n=0
-  eny(0,:) = 0.5*eny(0,:)
+  eny(0,:) = 0.5d0*eny(0,:)
 
-  f = 0.0
+  f = 0d0
 
-!!$omp parallel do private(j,i,fsum,n,p)
+!$omp parallel do private(j,jc,cj,i,fsum,x0,n,p)
   do j=0,ny-1
 
      do jc=0,nth-1
         if (yj(j) >= th(jc) .and. yj(j) <= th(jc+1)) then 
-           cj(:,:) = (cx(:,jc+1,:)*(yj(j)-th(jc))+cx(:,jc,:)*(th(jc+1)-yj(j)))/(th(1)-th(0))
-           if (jc+1 > nth) print *,'ERROR1' 
+           cj(:,:) = ( cx(:,jc+1,:)*(yj(j)-th(jc)) &
+                + cx(:,jc,:)*(th(jc+1)-yj(j)) )/(th(1)-th(0))
            exit
         endif
      enddo
 
      do i=0,nx-1
         fsum = 0.0
+        x0 = m*xi(i)*g2(j)/(2*pi)
         do n=0,nn-1
            do p=0,nr-1
-              fsum = fsum+real(cj(p,n)*epx(p,i)*eny(n,j)*exp(ic*n*m*xi(i)*yj(j)/(2*pi)))
+              fsum = fsum+real( cj(p,n)*epx(p,i)*eny(n,j)*exp(ic*n*x0) )
            enddo
         enddo
         f(i,j) = fsum
@@ -93,6 +95,6 @@ subroutine torcut(m,q,nr,nth,nn,nx,ny,c,f)
 
   enddo
 
-  deallocate(epx,eny,xi,yj,th,cj)
+  deallocate(epx,eny,xi,yj,th,cj,cx)
 
 end subroutine torcut

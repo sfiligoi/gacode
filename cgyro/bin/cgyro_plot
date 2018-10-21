@@ -112,6 +112,7 @@ then
   echo "         -t <value>"
   echo "         Specify integer time index (-1 is last time)."
   echo "         *Affects: ball, hb, hbcut, fluct"
+  echo "         *Contour examples: all, -1, 3-8"
   echo
   echo "         -n <value>"
   echo "         Specify values of n (toroidal mode index)"
@@ -188,7 +189,7 @@ TMAX=-1.0
 YMIN=0.0
 YMAX=auto
 W=0.5
-MOMENT=phi
+MOMENT=e
 INDX=1
 THETA=0.0
 N=null
@@ -288,7 +289,7 @@ case "$VIS_TYPE" in
 	python $PYROOT/vis_slices.py ;;
 	
    torcut)
-	python $PYROOT/vis_torcut.py $FTYPE $MOMENT $SPECIES $NX $NY $TIME $FMIN $FMAX $CMAP $FONTSIZE ;;
+	export OMP_NUM_THREADS=$NOMP ; python $PYROOT/vis_torcut.py $FTYPE $MOMENT $SPECIES $NX $NY $TIME $FMIN $FMAX $CMAP $FONTSIZE ;;
 	   
     *)
         echo "Unrecognized argument to -vis" ; exit 1 ;;

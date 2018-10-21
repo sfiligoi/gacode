@@ -67,29 +67,8 @@ if istr == '-1':
 else:
     ivec = str2list(istr)
 
-u=specmap(sim.mass[species],sim.z[species])
-
-# Set filename root and title
-isfield = True
-if (moment == 'n'):
-    fdata = '.cgyro.kxky_n'
-    title = r'${\delta \mathrm{n}}_'+u+'$'
-    isfield = False
-elif (moment == 'e'):
-    fdata = '.cgyro.kxky_e'
-    title = r'${\delta \mathrm{E}}_'+u+'$'
-    isfield = False
-elif (moment == 'phi'):
-    fdata = '.cgyro.kxky_phi'
-    title = r'$\delta\phi$'
-elif (moment == 'apar'):
-    fdata = '.cgyro.kxky_apar'
-    title = r'$\delta A_\parallel$'
-elif (moment == 'bpar'):
-    fdata = '.cgyro.kxky_bpar'
-    title = r'$\delta B_\parallel$'
-
-# ERROR CHECKS
+# Get filename and tags 
+fdata,title,isfield = tag_helper(sim.mass[species],sim.z[species],moment)
 
 # Check to see if data exists (try binary data first)
 if os.path.isfile('bin'+fdata):
