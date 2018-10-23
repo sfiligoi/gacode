@@ -185,7 +185,8 @@ def extract(d,sd,key,w,spec,moment,norm=False,verbose=False):
          # If this is a directory, get the key value
          for line in open(ddir+'input.cgyro').readlines():
             if re.match(key,line):
-               x.append(float(string.splitfields(line,'=')[1]))
+               found = float(string.splitfields(line,'=')[1]) 
+         x.append(found)
          # Get the corresponding flux
          sim = cgyrodata(ddir)
          sim.getflux()
