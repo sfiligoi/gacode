@@ -9,7 +9,8 @@ SRC=	../src/gapy_realfluct.f90 \
 	../src/gapy_util.f90
 #	../src/gapy_vpro.f90
 
-F2PYM:=$(filter-out --fcompiler=pg,$(F2PY))
+# Remove possible compilers
+F2PYM:=$(filter-out --fcompiler=pg --fcompiler=intelem,$(F2PY))
 
 ifndef F2PY
    all:
