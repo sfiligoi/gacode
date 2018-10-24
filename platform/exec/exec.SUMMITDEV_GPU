@@ -28,4 +28,6 @@ echo ">mpirun -n $nmpi $exec"
 # jsrun
 #mpirun --host summit2:32,summit1:32 --map-by core -n $nmpi $GACODE_ROOT/platform/exec/wrap.${GACODE_PLATFORM} $exec
 # mpirun -n $nmpi $GACODE_ROOT/platform/exec/wrap.${GACODE_PLATFORM} $exec
-mpirun -n $nmpi $exec
+jsrun -n $nmpi -g 4 $GACODE_ROOT/platform/exec/wrap.${GACODE_PLATFORM} $exec
+# mpirun -n $nmpi $exec
+# mpirun -n $nmpi $exec
