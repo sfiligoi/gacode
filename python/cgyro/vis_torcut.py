@@ -9,13 +9,10 @@ from cgyro.data import cgyrodata
 from mayavi import mlab 
 try:
    import gapy
-   hasgapy = True
 except:
    print 'ERROR: (vis_torcut) Please build gapy.so library!'
    sys.exit()
    
-PREC='f' ; BIT=4
-
 ftype    = sys.argv[1]
 moment   = sys.argv[2]
 species  = int(sys.argv[3])
@@ -70,19 +67,22 @@ zp = np.zeros([nx,ny])
 
 for i in range(nx):
    for j in range(ny):
-      r = 0.1+x[i]/(4*np.pi)
-      xp[i,j] = 1.0+r*np.cos(y[j])
+      r = 0.2+x[i]/(4*np.pi)
+      xp[i,j] = 1.0+r*np.cos(y[j]+np.arcsin(sim.delta)*np.sin(y[j]))
       yp[i,j] = sim.kappa*r*np.sin(y[j])
       zp[i,j] = 0.0
 
-# Shape functions
+# Shape functions (just up-down symmetric now)
 gapy.geo.geo_rmin_in=sim.rmin
 gapy.geo.geo_rmaj_in=sim.rmaj
 gapy.geo.geo_q_in=sim.q
 gapy.geo.geo_s_in=sim.shear
 gapy.geo.geo_kappa_in=sim.kappa
 gapy.geo.geo_delta_in=sim.delta
+gapy.geo.geo_s_kappa_in=sim.s_kappa
+gapy.geo.geo_s_delta_in=sim.s_delta
 gapy.geo.geo_drmaj_in=sim.shift
+gapy.geo.geo_beta_star_in=sim.beta_star
 
 gapy.geo.geo_interp(y,True)
 # g1 -> q*theta
@@ -90,7 +90,6 @@ g1 = -gapy.geo.geo_nu
 # g2 -> theta 
 g2 = gapy.geo.geo_b*gapy.geo.geo_captheta/gapy.geo.geo_s_in/gapy.geo.geo_grad_r**2
 
-print g1
 #------------------------------------------------------------------------
 
 # Get filename and tags 
@@ -147,19 +146,20 @@ def frame():
       # Close each time to prevent memory accumulation
       mlab.close()
                 
-i = 0
 
-work = True
+PREC='f' ; BIT=4
+
 # Open binary file
 fbin = open(fdata,'rb') 
 
-while work:
+i = 0
+while True:
    try:
       aa = struct.unpack(PREC*n_chunk,fbin.read(BIT*n_chunk))
    except:
       sys.exit()
-      
-   i = i+1
+
+   i += 1
    print 'INFO: (vis_torcut) Time index '+str(i) 
    if i in ivec:
       frame()
