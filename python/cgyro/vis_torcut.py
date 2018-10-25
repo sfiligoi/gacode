@@ -35,13 +35,7 @@ nn = sim.n_n
 ns = sim.n_species
 nth = sim.theta_plot
 
-# Generate vector of time frames 
-if istr == '-1':
-   ivec = [nt]
-elif istr == 'all':
-   ivec = range(nt)
-else:
-   ivec = str2list(istr)
+ivec = time_vector(istr,nt)
 
 #------------------------------------------------------------------------
 # (r,theta)=(x,y) mesh setup 

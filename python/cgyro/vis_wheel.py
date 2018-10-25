@@ -36,13 +36,7 @@ nn = sim.n_n
 ns = sim.n_species
 nth = sim.theta_plot
 
-# Generate vector of time frames 
-if istr == '-1':
-   ivec = [nt]
-elif istr == 'all':
-   ivec = range(nt)
-else:
-   ivec = str2list(istr)
+ivec = time_vector(istr,nt)
 
 #------------------------------------------------------------------------
 # (r,theta)=(x,y) mesh setup 
@@ -74,7 +68,7 @@ zp1 = np.zeros([nx,nz])
 for i in range(nx):
    for j in range(nz):
       dx = x[i]/(4*np.pi)
-      xp1[i,j] = 0.5+dx
+      xp1[i,j] = 0.2+dx
       yp1[i,j] = 0.0
       zp1[i,j] = z[j]/(4*np.pi)
 
@@ -86,7 +80,7 @@ zp2 = np.zeros([nx,nz])
 for i in range(nx):
    for j in range(nz):
       dx = x[i]/(4*np.pi)
-      xp2[i,j] = -0.5-dx
+      xp2[i,j] = -0.2-dx
       yp2[i,j] = 0.0
       zp2[i,j] = z[j]/(4*np.pi)
 
@@ -121,9 +115,10 @@ def frame():
       c = a[0,:,:,:]+1j*a[1,:,:,:]
    else:
       c = a[0,:,:,species,:]+1j*a[1,:,:,species,:]
-                
-   f = np.zeros([nx,ny],order='F')
-   gapy.realfluct6(c,f)
+
+   # 1
+   f = np.zeros([nx,nz],order='F')
+   gapy.realfluct(c[:,nth/2,:],f)
 
    if fmin == 'auto':
       f0=np.min(f)
@@ -132,7 +127,13 @@ def frame():
       f0=float(fmin)
       f1=float(fmax)
 
-   mlab.mesh(xp,yp,zp,scalars=f,colormap=colormap,vmin=f0,vmax=f1,opacity=1.0)
+   mlab.mesh(xp1,yp1,zp1,scalars=f,colormap=colormap,vmin=f0,vmax=f1,opacity=1.0)
+
+   # 2
+   f = np.zeros([nx,nz],order='F')
+   gapy.realfluct(c[:,0,:],f)
+   mlab.mesh(xp2,yp2,zp2,scalars=f,colormap=colormap,vmin=f0,vmax=f1,opacity=1.0)
+
    # View from positive z-axis
    mlab.view(azimuth=0, elevation=0)
    print 'INFO: (vis_torcut) min=%e , max=%e' % (f0,f1)

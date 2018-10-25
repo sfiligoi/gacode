@@ -58,6 +58,7 @@ then
   echo "         -vis <type>"
   echo "         <type> = slices   (fieldline slices)"
   echo "                = torcut   (toroidal cut)"
+  echo "                = wheel    (fluctuation wheel)"
   echo
   echo "OPTIONS"
   echo
@@ -196,6 +197,7 @@ N=null
 MESH=0
 NX=-1
 NY=-1
+NZ=-1
 ND=0
 NOMP=1
 FMIN=auto
@@ -251,6 +253,7 @@ while [ $# -gt 0 ] ; do
   -n) shift ; N=$1 ;;
   -nx) shift ; NX=$1 ;;
   -ny) shift ; NY=$1 ;;
+  -nz) shift ; NZ=$1 ;;
   -nd) shift ; ND=$1 ;;
   -fmin) shift ; FMIN=$1 ;;
   -fmax) shift ; FMAX=$1 ;;
@@ -290,6 +293,9 @@ case "$VIS_TYPE" in
 	
    torcut)
 	export OMP_NUM_THREADS=$NOMP ; python $PYROOT/vis_torcut.py $FTYPE $MOMENT $SPECIES $NX $NY $TIME $FMIN $FMAX $CMAP $FONTSIZE ;;
+
+   wheel)
+	export OMP_NUM_THREADS=$NOMP ; python $PYROOT/vis_wheel.py $FTYPE $MOMENT $SPECIES $NX $NY $NZ $TIME $FMIN $FMAX $CMAP $FONTSIZE ;;
 	   
     *)
         echo "Unrecognized argument to -vis" ; exit 1 ;;

@@ -37,6 +37,9 @@ nt = sim.n_time
 nr = sim.n_radial
 nn = sim.n_n
 ns = sim.n_species
+nth = sim.theta_plot
+
+ivec = time_vector(istr,nt)
 
 if nx < 0 or ny < 0:
    nx = nr+1
@@ -134,13 +137,6 @@ def maptoreal_fft(nr,nn,nx,ny,c):
    return f,end-start
 #------------------------------------------------------------------------
 
-
-# Generate vector of time frames 
-if istr == '-1':
-    ivec = range(nt)
-else:
-    ivec = str2list(istr)
-
 # Get filename and tags 
 fdata,title,isfield = tag_helper(sim.mass[species],sim.z[species],moment)
 
@@ -160,22 +156,21 @@ else:
 if usefft:
     print 'INFO: (plot_fluct) Using FFT (fast)'
 
-# **WARNING** Assumes theta_plot=1 
 if isfield:
-    n_chunk = 2*nr*nn
+    n_chunk = 2*nr*nth*nn
 else:
-    n_chunk = 2*nr*ns*nn
+    n_chunk = 2*nr*nth*ns*nn
 
 # This is the logic to generate a frame
 def frame():
 
    if i in ivec:
       if isfield:
-         a = np.reshape(aa,(2,nr,nn),order='F')
-         c = a[0,:,:]+1j*a[1,:,:]
+         a = np.reshape(aa,(2,nr,nth,nn),order='F')
+         c = a[0,:,nth/2,:]+1j*a[1,:,nth/2,:]
       else:
-         a = np.reshape(aa,(2,nr,ns,nn),order='F')
-         c = a[0,:,species,:]+1j*a[1,:,species,:]
+         a = np.reshape(aa,(2,nr,nth,ns,nn),order='F')
+         c = a[0,:,nth/2,species,:]+1j*a[1,:,nth/2,species,:]
                 
       f = np.zeros([nx,ny],order='F')
       if hasgapy:

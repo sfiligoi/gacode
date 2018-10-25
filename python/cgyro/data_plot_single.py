@@ -43,8 +43,9 @@ elif plot_type == 'ky_phi':
    ymax  = sys.argv[4]
    nstr  = sys.argv[5]
    ftype = sys.argv[6]
+   theta = 0.0
 
-   data_in.plot_ky_phi(field=field,ymin=ymin,ymax=ymax,nstr=nstr)
+   data_in.plot_ky_phi(field=field,theta=theta,ymin=ymin,ymax=ymax,nstr=nstr)
 
    outfile = 'out.cgyro.ky_phi.'+ftype
 
@@ -53,8 +54,9 @@ elif plot_type == 'rcorr_phi':
    field = int(sys.argv[2])
    w     = float(sys.argv[3])
    ftype = sys.argv[4]
-
-   data_in.plot_rcorr_phi(field=field,w=w)
+   theta = 0.0
+   
+   data_in.plot_rcorr_phi(field=field,theta=theta,w=w)
 
    outfile = 'out.cgyro.rcorr_phi.'+ftype
 
@@ -99,8 +101,9 @@ elif plot_type == 'phi':
 
    field = int(sys.argv[2])
    ftype = sys.argv[3]
-
-   head,x,y1,y2 = data_in.plot_phi(field=field)
+   theta = 0.0
+   
+   head,x,y1,y2 = data_in.plot_phi(field=field,theta=theta)
    
    outfile = 'out.cgyro.phi.'+ftype
 
@@ -160,8 +163,9 @@ elif plot_type == 'kxky_phi':
    field = int(sys.argv[2])
    w     = float(sys.argv[3])
    ftype = sys.argv[4]
-
-   data_in.plot_kxky_phi(field=field,w=w)
+   theta = 0.0
+   
+   data_in.plot_kxky_phi(field=field,theta=theta,w=w)
    
    outfile = 'out.cgyro.kxky_phi.'+ftype
 
@@ -173,8 +177,9 @@ elif plot_type == 'kx_phi':
    ymax  = sys.argv[5]
    nstr  = sys.argv[6]
    ftype = sys.argv[7]
-
-   data_in.plot_kx_phi(field=field,w=w,ymin=ymin,ymax=ymax,nstr=nstr)
+   theta = 0.0
+   
+   data_in.plot_kx_phi(field=field,theta=theta,w=w,ymin=ymin,ymax=ymax,nstr=nstr)
    
    outfile = 'out.cgyro.kx_phi.'+ftype
 

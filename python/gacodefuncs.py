@@ -270,3 +270,18 @@ def tag_helper(mass,z,moment):
       title = r'$\delta B_\parallel$'
 
   return fdata,title,isfield
+#---------------------------------------------------------------
+
+#---------------------------------------------------------------
+# Get time vector from commmand line option
+def time_vector(istr,nt):
+
+   if istr == '-1':
+      ivec = [nt]
+   elif istr == 'all':
+      ivec = range(nt)
+   else:
+      ivec = str2list(istr)
+
+   return ivec
+#---------------------------------------------------------------
