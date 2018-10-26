@@ -45,33 +45,35 @@ if nth == 1:
    print 'ERROR: (vis_wheel) This visualization requires THETA_PLOT > 1.'
    sys.exit()
    
-if nx < 0 or ny < 0 or nz < 0:
-   nx = nr+1
-   ny = nth
-   nz = 2*nn-1
+if nx < 0:
+   nx = 128
+if ny < 0:
+   ny = 128
+if nz < 0:
+   nz = 128
 
-x = np.zeros([nx])
-y = np.zeros([ny])
-z = np.zeros([nz])
+x = np.zeros([nx]) # x
+y = np.zeros([ny]) # alpha
+z = np.zeros([nz]) # theta
 
 for i in range(nx):
    x[i] = i*2*np.pi/(nx-1)
 for j in range(ny):
-   y[j] = j*np.pi/(ny-1)-np.pi
-for j in range(nz):
-   z[j] = j*2*np.pi/(nz-1)
+   y[j] = j*2*np.pi/(ny-1)
+for k in range(nz):
+   z[k] = k*np.pi/(nz-1)-np.pi
 
 # 1. 
-xp1 = np.zeros([nx,nz])
-yp1 = np.zeros([nx,nz])
-zp1 = np.zeros([nx,nz])
+xp1 = np.zeros([nx,ny])
+yp1 = np.zeros([nx,ny])
+zp1 = np.zeros([nx,ny])
 
 for i in range(nx):
-   for j in range(nz):
+   for j in range(ny):
       dx = x[i]/(4*np.pi)
       xp1[i,j] = 0.2+dx
       yp1[i,j] = 0.0
-      zp1[i,j] = z[j]/(4*np.pi)
+      zp1[i,j] = y[j]/(4*np.pi)
 
 # 2. 
 xp2 = np.zeros([nx,nz])
@@ -79,23 +81,34 @@ yp2 = np.zeros([nx,nz])
 zp2 = np.zeros([nx,nz])
 
 for i in range(nx):
-   for j in range(nz):
+   for k in range(nz):
       dx = x[i]/(4*np.pi)
-      xp2[i,j] = -1*(0.2+dx)
-      yp2[i,j] = 0.0
-      zp2[i,j] = z[j]/(4*np.pi)
+      xp2[i,k] = (0.2+dx)*np.cos(z[k])
+      yp2[i,k] = (0.2+dx)*np.sin(z[k])
+      zp2[i,k] = 0.5
 
 # 3. 
-xp3 = np.zeros([nx,nz])
-yp3 = np.zeros([nx,nz])
-zp3 = np.zeros([nx,nz])
+xp3 = np.zeros([ny,nz])
+yp3 = np.zeros([ny,nz])
+zp3 = np.zeros([ny,nz])
 
-for i in range(nx):
-   for j in range(ny):
-      dx = x[i]/(4*np.pi)
-      xp3[i,j] = (0.2+dx)*np.cos(y[j])
-      yp3[i,j] = dx*np.sin(y[j])
-      zp3[i,j] = 0.5
+for j in range(ny):
+   for k in range(nz):
+      dx = x[0]/(4*np.pi)
+      xp3[j,k] = (0.2+dx)*np.cos(z[k])
+      yp3[j,k] = (0.2+dx)*np.sin(z[k])
+      zp3[j,k] = y[j]/(4*np.pi)
+# 3. 
+xp4 = np.zeros([ny,nz])
+yp4 = np.zeros([ny,nz])
+zp4 = np.zeros([ny,nz])
+
+for j in range(ny):
+   for k in range(nz):
+      dx = x[-1]/(4*np.pi)
+      xp4[j,k] = (0.2+dx)*np.cos(z[k])
+      yp4[j,k] = (0.2+dx)*np.sin(z[k])
+      zp4[j,k] = y[j]/(4*np.pi)
 
 #------------------------------------------------------------------------
 
@@ -123,14 +136,14 @@ def frame():
    else:
       a = np.reshape(aa,(2,nr,nth,ns,nn),order='F')
 
-   mlab.figure(size=(900,900))
+   mlab.figure(size=(1000,800))
    if isfield:
       c = a[0,:,:,:]+1j*a[1,:,:,:]
    else:
       c = a[0,:,:,species,:]+1j*a[1,:,:,species,:]
 
    
-   # 1
+   # 1a
    f = np.zeros([nx,nz],order='F')
    gapy.realfluct(c[:,nth/2,:],f)
 
@@ -143,26 +156,26 @@ def frame():
 
    mlab.mesh(xp1,yp1,zp1,scalars=f,colormap=colormap,vmin=f0,vmax=f1,opacity=1.0)
 
-   # 2
-   f = np.zeros([nx,nz],order='F')
-   gapy.realfluct(c[:,0,:],f)
-   mlab.mesh(xp2,yp2,zp2,scalars=f,colormap=colormap,vmin=f0,vmax=f1,opacity=1.0)
-
-   # 3
+   # 1b
    f = np.zeros([nx,ny],order='F')
-   gapy.wheel1(c,f)
-   mlab.mesh(xp3,yp3,zp3,scalars=f,colormap=colormap,vmin=f0,vmax=f1,opacity=1.0)
-   mlab.mesh(xp3,yp3,0*zp3,scalars=f,colormap=colormap,vmin=f0,vmax=f1,opacity=1.0)
+   gapy.realfluct(c[:,0,:],f)
+   mlab.mesh(-xp1,yp1,zp1,scalars=f,colormap=colormap,vmin=f0,vmax=f1,opacity=1.0)
 
-   # 4
-   #f = np.zeros([nx,ny],order='F')
-   #gapy.wheel2(c,f)
-   #mlab.mesh(xp3,yp3,zp3,scalars=f,colormap=colormap,vmin=f0,vmax=f1,opacity=1.0)
-   #mlab.mesh(xp3,yp3,0*zp3,scalars=f,colormap=colormap,vmin=f0,vmax=f1,opacity=1.0)
+   # 2a,b
+   f = np.zeros([nx,nz],order='F')
+   gapy.wheel1(c,f)
+   mlab.mesh(xp2,yp2,zp2,scalars=f,colormap=colormap,vmin=f0,vmax=f1,opacity=1.0)
+   mlab.mesh(xp2,yp2,0*zp2,scalars=f,colormap=colormap,vmin=f0,vmax=f1,opacity=1.0)
+
+   # 3a,b
+   f = np.zeros([ny,nz],order='F')
+   gapy.wheel2(c,f)
+   mlab.mesh(xp3,yp3,zp3,scalars=f,colormap=colormap,vmin=f0,vmax=f1,opacity=1.0)
+   mlab.mesh(xp4,yp4,zp4,scalars=f,colormap=colormap,vmin=f0,vmax=f1,opacity=1.0)
 
    # View from positive z-axis
-   mlab.view(azimuth=0, elevation=0)
-   print 'INFO: (vis_torcut) min=%e , max=%e' % (f0,f1)
+   mlab.view(azimuth=70, elevation=60)
+   print 'INFO: (vis_wheel) min=%e , max=%e' % (f0,f1)
 
    if ftype == 'screen':
       mlab.show()

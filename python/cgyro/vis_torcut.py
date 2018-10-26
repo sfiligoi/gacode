@@ -17,7 +17,7 @@ ftype    = sys.argv[1]
 moment   = sys.argv[2]
 species  = int(sys.argv[3])
 nx       = int(sys.argv[4])
-ny       = int(sys.argv[5])
+nz       = int(sys.argv[5])
 istr     = sys.argv[6]
 fmin     = sys.argv[7]
 fmax     = sys.argv[8]
@@ -43,28 +43,29 @@ ivec = time_vector(istr,nt)
 if nth == 1:
    print 'WARNING: (vis_torcut) Should use THETA_PLOT > 1 in CGYRO.'
 
-if nx < 0 or ny < 0:
-   nx = nr+1
-   ny = 2*nn-1
+if nx < 0:
+   nx = 128
+if nz < 0:
+   nz = 128
 
 x = np.zeros([nx])
-y = np.zeros([ny])
+z = np.zeros([nz])
 
 for i in range(nx):
    x[i] = i*2*np.pi/(nx-1)
-for j in range(ny):
-   y[j] = j*2*np.pi/(ny-1)-np.pi
+for k in range(nz):
+   z[k] = k*2*np.pi/(nz-1)-np.pi
 
-xp = np.zeros([nx,ny])
-yp = np.zeros([nx,ny])
-zp = np.zeros([nx,ny])
+xp = np.zeros([nx,nz])
+yp = np.zeros([nx,nz])
+zp = np.zeros([nx,nz])
 
 for i in range(nx):
-   for j in range(ny):
+   for k in range(nz):
       r = 0.2+x[i]/(4*np.pi)
-      xp[i,j] = 1.0+r*np.cos(y[j]+np.arcsin(sim.delta)*np.sin(y[j]))
-      yp[i,j] = sim.kappa*r*np.sin(y[j])
-      zp[i,j] = 0.0
+      xp[i,k] = 1.0+r*np.cos(z[k]+np.arcsin(sim.delta)*np.sin(z[k]))
+      yp[i,k] = sim.kappa*r*np.sin(z[k])
+      zp[i,k] = 0.0
 
 # Shape functions (just up-down symmetric now)
 gapy.geo.geo_rmin_in=sim.rmin
@@ -78,7 +79,7 @@ gapy.geo.geo_s_delta_in=sim.s_delta
 gapy.geo.geo_drmaj_in=sim.shift
 gapy.geo.geo_beta_star_in=sim.beta_star
 
-gapy.geo.geo_interp(y,True)
+gapy.geo.geo_interp(z,True)
 # g1 -> q*theta
 g1 = -gapy.geo.geo_nu
 # g2 -> theta 
@@ -116,7 +117,7 @@ def frame():
    else:
       c = a[0,:,:,species,:]+1j*a[1,:,:,species,:]
                 
-   f = np.zeros([nx,ny],order='F')
+   f = np.zeros([nx,nz],order='F')
    gapy.torcut(sim.m_box,sim.q,g1,g2,c,f)
 
    if fmin == 'auto':

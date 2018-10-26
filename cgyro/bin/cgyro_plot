@@ -56,9 +56,8 @@ then
   echo "VISUALIZATION MODE (requires Mayavi)"
   echo 
   echo "         -vis <type>"
-  echo "         <type> = slices   (fieldline slices)"
-  echo "                = torcut   (toroidal cut)"
-  echo "                = wheel    (fluctuation wheel)"
+  echo "         <type> = torcut   (toroidal cut: nx,nz)"
+  echo "                = wheel    (fluctuation wheel: nx,ny,nz)"
   echo
   echo "OPTIONS"
   echo
@@ -292,7 +291,7 @@ case "$VIS_TYPE" in
 	python $PYROOT/vis_slices.py ;;
 	
    torcut)
-	export OMP_NUM_THREADS=$NOMP ; python $PYROOT/vis_torcut.py $FTYPE $MOMENT $SPECIES $NX $NY $TIME $FMIN $FMAX $CMAP $FONTSIZE ;;
+	export OMP_NUM_THREADS=$NOMP ; python $PYROOT/vis_torcut.py $FTYPE $MOMENT $SPECIES $NX $NZ $TIME $FMIN $FMAX $CMAP $FONTSIZE ;;
 
    wheel)
 	export OMP_NUM_THREADS=$NOMP ; python $PYROOT/vis_wheel.py $FTYPE $MOMENT $SPECIES $NX $NY $NZ $TIME $FMIN $FMAX $CMAP $FONTSIZE ;;
