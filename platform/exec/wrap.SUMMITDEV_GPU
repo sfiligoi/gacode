@@ -1,16 +1,14 @@
 #! /usr/bin/env bash
 # GACODE Parallel execution script (SUMMITDEV_GPU)
 
-export OMP_NUM_THREADS=1
+# jsrun corrupts this value
+export OMP_NUM_THREADS=${GACODE_NOMP}
 
 #echo $OMPI_COMM_WORLD_RANK
-export ACC_DEVICE_NUM=$CUDA_VISIBLE_DEVICES
 
-# Set this if you don't already have it in the .bashrc
-#source /nfs-projects/opt/pgi/pgi.source.openmpi
-#source /nfs-projects/sfiligoii/gitrepo/summit.source
+# propagate the info to the pgi ACC
+export ACC_DEVICE_NUM=${CUDA_VISIBLE_DEVICES}
 
 #echo $ACC_DEVICE_NUM
 
-#echo "LL $LD_LIBRARY_PATH"
 exec  "$@"
