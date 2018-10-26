@@ -767,20 +767,19 @@ class cgyrodata_plot(data.cgyrodata):
       # Note array structure
       # self.phi = np.reshape(data,(2,self.n_radial,self.n_n,nt),'F')
 
-      t =self.t
-      nx=self.n_radial
-      ny=self.n_n
+      t  = self.t  
+      nx = self.n_radial
+      ny = self.n_n
 
       f = np.zeros([nx-1,ny])
-      n = self.n_time
 
       # Field data selector
       fx,ft = self.kxky_select(theta,field,'phi',0)
 
-      imin = int((1.0-w)*n)
-      for i in np.arange(imin,n):
+      imin=iwindow(t,w)
+      for i in np.arange(imin,self.n_time):
          f = f+fx[1:,:,i]
-
+      
       # Fix (0,0)
       i0 = nx/2-1
       f[i0,0] = 1e-6
@@ -793,8 +792,8 @@ class cgyrodata_plot(data.cgyrodata):
 
       ax = fig.add_subplot(111)
 
-      #windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[-1])+']$'
-      windowtxt = ''
+      windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[-1])+']$'
+      #windowtxt = ''
 
       ax.set_xlabel(r'$k_x \rho_s/4$')
       ax.set_ylabel(r'$k_y \rho_s$')
@@ -802,7 +801,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       ax.imshow(np.transpose(f),extent=[-x0,x0,0,y0],interpolation='none')
 
-      fig.tight_layout(pad=0.4)
+      fig.tight_layout(pad=0.5)
 
    def plot_kx_phi(self,field=0,theta=0.0,w=0.5,ymin='auto',ymax='auto',nstr='null',fig=None):
 
@@ -956,7 +955,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       fig.tight_layout(pad=0.3)
 
-   def plot_hbcut(self,itime=-1,spec=0,tmax=-1.0,theta="0.0",fig=None):
+   def plot_hbcut(self,itime=-1,spec=0,tmax=-1.0,theta=0.0,fig=None):
 
       u = specmap(self.mass[spec],self.z[spec])
 
@@ -969,7 +968,7 @@ class cgyrodata_plot(data.cgyrodata):
       func = self.hb
 
       # Compute index for theta value in pitch angle and energy plots
-      i0 = int(round((1.0+float(theta))*self.n_theta/2.0))
+      i0 = int(round((1.0+theta)*self.n_theta/2.0))
       if i0 > self.n_theta-1:
          i0 = self.n_theta-1
 

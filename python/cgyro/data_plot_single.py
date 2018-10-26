@@ -39,11 +39,11 @@ elif plot_type == 'ky_freq':
 elif plot_type == 'ky_phi':
    
    field = int(sys.argv[2])
-   ymin  = sys.argv[3]
-   ymax  = sys.argv[4]
-   nstr  = sys.argv[5]
-   ftype = sys.argv[6]
-   theta = 0.0
+   theta = float(sys.argv[3])
+   ymin  = sys.argv[4]
+   ymax  = sys.argv[5]
+   nstr  = sys.argv[6]
+   ftype = sys.argv[7]
 
    data_in.plot_ky_phi(field=field,theta=theta,ymin=ymin,ymax=ymax,nstr=nstr)
 
@@ -52,9 +52,9 @@ elif plot_type == 'ky_phi':
 elif plot_type == 'rcorr_phi':
    
    field = int(sys.argv[2])
-   w     = float(sys.argv[3])
-   ftype = sys.argv[4]
-   theta = 0.0
+   theta = float(sys.argv[3])
+   w     = float(sys.argv[4])
+   ftype = sys.argv[5]
    
    data_in.plot_rcorr_phi(field=field,theta=theta,w=w)
 
@@ -161,9 +161,9 @@ elif plot_type == 'xflux':
 elif plot_type == 'kxky_phi':
 
    field = int(sys.argv[2])
-   w     = float(sys.argv[3])
-   ftype = sys.argv[4]
-   theta = 0.0
+   theta = float(sys.argv[3])
+   w     = float(sys.argv[4])
+   ftype = sys.argv[5]
    
    data_in.plot_kxky_phi(field=field,theta=theta,w=w)
    
@@ -172,12 +172,12 @@ elif plot_type == 'kxky_phi':
 elif plot_type == 'kx_phi':
 
    field = int(sys.argv[2])
-   w     = float(sys.argv[3])
-   ymin  = sys.argv[4]
-   ymax  = sys.argv[5]
-   nstr  = sys.argv[6]
-   ftype = sys.argv[7]
-   theta = 0.0
+   theta = float(sys.argv[3])
+   w     = float(sys.argv[4])
+   ymin  = sys.argv[5]
+   ymax  = sys.argv[6]
+   nstr  = sys.argv[7]
+   ftype = sys.argv[8]
    
    data_in.plot_kx_phi(field=field,theta=theta,w=w,ymin=ymin,ymax=ymax,nstr=nstr)
    
@@ -200,7 +200,7 @@ elif plot_type == 'hbcut':
    itime = int(sys.argv[2])
    spec  = int(sys.argv[3])
    tmax  = float(sys.argv[4])
-   theta = sys.argv[5]
+   theta = float(sys.argv[5])
    ftype = sys.argv[6]
 
    data_in.plot_hbcut(itime=itime,spec=spec,tmax=tmax,theta=theta)

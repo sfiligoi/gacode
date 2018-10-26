@@ -335,16 +335,16 @@ case "$PLOT_TYPE" in
 	python $PLT $PLOT_TYPE $FIELD $FTYPE ;;
 
    ky_phi)
-	python $PLT $PLOT_TYPE $FIELD $YMIN $YMAX $N $FTYPE ;;
+	python $PLT $PLOT_TYPE $FIELD $THETA $YMIN $YMAX $N $FTYPE ;;
 
    kx_phi)
-	python $PLT $PLOT_TYPE $FIELD $W $YMIN $YMAX $N $FTYPE ;;
+	python $PLT $PLOT_TYPE $FIELD $THETA $W $YMIN $YMAX $N $FTYPE ;;
 
    kxky_phi)
-	python $PLT $PLOT_TYPE $FIELD $W $FTYPE ;;
+	python $PLT $PLOT_TYPE $FIELD $THETA $W $FTYPE ;;
 
    rcorr_phi)
-        python $PLT $PLOT_TYPE $FIELD $W $FTYPE ;;
+        python $PLT $PLOT_TYPE $FIELD $THETA $W $FTYPE ;;
 
    zf)
 	python $PLT $PLOT_TYPE $W $FIELD $FTYPE ;;
