@@ -1,19 +1,16 @@
 #! /usr/bin/env bash
-# GACODE Parallel execution script (SUMMITDEV)
+# GACODE Parallel execution script (SUMMITDEV_GPU)
 
-echo $OMPI_COMM_WORLD_RANK
-# let r4=$OMPI_COMM_WORLD_RANK/4
-# let ACC_DEVICE_NUM="$OMPI_COMM_WORLD_RANK-($r4*4)"
-# export ACC_DEVICE_NUM
+export OMP_NUM_THREADS=1
+
+#echo $OMPI_COMM_WORLD_RANK
+export ACC_DEVICE_NUM=$CUDA_VISIBLE_DEVICES
 
 # Set this if you don't already have it in the .bashrc
 #source /nfs-projects/opt/pgi/pgi.source.openmpi
 #source /nfs-projects/sfiligoii/gitrepo/summit.source
 
-## echo $ACC_DEVICE_NUM
-## add nvme here if needed
+#echo $ACC_DEVICE_NUM
 
-# echo "LL $LD_LIBRARY_PATH"
-#
+#echo "LL $LD_LIBRARY_PATH"
 exec  "$@"
-#
