@@ -42,8 +42,9 @@ ivec = time_vector(istr,nt)
 # (r,theta)=(x,y) mesh setup 
 #
 if nth == 1:
-   print 'WARNING: (vis_torcut) Should use THETA_PLOT > 1 in CGYRO.'
-
+   print 'ERROR: (vis_wheel) This visualization requires THETA_PLOT > 1.'
+   sys.exit()
+   
 if nx < 0 or ny < 0 or nz < 0:
    nx = nr+1
    ny = nth
@@ -56,7 +57,7 @@ z = np.zeros([nz])
 for i in range(nx):
    x[i] = i*2*np.pi/(nx-1)
 for j in range(ny):
-   y[j] = j*2*np.pi/(ny-1)-np.pi
+   y[j] = j*np.pi/(ny-1)-np.pi
 for j in range(nz):
    z[j] = j*2*np.pi/(nz-1)
 
@@ -80,9 +81,21 @@ zp2 = np.zeros([nx,nz])
 for i in range(nx):
    for j in range(nz):
       dx = x[i]/(4*np.pi)
-      xp2[i,j] = -0.2-dx
+      xp2[i,j] = -1*(0.2+dx)
       yp2[i,j] = 0.0
       zp2[i,j] = z[j]/(4*np.pi)
+
+# 3. 
+xp3 = np.zeros([nx,nz])
+yp3 = np.zeros([nx,nz])
+zp3 = np.zeros([nx,nz])
+
+for i in range(nx):
+   for j in range(ny):
+      dx = x[i]/(4*np.pi)
+      xp3[i,j] = (0.2+dx)*np.cos(y[j])
+      yp3[i,j] = dx*np.sin(y[j])
+      zp3[i,j] = 0.5
 
 #------------------------------------------------------------------------
 
@@ -116,6 +129,7 @@ def frame():
    else:
       c = a[0,:,:,species,:]+1j*a[1,:,:,species,:]
 
+   
    # 1
    f = np.zeros([nx,nz],order='F')
    gapy.realfluct(c[:,nth/2,:],f)
@@ -133,6 +147,18 @@ def frame():
    f = np.zeros([nx,nz],order='F')
    gapy.realfluct(c[:,0,:],f)
    mlab.mesh(xp2,yp2,zp2,scalars=f,colormap=colormap,vmin=f0,vmax=f1,opacity=1.0)
+
+   # 3
+   f = np.zeros([nx,ny],order='F')
+   gapy.wheel1(c,f)
+   mlab.mesh(xp3,yp3,zp3,scalars=f,colormap=colormap,vmin=f0,vmax=f1,opacity=1.0)
+   mlab.mesh(xp3,yp3,0*zp3,scalars=f,colormap=colormap,vmin=f0,vmax=f1,opacity=1.0)
+
+   # 4
+   #f = np.zeros([nx,ny],order='F')
+   #gapy.wheel2(c,f)
+   #mlab.mesh(xp3,yp3,zp3,scalars=f,colormap=colormap,vmin=f0,vmax=f1,opacity=1.0)
+   #mlab.mesh(xp3,yp3,0*zp3,scalars=f,colormap=colormap,vmin=f0,vmax=f1,opacity=1.0)
 
    # View from positive z-axis
    mlab.view(azimuth=0, elevation=0)
