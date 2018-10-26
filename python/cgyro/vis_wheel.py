@@ -144,7 +144,7 @@ def frame():
 
    
    # 1a
-   f = np.zeros([nx,nz],order='F')
+   f = np.zeros([nx,ny],order='F')
    gapy.realfluct(c[:,nth/2,:],f)
 
    if fmin == 'auto':
