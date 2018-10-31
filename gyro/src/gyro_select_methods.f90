@@ -20,21 +20,6 @@ subroutine gyro_select_methods
   !-------------------------------------------------------------
   ! Various consistency and error checks
   ! 
-  ! Grid offset checks:
-  !
-  if (n_x_offset /= 0 .and. boundary_method == 1) then
-     call catch_error('ERROR: (GYRO) RADIAL_GRID_OFFSET must be zero.')
-  endif
-  if (abs(n_x_offset) > n_x/2-1) then
-     call catch_error('ERROR: (GYRO) RADIAL_GRID_OFFSET too large.')
-  endif
-  !
-  ! Study mode check:
-  !
-  if (n_study < 0 .or. n_study > n_n) then
-     call catch_error('ERROR: (GYRO) N_STUDY out of bounds.')
-  endif
-  !
   ! Toroidal grid check:
   !
   if (nonlinear_flag == 1 .and. n_n < 2) then
@@ -76,12 +61,6 @@ subroutine gyro_select_methods
      call catch_error('ERROR: (GYRO) require N_SOURCE > 0.')
   endif
   !
-  ! Check for validity of transfer diagnostic
-  !
-  if (boundary_method == 2 .and. nonlinear_transfer_flag == 1) then
-     call catch_error('ERROR: (GYRO) Need BOUNDARY_METHOD=1 for NONLINEAR_TRANSFER_FLAG=1.')
-  endif
-  !
   ! Check for solver consistency
   !
   if (linsolve_method > 1 .and. nonlinear_flag == 1) then
@@ -90,10 +69,6 @@ subroutine gyro_select_methods
   !
   if (radial_upwind < 0.0) then
      call catch_error('ERROR: (GYRO) RADIAL_UPWIND must be > 0.')
-  endif
-  !
-  if (nonlinear_transfer_flag == 1 .and. integrator_method > 1) then
-     call catch_error('ERROR: (GYRO) Need INTEGRATOR_METHOD=1 for nonlinear transfer diag.')
   endif
   !---------------------------------------------------
 
@@ -309,10 +284,6 @@ subroutine gyro_select_methods
         i_dx = 0
      endif
 
-     if (nonuniform_grid_flag == 1) then
-        call catch_error('ERROR: (GYRO) cannot have nonuniform grid.')
-     endif
-
   case (2)
 
      call send_line('boundary conditions  : NONPERIODIC')
@@ -488,31 +459,6 @@ subroutine gyro_select_methods
   !----------------------------------------------------
 
   !----------------------------------------------------
-  ! GRID SPACE METHOD:
-  !
-  select case (nonuniform_grid_flag) 
-
-  case (0)
-
-     call send_line('radial grid          : UNIFORM')
-
-  case (1)
-
-     if (flat_profile_flag == 1) then
-        nonuniform_grid_flag = 0 
-        call send_line('radial grid          : UNIFORM [reset]')
-     else
-        call send_line('radial grid          : NONUNIFORM (not recommended)')
-     endif
-
-  case default
-
-     call catch_error('ERROR: (GYRO) nonuniform_grid_flag')
-
-  end select
-  !----------------------------------------------------
-
-  !----------------------------------------------------
   ! INTEGRATOR (for initial-value method only)
   !
   if (linsolve_method == 1) then
@@ -565,26 +511,6 @@ subroutine gyro_select_methods
 
   endif
   !----------------------------------------------------
-
-  !-------------------------------------------------------
-  ! SPARSE MATRIX PACKAGE:
-  !
-  select case (sparse_method)
-
-  case (1)
-
-     call send_line('field solve          : UMFPACK (SEQUENTIAL)')
-
-  case (2)
-
-     call send_line('field solve          : MUMPS (DISTRIBUTED)')
-
-  case default
-
-     call catch_error('ERROR: (GYRO) sparse_method')
-
-  end select
-  !-------------------------------------------------------
 
   !----------------------------------------------------
   ! SOURCE METHOD:
@@ -665,17 +591,6 @@ subroutine gyro_select_methods
      endif
   else
      call send_line('z_eff_method         : Computing Z_EFF from n and Z.')
-  endif
-  !-------------------------------------------------------
-
-  !-------------------------------------------------------
-  ! KROOK COLLISIONS FLAG:
-  !
-  if (nu_i_krook > 0.0) then
-     krook_flag = 1
-     call send_line('ion Krook coll.      : ON for all n')
-  else
-     krook_flag = 0
   endif
   !-------------------------------------------------------
 

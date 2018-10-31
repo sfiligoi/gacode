@@ -96,7 +96,7 @@ subroutine gyro_omegas
               ! omega_dr with nonuniform grid effect:
 
               omega_dr(m,i,p_nek_loc,is) = rhos_norm/b_unit_s(i)*  &
-                   grad_r_t(i,k,m0)*e_temp*sin_t(i,k,m0)*dr_eodr(i)*dkill(is)
+                   grad_r_t(i,k,m0)*e_temp*sin_t(i,k,m0)*dkill(is)
 
            enddo ! is
 
@@ -171,7 +171,7 @@ subroutine gyro_omegas
 
               omega_dr(m,i,p_nek_loc,is) = omega_dr(m,i,p_nek_loc,is) + &
                    rhos_norm/b_unit_s(i)*grad_r_t(i,k,m0)*&
-                   e_temp_mach*usin_t(i,k,m0)*dr_eodr(i)*dkill(is)
+                   e_temp_mach*usin_t(i,k,m0)*dkill(is)
 
            enddo ! is
 

@@ -117,10 +117,7 @@ subroutine gyro_alloc_big(flag)
      allocate(gbflux_n(n_kinetic,n_field,p_moment))
      allocate(gbflux_vec(n_kinetic,n_field,p_moment,n_x))
 
-     allocate(nl_transfer(n_x,2))
-
      allocate(time_error(n_kinetic))
-     allocate(w_time(time_skip))
      allocate(omega_linear(n_n,2))
 
      !------------------------------------------------------------
@@ -163,7 +160,6 @@ subroutine gyro_alloc_big(flag)
      deallocate(f_store)
      deallocate(p_store)
 
-     if (allocated(rhs_krook)) deallocate(rhs_krook)
      if (allocated(f_coll)) deallocate(f_coll)
      if (allocated(fb_coll)) deallocate(fb_coll)
      if (allocated(h_c)) deallocate(h_c) 
@@ -206,10 +202,7 @@ subroutine gyro_alloc_big(flag)
      deallocate(gbflux_n)
      deallocate(gbflux_vec)
 
-     deallocate(nl_transfer)
-
      deallocate(time_error)
-     deallocate(w_time)
      deallocate(omega_linear)
      deallocate(h0_eq)
      deallocate(h0_mod)

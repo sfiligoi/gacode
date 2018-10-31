@@ -272,11 +272,10 @@ class GYROData:
         self.profile['gamma_p_s']  = profile[(mark+13*n_x):(mark+14*n_x)]
         self.profile['mach_s']     = profile[(mark+14*n_x):(mark+15*n_x)]
         self.profile['b_unit_s']   = profile[(mark+15*n_x):(mark+16*n_x)]
-        self.profile['dr_eodr']    = profile[(mark+16*n_x):(mark+17*n_x)]
-        self.profile['z_eff_s']    = profile[(mark+17*n_x):(mark+18*n_x)]
-        self.profile['nu_s']       = profile[(mark+18*n_x):(mark+19*n_x)]
-        self.profile['w0_s']       = profile[(mark+19*n_x):(mark+20*n_x)]
-        mark = mark + 20*n_x
+        self.profile['z_eff_s']    = profile[(mark+16*n_x):(mark+17*n_x)]
+        self.profile['nu_s']       = profile[(mark+17*n_x):(mark+18*n_x)]
+        self.profile['w0_s']       = profile[(mark+18*n_x):(mark+19*n_x)]
+        mark = mark + 19*n_x
         self.profile['box_multiplier'] = profile[mark]
         self.profile['lambda']     = profile[(mark+1):(mark+1+self.profile['n_lambda'])]
         mark = mark + 1 + self.profile['n_lambda']

@@ -36,9 +36,7 @@ subroutine gyro_moments_plot
   complex, dimension(n_theta_plot,n_x,3) :: mom_tmp
   !---------------------------------------------------
 
-  if (alltime_index == 0) then
-     moments_plot(:,:,:,:) = (0.0,0.0)
-  endif
+  moments_plot(:,:,:,:) = (0.0,0.0)
   moments_zero_plot(:,:,:) = 0.0
 
 
@@ -190,8 +188,7 @@ subroutine gyro_moments_plot
      !----------------------------------------------------------------
      ! Compute moments_plot with averaging:
      !
-     moments_plot(:,:,is,:) = moments_plot(:,:,is,:)+&
-          w_time(alltime_index+1)*mom_tmp(:,:,:)
+     moments_plot(:,:,is,:) = mom_tmp(:,:,:)
      !----------------------------------------------------------------
 
   enddo ! is

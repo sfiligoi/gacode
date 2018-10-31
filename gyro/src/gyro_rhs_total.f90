@@ -164,19 +164,6 @@ subroutine gyro_rhs_total
 !$omp end parallel
   !---------------------------------------------------------
 
-  !---------------------------------------------------------
-  ! Krook ion-ion collision operator:
-  !
-  if (krook_flag == 1) then
-     call gyro_collision_krook
-!$omp parallel private(i)
-     do i = ibeg, iend
-        rhs(:,i,:,1) = rhs(:,i,:,1)+rhs_krook(:,i,:)
-     end do
-!$omp end parallel
-  endif
-  !---------------------------------------------------------
-
   deallocate(cap_h)
   deallocate(lit_h)
 

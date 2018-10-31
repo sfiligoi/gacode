@@ -150,11 +150,8 @@ subroutine gyro_memory_usage(data_file,io)
            call alloc_add(io,size(gbflux_vec),8,'gbflux_vec')
         endif
 
-        call alloc_add(io,size(nl_transfer),8,'nl_transfer')
-
         call alloc_add(io,size(time_error),8,'time_error')
         call alloc_add(io,size(entropy),8,'entropy')
-        call alloc_add(io,size(w_time),8,'w_time')
 
         call alloc_add(io,size(h0_eq),8,'h0_eq')
         call alloc_add(io,size(h0_mod),8,'h0_mod')

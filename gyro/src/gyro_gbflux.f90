@@ -190,8 +190,8 @@ subroutine gyro_gbflux
      endif
   endif
 
-  ! Compute running time-average of radially-dependent fluxes
-  if (step > int((1.0-fluxaverage_window)*nstep)) then
+  ! Compute running time-average (factor 0.9) of radially-dependent fluxes
+  if (step > int((1.0-0.9)*nstep)) then
      p_ave = p_ave+1
      gbflux_vec(:,:,:,:) = ((p_ave-1)*gbflux_vec(:,:,:,:)+gbflux_i(:,:,:,:))/p_ave
   else

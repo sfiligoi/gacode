@@ -92,8 +92,7 @@ subroutine gyro_adaptive_source
 
      do p=1,n_lump
         do i=1,n_x
-           src_p(:,:,p) = src_p(:,:,p)+ &
-                b_src(i,p)*h0_mod(:,:,i)/dr_eodr(i)
+           src_p(:,:,p) = src_p(:,:,p)+b_src(i,p)*h0_mod(:,:,i)
         enddo
      enddo
      !----------------------------------------------------------------

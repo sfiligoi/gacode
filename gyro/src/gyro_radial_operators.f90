@@ -83,7 +83,7 @@ subroutine gyro_radial_operators
         do j_lump=1,n_lump
            do i=1,n_x
               m_src(i_lump,j_lump) = m_src(i_lump,j_lump)+ & 
-                   b_src(i,i_lump)*b_src(i,j_lump)/dr_eodr(i)
+                   b_src(i,i_lump)*b_src(i,j_lump)
            enddo
         enddo
      enddo

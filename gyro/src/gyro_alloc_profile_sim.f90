@@ -87,7 +87,6 @@ subroutine gyro_alloc_profile_sim(flag)
      allocate(angp(n_x))
 
      allocate(r_e(n_x))
-     allocate(dr_eodr(n_x))
 
      allocate(n(n_n))
      allocate(n_1(n_n_1))
@@ -178,7 +177,6 @@ subroutine gyro_alloc_profile_sim(flag)
      deallocate(angp)
 
      deallocate(r_e)
-     deallocate(dr_eodr)
 
      deallocate(n)
      deallocate(n_1)

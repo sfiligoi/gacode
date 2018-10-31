@@ -175,7 +175,6 @@ subroutine gyro_write_input
      write(1,20) '.GAMMA_E',gamma_e_s(ir_norm)
 !     write(1,20) '.LAMBDA_DEBYE',lambda_debye
      write(1,20) '.NU_EI',nu_s(indx_e,ir_norm)
-     write(1,20) '.NU_I_KROOK',nu_i_krook
      write(1,20) '.IPCCW',ipccw
      write(1,20) '.BTCCW',btccw
      i = ir_norm
@@ -280,7 +279,6 @@ subroutine gyro_write_input
      write(1,40) 'explicit_damp(i)',n_explicit_damp,explicit_damp
      write(1,40) 'explicit_damp(e)',n_explicit_damp,explicit_damp_elec
      write(1,*) '--'
-     write(1,40) 'offset',n_x_offset,real(n_x_offset)/real(n_x)
      write(1,20) 'LEFT : r_a',r(1)
      write(1,20) 'LEFT : r_a_physical',r(1+n_explicit_damp) 
      write(1,20) 'NORM : r(ir_norm)',r(ir_norm)
@@ -318,7 +316,6 @@ subroutine gyro_write_input
         write(1,30) '(nek) per subgroup:',n_nek_loc_1
         write(1,30) '(ine) per subgroup:',n_ine_loc_1
         write(1,*) '----------- TIME STEPPING PARAMETERS ----------'
-        write(1,20) 'plot_filter',plot_filter
         write(1,50) 'time_skip',time_skip
         write(1,50) 'restart_data_skip',restart_data_skip
         write(1,*) '----------- STABILITY PARAMETERS ----------------'

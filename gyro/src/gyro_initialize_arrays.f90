@@ -46,8 +46,7 @@ subroutine gyro_initialize_arrays
   gyro_uv_old  = 0.0
   gyro_uv_old2 = 0.0
 
-  entropy(:,:)     = 0.0
-  nl_transfer(:,:) = 0.0
+  entropy(:,:) = 0.0
   !---------------------------------------------------
 
   !---------------------------------------------------

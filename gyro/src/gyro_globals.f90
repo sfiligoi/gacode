@@ -156,18 +156,14 @@ module gyro_globals
   integer :: electron_method
   integer :: radial_profile_method
   integer :: geometry_method
-  integer :: nonuniform_grid_flag
-  integer :: nonlinear_transfer_flag
   integer :: density_method
   integer :: integrator_method
   integer :: nl_method
   integer :: lindiff_method
   integer :: gyro_method
-  integer :: sparse_method
   integer :: linsolve_method 
   integer :: fieldeigen_root_method
   integer :: gkeigen_method
-  integer :: truncation_method
   !
   ! (b) flags (0 or 1)
   !
@@ -204,10 +200,8 @@ module gyro_globals
   integer :: geo_gradbcurv_flag
   integer :: geo_fastionbeta_flag
   integer :: fakefield_flag
-  integer :: reintegrate_flag
   integer :: ic_method
   integer :: zf_test_flag
-  integer :: lock_ti_flag
   !---------------------------------------------------------
 
   !-----------------------------------------------------------------------------------
@@ -262,7 +256,6 @@ module gyro_globals
   ! Grid dimensions:
   !
   integer :: n_x
-  integer :: n_x_offset
   integer :: n_theta_section
   integer :: n_blend
   integer :: n_interval
@@ -272,10 +265,8 @@ module gyro_globals
   integer :: blend_fit_order
   integer :: n_stack 
   integer :: n_field
-  integer :: nint_ORB_s
-  integer :: nint_ORB_do
-  integer :: n_mumps_max
-  integer :: n_study
+  integer :: nint_ORB_s=64
+  integer :: nint_ORB_do=10
   !
   real :: energy_max
   real :: box_multiplier
@@ -430,20 +421,15 @@ module gyro_globals
   integer :: nstep
   integer :: data_step
   integer :: time_skip
-  integer :: alltime_index
   integer :: output_flag
   integer :: p_ave
   !
   real :: time_max
   real :: freq_tol
   real :: freq_err
-  real :: fluxaverage_window
   !
-  real :: plot_filter
   real :: dt
   real :: t_current
-  !
-  real, dimension(:), allocatable :: w_time
   !
   complex, dimension(:,:), allocatable :: omega_linear
   ! 
@@ -677,7 +663,6 @@ module gyro_globals
   real :: nu_ei
   real :: nu_ei_scale
   real :: nu_ii_scale
-  real :: nu_i_krook
   !
   real :: s_grid
   !
@@ -757,7 +742,6 @@ module gyro_globals
   ! nonuniform_grid_flag variables:
   !
   real, dimension(:), allocatable :: r_e
-  real, dimension(:), allocatable :: dr_eodr
   !
   ! General geometry Fourier coefficients
   !
@@ -798,7 +782,6 @@ module gyro_globals
   !
   real :: amp_n
   real :: amp_0
-  real :: amp_study
   !---------------------------------------------------------
 
   !---------------------------------------------------------
@@ -906,11 +889,6 @@ module gyro_globals
   real, dimension(:,:), allocatable :: gbflux_exc
   real, dimension(:,:,:), allocatable :: gbflux_trapped
   real, dimension(:,:,:), allocatable :: gbflux_n
-  !
-  ! Nonlinear transfer and turbulent energy spectra
-  !
-  real, dimension(:,:), allocatable :: nl_transfer
-  !
   real, dimension(:,:,:,:), allocatable :: gbflux_vec
   !------------------------------------------------
 

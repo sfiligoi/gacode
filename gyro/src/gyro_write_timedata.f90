@@ -258,14 +258,6 @@ subroutine gyro_write_timedata
           size(gbflux_n),&
           gbflux_n)
 
-     if (nonlinear_transfer_flag == 1) then
-        call write_distributed_real(&
-             trim(path)//'out.gyro.nl_transfer',&
-             10,&
-             size(nl_transfer),&
-             nl_transfer)
-     endif !nonlinear_transfer_flag ==1 
-
      if (i_proc == 0) then
 
         call write_local_real(trim(path)//'out.gyro.field_rms',10,size(ave_phi),ave_phi)

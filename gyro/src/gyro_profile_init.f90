@@ -14,9 +14,6 @@
 !  radial_profile_method = 3: 
 !    experimental profiles, model, or general geometry
 !
-!  r_e is the uniform REFERENCE grid.
-!  r is the (possibly nonuniform) PHYSICAL grid.
-!
 ! FIELD ORIENTATION NOTES:
 !  Field orientation is accomplished by giving signs to a minimal 
 !  set of quantities:
@@ -93,7 +90,7 @@ subroutine gyro_profile_init
   !
   ! Location of "norm point" (index of central radius)
   !
-  ir_norm = n_x/2+1-n_x_offset
+  ir_norm = n_x/2+1
   !
   ! Set some geometry parameters not defined for 
   ! circular equilibrium.  These will also be reset 
@@ -144,11 +141,6 @@ subroutine gyro_profile_init
   !---------------------------------------------------
 
   rhosda_s(:) = rho_star
-
-  if (lock_ti_flag == 1) then
-     t_vec(1:10) = t_vec(1)
-     dlntdr_vec(1:10) = dlntdr_vec(1)
-  endif
 
   select case (radial_profile_method)
 
@@ -212,7 +204,7 @@ subroutine gyro_profile_init
      ! and interpolate to simulation (_s) grid.  In general, the 
      ! _s grid is much finer than the _p grid.
      !
-     ! At this point r = r_e and dr_eodr = 1.0.
+     ! At this point r = r_e
      !
      call gyro_read_experimental_profiles
      !---------------------------------------------------------------
@@ -249,8 +241,7 @@ subroutine gyro_profile_init
            r(i) = r0-0.5*x_length+d_x*(i-1.0)
         enddo
 
-        r_e(:)     = r(:)
-        dr_eodr(:) = 1.0
+        r_e(:) = r(:)
 
      endif
      !------------------------------------------------------
@@ -280,19 +271,9 @@ subroutine gyro_profile_init
         dlnndr_s(is,:) = dlnndr_s(is,:)*(1.0-eps_dlnndr_vec(is))
         if (eps_dlntdr_vec(is) /= 0.0) then
            call send_message_real('INFO: (GYRO) Ti gradient RESCALED by: ',1.0-eps_dlntdr_vec(is))
-           if (reintegrate_flag == 1) then
-              !call logint(tem_s(is,:),dlntdr_s(is,:),r_s,n_x,ir_norm)
-              !call send_message('INFO: (GYRO) Ti profile REINTEGRATRED')
-              call catch_error('ERROR: (GYRO) REINTEGRATE_FLAG no longer supported')
-           endif
         endif
         if (eps_dlnndr_vec(is) /= 0.0) then
            call send_message_real('INFO: (GYRO) ni gradient RESCALED by: ',1.0-eps_dlnndr_vec(is))
-           if (reintegrate_flag == 1) then
-              !call logint(den_s(is,:),dlntdr_s(is,:),r_s,n_x,ir_norm)
-              !call send_message('INFO: (GYRO) ni profile REINTEGRATRED')
-              call catch_error('ERROR: (GYRO) REINTEGRATE_FLAG no longer supported')
-           endif
         endif
      enddo
      !
@@ -300,42 +281,11 @@ subroutine gyro_profile_init
      dlnndr_s(n_spec,:) = dlnndr_s(n_spec,:)*(1.0-eps_dlnndr_vec(0))
      if (eps_dlntdr_vec(0) /= 0.0) then
         call send_message_real('INFO: (GYRO) Te gradient RESCALED by: ',1.0-eps_dlntdr_vec(0))
-        if (reintegrate_flag == 1) then
-           !call logint(tem_s(n_spec,:),dlntdr_s(n_spec,:),r_s,n_x,ir_norm)
-           !call send_message('INFO: (GYRO) Te profile REINTEGRATRED')
-           call catch_error('ERROR: (GYRO) REINTEGRATE_FLAG no longer supported')
-        endif
      endif
      if (eps_dlnndr_vec(0) /= 0.0) then
         call send_message_real('INFO: (GYRO) ne gradient RESCALED by: ',1.0-eps_dlnndr_vec(0))
-        if (reintegrate_flag == 1) then
-           !call logint(den_s(n_spec,:),dlnndr_s(n_spec,:),r_s,n_x,ir_norm)
-           !call send_message('INFO: (GYRO) ne profile REINTEGRATRED')
-           call catch_error('ERROR: (GYRO) REINTEGRATE_FLAG no longer supported')
-        endif
      endif
      !
-     if ((sum(abs(eps_dlntdr_vec(:))+abs(eps_dlnndr_vec(:))) > 0.0)  .and. &
-          (reintegrate_flag == 1)) then
-        call send_message('INFO: (GYRO) profiles changed, recalculating beta_unit')
-
-        ! den_s  -> 1/m^3
-        ! tem_s  -> keV
-        ! b_unit -> T
-        !
-        ! beta calculation in CGS:
-        !
-        !         8*pi ( n[1e19/m^3]*1e-6*1e19 )( T[keV]*1.6022*1e-9 )
-        ! beta = ------------------------------------------------------
-        !                           ( 1e4*B[T] )^2
-        !
-        !      = 4.027e-3 n[1e19/m^3]*T[keV]/B[T]^2
-
-        do i=1,n_x
-           p_total = sum(den_s(:,i)*tem_s(:,i))
-           beta_unit_s(i) = 4.027e-3*p_total/b_unit_s(i)**2
-        enddo
-     endif
      !------------------------------------------------------
 
   end select ! profile_method
@@ -559,8 +509,8 @@ subroutine gyro_profile_init
 
         tem_s(:,i)    = tem_s(:,ir_norm)
         den_s(:,i)    = den_s(:,ir_norm)
-        dlntdr_s(:,i) = dlntdr_s(:,ir_norm)
-        dlnndr_s(:,i) = dlnndr_s(:,ir_norm)
+        if (unflat_dlntdr_flag == 0) dlntdr_s(:,i) = dlntdr_s(:,ir_norm)
+        if (unflat_dlnndr_flag == 0) dlnndr_s(:,i) = dlnndr_s(:,ir_norm)
         dlnpdr_s(i)   = dlnpdr_s(ir_norm)
         pr_s(:,i)     = pr_s(:,ir_norm)
         alpha_s(:,i)  = alpha_s(:,ir_norm)
