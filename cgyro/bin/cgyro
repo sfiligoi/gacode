@@ -393,7 +393,7 @@ fi
 if [ $TEST_FLAG -eq 0 ]
 then
    # If there are no restart files, its safe to overwrite the log file
-   PATTERN=(out.cgyro.restar*)
+   PATTERN=(bin.cgyro.restar*)
    if [ ! -r ${PATTERN[0]} ]; then
       > out.cgyro.version
    fi
@@ -420,7 +420,7 @@ if [ -f $CGYRO_DIR/src/cgyro ] ; then
    $GACODE_ROOT/platform/exec/exec.$GACODE_PLATFORM \
       $SIMDIR $NPROC "$CGYRO_DIR/src/cgyro $TEST_FLAG" $NOMP $NUMA $MPINUMA
 else
-   echo "ERROR: CGYRO excutable not found."
+   echo "ERROR: CGYRO executable not found."
    exit 1
 fi
 #===========================================================

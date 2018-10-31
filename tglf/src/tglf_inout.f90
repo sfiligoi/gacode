@@ -1901,6 +1901,54 @@ END SUBROUTINE write_tglf_intensity_spectrum
 
 !-----------------------------------------------------------------
 
+SUBROUTINE write_tglf_intensity_spectrum_per_mode
+  !
+  USE tglf_dimensions
+  USE tglf_global
+  USE tglf_species
+  USE tglf_kyspectrum
+  !   
+  IMPLICIT NONE
+  CHARACTER(36) :: fluxfile="out.tglf.intensity_spectrum_per_mode"
+  INTEGER :: i,is,n
+  REAL :: den,tem, u_par, q_tot
+  !
+  if(new_start)then
+     write(*,*)"error: tglf_TM must be called before write_tglf_intensity_spectrum_per_mode"
+     write(*,*)"       NN doesn't compute spectra -> if needed set tglf_nn_max_error_in=-1"
+  endif
+  !
+  OPEN(unit=33,file=fluxfile,status='replace')
+!
+  write(33,*)"gyro-bohm normalized intensity fluctuation amplitude spectra per mode"
+  write(33,*)"density,temperature,parallel velocity,parallel energy"
+  write(33,*)"index limits: ns,nky,nmodes"
+  write(33,*)ns,nky,nmodes_in
+  do is=ns0,ns
+    do i=1,nky
+      den = 0.0
+      tem = 0.0
+      u_par = 0.0
+      q_tot = 0.0
+      do n = 1,nmodes_in
+        den = intensity_spectrum_out(1,is,i,n)
+        tem = intensity_spectrum_out(2,is,i,n)
+        u_par = intensity_spectrum_out(3,is,i,n)
+        q_tot = intensity_spectrum_out(4,is,i,n)
+        write(33,*) den
+        write(33,*) tem
+        write(33,*) u_par
+        write(33,*) q_tot
+      enddo      
+    enddo
+  enddo
+!
+  CLOSE(33)
+!
+END SUBROUTINE write_tglf_intensity_spectrum_per_mode
+
+!-----------------------------------------------------------------
+
 SUBROUTINE write_tglf_field_spectrum
   !
   USE tglf_dimensions
@@ -1937,6 +1985,59 @@ SUBROUTINE write_tglf_field_spectrum
   CLOSE(33)
 !
 END SUBROUTINE write_tglf_field_spectrum
+
+!-----------------------------------------------------------------
+
+SUBROUTINE write_tglf_field_spectrum_per_mode
+  !
+  USE tglf_dimensions
+  USE tglf_global
+  USE tglf_species
+  USE tglf_kyspectrum
+  !   
+  IMPLICIT NONE
+  CHARACTER(36) :: fluxfile="out.tglf.field_spectrum_per_mode"
+  INTEGER :: i,n
+  REAL :: phi,a_par,b_par
+  !
+  if(new_start)then
+     write(*,*)"error: tglf_TM must be called before write_tglf_field_spectrum_per_mode"
+     write(*,*)"       NN doesn't compute spectra -> if needed set tglf_nn_max_error_in=-1"
+  endif
+  !
+  OPEN(unit=33,file=fluxfile,status='replace')
+!
+  write(33,*)"gyro-bohm normalized field fluctuation intensity spectra per mode"
+  write(33,*)"potential,A_par,B_par"
+  write(33,*)"index limits: nky,nmodes"
+  write(33,*)nky,nmodes_in
+  if(use_bper_in)then
+     write(33,*)"a_par_yes"
+  else
+     write(33,*)"a_par_no"
+  endif
+  if(use_bpar_in) then
+     write(33,*)"b_par_yes"
+  else
+     write(33,*)"b_par_no"
+  endif
+  do i=1,nky
+    phi = 0.0
+    a_par=0.0
+    b_par=0.0
+    do n = 1,nmodes_in
+      phi = field_spectrum_out(2,i,n)
+      if(use_bper_in)a_par = field_spectrum_out(3,i,n)
+      if(use_bpar_in)b_par = field_spectrum_out(4,i,n)
+      write(33,*)phi
+      if(use_bper_in)write(33,*)a_par
+      if(use_bpar_in)write(33,*)b_par
+    enddo
+  enddo
+!
+  CLOSE(33)
+!
+END SUBROUTINE write_tglf_field_spectrum_per_mode
 !-----------------------------------------------------------------
 
 SUBROUTINE write_tglf_eigenvalue_spectrum

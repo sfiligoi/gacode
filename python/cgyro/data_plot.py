@@ -11,8 +11,18 @@ class cgyrodata_plot(data.cgyrodata):
    TEXAPAR = r'\delta {A_\parallel}'
    TEXBPAR = r'\delta {B_\parallel}'
 
-   def kxky_select(self,itheta,field,moment,species):
+   def kxky_select(self,theta,field,moment,species):
 
+      # Select theta index
+      if self.theta_plot == 1:
+         itheta = 0
+      else:
+         # theta=0 check just to be safe
+         if theta == 0.0:
+            itheta = self.theta_plot/2
+         else:
+            itheta = int((theta+1.0)/2.0*self.theta_plot)
+      
       if moment == 'phi':
          if field == 0:
             f = self.kxky_phi_abs[:,itheta,:,:]
@@ -30,6 +40,7 @@ class cgyrodata_plot(data.cgyrodata):
          f = self.kxky_e_abs[:,itheta,species,:,:]
          ft = ''
 
+      print 'INFO: (kxky_select) Selected theta index',itheta+1,'of',self.theta_plot
       return f,ft
        
          
@@ -115,7 +126,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       fig.tight_layout(pad=0.3)
 
-   def plot_ky_phi(self,field=0,ymin='0',ymax='auto',nstr='null',fig=None):
+   def plot_ky_phi(self,field=0,theta=0.0,ymin='0',ymax='auto',nstr='null',fig=None):
       '''
       Plot fields versus time for particular values of ky
 
@@ -130,7 +141,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       self.getbigfield()
 
-      f,ft = self.kxky_select(0,field,'phi',0)
+      f,ft = self.kxky_select(theta,field,'phi',0)
       p = np.sum(f[:,:,:],axis=0)/self.rho
       
       ax = fig.add_subplot(111)
@@ -167,7 +178,7 @@ class cgyrodata_plot(data.cgyrodata):
       fig.tight_layout(pad=0.3)
 
       
-   def plot_rcorr_phi(self,field=0,w=0.5,fig=None):
+   def plot_rcorr_phi(self,field=0,theta=0.0,w=0.5,fig=None):
       '''
       Plot radial correlation 
 
@@ -204,8 +215,7 @@ class cgyrodata_plot(data.cgyrodata):
       ax.set_title(r'$\mathrm{Average~radial~correlation} \quad $'+windowtxt)
       ax.set_xlabel(xlabel)
 
-      itheta=0
-      f,ft = self.kxky_select(itheta,field,'phi',0)
+      f,ft = self.kxky_select(theta,field,'phi',0)
       y = np.sum(f[:,1:,:],axis=1)
       
       for j in range(self.n_radial):
@@ -239,12 +249,14 @@ class cgyrodata_plot(data.cgyrodata):
 
       print 'INFO: (data_plot.py) l_corr = ',l_corr
 
-   def plot_phi(self,field=0,fig=None):
+   def plot_phi(self,field=0,theta=0.0,fig=None):
 
       if fig is None:
          fig = plt.figure(figsize=(self.lx,self.ly))
 
       self.getbigfield()
+
+      f,ft = self.kxky_select(theta,field,'phi',0)
 
       #======================================
       # Set figure size and axes
@@ -252,12 +264,11 @@ class cgyrodata_plot(data.cgyrodata):
       ax.grid(which="majorminor",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(TIME)
-      ax.set_ylabel(r'$\left| \Phi \right|$')
+      ax.set_ylabel(r'$\left|'+ft+'\right|$')
       ax.set_yscale('log')
       ax.set_title(r'$\mathrm{Fluctuation~intensity} \quad k_\theta = nq/r$')
       #======================================
 
-      f,ft = self.kxky_select(0,field,'phi',0)
       y0 = np.sum(f[:,0,:],axis=0)/self.rho      
 
       # n=0 intensity
@@ -286,13 +297,13 @@ class cgyrodata_plot(data.cgyrodata):
          fig = plt.figure(figsize=(self.lx,self.ly))
 
       if self.n_n > 1:
-         print "ERROR: (plot_zf.py) This plot option valid for ZF test only."
+         print 'ERROR: (plot_zf.py) This plot option valid for ZF test only.'
          sys.exit()
 
       t  = self.t
       k0 = self.kx[0]
 
-      print "INFO: (plot_zf.py) Using index theta index n_theta/3+1"
+      print 'INFO: (plot_zf.py) Using index theta index n_theta/3+1'
       if field == 0:
          f = self.phib[0,self.n_theta/3,:]
       elif field == 1:
@@ -738,7 +749,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       fig.tight_layout(pad=0.3)
 
-   def plot_kxky_phi(self,field=0,w=0.5,fig=None):
+   def plot_kxky_phi(self,field=0,theta=0.0,w=0.5,fig=None):
 
       from mpl_toolkits.mplot3d import Axes3D
 
@@ -756,21 +767,19 @@ class cgyrodata_plot(data.cgyrodata):
       # Note array structure
       # self.phi = np.reshape(data,(2,self.n_radial,self.n_n,nt),'F')
 
-      t =self.t
-      nx=self.n_radial
-      ny=self.n_n
+      t  = self.t  
+      nx = self.n_radial
+      ny = self.n_n
 
       f = np.zeros([nx-1,ny])
-      n = self.n_time
 
-      itheta=0
       # Field data selector
-      fx,ft = self.kxky_select(itheta,field,'phi',0)
+      fx,ft = self.kxky_select(theta,field,'phi',0)
 
-      imin = int((1.0-w)*n)
-      for i in np.arange(imin,n):
+      imin=iwindow(t,w)
+      for i in np.arange(imin,self.n_time):
          f = f+fx[1:,:,i]
-
+      
       # Fix (0,0)
       i0 = nx/2-1
       f[i0,0] = 1e-6
@@ -783,8 +792,8 @@ class cgyrodata_plot(data.cgyrodata):
 
       ax = fig.add_subplot(111)
 
-      #windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[-1])+']$'
-      windowtxt = ''
+      windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[-1])+']$'
+      #windowtxt = ''
 
       ax.set_xlabel(r'$k_x \rho_s/4$')
       ax.set_ylabel(r'$k_y \rho_s$')
@@ -792,9 +801,9 @@ class cgyrodata_plot(data.cgyrodata):
 
       ax.imshow(np.transpose(f),extent=[-x0,x0,0,y0],interpolation='none')
 
-      fig.tight_layout(pad=0.4)
+      fig.tight_layout(pad=0.5)
 
-   def plot_kx_phi(self,field=0,w=0.5,ymin='auto',ymax='auto',nstr='null',fig=None):
+   def plot_kx_phi(self,field=0,theta=0.0,w=0.5,ymin='auto',ymax='auto',nstr='null',fig=None):
 
       if fig is None:
          fig = plt.figure(figsize=(self.lx,self.ly))
@@ -819,7 +828,7 @@ class cgyrodata_plot(data.cgyrodata):
       ax.set_title(r'$\mathrm{Average~fluctuation~intensity} \quad $'+windowtxt)
       ax.set_xlabel(xlabel)
 
-      f,ft = self.kxky_select(0,field,'phi',0)
+      f,ft = self.kxky_select(theta,field,'phi',0)
   
       if nstr == 'null':
          y = np.sum(f[:,:,:],axis=1)
@@ -946,7 +955,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       fig.tight_layout(pad=0.3)
 
-   def plot_hbcut(self,itime=-1,spec=0,tmax=-1.0,theta="0.0",fig=None):
+   def plot_hbcut(self,itime=-1,spec=0,tmax=-1.0,theta=0.0,fig=None):
 
       u = specmap(self.mass[spec],self.z[spec])
 
@@ -959,7 +968,7 @@ class cgyrodata_plot(data.cgyrodata):
       func = self.hb
 
       # Compute index for theta value in pitch angle and energy plots
-      i0 = int(round((1.0+float(theta))*self.n_theta/2.0))
+      i0 = int(round((1.0+theta)*self.n_theta/2.0))
       if i0 > self.n_theta-1:
          i0 = self.n_theta-1
 

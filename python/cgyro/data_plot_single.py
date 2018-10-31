@@ -39,22 +39,24 @@ elif plot_type == 'ky_freq':
 elif plot_type == 'ky_phi':
    
    field = int(sys.argv[2])
-   ymin  = sys.argv[3]
-   ymax  = sys.argv[4]
-   nstr  = sys.argv[5]
-   ftype = sys.argv[6]
+   theta = float(sys.argv[3])
+   ymin  = sys.argv[4]
+   ymax  = sys.argv[5]
+   nstr  = sys.argv[6]
+   ftype = sys.argv[7]
 
-   data_in.plot_ky_phi(field=field,ymin=ymin,ymax=ymax,nstr=nstr)
+   data_in.plot_ky_phi(field=field,theta=theta,ymin=ymin,ymax=ymax,nstr=nstr)
 
    outfile = 'out.cgyro.ky_phi.'+ftype
 
 elif plot_type == 'rcorr_phi':
    
    field = int(sys.argv[2])
-   w     = float(sys.argv[3])
-   ftype = sys.argv[4]
-
-   data_in.plot_rcorr_phi(field=field,w=w)
+   theta = float(sys.argv[3])
+   w     = float(sys.argv[4])
+   ftype = sys.argv[5]
+   
+   data_in.plot_rcorr_phi(field=field,theta=theta,w=w)
 
    outfile = 'out.cgyro.rcorr_phi.'+ftype
 
@@ -99,8 +101,9 @@ elif plot_type == 'phi':
 
    field = int(sys.argv[2])
    ftype = sys.argv[3]
-
-   head,x,y1,y2 = data_in.plot_phi(field=field)
+   theta = 0.0
+   
+   head,x,y1,y2 = data_in.plot_phi(field=field,theta=theta)
    
    outfile = 'out.cgyro.phi.'+ftype
 
@@ -158,23 +161,25 @@ elif plot_type == 'xflux':
 elif plot_type == 'kxky_phi':
 
    field = int(sys.argv[2])
-   w     = float(sys.argv[3])
-   ftype = sys.argv[4]
-
-   data_in.plot_kxky_phi(field=field,w=w)
+   theta = float(sys.argv[3])
+   w     = float(sys.argv[4])
+   ftype = sys.argv[5]
+   
+   data_in.plot_kxky_phi(field=field,theta=theta,w=w)
    
    outfile = 'out.cgyro.kxky_phi.'+ftype
 
 elif plot_type == 'kx_phi':
 
    field = int(sys.argv[2])
-   w     = float(sys.argv[3])
-   ymin  = sys.argv[4]
-   ymax  = sys.argv[5]
-   nstr  = sys.argv[6]
-   ftype = sys.argv[7]
-
-   data_in.plot_kx_phi(field=field,w=w,ymin=ymin,ymax=ymax,nstr=nstr)
+   theta = float(sys.argv[3])
+   w     = float(sys.argv[4])
+   ymin  = sys.argv[5]
+   ymax  = sys.argv[6]
+   nstr  = sys.argv[7]
+   ftype = sys.argv[8]
+   
+   data_in.plot_kx_phi(field=field,theta=theta,w=w,ymin=ymin,ymax=ymax,nstr=nstr)
    
    outfile = 'out.cgyro.kx_phi.'+ftype
 
@@ -195,13 +200,12 @@ elif plot_type == 'hbcut':
    itime = int(sys.argv[2])
    spec  = int(sys.argv[3])
    tmax  = float(sys.argv[4])
-   theta = sys.argv[5]
+   theta = float(sys.argv[5])
    ftype = sys.argv[6]
 
    data_in.plot_hbcut(itime=itime,spec=spec,tmax=tmax,theta=theta)
    
    outfile = 'out.cgyro.hbcut.'+ftype
-
 
 else:
 

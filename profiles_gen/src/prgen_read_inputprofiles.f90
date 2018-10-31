@@ -12,7 +12,7 @@ subroutine prgen_read_inputprofiles
 
   implicit none
 
-  integer :: i,ierr
+  integer :: i
 
   EXPRO_ctrl_quasineutral_flag = 0
   EXPRO_ctrl_numeq_flag = 0 

@@ -6,6 +6,7 @@ from matplotlib import rc
 import matplotlib.pyplot as plt
 from gacodefuncs import *
 from cgyro.data import cgyrodata
+
 try:
    import gapy
    hasgapy = True
@@ -36,6 +37,9 @@ nt = sim.n_time
 nr = sim.n_radial
 nn = sim.n_n
 ns = sim.n_species
+nth = sim.theta_plot
+
+ivec = time_vector(istr,nt)
 
 if nx < 0 or ny < 0:
    nx = nr+1
@@ -43,7 +47,6 @@ if nx < 0 or ny < 0:
    usefft = True
 else:
    usefft = False
-   
    
 epx = np.zeros([nx,nr],dtype=np.complex)
 eny = np.zeros([ny,nn],dtype=np.complex)
@@ -134,36 +137,8 @@ def maptoreal_fft(nr,nn,nx,ny,c):
    return f,end-start
 #------------------------------------------------------------------------
 
-
-# Generate vector of time frames 
-if istr == '-1':
-    ivec = range(nt)
-else:
-    ivec = str2list(istr)
-
-u=specmap(sim.mass[species],sim.z[species])
-
-# Set filename root and title
-isfield = True
-if (moment == 'n'):
-    fdata = '.cgyro.kxky_n'
-    title = r'${\delta \mathrm{n}}_'+u+'$'
-    isfield = False
-elif (moment == 'e'):
-    fdata = '.cgyro.kxky_e'
-    title = r'${\delta \mathrm{E}}_'+u+'$'
-    isfield = False
-elif (moment == 'phi'):
-    fdata = '.cgyro.kxky_phi'
-    title = r'$\delta\phi$'
-elif (moment == 'apar'):
-    fdata = '.cgyro.kxky_apar'
-    title = r'$\delta A_\parallel$'
-elif (moment == 'bpar'):
-    fdata = '.cgyro.kxky_bpar'
-    title = r'$\delta B_\parallel$'
-
-# ERROR CHECKS
+# Get filename and tags 
+fdata,title,isfield = tag_helper(sim.mass[species],sim.z[species],moment)
 
 # Check to see if data exists (try binary data first)
 if os.path.isfile('bin'+fdata):
@@ -181,22 +156,21 @@ else:
 if usefft:
     print 'INFO: (plot_fluct) Using FFT (fast)'
 
-# **WARNING** Assumes theta_plot=1 
 if isfield:
-    n_chunk = 2*nr*nn
+    n_chunk = 2*nr*nth*nn
 else:
-    n_chunk = 2*nr*ns*nn
+    n_chunk = 2*nr*nth*ns*nn
 
 # This is the logic to generate a frame
 def frame():
 
    if i in ivec:
       if isfield:
-         a = np.reshape(aa,(2,nr,nn),order='F')
-         c = a[0,:,:]+1j*a[1,:,:]
+         a = np.reshape(aa,(2,nr,nth,nn),order='F')
+         c = a[0,:,nth/2,:]+1j*a[1,:,nth/2,:]
       else:
-         a = np.reshape(aa,(2,nr,ns,nn),order='F')
-         c = a[0,:,species,:]+1j*a[1,:,species,:]
+         a = np.reshape(aa,(2,nr,nth,ns,nn),order='F')
+         c = a[0,:,nth/2,species,:]+1j*a[1,:,nth/2,species,:]
                 
       f = np.zeros([nx,ny],order='F')
       if hasgapy:
@@ -218,7 +192,7 @@ def frame():
       xp = x/(2*np.pi)*sim.length
       # ky[1] < 0 is possible
       yp = y/np.abs(sim.ky[1])
-      aspect = max(yp)/max(xp)
+      aspect = max(abs(yp))/max(abs(xp))
 
       fig = plt.figure(figsize=(8,8*aspect))
       ax = fig.add_subplot(111)
