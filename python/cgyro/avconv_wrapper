@@ -4,10 +4,13 @@
 TITLE="CGYRO Turbulence"
 TIMESTAMP=`date -Iseconds`
 
-# Main movie definitions
-BASENAME=%d.png
-BITRATE=1000k
+START=$1
 FRAMERATE=$2
+PRE=$3
+
+# Main movie definitions
+BASENAME=$PRE%d.png
+BITRATE=1000k
 QUALITY=19
 OUT=movie.mp4
 

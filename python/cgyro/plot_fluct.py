@@ -16,7 +16,7 @@ except:
 
 PREC='f' ; BIT=4  
 
-ftype = sys.argv[1]
+ext = sys.argv[1]
 moment = sys.argv[2]
 species = int(sys.argv[3])
 px = int(sys.argv[4])
@@ -34,6 +34,15 @@ land = int(sys.argv[13])
 rc('text',usetex=True)
 rc('font',size=font)
 
+# Extension handling
+s=ext.split('.')
+if len(s) == 2:
+   pre   = s[0]
+   ftype = s[1]
+else:
+   pre = ''
+   ftype = s[0]
+   
 sim = cgyrodata('./')
 nt = sim.n_time
 nr = sim.n_radial
@@ -221,9 +230,8 @@ def frame():
       if ftype == 'screen':
          plt.show()
       else:
-         fname = fdata+str(i)
          # Filename uses frame number 
-         plt.savefig(str(i)+'.'+ftype)
+         plt.savefig(pre+str(i)+'.'+ftype)
          # Close each time to prevent memory accumulation
          plt.close()
             
