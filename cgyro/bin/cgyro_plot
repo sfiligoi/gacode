@@ -118,13 +118,10 @@ then
   echo "         Specify values of n (toroidal mode index)"
   echo "         *Affects: ky_phi"
   echo
-  echo "         -cmap <value>"
-  echo "         Name of colormap (jet,hsv,brg,...)"  
-  echo
   echo "         -loc <loc>"
   echo "         Legend location (1-4)"  
   echo
-  echo "OPTIONS FOR -plot fluct/vid"
+  echo "OPTIONS FOR -plot fluct/vis"
   echo
   echo "         -nomp <threads>"
   echo "         Number of OpenMP threads per MPI task."
@@ -133,7 +130,13 @@ then
   echo "         Number of radial interpolation points (default FFT)"
   echo
   echo "         -ny <int>"
-  echo "          Number of alpha interpolation points (default FFT)"
+  echo "         Number of alpha interpolation points (default FFT)"
+  echo
+  echo "         -px <int>"
+  echo "         Number of horixontal pixels (default 800)"
+  echo
+  echo "         -py <int>"
+  echo "         Number of vertical pixels (default 800)"
   echo
   echo "         -fmin <float>"
   echo "         Minimum value for contour plot"
@@ -144,24 +147,40 @@ then
   echo "         -start <int>"
   echo "         First frame for encoding"
   echo
-  echo "LINEAR EXAMPLES:"
+  echo "         -cmap <value>"
+  echo "         Name of colormap (jet,hsv,brg,...)"  
+  echo
+  echo "         -legacy"
+  echo "         Use legacy Clebsch factor in eikonal"  
+  echo
+  echo "         -land"
+  echo "         Use landscape mode (ly,lx) for -plot fluct"  
+  echo
+  echo "LINEAR EXAMPLES"
   echo "  $ cgyro_plot -e . -plot freq           [frequency versus time]"
   echo "  $ cgyro_plot -e . -plot ball -field 0  [phi versus ballooning angle]"
   echo "  $ cgyro_plot -e . -plot zf             [zf phi versus time]"
   echo
-  echo
-  echo "NONLINEAR EXAMPLES (fields):"
+  echo "NONLINEAR EXAMPLES (fields)"
   echo "  $ cgyro_plot -e . -plot phi               [phi(t) for n=0 and n>0]"
   echo "  $ cgyro_plot -e . -plot ky_phi -n 0,2,4-8 [phi harmonics versus time]"
   echo "  $ cgyro_plot -e . -plot ky_phi -field 2   [bpar harmonics versus time]"
-  echo "NONLINEAR EXAMPLES (fluxes):"
+  echo
+  echo "NONLINEAR EXAMPLES (fluxes)"
   echo "  $ cgyro_plot -e . -plot flux              [energy flux versus time]"
   echo "  $ cgyro_plot -e . -plot flux -ext png     [... above to PNG file]"
   echo "  $ cgyro_plot -e . -plot flux -moment n    [particle flux versus time]"
   echo "  $ cgyro_plot -e . -plot flux -fc -field 1 [A_par energy flux versus time]"
   echo "  $ cgyro_plot -e . -plot ky_flux           [energy flux versus ky]"
-
-
+  echo
+  echo "VISUALIZATIONS [build gapy for speed]"
+  echo "  $ cyro_plot -plot fluct -t 16 -moment phi"
+  echo "  $ cyro_plot -plot fluct -t 16 -moment phi -land -nx 512 -ny 1024"
+  echo
+  echo "VISUALIZATIONS [*requires Mayavi*]"
+  echo "  $ cyro_plot -vis torcut -moment n -nx 256 -nz 512"
+  echo "  $ cyro_plot -vis wheel  -moment n -land -nx 256 -ny 256 -nz 256"
+  
   exit 1
 fi
 #==============================================================================
@@ -205,6 +224,10 @@ CMAP=jet
 START=1
 NSCALE=0
 LOC=2
+LEGACY_FLAG=0
+LAND_FLAG=0
+PX=800
+PY=800
 #==============================================================================
 
 #==============================================================================
@@ -242,6 +265,8 @@ while [ $# -gt 0 ] ; do
   -ymin) shift ; YMIN=$1 ;;
   -lx) shift ; LX=$1 ;;
   -ly) shift ; LY=$1 ;;
+  -px) shift ; PX=$1 ;;
+  -py) shift ; PY=$1 ;;
   -fontsize) shift ; FONTSIZE=$1 ;;
 
   -w) shift ; W=$1 ;;
@@ -261,6 +286,9 @@ while [ $# -gt 0 ] ; do
 
   -mesh) MESH=1 ;;
 
+  -legacy) LEGACY_FLAG=1 ;;
+  -land) LAND_FLAG=1 ;;
+  
   -h) shift ; cat $GACODE_ROOT/cgyro/bin/FILE_FORMAT ; exit 0 ;;
 
   *) echo "ERROR: incorrect syntax." ; exit 1 ;;
@@ -291,7 +319,7 @@ case "$VIS_TYPE" in
 	python $PYROOT/vis_slices.py ;;
 	
    torcut)
-	export OMP_NUM_THREADS=$NOMP ; python $PYROOT/vis_torcut.py $FTYPE $MOMENT $SPECIES $NX $NZ $TIME $FMIN $FMAX $CMAP $FONTSIZE ;;
+	export OMP_NUM_THREADS=$NOMP ; python $PYROOT/vis_torcut.py $FTYPE $MOMENT $SPECIES $NX $NZ $TIME $FMIN $FMAX $CMAP $FONTSIZE $LEGACY_FLAG ;;
 
    wheel)
 	export OMP_NUM_THREADS=$NOMP ; python $PYROOT/vis_wheel.py $FTYPE $MOMENT $SPECIES $NX $NY $NZ $TIME $FMIN $FMAX $CMAP $FONTSIZE ;;
@@ -353,7 +381,7 @@ case "$PLOT_TYPE" in
        python $PLT $PLOT_TYPE $FTYPE ;;
 
    fluct)
-       export OMP_NUM_THREADS=$NOMP ; python $PYROOT/plot_fluct.py $FTYPE $MOMENT $SPECIES $YMIN $YMAX $NX $NY $TIME $FMIN $FMAX $CMAP $FONTSIZE ;;
+       export OMP_NUM_THREADS=$NOMP ; python $PYROOT/plot_fluct.py $FTYPE $MOMENT $SPECIES $PX $PY $NX $NY $TIME $FMIN $FMAX $CMAP $FONTSIZE $LAND_FLAG ;;
 
    rt)
        export OMP_NUM_THREADS=$NOMP ; python $PYROOT/plot_rt.py $FTYPE $MOMENT $SPECIES $YMIN $YMAX $NX $ND $TIME $FMIN $FMAX $CMAP $FONTSIZE ;;

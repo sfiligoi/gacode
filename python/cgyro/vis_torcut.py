@@ -4,6 +4,7 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 from matplotlib import rc
+from matplotlib import cm
 from gacodefuncs import *
 from cgyro.data import cgyrodata
 from mayavi import mlab 
@@ -23,6 +24,7 @@ fmin     = sys.argv[7]
 fmax     = sys.argv[8]
 colormap = sys.argv[9]
 font     = int(sys.argv[10])
+legacy   = int(sys.argv[11])
 
 # Define plot and font size 
 rc('text',usetex=True)
@@ -81,9 +83,15 @@ gapy.geo.geo_beta_star_in=sim.beta_star
 
 gapy.geo.geo_interp(z,True)
 # g1 -> q*theta
-g1 = -gapy.geo.geo_nu
 # g2 -> theta 
-g2 = gapy.geo.geo_b*gapy.geo.geo_captheta/gapy.geo.geo_s_in/gapy.geo.geo_grad_r**2
+if legacy == 0:
+   # Correct form of Clebsch angle expansion nu(r,theta) 
+   g1 = -gapy.geo.geo_nu
+   g2 = gapy.geo.geo_b*gapy.geo.geo_captheta/gapy.geo.geo_s_in/gapy.geo.geo_grad_r**2
+else:
+   # s-alpha approximate (apparently used in legacy GYRO movies)
+   g1 = sim.q*z
+   g2 = z
 
 #------------------------------------------------------------------------
 
@@ -127,11 +135,17 @@ def frame():
       f0=float(fmin)
       f1=float(fmax)
 
-   mlab.mesh(xp,yp,zp,scalars=f,colormap=colormap,vmin=f0,vmax=f1,opacity=1.0)
+   image = mlab.mesh(xp,yp,zp,scalars=f,colormap=colormap,vmin=f0,vmax=f1,opacity=1.0)
    # View from positive z-axis
    mlab.view(azimuth=0, elevation=0)
    print 'INFO: (vis_torcut) min=%e , max=%e' % (f0,f1)
 
+   #lut = image.module_manager.scalar_lut_manager.lut.table.to_array()
+   #values = np.linspace(0., 1., 256)
+   #cmap = cm.get_cmap(colormap)(values.copy())
+   #cmap[:, -1] = np.linspace(0, 255, 256)
+   #image.module_manager.scalar_lut_manager.lut.table = cmap
+   
    if ftype == 'screen':
       mlab.show()
    else:

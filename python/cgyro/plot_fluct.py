@@ -16,21 +16,23 @@ except:
 
 PREC='f' ; BIT=4  
 
-# Use first 3 args to define plot and font size 
-rc('text',usetex=True)
-rc('font',size=int(sys.argv[12]))
-
 ftype = sys.argv[1]
 moment = sys.argv[2]
 species = int(sys.argv[3])
-ymin = sys.argv[4]
-ymax = sys.argv[5]
+px = int(sys.argv[4])
+py = int(sys.argv[5])
 nx = int(sys.argv[6])
 ny = int(sys.argv[7])
 istr = sys.argv[8]
 fmin = sys.argv[9]
 fmax = sys.argv[10]
 colormap = sys.argv[11]
+font = int(sys.argv[12])
+land = int(sys.argv[13])
+
+# Use first 3 args to define plot and font size 
+rc('text',usetex=True)
+rc('font',size=font)
 
 sim = cgyrodata('./')
 nt = sim.n_time
@@ -193,20 +195,29 @@ def frame():
       # ky[1] < 0 is possible
       yp = y/np.abs(sim.ky[1])
       aspect = max(abs(yp))/max(abs(xp))
-
-      fig = plt.figure(figsize=(8,8*aspect))
-      ax = fig.add_subplot(111)
-      ax.set_title(title)
-      ax.set_xlabel(r'$x/\rho_s$')
-      ax.set_ylabel(r'$y/\rho_s$')
-      ax.set_aspect('equal')
-        
+      
       levels = np.arange(f0,f1,(f1-f0)/256)
-      ax.contourf(xp,yp,np.transpose(f),levels,cmap=plt.get_cmap(colormap))
+      if land == 0:
+         fig = plt.figure(figsize=(px/100.0,py/100.0))
+         ax = fig.add_subplot(111)
+         ax.set_xlabel(r'$x/\rho_s$')
+         ax.set_ylabel(r'$y/\rho_s$')
+         ax.contourf(xp,yp,np.transpose(f),levels,cmap=plt.get_cmap(colormap))
+         plt.subplots_adjust(top=0.94)
+      else:
+         fig = plt.figure(figsize=(px/100.0,py/100.0))
+         ax = fig.add_subplot(111)
+         ax.set_xlabel(r'$y/\rho_s$')
+         ax.set_ylabel(r'$x/\rho_s$')
+         ax.contourf(yp,xp,f,levels,cmap=plt.get_cmap(colormap))
+         #plt.subplots_adjust(top=0.9,left=0.05,right=0.95)
+ 
       print 'INFO: (plot_fluct) min=%e , max=%e  (t=%e)' % (f0,f1,t)
 
-      fig.tight_layout(pad=0.3)
-      plt.subplots_adjust(top=0.94)
+      ax.set_title(title)
+      ax.set_aspect('equal')
+      fig.tight_layout()
+
       if ftype == 'screen':
          plt.show()
       else:
