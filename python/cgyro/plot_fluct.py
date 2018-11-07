@@ -29,6 +29,7 @@ fmax = sys.argv[10]
 colormap = sys.argv[11]
 font = int(sys.argv[12])
 land = int(sys.argv[13])
+theta = float(sys.argv[14])
 
 # Use first 3 args to define plot and font size 
 rc('text',usetex=True)
@@ -51,6 +52,7 @@ ns = sim.n_species
 nth = sim.theta_plot
 
 ivec = time_vector(istr,nt)
+itheta = theta_indx(theta,nth)
 
 if nx < 0 or ny < 0:
    nx = nr+1
@@ -178,10 +180,10 @@ def frame():
    if i in ivec:
       if isfield:
          a = np.reshape(aa,(2,nr,nth,nn),order='F')
-         c = a[0,:,nth/2,:]+1j*a[1,:,nth/2,:]
+         c = a[0,:,itheta,:]+1j*a[1,:,itheta,:]
       else:
          a = np.reshape(aa,(2,nr,nth,ns,nn),order='F')
-         c = a[0,:,nth/2,species,:]+1j*a[1,:,nth/2,species,:]
+         c = a[0,:,itheta,species,:]+1j*a[1,:,itheta,species,:]
                 
       f = np.zeros([nx,ny],order='F')
       if hasgapy:
