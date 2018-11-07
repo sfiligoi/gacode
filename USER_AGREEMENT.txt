@@ -1,6 +1,6 @@
 GACODE User Agreement
  Initial version (2013.07.02) 
- Updated version (2018.05.20)
+ Updated version (2018.11.06)
 
 GACODE development is funded by the US Department of Energy (DoE), 
 and distribution is subject to DoE requirements and restrictions.
