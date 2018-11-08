@@ -121,6 +121,9 @@ then
   echo "         -loc <loc>"
   echo "         Legend location (1-4)"  
   echo
+  echo "         -diss"
+  echo "         Toggle plotting of dissipation curve"  
+  echo
   echo "OPTIONS FOR -plot fluct/vis/vid"
   echo
   echo "         -nomp <threads>"
@@ -232,6 +235,7 @@ LEGACY_FLAG=0
 LAND_FLAG=0
 PX=800
 PY=800
+DISS=0
 #==============================================================================
 
 #==============================================================================
@@ -252,6 +256,8 @@ while [ $# -gt 0 ] ; do
   -field) shift ; FIELD=$1 ;;
 
   -fc) FC=1 ;;
+
+  -diss) DISS=1 ;;
 
   -moment) shift ; MOMENT=$1 ;;
 
@@ -362,7 +368,7 @@ case "$PLOT_TYPE" in
         python $PLT $PLOT_TYPE $W $FIELD $MOMENT $YMIN $YMAX $FC $EXT $LOC $NSCALE;;
 
    ky_flux)
-	python $PLT $PLOT_TYPE $W $FIELD $MOMENT $YMIN $YMAX $FC $EXT ;;
+	python $PLT $PLOT_TYPE $W $FIELD $MOMENT $YMIN $YMAX $FC $EXT $DISS ;;
 
    phi)
 	python $PLT $PLOT_TYPE $FIELD $EXT ;;
@@ -371,7 +377,7 @@ case "$PLOT_TYPE" in
 	python $PLT $PLOT_TYPE $FIELD $THETA $YMIN $YMAX $N $EXT ;;
 
    kx_phi)
-	python $PLT $PLOT_TYPE $FIELD $THETA $W $YMIN $YMAX $N $EXT ;;
+	python $PLT $PLOT_TYPE $FIELD $THETA $W $YMIN $YMAX $N $EXT $DISS ;;
 
    kxky_phi)
 	python $PLT $PLOT_TYPE $FIELD $THETA $W $EXT ;;

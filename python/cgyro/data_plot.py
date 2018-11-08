@@ -649,7 +649,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       fig.tight_layout(pad=0.3)
 
-   def plot_ky_flux(self,w=0.5,field=0,moment='e',ymin='auto',ymax='auto',fc=0,fig=None):
+   def plot_ky_flux(self,w=0.5,field=0,moment='e',ymin='auto',ymax='auto',fc=0,diss=0,fig=None):
       '''
       Plot fluxes versus ky
 
@@ -740,7 +740,8 @@ class cgyrodata_plot(data.cgyrodata):
          ax.bar(ky-dk/2.0,ave[:,ispec],width=dk/1.1,color=color[ispec],alpha=0.5,edgecolor='black')
 
          # Dissipation curve             
-         ax.plot(ky,self.alphadiss*ax.get_ylim()[1]*0.5,linewidth=2,color='k',alpha=0.2)
+         if diss == 1:
+            ax.plot(ky,self.alphadiss*ax.get_ylim()[1]*0.5,linewidth=2,color='k',alpha=0.2)
 
          # Set axis ranges
          ax.set_xlim([0,ky[-1]+dk])
@@ -803,7 +804,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       fig.tight_layout(pad=0.5)
 
-   def plot_kx_phi(self,field=0,theta=0.0,w=0.5,ymin='auto',ymax='auto',nstr='null',fig=None):
+   def plot_kx_phi(self,field=0,theta=0.0,w=0.5,ymin='auto',ymax='auto',nstr='null',diss=0,fig=None):
 
       if fig is None:
          fig = plt.figure(figsize=(self.lx,self.ly))
@@ -854,12 +855,11 @@ class cgyrodata_plot(data.cgyrodata):
 
       ax.set_xlim([-x0,x0])
       ax.set_yscale('log')
-
-      ymin,ymax=setlimits(ax.get_ylim(),ymin,ymax)
-      ax.set_ylim([ymin,ymax])
-
+      ax.set_ylim(bottom=0.5*np.sqrt(ave[-1]))
+      
       # Dissipation curve             
-      ax.plot(kx,self.radialdiss*ax.get_ylim()[1]*0.5,linewidth=2,color='k',alpha=0.2)
+      if diss == 1:
+         ax.plot(kx,self.radialdiss*ax.get_ylim()[1]*0.5,linewidth=2,color='k',alpha=0.2)
 
       fig.tight_layout(pad=0.3)
 

@@ -136,12 +136,13 @@ elif plot_type == 'ky_flux':
    ymax   = sys.argv[6]
    fc     = int(sys.argv[7])
    ftype  = sys.argv[8]
-
+   diss   = int(sys.argv[9])
+   
    if ftype == 'dump':
       cgyrodata_dump('./').dump_ky_flux(w=w,field=field,moment=moment,fc=fc)
       sys.exit()
    else:
-      data_in.plot_ky_flux(w=w,field=field,moment=moment,ymin=ymin,ymax=ymax,fc=fc)
+      data_in.plot_ky_flux(w=w,field=field,moment=moment,ymin=ymin,ymax=ymax,fc=fc,diss=diss)
 
    outfile = 'out.cgyro.ky_flux.'+ftype
 
@@ -178,8 +179,9 @@ elif plot_type == 'kx_phi':
    ymax  = sys.argv[6]
    nstr  = sys.argv[7]
    ftype = sys.argv[8]
+   diss = int(sys.argv[9])
    
-   data_in.plot_kx_phi(field=field,theta=theta,w=w,ymin=ymin,ymax=ymax,nstr=nstr)
+   data_in.plot_kx_phi(field=field,theta=theta,w=w,ymin=ymin,ymax=ymax,nstr=nstr,diss=diss)
    
    outfile = 'out.cgyro.kx_phi.'+ftype
 
