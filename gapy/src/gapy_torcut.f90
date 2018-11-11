@@ -25,6 +25,8 @@ subroutine torcut(m,q,nr,nth,nn,nx,nz,g1,g2,c,f)
   ! f2py intent(in) nn
   ! f2py intent(in) nx
   ! f2py intent(in) nz
+  ! f2py intent(in) g1
+  ! f2py intent(in) g2
   ! f2py intent(in) c
   ! f2py intent(in,out) f
 
@@ -80,7 +82,7 @@ subroutine torcut(m,q,nr,nth,nn,nx,nz,g1,g2,c,f)
            exit
         endif
      enddo
-
+     
      do i=0,nx-1
         fsum = 0.0
         x0 = m*x(i)*g2(k)/(2*pi)

@@ -14,7 +14,7 @@ except:
    print 'ERROR: (vis_torcut) Please build gapy.so library!'
    sys.exit()
    
-ftype    = sys.argv[1]
+ext      = sys.argv[1]
 moment   = sys.argv[2]
 species  = int(sys.argv[3])
 nx       = int(sys.argv[4])
@@ -38,6 +38,14 @@ ns = sim.n_species
 nth = sim.theta_plot
 
 ivec = time_vector(istr,nt)
+
+s=ext.split('.')
+if len(s) == 2:
+   pre   = s[0]
+   ftype = s[1]
+else:
+   pre = ''
+   ftype = s[0]
 
 #------------------------------------------------------------------------
 # (r,theta)=(x,y) mesh setup 
@@ -91,6 +99,7 @@ if legacy == 0:
 else:
    # s-alpha approximate (apparently used in legacy GYRO movies)
    g1 = sim.q*z
+   g2 = z-sim.q**2*sim.rmaj*sim.beta_star*np.sin(z)/sim.shear
    g2 = z
 
 #------------------------------------------------------------------------
@@ -149,9 +158,8 @@ def frame():
    if ftype == 'screen':
       mlab.show()
    else:
-      fname = fdata+str(i)
       # Filename uses frame number 
-      mlab.savefig(str(i)+'.'+ftype)
+      mlab.savefig(pre+str(i)+'.'+ftype)
       # Close each time to prevent memory accumulation
       mlab.close()
                 

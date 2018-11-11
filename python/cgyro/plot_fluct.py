@@ -36,13 +36,7 @@ rc('text',usetex=True)
 rc('font',size=font)
 
 # Extension handling
-s=ext.split('.')
-if len(s) == 2:
-   pre   = s[0]
-   ftype = s[1]
-else:
-   pre = ''
-   ftype = s[0]
+pre,ftype=mkfile(ext)
    
 sim = cgyrodata('./')
 nt = sim.n_time

@@ -12,7 +12,7 @@ PRE=$3
 BASENAME=$PRE%d.png
 BITRATE=1000k
 QUALITY=19
-OUT=movie.mp4
+OUT=${PRE}movie.mp4
 
 if hash avconv 2>/dev/null ; then
     avconv -framerate $FRAMERATE \

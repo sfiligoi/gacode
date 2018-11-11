@@ -302,3 +302,17 @@ def theta_indx(theta,theta_plot):
    print 'INFO: (theta_indx) Selected index',itheta+1,'of',theta_plot
    return itheta
 #---------------------------------------------------------------
+
+#---------------------------------------------------------------
+def mkfile(ext):
+
+    s=ext.split('.')
+    if len(s) == 2:
+        pre   = s[0]
+        ftype = s[1]
+    else:
+        pre = ''
+        ftype = s[0]
+
+    return pre,ftype
+#---------------------------------------------------------------
