@@ -6,12 +6,11 @@ TIMESTAMP=`date -Iseconds`
 
 START=$1
 FRAMERATE=$2
-PRE=$3
+QUALITY=$3
+PRE=$4
 
 # Main movie definitions
 BASENAME=$PRE%d.png
-BITRATE=1000k
-QUALITY=19
 OUT=${PRE}movie.mp4
 
 if hash avconv 2>/dev/null ; then
@@ -19,23 +18,19 @@ if hash avconv 2>/dev/null ; then
 	   -start_number $1 \
 	   -i $BASENAME \
 	   -c:v libx264 \
-	   -profile:v high \
-	   -crf $QUALITY \
 	   -pix_fmt yuv420p \
 	   -metadata title="$TITLE" \
 	   -metadata creation_time="$TIMESTAMP" \
-	   $OUT
+	   -crf $QUALITY $OUT
 elif hash ffmpeg 2>/dev/null ; then
     ffmpeg -framerate $FRAMERATE \
 	   -start_number $1 \
 	   -i $BASENAME \
 	   -c:v libx264 \
-	   -profile:v high \
-	   -crf $QUALITY \
 	   -pix_fmt yuv420p \
 	   -metadata title="$TITLE" \
 	   -metadata creation_time="$TIMESTAMP" \
-	   $OUT
+	   -crf $QUALITY $OUT
 else
     echo Need avconv or ffmpeg in gacode/python/cgyro/avconv_wrapper
 fi

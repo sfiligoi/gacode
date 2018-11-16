@@ -64,16 +64,19 @@ y = np.zeros([ny])
 # Some setup 
 #
 if usefft:
+   mode = 'FFT'
    for i in range(nx):
       x[i] = i*2*np.pi/nx
    for j in range(ny):
       y[j] = j*2*np.pi/ny
 elif hasgapy:
+   mode = 'gapy'
    for i in range(nx):
       x[i] = i*2*np.pi/(nx-1)
    for j in range(ny):
       y[j] = j*2*np.pi/(ny-1)
 else:
+   mode = 'slow'
    # Fourier arrays
    for i in range(nx):
       x[i] = i*2*np.pi/(nx-1)
@@ -121,6 +124,8 @@ def maptoreal_fft(nr,nn,nx,ny,c):
    # d[ ix, iy] = c[ ix,iy] 
    # d[ ix,-iy] = c[-ix,iy]^* 
 
+   start = time.time()
+
    for ix in range(-nr/2+1,nr/2):
       i = ix
       if ix < 0:
@@ -134,7 +139,6 @@ def maptoreal_fft(nr,nn,nx,ny,c):
       for iy in range(1,nn):
          d[i,ny-iy] = np.conj(c[ix+nr/2,iy])
           
-   start = time.time()
 
    # Sign convention negative exponent exp(-inx)
    f = np.real(np.fft.fft2(d))*0.5
@@ -160,9 +164,6 @@ else:
     print 'ERROR: (plot_fluct) No data for -moment '+moment+' exists.  Try -moment phi'
     sys.exit()
 
-if usefft:
-    print 'INFO: (plot_fluct) Using FFT (fast)'
-
 if isfield:
     n_chunk = 2*nr*nth*nn
 else:
@@ -180,14 +181,15 @@ def frame():
          c = a[0,:,itheta,species,:]+1j*a[1,:,itheta,species,:]
                 
       f = np.zeros([nx,ny],order='F')
-      if hasgapy:
+      if usefft:
+         f,t = maptoreal_fft(nr,nn,nx,ny,c)
+      elif hasgapy:
+         start = time.time()
          gapy.realfluct(c,f)
-         t = 0.0
+         end = time.time()
+         t = end-start
       else:
-         if usefft:
-            f,t = maptoreal_fft(nr,nn,nx,ny,c)
-         else:
-            f,t = maptoreal(nr,nn,nx,ny,c)
+         f,t = maptoreal(nr,nn,nx,ny,c)
          
       if fmin == 'auto':
          f0=np.min(f)
@@ -217,7 +219,7 @@ def frame():
          ax.contourf(yp,xp,f,levels,cmap=plt.get_cmap(colormap))
          #plt.subplots_adjust(top=0.9,left=0.05,right=0.95)
  
-      print 'INFO: (plot_fluct) min=%e , max=%e  (t=%e)' % (f0,f1,t)
+      print 'INFO: (plot_fluct '+mode+') min=%e , max=%e  (t=%e)' % (f0,f1,t)
 
       ax.set_title(title)
       ax.set_aspect('equal')
