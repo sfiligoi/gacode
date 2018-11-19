@@ -13,7 +13,7 @@ except:
    print 'ERROR: (vis_torcut) Please build gapy.so library!'
    sys.exit()
    
-ftype    = sys.argv[1]
+ext      = sys.argv[1]
 moment   = sys.argv[2]
 species  = int(sys.argv[3])
 nx       = int(sys.argv[4])
@@ -37,6 +37,12 @@ ns = sim.n_species
 nth = sim.theta_plot
 
 ivec = time_vector(istr,nt)
+
+xp = sim.length
+yp = 2*np.pi/np.abs(sim.ky[1])
+aspect = yp/xp
+
+pre,ftype = mkfile(ext)
 
 #------------------------------------------------------------------------
 # (r,theta)=(x,y) mesh setup 
@@ -73,7 +79,7 @@ for i in range(nx):
       dx = x[i]/(4*np.pi)
       xp1[i,j] = 0.2+dx
       yp1[i,j] = 0.0
-      zp1[i,j] = y[j]/(4*np.pi)
+      zp1[i,j] = y[j]/(4*np.pi)*aspect
 
 # 2. 
 xp2 = np.zeros([nx,nz])
@@ -85,7 +91,7 @@ for i in range(nx):
       dx = x[i]/(4*np.pi)
       xp2[i,k] = (0.2+dx)*np.cos(z[k])
       yp2[i,k] = (0.2+dx)*np.sin(z[k])
-      zp2[i,k] = 0.5
+      zp2[i,k] = 0.5*aspect
 
 # 3. 
 xp3 = np.zeros([ny,nz])
@@ -97,8 +103,8 @@ for j in range(ny):
       dx = x[0]/(4*np.pi)
       xp3[j,k] = (0.2+dx)*np.cos(z[k])
       yp3[j,k] = (0.2+dx)*np.sin(z[k])
-      zp3[j,k] = y[j]/(4*np.pi)
-# 3. 
+      zp3[j,k] = y[j]/(4*np.pi)*aspect
+# 4. 
 xp4 = np.zeros([ny,nz])
 yp4 = np.zeros([ny,nz])
 zp4 = np.zeros([ny,nz])
@@ -108,7 +114,7 @@ for j in range(ny):
       dx = x[-1]/(4*np.pi)
       xp4[j,k] = (0.2+dx)*np.cos(z[k])
       yp4[j,k] = (0.2+dx)*np.sin(z[k])
-      zp4[j,k] = y[j]/(4*np.pi)
+      zp4[j,k] = y[j]/(4*np.pi)*aspect
 
 #------------------------------------------------------------------------
 
@@ -174,15 +180,14 @@ def frame():
    mlab.mesh(xp4,yp4,zp4,scalars=f,colormap=colormap,vmin=f0,vmax=f1,opacity=1.0)
 
    # View from positive z-axis
-   mlab.view(azimuth=70, elevation=60)
+   mlab.view(azimuth=75, elevation=65,distance=3.2)
    print 'INFO: (vis_wheel) min=%e , max=%e' % (f0,f1)
 
    if ftype == 'screen':
       mlab.show()
    else:
-      fname = fdata+str(i)
       # Filename uses frame number 
-      mlab.savefig(str(i)+'.'+ftype)
+      mlab.savefig(pre+str(i)+'.'+ftype)
       # Close each time to prevent memory accumulation
       mlab.close()
                 
