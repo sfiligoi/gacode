@@ -509,8 +509,10 @@ subroutine gyro_profile_init
 
         tem_s(:,i)    = tem_s(:,ir_norm)
         den_s(:,i)    = den_s(:,ir_norm)
-        if (unflat_dlntdr_flag == 0) dlntdr_s(:,i) = dlntdr_s(:,ir_norm)
-        if (unflat_dlnndr_flag == 0) dlnndr_s(:,i) = dlnndr_s(:,ir_norm)
+        !if (unflat_dlntdr_flag == 0) dlntdr_s(:,i) = dlntdr_s(:,ir_norm)
+        !if (unflat_dlnndr_flag == 0) dlnndr_s(:,i) = dlnndr_s(:,ir_norm)
+        dlntdr_s(:,i) = dlntdr_s(:,ir_norm)
+        dlnndr_s(:,i) = dlnndr_s(:,ir_norm)
         dlnpdr_s(i)   = dlnpdr_s(ir_norm)
         pr_s(:,i)     = pr_s(:,ir_norm)
         alpha_s(:,i)  = alpha_s(:,ir_norm)

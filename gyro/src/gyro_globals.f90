@@ -161,6 +161,7 @@ module gyro_globals
   integer :: nl_method
   integer :: lindiff_method
   integer :: gyro_method
+  integer :: source_method
   integer :: linsolve_method 
   integer :: fieldeigen_root_method
   integer :: gkeigen_method
@@ -169,7 +170,6 @@ module gyro_globals
   !
   integer :: nonlinear_flag 
   integer :: collision_flag
-  integer :: krook_flag
   integer :: verbose_flag
   integer :: debug_flag
   integer :: flat_profile_flag
@@ -181,7 +181,6 @@ module gyro_globals
   integer :: kill_gyro_b_flag
   integer :: velocity_output_flag
   integer :: geo_array_print_flag
-  integer :: source_flag
   integer :: dist_print
   integer :: udsymmetry_flag
   integer :: silent_flag
@@ -802,11 +801,8 @@ module gyro_globals
   complex, dimension(:,:,:,:), allocatable :: h_cap_old
   complex, dimension(:,:,:,:), allocatable :: h_cap_old2
   complex, dimension(:,:,:,:), allocatable :: h_cap_dot
+  complex, dimension(:,:,:,:), allocatable :: h_source
   complex, dimension(:,:,:,:), allocatable :: rhs
-
-  complex, dimension(:,:,:,:), allocatable :: f_store
-  complex, dimension(:,:,:,:), allocatable :: p_store
-  !
   complex, dimension(:,:,:,:), allocatable :: h_tran
   complex, dimension(:,:,:), allocatable :: h_c
   complex, dimension(:,:,:), allocatable :: f_coll
@@ -821,8 +817,6 @@ module gyro_globals
   complex, dimension(:,:,:,:,:), allocatable :: gyro_uv_dot
   complex, dimension(:,:,:,:), allocatable :: gyro_u
   complex, dimension(:,:,:,:), allocatable :: gyro_u_tran
-  !
-  complex, dimension(:,:,:), allocatable :: rhs_krook
   !
   ! Collision operator
   !

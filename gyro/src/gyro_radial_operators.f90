@@ -55,7 +55,7 @@ subroutine gyro_radial_operators
   !---------------------------------------------------
   ! SOURCE EXPANSION COEFFICIENTS:
   !
-  if (source_flag == 1) then
+  if (source_method > 1) then
 
      n_node = n_lump-1
      allocate(r_node(n_node))

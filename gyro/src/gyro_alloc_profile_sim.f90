@@ -115,7 +115,7 @@ subroutine gyro_alloc_profile_sim(flag)
      allocate(i_loop(1-n_x:2*n_x))
      allocate(explicit_damp_vec(n_kinetic,n_x))
 
-     if (source_flag == 1) then
+     if (source_method > 1) then
         ! Source arrays
         allocate(b_src(n_x,n_lump))
         allocate(m_src(n_lump,n_lump))

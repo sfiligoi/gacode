@@ -66,7 +66,7 @@ module gyro_interface
   real    :: gyro_betae_unit_in = 0.0
   real    :: gyro_ampere_scale_in = 1.0
   integer :: gyro_n_field_in = 1
-  integer :: gyro_source_flag_in = 0
+  integer :: gyro_source_method_in = 1
   real    :: gyro_nu_source_in = 0.1
   integer :: gyro_verbose_flag_in = 0
   real    :: gyro_s_grid_in = 0.0
@@ -269,7 +269,7 @@ contains
     gyro_betae_unit_in = betae_unit
     gyro_ampere_scale_in = ampere_scale
     gyro_n_field_in = n_field
-    gyro_source_flag_in = source_flag
+    gyro_source_method_in = source_method
     gyro_nu_source_in = nu_source
     gyro_verbose_flag_in = verbose_flag
     gyro_s_grid_in = s_grid
@@ -467,7 +467,7 @@ contains
     betae_unit = gyro_betae_unit_in
     ampere_scale = gyro_ampere_scale_in
     n_field = gyro_n_field_in
-    source_flag = gyro_source_flag_in
+    source_method = gyro_source_method_in
     nu_source = gyro_nu_source_in
     verbose_flag = gyro_verbose_flag_in
     s_grid = gyro_s_grid_in
@@ -656,7 +656,7 @@ contains
     write(1,30) 'BETAE_UNIT',gyro_betae_unit_in
     write(1,30) 'AMPERE_SCALE',gyro_ampere_scale_in
     write(1,20) 'N_FIELD',gyro_n_field_in
-    write(1,20) 'SOURCE_FLAG',gyro_source_flag_in
+    write(1,20) 'SOURCE_METHOD',gyro_source_method_in
     write(1,30) 'NU_SOURCE',gyro_nu_source_in
     write(1,20) 'VERBOSE_FLAG',gyro_verbose_flag_in
     write(1,30) 'S_GRID',gyro_s_grid_in

@@ -91,18 +91,14 @@ subroutine gyro_memory_usage(data_file,io)
         call alloc_add(io,size(phi_squared),8,'phi_squared')
         call alloc_add(io,size(field_fluxave),8,'field_fluxave')
         call alloc_add(io,size(h_err),16,'h_err')
-        call alloc_add(io,size(h),16,'h')
-        call alloc_add(io,size(h_old),16,'h_old')
         call alloc_add(io,size(h_0),16,'h_0')
+        call alloc_add(io,size(h_old),16,'h_old')
+        call alloc_add(io,size(h),16,'h')
+        call alloc_add(io,size(h_cap),16,'h_cap')
+        call alloc_add(io,size(h_source),16,'h_source')
         call alloc_add(io,size(rhs),16,'rhs')
         call alloc_add(io,size(rhs_dr),16,'rhs_dr')
         call alloc_add(io,size(rhs_dt),16,'rhs_dt')
-        call alloc_add(io,size(f_store),16,'f_store')
-        call alloc_add(io,size(p_store),16,'p_store')
-
-        if (krook_flag == 1) then
-           call alloc_add(io,size(rhs_krook),16,'rhs_krook')
-        endif
 
         if (collision_flag == 1) then
            call alloc_add(io,size(f_coll),16,'f_coll')

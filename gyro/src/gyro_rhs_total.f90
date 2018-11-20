@@ -122,7 +122,7 @@ subroutine gyro_rhs_total
   !----------------------------------------------------------------------
   ! Adaptive source
   !
-  if (source_flag == 1) then
+  if (source_method > 1) then
 
      call gyro_adaptive_source
 
@@ -135,17 +135,32 @@ subroutine gyro_rhs_total
 
            p_nek_loc = p_nek_loc+1
 
-           ie = nek_e(p_nek)  
+           if (source_method ==2) then
 
-           do i = ibeg, iend
+              ie = nek_e(p_nek)  
+              
+              do i=ibeg,iend
 
-              ! In this expression, nu_source = 0 if n > 0.
-              ! (see gyro_radial_operators).
-              rhs(:,i,p_nek_loc,is) = rhs(:,i,p_nek_loc,is) &
-                   -nu_source*h0_eq(is,ie,i)
+                 ! In this expression, nu_source = 0 if n > 0.
+                 ! (see gyro_radial_operators).
+                 rhs(:,i,p_nek_loc,is) = rhs(:,i,p_nek_loc,is) &
+                      -nu_source*h0_eq(is,ie,i)
 
-           enddo ! i
+              enddo ! i
 
+           else
+
+              do i=ibeg,iend
+
+                 ! In this expression, nu_source = 0 if n > 0.
+                 ! (see gyro_radial_operators).
+                 rhs(:,i,p_nek_loc,is) = rhs(:,i,p_nek_loc,is) &
+                      -nu_source*h_source(:,i,p_nek_loc,is)
+                 
+              enddo ! i
+
+           endif
+        
         enddo ! p_nek
 
      enddo ! is

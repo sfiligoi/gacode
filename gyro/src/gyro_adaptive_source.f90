@@ -18,9 +18,9 @@ subroutine gyro_adaptive_source
   integer :: p
   !
   real, dimension(n_kinetic,n_energy,n_x) :: h0_loc
-  real :: src_p(n_kinetic,n_energy,n_lump)
+  real, dimension(:,:,:), allocatable :: src_3
+  real, dimension(:,:,:,:), allocatable :: src_4
   !----------------------------------------------------
-
 
   !------------------
   ! Total RHS source
@@ -66,12 +66,13 @@ subroutine gyro_adaptive_source
        i_err)
 
   !----------------------------------------------------------------
-  ! Compute 'simple' density and energy moments from fluctuating h:
+  ! Compute 'simple' density and energy moments (diagnostic) from
+  ! fluctuating h:
   !
   h0_n(:,:) = 0.0
   h0_e(:,:) = 0.0
   !
-  do is = 1, n_kinetic
+  do is=1,n_kinetic
     do ie=1,n_energy
        h0_n(is,:) = h0_n(is,:)+h0_mod(is,ie,:)*w_energy(ie)
        h0_e(is,:) = h0_e(is,:)+h0_mod(is,ie,:)*w_energy(ie)*energy(ie)
@@ -83,16 +84,17 @@ subroutine gyro_adaptive_source
   source_n(:,:) = 0.0
   source_e(:,:) = 0.0
 
-  if (source_flag == 1) then
+  if (source_method == 2) then
 
      !----------------------------------------------------------------
      ! Determine the (long-wavelength) finite-element amplitudes:
      !
-     src_p(:,:,:) = 0.0
+     allocate(src_3(n_kinetic,n_energy,n_lump))
+     src_3(:,:,:) = 0.0
 
      do p=1,n_lump
         do i=1,n_x
-           src_p(:,:,p) = src_p(:,:,p)+b_src(i,p)*h0_mod(:,:,i)
+           src_3(:,:,p) = src_3(:,:,p)+b_src(i,p)*h0_mod(:,:,i)
         enddo
      enddo
      !----------------------------------------------------------------
@@ -109,7 +111,7 @@ subroutine gyro_adaptive_source
                 m_src,&
                 n_lump,&
                 src_piv,&
-                src_p(is,ie,:),&
+                src_3(is,ie,:),&
                 n_lump,&
                 info)
 
@@ -118,11 +120,15 @@ subroutine gyro_adaptive_source
 
      do p=1,n_lump
         do i=1,n_x
-           h0_eq(:,:,i) = h0_eq(:,:,i)+src_p(:,:,p)*b_src(i,p)
+           h0_eq(:,:,i) = h0_eq(:,:,i)+src_3(:,:,p)*b_src(i,p)
         enddo
      enddo
+     deallocate(src_3)
      !----------------------------------------------------------------
 
+     !----------------------------------------------------------------
+     ! Diagnostics (not used in time evolution)
+     !
      do is=1,n_kinetic
        do ie=1,n_energy
           source_n(is,:) = source_n(is,:)-nu_source*h0_eq(is,ie,:)* &
@@ -133,6 +139,52 @@ subroutine gyro_adaptive_source
      enddo
 
   endif
+
+  if (source_method == 3) then
+
+     !----------------------------------------------------------------
+     ! Determine the (long-wavelength) finite-element amplitudes:
+     !
+     allocate(src_4(n_stack,n_lump,n_nek_loc_1,n_kinetic))
+     src_4 = 0.0
+
+     do p=1,n_lump
+        do i=1,n_x
+           src_4(:,p,:,:) = src_4(:,p,:,:)+b_src(i,p)*h(:,i,:,:)
+        enddo
+     enddo
+     !----------------------------------------------------------------
+
+     !----------------------------------------------------------------
+     ! Reconstruct h_source, the long-wavelength part of h.
+     !
+     do is=1,n_kinetic 
+        do m=1,n_stack
+           do p_nek_loc=1,n_nek_loc_1
+              call DGETRS('N',&
+                   n_lump,&
+                   1,&
+                   m_src,&
+                   n_lump,&
+                   src_piv,&
+                   src_4(m,:,p_nek_loc,is),&
+                   n_lump,&
+                   info)
+           enddo
+        enddo
+     enddo
+
+     h_source = 0.0
+     do p=1,n_lump
+        do i=1,n_x
+           h_source(:,i,:,:) = h_source(:,i,:,:)+src_4(:,p,:,:)*b_src(i,p)
+        enddo
+     enddo
+     deallocate(src_4)
+     !----------------------------------------------------------------
+
+  endif
+
 
   if (debug_flag == 1 .and. i_proc == 0) then
      print *,'[gyro_adaptive_source done]'
