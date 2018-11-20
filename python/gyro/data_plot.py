@@ -21,9 +21,6 @@ class gyrodata_plot(data.GYROData):
 
         t = self.t['(c_s/a)t']
 
-        # Read freq data
-        self.read_freq()
-
         # Determine tmin
         imin = iwindow(t,w)
 

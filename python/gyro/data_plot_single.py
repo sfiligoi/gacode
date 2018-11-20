@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 from matplotlib import rc
 from gyro.data_plot import gyrodata_plot
 
+data_in = gyrodata_plot('./')
+
 rc('text',usetex=True)
 rc('font',size=18)
 
@@ -14,18 +16,17 @@ if plot_type == 'freq':
    w      = float(sys.argv[2])
    ftype  = sys.argv[3]
 
-   gyrodata_plot('./').plot_freq(w=w)
+   data_in.plot_freq(w=w)
 
    outfile = 'freq.'+ftype
 
 elif plot_type == 'balloon':
 
-   simdir = sys.argv[2]
-   index  = sys.argv[3]
-   ftype  = sys.argv[4]
-   tmax   = float(sys.argv[5])
+   index  = sys.argv[2]
+   ftype  = sys.argv[3]
+   tmax   = float(sys.argv[4])
 
-   key = gyrodata_plot(simdir).plot_balloon(index=index,tmax=tmax)
+   key = data_in.plot_balloon(index=index,tmax=tmax)
 
    outfile = key+'.'+ftype
 
@@ -35,28 +36,26 @@ elif plot_type == 'zf':
    w      = float(sys.argv[3])
    ftype  = sys.argv[4]
    
-   gyrodata_plot(simdir).plot_zf(w=w)
+   data_in.plot_zf(w=w)
 
    outfile = 'zf.'+ftype
 
 elif plot_type == 'gbflux':
 
-   simdir   = sys.argv[2]
-   field    = sys.argv[3]
-   i_moment = int(sys.argv[4])
-   w        = float(sys.argv[5])
-   lx       = float(sys.argv[6])
-   ly       = float(sys.argv[7])
-   title    = sys.argv[8]
-   ymin     = sys.argv[9]
-   ymax     = sys.argv[10]
-   span1   = float(sys.argv[11])
-   span2   = float(sys.argv[12])
-   ftype    = sys.argv[13]
+   field    = sys.argv[2]
+   i_moment = int(sys.argv[3])
+   w        = float(sys.argv[4])
+   lx       = float(sys.argv[5])
+   ly       = float(sys.argv[6])
+   title    = sys.argv[7]
+   ymin     = sys.argv[8]
+   ymax     = sys.argv[9]
+   span1   = float(sys.argv[10])
+   span2   = float(sys.argv[11])
+   ftype    = sys.argv[12]
    
-   gyrodata_plot(simdir).plot_gbflux(field=field,i_moment=i_moment,w=w,
-                                     lx=lx,ly=ly,title=title,ymin=ymin,ymax=ymax,
-                                     span1=span1)
+   data_in.plot_gbflux(field=field,i_moment=i_moment,w=w,lx=lx,ly=ly,
+                       title=title,ymin=ymin,ymax=ymax,span1=span1)
 
    outfile = 'gbflux.'+ftype
 
@@ -70,8 +69,7 @@ elif plot_type == 'gbflux_i':
    ymax     = sys.argv[7]
    ftype    = sys.argv[8]
    
-   gyrodata_plot(simdir).plot_gbflux_i(field=field,i_moment=i_moment,w=w,
-                                     ymin=ymin,ymax=ymax)
+   data_in.plot_gbflux_i(field=field,i_moment=i_moment,w=w,ymin=ymin,ymax=ymax)
 
    outfile = 'gbflux_i.'+ftype
 
@@ -84,7 +82,7 @@ elif plot_type == 'gbflux_n':
    datafile = sys.argv[6]
    ftype    = sys.argv[7]
    
-   gyrodata_plot(simdir).plot_gbflux_n(field=field,i_moment=i_moment,w=w,datafile=datafile)
+   data_in.plot_gbflux_n(field=field,i_moment=i_moment,w=w,datafile=datafile)
 
    outfile = 'gbflux_n.'+ftype
 
@@ -96,7 +94,7 @@ elif plot_type == 'gbflux_rt':
    w        = float(sys.argv[5])
    ftype    = sys.argv[6]
    
-   gyrodata_plot(simdir).plot_gbflux_rt(field=field,i_moment=i_moment,w=w)
+   data_in.plot_gbflux_rt(field=field,i_moment=i_moment,w=w)
 
    outfile = 'gbflux_rt.'+ftype
 
@@ -106,7 +104,7 @@ elif plot_type == 'gbflux_exc':
    w        = float(sys.argv[3])
    ftype    = sys.argv[4]
    
-   gyrodata_plot(simdir).plot_gbflux_exc(w=w)
+   data_in.plot_gbflux_exc(w=w)
 
    outfile = 'gbflux_exc.'+ftype
 
@@ -120,7 +118,7 @@ elif plot_type == 'phi_n0':
    span2  = float(sys.argv[7])
    ftype  = sys.argv[8]
 
-   ax = gyrodata_plot(simdir).plot_phi_n0(lx=lx,ly=ly,ymax=ymax,span1=span1,span2=span2)
+   ax = data_in.plot_phi_n0(lx=lx,ly=ly,ymax=ymax,span1=span1,span2=span2)
    
    outfile = 'phi_n0.'+ftype
   
@@ -131,11 +129,10 @@ elif plot_type == 'moment_zero':
    w        = float(sys.argv[4])
    ftype    = sys.argv[5]
 
-   ax = gyrodata_plot(simdir).plot_moment_zero(i_moment=i_moment,w=w)
+   ax = data_in.plot_moment_zero(i_moment=i_moment,w=w)
    
    outfile = 'moment_zero.'+ftype
   
-
 #---------------------------------------------------------------
 # Plot to screen or to image file
 if ftype == 'screen':
