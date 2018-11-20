@@ -17,7 +17,7 @@ subroutine gyro_adaptive_source
   !
   integer :: p
   !
-  real, dimension(n_kinetic,n_energy,n_x) :: h0_loc
+  real, dimension(n_kinetic,n_energy,n_x) :: h0_loc,h0_mod
   real, dimension(:,:,:), allocatable :: src_3
   real, dimension(:,:,:,:), allocatable :: src_4
   !----------------------------------------------------
@@ -28,27 +28,27 @@ subroutine gyro_adaptive_source
 
   h0_loc(:,:,:) = 0.0
 
-  p_nek_loc = 0
+  if (n_1(in_1) == 0) then
+     p_nek_loc = 0
 
-  do p_nek=1+i_proc_1,n_nek_1,n_proc_1
+     do p_nek=1+i_proc_1,n_nek_1,n_proc_1
 
-     p_nek_loc = p_nek_loc+1
+        p_nek_loc = p_nek_loc+1
 
-     ie = nek_e(p_nek)  
-     k  = nek_k(p_nek)   
+        ie = nek_e(p_nek)  
+        k  = nek_k(p_nek)   
 
-     ck = class(k)
+        ck = class(k)
 
-     if (n_1(in_1) == 0) then
         do i=1,n_x
            do m=1,n_stack
               h0_loc(:,ie,i) = h0_loc(:,ie,i)+real(h(m,i,p_nek_loc,:))* &
                    w_lambda(i,k)*d_tau(ck)
            enddo ! m
         enddo ! i
-     endif
 
-  enddo ! p_nek
+     enddo ! p_nek
+  endif
 
   call MPI_ALLREDUCE(h0_loc,&
        h0_mod,&
@@ -73,10 +73,10 @@ subroutine gyro_adaptive_source
   h0_e(:,:) = 0.0
   !
   do is=1,n_kinetic
-    do ie=1,n_energy
-       h0_n(is,:) = h0_n(is,:)+h0_mod(is,ie,:)*w_energy(ie)
-       h0_e(is,:) = h0_e(is,:)+h0_mod(is,ie,:)*w_energy(ie)*energy(ie)
-    enddo
+     do ie=1,n_energy
+        h0_n(is,:) = h0_n(is,:)+h0_mod(is,ie,:)*w_energy(ie)
+        h0_e(is,:) = h0_e(is,:)+h0_mod(is,ie,:)*w_energy(ie)*energy(ie)
+     enddo
   enddo
   !----------------------------------------------------------------
 
@@ -126,18 +126,6 @@ subroutine gyro_adaptive_source
      deallocate(src_3)
      !----------------------------------------------------------------
 
-     !----------------------------------------------------------------
-     ! Diagnostics (not used in time evolution)
-     !
-     do is=1,n_kinetic
-       do ie=1,n_energy
-          source_n(is,:) = source_n(is,:)-nu_source*h0_eq(is,ie,:)* &
-               w_energy(ie)
-          source_e(is,:) = source_e(is,:)-nu_source*h0_eq(is,ie,:)* &
-               w_energy(ie)*energy(ie)
-       enddo
-     enddo
-
   endif
 
   if (source_method == 3) then
@@ -148,11 +136,13 @@ subroutine gyro_adaptive_source
      allocate(src_4(n_stack,n_lump,n_nek_loc_1,n_kinetic))
      src_4 = 0.0
 
-     do p=1,n_lump
-        do i=1,n_x
-           src_4(:,p,:,:) = src_4(:,p,:,:)+b_src(i,p)*h(:,i,:,:)
+     if (n_1(in_1) == 0) then
+        do p=1,n_lump
+           do i=1,n_x
+              src_4(:,p,:,:) = src_4(:,p,:,:)+b_src(i,p)*h(:,i,:,:)
+           enddo
         enddo
-     enddo
+     endif
      !----------------------------------------------------------------
 
      !----------------------------------------------------------------
@@ -181,10 +171,59 @@ subroutine gyro_adaptive_source
         enddo
      enddo
      deallocate(src_4)
+
+     p_nek_loc = 0
+
+     do p_nek=1+i_proc_1,n_nek_1,n_proc_1
+
+        p_nek_loc = p_nek_loc+1
+
+        ie = nek_e(p_nek)  
+        k  = nek_k(p_nek)   
+        ck = class(k)
+
+        if (n_1(in_1) == 0) then
+           do i=1,n_x
+              do m=1,n_stack
+                 h0_loc(:,ie,i) = h0_loc(:,ie,i)+real(h_source(m,i,p_nek_loc,:))* &
+                      w_lambda(i,k)*d_tau(ck)
+              enddo ! m
+           enddo ! i
+        endif
+
+     enddo ! p_nek
+
+     call MPI_ALLREDUCE(h0_loc,&
+          h0_eq,&
+          size(h0_eq),&
+          MPI_DOUBLE_PRECISION,&
+          MPI_SUM,&
+          NEW_COMM_1,&
+          i_err)
+
+     call MPI_BCAST(h0_eq,&
+          size(h0_eq),&
+          MPI_DOUBLE_PRECISION,&
+          0,&
+          NEW_COMM_2,&
+          i_err)
+
      !----------------------------------------------------------------
 
   endif
 
+  !----------------------------------------------------------------
+  ! Diagnostics (not used in time evolution)
+  !
+  do is=1,n_kinetic
+     do ie=1,n_energy
+        source_n(is,:) = source_n(is,:)-nu_source*h0_eq(is,ie,:)* &
+             w_energy(ie)
+        source_e(is,:) = source_e(is,:)-nu_source*h0_eq(is,ie,:)* &
+             w_energy(ie)*energy(ie)
+     enddo
+  enddo
+  !----------------------------------------------------------------
 
   if (debug_flag == 1 .and. i_proc == 0) then
      print *,'[gyro_adaptive_source done]'

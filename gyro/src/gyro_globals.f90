@@ -892,7 +892,6 @@ module gyro_globals
   real :: nu_source
   !
   real, dimension(:,:,:), allocatable :: h0_eq
-  real, dimension(:,:,:), allocatable :: h0_mod
   !
   real, dimension(:,:), allocatable :: h0_n
   real, dimension(:,:), allocatable :: h0_e

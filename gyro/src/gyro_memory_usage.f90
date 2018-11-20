@@ -150,8 +150,6 @@ subroutine gyro_memory_usage(data_file,io)
         call alloc_add(io,size(entropy),8,'entropy')
 
         call alloc_add(io,size(h0_eq),8,'h0_eq')
-        call alloc_add(io,size(h0_mod),8,'h0_mod')
-
         call alloc_add(io,size(h0_n),8,'h0_n')
         call alloc_add(io,size(h0_e),8,'h0_e')
         call alloc_add(io,size(source_n),8,'source_n')

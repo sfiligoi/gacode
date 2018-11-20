@@ -135,7 +135,7 @@ subroutine gyro_rhs_total
 
            p_nek_loc = p_nek_loc+1
 
-           if (source_method ==2) then
+           if (source_method == 2) then
 
               ie = nek_e(p_nek)  
               
@@ -173,7 +173,7 @@ subroutine gyro_rhs_total
   ! Er shear
   !
 !$omp parallel private(i)
-   do i = ibeg, iend
+   do i=ibeg,iend
       rhs(:,i,:,:) = rhs(:,i,:,:)-i_c*omega_eb_s(i)*h(:,i,:,:)
    enddo 
 !$omp end parallel
