@@ -145,7 +145,6 @@ module gyro_interface
   real    :: gyro_doppler_scale_in = 1.0
   integer :: gyro_nl_method_in = 1
   integer :: gyro_kill_gyro_b_flag_in = 0
-  integer :: gyro_velocity_output_flag_in = 0
   real    :: gyro_q_scale_in = 1.0
   integer :: gyro_dist_print_flag_in = 0
   integer :: gyro_udsymmetry_flag_in = 1
@@ -348,7 +347,6 @@ contains
     gyro_doppler_scale_in = doppler_scale
     gyro_nl_method_in = nl_method
     gyro_kill_gyro_b_flag_in = kill_gyro_b_flag
-    gyro_velocity_output_flag_in = velocity_output_flag
     gyro_q_scale_in = q_scale
     gyro_dist_print_flag_in = dist_print
     gyro_udsymmetry_flag_in = udsymmetry_flag
@@ -546,7 +544,6 @@ contains
     doppler_scale = gyro_doppler_scale_in
     nl_method = gyro_nl_method_in
     kill_gyro_b_flag = gyro_kill_gyro_b_flag_in
-    velocity_output_flag = gyro_velocity_output_flag_in
     q_scale = gyro_q_scale_in
     dist_print = gyro_dist_print_flag_in
     udsymmetry_flag = gyro_udsymmetry_flag_in
@@ -735,7 +732,6 @@ contains
     write(1,30) 'DOPPLER_SCALE',gyro_doppler_scale_in
     write(1,20) 'NL_METHOD',gyro_nl_method_in
     write(1,20) 'KILL_GYRO_B_FLAG',gyro_kill_gyro_b_flag_in
-    write(1,20) 'VELOCITY_OUTPUT_FLAG',gyro_velocity_output_flag_in
     write(1,30) 'Q_SCALE',gyro_q_scale_in
     write(1,20) 'DIST_PRINT_FLAG',gyro_dist_print_flag_in
     write(1,20) 'UDSYMMETRY_FLAG',gyro_udsymmetry_flag_in

@@ -129,10 +129,7 @@ subroutine gyro_memory_usage(data_file,io)
         call alloc_add(io,size(moments_zero_plot),8,'moments_zero_plot')
 
         call alloc_add(io,size(kxkyspec),8,'kxkyspec')
-        if (velocity_output_flag == 1) then
-           call alloc_add(io,size(nonlinear_flux_velocity),8,'nonlinear_flux_velocity')
-        endif
-
+ 
         call alloc_add(io,size(nonlinear_flux_passing),8,'nonlinear_flux_passing')
         call alloc_add(io,size(nonlinear_flux_trapped),8,'nonlinear_flux_trapped')
 

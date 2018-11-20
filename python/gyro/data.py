@@ -44,7 +44,6 @@ class GYROData:
 
        There are also routines to make "optional fluxes"
 
-       self.make_gbflux()
        self.make_diff()
        self.make_diff_i()
        """
@@ -253,6 +252,13 @@ class GYROData:
       if fmt != 'null':
          self.gbflux_i = np.reshape(data[0:nd],(n_kinetic,n_field,4,n_x,nt),'F')
          print "INFO: (data.py) Read data in "+fmt+".gyro.gbflux_i. "+t
+         if self.profile['boundary_method'] == 1:
+            # Periodic simulation
+            self.gbflux = np.mean(self.gbflux_i,axis=3)
+         else:
+            # Nonperiodic simulation: don't include buffers in average
+            n = self.profile['n_explicit_damp']
+            self.gbflux = np.mean(self.gbflux_i[:,:,:,n:-n,:],axis=3)
       #---------------------------------------------------------------------------#
 
    def read_gbflux_n(self):
@@ -374,28 +380,6 @@ class GYROData:
 
     #---------------------------------------------------------------------------#
 
-   def read_flux_velocity(self):
-        """Reads out.gyro.flux_velocity.
-        Output is numpy array with dimensions:
-          (n_energy,n_lambda,n_kinetic,n_field,2,n_n,n_time)"""
-
-        n_energy  = self.profile['n_energy']
-        n_lambda  = self.profile['n_lambda']
-        n_kinetic = self.profile['n_kinetic']
-        n_field   = self.profile['n_field']
-        n_n       = self.profile['n_n']
-
-        try:
-            data = np.fromfile(self.dir+'/out.gyro.flux_velocity',dtype=float,sep=" ")
-        except:
-            raise IOError("ERROR (GYROData): out.gyro.flux_velocity not found.")
-
-        t = len(data)/(n_energy*n_lambda*n_kinetic*n_field*2*n_n)
-        self.flux_velocity = data.reshape(
-            (n_energy,n_lambda,n_kinetic,n_field,2,n_n,t),order='F')
-
-    #---------------------------------------------------------------------------#
-
    def read_k_perp_squared(self):
         """Reads out.gyro.k_perp_squared.
            Output is numpy array with dimensions: (n_n,n_time)"""
@@ -407,8 +391,6 @@ class GYROData:
 
         t = len(data)/self.profile['n_n']
         self.k_perp_squared = data.reshape((self.profile['n_n'],t),order='F')
-
-    #---------------------------------------------------------------------------#
 
    def read_balloon(self):
         """Reads out.gyro.balloon*.  Data is stored in self.balloon"""
@@ -431,84 +413,7 @@ class GYROData:
             u = data.reshape((2,n_ang,m,self.t['n_time']),order='F')
             ext = string.splitfields(filename,'.')[-1]
             self.balloon[ext] = u[0,...]+1j*u[1,...]
-
-    #------------------------------------------------------------
-    # Create data from other previously imported data
-
-   def make_gbflux(self):
-        """Makes gbflux (omitting buffers properly). Output is numpy array
-           with dimensions: n_kinetic x n_field x 4 x n_time"""
-
-        if len(self.gbflux_i)==0:
-            self.read_gbflux_i()
-        if self.profile['boundary_method'] == 1:
-            # Periodic simulation
-            self.gbflux = np.mean(self.gbflux_i, axis=3)
-        else:
-            # Nonperiodic simulation: don't include buffers in average
-            n = self.profile['n_explicit_damp']
-            self.gbflux = np.mean(self.gbflux_i[:,:,:,n:-n,:],axis=3)
-
-    #---------------------------------------------------------------------------#
-
-   def make_diff(self):
-        """Makes diff.  Output is dictionary of numpy arrays with
-        dimensions: n_kinetic x n_field x n_time"""
-
-        # NOTE: deprecate n_x_offset in GYRO.
-
-        if self.gbflux == []:
-            self.make_gbflux()
-
-        ir_norm = int(self.profile['n_x']/2+1)
-
-        n_kinetic = self.profile['n_kinetic']
-        n_field   = self.profile['n_field']
-        n_time    = self.t['n_time']
-
-        self.diff = np.zeros((n_kinetic,n_field,2,n_time))
-        for i in range(n_kinetic):
-            # Density diffusivity
-            self.diff[i,:,0,:] = self.gbflux[i,:,0,:]/(
-                self.profile['dlnndr_s'][i,ir_norm]*
-                self.profile['den_s'][i,ir_norm])
-            # Energy diffusivity
-            self.diff[i,:,1,:] = self.gbflux[i,:,1,:]/(
-                self.profile['dlntdr_s'][i,ir_norm]*
-                self.profile['tem_s'][i,ir_norm]*
-                self.profile['den_s'][i,ir_norm])
-
-
-    #---------------------------------------------------------------------------#
-
-   def make_diff_i(self):
-        """Makes diff_i.  Output is dictionary of numpy arrays with
-        dimensions: n_kinetic x n_field x n_x x n_time"""
-
-        if self.gbflux_i == []:
-            self.read_gbflux_i()
-
-        ir_norm = int(self.profile['n_x']/2+1)
-
-        n_kinetic = self.profile['n_kinetic']
-        n_field   = self.profile['n_field']
-        n_x       = self.profile['n_x']
-        n_time    = self.t['n_time']
-
-        self.diff_i = np.zeros((n_kinetic,n_field,2,n_x,n_time))
-        for i in range(n_kinetic):
-            # Density diffusivity
-            self.diff_i[i,:,0,:,:] = self.gbflux_i[i,:,0,:,:]/(
-                self.profile['dlnndr_s'][i,ir_norm]*
-                self.profile['den_s'][i,ir_norm])
-            # Energy diffusivity
-            self.diff_i[i,:,1,:,:] = self.gbflux_i[i,:,1,:,:]/(
-                self.profile['dlntdr_s'][i,ir_norm]*
-                self.profile['tem_s'][i,ir_norm]*
-                self.profile['den_s'][i,ir_norm])
-
-
-    #---------------------------------------------------------------------------#
+            
 
    def make_tags(self):
         """Generate tags for fields, moments and species"""
@@ -576,8 +481,7 @@ class GYROData:
                     2 - Flow [unit] # Not implemented, need input.profiles.extra
         """
         import math
-        if self.gbflux == []:
-          self.make_gbflux()
+        
         gbflux = self.gbflux
         if field_num==None:
           gbflux = np.sum(gbflux,axis=1)

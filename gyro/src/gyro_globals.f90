@@ -179,7 +179,6 @@ module gyro_globals
   integer :: kill_e_drift_flag
   integer :: kill_coll_flag
   integer :: kill_gyro_b_flag
-  integer :: velocity_output_flag
   integer :: geo_array_print_flag
   integer :: dist_print
   integer :: udsymmetry_flag
@@ -868,7 +867,6 @@ module gyro_globals
   !------------------------------------------------
   ! Primitive fluxes:
   !
-  real, dimension(:,:,:,:,:), allocatable :: nonlinear_flux_velocity
   real, dimension(:,:,:,:), allocatable :: nonlinear_flux_passing
   real, dimension(:,:,:,:), allocatable :: nonlinear_flux_trapped
   real, dimension(:,:), allocatable :: nonlinear_flux_momparts

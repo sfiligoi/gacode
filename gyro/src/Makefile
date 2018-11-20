@@ -103,7 +103,6 @@ OBJECTS += gyro_globals.o \
           gyro_nl_direct.o \
           gyro_nl_fft.o \
           gyro_nonlinear_flux.o \
-          gyro_nonlinear_flux_velocity.o \
           gyro_omegas.o \
           gyro_operators_on_h.o \
           gyro_phi_kp_squared.o \

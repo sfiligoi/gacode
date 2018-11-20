@@ -98,9 +98,6 @@ subroutine gyro_alloc_big(flag)
 
      allocate(kxkyspec(n_x))
      allocate(k_perp_squared(n_n))
-     if (velocity_output_flag == 1) then
-        allocate(nonlinear_flux_velocity(n_energy,n_lambda,n_kinetic,n_field,n_moment))
-     endif
 
      allocate(nonlinear_flux_passing(n_x,n_kinetic,n_field,p_moment))
      allocate(nonlinear_flux_trapped(n_x,n_kinetic,n_field,p_moment))
@@ -181,7 +178,6 @@ subroutine gyro_alloc_big(flag)
 
      deallocate(kxkyspec)
      deallocate(k_perp_squared)
-     if (allocated(nonlinear_flux_velocity)) deallocate(nonlinear_flux_velocity)
 
      deallocate(nonlinear_flux_passing)  
      deallocate(nonlinear_flux_trapped)

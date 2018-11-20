@@ -327,20 +327,6 @@ subroutine gyro_write_timedata
   !------------------------------------------------------------
 
   !------------------------------------------------------------
-  ! Velocity-space diagnostics
-  !
-  if (velocity_output_flag == 1) then
-     call gyro_nonlinear_flux_velocity
-     call write_distributed_real(&
-          trim(path)//'out.gyro.flux_velocity',&
-          10,&
-          size(nonlinear_flux_velocity),&
-          nonlinear_flux_velocity)
-  endif
-  !
-  !------------------------------------------------------------
-
-  !------------------------------------------------------------
   ! Write precision-monitoring data
   !
   call gyro_write_precision(10,sum(abs(gbflux)))

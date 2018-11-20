@@ -190,7 +190,6 @@ subroutine gyro_read_input
   call readbc_real(doppler_scale)
   call readbc_int(nl_method)
   call readbc_int(kill_gyro_b_flag)
-  call readbc_int(velocity_output_flag)
   call readbc_real(q_scale)
   call readbc_int(dist_print)
   call readbc_int(udsymmetry_flag)

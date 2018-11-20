@@ -228,9 +228,7 @@ class gyrodata_plot(data.GYROData):
 
         t = self.t['(c_s/a)t']
 
-        # Read data in gbflux_i and make gbflux
         self.read_gbflux_i()
-        self.make_gbflux()
 
         flux = self.gbflux
 
@@ -514,9 +512,7 @@ class gyrodata_plot(data.GYROData):
 
         t = self.t['(c_s/a)t']
 
-        # Read data in gbflux_i and make gbflux
         self.read_gbflux_i()
-        self.make_gbflux()
 
         flux = self.gbflux_i
 
