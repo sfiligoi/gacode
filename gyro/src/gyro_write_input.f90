@@ -266,7 +266,7 @@ subroutine gyro_write_input
      if (electron_method == 2 .or. electron_method == 4) then
         write(1,20) 'orbit_upwind (elec)',orbit_upwind_vec(0)
      endif
-     if (source_flag == 1) then
+     if (source_method > 1) then
         write(1,*) '----------- SOURCE PARAMETERS -----------------'
         write(1,20) 'nu_source',nu_source
         write(1,10) 'n_source',n_source

@@ -267,7 +267,7 @@ subroutine gyro_select_methods
      flat_profile_flag = 1
 
      ! Don't want a source
-     source_flag = 0
+     source_method = 1
 
      if (m_gyro == n_x/2) then
         ! Fully pseudospectral gyroaverages
@@ -515,28 +515,35 @@ subroutine gyro_select_methods
   !----------------------------------------------------
   ! SOURCE METHOD:
   !
-  select case (source_flag) 
-
-  case (0)
-
-     call send_line('source_flag          : SOURCE OFF')
+  select case (source_method) 
 
   case (1)
 
-     call send_line('source_flag          : SOURCE ON')
+     call send_line('source_method        : NO SOURCE')
 
+  case (2)
+
+     call send_line('source_method        : ENERGY-DEPENDENT SOURCE')
+
+  case (3)
+
+     call send_line('source_method        : FULL SOURCE')
+
+  case default
+
+     call catch_error('ERROR: (GYRO) source_method')
+
+  end select
+
+  if (source_method > 1) then
      ! There are 4 more partial lumps than full lumps.
      n_lump = 4+n_source
 
      if (n_lump < 5) then
         call catch_error('ERROR: (GYRO) N_SOURCE TOO SMALL')
      endif
-
-  case default
-
-     call catch_error('ERROR: (GYRO) source_flag')
-
-  end select
+  endif
+  
   !----------------------------------------------------
 
   !-------------------------------------------------------

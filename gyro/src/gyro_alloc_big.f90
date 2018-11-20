@@ -62,13 +62,11 @@ subroutine gyro_alloc_big(flag)
      allocate(rhs_dr(n_stack,n_x,n_nek_loc_1,n_kinetic))
      allocate(rhs_dt(n_stack,n_x,n_nek_loc_1,n_kinetic))
      allocate(entropy(n_kinetic,n_entro))
-     allocate(f_store(n_stack,n_x,n_nek_loc_1,n_kinetic))
-     allocate(p_store(n_stack,n_x,n_nek_loc_1,n_kinetic))
 
-     if (krook_flag == 1) then
-        allocate(rhs_krook(n_stack,n_x,n_nek_loc_1))
+     if (source_method == 3) then
+        allocate(h_source(n_stack,n_x,n_nek_loc_1,n_kinetic))
      endif
-
+     
      if (collision_flag == 1) then
         allocate(f_coll(n_stack,n_x,n_nek_loc_1))
         allocate(fb_coll(n_stack,n_x,n_nek_loc_1))
@@ -124,8 +122,6 @@ subroutine gyro_alloc_big(flag)
      ! Source-related arrays
      !
      allocate(h0_eq(n_kinetic,n_energy,n_x))
-     allocate(h0_mod(n_kinetic,n_energy,n_x))
-     !
      allocate(h0_n(n_kinetic,n_x))
      allocate(h0_e(n_kinetic,n_x))
      allocate(source_n(n_kinetic,n_x))
@@ -153,12 +149,11 @@ subroutine gyro_alloc_big(flag)
      deallocate(h_cap_old)
      deallocate(h_cap_old2)
      deallocate(h_cap_dot)
+     if (allocated(h_source)) deallocate(h_source)
      deallocate(rhs)
      deallocate(rhs_dr)
      deallocate(rhs_dt)
      deallocate(entropy)
-     deallocate(f_store)
-     deallocate(p_store)
 
      if (allocated(f_coll)) deallocate(f_coll)
      if (allocated(fb_coll)) deallocate(fb_coll)
@@ -166,7 +161,7 @@ subroutine gyro_alloc_big(flag)
 
      deallocate(h_tran)
      deallocate(gyro_h)
-     if  (allocated(gyro_h_aperp)) deallocate(gyro_h_aperp)
+     if (allocated(gyro_h_aperp)) deallocate(gyro_h_aperp)
 
      deallocate(gyro_uv)
      if (allocated(kyro_uv)) deallocate(kyro_uv)
@@ -205,7 +200,6 @@ subroutine gyro_alloc_big(flag)
      deallocate(time_error)
      deallocate(omega_linear)
      deallocate(h0_eq)
-     deallocate(h0_mod)
      deallocate(h0_n)
      deallocate(h0_e)
      deallocate(source_n)

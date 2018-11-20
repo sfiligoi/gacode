@@ -86,7 +86,7 @@ subroutine gyro_read_input
   call readbc_real(betae_unit)
   call readbc_real(ampere_scale)
   call readbc_int(n_field)
-  call readbc_int(source_flag)
+  call readbc_int(source_method)
   call readbc_real(nu_source)
   call readbc_int(verbose_flag)
   call readbc_real(s_grid)

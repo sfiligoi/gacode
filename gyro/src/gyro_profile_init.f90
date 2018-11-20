@@ -270,20 +270,24 @@ subroutine gyro_profile_init
         dlntdr_s(is,:) = dlntdr_s(is,:)*(1.0-eps_dlntdr_vec(is))
         dlnndr_s(is,:) = dlnndr_s(is,:)*(1.0-eps_dlnndr_vec(is))
         if (eps_dlntdr_vec(is) /= 0.0) then
-           call send_message_real('INFO: (GYRO) Ti gradient RESCALED by: ',1.0-eps_dlntdr_vec(is))
+           call send_message_real('INFO: (GYRO) Ti gradient RESCALED by: ',&
+                1.0-eps_dlntdr_vec(is))
         endif
         if (eps_dlnndr_vec(is) /= 0.0) then
-           call send_message_real('INFO: (GYRO) ni gradient RESCALED by: ',1.0-eps_dlnndr_vec(is))
+           call send_message_real('INFO: (GYRO) ni gradient RESCALED by: ',&
+                1.0-eps_dlnndr_vec(is))
         endif
      enddo
      !
      dlntdr_s(n_spec,:) = dlntdr_s(n_spec,:)*(1.0-eps_dlntdr_vec(0))
      dlnndr_s(n_spec,:) = dlnndr_s(n_spec,:)*(1.0-eps_dlnndr_vec(0))
      if (eps_dlntdr_vec(0) /= 0.0) then
-        call send_message_real('INFO: (GYRO) Te gradient RESCALED by: ',1.0-eps_dlntdr_vec(0))
+        call send_message_real('INFO: (GYRO) Te gradient RESCALED by: ',&
+             1.0-eps_dlntdr_vec(0))
      endif
      if (eps_dlnndr_vec(0) /= 0.0) then
-        call send_message_real('INFO: (GYRO) ne gradient RESCALED by: ',1.0-eps_dlnndr_vec(0))
+        call send_message_real('INFO: (GYRO) ne gradient RESCALED by: ',&
+             1.0-eps_dlnndr_vec(0))
      endif
      !
      !------------------------------------------------------
@@ -504,13 +508,15 @@ subroutine gyro_profile_init
         beta_star_s(i)  = beta_star_s(ir_norm)
 
         gamma_e_s(i) = gamma_e_s(ir_norm)
-        gamma_p_s(i) =  gamma_p_s(ir_norm)
+        gamma_p_s(i) = gamma_p_s(ir_norm)
         mach_s(i)    = mach_s(ir_norm)
 
         tem_s(:,i)    = tem_s(:,ir_norm)
         den_s(:,i)    = den_s(:,ir_norm)
-        if (unflat_dlntdr_flag == 0) dlntdr_s(:,i) = dlntdr_s(:,ir_norm)
-        if (unflat_dlnndr_flag == 0) dlnndr_s(:,i) = dlnndr_s(:,ir_norm)
+        !if (unflat_dlntdr_flag == 0) dlntdr_s(:,i) = dlntdr_s(:,ir_norm)
+        !if (unflat_dlnndr_flag == 0) dlnndr_s(:,i) = dlnndr_s(:,ir_norm)
+        dlntdr_s(:,i) = dlntdr_s(:,ir_norm)
+        dlnndr_s(:,i) = dlnndr_s(:,ir_norm)
         dlnpdr_s(i)   = dlnpdr_s(ir_norm)
         pr_s(:,i)     = pr_s(:,ir_norm)
         alpha_s(:,i)  = alpha_s(:,ir_norm)
