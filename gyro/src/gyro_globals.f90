@@ -281,7 +281,6 @@ module gyro_globals
   integer :: n0
   integer :: d_n
   integer :: n_max
-  integer :: n_moment
   integer :: p_moment
   integer :: n_substep
   !

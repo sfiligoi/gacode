@@ -92,12 +92,10 @@ subroutine gyro_write_initdata(datafile1,datafile2,datafile3,io)
   write(io,10) krho_collect(:)
   write(io,10) rhos_norm
   write(io,10) z(:)
+  write(io,10) mu(:)
 
   ! Recent additions
   write(io,20) n_theta_plot*n_theta_mult
-
-  ! Number of flux moments
-  write(io,20) n_moment
 
   close(io)
 

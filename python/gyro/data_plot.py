@@ -210,88 +210,99 @@ class gyrodata_plot(data.GYROData):
 
         ax.legend()
 
-   def plot_gbflux(self,field='s',i_moment=0,w=0.5,lx=12,ly=6,
-                    title='',ymin='0.0',ymax='auto',span1=-1.0,span2=-1.0):
-        '''
-        Plot the n=0 AND n>0 potentials versus time.
+   def plot_gbflux(self,w=0.5,field='s',i_moment=0,ymin='0.0',ymax='auto',loc=2):
+      '''
+      Plot the gyrobohm flux versus time.
+      '''
 
-        ARGUMENTS:        
-         lx   : width of figure 
-         ly   : height of figure 
-         ymax : max vertical plot range
-         span1: left end of axvspan
-         span2: right end of avxspan
-        '''
+      self.read_gbflux_i()
 
-        n_field   = int(self.profile['n_field'])
-        n_kinetic = int(self.profile['n_kinetic'])
+      ns = int(self.profile['n_kinetic'])
 
-        t = self.t['(c_s/a)t']
+      t = self.t['(c_s/a)t']
 
-        self.read_gbflux_i()
+      field_tag = '\mathrm{Total}'
 
-        flux = self.gbflux
+      flux = self.gbflux
 
-        # Manage field
-        if field == 's':
-            flux0 = np.sum(flux,axis=1)
-            ftag  = self.tagfield[3]
-        else:
-            i_field = int(field)
-            flux0   = flux[:,i_field,:,:]
-            ftag    = self.tagfield[i_field]
+      # Manage field
+      if field == 's':
+         flux0 = np.sum(flux,axis=1)
+         ftag  = self.tagfield[3]
+      else:
+         i_field = int(field)
+         flux0   = flux[:,i_field,:,:]
+         if i_field == 0:
+            field_tag = '\phi'
+         elif i_field == 1:
+            field_tag = 'A_\parallel'
+         else:
+            field_tag = 'B_\parallel'
 
-        # Manage moment
-        mtag = self.tagmom[i_moment]
+      if i_moment == 0:
+         ntag = 'Density~flux'
+         mtag = '\Gamma'
+         ttag = 'G'
+         ftag = 'flux_n'
+         y = flux0[:,0,:]
+      elif i_moment == 1:
+         ntag = 'Energy~flux'
+         mtag = 'Q'
+         ttag = 'Q'
+         ftag = 'flux_e'
+         y = flux0[:,1,:]
+      elif i_moment == 2:
+         ntag = 'Momentum~flux'
+         mtag = '\Pi'
+         ttag = 'Pi'
+         ftag = 'flux_v'
+         y = flux0[:,2,:]
+      else:
+         print 'ERROR: (plot_flux.py) Invalid moment.'
+         sys.exit()
+       
+      # Normalizations
+      nscale = 0
+      if nscale == 0:
+         norm_vec = np.ones(ns)
+         mnorm = ''
+      else:
+         norm_vec = 1.0/self.dens
+         mnorm = '^\mathrm{norm}'
 
-        #======================================
-        fig = plt.figure(figsize=(lx,ly))
-        fig.subplots_adjust(left=0.1,right=0.95,top=0.92,bottom=0.12)
-        ax = fig.add_subplot(111)
-        ax.grid(which="majorminor",ls=":")
-        ax.grid(which="major",ls=":")
-        ax.set_xlabel(TIME)
-        ax.set_ylabel(r'$'+mtag+' \;('+ftag+')$',color='k')
-        #=====================================
+      # Get index for average window
+      imin=iwindow(t,w)
 
-        cvec = ['k','m','b','c','g']
+      # Otherwise plot
+      fig = plt.figure(figsize=(self.lx,self.ly))
+      ax = fig.add_subplot(111)
+      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="major",ls=":")
+      ax.set_xlabel(TIME)
 
-        # Determine tmin
-        for i in range(len(t)):
-            if t[i] < (1.0-w)*t[len(t)-1]:
-                imin = i
+      color = ['k','m','b','c','g','r']
 
-        if title=='null':
-            ax.set_title(r'$'+str(t[imin])+' < (c_s/a) t < '+str(t[-1])+'$')
-        else:
-            ax.set_title(r'$\mathrm{'+title+'}$')
-    
+      windowtxt = '['+str(t[imin])+' < (c_s/a) t < '+str(t[-1])+']'
 
-        # Plot data to screen or image file.
-        for i in range(n_kinetic):
-            ave   = average(flux0[i,i_moment,:],t,w)
-            if i > n_kinetic-2 and self.profile['electron_method'] > 1:
-                stag = r'$e'
-                color = 'r'
-            else:
-                stag = r'$i_'+str(i+1)
-                color = cvec[i]
+      ax.set_title(r'$\mathrm{'+ntag+'} \quad '+windowtxt+'\quad ['+field_tag+']$')
 
-            label = stag+' : '+str(round(ave,3))+'$'
-            y     = ave*np.ones(len(t))
-            ax.plot(t[imin:],y[imin:],'--',color=color)
-            ax.plot(t,flux0[i,i_moment,:],label=label,color=color)
+      for ispec in range(ns):
+         y_norm = y[ispec,:]*norm_vec[ispec]
+         ave    = average(y_norm,t,w)
+         y_ave  = ave*np.ones(len(t))
+         u = specmap(1.0/self.profile['mu'][ispec]**2,self.profile['z'][ispec])
+         label = r'$'+mtag+mnorm+'_'+u+'/'+mtag+'_\mathrm{GB}: '+str(round(ave,3))+'$'
+         # Average
+         ax.plot(t[imin:],y_ave[imin:],'--',color=color[ispec])
+         # Time trace
+         ax.plot(t,y_norm,label=label,color=color[ispec])
 
-        if span1 > 0.0:
-            ax.axvspan(span1,span2,facecolor='g',alpha=0.1)
+      ax.legend(loc=loc)
 
-        ax.set_xlim([0,t[-1]])
+      if ymax != 'auto':
+         ax.set_ylim([float(ymin),float(ymax)])
 
-        if ymax != 'auto':
-            ax.set_ylim([float(ymin),float(ymax)])
-        
-            ax.legend(loc=1)
-
+      fig.tight_layout(pad=0.3)
             
    def plot_gbflux_i(self,field='s',i_moment=0,w=0.5,ymin='0.0',ymax='auto',fig=None):
         '''
@@ -530,7 +541,7 @@ class gyrodata_plot(data.GYROData):
            ax.set_ylim([self.profile['r'][0],self.profile['r'][-1]])
 
 
-   def plot_moment_zero(self,i_kinetic=0,w=0.5,fig=None):
+   def plot_moment_zero(self,w=0.5,i_kinetic=0,fig=None):
 
       if fig is None:
          fig = plt.figure(figsize=(8*2,8))

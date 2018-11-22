@@ -18,7 +18,6 @@ class GYROData:
        self.tagspec    = []
        self.tagmom     = []
        self.tagmomtext = []
-       #self.units = []
 
        self.dir = sim_directory
        self.getdata()
@@ -168,9 +167,11 @@ class GYROData:
       self.profile['rho_s']      = data[mark+self.profile['n_n']]
       mark = mark + self.profile['n_n'] + 1
       self.profile['z']          = data[mark:(mark+n_spec)]
+      mark = mark + n_spec 
+      self.profile['mu']         = data[mark:(mark+n_spec)]
       self.profile['n_fine']     = int(data[mark+n_spec])
-      self.profile['n_moment']   = int(data[mark+n_spec+1])
-
+      # Done
+      
       if self.profile['n_theta_plot'] == 1:
           self.profile['theta_plot'] = 0.0
       else:
@@ -364,12 +365,11 @@ class GYROData:
       nt        = self.n
       n_x       = self.profile['n_x']
       n_kinetic = self.profile['n_kinetic']
-      n_moment  = self.profile['n_moment']
-      nd        = n_x*n_kinetic*n_moment*nt
+      nd        = n_x*n_kinetic*3*nt
       
       t,fmt,data = self.extract('.gyro.moment_zero')
       if fmt != 'null':
-         self.moment_zero = np.reshape(data[0:nd],(n_x,n_kinetic,n_moment,nt),'F')
+         self.moment_zero = np.reshape(data[0:nd],(n_x,n_kinetic,3,nt),'F')
          print "INFO: (data.py) Read data in "+fmt+".gyro.moment_zero. "+t
 
    def read_source(self):

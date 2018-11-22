@@ -94,7 +94,7 @@ subroutine gyro_alloc_big(flag)
      allocate(phi_plot(n_theta_plot,n_x,n_field+eparallel_plot_flag))
 
      allocate(moments_plot(n_theta_plot,n_x,n_kinetic,3))
-     allocate(moments_zero_plot(n_x,n_kinetic,n_moment))
+     allocate(moments_zero_plot(n_x,n_kinetic,3))
 
      allocate(kxkyspec(n_x))
      allocate(k_perp_squared(n_n))

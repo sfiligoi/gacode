@@ -79,10 +79,7 @@ subroutine gyro_select_methods
   !---------------------------------------------------
 
   !---------------------------------------------------
-  ! n_moment: number of traditional moments (n,E)
   ! p_moment: number of new moments (n,E,parallel,k,heating)
-
-  n_moment = 2
   p_moment = 4
   !---------------------------------------------------
 
