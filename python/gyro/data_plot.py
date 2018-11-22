@@ -299,10 +299,10 @@ class gyrodata_plot(data.GYROData):
 
       ax.legend(loc=loc)
 
-      if ymax != 'auto':
-         ax.set_ylim([float(ymin),float(ymax)])
+      #if ymax != 'auto':
+      #   ax.set_ylim([float(ymin),float(ymax)])
 
-      fig.tight_layout(pad=0.3)
+      #fig.tight_layout(pad=0.3)
             
    def plot_gbflux_i(self,field='s',i_moment=0,w=0.5,ymin='0.0',ymax='auto',fig=None):
         '''
@@ -549,9 +549,11 @@ class gyrodata_plot(data.GYROData):
       i   = i_kinetic
       nt  = self.n
       n_x = self.profile['n_x']
-
+      nd  = self.profile['n_explicit_damp']
+      
       t = self.t['(c_s/a)t']
-
+      r = self.profile['r']
+      
       # Get n=0 moment data
       self.read_moment_zero()
 
@@ -572,7 +574,7 @@ class gyrodata_plot(data.GYROData):
       f = np.array(self.moment_zero[:,i,0,:])
       g = average_n(f,t,w,n_x)/self.profile['rho_s']
 
-      ax.plot(self.profile['r'],g,label=r'true',color='k')
+      ax.plot(r,g,label=r'true',color='k')
       
       ax.legend()
 
@@ -587,12 +589,15 @@ class gyrodata_plot(data.GYROData):
       f = np.array(self.moment_zero[:,i,1,:])
       g = average_n(f,t,w,n_x)/self.profile['rho_s']
 
-      ax.plot(self.profile['r'],g,label=r'true',color='k')
-
+      ax.plot(r,g,label=r'true',color='k')
+      ax.axvspan(r[0],r[nd-1],facecolor='g',alpha=0.1)
+      ax.axvspan(r[-nd],r[-1],facecolor='g',alpha=0.1)
+      ax.set_xlim(r[0],r[-1])
+      
       ax.legend()
     
 
-   def plot_source(self,i_kinetic=0,w=0.5,fig=None):
+   def plot_source(self,w=0.5,i_kinetic=0,fig=None):
 
       if fig is None:
          fig = plt.figure(figsize=(6*3,7))
