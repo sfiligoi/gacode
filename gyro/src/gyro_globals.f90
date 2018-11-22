@@ -890,11 +890,7 @@ module gyro_globals
   real :: nu_source
   !
   real, dimension(:,:,:), allocatable :: h0_eq
-  !
-  real, dimension(:,:), allocatable :: h0_n
-  real, dimension(:,:), allocatable :: h0_e
-  real, dimension(:,:), allocatable :: source_n
-  real, dimension(:,:), allocatable :: source_e
+  real, dimension(:,:,:), allocatable :: source
   !
   real :: total_memory
   real, dimension(:), allocatable :: krho_collect

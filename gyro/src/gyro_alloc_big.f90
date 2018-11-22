@@ -119,10 +119,7 @@ subroutine gyro_alloc_big(flag)
      ! Source-related arrays
      !
      allocate(h0_eq(n_kinetic,n_energy,n_x))
-     allocate(h0_n(n_kinetic,n_x))
-     allocate(h0_e(n_kinetic,n_x))
-     allocate(source_n(n_kinetic,n_x))
-     allocate(source_e(n_kinetic,n_x))
+     allocate(source(n_kinetic,3,n_x))
      !------------------------------------------------------------
 
   else 
@@ -196,10 +193,7 @@ subroutine gyro_alloc_big(flag)
      deallocate(time_error)
      deallocate(omega_linear)
      deallocate(h0_eq)
-     deallocate(h0_n)
-     deallocate(h0_e)
-     deallocate(source_n)
-     deallocate(source_e)
+     deallocate(source)
 
   endif
 

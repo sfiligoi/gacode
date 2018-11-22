@@ -285,23 +285,12 @@ subroutine gyro_write_timedata
              trim(path)//'out.gyro.zerobar',10,&
              size(field_fluxave),transpose(field_fluxave))
 
-
-        allocate(a3(n_kinetic,4,n_x))
-        do i=1,n_x
-           a3(:,1,i) = h0_n(:,i)
-           a3(:,2,i) = h0_e(:,i)
-           a3(:,3,i) = source_n(:,i)
-           a3(:,4,i) = source_e(:,i)
-        enddo
-
         call write_local_real( &
-             trim(path)//'out.gyro.source',10,size(a3),a3)
+             trim(path)//'out.gyro.source',10,size(source),source)
 
         call write_local_real( &
              trim(path)//'out.gyro.moment_zero',10,&
              size(moments_zero_plot),moments_zero_plot)
-
-        deallocate(a3)
 
      endif! i_proc ==0
 

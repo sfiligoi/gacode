@@ -124,14 +124,23 @@ elif plot_type == 'phi_n0':
   
 elif plot_type == 'moment_zero':
 
-   simdir   = sys.argv[2]
-   i_moment = int(sys.argv[3])
-   w        = float(sys.argv[4])
-   ftype    = sys.argv[5]
+   i_kinetic = int(sys.argv[2])
+   w         = float(sys.argv[3])
+   ftype     = sys.argv[4]
 
-   ax = data_in.plot_moment_zero(i_moment=i_moment,w=w)
+   ax = data_in.plot_moment_zero(i_kinetic=i_kinetic,w=w)
    
    outfile = 'moment_zero.'+ftype
+
+elif plot_type == 'source':
+   
+   i_kinetic = int(sys.argv[2])
+   w        = float(sys.argv[3])
+   ftype    = sys.argv[4]
+
+   ax = data_in.plot_source(i_kinetic=i_kinetic,w=w)
+   
+   outfile = 'out.gyro.source.'+ftype
   
 #---------------------------------------------------------------
 # Plot to screen or to image file
@@ -139,4 +148,7 @@ if ftype == 'screen':
     plt.show()
 else:
     plt.savefig(outfile)
+
+if ftype != 'screen':
+       print 'INFO: (data_plot_single) Created '+outfile
 #---------------------------------------------------------------

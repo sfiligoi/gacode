@@ -211,9 +211,6 @@ class GYROData:
 
 
    def read_geometry(self):
-        """Reads in geometry_array data.  Output is dictionary of numpy arrays
-        with dimensions: n_fine x n_x."""
-
 
         try:
             geometry = np.fromfile(self.dir+'/out.gyro.geometry_arrays',dtype=float,sep=" ")
@@ -363,22 +360,30 @@ class GYROData:
 
 
    def read_moment_zero(self):
-        """Read data in out.gyro.moment_zero, store in self.moment_zero.
-        Dimensions: (n_x,n_kinetic,n_moment,n_time)"""
 
-        n_x          = self.profile['n_x']
-        n_kinetic    = self.profile['n_kinetic']
-        n_moment     = self.profile['n_moment']
+      nt        = self.n
+      n_x       = self.profile['n_x']
+      n_kinetic = self.profile['n_kinetic']
+      n_moment  = self.profile['n_moment']
+      nd        = n_x*n_kinetic*n_moment*nt
+      
+      t,fmt,data = self.extract('.gyro.moment_zero')
+      if fmt != 'null':
+         self.moment_zero = np.reshape(data[0:nd],(n_x,n_kinetic,n_moment,nt),'F')
+         print "INFO: (data.py) Read data in "+fmt+".gyro.moment_zero. "+t
 
-        try:
-            data = np.fromfile(self.dir+'/out.gyro.moment_zero',dtype=float,sep=" ")
-        except:
-            raise IOError("ERROR (GYROData): out.gyro.moment_zero not found.")
+   def read_source(self):
 
-        t = len(data)/(n_x*n_kinetic*n_moment)
-        self.moment_zero = data.reshape((n_x,n_kinetic,n_moment,t),order='F')
+      nt        = self.n
+      n_x       = self.profile['n_x']
+      n_kinetic = self.profile['n_kinetic']
+      nd        = n_x*n_kinetic*3*nt
+      
+      t,fmt,data = self.extract('.gyro.source')
+      if fmt != 'null':
+         self.source = np.reshape(data[0:nd],(n_kinetic,3,n_x,nt),'F')
+         print "INFO: (data.py) Read data in "+fmt+".gyro.source. "+t
 
-    #---------------------------------------------------------------------------#
 
    def read_k_perp_squared(self):
         """Reads out.gyro.k_perp_squared.

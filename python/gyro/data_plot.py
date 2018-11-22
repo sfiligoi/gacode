@@ -7,53 +7,53 @@ from gyro.data import GYROData
 
 class gyrodata_plot(data.GYROData):
 
-    def plot_freq(self,w=0.5,fig=None):
-        '''
-        Plot gamma and omega vs time
+   def plot_freq(self,w=0.5,fig=None):
+      '''
+      Plot gamma and omega vs time
 
-        ARGUMENTS:
-         w: fractional width of time window
-        '''
+      ARGUMENTS:
+      w: fractional width of time window
+      '''
 
-        if fig is None:
-            fig = plt.figure(figsize=(12,6))
-            fig.subplots_adjust(left=0.085,right=0.97,top=0.92,bottom=0.12)
+      if fig is None:
+         fig = plt.figure(figsize=(12,6))
+         fig.subplots_adjust(left=0.085,right=0.97,top=0.92,bottom=0.12)
 
-        t = self.t['(c_s/a)t']
+      t = self.t['(c_s/a)t']
 
-        # Determine tmin
-        imin = iwindow(t,w)
+      # Determine tmin
+      imin = iwindow(t,w)
 
-        color = ['k','m','b','c']
-        tor_n = self.profile['n0'] + \
-                self.profile['d_n']*np.arange(0,self.profile['n_n'])
-        #======================================
-        ax = fig.add_subplot(121)
-        ax.grid(which="majorminor",ls=":")
-        ax.grid(which="major",ls=":")
-        ax.set_xlabel(TIME)
-        ax.set_ylabel(r'$(a/c_s)\gamma$',color='k')
-        #=====================================
+      color = ['k','m','b','c']
+      tor_n = self.profile['n0'] + \
+              self.profile['d_n']*np.arange(0,self.profile['n_n'])
+      #======================================
+      ax = fig.add_subplot(121)
+      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="major",ls=":")
+      ax.set_xlabel(TIME)
+      ax.set_ylabel(r'$(a/c_s)\gamma$',color='k')
+      #=====================================
 
-        # Gamma
-        for i in range(self.profile['n_n']):
-            ax.plot(t[imin:],self.freq['(a/c_s)gamma'][i,imin:],color=color[i],
-                    label='gamma_n%d'%tor_n[i])
+      # Gamma
+      for i in range(self.profile['n_n']):
+          ax.plot(t[imin:],self.freq['(a/c_s)gamma'][i,imin:],color=color[i],
+                  label='gamma_n%d'%tor_n[i])
 
-        #======================================
-        ax = fig.add_subplot(122)
-        ax.grid(which="majorminor",ls=":")
-        ax.grid(which="major",ls=":")
-        ax.set_xlabel(TIME)
-        ax.set_ylabel(r'$(a/c_s)\omega$',color='k')
-        #=====================================
+      #======================================
+      ax = fig.add_subplot(122)
+      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="major",ls=":")
+      ax.set_xlabel(TIME)
+      ax.set_ylabel(r'$(a/c_s)\omega$',color='k')
+      #=====================================
 
-        # Omega
-        for i in range(self.profile['n_n']):
-            ax.plot(t[imin:],self.freq['(a/c_s)w'][i,imin:],color=color[i],
-                    label='omega_n%d'%tor_n[i])
+      # Omega
+      for i in range(self.profile['n_n']):
+          ax.plot(t[imin:],self.freq['(a/c_s)w'][i,imin:],color=color[i],
+                  label='omega_n%d'%tor_n[i])
 
-    def plot_balloon(self,index='phi',tmax=-1,fig=None):
+   def plot_balloon(self,index='phi',tmax=-1,fig=None):
         '''
         Plot the ballooning eigenmode structure
        
@@ -116,7 +116,7 @@ class gyrodata_plot(data.GYROData):
         ax.legend()
         return key
 
-    def plot_zf(self,w=0.5,fig=None):
+   def plot_zf(self,w=0.5,fig=None):
         '''
         Plot the zonal (n=0) potential versus time.
 
@@ -166,7 +166,7 @@ class gyrodata_plot(data.GYROData):
 
         ax.legend()
 
-    def plot_phi_n0(self,lx=10,ly=6,ymax='auto',span1=-1.0,span2=-1.0):
+   def plot_phi_n0(self,lx=10,ly=6,ymax='auto',span1=-1.0,span2=-1.0):
         '''
         Plot the n=0 AND n>0 potentials versus time.
 
@@ -210,7 +210,7 @@ class gyrodata_plot(data.GYROData):
 
         ax.legend()
 
-    def plot_gbflux(self,field='s',i_moment=0,w=0.5,lx=12,ly=6,
+   def plot_gbflux(self,field='s',i_moment=0,w=0.5,lx=12,ly=6,
                     title='',ymin='0.0',ymax='auto',span1=-1.0,span2=-1.0):
         '''
         Plot the n=0 AND n>0 potentials versus time.
@@ -292,16 +292,10 @@ class gyrodata_plot(data.GYROData):
         
             ax.legend(loc=1)
 
-    def plot_gbflux_i(self,field='s',i_moment=0,w=0.5,ymin='0.0',ymax='auto',fig=None):
+            
+   def plot_gbflux_i(self,field='s',i_moment=0,w=0.5,ymin='0.0',ymax='auto',fig=None):
         '''
-        Plot the n=0 AND n>0 potentials versus time.
-
-        ARGUMENTS:        
-         lx   : width of figure 
-         ly   : height of figure 
-         ymax : max vertical plot range
-         span1: left end of axvspan
-         span2: right end of avxspan
+        Plot flux versus radius
         '''
 
         if fig is None:
@@ -357,18 +351,10 @@ class gyrodata_plot(data.GYROData):
         ax.legend()
 
 
-    def plot_gbflux_n(self,field='s',i_moment=0,w=0.5,datafile='none',fig=None):
+   def plot_gbflux_n(self,field='s',i_moment=0,w=0.5,datafile='none',fig=None):
         '''
-        Plot the n=0 AND n>0 potentials versus time.
-
-        ARGUMENTS:        
-         lx   : width of figure 
-         ly   : height of figure 
-         ymax : max vertical plot range
-         span1: left end of axvspan
-         span2: right end of avxspan
+        Plot ky-dependent flux
         '''
-
         n_field   = int(self.profile['n_field'])
         n_kinetic = int(self.profile['n_kinetic'])
         n_n       = int(self.profile['n_n'])
@@ -441,7 +427,7 @@ class gyrodata_plot(data.GYROData):
            np.savetxt(fid,arr,fmt='%.5e')
            fid.close()
         
-    def plot_gbflux_exc(self,w=0.5,fig=None):
+   def plot_gbflux_exc(self,w=0.5,fig=None):
         '''
         Plot the n=0 AND n>0 potentials versus time.
 
@@ -492,7 +478,7 @@ class gyrodata_plot(data.GYROData):
         ax.legend()
 
         
-    def plot_gbflux_rt(self,field='s',i_moment=0,w=0.5,fig=None):
+   def plot_gbflux_rt(self,field='s',i_moment=0,w=0.5,fig=None):
         '''
         Plot the n=0 AND n>0 potentials versus time.
 
@@ -544,67 +530,120 @@ class gyrodata_plot(data.GYROData):
            ax.set_ylim([self.profile['r'][0],self.profile['r'][-1]])
 
 
-    def plot_moment_zero(self,i_moment=0,w=0.5,fig=None):
-        '''
-        Plot the n=0 AND n>0 potentials versus time.
+   def plot_moment_zero(self,i_kinetic=0,w=0.5,fig=None):
 
-        ARGUMENTS:        
-         lx   : width of figure 
-         ly   : height of figure 
-         ymax : max vertical plot range
-         span1: left end of axvspan
-         span2: right end of avxspan
-        '''
+      if fig is None:
+         fig = plt.figure(figsize=(8*2,8))
 
-        if fig is None:
-           fig = plt.figure(figsize=(7*3,6))
+      i   = i_kinetic
+      nt  = self.n
+      n_x = self.profile['n_x']
 
-        n_field   = self.profile['n_field']
-        n_kinetic = self.profile['n_kinetic']
-        n_x       = self.profile['n_x']
+      t = self.t['(c_s/a)t']
 
-        t = self.t['(c_s/a)t']
+      # Get n=0 moment data
+      self.read_moment_zero()
 
-        # Read data in gbflux_i
-        self.read_moment_zero()
+      imin  = iwindow(t,w)
+      title = r'$'+str(t[imin])+' < (c_s/a) t < '+str(t[-1])+'$'
+      
+      f = np.zeros([n_x,nt])
+      g = np.zeros(n_x)
 
-        delta_n = np.empty([n_x,n_kinetic])
-        delta_e = np.empty([n_x,n_kinetic])
-        delta_t = np.empty([n_x,n_kinetic])
+      # delta_n
+      ax = fig.add_subplot(1,2,1)
+      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="major",ls=":")
+      ax.set_xlabel(r'$r/a$')
+      ax.set_ylabel(r'$\delta n/\rho_s$')
+      ax.set_title(title)
 
-        # [n_x,n_kinetic,n_time]
-        for i in range(n_kinetic):
-           f   = np.array(self.moment_zero[:,i,0,:])
-           delta_n[:,i] = average_n(f,t,w,n_x)
-           f   = np.array(self.moment_zero[:,i,1,:])
-           delta_e[:,i] = average_n(f,t,w,n_x)
-           delta_t[:,i] = (delta_e[:,i]-1.5*self.profile['tem_s'][i]*delta_n[:,i])/(1.5*self.profile['den_s'][i])
-        imin = iwindow(t,w)
-           
-        color = ['k','m','b','c']
+      f = np.array(self.moment_zero[:,i,0,:])
+      g = average_n(f,t,w,n_x)/self.profile['rho_s']
 
-        f = np.empty([n_x,n_kinetic])
+      ax.plot(self.profile['r'],g,label=r'true',color='k')
+      
+      ax.legend()
 
-        for j in range(3):
-           ax = fig.add_subplot(1,3,j+1)
-           ax.grid(which="majorminor",ls=":")
-           ax.grid(which="major",ls=":")
-           ax.set_xlabel(r'$r/a$')
-           ax.set_title(r'$'+str(t[imin])+' < (c_s/a) t < '+str(t[-1])+'$')
+      # delta_E
+      ax = fig.add_subplot(1,2,2)
+      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="major",ls=":")
+      ax.set_xlabel(r'$r/a$')
+      ax.set_ylabel(r'$\delta E/\rho_s$')
+      ax.set_title(title)
 
-           if j == 0:
-              f = delta_n
-              ax.set_ylabel(r'$\delta n$',color='k')
-           if j == 1:
-              f = delta_e
-              ax.set_ylabel(r'$\delta E$',color='k')
-           if j == 2:
-              f = delta_t
-              ax.set_ylabel(r'$\delta T$',color='k')
+      f = np.array(self.moment_zero[:,i,1,:])
+      g = average_n(f,t,w,n_x)/self.profile['rho_s']
 
-           for i in range(n_kinetic):
-              stag = self.tagspec[i]
-              ax.plot(self.profile['r'],f[:,i],label=stag,color=color[i])
+      ax.plot(self.profile['r'],g,label=r'true',color='k')
 
-        ax.legend()
+      ax.legend()
+    
 
+   def plot_source(self,i_kinetic=0,w=0.5,fig=None):
+
+      if fig is None:
+         fig = plt.figure(figsize=(6*3,7))
+
+      i   = i_kinetic
+      nt  = self.n
+      n_x = self.profile['n_x']
+
+      t = self.t['(c_s/a)t']
+
+      # Get source data
+      self.read_source()
+
+      imin  = iwindow(t,w)
+      title = r'$'+str(t[imin])+' < (c_s/a) t < '+str(t[-1])+'$'
+      
+      f = np.zeros([n_x,nt])
+      g = np.zeros(n_x)
+
+      # delta_n
+      ax = fig.add_subplot(1,3,1)
+      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="major",ls=":")
+      ax.set_xlabel(r'$r/a$')
+      ax.set_ylabel(r'$S_n/\rho_s$')
+      ax.set_title(title)
+
+      f = np.array(self.source[i,0,:,:])
+      g = average_n(f,t,w,n_x)/self.profile['rho_s']
+      
+      ax.plot(self.profile['r'],g,label=r'simple',color='m',linewidth=3,alpha=0.2)
+      
+      ax.legend()
+
+      # delta_E
+      ax = fig.add_subplot(1,3,2)
+      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="major",ls=":")
+      ax.set_xlabel(r'$r/a$')
+      ax.set_ylabel(r'$S_E/\rho_s$')
+      ax.set_title(title)
+
+      f = np.array(self.source[i,1,:,:])
+      g = average_n(f,t,w,n_x)/self.profile['rho_s']
+      
+      ax.plot(self.profile['r'],g,label=r'simple',color='m',linewidth=3,alpha=0.2)
+
+      ax.legend()
+  
+      # delta_v
+      ax = fig.add_subplot(1,3,3)
+      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="major",ls=":")
+      ax.set_xlabel(r'$r/a$')
+      ax.set_ylabel(r'$S_v/\rho_s$')
+      ax.set_title(title)
+
+      f = np.array(self.source[i,2,:,:])
+      g = average_n(f,t,w,n_x)/self.profile['rho_s']
+      
+      ax.plot(self.profile['r'],g,label=r'simple',color='m',linewidth=3,alpha=0.2)
+
+      ax.legend()
+
+      plt.tight_layout()
