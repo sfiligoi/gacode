@@ -50,6 +50,7 @@ then
   echo "         Generate plot of given type."
   echo "         If this keyword is omitted, data will be listed to the screen."
   echo "         <type> = freq,"
+  echo "                    ball [use -moment for indexing],"
   echo "                    zf,"
   echo "                    phi_n0,"
   echo "                    flux,"
@@ -57,13 +58,11 @@ then
   echo "                    flux_n,"
   echo "                    flux_exc,"
   echo "                    flux_rt,"
-  echo "                    balloon [use -moment for indexing],"
+  echo "                    hmom,"
   echo "                    fluctuation2d [-moment 0 (n, all species) "
   echo "                                   -moment 1 (v, all species) "
   echo "                                   -moment 2 (e, all species) "
   echo "                                   -moment 3 (all fields)],"
-  echo "                    source,"
-  echo "                    moment_zero,"
   echo "                    text          [ASCII GB flux]"
   echo
   echo "         -ymin <float>"
@@ -168,14 +167,11 @@ case "$PLOT_TYPE" in
    text)
         python $PYROOT/text_flux.py $W $I_FIELD $I_MOMENT ;;
 
-   moment_zero)
+   ball)
+        python $PLT $PLOT_TYPE $I_MOMENT $EXT $TMAX ;;
+
+   hmom)
 	python $PLT $PLOT_TYPE $W $I_KINETIC $I_MOMENT $EXT ;;
-
-   source)
-	python $PLT $PLOT_TYPE $W $I_KINETIC $EXT ;;
-
-   fluctuation2d)
-	python $PYROOT/fluctuation2d.py $I_MOMENT $EXT ;;
 
    freq)
 	python $PLT $PLOT_TYPE $W $EXT ;;
@@ -189,7 +185,7 @@ case "$PLOT_TYPE" in
    flux)
        python $PLT $PLOT_TYPE $W $I_FIELD $I_MOMENT $YMIN $YMAX $EXT ;;
 
-   gbflux_i)
+   flux_i)
         python $PLT $PLOT_TYPE $W $I_FIELD $I_MOMENT $YMIN $YMAX $EXT ;;
 
    gbflux_n)
@@ -201,8 +197,8 @@ case "$PLOT_TYPE" in
    gbflux_exc)
         python $PLT $PLOT_TYPE $W $EXT ;;
 
-   ball)
-        python $PLT $PLOT_TYPE $I_MOMENT $EXT $TMAX ;;
+   fluctuation2d)
+	python $PYROOT/fluctuation2d.py $I_MOMENT $EXT ;;
 
    *)
         echo 'ERROR: (gyro_plot) Unrecognized argument to -plot.' ;;

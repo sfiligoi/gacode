@@ -299,10 +299,10 @@ class gyrodata_plot(data.GYROData):
 
       ax.legend(loc=loc)
 
-      #if ymax != 'auto':
-      #   ax.set_ylim([float(ymin),float(ymax)])
+      if ymax != 'auto':
+         ax.set_ylim([float(ymin),float(ymax)])
 
-      #fig.tight_layout(pad=0.3)
+      fig.tight_layout()
             
    def plot_gbflux_i(self,field='s',i_moment=0,w=0.5,ymin='0.0',ymax='auto',fig=None):
         '''
@@ -557,33 +557,50 @@ class gyrodata_plot(data.GYROData):
       self.read_moment_zero()
       self.read_source()
 
+      if i_moment == 0:
+         ntag = 'Density~moment'
+         mtag = '\delta n'
+         ftag = 'delta_n'
+      elif i_moment == 1:
+         ntag = 'Energy~moment'
+         mtag = '\delta E'
+         ftag = 'delta_e'
+      elif i_moment == 2:
+         ntag = 'vpar~moment'
+         mtag = '\delta v'
+         ftag = 'delta_v'
+
       imin  = iwindow(t,w)
       title = r'$'+str(t[imin])+' < (c_s/a) t < '+str(t[-1])+'$'
+      
+      u = specmap(1.0/self.profile['mu'][i_kinetic]**2,self.profile['z'][i_kinetic])
       
       f = np.zeros([n_x,nt])
       g = np.zeros(n_x)
 
       # Compare moment versus corresponding source
-      ax = fig.add_subplot(1,1,1)
+      ax = fig.add_subplot(111)
       ax.grid(which="majorminor",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(r'$r/a$')
-      ax.set_ylabel(r'$\delta E/\rho_s$')
+      ax.set_ylabel(r'$'+mtag+'_'+u+'/\\rho_s$')
       ax.set_title(title)
 
       f = np.array(self.moment_zero[:,i_kinetic,i_moment,:])
       g = average_n(f,t,w,n_x)/self.profile['rho_s']
 
-      ax.plot(r,g,label=r'true',color='k')
+      ax.plot(r,g,label=r'moment',color='k')
 
       f = np.array(self.source[i_kinetic,i_moment,:,:])
       g = average_n(f,t,w,n_x)/self.profile['rho_s']
       
-      ax.plot(self.profile['r'],g,label=r'simple',color='m',linewidth=3,alpha=0.2)
+      ax.plot(self.profile['r'],g,label=r'source',color='m',linewidth=3,alpha=0.2)
 
       ax.axvspan(r[0],r[nd-1],facecolor='g',alpha=0.1)
       ax.axvspan(r[-nd],r[-1],facecolor='g',alpha=0.1)
       ax.set_xlim(r[0],r[-1])
       
       ax.legend()
+      plt.tight_layout()
     
+      

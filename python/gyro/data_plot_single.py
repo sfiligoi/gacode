@@ -60,15 +60,14 @@ elif plot_type == 'flux':
 
 elif plot_type == 'flux_i':
 
-   simdir   = sys.argv[2]
+   w        = float(sys.argv[2])
    field    = sys.argv[3]
    i_moment = int(sys.argv[4])
-   w        = float(sys.argv[5])
-   ymin     = sys.argv[6]
-   ymax     = sys.argv[7]
-   ext      = sys.argv[8]
+   ymin     = sys.argv[5]
+   ymax     = sys.argv[6]
+   ext      = sys.argv[7]
    
-   data_in.plot_gbflux_i(field=field,i_moment=i_moment,w=w,ymin=ymin,ymax=ymax)
+   data_in.plot_gbflux_i(w=w,field=field,i_moment=i_moment,ymin=ymin,ymax=ymax)
 
    outfile = 'flux_i.'+ext
 
@@ -121,7 +120,7 @@ elif plot_type == 'phi_n0':
    
    outfile = 'phi_n0.'+ext
   
-elif plot_type == 'moment_zero':
+elif plot_type == 'hmom':
 
    w         = float(sys.argv[2])
    i_kinetic = int(sys.argv[3])
