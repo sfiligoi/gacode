@@ -115,9 +115,9 @@ subroutine gyro_adaptive_source
      source(:,:,:) = 0.0
      do is=1,n_kinetic
         do ie=1,n_energy
-           source(is,1,:) = source(is,1,:)-nu_source*h0_eq(is,ie,:)* &
+           source(is,1,:) = source(is,1,:)+h0_eq(is,ie,:)* &
                 w_energy(ie)
-           source(is,2,:) = source(is,2,:)-nu_source*h0_eq(is,ie,:)* &
+           source(is,2,:) = source(is,2,:)+h0_eq(is,ie,:)* &
                 w_energy(ie)*energy(ie)
         enddo
      enddo
@@ -209,8 +209,6 @@ subroutine gyro_adaptive_source
           NEW_COMM_2,&
           i_err)
      !----------------------------------------------------------------
-
-     source = -nu_source*source
 
   endif
 

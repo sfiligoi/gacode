@@ -125,21 +125,12 @@ elif plot_type == 'moment_zero':
 
    w         = float(sys.argv[2])
    i_kinetic = int(sys.argv[3])
-   ext       = sys.argv[4]
+   i_moment  = int(sys.argv[4])
+   ext       = sys.argv[5]
 
-   ax = data_in.plot_moment_zero(w=w,i_kinetic=i_kinetic)
+   ax = data_in.plot_moment_zero(w=w,i_kinetic=i_kinetic,i_moment=i_moment)
    
    outfile = 'moment_zero.'+ext
-
-elif plot_type == 'source':
-   
-   w         = float(sys.argv[2])
-   i_kinetic = int(sys.argv[3])
-   ext       = sys.argv[4]
-
-   ax = data_in.plot_source(w=w,i_kinetic=i_kinetic)
-   
-   outfile = 'out.gyro.source.'+ext
   
 #---------------------------------------------------------------
 # Plot to screen or to image file

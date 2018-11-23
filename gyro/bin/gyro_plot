@@ -169,7 +169,7 @@ case "$PLOT_TYPE" in
         python $PYROOT/text_flux.py $W $I_FIELD $I_MOMENT ;;
 
    moment_zero)
-	python $PLT $PLOT_TYPE $W $I_KINETIC $EXT ;;
+	python $PLT $PLOT_TYPE $W $I_KINETIC $I_MOMENT $EXT ;;
 
    source)
 	python $PLT $PLOT_TYPE $W $I_KINETIC $EXT ;;

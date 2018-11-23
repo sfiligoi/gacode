@@ -175,7 +175,7 @@ subroutine gyro_moments_plot
      !---------------------------------------------------------------
      ! Integrate to obtain flux-surface averages
      !
-     do ix=1,2
+     do ix=1,3
         do i=1,n_x
            do j=1,n_blend
               moments_zero_plot(i,is,ix) = &

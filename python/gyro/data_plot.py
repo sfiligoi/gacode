@@ -310,7 +310,7 @@ class gyrodata_plot(data.GYROData):
         '''
 
         if fig is None:
-            fig = plt.figure(figsize=(12,8))
+            fig = plt.figure(figsize=(self.lx,self.ly))
 
         n_field   = int(self.profile['n_field'])
         n_kinetic = int(self.profile['n_kinetic'])
@@ -541,12 +541,11 @@ class gyrodata_plot(data.GYROData):
            ax.set_ylim([self.profile['r'][0],self.profile['r'][-1]])
 
 
-   def plot_moment_zero(self,w=0.5,i_kinetic=0,fig=None):
+   def plot_moment_zero(self,w=0.5,i_kinetic=0,i_moment=0,fig=None):
 
       if fig is None:
-         fig = plt.figure(figsize=(8*2,8))
+         fig = plt.figure(figsize=(self.lx,self.ly))
 
-      i   = i_kinetic
       nt  = self.n
       n_x = self.profile['n_x']
       nd  = self.profile['n_explicit_damp']
@@ -556,59 +555,6 @@ class gyrodata_plot(data.GYROData):
       
       # Get n=0 moment data
       self.read_moment_zero()
-
-      imin  = iwindow(t,w)
-      title = r'$'+str(t[imin])+' < (c_s/a) t < '+str(t[-1])+'$'
-      
-      f = np.zeros([n_x,nt])
-      g = np.zeros(n_x)
-
-      # delta_n
-      ax = fig.add_subplot(1,2,1)
-      ax.grid(which="majorminor",ls=":")
-      ax.grid(which="major",ls=":")
-      ax.set_xlabel(r'$r/a$')
-      ax.set_ylabel(r'$\delta n/\rho_s$')
-      ax.set_title(title)
-
-      f = np.array(self.moment_zero[:,i,0,:])
-      g = average_n(f,t,w,n_x)/self.profile['rho_s']
-
-      ax.plot(r,g,label=r'true',color='k')
-      
-      ax.legend()
-
-      # delta_E
-      ax = fig.add_subplot(1,2,2)
-      ax.grid(which="majorminor",ls=":")
-      ax.grid(which="major",ls=":")
-      ax.set_xlabel(r'$r/a$')
-      ax.set_ylabel(r'$\delta E/\rho_s$')
-      ax.set_title(title)
-
-      f = np.array(self.moment_zero[:,i,1,:])
-      g = average_n(f,t,w,n_x)/self.profile['rho_s']
-
-      ax.plot(r,g,label=r'true',color='k')
-      ax.axvspan(r[0],r[nd-1],facecolor='g',alpha=0.1)
-      ax.axvspan(r[-nd],r[-1],facecolor='g',alpha=0.1)
-      ax.set_xlim(r[0],r[-1])
-      
-      ax.legend()
-    
-
-   def plot_source(self,w=0.5,i_kinetic=0,fig=None):
-
-      if fig is None:
-         fig = plt.figure(figsize=(6*3,7))
-
-      i   = i_kinetic
-      nt  = self.n
-      n_x = self.profile['n_x']
-
-      t = self.t['(c_s/a)t']
-
-      # Get source data
       self.read_source()
 
       imin  = iwindow(t,w)
@@ -617,49 +563,27 @@ class gyrodata_plot(data.GYROData):
       f = np.zeros([n_x,nt])
       g = np.zeros(n_x)
 
-      # delta_n
-      ax = fig.add_subplot(1,3,1)
+      # Compare moment versus corresponding source
+      ax = fig.add_subplot(1,1,1)
       ax.grid(which="majorminor",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(r'$r/a$')
-      ax.set_ylabel(r'$S_n/\rho_s$')
+      ax.set_ylabel(r'$\delta E/\rho_s$')
       ax.set_title(title)
 
-      f = np.array(self.source[i,0,:,:])
+      f = np.array(self.moment_zero[:,i_kinetic,i_moment,:])
       g = average_n(f,t,w,n_x)/self.profile['rho_s']
-      
-      ax.plot(self.profile['r'],g,label=r'simple',color='m',linewidth=3,alpha=0.2)
-      
-      ax.legend()
 
-      # delta_E
-      ax = fig.add_subplot(1,3,2)
-      ax.grid(which="majorminor",ls=":")
-      ax.grid(which="major",ls=":")
-      ax.set_xlabel(r'$r/a$')
-      ax.set_ylabel(r'$S_E/\rho_s$')
-      ax.set_title(title)
+      ax.plot(r,g,label=r'true',color='k')
 
-      f = np.array(self.source[i,1,:,:])
+      f = np.array(self.source[i_kinetic,i_moment,:,:])
       g = average_n(f,t,w,n_x)/self.profile['rho_s']
       
       ax.plot(self.profile['r'],g,label=r'simple',color='m',linewidth=3,alpha=0.2)
 
-      ax.legend()
-  
-      # delta_v
-      ax = fig.add_subplot(1,3,3)
-      ax.grid(which="majorminor",ls=":")
-      ax.grid(which="major",ls=":")
-      ax.set_xlabel(r'$r/a$')
-      ax.set_ylabel(r'$S_v/\rho_s$')
-      ax.set_title(title)
-
-      f = np.array(self.source[i,2,:,:])
-      g = average_n(f,t,w,n_x)/self.profile['rho_s']
+      ax.axvspan(r[0],r[nd-1],facecolor='g',alpha=0.1)
+      ax.axvspan(r[-nd],r[-1],facecolor='g',alpha=0.1)
+      ax.set_xlim(r[0],r[-1])
       
-      ax.plot(self.profile['r'],g,label=r'simple',color='m',linewidth=3,alpha=0.2)
-
       ax.legend()
-
-      plt.tight_layout()
+    
