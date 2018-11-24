@@ -62,7 +62,6 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
   real :: x
   real :: func(-n_x/2:n_x/2-1)
   complex :: g0
-  complex :: gp
   !
   real, external :: besei0
   !-----------------------------------------

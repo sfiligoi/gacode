@@ -469,7 +469,7 @@ class cgyrodata_plot(data.cgyrodata):
          else:
             field_tag = 'B_\parallel'
 
-         # Now, ys -> {n_species,3,nt}
+      # Now, ys -> {n_species,3,nt}
 
       if moment == 'n':
          ntag = 'Density~flux'
@@ -731,13 +731,13 @@ class cgyrodata_plot(data.cgyrodata):
 
       # One plot per species
       for ispec in range(ns):
-         stag = str(ispec)
          ax = fig.add_subplot(1,ns,ispec+1)
          ax.set_xlabel(xlabel)
          u = specmap(self.mass[ispec],self.z[ispec])
          ax.set_ylabel(r'$'+mtag+'_'+u+'$',color='k')
          ax.set_title(windowtxt)
-         ax.bar(ky-dk/2.0,ave[:,ispec],width=dk/1.1,color=color[ispec],alpha=0.5,edgecolor='black')
+         ax.bar(ky-dk/2.0,ave[:,ispec],width=dk/1.1,color=color[ispec],
+                alpha=0.5,edgecolor='black')
 
          # Dissipation curve             
          if diss == 1:

@@ -195,6 +195,17 @@ class GYROData:
          print "INFO: (data.py) Read data in "+fmt+".gyro.freq. "+t 
       #-----------------------------------------------------------------
 
+      #-----------------------------------------------------------------
+      # RMS field
+      #
+      t,fmt,data = self.extract('.gyro.field_rms')
+      
+      if fmt != 'null':
+         self.field_rms = np.reshape(data[0:nd],(2,nt),'F')
+         print "INFO: (data.py) Read data in "+fmt+".gyro.field_rms. "+t 
+      #-----------------------------------------------------------------
+   
+
    def read_units(self):
       """Read out.gyro.units ."""
 
@@ -308,17 +319,6 @@ class GYROData:
 
         self.kxkyspec = kxkyspec.reshape((n_x,n_n,nt),order='F')
 
-    #---------------------------------------------------------------------------#
-   def read_field_rms(self):
-
-        nt = self.n
-
-        try:
-            field_rms = np.fromfile(self.dir+'/out.gyro.field_rms',dtype=float,sep=" ")
-        except:
-            raise IOError("ERROR (GYROData): out.gyro.field_rms not found.")
-
-        self.field_rms = field_rms.reshape((2,nt),order='F')
 
     #---------------------------------------------------------------------------#
 

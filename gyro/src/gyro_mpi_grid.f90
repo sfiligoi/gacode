@@ -15,7 +15,6 @@ subroutine gyro_mpi_grid
   implicit none
   !
   integer, external :: parallel_dim
-  integer :: i_group_mumps
   integer :: splitkey
   !----------------------------------------
 

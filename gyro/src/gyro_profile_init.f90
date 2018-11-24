@@ -35,7 +35,6 @@ subroutine gyro_profile_init
   integer :: ic 
   real :: loglam
   real :: cc
-  real :: p_total
   !---------------------------------------------------
 
   !---------------------------------------------------

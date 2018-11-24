@@ -34,7 +34,7 @@ then
   echo "         Specify field to be plotted: [0,n_field-1]."
   echo "         Alternatively, specifying 's' returns a sum of all fields (default=s)."
   echo
-  echo "         -kinetic <value>"
+  echo "         -species <value>"
   echo "         Specify species to be plotted: [0,n_kinetic-1]."
   echo
   echo "         -moment <value>"
@@ -49,21 +49,21 @@ then
   echo "         -plot <type>"
   echo "         Generate plot of given type."
   echo "         If this keyword is omitted, data will be listed to the screen."
-  echo "         <type> = freq,"
-  echo "                    ball [use -moment for indexing],"
-  echo "                    zf,"
-  echo "                    phi_n0,"
-  echo "                    flux,"
-  echo "                    flux_i,"
-  echo "                    flux_n,"
-  echo "                    flux_exc,"
-  echo "                    flux_rt,"
-  echo "                    hmom,"
-  echo "                    fluctuation2d [-moment 0 (n, all species) "
-  echo "                                   -moment 1 (v, all species) "
-  echo "                                   -moment 2 (e, all species) "
-  echo "                                   -moment 3 (all fields)],"
-  echo "                    text          [ASCII GB flux]"
+  echo "         <type> = text   (text summary of fluxes)"
+  echo "                  freq   (frequency versus time)"
+  echo "                  ball   (ballooning modes ; use -moment for indexing)"
+  echo "                  zf     (zonal flow potential vs. time)"
+  echo "                  phi    (time-dependent ZF vs. finite-n intensities)"
+  echo "                  flux,"
+  echo "                  flux_i,"
+  echo "                  flux_n,"
+  echo "                  flux_exc,"
+  echo "                  flux_rt,"
+  echo "                  hmom,"
+  echo "                  fluctuation2d [-moment 0 (n, all species) "
+  echo "                                 -moment 1 (v, all species) "
+  echo "                                 -moment 2 (e, all species) "
+  echo "                                 -moment 3 (all fields)]"
   echo
   echo "         -ymin <float>"
   echo "         Minimum value of vertical axis (where applicable)."
@@ -96,9 +96,9 @@ fi
 LOCDIR=.
 SIMROOT=$PWD
 PLOT_TYPE=gbflux
-I_KINETIC=0
-I_FIELD="s"
-I_MOMENT=0
+SPECIES=0
+FIELD="s"
+MOMENT=1
 W=0.5
 EXT=screen
 TMAX=-1.0
@@ -123,11 +123,11 @@ while [ $# -gt 0 ] ; do
 
   -p) shift ; SIMROOT=$1 ;;
 
-  -kinetic) shift ; I_KINETIC=$1 ;;
+  -species) shift ; SPECIES=$1 ;;
 
-  -field) shift ; I_FIELD=$1 ;;
+  -field) shift ; FIELD=$1 ;;
 
-  -moment) shift ; I_MOMENT=$1 ;;
+  -moment) shift ; MOMENT=$1 ;;
 
   -w) shift ; W=$1 ;;
 
@@ -165,40 +165,41 @@ PLT="$PYROOT/data_plot_single.py $FONTSIZE $LX $LY"
 case "$PLOT_TYPE" in
 
    text)
-        python $PYROOT/text_flux.py $W $I_FIELD $I_MOMENT ;;
-
-   ball)
-        python $PLT $PLOT_TYPE $I_MOMENT $EXT $TMAX ;;
-
-   hmom)
-	python $PLT $PLOT_TYPE $W $I_KINETIC $I_MOMENT $EXT ;;
+        python $PYROOT/text_flux.py $W $FIELD $MOMENT ;;
 
    freq)
 	python $PLT $PLOT_TYPE $W $EXT ;;
 
+   ball)
+        python $PLT $PLOT_TYPE $MOMENT $EXT $TMAX ;;
+
    zf)
 	python $PLT $PLOT_TYPE $W $EXT ;;
 
-   phi_n0)
+   phi)
 	python $PLT $PLOT_TYPE $YMAX $EXT ;;
 
+   hmom)
+	python $PLT $PLOT_TYPE $W $SPECIES $MOMENT $EXT ;;
+
    flux)
-       python $PLT $PLOT_TYPE $W $I_FIELD $I_MOMENT $YMIN $YMAX $EXT ;;
+       python $PLT $PLOT_TYPE $W $FIELD $MOMENT $YMIN $YMAX $EXT ;;
 
    flux_i)
-        python $PLT $PLOT_TYPE $W $I_FIELD $I_MOMENT $YMIN $YMAX $EXT ;;
+        python $PLT $PLOT_TYPE $W $FIELD $MOMENT $YMIN $YMAX $EXT ;;
 
-   gbflux_n)
-        python $PLT $PLOT_TYPE $W $I_FIELD $I_MOMENT $EXT ;;
+   flux_n)
+        python $PLT $PLOT_TYPE $W $FIELD $MOMENT $YMIN $YMAX $EXT ;;
 
-   gbflux_rt)
-        python $PLT $PLOT_TYPE $W $I_FIELD $I_MOMENT $EXT ;;
-
-   gbflux_exc)
+   flux_exc)
         python $PLT $PLOT_TYPE $W $EXT ;;
 
+   flux_rt)
+        python $PLT $PLOT_TYPE $W $FIELD $MOMENT $EXT ;;
+
+ 
    fluctuation2d)
-	python $PYROOT/fluctuation2d.py $I_MOMENT $EXT ;;
+	python $PYROOT/fluctuation2d.py $MOMENT $EXT ;;
 
    *)
         echo 'ERROR: (gyro_plot) Unrecognized argument to -plot.' ;;

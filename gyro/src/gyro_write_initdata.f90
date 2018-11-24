@@ -25,7 +25,6 @@ subroutine gyro_write_initdata(datafile1,datafile2,datafile3,io)
   character (len=*), intent(in) :: datafile3
   !
   real :: kt
-  real :: theta
   real :: dr
   integer :: n_wedge
   real, dimension(:), allocatable :: ttmp
@@ -185,7 +184,7 @@ subroutine gyro_write_initdata(datafile1,datafile2,datafile3,io)
 
      endif
 
-     GEO_fourier_in(:,:) = a_fourier_geo_s(:,0:n_fourier_geo,i)
+     GEO_fourier_in(:,:) = a_fourier_geo_s(:,:,i)
 
      do j=1,n_wedge
         ttmp(j) = -pi+(j-1)*pi_2/n_wedge

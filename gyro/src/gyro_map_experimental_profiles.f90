@@ -23,8 +23,6 @@ subroutine gyro_map_experimental_profiles
 
   !-------------------------------------------------
   implicit none
-  ! 
-  real :: inter_fac
   !
   integer :: j1
   integer :: j2

@@ -19,8 +19,6 @@ subroutine gyro_write_timedata
   !---------------------------------------------------
   implicit none
   !
-  real, dimension(:,:,:), allocatable :: a3
-  !
   complex, dimension(n_theta_plot,n_x,n_kinetic) :: n_plot
   complex, dimension(n_theta_plot,n_x,n_kinetic) :: e_plot
   complex, dimension(n_theta_plot,n_x,n_kinetic) :: v_plot
