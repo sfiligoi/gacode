@@ -183,7 +183,7 @@ case "$PLOT_TYPE" in
 	python $PLT $PLOT_TYPE $W $SPECIES $MOMENT $EXT ;;
 
    flux)
-       python $PLT $PLOT_TYPE $W $FIELD $MOMENT $YMIN $YMAX $EXT ;;
+        python $PLT $PLOT_TYPE $W $FIELD $MOMENT $YMIN $YMAX $EXT ;;
 
    flux_i)
         python $PLT $PLOT_TYPE $W $FIELD $MOMENT $YMIN $YMAX $EXT ;;
@@ -197,7 +197,6 @@ case "$PLOT_TYPE" in
    flux_rt)
         python $PLT $PLOT_TYPE $W $FIELD $MOMENT $EXT ;;
 
- 
    fluctuation2d)
 	python $PYROOT/fluctuation2d.py $MOMENT $EXT ;;
 
