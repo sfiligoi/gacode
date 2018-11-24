@@ -596,7 +596,6 @@ class gyrodata_plot(data.GYROData):
       
       # Get n=0 moment data
       self.read_moment_zero()
-      self.read_source()
 
       if moment == 0:
          ntag = 'Density~moment'
@@ -627,15 +626,15 @@ class gyrodata_plot(data.GYROData):
       ax.set_ylabel(r'$'+mtag+'_'+u+'/\\rho_s$')
       ax.set_title(title)
 
-      f = np.array(self.moment_zero[:,species,moment,:])
+      f = self.moment_zero[:,species,moment,:]
       g = average_n(f,t,w,n_x)/self.profile['rho_s']
 
       ax.plot(r,g,label=r'moment',color='k')
 
-      f = np.array(self.source[species,moment,:,:])
+      f = self.moment_zero[:,species,moment+3,:]
       g = average_n(f,t,w,n_x)/self.profile['rho_s']
       
-      ax.plot(self.profile['r'],g,label=r'source',color='m',linewidth=3,alpha=0.2)
+      ax.plot(r,g,label=r'source',color='m',linewidth=3,alpha=0.2)
 
       ax.axvspan(r[0],r[nd-1],facecolor='g',alpha=0.1)
       ax.axvspan(r[-nd],r[-1],facecolor='g',alpha=0.1)

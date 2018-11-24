@@ -37,8 +37,7 @@ subroutine gyro_moments_plot
   !---------------------------------------------------
 
   moments_plot(:,:,:,:) = (0.0,0.0)
-  moments_zero_plot(:,:,:) = 0.0
-
+  moments_zero_plot(:,:,1:3) = 0.0
 
   do is=1,n_kinetic
 

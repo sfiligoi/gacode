@@ -135,7 +135,6 @@ module gyro_interface
   real    :: gyro_mach_in = 0.0
   real    :: gyro_mach_scale_in = 1.0
   integer :: gyro_lindiff_method_in = 1
-  integer :: gyro_trapdiff_flag_in = 0
   integer :: gyro_restart_new_flag_in = 1
   integer :: gyro_restart_data_skip_in = 10
   integer :: gyro_kill_i_parallel_flag_in = 0
@@ -156,6 +155,7 @@ module gyro_interface
   real    :: gyro_l_x_in = 64.0
   real    :: gyro_l_y_in = 64.0
   integer :: gyro_entropy_flag_in = 0
+  integer :: gyro_extra_print_flag_in = 0
   integer :: gyro_ord_rbf_in = 3
   integer :: gyro_num_equil_flag_in = 0
   real    :: gyro_zmag_in = 0.0
@@ -337,7 +337,6 @@ contains
     gyro_mach_in = mach0
     gyro_mach_scale_in = mach0_scale
     gyro_lindiff_method_in = lindiff_method
-    gyro_trapdiff_flag_in = trapdiff_flag
     gyro_restart_new_flag_in = restart_new_flag
     gyro_restart_data_skip_in = restart_data_skip
     gyro_kill_i_parallel_flag_in = kill_i_parallel_flag
@@ -358,6 +357,7 @@ contains
     gyro_l_x_in = l_x
     gyro_l_y_in = l_y
     gyro_entropy_flag_in = entropy_flag
+    gyro_extra_print_flag_in = extra_print_flag
     gyro_ord_rbf_in = ord_rbf
     gyro_num_equil_flag_in = num_equil_flag
     gyro_zmag_in = zmag0
@@ -534,7 +534,6 @@ contains
     mach0 = gyro_mach_in
     mach0_scale = gyro_mach_scale_in
     lindiff_method = gyro_lindiff_method_in
-    trapdiff_flag = gyro_trapdiff_flag_in
     restart_new_flag = gyro_restart_new_flag_in
     restart_data_skip = gyro_restart_data_skip_in
     kill_i_parallel_flag = gyro_kill_i_parallel_flag_in
@@ -555,6 +554,7 @@ contains
     l_x = gyro_l_x_in
     l_y = gyro_l_y_in
     entropy_flag = gyro_entropy_flag_in
+    extra_print_flag = gyro_extra_print_flag_in
     ord_rbf = gyro_ord_rbf_in
     num_equil_flag = gyro_num_equil_flag_in
     zmag0 = gyro_zmag_in
@@ -722,7 +722,6 @@ contains
     write(1,30) 'MACH',gyro_mach_in
     write(1,30) 'MACH_SCALE',gyro_mach_scale_in
     write(1,20) 'LINDIFF_METHOD',gyro_lindiff_method_in
-    write(1,20) 'TRAPDIFF_FLAG',gyro_trapdiff_flag_in
     write(1,20) 'RESTART_NEW_FLAG',gyro_restart_new_flag_in
     write(1,20) 'RESTART_DATA_SKIP',gyro_restart_data_skip_in
     write(1,20) 'KILL_I_PARALLEL_FLAG',gyro_kill_i_parallel_flag_in
@@ -743,6 +742,7 @@ contains
     write(1,30) 'L_X',gyro_l_x_in
     write(1,30) 'L_Y',gyro_l_y_in
     write(1,20) 'ENTROPY_FLAG',gyro_entropy_flag_in
+    write(1,20) 'EXTRA_PRINT_FLAG',gyro_extra_print_flag_in
     write(1,20) 'ORD_RBF',gyro_ord_rbf_in
     write(1,20) 'NUM_EQUIL_FLAG',gyro_num_equil_flag_in
     write(1,30) 'ZMAG',gyro_zmag_in

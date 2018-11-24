@@ -16,6 +16,7 @@ module gyro_globals
   integer, parameter :: fmtstr_len = 12
   ! Complex
   character(len=14) :: fmtstr2='(2(es11.4,1x))'
+  integer, parameter :: BYTE=4 ! Change to 8 for double precision
   !----------------------------------------------------
 
   !----------------------------------------------------
@@ -173,7 +174,6 @@ module gyro_globals
   integer :: verbose_flag
   integer :: debug_flag
   integer :: flat_profile_flag
-  integer :: trapdiff_flag
   integer :: kill_i_parallel_flag
   integer :: kill_i_drift_flag
   integer :: kill_e_drift_flag
@@ -185,6 +185,7 @@ module gyro_globals
   integer :: silent_flag
   integer :: eparallel_plot_flag
   integer :: entropy_flag
+  integer :: extra_print_flag
   integer :: num_equil_flag
   integer :: gkeigen_matrixonly
   integer :: gkeigen_mwrite_flag
@@ -866,19 +867,16 @@ module gyro_globals
   !------------------------------------------------
   ! Primitive fluxes:
   !
-  real, dimension(:,:,:,:), allocatable :: nonlinear_flux_passing
-  real, dimension(:,:,:,:), allocatable :: nonlinear_flux_trapped
+  real, dimension(:,:,:,:), allocatable :: nonlinear_flux
   real, dimension(:,:), allocatable :: nonlinear_flux_momparts
   real, dimension(:,:), allocatable :: nonlinear_flux_excparts
   !
   ! gyroBohm fluxes:
   !
   real, dimension(:,:,:,:), allocatable :: gbflux_i
-  real, dimension(:,:,:,:), allocatable :: gbflux_i_trapped
   real, dimension(:,:,:), allocatable :: gbflux
   real, dimension(:,:), allocatable :: gbflux_mom
   real, dimension(:,:), allocatable :: gbflux_exc
-  real, dimension(:,:,:), allocatable :: gbflux_trapped
   real, dimension(:,:,:), allocatable :: gbflux_n
   real, dimension(:,:,:,:), allocatable :: gbflux_vec
   !------------------------------------------------
@@ -889,7 +887,6 @@ module gyro_globals
   real :: nu_source
   !
   real, dimension(:,:,:), allocatable :: h0_eq
-  real, dimension(:,:,:), allocatable :: source
   !
   real :: total_memory
   real, dimension(:), allocatable :: krho_collect

@@ -130,13 +130,10 @@ subroutine gyro_memory_usage(data_file,io)
 
         call alloc_add(io,size(kxkyspec),8,'kxkyspec')
  
-        call alloc_add(io,size(nonlinear_flux_passing),8,'nonlinear_flux_passing')
-        call alloc_add(io,size(nonlinear_flux_trapped),8,'nonlinear_flux_trapped')
+        call alloc_add(io,size(nonlinear_flux),8,'nonlinear_flux')
 
         call alloc_add(io,size(gbflux_i),8,'gbflux_i')
-        call alloc_add(io,size(gbflux_i_trapped),8,'gbflux_i_trapped')
         call alloc_add(io,size(gbflux),8,'gbflux')
-        call alloc_add(io,size(gbflux_trapped),8,'gbflux_trapped')
         call alloc_add(io,size(gbflux_n),8,'gbflux_n')
 
         if (transport_method > 1) then
@@ -147,7 +144,6 @@ subroutine gyro_memory_usage(data_file,io)
         call alloc_add(io,size(entropy),8,'entropy')
 
         call alloc_add(io,size(h0_eq),8,'h0_eq')
-        call alloc_add(io,size(source),8,'source')
 
         !---------------------------------------------
         ! gyro_alloc_orbit

@@ -2,6 +2,8 @@ import os
 import numpy as np
 import sys
 
+BYTE='float32'
+
 class GYROData:
 
    """GYRO output data class."""
@@ -198,8 +200,8 @@ class GYROData:
       #-----------------------------------------------------------------
       # RMS field
       #
+      nd = 2*nt
       t,fmt,data = self.extract('.gyro.field_rms')
-      
       if fmt != 'null':
          self.field_rms = np.reshape(data[0:nd],(2,nt),'F')
          print "INFO: (data.py) Read data in "+fmt+".gyro.field_rms. "+t 
@@ -362,41 +364,19 @@ class GYROData:
 
    def read_moment_zero(self):
 
-      nt        = self.n
-      n_x       = self.profile['n_x']
-      n_kinetic = self.profile['n_kinetic']
-      nd        = n_x*n_kinetic*3*nt
+      nt   = self.n
+      n_x  = self.profile['n_x']
+      ns   = self.profile['n_kinetic']
+      nd   = n_x*ns*3*nt
       
       t,fmt,data = self.extract('.gyro.moment_zero')
-      if fmt != 'null':
-         self.moment_zero = np.reshape(data[0:nd],(n_x,n_kinetic,3,nt),'F')
+      if fmt == 'bin':
+         self.moment_zero = np.reshape(data[0:2*nd],(n_x,ns,6,nt),'F')
          print "INFO: (data.py) Read data in "+fmt+".gyro.moment_zero. "+t
-
-   def read_source(self):
-
-      nt        = self.n
-      n_x       = self.profile['n_x']
-      n_kinetic = self.profile['n_kinetic']
-      nd        = n_x*n_kinetic*3*nt
+      if fmt == 'out':
+         self.moment_zero = np.reshape(data[0:nd],(n_x,ns,3,nt),'F')
+         print "INFO: (data.py) Read data in "+fmt+".gyro.moment_zero. "+t
       
-      t,fmt,data = self.extract('.gyro.source')
-      if fmt != 'null':
-         self.source = np.reshape(data[0:nd],(n_kinetic,3,n_x,nt),'F')
-         print "INFO: (data.py) Read data in "+fmt+".gyro.source. "+t
-
-
-   def read_k_perp_squared(self):
-        """Reads out.gyro.k_perp_squared.
-           Output is numpy array with dimensions: (n_n,n_time)"""
-
-        try:
-            data = np.fromfile(self.dir+'/out.gyro.k_perp_squared',dtype=float,sep=" ")
-        except:
-            raise IOError("ERROR (GYROData): out.gyro.kperp_squared not found.")
-
-        t = len(data)/self.profile['n_n']
-        self.k_perp_squared = data.reshape((self.profile['n_n'],t),order='F')
-
    def read_balloon(self):
         """Reads out.gyro.balloon*.  Data is stored in self.balloon"""
 

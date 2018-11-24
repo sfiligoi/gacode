@@ -19,13 +19,14 @@ subroutine gyro_adaptive_source
   !
   real :: tmp(n_kinetic)
   real, dimension(n_kinetic,n_energy,n_x) :: h0_loc,h0_mod
-  real, dimension(n_kinetic,3,n_x) :: source_loc
+  real, dimension(n_x,n_kinetic,3) :: source
   real, dimension(:,:,:), allocatable :: src_3
   real, dimension(:,:,:,:), allocatable :: src_4
   !----------------------------------------------------
 
 
   h0_eq(:,:,:)  = 0.0
+  source(:,:,:) = 0.0
 
   if (source_method == 2) then
 
@@ -112,15 +113,16 @@ subroutine gyro_adaptive_source
      !----------------------------------------------------------------
 
      ! Source profile (diagnostic)
-     source(:,:,:) = 0.0
      do is=1,n_kinetic
         do ie=1,n_energy
-           source(is,1,:) = source(is,1,:)+h0_eq(is,ie,:)* &
+           source(:,is,1) = source(:,is,1)+h0_eq(is,ie,:)* &
                 w_energy(ie)
-           source(is,2,:) = source(is,2,:)+h0_eq(is,ie,:)* &
+           source(:,is,2) = source(:,is,2)+h0_eq(is,ie,:)* &
                 w_energy(ie)*energy(ie)
         enddo
      enddo
+
+     moments_zero_plot(:,:,4:5) = source(:,:,1:2)
 
   endif
 
@@ -171,8 +173,6 @@ subroutine gyro_adaptive_source
      deallocate(src_4)
 
      ! Source profile (diagnostic)
-     source_loc = 0.0
-
      p_nek_loc = 0
 
      if (n_1(in_1) == 0) then
@@ -186,23 +186,25 @@ subroutine gyro_adaptive_source
            do i=1,n_x
               do m=1,n_stack
                  tmp(:) = real(h_source(m,i,p_nek_loc,:))*w_p(ie,i,k)
-                 source_loc(:,1,i) = source_loc(:,1,i)+tmp
-                 source_loc(:,2,i) = source_loc(:,2,i)+tmp*energy(ie)
-                 source_loc(:,3,i) = source_loc(:,3,i)+tmp*v_para(m,i,p_nek_loc,:)
+                 source(i,:,1) = source(i,:,1)+tmp
+                 source(i,:,2) = source(i,:,2)+tmp*energy(ie)
+                 source(i,:,3) = source(i,:,3)+tmp*v_para(m,i,p_nek_loc,:)
               enddo ! m
            enddo ! i
         enddo ! p_nek
      endif
 
-     call MPI_ALLREDUCE(source_loc,&
-          source,&
+     ! Pack source into moments_zero_plot
+     
+     call MPI_ALLREDUCE(source,&
+          moments_zero_plot(:,:,4:6),&
           size(source),&
           MPI_DOUBLE_PRECISION,&
           MPI_SUM,&
           NEW_COMM_1,&
           i_err)
 
-     call MPI_BCAST(source,&
+     call MPI_BCAST(moments_zero_plot(:,:,4:6),&
           size(source),&
           MPI_DOUBLE_PRECISION,&
           0,&
