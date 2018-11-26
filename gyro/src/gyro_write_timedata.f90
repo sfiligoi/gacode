@@ -353,7 +353,7 @@ subroutine write_binary(datafile,io,n_fn,fn)
 
      ! Rewind
 
-     disp = data_step
+     disp = data_step+1
      disp = disp*size(fn)*BYTE
 
      open(unit=io,file=datafile,status='old',access='stream', iostat=i_err)
@@ -423,7 +423,7 @@ subroutine write_distributed_breal(datafile,io,n_fn,fn)
 
      ! Write in parallel to the binary datafile
      filemode = MPI_MODE_WRONLY
-     disp = data_step-1
+     disp = data_step
      disp = disp*n_proc_2*size(fn)*BYTE
 
      offset1 = i_proc_2*size(fn)
@@ -486,7 +486,7 @@ subroutine write_distributed_breal(datafile,io,n_fn,fn)
 
      if (i_proc == 0) then
 
-        disp = data_step
+        disp = data_step+1
         disp = disp*n_proc_2*size(fn)*BYTE
 
         open(unit=io,file=datafile,status='old',access='stream',iostat=i_err)
@@ -557,7 +557,7 @@ subroutine write_distributed_bcomplex(datafile,io,n_fn,fn)
 
      ! Write in parallel to the binary datafile
      filemode = MPI_MODE_WRONLY
-     disp = data_step-1
+     disp = data_step
      disp = disp*n_proc_2*size(fn)*BYTE*2
 
      offset1 = i_proc_2*size(fn)
@@ -620,7 +620,7 @@ subroutine write_distributed_bcomplex(datafile,io,n_fn,fn)
 
      if (i_proc == 0) then
 
-        disp = data_step
+        disp = data_step+1
         disp = disp*n_proc_2*size(fn)*BYTE*2
 
         open(unit=io,file=datafile,status='old',access='stream',iostat=i_err)
