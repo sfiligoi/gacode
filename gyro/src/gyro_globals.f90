@@ -643,6 +643,8 @@ module gyro_globals
   !
   real :: dlnndr_vec(0:10)
   real :: dlntdr_vec(0:10)
+  real :: sdlnndr_vec(0:10)
+  real :: sdlntdr_vec(0:10)
   real :: eps_dlnndr_vec(0:10)
   real :: eps_dlntdr_vec(0:10)
   real :: n_vec(0:10)
@@ -729,6 +731,8 @@ module gyro_globals
   real, dimension(:,:), allocatable :: tem_s
   real, dimension(:,:), allocatable :: dlnndr_s 
   real, dimension(:,:), allocatable :: dlntdr_s 
+  real, dimension(:), allocatable :: sdlnndr
+  real, dimension(:), allocatable :: sdlntdr 
   real, dimension(:,:), allocatable :: alpha_s
   real, dimension(:,:), allocatable :: nu_s   
   real, dimension(:,:), allocatable :: pr_s

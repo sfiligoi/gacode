@@ -152,6 +152,14 @@ subroutine gyro_profile_init
      ! Explicit sign convention
      q0 = q0*(ipccw)*(btccw)
 
+     ! Profile shears (constant)
+     do is=1,n_ion
+        sdlnndr(is) = sdlnndr_vec(is) 
+        sdlntdr(is) = sdlntdr_vec(is)
+     enddo
+     sdlnndr(n_spec) = sdlnndr_vec(0)
+     sdlntdr(n_spec) = sdlntdr_vec(0)
+
      do i=1,n_x
 
         shat_s(i) = s0
@@ -318,6 +326,8 @@ subroutine gyro_profile_init
      tem_s(1:n_spec,:)    = tem_s(n_spec:1:-1,:)
      dlntdr_s(1:n_spec,:) = dlntdr_s(n_spec:1:-1,:)
      dlnndr_s(1:n_spec,:) = dlnndr_s(n_spec:1:-1,:)
+     sdlntdr(1:n_spec)    = sdlntdr(n_spec:1:-1)
+     sdlnndr(1:n_spec)    = sdlnndr(n_spec:1:-1)
   endif
   !------------------------------------------------------------------
 
@@ -483,7 +493,7 @@ subroutine gyro_profile_init
            ! q, as always, needs a linear form here:
 
            q(i) = q_s(ir_norm)+   &
-                q_s(ir_norm)/r(ir_norm)*shat_s(ir_norm)*(r(i)-r(ir_norm))
+                q_s(ir_norm)/r_norm*shat_s(ir_norm)*(r(i)-r_norm)
 
         endif
 
@@ -512,17 +522,16 @@ subroutine gyro_profile_init
 
         tem_s(:,i)    = tem_s(:,ir_norm)
         den_s(:,i)    = den_s(:,ir_norm)
-        !if (unflat_dlntdr_flag == 0) dlntdr_s(:,i) = dlntdr_s(:,ir_norm)
-        !if (unflat_dlnndr_flag == 0) dlnndr_s(:,i) = dlnndr_s(:,ir_norm)
-        dlntdr_s(:,i) = dlntdr_s(:,ir_norm)
-        dlnndr_s(:,i) = dlnndr_s(:,ir_norm)
         dlnpdr_s(i)   = dlnpdr_s(ir_norm)
         pr_s(:,i)     = pr_s(:,ir_norm)
         alpha_s(:,i)  = alpha_s(:,ir_norm)
         krho_i(:,i)   = krho_i(:,ir_norm)
 
-        omega_eb_s(:) = gamma_e_s(ir_norm)*&
-             n_1(in_1)*q_norm/r_norm*(r(:)-r_norm)
+        dlntdr_s(:,i) = dlntdr_s(:,ir_norm)+(r(i)-r_norm)*sdlntdr(:)/rhosda_s(ir_norm)
+        dlnndr_s(:,i) = dlnndr_s(:,ir_norm)+(r(i)-r_norm)*sdlnndr(:)/rhosda_s(ir_norm)
+
+        omega_eb_s(i) = gamma_e_s(ir_norm)*&
+             n_1(in_1)*q_norm/r_norm*(r(i)-r_norm)
 
         a_fourier_geo_s(:,:,i) = a_fourier_geo_s(:,:,ir_norm)
 
@@ -531,6 +540,8 @@ subroutine gyro_profile_init
   endif
   !----------------------------------------------------------
 
+  if (i_proc == 0) print *,dlntdr_s(1,1),dlntdr_s(1,n_x)
+  
   !------------------------------------------------------
   ! Compute true Debye length at box center if profile
   ! data is available:
