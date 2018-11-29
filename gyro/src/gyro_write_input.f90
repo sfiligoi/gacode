@@ -107,23 +107,6 @@ subroutine gyro_write_input
   nu_tag(n_spec) = '(NU_EI)'
   !--------------------------------------------------
 
-  call send_line('----------------- UTILITY PARAMETERS ----------------------')
-  if (kill_i_parallel_flag == 0) then
-     call send_line('Ion parallel motion     : ON')
-  else
-     call send_line('Ion parallel motion     : OFF')
-  endif
-  if (kill_i_drift_flag == 0) then
-     call send_line('Ion curvature drift     : ON')
-  else
-     call send_line('Ion curvature drift     : OFF')
-  endif
-  if (kill_e_drift_flag == 0) then
-     call send_line('Electron curvature drift: ON')
-  else
-     call send_line('Electron curvature drift: OFF')
-  endif
-
   if (i_proc == 0 .and. output_flag == 1 .and. gkeigen_j_set == 0) then
      open(unit=1,file=trim(runfile),status='old',position='append')
 
@@ -213,17 +196,6 @@ subroutine gyro_write_input
      enddo
      !--------------------------------------------
 
-     write(1,*) '--------------------- TGLF PARAMETERS ---------------------'
-     write(1,20) 'Q_PRIME',(q_norm/r_norm)**2*shat_norm
-     write(1,20) 'P_PRIME',-1.0*(q_norm/r_norm)*beta_unit_s(ir_norm)/(8*pi)*dlnpdr_s(ir_norm)
-     write(1,*) '---------------------- GS2 PARAMETERS ---------------------'
-     write(1,*) '        [User must set R_geo=Rmaj in GS2 namelist]'
-     write(1,20) 'B_unit/B_T0',rmaj_s(ir_norm)/GEO_f
-     write(1,20) 'tri',asin(delta_s(ir_norm))
-     write(1,20) 'akappri',s_kappa_s(ir_norm)*kappa_s(ir_norm)/r_norm
-     write(1,20) 'tripri',s_delta_s(ir_norm)/sqrt(1-delta_s(ir_norm)**2)/r_norm
-     write(1,20) 'beta',betae_unit_norm*(rmaj_s(ir_norm)/GEO_f)**2
-     write(1,20) 'beta_prime_input',-beta_star_s(ir_norm)*(rmaj_s(ir_norm)/GEO_f)**2
      write(1,*) '------------- LOCAL PARAMETERS (diagnostic) ---------------'
      write(1,20) 'n_i*z_i - n_e: ',neutral
      write(1,20) 'r/R0',r(ir_norm)/rmaj_s(ir_norm)
@@ -272,12 +244,10 @@ subroutine gyro_write_input
         write(1,10) 'n_source',n_source
      endif
      write(1,*) '--------------- RADIAL DOMAIN PARAMETERS ------------------'
-     write(1,20) 's_grid',s_grid
      write(1,20) 'box_multiplier',box_multiplier
      write(1,20) 'L/a',x_length
      write(1,*) '--'
-     write(1,40) 'explicit_damp(i)',n_explicit_damp,explicit_damp
-     write(1,40) 'explicit_damp(e)',n_explicit_damp,explicit_damp_elec
+     write(1,40) 'explicit_damp',n_explicit_damp,explicit_damp
      write(1,*) '--'
      write(1,20) 'LEFT : r_a',r(1)
      write(1,20) 'LEFT : r_a_physical',r(1+n_explicit_damp) 

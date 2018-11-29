@@ -31,8 +31,6 @@ subroutine gyro_radial_simulation_box
   endif
   !------------------------------------------------------
 
-  if (s_grid == 0.0) s_grid = s0
-
   !---------------------------------------------------------
   ! If box_multiplier < 0, recompute d_n and box_multiplier
   ! based on values set by l_x and l_y.
@@ -44,7 +42,7 @@ subroutine gyro_radial_simulation_box
         ! NONLINEAR: use l_x,l_y
 
         rho_star = abs(2*pi*r0/(n_ref*q0*l_y))*(-btccw)
-        box_multiplier = abs(2*pi*s_grid*l_x/l_y)
+        box_multiplier = abs(2*pi*s0*l_x/l_y)
 
      else
 
@@ -61,7 +59,7 @@ subroutine gyro_radial_simulation_box
   !------------------------------------------------------
   ! Set box length (might be reset later)
   !
-  x_length = abs(box_multiplier*r0/(n_ref*q0*s_grid))
+  x_length = abs(box_multiplier*r0/(n_ref*q0*s0))
   !------------------------------------------------------
 
   !------------------------------------------------------

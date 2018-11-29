@@ -49,7 +49,6 @@ module gyro_interface
   integer :: gyro_radial_gyro_band_in = 3
   integer :: gyro_explicit_damp_grid_in = 8
   real    :: gyro_explicit_damp_in = 1.0
-  real    :: gyro_explicit_damp_elec_in = 1.0
   integer :: gyro_debug_flag_in = 0
   integer :: gyro_nonlinear_flag_in = 0
   real    :: gyro_amp_phi_n_in = 1.0e-4
@@ -69,7 +68,6 @@ module gyro_interface
   integer :: gyro_source_method_in = 1
   real    :: gyro_nu_source_in = 0.1
   integer :: gyro_verbose_flag_in = 0
-  real    :: gyro_s_grid_in = 0.0
   real    :: gyro_gamma_e_in = 0.0
   real    :: gyro_nu_ei_in = 0.0
   real    :: gyro_nu_ei_scale_in = 1.0
@@ -137,9 +135,6 @@ module gyro_interface
   integer :: gyro_lindiff_method_in = 1
   integer :: gyro_restart_new_flag_in = 1
   integer :: gyro_restart_data_skip_in = 10
-  integer :: gyro_kill_i_parallel_flag_in = 0
-  integer :: gyro_kill_i_drift_flag_in = 0
-  integer :: gyro_kill_e_drift_flag_in = 0
   integer :: gyro_kill_coll_flag_in = 1
   real    :: gyro_doppler_scale_in = 1.0
   integer :: gyro_nl_method_in = 1
@@ -251,7 +246,6 @@ contains
     gyro_radial_gyro_band_in = m_gyro
     gyro_explicit_damp_grid_in = n_explicit_damp
     gyro_explicit_damp_in = explicit_damp
-    gyro_explicit_damp_elec_in = explicit_damp_elec
     gyro_debug_flag_in = debug_flag
     gyro_nonlinear_flag_in = nonlinear_flag
     gyro_amp_phi_n_in = amp_n
@@ -271,7 +265,6 @@ contains
     gyro_source_method_in = source_method
     gyro_nu_source_in = nu_source
     gyro_verbose_flag_in = verbose_flag
-    gyro_s_grid_in = s_grid
     gyro_gamma_e_in = gamma_e
     gyro_nu_ei_in = nu_ei
     gyro_nu_ei_scale_in = nu_ei_scale
@@ -339,9 +332,6 @@ contains
     gyro_lindiff_method_in = lindiff_method
     gyro_restart_new_flag_in = restart_new_flag
     gyro_restart_data_skip_in = restart_data_skip
-    gyro_kill_i_parallel_flag_in = kill_i_parallel_flag
-    gyro_kill_i_drift_flag_in = kill_i_drift_flag
-    gyro_kill_e_drift_flag_in = kill_e_drift_flag
     gyro_kill_coll_flag_in = kill_coll_flag
     gyro_doppler_scale_in = doppler_scale
     gyro_nl_method_in = nl_method
@@ -448,7 +438,6 @@ contains
     m_gyro = gyro_radial_gyro_band_in
     n_explicit_damp = gyro_explicit_damp_grid_in
     explicit_damp = gyro_explicit_damp_in
-    explicit_damp_elec = gyro_explicit_damp_elec_in
     debug_flag = gyro_debug_flag_in
     nonlinear_flag = gyro_nonlinear_flag_in
     amp_n = gyro_amp_phi_n_in
@@ -468,7 +457,6 @@ contains
     source_method = gyro_source_method_in
     nu_source = gyro_nu_source_in
     verbose_flag = gyro_verbose_flag_in
-    s_grid = gyro_s_grid_in
     gamma_e = gyro_gamma_e_in
     nu_ei = gyro_nu_ei_in
     nu_ei_scale = gyro_nu_ei_scale_in
@@ -536,9 +524,6 @@ contains
     lindiff_method = gyro_lindiff_method_in
     restart_new_flag = gyro_restart_new_flag_in
     restart_data_skip = gyro_restart_data_skip_in
-    kill_i_parallel_flag = gyro_kill_i_parallel_flag_in
-    kill_i_drift_flag = gyro_kill_i_drift_flag_in
-    kill_e_drift_flag = gyro_kill_e_drift_flag_in
     kill_coll_flag = gyro_kill_coll_flag_in
     doppler_scale = gyro_doppler_scale_in
     nl_method = gyro_nl_method_in
@@ -636,7 +621,6 @@ contains
     write(1,20) 'RADIAL_GYRO_BAND',gyro_radial_gyro_band_in
     write(1,20) 'EXPLICIT_DAMP_GRID',gyro_explicit_damp_grid_in
     write(1,30) 'EXPLICIT_DAMP',gyro_explicit_damp_in
-    write(1,30) 'EXPLICIT_DAMP_ELEC',gyro_explicit_damp_elec_in
     write(1,20) 'DEBUG_FLAG',gyro_debug_flag_in
     write(1,20) 'NONLINEAR_FLAG',gyro_nonlinear_flag_in
     write(1,30) 'AMP_PHI_N',gyro_amp_phi_n_in
@@ -656,7 +640,6 @@ contains
     write(1,20) 'SOURCE_METHOD',gyro_source_method_in
     write(1,30) 'NU_SOURCE',gyro_nu_source_in
     write(1,20) 'VERBOSE_FLAG',gyro_verbose_flag_in
-    write(1,30) 'S_GRID',gyro_s_grid_in
     write(1,30) 'GAMMA_E',gyro_gamma_e_in
     write(1,30) 'NU_EI',gyro_nu_ei_in
     write(1,30) 'NU_EI_SCALE',gyro_nu_ei_scale_in
@@ -724,9 +707,6 @@ contains
     write(1,20) 'LINDIFF_METHOD',gyro_lindiff_method_in
     write(1,20) 'RESTART_NEW_FLAG',gyro_restart_new_flag_in
     write(1,20) 'RESTART_DATA_SKIP',gyro_restart_data_skip_in
-    write(1,20) 'KILL_I_PARALLEL_FLAG',gyro_kill_i_parallel_flag_in
-    write(1,20) 'KILL_I_DRIFT_FLAG',gyro_kill_i_drift_flag_in
-    write(1,20) 'KILL_E_DRIFT_FLAG',gyro_kill_e_drift_flag_in
     write(1,20) 'KILL_COLL_FLAG',gyro_kill_coll_flag_in
     write(1,30) 'DOPPLER_SCALE',gyro_doppler_scale_in
     write(1,20) 'NL_METHOD',gyro_nl_method_in

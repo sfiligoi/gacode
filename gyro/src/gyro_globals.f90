@@ -174,9 +174,6 @@ module gyro_globals
   integer :: verbose_flag
   integer :: debug_flag
   integer :: flat_profile_flag
-  integer :: kill_i_parallel_flag
-  integer :: kill_i_drift_flag
-  integer :: kill_e_drift_flag
   integer :: kill_coll_flag
   integer :: kill_gyro_b_flag
   integer :: geo_array_print_flag
@@ -449,7 +446,6 @@ module gyro_globals
   integer :: n_explicit_damp
   !
   real :: explicit_damp
-  real :: explicit_damp_elec
   real, dimension(:,:), allocatable :: explicit_damp_vec
   !---------------------------------------------------------
 
@@ -663,8 +659,6 @@ module gyro_globals
   real :: nu_ei
   real :: nu_ei_scale
   real :: nu_ii_scale
-  !
-  real :: s_grid
   !
   ! Scales experimental ExB
   real :: doppler_scale

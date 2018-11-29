@@ -129,7 +129,7 @@ subroutine gyro_radial_operators
         if (n_1(in_1) == 0) then
            if (i <= n_explicit_damp .or. i > n_x-n_explicit_damp) then
               explicit_damp_vec(:,i)      = explicit_damp
-              explicit_damp_vec(indx_e,i) = explicit_damp_elec
+              explicit_damp_vec(indx_e,i) = explicit_damp
            endif
         endif
      enddo
