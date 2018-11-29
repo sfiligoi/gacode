@@ -530,17 +530,7 @@ subroutine gyro_select_methods
 
      call catch_error('ERROR: (GYRO) source_method')
 
-  end select
-
-  if (source_method > 1) then
-     ! There are 4 more partial lumps than full lumps.
-     n_lump = 4+n_source
-
-     if (n_lump < 5) then
-        call catch_error('ERROR: (GYRO) N_SOURCE TOO SMALL')
-     endif
-  endif
-  
+  end select  
   !----------------------------------------------------
 
   !-------------------------------------------------------
