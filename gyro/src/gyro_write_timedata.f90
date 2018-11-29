@@ -112,7 +112,7 @@ subroutine gyro_write_timedata
        kxkyspec)
 
   if (i_proc == 0 .and. extra_print_flag == 1) then
-     call write_binary(&
+     call gyro_write_binary(&
           trim(path)//'bin.gyro.k_perp_squared',&
           10,&
           size(k_perp_squared),&
@@ -222,12 +222,12 @@ subroutine gyro_write_timedata
 
      if (i_proc == 0 .and. lindiff_method > 1) then
 
-        call write_binary( &
+        call gyro_write_binary( &
              trim(path)//'bin.gyro.gbflux',10,size(gbflux),gbflux)
         if (extra_print_flag == 1) then
-           call write_binary( &
+           call gyro_write_binary( &
                 trim(path)//'bin.gyro.gbflux_mom',10,size(gbflux_mom),gbflux_mom)
-           call write_binary( &
+           call gyro_write_binary( &
                 trim(path)//'bin.gyro.gbflux_i',10,size(gbflux_i),gbflux_i)
         endif
         
@@ -251,25 +251,25 @@ subroutine gyro_write_timedata
 
      if (i_proc == 0) then
 
-        call write_binary( &
+        call gyro_write_binary( &
              trim(path)//'bin.gyro.gbflux',10,size(gbflux),gbflux)
 
-        call write_binary( &
+        call gyro_write_binary( &
              trim(path)//'bin.gyro.gbflux_i',10,size(gbflux_i),gbflux_i)
 
-        call write_binary( &
+        call gyro_write_binary( &
              trim(path)//'bin.gyro.moment_zero',10,&
              size(moments_zero_plot),moments_zero_plot)
 
-        call write_binary(&
+        call gyro_write_binary(&
              trim(path)//'bin.gyro.field_rms',10,size(ave_phi),ave_phi)
 
         if (extra_print_flag == 1) then
-           call write_binary( &
+           call gyro_write_binary( &
                 trim(path)//'bin.gyro.gbflux_mom',10,size(gbflux_mom),gbflux_mom)
-           call write_binary( &
+           call gyro_write_binary( &
                 trim(path)//'bin.gyro.gbflux_exc',10,size(gbflux_exc),gbflux_exc)
-           call write_binary( &
+           call gyro_write_binary( &
                 trim(path)//'bin.gyro.zerobar',10,&
                 size(field_fluxave),transpose(field_fluxave))
         endif
@@ -291,7 +291,7 @@ subroutine gyro_write_timedata
   if (entropy_flag == 1) then
      call gyro_entropy 
      if (i_proc == 0) then 
-        call write_binary(&
+        call gyro_write_binary(&
              trim(path)//'bin.gyro.entropy.out',10,size(entropy),entropy)
      endif
   endif
@@ -311,7 +311,7 @@ subroutine gyro_write_timedata
 
 end subroutine gyro_write_timedata
 
-subroutine write_binary(datafile,io,n_fn,fn)
+subroutine gyro_write_binary(datafile,io,n_fn,fn)
 
   use gyro_globals, only: BYTE,io_control,data_step,i_proc
 
@@ -374,7 +374,7 @@ subroutine write_binary(datafile,io,n_fn,fn)
 
   end select
 
-end subroutine write_binary
+end subroutine gyro_write_binary
 
 subroutine write_distributed_breal(datafile,io,n_fn,fn)
 
