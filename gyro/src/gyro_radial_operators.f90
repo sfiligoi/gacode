@@ -57,8 +57,6 @@ subroutine gyro_radial_operators
   !
   if (source_method > 1) then
 
-     n_lump = n_source
-
      n_node = n_lump+3
 
      allocate(r_node(n_node))

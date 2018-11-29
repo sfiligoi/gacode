@@ -119,6 +119,7 @@ subroutine gyro_alloc_profile_sim(flag)
 
      if (source_method > 1) then
         ! Source arrays
+        n_lump = n_source
         allocate(b_src(n_x,n_lump))
         allocate(m_src(n_lump,n_lump))
         allocate(src_piv(n_lump))
