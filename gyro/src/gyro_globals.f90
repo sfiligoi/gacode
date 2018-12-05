@@ -609,8 +609,12 @@ module gyro_globals
   real :: zmag0
   real :: dzmag0
   real :: alpha_mhd0
-  real :: pgamma0
-  real :: mach0
+  real :: gamma_e
+  real :: gamma_e_scale
+  real :: gamma_p
+  real :: gamma_p_scale
+  real :: mach
+  real :: mach_scale
   real :: r_maj
   real :: r0
   real :: x_length
@@ -619,7 +623,6 @@ module gyro_globals
   real :: betae_unit
   real :: ampere_scale
   real :: geo_betaprime_scale
-  real :: gamma_e
   real :: lambda_debye_scale
   real :: lambda_debye
   !---------------------------------------------------------
@@ -659,18 +662,6 @@ module gyro_globals
   real :: nu_ei
   real :: nu_ei_scale
   real :: nu_ii_scale
-  !
-  ! Scales experimental ExB
-  real :: doppler_scale
-  ! 
-  ! Scales experimental q-profile but preserves s
-  real :: q_scale 
-  !
-  ! Scales experimental pgamma  
-  real :: pgamma0_scale
-  !
-  ! Scales experimental  mach 
-  real :: mach0_scale
   !
   ! Geometry Fourier coefficients
   integer :: n_fourier_geo

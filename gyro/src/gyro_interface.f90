@@ -68,7 +68,6 @@ module gyro_interface
   integer :: gyro_source_method_in = 1
   real    :: gyro_nu_source_in = 0.1
   integer :: gyro_verbose_flag_in = 0
-  real    :: gyro_gamma_e_in = 0.0
   real    :: gyro_nu_ei_in = 0.0
   real    :: gyro_nu_ei_scale_in = 1.0
   real    :: gyro_nu_ii_scale_in = 0.0
@@ -128,18 +127,18 @@ module gyro_interface
   real    :: gyro_orbit_upwind_4_in = 1.0
   real    :: gyro_orbit_upwind_5_in = 1.0
   real    :: gyro_orbit_upwind_electron_in = 1.0
-  real    :: gyro_pgamma_in = 0.0
-  real    :: gyro_pgamma_scale_in = 1.0
+  real    :: gyro_gamma_e_in = 0.0
+  real    :: gyro_gamma_e_scale_in = 1.0
+  real    :: gyro_gamma_p_in = 0.0
+  real    :: gyro_gamma_p_scale_in = 1.0
   real    :: gyro_mach_in = 0.0
   real    :: gyro_mach_scale_in = 1.0
   integer :: gyro_lindiff_method_in = 1
   integer :: gyro_restart_new_flag_in = 1
   integer :: gyro_restart_data_skip_in = 10
   integer :: gyro_kill_coll_flag_in = 1
-  real    :: gyro_doppler_scale_in = 1.0
   integer :: gyro_nl_method_in = 1
   integer :: gyro_kill_gyro_b_flag_in = 0
-  real    :: gyro_q_scale_in = 1.0
   integer :: gyro_dist_print_flag_in = 0
   integer :: gyro_udsymmetry_flag_in = 1
   integer :: gyro_gyro_method_in = 1
@@ -265,7 +264,6 @@ contains
     gyro_source_method_in = source_method
     gyro_nu_source_in = nu_source
     gyro_verbose_flag_in = verbose_flag
-    gyro_gamma_e_in = gamma_e
     gyro_nu_ei_in = nu_ei
     gyro_nu_ei_scale_in = nu_ei_scale
     gyro_nu_ii_scale_in = nu_ii_scale
@@ -325,18 +323,18 @@ contains
     gyro_orbit_upwind_4_in = orbit_upwind_vec(4)
     gyro_orbit_upwind_5_in = orbit_upwind_vec(5)
     gyro_orbit_upwind_electron_in = orbit_upwind_vec(0)
-    gyro_pgamma_in = pgamma0
-    gyro_pgamma_scale_in = pgamma0_scale
-    gyro_mach_in = mach0
-    gyro_mach_scale_in = mach0_scale
+    gyro_gamma_e_in = gamma_e
+    gyro_gamma_e_scale_in = gamma_e_scale
+    gyro_gamma_p_in = gamma_p
+    gyro_gamma_p_scale_in = gamma_p_scale
+    gyro_mach_in = mach
+    gyro_mach_scale_in = mach_scale
     gyro_lindiff_method_in = lindiff_method
     gyro_restart_new_flag_in = restart_new_flag
     gyro_restart_data_skip_in = restart_data_skip
     gyro_kill_coll_flag_in = kill_coll_flag
-    gyro_doppler_scale_in = doppler_scale
     gyro_nl_method_in = nl_method
     gyro_kill_gyro_b_flag_in = kill_gyro_b_flag
-    gyro_q_scale_in = q_scale
     gyro_dist_print_flag_in = dist_print
     gyro_udsymmetry_flag_in = udsymmetry_flag
     gyro_gyro_method_in = gyro_method
@@ -457,7 +455,6 @@ contains
     source_method = gyro_source_method_in
     nu_source = gyro_nu_source_in
     verbose_flag = gyro_verbose_flag_in
-    gamma_e = gyro_gamma_e_in
     nu_ei = gyro_nu_ei_in
     nu_ei_scale = gyro_nu_ei_scale_in
     nu_ii_scale = gyro_nu_ii_scale_in
@@ -517,18 +514,18 @@ contains
     orbit_upwind_vec(4) = gyro_orbit_upwind_4_in
     orbit_upwind_vec(5) = gyro_orbit_upwind_5_in
     orbit_upwind_vec(0) = gyro_orbit_upwind_electron_in
-    pgamma0 = gyro_pgamma_in
-    pgamma0_scale = gyro_pgamma_scale_in
-    mach0 = gyro_mach_in
-    mach0_scale = gyro_mach_scale_in
+    gamma_e = gyro_gamma_e_in
+    gamma_e_scale = gyro_gamma_e_scale_in
+    gamma_p = gyro_gamma_p_in
+    gamma_p_scale = gyro_gamma_p_scale_in
+    mach = gyro_mach_in
+    mach_scale = gyro_mach_scale_in
     lindiff_method = gyro_lindiff_method_in
     restart_new_flag = gyro_restart_new_flag_in
     restart_data_skip = gyro_restart_data_skip_in
     kill_coll_flag = gyro_kill_coll_flag_in
-    doppler_scale = gyro_doppler_scale_in
     nl_method = gyro_nl_method_in
     kill_gyro_b_flag = gyro_kill_gyro_b_flag_in
-    q_scale = gyro_q_scale_in
     dist_print = gyro_dist_print_flag_in
     udsymmetry_flag = gyro_udsymmetry_flag_in
     gyro_method = gyro_gyro_method_in
@@ -640,7 +637,6 @@ contains
     write(1,20) 'SOURCE_METHOD',gyro_source_method_in
     write(1,30) 'NU_SOURCE',gyro_nu_source_in
     write(1,20) 'VERBOSE_FLAG',gyro_verbose_flag_in
-    write(1,30) 'GAMMA_E',gyro_gamma_e_in
     write(1,30) 'NU_EI',gyro_nu_ei_in
     write(1,30) 'NU_EI_SCALE',gyro_nu_ei_scale_in
     write(1,30) 'NU_II_SCALE',gyro_nu_ii_scale_in
@@ -700,18 +696,18 @@ contains
     write(1,30) 'ORBIT_UPWIND_4',gyro_orbit_upwind_4_in
     write(1,30) 'ORBIT_UPWIND_5',gyro_orbit_upwind_5_in
     write(1,30) 'ORBIT_UPWIND_ELECTRON',gyro_orbit_upwind_electron_in
-    write(1,30) 'PGAMMA',gyro_pgamma_in
-    write(1,30) 'PGAMMA_SCALE',gyro_pgamma_scale_in
+    write(1,30) 'GAMMA_E',gyro_gamma_e_in
+    write(1,30) 'GAMMA_E_SCALE',gyro_gamma_e_scale_in
+    write(1,30) 'GAMMA_P',gyro_gamma_p_in
+    write(1,30) 'GAMMA_P_SCALE',gyro_gamma_p_scale_in
     write(1,30) 'MACH',gyro_mach_in
     write(1,30) 'MACH_SCALE',gyro_mach_scale_in
     write(1,20) 'LINDIFF_METHOD',gyro_lindiff_method_in
     write(1,20) 'RESTART_NEW_FLAG',gyro_restart_new_flag_in
     write(1,20) 'RESTART_DATA_SKIP',gyro_restart_data_skip_in
     write(1,20) 'KILL_COLL_FLAG',gyro_kill_coll_flag_in
-    write(1,30) 'DOPPLER_SCALE',gyro_doppler_scale_in
     write(1,20) 'NL_METHOD',gyro_nl_method_in
     write(1,20) 'KILL_GYRO_B_FLAG',gyro_kill_gyro_b_flag_in
-    write(1,30) 'Q_SCALE',gyro_q_scale_in
     write(1,20) 'DIST_PRINT_FLAG',gyro_dist_print_flag_in
     write(1,20) 'UDSYMMETRY_FLAG',gyro_udsymmetry_flag_in
     write(1,20) 'GYRO_METHOD',gyro_gyro_method_in

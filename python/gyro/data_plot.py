@@ -403,12 +403,13 @@ class gyrodata_plot(data.GYROData):
          u = specmap(1.0/self.profile['mu'][ispec]**2,self.profile['z'][ispec])
          label = r'$'+mtag+mnorm+'_'+u+'/'+mtag+'_\mathrm{GB}: '+str(round(ave,3))+'$'
          # Average
-         ax.plot(r[nd-1:-nd],ave*one[nd-1:-nd],'--',color=color[ispec])
+         ax.plot(r[nd:-(nd+1)],ave*one[nd:-(nd+1)],'--',color=color[ispec])
          # Time trace
          ax.plot(r,avei[:],label=label,color=color[ispec])
 
-      ax.axvspan(r[0],r[nd-1],facecolor='g',alpha=0.1)
-      ax.axvspan(r[-nd],r[-1],facecolor='g',alpha=0.1)
+      if nd > 0:
+         ax.axvspan(r[0],r[nd],facecolor='g',alpha=0.1)
+         ax.axvspan(r[-(nd+1)],r[-1],facecolor='g',alpha=0.1)
       ax.set_xlim(r[0],r[-1])
 
       if ymax != 'auto':

@@ -191,9 +191,9 @@ subroutine gyro_profile_init
 
         ! Rotation with correct helicity
 
-        gamma_p_s(i) = pgamma0
+        gamma_p_s(i) = gamma_p
         gamma_e_s(i) = gamma_e
-        mach_s(i)    = mach0
+        mach_s(i)    = mach
 
         ! Total pressure not available
         dlnptotdr_s(i) = 0.0
@@ -430,26 +430,26 @@ subroutine gyro_profile_init
   !
   if (radial_profile_method == 3) then
 
-     mach_s(:)     = mach_s(:)*mach0_scale
-     gamma_e_s(:)  = gamma_e_s(:)/csda_norm*doppler_scale
-     gamma_p_s(:)  = gamma_p_s(:)/csda_norm*pgamma0_scale
-     w0_s(:)       = w0_s(:)/csda_norm*doppler_scale
+     mach_s(:)     = mach_s(:)*mach_scale
+     gamma_e_s(:)  = gamma_e_s(:)/csda_norm*gamma_e_scale
+     gamma_p_s(:)  = gamma_p_s(:)/csda_norm*gamma_p_scale
+     w0_s(:)       = w0_s(:)/csda_norm*gamma_e_scale
 
      omega_eb_s(:) = -n_1(in_1)*w0_s(:)
 
-     if (mach0_scale /= 1.0) then
+     if (mach_scale /= 1.0) then
         call send_message_real('INFO: (GYRO) Scaling experimental Mach number by ',&
-             mach0_scale)
+             mach_scale)
      endif
 
-     if (pgamma0_scale /= 1.0) then
+     if (gamma_p_scale /= 1.0) then
         call send_message_real('INFO: (GYRO) Scaling experimental gamma_p by ',&
-             pgamma0_scale)
+             gamma_p_scale)
      endif
 
-     if (doppler_scale /= 1.0) then
+     if (gamma_e_scale /= 1.0) then
         call send_message_real('INFO: (GYRO) Scaling experimental gamma_e by ',&
-             doppler_scale)
+             gamma_e_scale)
      endif
 
      !---------------------------------------------------------
