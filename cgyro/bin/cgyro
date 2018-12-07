@@ -154,9 +154,9 @@ while [ $# -gt 0 ] ; do
   -compress) COMPRESS_FLAG=1 ;;
 
   -bin) BIN_FLAG=1 ;;
-  
+
   -cbin) CBIN_FLAG=1 ;;
-  
+
   -globalmap) GLOBALMAP_FLAG=1 ;;
 
   -rhos) shift ; RHOS=$1 ;;
