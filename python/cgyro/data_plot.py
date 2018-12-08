@@ -616,7 +616,6 @@ class cgyrodata_plot(data.cgyrodata):
          g0 = self.lky_flux_ave[ispec,0]
          label = r'$'+mtag+mnorm+'_'+u+'/'+mtag+'_\mathrm{GB}: '+str(round(g0,3))+'$'
          ax.plot([-e,e],[g0,g0],'o-',color=color[ispec],alpha=0.2,linewidth=3,label=label)
-         print 'INFO: (plot_xflux) Partial-domain average '+u+' : '+str(g0)
          #---------------------------------
 
          #---------------------------------
@@ -624,20 +623,20 @@ class cgyrodata_plot(data.cgyrodata):
          g1 = self.lky_flux_ave[ispec,1]
          ax.plot([0.5-e,0.5],[g1,g1],'o--',color=color[ispec],alpha=0.2,linewidth=3)
          ax.plot([-0.5,-0.5+e],[g1,g1],'o--',color=color[ispec],alpha=0.2,linewidth=3)
-         print 'INFO: (plot_xflux) Negative-domain average '+u+' : '+str(g1)
          #---------------------------------
 
          #---------------------------------
          # Flux spectral average
-         g0 = self.lky_xr[ispec,0]+2*np.pi/4*self.lky_xr[ispec,1]
-         print 'INFO: (plot_xflux)    Alternative average '+u+' : '+str(g0)
+         gs = self.lky_xr[ispec,0]+2*np.pi/4*self.lky_xr[ispec,1]
          #---------------------------------
-
+         
          #---------------------------------
          # Flux domain average
-         g0 = self.lky_xr[ispec,0]
-         ax.plot([-0.5,0.5],[g0,g0],color=color[ispec],alpha=0.5)
+         ga = self.lky_xr[ispec,0]
+         ax.plot([-0.5,0.5],[ga,ga],color=color[ispec],alpha=0.5)
          #---------------------------------
+
+         print 'INFO: (plot_xflux) Ave [inner/inner_spec, outer, domain] = {:.2f}/{:.2f}, {:.2f}, {:.2f}'.format(g0,gs,g1,ga) 
 
          if ymax != 'auto':
             ax.set_ylim([float(ymin),float(ymax)])
