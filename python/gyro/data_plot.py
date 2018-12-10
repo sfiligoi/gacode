@@ -1,9 +1,12 @@
 import data
 import sys
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 from gacodefuncs import *
 from gyro.data import GYROData
+
+MYDIR=os.path.basename(os.getcwd())
 
 class gyrodata_plot(data.GYROData):
 
@@ -16,7 +19,7 @@ class gyrodata_plot(data.GYROData):
       '''
 
       if fig is None:
-         fig = plt.figure(figsize=(self.lx*1.2,self.ly))
+         fig = plt.figure(MYDIR,figsize=(self.lx*1.2,self.ly))
 
       t = self.t['(c_s/a)t']
 
@@ -66,7 +69,7 @@ class gyrodata_plot(data.GYROData):
       '''
 
       if fig is None:
-         fig = plt.figure(figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       self.read_balloon()
 
@@ -131,7 +134,7 @@ class gyrodata_plot(data.GYROData):
       '''
 
       if fig is None:
-         fig = plt.figure(figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       # Read freq data
       self.read_moment('u')
@@ -190,7 +193,7 @@ class gyrodata_plot(data.GYROData):
       '''
 
       if fig is None:
-         fig = plt.figure(figsize=(self.lx*1.2,self.ly))
+         fig = plt.figure(MYDIR,figsize=(self.lx*1.2,self.ly))
          
       t = self.t['(c_s/a)t']
 
@@ -278,7 +281,7 @@ class gyrodata_plot(data.GYROData):
       imin=iwindow(t,w)
 
       # Otherwise plot
-      fig = plt.figure(figsize=(self.lx,self.ly))
+      fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
       ax = fig.add_subplot(111)
       ax.grid(which="majorminor",ls=":")
       ax.grid(which="major",ls=":")
@@ -317,7 +320,7 @@ class gyrodata_plot(data.GYROData):
       self.read_gbflux_i()
 
       if fig is None:
-         fig = plt.figure(figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       ns   = int(self.profile['n_kinetic'])
       n_x  = self.profile['n_x']
@@ -431,7 +434,7 @@ class gyrodata_plot(data.GYROData):
          sys.exit()
 
       if fig is None:
-         fig = plt.figure(figsize=(self.ly*ns,self.ly))
+         fig = plt.figure(MYDIR,figsize=(self.ly*ns,self.ly))
 
       # Need to read gbflux_n data
       self.read_gbflux_n()
@@ -506,7 +509,7 @@ class gyrodata_plot(data.GYROData):
    def plot_gbflux_exc(self,w=0.5,fig=None):
 
       if fig is None:
-         fig = plt.figure(figsize=(12,8))
+         fig = plt.figure(MYDIR,figsize=(12,8))
 
       ns = int(self.profile['n_kinetic'])
       t = self.t['(c_s/a)t']
@@ -545,7 +548,7 @@ class gyrodata_plot(data.GYROData):
       ns = int(self.profile['n_kinetic'])
 
       if fig is None:
-         fig = plt.figure(figsize=(7*ns,6))
+         fig = plt.figure(MYDIR,figsize=(7*ns,6))
 
       t = self.t['(c_s/a)t']
 
@@ -586,7 +589,7 @@ class gyrodata_plot(data.GYROData):
    def plot_moment_zero(self,w=0.5,species=0,moment=0,fig=None):
 
       if fig is None:
-         fig = plt.figure(figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       nt  = self.n
       n_x = self.profile['n_x']
