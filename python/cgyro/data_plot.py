@@ -1,9 +1,12 @@
 import data
 import sys
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 from gacodefuncs import *
 from cgyro.data import cgyrodata
+
+MYDIR=os.path.basename(os.getcwd())
 
 class cgyrodata_plot(data.cgyrodata):
 
@@ -53,7 +56,7 @@ class cgyrodata_plot(data.cgyrodata):
       '''
 
       if fig is None:
-         fig = plt.figure(figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       #======================================
       # Omega
@@ -94,7 +97,7 @@ class cgyrodata_plot(data.cgyrodata):
       '''
 
       if fig is None:
-         fig = plt.figure(figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       #======================================
       # Omega
@@ -137,7 +140,7 @@ class cgyrodata_plot(data.cgyrodata):
       '''
 
       if fig is None:
-         fig = plt.figure(figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       self.getbigfield()
 
@@ -194,7 +197,7 @@ class cgyrodata_plot(data.cgyrodata):
          return np.exp(-np.abs(x)/tau)
 
       if fig is None:
-         fig = plt.figure(figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       self.getbigfield()
 
@@ -252,7 +255,7 @@ class cgyrodata_plot(data.cgyrodata):
    def plot_phi(self,field=0,theta=0.0,fig=None):
 
       if fig is None:
-         fig = plt.figure(figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       self.getbigfield()
 
@@ -294,7 +297,7 @@ class cgyrodata_plot(data.cgyrodata):
    def plot_zf(self,w=0.5,field=0,fig=None):
 
       if fig is None:
-         fig = plt.figure(figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       if self.n_n > 1:
          print 'ERROR: (plot_zf.py) This plot option valid for ZF test only.'
@@ -353,7 +356,7 @@ class cgyrodata_plot(data.cgyrodata):
       self.getgeo()
 
       if fig is None:
-         fig = plt.figure(figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       theta = self.geo[:,0]/np.pi
 
@@ -374,7 +377,7 @@ class cgyrodata_plot(data.cgyrodata):
    def plot_error(self,fig=None):
 
       if fig is None:
-         fig = plt.figure(figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       ax = fig.add_subplot(111)
       ax.grid(which="majorminor",ls=":")
@@ -394,7 +397,7 @@ class cgyrodata_plot(data.cgyrodata):
    def plot_ball(self,itime=-1,field=0,tmax=-1.0,fig=None):
 
       if fig is None:
-         fig = plt.figure(figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       if itime > self.n_time-1:
          itime = self.n_time-1
@@ -448,7 +451,7 @@ class cgyrodata_plot(data.cgyrodata):
    def plot_flux(self,w=0.5,field=0,moment='e',ymin='auto',ymax='auto',fc=0,fig=None,loc=2,nscale=0):
 
       if fig is None:
-         fig = plt.figure(figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       self.getflux()
 
@@ -538,7 +541,7 @@ class cgyrodata_plot(data.cgyrodata):
    def plot_xflux(self,w=0.5,moment='e',ymin='auto',ymax='auto',fig=None,nscale=0):
 
       if fig is None:
-         fig = plt.figure(figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       self.getxflux()
       
@@ -667,7 +670,7 @@ class cgyrodata_plot(data.cgyrodata):
       t  = self.t
 
       if fig is None:
-         fig = plt.figure(figsize=(self.ly*ns,self.ly))
+         fig = plt.figure(MYDIR,figsize=(self.ly*ns,self.ly))
 
       self.getflux()
 
@@ -759,7 +762,7 @@ class cgyrodata_plot(data.cgyrodata):
       asp=y0/(2*x0)
 
       if fig is None:
-         fig = plt.figure(figsize=(self.lx,self.lx*asp))
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.lx*asp))
  
       self.getbigfield()
 
@@ -806,7 +809,7 @@ class cgyrodata_plot(data.cgyrodata):
    def plot_kx_phi(self,field=0,theta=0.0,w=0.5,ymin='auto',ymax='auto',nstr='null',diss=0,fig=None):
 
       if fig is None:
-         fig = plt.figure(figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       self.getbigfield()
 
@@ -869,7 +872,7 @@ class cgyrodata_plot(data.cgyrodata):
       u = specmap(self.mass[spec],self.z[spec])
 
       if fig is None:
-         fig = plt.figure(figsize=(self.lx,self.lx))
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.lx))
 
       theta=0.0
 
@@ -959,7 +962,7 @@ class cgyrodata_plot(data.cgyrodata):
       u = specmap(self.mass[spec],self.z[spec])
 
       if fig is None:
-         fig = plt.figure(figsize=(self.lx,self.lx))
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.lx))
        
       if itime > self.n_time-1:
          itime = self.n_time-1
