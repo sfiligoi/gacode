@@ -32,7 +32,7 @@ subroutine gyro_profile_init
   !---------------------------------------------------
   implicit none
   !
-  integer :: ic 
+  integer :: ic,i0
   real :: loglam
   real :: cc
   !---------------------------------------------------
@@ -527,9 +527,17 @@ subroutine gyro_profile_init
         alpha_s(:,i)  = alpha_s(:,ir_norm)
         krho_i(:,i)   = krho_i(:,ir_norm)
 
-        dlntdr_s(:,i) = dlntdr_s(:,ir_norm)+(r(i)-r_norm)*sdlntdr(:)/rhosda_s(ir_norm)
-        dlnndr_s(:,i) = dlnndr_s(:,ir_norm)+(r(i)-r_norm)*sdlnndr(:)/rhosda_s(ir_norm)
-
+        if (i < n_x/4) then
+           i0 = n_x/4
+        else if (i > 3*n_x/4) then
+           i0 = 3*n_x/4
+        else
+           i0 = i
+        endif
+          
+        dlntdr_s(:,i) = dlntdr_s(:,ir_norm)+(r(i0)-r_norm)*sdlntdr(:)/rhosda_s(ir_norm)
+        dlnndr_s(:,i) = dlnndr_s(:,ir_norm)+(r(i0)-r_norm)*sdlnndr(:)/rhosda_s(ir_norm)
+         
         omega_eb_s(i) = gamma_e_s(ir_norm)*&
              n_1(in_1)*q_norm/r_norm*(r(i)-r_norm)
 
