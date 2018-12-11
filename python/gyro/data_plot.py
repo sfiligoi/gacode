@@ -311,7 +311,7 @@ class gyrodata_plot(data.GYROData):
 
       fig.tight_layout()
             
-   def plot_gbflux_i(self,w=0.5,field='s',moment=0,ymin='0.0',ymax='auto',loc=2,fig=None):
+   def plot_gbflux_i(self,w=0.5,aw=0,field='s',moment=0,ymin='0.0',ymax='auto',loc=2,fig=None):
       '''
       Plot flux versus radius
       '''
@@ -401,14 +401,29 @@ class gyrodata_plot(data.GYROData):
       
       # Loop over species
       for ispec in range(ns):
-         avei[:] = average_n(yi[ispec,:,:]*norm_vec[ispec],t,w,n_x)
-         ave = average(y[ispec,:]*norm_vec[ispec],t,w)
          u = specmap(1.0/self.profile['mu'][ispec]**2,self.profile['z'][ispec])
+
+         # Time-averaged flux curve
+         avei[:] = average_n(yi[ispec,:,:]*norm_vec[ispec],t,w,n_x)
+         ax.plot(r,avei[:],color=color[ispec])
+
+         # Full average
+         ave = average(y[ispec,:]*norm_vec[ispec],t,w)
+         print 'INFO: (plot_gbflux_i) Full average = {:.2f}'.format(ave)
+         # Partial-r average
+         if aw > 0:
+            ave = np.average(avei[aw:-aw])
+         else:
+            ave = np.average(avei[nd:-nd])
          label = r'$'+mtag+mnorm+'_'+u+'/'+mtag+'_\mathrm{GB}: '+str(round(ave,3))+'$'
-         # Average
-         ax.plot(r[nd:-(nd+1)],ave*one[nd:-(nd+1)],'--',color=color[ispec])
-         # Time trace
-         ax.plot(r,avei[:],label=label,color=color[ispec])
+
+         if aw > 0:
+            ax.plot(r[aw:-aw],ave*one[aw:-aw],'--',label=label,color=color[ispec])
+         else:
+            if nd > 0:
+               ax.plot(r[nd:-nd],ave*one[nd:-nd],'--',label=label,color=color[ispec])
+            else:
+               ax.plot(r,ave*one,'--',label=label,color=color[ispec])
 
       if nd > 0:
          ax.axvspan(r[0],r[nd],facecolor='g',alpha=0.1)

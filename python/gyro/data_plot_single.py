@@ -70,13 +70,14 @@ elif plot_type == 'flux':
 elif plot_type == 'flux_i':
 
    w      = float(sys.argv[2])
-   field  = sys.argv[3]
-   moment = int(sys.argv[4])
-   ymin   = sys.argv[5]
-   ymax   = sys.argv[6]
-   ext    = sys.argv[7]
+   aw     = int(sys.argv[3])
+   field  = sys.argv[4]
+   moment = int(sys.argv[5])
+   ymin   = sys.argv[6]
+   ymax   = sys.argv[7]
+   ext    = sys.argv[8]
    
-   data_in.plot_gbflux_i(w=w,field=field,moment=moment,ymin=ymin,ymax=ymax)
+   data_in.plot_gbflux_i(w=w,aw=aw,field=field,moment=moment,ymin=ymin,ymax=ymax)
 
    outfile = 'flux_i.'+ext
 

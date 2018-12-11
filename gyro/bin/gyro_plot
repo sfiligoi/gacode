@@ -43,6 +43,9 @@ then
   echo "         -w <fraction>"
   echo "         Fraction of time record to use for average (default=0.8)."
   echo
+  echo "         -aw <index>"
+  echo "         Narrow radial average window"
+  echo
   echo "         -tmax <float>"
   echo "         Maximum value of ballooning angle is applicable."
   echo
@@ -106,6 +109,7 @@ TMAX=-1.0
 FONTSIZE=18
 LX=12
 LY=6
+AW=0
 
 YMIN=0.0
 YMAX=auto
@@ -130,6 +134,7 @@ while [ $# -gt 0 ] ; do
   -moment) shift ; MOMENT=$1 ;;
 
   -w) shift ; W=$1 ;;
+  -aw) shift ; AW=$1 ;;
 
   -tmax) shift ; TMAX=$1 ;;
 
@@ -186,7 +191,7 @@ case "$PLOT_TYPE" in
         python $PLT $PLOT_TYPE $W $FIELD $MOMENT $YMIN $YMAX $EXT ;;
 
    flux_i)
-        python $PLT $PLOT_TYPE $W $FIELD $MOMENT $YMIN $YMAX $EXT ;;
+        python $PLT $PLOT_TYPE $W $AW $FIELD $MOMENT $YMIN $YMAX $EXT ;;
 
    flux_n)
         python $PLT $PLOT_TYPE $W $FIELD $MOMENT $YMIN $YMAX $EXT ;;
