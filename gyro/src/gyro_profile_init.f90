@@ -32,8 +32,8 @@ subroutine gyro_profile_init
   !---------------------------------------------------
   implicit none
   !
-  integer :: ic,i0
-  real :: loglam
+  integer :: ic
+  real :: loglam,x0,tri
   real :: cc
   !---------------------------------------------------
 
@@ -526,17 +526,6 @@ subroutine gyro_profile_init
         pr_s(:,i)     = pr_s(:,ir_norm)
         alpha_s(:,i)  = alpha_s(:,ir_norm)
         krho_i(:,i)   = krho_i(:,ir_norm)
-
-        if (i < n_x/4) then
-           i0 = n_x/4
-        else if (i > 3*n_x/4) then
-           i0 = 3*n_x/4
-        else
-           i0 = i
-        endif
-          
-        dlntdr_s(:,i) = dlntdr_s(:,ir_norm)+(r(i0)-r_norm)*sdlntdr(:)/rhosda_s(ir_norm)
-        dlnndr_s(:,i) = dlnndr_s(:,ir_norm)+(r(i0)-r_norm)*sdlnndr(:)/rhosda_s(ir_norm)
          
         omega_eb_s(i) = gamma_e_s(ir_norm)*&
              n_1(in_1)*q_norm/r_norm*(r(i)-r_norm)
@@ -547,8 +536,6 @@ subroutine gyro_profile_init
 
   endif
   !----------------------------------------------------------
-
-  if (i_proc == 0) print *,dlntdr_s(1,1),dlntdr_s(1,n_x)
   
   !------------------------------------------------------
   ! Compute true Debye length at box center if profile
@@ -651,6 +638,19 @@ subroutine gyro_profile_init
   enddo
   !-------------------------------------------------------------
 
+  ! Profile shearing
+  if (i_proc == 0) open(unit=10,file='out.gyro.star',status='replace')
+  do i=1,n_x
+
+     x0 = (r(i)-r_norm)/x_length*2*pi
+     tri = (4.0/pi)*sin(x0)
+     dlntdr_s(:,i) = dlntdr_s(:,ir_norm)+tri*sdlntdr(:)*x_length/rhosda_s(ir_norm)/(2*pi)
+     dlnndr_s(:,i) = dlnndr_s(:,ir_norm)+tri*sdlnndr(:)*x_length/rhosda_s(ir_norm)/(2*pi)
+
+     if (i_proc == 0) write(10,'(2(1pe12.5,1x))') x0,dlnndr_s(1,i) 
+  enddo
+  if (i_proc == 0) close(10)
+     
   if (debug_flag == 1 .and. i_proc == 0) then
      print *,"[gyro_profile_init done]"
   endif
