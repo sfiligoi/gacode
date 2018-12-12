@@ -643,7 +643,7 @@ subroutine gyro_profile_init
   do i=1,n_x
 
      x0 = (r(i)-r_norm)/x_length*2*pi
-     tri = (4.0/pi)*sin(x0)
+     tri = (4.0/pi)*(sin(x0)-sin(3*x0)/9.0)
      dlntdr_s(:,i) = dlntdr_s(:,ir_norm)+tri*sdlntdr(:)*x_length/rhosda_s(ir_norm)/(2*pi)
      dlnndr_s(:,i) = dlnndr_s(:,ir_norm)+tri*sdlnndr(:)*x_length/rhosda_s(ir_norm)/(2*pi)
 
