@@ -655,8 +655,76 @@ class gyrodata_plot(data.GYROData):
       
       ax.plot(r,g,label=r'source',color='m',linewidth=3,alpha=0.2)
 
-      ax.axvspan(r[0],r[nd-1],facecolor='g',alpha=0.1)
-      ax.axvspan(r[-nd],r[-1],facecolor='g',alpha=0.1)
+      if nd > 0:
+         ax.axvspan(r[0],r[nd],facecolor='g',alpha=0.1)
+         ax.axvspan(r[-(nd+1)],r[-1],facecolor='g',alpha=0.1)
+      ax.set_xlim(r[0],r[-1])
+      
+      ax.legend()
+      plt.tight_layout()
+    
+      
+   def plot_profile_tot(self,w=0.5,species=0,moment=0,fig=None):
+
+      if fig is None:
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
+
+      nt  = self.n
+      n_x = self.profile['n_x']
+      nd  = self.profile['n_explicit_damp']
+      
+      t = self.t['(c_s/a)t']
+      r = self.profile['r']
+      
+      # Get n=0 moment data
+      self.read_moment_zero()
+
+      n0 = self.profile['den_s'][species,:]
+      T0 = self.profile['tem_s'][species,:]
+
+      f = np.zeros([n_x,nt])
+      f = self.moment_zero[:,species,0,:]
+      dn = average_n(f,t,w,n_x)
+       
+      f  = self.moment_zero[:,species,1,:]
+      dE = average_n(f,t,w,n_x)
+      dT = ((2.0/3)*dE-T0*dn)/n0
+
+      # Derivatives
+      dndr = np.gradient(dn,edge_order=2)/np.gradient(r,edge_order=2)
+      dTdr = np.gradient(dT,edge_order=2)/np.gradient(r,edge_order=2)
+
+      if moment == 0:
+         ntag = 'Density'
+         mtag = 'a/L_n'
+         ftag = 'dlnndr'
+         g =  self.profile['dlnndr_s'][species,:]-dndr/n0
+      elif moment == 1:
+         ntag = 'Temperature'
+         mtag = 'a/L_T'
+         ftag = 'dlntdr'
+         g =  self.profile['dlntdr_s'][species,:]-dTdr/T0
+      else:
+         sys.exit()
+         
+      imin  = iwindow(t,w)
+      title = r'$'+str(t[imin])+' < (c_s/a) t < '+str(t[-1])+'$'
+      
+      u = specmap(1.0/self.profile['mu'][species]**2,self.profile['z'][species])
+      
+      # Compare moment versus corresponding source
+      ax = fig.add_subplot(111)
+      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="major",ls=":")
+      ax.set_xlabel(r'$r/a$')
+      ax.set_ylabel(r'$'+mtag+'_'+u+'$')
+      ax.set_title(title)
+
+      ax.plot(r,g,color='k')
+
+      if nd > 0:
+         ax.axvspan(r[0],r[nd],facecolor='g',alpha=0.1)
+         ax.axvspan(r[-(nd+1)],r[-1],facecolor='g',alpha=0.1)
       ax.set_xlim(r[0],r[-1])
       
       ax.legend()

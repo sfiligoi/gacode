@@ -54,7 +54,7 @@ subroutine gyro_write_initdata(datafile1,datafile2,datafile3,io)
   write(io,20) n_grid_exp
   write(io,20) boundary_method
 
-  ! Basic profile data (** CORRECT IN VUGYRO **)
+  ! Basic profile data
   write(io,10) r(:)
   write(io,10) q(:)
   write(io,10) r_s(:)

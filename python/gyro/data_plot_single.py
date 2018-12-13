@@ -125,6 +125,17 @@ elif plot_type == 'hmom':
    
    outfile = 'moment_zero.'+ext
   
+elif plot_type == 'dprof':
+
+   w       = float(sys.argv[2])
+   species = int(sys.argv[3])
+   moment  = int(sys.argv[4])
+   ext     = sys.argv[5]
+
+   ax = data_in.plot_profile_tot(w=w,species=species,moment=moment)
+   
+   outfile = 'profile_tot.'+ext
+  
 #---------------------------------------------------------------
 # Plot to screen or to image file
 if ext == 'screen':

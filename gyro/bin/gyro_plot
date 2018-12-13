@@ -63,6 +63,7 @@ then
   echo "                  flux_exc,"
   echo "                  flux_rt,"
   echo "                  hmom,"
+  echo "                  dprof,"
   echo "                  fluctuation2d [-moment 0 (n, all species) "
   echo "                                 -moment 1 (v, all species) "
   echo "                                 -moment 2 (e, all species) "
@@ -185,6 +186,9 @@ case "$PLOT_TYPE" in
 	python $PLT $PLOT_TYPE $YMAX $EXT ;;
 
    hmom)
+	python $PLT $PLOT_TYPE $W $SPECIES $MOMENT $EXT ;;
+
+   dprof)
 	python $PLT $PLOT_TYPE $W $SPECIES $MOMENT $EXT ;;
 
    flux)
