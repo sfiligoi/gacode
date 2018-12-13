@@ -698,12 +698,14 @@ class gyrodata_plot(data.GYROData):
          ntag = 'Density'
          mtag = 'a/L_n'
          ftag = 'dlnndr'
-         g =  self.profile['dlnndr_s'][species,:]-dndr/n0
+         g0 = self.profile['dlnndr_s'][species,:]
+         g =  g0-dndr/n0
       elif moment == 1:
          ntag = 'Temperature'
          mtag = 'a/L_T'
          ftag = 'dlntdr'
-         g =  self.profile['dlntdr_s'][species,:]-dTdr/T0
+         g0 =  self.profile['dlntdr_s'][species,:]
+         g  =  g0-dTdr/T0
       else:
          sys.exit()
          
@@ -720,6 +722,7 @@ class gyrodata_plot(data.GYROData):
       ax.set_ylabel(r'$'+mtag+'_'+u+'$')
       ax.set_title(title)
 
+      ax.plot(r,g0,color='m',linewidth=3,alpha=0.2)
       ax.plot(r,g,color='k')
 
       if nd > 0:
@@ -727,7 +730,6 @@ class gyrodata_plot(data.GYROData):
          ax.axvspan(r[-(nd+1)],r[-1],facecolor='g',alpha=0.1)
       ax.set_xlim(r[0],r[-1])
       
-      ax.legend()
       plt.tight_layout()
     
       
