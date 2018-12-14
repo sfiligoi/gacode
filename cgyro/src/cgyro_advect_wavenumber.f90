@@ -20,7 +20,7 @@ subroutine cgyro_advect_wavenumber(ij)
   real :: scale
 
   if (nonlinear_flag == 0) return
-  
+
   if (profile_shear_flag == 1 .or. shear_method == 2) then
      call timer_lib_in('shear')
      allocate(he(n_theta,1-2*n_wave:n_radial+2*n_wave))
@@ -73,6 +73,23 @@ subroutine cgyro_advect_wavenumber(ij)
                  enddo
               enddo
            enddo
+
+           if (n == 0) then
+              scale = nu_global*abs(maxval(sdlnndr)+maxval(sdlntdr))
+
+              irm = -1+1+n_radial/2
+              irp = irm+2
+              irmc = (irm-1)*n_theta
+              irpc = irmc + 2*n_theta
+
+              do j=1,n_theta
+                 ! p = +1
+                 rhs(irpc+j,in,ij) = rhs(irpc+j,in,ij)-scale*h_x(irpc+j,in)
+                 ! p = -1
+                 rhs(irmc+j,in,ij) = rhs(irmc+j,in,ij)-scale*h_x(irmc+j,in)
+              enddo
+
+           endif
         endif
 
         ! Zonal damping (to reduce box-size correlation)
@@ -94,7 +111,7 @@ subroutine cgyro_advect_wavenumber(ij)
            enddo
         endif
 
-     enddo ! in=1,nv_loc
+     enddo
 
      deallocate(he)
      call timer_lib_out('shear')
