@@ -130,9 +130,11 @@ elif plot_type == 'dprof':
    w       = float(sys.argv[2])
    species = int(sys.argv[3])
    moment  = int(sys.argv[4])
-   ext     = sys.argv[5]
+   ymin    = sys.argv[5]
+   ymax    = sys.argv[6]
+   ext     = sys.argv[7]
 
-   ax = data_in.plot_profile_tot(w=w,species=species,moment=moment)
+   ax = data_in.plot_profile_tot(w=w,species=species,moment=moment,ymin=ymin,ymax=ymax)
    
    outfile = 'profile_tot.'+ext
   

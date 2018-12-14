@@ -189,7 +189,7 @@ case "$PLOT_TYPE" in
 	python $PLT $PLOT_TYPE $W $SPECIES $MOMENT $EXT ;;
 
    dprof)
-	python $PLT $PLOT_TYPE $W $SPECIES $MOMENT $EXT ;;
+	python $PLT $PLOT_TYPE $W $SPECIES $MOMENT $YMIN $YMAX $EXT ;;
 
    flux)
         python $PLT $PLOT_TYPE $W $FIELD $MOMENT $YMIN $YMAX $EXT ;;
