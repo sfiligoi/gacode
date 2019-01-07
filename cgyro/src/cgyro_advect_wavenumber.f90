@@ -47,6 +47,8 @@ subroutine cgyro_advect_wavenumber(ij)
               do l=1,n_wave
                  ll = 2*l-1
                  do j=1,n_theta
+                    ! Sign throughout paper is incorrect (or gamma -> - gamma)
+                    ! Thus sign below has been checked and is correct
                     rhs(icc+j,in,ij) = rhs(icc+j,in,ij)+c_wave(l)*(he(j,ir+ll)-he(j,ir-ll))
                  enddo
               enddo
@@ -69,7 +71,8 @@ subroutine cgyro_advect_wavenumber(ij)
               do l=1,n_wave
                  ll = 2*l-1
                  do j=1,n_theta
-                    rhs(icc+j,in,ij) = rhs(icc+j,in,ij)+c_wave(l)*(he(j,ir+ll)-he(j,ir-ll))
+                    ! Note opposite sign to ExB shear
+                    rhs(icc+j,in,ij) = rhs(icc+j,in,ij)-c_wave(l)*(he(j,ir+ll)-he(j,ir-ll))
                  enddo
               enddo
            enddo
