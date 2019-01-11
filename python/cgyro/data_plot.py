@@ -1,9 +1,12 @@
 import data
 import sys
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 from gacodefuncs import *
 from cgyro.data import cgyrodata
+
+MYDIR=os.path.basename(os.getcwd())
 
 class cgyrodata_plot(data.cgyrodata):
 
@@ -53,7 +56,7 @@ class cgyrodata_plot(data.cgyrodata):
       '''
 
       if fig is None:
-         fig = plt.figure(figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       #======================================
       # Omega
@@ -94,7 +97,7 @@ class cgyrodata_plot(data.cgyrodata):
       '''
 
       if fig is None:
-         fig = plt.figure(figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       #======================================
       # Omega
@@ -137,7 +140,7 @@ class cgyrodata_plot(data.cgyrodata):
       '''
 
       if fig is None:
-         fig = plt.figure(figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       self.getbigfield()
 
@@ -194,7 +197,7 @@ class cgyrodata_plot(data.cgyrodata):
          return np.exp(-np.abs(x)/tau)
 
       if fig is None:
-         fig = plt.figure(figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       self.getbigfield()
 
@@ -252,7 +255,7 @@ class cgyrodata_plot(data.cgyrodata):
    def plot_phi(self,field=0,theta=0.0,fig=None):
 
       if fig is None:
-         fig = plt.figure(figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       self.getbigfield()
 
@@ -264,7 +267,7 @@ class cgyrodata_plot(data.cgyrodata):
       ax.grid(which="majorminor",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(TIME)
-      ax.set_ylabel(r'$\left|'+ft+'\right|$')
+      ax.set_ylabel(r'$\left|'+ft+r'\right|$')
       ax.set_yscale('log')
       ax.set_title(r'$\mathrm{Fluctuation~intensity} \quad k_\theta = nq/r$')
       #======================================
@@ -294,7 +297,7 @@ class cgyrodata_plot(data.cgyrodata):
    def plot_zf(self,w=0.5,field=0,fig=None):
 
       if fig is None:
-         fig = plt.figure(figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       if self.n_n > 1:
          print 'ERROR: (plot_zf.py) This plot option valid for ZF test only.'
@@ -353,7 +356,7 @@ class cgyrodata_plot(data.cgyrodata):
       self.getgeo()
 
       if fig is None:
-         fig = plt.figure(figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       theta = self.geo[:,0]/np.pi
 
@@ -374,7 +377,7 @@ class cgyrodata_plot(data.cgyrodata):
    def plot_error(self,fig=None):
 
       if fig is None:
-         fig = plt.figure(figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       ax = fig.add_subplot(111)
       ax.grid(which="majorminor",ls=":")
@@ -394,7 +397,7 @@ class cgyrodata_plot(data.cgyrodata):
    def plot_ball(self,itime=-1,field=0,tmax=-1.0,fig=None):
 
       if fig is None:
-         fig = plt.figure(figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       if itime > self.n_time-1:
          itime = self.n_time-1
@@ -448,7 +451,7 @@ class cgyrodata_plot(data.cgyrodata):
    def plot_flux(self,w=0.5,field=0,moment='e',ymin='auto',ymax='auto',fc=0,fig=None,loc=2,nscale=0):
 
       if fig is None:
-         fig = plt.figure(figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       self.getflux()
 
@@ -469,7 +472,7 @@ class cgyrodata_plot(data.cgyrodata):
          else:
             field_tag = 'B_\parallel'
 
-         # Now, ys -> {n_species,3,nt}
+      # Now, ys -> {n_species,3,nt}
 
       if moment == 'n':
          ntag = 'Density~flux'
@@ -538,7 +541,7 @@ class cgyrodata_plot(data.cgyrodata):
    def plot_xflux(self,w=0.5,moment='e',ymin='auto',ymax='auto',fig=None,nscale=0):
 
       if fig is None:
-         fig = plt.figure(figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       self.getxflux()
       
@@ -616,7 +619,6 @@ class cgyrodata_plot(data.cgyrodata):
          g0 = self.lky_flux_ave[ispec,0]
          label = r'$'+mtag+mnorm+'_'+u+'/'+mtag+'_\mathrm{GB}: '+str(round(g0,3))+'$'
          ax.plot([-e,e],[g0,g0],'o-',color=color[ispec],alpha=0.2,linewidth=3,label=label)
-         print 'INFO: (plot_xflux) Partial-domain average '+u+' : '+str(g0)
          #---------------------------------
 
          #---------------------------------
@@ -624,20 +626,20 @@ class cgyrodata_plot(data.cgyrodata):
          g1 = self.lky_flux_ave[ispec,1]
          ax.plot([0.5-e,0.5],[g1,g1],'o--',color=color[ispec],alpha=0.2,linewidth=3)
          ax.plot([-0.5,-0.5+e],[g1,g1],'o--',color=color[ispec],alpha=0.2,linewidth=3)
-         print 'INFO: (plot_xflux) Negative-domain average '+u+' : '+str(g1)
          #---------------------------------
 
          #---------------------------------
          # Flux spectral average
-         g0 = self.lky_xr[ispec,0]+2*np.pi/4*self.lky_xr[ispec,1]
-         print 'INFO: (plot_xflux)    Alternative average '+u+' : '+str(g0)
+         gs = self.lky_xr[ispec,0]+2*np.pi/4*self.lky_xr[ispec,1]
          #---------------------------------
-
+         
          #---------------------------------
          # Flux domain average
-         g0 = self.lky_xr[ispec,0]
-         ax.plot([-0.5,0.5],[g0,g0],color=color[ispec],alpha=0.5)
+         ga = self.lky_xr[ispec,0]
+         ax.plot([-0.5,0.5],[ga,ga],color=color[ispec],alpha=0.5)
          #---------------------------------
+
+         print 'INFO: (plot_xflux) Ave [inner/inner_spec, outer, domain] = {:.2f}/{:.2f}, {:.2f}, {:.2f}'.format(g0,gs,g1,ga) 
 
          if ymax != 'auto':
             ax.set_ylim([float(ymin),float(ymax)])
@@ -649,7 +651,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       fig.tight_layout(pad=0.3)
 
-   def plot_ky_flux(self,w=0.5,field=0,moment='e',ymin='auto',ymax='auto',fc=0,fig=None):
+   def plot_ky_flux(self,w=0.5,field=0,moment='e',ymin='auto',ymax='auto',fc=0,diss=0,fig=None):
       '''
       Plot fluxes versus ky
 
@@ -668,7 +670,7 @@ class cgyrodata_plot(data.cgyrodata):
       t  = self.t
 
       if fig is None:
-         fig = plt.figure(figsize=(self.ly*ns,self.ly))
+         fig = plt.figure(MYDIR,figsize=(self.ly*ns,self.ly))
 
       self.getflux()
 
@@ -731,16 +733,17 @@ class cgyrodata_plot(data.cgyrodata):
 
       # One plot per species
       for ispec in range(ns):
-         stag = str(ispec)
          ax = fig.add_subplot(1,ns,ispec+1)
          ax.set_xlabel(xlabel)
          u = specmap(self.mass[ispec],self.z[ispec])
          ax.set_ylabel(r'$'+mtag+'_'+u+'$',color='k')
          ax.set_title(windowtxt)
-         ax.bar(ky-dk/2.0,ave[:,ispec],width=dk/1.1,color=color[ispec],alpha=0.5,edgecolor='black')
+         ax.bar(ky-dk/2.0,ave[:,ispec],width=dk/1.1,color=color[ispec],
+                alpha=0.5,edgecolor='black')
 
          # Dissipation curve             
-         ax.plot(ky,self.alphadiss*ax.get_ylim()[1]*0.5,linewidth=2,color='k',alpha=0.2)
+         if diss == 1:
+            ax.plot(ky,self.alphadiss*ax.get_ylim()[1]*0.5,linewidth=2,color='k',alpha=0.2)
 
          # Set axis ranges
          ax.set_xlim([0,ky[-1]+dk])
@@ -759,7 +762,7 @@ class cgyrodata_plot(data.cgyrodata):
       asp=y0/(2*x0)
 
       if fig is None:
-         fig = plt.figure(figsize=(self.lx,self.lx*asp))
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.lx*asp))
  
       self.getbigfield()
 
@@ -803,10 +806,10 @@ class cgyrodata_plot(data.cgyrodata):
 
       fig.tight_layout(pad=0.5)
 
-   def plot_kx_phi(self,field=0,theta=0.0,w=0.5,ymin='auto',ymax='auto',nstr='null',fig=None):
+   def plot_kx_phi(self,field=0,theta=0.0,w=0.5,ymin='auto',ymax='auto',nstr='null',diss=0,fig=None):
 
       if fig is None:
-         fig = plt.figure(figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       self.getbigfield()
 
@@ -854,12 +857,11 @@ class cgyrodata_plot(data.cgyrodata):
 
       ax.set_xlim([-x0,x0])
       ax.set_yscale('log')
-
-      ymin,ymax=setlimits(ax.get_ylim(),ymin,ymax)
-      ax.set_ylim([ymin,ymax])
-
+      ax.set_ylim(bottom=0.5*np.sqrt(ave[-1]))
+      
       # Dissipation curve             
-      ax.plot(kx,self.radialdiss*ax.get_ylim()[1]*0.5,linewidth=2,color='k',alpha=0.2)
+      if diss == 1:
+         ax.plot(kx,self.radialdiss*ax.get_ylim()[1]*0.5,linewidth=2,color='k',alpha=0.2)
 
       fig.tight_layout(pad=0.3)
 
@@ -870,7 +872,7 @@ class cgyrodata_plot(data.cgyrodata):
       u = specmap(self.mass[spec],self.z[spec])
 
       if fig is None:
-         fig = plt.figure(figsize=(self.lx,self.lx))
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.lx))
 
       theta=0.0
 
@@ -960,7 +962,7 @@ class cgyrodata_plot(data.cgyrodata):
       u = specmap(self.mass[spec],self.z[spec])
 
       if fig is None:
-         fig = plt.figure(figsize=(self.lx,self.lx))
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.lx))
        
       if itime > self.n_time-1:
          itime = self.n_time-1
