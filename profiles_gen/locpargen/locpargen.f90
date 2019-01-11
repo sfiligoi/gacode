@@ -86,7 +86,11 @@ program locpargen
        ipccw,&
        a)
 
-  print 10,'# rhos/a=',rhos_loc/a
+  print 10,'# rhos/a   =',rhos_loc/a
+  print 10,'# rhoi/a   =',rhos_loc/a*sqrt(temp_loc(ise)/temp_loc(1))
+  print 10,'# Te [keV] =',temp_loc(ise)
+  print 10,'# Ti [keV] =',temp_loc(1)
+  print 10,'# Bunit    =',b_unit_loc
 
   print 10,'RMIN=',r0
   print 10,'RMAJ=',rmaj_loc
@@ -148,6 +152,15 @@ program locpargen
      print 10,'SDLNTDR_'//tag(is)//'=',sdlntdr_loc(is)
   enddo
 
+  open(unit=1,file='out.locpargen',status='replace')
+  write(1,*) q_loc
+  write(1,*) r0
+  write(1,*) rmaj_loc
+  write(1,*) shift_loc
+  write(1,*) kappa_loc
+  write(1,*) q_loc*rhos_loc*sqrt(temp_loc(ise)/temp_loc(1))/a
+  close(1)
+  
 10 format(a,sp,1pe12.5)
 11 format(a,i0)
 
