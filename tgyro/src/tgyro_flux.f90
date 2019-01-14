@@ -271,6 +271,20 @@ subroutine tgyro_flux
 
      endif
 
+  case (5) 
+
+     call tgyro_etgcrit
+
+     pflux_e_tur(i_r) = etgcrit_elec_pflux_out
+     eflux_e_tur(i_r) = etgcrit_elec_eflux_out
+     mflux_e_tur(i_r) = 0.0
+     expwd_e_tur(i_r) = 0.0
+     
+     pflux_i_tur(1:loc_n_ion,i_r) = etgcrit_ion_pflux_out(1:loc_n_ion)
+     eflux_i_tur(1:loc_n_ion,i_r) = etgcrit_ion_eflux_out(1:loc_n_ion)
+     mflux_i_tur(1:loc_n_ion,i_r) = 0.0
+     expwd_i_tur(1:loc_n_ion,i_r) = 0.0
+
   case default
 
      call tgyro_catch_error('ERROR: (TGYRO) No matching flux method in tgyro_flux.')
