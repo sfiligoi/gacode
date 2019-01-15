@@ -18,6 +18,8 @@ sys.argv = sys.argv[3:]
 
 plot_type = sys.argv[1]
 
+doplot=True
+
 if plot_type == 'freq':
 
    w     = float(sys.argv[2])
@@ -121,7 +123,7 @@ elif plot_type == 'flux':
 
    if ftype == 'dump':
       cgyrodata_dump('./').dump_flux(fc=fc)
-      return
+      doplot=False
    else:
       data_in.plot_flux(w=w,field=field,moment=moment,
                         ymin=ymin,ymax=ymax,fc=fc,loc=loc,nscale=nscale)
@@ -141,7 +143,7 @@ elif plot_type == 'ky_flux':
 
    if ftype == 'dump':
       cgyrodata_dump('./').dump_ky_flux(w=w,field=field,moment=moment,fc=fc)
-      return
+      doplot=False
    else:
       data_in.plot_ky_flux(w=w,field=field,moment=moment,
                            ymin=ymin,ymax=ymax,fc=fc,diss=diss)
@@ -218,15 +220,16 @@ else:
 #---------------------------------------------------------------
 # Plot to screen or to image file
 
-if ftype == 'screen':
-   plt.show()
-elif ftype == 'dump':
-   data = np.column_stack((x,y1,y2))
-   np.savetxt(outfile,data,fmt='%.8e',header=head)
-else:
-   plt.savefig(outfile)
+if doplot:
+   if ftype == 'screen':
+      plt.show()
+   elif ftype == 'dump':
+      data = np.column_stack((x,y1,y2))
+      np.savetxt(outfile,data,fmt='%.8e',header=head)
+   else:
+      plt.savefig(outfile)
 
-if ftype != 'screen':
-   print 'INFO: (data_plot_single) Created '+outfile
+   if ftype != 'screen':
+      print 'INFO: (data_plot_single) Created '+outfile
 #---------------------------------------------------------------
 

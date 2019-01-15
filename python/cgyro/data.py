@@ -331,7 +331,7 @@ class cgyrodata:
       elif moment == 'v':
          z = np.sum(self.lky_flux_v,axis=3)
       else:
-         raise ValueError('(xfluxave) Invalid moment.'
+         raise ValueError('(xfluxave) Invalid moment.')
 
 
       #--------------------------------------------

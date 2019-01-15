@@ -300,7 +300,6 @@ class cgyrodata_plot(data.cgyrodata):
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       if self.n_n > 1:
-      else:
          raise ValueError('(plot_zf.py) This plot option valid for ZF test only.')
 
       t  = self.t
@@ -637,8 +636,8 @@ class cgyrodata_plot(data.cgyrodata):
          ax.plot([-0.5,0.5],[ga,ga],color=color[ispec],alpha=0.5)
          #---------------------------------
 
-         print 'INFO: (plot_xflux) Ave [inner/inner_spec, outer, domain] = '
-         '{:.2f}/{:.2f}, {:.2f}, {:.2f}'.format(g0,gs,g1,ga) 
+         print('INFO: (plot_xflux) Ave [inner/inner_spec, outer, domain] = '
+               '{:.2f}/{:.2f}, {:.2f}, {:.2f}'.format(g0,gs,g1,ga)) 
 
          if ymax != 'auto':
             ax.set_ylim([float(ymin),float(ymax)])
