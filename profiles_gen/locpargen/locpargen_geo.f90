@@ -44,7 +44,6 @@ subroutine locpargen_geo
      enddo
   enddo
 
-  print *
   print '(a)','INFO: (locpargen) Wrote input.geo.'
 
   close(1)

@@ -40,9 +40,6 @@ program locpargen
   call EXPRO_alloc('./',1) 
   call EXPRO_read
 
-  print '(a)','INFO: (locpargen) Local input parameters:'
-  print *
-
   ! Minor radius
   a = EXPRO_rmin(EXPRO_n_exp)
 
