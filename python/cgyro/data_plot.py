@@ -300,8 +300,8 @@ class cgyrodata_plot(data.cgyrodata):
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       if self.n_n > 1:
-         print 'ERROR: (plot_zf.py) This plot option valid for ZF test only.'
-         sys.exit()
+      else:
+         raise ValueError('(plot_zf.py) This plot option valid for ZF test only.')
 
       t  = self.t
       k0 = self.kx[0]
@@ -493,8 +493,7 @@ class cgyrodata_plot(data.cgyrodata):
          ftag = 'flux_v'
          y = ys[:,2,:]
       else:
-         print 'ERROR: (plot_flux.py) Invalid moment.'
-         sys.exit()
+         raise ValueError('(plot_flux.py) Invalid moment.')
 
   
       # Normalizations
@@ -571,8 +570,7 @@ class cgyrodata_plot(data.cgyrodata):
          z = np.sum(self.lky_flux_v,axis=3)
          ftag = 'xflux_v'
       else:
-         print 'ERROR (plot_xflux.py) Invalid moment.'
-         sys.exit()
+         raise ValueError('(plot_xflux.py) Invalid moment.')
 
 
       # Call routine for domain average
@@ -639,7 +637,8 @@ class cgyrodata_plot(data.cgyrodata):
          ax.plot([-0.5,0.5],[ga,ga],color=color[ispec],alpha=0.5)
          #---------------------------------
 
-         print 'INFO: (plot_xflux) Ave [inner/inner_spec, outer, domain] = {:.2f}/{:.2f}, {:.2f}, {:.2f}'.format(g0,gs,g1,ga) 
+         print 'INFO: (plot_xflux) Ave [inner/inner_spec, outer, domain] = '
+         '{:.2f}/{:.2f}, {:.2f}, {:.2f}'.format(g0,gs,g1,ga) 
 
          if ymax != 'auto':
             ax.set_ylim([float(ymin),float(ymax)])
@@ -663,8 +662,7 @@ class cgyrodata_plot(data.cgyrodata):
       '''
 
       if self.n_n == 1:
-         print 'ERROR (plot_ky_flux.py) Plot not available with a single mode.'
-         sys.exit()
+         raise ValueError('(plot_ky_flux.py) Plot not available with a single mode.')
 
       ns = self.n_species
       t  = self.t
@@ -709,9 +707,9 @@ class cgyrodata_plot(data.cgyrodata):
          ftag = 'flux_v'
          y = ys[:,2,:,:]
       else:
-         print 'ERROR (plot_ky_flux.py) Invalid moment.'
-         sys.exit()
+         raise ValueError('(plot_ky_flux.py) Invalid moment.')
 
+      
       # Determine tmin
       imin=iwindow(t,w)
 
@@ -796,7 +794,6 @@ class cgyrodata_plot(data.cgyrodata):
       ax = fig.add_subplot(111)
 
       windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[-1])+']$'
-      #windowtxt = ''
 
       ax.set_xlabel(r'$k_x \rho_s/4$')
       ax.set_ylabel(r'$k_y \rho_s$')

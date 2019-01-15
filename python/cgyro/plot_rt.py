@@ -114,9 +114,8 @@ if os.path.isfile('bin'+fdata):
     print 'INFO: (plot_rt) Found binary data in '+fdata 
     hasbin = True
 else:
-    print 'ERROR: (plot_rt) No data for -moment '+moment+' exists.  Try -moment phi'
-    sys.exit()
-
+   raise ValueError('(plot_rt) No data for -moment '+moment+' exists.  Try -moment phi')
+    
 if usefft:
     print 'INFO: (plot_rt) Using FFT (fast)'
 

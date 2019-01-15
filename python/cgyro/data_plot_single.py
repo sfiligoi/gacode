@@ -121,9 +121,10 @@ elif plot_type == 'flux':
 
    if ftype == 'dump':
       cgyrodata_dump('./').dump_flux(fc=fc)
-      sys.exit()
+      return
    else:
-      data_in.plot_flux(w=w,field=field,moment=moment,ymin=ymin,ymax=ymax,fc=fc,loc=loc,nscale=nscale)
+      data_in.plot_flux(w=w,field=field,moment=moment,
+                        ymin=ymin,ymax=ymax,fc=fc,loc=loc,nscale=nscale)
 
    outfile = 'out.cgyro.flux.'+ftype
 
@@ -140,9 +141,10 @@ elif plot_type == 'ky_flux':
 
    if ftype == 'dump':
       cgyrodata_dump('./').dump_ky_flux(w=w,field=field,moment=moment,fc=fc)
-      sys.exit()
+      return
    else:
-      data_in.plot_ky_flux(w=w,field=field,moment=moment,ymin=ymin,ymax=ymax,fc=fc,diss=diss)
+      data_in.plot_ky_flux(w=w,field=field,moment=moment,
+                           ymin=ymin,ymax=ymax,fc=fc,diss=diss)
 
    outfile = 'out.cgyro.ky_flux.'+ftype
 
