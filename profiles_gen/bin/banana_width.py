@@ -55,7 +55,6 @@ else:
    raise ValueError('l too large')
 
 y,err = integrate.quad(func,0,t0)
-
 db = data[5]
 print '# orbit width/a = {:.3f}'.format(np.abs(y*db))
 
