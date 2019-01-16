@@ -24,7 +24,7 @@ subroutine tgyro_flux
   integer :: n_12
   real, dimension(8) :: x_out
   real :: a1,a2,a3,a4
-  
+
   !-------------------------------------------
   ! IFS-PPPL parameters
   real :: rltcrit
@@ -154,8 +154,6 @@ subroutine tgyro_flux
   expwd_i_tur(:,:) = 0.0
   expwd_e_tur(:)   = 0.0
 
-  print *,i_proc_global,flux_method
-
   select case (flux_method)
 
   case (0)
@@ -201,7 +199,6 @@ subroutine tgyro_flux
 
      ! Map TGYRO parameters to TGLF
      call tgyro_tglf_map
-
      call tglf_run_mpi
 
      call tgyro_trap_component_error(tglf_error_status,tglf_error_message)
@@ -242,6 +239,8 @@ subroutine tgyro_flux
      mflux_i_tur(1:loc_n_ion,i_r) = glf23_ion_mflux_out(1:loc_n_ion)
      expwd_i_tur(1:loc_n_ion,i_r) = glf23_ion_expwd_out(1:loc_n_ion)
 
+     call tgyro_trap_component_error(0,'null')
+
   case (4)
 
      ! Map TGYRO parameters to GYRO
@@ -277,18 +276,18 @@ subroutine tgyro_flux
   case (5) 
 
      call tgyro_etgcrit(a1,a2,a3,a4)
-     eflux_e_tur(i_r) = a1
+     eflux_e_tur(i_r)   = a1
      eflux_i_tur(1,i_r) = a2
-     pflux_e_tur(i_r) = a3
+     pflux_e_tur(i_r)   = a3
      pflux_i_tur(1,i_r) = a4
+
+     call tgyro_trap_component_error(0,'null')
 
   case default
 
      call tgyro_catch_error('ERROR: (TGYRO) No matching flux method in tgyro_flux.')
 
   end select
-
-  print *,i_proc_global
 
   call MPI_BARRIER(MPI_COMM_WORLD,ierr)
 

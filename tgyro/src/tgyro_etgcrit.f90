@@ -16,9 +16,9 @@ subroutine tgyro_etgcrit(eflux_e_loc,eflux_i_loc,pflux_e_loc,pflux_i_loc)
   real :: d_e_out
 
   ! Input parameters
-  etae_in   = dlntedr(i_r)/dlnnedr(i_r)
-  alte_in   = r_min*dlntedr(i_r)
-  alne_in   = r_min*dlnnedr(i_r)
+  etae_in = dlntedr(i_r)/dlnnedr(i_r)
+  alte_in = r_min*dlntedr(i_r)
+  alne_in = r_min*dlnnedr(i_r)
 
   !----------------------------------------------
   ! Diffusivity model
