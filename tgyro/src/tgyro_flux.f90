@@ -23,7 +23,8 @@ subroutine tgyro_flux
   integer :: i1,i2
   integer :: n_12
   real, dimension(8) :: x_out
-
+  real :: a1,a2,a3,a4
+  
   !-------------------------------------------
   ! IFS-PPPL parameters
   real :: rltcrit
@@ -87,7 +88,7 @@ subroutine tgyro_flux
   case (0)
 
      ! Zero neoclassical flux
-     
+
      pflux_e_neo(i_r) = 0.0
      eflux_e_neo(i_r) = 0.0
 
@@ -152,6 +153,8 @@ subroutine tgyro_flux
   mflux_e_tur(:)   = 0.0
   expwd_i_tur(:,:) = 0.0
   expwd_e_tur(:)   = 0.0
+
+  print *,i_proc_global,flux_method
 
   select case (flux_method)
 
@@ -273,23 +276,19 @@ subroutine tgyro_flux
 
   case (5) 
 
-     call tgyro_etgcrit
-
-     pflux_e_tur(i_r) = etgcrit_elec_pflux_out
-     eflux_e_tur(i_r) = etgcrit_elec_eflux_out
-     mflux_e_tur(i_r) = 0.0
-     expwd_e_tur(i_r) = 0.0
-     
-     pflux_i_tur(1:loc_n_ion,i_r) = etgcrit_ion_pflux_out(1:loc_n_ion)
-     eflux_i_tur(1:loc_n_ion,i_r) = etgcrit_ion_eflux_out(1:loc_n_ion)
-     mflux_i_tur(1:loc_n_ion,i_r) = 0.0
-     expwd_i_tur(1:loc_n_ion,i_r) = 0.0
+     call tgyro_etgcrit(a1,a2,a3,a4)
+     eflux_e_tur(i_r) = a1
+     eflux_i_tur(1,i_r) = a2
+     pflux_e_tur(i_r) = a3
+     pflux_i_tur(1,i_r) = a4
 
   case default
 
      call tgyro_catch_error('ERROR: (TGYRO) No matching flux method in tgyro_flux.')
 
   end select
+
+  print *,i_proc_global
 
   call MPI_BARRIER(MPI_COMM_WORLD,ierr)
 
@@ -310,5 +309,5 @@ subroutine tgyro_flux
   mflux_tot(i_r) = mflux_e_neo(i_r)+mflux_e_tur(i_r)+&
        sum(mflux_i_neo(therm_vec(:),i_r)+mflux_i_tur(therm_vec(:),i_r))
   !-------------------------------------------------------------------
-  
+
 end subroutine tgyro_flux

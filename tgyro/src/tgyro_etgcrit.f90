@@ -1,23 +1,35 @@
-subroutine tgyro_etgcrit
+subroutine tgyro_etgcrit(eflux_e_loc,eflux_i_loc,pflux_e_loc,pflux_i_loc)
 
   use tgyro_globals
 
   implicit none
 
+  real, intent(inout) :: eflux_e_loc
+  real, intent(inout) :: eflux_i_loc
+  real, intent(inout) :: pflux_e_loc
+  real, intent(inout) :: pflux_i_loc
+  
+  real :: etae_in
+  real :: alte_in
+  real :: alne_in
+  real :: chi_e_out
+  real :: d_e_out
+
   ! Input parameters
-  chi_gb_in = chi_gb(i_r)
   etae_in   = dlntedr(i_r)/dlnnedr(i_r)
-  alte_in   = r_min*dlnnedr(i_r)
+  alte_in   = r_min*dlntedr(i_r)
+  alne_in   = r_min*dlnnedr(i_r)
 
+  !----------------------------------------------
   ! Diffusivity model
-  chi_e_out = 1.5*(etae_in-1.4)*(alte_in/60.0)*chi_gb_in
+  chi_e_out = 1.5*(etae_in-1.4)*(alte_in/60.0)
   d_e_out   = 0.02*chi_e_out
+  !----------------------------------------------
 
-  ! Conversion to output fluxes
-  etgcrit_elec_eflux_out = ne(i_r)*te(i_r)*dlntedr(i_r)*chi_e_out
-  etgcrit_elec_pflux_out = ne(i_r)*dlnnedr(i_r)*d_e_out
-  
-  etgcrit_ion_eflux_out(1:loc_n_ion) = 0.0
-  etgcrit_ion_pflux_out(1:loc_n_ion) = 0.0
-  
+  ! Conversion from diffusivity to flux
+  eflux_e_loc = chi_e_out * alte_in
+  pflux_e_loc =   d_e_out * alne_in
+  eflux_i_loc = 0.0
+  pflux_i_loc = pflux_e_loc
+
 end subroutine tgyro_etgcrit

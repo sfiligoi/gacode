@@ -370,6 +370,8 @@ class ManagerInput:
                 code='ifs'
             elif os.path.isfile(basedir+'/input.glf23'):
                 code='glf23'
+            elif os.path.isfile(basedir+'/input.etg'):
+                code='etg'
             else:
                 code='unknown'
                 self.error=1
