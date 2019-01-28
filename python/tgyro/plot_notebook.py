@@ -27,6 +27,7 @@ simdir = sys.argv[1]
 units  = int(sys.argv[2])
 ext    = sys.argv[3]
 nstr   = sys.argv[4]
+loc    = int(sys.argv[5])
 
 n = int(nstr)
 
@@ -117,7 +118,7 @@ def plot_z(ax,tag):
       plot_input_profiles(ax,'dlnnedr',1)
 
    ax.set_ylim([0.0,10.0])
-   ax.legend(loc=2)
+   ax.legend(loc=loc)
    plt.tight_layout
 
 def plot_flux(ax,tag):
@@ -130,7 +131,7 @@ def plot_flux(ax,tag):
  
    tot=r'$\mathbf{total}$'
    tar=r'$\mathbf{target}$'
-
+   
    if tag == 'eflux_e_target':
       if units == 0:
          ax.plot(x,sim.data['eflux_e_tot'][n],label=tot)
@@ -172,7 +173,7 @@ def plot_flux(ax,tag):
             ax.set_ylabel('$\Gamma_{i'+str(i+1)+'}~[10^{19}/m^2/s]$',color='k')
          break
 
-   ax.legend(loc=2)
+   ax.legend(loc=loc)
    plt.tight_layout
 
 def plot_smooth(ax,tag):
@@ -227,7 +228,7 @@ def plot_smooth(ax,tag):
          plot_input_profiles(ax,'ni_'+str(i+1))
          break
     
-   ax.legend(loc=1)
+   ax.legend(loc=loc)
    plt.tight_layout
         
 #-------------------------------------------------------------------------------------
@@ -337,11 +338,11 @@ if __name__ == "__main__":
         list.append('ni'+str(i+1)+'_target')
     list=list+['zte','zti','zne']
 
-    for x in list:
+    for xlist in list:
         figure = plt.figure(figsize=(9,6))
         figure.subplots_adjust(left=0.12,right=0.95,bottom=0.16)
         ax = figure.add_subplot(111) 
-        plot_select(ax,x)
-        pfile = 'out.'+x+'.'+ext
+        plot_select(ax,xlist)
+        pfile = 'out.'+xlist+'.'+ext
         plt.savefig(pfile)
         print 'INFO: (notebook.py) Wrote '+pfile
