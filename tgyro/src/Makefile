@@ -40,6 +40,7 @@ OBJECTS += tgyro_globals.o \
            tgyro_init_profiles_axis.o \
            tgyro_iteration_driver.o \
            tgyro_iteration_standard.o \
+           tgyro_iteration_diagonal.o \
            tgyro_iteration_serial.o \
            tgyro_iteration_parallel.o \
            tgyro_iteration_simplerelax.o \

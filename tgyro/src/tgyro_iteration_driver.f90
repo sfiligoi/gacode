@@ -168,6 +168,10 @@ subroutine tgyro_iteration_driver
 
      call tgyro_iteration_standard
 
+  case (2) 
+
+     call tgyro_iteration_diagonal
+
   case (4) 
 
      call tgyro_iteration_serial
