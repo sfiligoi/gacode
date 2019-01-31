@@ -12,7 +12,7 @@ subroutine tgyro_iteration_diagonal
   use tgyro_iteration_variables
 
   real :: dz
-  real, dimension(:), allocatable :: fn0,fn
+  real, dimension(:), allocatable :: fn0,fn,dxd
   logical :: evomain,evoaux
 
   if (i_proc_global == 0) then
@@ -54,6 +54,7 @@ subroutine tgyro_iteration_diagonal
 
   allocate(fn0(p_max))
   allocate(fn(p_max))
+  allocate(dxd(p_max))
 
   evomain = (loc_ti_feedback_flag == 1) .or. (loc_te_feedback_flag == 1)
   evoaux  = (evo_e(0) == 1) .or. (loc_er_feedback_flag == 1)
@@ -62,40 +63,41 @@ subroutine tgyro_iteration_diagonal
 
      i_tran = i_tran+1
 
-     ! Initialize gradients
-
-     x_vec0 = x_vec
-     g_vec0 = g_vec
-     f_vec0 = f_vec
-     res0   = res
-
-     if (i_tran_loop == 1) then
-        relax = loc_relax
-     endif
-
-
      if (evomain) then
 
         fn0 = g_vec-f_vec
-        call tgyro_flux_vector(x_vec0,f_vec,loc_dx,-1)
+        call tgyro_flux_vector(x_vec,f_vec,loc_dx,1)
         fn = g_vec-f_vec
 
-        p = 0
-        do i=2,n_r
-           if (loc_ti_feedback_flag == 1) then
-              p = p+1
-              x_vec(p) = x_vec0(p)-loc_relax*fn0(p)/(fn(p)-fn0(p))*loc_dx
+        do p=1,p_max
+           if (abs(fn(p)-fn0(p)) > 1e-5) then
+              dxd(p) = loc_relax*fn0(p)/(fn(p)-fn0(p))*loc_dx
+              if (abs(dxd(p)) > loc_dx_max) then
+                 dxd(p) = loc_dx_max*dxd(p)/abs(dxd(p))
+              endif
+           else
+              dxd(p) = 0.0
            endif
-           if (loc_te_feedback_flag == 1) then
-              p = p+1
-              x_vec(p) = x_vec0(p)-loc_relax*fn0(p)/(fn(p)-fn0(p))*loc_dx
+           x_vec(p) = x_vec(p)-dxd(p)
+        enddo
+
+        call tgyro_target_vector(x_vec,g_vec)
+        call tgyro_flux_vector(x_vec,f_vec,0.0,0)
+
+        fn0 = g_vec-f_vec
+        call tgyro_flux_vector(x_vec,f_vec,loc_dx,2)
+        fn = g_vec-f_vec
+
+        do p=1,p_max
+           if (abs(fn(p)-fn0(p)) > 1e-5) then
+              dxd(p) = loc_relax*fn0(p)/(fn(p)-fn0(p))*loc_dx
+              if (abs(dxd(p)) > loc_dx_max) then
+                 dxd(p) = loc_dx_max*dxd(p)/abs(dxd(p))
+              endif
+           else
+              dxd(p) = 0.0
            endif
-           if (loc_er_feedback_flag == 1) then
-              p = p+1
-           endif
-           if (evo_e(0) == 1) then 
-              p = p+1
-           endif
+           x_vec(p) = x_vec(p)-dxd(p)
         enddo
 
         call tgyro_target_vector(x_vec,g_vec)
@@ -109,22 +111,16 @@ subroutine tgyro_iteration_diagonal
         call tgyro_flux_vector(x_vec,f_vec,loc_dx,-2)
         fn = g_vec-f_vec
 
-        p = 0
-        do i=2,n_r
-           if (loc_ti_feedback_flag == 1) then
-              p = p+1
+        do p=1,p_max
+           if (abs(fn(p)-fn0(p)) > 1e-4) then
+              dxd(p) = loc_relax*fn0(p)/(fn(p)-fn0(p))*loc_dx
+              if (abs(dxd(p)) > loc_dx_max) then
+                 dxd(p) = loc_dx_max*dxd(p)/abs(dxd(p))
+              endif
+           else
+              dxd(p) = 0.0
            endif
-           if (loc_te_feedback_flag == 1) then
-              p = p+1
-           endif
-           if (loc_er_feedback_flag == 1) then
-              p = p+1
-              x_vec(p) = x_vec0(p)-loc_relax*fn0(p)/(fn(p)-fn0(p))*loc_dx
-           endif
-           if (evo_e(0) == 1) then 
-              p = p+1
-              x_vec(p) = x_vec0(p)-loc_relax*fn0(p)/(fn(p)-fn0(p))*loc_dx
-           endif
+           x_vec(p) = x_vec(p)-dxd(p)
         enddo
 
         call tgyro_target_vector(x_vec,g_vec)
