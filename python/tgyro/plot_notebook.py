@@ -43,6 +43,9 @@ ggb = sim.data['Gamma_GB'][n]
 qgb = sim.data['Q_GB'][n]
 pgb = sim.data['Pi_GB'][n]
 
+nit = sim.n_iterations+1
+nx  = sim.n_r-1
+
 n_ion = sim.n_ion
 
 wdir = os.path.realpath(simdir)
@@ -57,8 +60,10 @@ init=r'$\mathtt{iter=0}$'
 def plot_select(ax,tag):
    if 'flux' in tag:
       plot_flux(ax,tag)
-   if 'z' in tag:
+   elif 'z' in tag:
       plot_z(ax,tag)
+   elif 'res_' in tag:
+      plot_residual(ax,tag)
    else:
       plot_smooth(ax,tag)
   
@@ -118,6 +123,30 @@ def plot_z(ax,tag):
       plot_input_profiles(ax,'dlnnedr',1)
 
    ax.set_ylim([0.0,10.0])
+   ax.legend(loc=loc)
+   plt.tight_layout
+
+def plot_residual(ax,tag):
+
+   # Gradient scale lengths
+
+   ax.grid(which="major",ls="-",alpha=0.1,linewidth=2)
+   ax.grid(which="minor",ls=":",alpha=0.1,linewidth=2)
+   ax.set_xlabel('$r/a$')
+
+   y = np.arange(nit)
+
+   if tag == 'res_te':
+      for ix in range(nx):
+         #print sim.data['E(eflux_e)'][:,ix+1]
+         #print y
+         #ax.plot(x[1+ix]+0.01*sim.data['E(eflux_e)'][:,1+ix],y,color='k',label=init)
+      ax.set_ylabel('$\mathrm{Residual}(T_e)$',color='k')
+   elif tag == 'res_ti':
+      #ax.plot(x,sim.data['E(eflux_e)'][0],color='k',label=init)
+      ax.set_ylabel('$E(T_e}$',color='k')
+
+   #ax.set_ylim([0.0,1.0])
    ax.legend(loc=loc)
    plt.tight_layout
 
@@ -306,6 +335,14 @@ class DemoFrame(wx.Frame):
         tab = TabPanel(notebook)
         tab.draw('zne')
         notebook.AddPage(tab,'zne')
+
+        tab = TabPanel(notebook)
+        tab.draw('res_te')
+        notebook.AddPage(tab,'R(Te)')
+
+        tab = TabPanel(notebook)
+        tab.draw('res_ti')
+        notebook.AddPage(tab,'R(Ti)')
 
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(notebook, 1, wx.ALL|wx.EXPAND, 5)
