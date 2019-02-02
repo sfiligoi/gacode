@@ -19,6 +19,7 @@ from matplotlib import rc
 from gacodefuncs import *
 from tgyro.data import tgyrodata
 from profiles_gen.data import profiles_genData
+from matplotlib.colors import LogNorm
 
 rc('text',usetex=True)
 rc('font',size=18)
@@ -128,26 +129,38 @@ def plot_z(ax,tag):
 
 def plot_residual(ax,tag):
 
-   # Gradient scale lengths
+   if tag == 'res_tot':
+      ax.grid(which="major",ls="-",alpha=0.1,linewidth=2)
+      ax.grid(which="minor",ls=":",alpha=0.1,linewidth=2)
+      ax.set_yscale('log')
+      ze = np.sum(sim.data['E(eflux_e)'][:,1:],axis=1)/nx
+      ax.plot(ze,label=r'$R(T_e)$')
+      zi = np.sum(sim.data['E(eflux_i)'][:,1:],axis=1)/nx
+      ax.plot(zi,label=r'$R(T_i)$')
+      ne = np.sum(sim.data['E(pflux_e)'][:,1:],axis=1)/nx
+      ax.plot(ne,label=r'$R(n_e)$')
+      ax.set_ylabel('$\mathbf{residual}$')
+      ax.set_xlabel('$\mathbf{iteration}$')
+      ax.set_xlim([0,nit])
+      ax.set_ylim([1e-3,5e0])
+      ax.legend(loc=loc)
+   else:
+      if tag == 'res_te':
+         z = sim.data['E(eflux_e)'][:,1:]
+         ax.set_ylabel('$\mathrm{Residual}(T_e)$',color='k')
+      elif tag == 'res_ti':
+         z = sim.data['E(eflux_i)'][:,1:]
+         ax.set_ylabel('$\mathrm{Residual}(T_i)$',color='k')
+      elif tag == 'res_ne':
+         z = sim.data['E(pflux_e)'][:,1:]
+         ax.set_ylabel('$\mathrm{Residual}(n_e)$',color='k')
 
-   ax.grid(which="major",ls="-",alpha=0.1,linewidth=2)
-   ax.grid(which="minor",ls=":",alpha=0.1,linewidth=2)
-   ax.set_xlabel('$r/a$')
+      c=ax.pcolor(z,edgecolors='w',linewidths=1,
+                  norm=LogNorm(vmin=1e-3,vmax=1.0),cmap='rainbow')
+      plt.colorbar(c,ax=ax)
+      ax.set_xlabel('$r/a$')
+      ax.set_ylabel('$\mathbf{iteration}$')
 
-   y = np.arange(nit)
-
-   if tag == 'res_te':
-      for ix in range(nx):
-         #print sim.data['E(eflux_e)'][:,ix+1]
-         #print y
-         #ax.plot(x[1+ix]+0.01*sim.data['E(eflux_e)'][:,1+ix],y,color='k',label=init)
-      ax.set_ylabel('$\mathrm{Residual}(T_e)$',color='k')
-   elif tag == 'res_ti':
-      #ax.plot(x,sim.data['E(eflux_e)'][0],color='k',label=init)
-      ax.set_ylabel('$E(T_e}$',color='k')
-
-   #ax.set_ylim([0.0,1.0])
-   ax.legend(loc=loc)
    plt.tight_layout
 
 def plot_flux(ax,tag):
@@ -343,6 +356,14 @@ class DemoFrame(wx.Frame):
         tab = TabPanel(notebook)
         tab.draw('res_ti')
         notebook.AddPage(tab,'R(Ti)')
+
+        tab = TabPanel(notebook)
+        tab.draw('res_ne')
+        notebook.AddPage(tab,'R(ne)')
+
+        tab = TabPanel(notebook)
+        tab.draw('res_tot')
+        notebook.AddPage(tab,'Rtot')
 
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(notebook, 1, wx.ALL|wx.EXPAND, 5)

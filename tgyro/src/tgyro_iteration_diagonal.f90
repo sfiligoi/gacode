@@ -42,7 +42,7 @@ subroutine tgyro_iteration_diagonal
      ! GYRO restart data available
      gyro_restart_method = 2
   endif
-  res0 = 0.0
+ 
   call tgyro_residual(f_vec,g_vec,res,p_max,loc_residual_method)
 
   if (loc_restart_flag == 0 .or. tgyro_relax_iterations == 0) then
@@ -55,37 +55,23 @@ subroutine tgyro_iteration_diagonal
 
   allocate(fn0(p_max))
   allocate(fn(p_max))
-
+  
   do i_tran_loop=1,tgyro_relax_iterations
 
      i_tran = i_tran+1
 
      if (evomain) then
 
-        ! Update Ti
+        ! Update Ti,Te
 
         fn0 = g_vec-f_vec
-        call tgyro_flux_vector(x_vec,f_vec,loc_dx,1)
+        call tgyro_flux_vector(x_vec,f_vec,loc_dx,-1)
         fn  = g_vec-f_vec
 
         call get_dx
 
         do p=1,p_max
            if (mask(p,1) == 1) x_vec(p) = x_vec(p)-b(p)
-        enddo
-
-        call tgyro_target_vector(x_vec,g_vec)
-        call tgyro_flux_vector(x_vec,f_vec,0.0,0)
-
-        ! Update Te
-
-        fn0 = g_vec-f_vec
-        call tgyro_flux_vector(x_vec,f_vec,loc_dx,2)
-        fn  = g_vec-f_vec
-
-        call get_dx
-
-        do p=1,p_max
            if (mask(p,2) == 1) x_vec(p) = x_vec(p)-b(p)
         enddo
 
@@ -95,8 +81,39 @@ subroutine tgyro_iteration_diagonal
      endif
 
      ! Compute residual
+     res0 = res
      call tgyro_residual(f_vec,g_vec,res,p_max,loc_residual_method)
+     do p=1,p_max
+        if (res0(p) < res(p)) then
+           if (mask(p,1) == 1) x_vec(p) = x_vec(p)+b(p)/2
+           if (mask(p,2) == 1) x_vec(p) = x_vec(p)+b(p)/2
+        endif
+     enddo
 
+     if (evoaux .and. mod(i_tran,2) == 1) then
+
+        ! Update Ti,Te
+
+        fn0 = g_vec-f_vec
+        call tgyro_flux_vector(x_vec,f_vec,loc_dx,-2)
+        fn  = g_vec-f_vec
+
+        call get_dx
+
+        do p=1,p_max
+           if (mask(p,3) == 1) x_vec(p) = x_vec(p)-b(p)*0.2
+           if (mask(p,4) == 1) x_vec(p) = x_vec(p)-b(p)*0.2
+        enddo
+
+        call tgyro_target_vector(x_vec,g_vec)
+        call tgyro_flux_vector(x_vec,f_vec,0.0,0)
+
+     endif
+
+     ! Compute residual
+     res0 = res
+     call tgyro_residual(f_vec,g_vec,res,p_max,loc_residual_method)
+     
      ! Output results
      call tgyro_write_intermediate(0,res)
      call tgyro_write_data(1)
