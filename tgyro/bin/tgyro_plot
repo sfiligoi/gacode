@@ -37,6 +37,8 @@ then
   echo 
   echo " OPTIONS FOR <type>=note"
   echo
+  echo "          -n <iteration number (default -1 = last)>"
+  echo
   echo "          -dots"
   echo "          Toggle dot overlay."
   echo

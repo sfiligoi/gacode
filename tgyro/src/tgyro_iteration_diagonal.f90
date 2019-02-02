@@ -42,7 +42,7 @@ subroutine tgyro_iteration_diagonal
      ! GYRO restart data available
      gyro_restart_method = 2
   endif
- 
+
   call tgyro_residual(f_vec,g_vec,res,p_max,loc_residual_method)
 
   if (loc_restart_flag == 0 .or. tgyro_relax_iterations == 0) then
@@ -55,7 +55,7 @@ subroutine tgyro_iteration_diagonal
 
   allocate(fn0(p_max))
   allocate(fn(p_max))
-  
+
   do i_tran_loop=1,tgyro_relax_iterations
 
      i_tran = i_tran+1
@@ -101,19 +101,19 @@ subroutine tgyro_iteration_diagonal
         call get_dx
 
         do p=1,p_max
-           if (mask(p,3) == 1) x_vec(p) = x_vec(p)-b(p)*0.2
-           if (mask(p,4) == 1) x_vec(p) = x_vec(p)-b(p)*0.2
+           if (mask(p,3) == 1) x_vec(p) = x_vec(p)-b(p)*0.25
+           if (mask(p,4) == 1) x_vec(p) = x_vec(p)-b(p)*0.25
         enddo
 
         call tgyro_target_vector(x_vec,g_vec)
         call tgyro_flux_vector(x_vec,f_vec,0.0,0)
 
+        ! Compute residual
+        res0 = res
+        call tgyro_residual(f_vec,g_vec,res,p_max,loc_residual_method)
+
      endif
 
-     ! Compute residual
-     res0 = res
-     call tgyro_residual(f_vec,g_vec,res,p_max,loc_residual_method)
-     
      ! Output results
      call tgyro_write_intermediate(0,res)
      call tgyro_write_data(1)
@@ -121,7 +121,7 @@ subroutine tgyro_iteration_diagonal
   enddo
 
   deallocate(fn0,fn)
-  
+
 end subroutine tgyro_iteration_diagonal
 
 subroutine get_dx

@@ -32,7 +32,7 @@ loc    = int(sys.argv[5])
 
 n = int(nstr)
 
-sim = tgyrodata(simdir)
+sim = tgyrodata(simdir,verbose=False)
 
 print 'Number of ions  : ',sim.n_ion
 print 'Number of radii : ',sim.n_r
@@ -78,9 +78,9 @@ def plot_input_profiles(ax,tag,scale=0):
    color='black' ; width=5 ; alpha = 0.2 ; label='input.profiles'
 
    if os.path.isfile(f0):
-      prof = profiles_genData(f0)
+      prof = profiles_genData(f0,verbose=False)
    else:
-      prof = profiles_genData('input.profiles')
+      prof = profiles_genData('input.profiles',verbose=False)
       
    xp = prof.data['rmin']
    
