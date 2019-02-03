@@ -197,6 +197,8 @@ def plot_flux(ax,tag):
          ax.plot(x,sim.data['pflux_e_tot'][n],label=tot)
          ax.plot(x,sim.data['pflux_e_target'][n],label=tar)
          ax.set_ylabel('$\Gamma_e/\Gamma_{GB}$',color='k')
+         if max(abs(sim.data['pflux_e_tot'][n])) < 0.1:
+            ax.set_ylim([-0.1,0.1])
       else:
          ax.plot(x,sim.data['pflux_e_tot'][n]*ggb,label=tot)
          ax.plot(x,sim.data['pflux_e_target'][n]*ggb,label=tar)
