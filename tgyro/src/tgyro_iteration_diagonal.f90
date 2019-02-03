@@ -11,7 +11,7 @@ subroutine tgyro_iteration_diagonal
   use tgyro_globals
   use tgyro_iteration_variables
 
-  logical :: evomain,evoaux
+  implicit none
 
   if (i_proc_global == 0) then
      open(unit=1,file=trim(runfile),position='append')
@@ -50,9 +50,6 @@ subroutine tgyro_iteration_diagonal
   endif
   !----------------------------------------------------
 
-  evomain = (loc_ti_feedback_flag == 1) .or. (loc_te_feedback_flag == 1)
-  evoaux  = (evo_e(0) == 1) .or. (loc_er_feedback_flag == 1)
-
   allocate(fn0(p_max))
   allocate(fn(p_max))
 
@@ -60,10 +57,53 @@ subroutine tgyro_iteration_diagonal
 
      i_tran = i_tran+1
 
-     if (evomain) then
+     ! Update Ti,Te
 
-        ! Update Ti,Te
+     if (loc_ti_feedback_flag == 1) then
+        fn0 = g_vec-f_vec
+        call tgyro_flux_vector(x_vec,f_vec,loc_dx,1)
+        fn  = g_vec-f_vec
 
+        call get_dx
+
+        do p=1,p_max
+           if (mask(p,1) == 1) x_vec(p) = x_vec(p)-b(p)
+        enddo
+
+        call tgyro_target_vector(x_vec,g_vec)
+        call tgyro_flux_vector(x_vec,f_vec,0.0,0)
+        
+        ! Compute residual
+        res0 = res
+        call tgyro_residual(f_vec,g_vec,res,p_max,loc_residual_method)
+        do p=1,p_max
+           if (mask(p,1) == 1 .and. res0(p) < res(p)) x_vec(p) = x_vec(p)+b(p)*0.5
+        enddo
+
+     endif
+
+     if (loc_te_feedback_flag == 1) then
+        fn0 = g_vec-f_vec
+        call tgyro_flux_vector(x_vec,f_vec,loc_dx,2)
+        fn  = g_vec-f_vec
+
+        call get_dx
+
+        do p=1,p_max
+           if (mask(p,2) == 1) x_vec(p) = x_vec(p)-b(p)
+        enddo
+
+        call tgyro_target_vector(x_vec,g_vec)
+        call tgyro_flux_vector(x_vec,f_vec,0.0,0)
+        ! Compute residual
+        res0 = res
+        call tgyro_residual(f_vec,g_vec,res,p_max,loc_residual_method)
+        do p=1,p_max
+           if (mask(p,2) == 1 .and. res0(p) < res(p)) x_vec(p) = x_vec(p)+b(p)*0.5
+        enddo
+     endif
+
+     if (evo_e(0) == 1 .or. loc_er_feedback_flag == 1) then
         fn0 = g_vec-f_vec
         call tgyro_flux_vector(x_vec,f_vec,loc_dx,-1)
         fn  = g_vec-f_vec
@@ -71,48 +111,17 @@ subroutine tgyro_iteration_diagonal
         call get_dx
 
         do p=1,p_max
-           if (mask(p,1) == 1) x_vec(p) = x_vec(p)-b(p)
-           if (mask(p,2) == 1) x_vec(p) = x_vec(p)-b(p)
+           if (loc_er_feedback_flag ==1 .and. mask(p,3) == 1) x_vec(p) = x_vec(p)-b(p)*0.5
+           if (evo_e(0) == 1 .and. mask(p,4) == 1) x_vec(p) = x_vec(p)-b(p)*0.5
         enddo
 
         call tgyro_target_vector(x_vec,g_vec)
         call tgyro_flux_vector(x_vec,f_vec,0.0,0)
-
      endif
 
      ! Compute residual
      res0 = res
      call tgyro_residual(f_vec,g_vec,res,p_max,loc_residual_method)
-     do p=1,p_max
-        if (res0(p) < res(p)) then
-           if (mask(p,1) == 1) x_vec(p) = x_vec(p)+b(p)/2
-           if (mask(p,2) == 1) x_vec(p) = x_vec(p)+b(p)/2
-        endif
-     enddo
-
-     if (evoaux .and. mod(i_tran,2) == 1) then
-
-        ! Update Ti,Te
-
-        fn0 = g_vec-f_vec
-        call tgyro_flux_vector(x_vec,f_vec,loc_dx,-2)
-        fn  = g_vec-f_vec
-
-        call get_dx
-
-        do p=1,p_max
-           if (mask(p,3) == 1) x_vec(p) = x_vec(p)-b(p)*0.25
-           if (mask(p,4) == 1) x_vec(p) = x_vec(p)-b(p)*0.25
-        enddo
-
-        call tgyro_target_vector(x_vec,g_vec)
-        call tgyro_flux_vector(x_vec,f_vec,0.0,0)
-
-        ! Compute residual
-        res0 = res
-        call tgyro_residual(f_vec,g_vec,res,p_max,loc_residual_method)
-
-     endif
 
      ! Output results
      call tgyro_write_intermediate(0,res)

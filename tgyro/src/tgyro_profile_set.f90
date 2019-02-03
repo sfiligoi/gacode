@@ -25,7 +25,7 @@ subroutine tgyro_profile_set(x_vec,dx,index)
 
      if (loc_ti_feedback_flag == 1) then
         p = p+1
-        if (index == 1 .or. index == -1) then
+        if (index == 1) then
            dlntidr(therm_vec(:),i) = x_vec(p)+dx
         else
            dlntidr(therm_vec(:),i) = x_vec(p)
@@ -34,7 +34,7 @@ subroutine tgyro_profile_set(x_vec,dx,index)
 
      if (loc_te_feedback_flag == 1) then
         p = p+1
-        if (index == 2 .or. index == -1) then
+        if (index == 2) then
            dlntedr(i) = x_vec(p)+dx
         else
            dlntedr(i) = x_vec(p)
@@ -43,7 +43,7 @@ subroutine tgyro_profile_set(x_vec,dx,index)
 
      if (loc_er_feedback_flag == 1) then
         p = p+1
-        if (index == 3 .or. index == -2) then
+        if (index == 3 .or. index == -1) then
            f_rot(i) = x_vec(p)+dx
         else
            f_rot(i) = x_vec(p)
@@ -52,7 +52,7 @@ subroutine tgyro_profile_set(x_vec,dx,index)
 
      if (evo_e(0) == 1) then 
         p = p+1
-        if (index == 4 .or. index == -2) then
+        if (index == 4 .or. index == -1) then
            dlnnedr(i) = x_vec(p)+dx
         else
            dlnnedr(i) = x_vec(p)
