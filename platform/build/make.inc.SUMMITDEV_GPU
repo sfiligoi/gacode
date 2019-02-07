@@ -27,6 +27,7 @@ CC=mpicc
 F77 = mpif90  -I$(GACODE_ROOT)/modules
 
 # Compiler options/flags
+
 FACC   =-acc -Minfo=accel -ta=tesla:cc60 -Mcudalib=cufft -DDISABLE_GPUDIRECT_MPI
 
 FOMP   =-mp -Mstack_arrays ${FACC}
@@ -40,8 +41,14 @@ F2PY   = f2py --fcompiler=pg
 FFTW_INC=${OLCF_FFTW_ROOT}/include
 
 LMATH=-L${OLCF_FFTW_ROOT}/lib -L${OLCF_CUDA_ROOT}/lib64 \
-			       -lfftw3_threads -lfftw3f_threads -lfftw3f -lfftw3 -llapack -lblas
+			      -lfftw3_threads -lfftw3f_threads -lfftw3f -lfftw3 \
+			      -L${OLCF_ESSL_ROOT}/lib64 -lesslsmpcuda -lessl
 
+# -lessl
+# -llapack -lblas
+
+#
+# -llapack -lblas
 # NetCDF
 # NETCDF =-L${NETCDF_DIR}/lib -lnetcdff -lnetcdf -L${NETCDF_DIR}/lib -L${NETCDF_DIR}/lib -lz -lm
 # OLCF_NETCDF_FORTRAN_ROOT
