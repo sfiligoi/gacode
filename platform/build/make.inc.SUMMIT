@@ -1,4 +1,4 @@
-
+#
 #---------------------------------------------------
 # IBM summit-dev
 #
@@ -8,8 +8,8 @@ IDENTITY="IBM Summit-dev"
 
 # Note : Using only 8 out of 16 cores x CPU, to simplify usage
 # Note2: jsrun currently does not support hw threads
-CORES_PER_NODE=16
-NUMAS_PER_NODE=4
+CORES_PER_NODE=128
+NUMAS_PER_NODE=2
 
 #
 ## 2 10 core nodes of power 8, 8 hw threads
@@ -19,35 +19,73 @@ NUMAS_PER_NODE=4
 # Compilers and flags
 
 # Fortran 90/95 compiler
-FC = mpif90 -module ${GACODE_ROOT}/modules -Mpreprocess -DUSE_INLINE -I${OLCF_FFTW_ROOT}/include  \
-   -I${OLCF_NETCDF_FORTRAN_ROOT}/include
-CC=mpicc
+
+FC = mpif90 -m64 -O2 -g -module ${GACODE_ROOT}/modules -Mpreprocess -DUSE_INLINE \
+   -I${OLCF_NETCDF_FORTRAN_ROOT} -acc
+
+# -m64
+
+#  -acc -Minfo=accel -ta=tesla -Mcudalib=cufft -DDISABLE_GPUDIRECT_MPI
+# -I${OLCF_FFTW_ROOT}/include  -I${OLCF_NETCDF_FORTRAN_ROOT}/include
+
+CC=mpicc -m64 -acc
 
 # Fortran 77 compiler
-F77 = mpif90  -I$(GACODE_ROOT)/modules
+F77 = mpif90 -m64 -O2 -g -I$(GACODE_ROOT)/modules
+#
 
 # Compiler options/flags
 
-FACC   =-acc -Minfo=accel -ta=tesla:cc60 -Mcudalib=cufft
+# FACC =-acc -Minfo=accel -ta=tesla:managed -Mcudalib=cufft -DDISABLE_GPUDIRECT_MPI
+
+FACC =-acc -Minfo=accel -ta=tesla:cc70 -Mcudalib=cufft  -DDISABLE_GPUDIRECT_MPI
+
+# -DDISABLE_GPUDIRECT_MPI
+# -DDISABLE_GPUDIRECT_MPI
+
+# # FACC =-acc -Minfo=accel -ta=tesla:cc70 -Mcudalib=cufft -DDISABLE_GPUDIRECT_MPI
+
+# FACC =-acc -Minfo=accel -ta=tesla:cc60 -Mcudalib=cufft -DDISABLE_GPUDIRECT_MPI
 
 # -DDISABLE_GPUDIRECT_MPI
 
-FOMP   =-mp -Mstack_arrays ${FACC}
-FMATH  =-r8 -I${OLCF_FFTW_ROOT}/include 
+# FACC   =
+
+# FOMP   =-mp -Mstack_arrays ${FACC} -g
+#
+
+FOMP   =-mp -Mstack_arrays ${FACC} -g
+FMATH  =-r8 -I${OLCF_FFTW_ROOT}/include -g
+FDEBUG =-g -Kieee -Ktrap=fp,divz -Mchkptr -Mchkstk  -Minform=inform
+
+# -Mbounds 
+#  -traceback
 FOPT   =-fast -fastsse -Mvect
-FDEBUG =-g -Kieee -Ktrap=fp,divz -Mbounds -Mchkptr -Mchkstk -traceback -Minform=inform
+#  ${FDEBUG}
 F2PY   = f2py --fcompiler=pg
 
 # System math libraries
 
 FFTW_INC=${OLCF_FFTW_ROOT}/include
 
-LMATH=-L${OLCF_FFTW_ROOT}/lib -L${OLCF_CUDA_ROOT}/lib64 \
-			       -lfftw3_threads -lfftw3f_threads -lfftw3f -lfftw3 -llapack -lblas
+LMATH=-acc -L${OLCF_FFTW_ROOT}/lib -L${OLCF_CUDA_ROOT}/lib64 \
+			       -lfftw3_threads -lfftw3f_threads -lfftw3f -lfftw3 \
+			       -L${OLCF_ESSL_ROOT}/lib64 -lesslsmpcuda -lessl
+
+#			       -llapack -lblas
+#
+#			       
+#
+
+#			       
+# -llapack -lblas
+#
 
 # NetCDF
 # NETCDF =-L${NETCDF_DIR}/lib -lnetcdff -lnetcdf -L${NETCDF_DIR}/lib -L${NETCDF_DIR}/lib -lz -lm
 # OLCF_NETCDF_FORTRAN_ROOT
+
+
 
 NETCDF =-L${OLCF_NETCDF_FORTRAN_ROOT}/lib -lnetcdff -L${OLCF_NETCDF_ROOT}/lib -lnetcdf -lz -lm
 NETCDF_INC =${OLCF_NETCDF_DIR}/include
