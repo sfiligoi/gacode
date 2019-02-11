@@ -9,18 +9,15 @@ puts stderr "Use GACODE_PLATFORM: ${GACODE_PLATFORM}"
 echo "Use GACODE_PLATFORM: ${GACODE_PLATFORM}"
 
 module load pgi/19.1
-# module load spectrum-mpi
 module load fftw
 module load hdf5
 module load netcdf
-module load cuda
-module load essl
-
+module load netcdf-fortran
+module load essl                                                                               
+module load cuda/9.2.148
+module load python/2.7.15
 #
-
-# module load netlib-lapack
-# module load essl
 # setenv PAT_REPORT_IGNORE_CHECKSUM 1
 #
-setenv OMP_STACKSIZE 200M
+setenv OMP_STACKSIZE 400M
 setenv OMP_DYNAMIC FALSE
