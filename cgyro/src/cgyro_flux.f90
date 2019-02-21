@@ -4,6 +4,14 @@
 ! PURPOSE:
 !  Compute flux and mean-square fluctuation amplitudes as
 !  functions of (kx,ky).
+!
+! flux(kx,ky) = (kx,ky)-dependent energy-flux
+! fflux(ky)   = ky-dependent fluxes
+! cflux(ky)   = ky-dependent "interior" fluxes
+! gflux(ky)   = (l,ky)-dependent fluxes
+!
+! - The only "important" flux in the absence of ExB shear is fflux
+! - The important flux with ExB shear is cflux
 !-----------------------------------------------------------------
 
 subroutine cgyro_flux
@@ -17,20 +25,21 @@ subroutine cgyro_flux
   real :: dv,cn
   real :: vpar
   real :: prod
-  real, dimension(n_field) :: fprod,fprod2
+  real, dimension(n_field,0:n_global) :: fprod,fprod2
   real :: dvr
   real :: erot
   real :: flux_norm
   complex :: cprod, cprod2
+  real, parameter :: x_fraction=0.2
+  real :: u
 
   !-----------------------------------------------------
-  ! 1. Compute kx-ky fluxes (no field breakdown)
+  ! 1. Compute kx-ky moments (n,E)
   !-----------------------------------------------------
 
   flux_loc(:,:) = 0.0
   moment_loc(:,:,:,:) = 0.0
   gflux_loc(:,:,:) = 0.0
-
 
   iv_loc = 0
   do iv=nv1,nv2
@@ -57,9 +66,6 @@ subroutine cgyro_flux
         dvr   = w_theta(it)*dens_rot(it,is)*dens(is)*dv
         erot  = (energy(ie)+lambda_rot(it,is))*temp(is)
 
-        ! Energy flux : Q_a
-        flux_loc(ir,is) = flux_loc(ir,is)-prod*dvr*erot
-
         if (itp(it) > 0) then
            cprod = cap_h_c(ic,iv_loc)*dvjvec_c(1,ic,iv_loc)/z(is)
            cn    = dv*z(is)*dens(is)*dens_rot(it,is)/temp(is)
@@ -71,38 +77,12 @@ subroutine cgyro_flux
            moment_loc(ir,itp(it),is,2) = moment_loc(ir,itp(it),is,2)-(cn*field(1,ic)-cprod)*erot
         endif
 
-        ! Global fluxes (complex)
-        do l=0,n_global
-
-           cprod  = 0.0 
-           cprod2 = 0.0
-
-           ! i H * J0 phi^* - i H^* J0 phi
-
-           if (ir-l > 0) then
-              cprod  = cprod +i_c*cap_h_c(ic,iv_loc)*conjg(psi(ic_c(ir-l,it),iv_loc))
-              cprod2 = cprod2+i_c*cap_h_c(ic,iv_loc)*conjg(i_c*chi(ic_c(ir-l,it),iv_loc))
-           endif
-           if (ir+l <= n_radial) then
-              cprod  = cprod -i_c*conjg(cap_h_c(ic,iv_loc))*psi(ic_c(ir+l,it),iv_loc)
-              cprod2 = cprod2-i_c*conjg(cap_h_c(ic,iv_loc))*(i_c*chi(ic_c(ir+l,it),iv_loc))
-           endif
-
-           gflux_loc(l,is,1) = gflux_loc(l,is,1)+cprod*dvr
-           gflux_loc(l,is,2) = gflux_loc(l,is,2)+cprod*dvr*erot
-
-           cprod = cprod*(mach*bigr(it)/rmaj+btor(it)/bmag(it)*vpar)+cprod2
-
-           gflux_loc(l,is,3) = gflux_loc(l,is,3)+cprod*dvr*bigr(it)*mass(is)
-
-        enddo
-
      enddo
   enddo
 
-  !-----------------------------------------------------
-  ! 2. Compute ky energy fluxes (with field breakdown)
-  !~----------------------------------------------------
+  !------------------------------------------------------
+  ! 2. Compute ky-dependent fluxes (with field breakdown)
+  !~-----------------------------------------------------
 
   fflux_loc(:,:,:) = 0.0
 
@@ -123,12 +103,33 @@ subroutine cgyro_flux
 
      do ic=1,nc
 
+        ir = ir_c(ic)
         it = it_c(ic)
 
-        ! Im [ H * J0 phi^* ]
+        ! Global fluxes (complex)
+        do l=0,n_global
 
-        fprod(:)  = aimag(cap_h_c(ic,iv_loc)*conjg(jvec_c(:,ic,iv_loc)*field(:,ic)))
-        fprod2(:) = aimag(cap_h_c(ic,iv_loc)*conjg(i_c*jxvec_c(:,ic,iv_loc)*field(:,ic)))
+           fprod  = 0.0 
+           fprod2 = 0.0
+
+           ! i H J0 phi^* - i H^* J0 phi
+
+           if (ir-l > 0) then
+              icl = ic_c(ir-l,it)
+              fprod(:,l) = fprod(:,l) +i_c*cap_h_c(ic,iv_loc)*&
+                   conjg(jvec_c(:,icl,iv_loc)*field(:,icl))
+              fprod2(:,l) = fprod2(:,l)+i_c*cap_h_c(ic,iv_loc)*&
+                   conjg(i_c*jxvec_c(:,icl,iv_loc)*field(:,icl))
+           endif
+           if (ir+l <= n_radial) then
+              icl = ic_c(ir+l,it)
+              fprod(:,l) = fprod(:,l) -i_c*conjg(cap_h_c(ic,iv_loc))*&
+                   jvec_c(:,icl,it),iv_loc)*field(:,icl)
+              fprod2(:,l) = fprod2(:,l)-i_c*conjg(cap_h_c(ic,iv_loc))*&
+                   i_c*jxvec_c(:,icl,iv_loc)*field(:,icl)
+           endif
+
+        enddo
 
         dvr  = w_theta(it)*dens_rot(it,is)*dens(is)*dv
         erot = (energy(ie)+lambda_rot(it,is))*temp(is)
@@ -143,6 +144,22 @@ subroutine cgyro_flux
 
         ! Momentum flux: Pi_a
         fflux_loc(is,3,:) = fflux_loc(is,3,:)-fprod(:)*dvr*bigr(it)*mass(is)
+
+
+        !gflux_loc(l,is,1) = gflux_loc(l,is,1)+cprod*dvr
+        !gflux_loc(l,is,2) = gflux_loc(l,is,2)+cprod*dvr*erot
+
+        !cprod = cprod*(mach*bigr(it)/rmaj+btor(it)/bmag(it)*vpar)+cprod2
+
+        !gflux_loc(l,is,3) = gflux_loc(l,is,3)+cprod*dvr*bigr(it)*mass(is)
+
+        ! Construct "positive/interior" flux:
+        !if (l == 0) then
+        !   cflux_loc = real(gflux_loc(0,:,:))
+        !else
+        !   u = 2*pi*l*x_fraction
+        !   cflux_loc = cflux_loc+2*sin(u)*real(gflux_loc(l,:,:))/u
+        !endif
 
      enddo
 

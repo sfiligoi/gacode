@@ -346,11 +346,11 @@ module cgyro_globals
   complex, dimension(:,:,:,:), allocatable :: moment_loc
   complex, dimension(:,:,:,:), allocatable :: moment
   !
-  ! Nonlinear fluxes 
-  real, dimension(:,:), allocatable :: flux_loc
-  real, dimension(:,:), allocatable :: flux
+  ! Nonlinear fluxes (f=standard,c=central,g=global)
   real, dimension(:,:,:), allocatable :: fflux_loc
   real, dimension(:,:,:), allocatable :: fflux
+  real, dimension(:,:,:), allocatable :: cflux_loc
+  real, dimension(:,:,:), allocatable :: cflux
   complex, dimension(:,:,:), allocatable :: gflux_loc
   complex, dimension(:,:,:), allocatable :: gflux
   !

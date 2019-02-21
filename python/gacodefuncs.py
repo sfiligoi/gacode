@@ -191,13 +191,14 @@ def extract(d,sd,key,w,spec,moment,norm=False,verbose=False):
          sim = cgyrodata(ddir)
          sim.getflux()
          y = np.sum(sim.ky_flux,axis=(2,3))
-         # Energy flux of species k
+         # Flux for input (spec,moment) window w
          f.append(average(y[spec,moment,:],sim.t,w))
          print 'INFO: (extract) Processed data in '+ddir
       else:
          if verbose:
             print 'INFO: (extract) Checked for but cannot find '+ddir
 
+   # return (scan parameter, flux)
    if norm == True:
       return np.array(x),np.array(f)*sim.dens[1]/sim.dens[spec]
    else:

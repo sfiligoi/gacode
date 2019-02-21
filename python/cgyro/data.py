@@ -247,6 +247,10 @@ class cgyrodata:
       if fmt != 'null':  
          self.ky_flux = np.reshape(data[0:nd],(self.n_species,3,self.n_field,self.n_n,nt),'F')
          print "INFO: (data.py) Read data in "+fmt+".cgyro.ky_flux. "+t 
+      t,fmt,data = self.extract('.cgyro.ky_cflux')
+      if fmt != 'null':  
+         self.ky_cflux = np.reshape(data[0:nd],(self.n_species,3,self.n_field,self.n_n,nt),'F')
+         print "INFO: (data.py) Read data in "+fmt+".cgyro.ky_cflux. "+t 
       #-----------------------------------------------------------------
 
    def getbigflux(self):
@@ -354,7 +358,9 @@ class cgyrodata:
             g0 = g0+2*np.sin(u)*self.lky_xr[ispec,l]/u
             g1 = g1+2*np.sin(u)*self.lky_xr[ispec,l]/u*(-1)**l
 
+         # Average over true (positive) interval
          self.lky_flux_ave[ispec,0] = g0
+         # Average over negative interval
          self.lky_flux_ave[ispec,1] = g1
       
    def getbigfield(self):
