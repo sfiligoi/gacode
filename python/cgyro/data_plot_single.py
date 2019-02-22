@@ -217,7 +217,7 @@ elif plot_type == 'hbcut':
 
 else:
 
-   print 'ERROR: (data_plot_single) Plot type not found'
+   print('ERROR: (data_plot_single) Plot type not found')
 
 #---------------------------------------------------------------
 # Plot to screen or to image file
@@ -232,6 +232,6 @@ if doplot:
       plt.savefig(outfile)
 
    if ftype != 'screen':
-      print 'INFO: (data_plot_single) Created '+outfile
+      print('INFO: (data_plot_single) Created '+outfile)
 #---------------------------------------------------------------
 
