@@ -234,23 +234,36 @@ class cgyrodata:
          pass 
       #-----------------------------------------------------------------
 
-   def getflux(self):
+   def getflux(self,cflux):
 
       import numpy as np
 
+      if cflux == 'auto':
+         if abs(self.gamma_e) > 0.0:
+            usec = True
+         else:
+            usec = False
+      elif cflux == 'on':
+         usec = True
+      else:
+         usec = False
+  
       #-----------------------------------------------------------------
       # Particle, momentum and energy fluxes
       #
       nt = self.n_time
       nd = self.n_species*3*self.n_field*self.n_n*nt
-      t,fmt,data = self.extract('.cgyro.ky_flux')
-      if fmt != 'null':  
-         self.ky_flux = np.reshape(data[0:nd],(self.n_species,3,self.n_field,self.n_n,nt),'F')
-         print "INFO: (data.py) Read data in "+fmt+".cgyro.ky_flux. "+t 
-      t,fmt,data = self.extract('.cgyro.ky_cflux')
-      if fmt != 'null':  
-         self.ky_cflux = np.reshape(data[0:nd],(self.n_species,3,self.n_field,self.n_n,nt),'F')
-         print "INFO: (data.py) Read data in "+fmt+".cgyro.ky_cflux. "+t 
+
+      if usec:
+         t,fmt,data = self.extract('.cgyro.ky_cflux')
+         if fmt != 'null':  
+            self.ky_flux = np.reshape(data[0:nd],(self.n_species,3,self.n_field,self.n_n,nt),'F')
+            print "INFO: (data.py) Read data in "+fmt+".cgyro.ky_cflux. "+t 
+      else:
+         t,fmt,data = self.extract('.cgyro.ky_flux')
+         if fmt != 'null':  
+            self.ky_flux = np.reshape(data[0:nd],(self.n_species,3,self.n_field,self.n_n,nt),'F')
+            print "INFO: (data.py) Read data in "+fmt+".cgyro.ky_flux. "+t 
       #-----------------------------------------------------------------
 
    def getxflux(self):

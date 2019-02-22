@@ -72,9 +72,9 @@ subroutine cgyro_flux
      enddo
   enddo
 
-  !------------------------------------------------------
-  ! 2. Compute ky-dependent fluxes (with field breakdown)
-  !~-----------------------------------------------------
+  !-------------------------------------------------------------
+  ! 2. Compute global ky-dependent fluxes (with field breakdown)
+  !-------------------------------------------------------------
 
   gflux_loc(:,:,:,:) = 0.0
   cflux_loc(:,:,:) = 0.0

@@ -141,13 +141,14 @@ elif plot_type == 'ky_flux':
    fc     = int(sys.argv[7])
    ftype  = sys.argv[8]
    diss   = int(sys.argv[9])
+   cflux  = sys.argv[10]
 
    if ftype == 'dump':
       cgyrodata_dump('./').dump_ky_flux(w=w,field=field,moment=moment,fc=fc)
       doplot=False
    else:
       data_in.plot_ky_flux(w=w,field=field,moment=moment,
-                           ymin=ymin,ymax=ymax,fc=fc,diss=diss)
+                           ymin=ymin,ymax=ymax,fc=fc,diss=diss,cflux=cflux)
 
    outfile = 'out.cgyro.ky_flux.'+ftype
 

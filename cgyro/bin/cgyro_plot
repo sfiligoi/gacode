@@ -391,7 +391,7 @@ case "$PLOT_TYPE" in
         python $PLT $PLOT_TYPE $W $FIELD $MOMENT $YMIN $YMAX $FC $EXT $LOC $NSCALE $CFLUX ;;
 
    ky_flux)
-	python $PLT $PLOT_TYPE $W $FIELD $MOMENT $YMIN $YMAX $FC $EXT $DISS ;;
+	python $PLT $PLOT_TYPE $W $FIELD $MOMENT $YMIN $YMAX $FC $EXT $DISS $CFLUX ;;
 
    phi)
 	python $PLT $PLOT_TYPE $FIELD $EXT ;;

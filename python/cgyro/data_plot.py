@@ -448,17 +448,7 @@ class cgyrodata_plot(data.cgyrodata):
       if fig is None:
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
-      self.getflux()
-
-      if cflux == 'auto':
-         if abs(self.gamma_e) > 0.0:
-            z = self.ky_cflux
-         else:
-            z = self.ky_cflux
-      elif cflux == 'on':
-         z = self.ky_cflux
-      else:
-         z = self.ky_flux
+      self.getflux(cflux)
 
       ns = self.n_species
       t  = self.t
@@ -467,9 +457,9 @@ class cgyrodata_plot(data.cgyrodata):
 
       # Total flux or components
       if fc == 0:
-         ys = np.sum(z,axis=(2,3))
+         ys = np.sum(self.ky_flux,axis=(2,3))
       else:
-         ys = np.sum(z[:,:,field,:,:],axis=2)
+         ys = np.sum(self.ky_flux[:,:,field,:,:],axis=2)
          if field == 0:
             field_tag = '\phi'
          elif field == 1:
@@ -655,7 +645,8 @@ class cgyrodata_plot(data.cgyrodata):
 
       fig.tight_layout(pad=0.3)
 
-   def plot_ky_flux(self,w=0.5,field=0,moment='e',ymin='auto',ymax='auto',fc=0,diss=0,fig=None):
+   def plot_ky_flux(self,w=0.5,field=0,moment='e',ymin='auto',ymax='auto',
+                    fc=0,diss=0,fig=None,cflux='auto'):
       '''
       Plot fluxes versus ky
 
@@ -675,7 +666,7 @@ class cgyrodata_plot(data.cgyrodata):
       if fig is None:
          fig = plt.figure(MYDIR,figsize=(self.ly*ns,self.ly))
 
-      self.getflux()
+      self.getflux(cflux)
 
       ky  = self.ky
       ave = np.zeros((self.n_n,ns))
