@@ -266,6 +266,8 @@ class cgyrodata:
             print "INFO: (data.py) Read data in "+fmt+".cgyro.ky_flux. "+t 
       #-----------------------------------------------------------------
 
+      return usec
+   
    def getxflux(self):
 
       """Global-spectral flux files"""

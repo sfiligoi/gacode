@@ -448,7 +448,7 @@ class cgyrodata_plot(data.cgyrodata):
       if fig is None:
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
-      self.getflux(cflux)
+      usec = self.getflux(cflux)
 
       ns = self.n_species
       t  = self.t
@@ -490,7 +490,9 @@ class cgyrodata_plot(data.cgyrodata):
       else:
          raise ValueError('(plot_flux.py) Invalid moment.')
 
-  
+      if usec:
+         ntag = ntag+'~(central)'
+
       # Normalizations
       if nscale == 0:
          norm_vec = np.ones(ns)
@@ -666,7 +668,7 @@ class cgyrodata_plot(data.cgyrodata):
       if fig is None:
          fig = plt.figure(MYDIR,figsize=(self.ly*ns,self.ly))
 
-      self.getflux(cflux)
+      usec = self.getflux(cflux)
 
       ky  = self.ky
       ave = np.zeros((self.n_n,ns))
@@ -704,14 +706,19 @@ class cgyrodata_plot(data.cgyrodata):
          y = ys[:,2,:,:]
       else:
          raise ValueError('(plot_ky_flux.py) Invalid moment.')
-
       
       # Determine tmin
       imin=iwindow(t,w)
 
       color = ['m','k','b','c']
 
-      windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[-1])+']$'
+      if usec:
+         cstr = '~\mathrm{(central)}'
+      else:
+         cstr = ''
+         
+      windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[-1])+']'+cstr+'$'
+
 
       if ky[-1] < 0.0:
          ky = -ky
