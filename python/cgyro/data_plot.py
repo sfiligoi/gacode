@@ -1,10 +1,9 @@
-#import data
 import sys
 import os
 import numpy as np
 import matplotlib.pyplot as plt
 from gacodefuncs import *
-from cgyro.data import cgyrodata
+import data
 
 MYDIR=os.path.basename(os.getcwd())
 

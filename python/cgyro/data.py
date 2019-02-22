@@ -1,6 +1,8 @@
 import os
 import numpy as np
 import sys
+import time
+from gacodefuncs import *
 
 BYTE='float32'
 
@@ -16,11 +18,6 @@ class cgyrodata:
       self.getdata()
         
    def extract(self,f):
-
-      import sys
-      import os
-      import numpy as np
-      import time
 
       start = time.time()
       if os.path.isfile(self.dir+'bin'+f):
@@ -38,21 +35,18 @@ class cgyrodata:
       else:        
          t = 'TIME = '+str(time.time()-start)
  
-
       return t,fmt,data
        
           
    def getdata(self):
 
       """Initialize smaller data objects (don't load larger ones)"""
-
-      import numpy as np
       
       #-----------------------------------------------------------------
       # Read time vector.
       #
       data = np.fromfile(self.dir+'out.cgyro.time',dtype='float',sep=' ')
-      nt = len(data)/3
+      nt = len(data)//3
       data = np.reshape(data,(3,nt),'F')
       self.t    = data[0,:]
       self.err1 = data[1,:]
@@ -98,9 +92,9 @@ class cgyrodata:
       self.xi   = np.array(data[mark:mark+self.n_xi])
 
       mark = mark+self.n_xi
-      self.thetab = np.array(data[mark:mark+self.n_theta*self.n_radial/self.m_box])  
+      self.thetab = np.array(data[mark:mark+self.n_theta*self.n_radial//self.m_box])  
          
-      mark = mark+self.n_theta*(self.n_radial/self.m_box)
+      mark = mark+self.n_theta*(self.n_radial//self.m_box)
       self.ky = np.array(data[mark:mark+self.n_n])
 
       mark = mark+self.n_n
@@ -236,8 +230,6 @@ class cgyrodata:
 
    def getflux(self,cflux):
 
-      import numpy as np
-
       if cflux == 'auto':
          if abs(self.gamma_e) > 0.0:
             usec = True
@@ -272,8 +264,6 @@ class cgyrodata:
 
       """Global-spectral flux files"""
 
-      import numpy as np
-
       #-----------------------------------------------------------------
       # Particle and energy fluxes
       #
@@ -303,9 +293,6 @@ class cgyrodata:
       Do complicated spatial averages for xflux
       RESULT: self.lky_flux_ave
       """
-
-      import numpy as np
-      from gacodefuncs import *
 
       ns = self.n_species
       ng = self.n_global+1
@@ -359,8 +346,6 @@ class cgyrodata:
 
       """Larger field files"""
 
-      import numpy as np
-
       #-----------------------------------------------------------------
       # Read complex fields
       #
@@ -411,8 +396,6 @@ class cgyrodata:
    def getgeo(self):
 
       """Read theta-dependent geometry functions"""
-
-      import numpy as np
 
       t,fmt,data = self.extract('.cgyro.geo')
       if fmt != 'null':

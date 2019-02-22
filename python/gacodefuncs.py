@@ -193,10 +193,10 @@ def extract(d,sd,key,w,spec,moment,norm=False,verbose=False):
          y = np.sum(sim.ky_flux,axis=(2,3))
          # Flux for input (spec,moment) window w
          f.append(average(y[spec,moment,:],sim.t,w))
-         print 'INFO: (extract) Processed data in '+ddir
+         print('INFO: (extract) Processed data in '+ddir)
       else:
          if verbose:
-            print 'INFO: (extract) Checked for but cannot find '+ddir
+            print('INFO: (extract) Checked for but cannot find '+ddir)
 
    # return (scan parameter, flux)
    if norm == True:
@@ -300,7 +300,7 @@ def theta_indx(theta,theta_plot):
        else:
            itheta = int((theta+1.0)/2.0*theta_plot)
 
-   print 'INFO: (theta_indx) Selected index',itheta+1,'of',theta_plot
+   print('INFO: (theta_indx) Selected index',itheta+1,'of',theta_plot)
    return itheta
 #---------------------------------------------------------------
 

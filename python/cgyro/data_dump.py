@@ -43,7 +43,7 @@ class cgyrodata_dump(data.cgyrodata):
             head = head+'       '+ttag+'_'+str(ispec+1)+'/'+ttag+'_GB'
             data = np.column_stack((data,y[ispec,:]))
          np.savetxt(fname,data,fmt='%.8e',header=head)
-         print 'INFO: (dump_flux) Created '+fname
+         print('INFO: (dump_flux) Created '+fname)
 
    def dump_ky_flux(self,w=0.5,field=0,moment='e',fc=0,fig=None):
 
@@ -109,4 +109,4 @@ class cgyrodata_dump(data.cgyrodata):
       np.savetxt(fid,arr,fmt='%.5e')
       fid.close()
 
-      print 'INFO: (dump_ky_flux) Created '+fname
+      print('INFO: (dump_ky_flux) Created '+fname)
