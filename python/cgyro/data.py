@@ -31,7 +31,7 @@ class cgyrodata:
          data = []
          
       if int(sys.version_info[2]) > 6:
-         t = 'TIME = '+"{:.3e}".format(time.time()-start)+' s.'
+         t = 'TIME = '+'{:.3e}'.format(time.time()-start)+' s.'
       else:        
          t = 'TIME = '+str(time.time()-start)
  
@@ -113,7 +113,7 @@ class cgyrodata:
       t,fmt,data = self.extract('.cgyro.freq')
       if fmt != 'null':  
          self.freq = np.reshape(data[0:nd],(2,self.n_n,nt),'F')
-         print('INFO: (data.py) Read data in "+fmt+".cgyro.freq. '+t) 
+         print('INFO: (data.py) Read data in '+fmt+'.cgyro.freq. '+t) 
       #-----------------------------------------------------------------
 
       #-----------------------------------------------------------------
@@ -251,7 +251,8 @@ class cgyrodata:
          if fmt != 'null':  
             self.ky_flux = np.reshape(data[0:nd],(self.n_species,3,self.n_field,self.n_n,nt),'F')
             print('INFO: (data.py) Read data in '+fmt+'.cgyro.ky_cflux. '+t) 
-      else:
+
+      if not usec or fmt == 'null':      
          t,fmt,data = self.extract('.cgyro.ky_flux')
          if fmt != 'null':  
             self.ky_flux = np.reshape(data[0:nd],(self.n_species,3,self.n_field,self.n_n,nt),'F')
