@@ -1,4 +1,4 @@
-import data
+#import data
 import sys
 import os
 import numpy as np
@@ -43,7 +43,7 @@ class cgyrodata_plot(data.cgyrodata):
          f = self.kxky_e_abs[:,itheta,species,:,:]
          ft = ''
 
-      print 'INFO: (kxky_select) Selected theta index',itheta+1,'of',self.theta_plot
+      print('INFO: (kxky_select) Selected theta index',itheta+1,'of',self.theta_plot)
       return f,ft
        
          
@@ -250,7 +250,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       fig.tight_layout(pad=0.3)
 
-      print 'INFO: (data_plot.py) l_corr = ',l_corr
+      print('INFO: (data_plot.py) l_corr = ',l_corr)
 
    def plot_phi(self,field=0,theta=0.0,fig=None):
 
@@ -305,7 +305,7 @@ class cgyrodata_plot(data.cgyrodata):
       t  = self.t
       k0 = self.kx[0]
 
-      print 'INFO: (plot_zf.py) Using index theta index n_theta/3+1'
+      print('INFO: (plot_zf.py) Using index theta index n_theta/3+1')
       if field == 0:
          f = self.phib[0,self.n_theta/3,:]
       elif field == 1:
@@ -322,7 +322,7 @@ class cgyrodata_plot(data.cgyrodata):
       # Average calculations
       imin = iwindow(t,w)
       ave  = average(y[:],t,w)
-      print 'INFO: (plot_zf) Integral time-average = %.6f' % ave
+      print('INFO: (plot_zf) Integral time-average = %.6f' % ave)
 
       ave_vec = ave*np.ones(len(t))
       #----------------------------------------------------
@@ -842,7 +842,7 @@ class cgyrodata_plot(data.cgyrodata):
       else:
          y = np.zeros([self.n_radial,self.n_time])
          nvec = str2list(nstr)
-         print 'INFO: (plot_kx_phi) n = '+str(nvec)
+         print('INFO: (plot_kx_phi) n = '+str(nvec))
          ax.set_ylabel(r'$\overline{'+ft+'_n}$',color='k')
          for n in nvec:
             num = r'$n='+str(n)+'$'

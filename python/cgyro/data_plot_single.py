@@ -1,5 +1,7 @@
 import sys
 import numpy as np
+import matplotlib
+matplotlib.use('WXAgg')
 import matplotlib.pyplot as plt
 from matplotlib import rc
 from cgyro.data_plot import cgyrodata_plot
