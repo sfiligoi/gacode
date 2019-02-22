@@ -32,7 +32,7 @@ loc    = int(sys.argv[5])
 
 n = int(nstr)
 
-sim = tgyrodata(simdir,verbose=False)
+sim = tgyrodata(simdir,verbose=True)
 
 print 'Number of ions  : ',sim.n_ion
 print 'Number of radii : ',sim.n_r
@@ -203,6 +203,10 @@ def plot_flux(ax,tag):
          ax.plot(x,sim.data['pflux_e_tot'][n]*ggb,label=tot)
          ax.plot(x,sim.data['pflux_e_target'][n]*ggb,label=tar)
          ax.set_ylabel('$\Gamma_e~[10^{19}/m^2/s]$',color='k')
+   elif tag == 'mflux_target':
+      ax.plot(x,sim.data['mflux_tot'][n],label=tot)
+      ax.plot(x,sim.data['mflux_target'][n],label=tar)
+      ax.set_ylabel('$\Pi/\Pi_{GB}$',color='k')
             
    for i in range(n_ion):
       pstr = 'pflux_i'+str(i+1)
@@ -316,6 +320,10 @@ class DemoFrame(wx.Frame):
         tab = TabPanel(notebook)
         tab.draw('pflux_e_target')
         notebook.AddPage(tab,'*pflux_e')
+
+        tab = TabPanel(notebook)
+        tab.draw('mflux_target')
+        notebook.AddPage(tab,'*mflux')
 
         for i in range(n_ion):
             tab = TabPanel(notebook)

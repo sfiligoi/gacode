@@ -253,29 +253,6 @@ class cgyrodata:
          print "INFO: (data.py) Read data in "+fmt+".cgyro.ky_cflux. "+t 
       #-----------------------------------------------------------------
 
-   def getbigflux(self):
-
-      """Larger flux files (hopefully binary)"""
-
-      import numpy as np
-
-      #-----------------------------------------------------------------
-      # Particle and energy fluxes
-      #
-      nt = self.n_time
-      nd = self.n_radial*self.n_species*self.n_n*nt
-      t,fmt,data = self.extract('.cgyro.kxky_flux_e')
-      if fmt != 'null':  
-         self.kxky_flux_e = np.reshape(data[0:nd],(self.n_radial,self.n_species,self.n_n,nt),'F')
-         print "INFO: (data.py) Read data in "+fmt+".cgyro.kxky_flux_e. "+t
-      #
-      nd = self.n_radial*self.n_species*self.n_n*nt
-      t,fmt,data = self.extract('.cgyro.kxky_flux_n')
-      if fmt != 'null':  
-         self.kxky_flux_n = np.reshape(data[0:nd],(self.n_radial,self.n_species,self.n_n,nt),'F')
-         print "INFO: (data.py) Read data in "+fmt+".cgyro.kxky_flux_n. "+t
-      #-----------------------------------------------------------------
-
    def getxflux(self):
 
       """Global-spectral flux files"""

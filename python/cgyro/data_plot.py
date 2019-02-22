@@ -435,11 +435,6 @@ class cgyrodata_plot(data.cgyrodata):
 
       ax.plot(x,y1,'-o',color='black',markersize=2,label=r'$\mathrm{Re}$')
       ax.plot(x,y2,'-o',color='red',markersize=2,label=r'$\mathrm{Im}$')
-      #gp = 200.0*np.sqrt(2)
-      #w = 0.51*2.0*0.1*np.sqrt((1.0-0.5)*6.0)*(x*np.pi)**2
-      #pa = np.exp(-(1+1j)/np.sqrt(2)*np.sqrt(gp)*w+1j*gp/4*(x*np.pi)*2.0*6.0*0.1/np.sqrt(2))
-      #ax.plot(x,np.real(pa),'--',color='black')
-      #ax.plot(x,-np.imag(pa),'--',color='red')
       
       ax.legend()
 
@@ -447,12 +442,23 @@ class cgyrodata_plot(data.cgyrodata):
 
       return 'ang  Re(f)  Im(f)',x,y1,y2
          
-   def plot_flux(self,w=0.5,field=0,moment='e',ymin='auto',ymax='auto',fc=0,fig=None,loc=2,nscale=0):
-
+   def plot_flux(self,w=0.5,field=0,moment='e',ymin='auto',ymax='auto',
+                 fc=0,fig=None,loc=2,nscale=0,cflux='auto'):
+         
       if fig is None:
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       self.getflux()
+
+      if cflux == 'auto':
+         if abs(self.gamma_e) > 0.0:
+            z = self.ky_cflux
+         else:
+            z = self.ky_cflux
+      elif cflux == 'on':
+         z = self.ky_cflux
+      else:
+         z = self.ky_flux
 
       ns = self.n_species
       t  = self.t
@@ -461,9 +467,9 @@ class cgyrodata_plot(data.cgyrodata):
 
       # Total flux or components
       if fc == 0:
-         ys = np.sum(self.ky_flux,axis=(2,3))
+         ys = np.sum(z,axis=(2,3))
       else:
-         ys = np.sum(self.ky_flux[:,:,field,:,:],axis=2)
+         ys = np.sum(z[:,:,field,:,:],axis=2)
          if field == 0:
             field_tag = '\phi'
          elif field == 1:

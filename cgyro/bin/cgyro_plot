@@ -70,6 +70,9 @@ then
   echo "         -fc"
   echo "         Toggle plotting of field breakdown of fluxes."
   echo
+  echo "         -cflux <on,off,auto>"
+  echo "         Selector for central flux (on=on,off=off,auto=select based on gamma_e"
+  echo
   echo "         -moment <value>"
   echo "         Specify moment to be plotted [n,e,m,s]."
   echo
@@ -245,6 +248,7 @@ LAND_FLAG=0
 PX=800
 PY=800
 DISS=0
+CFLUX=auto
 
 PRE=
 FRAMERATE=20
@@ -273,6 +277,8 @@ while [ $# -gt 0 ] ; do
   -diss) DISS=1 ;;
 
   -moment) shift ; MOMENT=$1 ;;
+
+  -cflux) shift ; CFLUX=$1 ;;
 
   -ext) shift ; EXT=$1 ;;
 
@@ -382,7 +388,7 @@ case "$PLOT_TYPE" in
 	python $PLT $PLOT_TYPE $W $MOMENT $YMIN $YMAX $EXT $NSCALE ;;
 
    flux)
-        python $PLT $PLOT_TYPE $W $FIELD $MOMENT $YMIN $YMAX $FC $EXT $LOC $NSCALE;;
+        python $PLT $PLOT_TYPE $W $FIELD $MOMENT $YMIN $YMAX $FC $EXT $LOC $NSCALE $CFLUX ;;
 
    ky_flux)
 	python $PLT $PLOT_TYPE $W $FIELD $MOMENT $YMIN $YMAX $FC $EXT $DISS ;;

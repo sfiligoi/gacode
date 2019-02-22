@@ -120,13 +120,14 @@ elif plot_type == 'flux':
    ftype  = sys.argv[8]
    loc    = int(sys.argv[9])
    nscale = int(sys.argv[10])
+   cflux  = sys.argv[11]
 
    if ftype == 'dump':
       cgyrodata_dump('./').dump_flux(fc=fc)
       doplot=False
    else:
       data_in.plot_flux(w=w,field=field,moment=moment,
-                        ymin=ymin,ymax=ymax,fc=fc,loc=loc,nscale=nscale)
+                        ymin=ymin,ymax=ymax,fc=fc,loc=loc,nscale=nscale,cflux=cflux)
 
    outfile = 'out.cgyro.flux.'+ftype
 
