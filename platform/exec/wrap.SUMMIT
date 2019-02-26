@@ -2,13 +2,19 @@
 # GACODE Parallel execution script (SUMMIT)
 
 # jsrun corrupts this value
-export OMP_NUM_THREADS=${GACODE_NOMP}
+# export OMP_NUM_THREADS=${GACODE_NOMP}
+# export OMP_NUM_THREADS=${GACODE_NOMP}
+# echo $OMPI_COMM_WORLD_RANK
 
-#echo $OMPI_COMM_WORLD_RANK
+let r4=$OMPI_COMM_WORLD_RANK/6
+let ACC_DEVICE_NUM="$OMPI_COMM_WORLD_RANK-($r4*6)"
+export ACC_DEVICE_NUM
 
-# propagate the info to the pgi ACC
-export ACC_DEVICE_NUM=${CUDA_VISIBLE_DEVICES}
+# Set this if you don't already have it in the .bashrc
+#source /nfs-projects/opt/pgi/pgi.source.openmpi
+#source /nfs-projects/sfiligoii/gitrepo/summit.source
 
-#echo $ACC_DEVICE_NUM
+echo "ACC_DEVICE_NUM=" $ACC_DEVICE_NUM
 
+# echo "LL $LD_LIBRARY_PATH"
 exec  "$@"
