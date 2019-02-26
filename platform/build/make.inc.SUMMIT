@@ -1,95 +1,67 @@
-#
+
 #---------------------------------------------------
 # IBM summit-dev
 #
 #---------------------------------------------------
 
-IDENTITY="IBM Summit-dev"
-
-# Note : Using only 8 out of 16 cores x CPU, to simplify usage
-# Note2: jsrun currently does not support hw threads
-CORES_PER_NODE=128
+# FIXED Hardware parameters
+IDENTITY="IBM Summit"
+# node 20/21 core for each power9, 2 power9/node, on bsub smt* give *-hw-threads
+#
+CORES_PER_NODE=40
 NUMAS_PER_NODE=2
-
 #
-## 2 10 core nodes of power 8, 8 hw threads
-## 4 GPUs
+# libraries
 #
+NETCDF =-L${OLCF_NETCDF_FORTRAN_ROOT}/lib -lnetcdff -L${OLCF_NETCDF_ROOT}/lib -lnetcdf -lz -lm
+NETCDF_INC =${OLCF_NETCDF_DIR}/include
+NETCDFF_INC=${OLCF_NETCDF_FORTRAN_ROOT}/include
 
 # Compilers and flags
 
 # Fortran 90/95 compiler
-
-FC = mpif90 -m64 -module ${GACODE_ROOT}/modules -Mpreprocess -DUSE_INLINE \
-   -I${OLCF_NETCDF_FORTRAN_ROOT} -acc
-
-# -m64
-
-#  -acc -Minfo=accel -ta=tesla -Mcudalib=cufft -DDISABLE_GPUDIRECT_MPI
-# -I${OLCF_FFTW_ROOT}/include  -I${OLCF_NETCDF_FORTRAN_ROOT}/include
+FC = mpif90 -g -m64 -module ${GACODE_ROOT}/modules -Mpreprocess -DUSE_INLINE -acc
 
 CC=mpicc -m64
 
 # Fortran 77 compiler
-
-F77 = mpif90 -m64 -O2 -I$(GACODE_ROOT)/modules
-
-#
+F77 = mpif90 -m64 -acc -I$(GACODE_ROOT)/modules
 
 # Compiler options/flags
 
-# FACC =-acc -Minfo=accel -ta=tesla:managed -Mcudalib=cufft -DDISABLE_GPUDIRECT_MPI
-
-FACC =-acc -Minfo=accel -ta=tesla:cc70 -Mcudalib=cufft -DDISABLE_GPUDIRECT_MPI
-
-# # FACC =-acc -Minfo=accel -ta=tesla:cc70 -Mcudalib=cufft -DDISABLE_GPUDIRECT_MPI
-
-# FACC =-acc -Minfo=accel -ta=tesla:cc60 -Mcudalib=cufft -DDISABLE_GPUDIRECT_MPI
+FACC   =-acc -Minfo=accel  -ta=nvidia:cc70 -Mcudalib=cufft  -Mcudalib=cusparse -Mcudalib=cublas \
+        -DDISABLE_GPUDIRECT_MPI
 
 # -DDISABLE_GPUDIRECT_MPI
 
-# FACC   =
-
-# FOMP   =-mp -Mstack_arrays ${FACC} -g
-#
-
 FOMP   =-mp -Mstack_arrays ${FACC}
-FMATH  =-r8 -I${OLCF_FFTW_ROOT}/include
-FDEBUG =-g -Kieee -Ktrap=fp,divz -Mchkptr -Mchkstk  -Minform=inform
-
-# -Mbounds 
-#  -traceback
+FMATH  =-r8 -I${OLCF_FFTW_ROOT}/include 
 FOPT   =-fast -fastsse -Mvect
-#  ${FDEBUG}
-F2PY   = f2py --fcompiler=pg
+FDEBUG =-g -Kieee -Ktrap=fp,divz -Mbounds -Mchkptr -Mchkstk -traceback -Minform=inform
+# F2PY   = f2py --fcompiler=pg
 
 # System math libraries
 
 FFTW_INC=${OLCF_FFTW_ROOT}/include
+#		-L${OLCF_ESSL_ROOT}/lib64 -lessl -lesslsmpcuda
 
-LMATH=-acc -L${OLCF_FFTW_ROOT}/lib -L${OLCF_CUDA_ROOT}/lib64 \
-	   		       -L${OLCF_ESSL_ROOT}/lib64 -lesslsmpcuda -lessl \
-			       -lfftw3_threads -lfftw3f_threads -lfftw3f -lfftw3
+# LMATH=-L${OLCF_FFTW_ROOT}/lib -L${OLCF_CUDA_ROOT}/lib64 \
 
-
-#			       -llapack -lblas
+LMATH=-L${OLCF_CUDA_ROOT}/lib64 -L${OLCF_ESSL_ROOT}/lib64  -lessl
 #
-#			       
-#
+#			       -lfftw3_essl -lesslsmpcuda -lessl \
+#			       -lfftw3_threads \
+#			       -lfftw3_threads -lfftw3f_threads -lfftw3f -lfftw3
 
-#			       
+# -lesslsmpcuda
+#			       -L${OLCF_NETLIB_LAPACK_ROOT}/lib -llapack \
+#			       -L${OLCF_NETLIB_LAPACK_ROOT}/lib -lblas
 # -llapack -lblas
-#
 
 # NetCDF
 # NETCDF =-L${NETCDF_DIR}/lib -lnetcdff -lnetcdf -L${NETCDF_DIR}/lib -L${NETCDF_DIR}/lib -lz -lm
 # OLCF_NETCDF_FORTRAN_ROOT
 
-
-
-NETCDF =-L${OLCF_NETCDF_FORTRAN_ROOT}/lib -lnetcdff -L${OLCF_NETCDF_ROOT}/lib -lnetcdf -lz -lm
-NETCDF_INC =${OLCF_NETCDF_DIR}/include
-NETCDFF_INC=${OLCF_NETCDF_FORTRAN_ROOT}/include
 
 # Archive
 ARCH = ar cr
@@ -99,8 +71,6 @@ ARCH = ar cr
 #
 # NN_LIB=-L$(GACODE_ROOT)/../neural/ -I$(GACODE_ROOT)/../neural/ -lbrainfuse -L$(FANN_ROOT)/lib -lfann
 #endif
-
-# CUDA_DIR=${OLCF_CUDA_ROOT}
 
 # NEO platform defs
 #ifdef SUPERLU_DIR
