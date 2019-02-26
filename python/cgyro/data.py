@@ -263,7 +263,7 @@ class cgyrodata:
    
    def getxflux(self):
 
-      """Global-spectral flux files"""
+      """Global-spectral flux files (optional)"""
 
       #-----------------------------------------------------------------
       # Particle and energy fluxes

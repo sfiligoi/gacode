@@ -27,13 +27,9 @@ def print_flux():
     sim.getflux()
 
     # Determine imin
-    imin=iwindow(sim.t,w)
+    imin,imax=iwindow(sim.t,w,wmax)
 
-    if imin == nt-1:
-        print "Averaging Window too small." 
-        sys.exit()
-
-    print 'INFO: (text.py) Average Window:',str(sim.t[imin])+' < (c_s/a) t < '+str(sim.t[-1])
+    print 'INFO: (text.py) Average Window:',str(sim.t[imin])+' < (c_s/a) t < '+str(sim.t[imax])
 
     title = '        '
     for ispec in range(sim.n_species):
@@ -51,8 +47,9 @@ def print_flux():
 
 #-------------------------------------------------------------------
         
-w = float(sys.argv[1])
-ext = sys.argv[2]
+w    = float(sys.argv[1])
+wmax = float(sys.argv[2])
+ext  = sys.argv[3]
 
 sim = cgyrodata('./')
 
