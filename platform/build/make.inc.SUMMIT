@@ -20,12 +20,14 @@ NETCDFF_INC=${OLCF_NETCDF_FORTRAN_ROOT}/include
 # Compilers and flags
 
 # Fortran 90/95 compiler
-FC = mpif90 -g -m64 -module ${GACODE_ROOT}/modules -Mpreprocess -DUSE_INLINE -acc
 
-CC=mpicc -m64
+FC = mpif90 -m64 -module ${GACODE_ROOT}/modules -Mpreprocess -DUSE_INLINE -acc -fpic
+
+CC=mpicc -m64 -fpic
 
 # Fortran 77 compiler
-F77 = mpif90 -m64 -acc -I$(GACODE_ROOT)/modules
+
+F77 = mpif90 -m64 -acc -I$(GACODE_ROOT)/modules -fpic
 
 # Compiler options/flags
 
@@ -47,7 +49,8 @@ FFTW_INC=${OLCF_FFTW_ROOT}/include
 
 # LMATH=-L${OLCF_FFTW_ROOT}/lib -L${OLCF_CUDA_ROOT}/lib64 \
 
-LMATH=-L${OLCF_CUDA_ROOT}/lib64 -L${OLCF_ESSL_ROOT}/lib64  -lessl
+LMATH=-L${OLCF_CUDA_ROOT}/lib64 -L${OLCF_ESSL_ROOT}/lib64 -lesslsmpcuda -lessl
+
 #
 #			       -lfftw3_essl -lesslsmpcuda -lessl \
 #			       -lfftw3_threads \
