@@ -9,24 +9,24 @@
 TIME=r'$(c_s/a)\,t$'
 
 #---------------------------------------------------------------
-def average(f,t,window):
+def average(f,t,wmin,wmax):
  
     n_time = len(t)
 
     # Manage case with 2 time points (eigenvalue)
     if len(t) == 2:
-        tmin = t[n_time-1]
+        tmin = t[-1]
         tmax = tmin
-        ave  = f[n_time-1]
+        ave  = f[-1]
         return ave
 
-    tmin = (1.0-window)*t[n_time-1]
-    tmax = t[n_time-1]
+    tmin = (1.0-wmin)*t[-1]
+    tmax = (1.0-wmax)*t[-1]
 
     t_window = 0.0
     ave      = 0.0
     for i in range(n_time-1):
-        if t[i] > tmin: 
+        if t[i] >= tmin and t[i] <= tmax: 
             ave = ave+0.5*(f[i]+f[i+1])*(t[i+1]-t[i])
             t_window = t_window+t[i+1]-t[i]
 
@@ -35,19 +35,19 @@ def average(f,t,window):
     return ave
 #---------------------------------------------------------------
 #---------------------------------------------------------------
-def average_n(f,t,window,n):
+def average_n(f,t,wmin,wmax,n):
  
     import numpy as np
 
     ave = np.zeros(n)
 
     n_time = len(t)
-    tmin = (1.0-window)*t[n_time-1]
-    tmax = t[n_time-1]
+    tmin = (1.0-wmin)*t[-1]
+    tmax = (1.0-wmax)*t[-1]
 
     t_window = 0.0
     for i in range(n_time-1):
-        if t[i] > tmin:
+        if t[i] >= tmin and t[i] <= tmax: 
             ave[:] = ave[:]+0.5*(f[:,i]+f[:,i+1])*(t[i+1]-t[i])
             t_window = t_window+t[i+1]-t[i]
 
@@ -56,15 +56,16 @@ def average_n(f,t,window,n):
     return ave
 #---------------------------------------------------------------
 #---------------------------------------------------------------
-# Determine index imin for time-averaging window
-def iwindow(t,window):
+# Determine index imin,imax for time-averaging window
+def iwindow(t,wmin,wmax):
  
-    imin=0
     for i in range(len(t)):
-        if t[i] < (1.0-window)*t[-1]:
+        if t[i] < (1.0-wmin)*t[-1]:
             imin = i+1
+        if t[i] <= (1.0-wmax)*t[-1]:
+            imax = i
 
-    return imin
+    return imin,imax
 #---------------------------------------------------------------
 
 #------------------------------------------------------
