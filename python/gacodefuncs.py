@@ -166,7 +166,7 @@ def smooth_pro(x,z,p,n):
 #---------------------------------------------------------------
 
 #---------------------------------------------------------------
-def extract(d,sd,key,w,spec,moment,norm=False,verbose=False):
+def extract(d,sd,key,w,spec,moment,norm=False,verbose=False,wmax=0.0):
 
    import os
    import re
@@ -193,7 +193,7 @@ def extract(d,sd,key,w,spec,moment,norm=False,verbose=False):
          sim.getflux()
          y = np.sum(sim.ky_flux,axis=(2,3))
          # Flux for input (spec,moment) window w
-         f.append(average(y[spec,moment,:],sim.t,w))
+         f.append(average(y[spec,moment,:],sim.t,w,wmax))
          print('INFO: (extract) Processed data in '+ddir)
       else:
          if verbose:
@@ -201,7 +201,7 @@ def extract(d,sd,key,w,spec,moment,norm=False,verbose=False):
 
    # return (scan parameter, flux)
    if norm == True:
-      return np.array(x),np.array(f)*sim.dens[1]/sim.dens[spec]
+      return np.array(x),np.array(f)/sim.dens[spec]
    else:
       return np.array(x),np.array(f)
       
