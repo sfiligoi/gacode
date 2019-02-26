@@ -166,7 +166,7 @@ def smooth_pro(x,z,p,n):
 #---------------------------------------------------------------
 
 #---------------------------------------------------------------
-def extract(d,sd,key,w,spec,moment,norm=False,verbose=False,wmax=0.0):
+def extract(d,sd,key,w,spec,moment,norm=False,verbose=False,wmax=0.0,cflux='auto'):
 
    import os
    import re
@@ -177,7 +177,14 @@ def extract(d,sd,key,w,spec,moment,norm=False,verbose=False,wmax=0.0):
    # d   = directory
    # sd  = prefix of subdirectory ('a' for a1,a2,a3)
    # key = key to scan (for example, 'GAMMA_P') 
-
+   # w   = time-averaging width 
+   # spec = (0 ...) 
+   # moment = (0 ...)
+   # norm = True (density normalization)
+   # verbose = True (error diagnostics)
+   # wmax = time-averaging minimum
+   # cflux = 'on'/'off'/'auto'
+   
    x = []
    f = []
    for i in range(20):
@@ -190,7 +197,7 @@ def extract(d,sd,key,w,spec,moment,norm=False,verbose=False,wmax=0.0):
          x.append(found)
          # Get the corresponding flux
          sim = cgyrodata(ddir)
-         sim.getflux()
+         sim.getflux(cflux)
          y = np.sum(sim.ky_flux,axis=(2,3))
          # Flux for input (spec,moment) window w
          f.append(average(y[spec,moment,:],sim.t,w,wmax))
