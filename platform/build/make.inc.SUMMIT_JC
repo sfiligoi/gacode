@@ -1,0 +1,39 @@
+#---------------------------------------------------
+# IBM SUMMIT Power9-V100 
+#
+# node 20/21 core for each Power9, 2 power9/node,
+# on bsub smt* give *-hw-threads
+#---------------------------------------------------
+
+# FIXED Hardware parameters
+IDENTITY="IBM Summit"
+CORES_PER_NODE=40
+NUMAS_PER_NODE=2
+
+# Compilers and flags
+
+# Fortran 90/95 compiler
+FC = mpif90 -m64 -module ${GACODE_ROOT}/modules -Mpreprocess -DUSE_INLINE -acc -fpic
+
+# Fortran 77 compiler
+F77 = mpif90 -m64 -acc -I$(GACODE_ROOT)/modules -fpic
+
+# Compiler options/flags
+FACC   =-acc -Minfo=accel -ta=nvidia:cc70 -Mcudalib=cufft -Mcudalib=cusparse -Mcudalib=cublas \
+        -DDISABLE_GPUDIRECT_MPI
+FOMP   =-mp -Mstack_arrays ${FACC}
+FMATH  =-r8 -I${OLCF_FFTW_ROOT}/include 
+FOPT   =-fast -fastsse -Mvect
+FDEBUG =-g -Kieee -Ktrap=fp,divz -Mbounds -Mchkptr -Mchkstk -traceback -Minform=inform
+
+# System math libraries
+FFTW_INC=${OLCF_FFTW_ROOT}/include
+LMATH=-L${OLCF_CUDA_ROOT}/lib64 -L${OLCF_ESSL_ROOT}/lib64 -lesslsmpcuda -lessl
+
+# NetCDF
+NETCDF =-L${OLCF_NETCDF_FORTRAN_ROOT}/lib -lnetcdff -L${OLCF_NETCDF_ROOT}/lib -lnetcdf -lz -lm
+NETCDF_INC =${OLCF_NETCDF_DIR}/include
+NETCDFF_INC=${OLCF_NETCDF_FORTRAN_ROOT}/include
+
+# Archive
+ARCH = ar cr
