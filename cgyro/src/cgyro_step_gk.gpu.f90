@@ -93,13 +93,13 @@ subroutine cgyro_step_gk
   enddo
 
   ! Filter special spectral components
-  call cgyro_filter_gpu
+  call cgyro_filter
   
   call timer_lib_out('str')
 
 end subroutine cgyro_step_gk
   
-subroutine cgyro_filter_gpu
+subroutine cgyro_filter
 
   use cgyro_globals
 
@@ -132,5 +132,5 @@ subroutine cgyro_filter_gpu
      enddo
   endif
 
-end subroutine cgyro_filter_gpu
+end subroutine cgyro_filter
 
