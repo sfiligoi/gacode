@@ -367,6 +367,7 @@ fi
 # Init mode
 if [ $INIT_FLAG -eq 1 ]
 then
+   python $GACODE_ROOT/cgyro/bin/cgyro_mpi_grid.py
    exit 0
 fi
 #============================================================

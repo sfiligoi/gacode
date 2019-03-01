@@ -174,16 +174,16 @@ def extract(d,sd,key,w,spec,moment,norm=False,verbose=False,wmax=0.0,cflux='auto
    import numpy as np
    from cgyro.data import cgyrodata
 
-   # d   = directory
-   # sd  = prefix of subdirectory ('a' for a1,a2,a3)
-   # key = key to scan (for example, 'GAMMA_P') 
-   # w   = time-averaging width 
-   # spec = (0 ...) 
-   # moment = (0 ...)
-   # norm = True (density normalization)
+   # d       = directory
+   # sd      = prefix of subdirectory ('a' for a1,a2,a3)
+   # key     = key to scan (for example, 'GAMMA_P') 
+   # w       = time-averaging width 
+   # spec    = (0 ...) 
+   # moment  = (0 ...)
+   # norm    = True (density normalization)
    # verbose = True (error diagnostics)
-   # wmax = time-averaging minimum
-   # cflux = 'on'/'off'/'auto'
+   # wmax    = time-averaging minimum
+   # cflux   = 'on'/'off'/'auto'
    
    x = []
    f = []
@@ -324,4 +324,16 @@ def mkfile(ext):
         ftype = s[0]
 
     return pre,ftype
+#---------------------------------------------------------------
+#---------------------------------------------------------------
+def parameter_val(infile,par):
+
+   val = 'null'
+   f = open(infile,'r')
+   for line in f:
+      x = line.split()
+      if x[1] == par:
+         val = x[0]
+
+   return val
 #---------------------------------------------------------------
