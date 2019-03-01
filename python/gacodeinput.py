@@ -117,20 +117,20 @@ class ProfileInput:
         for line in open(inputfile,'r').readlines():
 
             # Remove leading and trailing whitespace from line
-            line = string.strip(line)
+            line = line.strip()
                 
             # Skip blank lines
             if len(line) > 0 and line[0] != '#':
-                x = string.splitfields(line,'=')
-                y = string.splitfields(x[1],'#')
-                arg = string.strip(x[0])
-                val = string.strip(y[0])
+                x = line.split('=')
+                y = x[1].split('#')
+                arg = x[0].strip()
+                val = y[0].strip()
 
                 self.user_dict[arg] = val
 
         # 2. build complete input file, looking for errors
         for x in self.user_dict.keys():
-            if self.data_dict.has_key(x) == 1:
+            if x in self.data_dict:
                 self.data_dict[x] = self.user_dict[x]
             else:
                 self.error=1
@@ -148,25 +148,23 @@ class ProfileInput:
 
         for line in open(inputfile,'r').readlines():
 
-            line = string.strip(line)
+            line = line.strip()
 
             # Split inputfile (input.profiles) into scalar and 
             # vector data:
             if 'SHOT' in line:
-                x = string.splitfields(line,':')[1]
-                x = string.strip(x) 
+                x = line.split(':')[1]
+                x = x.strip() 
                 if len(x) == 0:
                     x = '0'
                 file_temp.write('SHOT='+x+'\n')
 
             if (len(line) > 0) and (line[0] != '#'):                
-                if string.find(line,'=') > -1:
+                if line.find('=') > -1:
                     # Write scalar data into temp file
                     file_temp.write(line+'\n')
                 else:
-                    # Originally '  ' was the pattern:       
-                    #  data = string.splitfields(line,'   ')
-                    data = string.split(line)
+                    data = line.split()
                     ncol = len(data)
                     for j in range (0,ncol):
                         # Save vector data in variable v.
@@ -180,7 +178,7 @@ class ProfileInput:
         # Compute number of rows for profile data
         ncol = 5
         nrow = int(self.data_dict['N_EXP'])
-        nblock = len(profile_data)/(nrow*ncol)
+        nblock = len(profile_data)//(nrow*ncol)
 
         for x in self.data_orderlist:
             file_out.write(self.data_dict[x]+'  '+x+'\n')
@@ -201,7 +199,7 @@ class ProfileInput:
         for line in open(inputfile,'r').readlines():
            if index > 0:
               index = index+1
-              line = string.strip(line)
+              line = line.strip()
               if len(line) > 1:
                  x = line.split()
                  headerfile.write(x[2]+' '+x[3]+' '+x[4]+'\n')

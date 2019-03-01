@@ -45,7 +45,7 @@ for it in range(d*n_toroidal):
       n_proc_1 = j//n_toroidal
       nc_loc = nc//n_proc_1           
       nv_loc = nv//n_proc_1           
-      nsplit = 1+(nv_loc*n_theta-1)/n_toroidal
+      nsplit = 1+(nv_loc*n_theta-1)//n_toroidal
       print(' {:5d}     {:5d}     {:5d}     {:5d}'.format(j,nc_loc,nv_loc,nsplit))
 
 
