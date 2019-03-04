@@ -1,5 +1,11 @@
 #!/bin/bash
 
+LOCDIR=`basename $PWD`
+cd .. ; SIMROOT=$PWD
+SIMDIR=$SIMROOT/$LOCDIR
+EXEC=${GACODE_ROOT}/cgyro/src/cgyro
+cd $SIMDIR
+
 n=$#
 
 if [ $n -eq 0 ]
@@ -22,6 +28,11 @@ then
   echo "         -c <n>"
   echo "         Cores per socket (default=20)"
   echo
+  echo "         -eager <n>"
+  echo "         MP_EAGER_LIMIT (default=64)"
+  echo
+  echo "         -w <walltime>"
+  echo
 
   exit 1
 fi
@@ -29,8 +40,10 @@ fi
 nodes=1
 threads_per_core=2
 gpus_per_socket=3
-ranks_per_rs=1
+ranks_per_gpu=1
 cores_per_socket=20
+eager=64
+w=10
 
 while [ $# -gt 0 ] ; do
   case "$1" in
@@ -38,45 +51,39 @@ while [ $# -gt 0 ] ; do
   -n) shift ; nodes=$1 ;;
   -t) shift ; threads_per_core=$1 ;;
   -g) shift ; gpus_per_socket=$1 ;;
-  -r) shift ; ranks_per_rs=$1 ;;
+  -r) shift ; ranks_per_gpu=$1 ;;
   -c) shift ; cores_per_socket=$1 ;;
+  -eager) shift ; eager=$1 ;;
+  -w) shift ; w=$1 ;;
   *) echo "ERROR: unknown option $1." ; exit 1 ;;
 
   esac
   shift
 done
 
-gpus_per_rs=1 # 1 res set per GPU (one to one gpu to rs mapping).
-
 # derived quantities:
-let rs_per_socket=$gpus_per_socket/$gpus_per_rs
-let ranks_per_socket=$ranks_per_rs*$rs_per_socket
-
+let ranks_per_socket=$ranks_per_gpu*$gpus_per_socket
 let cores_per_rank=$cores_per_socket/$ranks_per_socket
-let cores_per_rs=$cores_per_rank*$ranks_per_rs
-let nrs=2*$rs_per_socket*$nodes
+let cores_per_gpu=$cores_per_rank*$ranks_per_gpu
+let nrs=2*$gpus_per_socket*$nodes
 let threads_per_rank=$threads_per_core*$cores_per_rank
 let nmpi=2*$ranks_per_socket*$nodes
 
-echo "nodes = $nodes"
-echo "MPI ranks = $nmpi"
-echo "gpus used per socket = $gpus_per_socket"
-echo "ranks_per_socket = $ranks_per_socket"
-echo "cores_per_rank = $cores_per_rank"
-echo "threads per rank = $threads_per_rank"
+echo "nodes           = $nodes"
+echo "Total MPI tasks = $nmpi"
 
-EXEC=${GACODE_ROOT}/cgyro/src/cgyro
 
 # BATCH SCRIPT:
 
 cat > batch.src << EOF
-#BSUB -o %J.out
-#BSUB -e %J.err
-#BSUB -nnodes ${nodes}
-#BSUB -alloc_flags "nvme gpumps smt$threads_per_core"
 #BSUB -P fus127
+#BSUB -J $LOCDIR
+#BSUB -o $SIMDIR/batch.out
+#BSUB -e $SIMDIR/batch.err
+#BSUB -nnodes $nodes
+#BSUB -alloc_flags "nvme gpumps smt$threads_per_core"
 #BSUB -q batch
-#BSUB -W 5
+#BSUB -W $w
 
 echo "smt level smt$threads_per_core"
 ulimit -s 10240
@@ -85,17 +92,17 @@ export PAMI_ENABLE_STRIPING=1
 export PAMI_IBV_ENABLE_DCT=1
 export OMP_NUM_THREADS=$threads_per_rank
 export OMP_STACKSIZE=400M
-export MP_EAGER_LIMIT=64
+export MP_EAGER_LIMIT=$eager
 
 jsrun \
 -D CUDA_VISIBLE_DEVICES \
 -E OMP_NUM_THREADS=$threads_per_rank \
 --nrs $nrs \
---tasks_per_rs $ranks_per_rs \
---cpu_per_rs $cores_per_rs \
---gpu_per_rs $gpus_per_rs \
+--tasks_per_rs $ranks_per_gpu \
+--cpu_per_rs $cores_per_gpu \
+--gpu_per_rs 1 \
 --bind=proportional-packed:$cores_per_rank \
--d plane:$ranks_per_rs \
+-d plane:$ranks_per_gpu \
 -l gpu-cpu \
 --smpiargs="-gpu -mca osc_pami_use_tunnel_atomics 1 -mca osc_pami_tunnel_atomics_hint_commutative_operations 1" $EXEC 0
 
