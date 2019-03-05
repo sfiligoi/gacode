@@ -7,6 +7,7 @@ modules/*.mod
 modules/*genmod*
 */*.o*y
 
+*/*.o
 */*/*.a
 */*/*.o*
 */*/*/*.a

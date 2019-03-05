@@ -13,14 +13,13 @@ NUMAS_PER_NODE=2
 # Compilers and flags
 
 # Fortran 90/95 compiler
-FC = mpif90 -m64 -module ${GACODE_ROOT}/modules -Mpreprocess -DUSE_INLINE -acc -fpic
+FC = mpif90 -m64 -module ${GACODE_ROOT}/modules -Mpreprocess -DUSE_INLINE -fpic
 
 # Fortran 77 compiler
-F77 = mpif90 -m64 -acc -I$(GACODE_ROOT)/modules -fpic
+F77 = mpif90 -m64 -I$(GACODE_ROOT)/modules -fpic
 
 # Compiler options/flags
-FACC   =-acc -Minfo=accel -ta=nvidia:cc70 -Mcudalib=cufft -Mcudalib=cusparse -Mcudalib=cublas \
-        -DDISABLE_GPUDIRECT_MPI
+FACC   =-acc -I${OLCF_CUDA_ROOT}/include CUDA_HOME=${CUDA_DIR} -Minfo=accel -ta=nvidia:cc70 -Mcudalib=cufft -Mcudalib=cusolver -Mcudalib=cusparse -Mcudalib=cublas -DDISABLE_GPUDIRECT_MPI
 FOMP   =-mp -Mstack_arrays ${FACC}
 FMATH  =-r8 -I${OLCF_FFTW_ROOT}/include 
 FOPT   =-fast -fastsse -Mvect
@@ -28,7 +27,7 @@ FDEBUG =-g -Kieee -Ktrap=fp,divz -Mbounds -Mchkptr -Mchkstk -traceback -Minform=
 
 # System math libraries
 FFTW_INC=${OLCF_FFTW_ROOT}/include
-LMATH=-L${OLCF_CUDA_ROOT}/lib64 -L${OLCF_ESSL_ROOT}/lib64 -lesslsmpcuda -lessl
+LMATH=-L${OLCF_CUDA_ROOT}/lib64 -L${OLCF_ESSL_ROOT}/lib64 -lesslsmpcuda -lesslsmp -lfftw3_essl -lessl -L${CUDA_DIR}/lib64 -lcusolver -lcusparse -lcudart -L${OLCF_FFTW_ROOT}/lib -lfftw3_essl -lfftw3_threads -lfftw3f_threads -lfftw3f -lfftw3
 
 # NetCDF
 NETCDF =-L${OLCF_NETCDF_FORTRAN_ROOT}/lib -lnetcdff -L${OLCF_NETCDF_ROOT}/lib -lnetcdf -lz -lm
