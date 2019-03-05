@@ -21,18 +21,12 @@ F77 = mpif90 -m64 -I$(GACODE_ROOT)/modules -fpic
 # Compiler options/flags
 FACC   =-acc -I${OLCF_CUDA_ROOT}/include CUDA_HOME=${CUDA_DIR} -Minfo=accel -ta=nvidia:cc70 -Mcudalib=cufft -Mcudalib=cusolver -Mcudalib=cusparse -Mcudalib=cublas -DDISABLE_GPUDIRECT_MPI
 FOMP   =-mp -Mstack_arrays ${FACC}
-FMATH  =-r8 -I${OLCF_FFTW_ROOT}/include 
+FMATH  =-r8 
 FOPT   =-fast -fastsse -Mvect
 FDEBUG =-g -Kieee -Ktrap=fp,divz -Mbounds -Mchkptr -Mchkstk -traceback -Minform=inform
 
 # System math libraries
-FFTW_INC=${OLCF_FFTW_ROOT}/include
-LMATH=-L${OLCF_CUDA_ROOT}/lib64 -L${OLCF_ESSL_ROOT}/lib64 -lesslsmpcuda -lesslsmp -lfftw3_essl -lessl -L${CUDA_DIR}/lib64 -lcusolver -lcusparse -lcudart -L${OLCF_FFTW_ROOT}/lib -lfftw3_essl -lfftw3_threads -lfftw3f_threads -lfftw3f -lfftw3
-
-# NetCDF
-NETCDF =-L${OLCF_NETCDF_FORTRAN_ROOT}/lib -lnetcdff -L${OLCF_NETCDF_ROOT}/lib -lnetcdf -lz -lm
-NETCDF_INC =${OLCF_NETCDF_DIR}/include
-NETCDFF_INC=${OLCF_NETCDF_FORTRAN_ROOT}/include
+LMATH=-L${OLCF_CUDA_ROOT}/lib64 -L${OLCF_ESSL_ROOT}/lib64 -lesslsmpcuda -lesslsmp -lessl -L${CUDA_DIR}/lib64 -lcusolver -lcusparse -lcudart
 
 # Archive
 ARCH = ar cr

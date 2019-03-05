@@ -31,6 +31,9 @@ then
   echo "         -eager <n>"
   echo "         MP_EAGER_LIMIT (default=64)"
   echo
+  echo "         -prof"
+  echo "         Toggle MPI profiling"
+  echo
   echo "         -w <walltime>"
   echo
 
@@ -44,6 +47,7 @@ ranks_per_gpu=1
 cores_per_socket=20
 eager=64
 w=10
+PROF=0
 
 while [ $# -gt 0 ] ; do
   case "$1" in
@@ -54,6 +58,7 @@ while [ $# -gt 0 ] ; do
   -r) shift ; ranks_per_gpu=$1 ;;
   -c) shift ; cores_per_socket=$1 ;;
   -eager) shift ; eager=$1 ;;
+  -prof) PROF=1 ;;
   -w) shift ; w=$1 ;;
   *) echo "ERROR: unknown option $1." ; exit 1 ;;
 
@@ -93,6 +98,9 @@ export PAMI_IBV_ENABLE_DCT=1
 export OMP_NUM_THREADS=$threads_per_rank
 export OMP_STACKSIZE=400M
 export MP_EAGER_LIMIT=$eager
+if [ $PROF -eq 1 ] ; then
+   export  OMPI_LD_PRELOAD_POSTPEND=/ccs/home/walkup/mpitrace/spectrum_mpi/libmpitrace.so
+fi
 
 jsrun \
 -D CUDA_VISIBLE_DEVICES \
