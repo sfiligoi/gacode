@@ -41,7 +41,7 @@ FACC =-acc -I${OLCF_CUDA_ROOT}/include -Minfo=accel \
 
 #       -ta=tesla:cuda9.2  -ta=nvidia:cc70 -Mcudalib=cufft \
 
-FOMP   =-mp -Mstack_arrays ${FACC}
+FOMP   =-mp -Mstack_arrays 
 FMATH  =-r8 -I${OLCF_FFTW_ROOT}/include 
 FOPT   =-fast -fastsse -Mvect
 FDEBUG =-g -Kieee -Ktrap=fp,divz -Mbounds -Mchkptr -Mchkstk -traceback -Minform=inform
