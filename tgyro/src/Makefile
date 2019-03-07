@@ -6,7 +6,7 @@ else
    FFLAGS=${FOPT}
 endif
 
-FC += ${FOMP}
+FC += ${FOMP} ${FACC}
 
 EXEC = tgyro_main
 
@@ -16,9 +16,17 @@ else
    NN=tgyro_eped_nn
 endif
 
-HARVEST=-L$(GACODE_ROOT)/shared/harvest_client/ \
-        -I$(GACODE_ROOT)/shared/harvest_client/ \
-        -lharvest
+ifdef OMFIT_ROOT
+   HAR_SRC=tgyro_harvest
+   HARVEST=-L$(GACODE_ROOT)/shared/harvest_client/ \
+           -I$(GACODE_ROOT)/shared/harvest_client/ \
+           -lharvest
+else
+   HAR_SRC=tgyro_harvest.stub
+   HARVEST=
+endif
+
+
 
 OBJECTS += tgyro_globals.o \
            tgyro_iteration_variables.o \
@@ -34,7 +42,6 @@ OBJECTS += tgyro_globals.o \
            tgyro_flux_set.o \
            tgyro_flux_vector.o \
            tgyro_gyro_map.o \
-           tgyro_harvest.o \
            tgyro_ifs_pppl.o \
            tgyro_init_profiles.o \
            tgyro_init_profiles_axis.o \
@@ -65,6 +72,7 @@ OBJECTS += tgyro_globals.o \
            tgyro_write_intermediate.o \
            tgyro_write_data.o \
            $(NN).o \
+           $(HAR_SRC).o \
            $(EXEC).o
 
 .SUFFIXES : .o .f90
