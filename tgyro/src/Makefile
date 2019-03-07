@@ -1,3 +1,5 @@
+USE_HARVEST=
+
 include ${GACODE_ROOT}/platform/build/make.inc.${GACODE_PLATFORM}
 
 ifeq ($(OPT),debug)
@@ -16,7 +18,7 @@ else
    NN=tgyro_eped_nn
 endif
 
-ifdef OMFIT_ROOT
+ifdef USE_HARVEST
    HAR_SRC=tgyro_harvest
    HARVEST=-L$(GACODE_ROOT)/shared/harvest_client/ \
            -I$(GACODE_ROOT)/shared/harvest_client/ \
