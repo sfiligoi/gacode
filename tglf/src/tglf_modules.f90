@@ -58,6 +58,8 @@
       INTEGER,DIMENSION(8) :: trace_path=0
       LOGICAL,EXTERNAL :: tglf_isnan
       LOGICAL,EXTERNAL :: tglf_isinf
+! input units switch
+      CHARACTER (len=4) :: units_in = 'TGLF'
 ! Input Gaussian width
       REAL :: width_in=1.65
       REAL :: width_min_in=0.3
@@ -247,6 +249,7 @@
       REAL :: SAT_geo0_out=1.0
       REAL :: DM_out = 0.25
       REAL :: DR_out = 0.0
+      REAL :: Bref_out = 1.0
       INTEGER :: nmodes_out
       INTEGER :: nfields_out
       character (len=80) :: error_msg='null' 
