@@ -77,6 +77,10 @@ let nmpi=2*$ranks_per_socket*$nodes
 echo "nodes           = $nodes"
 echo "Total MPI tasks = $nmpi"
 
+if [ $PROF -eq 1 ] ; then
+   CPROF="export OMPI_LD_PRELOAD_POSTPEND=/ccs/home/walkup/mpitrace/spectrum_mpi/libmpitrace.so"
+fi
+
 
 # BATCH SCRIPT:
 
@@ -98,9 +102,7 @@ export PAMI_IBV_ENABLE_DCT=1
 export OMP_NUM_THREADS=$threads_per_rank
 export OMP_STACKSIZE=400M
 export MP_EAGER_LIMIT=$eager
-if [ $PROF -eq 1 ] ; then
-   export  OMPI_LD_PRELOAD_POSTPEND=/ccs/home/walkup/mpitrace/spectrum_mpi/libmpitrace.so
-fi
+$CPROF
 
 jsrun \
 -D CUDA_VISIBLE_DEVICES \
