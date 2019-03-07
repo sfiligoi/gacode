@@ -1,6 +1,23 @@
 !-----------------------------------------------------------------
 !  input routines
 !-----------------------------------------------------------------
+SUBROUTINE put_units(units)
+!
+USE tglf_global
+!
+IMPLICIT NONE
+CHARACTER (len=*) :: units
+
+if(units .eq. 'TGLF' .or. units .eq. 'GENE')then
+   units_in = units
+else
+   call tglf_error(1,"Invalid units selected")
+endif
+!
+END SUBROUTINE put_units
+!
+!-----------------------------------------------------------------
+!
 SUBROUTINE put_species(nsp,zsp,msp)
   !
   USE tglf_global
