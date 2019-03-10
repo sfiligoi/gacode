@@ -78,6 +78,7 @@
       LOGICAL :: use_mhd_rule_in=.TRUE.
       LOGICAL :: use_bisection_in=.TRUE.
       LOGICAL :: use_inboard_detrapped_in=.FALSE.
+      LOGICAL :: kx_isotropic_in = .FALSE.
       INTEGER :: ibranch_in=-1
       INTEGER :: nmodes_in=2
       INTEGER :: nbasis_max_in=4
@@ -247,6 +248,7 @@
       REAL :: grad_r0_out=1.0
       REAL :: SAT_geo_ave_out=1.0
       REAL :: SAT_geo0_out=1.0
+      REAL :: kx_geo0_out=1.0
       REAL :: DM_out = 0.25
       REAL :: DR_out = 0.0
       REAL :: Bref_out = 1.0
