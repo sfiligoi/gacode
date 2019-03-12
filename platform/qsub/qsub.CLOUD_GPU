@@ -17,5 +17,5 @@ echo "#SBATCH --partition=$QUEUE" >> $bfile
 echo "#SBATCH -t $WALLTIME" >> $bfile
 echo "#SBATCH --ntasks=$nmpi" >> $bfile
 echo "#SBATCH --ntasks-per-node=$nmpi" >> $bfile
-
+echo "#SBATCH --exclusive" >> $bfile
 echo "$CODE -e $LOCDIR -n $nmpi -nomp $nomp -p $SIMROOT" >> $bfile 

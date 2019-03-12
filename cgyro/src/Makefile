@@ -14,8 +14,7 @@ FC += ${FOMP} ${FACC}
 
 EXEC = cgyro
 
-OBJECTS = nvtx_mod.o \
-          cgyro_globals.o \
+OBJECTS = cgyro_globals.o \
           cgyro_parallel_lib.o \
           cgyro_io.o \
           cgyro_advect_wavenumber.o \

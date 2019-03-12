@@ -1,5 +1,5 @@
 #! /usr/bin/env bash
-# GACODE Parallel execution script (CORI)
+# GACODE Parallel execution script (CLOUD_GPU)
 
 simdir=${1}
 nmpi=${2}
@@ -13,10 +13,10 @@ mpinuma=${6}
 # numa = NUMAs active per node
 # mpinuma = MPI tasks per active NUMA 
 
-. $GACODE_ROOT/shared/bin/gacode_mpi_tool
+#. $GACODE_ROOT/shared/bin/gacode_mpi_tool
 
 cd $simdir
 
 export OMP_NUM_THREADS=$nomp
-echo "> srun --exclusive $exec"
-srun --exclusive $exec
+echo "> mpirun -np $nmpi $exec"
+mpirun -np $nmpi $exec
