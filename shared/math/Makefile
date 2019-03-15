@@ -26,8 +26,7 @@ OBJECTS = math_constants.o \
           poly2diff.o \
           proc_time.o \
           pseudospec_lib.o \
-          timer_lib.o \
-          nvtx_mod.o 
+          timer_lib.o
 
 .SUFFIXES : .o .f90 .F90 .f
 
@@ -41,13 +40,10 @@ lib: $(OBJECTS)
 
 .f90.o :
 	$(FC) $(FMATH) $(FFLAGS) -c $<
-.F90.o :
-	$(FC) $(FMATH) $(FFLAGS) -c $<
 
 clean:
 	rm -f *.o $(LLIB).a *.mod *.lst
 	rm -f ${GACODE_ROOT}/modules/math_constants.mod
 	rm -f ${GACODE_ROOT}/modules/timer_lib.mod
-	rm -f ${GACODE_ROOT}/modules/nvtx_mod.mod
 
 -include ${GACODE_ROOT}/platform/build/make.inc.${GACODE_PLATFORM}

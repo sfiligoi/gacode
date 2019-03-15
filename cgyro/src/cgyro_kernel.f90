@@ -17,7 +17,6 @@ subroutine cgyro_kernel
   use mpi
   use cgyro_globals
   use cgyro_io
-  use nvtx_mod
 
   implicit none
 
@@ -28,7 +27,6 @@ subroutine cgyro_kernel
   character(5)  :: zone
   integer(KIND=8) :: start_time,aftermpi_time,beforetotal_time,exit_time
   integer(KIND=8) :: count_rate,count_max
-  integer(C_INT64_T) :: nvtx_id=1
   real :: mpi_dt,init_dt,exit_dt
   integer :: statusfd
 
@@ -103,7 +101,6 @@ subroutine cgyro_kernel
     close(statusfd)
   endif
 
-  !call nvtxStartRange('NVTX',1,nvtx_id)
   do i_time=1,n_time
 
      call timer_lib_in('TOTAL')
@@ -191,8 +188,6 @@ subroutine cgyro_kernel
 
   enddo
   !---------------------------------------------------------------------------
-
-  !call nvtxEndRange(nvtx_id)
 
 100 continue
 
