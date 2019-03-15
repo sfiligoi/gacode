@@ -19,7 +19,7 @@ FC = mpif90 -m64 -module ${GACODE_ROOT}/modules -Mpreprocess -DUSE_INLINE -fpic
 F77 = mpif90 -m64 -I$(GACODE_ROOT)/modules -fpic
 
 # Compiler options/flags
-FACC   =-acc -I${OLCF_CUDA_ROOT}/include CUDA_HOME=${CUDA_DIR} -Minfo=accel -ta=nvidia:cc70 -Mcudalib=cufft -Mcudalib=cusolver -Mcudalib=cusparse -Mcudalib=cublas -DDISABLE_GPUDIRECT_MPI
+FACC   =-acc -I${OLCF_CUDA_ROOT}/include -Minfo=accel -ta=nvidia:cc70 -Mcudalib=cufft -DDISABLE_GPUDIRECT_MPI
 FOMP   =-mp -Mstack_arrays 
 FMATH  =-r8
 FOPT   =-fast -fastsse -Mvect
