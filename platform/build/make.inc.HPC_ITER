@@ -22,3 +22,8 @@ NETCDF_INC=$(NCDIR)/include
 # Archive 
 
 ARCH = xiar cr
+
+ifdef FANN_ROOT
+   # neural net libraries
+   NN_LIB=-L$(GACODE_ROOT)/../neural/ -I$(GACODE_ROOT)/../neural/ -lbrainfuse -L$(FANN_ROOT)/lib -lfann
+endif
