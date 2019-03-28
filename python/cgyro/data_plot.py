@@ -648,15 +648,6 @@ class cgyrodata_plot(data.cgyrodata):
 
    def plot_ky_flux(self,w=0.5,wmax=0.0,field=0,moment='e',ymin='auto',ymax='auto',
                     fc=0,diss=0,fig=None,cflux='auto'):
-      '''
-      Plot fluxes versus ky
-
-      ARGUMENTS:
-      field: if fc=1, field to select 
-      ymin : plot range (min y)
-      ymax : plot range (max y)
-      fc   : select components (phi,Ap,Bp) of flux rather than total
-      '''
 
       if self.n_n == 1:
          raise ValueError('(plot_ky_flux.py) Plot not available with a single mode.')
@@ -738,7 +729,7 @@ class cgyrodata_plot(data.cgyrodata):
          u = specmap(self.mass[ispec],self.z[ispec])
          ax.set_ylabel(r'$'+mtag+'_'+u+'$',color='k')
          ax.set_title(windowtxt)
-         ax.bar(ky-dk/2.0,ave[:,ispec],width=dk/1.1,color=color[ispec],
+         ax.bar(ky,ave[:,ispec],width=dk/1.1,color=color[ispec],
                 alpha=0.5,edgecolor='black')
 
          # Dissipation curve             
