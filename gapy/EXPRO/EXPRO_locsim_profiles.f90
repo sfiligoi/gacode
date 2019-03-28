@@ -42,6 +42,8 @@
 !  real :: rho_norm_loc
 !  real :: psi_norm_loc
 !  real :: psi_a_loc
+!  real :: cs_loc
+!  real :: dlnpdr
 !
 !  real, dimension(9) :: dens_loc
 !  real, dimension(9) :: temp_loc
@@ -191,6 +193,9 @@ subroutine EXPRO_locsim_profiles(&
   call cub_spline(rmin_exp,EXPRO_polflux,EXPRO_n_exp,rmin,psi_norm_loc,1)
   psi_norm_loc  = psi_norm_loc/EXPRO_polflux(EXPRO_n_exp)
   psi_a_loc = EXPRO_polflux(EXPRO_n_exp)
+
+  ! JC: Need to define
+  dlnpdr = 0.0
   
   do i=1,n_species_exp
      ! Note: mapping is only done for n_species (not n_species_exp)

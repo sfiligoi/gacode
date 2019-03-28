@@ -46,6 +46,7 @@ module EXPRO_locsim_interface
   real :: psi_norm_loc
   real :: psi_a_loc
   real :: cs_loc
+  real :: dlnpdr
 
   real, dimension(9) :: mass_loc
   real, dimension(9) :: z_loc
