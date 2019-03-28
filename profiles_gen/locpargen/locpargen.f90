@@ -19,9 +19,10 @@ program locpargen
   read(1,*) rho0
   read(1,*) psi0
   read(1,*) hasgeo
+  read(1,*) qnflag
   close(1)
 
-  EXPRO_ctrl_quasineutral_flag = 0
+  EXPRO_ctrl_quasineutral_flag = qnflag
   ! We don't need the numerical eq. flag set for this routine.
   EXPRO_ctrl_numeq_flag = hasgeo
 
@@ -58,7 +59,7 @@ program locpargen
        -1,&
        hasgeo,&
        0,&
-       0,&
+       qnflag,&
        EXPRO_n_ion+1,&
        r0,&
        btccw,&

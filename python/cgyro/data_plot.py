@@ -855,8 +855,14 @@ class cgyrodata_plot(data.cgyrodata):
 
       ax.set_xlim([-x0,x0])
       ax.set_yscale('log')
-      ax.set_ylim(bottom=0.5*np.sqrt(ave[-1]))
-      
+      if ymin == 'auto':
+         ax.set_ylim(bottom=0.5*np.sqrt(ave[-1]))
+      else:
+         ax.set_ylim(bottom=float(ymin))
+      if ymax != 'auto':
+         ax.set_ylim(top=float(ymax))
+         
+         
       # Dissipation curve             
       if diss == 1:
          ax.plot(kx,self.radialdiss*ax.get_ylim()[1]*0.5,linewidth=2,color='k',alpha=0.2)
