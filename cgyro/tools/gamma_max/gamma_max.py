@@ -6,7 +6,7 @@
 import sys
 import os
 import numpy as np
-import gacodefuncs
+from gacodefuncs import *
 
 kmin = float(sys.argv[1])
 kmax = float(sys.argv[2])

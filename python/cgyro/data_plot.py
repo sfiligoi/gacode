@@ -730,12 +730,20 @@ class cgyrodata_plot(data.cgyrodata):
          ax.set_ylabel(r'$'+mtag+'_'+u+'$',color='k')
          ax.set_title(windowtxt)
          ax.bar(ky,ave[:,ispec],width=dk/1.1,color=color[ispec],
-                alpha=0.5,edgecolor='black')
-
+                alpha=0.5,edgecolor='black',align='center')
+         
          # Dissipation curve             
          if diss == 1:
             ax.plot(ky,self.alphadiss*ax.get_ylim()[1]*0.5,linewidth=2,color='k',alpha=0.2)
 
+         # Maximum
+         j = np.argmax(ave[:,ispec])
+         if j < len(ky)-1:
+            xs,ys = quadratic_max(ky[j-1:j+2],ave[j-1:j+2,ispec])
+         else:
+            xs = ky[-1]
+         print('INFO: (data_plot.py) Max(flux) occurs at ky*rho = {:.3f}'.format(xs))
+         
          # Set axis ranges
          ax.set_xlim([0,ky[-1]+dk])
          if ymax != 'auto':
