@@ -10,7 +10,7 @@ from mayavi import mlab
 try:
    import gapy
 except:
-   print 'ERROR: (vis_torcut) Please build gapy.so library!'
+   print('ERROR: (vis_torcut) Please build gapy.so library!')
    sys.exit()
    
 ext      = sys.argv[1]
@@ -48,7 +48,7 @@ pre,ftype = mkfile(ext)
 # (r,theta)=(x,y) mesh setup 
 #
 if nth == 1:
-   print 'ERROR: (vis_wheel) This visualization requires THETA_PLOT > 1.'
+   print('ERROR: (vis_wheel) This visualization requires THETA_PLOT > 1.')
    sys.exit()
    
 if nx < 0:
@@ -124,9 +124,9 @@ fdata,title,isfield = tag_helper(sim.mass[species],sim.z[species],moment)
 # Check to see if data exists 
 if os.path.isfile('bin'+fdata):
     fdata = 'bin'+fdata
-    print 'INFO: (vis_torcut) Found binary data in '+fdata 
+    print('INFO: (vis_torcut) Found binary data in '+fdata)
 else:
-    print 'ERROR: (vis_torcut) No data for -moment '+moment+' exists.  Try -moment phi'
+    print('ERROR: (vis_torcut) No data for -moment '+moment+' exists.  Try -moment phi')
     sys.exit()
 
 if isfield:
@@ -181,7 +181,7 @@ def frame():
 
    # View from positive z-axis
    mlab.view(azimuth=75, elevation=65,distance=3.2)
-   print 'INFO: (vis_wheel) min=%e , max=%e' % (f0,f1)
+   print('INFO: (vis_wheel) min=%e , max=%e' % (f0,f1))
 
    if ftype == 'screen':
       mlab.show()
@@ -205,7 +205,7 @@ while True:
       sys.exit()
 
    i += 1
-   print 'INFO: (vis_torcut) Time index '+str(i) 
+   print('INFO: (vis_torcut) Time index '+str(i))
    if i in ivec:
       frame()
    if i == max(ivec):
