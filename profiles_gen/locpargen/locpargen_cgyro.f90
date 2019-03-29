@@ -7,13 +7,41 @@ subroutine locpargen_cgyro
   implicit none
 
   open(unit=1,file='input.cgyro.locpargen',status='replace')
+
+  !---------------------------------------------------------
+  ! Resolution info (default)
+
+  write(1,'(a)')  '# Resolution'
+  write(1,11) 'N_ENERGY=', 8
+  write(1,11) 'N_XI=', 16
+  write(1,11) 'N_THETA=', 24
+  write(1,11) 'N_RADIAL=', 6
+  write(1,11) 'N_TOROIDAL=', 1
+  write(1,11) 'NONLINEAR_FLAG=', 0
+  write(1,*)
+  write(1,11) 'BOX_SIZE=', 1
+  write(1,10) 'KY=', 0.3
+  write(1,*)
+
+  !---------------------------------------------------------
+  ! Time Stepping (default)
+  write(1,10) 'DELTA_T=', 0.008
+  write(1,10) 'MAX_TIME=', 100.0
+  write(1,11) 'PRINT_STEP=', 100
+  write(1,*)
+  
+  !---------------------------------------------------------
+  ! Geometry data
+  
+  write(1,'(a)')  '# Geometry (Miller)'
   write(1,10) 'RMIN=',r0
   write(1,10) 'RMAJ=',rmaj_loc
   write(1,*)
+  write(1,11) 'EQUILIBRIUM_MODEL=', 2  
   write(1,10) 'SHIFT=',shift_loc
   write(1,10) 'ZMAG=',zmag_loc
   write(1,10) 'DZMAG=',dzmag_loc
-  write(1,10) 'Q=',q_loc
+  write(1,10) 'Q=',abs(q_loc)
   write(1,10) 'S=',s_loc
   write(1,10) 'KAPPA=',kappa_loc
   write(1,10) 'S_KAPPA=',s_kappa_loc
@@ -21,18 +49,34 @@ subroutine locpargen_cgyro
   write(1,10) 'S_DELTA=',s_delta_loc
   write(1,10) 'ZETA=',zeta_loc
   write(1,10) 'S_ZETA=',s_zeta_loc
+  write(1,11) 'IPCCW=', -EXPRO_signq*EXPRO_signb
+  write(1,11) 'BTCCW=', -EXPRO_signb
   write(1,*)
+  write(1,11) 'N_FIELD=', 2
+  write(1,10) 'BETAE_UNIT=',betae_unit
+  write(1,*)
+  
+  !---------------------------------------------------------
+  ! Rotation data
+  
+  write(1,'(a)')  '# Rotation (Sonic)'
+  write(1,11) 'ROTATION_MODEL=', 2   
   write(1,10) 'GAMMA_E=',gamma_e_loc*a/cs_loc
   write(1,10) 'GAMMA_P=',gamma_p_loc*a/cs_loc
   write(1,10) 'MACH=',mach_loc/cs_loc
   write(1,*)
-  write(1,10) 'NU_EE=',nu_ee*a/cs_loc
-  write(1,10) 'BETAE_UNIT=',betae_unit
 
+  !---------------------------------------------------------
+  ! Collision data
+  write(1,'(a)')  '# Collisions (Sugama)'
+  write(1,11) 'COLLISION_MODEL=', 4    
+  write(1,10) 'NU_EE=',nu_ee*a/cs_loc
+  write(1,*)
+  
   !---------------------------------------------------------
   ! Species data
   
-  write(1,*)
+  write(1,'(a)')  '# Species'
   write(1,11) 'N_SPECIES=',ise
 
   do is=1,ise

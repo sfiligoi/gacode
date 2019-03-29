@@ -107,6 +107,7 @@ program locpargen
 
   call locpargen_cgyro
   call locpargen_tglf
+  call locpargen_neo
 
 10 format(a,sp,1pe12.5)
 
