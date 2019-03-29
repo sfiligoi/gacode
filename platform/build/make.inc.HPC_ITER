@@ -2,6 +2,10 @@
 # HPC_ITER (Intel fortran, MPICH2)
 #---------------------------------------------------
 
+IDENTITY="ITER compute cluster"
+CORES_PER_NODE=1
+NUMAS_PER_NODE=1
+
 # Compilers
 
 FC	= mpif90 -mod $(GACODE_ROOT)/modules -I $(GACODE_ROOT)/modules -I $(FFTWDIR)/include -mkl=sequential 
