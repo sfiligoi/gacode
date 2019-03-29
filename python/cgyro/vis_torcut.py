@@ -25,6 +25,7 @@ fmax     = sys.argv[8]
 colormap = sys.argv[9]
 font     = int(sys.argv[10])
 legacy   = int(sys.argv[11])
+dn       = int(sys.argv[12])
 
 # Define plot and font size 
 rc('text',usetex=True)
@@ -99,7 +100,6 @@ if legacy == 0:
 else:
    # s-alpha approximate (apparently used in legacy GYRO movies)
    g1 = sim.q*z
-   g2 = z-sim.q**2*sim.rmaj*sim.beta_star*np.sin(z)/sim.shear
    g2 = z
 
 #------------------------------------------------------------------------
@@ -135,7 +135,7 @@ def frame():
       c = a[0,:,:,species,:]+1j*a[1,:,:,species,:]
                 
    f = np.zeros([nx,nz],order='F')
-   gapy.torcut(sim.m_box,sim.q,g1,g2,c,f)
+   gapy.torcut(dn,sim.m_box,sim.q,g1,g2,c,f)
 
    if fmin == 'auto':
       f0=np.min(f)

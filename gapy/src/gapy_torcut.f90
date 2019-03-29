@@ -1,8 +1,8 @@
-subroutine torcut(m,q,nr,nth,nn,nx,nz,g1,g2,c,f)
+subroutine torcut(dn,m,q,nr,nth,nn,nx,nz,g1,g2,c,f)
 
   implicit none
 
-  integer, intent(in) :: m
+  integer, intent(in) :: dn,m
   double precision, intent(in) :: q
   integer, intent(in) :: nr,nn,nth,nx,nz
   double precision, intent(in) :: g1(0:nz-1),g2(0:nz-1)
@@ -17,7 +17,8 @@ subroutine torcut(m,q,nr,nth,nn,nx,nz,g1,g2,c,f)
   integer :: n,p,pp
   double precision :: pi,fsum,x0
   double complex :: ic
-
+  
+  ! f2py intent(in) dn
   ! f2py intent(in) m
   ! f2py intent(in) q
   ! f2py intent(in) nr
@@ -37,7 +38,7 @@ subroutine torcut(m,q,nr,nth,nn,nx,nz,g1,g2,c,f)
   allocate(th(0:nth))
   allocate(c0(0:nr-1,0:nn-1))
   allocate(cx(0:nr-1,0:nth,0:nn-1))
-
+  
   ic = (0d0,1d0)
   pi = atan(1d0)*4d0
 
@@ -56,16 +57,15 @@ subroutine torcut(m,q,nr,nth,nn,nx,nz,g1,g2,c,f)
      do k=0,nz-1
         z(k) = k*2*pi/(nz-1)-pi
         do n=0,nn-1    
-           eny(n,k) = exp(ic*n*g1(k))
+           eny(n,k) = exp(ic*n*dn*g1(k))
         enddo
      enddo
      ! factor of 1/2 for n=0
      eny(0,:) = eny(0,:)/2
   else
-     n=1    
      do k=0,nz-1
         z(k) = k*2*pi/(nz-1)-pi
-        eny(0,k) = exp(ic*n*g1(k))
+        eny(0,k) = exp(ic*dn*g1(k))
      enddo
   endif
 
@@ -76,15 +76,14 @@ subroutine torcut(m,q,nr,nth,nn,nx,nz,g1,g2,c,f)
         do p=0,nr-1
            pp = p+n*m
            if (pp > nr-1) pp = pp-nr
-           cx(p,nth,n) = c(pp,0,n)*exp(-2*pi*ic*n*q)
+           cx(p,nth,n) = c(pp,0,n)*exp(-2*pi*ic*n*dn*q)
         enddo
      enddo
   else
-     n=1
      do p=0,nr-1
-        pp = p+n*m
+        pp = p+1*m
         if (pp > nr-1) pp = pp-nr
-        cx(p,nth,0) = c(pp,0,0)*exp(-2*pi*ic*n*q)
+        cx(p,nth,0) = c(pp,0,0)*exp(-2*pi*ic*dn*q)
      enddo
   endif
 
@@ -106,13 +105,12 @@ subroutine torcut(m,q,nr,nth,nn,nx,nz,g1,g2,c,f)
         if (nn > 1) then
            do n=0,nn-1
               do p=0,nr-1
-                 fsum = fsum+real( c0(p,n)*epx(p,i)*eny(n,k)*exp(ic*n*x0) )
+                 fsum = fsum+real( c0(p,n)*epx(p,i)*eny(n,k)*exp(ic*n*dn*x0) )
               enddo
            enddo
         else
-           n=1
            do p=0,nr-1
-              fsum = fsum+real( c0(p,0)*epx(p,i)*eny(0,k)*exp(ic*n*x0) )
+              fsum = fsum+real( c0(p,0)*epx(p,i)*eny(0,k)*exp(ic*dn*x0) )
            enddo
         endif
         f(i,k) = fsum

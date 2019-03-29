@@ -165,6 +165,9 @@ then
   echo "         -land"
   echo "         Use landscape mode (ly,lx) for -plot fluct"  
   echo
+  echo "         -dn"
+  echo "         Modify value of CGYRO delta n_toroidal (simulation runs with dn=1)"  
+  echo
   echo "OPTIONS FOR -plot vid"
   echo
   echo "         -pre <prefix>"
@@ -253,6 +256,7 @@ PX=800
 PY=800
 DISS=0
 CFLUX=auto
+DN=1
 
 PRE=
 FRAMERATE=20
@@ -323,6 +327,7 @@ while [ $# -gt 0 ] ; do
 
   -legacy) LEGACY_FLAG=1 ;;
   -land) LAND_FLAG=1 ;;
+  -dn) shift ; DN=$1 ;;
   
   -pre) shift ; PRE=$1 ;;
   -q)  shift ; QUALITY=$1 ;;
@@ -358,7 +363,7 @@ case "$VIS_TYPE" in
 	python $PYROOT/vis_slices.py ;;
 	
    torcut)
-	export OMP_NUM_THREADS=$NOMP ; python $PYROOT/vis_torcut.py $EXT $MOMENT $SPECIES $NX $NZ $TIME $FMIN $FMAX $CMAP $FONTSIZE $LEGACY_FLAG ;;
+	export OMP_NUM_THREADS=$NOMP ; python $PYROOT/vis_torcut.py $EXT $MOMENT $SPECIES $NX $NZ $TIME $FMIN $FMAX $CMAP $FONTSIZE $LEGACY_FLAG $DN ;;
 
    wheel)
 	export OMP_NUM_THREADS=$NOMP ; python $PYROOT/vis_wheel.py $EXT $MOMENT $SPECIES $NX $NY $NZ $TIME $FMIN $FMAX $CMAP $FONTSIZE ;;
