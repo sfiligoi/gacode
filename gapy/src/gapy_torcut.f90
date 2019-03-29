@@ -52,25 +52,42 @@ subroutine torcut(m,q,nr,nth,nn,nx,nz,g1,g2,c,f)
      enddo
   enddo
 
-  do k=0,nz-1
-     z(k) = k*2*pi/(nz-1)-pi
-     do n=0,nn-1    
-        eny(n,k) = exp(ic*n*g1(k))
+  if (nn > 1) then
+     do k=0,nz-1
+        z(k) = k*2*pi/(nz-1)-pi
+        do n=0,nn-1    
+           eny(n,k) = exp(ic*n*g1(k))
+        enddo
      enddo
-  enddo
+     ! factor of 1/2 for n=0
+     eny(0,:) = eny(0,:)/2
+  else
+     n=1    
+     do k=0,nz-1
+        z(k) = k*2*pi/(nz-1)-pi
+        eny(0,k) = exp(ic*n*g1(k))
+     enddo
+  endif
 
   ! Extended coefficients
   cx(:,0:nth-1,:) = c(:,:,:) 
-  do n=0,nn-1
+  if (nn > 1) then 
+     do n=0,nn-1
+        do p=0,nr-1
+           pp = p+n*m
+           if (pp > nr-1) pp = pp-nr
+           cx(p,nth,n) = c(pp,0,n)*exp(-2*pi*ic*n*q)
+        enddo
+     enddo
+  else
+     n=1
      do p=0,nr-1
         pp = p+n*m
         if (pp > nr-1) pp = pp-nr
-        cx(p,nth,n) = c(pp,0,n)*exp(-2*pi*ic*n*q)
+        cx(p,nth,0) = c(pp,0,0)*exp(-2*pi*ic*n*q)
      enddo
-  enddo
+  endif
 
-  ! factor of 1/2 for n=0
-  eny(0,:) = eny(0,:)/2
 
 !$omp parallel do private(k,kc,c0,i,fsum,x0,n,p)
   do k=0,nz-1
@@ -82,15 +99,22 @@ subroutine torcut(m,q,nr,nth,nn,nx,nz,g1,g2,c,f)
            exit
         endif
      enddo
-     
+
      do i=0,nx-1
         fsum = 0.0
         x0 = m*x(i)*g2(k)/(2*pi)
-        do n=0,nn-1
-           do p=0,nr-1
-              fsum = fsum+real( c0(p,n)*epx(p,i)*eny(n,k)*exp(ic*n*x0) )
+        if (nn > 1) then
+           do n=0,nn-1
+              do p=0,nr-1
+                 fsum = fsum+real( c0(p,n)*epx(p,i)*eny(n,k)*exp(ic*n*x0) )
+              enddo
            enddo
-        enddo
+        else
+           n=1
+           do p=0,nr-1
+              fsum = fsum+real( c0(p,0)*epx(p,i)*eny(0,k)*exp(ic*n*x0) )
+           enddo
+        endif
         f(i,k) = fsum
      enddo
 

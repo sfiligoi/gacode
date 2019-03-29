@@ -648,15 +648,6 @@ class cgyrodata_plot(data.cgyrodata):
 
    def plot_ky_flux(self,w=0.5,wmax=0.0,field=0,moment='e',ymin='auto',ymax='auto',
                     fc=0,diss=0,fig=None,cflux='auto'):
-      '''
-      Plot fluxes versus ky
-
-      ARGUMENTS:
-      field: if fc=1, field to select 
-      ymin : plot range (min y)
-      ymax : plot range (max y)
-      fc   : select components (phi,Ap,Bp) of flux rather than total
-      '''
 
       if self.n_n == 1:
          raise ValueError('(plot_ky_flux.py) Plot not available with a single mode.')
@@ -738,13 +729,21 @@ class cgyrodata_plot(data.cgyrodata):
          u = specmap(self.mass[ispec],self.z[ispec])
          ax.set_ylabel(r'$'+mtag+'_'+u+'$',color='k')
          ax.set_title(windowtxt)
-         ax.bar(ky-dk/2.0,ave[:,ispec],width=dk/1.1,color=color[ispec],
-                alpha=0.5,edgecolor='black')
-
+         ax.bar(ky,ave[:,ispec],width=dk/1.1,color=color[ispec],
+                alpha=0.5,edgecolor='black',align='center')
+         
          # Dissipation curve             
          if diss == 1:
             ax.plot(ky,self.alphadiss*ax.get_ylim()[1]*0.5,linewidth=2,color='k',alpha=0.2)
 
+         # Maximum
+         j = np.argmax(ave[:,ispec])
+         if j < len(ky)-1:
+            xs,ys = quadratic_max(ky[j-1:j+2],ave[j-1:j+2,ispec])
+         else:
+            xs = ky[-1]
+         print('INFO: (data_plot.py) Max(flux) occurs at ky*rho = {:.3f}'.format(xs))
+         
          # Set axis ranges
          ax.set_xlim([0,ky[-1]+dk])
          if ymax != 'auto':
@@ -856,8 +855,14 @@ class cgyrodata_plot(data.cgyrodata):
 
       ax.set_xlim([-x0,x0])
       ax.set_yscale('log')
-      ax.set_ylim(bottom=0.5*np.sqrt(ave[-1]))
-      
+      if ymin == 'auto':
+         ax.set_ylim(bottom=0.5*np.sqrt(ave[-1]))
+      else:
+         ax.set_ylim(bottom=float(ymin))
+      if ymax != 'auto':
+         ax.set_ylim(top=float(ymax))
+         
+         
       # Dissipation curve             
       if diss == 1:
          ax.plot(kx,self.radialdiss*ax.get_ylim()[1]*0.5,linewidth=2,color='k',alpha=0.2)
