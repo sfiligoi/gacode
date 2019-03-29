@@ -77,6 +77,7 @@ program locpargen
   print 10,'# Te [keV] =',temp_loc(ise)
   print 10,'# Ti [keV] =',temp_loc(1)
   print 10,'# Bunit    =',b_unit_loc
+  print 10,'# beta_*   =',beta_star_loc
 
   ! Compute collision frequency
   !

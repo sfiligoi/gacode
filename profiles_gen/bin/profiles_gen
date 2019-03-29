@@ -260,6 +260,9 @@ then
    echo 
    echo "             -qn"
    echo "             Toggle quasineutrality."
+   echo 
+   echo "             -fast"
+   echo "             Skip banada width calculation"
    echo
    echo "DUMP MODE"
    echo 
@@ -357,6 +360,7 @@ LOC_RHO=0
 LOC_PSI=0
 HASGEO=0
 QNFLAG=1
+FAST=1
 
 # DUMP MODE variables
 DUMP_FLAG=0
@@ -597,13 +601,10 @@ then
   echo $HASGEO >> input.locpargen
   echo $QNFLAG >> input.locpargen
   $LOCPARGEN
-  python ${PRGEN_BIN}/banana_width.py
+  if [ $FAST -eq 0 ] ; then
+     python ${PRGEN_BIN}/banana_width.py
+  fi
   rm input.locpargen
-  if [ $PLOT_FLAG -eq 1 ]
-  then
-     echo "WARNING: -plot deprecated.  Should remove locpargen_plot.py"
-     #python $PRGEN_BIN/locpargen_plot.py
-  fi 
   exit 0
 fi
 

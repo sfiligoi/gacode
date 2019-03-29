@@ -28,7 +28,6 @@ subroutine locpargen_cgyro
   write(1,*)
   write(1,10) 'NU_EE=',nu_ee*a/cs_loc
   write(1,10) 'BETAE_UNIT=',betae_unit
-  print *,beta_star_loc
 
   !---------------------------------------------------------
   ! Species data
