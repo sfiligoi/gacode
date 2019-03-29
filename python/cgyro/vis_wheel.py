@@ -39,7 +39,11 @@ nth = sim.theta_plot
 ivec = time_vector(istr,nt)
 
 xp = sim.length
-yp = 2*np.pi/np.abs(sim.ky[1])
+if nn > 1:
+   yp = 2*np.pi/np.abs(sim.ky[1])
+else:
+   yp = 2*np.pi/np.abs(sim.ky[0])
+   
 aspect = yp/xp
 
 pre,ftype = mkfile(ext)
@@ -147,11 +151,10 @@ def frame():
       c = a[0,:,:,:]+1j*a[1,:,:,:]
    else:
       c = a[0,:,:,species,:]+1j*a[1,:,:,species,:]
-
    
    # 1a
    f = np.zeros([nx,ny],order='F')
-   gapy.realfluct(c[:,nth/2,:],f)
+   gapy.realfluct(c[:,nth//2,:],f)
 
    if fmin == 'auto':
       f0=np.min(f)
@@ -160,24 +163,24 @@ def frame():
       f0=float(fmin)
       f1=float(fmax)
 
-   mlab.mesh(xp1,yp1,zp1,scalars=f,colormap=colormap,vmin=f0,vmax=f1,opacity=1.0)
+   mlab.mesh(xp1,yp1,zp1,scalars=f,colormap=colormap,vmin=f0,vmax=f1)
 
    # 1b
    f = np.zeros([nx,ny],order='F')
    gapy.realfluct(c[:,0,:],f)
-   mlab.mesh(-xp1,yp1,zp1,scalars=f,colormap=colormap,vmin=f0,vmax=f1,opacity=1.0)
+   mlab.mesh(-xp1,yp1,zp1,scalars=f,colormap=colormap,vmin=f0,vmax=f1)
 
    # 2a,b
    f = np.zeros([nx,nz],order='F')
    gapy.wheel1(c,f)
-   mlab.mesh(xp2,yp2,zp2,scalars=f,colormap=colormap,vmin=f0,vmax=f1,opacity=1.0)
-   mlab.mesh(xp2,yp2,0*zp2,scalars=f,colormap=colormap,vmin=f0,vmax=f1,opacity=1.0)
+   mlab.mesh(xp2,yp2,zp2,scalars=f,colormap=colormap,vmin=f0,vmax=f1)
+   mlab.mesh(xp2,yp2,0*zp2,scalars=f,colormap=colormap,vmin=f0,vmax=f1)
 
    # 3a,b
    f = np.zeros([ny,nz],order='F')
    gapy.wheel2(c,f)
-   mlab.mesh(xp3,yp3,zp3,scalars=f,colormap=colormap,vmin=f0,vmax=f1,opacity=1.0)
-   mlab.mesh(xp4,yp4,zp4,scalars=f,colormap=colormap,vmin=f0,vmax=f1,opacity=1.0)
+   mlab.mesh(xp3,yp3,zp3,scalars=f,colormap=colormap,vmin=f0,vmax=f1)
+   mlab.mesh(xp4,yp4,zp4,scalars=f,colormap=colormap,vmin=f0,vmax=f1)
 
    # View from positive z-axis
    mlab.view(azimuth=75, elevation=65,distance=3.2)

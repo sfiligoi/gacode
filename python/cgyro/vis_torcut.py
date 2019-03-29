@@ -11,7 +11,7 @@ from mayavi import mlab
 try:
    import gapy
 except:
-   print 'ERROR: (vis_torcut) Please build gapy.so library!'
+   print('ERROR: (vis_torcut) Please build gapy.so library!')
    sys.exit()
    
 ext      = sys.argv[1]
@@ -51,7 +51,7 @@ else:
 # (r,theta)=(x,y) mesh setup 
 #
 if nth == 1:
-   print 'WARNING: (vis_torcut) Should use THETA_PLOT > 1 in CGYRO.'
+   print('WARNING: (vis_torcut) Should use THETA_PLOT > 1 in CGYRO.')
 
 if nx < 0:
    nx = 128
@@ -110,9 +110,9 @@ fdata,title,isfield = tag_helper(sim.mass[species],sim.z[species],moment)
 # Check to see if data exists 
 if os.path.isfile('bin'+fdata):
     fdata = 'bin'+fdata
-    print 'INFO: (vis_torcut) Found binary data in '+fdata 
+    print('INFO: (vis_torcut) Found binary data in '+fdata) 
 else:
-    print 'ERROR: (vis_torcut) No data for -moment '+moment+' exists.  Try -moment phi'
+    print('ERROR: (vis_torcut) No data for -moment '+moment+' exists.  Try -moment phi')
     sys.exit()
 
 if isfield:
@@ -147,7 +147,7 @@ def frame():
    image = mlab.mesh(xp,yp,zp,scalars=f,colormap=colormap,vmin=f0,vmax=f1,opacity=1.0)
    # View from positive z-axis
    mlab.view(azimuth=0, elevation=0)
-   print 'INFO: (vis_torcut) min=%e , max=%e' % (f0,f1)
+   print('INFO: (vis_torcut) min=%e , max=%e' % (f0,f1))
 
    #lut = image.module_manager.scalar_lut_manager.lut.table.to_array()
    #values = np.linspace(0., 1., 256)
@@ -177,7 +177,7 @@ while True:
       sys.exit()
 
    i += 1
-   print 'INFO: (vis_torcut) Time index '+str(i) 
+   print('INFO: (vis_torcut) Time index '+str(i))
    if i in ivec:
       frame()
    if i == max(ivec):
