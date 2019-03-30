@@ -6,6 +6,8 @@ subroutine locpargen_tglf
 
   implicit none
 
+  integer :: isr
+  
   open(unit=1,file='input.tglf.locpargen',status='replace')
   write(1,10) 'RMIN_LOC=',r0
   write(1,10) 'RMAJ_LOC=',rmaj_loc
@@ -35,16 +37,21 @@ subroutine locpargen_tglf
   write(1,11) 'NS=',ise
 
   do is=1,ise
+     if (is == ise) then
+        isr = 1
+     else
+        isr = is+1
+     endif
      write(1,*)
-     write(1,11) 'ZS_'//tag(is)//'=',int(z_loc(is))
+     write(1,11) 'ZS_'//tag(isr)//'=',int(z_loc(is))
      ! Deuteron mass normalization
-     write(1,10) 'MASS_'//tag(is)//'=',mass_loc(is)/2.0
-     write(1,10) 'AS_'//tag(is)//'=',dens_loc(is)/dens_loc(ise)
-     write(1,10) 'TAUS_'//tag(is)//'=',temp_loc(is)/temp_loc(ise)
-     write(1,10) 'RLNS_'//tag(is)//'=',dlnndr_loc(is)
-     write(1,10) 'RLTS_'//tag(is)//'=',dlntdr_loc(is)
-     write(1,10) 'VPAR_SHEAR_'//tag(is)//'=',gamma_p_loc*a/cs_loc
-     write(1,10) 'VPAR_'//tag(is)//'=',mach_loc/cs_loc
+     write(1,10) 'MASS_'//tag(isr)//'=',mass_loc(is)/2.0
+     write(1,10) 'AS_'//tag(isr)//'=',dens_loc(is)/dens_loc(ise)
+     write(1,10) 'TAUS_'//tag(isr)//'=',temp_loc(is)/temp_loc(ise)
+     write(1,10) 'RLNS_'//tag(isr)//'=',dlnndr_loc(is)
+     write(1,10) 'RLTS_'//tag(isr)//'=',dlntdr_loc(is)
+     write(1,10) 'VPAR_SHEAR_'//tag(isr)//'=',gamma_p_loc*a/cs_loc
+     write(1,10) 'VPAR_'//tag(isr)//'=',mach_loc/cs_loc
   enddo
   close(1)
 
