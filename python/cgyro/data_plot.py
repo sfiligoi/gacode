@@ -42,7 +42,8 @@ class cgyrodata_plot(data.cgyrodata):
          f = self.kxky_e_abs[:,itheta,species,:,:]
          ft = ''
 
-      print('INFO: (kxky_select) Selected theta index',itheta+1,'of',self.theta_plot)
+      print('INFO: (kxky_select) Selected theta index {:d} of {:d} '.
+            format(itheta+1,self.theta_plot))
       return f,ft
        
          
@@ -249,7 +250,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       fig.tight_layout(pad=0.3)
 
-      print('INFO: (data_plot.py) l_corr = ',l_corr)
+      print('INFO: (data_plot.py) l_corr = {:d}'.format(l_corr))
 
    def plot_phi(self,field=0,theta=0.0,fig=None):
 

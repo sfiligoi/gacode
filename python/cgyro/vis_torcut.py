@@ -11,7 +11,7 @@ from mayavi import mlab
 try:
    import gapy
 except:
-   print('ERROR: (vis_torcut) Please build gapy.so library!')
+   print('ERROR: (vis_torcut) Please build gapy/f2py library!')
    sys.exit()
    
 ext      = sys.argv[1]
@@ -37,6 +37,11 @@ nr = sim.n_radial
 nn = sim.n_n
 ns = sim.n_species
 nth = sim.theta_plot
+
+lovera = 0.33
+
+print('Lx/rho = {:.2f}'.format(sim.length))
+print('rho/a  = {:.4f}'.format(sim.rho/dn))
 
 ivec = time_vector(istr,nt)
 
@@ -73,8 +78,8 @@ zp = np.zeros([nx,nz])
 
 for i in range(nx):
    for k in range(nz):
-      r = 0.2+x[i]/(4*np.pi)
-      xp[i,k] = 1.0+r*np.cos(z[k]+np.arcsin(sim.delta)*np.sin(z[k]))
+      r = sim.rmin+(x[i]/(2*np.pi)-0.5)*lovera
+      xp[i,k] = sim.rmaj+r*np.cos(z[k]+np.arcsin(sim.delta)*np.sin(z[k]))
       yp[i,k] = sim.kappa*r*np.sin(z[k])
       zp[i,k] = 0.0
 
@@ -147,7 +152,7 @@ def frame():
    image = mlab.mesh(xp,yp,zp,scalars=f,colormap=colormap,vmin=f0,vmax=f1,opacity=1.0)
    # View from positive z-axis
    mlab.view(azimuth=0, elevation=0)
-   print('INFO: (vis_torcut) min=%e , max=%e' % (f0,f1))
+   print('INFO: (vis_torcut) min={:.3f} | max={:.3f}'.format(f0,f1))
 
    #lut = image.module_manager.scalar_lut_manager.lut.table.to_array()
    #values = np.linspace(0., 1., 256)
@@ -177,7 +182,7 @@ while True:
       sys.exit()
 
    i += 1
-   print('INFO: (vis_torcut) Time index '+str(i))
+   print('INFO: (vis_torcut) Time index {:d} '.format(i))
    if i in ivec:
       frame()
    if i == max(ivec):
