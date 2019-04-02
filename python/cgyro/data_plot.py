@@ -1032,7 +1032,7 @@ class cgyrodata_plot(data.cgyrodata):
          ax.grid(which="majorminor",ls=":")
          ax.grid(which="major",ls=":")
 
-         ax.set_title(r'$'+u+': \\theta/\pi='+theta+' \quad \mathrm{ie}='+str(ie)+'$')
+         ax.set_title(r'$'+u+': \\theta/\pi='+str(theta)+' \quad \mathrm{ie}='+str(ie)+'$')
          ax.set_xlabel(r'$\xi = v_\parallel/v$')
 
          n0 = (self.n_radial/2)*self.n_theta+i0
@@ -1051,7 +1051,7 @@ class cgyrodata_plot(data.cgyrodata):
          ax.grid(which="majorminor",ls=":")
          ax.grid(which="major",ls=":")
 
-         ax.set_title(r'$'+u+': \\theta/\pi='+theta+' \quad \mathrm{ix}='+str(ix)+'$')
+         ax.set_title(r'$'+u+': \\theta/\pi='+str(theta)+' \quad \mathrm{ix}='+str(ix)+'$')
          ax.set_xlabel(r'$x=\sqrt{\varepsilon}$')
 
          n0 = (self.n_radial/2)*self.n_theta+i0
