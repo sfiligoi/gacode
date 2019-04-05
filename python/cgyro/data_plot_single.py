@@ -224,6 +224,17 @@ elif plot_type == 'hbcut':
 
    outfile = 'out.cgyro.hbcut.'+ftype
 
+elif plot_type == 'hball':
+
+   itime = int(sys.argv[2])
+   spec  = int(sys.argv[3])
+   tmax  = float(sys.argv[4])
+   ftype = sys.argv[5]
+
+   data_in.plot_hball(itime=itime,spec=spec,tmax=tmax)
+
+   outfile = 'out.cgyro.hball.'+ftype
+
 else:
 
    print('ERROR: (data_plot_single) Plot type not found')

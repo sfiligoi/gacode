@@ -34,6 +34,7 @@ then
   echo "                = freq     (frequency versus time)"
   echo "                = ky_freq  (frequency versus ky)"
   echo "                = ball     (ballooning modes OR ZF test)"
+  echo "                = hball    (ballooning distribution)"
   echo "                = hb       (2D ballooning distribution)"
   echo "                = hbcut    (1D ballooning distribution line plots)"
   echo "                = geo      (geometry arrays)"
@@ -384,6 +385,9 @@ case "$PLOT_TYPE" in
 
    hbcut)
 	python $PLT $PLOT_TYPE $TIME $SPECIES $TMAX $THETA $EXT ;;
+
+   hball)
+	python $PLT $PLOT_TYPE $TIME $SPECIES $TMAX $EXT ;;
 
    freq)
 	python $PLT $PLOT_TYPE $W $WMAX $EXT ;;
