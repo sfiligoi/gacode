@@ -229,9 +229,11 @@ elif plot_type == 'hball':
    itime = int(sys.argv[2])
    spec  = int(sys.argv[3])
    tmax  = float(sys.argv[4])
-   ftype = sys.argv[5]
+   nstr  = sys.argv[5]
+   ie    = int(sys.argv[6])
+   ftype = sys.argv[7]
 
-   data_in.plot_hball(itime=itime,spec=spec,tmax=tmax)
+   data_in.plot_hball(itime=itime,spec=spec,tmax=tmax,nstr=nstr,ie=ie)
 
    outfile = 'out.cgyro.hball.'+ftype
 

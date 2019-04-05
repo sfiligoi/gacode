@@ -1079,9 +1079,17 @@ class cgyrodata_plot(data.cgyrodata):
 
       fig.tight_layout(pad=0.3)
 
-   def plot_hball(self,itime=-1,spec=0,tmax=-1.0,fig=None):
+   def plot_hball(self,itime=-1,spec=0,tmax=-1.0,nstr='null',ie=0,fig=None):
+
+      if nstr == 'null':
+         nstr = '1,2,3'
 
       u = specmap(self.mass[spec],self.z[spec])
+
+      # Diagnostics
+      print('l    = '+nstr)
+      print('e    = '+str(ie))
+      print('spec = '+u)
 
       if fig is None:
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
@@ -1089,41 +1097,35 @@ class cgyrodata_plot(data.cgyrodata):
       if itime > self.n_time-1:
          itime = self.n_time-1
 
-      if self.n_radial > 1:
-         x = self.thetab/np.pi
-      else:
-         x = self.theta/np.pi
-
-      if tmax < 0.0:
-         if self.n_radial == 1:
-            tmax = 1.0
-         else:
-            tmax = self.n_radial-1
-
       ax = fig.add_subplot(111)
       ax.grid(which="majorminor",ls=":")
       ax.grid(which="major",ls=":")
-
       ax.set_xlabel(r'$\theta/\pi$')
 
+      x = self.thetab/np.pi
+      if tmax < 0.0:
+         ax.set_xlim([1-self.n_radial,-1+self.n_radial])
+      else:
+         ax.set_xlim([-tmax,tmax])
+
       # y = y[re/im,theta,xi]
-      y = np.array(self.hb[:,:,spec,:,self.n_energy/2,itime])
+      y = np.array(self.hb[:,:,spec,:,ie,itime])
 
       xp,wp = np.polynomial.legendre.leggauss(self.n_xi)
       c = np.zeros(self.n_xi)
-      alr = np.zeros([self.n_xi,len(x)])
-      ali = np.zeros([self.n_xi,len(x)])
+      alr = np.zeros([len(x)])
+      ali = np.zeros([len(x)])
+      cvec = ['black','red','blue','green','black','red','blue','green']
       for l in range(self.n_xi):
-         c[:] = 0.0 ; c[l] = 1.0
-         pl = np.polynomial.legendre.legval(xp,c)
-         for j in range(len(x)):
-            alr[l,j] = (l+0.5)*np.sum(pl[:]*y[0,j,:]) 
-            ali[l,j] = (l+0.5)*np.sum(pl[:]*y[1,j,:]) 
+         if str(l) in nstr:
+            c[:] = 0.0 ; c[l] = 1.0
+            pl = np.polynomial.legendre.legval(xp,c)
+            for j in range(len(x)):
+               alr[j] = (l+0.5)*np.sum(pl[:]*y[0,j,:]) 
+               ali[j] = (l+0.5)*np.sum(pl[:]*y[1,j,:]) 
       
-      ax.plot(x,alr[0,:],'-o',color='black',markersize=2)
-      ax.plot(x,ali[0,:],'--o',color='black',markersize=2)
-      ax.plot(x,alr[1,:],'-o',color='blue',markersize=2)
-      ax.plot(x,ali[1,:],'--o',color='blue',markersize=2)
-      ax.set_xlim([-tmax,tmax])
+            ax.plot(x,alr,'-',color=cvec[l],label=r'$\ell='+str(l)+'$')
+            ax.plot(x,ali,'--',color=cvec[l])
 
+      ax.legend(loc=1)
       fig.tight_layout(pad=0.3)

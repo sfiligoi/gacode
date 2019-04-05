@@ -34,7 +34,7 @@ then
   echo "                = freq     (frequency versus time)"
   echo "                = ky_freq  (frequency versus ky)"
   echo "                = ball     (ballooning modes OR ZF test)"
-  echo "                = hball    (ballooning distribution)"
+  echo "                = hball    (ballooning distribution; use -n for l and -ie for e)"
   echo "                = hb       (2D ballooning distribution)"
   echo "                = hbcut    (1D ballooning distribution line plots)"
   echo "                = geo      (geometry arrays)"
@@ -124,6 +124,10 @@ then
   echo "         -n <value>"
   echo "         Specify values of n (toroidal mode index)"
   echo "         *Affects: ky_phi"
+  echo
+  echo "         -ie <value>"
+  echo "         Specify energy index"
+  echo "         *Affects: hball"
   echo
   echo "         -loc <loc>"
   echo "         Legend location (1-4)"  
@@ -258,6 +262,7 @@ PY=800
 DISS=0
 CFLUX=auto
 DN=1
+IE=0
 
 PRE=
 FRAMERATE=20
@@ -286,6 +291,7 @@ while [ $# -gt 0 ] ; do
   -diss) DISS=1 ;;
 
   -moment) shift ; MOMENT=$1 ;;
+  -ie) shift ; IE=$1 ;;
 
   -cflux) shift ; CFLUX=$1 ;;
 
@@ -387,7 +393,7 @@ case "$PLOT_TYPE" in
 	python $PLT $PLOT_TYPE $TIME $SPECIES $TMAX $THETA $EXT ;;
 
    hball)
-	python $PLT $PLOT_TYPE $TIME $SPECIES $TMAX $EXT ;;
+	python $PLT $PLOT_TYPE $TIME $SPECIES $TMAX $N $IE $EXT ;;
 
    freq)
 	python $PLT $PLOT_TYPE $W $WMAX $EXT ;;
