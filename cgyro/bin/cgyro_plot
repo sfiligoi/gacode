@@ -234,7 +234,7 @@ FIELD=0
 FC=0
 TIME=-1
 TMAX=-1.0
-YMIN=0.0
+YMIN=auto
 YMAX=auto
 W=0.5
 WMAX=0.0
@@ -393,7 +393,7 @@ case "$PLOT_TYPE" in
 	python $PLT $PLOT_TYPE $TIME $SPECIES $TMAX $THETA $EXT ;;
 
    hball)
-	python $PLT $PLOT_TYPE $TIME $SPECIES $TMAX $N $IE $EXT ;;
+	python $PLT $PLOT_TYPE $TIME $SPECIES $YMIN $YMAX $TMAX $N $IE $EXT ;;
 
    freq)
 	python $PLT $PLOT_TYPE $W $WMAX $EXT ;;

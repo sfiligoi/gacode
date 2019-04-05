@@ -129,15 +129,9 @@ class cgyrodata_plot(data.cgyrodata):
 
       fig.tight_layout(pad=0.3)
 
-   def plot_ky_phi(self,field=0,theta=0.0,ymin='0',ymax='auto',nstr='null',fig=None):
-      '''
-      Plot fields versus time for particular values of ky
+   def plot_ky_phi(self,field=0,theta=0.0,ymin='auto',ymax='auto',nstr='null',fig=None):
 
-      ARGUMENTS:
-      ymin: plot range (min y)
-      ymax: plot range (max y)
-      nstr: string for toroidal mode selection (example: nstr='0,1-4,6')
-      '''
+      # Plot fields versus time for particular values of ky
 
       if fig is None:
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
@@ -169,14 +163,15 @@ class cgyrodata_plot(data.cgyrodata):
 
       ax.set_xlim([0,max(self.t)])
 
+      if ymax != 'auto':
+         ax.set_ylim(top=float(ymax))
+      if ymin != 'auto':
+         ax.set_ylim(bottom=float(ymin))
+
       if self.n_n > 16:
          ax.legend(loc=4, ncol=5, prop={'size':12})
       else:
          ax.legend(loc=4, ncol=6, prop={'size':12})
-
-      ymin,ymax=setlimits(ax.get_ylim(),ymin,ymax)
-
-      ax.set_ylim([ymin,ymax])
 
       fig.tight_layout(pad=0.3)
 
@@ -530,7 +525,9 @@ class cgyrodata_plot(data.cgyrodata):
       ax.legend(loc=loc)
 
       if ymax != 'auto':
-         ax.set_ylim([float(ymin),float(ymax)])
+         ax.set_ylim(top=float(ymax))
+      if ymin != 'auto':
+         ax.set_ylim(bottom=float(ymin))
 
       fig.tight_layout(pad=0.3)
 
@@ -638,7 +635,9 @@ class cgyrodata_plot(data.cgyrodata):
                '{:.2f}/{:.2f}, {:.2f}, {:.2f}'.format(g0,gs,g1,ga)) 
 
          if ymax != 'auto':
-            ax.set_ylim([float(ymin),float(ymax)])
+            ax.set_ylim(top=float(ymax))
+         if ymin != 'auto':
+            ax.set_ylim(bottom=float(ymin))
 
          ax.axvspan(-0.25,0.25,facecolor='g',alpha=0.1)
          ax.set_xlim([-0.5,0.5])
@@ -748,7 +747,9 @@ class cgyrodata_plot(data.cgyrodata):
          # Set axis ranges
          ax.set_xlim([0,ky[-1]+dk])
          if ymax != 'auto':
-            ax.set_ylim([0,float(ymax)])
+            ax.set_ylim(top=float(ymax))
+         if ymin != 'auto':
+            ax.set_ylim(bottom=float(ymin))
 
       fig.tight_layout(pad=0.3)
 
@@ -1079,7 +1080,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       fig.tight_layout(pad=0.3)
 
-   def plot_hball(self,itime=-1,spec=0,tmax=-1.0,nstr='null',ie=0,fig=None):
+   def plot_hball(self,itime=-1,spec=0,tmax=-1.0,ymin='auto',ymax='auto',nstr='null',ie=0,fig=None):
 
       if nstr == 'null':
          nvec = range(self.n_n)
@@ -1111,8 +1112,11 @@ class cgyrodata_plot(data.cgyrodata):
          ax.set_xlim([-tmax,tmax])
 
       # y = y[re/im,theta,xi]
-      y = np.array(self.hb[:,:,spec,:,ie,itime])
-
+      if hasattr(self.hb,'shape'):
+         y = np.array(self.hb[:,:,spec,:,ie,itime])
+      else:
+         raise ValueError('(plot_hball.py) Need to run with H_PRINT_FLAG=1')
+         
       xp,wp = np.polynomial.legendre.leggauss(self.n_xi)
       c = np.zeros(self.n_xi)
       alr = np.zeros([len(x)])
@@ -1127,6 +1131,11 @@ class cgyrodata_plot(data.cgyrodata):
       
          ax.plot(x,alr,'-',color=cvec[l%6],label=r'$\ell='+str(l)+'$')
          ax.plot(x,ali,'--',color=cvec[l%6])
+
+      if ymax != 'auto':
+         ax.set_ylim(top=float(ymax))
+      if ymin != 'auto':
+         ax.set_ylim(bottom=float(ymin))
 
       ax.legend(loc=1)
       fig.tight_layout(pad=0.3)
