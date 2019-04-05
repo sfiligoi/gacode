@@ -1112,9 +1112,9 @@ class cgyrodata_plot(data.cgyrodata):
          ax.set_xlim([-tmax,tmax])
 
       # y = y[re/im,theta,xi]
-      if hasattr(self.hb,'shape'):
+      try:
          y = np.array(self.hb[:,:,spec,:,ie,itime])
-      else:
+      except:
          raise ValueError('(plot_hball.py) Need to run with H_PRINT_FLAG=1')
          
       xp,wp = np.polynomial.legendre.leggauss(self.n_xi)
