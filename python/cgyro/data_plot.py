@@ -1082,7 +1082,9 @@ class cgyrodata_plot(data.cgyrodata):
    def plot_hball(self,itime=-1,spec=0,tmax=-1.0,nstr='null',ie=0,fig=None):
 
       if nstr == 'null':
-         nstr = '1,2,3'
+         nvec = range(self.n_n)
+      else:
+         nvec = str2list(nstr)
 
       u = specmap(self.mass[spec],self.z[spec])
 
@@ -1115,17 +1117,16 @@ class cgyrodata_plot(data.cgyrodata):
       c = np.zeros(self.n_xi)
       alr = np.zeros([len(x)])
       ali = np.zeros([len(x)])
-      cvec = ['black','red','blue','green','black','red','blue','green']
-      for l in range(self.n_xi):
-         if str(l) in nstr:
-            c[:] = 0.0 ; c[l] = 1.0
-            pl = np.polynomial.legendre.legval(xp,c)
-            for j in range(len(x)):
-               alr[j] = (l+0.5)*np.sum(pl[:]*y[0,j,:]) 
-               ali[j] = (l+0.5)*np.sum(pl[:]*y[1,j,:]) 
+      cvec = ['black','red','blue','green','purple','magenta']
+      for l in nvec:
+         c[:] = 0.0 ; c[l] = 1.0
+         pl = np.polynomial.legendre.legval(xp,c)
+         for j in range(len(x)):
+            alr[j] = (l+0.5)*np.sum(pl[:]*y[0,j,:])
+            ali[j] = (l+0.5)*np.sum(pl[:]*y[1,j,:])
       
-            ax.plot(x,alr,'-',color=cvec[l],label=r'$\ell='+str(l)+'$')
-            ax.plot(x,ali,'--',color=cvec[l])
+         ax.plot(x,alr,'-',color=cvec[l%6],label=r'$\ell='+str(l)+'$')
+         ax.plot(x,ali,'--',color=cvec[l%6])
 
       ax.legend(loc=1)
       fig.tight_layout(pad=0.3)
