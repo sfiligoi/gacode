@@ -6,8 +6,6 @@ subroutine locpargen_neo
 
   implicit none
 
-  open(unit=1,file='input.neo.locpargen',status='replace')
-
   !---------------------------------------------------------
   ! Resolution info (default)
 

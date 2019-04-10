@@ -263,6 +263,9 @@ then
    echo 
    echo "             -banana"
    echo "             Include banana-width diagnostic"
+   echo 
+   echo "             -append"
+   echo "             Append to existing input.*.locpargen files"
    echo
    echo "DUMP MODE"
    echo 
@@ -359,13 +362,14 @@ LOC_RAD=0
 LOC_RHO=0
 LOC_PSI=0
 HASGEO=0
-QNFLAG=1
+QNFLAG=0
 BANANA=0
 
 # DUMP MODE variables
 DUMP_FLAG=0
 DUMP_VAR=null
 X=rho
+APPENDFLAG=0
 
 # Plotting in locpargen
 PLOT_FLAG=0
@@ -433,10 +437,11 @@ while [ $# -gt 0 ] ; do
   -loc_rad) shift ; LOC_RAD=$1 ;;
   -loc_rho) shift ; LOC_RHO=$1 ;;
   -loc_psi) shift ; LOC_PSI=$1 ;;
-
+  -append) APPENDFLAG=1 ;;
+  
   -dump) shift ; DUMP_FLAG=1 ; DUMP_VAR=$1 ;;
   -x) shift ; X=$1 ;;
-  -qn) QNFLAG=$1 ;;
+  -qn) QNFLAG=1 ;;
   -banana) BANANA=1 ;;
 
   -plot) PLOT_FLAG=1 ;;
@@ -601,6 +606,7 @@ then
   echo $LOC_PSI >> input.locpargen
   echo $HASGEO >> input.locpargen
   echo $QNFLAG >> input.locpargen
+  echo $APPENDFLAG >> input.locpargen
   $LOCPARGEN
   if [ $BANANA -eq 1 ] ; then
      python ${PRGEN_BIN}/banana_width.py

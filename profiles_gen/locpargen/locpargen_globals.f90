@@ -6,7 +6,9 @@ module locpargen_globals
   real :: psi0
   real :: a
   real, dimension(1) :: x,y
-  integer :: hasgeo,qnflag
+  integer :: hasgeo
+  integer :: qnflag
+  integer :: appendflag
   
   character(len=1) :: tag(5)
 

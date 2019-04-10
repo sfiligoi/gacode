@@ -13,13 +13,14 @@ program locpargen
   use EXPRO_locsim_interface
 
   implicit none
-  
+
   open(unit=1,file='input.locpargen',status='old')
   read(1,*) r0
   read(1,*) rho0
   read(1,*) psi0
   read(1,*) hasgeo
   read(1,*) qnflag
+  read(1,*) appendflag
   close(1)
 
   EXPRO_ctrl_quasineutral_flag = qnflag
@@ -36,7 +37,7 @@ program locpargen
   ise = EXPRO_n_ion+1
 
   if (rho0 > 0.0) then
- 
+
      ! Use local rho
 
      x(1) = rho0
@@ -72,12 +73,18 @@ program locpargen
   if (hasgeo == 1) call locpargen_geo
   !------------------------------------------------------------
 
-  print 10,'# rhos/a   =',rhos_loc/a
-  print 10,'# rhoi/a   =',rhos_loc/a*sqrt(temp_loc(ise)/temp_loc(1))
-  print 10,'# Te [keV] =',temp_loc(ise)
-  print 10,'# Ti [keV] =',temp_loc(1)
-  print 10,'# Bunit    =',b_unit_loc
-  print 10,'# beta_*   =',beta_star_loc
+  if (qnflag == 0) then 
+     print 10,'INFO: (locpargen) Quasineutrality NOT enforced.'
+  else
+     print 10,'INFO: (locpargen) Quasineutrality enforced.'
+  endif
+
+  print 10,'INFO: (locpargen) rhos/a   =',rhos_loc/a
+  !print 10,'rhoi/a   =',rhos_loc/a*sqrt(temp_loc(ise)/temp_loc(1))
+  print 10,'INFO: (locpargen) Te [keV] =',temp_loc(ise)
+  print 10,'INFO: (locpargen) Ti [keV] =',temp_loc(1)
+  print 10,'INFO: (locpargen) Bunit    =',b_unit_loc
+  print 10,'INFO: (locpargen) beta_*   =',beta_star_loc
 
   ! Compute collision frequency
   !
@@ -105,10 +112,28 @@ program locpargen
   write(1,*) q_loc*rhos_loc*sqrt(temp_loc(ise)/temp_loc(1))/a
   close(1)
 
-  call locpargen_cgyro
-  call locpargen_tglf
-  call locpargen_neo
+  call fileopen('input.cgyro.locpargen') ; call locpargen_cgyro
+  call fileopen('input.tglf.locpargen')  ; call locpargen_tglf
+  call fileopen('input.neo.locpargen')   ; call locpargen_neo
+  print 10,'INFO: (locpargen) Wrote input.*.locpargen'
 
 10 format(a,sp,1pe12.5)
 
 end program locpargen
+
+subroutine fileopen(fname)
+
+  use locpargen_globals
+
+  implicit none
+
+  character(len=*) :: fname
+
+  if (appendflag == 0) then
+     open(unit=1,file=trim(fname),status='replace')
+  else
+     open(unit=1,file=trim(fname),position='append')
+     write(1,*) '# **************** CUT HERE **********************'
+  endif
+
+end subroutine fileopen

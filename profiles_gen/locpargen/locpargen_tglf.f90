@@ -8,7 +8,6 @@ subroutine locpargen_tglf
 
   integer :: isr
   
-  open(unit=1,file='input.tglf.locpargen',status='replace')
   write(1,10) 'RMIN_LOC=',r0
   write(1,10) 'RMAJ_LOC=',rmaj_loc
   write(1,*)
@@ -26,6 +25,7 @@ subroutine locpargen_tglf
   write(1,*)
   write(1,10) 'VEXB_SHEAR=',gamma_e_loc*a/cs_loc
   write(1,*)
+  write(1,10) 'ZEFF=',z_eff_loc
   write(1,10) 'XNUE=',nu_ee*a/cs_loc
   write(1,10) 'BETAE=',betae_unit
   write(1,10) 'P_PRIME_LOC=',(q_loc/r0)*(-beta_star_loc/(8*pi))

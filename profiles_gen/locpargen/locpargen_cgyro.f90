@@ -6,8 +6,6 @@ subroutine locpargen_cgyro
 
   implicit none
 
-  open(unit=1,file='input.cgyro.locpargen',status='replace')
-
   !---------------------------------------------------------
   ! Resolution info (default)
 
