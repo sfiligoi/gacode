@@ -8,6 +8,7 @@ subroutine locpargen_tglf
 
   integer :: isr
   
+  write(1,'(a)') '# Geometry (Miller)'
   write(1,10) 'RMIN_LOC=',r0
   write(1,10) 'RMAJ_LOC=',rmaj_loc
   write(1,*)
@@ -22,18 +23,24 @@ subroutine locpargen_tglf
   write(1,10) 'S_DELTA_LOC=',s_delta_loc
   write(1,10) 'ZETA_LOC=',zeta_loc
   write(1,10) 'S_ZETA_LOC=',s_zeta_loc
+  write(1,10) 'SIGN_BT=',-real(EXPRO_signb)
+  write(1,10) 'SIGN_IT=',-real(EXPRO_signq*EXPRO_signb)
   write(1,*)
-  write(1,10) 'VEXB_SHEAR=',gamma_e_loc*a/cs_loc
-  write(1,*)
+  write(1,'(a)') '# Collisions and pressure'
   write(1,10) 'ZEFF=',z_eff_loc
   write(1,10) 'XNUE=',nu_ee*a/cs_loc
+  write(1,10) 'DEBYE=',7.43*sqrt(1e3*temp_loc(ise)/(1e13*dens_loc(ise)))/abs(rhos_loc)
   write(1,10) 'BETAE=',betae_unit
-  write(1,10) 'P_PRIME_LOC=',(q_loc/r0)*(-beta_star_loc/(8*pi))
+  write(1,10) 'P_PRIME_LOC=',(abs(q_loc)/r0)*(-beta_star_loc/(8*pi))
+  write(1,*)
+  write(1,'(a)')  '# Rotation'
+  write(1,10) 'VEXB_SHEAR=',gamma_e_loc*a/cs_loc
 
   !---------------------------------------------------------
   ! Species data
   
   write(1,*)
+  write(1,'(a)') '# Species data'
   write(1,11) 'NS=',ise
 
   do is=1,ise
