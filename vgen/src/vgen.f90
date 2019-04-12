@@ -56,6 +56,7 @@ program vgen
   read(1,*) er_method
   read(1,*) vel_method
   read(1,*) erspecies_indx
+  read(1,*) epar_flag
   read(1,*) nth_min
   read(1,*) nth_max
   read(1,*) nn_flag
@@ -98,7 +99,7 @@ program vgen
      call MPI_finalize(i_err)
      stop
   end select
-
+  
   if (i_proc == 0) then
      if(nn_flag == 1) then
         print '(a)','INFO: (VGEN) Using NEO NN for bootstrap current'
@@ -106,6 +107,23 @@ program vgen
         print '(a)','INFO: (VGEN) Using NEO DKE for bootstrap current'
      endif
   endif
+
+  select case(epar_flag)
+  case(0)
+     if (i_proc == 0) then
+        print '(a)','INFO: (VGEN) Do not include NEO conductivity calculation'
+     endif
+  case(1)
+     if (i_proc == 0) then
+        print '(a)','INFO: (VGEN) Include NEO conductivity calculation'
+     endif
+  case default
+     if (i_proc == 0) then
+        print '(a)','ERROR: Invalid vel_method'
+     endif
+     call MPI_finalize(i_err)
+     stop
+  end select
   
   if (i_proc == 0) then
      print '(a,i2,a,i2)','INFO: (VGEN) Using NEO Theta Resolution: ',nth_min,'-',nth_max
@@ -324,6 +342,8 @@ program vgen
   call vgen_reduce(jbs_koh(2:EXPRO_n_exp-1),EXPRO_n_exp-2)
   call vgen_reduce(jtor_neo(2:EXPRO_n_exp-1),EXPRO_n_exp-2)
   call vgen_reduce(jtor_sauter(2:EXPRO_n_exp-1),EXPRO_n_exp-2)
+  call vgen_reduce(jsigma_neo(2:EXPRO_n_exp-1),EXPRO_n_exp-2)
+  call vgen_reduce(jsigma_sauter(2:EXPRO_n_exp-1),EXPRO_n_exp-2)
   
   !------------------------------------------------------------------------
   ! Extrapolation for r=0 and r=n_exp boundary points
@@ -377,6 +397,12 @@ program vgen
   call bound_extrap(ya,yb,jtor_sauter,EXPRO_rmin,EXPRO_n_exp)
   jtor_sauter(1)           = ya
   jtor_sauter(EXPRO_n_exp) = yb
+  call bound_extrap(ya,yb,jsigma_neo,EXPRO_rmin,EXPRO_n_exp)
+  jsigma_neo(1)           = ya
+  jsigma_neo(EXPRO_n_exp) = yb
+  call bound_extrap(ya,yb,jsigma_sauter,EXPRO_rmin,EXPRO_n_exp)
+  jsigma_sauter(1)           = ya
+  jsigma_sauter(EXPRO_n_exp) = yb
   call bound_extrap(ya,yb,pflux_sum,EXPRO_rmin,EXPRO_n_exp)
   pflux_sum(1)           = ya
   pflux_sum(EXPRO_n_exp) = yb
@@ -447,13 +473,15 @@ program vgen
      write(1,'(a)') '# jbs_koh    (MA/m^2)'
      write(1,'(a)') '# jtor_neo    (MA/m^2)'
      write(1,'(a)') '# jtor_sauter (MA/m^2)'
+     write(1,'(a)') '# jsigma_neo    (MS/m)'
+     write(1,'(a)') '# jsigma_sauter (MS/m)'
      write(1,'(a)') '# where jbs = < j_parallel B > / B_unit'
      write(1,'(a)') '# where jtor = < j_tor/R > / <1/R>'
      write(1,'(a)') '#'
      do i=1,EXPRO_n_exp
-        write(1,'(8(1pe14.7,2x))') EXPRO_rho(i), pflux_sum(i), &
+        write(1,'(10(1pe14.7,2x))') EXPRO_rho(i), pflux_sum(i), &
              jbs_neo(i), jbs_sauter(i), jbs_nclass(i), jbs_koh(i), &
-             jtor_neo(i), jtor_sauter(i)
+             jtor_neo(i), jtor_sauter(i), jsigma_neo(i), jsigma_sauter(i)
      enddo
      close(1)
      !----------------------------------------------------------------------
@@ -468,6 +496,10 @@ program vgen
   deallocate(jbs_sauter)
   deallocate(jbs_koh)
   deallocate(jbs_nclass)
+  deallocate(jtor_neo)
+  deallocate(jtor_sauter)
+  deallocate(jsigma_neo)
+  deallocate(jsigma_sauter)
   deallocate(pflux_sum)
   deallocate(i_glob)
 

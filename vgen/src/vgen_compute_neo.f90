@@ -17,7 +17,7 @@ subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, &
   integer, intent(out) :: simntheta
 
   integer :: j, n, is
-  real :: cc, loglam
+  real :: cc, loglam, etemp
 
   integer :: nmin, nmax, nth
   real :: cpu_in, cpu_out
@@ -220,5 +220,28 @@ subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, &
      pflux_sum(i) = pflux_sum(i) + zfac(j)*neo_pflux_dke_out(j)
   enddo
   pflux_sum(i) = pflux_sum(i) / neo_rho_star_in**2
+
+  ! For conductivity, need to call NEO again
+  if(epar_flag == 1) then
+
+     ! Set <epar B>=1 and all density and temperature gradients to zero
+     etemp = neo_epar0_in
+     neo_epar0_in = 1.0
+     neo_dlnndr_in(1:neo_n_species_in) = 0.0
+     neo_dlntdr_in(1:neo_n_species_in) = 0.0
+
+     call neo_run()
+
+     if (neo_error_status_out > 0) then
+        print *,neo_error_message_out
+        stop
+     endif
+
+     jsigma_neo(i)     = neo_jpar_dke_out*jbs_norm
+     jsigma_sauter(i)  = neo_jpar_thS_out*jbs_norm
+     
+     neo_epar0_in = etemp
+     
+  endif
   
 end subroutine vgen_compute_neo

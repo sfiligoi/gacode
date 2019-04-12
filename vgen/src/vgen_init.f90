@@ -129,6 +129,8 @@ subroutine vgen_init
   allocate(jbs_nclass(EXPRO_n_exp))
   allocate(jtor_neo(EXPRO_n_exp))
   allocate(jtor_sauter(EXPRO_n_exp))
+  allocate(jsigma_neo(EXPRO_n_exp))
+  allocate(jsigma_sauter(EXPRO_n_exp))
   allocate(pflux_sum(EXPRO_n_exp))
   jbs_neo(:)     = 0.0
   jbs_sauter(:)  = 0.0
@@ -136,6 +138,8 @@ subroutine vgen_init
   jbs_nclass(:)  = 0.0
   jtor_neo(:)    = 0.0
   jtor_sauter(:) = 0.0
+  jsigma_neo(:)    = 0.0
+  jsigma_sauter(:) = 0.0
   pflux_sum(:)   = 0.0
 
   do j=1,10

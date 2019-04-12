@@ -31,6 +31,30 @@ then
   echo "         -nomp <MPI tasks>" 
   echo "         Number of MPI tasks."
   echo
+  echo "             -in <string of ion species> " 
+  echo "             Choices: DC, DC_lowres, DC.revip, DCD, DHCD, HDC"
+  echo "             If this is blank, input.vgen must exist."
+  echo "             See"
+  echo "             $VGEN_DIR/input.vgen.*"
+  echo "             for examples."
+  echo
+  echo "             -er <val>" 
+  echo "             Method to compute Er."
+  echo "             1=Force balance, 2=NEO (weak rot), 3=NEO (strong rot), 4=Return given"
+   echo
+   echo "             -vel <val>" 
+   echo "             Method to compute velocities."
+   echo "             1=NEO (weak rot), 2=NEO (strong rot), 3=Return given"
+   echo
+   echo "             -epar <val>" 
+   echo "             Flag to compute conductivity."
+   echo "             0=yes, 1=no"
+   echo
+   echo "             -ix <index>" 
+   echo "             Index of ion species to match NEO and given velocities."
+   echo
+   echo "             -nth <min,max>" 
+   echo "             Minimum and maximum theta resolutions.  Default -nth 17,39"
   echo "         -nn"
   echo "         Use the NEO neural network instead of NEO DKE solve."
   echo
@@ -52,6 +76,12 @@ fi
 SIMROOT=$PWD
 VGEN_DIR=${GACODE_ROOT}/vgen
 VGEN_IN=null
+VGEN_ER=1
+VGEN_VEL=2
+VGEN_EPAR=0
+VGEN_IX=2
+VGEN_NTH=17,39
+VGEN_NN_FLAG=0
 # Default number of cores
 NPROC=1
 NOMP=1
@@ -59,7 +89,6 @@ NUMA=0
 MPINUMA=0
 # Execute/test mode flags
 CLEAN_FLAG=0
-VGEN_NN_FLAG=0
 #=============================================================
 
 #=============================================================
@@ -79,6 +108,18 @@ while [ $# -gt 0 ] ; do
   -numa) shift ; NUMA=$1 ;;
 
   -mpinuma) shift ; MPINUMA=$1 ;;
+
+  -in) shift ; VGEN_IN=$1 ;;
+
+  -er) shift ; VGEN_ER=$1 ;;
+
+  -vel) shift ; VGEN_VEL=$1 ;;
+
+  -ix) shift ; VGEN_IX=$1 ;;
+
+  -epar) shift ; VGEN_EPAR=$1 ;;
+
+  -nth) shift ; VGEN_NTH=$1 ;;
 
   -nn) VGEN_NN_FLAG=1 ;;
 

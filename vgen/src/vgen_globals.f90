@@ -13,6 +13,7 @@ module vgen_globals
   integer :: er_method
   integer :: erspecies_indx
   integer :: vel_method
+  integer :: epar_flag
   integer :: nth_min
   integer :: nth_max
   integer :: nn_flag
@@ -38,6 +39,8 @@ module vgen_globals
   real, dimension(:), allocatable :: pflux_sum
   real, dimension(:), allocatable :: jtor_neo
   real, dimension(:), allocatable :: jtor_sauter
+  real, dimension(:), allocatable :: jsigma_neo
+  real, dimension(:), allocatable :: jsigma_sauter
   
   integer :: n_ions
 
