@@ -211,8 +211,6 @@ subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, &
        *EXPRO_rmin(EXPRO_n_exp)/1e6
   jbs_neo(i)     = neo_jpar_dke_out*jbs_norm
   jbs_sauter(i)  = neo_jpar_thS_out*jbs_norm
-  jbs_koh(i)     = neo_jpar_thK_out*jbs_norm
-  jbs_nclass(i)  = neo_jpar_thN_out*jbs_norm
   jtor_neo(i)    = neo_jtor_dke_out*jbs_norm
   jtor_sauter(i) = neo_jtor_thS_out*jbs_norm
   pflux_sum(i)   = 0.0

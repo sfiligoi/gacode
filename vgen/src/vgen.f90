@@ -338,12 +338,10 @@ program vgen
   call vgen_reduce(pflux_sum(2:EXPRO_n_exp-1),EXPRO_n_exp-2)
   call vgen_reduce(jbs_neo(2:EXPRO_n_exp-1),EXPRO_n_exp-2)
   call vgen_reduce(jbs_sauter(2:EXPRO_n_exp-1),EXPRO_n_exp-2)
-  call vgen_reduce(jbs_nclass(2:EXPRO_n_exp-1),EXPRO_n_exp-2)
-  call vgen_reduce(jbs_koh(2:EXPRO_n_exp-1),EXPRO_n_exp-2)
-  call vgen_reduce(jtor_neo(2:EXPRO_n_exp-1),EXPRO_n_exp-2)
-  call vgen_reduce(jtor_sauter(2:EXPRO_n_exp-1),EXPRO_n_exp-2)
   call vgen_reduce(jsigma_neo(2:EXPRO_n_exp-1),EXPRO_n_exp-2)
   call vgen_reduce(jsigma_sauter(2:EXPRO_n_exp-1),EXPRO_n_exp-2)
+  call vgen_reduce(jtor_neo(2:EXPRO_n_exp-1),EXPRO_n_exp-2)
+  call vgen_reduce(jtor_sauter(2:EXPRO_n_exp-1),EXPRO_n_exp-2)
   
   !------------------------------------------------------------------------
   ! Extrapolation for r=0 and r=n_exp boundary points
@@ -385,24 +383,18 @@ program vgen
   call bound_extrap(ya,yb,jbs_sauter,EXPRO_rmin,EXPRO_n_exp)
   jbs_sauter(1)           = ya
   jbs_sauter(EXPRO_n_exp) = yb
-  call bound_extrap(ya,yb,jbs_koh,EXPRO_rmin,EXPRO_n_exp)
-  jbs_koh(1)           = ya
-  jbs_koh(EXPRO_n_exp) = yb
-  call bound_extrap(ya,yb,jbs_nclass,EXPRO_rmin,EXPRO_n_exp)
-  jbs_nclass(1)           = ya
-  jbs_nclass(EXPRO_n_exp) = yb
-  call bound_extrap(ya,yb,jtor_neo,EXPRO_rmin,EXPRO_n_exp)
-  jtor_neo(1)           = ya
-  jtor_neo(EXPRO_n_exp) = yb
-  call bound_extrap(ya,yb,jtor_sauter,EXPRO_rmin,EXPRO_n_exp)
-  jtor_sauter(1)           = ya
-  jtor_sauter(EXPRO_n_exp) = yb
   call bound_extrap(ya,yb,jsigma_neo,EXPRO_rmin,EXPRO_n_exp)
   jsigma_neo(1)           = ya
   jsigma_neo(EXPRO_n_exp) = yb
   call bound_extrap(ya,yb,jsigma_sauter,EXPRO_rmin,EXPRO_n_exp)
   jsigma_sauter(1)           = ya
   jsigma_sauter(EXPRO_n_exp) = yb
+  call bound_extrap(ya,yb,jtor_neo,EXPRO_rmin,EXPRO_n_exp)
+  jtor_neo(1)           = ya
+  jtor_neo(EXPRO_n_exp) = yb
+  call bound_extrap(ya,yb,jtor_sauter,EXPRO_rmin,EXPRO_n_exp)
+  jtor_sauter(1)           = ya
+  jtor_sauter(EXPRO_n_exp) = yb
   call bound_extrap(ya,yb,pflux_sum,EXPRO_rmin,EXPRO_n_exp)
   pflux_sum(1)           = ya
   pflux_sum(EXPRO_n_exp) = yb
@@ -469,19 +461,17 @@ program vgen
      write(1,'(a)') '# sum z*pflux_neo/(c_s n_e) /(rho_s/a_norm)**2'
      write(1,'(a)') '# jbs_neo    (MA/m^2)'
      write(1,'(a)') '# jbs_sauter (MA/m^2)'
-     write(1,'(a)') '# jbs_nclass (MA/m^2)'
-     write(1,'(a)') '# jbs_koh    (MA/m^2)'
-     write(1,'(a)') '# jtor_neo    (MA/m^2)'
-     write(1,'(a)') '# jtor_sauter (MA/m^2)'
      write(1,'(a)') '# jsigma_neo    (MS/m)'
      write(1,'(a)') '# jsigma_sauter (MS/m)'
+     write(1,'(a)') '# jtor_neo    (MA/m^2)'
+     write(1,'(a)') '# jtor_sauter (MA/m^2)' 
      write(1,'(a)') '# where jbs = < j_parallel B > / B_unit'
      write(1,'(a)') '# where jtor = < j_tor/R > / <1/R>'
      write(1,'(a)') '#'
      do i=1,EXPRO_n_exp
-        write(1,'(10(1pe14.7,2x))') EXPRO_rho(i), pflux_sum(i), &
-             jbs_neo(i), jbs_sauter(i), jbs_nclass(i), jbs_koh(i), &
-             jtor_neo(i), jtor_sauter(i), jsigma_neo(i), jsigma_sauter(i)
+        write(1,'(8(1pe14.7,2x))') EXPRO_rho(i), pflux_sum(i), &
+             jbs_neo(i), jbs_sauter(i), jsigma_neo(i), jsigma_sauter(i), &
+             jtor_neo(i), jtor_sauter(i)
      enddo
      close(1)
      !----------------------------------------------------------------------
@@ -494,12 +484,10 @@ program vgen
   deallocate(vtor_measured)
   deallocate(jbs_neo)
   deallocate(jbs_sauter)
-  deallocate(jbs_koh)
-  deallocate(jbs_nclass)
-  deallocate(jtor_neo)
-  deallocate(jtor_sauter)
   deallocate(jsigma_neo)
   deallocate(jsigma_sauter)
+  deallocate(jtor_neo)
+  deallocate(jtor_sauter)
   deallocate(pflux_sum)
   deallocate(i_glob)
 

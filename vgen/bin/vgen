@@ -18,7 +18,7 @@ then
   echo
   echo "         -p <path>"
   echo "         Set optional path to simulation directory."
-  echo "         The default path is \$VGEN_DIR/sim."
+  echo "         The default path is the current directory"
   echo
   echo "EXECUTE MODE"
   echo
@@ -33,9 +33,9 @@ then
   echo
   echo "             -in <string of ion species> " 
   echo "             Choices: DC, DC_lowres, DC.revip, DCD, DHCD, HDC"
-  echo "             If this is blank, input.vgen must exist."
+  echo "             If this is blank, input.neo must exist."
   echo "             See"
-  echo "             $VGEN_DIR/input.vgen.*"
+  echo "             $VGEN_DIR/input.neo.*"
   echo "             for examples."
   echo
   echo "             -er <val>" 
@@ -74,7 +74,7 @@ fi
 # Define variables for flag capture
 #
 SIMROOT=$PWD
-VGEN_DIR=${GACODE_ROOT}/vgen
+FILE_FLAG=0
 VGEN_IN=null
 VGEN_ER=1
 VGEN_VEL=2
@@ -100,6 +100,8 @@ while [ $# -gt 0 ] ; do
   -p) shift ; SIMROOT=$1 ;;
 
   -e) shift ; LOCDIR=$1 ;;
+
+  -i) shift ; FILE_FLAG=1 ; FILE="$1" ;;
 
   -n) shift ; NPROC=$1 ;;
 
@@ -169,52 +171,55 @@ cd $SIMDIR
 
 #=============================================================
 # Manage execution of vgen
-#
 NEO_DIR=${GACODE_ROOT}/neo
-VGEN_DIR=${GACODE_ROOT}/vgen
-TEMPLATE_DIR=${GACODE_ROOT}/vgen/templates
+VGEN_DIR=${GACODE_ROOT}/vgen/templates
+VGEN_EXE=${GACODE_ROOT}/vgen/src
 
-echo "NN_FLAG=$VGEN_NN_FLAG" >> input.vgen
-python ${VGEN_DIR}/bin/vgen_parse.py
+# Filetype detection and management
+#
+if [ "$FILE" == "" ] ; then
+   echo "ERROR: (profiles_gen) Specify an input file via -i."
+   exit 1
+fi
 
-# Determine species combination from TYPE variable
-IN=`grep TYPE input.vgen.gen`
-VGEN_IN=(${IN// / })
+if [ $VGEN_NN_FLAG -eq 1 ]
+then
+    if [ $VGEN_ER -ne 4 ]
+    then
+	echo "ERROR: (profiles_gen) With -nn, must specify -er 4"
+	exit
+    fi
+fi
 
 # Create/recreate vgen work directory
 
 rm -rf vgen ; mkdir vgen ; cd vgen
 
-# Check for template input.neo.TYPE
+# Check for input.neo file
 
-if [ "$VGEN_IN" == "NULL" ]
-then 
-    if [ -f "../input.neo" ]
-    then
-	cp ../input.neo input.neo
-    else
-	echo "ERROR: (vgen) input.neo needed with TYPE=NULL"
-	exit 1
-    fi
-
-elif [ -f $TEMPLATE_DIR/input.neo.$VGEN_IN ]
+if [ -f $VGEN_DIR/input.neo.$VGEN_IN ]
 then
-   cp $TEMPLATE_DIR/input.neo.$VGEN_IN input.neo
+    cp $VGEN_DIR/input.neo.$VGEN_IN input.neo
 else 
-   echo "ERROR: (vgen) TYPE=$VGEN_IN not found"
-   exit 1
+    if [ -f ../input.neo ]
+    then
+        cp ../input.neo input.neo
+    else
+        echo "ERROR: (profiles_gen) Specify ion string with -in, or create input.neo"
+        exit 1
+    fi
 fi
 
 # Tell NEO that its being run in subroutine mode by vgen.
-echo "SUBROUTINE_FLAG=1" >> input.neo 
+echo "SUBROUTINE_FLAG=1" >> input.neo
 
 # Copy input.profiles to simulation directory
-cp ../input.profiles .
-if [ -f "../input.profiles.geo" ]
+cp ../$FILE input.profiles
+if [ -f "../$FILE.geo" ]
 then
-    cp ../input.profiles.geo .
+    cp ../$FILE.geo input.profiles.geo
 else
-    echo "INFO: (profiles_gen) input.profiles.geo not found -- using EQUILIBRIUM_MODEL=2"
+    echo "INFO: (profiles_gen) $FILE.geo not found -- using EQUILIBRIUM_MODEL=2"
     echo "EQUILIBRIUM_MODEL=2" >> input.neo
 fi
 
@@ -222,11 +227,26 @@ python $NEO_DIR/bin/neo_parse.py
 python $GACODE_ROOT/profiles_gen/bin/profile_parse.py input.profiles 
 
 # Construct vgen.dat
-cp ../input.vgen.gen vgen.dat
+echo "$VGEN_ER"  > vgen.dat
+echo "$VGEN_VEL" >> vgen.dat
+echo "$VGEN_IX"  >>  vgen.dat
+echo "$VGEN_EPAR"  >>  vgen.dat
+# Strip to obtain nmin,nmax
+p=0
+for i in $(echo $VGEN_NTH | tr "," "\n")
+do
+    p=$(($p+1))
+    echo $i >> vgen.dat
+done
+if [ $p -eq 1 ] 
+then
+    echo $i >> vgen.dat
+fi
+echo "$VGEN_NN_FLAG" >> vgen.dat
 
 # Launch parallel vgen executable
 $GACODE_ROOT/platform/exec/exec.$GACODE_PLATFORM \
-    $SIMDIR/vgen $NPROC $VGEN_DIR/src/vgen $NOMP $NUMA $MPINUMA
+    $SIMDIR/vgen $NPROC $VGEN_EXE/vgen $NOMP $NUMA $MPINUMA
 
 if [ -f "input.profiles.new" ]
 then
