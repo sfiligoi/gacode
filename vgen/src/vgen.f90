@@ -28,6 +28,7 @@ program vgen
   real :: omega
   real :: omega_deriv
   integer :: simntheta
+  integer :: iteration_flag
   real :: cpu_tot_in, cpu_tot_out
 
   real, dimension(:), allocatable :: er_exp
@@ -230,7 +231,8 @@ program vgen
         omega = EXPRO_w0(i) 
         omega_deriv = EXPRO_w0p(i) 
 
-        call vgen_compute_neo(i,vtor_diff,rotation_model,er0,omega,omega_deriv, simntheta)
+        iteration_flag = 1
+        call vgen_compute_neo(i,vtor_diff,rotation_model,er0,omega,omega_deriv, simntheta,iteration_flag)
 
         print 10,EXPRO_rho(i),&
              er_exp(i),EXPRO_vpol(1,i)/1e3,simntheta,i_proc
@@ -257,8 +259,15 @@ program vgen
         omega = 0.0
         omega_deriv = 0.0
 
+        if (vel_method == 2 .and. epar_flag == 1) then
+           iteration_flag=2
+        else
+           iteration_flag=1
+        endif
+        
         call vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, &
-             omega_deriv, simntheta)
+             omega_deriv, simntheta,iteration_flag)
+        iteration_flag=1
 
         ! omega = (vtor_measured - vtor_neo_ater0) / R
 
@@ -316,7 +325,7 @@ program vgen
            omega = EXPRO_w0(i) 
            omega_deriv = EXPRO_w0p(i) 
            call vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, &
-                omega_deriv, simntheta)
+                omega_deriv, simntheta,iteration_flag)
 
            print 10,EXPRO_rho(i),&
                 er_exp(i),EXPRO_vpol(1,i)/1e3,simntheta,i_proc

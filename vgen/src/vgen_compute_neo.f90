@@ -1,5 +1,5 @@
 subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, &
-     omega, omega_deriv, simntheta)
+     omega, omega_deriv, simntheta,iteration_flag)
 
   use vgen_globals
   use neo_interface
@@ -15,6 +15,7 @@ subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, &
   real, intent(in)    :: omega_deriv    ! 1/(m s)
   real, intent(out)   :: vtor_diff      ! vtor_exp - vtor_neo (m/s) 
   integer, intent(out) :: simntheta
+  integer, intent(in)  :: iteration_flag
 
   integer :: j, n, is
   real :: cc, loglam, etemp
@@ -220,7 +221,7 @@ subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, &
   pflux_sum(i) = pflux_sum(i) / neo_rho_star_in**2
 
   ! For conductivity, need to call NEO again
-  if(epar_flag == 1) then
+  if(epar_flag == 1 .and. iteration_flag == 1) then
 
      ! Set <epar B>=1 and all density and temperature gradients to zero
      etemp = neo_epar0_in
