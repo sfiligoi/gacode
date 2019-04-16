@@ -262,6 +262,7 @@ PY=800
 DISS=0
 CFLUX=auto
 DN=1
+LOVERA=0.5
 IE=0
 
 PRE=
@@ -335,6 +336,7 @@ while [ $# -gt 0 ] ; do
   -legacy) LEGACY_FLAG=1 ;;
   -land) LAND_FLAG=1 ;;
   -dn) shift ; DN=$1 ;;
+  -lovera) shift ; LOVERA=$1 ;;
   
   -pre) shift ; PRE=$1 ;;
   -q)  shift ; QUALITY=$1 ;;
@@ -370,7 +372,7 @@ case "$VIS_TYPE" in
 	python $PYROOT/vis_slices.py ;;
 	
    torcut)
-	export OMP_NUM_THREADS=$NOMP ; python $PYROOT/vis_torcut.py $EXT $MOMENT $SPECIES $NX $NZ $TIME $FMIN $FMAX $CMAP $FONTSIZE $LEGACY_FLAG $DN ;;
+	export OMP_NUM_THREADS=$NOMP ; python $PYROOT/vis_torcut.py $EXT $MOMENT $SPECIES $NX $NZ $TIME $FMIN $FMAX $CMAP $FONTSIZE $LEGACY_FLAG $DN $LOVERA ;;
 
    wheel)
 	export OMP_NUM_THREADS=$NOMP ; python $PYROOT/vis_wheel.py $EXT $MOMENT $SPECIES $NX $NY $NZ $TIME $FMIN $FMAX $CMAP $FONTSIZE ;;
