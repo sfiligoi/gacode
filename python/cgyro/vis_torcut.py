@@ -26,6 +26,7 @@ colormap = sys.argv[9]
 font     = int(sys.argv[10])
 legacy   = int(sys.argv[11])
 dn       = int(sys.argv[12])
+lovera   = float(sys.argv[13])
 
 # Define plot and font size 
 rc('text',usetex=True)
@@ -38,7 +39,6 @@ nn = sim.n_n
 ns = sim.n_species
 nth = sim.theta_plot
 
-lovera = 0.33
 
 print('Lx/rho = {:.2f}'.format(sim.length))
 print('rho/a  = {:.4f}'.format(sim.rho/dn))
@@ -68,9 +68,9 @@ x = np.zeros([nx])
 z = np.zeros([nz])
 
 for i in range(nx):
-   x[i] = i*2*np.pi/(nx-1)
+   x[i] = i*2*np.pi/(nx-1.0)/dn
 for k in range(nz):
-   z[k] = k*2*np.pi/(nz-1)-np.pi
+   z[k] = k*2*np.pi/(nz-1.0)-np.pi
 
 xp = np.zeros([nx,nz])
 yp = np.zeros([nx,nz])
@@ -78,7 +78,7 @@ zp = np.zeros([nx,nz])
 
 for i in range(nx):
    for k in range(nz):
-      r = sim.rmin+(x[i]/(2*np.pi)-0.5)*lovera
+      r = sim.rmin+(dn*x[i]/(2*np.pi)-0.5)*lovera
       xp[i,k] = sim.rmaj+r*np.cos(z[k]+np.arcsin(sim.delta)*np.sin(z[k]))
       yp[i,k] = sim.kappa*r*np.sin(z[k])
       zp[i,k] = 0.0
@@ -133,7 +133,7 @@ def frame():
    else:
       a = np.reshape(aa,(2,nr,nth,ns,nn),order='F')
 
-   mlab.figure(size=(900,900))
+   mlab.figure(size=(900,900),bgcolor=(1,1,1))
    if isfield:
       c = a[0,:,:,:]+1j*a[1,:,:,:]
    else:

@@ -47,7 +47,7 @@ subroutine torcut(dn,m,q,nr,nth,nn,nx,nz,g1,g2,c,f)
   enddo
 
   do i=0,nx-1
-     x(i) = i*2*pi/(nx-1)
+     x(i) = i*2*pi/(nx-1)/dn
      do p=0,nr-1    
         epx(p,i) = exp(dn*ic*(p-nr/2)*x(i))
      enddo
