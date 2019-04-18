@@ -1,7 +1,7 @@
-subroutine EXPRO_locsim_alloc(flag)
+subroutine expro_locsim_alloc(flag)
 
   use vpro
-  use EXPRO_locsim_interface
+  use expro_locsim_interface
 
   implicit none
   integer, intent (in) :: flag  
@@ -11,18 +11,18 @@ subroutine EXPRO_locsim_alloc(flag)
 
   if (flag == 1) then
 
-     allocate(rmin_exp(EXPRO_n_exp))
+     allocate(rmin_exp(expro_n_exp))
 
-     allocate(temp_exp(n_species_exp,EXPRO_n_exp))
-     allocate(dens_exp(n_species_exp,EXPRO_n_exp))
-     allocate(dlntdr_exp(n_species_exp,EXPRO_n_exp))
-     allocate(dlnndr_exp(n_species_exp,EXPRO_n_exp))
-     allocate(sdlntdr_exp(n_species_exp,EXPRO_n_exp))
-     allocate(sdlnndr_exp(n_species_exp,EXPRO_n_exp))
+     allocate(temp_exp(n_species_exp,expro_n_exp))
+     allocate(dens_exp(n_species_exp,expro_n_exp))
+     allocate(dlntdr_exp(n_species_exp,expro_n_exp))
+     allocate(dlnndr_exp(n_species_exp,expro_n_exp))
+     allocate(sdlntdr_exp(n_species_exp,expro_n_exp))
+     allocate(sdlnndr_exp(n_species_exp,expro_n_exp))
 
-     allocate(gamma_e_exp(EXPRO_n_exp))
-     allocate(gamma_p_exp(EXPRO_n_exp))
-     allocate(mach_exp(EXPRO_n_exp))
+     allocate(gamma_e_exp(expro_n_exp))
+     allocate(gamma_p_exp(expro_n_exp))
+     allocate(mach_exp(expro_n_exp))
 
   else
 
@@ -43,4 +43,4 @@ subroutine EXPRO_locsim_alloc(flag)
 
   endif
 
-end subroutine EXPRO_locsim_alloc
+end subroutine expro_locsim_alloc

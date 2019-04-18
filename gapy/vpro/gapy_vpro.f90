@@ -263,7 +263,7 @@ contains
 
     call vpro_compute_derived
     
-30  format(1pe12.5)
+30  format(1pe14.7)
 
   end subroutine vpro_read
 
@@ -584,7 +584,7 @@ contains
     close(1)
 
 20  format(a)
-30  format(1pe12.5)
+30  format(1pe14.7)
 
   end subroutine vpro_write
 
@@ -703,7 +703,7 @@ contains
        write(1,10) x(i),i
     enddo
 
-10  format(1pe12.5,1x,i3)
+10  format(1pe14.7,1x,i3)
 
   end subroutine vpro_writev
 

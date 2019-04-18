@@ -17,12 +17,12 @@ contains
 
     integer, intent(in) :: n
 
-    real, intent(inout), dimension(n) :: df
-    real, intent(in), dimension(n) :: f
-    real, intent(in),dimension(n) :: r
+    double precision, intent(inout), dimension(n) :: df
+    double precision, intent(in), dimension(n) :: f
+    double precision, intent(in),dimension(n) :: r
 
-    real :: r1,r2,r3,ra
-    real :: f1,f2,f3
+    double precision :: r1,r2,r3,ra
+    double precision :: f1,f2,f3
 
     integer :: i
 
@@ -92,14 +92,14 @@ contains
 
     integer, intent(in) :: n
 
-    real, intent(inout) :: fa
-    real, intent(inout) :: fb
-    real, intent(in), dimension(n) :: f
-    real, intent(in), dimension(n) :: r
+    double precision, intent(inout) :: fa
+    double precision, intent(inout) :: fb
+    double precision, intent(in), dimension(n) :: f
+    double precision, intent(in), dimension(n) :: r
 
-    real :: r1,r2,r3
-    real :: ra,rb
-    real :: f1,f2,f3
+    double precision :: r1,r2,r3
+    double precision :: ra,rb
+    double precision :: f1,f2,f3
 
 
     ! Left boundary
