@@ -10,8 +10,14 @@ FC += ${FOMP}
 
 .SUFFIXES : .o .f90
 
+EXTRA_LIBS = \
+	${GACODE_ROOT}/gapy/vpro/vpro_lib.a \
+	${GACODE_ROOT}/gapy/src/geo_lib.a \
+	${GACODE_ROOT}/gapy/src/util_lib.a \
+	${GACODE_ROOT}/shared/math/math_lib.a
+
 vpro_test: vpro_test.o
-	$(FC) -o vpro_test vpro_test.o ../../vpro/vpro_lib.a ../../src/geo_lib.a ../../src/util_lib.a 
+	$(FC) -o vpro_test vpro_test.o ${EXTRA_LIBS} ${LMATH}
 
 .f90.o :
 	$(FC) $(FFLAGS) $(FMATH) -c $<
