@@ -11,10 +11,10 @@ FC += ${FOMP}
 .SUFFIXES : .o .f90
 
 vpro_test: vpro_test.o
-	$(FC) -o vpro_test vpro_test.o ../../src/vpro_lib.a ../../src/util_lib.a
+	$(FC) -o vpro_test vpro_test.o ../../vpro/vpro_lib.a ../../src/geo_lib.a ../../src/util_lib.a 
 
 .f90.o :
 	$(FC) $(FFLAGS) $(FMATH) -c $<
 
 clean:
-	rm -f *.o vpro_test dat.bin
+	rm -f *.o vpro_test input.gacode
