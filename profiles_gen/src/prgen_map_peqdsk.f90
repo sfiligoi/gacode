@@ -67,6 +67,7 @@ subroutine prgen_map_peqdsk
   EXPRO_ne(:)     = peqdsk_ne(:)*10
   EXPRO_z_eff(:)  = z_eff(:)
   ! COORDINATES: -ipccw accounts for DIII-D toroidal angle convention
+  ! (wrt Ip direction)
   EXPRO_w0(:)        = -ipccw*1e3*peqdsk_omgeb(:) 
   EXPRO_flow_mom(:)  = 0.0               ! flow_mom
   EXPRO_pow_e(:)     = peqdsk_pow_e(:)   ! pow_e
@@ -101,9 +102,9 @@ subroutine prgen_map_peqdsk
   enddo
 
   ! vphi
-  ! COORDINATES: -ipccw accounts for DIII-D toroidal angle convention
+  ! COORDINATES: negative sign accounts for DIII-D toroidal angle convention
   EXPRO_vtor(:,:) = 0.0
-  EXPRO_vtor(2,:) = -ipccw*1e3*peqdsk_omegat(:)*(rmaj(:)+rmin(:))
+  EXPRO_vtor(2,:) = -1e3*peqdsk_omegat(:)*(rmaj(:)+rmin(:))
 
   ! vpol
   EXPRO_vpol(:,:) = 0.0
