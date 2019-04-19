@@ -27,7 +27,7 @@ subroutine vpro_compute_derived
   double precision :: theta(1)
 
   if (expro_ctrl_n_ion == -1) expro_ctrl_n_ion = expro_n_ion
-   
+
   !---------------------------------------------------------------------
   ! Sanity checks
   !
@@ -116,7 +116,7 @@ subroutine vpro_compute_derived
   expro_dlntidr = 0.0
   expro_sdlnnidr = 0.0
   expro_sdlntidr = 0.0
-  
+
   do is=1,expro_n_ion
      if (minval(expro_ni(is,:)) > 0.0) then
         ! 1/L_ni = -dln(ni)/dr (1/m)
@@ -351,3 +351,18 @@ subroutine vpro_compute_derived
   !enddo
 
 end subroutine vpro_compute_derived
+
+subroutine vpro_skip_header(io)
+
+  implicit none
+
+  integer, intent(in) :: io
+  character (len=1) :: cdummy
+
+  do
+     read(io,'(a)') cdummy     
+     if (cdummy /= '#') exit
+  enddo
+  backspace io 
+
+end subroutine vpro_skip_header

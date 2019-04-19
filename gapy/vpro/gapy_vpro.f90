@@ -162,7 +162,7 @@ contains
 
     implicit none
 
-    integer :: nexp,ierr,i
+    integer :: nexp,nion,ierr,i
     character*22 :: ytag,c
 
     ! ORDERING NOTE: nexp should appear before any profile arrays
@@ -173,99 +173,97 @@ contains
 
        read(1,'(a)',end=99) ytag ; c = trim(ytag(3:22))
 
-       call vpro_icomm(c,'nexp',expro_n_exp)
-       call vpro_icomm(c,'nion',expro_n_ion)
-       call vpro_acomm(c,'mass',expro_mass,nion)
-
-       select case (trim(ytag(3:22)))
+       select case (c)
        case ('nexp')
           call vpro_icomm(expro_n_exp) 
+          nexp = expro_n_exp
        case ('nion')
           call vpro_icomm(expro_n_ion)
+          nion = expro_n_ion
+          if (allocated(expro_rho)) call vpro_init(0)
+          call vpro_init(1) 
        case ('mass')
-          read(1,*) expro_mass
+          call vpro_acomm(expro_mass,nion)
        case ('z')
-          read(1,*) expro_z
+          call vpro_acomm(expro_z,nion)
        case ('bt_exp')
-          read(1,30) expro_b_ref
+          call vpro_rcomm(expro_b_ref) 
        case ('arho_exp')
-          read(1,30) expro_arho
+          call vpro_rcomm(expro_arho) 
        case ('rho')
-          read(1,30) expro_rho 
+          call vpro_acomm(expro_rho,nexp)  
        case ('rmin')
-          read(1,30) expro_rmin 
+          call vpro_acomm(expro_rmin,nexp)  
        case ('polflux')
-          read(1,30) expro_polflux 
+          call vpro_acomm(expro_polflux,nexp)  
        case ('q')
-          read(1,30) expro_q 
+          call vpro_acomm(expro_q,nexp)  
        case ('w0')
-          read(1,30) expro_w0 
+          call vpro_acomm(expro_w0,nexp)  
        case ('rmaj')
-          read(1,30) expro_rmaj 
+          call vpro_acomm(expro_rmaj,nexp)  
        case ('zmag')
-          read(1,30) expro_zmag 
+          call vpro_acomm(expro_zmag,nexp)  
        case ('kappa')
-          read(1,30) expro_kappa 
+          call vpro_acomm(expro_kappa,nexp)  
        case ('delta')
-          read(1,30) expro_delta 
+          call vpro_acomm(expro_delta,nexp)  
        case ('zeta')
-          read(1,30) expro_zeta 
+          call vpro_acomm(expro_zeta,nexp)  
        case ('ne')
-          read(1,30) expro_ne
+          call vpro_acomm(expro_ne,nexp) 
        case ('Te')
-          read(1,30) expro_te 
+          call vpro_acomm(expro_te,nexp)  
        case ('ptot')
-          read(1,30) expro_ptot 
+          call vpro_acomm(expro_ptot,nexp)  
        case ('z_eff')
-          read(1,30) expro_z_eff 
+          call vpro_acomm(expro_z_eff,nexp) 
        case ('ni')
-          read(1,30) expro_ni(:,:)
+          call vpro_acomm(expro_ni(:,:),nion*nexp) 
        case ('ti')
-          read(1,30) expro_ti(:,:)
+          call vpro_acomm(expro_ti(:,:),nion*nexp) 
        case ('vpol')
-          read(1,30) expro_vpol(:,:)
+          call vpro_acomm(expro_vpol(:,:),nion*nexp) 
        case ('vtor')
-          read(1,30) expro_vtor(:,:)
+          call vpro_acomm(expro_vtor(:,:),nion*nexp) 
        case ('flow_beam')
-          read(1,30) expro_flow_beam 
+          call vpro_acomm(expro_flow_beam,nexp)  
        case ('flow_wall')
-          read(1,30) expro_flow_wall 
+          call vpro_acomm(expro_flow_wall,nexp)  
        case ('flow_mom')
-          read(1,30) expro_flow_mom 
+          call vpro_acomm(expro_flow_mom,nexp)  
        case ('pow_e')
-          read(1,30) expro_pow_e 
+          call vpro_acomm(expro_pow_e,nexp)  
        case ('pow_i')
-          read(1,30) expro_pow_i 
+          call vpro_acomm(expro_pow_i,nexp)  
        case ('pow_ei')
-          read(1,30) expro_pow_ei 
+          call vpro_acomm(expro_pow_e,nexp)
        case ('pow_e_aux')
-          read(1,30) expro_pow_e_aux 
+          call vpro_acomm(expro_pow_e_aux,nexp)  
        case ('pow_i_aux')
-          read(1,30) expro_pow_i_aux 
+          call vpro_acomm(expro_pow_i_aux,nexp)  
        case ('pow_e_fus')
-          read(1,30) expro_pow_e_fus 
+          call vpro_acomm(expro_pow_e_fus,nexp)  
        case ('pow_i_fus')
-          read(1,30) expro_pow_i_fus 
+          call vpro_acomm(expro_pow_i_fus,nexp)  
        case ('pow_e_sync')
-          read(1,30) expro_pow_e_sync
+          call vpro_acomm(expro_pow_e_sync,nexp) 
        case ('pow_e_brem')
-          read(1,30) expro_pow_e_brem 
+          call vpro_acomm(expro_pow_e_brem,nexp) 
        case ('pow_e_line')
-          read(1,30) expro_pow_e_line 
+          call vpro_acomm(expro_pow_e_line,nexp)  
        case ('sbeame')
-          read(1,30) expro_sbeame 
+          call vpro_acomm(expro_sbeame,nexp) 
        case ('sbcx')
-          read(1,30) expro_sbcx 
+          call vpro_acomm(expro_sbcx,nexp) 
        case ('sscxl')
-          read(1,30) expro_sscxl 
+          call vpro_acomm(expro_sscxl,nexp) 
        end select
 
     enddo
 
 99  close(1)
-    stop
     
-
     ! ** input.profiles.geo **
 
     nexp = expro_n_exp
@@ -293,24 +291,6 @@ contains
 
   end subroutine vpro_read
 
-
-  subroutine vpro_acomm(c,c0,x,n)
-
-    implicit none
-
-    double precision, intent(inout), allocatable(:) :: x
-    integer, intent(in) :: n
-    integer :: ierr,iproc
-    character*22 :: c,c0
-
-    if (c /= c0) return
-    allocate(x(n))
-    
-    read(1,*) x
-
-  end subroutine vpro_acomm
-
-
   subroutine vpro_init(flag)
 
     implicit none
@@ -323,26 +303,27 @@ contains
        nexp = expro_n_exp
        nion = expro_n_ion
 
-       !allocate(expro_mass(nion)) ; expro_mass = 1.0
-       allocate(expro_z(nion))    ; expro_z = 1.0
+       allocate(expro_mass(nion))    ; expro_mass = 1.0
+       allocate(expro_z(nion))       ; expro_z = 1.0
 
-       allocate(expro_rho(nexp))
-       allocate(expro_rmin(nexp))
-       allocate(expro_q(nexp))
-       allocate(expro_polflux(nexp))
-       allocate(expro_w0(nexp))
-       allocate(expro_rmaj(nexp))
-       allocate(expro_zmag(nexp))
-       allocate(expro_kappa(nexp))
-       allocate(expro_delta(nexp))
-       allocate(expro_zeta(nexp))
-       allocate(expro_ne(nexp))
-       allocate(expro_te(nexp))
-       allocate(expro_ptot(nexp))
-       allocate(expro_z_eff(nexp))
+       allocate(expro_rho(nexp))     ; expro_rho = 0.0
+       allocate(expro_rmin(nexp))    ; expro_rmin = 0.0
+       allocate(expro_q(nexp))       ; expro_q = 0.0
+       allocate(expro_polflux(nexp)) ; expro_polflux = 0.0
+       allocate(expro_w0(nexp))      ; expro_w0 = 0.0
+       allocate(expro_rmaj(nexp))    ; expro_rmaj = 0.0
+              
+       allocate(expro_zmag(nexp))    ; expro_zmag = 0.0
+       allocate(expro_kappa(nexp))   ; expro_kappa = 0.0
+       allocate(expro_delta(nexp))   ; expro_delta = 0.0
+       allocate(expro_zeta(nexp))    ; expro_zeta = 0.0
+       allocate(expro_ne(nexp))      ; expro_ne = 0.0
+       allocate(expro_te(nexp))      ; expro_te = 0.0
+       allocate(expro_ptot(nexp))    ; expro_ptot = 0.0
+       allocate(expro_z_eff(nexp))   ; expro_z_eff = 0.0
 
-       allocate(expro_flow_beam(nexp))
-       allocate(expro_flow_wall(nexp))
+       allocate(expro_flow_beam(nexp)) ; expro_flow_beam = 0.0
+       allocate(expro_flow_wall(nexp)) ; expro_flow_wall = 0.0
        allocate(expro_flow_mom(nexp))
        allocate(expro_pow_e(nexp))
        allocate(expro_pow_i(nexp))
@@ -358,23 +339,6 @@ contains
        allocate(expro_sbcx(nexp))
        allocate(expro_sscxl(nexp))
 
-       expro_rho     = 0.0
-       expro_rmin    = 0.0
-       expro_q       = 0.0
-       expro_polflux = 0.0
-       expro_w0      = 0.0
-       expro_rmaj    = 0.0
-       expro_zmag    = 0.0
-       expro_kappa   = 0.0
-       expro_delta   = 0.0
-       expro_zeta    = 0.0
-       expro_ne      = 0.0
-       expro_te      = 0.0
-       expro_ptot    = 0.0
-       expro_z_eff   = 0.0
-
-       expro_flow_beam = 0.0
-       expro_flow_wall = 0.0
        expro_flow_mom  = 0.0
        expro_pow_e     = 0.0
        expro_pow_i     = 0.0
@@ -436,7 +400,7 @@ contains
 
     else
 
-       !deallocate(expro_mass) 
+       deallocate(expro_mass) 
        deallocate(expro_z) 
 
        deallocate(expro_rho)
@@ -750,20 +714,5 @@ contains
 10  format(1pe14.7,1x,i3)
 
   end subroutine vpro_writev
-
-  subroutine vpro_skip_header(io)
-
-    implicit none
-
-    integer, intent(in) :: io
-    character (len=1) :: cdummy
-
-    do
-       read(io,'(a)') cdummy     
-       if (cdummy /= '#') exit
-    enddo
-    backspace io 
-
-  end subroutine vpro_skip_header
 
 end module vpro
