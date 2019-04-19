@@ -26,11 +26,25 @@ subroutine vpro_compute_derived
   double precision :: fa,fb
   double precision :: theta(1)
 
-  expro_ctrl_n_ion = expro_n_ion
-  expro_ctrl_numeq_flag = 0
-  expro_nfourier = -1
-  expro_ctrl_quasineutral_flag = 0
-  
+  if (expro_ctrl_n_ion == -1) expro_ctrl_n_ion = expro_n_ion
+   
+  !---------------------------------------------------------------------
+  ! Sanity checks
+  !
+  if (expro_ctrl_numeq_flag == 1 .and. expro_nfourier == -1) then
+     print '(a)','ERROR: (expro) input.profiles.geo missing'
+     stop
+  endif
+  if (expro_ctrl_quasineutral_flag == -1) then
+     print '(a)','ERROR: (expro) expro_ctrl_quasineutral_flag not set.'
+     stop
+  endif
+  if (expro_ctrl_numeq_flag == -1) then
+     print '(a)','ERROR: (expro) expro_ctrl_numeq_flag not set.'
+     stop
+  endif
+  !---------------------------------------------------------------------
+
   !---------------------------------------------------------------------
   ! Infer orientation
   ! 

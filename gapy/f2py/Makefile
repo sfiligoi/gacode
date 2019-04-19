@@ -10,6 +10,7 @@ SRC=	../src/gapy_realfluct.f90 \
 	../src/gapy_surfpar.f90 \
 	../vpro/gapy_vpro.f90 \
 	../vpro/gapy_vpro_util.f90 \
+	../vpro/gapy_vpro_pycomm.f90 \
         ../src/gapy_util.f90
 
 # Remove possible compilers

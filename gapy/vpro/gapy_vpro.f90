@@ -150,7 +150,7 @@ module vpro
   integer :: expro_signb
   integer :: expro_signq
 
-  ! Control parameters (force nonsensical default -1 for usage check)
+  ! Control parameters
 
   integer :: expro_ctrl_n_ion 
   integer :: expro_ctrl_quasineutral_flag 
@@ -162,30 +162,33 @@ contains
 
     implicit none
 
-    character*22 :: ytag
+    integer :: nexp,ierr,i
+    character*22 :: ytag,c
 
-    ! NOTE: nexp should appear before any profile arrays
+    ! ORDERING NOTE: nexp should appear before any profile arrays
 
     open(unit=1,file=infile,status='old')
 
     do 
 
-       read(1,'(a)',end=99) ytag
+       read(1,'(a)',end=99) ytag ; c = trim(ytag(3:22))
+
+       call vpro_icomm(c,'nexp',expro_n_exp)
+       call vpro_icomm(c,'nion',expro_n_ion)
+       call vpro_acomm(c,'mass',expro_mass,nion)
 
        select case (trim(ytag(3:22)))
-       case('nexp')
-          read(1,*) expro_n_exp
-       case('nion')
-          read(1,*) expro_n_ion
-          if (allocated(expro_rho)) call vpro_init(0)
-          call vpro_init(1)
-       case('mass')
+       case ('nexp')
+          call vpro_icomm(expro_n_exp) 
+       case ('nion')
+          call vpro_icomm(expro_n_ion)
+       case ('mass')
           read(1,*) expro_mass
-       case('z')
+       case ('z')
           read(1,*) expro_z
-       case('bt_exp')
+       case ('bt_exp')
           read(1,30) expro_b_ref
-       case('arho_exp')
+       case ('arho_exp')
           read(1,30) expro_arho
        case ('rho')
           read(1,30) expro_rho 
@@ -260,12 +263,53 @@ contains
     enddo
 
 99  close(1)
-
-    call vpro_compute_derived
+    stop
     
+
+    ! ** input.profiles.geo **
+
+    nexp = expro_n_exp
+    open(unit=1,file='input.profiles.geo',status='old',iostat=ierr)
+    if (ierr == 0) then
+       call vpro_skip_header(1)
+       read(1,*) expro_nfourier
+       if (allocated(expro_geo)) deallocate(expro_geo)
+       if (allocated(expro_dgeo)) deallocate(expro_dgeo)
+       allocate(expro_geo(4,0:expro_nfourier,nexp)) ; expro_geo(:,:,:)=0.0
+       allocate(expro_dgeo(4,0:expro_nfourier,nexp)) ; expro_dgeo(:,:,:)=0.0
+       do i=1,nexp
+          read(1,*) expro_geo(:,:,i)
+       enddo
+    else
+       expro_nfourier = -1
+    endif
+    close(1)
+
+    ! BCAST HERE
+    
+    call vpro_compute_derived
+
 30  format(1pe14.7)
 
   end subroutine vpro_read
+
+
+  subroutine vpro_acomm(c,c0,x,n)
+
+    implicit none
+
+    double precision, intent(inout), allocatable(:) :: x
+    integer, intent(in) :: n
+    integer :: ierr,iproc
+    character*22 :: c,c0
+
+    if (c /= c0) return
+    allocate(x(n))
+    
+    read(1,*) x
+
+  end subroutine vpro_acomm
+
 
   subroutine vpro_init(flag)
 
@@ -279,9 +323,9 @@ contains
        nexp = expro_n_exp
        nion = expro_n_ion
 
-       allocate(expro_mass(nion)) ; expro_mass = 1.0
+       !allocate(expro_mass(nion)) ; expro_mass = 1.0
        allocate(expro_z(nion))    ; expro_z = 1.0
-       
+
        allocate(expro_rho(nexp))
        allocate(expro_rmin(nexp))
        allocate(expro_q(nexp))
@@ -350,7 +394,7 @@ contains
        allocate(expro_ti(nion,nexp))   ; expro_ti = 0.0
        allocate(expro_vpol(nion,nexp)) ; expro_vpol = 0.0
        allocate(expro_vtor(nion,nexp)) ; expro_vtor = 0.0
-       
+
        ! Derived quantities
 
        allocate(expro_bunit(nexp))        ; expro_bunit = 0.0
@@ -389,10 +433,10 @@ contains
        allocate(expro_dlntidr(nion,nexp))  ; expro_dlntidr = 0.0
        allocate(expro_sdlnnidr(nion,nexp)) ; expro_sdlnnidr = 0.0
        allocate(expro_sdlntidr(nion,nexp)) ; expro_sdlntidr = 0.0
-   
+
     else
 
-       deallocate(expro_mass) 
+       !deallocate(expro_mass) 
        deallocate(expro_z) 
 
        deallocate(expro_rho)
@@ -706,5 +750,20 @@ contains
 10  format(1pe14.7,1x,i3)
 
   end subroutine vpro_writev
+
+  subroutine vpro_skip_header(io)
+
+    implicit none
+
+    integer, intent(in) :: io
+    character (len=1) :: cdummy
+
+    do
+       read(io,'(a)') cdummy     
+       if (cdummy /= '#') exit
+    enddo
+    backspace io 
+
+  end subroutine vpro_skip_header
 
 end module vpro

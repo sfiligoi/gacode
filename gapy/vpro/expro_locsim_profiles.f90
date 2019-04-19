@@ -209,7 +209,7 @@ subroutine expro_locsim_profiles(&
   betae_loc = 4.027e-3*dens_loc(n_species_exp)*temp_loc(n_species_exp)/b_unit_loc**2
 
   beta_star_loc = beta_star_loc*betae_loc/(dens_loc(n_species_exp)*temp_loc(n_species_exp))
-
+  
   if (numeq_flag == 1) then
 
      if (expro_nfourier <= 0) then
