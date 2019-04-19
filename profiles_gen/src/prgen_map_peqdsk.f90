@@ -109,4 +109,23 @@ subroutine prgen_map_peqdsk
   ! vpol
   EXPRO_vpol(:,:) = 0.0
 
+  !---------------------------------------------------------
+  ! Read the cer file and overlay
+  !
+  if (cer_file /= "null") then
+     allocate(vpolc_exp(nx))
+     allocate(vtorc_exp(nx))
+     call prgen_read_cer
+     EXPRO_w0 = omega0(:)
+     do i=1,peqdsk_nimp
+        if (peqdsk_m(i+1) .le. 12.0+epsilon(0.) .and. &
+             peqdsk_m(i+1) .ge. 12.0-epsilon(0.)) then
+           EXPRO_vtor(i+1,:) = vtorc_exp(:)
+           EXPRO_vpol(i+1,:) = vpolc_exp(:)
+           exit
+        endif
+     enddo
+  endif
+  !---------------------------------------------------------
+  
 end subroutine prgen_map_peqdsk
