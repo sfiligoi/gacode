@@ -88,7 +88,7 @@ subroutine cgyro_make_profiles
         return
      endif
 
-     call EXPRO_locsim_profiles(path,&
+     call expro_locsim_profiles(path,&
           CGYRO_COMM_WORLD,&
           geo_numeq_flag,&
           udsymmetry_flag,&

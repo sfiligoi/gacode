@@ -78,7 +78,6 @@ subroutine expro_locsim_profiles(&
   integer, intent(in) :: n_species_in
   double precision, intent(in) :: rmin
   double precision, intent(inout) :: btccw,ipccw,a_meters
-  double precision, parameter :: pi=3.14159265358979323846
   integer :: i,j,i_ion
 
   rmin_loc = rmin
@@ -92,12 +91,7 @@ subroutine expro_locsim_profiles(&
   expro_ctrl_numeq_flag = numeq_flag
   expro_ctrl_n_ion = n_species_exp-1
 
-  !if (comm == -1) then
-     call vpro_read
-  !else
-  !   call expro_palloc(comm,path,1)
-  !   call expro_pread
-  !endif
+  call vpro_read(path)
   call expro_locsim_alloc(1)
   !--------------------------------------------------------------
 
@@ -119,7 +113,7 @@ subroutine expro_locsim_profiles(&
 
   rmin_exp(:) = rmin_exp(:)/a_meters
 
-  ! Pack electrons into top of species vector.
+  ! Pack electrons into top of species vector
   temp_exp(n_species_exp,:)    = expro_te(:)
   dlntdr_exp(n_species_exp,:)  = expro_dlntedr(:)*a_meters 
   sdlntdr_exp(n_species_exp,:) = expro_sdlntedr(:)*a_meters
@@ -149,14 +143,6 @@ subroutine expro_locsim_profiles(&
         dens_exp(i_ion,:)    = expro_ni(i_ion,:)
         dlnndr_exp(i_ion,:)  = expro_dlnnidr(i_ion,:)*a_meters
         sdlnndr_exp(i_ion,:) = expro_sdlnnidr(i_ion,:)*a_meters
-     endif
-  enddo
-
-  ! Sanity check for densities
-  do i=1,n_species_exp
-     if (minval(dens_exp(i,:)) <= 0.0) then
-        !call cgyro_error('Nonpositive in exp. density profile')
-        return
      endif
   enddo
 
@@ -193,7 +179,7 @@ subroutine expro_locsim_profiles(&
   psi_norm_loc = psi_norm_loc/expro_polflux(expro_n_exp)
   psi_a_loc = expro_polflux(expro_n_exp)
 
-
+  
   beta_star_loc = 0.0  
   do i=1,n_species_exp
      ! Note: mapping is only done for n_species (not n_species_exp)
@@ -210,12 +196,8 @@ subroutine expro_locsim_profiles(&
 
   beta_star_loc = beta_star_loc*betae_loc/(dens_loc(n_species_exp)*temp_loc(n_species_exp))
   
-  if (numeq_flag == 1) then
-
-     if (expro_nfourier <= 0) then
-        return
-     endif
-
+  if (numeq_flag == 1 .and. expro_nfourier > 0) then
+ 
      geo_ny_loc = expro_nfourier
      allocate(geo_yin_exp(8,0:geo_ny_loc,expro_n_exp))
      if(allocated(geo_yin_loc)) deallocate(geo_yin_loc)

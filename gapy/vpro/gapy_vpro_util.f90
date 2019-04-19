@@ -330,10 +330,6 @@ subroutine vpro_compute_derived
      call bound_deriv(expro_sdlnnidr_new(:),expro_ni_new(:)*expro_dlnnidr_new(:),expro_rmin,expro_n_exp)
      expro_sdlnnidr_new(:) = expro_sdlnnidr_new(:)/expro_ni_new(:)*expro_rhos(:)
 
-     !if (minval(expro_ni_new(:)) <= 0.0) then
-     !   expro_error = 1
-     !endif
-
   else
 
      expro_ni_new(:) = expro_ni(1,:)
@@ -343,12 +339,6 @@ subroutine vpro_compute_derived
   endif
 
   deallocate(dummy)
-
-  !do is=1,expro_ctrl_n_ion
-  !   if (minval(expro_ni(is,:)) <= 0.0) then
-  !      expro_error=1
-  !   endif
-  !enddo
 
 end subroutine vpro_compute_derived
 
@@ -366,3 +356,36 @@ subroutine vpro_skip_header(io)
   backspace io 
 
 end subroutine vpro_skip_header
+
+subroutine vpro_writev(x,n)
+
+  implicit none
+
+  integer, intent(in) :: n
+  double precision, intent(in), dimension(n) :: x
+  integer :: i
+
+  do i=1,n
+     write(1,10) i,x(i)
+  enddo
+
+10 format(i3,1x,1pe14.7)
+
+end subroutine vpro_writev
+
+subroutine vpro_writea(x,m,n)
+
+  implicit none
+
+  integer, intent(in) :: m
+  integer, intent(in) :: n
+  double precision, intent(in), dimension(m,n) :: x
+  integer :: i
+
+  do i=1,n
+     write(1,10) i,x(:,i)
+  enddo
+
+10 format(i3,1x,10(1pe14.7,1x))
+
+end subroutine vpro_writea

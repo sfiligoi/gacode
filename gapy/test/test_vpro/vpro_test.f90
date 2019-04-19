@@ -10,7 +10,7 @@ program test
   call vpro_read_legacy
   call vpro_write
 
-  call vpro_read()
+  call vpro_read('./')
 
   print '(a,i0)'            ,'nexp    ',expro_n_exp
   print '(a,1pe12.5)'       ,'bt_exp  ',expro_b_ref
