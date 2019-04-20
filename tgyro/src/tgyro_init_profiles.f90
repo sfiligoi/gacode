@@ -10,7 +10,7 @@ subroutine tgyro_init_profiles
   use mpi
   use tgyro_globals
   use tgyro_ped
-  use EXPRO_interface
+  use vpro
 
   implicit none
 
@@ -137,14 +137,10 @@ subroutine tgyro_init_profiles
   EXPRO_ctrl_quasineutral_flag = 0
   EXPRO_ctrl_numeq_flag = loc_num_equil_flag
 
-  call EXPRO_palloc(MPI_COMM_WORLD,'./',1) 
-  call EXPRO_pread
+  call vpro_read('./') 
 
-  ! JC: Can we remove now that EXPRO_z is read from input.profiles header?
-  EXPRO_z(1:loc_n_ion) = zi_vec(1:loc_n_ion)
-
-  shot = EXPRO_shot
-
+  shot = 0
+  
   n_exp = EXPRO_n_exp
 
   ! r_min in m:
@@ -522,8 +518,6 @@ subroutine tgyro_init_profiles
 
   endif
   !-----------------------------------------------------------------
-
-  call EXPRO_palloc(MPI_COMM_WORLD,'./',0)
 
   ! Convert r_min to cm (from m):
   r_min = r_min*100.0

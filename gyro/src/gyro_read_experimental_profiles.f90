@@ -13,7 +13,7 @@ subroutine gyro_read_experimental_profiles
 
   use gyro_globals
   use gyro_profile_exp
-  use EXPRO_interface
+  use vpro
 
   !---------------------------------------------------
   implicit none
@@ -28,8 +28,7 @@ subroutine gyro_read_experimental_profiles
   EXPRO_ctrl_numeq_flag = num_equil_flag
   EXPRO_ctrl_n_ion = n_spec-1
 
-  call EXPRO_palloc(GYRO_COMM_WORLD,path,1) 
-  call EXPRO_pread
+  call vpro_read(path) 
   !---------------------------------------------------------------------
 
   !---------------------------------------------------------------------
@@ -212,9 +211,6 @@ subroutine gyro_read_experimental_profiles
   if (ampere_scale /= 1.0) then
      call send_message_real('INFO: (GYRO) betae in Ampere Eq. scaled by ',ampere_scale)
   endif
-
-  ! Deallocate EXPRO arrays
-  call EXPRO_palloc(GYRO_COMM_WORLD,path,0)
 
   if (debug_flag == 1 .and. i_proc == 0) then
      print *,'[gyro_read_experimental_profiles done]'
