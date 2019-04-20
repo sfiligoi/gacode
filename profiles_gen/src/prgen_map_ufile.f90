@@ -12,7 +12,7 @@
 subroutine prgen_map_ufile
 
   use prgen_globals
-  use EXPRO_interface
+  use vpro
 
   implicit none
   real, dimension(:), allocatable :: powd_i
@@ -78,7 +78,8 @@ subroutine prgen_map_ufile
   ! Map profile data onto single array:
   !
   EXPRO_n_exp = nx
-  call EXPRO_alloc('./',1)
+  EXPRO_n_ion = ufile_nion
+  call vpro_init(1)
   !
   EXPRO_rho(:)       = rho(:)
   EXPRO_rmin(:)      = rmin(:)
@@ -99,7 +100,7 @@ subroutine prgen_map_ufile
   EXPRO_flow_wall(:) = 0.0
   EXPRO_zmag(:)      = 0.0
   EXPRO_ptot(:)      = ufile_pres(:)
-  EXPRO_polflux = dpsi(:)
+  EXPRO_polflux      = dpsi(:)
 
   !-----------------------------------------------------------------
   ! Construct ion densities and temperatures with reordering

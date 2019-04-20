@@ -26,6 +26,7 @@ subroutine vpro_compute_derived
   double precision :: fa,fb
   double precision :: theta(1)
 
+  
   if (expro_ctrl_n_ion == -1) expro_ctrl_n_ion = expro_n_ion
 
   !---------------------------------------------------------------------

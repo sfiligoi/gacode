@@ -8,16 +8,15 @@
 subroutine prgen_map_inputprofiles
 
   use prgen_globals
-  use EXPRO_interface
+  use vpro
 
   implicit none
 
   integer :: i
   real :: xnew(nx)
 
-  EXPRO_n_exp = nx
-  call EXPRO_alloc('./',1) 
-  call EXPRO_read
+  expro_n_exp = nx
+  call vpro_read('./')
 
   if (efit_method > 1) then
 

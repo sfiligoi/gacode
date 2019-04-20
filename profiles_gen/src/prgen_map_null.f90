@@ -8,7 +8,7 @@
 subroutine prgen_map_null
 
   use prgen_globals
-  use EXPRO_interface
+  use vpro
 
   implicit none
 
@@ -18,8 +18,9 @@ subroutine prgen_map_null
   !---------------------------------------------------------
   ! Map profile data into EXPRO interface names:
   !
-  EXPRO_n_exp = nx
-  call EXPRO_alloc('./',1)
+  expro_n_exp = nx
+  expro_n_ion = 1
+  call vpro_init(1)
   
   EXPRO_rho  = rho
   EXPRO_rmin = rmin(:)

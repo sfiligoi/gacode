@@ -23,7 +23,7 @@
 program prgen
 
   use prgen_globals
-  use EXPRO_interface
+  use vpro
 
   !--------------------------------------------------
   implicit none
@@ -191,7 +191,6 @@ program prgen
   end select
 
   call prgen_write
-  call EXPRO_alloc('./',0)
 
   ! Successful completion
   open(unit=1,file='success',status='replace')

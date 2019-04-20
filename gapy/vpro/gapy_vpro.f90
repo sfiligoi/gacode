@@ -56,9 +56,15 @@ module vpro
        expro_mass,&
        expro_z
 
+  character*7, dimension(:), allocatable :: &
+       expro_name,&
+       expro_type
+
   double precision :: &
        expro_b_ref,&
-       expro_arho
+       expro_arho,&
+       expro_rvbv,&
+       expro_ip_exp
 
   double precision, dimension(:), allocatable :: &
        expro_rho,&
@@ -172,6 +178,8 @@ contains
 
        allocate(expro_mass(nion))    ; expro_mass = 1.0
        allocate(expro_z(nion))       ; expro_z = 1.0
+       allocate(expro_type(nion))    ; expro_type = ' '
+       allocate(expro_name(nion))    ; expro_name = ' '
 
        allocate(expro_rho(nexp))     ; expro_rho = 0.0
        allocate(expro_rmin(nexp))    ; expro_rmin = 0.0
@@ -254,6 +262,8 @@ contains
 
        deallocate(expro_mass) 
        deallocate(expro_z) 
+       deallocate(expro_type) 
+       deallocate(expro_name) 
 
        deallocate(expro_rho)
        deallocate(expro_rmin)
@@ -475,7 +485,7 @@ contains
     nexp = expro_n_exp
     nion = expro_n_ion
 
-    open(unit=1,file=infile,status='replace')
+    open(unit=1,file=infile,position='append')
 
     write(1,20) ident//tag(1)  ; write(1,'(i0)') nexp
     write(1,20) ident//tag(2)  ; write(1,'(i0)') nion

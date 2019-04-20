@@ -12,7 +12,7 @@
 subroutine prgen_map_plasmastate
 
   use prgen_globals
-  use EXPRO_interface
+  use vpro
 
   implicit none
 
@@ -267,8 +267,9 @@ subroutine prgen_map_plasmastate
   !---------------------------------------------------------
   ! Map profile data into EXPRO interface variables
   !
-  EXPRO_n_exp = nx
-  call EXPRO_alloc('./',1)
+  expro_n_exp = nx
+  expro_n_ion = plst_dp1_nspec_all-1
+  call vpro_init(1)
   !
   EXPRO_rho  = plst_rho
   EXPRO_rmin = rmin(:)
@@ -340,20 +341,20 @@ subroutine prgen_map_plasmastate
   ! Ion reordering diagnostics
 
   print '(a)','INFO: (prgen_map_plasmastate) Created these species:'
-  do i=1,n_ion_max
+  do i=1,expro_n_ion
      ip = reorder_vec(i)
      if (ip >= plst_dp1_nspec_all) then
         print '(t6,i2,1x,3(a))',i,'[null]'
      else
         if (ip+1 > plst_dp1_nspec_th) then
-           ion_type(i) = type_fast
+           expro_type(i) = type_fast
         else
-           ion_type(i) = type_therm
+           expro_type(i) = type_therm
         endif
-        print '(t6,i2,1x,a,1x,a)',i,trim(plst_all_name(ip+1)),ion_type(i)
-        ion_mass(i) = plst_m_all(ip+1)/1.66e-27
-        ion_z(i)    = nint(plst_q_all(ip+1)/1.6022e-19)
-        call prgen_ion_name(nint(ion_mass(i)),ion_z(i),ion_name(i))     
+        print '(t6,i2,1x,a,1x,a)',i,trim(plst_all_name(ip+1)),expro_type(i)
+        expro_mass(i) = plst_m_all(ip+1)/1.66e-27
+        expro_z(i)    = nint(plst_q_all(ip+1)/1.6022e-19)
+        call prgen_ion_name(nint(expro_mass(i)),expro_z(i),expro_name(i))     
      endif
   enddo
 

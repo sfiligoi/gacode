@@ -13,7 +13,7 @@
 subroutine prgen_map_iterdb
 
   use prgen_globals
-  use EXPRO_interface
+  use vpro
 
   implicit none
 
@@ -98,37 +98,6 @@ subroutine prgen_map_iterdb
        +pow_ei(:) &
        +pow_i_fus(:)
 
-  !---------------------------------------------------------
-  ! Map profile data into EXPRO interface variables
-  !
-  EXPRO_n_exp = nx
-  call EXPRO_alloc('./',1)
-  !
-  EXPRO_rho  = rho
-  EXPRO_rmin = rmin(:)
-  EXPRO_rmaj = rmaj(:)
-  ! COORDINATES: set sign of q
-  EXPRO_q = abs(q(:))*ipccw*btccw
-  EXPRO_kappa = kappa(:)
-  EXPRO_delta = delta(:)
-  EXPRO_te = onetwo_te(:)
-  EXPRO_ne = onetwo_ene(:)*1e-19
-  EXPRO_z_eff = onetwo_zeff(:)
-  EXPRO_flow_mom = flow_mom(:)
-  EXPRO_pow_e = pow_e(:)
-  EXPRO_pow_i = pow_i(:)
-  EXPRO_pow_ei = pow_ei(:)
-  EXPRO_zeta = zeta(:)
-  EXPRO_flow_beam = flow_beam(:)
-  EXPRO_flow_wall = flow_wall_exp(:)
-  EXPRO_sbeame = onetwo_sbeame(:)
-  EXPRO_sbcx = sbcx_d(:)
-  EXPRO_sscxl = onetwo_sscxl(:)
-  EXPRO_zmag = zmag(:)
-  EXPRO_ptot = p_tot(:) ! Total pressure
-  ! COORDINATES: set sign of poloidal flux
-  EXPRO_polflux = abs(dpsi(:))*(-ipccw)
-
   !----------------------------------------------------------------------
   ! Construct ion densities and temperatures, manage naming and numbering
   !
@@ -188,14 +157,45 @@ subroutine prgen_map_iterdb
 
   endif
 
-  onetwo_nion_tot = n0
   if (n0 > 10) then
      print '(a)',"ERROR: (prgen_map_iterdb) Too many ions; report to GACODE developers."
      stop
   endif
 
+  !---------------------------------------------------------
+  ! Map profile data into EXPRO interface variables
+  !
+  expro_n_exp = nx
+  expro_n_ion = n0
+  call vpro_init(1)
+  !
+  EXPRO_rho  = rho
+  EXPRO_rmin = rmin(:)
+  EXPRO_rmaj = rmaj(:)
+  ! COORDINATES: set sign of q
+  EXPRO_q = abs(q(:))*ipccw*btccw
+  EXPRO_kappa = kappa(:)
+  EXPRO_delta = delta(:)
+  EXPRO_te = onetwo_te(:)
+  EXPRO_ne = onetwo_ene(:)*1e-19
+  EXPRO_z_eff = onetwo_zeff(:)
+  EXPRO_flow_mom = flow_mom(:)
+  EXPRO_pow_e = pow_e(:)
+  EXPRO_pow_i = pow_i(:)
+  EXPRO_pow_ei = pow_ei(:)
+  EXPRO_zeta = zeta(:)
+  EXPRO_flow_beam = flow_beam(:)
+  EXPRO_flow_wall = flow_wall_exp(:)
+  EXPRO_sbeame = onetwo_sbeame(:)
+  EXPRO_sbcx = sbcx_d(:)
+  EXPRO_sscxl = onetwo_sscxl(:)
+  EXPRO_zmag = zmag(:)
+  EXPRO_ptot = p_tot(:) ! Total pressure
+  ! COORDINATES: set sign of poloidal flux
+  EXPRO_polflux = abs(dpsi(:))*(-ipccw)
+
   ! reorder
-  do i=1,10
+  do i=1,expro_n_ion
      ip = reorder_vec(i)
      EXPRO_ni(i,:) = onetwo_enion_vec(ip,:)
      EXPRO_ti(i,:) = onetwo_tion_vec(ip,:)
@@ -217,7 +217,7 @@ subroutine prgen_map_iterdb
   endif
 
   ! Insert carbon toroidal velocity
-  do i=1,10
+  do i=1,expro_n_ion
      if (reorder_vec(i) == onetwo_nprim+1) then
         EXPRO_vtor(i,:) = vphi_carbon(:)
      endif
@@ -258,7 +258,7 @@ subroutine prgen_map_iterdb
   ! Ion name association
   !
   print '(a)','INFO: (prgen_map_iterdb) Found these ion species:'
-  do i=1,onetwo_nion_tot
+  do i=1,expro_n_ion
      call onetwo_ion_zmass(onetwo_ion_name(i),onetwo_z(i),onetwo_m(i))
      print '(t6,i2,1x,a)',i,trim(onetwo_ion_name(i))
   enddo
@@ -266,23 +266,23 @@ subroutine prgen_map_iterdb
   ! Reordering
   !
   print '(a)','INFO: (prgen_map_iterdb) Created these species'
-  do i=1,n_ion_max
+  do i=1,expro_n_ion
 
      ip = reorder_vec(i)
 
-     if (ip > onetwo_nion_tot) then
+     if (ip > expro_n_ion) then
         print '(t6,i2,1x,a)',i,'[null]'
      else
         if (ip > onetwo_nion) then
-           ion_type(i) = type_fast
+           expro_type(i) = type_fast
         else
-           ion_type(i) = type_therm
+           expro_type(i) = type_therm
         endif
-        print '(t6,i2,1x,a,1x,a)',i,trim(onetwo_ion_name(ip)),ion_type(i)
-        ion_mass(i) = onetwo_m(ip)             
-        ion_z(i)    = onetwo_z(ip)             
-
-        call prgen_ion_name(nint(ion_mass(i)),ion_z(i),ion_name(i))     
+        print '(t6,i2,1x,a,1x,a)',i,trim(onetwo_ion_name(ip)),expro_type(i)
+        expro_mass(i) = onetwo_m(ip)             
+        expro_z(i)    = onetwo_z(ip)             
+        
+        call prgen_ion_name(nint(expro_mass(i)),nint(expro_z(i)),expro_name(i))     
     
      endif
   enddo

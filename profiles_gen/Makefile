@@ -6,9 +6,7 @@ all:
 	cd ${GACODE_ROOT}/shared/fluxfit ; make
 	cd locpargen ; make
 	cd src ; make
-	cd exprotools ; make
 
 clean:
 	cd locpargen ; make clean
 	cd src ; make clean
-	cd exprotools ; make clean

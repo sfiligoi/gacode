@@ -8,7 +8,7 @@
 subroutine prgen_map_peqdsk
 
   use prgen_globals
-  use EXPRO_interface
+  use vpro
   
   implicit none
   
@@ -22,7 +22,7 @@ subroutine prgen_map_peqdsk
   call prgen_get_chi(nx,q,kappa,rmin,dpsi,rho,peqdsk_bref,peqdsk_arho)
 
   ni_d(:) = 10*peqdsk_ni(:)
-  if(peqdsk_fmt == 0) then
+  if (peqdsk_fmt == 0) then
      ! old p-file, assume missing density is carbon
      ni_imp(1,:) = 10*(peqdsk_ne(:)-peqdsk_ni(:)-peqdsk_nb(:))/6.0
      peqdsk_nimp  = 1
@@ -30,7 +30,7 @@ subroutine prgen_map_peqdsk
      peqdsk_m(1)  = 2.0
      peqdsk_z(2)  = 6.0
      peqdsk_m(2)  = 12.0
-     if(peqdsk_nbeams == 1) then
+     if (peqdsk_nbeams == 1) then
         peqdsk_z(3)  = 1.0
         peqdsk_m(3)  = 2.0
      endif
@@ -53,8 +53,11 @@ subroutine prgen_map_peqdsk
   !---------------------------------------------------------
   ! Map profile data onto single array:
   !
+  peqdsk_nion = 1+peqdsk_nimp+peqdsk_nbeams
+
   EXPRO_n_exp = nx
-  call EXPRO_alloc('./',1)
+  EXPRO_n_ion = peqdsk_nion
+  call vpro_init(1)
   !
   EXPRO_rho(:)  = rho(:)
   EXPRO_rmin(:) = rmin(:)
@@ -107,5 +110,9 @@ subroutine prgen_map_peqdsk
 
   ! vpol
   EXPRO_vpol(:,:) = 0.0
+
+  expro_mass = peqdsk_m(1:expro_n_ion)
+  expro_z    = peqdsk_z(1:expro_n_ion)
+  
 
 end subroutine prgen_map_peqdsk

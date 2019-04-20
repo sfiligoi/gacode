@@ -82,10 +82,6 @@ module prgen_globals
 
   ! Ion name,type,mass,charge
   integer :: n_ion
-  character (len=6), dimension(n_ion_max) :: ion_name
-  character (len=7), dimension(n_ion_max) :: ion_type
-  real, dimension(n_ion_max) :: ion_mass
-  integer, dimension(n_ion_max) :: ion_z
   character (len=7) :: type_therm = '[therm]'
   character (len=7) :: type_fast  = '[fast] '
 
@@ -100,7 +96,6 @@ module prgen_globals
   integer :: onetwo_nb
   integer :: onetwo_npsi
   integer :: onetwo_nion
-  integer :: onetwo_nion_tot
   integer :: onetwo_nprim
   integer :: onetwo_nimp
   integer :: onetwo_nneu

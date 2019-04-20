@@ -8,7 +8,7 @@
 subroutine prgen_map_corsica
 
   use prgen_globals
-  use EXPRO_interface
+  use vpro
   
   implicit none
 
@@ -21,7 +21,8 @@ subroutine prgen_map_corsica
   ! Map profile data onto single array:
   !
   EXPRO_n_exp = corsica_nvals
-  call EXPRO_alloc('./',1)
+  EXPRO_n_ion = 2
+  call vpro_init(1)
   !
   EXPRO_rho(:)       = rho(:)
   EXPRO_rmin(:)      = rmin(:)

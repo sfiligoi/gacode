@@ -2,40 +2,30 @@
 ! prgen_read_inputprofiles.f90
 !
 ! PURPOSE:
-!  Read input.profiles.gen
+!  Read input.profiles
 !--------------------------------------------------------------
 
 subroutine prgen_read_inputprofiles
 
   use prgen_globals
-  use EXPRO_interface
+  use vpro
 
   implicit none
 
   integer :: i
 
-  EXPRO_ctrl_quasineutral_flag = 0
-  EXPRO_ctrl_numeq_flag = 0 
+  expro_ctrl_quasineutral_flag = 0
+  expro_ctrl_numeq_flag = 0 
   
-  call EXPRO_alloc('./',1) 
-  call EXPRO_read
+  call vpro_read('./')
   
-  nx    = EXPRO_n_exp
-  n_ion = EXPRO_n_ion
+  nx    = expro_n_exp
+  n_ion = expro_n_ion
 
   call allocate_internals
 
-  ! Needed for disagnostic printing
-  rmin(:) = EXPRO_rmin(:)
-  rmaj(:) = EXPRO_rmaj(:)
-
-  ! Need to close then reopen as usual in map
-  call EXPRO_alloc('./',0) 
-
-  open(unit=1,file='input.profiles.header',status='old')
-  do i=1,n_ion
-     read(1,*) ion_z(i),ion_mass(i),ion_type(i)
-  enddo
-  close(1)
-     
+  ! Needed for diagnostic printing
+  rmin(:) = expro_rmin(:)
+  rmaj(:) = expro_rmaj(:)
+       
 end subroutine prgen_read_inputprofiles
