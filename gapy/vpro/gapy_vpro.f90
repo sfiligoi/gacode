@@ -1,11 +1,11 @@
 module vpro
 
   ! Fundamental input
-  integer, parameter :: ntag = 40
-  character*12 :: infile = 'input.gacode'
+  integer, parameter, private :: ntag = 40
+  character*12, private :: infile = 'input.gacode'
 
-  character*2 :: ident='# '
-  character*20, dimension(ntag) :: tag = (/&
+  character*2, private :: ident='# '
+  character*20, dimension(ntag), private :: tag = (/&
        'nexp      ',& !1
        'nion      ',& !2
        'mass      ',& !3

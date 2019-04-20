@@ -1,5 +1,5 @@
 !--------------------------------------------------------
-! EXPRO_write_original.f90
+! expro_write_original.f90
 !
 ! PURPOSE:
 !  Rewrite original quantities to input.profiles
@@ -9,37 +9,35 @@
 !   about sign of q is retained in IPCCW and BTCCW.  
 !--------------------------------------------------------
 
-subroutine EXPRO_write_original(io1,datafile1,io2,datafile2,tag)
+subroutine expro_write_original(datafile1,datafile2,tag)
 
-  use EXPRO_globals
-  use EXPRO_interface
+  use vpro
 
   implicit none
 
-  integer, intent(in) :: io1,io2
   character (len=*), intent(in) :: datafile1,datafile2
   character (len=*), intent(in) :: tag
 
   integer :: ierr
   character (len=80) :: line
-  
-  open(unit=io1,file=trim(path)//trim(datafile1),status='old')
-  open(unit=io2,file=trim(path)//trim(datafile2),status='replace')
 
-  write(io2,'(a)') '# '//tag
-  write(io2,'(a)') '# '
+  open(unit=2,file=trim(datafile1),status='old')
+  open(unit=1,file=trim(datafile2),status='replace')
+
+  write(1,'(a)') '# '//tag
+  write(1,'(a)') '# '
   do 
-     read(io1,'(a)',iostat=ierr) line
+     read(2,'(a)',iostat=ierr) line
      if (ierr < 0) exit
      if (line(2:4) /= 'rho') then
-        write(io2,'(a)') line
+        write(1,'(a)') line
      else
         exit
      endif
   enddo
-  call EXPRO_write(io2)
+  close(2)
   
-  close(io1)
-  close(io2)
-
-end subroutine EXPRO_write_original
+  ! NOTE: vpro will use and close unit 1
+  call vpro_write
+  
+end subroutine expro_write_original

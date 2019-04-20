@@ -3,7 +3,6 @@ program pneo
   use mpi
   use pneo_globals
   use neo_interface
-  use EXPRO_interface
 
   implicit none
 

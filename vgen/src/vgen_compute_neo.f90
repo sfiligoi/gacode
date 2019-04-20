@@ -1,10 +1,10 @@
 subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, &
      omega, omega_deriv, simntheta,iteration_flag)
 
+  use mpi
   use vgen_globals
   use neo_interface
-  use EXPRO_interface
-  use mpi
+  use vpro
 
   implicit none
 

@@ -3,7 +3,7 @@ subroutine vgen_init
   use mpi
   use vgen_globals
   use neo_interface
-  use EXPRO_interface
+  use vpro
 
   implicit none
   integer :: num_ele
@@ -67,10 +67,6 @@ subroutine vgen_init
      stop
   endif
 
-  ! Read experimental profiles using EXPRO library.
-
-  call EXPRO_palloc(MPI_COMM_WORLD,path,1)
-
   ! Reset species 1 density for quasineutrality
 
   EXPRO_ctrl_quasineutral_flag = 1
@@ -78,7 +74,7 @@ subroutine vgen_init
   do j=1,neo_n_species_in
      if (zfac(j) > 0.0) then
        EXPRO_ctrl_n_ion = EXPRO_ctrl_n_ion+1
-       EXPRO_z(j) = zfac(j)
+!       EXPRO_z(j) = zfac(j)
      endif
   enddo
 
@@ -103,19 +99,19 @@ subroutine vgen_init
      endif
   endif
 
-  call EXPRO_pread
+  call vpro_read('./')
 
-  if (EXPRO_error == 1) then
-     if (i_proc == 0) then
-        print '(a)', 'ERROR: (VGEN) Negative ion density'
-     endif
-     call MPI_finalize(i_err)
-     stop
-  endif
+  !if (EXPRO_error == 1) then
+  !   if (i_proc == 0) then
+  !      print '(a)', 'ERROR: (VGEN) Negative ion density'
+  !   endif
+  !   call MPI_finalize(i_err)
+  !   stop
+  !endif
 
   ! Write the derived quantities to input.profiles.extra
 
-  if (i_proc == 0) call EXPRO_write_derived(1,'input.profiles.extra')
+  !if (i_proc == 0) call EXPRO_write_derived(1,'input.profiles.extra')
 
   ! Set sign of btccw and ipccw from sign of b and q from EXPRO
   neo_btccw_in = -EXPRO_signb

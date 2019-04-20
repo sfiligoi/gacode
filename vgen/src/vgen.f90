@@ -1,3 +1,7 @@
+! NOTES
+! - negative ion density check (part of sanity checker)
+
+
 !------------------------------------------------------------------------
 ! vgen.f90
 !
@@ -12,7 +16,7 @@ program vgen
   use mpi
   use vgen_globals
   use neo_interface
-  use EXPRO_interface
+  use vpro
 
   implicit none
 
@@ -457,11 +461,11 @@ program vgen
      ! Generate new input.profiles.* files
 
      ! 1. input.profiles
-     call EXPRO_write_original(1,'input.profiles',2,'input.profiles.new',' ')
+     call expro_write_original('input.gacode','input.gacode.new',' ')
 
      ! 2. input.profiles.extra
-     call EXPRO_compute_derived
-     call EXPRO_write_derived(1,'input.profiles.extra')
+     !call EXPRO_compute_derived
+     !call EXPRO_write_derived(1,'input.profiles.extra')
 
      ! 3. input.profiles.jbs
      open(unit=1,file='input.profiles.jbs',status='replace')
@@ -499,8 +503,6 @@ program vgen
   deallocate(jtor_sauter)
   deallocate(pflux_sum)
   deallocate(i_glob)
-
-  call EXPRO_palloc(MPI_COMM_WORLD,path,0)
 
   cpu_tot_out = MPI_Wtime()
 

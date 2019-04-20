@@ -1,8 +1,7 @@
 subroutine locpargen_cgyro
 
   use locpargen_globals
-  use EXPRO_interface
-  use EXPRO_locsim_interface
+  use expro_locsim_interface
 
   implicit none
 
@@ -47,8 +46,8 @@ subroutine locpargen_cgyro
   write(1,10) 'S_DELTA=',s_delta_loc
   write(1,10) 'ZETA=',zeta_loc
   write(1,10) 'S_ZETA=',s_zeta_loc
-  write(1,11) 'IPCCW=', -EXPRO_signq*EXPRO_signb
-  write(1,11) 'BTCCW=', -EXPRO_signb
+  write(1,10) 'IPCCW=',ipccw
+  write(1,10) 'BTCCW=',btccw
   write(1,*)
   write(1,11) 'N_FIELD=', 2
   write(1,10) 'BETAE_UNIT=',betae_unit

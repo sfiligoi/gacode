@@ -10,11 +10,11 @@
 
 subroutine tgyro_write_data(i_print)
 
+  use mpi
   use tgyro_globals
   use tgyro_ped
-  use EXPRO_interface
-  use mpi
   use tgyro_iteration_variables, only : i_tran_loop
+  use vpro
 
   implicit none
 
@@ -55,8 +55,7 @@ subroutine tgyro_write_data(i_print)
 
   if (tgyro_write_profiles_flag /= 0 .and. i_print > 0) then 
 
-     call EXPRO_palloc(MPI_COMM_WORLD,'./',1)
-     call EXPRO_pread
+     call vpro_read('./')
 
      call tgyro_profile_reintegrate
 
@@ -81,28 +80,24 @@ subroutine tgyro_write_data(i_print)
 
         call date_and_time(DATE=date_str,TIME=time_str)
         msg_str = 'Profiles modified by TGYRO '//trim(date_str)//' '//trim(time_str)
-        
+
         if (tgyro_write_profiles_flag == -1) then
            ! Output for each iteration
            write(ntag,'(i0)') i_tran
-           call EXPRO_write_original(&
-                1,'input.profiles',&
-                2,'input.profiles.'//trim(ntag),trim(msg_str))
+           call expro_write_original(&
+                'input.gacode',&
+                'input.gacode.'//trim(ntag),trim(msg_str))
         endif
 
         if (i_tran_loop == tgyro_relax_iterations .or. converged) then
            ! Output for last iteration
-           call EXPRO_write_original(&
-                1,'input.profiles',&
-                2,'input.profiles.new',trim(msg_str))
+           call expro_write_original(&
+                'input.gacode',&
+                'input.gacode.new',trim(msg_str))
 
-           call EXPRO_compute_derived
-           call EXPRO_write_derived(1,'input.profiles.extra')
         endif
 
      endif
-
-     call EXPRO_palloc(MPI_COMM_WORLD,'./',0)
 
   endif
 

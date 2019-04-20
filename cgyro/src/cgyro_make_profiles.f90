@@ -2,7 +2,7 @@ subroutine cgyro_make_profiles
 
   use cgyro_globals
   use cgyro_io
-  use EXPRO_locsim_interface
+  use expro_locsim_interface
 
   implicit none
 

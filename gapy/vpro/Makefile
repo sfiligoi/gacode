@@ -12,9 +12,9 @@ OBJECTS = gapy_vpro.o \
           gapy_vpro_util.o \
           gapy_vpro_comm.o \
           expro_locsim_interface.o \
+          expro_locsim_alloc.o \
           expro_locsim_profiles.o \
-          expro_locsim_alloc.o 
-
+          expro_write_original.o
 
 .SUFFIXES : .o .f90
 
