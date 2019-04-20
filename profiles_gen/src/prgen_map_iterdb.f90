@@ -18,7 +18,6 @@ subroutine prgen_map_iterdb
   implicit none
 
   integer :: i
-  integer :: ip
   integer :: n0
 
   do i=1,nx
@@ -163,47 +162,45 @@ subroutine prgen_map_iterdb
   endif
 
   !---------------------------------------------------------
-  ! Map profile data into EXPRO interface variables
+  ! Map profile data into expro interface variables
   !
   expro_n_exp = nx
   expro_n_ion = n0
   call vpro_init(1)
   !
-  EXPRO_rho  = rho
-  EXPRO_rmin = rmin(:)
-  EXPRO_rmaj = rmaj(:)
+  expro_rho  = rho
+  expro_rmin = rmin(:)
+  expro_rmaj = rmaj(:)
   ! COORDINATES: set sign of q
-  EXPRO_q = abs(q(:))*ipccw*btccw
-  EXPRO_kappa = kappa(:)
-  EXPRO_delta = delta(:)
-  EXPRO_te = onetwo_te(:)
-  EXPRO_ne = onetwo_ene(:)*1e-19
-  EXPRO_z_eff = onetwo_zeff(:)
-  EXPRO_flow_mom = flow_mom(:)
-  EXPRO_pow_e = pow_e(:)
-  EXPRO_pow_i = pow_i(:)
-  EXPRO_pow_ei = pow_ei(:)
-  EXPRO_zeta = zeta(:)
-  EXPRO_flow_beam = flow_beam(:)
-  EXPRO_flow_wall = flow_wall_exp(:)
-  EXPRO_sbeame = onetwo_sbeame(:)
-  EXPRO_sbcx = sbcx_d(:)
-  EXPRO_sscxl = onetwo_sscxl(:)
-  EXPRO_zmag = zmag(:)
-  EXPRO_ptot = p_tot(:) ! Total pressure
+  expro_q = abs(q(:))*ipccw*btccw
+  expro_kappa = kappa(:)
+  expro_delta = delta(:)
+  expro_te = onetwo_te(:)
+  expro_ne = onetwo_ene(:)*1e-19
+  expro_z_eff = onetwo_zeff(:)
+  expro_flow_mom = flow_mom(:)
+  expro_pow_e = pow_e(:)
+  expro_pow_i = pow_i(:)
+  expro_pow_ei = pow_ei(:)
+  expro_zeta = zeta(:)
+  expro_flow_beam = flow_beam(:)
+  expro_flow_wall = flow_wall_exp(:)
+  expro_sbeame = onetwo_sbeame(:)
+  expro_sbcx = sbcx_d(:)
+  expro_sscxl = onetwo_sscxl(:)
+  expro_zmag = zmag(:)
+  expro_ptot = p_tot(:) ! Total pressure
   ! COORDINATES: set sign of poloidal flux
-  EXPRO_polflux = abs(dpsi(:))*(-ipccw)
+  expro_polflux = abs(dpsi(:))*(-ipccw)
 
-  ! reorder
   do i=1,expro_n_ion
-     ip = reorder_vec(i)
-     EXPRO_ni(i,:) = onetwo_enion_vec(ip,:)
-     EXPRO_ti(i,:) = onetwo_tion_vec(ip,:)
+     expro_ni(i,:) = onetwo_enion_vec(i,:)
+     expro_ti(i,:) = onetwo_tion_vec(i,:)
   enddo
 
   ! velocities
-  EXPRO_vpol = 0.0
-  EXPRO_vtor = 0.0
+  expro_vpol = 0.0
+  expro_vtor = 0.0
 
   ! Look for carbon as first impurity, and insert toroidal velocity at theta=0
 
@@ -218,23 +215,23 @@ subroutine prgen_map_iterdb
 
   ! Insert carbon toroidal velocity
   do i=1,expro_n_ion
-     if (reorder_vec(i) == onetwo_nprim+1) then
-        EXPRO_vtor(i,:) = vphi_carbon(:)
+     if (i == onetwo_nprim+1) then
+        expro_vtor(i,:) = vphi_carbon(:)
      endif
   enddo
 
   ! Use angrot as an initial approximation for omega0
-  EXPRO_w0 = -ipccw*onetwo_angrot(:)
-  
+  expro_w0 = -ipccw*onetwo_angrot(:)
+
   ! Additional powers (fusion and radiation)
   ! * for iterdb, put all radiated power in pow_e_line
-  EXPRO_pow_e_fus  = pow_e_fus(:)
-  EXPRO_pow_i_fus  = pow_i_fus(:)
-  EXPRO_pow_e_line = -pow_e_rad(:) !Sign convention is pow_e_line should be positive
+  expro_pow_e_fus  = pow_e_fus(:)
+  expro_pow_i_fus  = pow_i_fus(:)
+  expro_pow_e_line = -pow_e_rad(:) !Sign convention is pow_e_line should be positive
 
   ! Additional powers (external heating)
-  EXPRO_pow_e_aux = pow_e_aux(:)
-  EXPRO_pow_i_aux = pow_i_aux(:)
+  expro_pow_e_aux = pow_e_aux(:)
+  expro_pow_i_aux = pow_i_aux(:)
   !---------------------------------------------------------
 
   !---------------------------------------------------------
@@ -244,11 +241,11 @@ subroutine prgen_map_iterdb
      allocate(vpolc_exp(nx))
      allocate(vtorc_exp(nx))
      call prgen_read_cer
-     EXPRO_w0 = omega0(:)
-     do i=1,10
-        if (reorder_vec(i) == onetwo_nprim+1) then
-           EXPRO_vtor(i,:) = vtorc_exp(:)
-           EXPRO_vpol(i,:) = vpolc_exp(:)
+     expro_w0 = omega0(:)
+     do i=1,expro_n_ion
+        if (i == onetwo_nprim+1) then
+           expro_vtor(i,:) = vtorc_exp(:)
+           expro_vpol(i,:) = vpolc_exp(:)
         endif
      enddo
   endif
@@ -263,28 +260,18 @@ subroutine prgen_map_iterdb
      print '(t6,i2,1x,a)',i,trim(onetwo_ion_name(i))
   enddo
   !
-  ! Reordering
-  !
   print '(a)','INFO: (prgen_map_iterdb) Created these species'
   do i=1,expro_n_ion
-
-     ip = reorder_vec(i)
-
-     if (ip > expro_n_ion) then
-        print '(t6,i2,1x,a)',i,'[null]'
+     if (i > onetwo_nion) then
+        expro_type(i) = type_fast
      else
-        if (ip > onetwo_nion) then
-           expro_type(i) = type_fast
-        else
-           expro_type(i) = type_therm
-        endif
-        print '(t6,i2,1x,a,1x,a)',i,trim(onetwo_ion_name(ip)),expro_type(i)
-        expro_mass(i) = onetwo_m(ip)             
-        expro_z(i)    = onetwo_z(ip)             
-        
-        call prgen_ion_name(nint(expro_mass(i)),nint(expro_z(i)),expro_name(i))     
-    
+        expro_type(i) = type_therm
      endif
+     print '(t6,i2,1x,a,1x,a)',i,trim(onetwo_ion_name(i)),expro_type(i)
+     expro_mass(i) = onetwo_m(i)             
+     expro_z(i)    = onetwo_z(i)             
+
+     call prgen_ion_name(nint(expro_mass(i)),nint(expro_z(i)),expro_name(i))         
   enddo
   !---------------------------------------------------------
 

@@ -15,6 +15,8 @@ subroutine prgen_map_ufile
   use vpro
 
   implicit none
+
+  integer :: i
   real, dimension(:), allocatable :: powd_i
   real, dimension(:), allocatable :: powd_e
   real, dimension(:), allocatable :: powd_i_aux
@@ -22,8 +24,6 @@ subroutine prgen_map_ufile
   real, dimension(:), allocatable :: powd_i_fus
   real, dimension(:), allocatable :: powd_e_fus
   real, dimension(:), allocatable :: powd_e_rad
-
-  integer :: i,j
 
   allocate(powd_i(nx))
   allocate(powd_e(nx))
@@ -77,72 +77,64 @@ subroutine prgen_map_ufile
   !---------------------------------------------------------
   ! Map profile data onto single array:
   !
-  EXPRO_n_exp = nx
-  EXPRO_n_ion = ufile_nion
+  expro_n_exp = nx
+  expro_n_ion = ufile_nion
   call vpro_init(1)
   !
-  EXPRO_rho(:)       = rho(:)
-  EXPRO_rmin(:)      = rmin(:)
-  EXPRO_rmaj(:)      = rmaj(:)
-  EXPRO_q(:)         = q(:)
-  EXPRO_kappa(:)     = kappa(:)
-  EXPRO_delta(:)     = delta(:)
-  EXPRO_te(:)        = ufile_te(:)*1e-3
-  EXPRO_ne(:)        = ufile_ne(:)*1e-19
-  EXPRO_z_eff(:)     = ufile_zeff(:)
-  EXPRO_w0(:)        = 0.0
-  EXPRO_flow_mom(:)  = 0.0
-  EXPRO_pow_e(:)     = pow_e(:)
-  EXPRO_pow_i(:)     = pow_i(:)
-  EXPRO_pow_ei(:)    = pow_ei(:)
-  EXPRO_zeta(:)      = 0.0
-  EXPRO_flow_beam(:) = 0.0
-  EXPRO_flow_wall(:) = 0.0
-  EXPRO_zmag(:)      = 0.0
-  EXPRO_ptot(:)      = ufile_pres(:)
-  EXPRO_polflux      = dpsi(:)
+  expro_rho(:)       = rho(:)
+  expro_rmin(:)      = rmin(:)
+  expro_rmaj(:)      = rmaj(:)
+  expro_q(:)         = q(:)
+  expro_kappa(:)     = kappa(:)
+  expro_delta(:)     = delta(:)
+  expro_te(:)        = ufile_te(:)*1e-3
+  expro_ne(:)        = ufile_ne(:)*1e-19
+  expro_z_eff(:)     = ufile_zeff(:)
+  expro_w0(:)        = 0.0
+  expro_flow_mom(:)  = 0.0
+  expro_pow_e(:)     = pow_e(:)
+  expro_pow_i(:)     = pow_i(:)
+  expro_pow_ei(:)    = pow_ei(:)
+  expro_zeta(:)      = 0.0
+  expro_flow_beam(:) = 0.0
+  expro_flow_wall(:) = 0.0
+  expro_zmag(:)      = 0.0
+  expro_ptot(:)      = ufile_pres(:)
+  expro_polflux      = dpsi(:)
 
   !-----------------------------------------------------------------
-  ! Construct ion densities and temperatures with reordering
-  ! in general case.  Use vphi and vpol as temporary arrays.
+  ! Construct ion densities and temperatures
   !
   do i=1,ufile_nion
-     EXPRO_vtor(i,:) = ufile_ni(:,i)*1e-19
-     EXPRO_vpol(i,:) = ufile_ti(:,i)*1e-3
-  enddo
-
-  ! reorder
-  do i=1,n_ion_max
-     EXPRO_ni(i,:) = EXPRO_vtor(reorder_vec(i),:)
-     EXPRO_ti(i,:) = EXPRO_vpol(reorder_vec(i),:)
+     expro_ni(i,:) = ufile_ni(:,i)*1e-19
+     expro_ti(i,:) = ufile_ti(:,i)*1e-3
   enddo
 
   ! vphi
-  EXPRO_vtor(:,:) = 0.0
+  expro_vtor(:,:) = 0.0
 
   ! Insert carbon toroidal velocity
   do i=1,8
-     j = reorder_vec(i)
-     if (nint(ufile_m(j)) == 12) then
+     if (nint(ufile_m(i)) == 12) then
         print '(a)', 'INFO: (prgen) Assuming VROT is the carbon toroidal rotation.'
-        EXPRO_vtor(i,:) = -ufile_vrot(:)*(rmaj(:)+rmin(:))
+        expro_vtor(i,:) = -ufile_vrot(:)*(rmaj(:)+rmin(:))
      endif
   enddo
 
   ! vpol
-  EXPRO_vpol(:,:) = 0.0
+  expro_vpol(:,:) = 0.0
 
   ! Additional powers (fusion and radiation)
   ! * for iterdb, put all radiated power in pow_e_line
-  EXPRO_pow_e_fus(:) = pow_e_fus(:)
-  EXPRO_pow_i_fus(:) = pow_i_fus(:)
-  EXPRO_pow_e_sync(:) = 0.0
-  EXPRO_pow_e_brem(:) = 0.0
-  EXPRO_pow_e_line(:) = pow_e_rad(:)
+  expro_pow_e_fus(:) = pow_e_fus(:)
+  expro_pow_i_fus(:) = pow_i_fus(:)
+  expro_pow_e_sync(:) = 0.0
+  expro_pow_e_brem(:) = 0.0
+  expro_pow_e_line(:) = pow_e_rad(:)
 
   ! Additional powers (external heating)
-  EXPRO_pow_e_aux(:) = pow_e_aux(:)
-  EXPRO_pow_i_aux(:) = pow_i_aux(:)
+  expro_pow_e_aux(:) = pow_e_aux(:)
+  expro_pow_i_aux(:) = pow_i_aux(:)
 
 end subroutine prgen_map_ufile
 

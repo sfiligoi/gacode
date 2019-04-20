@@ -23,11 +23,8 @@
 program prgen
 
   use prgen_globals
-  use vpro
 
-  !--------------------------------------------------
   implicit none
-  !--------------------------------------------------
 
   !--------------------------------------------------
   ! Parse the config file
@@ -162,15 +159,12 @@ program prgen
   end select
   !---------------------------------------------------
 
-  !--------------------------------------------------
-  ! Set ipccw and btccw if not defined at input
-  if(ipccw == 0) then
-     ipccw = 1
-  endif
-  if(btccw == 0) then
-     btccw = -1
-  endif
-  !---------------------------------------------------
+  !-----------------------------------------------------
+  ! Set ipccw and btccw to standard DIII-D configuration
+  ! if not defined at input
+  if (ipccw == 0) ipccw = 1
+  if (btccw == 0) btccw = -1
+  !------------------------------------------------------
   
   select case (format_type)
 
@@ -189,7 +183,7 @@ program prgen
   case (7)
      call prgen_map_inputprofiles
   end select
-
+  
   call prgen_write
 
   ! Successful completion

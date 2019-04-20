@@ -16,31 +16,31 @@ subroutine prgen_map_null
   call prgen_get_chi(nx,q,kappa,rmin,dpsi,rho,null_bref,null_arho)
 
   !---------------------------------------------------------
-  ! Map profile data into EXPRO interface names:
+  ! Map profile data into expro interface names:
   !
   expro_n_exp = nx
   expro_n_ion = 1
   call vpro_init(1)
   
-  EXPRO_rho  = rho
-  EXPRO_rmin = rmin(:)
-  EXPRO_rmaj = rmaj(:)
+  expro_rho  = rho
+  expro_rmin = rmin(:)
+  expro_rmaj = rmaj(:)
   ! COORDINATES: set sign of q
-  EXPRO_q = abs(q(:))*ipccw*btccw
-  EXPRO_ptot = p_tot(:)
-  EXPRO_kappa = kappa(:)
-  EXPRO_delta = delta(:)
-  EXPRO_zeta = zeta(:)
-  EXPRO_zmag = zmag(:)
-  EXPRO_te = 1.0
-  EXPRO_ne = 1.0
+  expro_q = abs(q(:))*ipccw*btccw
+  expro_ptot = p_tot(:)
+  expro_kappa = kappa(:)
+  expro_delta = delta(:)
+  expro_zeta = zeta(:)
+  expro_zmag = zmag(:)
+  expro_te = 1.0
+  expro_ne = 1.0
 
   ! COORDINATES: set sign of poloidal flux
-  EXPRO_polflux = abs(dpsi(:))*(-ipccw)
+  expro_polflux = abs(dpsi(:))*(-ipccw)
 
   ! Ion temperatures and densities
-  EXPRO_ni(1,:) = 1.0
-  EXPRO_ti(1,:) = 1.0
+  expro_ni(1,:) = 1.0
+  expro_ti(1,:) = 1.0
 
  end subroutine prgen_map_null
 

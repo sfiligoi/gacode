@@ -12,15 +12,12 @@ subroutine prgen_read_inputprofiles
 
   implicit none
 
-  integer :: i
-
   expro_ctrl_quasineutral_flag = 0
   expro_ctrl_numeq_flag = 0 
   
   call vpro_read('./')
   
-  nx    = expro_n_exp
-  n_ion = expro_n_ion
+  nx = expro_n_exp
 
   call allocate_internals
 

@@ -20,46 +20,51 @@ subroutine prgen_map_corsica
   !---------------------------------------------------------
   ! Map profile data onto single array:
   !
-  EXPRO_n_exp = corsica_nvals
-  EXPRO_n_ion = 2
+  expro_n_exp = corsica_nvals
+  expro_n_ion = 2
   call vpro_init(1)
   !
-  EXPRO_rho(:)       = rho(:)
-  EXPRO_rmin(:)      = rmin(:)
-  EXPRO_rmaj(:)      = rmaj(:)
-  EXPRO_q(:)         = q(:)
-  EXPRO_kappa(:)     = kappa(:)
-  EXPRO_delta(:)     = delta(:)
-  EXPRO_te(:)        = corsica_te(:)
-  EXPRO_ne(:)        = corsica_ne(:)*10.
-  EXPRO_z_eff(:)     = corsica_zeff(:)
-  EXPRO_w0(:)        = 0.0      ! omega
-  EXPRO_flow_mom(:)  = 0.0      ! flow_mom
-  EXPRO_pow_e(:)     = 0.0      ! pow_e
-  EXPRO_pow_i(:)     = 0.0      ! pow_i 
-  EXPRO_pow_ei(:)    = 0.0      ! pow_ei_exp
-  EXPRO_zeta(:)      = zeta(:)
-  EXPRO_flow_beam(:) = 0.0      ! flow_beam
-  EXPRO_flow_wall(:) = 0.0      ! flow_wall_exp
-  EXPRO_zmag(:)      = zmag(:)  
-  EXPRO_ptot(:)      = p_tot(:)
-  EXPRO_polflux(:)   = dpsi(:)
+  expro_rho(:)       = rho(:)
+  expro_rmin(:)      = rmin(:)
+  expro_rmaj(:)      = rmaj(:)
+  expro_q(:)         = q(:)
+  expro_kappa(:)     = kappa(:)
+  expro_delta(:)     = delta(:)
+  expro_te(:)        = corsica_te(:)
+  expro_ne(:)        = corsica_ne(:)*10.
+  expro_z_eff(:)     = corsica_zeff(:)
+  expro_w0(:)        = 0.0      ! omega
+  expro_flow_mom(:)  = 0.0      ! flow_mom
+  expro_pow_e(:)     = 0.0      ! pow_e
+  expro_pow_i(:)     = 0.0      ! pow_i 
+  expro_pow_ei(:)    = 0.0      ! pow_ei_exp
+  expro_zeta(:)      = zeta(:)
+  expro_flow_beam(:) = 0.0      ! flow_beam
+  expro_flow_wall(:) = 0.0      ! flow_wall_exp
+  expro_zmag(:)      = zmag(:)  
+  expro_ptot(:)      = p_tot(:)
+  expro_polflux(:)   = dpsi(:)
 
   ! Construct ion densities and temperatures assuming corsica ion species
   ! (n D+T) is two species, each with 1/2 n_corsica and same temperature
 
+  expro_mass(:) = 2.0
+  expro_z(:) = 1.0
+  expro_type(:) = type_therm
+  expro_name(:) = 'D'
+  
   ! ni
-  EXPRO_ni(1,:) = 0.5 * corsica_ndt(:)*10.0
-  EXPRO_ni(2,:) = 0.5 * corsica_ndt(:)*10.0
+  expro_ni(1,:) = 0.5 * corsica_ndt(:)*10.0
+  expro_ni(2,:) = 0.5 * corsica_ndt(:)*10.0
   
   ! ti
-  EXPRO_ti(1,:) = corsica_ti(:)
-  EXPRO_ti(2,:) = corsica_ti(:)
+  expro_ti(1,:) = corsica_ti(:)
+  expro_ti(2,:) = corsica_ti(:)
 
   ! vphi
-  EXPRO_vtor(:,:) = 0.0
+  expro_vtor(:,:) = 0.0
 
   ! vpol
-  EXPRO_vpol(:,:) = 0.0
+  expro_vpol(:,:) = 0.0
   
 end subroutine prgen_map_corsica

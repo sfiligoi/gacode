@@ -3,10 +3,6 @@
 !
 ! PURPOSE:
 !  Map native plasmastate data onto input.profiles standard.
-!
-! NOTES:
-!  See prgen_map_iterdb.f90 for analogous routine for 
-!  iterbd data.
 !--------------------------------------------------------------
 
 subroutine prgen_map_plasmastate
@@ -17,7 +13,7 @@ subroutine prgen_map_plasmastate
   implicit none
 
   integer :: i,j
-  integer :: ip,ix
+  integer :: ix
   real, dimension(nx) :: dphidpsi
   real, dimension(:), allocatable :: f1_therm,f2_therm
   real, dimension(:), allocatable :: f1_lump,f2_lump,f3_lump
@@ -265,46 +261,45 @@ subroutine prgen_map_plasmastate
   !-------------------------------------------------------------------------------
 
   !---------------------------------------------------------
-  ! Map profile data into EXPRO interface variables
+  ! Map profile data into expro interface variables
   !
   expro_n_exp = nx
   expro_n_ion = plst_dp1_nspec_all-1
   call vpro_init(1)
   !
-  EXPRO_rho  = plst_rho
-  EXPRO_rmin = rmin(:)
-  EXPRO_rmaj = rmaj(:)
+  expro_rho  = plst_rho
+  expro_rmin = rmin(:)
+  expro_rmaj = rmaj(:)
   ! COORDINATES: set sign of q
-  EXPRO_q = abs(q(:))*ipccw*btccw
-  EXPRO_kappa = kappa(:)
-  EXPRO_delta = delta(:)
-  EXPRO_te = plst_ts(:,1)
-  EXPRO_ne = plst_ns(:,1)*1e-19
-  EXPRO_z_eff = plst_zeff(:)
-  EXPRO_w0 = omega0(:) 
-  EXPRO_flow_mom = flow_mom(:)
-  EXPRO_pow_e = pow_e(:)
-  EXPRO_pow_i = pow_i(:)
-  EXPRO_pow_ei = pow_ei(:)
-  EXPRO_zeta = zeta(:)
-  EXPRO_flow_beam = flow_beam(:)
-  EXPRO_flow_wall = 0.0
-  EXPRO_zmag = zmag(:)
-  EXPRO_ptot = p_tot ! total pressure, thermal + fast ion
+  expro_q = abs(q(:))*ipccw*btccw
+  expro_kappa = kappa(:)
+  expro_delta = delta(:)
+  expro_te = plst_ts(:,1)
+  expro_ne = plst_ns(:,1)*1e-19
+  expro_z_eff = plst_zeff(:)
+  expro_w0 = omega0(:) 
+  expro_flow_mom = flow_mom(:)
+  expro_pow_e = pow_e(:)
+  expro_pow_i = pow_i(:)
+  expro_pow_ei = pow_ei(:)
+  expro_zeta = zeta(:)
+  expro_flow_beam = flow_beam(:)
+  expro_flow_wall = 0.0
+  expro_zmag = zmag(:)
+  expro_ptot = p_tot ! total pressure, thermal + fast ion
   ! COORDINATES: This poloidal flux has correct sign (see above).
-  EXPRO_polflux = dpsi(:)
+  expro_polflux = dpsi(:)
 
-  EXPRO_ni = 0.0
-  EXPRO_ti = 0.0
+  expro_ni = 0.0
+  expro_ti = 0.0
 
   ! ni,ti,vphi
   do i=1,plst_dp1_nspec_all-1
-     ip = reorder_vec(i)
-     EXPRO_ni(i,:) = plst_ns(:,ip+1)*1e-19
-     EXPRO_ti(i,:) = plst_ts(:,ip+1)
-     if (trim(plst_all_name(ip+1)) == 'C') then
+     expro_ni(i,:) = plst_ns(:,i+1)*1e-19
+     expro_ti(i,:) = plst_ts(:,i+1)
+     if (trim(plst_all_name(i+1)) == 'C') then
         ! COORDINATES: -ipccw accounts for plasmastate toroidal angle convention
-        EXPRO_vtor(i,:) = -ipccw*plst_omegat(:)*(rmaj(:)+rmin(:))
+        expro_vtor(i,:) = -ipccw*plst_omegat(:)*(rmaj(:)+rmin(:))
      endif
   enddo
 
@@ -316,46 +311,41 @@ subroutine prgen_map_plasmastate
      allocate(vpolc_exp(nx))
      allocate(vtorc_exp(nx))
      call prgen_read_cer
-     EXPRO_w0 = omega0(:)
+     expro_w0 = omega0(:)
      do i=1,plst_dp1_nspec_all
-        if (trim(plst_all_name(ip+1)) == 'C') then
-           EXPRO_vtor(i,:) = vtorc_exp(:)
-           EXPRO_vpol(i,:) = vpolc_exp(:)
+        if (trim(plst_all_name(i+1)) == 'C') then
+           expro_vtor(i,:) = vtorc_exp(:)
+           expro_vpol(i,:) = vpolc_exp(:)
         endif
      enddo
   endif
   !---------------------------------------------------
 
   ! Additional powers (fusion and radiation)
-  EXPRO_pow_e_fus = pow_e_fus(:)
-  EXPRO_pow_i_fus  = pow_i_fus(:)
-  EXPRO_pow_e_sync = pow_e_sync(:)
-  EXPRO_pow_e_brem = pow_e_brem(:)
-  EXPRO_pow_e_line = pow_e_line(:)
+  expro_pow_e_fus = pow_e_fus(:)
+  expro_pow_i_fus  = pow_i_fus(:)
+  expro_pow_e_sync = pow_e_sync(:)
+  expro_pow_e_brem = pow_e_brem(:)
+  expro_pow_e_line = pow_e_line(:)
 
   ! Additional powers (external heating)
-  EXPRO_pow_e_aux = pow_e_aux(:)
-  EXPRO_pow_i_aux = pow_i_aux(:)
+  expro_pow_e_aux = pow_e_aux(:)
+  expro_pow_i_aux = pow_i_aux(:)
   !---------------------------------------------------------
 
   ! Ion reordering diagnostics
 
   print '(a)','INFO: (prgen_map_plasmastate) Created these species:'
   do i=1,expro_n_ion
-     ip = reorder_vec(i)
-     if (ip >= plst_dp1_nspec_all) then
-        print '(t6,i2,1x,3(a))',i,'[null]'
+     if (i+1 > plst_dp1_nspec_th) then
+        expro_type(i) = type_fast
      else
-        if (ip+1 > plst_dp1_nspec_th) then
-           expro_type(i) = type_fast
-        else
-           expro_type(i) = type_therm
-        endif
-        print '(t6,i2,1x,a,1x,a)',i,trim(plst_all_name(ip+1)),expro_type(i)
-        expro_mass(i) = plst_m_all(ip+1)/1.66e-27
-        expro_z(i)    = nint(plst_q_all(ip+1)/1.6022e-19)
-        call prgen_ion_name(nint(expro_mass(i)),expro_z(i),expro_name(i))     
+        expro_type(i) = type_therm
      endif
+     print '(t6,i2,1x,a,1x,a)',i,trim(plst_all_name(i+1)),expro_type(i)
+     expro_mass(i) = plst_m_all(i+1)/1.66e-27
+     expro_z(i)    = nint(plst_q_all(i+1)/1.6022e-19)
+     call prgen_ion_name(nint(expro_mass(i)),expro_z(i),expro_name(i))     
   enddo
 
 end subroutine prgen_map_plasmastate

@@ -9,9 +9,9 @@ subroutine prgen_map_peqdsk
 
   use prgen_globals
   use vpro
-  
+
   implicit none
-  
+
   integer :: i
   real, dimension(nx) :: ni_d
   real, dimension(3,nx) :: ni_imp
@@ -55,64 +55,64 @@ subroutine prgen_map_peqdsk
   !
   peqdsk_nion = 1+peqdsk_nimp+peqdsk_nbeams
 
-  EXPRO_n_exp = nx
-  EXPRO_n_ion = peqdsk_nion
+  expro_n_exp = nx
+  expro_n_ion = peqdsk_nion
   call vpro_init(1)
   !
-  EXPRO_rho(:)  = rho(:)
-  EXPRO_rmin(:) = rmin(:)
-  EXPRO_rmaj(:)  = rmaj(:)
+  expro_rho(:)  = rho(:)
+  expro_rmin(:) = rmin(:)
+  expro_rmaj(:)  = rmaj(:)
   ! COORDINATES: set sign of q
-  EXPRO_q(:)      = abs(q(:))*ipccw*btccw
-  EXPRO_kappa(:)  = kappa(:)
-  EXPRO_delta(:)  = delta(:)
-  EXPRO_te(:)     = peqdsk_te(:)
-  EXPRO_ne(:)     = peqdsk_ne(:)*10
-  EXPRO_z_eff(:)  = z_eff(:)
+  expro_q(:)      = abs(q(:))*ipccw*btccw
+  expro_kappa(:)  = kappa(:)
+  expro_delta(:)  = delta(:)
+  expro_te(:)     = peqdsk_te(:)
+  expro_ne(:)     = peqdsk_ne(:)*10
+  expro_z_eff(:)  = z_eff(:)
   ! COORDINATES: -ipccw accounts for DIII-D toroidal angle convention
-  EXPRO_w0(:)        = -ipccw*1e3*peqdsk_omgeb(:) 
-  EXPRO_flow_mom(:)  = 0.0               ! flow_mom
-  EXPRO_pow_e(:)     = peqdsk_pow_e(:)   ! pow_e
-  EXPRO_pow_i(:)     = peqdsk_pow_i(:)   ! pow_i 
-  EXPRO_pow_ei(:)    = 0.0               ! pow_ei_exp
-  EXPRO_zeta(:)      = zeta(:)
-  EXPRO_flow_beam(:) = 0.0               ! flow_beam
-  EXPRO_flow_wall(:) = 0.0               ! flow_wall_exp
-  EXPRO_zmag(:)      = zmag(:)  
-  EXPRO_ptot(:)      = p_tot(:)      
+  expro_w0(:)        = -ipccw*1e3*peqdsk_omgeb(:) 
+  expro_flow_mom(:)  = 0.0               ! flow_mom
+  expro_pow_e(:)     = peqdsk_pow_e(:)   ! pow_e
+  expro_pow_i(:)     = peqdsk_pow_i(:)   ! pow_i 
+  expro_pow_ei(:)    = 0.0               ! pow_ei_exp
+  expro_zeta(:)      = zeta(:)
+  expro_flow_beam(:) = 0.0               ! flow_beam
+  expro_flow_wall(:) = 0.0               ! flow_wall_exp
+  expro_zmag(:)      = zmag(:)  
+  expro_ptot(:)      = p_tot(:)      
   ! COORDINATES: set sign of poloidal flux
-  EXPRO_polflux = abs(dpsi(:))*(-ipccw)
+  expro_polflux = abs(dpsi(:))*(-ipccw)
 
-  ! ni, nc, nb
-  EXPRO_ni(1,:) = ni_d(:)
+  ! ni, nc, nb -and- ti, tc, tb
+  expro_ni(1,:) = ni_d(:)
+  expro_ti(1,:) = peqdsk_ti(:)
+  expro_type(1) = type_therm
   do i=1,peqdsk_nimp
-     EXPRO_ni(1+i,:) = ni_imp(i,:)
+     expro_ni(1+i,:) = ni_imp(i,:)
+     expro_ti(1+i,:) = peqdsk_ti(:)
+     expro_type(1+1) = type_therm
   enddo
-  EXPRO_ni(1+peqdsk_nimp+1,:) = ni_b(:)
-
-  ! ti, tc, tb
-  EXPRO_ti(1,:) = peqdsk_ti(:)
-  do i=1,peqdsk_nimp
-     EXPRO_ti(1+i,:) = peqdsk_ti(:)
-  enddo
-  do i=1,nx
-     if (peqdsk_nb(i) > epsilon(0.)) then
-        EXPRO_ti(1+peqdsk_nimp+1,i) = peqdsk_pb(i)/(peqdsk_nb(i)*10)/1.602
-     else
-        EXPRO_ti(1+peqdsk_nimp+1,i) = 0.0
-     endif
-  enddo
+  if (peqdsk_nbeams == 1) then
+     i = 1+peqdsk_nimp+1
+     expro_ni(i,:) = ni_b(:)
+     ! JC: need to check for zero density here?
+     expro_ti(i,:) = peqdsk_pb(:)/(peqdsk_nb(:)*10)/1.602
+     expro_type(i) = type_fast
+  endif
 
   ! vphi
   ! COORDINATES: -ipccw accounts for DIII-D toroidal angle convention
-  EXPRO_vtor(:,:) = 0.0
-  EXPRO_vtor(2,:) = -ipccw*1e3*peqdsk_omegat(:)*(rmaj(:)+rmin(:))
+  expro_vtor(:,:) = 0.0
+  expro_vtor(2,:) = -ipccw*1e3*peqdsk_omegat(:)*(rmaj(:)+rmin(:))
 
   ! vpol
-  EXPRO_vpol(:,:) = 0.0
+  expro_vpol(:,:) = 0.0
 
   expro_mass = peqdsk_m(1:expro_n_ion)
   expro_z    = peqdsk_z(1:expro_n_ion)
-  
+  do i=1,expro_n_ion
+     call prgen_ion_name(nint(expro_mass(i)),nint(expro_z(i)),expro_name(i))         
+  enddo
+
 
 end subroutine prgen_map_peqdsk
