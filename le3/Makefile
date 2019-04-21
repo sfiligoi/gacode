@@ -2,7 +2,7 @@ include ${GACODE_ROOT}/platform/build/make.inc.${GACODE_PLATFORM}
 
 export EXTRA_LIBS = \
        ${GACODE_ROOT}/le3/minpack/minpack_lib.a \
-       ${GACODE_ROOT}/gapy/src/geo_lib.a \
+       ${GACODE_ROOT}/gapy/geo/geo_lib.a \
        ${GACODE_ROOT}/shared/fluxfit/fluxfit_lib.a
 
 all:

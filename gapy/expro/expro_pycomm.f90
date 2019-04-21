@@ -1,3 +1,5 @@
+! Simplified (non-MPI) version of expro_comm routines suitable for f2py
+
 subroutine expro_icomm(p)
 
   implicit none

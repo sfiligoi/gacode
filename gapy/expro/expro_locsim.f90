@@ -204,6 +204,7 @@ subroutine expro_locsim_profiles(&
   expro_ctrl_n_ion = n_species_exp-1
 
   call expro_read(path)
+  if (allocated(rmin_exp)) call expro_locsim_alloc(0)
   call expro_locsim_alloc(1)
   !--------------------------------------------------------------
 
