@@ -9,7 +9,6 @@ endif
 LLIB=math_lib
 
 OBJECTS = math_constants.o \
-          energy_integral.o \
           gauss_legendre.o \
           i0.o \
           parallel_dim.o
