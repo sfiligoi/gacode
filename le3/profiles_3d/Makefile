@@ -1,14 +1,14 @@
 include ${GACODE_ROOT}/platform/build/make.inc.${GACODE_PLATFORM}
 
+ifeq ($(OPT),debug)
+   FFLAGS=${FDEBUG} -I$(NETCDF_INC)
+else
+   FFLAGS=${FOPT} -I$(NETCDF_INC)
+endif
+
 export EXTRA_LIBS = \
 	${GACODE_ROOT}/shared/fluxfit/fluxfit_lib.a \
    	${GACODE_ROOT}/shared/math/math_lib.a
-
-ifeq ($(OPT),debug)
-   FFLAGS=${FDEBUG}
-else
-   FFLAGS=${FOPT}
-endif
 
 EXEC = profiles_3d
 
@@ -22,7 +22,7 @@ $(EXEC): $(OBJECTS) $(EXTRA_LIBS)
 	$(FC) $(FMATH) $(FFLAGS) -o $(EXEC) $(OBJECTS) $(EXTRA_LIBS) $(LMATH) $(NETCDF)
 
 .f90.o :
-	$(FC) $(FMATH) $(FFLAGS) -I$(NETCDFF_INC) -c $<
+	$(FC) $(FMATH) $(FFLAGS) -c $<
 
 clean:
 	rm -f *.o $(EXEC)

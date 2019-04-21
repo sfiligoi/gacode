@@ -9,9 +9,7 @@ endif
 EXEC = locpargen
 
 EXTRA_LIBS = ${GACODE_ROOT}/gapy/vpro/vpro_lib.a \
-             ${GACODE_ROOT}/gapy/src/geo_lib.a \
-             ${GACODE_ROOT}/shared/math/math_lib.a \
-             ${GACODE_ROOT}/gapy/src/util_lib.a
+             ${GACODE_ROOT}/gapy/src/geo_lib.a 
 
 OBJECTS = locpargen_globals.o \
           locpargen_geo.o \

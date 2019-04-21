@@ -422,7 +422,7 @@ contains
        case ('pow_i')
           call vpro_vcomm(expro_pow_i,nexp)  
        case ('pow_ei')
-          call vpro_vcomm(expro_pow_e,nexp)
+          call vpro_vcomm(expro_pow_ei,nexp)
        case ('pow_e_aux')
           call vpro_vcomm(expro_pow_e_aux,nexp)  
        case ('pow_i_aux')

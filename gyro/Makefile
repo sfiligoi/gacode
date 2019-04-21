@@ -14,7 +14,6 @@ export EXTRA_LIBS = \
 	${GACODE_ROOT}/gapy/vpro/vpro_lib.a \
 	${GACODE_ROOT}/gapy/src/geo_lib.a \
 	${GACODE_ROOT}/shared/math/math_lib.a \
-	${GACODE_ROOT}/gapy/src/util_lib.a \
 	${GACODE_ROOT}/shared/UMFPACK/UMFPACK_lib.a \
 	${GACODE_ROOT}/gyro/BLEND/BLEND_lib.a \
 	${GACODE_ROOT}/gyro/TRANSPOSE/TRANSP_lib.a \

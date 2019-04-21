@@ -15,6 +15,7 @@ FC += ${FOMP} ${FACC}
 EXEC = cgyro
 
 OBJECTS = cgyro_globals.o \
+	  cgyro_timer_lib.o \
           cgyro_parallel_lib.o \
           cgyro_io.o \
           cgyro_advect_wavenumber.o \
@@ -42,6 +43,7 @@ OBJECTS = cgyro_globals.o \
 	  cgyro_make_profiles.o \
 	  cgyro_nl_direct.o \
 	  cgyro_nl_fftw.o \
+          cgyro_pseudospec.o \
           cgyro_read_input.o \
           cgyro_rhs.o \
           cgyro_run.o \
@@ -52,7 +54,7 @@ OBJECTS = cgyro_globals.o \
           cgyro_write_restart.o \
           cgyro_write_timedata.o \
           cgyro_write_hosts.o \
-          cgyro_filter.o 
+          cgyro_filter.o
 
 .SUFFIXES : .o .f90 .F90
 

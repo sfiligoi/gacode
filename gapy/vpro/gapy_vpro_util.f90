@@ -1,7 +1,6 @@
 subroutine vpro_compute_derived
 
   use vpro
-  use util
   use geo
 
   implicit none
@@ -26,7 +25,7 @@ subroutine vpro_compute_derived
   double precision :: fa,fb
   double precision :: theta(1)
 
-  
+
   if (expro_ctrl_n_ion == -1) expro_ctrl_n_ion = expro_n_ion
 
   !---------------------------------------------------------------------
@@ -358,6 +357,132 @@ subroutine vpro_skip_header(io)
 
 end subroutine vpro_skip_header
 
+!-------------------------------------------------------
+! bound_deriv.f90
+!
+! PURPOSE:
+!  Compute the finite-difference derivative of a 
+!  function (on a grid which may be unequally-spaced)
+!  using the Lagrange interpolating polynomial.  
+!-------------------------------------------------------
+
+subroutine bound_deriv(df,f,r,n)
+
+  implicit none
+
+  integer, intent(in) :: n
+
+  double precision, intent(inout), dimension(n) :: df
+  double precision, intent(in), dimension(n) :: f
+  double precision, intent(in),dimension(n) :: r
+
+  double precision :: r1,r2,r3,ra
+  double precision :: f1,f2,f3
+
+  integer :: i
+
+  do i=1,n
+
+     if (i == 1) then
+
+        ! Left boundary
+
+        ra = r(1)
+
+        r1 = r(1)
+        r2 = r(2)
+        r3 = r(3)
+        f1 = f(1)
+        f2 = f(2)
+        f3 = f(3)
+
+     else if (i == n) then
+
+        ! Right boundary
+
+        ra = r(n)
+
+        r1 = r(n-2)
+        r2 = r(n-1)
+        r3 = r(n)
+        f1 = f(n-2)
+        f2 = f(n-1)
+        f3 = f(n)
+
+     else
+
+        ! Interior
+
+        ra = r(i)
+
+        r1 = r(i-1)
+        r2 = r(i)
+        r3 = r(i+1)
+        f1 = f(i-1)
+        f2 = f(i)
+        f3 = f(i+1)
+
+     endif
+
+     ! Derivative of Lagrange interpolating polynomial:
+
+     df(i) = ((ra-r1)+(ra-r2))/(r3-r1)/(r3-r2)*f3 &
+          + ((ra-r1)+(ra-r3))/(r2-r1)/(r2-r3)*f2 &
+          + ((ra-r2)+(ra-r3))/(r1-r2)/(r1-r3)*f1
+
+  enddo
+
+end subroutine bound_deriv
+
+!-------------------------------------------------------
+! bound_extrap.f90
+!
+! PURPOSE:
+!  Extrapolate to left and right boundaries. 
+!-------------------------------------------------------
+
+subroutine bound_extrap(fa,fb,f,r,n)
+
+  implicit none
+
+  integer, intent(in) :: n
+
+  double precision, intent(inout) :: fa
+  double precision, intent(inout) :: fb
+  double precision, intent(in), dimension(n) :: f
+  double precision, intent(in), dimension(n) :: r
+
+  double precision :: r1,r2,r3
+  double precision :: ra,rb
+  double precision :: f1,f2,f3
+
+
+  ! Left boundary
+
+  ra = r(1)
+
+  r2 = r(2)
+  r3 = r(3)
+
+  f2 = f(2)
+  f3 = f(3)
+
+  fa = (ra-r2)/(r3-r2)*f3+(r3-ra)/(r3-r2)*f2
+
+  ! Right boundary
+
+  rb = r(n)
+
+  r1 = r(n-2)
+  r2 = r(n-1)
+
+  f1 = f(n-2)
+  f2 = f(n-1)
+
+  fb = (rb-r1)/(r2-r1)*f2+(r2-rb)/(r2-r1)*f1
+
+end subroutine bound_extrap
+
 subroutine vpro_writev(x,n)
 
   implicit none
@@ -390,3 +515,122 @@ subroutine vpro_writea(x,m,n)
 10 format(i3,1x,10(1pe14.7,1x))
 
 end subroutine vpro_writea
+
+!---------------------------------------------------------------
+! cub_spline.f90
+!
+! PURPOSE:
+!  Take known points x(1:n),y(1:n) and perform cubic spline
+!  interpolation at the node points xi(1:ni) to give yi(1:ni).
+!
+!  Use 'natural' cubic spline interpolation, where natural 
+!  means the second derivative is zero at the boundaries.
+!
+!  INPUT  : x(1:n),y(1:n),n,xi(1:ni),ni
+!
+!  OUTPUT : yi(1:ni)
+!
+!  The only requirements are 
+!  
+!  1. Ordered data: x(i+1) > x(i) and xi(i+1) > xi(i).
+!  2. Bounded data: xi(1) < x(1) and xi(ni) > x(n).
+!----------------------------------------------------------------
+
+subroutine cub_spline(x,y,n,xi,yi,ni)
+
+  !-------------------------------------------------------------
+  implicit none
+  !
+  integer :: i,ii
+  real :: x0 
+  !
+  integer, intent(in) :: n
+  real, intent(in), dimension(n) :: x,y
+  !
+  integer, intent(in) :: ni
+  real, dimension(ni) :: xi,yi
+  !
+  ! LAPACK working variables
+  !
+  integer :: info
+  integer, dimension(n) :: ipiv 
+  real, dimension(n) :: c,z
+  real, dimension(n-1) :: zl,zu,h
+  real, dimension(n-2) :: zu2
+  real, dimension(n-1) :: b,d
+  !-------------------------------------------------------------
+
+  !-------------------------------------------------------------
+  ! Check to see that interpolated point is inside data interval
+  !
+  if (xi(ni) > x(n)) then
+     print *,'ERROR: (cub_spline) Data above upper bound'
+     print *,'xi(ni) > x(n)',xi(ni),x(n) 
+  endif 
+  if (xi(1) < x(1)) then
+     print *,'ERROR: (cub_spline) Data below lower bound'
+     print *,'xi(1) < x(1)',xi(1),x(1) 
+  endif 
+  !-------------------------------------------------------------
+
+  !-------------------------------------------------------------
+  ! Define coefficients of spline matrix 
+  !
+  do i=1,n-1 
+     h(i)  = x(i+1)-x(i)
+     zl(i) = h(i)
+     zu(i) = h(i)
+  enddo
+  zl(n-1) = 0.0
+  zu(1)   = 0.0
+
+  z(1) = 1.0
+  c(1) = 0.0
+  do i=2,n-1
+     z(i) = 2.0*(h(i-1)+h(i))
+     c(i) = 3.0*((y(i+1)-y(i))/h(i)-(y(i)-y(i-1))/h(i-1))
+  enddo
+  z(n) = 1.0
+  c(n) = 0.0
+  !-------------------------------------------------------------
+
+  !-------------------------------------------------------------
+  ! Solve the system using LAPACK
+  !
+  call DGTTRF(n,zl,z,zu,zu2,ipiv,info)
+  call DGTTRS('N',n,1,zl,z,zu,zu2,ipiv,c,n,info)
+  !-------------------------------------------------------------
+
+  !-------------------------------------------------------------
+  ! Find remaining polynomial coefficients:
+  !
+  c(n) = 0.0
+  do i=1,n-1
+     b(i) = (y(i+1)-y(i))/h(i)-h(i)*(2.0*c(i)+c(i+1))/3.0
+     d(i) = (c(i+1)-c(i))/(3.0*h(i))
+  enddo
+  !-------------------------------------------------------------
+
+  !print *,c(:)
+  
+  !-------------------------------------------------------------
+  ! Using known polynomial coefficients, perform interpolation.
+  !
+  !  S(x) = y(i) + b(i) [x-x(i)] + c(i) [x-x(i)]^2 
+  !                                        + d(i) [x-x(i)]^3
+  !
+  i  = 1
+  ii = 1
+  do while (ii <= ni)
+     x0 = xi(ii)
+     if (x0 <= x(i+1)) then
+        yi(ii) = y(i)+(x0-x(i))*(b(i)+(x0-x(i))*(c(i)+(x0-x(i))*d(i)))
+        ii = ii+1
+     else
+        i = i+1
+     endif
+  enddo
+  !-------------------------------------------------------------
+
+end subroutine cub_spline
+

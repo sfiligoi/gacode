@@ -12,12 +12,12 @@ all:
 	cd ${GACODE_ROOT}/shared/fluxfit ; make
 	cd minpack ; make
 	cd src ; make
-	cd profiles_3d ; make
+#	cd profiles_3d ; make
 
 clean:
-	cd minpack ; make clean 
+	cd minpack ; make clean
 	cd src ; make clean
-	cd profiles_3d ; make clean
+#	cd profiles_3d ; make clean
 	cd ../modules ; rm -f le3*.mod
 	rm -f .VERSION
 .IGNORE:

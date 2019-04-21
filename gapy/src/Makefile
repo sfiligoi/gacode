@@ -10,16 +10,14 @@ FC += ${FOMP}
 
 .SUFFIXES : .o .f90
 
-all: geo_lib.a util_lib.a
+all: geo_lib.a
 
 geo_lib.a: gapy_geo.o
 	$(ARCH) geo_lib.a gapy_geo.o
-
-util_lib.a: gapy_util.o
-	$(ARCH) util_lib.a gapy_util.o
 
 .f90.o :
 	$(FC) $(FFLAGS) $(FMATH) -c $<
 
 clean:
 	rm -f *.o *.a *.mod
+	rm -f ${GACODE_ROOT}/modules/geo.mod

@@ -339,15 +339,6 @@ else
 fi
 #==========================================================
 
-#==========================================================
-# See if we are using experimental profiles
-
-if [ -f input.profiles ]
-then
-   python $GACODE_ROOT/profiles_gen/bin/profile_parse.py input.profiles
-fi
-#==========================================================
-
 #============================================================
 # Init mode
 if [ $INIT_FLAG -eq 1 ]

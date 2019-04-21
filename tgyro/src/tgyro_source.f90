@@ -138,7 +138,7 @@ subroutine tgyro_source
      p_e(:) = p_e_in(:) &              ! Total electron input power 
           -(p_exch(:)-p_exch_in(:)) &  ! Consistent e-i exchange
           -p_expwd(:)*tgyro_expwd_flag ! Turbulent exchange
-
+     
   case (3)
 
      ! Reactor with consistent alpha power, exchange and radiation.

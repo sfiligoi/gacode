@@ -9,24 +9,10 @@ endif
 LLIB=math_lib
 
 OBJECTS = math_constants.o \
-          bound_deriv.o \
-          bound_extrap.o \
-          cub_spline.o \
-          cub_spline_deriv.o \
-          cub_spline_deriv2.o \
           energy_integral.o \
-          gacode_system.o \
           gauss_legendre.o \
-          gauss_integ.o \
           i0.o \
-          math_scaleint.o \
-          math_scaleintv.o \
-          parallel_dim.o \
-          polydiff.o \
-          poly2diff.o \
-          proc_time.o \
-          pseudospec_lib.o \
-          timer_lib.o
+          parallel_dim.o
 
 .SUFFIXES : .o .f90 .F90 .f
 
