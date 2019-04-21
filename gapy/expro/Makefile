@@ -25,3 +25,4 @@ expro_lib.a: $(OBJECTS)
 
 clean:
 	rm -f *.o *.a *.mod
+	rm -f ${GACODE_ROOT}/modules/expr*.mod

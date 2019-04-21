@@ -13,7 +13,7 @@ subroutine gyro_read_experimental_profiles
 
   use gyro_globals
   use gyro_profile_exp
-  use vpro
+  use expro
 
   !---------------------------------------------------
   implicit none
@@ -28,7 +28,7 @@ subroutine gyro_read_experimental_profiles
   EXPRO_ctrl_numeq_flag = num_equil_flag
   EXPRO_ctrl_n_ion = n_spec-1
 
-  call vpro_read(path) 
+  call expro_read(path) 
   !---------------------------------------------------------------------
 
   !---------------------------------------------------------------------

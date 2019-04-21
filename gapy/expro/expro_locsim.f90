@@ -69,7 +69,7 @@ subroutine expro_locsim_alloc(flag)
   use expro_locsim_interface
 
   implicit none
-  integer, intent (in) :: flag  
+  integer, intent(in) :: flag  
 
   ! flag=0: deallocate
   ! flag=1: allocate
@@ -267,27 +267,27 @@ subroutine expro_locsim_profiles(&
   ! Use local cubic spline interpolation to get simulation 
   ! profiles from experimental (_exp) ones.
   ! 
-  call cub_spline(rmin_exp,expro_rmaj/a_meters,expro_n_exp,rmin,rmaj_loc,1)
-  call cub_spline(rmin_exp,expro_q,expro_n_exp,rmin,q_loc,1)
-  call cub_spline(rmin_exp,expro_s,expro_n_exp,rmin,s_loc,1)
-  call cub_spline(rmin_exp,expro_drmaj,expro_n_exp,rmin,shift_loc,1)
-  call cub_spline(rmin_exp,expro_kappa,expro_n_exp,rmin,kappa_loc,1)
-  call cub_spline(rmin_exp,expro_skappa,expro_n_exp,rmin,s_kappa_loc,1)
-  call cub_spline(rmin_exp,expro_delta,expro_n_exp,rmin,delta_loc,1)
-  call cub_spline(rmin_exp,expro_sdelta,expro_n_exp,rmin,s_delta_loc,1)
-  call cub_spline(rmin_exp,expro_zeta,expro_n_exp,rmin,zeta_loc,1)
-  call cub_spline(rmin_exp,expro_szeta,expro_n_exp,rmin,s_zeta_loc,1)
-  call cub_spline(rmin_exp,expro_zmag/a_meters,expro_n_exp,rmin,zmag_loc,1)
-  call cub_spline(rmin_exp,expro_dzmag,expro_n_exp,rmin,dzmag_loc,1)
-  call cub_spline(rmin_exp,gamma_e_exp,expro_n_exp,rmin,gamma_e_loc,1)
-  call cub_spline(rmin_exp,gamma_p_exp,expro_n_exp,rmin,gamma_p_loc,1)
-  call cub_spline(rmin_exp,mach_exp,expro_n_exp,rmin,mach_loc,1)
-  call cub_spline(rmin_exp,expro_rhos,expro_n_exp,rmin,rhos_loc,1)
-  call cub_spline(rmin_exp,expro_cs,expro_n_exp,rmin,cs_loc,1)
-  call cub_spline(rmin_exp,expro_z_eff,expro_n_exp,rmin,z_eff_loc,1)
-  call cub_spline(rmin_exp,expro_bunit,expro_n_exp,rmin,b_unit_loc,1)
-  call cub_spline(rmin_exp,expro_rho,expro_n_exp,rmin,rho_norm_loc,1)
-  call cub_spline(rmin_exp,expro_polflux,expro_n_exp,rmin,psi_norm_loc,1)
+  call cub_spline1(rmin_exp,expro_rmaj/a_meters,expro_n_exp,rmin,rmaj_loc)
+  call cub_spline1(rmin_exp,expro_q,expro_n_exp,rmin,q_loc)
+  call cub_spline1(rmin_exp,expro_s,expro_n_exp,rmin,s_loc)
+  call cub_spline1(rmin_exp,expro_drmaj,expro_n_exp,rmin,shift_loc)
+  call cub_spline1(rmin_exp,expro_kappa,expro_n_exp,rmin,kappa_loc)
+  call cub_spline1(rmin_exp,expro_skappa,expro_n_exp,rmin,s_kappa_loc)
+  call cub_spline1(rmin_exp,expro_delta,expro_n_exp,rmin,delta_loc)
+  call cub_spline1(rmin_exp,expro_sdelta,expro_n_exp,rmin,s_delta_loc)
+  call cub_spline1(rmin_exp,expro_zeta,expro_n_exp,rmin,zeta_loc)
+  call cub_spline1(rmin_exp,expro_szeta,expro_n_exp,rmin,s_zeta_loc)
+  call cub_spline1(rmin_exp,expro_zmag/a_meters,expro_n_exp,rmin,zmag_loc)
+  call cub_spline1(rmin_exp,expro_dzmag,expro_n_exp,rmin,dzmag_loc)
+  call cub_spline1(rmin_exp,gamma_e_exp,expro_n_exp,rmin,gamma_e_loc)
+  call cub_spline1(rmin_exp,gamma_p_exp,expro_n_exp,rmin,gamma_p_loc)
+  call cub_spline1(rmin_exp,mach_exp,expro_n_exp,rmin,mach_loc)
+  call cub_spline1(rmin_exp,expro_rhos,expro_n_exp,rmin,rhos_loc)
+  call cub_spline1(rmin_exp,expro_cs,expro_n_exp,rmin,cs_loc)
+  call cub_spline1(rmin_exp,expro_z_eff,expro_n_exp,rmin,z_eff_loc)
+  call cub_spline1(rmin_exp,expro_bunit,expro_n_exp,rmin,b_unit_loc)
+  call cub_spline1(rmin_exp,expro_rho,expro_n_exp,rmin,rho_norm_loc)
+  call cub_spline1(rmin_exp,expro_polflux,expro_n_exp,rmin,psi_norm_loc)
   psi_norm_loc = psi_norm_loc/expro_polflux(expro_n_exp)
   psi_a_loc = expro_polflux(expro_n_exp)
 
@@ -295,12 +295,12 @@ subroutine expro_locsim_profiles(&
   beta_star_loc = 0.0  
   do i=1,n_species_exp
      ! Note: mapping is only done for n_species (not n_species_exp)
-     call cub_spline(rmin_exp,dens_exp(i,:),expro_n_exp,rmin,dens_loc(i),1)
-     call cub_spline(rmin_exp,temp_exp(i,:),expro_n_exp,rmin,temp_loc(i),1)
-     call cub_spline(rmin_exp,dlntdr_exp(i,:),expro_n_exp,rmin,dlntdr_loc(i),1)
-     call cub_spline(rmin_exp,dlnndr_exp(i,:),expro_n_exp,rmin,dlnndr_loc(i),1)
-     call cub_spline(rmin_exp,sdlntdr_exp(i,:),expro_n_exp,rmin,sdlntdr_loc(i),1)
-     call cub_spline(rmin_exp,sdlnndr_exp(i,:),expro_n_exp,rmin,sdlnndr_loc(i),1)
+     call cub_spline1(rmin_exp,dens_exp(i,:),expro_n_exp,rmin,dens_loc(i))
+     call cub_spline1(rmin_exp,temp_exp(i,:),expro_n_exp,rmin,temp_loc(i))
+     call cub_spline1(rmin_exp,dlntdr_exp(i,:),expro_n_exp,rmin,dlntdr_loc(i))
+     call cub_spline1(rmin_exp,dlnndr_exp(i,:),expro_n_exp,rmin,dlnndr_loc(i))
+     call cub_spline1(rmin_exp,sdlntdr_exp(i,:),expro_n_exp,rmin,sdlntdr_loc(i))
+     call cub_spline1(rmin_exp,sdlnndr_exp(i,:),expro_n_exp,rmin,sdlnndr_loc(i))
      beta_star_loc = beta_star_loc+dens_loc(i)*temp_loc(i)*(dlnndr_loc(i)+dlntdr_loc(i))
   enddo
   ! CGS beta calculation
@@ -319,8 +319,8 @@ subroutine expro_locsim_profiles(&
 
      do i=1,8
         do j=0,geo_ny_loc
-           call cub_spline(rmin_exp,geo_yin_exp(i,j,:),expro_n_exp,rmin, &
-                geo_yin_loc(i,j),1)
+           call cub_spline1(rmin_exp,geo_yin_exp(i,j,:),expro_n_exp,rmin, &
+                geo_yin_loc(i,j))
         enddo
      enddo
 
@@ -354,22 +354,22 @@ subroutine cub_spline(x,y,n,xi,yi,ni)
   implicit none
   !
   integer :: i,ii
-  real :: x0 
+  double precision :: x0 
   !
   integer, intent(in) :: n
-  real, intent(in), dimension(n) :: x,y
+  double precision, intent(in), dimension(n) :: x,y
   !
   integer, intent(in) :: ni
-  real, dimension(ni) :: xi,yi
+  double precision, dimension(ni) :: xi,yi
   !
   ! LAPACK working variables
   !
   integer :: info
   integer, dimension(n) :: ipiv 
-  real, dimension(n) :: c,z
-  real, dimension(n-1) :: zl,zu,h
-  real, dimension(n-2) :: zu2
-  real, dimension(n-1) :: b,d
+  double precision, dimension(n) :: c,z
+  double precision, dimension(n-1) :: zl,zu,h
+  double precision, dimension(n-2) :: zu2
+  double precision, dimension(n-1) :: b,d
   !-------------------------------------------------------------
 
   !-------------------------------------------------------------
@@ -446,20 +446,99 @@ subroutine cub_spline(x,y,n,xi,yi,ni)
 
 end subroutine cub_spline
 
-subroutine expro_skip_header(io)
+subroutine cub_spline1(x,y,n,xi,yi)
 
+  !-------------------------------------------------------------
   implicit none
+  !
+  integer :: i,ii
+  !
+  integer, intent(in) :: n
+  double precision, intent(in), dimension(n) :: x,y
+  !
+  double precision, intent(in) :: xi
+  double precision, intent(inout) :: yi
+  !
+  ! LAPACK working variables
+  !
+  integer :: info
+  integer, dimension(n) :: ipiv 
+  double precision, dimension(n) :: c,z
+  double precision, dimension(n-1) :: zl,zu,h
+  double precision, dimension(n-2) :: zu2
+  double precision, dimension(n-1) :: b,d
+  !-------------------------------------------------------------
 
-  integer, intent(in) :: io
-  character (len=1) :: cdummy
+  !-------------------------------------------------------------
+  ! Check to see that interpolated point is inside data interval
+  !
+  if (xi > x(n)) then
+     print *,'ERROR: (cub_spline) Data above upper bound'
+     print *,'xi(ni) > x(n)',xi,x(n) 
+  endif 
+  if (xi < x(1)) then
+     print *,'ERROR: (cub_spline) Data below lower bound'
+     print *,'xi(1) < x(1)',xi,x(1) 
+  endif 
+  !-------------------------------------------------------------
 
-  do
-     read(io,'(a)') cdummy     
-     if (cdummy /= '#') exit
+  !-------------------------------------------------------------
+  ! Define coefficients of spline matrix 
+  !
+  do i=1,n-1 
+     h(i)  = x(i+1)-x(i)
+     zl(i) = h(i)
+     zu(i) = h(i)
   enddo
-  backspace io 
+  zl(n-1) = 0.0
+  zu(1)   = 0.0
 
-end subroutine expro_skip_header
+  z(1) = 1.0
+  c(1) = 0.0
+  do i=2,n-1
+     z(i) = 2.0*(h(i-1)+h(i))
+     c(i) = 3.0*((y(i+1)-y(i))/h(i)-(y(i)-y(i-1))/h(i-1))
+  enddo
+  z(n) = 1.0
+  c(n) = 0.0
+  !-------------------------------------------------------------
+
+  !-------------------------------------------------------------
+  ! Solve the system using LAPACK
+  !
+  call DGTTRF(n,zl,z,zu,zu2,ipiv,info)
+  call DGTTRS('N',n,1,zl,z,zu,zu2,ipiv,c,n,info)
+  !-------------------------------------------------------------
+
+  !-------------------------------------------------------------
+  ! Find remaining polynomial coefficients:
+  !
+  c(n) = 0.0
+  do i=1,n-1
+     b(i) = (y(i+1)-y(i))/h(i)-h(i)*(2.0*c(i)+c(i+1))/3.0
+     d(i) = (c(i+1)-c(i))/(3.0*h(i))
+  enddo
+  !-------------------------------------------------------------
+
+  !-------------------------------------------------------------
+  ! Using known polynomial coefficients, perform interpolation.
+  !
+  !  S(x) = y(i) + b(i) [x-x(i)] + c(i) [x-x(i)]^2 
+  !                                        + d(i) [x-x(i)]^3
+  !
+  i  = 1
+  ii = 1
+  do while (ii <= 1)
+     if (xi <= x(i+1)) then
+        yi = y(i)+(xi-x(i))*(b(i)+(xi-x(i))*(c(i)+(xi-x(i))*d(i)))
+        ii = ii+1
+     else
+        i = i+1
+     endif
+  enddo
+  !-------------------------------------------------------------
+
+end subroutine cub_spline1
 
 !--------------------------------------------------------
 ! expro_write_original.f90
@@ -482,7 +561,7 @@ subroutine expro_write_original(datafile1,datafile2,tag)
   character (len=*), intent(in) :: tag
 
   integer :: ierr
-  character*80 :: line
+  character(len=80) :: line
 
   open(unit=2,file=trim(datafile1),status='old')
   open(unit=1,file=trim(datafile2),status='replace')

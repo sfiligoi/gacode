@@ -1,7 +1,7 @@
 subroutine vgen_getgeo
 
   use vgen_globals
-  use vpro
+  use expro
   use geo
 
   implicit none

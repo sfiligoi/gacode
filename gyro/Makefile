@@ -11,8 +11,8 @@ FC += ${FOMP}
 EXEC=gyro
 
 export EXTRA_LIBS = \
-	${GACODE_ROOT}/gapy/vpro/vpro_lib.a \
-	${GACODE_ROOT}/gapy/src/geo_lib.a \
+	${GACODE_ROOT}/gapy/expro/expro_lib.a \
+	${GACODE_ROOT}/gapy/geo/geo_lib.a \
 	${GACODE_ROOT}/shared/math/math_lib.a \
 	${GACODE_ROOT}/shared/UMFPACK/UMFPACK_lib.a \
 	${GACODE_ROOT}/gyro/BLEND/BLEND_lib.a \

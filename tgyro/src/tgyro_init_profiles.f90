@@ -10,7 +10,7 @@ subroutine tgyro_init_profiles
   use mpi
   use tgyro_globals
   use tgyro_ped
-  use vpro
+  use expro
 
   implicit none
 
@@ -137,7 +137,7 @@ subroutine tgyro_init_profiles
   EXPRO_ctrl_quasineutral_flag = 0
   EXPRO_ctrl_numeq_flag = loc_num_equil_flag
 
-  call vpro_read('./') 
+  call expro_read('./') 
 
   shot = 0
   

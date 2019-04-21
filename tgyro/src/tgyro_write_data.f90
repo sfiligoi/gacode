@@ -14,7 +14,7 @@ subroutine tgyro_write_data(i_print)
   use tgyro_globals
   use tgyro_ped
   use tgyro_iteration_variables, only : i_tran_loop
-  use vpro
+  use expro
 
   implicit none
 
@@ -55,7 +55,7 @@ subroutine tgyro_write_data(i_print)
 
   if (tgyro_write_profiles_flag /= 0 .and. i_print > 0) then 
 
-     call vpro_read('./')
+     call expro_read('./')
 
      call tgyro_profile_reintegrate
 

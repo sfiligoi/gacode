@@ -173,66 +173,66 @@ subroutine expro_compute_derived
   !
   ! - w0, w0p, vol, volp
   !
-  GEO_nfourier_in = expro_nfourier
-  GEO_signb_in    = expro_signb
+  geo_nfourier_in = expro_nfourier
+  geo_signb_in    = expro_signb
 
   r_min = expro_rmin(expro_n_exp)
 
   do i=2,expro_n_exp
 
-     ! Parameters to be passed to GEO library   
+     ! Parameters to be passed to geo library   
      !
      ! NOTE: dp/dr set to zero without loss of generality.
      ! 
-     GEO_rmin_in      = expro_rmin(i)/r_min
-     GEO_rmaj_in      = expro_rmaj(i)/r_min
-     GEO_drmaj_in     = expro_drmaj(i)
-     GEO_zmag_in      = expro_zmag(i)/r_min
-     GEO_dzmag_in     = expro_dzmag(i)
-     GEO_q_in         = expro_q(i)
-     GEO_s_in         = expro_s(i)
-     GEO_kappa_in     = expro_kappa(i)
-     GEO_s_kappa_in   = expro_skappa(i)
-     GEO_delta_in     = expro_delta(i)
-     GEO_s_delta_in   = expro_sdelta(i)
-     GEO_zeta_in      = expro_zeta(i)
-     GEO_s_zeta_in    = expro_szeta(i)
-     GEO_beta_star_in = 0.0
+     geo_rmin_in      = expro_rmin(i)/r_min
+     geo_rmaj_in      = expro_rmaj(i)/r_min
+     geo_drmaj_in     = expro_drmaj(i)
+     geo_zmag_in      = expro_zmag(i)/r_min
+     geo_dzmag_in     = expro_dzmag(i)
+     geo_q_in         = expro_q(i)
+     geo_s_in         = expro_s(i)
+     geo_kappa_in     = expro_kappa(i)
+     geo_s_kappa_in   = expro_skappa(i)
+     geo_delta_in     = expro_delta(i)
+     geo_s_delta_in   = expro_sdelta(i)
+     geo_zeta_in      = expro_zeta(i)
+     geo_s_zeta_in    = expro_szeta(i)
+     geo_beta_star_in = 0.0
      !
      theta(1) = 0.0
      if (expro_ctrl_numeq_flag == 0) then
-        ! Call GEO with model shape
-        GEO_model_in = 0
-        call GEO_interp(1,theta,.true.)
+        ! Call geo with model shape
+        geo_model_in = 0
+        call geo_interp(1,theta,.true.)
      else
-        ! Call GEO with general (numerical) shape
-        GEO_model_in = 1
-        GEO_fourier_in(1:4,0:GEO_nfourier_in) = expro_geo(:,:,i)/r_min
-        GEO_fourier_in(5:8,0:GEO_nfourier_in) = expro_dgeo(:,:,i)
-        call GEO_interp(1,theta,.true.)
-        if (minval(GEOV_jac_r) <= 0.0) then
-           print '(a,i3,a)','WARNING: (expro) Negative GEO Jacobian for i =',i,' in input.profiles'
+        ! Call geo with general (numerical) shape
+        geo_model_in = 1
+        geo_fourier_in(1:4,0:geo_nfourier_in) = expro_geo(:,:,i)/r_min
+        geo_fourier_in(5:8,0:geo_nfourier_in) = expro_dgeo(:,:,i)
+        call geo_interp(1,theta,.true.)
+        if (minval(geoV_jac_r) <= 0.0) then
+           print '(a,i3,a)','WARNING: (expro) Negative geo Jacobian for i =',i,' in input.profiles'
         endif
      endif
 
      ! V and dV/dr
-     expro_volp(i) = GEO_volume_prime*r_min**2
-     expro_vol(i)  = GEO_volume*r_min**3
+     expro_volp(i) = geo_volume_prime*r_min**2
+     expro_vol(i)  = geo_volume*r_min**3
 
      ! |grad r| at theta=0
-     expro_grad_r0(i) = GEO_grad_r0
+     expro_grad_r0(i) = geo_grad_r0
 
      ! <|grad r|> 
-     expro_ave_grad_r(i) = GEO_fluxsurfave_grad_r
+     expro_ave_grad_r(i) = geo_fluxsurfave_grad_r
 
      ! B_poloidal and B_toroidal [T] at theta=0
-     expro_bp0(i) = GEO_bp(1)*expro_bunit(i)
-     expro_bt0(i) = GEO_bt(1)*expro_bunit(i)
+     expro_bp0(i) = geo_bp(1)*expro_bunit(i)
+     expro_bt0(i) = geo_bt(1)*expro_bunit(i)
 
-     expro_thetascale(i) = GEO_thetascale
+     expro_thetascale(i) = geo_thetascale
 
      ! Plasma current [A] I = (1/mu0) Int[Bp dl] 
-     expro_ip(i) = 7.958e5*(GEO_bl*r_min*expro_bunit(i))
+     expro_ip(i) = 7.958e5*(geo_bl*r_min*expro_bunit(i))
 
   enddo
 
@@ -500,3 +500,18 @@ subroutine expro_writea(x,m,n)
 10 format(i3,1x,10(1pe14.7,1x))
 
 end subroutine expro_writea
+
+subroutine expro_skip_header(io)
+
+  implicit none
+
+  integer, intent(in) :: io
+  character(len=1) :: cdummy
+
+  do
+     read(io,'(a)') cdummy     
+     if (cdummy /= '#') exit
+  enddo
+  backspace io 
+
+end subroutine expro_skip_header

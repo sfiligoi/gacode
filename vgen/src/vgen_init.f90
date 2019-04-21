@@ -3,7 +3,7 @@ subroutine vgen_init
   use mpi
   use vgen_globals
   use neo_interface
-  use vpro
+  use expro
 
   implicit none
   integer :: num_ele
@@ -99,7 +99,7 @@ subroutine vgen_init
      endif
   endif
 
-  call vpro_read('./')
+  call expro_read('./')
 
   !if (EXPRO_error == 1) then
   !   if (i_proc == 0) then

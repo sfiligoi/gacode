@@ -8,7 +8,7 @@
 subroutine prgen_map_inputprofiles
 
   use prgen_globals
-  use vpro
+  use expro
 
   implicit none
 

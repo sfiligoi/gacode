@@ -12,7 +12,7 @@
 subroutine prgen_map_ufile
 
   use prgen_globals
-  use vpro
+  use expro
 
   implicit none
 
@@ -79,7 +79,7 @@ subroutine prgen_map_ufile
   !
   expro_n_exp = nx
   expro_n_ion = ufile_nion
-  call vpro_init(1)
+  call expro_init(1)
   !
   expro_rho(:)       = rho(:)
   expro_rmin(:)      = rmin(:)

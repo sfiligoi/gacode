@@ -8,7 +8,7 @@
 subroutine prgen_map_null
 
   use prgen_globals
-  use vpro
+  use expro
 
   implicit none
 
@@ -20,7 +20,7 @@ subroutine prgen_map_null
   !
   expro_n_exp = nx
   expro_n_ion = 1
-  call vpro_init(1)
+  call expro_init(1)
   
   expro_rho  = rho
   expro_rmin = rmin(:)

@@ -16,7 +16,7 @@ program vgen
   use mpi
   use vgen_globals
   use neo_interface
-  use vpro
+  use expro
 
   implicit none
 

@@ -7,8 +7,8 @@ program test
 
   real :: ipccw,btccw,a_meters
 
-  call expro_read_legacy
-  call expro_write
+  !call expro_read_legacy
+  !call expro_write
 
   call expro_read('./')
 

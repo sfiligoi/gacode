@@ -8,7 +8,7 @@
 subroutine prgen_map_corsica
 
   use prgen_globals
-  use vpro
+  use expro
   
   implicit none
 
@@ -22,7 +22,7 @@ subroutine prgen_map_corsica
   !
   expro_n_exp = corsica_nvals
   expro_n_ion = 2
-  call vpro_init(1)
+  call expro_init(1)
   !
   expro_rho(:)       = rho(:)
   expro_rmin(:)      = rmin(:)

@@ -7,8 +7,8 @@ else
 endif
 
 export EXTRA_LIBS = \
-	${GACODE_ROOT}/gapy/vpro/vpro_lib.a \
-        ${GACODE_ROOT}/gapy/src/geo_lib.a \
+	${GACODE_ROOT}/gapy/expro/expro_lib.a \
+        ${GACODE_ROOT}/gapy/geo/geo_lib.a \
 	${GACODE_ROOT}/shared/fluxfit/fluxfit_lib.a
 
 EXEC = prgen

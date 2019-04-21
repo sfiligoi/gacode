@@ -1,6 +1,6 @@
 subroutine prgen_swap
 
-  use vpro
+  use expro
   
   implicit none
 

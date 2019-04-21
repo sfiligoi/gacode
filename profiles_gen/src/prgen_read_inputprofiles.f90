@@ -8,14 +8,14 @@
 subroutine prgen_read_inputprofiles
 
   use prgen_globals
-  use vpro
+  use expro
 
   implicit none
 
   expro_ctrl_quasineutral_flag = 0
   expro_ctrl_numeq_flag = 0 
   
-  call vpro_read('./')
+  call expro_read('./')
   
   nx = expro_n_exp
 

@@ -13,7 +13,7 @@
 subroutine prgen_map_iterdb
 
   use prgen_globals
-  use vpro
+  use expro
 
   implicit none
 
@@ -166,7 +166,7 @@ subroutine prgen_map_iterdb
   !
   expro_n_exp = nx
   expro_n_ion = n0
-  call vpro_init(1)
+  call expro_init(1)
   !
   expro_rho  = rho
   expro_rmin = rmin(:)

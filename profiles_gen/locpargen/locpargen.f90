@@ -9,7 +9,7 @@
 program locpargen
 
   use locpargen_globals
-  use vpro
+  use expro
   use expro_locsim_interface
 
   implicit none
@@ -27,7 +27,7 @@ program locpargen
   ! We don't need the numerical eq. flag set for this routine.
   EXPRO_ctrl_numeq_flag = hasgeo
 
-  call vpro_read('./') 
+  call expro_read('./') 
 
   ! Minor radius
   a = EXPRO_rmin(EXPRO_n_exp)

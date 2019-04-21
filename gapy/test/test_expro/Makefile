@@ -12,7 +12,7 @@ FC += ${FOMP}
 
 EXTRA_LIBS = \
 	${GACODE_ROOT}/gapy/expro/expro_lib.a \
-	${GACODE_ROOT}/gapy/geo/geo_lib.a 
+	${GACODE_ROOT}/gapy/geo/geo_lib.a
 
 test: test.o
 	$(FC) -o test test.o ${EXTRA_LIBS} ${LMATH}
@@ -21,4 +21,4 @@ test: test.o
 	$(FC) $(FFLAGS) $(FMATH) -c $<
 
 clean:
-	rm -f *.o test input.gacode
+	rm -f *.o test

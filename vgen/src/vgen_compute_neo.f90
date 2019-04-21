@@ -4,7 +4,7 @@ subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, &
   use mpi
   use vgen_globals
   use neo_interface
-  use vpro
+  use expro
 
   implicit none
 

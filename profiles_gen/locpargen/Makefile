@@ -8,8 +8,8 @@ endif
 
 EXEC = locpargen
 
-EXTRA_LIBS = ${GACODE_ROOT}/gapy/vpro/vpro_lib.a \
-             ${GACODE_ROOT}/gapy/src/geo_lib.a 
+EXTRA_LIBS = ${GACODE_ROOT}/gapy/expro/expro_lib.a \
+             ${GACODE_ROOT}/gapy/geo/geo_lib.a 
 
 OBJECTS = locpargen_globals.o \
           locpargen_geo.o \
