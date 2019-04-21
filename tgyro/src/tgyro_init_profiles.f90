@@ -312,7 +312,7 @@ subroutine tgyro_init_profiles
   ! Z_eff:
   !
   if (loc_zeff_flag == 1) then
-     ! Set based on data in input.profiles
+     ! Set based on data in input.gacode
      call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_z_eff(:),n_exp,r,z_eff,n_r)
   else
      ! Set to unity

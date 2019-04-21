@@ -7,8 +7,8 @@
 !
 ! PURPOSE: 
 !  Driver for the vgen (velocity-generation) capability of NEO.  This 
-!  will write a new input.profiles with NEO-computed electric field 
-!  and/or velocities. A new input.profiles.extra will also be generated.
+!  will write a new input.gacode with NEO-computed electric field 
+!  and/or velocities. A new input.gacode.extra will also be generated.
 !------------------------------------------------------------------------
 
 program vgen
@@ -458,14 +458,14 @@ program vgen
      close(1)
      
      !----------------------------------------------------------------------
-     ! Generate new input.profiles.* files
+     ! Generate new input.gacode.* files
 
-     ! 1. input.profiles
+     ! 1. input.gacode
      call expro_write_original('input.gacode','input.gacode.new',' ')
 
-     ! 2. input.profiles.extra
+     ! 2. input.gacode.extra
      !call EXPRO_compute_derived
-     !call EXPRO_write_derived(1,'input.profiles.extra')
+     !call EXPRO_write_derived(1,'input.gacode.extra')
 
      ! 3. input.profiles.jbs
      open(unit=1,file='input.profiles.jbs',status='replace')

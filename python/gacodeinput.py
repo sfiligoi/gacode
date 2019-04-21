@@ -5,8 +5,7 @@
 #  Collection of classes for parsing of GACODE free-format input files.
 #
 # NOTES:
-#  SimpleInput  : input.gyro, input.neo, input.tglf input.glf23
-#  ProfileInput : input.profiles
+#  SimpleInput  : input.cgyro, input.neo, input.tglf
 #  ManagerInput : input.tgyro [see tgyro/bin/tgyro_parse.py]
 #----------------------------------------------------------------------
 

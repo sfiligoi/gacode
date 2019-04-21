@@ -2,7 +2,7 @@
 ! prgen_read_inputprofiles.f90
 !
 ! PURPOSE:
-!  Read input.profiles
+!  Read input.gacode
 !--------------------------------------------------------------
 
 subroutine prgen_read_inputprofiles

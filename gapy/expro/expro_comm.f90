@@ -59,15 +59,38 @@ subroutine expro_scomm(x,n)
   
   if (flag) then
      call MPI_COMM_RANK(MPI_COMM_WORLD,iproc,ierr)
+     if (iproc == 0) read(1,*) x
+     call MPI_BCAST(x,n,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
+  else
+     read(1,*) x
+  endif
+  
+end subroutine expro_scomm
+
+subroutine expro_lcomm(x,n)
+
+  use mpi
+
+  implicit none
+
+  integer, intent(in) :: n
+  double precision, intent(inout), dimension(n) :: x
+  integer :: ierr,iproc
+  logical :: flag
+  
+  call MPI_INITIALIZED(flag,ierr)
+  
+  if (flag) then
+     call MPI_COMM_RANK(MPI_COMM_WORLD,iproc,ierr)
      if (iproc == 0) read(1,10) x
      call MPI_BCAST(x,n,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
   else
      read(1,10) x
   endif
 
-10 format(10(1pe14.7))
+10 format(10(1pe14.7,1x))
 
-end subroutine expro_scomm
+end subroutine expro_lcomm
 
 subroutine expro_vcomm(x,n)
 

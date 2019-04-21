@@ -145,7 +145,7 @@ module expro
        expro_sdlnnidr,&
        expro_sdlntidr
 
-  ! input.profiles.geo dimension and arrays
+  ! input.gacode.geo dimension and arrays
 
   integer :: expro_nfourier
   double precision, dimension(:,:,:), allocatable :: expro_geo
@@ -368,9 +368,9 @@ contains
           if (allocated(expro_rho)) call expro_init(0)
           call expro_init(1) 
        case ('mass')
-          call expro_scomm(expro_mass,nion)
+          call expro_lcomm(expro_mass,nion)
        case ('z')
-          call expro_scomm(expro_z,nion)
+          call expro_lcomm(expro_z,nion)
        case ('bt_exp')
           call expro_rcomm(expro_b_ref) 
        case ('arho_exp')
@@ -449,10 +449,10 @@ contains
 
 99  close(1)
 
-    ! ** input.profiles.geo **
+    ! ** input.gacode.geo **
 
     nexp = expro_n_exp
-    open(unit=1,file=trim(path)//'input.profiles.geo',status='old',iostat=ierr)
+    open(unit=1,file=trim(path)//infile//'.geo',status='old',iostat=ierr)
     if (ierr == 0) then
        call expro_skip_header(1)
        call expro_icomm(expro_nfourier)
@@ -467,12 +467,10 @@ contains
        expro_nfourier = -1
     endif
     close(1)
-
+    
     ! BCAST HERE
 
     call expro_compute_derived
-
-30  format(1pe14.7)
 
   end subroutine expro_read
 

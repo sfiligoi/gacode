@@ -4,10 +4,10 @@
 #
 # PURPOSE:
 #  Top-level script for conversion of raw data into GYRO 
-#  format (input.profiles).
+#  format (input.gacode).
 #
 #  Autodetected profile formats:
-#   GACODE      (input.profiles)
+#   GACODE      (input.gacode)
 #   ITERDB      (ASCII iterdb)
 #   ITERDBNC    (netCDF iterdb)
 #   SWIM        (plasmastate)
@@ -54,7 +54,7 @@ then
    echo "Usage:       profiles_gen [options]"
    echo 
    echo "             Autodetected profile formats:"
-   echo "               GACODE      (input.profiles)"
+   echo "               GACODE      (input.gacode)"
    echo "               ITERDB      (text iterdb)"
    echo "               ITERDBNC    (netCDF iterdb)"
    echo "               SWIM        (plasmastate)"
@@ -75,7 +75,7 @@ then
    echo "             Working directory (default is present directory)"
    echo 
    echo "             -describe"
-   echo "             Print structure of current input.profiles to screen."
+   echo "             Print structure of current input.gacode to screen."
    echo 
    echo "             -V"
    echo "             Verbose (for debugging; use this if you get an error)."
@@ -97,7 +97,7 @@ then
    echo "             Merge EFIT gfile for high-precision geometry data."
    echo 
    echo "             -nfourier <int>"
-   echo "             Number of Fourier modes to retain in input.profiles.geo/input.geo. (default: 24)"
+   echo "             Number of Fourier modes to retain in input.gacode.geo/input.geo. (default: 24)"
    echo 
    echo "             -cer <vpol>"
    echo "             Merge data Er and velocity data from Solomon's cer datafile."
@@ -119,7 +119,7 @@ then
    echo "             EFIT gfile for high-precision geometry data (includes q and P_tot)."
    echo 
    echo "             -nfourier <int>"
-   echo "             Number of Fourier modes to retain in input.profiles.geo/input.geo. (default: 24)"
+   echo "             Number of Fourier modes to retain in input.gacode.geo/input.geo. (default: 24)"
    echo 
    echo "             -r <i1,i2,i3,i4,i5>"
    echo "             Reorder ions."
@@ -139,7 +139,7 @@ then
    echo "             EFIT gfile for high-precision geometry data (includes q and P_tot)."
    echo 
    echo "             -nfourier <int>"
-   echo "             Number of Fourier modes to retain in input.profiles.geo/input.geo. (default: 24)"
+   echo "             Number of Fourier modes to retain in input.gacode.geo/input.geo. (default: 24)"
    echo 
    echo "             -r <reorder sequence>"
    echo "             Reorder ions."
@@ -172,7 +172,7 @@ then
    echo "             EFIT gfile for high precision geometry data [REQUIRED] (includes q and P_tot)"
    echo 
    echo "             -nfourier <int>"
-   echo "             Number of Fourier modes to retain in input.profiles.geo/input.geo. (default 24)"
+   echo "             Number of Fourier modes to retain in input.gacode.geo/input.geo. (default 24)"
    echo
    echo "null Options"
    echo
@@ -183,7 +183,7 @@ then
    echo "             GFILE (geqdsk) containing flux-surface data [required]."
    echo 
    echo "             -nfourier <int>"
-   echo "             Number of Fourier modes to retain in input.profiles.geo/input.geo. (default: 24)"
+   echo "             Number of Fourier modes to retain in input.gacode.geo/input.geo. (default: 24)"
    echo
    echo "             -n_null <int>"
    echo "             Number of radial gridpoints (default: 40)"
@@ -205,16 +205,16 @@ then
    echo "             -omfitres <resolution>"
    echo "              <resolution>=low,medium,high (default medium)."
    echo
-   echo "input.profiles (simple passthrough if no gfile specified)"
+   echo "input.gacode (simple passthrough if no gfile specified)"
    echo
    echo "             -i <data>"
-   echo "             Data in input.profiles format."
+   echo "             Data in input.gacode format."
    echo
    echo "             -g <GFILE>"
    echo "             GFILE (geqdsk) containing flux-surface data."
    echo 
    echo "             -nfourier <int>"
-   echo "             Number of Fourier modes to retain in input.profiles.geo/input.geo. (default: 24)"
+   echo "             Number of Fourier modes to retain in input.gacode.geo/input.geo. (default: 24)"
    echo
    echo "VELOCITY GENERATION (VGEN) MODE"
    echo
@@ -292,16 +292,16 @@ then
    echo "    NEO will generate Er and all velocities:"
    echo 
    echo "    profiles_gen -i iterdb -g gfile"
-   echo "    profiles_gen -vgen -i input.profiles -er 2 -vel 1 -in DC -ix 2"
+   echo "    profiles_gen -vgen -i input.gacode -er 2 -vel 1 -in DC -ix 2"
    echo
    echo "    or for fast calculations"
-   echo "    profiles_gen -vgen -i input.profiles -er 2 -vel 1 -in DC_lowres -ix 2"
+   echo "    profiles_gen -vgen -i input.gacode -er 2 -vel 1 -in DC_lowres -ix 2"
    echo
    echo "(2) Typical usage for DIII-D plasmas with CER file available (2 steps)"
    echo "    NEO will take Er from CER file and generate all velocities:"
    echo 
    echo "    profiles_gen -i iterdb -g gfile -cer cerfile"
-   echo "    profiles_gen -vgen -i input.profiles -er 4 -vel 2 -in DC -ix 2"
+   echo "    profiles_gen -vgen -i input.gacode -er 4 -vel 2 -in DC -ix 2"
    echo 
 
    exit 1
@@ -601,13 +601,13 @@ then
      echo "ERROR: (profiles_gen) You need to build the locpargen executable."
      exit 1
   fi
-  if [ -f input.profiles.geo ]
+  if [ -f input.gacode.geo ]
   then
       HASGEO=1
   fi
   python $PRGEN_BIN/profile_parse.py $FILE
   cp $FILE.gen temp
-  mv temp input.profiles.gen
+  mv temp input.gacode.gen
   echo $LOC_RAD > input.locpargen
   echo $LOC_RHO >> input.locpargen
   echo $LOC_PSI >> input.locpargen
@@ -662,17 +662,17 @@ then
    # Tell NEO that its being run in subroutine mode by vgen.
    echo "SUBROUTINE_FLAG=1" >> input.neo 
 
-   cp ../$FILE input.profiles
+   cp ../$FILE input.gacode
    if [ -f "../$FILE.geo" ]
        then
-       cp ../$FILE.geo input.profiles.geo
+       cp ../$FILE.geo input.gacode.geo
    else
        echo "INFO: (profiles_gen) $FILE.geo not found -- using EQUILIBRIUM_MODEL=2"
        echo "EQUILIBRIUM_MODEL=2" >> input.neo
    fi
 
    python $NEO_DIR/bin/neo_parse.py
-   python $PRGEN_BIN/profile_parse.py input.profiles 
+   python $PRGEN_BIN/profile_parse.py input.gacode 
 
    # Construct vgen.dat
    echo "$VGEN_ER"  > vgen.dat
@@ -697,33 +697,33 @@ then
     $SIMDIR/vgen $NPROC $VGEN_EXE/vgen $NOMP $NUMA $MPINUMA
 
 
-   if [ -f "input.profiles.new" ]
+   if [ -f "input.gacode.new" ]
    then
-       > input.profiles
+       > input.gacode
        DATESTAMP=`date`
-       # Manage generated input.profiles and print diagnistics
-       echo "# VGEN: The file modified by VGEN on $DATESTAMP" >> input.profiles
+       # Manage generated input.gacode and print diagnistics
+       echo "# VGEN: The file modified by VGEN on $DATESTAMP" >> input.gacode
        if [ "$VGEN_ER" == "1" ] ; then 
-          echo "# VGEN: omega0 computed by force balance (-er 1)" >> input.profiles 
+          echo "# VGEN: omega0 computed by force balance (-er 1)" >> input.gacode 
        fi
        if [ "$VGEN_ER" == "2" ] ; then 
-          echo "# VGEN: omega0 computed by NEO with weak rotation (-er 2)" >> input.profiles
-          echo "# VGEN: matched toroidal velocity of species $VGEN_IX" >> input.profiles
+          echo "# VGEN: omega0 computed by NEO with weak rotation (-er 2)" >> input.gacode
+          echo "# VGEN: matched toroidal velocity of species $VGEN_IX" >> input.gacode
        fi
        if [ "$VGEN_ER" == "4" ] ; then 
-          echo "# VGEN: omega0 unchanged (-er 4)" >> input.profiles
+          echo "# VGEN: omega0 unchanged (-er 4)" >> input.gacode
        fi
        if [ "$VGEN_VEL" == "1" ] ; then 
-          echo "# VGEN: velocities computed by NEO with weak rotation (-vel 1)" >> input.profiles
+          echo "# VGEN: velocities computed by NEO with weak rotation (-vel 1)" >> input.gacode
        fi
        if [ "$VGEN_VEL" == "2" ] ; then 
-          echo "# VGEN: velocities computed by NEO with strong rotation (-vel 2)" >> input.profiles
+          echo "# VGEN: velocities computed by NEO with strong rotation (-vel 2)" >> input.gacode
        fi
 
-       cat input.profiles.new >> input.profiles
-       echo "INFO: (profiles_gen) VGEN created vgen/input.profiles [new data]"
-       echo "INFO: (profiles_gen) VGEN created vgen/input.profiles.extra    [diagnostics]"
-       echo "INFO: (profiles_gen) VGEN created vgen/input.profiles.jbs      [boostrap current]"
+       cat input.gacode.new >> input.gacode
+       echo "INFO: (profiles_gen) VGEN created vgen/input.gacode [new data]"
+       echo "INFO: (profiles_gen) VGEN created vgen/input.gacode.extra    [diagnostics]"
+       echo "INFO: (profiles_gen) VGEN created vgen/input.gacode.jbs      [boostrap current]"
    fi
 
    exit 0
@@ -733,8 +733,8 @@ fi
 #=============================================================
 # If we make it here, its time for cleanup
 #
-echo "INFO: (profiles_gen) Removing old input.profiles* files"
-rm -f input.profiles.geo input.profiles.extra
+echo "INFO: (profiles_gen) Removing old input.gacode* files"
+rm -f input.gacode.geo input.gacode.extra
 #=============================================================
 
 #=============================================================
@@ -1042,7 +1042,7 @@ if [ $VERBOSE_FLAG -eq 0 ]
 then
    rm -f $CONFIG fluxfit.* ingta o1gta grid.dat success
    rm -f *.ave out.com out.dim out.ufile.log
-   rm -f gfile out.expro.run pfile.*
+   rm -f gfile out.expro.run pfile.* out.gato.*
 else
    if [ -f "ingta" ] ; then
       mv ingta input.gato.ingta

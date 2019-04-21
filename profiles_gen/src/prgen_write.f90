@@ -37,7 +37,7 @@ subroutine prgen_write
   ! High-resolution geometry
   !
   if (efit_method > 1) then
-     write(1,'(a)') '# * An associated input.profiles.geo was generated'
+     write(1,'(a)') '# * An associated input.gacode.geo was generated'
      write(1,'(a)') '#'
      if ((format_type == 1 .or. format_type == 2)) then
         if (abs(dpsi_efit/dpsi_data-1) > 0.001) then
@@ -100,7 +100,7 @@ subroutine prgen_write
   ! Now we need to write the profile data
   !
   call expro_write
-  print '(a)','INFO: (prgen_write) Wrote input.profiles.'
+  print '(a)','INFO: (prgen_write) Wrote input.gacode.'
   !-------------------------------------------------------------------------------------
 
 20 format(5(a))

@@ -20,7 +20,7 @@ subroutine expro_rcomm(x)
 
 end subroutine expro_rcomm
 
-subroutine expro_scomm(x,n)
+subroutine expro_lcomm(x,n)
   
   implicit none
 
@@ -30,6 +30,17 @@ subroutine expro_scomm(x,n)
   read(1,10) x
 
 10 format(10(1pe14.7))
+
+end subroutine expro_lcomm
+
+subroutine expro_scomm(x,n)
+  
+  implicit none
+
+  integer, intent(in) :: n
+  double precision, intent(inout), dimension(n) :: x
+
+  read(1,*) x
 
 end subroutine expro_scomm
 

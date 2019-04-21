@@ -10,7 +10,7 @@ subroutine locpargen_geo
   open(unit=1,file='input.geo',status='replace')
   write(1,'(a)') '# input.geo'
   write(1,'(a)') '#'
-  write(1,'(a,f10.6)') '# NOTE: Derived from input.profiles.geo at r/a=',rmin_loc
+  write(1,'(a,f10.6)') '# NOTE: Derived from input.gacode.geo at r/a=',rmin_loc
   write(1,'(a)') '# Lengths normalized to a' 
   write(1,'(a,f10.6)') '# ASPECT_RATIO=',rmaj_loc
   write(1,'(a,f10.6)') '# SAFETY_FACTOR=',q_loc

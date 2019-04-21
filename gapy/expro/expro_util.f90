@@ -32,7 +32,7 @@ subroutine expro_compute_derived
   ! Sanity checks
   !
   if (expro_ctrl_numeq_flag == 1 .and. expro_nfourier == -1) then
-     print '(a)','ERROR: (expro) input.profiles.geo missing'
+     print '(a)','ERROR: (expro) input.gacode.geo missing'
      stop
   endif
   if (expro_ctrl_quasineutral_flag == -1) then
@@ -210,8 +210,8 @@ subroutine expro_compute_derived
         geo_fourier_in(1:4,0:geo_nfourier_in) = expro_geo(:,:,i)/r_min
         geo_fourier_in(5:8,0:geo_nfourier_in) = expro_dgeo(:,:,i)
         call geo_interp(1,theta,.true.)
-        if (minval(geoV_jac_r) <= 0.0) then
-           print '(a,i3,a)','WARNING: (expro) Negative geo Jacobian for i =',i,' in input.profiles'
+        if (minval(geov_jac_r) <= 0.0) then
+           print '(a,i3,a)','WARNING: (expro) Negative geo Jacobian for i =',i,' in input.gacode'
         endif
      endif
 

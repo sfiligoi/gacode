@@ -199,10 +199,8 @@ subroutine prgen_read_gato
   ! Explicitly set rmin=0 at origin
   g3rho(:,1:nfourier,1) = 0.0
 
-  open(unit=1,file='input.profiles.geo',status='replace')
-  write(1,'(a)') '# input.profiles.geo'
-  write(1,'(a)') '#'
-  write(1,'(a)') '# See https://fusion.gat.com/theory/input.profiles.geo for complete documentation.'
+  open(unit=1,file='input.gacode.geo',status='replace')
+  write(1,'(a)') '# input.gacode.geo'
   write(1,'(a)') '#'
   write(1,'(a)') '# File format:'
   write(1,'(a)') '#-------------------'
@@ -210,7 +208,7 @@ subroutine prgen_read_gato
   write(1,'(a)') '# a[4,0:nfourier,nx]'  
   write(1,'(a)') '#-------------------'
   write(1,'(a)') '#'
-  write(1,'(a)') '# NOTE: nx=EXPRO_n_exp is defined in input.profiles'
+  write(1,'(a)') '# NOTE: nx=EXPRO_n_exp is defined in input.gacode'
   write(1,*) nfourier
   write(1,'(1pe20.13)') g3rho(:,:,:)
   close(1)
@@ -226,6 +224,6 @@ subroutine prgen_read_gato
   deallocate(gato_bigr)
   deallocate(gato_bigz)
 
-  print '(a)','INFO: (prgen_read_gato) Wrote input.profiles.geo.'
+  print '(a)','INFO: (prgen_read_gato) Wrote input.gacode.geo.'
 
 end subroutine prgen_read_gato
