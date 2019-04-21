@@ -10,11 +10,15 @@ FC += ${FOMP}
 
 .SUFFIXES : .o .f90
 
+EXTRA_LIBS = \
+	${GACODE_ROOT}/gapy/expro/expro_lib.a \
+	${GACODE_ROOT}/gapy/geo/geo_lib.a 
+
 test: test.o
-	$(FC) -o test test.o ../../geo/geo_lib.a
+	$(FC) -o test test.o ${EXTRA_LIBS} ${LMATH}
 
 .f90.o :
 	$(FC) $(FFLAGS) $(FMATH) -c $<
 
 clean:
-	rm -f *.o test
+	rm -f *.o test input.gacode

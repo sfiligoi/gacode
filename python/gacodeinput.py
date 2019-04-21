@@ -259,9 +259,6 @@ class ManagerInput:
             else:
                 print('INFO: (gacodeinput.py) Found '+code+' input in '+basedir)
 
-            if os.path.isfile(basedir+'/input.profiles'):
-               os.system('python $GACODE_ROOT/profiles_gen/bin/profile_parse.py '+basedir+'/input.profiles')
-
             basefile = basedir+'/input.'+code
             tempfile = basefile+'.temp'
 

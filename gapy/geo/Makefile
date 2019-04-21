@@ -12,8 +12,8 @@ FC += ${FOMP}
 
 all: geo_lib.a
 
-geo_lib.a: gapy_geo.o
-	$(ARCH) geo_lib.a gapy_geo.o
+geo_lib.a: geo.o
+	$(ARCH) geo_lib.a geo.o
 
 .f90.o :
 	$(FC) $(FFLAGS) $(FMATH) -c $<

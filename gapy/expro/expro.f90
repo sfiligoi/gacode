@@ -1,11 +1,11 @@
-module vpro
+module expro
 
   ! Fundamental input
-  integer, parameter, private :: ntag = 40
-  character*12, private :: infile = 'input.gacode'
+  integer, parameter :: ntag = 40
+  character*12 :: infile = 'input.gacode'
 
-  character*2, private :: ident='# '
-  character*20, dimension(ntag), private :: tag = (/&
+  character*2 :: ident='# '
+  character*20, dimension(ntag) :: tag = (/&
        'nexp      ',& !1
        'nion      ',& !2
        'mass      ',& !3
@@ -164,7 +164,7 @@ module vpro
 
 contains
 
-  subroutine vpro_init(flag)
+  subroutine expro_init(flag)
 
     implicit none
 
@@ -340,9 +340,9 @@ contains
 
     endif
 
-  end subroutine vpro_init
+  end subroutine expro_init
 
-  subroutine vpro_read(path)
+  subroutine expro_read(path)
 
     implicit none
 
@@ -360,89 +360,89 @@ contains
 
        select case (c)
        case ('nexp')
-          call vpro_icomm(expro_n_exp) 
+          call expro_icomm(expro_n_exp) 
           nexp = expro_n_exp
        case ('nion')
-          call vpro_icomm(expro_n_ion)
+          call expro_icomm(expro_n_ion)
           nion = expro_n_ion
-          if (allocated(expro_rho)) call vpro_init(0)
-          call vpro_init(1) 
+          if (allocated(expro_rho)) call expro_init(0)
+          call expro_init(1) 
        case ('mass')
-          call vpro_scomm(expro_mass,nion)
+          call expro_scomm(expro_mass,nion)
        case ('z')
-          call vpro_scomm(expro_z,nion)
+          call expro_scomm(expro_z,nion)
        case ('bt_exp')
-          call vpro_rcomm(expro_b_ref) 
+          call expro_rcomm(expro_b_ref) 
        case ('arho_exp')
-          call vpro_rcomm(expro_arho) 
+          call expro_rcomm(expro_arho) 
        case ('rho')
-          call vpro_vcomm(expro_rho,nexp)  
+          call expro_vcomm(expro_rho,nexp)  
        case ('rmin')
-          call vpro_vcomm(expro_rmin,nexp)  
+          call expro_vcomm(expro_rmin,nexp)  
        case ('polflux')
-          call vpro_vcomm(expro_polflux,nexp)  
+          call expro_vcomm(expro_polflux,nexp)  
        case ('q')
-          call vpro_vcomm(expro_q,nexp)  
+          call expro_vcomm(expro_q,nexp)  
        case ('w0')
-          call vpro_vcomm(expro_w0,nexp)  
+          call expro_vcomm(expro_w0,nexp)  
        case ('rmaj')
-          call vpro_vcomm(expro_rmaj,nexp)  
+          call expro_vcomm(expro_rmaj,nexp)  
        case ('zmag')
-          call vpro_vcomm(expro_zmag,nexp)  
+          call expro_vcomm(expro_zmag,nexp)  
        case ('kappa')
-          call vpro_vcomm(expro_kappa,nexp)  
+          call expro_vcomm(expro_kappa,nexp)  
        case ('delta')
-          call vpro_vcomm(expro_delta,nexp)  
+          call expro_vcomm(expro_delta,nexp)  
        case ('zeta')
-          call vpro_vcomm(expro_zeta,nexp)  
+          call expro_vcomm(expro_zeta,nexp)  
        case ('ne')
-          call vpro_vcomm(expro_ne,nexp) 
+          call expro_vcomm(expro_ne,nexp) 
        case ('Te')
-          call vpro_vcomm(expro_te,nexp)  
+          call expro_vcomm(expro_te,nexp)  
        case ('ptot')
-          call vpro_vcomm(expro_ptot,nexp)  
+          call expro_vcomm(expro_ptot,nexp)  
        case ('z_eff')
-          call vpro_vcomm(expro_z_eff,nexp) 
+          call expro_vcomm(expro_z_eff,nexp) 
        case ('ni')
-          call vpro_acomm(expro_ni(:,:),nion,nexp) 
+          call expro_acomm(expro_ni(:,:),nion,nexp) 
        case ('ti')
-          call vpro_acomm(expro_ti(:,:),nion,nexp) 
+          call expro_acomm(expro_ti(:,:),nion,nexp) 
        case ('vpol')
-          call vpro_acomm(expro_vpol(:,:),nion,nexp) 
+          call expro_acomm(expro_vpol(:,:),nion,nexp) 
        case ('vtor')
-          call vpro_acomm(expro_vtor(:,:),nion,nexp) 
+          call expro_acomm(expro_vtor(:,:),nion,nexp) 
        case ('flow_beam')
-          call vpro_vcomm(expro_flow_beam,nexp)  
+          call expro_vcomm(expro_flow_beam,nexp)  
        case ('flow_wall')
-          call vpro_vcomm(expro_flow_wall,nexp)  
+          call expro_vcomm(expro_flow_wall,nexp)  
        case ('flow_mom')
-          call vpro_vcomm(expro_flow_mom,nexp)  
+          call expro_vcomm(expro_flow_mom,nexp)  
        case ('pow_e')
-          call vpro_vcomm(expro_pow_e,nexp)  
+          call expro_vcomm(expro_pow_e,nexp)  
        case ('pow_i')
-          call vpro_vcomm(expro_pow_i,nexp)  
+          call expro_vcomm(expro_pow_i,nexp)  
        case ('pow_ei')
-          call vpro_vcomm(expro_pow_ei,nexp)
+          call expro_vcomm(expro_pow_ei,nexp)
        case ('pow_e_aux')
-          call vpro_vcomm(expro_pow_e_aux,nexp)  
+          call expro_vcomm(expro_pow_e_aux,nexp)  
        case ('pow_i_aux')
-          call vpro_vcomm(expro_pow_i_aux,nexp)  
+          call expro_vcomm(expro_pow_i_aux,nexp)  
        case ('pow_e_fus')
-          call vpro_vcomm(expro_pow_e_fus,nexp)  
+          call expro_vcomm(expro_pow_e_fus,nexp)  
        case ('pow_i_fus')
-          call vpro_vcomm(expro_pow_i_fus,nexp)  
+          call expro_vcomm(expro_pow_i_fus,nexp)  
        case ('pow_e_sync')
-          call vpro_vcomm(expro_pow_e_sync,nexp) 
+          call expro_vcomm(expro_pow_e_sync,nexp) 
        case ('pow_e_brem')
-          call vpro_vcomm(expro_pow_e_brem,nexp) 
+          call expro_vcomm(expro_pow_e_brem,nexp) 
        case ('pow_e_line')
-          call vpro_vcomm(expro_pow_e_line,nexp)  
+          call expro_vcomm(expro_pow_e_line,nexp)  
        case ('sbeame')
-          call vpro_vcomm(expro_sbeame,nexp) 
+          call expro_vcomm(expro_sbeame,nexp) 
        case ('sbcx')
-          call vpro_vcomm(expro_sbcx,nexp) 
+          call expro_vcomm(expro_sbcx,nexp) 
        case ('sscxl')
-          call vpro_vcomm(expro_sscxl,nexp) 
+          call expro_vcomm(expro_sscxl,nexp) 
        end select
 
     enddo
@@ -454,14 +454,14 @@ contains
     nexp = expro_n_exp
     open(unit=1,file=trim(path)//'input.profiles.geo',status='old',iostat=ierr)
     if (ierr == 0) then
-       call vpro_skip_header(1)
-       call vpro_icomm(expro_nfourier)
+       call expro_skip_header(1)
+       call expro_icomm(expro_nfourier)
        if (allocated(expro_geo)) deallocate(expro_geo)
        if (allocated(expro_dgeo)) deallocate(expro_dgeo)
        allocate(expro_geo(4,0:expro_nfourier,nexp)) ; expro_geo(:,:,:)=0.0
        allocate(expro_dgeo(4,0:expro_nfourier,nexp)) ; expro_dgeo(:,:,:)=0.0
        do i=1,nexp
-          call vpro_scomm(expro_geo(:,:,i),4*(expro_nfourier+1))
+          call expro_scomm(expro_geo(:,:,i),4*(expro_nfourier+1))
        enddo
     else
        expro_nfourier = -1
@@ -470,13 +470,13 @@ contains
 
     ! BCAST HERE
 
-    call vpro_compute_derived
+    call expro_compute_derived
 
 30  format(1pe14.7)
 
-  end subroutine vpro_read
+  end subroutine expro_read
 
-  subroutine vpro_write
+  subroutine expro_write
 
     implicit none
 
@@ -493,40 +493,40 @@ contains
     write(1,20) ident//tag(4)  ; write(1,40) expro_z
     write(1,20) ident//tag(5)  ; write(1,30) expro_b_ref
     write(1,20) ident//tag(6)  ; write(1,30) expro_arho
-    write(1,20) ident//tag(7)  ; call vpro_writev(expro_rho,nexp)
-    write(1,20) ident//tag(8)  ; call vpro_writev(expro_rmin,nexp)
-    write(1,20) ident//tag(9)  ; call vpro_writev(expro_polflux,nexp)
-    write(1,20) ident//tag(10) ; call vpro_writev(expro_q,nexp)
-    write(1,20) ident//tag(11) ; call vpro_writev(expro_w0,nexp)
-    write(1,20) ident//tag(12) ; call vpro_writev(expro_rmaj,nexp)
-    write(1,20) ident//tag(13) ; call vpro_writev(expro_zmag,nexp)
-    write(1,20) ident//tag(14) ; call vpro_writev(expro_kappa,nexp)
-    write(1,20) ident//tag(15) ; call vpro_writev(expro_delta,nexp)
-    write(1,20) ident//tag(16) ; call vpro_writev(expro_zeta,nexp)
-    write(1,20) ident//tag(17) ; call vpro_writev(expro_ne,nexp)
-    write(1,20) ident//tag(18) ; call vpro_writev(expro_te,nexp)
-    write(1,20) ident//tag(19) ; call vpro_writev(expro_ptot,nexp)
-    write(1,20) ident//tag(20) ; call vpro_writev(expro_z_eff,nexp)
-    write(1,20) ident//tag(21) ; call vpro_writev(expro_flow_beam,nexp)
-    write(1,20) ident//tag(22) ; call vpro_writev(expro_flow_wall,nexp)
-    write(1,20) ident//tag(23) ; call vpro_writev(expro_flow_mom,nexp)
-    write(1,20) ident//tag(24) ; call vpro_writev(expro_pow_e,nexp)
-    write(1,20) ident//tag(25) ; call vpro_writev(expro_pow_i,nexp)
-    write(1,20) ident//tag(26) ; call vpro_writev(expro_pow_ei,nexp)
-    write(1,20) ident//tag(27) ; call vpro_writev(expro_pow_e_aux,nexp)
-    write(1,20) ident//tag(28) ; call vpro_writev(expro_pow_i_aux,nexp)
-    write(1,20) ident//tag(29) ; call vpro_writev(expro_pow_e_fus,nexp)
-    write(1,20) ident//tag(30) ; call vpro_writev(expro_pow_i_fus,nexp)
-    write(1,20) ident//tag(31) ; call vpro_writev(expro_pow_e_sync,nexp)
-    write(1,20) ident//tag(32) ; call vpro_writev(expro_pow_e_brem,nexp)
-    write(1,20) ident//tag(33) ; call vpro_writev(expro_pow_e_line,nexp)
-    write(1,20) ident//tag(34) ; call vpro_writev(expro_sbeame,nexp)
-    write(1,20) ident//tag(35) ; call vpro_writev(expro_sbcx,nexp)
-    write(1,20) ident//tag(36) ; call vpro_writev(expro_sscxl,nexp)
-    write(1,20) ident//tag(37) ; call vpro_writea(expro_ni(:,:),nion,nexp)
-    write(1,20) ident//tag(38) ; call vpro_writea(expro_ti(:,:),nion,nexp)
-    write(1,20) ident//tag(39) ; call vpro_writea(expro_vpol(:,:),nion,nexp)
-    write(1,20) ident//tag(40) ; call vpro_writea(expro_vtor(:,:),nion,nexp)
+    write(1,20) ident//tag(7)  ; call expro_writev(expro_rho,nexp)
+    write(1,20) ident//tag(8)  ; call expro_writev(expro_rmin,nexp)
+    write(1,20) ident//tag(9)  ; call expro_writev(expro_polflux,nexp)
+    write(1,20) ident//tag(10) ; call expro_writev(expro_q,nexp)
+    write(1,20) ident//tag(11) ; call expro_writev(expro_w0,nexp)
+    write(1,20) ident//tag(12) ; call expro_writev(expro_rmaj,nexp)
+    write(1,20) ident//tag(13) ; call expro_writev(expro_zmag,nexp)
+    write(1,20) ident//tag(14) ; call expro_writev(expro_kappa,nexp)
+    write(1,20) ident//tag(15) ; call expro_writev(expro_delta,nexp)
+    write(1,20) ident//tag(16) ; call expro_writev(expro_zeta,nexp)
+    write(1,20) ident//tag(17) ; call expro_writev(expro_ne,nexp)
+    write(1,20) ident//tag(18) ; call expro_writev(expro_te,nexp)
+    write(1,20) ident//tag(19) ; call expro_writev(expro_ptot,nexp)
+    write(1,20) ident//tag(20) ; call expro_writev(expro_z_eff,nexp)
+    write(1,20) ident//tag(21) ; call expro_writev(expro_flow_beam,nexp)
+    write(1,20) ident//tag(22) ; call expro_writev(expro_flow_wall,nexp)
+    write(1,20) ident//tag(23) ; call expro_writev(expro_flow_mom,nexp)
+    write(1,20) ident//tag(24) ; call expro_writev(expro_pow_e,nexp)
+    write(1,20) ident//tag(25) ; call expro_writev(expro_pow_i,nexp)
+    write(1,20) ident//tag(26) ; call expro_writev(expro_pow_ei,nexp)
+    write(1,20) ident//tag(27) ; call expro_writev(expro_pow_e_aux,nexp)
+    write(1,20) ident//tag(28) ; call expro_writev(expro_pow_i_aux,nexp)
+    write(1,20) ident//tag(29) ; call expro_writev(expro_pow_e_fus,nexp)
+    write(1,20) ident//tag(30) ; call expro_writev(expro_pow_i_fus,nexp)
+    write(1,20) ident//tag(31) ; call expro_writev(expro_pow_e_sync,nexp)
+    write(1,20) ident//tag(32) ; call expro_writev(expro_pow_e_brem,nexp)
+    write(1,20) ident//tag(33) ; call expro_writev(expro_pow_e_line,nexp)
+    write(1,20) ident//tag(34) ; call expro_writev(expro_sbeame,nexp)
+    write(1,20) ident//tag(35) ; call expro_writev(expro_sbcx,nexp)
+    write(1,20) ident//tag(36) ; call expro_writev(expro_sscxl,nexp)
+    write(1,20) ident//tag(37) ; call expro_writea(expro_ni(:,:),nion,nexp)
+    write(1,20) ident//tag(38) ; call expro_writea(expro_ti(:,:),nion,nexp)
+    write(1,20) ident//tag(39) ; call expro_writea(expro_vpol(:,:),nion,nexp)
+    write(1,20) ident//tag(40) ; call expro_writea(expro_vtor(:,:),nion,nexp)
 
     close(1)
 
@@ -534,9 +534,9 @@ contains
 30  format(1pe14.7)
 40  format(10(1pe14.7))
 
-  end subroutine vpro_write
+  end subroutine expro_write
 
-  subroutine vpro_read_legacy
+  subroutine expro_read_legacy
 
     implicit none
 
@@ -562,7 +562,7 @@ contains
        endif
     enddo
 
-    call vpro_init(1)
+    call expro_init(1)
 
     nexp = expro_n_exp
     nion = expro_n_ion
@@ -671,6 +671,6 @@ contains
     enddo
     close(1)
 
-  end subroutine vpro_read_legacy
+  end subroutine expro_read_legacy
 
-end module vpro
+end module expro

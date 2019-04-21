@@ -2,16 +2,15 @@ include ${GACODE_ROOT}/platform/build/make.inc.${GACODE_PLATFORM}
 
 DESTLIB=${GACODE_ROOT}/python/gapy.so
 
-SRC=	../src/gapy_realfluct.f90 \
-	../src/gapy_wheel1.f90 \
-	../src/gapy_wheel2.f90 \
-	../src/gapy_torcut.f90 \
-	../src/gapy_geo.f90 \
-	../src/gapy_surfpar.f90 \
-	../vpro/gapy_vpro.f90 \
-	../vpro/gapy_vpro_util.f90 \
-	../vpro/gapy_vpro_pycomm.f90 \
-        ../src/gapy_util.f90
+SRC= 	../vis/gapy_realfluct.f90 \
+	../vis/gapy_wheel1.f90 \
+	../vis/gapy_wheel2.f90 \
+	../vis/gapy_torcut.f90 \
+	../vis/gapy_surfpar.f90 \
+	../geo/geo.f90 \
+	../expro/expro.f90 \
+	../expro/expro_util.f90 \
+	../expro/expro_pycomm.f90
 
 # Remove possible compilers
 F2PYM:=$(filter-out --fcompiler=pg --fcompiler=intelem,$(F2PY))

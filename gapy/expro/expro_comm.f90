@@ -1,4 +1,4 @@
-subroutine vpro_icomm(p)
+subroutine expro_icomm(p)
 
   use mpi
 
@@ -18,9 +18,9 @@ subroutine vpro_icomm(p)
      read(1,*) p
   endif
 
-end subroutine vpro_icomm
+end subroutine expro_icomm
 
-subroutine vpro_rcomm(x)
+subroutine expro_rcomm(x)
 
   use mpi
 
@@ -42,9 +42,9 @@ subroutine vpro_rcomm(x)
 
 10 format(1pe14.7)
 
-end subroutine vpro_rcomm
+end subroutine expro_rcomm
 
-subroutine vpro_scomm(x,n)
+subroutine expro_scomm(x,n)
 
   use mpi
 
@@ -67,9 +67,9 @@ subroutine vpro_scomm(x,n)
 
 10 format(10(1pe14.7))
 
-end subroutine vpro_scomm
+end subroutine expro_scomm
 
-subroutine vpro_vcomm(x,n)
+subroutine expro_vcomm(x,n)
 
   use mpi
 
@@ -99,9 +99,9 @@ subroutine vpro_vcomm(x,n)
 
 10 format(i3,1x,1pe14.7)
 
-end subroutine vpro_vcomm
+end subroutine expro_vcomm
 
-subroutine vpro_acomm(x,m,n)
+subroutine expro_acomm(x,m,n)
 
   use mpi
 
@@ -131,5 +131,5 @@ subroutine vpro_acomm(x,m,n)
 
 10 format(i3,1x,10(1pe14.7,1x))
 
-end subroutine vpro_acomm
+end subroutine expro_acomm
 

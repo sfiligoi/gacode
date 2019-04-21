@@ -8,17 +8,20 @@ endif
 
 FC += ${FOMP}
 
+OBJECTS = expro.o \
+          expro_util.o \
+          expro_comm.o \
+          expro_locsim.o 
+
 .SUFFIXES : .o .f90
 
-EXTRA_LIBS = \
-	${GACODE_ROOT}/gapy/vpro/vpro_lib.a \
-	${GACODE_ROOT}/gapy/src/geo_lib.a 
+all: expro_lib.a
 
-vpro_test: vpro_test.o
-	$(FC) -o vpro_test vpro_test.o ${EXTRA_LIBS} ${LMATH}
+expro_lib.a: $(OBJECTS)
+	$(ARCH) expro_lib.a $(OBJECTS)
 
 .f90.o :
 	$(FC) $(FFLAGS) $(FMATH) -c $<
 
 clean:
-	rm -f *.o vpro_test input.gacode
+	rm -f *.o *.a *.mod
