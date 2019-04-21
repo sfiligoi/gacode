@@ -572,11 +572,11 @@ subroutine tgyro_write_data(i_print)
      close(1)
 
      !====================================================
-     ! Precision 
+     ! Precision (just the total residual)
      !====================================================
 
      open(unit=1,file='out.tgyro.prec',status='old',position='append')
-     write(1,*) sum(abs(eflux_i_tot(:))+abs(eflux_e_tot(:)))
+     write(1,*) sum(res_norm)/size(res_norm)
      close(1)
 
      !====================================================
