@@ -100,7 +100,7 @@ subroutine vgen_init
   endif
 
   call expro_read('./')
-
+   
   !if (EXPRO_error == 1) then
   !   if (i_proc == 0) then
   !      print '(a)', 'ERROR: (VGEN) Negative ion density'
@@ -135,12 +135,12 @@ subroutine vgen_init
   jtor_neo(:)    = 0.0
   jtor_sauter(:) = 0.0
 
-  do j=1,10
+  do j=1,EXPRO_n_ion
      if (j == erspecies_indx) then
         vtor_measured(:) = EXPRO_vtor(j,:)
      endif
      EXPRO_vpol(j,:) = 0.0
      EXPRO_vtor(j,:) = 0.0
   enddo
-
+  
 end subroutine vgen_init
