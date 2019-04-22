@@ -13,18 +13,13 @@ subroutine prgen_read_ufile
   implicit none
 
   integer :: i,ix,j
-  real :: chi_ta
   real, dimension(:), allocatable :: chi_t
   character(len=16) :: a
 
-  open(unit=1,file='out.BT.ave',status='old') 
-  read(1,*) ufile_bref
-  close(1)
-
   ! Chi_t(a), where Chi_t is the total toroidal flux
   open(unit=1,file='out.PHIA.ave',status='old') 
-  read(1,*) chi_ta
-  chi_ta = chi_ta/(2*pi)
+  read(1,*) ufile_torfluxa
+  ufile_torfluxa = ufile_torfluxa/(2*pi)
   close(1)
 
   open(unit=1,file='out.com',status='old') 
@@ -167,11 +162,10 @@ subroutine prgen_read_ufile
   quasi_err = abs(quasi_err/sum(ufile_ne(:))-1.0)
 
   !------------------------------------------------------------------------
-  ! Use classic parameterization chi_t = B_ref/2 rho^2
+  ! Use classic parameterization chi_t = chi_t(a) rho^2
   ! where chi_t is toroidal flux over 2pi.
   !
-  ufile_arho = sqrt(2*chi_ta/abs(ufile_bref))
-  chi_t(:)   = chi_ta*rho**2
+  chi_t(:) = ufile_torfluxa*rho**2
   !
   ! Compute psi_p by integrating d(chi_t)/q = d(psi_p)
   ! using the trapezoidal rule

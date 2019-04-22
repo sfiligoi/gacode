@@ -1,51 +1,50 @@
 module expro
 
   ! Fundamental input
-  integer, parameter :: nextag = 40
+  integer, parameter :: nextag = 39
   character(len=12) :: infile = 'input.gacode'
 
   character(len=2) :: ident='# '
   character(len=20), dimension(nextag) :: extag = (/&
-       'nexp      ',& !1
-       'nion      ',& !2
-       'mass      ',& !3
-       'z         ',& !4
-       'bt_exp    ',& !5
-       'arho_exp  ',& !6
-       'rho       ',& !7
-       'rmin      ',& !8
-       'polflux   ',& !9
-       'q         ',& !10
-       'w0        ',& !11
-       'rmaj      ',& !12
-       'zmag      ',& !13
-       'kappa     ',& !14
-       'delta     ',& !15
-       'zeta      ',& !16
-       'ne        ',& !17
-       'Te        ',& !18
-       'ptot      ',& !19
-       'z_eff     ',& !20
-       'flow_beam ',& !21
-       'flow_wall ',& !22
-       'flow_mom  ',& !23
-       'pow_e     ',& !24
-       'pow_i     ',& !25
-       'pow_ei    ',& !26
-       'pow_e_aux ',& !27
-       'pow_i_aux ',& !28
-       'pow_e_fus ',& !29
-       'pow_i_fus ',& !30
-       'pow_e_sync',& !31
-       'pow_e_brem',& !32
-       'pow_e_line',& !33
-       'sbeame    ',& !34
-       'sbcx      ',& !35
-       'sscxl     ',& !36
-       'ni        ',& !37
-       'ti        ',& !38
-       'vpol      ',& !39
-       'vtor      '&  !40
+       'nexp                ',& !1
+       'nion                ',& !2
+       'mass (m_H)          ',& !3
+       'z (-)               ',& !4
+       'torfluxa (Wb/radian)',& !5
+       'rho (-)             ',& !6
+       'rmin (m)            ',& !7
+       'polflux (Wb/radian) ',& !8
+       'q (-)               ',& !9
+       'w0 (rad/s)          ',& !10
+       'rmaj (m)            ',& !11
+       'zmag (m)            ',& !12
+       'kappa (-)           ',& !13
+       'delta (-)           ',& !14
+       'zeta (-)            ',& !15
+       'ne (10^19/m^3)      ',& !16
+       'ni (10^19/m^3)      ',& !17
+       'Te (keV)            ',& !18
+       'Ti (keV)            ',& !19
+       'ptot (Pa)           ',& !20
+       'z_eff (-)           ',& !21
+       'vpol (m/s)          ',& !22
+       'vtor (m/s)          ',& !23
+       'flow_beam (MW/keV)  ',& !24
+       'flow_wall (MW/keV)  ',& !25
+       'flow_mom (Nm)       ',& !26
+       'pow_e (MW)          ',& !27
+       'pow_i (MW)          ',& !28
+       'pow_ei (MW)         ',& !29
+       'pow_e_aux (MW)      ',& !30
+       'pow_i_aux (MW)      ',& !31
+       'pow_e_fus (MW)      ',& !32
+       'pow_i_fus (MW)      ',& !33
+       'pow_e_sync (MW)     ',& !34
+       'pow_e_brem (MW)     ',& !35
+       'pow_e_line (MW)     ',& !36
+       'sbeame (1/m^3/s)    ',& !37
+       'sbcx (1/m^3/s)      ',& !38
+       'sscxl (1/m^3/s)     '&  !39
        /)
 
   integer :: &
@@ -61,8 +60,7 @@ module expro
        expro_type
 
   double precision :: &
-       expro_b_ref,&
-       expro_arho,&
+       expro_torfluxa,&
        expro_rvbv,&
        expro_ip_exp
 
@@ -130,7 +128,6 @@ module expro
        expro_sdlnnidr_new,&
        expro_grad_r0,&
        expro_ave_grad_r,&
-       expro_drdrho,&
        expro_bp0,&
        expro_bt0,&
        expro_ip,&
@@ -244,7 +241,6 @@ contains
        allocate(expro_sdlnnidr_new(nexp)) ; expro_sdlnnidr_new = 0.0
        allocate(expro_grad_r0(nexp))      ; expro_grad_r0 = 0.0
        allocate(expro_ave_grad_r(nexp))   ; expro_ave_grad_r = 0.0
-       allocate(expro_drdrho(nexp))       ; expro_drdrho = 0.0
        allocate(expro_bp0(nexp))          ; expro_bp0 = 0.0
        allocate(expro_bt0(nexp))          ; expro_bt0 = 0.0
        allocate(expro_ip(nexp))           ; expro_ip = 0.0
@@ -324,7 +320,6 @@ contains
        deallocate(expro_sdlnnidr_new)
        deallocate(expro_grad_r0)      
        deallocate(expro_ave_grad_r)   
-       deallocate(expro_drdrho)       
        deallocate(expro_bp0)          
        deallocate(expro_bt0)          
        deallocate(expro_ip)           
@@ -347,7 +342,7 @@ contains
     implicit none
 
     character(len=*), intent(in) :: path 
-    integer :: nexp,nion,ierr,i
+    integer :: nexp,nion,ierr,i,nd
     character(len=22) :: ytag,c
 
     ! ORDERING NOTE: nexp should appear before any profile arrays
@@ -356,8 +351,17 @@ contains
 
     do 
 
-       read(1,'(a)',end=99) ytag ; c = trim(ytag(3:22))
+       read(1,'(a)',end=99) ytag
 
+       nd = scan(ytag,'[')
+       if (nd == 0) then
+          ! no units field so trim all whitespace
+          c = trim(ytag(3:))
+       else
+          ! trim units and whitespace
+          c = trim(ytag(3:nd-1))
+       endif
+          
        select case (c)
        case ('nexp')
           call expro_icomm(expro_n_exp) 
@@ -371,10 +375,8 @@ contains
           call expro_lcomm(expro_mass,nion)
        case ('z')
           call expro_lcomm(expro_z,nion)
-       case ('bt_exp')
-          call expro_rcomm(expro_b_ref) 
-       case ('arho_exp')
-          call expro_rcomm(expro_arho) 
+       case ('torfluxa')
+          call expro_rcomm(expro_torfluxa) 
        case ('rho')
           call expro_vcomm(expro_rho,nexp)  
        case ('rmin')
@@ -405,7 +407,7 @@ contains
           call expro_vcomm(expro_z_eff,nexp) 
        case ('ni')
           call expro_acomm(expro_ni(:,:),nion,nexp) 
-       case ('ti')
+       case ('Ti')
           call expro_acomm(expro_ti(:,:),nion,nexp) 
        case ('vpol')
           call expro_acomm(expro_vpol(:,:),nion,nexp) 
@@ -489,42 +491,41 @@ contains
     write(1,20) ident//extag(2)  ; write(1,'(i0)') nion
     write(1,20) ident//extag(3)  ; write(1,40) expro_mass
     write(1,20) ident//extag(4)  ; write(1,40) expro_z
-    write(1,20) ident//extag(5)  ; write(1,30) expro_b_ref
-    write(1,20) ident//extag(6)  ; write(1,30) expro_arho
-    write(1,20) ident//extag(7)  ; call expro_writev(expro_rho,nexp)
-    write(1,20) ident//extag(8)  ; call expro_writev(expro_rmin,nexp)
-    write(1,20) ident//extag(9)  ; call expro_writev(expro_polflux,nexp)
-    write(1,20) ident//extag(10) ; call expro_writev(expro_q,nexp)
-    write(1,20) ident//extag(11) ; call expro_writev(expro_w0,nexp)
-    write(1,20) ident//extag(12) ; call expro_writev(expro_rmaj,nexp)
-    write(1,20) ident//extag(13) ; call expro_writev(expro_zmag,nexp)
-    write(1,20) ident//extag(14) ; call expro_writev(expro_kappa,nexp)
-    write(1,20) ident//extag(15) ; call expro_writev(expro_delta,nexp)
-    write(1,20) ident//extag(16) ; call expro_writev(expro_zeta,nexp)
-    write(1,20) ident//extag(17) ; call expro_writev(expro_ne,nexp)
+    write(1,20) ident//extag(5)  ; write(1,30) expro_torfluxa
+    write(1,20) ident//extag(6)  ; call expro_writev(expro_rho,nexp)
+    write(1,20) ident//extag(7)  ; call expro_writev(expro_rmin,nexp)
+    write(1,20) ident//extag(8)  ; call expro_writev(expro_polflux,nexp)
+    write(1,20) ident//extag(9)  ; call expro_writev(expro_q,nexp)
+    write(1,20) ident//extag(10) ; call expro_writev(expro_w0,nexp)
+    write(1,20) ident//extag(11) ; call expro_writev(expro_rmaj,nexp)
+    write(1,20) ident//extag(12) ; call expro_writev(expro_zmag,nexp)
+    write(1,20) ident//extag(13) ; call expro_writev(expro_kappa,nexp)
+    write(1,20) ident//extag(14) ; call expro_writev(expro_delta,nexp)
+    write(1,20) ident//extag(15) ; call expro_writev(expro_zeta,nexp)
+    write(1,20) ident//extag(16) ; call expro_writev(expro_ne,nexp)
+    write(1,20) ident//extag(17) ; call expro_writea(expro_ni(:,:),nion,nexp)
     write(1,20) ident//extag(18) ; call expro_writev(expro_te,nexp)
-    write(1,20) ident//extag(19) ; call expro_writev(expro_ptot,nexp)
-    write(1,20) ident//extag(20) ; call expro_writev(expro_z_eff,nexp)
-    write(1,20) ident//extag(21) ; call expro_writev(expro_flow_beam,nexp)
-    write(1,20) ident//extag(22) ; call expro_writev(expro_flow_wall,nexp)
-    write(1,20) ident//extag(23) ; call expro_writev(expro_flow_mom,nexp)
-    write(1,20) ident//extag(24) ; call expro_writev(expro_pow_e,nexp)
-    write(1,20) ident//extag(25) ; call expro_writev(expro_pow_i,nexp)
-    write(1,20) ident//extag(26) ; call expro_writev(expro_pow_ei,nexp)
-    write(1,20) ident//extag(27) ; call expro_writev(expro_pow_e_aux,nexp)
-    write(1,20) ident//extag(28) ; call expro_writev(expro_pow_i_aux,nexp)
-    write(1,20) ident//extag(29) ; call expro_writev(expro_pow_e_fus,nexp)
-    write(1,20) ident//extag(30) ; call expro_writev(expro_pow_i_fus,nexp)
-    write(1,20) ident//extag(31) ; call expro_writev(expro_pow_e_sync,nexp)
-    write(1,20) ident//extag(32) ; call expro_writev(expro_pow_e_brem,nexp)
-    write(1,20) ident//extag(33) ; call expro_writev(expro_pow_e_line,nexp)
-    write(1,20) ident//extag(34) ; call expro_writev(expro_sbeame,nexp)
-    write(1,20) ident//extag(35) ; call expro_writev(expro_sbcx,nexp)
-    write(1,20) ident//extag(36) ; call expro_writev(expro_sscxl,nexp)
-    write(1,20) ident//extag(37) ; call expro_writea(expro_ni(:,:),nion,nexp)
-    write(1,20) ident//extag(38) ; call expro_writea(expro_ti(:,:),nion,nexp)
-    write(1,20) ident//extag(39) ; call expro_writea(expro_vpol(:,:),nion,nexp)
-    write(1,20) ident//extag(40) ; call expro_writea(expro_vtor(:,:),nion,nexp)
+    write(1,20) ident//extag(19) ; call expro_writea(expro_ti(:,:),nion,nexp)
+    write(1,20) ident//extag(20) ; call expro_writev(expro_ptot,nexp)
+    write(1,20) ident//extag(21) ; call expro_writev(expro_z_eff,nexp)
+    write(1,20) ident//extag(22) ; call expro_writea(expro_vpol(:,:),nion,nexp)
+    write(1,20) ident//extag(23) ; call expro_writea(expro_vtor(:,:),nion,nexp)
+    write(1,20) ident//extag(24) ; call expro_writev(expro_flow_beam,nexp)
+    write(1,20) ident//extag(25) ; call expro_writev(expro_flow_wall,nexp)
+    write(1,20) ident//extag(26) ; call expro_writev(expro_flow_mom,nexp)
+    write(1,20) ident//extag(27) ; call expro_writev(expro_pow_e,nexp)
+    write(1,20) ident//extag(28) ; call expro_writev(expro_pow_i,nexp)
+    write(1,20) ident//extag(29) ; call expro_writev(expro_pow_ei,nexp)
+    write(1,20) ident//extag(30) ; call expro_writev(expro_pow_e_aux,nexp)
+    write(1,20) ident//extag(31) ; call expro_writev(expro_pow_i_aux,nexp)
+    write(1,20) ident//extag(32) ; call expro_writev(expro_pow_e_fus,nexp)
+    write(1,20) ident//extag(33) ; call expro_writev(expro_pow_i_fus,nexp)
+    write(1,20) ident//extag(34) ; call expro_writev(expro_pow_e_sync,nexp)
+    write(1,20) ident//extag(35) ; call expro_writev(expro_pow_e_brem,nexp)
+    write(1,20) ident//extag(36) ; call expro_writev(expro_pow_e_line,nexp)
+    write(1,20) ident//extag(37) ; call expro_writev(expro_sbeame,nexp)
+    write(1,20) ident//extag(38) ; call expro_writev(expro_sbcx,nexp)
+    write(1,20) ident//extag(39) ; call expro_writev(expro_sscxl,nexp)
 
     close(1)
 
@@ -542,7 +543,8 @@ contains
     integer :: nexp,nion
     character(len=99) :: line
     double precision :: x(5)
-
+    double precision :: b_ref,arho
+    
     open(unit=1,file='input.profiles',status='old')
     do while (line(1:2) /= '#r')
        read(1,'(a)') line
@@ -553,12 +555,13 @@ contains
           read(line(7:),*) expro_n_ion
        endif
        if (line(1:6) == 'BT_EXP') then
-          read(line(8:),*) expro_b_ref
+          read(line(8:),*) b_ref
        endif
        if (line(1:8) == 'ARHO_EXP') then
-          read(line(10:),*) expro_arho
+          read(line(10:),*) arho
        endif
     enddo
+    expro_torfluxa = 0.5*b_ref*arho**2
 
     call expro_init(1)
 

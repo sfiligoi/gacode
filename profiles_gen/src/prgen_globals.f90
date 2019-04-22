@@ -241,8 +241,7 @@ module prgen_globals
   !---------------------------------------------------------
   ! PEQDSK variables
   !
-  real :: peqdsk_bref
-  real :: peqdsk_arho
+  real :: peqdsk_torfluxa
   real, dimension(:), allocatable :: peqdsk_psi
   real, dimension(:), allocatable :: peqdsk_ne
   real, dimension(:), allocatable :: peqdsk_te
@@ -259,13 +258,6 @@ module prgen_globals
   real, dimension(n_ion_max) :: peqdsk_z
   real, dimension(n_ion_max) :: peqdsk_m
   character (len=7), dimension(5)  :: peqdsk_type
-  !---------------------------------------------------------
-
-  !---------------------------------------------------------
-  ! null input variables
-  !
-  real :: null_bref
-  real :: null_arho
   !---------------------------------------------------------
 
   !--------------------------------------------------------
@@ -296,8 +288,7 @@ module prgen_globals
   real :: corsica_li3
 
   integer, parameter :: corsica_nvals = 81
-  real :: corsica_bref
-  real :: corsica_arho
+  real :: corsica_torfluxa
   real, allocatable :: corsica_rho(:)
   real, allocatable :: corsica_r_a(:)
   real, allocatable :: corsica_psin(:)
@@ -318,8 +309,7 @@ module prgen_globals
   ! UFILE variables
   !
   integer :: ufile_nion
-  real :: ufile_bref
-  real :: ufile_arho
+  real :: ufile_torfluxa
   real :: ufile_z(8)
   real :: ufile_m(8)
   character (len=10) :: ufile_tok

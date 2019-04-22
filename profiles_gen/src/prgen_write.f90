@@ -70,30 +70,27 @@ subroutine prgen_write
 
   case (0)
      ! (nothing but gfile)
-     expro_b_ref = -btccw*abs(null_bref)
-     expro_arho  = null_arho
+     expro_torfluxa = -btccw*abs(expro_torfluxa)
   case (1)
      ! onetwo statefile
-     expro_b_ref = -btccw*abs(onetwo_Btor)
-     expro_arho  = onetwo_rho_grid(nx)
+     expro_torfluxa = -0.5*btccw*abs(onetwo_Btor)*onetwo_rho_grid(nx)**2
      expro_rvbv  = onetwo_R0*onetwo_Btor
      expro_ip_exp = -ipccw*abs(ip_tot)
   case (2)
      ! plasmastate 
-     expro_b_ref = -btccw*abs(plst_b_axis_vac)
-     expro_arho  = sqrt(plst_phit(nx)/plst_b_axis_vac/pi)
+     expro_torfluxa = -btccw*abs(plst_phit(nx))/(2*pi)
   case (3)
      ! pfile
-     expro_b_ref = -btccw*abs(peqdsk_bref)
-     expro_arho  = peqdsk_arho
+     expro_torfluxa = -btccw*abs(peqdsk_torfluxa)
   case (5)
      ! corsica
-     expro_b_ref = -btccw*abs(corsica_bref)
-     expro_arho  = corsica_arho
+     expro_torfluxa = -btccw*abs(corsica_torfluxa)
   case (6)
      ! ufile
-     expro_b_ref = -btccw*abs(ufile_bref)
-     expro_arho  = ufile_arho
+     expro_torfluxa = -btccw*abs(ufile_torfluxa)
+  case (7)
+     ! ufile
+     expro_torfluxa = -btccw*abs(expro_torfluxa)
   end select
 
   !-------------------------------------------------------------------------------------

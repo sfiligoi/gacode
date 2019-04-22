@@ -12,11 +12,10 @@ program test
 
   call expro_read('./')
 
-  print '(a,i0)'            ,'nexp    ',expro_n_exp
-  print '(a,1pe12.5)'       ,'bt_exp  ',expro_b_ref
-  print '(a,1pe12.5)'       ,'arho_exp',expro_arho
-  print '(a,60(1pe12.5,1x))','ni      ',expro_ni(1,:)
-  print '(a,60(1pe12.5,1x))','bunit   ',expro_bunit
+  print '(a,i0)'            ,'nexp     ',expro_n_exp
+  print '(a,1pe12.5)'       ,'torfluxa ',expro_torfluxa
+  print '(a,60(1pe12.5,1x))','ni       ',expro_ni(1,:)
+  print '(a,60(1pe12.5,1x))','bunit    ',expro_bunit
 
   call expro_locsim_profiles('./',&
        -1,&

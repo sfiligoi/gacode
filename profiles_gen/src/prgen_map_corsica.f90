@@ -15,7 +15,7 @@ subroutine prgen_map_corsica
   ! Compute rho, bref and arho:
   ! Ignore corsica input "rho", "rmin", and "q"; use gato and corsica poloidal
   ! flux
-  call prgen_get_chi(nx,q,kappa,rmin,dpsi,rho,corsica_bref,corsica_arho)
+  call prgen_get_chi(nx,q,kappa,rmin,dpsi,rho,corsica_torfluxa)
 
   !---------------------------------------------------------
   ! Map profile data onto single array:

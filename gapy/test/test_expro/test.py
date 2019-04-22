@@ -10,8 +10,7 @@ nion = gapy.expro.expro_n_ion
 
 print 'nexp    ',gapy.expro.expro_n_exp
 print 'name    ',gapy.expro.expro_name[0]
-print 'bt_exp  ',gapy.expro.expro_b_ref
-print 'arho_exp',gapy.expro.expro_arho
+print 'torfluxa',gapy.expro.expro_torfluxa
 print 'ni      ',gapy.expro.expro_ni[0,:]
 
 # Derived

@@ -67,8 +67,7 @@ subroutine prgen_read_corsica
   end do
 
   close(1)
-
-
+  
   call allocate_internals
 
   dpsi(:)   = corsica_psin(:)

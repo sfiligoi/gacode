@@ -19,7 +19,7 @@ subroutine prgen_map_peqdsk
   real, dimension(nx) :: z_eff
 
   ! Compute rho, bref and arho:
-  call prgen_get_chi(nx,q,kappa,rmin,dpsi,rho,peqdsk_bref,peqdsk_arho)
+  call prgen_get_chi(nx,q,kappa,rmin,dpsi,rho,peqdsk_torfluxa)
 
   ni_d(:) = 10*peqdsk_ni(:)
   if (peqdsk_fmt == 0) then

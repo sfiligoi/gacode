@@ -16,7 +16,7 @@ subroutine expro_compute_derived
   double precision, parameter :: c  = 2.9979e10  ! cm/s
   double precision, parameter :: pi = 3.1415926535897932
 
-  double precision, dimension(:), allocatable :: rho
+  double precision, dimension(:), allocatable :: torflux
   double precision, dimension(:), allocatable :: dummy
   double precision, dimension(:), allocatable :: cc
   double precision, dimension(:), allocatable :: loglam
@@ -48,21 +48,20 @@ subroutine expro_compute_derived
   !---------------------------------------------------------------------
   ! Infer orientation
   ! 
-  expro_signb = nint(expro_b_ref/abs(expro_b_ref))
+  expro_signb = nint(expro_torfluxa/abs(expro_torfluxa))
   expro_signq = nint(expro_q(1)/abs(expro_q(1)))
   !---------------------------------------------------------------------
 
   !---------------------------------------------------------------------
   ! Derived quantities:
   !
-  allocate(rho(expro_n_exp))
+  allocate(torflux(expro_n_exp))
   allocate(dummy(expro_n_exp))
-
-  rho(:) = expro_arho*expro_rho(:)
+  
+  torflux(:) = expro_torfluxa*expro_rho(:)**2
 
   ! b_unit
-  call bound_deriv(dummy,rho**2,expro_rmin**2,expro_n_exp)
-  expro_bunit(:) = expro_b_ref*dummy(:)
+  call bound_deriv(expro_bunit,torflux,0.5*expro_rmin**2,expro_n_exp)
 
   ! s
   call bound_deriv(dummy,expro_q,expro_rmin,expro_n_exp)
@@ -141,9 +140,6 @@ subroutine expro_compute_derived
   else
      expro_dlnptotdr = 0.0
   endif
-
-  ! dr/d(rho)
-  call bound_deriv(expro_drdrho,expro_rmin,rho,expro_n_exp)
   !--------------------------------------------------------------------
 
   !-------------------------------------------------------------------
@@ -310,7 +306,7 @@ subroutine expro_compute_derived
   !--------------------------------------------------------------
 
   ! Clean up
-  deallocate(rho)
+  deallocate(torflux)
 
   ! Density profile control
 
