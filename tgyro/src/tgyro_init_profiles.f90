@@ -370,7 +370,7 @@ subroutine tgyro_init_profiles
 
      if (i_proc_global == 0) then
         open(unit=1,file=trim(runfile),position='append')
-        write(1,*) 'INFO: (TGYRO) Passing input.profiles.geo information to components'
+        write(1,*) 'INFO: (TGYRO) Passing input.gacode.geo information to components'
         write(1,*)
         close(1)
      endif
@@ -456,12 +456,12 @@ subroutine tgyro_init_profiles
      a_in = r_min
      ! Bt on axis [T]
      if (EXPRO_rvbv == 0.0) then
-        call tgyro_catch_error('EXPRO_rvbv = 0.  Check input.profiles')
+        call tgyro_catch_error('EXPRO_rvbv = 0.  Check input.gacode')
      endif
      bt_in = EXPRO_rvbv/EXPRO_rmaj(n_exp)
      ! Plasma current Ip [Ma]
      if (EXPRO_ip_exp == 0.0) then
-        call tgyro_catch_error('EXPRO_ip_exp = 0. Check input.profiles')
+        call tgyro_catch_error('EXPRO_ip_exp = 0. Check input.gacode')
      endif
      ip_in = 1e-6*EXPRO_ip_exp
      ! betan [%] = betat/In*100 where In = Ip/(a Bt) 

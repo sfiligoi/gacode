@@ -50,7 +50,7 @@ subroutine tgyro_write_data(i_print)
   converged = sum(res_norm)/size(res_norm) < tgyro_residual_tol
 
   !====================================================
-  ! input.profiles
+  ! input.gacode
   !====================================================
 
   if (tgyro_write_profiles_flag /= 0 .and. i_print > 0) then 
