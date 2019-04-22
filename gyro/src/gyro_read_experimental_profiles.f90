@@ -46,9 +46,6 @@ subroutine gyro_read_experimental_profiles
   !
   ! Transfer data from read arrays to individual arrays:
   !
-  bt_exp   = EXPRO_b_ref
-  arho_exp = EXPRO_arho
-  !
   btccw = -EXPRO_signb
   ipccw = -EXPRO_signq*EXPRO_signb
   !

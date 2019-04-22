@@ -476,16 +476,17 @@ contains
 
   end subroutine expro_read
 
-  subroutine expro_write
+  subroutine expro_write(thisinfile)
 
     implicit none
 
     integer :: nexp,nion
-
+    character(len=*) :: thisinfile 
+    
     nexp = expro_n_exp
     nion = expro_n_ion
 
-    open(unit=1,file=infile,position='append')
+    open(unit=1,file=trim(thisinfile),position='append')
 
     write(1,20) ident//extag(1)  ; write(1,'(i0)') nexp
     write(1,20) ident//extag(2)  ; write(1,'(i0)') nion

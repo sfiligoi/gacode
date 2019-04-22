@@ -572,7 +572,7 @@ subroutine expro_write_original(datafile1,datafile2,tag)
   do 
      read(2,'(a)',iostat=ierr) line
      if (ierr < 0) exit
-     if (line(2:4) /= 'rho') then
+     if (line(3:6) /= 'nexp') then
         write(1,'(a)') line
      else
         exit
@@ -581,6 +581,6 @@ subroutine expro_write_original(datafile1,datafile2,tag)
   close(2)
   
   ! NOTE: expro will use and close unit 1
-  call expro_write
+  call expro_write(datafile2)
   
 end subroutine expro_write_original

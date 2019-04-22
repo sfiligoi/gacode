@@ -96,7 +96,7 @@ subroutine prgen_write
   !-------------------------------------------------------------------------------------
   ! Now we need to write the profile data
   !
-  call expro_write
+  call expro_write('input.gacode')
   print '(a)','INFO: (prgen_write) Wrote input.gacode.'
   !-------------------------------------------------------------------------------------
 

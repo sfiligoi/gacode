@@ -17,7 +17,6 @@ subroutine tgyro_init_profiles
   integer :: i_ion
   integer :: i
   integer :: n
-  real :: arho
   real :: tmp_ped
   real :: p_ave
   real :: x0(1),y0(1)
@@ -146,12 +145,6 @@ subroutine tgyro_init_profiles
   ! r_min in m:
   r_min = EXPRO_rmin(n_exp)
 
-  ! arho in cm
-  arho  = 100*EXPRO_arho
-
-  ! b_ref in Gauss
-  b_ref = 1e4*EXPRO_b_ref
-
   ! Aspect ratio
   aspect_rat = EXPRO_rmaj(n_exp)/EXPRO_rmin(n_exp)
 
@@ -177,6 +170,9 @@ subroutine tgyro_init_profiles
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_zeta(:),n_exp,r,zeta,n_r)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_szeta(:),n_exp,r,s_zeta,n_r)
 
+  ! b_ref in Gauss (used for wce in Synchroton rad)
+  call cub_spline(EXPRO_rmin(:)/r_min,1e4*expro_bt0(:),n_exp,r,b_ref,n_r)
+  
   ! Convert ptot to Ba from Pascals (1 Pa = 10 Ba)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_ptot(:)*10.0,n_exp,r,ptot,n_r)
 
