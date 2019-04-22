@@ -267,7 +267,7 @@ subroutine expro_locsim_profiles(&
   !------------------------------------------------------------------
   ! Use local cubic spline interpolation to get simulation 
   ! profiles from experimental (_exp) ones.
-  ! 
+  !
   call cub_spline1(rmin_exp,expro_rmaj/a_meters,expro_n_exp,rmin,rmaj_loc)
   call cub_spline1(rmin_exp,expro_q,expro_n_exp,rmin,q_loc)
   call cub_spline1(rmin_exp,expro_s,expro_n_exp,rmin,s_loc)

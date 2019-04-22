@@ -353,7 +353,7 @@ contains
 
        read(1,'(a)',end=99) ytag
 
-       nd = scan(ytag,'[')
+       nd = scan(ytag,'(')
        if (nd == 0) then
           ! no units field so trim all whitespace
           c = trim(ytag(3:))
@@ -361,7 +361,7 @@ contains
           ! trim units and whitespace
           c = trim(ytag(3:nd-1))
        endif
-          
+
        select case (c)
        case ('nexp')
           call expro_icomm(expro_n_exp) 
