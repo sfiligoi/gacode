@@ -24,8 +24,6 @@
 #=============================================================
 # EXECUTABLE AND CONFIG FILE LOCATIONS:
 #
-# GYRO directory
-GYRO_DIR=${GACODE_ROOT}/gyro
 # VGEN inputs directory
 VGEN_DIR=${GACODE_ROOT}/vgen/templates
 # VGEN exec directory
@@ -38,8 +36,6 @@ GATO=${GACODE_ROOT}/gato/gato
 OMFIT=${OMFIT_ROOT}/omfit/omfit.py
 # - locpargen executable
 LOCPARGEN=${GACODE_ROOT}/profiles_gen/locpargen/locpargen
-# - exprodump executable
-EXPRODUMP=${GACODE_ROOT}/profiles_gen/exprotools/exprodump
 # - profiles_gen bin directory
 PRGEN_BIN=${GACODE_ROOT}/profiles_gen/bin
 #=============================================================
@@ -271,20 +267,6 @@ then
    echo "             -append"
    echo "             Append to existing input.*.locpargen files"
    echo
-   echo "DUMP MODE"
-   echo 
-   echo "             -dump <EXPRO variable>"
-   echo "             Dump any variable in EXPRO interface."
-   echo
-   echo "             -dump list"
-   echo "             Print list of available variables."
-   echo
-   echo "             -x <arg>"
-   echo "              <arg>=none: omit independent variable column."
-   echo "              <arg>=r:    r/a is first column."
-   echo "              <arg>=rho:  rho=sqrt[chi/chi(a)] is first column. [DEFAULT]"
-   echo "              <arg>=psi:  psi_N=psi/psi(a) is first column."
-   echo
    echo "EXAMPLES:"
    echo " "
    echo
@@ -370,12 +352,6 @@ HASGEO=0
 QNFLAG=0
 BANANA=0
 
-# DUMP MODE variables
-DUMP_FLAG=0
-DUMP_VAR=null
-X=rho
-APPENDFLAG=0
-
 # Plotting in locpargen
 PLOT_FLAG=0
 #=============================================================
@@ -445,9 +421,6 @@ while [ $# -gt 0 ] ; do
   -loc_rho) shift ; LOC_RHO=$1 ;;
   -loc_psi) shift ; LOC_PSI=$1 ;;
   -append) APPENDFLAG=1 ;;
-  
-  -dump) shift ; DUMP_FLAG=1 ; DUMP_VAR=$1 ;;
-  -x) shift ; X=$1 ;;
   -qn) QNFLAG=1 ;;
   -banana) BANANA=1 ;;
 
@@ -549,15 +522,6 @@ else
 fi
 
 #=============================================================
-# If file is GACODE, parse it.
-if [ "$itype" == "GACODE" ] ; then
-  cp -f $FILE $FILE.save
-  python $PRGEN_BIN/profile_parse.py $FILE
-fi
-#=============================================================
-
-
-#=============================================================
 # Trap a p-file and split into components 
 #
 if [ "$itype" == "PFILE" ] ; then
@@ -565,30 +529,6 @@ if [ "$itype" == "PFILE" ] ; then
    rm -f pfile.*
    python $PRGEN_BIN/gacode_pfile_tool.py $FILE
 fi
-#=============================================================
-
-#=============================================================
-# Manage execution of dump
-if  [ $DUMP_FLAG -eq 1 ]
-then
-  if [ ! -f $EXPRODUMP ]
-  then
-     echo "ERROR: (profiles_gen) You need to build the exprodump executable."
-     exit 1
-  fi
-  python $PRGEN_BIN/profile_parse.py $FILE
-  if [ "$DUMP_VAR" == "" ]
-  then
-     DUMP_VAR=list
-  fi
-  echo $DUMP_VAR > input.exprodump
-  echo $X >> input.exprodump
-  echo $QNFLAG >> input.exprodump
-  echo "INFO: (profiles_gen) Calling $EXPRODUMP"
-  $EXPRODUMP
-  rm input.exprodump
-  exit 0
-fi   
 #=============================================================
 
 #=============================================================
@@ -605,9 +545,6 @@ then
   then
       HASGEO=1
   fi
-  python $PRGEN_BIN/profile_parse.py $FILE
-  cp $FILE.gen temp
-  mv temp input.gacode.gen
   echo $LOC_RAD > input.locpargen
   echo $LOC_RHO >> input.locpargen
   echo $LOC_PSI >> input.locpargen
@@ -672,7 +609,6 @@ then
    fi
 
    python $NEO_DIR/bin/neo_parse.py
-   python $PRGEN_BIN/profile_parse.py input.gacode 
 
    # Construct vgen.dat
    echo "$VGEN_ER"  > vgen.dat
@@ -734,7 +670,7 @@ fi
 # If we make it here, its time for cleanup
 #
 echo "INFO: (profiles_gen) Removing old input.gacode* files"
-rm -f input.gacode.geo input.gacode.extra
+rm -f input.gacode.geo
 #=============================================================
 
 #=============================================================
