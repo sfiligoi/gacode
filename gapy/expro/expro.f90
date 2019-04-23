@@ -1,7 +1,7 @@
 module expro
 
   ! Fundamental input
-  integer, parameter :: nextag = 39
+  integer, parameter :: nextag = 42
   character(len=12) :: infile = 'input.gacode'
 
   character(len=2) :: ident='# '
@@ -26,25 +26,28 @@ module expro
        'Te (keV)            ',& !18
        'Ti (keV)            ',& !19
        'ptot (Pa)           ',& !20
-       'z_eff (-)           ',& !21
-       'vpol (m/s)          ',& !22
-       'vtor (m/s)          ',& !23
-       'flow_beam (MW/keV)  ',& !24
-       'flow_wall (MW/keV)  ',& !25
-       'flow_mom (Nm)       ',& !26
-       'pow_e (MW)          ',& !27
-       'pow_i (MW)          ',& !28
-       'pow_ei (MW)         ',& !29
-       'pow_e_aux (MW)      ',& !30
-       'pow_i_aux (MW)      ',& !31
-       'pow_e_fus (MW)      ',& !32
-       'pow_i_fus (MW)      ',& !33
-       'pow_e_sync (MW)     ',& !34
-       'pow_e_brem (MW)     ',& !35
-       'pow_e_line (MW)     ',& !36
-       'sbeame (1/m^3/s)    ',& !37
-       'sbcx (1/m^3/s)      ',& !38
-       'sscxl (1/m^3/s)     '&  !39
+       'jbs (MA/m^2)        ',& !21
+       'jbstor (MA/m^2)     ',& !22
+       'sigmapar (MS/m)     ',& !23
+       'z_eff (-)           ',& !24
+       'vpol (m/s)          ',& !25
+       'vtor (m/s)          ',& !26
+       'flow_beam (MW/keV)  ',& !27
+       'flow_wall (MW/keV)  ',& !28
+       'flow_mom (Nm)       ',& !29
+       'pow_e (MW)          ',& !30
+       'pow_i (MW)          ',& !31
+       'pow_ei (MW)         ',& !32
+       'pow_e_aux (MW)      ',& !33
+       'pow_i_aux (MW)      ',& !34
+       'pow_e_fus (MW)      ',& !35
+       'pow_i_fus (MW)      ',& !36
+       'pow_e_sync (MW)     ',& !37
+       'pow_e_brem (MW)     ',& !38
+       'pow_e_line (MW)     ',& !39
+       'sbeame (1/m^3/s)    ',& !40
+       'sbcx (1/m^3/s)      ',& !41
+       'sscxl (1/m^3/s)     '&  !42
        /)
 
   integer :: &
@@ -78,6 +81,9 @@ module expro
        expro_ne,&
        expro_te,&
        expro_ptot,&
+       expro_jbs,&
+       expro_jbstor,&
+       expro_sigmapar,&
        expro_z_eff,&
        expro_flow_beam,&
        expro_flow_wall,&
@@ -192,6 +198,9 @@ contains
        allocate(expro_ne(nexp))      ; expro_ne = 0.0
        allocate(expro_te(nexp))      ; expro_te = 0.0
        allocate(expro_ptot(nexp))    ; expro_ptot = 0.0
+       allocate(expro_jbs(nexp))     ; expro_jbs = 0.0
+       allocate(expro_jbstor(nexp))  ; expro_jbstor = 0.0
+       allocate(expro_sigmapar(nexp)); expro_sigmapar = 0.0
        allocate(expro_z_eff(nexp))   ; expro_z_eff = 0.0
 
        allocate(expro_flow_beam(nexp))  ; expro_flow_beam = 0.0
@@ -274,6 +283,9 @@ contains
        deallocate(expro_ne)
        deallocate(expro_te)
        deallocate(expro_ptot)
+       deallocate(expro_jbs)
+       deallocate(expro_jbstor)
+       deallocate(expro_sigmapar)
        deallocate(expro_z_eff)
 
        deallocate(expro_flow_beam)
@@ -403,6 +415,12 @@ contains
           call expro_vcomm(expro_te,nexp)  
        case ('ptot')
           call expro_vcomm(expro_ptot,nexp)  
+       case ('jbs ')
+          call expro_vcomm(expro_jbs,nexp)  
+       case ('jbstor')
+          call expro_vcomm(expro_jbstor,nexp)  
+       case ('sigmapar')
+          call expro_vcomm(expro_sigmapar,nexp)  
        case ('z_eff')
           call expro_vcomm(expro_z_eff,nexp) 
        case ('ni')
@@ -508,6 +526,9 @@ contains
     write(1,20) ident//extag(18) ; call expro_writev(expro_te,nexp)
     write(1,20) ident//extag(19) ; call expro_writea(expro_ti(:,:),nion,nexp)
     write(1,20) ident//extag(20) ; call expro_writev(expro_ptot,nexp)
+    write(1,20) ident//extag(20) ; call expro_writev(expro_jbs,nexp)
+    write(1,20) ident//extag(20) ; call expro_writev(expro_jbstor,nexp)
+    write(1,20) ident//extag(20) ; call expro_writev(expro_sigmapar,nexp)
     write(1,20) ident//extag(21) ; call expro_writev(expro_z_eff,nexp)
     write(1,20) ident//extag(22) ; call expro_writea(expro_vpol(:,:),nion,nexp)
     write(1,20) ident//extag(23) ; call expro_writea(expro_vtor(:,:),nion,nexp)
