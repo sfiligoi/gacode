@@ -20,7 +20,7 @@ subroutine prgen_read_iterdb
   !----------------------------------------------------
   ! Read the iterdb file
   !
-  open(unit=1,file=raw_data_file,status='old')
+  open(unit=1,file=file_state,status='old')
   read(1,*) t
 
   read(1,*) t ; read(1,*) onetwo_ishot

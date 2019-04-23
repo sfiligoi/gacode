@@ -597,7 +597,9 @@ subroutine expro_write_all(datafile)
   ! Write header
   open(unit=1,file=trim(datafile),status='replace')
   do i=1,6
-     write(1,'(a)') expro_header(i)
+     if (len(trim(expro_header(i))) > 13) then
+        write(1,'(a)') expro_header(i)
+     endif
   enddo
   write(1,'(a)') '#'
   close(1)

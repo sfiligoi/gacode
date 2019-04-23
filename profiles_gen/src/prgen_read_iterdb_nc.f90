@@ -22,7 +22,7 @@ subroutine prgen_read_iterdb_nc
   real, dimension(:), allocatable :: work
 
   ! Open the file (NF90_NOWRITE means read-only)
-  err = nf90_open(raw_data_file,NF90_NOWRITE,ncid)
+  err = nf90_open(file_state,NF90_NOWRITE,ncid)
 
   err = nf90_inq_varid(ncid,trim('shot'),varid)
   err = nf90_get_var(ncid,varid,onetwo_ishot)

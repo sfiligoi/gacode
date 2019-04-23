@@ -6,9 +6,10 @@ module prgen_globals
 
   ! List of possible data files
   character (len=70) :: date
-  character (len=70) :: raw_data_file
+  character (len=70) :: file_state
   character (len=70) :: raw_data_type
-  character (len=70) :: cer_file
+  character (len=70) :: file_g
+  character (len=70) :: file_cer
 
   !----------------------------------------------------------
   ! Internal control variables
@@ -20,7 +21,6 @@ module prgen_globals
   integer :: noq_flag
   integer :: nop_flag
   integer :: verbose_flag
-  character (len=70) :: efit_header
   integer :: ipccw
   integer :: btccw
   integer :: nfourier

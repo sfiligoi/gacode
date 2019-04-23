@@ -21,7 +21,7 @@ subroutine prgen_read_plasmastate
   real, parameter :: idiag=0
 
   ! Open the file (NF90_NOWRITE means read-only)
-  err = nf90_open(raw_data_file,NF90_NOWRITE,ncid)
+  err = nf90_open(file_state,NF90_NOWRITE,ncid)
 
   ! Shot
   plst_tag = 'shot_number'

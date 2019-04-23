@@ -120,7 +120,7 @@ subroutine prgen_map_peqdsk
   !---------------------------------------------------------
   ! Read the cer file and overlay
   !
-  if (cer_file /= "null") then
+  if (file_cer /= "null") then
      allocate(vpolc_exp(nx))
      allocate(vtorc_exp(nx))
      call prgen_read_cer

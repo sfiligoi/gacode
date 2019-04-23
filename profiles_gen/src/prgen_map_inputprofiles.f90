@@ -75,7 +75,7 @@ subroutine prgen_map_inputprofiles
   !---------------------------------------------------------
   ! Notification about CER file
   !
-  if (cer_file /= "null") then
+  if (file_cer /= "null") then
     print '(a)','INFO: (prgen_map_inputprofiles) IGNORING cer file'
   endif
   !---------------------------------------------------------

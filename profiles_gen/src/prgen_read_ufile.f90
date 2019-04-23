@@ -23,7 +23,7 @@ subroutine prgen_read_ufile
   close(1)
 
   open(unit=1,file='out.com',status='old') 
-  read(1,*) raw_data_file
+  read(1,*) file_state
   read(1,*) ufile_tok
   read(1,*) a
   read(1,*) a

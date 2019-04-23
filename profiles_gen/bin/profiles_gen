@@ -300,7 +300,6 @@ CONFIG=.config
 DESCRIBE_FLAG=0
 
 FILE_FLAG=0
-G_FLAG=0
 VERBOSE_FLAG=0
 ORDER_FLAG=0
 LUMP_FLAG=0
@@ -324,7 +323,8 @@ NOQ_FLAG=0
 OMFIT_FLAG=0
 OMFIT_RES="medium"
 
-# CER file 
+# Extra datafiles
+GFILE=null
 CER_FILE=null
 
 # VGEN mode variables
@@ -376,7 +376,7 @@ while [ $# -gt 0 ] ; do
   -ipccw) shift ; IPCCW="$1" ;;
   -btccw) shift ; BTCCW="$1" ;;
 
-  -g) shift ; G_FLAG=1 ; GFILE="$1" ;;
+  -g) shift ; GFILE="$1" ;;
 
   -nfourier) shift ; NFOURIER=$1 ;;
 
@@ -469,13 +469,14 @@ if [ "$itype" == "UNKNOWN" ] ; then
    exit 1 
 fi
 
-if [ $G_FLAG -eq 1 ] ; then
+if [ "$GFILE" != "null" ] ; then
 
+   G_FLAG=1
    gtype=`gacode_type_autodetect $GFILE`
    echo "INFO: (profiles_gen) $GFILE is autodetected as $gtype."
 
 else
-
+   G_FLAG=0
    gtype=none
    if [ "$itype" == "PFILE" ] ; then
       echo "ERROR: (profiles_gen) A GFILE (-g) must be used with a PFILE."  
@@ -698,6 +699,8 @@ else
 fi
 #=============================================================
 
+header=`head -1 $GFILE` ; harr=($header)
+
 #=============================================================
 # Construct prgen input file ($CONFIG)
 date > $CONFIG
@@ -706,7 +709,8 @@ date > $CONFIG
 echo $FILE >> $CONFIG
 echo $itype >> $CONFIG
 
-# Optional CER file
+# Optional data files
+echo $GFILE ${harr[1]} ${harr[5]} ${harr[6]} >> $CONFIG 
 echo $CER_FILE >> $CONFIG
 
 # EFIT method

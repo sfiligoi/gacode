@@ -33,14 +33,6 @@ subroutine prgen_read_gato
 
   character (len=70) :: cdum
 
-  !--------------------------------------------------
-  ! Read gfile header info
-  !
-  open(unit=1,file='eqgta',status='old')
-  read(1,'(a)') efit_header
-  close(1) 
-  !--------------------------------------------------
-  
   !---------------------------------------------------
   ! Read flux-surface data in GATO's grid.dat file
   !

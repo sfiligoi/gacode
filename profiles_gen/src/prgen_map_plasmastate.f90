@@ -306,7 +306,7 @@ subroutine prgen_map_plasmastate
   !---------------------------------------------------
   ! Read the cer file and overlay
   !
-  if (cer_file /= "null") then
+  if (file_cer /= "null") then
      rho = plst_rho
      allocate(vpolc_exp(nx))
      allocate(vtorc_exp(nx))

@@ -29,14 +29,6 @@ subroutine prgen_read_omfit
   real, dimension(:,:,:), allocatable :: g3rho
 
   !----------------------------------------------------------------
-  ! Read gfile header info
-  !
-  open(unit=1,file='gfile',status='old')
-  read(1,'(a)') efit_header
-  close(1) 
-  !----------------------------------------------------------------
-
-  !----------------------------------------------------------------
   ! Read the OMFIT mapper file
   open(unit=1,file='out.omfit.fluxsurf',status='old')
 

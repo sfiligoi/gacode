@@ -20,7 +20,7 @@ subroutine prgen_read_corsica
   nx = corsica_nvals
   call allocate_corsica_vars
 
-  open(unit=1, file=raw_data_file, action='read', status='old')
+  open(unit=1, file=file_state, action='read', status='old')
 
   ! skip header
   do 
@@ -35,22 +35,22 @@ subroutine prgen_read_corsica
 99 continue
   ! read scalar data
 100 format (1e12.5)
-  read(1, 100) corsica_time
-  read(1, 100) corsica_current
-  read(1, 100) corsica_loop_voltage
-  read(1, 100) corsica_fusion_power
-  read(1, 100) corsica_bootstrap_fraction
-  read(1, 100) corsica_betat
-  read(1, 100) corsica_betan
-  read(1, 100) corsica_taue
-  read(1, 100) corsica_q95
-  read(1, 100) corsica_r
-  read(1, 100) corsica_a
-  read(1, 100) corsica_kappa
-  read(1, 100) corsica_delta
-  read(1, 100) corsica_fusion_gain
-  read(1, 100) corsica_betap
-  read(1, 100) corsica_li3
+  read(1,100) corsica_time
+  read(1,100) corsica_current
+  read(1,100) corsica_loop_voltage
+  read(1,100) corsica_fusion_power
+  read(1,100) corsica_bootstrap_fraction
+  read(1,100) corsica_betat
+  read(1,100) corsica_betan
+  read(1,100) corsica_taue
+  read(1,100) corsica_q95
+  read(1,100) corsica_r
+  read(1,100) corsica_a
+  read(1,100) corsica_kappa
+  read(1,100) corsica_delta
+  read(1,100) corsica_fusion_gain
+  read(1,100) corsica_betap
+  read(1,100) corsica_li3
 
   ! skip comments
   do i=1, 4

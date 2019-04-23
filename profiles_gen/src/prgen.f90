@@ -31,9 +31,10 @@ program prgen
   !
   open(unit=1,file='.config',status='old')
   read(1,'(a)') date
-  read(1,'(a)') raw_data_file
+  read(1,'(a)') file_state
   read(1,'(a)') raw_data_type
-  read(1,'(a)') cer_file
+  read(1,'(a)') file_g
+  read(1,'(a)') file_cer
   read(1,*) efit_method
   read(1,*) noq_flag
   read(1,*) nop_flag
@@ -158,6 +159,26 @@ program prgen
      call prgen_read_dskgato
   end select
   !---------------------------------------------------
+
+  !---------------------------------------------------------------
+  ! High-resolution geometry
+  !
+  if (efit_method > 1) then
+     if ((format_type == 1 .or. format_type == 2)) then
+        if (abs(dpsi_efit/dpsi_data-1) > 0.001) then
+           print '(a,1pe9.2,a)', &
+                'INFO: (prgen_write) FLUX SHRINK FACTOR : ',dpsi_efit/dpsi_data-1.0,' [WARNING]'
+        else
+           print '(a,1pe9.2,a)', &
+                'INFO: (prgen_write) FLUX SHRINK FACTOR : ',dpsi_efit/dpsi_data-1.0,' [GOOD]'
+        endif
+     endif
+  !   write(1,40) '#             NFOURIER : ',nfourier
+  !   write(1,40) '#                NSURF : ',nsurf
+  !   write(1,40) '#                 NARC : ',narc
+  !   write(1,20) '#'
+  endif
+  !---------------------------------------------------------------
 
   !-----------------------------------------------------
   ! Set ipccw and btccw to standard DIII-D configuration
