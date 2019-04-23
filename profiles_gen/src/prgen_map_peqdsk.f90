@@ -70,16 +70,18 @@ subroutine prgen_map_peqdsk
   expro_ne(:)     = peqdsk_ne(:)*10
   expro_z_eff(:)  = z_eff(:)
   ! COORDINATES: -ipccw accounts for DIII-D toroidal angle convention
-  expro_w0(:)        = -ipccw*1e3*peqdsk_omgeb(:) 
-  expro_flow_mom(:)  = 0.0               ! flow_mom
-  expro_pow_e(:)     = peqdsk_pow_e(:)   ! pow_e
-  expro_pow_i(:)     = peqdsk_pow_i(:)   ! pow_i 
-  expro_pow_ei(:)    = 0.0               ! pow_ei_exp
-  expro_zeta(:)      = zeta(:)
-  expro_flow_beam(:) = 0.0               ! flow_beam
-  expro_flow_wall(:) = 0.0               ! flow_wall_exp
-  expro_zmag(:)      = zmag(:)  
-  expro_ptot(:)      = p_tot(:)      
+  ! (wrt Ip direction)
+  EXPRO_w0(:)        = -ipccw*1e3*peqdsk_omgeb(:) 
+  EXPRO_flow_mom(:)  = 0.0               ! flow_mom
+  EXPRO_pow_e(:)     = peqdsk_pow_e(:)   ! pow_e
+  EXPRO_pow_i(:)     = peqdsk_pow_i(:)   ! pow_i 
+  EXPRO_pow_ei(:)    = 0.0               ! pow_ei_exp
+  EXPRO_zeta(:)      = zeta(:)
+  EXPRO_flow_beam(:) = 0.0               ! flow_beam
+  EXPRO_flow_wall(:) = 0.0               ! flow_wall_exp
+  EXPRO_zmag(:)      = zmag(:)  
+  EXPRO_ptot(:)      = p_tot(:)      
+
   ! COORDINATES: set sign of poloidal flux
   expro_polflux = abs(dpsi(:))*(-ipccw)
 
@@ -101,9 +103,9 @@ subroutine prgen_map_peqdsk
   endif
 
   ! vphi
-  ! COORDINATES: -ipccw accounts for DIII-D toroidal angle convention
-  expro_vtor(:,:) = 0.0
-  expro_vtor(2,:) = -ipccw*1e3*peqdsk_omegat(:)*(rmaj(:)+rmin(:))
+  ! COORDINATES: negative sign accounts for DIII-D toroidal angle convention
+  EXPRO_vtor(:,:) = 0.0
+  EXPRO_vtor(2,:) = -1e3*peqdsk_omegat(:)*(rmaj(:)+rmin(:))
 
   ! vpol
   expro_vpol(:,:) = 0.0
@@ -115,4 +117,23 @@ subroutine prgen_map_peqdsk
   enddo
 
 
+  !---------------------------------------------------------
+  ! Read the cer file and overlay
+  !
+  if (cer_file /= "null") then
+     allocate(vpolc_exp(nx))
+     allocate(vtorc_exp(nx))
+     call prgen_read_cer
+     EXPRO_w0 = omega0(:)
+     do i=1,peqdsk_nimp
+        if (peqdsk_m(i+1) .le. 12.0+epsilon(0.) .and. &
+             peqdsk_m(i+1) .ge. 12.0-epsilon(0.)) then
+           EXPRO_vtor(i+1,:) = vtorc_exp(:)
+           EXPRO_vpol(i+1,:) = vpolc_exp(:)
+           exit
+        endif
+     enddo
+  endif
+  !---------------------------------------------------------
+  
 end subroutine prgen_map_peqdsk
