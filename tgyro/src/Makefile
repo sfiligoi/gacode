@@ -29,7 +29,6 @@ else
 endif
 
 
-
 OBJECTS += tgyro_globals.o \
            tgyro_iteration_variables.o \
            tgyro_allocate_globals.o \
@@ -83,7 +82,7 @@ all: $(OBJECTS) $(EXTRA_LIBS)
 	$(FC) $(FFLAGS) -o $(EXEC) $(OBJECTS) $(EXTRA_LIBS) $(LMATH) $(NN_LIB) $(HARVEST)
 
 .f90.o :
-	$(FC) $(FMATH) $(FFLAGS) $(NN_LIB) $(HARVEST) -c $<  
+	$(FC) $(FMATH) $(FFLAGS) $(NN_LIB) $(HARVEST) -c $<
 
 clean:
 	rm -f $(EXEC)
