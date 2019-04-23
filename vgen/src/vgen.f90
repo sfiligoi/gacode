@@ -463,6 +463,10 @@ program vgen
      ! 1. input.gacode
      call expro_write_original('input.gacode','input.gacode.new',' ')
 
+     ! NEW APPROACH
+     ! expro_header(5) = '#      vgen : blah blah blah'
+     ! call expro_write_all('input.gacode.new')
+     
      ! 2. input.gacode.extra
      !call EXPRO_compute_derived
      !call EXPRO_write_derived(1,'input.gacode.extra')
