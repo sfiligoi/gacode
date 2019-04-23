@@ -584,3 +584,25 @@ subroutine expro_write_original(datafile1,datafile2,tag)
   call expro_write(datafile2)
   
 end subroutine expro_write_original
+
+subroutine expro_write_all(datafile)
+
+  use expro
+
+  implicit none
+
+  integer :: i
+  character (len=*), intent(in) :: datafile
+
+  ! Write header
+  open(unit=1,file=trim(datafile),status='replace')
+  do i=1,6
+     write(1,'(a)') expro_header(i)
+  enddo
+  write(1,'(a)') '#'
+  close(1)
+
+  ! Write data
+  call expro_write(datafile)
+
+end subroutine expro_write_all

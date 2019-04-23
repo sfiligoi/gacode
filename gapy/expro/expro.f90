@@ -165,6 +165,16 @@ module expro
   integer :: expro_ctrl_quasineutral_flag 
   integer :: expro_ctrl_numeq_flag
 
+  ! header information
+  character(len=14), dimension(6) :: expro_header = (/&
+       '#  original : ',& !1
+       '# statefile : ',& !2
+       '#     gfile : ',& !3
+       '#   cerfile : ',& !4
+       '#      vgen : ',& !5
+       '#     tgyro : '& !6
+       /)
+
 contains
 
   subroutine expro_init(flag)
@@ -487,7 +497,7 @@ contains
        expro_nfourier = -1
     endif
     close(1)
-    
+
     ! BCAST HERE
 
     call expro_compute_derived
@@ -500,7 +510,7 @@ contains
 
     integer :: nexp,nion
     character(len=*) :: thisinfile 
-    
+
     nexp = expro_n_exp
     nion = expro_n_ion
 
@@ -566,7 +576,7 @@ contains
     character(len=99) :: line
     double precision :: x(5)
     double precision :: b_ref,arho
-    
+
     open(unit=1,file='input.profiles',status='old')
     do while (line(1:2) /= '#r')
        read(1,'(a)') line
