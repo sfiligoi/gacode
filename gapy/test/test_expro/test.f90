@@ -10,7 +10,7 @@ program test
   !call expro_read_legacy
   !call expro_write
 
-  call expro_read('./')
+  call expro_read('input.gacode')
 
   print '(a)'               ,'header   ',expro_header(1)
   print '(a,i0)'            ,'nexp     ',expro_n_exp

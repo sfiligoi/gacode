@@ -360,17 +360,17 @@ contains
 
   end subroutine expro_init
 
-  subroutine expro_read(path)
+  subroutine expro_read(thisinfile)
 
     implicit none
 
-    character(len=*), intent(in) :: path 
+    character(len=*), intent(in) :: thisinfile 
     integer :: nexp,nion,ierr,i,nd
     character(len=22) :: ytag,c
 
     ! ORDERING NOTE: nexp should appear before any profile arrays
 
-    open(unit=1,file=trim(path)//infile,status='old')
+    open(unit=1,file=trim(thisinfile),status='old')
 
     ! header
     do i=1,6
@@ -488,7 +488,7 @@ contains
     ! ** input.gacode.geo **
 
     nexp = expro_n_exp
-    open(unit=1,file=trim(path)//infile//'.geo',status='old',iostat=ierr)
+    open(unit=1,file=trim(thisinfile)//'.geo',status='old',iostat=ierr)
     if (ierr == 0) then
        call expro_skip_header(1)
        call expro_icomm(expro_nfourier)
@@ -515,7 +515,7 @@ contains
     implicit none
 
     integer :: i,nexp,nion
-    character(len=*) :: thisinfile 
+    character(len=*), intent(in) :: thisinfile 
 
     nexp = expro_n_exp
     nion = expro_n_ion
