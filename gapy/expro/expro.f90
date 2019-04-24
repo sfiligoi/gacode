@@ -167,13 +167,13 @@ module expro
   integer :: expro_ctrl_numeq_flag
 
   ! header information
-  character(len=50), dimension(6) :: expro_header = (/&
-       '#  original :                                     ',& !1
-       '# statefile :                                     ',& !2
-       '#     gfile :                                     ',& !3
-       '#   cerfile :                                     ',& !4
-       '#      vgen :                                     ',& !5
-       '#     tgyro :                                     '& !6
+  character(len=70), dimension(6) :: expro_header = (/&
+       '#  original :                                                         ',& !1
+       '# statefile :                                                         ',& !2
+       '#     gfile :                                                         ',& !3
+       '#   cerfile :                                                         ',& !4
+       '#      vgen :                                                         ',& !5
+       '#     tgyro :                                                         '& !6
        /)
 
 contains
