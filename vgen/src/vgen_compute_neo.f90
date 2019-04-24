@@ -208,6 +208,7 @@ subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, &
      EXPRO_vtor(j,i) = neo_vtor_dke_out(j) &
           * vth_norm * EXPRO_rmin(EXPRO_n_exp)
   enddo
+  
   jbs_norm = charge_norm_fac*dens_norm*vth_norm &
        *EXPRO_rmin(EXPRO_n_exp)/1e6
   jbs_neo(i)     = neo_jpar_dke_out*jbs_norm

@@ -219,9 +219,9 @@ then
    echo
    echo "             -in <string of ion species> " 
    echo "             Choices: DC, DC_lowres, DC.revip, DCD, DHCD, HDC"
-   echo "             If this is blank, input.vgen must exist."
+   echo "             If this is blank, input.neo must exist."
    echo "             See"
-   echo "             $VGEN_DIR/input.vgen.*"
+   echo "             $VGEN_DIR/input.neo.*"
    echo "             for examples."
    echo
    echo "             -er <val>" 
@@ -634,36 +634,6 @@ then
    # Launch parallel vgen executable
    $GACODE_ROOT/platform/exec/exec.$GACODE_PLATFORM \
     $SIMDIR/vgen $NPROC $VGEN_EXE/vgen $NOMP $NUMA $MPINUMA
-
-
-   if [ -f "input.gacode.new" ]
-   then
-       > input.gacode
-       DATESTAMP=`date`
-       # Manage generated input.gacode and print diagnistics
-       echo "# VGEN: The file modified by VGEN on $DATESTAMP" >> input.gacode
-       if [ "$VGEN_ER" == "1" ] ; then 
-          echo "# VGEN: omega0 computed by force balance (-er 1)" >> input.gacode 
-       fi
-       if [ "$VGEN_ER" == "2" ] ; then 
-          echo "# VGEN: omega0 computed by NEO with weak rotation (-er 2)" >> input.gacode
-          echo "# VGEN: matched toroidal velocity of species $VGEN_IX" >> input.gacode
-       fi
-       if [ "$VGEN_ER" == "4" ] ; then 
-          echo "# VGEN: omega0 unchanged (-er 4)" >> input.gacode
-       fi
-       if [ "$VGEN_VEL" == "1" ] ; then 
-          echo "# VGEN: velocities computed by NEO with weak rotation (-vel 1)" >> input.gacode
-       fi
-       if [ "$VGEN_VEL" == "2" ] ; then 
-          echo "# VGEN: velocities computed by NEO with strong rotation (-vel 2)" >> input.gacode
-       fi
-
-       cat input.gacode.new >> input.gacode
-       echo "INFO: (profiles_gen) VGEN created vgen/input.gacode [new data]"
-       echo "INFO: (profiles_gen) VGEN created vgen/input.gacode.extra    [diagnostics]"
-       echo "INFO: (profiles_gen) VGEN created vgen/input.gacode.jbs      [boostrap current]"
-   fi
 
    exit 0
 fi

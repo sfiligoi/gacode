@@ -37,7 +37,7 @@ program vgen
   character(len=14) :: er_tag
   character(len=17) :: vel_tag
   character(len=7)  :: ix_tag
-  character(len=11)  :: j_tag
+  character(len=15) :: j_tag
   
   real, dimension(:), allocatable :: er_exp
 
@@ -127,6 +127,40 @@ program vgen
      endif
   endif
 
+  select case(neo_sim_model_in)
+  case(0)
+     if (i_proc == 0) then
+        print '(a)','INFO: (VGEN) Bootstrap current from Sauter'
+        j_tag=' -jbs (Sauter)'
+     endif
+  case(1)
+     if (i_proc == 0) then
+        print '(a)','INFO: (VGEN) Bootstrap current from NEO'
+        j_tag=' -jbs (NEO)'
+     endif
+  case(2)
+     if (i_proc == 0) then
+        print '(a)','INFO: (VGEN) Bootstrap current from NEO'
+        j_tag=' -jbs (NEO)'
+     endif
+  case(3)
+     if (i_proc == 0) then
+        print '(a)','INFO: (VGEN) Bootstrap current from Sauter'
+        j_tag=' -jbs (Sauter)'
+     endif
+  case(4)
+     if (i_proc == 0) then
+        print '(a)','INFO: (VGEN) Bootstrap current from NEO NN'
+        j_tag=' -jbs (NEO NN)'
+     endif
+  case default
+     if (i_proc == 0) then
+        print '(a)','ERROR: Invalid neo_sim_model'
+     endif
+     call MPI_finalize(i_err)
+     stop
+  end select
+  
   select case(epar_flag)
   case(0)
      if (i_proc == 0) then
@@ -138,7 +172,7 @@ program vgen
      endif
   case default
      if (i_proc == 0) then
-        print '(a)','ERROR: Invalid vel_method'
+        print '(a)','ERROR: Invalid epar_flag'
      endif
      call MPI_finalize(i_err)
      stop
@@ -426,7 +460,19 @@ program vgen
   pflux_sum(1)           = ya
   pflux_sum(EXPRO_n_exp) = yb
   !------------------------------------------------------------------------
-
+  
+  if(neo_sim_model_in == 0 .or. neo_sim_model_in == 3) then
+     EXPRO_jbs(:)      = jbs_sauter(:)
+     EXPRO_jbstor(:)   = jtor_sauter(:)
+     EXPRO_sigmapar(:) = jsigma_sauter(:)
+  else
+     EXPRO_jbs(:)      = jbs_neo(:)
+     EXPRO_jbstor(:)   = jtor_neo(:)
+     EXPRO_sigmapar(:) = jsigma_neo(:)
+  endif
+  
+  !------------------------------------------------------------------------
+  
   ! Write output on processor 0
 
   if (i_proc == 0) then
@@ -478,15 +524,12 @@ program vgen
      !call expro_write_original('input.gacode','input.gacode.new',' ')
 
      ! NEW APPROACH
-     expro_header(5) = '#      vgen : ' //  trim(er_tag) // trim(ix_tag) // trim(vel_tag) 
-     call expro_write('input.gacode.new')
-     
-     ! 2. input.gacode.extra
-     !call EXPRO_compute_derived
-     !call EXPRO_write_derived(1,'input.gacode.extra')
+     expro_header(5) = '#      vgen : ' //  trim(er_tag) // trim(ix_tag) // trim(vel_tag) // trim(j_tag)
+     call expro_write('input.gacode')
+     print '(a)', 'INFO: (VGEN) Created vgen/input.gacode [new data]'
 
      ! 3. input.profiles.jbs
-     open(unit=1,file='input.profiles.jbs',status='replace')
+     open(unit=1,file='out.vgen.jbs',status='replace')
      write(1,'(a)') '#'
      write(1,'(a)') '# expro_rho'
      write(1,'(a)') '# sum z*pflux_neo/(c_s n_e) /(rho_s/a_norm)**2'
