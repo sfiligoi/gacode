@@ -28,7 +28,7 @@ subroutine gyro_read_experimental_profiles
   EXPRO_ctrl_numeq_flag = num_equil_flag
   EXPRO_ctrl_n_ion = n_spec-1
 
-  call expro_read(path) 
+  call expro_read('input.gacode') 
   !---------------------------------------------------------------------
 
   !---------------------------------------------------------------------

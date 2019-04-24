@@ -27,7 +27,7 @@ program locpargen
   ! We don't need the numerical eq. flag set for this routine.
   EXPRO_ctrl_numeq_flag = hasgeo
 
-  call expro_read('./') 
+  call expro_read('input.gacode') 
 
   ! Minor radius
   a = EXPRO_rmin(EXPRO_n_exp)

@@ -136,7 +136,7 @@ subroutine tgyro_init_profiles
   EXPRO_ctrl_quasineutral_flag = 0
   EXPRO_ctrl_numeq_flag = loc_num_equil_flag
 
-  call expro_read('./') 
+  call expro_read('input.gacode') 
 
   shot = 0
   

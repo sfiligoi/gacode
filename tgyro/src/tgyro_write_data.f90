@@ -55,7 +55,7 @@ subroutine tgyro_write_data(i_print)
 
   if (tgyro_write_profiles_flag /= 0 .and. i_print > 0) then 
 
-     call expro_read('./')
+     call expro_read('input.gacode')
 
      call tgyro_profile_reintegrate
 

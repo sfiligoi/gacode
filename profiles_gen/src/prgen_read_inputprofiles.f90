@@ -15,7 +15,7 @@ subroutine prgen_read_inputprofiles
   expro_ctrl_quasineutral_flag = 0
   expro_ctrl_numeq_flag = 0 
   
-  call expro_read('./')
+  call expro_read('input.gacode')
   
   nx = expro_n_exp
 
