@@ -9,14 +9,14 @@ ax.set_ylabel('Bunit')
 gapy.expro.expro_read('input.gacode')
 
 x = gapy.expro.expro_rho
-y = gapy.expro.expro_skappa
+y = gapy.expro.expro_bunit
 
 ax.plot(x,y)
 
 gapy.expro.expro_read('input.gacode.g')
 
 x = gapy.expro.expro_rho
-y = gapy.expro.expro_skappa
+y = gapy.expro.expro_bunit
 
 ax.plot(x,y)
 
