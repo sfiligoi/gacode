@@ -464,7 +464,150 @@ subroutine bound_extrap(fa,fb,f,r,n)
 
 end subroutine bound_extrap
 
+subroutine expro_read_legacy
+
+  use expro
+
+  implicit none
+
+  integer :: i
+  integer :: nexp,nion
+  character(len=99) :: line
+  double precision :: x(5)
+  double precision :: b_ref,arho
+
+  open(unit=1,file='input.profiles',status='old')
+  do while (line(1:2) /= '#r')
+     read(1,'(a)') line
+     if (line(1:5) == 'N_EXP') then
+        read(line(7:),*) expro_n_exp
+     endif
+     if (line(1:5) == 'N_ION') then
+        read(line(7:),*) expro_n_ion
+     endif
+     if (line(1:6) == 'BT_EXP') then
+        read(line(8:),*) b_ref
+     endif
+     if (line(1:8) == 'ARHO_EXP') then
+        read(line(10:),*) arho
+     endif
+  enddo
+  expro_torfluxa = 0.5*b_ref*arho**2
+
+  call expro_init(1)
+
+  nexp = expro_n_exp
+  nion = expro_n_ion
+
+  ! 1
+  do i=1,nexp
+     read(1,*) x
+     expro_rho(i)     = x(1)
+     expro_rmin(i)    = x(2)
+     expro_polflux(i) = x(3)
+     expro_q(i)       = x(4)
+     expro_w0(i)      = x(5)
+  enddo
+
+  read(1,'(a)') line
+  read(1,'(a)') line
+
+  ! 2
+  do i=1,nexp
+     read(1,*) x
+     expro_rmaj(i)  = x(1)
+     expro_zmag(i)  = x(2)
+     expro_kappa(i) = x(3)
+     expro_delta(i) = x(4)
+     expro_zeta(i)  = x(5)
+  enddo
+
+  read(1,'(a)') line
+  read(1,'(a)') line
+
+  ! 3
+  do i=1,nexp
+     read(1,*) x
+     expro_ne(i)    = x(1)
+     expro_te(i)    = x(2)
+     expro_ptot(i)  = x(3)
+     expro_z_eff(i) = x(4)
+  enddo
+
+  read(1,'(a)') line
+  read(1,'(a)') line
+
+  ! 4
+  do i=1,nexp
+     read(1,*) x
+     expro_ni(1:nion,i) = x(1:nion)
+  enddo
+
+  read(1,'(a)') line
+  read(1,'(a)') line
+
+  ! 5 (assume < 6 ions, so skip)
+  do i=1,nexp
+     read(1,*) x
+  enddo
+
+  read(1,'(a)') line
+  read(1,'(a)') line
+
+  ! 6
+  do i=1,nexp
+     read(1,*) x
+     expro_ti(1:nion,i) = x(1:nion)
+  enddo
+
+  read(1,'(a)') line
+  read(1,'(a)') line
+
+  ! 7 (assume < 6 ions, so skip)
+  do i=1,nexp
+     read(1,*) x
+  enddo
+
+  read(1,'(a)') line
+  read(1,'(a)') line
+
+  ! 8
+  do i=1,nexp
+     read(1,*) x
+     expro_vtor(1:nion,i) = x(1:nion)
+  enddo
+
+  read(1,'(a)') line
+  read(1,'(a)') line
+
+  ! 9 (assume < 6 ions, so skip)
+  do i=1,nexp
+     read(1,*) x
+  enddo
+
+  read(1,'(a)') line
+  read(1,'(a)') line
+
+  ! 10
+  do i=1,nexp
+     read(1,*) x
+     expro_vpol(1:nion,i) = x(1:nion)
+  enddo
+
+  read(1,'(a)') line
+  read(1,'(a)') line
+
+  ! 11 (assume < 6 ions, so skip)
+  do i=1,nexp
+     read(1,*) x
+  enddo
+  close(1)
+
+end subroutine expro_read_legacy
+
 subroutine expro_writev(x,n)
+
+  use expro, only : ident, extag, iextag
 
   implicit none
 
@@ -472,15 +615,21 @@ subroutine expro_writev(x,n)
   double precision, intent(in), dimension(n) :: x
   integer :: i
 
-  do i=1,n
-     write(1,10) i,x(i)
-  enddo
+  if (sum(abs(x)) > 1e-10) then
+     write(1,'(a)') ident//extag(iextag)
+     do i=1,n
+        write(1,10) i,x(i)
+     enddo
+  endif
+  iextag = iextag+1
 
 10 format(i3,1x,1pe14.7)
 
 end subroutine expro_writev
 
 subroutine expro_writea(x,m,n)
+
+  use expro, only : ident, extag, iextag
 
   implicit none
 
@@ -489,9 +638,13 @@ subroutine expro_writea(x,m,n)
   double precision, intent(in), dimension(m,n) :: x
   integer :: i
 
-  do i=1,n
-     write(1,10) i,x(:,i)
-  enddo
+  if (sum(abs(x)) > 1e-10) then
+     write(1,'(a)') ident//extag(iextag)  
+     do i=1,n
+        write(1,10) i,x(:,i)
+     enddo
+  endif
+  iextag = iextag+1
 
 10 format(i3,1x,10(1pe14.7,1x))
 

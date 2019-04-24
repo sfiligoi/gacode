@@ -474,8 +474,10 @@ if [ "$GFILE" != "null" ] ; then
    G_FLAG=1
    gtype=`gacode_type_autodetect $GFILE`
    echo "INFO: (profiles_gen) $GFILE is autodetected as $gtype."
+   header=`head -1 $GFILE` ; harr=($header)
 
 else
+
    G_FLAG=0
    gtype=none
    if [ "$itype" == "PFILE" ] ; then
@@ -699,7 +701,6 @@ else
 fi
 #=============================================================
 
-header=`head -1 $GFILE` ; harr=($header)
 
 #=============================================================
 # Construct prgen input file ($CONFIG)

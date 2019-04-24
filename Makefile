@@ -16,7 +16,7 @@ all:
 clean:
 	cd shared ; make clean
 	cd le3 ; make clean
-	cd gato ; make clean
+#	cd gato ; make clean
 	cd neo ; make clean
 	cd vgen ; make clean
 	cd glf23 ; make clean

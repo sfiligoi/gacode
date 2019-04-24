@@ -100,7 +100,8 @@ else
    if [[ $y -eq 5 ]] ; then
       echo "GFILE" 
       exit 0
-   fi 
+   fi
+   
    if [[ $y -eq 4 ]] ; then
       echo "DSKGATO_OLD" 
       exit 0
@@ -112,6 +113,13 @@ else
       exit 0
    fi 
 
+   # Added a new gfile test
+   y=`head -1 $1 | grep -o E | wc -l`
+   if [[ $y -eq 1 ]] ; then
+      echo "GFILE" 
+      exit 0
+   fi 
+  
    echo "UNKNOWN" 
    exit 1;
 fi

@@ -2,6 +2,7 @@ module expro
 
   ! Fundamental input
   integer, parameter :: nextag = 42
+  integer :: iextag
   character(len=12) :: infile = 'input.gacode'
 
   character(len=2) :: ident='# '
@@ -527,194 +528,56 @@ contains
     write(1,'(a)') '#'
 
     ! Write data
-    write(1,20) ident//extag(1)  ; write(1,'(i0)') nexp
-    write(1,20) ident//extag(2)  ; write(1,'(i0)') nion
-    write(1,20) ident//extag(3)  ; write(1,40) expro_mass
-    write(1,20) ident//extag(4)  ; write(1,40) expro_z
-    write(1,20) ident//extag(5)  ; write(1,30) expro_torfluxa
-    write(1,20) ident//extag(6)  ; call expro_writev(expro_rho,nexp)
-    write(1,20) ident//extag(7)  ; call expro_writev(expro_rmin,nexp)
-    write(1,20) ident//extag(8)  ; call expro_writev(expro_polflux,nexp)
-    write(1,20) ident//extag(9)  ; call expro_writev(expro_q,nexp)
-    write(1,20) ident//extag(10) ; call expro_writev(expro_w0,nexp)
-    write(1,20) ident//extag(11) ; call expro_writev(expro_rmaj,nexp)
-    write(1,20) ident//extag(12) ; call expro_writev(expro_zmag,nexp)
-    write(1,20) ident//extag(13) ; call expro_writev(expro_kappa,nexp)
-    write(1,20) ident//extag(14) ; call expro_writev(expro_delta,nexp)
-    write(1,20) ident//extag(15) ; call expro_writev(expro_zeta,nexp)
-    write(1,20) ident//extag(16) ; call expro_writev(expro_ne,nexp)
-    write(1,20) ident//extag(17) ; call expro_writea(expro_ni(:,:),nion,nexp)
-    write(1,20) ident//extag(18) ; call expro_writev(expro_te,nexp)
-    write(1,20) ident//extag(19) ; call expro_writea(expro_ti(:,:),nion,nexp)
-    write(1,20) ident//extag(20) ; call expro_writev(expro_ptot,nexp)
-    write(1,20) ident//extag(21) ; call expro_writev(expro_jbs,nexp)
-    write(1,20) ident//extag(22) ; call expro_writev(expro_jbstor,nexp)
-    write(1,20) ident//extag(23) ; call expro_writev(expro_sigmapar,nexp)
-    write(1,20) ident//extag(24) ; call expro_writev(expro_z_eff,nexp)
-    write(1,20) ident//extag(25) ; call expro_writea(expro_vpol(:,:),nion,nexp)
-    write(1,20) ident//extag(26) ; call expro_writea(expro_vtor(:,:),nion,nexp)
-    write(1,20) ident//extag(27) ; call expro_writev(expro_flow_beam,nexp)
-    write(1,20) ident//extag(28) ; call expro_writev(expro_flow_wall,nexp)
-    write(1,20) ident//extag(29) ; call expro_writev(expro_flow_mom,nexp)
-    write(1,20) ident//extag(30) ; call expro_writev(expro_pow_e,nexp)
-    write(1,20) ident//extag(31) ; call expro_writev(expro_pow_i,nexp)
-    write(1,20) ident//extag(32) ; call expro_writev(expro_pow_ei,nexp)
-    write(1,20) ident//extag(33) ; call expro_writev(expro_pow_e_aux,nexp)
-    write(1,20) ident//extag(34) ; call expro_writev(expro_pow_i_aux,nexp)
-    write(1,20) ident//extag(35) ; call expro_writev(expro_pow_e_fus,nexp)
-    write(1,20) ident//extag(36) ; call expro_writev(expro_pow_i_fus,nexp)
-    write(1,20) ident//extag(37) ; call expro_writev(expro_pow_e_sync,nexp)
-    write(1,20) ident//extag(38) ; call expro_writev(expro_pow_e_brem,nexp)
-    write(1,20) ident//extag(39) ; call expro_writev(expro_pow_e_line,nexp)
-    write(1,20) ident//extag(40) ; call expro_writev(expro_sbeame,nexp)
-    write(1,20) ident//extag(41) ; call expro_writev(expro_sbcx,nexp)
-    write(1,20) ident//extag(42) ; call expro_writev(expro_sscxl,nexp)
+    write(1,'(a)') ident//extag(1)  ; write(1,'(i0)') nexp
+    write(1,'(a)') ident//extag(2)  ; write(1,'(i0)') nion
+    write(1,'(a)') ident//extag(3)  ; write(1,40) expro_mass
+    write(1,'(a)') ident//extag(4)  ; write(1,40) expro_z
+    write(1,'(a)') ident//extag(5)  ; write(1,30) expro_torfluxa
+    iextag=6
+    ! Write vector/array data, skipping objects that are 0.0
+    call expro_writev(expro_rho,nexp)
+    call expro_writev(expro_rmin,nexp)
+    call expro_writev(expro_polflux,nexp)
+    call expro_writev(expro_q,nexp)
+    call expro_writev(expro_w0,nexp)
+    call expro_writev(expro_rmaj,nexp)
+    call expro_writev(expro_zmag,nexp)
+    call expro_writev(expro_kappa,nexp)
+    call expro_writev(expro_delta,nexp)
+    call expro_writev(expro_zeta,nexp)
+    call expro_writev(expro_ne,nexp)
+    call expro_writea(expro_ni(:,:),nion,nexp)
+    call expro_writev(expro_te,nexp)
+    call expro_writea(expro_ti(:,:),nion,nexp)
+    call expro_writev(expro_ptot,nexp)
+    call expro_writev(expro_jbs,nexp)
+    call expro_writev(expro_jbstor,nexp)
+    call expro_writev(expro_sigmapar,nexp)
+    call expro_writev(expro_z_eff,nexp)
+    call expro_writea(expro_vpol(:,:),nion,nexp)
+    call expro_writea(expro_vtor(:,:),nion,nexp)
+    call expro_writev(expro_flow_beam,nexp)
+    call expro_writev(expro_flow_wall,nexp)
+    call expro_writev(expro_flow_mom,nexp)
+    call expro_writev(expro_pow_e,nexp)
+    call expro_writev(expro_pow_i,nexp)
+    call expro_writev(expro_pow_ei,nexp)
+    call expro_writev(expro_pow_e_aux,nexp)
+    call expro_writev(expro_pow_i_aux,nexp)
+    call expro_writev(expro_pow_e_fus,nexp)
+    call expro_writev(expro_pow_i_fus,nexp)
+    call expro_writev(expro_pow_e_sync,nexp)
+    call expro_writev(expro_pow_e_brem,nexp)
+    call expro_writev(expro_pow_e_line,nexp)
+    call expro_writev(expro_sbeame,nexp)
+    call expro_writev(expro_sbcx,nexp)
+    call expro_writev(expro_sscxl,nexp)
 
     close(1)
 
-20  format(a)
 30  format(1pe14.7)
 40  format(10(1pe14.7))
 
   end subroutine expro_write
-
-  subroutine expro_read_legacy
-
-    implicit none
-
-    integer :: i
-    integer :: nexp,nion
-    character(len=99) :: line
-    double precision :: x(5)
-    double precision :: b_ref,arho
-
-    open(unit=1,file='input.profiles',status='old')
-    do while (line(1:2) /= '#r')
-       read(1,'(a)') line
-       if (line(1:5) == 'N_EXP') then
-          read(line(7:),*) expro_n_exp
-       endif
-       if (line(1:5) == 'N_ION') then
-          read(line(7:),*) expro_n_ion
-       endif
-       if (line(1:6) == 'BT_EXP') then
-          read(line(8:),*) b_ref
-       endif
-       if (line(1:8) == 'ARHO_EXP') then
-          read(line(10:),*) arho
-       endif
-    enddo
-    expro_torfluxa = 0.5*b_ref*arho**2
-
-    call expro_init(1)
-
-    nexp = expro_n_exp
-    nion = expro_n_ion
-
-    ! 1
-    do i=1,nexp
-       read(1,*) x
-       expro_rho(i)     = x(1)
-       expro_rmin(i)    = x(2)
-       expro_polflux(i) = x(3)
-       expro_q(i)       = x(4)
-       expro_w0(i)      = x(5)
-    enddo
-
-    read(1,'(a)') line
-    read(1,'(a)') line
-
-    ! 2
-    do i=1,nexp
-       read(1,*) x
-       expro_rmaj(i)  = x(1)
-       expro_zmag(i)  = x(2)
-       expro_kappa(i) = x(3)
-       expro_delta(i) = x(4)
-       expro_zeta(i)  = x(5)
-    enddo
-
-    read(1,'(a)') line
-    read(1,'(a)') line
-
-    ! 3
-    do i=1,nexp
-       read(1,*) x
-       expro_ne(i)    = x(1)
-       expro_te(i)    = x(2)
-       expro_ptot(i)  = x(3)
-       expro_z_eff(i) = x(4)
-    enddo
-
-    read(1,'(a)') line
-    read(1,'(a)') line
-
-    ! 4
-    do i=1,nexp
-       read(1,*) x
-       expro_ni(1:nion,i) = x(1:nion)
-    enddo
-
-    read(1,'(a)') line
-    read(1,'(a)') line
-
-    ! 5 (assume < 6 ions, so skip)
-    do i=1,nexp
-       read(1,*) x
-    enddo
-
-    read(1,'(a)') line
-    read(1,'(a)') line
-
-    ! 6
-    do i=1,nexp
-       read(1,*) x
-       expro_ti(1:nion,i) = x(1:nion)
-    enddo
-
-    read(1,'(a)') line
-    read(1,'(a)') line
-
-    ! 7 (assume < 6 ions, so skip)
-    do i=1,nexp
-       read(1,*) x
-    enddo
-
-    read(1,'(a)') line
-    read(1,'(a)') line
-
-    ! 8
-    do i=1,nexp
-       read(1,*) x
-       expro_vtor(1:nion,i) = x(1:nion)
-    enddo
-
-    read(1,'(a)') line
-    read(1,'(a)') line
-
-    ! 9 (assume < 6 ions, so skip)
-    do i=1,nexp
-       read(1,*) x
-    enddo
-
-    read(1,'(a)') line
-    read(1,'(a)') line
-
-    ! 10
-    do i=1,nexp
-       read(1,*) x
-       expro_vpol(1:nion,i) = x(1:nion)
-    enddo
-
-    read(1,'(a)') line
-    read(1,'(a)') line
-
-    ! 11 (assume < 6 ions, so skip)
-    do i=1,nexp
-       read(1,*) x
-    enddo
-    close(1)
-
-  end subroutine expro_read_legacy
 
 end module expro
