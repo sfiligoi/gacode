@@ -118,15 +118,19 @@ program vgen
      call MPI_finalize(i_err)
      stop
   end select
-  
-  if (i_proc == 0) then
-     if(nn_flag == 1) then
-        print '(a)','INFO: (VGEN) Using NEO NN for bootstrap current'
-     else
-        print '(a)','INFO: (VGEN) Using NEO DKE for bootstrap current'
-     endif
-  endif
 
+  !---------------------------------------------------------------------
+  ! Initialize vgen parameters
+  !
+  call vgen_init
+  allocate(er_exp(EXPRO_n_exp))
+  if (er_method /= 4) then
+     er_exp(:)    = 0.0
+     EXPRO_w0(:)  = 0.0
+     EXPRO_w0p(:) = 0.0
+  endif
+  !---------------------------------------------------------------------
+  
   select case(neo_sim_model_in)
   case(0)
      if (i_proc == 0) then
@@ -164,11 +168,11 @@ program vgen
   select case(epar_flag)
   case(0)
      if (i_proc == 0) then
-        print '(a)','INFO: (VGEN) Do not include NEO conductivity calculation'
+        print '(a)','INFO: (VGEN) Do not include conductivity calculation'
      endif
   case(1)
      if (i_proc == 0) then
-        print '(a)','INFO: (VGEN) Include NEO conductivity calculation'
+        print '(a)','INFO: (VGEN) Include conductivity calculation'
      endif
   case default
      if (i_proc == 0) then
@@ -182,18 +186,6 @@ program vgen
      print '(a,i2,a,i2)','INFO: (VGEN) Using NEO Theta Resolution: ',nth_min,'-',nth_max
      print '(a,i2)','INFO: (VGEN) MPI tasks: ',n_proc
   endif
-  
-  !---------------------------------------------------------------------
-  ! Initialize vgen parameters
-  !
-  call vgen_init
-  allocate(er_exp(EXPRO_n_exp))
-  if (er_method /= 4) then
-     er_exp(:)    = 0.0
-     EXPRO_w0(:)  = 0.0
-     EXPRO_w0p(:) = 0.0
-  endif
-  !---------------------------------------------------------------------
 
   !---------------------------------------------------------------------
   ! Distribution scheme.

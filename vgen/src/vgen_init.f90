@@ -99,7 +99,7 @@ subroutine vgen_init
      endif
   endif
 
-  call expro_read('./')
+  call expro_read('input.gacode')
    
   !if (EXPRO_error == 1) then
   !   if (i_proc == 0) then
