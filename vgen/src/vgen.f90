@@ -34,7 +34,11 @@ program vgen
   integer :: simntheta
   integer :: iteration_flag
   real :: cpu_tot_in, cpu_tot_out
-
+  character(len=14) :: er_tag
+  character(len=17) :: vel_tag
+  character(len=7)  :: ix_tag
+  character(len=11)  :: j_tag
+  
   real, dimension(:), allocatable :: er_exp
 
   !---------------------------------------------------------------------
@@ -71,14 +75,22 @@ program vgen
   case(1)
      if(i_proc == 0) then
         print '(a)','INFO: (VGEN) Computing omega0 (Er)  from force balance'
+        er_tag=' -er 1 (FB)'
+        write(ix_tag,'(i0)') erspecies_indx
+        ix_tag=' -ix ' // ix_tag
      endif
   case(2)
      if(i_proc == 0) then
         print '(a)', 'INFO: (VGEN) Computing omega0 (Er) from NEO (weak rotation limit)'
+        er_tag=' -er 2 (NEO)'
+        write(ix_tag,'(i0)') erspecies_indx
+        ix_tag=' -ix ' // ix_tag
      endif
   case(4)
      if(i_proc == 0) then
         print '(a)','INFO: (VGEN) Returning given omega0 (Er)'
+        er_tag=' -er 4 (given)'
+        ix_tag=''
      endif
   case default
      if(i_proc == 0) then
@@ -92,10 +104,12 @@ program vgen
   case(1)
      if (i_proc == 0) then
         print '(a)','INFO: (VGEN) Computing velocities from NEO (weak rotation limit)'
+        vel_tag=' -vel 1 (weak)'
      endif
   case(2)
      if (i_proc == 0) then
         print '(a)','INFO: (VGEN) Computing velocities from NEO (strong rotation limit)'
+        vel_tag=' -vel 2 (strong)'
      endif
   case default
      if (i_proc == 0) then
@@ -134,7 +148,7 @@ program vgen
      print '(a,i2,a,i2)','INFO: (VGEN) Using NEO Theta Resolution: ',nth_min,'-',nth_max
      print '(a,i2)','INFO: (VGEN) MPI tasks: ',n_proc
   endif
-
+  
   !---------------------------------------------------------------------
   ! Initialize vgen parameters
   !
@@ -464,7 +478,7 @@ program vgen
      !call expro_write_original('input.gacode','input.gacode.new',' ')
 
      ! NEW APPROACH
-     expro_header(5) = '#      vgen : blah blah blah'
+     expro_header(5) = '#      vgen : ' //  trim(er_tag) // trim(ix_tag) // trim(vel_tag) 
      call expro_write('input.gacode.new')
      
      ! 2. input.gacode.extra
