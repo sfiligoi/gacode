@@ -228,7 +228,7 @@ class cgyrodata:
          pass 
       #-----------------------------------------------------------------
 
-   def getflux(self,cflux):
+   def getflux(self,cflux='auto'):
 
       if cflux == 'auto':
          if abs(self.gamma_e) > 0.0:
