@@ -371,6 +371,11 @@ contains
 
     open(unit=1,file=trim(path)//infile,status='old')
 
+    ! header
+    do i=1,6
+       read(1,'(a)') expro_header(i)
+    enddo
+
     do 
 
        read(1,'(a)',end=99) ytag
@@ -508,14 +513,20 @@ contains
 
     implicit none
 
-    integer :: nexp,nion
+    integer :: i,nexp,nion
     character(len=*) :: thisinfile 
 
     nexp = expro_n_exp
     nion = expro_n_ion
 
-    open(unit=1,file=trim(thisinfile),position='append')
+    ! Write header
+    open(unit=1,file=trim(thisinfile),status='replace')
+    do i=1,6
+       write(1,'(a)') expro_header(i)
+    enddo
+    write(1,'(a)') '#'
 
+    ! Write data
     write(1,20) ident//extag(1)  ; write(1,'(i0)') nexp
     write(1,20) ident//extag(2)  ; write(1,'(i0)') nion
     write(1,20) ident//extag(3)  ; write(1,40) expro_mass

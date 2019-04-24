@@ -79,22 +79,17 @@ subroutine tgyro_write_data(i_print)
      if (i_proc_global == 0) then
 
         call date_and_time(DATE=date_str,TIME=time_str)
-        msg_str = 'Profiles modified by TGYRO '//trim(date_str)//' '//trim(time_str)
+        expro_header(6) = '#     tgyro : '//trim(date_str)//' '//trim(time_str)
 
         if (tgyro_write_profiles_flag == -1) then
            ! Output for each iteration
            write(ntag,'(i0)') i_tran
-           call expro_write_original(&
-                'input.gacode',&
-                'input.gacode.'//trim(ntag),trim(msg_str))
+           call expro_write('input.gacode.'//trim(ntag))
         endif
 
         if (i_tran_loop == tgyro_relax_iterations .or. converged) then
            ! Output for last iteration
-           call expro_write_original(&
-                'input.gacode',&
-                'input.gacode.new',trim(msg_str))
-
+           call expro_write('input.gacode.new')
         endif
 
      endif

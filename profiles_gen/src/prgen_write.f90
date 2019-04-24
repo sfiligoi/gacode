@@ -16,11 +16,6 @@ subroutine prgen_write
   integer :: i
   !---------------------------------------------------------------
 
-  expro_header(1) = '#  original : '//trim(date)
-  expro_header(2) = '# statefile : '//trim(file_state)
-  expro_header(3) = '#     gfile : '//trim(file_g)
-  expro_header(4) = '#   cerfile : '//trim(file_cer)
-
   !write(1,'(a)')     '#                      IONS :  Name       Z    Mass'
   !do i=1,expro_n_ion
   !   write(1,'(a,t32,a,t41,i3,t47,f5.1,t53,a)') '#',&
@@ -64,7 +59,12 @@ subroutine prgen_write
   !-------------------------------------------------------------------------------------
   ! Now we need to write the profile data
   !
-  call expro_write_all('input.gacode')
+  expro_header(1) = '#  original : '//trim(date)
+  expro_header(2) = '# statefile : '//trim(file_state)
+  expro_header(3) = '#     gfile : '//trim(file_g)
+  expro_header(4) = '#   cerfile : '//trim(file_cer)
+
+  call expro_write('input.gacode')
   print '(a)','INFO: (prgen_write) Wrote input.gacode.'
   !-------------------------------------------------------------------------------------
 
