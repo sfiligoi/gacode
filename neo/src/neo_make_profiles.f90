@@ -25,23 +25,6 @@ subroutine neo_make_profiles
      enddo
   endif
   
-  num_ele = 0
-  do is=1, n_species
-     if(z_in(is) < 0.0) then
-        is_ele = is
-        num_ele = num_ele + 1
-     endif
-  enddo
-  if(num_ele == 0) then
-     adiabatic_ele_model = 1
-     is_ele = n_species+1
-  else if(num_ele == 1) then
-     adiabatic_ele_model = 0
-  else
-     call neo_error('ERROR: (NEO) Only one electron species allowed')
-     return
-  end if
-  
   select case (profile_model) 
      
   case (1)
@@ -96,7 +79,7 @@ subroutine neo_make_profiles
      ne_ade(ir)      = ne_ade_in
      dlntdre_ade(ir) = dlntdre_ade_in
      dlnndre_ade(ir) = dlnndre_ade_in
-
+     
      omega_rot(ir)       = omega_rot_in 
      omega_rot_deriv(ir) = omega_rot_deriv_in 
 
@@ -107,8 +90,6 @@ subroutine neo_make_profiles
         dlnndr(is,ir)   = dlnndr_in(is)
         aniso_model(is) = aniso_model_in(is)
         if(aniso_model(is) == 2) then
-           !temp(is,ir)        = temp_in(is)
-           !dlntdr(is,ir)      = dlntdr_in(is)
            temp_para(is,ir)   = temp_para_in(is)
            temp_perp(is,ir)   = temp_perp_in(is)
            dlntdr_para(is,ir) =  dlntdr_para_in(is)
@@ -131,6 +112,17 @@ subroutine neo_make_profiles
              * sqrt(mass(1)/mass(is)) * (temp(1,ir)/temp(is,ir))**1.5
      enddo
 
+     if(adiabatic_ele_model == 1) then
+        is_ele = -1
+     else
+        do is=1, n_species
+           if(z(is) < 0.0) then
+              is_ele = is
+              exit
+           endif
+        enddo
+     endif
+     
      do is=1, n_species
         vth(is,ir) = sqrt(temp(is,ir)/mass(is))
         vth_para(is,ir) = sqrt(temp_para(is,ir)/mass(is))
@@ -157,17 +149,6 @@ subroutine neo_make_profiles
      ! EAB: beta_star is presently only used for anisotropic species, which
      ! currently only works in local profile mode
      beta_star(:) = 0.0
-     
-     do is=1,n_species
-        z(is)    = z_in(is)
-        mass(is) = mass_in(is)
-        aniso_model(is) = aniso_model_in(is)
-     enddo
-
-     if (adiabatic_ele_model == 0 .and. Z(n_species) > 0.0) then
-        call neo_error('ERROR: (NEO) For exp. profiles, electron species must be n_species')
-        return
-     endif
 
      udsymmetry_flag   = 0  ! do not enforce up-down symmetry
      quasineutral_flag = 1  ! do enforce quasineutrality
@@ -188,7 +169,13 @@ subroutine neo_make_profiles
              btccw_exp,&
              ipccw_exp,&
              a_meters)
-     
+
+        do is=1,n_species
+           z(is)    = z_loc(is)
+           mass(is) = mass_loc(is)/2.0
+           aniso_model(is) = aniso_model_in(is)
+        enddo
+        
         if(btccw_exp > 0.0) then
            sign_bunit = -1.0
         else
@@ -227,6 +214,12 @@ subroutine neo_make_profiles
               return
            endif
         enddo
+
+        if(adiabatic_ele_model == 1) then
+           is_ele = n_species+1
+        else
+           is_ele = n_species
+        endif
         
         ne_ade(ir)      = dens_loc(is_ele)
         te_ade(ir)      = temp_loc(is_ele)
@@ -357,6 +350,28 @@ subroutine neo_make_profiles
      vth_para(:,:)    = vth(:,:)
      
   end select
+
+  ! Check electron species consistency
+  num_ele = 0
+  do is=1, n_species
+     if(z(is) < 0.0) then
+        num_ele = num_ele + 1
+     endif
+  enddo
+  if(num_ele == 0) then
+     if(adiabatic_ele_model == 0) then
+        call neo_error('ERROR: (NEO) No electron species specified')
+        return
+     endif
+  else if(num_ele == 1) then
+     if(adiabatic_ele_model == 1) then
+        call neo_error('ERROR: (NEO) Electron species specified with adiabatic electron model')
+        return
+     endif
+  else
+     call neo_error('ERROR: (NEO) Only one electron species allowed')
+     return
+  endif
   
   if(rotation_model == 2) then
      ! In the strong rotation limit, only use phi_(-1) (set by omega_rot)

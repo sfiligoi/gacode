@@ -26,10 +26,6 @@ subroutine neo_read_input
   read(1,*) profile_equilibrium_model
   read(1,*) ipccw_in
   read(1,*) btccw_in
-  read(1,*) te_ade_in
-  read(1,*) ne_ade_in
-  read(1,*) dlntdre_ade_in
-  read(1,*) dlnndre_ade_in
 
   read(1,*) rotation_model
   read(1,*) omega_rot_in
@@ -42,6 +38,12 @@ subroutine neo_read_input
   read(1,*) coll_uncoupledei_model
   read(1,*) coll_uncoupledaniso_model
 
+  read(1,*) adiabatic_ele_model
+  read(1,*) ne_ade_in
+  read(1,*) te_ade_in
+  read(1,*) dlnndre_ade_in
+  read(1,*) dlntdre_ade_in
+  
   read(1,*) n_species
 
   read(1,*) nu_1_in

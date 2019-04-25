@@ -63,6 +63,21 @@ subroutine neo_check
      return
   end select
 
+  ! Electron model
+  select case (adiabatic_ele_model)
+  case(0)
+     if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_neoout,30) 'adiabatic_ele_model','KINETIC ELECTRONS'
+     endif
+  case(1)
+     if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_neoout,30) 'adiabatic_ele_model','ADIABATIC ELECTRONS'
+     endif
+  case default
+     call neo_error('ERROR: (NEO) invalid adiabatic_ele_model')
+     return
+  end select
+     
   ! Collision model
   !
   select case (collision_model)  
@@ -492,6 +507,10 @@ subroutine neo_check
            write(io_neoout,'(t2,i2,2x,f7.3,2x,6(1pe11.4,2x))') &
                 is,Z(is),dens(is,ir),temp(is,ir),mass(is),dlnndr(is,ir),dlntdr(is,ir),nu(is,ir)
         enddo
+        if (adiabatic_ele_model == 1) then
+           write(io_neoout,'(t2,a3,1x,f7.3,2x,2(1pe11.4,2x),1x,a2,10x,2(1pe11.4,2x),1x,a2)') &
+                'ade',-1.000,ne_ade(ir),te_ade(ir),'--',dlnndre_ade(ir),dlntdre_ade(ir),'--'
+        endif
 
         flag = 0
         do is=1,n_species

@@ -71,7 +71,6 @@ contains
     real, dimension(6) :: xmin = (/ 0.05,0.323,1.0,-2.0,0.6,1.0 /)
     real, dimension(6) :: xmax = (/ 0.35,0.766,10.0,1.0,0.99,3.0 /)
     real, dimension(6) :: C_ln, C_ke, C_ki1, C_ki2
-    real :: ke, ki1, ki2
     character(len=218) :: root
     character(len=255) :: data
     

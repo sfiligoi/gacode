@@ -33,10 +33,6 @@ module neo_interface
   integer :: neo_profile_equilibrium_model_in = 1
   integer :: neo_ipccw_in = -1
   integer :: neo_btccw_in = -1
-  real    :: neo_te_ade_in = 1.0
-  real    :: neo_ne_ade_in = 1.0
-  real    :: neo_dlntdre_ade_in  = 1.0
-  real    :: neo_dlnndre_ade_in  = 1.0
   integer :: neo_rotation_model_in = 1
   real    :: neo_omega_rot_in = 0.0
   real    :: neo_omega_rot_deriv_in = 0.0
@@ -45,6 +41,11 @@ module neo_interface
   real    :: neo_epar0_spitzer_in = 1.0
   integer :: neo_coll_uncoupledei_model_in = 0
   integer :: neo_coll_uncoupledaniso_model_in = 0
+  integer :: neo_adiabatic_ele_model_in = 0
+  real    :: neo_ne_ade_in = 1.0
+  real    :: neo_te_ade_in = 1.0
+  real    :: neo_dlnndre_ade_in  = 1.0
+  real    :: neo_dlntdre_ade_in  = 1.0
   integer :: neo_n_species_in = 1
   real                   :: neo_nu_1_in = 0.1
   real,    dimension(11) :: neo_z_in = (/1,1,1,1,1,1,1,1,1,1,1/)
@@ -156,10 +157,6 @@ contains
     neo_profile_equilibrium_model_in = profile_equilibrium_model
     neo_ipccw_in  = ipccw_in
     neo_btccw_in  = btccw_in
-    neo_te_ade_in = te_ade_in
-    neo_ne_ade_in = ne_ade_in
-    neo_dlntdre_ade_in = dlntdre_ade_in
-    neo_dlnndre_ade_in = dlnndre_ade_in
     neo_rotation_model_in = rotation_model
     neo_omega_rot_in = omega_rot_in
     neo_omega_rot_deriv_in = omega_rot_deriv_in
@@ -168,6 +165,11 @@ contains
     neo_epar0_spitzer_in = epar0_spitzer
     neo_coll_uncoupledei_model_in = coll_uncoupledei_model
     neo_coll_uncoupledaniso_model_in = coll_uncoupledaniso_model
+    neo_adiabatic_ele_model_in = adiabatic_ele_model
+    neo_ne_ade_in = ne_ade_in
+    neo_te_ade_in = te_ade_in
+    neo_dlnndre_ade_in = dlnndre_ade_in
+    neo_dlntdre_ade_in = dlntdre_ade_in
     neo_n_species_in = n_species
     neo_nu_1_in = nu_1_in  
     neo_z_in = z_in
@@ -237,11 +239,7 @@ contains
     profile_erad0_model = neo_profile_erad0_model_in
     profile_equilibrium_model = neo_profile_equilibrium_model_in
     ipccw_in  = neo_ipccw_in
-    btccw_in  = neo_btccw_in
-    te_ade_in = neo_te_ade_in
-    ne_ade_in = neo_ne_ade_in
-    dlntdre_ade_in = neo_dlntdre_ade_in
-    dlnndre_ade_in = neo_dlnndre_ade_in   
+    btccw_in  = neo_btccw_in 
     rotation_model = neo_rotation_model_in
     omega_rot_in = neo_omega_rot_in
     omega_rot_deriv_in = neo_omega_rot_deriv_in
@@ -250,6 +248,11 @@ contains
     epar0_spitzer = neo_epar0_spitzer_in
     coll_uncoupledei_model = neo_coll_uncoupledei_model_in
     coll_uncoupledaniso_model = neo_coll_uncoupledaniso_model_in
+    adiabatic_ele_model = neo_adiabatic_ele_model_in
+    ne_ade_in = neo_ne_ade_in
+    te_ade_in = neo_te_ade_in
+    dlnndre_ade_in = neo_dlnndre_ade_in
+    dlntdre_ade_in = neo_dlntdre_ade_in
     n_species = neo_n_species_in
     nu_1_in = neo_nu_1_in
     z_in = neo_z_in
@@ -330,10 +333,6 @@ contains
     write(1,20) 'COLLISION_MODEL=',neo_collision_model_in
     write(1,20) 'IPCCW=',neo_ipccw_in
     write(1,20) 'BTCCW=',neo_btccw_in
-    write(1,30) 'TE_ADE=',neo_te_ade_in
-    write(1,30) 'NE_ADE=',neo_ne_ade_in
-    write(1,30) 'DLNTDRE_ADE=',neo_dlntdre_ade_in
-    write(1,30) 'DLNNDRE_ADE=',neo_dlnndre_ade_in
     write(1,20) 'ROTATION_MODEL=',neo_rotation_model_in
     write(1,30) 'OMEGA_ROT=',neo_omega_rot_in
     write(1,30) 'OMEGA_ROT_DERIV=',neo_omega_rot_deriv_in
@@ -342,6 +341,11 @@ contains
     write(1,30) 'EPAR0_SPITZER=',neo_epar0_spitzer_in
     write(1,20) 'COLL_UNCOUPLEDEI_MODEL=',neo_coll_uncoupledei_model_in
     write(1,20) 'COLL_UNCOUPLEDANISO_MODEL=',neo_coll_uncoupledaniso_model_in
+    write(1,20) 'ADIABATIC_ELE_MODEL=',neo_adiabatic_ele_model_in
+    write(1,30) 'NE_ADE=',neo_ne_ade_in
+    write(1,30) 'TE_ADE=',neo_te_ade_in
+    write(1,30) 'DLNNDRE_ADE=',neo_dlnndre_ade_in
+    write(1,30) 'DLNTDRE_ADE=',neo_dlntdre_ade_in
     write(1,20) 'N_SPECIES=',neo_n_species_in
     write(1,30) 'NU_1=',neo_nu_1_in
 
