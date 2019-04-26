@@ -272,18 +272,19 @@ then
    echo
    echo "(1) Typical usage for DIII-D plasmas with iterdbfile only (2 steps)"
    echo "    NEO will generate Er and all velocities:"
+   echo "    (2 ions + electrons)"
    echo 
    echo "    profiles_gen -i iterdb -g gfile"
-   echo "    profiles_gen -vgen -i input.gacode -er 2 -vel 1 -in DC -ix 2"
+   echo "    profiles_gen -vgen -i input.gacode -er 2 -vel 1 -in 2 -ix 2"
    echo
-   echo "    or for fast calculations"
-   echo "    profiles_gen -vgen -i input.gacode -er 2 -vel 1 -in DC_lowres -ix 2"
-   echo
+   echo "    if using your own input.neo, use '-in input.neo'"
+   echo 
    echo "(2) Typical usage for DIII-D plasmas with CER file available (2 steps)"
    echo "    NEO will take Er from CER file and generate all velocities:"
+   echo "    (2 ions + electrons)"
    echo 
    echo "    profiles_gen -i iterdb -g gfile -cer cerfile"
-   echo "    profiles_gen -vgen -i input.gacode -er 4 -vel 2 -in DC -ix 2"
+   echo "    profiles_gen -vgen -i input.gacode -er 4 -vel 2 -in 2 -ix 2"
    echo 
 
    exit 1
