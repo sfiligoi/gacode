@@ -1,7 +1,7 @@
 module expro
 
   ! Fundamental input
-  integer, parameter :: nextag = 44
+  integer, parameter :: nextag = 48
   integer :: iextag
   character(len=12) :: infile = 'input.gacode'
 
@@ -11,9 +11,13 @@ module expro
        'nion                ',& !2
        'name                ',& !3
        'type                ',& !3
+       'masse (m_H)         ',& !3
        'mass (m_H)          ',& !3
+       'ze (-)              ',& !4
        'z (-)               ',& !4
        'torfluxa (Wb/radian)',& !5
+       'rvbv (Tm)           ',& !5
+       'ipa (MA)            ',& !5
        'rho (-)             ',& !6
        'rmin (m)            ',& !7
        'polflux (Wb/radian) ',& !8
@@ -61,14 +65,18 @@ module expro
        expro_name,&
        expro_type
 
+  double precision :: &
+       expro_masse=5.442585e-4,&
+       expro_ze=-1.0
+
   double precision, dimension(:), allocatable :: &
        expro_mass,&
        expro_z
 
   double precision :: &
-       expro_torfluxa,&
-       expro_rvbv,&
-       expro_ip_exp
+       expro_torfluxa=0.0,&
+       expro_rvbv=0.0,&
+       expro_ipa=0.0
 
   double precision, dimension(:), allocatable :: &
        expro_rho,&
@@ -415,12 +423,20 @@ contains
           call expro_tcomm(expro_name,nion)
        case ('type')
           call expro_tcomm(expro_type,nion)
+       case ('masse')
+          call expro_rcomm(expro_masse) 
        case ('mass')
           call expro_lcomm(expro_mass,nion)
+       case ('ze')
+          call expro_rcomm(expro_ze) 
        case ('z')
           call expro_lcomm(expro_z,nion)
        case ('torfluxa')
           call expro_rcomm(expro_torfluxa) 
+       case ('rvbv')
+          call expro_rcomm(expro_rvbv) 
+       case ('ip')
+          call expro_rcomm(expro_ipa) 
        case ('rho')
           call expro_vcomm(expro_rho,nexp)  
        case ('rmin')
@@ -551,12 +567,16 @@ contains
     write(1,'(a)') ident//extag(2) ; write(1,'(i0)') nion
     write(1,'(a)') ident//extag(3) ; write(1,'(20(a,1x))') (trim(expro_name(i)),i=1,nion)
     write(1,'(a)') ident//extag(4) ; write(1,'(20(a,1x))') (trim(expro_type(i)),i=1,nion)
-    write(1,'(a)') ident//extag(5) ; write(1,40) expro_mass
-    write(1,'(a)') ident//extag(6) ; write(1,40) expro_z
-    write(1,'(a)') ident//extag(7) ; write(1,30) expro_torfluxa
+    write(1,'(a)') ident//extag(5) ; write(1,30) expro_masse
+    write(1,'(a)') ident//extag(6) ; write(1,40) expro_mass
+    write(1,'(a)') ident//extag(7) ; write(1,30) expro_ze
+    write(1,'(a)') ident//extag(8) ; write(1,40) expro_z
+    iextag=9
 
-    iextag=8
     ! Write vector/array data, skipping objects that are 0.0
+    call expro_writes(expro_torfluxa)
+    call expro_writes(expro_rvbv)
+    call expro_writes(expro_ipa)
     call expro_writev(expro_rho,nexp)
     call expro_writev(expro_rmin,nexp)
     call expro_writev(expro_polflux,nexp)

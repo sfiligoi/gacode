@@ -611,6 +611,24 @@ subroutine expro_read_legacy
 
 end subroutine expro_read_legacy
 
+subroutine expro_writes(x)
+
+  use expro, only : ident, extag, iextag
+
+  implicit none
+
+  double precision, intent(in) :: x
+
+  if (abs(x) > 1e-16) then
+     write(1,'(a)') ident//extag(iextag)
+     write(1,10) x
+  endif
+  iextag = iextag+1
+
+10 format(1pe14.7)
+
+end subroutine expro_writes
+
 subroutine expro_writev(x,n)
 
   use expro, only : ident, extag, iextag
@@ -621,7 +639,7 @@ subroutine expro_writev(x,n)
   double precision, intent(in), dimension(n) :: x
   integer :: i
 
-  if (sum(abs(x)) > 1e-10) then
+  if (sum(abs(x)) > 1e-16) then
      write(1,'(a)') ident//extag(iextag)
      do i=1,n
         write(1,10) i,x(i)
@@ -644,7 +662,7 @@ subroutine expro_writea(x,m,n)
   double precision, intent(in), dimension(m,n) :: x
   integer :: i
 
-  if (sum(abs(x)) > 1e-10) then
+  if (sum(abs(x)) > 1e-16) then
      write(1,'(a)') ident//extag(iextag)  
      do i=1,n
         write(1,10) i,x(:,i)

@@ -16,8 +16,8 @@ subroutine prgen_write
   integer :: i
   !---------------------------------------------------------------
 
-  expro_rvbv  = 0.0
-  expro_ip_exp = 0.0
+  expro_rvbv = 0.0
+  expro_ipa  = 0.0
 
   ! Ensure correct sign of toroidal flux (Bt)
   !
@@ -29,8 +29,8 @@ subroutine prgen_write
   case (1)
      ! onetwo statefile
      expro_torfluxa = -0.5*btccw*abs(onetwo_Btor)*onetwo_rho_grid(nx)**2
-     expro_rvbv  = onetwo_R0*onetwo_Btor
-     expro_ip_exp = -ipccw*abs(ip_tot)
+     expro_rvbv = onetwo_R0*onetwo_Btor
+     expro_ipa = -ipccw*abs(ip_tot)
   case (2)
      ! plasmastate 
      expro_torfluxa = -btccw*abs(plst_phit(nx))/(2*pi)
