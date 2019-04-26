@@ -326,6 +326,8 @@ subroutine expro_compute_derived
      call bound_deriv(expro_sdlnnidr_new(:),expro_ni_new(:)*expro_dlnnidr_new(:),expro_rmin,expro_n_exp)
      expro_sdlnnidr_new(:) = expro_sdlnnidr_new(:)/expro_ni_new(:)*expro_rhos(:)
 
+     if (minval(expro_ni_new(:)) <= 0.0) expro_error = 1
+ 
   else
 
      expro_ni_new(:) = expro_ni(1,:)
@@ -336,6 +338,10 @@ subroutine expro_compute_derived
 
   deallocate(dummy)
 
+  do is=1,expro_ctrl_n_ion
+     if (minval(expro_ni(is,:)) <= 0.0) expro_error=1
+  enddo
+  
 end subroutine expro_compute_derived
 
 !-------------------------------------------------------

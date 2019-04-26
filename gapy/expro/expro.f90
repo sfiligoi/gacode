@@ -161,7 +161,8 @@ module expro
   integer :: expro_ctrl_n_ion = -1
   integer :: expro_ctrl_quasineutral_flag 
   integer :: expro_ctrl_numeq_flag
-
+  integer :: expro_error=0
+  
   ! header information
   character(len=10), dimension(:), allocatable :: expro_name
 
