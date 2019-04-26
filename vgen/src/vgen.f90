@@ -516,7 +516,7 @@ program vgen
      !call expro_write_original('input.gacode','input.gacode.new',' ')
 
      ! NEW APPROACH
-     expro_header(5) = '#      vgen : ' //  trim(er_tag) // trim(ix_tag) // trim(vel_tag) // trim(j_tag)
+     expro_head_vgen = '#      vgen : ' //  trim(er_tag) // trim(ix_tag) // trim(vel_tag) // trim(j_tag)
      call expro_write('input.gacode')
      print '(a)', 'INFO: (VGEN) Created vgen/input.gacode [new data]'
 

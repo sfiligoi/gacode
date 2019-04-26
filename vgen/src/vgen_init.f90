@@ -14,8 +14,6 @@ subroutine vgen_init
 
   neo_n_radial_in = 1
   neo_profile_model_in = 1
-
-  print *, neo_n_species_in
   
   ! Set qn option for EXPRO
 
@@ -47,8 +45,8 @@ subroutine vgen_init
      neo_mass_in(j) = expro_mass(j)/2.0
   enddo
   if(neo_adiabatic_ele_model_in == 0) then
-     neo_z_in(neo_n_species_in)    = -1.0
-     neo_mass_in(neo_n_species_in) =  1.0/1837.0/2.0
+     neo_z_in(neo_n_species_in)    = expro_ze
+     neo_mass_in(neo_n_species_in) = expro_masse/2.0
   endif
   
   ! Set sign of btccw and ipccw from sign of b and q from EXPRO
