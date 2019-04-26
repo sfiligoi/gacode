@@ -341,11 +341,11 @@ subroutine prgen_map_plasmastate
      expro_z(i)    = nint(plst_q_all(i+1)/1.6022e-19)
      call prgen_ion_name(nint(expro_mass(i)),expro_z(i),expro_name(i))     
      if (i+1 > plst_dp1_nspec_th) then
-        expro_name(i) = trim(expro_name(i))//type_fast
+        expro_type(i) = type_fast
      else
-        expro_name(i) = trim(expro_name(i))//type_therm
+        expro_type(i) = type_therm
      endif
-     print '(t6,i2,1x,a)',i,expro_name(i)
+     print '(t6,i2,2(1x,a))',i,trim(expro_name(i)),trim(expro_type(i))
   enddo
 
 end subroutine prgen_map_plasmastate

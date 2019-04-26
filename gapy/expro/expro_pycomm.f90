@@ -62,6 +62,19 @@ subroutine expro_vcomm(x,n)
 
 end subroutine expro_vcomm
 
+subroutine expro_tcomm(x,n)
+
+  use mpi
+
+  implicit none
+
+  integer, intent(in) :: n
+  character(len=10), intent(inout), dimension(n) :: x
+
+  read(1,*) x
+
+end subroutine expro_tcomm
+
 subroutine expro_acomm(x,m,n)
 
   implicit none

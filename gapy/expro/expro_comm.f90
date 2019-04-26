@@ -92,6 +92,29 @@ subroutine expro_lcomm(x,n)
 
 end subroutine expro_lcomm
 
+subroutine expro_tcomm(x,n)
+
+  use mpi
+
+  implicit none
+
+  integer, intent(in) :: n
+  character(len=10), intent(inout), dimension(n) :: x
+  integer :: ierr,iproc
+  logical :: flag
+  
+  call MPI_INITIALIZED(flag,ierr)
+  
+  if (flag) then
+     call MPI_COMM_RANK(MPI_COMM_WORLD,iproc,ierr)
+     if (iproc == 0) read(1,*) x
+     call MPI_BCAST(x,n,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
+  else
+     read(1,*) x
+  endif
+
+end subroutine expro_tcomm
+
 subroutine expro_vcomm(x,n)
 
   use mpi

@@ -50,7 +50,8 @@ subroutine prgen_map_corsica
 
   expro_mass(:) = 2.0
   expro_z(:) = 1.0
-  expro_name(:) = 'D'//type_therm
+  expro_name(:) = 'D'
+  expro_type(:) = type_therm
   
   ! ni
   expro_ni(1,:) = 0.5 * corsica_ndt(:)*10.0

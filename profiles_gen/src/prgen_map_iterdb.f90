@@ -265,13 +265,12 @@ subroutine prgen_map_iterdb
      expro_mass(i) = onetwo_m(i)             
      expro_z(i)    = onetwo_z(i)             
      call prgen_ion_name(nint(expro_mass(i)),nint(expro_z(i)),expro_name(i))         
-
      if (i > onetwo_nion) then
-        expro_name(i) = trim(expro_name(i))//type_fast
+        expro_type(i) = type_fast
      else
-        expro_name(i) = trim(expro_name(i))//type_therm
+        expro_type(i) = type_therm
      endif
-     print '(t6,i2,1x,a)',i,expro_name(i)
+     print '(t6,i2,2(1x,a))',i,trim(expro_name(i)),trim(expro_type(i))
 
   enddo
   !---------------------------------------------------------

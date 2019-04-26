@@ -1,7 +1,7 @@
 module expro
 
   ! Fundamental input
-  integer, parameter :: nextag = 42
+  integer, parameter :: nextag = 44
   integer :: iextag
   character(len=12) :: infile = 'input.gacode'
 
@@ -9,6 +9,8 @@ module expro
   character(len=20), dimension(nextag) :: extag = (/&
        'nexp                ',& !1
        'nion                ',& !2
+       'name                ',& !3
+       'type                ',& !3
        'mass (m_H)          ',& !3
        'z (-)               ',& !4
        'torfluxa (Wb/radian)',& !5
@@ -48,12 +50,16 @@ module expro
        'pow_e_line (MW)     ',& !39
        'sbeame (1/m^3/s)    ',& !40
        'sbcx (1/m^3/s)      ',& !41
-       'sscxl (1/m^3/s)     '&  !42
+       'sscxl (1/m^3/s)     '&  !44
        /)
 
   integer :: &
        expro_n_exp,&
        expro_n_ion
+
+  character(len=10), dimension(:), allocatable :: &
+       expro_name,&
+       expro_type
 
   double precision, dimension(:), allocatable :: &
        expro_mass,&
@@ -163,17 +169,13 @@ module expro
   integer :: expro_ctrl_numeq_flag
   integer :: expro_error=0
   
-  ! header information
-  character(len=10), dimension(:), allocatable :: expro_name
-
-  character(len=70), dimension(6) :: expro_header = (/&
-       '#  original :                                                         ',& !1
-       '# statefile :                                                         ',& !2
-       '#     gfile :                                                         ',& !3
-       '#   cerfile :                                                         ',& !4
-       '#      vgen :                                                         ',& !5
-       '#     tgyro :                                                         '& !6
-       /)
+  ! Header information
+  character(len=70) :: expro_head_original =  '#  *original : null'
+  character(len=70) :: expro_head_statefile = '# *statefile : null'
+  character(len=70) :: expro_head_gfile =     '#     *gfile : null'
+  character(len=70) :: expro_head_cerfile =   '#   *cerfile : null'
+  character(len=70) :: expro_head_vgen =      '#      *vgen : null'
+  character(len=70) :: expro_head_tgyro =     '#     *tgyro : null'
 
 contains
 
@@ -192,6 +194,7 @@ contains
        allocate(expro_mass(nion))    ; expro_mass = 1.0
        allocate(expro_z(nion))       ; expro_z = 1.0
        allocate(expro_name(nion))
+       allocate(expro_type(nion))
 
        allocate(expro_rho(nexp))     ; expro_rho = 0.0
        allocate(expro_rmin(nexp))    ; expro_rmin = 0.0
@@ -277,6 +280,7 @@ contains
        deallocate(expro_mass) 
        deallocate(expro_z) 
        deallocate(expro_name) 
+       deallocate(expro_type) 
 
        deallocate(expro_rho)
        deallocate(expro_rmin)
@@ -363,19 +367,32 @@ contains
 
     character(len=*), intent(in) :: thisinfile 
     integer :: nexp,nion,ierr,i,nd
-    character(len=22) :: ytag,c
+    character(len=70) :: ytag
+    character(len=22) :: c
     
     
     ! ORDERING NOTE: nexp should appear before any profile arrays
 
     open(unit=1,file=trim(thisinfile),status='old')
 
-    ! Ignore header for now, read later.
-   
     do
        
        read(1,'(a)',end=99) ytag
 
+       if (index(ytag,'*original') > 0) then
+          expro_head_original=ytag ; cycle
+       else if (index(ytag,'*statefile') > 0) then
+          expro_head_statefile=ytag ; cycle
+       else if (index(ytag,'*gfile') > 0) then
+          expro_head_gfile=ytag ; cycle
+       else if (index(ytag,'*cerfile') > 0) then
+          expro_head_cerfile=ytag ; cycle
+       else if (index(ytag,'*vgen') > 0) then
+          expro_head_vgen=ytag ; cycle
+       else if (index(ytag,'*tgyro') > 0) then
+          expro_head_tgyro=ytag ; cycle
+       endif
+       
        nd = scan(ytag,'(')
        if (nd == 0) then
           ! no units field so trim all whitespace
@@ -394,6 +411,10 @@ contains
           nion = expro_n_ion
           if (allocated(expro_rho)) call expro_init(0)
           call expro_init(1) 
+       case ('name')
+          call expro_tcomm(expro_name,nion)
+       case ('type')
+          call expro_tcomm(expro_type,nion)
        case ('mass')
           call expro_lcomm(expro_mass,nion)
        case ('z')
@@ -478,17 +499,7 @@ contains
 
     enddo
 
- 99 rewind 1
-    
-    ! Now read header
-    do i=1,6
-       read(1,'(a)') expro_header(i)
-    print *,expro_header(i)
-    enddo
-    read(1,*) 
-    read(1,*) c,expro_name(:)
-
-    close(1)
+ 99 close(1)
 
     ! ** input.gacode.geo **
 
@@ -527,21 +538,24 @@ contains
 
     ! Write header
     open(unit=1,file=trim(thisinfile),status='replace')
-    do i=1,6
-       write(1,'(a)') expro_header(i)
-    enddo
-    write(1,'(a)') '#'
-    write(1,'(20(a))') '# ',(trim(expro_name(i)),' ',i=1,nion)
+    write(1,'(a)') expro_head_original
+    write(1,'(a)') expro_head_statefile 
+    write(1,'(a)') expro_head_gfile
+    write(1,'(a)') expro_head_cerfile
+    write(1,'(a)') expro_head_vgen
+    write(1,'(a)') expro_head_tgyro
     write(1,'(a)') '#'
 
     ! Write data
     write(1,'(a)') ident//extag(1) ; write(1,'(i0)') nexp
     write(1,'(a)') ident//extag(2) ; write(1,'(i0)') nion
-    write(1,'(a)') ident//extag(3) ; write(1,40) expro_mass
-    write(1,'(a)') ident//extag(4) ; write(1,40) expro_z
-    write(1,'(a)') ident//extag(5) ; write(1,30) expro_torfluxa
+    write(1,'(a)') ident//extag(3) ; write(1,'(20(a,1x))') (trim(expro_name(i)),i=1,nion)
+    write(1,'(a)') ident//extag(4) ; write(1,'(20(a,1x))') (trim(expro_type(i)),i=1,nion)
+    write(1,'(a)') ident//extag(5) ; write(1,40) expro_mass
+    write(1,'(a)') ident//extag(6) ; write(1,40) expro_z
+    write(1,'(a)') ident//extag(7) ; write(1,30) expro_torfluxa
 
-    iextag=6
+    iextag=8
     ! Write vector/array data, skipping objects that are 0.0
     call expro_writev(expro_rho,nexp)
     call expro_writev(expro_rmin,nexp)

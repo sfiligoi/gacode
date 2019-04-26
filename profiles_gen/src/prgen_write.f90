@@ -51,10 +51,10 @@ subroutine prgen_write
   !-------------------------------------------------------------------------------------
   ! Now we need to write the profile data
   !
-  expro_header(1) = '#  original : '//trim(date)
-  expro_header(2) = '# statefile : '//trim(file_state)
-  expro_header(3) = '#     gfile : '//trim(file_g)
-  expro_header(4) = '#   cerfile : '//trim(file_cer)
+  expro_head_original  = '#  *original : '//trim(date)
+  expro_head_statefile = '# *statefile : '//trim(file_state)
+  expro_head_gfile     = '#     *gfile : '//trim(file_g)
+  expro_head_cerfile   = '#   *cerfile : '//trim(file_cer)
 
   call expro_write('input.gacode')
   print '(a)','INFO: (prgen_write) Wrote input.gacode.'
