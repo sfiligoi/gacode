@@ -85,21 +85,27 @@ subroutine prgen_map_peqdsk
   ! COORDINATES: set sign of poloidal flux
   expro_polflux = abs(dpsi(:))*(-ipccw)
 
+  expro_mass = peqdsk_m(1:expro_n_ion)
+  expro_z    = peqdsk_z(1:expro_n_ion)
+  do i=1,expro_n_ion
+     call prgen_ion_name(nint(expro_mass(i)),nint(expro_z(i)),expro_name(i))         
+  enddo
+
   ! ni, nc, nb -and- ti, tc, tb
   expro_ni(1,:) = ni_d(:)
   expro_ti(1,:) = peqdsk_ti(:)
-  expro_type(1) = type_therm
+  expro_name(1) = expro_name(1)//type_therm
   do i=1,peqdsk_nimp
      expro_ni(1+i,:) = ni_imp(i,:)
      expro_ti(1+i,:) = peqdsk_ti(:)
-     expro_type(1+1) = type_therm
+     expro_name(1+1) = expro_name(1+1)//type_therm
   enddo
   if (peqdsk_nbeams == 1) then
      i = 1+peqdsk_nimp+1
      expro_ni(i,:) = ni_b(:)
      ! JC: need to check for zero density here?
      expro_ti(i,:) = peqdsk_pb(:)/(peqdsk_nb(:)*10)/1.602
-     expro_type(i) = type_fast
+     expro_name(i) = expro_name(i)//type_fast
   endif
 
   ! vphi
@@ -109,13 +115,6 @@ subroutine prgen_map_peqdsk
 
   ! vpol
   expro_vpol(:,:) = 0.0
-
-  expro_mass = peqdsk_m(1:expro_n_ion)
-  expro_z    = peqdsk_z(1:expro_n_ion)
-  do i=1,expro_n_ion
-     call prgen_ion_name(nint(expro_mass(i)),nint(expro_z(i)),expro_name(i))         
-  enddo
-
 
   !---------------------------------------------------------
   ! Read the cer file and overlay

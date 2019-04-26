@@ -262,16 +262,17 @@ subroutine prgen_map_iterdb
   !
   print '(a)','INFO: (prgen_map_iterdb) Created these species'
   do i=1,expro_n_ion
-     if (i > onetwo_nion) then
-        expro_type(i) = type_fast
-     else
-        expro_type(i) = type_therm
-     endif
-     print '(t6,i2,1x,a,1x,a)',i,trim(onetwo_ion_name(i)),expro_type(i)
      expro_mass(i) = onetwo_m(i)             
      expro_z(i)    = onetwo_z(i)             
-
      call prgen_ion_name(nint(expro_mass(i)),nint(expro_z(i)),expro_name(i))         
+
+     if (i > onetwo_nion) then
+        expro_name(i) = trim(expro_name(i))//type_fast
+     else
+        expro_name(i) = trim(expro_name(i))//type_therm
+     endif
+     print '(t6,i2,1x,a)',i,expro_name(i)
+
   enddo
   !---------------------------------------------------------
 

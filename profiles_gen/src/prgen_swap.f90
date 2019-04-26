@@ -6,7 +6,6 @@ subroutine prgen_swap
 
   ! Perform reordering (may just be identity)
 
-  call swapc(expro_type,expro_n_ion)
   call swapc(expro_name,expro_n_ion)
   call swap1(expro_z,expro_n_ion)
   call swap1(expro_mass,expro_n_ion)

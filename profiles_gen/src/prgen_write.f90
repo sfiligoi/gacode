@@ -16,14 +16,6 @@ subroutine prgen_write
   integer :: i
   !---------------------------------------------------------------
 
-  !write(1,'(a)')     '#                      IONS :  Name       Z    Mass'
-  !do i=1,expro_n_ion
-  !   write(1,'(a,t32,a,t41,i3,t47,f5.1,t53,a)') '#',&
-  !        expro_name(i),nint(expro_z(i)),expro_mass(i),expro_type(i)
-  !enddo
-  !write(1,'(a,i2)')  '#                     IPCCW : ',ipccw
-  !write(1,'(a,i2)')  '#                     BTCCW : ',btccw
-
   expro_rvbv  = 0.0
   expro_ip_exp = 0.0
 

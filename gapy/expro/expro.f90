@@ -59,10 +59,6 @@ module expro
        expro_mass,&
        expro_z
 
-  character(len=7), dimension(:), allocatable :: &
-       expro_name,&
-       expro_type
-
   double precision :: &
        expro_torfluxa,&
        expro_rvbv,&
@@ -167,6 +163,8 @@ module expro
   integer :: expro_ctrl_numeq_flag
 
   ! header information
+  character(len=10), dimension(:), allocatable :: expro_name
+
   character(len=70), dimension(6) :: expro_header = (/&
        '#  original :                                                         ',& !1
        '# statefile :                                                         ',& !2
@@ -192,8 +190,7 @@ contains
 
        allocate(expro_mass(nion))    ; expro_mass = 1.0
        allocate(expro_z(nion))       ; expro_z = 1.0
-       allocate(expro_type(nion))    ; expro_type = '       '
-       allocate(expro_name(nion))    ; expro_name = '       '
+       allocate(expro_name(nion))
 
        allocate(expro_rho(nexp))     ; expro_rho = 0.0
        allocate(expro_rmin(nexp))    ; expro_rmin = 0.0
@@ -278,7 +275,6 @@ contains
 
        deallocate(expro_mass) 
        deallocate(expro_z) 
-       deallocate(expro_type) 
        deallocate(expro_name) 
 
        deallocate(expro_rho)
@@ -367,18 +363,16 @@ contains
     character(len=*), intent(in) :: thisinfile 
     integer :: nexp,nion,ierr,i,nd
     character(len=22) :: ytag,c
-
+    
+    
     ! ORDERING NOTE: nexp should appear before any profile arrays
 
     open(unit=1,file=trim(thisinfile),status='old')
 
-    ! header
-    do i=1,6
-       read(1,'(a)') expro_header(i)
-    enddo
-
-    do 
-
+    ! Ignore header for now, read later.
+   
+    do
+       
        read(1,'(a)',end=99) ytag
 
        nd = scan(ytag,'(')
@@ -483,7 +477,17 @@ contains
 
     enddo
 
-99  close(1)
+ 99 rewind 1
+    
+    ! Now read header
+    do i=1,6
+       read(1,'(a)') expro_header(i)
+    print *,expro_header(i)
+    enddo
+    read(1,*) 
+    read(1,*) c,expro_name(:)
+
+    close(1)
 
     ! ** input.gacode.geo **
 
@@ -526,13 +530,16 @@ contains
        write(1,'(a)') expro_header(i)
     enddo
     write(1,'(a)') '#'
+    write(1,'(20(a))') '# ',(trim(expro_name(i)),' ',i=1,nion)
+    write(1,'(a)') '#'
 
     ! Write data
-    write(1,'(a)') ident//extag(1)  ; write(1,'(i0)') nexp
-    write(1,'(a)') ident//extag(2)  ; write(1,'(i0)') nion
-    write(1,'(a)') ident//extag(3)  ; write(1,40) expro_mass
-    write(1,'(a)') ident//extag(4)  ; write(1,40) expro_z
-    write(1,'(a)') ident//extag(5)  ; write(1,30) expro_torfluxa
+    write(1,'(a)') ident//extag(1) ; write(1,'(i0)') nexp
+    write(1,'(a)') ident//extag(2) ; write(1,'(i0)') nion
+    write(1,'(a)') ident//extag(3) ; write(1,40) expro_mass
+    write(1,'(a)') ident//extag(4) ; write(1,40) expro_z
+    write(1,'(a)') ident//extag(5) ; write(1,30) expro_torfluxa
+
     iextag=6
     ! Write vector/array data, skipping objects that are 0.0
     call expro_writev(expro_rho,nexp)

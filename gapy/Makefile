@@ -3,10 +3,8 @@
 #---------------------------
 
 all:
-	cd geo  ; make
+	cd geo ; make
 	cd expro ; make
-#	cd f2py ; make
-	cd test ; make
 
 pip:
 	python setup.py build_ext
