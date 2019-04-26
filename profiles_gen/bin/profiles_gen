@@ -217,9 +217,9 @@ then
    echo "             -vgen"
    echo "             Toggle vgen mode."
    echo
-   echo "             -in <string of ion species> " 
-   echo "             Choices: DC, DC_lowres, DC.revip, DCD, DHCD, HDC"
-   echo "             If this is blank, input.neo must exist."
+   echo "             -in <number of ion species or input.neo> " 
+   echo "             If number specified (>=1), uses default neo template"
+   echo "             Otherwise, input.neo must exist."
    echo "             See"
    echo "             $VGEN_DIR/input.neo.*"
    echo "             for examples."
@@ -585,18 +585,23 @@ then
    rm -rf vgen ; mkdir vgen ; cd vgen
 
    # Check for input.neo file
-
-   if [ -f $VGEN_DIR/input.neo.$VGEN_IN ]
+   if [ $VGEN_IN == 'input.neo' ]
    then
-     cp $VGEN_DIR/input.neo.$VGEN_IN input.neo
-   else 
       if [ -f ../input.neo ]
       then
-         cp ../input.neo input.neo
+          cp ../input.neo input.neo
       else
-         echo "ERROR: (profiles_gen) Specify ion string with -in, or create input.neo"
-         exit 1
+          echo "ERROR: (profiles_gen) Specify ion number >= 1 with -in for default input.neo template, or create input.neo"
+          exit 1
       fi
+   else if [[ $VGEN_IN =~ [1-9] ]]
+	then
+	    cp $VGEN_DIR/input.neo.default input.neo
+	    echo "N_SPECIES="$((VGEN_IN + 1)) >> input.neo
+	else
+	  echo "ERROR: (profiles_gen) Specify ion number >= 1 with -in for default input.neo template, or create input.neo"
+          exit 1
+	fi
    fi
 
    # Tell NEO that its being run in subroutine mode by vgen.
@@ -604,10 +609,10 @@ then
 
    cp ../$FILE input.gacode
    if [ -f "../$FILE.geo" ]
-       then
+   then
        cp ../$FILE.geo input.gacode.geo
    else
-       echo "INFO: (profiles_gen) $FILE.geo not found -- using EQUILIBRIUM_MODEL=2"
+       echo "INFO: (profiles_gen) $FILE.geo not found -- using EQUILIBRIUM_MODEL=2 (miller geo)"
        echo "EQUILIBRIUM_MODEL=2" >> input.neo
    fi
 

@@ -8,7 +8,7 @@
 ! PURPOSE: 
 !  Driver for the vgen (velocity-generation) capability of NEO.  This 
 !  will write a new input.gacode with NEO-computed electric field 
-!  and/or velocities. A new input.gacode.extra will also be generated.
+!  and/or velocities. 
 !------------------------------------------------------------------------
 
 program vgen
@@ -77,14 +77,14 @@ program vgen
         print '(a)','INFO: (VGEN) Computing omega0 (Er)  from force balance'
         er_tag=' -er 1 (FB)'
         write(ix_tag,'(i0)') erspecies_indx
-        ix_tag=' -ix ' // ix_tag
+        ix_tag=' -ix ' // trim(ix_tag)
      endif
   case(2)
      if(i_proc == 0) then
         print '(a)', 'INFO: (VGEN) Computing omega0 (Er) from NEO (weak rotation limit)'
         er_tag=' -er 2 (NEO)'
         write(ix_tag,'(i0)') erspecies_indx
-        ix_tag=' -ix ' // ix_tag
+        ix_tag=' -ix ' // trim(ix_tag)
      endif
   case(4)
      if(i_proc == 0) then

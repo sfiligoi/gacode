@@ -6,8 +6,6 @@ subroutine vgen_init
   use expro
 
   implicit none
-  integer :: num_ele
-  integer :: indx_ele
   integer :: j
 
   call neo_init_serial(path)
@@ -17,86 +15,20 @@ subroutine vgen_init
   neo_n_radial_in = 1
   neo_profile_model_in = 1
 
-  zfac(:) = 0
-  do j=1,neo_n_species_in
-     zfac(j)=neo_z_in(j)
-  enddo
-
-  ! Species checks
-  num_ele = 0
-  indx_ele = 0
-  do j=1,neo_n_species_in
-     if (zfac(j) < 0.0) then
-        num_ele  = num_ele + 1
-        indx_ele = j
-     endif
-  enddo
-
-  if (num_ele == 0) then
-     n_ions = neo_n_species_in
-  else if (num_ele == 1) then
-     n_ions = neo_n_species_in - 1
-     if (indx_ele /= neo_n_species_in) then
-        if (i_proc == 0) then
-           print '(a)','ERROR: (VGEN) Electron species must be n_species'
-        endif
-        call MPI_finalize(i_err)
-        stop
-     endif
-  else
-     if (i_proc == 0) then
-        print '(a)', 'ERROR: (VGEN) Only one electron species allowed'
-     endif
-     call MPI_finalize(i_err)
-     stop
-  endif
-
-  if (n_ions < 1) then
-     if (i_proc == 0) then
-        print '(a)', 'ERROR: (VGEN) There must be at least one ion species'
-     endif
-     call MPI_finalize(i_err)
-     stop
-  endif
-
-  if (erspecies_indx > n_ions) then
-     if (i_proc == 0) then
-        print '(a)', 'ERROR: (VGEN) Invalid species index'
-     endif
-     call MPI_finalize(i_err)
-     stop
-  endif
-
-  ! Reset species 1 density for quasineutrality
+  print *, neo_n_species_in
+  
+  ! Set qn option for EXPRO
 
   EXPRO_ctrl_quasineutral_flag = 1
-  EXPRO_ctrl_n_ion = 0
-  do j=1,neo_n_species_in
-     if (zfac(j) > 0.0) then
-       EXPRO_ctrl_n_ion = EXPRO_ctrl_n_ion+1
-!       EXPRO_z(j) = zfac(j)
-     endif
-  enddo
-
+  EXPRO_ctrl_n_ion = neo_n_species_in + neo_adiabatic_ele_model_in - 1
+  n_ions = EXPRO_ctrl_n_ion
+  
   ! Set equilibrium option for EXPRO
 
   if (neo_equilibrium_model_in == 3) then
      EXPRO_ctrl_numeq_flag = 1
   else
      EXPRO_ctrl_numeq_flag = 0
-  endif
-
-  ! Set nn option for neoclassical solution
-  if (nn_flag == 1) then
-     neo_sim_model_in = 4
-     ! Presently only computes jpar
-     if(er_method /= 4) then
-        if (i_proc == 0) then
-           print '(a)','ERROR: (VGEN) NEO NN requires er_method=4'
-        endif
-        call MPI_finalize(i_err)
-        stop
-     endif
   endif
 
   call expro_read('input.gacode')
@@ -109,14 +41,43 @@ subroutine vgen_init
   !   stop
   !endif
 
-  ! Write the derived quantities to input.profiles.extra
-
-  !if (i_proc == 0) call EXPRO_write_derived(1,'input.profiles.extra')
-
+  ! Set mass and charge from EXPRO
+  do j=1, EXPRO_ctrl_n_ion
+     neo_z_in(j)    = expro_z(j)
+     neo_mass_in(j) = expro_mass(j)/2.0
+  enddo
+  if(neo_adiabatic_ele_model_in == 0) then
+     neo_z_in(neo_n_species_in)    = -1.0
+     neo_mass_in(neo_n_species_in) =  1.0/1837.0/2.0
+  endif
+  
   ! Set sign of btccw and ipccw from sign of b and q from EXPRO
   neo_btccw_in = -EXPRO_signb
   neo_ipccw_in = -EXPRO_signb*EXPRO_signq
 
+  ! Check ion velocity ix index
+  
+  if (erspecies_indx > EXPRO_ctrl_n_ion) then
+     if (i_proc == 0) then
+        print '(a)', 'ERROR: (VGEN) Invalid species index'
+     endif
+     call MPI_finalize(i_err)
+     stop
+  endif
+  
+  ! Set nn option for neoclassical solution
+  if (nn_flag == 1) then
+     neo_sim_model_in = 4
+     ! Presently only computes jpar
+     if(er_method /= 4) then
+        if (i_proc == 0) then
+           print '(a)','ERROR: (VGEN) NEO NN requires er_method=4'
+        endif
+        call MPI_finalize(i_err)
+        stop
+     endif
+  endif
+  
   ! Storage 
   allocate(vtor_measured(EXPRO_n_exp))
   allocate(pflux_sum(EXPRO_n_exp))
@@ -127,13 +88,13 @@ subroutine vgen_init
   allocate(jtor_neo(EXPRO_n_exp))
   allocate(jtor_sauter(EXPRO_n_exp))
   
-  pflux_sum(:)   = 0.0
-  jbs_neo(:)     = 0.0
-  jbs_sauter(:)  = 0.0
+  pflux_sum(:)     = 0.0
+  jbs_neo(:)       = 0.0
+  jbs_sauter(:)    = 0.0
   jsigma_neo(:)    = 0.0
   jsigma_sauter(:) = 0.0
-  jtor_neo(:)    = 0.0
-  jtor_sauter(:) = 0.0
+  jtor_neo(:)      = 0.0
+  jtor_sauter(:)   = 0.0
 
   do j=1,EXPRO_n_ion
      if (j == erspecies_indx) then

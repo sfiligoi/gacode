@@ -217,7 +217,7 @@ subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, &
   jtor_sauter(i) = neo_jtor_thS_out*jbs_norm
   pflux_sum(i)   = 0.0
   do j=1,neo_n_species_in
-     pflux_sum(i) = pflux_sum(i) + zfac(j)*neo_pflux_dke_out(j)
+     pflux_sum(i) = pflux_sum(i) + neo_z_in(j)*neo_pflux_dke_out(j)
   enddo
   pflux_sum(i) = pflux_sum(i) / neo_rho_star_in**2
 
