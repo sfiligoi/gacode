@@ -31,13 +31,13 @@ subroutine vgen_init
 
   call expro_read('input.gacode')
    
-  !if (EXPRO_error == 1) then
-  !   if (i_proc == 0) then
-  !      print '(a)', 'ERROR: (VGEN) Negative ion density'
-  !   endif
-  !   call MPI_finalize(i_err)
-  !   stop
-  !endif
+  if (EXPRO_error == 1) then
+     if (i_proc == 0) then
+        print '(a)', 'ERROR: (VGEN) Negative ion density'
+     endif
+     call MPI_finalize(i_err)
+     stop
+  endif
 
   ! Set mass and charge from EXPRO
   do j=1, EXPRO_ctrl_n_ion
