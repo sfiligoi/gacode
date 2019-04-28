@@ -14,6 +14,7 @@ subroutine prgen_write
   implicit none
   !
   integer :: i
+  real :: qd
   !---------------------------------------------------------------
 
   expro_rvbv = 0.0
@@ -60,5 +61,15 @@ subroutine prgen_write
   print '(a)','INFO: (prgen_write) Wrote input.gacode.'
   !-------------------------------------------------------------------------------------
 
+  !call expro_read('input.gacode')
+  !qd = 0.0
+  !do i=1,nx
+  !   print *,i,expro_vol(i),(pi*expro_rmin(i)**2*expro_kappa(i))*2*pi*expro_rmaj(i)
+  !enddo
+  !do i=1,nx-1
+  !   qd = qd+0.5*(expro_vol(i+1)-expro_vol(i))*(onetwo_qdelt(i+1)+onetwo_qdelt(i))
+  !   print *,i,expro_pow_ei(i+1),qd*(-1e-6)
+  !enddo
+ 
 end subroutine prgen_write
 

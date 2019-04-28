@@ -309,6 +309,25 @@ subroutine volint(f,fdv)
 
 end subroutine volint
 
+subroutine volint2(f,fdv)
+
+  use prgen_globals, &
+       only : pi,onetwo_volume,nx
+
+  implicit none
+
+  integer :: i
+  real, intent(in) :: f(nx)
+  real, intent(out) :: fdv(nx)
+
+  fdv(1) = 0.0
+
+  do i=2,nx
+     fdv(i) = fdv(i-1)+0.5*(f(i)+f(i-1))*(onetwo_volume(i)-onetwo_volume(i-1))
+  enddo
+
+end subroutine volint2
+
 subroutine onetwo_ion_zmass(iname,z,m)
 
   implicit none
