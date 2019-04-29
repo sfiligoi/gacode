@@ -14,7 +14,7 @@ subroutine prgen_write
   implicit none
   !
   integer :: i
-  real :: qd
+  real,dimension(nx) :: sr,sv
   !---------------------------------------------------------------
 
   expro_rvbv = 0.0
@@ -61,15 +61,16 @@ subroutine prgen_write
   print '(a)','INFO: (prgen_write) Wrote input.gacode.'
   !-------------------------------------------------------------------------------------
 
-  !call expro_read('input.gacode')
-  !qd = 0.0
-  !do i=1,nx
-  !   print *,i,expro_vol(i),(pi*expro_rmin(i)**2*expro_kappa(i))*2*pi*expro_rmaj(i)
-  !enddo
+  call expro_read('input.gacode')
+  !sr = 0.0 ; sv = 0.0
   !do i=1,nx-1
-  !   qd = qd+0.5*(expro_vol(i+1)-expro_vol(i))*(onetwo_qdelt(i+1)+onetwo_qdelt(i))
-  !   print *,i,expro_pow_ei(i+1),qd*(-1e-6)
+  !   sv(i+1) = sv(i)+0.5*(expro_vol(i+1)-expro_vol(i))*(onetwo_qdelt(i+1)+onetwo_qdelt(i))
+  !   sr(i+1) = sr(i)+0.5*(expro_rmin(i+1)-expro_rmin(i))*(onetwo_qdelt(i+1)*expro_volp(i+1)+onetwo_qdelt(i)*expro_volp(i))
+  !   print '(i3,2x,3(1pe12.5,1x))',i,expro_pow_ei(i+1),sr(i+1)*(-1e-6),sv(i+1)*(-1e-6)
   !enddo
- 
+  !do i=1,nx
+  !  print '(i3,2x,3(1pe12.5,1x))',i,onetwo_qdelt(i)
+  !enddo
+
 end subroutine prgen_write
 

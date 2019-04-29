@@ -17,8 +17,7 @@ subroutine prgen_map_inputprofiles
   
   if (efit_method > 1) then
 
-     ! Compute rho, bref and arho based on GATO dpsi and q.
-     call prgen_get_chi(nx,q,kappa,rmin,dpsi,rho,expro_torfluxa)
+     call prgen_get_chi(nx,q,dpsi,rho,expro_torfluxa)
 
      ! Align with new (GATO) rho grid, not old rho grid, expro_rho:
      call cub_spline(expro_rho,expro_te,nx,rho,xnew,nx)

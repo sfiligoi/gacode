@@ -1,11 +1,9 @@
-subroutine prgen_get_chi(nx,q,kappa,rmin,psi,rho,torfluxa)
+subroutine prgen_get_chi(nx,q,psi,rho,torfluxa)
 
   implicit none
 
   integer, intent(in) :: nx
   real, intent(in), dimension(nx) :: q
-  real, intent(in), dimension(nx) :: kappa
-  real, intent(in), dimension(nx) :: rmin
   real, intent(in), dimension(nx) :: psi
   real, intent(inout), dimension(nx) :: rho
   real, intent(inout) :: torfluxa
@@ -16,8 +14,6 @@ subroutine prgen_get_chi(nx,q,kappa,rmin,psi,rho,torfluxa)
   !---------------------------------------------------------
   ! Compute rho by integrating d(chi_t) = q d(psi_p)
   ! using the trapezoidal rule
-  !
-  ! NOTE: chi_t/bref)
   !
   allocate(chi_t(nx))  
   !

@@ -538,7 +538,11 @@ contains
 
     ! BCAST HERE
 
-    call expro_compute_derived
+    if (expro_ctrl_n_ion <= expro_n_ion) then
+       call expro_compute_derived
+    else
+       expro_error = 1
+    endif
 
   end subroutine expro_read
 

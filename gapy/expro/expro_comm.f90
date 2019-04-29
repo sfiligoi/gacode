@@ -88,7 +88,7 @@ subroutine expro_lcomm(x,n)
      read(1,10) x
   endif
 
-10 format(10(1pe14.7,1x))
+10 format(10(1pe14.7))
 
 end subroutine expro_lcomm
 
