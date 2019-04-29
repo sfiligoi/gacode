@@ -281,7 +281,7 @@ end subroutine prgen_map_iterdb
 ! Routine to perform Volume integration
 !------------------------------------------------------------------
 
-subroutine volint(f,fdv)
+subroutine volint2(f,fdv)
 
   use prgen_globals, &
        only : onetwo_rho_grid,pi,onetwo_R0,onetwo_hcap,nx
@@ -307,9 +307,9 @@ subroutine volint(f,fdv)
 
   enddo
 
-end subroutine volint
+end subroutine volint2
 
-subroutine volint2(f,fdv)
+subroutine volint(f,fdv)
 
   use prgen_globals, &
        only : pi,onetwo_volume,nx
@@ -326,7 +326,7 @@ subroutine volint2(f,fdv)
      fdv(i) = fdv(i-1)+0.5*(f(i)+f(i-1))*(onetwo_volume(i)-onetwo_volume(i-1))
   enddo
 
-end subroutine volint2
+end subroutine volint
 
 subroutine onetwo_ion_zmass(iname,z,m)
 
