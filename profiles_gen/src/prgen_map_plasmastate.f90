@@ -241,8 +241,6 @@ subroutine prgen_map_plasmastate
   ! Calculate integrated powers from input sources
   !
   do i=2,nx
-     pow_e(i) = pow_e(i-1)+1e-6*plst_pe_trans(i-1)
-     pow_i(i) = pow_i(i-1)+1e-6*plst_pi_trans(i-1)
   enddo
 
   do i=2,nx
@@ -251,6 +249,10 @@ subroutine prgen_map_plasmastate
      ! Total powers to electrons and ions "per zone"
      ! Integrated power is thus a partial sum.
      ! Factor of 1e-6 converts plasmastate (W) to input.profiles (MW).
+
+     ! plasmastate supplies totals which may not equal sum of components
+     qpow_e(i) = 1e-6*plst_pe_trans(i-1)/dvol
+     qpow_i(i) = 1e-6*plst_pi_trans(i-1)/dvol
 
      ! Collisional exchange
      expro_qei(i) = -1e-6*plst_qie(i-1)/dvol
@@ -267,9 +269,9 @@ subroutine prgen_map_plasmastate
      expro_qrfi(i)   = 1e-6*(plst_pmini(i-1)+plst_pminth(i-1)+plst_picth(i-1))/dvol
 
      ! Radiation
-     expro_qsync(i)  = 1e-6*plst_prad_cy(i-1)/dvol
-     expro_qbrem(i)  = 1e-6*plst_prad_br(i-1)/dvol
-     expro_line(i)   = 1e-6*plst_prad_li(i-1)/dvol
+     expro_qsync(i) = 1e-6*plst_prad_cy(i-1)/dvol
+     expro_qbrem(i) = 1e-6*plst_prad_br(i-1)/dvol
+     expro_line(i)  = 1e-6*plst_prad_li(i-1)/dvol
 
      ! Momentum source (tq_trans already in Nm)
      !   -ipccw accounts for plasmastate toroidal angle convention
@@ -295,12 +297,10 @@ subroutine prgen_map_plasmastate
 
   ! Manage auxiliary powers
   if (true_aux_flag == 1) then
-     pow_e_aux(:) = pow_e_ohm+pow_e_nb+pow_e_rf
-     pow_i_aux(:) =          +pow_i_nb+pow_i_rf
      print '(a)','INFO: (prgen_map_plasmastate) Setting aux. power as ohmic+NB+RF.'
   else
-     pow_e_aux(:) = pow_e-(pow_e_fus-pow_ei-pow_e_sync-pow_e_brem-pow_e_line)
-     pow_i_aux(:) = pow_i-(pow_i_fus+pow_ei)
+     pow_e_aux(:) = qpow_e-(expro_qfuse-expro_qei-expro_qsync-expro_qbrem-expro_qline)
+     pow_i_aux(:) = qpow_i-(expro_qfusi+expro_qei)
      print '(a)','INFO: (prgen_map_plasmastate) Setting aux. power as total-fus-rad.'
   endif
   !

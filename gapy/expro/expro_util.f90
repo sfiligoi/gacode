@@ -305,13 +305,13 @@ subroutine expro_compute_derived
   expro_mach(:)    = expro_rmaj(:)*expro_w0(:)/expro_cs(:)
   !--------------------------------------------------------------
 
+  !--------------------------------------------------------------
   ! Total auxiliary electron power  
   temp = expro_qohme+expro_qbeame+expro_qrfe+expro_qione
   call volint(temp,expro_pow_e_aux)
   ! Total electron power 
   temp = temp+expro_qbrem+expro_qsync+expro_qline-expro_qei+expro_qfuse
   call volint(temp,expro_pow_e)
-
   ! Total auxiliary ion power 
   temp = expro_qbeami+expro_qrfi+expro_qioni+expro_qcxi
   call volint(temp,expro_pow_i_aux)
@@ -334,6 +334,7 @@ subroutine expro_compute_derived
   ! Particle/momentum
   call volint(expro_qpar,expro_flow_beam)
   call volint(expro_qmom,expro_flow_mom)
+  !--------------------------------------------------------------
  
   ! Clean up
   deallocate(torflux)
