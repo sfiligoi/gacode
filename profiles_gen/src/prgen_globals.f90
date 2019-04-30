@@ -43,41 +43,13 @@ module prgen_globals
   real, dimension(:), allocatable :: rmaj
   real, dimension(:), allocatable :: q
   real, dimension(:), allocatable :: p_tot
-  real, dimension(:), allocatable :: vphi_exp
-  real, dimension(:), allocatable :: vphi_carbon
-  real, dimension(:), allocatable :: vpolc_exp
-  real, dimension(:), allocatable :: vtorc_exp
   real, dimension(:), allocatable :: omega0
   real, dimension(:), allocatable :: kappa
   real, dimension(:), allocatable :: delta
   real, dimension(:), allocatable :: zmag
   real, dimension(:), allocatable :: zeta
-  real, dimension(:), allocatable :: pow_e
-  real, dimension(:), allocatable :: pow_i
-  real, dimension(:), allocatable :: pow_ei
-  real, dimension(:), allocatable :: pow_e_fus
-  real, dimension(:), allocatable :: pow_i_fus
-  real, dimension(:), allocatable :: pow_e_sync
-  real, dimension(:), allocatable :: pow_e_brem
-  real, dimension(:), allocatable :: pow_e_line
-  real, dimension(:), allocatable :: pow_e_rad
-  real, dimension(:), allocatable :: pow_e_nb
-  real, dimension(:), allocatable :: pow_i_nb
-  real, dimension(:), allocatable :: pow_e_rf
-  real, dimension(:), allocatable :: pow_i_rf
-  real, dimension(:), allocatable :: pow_e_ohm
-  real, dimension(:), allocatable :: pow_e_aux
-  real, dimension(:), allocatable :: pow_i_aux
-  real, dimension(:), allocatable :: powe_ion_exp
-  real, dimension(:), allocatable :: powi_ion_exp
-  real, dimension(:), allocatable :: powe_wdot_exp
-  real, dimension(:), allocatable :: powi_wdot_exp
-  real, dimension(:), allocatable :: powi_cx_exp
-  real, dimension(:), allocatable :: flow_wall_exp
-  real, dimension(:), allocatable :: flow_beam
-  real, dimension(:), allocatable :: flow_mom
-  real, dimension(:), allocatable :: sion_d
-  real, dimension(:), allocatable :: sbcx_d
+  real, dimension(:), allocatable :: vpolc_exp
+  real, dimension(:), allocatable :: vtorc_exp
 
   ! Ion name,type,mass,charge
   integer :: n_ion
@@ -85,8 +57,6 @@ module prgen_globals
   character (len=7) :: type_fast  = '[fast] '
 
   real :: quasi_err
-  real :: pow_e_err
-  real :: pow_i_err
   real :: ip_tot
   !---------------------------------------------------------
   ! ONETWO variables
@@ -156,6 +126,7 @@ module prgen_globals
   real, dimension(:,:), allocatable :: onetwo_sbcx
   real, dimension(:,:), allocatable :: onetwo_s
   real, dimension(:,:), allocatable :: onetwo_dudt
+  real, dimension(:), allocatable :: sion_d,sbcx_d
   !
   ! psi-grid vectors
   !

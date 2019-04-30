@@ -72,13 +72,7 @@ subroutine prgen_map_peqdsk
   ! COORDINATES: -ipccw accounts for DIII-D toroidal angle convention
   ! (wrt Ip direction)
   expro_w0(:)        = -ipccw*1e3*peqdsk_omgeb(:) 
-  expro_flow_mom(:)  = 0.0               ! flow_mom
-  expro_pow_e(:)     = peqdsk_pow_e(:)   ! pow_e
-  expro_pow_i(:)     = peqdsk_pow_i(:)   ! pow_i 
-  expro_pow_ei(:)    = 0.0               ! pow_ei_exp
   expro_zeta(:)      = zeta(:)
-  expro_flow_beam(:) = 0.0               ! flow_beam
-  expro_flow_wall(:) = 0.0               ! flow_wall_exp
   expro_zmag(:)      = zmag(:)  
   expro_ptot(:)      = p_tot(:)      
 
@@ -120,8 +114,6 @@ subroutine prgen_map_peqdsk
   ! Read the cer file and overlay
   !
   if (file_cer /= "null") then
-     allocate(vpolc_exp(nx))
-     allocate(vtorc_exp(nx))
      call prgen_read_cer
      expro_w0 = omega0(:)
      do i=1,peqdsk_nimp

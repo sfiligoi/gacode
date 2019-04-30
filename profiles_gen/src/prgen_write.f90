@@ -57,11 +57,6 @@ subroutine prgen_write
   call expro_write('input.gacode')
   print '(a)','INFO: (prgen_write) Wrote input.gacode.'
   !-------------------------------------------------------------------------------------
-  call expro_compute_derived
-
-  !do i=1,nx
-  !   print '(4(1pe12.5,1x))',plst_vol(i),expro_vol(i),pow_ei(i),expro_pow_ei(i)
-  !enddo
   
 end subroutine prgen_write
 

@@ -16,6 +16,7 @@ subroutine prgen_map_plasmastate
   integer :: ix
   real :: dvol
   real, dimension(nx) :: dphidpsi
+  real, dimension(nx) :: qpow_e,qpow_i
   real, dimension(:), allocatable :: f1_therm,f2_therm
   real, dimension(:), allocatable :: f1_lump,f2_lump,f3_lump
   real, dimension(:), allocatable :: f1_fast,f2_fast,f3_fast,f4_fast
@@ -209,8 +210,6 @@ subroutine prgen_map_plasmastate
   !
   if (file_cer /= "null") then
      rho = plst_rho
-     allocate(vpolc_exp(nx))
-     allocate(vtorc_exp(nx))
      call prgen_read_cer
      expro_w0 = omega0(:)
      do i=1,plst_dp1_nspec_all
@@ -241,14 +240,12 @@ subroutine prgen_map_plasmastate
   ! Calculate integrated powers from input sources
   !
   do i=2,nx
-  enddo
-
-  do i=2,nx
+     
      dvol = plst_vol(i)-plst_vol(i-1)
 
      ! Total powers to electrons and ions "per zone"
      ! Integrated power is thus a partial sum.
-     ! Factor of 1e-6 converts plasmastate (W) to input.profiles (MW).
+     ! Factor of 1e-6 converts plasmastate (W) to input.gacode (MW).
 
      ! plasmastate supplies totals which may not equal sum of components
      qpow_e(i) = 1e-6*plst_pe_trans(i-1)/dvol
@@ -262,16 +259,16 @@ subroutine prgen_map_plasmastate
      expro_qfusi(i) = 1e-6*(plst_pfusi(i-1)+plst_pfusth(i-1))/dvol
 
      ! Heating
-     expro_qohm(i)   = 1e-6*plst_pohme(i-1)/dvol
+     expro_qohme(i)  = 1e-6*plst_pohme(i-1)/dvol
      expro_qbeame(i) = 1e-6*plst_pbe(i-1)/dvol
      expro_qbeami(i) = 1e-6*(plst_pbi(i-1)+plst_pbth(i-1))/dvol
-     expro_qrfe(i)   = 1e-6*(plst_peech(i-1)+plst_pmine(i-1))
+     expro_qrfe(i)   = 1e-6*(plst_peech(i-1)+plst_pmine(i-1))/dvol
      expro_qrfi(i)   = 1e-6*(plst_pmini(i-1)+plst_pminth(i-1)+plst_picth(i-1))/dvol
 
      ! Radiation
      expro_qsync(i) = 1e-6*plst_prad_cy(i-1)/dvol
      expro_qbrem(i) = 1e-6*plst_prad_br(i-1)/dvol
-     expro_line(i)  = 1e-6*plst_prad_li(i-1)/dvol
+     expro_qline(i) = 1e-6*plst_prad_li(i-1)/dvol
 
      ! Momentum source (tq_trans already in Nm)
      !   -ipccw accounts for plasmastate toroidal angle convention
@@ -284,7 +281,7 @@ subroutine prgen_map_plasmastate
   expro_qei(1)    = expro_qei(2)
   expro_qfuse(1)  = expro_qfuse(2)
   expro_qfusi(1)  = expro_qfusi(2)
-  expro_qohm(1)   = expro_qohm(2)
+  expro_qohme(1)  = expro_qohme(2)
   expro_qbeame(1) = expro_qbeame(2)
   expro_qbeami(1) = expro_qbeami(2)
   expro_qrfe(1)   = expro_qrfe(2)
@@ -299,14 +296,12 @@ subroutine prgen_map_plasmastate
   if (true_aux_flag == 1) then
      print '(a)','INFO: (prgen_map_plasmastate) Setting aux. power as ohmic+NB+RF.'
   else
-     pow_e_aux(:) = qpow_e-(expro_qfuse-expro_qei-expro_qsync-expro_qbrem-expro_qline)
-     pow_i_aux(:) = qpow_i-(expro_qfusi+expro_qei)
-     print '(a)','INFO: (prgen_map_plasmastate) Setting aux. power as total-fus-rad.'
+     ! WARNING: put missing auxiliary power into cx, giving correct total powers
+     expro_qione = qpow_e-(expro_qfuse-expro_qei-expro_qsync-expro_qbrem-expro_qline)
+     expro_qioni = qpow_i-(expro_qfusi+expro_qei)
+     print '(a)','INFO: (prgen_map_plasmastate) Setting aux. power as total-fus-rad'
+     print '(a)','INFO: (prgen_map_plasmastate) Missing aux. power stored in qione,qioni'
   endif
-  !
-  pow_e_err = abs(1.0-(pow_e_fus(nx)+pow_e_aux(nx)-pow_ei(nx)- &
-       pow_e_sync(nx)-pow_e_brem(nx)-pow_e_line(nx))/pow_e(nx))
-  pow_i_err = abs(1.0-(pow_i_fus(nx)+pow_i_aux(nx)+pow_ei(nx))/pow_i(nx))
   !--------------------------------------------------------------------
 
 end subroutine prgen_map_plasmastate

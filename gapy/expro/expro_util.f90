@@ -306,6 +306,8 @@ subroutine expro_compute_derived
   !--------------------------------------------------------------
 
   !--------------------------------------------------------------
+  ! Transport particle, momentum and energy sources
+  !
   ! Total auxiliary electron power  
   temp = expro_qohme+expro_qbeame+expro_qrfe+expro_qione
   call volint(temp,expro_pow_e_aux)

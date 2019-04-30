@@ -105,7 +105,6 @@ subroutine prgen_map_iterdb
   expro_te = onetwo_te(:)
   expro_ne = onetwo_ene(:)*1e-19
   expro_z_eff = onetwo_zeff(:)
-  expro_flow_mom = flow_mom(:)
   expro_zeta = zeta(:)
   expro_zmag = zmag(:)
   expro_ptot = p_tot(:) ! Total pressure
@@ -123,19 +122,17 @@ subroutine prgen_map_iterdb
 
   ! Look for carbon as first impurity, and insert toroidal velocity at theta=0
 
-  allocate(vphi_carbon(nx))
-
   if (trim(onetwo_namei(1)) == 'c') then
      ! COORDINATES: -ipccw accounts for DIII-D toroidal angle convention
-     vphi_carbon(:) = -ipccw*onetwo_angrot(:)*(rmaj(:)+rmin(:))
+     vtorc_exp(:) = -ipccw*onetwo_angrot(:)*(rmaj(:)+rmin(:))
   else
-     vphi_carbon(:) = 0.0
+     vtorc_exp(:) = 0.0
   endif
 
   ! Insert carbon toroidal velocity
   do i=1,expro_n_ion
      if (i == onetwo_nprim+1) then
-        expro_vtor(i,:) = vphi_carbon(:)
+        expro_vtor(i,:) = vtorc_exp(:)
      endif
   enddo
 
@@ -147,8 +144,6 @@ subroutine prgen_map_iterdb
   ! Read the cer file and overlay
   !
   if (file_cer /= "null") then
-     allocate(vpolc_exp(nx))
-     allocate(vtorc_exp(nx))
      call prgen_read_cer
      expro_w0 = omega0(:)
      do i=1,expro_n_ion
