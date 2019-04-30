@@ -14,106 +14,13 @@ subroutine prgen_map_plasmastate
 
   integer :: i,j
   integer :: ix
+  real :: dvol
   real, dimension(nx) :: dphidpsi
   real, dimension(:), allocatable :: f1_therm,f2_therm
   real, dimension(:), allocatable :: f1_lump,f2_lump,f3_lump
   real, dimension(:), allocatable :: f1_fast,f2_fast,f3_fast,f4_fast
   real :: z_eff_lump
   real :: m_eff_lump
-
-  !--------------------------------------------------------------------
-  ! Calculate integrated powers from input sources
-  !
-  pow_e(1)     = 0.0
-  pow_i(1)     = 0.0
-  pow_ei(1)    = 0.0
-  flow_mom(1)  = 0.0
-  flow_beam(1) = 0.0
-
-  pow_e_fus(1) = 0.0 
-  pow_i_fus(1) = 0.0
-  pow_e_sync(1) = 0.0
-  pow_e_brem(1) = 0.0
-  pow_e_line(1) = 0.0
-
-  pow_e_ohm(1) = 0.0
-  pow_e_nb(1)  = 0.0
-  pow_i_nb(1)  = 0.0
-  pow_e_rf(1)  = 0.0
-  pow_i_rf(1)  = 0.0
-
-  do i=2,nx
-
-     ! Total powers to electrons and ions "per zone"
-     ! Integrated power is thus a partial sum.
-     ! Factor of 1e-6 converts plasmastate (W) to input.profiles (MW).
-
-     pow_e(i) = pow_e(i-1)+1e-6*plst_pe_trans(i-1)
-     pow_i(i) = pow_i(i-1)+1e-6*plst_pi_trans(i-1)
-
-     ! Collisional exchange
-     !
-     ! plst_qie : power from ions to electrons
-     ! pow_ei   : power from electrons to ions
-     ! 
-     ! Thus, we need negative sign here:
-     pow_ei(i) = pow_ei(i-1)-1e-6*plst_qie(i-1)
-
-     ! Reactor power breakdown
-
-     pow_e_fus(i) = pow_e_fus(i-1)+1e-6*plst_pfuse(i-1)
-     pow_i_fus(i) = pow_i_fus(i-1)+1e-6*(plst_pfusi(i-1)+plst_pfusth(i-1))
-
-     pow_e_ohm(i) = pow_e_ohm(i-1)+1e-6*plst_pohme(i-1)
-     pow_e_nb(i)  = pow_e_nb(i-1)+1e-6*plst_pbe(i-1)
-     pow_i_nb(i)  = pow_i_nb(i-1)+1e-6*(plst_pbi(i-1)+plst_pbth(i-1))
-     pow_e_rf(i)  = pow_e_rf(i-1)+1e-6*(plst_peech(i-1)+plst_pmine(i-1))
-     pow_i_rf(i)  = pow_i_rf(i-1)+1e-6*(plst_pmini(i-1)+plst_pminth(i-1)+plst_picth(i-1))
-
-     pow_e_sync(i) = pow_e_sync(i-1)+1e-6*plst_prad_cy(i-1)
-     pow_e_brem(i) = pow_e_brem(i-1)+1e-6*plst_prad_br(i-1)
-     pow_e_line(i) = pow_e_line(i-1)+1e-6*plst_prad_li(i-1)
-
-     ! Momentum source
-     !
-     ! tq_trans already in Nm.
-     ! COORDINATES: -ipccw accounts for plasmastate toroidal angle convention
-     flow_mom(i) = flow_mom(i-1)+plst_tq_trans(i-1)*(-ipccw)
-
-     ! Particle source
-     !
-     ! MW/keV = 0.624e22/s
-
-     flow_beam(i) = flow_beam(i-1)+plst_sn_trans(i-1)/0.624e22
-
-  enddo
-
-  ! Check radiated powers
-  if (minval(pow_e_sync) < 0.0) then
-     print '(a)','WARNING: (prgen) Found negative sync radiation.'
-  endif
-  if (minval(pow_e_brem) < 0.0) then
-     print '(a)','WARNING: (prgen) Found negative brem radiation.'
-  endif
-  if (minval(pow_e_line) < 0.0) then
-     print '(a)','WARNING: (prgen) Found negative line radiation.'
-  endif
-
-  ! Manage auxiliary powers
-  if (true_aux_flag == 1) then
-     pow_e_aux(:) = pow_e_ohm+pow_e_nb+pow_e_rf
-     pow_i_aux(:) =          +pow_i_nb+pow_i_rf
-     print '(a)','INFO: (prgen_map_plasmastate) Setting aux. power as ohmic+NB+RF.'
-  else
-     pow_e_aux(:) = pow_e-(pow_e_fus-pow_ei-pow_e_sync-pow_e_brem-pow_e_line)
-     pow_i_aux(:) = pow_i-(pow_i_fus+pow_ei)
-     print '(a)','INFO: (prgen_map_plasmastate) Setting aux. power as total-fus-rad.'
-  endif
-  !
-  pow_e_err = abs(1.0-(pow_e_fus(nx)+pow_e_aux(nx)-pow_ei(nx)- &
-       pow_e_sync(nx)-pow_e_brem(nx)-pow_e_line(nx))/pow_e(nx))
-  pow_i_err = abs(1.0-(pow_i_fus(nx)+pow_i_aux(nx)+pow_ei(nx))/pow_i(nx))
-  !--------------------------------------------------------------------
 
   !--------------------------------------------------------------------
   ! COORDINATES: set sign of poloidal flux 
@@ -278,13 +185,7 @@ subroutine prgen_map_plasmastate
   expro_ne = plst_ns(:,1)*1e-19
   expro_z_eff = plst_zeff(:)
   expro_w0 = omega0(:) 
-  expro_flow_mom = flow_mom(:)
-  expro_pow_e = pow_e(:)
-  expro_pow_i = pow_i(:)
-  expro_pow_ei = pow_ei(:)
   expro_zeta = zeta(:)
-  expro_flow_beam = flow_beam(:)
-  expro_flow_wall = 0.0
   expro_zmag = zmag(:)
   expro_ptot = p_tot ! total pressure, thermal + fast ion
   ! COORDINATES: This poloidal flux has correct sign (see above).
@@ -321,19 +222,7 @@ subroutine prgen_map_plasmastate
   endif
   !---------------------------------------------------
 
-  ! Additional powers (fusion and radiation)
-  expro_pow_e_fus = pow_e_fus(:)
-  expro_pow_i_fus  = pow_i_fus(:)
-  expro_pow_e_sync = pow_e_sync(:)
-  expro_pow_e_brem = pow_e_brem(:)
-  expro_pow_e_line = pow_e_line(:)
-
-  ! Additional powers (external heating)
-  expro_pow_e_aux = pow_e_aux(:)
-  expro_pow_i_aux = pow_i_aux(:)
-  !---------------------------------------------------------
-
-  ! Ion reordering diagnostics
+  ! Ion identification
 
   print '(a)','INFO: (prgen_map_plasmastate) Created these species:'
   do i=1,expro_n_ion
@@ -347,5 +236,77 @@ subroutine prgen_map_plasmastate
      endif
      print '(t6,i2,2(1x,a))',i,trim(expro_name(i)),trim(expro_type(i))
   enddo
+
+  !--------------------------------------------------------------------
+  ! Calculate integrated powers from input sources
+  !
+  do i=2,nx
+     pow_e(i) = pow_e(i-1)+1e-6*plst_pe_trans(i-1)
+     pow_i(i) = pow_i(i-1)+1e-6*plst_pi_trans(i-1)
+  enddo
+
+  do i=2,nx
+     dvol = plst_vol(i)-plst_vol(i-1)
+
+     ! Total powers to electrons and ions "per zone"
+     ! Integrated power is thus a partial sum.
+     ! Factor of 1e-6 converts plasmastate (W) to input.profiles (MW).
+
+     ! Collisional exchange
+     expro_qei(i) = -1e-6*plst_qie(i-1)/dvol
+
+     ! Fusion power
+     expro_qfuse(i) = 1e-6*plst_pfuse(i-1)/dvol
+     expro_qfusi(i) = 1e-6*(plst_pfusi(i-1)+plst_pfusth(i-1))/dvol
+
+     ! Heating
+     expro_qohm(i)   = 1e-6*plst_pohme(i-1)/dvol
+     expro_qbeame(i) = 1e-6*plst_pbe(i-1)/dvol
+     expro_qbeami(i) = 1e-6*(plst_pbi(i-1)+plst_pbth(i-1))/dvol
+     expro_qrfe(i)   = 1e-6*(plst_peech(i-1)+plst_pmine(i-1))
+     expro_qrfi(i)   = 1e-6*(plst_pmini(i-1)+plst_pminth(i-1)+plst_picth(i-1))/dvol
+
+     ! Radiation
+     expro_qsync(i)  = 1e-6*plst_prad_cy(i-1)/dvol
+     expro_qbrem(i)  = 1e-6*plst_prad_br(i-1)/dvol
+     expro_line(i)   = 1e-6*plst_prad_li(i-1)/dvol
+
+     ! Momentum source (tq_trans already in Nm)
+     !   -ipccw accounts for plasmastate toroidal angle convention
+     expro_qmom(i) = -ipccw*plst_tq_trans(i-1)/dvol
+
+     ! Particle source
+     expro_qpar(i) = plst_sn_trans(i-1)/dvol
+
+  enddo
+  expro_qei(1)    = expro_qei(2)
+  expro_qfuse(1)  = expro_qfuse(2)
+  expro_qfusi(1)  = expro_qfusi(2)
+  expro_qohm(1)   = expro_qohm(2)
+  expro_qbeame(1) = expro_qbeame(2)
+  expro_qbeami(1) = expro_qbeami(2)
+  expro_qrfe(1)   = expro_qrfe(2)
+  expro_qrfi(1)   = expro_qrfi(2)
+  expro_qsync(1)  = expro_qsync(2)
+  expro_qbrem(1)  = expro_qbrem(2)
+  expro_qline(1)  = expro_qline(2)
+  expro_qmom(1)   = expro_qmom(2)
+  expro_qpar(1)   = expro_qpar(2)
+
+  ! Manage auxiliary powers
+  if (true_aux_flag == 1) then
+     pow_e_aux(:) = pow_e_ohm+pow_e_nb+pow_e_rf
+     pow_i_aux(:) =          +pow_i_nb+pow_i_rf
+     print '(a)','INFO: (prgen_map_plasmastate) Setting aux. power as ohmic+NB+RF.'
+  else
+     pow_e_aux(:) = pow_e-(pow_e_fus-pow_ei-pow_e_sync-pow_e_brem-pow_e_line)
+     pow_i_aux(:) = pow_i-(pow_i_fus+pow_ei)
+     print '(a)','INFO: (prgen_map_plasmastate) Setting aux. power as total-fus-rad.'
+  endif
+  !
+  pow_e_err = abs(1.0-(pow_e_fus(nx)+pow_e_aux(nx)-pow_ei(nx)- &
+       pow_e_sync(nx)-pow_e_brem(nx)-pow_e_line(nx))/pow_e(nx))
+  pow_i_err = abs(1.0-(pow_i_fus(nx)+pow_i_aux(nx)+pow_ei(nx))/pow_i(nx))
+  !--------------------------------------------------------------------
 
 end subroutine prgen_map_plasmastate

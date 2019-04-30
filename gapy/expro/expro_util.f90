@@ -17,7 +17,7 @@ subroutine expro_compute_derived
   double precision, parameter :: pi = 3.1415926535897932
 
   double precision, dimension(:), allocatable :: torflux
-  double precision, dimension(:), allocatable :: dummy
+  double precision, dimension(:), allocatable :: temp
   double precision, dimension(:), allocatable :: cc
   double precision, dimension(:), allocatable :: loglam
 
@@ -56,7 +56,7 @@ subroutine expro_compute_derived
   ! Derived quantities:
   !
   allocate(torflux(expro_n_exp))
-  allocate(dummy(expro_n_exp))
+  allocate(temp(expro_n_exp))
   
   torflux(:) = expro_torfluxa*expro_rho(:)**2
 
@@ -64,8 +64,8 @@ subroutine expro_compute_derived
   call bound_deriv(expro_bunit,torflux,0.5*expro_rmin**2,expro_n_exp)
 
   ! s
-  call bound_deriv(dummy,expro_q,expro_rmin,expro_n_exp)
-  expro_s(:) = (expro_rmin(:)/expro_q(:))*dummy(:)
+  call bound_deriv(temp,expro_q,expro_rmin,expro_n_exp)
+  expro_s(:) = (expro_rmin(:)/expro_q(:))*temp(:)
 
   !         d(rmaj)
   ! drmaj = -------
@@ -80,20 +80,20 @@ subroutine expro_compute_derived
   !             r   d(kappa)
   ! s_kappa = ----- -------- 
   !           kappa    dr
-  call bound_deriv(dummy,expro_kappa,expro_rmin,expro_n_exp)
-  expro_skappa(:) = (expro_rmin(:)/expro_kappa(:))*dummy(:)
+  call bound_deriv(temp,expro_kappa,expro_rmin,expro_n_exp)
+  expro_skappa(:) = (expro_rmin(:)/expro_kappa(:))*temp(:)
 
   !             d(delta)
   ! s_delta = r -------- 
   !                dr
-  call bound_deriv(dummy,expro_delta,expro_rmin,expro_n_exp)
-  expro_sdelta(:) = expro_rmin(:)*dummy(:) 
+  call bound_deriv(temp,expro_delta,expro_rmin,expro_n_exp)
+  expro_sdelta(:) = expro_rmin(:)*temp(:) 
 
   !            d(zeta)
   ! s_zeta = r -------- 
   !              dr
-  call bound_deriv(dummy,expro_zeta,expro_rmin,expro_n_exp)
-  expro_szeta(:) = expro_rmin(:)*dummy(:) 
+  call bound_deriv(temp,expro_zeta,expro_rmin,expro_n_exp)
+  expro_szeta(:) = expro_rmin(:)*temp(:) 
 
   ! 1/L_ne = -dln(ne)/dr (1/m)
   call bound_deriv(expro_dlnnedr,-log(expro_ne),expro_rmin,expro_n_exp)
@@ -305,6 +305,36 @@ subroutine expro_compute_derived
   expro_mach(:)    = expro_rmaj(:)*expro_w0(:)/expro_cs(:)
   !--------------------------------------------------------------
 
+  ! Total auxiliary electron power  
+  temp = expro_qohme+expro_qbeame+expro_qrfe+expro_qione
+  call volint(temp,expro_pow_e_aux)
+  ! Total electron power 
+  temp = temp+expro_qbrem+expro_qsync+expro_qline-expro_qei+expro_qfuse
+  call volint(temp,expro_pow_e)
+
+  ! Total auxiliary ion power 
+  temp = expro_qbeami+expro_qrfi+expro_qioni+expro_qcxi
+  call volint(temp,expro_pow_i_aux)
+  ! Total ion power 
+  temp = temp+expro_qei+expro_qfusi
+  call volint(temp,expro_pow_i)
+
+  ! Exchange power
+  call volint(expro_qei,expro_pow_ei)
+
+  ! Fusion power
+  call volint(expro_qfuse,expro_pow_e_fus)
+  call volint(expro_qfusi,expro_pow_i_fus)
+
+  ! Radiated power (sink/negative)
+  call volint(expro_qbrem,expro_pow_e_brem)
+  call volint(expro_qsync,expro_pow_e_sync)
+  call volint(expro_qline,expro_pow_e_line)
+
+  ! Particle/momentum
+  call volint(expro_qpar,expro_flow_beam)
+  call volint(expro_qmom,expro_flow_mom)
+ 
   ! Clean up
   deallocate(torflux)
 
@@ -323,7 +353,8 @@ subroutine expro_compute_derived
           expro_rmin,expro_n_exp)
 
      ! sni = -ni''/ni (1/m^2)
-     call bound_deriv(expro_sdlnnidr_new(:),expro_ni_new(:)*expro_dlnnidr_new(:),expro_rmin,expro_n_exp)
+     call bound_deriv(expro_sdlnnidr_new(:),expro_ni_new(:)*expro_dlnnidr_new(:),&
+          expro_rmin,expro_n_exp)
      expro_sdlnnidr_new(:) = expro_sdlnnidr_new(:)/expro_ni_new(:)*expro_rhos(:)
 
      if (minval(expro_ni_new(:)) <= 0.0) expro_error = 1
@@ -336,12 +367,12 @@ subroutine expro_compute_derived
 
   endif
 
-  deallocate(dummy)
+  deallocate(temp)
 
   do is=1,expro_ctrl_n_ion
      if (minval(expro_ni(is,:)) <= 0.0) expro_error=1
   enddo
-  
+ 
 end subroutine expro_compute_derived
 
 !-------------------------------------------------------
@@ -679,12 +710,31 @@ subroutine expro_skip_header(io)
   implicit none
 
   integer, intent(in) :: io
-  character(len=1) :: cdummy
+  character(len=1) :: ctemp
 
   do
-     read(io,'(a)') cdummy     
-     if (cdummy /= '#') exit
+     read(io,'(a)') ctemp     
+     if (ctemp /= '#') exit
   enddo
   backspace io 
 
 end subroutine expro_skip_header
+
+subroutine volint(f,fdv)
+
+  use expro
+  
+  implicit none
+
+  integer :: i
+  double precision, intent(in) :: f(expro_n_exp)
+  double precision, intent(out) :: fdv(expro_n_exp)
+
+  fdv(1) = 0.0
+
+  ! Integration is exact for constant f (density)
+  do i=2,expro_n_exp
+     fdv(i) = fdv(i-1)+0.5*(f(i)+f(i-1))*(expro_vol(i)-expro_vol(i-1))
+  enddo
+
+end subroutine volint

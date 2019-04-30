@@ -41,7 +41,6 @@ OBJECTS = prgen_globals.o \
 	  prgen_read_corsica.o \
 	  prgen_read_ufile.o \
 	  prgen_read_inputprofiles.o \
-          prgen_power.o \
           prgen_swap.o \
           prgen_write.o
 

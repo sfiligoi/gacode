@@ -220,9 +220,6 @@ subroutine prgen_map_iterdb
   expro_qmom = -ipccw*onetwo_storqueb
   !---------------------------------------------------------
   
-  ! Computed integrated powers
-  call prgen_power
-
 end subroutine prgen_map_iterdb
 
 !------------------------------------------------------------------
