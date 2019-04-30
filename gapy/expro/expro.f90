@@ -1,7 +1,7 @@
 module expro
 
   ! Fundamental input
-  integer, parameter :: nextag = 48
+  integer, parameter :: nextag = 51
   integer :: iextag
   character(len=12) :: infile = 'input.gacode'
 
@@ -10,51 +10,54 @@ module expro
        'nexp                ',& !1
        'nion                ',& !2
        'name                ',& !3
-       'type                ',& !3
-       'masse (m_H)         ',& !3
-       'mass (m_H)          ',& !3
-       'ze (-)              ',& !4
-       'z (-)               ',& !4
-       'torfluxa (Wb/radian)',& !5
-       'rvbv (Tm)           ',& !5
-       'ipa (MA)            ',& !5
-       'rho (-)             ',& !6
-       'rmin (m)            ',& !7
-       'polflux (Wb/radian) ',& !8
-       'q (-)               ',& !9
-       'w0 (rad/s)          ',& !10
-       'rmaj (m)            ',& !11
-       'zmag (m)            ',& !12
-       'kappa (-)           ',& !13
-       'delta (-)           ',& !14
-       'zeta (-)            ',& !15
-       'ne (10^19/m^3)      ',& !16
-       'ni (10^19/m^3)      ',& !17
-       'Te (keV)            ',& !18
-       'Ti (keV)            ',& !19
-       'ptot (Pa)           ',& !20
-       'jbs (MA/m^2)        ',& !21
-       'jbstor (MA/m^2)     ',& !22
-       'sigmapar (MS/m)     ',& !23
-       'z_eff (-)           ',& !24
-       'vpol (m/s)          ',& !25
-       'vtor (m/s)          ',& !26
-       'flow_beam (MW/keV)  ',& !27
-       'flow_wall (MW/keV)  ',& !28
-       'flow_mom (Nm)       ',& !29
-       'pow_e (MW)          ',& !30
-       'pow_i (MW)          ',& !31
-       'pow_ei (MW)         ',& !32
-       'pow_e_aux (MW)      ',& !33
-       'pow_i_aux (MW)      ',& !34
-       'pow_e_fus (MW)      ',& !35
-       'pow_i_fus (MW)      ',& !36
-       'pow_e_sync (MW)     ',& !37
-       'pow_e_brem (MW)     ',& !38
-       'pow_e_line (MW)     ',& !39
-       'sbeame (1/m^3/s)    ',& !40
-       'sbcx (1/m^3/s)      ',& !41
-       'sscxl (1/m^3/s)     '&  !44
+       'type                ',& !4
+       'masse (m_H)         ',& !5
+       'mass (m_H)          ',& !6
+       'ze (-)              ',& !7
+       'z (-)               ',& !8
+       'torfluxa (Wb/radian)',& !9
+       'rvbv (Tm)           ',& !10
+       'ipa (MA)            ',& !11
+       'rho (-)             ',& !12
+       'rmin (m)            ',& !13
+       'polflux (Wb/radian) ',& !14
+       'q (-)               ',& !15
+       'w0 (rad/s)          ',& !16
+       'rmaj (m)            ',& !17
+       'zmag (m)            ',& !18
+       'kappa (-)           ',& !19
+       'delta (-)           ',& !20
+       'zeta (-)            ',& !21
+       'ne (10^19/m^3)      ',& !22
+       'ni (10^19/m^3)      ',& !23
+       'Te (keV)            ',& !24
+       'Ti (keV)            ',& !25
+       'ptot (Pa)           ',& !26
+       'johm (MA/m^2)       ',& !27
+       'jbs (MA/m^2)        ',& !27
+       'jrf (MA/m^2)        ',& !27
+       'jnb (MA/m^2)        ',& !27
+       'jbstor (MA/m^2)     ',& !28
+       'sigmapar (MS/m)     ',& !29
+       'z_eff (-)           ',& !30
+       'vpol (m/s)          ',& !31
+       'vtor (m/s)          ',& !32
+       'qohme (MW/m^3)      ',& !46
+       'qbeame (MW/m^3)     ',& !47
+       'qbeami (MW/m^3)     ',& !48
+       'qrfe (MW/m^3)       ',& !49
+       'qrfi (MW/m^3)       ',& !50
+       'qfuse (MW/m^3)      ',& !51
+       'qfusi (MW/m^3)      ',& !52
+       'qbrem (MW/m^3)      ',& !53
+       'qsync (MW/m^3)      ',& !54
+       'qline (MW/m^3)      ',& !55
+       'qei (MW/m^3)        ',& !56
+       'qione (MW/m^3)      ',& !57
+       'qioni (MW/m^3)      ',& !58
+       'qcxi (MW/m^3)       ',& !59
+       'qpar (MW/m^3)       ',& !60
+       'qmom (MW/m^3)       '& !61
        /)
 
   integer :: &
@@ -92,26 +95,29 @@ module expro
        expro_ne,&
        expro_te,&
        expro_ptot,&
+       expro_johm,&
        expro_jbs,&
+       expro_jrf,&
+       expro_jnb,&
        expro_jbstor,&
        expro_sigmapar,&
        expro_z_eff,&
-       expro_flow_beam,&
-       expro_flow_wall,&
-       expro_flow_mom,&
-       expro_pow_e,&
-       expro_pow_i,&
-       expro_pow_ei,&
-       expro_pow_e_aux,&
-       expro_pow_i_aux,&
-       expro_pow_e_fus,&
-       expro_pow_i_fus,&
-       expro_pow_e_sync,&
-       expro_pow_e_brem,&
-       expro_pow_e_line,&
-       expro_sbeame,&
-       expro_sbcx,&
-       expro_sscxl
+       expro_qohme,&
+       expro_qbeame,&
+       expro_qbeami,&
+       expro_qrfe,&
+       expro_qrfi,&
+       expro_qfuse,&
+       expro_qfusi,&
+       expro_qbrem,&
+       expro_qsync,&
+       expro_qline,&
+       expro_qei,&
+       expro_qione,&
+       expro_qioni,&
+       expro_qcxi,&
+       expro_qpar,&
+       expro_qmom
 
   double precision, dimension(:,:), allocatable :: &
        expro_ni,&
@@ -151,7 +157,20 @@ module expro
        expro_gamma_e,&
        expro_gamma_p,&
        expro_mach,&
-       expro_thetascale
+       expro_thetascale,&
+       expro_flow_beam,&
+       expro_flow_wall,&
+       expro_flow_mom,&
+       expro_pow_e,&
+       expro_pow_i,&
+       expro_pow_ei,&
+       expro_pow_e_aux,&
+       expro_pow_i_aux,&
+       expro_pow_e_fus,&
+       expro_pow_i_fus,&
+       expro_pow_e_sync,&
+       expro_pow_e_brem,&
+       expro_pow_e_line
 
   double precision, dimension(:,:), allocatable :: &
        expro_dlnnidr,&
@@ -176,7 +195,7 @@ module expro
   integer :: expro_ctrl_quasineutral_flag 
   integer :: expro_ctrl_numeq_flag
   integer :: expro_error=0
-  
+
   ! Header information
   character(len=70) :: expro_head_original =  '#  *original : null'
   character(len=70) :: expro_head_statefile = '# *statefile : null'
@@ -218,27 +237,30 @@ contains
        allocate(expro_ne(nexp))      ; expro_ne = 0.0
        allocate(expro_te(nexp))      ; expro_te = 0.0
        allocate(expro_ptot(nexp))    ; expro_ptot = 0.0
+       allocate(expro_johm(nexp))    ; expro_johm = 0.0
        allocate(expro_jbs(nexp))     ; expro_jbs = 0.0
+       allocate(expro_jrf(nexp))     ; expro_jrf = 0.0
+       allocate(expro_jnb(nexp))     ; expro_jnb = 0.0
        allocate(expro_jbstor(nexp))  ; expro_jbstor = 0.0
        allocate(expro_sigmapar(nexp)); expro_sigmapar = 0.0
        allocate(expro_z_eff(nexp))   ; expro_z_eff = 0.0
 
-       allocate(expro_flow_beam(nexp))  ; expro_flow_beam = 0.0
-       allocate(expro_flow_wall(nexp))  ; expro_flow_wall = 0.0
-       allocate(expro_flow_mom(nexp))   ; expro_flow_mom = 0.0
-       allocate(expro_pow_e(nexp))      ; expro_pow_e = 0.0
-       allocate(expro_pow_i(nexp))      ; expro_pow_i = 0.0
-       allocate(expro_pow_ei(nexp))     ; expro_pow_ei = 0.0
-       allocate(expro_pow_e_aux(nexp))  ; expro_pow_e_aux = 0.0
-       allocate(expro_pow_i_aux(nexp))  ; expro_pow_i_aux = 0.0
-       allocate(expro_pow_e_fus(nexp))  ; expro_pow_e_fus = 0.0
-       allocate(expro_pow_i_fus(nexp))  ; expro_pow_i_fus = 0.0
-       allocate(expro_pow_e_sync(nexp)) ; expro_pow_e_sync = 0.0
-       allocate(expro_pow_e_brem(nexp)) ; expro_pow_e_brem = 0.0
-       allocate(expro_pow_e_line(nexp)) ; expro_pow_e_line = 0.0
-       allocate(expro_sbeame(nexp))     ; expro_sbeame = 0.0
-       allocate(expro_sbcx(nexp))       ; expro_sbcx = 0.0
-       allocate(expro_sscxl(nexp))      ; expro_sscxl = 0.0
+       allocate(expro_qohme(nexp))  ; expro_qohme = 0.0
+       allocate(expro_qbeame(nexp)) ; expro_qbeame = 0.0
+       allocate(expro_qbeami(nexp)) ; expro_qbeami = 0.0
+       allocate(expro_qrfe(nexp))   ; expro_qrfe = 0.0
+       allocate(expro_qrfi(nexp))   ; expro_qrfi = 0.0
+       allocate(expro_qfuse(nexp))  ; expro_qfuse = 0.0
+       allocate(expro_qfusi(nexp))  ; expro_qfusi = 0.0
+       allocate(expro_qbrem(nexp))  ; expro_qbrem = 0.0
+       allocate(expro_qsync(nexp))  ; expro_qsync = 0.0
+       allocate(expro_qline(nexp))  ; expro_qline = 0.0
+       allocate(expro_qei(nexp))    ; expro_qei = 0.0
+       allocate(expro_qione(nexp))  ; expro_qione = 0.0
+       allocate(expro_qioni(nexp))  ; expro_qioni = 0.0
+       allocate(expro_qcxi(nexp))   ; expro_qcxi = 0.0
+       allocate(expro_qpar(nexp))   ; expro_qpar = 0.0
+       allocate(expro_qmom(nexp))   ; expro_qmom = 0.0
 
        allocate(expro_ni(nion,nexp))   ; expro_ni = 0.0
        allocate(expro_ti(nion,nexp))   ; expro_ti = 0.0
@@ -277,6 +299,19 @@ contains
        allocate(expro_gamma_p(nexp))      ; expro_gamma_p = 0.0
        allocate(expro_mach(nexp))         ; expro_mach = 0.0
        allocate(expro_thetascale(nexp))   ; expro_thetascale = 0.0
+       allocate(expro_flow_beam(nexp))  ; expro_flow_beam = 0.0
+       allocate(expro_flow_wall(nexp))  ; expro_flow_wall = 0.0
+       allocate(expro_flow_mom(nexp))   ; expro_flow_mom = 0.0
+       allocate(expro_pow_e(nexp))      ; expro_pow_e = 0.0
+       allocate(expro_pow_i(nexp))      ; expro_pow_i = 0.0
+       allocate(expro_pow_ei(nexp))     ; expro_pow_ei = 0.0
+       allocate(expro_pow_e_aux(nexp))  ; expro_pow_e_aux = 0.0
+       allocate(expro_pow_i_aux(nexp))  ; expro_pow_i_aux = 0.0
+       allocate(expro_pow_e_fus(nexp))  ; expro_pow_e_fus = 0.0
+       allocate(expro_pow_i_fus(nexp))  ; expro_pow_i_fus = 0.0
+       allocate(expro_pow_e_sync(nexp)) ; expro_pow_e_sync = 0.0
+       allocate(expro_pow_e_brem(nexp)) ; expro_pow_e_brem = 0.0
+       allocate(expro_pow_e_line(nexp)) ; expro_pow_e_line = 0.0
 
        allocate(expro_dlnnidr(nion,nexp))  ; expro_dlnnidr = 0.0
        allocate(expro_dlntidr(nion,nexp))  ; expro_dlntidr = 0.0
@@ -303,27 +338,30 @@ contains
        deallocate(expro_ne)
        deallocate(expro_te)
        deallocate(expro_ptot)
+       deallocate(expro_johm)
        deallocate(expro_jbs)
+       deallocate(expro_jrf)
+       deallocate(expro_jnb)
        deallocate(expro_jbstor)
        deallocate(expro_sigmapar)
        deallocate(expro_z_eff)
 
-       deallocate(expro_flow_beam)
-       deallocate(expro_flow_wall)
-       deallocate(expro_flow_mom)
-       deallocate(expro_pow_e)
-       deallocate(expro_pow_i)
-       deallocate(expro_pow_ei)
-       deallocate(expro_pow_e_aux)
-       deallocate(expro_pow_i_aux)
-       deallocate(expro_pow_e_fus)
-       deallocate(expro_pow_i_fus)
-       deallocate(expro_pow_e_sync)
-       deallocate(expro_pow_e_brem)
-       deallocate(expro_pow_e_line)
-       deallocate(expro_sbeame)
-       deallocate(expro_sbcx)
-       deallocate(expro_sscxl)
+       deallocate(expro_qohme)
+       deallocate(expro_qbeame)
+       deallocate(expro_qbeami)
+       deallocate(expro_qrfe)
+       deallocate(expro_qrfi)
+       deallocate(expro_qfuse)
+       deallocate(expro_qfusi)
+       deallocate(expro_qbrem)
+       deallocate(expro_qsync)
+       deallocate(expro_qline)
+       deallocate(expro_qei)
+       deallocate(expro_qione)
+       deallocate(expro_qioni)
+       deallocate(expro_qcxi)
+       deallocate(expro_qpar)
+       deallocate(expro_qmom)
 
        deallocate(expro_ni,expro_ti,expro_vpol,expro_vtor)
 
@@ -359,6 +397,19 @@ contains
        deallocate(expro_gamma_p)      
        deallocate(expro_mach)   
        deallocate(expro_thetascale)  
+       deallocate(expro_flow_beam)
+       deallocate(expro_flow_wall)
+       deallocate(expro_flow_mom)
+       deallocate(expro_pow_e)
+       deallocate(expro_pow_i)
+       deallocate(expro_pow_ei)
+       deallocate(expro_pow_e_aux)
+       deallocate(expro_pow_i_aux)
+       deallocate(expro_pow_e_fus)
+       deallocate(expro_pow_i_fus)
+       deallocate(expro_pow_e_sync)
+       deallocate(expro_pow_e_brem)
+       deallocate(expro_pow_e_line)
 
        deallocate(expro_dlnnidr)
        deallocate(expro_dlntidr)  
@@ -377,14 +428,14 @@ contains
     integer :: nexp,nion,ierr,i,nd
     character(len=70) :: ytag
     character(len=22) :: c
-    
-    
+
+
     ! ORDERING NOTE: nexp should appear before any profile arrays
 
     open(unit=1,file=trim(thisinfile),status='old')
 
     do
-       
+
        read(1,'(a)',end=99) ytag
 
        if (index(ytag,'*original') > 0) then
@@ -400,7 +451,7 @@ contains
        else if (index(ytag,'*tgyro') > 0) then
           expro_head_tgyro=ytag ; cycle
        endif
-       
+
        nd = scan(ytag,'(')
        if (nd == 0) then
           ! no units field so trim all whitespace
@@ -463,8 +514,14 @@ contains
           call expro_vcomm(expro_te,nexp)  
        case ('ptot')
           call expro_vcomm(expro_ptot,nexp)  
-       case ('jbs ')
+       case ('johm')
+          call expro_vcomm(expro_johm,nexp)  
+       case ('jbs')
           call expro_vcomm(expro_jbs,nexp)  
+       case ('jrf')
+          call expro_vcomm(expro_jrf,nexp)  
+       case ('jnb')
+          call expro_vcomm(expro_jnb,nexp)  
        case ('jbstor')
           call expro_vcomm(expro_jbstor,nexp)  
        case ('sigmapar')
@@ -479,43 +536,43 @@ contains
           call expro_acomm(expro_vpol(:,:),nion,nexp) 
        case ('vtor')
           call expro_acomm(expro_vtor(:,:),nion,nexp) 
-       case ('flow_beam')
-          call expro_vcomm(expro_flow_beam,nexp)  
-       case ('flow_wall')
-          call expro_vcomm(expro_flow_wall,nexp)  
-       case ('flow_mom')
-          call expro_vcomm(expro_flow_mom,nexp)  
-       case ('pow_e')
-          call expro_vcomm(expro_pow_e,nexp)  
-       case ('pow_i')
-          call expro_vcomm(expro_pow_i,nexp)  
-       case ('pow_ei')
-          call expro_vcomm(expro_pow_ei,nexp)
-       case ('pow_e_aux')
-          call expro_vcomm(expro_pow_e_aux,nexp)  
-       case ('pow_i_aux')
-          call expro_vcomm(expro_pow_i_aux,nexp)  
-       case ('pow_e_fus')
-          call expro_vcomm(expro_pow_e_fus,nexp)  
-       case ('pow_i_fus')
-          call expro_vcomm(expro_pow_i_fus,nexp)  
-       case ('pow_e_sync')
-          call expro_vcomm(expro_pow_e_sync,nexp) 
-       case ('pow_e_brem')
-          call expro_vcomm(expro_pow_e_brem,nexp) 
-       case ('pow_e_line')
-          call expro_vcomm(expro_pow_e_line,nexp)  
-       case ('sbeame')
-          call expro_vcomm(expro_sbeame,nexp) 
-       case ('sbcx')
-          call expro_vcomm(expro_sbcx,nexp) 
-       case ('sscxl')
-          call expro_vcomm(expro_sscxl,nexp) 
+       case ('qohme')
+          call expro_vcomm(expro_qohme,nexp) 
+       case ('qbeame')
+          call expro_vcomm(expro_qbeame,nexp) 
+       case ('qbeami')
+          call expro_vcomm(expro_qbeami,nexp) 
+       case ('qrfe')
+          call expro_vcomm(expro_qrfe,nexp) 
+       case ('qrfi')
+          call expro_vcomm(expro_qrfi,nexp) 
+       case ('qfuse')
+          call expro_vcomm(expro_qfuse,nexp) 
+       case ('qfusi')
+          call expro_vcomm(expro_qfusi,nexp) 
+       case ('qbrem')
+          call expro_vcomm(expro_qbrem,nexp) 
+       case ('qsync')
+          call expro_vcomm(expro_qsync,nexp) 
+       case ('qline')
+          call expro_vcomm(expro_qline,nexp) 
+       case ('qei')
+          call expro_vcomm(expro_qei,nexp) 
+       case ('qione')
+          call expro_vcomm(expro_qione,nexp) 
+       case ('qioni')
+          call expro_vcomm(expro_qioni,nexp) 
+       case ('qcxi')
+          call expro_vcomm(expro_qcxi,nexp) 
+       case ('qpar')
+          call expro_vcomm(expro_qpar,nexp) 
+       case ('qmom')
+          call expro_vcomm(expro_qmom,nexp) 
        end select
 
     enddo
 
- 99 close(1)
+99  close(1)
 
     ! ** input.gacode.geo **
 
@@ -596,28 +653,31 @@ contains
     call expro_writev(expro_te,nexp)
     call expro_writea(expro_ti(:,:),nion,nexp)
     call expro_writev(expro_ptot,nexp)
+    call expro_writev(expro_johm,nexp)
     call expro_writev(expro_jbs,nexp)
+    call expro_writev(expro_jrf,nexp)
+    call expro_writev(expro_jnb,nexp)
     call expro_writev(expro_jbstor,nexp)
     call expro_writev(expro_sigmapar,nexp)
     call expro_writev(expro_z_eff,nexp)
     call expro_writea(expro_vpol(:,:),nion,nexp)
     call expro_writea(expro_vtor(:,:),nion,nexp)
-    call expro_writev(expro_flow_beam,nexp)
-    call expro_writev(expro_flow_wall,nexp)
-    call expro_writev(expro_flow_mom,nexp)
-    call expro_writev(expro_pow_e,nexp)
-    call expro_writev(expro_pow_i,nexp)
-    call expro_writev(expro_pow_ei,nexp)
-    call expro_writev(expro_pow_e_aux,nexp)
-    call expro_writev(expro_pow_i_aux,nexp)
-    call expro_writev(expro_pow_e_fus,nexp)
-    call expro_writev(expro_pow_i_fus,nexp)
-    call expro_writev(expro_pow_e_sync,nexp)
-    call expro_writev(expro_pow_e_brem,nexp)
-    call expro_writev(expro_pow_e_line,nexp)
-    call expro_writev(expro_sbeame,nexp)
-    call expro_writev(expro_sbcx,nexp)
-    call expro_writev(expro_sscxl,nexp)
+    call expro_writev(expro_qohme,nexp)
+    call expro_writev(expro_qbeame,nexp)
+    call expro_writev(expro_qbeami,nexp)
+    call expro_writev(expro_qrfe,nexp)
+    call expro_writev(expro_qrfi,nexp)
+    call expro_writev(expro_qfuse,nexp)
+    call expro_writev(expro_qfusi,nexp)
+    call expro_writev(expro_qbrem,nexp)
+    call expro_writev(expro_qsync,nexp)
+    call expro_writev(expro_qline,nexp)
+    call expro_writev(expro_qei,nexp)
+    call expro_writev(expro_qione,nexp)
+    call expro_writev(expro_qioni,nexp)
+    call expro_writev(expro_qcxi,nexp)
+    call expro_writev(expro_qpar,nexp)
+    call expro_writev(expro_qmom,nexp)
 
     close(1)
 

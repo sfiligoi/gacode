@@ -24,79 +24,6 @@ subroutine prgen_map_iterdb
      rho(i) = (i-1)/(nx-1.0)
   enddo
 
-  call volint(1e-6*onetwo_qbeame,pow_e_nb)
-  call volint(1e-6*onetwo_qrfe,pow_e_rf)
-  call volint(1e-6*onetwo_qohm,pow_e_ohm)
-  call volint(1e-6*onetwo_qrad,pow_e_rad)
-  call volint(1e-6*onetwo_qione,powe_ion_exp)
-  call volint(1e-6*onetwo_dpedt,powe_wdot_exp)
-  call volint(1e-6*onetwo_qfuse,pow_e_fus)
-  call volint(1e-6*onetwo_qfusi,pow_i_fus)
-  call volint(1e-6*onetwo_qbeami,pow_i_nb)
-  call volint(1e-6*onetwo_qrfi,pow_i_rf)
-  call volint(1e-6*onetwo_qioni,powi_ion_exp)
-  call volint(1e-6*onetwo_qcx,powi_cx_exp)
-  call volint(1e-6*onetwo_dpidt,powi_wdot_exp)
-  ! Note sign change to keep pow_ei_exp positive for te>ti
-  call volint(-1e-6*onetwo_qdelt,pow_ei)
-
-  ! Wall ion flow (scale is undefined) (MW/KeV = Kamp)
-  call volint(kevdsecpmw*sion_d,flow_wall_exp)
-
-  ! Beam ion flow
-  call volint(kevdsecpmw*(onetwo_sbeam+sbcx_d),flow_beam)
-
-  ! Torque (TAM flow) (nt-m)
-  call volint(onetwo_storqueb,flow_mom)
-  ! COORDINATES: -ipccw accounts for DIII-D toroidal angle convention
-  flow_mom = -ipccw*flow_mom
-
-  ! Total transport power (MW) to electrons: pow_e
-
-  ! pow_e_nb  (MW)     : NBI power to electrons
-  ! pow_e_rf  (MW)     : RF power to electrons
-  ! pow_e_ohm (MW)     : Ohmic power to electrons
-  ! pow_e_rad (MW)     : [negative] Radiated power to electrons
-  ! powe_ion_exp (MW)  : [negative] Neutral ionization power to electrons
-  ! powe_wdot_exp (MW) : 
-  ! pow_ei    (MW)     : Exchange power from electrons to ions 
-  ! pow_e_fus (MW)     : Fusion power to electrons
-
-  pow_e_aux(:) = &
-       +pow_e_nb(:) &
-       +pow_e_rf(:) &
-       +pow_e_ohm(:) &
-       +powe_ion_exp(:) 
-
-  pow_e(:) = &
-       -0.0*powe_wdot_exp(:) &
-       +pow_e_aux(:) &
-       +pow_e_rad(:) &
-       -pow_ei(:) &
-       +pow_e_fus(:)
-
-  ! Total transport power (MW) to ions: pow_i
-
-  ! pow_i_nb (MW)      : NBI power to ions
-  ! pow_i_rf (MW)      : RF power to ions
-  ! powi_ion_exp (MW)  : [positive] Neutral ionization power to ions
-  ! powi_cx_exp (MW)   : [negative] Neutral charge exch power to ions
-  ! powi_wdot_exp (MW) 
-  ! pow_ei (MW)        : Exchange power to ions
-  ! pow_i_fus (MW)     : Fusion power to ions
-
-  pow_i_aux(:) = &
-       +pow_i_nb(:) &
-       +pow_i_rf(:) &
-       +powi_ion_exp(:) &
-       +powi_cx_exp(:) 
-
-  pow_i(:) = &
-       -0.0*powi_wdot_exp(:) &
-       +pow_i_aux(:) &
-       +pow_ei(:) &
-       +pow_i_fus(:)
-
   !----------------------------------------------------------------------
   ! Construct ion densities and temperatures, manage naming and numbering
   !
@@ -179,15 +106,7 @@ subroutine prgen_map_iterdb
   expro_ne = onetwo_ene(:)*1e-19
   expro_z_eff = onetwo_zeff(:)
   expro_flow_mom = flow_mom(:)
-  expro_pow_e = pow_e(:)
-  expro_pow_i = pow_i(:)
-  expro_pow_ei = pow_ei(:)
   expro_zeta = zeta(:)
-  expro_flow_beam = flow_beam(:)
-  expro_flow_wall = flow_wall_exp(:)
-  expro_sbeame = onetwo_sbeame(:)
-  expro_sbcx = sbcx_d(:)
-  expro_sscxl = onetwo_sscxl(:)
   expro_zmag = zmag(:)
   expro_ptot = p_tot(:) ! Total pressure
   ! COORDINATES: set sign of poloidal flux
@@ -222,16 +141,6 @@ subroutine prgen_map_iterdb
 
   ! Use angrot as an initial approximation for omega0
   expro_w0 = -ipccw*onetwo_angrot(:)
-
-  ! Additional powers (fusion and radiation)
-  ! * for iterdb, put all radiated power in pow_e_line
-  expro_pow_e_fus  = pow_e_fus(:)
-  expro_pow_i_fus  = pow_i_fus(:)
-  expro_pow_e_line = -pow_e_rad(:) !Sign convention is pow_e_line should be positive
-
-  ! Additional powers (external heating)
-  expro_pow_e_aux = pow_e_aux(:)
-  expro_pow_i_aux = pow_i_aux(:)
   !---------------------------------------------------------
 
   !---------------------------------------------------------
@@ -275,58 +184,50 @@ subroutine prgen_map_iterdb
   enddo
   !---------------------------------------------------------
 
+  !---------------------------------------------------------
+  ! Power densities (q*) : source > 0, sink < 0
+  !
+  ! Ohmic
+  expro_qohme = 1e-6*onetwo_qohm
+  ! NBI
+  expro_qbeame = 1e-6*onetwo_qbeame
+  expro_qbeami = 1e-6*onetwo_qbeami
+  ! RF
+  expro_qrfe = 1e-6*onetwo_qrfe
+  expro_qrfi = 1e-6*onetwo_qrfi
+  ! Fusion
+  expro_qfuse = 1e-6*onetwo_qfuse
+  expro_qfusi = 1e-6*onetwo_qfusi
+  ! Radiated
+  expro_qbrem = 0.0
+  expro_qsync = 0.0
+  expro_qline = 0.0
+  ! electron-to-ion exchange (positive for Te > Ti)
+  expro_qei = -1e-6*onetwo_qdelt
+  ! neutrals (ion=ioninization, cx=charge exchange) 
+  expro_qione = 1e-6*onetwo_qione
+  expro_qioni = 1e-6*onetwo_qioni
+  expro_qcxi  = 1e-6*onetwo_qcx
+  !---------------------------------------------------------
+
+  !---------------------------------------------------------
+  ! Particle/momentum sources
+  !
+  ! particles
+  expro_qpar = onetwo_sbeam+sbcx_d
+  !
+  ! Torque (TAM flow) (nt-m)
+  expro_qmom = -ipccw*onetwo_storqueb
+  !---------------------------------------------------------
+  
+  ! Computed integrated powers
+  call prgen_power
+
 end subroutine prgen_map_iterdb
 
 !------------------------------------------------------------------
 ! Routine to perform Volume integration
 !------------------------------------------------------------------
-
-subroutine volint2(f,fdv)
-
-  use prgen_globals, &
-       only : onetwo_rho_grid,pi,onetwo_R0,onetwo_hcap,nx
-
-  implicit none
-
-  integer :: i
-  real, intent(in) :: f(nx)
-  real, intent(out) :: fdv(nx)
-  real :: drho
-  real :: dvoldr_p,dvoldr_m
-
-  fdv(1) = 0.0
-
-  do i=2,nx
-
-     drho = onetwo_rho_grid(i)-onetwo_rho_grid(i-1)
-
-     dvoldr_p = 2.0*pi*onetwo_rho_grid(i)*2.0*pi*onetwo_R0*onetwo_hcap(i)
-     dvoldr_m = 2.0*pi*onetwo_rho_grid(i-1)*2.0*pi*onetwo_R0*onetwo_hcap(i-1)
-
-     fdv(i) = fdv(i-1)+0.5*(dvoldr_p*f(i)+dvoldr_m*f(i-1))*drho
-
-  enddo
-
-end subroutine volint2
-
-subroutine volint(f,fdv)
-
-  use prgen_globals, &
-       only : pi,onetwo_volume,nx
-
-  implicit none
-
-  integer :: i
-  real, intent(in) :: f(nx)
-  real, intent(out) :: fdv(nx)
-
-  fdv(1) = 0.0
-
-  do i=2,nx
-     fdv(i) = fdv(i-1)+0.5*(f(i)+f(i-1))*(onetwo_volume(i)-onetwo_volume(i-1))
-  enddo
-
-end subroutine volint
 
 subroutine onetwo_ion_zmass(iname,z,m)
 

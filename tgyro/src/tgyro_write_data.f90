@@ -26,7 +26,7 @@ subroutine tgyro_write_data(i_print)
   real, dimension(2:n_r,loc_n_ion+4) :: res2,relax2
   character(len=2) :: itag
   character(len=6) :: ntag,ttag
-  character(len=50) :: msg_str,date_str,time_str
+  character(len=50) :: date_str,time_str
   logical :: converged
   real :: res_norm(p_max)
   
@@ -79,7 +79,7 @@ subroutine tgyro_write_data(i_print)
      if (i_proc_global == 0) then
 
         call date_and_time(DATE=date_str,TIME=time_str)
-        expro_header(6) = '#     tgyro : '//trim(date_str)//' '//trim(time_str)
+        expro_head_tgyro = '#     tgyro : '//trim(date_str)//' '//trim(time_str)
 
         if (tgyro_write_profiles_flag == -1) then
            ! Output for each iteration
