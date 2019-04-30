@@ -17,6 +17,7 @@ subroutine prgen_map_plasmastate
   real :: dvol
   real, dimension(nx) :: dphidpsi
   real, dimension(nx) :: qpow_e,qpow_i
+  real, dimension(nx) :: qspow_e,qspow_i
   real, dimension(:), allocatable :: f1_therm,f2_therm
   real, dimension(:), allocatable :: f1_lump,f2_lump,f3_lump
   real, dimension(:), allocatable :: f1_fast,f2_fast,f3_fast,f4_fast
@@ -239,6 +240,7 @@ subroutine prgen_map_plasmastate
   !--------------------------------------------------------------------
   ! Calculate integrated powers from input sources
   !
+  ! Need to convert these integrated powers (W) to densities (W/m^3)
   do i=2,nx
      
      dvol = plst_vol(i)-plst_vol(i-1)
@@ -292,13 +294,17 @@ subroutine prgen_map_plasmastate
   expro_qmom(1)   = expro_qmom(2)
   expro_qpar(1)   = expro_qpar(2)
 
+  qspow_e = expro_qohme+expro_qbeame+expro_qrfe+expro_qfuse-expro_qei &
+       -expro_qsync-expro_qbrem-expro_qline
+  qspow_i =             expro_qbeami+expro_qrfi+expro_qfusi+expro_qei
+  
   ! Manage auxiliary powers
   if (true_aux_flag == 1) then
      print '(a)','INFO: (prgen_map_plasmastate) Setting aux. power as ohmic+NB+RF.'
   else
      ! WARNING: put missing auxiliary power into cx, giving correct total powers
-     expro_qione = qpow_e-(expro_qfuse-expro_qei-expro_qsync-expro_qbrem-expro_qline)
-     expro_qioni = qpow_i-(expro_qfusi+expro_qei)
+     expro_qione = qpow_e-qspow_e
+     expro_qioni = qpow_i-qspow_i
      print '(a)','INFO: (prgen_map_plasmastate) Setting aux. power as total-fus-rad'
      print '(a)','INFO: (prgen_map_plasmastate) Missing aux. power stored in qione,qioni'
   endif
