@@ -11,7 +11,8 @@ LLIB=math_lib
 OBJECTS = math_constants.o \
           gauss_legendre.o \
           i0.o \
-          parallel_dim.o
+          parallel_dim.o \
+          pseudospec_lib.o
 
 .SUFFIXES : .o .f90 .F90 .f
 

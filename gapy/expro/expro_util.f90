@@ -310,32 +310,32 @@ subroutine expro_compute_derived
   !
   ! Total auxiliary electron power  
   temp = expro_qohme+expro_qbeame+expro_qrfe+expro_qione
-  call volint(temp,expro_pow_e_aux)
+  call volint(temp,expro_pow_e_aux,expro_n_exp)
   ! Total electron power 
   temp = temp+expro_qbrem+expro_qsync+expro_qline-expro_qei+expro_qfuse
-  call volint(temp,expro_pow_e)
+  call volint(temp,expro_pow_e,expro_n_exp)
   ! Total auxiliary ion power 
   temp = expro_qbeami+expro_qrfi+expro_qioni+expro_qcxi
-  call volint(temp,expro_pow_i_aux)
+  call volint(temp,expro_pow_i_aux,expro_n_exp)
   ! Total ion power 
   temp = temp+expro_qei+expro_qfusi
-  call volint(temp,expro_pow_i)
+  call volint(temp,expro_pow_i,expro_n_exp)
 
   ! Exchange power
-  call volint(expro_qei,expro_pow_ei)
+  call volint(expro_qei,expro_pow_ei,expro_n_exp)
 
   ! Fusion power
-  call volint(expro_qfuse,expro_pow_e_fus)
-  call volint(expro_qfusi,expro_pow_i_fus)
+  call volint(expro_qfuse,expro_pow_e_fus,expro_n_exp)
+  call volint(expro_qfusi,expro_pow_i_fus,expro_n_exp)
 
   ! Radiated power (sink/negative)
-  call volint(expro_qbrem,expro_pow_e_brem)
-  call volint(expro_qsync,expro_pow_e_sync)
-  call volint(expro_qline,expro_pow_e_line)
+  call volint(expro_qbrem,expro_pow_e_brem,expro_n_exp)
+  call volint(expro_qsync,expro_pow_e_sync,expro_n_exp)
+  call volint(expro_qline,expro_pow_e_line,expro_n_exp)
 
   ! Particle/momentum
-  call volint(expro_qpar,expro_flow_beam)
-  call volint(expro_qmom,expro_flow_mom)
+  call volint(expro_qpar,expro_flow_beam,expro_n_exp)
+  call volint(expro_qmom,expro_flow_mom,expro_n_exp)
   !--------------------------------------------------------------
  
   ! Clean up
@@ -723,20 +723,21 @@ subroutine expro_skip_header(io)
 
 end subroutine expro_skip_header
 
-subroutine volint(f,fdv)
+subroutine volint(f,fdv,n)
 
-  use expro
+  use expro, only : expro_vol
   
   implicit none
 
   integer :: i
-  double precision, intent(in) :: f(expro_n_exp)
-  double precision, intent(out) :: fdv(expro_n_exp)
+  integer, intent(in) :: n
+  double precision, intent(in) :: f(n)
+  double precision, intent(out) :: fdv(n)
 
   fdv(1) = 0.0
 
   ! Integration is exact for constant f (density)
-  do i=2,expro_n_exp
+  do i=2,n
      fdv(i) = fdv(i-1)+0.5*(f(i)+f(i-1))*(expro_vol(i)-expro_vol(i-1))
   enddo
 

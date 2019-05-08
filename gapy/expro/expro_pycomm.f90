@@ -64,8 +64,6 @@ end subroutine expro_vcomm
 
 subroutine expro_tcomm(x,n)
 
-  use mpi
-
   implicit none
 
   integer, intent(in) :: n

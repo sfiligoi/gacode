@@ -43,7 +43,6 @@ OBJECTS = cgyro_globals.o \
 	  cgyro_make_profiles.o \
 	  cgyro_nl_direct.o \
 	  cgyro_nl_fftw.o \
-          cgyro_pseudospec.o \
           cgyro_read_input.o \
           cgyro_rhs.o \
           cgyro_run.o \
