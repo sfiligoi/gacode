@@ -135,7 +135,7 @@ then
   echo "         -diss"
   echo "         Toggle plotting of dissipation curve"  
   echo
-  echo "OPTIONS FOR -plot fluct/vis"
+  echo "OPTIONS FOR -plot fluct, -vis"
   echo
   echo "         -nomp <threads>"
   echo "         Number of OpenMP threads per MPI task."
@@ -172,6 +172,9 @@ then
   echo
   echo "         -dn"
   echo "         Modify value of CGYRO delta n_toroidal (simulation runs with dn=1)"  
+  echo
+  echo "         -nozonal"
+  echo "         Remove zonal (n=0) component of the fluctuations (-vis torcut only)"  
   echo
   echo "OPTIONS FOR -plot vid"
   echo
@@ -264,6 +267,7 @@ CFLUX=auto
 DN=1
 LOVERA=0.5
 IE=0
+NOZONAL=0
 
 PRE=
 FRAMERATE=20
@@ -337,7 +341,8 @@ while [ $# -gt 0 ] ; do
   -land) LAND_FLAG=1 ;;
   -dn) shift ; DN=$1 ;;
   -lovera) shift ; LOVERA=$1 ;;
-  
+  -nozonal) NOZONAL=1 ;;
+
   -pre) shift ; PRE=$1 ;;
   -q)  shift ; QUALITY=$1 ;;
   -framerate) shift ; FRAMERATE=$1 ;;
@@ -372,7 +377,7 @@ case "$VIS_TYPE" in
 	python $PYROOT/vis_slices.py ;;
 	
    torcut)
-	export OMP_NUM_THREADS=$NOMP ; python $PYROOT/vis_torcut.py $EXT $MOMENT $SPECIES $NX $NZ $TIME $FMIN $FMAX $CMAP $FONTSIZE $LEGACY_FLAG $DN $LOVERA ;;
+	export OMP_NUM_THREADS=$NOMP ; python $PYROOT/vis_torcut.py $EXT $MOMENT $SPECIES $NX $NZ $TIME $FMIN $FMAX $CMAP $FONTSIZE $LEGACY_FLAG $DN $LOVERA $NOZONAL ;;
 
    wheel)
 	export OMP_NUM_THREADS=$NOMP ; python $PYROOT/vis_wheel.py $EXT $MOMENT $SPECIES $NX $NY $NZ $TIME $FMIN $FMAX $CMAP $FONTSIZE ;;
