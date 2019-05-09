@@ -24,9 +24,10 @@ fmin     = sys.argv[7]
 fmax     = sys.argv[8]
 colormap = sys.argv[9]
 font     = int(sys.argv[10])
-legacy   = int(sys.argv[11])
+legacy   = bool(sys.argv[11])
 dn       = int(sys.argv[12])
 lovera   = float(sys.argv[13])
+nozonal  = bool(sys.argv[14])
 
 # Define plot and font size 
 rc('text',usetex=True)
@@ -38,7 +39,6 @@ nr = sim.n_radial
 nn = sim.n_n
 ns = sim.n_species
 nth = sim.theta_plot
-
 
 print('Lx/rho = {:.2f}'.format(sim.length))
 print('rho/a  = {:.4f}'.format(sim.rho/dn))
@@ -98,7 +98,7 @@ gapy.geo.geo_beta_star_in=sim.beta_star
 gapy.geo.geo_interp(z,True)
 # g1 -> q*theta
 # g2 -> theta 
-if legacy == 0:
+if legacy:
    # Correct form of Clebsch angle expansion nu(r,theta) 
    g1 = -gapy.geo.geo_nu
    g2 = gapy.geo.geo_b*gapy.geo.geo_captheta/gapy.geo.geo_s_in/gapy.geo.geo_grad_r**2
@@ -133,6 +133,9 @@ def frame():
    else:
       a = np.reshape(aa,(2,nr,nth,ns,nn),order='F')
 
+   if nozonal and nn > 1:
+      a[:,:,:,:,0] = 0.0
+      
    mlab.figure(size=(900,900),bgcolor=(1,1,1))
    if isfield:
       c = a[0,:,:,:]+1j*a[1,:,:,:]
