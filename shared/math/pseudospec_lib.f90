@@ -30,6 +30,7 @@ subroutine pseudo_legendre(n,x,w,d1,dl)
   real, dimension(:), allocatable :: work
   real, dimension(:,:), allocatable :: c
   real, dimension(:,:), allocatable :: cp
+  real, dimension(:,:), allocatable :: cpp
   real, dimension(:,:), allocatable :: cl
 
   integer, parameter :: print_flag=0
@@ -39,15 +40,15 @@ subroutine pseudo_legendre(n,x,w,d1,dl)
   lwork = 2*n
   allocate(ipiv(n))
   allocate(work(lwork))
-
   allocate(c(n,n))
   allocate(cp(n,n))
+  allocate(cpp(n,n))
   allocate(cl(n,n))
 
   do i=1,n
      do j=1,n
         ! d/dxi
-        call pseudo_rec_legendre(j-1,x(i),c(i,j),cp(i,j))
+        call pseudo_rec_legendre(j-1,x(i),c(i,j),cp(i,j),cpp(i,j))
         ! L
         cl(i,j) = -(j-1)*j*c(i,j)
      enddo
@@ -84,6 +85,13 @@ subroutine pseudo_legendre(n,x,w,d1,dl)
      enddo
 
   endif
+
+  deallocate(ipiv)
+  deallocate(work)
+  deallocate(c)
+  deallocate(cp)
+  deallocate(cpp)
+  deallocate(cl)
 
 end subroutine pseudo_legendre
 
