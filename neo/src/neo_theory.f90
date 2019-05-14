@@ -758,6 +758,7 @@ contains
     real, intent(in)    :: ene
     real, intent(inout) :: nu_d
     real :: xa, xb, Hd_coll, Xd_coll, Hs_coll, Xs_coll, fac
+    real, external :: erf
 
     ! (Note: nu(is,ir) and pol part of dens from rotation will be added 
     !  in coll term in kinetic equation)
