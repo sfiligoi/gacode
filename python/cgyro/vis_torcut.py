@@ -27,7 +27,7 @@ font     = int(sys.argv[10])
 legacy   = bool(sys.argv[11])
 dn       = int(sys.argv[12])
 lovera   = float(sys.argv[13])
-nozonal  = bool(sys.argv[14])
+nozonal  = bool(int(sys.argv[14]))
 
 # Define plot and font size 
 rc('text',usetex=True)
@@ -80,7 +80,7 @@ for i in range(nx):
    for k in range(nz):
       r = sim.rmin+(dn*x[i]/(2*np.pi)-0.5)*lovera
       xp[i,k] = sim.rmaj+r*np.cos(z[k]+np.arcsin(sim.delta)*np.sin(z[k]))
-      yp[i,k] = sim.kappa*r*np.sin(z[k])
+      yp[i,k] = sim.zmag+sim.kappa*r*np.sin(z[k]+sim.zeta*np.sin(2*z[k]))
       zp[i,k] = 0.0
 
 # Shape functions (just up-down symmetric now)
@@ -132,9 +132,6 @@ def frame():
       a = np.reshape(aa,(2,nr,nth,nn),order='F')
    else:
       a = np.reshape(aa,(2,nr,nth,ns,nn),order='F')
-
-   if nozonal and nn > 1:
-      a[:,:,:,:,0] = 0.0
       
    mlab.figure(size=(900,900),bgcolor=(1,1,1))
    if isfield:
@@ -142,6 +139,9 @@ def frame():
    else:
       c = a[0,:,:,species,:]+1j*a[1,:,:,species,:]
                 
+   if nozonal and nn > 1:
+      c[:,:,0] = 0.0
+
    f = np.zeros([nx,nz],order='F')
    gapy.torcut(dn,sim.m_box,sim.q,g1,g2,c,f)
 
