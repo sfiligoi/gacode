@@ -22,9 +22,9 @@ subroutine cgyro_kernel
 
   character(len=30) :: final_msg
 
-  character(8)  :: date
-  character(10) :: time
-  character(5)  :: zone
+  character(8)  :: sdate
+  character(10) :: stime
+  character(len=64)  :: platform
   integer(KIND=8) :: start_time,aftermpi_time,beforetotal_time,exit_time
   integer(KIND=8) :: count_rate,count_max
   real :: mpi_dt,init_dt,exit_dt
@@ -91,13 +91,13 @@ subroutine cgyro_kernel
   endif
 
   if (i_proc == 0) then
-    call date_and_time(date,time,zone);
-    open(NEWUNIT=statusfd,FILE=trim(path)//runfile_startups,&
-         action="write",status="unknown",position='append')
-    write(statusfd, '(a,a,a,a,a,a,a,a,a,a,a,a,a,1pe10.3,a,1pe10.3,a)') &
-         date(1:4),"/",date(5:6),"/",date(7:8)," ", &
-         time(1:2),":",time(3:4),":",time(5:10), &
-         zone, ' [STARTED] Initialization time: ', init_dt, " (mpi init: ", mpi_dt, ")"
+    call date_and_time(sdate,stime);
+    call get_environment_variable('GACODE_PLATFORM',platform)
+    open(NEWUNIT=statusfd,FILE=trim(path)//runfile_startups,action='write',status='unknown',position='append')
+    write(statusfd,'(14(a),f7.3,a,f7.3,a)') &
+         sdate(1:4),'/',sdate(5:6),'/',sdate(7:8),' ', &
+         stime(1:2),':',stime(3:4),':',stime(5:6),' ', &
+         trim(platform),' [  INITIALIZATION] Time =',init_dt,' (mpi init: ', mpi_dt, ')'
     close(statusfd)
   endif
 
@@ -280,13 +280,13 @@ subroutine cgyro_kernel
     exit_dt = (exit_time-start_time+count_max)/real(count_rate)
   endif
 
-  if (i_proc == 0) then
-    call date_and_time(date,time,zone);
-    open(NEWUNIT=statusfd,FILE=trim(path)//runfile_startups,action="write",status="unknown",position='append')
-    write(statusfd, '(a,a,a,a,a,a,a,a,a,a,a,a,a,1pe10.3)') date(1:4),"/",date(5:6),"/",date(7:8)," ", &
-                    time(1:2),":",time(3:4),":",time(5:10), zone, ' [EXIT] After ', exit_dt
-    close(statusfd)
-  endif
+  !if (i_proc == 0) then
+  !  call date_and_time(date,time,zone);
+  !  open(NEWUNIT=statusfd,FILE=trim(path)//runfile_startups,action="write",status="unknown",position='append')
+  !  write(statusfd, '(a,a,a,a,a,a,a,a,a,a,a,a,a,1pe10.3)') date(1:4),"/",date(5:6),"/",date(7:8)," ", &
+  !                  time(1:2),":",time(3:4),":",time(5:10), zone, ' [EXIT] After ', exit_dt
+  !  close(statusfd)
+  !endif
 
 end subroutine cgyro_kernel
 
