@@ -26,7 +26,16 @@ program tglf
   call tglf_read_input()
   call tglf_run()
 
-  if(units_in.eq.'GENE')print 30,'GENE units used: Bref/Bunit = ',Bref_out
+  if(units_in.eq.'GENE')then
+     print 30,'GENE reference units used'
+     print 30,'Conversion to TGLF units:'
+     print 30,'Bunit/Bref = ',1.0/Bref_out
+     print 30,'Te/Tref = ',taus_in(1)
+     print 30,'mi/mref = ',mass_in(2)
+     print 30,'a/Lref = ',1.0
+     print 30,'cs/cref = ',SQRT(taus_in(1)/mass_in(2))
+     print 30,'rhos/rhoref = ',SQRT(mass_in(2)*taus_in(1))*Bref_out
+  endif
   if(kx_isotropic_in)print 30,'isotropic kx model used: kx_geo0_out = ',kx_geo0_out, &
       ' SAT_geo0_out = ',SAT_geo0_out
 
