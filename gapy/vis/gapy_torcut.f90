@@ -1,10 +1,11 @@
-subroutine torcut(dn,m,q,nr,nth,nn,nx,nz,g1,g2,c,f)
+subroutine torcut(dn,m,q,nr,nth,nn,nx,nz,thi,g1,g2,c,f)
 
   implicit none
 
   integer, intent(in) :: dn,m
   double precision, intent(in) :: q
-  integer, intent(in) :: nr,nn,nth,nx,nz
+  integer, intent(in) :: nr,nth,nn,nx,nz
+  double precision, intent(in) :: thi(0:nth-1)
   double precision, intent(in) :: g1(0:nz-1),g2(0:nz-1)
   double complex, intent(in) :: c(0:nr-1,0:nth-1,0:nn-1)
   double precision, intent(inout) :: f(0:nx-1,0:nz-1)
@@ -26,6 +27,7 @@ subroutine torcut(dn,m,q,nr,nth,nn,nx,nz,g1,g2,c,f)
   ! f2py intent(in) nn
   ! f2py intent(in) nx
   ! f2py intent(in) nz
+  ! f2py intent(in) thi
   ! f2py intent(in) g1
   ! f2py intent(in) g2
   ! f2py intent(in) c
@@ -42,10 +44,9 @@ subroutine torcut(dn,m,q,nr,nth,nn,nx,nz,g1,g2,c,f)
   ic = (0d0,1d0)
   pi = atan(1d0)*4d0
 
-  do kc=0,nth
-     th(kc) = kc*2*pi/nth-pi
-  enddo
-
+  th(0:nth-1) = thi
+  th(nth) = th(0)
+  
   do i=0,nx-1
      x(i) = i*2*pi/(nx-1)/dn
      do p=0,nr-1    
@@ -91,9 +92,11 @@ subroutine torcut(dn,m,q,nr,nth,nn,nx,nz,g1,g2,c,f)
   do k=0,nz-1
 
      do kc=0,nth-1
+        ! Interpolation of ballooning potential (on coarse, irregular th-grid)
+        ! onto fine, equally-spaced z-grid
         if (z(k) >= th(kc) .and. z(k) <= th(kc+1)) then 
            c0(:,:) = ( cx(:,kc+1,:)*(z(k)-th(kc)) &
-                + cx(:,kc,:)*(th(kc+1)-z(k)) )/(th(1)-th(0))
+                + cx(:,kc,:)*(th(kc+1)-z(k)) )/(th(kc+1)-th(kc))
            exit
         endif
      enddo
@@ -114,7 +117,7 @@ subroutine torcut(dn,m,q,nr,nth,nn,nx,nz,g1,g2,c,f)
         endif
         f(i,k) = fsum
      enddo
-
+     
   enddo
 
   deallocate(epx,eny,x,z,th,c0,cx)

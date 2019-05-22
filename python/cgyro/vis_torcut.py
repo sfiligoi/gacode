@@ -28,7 +28,6 @@ legacy   = bool(int(sys.argv[11]))
 dn       = int(sys.argv[12])
 lovera   = float(sys.argv[13])
 nozonal  = bool(int(sys.argv[14]))
-showco   = False
 
 sim = cgyrodata('./')
 nt = sim.n_time
@@ -80,16 +79,21 @@ for i in range(nx):
       yp[i,k] = sim.zmag+sim.kappa*r*np.sin(z[k]+sim.zeta*np.sin(2*z[k]))
       zp[i,k] = 0.0
 
-# Shape functions (just up-down symmetric now)
+# Shape functions 
+gapy.geo.signb_in=1 # fix
 gapy.geo.geo_rmin_in=sim.rmin
 gapy.geo.geo_rmaj_in=sim.rmaj
+gapy.geo.geo_drmaj_in=sim.shift
+gapy.geo.geo_zmag_in=sim.zmag
+gapy.geo.geo_dzmag_in=sim.dzmag
 gapy.geo.geo_q_in=sim.q
 gapy.geo.geo_s_in=sim.shear
 gapy.geo.geo_kappa_in=sim.kappa
 gapy.geo.geo_delta_in=sim.delta
+gapy.geo.geo_zeta_in=sim.zeta
 gapy.geo.geo_s_kappa_in=sim.s_kappa
 gapy.geo.geo_s_delta_in=sim.s_delta
-gapy.geo.geo_drmaj_in=sim.shift
+gapy.geo.geo_s_zeta_in=sim.s_zeta
 gapy.geo.geo_beta_star_in=sim.beta_star
 
 gapy.geo.geo_interp(z,True)
@@ -103,20 +107,19 @@ else:
    # Correct form of Clebsch angle expansion nu(r,theta) 
    g1 = -gapy.geo.geo_nu
    g2 = gapy.geo.geo_b*gapy.geo.geo_captheta/gapy.geo.geo_s_in/gapy.geo.geo_grad_r**2
-
+   
+showco = False
 if showco:
-   # Plot the geometry functions and exit
+   # (Optional) plot of the geometry functions, then exit
    rc('text',usetex=True) ; rc('font',size=font)
-   fig = plt.figure(figsize=(14,8))
+   fig = plt.figure(figsize=(10,8))
 
-   ax = fig.add_subplot(121)
-   ax.plot(z/np.pi,g1)
-   ax.plot(z/np.pi,sim.q*z,'--')
-
-   ax = fig.add_subplot(122)
-   ax.plot(z/np.pi,g2)
-   ax.plot(z/np.pi,z,'--')
-
+   ax = fig.add_subplot(111)
+   ax.plot(z/np.pi,g1/sim.q,label='g1')
+   ax.plot(z/np.pi,g2,label='g2')
+   ax.plot(z/np.pi,z,'--k')
+   ax.set_xlim([-1,1])
+   ax.legend()
    plt.show()
    sys.exit()
    
@@ -156,7 +159,7 @@ def frame():
       c[:,:,0] = 0.0
 
    f = np.zeros([nx,nz],order='F')
-   gapy.torcut(dn,sim.m_box,sim.q,g1,g2,c,f)
+   gapy.torcut(dn,sim.m_box,sim.q,sim.thetap,g1,g2,c,f)
 
    if fmin == 'auto':
       f0=np.min(f)
@@ -169,12 +172,6 @@ def frame():
    # View from positive z-axis
    mlab.view(azimuth=0, elevation=0)
    print('INFO: (vis_torcut) min={:.3f} | max={:.3f}'.format(f0,f1))
-
-   #lut = image.module_manager.scalar_lut_manager.lut.table.to_array()
-   #values = np.linspace(0., 1., 256)
-   #cmap = cm.get_cmap(colormap)(values.copy())
-   #cmap[:, -1] = np.linspace(0, 255, 256)
-   #image.module_manager.scalar_lut_manager.lut.table = cmap
    
    if ftype == 'screen':
       mlab.show()

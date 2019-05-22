@@ -106,6 +106,17 @@ class cgyrodata:
       print('INFO: (data.py) Read grid data in out.cgyro.grids.')
       #-----------------------------------------------------------------
 
+      #--------------------------------------------------------
+      # Construct theta_plot values (self.thetap[:])
+      self.thetap = np.zeros(self.theta_plot)
+      if self.theta_plot == 1:
+         self.thetap[0] = 0.0
+      else:
+         m = self.n_theta/self.theta_plot
+         for i in range(self.theta_plot):
+            self.thetap[i] = self.theta[m*i] 
+      #-----------------------------------------------------------------
+
       #-----------------------------------------------------------------
       # Linear frequency
       #
