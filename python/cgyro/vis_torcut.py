@@ -24,14 +24,11 @@ fmin     = sys.argv[7]
 fmax     = sys.argv[8]
 colormap = sys.argv[9]
 font     = int(sys.argv[10])
-legacy   = bool(sys.argv[11])
+legacy   = bool(int(sys.argv[11]))
 dn       = int(sys.argv[12])
 lovera   = float(sys.argv[13])
 nozonal  = bool(int(sys.argv[14]))
-
-# Define plot and font size 
-rc('text',usetex=True)
-rc('font',size=font)
+showco   = False
 
 sim = cgyrodata('./')
 nt = sim.n_time
@@ -96,17 +93,33 @@ gapy.geo.geo_drmaj_in=sim.shift
 gapy.geo.geo_beta_star_in=sim.beta_star
 
 gapy.geo.geo_interp(z,True)
-# g1 -> q*theta
-# g2 -> theta 
 if legacy:
+   # s-alpha approximate (apparently used in legacy GYRO movies)
+   # g1 -> q*theta
+   # g2 -> theta 
+   g1 = sim.q*z
+   g2 = z
+else:
    # Correct form of Clebsch angle expansion nu(r,theta) 
    g1 = -gapy.geo.geo_nu
    g2 = gapy.geo.geo_b*gapy.geo.geo_captheta/gapy.geo.geo_s_in/gapy.geo.geo_grad_r**2
-else:
-   # s-alpha approximate (apparently used in legacy GYRO movies)
-   g1 = sim.q*z
-   g2 = z
 
+if showco:
+   # Plot the geometry functions and exit
+   rc('text',usetex=True) ; rc('font',size=font)
+   fig = plt.figure(figsize=(14,8))
+
+   ax = fig.add_subplot(121)
+   ax.plot(z/np.pi,g1)
+   ax.plot(z/np.pi,sim.q*z,'--')
+
+   ax = fig.add_subplot(122)
+   ax.plot(z/np.pi,g2)
+   ax.plot(z/np.pi,z,'--')
+
+   plt.show()
+   sys.exit()
+   
 #------------------------------------------------------------------------
 
 # Get filename and tags 

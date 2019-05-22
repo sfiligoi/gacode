@@ -26,10 +26,10 @@ objs:
 	${F2PY}  --quiet -lgomp --f90flags='${FOMP} ${FOPT} ${FMATH}' -c sgn.pyf ${SRC}
 
 	rm -f ${DESTLIB}
-	ln -s ${GACODE_ROOT}/gapy/f2py/gapy.so ${DESTLIB}
+	ln -s ${GACODE_ROOT}/gapy/f2py/gap*.so ${DESTLIB}
 
 clean:
-	rm -f gapy.so ${DESTLIB} sgn.pyf *~
+	rm -f gap*.so ${DESTLIB} sgn.pyf *~
 
 exit:
 	echo "No f2py"
