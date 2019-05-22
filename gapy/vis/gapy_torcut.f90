@@ -45,7 +45,7 @@ subroutine torcut(dn,m,q,nr,nth,nn,nx,nz,thi,g1,g2,c,f)
   pi = atan(1d0)*4d0
 
   th(0:nth-1) = thi
-  th(nth) = th(0)
+  th(nth) = -th(0)
   
   do i=0,nx-1
      x(i) = i*2*pi/(nx-1)/dn
