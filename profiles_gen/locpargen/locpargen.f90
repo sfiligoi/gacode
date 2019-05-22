@@ -82,6 +82,7 @@ program locpargen
   print 10,'INFO: (locpargen) Ti [keV] =',temp_loc(1)
   print 10,'INFO: (locpargen) Bunit    =',b_unit_loc
   print 10,'INFO: (locpargen) beta_*   =',beta_star_loc
+  print 10,'INFO: ----->  n=1: ky*rhos =',q_loc/rmin_loc*rhos_loc/a
 
   ! Compute collision frequency
   !

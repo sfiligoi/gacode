@@ -35,16 +35,16 @@ subroutine locpargen_neo
   write(1,10) 'S_DELTA=',s_delta_loc
   write(1,10) 'ZETA=',zeta_loc
   write(1,10) 'S_ZETA=',s_zeta_loc
-  write(1,11) 'IPCCW=',ipccw
-  write(1,11) 'BTCCW=',btccw
+  write(1,11) 'IPCCW=',int(ipccw)
+  write(1,11) 'BTCCW=',int(btccw)
   write(1,*)
 
   !---------------------------------------------------------
   ! Rotation data
 
   write(1,'(a)')  '# Rotation (Sonic)'
-  write(1,11) 'ROTATION_MODEL=', 2   
-  write(1,10) 'OMEGA_ROT=', mach_loc/rmaj_loc/cs_loc
+  write(1,11) 'ROTATION_MODEL=',2   
+  write(1,10) 'OMEGA_ROT=',mach_loc/rmaj_loc/cs_loc
   write(1,10) 'OMEGA_ROT_DERIV=',-gamma_p_loc*a/cs_loc/rmaj_loc
   write(1,*)  
 

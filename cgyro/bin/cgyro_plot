@@ -170,8 +170,11 @@ then
   echo "         -land"
   echo "         Use landscape mode (ly,lx) for -plot fluct"  
   echo
-  echo "         -dn"
-  echo "         Modify value of CGYRO delta n_toroidal (simulation runs with dn=1)"  
+  echo "         -dn <int>"
+  echo "         Modify value of delta n_toroidal (simulation runs with dn=1) (default 1)"  
+  echo
+  echo "         -mag <float>"
+  echo "         Magnify radial direction (or set '-mag 0' to plot shape functions) (default 1.0)"  
   echo
   echo "         -nozonal"
   echo "         Remove zonal (n=0) component of the fluctuations (-vis torcut only)"  
@@ -265,7 +268,7 @@ PY=800
 DISS=0
 CFLUX=auto
 DN=1
-LOVERA=0.5
+MAG=1.0
 IE=0
 NOZONAL=0
 
@@ -340,7 +343,7 @@ while [ $# -gt 0 ] ; do
   -legacy) LEGACY_FLAG=1 ;;
   -land) LAND_FLAG=1 ;;
   -dn) shift ; DN=$1 ;;
-  -lovera) shift ; LOVERA=$1 ;;
+  -mag) shift ; MAG=$1 ;;
   -nozonal) NOZONAL=1 ;;
 
   -pre) shift ; PRE=$1 ;;
@@ -377,7 +380,7 @@ case "$VIS_TYPE" in
 	python $PYROOT/vis_slices.py ;;
 	
    torcut)
-	export OMP_NUM_THREADS=$NOMP ; python $PYROOT/vis_torcut.py $EXT $MOMENT $SPECIES $NX $NZ $TIME $FMIN $FMAX $CMAP $FONTSIZE $LEGACY_FLAG $DN $LOVERA $NOZONAL ;;
+	export OMP_NUM_THREADS=$NOMP ; python $PYROOT/vis_torcut.py $EXT $MOMENT $SPECIES $NX $NZ $TIME $FMIN $FMAX $CMAP $FONTSIZE $LEGACY_FLAG $DN $MAG $NOZONAL ;;
 
    wheel)
 	export OMP_NUM_THREADS=$NOMP ; python $PYROOT/vis_wheel.py $EXT $MOMENT $SPECIES $NX $NY $NZ $TIME $FMIN $FMAX $CMAP $FONTSIZE ;;

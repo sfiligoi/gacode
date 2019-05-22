@@ -26,7 +26,7 @@ colormap = sys.argv[9]
 font     = int(sys.argv[10])
 legacy   = bool(int(sys.argv[11]))
 dn       = int(sys.argv[12])
-lovera   = float(sys.argv[13])
+mag      = float(sys.argv[13])
 nozonal  = bool(int(sys.argv[14]))
 
 sim = cgyrodata('./')
@@ -36,8 +36,11 @@ nn = sim.n_n
 ns = sim.n_species
 nth = sim.theta_plot
 
+print('HINT: adjust -dn to match experimental dn (rho/a and Lx/a will shrink)')
 print('Lx/rho = {:.2f}'.format(sim.length))
 print('rho/a  = {:.4f}'.format(sim.rho/dn))
+lovera = sim.length*sim.rho/dn*mag
+print('Lx/a   = {:.4f}'.format(lovera))
 
 ivec = time_vector(istr,nt)
 
@@ -73,8 +76,8 @@ yp = np.zeros([nx,nz])
 zp = np.zeros([nx,nz])
 
 for i in range(nx):
+   r = sim.rmin+(dn*x[i]/(2*np.pi)-0.5)*lovera
    for k in range(nz):
-      r = sim.rmin+(dn*x[i]/(2*np.pi)-0.5)*lovera
       xp[i,k] = sim.rmaj+r*np.cos(z[k]+np.arcsin(sim.delta)*np.sin(z[k]))
       yp[i,k] = sim.zmag+sim.kappa*r*np.sin(z[k]+sim.zeta*np.sin(2*z[k]))
       zp[i,k] = 0.0
@@ -108,7 +111,10 @@ else:
    g1 = -gapy.geo.geo_nu
    g2 = gapy.geo.geo_b*gapy.geo.geo_captheta/gapy.geo.geo_s_in/gapy.geo.geo_grad_r**2
    
-showco = False
+if int(mag) == 0:
+   showco=True
+else:
+   showco=False
 if showco:
    # (Optional) plot of the geometry functions, then exit
    rc('text',usetex=True) ; rc('font',size=font)

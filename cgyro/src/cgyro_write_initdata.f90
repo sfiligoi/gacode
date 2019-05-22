@@ -102,7 +102,7 @@ subroutine cgyro_write_initdata
      write(io,20) '   zmag:',zmag, '  dzmag:',dzmag,  '   mach:',mach
 
      write(io,*)
-     write(io,20) '[rho/a]:',rho,'[z_eff]:',z_eff,'[w_E*dt]',(n_toroidal-1)*q/rmin*length*gamma_e/(2*pi)*delta_t
+     write(io,20) '[rho/a]:',rho,'[z_eff]:',z_eff
      write(io,*)
      write(io,'(a)') &
           ' i  z  n/n_norm   T/T_norm   m/m_norm     a/Ln       a/Lt       nu        s(a/Ln)    s(a/Lt)'
@@ -114,7 +114,7 @@ subroutine cgyro_write_initdata
 
      if (profile_model == 2) then
         write(io,*)
-        write(io,10) '           a[m]:',a_meters, '  b_unit[T]:',b_unit,  '     rhos/a:', rhos/a_meters
+        write(io,10) '           a[m]:',a_meters,'  b_unit[T]:',b_unit,  '     rhos/a:',rhos/a_meters,' dn:',rho/(rhos/a_meters)
         write(io,10) 'n_norm[e19/m^3]:',dens_norm,'v_norm[m/s]:',vth_norm,'T_norm[keV]:',temp_norm
      endif
      write(io,*)

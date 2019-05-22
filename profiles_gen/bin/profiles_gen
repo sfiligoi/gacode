@@ -352,6 +352,7 @@ LOC_PSI=0
 HASGEO=0
 QNFLAG=0
 BANANA=0
+APPENDFLAG=0
 
 # Plotting in locpargen
 PLOT_FLAG=0
@@ -559,7 +560,7 @@ then
   if [ $BANANA -eq 1 ] ; then
      python ${PRGEN_BIN}/banana_width.py
   fi
-  rm input.locpargen
+  #rm input.locpargen
   exit 0
 fi
 
