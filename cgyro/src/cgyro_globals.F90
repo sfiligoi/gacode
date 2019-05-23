@@ -61,11 +61,11 @@ module cgyro_globals
   integer :: zf_test_mode 
   integer :: nonlinear_flag 
   integer :: nonlinear_method
-  real :: te_ade
-  real :: ne_ade
-  real :: dlntdre_ade   
-  real :: dlnndre_ade   
-  real :: masse_ade
+  real :: temp_ae
+  real :: dens_ae
+  real :: mass_ae
+  real :: dlntdr_ae   
+  real :: dlnndr_ae   
   real :: lambda_star
   integer :: test_flag
   integer :: h_print_flag

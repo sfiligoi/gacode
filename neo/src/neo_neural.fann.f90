@@ -81,7 +81,7 @@ contains
        call neo_error('ERROR: (NEO) NN requires 2 ion species + electrons')
        return
     endif
-    if(adiabatic_ele_model == 1) then
+    if(ae_flag == 1) then
        call neo_error('ERROR: (NEO) NN requires 2 ion species + electrons')
        return
     endif

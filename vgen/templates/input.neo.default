@@ -7,7 +7,7 @@ N_THETA=17
 SIM_MODEL=2
 
 # Kinetic electrons
-ADIABATIC_ELE_MODEL=0
+AE_FLAG=0
 
 # Num ions + electrons
 N_SPECIES=3

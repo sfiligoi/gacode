@@ -76,12 +76,12 @@ contains
 
     ! majority ion species and zeff
 
-    if(adiabatic_ele_model == 0) then
+    if(ae_flag == 0) then
        dens_ele = dens(is_ele,ir)
        temp_ele = temp(is_ele,ir)
     else
-       dens_ele = ne_ade(ir)
-       temp_ele = te_ade(ir)
+       dens_ele = dens_ae(ir)
+       temp_ele = temp_ae(ir)
     endif
     is_ion = -1
     d_max = -1.0
@@ -113,7 +113,7 @@ contains
     nui_HH = nu(is_ion,ir) * (4.0/3.0) / sqrt(2.0*pi)
     nui_star_HH = nui_HH * rmaj(ir) * abs(q(ir)) &
          / (sqrt(eps)*sqrt(eps)*sqrt(eps) * vth(is_ion,ir))
-    if(adiabatic_ele_model == 1) then
+    if(ae_flag == 1) then
        nue_HH = 0.0
        nue_star_HH = 0.0
     else
@@ -240,7 +240,7 @@ contains
          * (2.0 * mass(is_ion) * temp(is_ion,ir) / (1.0 *Z(is_ion)**2)) &
          * rho(ir)**2 * sqrt(eps) * nui_HH * K2 * dlntdr(is_ion,ir)
 
-    if(adiabatic_ele_model == 1) then
+    if(ae_flag == 1) then
        pflux  = 0.0
        efluxe = 0.0
        jpar   = 0.0
@@ -459,7 +459,7 @@ contains
          - (z(is_ion)*1.0)/temp(is_ion,ir) * dphi0dr(ir) &
          + (1.0 - kpar) * dlntdr(is_ion,ir))
 
-    if(adiabatic_ele_model == 1) then
+    if(ae_flag == 1) then
        jpar = 0.0
        jtor = 0.0
     else
@@ -846,7 +846,7 @@ contains
     integer :: is
     real :: dens_sum, press_sum
 
-    if(adiabatic_ele_model == 1) then
+    if(ae_flag == 1) then
        jpar = 0.0
 
     else

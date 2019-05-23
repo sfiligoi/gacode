@@ -64,17 +64,17 @@ subroutine neo_check
   end select
 
   ! Electron model
-  select case (adiabatic_ele_model)
+  select case (ae_flag)
   case(0)
      if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_neoout,30) 'adiabatic_ele_model','KINETIC ELECTRONS'
+        write(io_neoout,30) 'ae_flag','KINETIC ELECTRONS'
      endif
   case(1)
      if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_neoout,30) 'adiabatic_ele_model','ADIABATIC ELECTRONS'
+        write(io_neoout,30) 'ae_flag','ADIABATIC ELECTRONS'
      endif
   case default
-     call neo_error('ERROR: (NEO) invalid adiabatic_ele_model')
+     call neo_error('ERROR: (NEO) invalid ae_flag')
      return
   end select
      
@@ -507,9 +507,9 @@ subroutine neo_check
            write(io_neoout,'(t2,i2,2x,f7.3,2x,6(1pe11.4,2x))') &
                 is,Z(is),dens(is,ir),temp(is,ir),mass(is),dlnndr(is,ir),dlntdr(is,ir),nu(is,ir)
         enddo
-        if (adiabatic_ele_model == 1) then
+        if (ae_flag == 1) then
            write(io_neoout,'(t2,a3,1x,f7.3,2x,2(1pe11.4,2x),1x,a2,10x,2(1pe11.4,2x),1x,a2)') &
-                'ade',-1.000,ne_ade(ir),te_ade(ir),'--',dlnndre_ade(ir),dlntdre_ade(ir),'--'
+                'ade',-1.000,dens_ae(ir),temp_ae(ir),'--',dlnndr_ae(ir),dlntdr_ae(ir),'--'
         endif
 
         flag = 0

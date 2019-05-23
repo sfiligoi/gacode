@@ -10,12 +10,11 @@ subroutine expro_compute_derived
   integer :: is
 
   double precision, parameter :: k  = 1.6022e-12 ! erg/eV
-  double precision, parameter :: mp = 1.6726e-24 ! g
-  double precision, parameter :: me = 0.00027230 ! m_ele/m_deuterium (dimensionless)
   double precision, parameter :: e  = 4.8032e-10 ! statcoul
   double precision, parameter :: c  = 2.9979e10  ! cm/s
   double precision, parameter :: pi = 3.1415926535897932
-
+  double precision :: mp  ! mass_deuterium/2.0 (g)
+  
   double precision, dimension(:), allocatable :: torflux
   double precision, dimension(:), allocatable :: temp
   double precision, dimension(:), allocatable :: cc
@@ -25,7 +24,8 @@ subroutine expro_compute_derived
   double precision :: fa,fb
   double precision :: theta(1)
 
-
+  mp = expro_mass_deuterium/2.0  ! mass_deuterium/2.0 (g)
+  
   if (expro_ctrl_n_ion == -1) expro_ctrl_n_ion = expro_n_ion
 
   !---------------------------------------------------------------------
@@ -290,7 +290,7 @@ subroutine expro_compute_derived
        * 1.0 / (sqrt(3.3452) * 1602.2**1.5) * 1e9
   loglam(:) = 24.0 - log(sqrt(expro_ne(:)*1e13)/(expro_te(:)*1e3))
   expro_nuee(:) = cc(:) * loglam(:) * expro_ne(:) &
-       / (sqrt(me) * expro_te(:)**1.5)
+       / (sqrt(expro_masse/2.0) * expro_te(:)**1.5)
   deallocate(cc)
   deallocate(loglam)
   !-----------------------------------------------------------------

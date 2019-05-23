@@ -47,10 +47,10 @@ module neo_globals
   integer :: ipccw_in
   integer :: btccw_in
   !
-  real :: te_ade_in
-  real :: ne_ade_in
-  real :: dlntdre_ade_in
-  real :: dlnndre_ade_in
+  real :: temp_ae_in
+  real :: dens_ae_in
+  real :: dlntdr_ae_in
+  real :: dlnndr_ae_in
   !
   real, dimension(11) :: z_in 
   real, dimension(11) :: mass_in
@@ -91,7 +91,7 @@ module neo_globals
   integer :: profile_erad0_model
   integer :: profile_equilibrium_model
   integer :: rotation_model
-  integer :: adiabatic_ele_model
+  integer :: ae_flag
   integer :: spitzer_model
   real    :: epar0_spitzer
   integer :: coll_uncoupledei_model
@@ -171,7 +171,7 @@ module neo_globals
   integer :: geo_ny
   real, dimension(:,:,:), allocatable :: geo_yin
   !
-  real, dimension(:), allocatable :: te_ade, ne_ade, dlnndre_ade, dlntdre_ade
+  real, dimension(:), allocatable :: temp_ae, dens_ae, dlnndr_ae, dlntdr_ae
   ! ele temp and dens -- used only if ade (for Poisson calculation)
   !
   ! (species-dependent)

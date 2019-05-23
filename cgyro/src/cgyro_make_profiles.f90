@@ -13,30 +13,7 @@ subroutine cgyro_make_profiles
   real :: cc,loglam
 
   !-------------------------------------------------------------
-  ! Manage electrons
-  !
-  num_ele = 0
-  do is=1,n_species
-     if (z(is) < 0) then
-        num_ele = num_ele + 1
-        is_ele = is
-     endif
-  enddo
-
-  if (num_ele == 0) then
-     ! Adiabatic electrons
-     ae_flag = 1
-     is_ele = n_species+1
-     call cgyro_info('Using adiabatic electrons')
-  else if (num_ele == 1) then
-     ! GK electrons
-     ae_flag = 0
-     call cgyro_info('Using gyrokinetic electrons')
-  else
-     call cgyro_error('Only one electron species allowed')
-     return
-  endif
-
+  
   !-------------------------------------------------------------
   ! Local geometry treatment
   !
@@ -79,15 +56,6 @@ subroutine cgyro_make_profiles
 
      ! Experimental profiles
 
-     ! Determine if electrons are to be included in the 
-     ! simulation.  Electron profiles are read even if not 
-     ! to be included in the simulation (needed to re-scale 
-     ! ion density/temp if not quasi-neutral).
-     if (ae_flag == 0 .and. z(n_species) > 0.0) then
-        call cgyro_error('For exp. profiles, electron index must be n_species')
-        return
-     endif
-
      call expro_locsim_profiles(path,&
           CGYRO_COMM_WORLD,&
           geo_numeq_flag,&
@@ -99,6 +67,11 @@ subroutine cgyro_make_profiles
           ipccw,&
           a_meters)
 
+     do is=1,n_species
+        z(is)    = z_loc(is)
+        mass(is) = mass_loc(is)/2.0
+     enddo
+     
      shift   = shift_loc
      kappa   = kappa_loc
      delta   = delta_loc
@@ -124,6 +97,12 @@ subroutine cgyro_make_profiles
      dlntdr(1:n_species) = dlntdr_loc(1:n_species)
      sdlnndr(1:n_species) = sdlnndr_loc(1:n_species)     
      sdlntdr(1:n_species) = sdlntdr_loc(1:n_species)     
+
+     if(ae_flag == 1) then
+        is_ele = n_species+1
+     else
+        is_ele = n_species
+     endif
      
      dens_ele = dens_loc(is_ele)
      temp_ele = temp_loc(is_ele)
@@ -192,13 +171,13 @@ subroutine cgyro_make_profiles
         temp(is) = temp(is)/temp_norm
         vth(is)  = vth(is)/vth_norm
      enddo
-     ne_ade   = ne_ade/dens_norm
-     te_ade   = te_ade/temp_norm
-     dens_ele = dens_ele/dens_norm
-     temp_ele = temp_ele/temp_norm
-     gamma_e  = gamma_e/(vth_norm/a_meters)
-     gamma_p  = gamma_p/(vth_norm/a_meters)
-     mach     = mach/vth_norm
+     dens_ae   = dens_ae/dens_norm
+     temp_ae   = temp_ae/temp_norm
+     dens_ele  = dens_ele/dens_norm
+     temp_ele  = temp_ele/temp_norm
+     gamma_e   = gamma_e/(vth_norm/a_meters)
+     gamma_p   = gamma_p/(vth_norm/a_meters)
+     mach      = mach/vth_norm
 
      do is=1,n_species
         nu(is) = nu_ee *z(is)**4 &
@@ -248,12 +227,23 @@ subroutine cgyro_make_profiles
      q = abs(q)*(ipccw)*(btccw)
 
      if (ae_flag == 1) then
-        dens_ele = ne_ade
-        temp_ele = te_ade
-        mass_ele = masse_ade
-        dlnndr_ele = dlnndre_ade
-        dlntdr_ele = dlntdre_ade
-     else 
+        is_ele = -1
+        dens_ele = dens_ae
+        temp_ele = temp_ae
+        mass_ele = mass_ae
+        dlnndr_ele = dlnndr_ae
+        dlntdr_ele = dlntdr_ae
+     else
+        is_ele = -1
+        do is=1, n_species
+           if(z(is) < 0.0) then
+              is_ele = is
+              exit
+           endif
+        enddo
+        if(is_ele == -1) then
+           call cgyro_error('ERROR: (CGYRO) No electron species specified')
+        endif
         dens_ele = dens(is_ele)
         temp_ele = temp(is_ele)
         mass_ele = mass(is_ele)
@@ -292,6 +282,28 @@ subroutine cgyro_make_profiles
      enddo
   endif
 
+  ! Check electron species consistency
+  num_ele = 0
+  do is=1,n_species
+     if (z(is) < 0) then
+        num_ele = num_ele + 1
+     endif
+  enddo
+  if(num_ele == 0) then
+     if(ae_flag == 0) then
+        call cgyro_error('ERROR: (CGYRO) No electron species specified')
+        return
+     endif
+  else if(num_ele == 1) then
+     if(ae_flag == 1) then
+        call cgyro_error('ERROR: (CGYRO) Electron species specified with adiabatic electron flag')
+        return
+     endif
+  else
+     call cgyro_error('ERROR: (NEO) Only one electron species allowed')
+     return
+  endif
+  
   !-------------------------------------------------------------
   ! Manage simulation type (n=0,linear,nonlinear)
   !

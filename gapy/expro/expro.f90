@@ -69,9 +69,12 @@ module expro
        expro_type
 
   double precision :: &
-       expro_masse=5.442585e-4,&
+       expro_masse=5.44887413e-4,&   ! me/md/2.0
        expro_ze=-1.0
 
+  double precision :: &
+       expro_mass_deuterium=3.34358e-24  ! md (g)
+  
   double precision, dimension(:), allocatable :: &
        expro_mass,&
        expro_z

@@ -82,8 +82,8 @@ subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, &
   
   ! Species-dependent parameters
   
-  neo_ne_ade_in = EXPRO_ne(i) / dens_norm
-  neo_te_ade_in = EXPRO_te(i) / temp_norm
+  neo_dens_ae_in = EXPRO_ne(i) / dens_norm
+  neo_temp_ae_in = EXPRO_te(i) / temp_norm
   
   loglam = 24.0 - log(sqrt(EXPRO_ne(i)*1e13)/(EXPRO_te(i)*1000))
   

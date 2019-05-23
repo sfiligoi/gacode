@@ -18,7 +18,7 @@ subroutine vgen_init
   ! Set qn option for EXPRO
 
   EXPRO_ctrl_quasineutral_flag = 1
-  EXPRO_ctrl_n_ion = neo_n_species_in + neo_adiabatic_ele_model_in - 1
+  EXPRO_ctrl_n_ion = neo_n_species_in + neo_ae_flag_in - 1
   n_ions = EXPRO_ctrl_n_ion
   
   ! Set equilibrium option for EXPRO
@@ -44,7 +44,7 @@ subroutine vgen_init
      neo_z_in(j)    = expro_z(j)
      neo_mass_in(j) = expro_mass(j)/2.0
   enddo
-  if(neo_adiabatic_ele_model_in == 0) then
+  if(neo_ae_flag_in == 0) then
      neo_z_in(neo_n_species_in)    = expro_ze
      neo_mass_in(neo_n_species_in) = expro_masse/2.0
   endif

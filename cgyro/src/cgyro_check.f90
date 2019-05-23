@@ -49,6 +49,19 @@ subroutine cgyro_check
   !------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------
+  ! Electrons
+  !
+  select case (ae_flag)
+  case(0)
+     call cgyro_info('Using gyrokinetic electrons')
+  case(1)
+     call cgyro_info('Using adiabatic electrons')
+  case default
+     call cgyro_error('Invalid value for ae_flag')
+     return
+  end select 
+  
+  !-----------------------------------------------------------------------
   ! Profile checks
   !
   select case (profile_model)

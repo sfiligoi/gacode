@@ -38,11 +38,11 @@ subroutine neo_read_input
   read(1,*) coll_uncoupledei_model
   read(1,*) coll_uncoupledaniso_model
 
-  read(1,*) adiabatic_ele_model
-  read(1,*) ne_ade_in
-  read(1,*) te_ade_in
-  read(1,*) dlnndre_ade_in
-  read(1,*) dlntdre_ade_in
+  read(1,*) ae_flag
+  read(1,*) dens_ae_in
+  read(1,*) temp_ae_in
+  read(1,*) dlnndr_ae_in
+  read(1,*) dlntdr_ae_in
   
   read(1,*) n_species
 

@@ -75,10 +75,10 @@ subroutine neo_make_profiles
      dphi0dr(ir)   = dphi0dr_in
      epar0(ir)     = epar0_in
 
-     te_ade(ir)      = te_ade_in
-     ne_ade(ir)      = ne_ade_in
-     dlntdre_ade(ir) = dlntdre_ade_in
-     dlnndre_ade(ir) = dlnndre_ade_in
+     temp_ae(ir)   = temp_ae_in
+     dens_ae(ir)   = dens_ae_in
+     dlntdr_ae(ir) = dlntdr_ae_in
+     dlnndr_ae(ir) = dlnndr_ae_in
      
      omega_rot(ir)       = omega_rot_in 
      omega_rot_deriv(ir) = omega_rot_deriv_in 
@@ -112,15 +112,19 @@ subroutine neo_make_profiles
              * sqrt(mass(1)/mass(is)) * (temp(1,ir)/temp(is,ir))**1.5
      enddo
 
-     if(adiabatic_ele_model == 1) then
+     if(ae_flag == 1) then
         is_ele = -1
      else
+        is_ele = -1
         do is=1, n_species
            if(z(is) < 0.0) then
               is_ele = is
               exit
            endif
         enddo
+        if(is_ele == -1) then
+           call neo_error('ERROR: (NEO) No electron species specified')
+        endif
      endif
      
      do is=1, n_species
@@ -164,7 +168,7 @@ subroutine neo_make_profiles
              geo_numeq_flag,&
              udsymmetry_flag,&
              quasineutral_flag,&
-             n_species+adiabatic_ele_model,&
+             n_species+ae_flag,&
              r(ir),&
              btccw_exp,&
              ipccw_exp,&
@@ -215,16 +219,16 @@ subroutine neo_make_profiles
            endif
         enddo
 
-        if(adiabatic_ele_model == 1) then
+        if(ae_flag == 1) then
            is_ele = n_species+1
         else
            is_ele = n_species
         endif
         
-        ne_ade(ir)      = dens_loc(is_ele)
-        te_ade(ir)      = temp_loc(is_ele)
-        dlnndre_ade(ir) = dlnndr_loc(is_ele)
-        dlntdre_ade(ir) = dlntdr_loc(is_ele)
+        dens_ae(ir)   = dens_loc(is_ele)
+        temp_ae(ir)   = temp_loc(is_ele)
+        dlnndr_ae(ir) = dlnndr_loc(is_ele)
+        dlntdr_ae(ir) = dlntdr_loc(is_ele)
         
         omega_rot(ir)       = mach_loc/(rmaj(ir)*a_meters)
         omega_rot_deriv(ir) = -gamma_p_loc/(rmaj(ir)*a_meters)
@@ -315,7 +319,7 @@ subroutine neo_make_profiles
            ! Coulomb logarithm
            ! EAB: 03/22/09 redefined this wrt electron species
            ! (was previously defined wrt species 1)
-           loglam = 24.0 - log(sqrt(ne_ade(ir)*1e13)/(te_ade(ir)*1000))
+           loglam = 24.0 - log(sqrt(dens_ae(ir)*1e13)/(temp_ae(ir)*1000))
 
            ! Collision rate (1/sec)
            nu(is,ir) = cc * loglam * dens(is,ir) * z(is)**4 &
@@ -333,8 +337,8 @@ subroutine neo_make_profiles
            dens(is,ir) = dens(is,ir)/dens_norm(ir)
            temp(is,ir) = temp(is,ir)/temp_norm(ir)
            if(is == 1) then
-              te_ade(ir) = te_ade(ir) / temp_norm(ir)
-              ne_ade(ir) = ne_ade(ir) / dens_norm(ir)
+              temp_ae(ir) = temp_ae(ir) / temp_norm(ir)
+              dens_ae(ir) = dens_ae(ir) / dens_norm(ir)
            endif
            ! Normalize vth/a
            vth(is,ir) = vth(is,ir)/vth_norm(ir)
@@ -359,13 +363,13 @@ subroutine neo_make_profiles
      endif
   enddo
   if(num_ele == 0) then
-     if(adiabatic_ele_model == 0) then
+     if(ae_flag == 0) then
         call neo_error('ERROR: (NEO) No electron species specified')
         return
      endif
   else if(num_ele == 1) then
-     if(adiabatic_ele_model == 1) then
-        call neo_error('ERROR: (NEO) Electron species specified with adiabatic electron model')
+     if(ae_flag == 1) then
+        call neo_error('ERROR: (NEO) Electron species specified with adiabatic electron flag')
         return
      endif
   else

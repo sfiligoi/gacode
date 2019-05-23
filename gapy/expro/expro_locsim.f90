@@ -1,8 +1,8 @@
 module expro_locsim_interface
 
   integer :: n_species_exp
-  
-  double precision, parameter :: mass_deuterium  = 3.3452
+
+  double precision :: mass_deuterium
   double precision, parameter :: temp_norm_fac   = 1602.2
   double precision, parameter :: charge_norm_fac = 1.6022
 
@@ -196,6 +196,8 @@ subroutine expro_locsim_profiles(&
   
   n_species_exp = n_species_in
 
+  mass_deuterium = expro_mass_deuterium*1e24
+  
   !--------------------------------------------------------------
   ! use expro routines to read data:
   !
@@ -234,7 +236,7 @@ subroutine expro_locsim_profiles(&
   dlnndr_exp(n_species_exp,:)  = expro_dlnnedr(:)*a_meters 
   sdlnndr_exp(n_species_exp,:) = expro_sdlnnedr(:)*a_meters
 
-  mass_loc(n_species_exp) = 1.0/1837
+  mass_loc(n_species_exp) = expro_masse
   z_loc(n_species_exp) = -1.0
  
   ! Pack ions from the bottom
