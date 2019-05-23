@@ -10,10 +10,11 @@ class cgyrodata:
 
    """CGYRO output data class."""
 
-   def __init__(self, sim_directory):
+   def __init__(self,sim_directory,silent=False):
 
       """Constructor reads in basic (not all) simulation data."""
 
+      self.silent = silent
       self.dir = sim_directory
       self.getdata()
         
@@ -55,7 +56,8 @@ class cgyrodata:
       except:
          self.err2 = data[1,:]
       self.n_time = nt   
-      print('INFO: (data.py) Read time vector in out.cgyro.time.')
+      if not self.silent:
+         print('INFO: (data.py) Read time vector in out.cgyro.time.')
       #-----------------------------------------------------------------
 
       #-----------------------------------------------------------------
@@ -103,7 +105,8 @@ class cgyrodata:
       mark = mark+self.n_n
       self.radialdiss = np.array(data[mark:mark+self.n_radial])
 
-      print('INFO: (data.py) Read grid data in out.cgyro.grids.')
+      if not self.silent:
+         print('INFO: (data.py) Read grid data in out.cgyro.grids.')
       #-----------------------------------------------------------------
 
       #--------------------------------------------------------
@@ -124,7 +127,8 @@ class cgyrodata:
       t,fmt,data = self.extract('.cgyro.freq')
       if fmt != 'null':  
          self.freq = np.reshape(data[0:nd],(2,self.n_n,nt),'F')
-         print('INFO: (data.py) Read data in '+fmt+'.cgyro.freq. '+t) 
+         if not self.silent:
+            print('INFO: (data.py) Read data in '+fmt+'.cgyro.freq. '+t) 
       #-----------------------------------------------------------------
 
       #-----------------------------------------------------------------
@@ -179,7 +183,8 @@ class cgyrodata:
             self.dlnndr[i] = data[35+7*i]
             self.dlntdr[i] = data[36+7*i]
             self.nu[i]     = data[37+7*i]
-         print('INFO: (data.py) Read data in out.cgyro.equilibrium.')
+         if not self.silent:
+            print('INFO: (data.py) Read data in out.cgyro.equilibrium.')
       except:
          print('WARNING: (data.py) Could not read out.cgyro.equilibrium.')
          pass
@@ -261,13 +266,15 @@ class cgyrodata:
          t,fmt,data = self.extract('.cgyro.ky_cflux')
          if fmt != 'null':  
             self.ky_flux = np.reshape(data[0:nd],(self.n_species,3,self.n_field,self.n_n,nt),'F')
-            print('INFO: (data.py) Read data in '+fmt+'.cgyro.ky_cflux. '+t) 
+            if not self.silent:
+               print('INFO: (data.py) Read data in '+fmt+'.cgyro.ky_cflux. '+t) 
 
       if not usec or fmt == 'null':      
          t,fmt,data = self.extract('.cgyro.ky_flux')
          if fmt != 'null':  
             self.ky_flux = np.reshape(data[0:nd],(self.n_species,3,self.n_field,self.n_n,nt),'F')
-            print('INFO: (data.py) Read data in '+fmt+'.cgyro.ky_flux. '+t) 
+            if not self.silent:
+               print('INFO: (data.py) Read data in '+fmt+'.cgyro.ky_flux. '+t) 
       #-----------------------------------------------------------------
 
       return usec
