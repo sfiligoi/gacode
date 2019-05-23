@@ -36,7 +36,7 @@ program tglf
      print 30,'cs/cref = ',SQRT(taus_in(1)/mass_in(2))
      print 30,'rhos/rhoref = ',SQRT(mass_in(2)*taus_in(1))*Bref_out
   endif
-  if(kx_isotropic_in)print 30,'isotropic kx model used: kx_geo0_out = ',kx_geo0_out, &
+  if(alpha_zf_in.lt.0.0)print 30,' kx_geo0_out = ',kx_geo0_out, &
       ' SAT_geo0_out = ',SAT_geo0_out
 
 ! write interchange stability criteria with ELITE conventions
