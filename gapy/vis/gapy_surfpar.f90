@@ -90,18 +90,24 @@ contains
 
     ! Compute generalized angles ---------------------
     eps = 1.0-1e-9
-    uz = asin(eps*(z-zmaj)/zmin)
-    ur = acos(eps*(r-rmaj)/rmin)
-
-    ! Sort out proper branches
-    vr = ur ; vz = uz
-    do i=1,n_arc-2
-       if (ur(i+1) < ur(i)) vr(i+1) = 2*pi-ur(i+1)
-       if (uz(i+1) <= uz(i)) vz(i+1) = pi-uz(i+1)
-       if (uz(i+1) >= uz(i) .and. x(i) > pi) then
-          vz(i+1) = 2*pi+uz(i+1)
+    do i=1,n_arc
+       uz(i) = asin(eps*(z(i)-zmaj)/zmin)
+       ur(i) = acos(eps*(r(i)-rmaj)/rmin)
+       if (i > 5) then 
+          if (uz(i) > uz(i-1) .and. ur(i) > ur(i-1)) then
+             vz(i) = uz(i) ; vr(i) = ur(i)
+          else if (uz(i) < uz(i-1) .and. ur(i) > ur(i-1)) then
+             vz(i) = pi-uz(i) ; vr(i) = ur(i)
+          else if (uz(i) < uz(i-1) .and. ur(i) < ur(i-1)) then
+             vz(i) = pi-uz(i) ; vr(i) = 2*pi-ur(i)
+          else if (uz(i) > uz(i-1) .and. ur(i) < ur(i-1)) then
+             vz(i) = 2*pi+uz(i) ; vr(i) = 2*pi-ur(i)
+          endif
+       else
+          vz(i) = uz(i) ; vr(i) = ur(i)
        endif
     enddo
+
 
     vr = vr-x
     vz = vz-x
