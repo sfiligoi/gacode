@@ -32,70 +32,46 @@ then
    echo "          -title <Optional title for top of plot>"  
    echo
    echo " PROFILE PLOTTING MODE:"
-   echo
-   echo "          -options"
-   echo "          Display all possible simulated parameters to plot in"
-   echo "          <file1>."
    echo 
-   echo "          -plot <var1>,<var2>,...,<varN>"
-   echo "          Produce plots of N parameters given."  
-   echo "          Default is ne,ni_1,Te,Ti_1."
+   echo "          -plot <group>"
+   echo "          <group> = geo,pow,pro (various profiles)"
+   echo "                  = surf  (Miller/Fourier flux surfaces)"
+   echo "                  = msurf (Miller flux surfaces)"
+   echo "                  = fsurf (Fourier flux surfaces)"
    echo 
-   echo "          -t <label1>,<label2>,...,<labelN>"  
-   echo
    echo "          -r <flux-surface coordinate for plotting>"
    echo "          Choices are r,r/a,rho"
    echo
-   echo "          -rmin <plot window minimum>"
-   echo "          -rmax <plot window maximum>"
+   echo "          -rmin <min plot radius>"
+   echo "          -rmax <max plot radius>"
    echo
-   echo " FLUX-SURFACE PLOTTING MODE:"
+   echo " FLUX-SURFACE PLOTTING MODE (-plot *surf):"
    echo 
    echo "          -n <integer>"
-   echo "          Change number of flux surfaces to plot.  Default is 16."
-   echo
-   echo "          -surf"
-   echo "          Produce Miller/Fourier flux surface plots."
-   echo
-   echo "          -msurf"
-   echo "          Produce Miller flux surface plots."
-   echo
-   echo "          -i0"
-   echo "          Radial index of surface to plot."
-   echo "          [Default is to plot all surface]."
-   echo
-   echo "          -fsurf"
-   echo "          Produce Fourier flux surface plots."
-   echo
+   echo "          Number of flux surfaces (default 16)"
+   echo "          If n < 0, plot single flux surface |n|"
    echo
    echo "EXAMPLES:"
    echo
-   echo "       profiles_gen_plot -options"
-   echo "       profiles_gen_plot -i input.profiles -plot bunit"
-   echo "       profiles_gen_plot -surf"
+   echo "       profiles_gen_plot -plot geo"
    echo
 fi
 
 #==============================================================================
 # Define variables for flag capture
 #
-INFILES=input.profiles,.,.,.,.
-PLOTS=Te,Ti_1
-INTERACTIVE=
+PLOT=geo
 FTYPE=screen
 LOC=1
-TOPTITLE=null
 
 # Plot options
-OPTIONS_FLAG=0
-PLOT_FLAG=0
 RVAR="r"
 RMIN=auto
 RMAX=auto
 
 # Surface options
+N=16
 SURF=null
-I0=-1
 #==============================================================================
 
 #==============================================================================
@@ -104,33 +80,20 @@ I0=-1
 while [ $# -gt 0 ] ; do
   case "$1" in
 
-  -i) shift ; INFILES=$1 ;;
-
-  -options) OPTIONS_FLAG=1 ;;
-
-  -plot) shift ; PLOT_FLAG=1 ; PLOTS="$1" ;;
+  -plot) shift ; PLOT="$1" ;;
 
   -r) shift ; RVAR=$1 ;;
 
-  -surf)  SURF=both ;;
-  -msurf) SURF=miller ;;
-  -fsurf) SURF=fourier ;;
-
-  -i0) shift ; I0=$1 ;;
+  -n) shift ; N=$1 ;;
   
   -f) shift ; FTYPE=$1 ;;
 
   -loc) shift ; LOC=$1 ;;
 
-  -t) shift ; T=$1 ;;
   -rmin) shift ; RMIN=$1 ;;
   -rmax) shift ; RMAX=$1 ;;
 
-  -title) shift ; TOPTITLE=$1 ;;
-
-  -interactive) INTERACTIVE=-i ;;
-
-   *) echo "ERROR: incorrect syntax." ; exit 1 ;;
+  *) echo "ERROR (profiles_gen_plot): incorrect syntax." ; exit 1 ;;
 
   esac
   shift
@@ -140,32 +103,13 @@ done
 PYROOT=$GACODE_ROOT/python/profiles_gen
 
 #==============================================================================
-# Give possible data to be plotted
-
-if [ $OPTIONS_FLAG -eq 1 ]
-then
-  python $INTERACTIVE $PYROOT/options.py $INFILES 
-  exit 0
-fi
-#==============================================================================
-
-#==============================================================================
 # Plot flux surfaces
 
-if [ "$SURF" != "null" ]
+if [ "$PLOT" != "*surf" ]
 then
-   python $INTERACTIVE $PYROOT/fluxplot.py $INFILES $SURF $I0 $FTYPE $LOC
-   exit 0
-fi
-#==============================================================================
-
-#==============================================================================
-# Plot data
-
-if [ $PLOT_FLAG -eq 1 ]
-then
-   python $INTERACTIVE $PYROOT/profileplot.py $RVAR $INFILES $PLOTS $FTYPE $LOC "$T" "$TOPTITLE" $RMIN $RMAX
-   exit 0
+   python $PYROOT/plot_profile.py $PLOT $RVAR $RMIN $RMAX $FTYPE $LOC
+else
+   python $PYROOT/plot_surf.py $PLOT $N $FTYPE
 fi
 #==============================================================================
 

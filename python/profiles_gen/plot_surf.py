@@ -3,7 +3,6 @@ import string
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import rc
-from profiles_gen.data import profiles_genData
 
 rc('text',usetex=True)
 rc('font',size=18)
@@ -11,15 +10,9 @@ rc('font',size=18)
 # Number of theta-points for plotting
 narc = 256
 
-infiles = sys.argv[1]
-surf    = sys.argv[2]
-i0      = int(sys.argv[3])
-ftype   = sys.argv[4]
-
-filevec = string.splitfields(infiles,',')
-
-# Support only one input.profiles file
-prof = profiles_genData(filevec[0])
+surf  = sys.argv[1]
+n     = int(sys.argv[2])
+ftype = sys.argv[3]
 
 fig = plt.figure(figsize=(8,12))
 ax = fig.add_subplot(111,aspect='equal')
@@ -28,7 +21,7 @@ ax.set_ylabel(r'$Z$')
 
 t = 2*np.pi*np.arange(0,narc)/float(narc-1)
 
-if i0 < 0:
+if i0 > 0:
     i1=0
     i2=prof.n_exp
 else:
