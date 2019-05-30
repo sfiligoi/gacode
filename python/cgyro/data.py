@@ -31,10 +31,7 @@ class cgyrodata:
          fmt  = 'null'
          data = []
          
-      if int(sys.version_info[2]) > 6:
-         t = 'TIME = '+'{:.3e}'.format(time.time()-start)+' s.'
-      else:        
-         t = 'TIME = '+str(time.time()-start)
+      t = 'TIME = '+'{:.3e}'.format(time.time()-start)+' s.'
  
       return t,fmt,data
        

@@ -14,9 +14,6 @@ def print_freq():
         print(sim.freq[:,0,i])
     
 def print_flux():
-    # Set print precision
-    np.set_printoptions(precision=4,suppress=True)
-
     b = np.zeros([sim.n_species])
  
     tag = [
@@ -38,12 +35,14 @@ def print_flux():
 
     for i in range(3):
         try:
-            for ispec in range(sim.n_species):
-                y = np.sum(sim.ky_flux,axis=(2,3))
-                b[ispec] = average(y[ispec,i,:],sim.t,w,wmax)
-            print(tag[i],b)
+           bstr=''
+           for ispec in range(sim.n_species):
+              y = np.sum(sim.ky_flux,axis=(2,3))
+              b[ispec] = average(y[ispec,i,:],sim.t,w,wmax)
+              bstr = bstr+"{:7.3f}".format(b[ispec])+' '
+           print(tag[i]+' '+bstr)
         except:
-            pass
+           pass
 
 #-------------------------------------------------------------------
         
