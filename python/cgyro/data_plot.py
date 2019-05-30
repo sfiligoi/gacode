@@ -219,7 +219,7 @@ class cgyrodata_plot(data.cgyrodata):
       for j in range(self.n_radial):
          ave[j] = average(y[j,:],self.t,w,wmax)
 
-      ave = np.roll(ave,-self.n_radial/2)
+      ave = np.roll(ave,-self.n_radial//2)
       ave[0] = 0.0
       corr = np.fft.fft(ave,self.n_radial)
       corr = np.fft.fftshift(corr)
@@ -245,7 +245,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       fig.tight_layout(pad=0.3)
 
-      print('INFO: (data_plot.py) l_corr = {:d}'.format(l_corr))
+      print('INFO: (data_plot.py) l_corr = {:.3f}'.format(l_corr[0]))
 
    def plot_phi(self,field=0,theta=0.0,fig=None):
 
@@ -785,7 +785,7 @@ class cgyrodata_plot(data.cgyrodata):
          f = f+fx[1:,:,i]
       
       # Fix (0,0)
-      i0 = nx/2-1
+      i0 = nx//2-1
       f[i0,0] = 1e-6
 
       # Reverse y order for image plotting
