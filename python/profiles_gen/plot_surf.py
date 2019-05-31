@@ -35,11 +35,6 @@ if n > 0:
 else:
    rlist = np.arange(abs(n),abs(n)+1)
 
-geo_ar = gapy.expro.expro_geo[0,:,:]
-geo_br = gapy.expro.expro_geo[1,:,:]
-geo_az = gapy.expro.expro_geo[2,:,:]
-geo_bz = gapy.expro.expro_geo[3,:,:]
-
 if surf == 'msurf' or surf == 'surf':
    # Miller geometry flux-surfaces
    for i in rlist:
@@ -59,42 +54,49 @@ if surf == 'msurf' or surf == 'surf':
          ax.plot(x,y,'-k',linewidth=1)
 
 
-if surf == 'fsurf' or surf == 'surf':
-   # Fourier geometry flux-surfaces 
-   for i in rlist:
-      x = geo_ar[0,i]/2
-      y = geo_az[0,i]/2
-      for j in range(nfourier):
-         p = j+1
-         ar = geo_ar[p,i]
-         br = geo_br[p,i]
-         az = geo_az[p,i]
-         bz = geo_bz[p,i]
-         x = x+ar*np.cos(p*t)+br*np.sin(p*t)
-         y = y+az*np.cos(p*t)+bz*np.sin(p*t)
+if nfourier > 0:
+  
+   geo_ar = gapy.expro.expro_geo[0,:,:]
+   geo_br = gapy.expro.expro_geo[1,:,:]
+   geo_az = gapy.expro.expro_geo[2,:,:]
+   geo_bz = gapy.expro.expro_geo[3,:,:]
 
-      if i == rlist[0]:
-         ax.plot(x,y,'-b',linewidth=1,label=r'$\mathrm{Fourier}~'+str(nfourier)+'$')
-      else:
-         ax.plot(x,y,'-b',linewidth=1)
+   if surf == 'fsurf' or surf == 'surf':
+      # Fourier geometry flux-surfaces 
+      for i in rlist:
+         x = geo_ar[0,i]/2
+         y = geo_az[0,i]/2
+         for j in range(nfourier):
+            p = j+1
+            ar = geo_ar[p,i]
+            br = geo_br[p,i]
+            az = geo_az[p,i]
+            bz = geo_bz[p,i]
+            x = x+ar*np.cos(p*t)+br*np.sin(p*t)
+            y = y+az*np.cos(p*t)+bz*np.sin(p*t)
 
-# LCFS
-i = nexp-1
-x = geo_ar[0,i]/2
-y = geo_az[0,i]/2
+            if i == rlist[0]:
+               ax.plot(x,y,'-b',linewidth=1,label=r'$\mathrm{Fourier}~'+str(nfourier)+'$')
+            else:
+               ax.plot(x,y,'-b',linewidth=1)
 
-for j in range(nfourier):
-   p = j+1
-   ar = geo_ar[p,i]
-   br = geo_br[p,i]
-   az = geo_az[p,i]
-   bz = geo_bz[p,i]
-   x = x+ar*np.cos(p*t)+br*np.sin(p*t)
-   y = y+az*np.cos(p*t)+bz*np.sin(p*t)
+   # LCFS
+   i = nexp-1
+   x = geo_ar[0,i]/2
+   y = geo_az[0,i]/2
 
-ax.plot(x,y,'-m',linewidth=2)
+   for j in range(nfourier):
+      p = j+1
+      ar = geo_ar[p,i]
+      br = geo_br[p,i]
+      az = geo_az[p,i]
+      bz = geo_bz[p,i]
+      x = x+ar*np.cos(p*t)+br*np.sin(p*t)
+      y = y+az*np.cos(p*t)+bz*np.sin(p*t)
 
-ax.legend()
+   ax.plot(x,y,'-m',linewidth=2)
+   ax.legend()
+
 if ftype == 'screen':
    plt.show()
 else:
