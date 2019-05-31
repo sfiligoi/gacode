@@ -15,21 +15,12 @@ if [ $n -eq 0 ]
 then
    echo
    echo "Usage:    profiles_gen_plot [options]"
-   echo 
-   echo "          -i <file1>,<file2>,...,<fileN>"
-   echo "          Sequence of input.profiles files."
-   echo "          [Default is input.profiles in the current directory]"
    echo
    echo "          -f <plotfile.ext>"
    echo "          Plot to plotfile.ext instead of screen." 
    echo "          <ext>=emf, eps, pdf, png, ps, raw, rgba, svg, svgz"
-   echo 
-   echo "          -interactive"
-   echo "          Use python in interactive mode.  Useful if matplotlibrc has interactive:True  "
    echo
    echo "          -loc <Legend location: 1,2,3,4>"
-   echo
-   echo "          -title <Optional title for top of plot>"  
    echo
    echo " PROFILE PLOTTING MODE:"
    echo 
@@ -60,7 +51,7 @@ fi
 #==============================================================================
 # Define variables for flag capture
 #
-PLOT=geo
+PLOT=null
 FTYPE=screen
 LOC=1
 
@@ -71,7 +62,6 @@ RMAX=auto
 
 # Surface options
 N=16
-SURF=null
 #==============================================================================
 
 #==============================================================================
@@ -103,13 +93,14 @@ done
 PYROOT=$GACODE_ROOT/python/profiles_gen
 
 #==============================================================================
-# Plot flux surfaces
+# Plotting control
 
-if [ "$PLOT" != "*surf" ]
-then
-   python $PYROOT/plot_profile.py $PLOT $RVAR $RMIN $RMAX $FTYPE $LOC
+if [ $PLOT == null ] ; then
+   exit 0
+elif [[ $PLOT == *surf ]] ; then 
+   python $PYROOT/plot_surf.py $PLOT $N $FTYPE 
 else
-   python $PYROOT/plot_surf.py $PLOT $N $FTYPE
+   python $PYROOT/plot_profile.py $PLOT $RVAR $RMIN $RMAX $FTYPE $LOC
 fi
 #==============================================================================
 
