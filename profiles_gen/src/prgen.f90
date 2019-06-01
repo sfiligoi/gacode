@@ -59,7 +59,7 @@ program prgen
   if (trim(raw_data_type) == 'GACODE') then
 
      ! Note (we may or may not have gmerge_flag == 1)
-     print '(a)','INFO: (prgen) Assuming input.profiles (GACODE) format.'
+     print '(a)','INFO: (prgen) Assuming input.gacode (GACODE) format.'
 
      call prgen_read_inputprofiles
 

@@ -1,135 +1,377 @@
 module expro
 
-  ! Fundamental input
-  integer, parameter :: nextag = 51
-  integer :: iextag
   character(len=12) :: infile = 'input.gacode'
-
   character(len=2) :: ident='# '
-  character(len=20), dimension(nextag) :: extag = (/&
-       'nexp                ',& !1
-       'nion                ',& !2
-       'name                ',& !3
-       'type                ',& !4
-       'masse (m_H)         ',& !5
-       'mass (m_H)          ',& !6
-       'ze (-)              ',& !7
-       'z (-)               ',& !8
-       'torfluxa (Wb/radian)',& !9
-       'rvbv (Tm)           ',& !10
-       'ipa (MA)            ',& !11
-       'rho (-)             ',& !12
-       'rmin (m)            ',& !13
-       'polflux (Wb/radian) ',& !14
-       'q (-)               ',& !15
-       'w0 (rad/s)          ',& !16
-       'rmaj (m)            ',& !17
-       'zmag (m)            ',& !18
-       'kappa (-)           ',& !19
-       'delta (-)           ',& !20
-       'zeta (-)            ',& !21
-       'ne (10^19/m^3)      ',& !22
-       'ni (10^19/m^3)      ',& !23
-       'Te (keV)            ',& !24
-       'Ti (keV)            ',& !25
-       'ptot (Pa)           ',& !26
-       'johm (MA/m^2)       ',& !27
-       'jbs (MA/m^2)        ',& !27
-       'jrf (MA/m^2)        ',& !27
-       'jnb (MA/m^2)        ',& !27
-       'jbstor (MA/m^2)     ',& !28
-       'sigmapar (MS/m)     ',& !29
-       'z_eff (-)           ',& !30
-       'vpol (m/s)          ',& !31
-       'vtor (m/s)          ',& !32
-       'qohme (MW/m^3)      ',& !46
-       'qbeame (MW/m^3)     ',& !47
-       'qbeami (MW/m^3)     ',& !48
-       'qrfe (MW/m^3)       ',& !49
-       'qrfi (MW/m^3)       ',& !50
-       'qfuse (MW/m^3)      ',& !51
-       'qfusi (MW/m^3)      ',& !52
-       'qbrem (MW/m^3)      ',& !53
-       'qsync (MW/m^3)      ',& !54
-       'qline (MW/m^3)      ',& !55
-       'qei (MW/m^3)        ',& !56
-       'qione (MW/m^3)      ',& !57
-       'qioni (MW/m^3)      ',& !58
-       'qcxi (MW/m^3)       ',& !59
-       'qpar (MW/m^3)       ',& !60
-       'qmom (MW/m^3)       '& !61
-       /)
+  integer, parameter :: strlen=30
 
-  integer :: &
-       expro_n_exp,&
-       expro_n_ion
-
-  character(len=10), dimension(:), allocatable :: &
-       expro_name,&
-       expro_type
-
-  double precision :: &
-       expro_masse=5.44887413e-4,&   ! me/md/2.0
-       expro_ze=-1.0
-
-  double precision :: &
-       expro_mass_deuterium=3.34358e-24  ! md (g)
+  double precision :: expro_mass_deuterium=3.34358e-24  ! md (g)
   
-  double precision, dimension(:), allocatable :: &
-       expro_mass,&
-       expro_z
 
-  double precision :: &
-       expro_torfluxa=0.0,&
-       expro_rvbv=0.0,&
-       expro_ipa=0.0
+  !-----------------------------------------------------------
+  ! DATA:
+  !
+  != Header entries
 
-  double precision, dimension(:), allocatable :: &
-       expro_rho,&
-       expro_rmin,&
-       expro_polflux,&
-       expro_q,&
-       expro_w0,&
-       expro_rmaj,&
-       expro_zmag,&
-       expro_kappa,&
-       expro_delta,&
-       expro_zeta,&
-       expro_ne,&
-       expro_te,&
-       expro_ptot,&
-       expro_johm,&
-       expro_jbs,&
-       expro_jrf,&
-       expro_jnb,&
-       expro_jbstor,&
-       expro_sigmapar,&
-       expro_z_eff,&
-       expro_qohme,&
-       expro_qbeame,&
-       expro_qbeami,&
-       expro_qrfe,&
-       expro_qrfi,&
-       expro_qfuse,&
-       expro_qfusi,&
-       expro_qbrem,&
-       expro_qsync,&
-       expro_qline,&
-       expro_qei,&
-       expro_qione,&
-       expro_qioni,&
-       expro_qcxi,&
-       expro_qpar,&
-       expro_qmom
+  integer :: expro_n_exp
+  character*(strlen),dimension(4) :: expro_n_exp_str = (/ &
+       'nexp                         ',&
+       '-                            ',&
+       'N_\mathrm{exp}               ',&
+       'number of exp. ratapoints    '/)
+  
+  integer :: expro_n_ion
+  character*(strlen), dimension(4) :: expro_n_ion_str = (/&
+       'nion                         ',&
+       '-                            ',&
+       'N_\mathrm{ion}               ',&
+       'number of ions               '/)
 
-  double precision, dimension(:,:), allocatable :: &
-       expro_ni,&
-       expro_ti,&
-       expro_vpol,&
-       expro_vtor
+  character(len=10), dimension(:), allocatable :: expro_name
+  character*(strlen), dimension(4) :: expro_name_str = (/&
+       'name                         ',&
+       '-                            ',&
+       '                             ',&
+       '                             '/)
 
-  ! Derived quantities
+  character(len=10), dimension(:), allocatable :: expro_type
+  character*(strlen), dimension(4) :: expro_type_str = (/&
+       'type                         ',&
+       '-                            ',&
+       '                             ',&
+       '                             '/)
 
+  double precision :: expro_masse=5.44887413e-4   ! me/m_H
+  character*(strlen), dimension(4) :: expro_masse_str = (/&
+       'masse                        ',&
+       'm_H                          ',&
+       '                             ',&
+       '                             '/)
+
+  double precision, dimension(:), allocatable :: expro_mass
+  character*(strlen), dimension(4) :: expro_mass_str = (/&
+       'mass                         ',&
+       'm_H                          ',&
+       '                             ',&
+       '                             '/)
+
+  double precision :: expro_ze=-1.0
+  character*(strlen), dimension(4) :: expro_ze_str = (/&
+       'ze                           ',&
+       '-                            ',&
+       '                             ',&
+       '                             '/)
+
+  double precision, dimension(:), allocatable :: expro_z
+  character*(strlen), dimension(4) :: expro_z_str = (/&
+       'z                            ',&
+       '-                            ',&
+       '                             ',&
+       '                             '/)
+
+  double precision :: expro_torfluxa=0.0
+  character*(strlen), dimension(4) :: expro_torfluxa_str = (/&
+       'torfluxa                     ',&
+       'Wb/radian                    ',&
+       '                             ',&
+       '                             '/)
+
+  double precision :: expro_rvbv=0.0
+  character*(strlen), dimension(4) :: expro_rvbv_str = (/&
+       'rvbv                         ',&
+       'Tm                           ',&
+       '                             ',&
+       '                             '/)
+
+  double precision :: expro_ipa=0.0
+  character*(strlen), dimension(4) :: expro_ipa_str = (/&
+       'ipa                          ',&
+       'MA                           ',&
+       '                             ',&
+       '                             '/)
+
+  != 1D and 2D profile arrays contained in input.gacode
+
+  double precision, dimension(:), allocatable :: expro_rho
+  character*(strlen), dimension(4) :: expro_rho_str = (/&
+       'rho                          ',&
+       '-                            ',&
+       '                             ',&
+       '                             '/)
+
+  double precision, dimension(:), allocatable :: expro_rmin
+  character*(strlen), dimension(4) :: expro_rmin_str = (/&
+       'rmin                         ',&
+       'm                            ',&
+       '                             ',&
+       '                             '/)
+
+  double precision, dimension(:), allocatable :: expro_polflux
+  character*(strlen), dimension(4) :: expro_polflux_str = (/&
+       'polflux                      ',&
+       'Wb/radian                    ',&
+       '                             ',&
+       '                             '/)
+
+  double precision, dimension(:), allocatable :: expro_q
+  character*(strlen), dimension(4) :: expro_q_str = (/&
+       'q                            ',&
+       '-                            ',&
+       '                             ',&
+       '                             '/)
+
+  double precision, dimension(:), allocatable :: expro_w0
+  character*(strlen), dimension(4) :: expro_w0_str = (/&
+       'w0                           ',&
+       'rad/s                        ',&
+       '                             ',&
+       '                             '/)
+
+  double precision, dimension(:), allocatable :: expro_rmaj
+  character*(strlen), dimension(4) :: expro_rmaj_str = (/&
+       'rmaj                         ',&
+       'm                            ',&
+       '                             ',&
+       '                             '/)
+
+  double precision, dimension(:), allocatable :: expro_zmag
+  character*(strlen), dimension(4) :: expro_zmag_str = (/&
+       'zmag                         ',&
+       'm                            ',&
+       '                             ',&
+       '                             '/)
+
+  double precision, dimension(:), allocatable :: expro_kappa
+  character*(strlen), dimension(4) :: expro_kappa_str = (/&
+       'kappa                        ',&
+       '-                            ',&
+       '                             ',&
+       '                             '/)
+
+  double precision, dimension(:), allocatable :: expro_delta
+  character*(strlen), dimension(4) :: expro_delta_str = (/&
+       'delta                        ',&
+       '-                            ',&
+       '                             ',&
+       '                             '/)
+
+  double precision, dimension(:), allocatable :: expro_zeta
+  character*(strlen), dimension(4) :: expro_zeta_str = (/&
+       'zeta                         ',&
+       '-                            ',&
+       '                             ',&
+       '                             '/)
+
+  double precision, dimension(:), allocatable :: expro_ne
+  character*(strlen), dimension(4) :: expro_ne_str = (/&
+       'ne                           ',&
+       '10^19/m^3                    ',&
+       '                             ',&
+       '                             '/)
+
+  double precision, dimension(:,:), allocatable :: expro_ni
+  character*(strlen), dimension(4) :: expro_ni_str = (/&
+       'ni                           ',&
+       '10^19/m^3                    ',&
+       '                             ',&
+       '                             '/)
+
+  double precision, dimension(:), allocatable :: expro_te
+  character*(strlen), dimension(4) :: expro_te_str = (/&
+       'te                           ',&
+       'keV                          ',&
+       '                             ',&
+       '                             '/)
+
+  double precision, dimension(:,:), allocatable :: expro_ti
+  character*(strlen), dimension(4) :: expro_ti_str = (/&
+       'ti                           ',&
+       'keV                          ',&
+       '                             ',&
+       '                             '/)
+
+  double precision, dimension(:), allocatable :: expro_ptot
+  character*(strlen), dimension(4) :: expro_ptot_str = (/&
+       'ptot                         ',&
+       'Pa                           ',&
+       'P_\mathrm{tot}               ',&
+       'total plasma pressure        '/)
+
+  double precision, dimension(:), allocatable :: expro_johm
+  character*(strlen), dimension(4) :: expro_johm_str = (/&
+       'johm                         ',&
+       'Ma/m^2                       ',&
+       'J_\mathrm{ohmic}             ',&
+       'Ohmic current                '/)
+
+  double precision, dimension(:), allocatable :: expro_jbs
+  character*(strlen), dimension(4) :: expro_jbs_str = (/&
+       'jbs                          ',&
+       'Ma/m^2                       ',&
+       'J_\mathrm{BS}                ',&
+       'bootstrap current            '/)
+
+  double precision, dimension(:), allocatable :: expro_jrf
+  character*(strlen), dimension(4) :: expro_jrf_str = (/&
+       'jrf                          ',&
+       'Ma/m^2                       ',&
+       'J_\mathrm{RF}                ',&
+       'RF-driven current            '/)
+
+  double precision, dimension(:), allocatable :: expro_jnb
+  character*(strlen), dimension(4) :: expro_jnb_str = (/&
+       'jnb                          ',&
+       'Ma/m^2                       ',&
+       'J_\mathrm{NB}                ',&
+       'neutral beam-driven current  '/)
+
+  double precision, dimension(:), allocatable :: expro_jbstor
+  character*(strlen), dimension(4) :: expro_jbstor_str = (/&
+       'jbstor                       ',&
+       'Ma/m^2                       ',&
+       'J_\mathrm{BS,tor}            ',&
+       'toroidal bootstrap current   '/)
+
+  double precision, dimension(:), allocatable :: expro_sigmapar
+  character*(strlen), dimension(4) :: expro_sigmapar_str = (/&
+       'sigmapar                     ',&
+       'MS/m                         ',&
+       '\sigma_\parallel             ',&
+       'parallel conductivity        '/)
+
+  double precision, dimension(:), allocatable :: expro_z_eff
+  character*(strlen), dimension(4) :: expro_z_eff_str = (/&
+       'zeff                         ',&
+       '-                            ',&
+       'Z_\mathrm{eff}               ',&
+       'effective charge             '/)
+
+  double precision, dimension(:,:), allocatable :: expro_vpol
+  character*(strlen), dimension(4) :: expro_vpol_str = (/&
+       'vpol                         ',&
+       'm/s                          ',&
+       '                             ',&
+       '                             '/)
+
+  double precision, dimension(:,:), allocatable :: expro_vtor
+  character*(strlen), dimension(4) :: expro_vtor_str = (/&
+       'vtor                         ',&
+       'm/s                          ',&
+       '                             ',&
+       '                             '/)
+
+  double precision, dimension(:), allocatable :: expro_qohme
+  character*(strlen), dimension(4) :: expro_qohme_str = (/&
+       'qohme                        ',&
+       'MW/m^3                       ',&
+       '                             ',&
+       '                             '/)
+
+  double precision, dimension(:), allocatable :: expro_qbeame
+  character*(strlen), dimension(4) :: expro_qbeame_str = (/&
+       'qbeame                       ',&
+       'MW/m^3                       ',&
+       '                             ',&
+       '                             '/)
+
+  double precision, dimension(:), allocatable :: expro_qbeami
+  character*(strlen), dimension(4) :: expro_qbeami_str = (/&
+       'qbeami                       ',&
+       'MW/m^3                       ',&
+       '                             ',&
+       '                             '/)
+
+  double precision, dimension(:), allocatable :: expro_qrfe
+  character*(strlen), dimension(4) :: expro_qrfe_str = (/&
+       'qrfe                         ',&
+       'MW/m^3                       ',&
+       '                             ',&
+       '                             '/)
+
+  double precision, dimension(:), allocatable :: expro_qrfi
+  character*(strlen), dimension(4) :: expro_qrfi_str = (/&
+       'qrfi                         ',&
+       'MW/m^3                       ',&
+       '                             ',&
+       '                             '/)
+
+  double precision, dimension(:), allocatable :: expro_qfuse
+  character*(strlen), dimension(4) :: expro_qfuse_str = (/&
+       'qfuse                        ',&
+       'MW/m^3                       ',&
+       '                             ',&
+       '                             '/)
+
+  double precision, dimension(:), allocatable :: expro_qfusi
+  character*(strlen), dimension(4) :: expro_qfusi_str = (/&
+       'qfusi                        ',&
+       'MW/m^3                       ',&
+       '                             ',&
+       '                             '/)
+
+  double precision, dimension(:), allocatable :: expro_qbrem
+  character*(strlen), dimension(4) :: expro_qbrem_str = (/&
+       'qbrem                        ',&
+       'MW/m^3                       ',&
+       '                             ',&
+       '                             '/)
+
+  double precision, dimension(:), allocatable :: expro_qsync
+  character*(strlen), dimension(4) :: expro_qsync_str = (/&
+       'qsync                        ',&
+       'MW/m^3                       ',&
+       '                             ',&
+       '                             '/)
+
+  double precision, dimension(:), allocatable :: expro_qline
+  character*(strlen), dimension(4) :: expro_qline_str = (/&
+       'qline                        ',&
+       'MW/m^3                       ',&
+       '                             ',&
+       '                             '/)
+
+  double precision, dimension(:), allocatable :: expro_qei
+  character*(strlen), dimension(4) :: expro_qei_str = (/&
+       'qei                          ',&
+       'MW/m^3                       ',&
+       '                             ',&
+       '                             '/)
+
+  double precision, dimension(:), allocatable :: expro_qione
+  character*(strlen), dimension(4) :: expro_qione_str = (/&
+       'qione                        ',&
+       'MW/m^3                       ',&
+       '                             ',&
+       '                             '/)
+
+  double precision, dimension(:), allocatable :: expro_qioni
+  character*(strlen), dimension(4) :: expro_qioni_str = (/&
+       'qioni                        ',&
+       'MW/m^3                       ',&
+       '                             ',&
+       '                             '/)
+
+  double precision, dimension(:), allocatable :: expro_qcxi
+  character*(strlen), dimension(4) :: expro_qcxi_str = (/&
+       'qcxi                         ',&
+       'MW/m^3                       ',&
+       '                             ',&
+       '                             '/)
+
+  double precision, dimension(:), allocatable :: expro_qpar
+  character*(strlen), dimension(4) :: expro_qpar_str = (/&
+       'qpar                         ',&
+       'MW/m^3                       ',&
+       '                             ',&
+       '                             '/)
+
+  double precision, dimension(:), allocatable :: expro_qmom
+  character*(strlen), dimension(4) :: expro_qmom_str = (/&
+       'qmom                         ',&
+       'MW/m^3                       ',&
+       '                             ',&
+       '                             '/)
+
+  != 1D Derived quantities
   double precision, dimension(:), allocatable :: &
        expro_bunit,&
        expro_s,&
@@ -175,11 +417,13 @@ module expro
        expro_pow_e_brem,&
        expro_pow_e_line
 
+  != 2D Derived quantities
   double precision, dimension(:,:), allocatable :: &
        expro_dlnnidr,&
        expro_dlntidr,&
        expro_sdlnnidr,&
        expro_sdlntidr
+  !-----------------------------------------------------------
 
   ! input.gacode.geo dimension and arrays
 
@@ -432,9 +676,8 @@ contains
     character(len=70) :: ytag
     character(len=22) :: c
 
-
     ! ORDERING NOTE: nexp should appear before any profile arrays
-
+    
     open(unit=1,file=trim(thisinfile),status='old')
 
     do
@@ -627,60 +870,59 @@ contains
     write(1,'(a)') '#'
 
     ! Write data
-    write(1,'(a)') ident//extag(1) ; write(1,'(i0)') nexp
-    write(1,'(a)') ident//extag(2) ; write(1,'(i0)') nion
-    write(1,'(a)') ident//extag(3) ; write(1,'(20(a,1x))') (trim(expro_name(i)),i=1,nion)
-    write(1,'(a)') ident//extag(4) ; write(1,'(20(a,1x))') (trim(expro_type(i)),i=1,nion)
-    write(1,'(a)') ident//extag(5) ; write(1,30) expro_masse
-    write(1,'(a)') ident//extag(6) ; write(1,40) expro_mass
-    write(1,'(a)') ident//extag(7) ; write(1,30) expro_ze
-    write(1,'(a)') ident//extag(8) ; write(1,40) expro_z
-    iextag=9
+    write(1,'(a)') ident//expro_n_exp_str(1) ; write(1,'(i0)') nexp
+    write(1,'(a)') ident//expro_n_ion_str(1) ; write(1,'(i0)') nion
+    write(1,'(a)') ident//expro_name_str(1) ; write(1,'(20(a,1x))') (trim(expro_name(i)),i=1,nion)
+    write(1,'(a)') ident//expro_type_str(1) ; write(1,'(20(a,1x))') (trim(expro_type(i)),i=1,nion)
+    write(1,'(a)') ident//expro_masse_str(1) ; write(1,30) expro_masse
+    write(1,'(a)') ident//expro_mass_str(1) ; write(1,40) expro_mass
+    write(1,'(a)') ident//expro_ze_str(1)   ; write(1,30) expro_ze
+    write(1,'(a)') ident//expro_z_str(1)    ; write(1,40) expro_z
 
     ! Write vector/array data, skipping objects that are 0.0
-    call expro_writes(expro_torfluxa)
-    call expro_writes(expro_rvbv)
-    call expro_writes(expro_ipa)
-    call expro_writev(expro_rho,nexp)
-    call expro_writev(expro_rmin,nexp)
-    call expro_writev(expro_polflux,nexp)
-    call expro_writev(expro_q,nexp)
-    call expro_writev(expro_w0,nexp)
-    call expro_writev(expro_rmaj,nexp)
-    call expro_writev(expro_zmag,nexp)
-    call expro_writev(expro_kappa,nexp)
-    call expro_writev(expro_delta,nexp)
-    call expro_writev(expro_zeta,nexp)
-    call expro_writev(expro_ne,nexp)
-    call expro_writea(expro_ni(:,:),nion,nexp)
-    call expro_writev(expro_te,nexp)
-    call expro_writea(expro_ti(:,:),nion,nexp)
-    call expro_writev(expro_ptot,nexp)
-    call expro_writev(expro_johm,nexp)
-    call expro_writev(expro_jbs,nexp)
-    call expro_writev(expro_jrf,nexp)
-    call expro_writev(expro_jnb,nexp)
-    call expro_writev(expro_jbstor,nexp)
-    call expro_writev(expro_sigmapar,nexp)
-    call expro_writev(expro_z_eff,nexp)
-    call expro_writea(expro_vpol(:,:),nion,nexp)
-    call expro_writea(expro_vtor(:,:),nion,nexp)
-    call expro_writev(expro_qohme,nexp)
-    call expro_writev(expro_qbeame,nexp)
-    call expro_writev(expro_qbeami,nexp)
-    call expro_writev(expro_qrfe,nexp)
-    call expro_writev(expro_qrfi,nexp)
-    call expro_writev(expro_qfuse,nexp)
-    call expro_writev(expro_qfusi,nexp)
-    call expro_writev(expro_qbrem,nexp)
-    call expro_writev(expro_qsync,nexp)
-    call expro_writev(expro_qline,nexp)
-    call expro_writev(expro_qei,nexp)
-    call expro_writev(expro_qione,nexp)
-    call expro_writev(expro_qioni,nexp)
-    call expro_writev(expro_qcxi,nexp)
-    call expro_writev(expro_qpar,nexp)
-    call expro_writev(expro_qmom,nexp)
+    call expro_writes(expro_torfluxa,expro_torfluxa_str(1:2))
+    call expro_writes(expro_rvbv,expro_rvbv_str(1:2))
+    call expro_writes(expro_ipa,expro_ipa_str(1:2))
+    call expro_writev(expro_rho,nexp,expro_rho_str(1:2))
+    call expro_writev(expro_rmin,nexp,expro_rmin_str(1:2))
+    call expro_writev(expro_polflux,nexp,expro_polflux_str(1:2))
+    call expro_writev(expro_q,nexp,expro_q_str(1:2))
+    call expro_writev(expro_w0,nexp,expro_w0_str(1:2))
+    call expro_writev(expro_rmaj,nexp,expro_rmaj_str(1:2))
+    call expro_writev(expro_zmag,nexp,expro_zmag_str(1:2))
+    call expro_writev(expro_kappa,nexp,expro_kappa_str(1:2))
+    call expro_writev(expro_delta,nexp,expro_delta_str(1:2))
+    call expro_writev(expro_zeta,nexp,expro_zeta_str(1:2))
+    call expro_writev(expro_ne,nexp,expro_ne_str(1:2))
+    call expro_writea(expro_ni(:,:),nion,nexp,expro_ni_str(1:2))
+    call expro_writev(expro_te,nexp,expro_te_str(1:2))
+    call expro_writea(expro_ti(:,:),nion,nexp,expro_ti_str(1:2))
+    call expro_writev(expro_ptot,nexp,expro_ptot_str(1:2))
+    call expro_writev(expro_johm,nexp,expro_johm_str(1:2))
+    call expro_writev(expro_jbs,nexp,expro_jbs_str(1:2))
+    call expro_writev(expro_jrf,nexp,expro_jrf_str(1:2))
+    call expro_writev(expro_jnb,nexp,expro_jnb_str(1:2))
+    call expro_writev(expro_jbstor,nexp,expro_jbstor_str(1:2))
+    call expro_writev(expro_sigmapar,nexp,expro_sigmapar_str(1:2))
+    call expro_writev(expro_z_eff,nexp,expro_z_eff_str(1:2))
+    call expro_writea(expro_vpol(:,:),nion,nexp,expro_vpol_str(1:2))
+    call expro_writea(expro_vtor(:,:),nion,nexp,expro_vtor_str(1:2))
+    call expro_writev(expro_qohme,nexp,expro_qohme_str(1:2))
+    call expro_writev(expro_qbeame,nexp,expro_qbeame_str(1:2))
+    call expro_writev(expro_qbeami,nexp,expro_qbeami_str(1:2))
+    call expro_writev(expro_qrfe,nexp,expro_qrfe_str(1:2))
+    call expro_writev(expro_qrfi,nexp,expro_qrfi_str(1:2))
+    call expro_writev(expro_qfuse,nexp,expro_qfuse_str(1:2))
+    call expro_writev(expro_qfusi,nexp,expro_qfusi_str(1:2))
+    call expro_writev(expro_qbrem,nexp,expro_qbrem_str(1:2))
+    call expro_writev(expro_qsync,nexp,expro_qsync_str(1:2))
+    call expro_writev(expro_qline,nexp,expro_qline_str(1:2))
+    call expro_writev(expro_qei,nexp,expro_qei_str(1:2))
+    call expro_writev(expro_qione,nexp,expro_qione_str(1:2))
+    call expro_writev(expro_qioni,nexp,expro_qioni_str(1:2))
+    call expro_writev(expro_qcxi,nexp,expro_qcxi_str(1:2))
+    call expro_writev(expro_qpar,nexp,expro_qpar_str(1:2))
+    call expro_writev(expro_qmom,nexp,expro_qmom_str(1:2))
 
     close(1)
 

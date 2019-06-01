@@ -171,7 +171,7 @@ subroutine expro_compute_derived
   !
   geo_nfourier_in = expro_nfourier
   geo_signb_in    = expro_signb
-
+  
   r_min = expro_rmin(expro_n_exp)
 
   do i=2,expro_n_exp
@@ -645,64 +645,64 @@ subroutine expro_read_legacy
 
 end subroutine expro_read_legacy
 
-subroutine expro_writes(x)
+subroutine expro_writes(x,xs)
 
-  use expro, only : ident, extag, iextag
+  use expro, only : ident,strlen
 
   implicit none
 
   double precision, intent(in) :: x
+  character(len=strlen), intent(in) :: xs(2)
 
   if (abs(x) > 1e-16) then
-     write(1,'(a)') ident//extag(iextag)
+     write(1,'(4a)') ident//trim(xs(1))//' | '//trim(xs(2))
      write(1,10) x
   endif
-  iextag = iextag+1
 
 10 format(1pe14.7)
 
 end subroutine expro_writes
 
-subroutine expro_writev(x,n)
+subroutine expro_writev(x,n,xs)
 
-  use expro, only : ident, extag, iextag
+  use expro, only : ident,strlen
 
   implicit none
 
   integer, intent(in) :: n
   double precision, intent(in), dimension(n) :: x
+  character(len=strlen), intent(in) :: xs(2)
   integer :: i
 
   if (sum(abs(x)) > 1e-16) then
-     write(1,'(a)') ident//extag(iextag)
+     write(1,'(4a)') ident//trim(xs(1))//' | '//trim(xs(2))
      do i=1,n
         write(1,10) i,x(i)
      enddo
   endif
-  iextag = iextag+1
 
 10 format(i3,1x,1pe14.7)
 
 end subroutine expro_writev
 
-subroutine expro_writea(x,m,n)
+subroutine expro_writea(x,m,n,xs)
 
-  use expro, only : ident, extag, iextag
+  use expro, only : ident,strlen
 
   implicit none
 
   integer, intent(in) :: m
   integer, intent(in) :: n
   double precision, intent(in), dimension(m,n) :: x
+  character(len=strlen), intent(in) :: xs(2)
   integer :: i
 
   if (sum(abs(x)) > 1e-16) then
-     write(1,'(a)') ident//extag(iextag)  
+     write(1,'(4a)') ident//trim(xs(1))//' | '//trim(xs(2))
      do i=1,n
         write(1,10) i,x(:,i)
      enddo
   endif
-  iextag = iextag+1
 
 10 format(i3,1x,10(1pe14.7,1x))
 
