@@ -240,7 +240,7 @@ module expro
 
   double precision, dimension(:), allocatable :: expro_z_eff
   character*(strlen), dimension(4) :: expro_z_eff_str = (/&
-       'zeff                         ',&
+       'z_eff                        ',&
        '-                            ',&
        'Z_\mathrm{eff}               ',&
        'effective charge             '/)
@@ -698,7 +698,7 @@ contains
           expro_head_tgyro=ytag ; cycle
        endif
 
-       nd = scan(ytag,'(')
+       nd = scan(ytag,'|')
        if (nd == 0) then
           ! no units field so trim all whitespace
           c = trim(ytag(3:))
@@ -756,7 +756,7 @@ contains
           call expro_vcomm(expro_zeta,nexp)  
        case ('ne')
           call expro_vcomm(expro_ne,nexp) 
-       case ('Te')
+       case ('te')
           call expro_vcomm(expro_te,nexp)  
        case ('ptot')
           call expro_vcomm(expro_ptot,nexp)  
@@ -776,7 +776,7 @@ contains
           call expro_vcomm(expro_z_eff,nexp) 
        case ('ni')
           call expro_acomm(expro_ni(:,:),nion,nexp) 
-       case ('Ti')
+       case ('ti')
           call expro_acomm(expro_ti(:,:),nion,nexp) 
        case ('vpol')
           call expro_acomm(expro_vpol(:,:),nion,nexp) 
