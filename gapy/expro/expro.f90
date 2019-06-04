@@ -383,14 +383,14 @@ module expro
   character*(strlen), dimension(4) :: expro_gamma_e_str = (/&
        'gamma_e                      ',&
        '1/s                          ',&
-       'gamma_E                      ',&
+       '\gamma_E                     ',&
        '                             '/)
 
   double precision, dimension(:), allocatable :: expro_gamma_p
   character*(strlen), dimension(4) :: expro_gamma_p_str = (/&
        'gamma_p                      ',&
        '1/s                          ',&
-       'gamma_p                      ',&
+       '\gamma_p                     ',&
        '                             '/)
      
   double precision, dimension(:), allocatable :: &

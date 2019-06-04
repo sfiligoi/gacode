@@ -22,22 +22,24 @@ from gapy import expro
 rc('text',usetex=True)
 rc('font',size=18)
 
+# $PLOT $RVAR $RMIN $RMAX $FTYPE $LOC
+
+
+
 simdir = './'
 wdir = os.path.realpath(simdir)
   
 def gapystr(s):
 
-#   n = len(s[0])
-#   u = s.transpose().reshape(-1,n).view('S'+str(n))
-   
-#   return [u[0].tostring().strip(),
-#           u[1].tostring().strip(),
-#           u[2].tostring().strip(),
-#           u[3].tostring().strip()]
-
-   if sys.version.info[1] <= 5:
+   if sys.version_info[0] > 2:
+      # Python 3 
       return s[2].decode('UTF-8')
-
+   else:
+      # Python 2
+      n = len(s[0])
+      u = s.transpose().reshape(-1,n).view('S'+str(n))   
+      return u[2].tostring().strip()
+   
 def plot_select(ax,tag):
 
    # Helper routine to plot data (tag) from input.profiles
@@ -47,13 +49,16 @@ def plot_select(ax,tag):
    x = expro.expro_rmin ; x = x/max(x)
    n = expro.expro_n_ion
 
+   # normalization
+   csa = expro.expro_cs/expro.expro_rmin[-1]
+   
    if tag == 'gamma':
       # gamma_e
       y = expro.expro_gamma_e ; ystr = gapystr(expro.expro_gamma_e_str)
-      ax.plot(x,y,label=r'$'+ystr+'$')
+      ax.plot(x,y/csa,label=r'$'+ystr+'$')
       # gamma_p
       y = expro.expro_gamma_p ; ystr = gapystr(expro.expro_gamma_p_str)
-      ax.plot(x,y,label=r'$'+ystr+'$')
+      ax.plot(x,y/csa,label=r'$'+ystr+'$')
 
    if tag == 'r':
       # rho
