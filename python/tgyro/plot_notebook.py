@@ -8,9 +8,7 @@
 import os
 import wx
 import matplotlib
-import string
 import sys
-import re
 import numpy as np
 matplotlib.use('WXAgg')
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
