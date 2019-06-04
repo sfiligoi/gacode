@@ -58,7 +58,7 @@ module expro
   character*(strlen), dimension(4) :: expro_ze_str = (/&
        'ze                           ',&
        '-                            ',&
-       '                             ',&
+       'Z_e                          ',&
        '                             '/)
 
   double precision, dimension(:), allocatable :: expro_z
@@ -72,7 +72,7 @@ module expro
   character*(strlen), dimension(4) :: expro_torfluxa_str = (/&
        'torfluxa                     ',&
        'Wb/radian                    ',&
-       '                             ',&
+       '\psi_a                       ',&
        '                             '/)
 
   double precision :: expro_rvbv=0.0
@@ -95,98 +95,98 @@ module expro
   character*(strlen), dimension(4) :: expro_rho_str = (/&
        'rho                          ',&
        '-                            ',&
-       '                             ',&
+       '\rho                         ',&
        '                             '/)
 
   double precision, dimension(:), allocatable :: expro_rmin
   character*(strlen), dimension(4) :: expro_rmin_str = (/&
        'rmin                         ',&
        'm                            ',&
-       '                             ',&
+       'r                            ',&
        '                             '/)
 
   double precision, dimension(:), allocatable :: expro_polflux
   character*(strlen), dimension(4) :: expro_polflux_str = (/&
        'polflux                      ',&
        'Wb/radian                    ',&
-       '                             ',&
+       '\psi                         ',&
        '                             '/)
 
   double precision, dimension(:), allocatable :: expro_q
   character*(strlen), dimension(4) :: expro_q_str = (/&
        'q                            ',&
        '-                            ',&
-       '                             ',&
+       'q                            ',&
        '                             '/)
 
   double precision, dimension(:), allocatable :: expro_w0
   character*(strlen), dimension(4) :: expro_w0_str = (/&
        'w0                           ',&
        'rad/s                        ',&
-       '                             ',&
+       '\omega_0                     ',&
        '                             '/)
 
   double precision, dimension(:), allocatable :: expro_rmaj
   character*(strlen), dimension(4) :: expro_rmaj_str = (/&
        'rmaj                         ',&
        'm                            ',&
-       '                             ',&
+       'R_0                          ',&
        '                             '/)
 
   double precision, dimension(:), allocatable :: expro_zmag
   character*(strlen), dimension(4) :: expro_zmag_str = (/&
        'zmag                         ',&
        'm                            ',&
-       '                             ',&
+       'Z_0                          ',&
        '                             '/)
 
   double precision, dimension(:), allocatable :: expro_kappa
   character*(strlen), dimension(4) :: expro_kappa_str = (/&
        'kappa                        ',&
        '-                            ',&
-       '                             ',&
+       '\kappa                       ',&
        '                             '/)
 
   double precision, dimension(:), allocatable :: expro_delta
   character*(strlen), dimension(4) :: expro_delta_str = (/&
        'delta                        ',&
        '-                            ',&
-       '                             ',&
+       '\delta                       ',&
        '                             '/)
 
   double precision, dimension(:), allocatable :: expro_zeta
   character*(strlen), dimension(4) :: expro_zeta_str = (/&
        'zeta                         ',&
        '-                            ',&
-       '                             ',&
+       '\zeta                        ',&
        '                             '/)
 
   double precision, dimension(:), allocatable :: expro_ne
   character*(strlen), dimension(4) :: expro_ne_str = (/&
        'ne                           ',&
        '10^19/m^3                    ',&
-       '                             ',&
+       'n_e                          ',&
        '                             '/)
 
   double precision, dimension(:,:), allocatable :: expro_ni
   character*(strlen), dimension(4) :: expro_ni_str = (/&
        'ni                           ',&
        '10^19/m^3                    ',&
-       '                             ',&
+       'n_{                          ',&
        '                             '/)
 
   double precision, dimension(:), allocatable :: expro_te
   character*(strlen), dimension(4) :: expro_te_str = (/&
        'te                           ',&
        'keV                          ',&
-       '                             ',&
+       'T_e                          ',&
        '                             '/)
 
   double precision, dimension(:,:), allocatable :: expro_ti
   character*(strlen), dimension(4) :: expro_ti_str = (/&
        'ti                           ',&
        'keV                          ',&
-       '                             ',&
+       'T_{                          ',&
        '                             '/)
 
   double precision, dimension(:), allocatable :: expro_ptot
