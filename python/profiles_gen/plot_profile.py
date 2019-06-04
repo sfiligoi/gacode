@@ -44,9 +44,28 @@ def plot_select(ax,tag):
    x = expro.expro_rmin ; x = x/max(x)
    n = expro.expro_n_ion
    
+   if tag == 'gamma':
+      # gamma_e
+      print(expro.expro_gamma_e_str[2])
+      y = expro.expro_gamma_e ; ystr = expro.expro_gamma_e_str[2].strip()
+      ax.plot(x,y,label=r'$'+ystr+'$')
+      # gamma_p
+      y = expro.expro_gamma_p ; ystr = expro.expro_gamma_p_str[2].strip()
+      ax.plot(x,y,label=r'$'+ystr+'$')
+
+   if tag == 'r':
+      # rho
+      y = expro.expro_rho ; ystr = expro.expro_rho_str[2].strip()
+      ax.plot(x,y,label=r'$'+ystr+'$')
+      # polflux
+      y = expro.expro_polflux ; ystr = expro.expro_polflux_str[2].strip()
+      ax.plot(x,y/y[-1],label=r'$'+ystr+'$')
+
    if tag == 'pro':
+      # ne
       y = expro.expro_ne ; ystr = expro.expro_ne_str[2].strip()
       ax.plot(x,y,label=r'$'+ystr+'$')
+      # ni
       for p in range(n):
          y = expro.expro_ni ; ystr = expro.expro_ni_str[2].strip()
          ax.plot(x,y[p,:],label=r'$'+ystr+str(p+1)+'}$')
@@ -60,6 +79,25 @@ def plot_select(ax,tag):
        ax.plot(x,y,label=r'$'+ystr+'$')
 
        y = expro.expro_kappa ; ystr = expro.expro_kappa_str[2].strip()
+       ax.plot(x,y,label=r'$'+ystr+'$')
+
+       y = expro.expro_delta ; ystr = expro.expro_delta_str[2].strip()
+       ax.plot(x,y,label=r'$'+ystr+'$')
+
+       y = expro.expro_zeta ; ystr = expro.expro_zeta_str[2].strip()
+       ax.plot(x,y,label=r'$'+ystr+'$')
+
+   if tag == 'pow':
+       y = expro.expro_q ; ystr = expro.expro_rmaj_str[2].strip()
+       ax.plot(x,y,label=r'$'+ystr+'$')
+
+       y = expro.expro_zmag ; ystr = expro.expro_zmag_str[2].strip()
+       ax.plot(x,y,label=r'$'+ystr+'$')
+
+       y = expro.expro_kappa ; ystr = expro.expro_kappa_str[2].strip()
+       ax.plot(x,y,label=r'$'+ystr+'$')
+
+       y = expro.expro_delta ; ystr = expro.expro_delta_str[2].strip()
        ax.plot(x,y,label=r'$'+ystr+'$')
      
        ax.legend()
@@ -96,6 +134,14 @@ class DemoFrame(wx.Frame):
         panel = wx.Panel(self)
  
         notebook = wx.Notebook(panel)
+
+        tab = TabPanel(notebook)
+        tab.draw('gamma')
+        notebook.AddPage(tab,'gamma')
+
+        tab = TabPanel(notebook)
+        tab.draw('r')
+        notebook.AddPage(tab,'r')
 
         tab = TabPanel(notebook)
         tab.draw('pro')

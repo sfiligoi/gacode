@@ -372,8 +372,28 @@ module expro
        '                             '/)
 
   != 1D Derived quantities
+  double precision, dimension(:), allocatable :: expro_bunit
+  character*(strlen), dimension(4) :: expro_bunit_str = (/&
+       'bunit                        ',&
+       'T                            ',&
+       'B_\mathrm{unit}              ',&
+       '                             '/)
+  
+  double precision, dimension(:), allocatable :: expro_gamma_e
+  character*(strlen), dimension(4) :: expro_gamma_e_str = (/&
+       'gamma_e                      ',&
+       '1/s                          ',&
+       'gamma_E                      ',&
+       '                             '/)
+
+  double precision, dimension(:), allocatable :: expro_gamma_p
+  character*(strlen), dimension(4) :: expro_gamma_p_str = (/&
+       'gamma_p                      ',&
+       '1/s                          ',&
+       'gamma_p                      ',&
+       '                             '/)
+     
   double precision, dimension(:), allocatable :: &
-       expro_bunit,&
        expro_s,&
        expro_drmaj,&
        expro_dzmag,&
@@ -399,8 +419,6 @@ module expro
        expro_bp0,&
        expro_bt0,&
        expro_ip,&
-       expro_gamma_e,&
-       expro_gamma_p,&
        expro_mach,&
        expro_thetascale,&
        expro_flow_beam,&
