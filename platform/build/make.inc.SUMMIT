@@ -15,7 +15,10 @@ NUMAS_PER_NODE=2
 
 FFTW_INC=${OLCF_FFTW_ROOT}/include
 
-FC=mpif90 -m64 -module ${GACODE_ROOT}/modules -Mpreprocess -DUSE_INLINE -fpic
+FC=mpif90 -m64 -module ${GACODE_ROOT}/modules -Mpreprocess -DUSE_INLINE -fpic \
+	  -Mhugetlb -DSUMMIT
+
+# -D SUMMIT for pgi compiler for gpu-direct
 
 CC=mpicc -m64 -fpic -I${OLCF_CUDA_ROOT}/include
 
@@ -24,7 +27,9 @@ F77=mpif90 -m64 -acc -fast -fastsse -I${GACODE_ROOT}/modules -fpic
 FACC   =-acc -I${OLCF_CUDA_ROOT}/include CUDA_HOME=${CUDA_DIR} -Minfo=accel \
        	     -ta=nvidia,cc70 -Mcudalib=cufft \
      	     -Mcudalib=cusolver -Mcudalib=cusparse \
-	     -Mcudalib=cublas -DDISABLE_GPUDIRECT_MPI
+	     -Mcudalib=cublas
+
+# -DDISABLE_GPUDIRECT_MPI
 
 FOMP   =-mp -Mstack_arrays
 FMATH  =-r8 -I${OLCF_FFTW_ROOT}/include
