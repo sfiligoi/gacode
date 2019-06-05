@@ -28,6 +28,11 @@ module cgyro_globals
   real    :: e_max
   integer :: e_method
   real    :: delta_t
+  real    :: delta_t_gk
+  real    :: delta_t_tol
+  integer :: error_mode
+  integer :: delta_gk_method
+  real    :: total_local_error
   real    :: max_time
   integer :: print_step
   integer :: restart_step

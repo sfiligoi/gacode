@@ -60,6 +60,15 @@ subroutine cgyro_upwind
 !$acc host_data use_device(res_loc,res)
 #endif
 
+#ifdef SUMMIT
+  call MPI_ALLREDUCE(res_loc(:,:),&
+       res(:,:),&
+       2*size(res(:,:)),&
+       MPI_DOUBLE_PRECISION,&
+       MPI_SUM,&
+       NEW_COMM_1,&
+       i_err)
+#else
   call MPI_ALLREDUCE(res_loc(:,:),&
        res(:,:),&
        size(res(:,:)),&
@@ -67,6 +76,7 @@ subroutine cgyro_upwind
        MPI_SUM,&
        NEW_COMM_1,&
        i_err)
+#endif
 
 #ifdef DISABLE_GPUDIRECT_MPI
 !$acc update device(res)

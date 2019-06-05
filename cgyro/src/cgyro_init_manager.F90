@@ -150,7 +150,8 @@ subroutine cgyro_init_manager
 !$acc enter data create(fcoef,gcoef,field,field_loc)
 
      ! Velocity-distributed arrays
-     allocate(rhs(nc,nv_loc,4))
+     ! allocate(rhs(nc,nv_loc,4))
+     allocate(rhs(nc,nv_loc,12))
      allocate(h_x(nc,nv_loc))
      allocate(g_x(nc,nv_loc))
      allocate(psi(nc,nv_loc))

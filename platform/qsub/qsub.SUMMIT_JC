@@ -31,7 +31,7 @@ echo "--"
 
 # BATCH SCRIPT:
 
-cat > batch.src << EOF
+cat > $SIMDIR/batch.src << EOF
 #BSUB -P fus127
 #BSUB -J $LOCDIR
 #BSUB -o $SIMDIR/batch.out
