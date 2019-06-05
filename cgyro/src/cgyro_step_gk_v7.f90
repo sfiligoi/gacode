@@ -125,18 +125,23 @@ subroutine cgyro_step_gk_v7
   h0_old = h_x
 !$omp end parallel workshare
 
-  
   do while (total_delta_step .lt. (orig_delta_t) .and. iiter .le. rk_MAX )
      
      if ( total_delta_step + deltah2 .gt. orig_delta_t ) then
         deltah2 = orig_delta_t - total_delta_step
         delta_t_last_step = deltah2
-        if ( deltah2 .lt. 1.e-9 ) goto 888  !! abandon
      else
         delta_t_gk = deltah2 + delta_t_gk
         delta_t_last = deltah2
         deltah2_min = min(deltah2, deltah2_min)
         deltah2_max = max(deltah2, deltah2_max)
+     endif
+
+     if (deltah2 .lt. 1.d-8) then
+        if ( i_proc .eq. 0 ) &
+             write(*,*) " ******* Stopping due to small substep size ", deltah2
+        flush(6)
+        stop
      endif
      
      if (( conv .eq. 0 ) .and. (iiter .ge. 1)) then
@@ -152,7 +157,7 @@ subroutine cgyro_step_gk_v7
         h0_x = h_x
 !$omp end parallel workshare
      endif
-
+     
 !!      if (i_proc == 0 ) write(*,*) iiter, " current time step size ", deltah2
      
      call cgyro_field_c     
@@ -370,10 +375,8 @@ subroutine cgyro_step_gk_v7
         conv = 0
         deltah2 = .5*deltah2
         if (i_proc .eq. 0 ) then
-           write(*,*) deltah2 , &
-                " V7 ***  error backing up *** not converged ", &
-                " new deltah2 ", deltah2,  &
-                " rel error ", rel_error
+           write(*,*) " V7 ***  error backing up *** not converged "
+           write(*,*) " new deltah2 ", deltah2,  " rel error ", rel_error
                 !! " rk error x1 ", error_x(1), &
                 !! " h1_x norm ", error_x(2)
         endif
@@ -386,14 +389,10 @@ subroutine cgyro_step_gk_v7
      if ( iiter .gt. rk_MAX) then
         write(*,*) " RK V7 exceeded iteration count ", iiter
         !! should do global mpiexit
+        flush(6)
         stop
      endif
 
-     if (deltah2 .lt. 1.d-8) then
-        if ( i_proc .eq. 0 ) &
-             write(*,*) " ******* Stopping due to small substep size ", deltah2
-        stop
-     endif
 
    enddo
 
