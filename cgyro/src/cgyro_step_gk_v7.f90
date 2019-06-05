@@ -434,7 +434,7 @@ subroutine cgyro_step_gk_v7
              write(*,*) " ******* Stopping due to small substep size ", deltah2
         stop
      endif
-     endif
+
    enddo
 
 888 continue
