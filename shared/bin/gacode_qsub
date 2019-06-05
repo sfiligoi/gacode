@@ -142,7 +142,7 @@ SIMDIR=$SIMROOT/$LOCDIR
 #=============================================================
 
 # Manage execution on ORNL SUMMIT
-if [[ $GACODE_PLATFORM -eq SUMMIT_JC ]] ; then
+if [[ '$GACODE_PLATFORM' -eq SUMMIT_JC ]] ; then
     . $GACODE_ROOT/platform/qsub/qsub.$GACODE_PLATFORM
     cat batch.src
     exit 0
