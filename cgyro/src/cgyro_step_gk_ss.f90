@@ -6,19 +6,6 @@ subroutine cgyro_step_gk_ss
 
   implicit none
 
-  integer converged, conv, rk_MAX , iiter
-
-  double precision orig_delta_x_t
-  double precision total_delta_step
-  double precision error_sum(2), delta_x_min, delta_x_max
-  double precision delta_x, tau, deltah2, delta_t_last, rel_error, var_error
-  double precision local_max_error, delta_t_last_step
-  double precision deltah2_min, deltah2_max
-  double precision error_x(2), tol
-  double precision scale_x
-  
-  complex, dimension(:,:), allocatable :: h0_old
-
   ! RK5(4) SS
   !
   !
@@ -34,62 +21,68 @@ subroutine cgyro_step_gk_ss
   ! Apar -> field(2)
   ! Bpar -> field(3)
 
-  double precision, parameter :: c2   = 16./105.
-  double precision, parameter :: c3   = 8./35.
-  double precision, parameter :: c4   = 9./20.
-  double precision, parameter :: c5   = 2./3.
-  double precision, parameter :: c6   = 7./9.
-  double precision, parameter :: c7   = 1.0
-
-  double precision, parameter :: a21  = 16./105.
-  double precision, parameter :: a31  = 2./35.
-  double precision, parameter :: a32  = 6./35.
-  double precision, parameter :: a41  = 8793./40960.
-  double precision, parameter :: a42  = -5103./8192.
-  double precision, parameter :: a43 = 17577./20480.
-  double precision, parameter :: a51 = 347./1458.
-  double precision, parameter :: a52 = -7./20.
-  double precision, parameter :: a53 = 3395./10044.
-  double precision, parameter :: a54 = 49792./112995.
-  double precision, parameter :: a61 = -1223224109959./9199771214400.
-  double precision, parameter :: a62 = 1234787701./2523942720.
-  double precision, parameter :: a63 = 568994101921./3168810084960.
-  double precision, parameter :: a64  = -105209683888./891227836395.
-  double precision, parameter :: a65  = 9./25.
-  double precision, parameter :: a71  = 2462504862877./8306031988800.
-  double precision, parameter :: a72  = -123991./287040.
-  double precision, parameter :: a73  = 106522578491./408709510560.
-  double precision, parameter :: a74  = 590616498832./804646848915.
-  double precision, parameter :: a75  = -319138726./534081275.
-  double precision, parameter :: a76  = 52758./71449.
+  integer converged, conv, rk_MAX , iiter
   
-  double precision, parameter :: b1 = 1093./15120.
-  double precision, parameter :: b2 = 0.
-  double precision, parameter :: b3 = 60025./190992.
-  double precision, parameter :: b4 = 3200./20709.
-  double precision, parameter :: b5 = 1611./11960.
-  double precision, parameter :: b6 = 712233./2857960.
-  double precision, parameter :: b7 = 3./40.
-
-  double precision, parameter :: b1p = 84018211./991368000.
-  double precision, parameter :: b2p  = 0.d0
-  double precision, parameter :: b3p  = 92098979./357791680.
-  double precision, parameter :: b4p  = 17606944./67891005.
-  double precision, parameter :: b5p  = 3142101./235253200.
-  double precision, parameter :: b6p  = 22004596809./70270091500.
-  double precision, parameter :: b7p  = 9./125.
-
-  double precision, parameter :: EPS  = 2.2d-12  !! 2.e-16 triggers ieee error
+  real orig_delta_x_t
+  real total_delta_step
+  real error_sum(2), delta_x_min, delta_x_max
+  real delta_x, tau, deltah2, delta_t_last, rel_error, var_error
+  real local_max_error, delta_t_last_step
+  real deltah2_min, deltah2_max
+  real error_x(2), tol
+  real scale_x, delta2_h_min, delta2_h_max
   
-  !!  allocate(h_rk4(nc,nv_loc))
-  !! allocate(h_rk5(nc,nv_loc))
-  !! allocate(h_rk6(nc,nv_loc))
+  complex, dimension(:,:), allocatable :: h0_old
+
+  real, parameter :: c2   = 16./105.
+  real, parameter :: c3   = 8./35.
+  real, parameter :: c4   = 9./20.
+  real, parameter :: c5   = 2./3.
+  real, parameter :: c6   = 7./9.
+  real, parameter :: c7   = 1.0
+
+  real, parameter :: a21  = 16./105.
+  real, parameter :: a31  = 2./35.
+  real, parameter :: a32  = 6./35.
+  real, parameter :: a41  = 8793./40960.
+  real, parameter :: a42  = -5103./8192.
+  real, parameter :: a43 = 17577./20480.
+  real, parameter :: a51 = 347./1458.
+  real, parameter :: a52 = -7./20.
+  real, parameter :: a53 = 3395./10044.
+  real, parameter :: a54 = 49792./112995.
+  real, parameter :: a61 = -1223224109959./9199771214400.
+  real, parameter :: a62 = 1234787701./2523942720.
+  real, parameter :: a63 = 568994101921./3168810084960.
+  real, parameter :: a64  = -105209683888./891227836395.
+  real, parameter :: a65  = 9./25.
+  real, parameter :: a71  = 2462504862877./8306031988800.
+  real, parameter :: a72  = -123991./287040.
+  real, parameter :: a73  = 106522578491./408709510560.
+  real, parameter :: a74  = 590616498832./804646848915.
+  real, parameter :: a75  = -319138726./534081275.
+  real, parameter :: a76  = 52758./71449.
+  
+  real, parameter :: b1 = 1093./15120.
+  real, parameter :: b2 = 0.
+  real, parameter :: b3 = 60025./190992.
+  real, parameter :: b4 = 3200./20709.
+  real, parameter :: b5 = 1611./11960.
+  real, parameter :: b6 = 712233./2857960.
+  real, parameter :: b7 = 3./40.
+
+  real, parameter :: b1p = 84018211./991368000.
+  real, parameter :: b2p  = 0.0
+  real, parameter :: b3p  = 92098979./357791680.
+  real, parameter :: b4p  = 17606944./67891005.
+  real, parameter :: b5p  = 3142101./235253200.
+  real, parameter :: b6p  = 22004596809./70270091500.
+  real, parameter :: b7p  = 9./125.
+
+  real, parameter :: EPS  = 2.2e-12
   
   allocate(h0_old(nc,nv_loc))
   
-  !! allocate(h_rk6(nc,nv_loc))
-  !! allocate(rk_error_x(nc,nv_loc))
-
   call timer_lib_in('str')
   
   !! call cgyro_step_gkssp
@@ -100,7 +93,12 @@ subroutine cgyro_step_gk_ss
   total_delta_step = 0.
   total_local_error = 0.
   local_max_error = 0.
+  var_error = 0.
+  
   delta_t_last = delta_t
+  delta2_h_min = 1.0
+  delta2_h_max = -1.0
+
 
   !! tol = .001d0
   !! if ( orig_delta_x_t .gt. 1 ) tol = tol/orig_delta_x_t
@@ -115,7 +113,7 @@ subroutine cgyro_step_gk_ss
      delta_t_gk = deltah2
   endif
   
-  delta_x_min = 1.d-10*orig_delta_x_t
+  delta_x_min = 1.e-10*orig_delta_x_t
   delta_x_max = orig_delta_x_t
 
   converged = 0
@@ -127,23 +125,22 @@ subroutine cgyro_step_gk_ss
   h0_old = h_x
 !$omp end parallel workshare  
   conv = 0
-  delta_t_gk = 0.d0
-  deltah2_min = 1.d10
-  deltah2_max = 0.
+  delta_t_gk = 0.0
+  deltah2_min = 1.e10
+  deltah2_max = -1.
 
   do while (total_delta_step .lt. orig_delta_x_t )
     
      if ( total_delta_step + deltah2 .gt. orig_delta_x_t ) then
         deltah2 = orig_delta_x_t - total_delta_step
         delta_t_last_step = deltah2
-        if ( deltah2 .lt. 1.d-9 ) goto 1111   !! abandon
      else
         delta_t_gk = deltah2+delta_t_gk
         delta_t_last = deltah2
-        deltah2_min = min(deltah2, deltah2_min)
-        deltah2_max = max(deltah2, deltah2_max)
+        !! deltah2_min = min(deltah2, deltah2_min)
+        !! deltah2_max = max(deltah2, deltah2_max)
      endif
-     
+
      if (( conv .eq. 0 ) .and. (iiter .ge. 1)) then
         !!
         !! last converged state
@@ -159,10 +156,10 @@ subroutine cgyro_step_gk_ss
      endif
      call cgyro_field_c
 
-     if ( i_proc == 0 ) write(*,*) i_proc, " step ", iiter, " ss deltah2 ", deltah2
+     !! for paper
+     !! if ( i_proc == 0 ) write(*,*) i_proc, " step ", iiter, " ss deltah2 ", deltah2
+     !! 
 
-     !! if ( iiter .gt. 0 ) call cgyro_field_c
-     
      !
      ! Stage 1
      !
@@ -228,11 +225,8 @@ subroutine cgyro_step_gk_ss
           + a75*rhs(:,:,5) + a76*rhs(:,:,6))
 !$omp end parallel workshare
 
-     
      call cgyro_field_c
-
      call cgyro_rhs(7)
-     
 
 !$omp parallel workshare
      h_x = h0_x + deltah2*(b1*rhs(:,:,1) &
@@ -261,17 +255,11 @@ subroutine cgyro_step_gk_ss
      error_x(2) = error_sum(2)! local h0
 
      delta_x = error_x(1)
-     tau = tol * max(error_x(2), 1.d0)
-
-     !! tau = tol*error_x(2)
+     tau = tol * error_x(2)
      
-     !! scale_x = 0.9*min((tol/(error_x(1) + EPS))**(1./5.), 10.)
-     !! scale_x = 0.9*min((tol/(error_x(1) + EPS))**(1./6.), delta_x_max)
-     !! delta_x = ((tol*delta_x_t)/(2.*error+EPS))**(1./5.)
-
-     !! if ( delta_x .lt. tau ) then
-
-     rel_error = error_x(1)/(error_x(2)+1.d-12)
+     !!     tau = tol * max(error_x(2), 1.d0)
+     
+     rel_error = error_x(1)/(error_x(2)+EPS)
      var_error = sqrt(total_local_error + rel_error*rel_error)
 
      !! if ( error_mode .eq. 0 ) then local error
@@ -282,8 +270,8 @@ subroutine cgyro_step_gk_ss
 
      if ( error_x(1) .lt. tau ) then
         
-        if ( i_proc == 0 ) &
-             write(*,*) " local error mode ", rel_error, " variance error", var_error
+!!         if ( i_proc == 0 ) &
+!!             write(*,*) " local error mode ", rel_error, " variance error", var_error
 
 !$omp parallel workshare        
         h0_old = h0_x
@@ -294,14 +282,14 @@ subroutine cgyro_step_gk_ss
         total_delta_step = total_delta_step + deltah2
         total_local_error = total_local_error + rel_error*rel_error
 
-        scale_x = max(0.95d0*deltah2*(tol/(delta_x + 1.0d-12))**(.2d0), &
-             0.95d0*deltah2*(tol/(delta_x + 1.0d-12))**(.25d0))
+        scale_x = max(0.95*(tol/(delta_x + EPS))**(.2), &
+             0.95*(tol/(delta_x + EPS))**(.25))
         
         deltah2 = deltah2*max(1., scale_x)
         local_max_error = max(local_max_error, rel_error)
      else
         conv = 0
-        deltah2 = .5d0*deltah2          !! interpolate?
+        deltah2 = .5*deltah2          !! interpolate?
         if (i_proc .eq. 0 ) then
            write(*,*) " ss ***  error backing up *** not converged ", &
                 " total delta_x step ", total_delta_step, " delta_x2 ", deltah2
@@ -309,17 +297,17 @@ subroutine cgyro_step_gk_ss
         endif
      endif
      
-     deltah2 = min(deltah2, delta_x_max)
-     deltah2 = max(delta_x_min, deltah2)
+     !! deltah2 = min(deltah2, delta_x_max)
+     !! deltah2 = max(delta_x_min, deltah2)
 
      iiter = iiter + 1
 
-     if (deltah2 .lt. 1.d-8) then
-        if ( i_proc .eq. 0 ) &
-             write(*,*) " ******* Stopping due to small substep size ", deltah2
-        flush(6)
-        stop
-     endif
+!!     if (deltah2 .lt. 1.d-8) then
+!!        if ( i_proc .eq. 0 ) &
+!!             write(*,*) " ******* Stopping due to small substep size ", deltah2
+!!        flush(6)
+!!        stop
+!!     endif
      
      if ( iiter .gt. rk_MAX ) then
         if ( i_proc == 0 ) &
@@ -329,23 +317,24 @@ subroutine cgyro_step_gk_ss
      endif
      
   enddo
-  
-1111 continue
+
   call timer_lib_out('str')  
   call cgyro_field_c
 
   delta_t_gk = delta_t_last
 
-  goto 2222
-  if ( i_proc .eq. 0 ) then
-     write(*,*) " local error ", total_local_error
-     write(*,*) " delta_t_gk ", delta_t_gk
-     write(*,*) " variance local error sqrt of local error ", var_error
-  endif
-2222 continue
+  !! paper texts
+  !!  if ( i_proc .eq. 0 ) then
+  !!     write(*,*) " local error ", total_local_error
+  !!     write(*,*) " delta_t_gk ", delta_t_gk
+  !!     write(*,*) " variance local error sqrt of local error ", var_error
+  !!  endif
   
   total_local_error = var_error
-  if ( i_proc == 0 ) write(*,*) i_proc , " ts deltah2_min, max ", deltah2_min, deltah2_max, converged
+
+  !! paper?
+  !! if ( i_proc == 0 ) &
+  !!       write(*,*) i_proc , " ss converged deltah2_min, max ", deltah2_min, deltah2_max
   
   call cgyro_filter
   
