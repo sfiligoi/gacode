@@ -2,26 +2,44 @@
 # GACODE Parallel execution script (SUMMIT_JC)
 
 simdir=${1}
-nmpi=${2}
+nmpi=${2} # nodes
 exec=${3}
-nomp=${4}
-numa=${5}
-mpinuma=${6}
-
-# nmpi = MPI tasks
-# nomp = OpenMP threads per MPI task
-# numa = NUMAs active per node
-# mpinuma = MPI tasks per active NUMA 
-
-# . $GACODE_ROOT/shared/bin/gacode_mpi_tool
-
-export GACODE_NOMP=$nomp
-let nproc=4/$nomp
-
-let ngrp=$nmpi/$nproc
+mpinuma=${6} # MPI per GPU
 
 cd $simdir
 
-export OMP_STACKSIZE=400M
+nodes=$nmpi
+threads_per_core=2
+gpus_per_socket=3
+ranks_per_gpu=$mpinuma
+cores_per_socket=20
+eager=64
 
-jsrun -n1 -g1 -a1 -c4 $exec 
+# derived quantities:
+let ranks_per_socket=$ranks_per_gpu*$gpus_per_socket
+let cores_per_rank=$cores_per_socket/$ranks_per_socket
+let cores_per_gpu=$cores_per_rank*$ranks_per_gpu
+let nrs=2*$gpus_per_socket*$nodes
+let threads_per_rank=$threads_per_core*$cores_per_rank
+let snmpi=2*$ranks_per_socket*$nodes
+
+echo "smt level smt$threads_per_core"
+ulimit -s 10240
+
+export PAMI_ENABLE_STRIPING=1
+export OMP_NUM_THREADS=$threads_per_rank
+export OMP_STACKSIZE=400M
+export MP_EAGER_LIMIT=$eager
+
+jsrun \
+-D CUDA_VISIBLE_DEVICES \
+-E OMP_NUM_THREADS=$threads_per_rank \
+--nrs $nrs \
+--tasks_per_rs $ranks_per_gpu \
+--cpu_per_rs $cores_per_gpu \
+--gpu_per_rs 1 \
+--bind=proportional-packed:$cores_per_rank \
+-d plane:$ranks_per_gpu \
+-l gpu-cpu \
+--smpiargs="-gpu -mca osc_pami_use_tunnel_atomics 1 -mca osc_pami_tunnel_atomics_hint_commutative_operations 1" \
+$exec
