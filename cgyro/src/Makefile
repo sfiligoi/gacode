@@ -37,7 +37,6 @@ OBJECTS = cgyro_globals.o \
           cgyro_init_manager.o \
 	  cgyro_step_collision_simple.o \
           cgyro_step_collision.o \
-          cgyro_step_gk_v7.o \
 	  cgyro_kernel.o \
           cgyro_mpi_grid.o \
 	  cgyro_make_profiles.o \
@@ -53,11 +52,11 @@ OBJECTS = cgyro_globals.o \
           cgyro_write_restart.o \
           cgyro_write_timedata.o \
           cgyro_write_hosts.o \
-	cgyro_step_gk_bs5.o \
-	cgyro_step_gk_ss.o \
-	cgyro_step_gk_ts.o \
-	cgyro_step_gk_ck.o \
-	cgyro_step_gk_v7.o
+	  cgyro_step_gk_bs5.o \
+	  cgyro_step_gk_ss.o \
+	  cgyro_step_gk_ts.o \
+	  cgyro_step_gk_v7.o \
+	  cgyro_step_gk_ck.o
 
 .SUFFIXES : .o .f90 .F90
 

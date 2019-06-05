@@ -126,9 +126,11 @@ subroutine cgyro_step_gk_bs5
   iiter = 0
   total_delta_x_step = 0.
   total_local_error = 0.
+  var_error = 0.
 
   tol = delta_t_tol
   deltah2 = delta_t_gk
+  
 
   if ( delta_t_gk .lt. 1.d-10) then
      deltah2 = orig_delta_x_t
@@ -379,8 +381,8 @@ subroutine cgyro_step_gk_bs5
         !! method 2 "variance" error
         !! if ( var_error .lt. tol ) then
         
-        if ( i_proc == 0 ) &
-             write(*,*) " BS5(4) **** local error mode ", rel_error, " variance error", var_error
+        !! if ( i_proc == 0 ) &
+        !! write(*,*) " BS5(4) **** local error mode ", rel_error, " variance error", var_error
         
         h0_old = h0_x
         
@@ -400,7 +402,7 @@ subroutine cgyro_step_gk_bs5
         deltah2 = .5*deltah2
         if (i_proc .eq. 0 ) then
            write(*,*) " bs5 ***  error backing up, not converged ", &
-                " total delta_x step ", total_delta_x_step, " delta_x2 ", deltah2
+                " total delta_x step ", total_delta_x_step, " new deltah2 ", deltah2
         endif
         flush(6)
      endif
@@ -423,10 +425,10 @@ subroutine cgyro_step_gk_bs5
   call cgyro_field_c
   
   delta_t_gk = delta_t_last
-
-  if (var_error .gt. tol ) stop
   total_local_error = var_error
-  if ( i_proc == 0 ) write(*,*) i_proc , " bst deltah2_min, max ", deltah2_min, deltah2_max, converged
+  
+!!   if ( i_proc == 0 ) &
+!!       write(*,*) i_proc , " bst deltah2_min, max ", deltah2_min, deltah2_max, converged
   
   ! Filter special spectral components
   call cgyro_filter

@@ -24,18 +24,18 @@ subroutine cgyro_step_gk_ck
   !! not not best for stiff
   !!
 
-  double precision deltah2, delta_ht, delta_old1,newstep, ctheta, orig_delta_t
+  double precision deltah2, orig_delta_t
   double precision delta_x_min, delta_x_max, local_max_error
-  double precision deltaht, tol_ck, Rdummy, dummy2, dummy3, total_delta_step
-  double precision Rdummy1, old_delta, error_x(5), error_sum(5)
+  double precision tol_ck, total_delta_step
+  double precision error_x(5), error_sum(5)
   double precision tau_ck, delta_t_old, delta_t_gk_old, delta_t_last
-  double precision last_total_error, delta_t_last_step, rel_error, var_error
+  double precision last_total_error, rel_error, var_error
   double precision deltah2_min, deltah2_max, scale_x
   
-  complex, dimension(:,:), allocatable :: h_rk4, h_rk5, h_rk6, rk_error
+  complex, dimension(:,:), allocatable :: rk_error
   complex, dimension(:,:), allocatable :: h0_old
 
-  integer conv, iiter, rk_count, rkMAXITER  , deadcount, converged, err_x
+  integer conv, iiter, rk_count, rkMAXITER, converged, err_x
 
   call timer_lib_in('str_mem')
   allocate(h0_old(nc,nv_loc))
@@ -76,6 +76,7 @@ subroutine cgyro_step_gk_ck
   total_delta_step = 0.
   total_local_error = 0.
   last_total_error = 0.
+  var_error = 0.
   conv = 0
   iiter = 0
   rk_count = 0
@@ -83,6 +84,8 @@ subroutine cgyro_step_gk_ck
   converged = 0
   deltah2_min = 1.d10
   deltah2_max = 0.
+
+  
 !$omp parallel workshare
   h0_old = h_x
 !$omp end parallel workshare
@@ -197,12 +200,7 @@ subroutine cgyro_step_gk_ck
      call cgyro_field_c
      call cgyro_rhs(6)
      
-     ! solution of order 1 to 5
-     !
-     !! h_rk(:,:,5) = h0_x(ic_loc,iv_loc) + deltah2*(37./378. * rhs(ic_loc, iv_loc, 1) &
-     !! + 250./621. * rhs(ic_loc, iv_loc, 3) + 125./594.*rhs(ic_loc, iv_loc, 4) &
-     !! + 512./1771.*rhs(:,:,6))
-     !!
+
      !! soln of order 5
 
 !$omp parallel do collapse(2)
@@ -219,50 +217,6 @@ subroutine cgyro_step_gk_ck
      call cgyro_field_c
 
      !
-     !! soln of rk4
-     !!
-     !! h_rk(:,:,4) = h0_x(ic_loc,iv_loc) + deltah2*(2825./27648. * rhs(ic_loc, iv_loc, 1) &
-     !! + 18575./48384. * rhs(ic_loc, iv_loc, 3) &
-     !! + 13525./55296.*rhs(ic_loc, iv_loc, 4)  &
-     !! + 277./14336.*rhs(ic_loc, iv_loc, 5) + 1./4.*rhs(ic_loc, iv_loc, 6))
-     !!
-     !! h_rk4 = h0_x(ic_loc,iv_loc) + deltah2*(2825./27648. * rhs(ic_loc, iv_loc, 1) &
-     !!     + 18575./48384. * rhs(ic_loc, iv_loc, 3) &
-     !! + 13525./55296.*rhs(ic_loc, iv_loc, 4)  &
-     !! + 277./14336.*rhs(ic_loc, iv_loc, 5) + 1./4.*rhs(ic_loc, iv_loc, 6))
-     !!
-     !! hold h_rk(:,:,3) = h0_x(ic_loc,iv_loc) + deltah2*(19./54.*rhs(ic_loc, iv_loc, 1) - 10./27.*rhs(ic_loc, iv_loc, 3) + 55./54.*rhs(ic_loc, iv_loc, 4))
-     !! hold h_rk(:,:,2) = h0_x(ic_loc,iv_loc) + deltah2*(-3./2.*rhs(ic_loc, iv_loc, 1) + 5./2.*rhs(ic_loc, iv_loc, 2))     
-     !! hold h_rk(:,:,1) = h0_x(ic_loc,iv_loc) + deltah2*rhs(ic_loc, iv_loc, 1)
-     !!
-     !! order 1 to 5 embedded solution
-     !! compute error to determine which one to take
-     !! compute Error
-     !!
-     !! should use without deltah2; difference of 5th order and 4th approx;
-     !! 
-     !! rk_error = h_rk(:,:,5)-h_rk(:,:,4)
-     !!
-     !! rhs(ic_loc, iv_loc, 1) = deltah2*(( 37./378. - 2825./27648.)*rhs(ic_loc, iv_loc, 1) &
-     !! + (250./621. - 18575./48384.)*rhs(ic_loc, iv_loc, 3) &
-     !! + (125./594. - 13525./55296.)*rhs(ic_loc, iv_loc, 4) &
-     !! + (-277./14336.)*rhs(ic_loc, iv_loc, 5) &
-     !! + (512./1771. - 1./4.)*rhs(ic_loc, iv_loc, 6))
-
-!!! !$omp parallel do collapse(2)
-!!!$omp parallel do private(ic_loc)
-!! !$omp do reduction(+:rhs)
-!!     do iv_loc=1,nv_loc
-!!        do ic_loc=1,nc
-!!           rhs(ic_loc, iv_loc, 1) = deltah2*(( 37./378. - 2825./27648.)*rhs(ic_loc, iv_loc, 1) &
-!!                + (250./621. - 18575./48384.)*rhs(ic_loc, iv_loc, 3) &
-!!                + (125./594. - 13525./55296.)*rhs(ic_loc, iv_loc, 4) &
-!!                + (-277./14336.)*rhs(ic_loc, iv_loc, 5) &
-!!                + (512./1771. - 1./4.)*rhs(ic_loc, iv_loc, 6))
-!!        enddo
-!!     enddo
-!!!$omp end do
-!!!$omp end parallel
 
 !$omp parallel do collapse(2)
      do iv_loc=1,nv_loc
@@ -293,13 +247,13 @@ subroutine cgyro_step_gk_ck
      if ( i_proc .eq. 0 ) write(*,*) " error_x ", error_x(1), error_x(2), rel_error
      
      !!     var_error = sqrt(total_local_error + rel_error*rel_error)/max(sqrt(abs(iiter-1.)), 1.)
-     
      var_error = sqrt(total_local_error + rel_error*rel_error)
 
      if ( error_x(1) .lt. tau_ck ) then
         if ( i_proc .eq. 0 ) &
              write(*,*) " local rel_error error ", rel_error, tau_ck
 
+        !! need a mode for tighter control
         !! for variance tight control if ( var_error .lt. tol_ck ) then
         !! if ( var_error .lt. tol_ck ) then
         ! if ( i_proc .eq. 0 ) write(*,*) " using var_x ", var_error, " tol_ck ", tol_ck
@@ -307,7 +261,10 @@ subroutine cgyro_step_gk_ck
         !! h_x = h_rk(:,:,5)
         !! endif
 
+!$omp parallel workshare        
         h0_old = h_x
+!$omp end parallel workshare
+        
         total_delta_step = total_delta_step + deltah2
         total_local_error = total_local_error + rel_error*rel_error
         
@@ -337,14 +294,14 @@ subroutine cgyro_step_gk_ck
 
      if (deltah2 .lt. 1.d-8) then
         if ( i_proc .eq. 0 ) &
-             write(*,*) " ******* Smallest substep size ", deltah2
+             write(*,*) " Stopping due to ***** Small substep size ", deltah2
         stop
      endif
 
      
      if ( iiter .gt. rkMAXITER) then
-!!        write(*,*) " *******gk45 step exceeded iteration total_delta_step ", rk_count, &
-!!             total_delta_step, " stepping deltah2 ", deltah2, " delta ", old_delta, " Rdummy ",  Rdummy, Rdummy1
+        write(*,*) " **gk4(5) step exceeded max iteration count ", rk_count
+!!             total_delta_step, " stepping deltah2 ", deltah2, " delta ", old_delta, " Rdummy !! ",  Rdummy, Rdummy1
         !! h_x = h_rk4
         goto  777
      endif
@@ -356,8 +313,6 @@ subroutine cgyro_step_gk_ck
   call timer_lib_out('str')
   call cgyro_filter
 
-222 continue
-  
 1111 continue
 
   delta_t_gk = delta_t_last
@@ -374,8 +329,4 @@ subroutine cgyro_step_gk_ck
 
   if(allocated(h0_old)) deallocate(h0_old)
   
-  !
-  !! call cgyro_filter
-  !
-
 end subroutine cgyro_step_gk_ck

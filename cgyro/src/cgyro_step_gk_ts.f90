@@ -22,18 +22,16 @@ subroutine cgyro_step_gk_ts
   ! Apar -> field(2)
   ! Bpar -> field(3)
 
-  integer converged, conv, rkcount, rk_MAX , deadcount, iiter
-  double precision delta_xh2, delta_x_ht, delta_x_old1,newstep, ctheta, orig_delta_x_t
-  double precision delta_xht, tolerance, Rdummy, dummy2, dummy3, total_delta_step
-  double precision Rdummy1, old_delta_x, error_sum(2), delta_x_min, delta_x_max
+  integer converged, conv, rk_MAX , iiter
+  double precision orig_delta_x_t
+  double precision total_delta_step
+  double precision error_sum(2), delta_x_min, delta_x_max
   double precision delta_x, tau, deltah2, delta_t_last, rel_error, var_error
   double precision local_max_error, delta_t_last_step
   double precision deltah2_min, deltah2_max
-  double precision error_x(2), tol, orig_t_current
+  double precision error_x(2), tol
   double precision scale_x
   
-  complex, dimension(:,:), allocatable :: h0_old_orig, h_rk4, h_rk5
-  complex, dimension(:,:), allocatable :: h_rk6, rk_error_x
   complex, dimension(:,:), allocatable :: h0_old
 
   ! Butcher table
@@ -88,22 +86,19 @@ subroutine cgyro_step_gk_ts
 
   allocate(h0_old(nc,nv_loc))
   
-  !! allocate(h_rk6(nc,nv_loc))
-  !! allocate(rk_error_x(nc,nv_loc))
-
   call timer_lib_in('str')
   
-  !! call cgyro_step_gkssp
-
   orig_delta_x_t = delta_t
 
   iiter = 0
   total_delta_step = 0.
   total_local_error = 0.
+  local_max_error = 0.
 
   tol = delta_t_tol
 
   deltah2 = delta_t_gk
+  delta_t_last = delta_t
   
   if ( delta_t_gk .lt. 1.d-10) then
      deltah2 = orig_delta_x_t
