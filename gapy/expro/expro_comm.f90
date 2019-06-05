@@ -99,7 +99,7 @@ subroutine expro_tcomm(x,n)
   implicit none
 
   integer, intent(in) :: n
-  character(len=10), intent(inout), dimension(n) :: x
+  character(len=10), intent(inout), dimension(20) :: x
   integer :: ierr,iproc
   logical :: flag
   
@@ -107,8 +107,8 @@ subroutine expro_tcomm(x,n)
   
   if (flag) then
      call MPI_COMM_RANK(MPI_COMM_WORLD,iproc,ierr)
-     if (iproc == 0) read(1,*) x
-     call MPI_BCAST(x,n,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
+     if (iproc == 0) read(1,*) x(1:n)
+     call MPI_BCAST(x,n*10,MPI_CHARACTER,0,MPI_COMM_WORLD,ierr)
   else
      read(1,*) x
   endif
