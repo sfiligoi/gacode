@@ -9,21 +9,19 @@ subroutine cgyro_step_gk_v7
 
   implicit none
 
-  double precision deltah2, delta_ht, delta_old1,newstep, ctheta, orig_delta_t
-  double precision deltaht, tolerance, Rdummy, dummy2, dummy3
+  double precision deltah2, orig_delta_t
   double precision total_delta_step, delta_t_last_step, delta_t_last
-  double precision Rdummy1, old_delta, error_sum(3), delta_min, delta_max, h
+  double precision error_sum(3)
   double precision var_error, rel_error
-  
-  complex, dimension(:,:), allocatable :: h0_old_orig, h_rk4, h_rk5
-  complex, dimension(:,:), allocatable :: h_rk6, h0_old, rk_error
 
-  double precision error_x(3), tol, orig_t_current
-  integer converged, conv, rkcount, rk_MAX , deadcount, iiter
+  double precision error_x(3), tol
+  integer converged, conv, rk_MAX , iiter
   double precision max_scale_factor, min_scale_factor, scale_x
   double precision delta_t_min, delta_t_max
-  double precision delta_x, tau, i_count
+  double precision delta_x, tau
   double precision deltah2_min, deltah2_max
+
+  complex, dimension(:,:), allocatable :: h0_old
 
   !
   ! embedded time-advance for the distribution , verner 7(6) method
@@ -111,6 +109,7 @@ subroutine cgyro_step_gk_v7
   tol = delta_t_tol
   delta_t_min = orig_delta_t*1.e-10
   delta_t_max = orig_delta_t
+  delta_t_last = deltah2  ! just a dummy initializer
   
   converged = 0
   conv = 0
@@ -126,18 +125,23 @@ subroutine cgyro_step_gk_v7
   h0_old = h_x
 !$omp end parallel workshare
 
-  
   do while (total_delta_step .lt. (orig_delta_t) .and. iiter .le. rk_MAX )
      
      if ( total_delta_step + deltah2 .gt. orig_delta_t ) then
         deltah2 = orig_delta_t - total_delta_step
         delta_t_last_step = deltah2
-        if ( deltah2 .lt. 1.e-9 ) goto 888  !! abandon
      else
         delta_t_gk = deltah2 + delta_t_gk
         delta_t_last = deltah2
         deltah2_min = min(deltah2, deltah2_min)
         deltah2_max = max(deltah2, deltah2_max)
+     endif
+
+     if (deltah2 .lt. 1.d-8) then
+        if ( i_proc .eq. 0 ) &
+             write(*,*) " ******* Stopping due to small substep size ", deltah2
+        flush(6)
+        stop
      endif
      
      if (( conv .eq. 0 ) .and. (iiter .ge. 1)) then
@@ -154,11 +158,12 @@ subroutine cgyro_step_gk_v7
 !$omp end parallel workshare
      endif
      
+!!      if (i_proc == 0 ) write(*,*) iiter, " current time step size ", deltah2
+     
      call cgyro_field_c     
      call cgyro_rhs(1)
      
      !!
-     !! k2 = (*f)(x0+h12, *y + h12 * k1)
      !!
 !$omp parallel do collapse(2)
      do iv_loc=1,nv_loc
@@ -185,9 +190,6 @@ subroutine cgyro_step_gk_v7
      call cgyro_field_c
      call cgyro_rhs(3)
      
-      !!
-      !! k4 = (*f)(x0+a4*h, *y + h * ( b41*k1 +b 43*k3) )
-      !!
 
 !$omp parallel do collapse(2)
      do iv_loc=1,nv_loc
@@ -202,7 +204,6 @@ subroutine cgyro_step_gk_v7
       call cgyro_rhs(4)
       
       !!
-      !! k5 = (*f)(x0+a5*h,  *y + h * ( b51*k1 + b53*k3 + b54*k4) )
       !!
 !$omp parallel do collapse(2)
      do iv_loc=1,nv_loc
@@ -218,8 +219,6 @@ subroutine cgyro_step_gk_v7
       call cgyro_rhs(5)
       
       !!
-      !! k6 = (*f)(x0+a6*h, *y + h * ( b61*k1 + b63*k3 + b64*k4 + b65*k5) )
-      !!
 
 !$omp parallel do collapse(2)
      do iv_loc=1,nv_loc
@@ -234,10 +233,6 @@ subroutine cgyro_step_gk_v7
 
       call cgyro_field_c
       call cgyro_rhs(6)
-      
-      !!
-      !! k7 = (*f)(x0+a7*h, *y + h * ( b71*k1 + b73*k3 + b74*k4 + b75*k5 + b76*k6) )
-      !!
 
 !$omp parallel do collapse(2)
      do iv_loc=1,nv_loc
@@ -254,11 +249,6 @@ subroutine cgyro_step_gk_v7
       call cgyro_field_c
       call cgyro_rhs(7)
       
-      !!
-      !! k8 = (*f)(x0+h, *y + h * ( b81*k1 + b83*k3 + b84*k4 + b85*k5 + b86*k6
-      !! + b87*k7) )
-      !!
-
 !$omp parallel do collapse(2)
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
@@ -273,12 +263,6 @@ subroutine cgyro_step_gk_v7
      enddo
      call cgyro_field_c
      call cgyro_rhs(8)
-
-      !!
-      !!
-      !! k9 = (*f)(x0+a9*h, *y + h * ( b91*k1 + b93*k3 + b94*k4 + b95*k5 + b96*k6
-      !! + b97*k7) )
-      !!
 
 !$omp parallel do collapse(2)
      do iv_loc=1,nv_loc
@@ -296,11 +280,6 @@ subroutine cgyro_step_gk_v7
      call cgyro_field_c
      call cgyro_rhs(9)
      
-     !!
-      !!   k10 = (*f)(x0+h, *y + h * ( b10_1*k1 + b10_3*k3 + b10_4*k4 + b10_5*k5
-      !! + b10_6*k6 + b10_7*k7 + b10_9*k9 ) );
-      !!
-      
 !$omp parallel do collapse(2)
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
@@ -319,19 +298,6 @@ subroutine cgyro_step_gk_v7
       call cgyro_rhs(10)
       
       !!
-      !! soln = h0_x(ic_loc,iv_loc) +  h * (c1 * k1 + c4 * k4 + c5 * k5 + c7 * k7 + c8 * k8)
-      !!
-      !! h_x(ic_loc,iv_loc) = h0_x(ic_loc,iv_loc) +  deltah2 * (c1 * rhs(ic_loc,iv_loc,1) + c4 * rhs(ic_loc,iv_loc,4) &
-      !! + c5 * rhs(ic_loc, iv_loc, 5) + c7 * rhs(ic_loc,iv_loc,7) + c8 * rhs(ic_loc,iv_loc,8))
-      !!
-      !! error between verner rk6 and rk7
-      !!
-      !! rk_error = deltah2*(e1*rhs(ic_loc,iv_loc,1) + e4*rhs(ic_loc,iv_loc,4) + e5* rhs(ic_loc, iv_loc, 5) &
-      !! + e6*rhs(ic_loc,iv_loc,6)  + e7*rhs(ic_loc,iv_loc,7) + e8*rhs(ic_loc,iv_loc,8) &
-      !! + e9*rhs(ic_loc,iv_loc,9) + e10*rhs(:,:,10))
-
-      !! rhs(ic_loc,iv_loc,1) contains the error
-
       !! soln order 7 
       !!
 
@@ -346,7 +312,6 @@ subroutine cgyro_step_gk_v7
                  + c8*rhs(ic_loc,iv_loc,8))
          enddo
      enddo
-
 
       call cgyro_field_c
 
@@ -380,6 +345,8 @@ subroutine cgyro_step_gk_v7
       var_error = sqrt(total_local_error + rel_error*rel_error)
 
 
+      ! if mode is var_error
+      !
       !     if ( var_error .lt. tol ) then
       !            if (i_proc == 0 ) &
       ! write(*,*) "after me = ", i_proc, " var error ", var_error
@@ -389,7 +356,6 @@ subroutine cgyro_step_gk_v7
          
 !!         if (i_proc == 0 ) &
 !!              write(*,*) "after me = ", i_proc, " local error ", rel_error
-
 
          total_local_error = total_local_error + rel_error*rel_error
 
@@ -409,32 +375,25 @@ subroutine cgyro_step_gk_v7
         conv = 0
         deltah2 = .5*deltah2
         if (i_proc .eq. 0 ) then
-           write(*,*) deltah2 , &
-                " V7 ***  error backing up *** not converged ", &
-                " deltah2 ", deltah2,  &
-                " rk error x1 ", error_x(1), &
-                " h1_x norm ", error_x(2)
+           write(*,*) " V7 ***  error backing up *** not converged "
+           write(*,*) " new deltah2 ", deltah2,  " rel error ", rel_error
+                !! " rk error x1 ", error_x(1), &
+                !! " h1_x norm ", error_x(2)
         endif
      endif
 
      deltah2 = min(deltah2, delta_t_max)
      deltah2 = max(delta_t_min, deltah2)
-     
-     !!
 
      iiter = iiter + 1
      if ( iiter .gt. rk_MAX) then
         write(*,*) " RK V7 exceeded iteration count ", iiter
         !! should do global mpiexit
+        flush(6)
         stop
      endif
 
-     if (deltah2 .lt. 1.d-8) then
-        if ( i_proc .eq. 0 ) &
-             write(*,*) " ******* Stopping due to small substep size ", deltah2
-        stop
-     endif
-     endif
+
    enddo
 
 888 continue
@@ -452,14 +411,11 @@ subroutine cgyro_step_gk_v7
    endif
    
    delta_t_gk = delta_t_last
-      
-!!   if ( i_proc .eq. 0 ) write(*,*) &
-!!        " variance local error ", var_error, &
-!!        " delta_t_gk ", delta_t_gk
-   
    total_local_error = var_error
 
-!!   if (var_error .gt. error_tol ) stop
-   
+!!   if ( i_proc .eq. 0) then
+!!      write(*,*) " v7 *** converged *** in iiter ", iiter
+!!   endif
+
  end subroutine cgyro_step_gk_v7
  

@@ -6,22 +6,20 @@ subroutine cgyro_step_gk_ss
 
   implicit none
 
-  double precision delta_xh2, delta_x_ht, delta_x_old1,newstep, ctheta, orig_delta_x_t
-  double precision delta_xht, tolerance, Rdummy, dummy2, dummy3, total_delta_step
-  double precision Rdummy1, old_delta_x, error_sum(2), delta_x_min, delta_x_max
+  integer converged, conv, rk_MAX , iiter
+
+  double precision orig_delta_x_t
+  double precision total_delta_step
+  double precision error_sum(2), delta_x_min, delta_x_max
   double precision delta_x, tau, deltah2, delta_t_last, rel_error, var_error
   double precision local_max_error, delta_t_last_step
   double precision deltah2_min, deltah2_max
-  
-  complex, dimension(:,:), allocatable :: h0_old_orig, h_rk4, h_rk5
-  complex, dimension(:,:), allocatable :: h_rk6, rk_error_x
-  complex, dimension(:,:), allocatable :: h0_old
-  double precision error_x(2), tol, orig_t_current
-  integer converged, conv, rkcount, rk_MAX , deadcount, iiter
+  double precision error_x(2), tol
   double precision scale_x
-  ! double complex h0_old(nc,nv_loc)
+  
+  complex, dimension(:,:), allocatable :: h0_old
 
-  ! RK5(4) TS.x
+  ! RK5(4) SS
   !
   !
   !           z e             vpar            z e  vperp^2
@@ -42,8 +40,6 @@ subroutine cgyro_step_gk_ss
   double precision, parameter :: c5   = 2./3.
   double precision, parameter :: c6   = 7./9.
   double precision, parameter :: c7   = 1.0
-
-
 
   double precision, parameter :: a21  = 16./105.
   double precision, parameter :: a31  = 2./35.
@@ -101,8 +97,10 @@ subroutine cgyro_step_gk_ss
   orig_delta_x_t = delta_t
 
   iiter = 0
-  total_delta_step = 0.d0
-  total_local_error = 0.d0
+  total_delta_step = 0.
+  total_local_error = 0.
+  local_max_error = 0.
+  delta_t_last = delta_t
 
   !! tol = .001d0
   !! if ( orig_delta_x_t .gt. 1 ) tol = tol/orig_delta_x_t
@@ -125,14 +123,15 @@ subroutine cgyro_step_gk_ss
   
   rk_MAX = 10000
 
+!$omp parallel workshare
   h0_old = h_x
+!$omp end parallel workshare  
   conv = 0
   delta_t_gk = 0.d0
   deltah2_min = 1.d10
   deltah2_max = 0.
 
   do while (total_delta_step .lt. orig_delta_x_t )
-
     
      if ( total_delta_step + deltah2 .gt. orig_delta_x_t ) then
         deltah2 = orig_delta_x_t - total_delta_step
@@ -149,15 +148,18 @@ subroutine cgyro_step_gk_ss
         !!
         !! last converged state
         !!
+!$omp parallel workshare
         h0_x = h0_old
         h_x = h0_old
-        call cgyro_field_c
+!$omp end parallel workshare
      else
+!$omp parallel workshare
         h0_x = h_x
-        call cgyro_field_c
+!$omp end parallel workshare
      endif
+     call cgyro_field_c
 
-     if ( i_proc == 0 ) write(*,*) i_proc, " step ", iiter, " ts deltah2 ", deltah2
+     if ( i_proc == 0 ) write(*,*) i_proc, " step ", iiter, " ss deltah2 ", deltah2
 
      !! if ( iiter .gt. 0 ) call cgyro_field_c
      
@@ -166,9 +168,10 @@ subroutine cgyro_step_gk_ss
      !
      
      call cgyro_rhs(1)
-     !!!$OMP PARALLEL
+!$omp parallel workshare
      h_x = h0_x + deltah2 * a21 * rhs(:,:,1)
-     !!!$OMP END PARALLEL
+!$omp end parallel workshare
+
      call cgyro_field_c
      
      ! Stage 2 ! k2
@@ -178,91 +181,85 @@ subroutine cgyro_step_gk_ss
      !!     
      !!     h_x = h0_x + 3./32.*delta_x_t*(rhs(:,:,1) + 3.*rhs(:,:,2))
      !!
-     !!!$OMP PARALLEL
+
+!$omp parallel workshare
      h_x = h0_x + deltah2*(a31*rhs(:,:,1) + a32*rhs(:,:,2))
-     !!!$OMP END PARALLEL
+!$omp end parallel workshare
+
      call cgyro_field_c
      
      ! Stage 3
      call cgyro_rhs(3)
      ! k4
-     !!!$OMP PARALLEL
+
+!$omp parallel workshare
      h_x = h0_x + deltah2*(a41*rhs(:,:,1) &
           + a42*rhs(:,:,2) + a43*rhs(:,:,3))
-     !!!$OMP END PARALLEL
+!$omp end parallel workshare
      !
      call cgyro_field_c
      
      ! Stage 4
      call cgyro_rhs(4)
      !  k5
-     !!!$OMP PARALLEL
+!$omp parallel workshare
      h_x = h0_x+deltah2*(a51*rhs(:,:,1) + a52*rhs(:,:,2) &
           + a53*rhs(:,:,3) + a54*rhs(:,:,4))
-     !!!$OMP END PARALLEL
+!$omp end parallel workshare
      call cgyro_field_c
      
      !  stage 5
      
      call cgyro_rhs(5)
-     !!!$OMP PARALLEL
+
+!$omp parallel workshare
      h_x = h0_x + deltah2*(a61*rhs(:,:,1) + a62*rhs(:,:,2) &
           + a63*rhs(:,:,3) + a64*rhs(:,:,4) + a65*rhs(:,:,5))
-     !!!$OMP END PARALLEL
+!$omp end parallel workshare
+
      call cgyro_field_c
 
      ! stage 6
      call cgyro_rhs(6)
-     !!!$OMP PARALLEL
+
+!$omp parallel workshare
      h_x = h0_x + deltah2*(a71*rhs(:,:,1) + a72*rhs(:,:,2) &
           + a73*rhs(:,:,3) + a74*rhs(:,:,4) &
           + a75*rhs(:,:,5) + a76*rhs(:,:,6))
-     !!!$OMP END PARALLEL
+!$omp end parallel workshare
+
      
      call cgyro_field_c
 
      call cgyro_rhs(7)
      
-     !! soln = h_x of order 5
-     !! error_x(2) = sum(abs(h0_x))
-     !!!$OMP PARALLEL
+
+!$omp parallel workshare
      h_x = h0_x + deltah2*(b1*rhs(:,:,1) &
           +b3*rhs(:,:,3) + b4*rhs(:,:,4) &
           + b5*rhs(:,:,5) + b6*rhs(:,:,6) + b7*rhs(:,:,7))
-     !!!$OMP END PARALLEL
+!$omp end parallel workshare
 
      call cgyro_field_c
      
-     !!!$OMP PARALLEL
+!$omp parallel workshare
      rhs(:,:,1) = deltah2*((b1-b1p)*rhs(:,:,1) &
           + (b3-b3p)*rhs(:,:,3) &
           + (b4-b4p)*rhs(:,:,4) &
           + (b5-b5p)*rhs(:,:,5) + (b6-b6p)*rhs(:,:,6) &
           + (b7-b7p)*rhs(:,:,7))
-     !!!$OMP END PARALLEL
+!$omp end parallel workshare
 
-     !! rk_error = -1.*rk_error
-
-     !! error_sum = 0.d0
-     
-     !! error_x(1) = sum(abs(rk_error_x))
+     error_sum = 0.
      error_x(1) = sum(abs(rhs(:,:,1)))
      error_x(2) = sum(abs(h_x))     
-
-     !! write(*,*) "me = ",  i_proc, " error before ", error, " error_sum ", error_sum
 
      call MPI_ALLREDUCE(error_x, error_sum, 2, MPI_DOUBLE_PRECISION,&
           MPI_SUM, MPI_COMM_WORLD, i_err)
      
-!!     write(*,*) "after me = ", i_proc, " error out ", error, " error_sum ", error_sum
-
      error_x(1) = error_sum(1)! local truncation error
      error_x(2) = error_sum(2)! local h0
 
-     !!
-     !! delta_x = 0.84*(tol/(error+EPS)**(1./5.))  !! prevent div 0
-     !!
-     
      delta_x = error_x(1)
      tau = tol * max(error_x(2), 1.d0)
 
@@ -285,47 +282,32 @@ subroutine cgyro_step_gk_ss
 
      if ( error_x(1) .lt. tau ) then
         
-        if ( i_proc == 0 ) write(*,*) " local error mode ", rel_error, " variance error", var_error
+        if ( i_proc == 0 ) &
+             write(*,*) " local error mode ", rel_error, " variance error", var_error
 
+!$omp parallel workshare        
         h0_old = h0_x
-        
-        !! h_x = h0_x + deltah2*(b1*rhs(:,:,1)+b3*rhs(:,:,3) + b4*rhs(:,:,4) &
-        !! + b5*rhs(:,:,5) + b6*rhs(:,:,6))
+!$omp end parallel workshare
         
         converged = converged + 1
         conv = 1
         total_delta_step = total_delta_step + deltah2
         total_local_error = total_local_error + rel_error*rel_error
 
-        !! t_current = t_current + delta_t
-        !! scale_x = min((tol/(error_x(1) + EPS))**(1./6.), delta_x_max)
-        !! scale_x = 0.9*min((tol/(error_x(1) + EPS))**(1./5.), 10.)
-        
-        !!delta_t = min(delta_x_max, &
-        !! .8d0*deltah2*(tau/(delta_x + 1.e-14))**(1.d0/6.d0))
-
-        !! deltah2 = 3.d0*.95d0*deltah2*(tol/(delta_x + 2.2d-12))**(.2d0)
-        !! check
-        
         scale_x = max(0.95d0*deltah2*(tol/(delta_x + 1.0d-12))**(.2d0), &
              0.95d0*deltah2*(tol/(delta_x + 1.0d-12))**(.25d0))
         
         deltah2 = deltah2*max(1., scale_x)
         local_max_error = max(local_max_error, rel_error)
      else
-        !! h_x = h0_old
         conv = 0
         deltah2 = .5d0*deltah2          !! interpolate?
-        !! deltah2 = (3./5.)*deltah2          !! interpolate?
-        !! deltah2 = (2.d0/3.d0)*deltah2          !! interpolate?
         if (i_proc .eq. 0 ) then
-           write(*,*) " ts ***  error backing up *** not converged " ! , &
-!                " total delta_x step ", total_delta_step, " delta_x2 ", deltah2
+           write(*,*) " ss ***  error backing up *** not converged ", &
+                " total delta_x step ", total_delta_step, " delta_x2 ", deltah2
+           flush(6)
         endif
      endif
-     
-     !! delta_x = 0.9*min((tol/(error + EPS))**(1./5.), 10.)
-     !! deltah2 = scale_x*deltah2
      
      deltah2 = min(deltah2, delta_x_max)
      deltah2 = max(delta_x_min, deltah2)
@@ -335,36 +317,24 @@ subroutine cgyro_step_gk_ss
      if (deltah2 .lt. 1.d-8) then
         if ( i_proc .eq. 0 ) &
              write(*,*) " ******* Stopping due to small substep size ", deltah2
+        flush(6)
         stop
      endif
      
      if ( iiter .gt. rk_MAX ) then
-        if ( i_proc .eq. 0 ) then
-           write(*,*) " rk ts max count  exceeded ", iiter
-        endif
-        goto 1111
+        if ( i_proc == 0 ) &
+             write(*,*) " rk ss max count  exceeded ", iiter
+        flush(6)
+        stop
      endif
+     
   enddo
+  
 1111 continue
   call timer_lib_out('str')  
   call cgyro_field_c
 
-!!  delta_t_gk = max(.5d0*(delta_t_gk + deltah2), delta_t/converged)
-
-  !! delta_t_gk = max(delta_t_gk, delta_t/converged)
-
-  !! delta_t_tol = 2.d0*min(adapt_tol, error_tol)/converged
-
   delta_t_gk = delta_t_last
-
-  !! gif3 delta_t_gk = delta_t_gk/converged
-
-  !! gif_3 delta_t_tol = 2.d0*max(total_local_error, &
-       !! tol/max(converged-1, 1)
-  
-  !! delta_t_tol = max(delta_t_tol, min(adapt_tol, error_tol))/max(converged-1, 1)
-
-  !! delta_t_tol = max(delta_t_tol, min(adapt_tol, error_tol))/max(converged-1, 1)
 
   goto 2222
   if ( i_proc .eq. 0 ) then
@@ -374,15 +344,10 @@ subroutine cgyro_step_gk_ss
   endif
 2222 continue
   
-  if (var_error .gt. tol ) stop
-  
-  !! t_current = orig_t_current
   total_local_error = var_error
   if ( i_proc == 0 ) write(*,*) i_proc , " ts deltah2_min, max ", deltah2_min, deltah2_max, converged
   
   call cgyro_filter
-  
-  ! Filter special spectral components
   
   if(allocated(h0_old)) deallocate(h0_old)  
   
