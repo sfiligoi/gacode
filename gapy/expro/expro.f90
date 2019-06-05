@@ -26,14 +26,14 @@ module expro
        'N_\mathrm{ion}               ',&
        'number of ions               '/)
 
-  character(len=10), dimension(:), allocatable :: expro_name
+  character(len=10), dimension(20) :: expro_name
   character*(strlen), dimension(4) :: expro_name_str = (/&
        'name                         ',&
        '-                            ',&
        '                             ',&
        '                             '/)
 
-  character(len=10), dimension(:), allocatable :: expro_type
+  character(len=10), dimension(20) :: expro_type
   character*(strlen), dimension(4) :: expro_type_str = (/&
        'type                         ',&
        '-                            ',&
@@ -485,8 +485,8 @@ contains
 
        allocate(expro_mass(nion))    ; expro_mass = 1.0
        allocate(expro_z(nion))       ; expro_z = 1.0
-       allocate(expro_name(nion))
-       allocate(expro_type(nion))
+       !allocate(expro_name(nion))
+       !allocate(expro_type(nion))
 
        allocate(expro_rho(nexp))     ; expro_rho = 0.0
        allocate(expro_rmin(nexp))    ; expro_rmin = 0.0
@@ -587,8 +587,8 @@ contains
 
        deallocate(expro_mass) 
        deallocate(expro_z) 
-       deallocate(expro_name) 
-       deallocate(expro_type) 
+       !deallocate(expro_name) 
+       !deallocate(expro_type) 
 
        deallocate(expro_rho)
        deallocate(expro_rmin)

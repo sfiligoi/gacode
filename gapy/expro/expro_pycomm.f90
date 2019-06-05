@@ -67,9 +67,9 @@ subroutine expro_tcomm(x,n)
   implicit none
 
   integer, intent(in) :: n
-  character(len=10), intent(inout), dimension(n) :: x
-
-  read(1,*) x
+  character(len=10), intent(inout), dimension(20) :: x
+  
+  read(1,*) x(1:n)
 
 end subroutine expro_tcomm
 
