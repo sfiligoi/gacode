@@ -9,18 +9,18 @@ subroutine cgyro_step_gk_v7
 
   implicit none
 
-  double precision deltah2, orig_delta_t
-  double precision total_delta_step, delta_t_last_step, delta_t_last
-  double precision error_sum(3)
-  double precision var_error, rel_error
-
-  double precision error_x(3), tol
+  real deltah2, orig_delta_t
+  real total_delta_step, delta_t_last_step, delta_t_last
+  real var_error, rel_error
+  real tol
   integer converged, conv, rk_MAX , iiter
-  double precision max_scale_factor, min_scale_factor, scale_x
-  double precision delta_t_min, delta_t_max
-  double precision delta_x, tau
-  double precision deltah2_min, deltah2_max
+  real max_scale_factor, min_scale_factor, scale_x
+  real delta_t_min, delta_t_max
+  real delta_x, tau
+  real deltah2_min, deltah2_max
+  real delta2_h_min, delta2_h_max
 
+  real, dimension(3):: error_sum, error_x
   complex, dimension(:,:), allocatable :: h0_old
 
   !
@@ -32,65 +32,65 @@ subroutine cgyro_step_gk_v7
   !            T               c               T   omega_a c
   !
 
-  double precision, parameter :: c1 = 7.0/90.0
-  double precision, parameter :: c4 = 32.0/90.0
-  double precision, parameter :: c5 = 32.0/90.0
-  double precision, parameter :: c7 = 12.0/90.0
-  double precision, parameter :: c8 = 7.0/90.0
+  real, parameter :: c1 = 7.0/90.0
+  real, parameter :: c4 = 32.0/90.0
+  real, parameter :: c5 = 32.0/90.0
+  real, parameter :: c7 = 12.0/90.0
+  real, parameter :: c8 = 7.0/90.0
   
-  double precision, parameter :: a2 = 1.0/12.0
-  double precision, parameter :: a3 = 1.0/6.0
-  double precision, parameter :: a4 = 1.0/4.0
-  double precision, parameter :: a5 = 3.0/4.0
-  double precision, parameter :: a6 = 16.0/17.0
-  double precision, parameter :: a7 = 1.0/2.0
-  double precision, parameter :: a9 = 2.0/3.0
+  real, parameter :: a2 = 1.0/12.0
+  real, parameter :: a3 = 1.0/6.0
+  real, parameter :: a4 = 1.0/4.0
+  real, parameter :: a5 = 3.0/4.0
+  real, parameter :: a6 = 16.0/17.0
+  real, parameter :: a7 = 1.0/2.0
+  real, parameter :: a9 = 2.0/3.0
   
-  double precision, parameter :: b41 = 1.0/16.0
-  double precision, parameter :: b43 = 3.0/16.0
-  double precision, parameter :: b51 = 21.0/16.0
-  double precision, parameter :: b53 = -81.0/16.0
-  double precision, parameter :: b54 = 72.0/16.0
-  double precision, parameter :: b61 = 1344688.0/250563.0
-  double precision, parameter :: b63 = -5127552.0/250563.0
-  double precision, parameter :: b64 = 4096896.0/250563.0
-  double precision, parameter :: b65 = -78208.0/250563.0
-  double precision, parameter :: b71 = -341549.0/234624.0
-  double precision, parameter :: b73 = 1407744.0/234624.0
-  double precision, parameter :: b74 = -1018368.0/234624.0
-  double precision, parameter :: b75 = 84224.0/234624.0
-  double precision, parameter :: b76 = -14739.0/234624.0
-  double precision, parameter :: b81 = -381875.0/136864.0
-  double precision, parameter :: b83 = 1642368.0 / 136864.0
-  double precision, parameter :: b84 = -1327872.0 / 136864.0
-  double precision, parameter :: b85 = 72192.0 / 136864.0
-  double precision, parameter :: b86 = 14739.0 / 136864.0
-  double precision, parameter :: b87 = 117312.0 / 136864.0
-  double precision, parameter :: b91 = -2070757.0 / 16755336.0
-  double precision, parameter :: b93 = 9929088.0 / 16755336.0
-  double precision, parameter :: b94 = 584064.0 / 16755336.0
-  double precision, parameter :: b95 = 3023488.0 / 16755336.0
-  double precision, parameter :: b96 = -447083.0 / 16755336.0
-  double precision, parameter :: b97 = 151424.0 / 16755336.0
+  real, parameter :: b41 = 1.0/16.0
+  real, parameter :: b43 = 3.0/16.0
+  real, parameter :: b51 = 21.0/16.0
+  real, parameter :: b53 = -81.0/16.0
+  real, parameter :: b54 = 72.0/16.0
+  real, parameter :: b61 = 1344688.0/250563.0
+  real, parameter :: b63 = -5127552.0/250563.0
+  real, parameter :: b64 = 4096896.0/250563.0
+  real, parameter :: b65 = -78208.0/250563.0
+  real, parameter :: b71 = -341549.0/234624.0
+  real, parameter :: b73 = 1407744.0/234624.0
+  real, parameter :: b74 = -1018368.0/234624.0
+  real, parameter :: b75 = 84224.0/234624.0
+  real, parameter :: b76 = -14739.0/234624.0
+  real, parameter :: b81 = -381875.0/136864.0
+  real, parameter :: b83 = 1642368.0 / 136864.0
+  real, parameter :: b84 = -1327872.0 / 136864.0
+  real, parameter :: b85 = 72192.0 / 136864.0
+  real, parameter :: b86 = 14739.0 / 136864.0
+  real, parameter :: b87 = 117312.0 / 136864.0
+  real, parameter :: b91 = -2070757.0 / 16755336.0
+  real, parameter :: b93 = 9929088.0 / 16755336.0
+  real, parameter :: b94 = 584064.0 / 16755336.0
+  real, parameter :: b95 = 3023488.0 / 16755336.0
+  real, parameter :: b96 = -447083.0 / 16755336.0
+  real, parameter :: b97 = 151424.0 / 16755336.0
   
-  double precision, parameter :: b10_1 = 130521209.0/10743824.0
-  double precision, parameter :: b10_3 = -499279872.0/10743824.0
-  double precision, parameter :: b10_4 = 391267968.0/10743824.0
-  double precision, parameter :: b10_5 = 13012608.0/10743824.0
-  double precision, parameter :: b10_6 = -3522621.0/10743824.0
-  double precision, parameter :: b10_7 = 9033024.0/10743824.0
-  double precision, parameter :: b10_9 = -30288492.0/10743824.0
+  real, parameter :: b10_1 = 130521209.0/10743824.0
+  real, parameter :: b10_3 = -499279872.0/10743824.0
+  real, parameter :: b10_4 = 391267968.0/10743824.0
+  real, parameter :: b10_5 = 13012608.0/10743824.0
+  real, parameter :: b10_6 = -3522621.0/10743824.0
+  real, parameter :: b10_7 = 9033024.0/10743824.0
+  real, parameter :: b10_9 = -30288492.0/10743824.0
   
-  double precision, parameter :: e1 = -1090635.0/172448640.0
-  double precision, parameter :: e4 = 9504768.0/172448640.0
-  double precision, parameter :: e5 = -171816960.0/172448640.0
-  double precision, parameter :: e6 =  72412707.0/172448640.0
-  double precision, parameter :: e7 = -55840512.0/172448640.0
-  double precision, parameter :: e8 = -13412672.0/172448640.0
-  double precision, parameter :: e9 =  181730952.0/172448640.0
-  double precision, parameter :: e10 = -21487648.0/172448640.0
+  real, parameter :: e1 = -1090635.0/172448640.0
+  real, parameter :: e4 = 9504768.0/172448640.0
+  real, parameter :: e5 = -171816960.0/172448640.0
+  real, parameter :: e6 =  72412707.0/172448640.0
+  real, parameter :: e7 = -55840512.0/172448640.0
+  real, parameter :: e8 = -13412672.0/172448640.0
+  real, parameter :: e9 =  181730952.0/172448640.0
+  real, parameter :: e10 = -21487648.0/172448640.0
   
-  double precision, parameter :: EPS = 1.d-12
+  real, parameter :: EPS = 1.e-12
   
   allocate(h0_old(nc,nv_loc))
   
@@ -110,6 +110,9 @@ subroutine cgyro_step_gk_v7
   delta_t_min = orig_delta_t*1.e-10
   delta_t_max = orig_delta_t
   delta_t_last = deltah2  ! just a dummy initializer
+  delta2_h_min = 1.0
+  delta2_h_max = -1.0
+
   
   converged = 0
   conv = 0
@@ -119,7 +122,6 @@ subroutine cgyro_step_gk_v7
   iiter = 0
   total_delta_step = 0.
   total_local_error = 0.
-  delta_t_gk = 0.
 
 !$omp parallel workshare
   h0_old = h_x
@@ -128,22 +130,17 @@ subroutine cgyro_step_gk_v7
   do while (total_delta_step .lt. (orig_delta_t) .and. iiter .le. rk_MAX )
      
      if ( total_delta_step + deltah2 .gt. orig_delta_t ) then
+        !!
+        !! last step in this interval; unless backup
+        !!
         deltah2 = orig_delta_t - total_delta_step
         delta_t_last_step = deltah2
      else
-        delta_t_gk = deltah2 + delta_t_gk
         delta_t_last = deltah2
-        deltah2_min = min(deltah2, deltah2_min)
-        deltah2_max = max(deltah2, deltah2_max)
+        !!        deltah2_min = min(deltah2, deltah2_min)
+        !!        deltah2_max = max(deltah2, deltah2_max)
      endif
 
-     if (deltah2 .lt. 1.d-8) then
-        if ( i_proc .eq. 0 ) &
-             write(*,*) " ******* Stopping due to small substep size ", deltah2
-        flush(6)
-        stop
-     endif
-     
      if (( conv .eq. 0 ) .and. (iiter .ge. 1)) then
         !!
         !! last converged state, backing up
@@ -369,34 +366,35 @@ subroutine cgyro_step_gk_v7
               0.95*(tol/(error_x(1) + EPS))**(1./7.))
          
          deltah2 = deltah2*max(scale_x, 1.0)
+         
+!!         if ( scale_x .gt. 1.0 .and. i_proc == 0 ) then
+!!            write(*,*) " new deltah2 ", deltah2
+         !!         endif
+         
          converged = converged + 1
          conv = 1
-     else
-        conv = 0
-        deltah2 = .5*deltah2
-        if (i_proc .eq. 0 ) then
-           write(*,*) " V7 ***  error backing up *** not converged "
-           write(*,*) " new deltah2 ", deltah2,  " rel error ", rel_error
-                !! " rk error x1 ", error_x(1), &
-                !! " h1_x norm ", error_x(2)
-        endif
-     endif
+      else
+         conv = 0
+         deltah2 = .5*deltah2
+         if (i_proc .eq. 0 ) then
+            write(*,*) " V7 ***  error backing up *** not converged "
+            write(*,*) " new deltah2 ", deltah2,  " rel error ", rel_error
+            !! " rk error x1 ", error_x(1), &
+            !! " h1_x norm ", error_x(2)
+         endif
+      endif
 
-     deltah2 = min(deltah2, delta_t_max)
-     deltah2 = max(delta_t_min, deltah2)
+      !! deltah2 = min(deltah2, delta_t_max)
+      !! deltah2 = max(delta_t_min, deltah2)
 
-     iiter = iiter + 1
-     if ( iiter .gt. rk_MAX) then
-        write(*,*) " RK V7 exceeded iteration count ", iiter
-        !! should do global mpiexit
-        flush(6)
-        stop
-     endif
-
-
+      iiter = iiter + 1
+      if ( iiter .gt. rk_MAX) then
+         write(*,*) " RK V7 exceeded iteration count ", iiter
+         !! should do global mpiexit
+         flush(6)
+         stop
+      endif
    enddo
-
-888 continue
 
    call timer_lib_out('str')
    if(allocated(h0_old)) deallocate(h0_old) 
@@ -412,10 +410,10 @@ subroutine cgyro_step_gk_v7
    
    delta_t_gk = delta_t_last
    total_local_error = var_error
-
-!!   if ( i_proc .eq. 0) then
-!!      write(*,*) " v7 *** converged *** in iiter ", iiter
-!!   endif
+   
+!!   if ( i_proc == 0 ) &
+!!        write(*,*) i_proc , " v7 converged deltah2_min, max ", deltah2_min, deltah2_max
 
  end subroutine cgyro_step_gk_v7
+
  

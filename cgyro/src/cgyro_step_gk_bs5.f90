@@ -160,10 +160,10 @@ subroutine cgyro_step_gk_bs5
         deltah2 = orig_delta_x_t - total_delta_x_step
         delta_t_last_step = deltah2
      else
-        delta_t_gk = deltah2+delta_t_gk
+        !! delta_t_gk = deltah2+delta_t_gk
         delta_t_last = deltah2
-        deltah2_min = min(deltah2, deltah2_min)
-        deltah2_max = max(deltah2, deltah2_max)
+        !!        deltah2_min = min(deltah2, deltah2_min)
+        !!        deltah2_max = max(deltah2, deltah2_max)
      endif
      
      if (( conv .eq. 0 ) .and. (iiter .ge. 1)) then
@@ -391,10 +391,15 @@ subroutine cgyro_step_gk_bs5
         total_delta_x_step = total_delta_x_step + deltah2
         total_local_error = total_local_error + rel_error*rel_error
 
-        scale_x = max(0.95*deltah2*(tol/(delta_x + EPS ))**(.2), &
-             0.95*deltah2*(tol/(delta_x + EPS ))**(.25))
+        scale_x = max(0.95*(tol/(delta_x + EPS ))**(.2), &
+             0.95*(tol/(delta_x + EPS ))**(.25))
 
         deltah2 = deltah2*max(1., scale_x)
+        
+        !!        if ( scale_x .gt. 1. .and. i_proc == 0 ) then
+        !!           write(*,*) " bs5 new deltah2 ", deltah2
+        !!        endif
+        
         local_max_error = max(local_max_error, rel_error)
 
      else
@@ -426,10 +431,11 @@ subroutine cgyro_step_gk_bs5
   
   delta_t_gk = delta_t_last
   total_local_error = var_error
-  
-!!   if ( i_proc == 0 ) &
-!!       write(*,*) i_proc , " bst deltah2_min, max ", deltah2_min, deltah2_max, converged
-  
+
+  !!
+  !!   if ( i_proc == 0 ) &
+  !!       write(*,*) i_proc , " bst deltah2_min, max ", deltah2_min, deltah2_max, converged
+  !!  
   ! Filter special spectral components
   call cgyro_filter
 
