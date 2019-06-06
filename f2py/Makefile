@@ -7,8 +7,8 @@ all:
 	cd expro ; make
 
 pip:
-	python setup.py build_ext
-	python setup.py sdist
+	python ./setup.py build_ext
+	python ./setup.py sdist
 
 so:
 	cd module ; make

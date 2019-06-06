@@ -26,14 +26,14 @@ module expro
        'N_\mathrm{ion}               ',&
        'number of ions               '/)
 
-  character(len=10), dimension(20) :: expro_name
+  character*10, dimension(20) :: expro_name
   character*(strlen), dimension(4) :: expro_name_str = (/&
        'name                         ',&
        '-                            ',&
        '                             ',&
        'Species name                 '/)
 
-  character(len=10), dimension(20) :: expro_type
+  character*10, dimension(20) :: expro_type
   character*(strlen), dimension(4) :: expro_type_str = (/&
        'type                         ',&
        '-                            ',&
@@ -731,9 +731,9 @@ contains
           if (allocated(expro_rho)) call expro_init(0)
           call expro_init(1) 
        case ('name')
-          call expro_tcomm(expro_name,nion)
+          call expro_tcomm(expro_name(1:nion),nion)
        case ('type')
-          call expro_tcomm(expro_type,nion)
+          call expro_tcomm(expro_type(1:nion),nion)
        case ('masse')
           call expro_rcomm(expro_masse) 
        case ('mass')
