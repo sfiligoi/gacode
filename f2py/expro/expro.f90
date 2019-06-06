@@ -31,49 +31,49 @@ module expro
        'name                         ',&
        '-                            ',&
        '                             ',&
-       '                             '/)
+       'Species name                 '/)
 
   character(len=10), dimension(20) :: expro_type
   character*(strlen), dimension(4) :: expro_type_str = (/&
        'type                         ',&
        '-                            ',&
        '                             ',&
-       '                             '/)
+       'Species type (therm or fast) '/)
 
   double precision :: expro_masse=5.44887413e-4   ! me/m_H
   character*(strlen), dimension(4) :: expro_masse_str = (/&
        'masse                        ',&
        'm_H                          ',&
        '                             ',&
-       '                             '/)
+       'Electron mass (units of m_H) '/)
 
   double precision, dimension(:), allocatable :: expro_mass
   character*(strlen), dimension(4) :: expro_mass_str = (/&
        'mass                         ',&
        'm_H                          ',&
        '                             ',&
-       '                             '/)
+       'Ion mass (units of m_H)      '/)
 
   double precision :: expro_ze=-1.0
   character*(strlen), dimension(4) :: expro_ze_str = (/&
        'ze                           ',&
        '-                            ',&
-       'Z_e                          ',&
-       '                             '/)
+       'z_e                          ',&
+       'Electron charge              '/)
 
   double precision, dimension(:), allocatable :: expro_z
   character*(strlen), dimension(4) :: expro_z_str = (/&
        'z                            ',&
        '-                            ',&
-       '                             ',&
-       '                             '/)
+       'z_i                          ',&
+       'Ion charge                   '/)
 
   double precision :: expro_torfluxa=0.0
   character*(strlen), dimension(4) :: expro_torfluxa_str = (/&
        'torfluxa                     ',&
        'Wb/radian                    ',&
        '\psi_a                       ',&
-       '                             '/)
+       'Toroidal flux/2pi at LCFS    '/)
 
   double precision :: expro_rvbv=0.0
   character*(strlen), dimension(4) :: expro_rvbv_str = (/&
@@ -96,28 +96,28 @@ module expro
        'rho                          ',&
        '-                            ',&
        '\rho                         ',&
-       '                             '/)
+       'Normalized root of tor. flux '/)
 
   double precision, dimension(:), allocatable :: expro_rmin
   character*(strlen), dimension(4) :: expro_rmin_str = (/&
        'rmin                         ',&
        'm                            ',&
        'r                            ',&
-       '                             '/)
+       'Midplane minor radius        '/)
 
   double precision, dimension(:), allocatable :: expro_polflux
   character*(strlen), dimension(4) :: expro_polflux_str = (/&
        'polflux                      ',&
        'Wb/radian                    ',&
        '\psi                         ',&
-       '                             '/)
+       'Poloidal flux/2pi            '/)
 
   double precision, dimension(:), allocatable :: expro_q
   character*(strlen), dimension(4) :: expro_q_str = (/&
        'q                            ',&
        '-                            ',&
        'q                            ',&
-       '                             '/)
+       'Safety factor                '/)
 
   double precision, dimension(:), allocatable :: expro_w0
   character*(strlen), dimension(4) :: expro_w0_str = (/&
@@ -131,7 +131,7 @@ module expro
        'rmaj                         ',&
        'm                            ',&
        'R_0                          ',&
-       '                             '/)
+       'Midplane major radius        '/)
 
   double precision, dimension(:), allocatable :: expro_zmag
   character*(strlen), dimension(4) :: expro_zmag_str = (/&
@@ -249,15 +249,15 @@ module expro
   character*(strlen), dimension(4) :: expro_vpol_str = (/&
        'vpol                         ',&
        'm/s                          ',&
-       '                             ',&
-       '                             '/)
+       'v_\theta                     ',&
+       'Poloidal velocity            '/)
 
   double precision, dimension(:,:), allocatable :: expro_vtor
   character*(strlen), dimension(4) :: expro_vtor_str = (/&
        'vtor                         ',&
        'm/s                          ',&
-       '                             ',&
-       '                             '/)
+       'v_\varphi                    ',&
+       'Toroidal velocity            '/)
 
   double precision, dimension(:), allocatable :: expro_qohme
   character*(strlen), dimension(4) :: expro_qohme_str = (/&
@@ -485,8 +485,6 @@ contains
 
        allocate(expro_mass(nion))    ; expro_mass = 1.0
        allocate(expro_z(nion))       ; expro_z = 1.0
-       !allocate(expro_name(nion))
-       !allocate(expro_type(nion))
 
        allocate(expro_rho(nexp))     ; expro_rho = 0.0
        allocate(expro_rmin(nexp))    ; expro_rmin = 0.0
@@ -587,8 +585,6 @@ contains
 
        deallocate(expro_mass) 
        deallocate(expro_z) 
-       !deallocate(expro_name) 
-       !deallocate(expro_type) 
 
        deallocate(expro_rho)
        deallocate(expro_rmin)

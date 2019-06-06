@@ -1,6 +1,6 @@
 include ${GACODE_ROOT}/platform/build/make.inc.${GACODE_PLATFORM}
 
-DESTLIB=${GACODE_ROOT}/python/gapy.so
+OBJ=pygacode
 
 SRC= 	../vis/gapy_realfluct.f90 \
 	../vis/gapy_wheel1.f90 \
@@ -22,14 +22,13 @@ else
 endif
 
 objs:
-	${F2PYM} --quiet --overwrite-signature -m gapy -h sgn.pyf ${SRC}
+	${F2PYM} --quiet --overwrite-signature -m ${OBJ} -h sgn.pyf ${SRC}
 	${F2PY}  --quiet -lgomp --f90flags='${FOMP} ${FOPT} ${FMATH}' -c sgn.pyf ${SRC}
 
-	rm -f ${DESTLIB}
-	ln -s ${GACODE_ROOT}/gapy/f2py/gap*.so ${DESTLIB}
+	cp py*.so ${GACODE_ROOT}/python
 
 clean:
-	rm -f gap*.so ${DESTLIB} sgn.pyf *~
+	rm -f py*.so sgn.pyf *~ ${GACODE_ROOT}/python/py*.so
 
 exit:
 	echo "No f2py"

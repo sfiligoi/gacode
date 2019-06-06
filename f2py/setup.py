@@ -15,5 +15,5 @@ setup(name='pygacode',
       license='MIT',
       packages=['expro','geo'],
       ext_modules=[wrapper],
-      zip_safe=False
+      zip_safe=True
 )

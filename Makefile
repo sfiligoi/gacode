@@ -10,7 +10,7 @@ all:
 	cd gyro ; make
 	cd tgyro ; make
 	cd profiles_gen ; make
-	cd gapy ; make
+	cd f2py ; make
 	@echo "GACODE build done"
 
 clean:
@@ -25,7 +25,7 @@ clean:
 	cd gyro ; make clean
 	cd tgyro ; make clean
 	cd profiles_gen ; make clean
-	cd gapy ; make clean
+	cd f2py ; make clean
 	rm -f python/*/*.pyc
 	rm -f python/*.pyc
 	rm -f modules/*genmod*
