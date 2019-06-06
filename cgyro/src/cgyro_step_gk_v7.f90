@@ -137,8 +137,8 @@ subroutine cgyro_step_gk_v7
         delta_t_last_step = deltah2
      else
         delta_t_last = deltah2
-        !!        deltah2_min = min(deltah2, deltah2_min)
-        !!        deltah2_max = max(deltah2, deltah2_max)
+        deltah2_min = min(deltah2, deltah2_min)
+        deltah2_max = max(deltah2, deltah2_max)
      endif
 
      if (( conv .eq. 0 ) .and. (iiter .ge. 1)) then
@@ -155,7 +155,7 @@ subroutine cgyro_step_gk_v7
 !$omp end parallel workshare
      endif
      
-!!      if (i_proc == 0 ) write(*,*) iiter, " current time step size ", deltah2
+     !! if (i_proc == 0 ) write(*,*) iiter, " current time step size ", deltah2
      
      call cgyro_field_c     
      call cgyro_rhs(1)
@@ -341,7 +341,6 @@ subroutine cgyro_step_gk_v7
       rel_error = error_x(1)/(error_x(2)+1.d-12)
       var_error = sqrt(total_local_error + rel_error*rel_error)
 
-
       ! if mode is var_error
       !
       !     if ( var_error .lt. tol ) then
@@ -352,7 +351,8 @@ subroutine cgyro_step_gk_v7
       if ( error_x(1) .lt. tau ) then
          
 !!         if (i_proc == 0 ) &
-!!              write(*,*) "after me = ", i_proc, " local error ", rel_error
+!!              write(*,*) "V7 deltat", deltah2, &
+!!              " rel_error ", rel_error, " var error ", var_error
 
          total_local_error = total_local_error + rel_error*rel_error
 
@@ -362,14 +362,18 @@ subroutine cgyro_step_gk_v7
 
          total_delta_step = total_delta_step + deltah2
 
-         scale_x = max(0.95*(tol/(error_x(1) + EPS))**(1./6.), &
-              0.95*(tol/(error_x(1) + EPS))**(1./7.))
+         !! scale_x = max(0.95*(tol/(error_x(1) + EPS))**(1./6.), &
+         !! .95*(tol/(error_x(1) + EPS))**(1./7.))
+
+         scale_x = max((tol/(error_x(1) + EPS))**(1./6.), &
+              (tol/(error_x(1) + EPS))**(1./7.))
+
          
          deltah2 = deltah2*max(scale_x, 1.0)
          
-!!         if ( scale_x .gt. 1.0 .and. i_proc == 0 ) then
-!!            write(*,*) " new deltah2 ", deltah2
-         !!         endif
+!!         if (( scale_x .gt. 1.0 ) .and. (i_proc == 0 )) then
+!!            write(*,*) iiter, " new deltah2 ", deltah2
+!!         endif
          
          converged = converged + 1
          conv = 1
@@ -388,6 +392,7 @@ subroutine cgyro_step_gk_v7
       !! deltah2 = max(delta_t_min, deltah2)
 
       iiter = iiter + 1
+      
       if ( iiter .gt. rk_MAX) then
          write(*,*) " RK V7 exceeded iteration count ", iiter
          !! should do global mpiexit
@@ -411,8 +416,11 @@ subroutine cgyro_step_gk_v7
    delta_t_gk = delta_t_last
    total_local_error = var_error
    
-!!   if ( i_proc == 0 ) &
-!!        write(*,*) i_proc , " v7 converged deltah2_min, max ", deltah2_min, deltah2_max
+!!   if ( i_proc == 0 ) then
+!!        write(*,*) i_proc , " v7 converged deltah2_min, max ", &
+!!             deltah2_min, deltah2_max
+!!        write(*,*) i_proc , " v7 converged continuation ", delta_t_gk
+!!     endif
 
  end subroutine cgyro_step_gk_v7
 
