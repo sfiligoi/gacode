@@ -32,11 +32,11 @@ subroutine cgyro_step_gk_v7
   !            T               c               T   omega_a c
   !
 
-  real, parameter :: c1 = 7.0/90.0
-  real, parameter :: c4 = 32.0/90.0
-  real, parameter :: c5 = 32.0/90.0
-  real, parameter :: c7 = 12.0/90.0
-  real, parameter :: c8 = 7.0/90.0
+  real, parameter :: b1p = 7.0/90.0
+  real, parameter :: b4p = 32.0/90.0
+  real, parameter :: b5p = 32.0/90.0
+  real, parameter :: b7p = 12.0/90.0
+  real, parameter :: b8p = 7.0/90.0
   
   real, parameter :: a2 = 1.0/12.0
   real, parameter :: a3 = 1.0/6.0
@@ -299,11 +299,11 @@ subroutine cgyro_step_gk_v7
       do iv_loc=1,nv_loc
          do ic_loc=1,nc
             h_x(ic_loc,iv_loc) = h0_x(ic_loc,iv_loc) &
-                 +  deltah2*(c1*rhs(ic_loc,iv_loc,1) &
-                 + c4*rhs(ic_loc,iv_loc,4) &
-                 + c5*rhs(ic_loc, iv_loc, 5) &
-                 + c7*rhs(ic_loc,iv_loc,7) &
-                 + c8*rhs(ic_loc,iv_loc,8))
+                 +  deltah2*(b1p*rhs(ic_loc,iv_loc,1) &
+                 + b4p*rhs(ic_loc,iv_loc,4) &
+                 + b5p*rhs(ic_loc, iv_loc, 5) &
+                 + b7p*rhs(ic_loc,iv_loc,7) &
+                 + b8p*rhs(ic_loc,iv_loc,8))
          enddo
      enddo
 
