@@ -1,5 +1,5 @@
 #---------------------------
-# Toplevel makefile for gapy
+# Toplevel makefile for f2py
 #---------------------------
 
 all:

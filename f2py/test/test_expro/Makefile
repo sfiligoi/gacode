@@ -11,8 +11,8 @@ FC += ${FOMP}
 .SUFFIXES : .o .f90
 
 EXTRA_LIBS = \
-	${GACODE_ROOT}/gapy/expro/expro_lib.a \
-	${GACODE_ROOT}/gapy/geo/geo_lib.a
+	${GACODE_ROOT}/f2py/expro/expro_lib.a \
+	${GACODE_ROOT}/f2py/geo/geo_lib.a
 
 test: test.o
 	$(FC) -o test test.o ${EXTRA_LIBS} ${LMATH}
