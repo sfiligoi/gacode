@@ -404,13 +404,14 @@ subroutine cgyro_step_gk_v7
    if(allocated(h0_old)) deallocate(h0_old) 
    call cgyro_filter
 
-   if (var_error .gt. tol ) then
-      if ( i_proc .eq. 0) then
-         write(*,*) " *** HALTING local integration error *** "
-         write(*,*) " sum of total_rel_local_error ", var_error
-      endif
-      stop
-   endif
+   !! a better way?
+!!   if (var_error .gt. tol ) then
+!!      if ( i_proc .eq. 0) then
+!!         write(*,*) " *** HALTING local integration error *** "
+!!         write(*,*) " sum of total_rel_local_error ", var_error
+!!      endif
+!! stop
+!! endif
    
    delta_t_gk = delta_t_last
    total_local_error = var_error
