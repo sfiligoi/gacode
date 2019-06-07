@@ -154,7 +154,7 @@ subroutine cgyro_step_gk_v7
 !$omp end parallel workshare
      endif
      
-     if (i_proc == 0 ) write(*,*) iiter, " V7 paper current time step size ", deltah2
+     !! if (i_proc == 0 ) write(*,*) iiter, " V7 paper current time step size ", deltah2
      
      call cgyro_field_c     
      call cgyro_rhs(1)
@@ -340,12 +340,13 @@ subroutine cgyro_step_gk_v7
 
       ! if mode is var_error
       !
-      !     if ( var_error .lt. tol ) then
+      
+      if ( var_error .lt. tol ) then
+         
       !            if (i_proc == 0 ) &
       ! write(*,*) "after me = ", i_proc, " var error ", var_error
       !
-      
-      if ( error_x(1) .lt. tau ) then
+         !! if ( error_x(1) .lt. tau ) then
          
 !!         if (i_proc == 0 ) &
 !!              write(*,*) "V7 deltat", deltah2, &
@@ -366,7 +367,7 @@ subroutine cgyro_step_gk_v7
               (tol/(error_x(1) + EPS)*1./delta_t)**(1./7.))
 
 
-         deltah2 = deltah2*min(scale_x, 7.0)
+         deltah2 = deltah2*max(min(scale_x, 7.0), 1.)
          
          !! paper? deltah2 = deltah2*max(scale_x, 1.0)
          
@@ -392,7 +393,7 @@ subroutine cgyro_step_gk_v7
       iiter = iiter + 1
       
       if ( iiter .gt. rk_MAX) then
-         write(*,*) " RK V7 exceeded iteration count ", iiter
+         write(*,*) " RK V7 exceeded iteration count stopping ", iiter
          !! should do global mpiexit
          flush(6)
          stop
@@ -415,7 +416,7 @@ subroutine cgyro_step_gk_v7
    total_local_error = var_error
    
 !!   if ( i_proc == 0 ) then
-!!        write(*,*) i_proc , " v7 converged deltah2_min, max ", &
+!!        write(*,*) i_proc , " paper v7 converged deltah2_min, max ", &
 !!             deltah2_min, deltah2_max
 !!        write(*,*) i_proc , " v7 converged continuation ", delta_t_gk
 !!     endif
