@@ -38,6 +38,7 @@ cat > $SIMDIR/batch.src << EOF
 #BSUB -e $SIMDIR/batch.err
 #BSUB -nnodes $nodes
 #BSUB -alloc_flags "nvme gpumps smt$threads_per_core"
+#BSUB -step_cgroup n
 #BSUB -q batch
 #BSUB -W $w
 $CODE -e $LOCDIR -n $nmpi -nomp $threads_per_rank -mpinuma $mpinuma -p $SIMROOT
