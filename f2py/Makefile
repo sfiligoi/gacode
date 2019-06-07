@@ -7,6 +7,12 @@ all:
 	cd expro ; make
 
 pip:
+	mkdir pygacode
+	cp -r ${GACODE_ROOT}/python/cgyro pygacode
+	cp -r ${GACODE_ROOT}/python/gyro pygacode
+	cp -r ${GACODE_ROOT}/python/tgyro pygacode
+	cp -r ${GACODE_ROOT}/python/neo pygacode
+
 	python ./setup.py build_ext
 	python ./setup.py sdist
 
@@ -19,6 +25,7 @@ clean:
 	cd module ; make clean
 	cd test ; make clean
 	rm -rf dist build MANIFEST sgn.pyf
+	rm -rf pygacode
 
 .IGNORE:
 
