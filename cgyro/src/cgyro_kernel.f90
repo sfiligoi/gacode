@@ -33,9 +33,6 @@ subroutine cgyro_kernel
   ! the time_lib relies on MPI being initalized, so need to use lower level functions for this
   call system_clock(start_time,count_rate,count_max)
 
-  delta_t_tol = min(adapt_tol, error_tol)
-  delta_t_gk = delta_t
-  
   i_time = 0
 
   ! Need to initialize the info runfile very early
@@ -104,7 +101,10 @@ subroutine cgyro_kernel
     close(statusfd)
   endif
 
-
+  ! setting adaptive time-stepping parameters
+  
+  delta_t_tol = min(adapt_tol, error_tol)
+  delta_t_gk = delta_t
   
   do i_time=1,n_time
 
@@ -123,21 +123,19 @@ subroutine cgyro_kernel
      ! Collisionless step: returns new h_x, cap_h_x, fields 
      ! Normal timestep
      
-     error_mode=0  !! should be from input
+     error_mode=0  !! currently default to sum of relative error
 
-     !! if ( delta_gk_method == 0 ) 
-     ! call cgyro_step_gk
+     !! if ( delta_t_method == 0 ) ! default
 
-     !! if ( delta_gk_method == 1 )
+     call cgyro_step_gk
+
+     !! if ( delta_t_method == 1 )     
      
      !! call cgyro_step_gk_bs5 !! bogacki-shampine 5(4)
+     !! if ( delta_t_method == 2 )     
      !! call cgyro_step_gk_ck  !! cash-karp or 5(4)
-     
-     !! call cgyro_step_gk_ts   !! order 5(4) ts; use 3
-     call cgyro_step_gk_v7   !! vernier order 7(6)
-     !! call cgyro_step_gk_ss  !! sharp-smart order 5(4)
-     !!
-     !! call cgyro_step_gk_dp !! dormand-prince adaptive 5(4)?
+     !! if ( delta_t_method == 3 )     
+     !! call cgyro_step_gk_v7   !! vernier order 7(6)
 
      call timer_lib_in('str_mem')
 !$acc update host(rhs(:,:,1))
