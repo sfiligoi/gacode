@@ -90,8 +90,6 @@ nmpi=1
 nomp=1
 numa=0
 mpinuma=0
-nidle=0
-START=new
 
 #=============================================================
 # Parse command line options
@@ -114,8 +112,6 @@ while [ $# -gt 0 ] ; do
   -numa) shift ; numa=$1 ;;
 
   -mpinuma) shift ; mpinuma=$1 ;;
-
-  -start) shift ; START=$1 ;;
 
   -queue) shift ; QUEUE=$1 ;;
 
@@ -142,9 +138,10 @@ SIMDIR=$SIMROOT/$LOCDIR
 #=============================================================
 
 # Manage execution on ORNL SUMMIT
-if [[ '$GACODE_PLATFORM' -eq SUMMIT_JC ]] ; then
+if [[ "$GACODE_PLATFORM" -eq SUMMIT_JC ]] ; then
     . $GACODE_ROOT/platform/qsub/qsub.$GACODE_PLATFORM
-    cat batch.src
+    cat $SIMDIR/batch.src
+    $GACODE_ROOT/platform/exec/exec.$GACODE_PLATFORM $SIMDIR $nmpi $CODE 0 1 $mpinuma 
     exit 0
 fi
 

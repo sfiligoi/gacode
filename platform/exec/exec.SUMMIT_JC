@@ -4,6 +4,7 @@
 simdir=${1}
 nmpi=${2} # nodes
 exec=${3}
+debug=${5} #NOTE: using this for debug flag (replaces numa=0)
 mpinuma=${6} # MPI per GPU
 
 cd $simdir
@@ -23,23 +24,83 @@ let nrs=2*$gpus_per_socket*$nodes
 let threads_per_rank=$threads_per_core*$cores_per_rank
 let snmpi=2*$ranks_per_socket*$nodes
 
-echo "smt level smt$threads_per_core"
-ulimit -s 10240
+if [ $debug -eq 0 ] ; then
 
-export PAMI_ENABLE_STRIPING=1
-export OMP_NUM_THREADS=$threads_per_rank
+ulimit -s 10240
+ulimit -c 0
+
+module load cuda
+module load essl
+module unload darshan-runtime
+module list
+
+export PAMI_ENABLE_STRIPING=0
+export PAMI_IBV_ADAPTER_AFFINITY=1
+export PAMI_IBV_DEVICE_NAME="mlx5_0:1"
+export PAMI_IBV_DEVICE_NAME_1="mlx5_3:1"
+export PAMI_IBV_ENABLE_OOO_AR=1
+export PAMI_IBV_QP_SERVICE_LEVEL=8
+
+unset PAMI_IBV_ENABLE_DCT
+
+export MP_EAGER_LIMIT=1028
 export OMP_STACKSIZE=400M
-export MP_EAGER_LIMIT=$eager
+export OMP_NUM_THREADS=$threads_per_rank
+export PMPI_GPU_AWARE=1
 
 jsrun \
 -D CUDA_VISIBLE_DEVICES \
 -E OMP_NUM_THREADS=$threads_per_rank \
+-E PMPI_GPU_AWARE=1 \
 --nrs $nrs \
 --tasks_per_rs $ranks_per_gpu \
 --cpu_per_rs $cores_per_gpu \
 --gpu_per_rs 1 \
 --bind=proportional-packed:$cores_per_rank \
 -d plane:$ranks_per_gpu \
--l gpu-cpu \
---smpiargs="-gpu -mca osc_pami_use_tunnel_atomics 1 -mca osc_pami_tunnel_atomics_hint_commutative_operations 1" \
+-l cpu-cpu \
+--smpiargs="-gpu" \
 $exec
+
+fi
+
+# -- diagnostics
+
+cat << EOF
+ulimit -s 10240
+ulimit -c 0
+
+module load cuda
+module load essl
+module unload darshan-runtime
+module list
+
+export PAMI_ENABLE_STRIPING=0
+export PAMI_IBV_ADAPTER_AFFINITY=1
+export PAMI_IBV_DEVICE_NAME="mlx5_0:1"
+export PAMI_IBV_DEVICE_NAME_1="mlx5_3:1"
+export PAMI_IBV_ENABLE_OOO_AR=1
+export PAMI_IBV_QP_SERVICE_LEVEL=8
+
+unset PAMI_IBV_ENABLE_DCT
+
+export MP_EAGER_LIMIT=1028
+export OMP_STACKSIZE=400M
+export OMP_NUM_THREADS=$threads_per_rank
+export PMPI_GPU_AWARE=1
+
+jsrun \
+-D CUDA_VISIBLE_DEVICES \
+-E OMP_NUM_THREADS=$threads_per_rank \
+-E PMPI_GPU_AWARE=1 \
+--nrs $nrs \
+--tasks_per_rs $ranks_per_gpu \
+--cpu_per_rs $cores_per_gpu \
+--gpu_per_rs 1 \
+--bind=proportional-packed:$cores_per_rank \
+-d plane:$ranks_per_gpu \
+-l cpu-cpu \
+--smpiargs="-gpu" \
+$exec
+
+EOF
