@@ -103,17 +103,16 @@ subroutine cgyro_step_gk_v7
   deltah2_max = 0.
   
   iiter = 0
-  min_scale_factor = 0.125
-  max_scale_factor = 4.0
+  min_scale_factor = 1./7.
+  max_scale_factor = 7.
   
   tol = delta_t_tol
-  delta_t_min = orig_delta_t*1.e-10
+  delta_t_min = orig_delta_t*1.e-8
   delta_t_max = orig_delta_t
   delta_t_last = deltah2  ! just a dummy initializer
   delta2_h_min = 1.0
   delta2_h_max = -1.0
 
-  
   converged = 0
   conv = 0
   rk_MAX = 10000
@@ -155,13 +154,11 @@ subroutine cgyro_step_gk_v7
 !$omp end parallel workshare
      endif
      
-     !! if (i_proc == 0 ) write(*,*) iiter, " current time step size ", deltah2
+     if (i_proc == 0 ) write(*,*) iiter, " V7 paper current time step size ", deltah2
      
      call cgyro_field_c     
      call cgyro_rhs(1)
      
-     !!
-     !!
 !$omp parallel do collapse(2)
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
@@ -208,7 +205,7 @@ subroutine cgyro_step_gk_v7
            h_x(ic_loc,iv_loc) = h0_x(ic_loc,iv_loc) &
                 + deltah2 * (b51*rhs(ic_loc,iv_loc,1) &
                 + b53*rhs(ic_loc,iv_loc,3) &
-                + b54 * rhs(ic_loc,iv_loc,4))
+                + b54*rhs(ic_loc,iv_loc,4))
               enddo
      enddo
 
@@ -365,11 +362,13 @@ subroutine cgyro_step_gk_v7
          !! scale_x = max(0.95*(tol/(error_x(1) + EPS))**(1./6.), &
          !! .95*(tol/(error_x(1) + EPS))**(1./7.))
 
-         scale_x = max((tol/(error_x(1) + EPS))**(1./6.), &
-              (tol/(error_x(1) + EPS))**(1./7.))
+         scale_x = max((tol/(error_x(1) + EPS)*1./delta_t)**(1./6.), &
+              (tol/(error_x(1) + EPS)*1./delta_t)**(1./7.))
 
+
+         deltah2 = deltah2*min(scale_x, 7.0)
          
-         deltah2 = deltah2*max(scale_x, 1.0)
+         !! paper? deltah2 = deltah2*max(scale_x, 1.0)
          
 !!         if (( scale_x .gt. 1.0 ) .and. (i_proc == 0 )) then
 !!            write(*,*) iiter, " new deltah2 ", deltah2
@@ -381,14 +380,13 @@ subroutine cgyro_step_gk_v7
          conv = 0
          deltah2 = .5*deltah2
          if (i_proc .eq. 0 ) then
-            write(*,*) " V7 ***  error backing up *** not converged "
-            write(*,*) " new deltah2 ", deltah2,  " rel error ", rel_error
-            !! " rk error x1 ", error_x(1), &
-            !! " h1_x norm ", error_x(2)
+            write(*,*) " V7 paper ***  error backing up *** not converged "
+            write(*,*) " new deltah2 ", deltah2, " iteration ", iiter
+            write(*,*) " rel error ", rel_error 
          endif
       endif
 
-      !! deltah2 = min(deltah2, delta_t_max)
+      !! paper deltah2 = min(deltah2, delta_t_max)
       !! deltah2 = max(delta_t_min, deltah2)
 
       iiter = iiter + 1
@@ -408,7 +406,7 @@ subroutine cgyro_step_gk_v7
    if (var_error .gt. tol ) then
       if ( i_proc .eq. 0) then
          write(*,*) " *** HALTING local integration error *** "
-         write(*,*) " total_local_error variance ", var_error
+         write(*,*) " sum of total_rel_local_error ", var_error
       endif
       stop
    endif
