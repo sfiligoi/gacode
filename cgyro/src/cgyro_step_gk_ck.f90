@@ -71,7 +71,7 @@ subroutine cgyro_step_gk_ck
   rkMAXITER = 10000
   converged = 0
   deltah2_min = 1.e10
-  deltah2_max = 0.
+  deltah2_max = -1.
   
 !$omp parallel workshare
   h0_old = h_x
@@ -90,8 +90,12 @@ subroutine cgyro_step_gk_ck
         !! if ( deltah2 .lt. 1.d-8 ) goto 1111   !! abandon keep?
      else
         delta_t_last = deltah2
-        !!? for safety?        deltah2_min = min(deltah2, deltah2_min)
-        !!        deltah2_max = max(deltah2, deltah2_max)
+        deltah2_min = min(deltah2, deltah2_min)
+        deltah2_max = max(deltah2, deltah2_max)
+     endif
+
+     if ( i_proc .eq. 0 ) then
+        write(*,*) " ck4 current deltah2 ", deltah2
      endif
 
      if (( conv .eq. 0 ) .and. (iiter .ge. 1)) then
@@ -231,24 +235,14 @@ subroutine cgyro_step_gk_ck
 
      rel_error = error_x(1)/(error_x(2) +1.d-12)
 
-     !! if ( i_proc .eq. 0 ) write(*,*) " error_x ", error_x(1), error_x(2), rel_error
-     
      !!     var_error = sqrt(total_local_error + rel_error*rel_error)/max(sqrt(abs(iiter-1.)), 1.)
      var_error = sqrt(total_local_error + rel_error*rel_error)
 
-     if ( error_x(1) .lt. tau_ck ) then
-
-        !! if ( i_proc .eq. 0 ) &
-        !! write(*,*) " local rel_error error ", rel_error, tau_ck
-
-        !! need a mode for tighter control
-        !! for variance tight control if ( var_error .lt. tol_ck ) then
-        !! if ( var_error .lt. tol_ck ) then
-        ! if ( i_proc .eq. 0 ) write(*,*) " using var_x ", var_error, " tol_ck ", tol_ck
-
-        !! h_x = h_rk(:,:,5)
-        !! endif
-
+     !! fro local error if ( error_x(1) .lt. tau_ck ) then
+     !! for variance tight control if ( var_error .lt. tol_ck ) then
+     
+     if ( var_error .lt. tol_ck ) then
+        
 !$omp parallel workshare        
         h0_old = h_x
 !$omp end parallel workshare
@@ -256,10 +250,12 @@ subroutine cgyro_step_gk_ck
         total_delta_step = total_delta_step + deltah2
         total_local_error = total_local_error + rel_error*rel_error
         
-        scale_x = max(0.95*(tol_ck/(error_x(1) + 1.d-12))**(.2), &
-             0.95*(tol_ck/(error_x(1) + 1.d-12))**(.25))
+        scale_x = max((tol_ck/(error_x(1) + 1.e-12)*1./delta_t)**(.2), &
+             (tol_ck/(error_x(1) + 1.e-12)*1./delta_t)**(.25))
         
-        deltah2 = deltah2 * max(1., scale_x)
+        scale_x = min(5., scale_x)
+        deltah2 = deltah2*max(1., scale_x)
+        
         local_max_error = max(local_max_error, rel_error)
 
         conv = 1
@@ -275,9 +271,8 @@ subroutine cgyro_step_gk_ck
         endif
      endif
 
-     !! safety? deltah2 = min(deltah2, delta_x_max)
+     !! deltah2 = min(deltah2, delta_x_max)
      !! deltah2 = max(delta_x_min, deltah2)
-
 
 !!     if (deltah2 .lt. 1.d-8) then
 !!        if ( i_proc .eq. 0 ) &
@@ -314,7 +309,9 @@ subroutine cgyro_step_gk_ck
   !! " delta_t_gk ", delta_t_gk
   
   !! paper, test
-  !! if ( i_proc .eq. 0 ) write(*,*) " Out ck4 deltah2_min, max ", deltah2_min, deltah2_max
+  
+  if ( i_proc .eq. 0 ) write(*,*) " Out ck4 deltah2_min, max ", &
+       iiter, deltah2_min, deltah2_max
   !!
 
   call timer_lib_out('str')

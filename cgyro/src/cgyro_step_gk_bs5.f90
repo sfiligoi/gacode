@@ -121,6 +121,7 @@ subroutine cgyro_step_gk_bs5
 
   local_max_error = 0.
   delta_t_last = 0.
+  delta_t_last_step = 0.
   orig_delta_x_t = delta_t
 
   iiter = 0
@@ -162,8 +163,8 @@ subroutine cgyro_step_gk_bs5
      else
         !! delta_t_gk = deltah2+delta_t_gk
         delta_t_last = deltah2
-        !!        deltah2_min = min(deltah2, deltah2_min)
-        !!        deltah2_max = max(deltah2, deltah2_max)
+        deltah2_min = min(deltah2, deltah2_min)
+        deltah2_max = max(deltah2, deltah2_max)
      endif
      
      if (( conv .eq. 0 ) .and. (iiter .ge. 1)) then
@@ -376,29 +377,36 @@ subroutine cgyro_step_gk_bs5
 
      !! method 1 local error
      
-     if ( error_x(1) .lt. tau ) then
+     !!if ( error_x(1) .lt. tau ) then
         
-        !! method 2 "variance" error
-        !! if ( var_error .lt. tol ) then
+     !! method 2 "variance" error
+     
+     if ( var_error .lt. tol ) then
         
+!!        if ( i_proc == 0 ) &
+        !! write(*,*) " BS5(4) **** local error mode ", rel_error, " variance error", var_err
+        !! or
+
         !! if ( i_proc == 0 ) &
-        !! write(*,*) " BS5(4) **** local error mode ", rel_error, " variance error", var_error
+        !! write(*,*) " paper dt ", deltah2, " BS5(4) **** var error mode ", rel_error, " variance error", var_error
+
         
         h0_old = h0_x
         
         converged = converged + 1
         conv = 1
+        
         total_delta_x_step = total_delta_x_step + deltah2
         total_local_error = total_local_error + rel_error*rel_error
 
-        scale_x = max(0.95*(tol/(delta_x + EPS ))**(.2), &
-             0.95*(tol/(delta_x + EPS ))**(.25))
+        !! scale_x = max(0.95*(tol/(delta_x + EPS ))**(.2), &
+        !! .95*(tol/(delta_x + EPS ))**(.25))
 
+        scale_x = max((tol/(delta_x + EPS )*1./delta_t)**(.2), &
+             (tol/(delta_x + EPS )*1./delta_t)**(.25))
+
+        scale_x = min(5., scale_x)
         deltah2 = deltah2*max(1., scale_x)
-        
-        !!        if ( scale_x .gt. 1. .and. i_proc == 0 ) then
-        !!           write(*,*) " bs5 new deltah2 ", deltah2
-        !!        endif
         
         local_max_error = max(local_max_error, rel_error)
 
@@ -412,31 +420,33 @@ subroutine cgyro_step_gk_bs5
         flush(6)
      endif
      
-     deltah2 = min(deltah2, delta_x_max)
-     deltah2 = max(delta_x_min, deltah2)
+     !! deltah2 = min(deltah2, delta_x_max)
+     !! deltah2 = max(delta_x_min, deltah2)
 
      iiter = iiter + 1
 
      if ( iiter .gt. rk_MAX ) then
         if ( i_proc .eq. 0 ) then
-           write(*,*) " bs5  max count  exceeded ", iiter
+           write(*,*) " bs5  max count  exceeded, stopping ", iiter
            flush(6)           
         endif
         stop
      endif
+     
   enddo
   
   call timer_lib_out('str')
   call cgyro_field_c
-  
+
   delta_t_gk = delta_t_last
   total_local_error = var_error
 
   !!
-  !!   if ( i_proc == 0 ) &
-  !!       write(*,*) i_proc , " bst deltah2_min, max ", deltah2_min, deltah2_max, converged
+  !! if ( i_proc == 0 ) &
+  !! write(*,*) i_proc , " bst deltah2_min, max converged ", deltah2_min, deltah2_max
   !!  
   ! Filter special spectral components
+  
   call cgyro_filter
 
   if(allocated(h_rk4)) deallocate(h_rk4)
