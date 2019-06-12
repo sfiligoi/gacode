@@ -125,17 +125,18 @@ subroutine cgyro_kernel
      
      error_mode=0  !! currently default to sum of relative error
 
-     !! if ( delta_t_method == 0 ) ! default
+     !! if ( delta_t_method == 0 ) ! default RK4
 
-     call cgyro_step_gk
+     !! call cgyro_step_gk         
 
      !! if ( delta_t_method == 1 )     
      
      !! call cgyro_step_gk_bs5 !! bogacki-shampine 5(4)
      !! if ( delta_t_method == 2 )     
      !! call cgyro_step_gk_ck  !! cash-karp or 5(4)
-     !! if ( delta_t_method == 3 )     
-     !! call cgyro_step_gk_v7   !! vernier order 7(6)
+     !! if ( delta_t_method == 3 )
+     
+     call cgyro_step_gk_v76   !! vernier order 7(6)
 
      call timer_lib_in('str_mem')
 !$acc update host(rhs(:,:,1))

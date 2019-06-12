@@ -56,7 +56,7 @@ OBJECTS = cgyro_globals.o \
 	  cgyro_step_gk_bs5.o \
 	  cgyro_step_gk_ss.o \
 	  cgyro_step_gk_ts.o \
-	  cgyro_step_gk_v7.o \
+	  cgyro_step_gk_v76.o \
 	  cgyro_step_gk_ck.o
 
 .SUFFIXES : .o .f90 .F90
