@@ -34,7 +34,7 @@ module prgen_globals
   integer, dimension(:), allocatable :: lump_vec
   integer :: ntop
 
-  integer :: true_aux_flag=0
+  integer :: true_aux_flag
   !----------------------------------------------------------
 
   ! Internal physics variables
