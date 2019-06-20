@@ -5,7 +5,7 @@ subroutine cgyro_step_gk_bs5
 
   implicit none
 
-  ! BS5(4), from Bogacki-Shampine
+  ! BS5(4), from Bogacki-Shampine, 1996
   !
   !
   !           z e             vpar            z e  vperp^2
@@ -104,6 +104,7 @@ subroutine cgyro_step_gk_bs5
   double precision, parameter :: b8p = 3293./556956.
 
   ! b1 - b1h
+  
   double precision, parameter :: e1 = -3./1280.
   double precision, parameter :: e2 = 0.
   double precision, parameter :: e3 = 6561./632320.
@@ -145,7 +146,7 @@ subroutine cgyro_step_gk_bs5
   conv = 0
   total_local_error = 0.
   
-  rk_MAX = 10000
+  rk_MAX = 1000
 
 !$omp parallel workshare
   h0_old = h_x
@@ -168,36 +169,40 @@ subroutine cgyro_step_gk_bs5
      endif
      
      if (( conv .eq. 0 ) .and. (iiter .ge. 1)) then
+        ! not converged so backing up
         
-!$omp parallel workshare
-        h0_x = h0_old
-        h_x = h0_x
-!$omp end parallel workshare
-        call cgyro_field_c
+!$omp parallel do collapse(2)
+        do iv_loc=1,nv_loc
+           do ic_loc=1,nc
+              h0_x(ic_loc,iv_loc) = h0_old(ic_loc, iv_loc)
+              h_x(ic_loc,iv_loc) = h0_old(ic_loc, iv_loc)
+           enddo
+        enddo
      else
-!$omp parallel workshare
-        h0_x = h_x
-!$omp end parallel workshare
-        call cgyro_field_c
+        ! h0_x = h_x
+!$omp parallel do collapse(2)
+        do iv_loc=1,nv_loc
+           do ic_loc=1,nc
+              h0_x(ic_loc,iv_loc) = h_x(ic_loc, iv_loc)
+           enddo
+        enddo
+        
      endif
+
+     call cgyro_field_c
 
      ! Stage 1
      !
      
      call cgyro_rhs(1)
 
-!! !$omp parallel do collapse(2)
-!!     do iv_loc=1,nv_loc
-!!        do ic_loc=1,nc
-!!           h_test(ic_loc,iv_loc) = h0_x(ic_loc,iv_loc) &
-!!                + a21*deltah2*rhs(ic_loc,iv_loc,1)
-!!        enddo
-!!     enddo
-
-!$omp parallel workshare
-     h_x = h0_x &
-          + a21*deltah2*rhs(:,:,1)
-!$omp end parallel workshare
+!$omp parallel do collapse(2)
+     do iv_loc=1,nv_loc
+        do ic_loc=1,nc
+           h_x(ic_loc,iv_loc) = h0_x(ic_loc,iv_loc) &
+                + a21*deltah2*rhs(ic_loc,iv_loc,1)
+        enddo
+     enddo
 
      call cgyro_field_c
 
@@ -235,7 +240,9 @@ subroutine cgyro_step_gk_bs5
      call cgyro_field_c
      
      ! Stage 4
+     
      call cgyro_rhs(4)
+     
      !  k5
 
 !$omp parallel do collapse(2)
@@ -286,76 +293,34 @@ subroutine cgyro_step_gk_bs5
         enddo
      enddo
 
-     
      call cgyro_field_c
      call cgyro_rhs(7)
 
-     !! soln = h_x of order 4
-     !! error_x(2) = sum(abs(h0_x(ic_loc,iv_loc)))
-
-!$omp parallel do collapse(2)
-     do iv_loc=1,nv_loc
-        do ic_loc=1,nc
-           h_x(ic_loc, iv_loc) = h0_x(ic_loc,iv_loc)  &
-                + deltah2*(a81*rhs(ic_loc, iv_loc, 1) &
-                + a83*rhs(ic_loc,iv_loc,3) &
-                + a84*rhs(ic_loc,iv_loc,4) &
-                + a85*rhs(ic_loc,iv_loc,5) &
-                + a86*rhs(ic_loc,iv_loc,6) &
-                + a87*rhs(ic_loc,iv_loc,7))
-        enddo
-     enddo
-
-     call cgyro_field_c
-     call cgyro_rhs(8)
-
-     !! soln = h_x of order 4
-
-!$omp parallel do collapse(2)
-     do iv_loc=1,nv_loc
-        do ic_loc=1,nc
-           h_rk4(ic_loc,iv_loc) = h0_x(ic_loc,iv_loc) &
-                + deltah2*((b1h)*rhs(ic_loc, iv_loc, 1) &
-                + (b3h)*rhs(ic_loc,iv_loc,3) &
-                + (b4h)*rhs(ic_loc,iv_loc,4) &
-                + (b5h)*rhs(ic_loc,iv_loc,5) &
-                + (b6h)*rhs(ic_loc,iv_loc,6) &
-                + (b7h)*rhs(ic_loc,iv_loc,7))
-        enddo
-     enddo
-
-     !! 5th order solution
-     
 !$omp parallel do collapse(2)
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
            h_x(ic_loc, iv_loc) = h0_x(ic_loc,iv_loc) &
-                + deltah2*(b1p*rhs(ic_loc, iv_loc, 1) &
-                + b3p*rhs(ic_loc,iv_loc,3) &
-                + b4p*rhs(ic_loc,iv_loc,4) &
-                + b5p*rhs(ic_loc,iv_loc,5) &
-                + b6p*rhs(ic_loc,iv_loc,6) &
-                + b7p*rhs(ic_loc,iv_loc,7) &
-                + b8p*rhs(ic_loc,iv_loc,8))
+                + deltah2*(b1*rhs(ic_loc, iv_loc, 1) &
+                + b3*rhs(ic_loc,iv_loc,3) &
+                + b4*rhs(ic_loc,iv_loc,4) &
+                + b5*rhs(ic_loc,iv_loc,5) &
+                + b6*rhs(ic_loc,iv_loc,6) &
+                + b7*rhs(ic_loc,iv_loc,7))
         enddo
      enddo
+     
+     call cgyro_field_c
 
+     !! 5th order solution
           
-     !! h_x = h_rk5 or us b-b1h
-     !!
-     !! error of order 5
-     !!
-     !! rk_error_x = deltah2*((b1-b1p)*rhs(ic_loc, iv_loc, 1) &
-     !! + (b3-b3p)*rhs(ic_loc,iv_loc,3) &
-     !! + (b4-b4p)*rhs(ic_loc,iv_loc,4) &
-     !! + (b5-b5p)*rhs(ic_loc,iv_loc,5) &
-     !! + (b6-b6p)*rhs(ic_loc,iv_loc,6) &
-     !! + (b7-b7p)*rhs(ic_loc,iv_loc,7))
-
 !$omp parallel do collapse(2)
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
-           rhs(ic_loc, iv_loc, 1) = h_x(ic_loc, iv_loc) - h_rk4(ic_loc, iv_loc)
+           rhs(ic_loc,iv_loc,1)= deltah2*((b1-b1h)*rhs(ic_loc, iv_loc, 1) &
+                + (b3-b3h)*rhs(ic_loc,iv_loc,3) &
+                + (b4-b4h)*rhs(ic_loc,iv_loc,4) &
+                + (b5-b5h)*rhs(ic_loc,iv_loc,5) &
+                + (b6-b6h)*rhs(ic_loc,iv_loc,6))
         enddo
      enddo
 
@@ -368,9 +333,8 @@ subroutine cgyro_step_gk_bs5
           MPI_SUM, MPI_COMM_WORLD, i_err)
      
      error_x = error_sum
-
      delta_x = error_x(1)
-     tau = tol * max(error_x(2), 1.)
+     tau = tol*max(error_x(2), 1.)
 
      rel_error = error_x(1)/(error_x(2)+EPS)
      var_error = sqrt(total_local_error + rel_error*rel_error)
@@ -383,16 +347,21 @@ subroutine cgyro_step_gk_bs5
      
      if ( var_error .lt. tol ) then
         
-!!        if ( i_proc == 0 ) &
+        !!        if ( i_proc == 0 ) &
         !! write(*,*) " BS5(4) **** local error mode ", rel_error, " variance error", var_err
         !! or
 
-        !! if ( i_proc == 0 ) &
-        !! write(*,*) " paper dt ", deltah2, " BS5(4) **** var error mode ", rel_error, " variance error", var_error
+        ! paper
+        if ( i_proc == 0 ) &
+             write(*,*) " paper dt ", deltah2, " BS5(4) **** var error mode ", rel_error, " variance error", var_error
 
-        
-        h0_old = h0_x
-        
+!$omp parallel do collapse(2)
+        do iv_loc=1,nv_loc
+           do ic_loc=1,nc
+              h0_old(ic_loc,iv_loc) = h0_x(ic_loc, iv_loc)
+           enddo
+        enddo
+
         converged = converged + 1
         conv = 1
         
@@ -402,14 +371,12 @@ subroutine cgyro_step_gk_bs5
         !! scale_x = max(0.95*(tol/(delta_x + EPS ))**(.2), &
         !! .95*(tol/(delta_x + EPS ))**(.25))
 
-        scale_x = max((tol/(delta_x + EPS )*1./delta_t)**(.2), &
+        scale_x = 0.95*max((tol/(delta_x + EPS )*1./delta_t)**(.2), &
              (tol/(delta_x + EPS )*1./delta_t)**(.25))
 
         scale_x = min(5., scale_x)
         deltah2 = deltah2*max(1., scale_x)
-        
         local_max_error = max(local_max_error, rel_error)
-
      else
         conv = 0
         deltah2 = .5*deltah2
@@ -420,14 +387,15 @@ subroutine cgyro_step_gk_bs5
         flush(6)
      endif
      
-     !! deltah2 = min(deltah2, delta_x_max)
-     !! deltah2 = max(delta_x_min, deltah2)
+     deltah2 = min(deltah2, delta_x_max)
+     deltah2 = max(delta_x_min, deltah2)
 
      iiter = iiter + 1
 
      if ( iiter .gt. rk_MAX ) then
         if ( i_proc .eq. 0 ) then
            write(*,*) " bs5  max count  exceeded, stopping ", iiter
+           write(*,*) " bs5  step size ", deltah2
            flush(6)           
         endif
         stop
