@@ -1,9 +1,12 @@
+# file processed by 2to3
+from __future__ import print_function, absolute_import
+from builtins import map, filter, range
 import sys
 import os
 import numpy as np
 import matplotlib.pyplot as plt
 from gacodefuncs import *
-import data
+from . import data
 
 MYDIR=os.path.basename(os.getcwd())
 
@@ -150,7 +153,7 @@ class cgyrodata_plot(data.cgyrodata):
       ax.set_title(r'$\mathrm{Fluctuation~intensity} \quad k_\theta = nq/r$')
         
       if nstr == 'null':
-         nvec = range(self.n_n)
+         nvec = list(range(self.n_n))
       else:
          nvec = str2list(nstr)
     
@@ -1083,7 +1086,7 @@ class cgyrodata_plot(data.cgyrodata):
    def plot_hball(self,itime=-1,spec=0,tmax=-1.0,ymin='auto',ymax='auto',nstr='null',ie=0,fig=None):
 
       if nstr == 'null':
-         nvec = range(self.n_n)
+         nvec = list(range(self.n_n))
       else:
          nvec = str2list(nstr)
 

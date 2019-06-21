@@ -1,3 +1,6 @@
+# file processed by 2to3
+from __future__ import print_function, absolute_import
+from builtins import map, filter, range
 vars_input_profiles = [
     ['rho', 'rmin', 'polflux', 'q', 'omega0'],
     ['rmaj', 'zmag', 'kappa', 'delta', 'zeta'],
@@ -187,7 +190,7 @@ class profiles_genData:
             self.data.update(tmp.data)
             self.n_exp = tmp.n_exp
             if verbose:
-                print('(INFO): (profiles_genData) ' + infile + ' found.')
+                print(('(INFO): (profiles_genData) ' + infile + ' found.'))
         except Exception as E:
             #raise (IOError('(ERROR): (profiles_genData) ' + infile + ' not found: ' + str(E)))
            pass
@@ -195,7 +198,7 @@ class profiles_genData:
         # OPTIONAL: Read input.profiles.extra if it exists
         try:
             self.data.update(profiles_gen_extra(infile + '.extra').data)
-            print('(INFO): (profiles_genData) ' + infile + '.extra found.')
+            print(('(INFO): (profiles_genData) ' + infile + '.extra found.'))
         except Exception as E:
             #print('(INFO): (profiles_genData) ' + infile + '.extra NOT loaded: ' + str(E))
            pass
@@ -205,7 +208,7 @@ class profiles_genData:
             tmp = profiles_gen_geo(infile + '.geo')
             self.geo.update(tmp.geo)
             self.nfourier = tmp.nfourier
-            print('(INFO): (profiles_genData) ' + infile + '.geo found.')
+            print(('(INFO): (profiles_genData) ' + infile + '.geo found.'))
         except Exception as E:
             #print('(INFO): (profiles_genData) ' + infile + '.geo NOT loaded: ' + str(E))
            pass
@@ -213,7 +216,7 @@ class profiles_genData:
         # OPTIONAL: Read input.profiles.jbs if it exists
         try:
             self.data.update(profiles_gen_jbs(infile + '.jbs').data)
-            print('(INFO): (profiles_genData) ' + infile + '.jbs found.')
+            print(('(INFO): (profiles_genData) ' + infile + '.jbs found.'))
         except Exception as E:
             #print('(INFO): (profiles_genData) ' + infile + '.jbs NOT loaded: ' + str(E))
            pass
@@ -315,5 +318,5 @@ if __name__ == '__main__':
     tmp = set(numpy.array(vars_input_profiles).flatten())
     tmp = tmp.union(set(vars_input_profiles_jbs))
     tmp = tmp.union(set(vars_input_profiles_extra))
-    print tmp.difference(set(fancyNames.keys()))
+    print(tmp.difference(set(fancyNames.keys())))
 

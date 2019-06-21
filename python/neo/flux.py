@@ -1,3 +1,6 @@
+# file processed by 2to3
+from __future__ import print_function, absolute_import
+from builtins import map, filter, range
 """flux.py is executed by the bash script neo_plot."""
 
 import sys
