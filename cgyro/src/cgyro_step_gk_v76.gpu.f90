@@ -401,11 +401,10 @@ subroutine cgyro_step_gk_v76
 
      error_rhs = 0.
 
-!!!     independent present(h0_x,h_x,rhs) reduction(+:error_rhs), 
 
-!!!$acc parallel loop collapse(2) gang present(h0_x,h_x,rhs) reduction(+:error_rhs)
+!! !$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs) reduction(+:error_rhs)
 
-!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs) reduction(+:error_rhs)
+!$acc parallel loop collapse(2) gang present(h0_x,h_x,rhs) reduction(+:error_rhs)
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
            rhs(ic_loc, iv_loc, 1) = deltah2*( &
@@ -423,7 +422,6 @@ subroutine cgyro_step_gk_v76
 
      error_hx = 0.
 
-!! !$acc parallel loop collapse(2) gang present(h_x) reduction(+:error_hx)
 !$acc parallel loop collapse(2) independent present(h_x) reduction(+:error_hx)
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
@@ -452,7 +450,6 @@ subroutine cgyro_step_gk_v76
      if ( i_proc == 0 ) &
           write(*,*) " paper V76effic **** rhs_error ", &
           error_x(1), " hx_error ", error_x(2)
-
 
      delta_x = error_x(1)
      tau = tol*max(error_x(2), 1.)
