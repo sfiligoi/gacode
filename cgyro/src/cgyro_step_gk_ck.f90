@@ -28,7 +28,7 @@ subroutine cgyro_step_gk_ck
   real delta_x_min, delta_x_max, local_max_error
   real tol_ck, total_delta_step
   real error_x(5), error_sum(5)
-  real tau_ck, delta_t_old, delta_t_gk_old, delta_t_last
+  real tau_ck, delta_t_old, delta_t_gk_old, delta_t_last, delta_t_last_step
   real last_total_error, rel_error, var_error
   real deltah2_min, deltah2_max, scale_x
   
@@ -89,6 +89,7 @@ subroutine cgyro_step_gk_ck
 
      if ( total_delta_step + deltah2 .gt. orig_delta_t ) then
         deltah2 = orig_delta_t - total_delta_step
+        delta_t_last_step = deltah2
      else
         delta_t_last = deltah2
         deltah2_min = min(deltah2, deltah2_min)
