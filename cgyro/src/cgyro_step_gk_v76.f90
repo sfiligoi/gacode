@@ -469,10 +469,8 @@ subroutine cgyro_step_gk_v76
   call timer_lib_out('str')
 
   delta_t_gk = delta_t_last
-  
   if ( delta_t_last_step .lt.  1.e-4*delta_t_last )  & 
        delta_t_gk = delta_t_last + delta_t_last_step
-
   total_local_error = var_error
 
   !!
