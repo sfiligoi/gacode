@@ -199,7 +199,6 @@ def smooth_pro(x,z,p,n):
 #---------------------------------------------------------------
 def extract(d,sd,key,w,spec,moment,norm=False,wmax=0.0,cflux='auto',dovar=False):
 
-   import glob
    import os
    import re
    import string
@@ -219,24 +218,25 @@ def extract(d,sd,key,w,spec,moment,norm=False,wmax=0.0,cflux='auto',dovar=False)
    
    x = []
    f = []
-   folder = glob.glob(d+'/'+sd+'*')
-   for sub in sorted(folder):
-      # If this is a directory, get the key value
-      for line in open(sub+'/input.cgyro').readlines():
-         if re.match(key,line):
-            found = float(string.splitfields(line,'=')[1]) 
-      x.append(found)
-      # Get the corresponding flux
-      sim = cgyrodata(sub+'/')
-      sim.getflux(cflux)
-      y = np.sum(sim.ky_flux,axis=(2,3))
-      # Flux for input (spec,moment) window w
-      ave,var = variance(y[spec,moment,:],sim.t,w,wmax)
-      if dovar:
-         f.append(var)
-      else:
-         f.append(ave)
-      print('INFO: (extract) Processed data in '+sub)
+   for i in range(32):
+      sub = d+'/'+sd+str(i)+'/'
+      if os.path.isdir(sub) == True:
+         # If this is a directory, get the key value
+         for line in open(sub+'/input.cgyro').readlines():
+            if re.match(key,line):
+               found = float(string.splitfields(line,'=')[1]) 
+         x.append(found)
+         # Get the corresponding flux
+         sim = cgyrodata(sub+'/')
+         sim.getflux(cflux)
+         y = np.sum(sim.ky_flux,axis=(2,3))
+         # Flux for input (spec,moment) window w
+         ave,var = variance(y[spec,moment,:],sim.t,w,wmax)
+         if dovar:
+            f.append(var)
+         else:
+            f.append(ave)
+         print('INFO: (extract) Processed data in '+sub)
 
    # return (scan parameter, flux, variance)
    if norm == True:
