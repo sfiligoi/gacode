@@ -201,7 +201,6 @@ def extract(d,sd,key,w,spec,moment,norm=False,wmax=0.0,cflux='auto',dovar=False)
 
    import os
    import re
-   import string
    import numpy as np
    from cgyro.data import cgyrodata
 
@@ -218,13 +217,13 @@ def extract(d,sd,key,w,spec,moment,norm=False,wmax=0.0,cflux='auto',dovar=False)
    
    x = []
    f = []
-   for i in range(32):
+   for i in range(64):
       sub = d+'/'+sd+str(i)+'/'
       if os.path.isdir(sub) == True:
          # If this is a directory, get the key value
          for line in open(sub+'/input.cgyro').readlines():
             if re.match(key,line):
-               found = float(string.splitfields(line,'=')[1]) 
+               found = float(line.split('=')[1]) 
          x.append(found)
          # Get the corresponding flux
          sim = cgyrodata(sub+'/')
