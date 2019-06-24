@@ -197,7 +197,7 @@ def smooth_pro(x,z,p,n):
 #---------------------------------------------------------------
 
 #---------------------------------------------------------------
-def extract(d,sd,key,w,spec,moment,norm=False,verbose=False,wmax=0.0,cflux='auto',variance=False):
+def extract(d,sd,key,w,spec,moment,norm=False,wmax=0.0,cflux='auto',dovar=False):
 
    import glob
    import os
@@ -213,14 +213,13 @@ def extract(d,sd,key,w,spec,moment,norm=False,verbose=False,wmax=0.0,cflux='auto
    # spec     = (0 ...) 
    # moment   = (0 ...)
    # norm     = True (density normalization)
-   # verbose  = True (error diagnostics)
    # wmax     = time-averaging minimum
    # cflux    = 'on'/'off'/'auto'
-   # variance = True/False (variance calculation)
+   # dovar    = True/False (variance calculation)
    
    x = []
    f = []
-   folder = d+'/'+sd+'*'
+   folder = glob.glob(d+'/'+sd+'*')
    for sub in sorted(folder):
       # If this is a directory, get the key value
       for line in open(sub+'/input.cgyro').readlines():
@@ -228,12 +227,12 @@ def extract(d,sd,key,w,spec,moment,norm=False,verbose=False,wmax=0.0,cflux='auto
             found = float(string.splitfields(line,'=')[1]) 
       x.append(found)
       # Get the corresponding flux
-      sim = cgyrodata(sub)
+      sim = cgyrodata(sub+'/')
       sim.getflux(cflux)
       y = np.sum(sim.ky_flux,axis=(2,3))
       # Flux for input (spec,moment) window w
       ave,var = variance(y[spec,moment,:],sim.t,w,wmax)
-      if variance:
+      if dovar:
          f.append(var)
       else:
          f.append(ave)
@@ -244,8 +243,6 @@ def extract(d,sd,key,w,spec,moment,norm=False,verbose=False,wmax=0.0,cflux='auto
       return np.array(x),np.array(f)/sim.dens[spec]
    else:
       return np.array(x),np.array(f)
-      
-   
 #---------------------------------------------------------------
 
 #---------------------------------------------------------------
