@@ -513,14 +513,16 @@ class cgyrodata_plot(data.cgyrodata):
 
       for ispec in range(ns):
          y_norm = y[ispec,:]*norm_vec[ispec]
-         ave    = average(y_norm,t,w,wmax)
-         y_ave  = ave*np.ones(len(t))
+         ave,var = variance(y_norm,t,w,wmax)
+         y_ave   = ave*np.ones(len(t))
          u = specmap(self.mass[ispec],self.z[ispec])
          label = r'$'+mtag+mnorm+'_'+u+'/'+mtag+'_\mathrm{GB}: '+str(round(ave,3))+'$'
          # Average
          ax.plot(t[imin:imax+1],y_ave[imin:imax+1],'--',color=color[ispec])
          # Time trace
          ax.plot(self.t,y_norm,label=label,color=color[ispec])
+
+         print('Var('+mtag+'_'+u+'): '+str(round(var,3)))
 
       ax.legend(loc=loc)
 

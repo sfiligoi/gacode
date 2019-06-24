@@ -9,6 +9,37 @@
 TIME=r'$(c_s/a)\,t$'
 
 #---------------------------------------------------------------
+# Generalization of average routine to include variance
+def variance(f,t,wmin,wmax):
+
+    import numpy as np
+    
+    n_time = len(t)
+
+    # Manage case with 2 time points (eigenvalue)
+    if len(t) == 2:
+        tmin = t[-1]
+        tmax = tmin
+        ave  = f[-1]
+        return ave
+
+    tmin = (1.0-wmin)*t[-1]
+    tmax = (1.0-wmax)*t[-1]
+
+    t_window = 0.0
+    ave      = 0.0 ; av2 = 0.0
+    for i in range(n_time-1):
+        if t[i] >= tmin and t[i] <= tmax: 
+            ave = ave+0.5*(f[i]+f[i+1])*(t[i+1]-t[i])
+            av2 = av2+0.5*(f[i]**2+f[i+1]**2)*(t[i+1]-t[i])
+            t_window = t_window+t[i+1]-t[i]
+
+    ave = ave/t_window
+    var = np.sqrt((av2/t_window-ave**2))
+   
+    return ave,var
+#---------------------------------------------------------------
+#---------------------------------------------------------------
 def average(f,t,wmin,wmax):
  
     n_time = len(t)
@@ -166,47 +197,53 @@ def smooth_pro(x,z,p,n):
 #---------------------------------------------------------------
 
 #---------------------------------------------------------------
-def extract(d,sd,key,w,spec,moment,norm=False,verbose=False,wmax=0.0,cflux='auto'):
+def extract(d,sd,key,w,spec,moment,norm=False,verbose=False,wmax=0.0,cflux='auto',variance=False):
 
+   import glob
    import os
    import re
    import string
    import numpy as np
    from cgyro.data import cgyrodata
 
-   # d       = directory
-   # sd      = prefix of subdirectory ('a' for a1,a2,a3)
-   # key     = key to scan (for example, 'GAMMA_P') 
-   # w       = time-averaging width 
-   # spec    = (0 ...) 
-   # moment  = (0 ...)
-   # norm    = True (density normalization)
-   # verbose = True (error diagnostics)
-   # wmax    = time-averaging minimum
-   # cflux   = 'on'/'off'/'auto'
+   # d        = directory
+   # sd       = prefix of subdirectory ('a' for a1,a2,a3)
+   # key      = key to scan (for example, 'GAMMA_P') 
+   # w        = time-averaging width 
+   # spec     = (0 ...) 
+   # moment   = (0 ...)
+   # norm     = True (density normalization)
+   # verbose  = True (error diagnostics)
+   # wmax     = time-averaging minimum
+   # cflux    = 'on'/'off'/'auto'
+   # variance = True/False (variance calculation)
    
    x = []
    f = []
-   for i in range(20):
-      ddir = d+'/'+sd+str(i)+'/'
+   folder = d+'/'+sd+'*'
+   for sub in sorted(folder):
       if os.path.isdir(ddir) == True:
          # If this is a directory, get the key value
-         for line in open(ddir+'input.cgyro').readlines():
+         for line in open(sub+'/input.cgyro').readlines():
             if re.match(key,line):
                found = float(string.splitfields(line,'=')[1]) 
          x.append(found)
          # Get the corresponding flux
-         sim = cgyrodata(ddir)
+         sim = cgyrodata(sub)
          sim.getflux(cflux)
          y = np.sum(sim.ky_flux,axis=(2,3))
          # Flux for input (spec,moment) window w
-         f.append(average(y[spec,moment,:],sim.t,w,wmax))
-         print('INFO: (extract) Processed data in '+ddir)
+         ave,var = variance(y[spec,moment,:],sim.t,w,wmax)
+         if variance:
+            f.append(var)
+         else:
+            f.append(ave)
+         print('INFO: (extract) Processed data in '+sub)
       else:
          if verbose:
-            print('INFO: (extract) Checked for but cannot find '+ddir)
+            print('INFO: (extract) Checked for but cannot find '+sub)
 
-   # return (scan parameter, flux)
+   # return (scan parameter, flux, variance)
    if norm == True:
       return np.array(x),np.array(f)/sim.dens[spec]
    else:
