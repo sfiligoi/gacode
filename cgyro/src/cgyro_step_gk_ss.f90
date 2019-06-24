@@ -6,7 +6,6 @@ subroutine cgyro_step_gk_ss
 
   implicit none
 
-  ! RK5(4) SS
   !
   !
   !           z e             vpar            z e  vperp^2
@@ -21,6 +20,8 @@ subroutine cgyro_step_gk_ss
   ! Apar -> field(2)
   ! Bpar -> field(3)
 
+  ! RK5(4) Sharp-Smart
+
   integer converged, conv, rk_MAX , iiter
   
   real orig_delta_x_t
@@ -34,12 +35,12 @@ subroutine cgyro_step_gk_ss
   
   complex, dimension(:,:), allocatable :: h0_old
 
-  real, parameter :: c2   = 16./105.
-  real, parameter :: c3   = 8./35.
-  real, parameter :: c4   = 9./20.
-  real, parameter :: c5   = 2./3.
-  real, parameter :: c6   = 7./9.
-  real, parameter :: c7   = 1.0
+  real, parameter :: c2 = 16./105.
+  real, parameter :: c3 = 8./35.
+  real, parameter :: c4 = 9./20.
+  real, parameter :: c5 = 2./3.
+  real, parameter :: c6 = 7./9.
+  real, parameter :: c7 = 1.0
 
   real, parameter :: a21  = 16./105.
   real, parameter :: a31  = 2./35.
@@ -51,11 +52,13 @@ subroutine cgyro_step_gk_ss
   real, parameter :: a52 = -7./20.
   real, parameter :: a53 = 3395./10044.
   real, parameter :: a54 = 49792./112995.
+  
   real, parameter :: a61 = -1223224109959./9199771214400.
   real, parameter :: a62 = 1234787701./2523942720.
   real, parameter :: a63 = 568994101921./3168810084960.
   real, parameter :: a64  = -105209683888./891227836395.
   real, parameter :: a65  = 9./25.
+  
   real, parameter :: a71  = 2462504862877./8306031988800.
   real, parameter :: a72  = -123991./287040.
   real, parameter :: a73  = 106522578491./408709510560.
@@ -119,7 +122,7 @@ subroutine cgyro_step_gk_ss
   converged = 0
   conv = 0
   
-  rk_MAX = 10000
+  rk_MAX = 1000
 
 !$omp parallel workshare
   h0_old = h_x
@@ -157,7 +160,7 @@ subroutine cgyro_step_gk_ss
      call cgyro_field_c
 
      !! for paper
-     !! if ( i_proc == 0 ) write(*,*) i_proc, " step ", iiter, " ss deltah2 ", deltah2
+     if ( i_proc == 0 ) write(*,*) i_proc, " step ", iiter, " ss deltah2 ", deltah2
      !! 
 
      !
@@ -204,10 +207,9 @@ subroutine cgyro_step_gk_ss
           + a53*rhs(:,:,3) + a54*rhs(:,:,4))
 !$omp end parallel workshare
      call cgyro_field_c
+     call cgyro_rhs(5)
      
      !  stage 5
-     
-     call cgyro_rhs(5)
 
 !$omp parallel workshare
      h_x = h0_x + deltah2*(a61*rhs(:,:,1) + a62*rhs(:,:,2) &
@@ -215,8 +217,6 @@ subroutine cgyro_step_gk_ss
 !$omp end parallel workshare
 
      call cgyro_field_c
-
-     ! stage 6
      call cgyro_rhs(6)
 
 !$omp parallel workshare
@@ -240,7 +240,8 @@ subroutine cgyro_step_gk_ss
      rhs(:,:,1) = deltah2*((b1-b1p)*rhs(:,:,1) &
           + (b3-b3p)*rhs(:,:,3) &
           + (b4-b4p)*rhs(:,:,4) &
-          + (b5-b5p)*rhs(:,:,5) + (b6-b6p)*rhs(:,:,6) &
+          + (b5-b5p)*rhs(:,:,5) &
+          + (b6-b6p)*rhs(:,:,6) &
           + (b7-b7p)*rhs(:,:,7))
 !$omp end parallel workshare
 
@@ -265,10 +266,11 @@ subroutine cgyro_step_gk_ss
      !! if ( error_mode .eq. 0 ) then local error
      !! if ( error_mode .eq. 1 ) then variance error
      
-     ! if ( var_error .lt. tol ) then
-     ! if ( i_proc == 0 ) write(*,*) " variance error mode ", var_error, total_local_error
+     if ( var_error .lt. tol ) then
+        
+        if ( i_proc == 0 ) write(*,*) deltah2, " variance error mode ", var_error, total_local_error
 
-     if ( error_x(1) .lt. tau ) then
+!!     if ( error_x(1) .lt. tau ) then
         
 !!         if ( i_proc == 0 ) &
 !!             write(*,*) " local error mode ", rel_error, " variance error", var_error
@@ -282,9 +284,10 @@ subroutine cgyro_step_gk_ss
         total_delta_step = total_delta_step + deltah2
         total_local_error = total_local_error + rel_error*rel_error
 
-        scale_x = max(0.95*(tol/(delta_x + EPS))**(.2), &
-             0.95*(tol/(delta_x + EPS))**(.25))
+        scale_x = .95*max((tol/(delta_x + EPS)*1./delta_t)**(.2), &
+             (tol/(delta_x + EPS)*1./delta_t)**(.25))
         
+        scale_x = min(5., scale_x)
         deltah2 = deltah2*max(1., scale_x)
         local_max_error = max(local_max_error, rel_error)
      else
@@ -297,8 +300,8 @@ subroutine cgyro_step_gk_ss
         endif
      endif
      
-     !! deltah2 = min(deltah2, delta_x_max)
-     !! deltah2 = max(delta_x_min, deltah2)
+     deltah2 = min(deltah2, delta_x_max)
+     deltah2 = max(delta_x_min, deltah2)
 
      iiter = iiter + 1
 
@@ -322,13 +325,16 @@ subroutine cgyro_step_gk_ss
   call cgyro_field_c
 
   delta_t_gk = delta_t_last
+  if ( delta_t_last_step .lt.  1.e-4*delta_t_last )  & 
+       delta_t_gk = delta_t_last + delta_t_last_step
+
 
   !! paper texts
-  !!  if ( i_proc .eq. 0 ) then
-  !!     write(*,*) " local error ", total_local_error
-  !!     write(*,*) " delta_t_gk ", delta_t_gk
-  !!     write(*,*) " variance local error sqrt of local error ", var_error
-  !!  endif
+  if ( i_proc .eq. 0 ) then
+     write(*,*) " local error ", total_local_error
+     write(*,*) " delta_t_gk ", delta_t_gk
+     write(*,*) " variance local error sqrt of local error ", var_error
+  endif
   
   total_local_error = var_error
 

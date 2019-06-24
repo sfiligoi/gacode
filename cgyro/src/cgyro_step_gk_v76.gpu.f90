@@ -1,6 +1,7 @@
 subroutine cgyro_step_gk_v76
-  use mpi
+
   use timer_lib
+  use mpi
   use cgyro_globals
 
   implicit none
@@ -20,7 +21,7 @@ subroutine cgyro_step_gk_v76
   ! Apar -> field(2)
   ! Bpar -> field(3)
 
-    integer converged, conv, rk_MAX , iiter
+  integer converged, conv, rk_MAX , iiter
   double precision orig_delta_x_t, total_delta_x_step, delta_x_min, delta_x_max
   double precision error_sum(2), error_x(2)
   double precision delta_x, tau, deltah2, local_max_error
@@ -28,8 +29,10 @@ subroutine cgyro_step_gk_v76
   double precision delta_t_last_step
   double precision deltah2_max, deltah2_min
   double precision var_error, scale_x, tol
+  double precision gt_error(2)
+  double precision error_rhs, error_hx
+  double precision local_error_rhs, local_error_hx
 
-  complex, dimension(:,:), allocatable :: h0_old
 
   !! butcher table
 
@@ -38,11 +41,11 @@ subroutine cgyro_step_gk_v76
   double precision, parameter :: a31  = -1.07679012345679012
   double precision, parameter :: a32  = 1.185679012345679012
   
-  double precision, parameter :: a41  = 0.4083333333333333333e-1
+  double precision, parameter :: a41  = .4083333333333333333e-1
   double precision, parameter :: a42  = 0.
-  double precision, parameter :: a43 =  0.1225
+  double precision, parameter :: a43 =  .1225
   
-  double precision, parameter :: a51 = 0.638913923625572678
+  double precision, parameter :: a51 =  .638913923625572678
   double precision, parameter :: a52 = 0.
   double precision, parameter :: a53 = -2.4556726382236568097
   double precision, parameter :: a54 = 2.27225871459808413161
@@ -51,7 +54,7 @@ subroutine cgyro_step_gk_v76
   double precision, parameter :: a62   = 0.
   double precision, parameter :: a63   = 10.804513886456137696
   double precision, parameter :: a64  = -8.35391465739619941197
-  double precision, parameter :: a65  = 0.8204875949566569791420
+  double precision, parameter :: a65  = .8204875949566569791420
   
   double precision, parameter :: a71  = 6.067741434696770992718
   double precision, parameter :: a72  = 0.
@@ -74,8 +77,8 @@ subroutine cgyro_step_gk_v76
   double precision, parameter :: a94  = 35.7638400399225700713502118
   double precision, parameter :: a95  = -4.3480228403929076533403703
   double precision, parameter :: a96  = 2.00986226837703589544194359
-  double precision, parameter :: a97  = 0.348749046033827240595382285
-  double precision, parameter :: a98  = -0.27143900510483128423715871
+  double precision, parameter :: a97  = .348749046033827240595382285
+  double precision, parameter :: a98  = -.27143900510483128423715871
 
   double precision, parameter :: a101  = -45.03007203429867712435322
   double precision, parameter :: a102  = 0.
@@ -89,27 +92,27 @@ subroutine cgyro_step_gk_v76
 
   double precision, parameter :: c1   = 0.
   double precision, parameter :: c2   = 5.e-2
-  double precision, parameter :: c3   =0.108888888888888888888888889
-  double precision, parameter :: c4   =0.163333333333333333333333333
-  double precision, parameter :: c5   =0.4555
-  double precision, parameter :: c6   =0.609509448997838131708700442
-  double precision, parameter :: c7   =0.884
-  double precision, parameter :: c8   =0.925
+  double precision, parameter :: c3   =.108888888888888888888888889
+  double precision, parameter :: c4   =.163333333333333333333333333
+  double precision, parameter :: c5   =.4555
+  double precision, parameter :: c6   =.609509448997838131708700442
+  double precision, parameter :: c7   =.884
+  double precision, parameter :: c8   =.925
   double precision, parameter :: c9   = 1.
   double precision, parameter :: c10   =1.
 
-  double precision, parameter :: b1 = 0.4715561848627222170431765108e-1
+  double precision, parameter :: b1 = .4715561848627222170431765108e-1
   double precision, parameter :: b2 = 0.
   double precision, parameter :: b3 = 0.
-  double precision, parameter :: b4 = 0.2575056429843415189596436101
-  double precision, parameter :: b5 = 0.26216653977412620477138630958
-  double precision, parameter :: b6 = 0.15216092656738557403231331992
-  double precision, parameter :: b7 = 0.49399691700324842469071758932
-  double precision, parameter :: b8 = -0.29430311714032504415572447441
-  double precision, parameter :: b9 =0.8131747232495109999734599440137e-1
+  double precision, parameter :: b4 = .2575056429843415189596436101
+  double precision, parameter :: b5 = .26216653977412620477138630958
+  double precision, parameter :: b6 = .15216092656738557403231331992
+  double precision, parameter :: b7 = .49399691700324842469071758932
+  double precision, parameter :: b8 = -.29430311714032504415572447441
+  double precision, parameter :: b9 =.8131747232495109999734599440137e-1
   double precision, parameter :: b10 = 0.
 
-  double precision, parameter :: b1h = 0.446086066063411762873181759748e-1
+  double precision, parameter :: b1h = .446086066063411762873181759748e-1
   double precision, parameter :: b2h = 0.
   double precision, parameter :: b3h = 0.
   double precision, parameter :: b4h = 0.267164037857137268050910226094
@@ -120,10 +123,28 @@ subroutine cgyro_step_gk_v76
   double precision, parameter :: b9h = 0.
   double precision, parameter :: b10h = 0.20295184663356282227670547938e-1
 
+  double precision, parameter :: e1 = b1-b1h
+  double precision, parameter :: e2 = b2-b2h
+  double precision, parameter :: e3 = b3-b3h
+  double precision, parameter :: e4 = b4-b4h
+  double precision, parameter :: e5 = b5-b5h
+  double precision, parameter :: e6 = b6-b6h
+  double precision, parameter :: e7 = b7-b7h
+  double precision, parameter :: e8 = b8-b8h
+  double precision, parameter :: e9 = b9-b9h
+  double precision, parameter :: e10 = b10-b10h
+
+
   double precision, parameter :: EPS  = 2.2d-12
-  
-  allocate(h0_old(nc,nv_loc))
-  h0_old = 0.
+
+  rhs = 0.
+
+!$acc parallel loop collapse(2) independent present(h0_old1)
+    do iv_loc=1,nv_loc
+       do ic_loc=1,nc
+          h0_old1(ic_loc,iv_loc) = 0.
+       enddo
+    enddo
 
   call timer_lib_in('str')
 
@@ -139,14 +160,13 @@ subroutine cgyro_step_gk_v76
 
   tol = delta_t_tol
   deltah2 = delta_t_gk
-  
 
   if ( delta_t_gk .lt. 1.d-10) then
      deltah2 = orig_delta_x_t
      delta_t_gk = deltah2
   endif
   
-  delta_x_min = 1.d-10*orig_delta_x_t
+  delta_x_min = 1.e-10*orig_delta_x_t
   delta_x_max = orig_delta_x_t
 
   converged = 0
@@ -155,9 +175,13 @@ subroutine cgyro_step_gk_v76
   
   rk_MAX = 10000
 
-!$omp parallel workshare
-  h0_old = h_x
-!$omp end parallel workshare
+!$acc parallel loop collapse(2) independent present(h0_old1,h_x)
+  do iv_loc=1,nv_loc
+     do ic_loc=1,nc
+        h0_old1(ic_loc,iv_loc) = h_x(ic_loc,iv_loc)
+     enddo
+  enddo
+
   conv = 0
   delta_t_gk = 0.
   deltah2_min = 1.d10
@@ -168,44 +192,49 @@ subroutine cgyro_step_gk_v76
      if ( total_delta_x_step + deltah2 .gt. orig_delta_x_t ) then
         deltah2 = orig_delta_x_t - total_delta_x_step
         delta_t_last_step = deltah2
+        if (deltah2 .lt. 1.e-10 ) goto 1000
      else
-        !! delta_t_gk = deltah2+delta_t_gk
         delta_t_last = deltah2
-        deltah2_min = min(deltah2, deltah2_min)
-        deltah2_max = max(deltah2, deltah2_max)
      endif
      
      call timer_lib_in('str_mem')             
      if (( conv .eq. 0 ) .and. (iiter .ge. 1)) then
         
-        call timer_lib_in('str_mem')        
-!$omp parallel workshare
-        h0_x = h0_old
-        h_x = h0_x
-!$omp end parallel workshare
+        call timer_lib_in('str_mem')
 
-
+!$acc parallel loop collapse(2) independent present(h0_x,h0_old1,h_x)
+        do iv_loc=1,nv_loc
+           do ic_loc=1,nc
+              h0_x(ic_loc,iv_loc) = h0_old1(ic_loc,iv_loc)
+              h_x(ic_loc,iv_loc) = h0_old1(ic_loc,iv_loc)
+           enddo
+        enddo
+  
         call timer_lib_out('str_mem')        
      else
         call timer_lib_in('str_mem')
-!$omp parallel workshare
-        h0_x = h_x
-!$omp end parallel workshare
-        call timer_lib_out('str_mem')        
+        
+!$acc parallel loop collapse(2) independent present(h0_x,h_x)
+        do iv_loc=1,nv_loc
+           do ic_loc=1,nc
+              h0_x(ic_loc,iv_loc) = h_x(ic_loc,iv_loc)
+           enddo
+        enddo
      endif
 
-     call cgyro_field_c
-
+     call timer_lib_out('str_mem')        
+     
+     call cgyro_field_c_gpu
+     
      if ( i_proc .eq. 0 ) write(*,*) " paper v76_effi deltah2 ", iiter, deltah2
-
 
      ! Stage 1
      !
      call cgyro_rhs(1)
 
      call timer_lib_in('str')
-     
-!$omp parallel do collapse(2)
+
+!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs(:,:,1))
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
            h_x(ic_loc,iv_loc) = h0_x(ic_loc,iv_loc) &
@@ -213,16 +242,15 @@ subroutine cgyro_step_gk_v76
         enddo
      enddo
 
-
      call timer_lib_out('str')
-     call cgyro_field_c
+     call cgyro_field_c_gpu
 
      ! Stage 2 ! k2
 
      call cgyro_rhs(2)
      call timer_lib_in('str')
      
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs)
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
            h_x(ic_loc, iv_loc) = h0_x(ic_loc,iv_loc) &
@@ -231,14 +259,14 @@ subroutine cgyro_step_gk_v76
         enddo
      enddo
      call timer_lib_out('str')
-     call cgyro_field_c
+     call cgyro_field_c_gpu
 
      ! Stage 3
      
      call cgyro_rhs(3)
      call timer_lib_in('str')     
      ! k4
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs)
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
            h_x(ic_loc, iv_loc) = h0_x(ic_loc, iv_loc) &
@@ -248,13 +276,13 @@ subroutine cgyro_step_gk_v76
      enddo
      call timer_lib_out('str')
 
-     call cgyro_field_c
+     call cgyro_field_c_gpu
      
      ! Stage 4
      call cgyro_rhs(4)
      !  k5
 
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs)
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
            h_x(ic_loc, iv_loc) = h0_x(ic_loc,iv_loc)  &
@@ -264,13 +292,13 @@ subroutine cgyro_step_gk_v76
         enddo
      enddo
 
-     call cgyro_field_c
+     call cgyro_field_c_gpu
      
      !  stage 5
      
      call cgyro_rhs(5)
 
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs)
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
            h_x(ic_loc, iv_loc) = h0_x(ic_loc,iv_loc) &
@@ -281,12 +309,12 @@ subroutine cgyro_step_gk_v76
         enddo
      enddo
 
-     call cgyro_field_c
+     call cgyro_field_c_gpu
 
      ! stage 6
      call cgyro_rhs(6)
 
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs)
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
            h_x(ic_loc, iv_loc) = h0_x(ic_loc,iv_loc) + &
@@ -299,13 +327,13 @@ subroutine cgyro_step_gk_v76
      enddo
 
      
-     call cgyro_field_c
+     call cgyro_field_c_gpu
      call cgyro_rhs(7)
 
      !! soln = h_x of order 4
      !! error_x(2) = sum(abs(h0_x(ic_loc,iv_loc)))
 
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs)
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
            h_x(ic_loc, iv_loc) = h0_x(ic_loc,iv_loc)  &
@@ -318,10 +346,10 @@ subroutine cgyro_step_gk_v76
         enddo
      enddo
 
-     call cgyro_field_c
+     call cgyro_field_c_gpu
      call cgyro_rhs(8)
 
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs)
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
            h_x(ic_loc, iv_loc) = h0_x(ic_loc,iv_loc)  &
@@ -335,10 +363,10 @@ subroutine cgyro_step_gk_v76
         enddo
      enddo
 
-     call cgyro_field_c
+     call cgyro_field_c_gpu
      call cgyro_rhs(9)
      
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs)
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
            h_x(ic_loc, iv_loc) = h0_x(ic_loc,iv_loc)  &
@@ -351,54 +379,77 @@ subroutine cgyro_step_gk_v76
         enddo
      enddo
 
-     call cgyro_field_c
+     call cgyro_field_c_gpu
      call cgyro_rhs(10)
 
      ! order 7 solution
      
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs)
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
            h_x(ic_loc,iv_loc) = h0_x(ic_loc,iv_loc) &
-                + deltah2*((b1)*rhs(ic_loc, iv_loc, 1) &
-                + (b4)*rhs(ic_loc,iv_loc,4) &
-                + (b5)*rhs(ic_loc,iv_loc,5) &
-                + (b6)*rhs(ic_loc,iv_loc,6) &
-                + (b7)*rhs(ic_loc,iv_loc,7) &
-                + (b8)*rhs(ic_loc,iv_loc,8) &
-                + (b9)*rhs(ic_loc,iv_loc,9))
+                + deltah2*(b1*rhs(ic_loc, iv_loc, 1) &
+                + b4*rhs(ic_loc,iv_loc,4) &
+                + b5*rhs(ic_loc,iv_loc,5) &
+                + b6*rhs(ic_loc,iv_loc,6) &
+                + b7*rhs(ic_loc,iv_loc,7) &
+                + b8*rhs(ic_loc,iv_loc,8) &
+                + b9*rhs(ic_loc,iv_loc,9))
         enddo
      enddo
-     call cgyro_field_c
+     call cgyro_field_c_gpu
 
-!$omp parallel do collapse(2)
+     error_rhs = 0.
+
+
+!! !$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs) reduction(+:error_rhs)
+
+!$acc parallel loop collapse(2) gang present(h0_x,h_x,rhs) reduction(+:error_rhs)
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
            rhs(ic_loc, iv_loc, 1) = deltah2*( &
-                (b1-b1h)*rhs(ic_loc, iv_loc, 1) &
-                + (b4-b4h)*rhs(ic_loc,iv_loc,4) &
-                + (b5-b5h)*rhs(ic_loc,iv_loc,5) &
-                + (b6-b6h)*rhs(ic_loc,iv_loc,6) &
-                + (b7-b7h)*rhs(ic_loc,iv_loc,7) &
-                + (b8-b8h)*rhs(ic_loc,iv_loc,8) &
-                + (b9-b9h)*rhs(ic_loc,iv_loc,9) &
-                + (b10-b10h)*rhs( ic_loc, iv_loc, 10))
+                e1*rhs(ic_loc, iv_loc, 1) &
+                + e4*rhs(ic_loc,iv_loc,4) &
+                + e5*rhs(ic_loc,iv_loc,5) &
+                + e6*rhs(ic_loc,iv_loc,6) &
+                + e7*rhs(ic_loc,iv_loc,7) &
+                + e8*rhs(ic_loc,iv_loc,8) &
+                + e9*rhs(ic_loc,iv_loc,9) &
+                + e10*rhs( ic_loc, iv_loc, 10))
+           error_rhs = error_rhs + abs(rhs(ic_loc, iv_loc, 1))
         enddo
      enddo
-           
+
+     error_hx = 0.
+
+!$acc parallel loop collapse(2) independent present(h_x) reduction(+:error_hx)
+     do iv_loc=1,nv_loc
+        do ic_loc=1,nc
+           error_hx = error_hx + abs(h_x(ic_loc,iv_loc))
+        enddo
+     enddo
+
      error_sum = 0.
      error_x = 0.
-     error_x(1) = sum(abs(rhs(:,:,1)))
-     error_x(2) = sum(abs(h_x))
+
+     !! error_x(1) = sum(abs(rhs(:,:,1)))
+     !! error_x(2) = sum(abs(h_x))
+
+     error_x(1) = error_rhs
+     error_x(2) = error_hx
 
      call timer_lib_in('str_comm')
      
-     call MPI_ALLREDUCE(error_x, error_sum, 2, MPI_DOUBLE_PRECISION,&
+     call MPI_ALLREDUCE(error_x, error_sum, 2, MPI_DOUBLE_PRECISION, &
           MPI_SUM, MPI_COMM_WORLD, i_err)
 
-     call timer_lib_out('str_comm')     
-     
      error_x = error_sum
+
+     call timer_lib_out('str_comm')     
+
+     if ( i_proc == 0 ) &
+          write(*,*) " paper V76effic **** rhs_error ", &
+          error_x(1), " hx_error ", error_x(2)
 
      delta_x = error_x(1)
      tau = tol*max(error_x(2), 1.)
@@ -415,18 +466,22 @@ subroutine cgyro_step_gk_v76
      if ( var_error .lt. tol ) then
         
         if ( i_proc == 0 ) &
-             write(*,*) " V76effic **** local error mode ", &
+             write(*,*) " paper V76effic **** local error mode ", &
              rel_error, " variance error", var_error
 
 
 !!paper        if ( i_proc == 0 ) &
         !! write(*,*) " dt ", deltah2, " V76 **** var error mode ", rel_error, " variance error", var_error
 
-!$omp parallel workshare
-        h0_old = h0_x
-!$omp end parallel workshare
-        call cgyro_field_c
-        
+!$acc parallel loop collapse(2) independent present(h0_x,h0_old1)
+        do iv_loc=1,nv_loc
+           do ic_loc=1,nc
+              h0_old1(ic_loc,iv_loc) = h0_x(ic_loc,iv_loc)
+           enddo
+        enddo
+
+        call cgyro_field_c_gpu
+
         converged = converged + 1
         conv = 1
         total_delta_x_step = total_delta_x_step + deltah2
@@ -450,7 +505,7 @@ subroutine cgyro_step_gk_v76
         endif
         flush(6)
      endif
-     
+
      deltah2 = min(deltah2, delta_x_max)
      deltah2 = max(delta_x_min, deltah2)
 
@@ -468,19 +523,21 @@ subroutine cgyro_step_gk_v76
   
   call timer_lib_out('str')
 
+1000 continue
+
   delta_t_gk = delta_t_last
   if ( delta_t_last_step .lt.  1.e-4*delta_t_last )  & 
        delta_t_gk = delta_t_last + delta_t_last_step
+  
   total_local_error = var_error
 
   !!
   if ( i_proc == 0 ) &
-       write(*,*) i_proc , " v76 deltah2_min, max converged ", deltah2_min, deltah2_max
+       write(*,*) i_proc , " paper v76 deltah2_min, max converged ", deltah2_min, deltah2_max
   !!  
   ! Filter special spectral components
   
   call cgyro_filter
+!!
 
-  if(allocated(h0_old)) deallocate(h0_old)
-  
 end subroutine cgyro_step_gk_v76

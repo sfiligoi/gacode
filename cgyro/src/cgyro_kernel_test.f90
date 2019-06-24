@@ -103,7 +103,7 @@ subroutine cgyro_kernel
 
   ! setting adaptive time-stepping parameters
   
-  delta_t_tol = min(adapt_tol, error_tol)
+  delta_t_tol = .1*min(adapt_tol, error_tol)
   delta_t_gk = delta_t
   
   do i_time=1,n_time
@@ -122,25 +122,25 @@ subroutine cgyro_kernel
 
      ! Collisionless step: returns new h_x, cap_h_x, fields 
      ! Normal timestep
-
-     if (integration_error(2) > adapt_tol .and. nonlinear_flag == 1) then
-        ! Trigger adaptive step
-        delta_t = delta_t/4
-        call cgyro_step_gk
-        call cgyro_step_gk
-        call cgyro_step_gk
-        call cgyro_step_gk
-        delta_t = 4*delta_t
-     else
-        ! Normal timestep
-        call cgyro_step_gk
-     endif
+     !!
+     !! if (integration_error(2) > adapt_tol .and. nonlinear_flag == 1) then
+     !! ! Trigger adaptive step
+     !! delta_t = delta_t/4
+     !! call cgyro_step_gk
+     !! call cgyro_step_gk
+     !! call cgyro_step_gk
+     !! call cgyro_step_gk
+     !! delta_t = 4*delta_t
+  !! else
+     !! ! Normal timestep
+     !! call cgyro_step_gk
+  !! endif
      
-     !error_mode=0  !! currently default to sum of relative error
+     error_mode=0  !! currently default to sum of relative error
 
      !! if ( delta_t_method == 0 ) ! default RK4
 
-     !call cgyro_step_gk
+     !! call cgyro_step_gk 
 
      !! if ( delta_t_method == 1 )     
      
@@ -148,12 +148,24 @@ subroutine cgyro_kernel
      !! if ( delta_t_method == 2 )     
      !! call cgyro_step_gk_ck  !! cash-karp or 5(4)
      !! if ( delta_t_method == 3 )
-     
-     !call cgyro_step_gk_v76   !! vernier order 7(6)
 
-     call timer_lib_in('str_mem')
+     !! call cgyro_step_gk_ss   !! sharp and smart 5(4)
+     
+  if (i_proc == 0) then
+     write(*,*) " in cgyro_kernel 0 "
+     flush(6)
+  endif
+
+  call cgyro_step_gk_v76   !! vernier order 7(6), efficient
+
+  if (i_proc == 0) then
+     write(*,*) " out cgyro_kernel 0 "
+     flush(6)
+  endif
+
+  call timer_lib_in('str_mem')
 !$acc update host(rhs(:,:,1))
-     call timer_lib_out('str_mem')
+  call timer_lib_out('str_mem')
 
      ! Collision step: returns new h_x, cap_h_x, fields
      if (collision_model == 5) then
@@ -214,6 +226,7 @@ subroutine cgyro_kernel
 100 continue
 
   ! Manage exit message
+
 
   if (error_status == 0) then
      if (nonlinear_flag == 1) then
