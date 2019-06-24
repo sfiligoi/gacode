@@ -222,26 +222,22 @@ def extract(d,sd,key,w,spec,moment,norm=False,verbose=False,wmax=0.0,cflux='auto
    f = []
    folder = d+'/'+sd+'*'
    for sub in sorted(folder):
-      if os.path.isdir(ddir) == True:
-         # If this is a directory, get the key value
-         for line in open(sub+'/input.cgyro').readlines():
-            if re.match(key,line):
-               found = float(string.splitfields(line,'=')[1]) 
-         x.append(found)
-         # Get the corresponding flux
-         sim = cgyrodata(sub)
-         sim.getflux(cflux)
-         y = np.sum(sim.ky_flux,axis=(2,3))
-         # Flux for input (spec,moment) window w
-         ave,var = variance(y[spec,moment,:],sim.t,w,wmax)
-         if variance:
-            f.append(var)
-         else:
-            f.append(ave)
-         print('INFO: (extract) Processed data in '+sub)
+      # If this is a directory, get the key value
+      for line in open(sub+'/input.cgyro').readlines():
+         if re.match(key,line):
+            found = float(string.splitfields(line,'=')[1]) 
+      x.append(found)
+      # Get the corresponding flux
+      sim = cgyrodata(sub)
+      sim.getflux(cflux)
+      y = np.sum(sim.ky_flux,axis=(2,3))
+      # Flux for input (spec,moment) window w
+      ave,var = variance(y[spec,moment,:],sim.t,w,wmax)
+      if variance:
+         f.append(var)
       else:
-         if verbose:
-            print('INFO: (extract) Checked for but cannot find '+sub)
+         f.append(ave)
+      print('INFO: (extract) Processed data in '+sub)
 
    # return (scan parameter, flux, variance)
    if norm == True:
