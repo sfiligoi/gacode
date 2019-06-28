@@ -10,8 +10,7 @@ def print_freq():
     np.set_printoptions(precision=5,suppress=True)
 
     print('   omega    gamma')
-    for i in range(nt):
-        print(sim.freq[:,0,i])
+    print(sim.freq[:,0,-1])
     
 def print_flux():
     b = np.zeros([sim.n_species])
@@ -58,6 +57,7 @@ if sim.n_n > 1:
     # Print flux (assuming nonlinear case)
     print_flux()
 else:
+    print_flux()
     # Pring frequency (assuming linear)
     print_freq()
         
