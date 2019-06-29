@@ -247,7 +247,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       print('INFO: (data_plot.py) l_corr = {:.3f}'.format(l_corr[0]))
 
-   def plot_phi(self,field=0,theta=0.0,fig=None):
+   def plot_phi(self,w=0.5,wmax=0.0,field=0,theta=0.0,fig=None):
 
       if fig is None:
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
@@ -262,10 +262,13 @@ class cgyrodata_plot(data.cgyrodata):
       ax.grid(which="majorminor",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(TIME)
-      ax.set_ylabel(r'$\left|'+ft+r'\right|$')
+      ax.set_ylabel(r'$\left|'+ft+r'\right|/\rho_{*D}$')
       ax.set_yscale('log')
       ax.set_title(r'$\mathrm{Fluctuation~intensity} \quad k_\theta = nq/r$')
       #======================================
+
+      # Get index for average window
+      imin,imax=iwindow(self.t,w,wmax)
 
       y0 = np.sum(f[:,0,:],axis=0)/self.rho      
 
@@ -279,10 +282,19 @@ class cgyrodata_plot(data.cgyrodata):
 
       ax.plot(self.t,yn,label=r'$n>0$')
         
+      # Averages
+      y0_ave = average(y0,self.t,w,wmax)
+      yn_ave = average(yn,self.t,w,wmax)
+      print('|phi_0|/rho_*D = {:.4f}'.format(y0_ave))
+      print('|phi_n|/rho_*D = {:.4f}'.format(yn_ave))
+
+      s = np.ones(imax-imin+1)
+      ax.plot(self.t[imin:imax+1],y0_ave*s,'--k')
+      ax.plot(self.t[imin:imax+1],yn_ave*s,'--k')
+
       ax.set_xlim([0,max(self.t)])
-
       ax.legend(loc=4)
-
+    
       head = '(cs/a) t     Phi_0/rho_*    Phi_n/rho_*'
 
       fig.tight_layout(pad=0.3)
