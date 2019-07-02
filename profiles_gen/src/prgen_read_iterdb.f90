@@ -197,6 +197,15 @@ subroutine prgen_read_iterdb
     onetwo_sscxl(:) = 0.0
   endif
 
+  ! qsync may be missing in iterdb file
+  read(1,'(a)',iostat=i) t
+  if (i == 0) then
+     print '(3(a))', 'INFO: (prgen_read_iterdb) Found new quantity "', trim(t), '" in iterdb file.'
+    read(1,*) onetwo_qsync(:)
+  else
+    onetwo_qsync(:) = 0.0
+  endif
+
 
   
   dpsi(:) = onetwo_psi(:)-onetwo_psi(1)

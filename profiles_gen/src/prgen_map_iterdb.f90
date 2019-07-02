@@ -194,12 +194,12 @@ subroutine prgen_map_iterdb
   expro_qfuse = 1e-6*onetwo_qfuse
   expro_qfusi = 1e-6*onetwo_qfusi
   ! Radiated
-  expro_qbrem = 0.0
-  expro_qsync = 0.0
+  expro_qbrem = 1e-6*(onetwo_qrad-onetwo_qione-onetwo_qsync)
+  expro_qsync = 1e-6*onetwo_qsync
   expro_qline = 0.0
   ! electron-to-ion exchange (positive for Te > Ti)
   expro_qei = -1e-6*onetwo_qdelt
-  ! neutrals (ion=ioninization, cx=charge exchange) 
+  ! neutrals (ion=ionization and recombination, cx=charge exchange) 
   expro_qione = 1e-6*onetwo_qione
   expro_qioni = 1e-6*onetwo_qioni
   expro_qcxi  = 1e-6*onetwo_qcx
