@@ -1,4 +1,4 @@
-import gapy
+from pygacode import expro
 import sys
 import string
 import numpy as np
@@ -16,9 +16,9 @@ n     = int(sys.argv[2])
 ftype = sys.argv[3]
 
 # Read profiles
-gapy.expro.expro_read('input.gacode')
-nexp = int(gapy.expro.expro_n_exp) 
-nfourier = int(gapy.expro.expro_nfourier)
+expro.expro_read('input.gacode')
+nexp = int(expro.expro_n_exp)
+nfourier = int(expro.expro_nfourier)
 
 print('nexp     = {:d}'.format(nexp))
 print('nfourier = {:d}'.format(nfourier))
@@ -38,13 +38,13 @@ else:
 if surf == 'msurf' or surf == 'surf':
    # Miller geometry flux-surfaces
    for i in rlist:
-      bigr = gapy.expro.expro_rmaj[i]  
-      bigz = gapy.expro.expro_zmag[i]   
-      r    = gapy.expro.expro_rmin[i]
-      d    = gapy.expro.expro_delta[i]
-      k    = gapy.expro.expro_kappa[i]
-      z    = gapy.expro.expro_zeta[i]
-      
+      bigr = expro.expro_rmaj[i]
+      bigz = expro.expro_zmag[i]
+      r    = expro.expro_rmin[i]
+      d    = expro.expro_delta[i]
+      k    = expro.expro_kappa[i]
+      z    = expro.expro_zeta[i]
+
       x = bigr+r*np.cos(t+np.arcsin(d)*np.sin(t))
       y = bigz+k*r*np.sin(t+z*np.sin(2*t))
 
@@ -56,10 +56,10 @@ if surf == 'msurf' or surf == 'surf':
 
 if nfourier > 0:
   
-   geo_ar = gapy.expro.expro_geo[0,:,:]
-   geo_br = gapy.expro.expro_geo[1,:,:]
-   geo_az = gapy.expro.expro_geo[2,:,:]
-   geo_bz = gapy.expro.expro_geo[3,:,:]
+   geo_ar = expro.expro_geo[0,:,:]
+   geo_br = expro.expro_geo[1,:,:]
+   geo_az = expro.expro_geo[2,:,:]
+   geo_bz = expro.expro_geo[3,:,:]
 
    if surf == 'fsurf' or surf == 'surf':
       # Fourier geometry flux-surfaces 
