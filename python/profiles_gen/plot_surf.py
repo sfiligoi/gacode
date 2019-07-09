@@ -75,10 +75,10 @@ if nfourier > 0:
             x = x+ar*np.cos(p*t)+br*np.sin(p*t)
             y = y+az*np.cos(p*t)+bz*np.sin(p*t)
 
-            if i == rlist[0]:
-               ax.plot(x,y,'-b',linewidth=1,label=r'$\mathrm{Fourier}~'+str(nfourier)+'$')
-            else:
-               ax.plot(x,y,'-b',linewidth=1)
+         if i == rlist[0]:
+            ax.plot(x,y,'-b',linewidth=1,label=r'$\mathrm{Fourier}~'+str(nfourier)+'$')
+         else:
+            ax.plot(x,y,'-b',linewidth=1)
 
    # LCFS
    i = nexp-1
