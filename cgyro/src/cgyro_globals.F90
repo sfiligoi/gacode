@@ -27,6 +27,7 @@ module cgyro_globals
   integer :: n_field
   real    :: e_max
   integer :: e_method
+  integer :: delta_t_method
   real    :: delta_t
   real    :: delta_t_gk
   real    :: delta_t_tol

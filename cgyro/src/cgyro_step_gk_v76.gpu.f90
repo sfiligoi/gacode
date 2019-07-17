@@ -137,12 +137,10 @@ subroutine cgyro_step_gk_v76
 
   double precision, parameter :: EPS  = 2.2d-12
 
-  rhs = 0.
-
-!$acc parallel loop collapse(2) independent present(h0_old1)
+!$acc parallel loop collapse(2) independent present(h0_old)
     do iv_loc=1,nv_loc
        do ic_loc=1,nc
-          h0_old1(ic_loc,iv_loc) = 0.
+          h0_old(ic_loc,iv_loc) = 0.
        enddo
     enddo
 
@@ -175,10 +173,10 @@ subroutine cgyro_step_gk_v76
   
   rk_MAX = 10000
 
-!$acc parallel loop collapse(2) independent present(h0_old1,h_x)
+!$acc parallel loop collapse(2) independent present(h0_old,h_x)
   do iv_loc=1,nv_loc
      do ic_loc=1,nc
-        h0_old1(ic_loc,iv_loc) = h_x(ic_loc,iv_loc)
+        h0_old(ic_loc,iv_loc) = h_x(ic_loc,iv_loc)
      enddo
   enddo
 
@@ -192,9 +190,10 @@ subroutine cgyro_step_gk_v76
      if ( total_delta_x_step + deltah2 .gt. orig_delta_x_t ) then
         deltah2 = orig_delta_x_t - total_delta_x_step
         delta_t_last_step = deltah2
-        if (deltah2 .lt. 1.e-10 ) goto 1000
      else
         delta_t_last = deltah2
+        deltah2_min = min(deltah2, deltah2_min)
+        deltah2_max = max(deltah2, deltah2_max)
      endif
      
      call timer_lib_in('str_mem')             
@@ -202,11 +201,11 @@ subroutine cgyro_step_gk_v76
         
         call timer_lib_in('str_mem')
 
-!$acc parallel loop collapse(2) independent present(h0_x,h0_old1,h_x)
+!$acc parallel loop collapse(2) independent present(h0_x,h0_old,h_x)
         do iv_loc=1,nv_loc
            do ic_loc=1,nc
-              h0_x(ic_loc,iv_loc) = h0_old1(ic_loc,iv_loc)
-              h_x(ic_loc,iv_loc) = h0_old1(ic_loc,iv_loc)
+              h0_x(ic_loc,iv_loc) = h0_old(ic_loc,iv_loc)
+              h_x(ic_loc,iv_loc) = h0_old(ic_loc,iv_loc)
            enddo
         enddo
   
@@ -404,7 +403,7 @@ subroutine cgyro_step_gk_v76
 
 !! !$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs) reduction(+:error_rhs)
 
-!$acc parallel loop collapse(2) gang present(h0_x,h_x,rhs) reduction(+:error_rhs)
+!$acc parallel loop collapse(2) gang present(rhs) reduction(+:error_rhs)
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
            rhs(ic_loc, iv_loc, 1) = deltah2*( &
@@ -465,18 +464,18 @@ subroutine cgyro_step_gk_v76
      
      if ( var_error .lt. tol ) then
         
-        if ( i_proc == 0 ) &
-             write(*,*) " paper V76effic **** local error mode ", &
-             rel_error, " variance error", var_error
+!!        if ( i_proc == 0 ) &
+!!             write(*,*) " paper V76effic **** local error mode ", &
+!!             rel_error, " variance error", var_error
 
 
 !!paper        if ( i_proc == 0 ) &
         !! write(*,*) " dt ", deltah2, " V76 **** var error mode ", rel_error, " variance error", var_error
 
-!$acc parallel loop collapse(2) independent present(h0_x,h0_old1)
+!$acc parallel loop collapse(2) independent present(h0_x,h0_old)
         do iv_loc=1,nv_loc
            do ic_loc=1,nc
-              h0_old1(ic_loc,iv_loc) = h0_x(ic_loc,iv_loc)
+              h0_old(ic_loc,iv_loc) = h0_x(ic_loc,iv_loc)
            enddo
         enddo
 
@@ -490,7 +489,7 @@ subroutine cgyro_step_gk_v76
         scale_x = .95*max((tol/(delta_x + EPS )*1./delta_t)**(1./6.), &
              (tol/(delta_x + EPS )*1./delta_t)**(1./7.))
 
-        scale_x = max(min(scale_x, 7.), 1.)
+        scale_x = max(min(scale_x, 8.), 1.)
         
         deltah2 = scale_x*deltah2
         
@@ -526,14 +525,14 @@ subroutine cgyro_step_gk_v76
 1000 continue
 
   delta_t_gk = delta_t_last
-  if ( delta_t_last_step .lt.  1.e-4*delta_t_last )  & 
+  if ( delta_t_last_step .lt.  .5*delta_t_last )  & 
        delta_t_gk = delta_t_last + delta_t_last_step
   
   total_local_error = var_error
 
   !!
-  if ( i_proc == 0 ) &
-       write(*,*) i_proc , " paper v76 deltah2_min, max converged ", deltah2_min, deltah2_max
+  !! if ( i_proc == 0 ) &
+  !! write(*,*) i_proc , " paper v76 deltah2_min, max converged ", deltah2_min, deltah2_max
   !!  
   ! Filter special spectral components
   
