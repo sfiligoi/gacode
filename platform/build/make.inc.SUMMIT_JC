@@ -30,8 +30,6 @@ FACC   =-acc -I${OLCF_CUDA_ROOT}/include CUDA_HOME=${CUDA_DIR} -Minfo=accel \
      	     -Mcudalib=cusolver -Mcudalib=cusparse \
 	     -Mcudalib=cublas
 
-
-
 FOMP   =-mp -Mstack_arrays
 FMATH  =-r8 -I${OLCF_FFTW_ROOT}/include
 FOPT   =-fast -fastsse -Mvect
@@ -39,7 +37,8 @@ FDEBUG =-g -Kieee -Ktrap=fp,divz -Mbounds -Mchkptr -Mchkstk -traceback -Minform=
 # F2PY   = f2py --fcompiler=pg
 
 LMATH=-L${OLCF_CUDA_ROOT}/lib64 -L${OLCF_ESSL_ROOT}/lib64 \
+				-L${CUDA_DIR}/lib64 -lcusolver -lcusparse -lcudart \
 				-lesslsmpcuda -lessl \
-				-L${CUDA_DIR}/lib64 -lcusolver -lcusparse -lcudart
+
 
 ARCH = ar cr
