@@ -23,7 +23,7 @@ FC=mpif90 -m64 -module ${GACODE_ROOT}/modules -Mpreprocess -DUSE_INLINE -fpic \
 
 CC=mpicc -m64 -fpic -I${OLCF_CUDA_ROOT}/include
 
-F77=mpif90 -m64 -acc -fast -fastsse -I${GACODE_ROOT}/modules -fpic
+F77=mpif90 -m64 -fast -fastsse -I${GACODE_ROOT}/modules -fpic
 
 FACC   =-acc -I${OLCF_CUDA_ROOT}/include CUDA_HOME=${CUDA_DIR} -Minfo=accel \
        	     -ta=nvidia,cc70 -Mcudalib=cufft \
