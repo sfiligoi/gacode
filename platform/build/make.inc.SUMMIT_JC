@@ -38,7 +38,7 @@ FDEBUG =-g -Kieee -Ktrap=fp,divz -Mbounds -Mchkptr -Mchkstk -traceback -Minform=
 
 LMATH=-L${OLCF_CUDA_ROOT}/lib64 -L${OLCF_ESSL_ROOT}/lib64 \
 				-L${CUDA_DIR}/lib64 -lcusolver -lcusparse -lcudart \
-				-lesslsmpcuda -lessl \
+				-lesslsmpcuda -lessl
 
 
 ARCH = ar cr
