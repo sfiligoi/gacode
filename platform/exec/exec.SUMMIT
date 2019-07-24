@@ -29,8 +29,6 @@ if [ $debug -eq 0 ] ; then
 ulimit -s 10240
 ulimit -c 0
 
-# module load cuda
-# module load essl
 module unload darshan-runtime
 module list
 
@@ -70,8 +68,6 @@ cat > $simdir/batch.out << EOF
 ulimit -s 10240
 ulimit -c 0
 
-# module load cuda
-# module load essl
 module unload darshan-runtime
 module list
 
