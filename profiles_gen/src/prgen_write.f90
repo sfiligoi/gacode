@@ -11,8 +11,6 @@ subroutine prgen_write
   use expro
 
   implicit none
-
-  integer :: i
   
   expro_rvbv = 0.0
   expro_ipa  = 0.0

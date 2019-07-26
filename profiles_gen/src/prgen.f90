@@ -29,7 +29,7 @@ program prgen
   !--------------------------------------------------
   ! Parse the config file
   !
-  open(unit=1,file='.config',status='old')
+  open(unit=1,file='.prgenconfig',status='old')
   read(1,'(a)') date
   read(1,'(a)') file_state
   read(1,'(a)') raw_data_type
@@ -62,9 +62,18 @@ program prgen
      ! Note (we may or may not have gmerge_flag == 1)
      print '(a)','INFO: (prgen) Assuming input.gacode (GACODE) format.'
 
-     call prgen_read_inputprofiles
+     call prgen_read_inputgacode
 
      format_type = 7
+
+  else if (trim(raw_data_type) == 'LEGACY') then
+
+     ! Note (we may or may not have gmerge_flag == 1)
+     print '(a)','INFO: (prgen) Assuming input.profiles (LEGACY GACODE) format.'
+
+     call prgen_read_inputprofiles
+
+     format_type = 8
 
   else if (trim(raw_data_type) == 'null') then
 
@@ -202,8 +211,8 @@ program prgen
      call prgen_map_corsica
   case (6)
      call prgen_map_ufile
-  case (7)
-     call prgen_map_inputprofiles
+  case (7,8)
+     call prgen_map_inputgacode
   end select
   
   call prgen_write

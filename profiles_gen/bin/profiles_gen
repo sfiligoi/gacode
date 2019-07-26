@@ -51,6 +51,7 @@ then
    echo 
    echo "             Autodetected profile formats:"
    echo "               GACODE      (input.gacode)"
+   echo "               LEGACY      (legacy input.profiles)"
    echo "               ITERDB      (text iterdb)"
    echo "               ITERDBNC    (netCDF iterdb)"
    echo "               SWIM        (plasmastate)"
@@ -300,7 +301,7 @@ fi
 # working root
 SIMROOT=$PWD
 
-CONFIG=.config
+CONFIG=.prgenconfig
 DESCRIBE_FLAG=0
 
 FILE_FLAG=0

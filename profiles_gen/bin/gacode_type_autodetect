@@ -5,6 +5,7 @@
 # Types:
 #
 #  GACODE      (input.gacode)
+#  LEGACY      (legacy input.profiles)
 #  ITERDB      (text iterdb)
 #  ITERDBNC    (netCDF iterdb)
 #  SWIM        (plasmastate)
@@ -17,6 +18,10 @@
 
 if [ "$1" == "input.gacode" ] ; then
     echo "GACODE" 
+    exit 0
+fi
+if [ "$1" == "input.profiles" ] ; then
+    echo "LEGACY" 
     exit 0
 fi
 if [ "$1" == "UFILE" ] ; then
