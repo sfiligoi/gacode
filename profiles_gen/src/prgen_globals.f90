@@ -101,6 +101,7 @@ module prgen_globals
   real, dimension(:), allocatable :: onetwo_qbeami
   real, dimension(:), allocatable :: onetwo_qrfi
   real, dimension(:), allocatable :: onetwo_qcx
+  real, dimension(:), allocatable :: onetwo_qsync
   real, dimension(:), allocatable :: onetwo_dpidt
   real, dimension(:), allocatable :: onetwo_qfusi
   real, dimension(:), allocatable :: onetwo_qdelt
