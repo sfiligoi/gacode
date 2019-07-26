@@ -29,8 +29,6 @@ subroutine cgyro_step_gk_v76
   double precision deltah2_max, deltah2_min
   double precision var_error, scale_x, tol
 
-  complex, dimension(:,:), allocatable :: h0_old
-
   !! butcher table
 
   double precision, parameter :: a21  = .5e-2
@@ -122,10 +120,14 @@ subroutine cgyro_step_gk_v76
 
   double precision, parameter :: EPS  = 2.2d-12
   
-  allocate(h0_old(nc,nv_loc))
-  h0_old = 0.
+!$omp parallel do collapse(2)
+  do iv_loc=1,nv_loc
+     do ic_loc=1,nc
+        h0_old(ic_loc,iv_loc) = 0.
+       enddo
+    enddo
 
-  call timer_lib_in('str')
+    call timer_lib_in('str')
 
   local_max_error = 0.
   delta_t_last = 0.
@@ -155,9 +157,13 @@ subroutine cgyro_step_gk_v76
   
   rk_MAX = 10000
 
-!$omp parallel workshare
-  h0_old = h_x
-!$omp end parallel workshare
+!$omp parallel do collapse(2)
+    do iv_loc=1,nv_loc
+     do ic_loc=1,nc
+        h0_old(ic_loc,iv_loc) = h_x(ic_loc,iv_loc)
+     enddo
+  enddo
+  
   conv = 0
   delta_t_gk = 0.
   deltah2_min = 1.d10
@@ -169,7 +175,6 @@ subroutine cgyro_step_gk_v76
         deltah2 = orig_delta_x_t - total_delta_x_step
         delta_t_last_step = deltah2
      else
-        !! delta_t_gk = deltah2+delta_t_gk
         delta_t_last = deltah2
         deltah2_min = min(deltah2, deltah2_min)
         deltah2_max = max(deltah2, deltah2_max)
@@ -179,24 +184,33 @@ subroutine cgyro_step_gk_v76
      if (( conv .eq. 0 ) .and. (iiter .ge. 1)) then
         
         call timer_lib_in('str_mem')        
-!$omp parallel workshare
-        h0_x = h0_old
-        h_x = h0_x
-!$omp end parallel workshare
 
+!$omp parallel do collapse(2)        
+        do iv_loc=1,nv_loc
+           do ic_loc=1,nc
+              h0_x(ic_loc,iv_loc) = h0_old(ic_loc,iv_loc)
+              h_x(ic_loc,iv_loc) = h0_old(ic_loc,iv_loc)
+           enddo
+        enddo
 
         call timer_lib_out('str_mem')        
      else
         call timer_lib_in('str_mem')
-!$omp parallel workshare
-        h0_x = h_x
-!$omp end parallel workshare
+        
+!$omp parallel do collapse(2)
+        do iv_loc=1,nv_loc
+           do ic_loc=1,nc
+              h0_x(ic_loc,iv_loc) = h_x(ic_loc,iv_loc)
+           enddo
+        enddo
+
         call timer_lib_out('str_mem')        
      endif
 
      call cgyro_field_c
 
-     if ( i_proc .eq. 0 ) write(*,*) " paper v76_effi deltah2 ", iiter, deltah2
+     if ( i_proc .eq. 0 ) write(*,*) " paper v76_effi deltah2 ", iiter, deltah2, &
+          total_delta_x_step
 
 
      ! Stage 1
@@ -422,9 +436,14 @@ subroutine cgyro_step_gk_v76
 !!paper        if ( i_proc == 0 ) &
         !! write(*,*) " dt ", deltah2, " V76 **** var error mode ", rel_error, " variance error", var_error
 
-!$omp parallel workshare
-        h0_old = h0_x
-!$omp end parallel workshare
+!$omp parallel do collapse(2)
+        do iv_loc=1,nv_loc
+           do ic_loc=1,nc
+              h0_old(ic_loc,iv_loc) = h0_x(ic_loc,iv_loc)
+           enddo
+        enddo
+
+
         call cgyro_field_c
         
         converged = converged + 1
@@ -435,7 +454,7 @@ subroutine cgyro_step_gk_v76
         scale_x = .95*max((tol/(delta_x + EPS )*1./delta_t)**(1./6.), &
              (tol/(delta_x + EPS )*1./delta_t)**(1./7.))
 
-        scale_x = max(min(scale_x, 7.), 1.)
+        scale_x = max(min(scale_x, 8.), 1.)
         
         deltah2 = scale_x*deltah2
         
@@ -469,18 +488,16 @@ subroutine cgyro_step_gk_v76
   call timer_lib_out('str')
 
   delta_t_gk = delta_t_last
-  if ( delta_t_last_step .lt.  1.e-4*delta_t_last )  & 
+  if ( delta_t_last_step .lt.  .5*delta_t_last )  & 
        delta_t_gk = delta_t_last + delta_t_last_step
   total_local_error = var_error
 
   !!
-  if ( i_proc == 0 ) &
-       write(*,*) i_proc , " v76 deltah2_min, max converged ", deltah2_min, deltah2_max
+  !!! if ( i_proc == 0 ) &
+  !! write(*,*) i_proc , " v76 deltah2_min, max converged ", deltah2_min, deltah2_max
   !!  
   ! Filter special spectral components
   
   call cgyro_filter
 
-  if(allocated(h0_old)) deallocate(h0_old)
-  
 end subroutine cgyro_step_gk_v76

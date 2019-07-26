@@ -131,12 +131,12 @@ class ManagerInput:
 
         n = 0
         for line in open(datafile,'r').readlines():
-            line_s = string.strip(line)
+            line_s = line.strip()
 
             # Look for occurence of tag and put item in list.
             if (line_s[0:3] == 'DIR'):   
                 n = n+1
-                data = string.splitfields(line_s,' ')
+                data = line_s.split(' ')
 
                 # data[0] -> DIR
                 # data[1] -> directory1, etc
@@ -153,7 +153,7 @@ class ManagerInput:
                     # Overlay or optional radius
                     if data[3][0:1] == 'X':
                         # This is the special option X=<xmin> for min(r/a) or min(rho)
-                        self.slaveradius.append(string.splitfields(data[3],'=')[1])
+                        self.slaveradius.append(data[3].split('=')[1])
                         # Need to subtract 4 because X is not an overlay
                         nover = len(data)-4
                         nj    = 4
