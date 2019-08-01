@@ -16,7 +16,7 @@ then
    echo
    echo "Usage:    profiles_gen_plot [options]"
    echo
-   echo "          -f <plotfile.ext>"
+   echo "          -ext <ext>"
    echo "          Plot to plotfile.ext instead of screen." 
    echo "          <ext>=emf, eps, pdf, png, ps, raw, rgba, svg, svgz"
    echo
@@ -25,7 +25,7 @@ then
    echo " PROFILE PLOTTING MODE:"
    echo 
    echo "          -plot <group>"
-   echo "          <group> = geo,pow,pro (various profiles)"
+   echo "          <group> = pro (default)"
    echo "                  = surf  (Miller/Fourier flux surfaces)"
    echo "                  = msurf (Miller flux surfaces)"
    echo "                  = fsurf (Fourier flux surfaces)"
@@ -46,13 +46,14 @@ then
    echo
    echo "       profiles_gen_plot -plot geo"
    echo
+   exit 0
 fi
 
 #==============================================================================
 # Define variables for flag capture
 #
-PLOT=null
-FTYPE=screen
+PLOT=pro
+EXT=screen
 LOC=1
 
 # Plot options
@@ -76,7 +77,7 @@ while [ $# -gt 0 ] ; do
 
   -n) shift ; N=$1 ;;
   
-  -f) shift ; FTYPE=$1 ;;
+  -ext) shift ; EXT=$1 ;;
 
   -loc) shift ; LOC=$1 ;;
 
@@ -98,9 +99,9 @@ PYROOT=$GACODE_ROOT/python/profiles_gen
 if [ $PLOT == null ] ; then
    exit 0
 elif [[ $PLOT == *surf ]] ; then 
-   python $PYROOT/plot_surf.py $PLOT $N $FTYPE 
+   python $PYROOT/plot_surf.py $PLOT $N $EXT
 else
-   python $PYROOT/plot_profile.py $PLOT $RVAR $RMIN $RMAX $FTYPE $LOC
+   python $PYROOT/plot_profile.py $RVAR $RMIN $RMAX $EXT $LOC
 fi
 #==============================================================================
 

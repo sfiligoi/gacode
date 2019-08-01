@@ -17,18 +17,21 @@ from matplotlib import rc
 from gacodefuncs import *
 from tgyro.data import tgyrodata
 from matplotlib.colors import LogNorm
-from gapy import expro
+from pygacode import expro
 
 rc('text',usetex=True)
 rc('font',size=18)
 
-# $PLOT $RVAR $RMIN $RMAX $FTYPE $LOC
-
-
+# $RVAR $RMIN $RMAX $EXT $LOC
 
 simdir = './'
 wdir = os.path.realpath(simdir)
-  
+rvar = sys.argv[1]
+rmin = sys.argv[2]
+rmax = sys.argv[3]
+ext = sys.argv[4]
+loc = int(sys.argv[5])
+
 def gapystr(s):
 
    if sys.version_info[0] > 2:
@@ -39,77 +42,98 @@ def gapystr(s):
       n = len(s[0])
       u = s.transpose().reshape(-1,n).view('S'+str(n))   
       return u[2].tostring().strip()
-   
+
+def gapystrv(s):
+
+   if sys.version_info[0] > 2:
+      # Python 3
+      u=[]
+      for i in range(expro.expro_n_ion):
+         u.append(s[i].decode('UTF-8').strip())
+      return u
+   else:
+      # Python 2
+      n = len(s[0])
+      u = s.transpose().reshape(-1,n).view('S'+str(n))   
+      return u[:].tostring().strip()
+      
 def plot_select(ax,tag):
 
-   # Helper routine to plot data (tag) from input.profiles
+   # Helper routine to plot data (tag) from input.gacode
 
    expro.expro_read('input.gacode')
 
    x = expro.expro_rmin ; x = x/max(x)
    n = expro.expro_n_ion
-
+   
    # normalization
    csa = expro.expro_cs/expro.expro_rmin[-1]
-   
-   if tag == 'gamma':
+
+   # Set x-range
+   m = len(x)
+   if rmax != 'auto':
+      ax.set_xlim([0,float(rmax)])
+      for m in range(len(x)):
+         if x[m] > float(rmax):
+            break
+
+   if tag == 'gammae':
       # gamma_e
       y = expro.expro_gamma_e ; ystr = gapystr(expro.expro_gamma_e_str)
-      ax.plot(x,y/csa,label=r'$'+ystr+'$')
+      ax.plot(x[:m],y[:m]/csa[:m],label=r'$'+ystr+'$')
+
+   if tag == 'gammap':
       # gamma_p
       y = expro.expro_gamma_p ; ystr = gapystr(expro.expro_gamma_p_str)
-      ax.plot(x,y/csa,label=r'$'+ystr+'$')
+      ax.plot(x[:m],y[:m]/csa[:m],label=r'$'+ystr+'$')
 
    if tag == 'r':
       # rho
       y = expro.expro_rho ; ystr = gapystr(expro.expro_rho_str)
-      ax.plot(x,y,label=r'$'+ystr+'$')
+      ax.plot(x[:m],y[:m],label=r'$'+ystr+'$')
       # polflux
       y = expro.expro_polflux ; ystr = gapystr(expro.expro_polflux_str)
-      ax.plot(x,y/y[-1],label=r'$'+ystr+'$')
+      ax.plot(x[:m],y[:m]/y[-1],label=r'$'+ystr+'$')
 
-   if tag == 'pro':
+   if tag == 'n':
+      sname = gapystrv(expro.expro_name)
+      stype = gapystrv(expro.expro_type)
       # ne
       y = expro.expro_ne ; ystr = gapystr(expro.expro_ne_str)
-      ax.plot(x,y,label=r'$'+ystr+'$')
+      ax.plot(x[:m],y[:m],label=r'$'+ystr+'$')
       # ni
+      y = expro.expro_ni ; ystr = gapystr(expro.expro_ni_str)
       for p in range(n):
-         y = expro.expro_ni ; ystr = gapystr(expro.expro_ni_str)
-         ax.plot(x,y[p,:],label=r'$'+ystr+str(p+1)+'}$')
-      ax.legend()
+         ax.plot(x[:m],y[p,:m],label=r'$'+ystr+sname[p]+'}$')
+
+   if tag == 'T':
+      sname = gapystrv(expro.expro_name)
+      stype = gapystrv(expro.expro_type)
+      # Te
+      y = expro.expro_te ; ystr = gapystr(expro.expro_te_str)
+      ax.plot(x[:m],y[:m],label=r'$'+ystr+'$')
+      # Ti
+      y = expro.expro_ti ; ystr = gapystr(expro.expro_ti_str)
+      for p in range(n):
+         if stype[p] == '[therm]':
+            ax.plot(x[:m],y[p,:m],label=r'$'+ystr+sname[p]+'}$')
          
-   if tag == 'geo':
-       y = expro.expro_rmaj ; ystr = gapystr(expro.expro_rmaj_str)
-       ax.plot(x,y,label=r'$'+ystr+'$')
-
-       y = expro.expro_zmag ; ystr = gapystr(expro.expro_zmag_str)
-       ax.plot(x,y,label=r'$'+ystr+'$')
-
+   if tag == 'kappa':
        y = expro.expro_kappa ; ystr = gapystr(expro.expro_kappa_str)
-       ax.plot(x,y,label=r'$'+ystr+'$')
+       ax.plot(x[:m],y[:m],label=r'$'+ystr+'$')
+       y = expro.expro_skappa ; ystr = 's_\kappa'
+       ax.plot(x[:m],y[:m],label=r'$'+ystr+'$')
 
+   if tag == 'delta':
        y = expro.expro_delta ; ystr = gapystr(expro.expro_delta_str)
-       ax.plot(x,y,label=r'$'+ystr+'$')
+       ax.plot(x[:m],y[:m],label=r'$'+ystr+'$')
+       y = expro.expro_sdelta ; ystr = 's_\delta'
+       ax.plot(x[:m],y[:m],label=r'$'+ystr+'$')
 
-       y = expro.expro_zeta ; ystr = gapystr(expro.expro_zeta_str)
-       ax.plot(x,y,label=r'$'+ystr+'$')
-
-   if tag == 'pow':
-       y = expro.expro_q ; ystr = gapystr(expro.expro_rmaj_str)
-       ax.plot(x,y,label=r'$'+ystr+'$')
-
-       y = expro.expro_zmag ; ystr = gapystr(expro.expro_zmag_str)
-       ax.plot(x,y,label=r'$'+ystr+'$')
-
-       y = expro.expro_kappa ; ystr = gapystr(expro.expro_kappa_str)
-       ax.plot(x,y,label=r'$'+ystr+'$')
-
-       y = expro.expro_delta ; ystr = gapystr(expro.expro_delta_str)
-       ax.plot(x,y,label=r'$'+ystr+'$')
-     
-       ax.legend()
+   ax.legend()
        
-        
+
+      
 #-------------------------------------------------------------------------------------
 
 class TabPanel(wx.Panel):
@@ -143,20 +167,32 @@ class DemoFrame(wx.Frame):
         notebook = wx.Notebook(panel)
 
         tab = TabPanel(notebook)
-        tab.draw('gamma')
-        notebook.AddPage(tab,'gamma')
+        tab.draw('gammae')
+        notebook.AddPage(tab,'gammae')
+
+        tab = TabPanel(notebook)
+        tab.draw('gammap')
+        notebook.AddPage(tab,'gammap')
 
         tab = TabPanel(notebook)
         tab.draw('r')
         notebook.AddPage(tab,'r')
 
         tab = TabPanel(notebook)
-        tab.draw('pro')
-        notebook.AddPage(tab,'pro')
+        tab.draw('kappa')
+        notebook.AddPage(tab,'kappa')
 
         tab = TabPanel(notebook)
-        tab.draw('geo')
-        notebook.AddPage(tab,'geo')
+        tab.draw('delta')
+        notebook.AddPage(tab,'delta')
+
+        tab = TabPanel(notebook)
+        tab.draw('n')
+        notebook.AddPage(tab,'n')
+
+        tab = TabPanel(notebook)
+        tab.draw('T')
+        notebook.AddPage(tab,'T')
 
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(notebook, 1, wx.ALL|wx.EXPAND, 5)
