@@ -2,7 +2,7 @@
 # plot_profile.py
 #
 # PURPOSE:
-#  Notebook plotter to see tgyro results.
+#  Notebook plotter to see input.gacode profiles
 #-------------------------------------------------------------
 
 import os
@@ -13,16 +13,11 @@ import numpy as np
 matplotlib.use('WXAgg')
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
 import matplotlib.pyplot as plt
-from matplotlib import rc
 from gacodefuncs import *
-from tgyro.data import tgyrodata
-from matplotlib.colors import LogNorm
 from pygacode import expro
 
-rc('text',usetex=True)
-rc('font',size=18)
-
-# $RVAR $RMIN $RMAX $EXT $LOC
+matplotlib.rc('text',usetex=True)
+matplotlib.rc('font',size=18)
 
 simdir = './'
 wdir = os.path.realpath(simdir)
@@ -76,6 +71,13 @@ def plot_select(ax,tag):
       for m in range(len(x)):
          if x[m] > float(rmax):
             break
+
+   ax.set_xlabel(r'$r/a$')
+      
+   if tag == 'bunit':
+      # bunit
+      y = expro.expro_bunit ; ystr = r'$B_\mathrm{unit}$'
+      ax.plot(x[:m],y[:m],label=r'$'+ystr+'$')
 
    if tag == 'gammae':
       # gamma_e
@@ -165,6 +167,10 @@ class DemoFrame(wx.Frame):
         panel = wx.Panel(self)
  
         notebook = wx.Notebook(panel)
+
+        tab = TabPanel(notebook)
+        tab.draw('bunit')
+        notebook.AddPage(tab,'bunit')
 
         tab = TabPanel(notebook)
         tab.draw('gammae')

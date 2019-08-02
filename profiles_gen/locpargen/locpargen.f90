@@ -23,32 +23,32 @@ program locpargen
   read(1,*) appendflag
   close(1)
 
-  EXPRO_ctrl_quasineutral_flag = qnflag
+  expro_ctrl_quasineutral_flag = qnflag
   ! We don't need the numerical eq. flag set for this routine.
-  EXPRO_ctrl_numeq_flag = hasgeo
+  expro_ctrl_numeq_flag = hasgeo
 
   call expro_read('input.gacode') 
 
   ! Minor radius
-  a = EXPRO_rmin(EXPRO_n_exp)
+  a = expro_rmin(expro_n_exp)
 
   ! Electron index
-  ise = EXPRO_n_ion+1
+  ise = expro_n_ion+1
 
   if (rho0 > 0.0) then
 
      ! Use local rho
 
      x(1) = rho0
-     call cub_spline(EXPRO_rho,EXPRO_rmin/a,EXPRO_n_exp,x,y,1)
+     call cub_spline(expro_rho,expro_rmin/a,expro_n_exp,x,y,1)
      r0 = y(1)
 
   else if (psi0 > 0.0) then
 
      ! Use local psi_N
 
-     x(1) = psi0*abs(EXPRO_polflux(EXPRO_n_exp))
-     call cub_spline(abs(EXPRO_polflux),EXPRO_rmin/a,EXPRO_n_exp,x,y,1)
+     x(1) = psi0*abs(expro_polflux(expro_n_exp))
+     call cub_spline(abs(expro_polflux),expro_rmin/a,expro_n_exp,x,y,1)
      r0 = y(1)
 
   endif
@@ -58,7 +58,7 @@ program locpargen
        hasgeo,&
        0,&
        qnflag,&
-       EXPRO_n_ion+1,&
+       expro_n_ion+1,&
        r0,&
        btccw,&
        ipccw,&
@@ -67,7 +67,7 @@ program locpargen
   !------------------------------------------------------------
   ! Create input.geo with local parameters for general geometry
   !
-  if (hasgeo == 1) call locpargen_geo
+  !if (hasgeo == 1) call locpargen_geo
   !------------------------------------------------------------
 
   if (qnflag == 0) then 

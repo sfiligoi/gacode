@@ -104,6 +104,10 @@ subroutine prgen_read_iterdb_nc
 
   err = nf90_inq_varid(ncid,trim('rho_grid'),varid)
   err = nf90_get_var(ncid,varid,onetwo_rho_grid)
+  ! Will use this for normalized rho-grid
+  do i=1,nx
+     rho(i) = (i-1)/(nx-1.0)
+  enddo
 
   err = nf90_inq_varid(ncid,trim('hcap'),varid)
   err = nf90_get_var(ncid,varid,onetwo_hcap)
@@ -271,7 +275,7 @@ subroutine prgen_read_iterdb_nc
 
   call cub_spline(onetwo_rho_mhd_gridnpsi,onetwo_elongxnpsi,onetwo_npsi,&
        onetwo_rho_grid,kappa,nx)
-
+ 
   work = 0.5*(onetwo_triangnpsi_u+onetwo_triangnpsi_l)
 
   call cub_spline(onetwo_rho_mhd_gridnpsi,work,onetwo_npsi,&

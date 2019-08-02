@@ -20,11 +20,12 @@ subroutine prgen_read_gato
 
   integer :: i
   integer :: ip
-  real :: fa,fb
+  real :: fa,fb,gato_torfluxa
   real, dimension(:), allocatable :: gato_psi  
   real, dimension(:), allocatable :: gato_dummy
   real, dimension(:), allocatable :: gato_q
   real, dimension(:), allocatable :: gato_p
+  real, dimension(:), allocatable :: gato_rho
   real, dimension(:,:), allocatable :: gato_bigr
   real, dimension(:,:), allocatable :: gato_bigz
   real, dimension(:,:), allocatable :: gvec
@@ -46,6 +47,7 @@ subroutine prgen_read_gato
   allocate(gato_dummy(0:nsurf))
   allocate(gato_q(0:nsurf))
   allocate(gato_p(0:nsurf))
+  allocate(gato_rho(0:nsurf))
   allocate(gato_bigr(narc,nsurf))
   allocate(gato_bigz(narc,nsurf))
 
@@ -93,13 +95,26 @@ subroutine prgen_read_gato
      enddo
   else
      ! Case 2: typical case 
-     dpsi_data = dpsi(nx)
-     dpsi_efit = gato_psi(nsurf)
-     
-     ! Ensure max(dpsi) = max(gato_psi) 
-     dpsi(:)  = dpsi(:)*dpsi_efit/dpsi_data
-     ! Extra insurance against roundoff
-     dpsi(nx) = dpsi_efit
+     if (noq_flag == 0) then
+
+        ! Use gato psi (Aug 2019)
+        ! NOTE: This is new default behaviour intended to improve on potentially
+        !       inferior poloidal flux from ONETWO
+        print '(a)','INFO: (prgen_read_gato) Using GATO poloidal flux (from gfile).'
+        call prgen_get_chi(nsurf+1,gato_q,gato_psi,gato_rho,gato_torfluxa)
+        call cub_spline(gato_rho,gato_psi,nsurf+1,rho,dpsi,nx)
+        dpsi_data = dpsi(nx)
+        dpsi_efit = gato_psi(nsurf)
+     else
+        ! Old behaviour, shrinks flux as a kludge
+        dpsi_data = dpsi(nx)
+        dpsi_efit = gato_psi(nsurf)
+
+        ! Ensure max(dpsi) = max(gato_psi) 
+        dpsi(:)  = dpsi(:)*dpsi_efit/dpsi_data
+        ! Extra insurance against roundoff
+        dpsi(nx) = dpsi_efit
+     endif
   endif
   !----------------------------------------------------------------
 
@@ -144,11 +159,11 @@ subroutine prgen_read_gato
   ! Total pressure and q from GATO-EFIT 
   ! (possible overwrite from raw data input in statefile)
   if (nop_flag == 0) then
-     print '(a)','INFO: (prgen_read_gato) Using total pressure from gfile.'
+     print '(a)','INFO: (prgen_read_gato) Using GATO total pressure (from gfile).'
      call cub_spline(gato_psi,gato_p,nsurf+1,dpsi,p_tot,nx)
   endif
   if (noq_flag == 0) then
-     print '(a)','INFO: (prgen_read_gato) Using safety factor (q) from gfile.'
+     print '(a)','INFO: (prgen_read_gato) Using GATO safety factor (q from gfile).'
      call cub_spline(gato_psi,gato_q,nsurf+1,dpsi,q,nx)
   endif
 

@@ -20,10 +20,6 @@ subroutine prgen_map_iterdb
   integer :: i
   integer :: n0
 
-  do i=1,nx
-     rho(i) = (i-1)/(nx-1.0)
-  enddo
-
   !----------------------------------------------------------------------
   ! Construct ion densities and temperatures, manage naming and numbering
   !

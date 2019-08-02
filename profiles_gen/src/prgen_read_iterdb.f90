@@ -67,6 +67,10 @@ subroutine prgen_read_iterdb
   read(1,*) t ; read(1,*) q
   read(1,*) t ; read(1,*) onetwo_ene
 
+  ! Will use this for normalized rho-grid
+  do i=1,nx
+     rho(i) = (i-1)/(nx-1.0)
+  enddo
 
   do i=1,onetwo_nion
      read(1,*) t ; read(1,*) onetwo_enion(:,i)
@@ -205,8 +209,6 @@ subroutine prgen_read_iterdb
   else
     onetwo_qsync(:) = 0.0
   endif
-
-
   
   dpsi(:) = onetwo_psi(:)-onetwo_psi(1)
 
