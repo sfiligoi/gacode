@@ -48,9 +48,11 @@ def gapystrv(s):
       return u
    else:
       # Python 2
-      n = len(s[0])
-      u = s.transpose().reshape(-1,n).view('S'+str(n))   
-      return u[:].tostring().strip()
+      u = []
+      a = s.transpose().reshape(-1,10).view('S'+str(10))
+      for i in range(expro.expro_n_ion):
+         u.append(a[i].tostring().strip())
+      return u
       
 def plot_select(ax,tag):
 
@@ -82,12 +84,12 @@ def plot_select(ax,tag):
    if tag == 'gammae':
       # gamma_e
       y = expro.expro_gamma_e ; ystr = gapystr(expro.expro_gamma_e_str)
-      ax.plot(x[:m],y[:m]/csa[:m],label=r'$'+ystr+'$')
+      ax.plot(x[:m],y[:m]/csa[:m],label=r'$(a/c_s)'+ystr+'$')
 
    if tag == 'gammap':
       # gamma_p
       y = expro.expro_gamma_p ; ystr = gapystr(expro.expro_gamma_p_str)
-      ax.plot(x[:m],y[:m]/csa[:m],label=r'$'+ystr+'$')
+      ax.plot(x[:m],y[:m]/csa[:m],label=r'$(a/c_s)'+ystr+'$')
 
    if tag == 'r':
       # rho
@@ -132,10 +134,18 @@ def plot_select(ax,tag):
        y = expro.expro_sdelta ; ystr = 's_\delta'
        ax.plot(x[:m],y[:m],label=r'$'+ystr+'$')
 
-   ax.legend()
+   if tag == 'q':
+       y = expro.expro_q ; ystr = gapystr(expro.expro_q_str)
+       if y[0] < 0.0:
+          y = -y
+          ystr = '-'+ystr
+       ax.plot(x[:m],y[:m],label=r'$'+ystr+'$')
+       y = expro.expro_s ; ystr = 's'
+       ax.plot(x[:m],y[:m],label=r'$'+ystr+'$')
+
+   ax.legend(loc=loc)
        
 
-      
 #-------------------------------------------------------------------------------------
 
 class TabPanel(wx.Panel):
@@ -162,15 +172,11 @@ class DemoFrame(wx.Frame):
 
         wx.Frame.__init__(self, None, wx.ID_ANY, 
                           'input.gacode plotting notebook -- '+wdir,
-                          size=(1100,600))
+                          size=(1100,800))
 
         panel = wx.Panel(self)
  
         notebook = wx.Notebook(panel)
-
-        tab = TabPanel(notebook)
-        tab.draw('bunit')
-        notebook.AddPage(tab,'bunit')
 
         tab = TabPanel(notebook)
         tab.draw('gammae')
@@ -191,6 +197,14 @@ class DemoFrame(wx.Frame):
         tab = TabPanel(notebook)
         tab.draw('delta')
         notebook.AddPage(tab,'delta')
+
+        tab = TabPanel(notebook)
+        tab.draw('bunit')
+        notebook.AddPage(tab,'bunit')
+
+        tab = TabPanel(notebook)
+        tab.draw('q')
+        notebook.AddPage(tab,'q')
 
         tab = TabPanel(notebook)
         tab.draw('n')
