@@ -16,7 +16,7 @@ subroutine locpargen_geo
   write(1,'(a,f10.6)') '# SAFETY_FACTOR=',q_loc
   write(1,'(a,f10.6)') '# SHEAR=',s_loc
   write(1,'(a,f4.1)') '# BTCCW=',btccw
-  write(1,'(a,i4.1)') '# IPCCW=',ipccw
+  write(1,'(a,f4.1)') '# IPCCW=',ipccw
   write(1,'(a)') '#'
   write(1,'(a)') '# File format:'
   write(1,'(a)') '#-------------------'
