@@ -7,9 +7,9 @@ from matplotlib import rc
 from matplotlib import cm
 from gacodefuncs import *
 from cgyro.data import cgyrodata
-from mayavi import mlab 
+from mayavi import mlab
 try:
-   import gapy
+   import pygacode
 except:
    print('ERROR: (vis_torcut) Please build gapy/f2py library!')
    sys.exit()
@@ -83,23 +83,23 @@ for i in range(nx):
       zp[i,k] = 0.0
 
 # Shape functions 
-gapy.geo.signb_in=1 # fix
-gapy.geo.geo_rmin_in=sim.rmin
-gapy.geo.geo_rmaj_in=sim.rmaj
-gapy.geo.geo_drmaj_in=sim.shift
-gapy.geo.geo_zmag_in=sim.zmag
-gapy.geo.geo_dzmag_in=sim.dzmag
-gapy.geo.geo_q_in=sim.q
-gapy.geo.geo_s_in=sim.shear
-gapy.geo.geo_kappa_in=sim.kappa
-gapy.geo.geo_delta_in=sim.delta
-gapy.geo.geo_zeta_in=sim.zeta
-gapy.geo.geo_s_kappa_in=sim.s_kappa
-gapy.geo.geo_s_delta_in=sim.s_delta
-gapy.geo.geo_s_zeta_in=sim.s_zeta
-gapy.geo.geo_beta_star_in=sim.beta_star
+pygacode.geo.signb_in=1 # fix
+pygacode.geo.geo_rmin_in=sim.rmin
+pygacode.geo.geo_rmaj_in=sim.rmaj
+pygacode.geo.geo_drmaj_in=sim.shift
+pygacode.geo.geo_zmag_in=sim.zmag
+pygacode.geo.geo_dzmag_in=sim.dzmag
+pygacode.geo.geo_q_in=sim.q
+pygacode.geo.geo_s_in=sim.shear
+pygacode.geo.geo_kappa_in=sim.kappa
+pygacode.geo.geo_delta_in=sim.delta
+pygacode.geo.geo_zeta_in=sim.zeta
+pygacode.geo.geo_s_kappa_in=sim.s_kappa
+pygacode.geo.geo_s_delta_in=sim.s_delta
+pygacode.geo.geo_s_zeta_in=sim.s_zeta
+pygacode.geo.geo_beta_star_in=sim.beta_star
 
-gapy.geo.geo_interp(z,True)
+pygacode.geo.geo_interp(z,True)
 if legacy:
    # s-alpha approximate (apparently used in legacy GYRO movies)
    # g1 -> q*theta
@@ -108,8 +108,8 @@ if legacy:
    g2 = z
 else:
    # Correct form of Clebsch angle expansion nu(r,theta) 
-   g1 = -gapy.geo.geo_nu
-   g2 = gapy.geo.geo_b*gapy.geo.geo_captheta/gapy.geo.geo_s_in/gapy.geo.geo_grad_r**2
+   g1 = -pygacode.geo.geo_nu
+   g2 = pygacode.geo.geo_b*pygacode.geo.geo_captheta/pygacode.geo.geo_s_in/pygacode.geo.geo_grad_r**2
    
 if int(mag) == 0:
    showco=True
@@ -165,7 +165,7 @@ def frame():
       c[:,:,0] = 0.0
 
    f = np.zeros([nx,nz],order='F')
-   gapy.torcut(dn,sim.m_box,sim.q,sim.thetap,g1,g2,c,f)
+   pygacode.torcut(dn,sim.m_box,sim.q,sim.thetap,g1,g2,c,f)
 
    if fmin == 'auto':
       f0=np.min(f)
