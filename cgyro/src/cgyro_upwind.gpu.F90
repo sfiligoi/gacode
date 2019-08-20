@@ -23,9 +23,9 @@ subroutine cgyro_upwind
   implicit none
 
   integer :: is,ie,ix
-  complex, dimension(nc,n_species) :: res_loc 
-  complex, dimension(nc,n_species) :: res
-  complex :: res_loc_one
+  complex, dimension(nc,n_species,2) :: res_loc 
+  complex, dimension(nc,n_species,2) :: res
+  complex :: res_loc_one(2)
 
   call timer_lib_in('str')
 
@@ -41,11 +41,11 @@ subroutine cgyro_upwind
        do iv=nv1,nv2
         iv_loc = iv-nv1+1
         if (is == is_v(iv)) then
-          res_loc_one = res_loc_one+upfac1(ic,iv_loc)*g_x(ic,iv_loc)
+          res_loc_one(:) = res_loc_one(:)+upfac1(ic,iv_loc,:)*g_x(ic,iv_loc)
         endif
        enddo
 
-       res_loc(ic,is) = res_loc_one
+       res_loc(ic,is,:) = res_loc_one(:)
     enddo
 
   enddo
@@ -61,17 +61,17 @@ subroutine cgyro_upwind
 #endif
 
 #ifdef SUMMIT
-  call MPI_ALLREDUCE(res_loc(:,:),&
-       res(:,:),&
-       2*size(res(:,:)),&
+  call MPI_ALLREDUCE(res_loc(:,:,:),&
+       res(:,:,:),&
+       2*size(res(:,:,:)),&
        MPI_DOUBLE_PRECISION,&
        MPI_SUM,&
        NEW_COMM_1,&
        i_err)
 #else
-  call MPI_ALLREDUCE(res_loc(:,:),&
-       res(:,:),&
-       size(res(:,:)),&
+  call MPI_ALLREDUCE(res_loc(:,:,:),&
+       res(:,:,:),&
+       size(res(:,:,:)),&
        MPI_DOUBLE_COMPLEX,&
        MPI_SUM,&
        NEW_COMM_1,&
@@ -98,7 +98,8 @@ subroutine cgyro_upwind
         ix = ix_v(iv)
         ie = ie_v(iv)
         g_x(ic,iv_loc) = abs(xi(ix))*vel(ie)*g_x(ic,iv_loc) &
-             -upfac2(ic,iv_loc)*res(ic,is)
+             -upfac2(ic,iv_loc,1)*res(ic,is,1) &
+             -upfac2(ic,iv_loc,2)*res(ic,is,2) &
      enddo
   enddo
 
