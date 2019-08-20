@@ -112,7 +112,7 @@ class cgyrodata:
       if self.theta_plot == 1:
          self.thetap[0] = 0.0
       else:
-         m = self.n_theta/self.theta_plot
+         m = self.n_theta//self.theta_plot
          for i in range(self.theta_plot):
             self.thetap[i] = self.theta[m*i] 
       #-----------------------------------------------------------------
