@@ -61,7 +61,7 @@ class cgyrodata_plot(data.cgyrodata):
       #======================================
       # Omega
       ax = fig.add_subplot(121)
-      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(TIME)
       ax.set_ylabel(r'$(a/c_s)\, \omega$')
@@ -75,7 +75,7 @@ class cgyrodata_plot(data.cgyrodata):
       #======================================
       # Gamma
       ax = fig.add_subplot(122)
-      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(TIME)
       ax.set_ylabel(r'$(a/c_s)\, \gamma$')
@@ -102,7 +102,7 @@ class cgyrodata_plot(data.cgyrodata):
       #======================================
       # Omega
       ax = fig.add_subplot(121)
-      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(r'$k_y \rho_s$')
       ax.set_ylabel(r'$(a/c_s)\, \omega$')
@@ -116,7 +116,7 @@ class cgyrodata_plot(data.cgyrodata):
       #======================================
       # Gamma
       ax = fig.add_subplot(122)
-      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(r'$k_y \rho_s$')
       ax.set_ylabel(r'$(a/c_s)\, \gamma$')
@@ -142,7 +142,7 @@ class cgyrodata_plot(data.cgyrodata):
       p = np.sum(f[:,:,:],axis=0)/self.rho
       
       ax = fig.add_subplot(111)
-      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(TIME)
       ax.set_ylabel(r'$\left| '+ft+'_n \\right|$')
@@ -259,7 +259,7 @@ class cgyrodata_plot(data.cgyrodata):
       #======================================
       # Set figure size and axes
       ax = fig.add_subplot(111)
-      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(TIME)
       ax.set_ylabel(r'$\left|'+ft+r'\right|/\rho_{*D}$')
@@ -335,7 +335,7 @@ class cgyrodata_plot(data.cgyrodata):
       #----------------------------------------------------
 
       ax = fig.add_subplot(111)
-      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(TIME)
       ax.set_ylabel(r'$\mathrm{Re}\left( \delta\phi/\delta\phi_0 \right)$')
@@ -371,7 +371,7 @@ class cgyrodata_plot(data.cgyrodata):
          y = self.geo[:,p1]
 
          ax = fig.add_subplot(2,4,p1)
-         ax.grid(which="majorminor",ls=":")
+         ax.grid(which="both",ls=":")
          ax.grid(which="major",ls=":")
          ax.set_xlabel(r'$\theta/\pi$')
          ax.set_title(r'$'+self.geotag[p1]+'$')
@@ -386,7 +386,7 @@ class cgyrodata_plot(data.cgyrodata):
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       ax = fig.add_subplot(111)
-      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(TIME)
       ax.set_ylabel(r'$\mathrm{Integration~Error}$')
@@ -420,7 +420,7 @@ class cgyrodata_plot(data.cgyrodata):
          ytag = self.TEXBPAR
 
       ax = fig.add_subplot(111)
-      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(r'$\theta_*/\pi$')
       ax.set_ylabel(r'$'+ytag+'$')
@@ -513,7 +513,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       # Otherwise plot
       ax = fig.add_subplot(111)
-      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(TIME)
 
@@ -597,7 +597,7 @@ class cgyrodata_plot(data.cgyrodata):
       #============================================================
       # Otherwise plot
       ax = fig.add_subplot(111)
-      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(r'$r/L_x$')
 
@@ -1022,7 +1022,7 @@ class cgyrodata_plot(data.cgyrodata):
 
          #========================================================
          ax = fig.add_subplot(3,3,p)
-         ax.grid(which="majorminor",ls=":")
+         ax.grid(which="both",ls=":")
          ax.grid(which="major",ls=":")
 
          ax.set_title(r'$'+u+': \\xi=0 \quad \mathrm{ie}='+str(ie)+'$')
@@ -1044,7 +1044,7 @@ class cgyrodata_plot(data.cgyrodata):
 
          #========================================================
          ax = fig.add_subplot(3,3,p)
-         ax.grid(which="majorminor",ls=":")
+         ax.grid(which="both",ls=":")
          ax.grid(which="major",ls=":")
 
          ax.set_title(r'$'+u+': \\theta/\pi='+str(theta)+' \quad \mathrm{ie}='+str(ie)+'$')
@@ -1063,7 +1063,7 @@ class cgyrodata_plot(data.cgyrodata):
 
          #========================================================
          ax = fig.add_subplot(3,3,p)
-         ax.grid(which="majorminor",ls=":")
+         ax.grid(which="both",ls=":")
          ax.grid(which="major",ls=":")
 
          ax.set_title(r'$'+u+': \\theta/\pi='+str(theta)+' \quad \mathrm{ix}='+str(ix)+'$')
@@ -1115,7 +1115,7 @@ class cgyrodata_plot(data.cgyrodata):
          itime = self.n_time-1
 
       ax = fig.add_subplot(111)
-      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(r'$\theta/\pi$')
 
