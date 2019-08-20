@@ -29,7 +29,6 @@ subroutine cgyro_step_gk_bs5
   double precision deltah2_max, deltah2_min
   double precision var_error, scale_x, tol
 
-  complex, dimension(:,:), allocatable :: h_rk4
   complex, dimension(:,:), allocatable :: h0_old
 
   !! butcher table
@@ -116,7 +115,6 @@ subroutine cgyro_step_gk_bs5
   double precision, parameter :: EPS  = 2.2d-12
   
   allocate(h0_old(nc,nv_loc))
-  allocate(h_rk4(nc,nv_loc))
 
   call timer_lib_in('str')
 
@@ -311,7 +309,7 @@ subroutine cgyro_step_gk_bs5
      
      call cgyro_field_c
 
-     !! 5th order solution
+     !! compute error between 5th and 4th order soln
           
 !$omp parallel do collapse(2)
      do iv_loc=1,nv_loc
@@ -323,6 +321,8 @@ subroutine cgyro_step_gk_bs5
                 + (b6-b6h)*rhs(ic_loc,iv_loc,6))
         enddo
      enddo
+
+     ! b*p gives another soln based on a8*
 
      error_sum = 0.
      error_x = 0.
@@ -348,7 +348,7 @@ subroutine cgyro_step_gk_bs5
      if ( var_error .lt. tol ) then
         
         !!        if ( i_proc == 0 ) &
-        !! write(*,*) " BS5(4) **** local error mode ", rel_error, " variance error", var_err
+        !! write(*,*) " paper BS5(4) **** local error mode ", rel_error, " variance error", var_err
         !! or
 
         ! paper
@@ -367,9 +367,6 @@ subroutine cgyro_step_gk_bs5
         
         total_delta_x_step = total_delta_x_step + deltah2
         total_local_error = total_local_error + rel_error*rel_error
-
-        !! scale_x = max(0.95*(tol/(delta_x + EPS ))**(.2), &
-        !! .95*(tol/(delta_x + EPS ))**(.25))
 
         scale_x = 0.95*max((tol/(delta_x + EPS )*1./delta_t)**(.2), &
              (tol/(delta_x + EPS )*1./delta_t)**(.25))
@@ -407,17 +404,20 @@ subroutine cgyro_step_gk_bs5
   call cgyro_field_c
 
   delta_t_gk = delta_t_last
+  
+  if ( delta_t_last_step .lt.  1.e-4*delta_t_last )  & 
+       delta_t_gk = delta_t_last + delta_t_last_step
+
   total_local_error = var_error
 
   !!
   !! if ( i_proc == 0 ) &
-  !! write(*,*) i_proc , " bst deltah2_min, max converged ", deltah2_min, deltah2_max
+  !! write(*,*) i_proc , " paper bst deltah2_min, max converged ", deltah2_min, deltah2_max
   !!  
   ! Filter special spectral components
   
   call cgyro_filter
 
-  if(allocated(h_rk4)) deallocate(h_rk4)
   if(allocated(h0_old)) deallocate(h0_old)
   
 end subroutine cgyro_step_gk_bs5

@@ -265,7 +265,7 @@ class ManagerInput:
             # Look for occurence of tag and put item in list.
             if (line_s[0:3] == 'DIR'):   
                 n = n+1
-                data = line_s.split()
+                data = line_s.split(' ')
 
                 # data[0] -> DIR
                 # data[1] -> directory1, etc

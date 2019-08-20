@@ -28,14 +28,17 @@ subroutine cgyro_step_gk_ck
   real delta_x_min, delta_x_max, local_max_error
   real tol_ck, total_delta_step
   real error_x(5), error_sum(5)
-  real tau_ck, delta_t_old, delta_t_gk_old, delta_t_last
+  real tau_ck, delta_t_old, delta_t_gk_old, delta_t_last, delta_t_last_step
   real last_total_error, rel_error, var_error
   real deltah2_min, deltah2_max, scale_x
   
   integer conv, iiter, rk_count, rkMAXITER, converged, err_x
+  
 
   complex, dimension(:,:), allocatable :: rk_error
   complex, dimension(:,:), allocatable :: h0_old
+
+  real, parameter :: EPS = 2.e-12
 
   call timer_lib_in('str_mem')
   allocate(h0_old(nc,nv_loc))
@@ -68,7 +71,7 @@ subroutine cgyro_step_gk_ck
   conv = 0
   iiter = 0
   rk_count = 0
-  rkMAXITER = 10000
+  rkMAXITER = 1000
   converged = 0
   deltah2_min = 1.e10
   deltah2_max = -1.
@@ -86,16 +89,16 @@ subroutine cgyro_step_gk_ck
 
      if ( total_delta_step + deltah2 .gt. orig_delta_t ) then
         deltah2 = orig_delta_t - total_delta_step
-        !! delta_t_last = deltah2
-        !! if ( deltah2 .lt. 1.d-8 ) goto 1111   !! abandon keep?
+        delta_t_last_step = deltah2
      else
         delta_t_last = deltah2
         deltah2_min = min(deltah2, deltah2_min)
         deltah2_max = max(deltah2, deltah2_max)
+        !! if ( deltah2 .lt. 1.d-8 ) goto 1111   !! abandon keep?
      endif
 
      if ( i_proc .eq. 0 ) then
-        write(*,*) " ck4 current deltah2 ", deltah2
+        write(*,*) " paper ck4 current iiter, deltah2 ", iiter, deltah2
      endif
 
      if (( conv .eq. 0 ) .and. (iiter .ge. 1)) then
@@ -120,7 +123,8 @@ subroutine cgyro_step_gk_ck
 !$omp parallel do collapse(2)
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
-           h_x(ic_loc, iv_loc) = h0_x(ic_loc, iv_loc) + 0.2*deltah2*rhs(ic_loc, iv_loc, 1)
+           h_x(ic_loc, iv_loc) = h0_x(ic_loc, iv_loc) &
+                + 0.2*deltah2*rhs(ic_loc, iv_loc, 1)
         enddo
      enddo
      
@@ -154,8 +158,6 @@ subroutine cgyro_step_gk_ck
                 + 6./5.*rhs(ic_loc, iv_loc, 3))
         enddo
      enddo
-     
-     !!!! $OMP END PARALLEL
      
      call cgyro_field_c
      
@@ -191,7 +193,6 @@ subroutine cgyro_step_gk_ck
      call cgyro_field_c
      call cgyro_rhs(6)
      
-
      !! soln of order 5
 
 !$omp parallel do collapse(2)
@@ -238,6 +239,7 @@ subroutine cgyro_step_gk_ck
      !!     var_error = sqrt(total_local_error + rel_error*rel_error)/max(sqrt(abs(iiter-1.)), 1.)
      var_error = sqrt(total_local_error + rel_error*rel_error)
 
+     !! error_mode = 0 ; local error
      !! fro local error if ( error_x(1) .lt. tau_ck ) then
      !! for variance tight control if ( var_error .lt. tol_ck ) then
      
@@ -246,23 +248,25 @@ subroutine cgyro_step_gk_ck
 !$omp parallel workshare        
         h0_old = h_x
 !$omp end parallel workshare
+
+        if ( i_proc .eq. 0 ) then
+           write(*,*) " paper ck4 current rel_error, var_error ", rel_error, var_error
+        endif
         
         total_delta_step = total_delta_step + deltah2
         total_local_error = total_local_error + rel_error*rel_error
         
-        scale_x = max((tol_ck/(error_x(1) + 1.e-12)*1./delta_t)**(.2), &
-             (tol_ck/(error_x(1) + 1.e-12)*1./delta_t)**(.25))
-        
+        scale_x = .95*max((tol_ck/(error_x(1) + EPS)*1./delta_t)**(.2), &
+             (tol_ck/(error_x(1) + EPS)*1./delta_t)**(.25))
+
         scale_x = min(5., scale_x)
         deltah2 = deltah2*max(1., scale_x)
         
         local_max_error = max(local_max_error, rel_error)
-
         conv = 1
         converged=converged+1
      else
         deltah2 = .5*deltah2
-        !! deltah2 = 3./5.*deltah2
         conv = 0
         if ( i_proc .eq. 0 ) then
            write(*,*) " *** backing up not converged step = ", rk_count
@@ -271,47 +275,35 @@ subroutine cgyro_step_gk_ck
         endif
      endif
 
-     !! deltah2 = min(deltah2, delta_x_max)
-     !! deltah2 = max(delta_x_min, deltah2)
-
-!!     if (deltah2 .lt. 1.d-8) then
-!!        if ( i_proc .eq. 0 ) &
-!!             write(*,*) " Stopping due to ***** Small substep size ", deltah2
-!!        stop
-!!     endif
-
+     deltah2 = min(deltah2, delta_x_max)
+     deltah2 = max(delta_x_min, deltah2)
 
      iiter = iiter + 1
-
     
      if ( iiter .gt. rkMAXITER) then
-        write(*,*) " **gk4(5) step exceeded max iteration count ", rk_count
-!!             total_delta_step, " stepping deltah2 ", deltah2, " delta ", old_delta, " Rdummy !! ",  Rdummy, Rdummy1
-        !! h_x = h_rk4
-        goto  777
+        write(*,*) " **gk ck4(5) step exceeded max iteration count ", rk_count
+        write(*,*) " **gk ck4(5) deltah2 ", deltah2
+        stop
      endif
 
   end do
 
-777 continue
-
   call timer_lib_out('str')
   call cgyro_filter
 
-1111 continue
-
   delta_t_gk = delta_t_last
+  if ( delta_t_last_step .lt.  1.e-4*delta_t_last )  & 
+       delta_t_gk = delta_t_last + delta_t_last_step
+
   total_local_error = var_error
 
   !! paper
   !! if ( i_proc .eq. 0 ) write(*,*) " total local error ", total_local_error,  &
   !! " variance local error ", var_error, &
   !! " delta_t_gk ", delta_t_gk
-  
-  !! paper, test
-  
-  if ( i_proc .eq. 0 ) write(*,*) " Out ck4 deltah2_min, max ", &
-       iiter, deltah2_min, deltah2_max
+
+  !! if ( i_proc .eq. 0 ) write(*,*) " paper Out ck4 deltah2_min, max ", &
+  !! iiter, deltah2_min, deltah2_max
   !!
 
   call timer_lib_out('str')
