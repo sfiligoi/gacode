@@ -168,8 +168,8 @@ subroutine cgyro_init_manager
      allocate(dvjvec_c(n_field,nc,nv_loc))
      allocate(dvjvec_v(n_field,nc_loc,nv))
      allocate(jxvec_c(n_field,nc,nv_loc))
-     allocate(upfac1(nc,nv_loc))
-     allocate(upfac2(nc,nv_loc))
+     allocate(upfac1(nc,nv_loc,2))
+     allocate(upfac2(nc,nv_loc,2))
      ! Real-space distributed arrays
      allocate(cap_h_v(nc_loc,nv))
      allocate(cap_h_v_prime(nc_loc,nv))
