@@ -36,16 +36,24 @@ subroutine cgyro_upwind
   do is=1,n_species
      do ic=1,nc
        res_loc_one = (0.0,0.0)
+       res_loc_two = (0.0,0.0)
 
-!$acc loop vector private(iv_loc) reduction(+:res_loc_one,+:res_loc_two)
+!$acc loop vector private(iv_loc) reduction(+:res_loc_one)
        do iv=nv1,nv2
-        iv_loc = iv-nv1+1
-        if (is == is_v(iv)) then
-           res_loc_one = res_loc_one+upfac1(ic,iv_loc,1)*g_x(ic,iv_loc)
-           res_loc_two = res_loc_two+upfac1(ic,iv_loc,2)*g_x(ic,iv_loc)
-        endif
+          iv_loc = iv-nv1+1
+          if (is == is_v(iv)) then
+             res_loc_one = res_loc_one+upfac1(ic,iv_loc,1)*g_x(ic,iv_loc)
+          endif
        enddo
        res_loc(ic,is,1) = res_loc_one
+
+!$acc loop vector private(iv_loc) reduction(+:res_loc_two)
+       do iv=nv1,nv2
+          iv_loc = iv-nv1+1
+          if (is == is_v(iv)) then
+             res_loc_two = res_loc_two+upfac1(ic,iv_loc,2)*g_x(ic,iv_loc)
+          endif
+       enddo
        res_loc(ic,is,2) = res_loc_two
     enddo
 
