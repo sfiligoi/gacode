@@ -99,7 +99,7 @@ subroutine cgyro_upwind
         ie = ie_v(iv)
         g_x(ic,iv_loc) = abs(xi(ix))*vel(ie)*g_x(ic,iv_loc) &
              -upfac2(ic,iv_loc,1)*res(ic,is,1) &
-             -upfac2(ic,iv_loc,2)*res(ic,is,2) &
+             -upfac2(ic,iv_loc,2)*res(ic,is,2) 
      enddo
   enddo
 
