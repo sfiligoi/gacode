@@ -1,4 +1,7 @@
-import data
+# file processed by 2to3
+from __future__ import print_function, absolute_import
+from builtins import map, filter, range
+from . import data
 import sys
 import os
 import numpy as np
@@ -80,13 +83,13 @@ class gyrodata_plot(data.GYROData):
 
       if index == 'phi':
          key = 'balloon_phi'
-         index = self.balloon.keys().index(key)
+         index = list(self.balloon.keys()).index(key)
       elif index == 'a':
          key = 'balloon_a'
-         index = self.balloon.keys().index(key)
+         index = list(self.balloon.keys()).index(key)
       elif index == 'aperp':
          key = 'balloon_aperp'
-         index = self.balloon.keys().index(key)
+         index = list(self.balloon.keys()).index(key)
       else:
          index = int(index)
 

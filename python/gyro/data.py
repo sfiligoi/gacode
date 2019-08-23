@@ -1,3 +1,6 @@
+# file processed by 2to3
+from __future__ import print_function, absolute_import
+from builtins import map, filter, range
 import os
 import numpy as np
 import sys
@@ -384,7 +387,6 @@ class GYROData:
         """Reads out.gyro.balloon*.  Data is stored in self.balloon"""
 
         import glob
-        import string
 
         m     = int(self.profile['box_multiplier'])
         n_x   = int(self.profile['n_x'])

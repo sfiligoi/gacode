@@ -1,6 +1,8 @@
+# file processed by 2to3
+from __future__ import print_function, absolute_import
+from builtins import map, filter, range
 import os
 import sys
-import string
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import rc
@@ -20,7 +22,7 @@ dots = int(sys.argv[6])
 
 # Test for required input.profiles data
 if not os.path.isfile('input.profiles.0'):
-    print 'ERROR: Need to run tgyro with TGYRO_WRITE_PROFILES_FLAG=-1'
+    print('ERROR: Need to run tgyro with TGYRO_WRITE_PROFILES_FLAG=-1')
     sys.exit(1)
 
 fig = plt.figure(figsize=(14,8))
@@ -35,7 +37,7 @@ def plotcurve(sim,prof):
             success = 1
             fulltag = keys[i]
     if success == 0:
-        print "ERROR: (plot_global.py) Bad profile : "+f
+        print("ERROR: (plot_global.py) Bad profile : "+f)
         sys.exit()
 
     ax.plot(x,prof.data[fulltag],color=color,alpha=alpha,linewidth=width,
@@ -93,6 +95,6 @@ if ext == 'screen':
     plt.show()
 else:
     outfile = f+'.'+ext
-    print "Saving plot to "+outfile
+    print("Saving plot to "+outfile)
     plt.savefig(outfile)
 
