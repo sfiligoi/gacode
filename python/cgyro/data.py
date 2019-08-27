@@ -1,6 +1,3 @@
-# file processed by 2to3
-from __future__ import print_function, absolute_import
-from builtins import map, filter, range
 import os
 import numpy as np
 import sys
@@ -20,7 +17,7 @@ class cgyrodata:
       self.silent = silent
       self.dir = sim_directory
       self.getdata()
-        
+
    def extract(self,f):
 
       start = time.time()
@@ -33,16 +30,16 @@ class cgyrodata:
       else:
          fmt  = 'null'
          data = []
-         
+
       t = 'TIME = '+'{:.3e}'.format(time.time()-start)+' s.'
- 
+
       return t,fmt,data
-       
-          
+
+
    def getdata(self):
 
       """Initialize smaller data objects (don't load larger ones)"""
-      
+
       #-----------------------------------------------------------------
       # Read time vector.
       #
@@ -55,14 +52,14 @@ class cgyrodata:
          self.err2 = data[2,:]
       except:
          self.err2 = data[1,:]
-      self.n_time = nt   
+      self.n_time = nt
       if not self.silent:
          print('INFO: (data.py) Read time vector in out.cgyro.time.')
       #-----------------------------------------------------------------
 
       #-----------------------------------------------------------------
       # Read grid data.
-      # 
+      #
       # NOTE: Grid data is packed, so unpack into sensible bits
       #
       data = np.fromfile(self.dir+'out.cgyro.grids',dtype='float32',sep=' ')
@@ -83,10 +80,10 @@ class cgyrodata:
 
       self.p = np.array(data[l:l+self.n_radial],dtype=int)
       self.kx = 2*np.pi*self.p/self.length
-    
+
       mark = l+self.n_radial
       self.theta = np.array(data[mark:mark+self.n_theta])
-        
+
       mark = mark+self.n_theta
       self.energy = np.array(data[mark:mark+self.n_energy])
 
@@ -94,8 +91,8 @@ class cgyrodata:
       self.xi   = np.array(data[mark:mark+self.n_xi])
 
       mark = mark+self.n_xi
-      self.thetab = np.array(data[mark:mark+self.n_theta*self.n_radial//self.m_box])  
-         
+      self.thetab = np.array(data[mark:mark+self.n_theta*self.n_radial//self.m_box])
+
       mark = mark+self.n_theta*(self.n_radial//self.m_box)
       self.ky = np.array(data[mark:mark+self.n_n])
 
@@ -194,12 +191,12 @@ class cgyrodata:
       #-----------------------------------------------------------------
       # Ballooning potentials
       #
-      nd = 2*self.n_theta*self.n_radial*nt 
+      nd = 2*self.n_theta*self.n_radial*nt
       f='.cgyro.phib'
       t,fmt,data = self.extract(f)
       if fmt != 'null':
          self.phib = np.reshape(data[0:nd],(2,self.n_theta*self.n_radial,nt),'F')
-         print('INFO: (data.py) Read data in '+fmt+f+'  '+t) 
+         print('INFO: (data.py) Read data in '+fmt+f+'  '+t)
 
       f='.cgyro.aparb'
       t,fmt,data = self.extract(f)
@@ -255,7 +252,7 @@ class cgyrodata:
          usec = True
       else:
          usec = False
-  
+
       #-----------------------------------------------------------------
       # Particle, momentum and energy fluxes
       #
@@ -264,21 +261,21 @@ class cgyrodata:
 
       if usec:
          t,fmt,data = self.extract('.cgyro.ky_cflux')
-         if fmt != 'null':  
+         if fmt != 'null':
             self.ky_flux = np.reshape(data[0:nd],(self.n_species,3,self.n_field,self.n_n,nt),'F')
             if not self.silent:
-               print('INFO: (data.py) Read data in '+fmt+'.cgyro.ky_cflux. '+t) 
+               print('INFO: (data.py) Read data in '+fmt+'.cgyro.ky_cflux. '+t)
 
-      if not usec or fmt == 'null':      
+      if not usec or fmt == 'null':
          t,fmt,data = self.extract('.cgyro.ky_flux')
          if fmt != 'null':  
             self.ky_flux = np.reshape(data[0:nd],(self.n_species,3,self.n_field,self.n_n,nt),'F')
             if not self.silent:
-               print('INFO: (data.py) Read data in '+fmt+'.cgyro.ky_flux. '+t) 
+               print('INFO: (data.py) Read data in '+fmt+'.cgyro.ky_flux. '+t)
       #-----------------------------------------------------------------
 
       return usec
-   
+
    def getxflux(self):
 
       """Global-spectral flux files (optional)"""
@@ -291,19 +288,19 @@ class cgyrodata:
       nd = 2*ng*self.n_species*self.n_n*nt
 
       t,fmt,data = self.extract('.cgyro.lky_flux_n')
-      if fmt != 'null':  
+      if fmt != 'null':
          self.lky_flux_n = np.reshape(data[0:nd],(2,ng,self.n_species,self.n_n,nt),'F')
          print('INFO: (data.py) Read data in '+fmt+'.cgyro.lky_flux_n. '+t)
 
       t,fmt,data = self.extract('.cgyro.lky_flux_e')
-      if fmt != 'null':  
+      if fmt != 'null':
          self.lky_flux_e = np.reshape(data[0:nd],(2,ng,self.n_species,self.n_n,nt),'F')
          print('INFO: (data.py) Read data in '+fmt+'.cgyro.lky_flux_e. '+t)
 
       t,fmt,data = self.extract('.cgyro.lky_flux_v')
-      if fmt != 'null':  
+      if fmt != 'null':
          self.lky_flux_v = np.reshape(data[0:nd],(2,ng,self.n_species,self.n_n,nt),'F')
-         print('INFO: (data.py) Read data in '+fmt+'.cgyro.lky_flux_v. '+t)      
+         print('INFO: (data.py) Read data in '+fmt+'.cgyro.lky_flux_v. '+t)
       #-----------------------------------------------------------------
 
    def xfluxave(self,w,moment,e=0.2,nscale=0):
@@ -321,7 +318,7 @@ class cgyrodata:
          # Find ne
          for ispec in range(ns):
             if self.z[ispec] < 0.0:
-               ne = self.dens[ispec]            
+               ne = self.dens[ispec]
          sc[:] = ne/self.dens[:]
       else:
          sc[:] = 1.0
@@ -360,7 +357,7 @@ class cgyrodata:
          self.lky_flux_ave[ispec,0] = g0
          # Average over negative interval
          self.lky_flux_ave[ispec,1] = g1
-      
+
    def getbigfield(self):
 
       """Larger field files"""
@@ -434,4 +431,4 @@ class cgyrodata:
          self.geotag.append('\omega_\mathrm{crdrift}')
          self.geotag.append('\omega_\mathrm{gammap')
          self.geotag.append('k_\perp')
- 
+
