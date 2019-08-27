@@ -1,3 +1,6 @@
+# file processed by 2to3
+from __future__ import print_function, absolute_import
+from builtins import map, filter, range
 #----------------------------------------------------------------------
 # gacodeinput.py
 #
@@ -9,7 +12,6 @@
 #  ManagerInput : input.tgyro [see tgyro/bin/tgyro_parse.py]
 #----------------------------------------------------------------------
 
-import string
 import os
 
 #--------------------------------------------------------------------
@@ -68,7 +70,7 @@ class SimpleInput:
                 self.user_dict[arg] = val
 
         # 2. build complete input file, looking for errors
-        for x in self.user_dict.keys():
+        for x in list(self.user_dict.keys()):
             if x in self.data_dict:
                 self.data_dict[x] = self.user_dict[x]
             elif x in self.dep_dict:

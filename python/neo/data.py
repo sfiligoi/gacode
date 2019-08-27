@@ -1,3 +1,6 @@
+# file processed by 2to3
+from __future__ import print_function, absolute_import
+from builtins import map, filter, range
 import numpy as np
 
 class NEOData:
@@ -120,7 +123,7 @@ class NEOData:
                 rcos,rsin,zcos,zsin = fourier.reshape((4,n_fourier+1 ,-1), order='F')
   
             except:
-                print "ERROR (NEOData): Fatal error!  Missing input.geo."
+                print("ERROR (NEOData): Fatal error!  Missing input.geo.")
                 return
  
 
@@ -144,7 +147,7 @@ class NEOData:
             data = np.loadtxt(self.dirname+'/out.neo.grid')
         except:
             if self.verbose:
-                print "ERROR (NEOData): Fatal error!  Missing out.neo.grid."
+                print("ERROR (NEOData): Fatal error!  Missing out.neo.grid.")
             return
 
         self.grid['n_species'] = int(data[0])
@@ -164,7 +167,7 @@ class NEOData:
             equil = np.loadtxt(self.dirname+'/out.neo.equil')
         except:
             if self.verbose:
-                print "ERROR (NEOData): Fatal error!  Missing out.neo.equil."
+                print("ERROR (NEOData): Fatal error!  Missing out.neo.equil.")
             return
 
         if len(equil.shape)==1:
@@ -192,7 +195,7 @@ class NEOData:
             data = np.loadtxt(self.dirname+'/out.neo.theory')
         except:
             if self.verbose:
-                print "ERROR (NEOData): Fatal error!  Missing out.neo.theory."
+                print("ERROR (NEOData): Fatal error!  Missing out.neo.theory.")
             return
 
 
@@ -227,7 +230,7 @@ class NEOData:
             data = np.loadtxt(self.dirname+'/out.neo.transport')
         except:
             if self.verbose:
-                print "ERROR (NEOData): Fatal error!  Missing out.neo.transport."
+                print("ERROR (NEOData): Fatal error!  Missing out.neo.transport.")
             return
 
         if len(data.shape)==1:
@@ -257,7 +260,7 @@ class NEOData:
             data = np.loadtxt(self.dirname+'/out.neo.transport_gv')
         except:
             if self.verbose:
-                print "ERROR (NEOData): Fatal error!  Missing out.neo.transport_gv."
+                print("ERROR (NEOData): Fatal error!  Missing out.neo.transport_gv.")
             return
 
         if len(data.shape)==1:
@@ -278,7 +281,7 @@ class NEOData:
             data = np.atleast_2d(np.loadtxt(self.dirname+'/out.neo.transport_exp'))
         except:
             if self.verbose:
-                print "ERROR (NEOData): Fatal error!  Missing out.neo.transport_exp."
+                print("ERROR (NEOData): Fatal error!  Missing out.neo.transport_exp.")
             return
 
         self.transport_exp['r']       = data[:,0]
@@ -319,7 +322,7 @@ class NEOData:
             
             
         except:
-            print "Warning (NEOData): Missing out.neo.rotation."
+            print("Warning (NEOData): Missing out.neo.rotation.")
             self.rotation['r_over_a'] = self.grid['r_over_a']
             self.rotation['dphi_ave'] = np.zeros([n_radial])
             self.rotation['n_ratio']  = np.ones([n_radial,n_spec])
@@ -340,7 +343,7 @@ class NEOData:
             data = np.loadtxt(self.dirname+'/out.neo.vel')
         except:
             if self.verbose:
-                print "ERROR (NEOData): Missing out.neo.vel."
+                print("ERROR (NEOData): Missing out.neo.vel.")
             return
 
         self.vel = data.reshape((self.grid['n_radial'],
@@ -353,7 +356,7 @@ class NEOData:
         try:
             data = np.loadtxt(self.dirname+'/out.neo.vel_fourier',ndmin=2)
         except:
-            print "ERROR (NEOData): Missing out.neo.vel_fourier."
+            print("ERROR (NEOData): Missing out.neo.vel_fourier.")
             raise Exception('no data') 
 
 

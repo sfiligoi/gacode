@@ -1,3 +1,6 @@
+# file processed by 2to3
+from __future__ import print_function, absolute_import
+from builtins import map, filter, range
 #----------------------------------------------------------------------
 # gacodefuncs.py
 #
@@ -223,7 +226,7 @@ def extract(d,sd,key,w,spec,moment,norm=False,wmax=0.0,cflux='auto',dovar=False)
          # If this is a directory, get the key value
          for line in open(sub+'/input.cgyro').readlines():
             if re.match(key,line):
-               found = float(line.split('=')[1]) 
+               found = float(line.split('=')[1])
          x.append(found)
          # Get the corresponding flux
          sim = cgyrodata(sub+'/')
@@ -317,7 +320,7 @@ def time_vector(istr,nt):
    if istr == '-1':
       ivec = [nt]
    elif istr == 'all':
-      ivec = range(nt)
+      ivec = list(range(nt))
    else:
       ivec = str2list(istr)
 

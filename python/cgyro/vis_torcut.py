@@ -13,7 +13,7 @@ try:
 except:
    print('ERROR: (vis_torcut) Please build gapy/f2py library!')
    sys.exit()
-   
+
 ext      = sys.argv[1]
 moment   = sys.argv[2]
 species  = int(sys.argv[3])

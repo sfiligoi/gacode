@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+# file processed by 2to3
+from __future__ import print_function, absolute_import
+from builtins import map, filter, range
 
 __all__ = ['ddb_float', 'harvest_send', 'harvest_nc']
 
@@ -43,14 +46,14 @@ def _data_2_message(payload):
         return tmpsc
 
     message=[]
-    for what in payload.keys():
+    for what in list(payload.keys()):
         data=payload[what]
         if isinstance(data,(bool,numpy.bool_)):
             tp='b'
             data=str(int(data))
         elif isinstance(data,(list,tuple,numpy.ndarray)):
             tp='a'
-            data=re.sub(' ','','['+','.join(compress(map(formatter,numpy.atleast_1d(data).flatten().tolist())))+']' )
+            data=re.sub(' ','','['+','.join(compress(list(map(formatter,numpy.atleast_1d(data).flatten().tolist()))))+']' )
         elif numpy.array(data).dtype.kind=='i':
             tp='i'
             data=str(data)
@@ -130,7 +133,7 @@ def harvest_send(payload, table='test_harvest', host=None, port=None, verbose=No
     if process is None:
         payload_.update(payload_)
     else:
-        for item in payload.keys():
+        for item in list(payload.keys()):
             payload_[item]=process(payload[item])
 
     payload_['_user']=os.environ['USER']
@@ -237,9 +240,9 @@ def harvest_nc(filename, entries=None, verbose=False):
 
     nc = netCDF4.Dataset(filename,'r',format='NETCDF3_CLASSIC')
     if entries is None:
-        entries=nc.variables.keys()
+        entries=list(nc.variables.keys())
     for entry in entries:
-        if entry in nc.variables.keys():
+        if entry in list(nc.variables.keys()):
             try:
                 value=nc.variables[entry].getValue()[0]
             except Exception:

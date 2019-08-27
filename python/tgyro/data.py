@@ -1,3 +1,6 @@
+# file processed by 2to3
+from __future__ import print_function, absolute_import
+from builtins import map, filter, range
 import os
 import sys
 import numpy as np
@@ -53,22 +56,19 @@ class tgyrodata:
             for root in ['evo_n','flux_i','profile_i']:
                 self.fileparser('out.tgyro.'+root+str(i+1))
 
-        if self.verbose:
-           print(self.data.keys())
+        if self.verbose: print(list(self.data.keys()))
 
 
     def get_tag_value(self, tag):
 
-        # Get value of input.tgyro.gen tag (like tag=LOC_N_ION)
-
-        datafile = open(self.dir+'/input.tgyro.gen','r')
+        datafile = open(self.dir+'/input.tgyro.gen','r').readlines()
 
         for line in datafile:
             try:
                 if line.split()[1] == tag:
                     return float(line.split()[0])
             except IndexError:
-                print("WARNING: Cannot find specified input parameter: "+tag)
+                print("WARNING: Cannot find specified input parameter: ", tag)
                 return 0
   
 
