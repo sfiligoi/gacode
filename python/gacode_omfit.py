@@ -23,16 +23,27 @@ class Gapy(dict):
 
     def __init__(self, filename, input_profiles_compatibility_mode=True):
         expro.expro_read(filename)
+      
+        # input.gacode quantities
         list = ['n_exp','n_ion','mass','z','torfluxa','rvbv','ipa',
                 'rho','rmin','polflux','q','w0','rmaj','zmag',
                 'kappa','delta','zeta','ne','ni','te','ti','ptot',
-                'z_eff','vpol','vtor']
+                'johm','jbs','jrf','jnb','jbstor','sigmapar',
+                'z_eff','vpol','vtor',
+                'qohme','qbeame','qbeami','qrfe','qrfi','qfuse','qfusi',
+                'qbrem','qsync','qline','qei','qione','qioni','qcxi','qpar','qmom']
         for item in list:
-            self[item] = getattr(expro,'expro_'+item)
-
+           self[item] = getattr(expro,'expro_'+item)
+      
+        # Species name and type
         self['name'] = gapystrv(expro.expro_name,expro.expro_n_ion)
         self['type'] = gapystrv(expro.expro_type,expro.expro_n_ion)
- 
+
+        # Selected Derived quantities
+        list = ['bunit','gamma_e','gamma_p','s','drmaj','dzmag',
+                'sdelta','skappa','szeta','dlnnedr','dlntedr','w0p',
+                'vol','volp','cs','rhos','nuee']
+        
         if input_profiles_compatibility_mode:
             self['Te'] = self['te']
             del self['te']

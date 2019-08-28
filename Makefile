@@ -28,7 +28,7 @@ clean:
 	cd f2py ; make clean
 	rm -f python/*/*.pyc
 	rm -f python/*.pyc
-	rm -f python/__pycache__
+	rm -rf python/__pycache__
 	rm -f modules/*genmod*
 	rm -f *.log
 	rm -rf *regression_test/
