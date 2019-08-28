@@ -7,7 +7,6 @@ all:
 	cd expro ; make
 
 pip:
-	mkdir pygacode
 	cp -r ${GACODE_ROOT}/python/cgyro .
 	cp -r ${GACODE_ROOT}/python/gyro .
 	cp -r ${GACODE_ROOT}/python/tgyro .

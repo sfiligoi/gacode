@@ -1,6 +1,6 @@
 include ${GACODE_ROOT}/platform/build/make.inc.${GACODE_PLATFORM}
 
-OBJ=pygacode
+OBJ=gacode
 
 SRC= 	../vis/gapy_realfluct.f90 \
 	../vis/gapy_wheel1.f90 \
