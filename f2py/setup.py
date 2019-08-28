@@ -15,17 +15,17 @@ setup(name='gacode',
       license='MIT',
       packages=['expro',
                 'geo',
-                'pygacode.cgyro',
-                'pygacode.gyro',
-                'pygacode.tgyro',
-                'pygacode.neo'
+                'cgyro',
+                'gyro',
+                'tgyro',
+                'neo'
       ],
       package_dir={'expro':'expro',
                    'geo':'geo',
-                   'pygacode.cgyro':'pygacode/cgyro',
-                   'pygacode.gyro':'pygacode/gyro',
-                   'pygacode.tgyro':'pygacode/tgyro',
-                   'pygacode.neo':'pygacode/neo'
+                   'cgyro':'cgyro',
+                   'gyro':'gyro',
+                   'tgyro':'tgyro',
+                   'neo':'neo'
       },
       ext_modules=[wrapper]
 )

@@ -504,17 +504,17 @@ subroutine bound_extrap(fa,fb,f,r,n)
 
 end subroutine bound_extrap
 
-subroutine expro_writes(x,xs)
+subroutine expro_writes(x,xs1,xs2)
 
-  use expro, only : ident,strlen
+  use expro, only : ident
 
   implicit none
 
   double precision, intent(in) :: x
-  character(len=strlen), intent(in) :: xs(2)
+  character(len=*), intent(in) :: xs1,xs2
 
   if (abs(x) > 1e-16) then
-     write(1,'(4a)') ident//trim(xs(1))//' | '//trim(xs(2))
+     write(1,'(4a)') ident//trim(xs1)//' | '//trim(xs2)
      write(1,10) x
   endif
 
@@ -522,19 +522,19 @@ subroutine expro_writes(x,xs)
 
 end subroutine expro_writes
 
-subroutine expro_writev(x,n,xs)
+subroutine expro_writev(x,n,xs1,xs2)
 
-  use expro, only : ident,strlen
+  use expro, only : ident
 
   implicit none
 
   integer, intent(in) :: n
   double precision, intent(in), dimension(n) :: x
-  character(len=strlen), intent(in) :: xs(2)
+  character(len=*), intent(in) :: xs1,xs2
   integer :: i
 
   if (sum(abs(x)) > 1e-16) then
-     write(1,'(4a)') ident//trim(xs(1))//' | '//trim(xs(2))
+     write(1,'(4a)') ident//trim(xs1)//' | '//trim(xs2)
      do i=1,n
         write(1,10) i,x(i)
      enddo
@@ -544,20 +544,19 @@ subroutine expro_writev(x,n,xs)
 
 end subroutine expro_writev
 
-subroutine expro_writea(x,m,n,xs)
+subroutine expro_writea(x,m,n,xs1,xs2)
 
-  use expro, only : ident,strlen
+  use expro, only : ident
 
   implicit none
 
-  integer, intent(in) :: m
-  integer, intent(in) :: n
+  integer, intent(in) :: m,n
   double precision, intent(in), dimension(m,n) :: x
-  character(len=strlen), intent(in) :: xs(2)
+  character(len=*), intent(in) :: xs1,xs2
   integer :: i
 
   if (sum(abs(x)) > 1e-16) then
-     write(1,'(4a)') ident//trim(xs(1))//' | '//trim(xs(2))
+     write(1,'(4a)') ident//trim(xs1)//' | '//trim(xs2)
      do i=1,n
         write(1,10) i,x(:,i)
      enddo

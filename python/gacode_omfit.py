@@ -1,27 +1,44 @@
-from pygacode import expro
+from gacode import expro
 import numpy
+import sys
+
+# Function to decode the insane string returned by gacode/f2py
+def gapystrv(s,n):
+
+   if sys.version_info[0] > 2:
+      # Python 3
+      u=[]
+      for i in range(n):
+         u.append(s[i].decode('UTF-8').strip())
+      return u
+   else:
+      # Python 2
+      u = []
+      a = s.transpose().reshape(-1,10).view('S'+str(10))
+      for i in range(n):
+         u.append(a[i].tostring().strip())
+      return u
 
 class Gapy(dict):
 
     def __init__(self, filename, input_profiles_compatibility_mode=True):
         expro.expro_read(filename)
-        for item in dir(expro):
-            if item.startswith('expro_') and item.endswith('_str'):
-                try:
-                    self[item[len('expro_'):-len('str_')]] = getattr(expro, item[:-len('str_')])
-                except Exception as _excp:
-                    print('WARNING: issue reading %s: %s' % (item, repr(_excp)))
-        for item in ['name', 'type']:
-            self[item] = map(lambda x: ''.join(x).strip().replace('[', '').replace(']', ''),
-                             numpy.split(numpy.array(list(self[item].tolist())), self['n_ion']))
+        list = ['n_exp','n_ion','mass','z','torfluxa','rvbv','ipa',
+                'rho','rmin','polflux','q','w0','rmaj','zmag',
+                'kappa','delta','zeta','ne','ni','te','ti','ptot',
+                'z_eff','vpol','vtor']
+        for item in list:
+            self[item] = getattr(expro,'expro_'+item)
 
+        self['name'] = gapystrv(expro.expro_name,expro.expro_n_ion)
+        self['type'] = gapystrv(expro.expro_type,expro.expro_n_ion)
+ 
         if input_profiles_compatibility_mode:
-
             self['Te'] = self['te']
             del self['te']
             self['Ti'] = self['ti']
             del self['ti']
-            for quantity in ['ni', 'Ti', 'vpol', 'vtor']:
+            for quantity in ['ni','Ti','vpol','vtor']:
                 if quantity in self:
                     for k in range(self['n_ion']):
                         self[quantity + '_%d' % (k + 1)] = self[quantity][k]
@@ -31,13 +48,11 @@ class Gapy(dict):
                 self['IONS'].append([self['name'][k], self['z'][k], self['mass'][k], self['type'][k]])
             del self['z']
             del self['mass']
-            del self['ze']
-            del self['masse']
             print(self['IONS'])
 
 import cgyro
 import gyro
 import neo
 import tgyro
-from pygacode import geo
+from gacode import geo
 

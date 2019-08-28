@@ -9,13 +9,13 @@ from gacodefuncs import *
 from cgyro.data import cgyrodata
 
 try:
-   import gapy
+   import pygacode
    hasgapy = True
 except:
-   print('BAD: (plot_fluct) Please build gapy.so library!')
+   print("BAD: (plot_fluct) Please 'make so' in gacode/f2py")
    hasgapy = False
 
-PREC='f' ; BIT=4  
+PREC='f' ; BIT=4
 
 ext = sys.argv[1]
 moment = sys.argv[2]
@@ -32,7 +32,7 @@ font = int(sys.argv[12])
 land = int(sys.argv[13])
 theta = float(sys.argv[14])
 
-# Use first 3 args to define plot and font size 
+# Use first 3 args to define plot and font size
 rc('text',usetex=True)
 rc('font',size=font)
 
@@ -185,7 +185,7 @@ def frame():
          f,t = maptoreal_fft(nr,nn,nx,ny,c)
       elif hasgapy:
          start = time.time()
-         gapy.realfluct(c,f)
+         pygacode.realfluct(c,f)
          end = time.time()
          t = end-start
       else:

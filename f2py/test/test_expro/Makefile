@@ -16,7 +16,6 @@ EXTRA_LIBS = \
 
 test: test.o
 	$(FC) -o test test.o ${EXTRA_LIBS} ${LMATH}
-	cp ${GACODE_ROOT}/cgyro/tools/input/profile_data/input.gacode .
 
 .f90.o :
 	$(FC) $(FFLAGS) $(FMATH) -c $<

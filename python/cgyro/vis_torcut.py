@@ -11,7 +11,7 @@ from mayavi import mlab
 try:
    import pygacode
 except:
-   print('ERROR: (vis_torcut) Please build gapy/f2py library!')
+   print("ERROR: (vis_torcut) Please type 'make so' in gacode/f2py")
    sys.exit()
 
 ext      = sys.argv[1]

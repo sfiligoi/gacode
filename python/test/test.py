@@ -1,3 +1,4 @@
 import gacode
+from gacode_omfit import *
 
-gacode.Gapy('../../f2py/test/data/input.gacode')
+Gapy('../../f2py/test/data/input.gacode')

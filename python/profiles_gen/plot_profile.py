@@ -78,7 +78,7 @@ def plot_select(ax,tag):
       
    if tag == 'bunit':
       # bunit
-      y = expro.expro_bunit ; ystr = r'$B_\mathrm{unit}$'
+      y = expro.expro_bunit ; ystr = r'B_\mathrm{unit}'
       ax.plot(x[:m],y[:m],label=r'$'+ystr+'$')
 
    if tag == 'gammae':
@@ -90,6 +90,11 @@ def plot_select(ax,tag):
       # gamma_p
       y = expro.expro_gamma_p ; ystr = gapystr(expro.expro_gamma_p_str)
       ax.plot(x[:m],y[:m]/csa[:m],label=r'$(a/c_s)'+ystr+'$')
+
+   if tag == 'mach':
+      # mach
+      y = expro.expro_mach ; ystr = r'M'
+      ax.plot(x[:m],y[:m],label=r'$'+ystr+'$')
 
    if tag == 'r':
       # rho
@@ -185,6 +190,10 @@ class DemoFrame(wx.Frame):
         tab = TabPanel(notebook)
         tab.draw('gammap')
         notebook.AddPage(tab,'gammap')
+
+        tab = TabPanel(notebook)
+        tab.draw('mach')
+        notebook.AddPage(tab,'mach')
 
         tab = TabPanel(notebook)
         tab.draw('r')
