@@ -1,12 +1,10 @@
-# file processed by 2to3
-from __future__ import print_function, absolute_import
-from builtins import map, filter, range
 # Dump text report of flux
 
 import sys
 import numpy as np
 from gacodefuncs import *
 from cgyro.data import cgyrodata
+#from asciichartpy import plot
 
 def print_freq():
     # Set print precision
@@ -28,7 +26,7 @@ def print_flux():
     # Determine imin
     imin,imax=iwindow(sim.t,w,wmax)
 
-    print('INFO: (text.py) Average Window:',str(sim.t[imin])+' < (c_s/a) t < '+str(sim.t[imax]))
+    print('INFO: (text.py) Average Window:'+str(sim.t[imin])+' < (c_s/a) t < '+str(sim.t[imax]))
 
     title = '        '
     for ispec in range(sim.n_species):

@@ -28,6 +28,7 @@ legacy   = bool(int(sys.argv[11]))
 dn       = int(sys.argv[12])
 mag      = float(sys.argv[13])
 nozonal  = bool(int(sys.argv[14]))
+onlyzonal = bool(int(sys.argv[15]))
 
 sim = cgyrodata('./')
 nt = sim.n_time
@@ -163,6 +164,8 @@ def frame():
                 
    if nozonal and nn > 1:
       c[:,:,0] = 0.0
+   if onlyzonal and nn > 1:
+      c[:,:,1:] = 0.0
 
    f = np.zeros([nx,nz],order='F')
    pygacode.torcut(dn,sim.m_box,sim.q,sim.thetap,g1,g2,c,f)

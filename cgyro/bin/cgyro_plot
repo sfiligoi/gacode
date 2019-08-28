@@ -179,6 +179,9 @@ then
   echo "         -nozonal"
   echo "         Remove zonal (n=0) component of the fluctuations (-vis torcut only)"  
   echo
+  echo "         -onlyzonal"
+  echo "         Remove nonzonal (n>0) component of the fluctuations (-vis torcut only)"  
+  echo
   echo "OPTIONS FOR -plot vid"
   echo
   echo "         -pre <prefix>"
@@ -271,6 +274,7 @@ DN=1
 MAG=1.0
 IE=0
 NOZONAL=0
+ONLYZONAL=0
 
 PRE=
 FRAMERATE=20
@@ -345,6 +349,7 @@ while [ $# -gt 0 ] ; do
   -dn) shift ; DN=$1 ;;
   -mag) shift ; MAG=$1 ;;
   -nozonal) NOZONAL=1 ;;
+  -onlyzonal) ONLYZONAL=1 ;;
 
   -pre) shift ; PRE=$1 ;;
   -q)  shift ; QUALITY=$1 ;;
@@ -380,7 +385,7 @@ case "$VIS_TYPE" in
 	python $PYROOT/vis_slices.py ;;
 	
    torcut)
-	export OMP_NUM_THREADS=$NOMP ; python $PYROOT/vis_torcut.py $EXT $MOMENT $SPECIES $NX $NZ $TIME $FMIN $FMAX $CMAP $FONTSIZE $LEGACY_FLAG $DN $MAG $NOZONAL ;;
+	export OMP_NUM_THREADS=$NOMP ; python $PYROOT/vis_torcut.py $EXT $MOMENT $SPECIES $NX $NZ $TIME $FMIN $FMAX $CMAP $FONTSIZE $LEGACY_FLAG $DN $MAG $NOZONAL $ONLYZONAL ;;
 
    wheel)
 	export OMP_NUM_THREADS=$NOMP ; python $PYROOT/vis_wheel.py $EXT $MOMENT $SPECIES $NX $NY $NZ $TIME $FMIN $FMAX $CMAP $FONTSIZE ;;
