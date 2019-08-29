@@ -27,6 +27,8 @@ subroutine prgen_get_chi(nx,q,psi,rho,torfluxa)
   ! Normalized root of chi_t:
   !
   rho(:) = sqrt(chi_t(:)/chi_t(nx))
+  ! Prevent any roundoff
+  rho(nx) = 1.0
   deallocate(chi_t)
   !---------------------------------------------------------
 

@@ -80,7 +80,7 @@ then
    echo "Flags for gfile control (see -g option below)"
    echo 
    echo "             -noq"
-   echo "             Do not use the q from the EFIT gfile"
+   echo "             Do not use the flux and q from the EFIT gfile (default is to use them)"
    echo 
    echo "             -nop"
    echo "             Do not use the P_tot from the EFIT gfile."

@@ -422,7 +422,7 @@ contains
           call expro_rcomm(expro_torfluxa) 
        case ('rvbv')
           call expro_rcomm(expro_rvbv) 
-       case ('ip')
+       case ('ipa')
           call expro_rcomm(expro_ipa) 
        case ('rho')
           call expro_vcomm(expro_rho,nexp)  

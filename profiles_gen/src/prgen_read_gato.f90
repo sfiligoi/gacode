@@ -100,7 +100,7 @@ subroutine prgen_read_gato
         ! Use gato psi (Aug 2019)
         ! NOTE: This is new default behaviour intended to improve on potentially
         !       inferior poloidal flux from ONETWO
-        print '(a)','INFO: (prgen_read_gato) Using GATO poloidal flux (from gfile).'
+        print '(a)','INFO: (prgen_read_gato) Using GATO flux and q (from gfile)'
         call prgen_get_chi(nsurf+1,gato_q,gato_psi,gato_rho,gato_torfluxa)
         call cub_spline(gato_rho,gato_psi,nsurf+1,rho,dpsi,nx)
         dpsi_data = dpsi(nx)
