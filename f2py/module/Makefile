@@ -25,10 +25,10 @@ objs:
 	${F2PYM} --quiet --overwrite-signature -m ${OBJ} -h sgn.pyf ${SRC}
 	${F2PY}  --quiet -lgomp --f90flags='${FOMP} ${FOPT} ${FMATH}' -c sgn.pyf ${SRC}
 
-	cp py*.so ${GACODE_ROOT}/python
+	cp *.so ${GACODE_ROOT}/python/
 
 clean:
-	rm -f py*.so sgn.pyf *~ ${GACODE_ROOT}/python/py*.so
+	rm -f sgn.pyf *~ *.so ${GACODE_ROOT}/python/*.so
 
 exit:
 	echo "No f2py"

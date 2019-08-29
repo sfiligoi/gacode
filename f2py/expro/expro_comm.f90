@@ -99,7 +99,7 @@ subroutine expro_tcomm(x,n)
   implicit none
 
   integer, intent(in) :: n
-  character*10, intent(inout), dimension(20) :: x
+  character(len=10), intent(inout), dimension(20) :: x
   integer :: ierr,iproc
   logical :: flag
   

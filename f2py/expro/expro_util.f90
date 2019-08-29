@@ -504,6 +504,13 @@ subroutine bound_extrap(fa,fb,f,r,n)
 
 end subroutine bound_extrap
 
+!------------------------------------------------------------------------------
+! write routines:
+!  writes - scalar
+!  writev - vector
+!  writea - 2D array
+!------------------------------------------------------------------------------
+
 subroutine expro_writes(x,xs1,xs2)
 
   use expro, only : ident

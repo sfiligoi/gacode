@@ -4,4 +4,4 @@ test:
 	profiles_gen -i iterdb
 
 clean:
-	rm input.gacod* iterdb
+	rm -f input.gacod* iterdb

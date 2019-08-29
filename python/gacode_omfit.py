@@ -3,27 +3,17 @@ import numpy
 import sys
 
 # Function to decode the insane string returned by gacode/f2py
-def gapystrv(s,n):
-
-   if sys.version_info[0] > 2:
-      # Python 3
-      u=[]
-      for i in range(n):
-         u.append(s[i].decode('UTF-8').strip())
-      return u
+def gapystr(s):
+   if sys.version_info[0] == 2:
+      return str(s).split()
    else:
-      # Python 2
-      u = []
-      a = s.transpose().reshape(-1,10).view('S'+str(10))
-      for i in range(n):
-         u.append(a[i].tostring().strip())
-      return u
+      return str(s,'utf-8').split()
 
 class Gapy(dict):
 
     def __init__(self, filename, input_profiles_compatibility_mode=True):
         expro.expro_read(filename)
-      
+
         # input.gacode quantities
         list = ['n_exp','n_ion','mass','z','torfluxa','rvbv','ipa',
                 'rho','rmin','polflux','q','w0','rmaj','zmag',
@@ -32,18 +22,19 @@ class Gapy(dict):
                 'z_eff','vpol','vtor',
                 'qohme','qbeame','qbeami','qrfe','qrfi','qfuse','qfusi',
                 'qbrem','qsync','qline','qei','qione','qioni','qcxi','qpar','qmom']
+        # Define Gapy class members corresponding to list[]
         for item in list:
            self[item] = getattr(expro,'expro_'+item)
-      
-        # Species name and type
-        self['name'] = gapystrv(expro.expro_name,expro.expro_n_ion)
-        self['type'] = gapystrv(expro.expro_type,expro.expro_n_ion)
 
-        # Selected Derived quantities
+        # Species name and type
+        self['name'] = gapystr(expro.expro_name)
+        self['type'] = gapystr(expro.expro_type)
+
+        # Selected derived quantities
         list = ['bunit','gamma_e','gamma_p','s','drmaj','dzmag',
                 'sdelta','skappa','szeta','dlnnedr','dlntedr','w0p',
                 'vol','volp','cs','rhos','nuee']
-        
+
         if input_profiles_compatibility_mode:
             self['Te'] = self['te']
             del self['te']

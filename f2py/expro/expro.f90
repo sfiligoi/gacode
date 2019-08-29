@@ -1,9 +1,6 @@
 module expro
 
-  character(len=12) :: infile = 'input.gacode'
   character(len=2) :: ident='# '
-  integer, parameter :: strlen=30
-
   double precision :: expro_mass_deuterium=3.34358e-24  ! md (g)
   
 
@@ -14,8 +11,8 @@ module expro
 
   integer :: expro_n_exp
   integer :: expro_n_ion
-  character*10, dimension(20) :: expro_name
-  character*10, dimension(20) :: expro_type
+  character(len=10), dimension(20) :: expro_name
+  character(len=10), dimension(20) :: expro_type
 
   double precision :: expro_masse=5.44887413e-4   ! me/m_H
   double precision, dimension(:), allocatable :: expro_mass
