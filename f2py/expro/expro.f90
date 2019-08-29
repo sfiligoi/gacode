@@ -1,9 +1,11 @@
 module expro
 
+  ! List of all useful interface objects
+  character*10, dimension(84) :: expro_list 
+
   character(len=2) :: ident='# '
   double precision :: expro_mass_deuterium=3.34358e-24  ! md (g)
   
-
   !-----------------------------------------------------------
   ! DATA:
   !
@@ -11,8 +13,8 @@ module expro
 
   integer :: expro_n_exp
   integer :: expro_n_ion
-  character(len=10), dimension(20) :: expro_name
-  character(len=10), dimension(20) :: expro_type
+  character*10, dimension(20) :: expro_name
+  character*10, dimension(20) :: expro_type
 
   double precision :: expro_masse=5.44887413e-4   ! me/m_H
   double precision, dimension(:), allocatable :: expro_mass
@@ -529,10 +531,9 @@ contains
     endif
     close(1)
 
-    ! BCAST HERE
-
     if (expro_ctrl_n_ion <= expro_n_ion) then
        call expro_compute_derived
+       call expro_list_set
     else
        expro_error = 1
     endif
@@ -620,5 +621,96 @@ contains
 40  format(10(1pe14.7))
 
   end subroutine expro_write
+
+! This is the full list of user variable for the expro interface
+ 
+subroutine expro_list_set
+  
+  expro_list(1) = 'n_exp'
+  expro_list(2) = 'n_ion'
+  expro_list(3) = 'mass'
+  expro_list(4) = 'z'
+  expro_list(5) = 'torfluxa'
+  expro_list(6) = 'rvbv'
+  expro_list(7) = 'ipa'
+  expro_list(8) = 'rho'
+  expro_list(9) = 'rmin'
+  expro_list(10) = 'polflux'
+  expro_list(11) = 'q'
+  expro_list(12) = 'w0'
+  expro_list(13) = 'rmaj'
+  expro_list(14) = 'zmag'
+  expro_list(15) = 'kappa'
+  expro_list(16) = 'delta'
+  expro_list(17) = 'zeta'
+  expro_list(18) = 'ne'
+  expro_list(19) = 'ni'
+  expro_list(20) = 'te'
+  expro_list(21) = 'ti'
+  expro_list(22) = 'ptot'
+  expro_list(23) = 'johm'
+  expro_list(24) = 'jbs'
+  expro_list(25) = 'jrf'
+  expro_list(26) = 'jnb'
+  expro_list(27) = 'jbstor'
+  expro_list(28) = 'sigmapar'
+  expro_list(29) = 'z_eff'
+  expro_list(30) = 'vpol'
+  expro_list(31) = 'vtor'
+  expro_list(32) = 'qohme'
+  expro_list(33) = 'qbeame'
+  expro_list(34) = 'qbeami'
+  expro_list(35) = 'qrfe'
+  expro_list(36) = 'qrfi'
+  expro_list(37) = 'qfuse'
+  expro_list(38) = 'qfusi'
+  expro_list(39) = 'qbrem'
+  expro_list(40) = 'qsync'
+  expro_list(41) = 'qline'
+  expro_list(42) = 'qei'
+  expro_list(43) = 'qione'
+  expro_list(44) = 'qioni'
+  expro_list(45) = 'qcxi'
+  expro_list(46) = 'qpar'
+  expro_list(47) = 'qmom'
+  expro_list(48) = 'bunit'
+  expro_list(49) = 'gamma_e'
+  expro_list(50) = 'gamma_p'
+  expro_list(51) = 's'
+  expro_list(52) = 'drmaj'
+  expro_list(53) = 'dzmag'
+  expro_list(54) = 'sdelta'
+  expro_list(55) = 'skappa'
+  expro_list(56) = 'szeta'
+  expro_list(57) = 'dlnnedr'
+  expro_list(58) = 'dlntedr'
+  expro_list(59) = 'w0p'
+  expro_list(60) = 'vol'
+  expro_list(61) = 'volp'
+  expro_list(62) = 'cs'
+  expro_list(63) = 'rhos'
+  expro_list(64) = 'nuee'
+  expro_list(65) = 'rhos'
+  expro_list(66) = 'grad_r0'
+  expro_list(67) = 'ave_grad_r'
+  expro_list(68) = 'bp0'
+  expro_list(69) = 'bt0'
+  expro_list(70) = 'ip'
+  expro_list(71) = 'mach'
+  expro_list(72) = 'flow_beam'
+  expro_list(73) = 'flow_wall'
+  expro_list(74) = 'flow_mom'
+  expro_list(75) = 'pow_e'
+  expro_list(76) = 'pow_i'
+  expro_list(77) = 'pow_ei'
+  expro_list(78) = 'pow_e_aux'
+  expro_list(79) = 'pow_i_aux'
+  expro_list(80) = 'pow_e_fus'
+  expro_list(81) = 'pow_i_fus'
+  expro_list(82) = 'pow_e_sync'
+  expro_list(83) = 'pow_e_brem'
+  expro_list(84) = 'pow_e_line'
+
+end subroutine expro_list_set
 
 end module expro

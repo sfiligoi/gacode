@@ -11,7 +11,7 @@ FC += ${FOMP}
 OBJECTS = expro.o \
           expro_util.o \
           expro_comm.o \
-          expro_locsim.o 
+          expro_locsim.o
 
 .SUFFIXES : .o .f90
 

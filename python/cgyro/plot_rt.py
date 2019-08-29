@@ -56,7 +56,7 @@ else:
    for i in range(nx):
       x[i] = i*2*np.pi/(nx-1)
       for p in range(nr):
-         epx[i,p]=np.exp(1j*(p-nr/2)*x[i])
+         epx[i,p]=np.exp(1j*(p-nr//2)*x[i])
 
 #------------------------------------------------------------------------
 # Real-space field reconstruction
@@ -89,11 +89,11 @@ def maptoreal_fft(nr,nx,c):
    # d[ ix,0 ] = c[ ix,0]
    # d[ ix,0 ] = c[-ix,0]^*
 
-   for ix in range(-nr/2+1,nr/2):
+   for ix in range(-nr//2+1,nr//2):
       i = ix
       if ix < 0:
          i = ix+nx
-      d[i] = c[-ix+nr/2]
+      d[i] = c[-ix+nr//2]
 
    start = time.time()
 
@@ -141,8 +141,8 @@ for i in range(nt):
       c = a[0,:,itheta,species,0]+1j*a[1,:,itheta,species,0]
 
    # Derivative (d/dx)**nd
-   for p in range(-nr/2,nr/2):
-      c[p+nr/2] = c[p+nr/2]*(1j*p)**nd
+   for p in range(-nr//2,nr//2):
+      c[p+nr//2] = c[p+nr//2]*(1j*p)**nd
 
    ff = np.zeros([nx],order='F')
    if usefft:

@@ -100,7 +100,7 @@ subroutine prgen_read_gato
         ! Use gato psi (Aug 2019)
         ! NOTE: This is new default behaviour intended to improve on potentially
         !       inferior poloidal flux from ONETWO
-        print '(a)','INFO: (prgen_read_gato) Using GATO flux and q (from gfile)'
+        print '(a)','INFO: (prgen_read_gato) Using GATO q,psi (from gfile) to redefine rho-grid'
         call prgen_get_chi(nsurf+1,gato_q,gato_psi,gato_rho,gato_torfluxa)
         call cub_spline(gato_rho,gato_psi,nsurf+1,rho,dpsi,nx)
         dpsi_data = dpsi(nx)
@@ -159,11 +159,11 @@ subroutine prgen_read_gato
   ! Total pressure and q from GATO-EFIT 
   ! (possible overwrite from raw data input in statefile)
   if (nop_flag == 0) then
-     print '(a)','INFO: (prgen_read_gato) Using GATO total pressure (from gfile).'
+     print '(a)','INFO: (prgen_read_gato) Mapping GATO p_tot (from gfile) onto rho-grid.'
      call cub_spline(gato_psi,gato_p,nsurf+1,dpsi,p_tot,nx)
   endif
   if (noq_flag == 0) then
-     print '(a)','INFO: (prgen_read_gato) Using GATO safety factor (q from gfile).'
+     print '(a)','INFO: (prgen_read_gato) Mapping GATO q (from gfile) onto rho-grid.'
      call cub_spline(gato_psi,gato_q,nsurf+1,dpsi,q,nx)
   endif
 
