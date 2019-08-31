@@ -42,13 +42,14 @@ def print_flux(ascii):
       print(tag[i]+' '+bstr)
 
    if ext == 'ascii':
-      import gnuplotlib as gp
-      x = sim.t
-      y0 = y[0,1,:]
-      gp.plot(x,y0,
-              _with= 'lines',
-              terminal ='dumb 80,40')
-
+      try:
+         import gnuplotlib as gp
+         x = sim.t
+         y0 = y[0,1,:]
+         gp.plot(x,y0,_with='lines',terminal='dumb 120,40')
+      except:
+         print('HINT: pip install --user gnuplotlib') 
+         
 #-------------------------------------------------------------------
         
 w    = float(sys.argv[1])
