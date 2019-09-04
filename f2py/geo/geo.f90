@@ -14,6 +14,16 @@ module geo
   double precision :: geo_s_delta_in = 0.0
   double precision :: geo_zeta_in = 0.0
   double precision :: geo_s_zeta_in = 0.0
+  double precision :: geo_shape_cos0_in = 0.0
+  double precision :: geo_shape_s_cos0_in = 0.0
+  double precision :: geo_shape_cos1_in = 0.0
+  double precision :: geo_shape_s_cos1_in = 0.0
+  double precision :: geo_shape_cos2_in = 0.0
+  double precision :: geo_shape_s_cos2_in = 0.0
+  double precision :: geo_shape_cos3_in = 0.0
+  double precision :: geo_shape_s_cos3_in = 0.0
+  double precision :: geo_shape_sin3_in = 0.0
+  double precision :: geo_shape_s_sin3_in = 0.0
   double precision :: geo_beta_star_in = 0.0
   double precision :: geo_beta_star_1_in = 0.0
   double precision :: geo_beta_star_2_in = 0.0

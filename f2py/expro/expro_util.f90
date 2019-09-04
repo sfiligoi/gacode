@@ -95,6 +95,20 @@ subroutine expro_compute_derived
   call bound_deriv(temp,expro_zeta,expro_rmin,expro_n_exp)
   expro_szeta(:) = expro_rmin(:)*temp(:) 
 
+  !                d(cos/sinx)
+  ! s_cos/sinx = r -------- 
+  !                dr
+  call bound_deriv(temp,expro_shape_cos0,expro_rmin,expro_n_exp)
+  expro_shape_scos0(:) = expro_rmin(:)*temp(:) 
+  call bound_deriv(temp,expro_shape_cos1,expro_rmin,expro_n_exp)
+  expro_shape_scos1(:) = expro_rmin(:)*temp(:)
+  call bound_deriv(temp,expro_shape_cos2,expro_rmin,expro_n_exp)
+  expro_shape_scos2(:) = expro_rmin(:)*temp(:)
+  call bound_deriv(temp,expro_shape_cos3,expro_rmin,expro_n_exp)
+  expro_shape_scos3(:) = expro_rmin(:)*temp(:)
+  call bound_deriv(temp,expro_shape_sin3,expro_rmin,expro_n_exp)
+  expro_shape_ssin3(:) = expro_rmin(:)*temp(:) 
+  
   ! 1/L_ne = -dln(ne)/dr (1/m)
   call bound_deriv(expro_dlnnedr,-log(expro_ne),expro_rmin,expro_n_exp)
 
@@ -193,6 +207,16 @@ subroutine expro_compute_derived
      geo_s_delta_in   = expro_sdelta(i)
      geo_zeta_in      = expro_zeta(i)
      geo_s_zeta_in    = expro_szeta(i)
+     geo_shape_cos0_in   = expro_shape_cos0(i)
+     geo_shape_s_cos0_in = expro_shape_scos0(i)
+     geo_shape_cos1_in   = expro_shape_cos1(i)
+     geo_shape_s_cos1_in = expro_shape_scos1(i)
+     geo_shape_cos2_in   = expro_shape_cos2(i)
+     geo_shape_s_cos2_in = expro_shape_scos2(i)
+     geo_shape_cos3_in   = expro_shape_cos3(i)
+     geo_shape_s_cos3_in = expro_shape_scos3(i)
+     geo_shape_sin3_in   = expro_shape_sin3(i)
+     geo_shape_s_sin3_in = expro_shape_ssin3(i)
      geo_beta_star_in = 0.0
      !
      theta(1) = 0.0
