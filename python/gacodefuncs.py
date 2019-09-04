@@ -1,6 +1,3 @@
-# file processed by 2to3
-from __future__ import print_function, absolute_import
-from builtins import map, filter, range
 #----------------------------------------------------------------------
 # gacodefuncs.py
 #
@@ -16,7 +13,7 @@ TIME=r'$(c_s/a)\,t$'
 def variance(f,t,wmin,wmax):
 
     import numpy as np
-    
+
     n_time = len(t)
 
     # Manage case with 2 time points (eigenvalue)
@@ -32,19 +29,19 @@ def variance(f,t,wmin,wmax):
     t_window = 0.0
     ave      = 0.0 ; av2 = 0.0
     for i in range(n_time-1):
-        if t[i] >= tmin and t[i] <= tmax: 
+        if t[i] >= tmin and t[i] <= tmax:
             ave = ave+0.5*(f[i]+f[i+1])*(t[i+1]-t[i])
             av2 = av2+0.5*(f[i]**2+f[i+1]**2)*(t[i+1]-t[i])
             t_window = t_window+t[i+1]-t[i]
 
     ave = ave/t_window
     var = np.sqrt((av2/t_window-ave**2))
-   
+
     return ave,var
 #---------------------------------------------------------------
 #---------------------------------------------------------------
 def average(f,t,wmin,wmax):
- 
+
     n_time = len(t)
 
     # Manage case with 2 time points (eigenvalue)
@@ -60,7 +57,7 @@ def average(f,t,wmin,wmax):
     t_window = 0.0
     ave      = 0.0
     for i in range(n_time-1):
-        if t[i] >= tmin and t[i] <= tmax: 
+        if t[i] >= tmin and t[i] <= tmax:
             ave = ave+0.5*(f[i]+f[i+1])*(t[i+1]-t[i])
             t_window = t_window+t[i+1]-t[i]
 
@@ -70,7 +67,7 @@ def average(f,t,wmin,wmax):
 #---------------------------------------------------------------
 #---------------------------------------------------------------
 def average_n(f,t,wmin,wmax,n):
- 
+
     import numpy as np
 
     ave = np.zeros(n)
@@ -81,7 +78,7 @@ def average_n(f,t,wmin,wmax,n):
 
     t_window = 0.0
     for i in range(n_time-1):
-        if t[i] >= tmin and t[i] <= tmax: 
+        if t[i] >= tmin and t[i] <= tmax:
             ave[:] = ave[:]+0.5*(f[:,i]+f[:,i+1])*(t[i+1]-t[i])
             t_window = t_window+t[i+1]-t[i]
 
@@ -92,7 +89,7 @@ def average_n(f,t,wmin,wmax,n):
 #---------------------------------------------------------------
 # Determine index imin,imax for time-averaging window
 def iwindow(t,wmin,wmax):
- 
+
     for i in range(len(t)):
         if t[i] < (1.0-wmin)*t[-1]:
             imin = i+1
@@ -119,7 +116,7 @@ def str2list(str):
 #------------------------------------------------------
 
 #------------------------------------------------------
-# Set axis limits 
+# Set axis limits
 def setlimits(a,fmin,fmax):
 
     fmin0=a[0]
@@ -136,7 +133,7 @@ def setlimits(a,fmin,fmax):
 #---------------------------------------------------------------
 # Determine species name (returnval) from mass and charge
 def specmap(m_in,z_in):
- 
+
   # Assume Deuterium normalization
   m = int(m_in*2)
   z = int(z_in)
@@ -209,15 +206,15 @@ def extract(d,sd,key,w,spec,moment,norm=False,wmax=0.0,cflux='auto',dovar=False)
 
    # d        = directory
    # sd       = prefix of subdirectory ('a' for a1,a2,a3)
-   # key      = key to scan (for example, 'GAMMA_P') 
-   # w        = time-averaging width 
-   # spec     = (0 ...) 
+   # key      = key to scan (for example, 'GAMMA_P')
+   # w        = time-averaging width
+   # spec     = (0 ...)
    # moment   = (0 ...)
    # norm     = True (density normalization)
    # wmax     = time-averaging minimum
    # cflux    = 'on'/'off'/'auto'
    # dovar    = True/False (variance calculation)
-   
+
    x = []
    f = []
    for i in range(64):
@@ -250,7 +247,7 @@ def extract(d,sd,key,w,spec,moment,norm=False,wmax=0.0,cflux='auto',dovar=False)
 #---------------------------------------------------------------
 # Determine species name (returnval) from mass and charge
 def specmap(m_in,z_in):
- 
+
   # Assume Deuterium normalization
   m = int(m_in*2)
   z = int(z_in)

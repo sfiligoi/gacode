@@ -1,6 +1,3 @@
-# file processed by 2to3
-from __future__ import print_function, absolute_import
-from builtins import map, filter, range
 import sys
 import os
 import numpy as np
@@ -27,7 +24,7 @@ class cgyrodata_plot(data.cgyrodata):
             itheta = self.theta_plot/2
          else:
             itheta = int((theta+1.0)/2.0*self.theta_plot)
-      
+
       if moment == 'phi':
          if field == 0:
             f = self.kxky_phi_abs[:,itheta,:,:]
@@ -48,8 +45,8 @@ class cgyrodata_plot(data.cgyrodata):
       print('INFO: (kxky_select) Selected theta index {:d} of {:d} '.
             format(itheta+1,self.theta_plot))
       return f,ft
-       
-         
+
+
    def plot_freq(self,w=0.5,wmax=0.0,fig=None):
       '''
       Plot gamma and omega vs time
@@ -90,7 +87,7 @@ class cgyrodata_plot(data.cgyrodata):
       #======================================
 
       fig.tight_layout(pad=0.3)
-      
+
    def plot_ky_freq(self,w=0.5,wmax=0.0,fig=None):
       '''
       Plot mode frequency versus ky
@@ -123,7 +120,7 @@ class cgyrodata_plot(data.cgyrodata):
       ax.grid(which="major",ls=":")
       ax.set_xlabel(r'$k_y \rho_s$')
       ax.set_ylabel(r'$(a/c_s)\, \gamma$')
-         
+
       ax.plot(self.ky,self.freq[1,:,-1],color='red')
       ax.plot(self.ky,self.freq[1,:,-1],"o",color='k')
       if len(self.ky) > 1:
@@ -143,7 +140,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       f,ft = self.kxky_select(theta,field,'phi',0)
       p = np.sum(f[:,:,:],axis=0)/self.rho
-      
+
       ax = fig.add_subplot(111)
       ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
@@ -151,12 +148,12 @@ class cgyrodata_plot(data.cgyrodata):
       ax.set_ylabel(r'$\left| '+ft+'_n \\right|$')
       ax.set_yscale('log')
       ax.set_title(r'$\mathrm{Fluctuation~intensity} \quad k_\theta = nq/r$')
-        
+
       if nstr == 'null':
          nvec = list(range(self.n_n))
       else:
          nvec = str2list(nstr)
-    
+
       for n in nvec:
          num = r'$n='+str(n)+'$'
          if n==0:
@@ -178,10 +175,10 @@ class cgyrodata_plot(data.cgyrodata):
 
       fig.tight_layout(pad=0.3)
 
-      
+
    def plot_rcorr_phi(self,field=0,theta=0.0,w=0.5,wmax=0.0,fig=None):
       '''
-      Plot radial correlation 
+      Plot radial correlation
 
       ARGUMENTS:
       w: fractional width of time window
@@ -204,7 +201,7 @@ class cgyrodata_plot(data.cgyrodata):
       ave = np.zeros(self.n_radial)
 
       imin,imax=iwindow(self.t,w,wmax)
-    
+
       dk = kx[1]-kx[0]
       x0 = kx[-1]+dk
 
@@ -218,7 +215,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       f,ft = self.kxky_select(theta,field,'phi',0)
       y = np.sum(f[:,1:,:],axis=1)
-      
+
       for j in range(self.n_radial):
          ave[j] = average(y[j,:],self.t,w,wmax)
 
