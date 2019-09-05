@@ -45,19 +45,29 @@ subroutine neo_make_profiles
      
      ir = 1
      
-     rmaj(ir)      = rmaj_in
-     q(ir)         = abs(q_in) * sign_q
-     rho(ir)       = abs(rho_in) * sign_bunit
-     shear(ir)     = shear_in      
-     shift(ir)     = shift_in     
-     kappa(ir)     = kappa_in     
-     s_kappa(ir)   = s_kappa_in   
-     delta(ir)     = delta_in    
-     s_delta(ir)   = s_delta_in
-     zeta(ir)      = zeta_in    
-     s_zeta(ir)    = s_zeta_in
-     zmag(ir)      = zmag_in    
-     s_zmag(ir)    = s_zmag_in
+     rmaj(ir)         = rmaj_in
+     q(ir)            = abs(q_in) * sign_q
+     rho(ir)          = abs(rho_in) * sign_bunit
+     shear(ir)        = shear_in      
+     shift(ir)        = shift_in
+     zmag(ir)         = zmag_in    
+     s_zmag(ir)       = s_zmag_in
+     kappa(ir)        = kappa_in     
+     s_kappa(ir)      = s_kappa_in   
+     delta(ir)        = delta_in    
+     s_delta(ir)      = s_delta_in
+     zeta(ir)         = zeta_in    
+     s_zeta(ir)       = s_zeta_in
+     shape_sin3(ir)   = shape_sin3_in
+     shape_s_sin3(ir) = shape_s_sin3_in
+     shape_cos0(ir)   = shape_cos0_in
+     shape_s_cos0(ir) = shape_s_cos0_in
+     shape_cos1(ir)   = shape_cos1_in
+     shape_s_cos1(ir) = shape_s_cos1_in
+     shape_cos2(ir)   = shape_cos2_in
+     shape_s_cos2(ir) = shape_s_cos2_in
+     shape_cos3(ir)   = shape_cos3_in
+     shape_s_cos3(ir) = shape_s_cos3_in
      beta_star(ir) = beta_star_in
      
      ! general geometry -- accessible only from interface 
@@ -196,14 +206,24 @@ subroutine neo_make_profiles
         q(ir)       = q_loc
         shear(ir)   = s_loc
         shift(ir)   = shift_loc
+        zmag(ir)    = zmag_loc     
+        s_zmag(ir)  = dzmag_loc
         kappa(ir)   = kappa_loc
         s_kappa(ir) = s_kappa_loc
-        delta(ir)   = delta_loc    * profile_delta_scale
-        s_delta(ir) = s_delta_loc  * profile_delta_scale
-        zeta(ir)    = zeta_loc     * profile_zeta_scale
-        s_zeta(ir)  = s_zeta_loc   * profile_zeta_scale
-        zmag(ir)    = zmag_loc     * profile_zmag_scale
-        s_zmag(ir)  = dzmag_loc    * profile_zmag_scale
+        delta(ir)   = delta_loc    
+        s_delta(ir) = s_delta_loc  
+        zeta(ir)    = zeta_loc     
+        s_zeta(ir)  = s_zeta_loc   
+        shape_sin3(ir)   = shape_sin3_loc
+        shape_s_sin3(ir) = shape_s_sin3_loc
+        shape_cos0(ir)   = shape_cos0_loc
+        shape_s_cos0(ir) = shape_s_cos0_loc
+        shape_cos1(ir)   = shape_cos1_loc
+        shape_s_cos1(ir) = shape_s_cos1_loc
+        shape_cos2(ir)   = shape_cos2_loc
+        shape_s_cos2(ir) = shape_s_cos2_loc
+        shape_cos3(ir)   = shape_cos3_loc
+        shape_s_cos3(ir) = shape_s_cos3_loc
         b_unit(ir)  = b_unit_loc
 
         dens(1:n_species,ir)   = dens_loc(1:n_species)     
