@@ -71,6 +71,14 @@ then
    echo "             -e <workdir>"
    echo "             Working directory (default is present directory)"
    echo 
+   echo "             -ipccw <val>"
+   echo "             Specify direction of current (as seen from above)"
+   echo "             (1=counter-clockwise,-1=clockwise)"
+   echo 
+   echo "             -btccw <val>"
+   echo "             Specify direction of toroidal field (as seen from above)"
+   echo "             (1=counter-clockwise,-1=clockwise)"
+   echo 
    echo "             -describe"
    echo "             Print structure of current input.gacode to screen."
    echo 
@@ -84,6 +92,9 @@ then
    echo 
    echo "             -nop"
    echo "             Do not use the P_tot from the EFIT gfile."
+   echo 
+   echo "             -nfourier <int>"
+   echo "             Number of Fourier modes to retain in input.gacode.geo/input.geo. (default 24)"
    echo
    echo "ITERDB Options"
    echo 
@@ -93,19 +104,8 @@ then
    echo "             -g <gfile>"
    echo "             Merge EFIT gfile for high-precision geometry data."
    echo 
-   echo "             -nfourier <int>"
-   echo "             Number of Fourier modes to retain in input.gacode.geo/input.geo. (default: 24)"
-   echo 
    echo "             -cer <vpol>"
    echo "             Merge data Er and velocity data from Solomon's cer datafile."
-   echo 
-   echo "             -ipccw <val>"
-   echo "             Specify direction of current (as seen from above)"
-   echo "             (1=counter-clockwise,-1=clockwise)"
-   echo 
-   echo "             -btccw <val>"
-   echo "             Specify direction of toroidal field (as seen from above)"
-   echo "             (1=counter-clockwise,-1=clockwise)"
    echo 
    echo "PLASMA STATE Options"
    echo
@@ -114,9 +114,6 @@ then
    echo
    echo "             -g <gfile>"
    echo "             EFIT gfile for high-precision geometry data (includes q and P_tot)."
-   echo 
-   echo "             -nfourier <int>"
-   echo "             Number of Fourier modes to retain in input.gacode.geo/input.geo. (default: 24)"
    echo 
    echo "             -r <i1,i2,i3,i4,i5>"
    echo "             Reorder ions."
@@ -138,9 +135,6 @@ then
    echo "             -g <gfile>"
    echo "             EFIT gfile for high-precision geometry data (includes q and P_tot)."
    echo 
-   echo "             -nfourier <int>"
-   echo "             Number of Fourier modes to retain in input.gacode.geo/input.geo. (default: 24)"
-   echo 
    echo "             -r <reorder sequence>"
    echo "             Reorder ions."
    echo
@@ -154,7 +148,6 @@ then
    echo
    echo "             -r <reorder sequence>"
    echo "             Reorder ions."
-   echo
    echo
    echo "             Example: To invoke UFILE mode, ensure the *d.dat files exist in the"
    echo "                      current directory, then type:"
@@ -170,9 +163,6 @@ then
    echo
    echo "             -g <gfile>"
    echo "             EFIT gfile for high precision geometry data [REQUIRED] (includes q and P_tot)"
-   echo 
-   echo "             -nfourier <int>"
-   echo "             Number of Fourier modes to retain in input.gacode.geo/input.geo. (default 24)"
    echo
    echo "null Options"
    echo
@@ -181,9 +171,6 @@ then
    echo
    echo "             -g <GFILE>"
    echo "             GFILE (geqdsk) containing flux-surface data [required]."
-   echo 
-   echo "             -nfourier <int>"
-   echo "             Number of Fourier modes to retain in input.gacode.geo/input.geo. (default: 24)"
    echo
    echo "             -n_null <int>"
    echo "             Number of radial gridpoints (default: 40)"
@@ -202,8 +189,8 @@ then
    echo "             -omfit"
    echo "             Toggle OMFIT mapper instead of default GATO mapper."
    echo
-   echo "             -omfitres <resolution>"
-   echo "              <resolution>=low,medium,high (default medium)."
+   echo "             -nrz <int>"
+   echo "              R-Z resolution for psi contours."
    echo
    echo "input.gacode (simple passthrough if no gfile specified)"
    echo
@@ -212,9 +199,6 @@ then
    echo
    echo "             -g <GFILE>"
    echo "             GFILE (geqdsk) containing flux-surface data."
-   echo 
-   echo "             -nfourier <int>"
-   echo "             Number of Fourier modes to retain in input.gacode.geo/input.geo. (default: 24)"
    echo
    echo "VELOCITY GENERATION (VGEN) MODE"
    echo

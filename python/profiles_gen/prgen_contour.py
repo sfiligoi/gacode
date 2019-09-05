@@ -127,9 +127,10 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
     slfR=np.linspace(min(Rin),max(Rin),nrz)
     slfZ=np.linspace(min(Zin),max(Zin),nrz)
     slfPSI=RectBivariateSplineNaN(Zin, Rin, slfPSIin)(slfZ,slfR)
-    slfdd=np.sqrt((slfR[1]-slfR[0])**2+(slfZ[1]-slfZ[0])**2)
+
     if not quiet:
-        print('INFO: (prgen_contour) Grid diagonal resolution [m] = {0:.5f}'.format(slfdd))
+       dres=np.sqrt((slfR[1]-slfR[0])**2+(slfZ[1]-slfZ[0])**2)
+       print('INFO: (prgen_contour) Grid diagonal resolution [m] = {0:.5f}'.format(dres))
 
     #-----------------------------------------------------------------
     # Crop 
@@ -140,7 +141,7 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
 
         if slfrlim is not None and slfzlim is not None:
             if any(np.isnan(slfrlim)) or any(np.isnan(slfzlim)):
-                print('fluxsurfaces: rlim/zlim arrays contain NaNs')
+                print('INFO: (prgen_contour) rlim/zlim arrays contain NaNs')
                 return
         bbox=[min(slfrlim),max(slfrlim),min(slfzlim),max(slfzlim)]
         limits=[max([np.argmin(abs(slfR-bbox[0]))-1,0]),
@@ -208,7 +209,7 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
         
     #separatrix is found by looking for the largest closed path enclosing the magnetic axis
     if not quiet:
-        print('INFO: (prgen_contour) Finding separatrix')
+       print('INFO: (prgen_contour) Finding separatrix')
 
     flxm=np.nanmin(slfPSI)
     flxM=np.nanmax(slfPSI)

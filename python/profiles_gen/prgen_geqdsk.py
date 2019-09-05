@@ -88,22 +88,8 @@ def prgen_geqdsk(filename):
         slf['ZLIM'] = np.array(list(map(float, splitter(merge(EQDSK[offset:offset + nlLIMITR]))))[1::2])
         offset = offset + nlLIMITR
     except ValueError:
-        # if it fails make the limiter as a rectangle around the plasma boundary that does not exceed the computational domain
-        slf['LIMITR'] = 5
-        dd = slf['RDIM']/10.0
-        R = np.linspace(0, slf['RDIM'], 2) + slf['RLEFT']
-        Z = np.linspace(0, slf['ZDIM'], 2) - slf['ZDIM'] / 2. + slf['ZMID']
-        slf['RLIM'] = np.array([max([R[0], np.min(slf['RBBBS']) - dd]),
-                                 min([R[1], np.max(slf['RBBBS']) + dd]),
-                                 min([R[1], np.max(slf['RBBBS']) + dd]),
-                                 max([R[0], np.min(slf['RBBBS']) - dd]),
-                                 max([R[0], np.min(slf['RBBBS']) - dd])])
-        slf['ZLIM'] = np.array([max([Z[0], np.min(slf['ZBBBS']) - dd]),
-                                 max([Z[0], np.min(slf['ZBBBS']) - dd]),
-                                 min([Z[1], np.max(slf['ZBBBS']) + dd]),
-                                 min([Z[1], np.max(slf['ZBBBS']) + dd]),
-                                 max([Z[0], np.min(slf['ZBBBS']) - dd])])
-
+       print('ERROR: (prgen_geqdsk) EFIT Limiter error')
+       
     try:
         [slf['KVTOR'], slf['RVTOR'], slf['NMASS']] = list(map(float,[_f for _f in EQDSK[offset:offset + 1][0].split(' ') if _f]))
         offset = offset + 1
