@@ -164,11 +164,13 @@ subroutine prgen_read_gato
      print '(a)','INFO: (prgen_read_gato) Mapping GATO p_tot (from gfile) onto rho-grid.'
      call cub_spline(gato_psi,gato_p,nsurf+1,dpsi,p_tot,nx)
   endif
-  if (noq_flag == 0) then
+  if (noq_flag == 0 .or. format_type == 3) then
      print '(a)','INFO: (prgen_read_gato) Mapping GATO q (from gfile) onto rho-grid.'
      call cub_spline(gato_psi,gato_q,nsurf+1,dpsi,q,nx)
   endif
 
+  print *,q
+  stop
   ! Explicitly set rmin=0 at origin
   rmin(1) = 0.0
 
