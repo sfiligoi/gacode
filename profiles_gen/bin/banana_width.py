@@ -1,11 +1,8 @@
-# file processed by 2to3
-from __future__ import print_function, absolute_import
-from builtins import map, filter, range
 import numpy as np
 from scipy import integrate,optimize,interpolate
 
 try:
-   import gapy
+   import gacode
    hasgapy = True
 except:
    print('WARNING: (banana_width.py) gapy.so not found.  Using circular geometry.')
