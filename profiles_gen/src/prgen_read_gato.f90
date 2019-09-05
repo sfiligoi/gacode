@@ -105,7 +105,6 @@ subroutine prgen_read_gato
         ! NOTE: This is new default behaviour intended to improve on potentially
         !       inferior poloidal flux from ONETWO
         print '(a)','INFO: (prgen_read_gato) Using GATO q,psi (from gfile) to redefine rho-grid'
-        print *,gato_q
         call prgen_get_chi(nsurf+1,gato_q,gato_psi,gato_rho,torfluxa)
         call cub_spline(gato_rho,gato_psi,nsurf+1,rho,dpsi,nx)
         dpsi_efit = gato_psi(nsurf)

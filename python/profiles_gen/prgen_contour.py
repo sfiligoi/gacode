@@ -14,7 +14,7 @@ def contourPaths(x, y, Z, levels, remove_boundary_points=False, smooth_factor=1)
     :param smooth_factor: smooth contours by cranking up grid resolution
     :return: list of segments
     '''
-    
+
     sf = int(round(smooth_factor))
     if sf > 1:
         x = ndimage.zoom(x,sf)
@@ -99,25 +99,25 @@ class RectBivariateSplineNaN:
             tmp[mask>0.01]=np.nan
         return tmp
 
-def polfluxcontour(gEQDSK,nrz,levels,psinorm,narc,quiet):
-       
-    Rin         = np.linspace(0,gEQDSK['RDIM'],gEQDSK['NW'])+gEQDSK['RLEFT']
-    Zin         = np.linspace(0,gEQDSK['ZDIM'],gEQDSK['NH'])-gEQDSK['ZDIM']/2.0+gEQDSK['ZMID']
-    slfPSIin    = gEQDSK['PSIRZ']
-    efitpsi0    = gEQDSK['SIMAG']
-    efitpsi1    = gEQDSK['SIBRY']
-    efitf       = gEQDSK['FPOL']
-    efitp       = gEQDSK['PRES']
-    efitq       = gEQDSK['QPSI']
-    efitffp     = gEQDSK['FFPRIM']
-    efitppp     = gEQDSK['PPRIME']
-    slfR0       = gEQDSK['RMAXIS']
-    slfZ0       = gEQDSK['ZMAXIS']
-    slfsep      = np.vstack((gEQDSK['RBBBS'],gEQDSK['ZBBBS'])).T
+def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
+
+    Rin         = np.linspace(0,geqdsk['RDIM'],geqdsk['NW'])+geqdsk['RLEFT']
+    Zin         = np.linspace(0,geqdsk['ZDIM'],geqdsk['NH'])-geqdsk['ZDIM']/2.0+geqdsk['ZMID']
+    slfPSIin    = geqdsk['PSIRZ']
+    efitpsi0    = geqdsk['SIMAG']
+    efitpsi1    = geqdsk['SIBRY']
+    efitf       = geqdsk['FPOL']
+    efitp       = geqdsk['PRES']
+    efitq       = geqdsk['QPSI']
+    efitffp     = geqdsk['FFPRIM']
+    efitppp     = geqdsk['PPRIME']
+    slfR0       = geqdsk['RMAXIS']
+    slfZ0       = geqdsk['ZMAXIS']
+    slfsep      = np.vstack((geqdsk['RBBBS'],geqdsk['ZBBBS'])).T
     slfopen_sep = None
-    slfrlim     = gEQDSK['RLIM']
-    slfzlim     = gEQDSK['ZLIM']
-        
+    slfrlim     = geqdsk['RLIM']
+    slfzlim     = geqdsk['ZLIM']
+
     #-----------------------------------------------------------------
     # Change resolution
     #-----------------------------------------------------------------
@@ -181,6 +181,7 @@ def polfluxcontour(gEQDSK,nrz,levels,psinorm,narc,quiet):
     else:
         # look for the maximum
         m = np.nanargmax(tmp)
+        
     Zmi = int(m / slfPSI.shape[1])
     Rmi = int(m - Zmi * slfPSI.shape[1])
 
@@ -258,7 +259,7 @@ def polfluxcontour(gEQDSK,nrz,levels,psinorm,narc,quiet):
         (np.abs(np.max(sep[:,0])-np.max(slfR)) < 1e-3) or
         (np.abs(np.min(sep[:,1])-np.min(slfZ)) < 1e-3) or
         (np.abs(np.max(sep[:,1])-np.max(slfZ)) < 1e-3)):
-        print("FAIL")
+        print("WARNING: (prgen_contour) New separatrix hits computation boundary")
             
     slfsep = sep
     slfopen_sep = open_sep
@@ -300,7 +301,7 @@ def polfluxcontour(gEQDSK,nrz,levels,psinorm,narc,quiet):
             r[0]=r[-1]=(r[0]+r[-1])*0.5
             z[0]=z[-1]=(z[0]+z[-1])*0.5
             if any(np.isnan(r*z)):
-                print('ERROR IN CONTOURING')
+                print('ERROR: (prgen_contour) Nan encountered')
             # Cubic interpolation from fine t0-mesh to coarse t-mesh
             t0=np.linspace(0,1,len(r))
             t =np.linspace(0,1,narc)

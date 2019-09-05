@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 from matplotlib import rc
 
 # Function to compute Fourier integrals
-# f,w are periodic 
+# f,w are periodic
 def moment(n,f,w,d):
-    
+
     s0 = 0.0
     s1 = 0.0
     for i in range(n-1):
@@ -16,8 +16,8 @@ def moment(n,f,w,d):
 
     return s0/s1
 
-def fit(r,z,n_arc,nf,pflag):
-   
+def prgen_shape(r,z,n_arc,nf,pflag):
+
    # Number of theta-points for plotting
    dz = np.zeros(n_arc)
    ur = np.zeros(n_arc) ; uz = np.zeros(n_arc)
@@ -49,8 +49,8 @@ def fit(r,z,n_arc,nf,pflag):
          # (ur,uz): principle angles (discontinuous)
          uz[i] = np.arcsin(eps*(z[i]-zmaj)/zmin)
          ur[i] = np.arccos(eps*(r[i]-rmaj)/rmin)
-         # (vr,vz): proper (continuous) branches 
-         if i > 4: 
+         # (vr,vz): proper (continuous) branches
+         if i > 4:
             if uz[i] > uz[i-1] and ur[i] > ur[i-1]:
                vz[i] = uz[i] ; vr[i] = ur[i]
             elif uz[i] < uz[i-1] and ur[i] > ur[i-1]:

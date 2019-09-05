@@ -454,16 +454,16 @@ subroutine tgyro_init_profiles
   if (tgyro_ped_model > 1) then
      ! a [m]
      a_in = r_min
-     ! Bt on axis [T]
-     if (abs(expro_rvbv) < 1e-10) then
-        call tgyro_catch_error('expro_rvbv = 0.  Check input.gacode')
+     ! Bt on axis (EFIT BCENTR) [T]
+     if (abs(expro_bcentr) < 1e-10) then
+        call tgyro_catch_error('expro_bcentr = 0.  Check input.gacode')
      endif
-     bt_in = expro_rvbv/expro_rmaj(n_exp)
-     ! Plasma current Ip [Ma]
-     if (abs(expro_ipa) < 1e-10) then
-        call tgyro_catch_error('expro_ip_exp = 0. Check input.gacode')
+     bt_in = expro_bcentr
+     ! Plasma current (EFIT CURRENT) [MA]
+     if (abs(expro_current) < 1e-10) then
+        call tgyro_catch_error('expro_current = 0. Check input.gacode')
      endif
-     ip_in = 1e-6*expro_ipa
+     ip_in = expro_current
      ! betan [%] = betat/In*100 where In = Ip/(a Bt) 
      betan_in = abs(( p_ave/(0.5*bt_in**2/mu_0) ) / ( ip_in/(a_in*bt_in) ) * 100.0)
      ! Triangularity [-]

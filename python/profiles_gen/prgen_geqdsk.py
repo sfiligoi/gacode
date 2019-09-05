@@ -12,14 +12,14 @@ def splitter(inv, step=16):
 def merge(inv):
     return ''.join(inv)
 
-def geqdsk(filename):
+def prgen_geqdsk(filename):
 
     slf = {}
     with open(filename, 'r') as f:
         EQDSK = f.read().splitlines()
 
     slf['CASE'] = np.array(splitter(EQDSK[0][0:48],8))
-    
+
     try:
         tmp = list([_f for _f in EQDSK[0][48:].split(' ') if _f])
         [IDUM, slf['NW'],slf['NH']] = list(map(int,tmp[:3]))
@@ -48,7 +48,7 @@ def geqdsk(filename):
 
     # now I have to read NW elements
     nlNW = int(np.ceil(slf['NW']/5.0))
-    
+
     slf['FPOL'] = np.array(list(map(float,splitter(merge(EQDSK[offset:offset+nlNW])))))
     offset = offset + nlNW
     slf['PRES'] = np.array(list(map(float,splitter(merge(EQDSK[offset:offset+nlNW])))))

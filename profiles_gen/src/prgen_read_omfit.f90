@@ -11,8 +11,7 @@ subroutine prgen_read_omfit
 
   implicit none
 
-  integer :: i
-  integer :: npsi
+  integer :: npsi,nf
   real, dimension(:,:), allocatable :: efit_si,efit_ci
   real, dimension(:), allocatable :: efit_rho,efit_psi,efit_q,efit_p
   real, dimension(:), allocatable :: efit_rmin,efit_rmaj,efit_kappa,efit_zmaj  
@@ -20,13 +19,14 @@ subroutine prgen_read_omfit
   !----------------------------------------------------------------
   open(unit=1,file='out.dim',status='old')
   read(1,*) npsi
+  read(1,*) nf
   read(1,*) rcentr
   read(1,*) bcentr
   read(1,*) current
   close(1)
 
-  allocate(efit_si(npsi,3))
-  allocate(efit_ci(npsi,3))
+  allocate(efit_si(npsi,nf))
+  allocate(efit_ci(npsi,nf))
   allocate(efit_rmin(npsi))
   allocate(efit_rmaj(npsi))
   allocate(efit_kappa(npsi))
@@ -37,15 +37,15 @@ subroutine prgen_read_omfit
   allocate(efit_rho(npsi))
 
   open(unit=1,file='out.data',status='old',access='stream')
+  read(1) efit_psi
+  read(1) efit_q
+  read(1) efit_p
   read(1) efit_si
   read(1) efit_ci
   read(1) efit_rmin
   read(1) efit_rmaj
   read(1) efit_kappa
   read(1) efit_zmaj
-  read(1) efit_psi
-  read(1) efit_q
-  read(1) efit_p
   close(1)
   !----------------------------------------------------------------
 

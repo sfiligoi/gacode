@@ -33,7 +33,7 @@ EXEC=${GACODE_ROOT}/profiles_gen/src/prgen
 # - GATO executable
 GATO=${GACODE_ROOT}/gato/gato
 # - OMFIT fitter script
-OMFIT=${GACODE_ROOT}/python/profiles_gen/fitter.py
+OMFIT=${GACODE_ROOT}/python/profiles_gen/prgen_shapeprofile.py
 # - locpargen executable
 LOCPARGEN=${GACODE_ROOT}/profiles_gen/locpargen/locpargen
 # - profiles_gen bin directory
@@ -57,7 +57,7 @@ then
    echo "               SWIM        (plasmastate)"
    echo "               PFILE       (peqdsk)"
    echo "               CORSICA     (Corsica) "
-   echo "               U FILE       (ITPA profile database format)"
+   echo "               UFILE       (ITPA profile database format)"
    echo 
    echo "             Autodetected geometry formats:"
    echo "               GFILE       (geqdsk equilibrium data)"
@@ -327,8 +327,9 @@ NOQ_FLAG=0
 
 # OMFIT mapper variables
 OMFIT_FLAG=0
-NRZ=512
+NRZ=1000
 NPSI=64
+PLOT=0
 
 # Extra datafiles
 GFILE=null
@@ -395,6 +396,7 @@ while [ $# -gt 0 ] ; do
   -omfit) OMFIT_FLAG=1 ;;
   -nrz) shift ; NRZ=$1 ;;
   -npsi) shift ; NPSI=$1 ;;
+  -plot) PLOT=1 ;;
 
   -sub_aux) TRUE_AUX_FLAG=0 ;;
   
@@ -874,7 +876,11 @@ fi
 
 # Use OMFIT mapper
 if [ $EFIT_METHOD -eq 3 ] ; then
-   python $OMFIT $GFILE $NPSI $NRZ 0 2
+    if [ $PLOT -eq 1 ] ; then
+       python $OMFIT $GFILE $NPSI $NRZ -1 3
+    else 
+       python $OMFIT $GFILE $NPSI $NRZ 0 3
+    fi
 fi
 
 # DSKGATO
@@ -948,7 +954,7 @@ rm -f input.gato.* dummy.peq
 if [ $VERBOSE_FLAG -eq 0 ]
 then
    rm -f $CONFIG fluxfit.* ingta o1gta grid.dat success
-   rm -f *.ave out.com out.dim out.ufile.log
+   rm -f *.ave out.com out.dim out.data out.ufile.log
    rm -f gfile out.expro.run pfile.* out.gato.*
 else
    if [ -f "ingta" ] ; then
