@@ -14,7 +14,7 @@ export EXTRA_LIBS = \
 EXEC = prgen
 
 OBJECTS = prgen_globals.o \
-          allocate_internals.o \
+          prgen_allocate.o \
           allocate_iterdb_vars.o \
           allocate_plasmastate_vars.o \
 	  allocate_peqdsk_vars.o \

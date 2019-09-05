@@ -19,7 +19,7 @@ subroutine prgen_read_inputgacode
   
   nx = expro_n_exp
 
-  call allocate_internals
+  call prgen_allocate
 
   ! Needed for diagnostic printing
   rmin(:) = expro_rmin(:)

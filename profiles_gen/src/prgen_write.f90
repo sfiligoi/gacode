@@ -27,6 +27,15 @@ subroutine prgen_write
      expro_torfluxa = -btccw*abs(expro_torfluxa)
   end select
 
+  ! Map the geometry coefficients:
+  expro_kappa = kappa
+  expro_delta = delta
+  expro_zeta  = zeta
+  expro_zmag  = zmag
+  expro_shape_cos0 = shape_cos0
+  expro_shape_cos1 = shape_cos1
+  expro_shape_cos2 = shape_cos2
+
   !-------------------------------------------------------------------------------------
   ! Now we need to write the profile data
   !

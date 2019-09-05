@@ -26,14 +26,10 @@ subroutine prgen_map_corsica
   expro_rmin(:)      = rmin(:)
   expro_rmaj(:)      = rmaj(:)
   expro_q(:)         = q(:)
-  expro_kappa(:)     = kappa(:)
-  expro_delta(:)     = delta(:)
   expro_te(:)        = corsica_te(:)
   expro_ne(:)        = corsica_ne(:)*10.0
   expro_z_eff(:)     = corsica_zeff(:)
   expro_w0(:)        = 0.0      ! omega
-  expro_zeta(:)      = zeta(:)
-  expro_zmag(:)      = zmag(:)  
   expro_ptot(:)      = p_tot(:)
   expro_polflux(:)   = dpsi(:)
 

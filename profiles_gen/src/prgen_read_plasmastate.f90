@@ -81,7 +81,7 @@ subroutine prgen_read_plasmastate
 
   nx = plst_dim_nrho
 
-  call allocate_internals
+  call prgen_allocate
   call allocate_plasmastate_vars
 
   ! Species names (abridged)
@@ -476,9 +476,6 @@ subroutine prgen_read_plasmastate
      call boundary_fix(rho,plst_ns(:,i),nx)
   enddo
   !----------------------------------------------
-
-  ! No squareness 
-  zeta(:) = 0.0
 
   ! Compute torflux(a) [will be overwritten by gfile]
   torfluxa = plst_phit(nx)/(2*pi)

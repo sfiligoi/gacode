@@ -52,7 +52,7 @@ subroutine prgen_read_iterdb
   read(1,*) t ; read(1,*) x ! Te0
   read(1,*) t ; read(1,*) x ! Ti0
 
-  call allocate_internals
+  call prgen_allocate
   call allocate_iterdb_vars
 
   allocate(xv(nx))
@@ -211,12 +211,6 @@ subroutine prgen_read_iterdb
   endif
   
   dpsi(:) = onetwo_psi(:)-onetwo_psi(1)
-
-  ! No squareness
-  zeta(:) = 0.0
-
-  ! No elevation
-  zmag(:) = 0.0
 
   ! Compute torflux(a) [will be overwritten by gfile]
   torfluxa = 0.5*onetwo_btor*onetwo_rho_grid(nx)**2

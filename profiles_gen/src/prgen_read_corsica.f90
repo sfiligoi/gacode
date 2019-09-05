@@ -68,16 +68,12 @@ subroutine prgen_read_corsica
 
   close(1)
   
-  call allocate_internals
+  call prgen_allocate
 
   dpsi(:)   = corsica_psin(:)
   rmin(:)   = 0.0
   rmaj(:)   = 0.0
   rho(:)    = 0.0
-  kappa(:)  = 0.0
-  delta(:)  = 0.0
-  zmag(:)   = 0.0
-  zeta(:)   = 0.0
   omega0(:) = 0.0
 
 end subroutine prgen_read_corsica

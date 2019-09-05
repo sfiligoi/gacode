@@ -39,7 +39,7 @@ subroutine prgen_read_ufile
   ! NOTE: this is a hardwired dimension
   nx = 51
 
-  call allocate_internals
+  call prgen_allocate
   call allocate_ufile_vars
 
   allocate(chi_t(nx))

@@ -27,10 +27,6 @@ subroutine prgen_map_null
   ! COORDINATES: set sign of q
   expro_q = abs(q(:))*ipccw*btccw
   expro_ptot = p_tot(:)
-  expro_kappa = kappa(:)
-  expro_delta = delta(:)
-  expro_zeta = zeta(:)
-  expro_zmag = zmag(:)
   expro_te = 1.0
   expro_ne = 1.0
 

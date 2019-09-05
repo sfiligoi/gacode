@@ -877,9 +877,9 @@ fi
 # Use OMFIT mapper
 if [ $EFIT_METHOD -eq 3 ] ; then
     if [ $PLOT -eq 1 ] ; then
-       python $OMFIT $GFILE $NPSI $NRZ -1 3
+       python $OMFIT $GFILE $NPSI $NRZ -1 2
     else 
-       python $OMFIT $GFILE $NPSI $NRZ 0 3
+       python $OMFIT $GFILE $NPSI $NRZ 0 2
     fi
 fi
 

@@ -210,7 +210,7 @@ program prgen
   case (7,8)
      call prgen_map_inputgacode
   end select
-  
+
   call prgen_write
 
   ! Successful completion

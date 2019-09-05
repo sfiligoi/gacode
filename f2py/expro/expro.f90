@@ -1,7 +1,7 @@
 module expro
 
   ! List of all useful interface objects
-  character*10, dimension(95) :: expro_list 
+  character*11, dimension(95) :: expro_list 
 
   character(len=2) :: ident='# '
   double precision :: expro_mass_deuterium=3.34358e-24  ! md (g)

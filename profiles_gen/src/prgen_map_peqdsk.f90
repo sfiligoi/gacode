@@ -63,16 +63,12 @@ subroutine prgen_map_peqdsk
   expro_rmaj(:)  = rmaj(:)
   ! COORDINATES: set sign of q
   expro_q(:)      = abs(q(:))*ipccw*btccw
-  expro_kappa(:)  = kappa(:)
-  expro_delta(:)  = delta(:)
   expro_te(:)     = peqdsk_te(:)
   expro_ne(:)     = peqdsk_ne(:)*10
   expro_z_eff(:)  = z_eff(:)
   ! COORDINATES: -ipccw accounts for DIII-D toroidal angle convention
   ! (wrt Ip direction)
   expro_w0(:)        = -ipccw*1e3*peqdsk_omgeb(:) 
-  expro_zeta(:)      = zeta(:)
-  expro_zmag(:)      = zmag(:)  
   expro_ptot(:)      = p_tot(:)      
 
   ! COORDINATES: set sign of poloidal flux
