@@ -111,10 +111,10 @@ subroutine prgen_read_iterdb
   read(1,*) t ; read(1,*) onetwo_sbeame ! (sbion) beam electron source
   read(1,*) t ; read(1,*) onetwo_sbeam  ! (sbion) beam thermal ion source
   read(1,*) t ; read(1,*) xv ! total current density
-  read(1,*) t ; read(1,*) xv ! ohmic current density
-  read(1,*) t ; read(1,*) xv ! bootstrap current density
-  read(1,*) t ; read(1,*) xv ! beam-driven current density
-  read(1,*) t ; read(1,*) xv ! RF current density
+  read(1,*) t ; read(1,*) johm ! ohmic current density
+  read(1,*) t ; read(1,*) jbs ! bootstrap current density
+  read(1,*) t ; read(1,*) jnb ! beam-driven current density
+  read(1,*) t ; read(1,*) jrf ! RF current density
   read(1,*) t ; read(1,*) xv ! rho*bp0*fcap*gcap*hcap, tesla*meters
   read(1,*) t ; read(1,*) onetwo_zeff   ! 31
   read(1,*) t ; read(1,*) onetwo_angrot ! 32
@@ -218,4 +218,7 @@ subroutine prgen_read_iterdb
   ! No elevation
   zmag(:) = 0.0
 
+  ! Compute torflux(a) [will be overwritten by gfile]
+  torfluxa = 0.5*onetwo_btor*onetwo_rho_grid(nx)**2
+  
 end subroutine prgen_read_iterdb

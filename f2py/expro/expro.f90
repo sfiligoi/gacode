@@ -1,7 +1,7 @@
 module expro
 
   ! List of all useful interface objects
-  character*10, dimension(94) :: expro_list 
+  character*10, dimension(95) :: expro_list 
 
   character(len=2) :: ident='# '
   double precision :: expro_mass_deuterium=3.34358e-24  ! md (g)
@@ -21,8 +21,9 @@ module expro
   double precision :: expro_ze=-1.0
   double precision, dimension(:), allocatable :: expro_z
   double precision :: expro_torfluxa=0.0
-  double precision :: expro_rvbv=0.0
-  double precision :: expro_ipa=0.0
+  double precision :: expro_rcentr=0.0
+  double precision :: expro_bcentr=0.0
+  double precision :: expro_current=0.0
 
   != 1D and 2D profile arrays contained in input.gacode
 
@@ -452,10 +453,12 @@ contains
           call expro_lcomm(expro_z,nion)
        case ('torfluxa')
           call expro_rcomm(expro_torfluxa) 
-       case ('rvbv')
-          call expro_rcomm(expro_rvbv) 
-       case ('ipa')
-          call expro_rcomm(expro_ipa) 
+       case ('rcentr')
+          call expro_rcomm(expro_rcentr) 
+       case ('bcentr')
+          call expro_rcomm(expro_bcentr) 
+       case ('current')
+          call expro_rcomm(expro_current) 
        case ('rho')
           call expro_vcomm(expro_rho,nexp)  
        case ('rmin')
@@ -612,8 +615,9 @@ contains
 
     ! Write vector/array data, skipping objects that are 0.0
     call expro_writes(expro_torfluxa,'torfluxa','Wb/radian')
-    call expro_writes(expro_rvbv,'rvbv','Tm')
-    call expro_writes(expro_ipa,'ipa','MA')
+    call expro_writes(expro_rcentr,'rcentr','m')
+    call expro_writes(expro_bcentr,'bcentr','T')
+    call expro_writes(expro_current,'current','MA')
     call expro_writev(expro_rho,nexp,'rho','-')
     call expro_writev(expro_rmin,nexp,'rmin','m')
     call expro_writev(expro_polflux,nexp,'polflux','Wb/radian')
@@ -676,11 +680,11 @@ subroutine expro_list_set
   expro_list(3) = 'mass'
   expro_list(4) = 'z'
   expro_list(5) = 'torfluxa'
-  expro_list(6) = 'rvbv'
-  expro_list(7) = 'ipa'
-  expro_list(8) = 'rho'
-  expro_list(9) = 'rmin'
-  expro_list(10) = 'polflux'
+  expro_list(6) = 'rcentr'
+  expro_list(7) = 'bcentr'
+  expro_list(8) = 'current'
+  expro_list(9) = 'rho'
+  expro_list(10) = 'rmin'
   expro_list(11) = 'q'
   expro_list(12) = 'w0'
   expro_list(13) = 'rmaj'
@@ -765,7 +769,8 @@ subroutine expro_list_set
   expro_list(92) = 'pow_e_sync'
   expro_list(93) = 'pow_e_brem'
   expro_list(94) = 'pow_e_line'
-
+  expro_list(95) = 'polflux'
+ 
 end subroutine expro_list_set
 
 end module expro

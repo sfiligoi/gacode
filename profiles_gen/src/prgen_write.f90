@@ -12,35 +12,18 @@ subroutine prgen_write
 
   implicit none
   
-  expro_rvbv = 0.0
-  expro_ipa  = 0.0
+  expro_rcentr = rcentr
+  expro_bcentr = -btccw*abs(bcentr)
+  expro_current = -ipccw*abs(current)
 
   ! Ensure correct sign of toroidal flux (Bt)
   !
   select case (format_type)
 
-  case (0)
-     ! (nothing but gfile)
-     expro_torfluxa = -btccw*abs(expro_torfluxa)
-  case (1)
-     ! onetwo statefile
-     expro_torfluxa = -0.5*btccw*abs(onetwo_Btor)*onetwo_rho_grid(nx)**2
-     expro_rvbv = onetwo_R0*onetwo_Btor
-     expro_ipa = -ipccw*abs(ip_tot)
-  case (2)
-     ! plasmastate 
-     expro_torfluxa = -btccw*abs(plst_phit(nx))/(2*pi)
-  case (3)
-     ! pfile
-     expro_torfluxa = -btccw*abs(peqdsk_torfluxa)
-  case (5)
-     ! corsica
-     expro_torfluxa = -btccw*abs(corsica_torfluxa)
-  case (6)
-     ! ufile
-     expro_torfluxa = -btccw*abs(ufile_torfluxa)
+  case (0,1,2,3,4,5,6)
+     expro_torfluxa = -btccw*abs(torfluxa)
   case (7,8)
-     ! ufile
+     ! GACODE/LEGACY
      expro_torfluxa = -btccw*abs(expro_torfluxa)
   end select
 

@@ -177,16 +177,12 @@ program prgen
      if ((format_type == 1 .or. format_type == 2)) then
         if (abs(dpsi_efit/dpsi_data-1) > 0.001) then
            print '(a,1pe9.2,a)', &
-                'INFO: (prgen_write) FLUX SHRINK FACTOR : ',dpsi_efit/dpsi_data-1.0,' [WARNING]'
+                'INFO: (prgen) FLUX SHRINK FACTOR : ',dpsi_efit/dpsi_data-1.0,' [WARNING]'
         else
            print '(a,1pe9.2,a)', &
-                'INFO: (prgen_write) FLUX SHRINK FACTOR : ',dpsi_efit/dpsi_data-1.0,' [GOOD]'
+                'INFO: (prgen) FLUX SHRINK FACTOR : ',dpsi_efit/dpsi_data-1.0,' [GOOD]'
         endif
      endif
-  !   write(1,40) '#             NFOURIER : ',nfourier
-  !   write(1,40) '#                NSURF : ',nsurf
-  !   write(1,40) '#                 NARC : ',narc
-  !   write(1,20) '#'
   endif
   !---------------------------------------------------------------
 

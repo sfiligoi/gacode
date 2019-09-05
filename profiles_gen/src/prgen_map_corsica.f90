@@ -13,7 +13,7 @@ subroutine prgen_map_corsica
   implicit none
 
   ! Ignore corsica input "rho", "rmin", and "q"; use gato and corsica poloidal flux
-  call prgen_get_chi(nx,q,dpsi,rho,corsica_torfluxa)
+  call prgen_get_chi(nx,q,dpsi,rho,torfluxa)
 
   !---------------------------------------------------------
   ! Map profile data onto single array:

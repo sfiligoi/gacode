@@ -17,5 +17,10 @@ subroutine allocate_internals
   allocate(zeta(nx))
   allocate(vpolc_exp(nx))
   allocate(vtorc_exp(nx))
+
+  allocate(johm(nx))
+  allocate(jbs(nx))
+  allocate(jnb(nx))
+  allocate(jrf(nx))
  
 end subroutine allocate_internals

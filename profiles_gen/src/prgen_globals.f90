@@ -51,6 +51,11 @@ module prgen_globals
   real, dimension(:), allocatable :: vpolc_exp
   real, dimension(:), allocatable :: vtorc_exp
 
+  real, dimension(:), allocatable :: johm
+  real, dimension(:), allocatable :: jbs
+  real, dimension(:), allocatable :: jnb
+  real, dimension(:), allocatable :: jrf
+
   ! Ion name,type,mass,charge
   integer :: n_ion
   character (len=7) :: type_therm = '[therm]'
@@ -58,6 +63,10 @@ module prgen_globals
 
   real :: quasi_err
   real :: ip_tot
+  real :: torfluxa
+  real :: rcentr
+  real :: bcentr
+  real :: current
   !---------------------------------------------------------
   ! ONETWO variables
   !
@@ -85,7 +94,7 @@ module prgen_globals
   real :: onetwo_delta
   real :: onetwo_volo
   real :: onetwo_cxareao
-  real :: onetwo_Btor
+  real :: onetwo_btor
   !
   real, dimension(:), allocatable :: onetwo_rho_grid
   real, dimension(:), allocatable :: onetwo_volume
@@ -211,7 +220,6 @@ module prgen_globals
   !---------------------------------------------------------
   ! PEQDSK variables
   !
-  real :: peqdsk_torfluxa
   real, dimension(:), allocatable :: peqdsk_psi
   real, dimension(:), allocatable :: peqdsk_ne
   real, dimension(:), allocatable :: peqdsk_te
@@ -258,7 +266,6 @@ module prgen_globals
   real :: corsica_li3
 
   integer, parameter :: corsica_nvals = 81
-  real :: corsica_torfluxa
   real, allocatable :: corsica_rho(:)
   real, allocatable :: corsica_r_a(:)
   real, allocatable :: corsica_psin(:)
@@ -279,7 +286,6 @@ module prgen_globals
   ! UFILE variables
   !
   integer :: ufile_nion
-  real :: ufile_torfluxa
   real :: ufile_z(8)
   real :: ufile_m(8)
   character (len=10) :: ufile_tok

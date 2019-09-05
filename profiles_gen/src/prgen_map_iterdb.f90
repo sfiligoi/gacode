@@ -210,7 +210,16 @@ subroutine prgen_map_iterdb
   ! Torque (TAM flow) (nt-m)
   expro_qmom = -ipccw*onetwo_storqueb
   !---------------------------------------------------------
-  
+
+  !---------------------------------------------------------
+  ! Current densities
+  !
+  expro_johm = johm*1e-6
+  expro_jbs = jbs*1e-6
+  expro_jnb = jnb*1e-6
+  expro_jrf = jrf*1e-6
+  !---------------------------------------------------------
+
 end subroutine prgen_map_iterdb
 
 !------------------------------------------------------------------

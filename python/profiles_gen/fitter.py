@@ -15,7 +15,7 @@ if len(sys.argv) > 1:
    ix    = int(sys.argv[4])
    nf    = int(sys.argv[5])
 else:
-   print('Usage: python fitter.py <gfile> <npsi> <ix> <nf>')
+   print('Usage: python fitter.py <gfile> <npsi> <nrz> <ix> <nf>')
    sys.exit()
 
 EQDSK = geqdsk(gfile)
@@ -23,7 +23,8 @@ n_arc = 512
 
 ri,zi,psi,q,p = polfluxcontour(EQDSK,nrz=nrz,levels=npsi,psinorm=0.9999,narc=n_arc,quiet=False)
 
-pnorm = (psi[1:]-psi[0])/(psi[-1]-psi[0]) 
+pnorm = (psi[:]-psi[0])/(psi[-1]-psi[0]) 
+
 
 if ix < 1:
    ci = np.zeros([npsi,nf+1])
@@ -39,17 +40,18 @@ if ix < 1:
    xi[0,0] = 0.0 # rmin
    xi[0,1] = xi[1,1] # rmaj
    xi[0,2] = xi[1,2] # kappa
-   xi[0,3] = xi[1,3] # zmaj
-   
-   
+   xi[0,3] = xi[1,3] # zmaj 
 else:
    r=ri[:,ix] ; z=zi[:,ix]
-   cr,sr = fit(r,z,n_arc,nf,True)
+   cr,sr,xr = fit(r,z,n_arc,nf,True)
    sys.exit()
 
 if ix == 0:
    f=open('out.dim','w')
-   f.write(str(npsi))
+   f.write(str(npsi)+'\n')
+   f.write(str(EQDSK['RCENTR'])+'\n')
+   f.write(str(EQDSK['BCENTR'])+'\n')
+   f.write(str(EQDSK['CURRENT']*1e-6)+'\n')
    f.close()
    np.stack((si[:,0],
              si[:,1],

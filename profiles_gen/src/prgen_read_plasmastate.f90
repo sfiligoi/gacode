@@ -480,6 +480,9 @@ subroutine prgen_read_plasmastate
   ! No squareness 
   zeta(:) = 0.0
 
+  ! Compute torflux(a) [will be overwritten by gfile]
+  torfluxa = plst_phit(nx)/(2*pi)
+
 end subroutine prgen_read_plasmastate
 
 !----------------------------------------------------------
