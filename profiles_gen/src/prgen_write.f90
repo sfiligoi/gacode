@@ -39,7 +39,7 @@ subroutine prgen_write
   case (6)
      ! ufile
      expro_torfluxa = -btccw*abs(ufile_torfluxa)
-  case (7)
+  case (7,8)
      ! ufile
      expro_torfluxa = -btccw*abs(expro_torfluxa)
   end select

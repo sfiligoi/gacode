@@ -175,8 +175,6 @@ module prgen_globals
   real, dimension(:), allocatable :: plst_eperp
   real, dimension(:), allocatable :: plst_epar
   real, dimension(:), allocatable :: plst_vol
-  real, dimension(:), allocatable :: plst_rho
-  real, dimension(:), allocatable :: plst_grho1
   real, dimension(:), allocatable :: plst_phit
   real, dimension(:), allocatable :: plst_psipol
   real, dimension(:), allocatable :: plst_elong

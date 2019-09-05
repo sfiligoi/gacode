@@ -176,9 +176,9 @@ subroutine prgen_map_plasmastate
   expro_n_ion = plst_dp1_nspec_all-1
   call expro_init(1)
   !
-  expro_rho  = plst_rho
-  expro_rmin = rmin(:)
-  expro_rmaj = rmaj(:)
+  expro_rho  = rho
+  expro_rmin = rmin
+  expro_rmaj = rmaj
   ! COORDINATES: set sign of q
   expro_q = abs(q(:))*ipccw*btccw
   expro_kappa = kappa(:)
@@ -210,7 +210,6 @@ subroutine prgen_map_plasmastate
   ! Read the cer file and overlay
   !
   if (file_cer /= "null") then
-     rho = plst_rho
      call prgen_read_cer
      expro_w0 = omega0(:)
      do i=1,plst_dp1_nspec_all

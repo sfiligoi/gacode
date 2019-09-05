@@ -128,11 +128,7 @@ subroutine prgen_read_plasmastate
   
   ! Root of normalized toroidal flux (rho)
   err = nf90_inq_varid(ncid,trim('rho'),varid)
-  err = nf90_get_var(ncid,varid,plst_rho(:))
-
-  ! Grad(rho)
-  err = nf90_inq_varid(ncid,trim('grho1'),varid)
-  err = nf90_get_var(ncid,varid,plst_grho1(:))
+  err = nf90_get_var(ncid,varid,rho(:))
 
   ! Toroidal flux
   err = nf90_inq_varid(ncid,trim('phit'),varid)
@@ -430,7 +426,7 @@ subroutine prgen_read_plasmastate
   if (idiag == 1) then
      open(unit=11,file='out.prgen.power_e',status='replace')
      do i=1,nx-1
-        write(11,'(14(1pe12.5,2x))') plst_rho(i),& ! 0
+        write(11,'(14(1pe12.5,2x))') rho(i),& ! 0
              plst_pe_trans(i), &     ! 1
              plst_pfuse(i), &        ! 2
              plst_qie(i), &          ! 3
@@ -476,8 +472,8 @@ subroutine prgen_read_plasmastate
   ! Error check for missing/zero boundary (n,T)
   !
   do i=1,plst_dp1_nspec_th     
-     call boundary_fix(plst_rho,plst_ts(:,i),nx)
-     call boundary_fix(plst_rho,plst_ns(:,i),nx)
+     call boundary_fix(rho,plst_ts(:,i),nx)
+     call boundary_fix(rho,plst_ns(:,i),nx)
   enddo
   !----------------------------------------------
 

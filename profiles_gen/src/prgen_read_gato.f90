@@ -86,6 +86,7 @@ subroutine prgen_read_gato
   ! Correct flux variation in profile data (ITERDB, etc) 
   !
   if (format_type == 0 .or. format_type == 7) then
+
      ! Case 1: raw gfile mode ; dpsi is undefined
      dpsi_data = gato_psi(nsurf)
      dpsi_efit = gato_psi(nsurf)
@@ -93,21 +94,22 @@ subroutine prgen_read_gato
         ! Shrink slightly for safety
         dpsi(i) = (i-1)*dpsi_efit/(nx-1+1e-12)
      enddo
-  else
-     ! Case 2: typical case 
-     if (noq_flag == 0) then
 
+  else
+     
+     dpsi_data = dpsi(nx)
+     
+     ! Case 2: typical case 
+     if (noq_flag == 0 .and. format_type /= 3) then
         ! Use gato psi (Aug 2019)
         ! NOTE: This is new default behaviour intended to improve on potentially
         !       inferior poloidal flux from ONETWO
         print '(a)','INFO: (prgen_read_gato) Using GATO q,psi (from gfile) to redefine rho-grid'
         call prgen_get_chi(nsurf+1,gato_q,gato_psi,gato_rho,gato_torfluxa)
         call cub_spline(gato_rho,gato_psi,nsurf+1,rho,dpsi,nx)
-        dpsi_data = dpsi(nx)
         dpsi_efit = gato_psi(nsurf)
      else
         ! Old behaviour, shrinks flux as a kludge
-        dpsi_data = dpsi(nx)
         dpsi_efit = gato_psi(nsurf)
 
         ! Ensure max(dpsi) = max(gato_psi) 

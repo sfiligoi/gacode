@@ -327,7 +327,8 @@ NOQ_FLAG=0
 
 # OMFIT mapper variables
 OMFIT_FLAG=0
-OMFIT_RES="medium"
+NRZ=128
+NPSI=64
 
 # Extra datafiles
 GFILE=null
@@ -392,7 +393,8 @@ while [ $# -gt 0 ] ; do
   -gato) shift ; GATO_ARGS="$1" ;;
 
   -omfit) OMFIT_FLAG=1 ;;
-  -omfitres) shift ; OMFIT_RES=$1 ;;
+  -nrz) shift ; NRZ=$1 ;;
+  -npsi) shift ; NPSI=$1 ;;
 
   -sub_aux) TRUE_AUX_FLAG=0 ;;
   
@@ -872,7 +874,7 @@ fi
 
 # Use OMFIT mapper
 if [ $EFIT_METHOD -eq 3 ] ; then
-   python $OMFIT $GFILE 64 0 2
+   python $OMFIT $GFILE $NPSI $NRZ 0 2
 fi
 
 # DSKGATO

@@ -99,7 +99,7 @@ class RectBivariateSplineNaN:
             tmp[mask>0.01]=np.nan
         return tmp
 
-def polfluxcontour(gEQDSK,resolution,levels,psinorm,narc,quiet):
+def polfluxcontour(gEQDSK,nrz,levels,psinorm,narc,quiet):
        
     Rin         = np.linspace(0,gEQDSK['RDIM'],gEQDSK['NW'])+gEQDSK['RLEFT']
     Zin         = np.linspace(0,gEQDSK['ZDIM'],gEQDSK['NH'])-gEQDSK['ZDIM']/2.0+gEQDSK['ZMID']
@@ -123,14 +123,13 @@ def polfluxcontour(gEQDSK,resolution,levels,psinorm,narc,quiet):
     #-----------------------------------------------------------------
     if not quiet:
         print('INFO: (prgen_contour) Levels based on psi')
-        print('INFO: (prgen_contour) Interpolating tables to '+str(resolution)+' m resolution ...')
 
-    slfR=np.linspace(min(Rin),max(Rin),np.ceil((max(Rin)-min(Rin))/resolution))
-    slfZ=np.linspace(min(Zin),max(Zin),np.ceil((max(Zin)-min(Zin))/resolution))
+    slfR=np.linspace(min(Rin),max(Rin),nrz)
+    slfZ=np.linspace(min(Zin),max(Zin),nrz)
     slfPSI=RectBivariateSplineNaN(Zin, Rin, slfPSIin)(slfZ,slfR)
     slfdd=np.sqrt((slfR[1]-slfR[0])**2+(slfZ[1]-slfZ[0])**2)
     if not quiet:
-        print('INFO: (prgen_contour) Grid diagonal resolution: '+str(slfdd)+' m')
+        print('INFO: (prgen_contour) Grid diagonal resolution [m] = {0:.5f}'.format(slfdd))
 
     #-----------------------------------------------------------------
     # Crop 
@@ -279,7 +278,7 @@ def polfluxcontour(gEQDSK,resolution,levels,psinorm,narc,quiet):
     #-----------------------------------------------------------
         
     if not quiet:
-        print('INFO: (prgen_contour) Contour levels = {:d} | n_arc = {:d}'.format(levels,narc))
+        print('INFO: (prgen_contour) Contour levels = {:d} | n_arc = {:d} | nrz = {:d}'.format(levels,narc,nrz))
 
     # absolute psi levels to interpolate (psinorm is normalized)
     levels_psi = np.linspace(0,psinorm,levels)*(psi1-psi0)+psi0

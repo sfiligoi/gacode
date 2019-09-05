@@ -76,7 +76,7 @@ def fit(r,z,n_arc,nf,pflag):
    xr = np.zeros(4)
    xr[0] = rmin
    xr[1] = rmaj
-   xr[2] = zmin
+   xr[2] = zmin/rmin
    xr[3] = zmaj
 
    for i in range(n_arc-1):

@@ -19,8 +19,6 @@ subroutine allocate_plasmastate_vars
   allocate(plst_epar(nx))
   allocate(plst_eperp(nx))
   allocate(plst_vol(nx))
-  allocate(plst_rho(nx))
-  allocate(plst_grho1(nx))
   allocate(plst_phit(nx))
   allocate(plst_psipol(nx))
   allocate(plst_elong(nx))

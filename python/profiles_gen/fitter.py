@@ -11,8 +11,9 @@ from gacode_fit import *
 if len(sys.argv) > 1:
    gfile = sys.argv[1]
    npsi  = int(sys.argv[2])
-   ix    = int(sys.argv[3])
-   nf    = int(sys.argv[4])
+   nrz   = int(sys.argv[3])
+   ix    = int(sys.argv[4])
+   nf    = int(sys.argv[5])
 else:
    print('Usage: python fitter.py <gfile> <npsi> <ix> <nf>')
    sys.exit()
@@ -20,7 +21,7 @@ else:
 EQDSK = geqdsk(gfile)
 n_arc = 512
 
-ri,zi,psi,q,p = polfluxcontour(EQDSK,resolution=0.0012,levels=npsi,psinorm=0.9999,narc=n_arc,quiet=False)
+ri,zi,psi,q,p = polfluxcontour(EQDSK,nrz=nrz,levels=npsi,psinorm=0.9999,narc=n_arc,quiet=False)
 
 pnorm = (psi[1:]-psi[0])/(psi[-1]-psi[0]) 
 
@@ -37,7 +38,7 @@ if ix < 1:
    ci[0,0] = ci[1,0] # tilt
    xi[0,0] = 0.0 # rmin
    xi[0,1] = xi[1,1] # rmaj
-   xi[0,2] = xi[1,2] # zmin
+   xi[0,2] = xi[1,2] # kappa
    xi[0,3] = xi[1,3] # zmaj
    
    
@@ -47,11 +48,22 @@ else:
    sys.exit()
 
 if ix == 0:
-   si.tofile('bin.si.fit')
-   ci.tofile('bin.ci.fit')
-   xi.tofile('bin.xi.fit')
-   psifunc = np.transpose(np.stack((psi,q,p)))
-   psifunc.tofile('bin.psi.fit')
+   f=open('out.dim','w')
+   f.write(str(npsi))
+   f.close()
+   np.stack((si[:,0],
+             si[:,1],
+             si[:,2],
+             ci[:,0],
+             ci[:,1],
+             ci[:,2],
+             xi[:,0],
+             xi[:,1],
+             xi[:,2],
+             xi[:,3],
+             psi,
+             q,
+             p)).tofile('out.data')
    sys.exit()
    
 #--------------------------------------------------------------------
