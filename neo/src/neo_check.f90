@@ -260,15 +260,6 @@ subroutine neo_check
      case (1)
         if (silent_flag == 0 .and. i_proc == 0) then
            write(io_neoout,30) 'profile_equilibrium_model','WITH MILLER GEOMETRY'
-           if(abs(profile_delta_scale-1.0) > epsilon(0.) ) then
-              write(io_neoout,30) 'profile_equilibrium_model','DELTA AND S_DELTA ARE RE-SCALED'
-           endif
-           if(abs(profile_zeta_scale-1.0) > epsilon(0.) ) then
-              write(io_neoout,30) 'profile_equilibrium_model','ZETA AND S_ZETA ARE RE-SCALED'
-           endif
-           if(abs(profile_zmag_scale-1.0) > epsilon(0.) ) then
-              write(io_neoout,30) 'profile_equilibrium_model','ZMAG AND S_MAG ARE RE-SCALED'
-           endif
         end if
      case (2)
         if (silent_flag == 0 .and. i_proc == 0) then
@@ -440,11 +431,16 @@ subroutine neo_check
         write(io_neoout,20) '      r/a:',r(ir)
         write(io_neoout,20) '      R/a:',rmaj(ir), '    shift:',shift(ir)
         write(io_neoout,20) '        q:',q(ir),    '        s:',shear(ir)
+        write(io_neoout,20) '     zmag:',zmag(ir), '    dzmag:',s_zmag(ir)
         write(io_neoout,20) '    kappa:',kappa(ir),'  s_kappa:',s_kappa(ir)
         write(io_neoout,20) '    delta:',delta(ir),'  s_delta:',s_delta(ir)
         write(io_neoout,20) '     zeta:',zeta(ir), '   s_zeta:',s_zeta(ir)
-        write(io_neoout,20) '     zmag:',zmag(ir), '    dzmag:',s_zmag(ir)
-
+        write(io_neoout,20) '     sin3:',shape_sin3(ir), '   s_sin3:',shape_s_sin3(ir)
+        write(io_neoout,20) '     cos0:',shape_cos0(ir), '   s_cos0:',shape_s_cos0(ir)
+        write(io_neoout,20) '     cos1:',shape_cos1(ir), '   s_cos1:',shape_s_cos1(ir)
+        write(io_neoout,20) '     cos2:',shape_cos2(ir), '   s_cos2:',shape_s_cos2(ir)
+        write(io_neoout,20) '     cos3:',shape_cos3(ir), '   s_cos3:',shape_s_cos3(ir)
+        
         write(io_neoout,*)
         write(io_neoout,20) ' dphi0/dr:',dphi0dr(ir)
         write(io_neoout,20) '    omega:',omega_rot(ir), &

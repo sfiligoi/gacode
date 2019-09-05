@@ -144,6 +144,16 @@ contains
        GEO_s_delta_in = s_delta(ir)
        GEO_zeta_in    = zeta(ir)
        GEO_s_zeta_in  = s_zeta(ir)
+       GEO_shape_sin3_in    = shape_sin3(ir)
+       GEO_shape_s_sin3_in  = shape_s_sin3(ir)
+       GEO_shape_cos0_in    = shape_cos0(ir)
+       GEO_shape_s_cos0_in  = shape_s_cos0(ir)
+       GEO_shape_cos1_in    = shape_cos1(ir)
+       GEO_shape_s_cos1_in  = shape_s_cos1(ir)
+       GEO_shape_cos2_in    = shape_cos2(ir)
+       GEO_shape_s_cos2_in  = shape_s_cos2(ir)
+       GEO_shape_cos3_in    = shape_cos3(ir)
+       GEO_shape_s_cos3_in  = shape_s_cos3(ir)
        !!!!! beta_star !!!!!
        ! EAB: does not enter in the first-order calc
        ! NOTE: it is not implemented in v_drift defs

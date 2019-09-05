@@ -25,21 +25,21 @@ module neo_globals
   real :: rho_in
   real :: shear_in
   real :: shift_in
+  real :: zmag_in
+  real :: s_zmag_in
   real :: kappa_in
   real :: s_kappa_in
   real :: delta_in
   real :: s_delta_in
   real :: zeta_in
   real :: s_zeta_in
-  real :: zmag_in
-  real :: s_zmag_in
+  real :: shape_sin3_in
+  real :: shape_s_sin3_in
+  real :: shape_cos0_in, shape_cos1_in, shape_cos2_in, shape_cos3_in
+  real :: shape_s_cos0_in, shape_s_cos1_in, shape_s_cos2_in, shape_s_cos3_in
   real :: beta_star_in
   integer :: geo_ny_in
   real, dimension(8,0:32) :: geo_yin_in
-  !
-  real :: profile_delta_scale
-  real :: profile_zeta_scale
-  real :: profile_zmag_scale
 
   real, dimension(11) :: profile_dlnndr_scale
   real, dimension(11) :: profile_dlntdr_scale
@@ -158,14 +158,18 @@ module neo_globals
   real, dimension(:), allocatable :: rho
   real, dimension(:), allocatable :: shear
   real, dimension(:), allocatable :: shift
+  real, dimension(:), allocatable :: zmag
+  real, dimension(:), allocatable :: s_zmag
   real, dimension(:), allocatable :: kappa
   real, dimension(:), allocatable :: s_kappa
   real, dimension(:), allocatable :: delta
   real, dimension(:), allocatable :: s_delta
   real, dimension(:), allocatable :: zeta
   real, dimension(:), allocatable :: s_zeta
-  real, dimension(:), allocatable :: zmag
-  real, dimension(:), allocatable :: s_zmag
+  real, dimension(:), allocatable :: shape_sin3
+  real, dimension(:), allocatable :: shape_s_sin3
+  real, dimension(:), allocatable :: shape_cos0, shape_cos1, shape_cos2, shape_cos3
+  real, dimension(:), allocatable :: shape_s_cos0, shape_s_cos1, shape_s_cos2, shape_s_cos3
   real, dimension(:), allocatable :: beta_star
   integer :: geo_numeq_flag
   integer :: geo_ny
