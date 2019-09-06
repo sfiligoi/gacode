@@ -136,12 +136,6 @@ module cgyro_globals
   real :: gamma_e_scale
   real :: gamma_p_scale
   real :: mach_scale
-  real :: q_scale
-  real :: s_scale
-  real :: shift_scale
-  real :: kappa_scale, s_kappa_scale
-  real :: delta_scale, s_delta_scale
-  real :: zeta_scale, s_zeta_scale
   real :: beta_star_scale, betae_unit_scale
   real :: nu_ee_scale
   real, dimension(6) :: dlnndr_scale

@@ -205,16 +205,7 @@ subroutine cgyro_make_profiles
      lambda_star      = lambda_star * lambda_star_scale
      gamma_e          = gamma_e      * gamma_e_scale
      gamma_p          = gamma_p      * gamma_p_scale
-     mach             = mach         * mach_scale
-     q                = q            * q_scale
-     s                = s            * s_scale
-     shift            = shift        * shift_scale
-     kappa            = kappa        * kappa_scale
-     delta            = delta        * delta_scale
-     zeta             = zeta         * zeta_scale
-     s_kappa          = s_kappa      * s_kappa_scale
-     s_delta          = s_delta      * s_delta_scale
-     s_zeta           = s_zeta       * s_zeta_scale
+     mach             = mach         * mach_scale    
      beta_star(0)     = beta_star(0) * beta_star_scale
      betae_unit       = betae_unit   * betae_unit_scale
      do is=1,n_species
