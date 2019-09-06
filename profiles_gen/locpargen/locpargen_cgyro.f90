@@ -35,6 +35,9 @@ subroutine locpargen_cgyro
   write(1,10) 'RMAJ=',rmaj_loc
   write(1,*)
   write(1,11) 'EQUILIBRIUM_MODEL=', 2  
+  write(1,10) 'IPCCW=',ipccw
+  write(1,10) 'BTCCW=',btccw
+  write(1,*)
   write(1,10) 'SHIFT=',shift_loc
   write(1,10) 'ZMAG=',zmag_loc
   write(1,10) 'DZMAG=',dzmag_loc
@@ -46,15 +49,18 @@ subroutine locpargen_cgyro
   write(1,10) 'S_DELTA=',s_delta_loc
   write(1,10) 'ZETA=',zeta_loc
   write(1,10) 'S_ZETA=',s_zeta_loc
-  write(1,10) 'IPCCW=',ipccw
-  write(1,10) 'BTCCW=',btccw
   write(1,*)
-  write(1,11) 'N_FIELD=', 2
-  write(1,10) 'BETAE_UNIT=',betae_unit
+  write(1,'(a)')  '# Geometry (Advanced)'
+  write(1,10) 'SHAPE_COS0=',shape_cos0_loc
+  write(1,10) 'SHAPE_COS1=',shape_cos1_loc
+  write(1,10) 'SHAPE_COS2=',shape_cos2_loc
+  write(1,10) 'SHAPE_S_COS0=',shape_cos0_loc
+  write(1,10) 'SHAPE_S_COS1=',shape_cos1_loc
+  write(1,10) 'SHAPE_S_COS2=',shape_cos2_loc  
   write(1,*)
   
   !---------------------------------------------------------
-  ! Rotation data
+  ! Rotation 
   
   write(1,'(a)')  '# Rotation (Sonic)'
   write(1,11) 'ROTATION_MODEL=', 2   
@@ -64,10 +70,13 @@ subroutine locpargen_cgyro
   write(1,*)
 
   !---------------------------------------------------------
-  ! Collision data
+  ! Collisions and data
   write(1,'(a)')  '# Collisions (Sugama)'
   write(1,11) 'COLLISION_MODEL=', 4    
   write(1,10) 'NU_EE=',nu_ee*a/cs_loc
+  write(1,*)
+  write(1,11) 'N_FIELD=', 2
+  write(1,10) 'BETAE_UNIT=',betae_unit
   write(1,*)
   
   !---------------------------------------------------------

@@ -79,6 +79,19 @@ subroutine cgyro_make_profiles
      s_kappa = s_kappa_loc
      s_delta = s_delta_loc
      s_zeta  = s_zeta_loc
+
+     shape_sin3 = shape_sin3_loc
+     shape_cos0 = shape_cos0_loc
+     shape_cos1 = shape_cos1_loc
+     shape_cos2 = shape_cos2_loc
+     shape_cos3 = shape_cos3_loc
+
+     shape_s_sin3 = shape_s_sin3_loc
+     shape_s_cos0 = shape_s_cos0_loc
+     shape_s_cos1 = shape_s_cos1_loc
+     shape_s_cos2 = shape_s_cos2_loc
+     shape_s_cos3 = shape_s_cos3_loc
+   
      q       = q_loc
      s       = s_loc
      zmag    = zmag_loc
