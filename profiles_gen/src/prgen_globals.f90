@@ -169,6 +169,7 @@ module prgen_globals
   integer :: plst_ipccw
   integer :: plst_dim_nrho
   integer :: plst_dim_nrho_eq_geo
+  integer :: plst_dim_nspec_beam
   integer :: plst_dp1_nspec_th
   integer :: plst_dp1_nspec_tha
   integer :: plst_dp1_nspec_all
@@ -181,14 +182,16 @@ module prgen_globals
   real, dimension(:), allocatable :: plst_m_all
   real, dimension(:,:), allocatable :: plst_ts
   real, dimension(:,:), allocatable :: plst_ns
-  real, dimension(:), allocatable :: plst_nb
+  real, dimension(:,:), allocatable :: plst_nb
   real, dimension(:), allocatable :: plst_nmini
   real, dimension(:), allocatable :: plst_nfusi
-  real, dimension(:), allocatable :: plst_tb
+  real, dimension(:,:), allocatable :: plst_tb
   real, dimension(:), allocatable :: plst_tmini
   real, dimension(:), allocatable :: plst_tfusi
   real, dimension(:), allocatable :: plst_eperp
   real, dimension(:), allocatable :: plst_epar
+  real, dimension(:,:), allocatable :: plst_beperp ! beams
+  real, dimension(:,:), allocatable :: plst_bepar  ! beams
   real, dimension(:), allocatable :: plst_vol
   real, dimension(:), allocatable :: plst_phit
   real, dimension(:), allocatable :: plst_psipol
