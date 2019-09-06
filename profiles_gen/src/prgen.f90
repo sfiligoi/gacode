@@ -38,6 +38,7 @@ program prgen
   read(1,*) efit_method
   read(1,*) noq_flag
   read(1,*) nop_flag
+  read(1,*) oldshape_flag
   read(1,*) verbose_flag
   read(1,*) ipccw
   read(1,*) btccw

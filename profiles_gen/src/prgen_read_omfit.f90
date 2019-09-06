@@ -78,8 +78,10 @@ subroutine prgen_read_omfit
   call cub_spline(efit_psi,efit_si(:,3),npsi,dpsi,zeta,nx)
 
   ! New shape coefficients
+  call cub_spline(efit_psi,efit_si(:,4),npsi,dpsi,shape_sin3,nx)
   call cub_spline(efit_psi,efit_ci(:,1),npsi,dpsi,shape_cos0,nx)
   call cub_spline(efit_psi,efit_ci(:,2),npsi,dpsi,shape_cos1,nx)
   call cub_spline(efit_psi,efit_ci(:,3),npsi,dpsi,shape_cos2,nx)
+  call cub_spline(efit_psi,efit_ci(:,4),npsi,dpsi,shape_cos3,nx)
 
 end subroutine prgen_read_omfit

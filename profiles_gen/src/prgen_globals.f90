@@ -19,6 +19,7 @@ module prgen_globals
   integer :: efit_method
   integer :: noq_flag
   integer :: nop_flag
+  integer :: oldshape_flag
   integer :: verbose_flag
   integer :: ipccw
   integer :: btccw
@@ -48,9 +49,11 @@ module prgen_globals
   real, dimension(:), allocatable :: delta
   real, dimension(:), allocatable :: zmag
   real, dimension(:), allocatable :: zeta
+  real, dimension(:), allocatable :: shape_sin3
   real, dimension(:), allocatable :: shape_cos0
   real, dimension(:), allocatable :: shape_cos1
   real, dimension(:), allocatable :: shape_cos2
+  real, dimension(:), allocatable :: shape_cos3
   real, dimension(:), allocatable :: vpolc_exp
   real, dimension(:), allocatable :: vtorc_exp
 

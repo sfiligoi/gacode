@@ -23,8 +23,10 @@ subroutine prgen_allocate
   allocate(delta(nx)) ; delta = 0.0
   allocate(zmag(nx))  ; zmag = 0.0
   allocate(zeta(nx))  ; zeta = 0.0
+  allocate(shape_sin3(nx)) ; shape_sin3 = 0.0
   allocate(shape_cos0(nx)) ; shape_cos0 = 0.0
   allocate(shape_cos1(nx)) ; shape_cos1 = 0.0
   allocate(shape_cos2(nx)) ; shape_cos2 = 0.0
+  allocate(shape_cos3(nx)) ; shape_cos3 = 0.0
  
 end subroutine prgen_allocate

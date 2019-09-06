@@ -179,6 +179,9 @@ then
    echo "             -nrz <int>"
    echo "              R-Z resolution for psi contours."
    echo
+   echo "             -oldshape <int>"
+   echo "              Generate old (restricted) shape parameter set."
+   echo
    echo "input.gacode (simple passthrough if no gfile specified)"
    echo
    echo "             -i <data>"
@@ -296,6 +299,7 @@ NPSI=128
 PLOT=0
 NOP_FLAG=0
 NOQ_FLAG=0
+OLDSHAPE=0
 
 # Extra datafiles
 GFILE=null
@@ -358,6 +362,7 @@ while [ $# -gt 0 ] ; do
   -nrz) shift ; NRZ=$1 ;;
   -npsi) shift ; NPSI=$1 ;;
   -plot) PLOT=1 ;;
+  -oldshape) OLDSHAPE=1 ;;
 
   -sub_aux) TRUE_AUX_FLAG=0 ;;
   
@@ -646,6 +651,7 @@ echo $CER_FILE >> $CONFIG
 echo $EFIT >> $CONFIG
 echo $NOQ_FLAG >> $CONFIG
 echo $NOP_FLAG >> $CONFIG
+echo $OLDSHAPE >> $CONFIG
 
 # Verbosity
 echo $VERBOSE_FLAG >> $CONFIG
