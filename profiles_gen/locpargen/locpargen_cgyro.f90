@@ -54,9 +54,9 @@ subroutine locpargen_cgyro
   write(1,10) 'SHAPE_COS0=',shape_cos0_loc
   write(1,10) 'SHAPE_COS1=',shape_cos1_loc
   write(1,10) 'SHAPE_COS2=',shape_cos2_loc
-  write(1,10) 'SHAPE_S_COS0=',shape_cos0_loc
-  write(1,10) 'SHAPE_S_COS1=',shape_cos1_loc
-  write(1,10) 'SHAPE_S_COS2=',shape_cos2_loc  
+  write(1,10) 'SHAPE_S_COS0=',shape_s_cos0_loc
+  write(1,10) 'SHAPE_S_COS1=',shape_s_cos1_loc
+  write(1,10) 'SHAPE_S_COS2=',shape_s_cos2_loc  
   write(1,*)
   
   !---------------------------------------------------------
