@@ -1,17 +1,6 @@
-from gacode import expro
-import numpy
 import sys
-
-# Function to decode the insane string returned by gacode/f2py
-def gapystr(s):
-   if sys.version_info[0] == 2:
-      u = []
-      a = s.transpose().reshape(-1,10).view('S'+str(10))
-      for i in range(len(a)):
-         u.append(a[i].tostring().strip())
-      return u
-   else:
-      return str(s,'utf-8').split()
+from gacode import expro
+from gacodefuncs import *
 
 class Gapy(dict):
 

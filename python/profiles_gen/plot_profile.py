@@ -14,7 +14,7 @@ matplotlib.use('WXAgg')
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
 import matplotlib.pyplot as plt
 from gacodefuncs import *
-from pygacode import expro
+from gacode import expro
 
 matplotlib.rc('text',usetex=True)
 matplotlib.rc('font',size=18)
@@ -27,33 +27,6 @@ rmax = sys.argv[3]
 ext = sys.argv[4]
 loc = int(sys.argv[5])
 
-def gapystr(s):
-
-   if sys.version_info[0] > 2:
-      # Python 3 
-      return s[2].decode('UTF-8')
-   else:
-      # Python 2
-      n = len(s[0])
-      u = s.transpose().reshape(-1,n).view('S'+str(n))   
-      return u[2].tostring().strip()
-
-def gapystrv(s):
-
-   if sys.version_info[0] > 2:
-      # Python 3
-      u=[]
-      for i in range(expro.expro_n_ion):
-         u.append(s[i].decode('UTF-8').strip())
-      return u
-   else:
-      # Python 2
-      u = []
-      a = s.transpose().reshape(-1,10).view('S'+str(10))
-      for i in range(expro.expro_n_ion):
-         u.append(a[i].tostring().strip())
-      return u
-      
 def plot_select(ax,tag):
 
    # Helper routine to plot data (tag) from input.gacode
@@ -83,12 +56,12 @@ def plot_select(ax,tag):
 
    if tag == 'gammae':
       # gamma_e
-      y = expro.expro_gamma_e ; ystr = gapystr(expro.expro_gamma_e_str)
+      y = expro.expro_gamma_e ; ystr = ''
       ax.plot(x[:m],y[:m]/csa[:m],label=r'$(a/c_s)'+ystr+'$')
 
    if tag == 'gammap':
       # gamma_p
-      y = expro.expro_gamma_p ; ystr = gapystr(expro.expro_gamma_p_str)
+      y = expro.expro_gamma_p ; ystr = ''
       ax.plot(x[:m],y[:m]/csa[:m],label=r'$(a/c_s)'+ystr+'$')
 
    if tag == 'mach':
@@ -98,10 +71,10 @@ def plot_select(ax,tag):
 
    if tag == 'r':
       # rho
-      y = expro.expro_rho ; ystr = gapystr(expro.expro_rho_str)
+      y = expro.expro_rho ; ystr = ''
       ax.plot(x[:m],y[:m],label=r'$'+ystr+'$')
       # polflux
-      y = expro.expro_polflux ; ystr = gapystr(expro.expro_polflux_str)
+      y = expro.expro_polflux ; ystr = ''
       ax.plot(x[:m],y[:m]/y[-1],label=r'$'+ystr+'$')
 
    if tag == 'n':
