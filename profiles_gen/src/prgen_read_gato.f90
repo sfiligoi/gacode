@@ -111,7 +111,7 @@ subroutine prgen_read_gato
      else
         ! Old behaviour, shrinks flux as a kludge
         dpsi_efit = gato_psi(nsurf)
-
+        print *,dpsi_efit
         ! Ensure max(dpsi) = max(gato_psi) 
         dpsi(:)  = dpsi(:)*dpsi_efit/dpsi_data
         ! Extra insurance against roundoff
@@ -169,8 +169,6 @@ subroutine prgen_read_gato
      call cub_spline(gato_psi,gato_q,nsurf+1,dpsi,q,nx)
   endif
 
-  print *,q
-  stop
   ! Explicitly set rmin=0 at origin
   rmin(1) = 0.0
 

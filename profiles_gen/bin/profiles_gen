@@ -311,8 +311,8 @@ NOQ_FLAG=0
 
 # OMFIT mapper variables
 OMFIT_FLAG=0
-NRZ=1000
-NPSI=64
+NRZ=2000
+NPSI=128
 PLOT=0
 
 # Extra datafiles
