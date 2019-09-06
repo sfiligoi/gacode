@@ -17,7 +17,7 @@ subroutine prgen_map_inputprofiles
   
   if (efit_method > 1) then
 
-     call prgen_get_chi(nx,q,dpsi,rho,expro_torfluxa)
+     call prgen_get_chi(nx,q,dpsi,rho,torfluxa)
 
      ! Align with new (GATO) rho grid, not old rho grid, expro_rho:
      call cub_spline(expro_rho,expro_te,nx,rho,xnew,nx)
@@ -62,18 +62,11 @@ subroutine prgen_map_inputprofiles
      ! Map profile data into expro interface.
      ! NOTE: expro_alloc already called in prgen_read_inputprofiles
      !
-     expro_rho(:)  = rho(:)
+     expro_rho(:)  = rho
      expro_rmin(:) = rmin
-     expro_rmaj(:) = rmaj(:)
-     ! COORDINATES: set sign of q
-     expro_q(:)     = abs(q(:))*ipccw*btccw
-     expro_kappa(:) = kappa(:)
-     expro_delta(:) = delta(:)
-     expro_zeta(:)  = zeta(:)
-     expro_zmag(:)  = zmag(:)
-     ! COORDINATES: set sign of poloidal flux
-     expro_polflux = abs(dpsi(:))*(-ipccw)
-
+     expro_rmaj(:) = rmaj
+     !---------------------------------------------------------
+ 
   endif
 
   !---------------------------------------------------------

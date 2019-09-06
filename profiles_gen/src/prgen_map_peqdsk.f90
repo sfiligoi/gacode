@@ -58,21 +58,16 @@ subroutine prgen_map_peqdsk
   expro_n_ion = peqdsk_nion
   call expro_init(1)
   !
-  expro_rho(:)  = rho(:)
-  expro_rmin(:) = rmin(:)
+  expro_rho(:)   = rho(:)
+  expro_rmin(:)  = rmin(:)
   expro_rmaj(:)  = rmaj(:)
-  ! COORDINATES: set sign of q
-  expro_q(:)      = abs(q(:))*ipccw*btccw
-  expro_te(:)     = peqdsk_te(:)
-  expro_ne(:)     = peqdsk_ne(:)*10
-  expro_z_eff(:)  = z_eff(:)
+  expro_te(:)    = peqdsk_te(:)
+  expro_ne(:)    = peqdsk_ne(:)*10
+  expro_z_eff(:) = z_eff(:)
+  expro_ptot(:)  = p_tot(:)      
   ! COORDINATES: -ipccw accounts for DIII-D toroidal angle convention
   ! (wrt Ip direction)
-  expro_w0(:)        = -ipccw*1e3*peqdsk_omgeb(:) 
-  expro_ptot(:)      = p_tot(:)      
-
-  ! COORDINATES: set sign of poloidal flux
-  expro_polflux = abs(dpsi(:))*(-ipccw)
+  expro_w0(:) = -ipccw*1e3*peqdsk_omgeb(:) 
 
   expro_mass = peqdsk_m(1:expro_n_ion)
   expro_z    = peqdsk_z(1:expro_n_ion)

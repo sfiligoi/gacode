@@ -94,14 +94,10 @@ subroutine prgen_map_iterdb
   expro_rho  = rho
   expro_rmin = rmin(:)
   expro_rmaj = rmaj(:)
-  ! COORDINATES: set sign of q
-  expro_q = abs(q(:))*ipccw*btccw
   expro_te = onetwo_te(:)
   expro_ne = onetwo_ene(:)*1e-19
   expro_z_eff = onetwo_zeff(:)
   expro_ptot = p_tot(:) ! Total pressure
-  ! COORDINATES: set sign of poloidal flux
-  expro_polflux = abs(dpsi(:))*(-ipccw)
 
   do i=1,expro_n_ion
      expro_ni(i,:) = onetwo_enion_vec(i,:)

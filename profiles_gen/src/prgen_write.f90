@@ -2,7 +2,7 @@
 ! prgen_write.f90
 !
 ! PURPOSE:
-!  Generate input.profiles and input.profiles.extra
+!  Write input.gacode 
 !----------------------------------------------------------
 
 subroutine prgen_write
@@ -11,27 +11,19 @@ subroutine prgen_write
   use expro
 
   implicit none
-  
-  expro_rcentr = rcentr
-  expro_bcentr = -btccw*abs(bcentr)
-  expro_current = -ipccw*abs(current)
 
-  ! Ensure correct sign of toroidal flux (Bt)
-  !
-  select case (format_type)
+  ! Map data from EFIT analysis
+  expro_rcentr   = rcentr
+  expro_bcentr   = -btccw*abs(bcentr)
+  expro_current  = -ipccw*abs(current)
+  expro_torfluxa = -btccw*abs(torfluxa)
 
-  case (0,1,2,3,4,5,6)
-     expro_torfluxa = -btccw*abs(torfluxa)
-  case (7,8)
-     ! GACODE/LEGACY
-     expro_torfluxa = -btccw*abs(expro_torfluxa)
-  end select
-
-  ! Map the geometry coefficients:
-  expro_kappa = kappa
-  expro_delta = delta
-  expro_zeta  = zeta
-  expro_zmag  = zmag
+  expro_q          = ipccw*btccw*abs(q)
+  expro_polflux    = -ipccw*abs(dpsi)
+  expro_kappa      = kappa
+  expro_delta      = delta
+  expro_zeta       = zeta
+  expro_zmag       = zmag
   expro_shape_cos0 = shape_cos0
   expro_shape_cos1 = shape_cos1
   expro_shape_cos2 = shape_cos2
@@ -47,6 +39,6 @@ subroutine prgen_write
   call expro_write('input.gacode')
   print '(a)','INFO: (prgen_write) Wrote input.gacode.'
   !-------------------------------------------------------------------------------------
-  
+
 end subroutine prgen_write
 

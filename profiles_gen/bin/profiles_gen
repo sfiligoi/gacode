@@ -17,8 +17,6 @@
 #
 #  Autodetected geometry formats:
 #   GFILE       (geqdsk equilibrium data)
-#   DSKGATO_OLD (old-type dskgato flux-surface data)
-#   DSKGATO_NEW (new-type dskgato flux-surface data)
 #============================================================= 
 
 #=============================================================
@@ -61,8 +59,6 @@ then
    echo 
    echo "             Autodetected geometry formats:"
    echo "               GFILE       (geqdsk equilibrium data)"
-   echo "               DSKGATO_OLD (old-type dskgato flux-surface data)"
-   echo "               DSKGATO_NEW (new-type dskgato flux-surface data)"
    echo 
    echo "             -p <path>"
    echo "             Set optional path to simulation directory."
@@ -175,19 +171,10 @@ then
    echo "             -n_null <int>"
    echo "             Number of radial gridpoints (default: 40)"
    echo
-   echo "GATO mapper control options"
-   echo 
-   echo "             -gato <parameter=val,parameter=val,...>"
-   echo 
-   echo "             Important parameters and defaults"
-   echo
-   echo "              dpsidl=0.0   [DEFINE]"    
-   echo "              npfit=150    [DEFINE]"   
-   echo
    echo "OMFIT mapper control options"
    echo 
-   echo "             -omfit"
-   echo "             Toggle OMFIT mapper instead of default GATO mapper."
+   echo "             -npsi <int>"
+   echo "              Number of flux-surfaces to contout"
    echo
    echo "             -nrz <int>"
    echo "              R-Z resolution for psi contours."
@@ -302,18 +289,13 @@ IPCCW=0
 BTCCW=0
 NFOURIER=24
 
-# GATO variables
-GATO_ARGS=
-
-# EFIT data options
-NOP_FLAG=0
-NOQ_FLAG=0
-
 # OMFIT mapper variables
-OMFIT_FLAG=0
+EFIT=0
 NRZ=2000
 NPSI=128
 PLOT=0
+NOP_FLAG=0
+NOQ_FLAG=0
 
 # Extra datafiles
 GFILE=null
@@ -344,9 +326,6 @@ HASGEO=0
 QNFLAG=0
 BANANA=0
 APPENDFLAG=0
-
-# Plotting in locpargen
-PLOT_FLAG=0
 #=============================================================
 
 #=============================================================
@@ -369,15 +348,13 @@ while [ $# -gt 0 ] ; do
   -ipccw) shift ; IPCCW="$1" ;;
   -btccw) shift ; BTCCW="$1" ;;
 
-  -g) shift ; GFILE="$1" ;;
+  -g) shift ; GFILE="$1" ; EFIT=1 ;;
 
   -nfourier) shift ; NFOURIER=$1 ;;
 
   -n_null) shift ; N_NULL=$1 ;;
 
-  -gato) shift ; GATO_ARGS="$1" ;;
-
-  -omfit) OMFIT_FLAG=1 ;;
+  -gato) EFIT=-1 ;;
   -nrz) shift ; NRZ=$1 ;;
   -npsi) shift ; NPSI=$1 ;;
   -plot) PLOT=1 ;;
@@ -420,8 +397,6 @@ while [ $# -gt 0 ] ; do
   -append) APPENDFLAG=1 ;;
   -qn) QNFLAG=1 ;;
   -banana) BANANA=1 ;;
-
-  -plot) PLOT_FLAG=1 ;;
 
   esac
   shift
@@ -466,17 +441,9 @@ if [ "$itype" == "UNKNOWN" ] ; then
    exit 1 
 fi
 
-if [ "$GFILE" != "null" ] ; then
+if [ $EFIT -eq 0 ] ; then
 
-   G_FLAG=1
-   gtype=`gacode_type_autodetect $GFILE`
-   echo "INFO: (profiles_gen) $GFILE is autodetected as $gtype."
-   header=`head -1 $GFILE` ; harr=($header)
-
-else
-
-   G_FLAG=0
-   gtype=none
+   gtype="none"
    if [ "$itype" == "PFILE" ] ; then
       echo "ERROR: (profiles_gen) A GFILE (-g) must be used with a PFILE."  
       exit 1
@@ -485,6 +452,12 @@ else
       echo "ERROR: (profiles_gen) A GFILE (-g) must be used with a CORSICA file."  
       exit 1
    fi
+
+else
+
+   gtype=`gacode_type_autodetect $GFILE`
+   echo "INFO: (profiles_gen) $GFILE is autodetected as $gtype."
+   header=`head -1 $GFILE` ; harr=($header)
 
 fi
 #=============================================================
@@ -659,23 +632,6 @@ fi
 
 #=============================================================
 # Construct prgen input file ($CONFIG)
-#
-# Determine method to extract flux surfaces
-# EFIT method:
-#  1=none, 2=GATO-gfile, 3=OMFIT-gfile, 4=DSKGATO_OLD, 5=DSKGATO_NEW
-#
-if [[ "$gtype" == DSKGATO_OLD ]] ; then
-   EFIT_METHOD=4
-elif [[ "$gtype" == DSKGATO_NEW ]] ; then
-   EFIT_METHOD=5
-else
-   EFIT_METHOD=$(($G_FLAG+$OMFIT_FLAG+1))
-fi
-#=============================================================
-
-
-#=============================================================
-# Construct prgen input file ($CONFIG)
 date > $CONFIG
 
 # Required data file (ITERDB, PLASMASTATE, etc)
@@ -686,10 +642,8 @@ echo $itype >> $CONFIG
 echo $GFILE ${harr[1]} ${harr[5]} ${harr[6]} >> $CONFIG 
 echo $CER_FILE >> $CONFIG
 
-# EFIT method
-echo $EFIT_METHOD >> $CONFIG
-
-# EFIT options
+# EFIT data control
+echo $EFIT >> $CONFIG
 echo $NOQ_FLAG >> $CONFIG
 echo $NOP_FLAG >> $CONFIG
 
@@ -717,7 +671,7 @@ echo $TRUE_AUX_FLAG >> $CONFIG
 #
 
 # Use GATO:
-if [ $EFIT_METHOD -eq 2 ]
+if [ $EFIT -eq -1 ]
 then
    if [ ! -f $GATO ]
    then
@@ -839,12 +793,6 @@ then
    echo " iodlbp   = -2" >> ingta
    echo " iodlap   = -2" >> ingta
    echo " iodlwp   = +2" >> ingta
-   p=0
-   for i in $(echo $GATO_ARGS | tr "," "\n")
-   do
-      echo "$i" >> ingta
-      p=$(($p+1))
-   done
    echo " &end" >> ingta
 
    $GATO >& out.gato.info
@@ -858,20 +806,14 @@ then
    fi
 fi
 
-# Use OMFIT mapper
-if [ $EFIT_METHOD -eq 3 ] ; then
-    if [ $PLOT -eq 1 ] ; then
-       python $OMFIT $GFILE $NPSI $NRZ -1 2
-    else 
-       python $OMFIT $GFILE $NPSI $NRZ 0 2
-    fi
+if [ $EFIT -eq 1 ] ; then
+   if [ $PLOT -eq 1 ] ; then
+      python $OMFIT $GFILE $NPSI $NRZ -1 2
+   else 
+      python $OMFIT $GFILE $NPSI $NRZ 0 2
+   fi
 fi
 
-# DSKGATO
-if [[ $EFIT_METHOD -eq 4 || $EFIT_METHOD -eq 5 ]]
-then
-   cp $GFILE grid.dat
-fi
 #==============================================================
 
 #==============================================================

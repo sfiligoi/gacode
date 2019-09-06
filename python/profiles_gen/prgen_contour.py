@@ -101,22 +101,21 @@ class RectBivariateSplineNaN:
 
 def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
 
-    Rin         = np.linspace(0,geqdsk['RDIM'],geqdsk['NW'])+geqdsk['RLEFT']
-    Zin         = np.linspace(0,geqdsk['ZDIM'],geqdsk['NH'])-geqdsk['ZDIM']/2.0+geqdsk['ZMID']
-    slfPSIin    = geqdsk['PSIRZ']
-    efitpsi0    = geqdsk['SIMAG']
-    efitpsi1    = geqdsk['SIBRY']
-    efitf       = geqdsk['FPOL']
-    efitp       = geqdsk['PRES']
-    efitq       = geqdsk['QPSI']
-    efitffp     = geqdsk['FFPRIM']
-    efitppp     = geqdsk['PPRIME']
-    slfR0       = geqdsk['RMAXIS']
-    slfZ0       = geqdsk['ZMAXIS']
-    slfsep      = np.vstack((geqdsk['RBBBS'],geqdsk['ZBBBS'])).T
-    slfopen_sep = None
-    slfrlim     = geqdsk['RLIM']
-    slfzlim     = geqdsk['ZLIM']
+    Rin      = np.linspace(0,geqdsk['RDIM'],geqdsk['NW'])+geqdsk['RLEFT']
+    Zin      = np.linspace(0,geqdsk['ZDIM'],geqdsk['NH'])-geqdsk['ZDIM']/2.0+geqdsk['ZMID']
+    psirz    = geqdsk['PSIRZ']
+    efitpsi0 = geqdsk['SIMAG']
+    efitpsi1 = geqdsk['SIBRY']
+    efitp    = geqdsk['PRES']
+    efitq    = geqdsk['QPSI']
+    slfR0    = geqdsk['RMAXIS']
+    slfZ0    = geqdsk['ZMAXIS']
+    slfrlim  = geqdsk['RLIM']
+    slfzlim  = geqdsk['ZLIM']
+
+    if any(np.isnan(slfrlim)) or any(np.isnan(slfzlim)):
+        print('ERROR: (prgen_contour) rlim/zlim arrays contain NaNs')
+        return
 
     #-----------------------------------------------------------------
     # Change resolution
@@ -124,25 +123,20 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
     if not quiet:
         print('INFO: (prgen_contour) Levels based on psi')
 
-    slfR=np.linspace(min(Rin),max(Rin),nrz)
-    slfZ=np.linspace(min(Zin),max(Zin),nrz)
-    slfPSI=RectBivariateSplineNaN(Zin, Rin, slfPSIin)(slfZ,slfR)
+    slfR   = np.linspace(min(Rin),max(Rin),nrz)
+    slfZ   = np.linspace(min(Zin),max(Zin),nrz)
+    slfPSI = RectBivariateSplineNaN(Zin,Rin,psirz)(slfZ,slfR)
 
     if not quiet:
        dres=np.sqrt((slfR[1]-slfR[0])**2+(slfZ[1]-slfZ[0])**2)
-       print('INFO: (prgen_contour) Grid diagonal resolution [m] = {0:.5f}'.format(dres))
+       print('INFO: (prgen_contour) Grid diagonal resolution [m] = {:.5f}'.format(dres))
 
     #-----------------------------------------------------------------
     # Crop 
     #-----------------------------------------------------------------
-    if slfrlim is not None and slfzlim is not None and len(slfrlim) and len(slfzlim):
+    if len(slfrlim) and len(slfzlim):
         if not quiet:
             print('INFO: (prgen_contour) Cropping tables')
-
-        if slfrlim is not None and slfzlim is not None:
-            if any(np.isnan(slfrlim)) or any(np.isnan(slfzlim)):
-                print('INFO: (prgen_contour) rlim/zlim arrays contain NaNs')
-                return
         bbox=[min(slfrlim),max(slfrlim),min(slfzlim),max(slfzlim)]
         limits=[max([np.argmin(abs(slfR-bbox[0]))-1,0]),
                 min([np.argmin(abs(slfR-bbox[1]))+1,len(slfR)-1]),
@@ -156,7 +150,7 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
     # Find axis
     #-----------------------------------------------------------------
     if not quiet:
-        print('INFO: (prgen_contour) Finding magnetic axis')
+        print('INFO: (prgen_contour) Finding magnetic axis and separatrix')
 
     Raxis = slfR0 ; Zaxis = slfZ0
     dmax = (slfR[-1] - slfR[0]) / 2.0 / 1.5
@@ -168,9 +162,9 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
 
     # figure out sign
     ax = 0
-    for k in range(1, int(min([ int(len(slfR) // 2), int(len(slfZ) // 2)])))[::-1]:
-        ri = (int(len(slfR) // 2) + np.array([-k, 0, +k, 0, 0])).astype(int)
-        zi = (int(len(slfZ) // 2) + np.array([0, 0, 0, +k, -k])).astype(int)
+    for k in range(1,int(min([len(slfR)//2,len(slfZ)//2])))[::-1]:
+        ri = (len(slfR)//2 + np.array([-k, 0, +k, 0, 0])).astype(int)
+        zi = (len(slfZ)//2 + np.array([0, 0, 0, +k, -k])).astype(int)
         try:
             ax, bx, ay, by, c = paraboloid(slfR[ri], slfZ[zi], tmp[zi, ri])
             break
@@ -193,23 +187,19 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
     # fit paraboloid in the vicinity of the grid-based center
     ri = (Rmi + np.array([-1, 0, +1, 0, 0])).astype(int)
     zi = (Zmi + np.array([0, 0, 0, +1, -1])).astype(int)
-    ax, bx, ay, by, c = paraboloid(slfR[ri], slfZ[zi], slfPSI[zi, ri])
-    slfR0_interp = -bx / (2 * ax)
-    slfZ0_interp = -by / (2 * ay)
+    ax, bx, ay, by, c = paraboloid(slfR[ri], slfZ[zi], slfPSI[zi,ri])
+    slfR0_interp = -bx/(2*ax)
+    slfZ0_interp = -by/(2*ay)
 
     # set as the center value of PSI (based on R0 and Z0)
     psi0 = RectBivariateSplineNaN(slfZ, slfR, slfPSI).ev(slfZ0_interp,slfR0_interp)
    
-    print('INFO: (prgen_contour) psi(0) = {0:.5f} [EFIT]  {0:.5f} [CONTOUR]'.format(efitpsi0,psi0))
-
     #-----------------------------------------------------------------
     # Find separatrix
     #-----------------------------------------------------------------
-    accuracy=7
+    accuracy = 7
         
-    #separatrix is found by looking for the largest closed path enclosing the magnetic axis
-    if not quiet:
-       print('INFO: (prgen_contour) Finding separatrix')
+    # separatrix is found by looking for the largest closed path enclosing the magnetic axis
 
     flxm=np.nanmin(slfPSI)
     flxM=np.nanmax(slfPSI)
@@ -226,7 +216,7 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
             if not np.isnan(path.vertices[:]).any() and np.allclose(path.vertices[0,0],path.vertices[-1,0]) and np.allclose(path.vertices[0,1],path.vertices[-1,1]):
                 path.vertices[0,0] = path.vertices[-1,0] = (path.vertices[0,0]+path.vertices[-1,0])*0.5
                 path.vertices[0,1] = path.vertices[-1,1] = (path.vertices[0,1]+path.vertices[-1,1])*0.5
-                simplePath=mp.Path(path.vertices[::int(len(path.vertices[:,0])//10+1),:])
+                simplePath=mp.Path(path.vertices[::len(path.vertices[:,0])//10+1,:])
                 if np.max(simplePath.vertices[:,0]) > slfR0 and np.min(simplePath.vertices[:,0]) < slfR0 and np.max(simplePath.vertices[:,1]) > slfZ0 and np.min(simplePath.vertices[:,1]) < slfZ0:
                     if simplePath.contains_point((slfR0,slfZ0)):
                         dR = path.vertices[1,0]-path.vertices[0,0]
@@ -253,28 +243,15 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
     if kdbg==kdbgmax-1:
         print('Finding of last closed flux surface aborted after %d iterations!'%kdbgmax)
 
-    print('INFO  (prgen_contour) psi(1) = {0:.5f} [EFIT]  {0:.5f} [CONTOUR]'.format(efitpsi1,psi1))
+    print('INFO  (prgen_contour) dpsi = {:.9f} [EFIT] {:.9f} [new]'.format(efitpsi1-efitpsi0,psi1-psi0))
 
-    # do not store new separatrix if it hits edges of computation domain
+    # Separatrix hits edges of computation domain
     if ((np.abs(np.min(sep[:,0])-np.min(slfR)) < 1e-3) or
         (np.abs(np.max(sep[:,0])-np.max(slfR)) < 1e-3) or
         (np.abs(np.min(sep[:,1])-np.min(slfZ)) < 1e-3) or
         (np.abs(np.max(sep[:,1])-np.max(slfZ)) < 1e-3)):
         print("WARNING: (prgen_contour) New separatrix hits computation boundary")
             
-    slfsep = sep
-    slfopen_sep = open_sep
-
-    outer_midplane_distance=[]
-    for k,path in enumerate(slfopen_sep):
-        ix=np.where(path.vertices[:,0]>slfR0)[0]
-        if not len(ix):
-            outer_midplane_distance.append(np.inf)
-            continue
-        outer_midplane_distance.append(min(abs(path.vertices[ix,1]-slfZ0)))
-    ix=np.argmin(outer_midplane_distance)
-    slfopen_sep=slfopen_sep[ix].vertices
-
     #-----------------------------------------------------------
     # Find surfaces
     #-----------------------------------------------------------
@@ -302,7 +279,7 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
             r[0]=r[-1]=(r[0]+r[-1])*0.5
             z[0]=z[-1]=(z[0]+z[-1])*0.5
             if any(np.isnan(r*z)):
-                print('ERROR: (prgen_contour) Nan encountered')
+                print('ERROR: (prgen_contour) NaN encountered')
             # Cubic interpolation from fine t0-mesh to coarse t-mesh
             t0=np.linspace(0,1,len(r))
             t =np.linspace(0,1,narc)

@@ -179,15 +179,11 @@ subroutine prgen_map_plasmastate
   expro_rho  = rho
   expro_rmin = rmin
   expro_rmaj = rmaj
-  ! COORDINATES: set sign of q
-  expro_q = abs(q(:))*ipccw*btccw
   expro_te = plst_ts(:,1)
   expro_ne = plst_ns(:,1)*1e-19
   expro_z_eff = plst_zeff(:)
   expro_w0 = omega0(:) 
   expro_ptot = p_tot ! total pressure, thermal + fast ion
-  ! COORDINATES: This poloidal flux has correct sign (see above).
-  expro_polflux = dpsi(:)
 
   expro_ni = 0.0
   expro_ti = 0.0

@@ -28,13 +28,11 @@ subroutine prgen_map_ufile
   expro_rho(:)   = rho(:)
   expro_rmin(:)  = rmin(:)
   expro_rmaj(:)  = rmaj(:)
-  expro_q(:)     = q(:)
   expro_te(:)    = ufile_te(:)*1e-3
   expro_ne(:)    = ufile_ne(:)*1e-19
   expro_z_eff(:) = ufile_zeff(:)
   expro_w0(:)    = 0.0
   expro_ptot(:)  = ufile_pres(:)
-  expro_polflux  = dpsi(:)
 
   print '(a,i2)','INFO: (prgen) Number of ions: ',ufile_nion
 

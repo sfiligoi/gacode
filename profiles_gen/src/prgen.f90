@@ -26,7 +26,7 @@ program prgen
 
   implicit none
 
-  !--------------------------------------------------
+  !--------------------------------------------------------------------
   ! Parse the config file
   !
   open(unit=1,file='.prgenconfig',status='old')
@@ -50,9 +50,10 @@ program prgen
   allocate(lump_vec(n_lump))
   read(1,*) lump_vec(:)
   close(1)
-  !--------------------------------------------------
+  !--------------------------------------------------------------------
 
-  !------------------------------------------------------------------
+
+  !--------------------------------------------------------------------
   ! Read the iterdb file and define standard variables.
   !
   ! Note that nx will be the experimental vector length in ALL cases:
@@ -147,44 +148,36 @@ program prgen
      stop
 
   endif
-  !------------------------------------------------------------------
+  !--------------------------------------------------------------------
 
-  !---------------------------------------------------
-  ! Read the GATO file for "better" geometry.  At this
-  ! point, GATO has already run and we are just reading 
-  ! the output.
+  !--------------------------------------------------------------------
+  ! Contour the EFIT data for "better" geometry analysis and calculation
+  ! of shape parameters.  At this point, the shape coefficients have
+  ! already been computed and we are just reading the output.
   !
   select case (efit_method)
-  case (1)
+  case (0)
      ! Use geometry data contained in profile data 
      print '(a)','INFO: (prgen) Using original geometry data.'
-  case (2)
+  case (-1)
      ! Use GATO-EFIT mapper
      call prgen_read_gato
-  case (3)
+  case (1)
      ! Use OMFIT-EFIT mapper
      call prgen_read_omfit
-  case (4,5)
-     ! Use DSKGATO data
-     call prgen_read_dskgato
   end select
-  !---------------------------------------------------
+  !--------------------------------------------------------------------
 
-  !---------------------------------------------------------------
+  !--------------------------------------------------------------------
   ! High-resolution geometry
   !
-  if (efit_method > 1) then
+  if (efit_method /= 0) then
      if ((format_type == 1 .or. format_type == 2)) then
-        if (abs(dpsi_efit/dpsi_data-1) > 0.001) then
-           print '(a,1pe9.2,a)', &
-                'INFO: (prgen) FLUX SHRINK FACTOR : ',dpsi_efit/dpsi_data-1.0,' [WARNING]'
-        else
-           print '(a,1pe9.2,a)', &
-                'INFO: (prgen) FLUX SHRINK FACTOR : ',dpsi_efit/dpsi_data-1.0,' [GOOD]'
-        endif
+        print '(a,2(f10.8,a))', &
+             'INFO: (prgen) dpsi = ',dpsi_data,' (statefile) ',dpsi_efit,' (new)'
      endif
   endif
-  !---------------------------------------------------------------
+  !--------------------------------------------------------------------
 
   !-----------------------------------------------------
   ! Set ipccw and btccw to standard DIII-D configuration
@@ -192,7 +185,7 @@ program prgen
   if (ipccw == 0) ipccw = 1
   if (btccw == 0) btccw = -1
   !------------------------------------------------------
-  
+
   select case (format_type)
 
   case (0)

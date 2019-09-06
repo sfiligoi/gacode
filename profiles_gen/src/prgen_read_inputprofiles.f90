@@ -38,7 +38,7 @@ subroutine prgen_read_inputprofiles
         read(line(10:),*) arho
      endif
   enddo
-  expro_torfluxa = 0.5*b_ref*arho**2
+  torfluxa = 0.5*b_ref*arho**2
 
   call expro_init(1)
 
@@ -52,11 +52,11 @@ subroutine prgen_read_inputprofiles
   ! 1
   do i=1,nexp
      read(1,*) x
-     expro_rho(i)     = x(1)
-     expro_rmin(i)    = x(2)
-     expro_polflux(i) = x(3)
-     expro_q(i)       = x(4)
-     expro_w0(i)      = x(5)
+     rho(i)        = x(1)
+     expro_rmin(i) = x(2)
+     dpsi(i)       = x(3)
+     q(i)          = x(4)
+     expro_w0(i)   = x(5)
   enddo
 
   read(1,'(a)') line
@@ -66,10 +66,10 @@ subroutine prgen_read_inputprofiles
   do i=1,nexp
      read(1,*) x
      expro_rmaj(i)  = x(1)
-     expro_zmag(i)  = x(2)
-     expro_kappa(i) = x(3)
-     expro_delta(i) = x(4)
-     expro_zeta(i)  = x(5)
+     zmag(i)  = x(2)
+     kappa(i) = x(3)
+     delta(i) = x(4)
+     zeta(i)  = x(5)
   enddo
 
   read(1,'(a)') line
@@ -156,7 +156,6 @@ subroutine prgen_read_inputprofiles
   ! Needed for diagnostic printing
   rmin(:) = expro_rmin(:)
   rmaj(:) = expro_rmaj(:)
-
 
   ! Missing stuff
   expro_name = 'unknown'

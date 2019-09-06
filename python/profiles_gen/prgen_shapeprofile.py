@@ -21,7 +21,7 @@ else:
 efit = prgen_geqdsk(gfile)
 n_arc = 512
 
-ri,zi,psi,q,p = prgen_contour(efit,nrz=nrz,levels=npsi,psinorm=0.9999,narc=n_arc,quiet=False)
+ri,zi,psi,q,p = prgen_contour(efit,nrz=nrz,levels=npsi,psinorm=0.99999,narc=n_arc,quiet=False)
 
 pnorm = (psi[:]-psi[0])/(psi[-1]-psi[0]) 
 

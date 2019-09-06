@@ -24,5 +24,5 @@ subroutine prgen_read_inputgacode
   ! Needed for diagnostic printing
   rmin(:) = expro_rmin(:)
   rmaj(:) = expro_rmaj(:)
-       
+   
 end subroutine prgen_read_inputgacode

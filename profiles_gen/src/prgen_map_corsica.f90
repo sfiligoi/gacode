@@ -25,13 +25,11 @@ subroutine prgen_map_corsica
   expro_rho(:)       = rho(:)
   expro_rmin(:)      = rmin(:)
   expro_rmaj(:)      = rmaj(:)
-  expro_q(:)         = q(:)
   expro_te(:)        = corsica_te(:)
   expro_ne(:)        = corsica_ne(:)*10.0
   expro_z_eff(:)     = corsica_zeff(:)
   expro_w0(:)        = 0.0      ! omega
   expro_ptot(:)      = p_tot(:)
-  expro_polflux(:)   = dpsi(:)
 
   ! Construct ion densities and temperatures assuming corsica ion species
   ! (n D+T) is two species, each with 1/2 n_corsica and same temperature
@@ -49,10 +47,7 @@ subroutine prgen_map_corsica
   expro_ti(1,:) = corsica_ti(:)
   expro_ti(2,:) = corsica_ti(:)
 
-  ! vphi
   expro_vtor(:,:) = 0.0
-
-  ! vpol
   expro_vpol(:,:) = 0.0
   
 end subroutine prgen_map_corsica
