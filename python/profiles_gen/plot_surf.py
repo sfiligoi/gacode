@@ -1,4 +1,4 @@
-from pygacode import expro
+from gacode import expro
 import sys
 import string
 import numpy as np
@@ -41,12 +41,24 @@ if surf == 'msurf' or surf == 'surf':
       bigr = expro.expro_rmaj[i]
       bigz = expro.expro_zmag[i]
       r    = expro.expro_rmin[i]
-      d    = expro.expro_delta[i]
       k    = expro.expro_kappa[i]
-      z    = expro.expro_zeta[i]
+      s1   = np.arcsin(expro.expro_delta[i])
+      s2   = expro.expro_zeta[i]
+      s3   = expro.expro_shape_sin3[i]
+      c0   = expro.expro_shape_cos0[i]
+      c1   = expro.expro_shape_cos1[i]
+      c2   = expro.expro_shape_cos2[i]
+      c3   = expro.expro_shape_cos3[i]
 
-      x = bigr+r*np.cos(t+np.arcsin(d)*np.sin(t))
-      y = bigz+k*r*np.sin(t+z*np.sin(2*t))
+      x = bigr+r*np.cos(t
+                        +s1*np.sin(t)
+                        +s2*np.sin(2*t)
+                        +s3*np.sin(3*t)
+                        +c0
+                        +c1*np.cos(t)
+                        +c2*np.cos(2*t)
+                        +c3*np.cos(3*t))
+      y = bigz+k*r*np.sin(t)
 
       if i == rlist[0]:
          ax.plot(x,y,'-k',linewidth=1,label=r'$\mathrm{Miller}$')

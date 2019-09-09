@@ -75,7 +75,7 @@ subroutine prgen_read_omfit
   call cub_spline(efit_psi,efit_rmaj,npsi,dpsi,rmaj,nx)
   call cub_spline(efit_psi,efit_kappa,npsi,dpsi,kappa,nx)
   call cub_spline(efit_psi,efit_si(:,2),npsi,dpsi,delta,nx) ; delta = sin(delta)
-  call cub_spline(efit_psi,efit_si(:,3),npsi,dpsi,zeta,nx)
+  call cub_spline(efit_psi,efit_si(:,3),npsi,dpsi,zeta,nx) ; zeta = -zeta
 
   ! New shape coefficients
   call cub_spline(efit_psi,efit_si(:,4),npsi,dpsi,shape_sin3,nx)
