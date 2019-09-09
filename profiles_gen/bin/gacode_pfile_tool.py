@@ -1,3 +1,6 @@
+# file processed by 2to3
+from __future__ import print_function, absolute_import
+from builtins import map, filter, range
 # Usage:
 #
 #   python gacode_pfile_tool.py <datafile>
@@ -11,7 +14,7 @@ import numpy as np
 try:
     infile=sys.argv[1]
 except:
-    print 'Usage: python gacode_pfile_tool.py <datafile>'
+    print('Usage: python gacode_pfile_tool.py <datafile>')
     sys.exit()
 
 
@@ -27,12 +30,12 @@ for line in open(infile,'r').readlines():
         outfile.close()
         title = 'pfile.'+nvar
         outfile = open(title,'w')
-        print 'INFO: (gacode_pfile_tool.py) Extracted '+title+'.'
+        print('INFO: (gacode_pfile_tool.py) Extracted '+title+'.')
         outfile.write(n+'\n')
     elif 'SPECIES' in line:
         outfile.close()
         outfile = open('pfile.species','w')
-        print 'INFO: (gacode_pfile_tool.py) Found ion species header.'
+        print('INFO: (gacode_pfile_tool.py) Found ion species header.')
         n = line[0]
         outfile.write(n+'\n')
     else:

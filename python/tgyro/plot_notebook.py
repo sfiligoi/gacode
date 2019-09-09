@@ -1,3 +1,6 @@
+# file processed by 2to3
+from __future__ import print_function, absolute_import
+from builtins import map, filter, range
 #-------------------------------------------------------------
 # notebook.py
 #
@@ -8,7 +11,6 @@
 import os
 import wx
 import matplotlib
-import string
 import sys
 import re
 import numpy as np
@@ -34,10 +36,10 @@ n = int(nstr)
 
 sim = tgyrodata(simdir,verbose=True)
 
-print 'Number of ions  : ',sim.n_ion
-print 'Number of radii : ',sim.n_r
-print 'Evolution eqns  : ',sim.n_evolve
-print 'Completed iter  : ',sim.n_iterations
+print('Number of ions  : ',sim.n_ion)
+print('Number of radii : ',sim.n_r)
+print('Evolution eqns  : ',sim.n_evolve)
+print('Completed iter  : ',sim.n_iterations)
 
 x   = sim.data['r/a'][0]
 ggb = sim.data['Gamma_GB'][n]
@@ -92,7 +94,7 @@ def plot_input_profiles(ax,tag,scale=0):
       ax.plot(xp,prof.data[tag]*snorm,color=color,alpha=alpha,linewidth=width,
               label=r'$\mathbf{'+label+'}$')
    except:
-      print 'WARNING: input.profiles.extra missing'
+      print('WARNING: input.profiles.extra missing')
       
    if os.path.isfile(fn):
       prof = profiles_genData(fn)
@@ -413,4 +415,4 @@ if __name__ == "__main__":
         plot_select(ax,xlist)
         pfile = 'out.'+xlist+'.'+ext
         plt.savefig(pfile)
-        print 'INFO: (notebook.py) Wrote '+pfile
+        print('INFO: (notebook.py) Wrote '+pfile)

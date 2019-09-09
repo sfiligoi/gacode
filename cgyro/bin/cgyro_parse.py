@@ -1,3 +1,6 @@
+# file processed by 2to3
+from __future__ import print_function, absolute_import
+from builtins import map, filter, range
 from gacodeinput import *
 import sys
 
@@ -14,6 +17,7 @@ x.add('N_TOROIDAL','1')
 x.add('N_FIELD','1')
 x.add('E_MAX','8.0')
 x.add('E_METHOD','1')
+x.add('DELTA_T_METHOD','0')
 x.add('DELTA_T','0.01')
 x.add('MAX_TIME','100.0')
 x.add('PRINT_STEP','100')

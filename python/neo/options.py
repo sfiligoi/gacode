@@ -1,3 +1,6 @@
+# file processed by 2to3
+from __future__ import print_function, absolute_import
+from builtins import map, filter, range
 from pyrats.neo.data import NEOData
 import sys
 import numpy as np
@@ -5,7 +8,7 @@ import numpy as np
 sim1 = NEOData(sys.argv[1])
 keys = []
 
-for k1, v1 in sim1.transport.iteritems():
+for k1, v1 in sim1.transport.items():
     s = 0
     s = np.sum(v1.data)
     if s != 0:
@@ -13,4 +16,4 @@ for k1, v1 in sim1.transport.iteritems():
         keys.append(k1)
 keys.sort()
 for k in keys:
-    print k
+    print(k)

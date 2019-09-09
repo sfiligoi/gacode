@@ -15,9 +15,12 @@ subroutine cgyro_init_arrays
   integer :: i_field
   integer :: l,ll
   complex :: thfac,carg
-  real, dimension(nc,n_species,2) :: res_loc
+  real, dimension(nc,n_species) :: res_loc
   real, dimension(:,:), allocatable :: jloc_c
   real, external :: spectraldiss
+#ifdef XLF
+!!  real, external :: bessel_j0, bessel_j1, bessel_jn
+#endif
 
   !-------------------------------------------------------------------------
   ! Distributed Bessel-function Gyroaverages
@@ -44,10 +47,12 @@ subroutine cgyro_init_arrays
         ! Need this for (Phi, A_parallel) terms in GK and field equations
 
         jloc_c(1,ic) = bessel_j0(arg)
+        !! write(*,*) " bessel_j0 ", arg, bessel_j0(arg)
 
         ! Needed for B_parallel in GK and field equations
 
         jloc_c(2,ic) = 0.5*(jloc_c(1,ic) + bessel_jn(2,arg))/bmag(it)
+        !! write(*,*) " bessel_jn 2 ", arg, bessel_jn(2, arg)
         
      enddo
 
@@ -107,9 +112,9 @@ subroutine cgyro_init_arrays
   !-------------------------------------------------------------------------
   ! Conservative upwind factor
   !
-  allocate(res_norm(nc,n_species,2))
+  allocate(res_norm(nc,n_species))
 
-  res_loc(:,:,:) = 0.0
+  res_loc(:,:) = 0.0
 
 !$omp parallel private(ic,iv_loc,is,ix,ie)
 !$omp do reduction(+:res_loc)
@@ -119,8 +124,7 @@ subroutine cgyro_init_arrays
      ix = ix_v(iv)
      ie = ie_v(iv)
      do ic=1,nc
-        res_loc(ic,is,1) = res_loc(ic,is,1)+w_xi(ix)*w_e(ie)*jvec_c(1,ic,iv_loc)**2 
-        res_loc(ic,is,2) = res_loc(ic,is,2)+w_xi(ix)*w_e(ie)*jvec_c(1,ic,iv_loc)**2*(xi(ix)*vel(ie))**2
+        res_loc(ic,is) = res_loc(ic,is)+w_xi(ix)*w_e(ie)*jvec_c(1,ic,iv_loc)**2 
      enddo
   enddo
 !$omp end do
@@ -141,10 +145,8 @@ subroutine cgyro_init_arrays
      ix = ix_v(iv)
      ie = ie_v(iv)
      do ic=1,nc
-        upfac1(ic,iv_loc,1) = w_e(ie)*w_xi(ix)*abs(xi(ix))*vel(ie)*jvec_c(1,ic,iv_loc)
-        upfac2(ic,iv_loc,1) = jvec_c(1,ic,iv_loc)/res_norm(ic,is,1)
-        upfac1(ic,iv_loc,2) = w_e(ie)*w_xi(ix)*abs(xi(ix))*vel(ie)*jvec_c(1,ic,iv_loc)*xi(ix)*vel(ie)
-        upfac2(ic,iv_loc,2) = jvec_c(1,ic,iv_loc)/res_norm(ic,is,2)*xi(ix)*vel(ie)
+        upfac1(ic,iv_loc) = w_e(ie)*w_xi(ix)*abs(xi(ix))*vel(ie)*jvec_c(1,ic,iv_loc)
+        upfac2(ic,iv_loc) = jvec_c(1,ic,iv_loc)/res_norm(ic,is)
      enddo
   enddo
 

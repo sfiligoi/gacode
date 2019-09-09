@@ -1,6 +1,8 @@
+# file processed by 2to3
+from __future__ import print_function, absolute_import
+from builtins import map, filter, range
 from omfit.classes.omfit_eqdsk import OMFITeqdsk
 import sys
-import string
 import numpy as np
 import gapy
 import matplotlib.pyplot as plt
@@ -41,11 +43,11 @@ else:
                          maxPSI=float(maxPSI))
 
 if uniform > 0:
-   print 'INFO (fluxSurfaceTracer) Resampling around contour'
+   print('INFO (fluxSurfaceTracer) Resampling around contour')
    EQDSK['fluxSurfaces'].resample(uniform)
 
 if filetype == 'ascii':
-   print 'INFO (fluxSurfaceTracer) output = '+outfile
+   print('INFO (fluxSurfaceTracer) output = '+outfile)
    EQDSK['fluxSurfaces']['flux'].deploy(outfile)
 
 r = np.zeros([levels,uniform])

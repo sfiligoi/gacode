@@ -168,13 +168,15 @@ subroutine cgyro_init_manager
      allocate(dvjvec_c(n_field,nc,nv_loc))
      allocate(dvjvec_v(n_field,nc_loc,nv))
      allocate(jxvec_c(n_field,nc,nv_loc))
-     allocate(upfac1(nc,nv_loc,2))
-     allocate(upfac2(nc,nv_loc,2))
+     allocate(upfac1(nc,nv_loc))
+     allocate(upfac2(nc,nv_loc))
      ! Real-space distributed arrays
      allocate(cap_h_v(nc_loc,nv))
      allocate(cap_h_v_prime(nc_loc,nv))
+     allocate(h0_old1(nc,nv_loc))
 
-!$acc enter data create(rhs,h_x,g_x,psi,chi,h0_x,cap_h_c,cap_h_ct,cap_h_v,dvjvec_c,dvjvec_v,jxvec_c)
+
+!$acc enter data create(rhs,h_x,h0_old1,g_x,psi,chi,h0_x,cap_h_c,cap_h_ct,cap_h_v,dvjvec_c,dvjvec_v,jxvec_c)
 
      ! Nonlinear arrays
      if (nonlinear_flag == 1) then
