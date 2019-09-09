@@ -137,13 +137,6 @@ fi
 SIMDIR=$SIMROOT/$LOCDIR
 #=============================================================
 
-# Manage execution on ORNL SUMMIT
-if [[ '$GACODE_PLATFORM' -eq SUMMIT_JC ]] ; then
-    . $GACODE_ROOT/platform/qsub/qsub.$GACODE_PLATFORM
-    cat $SIMDIR/batch.src
-    $GACODE_ROOT/platform/exec/exec.$GACODE_PLATFORM $SIMDIR $nmpi $CODE 0 1 $mpinuma 
-    exit 0
-fi
 
 # Extract CORES_PER_NODE and NUMAS_PER_NODE
 export `grep _NODE $GACODE_ROOT/platform/build/make.inc.$GACODE_PLATFORM`
