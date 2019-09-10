@@ -96,7 +96,9 @@ else:
 
 # Repair functions
 si0 = np.zeros([nf+1,npsi])
+ci0 = np.zeros([nf+1,npsi])
 si0[:,:] = si[:,:]
+ci0[:,:] = ci[:,:]
 
 u = si0[1,:]
 z,i = ising(rnorm,u/u[-1],0.9)
@@ -105,6 +107,18 @@ si[1,i:] = u[-1]*z[i:]
 u = si0[2,:]
 z,i = iring(pnorm,u/u[-1],0.81)
 si[2,i:] = u[-1]*z[i:]
+
+u = ci0[1,:]
+z,i = iring(pnorm,u/u[-1],0.81)
+ci[1,i:] = u[-1]*z[i:]
+
+u = ci0[2,:]
+z,i = iring(pnorm,u/u[-1],0.81)
+ci[2,i:] = u[-1]*z[i:]
+
+u = ci0[3,:]
+z,i = iring(pnorm,u/u[-1],0.81)
+ci[3,i:] = u[-1]*z[i:]
 
 if ix == 0:
    f=open('out.dim','w')
@@ -140,8 +154,9 @@ for i in range(nf+1):
    ax.set_title(r'$'+label[i]+'$')
    ax.grid(which="both",ls=":")
    ax.set_xlim([0.0,1])
-   u = ci[i,:]
-   ax.plot(pnorm,u,'-k',linewidth=1,alpha=1)
+   u = ci[i,:] ; u0 = ci0[i,:]
+   ax.plot(pnorm,u,'-r',linewidth=1,alpha=1)
+   ax.plot(pnorm,u0,'-k',linewidth=1,alpha=1)
 
 label=['\kappa','\delta','\zeta','s_3','s_4']
 for i in range(nf+1):
