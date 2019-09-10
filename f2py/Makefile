@@ -5,6 +5,7 @@
 all:
 	cd geo ; make
 	cd expro ; make
+	make so
 
 pip:
 	cp -r ${GACODE_ROOT}/python/cgyro .

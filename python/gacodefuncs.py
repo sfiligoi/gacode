@@ -386,6 +386,7 @@ def quadratic_max(x,g):
 
 # Function to decode the insane string returned by gacode/f2py
 def gapystr(s):
+   import sys
    if sys.version_info[0] == 2:
       u = []
       a = s.transpose().reshape(-1,10).view('S'+str(10))

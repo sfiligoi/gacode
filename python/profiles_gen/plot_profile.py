@@ -7,8 +7,8 @@
 
 import os
 import wx
-import matplotlib
 import sys
+import matplotlib
 import numpy as np
 matplotlib.use('WXAgg')
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
@@ -39,6 +39,9 @@ def plot_select(ax,tag):
    # normalization
    csa = expro.expro_cs/expro.expro_rmin[-1]
 
+   sname = gapystr(expro.expro_name)
+   stype = gapystr(expro.expro_type)
+
    # Set x-range
    m = len(x)
    if rmax != 'auto':
@@ -56,12 +59,12 @@ def plot_select(ax,tag):
 
    if tag == 'gammae':
       # gamma_e
-      y = expro.expro_gamma_e ; ystr = ''
+      y = expro.expro_gamma_e ; ystr = '\gamma_E'
       ax.plot(x[:m],y[:m]/csa[:m],label=r'$(a/c_s)'+ystr+'$')
 
    if tag == 'gammap':
       # gamma_p
-      y = expro.expro_gamma_p ; ystr = ''
+      y = expro.expro_gamma_p ; ystr = '\gamma_p'
       ax.plot(x[:m],y[:m]/csa[:m],label=r'$(a/c_s)'+ystr+'$')
 
    if tag == 'mach':
@@ -71,49 +74,45 @@ def plot_select(ax,tag):
 
    if tag == 'r':
       # rho
-      y = expro.expro_rho ; ystr = ''
+      y = expro.expro_rho ; ystr = '\rho'
       ax.plot(x[:m],y[:m],label=r'$'+ystr+'$')
       # polflux
-      y = expro.expro_polflux ; ystr = ''
+      y = expro.expro_polflux ; ystr = '\psi'
       ax.plot(x[:m],y[:m]/y[-1],label=r'$'+ystr+'$')
 
    if tag == 'n':
-      sname = gapystrv(expro.expro_name)
-      stype = gapystrv(expro.expro_type)
       # ne
-      y = expro.expro_ne ; ystr = gapystr(expro.expro_ne_str)
+      y = expro.expro_ne ; ystr = 'n_e'
       ax.plot(x[:m],y[:m],label=r'$'+ystr+'$')
       # ni
-      y = expro.expro_ni ; ystr = gapystr(expro.expro_ni_str)
+      y = expro.expro_ni ; ystr = 'n_i'
       for p in range(n):
-         ax.plot(x[:m],y[p,:m],label=r'$'+ystr+sname[p]+'}$')
+         ax.plot(x[:m],y[p,:m],label=r'$'+ystr+sname[p]+'$')
 
    if tag == 'T':
-      sname = gapystrv(expro.expro_name)
-      stype = gapystrv(expro.expro_type)
       # Te
-      y = expro.expro_te ; ystr = gapystr(expro.expro_te_str)
+      y = expro.expro_te ; ystr = 'T_e'
       ax.plot(x[:m],y[:m],label=r'$'+ystr+'$')
       # Ti
-      y = expro.expro_ti ; ystr = gapystr(expro.expro_ti_str)
+      y = expro.expro_ti ; ystr = 'T_i'
       for p in range(n):
          if stype[p] == '[therm]':
-            ax.plot(x[:m],y[p,:m],label=r'$'+ystr+sname[p]+'}$')
+            ax.plot(x[:m],y[p,:m],label=r'$'+ystr+sname[p]+'$')
          
    if tag == 'kappa':
-       y = expro.expro_kappa ; ystr = gapystr(expro.expro_kappa_str)
+       y = expro.expro_kappa ; ystr = '\kappa'
        ax.plot(x[:m],y[:m],label=r'$'+ystr+'$')
        y = expro.expro_skappa ; ystr = 's_\kappa'
        ax.plot(x[:m],y[:m],label=r'$'+ystr+'$')
 
    if tag == 'delta':
-       y = expro.expro_delta ; ystr = gapystr(expro.expro_delta_str)
+       y = expro.expro_delta ; ystr = '\delta'
        ax.plot(x[:m],y[:m],label=r'$'+ystr+'$')
        y = expro.expro_sdelta ; ystr = 's_\delta'
        ax.plot(x[:m],y[:m],label=r'$'+ystr+'$')
 
    if tag == 'q':
-       y = expro.expro_q ; ystr = gapystr(expro.expro_q_str)
+       y = expro.expro_q ; ystr = 'q'
        if y[0] < 0.0:
           y = -y
           ystr = '-'+ystr
@@ -133,6 +132,7 @@ class TabPanel(wx.Panel):
         self.figure = plt.Figure()
         self.figure.subplots_adjust(left=0.07,right=0.95)
         self.ax = self.figure.add_subplot(111)
+        self.ax.grid(which="both",ls=":")
         self.canvas = FigureCanvas(self, -1, self.figure)
         self.sizer = wx.BoxSizer(wx.VERTICAL)
         self.sizer.Add(self.canvas, 1, wx.LEFT | wx.TOP | wx.GROW)
