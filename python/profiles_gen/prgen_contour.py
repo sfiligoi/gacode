@@ -108,6 +108,7 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
     efitpsi1 = geqdsk['SIBRY']
     efitp    = geqdsk['PRES']
     efitq    = geqdsk['QPSI']
+    efitf    = geqdsk['FPOL']
     slfR0    = geqdsk['RMAXIS']
     slfZ0    = geqdsk['ZMAXIS']
     slfrlim  = geqdsk['RLIM']
@@ -260,9 +261,9 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
         print('INFO: (prgen_contour) Contour levels = {:d} | n_arc = {:d} | nrz = {:d}'.format(levels,narc,nrz))
 
     # absolute psi levels to interpolate (psinorm is normalized)
-    levels_psi = np.linspace(0,psinorm,levels)*(psi1-psi0)+psi0
+    out_psi = np.linspace(0,psinorm,levels)*(psi1-psi0)+psi0
 
-    CS = contourPaths(slfR,slfZ,slfPSI,levels_psi)
+    CS = contourPaths(slfR,slfZ,slfPSI,out_psi)
 
     RI = np.zeros([narc,levels])
     ZI = np.zeros([narc,levels])
@@ -286,9 +287,11 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
             cs=interpolate.CubicSpline(t0,path.vertices[:,0],bc_type='periodic') ; RI[:,k]=cs(t) 
             cs=interpolate.CubicSpline(t0,path.vertices[:,1],bc_type='periodic') ; ZI[:,k]=cs(t)
 
-    efitpsi = np.linspace(levels_psi[0],levels_psi[-1],len(efitp))
-    cs = interpolate.interp1d(efitpsi,efitp,kind='quadratic') ; levels_p = cs(levels_psi)
-    cs = interpolate.interp1d(efitpsi,efitq,kind='quadratic') ; levels_q = cs(levels_psi)
+    efitpsi = np.linspace(out_psi[0],out_psi[-1],len(efitp))
+    cs = interpolate.interp1d(efitpsi,efitp,kind='quadratic') ; out_p = cs(out_psi)
+    cs = interpolate.interp1d(efitpsi,efitq,kind='quadratic') ; out_q = cs(out_psi)
+    cs = interpolate.interp1d(efitpsi,efitf,kind='quadratic') ; out_f = cs(out_psi)
 
-    return RI,ZI,levels_psi,levels_q,levels_p
+    
+    return RI,ZI,out_psi,out_q,out_p,out_f
 

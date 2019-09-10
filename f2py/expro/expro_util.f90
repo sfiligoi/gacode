@@ -57,7 +57,7 @@ subroutine expro_compute_derived
   !
   allocate(torflux(expro_n_exp))
   allocate(temp(expro_n_exp))
-  
+ 
   torflux(:) = expro_torfluxa*expro_rho(:)**2
 
   ! b_unit
@@ -251,9 +251,7 @@ subroutine expro_compute_derived
 
      expro_thetascale(i) = geo_thetascale
 
-     ! Plasma current [A] I = (1/mu0) Int[Bp dl] 
-     expro_ip(i) = 7.958e5*(geo_bl*r_min*expro_bunit(i))
-
+     expro_fpol(i) = geo_f*expro_bunit(i)*r_min
   enddo
 
   !--------------------------------------------------------------
@@ -270,12 +268,14 @@ subroutine expro_compute_derived
 
   call bound_extrap(fa,fb,expro_bt0,expro_rmin,expro_n_exp)
   expro_bt0(1) = fa
+
+  call bound_extrap(fa,fb,expro_fpol,expro_rmin,expro_n_exp)
+  expro_fpol(1) = fa
   !
   ! Both V and dV/dr are zero on axis.
   !
   expro_vol(1)  = 0.0
   expro_volp(1) = 0.0  
-  expro_ip(1)   = 0.0
   expro_thetascale(1) = expro_thetascale(2)
 
   !--------------------------------------------------------------

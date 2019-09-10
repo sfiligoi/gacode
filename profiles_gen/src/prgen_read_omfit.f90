@@ -65,7 +65,6 @@ subroutine prgen_read_omfit
      dpsi = dpsi*dpsi_efit
      call cub_spline(efit_psi,efit_q,npsi,dpsi,q,nx)
      call prgen_get_chi(nx,q,dpsi,rho,torfluxa)
-     print *,dpsi_efit
   endif
 
   call cub_spline(efit_rho,efit_rmin,npsi,rho,rmin,nx)

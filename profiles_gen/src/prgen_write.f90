@@ -11,6 +11,7 @@ subroutine prgen_write
   use expro
 
   implicit none
+  integer :: i
 
   !-------------------------------------------------------------------------------------
   ! Map (common) data from EFIT analysis 

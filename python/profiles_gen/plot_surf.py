@@ -43,7 +43,7 @@ if surf == 'msurf' or surf == 'surf':
       r    = expro.expro_rmin[i]
       k    = expro.expro_kappa[i]
       s1   = np.arcsin(expro.expro_delta[i])
-      s2   = expro.expro_zeta[i]
+      s2   = -expro.expro_zeta[i]
       s3   = expro.expro_shape_sin3[i]
       c0   = expro.expro_shape_cos0[i]
       c1   = expro.expro_shape_cos1[i]

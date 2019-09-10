@@ -21,9 +21,10 @@ else:
 efit = prgen_geqdsk(gfile)
 n_arc = 512
 
-ri,zi,psi,q,p = prgen_contour(efit,nrz=nrz,levels=npsi,psinorm=0.99999,narc=n_arc,quiet=False)
+ri,zi,psi,q,p,fpol = prgen_contour(efit,nrz=nrz,levels=npsi,psinorm=0.999,narc=n_arc,quiet=False)
+#print(fpol)
 
-pnorm = (psi[:]-psi[0])/(psi[-1]-psi[0]) 
+pnorm = np.sqrt((psi[:]-psi[0])/(psi[-1]-psi[0]))
 
 # ci -> cosine terms
 # si -> sine terms
@@ -78,8 +79,9 @@ for i in range(nf+1):
    ax.set_xlabel(r'$\psi$')
    ax.set_title(r'$'+label[i]+'$')
    ax.grid(which="both",ls=":")
-   ax.set_xlim([0,1])
-   ax.plot(pnorm,ci[i,:],'-m',linewidth=1,alpha=1)
+   ax.set_xlim([0.9,1])
+#   ax.plot(pnorm,ci[i,:],'-m',linewidth=1,alpha=1)
+   ax.plot(pnorm,np.gradient(ci[i,:],pnorm),'-m',linewidth=1,alpha=1)
 
 label=['\kappa','\delta','\zeta','s_3','s_4']
 for i in range(nf+1):
@@ -87,11 +89,13 @@ for i in range(nf+1):
    ax.set_xlabel(r'$\psi$')
    ax.set_title(r'$'+label[i]+'$')
    ax.grid(which="both",ls=":")
-   ax.set_xlim([0,1])
+   ax.set_xlim([0.9,1])
    if i > 0:
-      ax.plot(pnorm,si[i,:],'-m',linewidth=1,alpha=1)
+#      ax.plot(pnorm,si[i,:],'-m',linewidth=1,alpha=1)
+      ax.plot(pnorm,np.gradient(si[i,:],pnorm),'-m',linewidth=1,alpha=1)
    else:
-      ax.plot(pnorm,xi[1,:],'-m',linewidth=1,alpha=1)
+#      ax.plot(pnorm,xi[1,:],'-m',linewidth=1,alpha=1)
+      ax.plot(pnorm,np.gradient(xi[1,:],pnorm),'-m',linewidth=1,alpha=1)
       
       
 plt.tight_layout()

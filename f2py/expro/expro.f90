@@ -107,7 +107,7 @@ module expro
        expro_ave_grad_r,&
        expro_bp0,&
        expro_bt0,&
-       expro_ip,&
+       expro_fpol,&
        expro_mach,&
        expro_thetascale,&
        expro_flow_beam,&
@@ -256,7 +256,7 @@ contains
        allocate(expro_ave_grad_r(nexp))   ; expro_ave_grad_r = 0.0
        allocate(expro_bp0(nexp))          ; expro_bp0 = 0.0
        allocate(expro_bt0(nexp))          ; expro_bt0 = 0.0
-       allocate(expro_ip(nexp))           ; expro_ip = 0.0
+       allocate(expro_fpol(nexp))         ; expro_fpol = 0.0
        allocate(expro_gamma_e(nexp))      ; expro_gamma_e = 0.0
        allocate(expro_gamma_p(nexp))      ; expro_gamma_p = 0.0
        allocate(expro_mach(nexp))         ; expro_mach = 0.0
@@ -362,7 +362,7 @@ contains
        deallocate(expro_ave_grad_r)   
        deallocate(expro_bp0)          
        deallocate(expro_bt0)          
-       deallocate(expro_ip)           
+       deallocate(expro_fpol)           
        deallocate(expro_gamma_e)      
        deallocate(expro_gamma_p)      
        deallocate(expro_mach)   
