@@ -8,6 +8,8 @@ from prgen_geqdsk import *
 from prgen_contour import *
 from prgen_shape import *
 
+repair = False
+
 def extrap(x,u):
    m = (u[5]-u[4])/(x[5]-x[4])
    b = u[5]-m*x[5]
@@ -50,12 +52,13 @@ def ising(x,u,xm):
 
 if len(sys.argv) > 1:
    gfile = sys.argv[1]
-   npsi  = int(sys.argv[2])
-   nrz   = int(sys.argv[3])
+   nrz   = int(sys.argv[2])
+   npsi  = int(sys.argv[3])
    ix    = int(sys.argv[4])
    nf    = int(sys.argv[5])
+   
 else:
-   print('Usage: python prgen_shapeprofile.py <gfile> <npsi> <nrz> <ix> <nf>')
+   print('Usage: python prgen_shapeprofile.py <gfile> <npsi> <ix> <nrz> <nf>')
    sys.exit()
 
 efit = prgen_geqdsk(gfile)
@@ -66,8 +69,8 @@ ri,zi,psi,q,p,fpol = prgen_contour(efit,nrz=nrz,levels=npsi,psinorm=0.999,narc=n
 pnorm = ((psi[:]-psi[0])/(psi[-1]-psi[0]))
 rnorm = np.sqrt(pnorm)
 
-# ci -> cosine terms
-# si -> sine terms
+# ci -> cos terms
+# si -> sin terms
 # xi -> rmin,rmaj,kappa,zmaj
 
 if ix < 1:
@@ -84,7 +87,7 @@ else:
    r=ri[:,ix] ; z=zi[:,ix]
    cr,sr,xr = prgen_shape(r,z,n_arc,nf,True)
    sys.exit()
-
+   
 # Repair functions near origin
 
 xi[0,:] = zero(rnorm,xi[0,:]) # rmin
@@ -102,26 +105,21 @@ ci[2,:] = zero(rnorm,ci[2,:]) # c2
 ci[3,:] = zero(rnorm,ci[3,:]) # c3
 
 # Repair near separatrix
-si0 = np.zeros([nf+1,npsi])
-ci0 = np.zeros([nf+1,npsi])
-si0[:,:] = si[:,:]
-ci0[:,:] = ci[:,:]
+si0 = np.zeros([nf+1,npsi]) ; si0[:,:] = si[:,:]
+ci0 = np.zeros([nf+1,npsi]) ; ci0[:,:] = ci[:,:]
 
-u = si0[1,:]
-z,i = ising(rnorm,u/u[-1],0.9)
-si[1,i:] = u[-1]*z[i:]
+if repair:
+   u = si0[1,:] ; z,i = ising(rnorm,u/u[-1],0.9)
+   si[1,i:] = u[-1]*z[i:]
 
-u = si0[2,:]
-z,i = iring(pnorm,u/u[-1],0.81)
-si[2,i:] = u[-1]*z[i:]
+   u = si0[2,:] ; z,i = iring(pnorm,u/u[-1],0.81)
+   si[2,i:] = u[-1]*z[i:]
 
-u = ci0[1,:]
-z,i = iring(pnorm,u/u[-1],0.81)
-ci[1,i:] = u[-1]*z[i:]
+   u = ci0[1,:] ; z,i = iring(pnorm,u/u[-1],0.81)
+   ci[1,i:] = u[-1]*z[i:]
 
-u = ci0[2,:]
-z,i = iring(pnorm,u/u[-1],0.81)
-ci[2,i:] = u[-1]*z[i:]
+   u = ci0[2,:] ; z,i = iring(pnorm,u/u[-1],0.81)
+   ci[2,i:] = u[-1]*z[i:]
 
 if ix == 0:
    f=open('out.dim','w')
@@ -147,7 +145,6 @@ if ix == 0:
 rc('text',usetex=True)
 rc('font',size=18)
 
-   
 fig = plt.figure(figsize=(14,12))
 
 label=['r','R','\kappa','Z']
@@ -181,7 +178,6 @@ for i in range(4):
       u = si[i,:] ; u0 = si0[i,:]
       ax.plot(pnorm,u,'-r',linewidth=1,alpha=1)
       ax.plot(pnorm,u0,'-k',linewidth=1,alpha=1)
-      
-      
+            
 plt.tight_layout()
 plt.show()
