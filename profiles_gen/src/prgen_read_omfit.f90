@@ -131,7 +131,7 @@ subroutine prgen_read_omfit
      write(1,'(a)') '#'
      write(1,'(a)') '# NOTE: nx=EXPRO_n_exp is defined in input.gacode'
      write(1,*) nfourier
-     do j=1,npsi
+     do j=1,nx
         do ip=0,nfourier
            do i=1,4
               write(1,'(1pe20.13)') g3rho(j,ip,i)
