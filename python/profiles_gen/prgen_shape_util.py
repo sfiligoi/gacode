@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import rc
 
+from prgen_fshape import *
+
 # Function to compute Fourier integrals
 # f,w are periodic
 def moment(n,f,w,d):
