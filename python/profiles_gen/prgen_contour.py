@@ -293,5 +293,15 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
     cs = interpolate.interp1d(efitpsi,efitq,kind='quadratic') ; out_q = cs(out_psi)
     cs = interpolate.interp1d(efitpsi,efitf,kind='quadratic') ; out_f = cs(out_psi)
 
+    # Recalculate q
+    loopint = np.zeros([levels])
+    for k in range(levels):
+       for i in range(narc-1):
+          loopint[k] = loopint[k]+(RI[i+1,k]-RI[i,k])*(ZI[i+1,k]+ZI[i,k])/(RI[i+1,k]+RI[i,k])-(ZI[i+1,k]-ZI[i,k])
+                    
+    loopint = loopint/(4*np.pi)
+    new_q = 2*out_f*np.gradient(loopint,out_psi)
+
+    print(new_q)
     return RI,ZI,out_psi,out_q,out_p,out_f
 

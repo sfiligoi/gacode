@@ -102,7 +102,7 @@ def oldfourier(ri,zi,nf,rnorm):
       azi[:,i+1] = az[:]
       bzi[:,i+1] = bz[:]
 
-   
+   # Repair origin
    ari[0,:] = extrap(rnorm,ari[0,:]) 
    azi[0,:] = extrap(rnorm,azi[0,:]) 
    for i in range(1,nf+1):
