@@ -198,7 +198,7 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
     #-----------------------------------------------------------------
     # Find separatrix
     #-----------------------------------------------------------------
-    accuracy = 7
+    accuracy = 9
         
     # separatrix is found by looking for the largest closed path enclosing the magnetic axis
 
@@ -275,8 +275,9 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
         else:
             # all others
             path=item1[-1]
-            r=path.vertices[:,0]
-            z=path.vertices[:,1]
+            # Reverse order (compared to original OMFIT order)
+            r=path.vertices[::-1,0]
+            z=path.vertices[::-1,1]
             r[0]=r[-1]=(r[0]+r[-1])*0.5
             z[0]=z[-1]=(z[0]+z[-1])*0.5
             if any(np.isnan(r*z)):
@@ -284,14 +285,13 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
             # Cubic interpolation from fine t0-mesh to coarse t-mesh
             t0=np.linspace(0,1,len(r))
             t =np.linspace(0,1,narc)
-            cs=interpolate.CubicSpline(t0,path.vertices[:,0],bc_type='periodic') ; RI[:,k]=cs(t) 
-            cs=interpolate.CubicSpline(t0,path.vertices[:,1],bc_type='periodic') ; ZI[:,k]=cs(t)
+            cs=interpolate.CubicSpline(t0,r,bc_type='periodic') ; RI[:,k]=cs(t) 
+            cs=interpolate.CubicSpline(t0,z,bc_type='periodic') ; ZI[:,k]=cs(t)
 
     efitpsi = np.linspace(out_psi[0],out_psi[-1],len(efitp))
     cs = interpolate.interp1d(efitpsi,efitp,kind='quadratic') ; out_p = cs(out_psi)
     cs = interpolate.interp1d(efitpsi,efitq,kind='quadratic') ; out_q = cs(out_psi)
     cs = interpolate.interp1d(efitpsi,efitf,kind='quadratic') ; out_f = cs(out_psi)
 
-    
     return RI,ZI,out_psi,out_q,out_p,out_f
 

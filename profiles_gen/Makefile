@@ -2,7 +2,6 @@ include ${GACODE_ROOT}/platform/build/make.inc.${GACODE_PLATFORM}
 
 all:
 	cd ${GACODE_ROOT}/f2py ; make
-	cd ${GACODE_ROOT}/shared/fluxfit ; make
 	cd locpargen ; make
 	cd src ; make
 

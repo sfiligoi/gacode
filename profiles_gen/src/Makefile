@@ -31,7 +31,6 @@ OBJECTS = prgen_globals.o \
 	  prgen_map_inputgacode.o \
           prgen_read_cer.o \
           prgen_read_omfit.o \
-          prgen_read_gato.o \
           prgen_read_iterdb.o \
           prgen_read_iterdb_nc.o \
           prgen_read_null.o \

@@ -160,9 +160,6 @@ program prgen
   case (0)
      ! Use geometry data contained in profile data 
      print '(a)','INFO: (prgen) Using original geometry data.'
-  case (-1)
-     ! Use GATO-EFIT mapper
-     call prgen_read_gato
   case (1)
      ! Use OMFIT-EFIT mapper
      call prgen_read_omfit

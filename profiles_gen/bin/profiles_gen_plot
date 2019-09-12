@@ -96,7 +96,7 @@ PYROOT=$GACODE_ROOT/python/profiles_gen
 #==============================================================================
 # Plotting control
 
-if [ $PLOT == null ] ; then
+if [ $PLOT = null ] ; then
    exit 0
 elif [[ $PLOT == *surf ]] ; then 
    python $PYROOT/plot_surf.py $PLOT $N $EXT

@@ -86,8 +86,9 @@ subroutine expro_compute_derived
   !             d(delta)
   ! s_delta = r -------- 
   !                dr
+
   call bound_deriv(temp,expro_delta,expro_rmin,expro_n_exp)
-  expro_sdelta(:) = expro_rmin(:)*temp(:) 
+  expro_sdelta(:) = expro_rmin(:)*temp(:)
 
   !            d(zeta)
   ! s_zeta = r -------- 

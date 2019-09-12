@@ -8,7 +8,7 @@ from prgen_geqdsk import *
 from prgen_contour import *
 from prgen_shape import *
 
-repair = False
+repair = True
 
 def extrap(x,u):
    m = (u[5]-u[4])/(x[5]-x[4])
@@ -31,11 +31,12 @@ def iring(x,u,xm):
    i = np.argmin(np.abs(x-xm))
    x0 = x[i]
    y0 = u[i]
-   d = 0.0
+   d = 0.01
    for j in range(8):
       d = y0*(1.0+d-x0)
 
    z = d/(1+d-x)
+   print('INFO: (prgen_shapeprofile) Pole fit with d={:.4f}'.format(d))
    return z,i
 
 def ising(x,u,xm):
@@ -43,11 +44,12 @@ def ising(x,u,xm):
    x0 = x[i]
    y0 = u[i]
    r  = 1/y0
-   d = 0.0
+   d = 0.01
    for j in range(8):
       d = (1.0+d-x0)**r
-      
+
    z = np.log(1+d-x)/np.log(d)
+   print('INFO: (prgen_shapeprofile) Log fit with d={:.4f}'.format(d))
    return z,i
 
 if len(sys.argv) > 1:
@@ -60,7 +62,7 @@ else:
    print('Usage: python prgen_shapeprofile.py <gfile> <nrz> <npsi> <ix> <nfourier>')
    sys.exit()
 
-efit = prgen_geqdsk(gfile)
+efit  = prgen_geqdsk(gfile)
 n_arc = 512
 nf = 3
 
@@ -110,19 +112,26 @@ ci[3,:] = zero(rnorm,ci[3,:]) # c3
 # Repair near separatrix
 si0 = np.zeros([nf+1,npsi]) ; si0[:,:] = si[:,:]
 ci0 = np.zeros([nf+1,npsi]) ; ci0[:,:] = ci[:,:]
+xi0 = np.zeros([4,npsi])    ; xi0[:,:] = xi[:,:]
 
 if repair:
-   u = si0[1,:] ; z,i = ising(rnorm,u/u[-1],0.9)
+   u = si0[1,:] ; z,i = ising(rnorm,u/u[-1],0.92)
    si[1,i:] = u[-1]*z[i:]
 
-   u = si0[2,:] ; z,i = iring(pnorm,u/u[-1],0.81)
+   u = si0[2,:] ; z,i = iring(pnorm,u/u[-1],0.84)
    si[2,i:] = u[-1]*z[i:]
 
-   u = ci0[1,:] ; z,i = iring(pnorm,u/u[-1],0.81)
+   u = ci0[0,:] ; z,i = iring(pnorm,(u-u[0])/(u[-1]-u[0]),0.84)
+   ci[0,i:] = (u[-1]-u[0])*z[i:]+u[0]
+
+   u = ci0[1,:] ; z,i = iring(pnorm,u/u[-1],0.84)
    ci[1,i:] = u[-1]*z[i:]
 
-   u = ci0[2,:] ; z,i = iring(pnorm,u/u[-1],0.81)
+   u = ci0[2,:] ; z,i = iring(pnorm,u/u[-1],0.84)
    ci[2,i:] = u[-1]*z[i:]
+
+   u = xi0[2,:] ; z,i = ising(pnorm,(u-u[0])/(u[-1]-u[0]),0.84)
+   xi[2,i:] = (u[-1]-u[0])*z[i:]+u[0]
 
 if ix == 0:
    f=open('out.dim','w')
@@ -156,8 +165,10 @@ for i in range(4):
    ax.set_xlabel(r'$\psi^{1/2}$')
    ax.set_title(r'$'+label[i]+'$')
    ax.grid(which="both",ls=":")
-   ax.set_xlim([0.0,1])
-   ax.plot(rnorm,xi[i,:],'-k',linewidth=1,alpha=1)
+   ax.set_xlim([0,1])
+   u = xi[i,:] ; u0 = xi0[i,:]
+   ax.plot(pnorm,u,'-r',linewidth=1,alpha=1)
+   ax.plot(pnorm,u0,'-k',linewidth=1,alpha=1)
 
 label=['c_0','c_1','c_2','c_3']
 for i in range(4):
@@ -165,7 +176,7 @@ for i in range(4):
    ax.set_xlabel(r'$\psi$')
    ax.set_title(r'$'+label[i]+'$')
    ax.grid(which="both",ls=":")
-   ax.set_xlim([0.0,1])
+   ax.set_xlim([0,1])
    u = ci[i,:] ; u0 = ci0[i,:]
    ax.plot(pnorm,u,'-r',linewidth=1,alpha=1)
    ax.plot(pnorm,u0,'-k',linewidth=1,alpha=1)
@@ -176,7 +187,7 @@ for i in range(4):
    ax.set_xlabel(r'$\psi$')
    ax.set_title(r'$'+label[i]+'$')
    ax.grid(which="both",ls=":")
-   ax.set_xlim([0.0,1.0])
+   ax.set_xlim([0,1])
    if i > 0:
       u = si[i,:] ; u0 = si0[i,:]
       ax.plot(pnorm,u,'-r',linewidth=1,alpha=1)

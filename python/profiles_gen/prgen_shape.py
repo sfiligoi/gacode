@@ -31,24 +31,24 @@ def prgen_shape(r,z,n_arc,nf,pflag):
       # Reverse order (may be needed)
       r = np.flip(r,0) ; z = np.flip(z,0)
 
-      # Compute generalized angles
-      eps = 1.0-1e-6
-      for i in range(n_arc):
-         # (ur,uz): principle angles (discontinuous)
-         uz[i] = np.arcsin(eps*(z[i]-zmaj)/zmin)
-         ur[i] = np.arccos(eps*(r[i]-rmaj)/rmin)
-         # (vr,vz): proper (continuous) branches
-         if i > 4:
-            if uz[i] > uz[i-1] and ur[i] > ur[i-1]:
-               vz[i] = uz[i] ; vr[i] = ur[i]
-            elif uz[i] < uz[i-1] and ur[i] > ur[i-1]:
-               vz[i] = np.pi-uz[i] ; vr[i] = ur[i]
-            elif uz[i] < uz[i-1] and ur[i] < ur[i-1]:
-               vz[i] = np.pi-uz[i] ; vr[i] = 2*np.pi-ur[i]
-            elif uz[i] > uz[i-1] and ur[i] < ur[i-1]:
-               vz[i] = 2*np.pi+uz[i] ; vr[i] = 2*np.pi-ur[i]
-         else:
+   # Compute generalized angles
+   eps = 1.0-1e-6
+   for i in range(n_arc):
+      # (ur,uz): principle angles (discontinuous)
+      uz[i] = np.arcsin(eps*(z[i]-zmaj)/zmin)
+      ur[i] = np.arccos(eps*(r[i]-rmaj)/rmin)
+      # (vr,vz): proper (continuous) branches
+      if i > 4:
+         if uz[i] > uz[i-1] and ur[i] > ur[i-1]:
             vz[i] = uz[i] ; vr[i] = ur[i]
+         elif uz[i] < uz[i-1] and ur[i] > ur[i-1]:
+            vz[i] = np.pi-uz[i] ; vr[i] = ur[i]
+         elif uz[i] < uz[i-1] and ur[i] < ur[i-1]:
+            vz[i] = np.pi-uz[i] ; vr[i] = 2*np.pi-ur[i]
+         elif uz[i] > uz[i-1] and ur[i] < ur[i-1]:
+            vz[i] = 2*np.pi+uz[i] ; vr[i] = 2*np.pi-ur[i]
+      else:
+         vz[i] = uz[i] ; vr[i] = ur[i]
 
    # Define vr as deviation from vz
    vr = vr-vz ; vr[-1] = vr[0]

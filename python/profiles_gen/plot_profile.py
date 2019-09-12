@@ -27,8 +27,16 @@ rmax = sys.argv[3]
 ext = sys.argv[4]
 loc = int(sys.argv[5])
 
-def plot_select(ax,tag):
+m1 = 0 ; m2 = 0
 
+def plotit(ax,x,y,ystr):
+   global m1,m2
+   ax.plot(x[m1:m2],y[m1:m2],label=r'$'+ystr+'$')
+   return
+
+def plot_select(ax,tag):
+   global m1,m2
+   
    # Helper routine to plot data (tag) from input.gacode
 
    expro.expro_read('input.gacode')
@@ -43,61 +51,52 @@ def plot_select(ax,tag):
    stype = gapystr(expro.expro_type)
 
    # Set x-range
-   m = len(x)
+   m1 = 0 ; m2 = len(x)
    if rmax != 'auto':
-      ax.set_xlim([0,float(rmax)])
-      for m in range(len(x)):
-         if x[m] > float(rmax):
-            break
+      m2 = np.argmin(np.abs(x-np.float(rmax)))
+   if rmin != 'auto':
+      m1 = np.argmin(np.abs(x-np.float(rmin)))
+      
+   ax.set_xlim([x[m1],x[m2-1]])
 
    ax.set_xlabel(r'$r/a$')
-      
+
+   m=m2
    if tag == 'bunit':
       # bunit
-      y = expro.expro_bunit ; ystr = r'B_\mathrm{unit}'
-      ax.plot(x[:m],y[:m],label=r'$'+ystr+'$')
+      y = expro.expro_bunit ; ystr = 'B_\mathrm{unit}' ; plotit(ax,x,y,ystr)
 
    if tag == 'gammae':
       # gamma_e
-      y = expro.expro_gamma_e ; ystr = '\gamma_E'
-      ax.plot(x[:m],y[:m]/csa[:m],label=r'$(a/c_s)'+ystr+'$')
+      y = expro.expro_gamma_e ; ystr = '(a/c_s) \gamma_E' ; plotit(ax,x,y/csa,ystr)
 
    if tag == 'gammap':
       # gamma_p
-      y = expro.expro_gamma_p ; ystr = '\gamma_p'
-      ax.plot(x[:m],y[:m]/csa[:m],label=r'$(a/c_s)'+ystr+'$')
+      y = expro.expro_gamma_p ; ystr = '(a/c_s) \gamma_p' ; plotit(ax,x,y/csa,ystr) 
 
    if tag == 'mach':
       # mach
-      y = expro.expro_mach ; ystr = r'M'
-      ax.plot(x[:m],y[:m],label=r'$'+ystr+'$')
+      y = expro.expro_mach ; ystr = r'M' ; plotit(ax,x,y,ystr)
 
    if tag == 'r':
       # rho
-      y = expro.expro_rho ; ystr = '\rho'
-      ax.plot(x[:m],y[:m],label=r'$'+ystr+'$')
+      y = expro.expro_rho ; ystr = '\\rho' ; plotit(ax,x,y,ystr)
       # polflux
-      y = expro.expro_polflux ; ystr = '\psi'
-      ax.plot(x[:m],y[:m]/y[-1],label=r'$'+ystr+'$')
+      y = expro.expro_polflux ; ystr = '\psi' ; plotit(ax,x,y/y[-1],ystr)
 
    if tag == 'n':
       # ne
-      y = expro.expro_ne ; ystr = 'n_e'
-      ax.plot(x[:m],y[:m],label=r'$'+ystr+'$')
+      y = expro.expro_ne ; ystr = 'n_e' ; plotit(ax,x,y,ystr)
       # ni
-      y = expro.expro_ni ; ystr = 'n_i'
       for p in range(n):
-         ax.plot(x[:m],y[p,:m],label=r'$'+ystr+sname[p]+'$')
+         y = expro.expro_ni[p,:] ; ystr = 'n_i ['+sname[p]+']' ; plotit(ax,x,y,ystr)
 
    if tag == 'T':
       # Te
-      y = expro.expro_te ; ystr = 'T_e'
-      ax.plot(x[:m],y[:m],label=r'$'+ystr+'$')
+      y = expro.expro_te ; ystr = 'T_e' ; plotit(ax,x,y,ystr)
       # Ti
-      y = expro.expro_ti ; ystr = 'T_i'
       for p in range(n):
-         if stype[p] == '[therm]':
-            ax.plot(x[:m],y[p,:m],label=r'$'+ystr+sname[p]+'$')
+         y = expro.expro_ti[p,:] ; ystr = 'T_i ['+sname[p]+']' ; plotit(ax,x,y,ystr)
          
    if tag == 'kappa':
        y = expro.expro_kappa ; ystr = '\kappa'
@@ -106,10 +105,8 @@ def plot_select(ax,tag):
        ax.plot(x[:m],y[:m],label=r'$'+ystr+'$')
 
    if tag == 'delta':
-       y = expro.expro_delta ; ystr = '\delta'
-       ax.plot(x[:m],y[:m],label=r'$'+ystr+'$')
-       y = expro.expro_sdelta ; ystr = 's_\delta'
-       ax.plot(x[:m],y[:m],label=r'$'+ystr+'$')
+       y = expro.expro_delta ; ystr = '\delta' ; plotit(ax,x,y,ystr)
+       y = expro.expro_sdelta ; ystr = 's_\delta' ; plotit(ax,x,y,ystr)
 
    if tag == 'q':
        y = expro.expro_q ; ystr = 'q'

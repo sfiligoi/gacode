@@ -239,8 +239,8 @@ subroutine expro_locsim_profiles(&
   rmin_exp(:) = expro_rmin(:)
 
   if (udsymmetry_flag == 1) then
-     expro_zmag(:) = 0.0   
-     expro_dzmag(:) = 0.0
+     expro_zmag(:) = 0d0   
+     expro_dzmag(:) = 0d0
   endif
 
   ! Minor radius, a, in meters:
@@ -257,7 +257,7 @@ subroutine expro_locsim_profiles(&
   sdlnndr_exp(n_species_exp,:) = expro_sdlnnedr(:)*a_meters
 
   mass_loc(n_species_exp) = expro_masse
-  z_loc(n_species_exp) = -1.0
+  z_loc(n_species_exp) = -1d0
  
   ! Pack ions from the bottom
   do i_ion=1,n_species_exp-1
@@ -325,7 +325,7 @@ subroutine expro_locsim_profiles(&
   psi_a_loc = expro_polflux(expro_n_exp)
 
   
-  beta_star_loc = 0.0  
+  beta_star_loc = 0d0  
   do i=1,n_species_exp
      ! Note: mapping is only done for n_species (not n_species_exp)
      call cub_spline1(rmin_exp,dens_exp(i,:),expro_n_exp,rmin,dens_loc(i))
@@ -426,17 +426,17 @@ subroutine cub_spline(x,y,n,xi,yi,ni)
      zl(i) = h(i)
      zu(i) = h(i)
   enddo
-  zl(n-1) = 0.0
-  zu(1)   = 0.0
+  zl(n-1) = 0d0
+  zu(1)   = 0d0
 
-  z(1) = 1.0
-  c(1) = 0.0
+  z(1) = 1d0
+  c(1) = 0d0
   do i=2,n-1
-     z(i) = 2.0*(h(i-1)+h(i))
-     c(i) = 3.0*((y(i+1)-y(i))/h(i)-(y(i)-y(i-1))/h(i-1))
+     z(i) = 2d0*(h(i-1)+h(i))
+     c(i) = 3d0*((y(i+1)-y(i))/h(i)-(y(i)-y(i-1))/h(i-1))
   enddo
-  z(n) = 1.0
-  c(n) = 0.0
+  z(n) = 1d0
+  c(n) = 0d0
   !-------------------------------------------------------------
 
   !-------------------------------------------------------------
@@ -449,15 +449,13 @@ subroutine cub_spline(x,y,n,xi,yi,ni)
   !-------------------------------------------------------------
   ! Find remaining polynomial coefficients:
   !
-  c(n) = 0.0
+  c(n) = 0d0
   do i=1,n-1
-     b(i) = (y(i+1)-y(i))/h(i)-h(i)*(2.0*c(i)+c(i+1))/3.0
-     d(i) = (c(i+1)-c(i))/(3.0*h(i))
+     b(i) = (y(i+1)-y(i))/h(i)-h(i)*(2d0*c(i)+c(i+1))/3d0
+     d(i) = (c(i+1)-c(i))/(3d0*h(i))
   enddo
   !-------------------------------------------------------------
 
-  !print *,c(:)
-  
   !-------------------------------------------------------------
   ! Using known polynomial coefficients, perform interpolation.
   !
@@ -523,17 +521,17 @@ subroutine cub_spline1(x,y,n,xi,yi)
      zl(i) = h(i)
      zu(i) = h(i)
   enddo
-  zl(n-1) = 0.0
-  zu(1)   = 0.0
+  zl(n-1) = 0d0
+  zu(1)   = 0d0
 
-  z(1) = 1.0
-  c(1) = 0.0
+  z(1) = 1d0
+  c(1) = 0d0
   do i=2,n-1
-     z(i) = 2.0*(h(i-1)+h(i))
-     c(i) = 3.0*((y(i+1)-y(i))/h(i)-(y(i)-y(i-1))/h(i-1))
+     z(i) = 2d0*(h(i-1)+h(i))
+     c(i) = 3d0*((y(i+1)-y(i))/h(i)-(y(i)-y(i-1))/h(i-1))
   enddo
-  z(n) = 1.0
-  c(n) = 0.0
+  z(n) = 1d0
+  c(n) = 0d0
   !-------------------------------------------------------------
 
   !-------------------------------------------------------------
@@ -546,10 +544,10 @@ subroutine cub_spline1(x,y,n,xi,yi)
   !-------------------------------------------------------------
   ! Find remaining polynomial coefficients:
   !
-  c(n) = 0.0
+  c(n) = 0d0
   do i=1,n-1
-     b(i) = (y(i+1)-y(i))/h(i)-h(i)*(2.0*c(i)+c(i+1))/3.0
-     d(i) = (c(i+1)-c(i))/(3.0*h(i))
+     b(i) = (y(i+1)-y(i))/h(i)-h(i)*(2d0*c(i)+c(i+1))/3d0
+     d(i) = (c(i+1)-c(i))/(3d0*h(i))
   enddo
   !-------------------------------------------------------------
 

@@ -61,29 +61,29 @@ subroutine prgen_read_omfit
 
   if (format_type /= 3) then
      ! We have rho on statefile grid
-     call cub_spline(efit_rho,efit_psi,npsi,rho,dpsi,nx)
+     call bound_interp(efit_rho,efit_psi,npsi,rho,dpsi,nx)
   else
      ! We have psinorm on statefile grid
      dpsi = dpsi*dpsi_efit
-     call cub_spline(efit_psi,efit_q,npsi,dpsi,q,nx)
+     call bound_interp(efit_psi,efit_q,npsi,dpsi,q,nx)
      call prgen_get_chi(nx,q,dpsi,rho,torfluxa)
   endif
 
-  call cub_spline(efit_rho,efit_rmin,npsi,rho,rmin,nx)
-  call cub_spline(efit_psi,efit_q,npsi,dpsi,q,nx)
-  call cub_spline(efit_psi,efit_p,npsi,dpsi,p_tot,nx)
-  call cub_spline(efit_psi,efit_zmaj,npsi,dpsi,zmag,nx)
-  call cub_spline(efit_psi,efit_rmaj,npsi,dpsi,rmaj,nx)
-  call cub_spline(efit_psi,efit_kappa,npsi,dpsi,kappa,nx)
-  call cub_spline(efit_psi,efit_si(:,2),npsi,dpsi,delta,nx) ; delta = sin(delta)
-  call cub_spline(efit_psi,efit_si(:,3),npsi,dpsi,zeta,nx) ; zeta = -zeta
+  call bound_interp(efit_rho,efit_rmin,npsi,rho,rmin,nx)
+  call bound_interp(efit_psi,efit_q,npsi,dpsi,q,nx)
+  call bound_interp(efit_psi,efit_p,npsi,dpsi,p_tot,nx)
+  call bound_interp(efit_psi,efit_zmaj,npsi,dpsi,zmag,nx)
+  call bound_interp(efit_psi,efit_rmaj,npsi,dpsi,rmaj,nx)
+  call bound_interp(efit_psi,efit_kappa,npsi,dpsi,kappa,nx)
+  call bound_interp(efit_psi,efit_si(:,2),npsi,dpsi,delta,nx) ; delta = sin(delta)
+  call bound_interp(efit_psi,efit_si(:,3),npsi,dpsi,zeta,nx) ; zeta = -zeta
 
   ! New shape coefficients
-  call cub_spline(efit_psi,efit_si(:,4),npsi,dpsi,shape_sin3,nx)
-  call cub_spline(efit_psi,efit_ci(:,1),npsi,dpsi,shape_cos0,nx)
-  call cub_spline(efit_psi,efit_ci(:,2),npsi,dpsi,shape_cos1,nx)
-  call cub_spline(efit_psi,efit_ci(:,3),npsi,dpsi,shape_cos2,nx)
-  call cub_spline(efit_psi,efit_ci(:,4),npsi,dpsi,shape_cos3,nx)
+  call bound_interp(efit_psi,efit_si(:,4),npsi,dpsi,shape_sin3,nx)
+  call bound_interp(efit_psi,efit_ci(:,1),npsi,dpsi,shape_cos0,nx)
+  call bound_interp(efit_psi,efit_ci(:,2),npsi,dpsi,shape_cos1,nx)
+  call bound_interp(efit_psi,efit_ci(:,3),npsi,dpsi,shape_cos2,nx)
+  call bound_interp(efit_psi,efit_ci(:,4),npsi,dpsi,shape_cos3,nx)
 
   !==============================================================================
 
@@ -112,7 +112,7 @@ subroutine prgen_read_omfit
      ! NOTE: need sqrt here to get sensible behaviour as r -> 0.
      do i=1,4
         do ip=0,nfourier
-           call cub_spline(sqrt(efit_psi),g3vec(:,ip,i),npsi,sqrt(dpsi),g3rho(:,ip,i),nx)
+           call bound_interp(sqrt(efit_psi),g3vec(:,ip,i),npsi,sqrt(dpsi),g3rho(:,ip,i),nx)
         enddo
      enddo
 
@@ -147,3 +147,46 @@ subroutine prgen_read_omfit
   endif
 
 end subroutine prgen_read_omfit
+
+subroutine bound_interp(xj,yj,nj,x,y,n)
+
+  implicit none
+
+  integer :: i,j
+  integer, intent(in) :: nj,n
+
+  double precision :: u,r1,r2,r3
+  double precision, intent(in), dimension(nj) :: xj,yj
+  double precision, intent(in), dimension(n) :: x
+  double precision, intent(inout), dimension(n) :: y
+  integer, dimension(n) :: ja,jb,jc
+
+  j=1
+  do i=1,n
+10   if (x(i) >= xj(j) .and. x(i) <= xj(j+1)) then
+        ja(i) = j
+        jb(i) = j+1
+        if (j-1 > 0) then
+           jc(i) = j-1
+        else
+           jc(i) = j+2
+        endif
+     else
+        j = j+1
+        goto 10
+     endif
+  enddo
+
+  do i=1,n
+     u = x(i)
+     r1 = xj(ja(i))
+     r2 = xj(jb(i))
+     r3 = xj(jc(i))
+     
+     y(i) = (u-r1)*(u-r2)/(r3-r1)/(r3-r2)*yj(jc(i)) &
+          + (u-r1)*(u-r3)/(r2-r1)/(r2-r3)*yj(jb(i)) &
+          + (u-r2)*(u-r3)/(r1-r2)/(r1-r3)*yj(ja(i))
+     
+  enddo
+  
+end subroutine bound_interp
