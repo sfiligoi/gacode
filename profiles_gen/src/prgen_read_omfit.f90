@@ -88,16 +88,15 @@ subroutine prgen_read_omfit
   !==============================================================================
 
   if (nfourier > 0) then
-     
+
      ! Old Fourier rpresentation
      allocate(g3vec(npsi,0:nfourier,4))
      allocate(g3rho(nx,0:nfourier,4))
 
      open(unit=1,file='fluxfit.geo',status='old',access='stream')
-     read(1) g3vec(2:npsi,:,1)
-     read(1) g3vec(2:npsi,:,2)
-     read(1) g3vec(2:npsi,:,3)
-     read(1) g3vec(2:npsi,:,4)
+     do i=1,4
+        read(1) g3vec(:,:,i)
+     enddo
      close(1)
 
      ! Explicitly set rmin=0 at origin
