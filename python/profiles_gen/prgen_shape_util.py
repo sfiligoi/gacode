@@ -85,8 +85,10 @@ def plot(r,z,x,vr,xr,cr,sr):
     plt.show()
 
 
-def oldfourier(ri,zi,nf,npsi):
+def oldfourier(ri,zi,nf,rnorm):
 
+   npsi = len(rnorm)
+   
    ari = np.zeros([nf+1,npsi])
    bri = np.zeros([nf+1,npsi])
    azi = np.zeros([nf+1,npsi])
@@ -100,8 +102,34 @@ def oldfourier(ri,zi,nf,npsi):
       azi[:,i+1] = az[:]
       bzi[:,i+1] = bz[:]
 
+   
+   ari[0,:] = extrap(rnorm,ari[0,:]) 
+   azi[0,:] = extrap(rnorm,azi[0,:]) 
+   for i in range(1,nf+1):
+      ari[i,:] = zero(rnorm,ari[i,:]) 
+      bri[i,:] = zero(rnorm,bri[i,:]) 
+      azi[i,:] = zero(rnorm,azi[i,:]) 
+      bzi[i,:] = zero(rnorm,bzi[i,:]) 
+
    u = ari
    u = np.append(u,bri)
    u = np.append(u,azi)
    u = np.append(u,bzi)
    u.tofile('fluxfit.geo')
+
+def extrap(x,u):
+   m = (u[5]-u[4])/(x[5]-x[4])
+   b = u[5]-m*x[5]
+   u[0] = b
+   u[1] = m*x[1]+b
+   u[2] = m*x[2]+b
+   u[3] = m*x[3]+b
+   return u
+
+def zero(x,u):
+   r = u[4]/x[4]
+   u[0] = 0.0
+   u[1] = x[1]*r
+   u[2] = x[2]*r
+   u[3] = x[3]*r
+   return u

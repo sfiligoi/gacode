@@ -10,23 +10,6 @@ from prgen_shape import *
 
 repair = True
 
-def extrap(x,u):
-   m = (u[5]-u[4])/(x[5]-x[4])
-   b = u[5]-m*x[5]
-   u[0] = b
-   u[1] = m*x[1]+b
-   u[2] = m*x[2]+b
-   u[3] = m*x[3]+b
-   return u
-
-def zero(x,u):
-   r = u[4]/x[4]
-   u[0] = 0.0
-   u[1] = x[1]*r
-   u[2] = x[2]*r
-   u[3] = x[3]*r
-   return u
-
 def iring(x,u,xm):
    i = np.argmin(np.abs(x-xm))
    x0 = x[i]
@@ -72,7 +55,7 @@ pnorm = ((psi[:]-psi[0])/(psi[-1]-psi[0]))
 rnorm = np.sqrt(pnorm)
 
 if nfourier > 0:
-   oldfourier(ri,zi,nfourier,npsi)
+   oldfourier(ri,zi,nfourier,rnorm)
 
 # ci -> cos terms
 # si -> sin terms
