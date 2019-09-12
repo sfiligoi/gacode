@@ -89,7 +89,7 @@ subroutine prgen_read_omfit
 
   if (nfourier > 0) then
 
-     ! Old Fourier rpresentation
+     ! Old Fourier representation
      allocate(g3vec(npsi,0:nfourier,4))
      allocate(g3rho(nx,0:nfourier,4))
 
@@ -117,7 +117,7 @@ subroutine prgen_read_omfit
      enddo
 
      ! Explicitly set rmin=0 at origin
-     g3rho(:,1:nfourier,1) = 0.0
+     g3rho(1,1:nfourier,:) = 0.0
 
      open(unit=1,file='input.gacode.geo',status='replace')
      write(1,'(a)') '# input.gacode.geo'
