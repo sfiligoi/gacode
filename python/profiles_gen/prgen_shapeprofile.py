@@ -51,23 +51,26 @@ def ising(x,u,xm):
    return z,i
 
 if len(sys.argv) > 1:
-   gfile = sys.argv[1]
-   nrz   = int(sys.argv[2])
-   npsi  = int(sys.argv[3])
-   ix    = int(sys.argv[4])
-   nf    = int(sys.argv[5])
-   
+   gfile   = sys.argv[1]
+   nrz     = int(sys.argv[2])
+   npsi    = int(sys.argv[3])
+   ix      = int(sys.argv[4])
+   nfourier = int(sys.argv[5])
 else:
-   print('Usage: python prgen_shapeprofile.py <gfile> <npsi> <ix> <nrz> <nf>')
+   print('Usage: python prgen_shapeprofile.py <gfile> <nrz> <npsi> <ix> <nfourier>')
    sys.exit()
 
 efit = prgen_geqdsk(gfile)
 n_arc = 512
+nf = 3
 
 ri,zi,psi,q,p,fpol = prgen_contour(efit,nrz=nrz,levels=npsi,psinorm=0.999,narc=n_arc,quiet=False)
 
 pnorm = ((psi[:]-psi[0])/(psi[-1]-psi[0]))
 rnorm = np.sqrt(pnorm)
+
+if nfourier > 0:
+   oldfourier(ri,zi,nfourier,npsi)
 
 # ci -> cos terms
 # si -> sin terms

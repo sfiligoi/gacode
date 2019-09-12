@@ -814,13 +814,10 @@ fi
 
 if [ $EFIT -eq 1 ] ; then
    if [ $PLOT -eq 1 ] ; then
-      python $OMFIT $GFILE $NRZ $NPSI -1 3
+      python $OMFIT $GFILE $NRZ $NPSI -1 $NFOURIER
    else 
-      python $OMFIT $GFILE $NRZ $NPSI 0 3
+      python $OMFIT $GFILE $NRZ $NPSI 0 $NFOURIER
    fi
-   if [ $NFOURIER -gt 0 ] ; then
-      python ${GACODE_ROOT}/python/profiles_gen/prgen_fshapeprofile.py $GFILE $NRZ $NPSI $NFOURIER
-   fi   
 fi
 
 #==============================================================

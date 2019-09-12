@@ -82,3 +82,24 @@ def plot(r,z,x,vr,xr,cr,sr):
     plt.tight_layout()
     plt.show()
 
+
+def oldfourier(ri,zi,nf,npsi):
+
+   ari = np.zeros([nf+1,npsi])
+   bri = np.zeros([nf+1,npsi])
+   azi = np.zeros([nf+1,npsi])
+   bzi = np.zeros([nf+1,npsi])
+
+   for i in range(npsi-1):
+      r=ri[:,i+1] ; z=zi[:,i+1]
+      ar,br,az,bz = prgen_fshape(r,z,nf)
+      ari[:,i+1] = ar[:]
+      bri[:,i+1] = br[:]
+      azi[:,i+1] = az[:]
+      bzi[:,i+1] = bz[:]
+
+   u = ari
+   u = np.append(u,bri)
+   u = np.append(u,azi)
+   u = np.append(u,bzi)
+   u.tofile('fluxfit.geo')
