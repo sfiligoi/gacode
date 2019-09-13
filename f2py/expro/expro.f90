@@ -704,8 +704,8 @@ contains
     write(1,'(a)') ident//'nexp' ; write(1,'(i0)') nexp
     write(1,'(a)') ident//'nneu' ; write(1,'(i0)') nneu
     write(1,'(a)') ident//'name' ; write(1,'(20(a,1x))') (trim(expro_name(i)),i=1,nneu)
-    write(1,'(a)') ident//'mass' ; write(1,40) expro_mass
-    write(1,'(a)') ident//'z'    ; write(1,40) expro_z
+    write(1,'(a)') ident//'mass' ; write(1,40) expro_mass(1)
+    write(1,'(a)') ident//'z'    ; write(1,40) expro_z(1)
 
     ! Write vector/array data, skipping objects that are 0.0
     call expro_writev(expro_rho,nexp,'rho','-')
