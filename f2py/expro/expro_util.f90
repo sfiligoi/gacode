@@ -9,10 +9,10 @@ subroutine expro_compute_derived
   integer :: i
   integer :: is
 
-  double precision, parameter :: k  = 1.6022e-12 ! erg/eV
-  double precision, parameter :: e  = 4.8032e-10 ! statcoul
-  double precision, parameter :: c  = 2.9979e10  ! cm/s
-  double precision, parameter :: pi = 3.1415926535897932
+  double precision, parameter :: k  = 1.6022d-12 ! erg/eV
+  double precision, parameter :: e  = 4.8032d-10 ! statcoul
+  double precision, parameter :: c  = 2.9979d10  ! cm/s
+  double precision, parameter :: pi = 3.1415926535897932d0
   double precision :: mp  ! mass_deuterium/2.0 (g)
   
   double precision, dimension(:), allocatable :: torflux
@@ -24,7 +24,7 @@ subroutine expro_compute_derived
   double precision :: fa,fb
   double precision :: theta(1)
 
-  mp = expro_mass_deuterium/2.0  ! mass_deuterium/2.0 (g)
+  mp = expro_mass_deuterium/2d0  ! mass_deuterium/2.0 (g)
   
   if (expro_ctrl_n_ion == -1) expro_ctrl_n_ion = expro_n_ion
 
@@ -61,7 +61,7 @@ subroutine expro_compute_derived
   torflux(:) = expro_torfluxa*expro_rho(:)**2
 
   ! b_unit
-  call bound_deriv(expro_bunit,torflux,0.5*expro_rmin**2,expro_n_exp)
+  call bound_deriv(expro_bunit,torflux,0.5d0*expro_rmin**2,expro_n_exp)
 
   ! s
   call bound_deriv(temp,expro_q,expro_rmin,expro_n_exp)
@@ -126,13 +126,13 @@ subroutine expro_compute_derived
   call bound_deriv(expro_sdlntedr,expro_te*expro_dlntedr,expro_rmin,expro_n_exp)
   expro_sdlntedr = expro_sdlntedr/expro_te
 
-  expro_dlnnidr = 0.0
-  expro_dlntidr = 0.0
-  expro_sdlnnidr = 0.0
-  expro_sdlntidr = 0.0
+  expro_dlnnidr = 0d0
+  expro_dlntidr = 0d0
+  expro_sdlnnidr = 0d0
+  expro_sdlntidr = 0d0
 
   do is=1,expro_n_ion
-     if (minval(expro_ni(is,:)) > 0.0) then
+     if (minval(expro_ni(is,:)) > 0d0) then
         ! 1/L_ni = -dln(ni)/dr (1/m)
         call bound_deriv(expro_dlnnidr(is,:),-log(expro_ni(is,:)),expro_rmin,expro_n_exp)
 
@@ -150,10 +150,10 @@ subroutine expro_compute_derived
   enddo
 
   ! 1/L_Ptot = -dln(Ptot)/dr (1/m)
-  if (minval(expro_ptot) > 0.0) then
+  if (minval(expro_ptot) > 0d0) then
      call bound_deriv(expro_dlnptotdr,-log(expro_ptot),expro_rmin,expro_n_exp)
   else
-     expro_dlnptotdr = 0.0
+     expro_dlnptotdr = 0d0
   endif
   !--------------------------------------------------------------------
 
@@ -218,9 +218,9 @@ subroutine expro_compute_derived
      geo_shape_s_cos3_in = expro_shape_scos3(i)
      geo_shape_sin3_in   = expro_shape_sin3(i)
      geo_shape_s_sin3_in = expro_shape_ssin3(i)
-     geo_beta_star_in = 0.0
+     geo_beta_star_in = 0d0
      !
-     theta(1) = 0.0
+     theta(1) = 0d0
      if (expro_ctrl_numeq_flag == 0) then
         ! Call geo with model shape
         geo_model_in = 0
@@ -231,7 +231,7 @@ subroutine expro_compute_derived
         geo_fourier_in(1:4,0:geo_nfourier_in) = expro_geo(:,:,i)/r_min
         geo_fourier_in(5:8,0:geo_nfourier_in) = expro_dgeo(:,:,i)
         call geo_interp(1,theta,.true.)
-        if (minval(geov_jac_r) <= 0.0) then
+        if (minval(geov_jac_r) <= 0d0) then
            print '(a,i3,a)','WARNING: (expro) Negative geo Jacobian for i =',i,' in input.gacode'
         endif
      endif
@@ -275,8 +275,8 @@ subroutine expro_compute_derived
   !
   ! Both V and dV/dr are zero on axis.
   !
-  expro_vol(1)  = 0.0
-  expro_volp(1) = 0.0  
+  expro_vol(1)  = 0d0
+  expro_volp(1) = 0d0  
   expro_thetascale(1) = expro_thetascale(2)
 
   !--------------------------------------------------------------
@@ -285,13 +285,13 @@ subroutine expro_compute_derived
   ! CGS calculation of deuterium sound speed (cm/s) and 
   ! deuterium gyroradius (cm)
   !
-  expro_cs(:)   = sqrt( k*(1e3*expro_te(:))/(2.0*mp) )   
-  expro_rhos(:) = expro_cs(:)/(e*(1e4*expro_bunit(:))/(2.0*mp*c))
+  expro_cs(:)   = sqrt( k*(1d3*expro_te(:))/(2.0*mp) )   
+  expro_rhos(:) = expro_cs(:)/(e*(1d4*expro_bunit(:))/(2.0*mp*c))
   ! 
   ! Convert to m/s and m:
   !
-  expro_cs(:)   = expro_cs(:)/100.0
-  expro_rhos(:) = expro_rhos(:)/100.0
+  expro_cs(:)   = expro_cs(:)/1d2
+  expro_rhos(:) = expro_rhos(:)/1d2
   !-----------------------------------------------------------------
 
   !-----------------------------------------------------------------
@@ -370,7 +370,7 @@ subroutine expro_compute_derived
 
   if (expro_ctrl_quasineutral_flag == 1) then
 
-     expro_ni_new(:) = 0.0
+     expro_ni_new(:) = 0d0
      do is=2,expro_ctrl_n_ion
         expro_ni_new(:) = expro_ni_new(:)+expro_z(is)*expro_ni(is,:)
      enddo
@@ -385,7 +385,7 @@ subroutine expro_compute_derived
           expro_rmin,expro_n_exp)
      expro_sdlnnidr_new(:) = expro_sdlnnidr_new(:)/expro_ni_new(:)*expro_rhos(:)
 
-     if (minval(expro_ni_new(:)) <= 0.0) expro_error = 1
+     if (minval(expro_ni_new(:)) <= 0d0) expro_error = 1
  
   else
 
@@ -398,7 +398,7 @@ subroutine expro_compute_derived
   deallocate(temp)
 
   do is=1,expro_ctrl_n_ion
-     if (minval(expro_ni(is,:)) <= 0.0) expro_error=1
+     if (minval(expro_ni(is,:)) <= 0d0) expro_error=1
   enddo
  
 end subroutine expro_compute_derived
@@ -529,6 +529,49 @@ subroutine bound_extrap(fa,fb,f,r,n)
 
 end subroutine bound_extrap
 
+subroutine bound_interp(xj,yj,nj,x,y,n)
+
+  implicit none
+
+  integer :: i,j
+  integer, intent(in) :: nj,n
+
+  double precision :: u,r1,r2,r3
+  double precision, intent(in), dimension(nj) :: xj,yj
+  double precision, intent(in), dimension(n) :: x
+  double precision, intent(inout), dimension(n) :: y
+  integer, dimension(n) :: ja,jb,jc
+
+  j=1
+  do i=1,n
+10   if (x(i) >= xj(j) .and. x(i) <= xj(j+1)) then
+        ja(i) = j
+        jb(i) = j+1
+        if (j-1 > 0) then
+           jc(i) = j-1
+        else
+           jc(i) = j+2
+        endif
+     else
+        j = j+1
+        goto 10
+     endif
+  enddo
+
+  do i=1,n
+     u = x(i)
+     r1 = xj(ja(i))
+     r2 = xj(jb(i))
+     r3 = xj(jc(i))
+     
+     y(i) = (u-r1)*(u-r2)/(r3-r1)/(r3-r2)*yj(jc(i)) &
+          + (u-r1)*(u-r3)/(r2-r1)/(r2-r3)*yj(jb(i)) &
+          + (u-r2)*(u-r3)/(r1-r2)/(r1-r3)*yj(ja(i))
+     
+  enddo
+  
+end subroutine bound_interp
+
 !------------------------------------------------------------------------------
 ! write routines:
 !  writes - scalar
@@ -545,7 +588,7 @@ subroutine expro_writes(x,xs1,xs2)
   double precision, intent(in) :: x
   character(len=*), intent(in) :: xs1,xs2
 
-  if (abs(x) > 1e-16) then
+  if (abs(x) > 1d-16) then
      write(1,'(4a)') ident//trim(xs1)//' | '//trim(xs2)
      write(1,10) x
   endif
@@ -565,7 +608,7 @@ subroutine expro_writev(x,n,xs1,xs2)
   character(len=*), intent(in) :: xs1,xs2
   integer :: i
 
-  if (sum(abs(x)) > 1e-16) then
+  if (sum(abs(x)) > 1d-16) then
      write(1,'(4a)') ident//trim(xs1)//' | '//trim(xs2)
      do i=1,n
         write(1,10) i,x(i)
@@ -587,7 +630,7 @@ subroutine expro_writea(x,m,n,xs1,xs2)
   character(len=*), intent(in) :: xs1,xs2
   integer :: i
 
-  if (sum(abs(x)) > 1e-16) then
+  if (sum(abs(x)) > 1d-16) then
      write(1,'(4a)') ident//trim(xs1)//' | '//trim(xs2)
      do i=1,n
         write(1,10) i,x(:,i)
@@ -624,11 +667,11 @@ subroutine volint(f,fdv,n)
   double precision, intent(in) :: f(n)
   double precision, intent(out) :: fdv(n)
 
-  fdv(1) = 0.0
+  fdv(1) = 0d0
 
   ! Integration is exact for constant f (density)
   do i=2,n
-     fdv(i) = fdv(i-1)+0.5*(f(i)+f(i-1))*(expro_vol(i)-expro_vol(i-1))
+     fdv(i) = fdv(i-1)+0.5d0*(f(i)+f(i-1))*(expro_vol(i)-expro_vol(i-1))
   enddo
 
 end subroutine volint

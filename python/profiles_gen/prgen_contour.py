@@ -136,8 +136,8 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
     # Crop 
     #-----------------------------------------------------------------
     if len(slfrlim) and len(slfzlim):
-        if not quiet:
-            print('INFO: (prgen_contour) Cropping tables')
+        #if not quiet:
+        #    print('INFO: (prgen_contour) Cropping tables')
         bbox=[min(slfrlim),max(slfrlim),min(slfzlim),max(slfzlim)]
         limits=[max([np.argmin(abs(slfR-bbox[0]))-1,0]),
                 min([np.argmin(abs(slfR-bbox[1]))+1,len(slfR)-1]),
@@ -293,7 +293,7 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
     cs = interpolate.interp1d(efitpsi,efitq,kind='quadratic') ; out_q = cs(out_psi)
     cs = interpolate.interp1d(efitpsi,efitf,kind='quadratic') ; out_f = cs(out_psi)
 
-    # Recalculate q
+    # Recalculate q based on definition (and some identities)
     loopint = np.zeros([levels])
     for k in range(levels):
        for i in range(narc-1):

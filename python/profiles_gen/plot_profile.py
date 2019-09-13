@@ -37,8 +37,6 @@ def plotit(ax,x,y,ystr):
 def plot_select(ax,tag):
    global m1,m2
    
-   # Helper routine to plot data (tag) from input.gacode
-
    expro.expro_read('input.gacode')
 
    x = expro.expro_rmin ; x = x/max(x)
@@ -102,10 +100,17 @@ def plot_select(ax,tag):
        y = expro.expro_kappa ; ystr = '\kappa' ; plotit(ax,x,y,ystr)
        y = expro.expro_skappa ; ystr = 's_\kappa' ; plotit(ax,x,y,ystr)
 
-   if tag == 'delta':
-       y = expro.expro_delta ; ystr = '\delta' ; plotit(ax,x,y,ystr)
-       y = expro.expro_sdelta ; ystr = 's_\delta' ; plotit(ax,x,y,ystr)
-
+   if tag == 'sin':
+       y = np.arcsin(expro.expro_delta) ; ystr = 's_1 = \sin^{-1}\delta' ; plotit(ax,x,y,ystr)
+       y = -expro.expro_zeta         ; ystr = 's_2 = -\zeta' ; plotit(ax,x,y,ystr)
+       y = expro.expro_shape_sin3    ; ystr = 's_3' ; plotit(ax,x,y,ystr)
+     
+   if tag == 'cos':
+       y = expro.expro_shape_cos0 ; ystr = 'c_0' ; plotit(ax,x,y,ystr)
+       y = expro.expro_shape_cos1 ; ystr = 'c_1' ; plotit(ax,x,y,ystr)
+       y = expro.expro_shape_cos2 ; ystr = 'c_2' ; plotit(ax,x,y,ystr)
+       y = expro.expro_shape_cos3 ; ystr = 'c_3' ; plotit(ax,x,y,ystr)
+     
    if tag == 'q':
        y = expro.expro_q ; ystr = 'q'
        if y[0] < 0.0:
@@ -170,9 +175,6 @@ class DemoFrame(wx.Frame):
         tab.draw('kappa')
         notebook.AddPage(tab,'kappa')
 
-        tab = TabPanel(notebook)
-        tab.draw('delta')
-        notebook.AddPage(tab,'delta')
 
         tab = TabPanel(notebook)
         tab.draw('bunit')
@@ -189,6 +191,13 @@ class DemoFrame(wx.Frame):
         tab = TabPanel(notebook)
         tab.draw('T')
         notebook.AddPage(tab,'T')
+
+        tab = TabPanel(notebook)
+        tab.draw('sin')
+        notebook.AddPage(tab,'sin')
+        tab = TabPanel(notebook)
+        tab.draw('cos')
+        notebook.AddPage(tab,'cos')
 
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(notebook, 1, wx.ALL|wx.EXPAND, 5)

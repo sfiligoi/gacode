@@ -215,7 +215,7 @@ subroutine prgen_read_plasmastate
      plst_tb(nx,:)     = plst_tb(nx-1,:)
 
      do i=1,plst_dim_nspec_beam
-        print *,'Writing beam',i,plst_nb(:,i)
+        print '(a,i2)','INFO: (prgen_read_plasmastate) Found beam ',i
         ntop = ntop+1
         plst_ns(:,ntop) = plst_nb(:,i)
         plst_ts(:,ntop) = plst_tb(:,i)

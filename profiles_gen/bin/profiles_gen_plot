@@ -21,25 +21,23 @@ then
    echo "          <ext>=emf, eps, pdf, png, ps, raw, rgba, svg, svgz"
    echo
    echo "          -loc <Legend location: 1,2,3,4>"
-   echo
-   echo " PROFILE PLOTTING MODE:"
    echo 
    echo "          -plot <group>"
    echo "          <group> = pro (default)"
-   echo "                  = surf  (Miller/Fourier flux surfaces)"
-   echo "                  = msurf (Miller flux surfaces)"
-   echo "                  = fsurf (Fourier flux surfaces)"
+   echo "                  = surf  (exMil/Fourier flux surfaces)"
    echo 
+   echo " PROFILE PLOTTING MODE (-plot pro):"
+   echo
    echo "          -r <flux-surface coordinate for plotting>"
    echo "          Choices are r,r/a,rho"
    echo
    echo "          -rmin <min plot radius>"
    echo "          -rmax <max plot radius>"
    echo
-   echo " FLUX-SURFACE PLOTTING MODE (-plot *surf):"
+   echo " FLUX-SURFACE PLOTTING MODE (-plot surf):"
    echo 
    echo "          -n <integer>"
-   echo "          Number of flux surfaces (default 16)"
+   echo "          Number of flux surfaces to skip (default 16)"
    echo "          If n < 0, plot single flux surface |n|"
    echo
    echo "EXAMPLES:"
@@ -98,7 +96,7 @@ PYROOT=$GACODE_ROOT/python/profiles_gen
 
 if [ $PLOT = null ] ; then
    exit 0
-elif [[ $PLOT == *surf ]] ; then 
+elif [ $PLOT = surf ] ; then 
    python $PYROOT/plot_surf.py $PLOT $N $EXT
 else
    python $PYROOT/plot_profile.py $RVAR $RMIN $RMAX $EXT $LOC
