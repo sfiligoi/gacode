@@ -323,8 +323,7 @@ subroutine expro_locsim_profiles(&
   call cub_spline1(rmin_exp,expro_polflux,expro_n_exp,rmin,psi_norm_loc)
   psi_norm_loc = psi_norm_loc/expro_polflux(expro_n_exp)
   psi_a_loc = expro_polflux(expro_n_exp)
-
-  
+    
   beta_star_loc = 0d0  
   do i=1,n_species_exp
      ! Note: mapping is only done for n_species (not n_species_exp)

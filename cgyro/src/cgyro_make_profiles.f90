@@ -80,6 +80,7 @@ subroutine cgyro_make_profiles
      s_delta = s_delta_loc
      s_zeta  = s_zeta_loc
 
+     ! Extended Miller
      shape_sin3 = shape_sin3_loc
      shape_cos0 = shape_cos0_loc
      shape_cos1 = shape_cos1_loc

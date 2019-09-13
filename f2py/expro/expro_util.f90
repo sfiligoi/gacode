@@ -100,7 +100,7 @@ subroutine expro_compute_derived
   ! s_cos/sinx = r -------- 
   !                dr
   call bound_deriv(temp,expro_shape_cos0,expro_rmin,expro_n_exp)
-  expro_shape_scos0(:) = expro_rmin(:)*temp(:) 
+  expro_shape_scos0(:) = expro_rmin(:)*temp(:)
   call bound_deriv(temp,expro_shape_cos1,expro_rmin,expro_n_exp)
   expro_shape_scos1(:) = expro_rmin(:)*temp(:)
   call bound_deriv(temp,expro_shape_cos2,expro_rmin,expro_n_exp)
@@ -108,7 +108,7 @@ subroutine expro_compute_derived
   call bound_deriv(temp,expro_shape_cos3,expro_rmin,expro_n_exp)
   expro_shape_scos3(:) = expro_rmin(:)*temp(:)
   call bound_deriv(temp,expro_shape_sin3,expro_rmin,expro_n_exp)
-  expro_shape_ssin3(:) = expro_rmin(:)*temp(:) 
+  expro_shape_ssin3(:) = expro_rmin(:)*temp(:)
   
   ! 1/L_ne = -dln(ne)/dr (1/m)
   call bound_deriv(expro_dlnnedr,-log(expro_ne),expro_rmin,expro_n_exp)
