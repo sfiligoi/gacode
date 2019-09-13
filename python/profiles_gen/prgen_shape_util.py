@@ -117,6 +117,18 @@ def oldfourier(ri,zi,nf,rnorm):
    u = np.append(u,bzi)
    u.tofile('fluxfit.geo')
 
+   if 0==1:
+      fig = plt.figure(figsize=(12,8))
+
+      # PLOT contour
+      ax = fig.add_subplot(111)
+      for i in range(1,4):
+         ax.plot(rnorm,ari[i,:],'-k',linewidth=1)
+         ax.plot(rnorm,azi[i,:],'-k',linewidth=1)
+         ax.plot(rnorm,bri[i,:],'-k',linewidth=1)
+         ax.plot(rnorm,bzi[i,:],'-k',linewidth=1)
+      plt.show()
+   
 def extrap(x,u):
    m = (u[5]-u[4])/(x[5]-x[4])
    b = u[5]-m*x[5]

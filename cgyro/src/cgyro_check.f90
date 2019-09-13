@@ -70,7 +70,7 @@ subroutine cgyro_check
      call cgyro_info('Profile model: local input (input.cgyro)')
 
   case (2)
-     call cgyro_info('Profile model: experimental (input.profiles)')
+     call cgyro_info('Profile model: experimental (input.gacode)')
 
   case default
      call cgyro_error('Invalid value for profile_model')

@@ -99,10 +99,8 @@ def plot_select(ax,tag):
          y = expro.expro_ti[p,:] ; ystr = 'T_i ['+sname[p]+']' ; plotit(ax,x,y,ystr)
          
    if tag == 'kappa':
-       y = expro.expro_kappa ; ystr = '\kappa'
-       ax.plot(x[:m],y[:m],label=r'$'+ystr+'$')
-       y = expro.expro_skappa ; ystr = 's_\kappa'
-       ax.plot(x[:m],y[:m],label=r'$'+ystr+'$')
+       y = expro.expro_kappa ; ystr = '\kappa' ; plotit(ax,x,y,ystr)
+       y = expro.expro_skappa ; ystr = 's_\kappa' ; plotit(ax,x,y,ystr)
 
    if tag == 'delta':
        y = expro.expro_delta ; ystr = '\delta' ; plotit(ax,x,y,ystr)
@@ -113,9 +111,8 @@ def plot_select(ax,tag):
        if y[0] < 0.0:
           y = -y
           ystr = '-'+ystr
-       ax.plot(x[:m],y[:m],label=r'$'+ystr+'$')
-       y = expro.expro_s ; ystr = 's'
-       ax.plot(x[:m],y[:m],label=r'$'+ystr+'$')
+       plotit(ax,x,y,ystr)
+       y = expro.expro_s ; ystr = 's' ; plotit(ax,x,y,ystr)
 
    ax.legend(loc=loc)
        
