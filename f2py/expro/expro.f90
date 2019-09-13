@@ -44,6 +44,9 @@ module expro
   double precision, dimension(:), allocatable :: expro_shape_sin3
   double precision, dimension(:), allocatable :: expro_ne
   double precision, dimension(:,:), allocatable :: expro_ni
+  double precision, dimension(:), allocatable :: expro_enn
+  double precision, dimension(:), allocatable :: expro_ennw
+  double precision, dimension(:), allocatable :: expro_ennv
   double precision, dimension(:), allocatable :: expro_te
   double precision, dimension(:,:), allocatable :: expro_ti
   double precision, dimension(:), allocatable :: expro_ptot
@@ -192,6 +195,9 @@ contains
        allocate(expro_shape_cos3(nexp))   ; expro_shape_cos3 = 0.0
        allocate(expro_shape_sin3(nexp))   ; expro_shape_sin3 = 0.0
        allocate(expro_ne(nexp))      ; expro_ne = 0.0
+       allocate(expro_enn(nexp))     ; expro_enn = 0.0
+       allocate(expro_ennw(nexp))    ; expro_ennw = 0.0
+       allocate(expro_ennv(nexp))    ; expro_ennv = 0.0
        allocate(expro_te(nexp))      ; expro_te = 0.0
        allocate(expro_ptot(nexp))    ; expro_ptot = 0.0
        allocate(expro_johm(nexp))    ; expro_johm = 0.0
@@ -301,6 +307,9 @@ contains
        deallocate(expro_shape_cos3)
        deallocate(expro_shape_sin3)
        deallocate(expro_ne)
+       deallocate(expro_enn)
+       deallocate(expro_ennw)
+       deallocate(expro_ennv)
        deallocate(expro_te)
        deallocate(expro_ptot)
        deallocate(expro_johm)
@@ -670,6 +679,47 @@ contains
 40  format(10(1pe14.7))
 
   end subroutine expro_write
+
+  subroutine expro_write_neutrals(thisinfile)
+
+    implicit none
+
+    integer :: i,nexp,nion,nneu
+    character(len=*), intent(in) :: thisinfile 
+
+    nexp = expro_n_exp
+    nneu = 1
+
+    ! Write header
+    open(unit=1,file=trim(thisinfile),status='replace')
+    write(1,'(a)') expro_head_original
+    write(1,'(a)') expro_head_statefile 
+    write(1,'(a)') expro_head_gfile
+    write(1,'(a)') expro_head_cerfile
+    write(1,'(a)') expro_head_vgen
+    write(1,'(a)') expro_head_tgyro
+    write(1,'(a)') '#'
+
+    ! Write data
+    write(1,'(a)') ident//'nexp' ; write(1,'(i0)') nexp
+    write(1,'(a)') ident//'nneu' ; write(1,'(i0)') nneu
+    write(1,'(a)') ident//'name' ; write(1,'(20(a,1x))') (trim(expro_name(i)),i=1,nneu)
+    write(1,'(a)') ident//'mass' ; write(1,40) expro_mass
+    write(1,'(a)') ident//'z'    ; write(1,40) expro_z
+
+    ! Write vector/array data, skipping objects that are 0.0
+    call expro_writev(expro_rho,nexp,'rho','-')
+    call expro_writev(expro_enn,nexp,'enn','10^19/m^3')
+    call expro_writev(expro_enn,nexp,'ennw','10^19/m^3')
+    call expro_writev(expro_enn,nexp,'ennv','10^19/m^3')
+
+    close(1)
+
+30  format(1pe14.7)
+40  format(10(1pe14.7))
+
+  end subroutine expro_write_neutrals
+
 
 ! This is the full list of user variable for the expro interface
  

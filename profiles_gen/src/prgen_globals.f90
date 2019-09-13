@@ -135,6 +135,9 @@ module prgen_globals
   real, dimension(:), allocatable :: onetwo_storqueb
   real, dimension(:,:), allocatable :: onetwo_enion
   real, dimension(:,:), allocatable :: onetwo_enbeam
+  real, dimension(:,:), allocatable :: onetwo_enn
+  real, dimension(:,:), allocatable :: onetwo_ennw
+  real, dimension(:,:), allocatable :: onetwo_ennv
   real, dimension(:,:), allocatable :: onetwo_pressb
   real, dimension(:,:), allocatable :: onetwo_sion
   real, dimension(:,:), allocatable :: onetwo_srecom

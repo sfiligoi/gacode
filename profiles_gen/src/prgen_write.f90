@@ -45,6 +45,7 @@ subroutine prgen_write
   expro_head_cerfile   = '#   *cerfile : '//trim(file_cer)
 
   call expro_write('input.gacode')
+  call expro_write_neutrals('input.gacode.neutrals')
   print '(a)','INFO: (prgen_write) Wrote input.gacode.'
   !-------------------------------------------------------------------------------------
 

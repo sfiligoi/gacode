@@ -93,15 +93,15 @@ subroutine prgen_read_iterdb
   read(1,*) t ; read(1,*) onetwo_enbeam(:,1) ! fast ion density
 
   do i=1,onetwo_nprim
-     read(1,*) t ; read(1,*) xv ! neutral density
+     read(1,*) t ; read(1,*) onetwo_enn(:,i) ! neutral density
   enddo
 
   do i=1,onetwo_nprim
-     read(1,*) t ; read(1,*) xv ! neutral density from wall source
+     read(1,*) t ; read(1,*) onetwo_ennw(:,i) ! neutral density from wall source
   enddo
 
   do i=1,onetwo_nprim
-     read(1,*) t ; read(1,*) xv ! neutral density from volume source
+     read(1,*) t ; read(1,*) onetwo_ennv(:,i) ! neutral density from volume source
   enddo
 
   do i=1,onetwo_nprim
