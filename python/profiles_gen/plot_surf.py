@@ -85,7 +85,7 @@ for i in rlist:
    y = zmaj+k*r*np.sin(t)
 
    if i == rlist[0]:
-      ax.plot(x,y,'-k',linewidth=1,label=r'$\mathrm{xMil}$')
+      ax.plot(x,y,'-k',linewidth=1,label=r'$\mathrm{HAM~3}$')
    else:
       ax.plot(x,y,'-k',linewidth=1)
 

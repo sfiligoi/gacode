@@ -140,38 +140,24 @@ def prgen_fshape(rd,zd,nf):
         dl = np.sqrt((rd[i+1]-rd[i])**2+(zd[i+1]-zd[i])**2)
         l_tot = l_tot+dl
 
-    # Construct poloidal angle starting at r0 and 
-    # winding counter-clockwise.
-
-    theta = np.zeros(nd)
-    theta[imax] = 2*np.pi*(dl0)/l_tot
-    for i in range(imax,imax+nd-1):
-        ip = np.mod(i+1,nd)
-        im = np.mod(i,nd)
-        dl = np.sqrt((rd[ip]-rd[im])**2+(zd[ip]-zd[im])**2)
-        theta[ip] = theta[im] + 2*np.pi*dl/l_tot
-
+    # Construct equally-spaced poloidal angle
+    theta  = np.linspace(0,1,nd)*2*np.pi
+    dtheta = theta[1]-theta[0]
+    
     ar = np.zeros(nf+1)
     br = np.zeros(nf+1)
     az = np.zeros(nf+1)
     bz = np.zeros(nf+1)
 
-    for i in range(nd-1):
-        dtheta = theta[i+1]-theta[i]
-        if dtheta > np.pi:
-            dtheta = dtheta-2*np.pi
-        if dtheta < -np.pi:
-            dtheta = dtheta+2*np.pi
-        for n in range(nf+1):
-            y = 0.5*(np.cos(n*theta[i+1])*rd[i+1]+np.cos(n*theta[i])*rd[i])
-            ar[n] = ar[n]+dtheta*y/np.pi
-            y = 0.5*(np.sin(n*theta[i+1])*rd[i+1]+np.sin(n*theta[i])*rd[i])
-            br[n] = br[n]+dtheta*y/np.pi
-            y = 0.5*(np.cos(n*theta[i+1])*zd[i+1]+np.cos(n*theta[i])*zd[i])
-            az[n] = az[n]+dtheta*y/np.pi
-            y = 0.5*(np.sin(n*theta[i+1])*zd[i+1]+np.sin(n*theta[i])*zd[i])
-            bz[n] = bz[n]+dtheta*y/np.pi
+    ds = dtheta/(2*np.pi)
 
+    # Trapezoidal integration spectrally-accurate
+    for i in range(nd-1):
+        for n in range(nf+1):
+            y = np.cos(n*theta[i])*rd[i] ; ar[n] = ar[n]+ds*y
+            y = np.sin(n*theta[i])*rd[i] ; br[n] = br[n]+ds*y
+            y = np.cos(n*theta[i])*zd[i] ; az[n] = az[n]+ds*y
+            y = np.sin(n*theta[i])*zd[i] ; bz[n] = bz[n]+ds*y
 
     return ar,br,az,bz
 
