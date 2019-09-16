@@ -5,8 +5,8 @@ import numpy as np
 def minmax(x,y):
 
     n = len(x)
-    
-    # High accuracy estimate of minimum x given initial guess as 
+
+    # High accuracy estimate of minimum x given initial guess as
     # minimum of array x.
 
     # Maximum x
@@ -40,7 +40,7 @@ def minmax(x,y):
 def intersect(x,y,y0):
 
     n = len(x)
-  
+
     x_c = 0.5*(np.min(x)+np.max(x))
 
     for i in range(n-1):
@@ -60,7 +60,7 @@ def intersect(x,y,y0):
                     i0 = n-2
                 else:
                     i0 = i-1
-        
+
                 y1 = y[i0]
                 y2 = ya
                 y3 = yb
@@ -72,7 +72,7 @@ def intersect(x,y,y0):
                     i0 = 1
                 else:
                     i0 = i+2
-           
+
                 y1 = ya
                 y2 = yb
                 y3 = y[i0]
@@ -88,7 +88,7 @@ def intersect(x,y,y0):
             d1 = d12*d13
 
             # Quadratic approximation:
- 
+
             x0 = (y0-y1)*(y0-y2)*x3/d3+(y0-y1)*(y0-y3)*x2/d2+(y0-y2)*(y0-y3)*x1/d1
 
             if x0 > x_c:
@@ -101,19 +101,19 @@ def intersect(x,y,y0):
 def prgen_fshape(rd,zd,nf):
 
     nd = len(rd)
-    
+
     # Find the centroid
     s1 = s2 = s3 = 0.0
     for i in range(nd-1):
         ip = i+1
         dz = zd[ip]-zd[i]       ; dr = rd[ip]-rd[i]
         r0 = 0.5*(rd[ip]+rd[i]) ; z0 = 0.5*(zd[ip]+zd[i])
-     
+
         # A = Int R dZ = -Int Z dR
         s1 = s1+dz*r0    # Area
         s2 = s2-dr*z0*r0 # Centroid (R)
         s3 = s3+dz*r0*z0 # Centroid (Z)
-   
+
     r_c = s2/s1 ; z_c = s3/s1
 
     # Find major radii (rp,rm) at the height of the centroid.
@@ -123,10 +123,10 @@ def prgen_fshape(rd,zd,nf):
     rmin = 0.5*(rp-rm) ; rmaj = 0.5*(rp+rm)
 
     # Find rightmost R (r0)
-    
+
     r0,z0 = minmax(rd,zd)
 
-    imax = np.argmax(rd) 
+    imax = np.argmax(rd)
     r2 = rd[imax]
     z2 = zd[imax]
 
@@ -143,13 +143,13 @@ def prgen_fshape(rd,zd,nf):
     # Construct equally-spaced poloidal angle
     theta  = np.linspace(0,1,nd)*2*np.pi
     dtheta = theta[1]-theta[0]
-    
+
     ar = np.zeros(nf+1)
     br = np.zeros(nf+1)
     az = np.zeros(nf+1)
     bz = np.zeros(nf+1)
 
-    ds = dtheta/(2*np.pi)
+    ds = dtheta/np.pi
 
     # Trapezoidal integration spectrally-accurate
     for i in range(nd-1):
