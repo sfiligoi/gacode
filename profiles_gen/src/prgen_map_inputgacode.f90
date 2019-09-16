@@ -20,43 +20,43 @@ subroutine prgen_map_inputgacode
      call prgen_get_chi(nx,q,dpsi,rho,expro_torfluxa)
 
      ! Align with new rho grid, not old rho grid, expro_rho:
-     call bound_interp(expro_rho,expro_te,nx,rho,xnew,nx)
+     call cub_spline(expro_rho,expro_te,nx,rho,xnew,nx)
      expro_te = xnew
-     call bound_interp(expro_rho,expro_ne,nx,rho,xnew,nx)
+     call cub_spline(expro_rho,expro_ne,nx,rho,xnew,nx)
      expro_ne = xnew
-     call bound_interp(expro_rho,expro_z_eff,nx,rho,xnew,nx)
+     call cub_spline(expro_rho,expro_z_eff,nx,rho,xnew,nx)
      expro_z_eff = xnew
-     call bound_interp(expro_rho,expro_w0,nx,rho,xnew,nx)
+     call cub_spline(expro_rho,expro_w0,nx,rho,xnew,nx)
      expro_w0 = xnew
-     call bound_interp(expro_rho,expro_ptot,nx,rho,xnew,nx)
+     call cub_spline(expro_rho,expro_ptot,nx,rho,xnew,nx)
      expro_ptot = xnew
      do i=1,10
-        call bound_interp(expro_rho,expro_ni(i,:),nx,rho,xnew,nx)
+        call cub_spline(expro_rho,expro_ni(i,:),nx,rho,xnew,nx)
         expro_ni(i,:) = xnew(:)
-        call bound_interp(expro_rho,expro_ti(i,:),nx,rho,xnew,nx)
+        call cub_spline(expro_rho,expro_ti(i,:),nx,rho,xnew,nx)
         expro_ti(i,:) = xnew(:)
-        call bound_interp(expro_rho,expro_vtor(i,:),nx,rho,xnew,nx)
+        call cub_spline(expro_rho,expro_vtor(i,:),nx,rho,xnew,nx)
         expro_vtor(i,:) = xnew(:)
-        call bound_interp(expro_rho,expro_vpol(i,:),nx,rho,xnew,nx)
+        call cub_spline(expro_rho,expro_vpol(i,:),nx,rho,xnew,nx)
         expro_vpol(i,:) = xnew(:)
      enddo
 
-     call bound_interp(expro_rho,expro_qohme,nx,rho,xnew,nx)  ; expro_qohme = xnew
-     call bound_interp(expro_rho,expro_qbeame,nx,rho,xnew,nx) ; expro_qbeame = xnew
-     call bound_interp(expro_rho,expro_qbeami,nx,rho,xnew,nx) ; expro_qbeami = xnew
-     call bound_interp(expro_rho,expro_qrfe,nx,rho,xnew,nx)   ; expro_qrfe = xnew
-     call bound_interp(expro_rho,expro_qrfi,nx,rho,xnew,nx)   ; expro_qrfi = xnew
-     call bound_interp(expro_rho,expro_qfuse,nx,rho,xnew,nx) ; expro_qfuse = xnew
-     call bound_interp(expro_rho,expro_qfusi,nx,rho,xnew,nx) ; expro_qfusi = xnew
-     call bound_interp(expro_rho,expro_qbrem,nx,rho,xnew,nx) ; expro_qbrem = xnew
-     call bound_interp(expro_rho,expro_qsync,nx,rho,xnew,nx) ; expro_qsync = xnew
-     call bound_interp(expro_rho,expro_qline,nx,rho,xnew,nx) ; expro_qline = xnew
-     call bound_interp(expro_rho,expro_qei,nx,rho,xnew,nx)   ; expro_qei = xnew
-     call bound_interp(expro_rho,expro_qione,nx,rho,xnew,nx) ; expro_qione = xnew
-     call bound_interp(expro_rho,expro_qioni,nx,rho,xnew,nx) ; expro_qioni = xnew
-     call bound_interp(expro_rho,expro_qcxi,nx,rho,xnew,nx)  ; expro_qcxi = xnew
-     call bound_interp(expro_rho,expro_qmom,nx,rho,xnew,nx)  ; expro_qmom = xnew
-     call bound_interp(expro_rho,expro_qpar,nx,rho,xnew,nx)  ; expro_qpar = xnew
+     call cub_spline(expro_rho,expro_qohme,nx,rho,xnew,nx)  ; expro_qohme = xnew
+     call cub_spline(expro_rho,expro_qbeame,nx,rho,xnew,nx) ; expro_qbeame = xnew
+     call cub_spline(expro_rho,expro_qbeami,nx,rho,xnew,nx) ; expro_qbeami = xnew
+     call cub_spline(expro_rho,expro_qrfe,nx,rho,xnew,nx)   ; expro_qrfe = xnew
+     call cub_spline(expro_rho,expro_qrfi,nx,rho,xnew,nx)   ; expro_qrfi = xnew
+     call cub_spline(expro_rho,expro_qfuse,nx,rho,xnew,nx) ; expro_qfuse = xnew
+     call cub_spline(expro_rho,expro_qfusi,nx,rho,xnew,nx) ; expro_qfusi = xnew
+     call cub_spline(expro_rho,expro_qbrem,nx,rho,xnew,nx) ; expro_qbrem = xnew
+     call cub_spline(expro_rho,expro_qsync,nx,rho,xnew,nx) ; expro_qsync = xnew
+     call cub_spline(expro_rho,expro_qline,nx,rho,xnew,nx) ; expro_qline = xnew
+     call cub_spline(expro_rho,expro_qei,nx,rho,xnew,nx)   ; expro_qei = xnew
+     call cub_spline(expro_rho,expro_qione,nx,rho,xnew,nx) ; expro_qione = xnew
+     call cub_spline(expro_rho,expro_qioni,nx,rho,xnew,nx) ; expro_qioni = xnew
+     call cub_spline(expro_rho,expro_qcxi,nx,rho,xnew,nx)  ; expro_qcxi = xnew
+     call cub_spline(expro_rho,expro_qmom,nx,rho,xnew,nx)  ; expro_qmom = xnew
+     call cub_spline(expro_rho,expro_qpar,nx,rho,xnew,nx)  ; expro_qpar = xnew
 
      !---------------------------------------------------------
      ! Map profile data into expro interface.
