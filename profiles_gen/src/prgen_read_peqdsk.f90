@@ -47,7 +47,7 @@ subroutine prgen_read_peqdsk
   read(1,*) i
   allocate(xv(ncol,i))
   read(1,*) xv
-  call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_ne,nx)
+  call bound_interp(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_ne,nx)
   deallocate(xv)
   close(1)
 
@@ -61,7 +61,7 @@ subroutine prgen_read_peqdsk
   read(1,*) i
   allocate(xv(ncol,i))
   read(1,*) xv
-  call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_te,nx)
+  call bound_interp(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_te,nx)
   deallocate(xv)
   close(1)
 
@@ -70,7 +70,7 @@ subroutine prgen_read_peqdsk
   read(1,*) i
   allocate(xv(ncol,i))
   read(1,*) xv
-  call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_ni,nx)
+  call bound_interp(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_ni,nx)
   deallocate(xv)
   close(1)
 
@@ -84,7 +84,7 @@ subroutine prgen_read_peqdsk
   read(1,*) i
   allocate(xv(ncol,i))
   read(1,*) xv
-  call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_ti,nx)
+  call bound_interp(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_ti,nx)
   deallocate(xv)
   close(1)
 
@@ -95,7 +95,7 @@ subroutine prgen_read_peqdsk
      read(1,*) i
      allocate(xv(ncol,i))
      read(1,*) xv
-     call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,p_tot,nx)
+     call bound_interp(xv(1,:),xv(2,:),i,peqdsk_psi,p_tot,nx)
      deallocate(xv)
      close(1)
   else
@@ -109,7 +109,7 @@ subroutine prgen_read_peqdsk
      read(1,*) i
      allocate(xv(ncol,i))
      read(1,*) xv
-     call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_nb,nx)
+     call bound_interp(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_nb,nx)
      deallocate(xv)
      close(1)
      peqdsk_nbeams = 1
@@ -125,7 +125,7 @@ subroutine prgen_read_peqdsk
      read(1,*) i
      allocate(xv(ncol,i))
      read(1,*) xv
-     call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_pb,nx)
+     call bound_interp(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_pb,nx)
      deallocate(xv)
      close(1)
   else
@@ -140,7 +140,7 @@ subroutine prgen_read_peqdsk
      read(1,*) i
      allocate(xv(ncol,i))
      read(1,*) xv
-     call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_nz(1,:),nx)
+     call bound_interp(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_nz(1,:),nx)
      deallocate(xv)
      close(1)
      peqdsk_nimp = peqdsk_nimp + 1
@@ -150,7 +150,7 @@ subroutine prgen_read_peqdsk
         read(1,*) i
         allocate(xv(ncol,i))
         read(1,*) xv
-        call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_nz(2,:),nx)
+        call bound_interp(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_nz(2,:),nx)
         deallocate(xv)
         close(1)
         peqdsk_nimp = peqdsk_nimp + 1
@@ -160,7 +160,7 @@ subroutine prgen_read_peqdsk
            read(1,*) i
            allocate(xv(ncol,i))
            read(1,*) xv
-           call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_nz(3,:),nx)
+           call bound_interp(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_nz(3,:),nx)
            deallocate(xv)
            close(1)
            peqdsk_nimp = peqdsk_nimp + 1 
@@ -211,7 +211,7 @@ subroutine prgen_read_peqdsk
      read(1,*) i
      allocate(xv(ncol,i))
      read(1,*) xv
-     call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_omegat,nx)
+     call bound_interp(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_omegat,nx)
      deallocate(xv)
      close(1)
   else
@@ -225,7 +225,7 @@ subroutine prgen_read_peqdsk
      read(1,*) i
      allocate(xv(ncol,i))
      read(1,*) xv
-     call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_omgeb,nx)
+     call bound_interp(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_omgeb,nx)
      deallocate(xv)
      close(1)
   else
@@ -239,7 +239,7 @@ subroutine prgen_read_peqdsk
      read(1,*) i
      allocate(xv(ncol,i))
      read(1,*) xv
-     call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_pow_i,nx)
+     call bound_interp(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_pow_i,nx)
      deallocate(xv)
      close(1)
   else
@@ -252,7 +252,7 @@ subroutine prgen_read_peqdsk
      read(1,*) i
      allocate(xv(ncol,i))
      read(1,*) xv
-     call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_pow_e,nx)
+     call bound_interp(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_pow_e,nx)
      deallocate(xv)
      close(1)
   else

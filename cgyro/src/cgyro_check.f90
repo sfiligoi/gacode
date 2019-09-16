@@ -104,10 +104,10 @@ subroutine cgyro_check
      endif
 
   case (2) 
-     call cgyro_info('Equilibrium: Miller')
+     call cgyro_info('Equilibrium: HAM')
 
   case (3) 
-     call cgyro_info('Equilibrium: General (Fourier)')
+     call cgyro_info('Equilibrium: Fourier')
 
      if (geo_ny <= 0) then
         call cgyro_error('Fourier geometry coefficients missing.')

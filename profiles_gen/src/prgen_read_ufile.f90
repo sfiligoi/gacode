@@ -232,13 +232,13 @@ subroutine ufile_mapper(file,x,y,nx,neg_protect)
      endif
      y0(0) = ya
      y0(nx0+1) = yb
-     call cub_spline(x0,y0,nx0+2,x,y,nx)
+     call bound_interp(x0,y0,nx0+2,x,y,nx)
   else if (x0(1) > 0.0 .and. abs(x0(nx0)-1.0) <= epsilon(0.0)) then
      ! Extrapolate to 0 only
      x0(0) = 0.0
      call bound_extrap(ya,yb,y0(0:nx0),x0(0:nx0),nx0+1)
      y0(0) = ya
-     call cub_spline(x0(0:nx0),y0(0:nx0),nx0+1,x,y,nx)
+     call bound_interp(x0(0:nx0),y0(0:nx0),nx0+1,x,y,nx)
   else
      print '(a)','WARNING: (prgen) Bad data in prgen_read_ufile: '//file
      y(:) = 0.0

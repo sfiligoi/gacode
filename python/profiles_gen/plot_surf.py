@@ -63,7 +63,7 @@ if nfourier > 0:
          else:
             ax.plot(x,y,'-',color='purple',linewidth=2,alpha=0.4)
 
-# exMil geometry flux-surfaces
+# HAM geometry flux-surfaces
 for i in rlist:
    rmaj = expro.expro_rmaj[i]
    zmaj = expro.expro_zmag[i]

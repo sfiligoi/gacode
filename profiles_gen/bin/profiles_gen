@@ -65,6 +65,9 @@ then
    echo "             -e <workdir>"
    echo "             Working directory (default is present directory)"
    echo 
+   echo "             -g <GFILE>"
+   echo "             GFILE (geqdsk) containing flux-surface data [required]."
+   echo
    echo "             -ipccw <val>"
    echo "             Specify direction of current (as seen from above)"
    echo "             (1=counter-clockwise,-1=clockwise)"
@@ -73,27 +76,19 @@ then
    echo "             Specify direction of toroidal field (as seen from above)"
    echo "             (1=counter-clockwise,-1=clockwise)"
    echo 
+   echo "             -nfourier <int>"
+   echo "             General legacy Fourier geometry coefficents in input.gacode.geo. (default 24)"
+   echo 
+   echo "             -neut"
+   echo "             Toggle extraction of neutral profiles (input.gacode.neutral)"
+   echo 
    echo "             -V"
    echo "             Verbose (for debugging; use this if you get an error)."
-   echo 
-   echo "Flags for gfile control (see -g option below)"
-   echo 
-   echo "             -noq"
-   echo "             Do not use the flux and q from the EFIT gfile (default is to use them)"
-   echo 
-   echo "             -nop"
-   echo "             Do not use the P_tot from the EFIT gfile."
-   echo 
-   echo "             -nfourier <int>"
-   echo "             Number of Fourier modes to retain in input.gacode.geo/input.geo. (default 24)"
    echo
    echo "ITERDB Options"
    echo 
    echo "             -i <data>"
    echo "             Specify text or NetCDF data file."
-   echo 
-   echo "             -g <gfile>"
-   echo "             Merge EFIT gfile for high-precision geometry data."
    echo 
    echo "             -cer <vpol>"
    echo "             Merge data Er and velocity data from Solomon's cer datafile."
@@ -102,9 +97,6 @@ then
    echo
    echo "             -i <data>"
    echo "             Specify NetCDF data file."
-   echo
-   echo "             -g <gfile>"
-   echo "             EFIT gfile for high-precision geometry data (includes q and P_tot)."
    echo 
    echo "             -r <i1,i2,i3,i4,i5>"
    echo "             Reorder ions."
@@ -122,9 +114,6 @@ then
    echo
    echo "             -i <data.corsica>"
    echo "             Specify Corsica data file."
-   echo
-   echo "             -g <gfile>"
-   echo "             EFIT gfile for high-precision geometry data (includes q and P_tot)."
    echo 
    echo "             -r <reorder sequence>"
    echo "             Reorder ions."
@@ -147,26 +136,20 @@ then
    echo                   
    echo "                      Leaving out the -t option will print time window"
    echo
-   echo "PEQDSK/PFILE Options"
+   echo "PEQDSK/PFILE Options (gfile required)"
    echo
    echo "             -i <PFILE>"
    echo "             Specify PFILE (peqdsk) data file."
-   echo
-   echo "             -g <gfile>"
-   echo "             EFIT gfile for high precision geometry data [REQUIRED] (includes q and P_tot)"
    echo
    echo "null Options"
    echo
    echo "             -i null"
    echo "             Toggle null profile data mode."
    echo
-   echo "             -g <GFILE>"
-   echo "             GFILE (geqdsk) containing flux-surface data [required]."
-   echo
    echo "             -n_null <int>"
    echo "             Number of radial gridpoints (default: 40)"
    echo
-   echo "OMFIT mapper control options"
+   echo "Flux-surface mapper control options"
    echo 
    echo "             -npsi <int>"
    echo "              Number of flux-surfaces to contout"
@@ -181,9 +164,6 @@ then
    echo
    echo "             -i <data>"
    echo "             Data in input.gacode format."
-   echo
-   echo "             -g <GFILE>"
-   echo "             GFILE (geqdsk) containing flux-surface data."
    echo
    echo "VELOCITY GENERATION (VGEN) MODE"
    echo
@@ -278,6 +258,7 @@ ORDER_FLAG=0
 LUMP_FLAG=0
 LUMP_FAST_FLAG=0
 TRUE_AUX_FLAG=1
+NEUT_FLAG=0
 
 # Number of points for -i null option
 N_NULL=40
@@ -290,8 +271,6 @@ EFIT=0
 NRZ=2000
 NPSI=101
 PLOT=0
-NOP_FLAG=0
-NOQ_FLAG=0
 OLDSHAPE=0
 NFOURIER=0
 
@@ -353,14 +332,12 @@ while [ $# -gt 0 ] ; do
   -nrz) shift ; NRZ=$1 ;;
   -npsi) shift ; NPSI=$1 ;;
   -plot) PLOT=1 ;;
-  -oldshape) OLDSHAPE=1 ;;
 
   -sub_aux) TRUE_AUX_FLAG=0 ;;
   
   -V) VERBOSE_FLAG=1 ;;
 
-  -nop) NOP_FLAG=1 ;;
-  -noq) NOQ_FLAG=1 ;;
+  -neut) NEUT_FLAG=1 ;;
 
   -r) shift ; ORDER="$1" ; ORDER_FLAG=1 ;;
 
@@ -634,9 +611,7 @@ echo $CER_FILE >> $CONFIG
 
 # EFIT data control
 echo $EFIT >> $CONFIG
-echo $NOQ_FLAG >> $CONFIG
-echo $NOP_FLAG >> $CONFIG
-echo $OLDSHAPE >> $CONFIG
+echo $NEUT_FLAG >> $CONFIG
 
 # Verbosity
 echo $VERBOSE_FLAG >> $CONFIG

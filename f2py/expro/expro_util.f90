@@ -64,8 +64,8 @@ subroutine expro_compute_derived
   call bound_deriv(expro_bunit,torflux,0.5d0*expro_rmin**2,expro_n_exp)
 
   ! s
-  call bound_deriv(temp,expro_q,expro_rmin,expro_n_exp)
-  expro_s(:) = (expro_rmin(:)/expro_q(:))*temp(:)
+  call bound_deriv(temp,log(abs(expro_q)),expro_rmin,expro_n_exp)
+  expro_s(:) = expro_rmin(:)*temp(:)
 
   !         d(rmaj)
   ! drmaj = -------

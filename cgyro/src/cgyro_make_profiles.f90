@@ -13,7 +13,7 @@ subroutine cgyro_make_profiles
   real :: cc,loglam
 
   !-------------------------------------------------------------
-  
+
   !-------------------------------------------------------------
   ! Local geometry treatment
   !
@@ -24,7 +24,7 @@ subroutine cgyro_make_profiles
      allocate(geo_yin(8,0:geo_ny))
      geo_yin(:,:) = 0.0
   else if (equilibrium_model == 2) then
-     ! Miller
+     ! HAM
      geo_numeq_flag = 0
      geo_ny = 0
      allocate(geo_yin(8,0:geo_ny))
@@ -71,7 +71,7 @@ subroutine cgyro_make_profiles
         z(is)    = z_loc(is)
         mass(is) = mass_loc(is)/2.0
      enddo
-     
+
      shift   = shift_loc
      kappa   = kappa_loc
      delta   = delta_loc
@@ -80,19 +80,19 @@ subroutine cgyro_make_profiles
      s_delta = s_delta_loc
      s_zeta  = s_zeta_loc
 
-     ! Extended Miller
-     shape_sin3 = shape_sin3_loc
-     shape_cos0 = shape_cos0_loc
-     shape_cos1 = shape_cos1_loc
-     shape_cos2 = shape_cos2_loc
-     shape_cos3 = shape_cos3_loc
+     ! HAM (will be reset to 0.0 if udsymmetry_flag=1)
+        shape_sin3 = shape_sin3_loc
+        shape_cos0 = shape_cos0_loc
+        shape_cos1 = shape_cos1_loc
+        shape_cos2 = shape_cos2_loc
+        shape_cos3 = shape_cos3_loc
 
-     shape_s_sin3 = shape_s_sin3_loc
-     shape_s_cos0 = shape_s_cos0_loc
-     shape_s_cos1 = shape_s_cos1_loc
-     shape_s_cos2 = shape_s_cos2_loc
-     shape_s_cos3 = shape_s_cos3_loc
-   
+        shape_s_sin3 = shape_s_sin3_loc
+        shape_s_cos0 = shape_s_cos0_loc
+        shape_s_cos1 = shape_s_cos1_loc
+        shape_s_cos2 = shape_s_cos2_loc
+        shape_s_cos3 = shape_s_cos3_loc
+ 
      q       = q_loc
      s       = s_loc
      zmag    = zmag_loc
@@ -117,7 +117,7 @@ subroutine cgyro_make_profiles
      else
         is_ele = n_species
      endif
-     
+
      dens_ele = dens_loc(is_ele)
      temp_ele = temp_loc(is_ele)
      mass_ele = mass(is_ele)
@@ -308,7 +308,16 @@ subroutine cgyro_make_profiles
      call cgyro_error('ERROR: (NEO) Only one electron species allowed')
      return
   endif
-  
+
+  if (udsymmetry_flag == 1) then
+     zmag = 0.0 ; dzmag = 0.0
+     shape_sin3 = 0.0 ; shape_s_sin3 = 0.0
+     shape_cos0 = 0.0 ; shape_s_cos0 = 0.0
+     shape_cos1 = 0.0 ; shape_s_cos1 = 0.0
+     shape_cos2 = 0.0 ; shape_s_cos2 = 0.0
+     shape_cos3 = 0.0 ; shape_s_cos3 = 0.0
+  endif
+
   !-------------------------------------------------------------
   ! Manage simulation type (n=0,linear,nonlinear)
   !

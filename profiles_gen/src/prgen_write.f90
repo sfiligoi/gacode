@@ -26,14 +26,12 @@ subroutine prgen_write
   expro_delta      = delta
   expro_zeta       = zeta
   expro_zmag       = zmag
-  
-  if (oldshape_flag == 0) then
-     expro_shape_sin3 = shape_sin3
-     expro_shape_cos0 = shape_cos0
-     expro_shape_cos1 = shape_cos1
-     expro_shape_cos2 = shape_cos2
-     expro_shape_cos3 = shape_cos3
-  endif
+
+  expro_shape_sin3 = shape_sin3
+  expro_shape_cos0 = shape_cos0
+  expro_shape_cos1 = shape_cos1
+  expro_shape_cos2 = shape_cos2
+  expro_shape_cos3 = shape_cos3
   !-------------------------------------------------------------------------------------
 
   !-------------------------------------------------------------------------------------
@@ -45,8 +43,10 @@ subroutine prgen_write
   expro_head_cerfile   = '#   *cerfile : '//trim(file_cer)
 
   call expro_write('input.gacode')
-  call expro_write_neutrals('input.gacode.neutrals')
   print '(a)','INFO: (prgen_write) Wrote input.gacode.'
+  if (neut_flag == 1) then
+     call expro_write_neutrals('input.gacode.neutrals')
+  endif
   !-------------------------------------------------------------------------------------
 
 end subroutine prgen_write

@@ -277,18 +277,18 @@ subroutine prgen_read_iterdb_nc
   err = nf90_inq_varid(ncid,trim('sscxl'),varid)
   err = nf90_get_var(ncid,varid,onetwo_sscxl)
   
-  call cub_spline(onetwo_rho_mhd_gridnpsi,onetwo_rmajavnpsi,onetwo_npsi,&
+  call bound_interp(onetwo_rho_mhd_gridnpsi,onetwo_rmajavnpsi,onetwo_npsi,&
        onetwo_rho_grid,rmaj,nx)
 
-  call cub_spline(onetwo_rho_mhd_gridnpsi,onetwo_rminavnpsi,onetwo_npsi,&
+  call bound_interp(onetwo_rho_mhd_gridnpsi,onetwo_rminavnpsi,onetwo_npsi,&
        onetwo_rho_grid,rmin,nx)
 
-  call cub_spline(onetwo_rho_mhd_gridnpsi,onetwo_elongxnpsi,onetwo_npsi,&
+  call bound_interp(onetwo_rho_mhd_gridnpsi,onetwo_elongxnpsi,onetwo_npsi,&
        onetwo_rho_grid,kappa,nx)
  
   work = 0.5*(onetwo_triangnpsi_u+onetwo_triangnpsi_l)
 
-  call cub_spline(onetwo_rho_mhd_gridnpsi,work,onetwo_npsi,&
+  call bound_interp(onetwo_rho_mhd_gridnpsi,work,onetwo_npsi,&
        onetwo_rho_grid,delta,nx)
 
   err = nf90_close(ncid)

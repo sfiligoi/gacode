@@ -17,9 +17,7 @@ module prgen_globals
   integer :: nx
   integer :: format_type
   integer :: efit_method
-  integer :: noq_flag
-  integer :: nop_flag
-  integer :: oldshape_flag
+  integer :: neut_flag
   integer :: verbose_flag
   integer :: ipccw
   integer :: btccw
