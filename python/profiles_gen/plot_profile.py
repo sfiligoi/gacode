@@ -26,13 +26,18 @@ rmin = sys.argv[2]
 rmax = sys.argv[3]
 ext = sys.argv[4]
 loc = int(sys.argv[5])
+dot = int(sys.argv[6])
 
 m1 = 0 ; m2 = 0
 
 def plotit(ax,x,y,ystr):
-   global m1,m2
+   global m1,m2,dot
+   
    ax.plot(x[m1:m2],y[m1:m2],label=r'$'+ystr+'$')
+   if dot:
+      ax.plot(x[m1:m2],y[m1:m2],'o',color='k',alpha=0.3,ms=4)     
    return
+
 
 def plot_select(ax,tag):
    global m1,m2
@@ -76,6 +81,11 @@ def plot_select(ax,tag):
       # mach
       y = expro.expro_mach ; ystr = r'M' ; plotit(ax,x,y,ystr)
 
+   if tag == 'R':
+      # rmaj
+      y = expro.expro_rmaj ; ystr = r'R_0' ; plotit(ax,x,y,ystr)
+      y = expro.expro_drmaj ; ystr = r'dR_0/dr' ; plotit(ax,x,y,ystr)
+
    if tag == 'r':
       # rho
       y = expro.expro_rho ; ystr = '\\rho' ; plotit(ax,x,y,ystr)
@@ -96,9 +106,8 @@ def plot_select(ax,tag):
       for p in range(n):
          y = expro.expro_ti[p,:] ; ystr = 'T_i ['+sname[p]+']' ; plotit(ax,x,y,ystr)
          
-   if tag == 'kappa':
-       y = expro.expro_kappa ; ystr = '\kappa' ; plotit(ax,x,y,ystr)
-       y = expro.expro_skappa ; ystr = 's_\kappa' ; plotit(ax,x,y,ystr)
+   if tag == 'jbs':
+       y = expro.expro_jbs ; ystr = 'J_{bs}' ; plotit(ax,x,y,ystr)
 
    if tag == 'sin':
        y = np.arcsin(expro.expro_delta) ; ystr = 's_1 = \sin^{-1}\delta' ; plotit(ax,x,y,ystr)
@@ -172,9 +181,12 @@ class DemoFrame(wx.Frame):
         notebook.AddPage(tab,'r')
 
         tab = TabPanel(notebook)
+        tab.draw('R')
+        notebook.AddPage(tab,'R')
+
+        tab = TabPanel(notebook)
         tab.draw('kappa')
         notebook.AddPage(tab,'kappa')
-
 
         tab = TabPanel(notebook)
         tab.draw('bunit')
@@ -191,6 +203,10 @@ class DemoFrame(wx.Frame):
         tab = TabPanel(notebook)
         tab.draw('T')
         notebook.AddPage(tab,'T')
+
+        tab = TabPanel(notebook)
+        tab.draw('jbs')
+        notebook.AddPage(tab,'jbs')
 
         tab = TabPanel(notebook)
         tab.draw('sin')

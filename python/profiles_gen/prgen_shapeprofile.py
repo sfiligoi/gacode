@@ -8,32 +8,7 @@ from prgen_geqdsk import *
 from prgen_contour import *
 from prgen_shape import *
 
-repair = True
-
-def iring(x,u,xm):
-   i = np.argmin(np.abs(x-xm))
-   x0 = x[i]
-   y0 = u[i]
-   d = 0.01
-   for j in range(8):
-      d = y0*(1.0+d-x0)
-
-   z = d/(1+d-x)
-   print('INFO: (prgen_shapeprofile) Pole fit with d={:.4f}'.format(d))
-   return z,i
-
-def ising(x,u,xm):
-   i = np.argmin(np.abs(x-xm))
-   x0 = x[i]
-   y0 = u[i]
-   r  = 1/y0
-   d = 0.01
-   for j in range(8):
-      d = (1.0+d-x0)**r
-
-   z = np.log(1+d-x)/np.log(d)
-   print('INFO: (prgen_shapeprofile) Log fit with d={:.4f}'.format(d))
-   return z,i
+repair = False
 
 if len(sys.argv) > 1:
    gfile   = sys.argv[1]
@@ -46,13 +21,27 @@ else:
    sys.exit()
 
 efit  = prgen_geqdsk(gfile)
-n_arc = 512
+n_arc = 400
 nf = 3
 
 ri,zi,psi,q,p,fpol = prgen_contour(efit,nrz=nrz,levels=npsi,psinorm=0.9999,narc=n_arc,quiet=False)
 
 pnorm = ((psi[:]-psi[0])/(psi[-1]-psi[0]))
 rnorm = np.sqrt(pnorm)
+
+if 0==1:
+   fig = plt.figure(figsize=(14,12))
+   ax = fig.add_subplot(111)
+   rd = np.gradient(ri[:,npsi//2])
+   zd = np.gradient(zi[:,npsi//2])
+   s = np.argmax(rd)
+
+   # Shift elements so that first index at max(R).
+   rd[0:-1] = np.roll(rd[0:-1],-s) ; rd[-1] = rd[0] 
+   zd[0:-1] = np.roll(zd[0:-1],-s) ; zd[-1] = zd[0]
+   ax.plot(rd-np.mean(rd))
+   ax.plot(zd)
+   plt.show()
 
 if nfourier > 0:
    oldfourier(ri,zi,nfourier,rnorm)

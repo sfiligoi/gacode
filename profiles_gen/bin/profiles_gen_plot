@@ -34,6 +34,9 @@ then
    echo "          -rmin <min plot radius>"
    echo "          -rmax <max plot radius>"
    echo
+   echo "          -dot"
+   echo "           Toggle plotting profile dots"
+   echo
    echo " FLUX-SURFACE PLOTTING MODE (-plot surf):"
    echo 
    echo "          -n <integer>"
@@ -58,6 +61,7 @@ LOC=1
 RVAR="r"
 RMIN=auto
 RMAX=auto
+DOT=0
 
 # Surface options
 N=16
@@ -78,6 +82,7 @@ while [ $# -gt 0 ] ; do
   -ext) shift ; EXT=$1 ;;
 
   -loc) shift ; LOC=$1 ;;
+  -dot) DOT=1 ;;
 
   -rmin) shift ; RMIN=$1 ;;
   -rmax) shift ; RMAX=$1 ;;
@@ -99,7 +104,7 @@ if [ $PLOT = null ] ; then
 elif [ $PLOT = surf ] ; then 
    python $PYROOT/plot_surf.py $PLOT $N $EXT
 else
-   python $PYROOT/plot_profile.py $RVAR $RMIN $RMAX $EXT $LOC
+   python $PYROOT/plot_profile.py $RVAR $RMIN $RMAX $EXT $LOC $DOT
 fi
 #==============================================================================
 

@@ -261,7 +261,10 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
         print('INFO: (prgen_contour) Contour levels = {:d} | n_arc = {:d} | nrz = {:d}'.format(levels,narc,nrz))
 
     # absolute psi levels to interpolate (psinorm is normalized)
-    out_psi = np.linspace(0,psinorm,levels)*(psi1-psi0)+psi0
+    # packsep < 1.0 increases separatrix packing
+    packsep = 0.8
+    
+    out_psi = (np.linspace(0,psinorm,levels))**packsep*(psi1-psi0)+psi0
 
     CS = contourPaths(slfR,slfZ,slfPSI,out_psi)
 

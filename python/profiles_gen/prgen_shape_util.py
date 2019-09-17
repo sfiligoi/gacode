@@ -122,7 +122,7 @@ def oldfourier(ri,zi,nf,rnorm):
 
       # PLOT contour
       ax = fig.add_subplot(111)
-      for i in range(1,4):
+      for i in range(1,6):
          ax.plot(rnorm,ari[i,:],'-k',linewidth=1)
          ax.plot(rnorm,azi[i,:],'-k',linewidth=1)
          ax.plot(rnorm,bri[i,:],'-k',linewidth=1)
@@ -130,18 +130,41 @@ def oldfourier(ri,zi,nf,rnorm):
       plt.show()
    
 def extrap(x,u):
-   m = (u[5]-u[4])/(x[5]-x[4])
-   b = u[5]-m*x[5]
-   u[0] = b
-   u[1] = m*x[1]+b
-   u[2] = m*x[2]+b
-   u[3] = m*x[3]+b
-   return u
+    p = 4
+    m = (u[p]-u[p-1])/(x[p]-x[p-1])
+    b = u[p]-m*x[p]
+    for i in range(p-2):
+        u[i] = m*x[i]+b
+    return u
 
 def zero(x,u):
-   r = u[4]/x[4]
-   u[0] = 0.0
-   u[1] = x[1]*r
-   u[2] = x[2]*r
-   u[3] = x[3]*r
-   return u
+    p = 3
+    r = u[p]/x[p]
+    for i in range(p-1):
+        u[i] = x[i]*r
+    return u
+
+def iring(x,u,xm):
+    i = np.argmin(np.abs(x-xm))
+    x0 = x[i]
+    y0 = u[i]
+    d = 0.01
+    for j in range(8):
+        d = y0*(1.0+d-x0)
+
+    z = d/(1+d-x)
+    print('INFO: (prgen_shapeprofile) Pole fit with d={:.4f}'.format(d))
+    return z,i
+
+def ising(x,u,xm):
+    i = np.argmin(np.abs(x-xm))
+    x0 = x[i]
+    y0 = u[i]
+    r  = 1/y0
+    d = 0.01
+    for j in range(8):
+        d = (1.0+d-x0)**r
+
+    z = np.log(1+d-x)/np.log(d)
+    print('INFO: (prgen_shapeprofile) Log fit with d={:.4f}'.format(d))
+    return z,i
