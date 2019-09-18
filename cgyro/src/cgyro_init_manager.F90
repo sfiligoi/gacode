@@ -16,6 +16,7 @@ subroutine cgyro_init_manager
   use mpi
   use timer_lib
   use cgyro_globals
+  use half_hermite
 
 #ifdef _OPENACC
   use cgyro_io
@@ -64,12 +65,24 @@ subroutine cgyro_init_manager
   allocate(e_deriv1_mat(n_energy,n_energy))
 
   ! Construct energy nodes and weights
-  call pseudo_maxwell_new(n_energy,&
-       e_max,&
-       energy,&
-       w_e,&
-       e_deriv1_mat,&
-       trim(path)//'out.cgyro.egrid')
+  if (e_method<=2) then
+     call pseudo_maxwell_new(n_energy,&
+          e_max,&
+          energy,&
+          w_e,&
+          e_deriv1_mat,&
+          trim(path)//'out.cgyro.egrid')
+  else if (e_method==3) then
+     ! interface function in module half_hermite
+     call pseudo_maxwell_pliocene(n_energy,&
+          e_max,&
+          energy,&
+          w_e,&
+          e_deriv1_mat,&
+          alpha_poly,& ! weight fct=x^alpha_poly*exp(-x**2)
+          trim(path)//'out.cgyro.egrid')
+  end if
+     
 
   vel(:) = sqrt(energy(:))
 
