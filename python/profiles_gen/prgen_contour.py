@@ -264,7 +264,7 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
 
     # absolute psi levels to interpolate (psinorm is normalized)
     # packsep < 1.0 increases separatrix packing
-    packsep = 0.7
+    packsep = 0.8
     
     out_psi = (np.linspace(0,psinorm,levels))**packsep*(psi1-psi0)+psi0
 
