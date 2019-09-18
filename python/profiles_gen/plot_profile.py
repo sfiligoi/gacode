@@ -81,16 +81,22 @@ def plot_select(ax,tag):
       # mach
       y = expro.expro_mach ; ystr = r'M' ; plotit(ax,x,y,ystr)
 
-   if tag == 'R':
-      # rmaj
-      y = expro.expro_rmaj ; ystr = r'R_0' ; plotit(ax,x,y,ystr)
-      y = expro.expro_drmaj ; ystr = r'dR_0/dr' ; plotit(ax,x,y,ystr)
-
    if tag == 'r':
       # rho
       y = expro.expro_rho ; ystr = '\\rho' ; plotit(ax,x,y,ystr)
       # polflux
       y = expro.expro_polflux ; ystr = '\psi' ; plotit(ax,x,y/y[-1],ystr)
+
+   if tag == 'R':
+      # rmaj
+      y = expro.expro_rmaj ; ystr = r'R_0' ; plotit(ax,x,y,ystr)
+      y = expro.expro_drmaj ; ystr = r'dR_0/dr' ; plotit(ax,x,y,ystr)
+
+   if tag == 'kappa':
+      # kappa
+      y = expro.expro_kappa ; ystr = r'\kappa' ; plotit(ax,x,y,ystr)
+      y = expro.expro_skappa ; ystr = r's_\kappa' ; plotit(ax,x,y,ystr)
+
 
    if tag == 'n':
       # ne

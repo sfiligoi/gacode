@@ -130,18 +130,18 @@ def oldfourier(ri,zi,nf,rnorm):
       plt.show()
    
 def extrap(x,u):
-    p = 4
+    p = 2
     m = (u[p]-u[p-1])/(x[p]-x[p-1])
     b = u[p]-m*x[p]
-    for i in range(p-2):
-        u[i] = m*x[i]+b
+    u[0] = b
     return u
 
 def zero(x,u):
-    p = 3
-    r = u[p]/x[p]
-    for i in range(p-1):
-        u[i] = x[i]*r
+    #p = 1
+    #r = u[p]/x[p]
+    #for i in range(p):
+    #    u[i] = x[i]*r
+    u[0] = 0.0
     return u
 
 def iring(x,u,xm):

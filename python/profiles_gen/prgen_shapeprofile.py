@@ -21,10 +21,10 @@ else:
    sys.exit()
 
 efit  = prgen_geqdsk(gfile)
-n_arc = 400
+n_arc = 700
 nf = 3
 
-ri,zi,psi,q,p,fpol = prgen_contour(efit,nrz=nrz,levels=npsi,psinorm=0.9999,narc=n_arc,quiet=False)
+ri,zi,psi,q,p,fpol = prgen_contour(efit,nrz=nrz,levels=npsi,psinorm=0.995,narc=n_arc,quiet=False)
 
 pnorm = ((psi[:]-psi[0])/(psi[-1]-psi[0]))
 rnorm = np.sqrt(pnorm)
@@ -68,18 +68,18 @@ else:
 # Repair functions near origin
 
 xi[0,:] = zero(rnorm,xi[0,:]) # rmin
-xi[1,:] = extrap(rnorm,xi[1,:]) # rmaj
+xi[1,:] = extrap(pnorm,xi[1,:]) # rmaj
 xi[2,:] = extrap(rnorm,xi[2,:]) # kappa
 xi[3,:] = extrap(rnorm,xi[3,:]) # zmaj
 
 si[1,:] = zero(rnorm,si[1,:]) # delta
-si[2,:] = zero(rnorm,si[2,:]) # zeta
-si[3,:] = zero(rnorm,si[3,:]) # s3
+si[2,:] = zero(pnorm,si[2,:]) # zeta
+si[3,:] = zero(pnorm,si[3,:]) # s3
 
-ci[0,:] = extrap(rnorm,ci[0,:]) # tilt
+ci[0,:] = extrap(pnorm,ci[0,:]) # tilt
 ci[1,:] = zero(rnorm,ci[1,:]) # c1
-ci[2,:] = zero(rnorm,ci[2,:]) # c2
-ci[3,:] = zero(rnorm,ci[3,:]) # c3
+ci[2,:] = zero(pnorm,ci[2,:]) # c2
+ci[3,:] = zero(pnorm,ci[3,:]) # c3
 
 # Repair near separatrix
 si0 = np.zeros([nf+1,npsi]) ; si0[:,:] = si[:,:]

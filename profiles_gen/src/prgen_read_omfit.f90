@@ -69,21 +69,21 @@ subroutine prgen_read_omfit
      call prgen_get_chi(nx,q,dpsi,rho,torfluxa)
   endif
 
-  call cub_spline(efit_rho,efit_rmin,npsi,rho,rmin,nx)
-  call cub_spline(efit_psi,efit_q,npsi,dpsi,q,nx)
-  call cub_spline(efit_psi,efit_p,npsi,dpsi,p_tot,nx)
-  call cub_spline(efit_psi,efit_zmaj,npsi,dpsi,zmag,nx)
-  call cub_spline(efit_psi,efit_rmaj,npsi,dpsi,rmaj,nx)
-  call cub_spline(efit_psi,efit_kappa,npsi,dpsi,kappa,nx)
-  call cub_spline(efit_psi,efit_si(:,2),npsi,dpsi,delta,nx) ; delta = sin(delta)
-  call cub_spline(efit_psi,efit_si(:,3),npsi,dpsi,zeta,nx) ; zeta = -zeta
+  call bound_interp(efit_rho,efit_rmin,npsi,rho,rmin,nx)
+  call bound_interp(efit_psi,efit_q,npsi,dpsi,q,nx)
+  call bound_interp(efit_psi,efit_p,npsi,dpsi,p_tot,nx)
+  call bound_interp(efit_rho,efit_zmaj,npsi,rho,zmag,nx)
+  call bound_interp(efit_rho,efit_rmaj,npsi,rho,rmaj,nx)
+  call bound_interp(efit_rho,efit_kappa,npsi,rho,kappa,nx)
+  call bound_interp(efit_rho,efit_si(:,2),npsi,rho,delta,nx) ; delta = sin(delta)
+  call bound_interp(efit_rho,efit_si(:,3),npsi,rho,zeta,nx) ; zeta = -zeta
 
   ! New shape coefficients
-  call cub_spline(efit_psi,efit_si(:,4),npsi,dpsi,shape_sin3,nx)
-  call cub_spline(efit_psi,efit_ci(:,1),npsi,dpsi,shape_cos0,nx)
-  call cub_spline(efit_psi,efit_ci(:,2),npsi,dpsi,shape_cos1,nx)
-  call cub_spline(efit_psi,efit_ci(:,3),npsi,dpsi,shape_cos2,nx)
-  call cub_spline(efit_psi,efit_ci(:,4),npsi,dpsi,shape_cos3,nx)
+  call bound_interp(efit_rho,efit_si(:,4),npsi,rho,shape_sin3,nx)
+  call bound_interp(efit_rho,efit_ci(:,1),npsi,rho,shape_cos0,nx)
+  call bound_interp(efit_rho,efit_ci(:,2),npsi,rho,shape_cos1,nx)
+  call bound_interp(efit_rho,efit_ci(:,3),npsi,rho,shape_cos2,nx)
+  call bound_interp(efit_rho,efit_ci(:,4),npsi,rho,shape_cos3,nx)
 
   !==============================================================================
 
@@ -112,7 +112,7 @@ subroutine prgen_read_omfit
      ! NOTE: need sqrt here to get sensible behaviour as r -> 0.
      do i=1,4
         do ip=0,nfourier
-           call cub_spline(sqrt(efit_psi),g3vec(:,ip,i),npsi,sqrt(dpsi),g3rho(:,ip,i),nx)
+           call bound_interp(sqrt(efit_psi),g3vec(:,ip,i),npsi,sqrt(dpsi),g3rho(:,ip,i),nx)
         enddo
      enddo
 

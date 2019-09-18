@@ -124,8 +124,10 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
     if not quiet:
         print('INFO: (prgen_contour) Levels based on psi')
 
+    nrzz = int(nrz*(min(Zin)-max(Zin))/(min(Rin)-max(Rin)))
+    
     slfR   = np.linspace(min(Rin),max(Rin),nrz)
-    slfZ   = np.linspace(min(Zin),max(Zin),nrz)
+    slfZ   = np.linspace(min(Zin),max(Zin),nrzz)
     slfPSI = RectBivariateSplineNaN(Zin,Rin,psirz)(slfZ,slfR)
 
     if not quiet:
@@ -262,7 +264,7 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
 
     # absolute psi levels to interpolate (psinorm is normalized)
     # packsep < 1.0 increases separatrix packing
-    packsep = 0.8
+    packsep = 0.7
     
     out_psi = (np.linspace(0,psinorm,levels))**packsep*(psi1-psi0)+psi0
 
