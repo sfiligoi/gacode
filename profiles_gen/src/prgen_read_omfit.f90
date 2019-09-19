@@ -89,7 +89,7 @@ subroutine prgen_read_omfit
 
   if (nfourier > 0) then
 
-     ! Old Fourier representation
+     ! Legacy direct Fourier representation
      allocate(g3vec(npsi,0:nfourier,4))
      allocate(g3rho(nx,0:nfourier,4))
 
@@ -99,25 +99,13 @@ subroutine prgen_read_omfit
      enddo
      close(1)
 
-     ! Explicitly set rmin=0 at origin
-     g3vec(1,1:nfourier,:) = 0.0
-
-     ! Extrapolate centers (R0,Z0) to origin
-     do i=1,4
-        call bound_extrap(fa,fb,g3vec(:,0,i),efit_psi,npsi)
-        g3vec(1,0,i) = fa
-     enddo
-
      ! Map results onto poloidal flux (dpsi) grid:
      ! NOTE: need sqrt here to get sensible behaviour as r -> 0.
      do i=1,4
         do ip=0,nfourier
-           call bound_interp(sqrt(efit_psi),g3vec(:,ip,i),npsi,sqrt(dpsi),g3rho(:,ip,i),nx)
+           call bound_interp(efit_rho,g3vec(:,ip,i),npsi,rho,g3rho(:,ip,i),nx)
         enddo
      enddo
-
-     ! Explicitly set rmin=0 at origin
-     g3rho(1,1:nfourier,:) = 0.0
 
      open(unit=1,file='input.gacode.geo',status='replace')
      write(1,'(a)') '# input.gacode.geo'
