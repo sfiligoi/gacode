@@ -1,4 +1,5 @@
 !gfortran -march=native -O3 -fno-stack-arrays -fimplicit-none -fdefault-real-8 half_hermite.f90 -c
+!gfortran -march=native -O3 -fcheck=all -ffpe-trap=invalid -fno-stack-arrays -fimplicit-none -fdefault-real-8 half_hermite.f90 -c
 !intel:
 !ifort -stand f15 -warn all -march=native -O3 -heap-arrays 10 -implicitnone -real-size 64 half_hermite.f90 -c
 module half_hermite
@@ -183,8 +184,7 @@ contains
     endif
     if (vb) print 2,'thp,e',tanhp1(log(epsmori/2.)/2),tanhp1(mori*sinh(t0)),epsmori
 
-    nintervals=2*n ! number of elementary intervals between integration points
-!    nintervals=128 ! number of elementary intervals between integration points
+    nintervals=max(128,2*n) ! number of elementary intervals between integration points
     eps=epsbase*sqrt(1.*nintervals) !*3*n
     dt=(t1-t0)/nintervals
     !preliminary values
