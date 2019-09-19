@@ -24,7 +24,7 @@ efit  = prgen_geqdsk(gfile)
 n_arc = 800
 nf = 3
 
-ri,zi,psi,q,p,fpol = prgen_contour(efit,nrz=nrz,levels=npsi,psinorm=0.995,narc=n_arc,quiet=False)
+ri,zi,psi,q,p,fpol = prgen_contour(efit,nrz=nrz,levels=npsi,psinorm=0.999,narc=n_arc,quiet=False)
 
 pnorm = ((psi[:]-psi[0])/(psi[-1]-psi[0]))
 rnorm = np.sqrt(pnorm)
@@ -81,30 +81,6 @@ ci[1,:] = zero(rnorm,ci[1,:]) # c1
 ci[2,:] = zero(pnorm,ci[2,:]) # c2
 ci[3,:] = zero(pnorm,ci[3,:]) # c3
 
-# Repair near separatrix
-si0 = np.zeros([nf+1,npsi]) ; si0[:,:] = si[:,:]
-ci0 = np.zeros([nf+1,npsi]) ; ci0[:,:] = ci[:,:]
-xi0 = np.zeros([4,npsi])    ; xi0[:,:] = xi[:,:]
-
-if repair:
-   u = si0[1,:] ; z,i = ising(rnorm,u/u[-1],0.92)
-   si[1,i:] = u[-1]*z[i:]
-
-   u = si0[2,:] ; z,i = iring(pnorm,u/u[-1],0.84)
-   si[2,i:] = u[-1]*z[i:]
-
-   u = ci0[0,:] ; z,i = iring(pnorm,(u-u[0])/(u[-1]-u[0]),0.84)
-   ci[0,i:] = (u[-1]-u[0])*z[i:]+u[0]
-
-   u = ci0[1,:] ; z,i = iring(pnorm,u/u[-1],0.84)
-   ci[1,i:] = u[-1]*z[i:]
-
-   u = ci0[2,:] ; z,i = iring(pnorm,u/u[-1],0.84)
-   ci[2,i:] = u[-1]*z[i:]
-
-   u = xi0[2,:] ; z,i = ising(pnorm,(u-u[0])/(u[-1]-u[0]),0.84)
-   xi[2,i:] = (u[-1]-u[0])*z[i:]+u[0]
-
 if ix == 0:
    f=open('out.dim','w')
    f.write(str(npsi)+'\n')
@@ -138,9 +114,8 @@ for i in range(4):
    ax.set_title(r'$'+label[i]+'$')
    ax.grid(which="both",ls=":")
    ax.set_xlim([0,1])
-   u = xi[i,:] ; u0 = xi0[i,:]
+   u = xi[i,:] 
    ax.plot(pnorm,u,'-r',linewidth=1,alpha=1)
-   ax.plot(pnorm,u0,'-k',linewidth=1,alpha=1)
 
 label=['c_0','c_1','c_2','c_3']
 for i in range(4):
@@ -149,9 +124,8 @@ for i in range(4):
    ax.set_title(r'$'+label[i]+'$')
    ax.grid(which="both",ls=":")
    ax.set_xlim([0,1])
-   u = ci[i,:] ; u0 = ci0[i,:]
+   u = ci[i,:]
    ax.plot(pnorm,u,'-r',linewidth=1,alpha=1)
-   ax.plot(pnorm,u0,'-k',linewidth=1,alpha=1)
 
 label=['-','\delta','-\zeta','s_3']
 for i in range(4):
@@ -161,9 +135,8 @@ for i in range(4):
    ax.grid(which="both",ls=":")
    ax.set_xlim([0,1])
    if i > 0:
-      u = si[i,:] ; u0 = si0[i,:]
+      u = si[i,:]
       ax.plot(pnorm,u,'-r',linewidth=1,alpha=1)
-      ax.plot(pnorm,u0,'-k',linewidth=1,alpha=1)
             
 plt.tight_layout()
 plt.show()
