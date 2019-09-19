@@ -20,15 +20,15 @@ F77    = ${FC}
 
 FOMP   = -qopenmp
 FMATH  = -r8
-FOPT   = -xMIC-AVX512 -mtune=knl -no-prec-div -O3 -fp-model fast=2 -pad -ip -qoverride-limits -mkl=sequential #-fast -no-ipo
-FDEBUG = -shared-intel -check all -check noarg_temp_created -traceback
+FOPT   = -xMIC-AVX512 -mtune=knl -implicitnone -no-prec-div -O3 -fp-model fast=2 -pad -ip -qoverride-limits -mkl=sequential #-fast -no-ipo
+FDEBUG = -shared-intel -implicitnone -check all -check noarg_temp_created -traceback
 #FPETSC = 
 F2PY  = f2py
 
 # System math libraries
 
-LMATH =  -mkl=cluster
-#       -L${FFTW_DIR}/lib -lfftw3_threads -lfftw3f_threads -lfftw3 -lfftw3f
+LMATH =  
+#       -L${FFTW_DIR}/lib -lfftw3_threads -lfftw3f_threads -lfftw3 -lfftw3f -mkl=cluster
 #       -L${FFTW_DIR}/lib -lfftw3_threads -lfftw3 -mkl=cluster
 
 # NetCDF
