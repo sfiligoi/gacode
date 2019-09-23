@@ -24,12 +24,11 @@ def prgen_fshape(rd,zd,nf):
     ds = dtheta/np.pi
 
     # Trapezoidal integration spectrally-accurate
-    for i in range(nd-1):
-        for n in range(nf+1):
-            y = np.cos(n*theta[i])*rd[i] ; ar[n] = ar[n]+ds*y
-            y = np.sin(n*theta[i])*rd[i] ; br[n] = br[n]+ds*y
-            y = np.cos(n*theta[i])*zd[i] ; az[n] = az[n]+ds*y
-            y = np.sin(n*theta[i])*zd[i] ; bz[n] = bz[n]+ds*y
+    for n in range(nf+1):
+       y = np.cos(n*theta[:])*rd[:] ; ar[n] = ds*np.sum(y[:-1])
+       y = np.sin(n*theta[:])*rd[:] ; br[n] = ds*np.sum(y[:-1])
+       y = np.cos(n*theta[:])*zd[:] ; az[n] = ds*np.sum(y[:-1])
+       y = np.sin(n*theta[:])*zd[:] ; bz[n] = ds*np.sum(y[:-1])
 
     return ar,br,az,bz
 

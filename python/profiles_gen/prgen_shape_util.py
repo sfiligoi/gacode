@@ -101,6 +101,7 @@ def oldfourier(ri,zi,nf,rnorm):
       bri[:,i+1] = br[:]
       azi[:,i+1] = az[:]
       bzi[:,i+1] = bz[:]
+   print(ari[:,-1])
 
    # Repair origin
    ari[0,:] = extrap(rnorm,ari[0,:]) 
@@ -137,34 +138,5 @@ def extrap(x,u):
     return u
 
 def zero(x,u):
-    #p = 1
-    #r = u[p]/x[p]
-    #for i in range(p):
-    #    u[i] = x[i]*r
     u[0] = 0.0
     return u
-
-def iring(x,u,xm):
-    i = np.argmin(np.abs(x-xm))
-    x0 = x[i]
-    y0 = u[i]
-    d = 0.01
-    for j in range(8):
-        d = y0*(1.0+d-x0)
-
-    z = d/(1+d-x)
-    print('INFO: (prgen_shapeprofile) Pole fit with d={:.4f}'.format(d))
-    return z,i
-
-def ising(x,u,xm):
-    i = np.argmin(np.abs(x-xm))
-    x0 = x[i]
-    y0 = u[i]
-    r  = 1/y0
-    d = 0.01
-    for j in range(8):
-        d = (1.0+d-x0)**r
-
-    z = np.log(1+d-x)/np.log(d)
-    print('INFO: (prgen_shapeprofile) Log fit with d={:.4f}'.format(d))
-    return z,i
