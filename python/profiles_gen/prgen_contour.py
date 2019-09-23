@@ -289,9 +289,8 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
             z[0]=z[-1]=(z[0]+z[-1])*0.5
             n0 = len(r)
             # Arc length
-            larc = np.zeros([n0])
-            for i in range(n0-1):
-               larc[i+1] = larc[i]+np.sqrt((r[i+1]-r[i])**2+(z[i+1]-z[i])**2)
+            dl = np.sqrt(np.diff(r)**2+np.diff(z)**2)
+            larc = np.zeros([n0]) ; larc[1:] = np.cumsum(dl)
                
             # Cubic interpolation from fine t0-mesh to coarse t-mesh
             t =np.linspace(0,1,narc)*larc[-1]
@@ -303,6 +302,7 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
     cs = interpolate.interp1d(efitpsi,efitq,kind='quadratic') ; out_q = cs(out_psi)
     cs = interpolate.interp1d(efitpsi,efitf,kind='quadratic') ; out_f = cs(out_psi)
 
+    print(larc[0],larc[-1],RI[20:30,-1])
     # Recalculate q based on definition (and some identities)
     loopint = np.zeros([levels])
     for k in range(levels):
