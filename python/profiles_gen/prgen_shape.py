@@ -4,12 +4,12 @@ import numpy as np
 
 from prgen_shape_util import *
 
-def prgen_shape(r,z,n_arc,nf,pflag):
+def prgen_shape(r,z,narc,nf,pflag):
 
    # Number of theta-points for plotting
-   dz = np.zeros(n_arc)
-   ur = np.zeros(n_arc) ; uz = np.zeros(n_arc)
-   vr = np.zeros(n_arc) ; vz = np.zeros(n_arc)
+   dz = np.zeros(narc)
+   ur = np.zeros(narc) ; uz = np.zeros(narc)
+   vr = np.zeros(narc) ; vz = np.zeros(narc)
 
    # Pointwise Extrema ; definitions of rmin, rmaj, etc.
    n1 = np.argmax(z) ; m1 = np.argmin(z)
@@ -33,7 +33,7 @@ def prgen_shape(r,z,n_arc,nf,pflag):
 
    # Compute generalized angles
    eps = 1.0-1e-6
-   for i in range(n_arc):
+   for i in range(narc):
       # (ur,uz): principle angles (discontinuous)
       uz[i] = np.arcsin(eps*(z[i]-zmaj)/zmin)
       ur[i] = np.arccos(eps*(r[i]-rmaj)/rmin)
@@ -67,7 +67,7 @@ def prgen_shape(r,z,n_arc,nf,pflag):
    xr[2] = zmin/rmin
    xr[3] = zmaj
 
-   for i in range(n_arc-1):
+   for i in range(narc-1):
       dz[i] = vz[i+1]-vz[i]
 
    dz[-1] = dz[0]
@@ -77,10 +77,10 @@ def prgen_shape(r,z,n_arc,nf,pflag):
    cr = np.zeros(nf+1) 
    sr = np.zeros(nf+1) 
 
-   cr[0] = moment(n_arc,vr,np.ones(n_arc),dz)
+   cr[0] = moment(narc,vr,np.ones(narc),dz)
    for p in range(1,nf+1):
-      cr[p] = moment(n_arc,vr,np.cos(p*x),dz)
-      sr[p] = moment(n_arc,vr,np.sin(p*x),dz)
+      cr[p] = moment(narc,vr,np.cos(p*x),dz)
+      sr[p] = moment(narc,vr,np.sin(p*x),dz)
 
    if pflag:
        plot(r,z,x,vr,xr,cr,sr)

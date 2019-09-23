@@ -8,14 +8,11 @@ from prgen_fshape import *
 # f,w are periodic
 def moment(n,f,w,d):
 
-    s0 = 0.0
-    s1 = 0.0
-    for i in range(n-1):
-      s0 = s0+0.5*(f[i]*w[i]+f[i+1]*w[i+1])*d[i]
-      s1 = s1+0.5*(w[i]*w[i]+w[i+1]*w[i+1])*d[i]
-
-    return s0/s1
-
+   s0 = 0.5*np.sum((f[:-1]*w[:-1]+f[1:]*w[1:])*d[:-1])
+   s1 = 0.5*np.sum((w[:-1]*w[:-1]+w[1:]*w[1:])*d[:-1])
+   
+   return s0/s1
+    
 def plot(r,z,x,vr,xr,cr,sr):
 
     nf = len(cr)-1

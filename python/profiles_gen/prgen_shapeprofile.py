@@ -64,7 +64,9 @@ else:
    r=ri[:,ix] ; z=zi[:,ix]
    cr,sr,xr = prgen_shape(r,z,narc,nf,True)
    sys.exit()
-   
+
+print(ci[:,-1])
+
 # Repair functions near origin
 
 xi[0,:] = zero(rnorm,xi[0,:]) # rmin
