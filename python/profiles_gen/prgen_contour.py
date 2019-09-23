@@ -283,15 +283,20 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
             # Reverse order (compared to original OMFIT order)
             r=path.vertices[::-1,0]
             z=path.vertices[::-1,1]
-            r[0]=r[-1]=(r[0]+r[-1])*0.5
-            z[0]=z[-1]=(z[0]+z[-1])*0.5
             if any(np.isnan(r*z)):
                 print('ERROR: (prgen_contour) NaN encountered')
+            r[0]=r[-1]=(r[0]+r[-1])*0.5
+            z[0]=z[-1]=(z[0]+z[-1])*0.5
+            n0 = len(r)
+            # Arc length
+            larc = np.zeros([n0])
+            for i in range(n0-1):
+               larc[i+1] = larc[i]+np.sqrt((r[i+1]-r[i])**2+(z[i+1]-z[i])**2)
+               
             # Cubic interpolation from fine t0-mesh to coarse t-mesh
-            t0=np.linspace(0,1,len(r))
-            t =np.linspace(0,1,narc)
-            cs=interpolate.CubicSpline(t0,r,bc_type='periodic') ; RI[:,k]=cs(t) 
-            cs=interpolate.CubicSpline(t0,z,bc_type='periodic') ; ZI[:,k]=cs(t)
+            t =np.linspace(0,1,narc)*larc[-1]
+            cs=interpolate.CubicSpline(larc,r,bc_type='periodic') ; RI[:,k]=cs(t) 
+            cs=interpolate.CubicSpline(larc,z,bc_type='periodic') ; ZI[:,k]=cs(t)
 
     efitpsi = np.linspace(out_psi[0],out_psi[-1],len(efitp))
     cs = interpolate.interp1d(efitpsi,efitp,kind='quadratic') ; out_p = cs(out_psi)

@@ -157,6 +157,9 @@ then
    echo "             -nrz <int>"
    echo "              R-Z resolution for psi contours."
    echo
+   echo "             -narc <int>"
+   echo "              Equal-arc contour points."
+   echo
    echo "             -oldshape <int>"
    echo "              Generate old (restricted) shape parameter set."
    echo
@@ -268,8 +271,9 @@ BTCCW=0
 
 # OMFIT mapper variables
 EFIT=0
-NRZ=3800
-NPSI=120
+NRZ=1201
+NPSI=200
+NARC=600
 PLOT=0
 NFOURIER=0
 
@@ -329,6 +333,7 @@ while [ $# -gt 0 ] ; do
   -n_null) shift ; N_NULL=$1 ;;
 
   -nrz) shift ; NRZ=$1 ;;
+  -narc) shift ; NARC=$1 ;;
   -npsi) shift ; NPSI=$1 ;;
   -plot) PLOT=1 ;;
 
@@ -635,9 +640,9 @@ echo $TRUE_AUX_FLAG >> $CONFIG
 #==============================================================
 if [ $EFIT -eq 1 ] ; then
    if [ $PLOT -eq 1 ] ; then
-      python $OMFIT $GFILE $NRZ $NPSI -1 $NFOURIER
+      python $OMFIT $GFILE $NRZ $NARC $NPSI -1 $NFOURIER
    else 
-      python $OMFIT $GFILE $NRZ $NPSI 0 $NFOURIER
+      python $OMFIT $GFILE $NRZ $NARC $NPSI 0 $NFOURIER
    fi
 fi
 #==============================================================

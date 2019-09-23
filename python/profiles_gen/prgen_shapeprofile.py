@@ -13,18 +13,18 @@ repair = False
 if len(sys.argv) > 1:
    gfile   = sys.argv[1]
    nrz     = int(sys.argv[2])
-   npsi    = int(sys.argv[3])
-   ix      = int(sys.argv[4])
-   nfourier = int(sys.argv[5])
+   narc    = int(sys.argv[3])
+   npsi    = int(sys.argv[4])
+   ix      = int(sys.argv[5])
+   nfourier = int(sys.argv[6])
 else:
    print('Usage: python prgen_shapeprofile.py <gfile> <nrz> <npsi> <ix> <nfourier>')
    sys.exit()
 
-efit  = prgen_geqdsk(gfile)
-n_arc = 800
+efit = prgen_geqdsk(gfile)
 nf = 3
 
-ri,zi,psi,q,p,fpol = prgen_contour(efit,nrz=nrz,levels=npsi,psinorm=0.999,narc=n_arc,quiet=False)
+ri,zi,psi,q,p,fpol = prgen_contour(efit,nrz=nrz,levels=npsi,psinorm=0.999,narc=narc,quiet=False)
 
 pnorm = ((psi[:]-psi[0])/(psi[-1]-psi[0]))
 rnorm = np.sqrt(pnorm)
@@ -56,13 +56,13 @@ if ix < 1:
    xi = np.zeros([4,npsi])
    for i in range(npsi-1):
       r=ri[:,i+1] ; z=zi[:,i+1]
-      cr,sr,xr = prgen_shape(r,z,n_arc,nf,False)
+      cr,sr,xr = prgen_shape(r,z,narc,nf,False)
       ci[:,i+1] = cr[:]
       si[:,i+1] = sr[:]
       xi[:,i+1] = xr[:]
 else:
    r=ri[:,ix] ; z=zi[:,ix]
-   cr,sr,xr = prgen_shape(r,z,n_arc,nf,True)
+   cr,sr,xr = prgen_shape(r,z,narc,nf,True)
    sys.exit()
    
 # Repair functions near origin
