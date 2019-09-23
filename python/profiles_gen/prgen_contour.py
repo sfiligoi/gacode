@@ -304,9 +304,8 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
     
     # Recalculate q based on definition (and some identities)
     loopint = np.zeros([levels])
-    for k in range(levels):
-       for i in range(narc-1):
-          loopint[k] = loopint[k]+(RI[i+1,k]-RI[i,k])*(ZI[i+1,k]+ZI[i,k])/(RI[i+1,k]+RI[i,k])
+    for i in range(narc-1):
+       loopint[:] = loopint[:]+(RI[i+1,:]-RI[i,:])*(ZI[i+1,:]+ZI[i,:])/(RI[i+1,:]+RI[i,:])
                     
     loopint = loopint/(2*np.pi)
     new_q = out_f*np.gradient(loopint,out_psi)
