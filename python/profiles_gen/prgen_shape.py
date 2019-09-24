@@ -48,7 +48,7 @@ def prgen_shape(r,z,narc,nf,xplot):
 
    # Define vr as deviation from vz
    vr = vr-vz ; vr[-1] = vr[0]
-
+   
    x = vz
    # Now:
    #
@@ -64,19 +64,19 @@ def prgen_shape(r,z,narc,nf,xplot):
    xr[3] = zmaj
 
    for i in range(narc-1):
-      dz[i] = vz[i+1]-vz[i]
+      dx[i] = x[i+1]-x[i]
 
-   dz[-1] = dz[0]
+   dx[-1] = dx[0]
 
    # Compute expansion coefficients (cr):
    #  vr = sum cr*cos(nx)+sr*sin(nx)
    cr = np.zeros(nf+1) 
    sr = np.zeros(nf+1) 
 
-   cr[0] = moment(narc,vr,np.ones(narc),dz)
+   cr[0] = moment(narc,vr,np.ones(narc),dx)
    for p in range(1,nf+1):
-      cr[p] = moment(narc,vr,np.cos(p*x),dz)
-      sr[p] = moment(narc,vr,np.sin(p*x),dz)
+      cr[p] = moment(narc,vr,np.cos(p*x),dx)
+      sr[p] = moment(narc,vr,np.sin(p*x),dx)
 
    if xplot > 0.0:
       outfile = '{:.3f}'.format(xplot)+'.png'

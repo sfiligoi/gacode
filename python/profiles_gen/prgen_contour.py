@@ -229,42 +229,39 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
     
     out_psi = (np.linspace(0,psinorm,levels))**packsep*(psi1-psi0)+psi0
 
-    CS = contourPaths(r2d,z2d,psi2d,out_psi)
+    contours = contourPaths(r2d,z2d,psi2d,out_psi)
 
     RI = np.zeros([narc,levels]) ; ZI = np.zeros([narc,levels])
-    R1 = np.zeros([narc])        ; Z1 = np.zeros([narc])
+    r1 = np.zeros([narc])        ; z1 = np.zeros([narc])
     
-    for k,item1 in enumerate(CS):
+    for k,item1 in enumerate(contours):
         if k==0:
             # axis
-            R1[:] = raxis_new*np.ones(narc) ; Z1[:] = zaxis_new*np.ones(narc)
+            r1[:] = raxis_new*np.ones([narc]) ; z1[:] = zaxis_new*np.ones([narc])
         else:
             # all others
             path=item1[-1]
             # Reverse order (compared to original OMFIT order)
-            r=path.vertices[::-1,0]
-            z=path.vertices[::-1,1]
+            r=path.vertices[::-1,0] ; r[-1] = r[0]
+            z=path.vertices[::-1,1] ; z[-1] = z[0]
             if any(np.isnan(r*z)):
                 print('ERROR: (prgen_contour) NaN encountered')
-            r[0]=r[-1]=(r[0]+r[-1])*0.5
-            z[0]=z[-1]=(z[0]+z[-1])*0.5
-            n0 = len(r)
 
             # Arc length
             dl = np.sqrt(np.diff(r)**2+np.diff(z)**2)
-            larc = np.zeros([n0]) ; larc[1:] = np.cumsum(dl)
+            larc = np.zeros([len(r)]) ; larc[1:] = np.cumsum(dl)
                
-            # Cubic interpolation from fine t0-mesh to coarse t-mesh
+            # Cubic interpolation from fine contour mesh to coarse t-mesh
             t = np.linspace(0,1,narc)*larc[-1]
-            cs = interpolate.CubicSpline(larc,r,bc_type='periodic') ; R1=cs(t) 
-            cs = interpolate.CubicSpline(larc,z,bc_type='periodic') ; Z1=cs(t)
+            cs = interpolate.splrep(larc,r,per=True) ; r1=interpolate.splev(t,cs) 
+            cs = interpolate.splrep(larc,z,per=True) ; z1=interpolate.splev(t,cs)
 
             # Shift elements so that first index at max(R).
-            s = np.argmax(R1)
-            R1[0:-1] = np.roll(R1[0:-1],-s) ; R1[-1] = R1[0] 
-            Z1[0:-1] = np.roll(Z1[0:-1],-s) ; Z1[-1] = Z1[0]
+            s = np.argmax(r1)
+            r1[0:-1] = np.roll(r1[0:-1],-s) ; r1[-1] = r1[0] 
+            z1[0:-1] = np.roll(z1[0:-1],-s) ; z1[-1] = z1[0]
             
-        RI[:,k] = R1[:] ; ZI[:,k] = Z1[:]
+        RI[:,k] = r1[:] ; ZI[:,k] = z1[:]
             
     efitpsi = np.linspace(out_psi[0],out_psi[-1],len(efitp))
     cs = interpolate.interp1d(efitpsi,efitp,kind='quadratic') ; out_p = cs(out_psi)
@@ -276,8 +273,8 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
     for i in range(narc-1):
        loopint[:] = loopint[:]+(RI[i+1,:]-RI[i,:])*(ZI[i+1,:]+ZI[i,:])/(RI[i+1,:]+RI[i,:])
                     
-    loopint = loopint/(2*np.pi)
-    new_q = out_f*np.gradient(loopint,out_psi)
-
+    cs = interpolate.splrep(out_psi,loopint) ; new_q = interpolate.splev(out_psi,cs,der=1)
+    new_q = out_f*new_q/(2*np.pi)
+   
     return RI,ZI,out_psi,new_q,out_p,out_f
 
