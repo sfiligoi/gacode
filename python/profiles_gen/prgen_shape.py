@@ -8,7 +8,7 @@ from prgen_shape_util import *
 def prgen_shape(r,z,narc,nf,xplot):
    
    # Number of theta-points for plotting
-   dz = np.zeros(narc)
+   dx = np.zeros(narc)
    ur = np.zeros(narc) ; uz = np.zeros(narc)
    vr = np.zeros(narc) ; vz = np.zeros(narc)
 
