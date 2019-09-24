@@ -77,12 +77,12 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
     efitp    = geqdsk['PRES']
     efitq    = geqdsk['QPSI']
     efitf    = geqdsk['FPOL']
-    slfR0    = geqdsk['RMAXIS']
-    slfZ0    = geqdsk['ZMAXIS']
-    slfrlim  = geqdsk['RLIM']
-    slfzlim  = geqdsk['ZLIM']
+    raxis    = geqdsk['RMAXIS']
+    zaxis    = geqdsk['ZMAXIS']
+    rlim     = geqdsk['RLIM']
+    zlim     = geqdsk['ZLIM']
 
-    if any(np.isnan(slfrlim)) or any(np.isnan(slfzlim)):
+    if any(np.isnan(rlim)) or any(np.isnan(zlim)):
         print('ERROR: (prgen_contour) rlim/zlim arrays contain NaNs')
         return
 
@@ -94,28 +94,26 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
 
     nrzz = int(nrz*(min(Zin)-max(Zin))/(min(Rin)-max(Rin)))
     
-    slfR   = np.linspace(min(Rin),max(Rin),nrz)
-    slfZ   = np.linspace(min(Zin),max(Zin),nrzz)
-    slfPSI = RectBivariateSplineNaN(Zin,Rin,psirz)(slfZ,slfR)
+    r2d   = np.linspace(min(Rin),max(Rin),nrz)
+    z2d   = np.linspace(min(Zin),max(Zin),nrzz)
+    psi2d = RectBivariateSplineNaN(Zin,Rin,psirz)(z2d,r2d)
 
     if not quiet:
-       dres=np.sqrt((slfR[1]-slfR[0])**2+(slfZ[1]-slfZ[0])**2)
+       dres=np.sqrt((r2d[1]-r2d[0])**2+(z2d[1]-z2d[0])**2)
        print('INFO: (prgen_contour) Grid diagonal resolution [m] = {:.5f}'.format(dres))
 
     #-----------------------------------------------------------------
     # Crop 
     #-----------------------------------------------------------------
-    if len(slfrlim) and len(slfzlim):
-        #if not quiet:
-        #    print('INFO: (prgen_contour) Cropping tables')
-        bbox=[min(slfrlim),max(slfrlim),min(slfzlim),max(slfzlim)]
-        limits=[max([np.argmin(abs(slfR-bbox[0]))-1,0]),
-                min([np.argmin(abs(slfR-bbox[1]))+1,len(slfR)-1]),
-                max([np.argmin(abs(slfZ-bbox[2]))-1,0]),
-                min([np.argmin(abs(slfZ-bbox[3]))+1,len(slfZ)-1])]
-        slfPSI=slfPSI[limits[2]:limits[3],limits[0]:limits[1]]
-        slfR=slfR[limits[0]:limits[1]]
-        slfZ=slfZ[limits[2]:limits[3]]
+    if len(rlim) and len(zlim):
+        bbox=[min(rlim),max(rlim),min(zlim),max(zlim)]
+        limits=[max([np.argmin(abs(r2d-bbox[0]))-1,0]),
+                min([np.argmin(abs(r2d-bbox[1]))+1,len(r2d)-1]),
+                max([np.argmin(abs(z2d-bbox[2]))-1,0]),
+                min([np.argmin(abs(z2d-bbox[3]))+1,len(z2d)-1])]
+        psi2d=psi2d[limits[2]:limits[3],limits[0]:limits[1]]
+        r2d=r2d[limits[0]:limits[1]]
+        z2d=z2d[limits[2]:limits[3]]
 
     #-----------------------------------------------------------------
     # Find axis
@@ -123,21 +121,20 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
     if not quiet:
         print('INFO: (prgen_contour) Finding magnetic axis and separatrix')
 
-    Raxis = slfR0 ; Zaxis = slfZ0
-    dmax = (slfR[-1] - slfR[0]) / 2.0 / 1.5
+    dmax = (r2d[-1]-r2d[0])/2.0/1.5
 
-    RR,ZZ = np.meshgrid(slfR-Raxis,slfZ-Zaxis)
+    RR,ZZ = np.meshgrid(r2d-raxis,z2d-zaxis)
     DD = np.sqrt(RR**2+ZZ**2) < dmax
-    tmp = slfPSI.copy()
+    tmp = psi2d.copy()
     tmp[np.where(DD == 0)] = np.nan
 
     # figure out sign
     ax = 0
-    for k in range(1,int(min([len(slfR)//2,len(slfZ)//2])))[::-1]:
-        ri = (len(slfR)//2 + np.array([-k, 0, +k, 0, 0])).astype(int)
-        zi = (len(slfZ)//2 + np.array([0, 0, 0, +k, -k])).astype(int)
+    for k in range(1,int(min([len(r2d)//2,len(z2d)//2])))[::-1]:
+        ri = (len(r2d)//2 + np.array([-k, 0, +k, 0, 0])).astype(int)
+        zi = (len(z2d)//2 + np.array([0, 0, 0, +k, -k])).astype(int)
         try:
-            ax, bx, ay, by, c = paraboloid(slfR[ri], slfZ[zi], tmp[zi, ri])
+            ax, bx, ay, by, c = paraboloid(r2d[ri], z2d[zi], tmp[zi, ri])
             break
         except np.linalg.LinAlgError:
             pass
@@ -148,22 +145,18 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
         # look for the maximum
         m = np.nanargmax(tmp)
         
-    Zmi = int(m / slfPSI.shape[1])
-    Rmi = int(m - Zmi * slfPSI.shape[1])
-
-    # pick center points based on the grid
-    slfR0 = slfR[Rmi]
-    slfZ0 = slfZ[Zmi]
+    Zmi = int(m / psi2d.shape[1])
+    Rmi = int(m - Zmi * psi2d.shape[1])
 
     # fit paraboloid in the vicinity of the grid-based center
     ri = (Rmi + np.array([-1, 0, +1, 0, 0])).astype(int)
     zi = (Zmi + np.array([0, 0, 0, +1, -1])).astype(int)
-    ax, bx, ay, by, c = paraboloid(slfR[ri], slfZ[zi], slfPSI[zi,ri])
-    slfR0_interp = -bx/(2*ax)
-    slfZ0_interp = -by/(2*ay)
+    ax, bx, ay, by, c = paraboloid(r2d[ri], z2d[zi], psi2d[zi,ri])
+    raxis_new = -bx/(2*ax)
+    zaxis_new = -by/(2*ay)
 
     # set as the center value of PSI (based on R0 and Z0)
-    psi0 = RectBivariateSplineNaN(slfZ, slfR, slfPSI).ev(slfZ0_interp,slfR0_interp)
+    psi0 = RectBivariateSplineNaN(z2d, r2d, psi2d).ev(zaxis_new,raxis_new)
    
     #-----------------------------------------------------------------
     # Find separatrix
@@ -172,8 +165,8 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
         
     # separatrix is found by looking for the largest closed path enclosing the magnetic axis
 
-    flxm=np.nanmin(slfPSI)
-    flxM=np.nanmax(slfPSI)
+    flxm=np.nanmin(psi2d)
+    flxM=np.nanmax(psi2d)
         
     kdbgmax=100
     psi1 = None
@@ -182,24 +175,24 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
         flx=0.5*(flxM+flxm)
     
         line=[]
-        paths=contourPaths(slfR,slfZ,slfPSI,[flx])[0]
+        paths=contourPaths(r2d,z2d,psi2d,[flx])[0]
         for path in paths:
             if not np.isnan(path.vertices[:]).any() and np.allclose(path.vertices[0,0],path.vertices[-1,0]) and np.allclose(path.vertices[0,1],path.vertices[-1,1]):
                 path.vertices[0,0] = path.vertices[-1,0] = (path.vertices[0,0]+path.vertices[-1,0])*0.5
                 path.vertices[0,1] = path.vertices[-1,1] = (path.vertices[0,1]+path.vertices[-1,1])*0.5
                 simplePath=mp.Path(path.vertices[::len(path.vertices[:,0])//10+1,:])
-                if np.max(simplePath.vertices[:,0]) > slfR0 and np.min(simplePath.vertices[:,0]) < slfR0 and np.max(simplePath.vertices[:,1]) > slfZ0 and np.min(simplePath.vertices[:,1]) < slfZ0:
-                    if simplePath.contains_point((slfR0,slfZ0)):
+                if np.max(simplePath.vertices[:,0]) > raxis_new and np.min(simplePath.vertices[:,0]) < raxis_new and np.max(simplePath.vertices[:,1]) > zaxis_new and np.min(simplePath.vertices[:,1]) < zaxis_new:
+                    if simplePath.contains_point((raxis_new,zaxis_new)):
                         dR = path.vertices[1,0]-path.vertices[0,0]
                         dZ = path.vertices[1,1]-path.vertices[0,1]
-                        orientation = int(np.sign((path.vertices[0,1]-slfZ0)*dR-(path.vertices[0,0]-slfR0)*dZ))
+                        orientation = int(np.sign((path.vertices[0,1]-zaxis_new)*dR-(path.vertices[0,0]-raxis_new)*dZ))
                         line=line=path.vertices[::orientation,:]
                         break
             
         if len(line):
             try:
                 # stop condition
-                np.testing.assert_array_almost_equal(sep/slfR0,line/slfR0,accuracy)
+                np.testing.assert_array_almost_equal(sep/raxis_new,line/raxis_new,accuracy)
                 break
             except Exception:
                 pass
@@ -217,10 +210,10 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
     print('INFO  (prgen_contour) dpsi = {:.9f} [EFIT] {:.9f} [new]'.format(efitpsi1-efitpsi0,psi1-psi0))
 
     # Separatrix hits edges of computation domain
-    if ((np.abs(np.min(sep[:,0])-np.min(slfR)) < 1e-3) or
-        (np.abs(np.max(sep[:,0])-np.max(slfR)) < 1e-3) or
-        (np.abs(np.min(sep[:,1])-np.min(slfZ)) < 1e-3) or
-        (np.abs(np.max(sep[:,1])-np.max(slfZ)) < 1e-3)):
+    if ((np.abs(np.min(sep[:,0])-np.min(r2d)) < 1e-3) or
+        (np.abs(np.max(sep[:,0])-np.max(r2d)) < 1e-3) or
+        (np.abs(np.min(sep[:,1])-np.min(z2d)) < 1e-3) or
+        (np.abs(np.max(sep[:,1])-np.max(z2d)) < 1e-3)):
         print("WARNING: (prgen_contour) New separatrix hits computation boundary")
             
     #-----------------------------------------------------------
@@ -236,15 +229,15 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
     
     out_psi = (np.linspace(0,psinorm,levels))**packsep*(psi1-psi0)+psi0
 
-    CS = contourPaths(slfR,slfZ,slfPSI,out_psi)
+    CS = contourPaths(r2d,z2d,psi2d,out_psi)
 
-    RI = np.zeros([narc,levels])
-    ZI = np.zeros([narc,levels])
-        
+    RI = np.zeros([narc,levels]) ; ZI = np.zeros([narc,levels])
+    R1 = np.zeros([narc])        ; Z1 = np.zeros([narc])
+    
     for k,item1 in enumerate(CS):
         if k==0:
             # axis
-            RI[:,k] = slfR0*np.ones(narc) ; ZI[:,k] = slfZ0*np.ones(narc)
+            R1[:] = raxis_new*np.ones(narc) ; Z1[:] = zaxis_new*np.ones(narc)
         else:
             # all others
             path=item1[-1]
@@ -256,15 +249,23 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
             r[0]=r[-1]=(r[0]+r[-1])*0.5
             z[0]=z[-1]=(z[0]+z[-1])*0.5
             n0 = len(r)
+
             # Arc length
             dl = np.sqrt(np.diff(r)**2+np.diff(z)**2)
             larc = np.zeros([n0]) ; larc[1:] = np.cumsum(dl)
                
             # Cubic interpolation from fine t0-mesh to coarse t-mesh
-            t =np.linspace(0,1,narc)*larc[-1]
-            cs=interpolate.CubicSpline(larc,r,bc_type='periodic') ; RI[:,k]=cs(t) 
-            cs=interpolate.CubicSpline(larc,z,bc_type='periodic') ; ZI[:,k]=cs(t)
+            t = np.linspace(0,1,narc)*larc[-1]
+            cs = interpolate.CubicSpline(larc,r,bc_type='periodic') ; R1=cs(t) 
+            cs = interpolate.CubicSpline(larc,z,bc_type='periodic') ; Z1=cs(t)
 
+            # Shift elements so that first index at max(R).
+            s = np.argmax(R1)
+            R1[0:-1] = np.roll(R1[0:-1],-s) ; R1[-1] = R1[0] 
+            Z1[0:-1] = np.roll(Z1[0:-1],-s) ; Z1[-1] = Z1[0]
+            
+        RI[:,k] = R1[:] ; ZI[:,k] = Z1[:]
+            
     efitpsi = np.linspace(out_psi[0],out_psi[-1],len(efitp))
     cs = interpolate.interp1d(efitpsi,efitp,kind='quadratic') ; out_p = cs(out_psi)
     cs = interpolate.interp1d(efitpsi,efitq,kind='quadratic') ; out_q = cs(out_psi)

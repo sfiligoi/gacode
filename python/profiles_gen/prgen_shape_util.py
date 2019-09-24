@@ -90,6 +90,9 @@ def plot_ang(r,z,x,vr,xr,cr,sr,outfile):
     plt.tight_layout()
     print('INFO: (plot_ang) Writing '+outfile)
     plt.savefig(outfile)
+    plt.close()
+
+    return
 
 def plot_coef(pnorm,ci,si,xi):
    
@@ -132,4 +135,6 @@ def plot_coef(pnorm,ci,si,xi):
             
    plt.tight_layout()
    plt.savefig('plot_coef.png')
-   
+   plt.close()
+
+   return

@@ -92,6 +92,11 @@ def plot_select(ax,tag):
       y = expro.expro_rmaj ; ystr = r'R_0' ; plotit(ax,x,y,ystr)
       y = expro.expro_drmaj ; ystr = r'dR_0/dr' ; plotit(ax,x,y,ystr)
 
+   if tag == 'Z':
+      # rmaj
+      y = expro.expro_zmag ; ystr = r'Z_0' ; plotit(ax,x,y,ystr)
+      y = expro.expro_dzmag ; ystr = r'dZ_0/dr' ; plotit(ax,x,y,ystr)
+
    if tag == 'kappa':
       # kappa
       y = expro.expro_kappa ; ystr = r'\kappa' ; plotit(ax,x,y,ystr)
@@ -189,6 +194,10 @@ class DemoFrame(wx.Frame):
         tab = TabPanel(notebook)
         tab.draw('R')
         notebook.AddPage(tab,'R')
+
+        tab = TabPanel(notebook)
+        tab.draw('Z')
+        notebook.AddPage(tab,'Z')
 
         tab = TabPanel(notebook)
         tab.draw('kappa')

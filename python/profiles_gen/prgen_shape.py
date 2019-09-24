@@ -2,37 +2,33 @@ import sys
 import string
 import numpy as np
 
+from gacodefuncs import *
 from prgen_shape_util import *
 
 def prgen_shape(r,z,narc,nf,xplot):
-
+   
    # Number of theta-points for plotting
    dz = np.zeros(narc)
    ur = np.zeros(narc) ; uz = np.zeros(narc)
    vr = np.zeros(narc) ; vz = np.zeros(narc)
 
-   # Pointwise Extrema ; definitions of rmin, rmaj, etc.
+   # Extrema ; definitions of rmin, rmaj, etc.
    n1 = np.argmax(z) ; m1 = np.argmin(z)
-   zmaj = 0.5*(z[n1]+z[m1])
-   zmin = 0.5*(z[n1]-z[m1])
-
    n2 = np.argmax(r) ; m2 = np.argmin(r)
-   rmaj = 0.5*(r[n2]+r[m2])
-   rmin = 0.5*(r[n2]-r[m2])
-
-   # Index of rightmost point (want this to be 0th index)
-   s = n2
-
-   # Shift elements so that first index at max(R).
-   r[0:-1] = np.roll(r[0:-1],-s) ; z[0:-1] = np.roll(z[0:-1],-s)
-   r[-1] = r[0] ; z[-1] = z[0]
-
+   u = np.array([1,2,3])
+   l,za = quadratic_max(u,np.array([z[n1-1],z[n1],z[n1+1]]))
+   l,zb = quadratic_max(u,np.array([z[m1-1],z[m1],z[m1+1]]))
+   l,ra = quadratic_max(u,np.array([r[n2-1],r[n2],r[n2+1]]))
+   l,rb = quadratic_max(u,np.array([r[m2-1],r[m2],r[m2+1]]))
+   zmaj = 0.5*(za+zb) ; zmin = 0.5*(za-zb)
+   rmaj = 0.5*(ra+rb) ; rmin = 0.5*(ra-rb)
+     
    if z[1] < z[0]:
       # Reverse order (may be needed)
       r = np.flip(r,0) ; z = np.flip(z,0)
 
    # Compute generalized angles
-   eps = 1.0-1e-6
+   eps = 1.0-1e-10
    for i in range(narc):
       # (ur,uz): principle angles (discontinuous)
       uz[i] = np.arcsin(eps*(z[i]-zmaj)/zmin)
@@ -83,7 +79,7 @@ def prgen_shape(r,z,narc,nf,xplot):
       sr[p] = moment(narc,vr,np.sin(p*x),dz)
 
    if xplot > 0.0:
-      outfile = '{:4.2}'.format(xplot)+'.png'
+      outfile = '{:.3f}'.format(xplot)+'.png'
       plot_ang(r,z,x,vr,xr,cr,sr,outfile)
 
    return cr,sr,xr
@@ -91,21 +87,13 @@ def prgen_shape(r,z,narc,nf,xplot):
 def prgen_fshape(rd,zd,nf):
 
     nd = len(rd)
-
-    s = np.argmax(rd)
-
-    # Shift elements so that first index at max(R).
-    rd[0:-1] = np.roll(rd[0:-1],-s) ; rd[-1] = rd[0] 
-    zd[0:-1] = np.roll(zd[0:-1],-s) ; zd[-1] = zd[0]
-    
+   
     # Construct equally-spaced poloidal angle
     theta  = np.linspace(0,1,nd)*2*np.pi
     dtheta = theta[1]-theta[0]
     
-    ar = np.zeros(nf+1)
-    br = np.zeros(nf+1)
-    az = np.zeros(nf+1)
-    bz = np.zeros(nf+1)
+    ar = np.zeros(nf+1) ; br = np.zeros(nf+1)
+    az = np.zeros(nf+1) ; bz = np.zeros(nf+1)
 
     ds = dtheta/np.pi
 
@@ -126,30 +114,26 @@ def oldfourier(ri,zi,nf,rnorm):
    print("INFO: (oldfourier) Generating legacy Fourier coefficients")
    npsi = len(rnorm)
    
-   ari = np.zeros([nf+1,npsi])
-   bri = np.zeros([nf+1,npsi])
-   azi = np.zeros([nf+1,npsi])
-   bzi = np.zeros([nf+1,npsi])
+   ari = np.zeros([nf+1,npsi]) ; bri = np.zeros([nf+1,npsi])
+   azi = np.zeros([nf+1,npsi]) ; bzi = np.zeros([nf+1,npsi])
 
    for i in range(npsi-1):
       r=ri[:,i+1] ; z=zi[:,i+1]
       ar,br,az,bz = prgen_fshape(r,z,nf)
-      ari[:,i+1] = ar[:]
-      bri[:,i+1] = br[:]
-      azi[:,i+1] = az[:]
-      bzi[:,i+1] = bz[:]
+      ari[:,i+1] = ar[:] ; bri[:,i+1] = br[:]
+      azi[:,i+1] = az[:] ; bzi[:,i+1] = bz[:]
 
    # Repair origin
    ari[0,:] = extrap(rnorm,ari[0,:]) 
    azi[0,:] = extrap(rnorm,azi[0,:]) 
    for i in range(1,nf+1):
-      ari[i,:] = zero(rnorm,ari[i,:]) 
-      bri[i,:] = zero(rnorm,bri[i,:]) 
-      azi[i,:] = zero(rnorm,azi[i,:]) 
-      bzi[i,:] = zero(rnorm,bzi[i,:]) 
+      ari[i,:] = zero(rnorm,ari[i,:]) ; bri[i,:] = zero(rnorm,bri[i,:]) 
+      azi[i,:] = zero(rnorm,azi[i,:]) ; bzi[i,:] = zero(rnorm,bzi[i,:]) 
 
    u = ari
    u = np.append(u,bri)
    u = np.append(u,azi)
    u = np.append(u,bzi)
    u.tofile('fluxfit.geo')
+
+   return
