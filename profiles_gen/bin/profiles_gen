@@ -76,9 +76,6 @@ then
    echo "             Specify direction of toroidal field (as seen from above)"
    echo "             (1=counter-clockwise,-1=clockwise)"
    echo 
-   echo "             -nfourier <int>"
-   echo "             General legacy Fourier geometry coefficents in input.gacode.geo. (default 24)"
-   echo 
    echo "             -neut"
    echo "             Toggle extraction of neutral profiles (input.gacode.neutral)"
    echo 
@@ -160,8 +157,8 @@ then
    echo "             -narc <int>"
    echo "              Equal-arc contour points."
    echo
-   echo "             -oldshape <int>"
-   echo "              Generate old (restricted) shape parameter set."
+   echo "             -nfourier <int>"
+   echo "             General legacy Fourier geometry coefficents in input.gacode.geo (off by default)"
    echo
    echo "input.gacode (simple passthrough if no gfile specified)"
    echo
@@ -271,10 +268,9 @@ BTCCW=0
 
 # OMFIT mapper variables
 EFIT=0
-NRZ=1201
+NRZ=1401
 NPSI=200
 NARC=600
-PLOT=0
 NFOURIER=0
 
 # Extra datafiles
@@ -335,7 +331,6 @@ while [ $# -gt 0 ] ; do
   -nrz) shift ; NRZ=$1 ;;
   -narc) shift ; NARC=$1 ;;
   -npsi) shift ; NPSI=$1 ;;
-  -plot) PLOT=1 ;;
 
   -sub_aux) TRUE_AUX_FLAG=0 ;;
   
@@ -639,11 +634,7 @@ echo $TRUE_AUX_FLAG >> $CONFIG
 
 #==============================================================
 if [ $EFIT -eq 1 ] ; then
-   if [ $PLOT -eq 1 ] ; then
-      python $OMFIT $GFILE $NRZ $NARC $NPSI -1 $NFOURIER
-   else 
-      python $OMFIT $GFILE $NRZ $NARC $NPSI 0 $NFOURIER
-   fi
+   python $OMFIT $GFILE $NRZ $NARC $NPSI $NFOURIER
 fi
 #==============================================================
 

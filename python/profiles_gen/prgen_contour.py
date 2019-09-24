@@ -4,53 +4,21 @@ import matplotlib.path as mp
 import matplotlib._contour as _contour
 import matplotlib.pyplot as plt
 
-def contourPaths(x, y, Z, levels, remove_boundary_points=False, smooth_factor=1):
+def contourPaths(x, y, Z, levels):
     '''
     :param x: 1D x coordinate
     :param y: 1D y coordinate
     :param Z: 2D data
     :param levels: levels to trace
-    :param remove_boundary_points: remove traces at the boundary
-    :param smooth_factor: smooth contours by cranking up grid resolution
     :return: list of segments
     '''
-
-    sf = int(round(smooth_factor))
-    if sf > 1:
-        x = ndimage.zoom(x,sf)
-        y = ndimage.zoom(y,sf)
-        Z = ndimage.zoom(Z,sf)
 
     [X,Y]=np.meshgrid(x,y)
     contour_generator = _contour.QuadContourGenerator(X, Y, Z, None, True, 0)
 
-    mx=min(x)
-    Mx=max(x)
-    my=min(y)
-    My=max(y)
-
     allsegs = []
     for level in levels:
-        segs=contour_generator.create_contour(level)
-        if not remove_boundary_points:
-            segs_ = segs
-        else:
-            segs_ = []
-            for segarray in segs:
-                x_ = segarray[:,0]
-                y_ = segarray[:,1]
-                valid = []
-                for i in range(len(x_)-1):
-                    if np.isclose(x_[i],x_[i+1]) and (np.isclose(x_[i],Mx) or np.isclose(x_[i],mx)):
-                        continue
-                    if np.isclose(y_[i],y_[i+1]) and (np.isclose(y_[i],My) or np.isclose(y_[i],my)):
-                        continue
-                    valid.append((x_[i],y_[i]))
-                    if i==len(x_):
-                        valid.append(x_[i+1],y_[i+1])
-                if len(valid):
-                    segs_.append(np.array(valid))
-
+        segs_=contour_generator.create_contour(level)
         segs=list(map(mp.Path,segs_))
         allsegs.append(segs)
 

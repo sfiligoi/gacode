@@ -4,7 +4,7 @@ import numpy as np
 
 from prgen_shape_util import *
 
-def prgen_shape(r,z,narc,nf,pflag):
+def prgen_shape(r,z,narc,nf,xplot):
 
    # Number of theta-points for plotting
    dz = np.zeros(narc)
@@ -82,7 +82,74 @@ def prgen_shape(r,z,narc,nf,pflag):
       cr[p] = moment(narc,vr,np.cos(p*x),dz)
       sr[p] = moment(narc,vr,np.sin(p*x),dz)
 
-   if pflag:
-       plot(r,z,x,vr,xr,cr,sr)
+   if xplot > 0.0:
+      outfile = '{:4.2}'.format(xplot)+'.png'
+      plot_ang(r,z,x,vr,xr,cr,sr,outfile)
 
    return cr,sr,xr
+
+def prgen_fshape(rd,zd,nf):
+
+    nd = len(rd)
+
+    s = np.argmax(rd)
+
+    # Shift elements so that first index at max(R).
+    rd[0:-1] = np.roll(rd[0:-1],-s) ; rd[-1] = rd[0] 
+    zd[0:-1] = np.roll(zd[0:-1],-s) ; zd[-1] = zd[0]
+    
+    # Construct equally-spaced poloidal angle
+    theta  = np.linspace(0,1,nd)*2*np.pi
+    dtheta = theta[1]-theta[0]
+    
+    ar = np.zeros(nf+1)
+    br = np.zeros(nf+1)
+    az = np.zeros(nf+1)
+    bz = np.zeros(nf+1)
+
+    ds = dtheta/np.pi
+
+    # Trapezoidal integration spectrally-accurate
+    for n in range(nf+1):
+       y = np.cos(n*theta[:])*rd[:] ; ar[n] = ds*np.sum(y[:-1])
+       y = np.sin(n*theta[:])*rd[:] ; br[n] = ds*np.sum(y[:-1])
+       y = np.cos(n*theta[:])*zd[:] ; az[n] = ds*np.sum(y[:-1])
+       y = np.sin(n*theta[:])*zd[:] ; bz[n] = ds*np.sum(y[:-1])
+
+    return ar,br,az,bz
+
+#-----------------------------------------------------------------------------
+# Old Fourier expansion
+#-----------------------------------------------------------------------------
+def oldfourier(ri,zi,nf,rnorm):
+
+   print("INFO: (oldfourier) Generating legacy Fourier coefficients")
+   npsi = len(rnorm)
+   
+   ari = np.zeros([nf+1,npsi])
+   bri = np.zeros([nf+1,npsi])
+   azi = np.zeros([nf+1,npsi])
+   bzi = np.zeros([nf+1,npsi])
+
+   for i in range(npsi-1):
+      r=ri[:,i+1] ; z=zi[:,i+1]
+      ar,br,az,bz = prgen_fshape(r,z,nf)
+      ari[:,i+1] = ar[:]
+      bri[:,i+1] = br[:]
+      azi[:,i+1] = az[:]
+      bzi[:,i+1] = bz[:]
+
+   # Repair origin
+   ari[0,:] = extrap(rnorm,ari[0,:]) 
+   azi[0,:] = extrap(rnorm,azi[0,:]) 
+   for i in range(1,nf+1):
+      ari[i,:] = zero(rnorm,ari[i,:]) 
+      bri[i,:] = zero(rnorm,bri[i,:]) 
+      azi[i,:] = zero(rnorm,azi[i,:]) 
+      bzi[i,:] = zero(rnorm,bzi[i,:]) 
+
+   u = ari
+   u = np.append(u,bri)
+   u = np.append(u,azi)
+   u = np.append(u,bzi)
+   u.tofile('fluxfit.geo')

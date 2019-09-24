@@ -2,18 +2,27 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import rc
 
-from prgen_fshape import *
-
 # Function to compute Fourier integrals
 # f,w are periodic
 def moment(n,f,w,d):
 
-   s0 = 0.5*np.sum((f[:-1]*w[:-1]+f[1:]*w[1:])*d[:-1])
-   s1 = 0.5*np.sum((w[:-1]*w[:-1]+w[1:]*w[1:])*d[:-1])
+   s0 = np.sum((f[:-1]*w[:-1]+f[1:]*w[1:])*d[:-1])
+   s1 = np.sum((w[:-1]*w[:-1]+w[1:]*w[1:])*d[:-1])
    
    return s0/s1
     
-def plot(r,z,x,vr,xr,cr,sr):
+def extrap(x,u):
+    p = 2
+    m = (u[p]-u[p-1])/(x[p]-x[p-1])
+    b = u[p]-m*x[p]
+    u[0] = b
+    return u
+
+def zero(x,u):
+    u[0] = 0.0
+    return u
+
+def plot_ang(r,z,x,vr,xr,cr,sr,outfile):
 
     nf = len(cr)-1
     
@@ -79,61 +88,48 @@ def plot(r,z,x,vr,xr,cr,sr):
     ax.plot(x,vr,'-k',linewidth=2,alpha=0.3)
 
     plt.tight_layout()
-    plt.show()
+    print('INFO: (plot_ang) Writing '+outfile)
+    plt.savefig(outfile)
 
-
-def oldfourier(ri,zi,nf,rnorm):
-
-   npsi = len(rnorm)
+def plot_coef(pnorm,ci,si,xi):
    
-   ari = np.zeros([nf+1,npsi])
-   bri = np.zeros([nf+1,npsi])
-   azi = np.zeros([nf+1,npsi])
-   bzi = np.zeros([nf+1,npsi])
+   # Latex fonts
+   rc('text',usetex=True)
+   rc('font',size=18)
 
-   for i in range(npsi-1):
-      r=ri[:,i+1] ; z=zi[:,i+1]
-      ar,br,az,bz = prgen_fshape(r,z,nf)
-      ari[:,i+1] = ar[:]
-      bri[:,i+1] = br[:]
-      azi[:,i+1] = az[:]
-      bzi[:,i+1] = bz[:]
-   print(ari[:,-1])
+   fig = plt.figure(figsize=(14,12))
 
-   # Repair origin
-   ari[0,:] = extrap(rnorm,ari[0,:]) 
-   azi[0,:] = extrap(rnorm,azi[0,:]) 
-   for i in range(1,nf+1):
-      ari[i,:] = zero(rnorm,ari[i,:]) 
-      bri[i,:] = zero(rnorm,bri[i,:]) 
-      azi[i,:] = zero(rnorm,azi[i,:]) 
-      bzi[i,:] = zero(rnorm,bzi[i,:]) 
+   label=['r','R','\kappa','Z']
+   for i in range(4):
+      ax = fig.add_subplot(3,4,i+1)
+      ax.set_xlabel(r'$\psi$')
+      ax.set_title(r'$'+label[i]+'$')
+      ax.grid(which="both",ls=":")
+      ax.set_xlim([0,1])
+      u = xi[i,:] 
+      ax.plot(pnorm,u,'-r',linewidth=1,alpha=1)
 
-   u = ari
-   u = np.append(u,bri)
-   u = np.append(u,azi)
-   u = np.append(u,bzi)
-   u.tofile('fluxfit.geo')
+   label=['c_0','c_1','c_2','c_3']
+   for i in range(4):
+      ax = fig.add_subplot(3,4,i+5)
+      ax.set_xlabel(r'$\psi$')
+      ax.set_title(r'$'+label[i]+'$')
+      ax.grid(which="both",ls=":")
+      ax.set_xlim([0,1])
+      u = ci[i,:]
+      ax.plot(pnorm,u,'-r',linewidth=1,alpha=1)
 
-   if 0==1:
-      fig = plt.figure(figsize=(12,8))
-
-      # PLOT contour
-      ax = fig.add_subplot(111)
-      for i in range(1,6):
-         ax.plot(rnorm,ari[i,:],'-k',linewidth=1)
-         ax.plot(rnorm,azi[i,:],'-k',linewidth=1)
-         ax.plot(rnorm,bri[i,:],'-k',linewidth=1)
-         ax.plot(rnorm,bzi[i,:],'-k',linewidth=1)
-      plt.show()
+   label=['-','\delta','-\zeta','s_3']
+   for i in range(4):
+      ax = fig.add_subplot(3,4,i+9)
+      ax.set_xlabel(r'$\psi$')
+      ax.set_title(r'$'+label[i]+'$')
+      ax.grid(which="both",ls=":")
+      ax.set_xlim([0,1])
+      if i > 0:
+         u = si[i,:]
+         ax.plot(pnorm,u,'-r',linewidth=1,alpha=1)
+            
+   plt.tight_layout()
+   plt.savefig('plot_coef.png')
    
-def extrap(x,u):
-    p = 2
-    m = (u[p]-u[p-1])/(x[p]-x[p-1])
-    b = u[p]-m*x[p]
-    u[0] = b
-    return u
-
-def zero(x,u):
-    u[0] = 0.0
-    return u
