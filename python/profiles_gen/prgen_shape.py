@@ -15,11 +15,13 @@ def prgen_shape(r,z,narc,nf,xplot):
    # Extrema ; definitions of rmin, rmaj, etc.
    n1 = np.argmax(z) ; m1 = np.argmin(z)
    n2 = np.argmax(r) ; m2 = np.argmin(r)
-   u = np.array([1,2,3])
-   l,za = quadratic_max(u,np.array([z[n1-1],z[n1],z[n1+1]]))
-   l,zb = quadratic_max(u,np.array([z[m1-1],z[m1],z[m1+1]]))
-   l,ra = quadratic_max(u,np.array([r[n2-1],r[n2],r[n2+1]]))
-   l,rb = quadratic_max(u,np.array([r[m2-1],r[m2],r[m2+1]]))
+   #u = np.array([1,2,3])
+   #l,za = quadratic_max(u,np.array([z[n1-1],z[n1],z[n1+1]]))
+   #l,zb = quadratic_max(u,np.array([z[m1-1],z[m1],z[m1+1]]))
+   #l,ra = quadratic_max(u,np.array([r[n2-1],r[n2],r[n2+1]]))
+   #l,rb = quadratic_max(u,np.array([r[m2-1],r[m2],r[m2+1]]))
+   za = z[n1] ; zb = z[m1]
+   ra = r[n2] ; rb = r[m2]
    zmaj = 0.5*(za+zb) ; zmin = 0.5*(za-zb)
    rmaj = 0.5*(ra+rb) ; rmin = 0.5*(ra-rb)
      
@@ -28,7 +30,7 @@ def prgen_shape(r,z,narc,nf,xplot):
       r = np.flip(r,0) ; z = np.flip(z,0)
 
    # Compute generalized angles
-   eps = 1.0-1e-10
+   eps = 1.0-1e-9
    for i in range(narc):
       # (ur,uz): principle angles (discontinuous)
       uz[i] = np.arcsin(eps*(z[i]-zmaj)/zmin)
