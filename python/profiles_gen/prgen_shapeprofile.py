@@ -22,7 +22,7 @@ efit = prgen_geqdsk(gfile)
 nf = 3
 
 # Call OMFIT mapper
-ri,zi,psi,q,p,fpol = prgen_contour(efit,nrz=nrz,levels=npsi,psinorm=0.999,narc=narc,quiet=False)
+ri,zi,psi,q,p,fpol = prgen_contour(efit,nrz=nrz,levels=npsi,psinorm=0.996,narc=narc,quiet=False)
 
 pnorm = ((psi[:]-psi[0])/(psi[-1]-psi[0]))
 rnorm = np.sqrt(pnorm)
