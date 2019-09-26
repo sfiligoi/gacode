@@ -26,6 +26,7 @@ module cgyro_globals
   integer :: n_toroidal
   integer :: n_field
   real    :: e_max
+  real    :: alpha_poly
   integer :: e_method
   integer :: delta_t_method
   real    :: delta_t
