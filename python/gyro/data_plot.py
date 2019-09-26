@@ -1,6 +1,3 @@
-# file processed by 2to3
-from __future__ import print_function, absolute_import
-from builtins import map, filter, range
 from . import data
 import sys
 import os
@@ -31,7 +28,7 @@ class gyrodata_plot(data.GYROData):
 
       # Determine tmin
       imin,imax = iwindow(t,w,wmax)
-      
+
       color = ['k','m','b','c']
       tor_n = self.profile['n0'] + \
               self.profile['d_n']*np.arange(0,self.profile['n_n'])

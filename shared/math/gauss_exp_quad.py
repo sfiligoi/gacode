@@ -1,6 +1,3 @@
-# file processed by 2to3
-from __future__ import print_function, absolute_import
-from builtins import map, filter, range
 import sys
 from mpmath import mp
 
@@ -19,7 +16,7 @@ if prec == 0:
       prec = 60
    elif n <= 20:
       prec = 50
-      
+
 #--------------------
 b = mp.sqrt(emax)
 n = n+1
@@ -89,7 +86,7 @@ def poly(x0):
     f = pa[n-1]
     g = qa[n-1]
     return f,g
-    
+
 x0 = mp.mpf(0)
 f,g = poly(x0)
 k = 0
@@ -102,12 +99,12 @@ for i in range(nplot):
     if f*f0 < 0:
         xl[k] = x0-b/(nplot-1)
         xr[k] = x0
-        k = k+1 
-        
+        k = k+1
+
 if k < n-1:
     print('ERROR: (gauss_exp_quad) Not all roots bracketed!  Need higher precision.')
     sys.exit()
-    
+
 # Solve for roots using Newton's method
 for k in range(n-1):
     x0 = (xl[k]+xr[k])/2
@@ -121,7 +118,7 @@ for k in range(n-1):
     for kp in range(n-1):
         z[k,kp]   = pa[kp]
         zp[k,kp]  = qa[kp]
-      
+
 zp  = zp*mp.powm(z,-1)*b
 
 # Redefine weight and renormalize last element
@@ -141,6 +138,5 @@ for k in range(n-1):
     for kp in range(n-1):
         fout.write(mp.nstr(zp[k,kp],17)+' ')
     fout.write('\n')
-    
+
 fout.close()
-               
