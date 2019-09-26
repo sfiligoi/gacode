@@ -1,5 +1,5 @@
 import numpy as np
-from scipy import interpolate, integrate, ndimage
+from scipy import interpolate
 import matplotlib.path as mp
 import matplotlib._contour as _contour
 import matplotlib.pyplot as plt
@@ -204,8 +204,8 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
             open_sep=paths
             flxM=flx
 
-    if kdbg==kdbgmax-1:
-        print('Finding of last closed flux surface aborted after %d iterations!'%kdbgmax)
+    if kdbg == kdbgmax-1:
+        print('WARNING: (prgen_contour) Finding LCFS aborted after %d iterations!'%kdbgmax)
 
     print('INFO  (prgen_contour) dpsi = {:.9f} [EFIT] {:.9f} [new]'.format(efitpsi1-efitpsi0,psi1-psi0))
 
@@ -214,7 +214,7 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
         (np.abs(np.max(sep[:,0])-np.max(r2d)) < 1e-3) or
         (np.abs(np.min(sep[:,1])-np.min(z2d)) < 1e-3) or
         (np.abs(np.max(sep[:,1])-np.max(z2d)) < 1e-3)):
-        print("WARNING: (prgen_contour) New separatrix hits computation boundary")
+        print('WARNING: (prgen_contour) New separatrix hits computation boundary')
             
     #-----------------------------------------------------------
     # Find surfaces
@@ -265,16 +265,16 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
             
     efitpsi = np.linspace(out_psi[0],out_psi[-1],len(efitp))
     cs = interpolate.interp1d(efitpsi,efitp,kind='quadratic') ; out_p = cs(out_psi)
-    cs = interpolate.interp1d(efitpsi,efitq,kind='quadratic') ; out_q = cs(out_psi)
     cs = interpolate.interp1d(efitpsi,efitf,kind='quadratic') ; out_f = cs(out_psi)
-    
+    #cs = interpolate.interp1d(efitpsi,efitq,kind='quadratic') ; out_q = cs(out_psi)
+
     # Recalculate q based on definition (and some identities)
     loopint = np.zeros([levels])
     for i in range(narc-1):
        loopint[:] = loopint[:]+(RI[i+1,:]-RI[i,:])*(ZI[i+1,:]+ZI[i,:])/(RI[i+1,:]+RI[i,:])
                     
-    cs = interpolate.splrep(out_psi,loopint) ; new_q = interpolate.splev(out_psi,cs,der=1)
-    new_q = out_f*new_q/(2*np.pi)
+    cs = interpolate.splrep(out_psi,loopint) ; out_q = interpolate.splev(out_psi,cs,der=1)
+    out_q = out_f*out_q/(2*np.pi)
    
-    return RI,ZI,out_psi,new_q,out_p,out_f
+    return RI,ZI,out_psi,out_q,out_p,out_f
 
