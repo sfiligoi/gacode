@@ -34,6 +34,7 @@ OBJECTS = cgyro_globals.o \
           cgyro_init_h.o \
           cgyro_init_arrays.o \
 	  cgyro_init_collision_simple.o \
+	  cgyro_init_collision_landau.o \
           cgyro_init_collision.o \
           cgyro_init_manager.o \
 	  cgyro_step_collision_simple.o \
@@ -62,13 +63,15 @@ OBJECTS = cgyro_globals.o \
 .SUFFIXES : .o .f90 .F90
 
 all: cgyro_lib.a $(EXEC).o $(EXTRA_LIBS)
-	$(FC) $(FFLAGS) -o $(EXEC) $(EXEC).o cgyro_lib.a $(EXTRA_LIBS) $(LMATH)
+	$(FC) $(FFLAGS) -o $(EXEC) $(EXEC).o cgyro_lib.a $(EXTRA_LIBS) $(LMATH) -lgsl
 
 cgyro_lib.a: $(OBJECTS)
 	$(ARCH) cgyro_lib.a $(OBJECTS)
 
 .f90.o .F90.o :
 	$(FC) $(FMATH) $(FFLAGS) -c $<
+
+cgyro_init_collision.o: cgyro_init_collision_landau.o
 
 clean:
 	rm -rf *.o cgyro_lib.a $(EXEC) *~ *.cub *.ptx *.gpu *.h *lst
