@@ -170,11 +170,17 @@ then
   echo "         -land"
   echo "         Use landscape mode (ly,lx) for -plot fluct"  
   echo
-  echo "         -dn"
-  echo "         Modify value of CGYRO delta n_toroidal (simulation runs with dn=1)"  
+  echo "         -dn <int>"
+  echo "         Modify value of delta n_toroidal (simulation runs with dn=1) (default 1)"  
+  echo
+  echo "         -mag <float>"
+  echo "         Magnify radial direction (or set '-mag 0' to plot shape functions) (default 1.0)"  
   echo
   echo "         -nozonal"
   echo "         Remove zonal (n=0) component of the fluctuations (-vis torcut only)"  
+  echo
+  echo "         -onlyzonal"
+  echo "         Remove nonzonal (n>0) component of the fluctuations (-vis torcut only)"  
   echo
   echo "OPTIONS FOR -plot vid"
   echo
@@ -265,9 +271,10 @@ PY=800
 DISS=0
 CFLUX=auto
 DN=1
-LOVERA=0.5
+MAG=1.0
 IE=0
 NOZONAL=0
+ONLYZONAL=0
 
 PRE=
 FRAMERATE=20
@@ -340,8 +347,9 @@ while [ $# -gt 0 ] ; do
   -legacy) LEGACY_FLAG=1 ;;
   -land) LAND_FLAG=1 ;;
   -dn) shift ; DN=$1 ;;
-  -lovera) shift ; LOVERA=$1 ;;
+  -mag) shift ; MAG=$1 ;;
   -nozonal) NOZONAL=1 ;;
+  -onlyzonal) ONLYZONAL=1 ;;
 
   -pre) shift ; PRE=$1 ;;
   -q)  shift ; QUALITY=$1 ;;
@@ -377,7 +385,7 @@ case "$VIS_TYPE" in
 	python $PYROOT/vis_slices.py ;;
 	
    torcut)
-	export OMP_NUM_THREADS=$NOMP ; python $PYROOT/vis_torcut.py $EXT $MOMENT $SPECIES $NX $NZ $TIME $FMIN $FMAX $CMAP $FONTSIZE $LEGACY_FLAG $DN $LOVERA $NOZONAL ;;
+	export OMP_NUM_THREADS=$NOMP ; python $PYROOT/vis_torcut.py $EXT $MOMENT $SPECIES $NX $NZ $TIME $FMIN $FMAX $CMAP $FONTSIZE $LEGACY_FLAG $DN $MAG $NOZONAL $ONLYZONAL ;;
 
    wheel)
 	export OMP_NUM_THREADS=$NOMP ; python $PYROOT/vis_wheel.py $EXT $MOMENT $SPECIES $NX $NY $NZ $TIME $FMIN $FMAX $CMAP $FONTSIZE ;;
@@ -421,7 +429,7 @@ case "$PLOT_TYPE" in
 	python $PLT $PLOT_TYPE $W $WMAX $FIELD $MOMENT $YMIN $YMAX $FC $EXT $DISS $CFLUX ;;
 
    phi)
-	python $PLT $PLOT_TYPE $FIELD $EXT ;;
+	python $PLT $PLOT_TYPE $W $WMAX $FIELD $EXT ;;
 
    ky_phi)
 	python $PLT $PLOT_TYPE $FIELD $THETA $YMIN $YMAX $N $EXT ;;

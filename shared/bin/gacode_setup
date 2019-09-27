@@ -12,18 +12,15 @@ export PATH=$GACODE_ROOT/tglf/bin:${PATH}
 export PATH=$GACODE_ROOT/le3/bin:${PATH}
 export PATH=$GACODE_ROOT/profiles_gen/bin:${PATH}
 export PATH=$GACODE_ROOT/shared/bin:${PATH}
-#export PATH=$GACODE_ROOT/glf23/bin:${PATH}
-#export PATH=$GACODE_ROOT/quick/bin:${PATH}
 
-if [ -d $GACODE_ADD_ROOT ] 
+if [ -d $GACODE_ROOT/../gacode_add ] 
 then
+   export GACODE_ADD_ROOT=$GACODE_ROOT/../gacode_add
    export PATH=$GACODE_ADD_ROOT/freya/bin:${PATH}
    export PATH=$GACODE_ADD_ROOT/prefreya/bin:${PATH}
 fi
 
 export PYTHONPATH=$GACODE_ROOT/python:${PYTHONPATH}
-
-export IDL_PATH=$GACODE_ROOT/gyro/vugyro:${IDL_PATH}
 
 export EPEDNN_MODEL_DIR=$GACODE_ROOT/../neural/eped1nn/models/EPED1_H_superH/
 export TGLFNN_MODEL_DIR=$GACODE_ROOT/../neural/tglfnn/models/DIIID_ion_stiffness_60_rotation/

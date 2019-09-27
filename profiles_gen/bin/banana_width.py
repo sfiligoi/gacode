@@ -2,10 +2,10 @@ import numpy as np
 from scipy import integrate,optimize,interpolate
 
 try:
-   import gapy
+   import gacode
    hasgapy = True
 except:
-   print 'WARNING: (banana_width.py) gapy.so not found.  Using circular geometry.'
+   print('WARNING: (banana_width.py) gapy.so not found.  Using circular geometry.')
    hasgapy = False
 
 data=np.loadtxt('out.locpargen')
@@ -56,5 +56,5 @@ else:
 
 y,err = integrate.quad(func,0,t0)
 db = data[5]
-print '# orbit width/a = {:.3f}'.format(np.abs(y*db))
+print('# orbit width/a = {:.3f}'.format(np.abs(y*db)))
 

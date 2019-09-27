@@ -105,7 +105,7 @@ subroutine cgyro_step_gk_ts
      delta_t_gk = deltah2
   endif
   
-  delta_x_min = 1.d-10*orig_delta_x_t
+  delta_x_min = 1.e-10*orig_delta_x_t
   delta_x_max = orig_delta_x_t
 
   converged = 0
@@ -132,8 +132,8 @@ subroutine cgyro_step_gk_ts
      else
         delta_t_gk = deltah2+delta_t_gk
         delta_t_last = deltah2
-        !! deltah2_min = min(deltah2, deltah2_min)
-        !! deltah2_max = max(deltah2, deltah2_max)
+        deltah2_min = min(deltah2, deltah2_min)
+        deltah2_max = max(deltah2, deltah2_max)
      endif
      
      if (( conv .eq. 0 ) .and. (iiter .ge. 1)) then
@@ -255,10 +255,12 @@ subroutine cgyro_step_gk_ts
      !! if ( delta_x .lt. tau ) then
        !! if ( error_mode .eq. 1 ) then variance error
      
-     ! if ( var_error .lt. tol ) then
-     ! if ( i_proc == 0 ) write(*,*) " variance error mode ", var_error, total_local_error
-     if ( error_x(1) .lt. tau ) then
+     if ( var_error .lt. tol ) then
+        !! if ( i_proc == 0 ) write(*,*) " variance error mode ", var_error, total_local_error
+        !! if ( error_x(1) .lt. tau ) then
 
+        if ( i_proc == 0 ) &
+             write(*,*) iiter, " delt variance error mode ", deltah2, var_error, rel_error
 
 !$omp parallel workshare
         h0_old = h0_x
@@ -269,10 +271,15 @@ subroutine cgyro_step_gk_ts
         total_delta_step = total_delta_step + deltah2
         total_local_error = total_local_error + rel_error*rel_error
 
-        scale_x = max(0.95*(tol/(delta_x + 1.e-12))**(.2), &
-             0.95d0*(tol/(delta_x + 1.e-12))**(.25))
-        
+        !! scale_x = max(0.95*(tol/(delta_x + 1.e-12))**(.2), &
+        !!     0.95d0*(tol/(delta_x + 1.e-12))**(.25))
+
+        scale_x = max((tol/(delta_x + 1.e-12)*1./delta_t)**(.2), &
+             (tol/(delta_x + 1.e-12)*1./delta_t)**(.25))
+
+        scale_x = min(5., scale_x)
         deltah2 = deltah2*max(1., scale_x)
+        
         local_max_error = max(local_max_error, rel_error)
      else
         conv = 0
@@ -283,8 +290,8 @@ subroutine cgyro_step_gk_ts
         endif
      endif
      
-     !! deltah2 = min(deltah2, delta_x_max)
-     !! deltah2 = max(delta_x_min, deltah2)
+     deltah2 = min(deltah2, delta_x_max)
+     deltah2 = max(delta_x_min, deltah2)
 
      iiter = iiter + 1
 
@@ -299,6 +306,9 @@ subroutine cgyro_step_gk_ts
   call cgyro_field_c
 
   delta_t_gk = delta_t_last
+  if ( delta_t_last_step .lt.  1.e-4*delta_t_last )  & 
+       delta_t_gk = delta_t_last + delta_t_last_step
+
 
   ! used for paper output
 !!  if ( i_proc .eq. 0 ) then
@@ -309,8 +319,8 @@ subroutine cgyro_step_gk_ts
   
   total_local_error = var_error
   
-  !!  if ( i_proc == 0 ) &
-  !!       write(*,*) i_proc , " ts deltah2_min, max ", deltah2_min, deltah2_max, converged
+  if ( i_proc == 0 ) &
+       write(*,*) i_proc , " ts deltah2_min, max ", deltah2_min, deltah2_max, converged
 
   ! Filter special spectral components
   call cgyro_filter

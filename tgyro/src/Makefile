@@ -29,7 +29,6 @@ else
 endif
 
 
-
 OBJECTS += tgyro_globals.o \
            tgyro_iteration_variables.o \
            tgyro_allocate_globals.o \

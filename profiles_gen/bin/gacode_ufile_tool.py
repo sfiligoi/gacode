@@ -2,7 +2,7 @@
 #
 #   python gacode_ufile_tool.py <datafile> <time>
 #
-#   NOTES: 
+#   NOTES:
 #   - Interpolate data to t=<time>.
 #   - If time is absent, print list of tags.
 #   - Operates on 1d and 2D datafiles
@@ -14,17 +14,16 @@ import numpy as np
 def extract0d(infile):
 
     # Test for csv or block format
-    f = open(infile,'r')  
+    f = open(infile,'r')
     line = f.readline()
     if line[0] == 'A':
         csv = 1
     else:
         csv = 0
- 
 
     if csv == 1:
-        
-        print 'INFO: (ufile_tool) Detected CSV format for '+infile
+
+        print('INFO: (ufile_tool) Detected CSV format for '+infile)
 
         # CSV format for 0d file.
         data = np.loadtxt(infile,delimiter=',',dtype=str)
@@ -82,7 +81,7 @@ def extract0d(infile):
 
     else:
 
-        print 'INFO: (ufile_tool) Detected block format for '+infile
+        print('INFO: (ufile_tool) Detected block format for '+infile)
 
         # Block format for 0d file
         p=0
@@ -154,13 +153,13 @@ def extract1d(infile,t0):
             data_region = 0
             if t0 >= vt[0] and t0 <= vt[-1]:
                 # Compute average if time-point in range
-                print 'Converting '+var+'  '+str(vt[0])+' <= '+str(t0)+ ' <= '+str(vt[-1])
+                print('Converting '+var+'  '+str(vt[0])+' <= '+str(t0)+ ' <= '+str(vt[-1]))
                 yave = np.zeros(1)
                 yave[0] = np.interp(t0,vt,vy)
                 # Write the averaged data for current profile (var)
                 np.savetxt('out.'+var+'.ave',yave,fmt='%1.6e')
             else:
-                print 'INFO: (ufile_tool) Time window: '+'t=['+str(vt[0])+','+str(vt[-1])+']'
+                print('INFO: (ufile_tool) Time window: '+'t=['+str(vt[0])+','+str(vt[-1])+']')
                 return
 
         if data_region == 0:
@@ -168,7 +167,7 @@ def extract1d(infile,t0):
             if line.count("-DEP") == 1:
                 # Extract current variable name
                 var=line.split('  ')[0].strip()
-             
+
             if line.count("OF PTS") == 1:
                 # Get length of radial grid
                 nt=int(line.split(";-# OF PTS")[0].strip())
@@ -183,7 +182,7 @@ def extract1d(infile,t0):
 
             # Here we are reading numbers
 
-            # Number of columns 
+            # Number of columns
             n = np.max([line.count("E"),line.count("e")])
 
             if it < nt:
@@ -208,14 +207,14 @@ def extract2d(infile,t0):
                 # Compute average if time-point in range
                 fxt  = vy.reshape((nx,nt),order='F')
                 yave = np.zeros(nx)
-                print 'Converting '+var+'  '+str(vt[0])+' <= '+str(t0)+ ' <= '+str(vt[-1])
+                print('Converting '+var+'  '+str(vt[0])+' <= '+str(t0)+ ' <= '+str(vt[-1]))
                 for i in range(nx):
                     yave[i] = np.interp(t0,vt,fxt[i,:])
                     # Write the averaged data for current profile (var)
                     # Output filename: "out.TAG.ave"
                     np.savetxt('out.'+var+'.ave',np.transpose((vx,yave)),fmt='%1.6e')
             else:
-                print 'INFO: (ufile_tool) Time window: '+'t=['+str(vt[0])+','+str(vt[-1])+']'
+                print('INFO: (ufile_tool) Time window: '+'t=['+str(vt[0])+','+str(vt[-1])+']')
                 return
 
         if data_region == 0:
@@ -223,7 +222,7 @@ def extract2d(infile,t0):
             if line.count("-DEP") == 1:
                 # Extract current variable name
                 var=line.split('  ')[0].strip()
-             
+
             if line.count("X PTS") == 1:
                 # Get length of radial grid
                 nx=int(line.split(";-# OF X")[0].strip())
@@ -249,9 +248,9 @@ def extract2d(infile,t0):
 
             # Here we are reading numbers
 
-            # Number of columns 
+            # Number of columns
             n = np.max([line.count("E"),line.count("e")])
-        
+
             if ix < nx:
                 # Read the radial grid [nx points]
                 for i in range(n):
@@ -280,7 +279,7 @@ try:
     if infile.split("_")[-1]=='2d.dat':
         infileval='2'
 except:
-    print 'Usage: python split.py <datafile> <time>'
+    print('Usage: python split.py <datafile> <time>')
     sys.exit()
 
 if infile.split("_")[-1]=='0d.dat':
@@ -301,14 +300,12 @@ except:
             var=line.split('  ')[0].strip()
             varlist.append(var)
     # Print list of included profiles (tags) in blocks of 10
-    print 'INFO: (ufile_tool) '+infileval+'D tags ->'
+    print('INFO: (ufile_tool) '+infileval+'D tags ->')
     for i in np.arange(start=0,stop=len(varlist),step=10):
-        print '       '+' '.join(varlist[i:i+10])
+        print('       '+' '.join(varlist[i:i+10]))
 
 if infile.split("_")[-1]=='1d.dat':
     extract1d(infile,t0)
 
 if infile.split("_")[-1]=='2d.dat':
     extract2d(infile,t0)
-
-

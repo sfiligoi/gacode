@@ -63,6 +63,21 @@ subroutine neo_check
      return
   end select
 
+  ! Electron model
+  select case (ae_flag)
+  case(0)
+     if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_neoout,30) 'ae_flag','KINETIC ELECTRONS'
+     endif
+  case(1)
+     if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_neoout,30) 'ae_flag','ADIABATIC ELECTRONS'
+     endif
+  case default
+     call neo_error('ERROR: (NEO) invalid ae_flag')
+     return
+  end select
+     
   ! Collision model
   !
   select case (collision_model)  
@@ -245,15 +260,6 @@ subroutine neo_check
      case (1)
         if (silent_flag == 0 .and. i_proc == 0) then
            write(io_neoout,30) 'profile_equilibrium_model','WITH MILLER GEOMETRY'
-           if(abs(profile_delta_scale-1.0) > epsilon(0.) ) then
-              write(io_neoout,30) 'profile_equilibrium_model','DELTA AND S_DELTA ARE RE-SCALED'
-           endif
-           if(abs(profile_zeta_scale-1.0) > epsilon(0.) ) then
-              write(io_neoout,30) 'profile_equilibrium_model','ZETA AND S_ZETA ARE RE-SCALED'
-           endif
-           if(abs(profile_zmag_scale-1.0) > epsilon(0.) ) then
-              write(io_neoout,30) 'profile_equilibrium_model','ZMAG AND S_MAG ARE RE-SCALED'
-           endif
         end if
      case (2)
         if (silent_flag == 0 .and. i_proc == 0) then
@@ -263,55 +269,6 @@ subroutine neo_check
         call neo_error('ERROR: (NEO) invalid profile_equilibrium_model')
         return
      end select
-
-     if (n_species >= 1) then
-        if(abs(profile_dlnndr_scale(1)-1.0) > epsilon(0.) ) then
-           write(io_neoout,30) 'profile_equilibrium_model','DLNNDR_1 IS RE-SCALED'
-        endif
-        if(abs(profile_dlntdr_scale(1)-1.0) > epsilon(0.) ) then
-           write(io_neoout,30) 'profile_equilibrium_model','DLNTDR_1 IS RE-SCALED'
-        endif
-     endif
-     if (n_species >= 2) then
-        if(abs(profile_dlnndr_scale(2)-1.0) > epsilon(0.) ) then
-           write(io_neoout,30) 'profile_equilibrium_model','DLNNDR_2 IS RE-SCALED'
-        endif
-        if(abs(profile_dlntdr_scale(2)-1.0) > epsilon(0.) ) then
-           write(io_neoout,30) 'profile_equilibrium_model','DLNTDR_2 IS RE-SCALED'
-        endif
-     endif
-     if (n_species >= 3) then
-        if(abs(profile_dlnndr_scale(3)-1.0) > epsilon(0.) ) then
-           write(io_neoout,30) 'profile_equilibrium_model','DLNNDR_3 IS RE-SCALED'
-        endif
-        if(abs(profile_dlntdr_scale(3)-1.0) > epsilon(0.) ) then
-           write(io_neoout,30) 'profile_equilibrium_model','DLNTDR_3 IS RE-SCALED'
-        endif
-     endif
-     if (n_species >= 4) then
-        if(abs(profile_dlnndr_scale(4)-1.0) > epsilon(0.) ) then
-           write(io_neoout,30) 'profile_equilibrium_model','DLNNDR_4 IS RE-SCALED'
-        endif
-        if(abs(profile_dlntdr_scale(4)-1.0) > epsilon(0.) ) then
-           write(io_neoout,30) 'profile_equilibrium_model','DLNTDR_4 IS RE-SCALED'
-        endif
-     endif
-     if (n_species >= 5) then
-        if(abs(profile_dlnndr_scale(5)-1.0) > epsilon(0.) ) then
-           write(io_neoout,30) 'profile_equilibrium_model','DLNNDR_5 IS RE-SCALED'
-        endif
-        if(abs(profile_dlntdr_scale(5)-1.0) > epsilon(0.) ) then
-           write(io_neoout,30) 'profile_equilibrium_model','DLNTDR_5 IS RE-SCALED'
-        endif
-     endif
-     if (n_species >= 6) then
-        if(abs(profile_dlnndr_scale(6)-1.0) > epsilon(0.) ) then
-           write(io_neoout,30) 'profile_equilibrium_model','DLNNDR_6 IS RE-SCALED'
-        endif
-        if(abs(profile_dlntdr_scale(6)-1.0) > epsilon(0.) ) then
-           write(io_neoout,30) 'profile_equilibrium_model','DLNTDR_6 IS RE-SCALED'
-        endif
-     endif
 
   case default
 
@@ -474,11 +431,16 @@ subroutine neo_check
         write(io_neoout,20) '      r/a:',r(ir)
         write(io_neoout,20) '      R/a:',rmaj(ir), '    shift:',shift(ir)
         write(io_neoout,20) '        q:',q(ir),    '        s:',shear(ir)
+        write(io_neoout,20) '     zmag:',zmag(ir), '    dzmag:',s_zmag(ir)
         write(io_neoout,20) '    kappa:',kappa(ir),'  s_kappa:',s_kappa(ir)
         write(io_neoout,20) '    delta:',delta(ir),'  s_delta:',s_delta(ir)
         write(io_neoout,20) '     zeta:',zeta(ir), '   s_zeta:',s_zeta(ir)
-        write(io_neoout,20) '     zmag:',zmag(ir), '    dzmag:',s_zmag(ir)
-
+        write(io_neoout,20) '     sin3:',shape_sin3(ir), '   s_sin3:',shape_s_sin3(ir)
+        write(io_neoout,20) '     cos0:',shape_cos0(ir), '   s_cos0:',shape_s_cos0(ir)
+        write(io_neoout,20) '     cos1:',shape_cos1(ir), '   s_cos1:',shape_s_cos1(ir)
+        write(io_neoout,20) '     cos2:',shape_cos2(ir), '   s_cos2:',shape_s_cos2(ir)
+        write(io_neoout,20) '     cos3:',shape_cos3(ir), '   s_cos3:',shape_s_cos3(ir)
+        
         write(io_neoout,*)
         write(io_neoout,20) ' dphi0/dr:',dphi0dr(ir)
         write(io_neoout,20) '    omega:',omega_rot(ir), &
@@ -492,6 +454,10 @@ subroutine neo_check
            write(io_neoout,'(t2,i2,2x,f7.3,2x,6(1pe11.4,2x))') &
                 is,Z(is),dens(is,ir),temp(is,ir),mass(is),dlnndr(is,ir),dlntdr(is,ir),nu(is,ir)
         enddo
+        if (ae_flag == 1) then
+           write(io_neoout,'(t2,a3,1x,f7.3,2x,2(1pe11.4,2x),1x,a2,10x,2(1pe11.4,2x),1x,a2)') &
+                'ade',-1.000,dens_ae(ir),temp_ae(ir),'--',dlnndr_ae(ir),dlntdr_ae(ir),'--'
+        endif
 
         flag = 0
         do is=1,n_species

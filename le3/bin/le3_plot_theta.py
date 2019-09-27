@@ -1,3 +1,6 @@
+# file processed by 2to3
+from __future__ import print_function, absolute_import
+from builtins import map, filter, range
 import sys
 import os
 import numpy as np
@@ -87,4 +90,4 @@ if imgfile == 'screen':
     plt.show()
 else:
     plt.savefig(imgfile)
-    print "INFO: (le3_plot_theta) Wrote plot to "+imgfile+"."
+    print("INFO: (le3_plot_theta) Wrote plot to "+imgfile+".")

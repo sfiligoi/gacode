@@ -5,8 +5,8 @@ subroutine cgyro_step_gk_v76
 
   implicit none
 
-  ! V7(6), robust Vernier, ?1990 paper
-  !
+  ! V7(6), Vernier, ?2010 paper
+  ! efficient
   !
   !           z e             vpar            z e  vperp^2
   !  h = H - ----- G0 ( phi - ----- Apar ) + ----- ---------- Gperp Bpar
@@ -29,104 +29,105 @@ subroutine cgyro_step_gk_v76
   double precision deltah2_max, deltah2_min
   double precision var_error, scale_x, tol
 
-  complex, dimension(:,:), allocatable :: h_rk6
-  complex, dimension(:,:), allocatable :: h0_old
-
   !! butcher table
 
   double precision, parameter :: a21  = .5e-2
   
-  double precision, parameter :: a31  = -1.076790123456790123456790123456790123457
-  double precision, parameter :: a32  = 1.185679012345679012345679012345679012346
+  double precision, parameter :: a31  = -1.07679012345679012
+  double precision, parameter :: a32  = 1.185679012345679012
   
-  double precision, parameter :: a41  = .4083333333333333333333333333333333333333e-1
+  double precision, parameter :: a41  = 0.4083333333333333333e-1
   double precision, parameter :: a42  = 0.
-  double precision, parameter :: a43 =  .1225
+  double precision, parameter :: a43 =  0.1225
   
-  double precision, parameter :: a51 =  .6389139236255726780508121615993336109954
+  double precision, parameter :: a51 = 0.638913923625572678
   double precision, parameter :: a52 = 0.
-  double precision, parameter :: a53 = -2.455672638223656809662640566430653894211
-  double precision, parameter :: a54 = 2.272258714598084131611828404831320283215
+  double precision, parameter :: a53 = -2.4556726382236568097
+  double precision, parameter :: a54 = 2.27225871459808413161
   
-  double precision, parameter :: a61   = -2.661577375018757131119259297861818119279
+  double precision, parameter :: a61   = -2.661577375018757131
   double precision, parameter :: a62   = 0.
-  double precision, parameter :: a63   = 10.80451388645613769565396655365532838482
-  double precision, parameter :: a64  = -8.353914657396199411968048547819291691541
-  double precision, parameter :: a65  = .8204875949566569791420417341743839209619
+  double precision, parameter :: a63   = 10.804513886456137696
+  double precision, parameter :: a64  = -8.35391465739619941197
+  double precision, parameter :: a65  = 0.8204875949566569791420
   
-  double precision, parameter :: a71  = 6.067741434696770992718360183877276714679
+  double precision, parameter :: a71  = 6.067741434696770992718
   double precision, parameter :: a72  = 0.
-  double precision, parameter :: a73  = -24.71127363591108579734203485290746001803
-  double precision, parameter :: a74  =  20.42751793078889394045773111748346612697
-  double precision, parameter :: a75  = -1.906157978816647150624096784352757010879
-  double precision, parameter :: a76  = 1.006172249242068014790040335899474187268
+  double precision, parameter :: a73  = -24.7112736359110857973
+  double precision, parameter :: a74  =  20.427517930788893940467
+  double precision, parameter :: a75  = -1.9061579788166471506241
+  double precision, parameter :: a76  = 1.00617224924206801479004
   
-  double precision, parameter :: a81  = 12.05467007625320299509109452892778311648
+  double precision, parameter :: a81  = 12.0546700762532029950911
   double precision, parameter :: a82  = 0.
-  double precision, parameter :: a83  = -49.75478495046898932807257615331444758322
-  double precision, parameter :: a84  = 41.14288863860467663259698416710157354209
-  double precision, parameter :: a85  = -4.461760149974004185641911603484815375051
-  double precision, parameter :: a86  = 2.042334822239174959821717077708608543738
-  double precision, parameter :: a87  = -0.9834843665406107379530801693870224403537e-1
+  double precision, parameter :: a83  = -49.754784950468989328073
+  double precision, parameter :: a84  = 41.14288863860467663259698
+  double precision, parameter :: a85  = -4.46176014997400418564191
+  double precision, parameter :: a86  = 2.0423348222391749598217172
+  double precision, parameter :: a87  = -0.983484366540610737953080e-1
 
-  double precision, parameter :: a91  = 10.13814652288180787641845141981689030769
+  double precision, parameter :: a91  = 10.138146522881807876418451
   double precision, parameter :: a92  = 0.
-  double precision, parameter :: a93  = -42.64113603171750214622846006736635730625
-  double precision, parameter :: a94  = 35.76384003992257007135021178023160054034
-  double precision, parameter :: a95  = -4.34802284039290765334037029690824594371
-  double precision, parameter :: a96  = 2.009862268377035895441943593011827554771
-  double precision, parameter :: a97  = .3487490460338272405953822853053145879140
-  double precision, parameter :: a98  = -.2714390051048312842371587140910297407572
+  double precision, parameter :: a93  = -42.64113603171750214622846
+  double precision, parameter :: a94  = 35.7638400399225700713502118
+  double precision, parameter :: a95  = -4.3480228403929076533403703
+  double precision, parameter :: a96  = 2.00986226837703589544194359
+  double precision, parameter :: a97  = 0.348749046033827240595382285
+  double precision, parameter :: a98  = -0.27143900510483128423715871
 
-  double precision, parameter :: a101  = -45.03007203429867712435322405073769635151
+  double precision, parameter :: a101  = -45.03007203429867712435322
   double precision, parameter :: a102  = 0.
-  double precision, parameter :: a103  = 187.3272437654588840752418206154201997384
-  double precision, parameter :: a104  = -154.0288236935018690596728621034510402582
-  double precision, parameter :: a105  = 18.56465306347536233859492332958439136765
-  double precision, parameter :: a106  = -7.141809679295078854925420496823551192821
-  double precision, parameter :: a107  = 1.308808578161378625114762706007696696508
+  double precision, parameter :: a103  = 187.32724376545888407524182
+  double precision, parameter :: a104  = -154.02882369350186905967286
+  double precision, parameter :: a105  = 18.56465306347536233859492333
+  double precision, parameter :: a106  = -7.141809679295078854925420497
+  double precision, parameter :: a107  = 1.30880857816137862511476270601
   double precision, parameter :: a108 = 0.
   double precision, parameter :: a109 = 0.
 
   double precision, parameter :: c1   = 0.
   double precision, parameter :: c2   = 5.e-2
-  double precision, parameter :: c3   =.1088888888888888888888888888888888888889
-  double precision, parameter :: c4   =.1633333333333333333333333333333333333333
-  double precision, parameter :: c5   =.4555
-  double precision, parameter :: c6   =.6095094489978381317087004421486024949638
-  double precision, parameter :: c7   =.884
-  double precision, parameter :: c8   =.925
+  double precision, parameter :: c3   =0.108888888888888888888888889
+  double precision, parameter :: c4   =0.163333333333333333333333333
+  double precision, parameter :: c5   =0.4555
+  double precision, parameter :: c6   =0.609509448997838131708700442
+  double precision, parameter :: c7   =0.884
+  double precision, parameter :: c8   =0.925
   double precision, parameter :: c9   = 1.
   double precision, parameter :: c10   =1.
 
-  double precision, parameter :: b1 = .4715561848627222170431765108838175679569e-1
+  double precision, parameter :: b1 = 0.4715561848627222170431765108e-1
   double precision, parameter :: b2 = 0.
   double precision, parameter :: b3 = 0.
-  double precision, parameter :: b4 = .2575056429843415189596436101037687580986
-  double precision, parameter :: b5 = .2621665397741262047713863095764527711129
-  double precision, parameter :: b6 = .1521609265673855740323133199165117535523
-  double precision, parameter :: b7 = .4939969170032484246907175893227876844296
-  double precision, parameter :: b8 = -.2943031171403250441557244744092703429139
-  double precision, parameter :: b9 =.8131747232495109999734599440136761892478e-1
+  double precision, parameter :: b4 = 0.2575056429843415189596436101
+  double precision, parameter :: b5 = 0.26216653977412620477138630958
+  double precision, parameter :: b6 = 0.15216092656738557403231331992
+  double precision, parameter :: b7 = 0.49399691700324842469071758932
+  double precision, parameter :: b8 = -0.29430311714032504415572447441
+  double precision, parameter :: b9 =0.8131747232495109999734599440137e-1
   double precision, parameter :: b10 = 0.
 
-  double precision, parameter :: b1h = .4460860660634117628731817597479197781432e-1
+  double precision, parameter :: b1h = 0.446086066063411762873181759748e-1
   double precision, parameter :: b2h = 0.
   double precision, parameter :: b3h = 0.
-  double precision, parameter :: b4h = .2671640378571372680509102260943837899738
-  double precision, parameter :: b5h = .2201018300177293019979715776650753096323
-  double precision, parameter :: b6h = .2188431703143156830983120833512893824578
-  double precision, parameter :: b7h = .2289871705411202883378173889763552365362
+  double precision, parameter :: b4h = 0.267164037857137268050910226094
+  double precision, parameter :: b5h = 0.220101830017729301997971577665
+  double precision, parameter :: b6h = 0.2188431703143156830983120833513
+  double precision, parameter :: b7h = 0.2289871705411202883378173889764
   double precision, parameter :: b8h = 0.
   double precision, parameter :: b9h = 0.
-  double precision, parameter :: b10h = .2029518466335628222767054793810430358554e-1
+  double precision, parameter :: b10h = 0.20295184663356282227670547938e-1
 
   double precision, parameter :: EPS  = 2.2d-12
   
-  allocate(h0_old(nc,nv_loc))
-  allocate(h_rk6(nc,nv_loc))
+!$omp parallel do collapse(2)
+  do iv_loc=1,nv_loc
+     do ic_loc=1,nc
+        h0_old(ic_loc,iv_loc) = 0.
+       enddo
+    enddo
 
-  call timer_lib_in('str')
+    call timer_lib_in('str')
 
   local_max_error = 0.
   delta_t_last = 0.
@@ -156,9 +157,13 @@ subroutine cgyro_step_gk_v76
   
   rk_MAX = 10000
 
-!$omp parallel workshare
-  h0_old = h_x
-!$omp end parallel workshare
+!$omp parallel do collapse(2)
+    do iv_loc=1,nv_loc
+     do ic_loc=1,nc
+        h0_old(ic_loc,iv_loc) = h_x(ic_loc,iv_loc)
+     enddo
+  enddo
+  
   conv = 0
   delta_t_gk = 0.
   deltah2_min = 1.d10
@@ -170,7 +175,6 @@ subroutine cgyro_step_gk_v76
         deltah2 = orig_delta_x_t - total_delta_x_step
         delta_t_last_step = deltah2
      else
-        !! delta_t_gk = deltah2+delta_t_gk
         delta_t_last = deltah2
         deltah2_min = min(deltah2, deltah2_min)
         deltah2_max = max(deltah2, deltah2_max)
@@ -180,29 +184,41 @@ subroutine cgyro_step_gk_v76
      if (( conv .eq. 0 ) .and. (iiter .ge. 1)) then
         
         call timer_lib_in('str_mem')        
-!$omp parallel workshare
-        h0_x = h0_old
-        h_x = h0_x
-!$omp end parallel workshare
+
+!$omp parallel do collapse(2)        
+        do iv_loc=1,nv_loc
+           do ic_loc=1,nc
+              h0_x(ic_loc,iv_loc) = h0_old(ic_loc,iv_loc)
+              h_x(ic_loc,iv_loc) = h0_old(ic_loc,iv_loc)
+           enddo
+        enddo
+
         call timer_lib_out('str_mem')        
-        call cgyro_field_c
      else
         call timer_lib_in('str_mem')
-!$omp parallel workshare
-        h0_x = h_x
-!$omp end parallel workshare
+        
+!$omp parallel do collapse(2)
+        do iv_loc=1,nv_loc
+           do ic_loc=1,nc
+              h0_x(ic_loc,iv_loc) = h_x(ic_loc,iv_loc)
+           enddo
+        enddo
+
         call timer_lib_out('str_mem')        
-        call cgyro_field_c
      endif
 
-     ! paper if ( i_proc .eq. 0 ) write(*,*) " paper v76_effi deltah2 ", iiter, deltah2
+     call cgyro_field_c
+
+     if ( i_proc .eq. 0 ) write(*,*) " paper v76_effi deltah2 ", iiter, deltah2, &
+          total_delta_x_step
 
 
      ! Stage 1
      !
      call cgyro_rhs(1)
 
-call timer_lib_in('str')
+     call timer_lib_in('str')
+     
 !$omp parallel do collapse(2)
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
@@ -211,10 +227,7 @@ call timer_lib_in('str')
         enddo
      enddo
 
-!! !$omp parallel workshare
-!!     h_x = h0_x &
-!!          + a21*deltah2*rhs(:,:,1)
-!! !$omp end parallel workshare
+
      call timer_lib_out('str')
      call cgyro_field_c
 
@@ -222,6 +235,7 @@ call timer_lib_in('str')
 
      call cgyro_rhs(2)
      call timer_lib_in('str')
+     
 !$omp parallel do collapse(2)
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
@@ -371,50 +385,37 @@ call timer_lib_in('str')
      enddo
      call cgyro_field_c
 
-!!!$omp parallel do collapse(2)
-!!     do iv_loc=1,nv_loc
-!!        do ic_loc=1,nc
-!!           h_rk6(ic_loc, iv_loc) = h0_x(ic_loc,iv_loc) &
-!!                + deltah2*(b1h*rhs(ic_loc, iv_loc, 1) &
-!!                + b4h*rhs(ic_loc,iv_loc,4) &
-!!                + b5h*rhs(ic_loc,iv_loc,5) &
-!!                + b6h*rhs(ic_loc,iv_loc,6) &
-!!                + b7h*rhs(ic_loc,iv_loc,7) &
-!!                + b10h*rhs(ic_loc,iv_loc,10))
-!!        enddo
-!!     enddo
-
 !$omp parallel do collapse(2)
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
-           rhs(ic_loc, iv_loc, 1) = deltah2*((b1-b1h)*rhs(ic_loc, iv_loc, 1) &
-                + (b4-b4h)*rhs(ic_loc,iv_loc,4) + (b5-b5h)*rhs(ic_loc,iv_loc,5) &
-                + (b6-b6h)*rhs(ic_loc,iv_loc,6) + (b7-b7h)*rhs(ic_loc,iv_loc,7) &
+           rhs(ic_loc, iv_loc, 1) = deltah2*( &
+                (b1-b1h)*rhs(ic_loc, iv_loc, 1) &
+                + (b4-b4h)*rhs(ic_loc,iv_loc,4) &
+                + (b5-b5h)*rhs(ic_loc,iv_loc,5) &
+                + (b6-b6h)*rhs(ic_loc,iv_loc,6) &
+                + (b7-b7h)*rhs(ic_loc,iv_loc,7) &
                 + (b8-b8h)*rhs(ic_loc,iv_loc,8) &
                 + (b9-b9h)*rhs(ic_loc,iv_loc,9) &
                 + (b10-b10h)*rhs( ic_loc, iv_loc, 10))
         enddo
      enddo
            
-!! !$omp parallel do collapse(2)
-!!     do iv_loc=1,nv_loc
-!!        do ic_loc=1,nc
-!!           rhs(ic_loc, iv_loc, 1) = h_x(ic_loc, iv_loc) - h_rk6(ic_loc, iv_loc)
-!!        enddo
-!!!     enddo
-
      error_sum = 0.
      error_x = 0.
      error_x(1) = sum(abs(rhs(:,:,1)))
-     error_x(2) = sum(abs(h_x))     
+     error_x(2) = sum(abs(h_x))
+
+     call timer_lib_in('str_comm')
      
      call MPI_ALLREDUCE(error_x, error_sum, 2, MPI_DOUBLE_PRECISION,&
           MPI_SUM, MPI_COMM_WORLD, i_err)
+
+     call timer_lib_out('str_comm')     
      
      error_x = error_sum
 
      delta_x = error_x(1)
-     tau = tol * max(error_x(2), 1.)
+     tau = tol*max(error_x(2), 1.)
 
      rel_error = error_x(1)/(error_x(2)+EPS)
      var_error = sqrt(total_local_error + rel_error*rel_error)
@@ -427,29 +428,33 @@ call timer_lib_in('str')
      
      if ( var_error .lt. tol ) then
         
-! paper        if ( i_proc == 0 ) &
-! paper             write(*,*) " V76effic **** local error mode ", &
-! PAPER             rel_error, " variance error", var_error
+        if ( i_proc == 0 ) &
+             write(*,*) " V76effic **** local error mode ", &
+             rel_error, " variance error", var_error
 
 
 !!paper        if ( i_proc == 0 ) &
         !! write(*,*) " dt ", deltah2, " V76 **** var error mode ", rel_error, " variance error", var_error
 
-!$omp parallel workshare
-        h0_old = h0_x
-!$omp end parallel workshare
+!$omp parallel do collapse(2)
+        do iv_loc=1,nv_loc
+           do ic_loc=1,nc
+              h0_old(ic_loc,iv_loc) = h0_x(ic_loc,iv_loc)
+           enddo
+        enddo
+
+
+        call cgyro_field_c
         
         converged = converged + 1
         conv = 1
         total_delta_x_step = total_delta_x_step + deltah2
         total_local_error = total_local_error + rel_error*rel_error
 
-        scale_x = max((tol/(delta_x + EPS )*1./delta_t)**(1./6.), &
+        scale_x = .95*max((tol/(delta_x + EPS )*1./delta_t)**(1./6.), &
              (tol/(delta_x + EPS )*1./delta_t)**(1./7.))
 
-        scale_x = max(min(scale_x, 7.), 1.)
-
-        !! scale_x = min(scale_x, 7.)
+        scale_x = max(min(scale_x, 8.), 1.)
         
         deltah2 = scale_x*deltah2
         
@@ -481,20 +486,18 @@ call timer_lib_in('str')
   enddo
   
   call timer_lib_out('str')
-  call cgyro_field_c
 
   delta_t_gk = delta_t_last
+  if ( delta_t_last_step .lt.  .5*delta_t_last )  & 
+       delta_t_gk = delta_t_last + delta_t_last_step
   total_local_error = var_error
 
   !!
-  !! paper if ( i_proc == 0 ) &
+  !!! if ( i_proc == 0 ) &
   !! write(*,*) i_proc , " v76 deltah2_min, max converged ", deltah2_min, deltah2_max
   !!  
   ! Filter special spectral components
   
   call cgyro_filter
 
-  if(allocated(h_rk6)) deallocate(h_rk6)
-  if(allocated(h0_old)) deallocate(h0_old)
-  
 end subroutine cgyro_step_gk_v76

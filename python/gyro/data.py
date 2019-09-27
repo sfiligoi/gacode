@@ -384,7 +384,6 @@ class GYROData:
         """Reads out.gyro.balloon*.  Data is stored in self.balloon"""
 
         import glob
-        import string
 
         m     = int(self.profile['box_multiplier'])
         n_x   = int(self.profile['n_x'])

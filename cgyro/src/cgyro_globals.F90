@@ -26,7 +26,9 @@ module cgyro_globals
   integer :: n_toroidal
   integer :: n_field
   real    :: e_max
+  real    :: alpha_poly
   integer :: e_method
+  integer :: delta_t_method
   real    :: delta_t
   real    :: delta_t_gk
   real    :: delta_t_tol
@@ -66,11 +68,11 @@ module cgyro_globals
   integer :: zf_test_mode 
   integer :: nonlinear_flag 
   integer :: nonlinear_method
-  real :: te_ade
-  real :: ne_ade
-  real :: dlntdre_ade   
-  real :: dlnndre_ade   
-  real :: masse_ade
+  real :: temp_ae
+  real :: dens_ae
+  real :: mass_ae
+  real :: dlntdr_ae   
+  real :: dlnndr_ae   
   real :: lambda_star
   integer :: test_flag
   integer :: h_print_flag
@@ -113,20 +115,30 @@ module cgyro_globals
   real :: s_zeta
   real :: zmag
   real :: dzmag
+  real :: shape_sin3        
+  real :: shape_s_sin3
+  real :: shape_cos0    
+  real :: shape_s_cos0
+  real :: shape_cos1
+  real :: shape_s_cos1
+  real :: shape_cos2    
+  real :: shape_s_cos2
+  real :: shape_cos3    
+  real :: shape_s_cos3
   real :: betae_unit
   !
   ! Species parameters
   !
   integer :: n_species
   real :: nu_ee
-  real, dimension(6) :: z
-  real, dimension(6) :: mass
-  real, dimension(6) :: dens
-  real, dimension(6) :: temp
-  real, dimension(6) :: dlnndr
-  real, dimension(6) :: dlntdr
-  real, dimension(6) :: sdlnndr
-  real, dimension(6) :: sdlntdr
+  real, dimension(11) :: z
+  real, dimension(11) :: mass
+  real, dimension(11) :: dens
+  real, dimension(11) :: temp
+  real, dimension(11) :: dlnndr
+  real, dimension(11) :: dlntdr
+  real, dimension(11) :: sdlnndr
+  real, dimension(11) :: sdlntdr
 
   integer :: subroutine_flag  ! only used for cgyro_read_input
 
@@ -136,16 +148,10 @@ module cgyro_globals
   real :: gamma_e_scale
   real :: gamma_p_scale
   real :: mach_scale
-  real :: q_scale
-  real :: s_scale
-  real :: shift_scale
-  real :: kappa_scale, s_kappa_scale
-  real :: delta_scale, s_delta_scale
-  real :: zeta_scale, s_zeta_scale
   real :: beta_star_scale, betae_unit_scale
   real :: nu_ee_scale
-  real, dimension(6) :: dlnndr_scale
-  real, dimension(6) :: dlntdr_scale
+  real, dimension(11) :: dlnndr_scale
+  real, dimension(11) :: dlntdr_scale
 
   real :: lambda_debye
   real :: rhos
@@ -282,8 +288,8 @@ module cgyro_globals
   real :: dlnndr_ele
   real :: dlntdr_ele
   !
-  real, dimension(6) :: vth  
-  real, dimension(6) :: nu
+  real, dimension(11) :: vth  
+  real, dimension(11) :: nu
   real :: rho
   real :: k_theta
   real :: length
@@ -336,12 +342,12 @@ module cgyro_globals
   real, dimension(:,:,:), allocatable :: dvjvec_c
   real, dimension(:,:,:), allocatable :: dvjvec_v
   real, dimension(:,:,:), allocatable :: jxvec_c
-  real, dimension(:,:), allocatable :: upfac1,upfac2
+  real, dimension(:,:,:), allocatable :: upfac1,upfac2
   !
   ! Fields
   real, dimension(:,:), allocatable :: fcoef
   real, dimension(:,:), allocatable :: gcoef
-  real, dimension(:,:), allocatable :: res_norm
+  real, dimension(:,:,:), allocatable :: res_norm
   complex, dimension(:,:), allocatable :: field
   complex, dimension(:,:), allocatable :: field_loc
   complex, dimension(:,:), allocatable :: field_old

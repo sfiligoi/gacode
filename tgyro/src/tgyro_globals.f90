@@ -184,6 +184,7 @@ module tgyro_globals
   real, dimension(:), allocatable :: zeta
   real, dimension(:), allocatable :: s_zeta
 
+  real, dimension(:), allocatable :: b_ref
   real, dimension(:), allocatable :: b_unit
   real, dimension(:), allocatable :: volp
   real, dimension(:), allocatable :: vol
@@ -243,7 +244,6 @@ module tgyro_globals
   real :: aspect_rat
   real :: mu_0
   !
-  real :: b_ref
   real :: r_min
   !
   integer, dimension(:,:), allocatable :: pmap,mask
@@ -314,6 +314,8 @@ module tgyro_globals
   integer :: tgyro_gyro_restart_flag
   integer :: tgyro_write_profiles_flag
   integer :: tgyro_neo_n_theta
+  integer :: tgyro_neo_n_xi
+  integer :: tgyro_neo_n_energy
   integer :: tgyro_ptot_flag
   integer :: tgyro_ped_model
   real :: tgyro_rped

@@ -326,7 +326,8 @@ then
    PREC=0
    python $GACODE_ROOT/shared/math/gauss_exp_quad.py $emax $ne $PREC
    echo "INFO: (cgyro) Generated energy mesh data"
-else
+elif [ $emethod -ne 3 ]
+then
    data=$GACODE_ROOT/cgyro/tools/egrid/egrid.$ne.${emax%.*}
    if [ -f $data ]
    then
@@ -336,15 +337,6 @@ else
       echo $data
       exit 1
    fi
-fi
-#==========================================================
-
-#==========================================================
-# See if we are using experimental profiles
-
-if [ -f input.profiles ]
-then
-   python $GACODE_ROOT/profiles_gen/bin/profile_parse.py input.profiles
 fi
 #==========================================================
 

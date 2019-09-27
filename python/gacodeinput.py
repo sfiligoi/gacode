@@ -5,12 +5,10 @@
 #  Collection of classes for parsing of GACODE free-format input files.
 #
 # NOTES:
-#  SimpleInput  : input.gyro, input.neo, input.tglf input.glf23
-#  ProfileInput : input.profiles
+#  SimpleInput  : input.cgyro, input.neo, input.tglf
 #  ManagerInput : input.tgyro [see tgyro/bin/tgyro_parse.py]
 #----------------------------------------------------------------------
 
-import string
 import os
 
 #--------------------------------------------------------------------
@@ -69,7 +67,7 @@ class SimpleInput:
                 self.user_dict[arg] = val
 
         # 2. build complete input file, looking for errors
-        for x in self.user_dict.keys():
+        for x in list(self.user_dict.keys()):
             if x in self.data_dict:
                 self.data_dict[x] = self.user_dict[x]
             elif x in self.dep_dict:
@@ -85,132 +83,6 @@ class SimpleInput:
             for x in self.data_orderlist:
                 f.write(self.data_dict[x]+'  '+x+'\n')
         
-
-#--------------------------------------------------------------------
-# PARSER FOR input.profiles
-#--------------------------------------------------------------------
-class ProfileInput:
-    """Input parser for input.profiles"""
-    def __init__(self):
-        self.data_dict = {}
-        self.data_orderlist = []
-        self.user_dict = {}
-        self.error = 0
-        self.error_msg = ""
-        self.extension = ".gen"
-
-    def add(self,param,default):
-        self.data_dict[param]=default
-        self.data_orderlist.append(param)
-
-    def printmsg(self):
-        if self.error == 1:
-            print(self.error_msg)
-
-    def set_extension(self,text):
-        self.extension = text
-
-    def read_input(self,inputfile):
-        # NOTE: this routine called by read_profile
-
-        # 1. read user input file
-        for line in open(inputfile,'r').readlines():
-
-            # Remove leading and trailing whitespace from line
-            line = line.strip()
-                
-            # Skip blank lines
-            if len(line) > 0 and line[0] != '#':
-                x = line.split('=')
-                y = x[1].split('#')
-                arg = x[0].strip()
-                val = y[0].strip()
-
-                self.user_dict[arg] = val
-
-        # 2. build complete input file, looking for errors
-        for x in self.user_dict.keys():
-            if x in self.data_dict:
-                self.data_dict[x] = self.user_dict[x]
-            else:
-                self.error=1
-                self.error_msg=self.error_msg+"ERROR: Bogus parameter "+x+'\n'
-
-
-    def read_profile(self,inputfile):
-
-        outputfile = inputfile+self.extension
-
-        file_out = open(outputfile,'w')
-        file_temp = open('parse_temp','w')
-
-        profile_data = []
-
-        for line in open(inputfile,'r').readlines():
-
-            line = line.strip()
-
-            # Split inputfile (input.profiles) into scalar and 
-            # vector data:
-            if 'SHOT' in line:
-                x = line.split(':')[1]
-                x = x.strip() 
-                if len(x) == 0:
-                    x = '0'
-                file_temp.write('SHOT='+x+'\n')
-
-            if (len(line) > 0) and (line[0] != '#'):                
-                if line.find('=') > -1:
-                    # Write scalar data into temp file
-                    file_temp.write(line+'\n')
-                else:
-                    data = line.split()
-                    ncol = len(data)
-                    for j in range (0,ncol):
-                        # Save vector data in variable v.
-                        profile_data.append(data[j])
-
-        file_temp.close()
-
-        # Parse the scalar data in file_temp
-        self.read_input('parse_temp')
-
-        # Compute number of rows for profile data
-        ncol = 5
-        nrow = int(self.data_dict['N_EXP'])
-        nblock = len(profile_data)//(nrow*ncol)
-
-        for x in self.data_orderlist:
-            file_out.write(self.data_dict[x]+'  '+x+'\n')
-
-        # Write vector data
-        for k in range(nblock):
-            for j in range(ncol):
-                for i in range(nrow):
-                    indx = ncol*i+j+k*nrow*ncol
-                    file_out.write(profile_data[indx]+'\n')
-    
-        # Clean up temporary file
-        os.system('rm parse_temp')
-
-        # Finally, read species header (separately) and dump
-        headerfile = open(inputfile+'.header','w')
-        index = 0
-        for line in open(inputfile,'r').readlines():
-           if index > 0:
-              index = index+1
-              line = line.strip()
-              if len(line) > 1:
-                 x = line.split()
-                 headerfile.write(x[2]+' '+x[3]+' '+x[4]+'\n')
-              else:
-                 break
-
-           if 'IONS' in line:
-              index = 1
-
-        headerfile.close()
-
 #--------------------------------------------------------------------
 # PARSER FOR input.tgyro
 #--------------------------------------------------------------------
@@ -258,12 +130,12 @@ class ManagerInput:
 
         n = 0
         for line in open(datafile,'r').readlines():
-            line_s = string.strip(line)
+            line_s = line.strip()
 
             # Look for occurence of tag and put item in list.
             if (line_s[0:3] == 'DIR'):   
                 n = n+1
-                data = string.splitfields(line_s,' ')
+                data = line_s.split(' ')
 
                 # data[0] -> DIR
                 # data[1] -> directory1, etc
@@ -280,7 +152,7 @@ class ManagerInput:
                     # Overlay or optional radius
                     if data[3][0:1] == 'X':
                         # This is the special option X=<xmin> for min(r/a) or min(rho)
-                        self.slaveradius.append(string.splitfields(data[3],'=')[1])
+                        self.slaveradius.append(data[3].split('=')[1])
                         # Need to subtract 4 because X is not an overlay
                         nover = len(data)-4
                         nj    = 4
@@ -384,9 +256,6 @@ class ManagerInput:
                 continue
             else:
                 print('INFO: (gacodeinput.py) Found '+code+' input in '+basedir)
-
-            if os.path.isfile(basedir+'/input.profiles'):
-               os.system('python $GACODE_ROOT/profiles_gen/bin/profile_parse.py '+basedir+'/input.profiles')
 
             basefile = basedir+'/input.'+code
             tempfile = basefile+'.temp'

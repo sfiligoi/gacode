@@ -22,7 +22,7 @@ subroutine prgen_read_iterdb_nc
   real, dimension(:), allocatable :: work
 
   ! Open the file (NF90_NOWRITE means read-only)
-  err = nf90_open(raw_data_file,NF90_NOWRITE,ncid)
+  err = nf90_open(file_state,NF90_NOWRITE,ncid)
 
   err = nf90_inq_varid(ncid,trim('shot'),varid)
   err = nf90_get_var(ncid,varid,onetwo_ishot)
@@ -88,22 +88,24 @@ subroutine prgen_read_iterdb_nc
   err = nf90_get_var(ncid,varid,ip_tot)
 
   err = nf90_inq_varid(ncid,trim('Ipsign'),varid)
-  if(err == 0) then
+  if (err == 0) then
      err = nf90_get_var(ncid,varid,onetwo_ipccw)
-     if(ipccw == 0) then
+     if (ipccw == 0) then
         ipccw = onetwo_ipccw
      endif
   endif
   
-  nx = nx
-
-  call allocate_internals
+  call prgen_allocate
   call allocate_iterdb_vars
 
   allocate(work(onetwo_npsi))
 
   err = nf90_inq_varid(ncid,trim('rho_grid'),varid)
   err = nf90_get_var(ncid,varid,onetwo_rho_grid)
+  ! Will use this for normalized rho-grid
+  do i=1,nx
+     rho(i) = (i-1)/(nx-1.0)
+  enddo
 
   err = nf90_inq_varid(ncid,trim('hcap'),varid)
   err = nf90_get_var(ncid,varid,onetwo_hcap)
@@ -119,6 +121,18 @@ subroutine prgen_read_iterdb_nc
 
   err = nf90_inq_varid(ncid,trim('q_value'),varid)
   err = nf90_get_var(ncid,varid,q)
+
+  err = nf90_inq_varid(ncid,trim('curohm'),varid)
+  err = nf90_get_var(ncid,varid,johm)
+
+  err = nf90_inq_varid(ncid,trim('curboot'),varid)
+  err = nf90_get_var(ncid,varid,jbs)
+
+  err = nf90_inq_varid(ncid,trim('currf'),varid)
+  err = nf90_get_var(ncid,varid,jrf)
+
+  err = nf90_inq_varid(ncid,trim('curbeam'),varid)
+  err = nf90_get_var(ncid,varid,jnb)
 
   err = nf90_inq_varid(ncid,trim('ene'),varid)
   err = nf90_get_var(ncid,varid,onetwo_ene)
@@ -271,7 +285,7 @@ subroutine prgen_read_iterdb_nc
 
   call cub_spline(onetwo_rho_mhd_gridnpsi,onetwo_elongxnpsi,onetwo_npsi,&
        onetwo_rho_grid,kappa,nx)
-
+ 
   work = 0.5*(onetwo_triangnpsi_u+onetwo_triangnpsi_l)
 
   call cub_spline(onetwo_rho_mhd_gridnpsi,work,onetwo_npsi,&
@@ -281,11 +295,8 @@ subroutine prgen_read_iterdb_nc
 
   dpsi(:) = onetwo_psi(:)-onetwo_psi(1)
 
-  ! No squareness 
-  zeta(:) = 0.0
-
-  ! No elevation 
-  zmag(:) = 0.0
+  ! Compute torflux(a) [will be overwritten by gfile]
+  torfluxa = 0.5*onetwo_btor*onetwo_rho_grid(nx)**2
 
 end subroutine prgen_read_iterdb_nc
 

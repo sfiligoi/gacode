@@ -4,7 +4,8 @@
 #
 # Types:
 #
-#  GACODE      (input.profiles)
+#  GACODE      (input.gacode)
+#  LEGACY      (legacy input.profiles)
 #  ITERDB      (text iterdb)
 #  ITERDBNC    (netCDF iterdb)
 #  SWIM        (plasmastate)
@@ -15,6 +16,14 @@
 #  DSKGATO_NEW (new-type dskgato flux-surface data)
 #--------------------------------------------
 
+if [ "$1" == "input.gacode" ] ; then
+    echo "GACODE" 
+    exit 0
+fi
+if [ "$1" == "input.profiles" ] ; then
+    echo "LEGACY" 
+    exit 0
+fi
 if [ "$1" == "UFILE" ] ; then
    echo "UFILE"
    exit 0
@@ -73,11 +82,11 @@ else
       exit 0
    fi
 
-   y=`grep -c BT_EXP $1`
-   if [[ $y -gt 0 ]] ; then
-      echo "GACODE" 
-      exit 0
-   fi 
+#   y=`grep -c BT_EXP $1`
+#   if [[ $y -gt 0 ]] ; then
+#      echo "GACODE" 
+#      exit 0
+#   fi 
 
    y=`grep -c cxareao $1`
    if [[ $y -gt 0 ]] ; then
@@ -96,7 +105,8 @@ else
    if [[ $y -eq 5 ]] ; then
       echo "GFILE" 
       exit 0
-   fi 
+   fi
+   
    if [[ $y -eq 4 ]] ; then
       echo "DSKGATO_OLD" 
       exit 0
@@ -108,6 +118,13 @@ else
       exit 0
    fi 
 
+   # Added a new gfile test
+   y=`head -1 $1 | grep -o E | wc -l`
+   if [[ $y -eq 1 ]] ; then
+      echo "GFILE" 
+      exit 0
+   fi 
+  
    echo "UNKNOWN" 
    exit 1;
 fi

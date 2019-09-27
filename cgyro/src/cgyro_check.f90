@@ -35,8 +35,8 @@ subroutine cgyro_check
      return
   endif
 
-  if (n_species > 6) then
-     call cgyro_error('n_species <= 6.')
+  if (n_species > 11) then
+     call cgyro_error('n_species <= 11.')
      return
   endif
 
@@ -49,6 +49,19 @@ subroutine cgyro_check
   !------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------
+  ! Electrons
+  !
+  select case (ae_flag)
+  case(0)
+     call cgyro_info('Using gyrokinetic electrons')
+  case(1)
+     call cgyro_info('Using adiabatic electrons')
+  case default
+     call cgyro_error('Invalid value for ae_flag')
+     return
+  end select 
+  
+  !-----------------------------------------------------------------------
   ! Profile checks
   !
   select case (profile_model)
@@ -57,7 +70,7 @@ subroutine cgyro_check
      call cgyro_info('Profile model: local input (input.cgyro)')
 
   case (2)
-     call cgyro_info('Profile model: experimental (input.profiles)')
+     call cgyro_info('Profile model: experimental (input.gacode)')
 
   case default
      call cgyro_error('Invalid value for profile_model')
@@ -91,10 +104,10 @@ subroutine cgyro_check
      endif
 
   case (2) 
-     call cgyro_info('Equilibrium: Miller')
+     call cgyro_info('Equilibrium: HAM')
 
   case (3) 
-     call cgyro_info('Equilibrium: General (Fourier)')
+     call cgyro_info('Equilibrium: Fourier')
 
      if (geo_ny <= 0) then
         call cgyro_error('Fourier geometry coefficients missing.')

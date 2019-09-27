@@ -7,13 +7,13 @@ from matplotlib import rc
 from matplotlib import cm
 from gacodefuncs import *
 from cgyro.data import cgyrodata
-from mayavi import mlab 
+from mayavi import mlab
 try:
-   import gapy
+   import pygacode
 except:
-   print('ERROR: (vis_torcut) Please build gapy/f2py library!')
+   print("ERROR: (vis_torcut) Please type 'make so' in gacode/f2py")
    sys.exit()
-   
+
 ext      = sys.argv[1]
 moment   = sys.argv[2]
 species  = int(sys.argv[3])
@@ -24,14 +24,11 @@ fmin     = sys.argv[7]
 fmax     = sys.argv[8]
 colormap = sys.argv[9]
 font     = int(sys.argv[10])
-legacy   = bool(sys.argv[11])
+legacy   = bool(int(sys.argv[11]))
 dn       = int(sys.argv[12])
-lovera   = float(sys.argv[13])
-nozonal  = bool(sys.argv[14])
-
-# Define plot and font size 
-rc('text',usetex=True)
-rc('font',size=font)
+mag      = float(sys.argv[13])
+nozonal  = bool(int(sys.argv[14]))
+onlyzonal = bool(int(sys.argv[15]))
 
 sim = cgyrodata('./')
 nt = sim.n_time
@@ -40,8 +37,11 @@ nn = sim.n_n
 ns = sim.n_species
 nth = sim.theta_plot
 
+print('HINT: adjust -dn to match experimental dn (rho/a and Lx/a will shrink)')
 print('Lx/rho = {:.2f}'.format(sim.length))
 print('rho/a  = {:.4f}'.format(sim.rho/dn))
+lovera = sim.length*sim.rho/dn*mag
+print('Lx/a   = {:.4f}'.format(lovera))
 
 ivec = time_vector(istr,nt)
 
@@ -77,36 +77,59 @@ yp = np.zeros([nx,nz])
 zp = np.zeros([nx,nz])
 
 for i in range(nx):
+   r = sim.rmin+(dn*x[i]/(2*np.pi)-0.5)*lovera
    for k in range(nz):
-      r = sim.rmin+(dn*x[i]/(2*np.pi)-0.5)*lovera
       xp[i,k] = sim.rmaj+r*np.cos(z[k]+np.arcsin(sim.delta)*np.sin(z[k]))
-      yp[i,k] = sim.kappa*r*np.sin(z[k])
+      yp[i,k] = sim.zmag+sim.kappa*r*np.sin(z[k]+sim.zeta*np.sin(2*z[k]))
       zp[i,k] = 0.0
 
-# Shape functions (just up-down symmetric now)
-gapy.geo.geo_rmin_in=sim.rmin
-gapy.geo.geo_rmaj_in=sim.rmaj
-gapy.geo.geo_q_in=sim.q
-gapy.geo.geo_s_in=sim.shear
-gapy.geo.geo_kappa_in=sim.kappa
-gapy.geo.geo_delta_in=sim.delta
-gapy.geo.geo_s_kappa_in=sim.s_kappa
-gapy.geo.geo_s_delta_in=sim.s_delta
-gapy.geo.geo_drmaj_in=sim.shift
-gapy.geo.geo_beta_star_in=sim.beta_star
+# Shape functions 
+pygacode.geo.signb_in=1 # fix
+pygacode.geo.geo_rmin_in=sim.rmin
+pygacode.geo.geo_rmaj_in=sim.rmaj
+pygacode.geo.geo_drmaj_in=sim.shift
+pygacode.geo.geo_zmag_in=sim.zmag
+pygacode.geo.geo_dzmag_in=sim.dzmag
+pygacode.geo.geo_q_in=sim.q
+pygacode.geo.geo_s_in=sim.shear
+pygacode.geo.geo_kappa_in=sim.kappa
+pygacode.geo.geo_delta_in=sim.delta
+pygacode.geo.geo_zeta_in=sim.zeta
+pygacode.geo.geo_s_kappa_in=sim.s_kappa
+pygacode.geo.geo_s_delta_in=sim.s_delta
+pygacode.geo.geo_s_zeta_in=sim.s_zeta
+pygacode.geo.geo_beta_star_in=sim.beta_star
 
-gapy.geo.geo_interp(z,True)
-# g1 -> q*theta
-# g2 -> theta 
+pygacode.geo.geo_interp(z,True)
 if legacy:
-   # Correct form of Clebsch angle expansion nu(r,theta) 
-   g1 = -gapy.geo.geo_nu
-   g2 = gapy.geo.geo_b*gapy.geo.geo_captheta/gapy.geo.geo_s_in/gapy.geo.geo_grad_r**2
-else:
    # s-alpha approximate (apparently used in legacy GYRO movies)
+   # g1 -> q*theta
+   # g2 -> theta 
    g1 = sim.q*z
    g2 = z
+else:
+   # Correct form of Clebsch angle expansion nu(r,theta) 
+   g1 = -pygacode.geo.geo_nu
+   g2 = pygacode.geo.geo_b*pygacode.geo.geo_captheta/pygacode.geo.geo_s_in/pygacode.geo.geo_grad_r**2
+   
+if int(mag) == 0:
+   showco=True
+else:
+   showco=False
+if showco:
+   # (Optional) plot of the geometry functions, then exit
+   rc('text',usetex=True) ; rc('font',size=font)
+   fig = plt.figure(figsize=(10,8))
 
+   ax = fig.add_subplot(111)
+   ax.plot(z/np.pi,g1/sim.q,label='g1')
+   ax.plot(z/np.pi,g2,label='g2')
+   ax.plot(z/np.pi,z,'--k')
+   ax.set_xlim([-1,1])
+   ax.legend()
+   plt.show()
+   sys.exit()
+   
 #------------------------------------------------------------------------
 
 # Get filename and tags 
@@ -132,9 +155,6 @@ def frame():
       a = np.reshape(aa,(2,nr,nth,nn),order='F')
    else:
       a = np.reshape(aa,(2,nr,nth,ns,nn),order='F')
-
-   if nozonal and nn > 1:
-      a[:,:,:,:,0] = 0.0
       
    mlab.figure(size=(900,900),bgcolor=(1,1,1))
    if isfield:
@@ -142,8 +162,13 @@ def frame():
    else:
       c = a[0,:,:,species,:]+1j*a[1,:,:,species,:]
                 
+   if nozonal and nn > 1:
+      c[:,:,0] = 0.0
+   if onlyzonal and nn > 1:
+      c[:,:,1:] = 0.0
+
    f = np.zeros([nx,nz],order='F')
-   gapy.torcut(dn,sim.m_box,sim.q,g1,g2,c,f)
+   pygacode.torcut(dn,sim.m_box,sim.q,sim.thetap,g1,g2,c,f)
 
    if fmin == 'auto':
       f0=np.min(f)
@@ -156,12 +181,6 @@ def frame():
    # View from positive z-axis
    mlab.view(azimuth=0, elevation=0)
    print('INFO: (vis_torcut) min={:.3f} | max={:.3f}'.format(f0,f1))
-
-   #lut = image.module_manager.scalar_lut_manager.lut.table.to_array()
-   #values = np.linspace(0., 1., 256)
-   #cmap = cm.get_cmap(colormap)(values.copy())
-   #cmap[:, -1] = np.linspace(0, 255, 256)
-   #image.module_manager.scalar_lut_manager.lut.table = cmap
    
    if ftype == 'screen':
       mlab.show()

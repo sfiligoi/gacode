@@ -1,4 +1,4 @@
-import data
+from . import data
 import sys
 import os
 import numpy as np
@@ -28,7 +28,7 @@ class gyrodata_plot(data.GYROData):
 
       # Determine tmin
       imin,imax = iwindow(t,w,wmax)
-      
+
       color = ['k','m','b','c']
       tor_n = self.profile['n0'] + \
               self.profile['d_n']*np.arange(0,self.profile['n_n'])
@@ -80,13 +80,13 @@ class gyrodata_plot(data.GYROData):
 
       if index == 'phi':
          key = 'balloon_phi'
-         index = self.balloon.keys().index(key)
+         index = list(self.balloon.keys()).index(key)
       elif index == 'a':
          key = 'balloon_a'
-         index = self.balloon.keys().index(key)
+         index = list(self.balloon.keys()).index(key)
       elif index == 'aperp':
          key = 'balloon_aperp'
-         index = self.balloon.keys().index(key)
+         index = list(self.balloon.keys()).index(key)
       else:
          index = int(index)
 
