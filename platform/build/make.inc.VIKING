@@ -1,0 +1,81 @@
+#---------------------------------------------------
+# University of York Cluster VIKING 
+#               with Intel Compiler and OpenMPI
+#---------------------------------------------------
+# B Patel (bhavin.patel@york.ac.uk)
+#
+# Intel compiler works with all modules
+# Need the following modules, in this order:
+# module purge
+# module load compiler/ifort/2018.3.222-GCC-7.3.0-2.30
+# module load mpi/impi/2018.3.222-iccifort-2018.3.222-GCC-7.3.0-2.30
+# module load numlib/FFTW
+# module load numlib/LAPACK
+# module load numlib/OpenBLAS/0.3.1-GCC-7.3.0-2.30
+# module load data/netCDF-Fortran/4.4.4-intel-2018b
+# module load tools/git
+# module load tools/Emacs
+# module load lang/Anaconda3
+
+# export GACODE_PLATFORM=VIKING
+# export GACODE_ROOT=$HOME/gacode
+# . $GACODE_ROOT/shared/bin/gacode_setup
+
+
+IDENTITY="Viking cluster"
+CORES_PER_NODE=40
+NUMAS_PER_NODE=1
+
+
+# Compilers (intel) and flags 
+
+FC	= mpiifort -module $(GACODE_ROOT)/modules -I$(GACODE_ROOT)/modules
+F77	= ${FC}
+CC	= icc
+
+FOMP    = -qopenmp
+FMATH	= -r8
+#FOPT	= -qopt-report=0 -qopt-report-phase=vec -shared-intel
+FDEBUG	= -warn all -shared-intel -check all -g
+
+#FOPT    = -Ofast
+FOPT   = -xHOST -O3 -no-prec-div -g
+FDEBUG = -check all -traceback
+
+
+
+# FC  = mpif90 -std=f2008 -fall-intrinsics -I$(GACODE_ROOT)/modules -J $(GACODE_ROOT)/modules -fPIC  
+# F77 = mpif77 -I$(GACODE_ROOT)/modules
+# #F2PY = f2py2.7
+# CC  = gcc
+
+# FOMP   = -fopenmp
+# FMATH  = -fdefault-real-8 -fdefault-double-8 
+# FOPT   = #-Ofast
+# FDEBUG = -Wall -W fcheck=mem,bounds -g -fbacktrace -ffpe-trap=invalid,zero,overflow
+
+#OPT     = debug
+# System math libraries
+
+# FFTW and LAPACK
+
+LAPACK = ${EBROOTLAPACK}/lib/liblapack.a -L${EBROOTLAPACK}/lib -llapack 
+
+LMATH = -L${EBROOTOPENBLAS} -lopenblas \
+      -L${EBROOTFFTW}/lib -lfftw3 -lfftw3_threads -lfftw3f_threads -lfftw3f
+
+FFTW_INC = ${EBROOTFFTW}/include
+
+NETCDF = -L${EBROOTNETCDFMINFORTRAN}/lib/ -lnetcdff -L${EBROOTNETCDF} -lnetcdf -L${EBROOTHDF5}/lib -lhdf5_hl -lhdf5 -lz -lcurl
+NETCDF_INC = ${EBROOTNETCDF}/include -I${EBROOTNETCDFMINFORTRAN}/include
+NETCDFF_INC = ${EBROOTNETCDFMINFORTRAN}/include
+
+ifdef PETSC_DIR
+  PETSC_LIB += -Wl,-rpath,$(PETSC_DIR)/lib -L$(PETSC_DIR)/lib -lpetsc -lsuperlu
+  PETSC_INC += -I$(PETSC_DIR)/include
+endif
+
+# Archive
+
+ARCH = ar cr
+
