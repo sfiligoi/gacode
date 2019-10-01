@@ -26,14 +26,14 @@ contains
     integer :: newmin,newmax
     real, dimension(:), pointer :: mw2,mp2,poly2,poly12 !Mori weights and
     !points
-    integer istart,iend,isn,ien
+    integer istart,iend,isn,ien,i
     ! we assume nintervals has already been updated.
     ! if step=2 ==> the points are supposed to be spread with stepsize step.
     istart=i0-(2*nsafe)/step
     iend=i0+(2*(nintervals+nsafe))/step
     newmin=-10*nsafe-9
     newmax=10*nsafe+9+2*nintervals
-2   format (*(G0,"  "))
+2   format ("*(G0,'  ')")
     if (vb) print 2,'Reallocating',minalloc,maxalloc,newmin,newmax,step
     if ((istart-i0)*step<newmin .or. (iend-i0)*step>newmax) then
        print 2,'Serious error reallocating in half_hermite:'
@@ -59,16 +59,15 @@ contains
     mp2(isn:ien:step)=mp(istart:iend)
     poly2(isn:ien:step)=poly(istart:iend)
     poly12(isn:ien:step)=poly1(istart:iend)
-    block
-      integer i
-      do i=isn,ien,2*step
-         if (mw2(i)==-500) then
-            print 2,'Very serious error i',i,isn,ien,istart,iend
-            print 2,mw(istart:min(istart+10,iend):2)
-            stop
-         endif
-      end do
-    end block
+
+    do i=isn,ien,2*step
+       if (mw2(i)==-500) then
+          print 2,'Very serious error i',i,isn,ien,istart,iend
+          print 2,mw(istart:min(istart+10,iend):2)
+          stop
+       endif
+    end do
+
     deallocate(mw,mp,poly,poly1)
     mw=>mw2
     mp=>mp2
@@ -98,6 +97,7 @@ contains
     real eps
     integer i,j,k,ia
     integer leftnew,rightnew
+    logical makenew
 
     ! calculate recursion coefficients for orthogonal polynomials for weight
     ! function 
@@ -169,7 +169,7 @@ contains
     t1=-t0
     t00=t0
     t10=t1
-2   format (*(G0,"  "))
+2   format ("*(G0,'  ')")
     if (vb) then
        ngauss=n+xmax**2+xmax*sqrt(-2*log(epsgauss))-log(epsgauss)/3
        ngauss=n+ceiling(10*xmax)+ceiling(alpha/2)
@@ -290,127 +290,124 @@ contains
 
        ! now see whether we need to extend the integration domain, or whether
        ! it is accurate enough: We do nsafe extra points at both ends.
-       block
-         logical makenew
-         makenew=.false.
-         do
-            s3=0
-            s3x=0
-            do k=-nsafe,0
-               ia=2*k+i0
-               if (makenew .or. i==1) then
-                  t=t0+dt*k
-                  dxdt=.5*(xmax-xmin)*sech2(mori*sinh(t))*mori*cosh(t)
-                  ! x approx. xmax*exp(-mori*exp(-t)) for t<-3 or so
-                  x=.5*(xmax-xmin)*tanhp1(mori*sinh(t))+xmin
-                  ! calculate polynomial at x
-                  mp(ia)=x
-                  mw(ia)=dxdt*w(x)
-                  p1=0
-                  pi=c1(1)
-                  do j=2,i
-                     p0=pi
-                     pi=(c1(j)*x-a1(j))*pi-b1(j)*p1
-                     p1=p0
-                  enddo
-                  poly1(ia)=p1
+       makenew=.false.
+       do
+          s3=0
+          s3x=0
+          do k=-nsafe,0
+             ia=2*k+i0
+             if (makenew .or. i==1) then
+                t=t0+dt*k
+                dxdt=.5*(xmax-xmin)*sech2(mori*sinh(t))*mori*cosh(t)
+                ! x approx. xmax*exp(-mori*exp(-t)) for t<-3 or so
+                x=.5*(xmax-xmin)*tanhp1(mori*sinh(t))+xmin
+                ! calculate polynomial at x
+                mp(ia)=x
+                mw(ia)=dxdt*w(x)
+                p1=0
+                pi=c1(1)
+                do j=2,i
+                   p0=pi
+                   pi=(c1(j)*x-a1(j))*pi-b1(j)*p1
+                   p1=p0
+                enddo
+                poly1(ia)=p1
 
-                  if (vb) then; if (poly(ia)/=-500) then
-                     print 2,'serious error e',ia,minalloc,maxalloc,i0,k
-                     stop
-                  end if; end if
-               else
-                  x=mp(ia)
-                  pi=(c1(i)*x-a1(i))*poly(ia)-b1(i)*poly1(ia)
-                  poly1(ia)=poly(ia)
-               endif
-               poly(ia)=pi
-               !           if (vb) print 2,'Extension left test',k,s1,s3,t,x,pi,w(x),dxdt
-               pi=pi*pi*mw(ia)
-               s3=s3+pi
-               s3x=s3x+pi*x
-            enddo
-            !        if (vb) print 2,'Extension left test',k,s1,s3,t,x,pi,w(x),dxdt
-            if (abs(s3)>abs(s1+s2)*eps .or. abs(s3x)>abs(s1x+s2x)*eps) then
-               ! must extend t-domain to the left
-               ! this extension should never stop for alpha=-1. But it does. Why?
-               s1=s1+s3
-               s1x=s1x+s3x
-               if (vb) print 2,'Extending t-domain to left',t0,t0-(nsafe+1)&
-                    *dt,s1,s3,s1x,s3x,s2,s2x
-               if (i0-4*nsafe-2<minalloc) then
-                  if (i==1) nintervals=nintervals-nsafe-1 ! to prevent error with not yet defined
-                  !right boundary region.
-                  call realloc(1)
-                  if (i==1) nintervals=nintervals+nsafe+1
-               endif
-               t0=t0-(nsafe+1)*dt
-               nintervals=nintervals+(nsafe+1)
-               i0=i0-2*(nsafe+1)
-               makenew=.true.
-               leftnew=leftnew+nsafe+1
-            else
-                ! if (vb) print 2,'NOT Extending t-domain to left',t0,t0-(nsafe+1)&
-                !    *dt,s1,s3,s1x,s3x,s2,s2x,'dxdt',dxdt,poly(i0),mw(i0),x&
-                !    ,w(x),alpha
+                if (vb) then; if (poly(ia)/=-500) then
+                   print 2,'serious error e',ia,minalloc,maxalloc,i0,k
+                   stop
+                end if; end if
+             else
+                x=mp(ia)
+                pi=(c1(i)*x-a1(i))*poly(ia)-b1(i)*poly1(ia)
+                poly1(ia)=poly(ia)
+             endif
+             poly(ia)=pi
+             !           if (vb) print 2,'Extension left test',k,s1,s3,t,x,pi,w(x),dxdt
+             pi=pi*pi*mw(ia)
+             s3=s3+pi
+             s3x=s3x+pi*x
+          enddo
+          !        if (vb) print 2,'Extension left test',k,s1,s3,t,x,pi,w(x),dxdt
+          if (abs(s3)>abs(s1+s2)*eps .or. abs(s3x)>abs(s1x+s2x)*eps) then
+             ! must extend t-domain to the left
+             ! this extension should never stop for alpha=-1. But it does. Why?
+             s1=s1+s3
+             s1x=s1x+s3x
+             if (vb) print 2,'Extending t-domain to left',t0,t0-(nsafe+1)&
+                  *dt,s1,s3,s1x,s3x,s2,s2x
+             if (i0-4*nsafe-2<minalloc) then
+                if (i==1) nintervals=nintervals-nsafe-1 ! to prevent error with not yet defined
+                !right boundary region.
+                call realloc(1)
+                if (i==1) nintervals=nintervals+nsafe+1
+             endif
+             t0=t0-(nsafe+1)*dt
+             nintervals=nintervals+(nsafe+1)
+             i0=i0-2*(nsafe+1)
+             makenew=.true.
+             leftnew=leftnew+nsafe+1
+          else
+             ! if (vb) print 2,'NOT Extending t-domain to left',t0,t0-(nsafe+1)&
+             !    *dt,s1,s3,s1x,s3x,s2,s2x,'dxdt',dxdt,poly(i0),mw(i0),x&
+             !    ,w(x),alpha
              exit
-            endif
-         enddo
-         makenew=.false.
-         do
-            s3=0
-            s3x=0
-            do k=-nsafe,0
-               ia=2*(nintervals-k)+i0
-               if (makenew .or. i==1) then
-                  t=t1-dt*k
-                  !z=tanh(mori*sinh(t))
-                  dxdt=.5*(xmax-xmin)*sech2(mori*sinh(t))*mori*cosh(t)
-                  !x=.5*(xmax-xmin)*(1+z)+xmin
-                  x=.5*(xmax-xmin)*tanhm1(mori*sinh(t))+xmax
-                  ! calculate polynomial at x
-                  mp(ia)=x
-                  mw(ia)=dxdt*w(x)
-                  p1=0
-                  pi=c1(1)
-                  do j=2,i
-                     p0=pi
-                     pi=(c1(j)*x-a1(j))*pi-b1(j)*p1
-                     p1=p0
-                  enddo
-                  poly1(ia)=p1
+          endif
+       enddo
+       makenew=.false.
+       do
+          s3=0
+          s3x=0
+          do k=-nsafe,0
+             ia=2*(nintervals-k)+i0
+             if (makenew .or. i==1) then
+                t=t1-dt*k
+                !z=tanh(mori*sinh(t))
+                dxdt=.5*(xmax-xmin)*sech2(mori*sinh(t))*mori*cosh(t)
+                !x=.5*(xmax-xmin)*(1+z)+xmin
+                x=.5*(xmax-xmin)*tanhm1(mori*sinh(t))+xmax
+                ! calculate polynomial at x
+                mp(ia)=x
+                mw(ia)=dxdt*w(x)
+                p1=0
+                pi=c1(1)
+                do j=2,i
+                   p0=pi
+                   pi=(c1(j)*x-a1(j))*pi-b1(j)*p1
+                   p1=p0
+                enddo
+                poly1(ia)=p1
 
-                  if (vb) then; if (poly(ia)/=-500) then
-                     print 2,'serious error f',i,ia,minalloc,maxalloc,i0,k
-                     stop
-                  end if; end if
-               else
-                  x=mp(ia)
-                  pi=(c1(i)*x-a1(i))*poly(ia)-b1(i)*poly1(ia)
-                  poly1(ia)=poly(ia)
-               endif
-               poly(ia)=pi
-               pi=pi*pi*mw(ia)
-               s3=s3+pi
-               s3x=s3x+pi*x
-            enddo
-            if (abs(s3)>abs(s1+s2)*eps .or. abs(s3x)>abs(s1x+s2x)*eps) then
-               ! must extend t-domain to the right
-               s1=s1+s3
-               s1x=s1x+s3x
-               if (vb) print 2,'Extending t-domain to right',t1,t1+(nsafe+1)&
-                    *dt,s1,s3,s1x,s3x,s2,s2x!,'dxdt',dxdt,poly(2*nintervals&
-               !+i0),mw(2*nintervals+i0),x,w(x)
-               if (i0+2*(nintervals+2*nsafe+1)>maxalloc) call realloc(1)
-               t1=t1+(nsafe+1)*dt
-               nintervals=nintervals+(nsafe+1)
-               makenew=.true.
-               rightnew=rightnew+nsafe+1
-            else
-               exit
-            endif
-         enddo
-       end block
+                if (vb) then; if (poly(ia)/=-500) then
+                   print 2,'serious error f',i,ia,minalloc,maxalloc,i0,k
+                   stop
+                end if; end if
+             else
+                x=mp(ia)
+                pi=(c1(i)*x-a1(i))*poly(ia)-b1(i)*poly1(ia)
+                poly1(ia)=poly(ia)
+             endif
+             poly(ia)=pi
+             pi=pi*pi*mw(ia)
+             s3=s3+pi
+             s3x=s3x+pi*x
+          enddo
+          if (abs(s3)>abs(s1+s2)*eps .or. abs(s3x)>abs(s1x+s2x)*eps) then
+             ! must extend t-domain to the right
+             s1=s1+s3
+             s1x=s1x+s3x
+             if (vb) print 2,'Extending t-domain to right',t1,t1+(nsafe+1)&
+                  *dt,s1,s3,s1x,s3x,s2,s2x!,'dxdt',dxdt,poly(2*nintervals&
+             !+i0),mw(2*nintervals+i0),x,w(x)
+             if (i0+2*(nintervals+2*nsafe+1)>maxalloc) call realloc(1)
+             t1=t1+(nsafe+1)*dt
+             nintervals=nintervals+(nsafe+1)
+             makenew=.true.
+             rightnew=rightnew+nsafe+1
+          else
+             exit
+          endif
+       enddo
        ! add the two halves together and apply dt:
        s3=dt*(s1+s2)
        s3x=dt*(s1x+s2x)
@@ -722,7 +719,7 @@ contains
     
     if (.not. present(ortho_f)) deallocate(projsteen)
     
-2   format (*(G0,"  "))
+2   format ('*(G0,"  ")')
   end subroutine gauss_nodes_functions
   
   !interface function for cgyro_init_manager: (cf also pseudo_spec_lib.f90)
@@ -757,7 +754,7 @@ contains
     ! recalculate weights for weight function x**2 expected by the code.
     ! relative size of remainder integral to recreate balancing the
     ! integral by last element
-    v=exp(-e_max)*2*xmax/sqrt(pi1)+erfc(xmax) 
+    v=exp(-e_max)*2*xmax/sqrt(pi1)+erfc(xmax) !(1-erf(xmax))
     w_e=projsteen(1,:)**2*x**(2-alpha)
     w_e=w_e/sum(w_e)*(1-v)
     w_e(n)=w_e(n)+v
@@ -806,6 +803,6 @@ contains
        enddo
        close(1)
     end if
-2   format (*(G23.16))
+2   format ('*(G23.16)')
   end subroutine pseudo_maxwell_pliocene
 end module half_hermite
