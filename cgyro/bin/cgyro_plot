@@ -27,6 +27,9 @@ then
   echo "         Output file type (and optional prefix)"
   echo "         <filetype>=eps, pdf, png, svg, dump"
   echo
+  echo "         -notex"
+  echo "         Disable latex fonts"
+  echo
   echo "PLOT MODE"
   echo 
   echo "         -plot <type>"
@@ -230,6 +233,7 @@ fi
 LOCDIR=.
 SIMROOT=$PWD
 
+TEX=1
 FONTSIZE=18
 LX=12
 LY=6
@@ -301,6 +305,7 @@ while [ $# -gt 0 ] ; do
   -fc) FC=1 ;;
 
   -diss) DISS=1 ;;
+  -notex) TEX=0 ;;
 
   -moment) shift ; MOMENT=$1 ;;
   -ie) shift ; IE=$1 ;;
@@ -375,7 +380,7 @@ cd $SIMDIR
 PYROOT=$GACODE_ROOT/python/cgyro
 
 #==============================================================================
-PLT="$PYROOT/data_plot_single.py $FONTSIZE $LX $LY"
+PLT="$PYROOT/data_plot_single.py $TEX $FONTSIZE $LX $LY"
 
 case "$VIS_TYPE" in
 
