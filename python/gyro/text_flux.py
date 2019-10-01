@@ -1,11 +1,8 @@
-# file processed by 2to3
-from __future__ import print_function, absolute_import
-from builtins import map, filter, range
 import sys
 import numpy as np
 from gacodefuncs import *
 from gyro.data import GYROData
- 
+
 sim       = GYROData('./')
 w         = float(sys.argv[1])
 wmax      = 0.0

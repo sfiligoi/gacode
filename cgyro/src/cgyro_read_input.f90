@@ -18,6 +18,7 @@ subroutine cgyro_read_input
   call cgyro_readbc_int(n_toroidal)
   call cgyro_readbc_int(n_field)
   call cgyro_readbc_real(e_max)
+  call cgyro_readbc_real(alpha_poly)
   call cgyro_readbc_int(e_method)
   call cgyro_readbc_int(delta_t_method)
   call cgyro_readbc_real(delta_t)

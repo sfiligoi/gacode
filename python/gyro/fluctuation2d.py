@@ -1,6 +1,3 @@
-# file processed by 2to3
-from __future__ import print_function, absolute_import
-from builtins import map, filter, range
 import sys
 import numpy as np
 import scipy.interpolate
@@ -51,7 +48,7 @@ else:
         f = np.array(sim.moment_e[j,:,:,:,-1],dtype=complex)
         title = '$\delta E$'
 
-print('INFO (GYROData): Processing data.') 
+print('INFO (GYROData): Processing data.')
 
 #--------------------------------------------------------
 # Plot resolution

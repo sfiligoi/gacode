@@ -1,7 +1,4 @@
 #!/task/imd/anaconda/bin/python
-# file processed by 2to3
-from __future__ import print_function, absolute_import
-from builtins import map, filter, range
 import os, sys
 def make_clean():
     ret = os.system('cd $GACODE_ROOT; make clean')

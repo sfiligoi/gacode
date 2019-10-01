@@ -17,7 +17,7 @@ from matplotlib import rc
 from gacodefuncs import *
 from tgyro.data import tgyrodata
 from matplotlib.colors import LogNorm
-from gapy import expro
+from gacode import expro
 
 rc('text',usetex=True)
 rc('font',size=18)
@@ -55,7 +55,7 @@ else:
    fin = r'$\mathtt{iter='+nstr+'}$'
 
 init=r'$\mathtt{iter=0}$'
-  
+
 def plot_select(ax,tag):
    if 'flux' in tag:
       plot_flux(ax,tag)
@@ -91,29 +91,29 @@ def plot_input_profiles(ax,tag,scale=0):
 
    f0 = 'input.profiles.'+str(0)
    fn = 'input.profiles.'+str(n)
-   
+
    color='black' ; width=5 ; alpha = 0.2 ; label='input.gacode'
 
    if os.path.isfile(f0):
       expro.expro_read(f0)
    else:
       expro.expro_read('input.gacode')
-      
+
    xp = expro.expro_rmin
-   
+
    snorm = max(xp)**scale
-    
+
    xp = xp/max(xp)
 
    y = setprof(expro,tag)
-      
+
    ax.plot(xp,y*snorm,color=color,alpha=alpha,linewidth=width,
            label=r'$\mathbf{'+label+'}$')
-       
+
    if os.path.isfile(fn):
       expro.expro_read(fn)
       y = setprof(expro,tag)
-      
+
       ax.plot(xp,y*snorm,color=color,alpha=alpha,linewidth=width,
             label=r'$\mathbf{'+label+'}$')
 
@@ -191,10 +191,10 @@ def plot_flux(ax,tag):
    ax.grid(which="major",ls="-",alpha=0.1,linewidth=2)
    ax.grid(which="minor",ls=":",alpha=0.1,linewidth=2)
    ax.set_xlabel('$r/a$')
- 
+
    tot=r'$\mathbf{total}$'
    tar=r'$\mathbf{target}$'
-   
+
    if tag == 'eflux_e_target':
       if units == 0:
          ax.plot(x,sim.data['eflux_e_tot'][n],label=tot)
@@ -228,7 +228,7 @@ def plot_flux(ax,tag):
       ax.plot(x,sim.data['mflux_tot'][n],label=tot)
       ax.plot(x,sim.data['mflux_target'][n],label=tar)
       ax.set_ylabel('$\Pi/\Pi_{GB}$',color='k')
-            
+
    for i in range(n_ion):
       pstr = 'pflux_i'+str(i+1)
       if tag == pstr+'_target':
@@ -296,16 +296,16 @@ def plot_smooth(ax,tag):
          ax.plot(x,sim.data[tag][n]/1e13,'o',color='k')
          plot_input_profiles(ax,'ni_'+str(i+1))
          break
-    
+
    ax.legend(loc=loc)
    plt.tight_layout
-        
+
 #-------------------------------------------------------------------------------------
 
 class TabPanel(wx.Panel):
     def __init__(self, parent):
-        wx.Panel.__init__(self, parent=parent)
- 
+	wx.Panel.__init__(self, parent=parent)
+
         self.figure = plt.Figure()
         self.figure.subplots_adjust(left=0.07,right=0.95)
         self.ax = self.figure.add_subplot(111)
@@ -314,20 +314,20 @@ class TabPanel(wx.Panel):
         self.sizer.Add(self.canvas, 1, wx.LEFT | wx.TOP | wx.GROW)
         self.SetSizer(self.sizer)
         self.Fit()
-        
+
     def draw(self,tag):
         plot_select(self.ax,tag)
-  
+
 #-------------------------------------------------------------------------------------
 
 class DemoFrame(wx.Frame):
   def __init__(self):
-        """Constructor"""        
-        wx.Frame.__init__(self, None, wx.ID_ANY, 
+        """Constructor"""
+        wx.Frame.__init__(self, None, wx.ID_ANY,
                           'TGYRO plotting notebook -- '+wdir,
                           size=(1100,600))
         panel = wx.Panel(self)
- 
+
         notebook = wx.Notebook(panel)
 
         tab = TabPanel(notebook)
@@ -350,7 +350,7 @@ class DemoFrame(wx.Frame):
             tab = TabPanel(notebook)
             tab.draw('pflux_i'+str(i+1)+'_target')
             notebook.AddPage(tab,'*pflux_i'+str(i+1))
-           
+
         tab = TabPanel(notebook)
         tab.draw('te')
         notebook.AddPage(tab,'Te')
@@ -400,9 +400,8 @@ class DemoFrame(wx.Frame):
         sizer.Add(notebook, 1, wx.ALL|wx.EXPAND, 5)
         panel.SetSizer(sizer)
         self.Layout()
- 
+
         self.Show()
- 
 #-------------------------------------------------------------------------------------
 
 if __name__ == "__main__":
@@ -410,11 +409,11 @@ if __name__ == "__main__":
   if ext == 'screen':
 
     # On-screen wxpython notebook
-      
+
     app = wx.App(False)
     frame = DemoFrame()
     app.MainLoop()
-    
+
   else:
 
     # Generate plots
@@ -430,7 +429,7 @@ if __name__ == "__main__":
     for xlist in list:
         figure = plt.figure(figsize=(9,6))
         figure.subplots_adjust(left=0.12,right=0.95,bottom=0.16)
-        ax = figure.add_subplot(111) 
+        ax = figure.add_subplot(111)
         plot_select(ax,xlist)
         pfile = 'out.'+xlist+'.'+ext
         plt.savefig(pfile)

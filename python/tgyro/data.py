@@ -1,6 +1,3 @@
-# file processed by 2to3
-from __future__ import print_function, absolute_import
-from builtins import map, filter, range
 import os
 import sys
 import numpy as np
@@ -19,7 +16,7 @@ class tgyrodata:
         self.n_r          = 0
         self.data         = {}
         self.pedflag      = 0
-    
+
         self.dir = sim_directory
         self.n_ion = int(self.get_tag_value("LOC_N_ION"))
 
@@ -27,12 +24,12 @@ class tgyrodata:
         self.n_r         = int(data[0])
         self.n_evolve     = int(data[1])
         self.n_iterations = int(data[2])
- 
+
         self.getdata()
-        
+
     def getdata(self):
         """Read all tgyro-format datafiles"""
-        
+
         self.fileparser('out.tgyro.alpha')
         self.fileparser('out.tgyro.geometry.1')
         self.fileparser('out.tgyro.geometry.2')
@@ -47,7 +44,7 @@ class tgyrodata:
         self.fileparser('out.tgyro.evo_ti')
         self.fileparser('out.tgyro.profile')
 
-        # Species series 
+        # Species series
         self.fileparser('out.tgyro.evo_ne')
         self.fileparser('out.tgyro.flux_e')
         self.fileparser('out.tgyro.profile_e')
@@ -70,7 +67,7 @@ class tgyrodata:
             except IndexError:
                 print("WARNING: Cannot find specified input parameter: ", tag)
                 return 0
-  
+
 
     def fileparser(self,file,onerow=False,ped=False):
         """Generic parser for standard TGYRO iteration-based file format"""
@@ -127,6 +124,6 @@ class tgyrodata:
         # Populate data list
         for ic in range(nc):
             self.data[tags[ic]] = numdata[ic,:,:]
-        
+
         if self.verbose: print('INFO: (data.py) Read data in '+file)
         return 1
