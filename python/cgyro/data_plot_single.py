@@ -7,14 +7,20 @@ from cgyro.data_dump import cgyrodata_dump
 
 data_in = cgyrodata_plot('./')
 
-# Use first 3 args to define plot and font size
-rc('text',usetex=True)
-rc('font',size=int(sys.argv[1]))
-data_in.lx = int(sys.argv[2])
-data_in.ly = int(sys.argv[3])
+# Use first 4 args to define plot and font size
 
-# Shift list by 3
-sys.argv = sys.argv[3:]
+# Use latex fonts if set
+if int(sys.argv[1]) == 0:
+   rc('text',usetex=False)
+else:
+   rc('text',usetex=True)
+
+rc('font',size=int(sys.argv[2]))
+data_in.lx = int(sys.argv[3])
+data_in.ly = int(sys.argv[4])
+
+# Shift list by 4
+sys.argv = sys.argv[4:]
 
 plot_type = sys.argv[1]
 
