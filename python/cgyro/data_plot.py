@@ -27,20 +27,23 @@ class cgyrodata_plot(data.cgyrodata):
 
       if moment == 'phi':
          if field == 0:
-            f = self.kxky_phi_abs[:,itheta,:,:]
+            f  = self.kxky_phi_abs[:,itheta,:,:]
             ft = self.TEXPHI
          elif field == 1:
-            f = self.kxky_apar_abs[:,itheta,:,:]
+            f  = self.kxky_apar_abs[:,itheta,:,:]
             ft = self.TEXAPAR
          else:
-            f = self.kxky_bpar_abs[:,itheta,:,:]
+            f  = self.kxky_bpar_abs[:,itheta,:,:]
             ft = self.TEXBPAR
       elif moment == 'n':
-         f = self.kxky_n_abs[:,itheta,species,:,:]
-         ft = ''
+         f  = self.kxky_n[0,:,itheta,species,:,:]
+         ft = self.kxky_n[1,:,itheta,species,:,:]
       elif moment == 'e':
-         f = self.kxky_e_abs[:,itheta,species,:,:]
-         ft = ''
+         f  = self.kxky_e[0,:,itheta,species,:,:]
+         ft = self.kxky_e[1,:,itheta,species,:,:]
+      elif moment == 'v':
+         f  = self.kxky_v[0,:,itheta,species,:,:]
+         ft = self.kxky_v[1,:,itheta,species,:,:]
 
       print('INFO: (kxky_select) Selected theta index {:d} of {:d} '.
             format(itheta+1,self.theta_plot))
@@ -301,6 +304,53 @@ class cgyrodata_plot(data.cgyrodata):
 
       return head,self.t,y0,yn
 
+   def plot_low(self,w=0.5,wmax=0.0,spec=0,moment='n',theta=0.0,ymin='auto',ymax='auto',fig=None):
+
+      if fig is None:
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
+
+      self.getbigfield()
+
+      #======================================
+      # Set figure size and axes
+      ax = fig.add_subplot(111)
+      ax.grid(which="both",ls=":")
+      ax.grid(which="major",ls=":")
+      ax.set_xlabel(TIME)
+      ax.set_ylabel(r'$\left|\delta '+moment+r'\right|/\rho_{*D}$')
+      #======================================
+
+      color = ['k','m','b','c','g','r']
+      t  = self.t
+
+      # Get index for average window
+      imin,imax=iwindow(t,w,wmax)
+
+      windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[imax])+']$'
+
+      ax.set_title(windowtxt)
+
+      p0 = self.n_radial//2
+      
+      # f[p,n,t]
+      f,ft = self.kxky_select(theta,0,moment,spec)
+      yr = f[p0+1,0,:] ; yi = ft[p0+1,0,:]
+      ax.plot(self.t,yr,color=color[0],label=r'$\mathrm{Re}$')
+      ax.plot(self.t,yi,color=color[1],label=r'$\mathrm{Im}$')
+      ave,var = variance(yr,t,w,wmax) ; y_ave = ave*np.ones(len(t))
+      ax.plot(t[imin:imax+1],y_ave[imin:imax+1],'--',color=color[0])
+      ave,var = variance(yi,t,w,wmax) ; y_ave = ave*np.ones(len(t))
+      ax.plot(t[imin:imax+1],y_ave[imin:imax+1],'--',color=color[1])
+
+      if ymax != 'auto':
+         ax.set_ylim(top=float(ymax))
+      if ymin != 'auto':
+         ax.set_ylim(bottom=float(ymin))
+
+      fig.tight_layout(pad=0.3)
+
+      return
+
    def plot_zf(self,w=0.5,wmax=0.0,field=0,fig=None):
 
       if fig is None:
@@ -314,9 +364,9 @@ class cgyrodata_plot(data.cgyrodata):
 
       print('INFO: (plot_zf.py) Using index theta index n_theta/3+1')
       if field == 0:
-         f = self.phib[0,self.n_theta/3,:]
+         f = self.phib[0,self.n_theta//3,:]
       elif field == 1:
-         f = self.aparb[0,self.n_theta/3,:]
+         f = self.aparb[0,self.n_theta//3,:]
       else:
          f = self.bparb[0,self.n_theta/3,:]
 

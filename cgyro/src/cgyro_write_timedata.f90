@@ -59,7 +59,7 @@ subroutine cgyro_write_timedata
 
   if (nonlinear_flag == 1 .and. moment_print_flag == 1) then
      ! (n,e) moment for all species at selected thetas.
-     do i_moment=1,2
+     do i_moment=1,3
         call cgyro_write_distributed_bcomplex(&
              trim(path)//binfile_kxky(i_moment),&
              size(moment(:,:,:,i_moment)),&
