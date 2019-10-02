@@ -184,7 +184,6 @@ module cgyro_globals
   integer :: CGYRO_COMM_WORLD
   integer :: NEW_COMM_1
   integer :: NEW_COMM_2
-  integer :: NEW_COMM_RESTART_IO
   integer :: nv1,nv2,nc1,nc2
   integer :: nsplit
   integer, dimension(:), allocatable :: recv_status
@@ -236,8 +235,8 @@ module cgyro_globals
   character(len=18) :: binfile_ky_cflux = 'bin.cgyro.ky_cflux'
   character(len=15), dimension(3) :: binfile_fieldb = &
        (/'bin.cgyro.phib ','bin.cgyro.aparb','bin.cgyro.bparb'/)
-  character(len=16), dimension(2) :: binfile_kxky = &
-       (/'bin.cgyro.kxky_n','bin.cgyro.kxky_e'/)
+  character(len=16), dimension(3) :: binfile_kxky = &
+       (/'bin.cgyro.kxky_n','bin.cgyro.kxky_e','bin.cgyro.kxky_v'/)
   character(len=19), dimension(3) :: binfile_kxky_field = &
        (/'bin.cgyro.kxky_phi ','bin.cgyro.kxky_apar','bin.cgyro.kxky_bpar'/)
   character(len=20), dimension(3) :: binfile_lky_flux = &
