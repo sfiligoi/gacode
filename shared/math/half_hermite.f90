@@ -4,9 +4,7 @@
 !ifort -stand f15 -warn all -march=native -O3 -heap-arrays 10 -implicitnone -real-size 64 half_hermite.f90 -c
 module half_hermite
   real, private, parameter :: pi1=atan(1.)*4
-  real, private, dimension(:), pointer :: mw,mp,poly,poly1 !Mori weights and points
   !and polynomial recursion variables
-  integer, private :: minalloc,maxalloc,i0,nintervals,nn ! current limits of allocation
   !i0 points to where the index 0 is.
   integer, private, parameter :: nsafe=3,maxmem=50
   ! The code uses mainly nintervals intervals, and for these nintervals-1
@@ -17,16 +15,18 @@ module half_hermite
   ! If the first interior point has index 1, the last interior vertex has
   ! index nintervals-1 and the first "safe" point has index -nsafe and the
   ! last of those is nintervals+nsafe. (That's why it's nsafe+1)
-  logical vb
   private realloc
 contains
-  subroutine realloc(step)
+  subroutine realloc(step,mw,mp,poly,poly1,minalloc,maxalloc,i0,nintervals,nn,vb)
     implicit none
     integer,intent(in) :: step
+    integer,intent(inout) :: minalloc,maxalloc,i0,nintervals,nn
     integer :: newmin,newmax
+    real, dimension(:), pointer,intent(inout) :: mw,mp,poly,poly1 !Mori weights and points
     real, dimension(:), pointer :: mw2,mp2,poly2,poly12 !Mori weights and
     !points
     integer istart,iend,isn,ien,i
+    logical vb
     ! we assume nintervals has already been updated.
     ! if step=2 ==> the points are supposed to be spread with stepsize step.
     istart=i0-(2*nsafe)/step
@@ -97,7 +97,10 @@ contains
     integer i,j,k,ia
     integer leftnew,rightnew
     logical makenew
+    logical vb
 
+    real, dimension(:), pointer :: mw,mp,poly,poly1 !Mori weights and points
+    integer :: minalloc,maxalloc,i0,nintervals,nn ! current limits of allocation
     ! calculate recursion coefficients for orthogonal polynomials for weight
     ! function 
 
@@ -337,7 +340,7 @@ contains
              if (i0-4*nsafe-2<minalloc) then
                 if (i==1) nintervals=nintervals-nsafe-1 ! to prevent error with not yet defined
                 !right boundary region.
-                call realloc(1)
+                call realloc(1,mw,mp,poly,poly1,minalloc,maxalloc,i0,nintervals,nn,vb)
                 if (i==1) nintervals=nintervals+nsafe+1
              endif
              t0=t0-(nsafe+1)*dt
@@ -397,7 +400,8 @@ contains
              if (vb) print *,'Extending t-domain to right',t1,t1+(nsafe+1)&
                   *dt,s1,s3,s1x,s3x,s2,s2x!,'dxdt',dxdt,poly(2*nintervals&
              !+i0),mw(2*nintervals+i0),x,w(x)
-             if (i0+2*(nintervals+2*nsafe+1)>maxalloc) call realloc(1)
+             if (i0+2*(nintervals+2*nsafe+1)>maxalloc) &
+                  call realloc(1,mw,mp,poly,poly1,minalloc,maxalloc,i0,nintervals,nn,vb)
              t1=t1+(nsafe+1)*dt
              nintervals=nintervals+(nsafe+1)
              makenew=.true.
@@ -545,7 +549,7 @@ contains
                 dt=(t1-t0)/nintervals
                 i0=i0-nsafe ! new i0 index
                 !print *,'prerefpoly',poly(i0-2*nsafe:i0+nsafe)
-                call realloc(2)
+                call realloc(2,mw,mp,poly,poly1,minalloc,maxalloc,i0,nintervals,nn,vb)
                 leftnew=nintervals !make all the half points new
                 rightnew=nintervals
                 if (vb) print *,'new dt, refinements',dt,log((t10-t00)/(dt*2*n))/log(2.)
@@ -737,8 +741,8 @@ contains
     real, dimension(:), allocatable :: a1,b1,c1,lg,a,bsq
     real, dimension(:,:), allocatable :: projsteen,deriv(:,:)
 
-    real xmax,v
-    integer i,m,ifail
+    real xmax
+    integer i
 
     xmax=sqrt(e_max)
     
