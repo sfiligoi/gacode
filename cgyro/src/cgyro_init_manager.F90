@@ -74,22 +74,22 @@ subroutine cgyro_init_manager
           trim(path)//'out.cgyro.egrid')
   else if (e_method==3) then
      ! interface function in module half_hermite
-     if (i_proc==0) then
-        call pseudo_maxwell_pliocene(n_energy,&
-             e_max,&
-             energy,&
-             w_e,&
-             e_deriv1_mat,&
-             alpha_poly,& ! weight fct=x^alpha_poly*exp(-x**2)
-             trim(path)//'out.cgyro.egrid')
-     else
+!     if (i_proc==0) then
+!        call pseudo_maxwell_pliocene(n_energy,&
+!             e_max,&
+!             energy,&
+!             w_e,&
+!             e_deriv1_mat,&
+!             alpha_poly,& ! weight fct=x^alpha_poly*exp(-x**2)
+!             trim(path)//'out.cgyro.egrid')
+!     else
         call pseudo_maxwell_pliocene(n_energy,&
              e_max,&
              energy,&
              w_e,&
              e_deriv1_mat,&
              alpha_poly) ! only write results on i_proc zero.
-     end if
+!     end if
   end if
      
 
