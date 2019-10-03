@@ -27,6 +27,7 @@ class NEOData:
         self.read_vel()
         self.read_rotation()
         self.read_neoinputgeo()
+        self.read_transport_exp()
     #-------------------------------------------------------------------------#
 
     def init_data(self):
@@ -39,6 +40,7 @@ class NEOData:
         self.theory_nclass = {}
         self.transport     = {}
         self.transport_gv  = {}
+        self.transport_exp = {}
         self.expnorm       = {}
         self.phi           = {}
         self.vel           = []
@@ -280,20 +282,20 @@ class NEOData:
             if self.verbose:
                 print("ERROR (NEOData): Fatal error!  Missing out.neo.transport_exp.")
             return
-
-        self.transport_exp['r']       = data[:,0]
-        self.transport_exp['phisq']   = data[:,1]
-        self.transport_exp['jparB']   = data[:,2]
-        self.transport_exp['vtheta0'] = data[:,3]
-        self.transport_exp['uparB0']  = data[:,4]
-        self.transport_exp['Gamma']   = data[:,5::8]
-        self.transport_exp['Q']       = data[:,6::8]
-        self.transport_exp['Pi']      = data[:,7::8]
-        self.transport_exp['uparB']   = data[:,8::8]
-        self.transport_exp['k']       = data[:,9::8]
-        self.transport_exp['K']       = data[:,10::8]
-        self.transport_exp['vtheta']  = data[:,11::8]
-        self.transport_exp['vphi']    = data[:,12::8]
+        add_txt = '_exp'
+        self.transport_exp['r'+add_txt]       = data[:,0]
+        self.transport_exp['phisq'+add_txt]   = data[:,1]
+        self.transport_exp['jparB'+add_txt]   = data[:,2]
+        self.transport_exp['vtheta0'+add_txt] = data[:,3]
+        self.transport_exp['uparB0'+add_txt]  = data[:,4]
+        self.transport_exp['Gamma'+add_txt]   = data[:,5::8]
+        self.transport_exp['Q'+add_txt]       = data[:,6::8]
+        self.transport_exp['Pi'+add_txt]      = data[:,7::8]
+        self.transport_exp['uparB'+add_txt]   = data[:,8::8]
+        self.transport_exp['k'+add_txt]       = data[:,9::8]
+        self.transport_exp['K'+add_txt]       = data[:,10::8]
+        self.transport_exp['vtheta'+add_txt]  = data[:,11::8]
+        self.transport_exp['vphi'+add_txt]    = data[:,12::8]
 
     #-------------------------------------------------------------------------#
 
