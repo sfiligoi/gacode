@@ -742,7 +742,7 @@ contains
     real, dimension(:), allocatable :: a1,b1,c1,lg,a,bsq
     real, dimension(:,:), allocatable :: projsteen,deriv(:,:)
 
-    real xmax
+    real xmax,v
     integer i
 
     xmax=sqrt(e_max)
