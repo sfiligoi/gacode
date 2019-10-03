@@ -4,8 +4,6 @@
 !ifort -stand f15 -warn all -march=native -O3 -heap-arrays 10 -implicitnone -real-size 64 half_hermite.f90 -c
 module half_hermite
   real, private, parameter :: pi1=atan(1.)*4
-  !and polynomial recursion variables
-  !i0 points to where the index 0 is.
   integer, private, parameter :: nsafe=3,maxmem=50
   ! The code uses mainly nintervals intervals, and for these nintervals-1
   ! vertices for integration (the interior vertices). In addition, as a
@@ -100,7 +98,10 @@ contains
     logical vb
 
     real, dimension(:), pointer :: mw,mp,poly,poly1 !Mori weights and points
+    !and polynomial recursion variables
     integer :: minalloc,maxalloc,i0,nintervals,nn ! current limits of allocation
+    !i0 points to where the index 0 is.
+
     ! calculate recursion coefficients for orthogonal polynomials for weight
     ! function 
 
