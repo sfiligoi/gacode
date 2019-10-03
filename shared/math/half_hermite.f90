@@ -33,15 +33,14 @@ contains
     iend=i0+(2*(nintervals+nsafe))/step
     newmin=-10*nsafe-9
     newmax=10*nsafe+9+2*nintervals
-2   format ("*(G0,'  ')")
-    if (vb) print 2,'Reallocating',minalloc,maxalloc,newmin,newmax,step
+    if (vb) print *,'Reallocating',minalloc,maxalloc,newmin,newmax,step
     if ((istart-i0)*step<newmin .or. (iend-i0)*step>newmax) then
-       print 2,'Serious error reallocating in half_hermite:'
-       print 2,'Reallocating',minalloc,i0,nintervals,maxalloc,newmin,newmax,step
+       print *,'Serious error reallocating in half_hermite:'
+       print *,'Reallocating',minalloc,i0,nintervals,maxalloc,newmin,newmax,step
        stop
     endif
     if (newmax-newmin>2048+maxmem*nn) then
-       print 2,'Too much memory needed in half_hermite',newmax-newmin&
+       print *,'Too much memory needed in half_hermite',newmax-newmin&
             ,maxmem*nn,maxmem,nn,newmin,newmax
        stop
     endif
@@ -62,8 +61,8 @@ contains
 
     do i=isn,ien,2*step
        if (mw2(i)==-500) then
-          print 2,'Very serious error i',i,isn,ien,istart,iend
-          print 2,mw(istart:min(istart+10,iend):2)
+          print *,'Very serious error i',i,isn,ien,istart,iend
+          print *,mw(istart:min(istart+10,iend):2)
           stop
        endif
     end do
@@ -76,7 +75,7 @@ contains
     minalloc=newmin
     maxalloc=newmax
     i0=0
-    if (vb) print 2,'done'
+    if (vb) print *,'done'
   end subroutine realloc
     
 
@@ -169,20 +168,19 @@ contains
     t1=-t0
     t00=t0
     t10=t1
-2   format ("*(G0,'  ')")
     if (vb) then
        ngauss=n+xmax**2+xmax*sqrt(-2*log(epsgauss))-log(epsgauss)/3
        ngauss=n+ceiling(10*xmax)+ceiling(alpha/2)
-       print 2,'ngauss=',ngauss
+       print *,'ngauss=',ngauss
        allocate(gw(ngauss),gp(ngauss),gw2(ngauss*2),gp2(ngauss*2))
        call gauss_legendre(xmin,xmax,gp,gw,ngauss)
        call gauss_legendre(xmin,xmax,gp2,gw2,2*ngauss)
     endif
     if (xmax**2 > Log(1e300)) then
-       if (vb) print 2,'Careful, the squared polynomials will be of order exp(xmax^2) at&
+       if (vb) print *,'Careful, the squared polynomials will be of order exp(xmax^2) at&
             & xmax. xmax should be smaller than',sqrt(log(1e300))
     endif
-    if (vb) print 2,'thp,e',tanhp1(log(epsmori/2.)/2),tanhp1(mori*sinh(t0)),epsmori
+    if (vb) print *,'thp,e',tanhp1(log(epsmori/2.)/2),tanhp1(mori*sinh(t0)),epsmori
 
     nintervals=max(128,2*n) ! number of elementary intervals between integration points
     eps=epsbase*sqrt(1.*nintervals) !*3*n
@@ -239,7 +237,7 @@ contains
              poly1(ia)=0
              pi=c1(1)
              if (vb) then; if (poly(ia)/=-500) then
-                print 2,'serious error h',ia,minalloc,maxalloc,i0,k
+                print *,'serious error h',ia,minalloc,maxalloc,i0,k
                 stop
              end if; end if
           else
@@ -249,12 +247,12 @@ contains
           endif
           poly(ia)=pi
 
-          !if (vb) print 2,'left: i,k,t,x,pi,dxdt,w',i,k,t,x,pi,dxdt,w(x)
+          !if (vb) print *,'left: i,k,t,x,pi,dxdt,w',i,k,t,x,pi,dxdt,w(x)
           pi=pi*pi*mw(ia)
           s1=s1+pi
           s1x=s1x+pi*x
        enddo
-       if (vb) print 2,'left integral i,s,sx',i,s1,s1x
+       if (vb) print *,'left integral i,s,sx',i,s1,s1x
        s2=0
        s2x=0
        do k=1,(nintervals-1)/2
@@ -271,7 +269,7 @@ contains
              poly1(ia)=0
              pi=c1(1)
              if (vb) then; if (poly(ia)/=-500) then
-                print 2,'serious error g',ia,minalloc,maxalloc,i0,k
+                print *,'serious error g',ia,minalloc,maxalloc,i0,k
                 stop
              end if; end if
           else
@@ -280,13 +278,13 @@ contains
              poly1(ia)=poly(ia)
           end if
           poly(ia)=pi
-          !if (vb) print 2,'right: i,k,t,x,pi,dxdt,w',i,k,t,x,pi,dxdt,w(x)
+          !if (vb) print *,'right: i,k,t,x,pi,dxdt,w',i,k,t,x,pi,dxdt,w(x)
           pi=pi*pi*mw(ia)
           s2=s2+pi
           s2x=s2x+pi*x
        enddo
        ! nintervals/2 + (nintervals-1)/2 = nintervals-1, for odd or even
-       if (vb) print 2,'right integral i,s,sx',i,s2,s2x
+       if (vb) print *,'right integral i,s,sx',i,s2,s2x
 
        ! now see whether we need to extend the integration domain, or whether
        ! it is accurate enough: We do nsafe extra points at both ends.
@@ -314,7 +312,7 @@ contains
                 poly1(ia)=p1
 
                 if (vb) then; if (poly(ia)/=-500) then
-                   print 2,'serious error e',ia,minalloc,maxalloc,i0,k
+                   print *,'serious error e',ia,minalloc,maxalloc,i0,k
                    stop
                 end if; end if
              else
@@ -323,18 +321,18 @@ contains
                 poly1(ia)=poly(ia)
              endif
              poly(ia)=pi
-             !           if (vb) print 2,'Extension left test',k,s1,s3,t,x,pi,w(x),dxdt
+             !           if (vb) print *,'Extension left test',k,s1,s3,t,x,pi,w(x),dxdt
              pi=pi*pi*mw(ia)
              s3=s3+pi
              s3x=s3x+pi*x
           enddo
-          !        if (vb) print 2,'Extension left test',k,s1,s3,t,x,pi,w(x),dxdt
+          !        if (vb) print *,'Extension left test',k,s1,s3,t,x,pi,w(x),dxdt
           if (abs(s3)>abs(s1+s2)*eps .or. abs(s3x)>abs(s1x+s2x)*eps) then
              ! must extend t-domain to the left
              ! this extension should never stop for alpha=-1. But it does. Why?
              s1=s1+s3
              s1x=s1x+s3x
-             if (vb) print 2,'Extending t-domain to left',t0,t0-(nsafe+1)&
+             if (vb) print *,'Extending t-domain to left',t0,t0-(nsafe+1)&
                   *dt,s1,s3,s1x,s3x,s2,s2x
              if (i0-4*nsafe-2<minalloc) then
                 if (i==1) nintervals=nintervals-nsafe-1 ! to prevent error with not yet defined
@@ -348,7 +346,7 @@ contains
              makenew=.true.
              leftnew=leftnew+nsafe+1
           else
-             ! if (vb) print 2,'NOT Extending t-domain to left',t0,t0-(nsafe+1)&
+             ! if (vb) print *,'NOT Extending t-domain to left',t0,t0-(nsafe+1)&
              !    *dt,s1,s3,s1x,s3x,s2,s2x,'dxdt',dxdt,poly(i0),mw(i0),x&
              !    ,w(x),alpha
              exit
@@ -379,7 +377,7 @@ contains
                 poly1(ia)=p1
 
                 if (vb) then; if (poly(ia)/=-500) then
-                   print 2,'serious error f',i,ia,minalloc,maxalloc,i0,k
+                   print *,'serious error f',i,ia,minalloc,maxalloc,i0,k
                    stop
                 end if; end if
              else
@@ -396,7 +394,7 @@ contains
              ! must extend t-domain to the right
              s1=s1+s3
              s1x=s1x+s3x
-             if (vb) print 2,'Extending t-domain to right',t1,t1+(nsafe+1)&
+             if (vb) print *,'Extending t-domain to right',t1,t1+(nsafe+1)&
                   *dt,s1,s3,s1x,s3x,s2,s2x!,'dxdt',dxdt,poly(2*nintervals&
              !+i0),mw(2*nintervals+i0),x,w(x)
              if (i0+2*(nintervals+2*nsafe+1)>maxalloc) call realloc(1)
@@ -411,7 +409,7 @@ contains
        ! add the two halves together and apply dt:
        s3=dt*(s1+s2)
        s3x=dt*(s1x+s2x)
-       if (vb) print 2,'complete integrals',i,s3,s3x
+       if (vb) print *,'complete integrals',i,s3,s3x
 
        ! Now we check, whether we have to increase the number of points
        ! For this doubling of the integration points we take one more interval
@@ -446,21 +444,21 @@ contains
                       p0=pi
                       pi=(c1(j)*x-a1(j))*pi-b1(j)*p1
                       p1=p0
-                      if (vb .and. k==1-nsafe) print 2,'refiningxx',x,k,pi,p1,j
+                      if (vb .and. k==1-nsafe) print *,'refiningxx',x,k,pi,p1,j
                    enddo
-                   if (vb .and. k==1-nsafe) print 2,'refiningyy',c1(1:i),'a',a1(2:i),'b&
+                   if (vb .and. k==1-nsafe) print *,'refiningyy',c1(1:i),'a',a1(2:i),'b&
                         &',b1(2:i)
                    poly1(ia)=p1
 
                    if (vb) then; if (poly(ia)/=-500) then
-                      print 2,'serious error a',ia,minalloc,maxalloc,i0,k
-                      print 2,'poly(',i0-nsafe*2,')',poly(i0-nsafe*2:i0)
+                      print *,'serious error a',ia,minalloc,maxalloc,i0,k
+                      print *,'poly(',i0-nsafe*2,')',poly(i0-nsafe*2:i0)
                       stop
                    end if; end if
                 else
                    if (vb) then; if (mp(ia)==-500) then
-                      print 2,'serious error c',ia,minalloc,maxalloc,i0,k
-                      print 2,'poly(',i0-nsafe*2,')',poly(i0-nsafe*2:i0)
+                      print *,'serious error c',ia,minalloc,maxalloc,i0,k
+                      print *,'poly(',i0-nsafe*2,')',poly(i0-nsafe*2:i0)
                       stop
                    end if; end if
                    x=mp(ia)
@@ -468,18 +466,18 @@ contains
                    poly1(ia)=poly(ia)
                 endif
                 poly(ia)=pi
-                !if (vb) print 2,'left:
+                !if (vb) print *,'left:
                 !i,k,t,x,pi,dxdt,w',i,k,t,x,pi,dxdt,w(x)
                 if (vb) then
                    if (mw(ia)==-500) then
-                      print 2,'error xxx'
+                      print *,'error xxx'
                       stop
                    endif
                 end if
                 pi=pi*pi*mw(ia)
                 s1=s1+pi
                 s1x=s1x+pi*x
-                !if (vb) print 2,'refining',k,poly(ia-1:ia+1),mw(ia-1:ia+1),mp(ia-1:ia+1)
+                !if (vb) print *,'refining',k,poly(ia-1:ia+1),mw(ia-1:ia+1),mp(ia-1:ia+1)
              enddo
              s2=0
              s2x=0
@@ -503,15 +501,15 @@ contains
                    enddo
                    poly1(ia)=p1
                    if (vb) then; if (poly(ia)/=-500) then
-                      print 2,'serious error b',ia,minalloc,maxalloc,i0,k
+                      print *,'serious error b',ia,minalloc,maxalloc,i0,k
                       stop
                    end if; end if
                 else
                    if (vb) then; if (mp(ia)==-500) then
-                      print 2,'serious error d',ia,minalloc,maxalloc,i0,k
-                      print 2,'poly(',i0-nsafe*2,')',poly(i0-nsafe*2:i0)
-                      print 2,'poly(',ia-nsafe,')',poly(ia-nsafe:ia+nsafe)
-                      print 2,'mp(',ia-nsafe,')',mp(ia-nsafe:ia+nsafe)
+                      print *,'serious error d',ia,minalloc,maxalloc,i0,k
+                      print *,'poly(',i0-nsafe*2,')',poly(i0-nsafe*2:i0)
+                      print *,'poly(',ia-nsafe,')',poly(ia-nsafe:ia+nsafe)
+                      print *,'mp(',ia-nsafe,')',mp(ia-nsafe:ia+nsafe)
                       stop
                    end if; end if
                    x=mp(ia)
@@ -519,7 +517,7 @@ contains
                    poly1(ia)=poly(ia)
                 end if
                 poly(ia)=pi
-                !if (vb) print 2,'right: i,k,t,x,pi,dxdt,w',i,k,t,x,pi,dxdt,w(x)
+                !if (vb) print *,'right: i,k,t,x,pi,dxdt,w',i,k,t,x,pi,dxdt,w(x)
                 pi=pi*pi*mw(ia)
                 s2=s2+pi
                 s2x=s2x+pi*x
@@ -528,17 +526,17 @@ contains
              ! so now we have in toto nintervals*2-1 points.
              s1=(s1+s2)*dt
              s1x=(s1x+s2x)*dt
-             if (vb) print 2,'complete intermediate integrals',i,s1,s2*dt,s1x
+             if (vb) print *,'complete intermediate integrals',i,s1,s2*dt,s1x
              s1=.5*(s1+s3)
              s1x=.5*(s1x+s3x)
              !s1 and s1x contain the up to now most accurate values.
              if (abs(s1-s3)>eps*abs(s3) .or. abs(s1x-s3x)>eps*abs(s3x)) then
                 ! need to increase number of intervals
-                if (vb) print 2,'Increasing nintervals',dt,s1,s3,abs(s1/s3&
+                if (vb) print *,'Increasing nintervals',dt,s1,s3,abs(s1/s3&
                      -1),s1x,s3x,nintervals,2*nintervals+1
                 s3=s1
                 s3x=s1x
-                if (vb) print 2,'old dt, refinements',dt,(t1-t0)/nintervals
+                if (vb) print *,'old dt, refinements',dt,(t1-t0)/nintervals
                 !nintervals=2*(nintervals+2*nsafe)-2*nsafe
                 nintervals=2*(nintervals+nsafe)
                 t0=t0-.5*dt*nsafe
@@ -546,11 +544,11 @@ contains
                 eps=epsbase*sqrt(1.*nintervals) !*3*n
                 dt=(t1-t0)/nintervals
                 i0=i0-nsafe ! new i0 index
-                !print 2,'prerefpoly',poly(i0-2*nsafe:i0+nsafe)
+                !print *,'prerefpoly',poly(i0-2*nsafe:i0+nsafe)
                 call realloc(2)
                 leftnew=nintervals !make all the half points new
                 rightnew=nintervals
-                if (vb) print 2,'new dt, refinements',dt,log((t10-t00)/(dt*2*n))/log(2.)
+                if (vb) print *,'new dt, refinements',dt,log((t10-t00)/(dt*2*n))/log(2.)
              else
                 leftnew=-nsafe !make nothing new next time.
                 rightnew=-nsafe
@@ -603,7 +601,7 @@ contains
              s5=s5+pi*gw2(k)
              s5x=s5x+pi*x*gw2(k)
           enddo
-          print 2,'gauss comparison',i,s4/s3-1,s4x/s3x-1,s5/s4-1,s5x/s4x-1,s5/s3-1,s5x/s3x-1,ngauss,nintervals
+          print *,'gauss comparison',i,s4/s3-1,s4x/s3x-1,s5/s4-1,s5x/s4x-1,s5/s3-1,s5x/s3x-1,ngauss,nintervals
        endif !vb
        logg(i)=log(s1)+logg(i)
        !a(i)=s1x/s1
@@ -616,12 +614,12 @@ contains
        b1(i)=b1(i)*c1(i)
        if (vb) then
           if (i0-nsafe*2<minalloc .or. i0+2*(nintervals+nsafe)>maxalloc) then
-             print 2,'Utmost error',i0,nsafe,nintervals,minalloc,maxalloc
+             print *,'Utmost error',i0,nsafe,nintervals,minalloc,maxalloc
              stop
           endif
           do k=i0-nsafe*2,i0+2*(nintervals+nsafe)
              if (poly(k)==-500) then
-                print 2,'Still error',k,i0,nsafe,nintervals,minalloc,maxalloc
+                print *,'Still error',k,i0,nsafe,nintervals,minalloc,maxalloc
                 stop
              endif
           end do
@@ -648,9 +646,9 @@ contains
           c1(i+1)=1
           logg(i+1)=logg(i)
        end if
-       if (vb) print 2,'i,a1,b1,c1,logg',i,a1(i),b1(i),c1(i),logg(i),'nintervals=',nintervals
+       if (vb) print *,'i,a1,b1,c1,logg',i,a1(i),b1(i),c1(i),logg(i),'nintervals=',nintervals
     enddo
-    if (vb) print 2,'hhn used mem',2*(nsafe+nintervals)
+    if (vb) print *,'hhn used mem',2*(nsafe+nintervals)
     deallocate(mw,mp,poly,poly1) !deallocation may be necessary because these are pointers.
   end subroutine half_hermite_norm
 
@@ -700,7 +698,7 @@ contains
     call dstevr('N','A',n,a(1:n),bsq(2:n),0.,0.,0,0,0.,m,sp,projsteen,n,isuppz,work,lwork,iwork,liwork,info)
 
     if (info/=0) then
-       print 2,'module half_hermite: gaus_nodes_weights: dstevr: info=',info,m,n
+       print *,'module half_hermite: gaus_nodes_weights: dstevr: info=',info,m,n
        stop
     end if
     
@@ -719,7 +717,6 @@ contains
     
     if (.not. present(ortho_f)) deallocate(projsteen)
     
-2   format ('*(G0,"  ")')
   end subroutine gauss_nodes_functions
   
   !interface function for cgyro_init_manager: (cf also pseudo_spec_lib.f90)
@@ -803,6 +800,6 @@ contains
        enddo
        close(1)
     end if
-2   format ('*(G23.16)')
+2   format (*(EN25.16))
   end subroutine pseudo_maxwell_pliocene
 end module half_hermite
