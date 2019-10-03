@@ -75,7 +75,7 @@ subroutine cgyro_read_restart_verify
   recid = recid + 1
   if ( magic /= restart_magic) then
      close(io)
-     call cgyro_error('ERROR: (CGYRO) Wrong magic number in restart header')
+     call cgyro_error('Wrong magic number in restart header')
      return
   endif
    
@@ -83,7 +83,7 @@ subroutine cgyro_read_restart_verify
   recid = recid + 1
   if ( version /= 2) then
      close(io)
-     call cgyro_error('ERROR: (CGYRO) Wrong version in restart header, only v2 supported')
+     call cgyro_error('Wrong version in restart header, only v2 supported')
      return
   endif
 
@@ -103,7 +103,7 @@ subroutine cgyro_read_restart_verify
        (t_n_species/=n_species) .or. (t_n_xi/=n_xi) .or. &
        (t_n_energy/=n_energy) .or. (t_n_toroidal/=n_toroidal) ) then
      close(io)
-     call cgyro_error('ERROR: (CGYRO) Wrong geometry in restart header')
+     call cgyro_error('Wrong geometry in restart header')
      return
   endif
 
@@ -155,7 +155,7 @@ subroutine cgyro_read_restart_one
 
   offset1 = size(h_x,kind=MPI_OFFSET_KIND)*(i_proc_1+i_proc_2*n_proc_1) + restart_header_size
   if (offset1 < restart_header_size) then
-     call cgyro_error('ERROR: (CGYRO) overflow detected in cgyro_read_restart_one')
+     call cgyro_error('Overflow detected in cgyro_read_restart_one')
      return
   endif
 
@@ -169,7 +169,7 @@ subroutine cgyro_read_restart_one
           i_err)
 
   if (i_err /= 0) then
-     call cgyro_error('ERROR: (CGYRO) MPI_FILE_OPEN in cgyro_read_restart_one failed')
+     call cgyro_error('MPI_FILE_OPEN in cgyro_read_restart_one failed')
      return
   endif
 
@@ -190,7 +190,7 @@ subroutine cgyro_read_restart_one
           i_err)
 
   if (i_err /= 0) then
-     call cgyro_error('ERROR: (CGYRO) MPI_FILE_READ_AT in cgyro_read_restart_one failed')
+     call cgyro_error('MPI_FILE_READ_AT in cgyro_read_restart_one failed')
      return
   endif
 

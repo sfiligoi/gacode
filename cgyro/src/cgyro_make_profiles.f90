@@ -247,7 +247,8 @@ subroutine cgyro_make_profiles
            endif
         enddo
         if(is_ele == -1) then
-           call cgyro_error('ERROR: (CGYRO) No electron species specified')
+           call cgyro_error('No electron species specified')
+           return
         endif
         dens_ele = dens(is_ele)
         temp_ele = temp(is_ele)
@@ -296,16 +297,16 @@ subroutine cgyro_make_profiles
   enddo
   if(num_ele == 0) then
      if(ae_flag == 0) then
-        call cgyro_error('ERROR: (CGYRO) No electron species specified')
+        call cgyro_error('No electron species specified')
         return
      endif
   else if(num_ele == 1) then
      if(ae_flag == 1) then
-        call cgyro_error('ERROR: (CGYRO) Electron species specified with adiabatic electron flag')
+        call cgyro_error('Electron species specified with adiabatic electron flag')
         return
      endif
   else
-     call cgyro_error('ERROR: (NEO) Only one electron species allowed')
+     call cgyro_error('Only one electron species allowed')
      return
   endif
 

@@ -75,7 +75,7 @@ subroutine cgyro_write_restart_one
 
   offset1 = size(h_x,kind=MPI_OFFSET_KIND)*(i_proc_1+i_proc_2*n_proc_1) + restart_header_size
   if (offset1 < restart_header_size) then
-     call cgyro_error('ERROR: (CGYRO) overflow in cgyro_write_restart')
+     call cgyro_error('Overflow in cgyro_write_restart')
      return
   endif
 
@@ -92,7 +92,7 @@ subroutine cgyro_write_restart_one
           fhv,&
           i_err)
   if (i_err /= 0) then
-     call cgyro_error('ERROR: (CGYRO) MPI_FILE_OPEN in cgyro_write_restart failed')
+     call cgyro_error('MPI_FILE_OPEN in cgyro_write_restart failed')
      return
   endif
 
@@ -113,19 +113,19 @@ subroutine cgyro_write_restart_one
           i_err)
 
   if (i_err /= 0) then
-     call cgyro_error('ERROR: (CGYRO) MPI_FILE_WRITE_AT in cgyro_write_restart failed')
+     call cgyro_error('MPI_FILE_WRITE_AT in cgyro_write_restart failed')
      return
   endif
 
   call MPI_FILE_SYNC(fhv,i_err)
   if (i_err /= 0) then
-     call cgyro_error('ERROR: (CGYRO) MPI_FILE_SYNC in cgyro_write_restart failed')
+     call cgyro_error('MPI_FILE_SYNC in cgyro_write_restart failed')
      return
   endif
 
   call MPI_FILE_CLOSE(fhv,i_err)
   if (i_err /= 0) then
-     call cgyro_error('ERROR: (CGYRO) MPI_FILE_CLOSE in cgyro_write_restart failed')
+     call cgyro_error('MPI_FILE_CLOSE in cgyro_write_restart failed')
      return
   endif
 
@@ -146,7 +146,7 @@ subroutine cgyro_write_restart_one
 
     i_err = RENAME(trim(path)//runfile_restart//".part", trim(path)//runfile_restart)
     if (i_err /= 0) then
-       call cgyro_error('ERROR: (CGYRO) Final rename in cgyro_write_restart failed')
+       call cgyro_error('Final rename in cgyro_write_restart failed')
        return
     endif
   endif

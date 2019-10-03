@@ -273,13 +273,13 @@ subroutine cgyro_write_distributed_bcomplex(datafile,n_fn,fn)
 
         open(unit=io,file=datafile,status='old',access='stream',iostat=i_err)
         if (i_err/=0) then
-          call cgyro_error('ERROR: (CGYRO) [REWIND] Failed to open '//datafile)
+          call cgyro_error('[REWIND] Failed to open '//datafile)
           return
         endif
         if (disp>0) then
           read(io,pos=disp, iostat=i_err) cdummy
           if (i_err/=0) then
-            call cgyro_error('ERROR: (CGYRO) [REWIND] Failed to rewind '//datafile)
+            call cgyro_error('[REWIND] Failed to rewind '//datafile)
             close(io)
             return
           endif
@@ -416,13 +416,13 @@ subroutine cgyro_write_distributed_breal(datafile,n_fn,fn)
 
         open(unit=io,file=datafile,status='old',access='stream',iostat=i_err)
         if (i_err/=0) then
-          call cgyro_error('ERROR: (CGYRO) [REWIND] Failed to open '//datafile)
+          call cgyro_error('[REWIND] Failed to open '//datafile)
           return
         endif
         if (disp>0) then
           read(io,pos=disp, iostat=i_err) cdummy
           if (i_err/=0) then
-            call cgyro_error('ERROR: (CGYRO) [REWIND] Failed to rewind '//datafile)
+            call cgyro_error('[REWIND] Failed to rewind '//datafile)
             close(io)
             return
           endif
@@ -833,13 +833,13 @@ subroutine write_binary(datafile,fn,n_fn)
 
      open(unit=io,file=datafile,status='old',access='stream', iostat=i_err)
      if (i_err/=0) then
-       call cgyro_error('ERROR: (CGYRO) [REWIND] Failed to open '//datafile)
+       call cgyro_error('[REWIND] Failed to open '//datafile)
        return
      endif
      if (disp>0) then
        read(io,pos=disp, iostat=i_err) cdummy
        if (i_err/=0) then
-         call cgyro_error('ERROR: (CGYRO) [REWIND] Failed to rewind '//datafile)
+         call cgyro_error('[REWIND] Failed to rewind '//datafile)
          close(io)
          return
        endif
