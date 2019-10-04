@@ -335,12 +335,16 @@ class cgyrodata_plot(data.cgyrodata):
       # f[p,n,t]
       f,ft = self.kxky_select(theta,0,moment,spec)
       yr = f[p0+1,0,:] ; yi = ft[p0+1,0,:]
-      ax.plot(self.t,yr,color=color[0],label=r'$\mathrm{Re}$')
-      ax.plot(self.t,yi,color=color[1],label=r'$\mathrm{Im}$')
+      # Re
       ave,var = variance(yr,t,w,wmax) ; y_ave = ave*np.ones(len(t))
+      ax.plot(self.t,yr,color=color[0],label=r'$\mathrm{Re:} '+str(round(ave,3))+'$')
       ax.plot(t[imin:imax+1],y_ave[imin:imax+1],'--',color=color[0])
+      # Im
       ave,var = variance(yi,t,w,wmax) ; y_ave = ave*np.ones(len(t))
+      ax.plot(self.t,yi,color=color[1],label=r'$\mathrm{Im:} '+str(round(ave,3))+'$' )
       ax.plot(t[imin:imax+1],y_ave[imin:imax+1],'--',color=color[1])
+
+      ax.legend(loc=2)
 
       if ymax != 'auto':
          ax.set_ylim(top=float(ymax))
