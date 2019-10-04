@@ -38,7 +38,6 @@ def plotit(ax,x,y,ystr):
       ax.plot(x[m1:m2],y[m1:m2],'o',color='k',alpha=0.3,ms=4)     
    return
 
-
 def plot_select(ax,tag):
    global m1,m2
    

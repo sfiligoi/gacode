@@ -16,6 +16,7 @@ class cgyrodata:
 
       self.silent = silent
       self.dir = sim_directory
+      self.getgrid()
       self.getdata()
 
    def extract(self,f):
@@ -35,11 +36,14 @@ class cgyrodata:
 
       return t,fmt,data
 
-
    def getdata(self):
 
       """Initialize smaller data objects (don't load larger ones)"""
 
+      if not os.path.isfile(self.dir+'out.cgyro.time'):
+         print('INFO: (data.py) No time record exists.')
+         return
+      
       #-----------------------------------------------------------------
       # Read time vector.
       #
@@ -58,66 +62,6 @@ class cgyrodata:
       #-----------------------------------------------------------------
 
       #-----------------------------------------------------------------
-      # Read grid data.
-      #
-      # NOTE: Grid data is packed, so unpack into sensible bits
-      #
-      data = np.fromfile(self.dir+'out.cgyro.grids',dtype='float32',sep=' ')
-
-      self.n_n       = int(data[0])
-      self.n_species = int(data[1])
-      self.n_field   = int(data[2])
-      self.n_radial  = int(data[3])
-      self.n_theta   = int(data[4])
-      self.n_energy  = int(data[5])
-      self.n_xi      = int(data[6])
-      self.m_box     = int(data[7])
-      self.length    = float(data[8])
-      self.n_global  = int(data[9])
-      self.theta_plot= int(data[10])
-      # Set l to last data index plus one.
-      l=11
-
-      self.p = np.array(data[l:l+self.n_radial],dtype=int)
-      self.kx = 2*np.pi*self.p/self.length
-
-      mark = l+self.n_radial
-      self.theta = np.array(data[mark:mark+self.n_theta])
-
-      mark = mark+self.n_theta
-      self.energy = np.array(data[mark:mark+self.n_energy])
-
-      mark = mark+self.n_energy
-      self.xi   = np.array(data[mark:mark+self.n_xi])
-
-      mark = mark+self.n_xi
-      self.thetab = np.array(data[mark:mark+self.n_theta*self.n_radial//self.m_box])
-
-      mark = mark+self.n_theta*(self.n_radial//self.m_box)
-      self.ky = np.array(data[mark:mark+self.n_n])
-
-      mark = mark+self.n_n
-      self.alphadiss = np.array(data[mark:mark+self.n_n])
-
-      mark = mark+self.n_n
-      self.radialdiss = np.array(data[mark:mark+self.n_radial])
-
-      if not self.silent:
-         print('INFO: (data.py) Read grid data in out.cgyro.grids.')
-      #-----------------------------------------------------------------
-
-      #--------------------------------------------------------
-      # Construct theta_plot values (self.thetap[:])
-      self.thetap = np.zeros(self.theta_plot)
-      if self.theta_plot == 1:
-         self.thetap[0] = 0.0
-      else:
-         m = self.n_theta//self.theta_plot
-         for i in range(self.theta_plot):
-            self.thetap[i] = self.theta[m*i] 
-      #-----------------------------------------------------------------
-
-      #-----------------------------------------------------------------
       # Linear frequency
       #
       nd = 2*self.n_n*nt
@@ -126,66 +70,6 @@ class cgyrodata:
          self.freq = np.reshape(data[0:nd],(2,self.n_n,nt),'F')
          if not self.silent:
             print('INFO: (data.py) Read data in '+fmt+'.cgyro.freq. '+t) 
-      #-----------------------------------------------------------------
-
-      #-----------------------------------------------------------------
-      # Equil file
-      #
-      try:
-         data = np.fromfile(self.dir+'out.cgyro.equilibrium',dtype='float32',sep=' ')
-         self.rmin          = data[0]
-         self.rmaj          = data[1]
-         self.q             = data[2]
-         self.shear         = data[3]
-         self.shift         = data[4]
-         self.kappa         = data[5]
-         self.s_kappa       = data[6]
-         self.delta         = data[7]
-         self.s_delta       = data[8]
-         self.zeta          = data[9]
-         self.s_zeta        = data[10]
-         self.zmag          = data[11]
-         self.dzmag         = data[12]
-         self.rho           = data[13]
-         self.ky0           = data[14]
-         self.betae_unit    = data[15]
-         self.beta_star     = data[16]
-         self.lambda_star   = data[17]
-         self.gamma_e       = data[18]
-         self.gamma_p       = data[19]
-         self.mach          = data[20]
-         self.a_meters      = data[21]
-         self.b_unit        = data[22]
-         self.dens_norm     = data[23]
-         self.temp_norm     = data[24]
-         self.vth_norm      = data[25]
-         self.mass_norm     = data[26]
-         self.rho_star_norm = data[27]
-         self.gamma_gb_norm = data[28]
-         self.q_gb_norm     = data[29]
-         self.pi_gb_norm    = data[30]
-         # Define species vectors
-         self.z      = np.zeros(self.n_species)
-         self.mass   = np.zeros(self.n_species)
-         self.dens   = np.zeros(self.n_species)
-         self.temp   = np.zeros(self.n_species)
-         self.dlnndr = np.zeros(self.n_species)
-         self.dlntdr = np.zeros(self.n_species)
-         self.nu     = np.zeros(self.n_species)
-         for i in range(self.n_species):
-            self.z[i]      = data[31+7*i]
-            self.mass[i]   = data[32+7*i]
-            self.dens[i]   = data[33+7*i]
-            self.temp[i]   = data[34+7*i]
-            self.dlnndr[i] = data[35+7*i]
-            self.dlntdr[i] = data[36+7*i]
-            self.nu[i]     = data[37+7*i]
-         if not self.silent:
-            print('INFO: (data.py) Read data in out.cgyro.equilibrium.')
-      except:
-         print('WARNING: (data.py) Could not read out.cgyro.equilibrium.')
-         pass
-
       #-----------------------------------------------------------------
 
       #-----------------------------------------------------------------
@@ -220,25 +104,6 @@ class cgyrodata:
                                     self.n_species,self.n_xi,self.n_energy,nt),'F')
          print('INFO: (data.py) Read data in '+fmt+'.cgyro.hb. '+t) 
          self.hb = self.hb/np.max(self.hb)
-      #-----------------------------------------------------------------
-
-      #-----------------------------------------------------------------
-      # Compressed particle and energy fluxes (deprecated)
-      #
-      nd = self.n_species*nt
-      try:
-         data = np.loadtxt(self.dir+'out.cgyro.flux_n',dtype='float')
-         self.flux_n = np.transpose(data[:,1:])
-         print('INFO: (data.py) Read data in out.cgyro.flux_n.')
-      except:
-         pass
-
-      try:
-         data = np.loadtxt(self.dir+'out.cgyro.flux_e',dtype='float')
-         self.flux_e = np.transpose(data[:,1:])
-         print('INFO: (data.py) Read data in out.cgyro.flux_e.')
-      except:
-         pass 
       #-----------------------------------------------------------------
 
    def getflux(self,cflux='auto'):
@@ -332,7 +197,6 @@ class cgyrodata:
       else:
          raise ValueError('(xfluxave) Invalid moment.')
 
-
       #--------------------------------------------
       # Useful arrays required outside this routine
       self.lky_xr = np.zeros((ns,ng))
@@ -424,7 +288,7 @@ class cgyrodata:
 
          self.geotag = []
          self.geotag.append('\theta')
-         self.geotag.append('w_\\theta')
+         self.geotag.append('G_\\theta')
          self.geotag.append('|B|')
          self.geotag.append('\omega_\mathrm{stream}')
          self.geotag.append('\omega_\mathrm{trap}')
@@ -436,3 +300,130 @@ class cgyrodata:
          self.geotag.append('\omega_\mathrm{gammap')
          self.geotag.append('k_\perp')
 
+   def getgrid(self):
+
+      #-----------------------------------------------------------------
+      # Read grid data.
+      #
+      # NOTE: Grid data is packed, so unpack into sensible bits
+      #
+      data = np.fromfile(self.dir+'out.cgyro.grids',dtype='float32',sep=' ')
+
+      self.n_n       = int(data[0])
+      self.n_species = int(data[1])
+      self.n_field   = int(data[2])
+      self.n_radial  = int(data[3])
+      self.n_theta   = int(data[4])
+      self.n_energy  = int(data[5])
+      self.n_xi      = int(data[6])
+      self.m_box     = int(data[7])
+      self.length    = float(data[8])
+      self.n_global  = int(data[9])
+      self.theta_plot= int(data[10])
+      # Set l to last data index plus one.
+      l=11
+
+      self.p = np.array(data[l:l+self.n_radial],dtype=int)
+      self.kx = 2*np.pi*self.p/self.length
+
+      mark = l+self.n_radial
+      self.theta = np.array(data[mark:mark+self.n_theta])
+
+      mark = mark+self.n_theta
+      self.energy = np.array(data[mark:mark+self.n_energy])
+
+      mark = mark+self.n_energy
+      self.xi   = np.array(data[mark:mark+self.n_xi])
+
+      mark = mark+self.n_xi
+      self.thetab = np.array(data[mark:mark+self.n_theta*self.n_radial//self.m_box])
+
+      mark = mark+self.n_theta*(self.n_radial//self.m_box)
+      self.ky = np.array(data[mark:mark+self.n_n])
+
+      mark = mark+self.n_n
+      self.alphadiss = np.array(data[mark:mark+self.n_n])
+
+      mark = mark+self.n_n
+      self.radialdiss = np.array(data[mark:mark+self.n_radial])
+
+      if not self.silent:
+         print('INFO: (data.py) Read grid data in out.cgyro.grids.')
+      #-----------------------------------------------------------------
+
+      #--------------------------------------------------------
+      # Construct theta_plot values (self.thetap[:])
+      self.thetap = np.zeros(self.theta_plot)
+      if self.theta_plot == 1:
+         self.thetap[0] = 0.0
+      else:
+         m = self.n_theta//self.theta_plot
+         for i in range(self.theta_plot):
+            self.thetap[i] = self.theta[m*i] 
+      #-----------------------------------------------------------------
+
+      #-----------------------------------------------------------------
+      # Equil file
+      #
+      data = np.fromfile(self.dir+'out.cgyro.equilibrium',dtype='float32',sep=' ')
+      self.rmin          = data[0]
+      self.rmaj          = data[1]
+      self.q             = data[2]
+      self.shear         = data[3]
+      self.shift         = data[4]
+      self.kappa         = data[5]
+      self.s_kappa       = data[6]
+      self.delta         = data[7]
+      self.s_delta       = data[8]
+      self.zeta          = data[9]
+      self.s_zeta        = data[10]
+      self.zmag          = data[11]
+      self.dzmag         = data[12]
+      self.shape_sin3    = data[13]
+      self.shape_s_sin3  = data[14]
+      self.shape_cos0    = data[15]
+      self.shape_s_cos0  = data[16]
+      self.shape_cos1    = data[17]
+      self.shape_s_cos1  = data[18]
+      self.shape_cos2    = data[19]
+      self.shape_s_cos2  = data[20]
+      self.shape_cos3    = data[21]
+      self.shape_s_cos3  = data[22]
+      self.rho           = data[23]
+      self.ky0           = data[24]
+      self.betae_unit    = data[25]
+      self.beta_star     = data[26]
+      self.lambda_star   = data[27]
+      self.gamma_e       = data[28]
+      self.gamma_p       = data[29]
+      self.mach          = data[30]
+      self.a_meters      = data[31]
+      self.b_unit        = data[32]
+      self.dens_norm     = data[33]
+      self.temp_norm     = data[34]
+      self.vth_norm      = data[35]
+      self.mass_norm     = data[36]
+      self.rho_star_norm = data[37]
+      self.gamma_gb_norm = data[38]
+      self.q_gb_norm     = data[39]
+      self.pi_gb_norm    = data[40]
+      # Define species vectors
+      self.z      = np.zeros(self.n_species)
+      self.mass   = np.zeros(self.n_species)
+      self.dens   = np.zeros(self.n_species)
+      self.temp   = np.zeros(self.n_species)
+      self.dlnndr = np.zeros(self.n_species)
+      self.dlntdr = np.zeros(self.n_species)
+      self.nu     = np.zeros(self.n_species)
+      for i in range(self.n_species):
+         self.z[i]      = data[41+7*i]
+         self.mass[i]   = data[42+7*i]
+         self.dens[i]   = data[43+7*i]
+         self.temp[i]   = data[44+7*i]
+         self.dlnndr[i] = data[45+7*i]
+         self.dlntdr[i] = data[46+7*i]
+         self.nu[i]     = data[47+7*i]
+      if not self.silent:
+         print('INFO: (data.py) Read data in out.cgyro.equilibrium.')
+
+      #-----------------------------------------------------------------

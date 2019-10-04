@@ -2,6 +2,8 @@ import sys
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.gridspec import GridSpec
+from matplotlib import rc
 from gacodefuncs import *
 from . import data
 
@@ -416,22 +418,54 @@ class cgyrodata_plot(data.cgyrodata):
       self.getgeo()
 
       if fig is None:
-         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(1.2*self.lx,1.2*self.ly))
+
+      # Decrease font size a bit for this plot
+      rc('font',size=12)
+      # Create 3x4 subplot grid
+      gs = GridSpec(3,4)
 
       theta = self.geo[:,0]/np.pi
 
-      for p in range(8):
+      # CGYRO geometry functions
+      for p in range(9):
          p1 = p+1
-         y = self.geo[:,p1]
+         if p < 4:
+            a = 1.0
+         else:
+            a = 1.0/self.rho
+         y = a*self.geo[:,p1]
 
-         ax = fig.add_subplot(2,4,p1)
+         ax = fig.add_subplot(gs[p/3,np.mod(p,3)])
          ax.grid(which="both",ls=":")
          ax.grid(which="major",ls=":")
          ax.set_xlabel(r'$\theta/\pi$')
          ax.set_title(r'$'+self.geotag[p1]+'$')
-         ax.plot(theta,y)
+         ax.plot(theta,y,'m')
+         ax.plot(theta,y,'o',color='k',markersize=2)
          ax.set_xlim([-1,1])
 
+      # Flux surface
+      ax = fig.add_subplot(gs[:,3],aspect='equal')
+      ax.set_title(r'$r/a='+str(self.rmin)+'$')
+      ax.set_facecolor('lightcyan')
+      ax.set_xlabel(r'$R$')
+      ax.set_ylabel(r'$Z$')
+      t = 2*np.pi*np.linspace(0,1,200)
+      rmaj = self.rmin
+      zmaj = self.zmag
+      r = self.rmin
+      k = self.kappa
+      s1 = np.arcsin(self.delta) ; s2 = -self.zeta ; s3 = 0.0
+      c0 = 0.0 ; c1 = 0.0 ; c2 = 0.0 ; c3 = 0.0
+      x = rmaj+r*np.cos(t+c0
+                        +s1*np.sin(t)  +c1*np.cos(t)
+                        +s2*np.sin(2*t)+c2*np.cos(2*t)
+                        +s3*np.sin(3*t)+c3*np.cos(3*t))
+      y = zmaj+k*r*np.sin(t)
+      
+      ax.plot(x,y,'k')
+   
       fig.tight_layout(pad=0.3)
 
    def plot_error(self,fig=None):
