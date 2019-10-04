@@ -662,6 +662,7 @@ contains
     ! points sp and the orthogonal functions
     ! Poly(sp)*sqrt(w(sp)) at these points  in ortho_f,
     ! where w(x) is the weight function of the set of polynomials
+    use, intrinsic :: ieee_exceptions
     implicit none
     integer,intent(in) :: n
     real,intent(in) :: a(n+1),bsq(n+1)
@@ -674,6 +675,7 @@ contains
     real,allocatable,dimension(:) :: work
     integer liwork,lwork
     integer i,m
+    logical invmode,zeromode !ieee_exception mode storage
 
     if (present(ortho_f)) then
        projsteen=>ortho_f
@@ -700,6 +702,10 @@ contains
     ! i.e. x pn_i-1(x)=sum_j J_ij pn_j-1(x) for i=1...n-1 and
     !      x pn_n-1(x)=sum_j J_nj pn_j-1(x) + J_n,n+1 Pn_n(x)
     
+    call ieee_get_halting_mode(ieee_invalid,invmode)
+    call ieee_get_halting_mode(ieee_divide_by_zero,zeromode)
+    call ieee_set_halting_mode(ieee_invalid,.false.)
+    call ieee_set_halting_mode(ieee_divide_by_zero,.false.)
     call dstevr('N','A',n,a(1:n),bsq(2:n),0.,0.,0,0,0.,m,sp,projsteen,n,isuppz,work,lwork,iwork,liwork,info)
 
     if (info/=0) then
@@ -710,6 +716,9 @@ contains
     !Using dstein for the eigenvectors instead of dstevr itself, since they are accurate
     !even in the face of very small components.
     call dstein(n,a(1:n),bsq(2:n),n,sp,(/(1,i=1,n)/),(/(n,i=1,n)/),projsteen,n,work,iwork,ifail,info)
+    call ieee_set_halting_mode(ieee_invalid,invmode)
+    call ieee_set_halting_mode(ieee_divide_by_zero,zeromode)
+    call ieee_set_flag(ieee_all,.false.)
     ! the eigenvectors are normalised to their square sums
     ! The eigenvectors in projsteen are projsteen(i,j)=pn_(i)(x_j) sqrt(w_j) n_i
     ! with a normalisation factor n_i and the Gauss weights w_j
