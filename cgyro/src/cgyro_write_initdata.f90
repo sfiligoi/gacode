@@ -95,8 +95,8 @@ subroutine cgyro_write_initdata
 
      if (udsymmetry_flag == 0) then
         write(io,*)
-        write(io,21) '   c0:',shape_cos0,  '   c1:',shape_cos1,  '   c2:',shape_cos2,  '   c3:',shape_cos3,  '   s3:',shape_s_sin3
-        write(io,21) ' s_c0:',shape_s_cos0,' s_c2:',shape_s_cos1,' s_c2:',shape_s_cos2,' s_c3:',shape_s_cos3,' s_s3:',shape_s_sin3
+        write(io,21) '   c0:',shape_cos0,  '   c1:',shape_cos1,  '   c2:',shape_cos2,  '   c3:',shape_cos3,  '   s3:',shape_sin3
+        write(io,21) ' s_c0:',shape_s_cos0,' s_c1:',shape_s_cos1,' s_c2:',shape_s_cos2,' s_c3:',shape_s_cos3,' s_s3:',shape_s_sin3
      endif
 
      write(io,*)

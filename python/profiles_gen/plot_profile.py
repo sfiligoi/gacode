@@ -50,8 +50,10 @@ def plot_select(ax,tag):
    # normalization
    csa = expro.expro_cs/expro.expro_rmin[-1]
 
-   sname = gapystr(expro.expro_name)
+   sname = gapystr(expro.expro_name) 
    stype = gapystr(expro.expro_type)
+   #sname=['n','n','n','n']
+   #stype=['n','n','n','n']
 
    # Set x-range
    m1 = 0 ; m2 = len(x)
