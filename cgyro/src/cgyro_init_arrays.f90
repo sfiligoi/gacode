@@ -347,7 +347,6 @@ subroutine cgyro_init_arrays
         ! See whiteboard notes 
         carg = -k_theta*length*(sdlnndr(is)+sdlntdr(is)*(energy(ie)-1.5))/(2*pi)
 
-        ! This array *not* used by OpenACC
         omega_ss(:,ic,iv_loc) = carg*jvec_c(:,ic,iv_loc)
 
      enddo

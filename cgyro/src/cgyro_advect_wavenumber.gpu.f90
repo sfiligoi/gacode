@@ -78,7 +78,7 @@ subroutine cgyro_advect_wavenumber(ij)
              ll = 2*l-1
 !$acc loop vector private(j)
              do j=1,n_theta
-                rhs(icc+j,in,ij) = rhs(icc+j,in,ij)+c_wave(l)*(he(j,ir+ll)-he(j,ir-ll))
+                rhs(icc+j,in,ij) = rhs(icc+j,in,ij)-c_wave(l)*(he(j,ir+ll)-he(j,ir-ll))
               enddo
            enddo
          enddo
