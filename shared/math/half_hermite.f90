@@ -103,6 +103,14 @@ contains
     integer :: minalloc,maxalloc,i0,nintervals,nn ! current limits of allocation
     !i0 points to where the index 0 is.
 
+
+    ! alpha=-0.94 is about the limit for the following reason:
+    ! int x^(-1+e) dx=x^e/e. ==> to get up to epsilon accuracy xmin^e~epsilon
+    ! ==> xmin~epsilon^(1/e) but xmin must be >0. min xmin is about 1e-300.
+    ! real*8 range:  2.225074D-308, 1.797693D+308
+    ! so 3e-308^e<epsilon -308*e <Log10(epsilon)  308*e>-Log10(epsilon)
+    ! e> -log10(epsilon)/308 ~ 16/308=0.053
+
     ! calculate recursion coefficients for orthogonal polynomials for weight
     ! function 
 
@@ -678,7 +686,7 @@ contains
     real,allocatable,dimension(:) :: work
     integer liwork,lwork
     integer i,m
-    logical invmode,zeromode !ieee_exception mode storage
+    type(ieee_status_type) ieee_status
 
     if (present(ortho_f)) then
        projsteen=>ortho_f
@@ -705,10 +713,10 @@ contains
     ! i.e. x pn_i-1(x)=sum_j J_ij pn_j-1(x) for i=1...n-1 and
     !      x pn_n-1(x)=sum_j J_nj pn_j-1(x) + J_n,n+1 Pn_n(x)
     
-    call ieee_get_halting_mode(ieee_invalid,invmode)
-    call ieee_get_halting_mode(ieee_divide_by_zero,zeromode)
+    call ieee_get_status(ieee_status)
     call ieee_set_halting_mode(ieee_invalid,.false.)
     call ieee_set_halting_mode(ieee_divide_by_zero,.false.)
+    
     call dstevr('N','A',n,a(1:n),bsq(2:n),0.,0.,0,0,0.,m,sp,projsteen,n,isuppz,work,lwork,iwork,liwork,info)
 
     if (info/=0) then
@@ -719,9 +727,7 @@ contains
     !Using dstein for the eigenvectors instead of dstevr itself, since they are accurate
     !even in the face of very small components.
     call dstein(n,a(1:n),bsq(2:n),n,sp,(/(1,i=1,n)/),(/(n,i=1,n)/),projsteen,n,work,iwork,ifail,info)
-    call ieee_set_halting_mode(ieee_invalid,invmode)
-    call ieee_set_halting_mode(ieee_divide_by_zero,zeromode)
-    call ieee_set_flag(ieee_all,.false.)
+    call ieee_set_status(ieee_status)
     ! the eigenvectors are normalised to their square sums
     ! The eigenvectors in projsteen are projsteen(i,j)=pn_(i)(x_j) sqrt(w_j) n_i
     ! with a normalisation factor n_i and the Gauss weights w_j
