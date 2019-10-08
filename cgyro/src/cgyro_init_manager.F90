@@ -168,11 +168,12 @@ subroutine cgyro_init_manager
      allocate(icd_c(-nup_theta:nup_theta, nc))
      allocate(dtheta(-nup_theta:nup_theta, nc))
      allocate(dtheta_up(-nup_theta:nup_theta, nc))
+     allocate(ha(0:1,n_theta,nv_loc))
 
 !$acc enter data create(fcoef,gcoef,field,field_loc)
 
      ! Velocity-distributed arrays
-     ! allocate(rhs(nc,nv_loc,4))
+     !allocate(rhs(nc,nv_loc,4))
      allocate(rhs(nc,nv_loc,12))
      allocate(h_x(nc,nv_loc))
      allocate(g_x(nc,nv_loc))

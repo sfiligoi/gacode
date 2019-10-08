@@ -317,6 +317,8 @@ module cgyro_globals
   !
   ! Wavenumber advection
   real, dimension(:), allocatable :: c_wave
+  complex, dimension(:,:,:), allocatable :: ha
+  real :: sa=0.0
   !
   ! Distributions
   complex, dimension(:,:,:), allocatable :: rhs
