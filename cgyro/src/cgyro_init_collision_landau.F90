@@ -166,7 +166,7 @@ contains
     end do
     sw=projsteen(1,:)**2/c1(1)**2 ! Steen weights
 
-    if (present(cmat1)) then
+    if (present(cmat1) .or. collision_model==7) then
        allocate(polyrep(nmaxpoly,nmaxpoly))
        polyrep=0
        j=1
