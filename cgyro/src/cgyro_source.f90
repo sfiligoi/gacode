@@ -17,6 +17,8 @@ subroutine cgyro_source
 
   if (nonlinear_flag == 0) return
 
+  if (profile_shear_flag == 1 .or. shear_method == 2) then
+
   sa = 1.0+exp(-delta_t*nu_global)*sa
 
   ! Time-delay source
@@ -34,5 +36,6 @@ subroutine cgyro_source
      enddo
 
   endif
+endif
 
 end subroutine cgyro_source

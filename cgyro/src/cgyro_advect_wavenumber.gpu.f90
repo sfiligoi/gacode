@@ -22,8 +22,8 @@ subroutine cgyro_advect_wavenumber(ij)
      call timer_lib_in('shear')
      allocate(he(n_theta,1-2*n_wave:n_radial+2*n_wave))
 
-!$acc parallel loop gang private(p,k,j,in,ir,l,icc,ll,he) &
-!$acc&                   present(rhs(:,:,ij),omega_ss,field,h_x,c_wave,ha,sa) &
+!$acc parallel loop gang private(in,ir,l,icc,ll,he) &
+!$acc&                   present(rhs(:,:,ij),omega_ss,field,h_x,c_wave) &
 !$acc&                   vector_length(n_theta)
      do in=1,nv_loc
        he(:,1-2*n_wave:0) =0.0
@@ -81,6 +81,8 @@ subroutine cgyro_advect_wavenumber(ij)
            enddo
          enddo
        endif
+
+    enddo
 
     deallocate(he)
     call timer_lib_out('shear')
