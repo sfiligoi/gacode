@@ -138,7 +138,7 @@ subroutine cgyro_read_restart_one
   integer(KIND=8) :: start_time,cp_time
   integer(KIND=8) :: count_rate, count_max
   real :: cp_dt
-  integer :: statusfd
+  integer :: ic0,j,statusfd
 
   ! use system_clock to be consistent with cgyro_kernel
   call system_clock(start_time,count_rate,count_max)
@@ -197,6 +197,14 @@ subroutine cgyro_read_restart_one
   call MPI_FILE_CLOSE(fhv,i_err)
   call MPI_INFO_FREE(finfo,i_err)
 
+  ! Unpack h(0,0) into source 
+  if (n == 0) then
+     ic0 = (n_radial/2)*n_theta
+     do j=1,n_theta
+        source(j,:) = h_x(ic0+j,:) 
+     enddo
+  endif
+  
   call system_clock(cp_time,count_rate,count_max)
   if (cp_time > start_time) then
     cp_dt = (cp_time-start_time)/real(count_rate)

@@ -12,11 +12,11 @@ subroutine cgyro_source
 
   implicit none
 
-  integer :: p,k,ir,j,icc,in
-  complex, dimension(:,:),allocatable :: he
+  integer :: p,k,ir,j
+  integer :: icm,icp
   real :: nu_eff
   real :: tau_ave = 100.0
-  
+
   if (nonlinear_flag == 0) return
 
   if (profile_shear_flag == 1 .or. shear_method == 2) then
@@ -29,13 +29,16 @@ subroutine cgyro_source
 
         ir = 1+n_radial/2
 
-        do p=-1,1,2
-           icc = (ir-1+p)*n_theta
-           k = (p+1)/2
-           do j=1,n_theta
-              ha(k,j,:) = ha(k,j,:)+(h_x(icc+j,:)-ha(k,j,:))/sa
-              h_x(icc+j,:) = h_x(icc+j,:)-nu_eff*delta_t*ha(k,j,:)  
-           enddo
+        icm = (ir-1-1)*n_theta
+        icp = (ir-1+1)*n_theta
+
+        do j=1,n_theta
+           ! Recursive update of p=+1 source 
+           source(j,:) = source(j,:)+(h_x(icp+j,:)-source(j,:))/sa
+           ! Subtract source from h(0,+1)
+           h_x(icp+j,:) = h_x(icp+j,:)-nu_eff*delta_t*source(j,:)
+           ! Subtract source from h(0,-1)
+           h_x(icm+j,:) = h_x(icm+j,:)-nu_eff*delta_t*conjg(source(j,:))
         enddo
 
      endif
