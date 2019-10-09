@@ -15,7 +15,6 @@ subroutine cgyro_source
   integer :: p,k,ir,j
   integer :: icm,icp
   real :: nu_eff
-  real :: tau_ave = 100.0
 
   if (nonlinear_flag == 0) return
 

@@ -203,6 +203,10 @@ subroutine cgyro_read_restart_one
      do j=1,n_theta
         source(j,:) = h_x(ic0+j,:) 
      enddo
+     sa = 0.0
+     do j=1,nint(t_current/delta_t)
+        sa = 1.0+exp(-delta_t/tau_ave)*sa
+     enddo
   endif
   
   call system_clock(cp_time,count_rate,count_max)
