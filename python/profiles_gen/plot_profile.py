@@ -111,6 +111,22 @@ def plot_select(ax,tag):
       for p in range(n):
          y = expro.expro_ni[p,:] ; ystr = 'n_i ['+sname[p]+']' ; plotit(ax,x,y,ystr)
 
+   if tag == 'sn':
+      # sne
+      y = expro.expro_sdlnnedr ; ystr = 'sn_e' ; plotit(ax,x,y,ystr)
+      # sni
+      for p in range(n):
+         if stype[p] == '[therm]':
+            y = expro.expro_sdlnnidr[p,:] ; ystr = 'sn_i ['+sname[p]+']' ; plotit(ax,x,y,ystr)
+
+   if tag == 'sT':
+      # sTe
+      y = expro.expro_sdlntedr ; ystr = 'sT_e' ; plotit(ax,x,y,ystr)
+      # sTi
+      for p in range(n):
+         if stype[p] == '[therm]':
+            y = expro.expro_sdlntidr[p,:] ; ystr = 'sT_i ['+sname[p]+']' ; plotit(ax,x,y,ystr)
+
    if tag == 'T':
       # Te
       y = expro.expro_te ; ystr = 'T_e' ; plotit(ax,x,y,ystr)
@@ -217,8 +233,16 @@ class DemoFrame(wx.Frame):
         notebook.AddPage(tab,'n')
 
         tab = TabPanel(notebook)
+        tab.draw('sn')
+        notebook.AddPage(tab,'sn')
+
+        tab = TabPanel(notebook)
         tab.draw('T')
         notebook.AddPage(tab,'T')
+
+        tab = TabPanel(notebook)
+        tab.draw('sT')
+        notebook.AddPage(tab,'sT')
 
         tab = TabPanel(notebook)
         tab.draw('jbs')
