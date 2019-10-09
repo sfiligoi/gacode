@@ -146,8 +146,10 @@ subroutine cgyro_kernel
         call timer_lib_out('shear')
      endif
 
+     call timer_lib_in('shear')
      call cgyro_source
-     !------------------------------------------------------------
+     call timer_lib_out('shear')
+    !------------------------------------------------------------
 
      !------------------------------------------------------------
      ! Diagnostics
@@ -275,13 +277,5 @@ subroutine cgyro_kernel
   else
     exit_dt = (exit_time-start_time+count_max)/real(count_rate)
   endif
-
-  !if (i_proc == 0) then
-  !  call date_and_time(date,time,zone);
-  !  open(NEWUNIT=statusfd,FILE=trim(path)//runfile_startups,action="write",status="unknown",position='append')
-  !  write(statusfd, '(a,a,a,a,a,a,a,a,a,a,a,a,a,1pe10.3)') date(1:4),"/",date(5:6),"/",date(7:8)," ", &
-  !                  time(1:2),":",time(3:4),":",time(5:10), zone, ' [EXIT] After ', exit_dt
-  !  close(statusfd)
-  !endif
 
 end subroutine cgyro_kernel
