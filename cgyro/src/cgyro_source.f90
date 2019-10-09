@@ -15,13 +15,14 @@ subroutine cgyro_source
   integer :: p,k,ir,j,icc,in
   complex, dimension(:,:),allocatable :: he
   real :: nu_eff
+  real :: tau_ave = 100.0
   
   if (nonlinear_flag == 0) return
 
   if (profile_shear_flag == 1 .or. shear_method == 2) then
 
-     nu_eff = nu_global*(abs(gamma_e)+abs(maxval(sdlnndr(:)))+abs(maxval(sdlntdr(:))))
-     sa = 1.0+exp(-delta_t*nu_eff)*sa
+     nu_eff = nu_global*(abs(gamma_e)+maxval(abs(sdlnndr(:)))+maxval(abs(sdlntdr(:))))
+     sa = 1.0+exp(-delta_t/tau_ave)*sa
 
      ! Time-delay source
      if (n == 0) then
