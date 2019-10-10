@@ -93,7 +93,8 @@ contains
     real w,sech2,sech,sechb,tanhp1,tanhm1,tanhb
     real eps
     integer i,j,k,ia
-    integer leftnew,rightnew
+    integer leftnew,rightnew ! How many points of the left or right summation have to be computed
+    ! from scratch in the interval refinement test step.
     logical makenew
     logical vb
 
@@ -204,6 +205,8 @@ contains
        poly=-500
        poly1=-500
     end if
+    leftnew=nintervals ! only needed to calm down ifort when in check all mode.
+    rightnew=nintervals
     do i=1,n
        ! first compute g(i)=<P(i)^2> and <x P(i)^2> using double exponential
        ! integration.
