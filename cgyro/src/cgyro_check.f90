@@ -8,6 +8,7 @@ subroutine cgyro_check
   integer :: is
   logical :: lfe
   character(len=1), dimension(7) :: ctag
+  character(1000) :: outstr
 
   !-----------------------------------------------------------------------
   ! Grid parameter checks
@@ -194,11 +195,15 @@ subroutine cgyro_check
      call cgyro_info('Collision model: Lorentz ee+ei')
   case (2) 
      call cgyro_info('Collision model: Connor')
-  case (4,6) 
+  case (4) 
      call cgyro_info('Collision model: Sugama')
      ctag(2) = 'x'
   case(5)
      call cgyro_info('Collision model: Simple Lorentz ee+ei')
+  case(6)
+     call cgyro_info('Collision model: Landau')
+  case(7)
+     call cgyro_info('Collision model: New (Galerkin) Sugama')
   case default
      call cgyro_error('Invalid value for collision_model')
      return
@@ -311,6 +316,13 @@ subroutine cgyro_check
      return
   endif
 
+
+  if (collision_test_mode>0) then
+     write(unit=outstr,fmt='(A,I1)') 'Warning, 0<collision_test_mode=',collision_test_mode
+     call cgyro_info(trim(outstr))
+  end if
+     
+  
   !------------------------------------------------------------------------
   ! Check profile parameters
   !
