@@ -63,7 +63,7 @@ OBJECTS = cgyro_globals.o \
 .SUFFIXES : .o .f90 .F90
 
 all: cgyro_lib.a $(EXEC).o $(EXTRA_LIBS)
-	$(FC) $(FFLAGS) -o $(EXEC) $(EXEC).o cgyro_lib.a $(EXTRA_LIBS) $(LMATH) -lgsl
+	$(FC) $(FFLAGS) -o $(EXEC) $(EXEC).o cgyro_lib.a $(EXTRA_LIBS) $(LMATH)
 
 cgyro_lib.a: $(OBJECTS)
 	$(ARCH) cgyro_lib.a $(OBJECTS)

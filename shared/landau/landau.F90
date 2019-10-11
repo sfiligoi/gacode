@@ -294,18 +294,6 @@ contains
 
   subroutine genintkernel(n,lmax,a1,b1,c1,xmax,beta,t1t2ratio,gp,gw,ngauss,gp2,gw2,ng2,addcutoff,intkernel,intlokernel)
     implicit none
-    interface
-       function gsl_sf_gamma_inc ( a,x ) bind ( c )
-         use iso_c_binding
-         real ( c_double ), VALUE :: a,x
-         real ( c_double ) :: gsl_sf_gamma_inc
-       end function gsl_sf_gamma_inc
-       function gsl_sf_gamma_inc_P ( a,x ) bind ( c,name="gsl_sf_gamma_inc_P")
-         use iso_c_binding
-         real ( c_double ), VALUE :: a,x
-         real ( c_double ) :: gsl_sf_gamma_inc_P
-       end function gsl_sf_gamma_inc_P
-    end interface
     optional :: intlokernel
     logical,intent(in) :: addcutoff
     integer, intent(in) :: n,lmax,ngauss,ng2  ! lmax=max l-**index**, lphys=l-1
@@ -435,28 +423,28 @@ contains
                enddo
             enddo
          enddo
-         if (verbose>2) then
-            print 2,'Check b1integral:'
-            print 2,'n=1 (Pn=const)'
-            do l=1,lmax+1
-               m1=2-l
-               val=c1(1)*.5*(gsl_sf_gamma_inc(.5*(1+m1),mymin**2)&
-                    &-gsl_sf_gamma_inc(.5*(1+m1),xmax**2))
-               if (beta>1) val=val*(beta/xmax)**m1 ! ** rescaling of v1
-               print 2,'l=',l,'m1=',m1,b1integral(1,l),val,val/b1integral(1,l)-1
-            enddo
-            print 2,'n=2 (Pn=const)'
-            do l=1,lmax+1
-               m1=2-l
-               val1=c1(1)*.5*(gsl_sf_gamma_inc(.5*(1+m1),mymin**2)&
-                    &-gsl_sf_gamma_inc(.5*(1+m1),xmax**2))
-               val2=c1(2)*c1(1)*.5*(gsl_sf_gamma_inc(.5*(1+m1+1),mymin**2)&
-                    &-gsl_sf_gamma_inc(.5*(1+m1+1),xmax**2))
-               val=val2-a1(2)*val1
-               if (beta>1) val=val*(beta/xmax)**m1 ! ** rescaling of v1
-               print 2,'l=',l,'m1=',m1,b1integral(2,l),val,val/b1integral(2,l)-1
-            enddo
-         endif
+!!$         if (verbose>2) then
+!!$            print 2,'Check b1integral:'
+!!$            print 2,'n=1 (Pn=const)'
+!!$            do l=1,lmax+1
+!!$               m1=2-l
+!!$               val=c1(1)*.5*(gsl_sf_gamma_inc(.5*(1+m1),mymin**2)&
+!!$                    &-gsl_sf_gamma_inc(.5*(1+m1),xmax**2))
+!!$               if (beta>1) val=val*(beta/xmax)**m1 ! ** rescaling of v1
+!!$               print 2,'l=',l,'m1=',m1,b1integral(1,l),val,val/b1integral(1,l)-1
+!!$            enddo
+!!$            print 2,'n=2 (Pn=const)'
+!!$            do l=1,lmax+1
+!!$               m1=2-l
+!!$               val1=c1(1)*.5*(gsl_sf_gamma_inc(.5*(1+m1),mymin**2)&
+!!$                    &-gsl_sf_gamma_inc(.5*(1+m1),xmax**2))
+!!$               val2=c1(2)*c1(1)*.5*(gsl_sf_gamma_inc(.5*(1+m1+1),mymin**2)&
+!!$                    &-gsl_sf_gamma_inc(.5*(1+m1+1),xmax**2))
+!!$               val=val2-a1(2)*val1
+!!$               if (beta>1) val=val*(beta/xmax)**m1 ! ** rescaling of v1
+!!$               print 2,'l=',l,'m1=',m1,b1integral(2,l),val,val/b1integral(2,l)-1
+!!$            enddo
+!!$         endif
       endif
       !chacka!
       ! now calculate all necessary v2 integrals for the gausspoints of v1
