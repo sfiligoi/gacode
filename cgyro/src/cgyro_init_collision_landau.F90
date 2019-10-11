@@ -230,66 +230,64 @@ contains
        lor=lor_self*normalization
        dif=dif_self*normalization
        if (t1t2flag) t1t2=0
-       interspec: if (.true.) then
-          do ib=1,n_species
-             if (ib==ia) cycle
-             t1t2ratio=temp(ia)/temp(ib)
-             beta=sqrt(mass(ib)/mass(ia)*t1t2ratio)
-             testnormalization=(z(ia)*z(ib))**2*dens(ia)*dens(ib)*mass(ib)/&
-                  (mass(ia)**1.5*sqrt(temp(ia))*temp(ib)) !*normcol <- this we save for later.
-             ! ^^^ cgyrolandauop.tex Eq. (82) before "Analogously ..."
-             if (temp(ia)==temp(ib)) then
-                call gentestkernel(nmaxpoly,a1,b1,c1,xmax,beta,gp,gw,ngauss,lor1,dif1)
-             else
-                call gentestkernel(nmaxpoly,a1,b1,c1,xmax,beta,gp,gw,ngauss,lor1,dif1,t1t2_int=t1t21)
-                dif1=dif1+(t1t2ratio-1)*t1t21
-             end if
-             lor=lor+testnormalization*lor1
-             dif=dif+testnormalization*dif1
-             if (collision_model==4 .or. collision_model==7) then
-                ! calc. mock up Sugama field op.
-                ! left out for the moment t1t2ratio !!!!
-                ! cancel l=2 (lphys=1) v^1 and l=1 (lphys=0) v^2 polynomial.
-                ! at this point for every pair a,b with b>a we first have (ia,ib)=(b,a) and then (a,b)
-                if (.not. DIFF_OFF) then
-                   l=1;k=3
-                   if (ib>ia) then !first half
-                      Landauop(:,1,l,ispec(ia,ib))=-matmul(dif1,polyrep(k,:)-polyrep(1,:)*1.5)/&
-                           dot_product(polyrep(k,:)-polyrep(1,:)*1.5,matmul(dif1,polyrep(k,:)-polyrep(1,:)*1.5))&
-                           /(dens(ia)*temp(ia))
-                      Landauop(1,:,l,ispec(ib,ia))=-matmul(polyrep(k,:)-polyrep(1,:)*1.5,dif1(:,:))&
-                           *testnormalization*dens(ia)*temp(ia)
-                   else
-                      do i=nmaxpoly,1,-1
-                         Landauop(i,:,l,ispec(ia,ib))=Landauop(1,:,l,ispec(ia,ib))*dot_product(dif1(i,:),polyrep(k,:)-polyrep(1,:)*1.5)/&
-                              dot_product(polyrep(k,:)-polyrep(1,:)*1.5,matmul(dif1,polyrep(k,:)-polyrep(1,:)*1.5))&
-                              /(dens(ia)*temp(ia))
-                         Landauop(:,i,l,ispec(ib,ia))=dot_product(polyrep(k,:)-polyrep(1,:)*1.5,dif1(:,i))*Landauop(:,1,l,ispec(ib,ia))&
-                              *testnormalization*dens(ia)*temp(ia)
-                      end do
-                   end if
-                end if
-                l=2;k=2
+       do ib=1,n_species
+          if (ib==ia) cycle
+          t1t2ratio=temp(ia)/temp(ib)
+          beta=sqrt(mass(ib)/mass(ia)*t1t2ratio)
+          testnormalization=(z(ia)*z(ib))**2*dens(ia)*dens(ib)*mass(ib)/&
+               (mass(ia)**1.5*sqrt(temp(ia))*temp(ib)) !*normcol <- this we save for later.
+          ! ^^^ cgyrolandauop.tex Eq. (82) before "Analogously ..."
+          if (temp(ia)==temp(ib)) then
+             call gentestkernel(nmaxpoly,a1,b1,c1,xmax,beta,gp,gw,ngauss,lor1,dif1)
+          else
+             call gentestkernel(nmaxpoly,a1,b1,c1,xmax,beta,gp,gw,ngauss,lor1,dif1,t1t2_int=t1t21)
+             dif1=dif1+(t1t2ratio-1)*t1t21
+          end if
+          lor=lor+testnormalization*lor1
+          dif=dif+testnormalization*dif1
+          if (collision_model==4 .or. collision_model==7) then
+             ! calc. mock up Sugama field op.
+             ! left out for the moment t1t2ratio !!!!
+             ! cancel l=2 (lphys=1) v^1 and l=1 (lphys=0) v^2 polynomial.
+             ! at this point for every pair a,b with b>a we first have (ia,ib)=(b,a) and then (a,b)
+             if (.not. DIFF_OFF) then
+                l=1;k=3
                 if (ib>ia) then !first half
-                   Landauop(:,1,l,ispec(ia,ib))=-matmul(dif1+lor1*l*(l-1),polyrep(k,:))/&
-                        dot_product(polyrep(k,:),matmul(dif1+lor1*l*(l-1),polyrep(k,:)))&
-                        /(dens(ia)*sqrt(temp(ia)*mass(ia)))
-                   Landauop(1,:,l,ispec(ib,ia))=-matmul(polyrep(k,:),dif1+lor1*l*(l-1))&
-                        *testnormalization*dens(ia)*sqrt(temp(ia)*mass(ia))
+                   Landauop(:,1,l,ispec(ia,ib))=-matmul(dif1,polyrep(k,:)-polyrep(1,:)*1.5)/&
+                        dot_product(polyrep(k,:)-polyrep(1,:)*1.5,matmul(dif1,polyrep(k,:)-polyrep(1,:)*1.5))&
+                        /(dens(ia)*temp(ia))
+                   Landauop(1,:,l,ispec(ib,ia))=-matmul(polyrep(k,:)-polyrep(1,:)*1.5,dif1(:,:))&
+                        *testnormalization*dens(ia)*temp(ia)
                 else
                    do i=nmaxpoly,1,-1
-                      Landauop(i,:,l,ispec(ia,ib))=Landauop(1,:,l,ispec(ia,ib))*&
-                           dot_product(dif1(i,:)+lor1(i,:)*l*(l-1),polyrep(k,:))/&
-                           dot_product(polyrep(k,:),matmul(dif1+lor1*l*(l-1),polyrep(k,:)))&
-                           /(dens(ia)*sqrt(temp(ia)*mass(ia)))
-                      Landauop(:,i,l,ispec(ib,ia))=dot_product(polyrep(k,:),dif1(:,i)+lor1(:,i)*l*(l-1))&
-                           *Landauop(:,1,l,ispec(ib,ia))&
-                           *testnormalization*dens(ia)*sqrt(temp(ia)*mass(ia))
+                      Landauop(i,:,l,ispec(ia,ib))=Landauop(1,:,l,ispec(ia,ib))*dot_product(dif1(i,:),polyrep(k,:)-polyrep(1,:)*1.5)/&
+                           dot_product(polyrep(k,:)-polyrep(1,:)*1.5,matmul(dif1,polyrep(k,:)-polyrep(1,:)*1.5))&
+                           /(dens(ia)*temp(ia))
+                      Landauop(:,i,l,ispec(ib,ia))=dot_product(polyrep(k,:)-polyrep(1,:)*1.5,dif1(:,i))*Landauop(:,1,l,ispec(ib,ia))&
+                           *testnormalization*dens(ia)*temp(ia)
                    end do
                 end if
              end if
-          end do
-       end if interspec
+             l=2;k=2
+             if (ib>ia) then !first half
+                Landauop(:,1,l,ispec(ia,ib))=-matmul(dif1+lor1*l*(l-1),polyrep(k,:))/&
+                     dot_product(polyrep(k,:),matmul(dif1+lor1*l*(l-1),polyrep(k,:)))&
+                     /(dens(ia)*sqrt(temp(ia)*mass(ia)))
+                Landauop(1,:,l,ispec(ib,ia))=-matmul(polyrep(k,:),dif1+lor1*l*(l-1))&
+                     *testnormalization*dens(ia)*sqrt(temp(ia)*mass(ia))
+             else
+                do i=nmaxpoly,1,-1
+                   Landauop(i,:,l,ispec(ia,ib))=Landauop(1,:,l,ispec(ia,ib))*&
+                        dot_product(dif1(i,:)+lor1(i,:)*l*(l-1),polyrep(k,:))/&
+                        dot_product(polyrep(k,:),matmul(dif1+lor1*l*(l-1),polyrep(k,:)))&
+                        /(dens(ia)*sqrt(temp(ia)*mass(ia)))
+                   Landauop(:,i,l,ispec(ib,ia))=dot_product(polyrep(k,:),dif1(:,i)+lor1(:,i)*l*(l-1))&
+                        *Landauop(:,1,l,ispec(ib,ia))&
+                        *testnormalization*dens(ia)*sqrt(temp(ia)*mass(ia))
+                end do
+             end if
+          end if
+       end do
        do l=1,lmax
           Landauop(:,:,l,is)=((l-1)*l)*lor+dif-field(:,:,l)*normalization
        end do
@@ -466,7 +464,7 @@ contains
     call cpu_time(t2)
     t(1)=t2-t1
     t1=t2
-    
+
     allocate(nk(n_species,n_species))
     do ia=1,n_species
        do ib=1,n_species
@@ -536,20 +534,6 @@ contains
     end do
     if (i_proc==0 .and. verbose>0) gtvb=1
 
-    do i=1,n_proc
-       if (i_proc==i-1) print 1,'gtcost',i_proc,gtcost(1:min(nkmax,15),1,1)
-       call MPI_Barrier(MPI_COMM_WORLD)
-    end do
-!!$    do i=1,n_proc
-!!$       call MPI_Barrier(MPI_COMM_WORLD)
-!!$       if (i_proc==i-1) print 1,'sorip',i_proc,sortidx(1:10)
-!!$       call MPI_Barrier(MPI_COMM_WORLD)
-!!$    end do
-!!$    do i=1,n_proc
-!!$       call MPI_Barrier(MPI_COMM_WORLD)
-!!$       if (i_proc==i-1) print 1,'sorip',i_proc,gtcost(sortidx(1:10),1,1)
-!!$       call MPI_Barrier(MPI_COMM_WORLD)
-!!$    end do
     ! Now distribute the ia,ib,k *fairly* among the processors, and
     ! when Ta=Tb only do the ia>=ib case.
     ! I.e. minimize max. cost on single processor.
@@ -630,32 +614,30 @@ contains
     t(3)=t2-t1
     t1=t2
     ! Now do the fill in of potentially left out symmetric halfs
-    if (.true.) then
-       do i=1,n_species**2*nkmax
-          idx=sortidx(i)-1
-          ik=mod(idx,nkmax)+1
-          idx=idx/nkmax
-          ia=mod(idx,n_species)+1
-          idx=idx/n_species
-          ib=idx+1
-          if (proc(ik,ia,ib)==0) exit
-          if (i_proc==proc(ik,ia,ib)-1 .and. ia>ib .and. temp(ia)==temp(ib)) then
-             do ik=1,nk(ia,ib)
+    do i=1,n_species**2*nkmax
+       idx=sortidx(i)-1
+       ik=mod(idx,nkmax)+1
+       idx=idx/nkmax
+       ia=mod(idx,n_species)+1
+       idx=idx/n_species
+       ib=idx+1
+       if (proc(ik,ia,ib)==0) exit
+       if (i_proc==proc(ik,ia,ib)-1 .and. ia>ib .and. temp(ia)==temp(ib)) then
+          do ik=1,nk(ia,ib)
 #ifdef __INTEL_COMPILER
-                !use MKL
-                call mkl_domatcopy('c','t',n_xi*n_energy,n_xi*n_energy,1.,&
-                     gyrocolmat(:,:,:,:,ia,ib,ik),n_xi*n_energy,&
-                     gyrocolmat(:,:,:,:,ib,ia,ik),n_xi*n_energy)
+             !use MKL
+             call mkl_domatcopy('c','t',n_xi*n_energy,n_xi*n_energy,1.,&
+                  gyrocolmat(:,:,:,:,ia,ib,ik),n_xi*n_energy,&
+                  gyrocolmat(:,:,:,:,ib,ia,ik),n_xi*n_energy)
 #else
-                !use openBLAS
-                call domatcopy('c','t',n_xi*n_energy,n_xi*n_energy,1.,&
-                     gyrocolmat(:,:,:,:,ia,ib,ik),n_xi*n_energy,&
-                     gyrocolmat(:,:,:,:,ib,ia,ik),n_xi*n_energy)
+             !use openBLAS
+             call domatcopy('c','t',n_xi*n_energy,n_xi*n_energy,1.,&
+                  gyrocolmat(:,:,:,:,ia,ib,ik),n_xi*n_energy,&
+                  gyrocolmat(:,:,:,:,ib,ia,ik),n_xi*n_energy)
 #endif
-             end do
-          end if
-       end do
-    end if
+          end do
+       end if
+    end do
     call cpu_time(t2)
     t(9)=t2-t1
     t1=t2
