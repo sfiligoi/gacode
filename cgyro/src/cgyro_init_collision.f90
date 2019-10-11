@@ -6,7 +6,8 @@ subroutine cgyro_init_collision
   use cgyro_init_collision_landau
   use landau
   use gyrotransformation
-
+  use mpi_f08
+  
   implicit none
 
   real, dimension(:,:,:), allocatable :: nu_d, nu_par

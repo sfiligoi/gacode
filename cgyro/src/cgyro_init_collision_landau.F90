@@ -26,7 +26,7 @@ contains
          n_energy,e_max,n_xi,n_radial,n_theta,n_species,nc_loc,nc1,nc2,nc,&
          nu_ee,&
          xi,w_xi,& !needed for projleg calc
-         collision_model,collision_interspecies,&   ! if this is 4, we switch to calculating Sugama.
+         collision_model,&   ! if this is 7, we switch to calculating Sugama.
          ic_c,it_c,iv_v,&
          k_perp,bmag,&
          alpha_poly,&
@@ -230,7 +230,7 @@ contains
        lor=lor_self*normalization
        dif=dif_self*normalization
        if (t1t2flag) t1t2=0
-       interspec: if (collision_interspecies/=0) then
+       interspec: if (.true.) then
           do ib=1,n_species
              if (ib==ia) cycle
              t1t2ratio=temp(ia)/temp(ib)
@@ -348,7 +348,7 @@ contains
     call cpu_time(t2)
     t(5)=t2-t1
     t1=t2
-    if (collision_model==6 .and. collision_interspecies/=0) then
+    if (collision_model==6) then
        do ib=1,n_species
           do ia=1,n_species
              if (ia==ib) cycle
@@ -466,19 +466,15 @@ contains
     call cpu_time(t2)
     t(1)=t2-t1
     t1=t2
-
+    
     allocate(nk(n_species,n_species))
     do ia=1,n_species
        do ib=1,n_species
-          if (ib/=ia .and. collision_interspecies==0) then
-             nk(ia,ib)=0
-          else
-             nk(ia,ib)=est_k_sampling(kperp_bmag_max*xmax*&
-                  (abs(rho_spec(ia))+abs(rho_spec(ib))),eps)
-             if (i_proc==0 .and. verbose>0) then
-                print 1,'number Chebyshev k-points nk(',ia,',',ib,')=',nk(ia,ib)
-             endif
-          end if
+          nk(ia,ib)=est_k_sampling(kperp_bmag_max*xmax*&
+               (abs(rho_spec(ia))+abs(rho_spec(ib))),eps)
+          if (i_proc==0 .and. verbose>0) then
+             print 1,'number Chebyshev k-points nk(',ia,',',ib,')=',nk(ia,ib)
+          endif
        end do
     end do
 
@@ -515,7 +511,6 @@ contains
     gtcost=0
     do ia=1,n_species
        do ib=1,n_species
-          if (ia/=ib .and. collision_interspecies==0) cycle
           if (ia>=ib .or. temp(ia)/=temp(ib)) then
              do ik=1,nk(ia,ib)
                 block
@@ -635,7 +630,7 @@ contains
     t(3)=t2-t1
     t1=t2
     ! Now do the fill in of potentially left out symmetric halfs
-    if (collision_interspecies/=0) then
+    if (.true.) then
        do i=1,n_species**2*nkmax
           idx=sortidx(i)-1
           ik=mod(idx,nkmax)+1
@@ -884,7 +879,6 @@ contains
          !target_k=sin(.5*pi1*(target_ik-.5)/nk(ia,ib))**2
          do ia=1,n_species
             do ib=1,n_species
-               if (collision_interspecies==0 .and. ia/=ib) cycle
                target_ik=asin(sqrt(target_k))*(nk(ia,ib)/(.5*pi1))+.5
                ! for sinc --> see below
                chebweightarr(1:nk(ia,ib))=[(sinc(target_ik-i,nk(ia,ib))+sinc(target_ik+i-1,nk(ia,ib)),&
@@ -975,7 +969,6 @@ contains
             ic_loc=ic+1-nc1
             do ia=1,n_species
                specbloop: do ib=1,n_species
-                  if (collision_interspecies==0 .and. ia/=ib) cycle
                   if (ic>=nc1 .and. ic<=nc2) then
                      do jx=1,n_xi
                         do je=1,n_energy
@@ -1084,7 +1077,6 @@ contains
             ic_loc=ic+1-nc1
             do ia=1,n_species
                specbloop2: do ib=1,n_species
-                  if (collision_interspecies==0 .and. ia/=ib) cycle
                   if (ic>=nc1 .and. ic<=nc2) then
                      do jx=1,n_xi
                         do je=1,n_energy
