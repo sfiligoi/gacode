@@ -260,11 +260,14 @@ contains
                         *testnormalization*dens(ia)*temp(ia)
                 else
                    do i=nmaxpoly,1,-1
-                      Landauop(i,:,l,ispec(ia,ib))=Landauop(1,:,l,ispec(ia,ib))*dot_product(dif1(i,:),polyrep(k,:)-polyrep(1,:)*1.5)/&
-                           dot_product(polyrep(k,:)-polyrep(1,:)*1.5,matmul(dif1,polyrep(k,:)-polyrep(1,:)*1.5))&
+                      Landauop(i,:,l,ispec(ia,ib))=Landauop(1,:,l,ispec(ia&
+                           ,ib))*dot_product(dif1(i,:),polyrep(k,:)-polyrep(1&
+                           ,:)*1.5)/ dot_product(polyrep(k,:)-polyrep(1,:)&
+                           *1.5,matmul(dif1,polyrep(k,:)-polyrep(1,:)*1.5)) &
                            /(dens(ia)*temp(ia))
-                      Landauop(:,i,l,ispec(ib,ia))=dot_product(polyrep(k,:)-polyrep(1,:)*1.5,dif1(:,i))*Landauop(:,1,l,ispec(ib,ia))&
-                           *testnormalization*dens(ia)*temp(ia)
+                      Landauop(:,i,l,ispec(ib,ia))=dot_product(polyrep(k,:)&
+                           -polyrep(1,:)*1.5,dif1(:,i))*Landauop(:,1,l&
+                           ,ispec(ib,ia)) *testnormalization*dens(ia)*temp(ia)
                    end do
                 end if
              end if

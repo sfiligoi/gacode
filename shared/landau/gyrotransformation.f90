@@ -54,9 +54,9 @@ contains
 !!$    if (verbose>0) print "(3(A,G0),4(A,ES11.4),2ES11.4)",'mpullback based on Jn is ',est_mpullback,' initial guess was ',ceiling(2 *max(kbounda&
 !!$         ,kbb)),'k1,k2',kbounda,kbb,' Bessel_j(' ,est_mpullback,',',kbounda,')=',bessel_jn(est_mpullback ,kbounda),' squaresum=',val,' sqrt=' &
 !!$         ,sqrt(val) ,val1,sqrt(val1)
-    if (verbose>0) print 2,'mpullback based on Jn is ',est_mpullback,' initial guess was ',ceiling(2 *max(kbounda&
-         ,kbb)),'k1,k2',kbounda,kbb,' Bessel_j(' ,est_mpullback,',',kbounda,')=',bessel_jn(est_mpullback ,kbounda),' squaresum=',val,' sqrt=' &
-         ,sqrt(val) ,val1,sqrt(val1)
+    if (verbose>0) print 2,'mpullback based on Jn is ',est_mpullback,' initial guess was ',ceiling(2 &
+         *max(kbounda,kbb)),'k1,k2',kbounda,kbb,' Bessel_j(' ,est_mpullback,',',kbounda,')=',&
+         bessel_jn(est_mpullback ,kbounda),' squaresum=',val,' sqrt=',sqrt(val) ,val1,sqrt(val1)
     if (est_mpullback==max(200,ceiling(2*max(kbounda,kbb)))) then
        print 2,'mpullback wrong!'
        stop
