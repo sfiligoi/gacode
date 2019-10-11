@@ -150,21 +150,21 @@ class cgyrodata:
       #
       nt = self.n_time
       ng = self.n_global+1
-      nd = 2*ng*self.n_species*self.n_n*nt
+      nd = 2*ng*self.n_species*self.n_field*self.n_n*nt
 
       t,fmt,data = self.extract('.cgyro.lky_flux_n')
       if fmt != 'null':
-         self.lky_flux_n = np.reshape(data[0:nd],(2,ng,self.n_species,self.n_n,nt),'F')
+         self.lky_flux_n = np.reshape(data[0:nd],(2,ng,self.n_species,self.n_field,self.n_n,nt),'F')
          print('INFO: (data.py) Read data in '+fmt+'.cgyro.lky_flux_n. '+t)
 
       t,fmt,data = self.extract('.cgyro.lky_flux_e')
       if fmt != 'null':
-         self.lky_flux_e = np.reshape(data[0:nd],(2,ng,self.n_species,self.n_n,nt),'F')
+         self.lky_flux_e = np.reshape(data[0:nd],(2,ng,self.n_species,self.n_field,self.n_n,nt),'F')
          print('INFO: (data.py) Read data in '+fmt+'.cgyro.lky_flux_e. '+t)
 
       t,fmt,data = self.extract('.cgyro.lky_flux_v')
       if fmt != 'null':
-         self.lky_flux_v = np.reshape(data[0:nd],(2,ng,self.n_species,self.n_n,nt),'F')
+         self.lky_flux_v = np.reshape(data[0:nd],(2,ng,self.n_species,self.n_field,self.n_n,nt),'F')
          print('INFO: (data.py) Read data in '+fmt+'.cgyro.lky_flux_v. '+t)
       #-----------------------------------------------------------------
 
@@ -174,6 +174,8 @@ class cgyrodata:
       Do complicated spatial averages for xflux
       RESULT: self.lky_flux_ave
       """
+
+      print('INFO: (xfluxave) Computing partial-domain averages')
 
       ns = self.n_species
       ng = self.n_global+1
@@ -189,11 +191,11 @@ class cgyrodata:
          sc[:] = 1.0
 
       if moment == 'n':
-         z = np.sum(self.lky_flux_n,axis=3)
+         z = np.sum(self.lky_flux_n,axis=(3,4))
       elif moment == 'e':
-         z = np.sum(self.lky_flux_e,axis=3)
+         z = np.sum(self.lky_flux_e,axis=(3,4))
       elif moment == 'v':
-         z = np.sum(self.lky_flux_v,axis=3)
+         z = np.sum(self.lky_flux_v,axis=(3,4))
       else:
          raise ValueError('(xfluxave) Invalid moment.')
 

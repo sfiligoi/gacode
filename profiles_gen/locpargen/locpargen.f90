@@ -99,7 +99,7 @@ program locpargen
 
   betae_unit = 4.027e-3*dens_loc(ise)*temp_loc(ise)/b_unit_loc**2
 
-  tag(:) = (/'1','2','3','4','5'/)
+  tag(:) = (/'1','2','3','4','5','6','7','8','9'/)
 
   open(unit=1,file='out.locpargen',status='replace')
   write(1,*) q_loc

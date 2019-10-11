@@ -62,16 +62,24 @@ subroutine cgyro_write_restart_one
   integer(KIND=8) :: start_time,cp_time
   integer(KIND=8) :: count_rate, count_max
   real :: cp_dt
-  integer :: statusfd
+  integer :: j,ic0,statusfd
 
   ! use system_clock to be consistent with cgyro_kernel
   call system_clock(start_time,count_rate,count_max)
 
   !-----------------------------------------------
-  ! Dump h and blending coefficients:
+  ! Write h_x [filling (0,0) with source]
   !
   filemode = IOR(MPI_MODE_WRONLY,MPI_MODE_CREATE)
   disp     = 0
+
+  ! Pack source into h(0,0)
+  if (n == 0) then
+     ic0 = (n_radial/2)*n_theta
+     do j=1,n_theta
+        h_x(ic0+j,:) = source(j,:)
+     enddo
+  endif
 
   offset1 = size(h_x,kind=MPI_OFFSET_KIND)*(i_proc_1+i_proc_2*n_proc_1) + restart_header_size
   if (offset1 < restart_header_size) then
