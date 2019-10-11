@@ -322,7 +322,7 @@ subroutine cgyro_make_profiles
   !-------------------------------------------------------------
   ! Manage simulation type (n=0,linear,nonlinear)
   !
-  if (zf_test_mode > 0) then
+  if (zf_test_mode > 0 .or. collision_test_mode>0) then
 
      if (zf_test_mode > 2) then
         ! The Apar and Bpar initial conditions could later be
@@ -422,7 +422,11 @@ subroutine cgyro_make_profiles
   ! Fourier index mapping
   !
   allocate(px(n_radial))
-  if (zf_test_mode > 0) then
+  if (collision_test_mode>0) then
+     do ir=1,n_radial
+        px(ir) = ir-1
+     enddo
+  else if (zf_test_mode > 0) then
      ! Need positive k_r Fourier coefficients only
      do ir=1,n_radial
         px(ir) = ir
