@@ -3,6 +3,9 @@ subroutine cgyro_init_collision
   use timer_lib
 
   use cgyro_globals
+  use cgyro_init_collision_landau
+  use landau
+  use gyrotransformation
 
   implicit none
 
@@ -13,7 +16,7 @@ subroutine cgyro_init_collision
 
   real :: arg
   real :: xa, xb, tauinv_ab
-  real :: mo1,mo2,en1,en2 ! von mir
+  real :: mo1,mo2,en1,en2
   integer :: jv
   integer :: is,ir,it,ix,ie,js,je,jx,ks
   ! parameters for matrix solve
@@ -21,579 +24,692 @@ subroutine cgyro_init_collision
   real, dimension(:,:,:,:,:,:), allocatable :: ctest
   real, dimension(:,:,:,:,:), allocatable :: bessel
   integer :: test_coll_flag = 0
-  
+
   if (collision_model == 5) then
      call cgyro_init_collision_simple
      return
   endif
+  do_old_coll:  if (.not. (collision_model <= 4 .or. collision_test_mode/=0)) then
+     ! collision_model=6 (Landau) or 7 (New Sugama method [Galerkin])
+     if (i_proc==0 .and. maxval(abs(temp(1:n_species)-temp(1)))/=0) then
+        print 1,'Warning: Landau not yet working for different species temperatures!!'
+     end if
+     call cgyro_init_landau
+  else
+     allocate(nu_d(n_energy,n_species,n_species))
+     allocate(nu_par(n_energy,n_species,n_species))
+     allocate(klor_fac(n_species,n_species))
+     allocate(kdiff_fac(n_species,n_species))
+     nu_d(:,:,:) = 0.0
+     nu_par(:,:,:) = 0.0
+     klor_fac(:,:) = 0.0
+     kdiff_fac(:,:) = 0.0
 
-  allocate(nu_d(n_energy,n_species,n_species))
-  allocate(nu_par(n_energy,n_species,n_species))
-  allocate(klor_fac(n_species,n_species))
-  allocate(kdiff_fac(n_species,n_species))
-  nu_d(:,:,:) = 0.0
-  nu_par(:,:,:) = 0.0
-  klor_fac(:,:) = 0.0
-  kdiff_fac(:,:) = 0.0
-  
-  do ie=1,n_energy
-     do is=1,n_species
-        do js=1,n_species
+     do ie=1,n_energy
+        do is=1,n_species
+           do js=1,n_species
 
-           xa = vel(ie)
-           xb = xa * vth(is) / vth(js)
-           tauinv_ab = nu(is) * z(js)**2 / z(is)**2 &
-                * dens(js)/dens(is)
-           ! re-scale only electron collisions (ee,ei,ie)
-           if(is == is_ele .or. js == is_ele) then
-              tauinv_ab = tauinv_ab * collision_ele_scale
-           endif
-              
-           select case (collision_model)
+              xa = vel(ie)
+              xb = xa * vth(is) / vth(js)
+              tauinv_ab = nu(is) * z(js)**2 / z(is)**2 &
+                   * dens(js)/dens(is)
+              ! re-scale only electron collisions (ee,ei,ie)
+              if(is == is_ele .or. js == is_ele) then
+                 tauinv_ab = tauinv_ab * collision_ele_scale
+              endif
 
-           case (1)
+              select case (collision_model)
 
-              ! Only ee,ei Connor-like Lorentz
-              if (is == is_ele) then
-                 if (is == js) then
-                    ! e-e
+              case (1)
+
+                 ! Only ee,ei Connor-like Lorentz
+                 if (is == is_ele) then
+                    if (is == js) then
+                       ! e-e
+                       nu_d(ie,is,js) = tauinv_ab * (1.0/xa**3) &
+                            * (exp(-xb*xb)/(xb*sqrt(pi)) &
+                            + (1.0-1.0/(2.0*xb*xb)) * erf(xb))
+                    else
+                       ! e-i
+                       if(z_eff_method == 2) then
+                          nu_d(ie,is,js) = tauinv_ab * (1.0/xa**3)
+                       else
+                          nu_d(ie,is,js) = tauinv_ab * (1.0/xa**3) &
+                               * z(is)**2 / z(js)**2 &
+                               * dens(is)/dens(js) * z_eff/(n_species-1)
+                       endif
+                    endif
+                 endif
+
+              case (2)
+
+                 ! Connor model
+                 if (is == js .or. &
+                      (abs(mass(is) - mass(js)) < epsilon(0.0))) then
+                    ! case 1: like-species/same mass collisions
                     nu_d(ie,is,js) = tauinv_ab * (1.0/xa**3) &
                          * (exp(-xb*xb)/(xb*sqrt(pi)) &
                          + (1.0-1.0/(2.0*xb*xb)) * erf(xb))
+
+                 else if (mass(is) < mass(js)) then
+                    ! case 2: ele-ion and ion-imp(heavy) collisions
+                    nu_d(ie,is,js) = tauinv_ab * (1.0/xa**3)
+
                  else
-                    ! e-i
-                    if(z_eff_method == 2) then
-                       nu_d(ie,is,js) = tauinv_ab * (1.0/xa**3)
-                    else
-                       nu_d(ie,is,js) = tauinv_ab * (1.0/xa**3) &
-                            * z(is)**2 / z(js)**2 &
-                            * dens(is)/dens(js) * z_eff/(n_species-1)
-                    endif
+                    ! case 3: ion-ele and imp(heavy)-ion collisions
+                    nu_d(ie,is,js) = tauinv_ab * 4.0/(3.0*sqrt(pi)) &
+                         * sqrt(mass(js)/mass(is)) * (temp(is)/temp(js))**1.5
                  endif
-              endif
 
-           case (2)
+              case(4,6,7)
 
-              ! Connor model
-              if (is == js .or. &
-                   (abs(mass(is) - mass(js)) < epsilon(0.0))) then
-                 ! case 1: like-species/same mass collisions
+                 ! Ad hoc op
+                 ! (Fix for underflow)
                  nu_d(ie,is,js) = tauinv_ab * (1.0/xa**3) &
                       * (exp(-xb*xb)/(xb*sqrt(pi)) &
                       + (1.0-1.0/(2.0*xb*xb)) * erf(xb))
+                 ! No i-e Lorentz
+                 !if (is /= is_ele .and. js == is_ele) then
+                 !   nu_d(ie,is,js) = 0.0
+                 !endif
+                 if(collision_kperp == 1) then
+                    klor_fac(is,js) = 1.0
+                 endif
 
-              else if (mass(is) < mass(js)) then
-                 ! case 2: ele-ion and ion-imp(heavy) collisions
-                 nu_d(ie,is,js) = tauinv_ab * (1.0/xa**3)
+                 ! Diffusion 
+                 nu_par(ie,is,js) = tauinv_ab * (2.0/xa**3) &
+                      * (-exp(-xb*xb)/(xb*sqrt(pi)) &
+                      + (1.0/(2.0*xb*xb)) * erf(xb))
+                 if(collision_kperp == 1) then
+                    kdiff_fac(is,js) = 1.0
+                 endif
 
-              else
-                 ! case 3: ion-ele and imp(heavy)-ion collisions
-                 nu_d(ie,is,js) = tauinv_ab * 4.0/(3.0*sqrt(pi)) &
-                      * sqrt(mass(js)/mass(is)) * (temp(is)/temp(js))**1.5
-              endif
+              end select
 
-           case(4)
-
-              ! Ad hoc op
-              ! (Fix for underflow)
-              nu_d(ie,is,js) = tauinv_ab * (1.0/xa**3) &
-                   * (exp(-xb*xb)/(xb*sqrt(pi)) &
-                   + (1.0-1.0/(2.0*xb*xb)) * erf(xb))
-              ! No i-e Lorentz
-              !if (is /= is_ele .and. js == is_ele) then
-              !   nu_d(ie,is,js) = 0.0
-              !endif
-              if(collision_kperp == 1) then
-                 klor_fac(is,js) = 1.0
-              endif
-
-              ! Diffusion 
-              nu_par(ie,is,js) = tauinv_ab * (2.0/xa**3) &
-                   * (-exp(-xb*xb)/(xb*sqrt(pi)) &
-                   + (1.0/(2.0*xb*xb)) * erf(xb))
-              if(collision_kperp == 1) then
-                 kdiff_fac(is,js) = 1.0
-              endif
-              
-           end select
-
+           enddo
         enddo
      enddo
-  enddo
 
-  if (collision_ion_model == 1) then
+     if (collision_ion_model == 1) then
+        do is=1,n_species
+           if(is /= is_ele) then
+              do js=1,n_species
+                 nu_d(:,is,js) = 0.0
+                 nu_par(:,is,js) = 0.0
+              enddo
+           endif
+        enddo
+     endif
+
+     ! Printout used for CGYRO paper.
+     !if (i_proc == 0) then
+     !   do ie=1,n_energy
+     !      print '(i1,3(" &{\tt ",f9.5,"}")," \\")',&
+     !           ie,vel(ie),w_e(ie),nu_d(ie,n_species,n_species)
+     !   enddo
+     !   print *,sum(w_e)
+     !endif
+
+     if ((collision_model == 4 .or. (collision_model==6.or.collision_model==7) &
+          .and.collision_test_mode/=0) .and. collision_kperp == 1 .and. &
+          (collision_mom_restore == 1 .or. collision_ene_restore == 1)) then
+        allocate(bessel(n_species,n_xi,n_energy,nc_loc,0:1))
+        !$omp parallel do private(ic_loc,it,ie,ix,is,arg)
+        do ic=nc1,nc2
+           ic_loc = ic-nc1+1
+           it = it_c(ic)
+           do ie=1,n_energy
+              do ix=1,n_xi
+                 do is=1,n_species   
+                    arg = k_perp(ic)*rho*vth(is)*mass(is)&
+                         /(z(is)*bmag(it)) *sqrt(2.0*energy(ie)) &
+                         *sqrt(1.0-xi(ix)**2)
+                    bessel(is,ix,ie,ic_loc,0) = bessel_j0(arg)
+                    bessel(is,ix,ie,ic_loc,1) = bessel_j1(arg)
+                 enddo
+              enddo
+           enddo
+        enddo
+     endif
+
+     allocate(ctest(n_species,n_species,n_xi,n_xi,n_energy,n_energy))
+     allocate(rs(n_species,n_species))
+     allocate(rsvec(n_species,n_species,n_xi,n_energy))
+     allocate(rsvect0(n_species,n_species,n_xi,n_energy))
+     allocate(rsvect1(n_species,n_species,n_xi,n_energy))
+
+     ! Collision test particle component
+     ctest = 0.0
+
+     ! Lorentz
      do is=1,n_species
-        if(is /= is_ele) then
-           do js=1,n_species
-              nu_d(:,is,js) = 0.0
-              nu_par(:,is,js) = 0.0
-           enddo
-        endif
-     enddo
-  endif
-  
-  ! Printout used for CGYRO paper.
-  !if (i_proc == 0) then
-  !   do ie=1,n_energy
-  !      print '(i1,3(" &{\tt ",f9.5,"}")," \\")',&
-  !           ie,vel(ie),w_e(ie),nu_d(ie,n_species,n_species)
-  !   enddo
-  !   print *,sum(w_e)
-  !endif
-
-  if ( collision_model == 4 .and. collision_kperp == 1 .and. &
-       (collision_mom_restore == 1 .or. collision_ene_restore == 1)) then
-     allocate(bessel(n_species,n_xi,n_energy,nc_loc,0:1))
-!$omp parallel do private(ic_loc,it,ie,ix,is,arg)
-     do ic=nc1,nc2
-        ic_loc = ic-nc1+1
-        it = it_c(ic)
-        do ie=1,n_energy
-           do ix=1,n_xi
-              do is=1,n_species   
-                 arg = k_perp(ic)*rho*vth(is)*mass(is)&
-                      /(z(is)*bmag(it)) *sqrt(2.0*energy(ie)) &
-                      *sqrt(1.0-xi(ix)**2)
-                 bessel(is,ix,ie,ic_loc,0) = bessel_j0(arg)
-                 bessel(is,ix,ie,ic_loc,1) = bessel_j1(arg)
-              enddo
-           enddo
-        enddo
-     enddo
-  endif
-
-  allocate(ctest(n_species,n_species,n_xi,n_xi,n_energy,n_energy))
-  allocate(rs(n_species,n_species))
-  allocate(rsvec(n_species,n_species,n_xi,n_energy))
-  allocate(rsvect0(n_species,n_species,n_xi,n_energy))
-  allocate(rsvect1(n_species,n_species,n_xi,n_energy))
-  allocate(amat(nv,nv))
-
-  ! Collision test particle component
-  ctest = 0.0
-
-  ! Lorentz
-  do is=1,n_species
-     do ix=1,n_xi
-        do ie=1,n_energy
-           do js=1,n_species
-              do jx=1,n_xi
-                 je = ie
-                 ctest(is,js,ix,jx,ie,je) &
-                      = ctest(is,js,ix,jx,ie,je) &
-                      + xi_lor_mat(ix,jx) *0.5*nu_d(ie,is,js)
-              enddo
-           enddo
-        enddo
-     enddo
-  enddo
-
-  ! Diffusion
-  if (collision_model == 4 .and. collision_ene_diffusion == 1) then
-!$omp parallel do collapse(5) private(is,ix,ie,js,je,jx)     
-     do is=1,n_species 
         do ix=1,n_xi
            do ie=1,n_energy
               do js=1,n_species
-                 do je=1,n_energy
-                    jx = ix
-                    ! From K. Hallatschek
-                    ! self-adjoint part of ctest written self-adjointly
-                    ctest(is,js,ix,jx,ie,je) = ctest(is,js,ix,jx,ie,je) &
-                         -0.5 / w_e(ie) &
-                         *sum(w_e(:)*e_deriv1_mat(:,ie)*energy(:) &
-                         *nu_par(:,is,js) *e_deriv1_mat(:,je))/(1.0*e_max)
-                    ! non-self-adjoint part proportional 1-Ta/Tb written
-                    ! in a way that supports inherent particle number 
-                    ! conservation for small kperp
-                    ctest(is,js,ix,jx,ie,je) = ctest(is,js,ix,jx,ie,je) &
-                         + (1-temp(is)/temp(js)) / sqrt(1.0*e_max)/w_e(ie) &
-                         * w_e(je)*e_deriv1_mat(je,ie) &
-                         * nu_par(je,is,js)*energy(je)**1.5
+                 do jx=1,n_xi
+                    je = ie
+                    ctest(is,js,ix,jx,ie,je) &
+                         = ctest(is,js,ix,jx,ie,je) &
+                         + xi_lor_mat(ix,jx) *0.5*nu_d(ie,is,js)
                  enddo
               enddo
            enddo
         enddo
      enddo
-  endif
 
-  ! Collision field particle component
-  amat(:,:)   = 0.0
-  cmat(:,:,:) = 0.0
-
-  select case (collision_model)
-
-  case(2)
-     if (collision_mom_restore == 1) then
-        do is=1,n_species
-           do js=1,n_species
-              rs(is,js) = 0.0
-              do ie=1,n_energy
-                 rs(is,js) = rs(is,js) + w_e(ie)*nu_d(ie,is,js)*energy(ie)
-              enddo
-           enddo
-        enddo
-
-        ic_loc = 0
-        do ic=nc1,nc2
-           ic_loc = ic_loc+1
-           it = it_c(ic)
-           
-           do iv=1,nv  
-              is = is_v(iv)
-              ix = ix_v(iv)
-              ie = ie_v(iv)
-
-              do jv=1,nv
-                 js = is_v(jv)
-                 jx = ix_v(jv)
-                 je = ie_v(jv)
-
-                 if (abs(rs(is,js)) > epsilon(0.0)) then
-                    cmat(iv,jv,ic_loc) = &
-                         cmat(iv,jv,ic_loc) &
-                         + 3.0 * (mass(js)/mass(is)) &
-                         * (dens(js)/dens(is)) * dens_rot(it,js) &
-                         * (vth(js)/vth(is)) * nu_d(ie,is,js) &
-                         * vel(ie) * xi(ix) &
-                         * nu_d(je,js,is) * sqrt(energy(je)) &
-                         * xi(jx) * w_e(je) * w_xi(jx) / rs(is,js)
-                 endif
-              enddo
-           enddo
-        enddo
-
-     endif
-
-  case(4)
-
-     ! Momentum Restoring
-
-     if (collision_mom_restore == 1) then
-
-        ! C_test_ab(v_par f0a,f0b) and w_e v_par C_test_ab(H_a)
-        rsvec = 0.0
-        rsvect0 = 0.0
-        rs(:,:) = 0.0
-        
-        do is=1,n_species
-           do js=1,n_species
-              do ix=1,n_xi
-                 do jx=1,n_xi
-                    do ie=1,n_energy
-                       do je=1,n_energy
-                          rsvec(is,js,ix,ie) = rsvec(is,js,ix,ie) &
-                               + ctest(is,js,ix,jx,ie,je) &
-                               * sqrt(2.0*energy(je)) * xi(jx) * vth(is)
-                          rsvect0(is,js,ix,ie) = rsvect0(is,js,ix,ie) &
-                               + ctest(is,js,jx,ix,je,ie) &
-                               * sqrt(2.0*energy(je)) * xi(jx) &
-                               * w_e(je)*w_xi(jx) * vth(is)
-                       enddo
-                    enddo
-                 enddo
-              enddo
-
-              ! int v_par C_test_ab(v_par f0a,f0b) / n_0a
-              do ix=1,n_xi
-                 do ie=1,n_energy
-                    rs(is,js) = rs(is,js) + w_e(ie)*w_xi(ix) * dens(is) &
-                         * rsvec(is,js,ix,ie) * sqrt(2.0*energy(ie)) * xi(ix) &
-                         * vth(is)
-                 enddo
-              enddo
-           enddo
-        enddo
-
-        if (collision_kperp == 0) then
-           ic_loc = 0
-           do ic=nc1,nc2
-              ic_loc = ic_loc+1
-              it = it_c(ic)
-              
-              do iv=1,nv  
-                 is = is_v(iv)
-                 ix = ix_v(iv)
-                 ie = ie_v(iv)
-
-                 do jv=1,nv
-                    js = is_v(jv)
-                    jx = ix_v(jv)
-                    je = ie_v(jv)
-
-                    if (abs(rs(is,js))>epsilon(0.0)) then
-                       cmat(iv,jv,ic_loc) &
-                            = cmat(iv,jv,ic_loc) &
-                            - mass(js)/mass(is) * dens(js) * dens_rot(it,js) &
-                            * rsvec(is,js,ix,ie) / rs(is,js) &
-                            * rsvect0(js,is,jx,je)
-                    endif
-                 enddo
-              enddo
-           enddo
-
-        else
-           ic_loc = 0
-           do ic=nc1,nc2
-              ic_loc = ic_loc+1
-              it = it_c(ic)
-              ir = ir_c(ic)
-
-              rsvect0(:,:,:,:) = 0.0
-              rsvect1(:,:,:,:) = 0.0
-              do is=1,n_species
-                 do js=1, n_species
-                    do ix=1,n_xi
-                       do jx=1,n_xi
-                          do ie=1,n_energy
-                             do je=1,n_energy
-                                rsvect0(is,js,ix,ie) = rsvect0(is,js,ix,ie) &
-                                     + ctest(is,js,jx,ix,je,ie) &
-                                     * sqrt(2.0*energy(je)) * xi(jx) &
-                                     * w_e(je)*w_xi(jx) * vth(is) &
-                                     * bessel(is,ix,ie,ic_loc,0)
-                                rsvect1(is,js,ix,ie) = rsvect1(is,js,ix,ie) &
-                                     + ctest(is,js,jx,ix,je,ie) &
-                                     * sqrt(2.0*energy(je)) * xi(jx) &
-                                     * w_e(je)*w_xi(jx) * vth(is) &
-                                     * bessel(is,ix,ie,ic_loc,1) &
-                                     * sqrt(1.0-xi(ix)**2)/xi(ix)
-                             enddo
-                          enddo
-                       enddo
-                    enddo
-                 enddo
-              enddo
-              
-              do iv=1,nv  
-                 is = is_v(iv)
-                 ix = ix_v(iv)
-                 ie = ie_v(iv)
-
-                 do jv=1,nv
-                    js = is_v(jv)
-                    jx = ix_v(jv)
-                    je = ie_v(jv)
-
-                    if (abs(rs(is,js)) > epsilon(0.)) then 
-                       cmat(iv,jv,ic_loc) &
-                            = cmat(iv,jv,ic_loc) &
-                            - mass(js)/mass(is) &
-                            * dens(js) * dens_rot(it,js) &
-                            * rsvec(is,js,ix,ie) &
-                            * bessel(is,ix,ie,ic_loc,0) / rs(is,js) &
-                            * rsvect0(js,is,jx,je)
-                       cmat(iv,jv,ic_loc) &
-                            = cmat(iv,jv,ic_loc) &
-                            - mass(js)/mass(is) &
-                            * dens(js) * dens_rot(it,js) &
-                            * rsvec(is,js,ix,ie) / rs(is,js) &
-                            * bessel(is,ix,ie,ic_loc,1) &
-                            * sqrt(1.0-xi(ix)**2)/xi(ix) &
-                            * rsvect1(js,is,jx,je) 
-                    endif
-                 enddo
-              enddo
-           enddo
-
-        endif
-
-     endif
-
-     ! Energy Restoring
-
-     if (collision_ene_restore == 1) then
-              
-        ! C_test_ab(u_a^2 f0a,f0b) and w_e u_a^2 C_test_ab(H_a)
-        rsvec  = 0.0
-        rsvect0 = 0.0
-        rs(:,:) = 0.0
-
-        do is=1,n_species
-           do js=1,n_species
-              do ix=1,n_xi
-                 do jx=1,n_xi
-                    do ie=1,n_energy
-                       do je=1,n_energy
-                          rsvec(is,js,ix,ie) = rsvec(is,js,ix,ie) &
-                               + ctest(is,js,ix,jx,ie,je) * energy(je)
-                          rsvect0(is,js,ix,ie) = rsvect0(is,js,ix,ie) &
-                               + ctest(is,js,jx,ix,je,ie) * energy(je) &
-                               * w_e(je)*w_xi(jx)
-                       enddo
-                    enddo
-                 enddo
-              enddo
-           
-              ! int v^2 C_test_ab(u_a^2 f0a,f0b) 
-              
-              do ix=1,n_xi
-                 do ie=1,n_energy
-                    rs(is,js) = rs(is,js) + w_e(ie)*w_xi(ix) &
-                         * dens(is) * rsvec(is,js,ix,ie) * energy(ie) 
-                 enddo
-              enddo
-           enddo
-        enddo
-
-        if (collision_kperp == 0) then
-           ic_loc = 0
-           do ic=nc1,nc2
-              ic_loc = ic_loc+1
-              it = it_c(ic)
-              
-              do iv=1,nv  
-                 is = is_v(iv)
-                 ix = ix_v(iv)
-                 ie = ie_v(iv)
-
-                 do jv=1,nv
-                    js = is_v(jv)
-                    jx = ix_v(jv)
-                    je = ie_v(jv)
-
-                    if (abs(rs(is,js)) > epsilon(0.0)) then
-                       cmat(iv,jv,ic_loc) &
-                            = cmat(iv,jv,ic_loc) &
-                            - temp(js)/temp(is) * dens(js) * dens_rot(it,js) &
-                            * rsvec(is,js,ix,ie) &
-                            / rs(is,js) * rsvect0(js,is,jx,je) 
-                    endif
-                 enddo
-              enddo
-           enddo
-
-        else
-           ic_loc = 0
-           do ic=nc1,nc2
-              ic_loc = ic_loc+1
-              it = it_c(ic)
-              ir = ir_c(ic)
-
-              rsvect0(:,:,:,:) = 0.0
-              do is=1,n_species
-                 do js=1,n_species
-                    do ix=1,n_xi
-                       do jx=1,n_xi
-                          do ie=1,n_energy
-                             do je=1,n_energy
-                                rsvect0(is,js,ix,ie) = rsvect0(is,js,ix,ie) &
-                                     + ctest(is,js,jx,ix,je,ie) * energy(je) &
-                                     * w_e(je)*w_xi(jx) &
-                                     * bessel(is,ix,ie,ic_loc,0) 
-                             enddo
-                          enddo
-                       enddo
-                    enddo
-                 enddo
-              enddo
-              
-              do iv=1,nv  
-                 is = is_v(iv)
-                 ix = ix_v(iv)
-                 ie = ie_v(iv)
-                 
-                 do jv=1,nv
-                    js = is_v(jv)
-                    jx = ix_v(jv)
-                    je = ie_v(jv)
-                    
-                    if (abs(rs(is,js)) > epsilon(0.0)) then
-                       cmat(iv,jv,ic_loc) &
-                            = cmat(iv,jv,ic_loc) &
-                            - temp(js)/temp(is) * dens(js) * dens_rot(it,js) &
-                            * rsvec(is,js,ix,ie) &
-                            * bessel(is,ix,ie,ic_loc,0) / rs(is,js) &
-                            * rsvect0(js,is,jx,je)
-                    endif
-                 enddo
-              enddo
-           enddo
-        endif
-        
-     endif
-     
-  end select
-
-  if (test_coll_flag == 1) then
-     !Ausgabe eines sinnvollen Testwerts:
-     !if (it_c(0) == 0) then
-     !if (i_proc==1) then
-     print *,'energy',energy(2),vel(2),vth(1)
-     do is=1,2
-        do js=1,2
-           mo1=0 !ctest
-           mo2=0 !cmat
-           !addiere Impulsbeitrag für jx,je=1,1 für species 1
-           en1=0
-           en2=0
+     ! Diffusion
+     if ((collision_model == 4 .or. &
+          (collision_model==6 .or. collision_model==7) .and. collision_test_mode/=0) &
+          .and. collision_ene_diffusion == 1) then
+        !$omp parallel do collapse(5) private(is,ix,ie,js,je,jx)     
+        do is=1,n_species 
            do ix=1,n_xi
               do ie=1,n_energy
-                 mo1=mo1+mass(is)*dens(is)*vth(is)*vel(ie)*xi(ix)*w_xi(ix)*w_e(ie)*dens_rot(it_c(1),is) &
-                      * (ctest(is,js,ix,4,ie,4) &
-                      -0.25*(k_perp(1)*rho*vth(is)*mass(is) &
-                      / (z(is)*bmag(it_c(1))))**2 &
-                      * 2.0*energy(ie) &
-                      * (klor_fac(is,js)*nu_d(ie,is,js) * (1+xi(ix)**2) &
-                      + kdiff_fac(is,js)*nu_par(ie,is,js) * (1-xi(ix)**2)))
-                 en1=en1+temp(is)*dens(is)*energy(ie)*w_xi(ix)*w_e(ie) &
-                      *dens_rot(it_c(1),is) &
-                      *(ctest(is,js,ix,4,ie,4) &
-                      -0.25*(k_perp(1)*rho*vth(is)*mass(is) &
-                      / (z(is)*bmag(it_c(1))))**2 &
-                      * 2.0*energy(ie) &
-                      * (klor_fac(is,js)*nu_d(ie,is,js) * (1+xi(ix)**2) &
-                      + kdiff_fac(is,js)*nu_par(ie,is,js) * (1-xi(ix)**2)))
-                 jv=iv_v(4,4,is)
-                 iv=iv_v(ie,ix,js)
-                 mo2=mo2+mass(js)*dens(js)*vth(js)*cmat(iv,jv,it_c(1))*vel(ie)*xi(ix)*w_xi(ix)*w_e(ie)*dens_rot(it_c(1),js)
-                 en2=en2+temp(js)*dens(js)*cmat(iv,jv,it_c(1))*energy(ie)*w_xi(ix)*w_e(ie)*dens_rot(it_c(1),js)
+                 do js=1,n_species
+                    do je=1,n_energy
+                       jx = ix
+                       ! From K. Hallatschek
+                       ! self-adjoint part of ctest written self-adjointly
+                       ctest(is,js,ix,jx,ie,je) = ctest(is,js,ix,jx,ie,je) &
+                            -0.5 / w_e(ie) &
+                            *sum(w_e(:)*e_deriv1_mat(:,ie)*energy(:) &
+                            *nu_par(:,is,js) *e_deriv1_mat(:,je))/(1.0*e_max)
+                       ! non-self-adjoint part proportional 1-Ta/Tb written
+                       ! in a way that supports inherent particle number 
+                       ! conservation for small kperp
+                       ctest(is,js,ix,jx,ie,je) = ctest(is,js,ix,jx,ie,je) &
+                            + (1-temp(is)/temp(js)) / sqrt(1.0*e_max)/w_e(ie) &
+                            * w_e(je)*e_deriv1_mat(je,ie) &
+                            * nu_par(je,is,js)*energy(je)**1.5
+                    enddo
+                 enddo
               enddo
            enddo
-           if (nc1==1) then
-              print *,'is=',is,' js=',js,' mo1 ',mo1,' mo2 ',mo2,' nc1 ', &
-                   nc1,' nc2 ',nc2,' itc ',it_c(nc1),' dr ',dens_rot(it_c(1),1)
-           endif
-           if (nc1==1) then
-              print *,'is=',is,' js=',js,' en1 ',en1,' en2 ',en2,' nc1 ',&
-                   nc1,' nc2 ',nc2,' itc ',it_c(nc1),' dr ',dens_rot(it_c(1),1)
-           endif
         enddo
-     enddo
-     if (nc1==1) print *,'w_e ',w_e
-     if (nc1==1) print *,'vel ',vel
-     if (nc1==1) print *,'ctest',ctest(is,js,:,2,1:3,2)  
-     !endif
-  endif
-  
-  if (collision_model == 4 .and. collision_kperp == 1 .and. &
-       (collision_mom_restore == 1 .or. collision_ene_restore == 1)) then
-     deallocate(bessel)
-  end if
+     endif
 
+     ! Collision field particle component
+     cmat(:,:,:) = 0.0
+
+     select case (collision_model)
+
+     case(2)
+        if (collision_mom_restore == 1) then
+           do is=1,n_species
+              do js=1,n_species
+                 rs(is,js) = 0.0
+                 do ie=1,n_energy
+                    rs(is,js) = rs(is,js) + w_e(ie)*nu_d(ie,is,js)*energy(ie)
+                 enddo
+              enddo
+           enddo
+
+           ic_loc = 0
+           do ic=nc1,nc2
+              ic_loc = ic_loc+1
+              it = it_c(ic)
+
+              do iv=1,nv  
+                 is = is_v(iv)
+                 ix = ix_v(iv)
+                 ie = ie_v(iv)
+
+                 do jv=1,nv
+                    js = is_v(jv)
+                    jx = ix_v(jv)
+                    je = ie_v(jv)
+
+                    if (abs(rs(is,js)) > epsilon(0.0)) then
+                       cmat(iv,jv,ic_loc) = &
+                            cmat(iv,jv,ic_loc) &
+                            + 3.0 * (mass(js)/mass(is)) &
+                            * (dens(js)/dens(is)) * dens_rot(it,js) &
+                            * (vth(js)/vth(is)) * nu_d(ie,is,js) &
+                            * vel(ie) * xi(ix) &
+                            * nu_d(je,js,is) * sqrt(energy(je)) &
+                            * xi(jx) * w_e(je) * w_xi(jx) / rs(is,js)
+                    endif
+                 enddo
+              enddo
+           enddo
+
+        endif
+
+     case(4,6,7)
+
+        ! Momentum Restoring
+
+        if (collision_mom_restore == 1) then
+
+           ! C_test_ab(v_par f0a,f0b) and w_e v_par C_test_ab(H_a)
+           rsvec = 0.0
+           rsvect0 = 0.0
+           rs(:,:) = 0.0
+
+           do is=1,n_species
+              do js=1,n_species
+                 do ix=1,n_xi
+                    do jx=1,n_xi
+                       do ie=1,n_energy
+                          do je=1,n_energy
+                             rsvec(is,js,ix,ie) = rsvec(is,js,ix,ie) &
+                                  + ctest(is,js,ix,jx,ie,je) &
+                                  * sqrt(2.0*energy(je)) * xi(jx) * vth(is)
+                             rsvect0(is,js,ix,ie) = rsvect0(is,js,ix,ie) &
+                                  + ctest(is,js,jx,ix,je,ie) &
+                                  * sqrt(2.0*energy(je)) * xi(jx) &
+                                  * w_e(je)*w_xi(jx) * vth(is)
+                          enddo
+                       enddo
+                    enddo
+                 enddo
+
+                 ! int v_par C_test_ab(v_par f0a,f0b) / n_0a
+                 do ix=1,n_xi
+                    do ie=1,n_energy
+                       rs(is,js) = rs(is,js) + w_e(ie)*w_xi(ix) * dens(is) &
+                            * rsvec(is,js,ix,ie) * sqrt(2.0*energy(ie)) * xi(ix) &
+                            * vth(is)
+                    enddo
+                 enddo
+              enddo
+           enddo
+
+           if (.not. ((collision_model == 4 .or. (collision_model==6 .or. collision_model==7) &
+                .and. collision_test_mode/=0)&
+                .and. collision_kperp == 1)) then
+              ic_loc = 0
+              do ic=nc1,nc2
+                 ic_loc = ic_loc+1
+                 it = it_c(ic)
+
+                 do iv=1,nv  
+                    is = is_v(iv)
+                    ix = ix_v(iv)
+                    ie = ie_v(iv)
+
+                    do jv=1,nv
+                       js = is_v(jv)
+                       jx = ix_v(jv)
+                       je = ie_v(jv)
+
+                       if (abs(rs(is,js))>epsilon(0.0)) then
+                          cmat(iv,jv,ic_loc) &
+                               = cmat(iv,jv,ic_loc) &
+                               - mass(js)/mass(is) * dens(js) * dens_rot(it,js) &
+                               * rsvec(is,js,ix,ie) / rs(is,js) &
+                               * rsvect0(js,is,jx,je)
+                       endif
+                    enddo
+                 enddo
+              enddo
+
+           else
+              ic_loc = 0
+              do ic=nc1,nc2
+                 ic_loc = ic_loc+1
+                 it = it_c(ic)
+                 ir = ir_c(ic)
+
+                 rsvect0(:,:,:,:) = 0.0
+                 rsvect1(:,:,:,:) = 0.0
+                 do is=1,n_species
+                    do js=1, n_species
+                       do ix=1,n_xi
+                          do jx=1,n_xi
+                             do ie=1,n_energy
+                                do je=1,n_energy
+                                   rsvect0(is,js,ix,ie) = rsvect0(is,js,ix,ie) &
+                                        + ctest(is,js,jx,ix,je,ie) &
+                                        * sqrt(2.0*energy(je)) * xi(jx) &
+                                        * w_e(je)*w_xi(jx) * vth(is) &
+                                        * bessel(is,ix,ie,ic_loc,0)
+                                   rsvect1(is,js,ix,ie) = rsvect1(is,js,ix,ie) &
+                                        + ctest(is,js,jx,ix,je,ie) &
+                                        * sqrt(2.0*energy(je)) * xi(jx) &
+                                        * w_e(je)*w_xi(jx) * vth(is) &
+                                        * bessel(is,ix,ie,ic_loc,1) &
+                                        * sqrt(1.0-xi(ix)**2)/xi(ix)
+                                enddo
+                             enddo
+                          enddo
+                       enddo
+                    enddo
+                 enddo
+
+                 do iv=1,nv  
+                    is = is_v(iv)
+                    ix = ix_v(iv)
+                    ie = ie_v(iv)
+
+                    do jv=1,nv
+                       js = is_v(jv)
+                       jx = ix_v(jv)
+                       je = ie_v(jv)
+
+                       if (abs(rs(is,js)) > epsilon(0.)) then 
+                          cmat(iv,jv,ic_loc) &
+                               = cmat(iv,jv,ic_loc) &
+                               - mass(js)/mass(is) &
+                               * dens(js) * dens_rot(it,js) &
+                               * rsvec(is,js,ix,ie) &
+                               * bessel(is,ix,ie,ic_loc,0) / rs(is,js) &
+                               * rsvect0(js,is,jx,je)
+                          cmat(iv,jv,ic_loc) &
+                               = cmat(iv,jv,ic_loc) &
+                               - mass(js)/mass(is) &
+                               * dens(js) * dens_rot(it,js) &
+                               * rsvec(is,js,ix,ie) / rs(is,js) &
+                               * bessel(is,ix,ie,ic_loc,1) &
+                               * sqrt(1.0-xi(ix)**2)/xi(ix) &
+                               * rsvect1(js,is,jx,je) 
+                       endif
+                    enddo
+                 enddo
+              enddo
+
+           endif
+
+        endif
+
+        ! Energy Restoring
+
+        if (collision_ene_restore == 1) then
+
+           ! C_test_ab(u_a^2 f0a,f0b) and w_e u_a^2 C_test_ab(H_a)
+           rsvec  = 0.0
+           rsvect0 = 0.0
+           rs(:,:) = 0.0
+
+           do is=1,n_species
+              do js=1,n_species
+                 do ix=1,n_xi
+                    do jx=1,n_xi
+                       do ie=1,n_energy
+                          do je=1,n_energy
+                             rsvec(is,js,ix,ie) = rsvec(is,js,ix,ie) &
+                                  + ctest(is,js,ix,jx,ie,je) * energy(je)
+                             rsvect0(is,js,ix,ie) = rsvect0(is,js,ix,ie) &
+                                  + ctest(is,js,jx,ix,je,ie) * energy(je) &
+                                  * w_e(je)*w_xi(jx)
+                          enddo
+                       enddo
+                    enddo
+                 enddo
+
+                 ! int v^2 C_test_ab(u_a^2 f0a,f0b) 
+
+                 do ix=1,n_xi
+                    do ie=1,n_energy
+                       rs(is,js) = rs(is,js) + w_e(ie)*w_xi(ix) &
+                            * dens(is) * rsvec(is,js,ix,ie) * (energy(ie)-1.5)
+                       !Using temperature, not energy here. Matters for Ta/=Tb.
+                    enddo
+                 enddo
+              enddo
+           enddo
+
+           if (.not. ((collision_model == 4 .or. (collision_model==6 .or. collision_model==7) &
+                .and. collision_test_mode/=0) .and. collision_kperp == 1)) then
+              ic_loc = 0
+              do ic=nc1,nc2
+                 ic_loc = ic_loc+1
+                 it = it_c(ic)
+
+                 do iv=1,nv  
+                    is = is_v(iv)
+                    ix = ix_v(iv)
+                    ie = ie_v(iv)
+
+                    do jv=1,nv
+                       js = is_v(jv)
+                       jx = ix_v(jv)
+                       je = ie_v(jv)
+
+                       if (abs(rs(is,js)) > epsilon(0.0)) then
+                          cmat(iv,jv,ic_loc) &
+                               = cmat(iv,jv,ic_loc) &
+                               - temp(js)/temp(is) * dens(js) * dens_rot(it,js) &
+                               * rsvec(is,js,ix,ie) &
+                               / rs(is,js) * rsvect0(js,is,jx,je) 
+                       endif
+                    enddo
+                 enddo
+              enddo
+
+           else
+              ic_loc = 0
+              do ic=nc1,nc2
+                 ic_loc = ic_loc+1
+                 it = it_c(ic)
+                 ir = ir_c(ic)
+
+                 rsvect0(:,:,:,:) = 0.0
+                 do is=1,n_species
+                    do js=1,n_species
+                       do ix=1,n_xi
+                          do jx=1,n_xi
+                             do ie=1,n_energy
+                                do je=1,n_energy
+                                   rsvect0(is,js,ix,ie) = rsvect0(is,js,ix,ie) &
+                                        + ctest(is,js,jx,ix,je,ie) * energy(je) &
+                                        * w_e(je)*w_xi(jx) &
+                                        * bessel(is,ix,ie,ic_loc,0) 
+                                enddo
+                             enddo
+                          enddo
+                       enddo
+                    enddo
+                 enddo
+
+                 do iv=1,nv  
+                    is = is_v(iv)
+                    ix = ix_v(iv)
+                    ie = ie_v(iv)
+
+                    do jv=1,nv
+                       js = is_v(jv)
+                       jx = ix_v(jv)
+                       je = ie_v(jv)
+
+                       if (abs(rs(is,js)) > epsilon(0.0)) then
+                          cmat(iv,jv,ic_loc) &
+                               = cmat(iv,jv,ic_loc) &
+                               - temp(js)/temp(is) * dens(js) * dens_rot(it,js) &
+                               * rsvec(is,js,ix,ie) &
+                               * bessel(is,ix,ie,ic_loc,0) / rs(is,js) &
+                               * rsvect0(js,is,jx,je)
+                       endif
+                    enddo
+                 enddo
+              enddo
+           endif
+
+        endif
+
+     end select
+
+     if (test_coll_flag == 1 .and. n_energy>=4 .and. n_xi >=4 .and. i_proc &
+          &==1) then
+        !Ausgabe eines sinnvollen Testwerts:
+        !if (it_c(0) == 0) then
+        !if (i_proc==1) then
+        print *,'energy',energy(2),vel(2),vth(1)
+        do is=1,2
+           do js=1,2
+              mo1=0 !ctest
+              mo2=0 !cmat
+              !addiere Impulsbeitrag für jx,je=1,1 für species 1
+              en1=0
+              en2=0
+              do ix=1,n_xi
+                 do ie=1,n_energy
+                    mo1=mo1+mass(is)*dens(is)*vth(is)*vel(ie)*xi(ix)*w_xi(ix)*w_e(ie)*dens_rot(it_c(1),is) &
+                         * (ctest(is,js,ix,4,ie,4) &
+                         -0.25*(k_perp(1)*rho*vth(is)*mass(is) &
+                         / (z(is)*bmag(it_c(1))))**2 &
+                         * 2.0*energy(ie) &
+                         * (klor_fac(is,js)*nu_d(ie,is,js) * (1+xi(ix)**2) &
+                         + kdiff_fac(is,js)*nu_par(ie,is,js) * (1-xi(ix)**2)))
+                    en1=en1+temp(is)*dens(is)*energy(ie)*w_xi(ix)*w_e(ie) &
+                         *dens_rot(it_c(1),is) &
+                         *(ctest(is,js,ix,4,ie,4) &
+                         -0.25*(k_perp(1)*rho*vth(is)*mass(is) &
+                         / (z(is)*bmag(it_c(1))))**2 &
+                         * 2.0*energy(ie) &
+                         * (klor_fac(is,js)*nu_d(ie,is,js) * (1+xi(ix)**2) &
+                         + kdiff_fac(is,js)*nu_par(ie,is,js) * (1-xi(ix)**2)))
+                    jv=iv_v(4,4,is)
+                    iv=iv_v(ie,ix,js)
+                    mo2=mo2+mass(js)*dens(js)*vth(js)*cmat(iv,jv,it_c(1))*vel(ie)*xi(ix)*w_xi(ix)*w_e(ie)*dens_rot(it_c(1),js)
+                    en2=en2+temp(js)*dens(js)*cmat(iv,jv,it_c(1))*energy(ie)*w_xi(ix)*w_e(ie)*dens_rot(it_c(1),js)
+                 enddo
+              enddo
+              if (nc1==1) then
+                 print *,'is=',is,' js=',js,' mo1 ',mo1,' mo2 ',mo2,' nc1 ', &
+                      nc1,' nc2 ',nc2,' itc ',it_c(nc1),' dr ',dens_rot(it_c(1),1)
+              endif
+              if (nc1==1) then
+                 print *,'is=',is,' js=',js,' en1 ',en1,' en2 ',en2,' nc1 ',&
+                      nc1,' nc2 ',nc2,' itc ',it_c(nc1),' dr ',dens_rot(it_c(1),1)
+              endif
+           enddo
+        enddo
+        if (nc1==1) print *,'w_e ',w_e
+        if (nc1==1) print *,'vel ',vel
+        if (nc1==1) print *,'ctest',ctest(is,js,:,2,1:3,2)  
+        !endif
+     endif
+
+     if ((collision_model == 4 .or. &
+          (collision_model==6 .or. collision_model==7) .and. collision_test_mode/=0) .and. collision_kperp == 1 .and. &
+          (collision_mom_restore == 1 .or. collision_ene_restore == 1)) then
+        deallocate(bessel)
+     end if
+
+     ! Change necessary to be able to compare with Landau operator: combine
+     ! cmat and ctest right now here into one matrix cmat, including the kperp components.
+     do ic=nc1,nc2
+
+        ic_loc = ic-nc1+1
+
+        it = it_c(ic)
+        ir = ir_c(ic)
+        do iv=1,nv
+
+           is = is_v(iv)
+           ix = ix_v(iv)
+           ie = ie_v(iv)
+
+           do jv=1,nv
+
+              js = is_v(jv)
+              jx = ix_v(jv)
+              je = ie_v(jv)
+
+              ! Collision component: Test particle
+              if (is == js) then
+                 do ks=1,n_species
+                    cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
+                         + ctest(is,ks,ix,jx,ie,je) &
+                         * dens_rot(it,ks)
+                 enddo
+              endif
+              ! Finite-kperp test particle corrections 
+              if ((collision_model == 4 .or. &
+                   (collision_model==6 .or. collision_model==7) .and. collision_test_mode/=0) .and. collision_kperp == 1) then
+                 if (is == js .and. jx == ix .and. je == ie) then
+                    do ks=1,n_species
+                       cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
+                            + (-0.25*(k_perp(ic)*rho*vth(is)*mass(is) &
+                            / (z(is)*bmag(it)))**2 * 2.0*energy(ie) &
+                            * (klor_fac(is,ks)*nu_d(ie,is,ks) * (1+xi(ix)**2) &
+                            + kdiff_fac(is,ks)*nu_par(ie,is,ks)* (1-xi(ix)**2)))
+                    enddo
+                 endif
+              endif
+           end do
+        end do
+     end do
+
+     deallocate(ctest)
+     deallocate(nu_d)
+     deallocate(nu_par)
+     deallocate(rs)
+     deallocate(rsvec)
+     deallocate(rsvect0)
+     deallocate(rsvect1)
+
+     if (collision_test_mode==1) then
+        block
+          real,allocatable :: cmat1(:,:,:)
+          allocate(cmat1(nv,nv,nc_loc))
+          cmat1=cmat
+          cmat=1e300
+          call cgyro_init_landau(cmat1)
+          ! now let's compare
+          block
+            real md,d
+            md=-1
+            do ic_loc=1,nc_loc
+               do is=1,n_species
+                  do ix=1,n_xi
+                     do ie=1,n_energy
+                        iv=iv_v(ie,ix,is)
+                        do js=1,n_species
+                           do jx=1,n_xi
+                              do je=1,n_energy
+                                 jv=iv_v(je,jx,js)
+                                 d=abs(cmat(iv,jv,ic_loc)-cmat1(iv,jv,ic_loc))
+                                 if (d>md) then
+                                    md=d
+                                    if (i_proc==0) &
+                                         print 1,'so far max cmat diff @ ic_loc',ic_loc,'(is,ix,ie)=',is,ix,ie,&
+                                         '(js,jx,je)=',js,jx,je,'d=',d,'c=',cmat(iv,jv,ic_loc),&
+                                         'c1=',cmat1(iv,jv,ic_loc)
+                                 end if
+                              end do
+                           end do
+                        end do
+                     end do
+                  end do
+               end do
+            end do
+            call MPI_reduce(md,d,1,MPI_REAL8,MPI_MAX,0,MPI_COMM_WORLD)
+            if (i_proc==0) print 1,'Max. deviation over all processors:',d
+          end block
+        end block
+1       format ('cgyro_in._col.: ',*(G0,' '))
+        call MPI_Barrier(MPI_COMM_WORLD)
+        call MPI_finalize
+        stop
+     endif
+  endif do_old_coll
   ! matrix solve parameters
   allocate(i_piv(nv))
+  allocate(amat(nv,nv))
+  amat(:,:)   = 0.0
 
   ! Construct the collision matrix
 
-!$omp  parallel do  default(none) &
-!$omp& shared(nc1,nc2,nv,n,delta_t,n_species,rho,is_ele,n_field) &
-!$omp& shared(collision_kperp,collision_field_model) &
-!$omp& firstprivate(collision_model) &
-!$omp& shared(ae_flag,lambda_debye,dens_ele,temp_ele,dens_rot) &
-!$omp& shared(betae_unit,sum_den_h) &
-!$omp& shared(it_c,ir_c,px,is_v,ix_v,ie_v,ctest,xi_deriv_mat) &
-!$omp& shared(temp,jvec_v,omega_trap,dens,energy,vel) &
-!$omp& shared(omega_rot_trap,omega_rot_u,e_deriv1_mat,e_max) &
-!$omp& shared(xi_lor_mat) &
-!$omp& shared(k_perp,vth,mass,z,bmag,nu_d,xi,nu_par,w_e,w_xi) &
-!$omp& shared(klor_fac,kdiff_fac) &
-!$omp& private(ic,ic_loc,it,ir,info) &
-!$omp& private(iv,is,ix,ie,jv,js,jx,je,ks) &
-!$omp& private(amat,i_piv) &
-!$omp& shared(cmat)
+  !$omp  parallel do  default(none) &
+  !$omp& shared(nc1,nc2,nv,n,delta_t,n_species,rho,is_ele,n_field) &
+  !$omp& shared(collision_kperp,collision_field_model) &
+  !$omp& firstprivate(collision_model) &
+  !$omp& shared(ae_flag,lambda_debye,dens_ele,temp_ele,dens_rot) &
+  !$omp& shared(betae_unit,sum_den_h) &
+  !$omp& shared(it_c,ir_c,px,is_v,ix_v,ie_v,xi_deriv_mat) &
+  !$omp& shared(temp,jvec_v,omega_trap,dens,energy,vel) &
+  !$omp& shared(omega_rot_trap,omega_rot_u,e_deriv1_mat,e_max) &
+  !$omp& shared(xi_lor_mat) &
+  !$omp& shared(k_perp,vth,mass,z,bmag,xi,w_e,w_xi) &
+  !$omp& shared(klor_fac,kdiff_fac) &
+  !$omp& private(ic,ic_loc,it,ir,info) &
+  !$omp& private(iv,is,ix,ie,jv,js,jx,je,ks) &
+  !$omp& private(amat,i_piv) &
+  !$omp& shared(cmat)
   do ic=nc1,nc2
-   
+
      ic_loc = ic-nc1+1
 
      it = it_c(ic)
@@ -628,18 +744,6 @@ subroutine cgyro_init_collision
               jx = ix_v(jv)
               je = ie_v(jv)
 
-              ! Collision component: Test particle
-              if (is == js) then
-                 do ks=1,n_species
-                    cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
-                         - (0.5*delta_t) * ctest(is,ks,ix,jx,ie,je) &
-                         * dens_rot(it,ks)
-                    amat(iv,jv) = amat(iv,jv) &
-                         + (0.5*delta_t) * ctest(is,ks,ix,jx,ie,je) &
-                         * dens_rot(it,ks)
-                 enddo
-              endif
-
               ! Trapping 
               ! (not part of collision operator but contains xi-derivative)
               if (is == js .and. ie == je) then
@@ -664,25 +768,6 @@ subroutine cgyro_init_collision
                       * e_deriv1_mat(ie,je)/sqrt(1.0*e_max)
               endif
 
-              ! Finite-kperp test particle corrections 
-              if (collision_model == 4 .and. collision_kperp == 1) then
-                 if (is == js .and. jx == ix .and. je == ie) then
-                    do ks=1,n_species
-                       cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
-                            - (0.5*delta_t) &
-                            * (-0.25*(k_perp(ic)*rho*vth(is)*mass(is) &
-                            / (z(is)*bmag(it)))**2 * 2.0*energy(ie) &
-                            * (klor_fac(is,ks)*nu_d(ie,is,ks) * (1+xi(ix)**2) &
-                            + kdiff_fac(is,ks)*nu_par(ie,is,ks)* (1-xi(ix)**2)))
-                       amat(iv,jv) = amat(iv,jv) &
-                            + (0.5*delta_t) &
-                            * (-0.25*(k_perp(ic)*rho*vth(is)*mass(is) &
-                            / (z(is)*bmag(it)))**2 * 2.0*energy(ie) &
-                            * (klor_fac(is,ks)*nu_d(ie,is,ks)* (1+xi(ix)**2) &
-                            + kdiff_fac(is,ks)*nu_par(ie,is,ks)* (1-xi(ix)**2)))
-                    enddo
-                 endif
-              endif
 
               if (collision_field_model == 1) then
 
@@ -758,16 +843,9 @@ subroutine cgyro_init_collision
      cmat(:,:,ic_loc) = amat(:,:)
 
   enddo
-!$acc enter data copyin(cmat) if (gpu_bigmem_flag == 1)
+  !$acc enter data copyin(cmat) if (gpu_bigmem_flag == 1)
 
   deallocate(amat)
   deallocate(i_piv)
-  deallocate(nu_d)
-  deallocate(nu_par)
-  deallocate(rs)
-  deallocate(rsvec)
-  deallocate(rsvect0)
-  deallocate(rsvect1)
-  deallocate(ctest)
 
 end subroutine cgyro_init_collision
