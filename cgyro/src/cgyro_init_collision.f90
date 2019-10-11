@@ -151,8 +151,7 @@ subroutine cgyro_init_collision
      !   print *,sum(w_e)
      !endif
 
-     if ((collision_model == 4 .or. (collision_model==6.or.collision_model==7) &
-          .and.collision_test_mode/=0) .and. collision_kperp == 1 .and. &
+     if (collision_model >= 4 .and. collision_kperp == 1 .and. &
           (collision_mom_restore == 1 .or. collision_ene_restore == 1)) then
         allocate(bessel(n_species,n_xi,n_energy,nc_loc,0:1))
         !$omp parallel do private(ic_loc,it,ie,ix,is,arg)
@@ -199,9 +198,7 @@ subroutine cgyro_init_collision
      enddo
 
      ! Diffusion
-     if ((collision_model == 4 .or. &
-          (collision_model==6 .or. collision_model==7) .and. collision_test_mode/=0) &
-          .and. collision_ene_diffusion == 1) then
+     if (collision_model >= 4 .and. collision_ene_diffusion == 1) then
         !$omp parallel do collapse(5) private(is,ix,ie,js,je,jx)     
         do is=1,n_species 
            do ix=1,n_xi
@@ -450,8 +447,7 @@ subroutine cgyro_init_collision
               enddo
            enddo
 
-           if (.not. ((collision_model == 4 .or. (collision_model==6 .or. collision_model==7) &
-                .and. collision_test_mode/=0) .and. collision_kperp == 1)) then
+           if (.not. (collision_model >= 4 .and. collision_kperp == 1)) then
               ic_loc = 0
               do ic=nc1,nc2
                  ic_loc = ic_loc+1
@@ -582,8 +578,7 @@ subroutine cgyro_init_collision
         !endif
      endif
 
-     if ((collision_model == 4 .or. &
-          (collision_model==6 .or. collision_model==7) .and. collision_test_mode/=0) .and. collision_kperp == 1 .and. &
+     if (collision_model >= 4 .and. collision_kperp == 1 .and. &
           (collision_mom_restore == 1 .or. collision_ene_restore == 1)) then
         deallocate(bessel)
      end if
@@ -617,8 +612,7 @@ subroutine cgyro_init_collision
                  enddo
               endif
               ! Finite-kperp test particle corrections 
-              if ((collision_model == 4 .or. &
-                   (collision_model==6 .or. collision_model==7) .and. collision_test_mode/=0) .and. collision_kperp == 1) then
+              if (collision_model>=4 .and. collision_kperp == 1) then
                  if (is == js .and. jx == ix .and. je == ie) then
                     do ks=1,n_species
                        cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
@@ -633,9 +627,10 @@ subroutine cgyro_init_collision
         end do
      end do
 
-     deallocate(ctest)
+     ! in  else branch of do_old_coll if clause:
      deallocate(nu_d)
      deallocate(nu_par)
+     deallocate(ctest)
      deallocate(rs)
      deallocate(rsvec)
      deallocate(rsvect0)
