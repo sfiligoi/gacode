@@ -19,7 +19,7 @@ all:
 	cd src ; make
 
 clean:
-	cd ${GACODE_ROOT}/modules ; rm -f cgyro*.mod
+	cd ${GACODE_ROOT}/modules ; rm -f cgyro*.mod timer_lib.mod
 	cd src ; make clean
 
 deepclean:
