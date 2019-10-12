@@ -6,9 +6,12 @@ subroutine cgyro_init_collision
   use cgyro_init_collision_landau
   use landau
   use gyrotransformation
-  use mpi_f08
+!  use mpi_f08
+  use mpi
   
   implicit none
+
+  integer ierror ! for MPI
 
   real, dimension(:,:,:), allocatable :: nu_d, nu_par
   real, dimension(:,:), allocatable :: rs
@@ -671,13 +674,13 @@ subroutine cgyro_init_collision
                   end do
                end do
             end do
-            call MPI_reduce(md,d,1,MPI_REAL8,MPI_MAX,0,MPI_COMM_WORLD)
+            call MPI_reduce(md,d,1,MPI_REAL8,MPI_MAX,0,MPI_COMM_WORLD,ierror)
             if (i_proc==0) print 1,'Max. deviation over all processors:',d
           end block
         end block
 1       format ('cgyro_in._col.: ',*(G0,' '))
-        call MPI_Barrier(MPI_COMM_WORLD)
-        call MPI_finalize
+        call MPI_Barrier(MPI_COMM_WORLD,ierror)
+        call MPI_finalize(ierror)
         stop
      endif
   endif do_old_coll

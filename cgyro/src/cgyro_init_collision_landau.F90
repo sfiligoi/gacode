@@ -35,7 +35,8 @@ contains
     use landau, landauvb=>verbose
     use gyrotransformation, gtvb=>verbose
     use half_hermite
-    use mpi_f08
+    !    use mpi_f08
+    use mpi
     ! need to calculate up to lphys=n_xi-1, n_energy polynomials and for n_species.
     use, intrinsic :: ieee_exceptions
     implicit none
@@ -52,8 +53,10 @@ contains
     integer lwork,liwork,info
 
     ! for MPI
-    type(MPI_Status) :: status
-
+    !type(MPI_Status) :: status !mpi_f08
+    integer status(MPI_STATUS_SIZE)
+    integer ierror
+    
     ! for IEEE
     type(ieee_status_type) ieee_status
 
@@ -88,7 +91,7 @@ contains
        gtvb=1
     end if
 
-    call MPI_Barrier(MPI_COMM_WORLD)
+!$    call MPI_Barrier(MPI_COMM_WORLD,ierror) ! may improve timing
     call cpu_time(t1)
     ns=ispec(n_species,n_species) !number of non-redundant species pairs
     xmax=sqrt(e_max) !cut off at exp(-xmax^2)
@@ -112,7 +115,7 @@ contains
     end do
     ! kperp_bmag_max is not completely global, there is still the n dependence.
     ! we need to maximize over the toroidal mode numbers:
-    call MPI_ALLREDUCE(MPI_IN_PLACE,kperp_bmag_max,1,MPI_REAL8,MPI_MAX,MPI_COMM_WORLD)
+    call MPI_ALLREDUCE(MPI_IN_PLACE,kperp_bmag_max,1,MPI_REAL8,MPI_MAX,MPI_COMM_WORLD,ierror)
     rhomax=maxval(abs(rho_spec([(i,i=1,n_species)])))*xmax
     kperprhomax=kperp_bmag_max*rhomax
     if (verbose>0 .and. i_proc==0) print 1,'using kperprhomax=',kperprhomax
@@ -812,12 +815,12 @@ contains
        print 1,'pre_scatter timing:'
        do i=1,n_proc
           if (i>1) then
-             call MPI_Recv(t,11,MPI_REAL8,i-1,i-1,MPI_COMM_WORLD,status)
+             call MPI_Recv(t,11,MPI_REAL8,i-1,i-1,MPI_COMM_WORLD,status,ierror)
           endif
           print 1,'i_proc=',i-1,'took',t(1:7),'load',load(i),'rel',t(3)/load(i)
        end do
     else
-       call MPI_Send(t,11,MPI_REAL8,0,i_proc,MPI_COMM_WORLD)
+       call MPI_Send(t,11,MPI_REAL8,0,i_proc,MPI_COMM_WORLD,ierror)
     end if
     call cpu_time(t1)
     ! Now do the scatter
@@ -831,18 +834,18 @@ contains
        ib=idx+1
        if (proc(ik,ia,ib)/=0) then
 !!$          do j=1,n_proc
-!!$             call MPI_BARRIER(MPI_COMM_WORLD)
+!!$             call MPI_BARRIER(MPI_COMM_WORLD,ierror)
 !!$!          if (i_proc==0 .and. verbose>100) then
 !!$             if (i_proc==j-1) print 1,'bcasting (ik,ia,ib,proc)=',ik,ia,ib,proc(ik,ia,ib)-1,'ip',i_proc
 !!$          !          end if
-!!$             call MPI_BARRIER(MPI_COMM_WORLD)
+!!$             call MPI_BARRIER(MPI_COMM_WORLD,ierror)
 !!$          end do
 
           call MPI_Bcast(gyrocolmat(:,:,:,:,ia,ib,ik),n_xi**2*n_energy**2,&
-               MPI_REAL8,proc(ik,ia,ib)-1,MPI_COMM_WORLD)
+               MPI_REAL8,proc(ik,ia,ib)-1,MPI_COMM_WORLD,ierror)
           if (ia>ib .and. temp(ia)==temp(ib)) then
              call MPI_Bcast(gyrocolmat(:,:,:,:,ib,ia,ik),n_xi**2*n_energy**2,&
-                  MPI_REAL8,proc(ik,ia,ib)-1,MPI_COMM_WORLD)
+                  MPI_REAL8,proc(ik,ia,ib)-1,MPI_COMM_WORLD,ierror)
           end if
        end if
     enddo
@@ -905,12 +908,12 @@ contains
     if (i_proc==0) then
        do i=1,n_proc
           if (i>1) then
-             call MPI_Recv(t,11,MPI_REAL8,i-1,i-1,MPI_COMM_WORLD,status)
+             call MPI_Recv(t,11,MPI_REAL8,i-1,i-1,MPI_COMM_WORLD,status,ierror)
           endif
           print 1,'i_proc=',i-1,'took',t(1:10),'load',load(i),'rel',t(3)/load(i)
        end do
     else
-       call MPI_Send(t,11,MPI_REAL8,0,i_proc,MPI_COMM_WORLD)
+       call MPI_Send(t,11,MPI_REAL8,0,i_proc,MPI_COMM_WORLD,ierror)
     end if
 !!$    do ia=1,n_species
 !!$       do ib=1,n_species
@@ -938,8 +941,8 @@ contains
          nc1_proc(i_proc+1)=nc1
          nc2_proc(i_proc+1)=nc2
          do i=1,n_proc
-            call MPI_BCAST(nc1_proc(i),1,MPI_INTEGER,i-1,MPI_COMM_WORLD)
-            call MPI_BCAST(nc2_proc(i),1,MPI_INTEGER,i-1,MPI_COMM_WORLD)
+            call MPI_BCAST(nc1_proc(i),1,MPI_INTEGER,i-1,MPI_COMM_WORLD,ierror)
+            call MPI_BCAST(nc2_proc(i),1,MPI_INTEGER,i-1,MPI_COMM_WORLD,ierror)
             proc_c(nc1_proc(i):nc2_proc(i))=i-1
          end do
          if (i_proc==0) then
@@ -986,11 +989,11 @@ contains
                              **2,L2xi,n_xi,0.,c(:,:,:,:,l),n_xi*n_energy**2)
                      end do
                      if (i_proc/=0) then
-                        call MPI_SEND(c,size(c),MPI_REAL8,0,1234,MPI_COMM_WORLD)
+                        call MPI_SEND(c,size(c),MPI_REAL8,0,1234,MPI_COMM_WORLD,ierror)
                      endif
                   else
                      if (i_proc==0) then
-                        call MPI_RECV(c,size(c),MPI_REAL8,proc_c(ic),1234,MPI_COMM_WORLD,status)
+                        call MPI_RECV(c,size(c),MPI_REAL8,proc_c(ic),1234,MPI_COMM_WORLD,status,ierror)
                      end if
                   end if
 !!$                  block
@@ -1113,11 +1116,11 @@ contains
                              **2,L2xi,n_xi,0.,c(:,:,:,:,l),n_xi*n_energy**2)
                      end do
                      if (i_proc/=0) then
-                        call MPI_SEND(c,size(c),MPI_REAL8,0,1234,MPI_COMM_WORLD)
+                        call MPI_SEND(c,size(c),MPI_REAL8,0,1234,MPI_COMM_WORLD,ierror)
                      endif
                   else
                      if (i_proc==0) then
-                        call MPI_RECV(c,size(c),MPI_REAL8,proc_c(ic),1234,MPI_COMM_WORLD,status)
+                        call MPI_RECV(c,size(c),MPI_REAL8,proc_c(ic),1234,MPI_COMM_WORLD,status,ierror)
                      end if
                   end if
 
@@ -1141,9 +1144,9 @@ contains
     end if cmat1present
 2   format (*(G26.16,"  "))
 
-    call MPI_Barrier(MPI_COMM_WORLD)
-    print 1,'i_proc',i_proc,'done with init_landau'
-    call MPI_Barrier(MPI_COMM_WORLD)
+!!$    call MPI_Barrier(MPI_COMM_WORLD,ierror)
+!!$    print 1,'i_proc',i_proc,'done with init_landau'
+!!$    call MPI_Barrier(MPI_COMM_WORLD,ierror)
 
   contains
     elemental real function sinc(target_k,halfperiod)
