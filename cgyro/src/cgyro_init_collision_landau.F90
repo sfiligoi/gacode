@@ -1188,8 +1188,8 @@ contains
   subroutine qsort(sortidx,val,n)
     use cgyro_globals, only : i_proc
     implicit none
-    integer,intent(inout) :: sortidx(n)
     integer,intent(in):: n,val(n)
+    integer,intent(inout) :: sortidx(n)
     integer is,ie,i,j,k,ic,vic,s,isstack(n),iestack(n),sp
 !!$    integer v
 !!$    v(i)=val(sortidx(i)) !forced by fortran standard (LOL) to use obsolete statement function here.
