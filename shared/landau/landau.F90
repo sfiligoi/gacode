@@ -2,7 +2,7 @@
 !intel:
 !ifort -stand f15 -warn all -march=native -O3 -heap-arrays 10 -implicitnone -real-size 64 landau.F90 -c
 module landau
-  real*16, parameter,private :: pi1=atan(1._16)*4
+  real(16), parameter,private :: pi1=atan(1._16)*4
   real, parameter :: intnorm=pi1**(-1.5)*4*pi1
   ! int gphys(v) d^3v=1=int g(x) x^2 dx *intnor
   ! Maybe one should normalise this once for a given xmax and density 1?
@@ -67,8 +67,8 @@ contains
     real p0,p1,pi,q0,q1,qi,r0,r1,ri,s0,s1,si,x,x1,xmax1
     real f1,f2
     integer i,j,k
-    real*16 fct1,fct2,fct1lo,fct1hi,fct2lo,fct2hi !inline functions
-    real*16 w,xmaxx
+    real(16) fct1,fct2,fct1lo,fct1hi,fct2lo,fct2hi !inline functions
+    real(16) w,xmaxx
     logical t1t2,addcutoff1
     fct1(w)=.125_16*w**(-3)*(exp(-w*w)*w+(2*w*w-1)*.5_16*sqrt(pi1)*erf(w))
     fct2(w)=.25_16*w**(-1)*(.5_16*sqrt(pi1)*erf(w)-w*exp(-w**2))
