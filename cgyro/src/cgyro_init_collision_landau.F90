@@ -741,7 +741,7 @@ contains
     block
       real, allocatable :: AF(:,:),pv(:,:),em(:,:),Sc(:),ferr(:),berr(:)
       real rcond
-      character*1 equed
+      character equed
       allocate(AF(n_energy,n_energy),Sc(n_energy),ferr(n_energy),&
            berr(n_energy))
       ! lowest dimensions: work(3*n_energy), iwork(n_energy)
