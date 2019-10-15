@@ -74,7 +74,7 @@ subroutine cgyro_write_restart_one
   disp     = 0
 
   ! Pack source into h(0,0)
-  if (n == 0) then
+  if (n == 0 .and. px(n_radial/2)==0.0) then
      ic0 = (n_radial/2)*n_theta
      do j=1,n_theta
         h_x(ic0+j,:) = source(j,:)
