@@ -6,6 +6,7 @@ IDENTITY="Linux TUMBLEWEED gfortran+OpenBLAS+OPENMPI"
 CORES_PER_NODE=2
 NUMAS_PER_NODE=1
 #SOLVER_OPT=slumt
+#need packages fftw_openmp_devel openblas_devel
 
 FFTWDIR=/usr/lib/x86_64-linux-gnu
 
@@ -19,7 +20,7 @@ F77    = mpifort -fimplicit-none
 #F77    = gfortran
 FOMP   =-fopenmp
 FMATH  =-fdefault-real-8 -fdefault-double-8
-FOPT   =-O3
+FOPT   =-O3 -march=native
 FDEBUG =-Wall -W -fcheck=all -g -fbacktrace #-ffpe-trap=invalid,zero,overflow
 F2PY   = f2py
 
