@@ -27,8 +27,11 @@ rmax = sys.argv[3]
 ext = sys.argv[4]
 loc = int(sys.argv[5])
 dot = int(sys.argv[6])
+therm = int(sys.argv[7])
 
 m1 = 0 ; m2 = 0
+
+alls = not bool(therm)
 
 def plotit(ax,x,y,ystr):
    global m1,m2,dot
@@ -51,9 +54,7 @@ def plot_select(ax,tag):
 
    sname = gapystr(expro.expro_name) 
    stype = gapystr(expro.expro_type)
-   #sname=['n','n','n','n']
-   #stype=['n','n','n','n']
-
+   
    # Set x-range
    m1 = 0 ; m2 = len(x)
    if rmax != 'auto':
@@ -109,30 +110,48 @@ def plot_select(ax,tag):
       y = expro.expro_ne ; ystr = 'n_e' ; plotit(ax,x,y,ystr)
       # ni
       for p in range(n):
-         y = expro.expro_ni[p,:] ; ystr = 'n_i ['+sname[p]+']' ; plotit(ax,x,y,ystr)
+         if alls or stype[p] == '[therm]':
+            y = expro.expro_ni[p,:] ; ystr = 'n_i~['+sname[p]+']' ; plotit(ax,x,y,ystr)
+
+   if tag == 'Ln':
+      # Lne
+      y = expro.expro_sdlnnedr ; ystr = 'a/L_{ne}' ; plotit(ax,x,y,ystr)
+      # Lni
+      for p in range(n):
+         if alls or stype[p] == '[therm]':
+            y = expro.expro_dlnnidr[p,:] ; ystr = 'a/L_{ni}~['+sname[p]+']' ; plotit(ax,x,y,ystr)
 
    if tag == 'sn':
       # sne
-      y = expro.expro_sdlnnedr ; ystr = 'sn_e' ; plotit(ax,x,y,ystr)
+      y = expro.expro_sdlnnedr ; ystr = 's_{ne}' ; plotit(ax,x,y,ystr)
       # sni
       for p in range(n):
-         if stype[p] == '[therm]':
-            y = expro.expro_sdlnnidr[p,:] ; ystr = 'sn_i ['+sname[p]+']' ; plotit(ax,x,y,ystr)
+         if alls or stype[p] == '[therm]':
+            y = expro.expro_sdlnnidr[p,:] ; ystr = 's_{ni}~['+sname[p]+']' ; plotit(ax,x,y,ystr)
 
    if tag == 'sT':
       # sTe
-      y = expro.expro_sdlntedr ; ystr = 'sT_e' ; plotit(ax,x,y,ystr)
+      y = expro.expro_sdlntedr ; ystr = 's_{Te}' ; plotit(ax,x,y,ystr)
       # sTi
       for p in range(n):
-         if stype[p] == '[therm]':
-            y = expro.expro_sdlntidr[p,:] ; ystr = 'sT_i ['+sname[p]+']' ; plotit(ax,x,y,ystr)
+         if alls or stype[p] == '[therm]':
+            y = expro.expro_sdlntidr[p,:] ; ystr = 's_{Ti}~['+sname[p]+']' ; plotit(ax,x,y,ystr)
+
+   if tag == 'LT':
+      # LTe
+      y = expro.expro_dlntedr ; ystr = 'a/L_{Te}' ; plotit(ax,x,y,ystr)
+      # LTi
+      for p in range(n):
+         if alls or stype[p] == '[therm]':
+            y = expro.expro_dlntidr[p,:] ; ystr = 'a/L_{Ti}~['+sname[p]+']' ; plotit(ax,x,y,ystr)
 
    if tag == 'T':
       # Te
       y = expro.expro_te ; ystr = 'T_e' ; plotit(ax,x,y,ystr)
       # Ti
       for p in range(n):
-         y = expro.expro_ti[p,:] ; ystr = 'T_i ['+sname[p]+']' ; plotit(ax,x,y,ystr)
+         if alls or stype[p] == '[therm]':
+            y = expro.expro_ti[p,:] ; ystr = 'T_i~['+sname[p]+']' ; plotit(ax,x,y,ystr)
          
    if tag == 'jbs':
        y = expro.expro_jbs ; ystr = 'J_{bs}' ; plotit(ax,x,y,ystr)
@@ -194,15 +213,15 @@ class DemoFrame(wx.Frame):
 
         tab = TabPanel(notebook)
         tab.draw('gammae')
-        notebook.AddPage(tab,'gammae')
+        notebook.AddPage(tab,'gam_e')
 
         tab = TabPanel(notebook)
         tab.draw('gammap')
-        notebook.AddPage(tab,'gammap')
+        notebook.AddPage(tab,'gam_p')
 
         tab = TabPanel(notebook)
         tab.draw('mach')
-        notebook.AddPage(tab,'mach')
+        notebook.AddPage(tab,'Mach')
 
         tab = TabPanel(notebook)
         tab.draw('r')
@@ -222,7 +241,7 @@ class DemoFrame(wx.Frame):
 
         tab = TabPanel(notebook)
         tab.draw('bunit')
-        notebook.AddPage(tab,'bunit')
+        notebook.AddPage(tab,'Bunit')
 
         tab = TabPanel(notebook)
         tab.draw('q')
@@ -233,12 +252,20 @@ class DemoFrame(wx.Frame):
         notebook.AddPage(tab,'n')
 
         tab = TabPanel(notebook)
+        tab.draw('Ln')
+        notebook.AddPage(tab,'Ln')
+
+        tab = TabPanel(notebook)
         tab.draw('sn')
         notebook.AddPage(tab,'sn')
 
         tab = TabPanel(notebook)
         tab.draw('T')
         notebook.AddPage(tab,'T')
+
+        tab = TabPanel(notebook)
+        tab.draw('LT')
+        notebook.AddPage(tab,'LT')
 
         tab = TabPanel(notebook)
         tab.draw('sT')
@@ -251,6 +278,7 @@ class DemoFrame(wx.Frame):
         tab = TabPanel(notebook)
         tab.draw('sin')
         notebook.AddPage(tab,'sin')
+        
         tab = TabPanel(notebook)
         tab.draw('cos')
         notebook.AddPage(tab,'cos')

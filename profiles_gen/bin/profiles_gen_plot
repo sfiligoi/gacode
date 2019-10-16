@@ -37,6 +37,9 @@ then
    echo "          -dot"
    echo "           Toggle plotting profile dots"
    echo
+   echo "          -therm"
+   echo "           Toggle plotting of thermal species only"
+   echo
    echo " FLUX-SURFACE PLOTTING MODE (-plot surf):"
    echo 
    echo "          -n <integer>"
@@ -62,6 +65,7 @@ RVAR="r"
 RMIN=auto
 RMAX=auto
 DOT=0
+THERM=0
 
 # Surface options
 N=16
@@ -83,6 +87,7 @@ while [ $# -gt 0 ] ; do
 
   -loc) shift ; LOC=$1 ;;
   -dot) DOT=1 ;;
+  -therm) THERM=1 ;;
 
   -rmin) shift ; RMIN=$1 ;;
   -rmax) shift ; RMAX=$1 ;;
@@ -104,7 +109,7 @@ if [ $PLOT = null ] ; then
 elif [ $PLOT = surf ] ; then 
    python $PYROOT/plot_surf.py $PLOT $N $EXT
 else
-   python $PYROOT/plot_profile.py $RVAR $RMIN $RMAX $EXT $LOC $DOT
+   python $PYROOT/plot_profile.py $RVAR $RMIN $RMAX $EXT $LOC $DOT $THERM
 fi
 #==============================================================================
 

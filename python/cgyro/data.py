@@ -223,7 +223,6 @@ class cgyrodata:
          self.lky_flux_ave[ispec,0] = g0
          # Average over negative interval
          self.lky_flux_ave[ispec,1] = g1
-         print(g0,g1)
 
    def getbigfield(self):
 
