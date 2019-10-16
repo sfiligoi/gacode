@@ -79,6 +79,7 @@ contains
     real epsp
     real val,x
     integer i,j,k,mm
+    real, allocatable :: sample(:)
 
     if (verbose>0) print 2,'Warning, need abs(kbound) est_extradegree!'
     mm=0
@@ -89,30 +90,28 @@ contains
        epsp=epspullback
     endif
     k=ceiling(kbound)+20
-    chebysample:  block
-      real sample(2*k)
-      do i=1,2*k
-         x=(2*i-1)*(.25*pi1/k)
-         !Now if we want to deal with polynomials up to degree k,
-         !we need at least k vertices. With 2k vertices we can deal with
-         !polynomials up to degree 2k.
-         !x should from pi/4k up to pi-pi/4k
-         
-         sample(i)=bessel_jn(mm,(cos(x)+1)*(.5*kbound))-bessel_jn(mm,0.)
-         ! subtracting bessel(0) here cures numerical precision issues for krho~0
-         !! sample(i)=gsl_sf_bessel_jl(mm,(sin(x)+1)*.5*kbound)-gsl_sf_bessel_jl(mm,0.)
-      end do
-      do j=k,1,-1
-         val=0
-         do i=1,2*k
-            x=(2*i-1)*(.25*pi1/k)
-            val=val+sample(i)*cos(j*x)
-         end do
-         val=val/k
-         if (verbose>4) print 2,'deg',j,val
-         if (abs(val)>epsp) exit
-      end do
-    end block chebysample
+    allocate(sample(2*k))
+    do i=1,2*k
+       x=(2*i-1)*(.25*pi1/k)
+       !Now if we want to deal with polynomials up to degree k,
+       !we need at least k vertices. With 2k vertices we can deal with
+       !polynomials up to degree 2k.
+       !x should from pi/4k up to pi-pi/4k
+
+       sample(i)=bessel_jn(mm,(cos(x)+1)*(.5*kbound))-bessel_jn(mm,0.)
+       ! subtracting bessel(0) here cures numerical precision issues for krho~0
+       !! sample(i)=gsl_sf_bessel_jl(mm,(sin(x)+1)*.5*kbound)-gsl_sf_bessel_jl(mm,0.)
+    end do
+    do j=k,1,-1
+       val=0
+       do i=1,2*k
+          x=(2*i-1)*(.25*pi1/k)
+          val=val+sample(i)*cos(j*x)
+       end do
+       val=val/k
+       if (verbose>4) print 2,'deg',j,val
+       if (abs(val)>epsp) exit
+    end do
 !!$    if (j==0) then
 !!$       print 2,'Did not find proper degree to sample Bessel fct!'
 !!$       stop
@@ -147,7 +146,7 @@ contains
        epsp=epspullback
     endif
     k=ceiling(kbound)+20
-    chebysample:  block
+!!$    chebysample:  block
 !!$      complex*16 sample(2*k),val
 !!$      do i=1,2*k
 !!$         x=(i-.5)*(.5_16*pi1/k)
@@ -155,7 +154,7 @@ contains
 !!$         ! sampling exp(i kbound*y) at  y=.5*(1+cos(pi/n*(2*i-1)))
 !!$         sample(i)=exp(sin(.5*x)**2*((0,1)*kbound))-1
 !!$      end do
-      do j=k,1,-1
+    do j=k,1,-1
 !!$         val=0
 !!$         do i=1,2*k
 !!$            x=(i-.5)*(.5*pi1/k)
@@ -164,12 +163,12 @@ contains
 !!$         val=val/k
 !!$         if (verbose>4) print 2,'deg',j,val,'should',&
 !!$              exp((0,.5)*kbound)*(0,1.)**j*2*bessel_jn(j,kbound*.5)
-         val=exp((0,.5)*kbound)*(0,1.)**j*2*bessel_jn(j,kbound*.5)
-         if (verbose>4) print 2,'deg',j,val
-         if (abs(val)>epsp) exit
-      end do
-    end block chebysample
-!    j=j*8
+       val=exp((0,.5)*kbound)*(0,1.)**j*2*bessel_jn(j,kbound*.5)
+       if (verbose>4) print 2,'deg',j,val
+       if (abs(val)>epsp) exit
+    end do
+!!$    end block chebysample
+    !    j=j*8
     if (verbose>0) print 2,'Found k sample number needed for gyro phases=',j,'at k=',kbound,'WARNING should depend on both species'
     est_k_sampling=j
 2   format (*(G0,"  "))
@@ -268,6 +267,21 @@ contains
     integer m1,m2,o,q !used for verbose output in projassleg
     integer, external ::idamax
 
+    ! originally in block "timeblock":
+    real tbes,t(11),tto,t1,t2,cost(11)
+    real,allocatable,dimension(:,:,:) :: max_n_comp,max_l_comp
+
+    ! originally in block "lminblock":
+    integer lminb
+    real lbval,lminbval
+
+    ! originally in certain diagnostic blocks:
+    integer idx,a(4)
+    real v1
+    integer a1(4),a2(4)
+    real div,siv,sym,sym1
+
+    real,allocatable,dimension(:) :: maxn,maxl
 
     if (present(krhob)) then
        krb=krhob
@@ -455,45 +469,40 @@ contains
     !    print 2,'sumprojsteen',sum(projsteen),sum(projassleg),sum(projleg)
     gyrocolmat=0
     val=0
-    timeblock: block
-      real tbes,t(11),tto,t1,t2,cost(11)
-      real max_n_comp(nmaxpoly,nmax0,lmax0),max_l_comp(lmax,nmax0,lmax0)
-      if (verbose>4) then
-         max_n_comp=0
-         max_l_comp=0
-         q=0;o=20 ! for error messages
-      end if
-      tbes=0
-      t=0
-      cost=0
-      call cpu_time(tto)
-      call cpu_time(t1)
-      do m=mpullback,0,-1
-         do l2=1,lmax/2
-            beskla(:,l2,m)=bessel_jn(m,krhoa*sp*sqrt(1-gpl(l2)**2))
-            if (krb/=krhoa) then
-               besklb(:,l2,m)=bessel_jn(m,krb*sp*sqrt(1-gpl(l2)**2))
-            end if
-            ! don't like sqrt(1-gpl(l)**2) for sin theta. Should use something more accurate. ???
-         enddo
-         !         print 2,'m=',m,'sumbeskl',sum(beskla(:,1:lmax/2,m))
-      end do
-      call cpu_time(t2)
-      tbes=tbes+(t2-t1)
+    if (verbose>4) then
+       allocate(max_n_comp(nmaxpoly,nmax0,lmax0),max_l_comp(lmax,nmax0,lmax0))
+       max_n_comp=0
+       max_l_comp=0
+       q=0;o=20 ! for error messages
+    end if
+    tbes=0
+    t=0
+    cost=0
+    call cpu_time(tto)
+    call cpu_time(t1)
+    do m=mpullback,0,-1
+       do l2=1,lmax/2
+          beskla(:,l2,m)=bessel_jn(m,krhoa*sp*sqrt(1-gpl(l2)**2))
+          if (krb/=krhoa) then
+             besklb(:,l2,m)=bessel_jn(m,krb*sp*sqrt(1-gpl(l2)**2))
+          end if
+          ! don't like sqrt(1-gpl(l)**2) for sin theta. Should use something more accurate. ???
+       enddo
+       !         print 2,'m=',m,'sumbeskl',sum(beskla(:,1:lmax/2,m))
+    end do
+    call cpu_time(t2)
+    tbes=tbes+(t2-t1)
 
 
-      jloop: do j=1,lmax0
-         oe=mod(j+1,2)+1 !oe=1: even in z oe=2: odd in z
-         lminblock: block
-           integer lminb
-           real lbval,lminbval
-           lminb=0
-           lminbval=0
-           !m=mphys l=lphys+1 here
-           !l>=m+1, l<=lmax and oe+m+l is even.
-           !==> l>=m+oe. since lmax is even l<=lmax-mod(oe+m,2)
-           !the correct arguments are projassleg(,(l+1)/2,oe,m+1)
-           !==> (l+1)/2 >=(m+oe+1)/2  (l+1)/2<=(lmax-mod(oe+m,2)+1)/2=lmax/2 +(1-mod(oe+m,2))/2=lmax/2
+    jloop: do j=1,lmax0
+       oe=mod(j+1,2)+1 !oe=1: even in z oe=2: odd in z
+       lminb=0
+       lminbval=0
+       !m=mphys l=lphys+1 here
+       !l>=m+1, l<=lmax and oe+m+l is even.
+       !==> l>=m+oe. since lmax is even l<=lmax-mod(oe+m,2)
+       !the correct arguments are projassleg(,(l+1)/2,oe,m+1)
+       !==> (l+1)/2 >=(m+oe+1)/2  (l+1)/2<=(lmax-mod(oe+m,2)+1)/2=lmax/2 +(1-mod(oe+m,2))/2=lmax/2
 !!$          do l2=(m+oe+1)/2,lmax/2 !n_elements=lmax/2-(m+oe+1)/2+1=(lmax+2-m-oe)/2
 !!$             lbval=sum(beskla(nmaxpoly,:)*projleg(:lmax/2,j)&
 !!$                  *projassleg(:,l2,oe,m+1))
@@ -504,102 +513,102 @@ contains
 !!$             end if
 !!$          end do
 !!$          print 2,'m',m,'j',j,'lminb',lminb,'lminbval',lminbval
-           !^^ can use this boundary value as estimate of max l needed.
-           ! most conservative value for m=0.
-           ! can also reduce lmax by that. But will not be greatly different from lmax.
-           
-           iloop: do i=1,nmax0
-              moeloop: do moe=0,1 ! do odd and even m separately
-                 ! we do now all odd or even m in one bunch to be able to reuse the read in collision matrix.
-                 ! costs a little more memory.
-                 mloop:  do m=mpullback-moe,moe,-2 ! Leaving out negative m's here. That must be accounted for when doing sums.
+       !^^ can use this boundary value as estimate of max l needed.
+       ! most conservative value for m=0.
+       ! can also reduce lmax by that. But will not be greatly different from lmax.
 
-                    call cpu_time(t1)
-                    do l2=1,lmax/2
-                       do k=1,nsteen
-                          v_theta_space(k,l2)=beskla(k,l2,m)*projsteen(i,k)*projleg(l2,j)
-                          ! should be same as *projassleg(l2,j/2,oe,1)
-                          ! Note: sum_i=-infty,+infty  bessel_jn(i,x)^2 = 1 for any x.
-                       enddo
-                    enddo
-                    call cpu_time(t2)
-                    t(1)=t(1)+(t2-t1)
-                    cost(1)=cost(1)+nsteen*lmax/2
-                    !cost=lmax*n maybe lmax/2*n
-                    ! Now transform into l space. For this we have to multiply with the Pml for l>=m.
-                    ! This is independent for every k.
-                    ! Matrix multiply with upper triangular matrix projassleg:
-                    !             v_l_space(:,1:m)=0
-                    if (verbose>4) v_l_space=1e300
-                    call cpu_time(t1)
-                    call dgemm('n','n',nsteen,(lmax-m+2-oe)/2,lmax/2,1.,v_theta_space,nsteen,projassleg(:,(m+oe+1)/2:lmax/2,oe,m+1)&
-                         ,lmax/2,0.,v_l_space(:,(m+oe+1)/2:lmax/2) ,nsteen)
-                    call cpu_time(t2)
-                    t(2)=t(2)+(t2-t1)
-                    cost(2)=cost(2)+nsteen*((lmax-m+2-oe)/2)*lmax/2
-                    !cost=(lmax-m)*n*lmax maybe (lmax-m)*n*lmax/4
-                    ! Only l remain here, for which m+j+l=even.
-                    ! or j+oe=even.
-                    ! Of course also on the way back parity is conserved.
-                    ! We have therefore separate even l and odd l gyrocolmat.
-                    ! This makes total sense.
-                    ! Pml and projassleg is an even function for 
-                    ! Now we work on v_l_space with the steen polynomials and the collision operator.
-                    ! we multiply over the left index of v_l_space
-                    if (verbose>4) steen_l_space=1e300
-                    call cpu_time(t1)
-                    call dgemm('n','n',nmaxpoly,(lmax-m+2-oe)/2,nsteen,1.,projsteen,nsteen&
-                         ,v_l_space(:,(m+oe+1)/2:lmax/2),nsteen,0.,steen_l_space(:&
-                         ,m/2,(m+oe+1)/2),nmaxpoly*(1+mpullback/2))
-                    call cpu_time(t2)
-                    t(3)=t(3)+(t2-t1)
-                    cost(3)=cost(3)+nmaxpoly*((lmax-m+2-oe)/2)*nsteen
-                    !cost=n*(lmax-m)*n maybe n*(lmax-m)*n/2
-                    !could conceivably cut off this matrix product
-                    if (verbose>4) then
-                       do k=1,nmaxpoly
-                          max_n_comp(k,i,j)=max(max_n_comp(k,i,j),maxval(steen_l_space(k,m/2,(m+oe+1)/2:lmax/2)))
-                       end do
-                       do k=(m+oe+1)/2,lmax/2
-                          l=k*2-mod(oe+m,2)
-                          max_l_comp(l,i,j)=max(max_l_comp(l,i,j),maxval(steen_l_space(:,m/2,k)))
-                       end do
-                    end if
-                    ! epspullback-small whenever l>j+mpullback or l<j-mpullback (bec of spherical Bessels)
-                    ! on the otherhand: l>m
-                    ! for backtransform small, if
-                    ! j<l-mpullback or j> l+mpullback
-                    ! kann man kucken, bis wohin man brauch. auch radial cut-off
-                    ! if there is no redistribution of l,
-                    ! it is sufficient to have sqrt(epspullback)??
-                    ! only lmax cutoff, not mpullback
-                    ! 
-                    ! Now we do whatever we want with steen_l_space.
-                    
-                    !  here
-                    ! can use dgemm_batch of mkl library.
-                    if (verbose>4) then
-                       do l2=1,(m+oe+1)/2-1
-                          steen_l_space(:,m/2,l2)=1e300
-                       end do
-                    end if
-                 end do mloop
-                 call cpu_time(t1)
-                 ! This is really a costly procedure. dgemm cannot reuse colmat matrix elements for different l,l2.
-                 ! The dominant cost is reading through the colmat matrices.
-                 ! This is on an ivy-bridge 10x slower than the other operations per flop.
-                 ! Maybe one should do several i,j at once.
-                 do l2=(moe+oe+1)/2,lmax/2
-                    l=l2*2-mod(oe+moe,2)
-                    call dgemm('n','n',nmaxpoly,1+(mpullback-moe)/2,nmaxpoly,1.,colmat(:,:,l),ncolmat,&
-                         steen_l_space(:,0:(mpullback-moe)/2,l2),nmaxpoly,0.,&
-                         tmp_steen_space,nmaxpoly)
-                    call dcopy(nmaxpoly*(1+(mpullback-moe)/2),tmp_steen_space,1,steen_l_space(:,:,l2),1)
-!                    steen_l_space(:,0:(mpullback-moe)/2,l2)=tmp_steen_space(:,0:(mpullback-moe)/2)
-                 end do
-                 call cpu_time(t2)
-                 t(11)=t(11)+(t2-t1)
-                 cost(11)=cost(11)+(lmax/2-(m+oe+1)/2)*nmaxpoly**2*(1+(mpullback-moe)/2)
+       iloop: do i=1,nmax0
+          moeloop: do moe=0,1 ! do odd and even m separately
+             ! we do now all odd or even m in one bunch to be able to reuse the read in collision matrix.
+             ! costs a little more memory.
+             mloop:  do m=mpullback-moe,moe,-2 ! Leaving out negative m's here. That must be accounted for when doing sums.
+
+                call cpu_time(t1)
+                do l2=1,lmax/2
+                   do k=1,nsteen
+                      v_theta_space(k,l2)=beskla(k,l2,m)*projsteen(i,k)*projleg(l2,j)
+                      ! should be same as *projassleg(l2,j/2,oe,1)
+                      ! Note: sum_i=-infty,+infty  bessel_jn(i,x)^2 = 1 for any x.
+                   enddo
+                enddo
+                call cpu_time(t2)
+                t(1)=t(1)+(t2-t1)
+                cost(1)=cost(1)+nsteen*lmax/2
+                !cost=lmax*n maybe lmax/2*n
+                ! Now transform into l space. For this we have to multiply with the Pml for l>=m.
+                ! This is independent for every k.
+                ! Matrix multiply with upper triangular matrix projassleg:
+                !             v_l_space(:,1:m)=0
+                if (verbose>4) v_l_space=1e300
+                call cpu_time(t1)
+                call dgemm('n','n',nsteen,(lmax-m+2-oe)/2,lmax/2,1.,v_theta_space,nsteen,projassleg(:,(m+oe+1)/2:lmax/2,oe,m+1)&
+                     ,lmax/2,0.,v_l_space(:,(m+oe+1)/2:lmax/2) ,nsteen)
+                call cpu_time(t2)
+                t(2)=t(2)+(t2-t1)
+                cost(2)=cost(2)+nsteen*((lmax-m+2-oe)/2)*lmax/2
+                !cost=(lmax-m)*n*lmax maybe (lmax-m)*n*lmax/4
+                ! Only l remain here, for which m+j+l=even.
+                ! or j+oe=even.
+                ! Of course also on the way back parity is conserved.
+                ! We have therefore separate even l and odd l gyrocolmat.
+                ! This makes total sense.
+                ! Pml and projassleg is an even function for 
+                ! Now we work on v_l_space with the steen polynomials and the collision operator.
+                ! we multiply over the left index of v_l_space
+                if (verbose>4) steen_l_space=1e300
+                call cpu_time(t1)
+                call dgemm('n','n',nmaxpoly,(lmax-m+2-oe)/2,nsteen,1.,projsteen,nsteen&
+                     ,v_l_space(:,(m+oe+1)/2:lmax/2),nsteen,0.,steen_l_space(:&
+                     ,m/2,(m+oe+1)/2),nmaxpoly*(1+mpullback/2))
+                call cpu_time(t2)
+                t(3)=t(3)+(t2-t1)
+                cost(3)=cost(3)+nmaxpoly*((lmax-m+2-oe)/2)*nsteen
+                !cost=n*(lmax-m)*n maybe n*(lmax-m)*n/2
+                !could conceivably cut off this matrix product
+                if (verbose>4) then
+                   do k=1,nmaxpoly
+                      max_n_comp(k,i,j)=max(max_n_comp(k,i,j),maxval(steen_l_space(k,m/2,(m+oe+1)/2:lmax/2)))
+                   end do
+                   do k=(m+oe+1)/2,lmax/2
+                      l=k*2-mod(oe+m,2)
+                      max_l_comp(l,i,j)=max(max_l_comp(l,i,j),maxval(steen_l_space(:,m/2,k)))
+                   end do
+                end if
+                ! epspullback-small whenever l>j+mpullback or l<j-mpullback (bec of spherical Bessels)
+                ! on the otherhand: l>m
+                ! for backtransform small, if
+                ! j<l-mpullback or j> l+mpullback
+                ! kann man kucken, bis wohin man brauch. auch radial cut-off
+                ! if there is no redistribution of l,
+                ! it is sufficient to have sqrt(epspullback)??
+                ! only lmax cutoff, not mpullback
+                ! 
+                ! Now we do whatever we want with steen_l_space.
+
+                !  here
+                ! can use dgemm_batch of mkl library.
+                if (verbose>4) then
+                   do l2=1,(m+oe+1)/2-1
+                      steen_l_space(:,m/2,l2)=1e300
+                   end do
+                end if
+             end do mloop
+             call cpu_time(t1)
+             ! This is really a costly procedure. dgemm cannot reuse colmat matrix elements for different l,l2.
+             ! The dominant cost is reading through the colmat matrices.
+             ! This is on an ivy-bridge 10x slower than the other operations per flop.
+             ! Maybe one should do several i,j at once.
+             do l2=(moe+oe+1)/2,lmax/2
+                l=l2*2-mod(oe+moe,2)
+                call dgemm('n','n',nmaxpoly,1+(mpullback-moe)/2,nmaxpoly,1.,colmat(:,:,l),ncolmat,&
+                     steen_l_space(:,0:(mpullback-moe)/2,l2),nmaxpoly,0.,&
+                     tmp_steen_space,nmaxpoly)
+                call dcopy(nmaxpoly*(1+(mpullback-moe)/2),tmp_steen_space,1,steen_l_space(:,:,l2),1)
+                !                    steen_l_space(:,0:(mpullback-moe)/2,l2)=tmp_steen_space(:,0:(mpullback-moe)/2)
+             end do
+             call cpu_time(t2)
+             t(11)=t(11)+(t2-t1)
+             cost(11)=cost(11)+(lmax/2-(m+oe+1)/2)*nmaxpoly**2*(1+(mpullback-moe)/2)
 
 !!$                 !Achtung:
 !!$                 !vergleiche:
@@ -608,200 +617,190 @@ contains
 !!$ evtl. könnte man bei nmax noch eine maximal rechts lokalisierte Funktion ausrechnen.
 !!$                 und was nicht geht: zu großer error in den diagonalen.
 !!$                 ksh@gadget:~/w> ./gtt 5 5 0 1 1 .1
-                 
-                 mloop2:  do m=mpullback-moe,moe,-2 ! Leaving out negative m's here. That must be accounted for when doing sums.
 
-                    ! ..... and then:
-                    if (verbose>4) v_l_space=1e300
-                    call cpu_time(t1)
-                    call dgemm('t','n',nsteen,(lmax-m+2-oe)/2,nmaxpoly,1.,projsteen,nsteen&
-                         ,steen_l_space(:,m/2,(m+oe+1)/2),nmaxpoly*(1+mpullback/2),0.,v_l_space(:,(m+oe&
-                         +1)/2:lmax/2),nsteen)
-                    call cpu_time(t2)
-                    t(4)=t(4)+(t2-t1)
-                    cost(4)=cost(4)+nsteen*((lmax-m+2-oe)/2)*nmaxpoly
+             mloop2:  do m=mpullback-moe,moe,-2 ! Leaving out negative m's here. That must be accounted for when doing sums.
 
-                    if (verbose>4) v_theta_space=1e300
-                    call cpu_time(t1)
-                    call dgemm('n','t',nsteen,lmax/2,(lmax-m+2-oe)/2,1.,v_l_space(:,(m+oe+1)/2:lmax/2),nsteen,projassleg(:,(m+oe+1)&
-                         /2:lmax/2,oe,m+1),lmax/2,0.,v_theta_space ,nsteen)
-                    call cpu_time(t2)
-                    t(5)=t(5)+(t2-t1)
-                    cost(5)=cost(5)+lmax/2*((lmax-m+2-oe)/2)*nsteen
+                ! ..... and then:
+                if (verbose>4) v_l_space=1e300
+                call cpu_time(t1)
+                call dgemm('t','n',nsteen,(lmax-m+2-oe)/2,nmaxpoly,1.,projsteen,nsteen&
+                     ,steen_l_space(:,m/2,(m+oe+1)/2),nmaxpoly*(1+mpullback/2),0.,v_l_space(:,(m+oe&
+                     +1)/2:lmax/2),nsteen)
+                call cpu_time(t2)
+                t(4)=t(4)+(t2-t1)
+                cost(4)=cost(4)+nsteen*((lmax-m+2-oe)/2)*nmaxpoly
 
-                    call cpu_time(t1)
-                    if (krb/=krhoa) then
-                       v_theta_space=v_theta_space*besklb(:,:,m)
-                    else
-                       v_theta_space=v_theta_space*beskla(:,:,m)
-                    end if
-                    call cpu_time(t2)
-                    t(6)=t(6)+(t2-t1)
-                    cost(6)=cost(6)+nsteen*lmax/2
+                if (verbose>4) v_theta_space=1e300
+                call cpu_time(t1)
+                call dgemm('n','t',nsteen,lmax/2,(lmax-m+2-oe)/2,1.,v_l_space(:,(m+oe+1)/2:lmax/2),nsteen,projassleg(:,(m+oe+1)&
+                     /2:lmax/2,oe,m+1),lmax/2,0.,v_theta_space ,nsteen)
+                call cpu_time(t2)
+                t(5)=t(5)+(t2-t1)
+                cost(5)=cost(5)+lmax/2*((lmax-m+2-oe)/2)*nsteen
 
-                    if (verbose>4) steen0_theta_space=1e300
-                    call cpu_time(t1)
-                    call dgemm('n','n',nmax0,lmax/2,nsteen,1.,projsteen,nsteen,v_theta_space,nsteen,0.,steen0_theta_space,nmax0)
-                    call cpu_time(t2)
-                    t(7)=t(7)+(t2-t1)
-                    cost(7)=cost(7)+nsteen*lmax/2*nmax0
-                    !             ! SUM UP gyrocolmat (!) ==>
-                    call cpu_time(t1)
-                    if (m==0) then
-                       !projleg delivers 1<=l<=lmax0. thereby oe=1: 1,3,... oe=2: 2,4,...  max(l)=lmax0-mod(oe+lmax0,2)
-                       ! n(l)=(max(l)-oe)/2+1=(lmax0-mod(oe+lmax0,2)-oe+2)/2=(lmax0-oe-mod(lmax0-oe,2)+2)/2=(lmax0-oe+2)/2 correct.
-                       call dgemm('n','n',nmax0,(lmax0-oe)/2+1,lmax/2,4.,steen0_theta_space&
-                            ,nmax0,projleg(1,oe),lmax,1.,gyrocolmat(1,oe,i,j),nmax0*2)
-                       !factor 8 because of lmax/2 and in total 4 L projectors in a row.
-                       !note dimensions: projleg(lmax/2,lmax0) gyrocolmat(nmax0,lmax0,nmax0,lmax0)
-                       !note further: parity conservation requires gyrocolmat(_,i,_,j) to be zero for odd i+j.
-                       !lmax and nmax0*2 because of parity conservation
-                    else
-                       call dgemm('n','n',nmax0,(lmax0-oe)/2+1,lmax/2,8.,steen0_theta_space,nmax0,&
-                            projleg(1,oe),lmax,1.,gyrocolmat(1,oe,i,j),nmax0*2)
-                    endif
-                    call cpu_time(t2)
-                    t(8)=t(8)+(t2-t1)
-                    cost(8)=cost(8)+lmax/2*nmax0*((lmax0-oe)/2+1)
+                call cpu_time(t1)
+                if (krb/=krhoa) then
+                   v_theta_space=v_theta_space*besklb(:,:,m)
+                else
+                   v_theta_space=v_theta_space*beskla(:,:,m)
+                end if
+                call cpu_time(t2)
+                t(6)=t(6)+(t2-t1)
+                cost(6)=cost(6)+nsteen*lmax/2
+
+                if (verbose>4) steen0_theta_space=1e300
+                call cpu_time(t1)
+                call dgemm('n','n',nmax0,lmax/2,nsteen,1.,projsteen,nsteen,v_theta_space,nsteen,0.,steen0_theta_space,nmax0)
+                call cpu_time(t2)
+                t(7)=t(7)+(t2-t1)
+                cost(7)=cost(7)+nsteen*lmax/2*nmax0
+                !             ! SUM UP gyrocolmat (!) ==>
+                call cpu_time(t1)
+                if (m==0) then
+                   !projleg delivers 1<=l<=lmax0. thereby oe=1: 1,3,... oe=2: 2,4,...  max(l)=lmax0-mod(oe+lmax0,2)
+                   ! n(l)=(max(l)-oe)/2+1=(lmax0-mod(oe+lmax0,2)-oe+2)/2=(lmax0-oe-mod(lmax0-oe,2)+2)/2=(lmax0-oe+2)/2 correct.
+                   call dgemm('n','n',nmax0,(lmax0-oe)/2+1,lmax/2,4.,steen0_theta_space&
+                        ,nmax0,projleg(1,oe),lmax,1.,gyrocolmat(1,oe,i,j),nmax0*2)
+                   !factor 8 because of lmax/2 and in total 4 L projectors in a row.
+                   !note dimensions: projleg(lmax/2,lmax0) gyrocolmat(nmax0,lmax0,nmax0,lmax0)
+                   !note further: parity conservation requires gyrocolmat(_,i,_,j) to be zero for odd i+j.
+                   !lmax and nmax0*2 because of parity conservation
+                else
+                   call dgemm('n','n',nmax0,(lmax0-oe)/2+1,lmax/2,8.,steen0_theta_space,nmax0,&
+                        projleg(1,oe),lmax,1.,gyrocolmat(1,oe,i,j),nmax0*2)
+                endif
+                call cpu_time(t2)
+                t(8)=t(8)+(t2-t1)
+                cost(8)=cost(8)+lmax/2*nmax0*((lmax0-oe)/2+1)
 
 
-                    ! Then we transform everything back into normal space.
-                    ! steen_l_space is the nice pullbacked matrix.
-                    ! In principle the full specification is
-                    ! steen_l_space(1..n,m/2,l=m..lmax [,i=1..nmax0,j=1..lmax0,m=1..mpullback+1])   l>=m
-                    !    [..] suppressed (loop variables)
-                    ! it may be useful to actually caclulate this one.
-                    ! ok, we probably don't have to store the m's simultaneously.
-                    ! the outer loop should be over m.
-                    ! totally clear, that the m sum is outside. and we store the bessel_jn(m, ... k ... l)
-                    ! independent from the rest.
-                    ! with that the storage is reduced to n*lmax for bessel, n*nmax0 for projsteen
-                    ! lmax*lmax0 for projleg and (m*) lmax*mpullback.
-                 enddo mloop2
-              end do moeloop
-           end do iloop
-         end block lminblock
-      enddo jloop
-      call cpu_time(t1)
-      if (verbose>4) then
-         block
-           integer idx,a(4)
-           real v1
-           !find index of max absolute element of gyrocolmat:
-           idx=idamax((nmax0*lmax0)**2,gyrocolmat,1)
-           a=Mod((idx-1)/(/nmax0*lmax0**2,nmax0*lmax0,lmax0,1/),(/nmax0,lmax0,nmax0,lmax0/))+(/1,1,1,1/)
-           v1=gyrocolmat(a(1),a(2),a(3),a(4))
-           if (abs(v1)>val) then
-              val=abs(v1)
-              print "(A,I3,A,4I4,A,ES25.17)",'At m=',m,' component maximum at i,j,k,l=',a,' value=' ,v1
-           end if
-         end block
-         m1=0
-         do i=1,nmax0
-            do j=1,lmax0
-               do k=1,nmax0
-                  do l=1,lmax0
-                     if (mod(j+l,2)==1) then
-                        if (gyrocolmat(i,j,k,l)/=0) then
-                           print 2,'gyrocolmat parity??',m,i,j,k,l,gyrocolmat(i,j,k,l)
-                           m1=m1+1
-                        end if
-                     else
-                        if (gyrocolmat(i,j,k,l)==0) then
-                           if (m==0 .or. krhoa /=0 .and. krb/=0) then
-                              !in case for some reason kperp=0 we do not print the m>0.
-                              print 2,'gyrocolmat zero??',m,i,j,k,l,gyrocolmat(i,j,k,l)
-                              m1=m1+1
-                           end if
-                        else if (abs(gyrocolmat(i,j,k,l))<1e-16*epsgyrocolmat) then
-                           print 2,'extraneous (near) zero at',m,i,j,k,l,gyrocolmat(i,j,k,l)
-                        end if
-                     end if
-                     if ((i<k .or. i<=k .and. j<l) .and. abs(gyrocolmat(i,j,k,l)-gyrocolmat(k,l,i,j))>epsgyrocolmat*(1 &
-                          +abs(gyrocolmat(i,j,k,l)))) then
+                ! Then we transform everything back into normal space.
+                ! steen_l_space is the nice pullbacked matrix.
+                ! In principle the full specification is
+                ! steen_l_space(1..n,m/2,l=m..lmax [,i=1..nmax0,j=1..lmax0,m=1..mpullback+1])   l>=m
+                !    [..] suppressed (loop variables)
+                ! it may be useful to actually caclulate this one.
+                ! ok, we probably don't have to store the m's simultaneously.
+                ! the outer loop should be over m.
+                ! totally clear, that the m sum is outside. and we store the bessel_jn(m, ... k ... l)
+                ! independent from the rest.
+                ! with that the storage is reduced to n*lmax for bessel, n*nmax0 for projsteen
+                ! lmax*lmax0 for projleg and (m*) lmax*mpullback.
+             enddo mloop2
+          end do moeloop
+       end do iloop
+    enddo jloop
+    call cpu_time(t1)
+    if (verbose>4) then
+       !find index of max absolute element of gyrocolmat:
+       idx=idamax((nmax0*lmax0)**2,gyrocolmat,1)
+       a=Mod((idx-1)/(/nmax0*lmax0**2,nmax0*lmax0,lmax0,1/),(/nmax0,lmax0,nmax0,lmax0/))+(/1,1,1,1/)
+       v1=gyrocolmat(a(1),a(2),a(3),a(4))
+       if (abs(v1)>val) then
+          val=abs(v1)
+          print "(A,I3,A,4I4,A,ES25.17)",'At m=',m,' component maximum at i,j,k,l=',a,' value=' ,v1
+       end if
+       m1=0
+       do i=1,nmax0
+          do j=1,lmax0
+             do k=1,nmax0
+                do l=1,lmax0
+                   if (mod(j+l,2)==1) then
+                      if (gyrocolmat(i,j,k,l)/=0) then
+                         print 2,'gyrocolmat parity??',m,i,j,k,l,gyrocolmat(i,j,k,l)
+                         m1=m1+1
+                      end if
+                   else
+                      if (gyrocolmat(i,j,k,l)==0) then
+                         if (m==0 .or. krhoa /=0 .and. krb/=0) then
+                            !in case for some reason kperp=0 we do not print the m>0.
+                            print 2,'gyrocolmat zero??',m,i,j,k,l,gyrocolmat(i,j,k,l)
+                            m1=m1+1
+                         end if
+                      else if (abs(gyrocolmat(i,j,k,l))<1e-16*epsgyrocolmat) then
+                         print 2,'extraneous (near) zero at',m,i,j,k,l,gyrocolmat(i,j,k,l)
+                      end if
+                   end if
+                   if ((i<k .or. i<=k .and. j<l) .and. abs(gyrocolmat(i,j,k,l)-gyrocolmat(k,l,i,j))>epsgyrocolmat*(1 &
+                        +abs(gyrocolmat(i,j,k,l)))) then
 !!$                           if(q<o) print 2,'gyrocolmat symmetry??',m,i,j,k,l,gyrocolmat(i,j,k,l),gyrocolmat(k,l,i,j) &
 !!$                                ,gyrocolmat(i,j,k ,l)-gyrocolmat(k ,l,i,j)
 !!$                           q=q+1
-                        m1=m1+1
-                     endif
-                  end do
-               end do
-            end do
-         end do
-         if (m1/=0) print 2,'gyrocolmat at m=',m,'had',m1,'issues.'
-      end if
-      call cpu_time(t2)
-      t(9)=t(9)+(t2-t1)
+                      m1=m1+1
+                   endif
+                end do
+             end do
+          end do
+       end do
+       if (m1/=0) print 2,'gyrocolmat at m=',m,'had',m1,'issues.'
+    end if
+    call cpu_time(t2)
+    t(9)=t(9)+(t2-t1)
 
-      call cpu_time(t2)
-      tto=t2-tto
-      if (verbose>0) then
-         print 3,'tbes:',tbes
-         cost(9)=1
-         do i=1,11
-            print "(I2,*(' ',A,ES9.2))",i,'t(i):',t(i),'cost(i):',cost(i),'t(i)/cost(i):',t(i)/cost(i),'flops/cycle(i):',2*cost(i)&
-                 /(t(i)*3.9d9)
-         end do
-         print 2,'tot',tto,tbes+sum(t)
-      end if
-      if (verbose>4) then
-         block
-           real maxn(nmax0:nmaxpoly),maxl(lmax0:lmax)
-           do i=nmax0,nmaxpoly
-              maxn(i)=maxval(max_n_comp(i,:,:))
-           end do
-           do i=lmax0,lmax
-              maxl(i)=maxval(max_l_comp(i,:,:))
-           end do
-           print '(A,*(ES9.2))','maxl',maxl
-           print '(A,*(ES9.2))','maxn',maxn
-           ! e.g. ./gt 5 .1 1 1 1 100
-         end block
-      end if
-    end block timeblock
+    call cpu_time(t2)
+    tto=t2-tto
+    if (verbose>0) then
+       print 3,'tbes:',tbes
+       cost(9)=1
+       do i=1,11
+          print "(I2,*(' ',A,ES9.2))",i,'t(i):',t(i),'cost(i):',cost(i),'t(i)/cost(i):',t(i)/cost(i),'flops/cycle(i):',2*cost(i)&
+               /(t(i)*3.9d9)
+       end do
+       print 2,'tot',tto,tbes+sum(t)
+    end if
+    if (verbose>4) then
+       allocate(maxn(nmax0:nmaxpoly),maxl(lmax0:lmax))
+       do i=nmax0,nmaxpoly
+          maxn(i)=maxval(max_n_comp(i,:,:))
+       end do
+       do i=lmax0,lmax
+          maxl(i)=maxval(max_l_comp(i,:,:))
+       end do
+       print '(A,*(ES9.2))','maxl',maxl
+       print '(A,*(ES9.2))','maxn',maxn
+       ! e.g. ./gt 5 .1 1 1 1 100
+       deallocate(maxn,maxl,max_n_comp,max_l_comp)
+    end if
     ! Now go through gyrocolmat and check for larger than normal discrepancies
     if (verbose>4) then
-       block
-         integer a1(4),a2(4)
-         real div,siv,sym,sym1
-         o=20
-         q=0
-         div=0
-         siv=0
-         sym=0
-         do i=1,nmax0
-            do j=1,lmax0
-               do k=1,nmax0
-                  do l=1,lmax0
-                     if (mod(j+l,2)==1) then
-                        if (gyrocolmat(i,j,k,l)/=0) then
-                           print 2,'gyrocolmat parity??',i,j,k,l,gyrocolmat(i,j,k,l)
-                        end if
-                     else
-                        if (gyrocolmat(i,j,k,l)==0) then
-                           !if (abs(j-l)<=2 .and. abs(i-k)<=5) &
-                           print 2,'gyrocolmat zero??',i,j,k,l,gyrocolmat(i,j,k,l)
-                           ! this vanishes if xmax<=3:
-                           ! ksh@napoleon:~/w> ./gt 15 5 2 1 1 6
-                           ! ksh@napoleon:~/w> ./gt 5 30 2 1 1 1
-                           ! produces zero??
-                           ! ksh@napoleon:~/w> ./gt 15 3 2 1 1  10
-                           ! ksh@napoleon:~/w> ./gt 5 1 2 1 1 30
-                           ! produces nothing.
+       o=20
+       q=0
+       div=0
+       siv=0
+       sym=0
+       do i=1,nmax0
+          do j=1,lmax0
+             do k=1,nmax0
+                do l=1,lmax0
+                   if (mod(j+l,2)==1) then
+                      if (gyrocolmat(i,j,k,l)/=0) then
+                         print 2,'gyrocolmat parity??',i,j,k,l,gyrocolmat(i,j,k,l)
+                      end if
+                   else
+                      if (gyrocolmat(i,j,k,l)==0) then
+                         !if (abs(j-l)<=2 .and. abs(i-k)<=5) &
+                         print 2,'gyrocolmat zero??',i,j,k,l,gyrocolmat(i,j,k,l)
+                         ! this vanishes if xmax<=3:
+                         ! ksh@napoleon:~/w> ./gt 15 5 2 1 1 6
+                         ! ksh@napoleon:~/w> ./gt 5 30 2 1 1 1
+                         ! produces zero??
+                         ! ksh@napoleon:~/w> ./gt 15 3 2 1 1  10
+                         ! ksh@napoleon:~/w> ./gt 5 1 2 1 1 30
+                         ! produces nothing.
 
 !!$                   else if (abs(gyrocolmat(i,j,k,l))<epsgyrocolmat) then
 !!$                      print 2,'extraneous (near) zero at',i,j,k,l,gyrocolmat(i,j,k,l)
-                        end if
-                     end if
-                     if ((i<k .or. i<=k .and. j<l)) then
-                        sym1= abs(gyrocolmat(i,j,k,l)-gyrocolmat(k,l,i,j))
-                        if (sym1>sym) then
-                           sym=sym1
-                           if(q<o .and. sym>epsgyrocolmat) print 2,'gyrocolmat symmetry??',i,j,k,l,gyrocolmat(i,j ,k,l)&
-                                ,gyrocolmat(k,l,i,j),gyrocolmat(i,j,k ,l)-gyrocolmat(k,l,i,j)
-                           q=q+1
-                        end if
-                     endif
+                      end if
+                   end if
+                   if ((i<k .or. i<=k .and. j<l)) then
+                      sym1= abs(gyrocolmat(i,j,k,l)-gyrocolmat(k,l,i,j))
+                      if (sym1>sym) then
+                         sym=sym1
+                         if(q<o .and. sym>epsgyrocolmat) print 2,'gyrocolmat symmetry??',i,j,k,l,gyrocolmat(i,j ,k,l)&
+                              ,gyrocolmat(k,l,i,j),gyrocolmat(i,j,k ,l)-gyrocolmat(k,l,i,j)
+                         q=q+1
+                      end if
+                   endif
 !!$                     if (i==k .and. j==l) then
 !!$                        if (abs(gyrocolmat(i,j,k,l)-1)>div) then
 !!$                           div=abs(gyrocolmat(i,j,k,l)-1)
@@ -815,21 +814,20 @@ contains
 !!$                           print '("gyrocolmat side error",4i3,ES24.16)',i,j,k,l,gyrocolmat(i,j,k,l)
 !!$                        end if
 !!$                     endif
-                  end do
-               end do
-            end do
-         end do
+                end do
+             end do
+          end do
+       end do
 !!$         if (div>epsp*4 .or. siv>epsp*4) then
 !!$            print 2,'something went wrong'
 !!$         else
 !!$            print 2,'everything ok'
 !!$         endif
-         print "(A,ES12.2,2I3,ES25.16)",'max symmetry error',sym
+       print "(A,ES12.2,2I3,ES25.16)",'max symmetry error',sym
 !!$         print "(A,ES12.2,2I3,ES25.16)",'max error on diagonal',div,a1(1:2),gyrocolmat(a1(1),a1(2),a1(3),a1(4))
 !!$         print "(A,ES9.2,4I3,2ES25.16)",'max error on sides',siv,a2&
 !!$              ,gyrocolmat(a2(1),a2(2),a2(3),a2(4)),gyrocolmat(a2(3),a2(4)&
 !!$              ,a2(1),a2(2))
-       end block
 !!$       do i=2,nmax0-1
 !!$          do j=1,lmax0
 !!$             print 2,'testm',i,j,gyrocolmat(i-1:i+1,j,i,j)
@@ -1091,6 +1089,14 @@ contains
     integer ng2 ! half the Gauss points for Legendre.
     logical timing
     integer, external ::idamax
+    integer ngs
+
+    ! originally in block "timeblock":
+    real tbes,t(11),tto,t1,t2,cost(11)
+
+    ! originally in block "lminblock"
+    integer lminb
+    real lbval,lminbval
 
     timing=verbose>0
 
@@ -1210,75 +1216,65 @@ contains
 
        call calc_projassleg(paltest,ng2,lmax/2,mmode,gpl,gwl)
        print 2,'Comparison of new projasslegm with old projassleg:'
-       block
-         integer ngs
-         ngs=max(1,ng2-4)
-         do l=mmode,lmax
-            print 2,'l=',l,'projasslegm(ngs:ng2,l)=',projasslegm(ngs:ng2,l-mmode+1)
-            print 2,'l=',l,'    paltest(ngs:ng2,l)=',paltest(ngs:ng2,(l+1)/2,mod(l+mmode,2)+1,mmode)
-            print 2,'l=',l,'      delta(ngs:ng2,l)=',paltest(ngs:ng2,(l+1)/2,mod(l+mmode,2)+1,mmode)&
-                 -projasslegm(ngs:ng2,l-mmode+1)
-         end do
-       end block
+       ngs=max(1,ng2-4)
+       do l=mmode,lmax
+          print 2,'l=',l,'projasslegm(ngs:ng2,l)=',projasslegm(ngs:ng2,l-mmode+1)
+          print 2,'l=',l,'    paltest(ngs:ng2,l)=',paltest(ngs:ng2,(l+1)/2,mod(l+mmode,2)+1,mmode)
+          print 2,'l=',l,'      delta(ngs:ng2,l)=',paltest(ngs:ng2,(l+1)/2,mod(l+mmode,2)+1,mmode)&
+               -projasslegm(ngs:ng2,l-mmode+1)
+       end do
     end if
 
     allocate(beskl(nsteen,ng2))
     allocate(steen0_theta_space(nmax0,ng2))
     allocate(v_theta_space(nsteen,ng2))
 
-    val=0
-    timeblock: block
-      real tbes,t(11),tto,t1,t2,cost(11)
-      real max_n_comp(nmaxpoly,nmax0,lmax0),max_l_comp(lmax,nmax0,lmax0)
-      if (verbose>4) then
-         max_n_comp=0
-         max_l_comp=0
-         q=0;o=20 ! for error messages
-      end if
-      if (timing) then
-         tbes=0; t=0; cost=0
-         call cpu_time(tto)
-      end if
-      mphys=mmode-1 !m is mphys here.
 
-      if (timing) call cpu_time(t1)
-      if (verbose>4) beskl=1e300
-      do l2=1,ng2
-         beskl(:,l2)=bessel_jn(mphys,krho*sp*sqrt(1-gpl(l2)**2))
-         ! The plane wave exp(iky)=sum_(m in Z) bessel_jn(m,k|r|)exp(im phi)
-         ! r=(x,y)
-         ! kx*rho_x=-kx*mv_y/qB for B=Bz positive.
-         ! i.e.
-         ! exp(i kx rho_x)=exp(-i kx*m/(qB) vy) =sum_m bessel_jn(m,-krho |v|) exp(imphi)
-         ! call kx*m/(qB)=krho.
-         ! multiplication of real space distribution function with exp(ikx*rhox)
-         ! gives the gyrocenter distribution function. (Both Fourier transformed)
-         ! Thereafter we determine the l,m=0 components == gyro averaging.
-         ! We take the -mphys component of this expansion to get a non-zero contribution
-         ! from mphys=(mmode-1)
-         ! Bessel_jn(-m,-krho |v|) exp(-imphi)=Bessel_jn(m,krho|v|) exp(-imphi)
-         ! Note bessel_jn(-m)=bessel_jn(m)*(-1)^m
-         !      Bessel_jn(m,-x)=(-1)^m Bessel_Jn(m,x)=Bessel_jn(-m,x)
-         ! must use -m, but this gives just a (-1)^m sign.
-         ! don't like sqrt(1-gpl(l)**2) for sin theta. Should use something more accurate. ???
-      enddo
-      !         print 2,'m=',m,'sumbeskl',sum(beskla(:,1:ng2))
-      if (timing) then
-         call cpu_time(t2)
-         tbes=tbes+(t2-t1)
-      end if
-      j=lmode
-      oe=mod(lmode+mmode,2)+1 !oe=1: even in z oe=2: odd in z
-      lminblock: block
-        integer lminb
-        real lbval,lminbval
-        lminb=0
-        lminbval=0
-        !m=mphys l=lphys+1 here
-        !l>=m+1, l<=lmax and oe+m+l is even.
-        !==> l>=m+oe. since lmax is even l<=lmax-mod(oe+m,2)
-        !the correct arguments are projassleg(,(l+1)/2,oe,m+1)
-        !==> (l+1)/2 >=(m+oe+1)/2  (l+1)/2<=(lmax-mod(oe+m,2)+1)/2=ng2 +(1-mod(oe+m,2))/2=ng2
+    val=0
+    if (verbose>4) then
+       q=0;o=20 ! for error messages
+    end if
+    if (timing) then
+       tbes=0; t=0; cost=0
+       call cpu_time(tto)
+    end if
+    mphys=mmode-1 !m is mphys here.
+
+    if (timing) call cpu_time(t1)
+    if (verbose>4) beskl=1e300
+    do l2=1,ng2
+       beskl(:,l2)=bessel_jn(mphys,krho*sp*sqrt(1-gpl(l2)**2))
+       ! The plane wave exp(iky)=sum_(m in Z) bessel_jn(m,k|r|)exp(im phi)
+       ! r=(x,y)
+       ! kx*rho_x=-kx*mv_y/qB for B=Bz positive.
+       ! i.e.
+       ! exp(i kx rho_x)=exp(-i kx*m/(qB) vy) =sum_m bessel_jn(m,-krho |v|) exp(imphi)
+       ! call kx*m/(qB)=krho.
+       ! multiplication of real space distribution function with exp(ikx*rhox)
+       ! gives the gyrocenter distribution function. (Both Fourier transformed)
+       ! Thereafter we determine the l,m=0 components == gyro averaging.
+       ! We take the -mphys component of this expansion to get a non-zero contribution
+       ! from mphys=(mmode-1)
+       ! Bessel_jn(-m,-krho |v|) exp(-imphi)=Bessel_jn(m,krho|v|) exp(-imphi)
+       ! Note bessel_jn(-m)=bessel_jn(m)*(-1)^m
+       !      Bessel_jn(m,-x)=(-1)^m Bessel_Jn(m,x)=Bessel_jn(-m,x)
+       ! must use -m, but this gives just a (-1)^m sign.
+       ! don't like sqrt(1-gpl(l)**2) for sin theta. Should use something more accurate. ???
+    enddo
+    !         print 2,'m=',m,'sumbeskl',sum(beskla(:,1:ng2))
+    if (timing) then
+       call cpu_time(t2)
+       tbes=tbes+(t2-t1)
+    end if
+    j=lmode
+    oe=mod(lmode+mmode,2)+1 !oe=1: even in z oe=2: odd in z
+    lminb=0
+    lminbval=0
+    !m=mphys l=lphys+1 here
+    !l>=m+1, l<=lmax and oe+m+l is even.
+    !==> l>=m+oe. since lmax is even l<=lmax-mod(oe+m,2)
+    !the correct arguments are projassleg(,(l+1)/2,oe,m+1)
+    !==> (l+1)/2 >=(m+oe+1)/2  (l+1)/2<=(lmax-mod(oe+m,2)+1)/2=ng2 +(1-mod(oe+m,2))/2=ng2
 !!$          do l2=(m+oe+1)/2,ng2 !n_elements=ng2-(m+oe+1)/2+1=(lmax+2-m-oe)/2
 !!$             lbval=sum(beskla(nmaxpoly,:)*projleg(:ng2,j)&
 !!$                  *projassleg(:,l2,oe,m+1))
@@ -1289,69 +1285,67 @@ contains
 !!$             end if
 !!$          end do
 !!$          print 2,'m',m,'j',j,'lminb',lminb,'lminbval',lminbval
-        !^^ can use this boundary value as estimate of max l needed.
-        ! most conservative value for m=0.
-        ! can also reduce lmax by that. But will not be greatly different from lmax.
+    !^^ can use this boundary value as estimate of max l needed.
+    ! most conservative value for m=0.
+    ! can also reduce lmax by that. But will not be greatly different from lmax.
 
-        iloop: do i=1,nmax0
-           if (timing) call cpu_time(t1)
-           do l2=1,ng2
-              do k=1,nsteen
-                 v_theta_space(k,l2)=beskl(k,l2)*projsteen(i,k)*projasslegm(l2,lmode-mmode+1)
-                 ! Now we are at RMS=1/sqrt(2) due to the normalisation of projasslegm.
-                 !write down mode ampl*plane wave with -m.
-                 ! Note: sum_i=-infty,+infty  bessel_jn(i,x)^2 = 1 for any x.
-              enddo
-           enddo
-           if (timing) then
-              call cpu_time(t2)
-              t(1)=t(1)+(t2-t1)
-              cost(1)=cost(1)+nsteen*ng2
-              !cost=lmax*n maybe ng2*n
-           end if
-           if (verbose>4) steen0_theta_space=1e300
-           if (timing) call cpu_time(t1)
-           call dgemm('n','n',nmax0,ng2,nsteen,1.,projsteen,nsteen,v_theta_space,nsteen,&
-                0.,steen0_theta_space,nmax0)
-           ! angular RMS unchanged, just transform into orthonormal radial polynomials.
-           if (timing) then
-              call cpu_time(t2)
-              t(7)=t(7)+(t2-t1)
-              cost(7)=cost(7)+nsteen*ng2*nmax0
-           end if
-           if (verbose>4) then
-              fout(:,3-oe::2,i)=1e100 ! these are actually zero due to parity and should not be needed later.
-              fout(:,oe::2,i)=1e300
-           end if
-           if (timing) call cpu_time(t1)
-           !projleg delivers 1<=l<=lmax0. thereby oe=1: 1,3,... oe=2: 2,4,...  max(l)=lmax0-mod(oe+lmax0,2)
-           ! n(l)=(max(l)-oe)/2+1=(lmax0-mod(oe+lmax0,2)-oe+2)/2=(lmax0-oe-mod(lmax0-oe,2)+2)/2=(lmax0-oe+2)/2 correct.
-           if (lmax0>=oe) call dgemm('n','n',nmax0,(lmax0-oe)/2+1,ng2,2.,steen0_theta_space,nmax0,projleg(1&
-                ,oe),ng2*2,0.,fout(1,oe,i),nmax0*2)
-           ! Now we have integrated over the domain [0,1] with a function of RMS=1/sqrt(2).
-           ! i.e. ==> with the RMS=1/sqrt(2.) before we are now in principle at 1/2 and must
-           ! multiply 2 back.
-           ! In other words: multiply a factor of 2 because we have exactly one legendre/ass.-legendre projection.
-           if (timing) then
-              call cpu_time(t2)
-              t(8)=t(8)+(t2-t1)
-              cost(8)=cost(8)+ng2*nmax0*((lmax0-oe)/2+1)
-           end if
-        enddo iloop
-      end block lminblock
-      if (timing) then
-         call cpu_time(t2)
-         tto=t2-tto
-         print 3,'tbes:',tbes
-         cost(9)=1
-         do i=1,11
-            if (t(i)/=0) &
-                 print "(I2,*(' ',A,ES9.2))",i,'t(i):',t(i),'cost(i):',cost(i),'t(i)/cost(i):',&
-                 t(i)/cost(i),'flops/cycle(i):',2*cost(i)/(t(i)*3.9d9) ! for I7-3770
-         end do
-         print 2,'tot',tto,tbes+sum(t)
-      end if
-    end block timeblock
+    iloop: do i=1,nmax0
+       if (timing) call cpu_time(t1)
+       do l2=1,ng2
+          do k=1,nsteen
+             v_theta_space(k,l2)=beskl(k,l2)*projsteen(i,k)*projasslegm(l2,lmode-mmode+1)
+             ! Now we are at RMS=1/sqrt(2) due to the normalisation of projasslegm.
+             !write down mode ampl*plane wave with -m.
+             ! Note: sum_i=-infty,+infty  bessel_jn(i,x)^2 = 1 for any x.
+          enddo
+       enddo
+       if (timing) then
+          call cpu_time(t2)
+          t(1)=t(1)+(t2-t1)
+          cost(1)=cost(1)+nsteen*ng2
+          !cost=lmax*n maybe ng2*n
+       end if
+       if (verbose>4) steen0_theta_space=1e300
+       if (timing) call cpu_time(t1)
+       call dgemm('n','n',nmax0,ng2,nsteen,1.,projsteen,nsteen,v_theta_space,nsteen,&
+            0.,steen0_theta_space,nmax0)
+       ! angular RMS unchanged, just transform into orthonormal radial polynomials.
+       if (timing) then
+          call cpu_time(t2)
+          t(7)=t(7)+(t2-t1)
+          cost(7)=cost(7)+nsteen*ng2*nmax0
+       end if
+       if (verbose>4) then
+          fout(:,3-oe::2,i)=1e100 ! these are actually zero due to parity and should not be needed later.
+          fout(:,oe::2,i)=1e300
+       end if
+       if (timing) call cpu_time(t1)
+       !projleg delivers 1<=l<=lmax0. thereby oe=1: 1,3,... oe=2: 2,4,...  max(l)=lmax0-mod(oe+lmax0,2)
+       ! n(l)=(max(l)-oe)/2+1=(lmax0-mod(oe+lmax0,2)-oe+2)/2=(lmax0-oe-mod(lmax0-oe,2)+2)/2=(lmax0-oe+2)/2 correct.
+       if (lmax0>=oe) call dgemm('n','n',nmax0,(lmax0-oe)/2+1,ng2,2.,steen0_theta_space,nmax0,projleg(1&
+            ,oe),ng2*2,0.,fout(1,oe,i),nmax0*2)
+       ! Now we have integrated over the domain [0,1] with a function of RMS=1/sqrt(2).
+       ! i.e. ==> with the RMS=1/sqrt(2.) before we are now in principle at 1/2 and must
+       ! multiply 2 back.
+       ! In other words: multiply a factor of 2 because we have exactly one legendre/ass.-legendre projection.
+       if (timing) then
+          call cpu_time(t2)
+          t(8)=t(8)+(t2-t1)
+          cost(8)=cost(8)+ng2*nmax0*((lmax0-oe)/2+1)
+       end if
+    enddo iloop
+    if (timing) then
+       call cpu_time(t2)
+       tto=t2-tto
+       print 3,'tbes:',tbes
+       cost(9)=1
+       do i=1,11
+          if (t(i)/=0) &
+               print "(I2,*(' ',A,ES9.2))",i,'t(i):',t(i),'cost(i):',cost(i),'t(i)/cost(i):',&
+               t(i)/cost(i),'flops/cycle(i):',2*cost(i)/(t(i)*3.9d9) ! for I7-3770
+       end do
+       print 2,'tot',tto,tbes+sum(t)
+    end if
 
 1   format (*(A))
 2   format (*(G0,"  "))
