@@ -2,6 +2,8 @@
 !intel:
 !ifort -stand f15 -warn all -march=native -O3 -heap-arrays 10 -implicitnone -real-size 64 landau.F90 -c
 module landau
+#ifndef __PGI
+  !can't use quad precision with frumpy pgi compiler
   real(16), parameter,private :: pi1=atan(1._16)*4
   real, parameter :: intnorm=pi1**(-1.5)*4*pi1
   ! int gphys(v) d^3v=1=int g(x) x^2 dx *intnor
@@ -9,6 +11,11 @@ module landau
   real, parameter :: vunit=sqrt(2._16)
   ! v*vunit is v in units of sqrt(T/m)
   ! v itself is v in units of sqrt(2T/m) ("collision operator units")
+#else
+  real, parameter,private :: pi1=atan(1.)*4
+  real, parameter :: intnorm=sqrt(pi1)*4
+  real, parameter :: vunit=sqrt(2.)
+#endif
   real, parameter :: normcol=sqrt(8/pi1)
   ! Normalisation of ctest/emat cfield/emat for the self-collisions of the
   ! reference species without caa or cab.
@@ -67,18 +74,29 @@ contains
     real p0,p1,pi,q0,q1,qi,r0,r1,ri,s0,s1,si,x,x1,xmax1
     real f1,f2
     integer i,j,k
+#ifndef __PGI
     real(16) fct1,fct2,fct1lo,fct1hi,fct2lo,fct2hi !inline functions
     real(16) w,xmaxx
+#else
+    real fct1,fct2,fct1lo,fct1hi,fct2lo,fct2hi !inline functions
+    real w,xmaxx
+#endif
     logical t1t2,addcutoff1
     real t1,t2 ! for timing
+#ifndef __PGI
     fct1(w)=.125_16*w**(-3)*(exp(-w*w)*w+(2*w*w-1)*.5_16*sqrt(pi1)*erf(w))
     fct2(w)=.25_16*w**(-1)*(.5_16*sqrt(pi1)*erf(w)-w*exp(-w**2))
+    fct2hi(w)=-w**(-1)*((1._16/12)*xmaxx*exp(-xmaxx**2)*(3+2*xmaxx**2)-(sqrt(pi1)/8)*erf(xmaxx))
+#else
+    fct1(w)=.125*w**(-3)*(exp(-w*w)*w+(2*w*w-1)*.5*sqrt(pi1)*erf(w))
+    fct2(w)=.25*w**(-1)*(.5*sqrt(pi1)*erf(w)-w*exp(-w**2))
+    fct2hi(w)=-w**(-1)*((1./12)*xmaxx*exp(-xmaxx**2)*(3+2*xmaxx**2)-(sqrt(pi1)/8)*erf(xmaxx))
+#endif
     fct1lo(w)=fct1(w)-exp(-xmaxx**2)/6  ! for w<xmax
     fct2lo(w)=fct2(w)-w*w*exp(-xmaxx**2)/6 !for w<xmax
     !  fct1hi(w)=w**(-3)*((1./24)*exp(-xmaxx**2)*xmaxx*(3-6*w**2+2*xmaxx**2)+(sqrt(pi1)/16)*(2*w**2-1)*erf(xmaxx))
     fct1hi(w)=-w**(-3)/48*((-2*exp(-xmaxx**2)*xmaxx*(3+2*xmaxx**2)+3*sqrt(pi1)*erf(xmaxx))+&
          w**2*(12*exp(-xmaxx**2)*xmaxx-6*sqrt(pi1)*erf(xmaxx)))
-    fct2hi(w)=-w**(-1)*((1._16/12)*xmaxx*exp(-xmaxx**2)*(3+2*xmaxx**2)-(sqrt(pi1)/8)*erf(xmaxx))
 
     !Inaccuracy for
     !./hhv 5 .5 0 50 1 1
@@ -177,6 +195,7 @@ contains
     do k=1,ngauss
        x=gp(k)*xmax1
        x1=x*beta
+#ifndef __PGI
        if (addcutoff1) then
           f1=fct1lo(real(x1,16))
           f2=fct2lo(real(x1,16))
@@ -184,6 +203,15 @@ contains
           f1=fct1(real(x1,16))
           f2=fct2(real(x1,16))
        endif
+#else
+       if (addcutoff1) then
+          f1=fct1lo(x1)
+          f2=fct2lo(x1)
+       else
+          f1=fct1(x1)
+          f2=fct2(x1)
+       endif
+#endif
        do j=1,n
           if (j==1) then
              q1=0
@@ -223,8 +251,13 @@ contains
        do k=1,ngauss
           x1=xmax*(1+(beta-1)*gp(k))
           x=x1/beta
+#ifndef __PGI
           f1=fct1hi(real(x1,16))
           f2=fct2hi(real(x1,16))
+#else
+          f1=fct1hi(x1)
+          f2=fct2hi(x1)
+#endif
 
           do j=1,n
              if (j==1) then
