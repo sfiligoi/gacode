@@ -7,7 +7,7 @@
 
 module gyrotransformation
   real, parameter,private :: epspullback=1e-13,epsgyrocolmat=1e-15
-  real, parameter,private :: pi1=real(atan(1._16)*4,8)
+  real, parameter,private :: pi1=atan(1.)*4
   integer :: verbose=0
 contains
   integer function est_mpullback(kbounda,kboundb,eps)
@@ -135,7 +135,6 @@ contains
     optional :: eps
     real epsp
     real x,kbound
-    real, parameter :: pi1=atan(1._16)*4
     complex val
     integer i,j,k
 
