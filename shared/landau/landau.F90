@@ -849,6 +849,7 @@ contains
     ! hence:
 
     do l=1,lmax
+#if !(defined(NO_DIMATCOPY)|defined(__PGI)|defined(__APPLE__))
 #ifdef __INTEL_COMPILER
        !use MKL
        call mkl_dimatcopy('c','t',n,n,1.,intkernel(:,:,l),n,n)
@@ -858,19 +859,21 @@ contains
        call dimatcopy('c','t',n,n,1.,intkernel(:,:,l),n,n)
        if (t1t2ratio/=1) call dimatcopy('c','t',n,n,1.,intlokernel(:,:,l),n,n)
 #endif
-!!$  ! alternative to the dimatcopy:
-!!$         do i=1,n
-!!$            do j=1,i-1
-!!$               val=intkernel(i,j,l)
-!!$               intkernel(i,j,l)=intkernel(j,i,l)
-!!$               intkernel(j,i,l)=val
-!!$               if (t1t2ratio/=1) then
-!!$                  val=intkernel(i,j,l)
-!!$                  intlokernel(i,j,l)=intlokernel(j,i,l)
-!!$                  intlokernel(j,i,l)=val
-!!$               endif
-!!$            enddo
-!!$         enddo
+#else
+         !alternative to dimatcopy
+         do i=1,n
+            do j=1,i-1
+               val=intkernel(i,j,l)
+               intkernel(i,j,l)=intkernel(j,i,l)
+               intkernel(j,i,l)=val
+               if (t1t2ratio/=1) then
+                  val=intkernel(i,j,l)
+                  intlokernel(i,j,l)=intlokernel(j,i,l)
+                  intlokernel(j,i,l)=val
+               endif
+            enddo
+         enddo
+#endif
     enddo
     !** rescale everything with beta**2, since we did not completely balance
     !the shrinking of the integral of the exp(-beta**2 x**2) in **3d-space**
