@@ -106,12 +106,14 @@ contains
     addcutoff1=.true.
     if (present(addcutoff)) addcutoff1=addcutoff
 
-2   format (*(G0,"  "))
-
+#ifndef __PGI
+2   format (A,3G25.16)
+    
     if (verbose>2) then
        print 2,'1,lo,hi',fct1lo(xmaxx),fct1hi(xmaxx),fct1(xmaxx)
        print 2,'2,lo,hi',fct2lo(xmaxx),fct2hi(xmaxx),fct2(xmaxx)
     end if
+#endif
     ! lor_int and dif_int are symmetric in i,j
     ! t1t2_int is not symmetric (but not antisymmetric.)
     ! The first index is in that case the output index
@@ -318,9 +320,8 @@ contains
     ! i.e. we multiply with beta!!
     if (t1t2) t1t2_int=t1t2_int*beta**(-4) ! ***<--- must be multiplied with (Ta/Tb-1)
     call cpu_time(t2)
-    if (verbose>0) print 2,'gentestkernel took ',t2-t1
-!!$      print 2,'WARNING: LANDAU: DIFFUSION off'
-!!$      dif_int=0
+    
+    if (verbose>0) print '(A,G13.3)','gentestkernel took ',t2-t1
   end subroutine gentestkernel
 
   subroutine genintkernel(n,lmax,a1,b1,c1,xmax,beta,t1t2ratio,gp,gw,ngauss,gp2,gw2,ng2,addcutoff,intkernel,intlokernel)
@@ -436,8 +437,7 @@ contains
        do l=1,lmax+1
           m1=2-l
           if (m1<-1) mymax=min(xmax,mymin*epsmax**(1./(m1+1)))
-2         format (*(G0,"  "))
-          if (verbose>2) print 2,l,'ngauss',ngauss,mymin,mymax
+          if (verbose>2) print '(I3,A,3I3)',l,'ngauss',ngauss,mymin,mymax
           do k=1,ngauss
              x=gp(k)*(mymax-mymin)+mymin
              p1=0
@@ -453,6 +453,7 @@ contains
              enddo
           enddo
        enddo
+!!$2      format (*(G0,"  "))
 !!$         if (verbose>2) then
 !!$            print 2,'Check b1integral:'
 !!$            print 2,'n=1 (Pn=const)'
@@ -520,7 +521,7 @@ contains
        mymin=mymax
     enddo
     if (.true. .and. verbose>2) then
-       print 2,'Check complete v2integral up to v2=',v2max
+       print '(A,G23.16)','Check complete v2integral up to v2=',v2max
        do i=1,min(n,lmax+3)
           l=i
           m2=l+1
@@ -538,7 +539,8 @@ contains
              val=val+pi
           enddo
 
-          print 2,'v2int',i,l,v2integral(i,l,ngauss+1),val,v2integral(i,l,ngauss+1)/val-1,&
+4         format (A,2I3,*(G25.16,"  "))
+          print 4,'v2int',i,l,v2integral(i,l,ngauss+1),val,v2integral(i,l,ngauss+1)/val-1,&
                maxval(abs(v2integral(i,l,:)))/v2integral(i,l,ngauss+1)
           ! agreement here perfect for beta=0.02 e.g.
           ! agreement here less than perfect for n=50 beta=1.
@@ -552,7 +554,7 @@ contains
     ! Compare end result for beta>=1
     if (verbose>2 .and. beta >=1 .and. .false.) then
        do l=1,lmax+3,2
-          print 2,v2max
+          print '(G25.16)',v2max
           m2=l+1
           do i=2,n,2
              val2=0
@@ -569,7 +571,7 @@ contains
                 val2=val2+gw(k)*pi*exp(-x**2)*(x/v2max)**m2*v2max
              enddo
 
-             print 2,'v2compare',i,l,v2integral(i,l,ngauss+1),val2,v2integral(i,l&
+             print 4,'v2compare',i,l,v2integral(i,l,ngauss+1),val2,v2integral(i,l&
                   &,ngauss+1)/val2-1
              !so for i>m2+1=l+3 this value should be zero.
              !looks good.
@@ -633,7 +635,8 @@ contains
     if (verbose>2 .and. beta>1) then
        k=ngauss+1
        do l=1,n
-          print 2,'d35l',l,delta35integral(l,l,1,l),b1integral(l,l)&
+5         format (A,I3,*(G25.16,"  "))
+         print 5,'d35l',l,delta35integral(l,l,1,l),b1integral(l,l)&
                &*v2integral(l,l,k)*v1max**3,delta35integral(l,l,1,l)+b1integral(l,l)&
                &*v2integral(l,l,k)*v1max**3
           ! for testing, e.g. do a
@@ -644,7 +647,7 @@ contains
           ! but the first two do, because of different integral splits.
        enddo
        do l=1,n
-          print 2,'d35l',l,delta35integral(l,l,2,l),b1integral(l,l)&
+          print 5,'d35l',l,delta35integral(l,l,2,l),b1integral(l,l)&
                &*v2integral(l,l+2,k)*v1max**5,delta35integral(l,l,2,l)+b1integral(l,l)&
                &*v2integral(l,l+2,k)*v1max**5
        enddo
@@ -682,7 +685,7 @@ contains
     !endif
     if (verbose>2) then
        do l=1,lmax+1
-          print 2,'lend',l,delta35integral(1,1,1,l),delta35integral(1,1,1,l)/c1(1)**2,&
+          print 5,'lend',l,delta35integral(1,1,1,l),delta35integral(1,1,1,l)/c1(1)**2,&
                delta35integral(1,1,2,l),delta35integral(1,1,2,l)/c1(1)**2
        enddo
     endif
@@ -817,7 +820,8 @@ contains
                 val2=1./(1+2*lphys)*&
                      &((1+lphys)/s22-lphys/s12)*delta35integral(i,j,1,l)
                 if (abs(val)<abs(val1)*1e-5 .or. abs(val)<abs(val2)*1e-5) then
-                   print 2,'nc',i,j,l,val,val1,val2
+6                  format (A,3I3,*(G25.16,"  "))
+                   print 6,'nc',i,j,l,val,val1,val2
                 endif
              end do
           end do
@@ -826,14 +830,14 @@ contains
        do l=1,min(3,lmax)
           lphys=l-1 ! difference between index and actual l
           do i=1,5
-             print 2,'ik',l,i,intkernel(i,1:5,l)
-             print 2,'ik1',l,i,-(lphys+1.)*(lphys+2.)/(2.*(1.+2*lphys)*(3.+2*lphys)*s12&
+             print 4,'ik',l,i,intkernel(i,1:5,l)
+             print 4,'ik1',l,i,-(lphys+1.)*(lphys+2.)/(2.*(1.+2*lphys)*(3.+2*lphys)*s12&
                   &*s22)&
                   &*delta35integral(i,1:5,2,l)
-             print 2,'ik2',l,i,1./(1+2*lphys)*&
+             print 4,'ik2',l,i,1./(1+2*lphys)*&
                   &((1+lphys)/s22-lphys/s12)*delta35integral(i,1:5,1,l)
              if (lphys>=2) then
-                print 2,'ik3',l,i,1./(1+2*lphys)*&
+                print 4,'ik3',l,i,1./(1+2*lphys)*&
                      &lphys*(lphys-1.)/(2*(2*lphys-1.)*s12*s22)*&
                      &delta35integral(i,1:5,2,l-2)
              endif
@@ -873,7 +877,7 @@ contains
     !(only 1d)
     !  intkernel=intkernel*beta**2
     call cpu_time(t2)
-    if (verbose>0) print 2,'genintkernel took',t2-t1
+    if (verbose>0) print '(A,G13.3)','genintkernel took',t2-t1
   end subroutine genintkernel
 
   subroutine deltaintegrate(n,a1,b1,c1,xmax,beta,gp,gw,ngauss,deltaintegral)
@@ -936,21 +940,21 @@ contains
        enddo
     enddo
     call cpu_time(t2)
-2   format (*(G0,"  "))
-    if (verbose>0) print 2,'deltaintegrate took',t2-t1
+    if (verbose>0) print '(A,G13.3)','deltaintegrate took',t2-t1
 
     if (verbose>2) then
+5      format (A,I3,*(G25.16,"  "))
        do i=1,min(n,6)
-          print 2,'di',i,deltaintegral(i,:min(6,n))
+          print 5,'di',i,deltaintegral(i,:min(6,n))
        enddo
        do i=max(1,n-4),n
-          print 2,'di',i,deltaintegral(i,max(1,n-4):)
+          print 5,'di',i,deltaintegral(i,max(1,n-4):)
        enddo
        do i=1,min(n,6)
-          print 2,'di*beta',i,deltaintegral(i,:min(6,n))*beta
+          print 5,'di*beta',i,deltaintegral(i,:min(6,n))*beta
        enddo
        do i=max(1,n-4),n
-          print 2,'di*beta',i,deltaintegral(i,max(1,n-4):)*beta
+          print 5,'di*beta',i,deltaintegral(i,max(1,n-4):)*beta
        enddo
     endif
     ! new rescaling:
@@ -1028,7 +1032,7 @@ contains
     call cpu_time(t1)
 
     if (t1t2ratio/=1 .and. .not. present(intkernel2)) then
-       print 2,'genfieldkernel: t1t2ratio=',t1t2ratio,'and optional arg intker&
+       print '(A,G25.16,A)','genfieldkernel: t1t2ratio=',t1t2ratio,'and optional arg intker&
             &nel2 missing.'
     end if
 
@@ -1090,6 +1094,7 @@ contains
           end do
        endif
     endif
+!!$2   format (*(G0,"  "))
 !!$      block
 !!$        real di1(n,n),val
 !!$        call deltaintegrate(n,a1,b1,c1,xmax,1/beta,gp,gw,ngauss,di1)
@@ -1105,7 +1110,6 @@ contains
 !!$      end block
     deallocate(deltaintegral)
     call cpu_time(t2)
-    if (verbose>1) print 2,'genfieldkernel took',t2-t1
-2   format (*(G0,"  "))
+    if (verbose>1) print '(A,G13.3)','genfieldkernel took',t2-t1
   end subroutine genfieldkernel
 end module landau
