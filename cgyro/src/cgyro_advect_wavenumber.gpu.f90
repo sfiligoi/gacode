@@ -59,7 +59,8 @@ subroutine cgyro_advect_wavenumber(ij)
        ! Wavenumber advection profile shear
 
        if (profile_shear_flag == 1) then
- 
+
+!$acc loop seq 
          do ir=1,n_radial
            icc = (ir-1)*n_theta
 !$acc loop vector private(j)
