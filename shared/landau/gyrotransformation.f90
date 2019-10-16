@@ -27,7 +27,7 @@ contains
     ! (2/m)^(1/3)*0.535656656015.)  So mpullback depends on kbounda and
     ! kboundb
     
-    if (verbose>0) print 2,'Warning, need abs(kbound) est_mpullback!'
+    if (verbose>0) print '(A)','Warning, need abs(kbound) est_mpullback!'
     if (present(kboundb)) then
        kbb=kboundb
     else
@@ -39,7 +39,7 @@ contains
     else
        epsp=epspullback
     endif
-    if (verbose>0) print 2,'WARNING: using max of kb for both species in est_mpullback please improve me.'
+    if (verbose>0) print '(A)','WARNING: using max of kb for both species in est_mpullback please improve me.'
     kba=kbounda
     kba=max(kbounda,kbb)
     kbb=kba
@@ -54,14 +54,14 @@ contains
 !!$    if (verbose>0) print "(3(A,G0),4(A,ES11.4),2ES11.4)",'mpullback based on Jn is ',est_mpullback,' initial guess was ',ceiling(2 *max(kbounda&
 !!$         ,kbb)),'k1,k2',kbounda,kbb,' Bessel_j(' ,est_mpullback,',',kbounda,')=',bessel_jn(est_mpullback ,kbounda),' squaresum=',val,' sqrt=' &
 !!$         ,sqrt(val) ,val1,sqrt(val1)
-    if (verbose>0) print 2,'mpullback based on Jn is ',est_mpullback,' initial guess was ',ceiling(2 &
-         *max(kbounda,kbb)),'k1,k2',kbounda,kbb,' Bessel_j(' ,est_mpullback,',',kbounda,')=',&
+    if (verbose>0) print '(2(A,I3),5(A,G23.16),*(G23.16))','mpullback based on Jn is ',&
+         est_mpullback,' initial guess was ',ceiling(2*max(kbounda,kbb)),'k1,k2',kbounda,kbb,&
+         ' Bessel_j(' ,est_mpullback,',',kbounda,')=',&
          bessel_jn(est_mpullback ,kbounda),' squaresum=',val,' sqrt=',sqrt(val) ,val1,sqrt(val1)
     if (est_mpullback==max(200,ceiling(2*max(kbounda,kbb)))) then
-       print 2,'mpullback wrong!'
+       print '(A)','mpullback wrong!'
        stop
     end if
-2   format (*(G0,"  "))
   end function est_mpullback
 
   integer function est_extradegree(kbound,eps,mmode)
@@ -81,7 +81,7 @@ contains
     integer i,j,k,mm
     real, allocatable :: sample(:)
 
-    if (verbose>0) print 2,'Warning, need abs(kbound) est_extradegree!'
+    if (verbose>0) print '(A)','Warning, need abs(kbound) est_extradegree!'
     mm=0
     if (present(mmode)) mm=mmode
     if (present(eps)) then
@@ -109,16 +109,15 @@ contains
           val=val+sample(i)*cos(j*x)
        end do
        val=val/k
-       if (verbose>4) print 2,'deg',j,val
+       if (verbose>4) print '(A,2I3)','deg',j,val
        if (abs(val)>epsp) exit
     end do
 !!$    if (j==0) then
 !!$       print 2,'Did not find proper degree to sample Bessel fct!'
 !!$       stop
 !!$    end if
-    if (verbose>0) print 2,'Extra degree needed for sampling of Bessel fct=',j,'at k=',kbound
+    if (verbose>0) print '(A,I3,A,G23.16)','Extra degree needed for sampling of Bessel fct=',j,'at k=',kbound
     est_extradegree=j
-2   format (*(G0,"  "))
   end function est_extradegree
 
   integer function est_k_sampling(kb1,eps)
@@ -163,14 +162,14 @@ contains
 !!$         if (verbose>4) print 2,'deg',j,val,'should',&
 !!$              exp((0,.5)*kbound)*(0,1.)**j*2*bessel_jn(j,kbound*.5)
        val=exp((0,.5)*kbound)*(0,1.)**j*2*bessel_jn(j,kbound*.5)
-       if (verbose>4) print 2,'deg',j,val
+       if (verbose>4) print '(A,I3,G23.16)','deg',j,val
        if (abs(val)>epsp) exit
     end do
 !!$    end block chebysample
     !    j=j*8
-    if (verbose>0) print 2,'Found k sample number needed for gyro phases=',j,'at k=',kbound,'WARNING should depend on both species'
+    if (verbose>0) print '(A,I3,A,G23.16,A)','Found k sample number needed for gyro phases=',&
+         j,'at k=',kbound,'WARNING should depend on both species'
     est_k_sampling=j
-2   format (*(G0,"  "))
   end function est_k_sampling
   
   subroutine calc_projleg(projleg,lmax2,lmax0,gpl,gwl)
@@ -203,17 +202,18 @@ contains
        if (verbose>4) then
           do l=1,lmax0
              if (projleg(i,l)==0) then
-                print 2,'projleg zero??',i,l,projleg(i,l)
+                print 3,'projleg zero??',i,l,projleg(i,l)
                 k=k+1
              else if(abs(projleg(i,l))<epsgyrocolmat) then
-                print 2,'projleg near zero',i,l,projleg(i,l)
+                print 3,'projleg near zero',i,l,projleg(i,l)
                 k=k+1
+3               format (A,2I3,G23.16)
              end if
           end do
        end if
     enddo
     if (verbose>4) then
-       print 2,'projleg had',k,'strange coefficients.'
+       print '(A,I3,A)','projleg had',k,'strange coefficients.'
        do l=1,lmax0
           print 2,'projleg l norm=1',l,sum(projleg(:,l)**2)
        enddo
@@ -227,7 +227,8 @@ contains
           print 2,'projleg l norm=0',l,sum(projleg(l,:)*projleg(l+1,:))
        enddo
     end if
-2   format (*(G0,"  "))
+2   format (A,I3,G23.16)
+    
   end subroutine calc_projleg
 
 
@@ -298,6 +299,7 @@ contains
 
 
     if (verbose>0 .and. mod(lcolmat,2)==1) then
+2      format (A,I3,A)
        print 2,'Warning in gyrotrafo: lmax is assumed to be even, but input collision matrix has l=',lcolmat,'.'
        print 2,'Cannot use this extra information. Because lmax is needed to be even.'
     end if
@@ -706,19 +708,20 @@ contains
                 do l=1,lmax0
                    if (mod(j+l,2)==1) then
                       if (gyrocolmat(i,j,k,l)/=0) then
-                         print 2,'gyrocolmat parity??',m,i,j,k,l,gyrocolmat(i,j,k,l)
+                         print 5,'gyrocolmat parity??',m,i,j,k,l,gyrocolmat(i,j,k,l)
                          m1=m1+1
                       end if
                    else
                       if (gyrocolmat(i,j,k,l)==0) then
                          if (m==0 .or. krhoa /=0 .and. krb/=0) then
                             !in case for some reason kperp=0 we do not print the m>0.
-                            print 2,'gyrocolmat zero??',m,i,j,k,l,gyrocolmat(i,j,k,l)
+                            print 5,'gyrocolmat zero??',m,i,j,k,l,gyrocolmat(i,j,k,l)
                             m1=m1+1
                          end if
                       else if (abs(gyrocolmat(i,j,k,l))<1e-16*epsgyrocolmat) then
-                         print 2,'extraneous (near) zero at',m,i,j,k,l,gyrocolmat(i,j,k,l)
+                         print 5,'extraneous (near) zero at',m,i,j,k,l,gyrocolmat(i,j,k,l)
                       end if
+5                     format (A,4I3,G23.16)
                    end if
                    if ((i<k .or. i<=k .and. j<l) .and. abs(gyrocolmat(i,j,k,l)-gyrocolmat(k,l,i,j))>epsgyrocolmat*(1 &
                         +abs(gyrocolmat(i,j,k,l)))) then
@@ -731,7 +734,7 @@ contains
              end do
           end do
        end do
-       if (m1/=0) print 2,'gyrocolmat at m=',m,'had',m1,'issues.'
+       if (m1/=0) print '(A,I3,A,I3,A)','gyrocolmat at m=',m,'had',m1,'issues.'
     end if
     call cpu_time(t2)
     t(9)=t(9)+(t2-t1)
@@ -739,13 +742,13 @@ contains
     call cpu_time(t2)
     tto=t2-tto
     if (verbose>0) then
-       print 3,'tbes:',tbes
+       print '(A,G23.16)','tbes:',tbes
        cost(9)=1
        do i=1,11
           print "(I2,*(' ',A,ES9.2))",i,'t(i):',t(i),'cost(i):',cost(i),'t(i)/cost(i):',t(i)/cost(i),'flops/cycle(i):',2*cost(i)&
                /(t(i)*3.9d9)
        end do
-       print 2,'tot',tto,tbes+sum(t)
+       print '(A,2G23.16)','tot',tto,tbes+sum(t)
     end if
     if (verbose>4) then
        allocate(maxn(nmax0:nmaxpoly),maxl(lmax0:lmax))
@@ -773,7 +776,7 @@ contains
                 do l=1,lmax0
                    if (mod(j+l,2)==1) then
                       if (gyrocolmat(i,j,k,l)/=0) then
-                         print 2,'gyrocolmat parity??',i,j,k,l,gyrocolmat(i,j,k,l)
+                         print '(A,4I3,G23.16)','gyrocolmat parity??',i,j,k,l,gyrocolmat(i,j,k,l)
                       end if
                    else
                       if (gyrocolmat(i,j,k,l)==0) then
@@ -795,7 +798,8 @@ contains
                       sym1= abs(gyrocolmat(i,j,k,l)-gyrocolmat(k,l,i,j))
                       if (sym1>sym) then
                          sym=sym1
-                         if(q<o .and. sym>epsgyrocolmat) print 2,'gyrocolmat symmetry??',i,j,k,l,gyrocolmat(i,j ,k,l)&
+                         if(q<o .and. sym>epsgyrocolmat) &
+                              print '(A,4I3,*(G23.16))','gyrocolmat symmetry??',i,j,k,l,gyrocolmat(i,j ,k,l)&
                               ,gyrocolmat(k,l,i,j),gyrocolmat(i,j,k ,l)-gyrocolmat(k,l,i,j)
                          q=q+1
                       end if
@@ -843,8 +847,6 @@ contains
 !!$          end do
 !!$       enddo
     end if
-2   format (*(G0,"  "))
-3   format (*(G0.2,"  "))
   end subroutine gyrotrafo
 
   subroutine calc_projassleg(projassleg,ng,lmax2,mmax,gpl,gwl)
@@ -929,7 +931,7 @@ contains
                    if (l2*2+mod(oe+m,2)-1<m) cycle
                    j=j+1
                    if (projassleg(i,l2,oe,m)==0) then
-                      print 2,'projassleg zero??',i,x,l2,oe,m,projassleg(i,l2,oe,m)
+                      print '(A,I3,G23.16,3I3,G23.16)','projassleg zero??',i,x,l2,oe,m,projassleg(i,l2,oe,m)
                       m1=m1+1
                    else if(abs(projassleg(i,l2,oe,m))<epsgyrocolmat) then
                       !print 2,'projassleg near zero',i,x,l2,oe,m,projassleg(i,l2,oe,m)
@@ -940,7 +942,7 @@ contains
           end if
        enddo
     enddo
-    if (verbose>4) print 2,'projassleg had',m1,'zero and',m2,'near zero coefficients of',j,'total',(mmax)*ng*lmax2*2
+    if (verbose>4) print '(*(A,I3))','projassleg had',m1,'zero and',m2,'near zero coefficients of',j,'total',(mmax)*ng*lmax2*2
     ! Now should better check the normalisation
 !!$  m=(lmax+1)/2
 !!$  m=mpullback+1
@@ -950,7 +952,7 @@ contains
 !!$  do l=m,lmax-1
 !!$     print 2,'m,l norm=0',m,l,sum(projassleg(:,l,m)*projassleg(:,l+1,m))
 !!$  enddo
-2   format (*(G0,"  "))
+!!$ 2   format (*(G0,"  "))
   end subroutine calc_projassleg
   
   subroutine calc_projasslegm(projasslegm,ng,lmax,mmode,gpl,gwl)
@@ -973,7 +975,7 @@ contains
     integer m1,m2,q,o !only for verbose>4
 
     if (lmax > 2*ng) then
-       print 2,'calc_projasslegm error 2ng=',2*ng,'lmax=',lmax,'-> scalar products incorrect.'
+       print '(A,I3,A,I3,A)','calc_projasslegm error 2ng=',2*ng,'lmax=',lmax,'-> scalar products incorrect.'
        stop
     end if
     
@@ -1017,7 +1019,7 @@ contains
           do l=mmode,lmax
              j=j+1
              if (projasslegm(i,l-mmode+1)==0) then
-                print 2,'projasslegm zero??',i,x,l,mmode,projasslegm(i,l-mmode+1)
+                print '(A,I3,G23.16,I3,I3,G23.16)','projasslegm zero??',i,x,l,mmode,projasslegm(i,l-mmode+1)
                 m1=m1+1
              else if(abs(projasslegm(i,l-mmode+1))<epsgyrocolmat) then
                 !print 2,'projasslegm near zero',i,x,l,mmode,projasslegm(i,l-mmode+1)
@@ -1027,18 +1029,17 @@ contains
        end if
     enddo
     if (verbose>4) then
-       print 2,'projasslegm had',m1,'zero and',m2,'near zero coefficients of',j,'total',ng*(lmax-mmode+1)
+       print '(*(A,I3))','projasslegm had',m1,'zero and',m2,'near zero coefficients of',j,'total',ng*(lmax-mmode+1)
        ! Now should better check the normalisation
        ! ACTUALLY: Norm is not so accurate and looses 4 digits. Maybe there is a
        ! numerically better way to calculate these polynomials
        do l=max(mmode,lmax-5),lmax
-          print 2,'l norm=1',mmode,l,sum(projasslegm(:,l-mmode+1)**2)
+          print '(A,2I3,G23.16)','l norm=1',mmode,l,sum(projasslegm(:,l-mmode+1)**2)
        enddo
        do l=max(mmode,lmax-7),lmax-2
-          print 2,'l norm=0',mmode,l,sum(projasslegm(:,l-mmode+1)*projasslegm(:,l+2-mmode+1))
+          print '(A,2I3,G23.16)','l norm=0',mmode,l,sum(projasslegm(:,l-mmode+1)*projasslegm(:,l+2-mmode+1))
        enddo
     end if
-2   format (*(G0,"  "))
   end subroutine calc_projasslegm
 
   subroutine gyroproj(fout,nmax0,lmax0,lmode,mmode,projsteen,sp,nsteen,xmax,krho,eps)
@@ -1110,11 +1111,12 @@ contains
 
 
     if (mmode/=1 .or. lmode>lmax0) then
-       print 1,'Warning in gyroproj: lmode is larger than lmax0 or mmode/=1. ',&
+       print 2,'Warning in gyroproj: lmode is larger than lmax0 or mmode/=1. ',&
             'Projection will work, but result does not at all represent the original.'
     end if
 
     if (mmode>lmode .or. mmode<1 .or. lmode<1) then
+2      format (A,*(I3))
        print 2,'Illegal combination of lmode,mmode:',lmode,mmode
        stop
     end if
@@ -1165,7 +1167,8 @@ contains
     ! The minimum l index at all is max(0,lmode-lplanewave+1)
     if (verbose>0) print 2,'Minimum physical L after projection is',max(0,lmode-mpullback)
     if (lmax0>lmax) then
-       print 2,'warning gyroproj: lmax0=',lmax0,'>lmax=',lmax,'=lmode(',lmode,&
+3      format (A,*(I3,A))
+       print 3,'warning gyroproj: lmax0=',lmax0,'>lmax=',lmax,'=lmode(',lmode,&
             ')+mpullback(',mpullback,')'
        print 3,'=> the coefficients from lmax+1 .. lmax0 will be < epspullback. Reduce lmax0.'
     end if
@@ -1178,15 +1181,15 @@ contains
        lmax=lmode+mpullback
        print 2,'Corrected mpullback to make lmax even mp.=',mpullback
     end if
-    print 2,'Using lmax=',lmax,'. (lmode=',lmode,'lmax0=',lmax0,')'
+    print 3,'Using lmax=',lmax,'. (lmode=',lmode,'lmax0=',lmax0,')'
 
     extradegree=est_extradegree(abs(krho)*xmax,eps=eps)
 
     nmaxpoly=nmax0+extradegree
-    print 2,'Need extradegree',extradegree,'-> max. polynomial degree=',nmaxpoly-1
+    print 3,'Need extradegree',extradegree,'-> max. polynomial degree=',nmaxpoly-1
 
     if (nmaxpoly>nsteen) then
-       print 2,'Error in gyroproj: Max. polynomial degree in projsteen/sp='&
+       print 3,'Error in gyroproj: Max. polynomial degree in projsteen/sp='&
             ,nsteen-1,', but need',nmaxpoly-1
        stop
     end if
@@ -1214,12 +1217,13 @@ contains
        !    call calc_projassleg(paltest,lmax/2,(lmode+1)/2,mmode,gpl,gwl)
 
        call calc_projassleg(paltest,ng2,lmax/2,mmode,gpl,gwl)
-       print 2,'Comparison of new projasslegm with old projassleg:'
+       print 5,'Comparison of new projasslegm with old projassleg:'
        ngs=max(1,ng2-4)
        do l=mmode,lmax
-          print 2,'l=',l,'projasslegm(ngs:ng2,l)=',projasslegm(ngs:ng2,l-mmode+1)
-          print 2,'l=',l,'    paltest(ngs:ng2,l)=',paltest(ngs:ng2,(l+1)/2,mod(l+mmode,2)+1,mmode)
-          print 2,'l=',l,'      delta(ngs:ng2,l)=',paltest(ngs:ng2,(l+1)/2,mod(l+mmode,2)+1,mmode)&
+5         format (A,I3,A,G23.16)
+          print 5,'l=',l,'projasslegm(ngs:ng2,l)=',projasslegm(ngs:ng2,l-mmode+1)
+          print 5,'l=',l,'    paltest(ngs:ng2,l)=',paltest(ngs:ng2,(l+1)/2,mod(l+mmode,2)+1,mmode)
+          print 5,'l=',l,'      delta(ngs:ng2,l)=',paltest(ngs:ng2,(l+1)/2,mod(l+mmode,2)+1,mmode)&
                -projasslegm(ngs:ng2,l-mmode+1)
        end do
     end if
@@ -1260,7 +1264,7 @@ contains
        ! must use -m, but this gives just a (-1)^m sign.
        ! don't like sqrt(1-gpl(l)**2) for sin theta. Should use something more accurate. ???
     enddo
-    !         print 2,'m=',m,'sumbeskl',sum(beskla(:,1:ng2))
+    !         print 5,'m=',m,'sumbeskl',sum(beskla(:,1:ng2))
     if (timing) then
        call cpu_time(t2)
        tbes=tbes+(t2-t1)
@@ -1336,19 +1340,16 @@ contains
     if (timing) then
        call cpu_time(t2)
        tto=t2-tto
-       print 3,'tbes:',tbes
+       print '(A,ES9.2)','tbes:',tbes
        cost(9)=1
        do i=1,11
           if (t(i)/=0) &
                print "(I2,*(' ',A,ES9.2))",i,'t(i):',t(i),'cost(i):',cost(i),'t(i)/cost(i):',&
                t(i)/cost(i),'flops/cycle(i):',2*cost(i)/(t(i)*3.9d9) ! for I7-3770
        end do
-       print 2,'tot',tto,tbes+sum(t)
+       print '(A,2ES9.2)','tot',tto,tbes+sum(t)
     end if
 
-1   format (*(A))
-2   format (*(G0,"  "))
-3   format (*(G0.2,"  "))
   end subroutine gyroproj
 
   subroutine gen_polys(polys,names,unitsenergy,npolys,emat,projsteen,sp,a1,b1,c1,xmax,krho,&
@@ -1376,7 +1377,7 @@ contains
     integer l,m
 
     if (nmax0<4) then
-       print 1,'gen_pols: nmax0 must be >=4, otherwise the heat flux cannot be represented.'
+       print '(A)','gen_pols: nmax0 must be >=4, otherwise the heat flux cannot be represented.'
        stop
     end if
     allocate(fout(nmax0,lmax0,nmax0,3,3))
@@ -1416,32 +1417,34 @@ contains
     densener=1/(den(1)*emat(1,1)*den(1)*intnorm)
     dens=den*densener  ! -> now <dens|emat|den>=1. <dens|emat|dens=densener
     !dens: source of unit density, den: measurement "bra" vector.
-    print 2,'density energy=',densener,dens(1)**2*emat(1,1)*intnorm
+5   format (A,*(G23.16))
+    print 5,'density energy=',densener,dens(1)**2*emat(1,1)*intnorm
     momsener=1/(dot_product(mom(1:2),matmul(emat(1:2,1:2),mom(1:2)))*2./6.*intnorm)
     ! Factor 2./6: 2 Y functions contribute, each of them 1/sqrt(6)^2
     ! or: x^2 averaged over the sphere is 1/3.
     moms=mom/momsener
-    print 2,'momenergy=',momsener,dot_product(moms(1:2),matmul(emat(1:2,1:2),moms(1:2)))*2./6.*intnorm,&
+    print 5,'momenergy=',momsener,dot_product(moms(1:2),matmul(emat(1:2,1:2),moms(1:2)))*2./6.*intnorm,&
          dot_product(mom(1:2),matmul(emat(1:2,1:2),moms(1:2)))*intnorm
     ! energy of momentum "1" (*2)
     v=dot_product(en(1:3),emat(1:3,1))*dens(1)/densener*intnorm
     temps=en-dens*v
     w=1.5/(dot_product(temps(1:3),matmul(emat(1:3,1:3),en(1:3)))*intnorm)
     temps=temps*w
-    print 2,'temps=en*',w,'-dens*',v*w
+    print 6,'temps=en*',w,'-dens*',v*w
     tempsener=dot_product(temps(1:3),matmul(emat(1:3,1:3),temps(1:3)))*intnorm ! should be 1.5
     temp=temps/tempsener
-    print 2,'tempener',tempsener,'entemps',dot_product(temps(1:3),matmul(emat(1:3,1:3),en(1:3)))*intnorm,&
+    print 6,'tempener',tempsener,'entemps',dot_product(temps(1:3),matmul(emat(1:3,1:3),en(1:3)))*intnorm,&
          'dentemps',den(1)*sum(emat(1,1:3)*temps(1:3))*intnorm
     ! energy of temperature "1" (*2)
     v=dot_product(enfl(1:4),matmul(emat(1:4,1:2),moms(1:2)))/momsener*2./6*intnorm
     hfls=enfl-moms*v
     w=1/(dot_product(hfls(1:4),matmul(emat(1:4,1:4),enfl(1:4)))*2./6.*intnorm)
     hfls=hfls*w
-    print 2,'hfls=enfl*',w,'-moms*',v*w
+6   format (*(A,G23.16))
+    print 6,'hfls=enfl*',w,'-moms*',v*w
     hflsener=dot_product(hfls(1:4),matmul(emat(1:4,1:4),hfls(1:4)))*2./6*intnorm
     hfl=hfls/hflsener
-    print 2,'hflener',hflsener,'enfl*hfls',dot_product(hfls(1:4),matmul(emat(1:4,1:4),enfl(1:4)))*2./6*intnorm,&
+    print 6,'hflener',hflsener,'enfl*hfls',dot_product(hfls(1:4),matmul(emat(1:4,1:4),enfl(1:4)))*2./6*intnorm,&
          'momhfls',dot_product(hfls(1:4),matmul(emat(1:4,1:2),mom(1:2)))*2./6*intnorm
     ! energy of heat flux "1" (*2)
 
@@ -1461,7 +1464,7 @@ contains
     pxxs=pzzs
     pxxsener=pzzsener
     pxx=pzz
-    print 2,'pzzener',pzzsener,'pyzener=',pyzsener,'pxx_yyener',pxx_yysener
+    print 6,'pzzener',pzzsener,'pyzener=',pyzsener,'pxx_yyener',pxx_yysener
 
     npolys=11
     allocate(polys(nmax0,lmax0,npolys),names(npolys),unitsenergy(npolys))
@@ -1502,7 +1505,6 @@ contains
        end if
        !zero is the: xy stress,
     end do
-1   format (*(A))
-2   format (*(G0,"  "))
+
   end subroutine gen_polys
 end module gyrotransformation
