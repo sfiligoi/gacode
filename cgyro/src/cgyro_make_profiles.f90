@@ -13,6 +13,11 @@ subroutine cgyro_make_profiles
   real :: cc,loglam
 
   !-------------------------------------------------------------
+  ! Adiabatic-electron logic
+  if (n_species == 1) then
+     ae_flag = 1
+  endif
+  !-------------------------------------------------------------
 
   !-------------------------------------------------------------
   ! Local geometry treatment
