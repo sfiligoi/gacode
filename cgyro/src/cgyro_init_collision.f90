@@ -6,9 +6,9 @@ subroutine cgyro_init_collision
   use cgyro_init_collision_landau
   use landau
   use gyrotransformation
-!  use mpi_f08
+  !  use mpi_f08
   use mpi
-  
+
   implicit none
 
   integer ierror ! for MPI
@@ -28,6 +28,10 @@ subroutine cgyro_init_collision
   real, dimension(:,:,:,:,:,:), allocatable :: ctest
   real, dimension(:,:,:,:,:), allocatable :: bessel
   integer :: test_coll_flag = 0
+
+  !for collision_test_mode=1
+  real,allocatable :: cmat1(:,:,:)
+  real md,d
 
   if (collision_model == 5) then
      call cgyro_init_collision_simple
@@ -639,50 +643,44 @@ subroutine cgyro_init_collision
      deallocate(rsvect0)
      deallocate(rsvect1)
 
-     if (collision_test_mode==1) then
-        block
-          real,allocatable :: cmat1(:,:,:)
-          allocate(cmat1(nv,nv,nc_loc))
-          cmat1=cmat
-          cmat=1e300
-          call cgyro_init_landau(cmat1)
-          ! now let's compare
-          block
-            real md,d
-            md=-1
-            do ic_loc=1,nc_loc
-               do is=1,n_species
-                  do ix=1,n_xi
-                     do ie=1,n_energy
-                        iv=iv_v(ie,ix,is)
-                        do js=1,n_species
-                           do jx=1,n_xi
-                              do je=1,n_energy
-                                 jv=iv_v(je,jx,js)
-                                 d=abs(cmat(iv,jv,ic_loc)-cmat1(iv,jv,ic_loc))
-                                 if (d>md) then
-                                    md=d
-                                    if (i_proc==0) &
-                                         print 1,'so far max cmat diff @ ic_loc',ic_loc,'(is,ix,ie)=',is,ix,ie,&
-                                         '(js,jx,je)=',js,jx,je,'d=',d,'c=',cmat(iv,jv,ic_loc),&
-                                         'c1=',cmat1(iv,jv,ic_loc)
-                                 end if
-                              end do
-                           end do
-                        end do
-                     end do
-                  end do
-               end do
-            end do
-            call MPI_reduce(md,d,1,MPI_REAL8,MPI_MAX,0,MPI_COMM_WORLD,ierror)
-            if (i_proc==0) print 1,'Max. deviation over all processors:',d
-          end block
-        end block
+     coltestmode1: if (collision_test_mode==1) then
+        allocate(cmat1(nv,nv,nc_loc))
+        cmat1=cmat
+        cmat=1e300
+        call cgyro_init_landau(cmat1)
+        ! now let's compare
+        md=-1
+        do ic_loc=1,nc_loc
+           do is=1,n_species
+              do ix=1,n_xi
+                 do ie=1,n_energy
+                    iv=iv_v(ie,ix,is)
+                    do js=1,n_species
+                       do jx=1,n_xi
+                          do je=1,n_energy
+                             jv=iv_v(je,jx,js)
+                             d=abs(cmat(iv,jv,ic_loc)-cmat1(iv,jv,ic_loc))
+                             if (d>md) then
+                                md=d
+                                if (i_proc==0) &
+                                     print 1,'so far max cmat diff @ ic_loc',ic_loc,'(is,ix,ie)=',is,ix,ie,&
+                                     '(js,jx,je)=',js,jx,je,'d=',d,'c=',cmat(iv,jv,ic_loc),&
+                                     'c1=',cmat1(iv,jv,ic_loc)
+                             end if
+                          end do
+                       end do
+                    end do
+                 end do
+              end do
+           end do
+        end do
+        call MPI_reduce(md,d,1,MPI_REAL8,MPI_MAX,0,MPI_COMM_WORLD,ierror)
+        if (i_proc==0) print 1,'Max. deviation over all processors:',d
 1       format ('cgyro_in._col.: ',*(G0,' '))
         call MPI_Barrier(MPI_COMM_WORLD,ierror)
         call MPI_finalize(ierror)
         stop
-     endif
+     endif coltestmode1
   endif do_old_coll
   ! matrix solve parameters
   allocate(i_piv(nv))
