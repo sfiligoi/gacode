@@ -662,8 +662,9 @@ subroutine cgyro_init_collision
                              d=abs(cmat(iv,jv,ic_loc)-cmat1(iv,jv,ic_loc))
                              if (d>md) then
                                 md=d
+7                               format (A,I3,2(A,3I3),3(A,G23.16))
                                 if (i_proc==0) &
-                                     print 1,'so far max cmat diff @ ic_loc',ic_loc,'(is,ix,ie)=',is,ix,ie,&
+                                     print 7,'so far max cmat diff @ ic_loc',ic_loc,'(is,ix,ie)=',is,ix,ie,&
                                      '(js,jx,je)=',js,jx,je,'d=',d,'c=',cmat(iv,jv,ic_loc),&
                                      'c1=',cmat1(iv,jv,ic_loc)
                              end if
@@ -676,7 +677,7 @@ subroutine cgyro_init_collision
         end do
         call MPI_reduce(md,d,1,MPI_REAL8,MPI_MAX,0,MPI_COMM_WORLD,ierror)
         if (i_proc==0) print 1,'Max. deviation over all processors:',d
-1       format ('cgyro_in._col.: ',*(G0,' '))
+1       format ('cgyro_in._col.: ',A,G23.16)
         call MPI_Barrier(MPI_COMM_WORLD,ierror)
         call MPI_finalize(ierror)
         stop
