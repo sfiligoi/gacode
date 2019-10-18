@@ -135,7 +135,7 @@ contains
     nmaxpoly=n_energy+est_extradegree(kperprhomax,eps)
     lmax=n_xi+est_mpullback(kperprhomax,eps=eps)
     lmax=lmax+mod(lmax,2)
-    if (verbose>1 .and. i_proc==0) print '(*(A,I3))','init_collision_landau: using nmaxpoly',nmaxpoly,'lmax=',lmax
+    if (verbose>1 .and. i_proc==0) print '(9(A,I3))','init_collision_landau: using nmaxpoly',nmaxpoly,'lmax=',lmax
 
     allocate(a1(nmaxpoly+1),b1(nmaxpoly+1),c1(nmaxpoly+1),a(nmaxpoly+1),bsq(nmaxpoly+1),lg(nmaxpoly+1))
     call half_hermite_norm(nmaxpoly+1,0.,xmax,1.,alpha_poly,a1,b1,c1,a,bsq,lg)
@@ -161,7 +161,7 @@ contains
     call dstevr('N','A',nmaxpoly,a(1:nmaxpoly),bsq(2:nmaxpoly),0.,0.,0,0,0.,m,sp,&
          projsteen,nmaxpoly,isuppz,work,lwork,iwork,liwork,info)
     if (info/=0 .or. m/=nmaxpoly) then
-       if (i_proc==0) print '(A,*(I3))','init_collision_landau: dstevr error, here is info,m,nmaxpol',info,m,nmaxpoly
+       if (i_proc==0) print '(A,9(I3))','init_collision_landau: dstevr error, here is info,m,nmaxpol',info,m,nmaxpoly
        stop
     end if
     call dstein(nmaxpoly,a(1:nmaxpoly),bsq(2:nmaxpoly),nmaxpoly,sp,(/(1,i=1,nmaxpoly)/),&
@@ -194,7 +194,7 @@ contains
     end if
 
     ngauss=max(70,ceiling(15*xmax))+nmaxpoly+ceiling(alpha_poly/2) ! this is a good empirical value for sqrt(2)*xmax
-7   format (*(A,I3))
+7   format (9(A,I3))
     if (i_proc==0 .and. verbose>1) print 7,'init_collision_landau: using ng2=',ng2,'and ngauss=',ngauss
     allocate(gw(ngauss),gp(ngauss),gw2(ng2),gp2(ng2))
     call gauss_legendre(0.,1.,gp,gw,ngauss)
@@ -1113,7 +1113,7 @@ contains
                 if (i_proc==0) then
                    do l=1,2
                       ! kperp n-diff,mom-diff heat-diff T->n n->T
-                      write(6+ib+n_species*(ia+n_species*l),'(*(G24.16))') &
+                      write(6+ib+n_species*(ia+n_species*l),'(6(G24.16))') &
                            k_perp(ic)/bmag(it_c(ic))*rho,c(1,1,1,1,l),c(2,2,2,2,l),&
                            c(3,1,3,1,l),c(1,1,3,1,l),c(3,1,1,1,l)
                    end do
