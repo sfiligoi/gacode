@@ -390,7 +390,7 @@ def gapystr(s):
     if sys.version_info[0] == 2:
         u = []
         for i in range(10):
-            u.append(s[i].strip())
+            u.append(str(s[i]).strip())
         return u
     else:
         return str(s,'utf-8').split()
