@@ -95,6 +95,10 @@ contains
     if (i_proc==0) print 1,'WARNING: dens_rot not yet implemented in cgyro_init_collision_landau.F90!!'
     if (i_proc==0) print 1,'WARNING: nu_global not yet implemented in cgyro_init_collision_landau.F90!!'
     if (i_proc==0 .and. present(cmat1)) print 1,'cmat1 present, comparing ...'
+#ifdef __PGI
+    if (i_proc==0) print *,'init_collision_landau: WARNING: precision loss in landau.F90 - can''t use quad precision in PGI!!'
+#endif
+
 
     if (i_proc==0 .and. verbose>0) then ! verboseness settings of modules
        landauvb=1
