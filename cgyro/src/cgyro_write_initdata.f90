@@ -69,8 +69,8 @@ subroutine cgyro_write_initdata
            write(io,*)
            write(io,'(t2,a,1pe10.3)') ' kx*rho: ',2*pi*rho/length
         else
-           write(io,*) '          n          Delta            Max           L/rho'
-           write(io,'(a,i4,2x,2(g0.8,2x),2x,g0.8)') ' kx*rho:',&
+           write(io,'(a)') '          n          Delta            Max          L/rho'
+           write(io,'(a7,i4,3g15.8)') 'kx*rho:',&
                 n_radial,2*pi*rho/length,2*pi*rho*(n_radial/2-1)/length,length/rho
         endif
 
