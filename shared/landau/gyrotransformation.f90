@@ -54,8 +54,8 @@ contains
 !!$    if (verbose>0) print "(3(A,G0),4(A,ES11.4),2ES11.4)",'mpullback based on Jn is ',est_mpullback,' initial guess was ',ceiling(2 *max(kbounda&
 !!$         ,kbb)),'k1,k2',kbounda,kbb,' Bessel_j(' ,est_mpullback,',',kbounda,')=',bessel_jn(est_mpullback ,kbounda),' squaresum=',val,' sqrt=' &
 !!$         ,sqrt(val) ,val1,sqrt(val1)
-    if (verbose>0) print '(2(A,I3),5(A,G23.16),*(G23.16))','mpullback based on Jn is ',&
-         est_mpullback,' initial guess was ',ceiling(2*max(kbounda,kbb)),'k1,k2',kbounda,kbb,&
+    if (verbose>0) print '(2(A,I0),A,2G23.16,5(A,G23.16),5(G24.16))','mpullback based on Jn is',&
+         est_mpullback,' initial guess was ',ceiling(2*max(kbounda,kbb)),' k1,k2',kbounda,kbb,&
          ' Bessel_j(' ,est_mpullback,',',kbounda,')=',&
          bessel_jn(est_mpullback ,kbounda),' squaresum=',val,' sqrt=',sqrt(val) ,val1,sqrt(val1)
     if (est_mpullback==max(200,ceiling(2*max(kbounda,kbb)))) then
@@ -162,7 +162,7 @@ contains
 !!$         if (verbose>4) print 2,'deg',j,val,'should',&
 !!$              exp((0,.5)*kbound)*(0,1.)**j*2*bessel_jn(j,kbound*.5)
        val=exp((0,.5)*kbound)*(0,1.)**j*2*bessel_jn(j,kbound*.5)
-       if (verbose>4) print '(A,I3,G23.16)','deg',j,val
+       if (verbose>4) print '(A,I3,G25.16)','deg',j,val
        if (abs(val)>epsp) exit
     end do
 !!$    end block chebysample
@@ -207,7 +207,7 @@ contains
              else if(abs(projleg(i,l))<epsgyrocolmat) then
                 print 3,'projleg near zero',i,l,projleg(i,l)
                 k=k+1
-3               format (A,2I3,G23.16)
+3               format (A,2I3,G25.16)
              end if
           end do
        end if
@@ -227,7 +227,7 @@ contains
           print 2,'projleg l norm=0',l,sum(projleg(l,:)*projleg(l+1,:))
        enddo
     end if
-2   format (A,I3,G23.16)
+2   format (A,I3,G25.16)
     
   end subroutine calc_projleg
 
@@ -721,7 +721,7 @@ contains
                       else if (abs(gyrocolmat(i,j,k,l))<1e-16*epsgyrocolmat) then
                          print 5,'extraneous (near) zero at',m,i,j,k,l,gyrocolmat(i,j,k,l)
                       end if
-5                     format (A,4I3,G23.16)
+5                     format (A,4I3,G25.16)
                    end if
                    if ((i<k .or. i<=k .and. j<l) .and. abs(gyrocolmat(i,j,k,l)-gyrocolmat(k,l,i,j))>epsgyrocolmat*(1 &
                         +abs(gyrocolmat(i,j,k,l)))) then
@@ -742,13 +742,13 @@ contains
     call cpu_time(t2)
     tto=t2-tto
     if (verbose>0) then
-       print '(A,G23.16)','tbes:',tbes
+       print '(A,G24.16)','tbes:',tbes
        cost(9)=1
        do i=1,11
-          print "(I2,*(' ',A,ES9.2))",i,'t(i):',t(i),'cost(i):',cost(i),'t(i)/cost(i):',t(i)/cost(i),'flops/cycle(i):',2*cost(i)&
+          print "(I2,9(' ',A,ES9.2))",i,'t(i):',t(i),'cost(i):',cost(i),'t(i)/cost(i):',t(i)/cost(i),'flops/cycle(i):',2*cost(i)&
                /(t(i)*3.9d9)
        end do
-       print '(A,2G23.16)','tot',tto,tbes+sum(t)
+       print '(A,2G25.16)','tot',tto,tbes+sum(t)
     end if
     if (verbose>4) then
        allocate(maxn(nmax0:nmaxpoly),maxl(lmax0:lmax))
@@ -758,8 +758,8 @@ contains
        do i=lmax0,lmax
           maxl(i)=maxval(max_l_comp(i,:,:))
        end do
-       print '(A,*(ES9.2))','maxl',maxl
-       print '(A,*(ES9.2))','maxn',maxn
+       print '(A,10(ES9.2))','maxl',maxl
+       print '(A,10(ES9.2))','maxn',maxn
        ! e.g. ./gt 5 .1 1 1 1 100
        deallocate(maxn,maxl,max_n_comp,max_l_comp)
     end if
@@ -776,7 +776,7 @@ contains
                 do l=1,lmax0
                    if (mod(j+l,2)==1) then
                       if (gyrocolmat(i,j,k,l)/=0) then
-                         print '(A,4I3,G23.16)','gyrocolmat parity??',i,j,k,l,gyrocolmat(i,j,k,l)
+                         print '(A,4I3,G25.16)','gyrocolmat parity??',i,j,k,l,gyrocolmat(i,j,k,l)
                       end if
                    else
                       if (gyrocolmat(i,j,k,l)==0) then
@@ -799,7 +799,7 @@ contains
                       if (sym1>sym) then
                          sym=sym1
                          if(q<o .and. sym>epsgyrocolmat) &
-                              print '(A,4I3,*(G23.16))','gyrocolmat symmetry??',i,j,k,l,gyrocolmat(i,j ,k,l)&
+                              print '(A,4I3,5(G25.16))','gyrocolmat symmetry??',i,j,k,l,gyrocolmat(i,j ,k,l)&
                               ,gyrocolmat(k,l,i,j),gyrocolmat(i,j,k ,l)-gyrocolmat(k,l,i,j)
                          q=q+1
                       end if
@@ -931,7 +931,7 @@ contains
                    if (l2*2+mod(oe+m,2)-1<m) cycle
                    j=j+1
                    if (projassleg(i,l2,oe,m)==0) then
-                      print '(A,I3,G23.16,3I3,G23.16)','projassleg zero??',i,x,l2,oe,m,projassleg(i,l2,oe,m)
+                      print '(A,I3,G25.16,3I3,G25.16)','projassleg zero??',i,x,l2,oe,m,projassleg(i,l2,oe,m)
                       m1=m1+1
                    else if(abs(projassleg(i,l2,oe,m))<epsgyrocolmat) then
                       !print 2,'projassleg near zero',i,x,l2,oe,m,projassleg(i,l2,oe,m)
@@ -942,7 +942,7 @@ contains
           end if
        enddo
     enddo
-    if (verbose>4) print '(*(A,I3))','projassleg had',m1,'zero and',m2,'near zero coefficients of',j,'total',(mmax)*ng*lmax2*2
+    if (verbose>4) print '(8(A,I3))','projassleg had',m1,'zero and',m2,'near zero coefficients of',j,'total',(mmax)*ng*lmax2*2
     ! Now should better check the normalisation
 !!$  m=(lmax+1)/2
 !!$  m=mpullback+1
@@ -952,7 +952,7 @@ contains
 !!$  do l=m,lmax-1
 !!$     print 2,'m,l norm=0',m,l,sum(projassleg(:,l,m)*projassleg(:,l+1,m))
 !!$  enddo
-!!$ 2   format (*(G0,"  "))
+!!$ 2   format (5(G0,"  "))
   end subroutine calc_projassleg
   
   subroutine calc_projasslegm(projasslegm,ng,lmax,mmode,gpl,gwl)
@@ -1019,7 +1019,7 @@ contains
           do l=mmode,lmax
              j=j+1
              if (projasslegm(i,l-mmode+1)==0) then
-                print '(A,I3,G23.16,I3,I3,G23.16)','projasslegm zero??',i,x,l,mmode,projasslegm(i,l-mmode+1)
+                print '(A,I3,G25.16,I3,I3,G25.16)','projasslegm zero??',i,x,l,mmode,projasslegm(i,l-mmode+1)
                 m1=m1+1
              else if(abs(projasslegm(i,l-mmode+1))<epsgyrocolmat) then
                 !print 2,'projasslegm near zero',i,x,l,mmode,projasslegm(i,l-mmode+1)
@@ -1029,15 +1029,15 @@ contains
        end if
     enddo
     if (verbose>4) then
-       print '(*(A,I3))','projasslegm had',m1,'zero and',m2,'near zero coefficients of',j,'total',ng*(lmax-mmode+1)
+       print '(8(A,I3))','projasslegm had',m1,'zero and',m2,'near zero coefficients of',j,'total',ng*(lmax-mmode+1)
        ! Now should better check the normalisation
        ! ACTUALLY: Norm is not so accurate and looses 4 digits. Maybe there is a
        ! numerically better way to calculate these polynomials
        do l=max(mmode,lmax-5),lmax
-          print '(A,2I3,G23.16)','l norm=1',mmode,l,sum(projasslegm(:,l-mmode+1)**2)
+          print '(A,2I3,G25.16)','l norm=1',mmode,l,sum(projasslegm(:,l-mmode+1)**2)
        enddo
        do l=max(mmode,lmax-7),lmax-2
-          print '(A,2I3,G23.16)','l norm=0',mmode,l,sum(projasslegm(:,l-mmode+1)*projasslegm(:,l+2-mmode+1))
+          print '(A,2I3,G25.16)','l norm=0',mmode,l,sum(projasslegm(:,l-mmode+1)*projasslegm(:,l+2-mmode+1))
        enddo
     end if
   end subroutine calc_projasslegm
@@ -1116,7 +1116,7 @@ contains
     end if
 
     if (mmode>lmode .or. mmode<1 .or. lmode<1) then
-2      format (A,*(I3))
+2      format (A,30(I3))
        print 2,'Illegal combination of lmode,mmode:',lmode,mmode
        stop
     end if
@@ -1167,7 +1167,7 @@ contains
     ! The minimum l index at all is max(0,lmode-lplanewave+1)
     if (verbose>0) print 2,'Minimum physical L after projection is',max(0,lmode-mpullback)
     if (lmax0>lmax) then
-3      format (A,*(I3,A))
+3      format (A,20(I3,A))
        print 3,'warning gyroproj: lmax0=',lmax0,'>lmax=',lmax,'=lmode(',lmode,&
             ')+mpullback(',mpullback,')'
        print 3,'=> the coefficients from lmax+1 .. lmax0 will be < epspullback. Reduce lmax0.'
@@ -1220,7 +1220,7 @@ contains
        print 5,'Comparison of new projasslegm with old projassleg:'
        ngs=max(1,ng2-4)
        do l=mmode,lmax
-5         format (A,I3,A,G23.16)
+5         format (A,I3,A,G25.16)
           print 5,'l=',l,'projasslegm(ngs:ng2,l)=',projasslegm(ngs:ng2,l-mmode+1)
           print 5,'l=',l,'    paltest(ngs:ng2,l)=',paltest(ngs:ng2,(l+1)/2,mod(l+mmode,2)+1,mmode)
           print 5,'l=',l,'      delta(ngs:ng2,l)=',paltest(ngs:ng2,(l+1)/2,mod(l+mmode,2)+1,mmode)&
@@ -1344,7 +1344,7 @@ contains
        cost(9)=1
        do i=1,11
           if (t(i)/=0) &
-               print "(I2,*(' ',A,ES9.2))",i,'t(i):',t(i),'cost(i):',cost(i),'t(i)/cost(i):',&
+               print "(I2,9(' ',A,ES9.2))",i,'t(i):',t(i),'cost(i):',cost(i),'t(i)/cost(i):',&
                t(i)/cost(i),'flops/cycle(i):',2*cost(i)/(t(i)*3.9d9) ! for I7-3770
        end do
        print '(A,2ES9.2)','tot',tto,tbes+sum(t)
@@ -1417,7 +1417,7 @@ contains
     densener=1/(den(1)*emat(1,1)*den(1)*intnorm)
     dens=den*densener  ! -> now <dens|emat|den>=1. <dens|emat|dens=densener
     !dens: source of unit density, den: measurement "bra" vector.
-5   format (A,*(G23.16))
+5   format (A,(G23.16,4G25.16))
     print 5,'density energy=',densener,dens(1)**2*emat(1,1)*intnorm
     momsener=1/(dot_product(mom(1:2),matmul(emat(1:2,1:2),mom(1:2)))*2./6.*intnorm)
     ! Factor 2./6: 2 Y functions contribute, each of them 1/sqrt(6)^2
@@ -1440,7 +1440,7 @@ contains
     hfls=enfl-moms*v
     w=1/(dot_product(hfls(1:4),matmul(emat(1:4,1:4),enfl(1:4)))*2./6.*intnorm)
     hfls=hfls*w
-6   format (*(A,G23.16))
+6   format (4(A,G23.16))
     print 6,'hfls=enfl*',w,'-moms*',v*w
     hflsener=dot_product(hfls(1:4),matmul(emat(1:4,1:4),hfls(1:4)))*2./6*intnorm
     hfl=hfls/hflsener
