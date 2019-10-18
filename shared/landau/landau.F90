@@ -539,7 +539,7 @@ contains
              val=val+pi
           enddo
 
-4         format (A,2I3,*(G25.16,"  "))
+4         format (A,2I3,5(G25.16))
           print 4,'v2int',i,l,v2integral(i,l,ngauss+1),val,v2integral(i,l,ngauss+1)/val-1,&
                maxval(abs(v2integral(i,l,:)))/v2integral(i,l,ngauss+1)
           ! agreement here perfect for beta=0.02 e.g.
@@ -554,7 +554,7 @@ contains
     ! Compare end result for beta>=1
     if (verbose>2 .and. beta >=1 .and. .false.) then
        do l=1,lmax+3,2
-          print '(G25.16)',v2max
+          print '(G23.16)',v2max
           m2=l+1
           do i=2,n,2
              val2=0
@@ -635,7 +635,7 @@ contains
     if (verbose>2 .and. beta>1) then
        k=ngauss+1
        do l=1,n
-5         format (A,I3,*(G25.16,"  "))
+5         format (A,I3,5(G25.16))
          print 5,'d35l',l,delta35integral(l,l,1,l),b1integral(l,l)&
                &*v2integral(l,l,k)*v1max**3,delta35integral(l,l,1,l)+b1integral(l,l)&
                &*v2integral(l,l,k)*v1max**3
@@ -820,7 +820,7 @@ contains
                 val2=1./(1+2*lphys)*&
                      &((1+lphys)/s22-lphys/s12)*delta35integral(i,j,1,l)
                 if (abs(val)<abs(val1)*1e-5 .or. abs(val)<abs(val2)*1e-5) then
-6                  format (A,3I3,*(G25.16,"  "))
+6                  format (A,3I3,5(G25.16))
                    print 6,'nc',i,j,l,val,val1,val2
                 endif
              end do
@@ -943,7 +943,7 @@ contains
     if (verbose>0) print '(A,G13.3)','deltaintegrate took',t2-t1
 
     if (verbose>2) then
-5      format (A,I3,*(G25.16,"  "))
+5      format (A,I3,5(G25.16))
        do i=1,min(n,6)
           print 5,'di',i,deltaintegral(i,:min(6,n))
        enddo
@@ -1032,7 +1032,7 @@ contains
     call cpu_time(t1)
 
     if (t1t2ratio/=1 .and. .not. present(intkernel2)) then
-       print '(A,G25.16,A)','genfieldkernel: t1t2ratio=',t1t2ratio,'and optional arg intker&
+       print '(A,G23.16,A)','genfieldkernel: t1t2ratio=',t1t2ratio,'and optional arg intker&
             &nel2 missing.'
     end if
 
