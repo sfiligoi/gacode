@@ -391,6 +391,7 @@ contains
                    do l=1,lmax
                       ! in this case Landauop is self-adjoint, i.e. for given l and ia and ib
                       ! Landauop=Landauop^T
+#if !(defined(NO_DIMATCOPY)|defined(__PGI)|defined(__APPLE__))
 #ifdef __INTEL_COMPILER
                       !use MKL
                       call mkl_domatcopy('c','t',nmaxpoly,nmaxpoly,1.,Landauop(:,:,l,is),&
@@ -399,6 +400,14 @@ contains
                       !use openBLAS
                       call domatcopy('c','t',nmaxpoly,nmaxpoly,1.,Landauop(:,:,l,is),&
                            nmaxpoly,Landauop(:,:,l,is1),nmaxpoly)
+#endif
+#else
+                      !alternative to domatcopy
+                      do i=1,nmaxpoly
+                         do j=1,nmaxpoly
+                            Landauop(j,i,l,is1)=Landauop(i,j,l,is)
+                         end do
+                      end do
 #endif
                    end do
                 end if
@@ -640,6 +649,7 @@ contains
        if (proc(ik,ia,ib)==0) exit
        if (i_proc==proc(ik,ia,ib)-1 .and. ia>ib .and. temp(ia)==temp(ib)) then
           do ik=1,nk(ia,ib)
+#if !(defined(NO_DIMATCOPY)|defined(__PGI)|defined(__APPLE__))
 #ifdef __INTEL_COMPILER
              !use MKL
              call mkl_domatcopy('c','t',n_xi*n_energy,n_xi*n_energy,1.,&
@@ -650,6 +660,14 @@ contains
              call domatcopy('c','t',n_xi*n_energy,n_xi*n_energy,1.,&
                   gyrocolmat(:,:,:,:,ia,ib,ik),n_xi*n_energy,&
                   gyrocolmat(:,:,:,:,ib,ia,ik),n_xi*n_energy)
+#endif
+#else
+             !alternative to domatcopy
+             do k=1,n_xi*n_energy
+                do j=1,n_xi*n_energy
+                   gyrocolmat(j,1,k,1,ib,ia,ik)=gyrocolmat(k,1,j,1,ia,ib,ik)
+                end do
+             end do
 #endif
           end do
        end if
