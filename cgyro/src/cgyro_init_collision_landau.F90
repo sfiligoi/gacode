@@ -56,7 +56,7 @@ contains
     !type(MPI_Status) :: status !mpi_f08
     integer status(MPI_STATUS_SIZE)
     integer ierror
-    
+
     ! for IEEE
     type(ieee_status_type) ieee_status
 
@@ -73,15 +73,25 @@ contains
     integer ngauss
     integer it,ic,ic_loc,ia,ib,ik,nkmax,is,is1,ns
     integer,allocatable :: nk(:,:)
-    real, allocatable :: kperp_arr(:,:,:)
-
+    real, allocatable :: kperp_arr(:,:,:),loss(:),dist(:),id(:,:)
+    real,allocatable:: AF(:,:),pv(:,:),em(:,:),Sc(:),ferr(:),berr(:)
+    real rcond
+    character equed
+    real, allocatable, dimension(:,:,:,:) :: m1,m2
+    real, allocatable :: chebweightarr(:)
+    real target_k,target_ik
+    integer ix,ie,jx,je,iv,jv
     integer i,j,k,l,m
     real xmax,kperp_bmag_max,rhomax,kperprhomax
+    real kperp_bmag,md,d,md1,d1,devi,s,s1
     integer nmaxpoly,lmax
-    integer totalcost
+    integer totalcost,lneeded
     real beta,t1t2ratio,normalization,fieldnormalization,fieldnormalization_ba,testnormalization
     logical t1t2flag
-
+    character(1000) :: fn
+    real, allocatable, dimension(:,:,:,:,:) :: c
+    real, allocatable, dimension(:,:) :: v2polytimesemat,mommat,v2momtimesemat,mom2v
+    integer, allocatable, dimension(:) :: nc1_proc,nc2_proc,proc_c
     if (i_proc==0) print 1,'WARNING: dens_rot not yet implemented in cgyro_init_collision_landau.F90!!'
     if (i_proc==0) print 1,'WARNING: nu_global not yet implemented in cgyro_init_collision_landau.F90!!'
     if (i_proc==0 .and. present(cmat1)) print 1,'cmat1 present, comparing ...'
@@ -91,7 +101,7 @@ contains
        gtvb=1
     end if
 
-!$    call MPI_Barrier(MPI_COMM_WORLD,ierror) ! may improve timing
+    !$    call MPI_Barrier(MPI_COMM_WORLD,ierror) ! may improve timing
     call cpu_time(t1)
     ns=ispec(n_species,n_species) !number of non-redundant species pairs
     xmax=sqrt(e_max) !cut off at exp(-xmax^2)
@@ -105,12 +115,9 @@ contains
     end if
     do i=1,n_theta
        do j=1,n_radial
-          block
-            real kperp_bmag
-            kperp_bmag=k_perp(ic_c(j,i))/bmag(i)
-            !        global array k_perp(1 ... nc) nc=n_theta*n_radial
-            kperp_bmag_max=max(kperp_bmag_max,kperp_bmag)
-          end block
+          kperp_bmag=k_perp(ic_c(j,i))/bmag(i)
+          !        global array k_perp(1 ... nc) nc=n_theta*n_radial
+          kperp_bmag_max=max(kperp_bmag_max,kperp_bmag)
        end do
     end do
     ! kperp_bmag_max is not completely global, there is still the n dependence.
@@ -313,39 +320,38 @@ contains
 !!$       end do
        !Now check momentum and energy conservation
        if (i_proc==0) then
-          block
-            real loss(nmaxpoly),dist(nmaxpoly)
-            l=1;k=3 !energy
-            do ib=1,n_species
-               dist=0
-               do ia=1,n_species
-                  if (ib==ia) then
-                     loss=matmul(polyrep(k,:),Landauop(:,:,l,ispec(ia,ib)))*temp(ia)*dens(ia)
-                  else
-                     dist=dist+matmul(polyrep(k,:),Landauop(:,:,l,ispec(ia,ib)))*temp(ia)*dens(ia)
-                  end if
-               end do
-               print 1,'spec',ib,' energy:'
-               print 1,'loss',loss
-               print 1,'dist',dist
-            end do
-            l=2;k=2 !momentum
-            do ib=1,n_species
-               dist=0
-               do ia=1,n_species
-                  if (ib==ia) then
-                     loss=matmul(polyrep(k,:),Landauop(:,:,l,ispec(ia,ib)))*&
-                          sqrt(temp(ia)*mass(ia))*dens(ia)
-                  else
-                     dist=dist+matmul(polyrep(k,:),Landauop(:,:,l,ispec(ia,ib)))*&
-                          sqrt(temp(ia)*mass(ia))*dens(ia)
-                  end if
-               end do
-               print 1,'spec',ib,' momentum:'
-               print 1,'loss',loss
-               print 1,'dist',dist
-            end do
-          end block
+          allocate(loss(nmaxpoly),dist(nmaxpoly))
+          l=1;k=3 !energy
+          do ib=1,n_species
+             dist=0
+             do ia=1,n_species
+                if (ib==ia) then
+                   loss=matmul(polyrep(k,:),Landauop(:,:,l,ispec(ia,ib)))*temp(ia)*dens(ia)
+                else
+                   dist=dist+matmul(polyrep(k,:),Landauop(:,:,l,ispec(ia,ib)))*temp(ia)*dens(ia)
+                end if
+             end do
+             print 1,'spec',ib,' energy:'
+             print 1,'loss',loss
+             print 1,'dist',dist
+          end do
+          l=2;k=2 !momentum
+          do ib=1,n_species
+             dist=0
+             do ia=1,n_species
+                if (ib==ia) then
+                   loss=matmul(polyrep(k,:),Landauop(:,:,l,ispec(ia,ib)))*&
+                        sqrt(temp(ia)*mass(ia))*dens(ia)
+                else
+                   dist=dist+matmul(polyrep(k,:),Landauop(:,:,l,ispec(ia,ib)))*&
+                        sqrt(temp(ia)*mass(ia))*dens(ia)
+                end if
+             end do
+             print 1,'spec',ib,' momentum:'
+             print 1,'loss',loss
+             print 1,'dist',dist
+          end do
+          deallocate(loss,dist)
        end if
     endif
     ! Now the interspecies collision matrices
@@ -390,25 +396,22 @@ contains
                 !Now check self-adjointness, when possible:
                 if (verbose>4 .and. i_proc==0 .and. ia<ib) then
                    print 1,'Checking self-adjointness at ia',ia,'ib',ib,'Ta=Tb',temp(ia),temp(ib)
-                   block
-                     real md,d
-                     md=-1
-                     do l=1,lmax
-                        do i=1,nmaxpoly
-                           do j=1,nmaxpoly
-                              d=abs(Landauop(i,j,l,is)-Landauop(j,i,l,is1))
-                              if (d>1e-15) then
-                                 print 1,'SA-error',i,j,l,ia,ib,'is',is,is1,&
-                                      'cm',Landauop(i,j,l,is),Landauop(j,i,l,is1)
-                              elseif (d>md) then
-                                 md=d
-                                 print 1,'so far max SA deviation',i,j,l,ia,ib,'is',is,is1,&
-                                      'cm',Landauop(i,j,l,is),Landauop(j,i,l,is1),d
-                              end if
-                           end do
-                        end do
-                     end do
-                   end block
+                   md=-1
+                   do l=1,lmax
+                      do i=1,nmaxpoly
+                         do j=1,nmaxpoly
+                            d=abs(Landauop(i,j,l,is)-Landauop(j,i,l,is1))
+                            if (d>1e-15) then
+                               print 1,'SA-error',i,j,l,ia,ib,'is',is,is1,&
+                                    'cm',Landauop(i,j,l,is),Landauop(j,i,l,is1)
+                            elseif (d>md) then
+                               md=d
+                               print 1,'so far max SA deviation',i,j,l,ia,ib,'is',is,is1,&
+                                    'cm',Landauop(i,j,l,is),Landauop(j,i,l,is1),d
+                            end if
+                         end do
+                      end do
+                   end do
                 endif
              else if (ia>ib) then ! Ta /= Tb
                 ! in this case genfieldkernel calculates ab and ba field simultaneously
@@ -416,37 +419,34 @@ contains
                      gp,gw,ngauss,gp2,gw2,ng2,Landauop(:,:,:,is),intkernel2=Landauop(:,:,:,is1))
                 if (verbose>4 .and. i_proc==0) then
                    print 1,'Checking symmetries of field kernel at ia',ia,'ib',ib,'Ta',temp(ia),'Tb',temp(ib)
-                   block
-                     real d,md,d1,md1
-                     call genfieldkernel(nmaxpoly,lmax,a1,b1,c1,xmax,1./beta,1./t1t2ratio,&
-                          gp,gw,ngauss,gp2,gw2,ng2,field,intkernel2=field2)
-                     md=-1
-                     md1=-1
-                     do l=1,lmax
-                        do i=1,nmaxpoly
-                           do j=1,nmaxpoly
-                              d=abs(Landauop(i,j,l,is)-field2(i,j,l))
-                              if (d>1e-15) then
-                                 print 1,'symm-error',i,j,l,ia,ib,'is',is,is1,&
-                                      'cm',Landauop(i,j,l,is),field2(i,j,l),d
-                              elseif (d>md) then
-                                 md=d
-                                 print 1,'so far max symm error',i,j,l,ia,ib,'is',is,is1,&
-                                      'cm',Landauop(i,j,l,is),field2(i,j,l),d
-                              end if
-                              d1=abs(Landauop(i,j,l,is1)-field(i,j,l))
-                              if (d1>1e-15) then
-                                 print 1,'symm-error (2)',i,j,l,ia,ib,'is',is,is1,&
-                                      'cm',Landauop(i,j,l,is1),field(i,j,l),d1
-                              elseif (d1>md1) then
-                                 md1=d1
-                                 print 1,'so far max symm error (2)',i,j,l,ia,ib,'is',is,is1,&
-                                      'cm',Landauop(i,j,l,is1),field(i,j,l),d1
-                              end if
-                           end do
-                        end do
-                     end do
-                   end block
+                   call genfieldkernel(nmaxpoly,lmax,a1,b1,c1,xmax,1./beta,1./t1t2ratio,&
+                        gp,gw,ngauss,gp2,gw2,ng2,field,intkernel2=field2)
+                   md=-1
+                   md1=-1
+                   do l=1,lmax
+                      do i=1,nmaxpoly
+                         do j=1,nmaxpoly
+                            d=abs(Landauop(i,j,l,is)-field2(i,j,l))
+                            if (d>1e-15) then
+                               print 1,'symm-error',i,j,l,ia,ib,'is',is,is1,&
+                                    'cm',Landauop(i,j,l,is),field2(i,j,l),d
+                            elseif (d>md) then
+                               md=d
+                               print 1,'so far max symm error',i,j,l,ia,ib,'is',is,is1,&
+                                    'cm',Landauop(i,j,l,is),field2(i,j,l),d
+                            end if
+                            d1=abs(Landauop(i,j,l,is1)-field(i,j,l))
+                            if (d1>1e-15) then
+                               print 1,'symm-error (2)',i,j,l,ia,ib,'is',is,is1,&
+                                    'cm',Landauop(i,j,l,is1),field(i,j,l),d1
+                            elseif (d1>md1) then
+                               md1=d1
+                               print 1,'so far max symm error (2)',i,j,l,ia,ib,'is',is,is1,&
+                                    'cm',Landauop(i,j,l,is1),field(i,j,l),d1
+                            end if
+                         end do
+                      end do
+                   end do
                 end if
 
                 call dscal(nmaxpoly**2*lmax,-fieldnormalization,Landauop(:,:,:,is),1)
@@ -517,17 +517,14 @@ contains
        do ib=1,n_species
           if (ia>=ib .or. temp(ia)/=temp(ib)) then
              do ik=1,nk(ia,ib)
-                block
-                  integer lneeded !,npolyneeded
-                  lneeded=n_xi+est_mpullback(kperp_arr(ik,ia,ib)*xmax,kboundb=kperp_arr(ik,ib,ia)*xmax,eps=eps)
-                  ! npolyneeded=n_energy+est_extradegree(kbound=max(kperp_arr(ik,ia,ib),kperp_arr(ik,ib,ia))*xmax,eps=eps)
-                  ! for simplicity, always the maximum available Steen(-like) polys are used.
-                  gtcost(ik,ia,ib)=(lneeded-n_xi+1)*lneeded !*nmaxpoly**2 !only need relative estimate
-                  if (gtcost(ik,ia,ib)==0) then
-                     print 1,'ERROR iproc',i_proc,'cost=0, (ik,ia,ib)=',ik,ia,ib
-                     stop
-                  end if
-                end block
+                lneeded=n_xi+est_mpullback(kperp_arr(ik,ia,ib)*xmax,kboundb=kperp_arr(ik,ib,ia)*xmax,eps=eps)
+                ! npolyneeded=n_energy+est_extradegree(kbound=max(kperp_arr(ik,ia,ib),kperp_arr(ik,ib,ia))*xmax,eps=eps)
+                ! for simplicity, always the maximum available Steen(-like) polys are used.
+                gtcost(ik,ia,ib)=(lneeded-n_xi+1)*lneeded !*nmaxpoly**2 !only need relative estimate
+                if (gtcost(ik,ia,ib)==0) then
+                   print 1,'ERROR iproc',i_proc,'cost=0, (ik,ia,ib)=',ik,ia,ib
+                   stop
+                end if
                 if (i_proc==0 .and. verbose>0) then
                    print 1,'cost estimate for ia=',ia,'ib=',ib,'ik=',ik,'is',gtcost(ik,ia,ib)
                 endif
@@ -658,26 +655,25 @@ contains
        xi2L(:,i)=projleg(i,:)*sqrt(w_xi(i))
     end do
     if (verbose>2 .and. i_proc==0) then
-       block
-         real id(n_xi,n_xi),devi,d
-         call dgemm('N','N',n_xi,n_xi,n_xi,1.,xi2L,n_xi,L2xi,n_xi,0.&
-              ,id,n_xi)
-         devi=0
-         do i=1,n_xi
-            do j=1,n_xi
-               if (i==j) then
-                  d=abs(id(i,j)-1)
-               else
-                  d=abs(id(i,j))
-               end if
-               if (d>devi) then
-                  print 1,'so far max xi-mat deviation',d,'at i,j',i,j,'mat='&
-                       ,id(i,j)
-                  devi=d
-               end if
-            end do
-         end do
-       end block
+       allocate(id(n_xi,n_xi))
+       call dgemm('N','N',n_xi,n_xi,n_xi,1.,xi2L,n_xi,L2xi,n_xi,0.&
+            ,id,n_xi)
+       devi=0
+       do i=1,n_xi
+          do j=1,n_xi
+             if (i==j) then
+                d=abs(id(i,j)-1)
+             else
+                d=abs(id(i,j))
+             end if
+             if (d>devi) then
+                print 1,'so far max xi-mat deviation',d,'at i,j',i,j,'mat='&
+                     ,id(i,j)
+                devi=d
+             end if
+          end do
+       end do
+       deallocate(id)
     end if
     ! do the same thing from above again for the lesser n_energy vertices:
     deallocate(projsteen)
@@ -710,26 +706,25 @@ contains
     ! now polycoeff=v2poly*vertexcoeff
     !   vertexcoeff=poly2v^T*polycoeff.
     if (verbose>2 .and. i_proc==0) then
-       block
-         real id(n_energy,n_energy),devi,d
-         call dgemm('T','N',n_energy,n_energy,n_energy,1.,poly2v,n_energy,v2poly,n_energy,0.&
-              ,id,n_energy)
-         devi=0
-         do i=1,n_energy
-            do j=1,n_energy
-               if (i==j) then
-                  d=abs(id(i,j)-1)
-               else
-                  d=abs(id(i,j))
-               end if
-               if (d>devi) then
-                  print 1,'so far max "e"-mat deviation',d,'at i,j',i,j,'mat='&
-                       ,id(i,j)
-                  devi=d
-               end if
-            end do
-         end do
-       end block
+       allocate(id(n_energy,n_energy))
+       call dgemm('T','N',n_energy,n_energy,n_energy,1.,poly2v,n_energy,v2poly,n_energy,0.&
+            ,id,n_energy)
+       devi=0
+       do i=1,n_energy
+          do j=1,n_energy
+             if (i==j) then
+                d=abs(id(i,j)-1)
+             else
+                d=abs(id(i,j))
+             end if
+             if (d>devi) then
+                print 1,'so far max "e"-mat deviation',d,'at i,j',i,j,'mat='&
+                     ,id(i,j)
+                devi=d
+             end if
+          end do
+       end do
+       deallocate(id)
     end if
     call ieee_set_flag(ieee_all,.false.)
 
@@ -738,77 +733,72 @@ contains
     !   polycoeff=emat^-1*Landauop. ; vertexcoeff=poly2v^T*emat^-1*Landauop
     !   ==> Landau2v=poly2v^T*emat^-1=(emat^-1*poly2v)^T
     allocate(Landau2v(n_energy,n_energy))
-    block
-      real, allocatable :: AF(:,:),pv(:,:),em(:,:),Sc(:),ferr(:),berr(:)
-      real rcond
-      character equed
-      allocate(AF(n_energy,n_energy),Sc(n_energy),ferr(n_energy),&
-           berr(n_energy))
-      ! lowest dimensions: work(3*n_energy), iwork(n_energy)
-      ! solve for vertex projection matrix
-      allocate(pv(n_energy,n_energy),em(n_energy,n_energy))
-      em=energymatrix
-      pv=poly2v
-      call dposvx('E','U', n_energy,n_energy,em,n_energy, AF,n_energy,&
-           EQUED, Sc, pv,n_energy,Landau2v,n_energy,&
-           RCOND, FERR, BERR, WORK, IWORK, INFO)
-      ! note: energymatrix, poly2v are potentially destroyed by this call.
-      if (verbose>1 .and. i_proc==0) print 1,'energy matrix dposvx rcond=',rcond
-      if (info/=0) then
-         print 1,'dposvx info=',info,'i_proc',i_proc
-         stop
-      end if
-    end block
+    allocate(AF(n_energy,n_energy),Sc(n_energy),ferr(n_energy),&
+         berr(n_energy))
+    ! lowest dimensions: work(3*n_energy), iwork(n_energy)
+    ! solve for vertex projection matrix
+    allocate(pv(n_energy,n_energy),em(n_energy,n_energy))
+    em=energymatrix
+    pv=poly2v
+    call dposvx('E','U', n_energy,n_energy,em,n_energy, AF,n_energy,&
+         EQUED, Sc, pv,n_energy,Landau2v,n_energy,&
+         RCOND, FERR, BERR, WORK, IWORK, INFO)
+    ! note: energymatrix, poly2v are potentially destroyed by this call.
+    if (verbose>1 .and. i_proc==0) print 1,'energy matrix dposvx rcond=',rcond
+    if (info/=0) then
+       print 1,'dposvx info=',info,'i_proc',i_proc
+       stop
+    end if
+    deallocate(AF,Sc,ferr,berr,pv,em)
     ! *** Note that Landau2v needs to be transposed upon application.
-    block
-      real, allocatable, dimension(:,:,:,:) :: m1,m2
-      allocate(m1(n_energy,n_xi,n_energy,n_xi),m2(n_energy,n_xi,n_energy,n_xi))
-      do i=1,n_species**2*nkmax
-         idx=sortidx(i)-1
-         ik=mod(idx,nkmax)+1
-         idx=idx/nkmax
-         ia=mod(idx,n_species)+1
-         idx=idx/n_species
-         ib=idx+1
-         if (proc(ik,ia,ib)==0) exit
-         if (i_proc==proc(ik,ia,ib)-1) then
-            call dgemm('T','N',n_energy,n_xi**2*n_energy,n_energy,1.,Landau2v&
-                 ,n_energy,gyrocolmat(:,:,:,:,ia,ib,ik),n_energy,0.,&
-                 m1,n_energy)
-            do k=1,n_xi
-               do j=1,n_energy
-                  call dgemm('N','T',n_energy,n_xi,n_xi,1.,m1(:,:,j,k),n_energy,&
-                       L2xi,n_xi,0.,m2(:,:,j,k),n_energy)
-               end do
-            end do
-            do j=1,n_xi
-               call dgemm('N','N',n_xi*n_energy,n_energy,n_energy,1.,m2(:,:,:&
-                    ,j),n_xi*n_energy,v2poly,n_energy,0.,&
-                    m1(:,:,:,j),n_xi*n_energy)
-            end do
-            call  dgemm('N','N',n_xi*n_energy**2,n_xi,n_xi,1.,m1,n_xi*n_energy&
-                 **2,xi2L,n_xi,0.,gyrocolmat(:,:,:,:,ia,ib,ik),n_xi*n_energy**2)
-            if (ia>ib .and. temp(ia)==temp(ib)) then
-               call dgemm('T','N',n_energy,n_xi**2*n_energy,n_energy,1.,Landau2v&
-                    ,n_energy,gyrocolmat(:,:,:,:,ib,ia,ik),n_energy,0.,&
-                    m1,n_energy)
-               do k=1,n_xi
-                  do j=1,n_energy
-                     call dgemm('N','T',n_energy,n_xi,n_xi,1.,m1(:,:,j,k),n_energy,&
-                          L2xi,n_xi,0.,m2(:,:,j,k),n_energy)
-                  end do
-               end do
-               do j=1,n_xi
-                  call dgemm('N','N',n_xi*n_energy,n_energy,n_energy,1.,m2(:,:,:&
-                       ,j),n_xi*n_energy,v2poly,n_energy,0.,&
-                       m1(:,:,:,j),n_xi*n_energy)
-               end do
-               call  dgemm('N','N',n_xi*n_energy**2,n_xi,n_xi,1.,m1,n_xi*n_energy&
-                    **2,xi2L,n_xi,0.,gyrocolmat(:,:,:,:,ib,ia,ik),n_xi*n_energy**2)
-            end if
-         endif
-      enddo
-    end block
+    allocate(m1(n_energy,n_xi,n_energy,n_xi),m2(n_energy,n_xi,n_energy,n_xi))
+    do i=1,n_species**2*nkmax
+       idx=sortidx(i)-1
+       ik=mod(idx,nkmax)+1
+       idx=idx/nkmax
+       ia=mod(idx,n_species)+1
+       idx=idx/n_species
+       ib=idx+1
+       if (proc(ik,ia,ib)==0) exit
+       if (i_proc==proc(ik,ia,ib)-1) then
+          call dgemm('T','N',n_energy,n_xi**2*n_energy,n_energy,1.,Landau2v&
+               ,n_energy,gyrocolmat(:,:,:,:,ia,ib,ik),n_energy,0.,&
+               m1,n_energy)
+          do k=1,n_xi
+             do j=1,n_energy
+                call dgemm('N','T',n_energy,n_xi,n_xi,1.,m1(:,:,j,k),n_energy,&
+                     L2xi,n_xi,0.,m2(:,:,j,k),n_energy)
+             end do
+          end do
+          do j=1,n_xi
+             call dgemm('N','N',n_xi*n_energy,n_energy,n_energy,1.,m2(:,:,:&
+                  ,j),n_xi*n_energy,v2poly,n_energy,0.,&
+                  m1(:,:,:,j),n_xi*n_energy)
+          end do
+          call  dgemm('N','N',n_xi*n_energy**2,n_xi,n_xi,1.,m1,n_xi*n_energy&
+               **2,xi2L,n_xi,0.,gyrocolmat(:,:,:,:,ia,ib,ik),n_xi*n_energy**2)
+          if (ia>ib .and. temp(ia)==temp(ib)) then
+             call dgemm('T','N',n_energy,n_xi**2*n_energy,n_energy,1.,Landau2v&
+                  ,n_energy,gyrocolmat(:,:,:,:,ib,ia,ik),n_energy,0.,&
+                  m1,n_energy)
+             do k=1,n_xi
+                do j=1,n_energy
+                   call dgemm('N','T',n_energy,n_xi,n_xi,1.,m1(:,:,j,k),n_energy,&
+                        L2xi,n_xi,0.,m2(:,:,j,k),n_energy)
+                end do
+             end do
+             do j=1,n_xi
+                call dgemm('N','N',n_xi*n_energy,n_energy,n_energy,1.,m2(:,:,:&
+                     ,j),n_xi*n_energy,v2poly,n_energy,0.,&
+                     m1(:,:,:,j),n_xi*n_energy)
+             end do
+             call  dgemm('N','N',n_xi*n_energy**2,n_xi,n_xi,1.,m1,n_xi*n_energy&
+                  **2,xi2L,n_xi,0.,gyrocolmat(:,:,:,:,ib,ia,ik),n_xi*n_energy**2)
+          end if
+       endif
+    enddo
+    !deallocate(m1)
+    deallocate(m2)
     call cpu_time(t2)
     t(7)=t2-t1
     if (i_proc==0) then
@@ -854,53 +844,50 @@ contains
     t1=t2
 
     ! now to the k-interpolation of cmat
-    block
-      real, allocatable :: m1(:,:,:,:),chebweightarr(:)
-      real target_k,target_ik
-      integer ix,ie,jx,je,iv,jv
-      allocate(chebweightarr(nkmax))
-      allocate(m1(n_energy,n_xi,n_energy,n_xi))
-      do ic_loc=1,nc_loc
-         ic=ic_loc-1+nc1
-         it=it_c(ic)
-         target_k=k_perp(ic)/bmag(it)/kperp_bmag_max
-         !target_k=sin(.5*pi1*(target_ik-.5)/nk(ia,ib))**2
-         do ia=1,n_species
-            do ib=1,n_species
-               target_ik=asin(sqrt(target_k))*(nk(ia,ib)/(.5*pi1))+.5
-               ! for sinc --> see below
-               chebweightarr(1:nk(ia,ib))=[(sinc(target_ik-i,nk(ia,ib))+sinc(target_ik+i-1,nk(ia,ib)),&
-                    i=1,nk(ia,ib))]
-               if (verbose>4 .and. i_proc==0) then
-                  print 1,'interpolation for krel=',target_k,'target_ik=',target_ik,&
-                       'weightsum',sum(chebweightarr(1:nk(ia,ib))),&
-                       'ipoltest',sum(chebweightarr(1:nk(ia,ib))*kperp_arr(1:nk(ia,ib),ia,ib)),&
-                       'should be',target_k*rho_spec(ia)*kperp_bmag_max
-                  print 1,'interpolationtest',sum(chebweightarr(1:nk(ia,ib))*&
-                       [(sin(.5*pi1*(i-.5)/nk(ia,ib))**2,i=1,nk(ia,ib))]),&
-                       'should be',sin(.5*pi1*(target_ik-.5)/nk(ia,ib))**2,nk(ia,ib)
-               end if
-               call dgemm('N','N',n_xi**2*n_energy**2,1,nk(ia,ib),1.,&
-                    gyrocolmat(:,:,:,:,ia,ib,1),n_xi**2*n_energy**2*n_species**2,chebweightarr,nk(ia,ib),&
-                    0.,m1,n_xi**2*n_energy**2)
-               do jx=1,n_xi
-                  do je=1,n_energy
-                     jv=iv_v(je,jx,ib)
-                     do ix=1,n_xi
-                        do ie=1,n_energy
-                           iv=iv_v(ie,ix,ia)
-                           cmat(iv,jv,ic_loc)=-m1(ie,ix,je,jx)
+    allocate(chebweightarr(nkmax))
+    !allocate(m1(n_energy,n_xi,n_energy,n_xi))
+    do ic_loc=1,nc_loc
+       ic=ic_loc-1+nc1
+       it=it_c(ic)
+       target_k=k_perp(ic)/bmag(it)/kperp_bmag_max
+       !target_k=sin(.5*pi1*(target_ik-.5)/nk(ia,ib))**2
+       do ia=1,n_species
+          do ib=1,n_species
+             target_ik=asin(sqrt(target_k))*(nk(ia,ib)/(.5*pi1))+.5
+             ! for sinc --> see below
+             chebweightarr(1:nk(ia,ib))=[(sinc(target_ik-i,nk(ia,ib))+sinc(target_ik+i-1,nk(ia,ib)),&
+                  i=1,nk(ia,ib))]
+             if (verbose>4 .and. i_proc==0) then
+                print 1,'interpolation for krel=',target_k,'target_ik=',target_ik,&
+                     'weightsum',sum(chebweightarr(1:nk(ia,ib))),&
+                     'ipoltest',sum(chebweightarr(1:nk(ia,ib))*kperp_arr(1:nk(ia,ib),ia,ib)),&
+                     'should be',target_k*rho_spec(ia)*kperp_bmag_max
+                print 1,'interpolationtest',sum(chebweightarr(1:nk(ia,ib))*&
+                     [(sin(.5*pi1*(i-.5)/nk(ia,ib))**2,i=1,nk(ia,ib))]),&
+                     'should be',sin(.5*pi1*(target_ik-.5)/nk(ia,ib))**2,nk(ia,ib)
+             end if
+             call dgemm('N','N',n_xi**2*n_energy**2,1,nk(ia,ib),1.,&
+                  gyrocolmat(:,:,:,:,ia,ib,1),n_xi**2*n_energy**2*n_species**2,chebweightarr,nk(ia,ib),&
+                  0.,m1,n_xi**2*n_energy**2)
+             do jx=1,n_xi
+                do je=1,n_energy
+                   jv=iv_v(je,jx,ib)
+                   do ix=1,n_xi
+                      do ie=1,n_energy
+                         iv=iv_v(ie,ix,ia)
+                         cmat(iv,jv,ic_loc)=-m1(ie,ix,je,jx)
 !!$                           if (gyrocolmat(ie,ix,je,jx,ia,ib,1)==0 .and. ic_loc==1) &
 !!$                                print 1,'zero gc i_proc',i_proc,&
 !!$                                '(ie,ix,ia,je,jx,ib,ic_loc)',ie,ix,ia,je,jx,ib,ic_loc
-                        end do
-                     end do
-                  end do
-               end do
-            end do
-         end do
-      end do
-    end block
+                      end do
+                   end do
+                end do
+             end do
+          end do
+       end do
+    end do
+    deallocate(chebweightarr)
+    deallocate(m1)
     call cpu_time(t2)
     t(10)=t2-t1
     t1=t2
@@ -926,76 +913,68 @@ contains
 
     cmat1present: if (present(cmat1)) then
        !compare with supplied cmat1
-       block
-         real md,d,s,s1
-         integer ix,jx,ie,je,jv,iv
-         real, allocatable, dimension(:,:,:,:) :: m1,m2
-         real, allocatable, dimension(:,:,:,:,:) :: c
-         real, allocatable, dimension(:,:) :: v2polytimesemat,mommat,v2momtimesemat,mom2v
-         integer, allocatable, dimension(:) :: nc1_proc,nc2_proc,proc_c
-         character(1000) :: fn
-         allocate(m1(n_energy,n_xi,n_energy,n_xi),m2(n_energy,n_xi,n_energy,n_xi),&
-              c(n_energy,n_xi,n_energy,n_xi,2))
-         allocate(v2polytimesemat(n_energy,n_energy))
-         allocate (nc1_proc(n_proc),nc2_proc(n_proc),proc_c(nc))
-         nc1_proc(i_proc+1)=nc1
-         nc2_proc(i_proc+1)=nc2
-         do i=1,n_proc
-            call MPI_BCAST(nc1_proc(i),1,MPI_INTEGER,i-1,MPI_COMM_WORLD,ierror)
-            call MPI_BCAST(nc2_proc(i),1,MPI_INTEGER,i-1,MPI_COMM_WORLD,ierror)
-            proc_c(nc1_proc(i):nc2_proc(i))=i-1
-         end do
-         if (i_proc==0) then
-            print 1,'nc1',nc1_proc
-            print 1,'nc2',nc2_proc
-            print 1,'proc_c',proc_c
-         end if
-         call dgemm('n','n',n_energy,n_energy,n_energy,1.,energymatrix,n_energy,v2poly,n_energy,&
-              0.,v2polytimesemat,n_energy)
-         md=-1
-         do ic=1,nc,nc-1
-            ic_loc=ic+1-nc1
-            do ia=1,n_species
-               specbloop: do ib=1,n_species
-                  if (ic>=nc1 .and. ic<=nc2) then
-                     do jx=1,n_xi
-                        do je=1,n_energy
-                           jv=iv_v(je,jx,ib)
-                           do ix=1,n_xi
-                              do ie=1,n_energy
-                                 iv=iv_v(ie,ix,ia)
-                                 c(ie,ix,je,jx,1)=cmat(iv,jv,ic_loc)
-                                 c(ie,ix,je,jx,2)=cmat1(iv,jv,ic_loc)
-                              end do
-                           end do
-                        end do
-                     end do
-                     do l=1,2
-                        call dgemm('N','N',n_energy,n_xi**2*n_energy,n_energy,1.,v2polytimesemat&
-                             ,n_energy,c(:,:,:,:,l),n_energy,0.,&
-                             m1,n_energy)
-                        do k=1,n_xi
-                           do j=1,n_energy
-                              call dgemm('N','T',n_energy,n_xi,n_xi,1.,m1(:,:,j,k),n_energy,&
-                                   xi2L,n_xi,0.,m2(:,:,j,k),n_energy)
-                           end do
-                        end do
-                        do j=1,n_xi
-                           call dgemm('N','T',n_xi*n_energy,n_energy,n_energy,1.,m2(:,:,:&
-                                ,j),n_xi*n_energy,poly2v,n_energy,0.,&
-                                m1(:,:,:,j),n_xi*n_energy)
-                        end do
-                        call  dgemm('N','N',n_xi*n_energy**2,n_xi,n_xi,1.,m1,n_xi*n_energy&
-                             **2,L2xi,n_xi,0.,c(:,:,:,:,l),n_xi*n_energy**2)
-                     end do
-                     if (i_proc/=0) then
-                        call MPI_SEND(c,size(c),MPI_REAL8,0,1234,MPI_COMM_WORLD,ierror)
-                     endif
-                  else
-                     if (i_proc==0) then
-                        call MPI_RECV(c,size(c),MPI_REAL8,proc_c(ic),1234,MPI_COMM_WORLD,status,ierror)
-                     end if
-                  end if
+       allocate(m1(n_energy,n_xi,n_energy,n_xi),m2(n_energy,n_xi,n_energy,n_xi),&
+            c(n_energy,n_xi,n_energy,n_xi,2))
+       allocate(v2polytimesemat(n_energy,n_energy))
+       allocate (nc1_proc(n_proc),nc2_proc(n_proc),proc_c(nc))
+       nc1_proc(i_proc+1)=nc1
+       nc2_proc(i_proc+1)=nc2
+       do i=1,n_proc
+          call MPI_BCAST(nc1_proc(i),1,MPI_INTEGER,i-1,MPI_COMM_WORLD,ierror)
+          call MPI_BCAST(nc2_proc(i),1,MPI_INTEGER,i-1,MPI_COMM_WORLD,ierror)
+          proc_c(nc1_proc(i):nc2_proc(i))=i-1
+       end do
+       if (i_proc==0) then
+          print 1,'nc1',nc1_proc
+          print 1,'nc2',nc2_proc
+          print 1,'proc_c',proc_c
+       end if
+       call dgemm('n','n',n_energy,n_energy,n_energy,1.,energymatrix,n_energy,v2poly,n_energy,&
+            0.,v2polytimesemat,n_energy)
+       md=-1
+       do ic=1,nc,nc-1
+          ic_loc=ic+1-nc1
+          do ia=1,n_species
+             specbloop: do ib=1,n_species
+                if (ic>=nc1 .and. ic<=nc2) then
+                   do jx=1,n_xi
+                      do je=1,n_energy
+                         jv=iv_v(je,jx,ib)
+                         do ix=1,n_xi
+                            do ie=1,n_energy
+                               iv=iv_v(ie,ix,ia)
+                               c(ie,ix,je,jx,1)=cmat(iv,jv,ic_loc)
+                               c(ie,ix,je,jx,2)=cmat1(iv,jv,ic_loc)
+                            end do
+                         end do
+                      end do
+                   end do
+                   do l=1,2
+                      call dgemm('N','N',n_energy,n_xi**2*n_energy,n_energy,1.,v2polytimesemat&
+                           ,n_energy,c(:,:,:,:,l),n_energy,0.,&
+                           m1,n_energy)
+                      do k=1,n_xi
+                         do j=1,n_energy
+                            call dgemm('N','T',n_energy,n_xi,n_xi,1.,m1(:,:,j,k),n_energy,&
+                                 xi2L,n_xi,0.,m2(:,:,j,k),n_energy)
+                         end do
+                      end do
+                      do j=1,n_xi
+                         call dgemm('N','T',n_xi*n_energy,n_energy,n_energy,1.,m2(:,:,:&
+                              ,j),n_xi*n_energy,poly2v,n_energy,0.,&
+                              m1(:,:,:,j),n_xi*n_energy)
+                      end do
+                      call  dgemm('N','N',n_xi*n_energy**2,n_xi,n_xi,1.,m1,n_xi*n_energy&
+                           **2,L2xi,n_xi,0.,c(:,:,:,:,l),n_xi*n_energy**2)
+                   end do
+                   if (i_proc/=0) then
+                      call MPI_SEND(c,size(c),MPI_REAL8,0,1234,MPI_COMM_WORLD,ierror)
+                   endif
+                else
+                   if (i_proc==0) then
+                      call MPI_RECV(c,size(c),MPI_REAL8,proc_c(ic),1234,MPI_COMM_WORLD,status,ierror)
+                   end if
+                end if
 !!$                  block
 !!$                    real s(n_energy,n_xi),s1(n_energy,n_xi)
 !!$                    if (i_proc==0) then
@@ -1016,68 +995,68 @@ contains
 !!$                       print 1,'particle conservation',ia,ib,'s1',s1
 !!$                    end if
 !!$                  end block
-                  if (i_proc==0) then
-                     jxloop: do jx=1,n_xi !n_xi
-                        do je=1,n_energy/2
-                           do ix=1,n_xi
-                              do ie=1,n_energy/2 !n_energy
-                                 s=c(ie,ix,je,jx,1)
-                                 s1=c(ie,ix,je,jx,2)
-                                 d=abs(s-s1)
-                                 if (d>md) then
-                                    md=d
-                                 end if
-                                 print 1,'ia,ib,ic_loc,kp',ia,ib,ic_loc,k_perp(ic)/bmag(it_c(ic))*rho*sqrt(2.),&
-                                      'jx,je',jx,je,'ix,ie',ix,ie,'d',d,'c,c1',s,s1
-                              end do
-                           end do
-                        end do
-                     end do jxloop
-                  end if
-               end do specbloop
-            end do
-         end do
-         ! print out all kradial for certain moments:
-         allocate(mommat(3,n_energy))
-         mommat(1,:)=polyrep(1,:n_energy)
-         mommat(2,:)=polyrep(2,:n_energy)
-         mommat(3,:)=polyrep(3,:n_energy)-1.5*polyrep(1,:n_energy) !no units attached
-         allocate(v2momtimesemat(3,n_energy))
-         call dgemm('n','n',3,n_energy,n_energy,1.,mommat,3,v2polytimesemat,n_energy,0.,v2momtimesemat,3)
-         allocate(mom2v(3,n_energy))
-         call dgemm('n','n',3,n_energy,n_energy,1.,mommat,3,poly2v,n_energy,0.,mom2v,3)
-         if (i_proc==0) then
-            do l=1,2
-               do ia=1,n_species
-                  do ib=1,n_species
-                     if (collision_model==6) then
-                        ! V3=Landau V2=old sugama V1=new sugama
-                        write(fn,"('cgyro.moments.V',I1,'a',I1,'b',I1)") 4-l,ia,ib
-                     else
-                        write(fn,"('cgyro.moments.V',I1,'a',I1,'b',I1)") l,ia,ib
-                     end if
-                     open(6+ib+n_species*(ia+n_species*l),file=fn)
-                  end do
-               enddo
-            end do
-         end if
-         do ic=1,nc
-            ic_loc=ic+1-nc1
-            do ia=1,n_species
-               specbloop2: do ib=1,n_species
-                  if (ic>=nc1 .and. ic<=nc2) then
-                     do jx=1,n_xi
-                        do je=1,n_energy
-                           jv=iv_v(je,jx,ib)
-                           do ix=1,n_xi
-                              do ie=1,n_energy
-                                 iv=iv_v(ie,ix,ia)
-                                 c(ie,ix,je,jx,1)=cmat(iv,jv,ic_loc)
-                                 c(ie,ix,je,jx,2)=cmat1(iv,jv,ic_loc)
-                              end do
-                           end do
-                        end do
-                     end do
+                if (i_proc==0) then
+                   jxloop: do jx=1,n_xi !n_xi
+                      do je=1,n_energy/2
+                         do ix=1,n_xi
+                            do ie=1,n_energy/2 !n_energy
+                               s=c(ie,ix,je,jx,1)
+                               s1=c(ie,ix,je,jx,2)
+                               d=abs(s-s1)
+                               if (d>md) then
+                                  md=d
+                               end if
+                               print 1,'ia,ib,ic_loc,kp',ia,ib,ic_loc,k_perp(ic)/bmag(it_c(ic))*rho*sqrt(2.),&
+                                    'jx,je',jx,je,'ix,ie',ix,ie,'d',d,'c,c1',s,s1
+                            end do
+                         end do
+                      end do
+                   end do jxloop
+                end if
+             end do specbloop
+          end do
+       end do
+       ! print out all kradial for certain moments:
+       allocate(mommat(3,n_energy))
+       mommat(1,:)=polyrep(1,:n_energy)
+       mommat(2,:)=polyrep(2,:n_energy)
+       mommat(3,:)=polyrep(3,:n_energy)-1.5*polyrep(1,:n_energy) !no units attached
+       allocate(v2momtimesemat(3,n_energy))
+       call dgemm('n','n',3,n_energy,n_energy,1.,mommat,3,v2polytimesemat,n_energy,0.,v2momtimesemat,3)
+       allocate(mom2v(3,n_energy))
+       call dgemm('n','n',3,n_energy,n_energy,1.,mommat,3,poly2v,n_energy,0.,mom2v,3)
+       if (i_proc==0) then
+          do l=1,2
+             do ia=1,n_species
+                do ib=1,n_species
+                   if (collision_model==6) then
+                      ! V3=Landau V2=old sugama V1=new sugama
+                      write(fn,"('cgyro.moments.V',I1,'a',I1,'b',I1)") 4-l,ia,ib
+                   else
+                      write(fn,"('cgyro.moments.V',I1,'a',I1,'b',I1)") l,ia,ib
+                   end if
+                   open(6+ib+n_species*(ia+n_species*l),file=fn)
+                end do
+             enddo
+          end do
+       end if
+       do ic=1,nc
+          ic_loc=ic+1-nc1
+          do ia=1,n_species
+             specbloop2: do ib=1,n_species
+                if (ic>=nc1 .and. ic<=nc2) then
+                   do jx=1,n_xi
+                      do je=1,n_energy
+                         jv=iv_v(je,jx,ib)
+                         do ix=1,n_xi
+                            do ie=1,n_energy
+                               iv=iv_v(ie,ix,ia)
+                               c(ie,ix,je,jx,1)=cmat(iv,jv,ic_loc)
+                               c(ie,ix,je,jx,2)=cmat1(iv,jv,ic_loc)
+                            end do
+                         end do
+                      end do
+                   end do
 !!$                     do l=1,2
 !!$                        call dgemm('N','N',n_energy,n_xi**2*n_energy,n_energy,1.,v2polytimesemat&
 !!$                             ,n_energy,c(:,:,:,:,l),n_energy,0.,&
@@ -1097,50 +1076,50 @@ contains
 !!$                             **2,L2xi,n_xi,0.,c(:,:,:,:,l),n_xi*n_energy**2)
 !!$                     end do
 
-                     do l=1,2
-                        call dgemm('N','N',3,n_xi**2*n_energy,n_energy,1.,v2momtimesemat&
-                             ,3,c(:,:,:,:,l),n_energy,0.,&
-                             m1,n_energy)
-                        do k=1,n_xi
-                           do j=1,n_energy
-                              call dgemm('N','T',n_energy,n_xi,n_xi,1.,m1(:,:,j,k),n_energy,&
-                                   xi2L,n_xi,0.,m2(:,:,j,k),n_energy)
-                           end do
-                        end do
-                        do j=1,n_xi
-                           call dgemm('N','T',n_xi*n_energy,3,n_energy,1.,m2(:,:,:&
-                                ,j),n_xi*n_energy,mom2v,3,0.,&
-                                m1(:,:,:,j),n_xi*n_energy)
-                        end do
-                        call  dgemm('N','N',n_xi*n_energy*3,n_xi,n_xi,1.,m1,n_xi*n_energy&
-                             **2,L2xi,n_xi,0.,c(:,:,:,:,l),n_xi*n_energy**2)
-                     end do
-                     if (i_proc/=0) then
-                        call MPI_SEND(c,size(c),MPI_REAL8,0,1234,MPI_COMM_WORLD,ierror)
-                     endif
-                  else
-                     if (i_proc==0) then
-                        call MPI_RECV(c,size(c),MPI_REAL8,proc_c(ic),1234,MPI_COMM_WORLD,status,ierror)
-                     end if
-                  end if
+                   do l=1,2
+                      call dgemm('N','N',3,n_xi**2*n_energy,n_energy,1.,v2momtimesemat&
+                           ,3,c(:,:,:,:,l),n_energy,0.,&
+                           m1,n_energy)
+                      do k=1,n_xi
+                         do j=1,n_energy
+                            call dgemm('N','T',n_energy,n_xi,n_xi,1.,m1(:,:,j,k),n_energy,&
+                                 xi2L,n_xi,0.,m2(:,:,j,k),n_energy)
+                         end do
+                      end do
+                      do j=1,n_xi
+                         call dgemm('N','T',n_xi*n_energy,3,n_energy,1.,m2(:,:,:&
+                              ,j),n_xi*n_energy,mom2v,3,0.,&
+                              m1(:,:,:,j),n_xi*n_energy)
+                      end do
+                      call  dgemm('N','N',n_xi*n_energy*3,n_xi,n_xi,1.,m1,n_xi*n_energy&
+                           **2,L2xi,n_xi,0.,c(:,:,:,:,l),n_xi*n_energy**2)
+                   end do
+                   if (i_proc/=0) then
+                      call MPI_SEND(c,size(c),MPI_REAL8,0,1234,MPI_COMM_WORLD,ierror)
+                   endif
+                else
+                   if (i_proc==0) then
+                      call MPI_RECV(c,size(c),MPI_REAL8,proc_c(ic),1234,MPI_COMM_WORLD,status,ierror)
+                   end if
+                end if
 
-                  if (i_proc==0) then
-                     do l=1,2
-                        ! kperp n-diff,mom-diff heat-diff T->n n->T
-                        write(6+ib+n_species*(ia+n_species*l),2) &
-                             k_perp(ic)/bmag(it_c(ic))*rho,c(1,1,1,1,l),c(2,2,2,2,l),&
-                             c(3,1,3,1,l),c(1,1,3,1,l),c(3,1,1,1,l)
-                     end do
-                  end if
-               end do specbloop2
-            end do
-         end do
-         if (i_proc==0) then
-            do i=1,2*n_species**2
-               close(6+i)
-            end do
-         end if
-       end block
+                if (i_proc==0) then
+                   do l=1,2
+                      ! kperp n-diff,mom-diff heat-diff T->n n->T
+                      write(6+ib+n_species*(ia+n_species*l),2) &
+                           k_perp(ic)/bmag(it_c(ic))*rho,c(1,1,1,1,l),c(2,2,2,2,l),&
+                           c(3,1,3,1,l),c(1,1,3,1,l),c(3,1,1,1,l)
+                   end do
+                end if
+             end do specbloop2
+          end do
+       end do
+       if (i_proc==0) then
+          do i=1,2*n_species**2
+             close(6+i)
+          end do
+       end if
+       deallocate(m1,m2,c,v2polytimesemat,nc1_proc,nc2_proc,proc_c)
     end if cmat1present
 2   format (*(G26.16,"  "))
 
