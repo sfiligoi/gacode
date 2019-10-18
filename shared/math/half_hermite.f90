@@ -823,6 +823,6 @@ contains
        enddo
        close(1)
     end if
-2   format (*(EN25.16))
+2   format (5(EN25.16))
   end subroutine pseudo_maxwell_pliocene
 end module half_hermite
