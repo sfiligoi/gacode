@@ -54,7 +54,7 @@ contains
 !!$    if (verbose>0) print "(3(A,G0),4(A,ES11.4),2ES11.4)",'mpullback based on Jn is ',est_mpullback,' initial guess was ',ceiling(2 *max(kbounda&
 !!$         ,kbb)),'k1,k2',kbounda,kbb,' Bessel_j(' ,est_mpullback,',',kbounda,')=',bessel_jn(est_mpullback ,kbounda),' squaresum=',val,' sqrt=' &
 !!$         ,sqrt(val) ,val1,sqrt(val1)
-    if (verbose>0) print '(2(A,I0),A,2G23.16,5(A,G23.16),5(G24.16))','mpullback based on Jn is',&
+    if (verbose>0) print '(2(A,I0),A,2G23.16,A,I0,4(A,G23.16),5(G24.16))','mpullback based on Jn is ',&
          est_mpullback,' initial guess was ',ceiling(2*max(kbounda,kbb)),' k1,k2',kbounda,kbb,&
          ' Bessel_j(' ,est_mpullback,',',kbounda,')=',&
          bessel_jn(est_mpullback ,kbounda),' squaresum=',val,' sqrt=',sqrt(val) ,val1,sqrt(val1)
@@ -116,7 +116,8 @@ contains
 !!$       print 2,'Did not find proper degree to sample Bessel fct!'
 !!$       stop
 !!$    end if
-    if (verbose>0) print '(A,I0,X,A,G23.16)','Extra degree needed for sampling of Bessel fct=',j,'at k=',kbound
+    if (verbose>0) print '(A,I0,A,G23.16)',&
+         'Extra degree needed for sampling of Bessel fct=',j,' at k=',kbound
     est_extradegree=j
   end function est_extradegree
 
@@ -202,18 +203,17 @@ contains
        if (verbose>4) then
           do l=1,lmax0
              if (projleg(i,l)==0) then
-                print 3,'projleg zero??',i,l,projleg(i,l)
+                print *,'projleg zero??',i,l,projleg(i,l)
                 k=k+1
              else if(abs(projleg(i,l))<epsgyrocolmat) then
-                print 3,'projleg near zero',i,l,projleg(i,l)
+                print *,'projleg near zero',i,l,projleg(i,l)
                 k=k+1
-3               format (A,2I3,G25.16)
              end if
           end do
        end if
     enddo
     if (verbose>4) then
-       print '(A,I3,A)','projleg had',k,'strange coefficients.'
+       print '(A,I5,A)','projleg had',k,' strange coefficients.'
        do l=1,lmax0
           print 2,'projleg l norm=1',l,sum(projleg(:,l)**2)
        enddo
@@ -227,7 +227,7 @@ contains
           print 2,'projleg l norm=0',l,sum(projleg(l,:)*projleg(l+1,:))
        enddo
     end if
-2   format (A,I3,G25.16)
+2   format (A,I5,G25.16)
     
   end subroutine calc_projleg
 
@@ -299,7 +299,7 @@ contains
 
 
     if (verbose>0 .and. mod(lcolmat,2)==1) then
-2      format (A,I3,A)
+2      format (A,9(I0,A))
        print 2,'Warning in gyrotrafo: lmax is assumed to be even, but input collision matrix has l=',lcolmat,'.'
        print 2,'Cannot use this extra information. Because lmax is needed to be even.'
     end if
@@ -326,12 +326,12 @@ contains
     nmaxpoly=nmax0+extradegree
     if (verbose>0) print 2,'Need extradegree',extradegree,'-> max. polynomial degree=',nmaxpoly-1
     if (nmaxpoly>ncolmat) then
-       print 2,'Error in gyrotrafo: Max. polynomial degree in colmat='&
+       print *,'Error in gyrotrafo: Max. polynomial degree in colmat='&
             ,ncolmat-1,', but need',nmaxpoly-1
        stop
     end if
     if (nmaxpoly>nsteen) then
-       print 2,'Error in gyrotrafo: Max. polynomial degree in projsteen/sp='&
+       print *,'Error in gyrotrafo: Max. polynomial degree in projsteen/sp='&
             ,nsteen-1,', but need',nmaxpoly-1
        stop
     end if
@@ -349,16 +349,16 @@ contains
     !eigenvector routine or real*16 variables
 
     if (verbose>4) then
-       print 2,'Steen function projsteen(nmax0,nmaxpoly)=',projsteen(nmax0&
+       print *,'Steen function projsteen(nmax0,nmaxpoly)=',projsteen(nmax0&
             ,nmaxpoly),'at sp=',sp(nmaxpoly),'nmax0=',nmax0
-       print 2,'Steen function projsteen(nmaxpoly,nmaxpoly)=' &
+       print *,'Steen function projsteen(nmaxpoly,nmaxpoly)=' &
             ,projsteen(nmaxpoly,nmaxpoly),'at gp=',sp(nmaxpoly),'nmaxpoly='&
             ,nmaxpoly
 !!$  do i=1,nmaxpoly
-!!$     print 2,'projsteen norm=1',i,sum(projsteen(i,:)**2)
+!!$     print *,'projsteen norm=1',i,sum(projsteen(i,:)**2)
 !!$  enddo
 !!$  do i=1,nmaxpoly-1
-!!$     print 2,'projsteen norm=0',i,sum(projsteen(i,:)*projsteen(i+1,:))
+!!$     print *,'projsteen norm=0',i,sum(projsteen(i,:)*projsteen(i+1,:))
 !!$  enddo
 
     end if
@@ -708,20 +708,19 @@ contains
                 do l=1,lmax0
                    if (mod(j+l,2)==1) then
                       if (gyrocolmat(i,j,k,l)/=0) then
-                         print 5,'gyrocolmat parity??',m,i,j,k,l,gyrocolmat(i,j,k,l)
+                         print *,'gyrocolmat parity??',i,j,k,l,gyrocolmat(i,j,k,l)
                          m1=m1+1
                       end if
                    else
                       if (gyrocolmat(i,j,k,l)==0) then
                          if (m==0 .or. krhoa /=0 .and. krb/=0) then
                             !in case for some reason kperp=0 we do not print the m>0.
-                            print 5,'gyrocolmat zero??',m,i,j,k,l,gyrocolmat(i,j,k,l)
+                            print *,'gyrocolmat zero??',i,j,k,l,gyrocolmat(i,j,k,l)
                             m1=m1+1
                          end if
                       else if (abs(gyrocolmat(i,j,k,l))<1e-16*epsgyrocolmat) then
-                         print 5,'extraneous (near) zero at',m,i,j,k,l,gyrocolmat(i,j,k,l)
+                         print '(A,4I5,G25.16)','extraneous (near) zero at',i,j,k,l,gyrocolmat(i,j,k,l)
                       end if
-5                     format (A,4I3,G25.16)
                    end if
                    if ((i<k .or. i<=k .and. j<l) .and. abs(gyrocolmat(i,j,k,l)-gyrocolmat(k,l,i,j))>epsgyrocolmat*(1 &
                         +abs(gyrocolmat(i,j,k,l)))) then
@@ -734,7 +733,7 @@ contains
              end do
           end do
        end do
-       if (m1/=0) print '(A,I3,A,I3,A)','gyrocolmat at m=',m,'had',m1,'issues.'
+       if (m1/=0) print 2,'gyrocolmat at m=',m,' had',m1,' issues.'
     end if
     call cpu_time(t2)
     t(9)=t(9)+(t2-t1)
@@ -748,7 +747,7 @@ contains
           print "(I2,9(' ',A,ES9.2))",i,'t(i):',t(i),'cost(i):',cost(i),'t(i)/cost(i):',t(i)/cost(i),'flops/cycle(i):',2*cost(i)&
                /(t(i)*3.9d9)
        end do
-       print '(A,2G25.16)','tot',tto,tbes+sum(t)
+       print '(A,2(G24.16))','tot',tto,tbes+sum(t)
     end if
     if (verbose>4) then
        allocate(maxn(nmax0:nmaxpoly),maxl(lmax0:lmax))
@@ -776,12 +775,12 @@ contains
                 do l=1,lmax0
                    if (mod(j+l,2)==1) then
                       if (gyrocolmat(i,j,k,l)/=0) then
-                         print '(A,4I3,G25.16)','gyrocolmat parity??',i,j,k,l,gyrocolmat(i,j,k,l)
+                         print *,'gyrocolmat parity??',i,j,k,l,gyrocolmat(i,j,k,l)
                       end if
                    else
                       if (gyrocolmat(i,j,k,l)==0) then
                          !if (abs(j-l)<=2 .and. abs(i-k)<=5) &
-                         print 2,'gyrocolmat zero??',i,j,k,l,gyrocolmat(i,j,k,l)
+                         print *,'gyrocolmat zero??',i,j,k,l,gyrocolmat(i,j,k,l)
                          ! this vanishes if xmax<=3:
                          ! ksh@napoleon:~/w> ./gt 15 5 2 1 1 6
                          ! ksh@napoleon:~/w> ./gt 5 30 2 1 1 1
@@ -799,7 +798,7 @@ contains
                       if (sym1>sym) then
                          sym=sym1
                          if(q<o .and. sym>epsgyrocolmat) &
-                              print '(A,4I3,5(G25.16))','gyrocolmat symmetry??',i,j,k,l,gyrocolmat(i,j ,k,l)&
+                              print *,'gyrocolmat symmetry??',i,j,k,l,gyrocolmat(i,j ,k,l)&
                               ,gyrocolmat(k,l,i,j),gyrocolmat(i,j,k ,l)-gyrocolmat(k,l,i,j)
                          q=q+1
                       end if
@@ -826,7 +825,7 @@ contains
 !!$         else
 !!$            print 2,'everything ok'
 !!$         endif
-       print "(A,ES12.2,2I3,ES25.16)",'max symmetry error',sym
+       print "(A,ES12.2)",'max symmetry error',sym
 !!$         print "(A,ES12.2,2I3,ES25.16)",'max error on diagonal',div,a1(1:2),gyrocolmat(a1(1),a1(2),a1(3),a1(4))
 !!$         print "(A,ES9.2,4I3,2ES25.16)",'max error on sides',siv,a2&
 !!$              ,gyrocolmat(a2(1),a2(2),a2(3),a2(4)),gyrocolmat(a2(3),a2(4)&
@@ -931,7 +930,7 @@ contains
                    if (l2*2+mod(oe+m,2)-1<m) cycle
                    j=j+1
                    if (projassleg(i,l2,oe,m)==0) then
-                      print '(A,I3,G25.16,3I3,G25.16)','projassleg zero??',i,x,l2,oe,m,projassleg(i,l2,oe,m)
+                      print *,'projassleg zero??',i,x,l2,oe,m,projassleg(i,l2,oe,m)
                       m1=m1+1
                    else if(abs(projassleg(i,l2,oe,m))<epsgyrocolmat) then
                       !print 2,'projassleg near zero',i,x,l2,oe,m,projassleg(i,l2,oe,m)
