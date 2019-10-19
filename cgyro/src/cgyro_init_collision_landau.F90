@@ -680,8 +680,8 @@ contains
                 d=abs(id(i,j))
              end if
              if (d>devi) then
-                print '("init_collision_landau: ",A,G24.16E3,A,2I3," ",A,G24.16E3)',&
-                     'so far max xi-mat deviation',d,'at i,j',i,j,'mat=',id(i,j)
+                print '("init_collision_landau: ",A,G24.16E3,A,2I4,A,G23.16E3)',&
+                     'so far max xi-mat deviation',d,' at i,j',i,j,' mat=',id(i,j)
                 devi=d
              end if
           end do
@@ -701,7 +701,7 @@ contains
     call dstein(n_energy,a(1:n_energy),bsq(2:n_energy),n_energy,sp,(/(1,i=1,n_energy)/),&
          (/(n_energy,i=1,n_energy)/),projsteen,n_energy,work ,iwork,ifail,info)
     if (info/=0) then
-       if (i_proc==0) print '(A,2I3," ",A,I0)','dstein error, here is i,info',i,info,'and ifail',ifail
+       if (i_proc==0) print '(A,2I0," ",A,I0)','dstein error, here is i,info',i,info,'and ifail',ifail
        stop
     end if
     do i=1,n_energy
@@ -731,8 +731,8 @@ contains
                 d=abs(id(i,j))
              end if
              if (d>devi) then
-                print '("init_collision_landau: ",A,X,I0,X,A,2I3,X,A,G24.16E3)',&
-                     'so far max "e"-mat deviation',d,'at i,j',i,j,'mat=',id(i,j)
+                print '("init_collision_landau: ",A,G24.16,A,2I4,A,G23.16E3)',&
+                     'so far max "e"-mat deviation',d,' at i,j',i,j,' mat=',id(i,j)
                 devi=d
              end if
           end do
@@ -757,7 +757,7 @@ contains
          EQUED, Sc, pv,n_energy,Landau2v,n_energy,&
          RCOND, FERR, BERR, WORK, IWORK, INFO)
     ! note: energymatrix, poly2v are potentially destroyed by this call.
-    if (verbose>1 .and. i_proc==0) print 7,'energy matrix dposvx rcond=',rcond
+    if (verbose>1 .and. i_proc==0) print 6,'energy matrix dposvx rcond=',rcond
     if (info/=0) then
        print 7,'dposvx info=',info,'i_proc',i_proc
        stop
