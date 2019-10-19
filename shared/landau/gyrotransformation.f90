@@ -167,7 +167,7 @@ contains
        if (abs(val)>epsp) exit
     end do
 !!$    end block chebysample
-    !    j=j*8
+    j=j+1 ! j is the min. *frequency* - we need one more interpolation point
     if (verbose>0) print '(A,I0,A,G23.16,A)','Found k-sample-number needed for gyro phases=',&
          j,' at k=',kbound,' WARNING should depend on both species'
     est_k_sampling=j
