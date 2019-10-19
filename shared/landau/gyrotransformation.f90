@@ -109,14 +109,14 @@ contains
           val=val+sample(i)*cos(j*x)
        end do
        val=val/k
-       if (verbose>4) print '(A,2I3)','deg',j,val
+       if (verbose>4) print '(A,I5,G24.16)','deg',j,val
        if (abs(val)>epsp) exit
     end do
 !!$    if (j==0) then
 !!$       print 2,'Did not find proper degree to sample Bessel fct!'
 !!$       stop
 !!$    end if
-    if (verbose>0) print '(A,I3,A,G23.16)','Extra degree needed for sampling of Bessel fct=',j,'at k=',kbound
+    if (verbose>0) print '(A,I0,X,A,G23.16)','Extra degree needed for sampling of Bessel fct=',j,'at k=',kbound
     est_extradegree=j
   end function est_extradegree
 
@@ -162,13 +162,13 @@ contains
 !!$         if (verbose>4) print 2,'deg',j,val,'should',&
 !!$              exp((0,.5)*kbound)*(0,1.)**j*2*bessel_jn(j,kbound*.5)
        val=exp((0,.5)*kbound)*(0,1.)**j*2*bessel_jn(j,kbound*.5)
-       if (verbose>4) print '(A,I3,G25.16)','deg',j,val
+       if (verbose>4) print '(A,I5,": (",G23.16,",",G23.16,")")','deg',j,val
        if (abs(val)>epsp) exit
     end do
 !!$    end block chebysample
     !    j=j*8
-    if (verbose>0) print '(A,I3,A,G23.16,A)','Found k sample number needed for gyro phases=',&
-         j,'at k=',kbound,'WARNING should depend on both species'
+    if (verbose>0) print '(A,I0,A,G23.16,A)','Found k-sample-number needed for gyro phases=',&
+         j,' at k=',kbound,' WARNING should depend on both species'
     est_k_sampling=j
   end function est_k_sampling
   
