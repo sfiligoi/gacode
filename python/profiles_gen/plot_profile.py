@@ -115,7 +115,7 @@ def plot_select(ax,tag):
 
    if tag == 'Ln':
       # Lne
-      y = expro.expro_sdlnnedr ; ystr = 'a/L_{ne}' ; plotit(ax,x,y,ystr)
+      y = expro.expro_dlnnedr ; ystr = 'a/L_{ne}' ; plotit(ax,x,y,ystr)
       # Lni
       for p in range(n):
          if alls or stype[p] == '[therm]':
