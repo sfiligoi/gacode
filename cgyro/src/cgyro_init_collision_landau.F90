@@ -1020,9 +1020,9 @@ contains
                                if (d>md) then
                                   md=d
                                end if
-                               print *,'ia,ib,ic_loc,kp',ia,&
+                               print '(A,3I3,G14.6,2(A,I3,I4),A,G25.16E3,A,2G25.16E3)','ia,ib,ic_loc,kp',ia,&
                                       ib,ic_loc,k_perp(ic)/bmag(it_c(ic))*rho*sqrt(2.),&
-                                    'jx,je',jx,je,'ix,ie',ix,ie,'d',d,'c,c1',s,s1
+                                    'jx,je',jx,je,' ix,ie',ix,ie,' d',d,' c,c1',s,s1
                             end do
                          end do
                       end do
