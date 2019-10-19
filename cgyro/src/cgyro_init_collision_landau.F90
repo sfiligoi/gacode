@@ -40,6 +40,7 @@ contains
     ! need to calculate up to lphys=n_xi-1, n_energy polynomials and for n_species.
     use, intrinsic :: ieee_exceptions
     implicit none
+    !character(*),parameter :: sr='init_collision_landau: '
     real, intent(in),optional :: cmat1(:,:,:)
     real, dimension(:), allocatable :: a1,b1,c1,lg,a,bsq,sp,sw,gw,gp,gw2,gp2
     real, dimension(:,:), allocatable :: projsteen,projleg,L2xi,xi2L,poly2v,v2poly,Landau2v,&
@@ -92,11 +93,12 @@ contains
     real, allocatable, dimension(:,:,:,:,:) :: c
     real, allocatable, dimension(:,:) :: v2polytimesemat,mommat,v2momtimesemat,mom2v
     integer, allocatable, dimension(:) :: nc1_proc,nc2_proc,proc_c
-    if (i_proc==0) print *,'init_collision_landau: WARNING: dens_rot not yet implemented in cgyro_init_collision_landau.F90!!'
-    if (i_proc==0) print *,'init_collision_landau: WARNING: nu_global not yet implemented in cgyro_init_collision_landau.F90!!'
-    if (i_proc==0 .and. present(cmat1)) print *,'init_collision_landau: cmat1 present, comparing ...'
+1   format ("init_collision_landau: ",9A)
+    if (i_proc==0) print 1,'WARNING: dens_rot not yet implemented!!'
+    if (i_proc==0) print 1,'WARNING: nu_global not yet implemented!!'
+    if (i_proc==0 .and. present(cmat1)) print 1,'cmat1 present, comparing ...'
 #ifdef __PGI
-    if (i_proc==0) print *,'init_collision_landau: WARNING: precision loss in landau.F90 - can''t use quad precision in PGI!!'
+    if (i_proc==0) print 1,'WARNING: precision loss in landau.F90 - can''t use quad precision in PGI!!'
 #endif
 
 
@@ -114,7 +116,8 @@ contains
     kperp_bmag_max=0
     if (i_proc==0) then
        do i=1,nc
-          print *,'init_collision_landau: kperp(',i,')=',k_perp(i)/bmag(it_c(i))*rho,bmag(it_c(i))
+9         format ("init_collision_landau: ",A,I0,A,5G24.16E3)
+          print 9,'kperp(',i,')=',k_perp(i)/bmag(it_c(i))*rho,bmag(it_c(i))
        end do
     end if
     do i=1,n_theta
@@ -129,13 +132,13 @@ contains
     call MPI_ALLREDUCE(MPI_IN_PLACE,kperp_bmag_max,1,MPI_REAL8,MPI_MAX,MPI_COMM_WORLD,ierror)
     rhomax=maxval(abs(rho_spec([(i,i=1,n_species)])))*xmax
     kperprhomax=kperp_bmag_max*rhomax
-    if (verbose>0 .and. i_proc==0) print '(A,G23.16)','init_collision_landau: using kperprhomax=',kperprhomax
+    if (verbose>0 .and. i_proc==0) print 6,'using kperprhomax=',kperprhomax
 
     ! first calculate the required polynomials
     nmaxpoly=n_energy+est_extradegree(kperprhomax,eps)
     lmax=n_xi+est_mpullback(kperprhomax,eps=eps)
     lmax=lmax+mod(lmax,2)
-    if (verbose>1 .and. i_proc==0) print '(9(A,I3))','init_collision_landau: using nmaxpoly',nmaxpoly,'lmax=',lmax
+    if (verbose>1 .and. i_proc==0) print 7,'using nmaxpoly',nmaxpoly,'lmax=',lmax
 
     allocate(a1(nmaxpoly+1),b1(nmaxpoly+1),c1(nmaxpoly+1),a(nmaxpoly+1),bsq(nmaxpoly+1),lg(nmaxpoly+1))
     call half_hermite_norm(nmaxpoly+1,0.,xmax,1.,alpha_poly,a1,b1,c1,a,bsq,lg)
@@ -161,14 +164,14 @@ contains
     call dstevr('N','A',nmaxpoly,a(1:nmaxpoly),bsq(2:nmaxpoly),0.,0.,0,0,0.,m,sp,&
          projsteen,nmaxpoly,isuppz,work,lwork,iwork,liwork,info)
     if (info/=0 .or. m/=nmaxpoly) then
-       if (i_proc==0) print '(A,9(I3))','init_collision_landau: dstevr error, here is info,m,nmaxpol',info,m,nmaxpoly
+       if (i_proc==0) print '("init_collision_landau: ",A,9(I3))','dstevr error, here is info,m,nmaxpol',info,m,nmaxpoly
        stop
     end if
     call dstein(nmaxpoly,a(1:nmaxpoly),bsq(2:nmaxpoly),nmaxpoly,sp,(/(1,i=1,nmaxpoly)/),&
          (/(nmaxpoly,i=1,nmaxpoly)/),projsteen,nmaxpoly,work ,iwork,ifail,info)
     call ieee_set_status(ieee_status)
     if (info/=0) then
-       if (i_proc==0) print '(A,2I3,A,I3)','init_collision_landau: dstein error, here is i,info',i,info,'and ifail',ifail
+       if (i_proc==0) print '("init_collision_landau: ",A,2I3," ",A,I3)','dstein error, here is i,info',i,info,'and ifail',ifail
        stop
     end if
     do i=1,nmaxpoly
@@ -188,14 +191,14 @@ contains
        enddo
        call dtrtri('L','N',nmaxpoly,polyrep,nmaxpoly,info)
        if (info /=0) then
-          print '(A,I3)','init_collision_landau: dtrtriinfo',info
+          print 7,'dtrtriinfo',info
           stop
        end if
     end if
 
     ngauss=max(70,ceiling(15*xmax))+nmaxpoly+ceiling(alpha_poly/2) ! this is a good empirical value for sqrt(2)*xmax
-7   format (9(A,I3))
-    if (i_proc==0 .and. verbose>1) print 7,'init_collision_landau: using ng2=',ng2,'and ngauss=',ngauss
+7   format ("init_collision_landau: ",9(A,I0,' '))
+    if (i_proc==0 .and. verbose>1) print 7,'using ng2=',ng2,'and ngauss=',ngauss
     allocate(gw(ngauss),gp(ngauss),gw2(ng2),gp2(ng2))
     call gauss_legendre(0.,1.,gp,gw,ngauss)
     call gauss_legendre(0.,1.,gp2,gw2,ng2)
@@ -335,10 +338,11 @@ contains
                    dist=dist+matmul(polyrep(k,:),Landauop(:,:,l,ispec(ia,ib)))*temp(ia)*dens(ia)
                 end if
              end do
-             print 7,'init_collision_landau: spec',ib,' energy:'
-6            format (A,G23.16)
-             print 6,'init_collision_landau: loss',loss
-             print 6,'init_collision_landau: dist',dist
+6            format ("init_collision_landau: ",A,5(G24.16))
+             
+             print 9,'spec',ib,' energy:'
+             print 6,'loss',loss
+             print 6,'dist',dist
           end do
           l=2;k=2 !momentum
           do ib=1,n_species
@@ -352,9 +356,9 @@ contains
                         sqrt(temp(ia)*mass(ia))*dens(ia)
                 end if
              end do
-             print 7,'init_collision_landau: spec',ib,' momentum:'
-             print 6,'init_collision_landau: loss',loss
-             print 6,'init_collision_landau: dist',dist
+             print 9,'spec',ib,' momentum:'
+             print 6,'loss',loss
+             print 6,'dist',dist
           end do
           deallocate(loss,dist)
        end if
@@ -400,19 +404,20 @@ contains
                 end if
                 !Now check self-adjointness, when possible:
                 if (verbose>4 .and. i_proc==0 .and. ia<ib) then
-                   print '(2(A,I3),A,2G23.16)','init_collision_landau: Checking self-adjointness at ia',&
-                        ia,'ib',ib,'Ta=Tb',temp(ia),temp(ib)
+3                  format("init_collision_landau: ",2(A,I3),A,2G24.16)
+                   print 3,'Checking self-adjointness at ia',ia,'ib',ib,'Ta=Tb',temp(ia),temp(ib)
                    md=-1
                    do l=1,lmax
                       do i=1,nmaxpoly
                          do j=1,nmaxpoly
                             d=abs(Landauop(i,j,l,is)-Landauop(j,i,l,is1))
                             if (d>1e-15) then
-                               print *,'init_collision_landau: SA-error',i,j,l,ia,ib,'is',is,is1,&
+4                              format("init_collision_landau: ",A,5(I0," "),A,2(I0," "),A,3G24.16E3)
+                               print 4,'SA-error',i,j,l,ia,ib,'is',is,is1,&
                                     'cm',Landauop(i,j,l,is),Landauop(j,i,l,is1)
                             elseif (d>md) then
                                md=d
-                               print *,'init_collision_landau: so far max SA deviation',i,j,l,ia,ib,'is',is,is1,&
+                               print 4,'so far max SA deviation',i,j,l,ia,ib,'is',is,is1,&
                                     'cm',Landauop(i,j,l,is),Landauop(j,i,l,is1),d
                             end if
                          end do
@@ -424,7 +429,8 @@ contains
                 call genfieldkernel(nmaxpoly,lmax,a1,b1,c1,xmax,beta,t1t2ratio,&
                      gp,gw,ngauss,gp2,gw2,ng2,Landauop(:,:,:,is),intkernel2=Landauop(:,:,:,is1))
                 if (verbose>4 .and. i_proc==0) then
-                   print *,'init_collision_landau: Checking symmetries of field kernel at ia',ia,'ib',ib,'Ta',temp(ia),'Tb',temp(ib)
+                   print '("init_collision_landau: ",2(A,I0),2(A,G24.16))',&
+                        'Checking symmetries of field kernel at ia=',ia,' ib=',ib,' Ta',temp(ia),' Tb',temp(ib)
                    call genfieldkernel(nmaxpoly,lmax,a1,b1,c1,xmax,1./beta,1./t1t2ratio,&
                         gp,gw,ngauss,gp2,gw2,ng2,field,intkernel2=field2)
                    md=-1
@@ -434,20 +440,20 @@ contains
                          do j=1,nmaxpoly
                             d=abs(Landauop(i,j,l,is)-field2(i,j,l))
                             if (d>1e-15) then
-                               print *,'init_collision_landau: symm-error',i,j,l,ia,ib,'is',is,is1,&
+                               print 4,'symm-error',i,j,l,ia,ib,'is',is,is1,&
                                     'cm',Landauop(i,j,l,is),field2(i,j,l),d
                             elseif (d>md) then
                                md=d
-                               print *,'init_collision_landau: so far max symm error',i,j,l,ia,ib,'is',is,is1,&
+                               print 4,'so far max symm error',i,j,l,ia,ib,'is',is,is1,&
                                     'cm',Landauop(i,j,l,is),field2(i,j,l),d
                             end if
                             d1=abs(Landauop(i,j,l,is1)-field(i,j,l))
                             if (d1>1e-15) then
-                               print *,'init_collision_landau: symm-error (2)',i,j,l,ia,ib,'is',is,is1,&
+                               print 4,'symm-error (2)',i,j,l,ia,ib,'is',is,is1,&
                                     'cm',Landauop(i,j,l,is1),field(i,j,l),d1
                             elseif (d1>md1) then
                                md1=d1
-                               print *,'init_collision_landau: so far max symm error (2)',i,j,l,ia,ib,'is',is,is1,&
+                               print 4,'so far max symm error (2)',i,j,l,ia,ib,'is',is,is1,&
                                     'cm',Landauop(i,j,l,is1),field(i,j,l),d1
                             end if
                          end do
@@ -471,7 +477,7 @@ contains
     ! The only thing left is its gyro-transformation.
     ! now need to find out how many Chebyshev points for k we need to compute for each combination of species.
     if (i_proc==0) then
-       print *,'init_collision_landau: landauop(1,1,2,1)',Landauop(1,1,2,1)
+       print 6,'landauop(1,1,2,1)',Landauop(1,1,2,1)
     end if
     call cpu_time(t2)
     t(1)=t2-t1
@@ -483,7 +489,7 @@ contains
           nk(ia,ib)=est_k_sampling(kperp_bmag_max*xmax*&
                (abs(rho_spec(ia))+abs(rho_spec(ib))),eps)
           if (i_proc==0 .and. verbose>0) then
-             print *,'init_collision_landau: number Chebyshev k-points nk(',ia,',',ib,')=',nk(ia,ib)
+             print 7,'number Chebyshev k-points nk(',ia,',',ib,')=',nk(ia,ib)
           endif
        end do
     end do
@@ -528,14 +534,15 @@ contains
                 ! for simplicity, always the maximum available Steen(-like) polys are used.
                 gtcost(ik,ia,ib)=(lneeded-n_xi+1)*lneeded !*nmaxpoly**2 !only need relative estimate
                 if (gtcost(ik,ia,ib)==0) then
-                   print *,'init_collision_landau: ERROR iproc',i_proc,'cost=0, (ik,ia,ib)=',ik,ia,ib
+                   print '("init_collision_landau: ",A,I0,A,3I3)','ERROR iproc',i_proc,' cost=0, (ik,ia,ib)=',ik,ia,ib
                    stop
                 end if
                 if (i_proc==0 .and. verbose>0) then
-                   print *,'init_collision_landau: cost estimate for ia=',ia,'ib=',ib,'ik=',ik,'is',gtcost(ik,ia,ib)
+                   print '("init_collision_landau: ",3(A,I0),A,G24.16E3)',&
+                        'cost estimate for ia=',ia,' ib=',ib,' ik=',ik,' is',gtcost(ik,ia,ib)
                 endif
                 if (i_proc==0 .and. gtcost(ik,ia,ib)==0) then
-                   print *,'init_collision_landau: WARNING: gtcost for ia=',ia,'ib=',ib,'ik=',ik,'is zero!'
+                   print 7,'WARNING: gtcost for ia=',ia,'ib=',ib,'ik=',ik,'is zero!'
                 end if
              end do
           end if
@@ -550,7 +557,7 @@ contains
     !sort gtcost:
     allocate(sortidx(n_species**2*nkmax))
     sortidx=[(i,i=1,n_species**2*nkmax)]
-    if (i_proc==0) print *,'init_collision_landau: qsort:'
+    if (i_proc==0) print 7,'qsort:'
     call qsort(sortidx,gtcost,n_species**2*nkmax)
 !!$    if (i_proc==0) then
 !!$       do i=1,n_species**2*nkmax
@@ -586,7 +593,7 @@ contains
        do j=1,n_proc
           if (load(j)==min_load .or. load(j)+cost<=max_load) then
              if (i_proc==0) then
-                print *,'init_collision_landau: assigning (ik,ia,ib)=',ik,ia,ib,'to proc',j-1,'cost',cost
+                print '("init_collision_landau: ",A,3I3,2(" ",A,I0))','assigning (ik,ia,ib)=',ik,ia,ib,'to proc',j-1,'cost',cost
              end if
              load(j)=load(j)+cost
              proc(ik,ia,ib)=j
@@ -673,8 +680,8 @@ contains
                 d=abs(id(i,j))
              end if
              if (d>devi) then
-                print *,'init_collision_landau: so far max xi-mat deviation',d,'at i,j',i,j,'mat='&
-                     ,id(i,j)
+                print '("init_collision_landau: ",A,G24.16E3,A,2I3," ",A,G24.16E3)',&
+                     'so far max xi-mat deviation',d,'at i,j',i,j,'mat=',id(i,j)
                 devi=d
              end if
           end do
@@ -688,13 +695,13 @@ contains
     call dstevr('N','A',n_energy,a(1:n_energy),bsq(2:n_energy),0.,0.,0,0,0.,m,sp,&
          projsteen,n_energy,isuppz,work,lwork,iwork,liwork,info)
     if (info/=0 .or. m/=n_energy) then
-       if (i_proc==0) print *,'init_collision_landau: dstevr error, here is info,m,nmaxpol',info,m,n_energy
+       if (i_proc==0) print 4,'dstevr error, here is info,m,nmaxpol',info,m,n_energy
        stop
     end if
     call dstein(n_energy,a(1:n_energy),bsq(2:n_energy),n_energy,sp,(/(1,i=1,n_energy)/),&
          (/(n_energy,i=1,n_energy)/),projsteen,n_energy,work ,iwork,ifail,info)
     if (info/=0) then
-       if (i_proc==0) print *,'init_collision_landau: dstein error, here is i,info',i,info,'and ifail',ifail
+       if (i_proc==0) print '(A,2I3," ",A,I0)','dstein error, here is i,info',i,info,'and ifail',ifail
        stop
     end if
     do i=1,n_energy
@@ -724,8 +731,8 @@ contains
                 d=abs(id(i,j))
              end if
              if (d>devi) then
-                print *,'init_collision_landau: so far max "e"-mat deviation',d,'at i,j',i,j,'mat='&
-                     ,id(i,j)
+                print '("init_collision_landau: ",A,X,I0,X,A,2I3,X,A,G24.16E3)',&
+                     'so far max "e"-mat deviation',d,'at i,j',i,j,'mat=',id(i,j)
                 devi=d
              end if
           end do
@@ -750,9 +757,9 @@ contains
          EQUED, Sc, pv,n_energy,Landau2v,n_energy,&
          RCOND, FERR, BERR, WORK, IWORK, INFO)
     ! note: energymatrix, poly2v are potentially destroyed by this call.
-    if (verbose>1 .and. i_proc==0) print *,'init_collision_landau: energy matrix dposvx rcond=',rcond
+    if (verbose>1 .and. i_proc==0) print 7,'energy matrix dposvx rcond=',rcond
     if (info/=0) then
-       print *,'init_collision_landau: dposvx info=',info,'i_proc',i_proc
+       print 7,'dposvx info=',info,'i_proc',i_proc
        stop
     end if
     deallocate(AF,Sc,ferr,berr,pv,em)
@@ -808,12 +815,13 @@ contains
     call cpu_time(t2)
     t(7)=t2-t1
     if (i_proc==0) then
-       print *,'init_collision_landau: pre_scatter timing:'
+       print 7,'pre_scatter timing:'
        do i=1,n_proc
           if (i>1) then
              call MPI_Recv(t,11,MPI_REAL8,i-1,i-1,MPI_COMM_WORLD,status,ierror)
           endif
-          print *,'init_collision_landau: i_proc=',i-1,'took',t(1:7),'load',load(i),'rel',t(3)/load(i)
+5         format("init_collision_landau: ",A,I0,X,A,7G24.16E3,X,A,X,I0,X,A,G24.16E3)
+          print 5,'i_proc=',i-1,'took',t(1:7),'load',load(i),'rel',t(3)/load(i)
        end do
     else
        call MPI_Send(t,11,MPI_REAL8,0,i_proc,MPI_COMM_WORLD,ierror)
@@ -864,11 +872,11 @@ contains
              chebweightarr(1:nk(ia,ib))=[(sinc(target_ik-i,nk(ia,ib))+sinc(target_ik+i-1,nk(ia,ib)),&
                   i=1,nk(ia,ib))]
              if (verbose>4 .and. i_proc==0) then
-                print *,'init_collision_landau: interpolation for krel=',target_k,'target_ik=',target_ik,&
+                print *,'interpolation for krel=',target_k,'target_ik=',target_ik,&
                      'weightsum',sum(chebweightarr(1:nk(ia,ib))),&
                      'ipoltest',sum(chebweightarr(1:nk(ia,ib))*kperp_arr(1:nk(ia,ib),ia,ib)),&
                      'should be',target_k*rho_spec(ia)*kperp_bmag_max
-                print *,'init_collision_landau: interpolationtest',sum(chebweightarr(1:nk(ia,ib))*&
+                print *,'interpolationtest',sum(chebweightarr(1:nk(ia,ib))*&
                      [(sin(.5*pi1*(i-.5)/nk(ia,ib))**2,i=1,nk(ia,ib))]),&
                      'should be',sin(.5*pi1*(target_ik-.5)/nk(ia,ib))**2,nk(ia,ib)
              end if
@@ -903,7 +911,7 @@ contains
           if (i>1) then
              call MPI_Recv(t,11,MPI_REAL8,i-1,i-1,MPI_COMM_WORLD,status,ierror)
           endif
-          print *,'init_collision_landau: i_proc=',i-1,'took',t(1:10),'load',load(i),'rel',t(3)/load(i)
+          print *,'i_proc=',i-1,'took',t(1:10),'load',load(i),'rel',t(3)/load(i)
        end do
     else
        call MPI_Send(t,11,MPI_REAL8,0,i_proc,MPI_COMM_WORLD,ierror)
@@ -931,9 +939,9 @@ contains
           proc_c(nc1_proc(i):nc2_proc(i))=i-1
        end do
        if (i_proc==0) then
-          print *,'init_collision_landau: nc1',nc1_proc
-          print *,'init_collision_landau: nc2',nc2_proc
-          print *,'init_collision_landau: proc_c',proc_c
+          print *,'nc1',nc1_proc
+          print *,'nc2',nc2_proc
+          print *,'proc_c',proc_c
        end if
        call dgemm('n','n',n_energy,n_energy,n_energy,1.,energymatrix,n_energy,v2poly,n_energy,&
             0.,v2polytimesemat,n_energy)
@@ -1012,7 +1020,7 @@ contains
                                if (d>md) then
                                   md=d
                                end if
-                               print *,'init_collision_landau: ia,ib,ic_loc,kp',ia,&
+                               print *,'ia,ib,ic_loc,kp',ia,&
                                       ib,ic_loc,k_perp(ic)/bmag(it_c(ic))*rho*sqrt(2.),&
                                     'jx,je',jx,je,'ix,ie',ix,ie,'d',d,'c,c1',s,s1
                             end do
@@ -1247,11 +1255,11 @@ contains
     if (verbose>=1000 .and. i_proc==0) then
        do i=1,n-1
           if (v(i)<v(i+1)) then
-             print *,'init_collision_landau: qsort error at ',i,'v(i)',v(i),'v(i+1)',v(i+1)
+             print *,'qsort error at ',i,'v(i)',v(i),'v(i+1)',v(i+1)
              stop
           end if
        end do
-       print *,'init_collision_landau: qsort correctly done',n
+       print *,'qsort correctly done',n
        do i=1,n
           print *,'i',i,sortidx(i),'v',v(i)
           if (v(i)==0) exit
