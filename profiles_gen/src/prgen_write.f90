@@ -13,6 +13,12 @@ subroutine prgen_write
   implicit none
   integer :: i
 
+  print '(a)','INFO: (prgen_write) Created these species'
+
+  do i=1,expro_n_ion
+     print '(t6,i2,2(1x,a))',i,trim(expro_name(i)),trim(expro_type(i))
+  enddo
+
   !-------------------------------------------------------------------------------------
   ! Map (common) data from EFIT analysis 
   expro_rcentr   = rcentr
@@ -44,9 +50,6 @@ subroutine prgen_write
 
   call expro_write('input.gacode')
   print '(a)','INFO: (prgen_write) Wrote input.gacode.'
-  if (neut_flag == 1) then
-     call expro_write_neutrals('input.gacode.neutrals')
-  endif
   !-------------------------------------------------------------------------------------
 
 end subroutine prgen_write

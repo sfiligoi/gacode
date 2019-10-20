@@ -155,7 +155,6 @@ subroutine prgen_map_iterdb
      print '(t6,i2,1x,a)',i,trim(onetwo_ion_name(i))
   enddo
   !
-  print '(a)','INFO: (prgen_map_iterdb) Created these species'
   do i=1,expro_n_ion
      expro_mass(i) = onetwo_m(i)             
      expro_z(i)    = onetwo_z(i)             
@@ -165,8 +164,6 @@ subroutine prgen_map_iterdb
      else
         expro_type(i) = type_therm
      endif
-     print '(t6,i2,2(1x,a))',i,trim(expro_name(i)),trim(expro_type(i))
-
   enddo
   !---------------------------------------------------------
 
