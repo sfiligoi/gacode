@@ -50,7 +50,8 @@ def plot_select(ax,tag):
    n = expro.expro_n_ion
    
    # normalization
-   csa = expro.expro_cs/expro.expro_rmin[-1]
+   a = expro.expro_rmin[-1]
+   csa = expro.expro_cs/a
 
    sname = gapystr(expro.expro_name) 
    stype = gapystr(expro.expro_type)
@@ -67,43 +68,33 @@ def plot_select(ax,tag):
    ax.set_xlabel(r'$r/a$')
 
    m=m2
-   if tag == 'bunit':
-      # bunit
+   if tag == 'Bunit':
       y = expro.expro_bunit ; ystr = 'B_\mathrm{unit}' ; plotit(ax,x,y,ystr)
 
-   if tag == 'gammae':
-      # gamma_e
+   if tag == 'gam_e':
       y = expro.expro_gamma_e ; ystr = '(a/c_s) \gamma_E' ; plotit(ax,x,y/csa,ystr)
 
-   if tag == 'gammap':
-      # gamma_p
+   if tag == 'gam_p':
       y = expro.expro_gamma_p ; ystr = '(a/c_s) \gamma_p' ; plotit(ax,x,y/csa,ystr) 
 
-   if tag == 'mach':
-      # mach
+   if tag == 'Mach':
       y = expro.expro_mach ; ystr = r'M' ; plotit(ax,x,y,ystr)
 
    if tag == 'r':
-      # rho
       y = expro.expro_rho ; ystr = '\\rho' ; plotit(ax,x,y,ystr)
-      # polflux
       y = expro.expro_polflux ; ystr = '\psi' ; plotit(ax,x,y/y[-1],ystr)
 
    if tag == 'R':
-      # rmaj
       y = expro.expro_rmaj ; ystr = r'R_0' ; plotit(ax,x,y,ystr)
       y = expro.expro_drmaj ; ystr = r'dR_0/dr' ; plotit(ax,x,y,ystr)
 
    if tag == 'Z':
-      # rmaj
       y = expro.expro_zmag ; ystr = r'Z_0' ; plotit(ax,x,y,ystr)
       y = expro.expro_dzmag ; ystr = r'dZ_0/dr' ; plotit(ax,x,y,ystr)
 
    if tag == 'kappa':
-      # kappa
       y = expro.expro_kappa ; ystr = r'\kappa' ; plotit(ax,x,y,ystr)
       y = expro.expro_skappa ; ystr = r's_\kappa' ; plotit(ax,x,y,ystr)
-
 
    if tag == 'n':
       # ne
@@ -129,32 +120,27 @@ def plot_select(ax,tag):
          if alls or stype[p] == '[therm]':
             y = expro.expro_sdlnnidr[p,:] ; ystr = 's_{ni}~['+sname[p]+']' ; plotit(ax,x,y,ystr)
 
-   if tag == 'sT':
-      # sTe
-      y = expro.expro_sdlntedr ; ystr = 's_{Te}' ; plotit(ax,x,y,ystr)
-      # sTi
+   if tag == 'T':
+      y = expro.expro_te ; ystr = 'T_e' ; plotit(ax,x,y,ystr)
       for p in range(n):
          if alls or stype[p] == '[therm]':
-            y = expro.expro_sdlntidr[p,:] ; ystr = 's_{Ti}~['+sname[p]+']' ; plotit(ax,x,y,ystr)
+            y = expro.expro_ti[p,:] ; ystr = 'T_i~['+sname[p]+']' ; plotit(ax,x,y,ystr)
 
    if tag == 'LT':
-      # LTe
       y = expro.expro_dlntedr ; ystr = 'a/L_{Te}' ; plotit(ax,x,y,ystr)
-      # LTi
       for p in range(n):
          if alls or stype[p] == '[therm]':
             y = expro.expro_dlntidr[p,:] ; ystr = 'a/L_{Ti}~['+sname[p]+']' ; plotit(ax,x,y,ystr)
 
-   if tag == 'T':
-      # Te
-      y = expro.expro_te ; ystr = 'T_e' ; plotit(ax,x,y,ystr)
-      # Ti
+   if tag == 'sT':
+      y = expro.expro_sdlntedr ; ystr = 's_{Te}' ; plotit(ax,x,y,ystr)
       for p in range(n):
          if alls or stype[p] == '[therm]':
-            y = expro.expro_ti[p,:] ; ystr = 'T_i~['+sname[p]+']' ; plotit(ax,x,y,ystr)
-         
-   if tag == 'jbs':
-       y = expro.expro_jbs ; ystr = 'J_{bs}' ; plotit(ax,x,y,ystr)
+            y = expro.expro_sdlntidr[p,:] ; ystr = 's_{Ti}~['+sname[p]+']' ; plotit(ax,x,y,ystr)
+
+   if tag == 'j':
+       y = expro.expro_jbs ; ystr = 'J_\mathrm{bs}' ; plotit(ax,x,y,ystr)
+       y = expro.expro_johm ; ystr = 'J_\mathrm{ohm}' ; plotit(ax,x,y,ystr)
 
    if tag == 'sin':
        y = np.arcsin(expro.expro_delta) ; ystr = 's_1 = \sin^{-1}\delta' ; plotit(ax,x,y,ystr)
@@ -174,6 +160,12 @@ def plot_select(ax,tag):
           ystr = '-'+ystr
        plotit(ax,x,y,ystr)
        y = expro.expro_s ; ystr = 's' ; plotit(ax,x,y,ystr)
+
+   if tag == 'nu':
+       y = expro.expro_nuee ; ystr = '(a/c_s) \\nu_{ee}' ; plotit(ax,x,y/csa,ystr)
+
+   if tag == 'rhos':
+       y = expro.expro_rhos ; ystr = '\\rho_s/a' ; plotit(ax,x,y/a,ystr)
 
    ax.legend(loc=loc)
        
@@ -211,77 +203,13 @@ class DemoFrame(wx.Frame):
  
         notebook = wx.Notebook(panel)
 
-        tab = TabPanel(notebook)
-        tab.draw('gammae')
-        notebook.AddPage(tab,'gam_e')
+        mytabs = ['r','R','Z','kappa','sin','cos','q','Bunit',
+                  'n','Ln','sn','T','LT','sT','gam_e','gam_p','Mach','j','nu','rhos']
 
-        tab = TabPanel(notebook)
-        tab.draw('gammap')
-        notebook.AddPage(tab,'gam_p')
-
-        tab = TabPanel(notebook)
-        tab.draw('mach')
-        notebook.AddPage(tab,'Mach')
-
-        tab = TabPanel(notebook)
-        tab.draw('r')
-        notebook.AddPage(tab,'r')
-
-        tab = TabPanel(notebook)
-        tab.draw('R')
-        notebook.AddPage(tab,'R')
-
-        tab = TabPanel(notebook)
-        tab.draw('Z')
-        notebook.AddPage(tab,'Z')
-
-        tab = TabPanel(notebook)
-        tab.draw('kappa')
-        notebook.AddPage(tab,'kappa')
-
-        tab = TabPanel(notebook)
-        tab.draw('bunit')
-        notebook.AddPage(tab,'Bunit')
-
-        tab = TabPanel(notebook)
-        tab.draw('q')
-        notebook.AddPage(tab,'q')
-
-        tab = TabPanel(notebook)
-        tab.draw('n')
-        notebook.AddPage(tab,'n')
-
-        tab = TabPanel(notebook)
-        tab.draw('Ln')
-        notebook.AddPage(tab,'Ln')
-
-        tab = TabPanel(notebook)
-        tab.draw('sn')
-        notebook.AddPage(tab,'sn')
-
-        tab = TabPanel(notebook)
-        tab.draw('T')
-        notebook.AddPage(tab,'T')
-
-        tab = TabPanel(notebook)
-        tab.draw('LT')
-        notebook.AddPage(tab,'LT')
-
-        tab = TabPanel(notebook)
-        tab.draw('sT')
-        notebook.AddPage(tab,'sT')
-
-        tab = TabPanel(notebook)
-        tab.draw('jbs')
-        notebook.AddPage(tab,'jbs')
-
-        tab = TabPanel(notebook)
-        tab.draw('sin')
-        notebook.AddPage(tab,'sin')
-        
-        tab = TabPanel(notebook)
-        tab.draw('cos')
-        notebook.AddPage(tab,'cos')
+        for x in mytabs:
+           tab = TabPanel(notebook)
+           tab.draw(x)
+           notebook.AddPage(tab,x)
 
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(notebook, 1, wx.ALL|wx.EXPAND, 5)
