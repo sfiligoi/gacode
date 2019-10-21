@@ -96,9 +96,6 @@ subroutine prgen_map_iterdb
   expro_rmaj = rmaj(:)
   expro_te = onetwo_te(:)
   expro_ne = onetwo_ene(:)*1e-19
-  expro_enn = onetwo_enn(:,1)*1e-19
-  expro_ennw = onetwo_ennw(:,1)*1e-19
-  expro_ennv = onetwo_ennv(:,1)*1e-19
   expro_z_eff = onetwo_zeff(:)
   expro_ptot = p_tot(:) ! Total pressure
 
