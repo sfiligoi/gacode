@@ -167,6 +167,11 @@ def plot_select(ax,tag):
    if tag == 'rhos':
        y = expro.expro_rhos ; ystr = '\\rho_s/a' ; plotit(ax,x,y/a,ystr)
 
+   if tag == 'V':
+       y = expro.expro_vol ; ystr = 'V/a^3' ; plotit(ax,x,y/a**3,ystr)
+       y = expro.expro_volp ; ystr = 'V^\prime/a^2' ; plotit(ax,x,y/a**2,ystr)
+       y = expro.expro_surf ; ystr = 'S/a^2' ; plotit(ax,x,y/a**2,ystr)
+
    ax.legend(loc=loc)
        
 
@@ -204,7 +209,8 @@ class DemoFrame(wx.Frame):
         notebook = wx.Notebook(panel)
 
         mytabs = ['r','R','Z','kappa','sin','cos','q','Bunit',
-                  'n','Ln','sn','T','LT','sT','gam_e','gam_p','Mach','j','nu','rhos']
+                  'n','Ln','sn','T','LT','sT','gam_e','gam_p','Mach',
+                  'j','nu','rhos','V']
 
         for x in mytabs:
            tab = TabPanel(notebook)

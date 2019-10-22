@@ -1,7 +1,7 @@
 module expro
 
   ! List of all useful interface objects
-  character*11, dimension(96) :: expro_list 
+  character*11, dimension(97) :: expro_list 
 
   character(len=2) :: ident='# '
   double precision :: expro_mass_deuterium=3.34358e-24  ! md (g)
@@ -95,6 +95,7 @@ module expro
        expro_sdlntedr,&
        expro_dlnptotdr,&
        expro_w0p,&
+       expro_surf,&
        expro_vol,&
        expro_volp,&
        expro_cs,&
@@ -244,6 +245,7 @@ contains
        allocate(expro_sdlntedr(nexp))     ; expro_sdlntedr = 0.0
        allocate(expro_dlnptotdr(nexp))    ; expro_dlnptotdr = 0.0
        allocate(expro_w0p(nexp))          ; expro_w0p = 0.0
+       allocate(expro_surf(nexp))         ; expro_surf = 0.0
        allocate(expro_vol(nexp))          ; expro_vol = 0.0
        allocate(expro_volp(nexp))         ; expro_volp = 0.0
        allocate(expro_cs(nexp))           ; expro_cs = 0.0
@@ -350,6 +352,7 @@ contains
        deallocate(expro_sdlntedr)      
        deallocate(expro_dlnptotdr)    
        deallocate(expro_w0p)          
+       deallocate(expro_surf)          
        deallocate(expro_vol)          
        deallocate(expro_volp)         
        deallocate(expro_cs)           
@@ -746,31 +749,32 @@ subroutine expro_list_set
   expro_list(69) = 'dlnnidr'
   expro_list(70) = 'dlntidr'
   expro_list(71) = 'w0p'
-  expro_list(72) = 'vol'
-  expro_list(73) = 'volp'
-  expro_list(74) = 'cs'
-  expro_list(75) = 'rhos'
-  expro_list(76) = 'nuee'
-  expro_list(77) = 'grad_r0'
-  expro_list(78) = 'ave_grad_r'
-  expro_list(79) = 'bp0'
-  expro_list(80) = 'bt0'
-  expro_list(81) = 'ip'
-  expro_list(82) = 'mach'
-  expro_list(83) = 'flow_beam'
-  expro_list(84) = 'flow_wall'
-  expro_list(85) = 'flow_mom'
-  expro_list(86) = 'pow_e'
-  expro_list(87) = 'pow_i'
-  expro_list(88) = 'pow_ei'
-  expro_list(89) = 'pow_e_aux'
-  expro_list(90) = 'pow_i_aux'
-  expro_list(91) = 'pow_e_fus'
-  expro_list(92) = 'pow_i_fus'
-  expro_list(93) = 'pow_e_sync'
-  expro_list(94) = 'pow_e_brem'
-  expro_list(95) = 'pow_e_line'
-  expro_list(96) = 'polflux'
+  expro_list(72) = 'surf'
+  expro_list(73) = 'vol'
+  expro_list(74) = 'volp'
+  expro_list(75) = 'cs'
+  expro_list(76) = 'rhos'
+  expro_list(77) = 'nuee'
+  expro_list(78) = 'grad_r0'
+  expro_list(79) = 'ave_grad_r'
+  expro_list(80) = 'bp0'
+  expro_list(81) = 'bt0'
+  expro_list(82) = 'ip'
+  expro_list(83) = 'mach'
+  expro_list(84) = 'flow_beam'
+  expro_list(85) = 'flow_wall'
+  expro_list(86) = 'flow_mom'
+  expro_list(87) = 'pow_e'
+  expro_list(88) = 'pow_i'
+  expro_list(89) = 'pow_ei'
+  expro_list(90) = 'pow_e_aux'
+  expro_list(91) = 'pow_i_aux'
+  expro_list(92) = 'pow_e_fus'
+  expro_list(93) = 'pow_i_fus'
+  expro_list(94) = 'pow_e_sync'
+  expro_list(95) = 'pow_e_brem'
+  expro_list(96) = 'pow_e_line'
+  expro_list(97) = 'polflux'
  
 end subroutine expro_list_set
 
