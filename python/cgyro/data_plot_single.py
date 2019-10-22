@@ -136,6 +136,21 @@ elif plot_type == 'low':
 
    outfile = 'out.cgyro.low.'+ftype
 
+elif plot_type == 'corrug':
+
+   w     = float(sys.argv[2])
+   wmax  = float(sys.argv[3])
+   spec  = int(sys.argv[4])
+   moment = sys.argv[5]
+   ftype = sys.argv[6]
+   theta = 0.0
+   ymin  = sys.argv[7]
+   ymax  = sys.argv[8]
+
+   data_in.plot_corrug(w=w,wmax=wmax,spec=spec,moment=moment,theta=theta,ymin=ymin,ymax=ymax)
+
+   outfile = 'out.cgyro.corrug.'+ftype
+
 elif plot_type == 'flux':
 
    w      = float(sys.argv[2])
