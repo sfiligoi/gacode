@@ -738,7 +738,14 @@ contains
     ! we have the Gauss weights as
     
     
-    if (.not. present(ortho_f)) deallocate(projsteen)
+    if (present(ortho_f)) then
+       !some signs may be wrong:
+       do i=1,n
+          if (projsteen(1,i)<0) projsteen(:,i)=-projsteen(:,i)
+       end do
+    else
+       deallocate(projsteen)
+    endif
     
   end subroutine gauss_nodes_functions
   
