@@ -96,9 +96,6 @@ subroutine prgen_map_iterdb
   expro_rmaj = rmaj(:)
   expro_te = onetwo_te(:)
   expro_ne = onetwo_ene(:)*1e-19
-  expro_enn = onetwo_enn(:,1)*1e-19
-  expro_ennw = onetwo_ennw(:,1)*1e-19
-  expro_ennv = onetwo_ennv(:,1)*1e-19
   expro_z_eff = onetwo_zeff(:)
   expro_ptot = p_tot(:) ! Total pressure
 
@@ -155,7 +152,6 @@ subroutine prgen_map_iterdb
      print '(t6,i2,1x,a)',i,trim(onetwo_ion_name(i))
   enddo
   !
-  print '(a)','INFO: (prgen_map_iterdb) Created these species'
   do i=1,expro_n_ion
      expro_mass(i) = onetwo_m(i)             
      expro_z(i)    = onetwo_z(i)             
@@ -165,8 +161,6 @@ subroutine prgen_map_iterdb
      else
         expro_type(i) = type_therm
      endif
-     print '(t6,i2,2(1x,a))',i,trim(expro_name(i)),trim(expro_type(i))
-
   enddo
   !---------------------------------------------------------
 

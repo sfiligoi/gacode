@@ -52,6 +52,7 @@ then
   echo "                = rcorr_phi (time-average radial correlation function)"
   echo "                = xflux    (radial profile of fluxes for all species)"
   echo "                = low      (long-wavelength moments versus time)"
+  echo "                = corrug   (time-averaged profile corrugations)"
   echo "                = fluct    (x-y fluctuation contours at fixed timeslice)"
   echo "                = rt       (x-t fluctuation contours)"
   echo "                = vid      (create video from png files)"
@@ -416,10 +417,7 @@ case "$PLOT_TYPE" in
    hball)
 	python $PLT $PLOT_TYPE $TIME $SPECIES $YMIN $YMAX $TMAX $N $IE $EXT ;;
 
-   freq)
-	python $PLT $PLOT_TYPE $W $WMAX $EXT ;;
-
-   ky_freq)
+   freq | ky_freq )
 	python $PLT $PLOT_TYPE $W $WMAX $EXT ;;
 
    error)
@@ -437,7 +435,7 @@ case "$PLOT_TYPE" in
    phi)
 	python $PLT $PLOT_TYPE $W $WMAX $FIELD $EXT ;;
 
-   low)
+   low | corrug)
 	python $PLT $PLOT_TYPE $W $WMAX $SPECIES $MOMENT $EXT $YMIN $YMAX ;;
 
    ky_phi)
@@ -446,11 +444,8 @@ case "$PLOT_TYPE" in
    kx_phi)
 	python $PLT $PLOT_TYPE $FIELD $THETA $W $WMAX $YMIN $YMAX $N $EXT $DISS ;;
 
-   kxky_phi)
+   kxky_phi | rcorr_phi)
 	python $PLT $PLOT_TYPE $FIELD $THETA $W $WMAX $EXT ;;
-
-   rcorr_phi)
-        python $PLT $PLOT_TYPE $FIELD $THETA $W $WMAX $EXT ;;
 
    zf)
 	python $PLT $PLOT_TYPE $W $WMAX $FIELD $EXT ;;

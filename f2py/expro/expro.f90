@@ -1,7 +1,7 @@
 module expro
 
   ! List of all useful interface objects
-  character*11, dimension(95) :: expro_list 
+  character*11, dimension(97) :: expro_list 
 
   character(len=2) :: ident='# '
   double precision :: expro_mass_deuterium=3.34358e-24  ! md (g)
@@ -44,9 +44,6 @@ module expro
   double precision, dimension(:), allocatable :: expro_shape_sin3
   double precision, dimension(:), allocatable :: expro_ne
   double precision, dimension(:,:), allocatable :: expro_ni
-  double precision, dimension(:), allocatable :: expro_enn
-  double precision, dimension(:), allocatable :: expro_ennw
-  double precision, dimension(:), allocatable :: expro_ennv
   double precision, dimension(:), allocatable :: expro_te
   double precision, dimension(:,:), allocatable :: expro_ti
   double precision, dimension(:), allocatable :: expro_ptot
@@ -98,6 +95,7 @@ module expro
        expro_sdlntedr,&
        expro_dlnptotdr,&
        expro_w0p,&
+       expro_surf,&
        expro_vol,&
        expro_volp,&
        expro_cs,&
@@ -195,9 +193,6 @@ contains
        allocate(expro_shape_cos3(nexp))   ; expro_shape_cos3 = 0.0
        allocate(expro_shape_sin3(nexp))   ; expro_shape_sin3 = 0.0
        allocate(expro_ne(nexp))      ; expro_ne = 0.0
-       allocate(expro_enn(nexp))     ; expro_enn = 0.0
-       allocate(expro_ennw(nexp))    ; expro_ennw = 0.0
-       allocate(expro_ennv(nexp))    ; expro_ennv = 0.0
        allocate(expro_te(nexp))      ; expro_te = 0.0
        allocate(expro_ptot(nexp))    ; expro_ptot = 0.0
        allocate(expro_johm(nexp))    ; expro_johm = 0.0
@@ -250,6 +245,7 @@ contains
        allocate(expro_sdlntedr(nexp))     ; expro_sdlntedr = 0.0
        allocate(expro_dlnptotdr(nexp))    ; expro_dlnptotdr = 0.0
        allocate(expro_w0p(nexp))          ; expro_w0p = 0.0
+       allocate(expro_surf(nexp))         ; expro_surf = 0.0
        allocate(expro_vol(nexp))          ; expro_vol = 0.0
        allocate(expro_volp(nexp))         ; expro_volp = 0.0
        allocate(expro_cs(nexp))           ; expro_cs = 0.0
@@ -307,9 +303,6 @@ contains
        deallocate(expro_shape_cos3)
        deallocate(expro_shape_sin3)
        deallocate(expro_ne)
-       deallocate(expro_enn)
-       deallocate(expro_ennw)
-       deallocate(expro_ennv)
        deallocate(expro_te)
        deallocate(expro_ptot)
        deallocate(expro_johm)
@@ -359,6 +352,7 @@ contains
        deallocate(expro_sdlntedr)      
        deallocate(expro_dlnptotdr)    
        deallocate(expro_w0p)          
+       deallocate(expro_surf)          
        deallocate(expro_vol)          
        deallocate(expro_volp)         
        deallocate(expro_cs)           
@@ -680,47 +674,6 @@ contains
 
   end subroutine expro_write
 
-  subroutine expro_write_neutrals(thisinfile)
-
-    implicit none
-
-    integer :: i,nexp,nion,nneu
-    character(len=*), intent(in) :: thisinfile 
-
-    nexp = expro_n_exp
-    nneu = 1
-
-    ! Write header
-    open(unit=1,file=trim(thisinfile),status='replace')
-    write(1,'(a)') expro_head_original
-    write(1,'(a)') expro_head_statefile 
-    write(1,'(a)') expro_head_gfile
-    write(1,'(a)') expro_head_cerfile
-    write(1,'(a)') expro_head_vgen
-    write(1,'(a)') expro_head_tgyro
-    write(1,'(a)') '#'
-
-    ! Write data
-    write(1,'(a)') ident//'nexp' ; write(1,'(i0)') nexp
-    write(1,'(a)') ident//'nneu' ; write(1,'(i0)') nneu
-    write(1,'(a)') ident//'name' ; write(1,'(20(a,1x))') (trim(expro_name(i)),i=1,nneu)
-    write(1,'(a)') ident//'mass' ; write(1,40) expro_mass(1)
-    write(1,'(a)') ident//'z'    ; write(1,40) expro_z(1)
-
-    ! Write vector/array data, skipping objects that are 0.0
-    call expro_writev(expro_rho,nexp,'rho','-')
-    call expro_writev(expro_enn,nexp,'enn','10^19/m^3')
-    call expro_writev(expro_enn,nexp,'ennw','10^19/m^3')
-    call expro_writev(expro_enn,nexp,'ennv','10^19/m^3')
-
-    close(1)
-
-30  format(1pe14.7)
-40  format(10(1pe14.7))
-
-  end subroutine expro_write_neutrals
-
-
 ! This is the full list of user variable for the expro interface
  
 subroutine expro_list_set
@@ -793,33 +746,35 @@ subroutine expro_list_set
   expro_list(66) = 'shape_ssin3'
   expro_list(67) = 'dlnnedr'
   expro_list(68) = 'dlntedr'
-  expro_list(69) = 'w0p'
-  expro_list(70) = 'vol'
-  expro_list(71) = 'volp'
-  expro_list(72) = 'cs'
-  expro_list(73) = 'rhos'
-  expro_list(74) = 'nuee'
-  expro_list(75) = 'rhos'
-  expro_list(76) = 'grad_r0'
-  expro_list(77) = 'ave_grad_r'
-  expro_list(78) = 'bp0'
-  expro_list(79) = 'bt0'
-  expro_list(80) = 'ip'
-  expro_list(81) = 'mach'
-  expro_list(82) = 'flow_beam'
-  expro_list(83) = 'flow_wall'
-  expro_list(84) = 'flow_mom'
-  expro_list(85) = 'pow_e'
-  expro_list(86) = 'pow_i'
-  expro_list(87) = 'pow_ei'
-  expro_list(88) = 'pow_e_aux'
-  expro_list(89) = 'pow_i_aux'
-  expro_list(90) = 'pow_e_fus'
-  expro_list(91) = 'pow_i_fus'
-  expro_list(92) = 'pow_e_sync'
-  expro_list(93) = 'pow_e_brem'
-  expro_list(94) = 'pow_e_line'
-  expro_list(95) = 'polflux'
+  expro_list(69) = 'dlnnidr'
+  expro_list(70) = 'dlntidr'
+  expro_list(71) = 'w0p'
+  expro_list(72) = 'surf'
+  expro_list(73) = 'vol'
+  expro_list(74) = 'volp'
+  expro_list(75) = 'cs'
+  expro_list(76) = 'rhos'
+  expro_list(77) = 'nuee'
+  expro_list(78) = 'grad_r0'
+  expro_list(79) = 'ave_grad_r'
+  expro_list(80) = 'bp0'
+  expro_list(81) = 'bt0'
+  expro_list(82) = 'ip'
+  expro_list(83) = 'mach'
+  expro_list(84) = 'flow_beam'
+  expro_list(85) = 'flow_wall'
+  expro_list(86) = 'flow_mom'
+  expro_list(87) = 'pow_e'
+  expro_list(88) = 'pow_i'
+  expro_list(89) = 'pow_ei'
+  expro_list(90) = 'pow_e_aux'
+  expro_list(91) = 'pow_i_aux'
+  expro_list(92) = 'pow_e_fus'
+  expro_list(93) = 'pow_i_fus'
+  expro_list(94) = 'pow_e_sync'
+  expro_list(95) = 'pow_e_brem'
+  expro_list(96) = 'pow_e_line'
+  expro_list(97) = 'polflux'
  
 end subroutine expro_list_set
 

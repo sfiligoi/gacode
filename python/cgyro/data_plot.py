@@ -357,6 +357,59 @@ class cgyrodata_plot(data.cgyrodata):
 
       return
 
+   def plot_corrug(self,w=0.5,wmax=0.0,spec=0,moment='n',theta=0.0,ymin='auto',ymax='auto',fig=None):
+
+      if fig is None:
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
+
+      self.getbigfield()
+      nr = self.n_radial
+      
+      #======================================
+      # Set figure size and axes
+      ax = fig.add_subplot(111)
+      ax.grid(which="both",ls=":")
+      ax.grid(which="major",ls=":")
+      ax.set_xlabel(r'$r/L$')
+      ax.set_ylabel(r'$\left|\delta '+moment+r'\right|/\rho_{*D}$')
+      #======================================
+
+      color = ['k','m','b','c','g','r']
+      t  = self.t
+
+      # Get index for average window
+      imin,imax=iwindow(t,w,wmax)
+
+      windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[imax])+']$'
+
+      ax.set_title(windowtxt)
+      
+      # f[p,n,t]
+      f,ft = self.kxky_select(theta,0,moment,spec)
+      yr = average_n( f[:,0,:],t,w,wmax,nr)
+      yi = average_n(ft[:,0,:],t,w,wmax,nr)
+      y  = yr+1j*yi
+      nx = 8*nr
+      yave = np.zeros(nx)
+      x = np.linspace(0,2*np.pi,num=nx)
+      for i in range(nr):
+         p = i-nr//2
+         yave = yave + np.real(1j*p*np.exp(1j*p*x)*y[i])
+      yave = 2*yave*(2*np.pi/self.length)
+         
+      ax.plot(x/(2*np.pi),yave)
+
+      ax.legend(loc=2)
+
+      if ymax != 'auto':
+         ax.set_ylim(top=float(ymax))
+      if ymin != 'auto':
+         ax.set_ylim(bottom=float(ymin))
+
+      fig.tight_layout(pad=0.3)
+
+      return
+
    def plot_zf(self,w=0.5,wmax=0.0,field=0,fig=None):
 
       if fig is None:
@@ -743,6 +796,8 @@ class cgyrodata_plot(data.cgyrodata):
 
          ax.axvspan(-0.25,0.25,facecolor='g',alpha=0.1)
          ax.set_xlim([-0.5,0.5])
+         ax.set_xticks([-0.5,-0.375,-0.25,-0.125,0,0.125,0.25,0.375,0.5])
+         ax.set_xticklabels([r'$-0.5$',r'$-0.375$',r'$-0.25$',r'$-0.125$',r'$0$',r'$0.125$',r'$0.25$',r'$0.375$',r'$0.5$'])
 
          ax.legend(loc=2)
 

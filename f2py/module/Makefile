@@ -23,7 +23,7 @@ endif
 
 objs:
 	${F2PYM} --quiet --overwrite-signature -m ${OBJ} -h sgn.pyf ${SRC}
-	${F2PY}  --quiet -lgomp --f90flags='${FOMP} ${FOPT} ${FMATH}' -c sgn.pyf ${SRC}
+	${F2PY}  --quiet -lgomp -c sgn.pyf ${SRC}
 
 	cp *.so ${GACODE_ROOT}/python/
 

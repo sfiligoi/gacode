@@ -6,7 +6,8 @@ subroutine prgen_swap
 
   ! Perform reordering (may just be identity)
 
-  call swapc(expro_name,expro_n_ion)
+  call swapc(expro_name)
+  call swapc(expro_type)
   call swap1(expro_z,expro_n_ion)
   call swap1(expro_mass,expro_n_ion)
   call swap2(expro_ni,expro_n_ion,expro_n_exp)
@@ -56,20 +57,19 @@ subroutine swap2(f,nion,nexp)
 
 end subroutine swap2
 
-subroutine swapc(f,nion)
+subroutine swapc(f)
 
   use prgen_globals
 
   implicit none
 
-  integer, intent(in) :: nion
-  character(len=7), intent(inout), dimension(nion) :: f
+  character(len=10), intent(inout), dimension(20) :: f
 
   integer :: i,ip
-  character(len=7), dimension(nion) :: ftmp
-
+  character(len=10), dimension(20) :: ftmp
+  
   ftmp = f
-  do i=1,nion
+  do i=1,10
      ip   = reorder_vec(i)
      f(i) = ftmp(ip)
   enddo

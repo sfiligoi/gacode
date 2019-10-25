@@ -13,6 +13,11 @@ subroutine cgyro_make_profiles
   real :: cc,loglam
 
   !-------------------------------------------------------------
+  ! Adiabatic-electron logic
+  if (n_species == 1) then
+     ae_flag = 1
+  endif
+  !-------------------------------------------------------------
 
   !-------------------------------------------------------------
   ! Local geometry treatment
@@ -81,17 +86,17 @@ subroutine cgyro_make_profiles
      s_zeta  = s_zeta_loc
 
      ! HAM (will be reset to 0.0 if udsymmetry_flag=1)
-        shape_sin3 = shape_sin3_loc
-        shape_cos0 = shape_cos0_loc
-        shape_cos1 = shape_cos1_loc
-        shape_cos2 = shape_cos2_loc
-        shape_cos3 = shape_cos3_loc
+     shape_sin3 = shape_sin3_loc
+     shape_cos0 = shape_cos0_loc
+     shape_cos1 = shape_cos1_loc
+     shape_cos2 = shape_cos2_loc
+     shape_cos3 = shape_cos3_loc
 
-        shape_s_sin3 = shape_s_sin3_loc
-        shape_s_cos0 = shape_s_cos0_loc
-        shape_s_cos1 = shape_s_cos1_loc
-        shape_s_cos2 = shape_s_cos2_loc
-        shape_s_cos3 = shape_s_cos3_loc
+     shape_s_sin3 = shape_s_sin3_loc
+     shape_s_cos0 = shape_s_cos0_loc
+     shape_s_cos1 = shape_s_cos1_loc
+     shape_s_cos2 = shape_s_cos2_loc
+     shape_s_cos3 = shape_s_cos3_loc
  
      q       = q_loc
      s       = s_loc
@@ -112,7 +117,7 @@ subroutine cgyro_make_profiles
      sdlnndr(1:n_species) = sdlnndr_loc(1:n_species)     
      sdlntdr(1:n_species) = sdlntdr_loc(1:n_species)     
 
-     if(ae_flag == 1) then
+     if (ae_flag == 1) then
         is_ele = n_species+1
      else
         is_ele = n_species
@@ -438,9 +443,7 @@ subroutine cgyro_make_profiles
   endif
 
   !-------------------------------------------------------------
-!$acc enter data copyin(px)
-
-!$acc update device(temp)
+!$acc enter data copyin(px,z,temp)
 
 end subroutine cgyro_make_profiles
 

@@ -12,7 +12,7 @@ subroutine cgyro_source
 
   implicit none
 
-  integer :: p,k,ir,j
+  integer :: ir,j
   integer :: icm,icp
   real :: nu_eff
 

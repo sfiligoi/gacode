@@ -215,7 +215,6 @@ subroutine prgen_map_plasmastate
 
   ! Ion identification
 
-  print '(a)','INFO: (prgen_map_plasmastate) Created these species:'
   do i=1,expro_n_ion
      expro_mass(i) = plst_m_all(i+1)/1.66e-27
      expro_z(i)    = nint(plst_q_all(i+1)/1.6022e-19)
@@ -225,7 +224,6 @@ subroutine prgen_map_plasmastate
      else
         expro_type(i) = type_therm
      endif
-     print '(t6,i2,2(1x,a))',i,trim(expro_name(i)),trim(expro_type(i))
   enddo
 
   !--------------------------------------------------------------------
