@@ -16,7 +16,7 @@ subroutine cgyro_init_manager
   use mpi
   use timer_lib
   use cgyro_globals
-!  use half_hermite
+  use half_hermite
 
 #ifdef _OPENACC
   use cgyro_io
