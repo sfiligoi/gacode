@@ -838,8 +838,8 @@ contains
           if (i>1) then
              call MPI_Recv(t,11,MPI_REAL8,i-1,i-1,MPI_COMM_WORLD,status,ierror)
           endif
-5         format("init_collision_landau: ",A,I0,X,A,7G24.16E3,X,A,X,I0,X,A,G24.16E3)
-          print 5,'i_proc=',i-1,'took',t(1:7),'load',load(i),'rel',t(3)/load(i)
+5         format("init_collision_landau: ",A,I0,A,7G24.16E3,A,I0,A,G24.16E3)
+          print 5,'i_proc=',i-1,' took',t(1:7),' load ',load(i),' rel',t(3)/load(i)
        end do
     else
        call MPI_Send(t,11,MPI_REAL8,0,i_proc,MPI_COMM_WORLD,ierror)
