@@ -316,6 +316,7 @@ module cgyro_globals
   complex, dimension(:,:), allocatable :: dtheta_up
   !
   ! Wavenumber advection
+  integer :: source_flag
   real, parameter :: tau_ave=50.0
   real, dimension(:), allocatable :: c_wave
   complex, dimension(:,:), allocatable :: source
