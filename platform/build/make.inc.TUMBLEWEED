@@ -14,8 +14,8 @@ FFTWDIR=/usr/lib/x86_64-linux-gnu
 
 # Compilers
 
-FC     = mpifort -fimplicit-none -J $(GACODE_ROOT)/modules #-fPIC
-#FC     = gfortran -std=f2008 -fall-intrinsics -fimplicit-none -J $(GACODE_ROOT)/modules #-fPIC
+#FC     = mpifort -fimplicit-none -J $(GACODE_ROOT)/modules #-fPIC
+FC     = mpifort -std=f2008 -fall-intrinsics -fimplicit-none -J $(GACODE_ROOT)/modules #-fPIC
 F77    = mpifort -fimplicit-none
 #F77    = gfortran
 FOMP   =-fopenmp
