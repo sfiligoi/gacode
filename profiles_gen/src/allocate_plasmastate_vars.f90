@@ -21,6 +21,7 @@ subroutine allocate_plasmastate_vars
   allocate(plst_bepar(nx,plst_dim_nspec_beam))
   allocate(plst_beperp(nx,plst_dim_nspec_beam))
   allocate(plst_vol(nx))
+  allocate(plst_surf(nx))
   allocate(plst_phit(nx))
   allocate(plst_psipol(nx))
   allocate(plst_elong(nx))
@@ -53,5 +54,8 @@ subroutine allocate_plasmastate_vars
   allocate(plst_prad_li(nx))
   allocate(plst_tq_trans(nx))
   allocate(plst_sn_trans(nx))
+
+  allocate(plst_curr_ohmic(nx))
+  allocate(plst_curr_bootstrap(nx))
 
 end subroutine allocate_plasmastate_vars

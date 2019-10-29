@@ -194,6 +194,7 @@ module prgen_globals
   real, dimension(:,:), allocatable :: plst_beperp ! beams
   real, dimension(:,:), allocatable :: plst_bepar  ! beams
   real, dimension(:), allocatable :: plst_vol
+  real, dimension(:), allocatable :: plst_surf
   real, dimension(:), allocatable :: plst_phit
   real, dimension(:), allocatable :: plst_psipol
   real, dimension(:), allocatable :: plst_elong
@@ -225,6 +226,9 @@ module prgen_globals
   real, dimension(:), allocatable :: plst_prad_li
   real, dimension(:), allocatable :: plst_tq_trans
   real, dimension(:), allocatable :: plst_sn_trans
+
+  real, dimension(:), allocatable :: plst_curr_ohmic
+  real, dimension(:), allocatable :: plst_curr_bootstrap
   !---------------------------------------------------------
 
   !---------------------------------------------------------

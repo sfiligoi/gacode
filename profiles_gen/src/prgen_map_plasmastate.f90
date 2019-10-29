@@ -227,9 +227,7 @@ subroutine prgen_map_plasmastate
   enddo
 
   !--------------------------------------------------------------------
-  ! Calculate integrated powers from input sources
-  !
-  ! Need to convert these integrated powers (W) to densities (W/m^3)
+  ! Convert SWIM integrated powers (W) to densities (W/m^3)
   do i=2,nx
      
      dvol = plst_vol(i)-plst_vol(i-1)
@@ -297,6 +295,22 @@ subroutine prgen_map_plasmastate
      print '(a)','INFO: (prgen_map_plasmastate) Setting aux. power as total-fus-rad'
      print '(a)','INFO: (prgen_map_plasmastate) Missing aux. power stored in qione,qioni'
   endif
+  !--------------------------------------------------------------------
+
+  !--------------------------------------------------------------------
+  ! Convert SWIM currents (MA) to current densities (MA/m^2)
+  expro_johm=0 ; expro_jbs = 0
+  do i=2,nx
+     expro_johm(i) = expro_johm(i-1)+plst_curr_ohmic(i-1)
+     expro_jbs(i) = expro_jbs(i-1)+plst_curr_bootstrap(i-1)
+  enddo
+  do i=2,nx
+     dvol = plst_surf(i)
+     expro_johm(i) = expro_johm(i)/dvol*1e-6
+     expro_jbs(i) = expro_jbs(i)/dvol*1e-6
+  enddo
+  expro_johm(1) = expro_johm(2) 
+  expro_jbs(1) = expro_jbs(2) 
   !--------------------------------------------------------------------
 
 end subroutine prgen_map_plasmastate

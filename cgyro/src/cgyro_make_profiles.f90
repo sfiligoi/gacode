@@ -395,6 +395,7 @@ subroutine cgyro_make_profiles
   !------------------------------------------------------------------------
   ! ExB and profile shear
   !
+  source_flag = 0
   if (abs(gamma_e) > 1e-10 .and. nonlinear_flag > 0) then
      omega_eb = k_theta*length*gamma_e/(2*pi)
      select case (shear_method)
@@ -402,6 +403,7 @@ subroutine cgyro_make_profiles
         call cgyro_info('ExB shear: Hammett discrete shift') 
      case (2)
         call cgyro_info('ExB shear: Wavenumber advection') 
+        source_flag = 1
      case default
         call cgyro_error('Unknown ExB shear method') 
      end select
@@ -413,6 +415,7 @@ subroutine cgyro_make_profiles
 
   if (profile_shear_flag == 1) then
      call cgyro_info('Profile shear: Continuous wavenumber advection') 
+     source_flag = 1
   else
      sdlnndr(1:n_species) = 0.0
      sdlntdr(1:n_species) = 0.0
