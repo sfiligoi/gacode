@@ -229,6 +229,7 @@ module prgen_globals
 
   real, dimension(:), allocatable :: plst_curr_ohmic
   real, dimension(:), allocatable :: plst_curr_bootstrap
+  real, dimension(:), allocatable :: plst_curt
   !---------------------------------------------------------
 
   !---------------------------------------------------------
