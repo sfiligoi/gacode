@@ -299,18 +299,16 @@ subroutine prgen_map_plasmastate
 
   !--------------------------------------------------------------------
   ! Convert SWIM currents (MA) to current densities (MA/m^2)
-  expro_johm=0 ; expro_jbs = 0
+  expro_johm=0 ; expro_jbs = 0 ; expro_jbstor = 0
   do i=2,nx
-     expro_johm(i) = expro_johm(i-1)+plst_curr_ohmic(i-1)
-     expro_jbs(i) = expro_jbs(i-1)+plst_curr_bootstrap(i-1)
+     dvol = (plst_vol(i)-plst_vol(i-1))/(2*pi*rmaj(i))
+     expro_johm(i) = plst_curr_ohmic(i)/dvol*1e-6
+     expro_jbs(i) = plst_curr_bootstrap(i)/dvol*1e-6
+     expro_jbstor(i) = (plst_curt(i)-plst_curt(i-1))/dvol*1e-6
   enddo
-  do i=2,nx
-     dvol = plst_surf(i)
-     expro_johm(i) = expro_johm(i)/dvol*1e-6
-     expro_jbs(i) = expro_jbs(i)/dvol*1e-6
-  enddo
-  expro_johm(1) = expro_johm(2) 
-  expro_jbs(1) = expro_jbs(2) 
+  expro_johm(1) = expro_johm(2)
+  expro_jbs(1) = expro_jbs(2)
+  expro_jbstor(1) = expro_jbstor(2)
   !--------------------------------------------------------------------
 
 end subroutine prgen_map_plasmastate

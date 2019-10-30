@@ -469,6 +469,11 @@ subroutine prgen_read_plasmastate
   err = nf90_inq_varid(ncid,trim('curr_bootstrap'),varid)
   err = nf90_get_var(ncid,varid,plst_curr_bootstrap(1:nx-1))
   plst_curr_bootstrap(nx) = 0.0
+  !
+  ! Bootstrap current 
+  err = nf90_inq_varid(ncid,trim('curt'),varid)
+  err = nf90_get_var(ncid,varid,plst_curt(1:nx-1))
+  plst_curt(nx) = 0.0
   !------------------------------------------------------------
   
   ! Angular momentum source torque
