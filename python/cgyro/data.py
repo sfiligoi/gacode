@@ -240,6 +240,7 @@ class cgyrodata:
       if fmt != 'null':
          print('INFO: (data.py) Read data in '+fmt+'.cgyro.kxky_phi. '+t)
          tmp = np.reshape(data[0:nd],(2,self.n_radial,self.theta_plot,self.n_n,nt),'F')
+         self.kxky_phi = tmp[0,:,:,:,:]+1j*tmp[1,:,:,:,:]
          self.kxky_phi_abs = np.sqrt(tmp[0,:,:,:,:]**2+tmp[1,:,:,:,:]**2)
 
       # 1b. kxky_apar
