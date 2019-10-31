@@ -239,23 +239,19 @@ class cgyrodata:
       t,fmt,data = self.extract('.cgyro.kxky_phi')
       if fmt != 'null':
          print('INFO: (data.py) Read data in '+fmt+'.cgyro.kxky_phi. '+t)
-         tmp = np.reshape(data[0:nd],(2,self.n_radial,self.theta_plot,self.n_n,nt),'F')
-         self.kxky_phi = tmp[0,:,:,:,:]+1j*tmp[1,:,:,:,:]
-         self.kxky_phi_abs = np.sqrt(tmp[0,:,:,:,:]**2+tmp[1,:,:,:,:]**2)
+         self.kxky_phi = np.reshape(data[0:nd],(2,self.n_radial,self.theta_plot,self.n_n,nt),'F')
 
       # 1b. kxky_apar
       t,fmt,data = self.extract('.cgyro.kxky_apar')
       if fmt != 'null':
          print('INFO: (data.py) Read data in '+fmt+'.cgyro.kxky_apar. '+t)
-         tmp = np.reshape(data[0:nd],(2,self.n_radial,self.theta_plot,self.n_n,nt),'F')
-         self.kxky_apar_abs = np.sqrt(tmp[0,:,:,:,:]**2+tmp[1,:,:,:,:]**2)
+         self.kxky_apar = np.reshape(data[0:nd],(2,self.n_radial,self.theta_plot,self.n_n,nt),'F')
 
       # 1c. kxky_bpar
       t,fmt,data = self.extract('.cgyro.kxky_bpar')
       if fmt != 'null':
          print('INFO: (data.py) Read data in '+fmt+'.cgyro.kxky_bpar. '+t)
-         tmp = np.reshape(data[0:nd],(2,self.n_radial,self.theta_plot,self.n_n,nt),'F')
-         self.kxky_bpar_abs = np.sqrt(tmp[0,:,:,:,:]**2+tmp[1,:,:,:,:]**2)
+         self.kxky_bpar = np.reshape(data[0:nd],(2,self.n_radial,self.theta_plot,self.n_n,nt),'F')
 
       # 2. kxky_n
       nd = 2*self.n_radial*self.theta_plot*self.n_species*self.n_n*nt

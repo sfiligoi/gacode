@@ -151,6 +151,19 @@ elif plot_type == 'corrug':
 
    outfile = 'out.cgyro.corrug.'+ftype
 
+elif plot_type == 'shift':
+
+   w     = float(sys.argv[2])
+   wmax  = float(sys.argv[3])
+   ftype = sys.argv[4]
+   theta = 0.0
+   ymin  = sys.argv[5]
+   ymax  = sys.argv[6]
+
+   data_in.plot_shift(w=w,wmax=wmax,theta=theta,ymin=ymin,ymax=ymax)
+
+   outfile = 'out.cgyro.shift.'+ftype
+
 elif plot_type == 'flux':
 
    w      = float(sys.argv[2])
