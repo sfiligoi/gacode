@@ -24,6 +24,11 @@ subroutine prgen_map_plasmastate
   real :: z_eff_lump
   real :: m_eff_lump
 
+  !----------------------------------------------------------------------
+  ! shot number
+  !
+  expro_shot = plst_shot_number
+
   !--------------------------------------------------------------------
   ! COORDINATES: set sign of poloidal flux 
   dpsi(:) = abs(dpsi(:))*(-ipccw)

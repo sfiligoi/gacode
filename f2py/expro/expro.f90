@@ -13,6 +13,8 @@ module expro
 
   integer :: expro_n_exp
   integer :: expro_n_ion
+  integer :: expro_shot
+  integer :: expro_time
   character*10, dimension(20) :: expro_name
   character*10, dimension(20) :: expro_type
 
@@ -434,6 +436,10 @@ contains
        endif
 
        select case (c)
+       case ('shot')
+          call expro_icomm(expro_shot) 
+       case ('time')
+          call expro_icomm(expro_time) 
        case ('nexp')
           call expro_icomm(expro_n_exp) 
           nexp = expro_n_exp
@@ -607,6 +613,8 @@ contains
     write(1,'(a)') '#'
 
     ! Write data
+    write(1,'(a)') ident//'shot' ; write(1,'(i0)') expro_shot
+    write(1,'(a)') ident//'time' ; write(1,'(i0)') expro_time
     write(1,'(a)') ident//'nexp' ; write(1,'(i0)') nexp
     write(1,'(a)') ident//'nion' ; write(1,'(i0)') nion
     write(1,'(a)') ident//'name' ; write(1,'(20(a,1x))') (trim(expro_name(i)),i=1,nion)
