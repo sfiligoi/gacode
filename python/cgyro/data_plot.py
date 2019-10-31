@@ -420,47 +420,63 @@ class cgyrodata_plot(data.cgyrodata):
 
       if fig is None:
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
-
-      self.getbigfield()
-      nx = self.n_radial
       
       #======================================
       # Set figure size and axes
       ax = fig.add_subplot(111)
       ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
-      ax.set_xlabel(r'$r/L$')
+      ax.set_xlabel(r'$k_y \rho_s$')
+      ax.set_ylabel(r'$\left\langle k_x \rho_s \right\rangle$')
       #======================================
 
       color = ['k','m','b','c','g','r']
-      t  = self.t
+      
+      self.getbigfield()
+      nx = self.n_radial
+      nt = self.n_time
+      nn = self.n_n
+
+      t = self.t
 
       # Get index for average window
       imin,imax=iwindow(t,w,wmax)
-
       windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[imax])+']$'
-
       ax.set_title(windowtxt)
-      
-      # f[p,n,t]
-      f,ft = self.kxky_select(theta,0,moment,spec)
-      ax.set_ylabel(r'$\left|'+ft+'^\prime\\right|/\\rho_s$')
 
-      # complex n=0 amplitudes
-      yr = average_n(np.real(f[:,0,:]),t,w,wmax,nx)
-      yi = average_n(np.imag(f[:,0,:]),t,w,wmax,nx)
-      nxp = 8*nx
-      yave = np.zeros(nxp)
-      x = np.linspace(0,2*np.pi,num=nxp)
-      y = yr+1j*yi
+      ky = np.zeros([nn])
+      y = np.zeros([nn])
+      x = np.zeros([nx])
+
       for i in range(nx):
-         p = i-nx//2
-         yave = yave + np.real(1j*p*np.exp(1j*p*x)*y[i])
-      yave = 2*yave*(2*np.pi/self.length)
-         
-      ax.plot(x/(2*np.pi),yave)
+         x[i] = i*2*np.pi/nx-np.pi
 
-      ax.set_xlim([0,1])
+      f,ft = self.kxky_select(theta,0,'phi',0)
+
+      for n in range(nn):
+
+         # phi[p,t]
+         phit = f[:,n,:]
+
+         phi  = np.zeros([nx,nt],dtype=np.complex_)
+         phip = np.zeros([nx,nt],dtype=np.complex_)
+         phis = np.zeros([nx,nt],dtype=np.complex_)
+
+         for p in range(-nx//2,nx//2):
+            for i in range(nx):
+               if abs(x[i]) < np.pi/2: 
+                  u = phit[p+nx//2,:]*np.exp(1j*p*x[i]) 
+                  phi[i,:]  = phi[i,:]+u[:] 
+                  phis[i,:] = phis[i,:]+np.conj(u[:]) 
+                  phip[i,:] = phip[i,:]-p*u[:] 
+
+         pn = average(np.sum(phis[:,:]*phip[:,:],axis=0),t,w,0.0)
+         pd = average(np.sum(phis[:,:]*phi[:,:],axis=0),t,w,0.0)
+
+         ky[n] = self.ky[n]
+         y[n] = (2*np.pi/self.length)*np.real(pn/pd)
+   
+      ax.plot(ky,y)
 
       if ymax != 'auto':
          ax.set_ylim(top=float(ymax))
