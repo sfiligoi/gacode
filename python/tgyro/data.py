@@ -187,7 +187,7 @@ class tgyrodata:
                     except ValueError:
                         # parse badly formatted numbers like this 3.952525-323
                         tmp = re.match('([\-\+]*[\.0-9]+)([\-\+])([0-9]+)', row[ic])
-                        if tmp.groups():
+                        if tmp and tmp.groups():
                             numdata[ic, ib, ir] = float('%sE%s%s' % (tmp.groups()[0], tmp.groups()[1], tmp.groups()[2]))
                         else:
                             raise
