@@ -7,12 +7,12 @@ wrapper = Extension('gacode_ext',
                              'geo/geo.f90'])
 
 setup(name='gacode',
-      version='0.1',
+      version='0.31',
       description='Python interface to gacode profile and geometry tools.',
       url='https://gafusion.github.io/doc',
       author='General Atomics Theory Group',
       author_email='candy@fusion.gat.com',
       license='MIT',
-      py_modules=['gacode.omfit','gacode.cgyro'],
+      py_modules=['gacode.omfit'],
       ext_modules=[wrapper]
 )
