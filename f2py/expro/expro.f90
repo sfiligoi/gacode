@@ -1,7 +1,7 @@
 module expro
 
   ! List of all useful interface objects
-  character*11, dimension(97) :: expro_list 
+  character*12, dimension(99) :: expro_list 
 
   character(len=2) :: ident='# '
   double precision :: expro_mass_deuterium=3.34358e-24  ! md (g)
@@ -13,8 +13,8 @@ module expro
 
   integer :: expro_n_exp
   integer :: expro_n_ion
-  integer :: expro_shot
-  integer :: expro_time
+  integer :: expro_shot=0
+  integer :: expro_time=0
   character*10, dimension(20) :: expro_name
   character*10, dimension(20) :: expro_type
 
@@ -436,10 +436,6 @@ contains
        endif
 
        select case (c)
-       case ('shot')
-          call expro_icomm(expro_shot) 
-       case ('time')
-          call expro_icomm(expro_time) 
        case ('nexp')
           call expro_icomm(expro_n_exp) 
           nexp = expro_n_exp
@@ -448,6 +444,10 @@ contains
           nion = expro_n_ion
           if (allocated(expro_rho)) call expro_init(0)
           call expro_init(1) 
+       case ('shot')
+          call expro_icomm(expro_shot) 
+       case ('time')
+          call expro_icomm(expro_time) 
        case ('name')
           call expro_tcomm(expro_name(1:nion),nion)
        case ('type')
@@ -613,10 +613,10 @@ contains
     write(1,'(a)') '#'
 
     ! Write data
-    write(1,'(a)') ident//'shot' ; write(1,'(i0)') expro_shot
-    write(1,'(a)') ident//'time' ; write(1,'(i0)') expro_time
-    write(1,'(a)') ident//'nexp' ; write(1,'(i0)') nexp
-    write(1,'(a)') ident//'nion' ; write(1,'(i0)') nion
+    call expro_writei(nexp,'nexp')
+    call expro_writei(nion,'nion')
+    call expro_writei(expro_shot,'shot')
+    call expro_writei(expro_time,'time')
     write(1,'(a)') ident//'name' ; write(1,'(20(a,1x))') (trim(expro_name(i)),i=1,nion)
     write(1,'(a)') ident//'type' ; write(1,'(20(a,1x))') (trim(expro_type(i)),i=1,nion)
     write(1,'(a)') ident//'masse'; write(1,30) expro_masse
@@ -767,7 +767,7 @@ subroutine expro_list_set
   expro_list(79) = 'ave_grad_r'
   expro_list(80) = 'bp0'
   expro_list(81) = 'bt0'
-  expro_list(82) = 'ip'
+  expro_list(82) = 'fpol'
   expro_list(83) = 'mach'
   expro_list(84) = 'flow_beam'
   expro_list(85) = 'flow_wall'
@@ -783,7 +783,9 @@ subroutine expro_list_set
   expro_list(95) = 'pow_e_brem'
   expro_list(96) = 'pow_e_line'
   expro_list(97) = 'polflux'
- 
+  expro_list(98) = 'shot'
+  expro_list(99) = 'time'
+
 end subroutine expro_list_set
 
 end module expro

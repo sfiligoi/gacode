@@ -10,7 +10,7 @@ subroutine wheel1(nr,nth,nn,nx,nz,c,f)
   double precision, dimension(:), allocatable :: eny
   double precision, dimension(:), allocatable :: z,th
 
-  integer :: i,j,k,kc
+  integer :: i,k,kc
   integer :: n,p
   double precision :: pi,fsum,xi
   double complex :: ic

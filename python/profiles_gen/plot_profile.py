@@ -15,6 +15,7 @@ from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
 import matplotlib.pyplot as plt
 from gacodefuncs import *
 from gacode import expro
+from gacode.omfit import gapystr
 
 matplotlib.rc('text',usetex=True)
 matplotlib.rc('font',size=18)
