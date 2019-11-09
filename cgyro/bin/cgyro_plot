@@ -53,6 +53,7 @@ then
   echo "                = xflux    (radial profile of fluxes for all species)"
   echo "                = low      (long-wavelength moments versus time)"
   echo "                = corrug   (time-averaged profile corrugations)"
+  echo "                = shift    (spectral shift)"
   echo "                = fluct    (x-y fluctuation contours at fixed timeslice)"
   echo "                = rt       (x-t fluctuation contours)"
   echo "                = vid      (create video from png files)"
@@ -436,7 +437,10 @@ case "$PLOT_TYPE" in
 	python $PLT $PLOT_TYPE $W $WMAX $FIELD $EXT ;;
 
    low | corrug)
-	python $PLT $PLOT_TYPE $W $WMAX $SPECIES $MOMENT $EXT $YMIN $YMAX ;;
+       python $PLT $PLOT_TYPE $W $WMAX $SPECIES $MOMENT $EXT $YMIN $YMAX ;;
+
+   shift )
+	python $PLT $PLOT_TYPE $W $WMAX $EXT $YMIN $YMAX ;;
 
    ky_phi)
 	python $PLT $PLOT_TYPE $FIELD $THETA $YMIN $YMAX $N $EXT ;;

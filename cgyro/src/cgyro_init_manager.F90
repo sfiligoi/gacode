@@ -16,7 +16,7 @@ subroutine cgyro_init_manager
   use mpi
   use timer_lib
   use cgyro_globals
-!  use half_hermite
+  use half_hermite
 
 #ifdef _OPENACC
   use cgyro_io
@@ -72,24 +72,24 @@ subroutine cgyro_init_manager
           w_e,&
           e_deriv1_mat,&
           trim(path)//'out.cgyro.egrid')
-!  else if (e_method==3) then
-!     ! interface function in module half_hermite
-!     if (i_proc==0) then
-!        call pseudo_maxwell_pliocene(n_energy,&
-!             e_max,&
-!             energy,&
-!             w_e,&
-!             e_deriv1_mat,&
-!             alpha_poly,& ! weight fct=x^alpha_poly*exp(-x**2)
-!             trim(path)//'out.cgyro.egrid')
-!     else
-!        call pseudo_maxwell_pliocene(n_energy,&
-!             e_max,&
-!             energy,&
-!             w_e,&
-!             e_deriv1_mat,&
-!             alpha_poly) ! only write results on i_proc zero.
-!     end if
+  else if (e_method==3) then
+     ! interface function in module half_hermite
+     if (i_proc==0) then
+        call pseudo_maxwell_pliocene(n_energy,&
+             e_max,&
+             energy,&
+             w_e,&
+             e_deriv1_mat,&
+             alpha_poly,& ! weight fct=x^alpha_poly*exp(-x**2)
+             trim(path)//'out.cgyro.egrid')
+     else
+        call pseudo_maxwell_pliocene(n_energy,&
+             e_max,&
+             energy,&
+             w_e,&
+             e_deriv1_mat,&
+             alpha_poly) ! only write results on i_proc zero.
+     end if
   end if
      
 

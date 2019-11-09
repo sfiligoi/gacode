@@ -1,8 +1,18 @@
 import sys
 from gacode import expro
-from gacodefuncs import *
 
-class Gapy(dict):
+# Function to decode the insane string returned by gacode/f2py
+def gapystr(s):
+    import sys
+    if sys.version_info[0] == 2:
+        u = []
+        for i in range(len(s)):
+            u.append(str(s[i]).strip())
+        return u
+    else:
+        return str(s,'utf-8').split()
+
+class gapy(dict):
 
     def __init__(self, filename, input_profiles_compatibility_mode=True):
         expro.expro_read(filename)
@@ -33,10 +43,4 @@ class Gapy(dict):
             del self['z']
             del self['mass']
             print(self['IONS'])
-
-import cgyro
-import gyro
-import neo
-import tgyro
-from gacode import geo
 

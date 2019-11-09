@@ -10,6 +10,7 @@ LLIB=math_lib
 
 OBJECTS = math_constants.o \
           gauss_legendre.o \
+          half_hermite.o \
           i0.o \
           parallel_dim.o \
           pseudospec_lib.o

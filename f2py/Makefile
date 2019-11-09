@@ -5,19 +5,14 @@
 all:
 	cd geo ; make
 	cd expro ; make
-#	make so
 
 pip:
-	cp -r ${GACODE_ROOT}/python/cgyro .
-	cp -r ${GACODE_ROOT}/python/gyro .
-	cp -r ${GACODE_ROOT}/python/tgyro .
-	cp -r ${GACODE_ROOT}/python/neo .
-
-	python ./setup.py build_ext
+	python ./setup.py build
 	python ./setup.py sdist
 
 so:
-	cd module ; make
+	python ./setup.py install --home=${GACODE_ROOT}/python
+	mv ${GACODE_ROOT}/python/lib/python/* ${GACODE_ROOT}/python/ 
 
 clean:
 	cd geo ; make clean
@@ -25,7 +20,7 @@ clean:
 	cd module ; make clean
 	cd test ; make clean
 	rm -rf dist build MANIFEST sgn.pyf
-	rm -rf cgyro gyro tgyro neo
+	cd ${GACODE_ROOT}/python ; rm -rf gacode *-info *.so 
 
 .IGNORE:
 

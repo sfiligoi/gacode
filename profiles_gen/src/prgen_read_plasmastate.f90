@@ -114,6 +114,10 @@ subroutine prgen_read_plasmastate
   err = nf90_inq_varid(ncid,trim('vol'),varid)
   err = nf90_get_var(ncid,varid,plst_vol(:))
 
+  ! Area
+  err = nf90_inq_varid(ncid,trim('area'),varid)
+  err = nf90_get_var(ncid,varid,plst_surf(:))
+
   ! Normalizing B for toroidal flux
   err = nf90_inq_varid(ncid,trim('B_axis_vac'),varid)
   err = nf90_get_var(ncid,varid,plst_b_axis_vac)
@@ -293,8 +297,13 @@ subroutine prgen_read_plasmastate
 
   plst_omegat(nx) = dummy
 
-  ! SOURCES
+  !==========================
+  ! SOURCES: powers, currents
+  !==========================
 
+  !------------------------------------------------------------
+  ! Powers
+  !
   ! Total power to electrons
   err = nf90_inq_varid(ncid,trim('pe_trans'),varid)
   err = nf90_get_var(ncid,varid,plst_pe_trans(1:nx-1))
@@ -446,7 +455,27 @@ subroutine prgen_read_plasmastate
      enddo
      close(11)
   endif
+  !------------------------------------------------------------
 
+  !------------------------------------------------------------
+  ! Currents
+  !
+  ! Ohmic current 
+  err = nf90_inq_varid(ncid,trim('curr_ohmic'),varid)
+  err = nf90_get_var(ncid,varid,plst_curr_ohmic(1:nx-1))
+  plst_curr_ohmic(nx) = 0.0
+  !
+  ! Bootstrap current 
+  err = nf90_inq_varid(ncid,trim('curr_bootstrap'),varid)
+  err = nf90_get_var(ncid,varid,plst_curr_bootstrap(1:nx-1))
+  plst_curr_bootstrap(nx) = 0.0
+  !
+  ! Bootstrap current 
+  err = nf90_inq_varid(ncid,trim('curt'),varid)
+  err = nf90_get_var(ncid,varid,plst_curt(1:nx-1))
+  plst_curt(nx) = 0.0
+  !------------------------------------------------------------
+  
   ! Angular momentum source torque
   err = nf90_inq_varid(ncid,trim('tq_trans'),varid)
   err = nf90_get_var(ncid,varid,plst_tq_trans(1:nx-1))
