@@ -1,5 +1,7 @@
 import sys
 from gacode import expro
+import numpy
+import re
 
 # Function to decode the insane string returned by gacode/f2py
 def gapystr(s):
@@ -62,6 +64,35 @@ class gapy(dict):
             for item in self:
                 if isinstance(self[item], numpy.ndarray) and not len(self[item].shape):
                     self[item] = self[item].item()
+
+    def save(self):
+        def sort_key(x):
+            if re.match('[a-zA-Z]+_[0-9]+', x):
+                x = x.split('_')
+                x = '%s_%02d' % (x[0], int(x[1]))
+            return x
+
+        collated = {}
+        for item in sorted(list(self.keys()), key=sort_key):
+            if item == 'IONS':
+                continue
+            expro_item = item
+            expro_value = self[item]
+            if item in ['N_EXP', 'SHOT', 'TIME']:
+                expro_item = item.lower()
+            if self.input_profiles_compatibility_mode and re.match('[a-zA-Z]+_[0-9]+', item):
+                expro_item = item.split('_')
+                collated.setdefault(expro_item[0], []).append(self[item])
+                continue
+            setattr(expro, 'expro_' + expro_item, expro_value)
+        for expro_item in collated:
+            setattr(expro, 'expro_' + expro_item, collated[expro_item])
+        if 'IONS' in self:
+            for item_n, item in enumerate(['name', 'z', 'mass', 'type']):
+                self[item] = [self['IONS'][k][item_n] for k in self['IONS']]
+            self['n_ion'] = len(self['IONS'])
+
+        expro.expro_write(self.filename)
 
     def sort(self):
         keys = sorted(list(self.keys()), key=lambda x: x.lower())
