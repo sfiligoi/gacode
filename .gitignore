@@ -61,6 +61,8 @@ le3/profiles_3d/profiles_3d
 quick/src/quick
 gapy/test/test_geo/test
 gapy/test/test_expro/test
+f2py/build
+f2py/gacode.egg-info
 
 # Regression logs and directories
 *.log
