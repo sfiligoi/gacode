@@ -427,7 +427,15 @@ else
 
 fi
 #=============================================================
-
+# If file is GACODE LEGACY (input.profiles), parse header
+# to get ion masses, charge, names
+#
+if [ "$itype" == "LEGACY" ] ; then
+  echo "INFO: (profiles_gen) Parsing input.profiles header."
+#  python $PRGEN_BIN/profile_parse.py $FILE
+  python $PRGEN_BIN/profile_header_dump.py $FILE
+  python $PRGEN_BIN/profile_header_shot.py $FILE
+fi
 #=============================================================
 # Managing input file (also catches UFILE mode)
 
@@ -697,7 +705,7 @@ fi
 
 if [ $VERBOSE_FLAG -eq 0 ]
 then
-   rm -f $CONFIG fluxfit.* success
+   rm -f $CONFIG fluxfit.* success profile_header profile_shot
    rm -f *.ave out.com out.dim out.data out.ufile.log
    rm -f gfile out.expro.run pfile.*
 fi
