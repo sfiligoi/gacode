@@ -24,6 +24,11 @@ subroutine prgen_map_plasmastate
   real :: z_eff_lump
   real :: m_eff_lump
 
+  !----------------------------------------------------------------------
+  ! shot number
+  !
+  expro_shot = plst_shot_number
+
   !--------------------------------------------------------------------
   ! COORDINATES: set sign of poloidal flux 
   dpsi(:) = abs(dpsi(:))*(-ipccw)
@@ -215,7 +220,6 @@ subroutine prgen_map_plasmastate
 
   ! Ion identification
 
-  print '(a)','INFO: (prgen_map_plasmastate) Created these species:'
   do i=1,expro_n_ion
      expro_mass(i) = plst_m_all(i+1)/1.66e-27
      expro_z(i)    = nint(plst_q_all(i+1)/1.6022e-19)
@@ -225,13 +229,10 @@ subroutine prgen_map_plasmastate
      else
         expro_type(i) = type_therm
      endif
-     print '(t6,i2,2(1x,a))',i,trim(expro_name(i)),trim(expro_type(i))
   enddo
 
   !--------------------------------------------------------------------
-  ! Calculate integrated powers from input sources
-  !
-  ! Need to convert these integrated powers (W) to densities (W/m^3)
+  ! Convert SWIM integrated powers (W) to densities (W/m^3)
   do i=2,nx
      
      dvol = plst_vol(i)-plst_vol(i-1)
@@ -299,6 +300,20 @@ subroutine prgen_map_plasmastate
      print '(a)','INFO: (prgen_map_plasmastate) Setting aux. power as total-fus-rad'
      print '(a)','INFO: (prgen_map_plasmastate) Missing aux. power stored in qione,qioni'
   endif
+  !--------------------------------------------------------------------
+
+  !--------------------------------------------------------------------
+  ! Convert SWIM currents (MA) to current densities (MA/m^2)
+  expro_johm=0 ; expro_jbs = 0 ; expro_jbstor = 0
+  do i=2,nx
+     dvol = (plst_vol(i)-plst_vol(i-1))/(2*pi*rmaj(i))
+     expro_johm(i) = plst_curr_ohmic(i)/dvol*1e-6
+     expro_jbs(i) = plst_curr_bootstrap(i)/dvol*1e-6
+     expro_jbstor(i) = (plst_curt(i)-plst_curt(i-1))/dvol*1e-6
+  enddo
+  expro_johm(1) = expro_johm(2)
+  expro_jbs(1) = expro_jbs(2)
+  expro_jbstor(1) = expro_jbstor(2)
   !--------------------------------------------------------------------
 
 end subroutine prgen_map_plasmastate

@@ -9,7 +9,7 @@ subroutine wheel2(nr,nth,nn,ny,nz,c,f)
   double complex, dimension(:,:), allocatable :: eny,c0
   double precision, dimension(:), allocatable :: y,z,th
 
-  integer :: i,j,k,kc
+  integer :: j,k,kc
   integer :: n,p
   double precision :: pi,fsum
   double complex :: ic

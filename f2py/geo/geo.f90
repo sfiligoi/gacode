@@ -67,6 +67,7 @@ module geo
   double precision :: geo_ffprime
   double precision :: geo_volume_prime
   double precision :: geo_volume
+  double precision :: geo_surf
   double precision :: geo_fluxsurfave_grad_r2
   double precision :: geo_fluxsurfave_grad_r
   double precision :: geo_grad_r0
@@ -158,6 +159,7 @@ contains
 
        geo_volume       = 2*pi**2*geo_rmin_in**2*geo_rmaj_in
        geo_volume_prime = 4*pi**2*geo_rmin_in*geo_rmaj_in
+       geo_surf         = geo_volume_prime
 
        ! Theta-dependent functions (some are set to zero for now)
 
@@ -698,10 +700,12 @@ contains
     geo_ffprime = f*f_prime
     geo_f       = f
     !
-    ! pre-factor of 0.5 comes from triangular element in phi-direction:
+    ! pre-factor of 0.5 in dV comes from triangular element in phi-direction:
     ! dV = (0.5*R*dphi)*(R*dZ) 
+    ! dS = (R*dphi)*(dl)
     !
     geo_volume = 0.5*pi_2*sum(bigz_t(1:n_theta-1)*geov_bigr(1:n_theta-1)**2)*d_theta
+    geo_surf   = pi_2*sum(geov_l_t(1:n_theta-1)*geov_bigr(1:n_theta-1))*d_theta
     geo_bl     = sum(geov_l_t(:)*geov_bp(:))*d_theta
     !-----------------------------------------------------------
 

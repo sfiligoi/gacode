@@ -121,36 +121,8 @@ subroutine cgyro_kernel
      call timer_lib_out('str_mem')
 
      ! Collisionless step: returns new h_x, cap_h_x, fields 
-     ! Normal timestep
-
-     if (integration_error(2) > adapt_tol .and. nonlinear_flag == 1) then
-        ! Trigger adaptive step
-        delta_t = delta_t/4
-        call cgyro_step_gk
-        call cgyro_step_gk
-        call cgyro_step_gk
-        call cgyro_step_gk
-        delta_t = 4*delta_t
-     else
-        ! Normal timestep
-        call cgyro_step_gk
-     endif
-     
-     !error_mode=0  !! currently default to sum of relative error
-
-     !! if ( delta_t_method == 0 ) ! default RK4
-
-     !call cgyro_step_gk
-
-     !! if ( delta_t_method == 1 )     
-     
-     !! call cgyro_step_gk_bs5 !! bogacki-shampine 5(4)
-     !! if ( delta_t_method == 2 )     
-     !! call cgyro_step_gk_ck  !! cash-karp or 5(4)
-     !! if ( delta_t_method == 3 )
-     
-     !call cgyro_step_gk_v76   !! vernier order 7(6)
-
+     call cgyro_step_gk
+   
      call timer_lib_in('str_mem')
 !$acc update host(rhs(:,:,1))
      call timer_lib_out('str_mem')
@@ -173,7 +145,11 @@ subroutine cgyro_kernel
         call cgyro_shear_hammett
         call timer_lib_out('shear')
      endif
-     !------------------------------------------------------------
+
+     call timer_lib_in('shear')
+     call cgyro_source
+     call timer_lib_out('shear')
+    !------------------------------------------------------------
 
      !------------------------------------------------------------
      ! Diagnostics
@@ -301,13 +277,5 @@ subroutine cgyro_kernel
   else
     exit_dt = (exit_time-start_time+count_max)/real(count_rate)
   endif
-
-  !if (i_proc == 0) then
-  !  call date_and_time(date,time,zone);
-  !  open(NEWUNIT=statusfd,FILE=trim(path)//runfile_startups,action="write",status="unknown",position='append')
-  !  write(statusfd, '(a,a,a,a,a,a,a,a,a,a,a,a,a,1pe10.3)') date(1:4),"/",date(5:6),"/",date(7:8)," ", &
-  !                  time(1:2),":",time(3:4),":",time(5:10), zone, ' [EXIT] After ', exit_dt
-  !  close(statusfd)
-  !endif
 
 end subroutine cgyro_kernel

@@ -104,8 +104,8 @@ TGYRO_DIR=$GACODE_ROOT/tgyro
 # Parallelization parameters
 NPROC=1
 NOMP=1
-NUMA=1
-MPINUMA=1
+NUMA=0
+MPINUMA=0
 # Execute/test mode flags
 EXEC_FLAG=0
 TEST_FLAG=0
@@ -116,7 +116,6 @@ REGRESS_RESET=0
 SCOPY_FLAG=0
 KILL_STATUS=2
 START=new
-HARVEST_FLAG=1
 #=============================================================
 
 #=============================================================
@@ -156,8 +155,6 @@ while [ $# -gt 0 ] ; do
   -K) shift ; KILL_STATUS=1 ; LOCDIR=$1 ;;
 
   -start) shift ; START=$1 ;;
-  
-  -noharvest) shift ; HARVEST_FLAG=0 ;;
 
   *) echo "ERROR: incorrect gyro syntax." ; exit 1 ;;
  
@@ -283,10 +280,10 @@ echo 0 > halt
 #
 # Machine information
 echo " -----------------------------------------------------------------" > $RUNBASE
-echo " TGYRO simdir : $simdir" >> $RUNBASE
+echo " TGYRO simdir : $SIMDIR" >> $RUNBASE
 
 rm -f $LOG_FILE
-python $TGYRO_DIR/bin/tgyro_parse.py "-start $START" >> $LOG_FILE
+python $TGYRO_DIR/bin/tgyro_parse.py >> $LOG_FILE
 
 # See if we returned with an error
 if [ $? -eq 1 ]
@@ -311,17 +308,12 @@ TPROC=${z[0]} ; EPROC=${z[1]} ; rm proc
 
 gacode_printversion TGYRO 
 
-if [ $HARVEST_FLAG -eq 0 ]
-then
-   export HARVEST_HOST=127.0.0.1
-fi
-
 cat $LOG_FILE
 echo "INFO: (tgyro script) See $RUNBASE for TGYRO run summary."
 
 if [ $EXEC_FLAG -eq 1 ]
 then
-   if [ $NPROC -ne $EPROC ]
+   if [ $NPROC -ne $EPROC ] && [ "$GACODE_PLATFORM" != "SUMMIT_JC" ]
    then
        #cat $LOG_FILE
        echo "ERROR: (tgyro script) processor count mismatch."

@@ -55,7 +55,6 @@ subroutine cgyro_flux
         ir = ir_c(ic)
         it = it_c(ic)
 
-        dvr   = w_theta(it)*dens_rot(it,is)*dens(is)*dv
         erot  = (energy(ie)+lambda_rot(it,is))*temp(is)
 
         if (itp(it) > 0) then
@@ -67,6 +66,9 @@ subroutine cgyro_flux
 
            ! Energy moment : (delta E_a)/(n_norm T_norm rho_norm)
            moment_loc(ir,itp(it),is,2) = moment_loc(ir,itp(it),is,2)-(cn*field(1,ic)-cprod)*erot
+
+           ! Velocity moment : (delta v_a)/(n_norm v_norm rho_norm)
+           moment_loc(ir,itp(it),is,3) = moment_loc(ir,itp(it),is,3)-(cn*field(1,ic)-cprod)*vpar
         endif
 
      enddo

@@ -95,8 +95,8 @@ subroutine cgyro_write_initdata
 
      if (udsymmetry_flag == 0) then
         write(io,*)
-        write(io,21) '   c0:',shape_cos0,  '   c1:',shape_cos1,  '   c2:',shape_cos2,  '   c3:',shape_cos3,  '   s3:',shape_s_sin3
-        write(io,21) ' s_c0:',shape_s_cos0,' s_c2:',shape_s_cos1,' s_c2:',shape_s_cos2,' s_c3:',shape_s_cos3,' s_s3:',shape_s_sin3
+        write(io,21) '   c0:',shape_cos0,  '   c1:',shape_cos1,  '   c2:',shape_cos2,  '   c3:',shape_cos3,  '   s3:',shape_sin3
+        write(io,21) ' s_c0:',shape_s_cos0,' s_c1:',shape_s_cos1,' s_c2:',shape_s_cos2,' s_c3:',shape_s_cos3,' s_s3:',shape_s_sin3
      endif
 
      write(io,*)
@@ -144,6 +144,16 @@ subroutine cgyro_write_initdata
      write (io,fmtstr) s_zeta
      write (io,fmtstr) zmag
      write (io,fmtstr) dzmag
+     write (io,fmtstr) shape_sin3
+     write (io,fmtstr) shape_s_sin3
+     write (io,fmtstr) shape_cos0
+     write (io,fmtstr) shape_s_cos0
+     write (io,fmtstr) shape_cos1
+     write (io,fmtstr) shape_s_cos1
+     write (io,fmtstr) shape_cos2
+     write (io,fmtstr) shape_s_cos2
+     write (io,fmtstr) shape_cos3
+     write (io,fmtstr) shape_s_cos3
      write (io,fmtstr) rho
      write (io,fmtstr) ky
      write (io,fmtstr) betae_unit
@@ -181,10 +191,9 @@ subroutine cgyro_write_initdata
   ! Write the initial equilibrium geometry data
   !
   if (silent_flag == 0 .and. i_proc == 0) then
-
      open(unit=io,file=trim(path)//'bin.cgyro.geo',status='replace',access='stream')
      write(io) real(theta,kind=4)
-     write(io) real(w_theta,kind=4)
+     write(io) real(g_theta_geo,kind=4)
      write(io) real(bmag,kind=4)
      write(io) real(omega_stream(:,1),kind=4)
      write(io) real(omega_trap(:,1),kind=4)

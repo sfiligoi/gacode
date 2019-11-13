@@ -200,6 +200,7 @@ program prgen
      call prgen_map_inputgacode
   end select
 
+  call prgen_swap
   call prgen_write
 
   ! Successful completion

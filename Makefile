@@ -1,6 +1,6 @@
 all:
 	cd shared ; make
-	cd le3 ; make
+#	cd le3 ; make
 	cd neo ; make
 	cd vgen ; make
 	cd glf23 ; make
@@ -14,7 +14,7 @@ all:
 
 clean:
 	cd shared ; make clean
-	cd le3 ; make clean
+#	cd le3 ; make clean
 	cd neo ; make clean
 	cd vgen ; make clean
 	cd glf23 ; make clean

@@ -15,6 +15,10 @@ subroutine prgen_map_inputprofiles
   integer :: i
   real :: xnew(nx)
   
+  do i=1,nx
+    write(*,*) i, rho(i), expro_rho(i), ' rho,expro_rho'
+  enddo
+  stop
   if (efit_method > 1) then
 
      call prgen_get_chi(nx,q,dpsi,rho,torfluxa)

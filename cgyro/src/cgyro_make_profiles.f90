@@ -13,6 +13,11 @@ subroutine cgyro_make_profiles
   real :: cc,loglam
 
   !-------------------------------------------------------------
+  ! Adiabatic-electron logic
+  if (n_species == 1) then
+     ae_flag = 1
+  endif
+  !-------------------------------------------------------------
 
   !-------------------------------------------------------------
   ! Local geometry treatment
@@ -81,17 +86,17 @@ subroutine cgyro_make_profiles
      s_zeta  = s_zeta_loc
 
      ! HAM (will be reset to 0.0 if udsymmetry_flag=1)
-        shape_sin3 = shape_sin3_loc
-        shape_cos0 = shape_cos0_loc
-        shape_cos1 = shape_cos1_loc
-        shape_cos2 = shape_cos2_loc
-        shape_cos3 = shape_cos3_loc
+     shape_sin3 = shape_sin3_loc
+     shape_cos0 = shape_cos0_loc
+     shape_cos1 = shape_cos1_loc
+     shape_cos2 = shape_cos2_loc
+     shape_cos3 = shape_cos3_loc
 
-        shape_s_sin3 = shape_s_sin3_loc
-        shape_s_cos0 = shape_s_cos0_loc
-        shape_s_cos1 = shape_s_cos1_loc
-        shape_s_cos2 = shape_s_cos2_loc
-        shape_s_cos3 = shape_s_cos3_loc
+     shape_s_sin3 = shape_s_sin3_loc
+     shape_s_cos0 = shape_s_cos0_loc
+     shape_s_cos1 = shape_s_cos1_loc
+     shape_s_cos2 = shape_s_cos2_loc
+     shape_s_cos3 = shape_s_cos3_loc
  
      q       = q_loc
      s       = s_loc
@@ -112,7 +117,7 @@ subroutine cgyro_make_profiles
      sdlnndr(1:n_species) = sdlnndr_loc(1:n_species)     
      sdlntdr(1:n_species) = sdlntdr_loc(1:n_species)     
 
-     if(ae_flag == 1) then
+     if (ae_flag == 1) then
         is_ele = n_species+1
      else
         is_ele = n_species
@@ -247,7 +252,8 @@ subroutine cgyro_make_profiles
            endif
         enddo
         if(is_ele == -1) then
-           call cgyro_error('ERROR: (CGYRO) No electron species specified')
+           call cgyro_error('No electron species specified')
+           return
         endif
         dens_ele = dens(is_ele)
         temp_ele = temp(is_ele)
@@ -296,16 +302,16 @@ subroutine cgyro_make_profiles
   enddo
   if(num_ele == 0) then
      if(ae_flag == 0) then
-        call cgyro_error('ERROR: (CGYRO) No electron species specified')
+        call cgyro_error('No electron species specified')
         return
      endif
   else if(num_ele == 1) then
      if(ae_flag == 1) then
-        call cgyro_error('ERROR: (CGYRO) Electron species specified with adiabatic electron flag')
+        call cgyro_error('Electron species specified with adiabatic electron flag')
         return
      endif
   else
-     call cgyro_error('ERROR: (NEO) Only one electron species allowed')
+     call cgyro_error('Only one electron species allowed')
      return
   endif
 
@@ -389,6 +395,7 @@ subroutine cgyro_make_profiles
   !------------------------------------------------------------------------
   ! ExB and profile shear
   !
+  source_flag = 0
   if (abs(gamma_e) > 1e-10 .and. nonlinear_flag > 0) then
      omega_eb = k_theta*length*gamma_e/(2*pi)
      select case (shear_method)
@@ -396,6 +403,7 @@ subroutine cgyro_make_profiles
         call cgyro_info('ExB shear: Hammett discrete shift') 
      case (2)
         call cgyro_info('ExB shear: Wavenumber advection') 
+        source_flag = 1
      case default
         call cgyro_error('Unknown ExB shear method') 
      end select
@@ -407,6 +415,7 @@ subroutine cgyro_make_profiles
 
   if (profile_shear_flag == 1) then
      call cgyro_info('Profile shear: Continuous wavenumber advection') 
+     source_flag = 1
   else
      sdlnndr(1:n_species) = 0.0
      sdlntdr(1:n_species) = 0.0
@@ -433,9 +442,7 @@ subroutine cgyro_make_profiles
   endif
 
   !-------------------------------------------------------------
-!$acc enter data copyin(px)
-
-!$acc update device(temp)
+!$acc enter data copyin(px,z,temp)
 
 end subroutine cgyro_make_profiles
 

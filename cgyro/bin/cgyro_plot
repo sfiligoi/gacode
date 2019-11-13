@@ -27,6 +27,9 @@ then
   echo "         Output file type (and optional prefix)"
   echo "         <filetype>=eps, pdf, png, svg, dump"
   echo
+  echo "         -notex"
+  echo "         Disable latex fonts"
+  echo
   echo "PLOT MODE"
   echo 
   echo "         -plot <type>"
@@ -48,6 +51,9 @@ then
   echo "                = kxky_phi (kx-ky spectra of ave(|phi|))"
   echo "                = rcorr_phi (time-average radial correlation function)"
   echo "                = xflux    (radial profile of fluxes for all species)"
+  echo "                = low      (long-wavelength moments versus time)"
+  echo "                = corrug   (time-averaged profile corrugations)"
+  echo "                = shift    (spectral shift)"
   echo "                = fluct    (x-y fluctuation contours at fixed timeslice)"
   echo "                = rt       (x-t fluctuation contours)"
   echo "                = vid      (create video from png files)"
@@ -230,6 +236,7 @@ fi
 LOCDIR=.
 SIMROOT=$PWD
 
+TEX=1
 FONTSIZE=18
 LX=12
 LY=6
@@ -301,6 +308,7 @@ while [ $# -gt 0 ] ; do
   -fc) FC=1 ;;
 
   -diss) DISS=1 ;;
+  -notex) TEX=0 ;;
 
   -moment) shift ; MOMENT=$1 ;;
   -ie) shift ; IE=$1 ;;
@@ -375,7 +383,7 @@ cd $SIMDIR
 PYROOT=$GACODE_ROOT/python/cgyro
 
 #==============================================================================
-PLT="$PYROOT/data_plot_single.py $FONTSIZE $LX $LY"
+PLT="$PYROOT/data_plot_single.py $TEX $FONTSIZE $LX $LY"
 
 case "$VIS_TYPE" in
 
@@ -410,10 +418,7 @@ case "$PLOT_TYPE" in
    hball)
 	python $PLT $PLOT_TYPE $TIME $SPECIES $YMIN $YMAX $TMAX $N $IE $EXT ;;
 
-   freq)
-	python $PLT $PLOT_TYPE $W $WMAX $EXT ;;
-
-   ky_freq)
+   freq | ky_freq )
 	python $PLT $PLOT_TYPE $W $WMAX $EXT ;;
 
    error)
@@ -431,17 +436,20 @@ case "$PLOT_TYPE" in
    phi)
 	python $PLT $PLOT_TYPE $W $WMAX $FIELD $EXT ;;
 
+   low | corrug)
+       python $PLT $PLOT_TYPE $W $WMAX $SPECIES $MOMENT $EXT $YMIN $YMAX ;;
+
+   shift )
+	python $PLT $PLOT_TYPE $W $WMAX $EXT $YMIN $YMAX ;;
+
    ky_phi)
 	python $PLT $PLOT_TYPE $FIELD $THETA $YMIN $YMAX $N $EXT ;;
 
    kx_phi)
 	python $PLT $PLOT_TYPE $FIELD $THETA $W $WMAX $YMIN $YMAX $N $EXT $DISS ;;
 
-   kxky_phi)
+   kxky_phi | rcorr_phi)
 	python $PLT $PLOT_TYPE $FIELD $THETA $W $WMAX $EXT ;;
-
-   rcorr_phi)
-        python $PLT $PLOT_TYPE $FIELD $THETA $W $WMAX $EXT ;;
 
    zf)
 	python $PLT $PLOT_TYPE $W $WMAX $FIELD $EXT ;;

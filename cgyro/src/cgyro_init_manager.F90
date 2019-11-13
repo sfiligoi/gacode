@@ -157,8 +157,8 @@ subroutine cgyro_init_manager
      allocate(field_old(n_field,nc))
      allocate(field_old2(n_field,nc))
      allocate(field_old3(n_field,nc))
-     allocate(    moment(n_radial,theta_plot,n_species,2))
-     allocate(moment_loc(n_radial,theta_plot,n_species,2))
+     allocate(    moment(n_radial,theta_plot,n_species,3))
+     allocate(moment_loc(n_radial,theta_plot,n_species,3))
      allocate(    cflux(n_species,3,n_field))
      allocate(cflux_loc(n_species,3,n_field))
      allocate(    gflux(0:n_global,n_species,3,n_field))
@@ -168,12 +168,13 @@ subroutine cgyro_init_manager
      allocate(icd_c(-nup_theta:nup_theta, nc))
      allocate(dtheta(-nup_theta:nup_theta, nc))
      allocate(dtheta_up(-nup_theta:nup_theta, nc))
+     allocate(source(n_theta,nv_loc))
 
 !$acc enter data create(fcoef,gcoef,field,field_loc)
 
      ! Velocity-distributed arrays
-     ! allocate(rhs(nc,nv_loc,4))
-     allocate(rhs(nc,nv_loc,12))
+     allocate(rhs(nc,nv_loc,4))
+     !allocate(rhs(nc,nv_loc,12))
      allocate(h_x(nc,nv_loc))
      allocate(g_x(nc,nv_loc))
      allocate(psi(nc,nv_loc))

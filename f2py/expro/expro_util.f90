@@ -186,7 +186,8 @@ subroutine expro_compute_derived
   !
   geo_nfourier_in = expro_nfourier
   geo_signb_in    = expro_signb
-  
+
+  ! r_min = a [m]
   r_min = expro_rmin(expro_n_exp)
 
   do i=2,expro_n_exp
@@ -236,9 +237,10 @@ subroutine expro_compute_derived
         endif
      endif
 
-     ! V and dV/dr
+     ! V, dV/dr and S (note that S=dV/dr only in a circle)
      expro_volp(i) = geo_volume_prime*r_min**2
      expro_vol(i)  = geo_volume*r_min**3
+     expro_surf(i) = geo_surf*r_min**2
 
      ! |grad r| at theta=0
      expro_grad_r0(i) = geo_grad_r0
@@ -596,6 +598,24 @@ subroutine expro_writes(x,xs1,xs2)
 10 format(1pe14.7)
 
 end subroutine expro_writes
+
+subroutine expro_writei(i,xs1)
+
+  use expro, only : ident
+
+  implicit none
+
+  integer, intent(in) :: i
+  character(len=*), intent(in) :: xs1
+
+  if (i > 0) then
+     write(1,'(a)') ident//trim(xs1)
+     write(1,10) i
+  endif
+
+10 format(i0)
+
+end subroutine expro_writei
 
 subroutine expro_writev(x,n,xs1,xs2)
 

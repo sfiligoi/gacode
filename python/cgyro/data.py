@@ -16,6 +16,7 @@ class cgyrodata:
 
       self.silent = silent
       self.dir = sim_directory
+      self.getgrid()
       self.getdata()
 
    def extract(self,f):
@@ -35,11 +36,14 @@ class cgyrodata:
 
       return t,fmt,data
 
-
    def getdata(self):
 
       """Initialize smaller data objects (don't load larger ones)"""
 
+      if not os.path.isfile(self.dir+'out.cgyro.time'):
+         print('INFO: (data.py) No time record exists.')
+         return
+      
       #-----------------------------------------------------------------
       # Read time vector.
       #
@@ -56,6 +60,246 @@ class cgyrodata:
       if not self.silent:
          print('INFO: (data.py) Read time vector in out.cgyro.time.')
       #-----------------------------------------------------------------
+
+      #-----------------------------------------------------------------
+      # Linear frequency
+      #
+      nd = 2*self.n_n*nt
+      t,fmt,data = self.extract('.cgyro.freq')
+      if fmt != 'null':  
+         self.freq = np.reshape(data[0:nd],(2,self.n_n,nt),'F')
+         if not self.silent:
+            print('INFO: (data.py) Read data in '+fmt+'.cgyro.freq. '+t) 
+      #-----------------------------------------------------------------
+
+      #-----------------------------------------------------------------
+      # Ballooning potentials
+      #
+      nd = 2*self.n_theta*self.n_radial*nt
+      f='.cgyro.phib'
+      t,fmt,data = self.extract(f)
+      if fmt != 'null':
+         self.phib = np.reshape(data[0:nd],(2,self.n_theta*self.n_radial,nt),'F')
+         print('INFO: (data.py) Read data in '+fmt+f+'  '+t)
+
+      f='.cgyro.aparb'
+      t,fmt,data = self.extract(f)
+      if fmt != 'null':
+         self.aparb = np.reshape(data[0:nd],(2,self.n_theta*self.n_radial,nt),'F')
+         print('INFO: (data.py) Read data in '+fmt+f+' '+t)
+
+      f='.cgyro.bparb'
+      t,fmt,data = self.extract(f)
+      if fmt != 'null':
+         self.bparb = np.reshape(data[0:nd],(2,self.n_theta*self.n_radial,nt),'F')
+         print('INFO: (data.py) Read data in '+fmt+f+' '+t)
+      #-----------------------------------------------------------------
+
+      #-----------------------------------------------------------------
+      # Ballooning distribution
+      #
+      t,fmt,data = self.extract('.cgyro.hb')
+      if fmt != 'null':
+         self.hb = np.reshape(data,(2,self.n_radial*self.n_theta,
+                                    self.n_species,self.n_xi,self.n_energy,nt),'F')
+         print('INFO: (data.py) Read data in '+fmt+'.cgyro.hb. '+t) 
+         self.hb = self.hb/np.max(self.hb)
+      #-----------------------------------------------------------------
+
+   def getflux(self,cflux='auto'):
+
+      if cflux == 'auto':
+         if abs(self.gamma_e) > 0.0:
+            usec = True
+         else:
+            usec = False
+      elif cflux == 'on':
+         usec = True
+      else:
+         usec = False
+
+      #-----------------------------------------------------------------
+      # Particle, momentum and energy fluxes
+      #
+      nt = self.n_time
+      nd = self.n_species*3*self.n_field*self.n_n*nt
+
+      if usec:
+         t,fmt,data = self.extract('.cgyro.ky_cflux')
+         if fmt != 'null':
+            self.ky_flux = np.reshape(data[0:nd],(self.n_species,3,self.n_field,self.n_n,nt),'F')
+            if not self.silent:
+               print('INFO: (data.py) Read data in '+fmt+'.cgyro.ky_cflux. '+t)
+
+      if not usec or fmt == 'null':
+         t,fmt,data = self.extract('.cgyro.ky_flux')
+         if fmt != 'null':  
+            self.ky_flux = np.reshape(data[0:nd],(self.n_species,3,self.n_field,self.n_n,nt),'F')
+            if not self.silent:
+               print('INFO: (data.py) Read data in '+fmt+'.cgyro.ky_flux. '+t)
+      #-----------------------------------------------------------------
+
+      return usec
+
+   def getxflux(self):
+
+      """Global-spectral flux files (optional)"""
+
+      #-----------------------------------------------------------------
+      # Particle and energy fluxes
+      #
+      nt = self.n_time
+      ng = self.n_global+1
+      nd = 2*ng*self.n_species*self.n_field*self.n_n*nt
+
+      t,fmt,data = self.extract('.cgyro.lky_flux_n')
+      if fmt != 'null':
+         self.lky_flux_n = np.reshape(data[0:nd],(2,ng,self.n_species,self.n_field,self.n_n,nt),'F')
+         print('INFO: (data.py) Read data in '+fmt+'.cgyro.lky_flux_n. '+t)
+
+      t,fmt,data = self.extract('.cgyro.lky_flux_e')
+      if fmt != 'null':
+         self.lky_flux_e = np.reshape(data[0:nd],(2,ng,self.n_species,self.n_field,self.n_n,nt),'F')
+         print('INFO: (data.py) Read data in '+fmt+'.cgyro.lky_flux_e. '+t)
+
+      t,fmt,data = self.extract('.cgyro.lky_flux_v')
+      if fmt != 'null':
+         self.lky_flux_v = np.reshape(data[0:nd],(2,ng,self.n_species,self.n_field,self.n_n,nt),'F')
+         print('INFO: (data.py) Read data in '+fmt+'.cgyro.lky_flux_v. '+t)
+      #-----------------------------------------------------------------
+
+   def xfluxave(self,w,moment,e=0.2,nscale=0):
+
+      """
+      Do complicated spatial averages for xflux
+      RESULT: self.lky_flux_ave
+      """
+
+      print('INFO: (xfluxave) Computing partial-domain averages')
+
+      ns = self.n_species
+      ng = self.n_global+1
+
+      sc = np.zeros(ns)
+      if nscale == 1:
+         # Find ne
+         for ispec in range(ns):
+            if self.z[ispec] < 0.0:
+               ne = self.dens[ispec]
+         sc[:] = ne/self.dens[:]
+      else:
+         sc[:] = 1.0
+
+      if moment == 'n':
+         z = np.sum(self.lky_flux_n,axis=(3,4))
+      elif moment == 'e':
+         z = np.sum(self.lky_flux_e,axis=(3,4))
+      elif moment == 'v':
+         z = np.sum(self.lky_flux_v,axis=(3,4))
+      else:
+         raise ValueError('(xfluxave) Invalid moment.')
+
+      #--------------------------------------------
+      # Useful arrays required outside this routine
+      self.lky_xr = np.zeros((ns,ng))
+      self.lky_xi = np.zeros((ns,ng))
+      self.lky_flux_ave = np.zeros((ns,2))
+      #--------------------------------------------
+
+      for ispec in range(ns):
+         for l in range(ng):
+            self.lky_xr[ispec,l] = average(z[0,l,ispec,:],self.t,w,0.0)*sc[ispec]
+            self.lky_xi[ispec,l] = average(z[1,l,ispec,:],self.t,w,0.0)*sc[ispec]
+
+         # Flux partial average over [-e,e]
+         g0 = self.lky_xr[ispec,0]
+         g1 = g0
+         for l in range(1,ng):
+            u = 2*np.pi*l*e
+            g0 = g0+2*np.sin(u)*self.lky_xr[ispec,l]/u
+            g1 = g1+2*np.sin(u)*self.lky_xr[ispec,l]/u*(-1)**l
+
+         # Average over true (positive) interval
+         self.lky_flux_ave[ispec,0] = g0
+         # Average over negative interval
+         self.lky_flux_ave[ispec,1] = g1
+
+   def getbigfield(self):
+
+      """Larger field files"""
+
+      #-----------------------------------------------------------------
+      # Read complex fields
+      #
+
+      nt = self.n_time
+      nd = 2*self.n_radial*self.theta_plot*self.n_n*nt
+
+      # 1a. kxky_phi
+      t,fmt,data = self.extract('.cgyro.kxky_phi')
+      if fmt != 'null':
+         print('INFO: (data.py) Read data in '+fmt+'.cgyro.kxky_phi. '+t)
+         self.kxky_phi = np.reshape(data[0:nd],(2,self.n_radial,self.theta_plot,self.n_n,nt),'F')
+
+      # 1b. kxky_apar
+      t,fmt,data = self.extract('.cgyro.kxky_apar')
+      if fmt != 'null':
+         print('INFO: (data.py) Read data in '+fmt+'.cgyro.kxky_apar. '+t)
+         self.kxky_apar = np.reshape(data[0:nd],(2,self.n_radial,self.theta_plot,self.n_n,nt),'F')
+
+      # 1c. kxky_bpar
+      t,fmt,data = self.extract('.cgyro.kxky_bpar')
+      if fmt != 'null':
+         print('INFO: (data.py) Read data in '+fmt+'.cgyro.kxky_bpar. '+t)
+         self.kxky_bpar = np.reshape(data[0:nd],(2,self.n_radial,self.theta_plot,self.n_n,nt),'F')
+
+      # 2. kxky_n
+      nd = 2*self.n_radial*self.theta_plot*self.n_species*self.n_n*nt
+
+      t,fmt,data = self.extract('.cgyro.kxky_n')
+      if fmt != 'null':
+         print('INFO: (data.py) Read data in '+fmt+'.cgyro.kxky_n.   '+t)
+         self.kxky_n = np.reshape(data[0:nd],(2,self.n_radial,self.theta_plot,self.n_species,self.n_n,nt),'F')
+
+      # 3. kxky_e
+      t,fmt,data = self.extract('.cgyro.kxky_e')
+
+      if fmt != 'null':
+         print('INFO: (data.py) Read data in '+fmt+'.cgyro.kxky_e.   '+t)
+         self.kxky_e = np.reshape(data[0:nd],(2,self.n_radial,self.theta_plot,self.n_species,self.n_n,nt),'F')
+
+      # 4. kxky_e
+      t,fmt,data = self.extract('.cgyro.kxky_v')
+
+      if fmt != 'null':
+         print('INFO: (data.py) Read data in '+fmt+'.cgyro.kxky_v.   '+t)
+         self.kxky_v = np.reshape(data[0:nd],(2,self.n_radial,self.theta_plot,self.n_species,self.n_n,nt),'F')
+      #-----------------------------------------------------------------
+
+   def getgeo(self):
+
+      """Read theta-dependent geometry functions"""
+
+      t,fmt,data = self.extract('.cgyro.geo')
+      if fmt != 'null':
+         print('INFO: (data.py) Read data in '+fmt+'.cgyro.geo   '+t)
+         self.geo = np.reshape(data,(self.n_theta,12),'F')
+
+         self.geotag = []
+         self.geotag.append('\theta')
+         self.geotag.append('G_\\theta')
+         self.geotag.append('|B|')
+         self.geotag.append('\omega_\mathrm{stream}')
+         self.geotag.append('\omega_\mathrm{trap}')
+         self.geotag.append('\omega_\mathrm{rdrift}')
+         self.geotag.append('\omega_\mathrm{adrift}')
+         self.geotag.append('\omega_\mathrm{aprdrift}')
+         self.geotag.append('\omega_\mathrm{cdrift}')
+         self.geotag.append('\omega_\mathrm{crdrift}')
+         self.geotag.append('\omega_\mathrm{gammap')
+         self.geotag.append('k_\perp')
+
+   def getgrid(self):
 
       #-----------------------------------------------------------------
       # Read grid data.
@@ -118,317 +362,67 @@ class cgyrodata:
       #-----------------------------------------------------------------
 
       #-----------------------------------------------------------------
-      # Linear frequency
-      #
-      nd = 2*self.n_n*nt
-      t,fmt,data = self.extract('.cgyro.freq')
-      if fmt != 'null':  
-         self.freq = np.reshape(data[0:nd],(2,self.n_n,nt),'F')
-         if not self.silent:
-            print('INFO: (data.py) Read data in '+fmt+'.cgyro.freq. '+t) 
-      #-----------------------------------------------------------------
-
-      #-----------------------------------------------------------------
       # Equil file
       #
-      try:
-         data = np.fromfile(self.dir+'out.cgyro.equilibrium',dtype='float32',sep=' ')
-         self.rmin          = data[0]
-         self.rmaj          = data[1]
-         self.q             = data[2]
-         self.shear         = data[3]
-         self.shift         = data[4]
-         self.kappa         = data[5]
-         self.s_kappa       = data[6]
-         self.delta         = data[7]
-         self.s_delta       = data[8]
-         self.zeta          = data[9]
-         self.s_zeta        = data[10]
-         self.zmag          = data[11]
-         self.dzmag         = data[12]
-         self.rho           = data[13]
-         self.ky0           = data[14]
-         self.betae_unit    = data[15]
-         self.beta_star     = data[16]
-         self.lambda_star   = data[17]
-         self.gamma_e       = data[18]
-         self.gamma_p       = data[19]
-         self.mach          = data[20]
-         self.a_meters      = data[21]
-         self.b_unit        = data[22]
-         self.dens_norm     = data[23]
-         self.temp_norm     = data[24]
-         self.vth_norm      = data[25]
-         self.mass_norm     = data[26]
-         self.rho_star_norm = data[27]
-         self.gamma_gb_norm = data[28]
-         self.q_gb_norm     = data[29]
-         self.pi_gb_norm    = data[30]
-         # Define species vectors
-         self.z      = np.zeros(self.n_species)
-         self.mass   = np.zeros(self.n_species)
-         self.dens   = np.zeros(self.n_species)
-         self.temp   = np.zeros(self.n_species)
-         self.dlnndr = np.zeros(self.n_species)
-         self.dlntdr = np.zeros(self.n_species)
-         self.nu     = np.zeros(self.n_species)
-         for i in range(self.n_species):
-            self.z[i]      = data[31+7*i]
-            self.mass[i]   = data[32+7*i]
-            self.dens[i]   = data[33+7*i]
-            self.temp[i]   = data[34+7*i]
-            self.dlnndr[i] = data[35+7*i]
-            self.dlntdr[i] = data[36+7*i]
-            self.nu[i]     = data[37+7*i]
-         if not self.silent:
-            print('INFO: (data.py) Read data in out.cgyro.equilibrium.')
-      except:
-         print('WARNING: (data.py) Could not read out.cgyro.equilibrium.')
-         pass
+      data = np.fromfile(self.dir+'out.cgyro.equilibrium',dtype='float32',sep=' ')
+      self.rmin          = data[0]
+      self.rmaj          = data[1]
+      self.q             = data[2]
+      self.shear         = data[3]
+      self.shift         = data[4]
+      self.kappa         = data[5]
+      self.s_kappa       = data[6]
+      self.delta         = data[7]
+      self.s_delta       = data[8]
+      self.zeta          = data[9]
+      self.s_zeta        = data[10]
+      self.zmag          = data[11]
+      self.dzmag         = data[12]
+      self.shape_sin3    = data[13]
+      self.shape_s_sin3  = data[14]
+      self.shape_cos0    = data[15]
+      self.shape_s_cos0  = data[16]
+      self.shape_cos1    = data[17]
+      self.shape_s_cos1  = data[18]
+      self.shape_cos2    = data[19]
+      self.shape_s_cos2  = data[20]
+      self.shape_cos3    = data[21]
+      self.shape_s_cos3  = data[22]
+      self.rho           = data[23]
+      self.ky0           = data[24]
+      self.betae_unit    = data[25]
+      self.beta_star     = data[26]
+      self.lambda_star   = data[27]
+      self.gamma_e       = data[28]
+      self.gamma_p       = data[29]
+      self.mach          = data[30]
+      self.a_meters      = data[31]
+      self.b_unit        = data[32]
+      self.dens_norm     = data[33]
+      self.temp_norm     = data[34]
+      self.vth_norm      = data[35]
+      self.mass_norm     = data[36]
+      self.rho_star_norm = data[37]
+      self.gamma_gb_norm = data[38]
+      self.q_gb_norm     = data[39]
+      self.pi_gb_norm    = data[40]
+      # Define species vectors
+      self.z      = np.zeros(self.n_species)
+      self.mass   = np.zeros(self.n_species)
+      self.dens   = np.zeros(self.n_species)
+      self.temp   = np.zeros(self.n_species)
+      self.dlnndr = np.zeros(self.n_species)
+      self.dlntdr = np.zeros(self.n_species)
+      self.nu     = np.zeros(self.n_species)
+      for i in range(self.n_species):
+         self.z[i]      = data[41+7*i]
+         self.mass[i]   = data[42+7*i]
+         self.dens[i]   = data[43+7*i]
+         self.temp[i]   = data[44+7*i]
+         self.dlnndr[i] = data[45+7*i]
+         self.dlntdr[i] = data[46+7*i]
+         self.nu[i]     = data[47+7*i]
+      if not self.silent:
+         print('INFO: (data.py) Read data in out.cgyro.equilibrium.')
 
       #-----------------------------------------------------------------
-
-      #-----------------------------------------------------------------
-      # Ballooning potentials
-      #
-      nd = 2*self.n_theta*self.n_radial*nt
-      f='.cgyro.phib'
-      t,fmt,data = self.extract(f)
-      if fmt != 'null':
-         self.phib = np.reshape(data[0:nd],(2,self.n_theta*self.n_radial,nt),'F')
-         print('INFO: (data.py) Read data in '+fmt+f+'  '+t)
-
-      f='.cgyro.aparb'
-      t,fmt,data = self.extract(f)
-      if fmt != 'null':
-         self.aparb = np.reshape(data[0:nd],(2,self.n_theta*self.n_radial,nt),'F')
-         print('INFO: (data.py) Read data in '+fmt+f+' '+t)
-
-      f='.cgyro.bparb'
-      t,fmt,data = self.extract(f)
-      if fmt != 'null':
-         self.bparb = np.reshape(data[0:nd],(2,self.n_theta*self.n_radial,nt),'F')
-         print('INFO: (data.py) Read data in '+fmt+f+' '+t)
-      #-----------------------------------------------------------------
-
-      #-----------------------------------------------------------------
-      # Ballooning distribution
-      #
-      t,fmt,data = self.extract('.cgyro.hb')
-      if fmt != 'null':
-         self.hb = np.reshape(data,(2,self.n_radial*self.n_theta,
-                                    self.n_species,self.n_xi,self.n_energy,nt),'F')
-         print('INFO: (data.py) Read data in '+fmt+'.cgyro.hb. '+t) 
-         self.hb = self.hb/np.max(self.hb)
-      #-----------------------------------------------------------------
-
-      #-----------------------------------------------------------------
-      # Compressed particle and energy fluxes (deprecated)
-      #
-      nd = self.n_species*nt
-      try:
-         data = np.loadtxt(self.dir+'out.cgyro.flux_n',dtype='float')
-         self.flux_n = np.transpose(data[:,1:])
-         print('INFO: (data.py) Read data in out.cgyro.flux_n.')
-      except:
-         pass
-
-      try:
-         data = np.loadtxt(self.dir+'out.cgyro.flux_e',dtype='float')
-         self.flux_e = np.transpose(data[:,1:])
-         print('INFO: (data.py) Read data in out.cgyro.flux_e.')
-      except:
-         pass 
-      #-----------------------------------------------------------------
-
-   def getflux(self,cflux='auto'):
-
-      if cflux == 'auto':
-         if abs(self.gamma_e) > 0.0:
-            usec = True
-         else:
-            usec = False
-      elif cflux == 'on':
-         usec = True
-      else:
-         usec = False
-
-      #-----------------------------------------------------------------
-      # Particle, momentum and energy fluxes
-      #
-      nt = self.n_time
-      nd = self.n_species*3*self.n_field*self.n_n*nt
-
-      if usec:
-         t,fmt,data = self.extract('.cgyro.ky_cflux')
-         if fmt != 'null':
-            self.ky_flux = np.reshape(data[0:nd],(self.n_species,3,self.n_field,self.n_n,nt),'F')
-            if not self.silent:
-               print('INFO: (data.py) Read data in '+fmt+'.cgyro.ky_cflux. '+t)
-
-      if not usec or fmt == 'null':
-         t,fmt,data = self.extract('.cgyro.ky_flux')
-         if fmt != 'null':  
-            self.ky_flux = np.reshape(data[0:nd],(self.n_species,3,self.n_field,self.n_n,nt),'F')
-            if not self.silent:
-               print('INFO: (data.py) Read data in '+fmt+'.cgyro.ky_flux. '+t)
-      #-----------------------------------------------------------------
-
-      return usec
-
-   def getxflux(self):
-
-      """Global-spectral flux files (optional)"""
-
-      #-----------------------------------------------------------------
-      # Particle and energy fluxes
-      #
-      nt = self.n_time
-      ng = self.n_global+1
-      nd = 2*ng*self.n_species*self.n_n*nt
-
-      t,fmt,data = self.extract('.cgyro.lky_flux_n')
-      if fmt != 'null':
-         self.lky_flux_n = np.reshape(data[0:nd],(2,ng,self.n_species,self.n_n,nt),'F')
-         print('INFO: (data.py) Read data in '+fmt+'.cgyro.lky_flux_n. '+t)
-
-      t,fmt,data = self.extract('.cgyro.lky_flux_e')
-      if fmt != 'null':
-         self.lky_flux_e = np.reshape(data[0:nd],(2,ng,self.n_species,self.n_n,nt),'F')
-         print('INFO: (data.py) Read data in '+fmt+'.cgyro.lky_flux_e. '+t)
-
-      t,fmt,data = self.extract('.cgyro.lky_flux_v')
-      if fmt != 'null':
-         self.lky_flux_v = np.reshape(data[0:nd],(2,ng,self.n_species,self.n_n,nt),'F')
-         print('INFO: (data.py) Read data in '+fmt+'.cgyro.lky_flux_v. '+t)
-      #-----------------------------------------------------------------
-
-   def xfluxave(self,w,moment,e=0.2,nscale=0):
-
-      """
-      Do complicated spatial averages for xflux
-      RESULT: self.lky_flux_ave
-      """
-
-      ns = self.n_species
-      ng = self.n_global+1
-
-      sc = np.zeros(ns)
-      if nscale == 1:
-         # Find ne
-         for ispec in range(ns):
-            if self.z[ispec] < 0.0:
-               ne = self.dens[ispec]
-         sc[:] = ne/self.dens[:]
-      else:
-         sc[:] = 1.0
-
-      if moment == 'n':
-         z = np.sum(self.lky_flux_n,axis=3)
-      elif moment == 'e':
-         z = np.sum(self.lky_flux_e,axis=3)
-      elif moment == 'v':
-         z = np.sum(self.lky_flux_v,axis=3)
-      else:
-         raise ValueError('(xfluxave) Invalid moment.')
-
-
-      #--------------------------------------------
-      # Useful arrays required outside this routine
-      self.lky_xr = np.zeros((ns,ng))
-      self.lky_xi = np.zeros((ns,ng))
-      self.lky_flux_ave = np.zeros((ns,2))
-      #--------------------------------------------
-
-      for ispec in range(ns):
-         for l in range(ng):
-            self.lky_xr[ispec,l] = average(z[0,l,ispec,:],self.t,w,0.0)*sc[ispec]
-            self.lky_xi[ispec,l] = average(z[1,l,ispec,:],self.t,w,0.0)*sc[ispec]
-
-         # Flux partial average over [-e,e]
-         g0 = self.lky_xr[ispec,0]
-         g1 = g0
-         for l in range(1,ng):
-            u = 2*np.pi*l*e
-            g0 = g0+2*np.sin(u)*self.lky_xr[ispec,l]/u
-            g1 = g1+2*np.sin(u)*self.lky_xr[ispec,l]/u*(-1)**l
-
-         # Average over true (positive) interval
-         self.lky_flux_ave[ispec,0] = g0
-         # Average over negative interval
-         self.lky_flux_ave[ispec,1] = g1
-
-   def getbigfield(self):
-
-      """Larger field files"""
-
-      #-----------------------------------------------------------------
-      # Read complex fields
-      #
-
-      nt = self.n_time
-
-      # 1a. kxky_phi
-      nd = 2*self.n_radial*self.theta_plot*self.n_n*nt
-      t,fmt,data = self.extract('.cgyro.kxky_phi')
-      if fmt != 'null':
-         print('INFO: (data.py) Read data in '+fmt+'.cgyro.kxky_phi. '+t)
-         tmp = np.reshape(data[0:nd],(2,self.n_radial,self.theta_plot,self.n_n,nt),'F')
-         self.kxky_phi_abs = np.sqrt(tmp[0,:,:,:,:]**2+tmp[1,:,:,:,:]**2)
-
-      # 1b. kxky_apar
-      nd = 2*self.n_radial*self.theta_plot*self.n_n*nt
-      t,fmt,data = self.extract('.cgyro.kxky_apar')
-      if fmt != 'null':
-         print('INFO: (data.py) Read data in '+fmt+'.cgyro.kxky_apar. '+t)
-         tmp = np.reshape(data[0:nd],(2,self.n_radial,self.theta_plot,self.n_n,nt),'F')
-         self.kxky_apar_abs = np.sqrt(tmp[0,:,:,:,:]**2+tmp[1,:,:,:,:]**2)
-
-      # 1c. kxky_bpar
-      nd = 2*self.n_radial*self.theta_plot*self.n_n*nt
-      t,fmt,data = self.extract('.cgyro.kxky_bpar')
-      if fmt != 'null':
-         print('INFO: (data.py) Read data in '+fmt+'.cgyro.kxky_bpar. '+t)
-         tmp = np.reshape(data[0:nd],(2,self.n_radial,self.theta_plot,self.n_n,nt),'F')
-         self.kxky_bpar_abs = np.sqrt(tmp[0,:,:,:,:]**2+tmp[1,:,:,:,:]**2)
-
-      # 2. kxky_n
-      nd = 2*self.n_radial*self.theta_plot*self.n_species*self.n_n*nt
-      t,fmt,data = self.extract('.cgyro.kxky_n')
-
-      if fmt != 'null':
-         print('INFO: (data.py) Read data in '+fmt+'.cgyro.kxky_n.   '+t)
-         self.kxky_n = np.reshape(data[0:nd],(2,self.n_radial,self.theta_plot,self.n_species,self.n_n,nt),'F')
-
-      # 3. kxky_e
-      nd = 2*self.n_radial*self.theta_plot*self.n_species*self.n_n*nt
-      t,fmt,data = self.extract('.cgyro.kxky_e')
-
-      if fmt != 'null':
-         print('INFO: (data.py) Read data in '+fmt+'.cgyro.kxky_e.   '+t)
-         self.kxky_e = np.reshape(data[0:nd],(2,self.n_radial,self.theta_plot,self.n_species,self.n_n,nt),'F')
-      #-----------------------------------------------------------------
-
-   def getgeo(self):
-
-      """Read theta-dependent geometry functions"""
-
-      t,fmt,data = self.extract('.cgyro.geo')
-      if fmt != 'null':
-         print('INFO: (data.py) Read data in '+fmt+'.cgyro.geo   '+t)
-         self.geo = np.reshape(data,(self.n_theta,12),'F')
-
-         self.geotag = []
-         self.geotag.append('\theta')
-         self.geotag.append('w_\\theta')
-         self.geotag.append('|B|')
-         self.geotag.append('\omega_\mathrm{stream}')
-         self.geotag.append('\omega_\mathrm{trap}')
-         self.geotag.append('\omega_\mathrm{rdrift}')
-         self.geotag.append('\omega_\mathrm{adrift}')
-         self.geotag.append('\omega_\mathrm{aprdrift}')
-         self.geotag.append('\omega_\mathrm{cdrift}')
-         self.geotag.append('\omega_\mathrm{crdrift}')
-         self.geotag.append('\omega_\mathrm{gammap')
-         self.geotag.append('k_\perp')
-

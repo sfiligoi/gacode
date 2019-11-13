@@ -7,14 +7,20 @@ from cgyro.data_dump import cgyrodata_dump
 
 data_in = cgyrodata_plot('./')
 
-# Use first 3 args to define plot and font size
-rc('text',usetex=True)
-rc('font',size=int(sys.argv[1]))
-data_in.lx = int(sys.argv[2])
-data_in.ly = int(sys.argv[3])
+# Use first 4 args to define plot and font size
 
-# Shift list by 3
-sys.argv = sys.argv[3:]
+# Use latex fonts if set
+if int(sys.argv[1]) == 0:
+   rc('text',usetex=False)
+else:
+   rc('text',usetex=True)
+
+rc('font',size=int(sys.argv[2]))
+data_in.lx = int(sys.argv[3])
+data_in.ly = int(sys.argv[4])
+
+# Shift list by 4
+sys.argv = sys.argv[4:]
 
 plot_type = sys.argv[1]
 
@@ -114,6 +120,49 @@ elif plot_type == 'phi':
    head,x,y1,y2 = data_in.plot_phi(w=w,wmax=wmax,field=field,theta=theta)
 
    outfile = 'out.cgyro.phi.'+ftype
+
+elif plot_type == 'low':
+
+   w     = float(sys.argv[2])
+   wmax  = float(sys.argv[3])
+   spec  = int(sys.argv[4])
+   moment = sys.argv[5]
+   ftype = sys.argv[6]
+   theta = 0.0
+   ymin  = sys.argv[7]
+   ymax  = sys.argv[8]
+
+   data_in.plot_low(w=w,wmax=wmax,spec=spec,moment=moment,theta=theta,ymin=ymin,ymax=ymax)
+
+   outfile = 'out.cgyro.low.'+ftype
+
+elif plot_type == 'corrug':
+
+   w     = float(sys.argv[2])
+   wmax  = float(sys.argv[3])
+   spec  = int(sys.argv[4])
+   moment = sys.argv[5]
+   ftype = sys.argv[6]
+   theta = 0.0
+   ymin  = sys.argv[7]
+   ymax  = sys.argv[8]
+
+   data_in.plot_corrug(w=w,wmax=wmax,spec=spec,moment=moment,theta=theta,ymin=ymin,ymax=ymax)
+
+   outfile = 'out.cgyro.corrug.'+ftype
+
+elif plot_type == 'shift':
+
+   w     = float(sys.argv[2])
+   wmax  = float(sys.argv[3])
+   ftype = sys.argv[4]
+   theta = 0.0
+   ymin  = sys.argv[5]
+   ymax  = sys.argv[6]
+
+   data_in.plot_shift(w=w,wmax=wmax,theta=theta,ymin=ymin,ymax=ymax)
+
+   outfile = 'out.cgyro.shift.'+ftype
 
 elif plot_type == 'flux':
 

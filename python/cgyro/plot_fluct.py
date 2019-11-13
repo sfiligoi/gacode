@@ -9,7 +9,7 @@ from gacodefuncs import *
 from cgyro.data import cgyrodata
 
 try:
-   import pygacode
+   import gacode
    hasgapy = True
 except:
    print("BAD: (plot_fluct) Please 'make so' in gacode/f2py")
@@ -55,14 +55,14 @@ if nx < 0 or ny < 0:
    usefft = True
 else:
    usefft = False
-   
+
 epx = np.zeros([nx,nr],dtype=np.complex)
 eny = np.zeros([ny,nn],dtype=np.complex)
 x = np.zeros([nx])
 y = np.zeros([ny])
 
 #------------------------------------------------------------------------
-# Some setup 
+# Some setup
 #
 if usefft:
    mode = 'FFT'
@@ -81,17 +81,17 @@ else:
    # Fourier arrays
    for i in range(nx):
       x[i] = i*2*np.pi/(nx-1)
-      for p in range(nr):    
+      for p in range(nr):
          epx[i,p]=np.exp(1j*(p-nr/2)*x[i])
 
    for j in range(ny):
       y[j] = j*2*np.pi/(ny-1)
-      for n in range(nn):    
+      for n in range(nn):
          eny[j,n]=np.exp(-1j*n*y[j])
 
    # factor of 1/2 for n=0
-   eny[:,0] = 0.5*eny[:,0] 
-      
+   eny[:,0] = 0.5*eny[:,0]
+
 #------------------------------------------------------------------------
 # Real-space field reconstruction (if no gapy)
 def maptoreal(nr,nn,nx,ny,c):
@@ -106,9 +106,9 @@ def maptoreal(nr,nn,nx,ny,c):
     for p in range(nr):
         for n in range(nn):
             f[:,:] = f[:,:]+np.real(c[p,n]*np.outer(epx[:,p],eny[:,n]))
-    
+
     end = time.time()
-  
+
     return f,end-start
 #------------------------------------------------------------------------
 
@@ -118,12 +118,12 @@ def maptoreal_fft(nr,nn,nx,ny,c):
 
    import numpy as np
    import time
-   
+
    d = np.zeros([nx,ny],dtype=np.complex)
 
    # Mapping
-   # d[ ix, iy] = c[ ix,iy] 
-   # d[ ix,-iy] = c[-ix,iy]^* 
+   # d[ ix, iy] = c[ ix,iy]
+   # d[ ix,-iy] = c[-ix,iy]^*
 
    start = time.time()
 
@@ -139,26 +139,26 @@ def maptoreal_fft(nr,nn,nx,ny,c):
          i = ix+nx
       for iy in range(1,nn):
          d[i,ny-iy] = np.conj(c[ix+nr//2,iy])
-          
+
    # Sign convention negative exponent exp(-inx)
    f = np.real(np.fft.fft2(d))*0.5
-    
+
    end = time.time()
-  
+
    return f,end-start
 #------------------------------------------------------------------------
 
-# Get filename and tags 
+# Get filename and tags
 fdata,title,isfield = tag_helper(sim.mass[species],sim.z[species],moment)
 
 # Check to see if data exists (try binary data first)
 if os.path.isfile('bin'+fdata):
     fdata = 'bin'+fdata
-    print('INFO: (plot_fluct) Found binary data in '+fdata) 
+    print('INFO: (plot_fluct) Found binary data in '+fdata)
     hasbin = True
 elif os.path.isfile('out'+fdata):
     fdata = 'out'+fdata
-    print('BAD: (plot_fluct) Using inefficient ASCII data in '+fdata) 
+    print('BAD: (plot_fluct) Using inefficient ASCII data in '+fdata)
     hasbin = False
 else:
     print('ERROR: (plot_fluct) No data for -moment '+moment+' exists.  Try -moment phi')
@@ -179,18 +179,18 @@ def frame():
       else:
          a = np.reshape(aa,(2,nr,nth,ns,nn),order='F')
          c = a[0,:,itheta,species,:]+1j*a[1,:,itheta,species,:]
-                
+
       f = np.zeros([nx,ny],order='F')
       if usefft:
          f,t = maptoreal_fft(nr,nn,nx,ny,c)
       elif hasgapy:
          start = time.time()
-         pygacode.realfluct(c,f)
+         gacode.realfluct(c,f)
          end = time.time()
          t = end-start
       else:
          f,t = maptoreal(nr,nn,nx,ny,c)
-         
+
       if fmin == 'auto':
          f0=np.min(f)
          f1=np.max(f)
@@ -202,7 +202,7 @@ def frame():
       # ky[1] < 0 is possible
       yp = y/np.abs(sim.ky[1])
       aspect = max(abs(yp))/max(abs(xp))
-      
+
       levels = np.arange(f0,f1,(f1-f0)/256)
       if land == 0:
          fig = plt.figure(figsize=(px/100.0,py/100.0))
@@ -217,8 +217,7 @@ def frame():
          ax.set_xlabel(r'$y/\rho_s$')
          ax.set_ylabel(r'$x/\rho_s$')
          ax.contourf(yp,xp,f,levels,cmap=plt.get_cmap(colormap))
-         #plt.subplots_adjust(top=0.9,left=0.05,right=0.95)
- 
+
       print('INFO: (plot_fluct '+mode+') min=%e , max=%e  (t=%e)' % (f0,f1,t))
 
       ax.set_title(title)
@@ -228,7 +227,7 @@ def frame():
       if ftype == 'screen':
          plt.show()
       else:
-         # Filename uses frame number 
+         # Filename uses frame number
          plt.savefig(pre+str(i)+'.'+ftype)
          # Close each time to prevent memory accumulation
          plt.close()

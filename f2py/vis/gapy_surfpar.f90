@@ -21,7 +21,7 @@ contains
     double precision, intent(in), dimension(n_psi,n_arc) :: r_in,z_in
 
 
-    integer :: i,ix,p
+    integer :: i,p
     integer :: n1,m1,n2,m2,s
     double precision, dimension(:), allocatable :: dl,ur,uz,l
     double precision, dimension(:), allocatable :: cr,cz,sr,sz
