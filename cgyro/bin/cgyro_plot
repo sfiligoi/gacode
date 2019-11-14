@@ -81,7 +81,7 @@ then
   echo "         Selector for central flux (on=on,off=off,auto=select based on gamma_e"
   echo
   echo "         -moment <value>"
-  echo "         Specify moment to be plotted [n,e,m,s]."
+  echo "         Specify moment to be plotted [n,e,v]."
   echo
   echo "         -w <float>"
   echo "         Width of time-average window min (1.0 is entire time history)."
