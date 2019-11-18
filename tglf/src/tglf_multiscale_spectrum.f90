@@ -74,7 +74,7 @@
       !   write(*,*)" ax= ",ax," ay= ",ay
       do i=1,nky
          kx=spectral_shift_out(i)
-         gamma_net(i) = eigenvalue_spectrum_out(1,i,1)/(1.0 + (ax*kx_geo0_out*kx)**4)
+         gamma_net(i) = eigenvalue_spectrum_out(1,i,1)/(1.0 + (ax*kx)**4)
       !   write(*,*)i,"gamma_net = ",gamma_net(i)
       enddo
       if(USE_MIX)then
@@ -277,7 +277,7 @@
           else
             if(ky0.gt.kyetg)gammaeff = gammaeff*SQRT(ky0/kyetg)
           endif
-          field_spectrum_out(2,j,i) = SAT_geo0_out*(cnorm*gammaeff*gammaeff/ky0**4)/(1.0+ay*(kx_geo0_out*kx)**2)**2
+          field_spectrum_out(2,j,i) = SAT_geo0_out*(cnorm*gammaeff*gammaeff/ky0**4)/(1.0+ay*kx**2)**2
         enddo
      enddo
      ! recompute the intensity and flux spectra

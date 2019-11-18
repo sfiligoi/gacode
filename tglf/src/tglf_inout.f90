@@ -8,7 +8,7 @@ USE tglf_global
 IMPLICIT NONE
 CHARACTER (len=*) :: units
 
-if(units .eq. 'TGLF' .or. units .eq. 'GENE')then
+if(units .eq. 'GYRO' .or. units .eq. 'CGYRO' .or. units .eq. 'GENE')then
    units_in = units
 else
    call tglf_error(1,"Invalid units selected")

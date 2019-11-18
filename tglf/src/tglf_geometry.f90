@@ -56,8 +56,12 @@ SUBROUTINE xgrid_functions_sa
   if(alpha_quench_in.eq.0.0.and.gamma_reference_kx0(1).ne.0.0)then
      vexb_shear_kx0 = alpha_e_in*vexb_shear_s
      kyi = ky*vs(2)*mass(2)/ABS(zs(2))
-     wE = MIN(kyi/0.3,1.0)*vexb_shear_kx0/gamma_reference_kx0(1)
+     if(units_in.eq.'GYRO')then
+       wE = MIN(kyi/0.3,1.0)*vexb_shear_kx0/gamma_reference_kx0(1)
      ! write(*,*)"wE=",wE
+     else
+       wE=0.0
+     endif
      kx0_e = -(0.36*vexb_shear_kx0/gamma_reference_kx0(1) + 0.38*wE*TANH((0.69*wE)**6))
      if(sat_rule_in.eq.1)kx0_e = -(0.53*vexb_shear_kx0/gamma_reference_kx0(1) + 0.25*wE*TANH((0.69*wE)**6))
      a0 = 1.3
@@ -239,14 +243,16 @@ SUBROUTINE xgrid_functions_geo
      kyi = ky*vs(2)*mass(2)/ABS(zs(2))
      wE=0.0
      wd0 = ABS(ky/Rmaj_s)
-     kx0_factor = ABS(b_geo(0)/qrat_geo(0)**2)
-     If(alpha_ZF_in.lt.0.0)kx0_factor = ABS(1.0/B_geo(0))
-     kx0_factor = 1.0+0.40*(kx0_factor-1.0)**2
+     if(units_in.eq.'GYRO')then
+       kx0_factor = ABS(b_geo(0)/qrat_geo(0)**2)
+       kx0_factor = 1.0+0.40*(kx0_factor-1.0)**2
      ! write(*,*)"kx0_factor=",kx0_factor
-     wE = kx0_factor*MIN(kyi/0.3,1.0)*vexb_shear_kx0/gamma_reference_kx0(1)
+       wE = kx0_factor*MIN(kyi/0.3,1.0)*vexb_shear_kx0/gamma_reference_kx0(1)
      ! write(*,*)"wE=",wE
-     ! kx0_factor = alpha_kx_p_in
-     !! kx0_e = -(0.36*vexb_shear_s/gamma_reference_kx0(1) + 0.29*wE*TANH((0.71*wE)**6))
+     else
+       kx0_factor = 1.0
+       wE = 0.0
+     endif
      kx0_e = -(0.36*vexb_shear_kx0/gamma_reference_kx0(1) + 0.38*wE*TANH((0.69*wE)**6))
      if(sat_rule_in.eq.1)kx0_e = -(0.53*vexb_shear_kx0/gamma_reference_kx0(1) + 0.25*wE*TANH((0.69*wE)**6))
 !     a0 = alpha_e_in*2.0
@@ -258,6 +264,7 @@ SUBROUTINE xgrid_functions_geo
      a0 = 1.3
      if(sat_rule_in.eq.1)a0=1.45
      if(ABS(kx0_e).gt.a0)kx0_e = a0*kx0_e/ABS(kx0_e)
+     kx0 = sign_Bt_in*kx0_e/kx_geo0_out ! cancel the sign_Bt_in factor in kxx below
      !
      !APS2010 kx0 = alpha_kx_e_in*0.19*TANH(vexb_shear_s*Rmaj_s/vs(2))*kyi*kyi/(kyi*kyi+0.001)/ky
      !EPS2011 kx0 = kx0 -alpha_kx_p_in*sign_Bt_in*TANH((0.26/3.0)*vpar_shear_in(2)*Rmaj_s/vs(2)) &
@@ -275,11 +282,7 @@ SUBROUTINE xgrid_functions_geo
      !ESP2011 if(kx0.lt.0.0)sign_kx0=-1.0
      !EPS2011 kx0 = kx0_e + kx0_p
      ! write(*,*)ky,"kx0_e",kx0_e,"kx0_p=",kx0_p,"kx0=",kx0
-     kx0 = sign_Bt_in*kx0_e ! this is here to cancel the sign_Bt_in factor in kxx below
-     if(alpha_zf_in.lt.0.0)kx0 = kx0*qrat_geo(0)/B_geo(0)  ! 1/grad-r0 factor
   endif
-  ! kx0 = alpha_kx_e_in
-  ! write(*,*)"1/qrat=",1.0/qrat_geo(0)
   !
   !*************************************************************
   ! begin calculation of wdx and b0x
@@ -419,11 +422,12 @@ SUBROUTINE xgrid_functions_geo
   ! poloidal magnetic field on outboard midplane
   !
   Bp0_out = Bp(0)/B_unit
-  kx_geo0_out = 1.0
-  SAT_geo0_out = 1.0
-  if (alpha_zf_in.lt.0.0)then
-     kx_geo0_out = grad_r0_out
-     SAT_geo0_out = kx_geo0_out
+  if(units_in.eq.'GYRO') then
+    kx_geo0_out = 1.0
+    SAT_geo0_out = 1.0
+  else
+     kx_geo0_out = grad_r0_out/B_geo(0)
+     SAT_geo0_out = 0.946*kx_geo0_out      ! normed to GASTD with CGYRO
     !write(*,*)"kx_geo0 = ",kx_geo0_out
     !write(*,*)"SAT_geo0 = ",SAT_geo0_out
   endif

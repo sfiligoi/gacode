@@ -43,7 +43,7 @@ module tglf_interface
   integer              :: tglf_test_flag_in  = 0
 
 ! units switch
-  character (len=4) :: tglf_units_in = 'TGLF'
+  character (len=8) :: tglf_units_in = 'GYRO'
 
 ! INPUT PARAMETERS
   logical :: tglf_use_transport_model_in = .true.

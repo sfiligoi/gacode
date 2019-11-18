@@ -59,7 +59,7 @@
       LOGICAL,EXTERNAL :: tglf_isnan
       LOGICAL,EXTERNAL :: tglf_isinf
 ! input units switch
-      CHARACTER (len=4) :: units_in = 'TGLF'
+      CHARACTER (len=8) :: units_in = 'GYRO'
 ! Input Gaussian width
       REAL :: width_in=1.65
       REAL :: width_min_in=0.3
