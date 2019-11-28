@@ -22,6 +22,7 @@ SUBROUTINE xgrid_functions_sa
   USE tglf_species
   USE tglf_hermite
   USE tglf_xgrid
+  USE tglf_sgrid
   !
   IMPLICIT NONE
   INTEGER :: i
@@ -43,6 +44,8 @@ SUBROUTINE xgrid_functions_sa
   !
   rmin_input = rmin_sa
   Rmaj_input = rmaj_sa
+  betae_s = betae_in
+  debye_s = debye_in
   !
   ! fill the x-grid eikonal function arrays wdx and b0x
   eps = rmin_sa/rmaj_sa
@@ -860,13 +863,15 @@ SUBROUTINE mercier_luc
   ! write(*,*)"f = ",f,q_s
   ! write(*,*)"ds=",ds
   Bref_out = 1.0
+  betae_s = betae_in
+  debye_s = debye_in
   if(units_in .eq. 'GENE')then
 ! convert inputs from GENE reference magnetic field to Bunit
     Bref_out = f/Rmaj_input ! Bref/Bunit
     ! write(*,*)"Bref/Bunit = ",Bref_out
-    betae_in = betae_in*Bref_out**2
-    p_prime_s = p_prime_s*Bref_out**2
-    debye_in = debye_in/Bref_out
+    betae_s = betae_in*Bref_out**2
+    p_prime_s = p_prime_loc*Bref_out**2
+    debye_s = debye_in/Bref_out
   endif
   !
   !-----------------------------------------------------------
@@ -1478,8 +1483,8 @@ SUBROUTINE miller_geo
   ! p_prime = (q/r) (1/b_unit) dp/dr
   ! = (q/r) (1/b_unit) p * dlnpdr
   ! rescale p_prime and q_prime to keep normalized eikonal invariant
-  p_prime_s = p_prime_s*B_unit ! B_unit**2/B_unit
-  q_prime_s = q_prime_s/B_unit !
+  p_prime_s = p_prime_loc*B_unit ! B_unit**2/B_unit
+  q_prime_s = q_prime_loc/B_unit !
   ! write(*,*)"p_prime_s =",p_prime_s,"q_prime_s =",q_prime_s
   !
 END SUBROUTINE miller_geo
@@ -1723,8 +1728,8 @@ SUBROUTINE fourier_geo
   ! p_prime = (q/r) (1/b_unit) dp/dr
   ! = (q/r) (1/b_unit) p * dlnpdr
   ! rescale p_prime and q_prime to keep normalized eikonal invariant
-  p_prime_s = p_prime_s*B_unit ! B_unit**2/B_unit
-  q_prime_s = q_prime_s/B_unit !
+  p_prime_s = p_prime_fourier_in*B_unit ! B_unit**2/B_unit
+  q_prime_s = q_prime_fourier_in/B_unit !
   ! write(*,*)"p_prime_s =",p_prime_s,"q_prime_s =",q_prime_s
   !
 END SUBROUTINE fourier_geo
@@ -1867,7 +1872,7 @@ SUBROUTINE ELITE_geo
   R(ms) = R(0)
   Z(ms) = Z(0)
   Bp(ms) = Bp(0)
-  write(*,*)"k = ",k
+ ! write(*,*)"k = ",k
   !
   ! set remaining variables for tglf_sgrid input
   !
@@ -1877,17 +1882,17 @@ SUBROUTINE ELITE_geo
   q_s = q_ELITE
   q_prime_s = q_prime_ELITE
   ! debug
-  write(*,*)"Rmax = ",Rmax
-  write(*,*)"Zmax = ",Zmax
-  write(*,*)"Bpmax = ",Bpmax
-  write(*,*)"B_unit = ",B_unit
-  write(*,*)"Ls = ",Ls
-  write(*,*)"ds = ",ds
-  write(*,*)"Rmaj_s =",Rmaj_s
-  write(*,*)"rmin_s = ",rmin_s
-  write(*,*)"p_prime_s = ",p_prime_s
-  write(*,*)"q_s = ",q_s
-  write(*,*)"q_prime_s = ",q_prime_s
+ ! write(*,*)"Rmax = ",Rmax
+ ! write(*,*)"Zmax = ",Zmax
+ ! write(*,*)"Bpmax = ",Bpmax
+ ! write(*,*)"B_unit = ",B_unit
+ ! write(*,*)"Ls = ",Ls
+ ! write(*,*)"ds = ",ds
+ ! write(*,*)"Rmaj_s =",Rmaj_s
+ ! write(*,*)"rmin_s = ",rmin_s
+ ! write(*,*)"p_prime_s = ",p_prime_s
+ ! write(*,*)"q_s = ",q_s
+ ! write(*,*)"q_prime_s = ",q_prime_s
   ! open(3,file='Bp.dat',status='replace')
   ! open(2,file='RZ.dat',status='replace')
   ! do i=0,ms

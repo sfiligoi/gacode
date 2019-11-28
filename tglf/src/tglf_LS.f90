@@ -572,6 +572,7 @@
       USE tglf_eigen
       USE tglf_coeff
       USE tglf_weight
+      USE tglf_sgrid
 ! 
       IMPLICIT NONE
 !
@@ -652,9 +653,9 @@
 !  compute the electromagnetic potentials
 !
       betae_psi = 0.0
-      if(use_bper_in)betae_psi = 0.5*betae_in/(ky*ky)
+      if(use_bper_in)betae_psi = 0.5*betae_s/(ky*ky)
       betae_sig = 0.0
-      if(use_bpar_in)betae_sig = 0.5*betae_in
+      if(use_bpar_in)betae_sig = 0.5*betae_s
       do i=1,nbasis
         phi(i)=0.0
         psi(i)=0.0
