@@ -18,6 +18,7 @@ then
    export GACODE_ADD_ROOT=$GACODE_ROOT/../gacode_add
    export PATH=$GACODE_ADD_ROOT/freya/bin:${PATH}
    export PATH=$GACODE_ADD_ROOT/prefreya/bin:${PATH}
+   export PATH=$GACODE_ADD_ROOT/qlgyro/bin:${PATH}
 fi
 
 export PYTHONPATH=$GACODE_ROOT/python:${PYTHONPATH}
