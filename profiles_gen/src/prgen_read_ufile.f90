@@ -22,6 +22,16 @@ subroutine prgen_read_ufile
   torfluxa = torfluxa/(2*pi)
   close(1)
 
+  ! Rcentr(a), where Rcentr is the centre of the LCFS
+  open(unit=1,file='out.RCENTR.ave',status='old') 
+  read(1,*) rcentr
+  close(1)
+
+  ! Chi_t(a), where Bcentr is the B field at Rcentr
+  open(unit=1,file='out.BCENTR.ave',status='old') 
+  read(1,*) bcentr
+  close(1)
+
   open(unit=1,file='out.com',status='old') 
   read(1,*) file_state
   read(1,*) ufile_tok
@@ -35,7 +45,7 @@ subroutine prgen_read_ufile
      read(1,*) ufile_m(i)
   enddo
   close(1)
- 
+
   ! NOTE: this is a hardwired dimension
   nx = 51
 
@@ -60,6 +70,7 @@ subroutine prgen_read_ufile
   call ufile_mapper('out.Q.ave',rho,q,nx,0)
   call ufile_mapper('out.KAPPAR.ave',rho,kappa,nx,0)
   call ufile_mapper('out.DELTAR.ave',rho,delta,nx,0)
+  call ufile_mapper('out.ZETAR.ave',rho,zeta,nx,0)
   call ufile_mapper('out.PRES.ave',rho,ufile_pres,nx,1)
   call ufile_mapper('out.VROT.ave',rho,ufile_vrot,nx,0)
   call ufile_mapper('out.VROTM.ave',rho,ufile_vrotm,nx,0)
@@ -141,7 +152,7 @@ subroutine prgen_read_ufile
         i = i+1
      endif
   enddo
-
+  
   ! Set ion temperatures
   do i=2,ufile_nion
      if (ufile_type(i) == 'therm') then
@@ -196,7 +207,7 @@ subroutine ufile_mapper(file,x,y,nx,neg_protect)
   real :: ya,yb
   integer :: ierr
 
-  open(unit=1,file='out.dim',status='old')
+  open(unit=1,file='out.ufile.dim',status='old')
   read(1,*) nx0
   close(1)
 
@@ -216,7 +227,7 @@ subroutine ufile_mapper(file,x,y,nx,neg_protect)
   endif
 
   ! Check for zero profile (1.0 is effectively zero).
-  if (sum(y0(1:nx0)) < 1.0) then 
+  if (sum(abs(y0(1:nx0))) < 1e-4) then 
      y(:) = 0.0
      return
   endif
