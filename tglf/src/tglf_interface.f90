@@ -192,10 +192,25 @@ module tglf_interface
   real, dimension(nsm-1) :: tglf_ion_eflux_low_out = 0.0
   real, dimension(nsm-1) :: tglf_ion_mflux_out = 0.0
   real, dimension(nsm-1) :: tglf_ion_expwd_out = 0.0
+
+  real, dimension(nsm-1, 3) :: tglf_particle_flux_out = 0.0
+  real, dimension(nsm-1, 3) :: tglf_energy_flux_out = 0.0
+  real, dimension(nsm-1, 3) :: tglf_stress_tor_out = 0.0
+  real, dimension(nsm-1, 3) :: tglf_stress_par_out = 0.0
+  real, dimension(nsm-1, 3) :: tglf_exchange_out = 0.0
   
   ! LINEAR OUTPUT PARAMETERS
   complex :: tglf_eigenvalue_out(maxmodes)
 
+  ! GYRO TGLF input
+  real, allocatable, dimension(:, :, :) :: tglf_eigenvalue_spectrum_out
+  real, allocatable, dimension(:) :: tglf_ky_spectrum_out, tglf_dky_spectrum_out
+
+  real, allocatable, dimension(:, :, :) :: tglf_field_spectrum_out
+  real, allocatable, dimension(:, :, :, :, :) :: tglf_flux_spectrum_out
+  
+  
+  
   ! DIAGNOSTIC OUTPUT PARAMETERS
   real :: interchange_DR = 0.0
   real :: interchange_DM = 0.0
