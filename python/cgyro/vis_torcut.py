@@ -9,7 +9,8 @@ from gacodefuncs import *
 from cgyro.data import cgyrodata
 from mayavi import mlab
 try:
-   import pygacode
+   from gacode import vis
+   from gacode import geo
 except:
    print("ERROR: (vis_torcut) Please type 'make so' in gacode/f2py")
    sys.exit()
@@ -84,23 +85,23 @@ for i in range(nx):
       zp[i,k] = 0.0
 
 # Shape functions 
-pygacode.geo.signb_in=1 # fix
-pygacode.geo.geo_rmin_in=sim.rmin
-pygacode.geo.geo_rmaj_in=sim.rmaj
-pygacode.geo.geo_drmaj_in=sim.shift
-pygacode.geo.geo_zmag_in=sim.zmag
-pygacode.geo.geo_dzmag_in=sim.dzmag
-pygacode.geo.geo_q_in=sim.q
-pygacode.geo.geo_s_in=sim.shear
-pygacode.geo.geo_kappa_in=sim.kappa
-pygacode.geo.geo_delta_in=sim.delta
-pygacode.geo.geo_zeta_in=sim.zeta
-pygacode.geo.geo_s_kappa_in=sim.s_kappa
-pygacode.geo.geo_s_delta_in=sim.s_delta
-pygacode.geo.geo_s_zeta_in=sim.s_zeta
-pygacode.geo.geo_beta_star_in=sim.beta_star
+geo.signb_in=1 # fix
+geo.geo_rmin_in=sim.rmin
+geo.geo_rmaj_in=sim.rmaj
+geo.geo_drmaj_in=sim.shift
+geo.geo_zmag_in=sim.zmag
+geo.geo_dzmag_in=sim.dzmag
+geo.geo_q_in=sim.q
+geo.geo_s_in=sim.shear
+geo.geo_kappa_in=sim.kappa
+geo.geo_delta_in=sim.delta
+geo.geo_zeta_in=sim.zeta
+geo.geo_s_kappa_in=sim.s_kappa
+geo.geo_s_delta_in=sim.s_delta
+geo.geo_s_zeta_in=sim.s_zeta
+geo.geo_beta_star_in=sim.beta_star
 
-pygacode.geo.geo_interp(z,True)
+geo.geo_interp(z,True)
 if legacy:
    # s-alpha approximate (apparently used in legacy GYRO movies)
    # g1 -> q*theta
@@ -109,8 +110,8 @@ if legacy:
    g2 = z
 else:
    # Correct form of Clebsch angle expansion nu(r,theta) 
-   g1 = -pygacode.geo.geo_nu
-   g2 = pygacode.geo.geo_b*pygacode.geo.geo_captheta/pygacode.geo.geo_s_in/pygacode.geo.geo_grad_r**2
+   g1 = -geo.geo_nu
+   g2 = geo.geo_b*geo.geo_captheta/geo.geo_s_in/geo.geo_grad_r**2
    
 if int(mag) == 0:
    showco=True
@@ -168,7 +169,7 @@ def frame():
       c[:,:,1:] = 0.0
 
    f = np.zeros([nx,nz],order='F')
-   pygacode.torcut(dn,sim.m_box,sim.q,sim.thetap,g1,g2,c,f)
+   vis.torcut(dn,sim.m_box,sim.q,sim.thetap,g1,g2,c,f)
 
    if fmin == 'auto':
       f0=np.min(f)
