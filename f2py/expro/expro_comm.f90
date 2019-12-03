@@ -6,10 +6,16 @@ subroutine expro_icomm(p)
 
   integer, intent(inout) :: p
   integer :: ierr,iproc
-  logical :: flag
+  logical :: flag, file_exists
   
   call MPI_INITIALIZED(flag,ierr)
 
+  ! Check if running QLGYRO - if directly read in data
+  ! Otherwise have to wait for proc 0 to reach here
+  inquire(file='out.qlgyro.status', exist=file_exists)
+  
+  if (file_exists) flag = .false.
+  
   if (flag) then
      call MPI_COMM_RANK(MPI_COMM_WORLD,iproc,ierr)
      if (iproc == 0) read(1,*) p
@@ -28,9 +34,12 @@ subroutine expro_rcomm(x)
 
   double precision, intent(inout) :: x
   integer :: ierr,iproc
-  logical :: flag
+  logical :: flag, file_exists
   
   call MPI_INITIALIZED(flag,ierr)
+  
+  inquire(file='out.qlgyro.status', exist=file_exists)
+  if (file_exists) flag = .false.
   
   if (flag) then
      call MPI_COMM_RANK(MPI_COMM_WORLD,iproc,ierr)
@@ -53,9 +62,12 @@ subroutine expro_scomm(x,n)
   integer, intent(in) :: n
   double precision, intent(inout), dimension(n) :: x
   integer :: ierr,iproc
-  logical :: flag
+  logical :: flag, file_exists
   
   call MPI_INITIALIZED(flag,ierr)
+
+  inquire(file='out.qlgyro.status', exist=file_exists)
+  if (file_exists) flag = .false.
   
   if (flag) then
      call MPI_COMM_RANK(MPI_COMM_WORLD,iproc,ierr)
@@ -76,9 +88,12 @@ subroutine expro_lcomm(x,n)
   integer, intent(in) :: n
   double precision, intent(inout), dimension(n) :: x
   integer :: ierr,iproc
-  logical :: flag
+  logical :: flag, file_exists
   
   call MPI_INITIALIZED(flag,ierr)
+  
+  inquire(file='out.qlgyro.status', exist=file_exists)
+  if (file_exists) flag = .false.
   
   if (flag) then
      call MPI_COMM_RANK(MPI_COMM_WORLD,iproc,ierr)
@@ -101,9 +116,12 @@ subroutine expro_tcomm(x,n)
   integer, intent(in) :: n
   character*10, intent(inout), dimension(20) :: x
   integer :: ierr,iproc
-  logical :: flag
+  logical :: flag, file_exists
   
   call MPI_INITIALIZED(flag,ierr)
+
+  inquire(file='out.qlgyro.status', exist=file_exists)
+  if (file_exists) flag = .false.
   
   if (flag) then
      call MPI_COMM_RANK(MPI_COMM_WORLD,iproc,ierr)
@@ -125,10 +143,13 @@ subroutine expro_vcomm(x,n)
   integer, intent(in) :: n
   double precision, intent(inout), dimension(n) :: x
   integer :: ierr,iproc
-  logical :: flag
+  logical :: flag, file_exists
 
   call MPI_INITIALIZED(flag,ierr)
-
+  
+  inquire(file='out.qlgyro.status', exist=file_exists)
+  if (file_exists) flag = .false.
+  
   if (flag) then
      call MPI_COMM_RANK(MPI_COMM_WORLD,iproc,ierr)
      if (iproc == 0) then
@@ -157,10 +178,13 @@ subroutine expro_acomm(x,m,n)
   integer, intent(in) :: m,n
   double precision, intent(inout), dimension(m,n) :: x
   integer :: ierr,iproc
-  logical :: flag
+  logical :: flag, file_exists
 
   call MPI_INITIALIZED(flag,ierr)
 
+  inquire(file='out.qlgyro.status', exist=file_exists)
+  if (file_exists) flag = .false.
+  
   if (flag) then
      call MPI_COMM_RANK(MPI_COMM_WORLD,iproc,ierr)
      if (iproc == 0) then
