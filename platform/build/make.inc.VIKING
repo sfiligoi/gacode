@@ -39,7 +39,7 @@ FMATH	= -r8
 FDEBUG	= -warn all -shared-intel -check all -g
 
 #FOPT    = -Ofast
-FOPT   = -xHOST -O3 -no-prec-div -g
+FOPT   = -xHOST -O3 -no-prec-div -g -traceback
 FDEBUG = -check all -traceback
 
 
