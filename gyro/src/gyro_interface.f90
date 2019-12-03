@@ -197,11 +197,15 @@ module gyro_interface
 
   real, dimension(:), allocatable :: gyro_r_out
 
-  complex :: gyro_fieldeigen_omega_out
-  real :: gyro_fieldeigen_error_out
+  real, dimension(:, :, :), allocatable :: gyro_gbflux_out
+
+  complex :: gyro_omega_out
+  complex :: gyro_omega_error_out
 
   integer :: gyro_error_status_out
   character(len=80) :: gyro_error_message_out
+
+  character(len=80) :: gyro_path_in
 
 contains
 
@@ -379,6 +383,7 @@ contains
     gyro_n_fourier_geo_in = n_fourier_geo
     gyro_a_fourier_geo_in(:,:) = a_fourier_geo(:,:)
 
+    gyro_path_in = path
     ! Allocate output arrays (deallocated in gyro_cleanup)
     if (.not.allocated(gyro_elec_pflux_out)) allocate(gyro_elec_pflux_out(n_x))
     if (.not.allocated(gyro_elec_mflux_out)) allocate(gyro_elec_mflux_out(n_x))
@@ -570,6 +575,7 @@ contains
     n_fourier_geo = gyro_n_fourier_geo_in
     a_fourier_geo(:,:) = gyro_a_fourier_geo_in(:,:)
 
+    path = gyro_path_in
     if (debug_flag == 1 .and. i_proc == 0) then
        print *, '[map_interface2global done]'
     endif
