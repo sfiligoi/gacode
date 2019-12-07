@@ -9,6 +9,12 @@ from . import data
 
 MYDIR=os.path.basename(os.getcwd())
 
+'''
+ARGUMENT DEFINITIONS:
+
+w = width of time-average window : 0 < w < 1
+'''
+
 class cgyrodata_plot(data.cgyrodata):
 
    TEXPHI  = r'{\delta\phi}'
@@ -54,30 +60,54 @@ class cgyrodata_plot(data.cgyrodata):
             format(itheta+1,self.theta_plot))
       return f,ft
 
+   def sunit(self,norm):
 
-   def plot_freq(self,w=0.5,wmax=0.0,fig=None):
-      '''
-      Plot gamma and omega vs time
+      if norm == 'elec':
 
-      ARGUMENTS:
-      w: fractional width of time window
-      '''
+         tnorm = self.t
+         tstr  = TIME
+         fnorm = self.freq 
+         fstr  = r'$(a/c_s)\, \omega$'
+
+      else:
+         
+         i = int(norm)
+      
+         for j in range(self.n_species):
+            if self.z[j] < 0.0:
+               je = j
+
+         # Convert cs=sqrt(Te/mD) to vi=sqrt(Ti/mi)
+         conv = np.sqrt(self.temp[i]/self.temp[je]/self.mass[i])
+         tstr  = r'$(v_'+str(i)+'/a) \, t$'
+         fstr  = r'$(a/v_'+str(i)+') \, \omega$'
+
+         tnorm = self.t*conv 
+         fnorm = self.freq/conv
+      
+      return tnorm,tstr,fnorm,fstr
+      
+   def plot_freq(self,w=0.5,wmax=0.0,norm='elec',fig=None):
+
+      # Function: plot gamma and omega vs time
 
       if fig is None:
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
+      t,tstr,freq,fstr = self.sunit(norm)
+         
       #======================================
       # Omega
       ax = fig.add_subplot(121)
       ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
-      ax.set_xlabel(TIME)
-      ax.set_ylabel(r'$(a/c_s)\, \omega$')
+      ax.set_xlabel(tstr)
+      ax.set_ylabel(fstr)
 
       for i in range(self.n_n):
-         ax.plot(self.t,self.freq[0,i,:])
+         ax.plot(t,freq[0,i,:])
 
-      ax.set_xlim([0,self.t[-1]])
+      ax.set_xlim([0,t[-1]])
       #======================================
 
       #======================================
@@ -85,27 +115,23 @@ class cgyrodata_plot(data.cgyrodata):
       ax = fig.add_subplot(122)
       ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
-      ax.set_xlabel(TIME)
-      ax.set_ylabel(r'$(a/c_s)\, \gamma$')
+      ax.set_xlabel(tstr)
+      ax.set_ylabel(fstr)
 
       for i in range(self.n_n):
-         ax.plot(self.t,self.freq[1,i,:])
+         ax.plot(t,freq[1,i,:])
 
-      ax.set_xlim([0,self.t[-1]])
+      ax.set_xlim([0,t[-1]])
       #======================================
 
       fig.tight_layout(pad=0.3)
 
-   def plot_ky_freq(self,w=0.5,wmax=0.0,fig=None):
-      '''
-      Plot mode frequency versus ky
-
-      ARGUMENTS:
-      w: fractional width of time window
-      '''
+   def plot_ky_freq(self,w=0.5,wmax=0.0,norm='elec',fig=None):
 
       if fig is None:
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
+
+      t,tstr,freq,fstr = self.sunit(norm)
 
       #======================================
       # Omega
@@ -185,13 +211,9 @@ class cgyrodata_plot(data.cgyrodata):
 
 
    def plot_rcorr_phi(self,field=0,theta=0.0,w=0.5,wmax=0.0,fig=None):
-      '''
-      Plot radial correlation
 
-      ARGUMENTS:
-      w: fractional width of time window
-      '''
-
+      # FUNCTION: plot radial correlation
+ 
       import scipy as scipy
       import scipy.signal as signal
       from scipy.optimize import curve_fit

@@ -30,9 +30,10 @@ if plot_type == 'freq':
 
    w     = float(sys.argv[2])
    wmax  = float(sys.argv[3])
-   ftype = sys.argv[4]
+   norm  = sys.argv[4]
+   ftype = sys.argv[5]
 
-   data_in.plot_freq(w=w,wmax=wmax)
+   data_in.plot_freq(w=w,wmax=wmax,norm=norm)
 
    outfile = 'out.cgyro.freq.'+ftype
 
@@ -40,9 +41,10 @@ elif plot_type == 'ky_freq':
 
    w     = float(sys.argv[2])
    wmax  = float(sys.argv[3])
-   ftype = sys.argv[4]
+   norm  = sys.argv[4]
+   ftype = sys.argv[5]
 
-   data_in.plot_ky_freq(w=w,wmax=wmax)
+   data_in.plot_ky_freq(w=w,wmax=wmax,norm=norm)
 
    outfile = 'out.cgyro.ky_freq.'+ftype
 

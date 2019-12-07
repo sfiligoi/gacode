@@ -141,6 +141,9 @@ then
   echo "         -diss"
   echo "         Toggle plotting of dissipation curve"  
   echo
+  echo "         -norm"
+  echo "         Species index for normalization (starts at 0)"  
+  echo
   echo "OPTIONS FOR -plot fluct, -vis"
   echo
   echo "         -nomp <threads>"
@@ -276,6 +279,8 @@ LAND_FLAG=0
 PX=800
 PY=800
 DISS=0
+NORM='elec'
+
 CFLUX=auto
 DN=1
 MAG=1.0
@@ -309,7 +314,8 @@ while [ $# -gt 0 ] ; do
 
   -diss) DISS=1 ;;
   -notex) TEX=0 ;;
-
+  -norm) shift ; NORM=$1 ;;
+  
   -moment) shift ; MOMENT=$1 ;;
   -ie) shift ; IE=$1 ;;
 
@@ -419,7 +425,7 @@ case "$PLOT_TYPE" in
 	python $PLT $PLOT_TYPE $TIME $SPECIES $YMIN $YMAX $TMAX $N $IE $EXT ;;
 
    freq | ky_freq )
-	python $PLT $PLOT_TYPE $W $WMAX $EXT ;;
+	python $PLT $PLOT_TYPE $W $WMAX $NORM $EXT ;;
 
    error)
 	python $PLT $PLOT_TYPE $EXT ;;
