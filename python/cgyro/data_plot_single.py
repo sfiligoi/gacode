@@ -55,9 +55,10 @@ elif plot_type == 'ky_phi':
    ymin  = sys.argv[4]
    ymax  = sys.argv[5]
    nstr  = sys.argv[6]
-   ftype = sys.argv[7]
+   norm  = sys.argv[7]
+   ftype = sys.argv[8]
 
-   data_in.plot_ky_phi(field=field,theta=theta,ymin=ymin,ymax=ymax,nstr=nstr)
+   data_in.plot_ky_phi(field=field,theta=theta,ymin=ymin,ymax=ymax,nstr=nstr,norm=norm)
 
    outfile = 'out.cgyro.ky_phi.'+ftype
 

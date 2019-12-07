@@ -18,7 +18,7 @@ class cgyrodata:
       self.dir = sim_directory
       self.getgrid()
       self.getdata()
-
+      
    def extract(self,f):
 
       start = time.time()
@@ -426,3 +426,46 @@ class cgyrodata:
          print('INFO: (data.py) Read data in out.cgyro.equilibrium.')
 
       #-----------------------------------------------------------------
+
+   def getnorm(self,norm):
+
+      if norm == 'elec':
+
+         # Standard normalizations
+
+         self.tnorm  = self.t
+         self.tstr   = TIME
+         self.fnorm  = self.freq 
+         self.fstr   = [r'$(a/c_s)\, \omega$',r'$(a/c_s)\, \gamma$']
+         self.kynorm = self.ky
+         self.kstr   = r'$k_y \rho_s$'
+         self.rhonorm = self.rho
+         self.rhostr = r'$\rho_s$'
+         
+      else:
+
+         # Species-i normalizations
+         
+         i = int(norm)
+      
+         for j in range(self.n_species):
+            if self.z[j] < 0.0:
+               je = j
+
+         # Convert csD=sqrt(Te/mD) to vi=sqrt(Ti/mi)
+         conv = np.sqrt(self.temp[i]/self.temp[je]/self.mass[i])
+ 
+         self.tnorm = self.t*conv 
+         self.tstr  = r'$(v_'+str(i)+'/a) \, t$'
+
+         self.fnorm = self.freq/conv
+         self.fstr  = [r'$(a/v_'+str(i)+') \, \omega$',r'$(a/v_'+str(i)+') \, \gamma$']
+
+         # Convert rho_sD=csD/Omega_i to rho_i=vi/Omega_i
+         self.rhonorm = self.rho*conv/(self.z[i]/self.mass[i])
+         self.rhostr  = r'$\rho_'+str(i)+'$'
+
+         self.kynorm = self.ky*conv/(self.z[i]/self.mass[i])
+         self.kstr   = r'$k_y \rho_'+str(i)+'$'
+
+ 

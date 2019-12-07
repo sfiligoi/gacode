@@ -59,33 +59,6 @@ class cgyrodata_plot(data.cgyrodata):
       print('INFO: (kxky_select) Selected theta index {:d} of {:d} '.
             format(itheta+1,self.theta_plot))
       return f,ft
-
-   def sunit(self,norm):
-
-      if norm == 'elec':
-
-         tnorm = self.t
-         tstr  = TIME
-         fnorm = self.freq 
-         fstr  = r'$(a/c_s)\, \omega$'
-
-      else:
-         
-         i = int(norm)
-      
-         for j in range(self.n_species):
-            if self.z[j] < 0.0:
-               je = j
-
-         # Convert cs=sqrt(Te/mD) to vi=sqrt(Ti/mi)
-         conv = np.sqrt(self.temp[i]/self.temp[je]/self.mass[i])
-         tstr  = r'$(v_'+str(i)+'/a) \, t$'
-         fstr  = r'$(a/v_'+str(i)+') \, \omega$'
-
-         tnorm = self.t*conv 
-         fnorm = self.freq/conv
-      
-      return tnorm,tstr,fnorm,fstr
       
    def plot_freq(self,w=0.5,wmax=0.0,norm='elec',fig=None):
 
@@ -94,18 +67,18 @@ class cgyrodata_plot(data.cgyrodata):
       if fig is None:
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
-      t,tstr,freq,fstr = self.sunit(norm)
+      self.getnorm(norm) ; t = self.tnorm
          
       #======================================
       # Omega
       ax = fig.add_subplot(121)
       ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
-      ax.set_xlabel(tstr)
-      ax.set_ylabel(fstr)
+      ax.set_xlabel(self.tstr)
+      ax.set_ylabel(self.fstr[0])
 
       for i in range(self.n_n):
-         ax.plot(t,freq[0,i,:])
+         ax.plot(t,self.fnorm[0,i,:])
 
       ax.set_xlim([0,t[-1]])
       #======================================
@@ -115,11 +88,11 @@ class cgyrodata_plot(data.cgyrodata):
       ax = fig.add_subplot(122)
       ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
-      ax.set_xlabel(tstr)
-      ax.set_ylabel(fstr)
+      ax.set_xlabel(self.tstr)
+      ax.set_ylabel(self.fstr[1])
 
       for i in range(self.n_n):
-         ax.plot(t,freq[1,i,:])
+         ax.plot(t,self.fnorm[1,i,:])
 
       ax.set_xlim([0,t[-1]])
       #======================================
@@ -131,20 +104,20 @@ class cgyrodata_plot(data.cgyrodata):
       if fig is None:
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
-      t,tstr,freq,fstr = self.sunit(norm)
+      self.getnorm(norm) ; t = self.tnorm ; ky = self.kynorm
 
       #======================================
       # Omega
       ax = fig.add_subplot(121)
       ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
-      ax.set_xlabel(r'$k_y \rho_s$')
-      ax.set_ylabel(r'$(a/c_s)\, \omega$')
+      ax.set_xlabel(self.kstr)
+      ax.set_ylabel(self.fstr[0])
 
-      ax.plot(self.ky,self.freq[0,:,-1],color='blue')
-      ax.plot(self.ky,self.freq[0,:,-1],"o",color='k')
-      if len(self.ky) > 1:
-         ax.set_xlim([0,self.ky[-1]])
+      ax.plot(ky,self.fnorm[0,:,-1],color='blue')
+      ax.plot(ky,self.fnorm[0,:,-1],"o",color='k')
+      if len(ky) > 1:
+         ax.set_xlim([0,ky[-1]])
       #======================================
 
       #======================================
@@ -152,18 +125,18 @@ class cgyrodata_plot(data.cgyrodata):
       ax = fig.add_subplot(122)
       ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
-      ax.set_xlabel(r'$k_y \rho_s$')
-      ax.set_ylabel(r'$(a/c_s)\, \gamma$')
+      ax.set_xlabel(self.kstr)
+      ax.set_ylabel(self.fstr[1])
 
-      ax.plot(self.ky,self.freq[1,:,-1],color='red')
-      ax.plot(self.ky,self.freq[1,:,-1],"o",color='k')
-      if len(self.ky) > 1:
-         ax.set_xlim([0,self.ky[-1]])
+      ax.plot(ky,self.fnorm[1,:,-1],color='red')
+      ax.plot(ky,self.fnorm[1,:,-1],"o",color='k')
+      if len(ky) > 1:
+         ax.set_xlim([0,ky[-1]])
       #======================================
 
       fig.tight_layout(pad=0.3)
 
-   def plot_ky_phi(self,field=0,theta=0.0,ymin='auto',ymax='auto',nstr='null',fig=None):
+   def plot_ky_phi(self,field=0,theta=0.0,ymin='auto',ymax='auto',nstr='null',norm='elec',fig=None):
 
       # Plot fields versus time for particular values of ky
 
@@ -171,17 +144,18 @@ class cgyrodata_plot(data.cgyrodata):
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       self.getbigfield()
+      self.getnorm(norm) ; t = self.tnorm 
 
       f,ft = self.kxky_select(theta,field,'phi',0)
-      p = np.sum(abs(f[:,:,:]),axis=0)/self.rho
+      p = np.sum(abs(f[:,:,:]),axis=0)/self.rhonorm
 
       ax = fig.add_subplot(111)
       ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
-      ax.set_xlabel(TIME)
-      ax.set_ylabel(r'$\left| '+ft+'_n \\right|$')
+      ax.set_xlabel(self.tstr)
+      ax.set_ylabel(r'$\left| '+ft+'_n \\right|/$'+self.rhostr)
       ax.set_yscale('log')
-      ax.set_title(r'$\mathrm{Fluctuation~intensity} \quad k_\theta = nq/r$')
+      ax.set_title(r'$\mathrm{Fluctuation~intensity}$')
 
       if nstr == 'null':
          nvec = list(range(self.n_n))
@@ -191,9 +165,9 @@ class cgyrodata_plot(data.cgyrodata):
       for n in nvec:
          num = r'$n='+str(n)+'$'
          if n==0:
-            ax.plot(self.t,p[n,:],linewidth=2,label=num)
+            ax.plot(t,p[n,:],linewidth=2,label=num)
          else:
-            ax.plot(self.t,p[n,:],label=num)
+            ax.plot(t,p[n,:],label=num)
 
       ax.set_xlim([0,max(self.t)])
 
