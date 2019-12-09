@@ -49,6 +49,9 @@ OBJECTS = cgyro_globals.o \
           cgyro_shear_hammett.o \
           cgyro_source.o \
 	  cgyro_step_gk.o \
+	  cgyro_step_gk_ck.o \
+	  cgyro_step_gk_bs5.o \
+	  cgyro_step_gk_v76.o \
           cgyro_write_initdata.o \
           cgyro_read_restart.o \
           cgyro_write_restart.o \

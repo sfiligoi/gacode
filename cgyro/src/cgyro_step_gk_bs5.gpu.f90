@@ -29,6 +29,7 @@ subroutine cgyro_step_gk_bs5
   real delta_t_last_step
   real deltah2_max, deltah2_min
   real var_error, scale_x, tol, scale_old
+  real error_rhs, error_hx
 
   !! butcher table
 
@@ -139,10 +140,13 @@ subroutine cgyro_step_gk_bs5
   
   rk_MAX = 1000
 
-!$omp parallel workshare
-  rhs(:,:,:) = 0
-  h0_old(:,:) = h_x(:,:)
-!$omp end parallel workshare
+!$acc parallel loop collapse(2) independent present(h0_old,h_x)
+  do iv_loc=1,nv_loc
+     do ic_loc=1,nc
+        h0_old(ic_loc,iv_loc) = h_x(ic_loc,iv_loc)
+     enddo
+  enddo
+
   conv = 0
   delta_t_gk = 0.d0
   deltah2_min = 1.d10
@@ -164,7 +168,7 @@ subroutine cgyro_step_gk_bs5
      if (( conv .eq. 0 ) .and. (iiter .ge. 1)) then
         ! not converged so backing up
         
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h0_x,h0_old,h_x)
         do iv_loc=1,nv_loc
            do ic_loc=1,nc
               h0_x(ic_loc,iv_loc) = h0_old(ic_loc, iv_loc)
@@ -172,7 +176,7 @@ subroutine cgyro_step_gk_bs5
            enddo
         enddo
      else
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h0_x,h_x)
         do iv_loc=1,nv_loc
            do ic_loc=1,nc
               h0_x(ic_loc,iv_loc) = h_x(ic_loc, iv_loc)
@@ -181,14 +185,14 @@ subroutine cgyro_step_gk_bs5
         
      endif
 
-     call cgyro_field_c
+     call cgyro_field_c_gpu
 
      ! Stage 1
      !
      
      call cgyro_rhs(1)
 
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs(:,:,1))
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
            h_x(ic_loc,iv_loc) = h0_x(ic_loc,iv_loc) &
@@ -196,13 +200,13 @@ subroutine cgyro_step_gk_bs5
         enddo
      enddo
 
-     call cgyro_field_c
+     call cgyro_field_c_gpu
 
      ! Stage 2 ! k2
 
      call cgyro_rhs(2)
 
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs)
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
            h_x(ic_loc, iv_loc) = h0_x(ic_loc,iv_loc) &
@@ -211,14 +215,15 @@ subroutine cgyro_step_gk_bs5
         enddo
      enddo
 
-     call cgyro_field_c
+     call cgyro_field_c_gpu
+     call cgyro_rhs(3)
 
      ! Stage 3
      
-     call cgyro_rhs(3)
+
      
      ! k4
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs)
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
            h_x(ic_loc, iv_loc) = h0_x(ic_loc, iv_loc) &
@@ -228,12 +233,10 @@ subroutine cgyro_step_gk_bs5
         enddo
      enddo
 
-
-     call cgyro_field_c
-     
+     call cgyro_field_c_gpu
      call cgyro_rhs(4)
      
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs) 
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
            h_x(ic_loc, iv_loc) = h0_x(ic_loc,iv_loc)  &
@@ -244,12 +247,10 @@ subroutine cgyro_step_gk_bs5
         enddo
      enddo
 
-     
-     call cgyro_field_c
-     
+     call cgyro_field_c_gpu
      call cgyro_rhs(5)
 
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs)
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
            h_x(ic_loc, iv_loc) = h0_x(ic_loc,iv_loc) &
@@ -261,10 +262,10 @@ subroutine cgyro_step_gk_bs5
         enddo
      enddo
 
-     call cgyro_field_c
+     call cgyro_field_c_gpu
      call cgyro_rhs(6)
 
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs)
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
            h_x(ic_loc, iv_loc) = h0_x(ic_loc,iv_loc) + &
@@ -277,10 +278,10 @@ subroutine cgyro_step_gk_bs5
         enddo
      enddo
 
-     call cgyro_field_c
+     call cgyro_field_c_gpu
      call cgyro_rhs(7)
 
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs)
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
            h_x(ic_loc, iv_loc) = h0_x(ic_loc,iv_loc) &
@@ -293,11 +294,9 @@ subroutine cgyro_step_gk_bs5
         enddo
      enddo
     
-
-
      !! compute error between 5th and 4th order soln
-          
-!$omp parallel do collapse(2)
+     error_rhs = 0.d0
+!$acc parallel loop collapse(2) gang present(rhs) reduction(+:error_rhs)
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
            rhs(ic_loc,iv_loc,1)= deltah2*(e1*rhs(ic_loc, iv_loc, 1) &
@@ -305,6 +304,15 @@ subroutine cgyro_step_gk_bs5
                 + e4*rhs(ic_loc,iv_loc,4) &
                 + e5*rhs(ic_loc,iv_loc,5) &
                 + e6*rhs(ic_loc,iv_loc,6))
+           error_rhs = error_rhs + abs(rhs(ic_loc, iv_loc, 1))
+        enddo
+     enddo
+
+     error_hx = 0.
+!$acc parallel loop collapse(2) independent present(h_x) reduction(+:error_hx)
+     do iv_loc=1,nv_loc
+        do ic_loc=1,nc
+           error_hx = error_hx + abs(h_x(ic_loc,iv_loc))
         enddo
      enddo
 
@@ -312,9 +320,11 @@ subroutine cgyro_step_gk_bs5
 
      error_sum = 0.d0
      error_x = 0.d0
-     error_x(1) = sum(abs(rhs(:,:,1)))
-     error_x(2) = sum(abs(h_x))     
-     
+     !! error_x(1) = sum(abs(rhs(:,:,1)))
+     !! error_x(2) = sum(abs(h_x))     
+     error_x(1) = error_rhs
+     error_x(2) = error_hx
+
      call MPI_ALLREDUCE(error_x, error_sum, 2, MPI_DOUBLE_PRECISION,&
           MPI_SUM, MPI_COMM_WORLD, i_err)
      
@@ -332,16 +342,16 @@ subroutine cgyro_step_gk_bs5
      !! method 2 "variance" error
      
      if ( var_error .lt. tol ) then
-        call cgyro_field_c
+        call cgyro_field_c_gpu
         call cgyro_filter
         
-
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h0_x,h0_old)
         do iv_loc=1,nv_loc
            do ic_loc=1,nc
-              h0_old(ic_loc,iv_loc) = h0_x(ic_loc, iv_loc)
+              h0_old(ic_loc,iv_loc) = h0_x(ic_loc,iv_loc)
            enddo
         enddo
+
 
         converged = converged + 1
         conv = 1
@@ -405,17 +415,7 @@ subroutine cgyro_step_gk_bs5
   endif
 
   delta_t_gk = min(delta_t, delta_t_gk)
-
   total_local_error = var_error
 
   
-!!  if ( i_proc == 0 ) then
-!!     write(*,*) i_proc , " paper bst deltah2_min, max converged ", &
-!!          " dt last ", delta_t_last, " dt_last_step ",delta_t_last_step
-!!  endif
-  !!  
-  ! Filter special spectral components
-  
-
-
 end subroutine cgyro_step_gk_bs5

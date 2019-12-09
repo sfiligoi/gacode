@@ -120,9 +120,26 @@ subroutine cgyro_kernel
 !$acc update device(field,psi,cap_h_c,chi,h_x)
      call timer_lib_out('str_mem')
 
-     ! Collisionless step: returns new h_x, cap_h_x, fields 
-     call cgyro_step_gk
-   
+     ! Collisionless step: returns new h_x, cap_h_x, fields
+     
+     !! call cgyro_step_gk
+     
+     select case(delta_t_method)
+     case(1)
+        call cgyro_step_gk_ck
+     case(2)
+        call cgyro_step_gk_bs5
+!!     case(3)
+!!        call cgyro_step_gk_ss
+!!     case(4)
+!!        call cgyro_step_gk_ts
+     case(5)
+        call cgyro_step_gk_v76 
+     case default
+        ! Normal timestep
+        call cgyro_step_gk
+     end select
+     
      call timer_lib_in('str_mem')
 !$acc update host(rhs(:,:,1))
      call timer_lib_out('str_mem')
@@ -261,6 +278,8 @@ subroutine cgyro_kernel
   if(allocated(xi_lor_mat))    deallocate(xi_lor_mat)
   if(allocated(xi_deriv_mat))  deallocate(xi_deriv_mat)
   if(allocated(h_x))           deallocate(h_x)
+  if(allocated(h0_x))          deallocate(h0_x)
+  if(allocated(h0_old))          deallocate(h0_old)
   if(allocated(cap_h_c))       deallocate(cap_h_c)
   if(allocated(cap_h_v))       deallocate(cap_h_v)
   if(allocated(field))         deallocate(field)

@@ -173,8 +173,28 @@ subroutine cgyro_init_manager
 !$acc enter data create(fcoef,gcoef,field,field_loc)
 
      ! Velocity-distributed arrays
-     allocate(rhs(nc,nv_loc,4))
-     !allocate(rhs(nc,nv_loc,12))
+
+     select case(delta_t_method)
+     case(1)
+        allocate(h0_old(nc,nv_loc))     
+        allocate(rhs(nc,nv_loc,6))
+     case(2)
+        allocate(h0_old(nc,nv_loc))
+        allocate(rhs(nc,nv_loc,7))
+!!     case(3)
+!!        allocate(h0_old(nc,nv_loc))
+!!        allocate(rhs(nc,nv_loc,7))
+!!     case(4)
+!!        allocate(h0_old(nc,nv_loc))
+!!        allocate(rhs(nc,nv_loc,7))
+     case(5)
+        allocate(h0_old(nc,nv_loc))
+        allocate(rhs(nc,nv_loc,10))
+     case default
+        ! Normal timestep
+        allocate(rhs(nc,nv_loc,4))
+     end select 
+     
      allocate(h_x(nc,nv_loc))
      allocate(g_x(nc,nv_loc))
      allocate(psi(nc,nv_loc))
@@ -197,7 +217,7 @@ subroutine cgyro_init_manager
      allocate(cap_h_v(nc_loc,nv))
      allocate(cap_h_v_prime(nc_loc,nv))
 
-!$acc enter data create(rhs,h_x,g_x,psi,chi,h0_x,cap_h_c,cap_h_ct,cap_h_v,dvjvec_c,dvjvec_v,jxvec_c)
+!$acc enter data create(rhs,h_x,g_x,psi,chi,h0_x,h0_old,cap_h_c,cap_h_ct,cap_h_v,dvjvec_c,dvjvec_v,jxvec_c)
 
      ! Nonlinear arrays
      if (nonlinear_flag == 1) then
