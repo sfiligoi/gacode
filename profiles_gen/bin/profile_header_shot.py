@@ -10,7 +10,7 @@ for line in open(inputfile,'r').readlines():
       index = 1
 
    if index > 0:
-      line = string.strip(line)
+      line = line.strip()
       if len(line) > 1:
          x = line.split()
          outfile.write(' '+x[4]+'\n')
@@ -23,11 +23,11 @@ for line in open(inputfile,'r').readlines():
       index = 1
 
    if index > 0:
-      line = string.strip(line)
+      line = line.strip()
       if len(line) > 1:
          x = line.split()
-         x[4] = x[4].strip('ms')
-         outfile.write(' '+x[4]+'\n')
+         y = x[4].split('ms')
+         outfile.write(' '+y[0]+'\n')
       else:
          sys.exit()
 
