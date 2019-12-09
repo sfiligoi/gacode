@@ -30,6 +30,7 @@ subroutine cgyro_step_gk_ck
   real delta_x_min, delta_x_max, local_max_error
   real tol_ck, total_delta_step
   real error_x(5), error_sum(5)
+  real error_rhs, error_hx
   real tau_ck, delta_t_old, delta_t_gk_old, delta_t_last, delta_t_last_step
   real last_total_error, rel_error, var_error
   real deltah2_min, deltah2_max, scale_x, scale_old
@@ -63,7 +64,7 @@ subroutine cgyro_step_gk_ck
   deltah2_min = 1.d10
   deltah2_max = -1.d0
 
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h0_old,h_x)
   do iv_loc=1,nv_loc
      do ic_loc=1,nc
         h0_old(ic_loc,iv_loc) = h_x(ic_loc,iv_loc)
@@ -92,14 +93,14 @@ subroutine cgyro_step_gk_ck
 !!     endif
 
      if (conv == 1 ) then
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h0_x,h_x)
         do iv_loc=1,nv_loc
            do ic_loc=1,nc
               h0_x(ic_loc,iv_loc) = h_x(ic_loc,iv_loc)
            enddo
         enddo
      else
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h0_x,h0_old,h_x)
         do iv_loc=1,nv_loc
            do ic_loc=1,nc
               h0_x(ic_loc,iv_loc) = h0_old(ic_loc,iv_loc)
@@ -108,10 +109,10 @@ subroutine cgyro_step_gk_ck
         enddo
      endif
      
-     call cgyro_field_c
+     call cgyro_field_c_gpu
      call cgyro_rhs(1)
 
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs(:,:,1))
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
            h_x(ic_loc, iv_loc) = h0_x(ic_loc, iv_loc) &
@@ -119,10 +120,10 @@ subroutine cgyro_step_gk_ck
         enddo
      enddo
      
-     call cgyro_field_c
+     call cgyro_field_c_gpu
      call cgyro_rhs(2)
 
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h_x,h0_x,h0_old,rhs)
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
            h_x(ic_loc, iv_loc) = h0_x(ic_loc,iv_loc) &
@@ -131,10 +132,10 @@ subroutine cgyro_step_gk_ck
         enddo
      enddo
 
-     call cgyro_field_c
+     call cgyro_field_c_gpu
      call cgyro_rhs(3)
 
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h_x,h0_x,rhs)
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
            h_x(ic_loc, iv_loc) = h0_x(ic_loc,iv_loc) &
@@ -144,10 +145,10 @@ subroutine cgyro_step_gk_ck
         enddo
      enddo
      
-     call cgyro_field_c
+     call cgyro_field_c_gpu
      call cgyro_rhs(4) 
 
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h_x,h0_x,rhs)
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
            h_x(ic_loc, iv_loc) = h0_x(ic_loc,iv_loc) &
@@ -159,10 +160,10 @@ subroutine cgyro_step_gk_ck
      enddo
      
 
-     call cgyro_field_c
+     call cgyro_field_c_gpu
      call cgyro_rhs(5)
 
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs)
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
            h_x(ic_loc,iv_loc) = h0_x(ic_loc,iv_loc) &
@@ -174,24 +175,24 @@ subroutine cgyro_step_gk_ck
         enddo
      enddo
      
-     call cgyro_field_c
+     call cgyro_field_c_gpu
      call cgyro_rhs(6)
      
      !! soln of order 5
 
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs)
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
            h_x(ic_loc, iv_loc) = h0_x(ic_loc,iv_loc) &
                 + deltah2*( 37.d0/378.d0*rhs(ic_loc, iv_loc, 1) &
-                + 250.d0/621.d0 * rhs(ic_loc, iv_loc, 3) &
+                + 250.d0/621.d0*rhs(ic_loc, iv_loc, 3) &
                 + 125.d0/594.d0*rhs(ic_loc, iv_loc, 4) &
                 + 512.d0/1771.d0*rhs(ic_loc, iv_loc, 6))
         enddo
      enddo
 
-
-!$omp parallel do collapse(2)
+     error_rhs = 0.
+!$acc parallel loop collapse(2) gang present(rhs) reduction(+:error_rhs)
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
            rhs(ic_loc, iv_loc, 1) = deltah2*(& 
@@ -200,12 +201,24 @@ subroutine cgyro_step_gk_ck
                 + (125.d0/594.d0-13525.d0/55296.d0)*rhs(ic_loc, iv_loc, 4) &
                 + (-277.d0/14336.d0)*rhs(ic_loc, iv_loc, 5) &
                 + (512.d0/1771.d0-1.d0/4.d0)*rhs(ic_loc, iv_loc, 6))
+           error_rhs = error_rhs + abs(rhs(ic_loc, iv_loc, 1))
+        enddo
+     enddo
+
+     error_hx = 0.
+!$acc parallel loop collapse(2) independent present(h_x) reduction(+:error_hx)
+     
+     do iv_loc=1,nv_loc
+        do ic_loc=1,nc
+           error_hx = error_hx + abs(h_x(ic_loc,iv_loc))
         enddo
      enddo
 
      error_sum = 0.
-     error_x(1) = sum(abs(rhs(:, :, 1)))
-     error_x(2) = sum(abs(h_x))
+     !! error_x(1) = sum(abs(rhs(:, :, 1)))
+     !! error_x(2) = sum(abs(h_x))
+     error_x(1) = error_rhs
+     error_x(2) = error_hx
 
      call MPI_ALLREDUCE(error_x, error_sum, 2, &
           MPI_DOUBLE_PRECISION,&
@@ -226,7 +239,7 @@ subroutine cgyro_step_gk_ck
      !! for variance tight control if ( var_error .lt. tol_ck ) then
      
      if ( var_error .lt. tol_ck ) then
-        call cgyro_field_c
+        call cgyro_field_c_gpu
         call cgyro_filter
 
         total_delta_step = total_delta_step + deltah2
@@ -241,7 +254,7 @@ subroutine cgyro_step_gk_ck
         conv = 1
         converged=converged+1
 
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h_x,h0_old)
         do iv_loc=1,nv_loc
            do ic_loc=1,nc
               h0_old(ic_loc,iv_loc) = h0_x(ic_loc, iv_loc)
