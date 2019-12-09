@@ -19,9 +19,9 @@ subroutine prgen_read_inputprofiles
 
   expro_ctrl_quasineutral_flag = 0
   expro_ctrl_numeq_flag = 0 
-  
+
   !----------------------------------------------
-  
+
   open(unit=1,file='input.profiles',status='old')
   do while (line(1:2) /= '#r')
      read(1,'(a)') line
@@ -158,7 +158,7 @@ subroutine prgen_read_inputprofiles
      read(1,*) x
   enddo
   close(1)
-  
+
   ! Needed for diagnostic printing
   rmin(:) = expro_rmin(:)
   rmaj(:) = expro_rmaj(:)
@@ -173,8 +173,8 @@ subroutine prgen_read_inputprofiles
   expro_rho(:) = rho
 
   open(unit=1,file='profile_shot',status='old')
-   read(1,*) expro_shot
-   read(1,*) expro_time
+  read(1,*) expro_shot
+  read(1,*) expro_time
   close(1)
 
   open(unit=1,file='profile_header',status='old')
@@ -183,5 +183,5 @@ subroutine prgen_read_inputprofiles
      call prgen_ion_name(nint(expro_mass(i)),nint(expro_z(i)),expro_name(i))
   enddo
   close(1)
-  
+
 end subroutine prgen_read_inputprofiles

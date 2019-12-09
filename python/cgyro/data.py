@@ -6,19 +6,18 @@ from gacodefuncs import *
 
 BYTE='float32'
 
+# class to read cgyro output data
 class cgyrodata:
 
-   """CGYRO output data class."""
-
+   # constructor reads in basic (not all) simulation data
    def __init__(self,sim_directory,silent=False):
-
-      """Constructor reads in basic (not all) simulation data."""
 
       self.silent = silent
       self.dir = sim_directory
       self.getgrid()
       self.getdata()
       
+   # standard routine to read binary or ASCII data 
    def extract(self,f):
 
       start = time.time()
@@ -37,8 +36,6 @@ class cgyrodata:
       return t,fmt,data
 
    def getdata(self):
-
-      """Initialize smaller data objects (don't load larger ones)"""
 
       if not os.path.isfile(self.dir+'out.cgyro.time'):
          print('INFO: (data.py) No time record exists.')
@@ -435,37 +432,49 @@ class cgyrodata:
 
          self.tnorm  = self.t
          self.tstr   = TIME
+
          self.fnorm  = self.freq 
          self.fstr   = [r'$(a/c_s)\, \omega$',r'$(a/c_s)\, \gamma$']
-         self.kynorm = self.ky
-         self.kstr   = r'$k_y \rho_s$'
+
          self.rhonorm = self.rho
          self.rhostr = r'$\rho_s$'
+
+         self.kynorm = self.ky
+         self.kstr   = r'$k_y \rho_s$'
+
+         self.qc     = 1.0
+         self.gbnorm = '_\mathrm{GBD}'
          
       else:
 
          # Species-i normalizations
          
          i = int(norm)
-      
+
+         te = 1.0
          for j in range(self.n_species):
             if self.z[j] < 0.0:
-               je = j
+               te = self.temp[j]
 
          # Convert csD=sqrt(Te/mD) to vi=sqrt(Ti/mi)
-         conv = np.sqrt(self.temp[i]/self.temp[je]/self.mass[i])
+         vc = np.sqrt(self.temp[i]/te/self.mass[i])
  
-         self.tnorm = self.t*conv 
+         self.tnorm = self.t*vc
          self.tstr  = r'$(v_'+str(i)+'/a) \, t$'
 
-         self.fnorm = self.freq/conv
+         self.fnorm = self.freq/vc
          self.fstr  = [r'$(a/v_'+str(i)+') \, \omega$',r'$(a/v_'+str(i)+') \, \gamma$']
 
          # Convert rho_sD=csD/Omega_i to rho_i=vi/Omega_i
-         self.rhonorm = self.rho*conv/(self.z[i]/self.mass[i])
+         rhoc = vc/(self.z[i]/self.mass[i])
+
+         self.rhonorm = self.rho*rhoc
          self.rhostr  = r'$\rho_'+str(i)+'$'
 
-         self.kynorm = self.ky*conv/(self.z[i]/self.mass[i])
+         self.kynorm = self.ky*rhoc
          self.kstr   = r'$k_y \rho_'+str(i)+'$'
 
- 
+          # Convert Q_GBD to Q_GBi
+         self.qc = vc*(self.temp[i]/te)*rhoc**2
+         self.gbnorm = '_\mathrm{GB'+str(i)+'}'
+

@@ -664,15 +664,16 @@ class cgyrodata_plot(data.cgyrodata):
       return 'ang  Re(f)  Im(f)',x,y1,y2
          
    def plot_flux(self,w=0.5,wmax=0.0,field=0,moment='e',ymin='auto',ymax='auto',
-                 fc=0,fig=None,loc=2,nscale=0,cflux='auto'):
+                 fc=0,fig=None,loc=2,nscale=0,cflux='auto',norm='elec'):
          
       if fig is None:
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       usec = self.getflux(cflux)
 
+      self.getnorm(norm) ; t = self.tnorm
+
       ns = self.n_species
-      t  = self.t
 
       field_tag = '\mathrm{Total}'
 
@@ -742,7 +743,7 @@ class cgyrodata_plot(data.cgyrodata):
          ave,var = variance(y_norm,t,w,wmax)
          y_ave   = ave*np.ones(len(t))
          u = specmap(self.mass[ispec],self.z[ispec])
-         label = r'$'+mtag+mnorm+'_'+u+'/'+mtag+'_\mathrm{GB}: '+str(round(ave,3))+'$'
+         label = r'$'+mtag+mnorm+'_'+u+'/'+mtag+self.gbnorm+': '+str(round(ave,3))+'$'
          # Average
          ax.plot(t[imin:imax+1],y_ave[imin:imax+1],'--',color=color[ispec])
          # Time trace
