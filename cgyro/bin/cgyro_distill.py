@@ -7,13 +7,13 @@ from gacodefuncs import *
 from cgyro.data import cgyrodata
 
 if len(sys.argv) < 2:
-    print "Usage: cgyro_distill.py <window>"
+    print("Usage: cgyro_distill.py <window>")
     sys.exit()
 
 if not os.path.isfile('bin.cgyro.kxky_phi'):
-    print "Error: no data found"
+    print("Error: no data found")
     sys.exit()
-    
+
 w = float(sys.argv[1])
 
 # read basic simulation data
