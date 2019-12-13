@@ -434,13 +434,13 @@ class cgyrodata:
          self.tstr   = TIME
 
          self.fnorm  = self.freq 
-         self.fstr   = [r'$(a/c_s)\, \omega$',r'$(a/c_s)\, \gamma$']
+         self.fstr   = [r'$(a/c_{sD})\, \omega$',r'$(a/c_{sD})\, \gamma$']
 
          self.rhonorm = self.rho
-         self.rhostr = r'$\rho_s$'
+         self.rhostr = r'$\rho_{sD}$'
 
          self.kynorm = self.ky
-         self.kstr   = r'$k_y \rho_s$'
+         self.kstr   = r'$k_y \rho_{sD}$'
 
          self.qc     = 1.0
          self.gbnorm = '_\mathrm{GBD}'

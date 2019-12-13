@@ -702,7 +702,7 @@ class cgyrodata_plot(data.cgyrodata):
          mtag = 'Q'
          ttag = 'Q'
          ftag = 'flux_e'
-         y = ys[:,1,:]
+         y = ys[:,1,:]/self.qc
       elif moment == 'v':
          ntag = 'Momentum~flux'
          mtag = '\Pi'
@@ -730,7 +730,7 @@ class cgyrodata_plot(data.cgyrodata):
       ax = fig.add_subplot(111)
       ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
-      ax.set_xlabel(TIME)
+      ax.set_xlabel(self.tstr)
 
       color = ['k','m','b','c','g','r']
 
@@ -747,7 +747,7 @@ class cgyrodata_plot(data.cgyrodata):
          # Average
          ax.plot(t[imin:imax+1],y_ave[imin:imax+1],'--',color=color[ispec])
          # Time trace
-         ax.plot(self.t,y_norm,label=label,color=color[ispec])
+         ax.plot(t,y_norm,label=label,color=color[ispec])
 
          print('Var('+mtag+'_'+u+'): '+str(round(var,3)))
 
