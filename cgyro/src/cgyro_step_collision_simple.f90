@@ -26,7 +26,7 @@ subroutine cgyro_step_collision_simple
   !----------------------------------------------------------------
   ! Perform data tranpose from _c to _v data layouts:
   call timer_lib_in('coll_mem')
-  call parallel_lib_rtrans_pack(h_x)
+  call parallel_lib_rtrans_pack(cap_h_c)
   call timer_lib_out('coll_mem')
   call timer_lib_in('coll_comm')
   call parallel_lib_r_do(cap_h_v)
@@ -100,18 +100,6 @@ subroutine cgyro_step_collision_simple
 
   ! Compute H given h and [phi(h), apar(h)]
 
-!$omp parallel do private(iv_loc,ic,iv)
-  do iv=nv1,nv2
-     iv_loc = iv-nv1+1
-     do ic=1,nc
-        h_x(ic,iv_loc) = cap_h_ct(iv_loc,ic)
-     enddo
-  enddo
-
-  call timer_lib_out('coll')
-
-  call cgyro_field_c
-
 !$omp parallel do private(iv_loc,is,ic,iv)
   do iv=nv1,nv2
      iv_loc = iv-nv1+1
@@ -119,10 +107,17 @@ subroutine cgyro_step_collision_simple
         psi(ic,iv_loc) = sum(jvec_c(:,ic,iv_loc)*field(:,ic))
      enddo
      ! this should be coll_mem timer , but not easy with OMP
+     do ic=1,nc
+        cap_h_c(ic,iv_loc) = cap_h_ct(iv_loc,ic)
+     enddo
      is = is_v(iv)
      do ic=1,nc
-        cap_h_c(ic,iv_loc) = h_x(ic,iv_loc)+psi(ic,iv_loc)*(z(is)/temp(is))
+        h_x(ic,iv_loc) = cap_h_c(ic,iv_loc)-psi(ic,iv_loc)*(z(is)/temp(is))
      enddo
   enddo
+
+  call timer_lib_out('coll')
+
+  call cgyro_field_c
 
 end subroutine cgyro_step_collision_simple

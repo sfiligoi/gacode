@@ -26,7 +26,7 @@ subroutine cgyro_step_collision_simple
   !----------------------------------------------------------------
   ! Perform data tranpose from _c to _v data layouts:
   call timer_lib_in('coll_mem')
-  call parallel_lib_rtrans_pack_gpu(h_x)
+  call parallel_lib_rtrans_pack_gpu(cap_h_c)
   call timer_lib_out('coll_mem')
   call timer_lib_in('coll_comm')
   call parallel_lib_r_do_gpu(cap_h_v)
@@ -124,30 +124,22 @@ subroutine cgyro_step_collision_simple
 
   ! Compute H given h and [phi(h), apar(h)]
 
-!$acc parallel loop collapse(2) gang vector private(iv_loc) &
-!$acc&         present(cap_h_ct,h_x) &
-!$acc&         default(none)
-  do iv=nv1,nv2
-     do ic=1,nc
-        iv_loc = iv-nv1+1
-        h_x(ic,iv_loc) = cap_h_ct(iv_loc,ic)
-     enddo
-  enddo
-
-  call timer_lib_out('coll')
-
-  call cgyro_field_c_gpu
-
 !$acc parallel loop collapse(2) gang vector private(iv_loc,is) &
-!$acc&         present(is_v,psi,cap_h_c,cap_h_ct,jvec_c,field,z,temp,h_x) &
+!$acc&         present(is_v,psi,cap_h_c,cap_h_ct,cap_h_c,jvec_c,field,z,temp,h_x) &
 !$acc&         default(none)
   do iv=nv1,nv2
      do ic=1,nc
         iv_loc = iv-nv1+1
         is = is_v(iv)
         psi(ic,iv_loc) = sum(jvec_c(:,ic,iv_loc)*field(:,ic))
-        cap_h_c(ic,iv_loc) = h_x(ic,iv_loc)+psi(ic,iv_loc)*(z(is)/temp(is))
+        cap_h_c(ic,iv_loc) = cap_h_ct(iv_loc,ic)
+        h_x(ic,iv_loc) = cap_h_c(ic,iv_loc)-psi(ic,iv_loc)*(z(is)/temp(is))
      enddo
   enddo
+
+
+  call timer_lib_out('coll')
+
+  call cgyro_field_c_gpu
 
 end subroutine cgyro_step_collision_simple
