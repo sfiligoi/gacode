@@ -117,10 +117,13 @@ elif plot_type == 'phi':
    w     = float(sys.argv[2])
    wmax  = float(sys.argv[3])
    field = int(sys.argv[4])
-   ftype = sys.argv[5]
    theta = 0.0
+   ymin  = sys.argv[6]
+   ymax  = sys.argv[7]
+   rms   = int(sys.argv[8])
+   ftype = sys.argv[9]
 
-   head,x,y1,y2 = data_in.plot_phi(w=w,wmax=wmax,field=field,theta=theta)
+   head,x,y1,y2 = data_in.plot_phi(w=w,wmax=wmax,field=field,theta=theta,ymin=ymin,ymax=ymax,rms=rms)
 
    outfile = 'out.cgyro.phi.'+ftype
 

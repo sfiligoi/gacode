@@ -251,8 +251,10 @@ class cgyrodata_plot(data.cgyrodata):
 
       print('INFO: (data_plot.py) l_corr = {:.3f}'.format(l_corr[0]))
 
-   def plot_phi(self,w=0.5,wmax=0.0,field=0,theta=0.0,fig=None):
+   def plot_phi(self,w=0.5,wmax=0.0,field=0,theta=0.0,ymin='auto',ymax='auto',rms=0,fig=None):
 
+      print(rms)
+      
       if fig is None:
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
@@ -266,37 +268,56 @@ class cgyrodata_plot(data.cgyrodata):
       ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(TIME)
-      ax.set_ylabel(r'$\left|'+ft+r'\right|/\rho_s$')
       ax.set_yscale('log')
-      ax.set_title(r'$\mathrm{Fluctuation~intensity} \quad k_\theta = nq/r$')
+      ax.set_title(r'$\mathrm{Fluctuation~intensity}$')
       #======================================
 
       # Get index for average window
       imin,imax=iwindow(self.t,w,wmax)
 
-      y0 = np.sum(abs(f[:,0,:]),axis=0)/self.rho      
-
       # n=0 intensity
-      ax.plot(self.t,y0,label=r'$n=0$',linewidth=2)
+      y0 = np.sum(abs(f[:,0,:]),axis=0)/self.rho      
+      s0 = np.sum(abs(f[:,0,:])**2,axis=0)/self.rho**2      
 
       # finite-n intensity
       yn = np.sum(abs(f[:,1,:]),axis=0)/self.rho 
+      sn = np.sum(abs(f[:,1,:])**2,axis=0)/self.rho 
       for n in range(2,self.n_n):
          yn = yn+np.sum(abs(f[:,n,:]),axis=0)/self.rho 
-
-      ax.plot(self.t,yn,label=r'$n>0$')
-        
+         sn = yn+np.sum(abs(f[:,n,:])**2,axis=0)/self.rho**2 
+         
       # Averages
       y0_ave = average(y0,self.t,w,wmax)
       yn_ave = average(yn,self.t,w,wmax)
-      print('|phi_0|/rho_*D = {:.4f}'.format(y0_ave))
-      print('|phi_n|/rho_*D = {:.4f}'.format(yn_ave))
+      print('INFO: (plot_phi) <|phi_0|>/rho_*D = {:.4f}'.format(y0_ave))
+      print('INFO: (plot_phi) <|phi_n|>/rho_*D = {:.4f}'.format(yn_ave))
+      
+      s0_ave = average(s0,self.t,w,wmax)
+      sn_ave = average(sn,self.t,w,wmax)
+      print('INFO: (plot_phi) sqrt[ <|phi_0|^2> ]/rho_*D = {:.4f}'.format(np.sqrt(s0_ave)))
+      print('INFO: (plot_phi) sqrt[ <|phi_n|^2> ]/rho_*D = {:.4f}'.format(np.sqrt(sn_ave)))
 
       s = np.ones(imax-imin+1)
-      ax.plot(self.t[imin:imax+1],y0_ave*s,'--k')
-      ax.plot(self.t[imin:imax+1],yn_ave*s,'--k')
+      if rms == 1:
+         lab0=r'$\sqrt{\left\langle\left|'+ft+r'_0\right|^2\right\rangle}/\rho_{*D}$'
+         labn=r'$\sqrt{\left\langle\left|'+ft+r'_n\right|^2\right\rangle}/\rho_{*D}$'
+         ax.plot(self.t,np.sqrt(s0),label=lab0,linewidth=2)
+         ax.plot(self.t,np.sqrt(sn),label=labn)
+         ax.plot(self.t[imin:imax+1],np.sqrt(s0_ave)*s,'--k')
+         ax.plot(self.t[imin:imax+1],np.sqrt(sn_ave)*s,'--k')
+      else:
+         lab0=r'$\left\langle \left|'+ft+r'_0\right|\right\rangle/\rho_{*D}$'
+         labn=r'$\left\langle \left|'+ft+r'_n\right|\right\rangle/\rho_{*D}$'
+         ax.plot(self.t,y0,label=lab0,linewidth=2)
+         ax.plot(self.t,yn,label=labn)
+         ax.plot(self.t[imin:imax+1],y0_ave*s,'--k')
+         ax.plot(self.t[imin:imax+1],yn_ave*s,'--k')
 
       ax.set_xlim([0,max(self.t)])
+      if ymax != 'auto':
+         ax.set_ylim(top=float(ymax))
+      if ymin != 'auto':
+         ax.set_ylim(bottom=float(ymin))
       ax.legend(loc=4)
     
       head = '(cs/a) t     Phi_0/rho_*    Phi_n/rho_*'

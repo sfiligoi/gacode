@@ -141,8 +141,11 @@ then
   echo "         -diss"
   echo "         Toggle plotting of dissipation curve"  
   echo
-  echo "         -norm"
+  echo "         -norm <int>"
   echo "         Species index for normalization (starts at 0)"  
+  echo
+  echo "         -rms"
+  echo "         Toggle RMS normalization (rather than abs) in -plot phi"  
   echo
   echo "OPTIONS FOR -plot fluct, -vis"
   echo
@@ -280,6 +283,7 @@ PX=800
 PY=800
 DISS=0
 NORM='elec'
+RMS=0
 
 CFLUX=auto
 DN=1
@@ -314,6 +318,7 @@ while [ $# -gt 0 ] ; do
 
   -diss) DISS=1 ;;
   -notex) TEX=0 ;;
+  -rms) RMS=1 ;;
   -norm) shift ; NORM=$1 ;;
   
   -moment) shift ; MOMENT=$1 ;;
@@ -440,7 +445,7 @@ case "$PLOT_TYPE" in
 	python $PLT $PLOT_TYPE $W $WMAX $FIELD $MOMENT $YMIN $YMAX $FC $EXT $DISS $CFLUX ;;
 
    phi)
-	python $PLT $PLOT_TYPE $W $WMAX $FIELD $EXT ;;
+	python $PLT $PLOT_TYPE $W $WMAX $FIELD $THETA $YMIN $YMAX $RMS $EXT ;;
 
    low | corrug)
        python $PLT $PLOT_TYPE $W $WMAX $SPECIES $MOMENT $EXT $YMIN $YMAX ;;
