@@ -280,11 +280,8 @@ class cgyrodata_plot(data.cgyrodata):
       s0 = np.sum(abs(f[:,0,:])**2,axis=0)/self.rho**2      
 
       # finite-n intensity
-      yn = np.sum(abs(f[:,1,:]),axis=0)/self.rho 
-      sn = np.sum(abs(f[:,1,:])**2,axis=0)/self.rho 
-      for n in range(2,self.n_n):
-         yn = yn+np.sum(abs(f[:,n,:]),axis=0)/self.rho 
-         sn = yn+np.sum(abs(f[:,n,:])**2,axis=0)/self.rho**2 
+      yn = np.sum(abs(f[:,1:,:]),axis=(0,1))/self.rho 
+      sn = np.sum(abs(f[:,1:,:])**2,axis=(0,1))/self.rho**2
          
       # Averages
       y0_ave = average(y0,self.t,w,wmax)
