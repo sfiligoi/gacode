@@ -285,7 +285,9 @@ subroutine prgen_map_plasmastate
   expro_qline(1)  = expro_qline(2)
   expro_qmom(1)   = expro_qmom(2)
   expro_qpar(1)   = expro_qpar(2)
-
+  qpow_e(1)       = qpow_e(2)
+  qpow_i(1)       = qpow_i(2)
+  
   qspow_e = expro_qohme+expro_qbeame+expro_qrfe+expro_qfuse-expro_qei &
        -expro_qsync-expro_qbrem-expro_qline
   qspow_i =             expro_qbeami+expro_qrfi+expro_qfusi+expro_qei
@@ -299,6 +301,7 @@ subroutine prgen_map_plasmastate
      ! This assumes that total powers are correct.
      expro_qione = qpow_e-qspow_e
      expro_qioni = qpow_i-qspow_i
+ 
      print '(a)','INFO: (prgen_map_plasmastate) Setting aux. power as total-fus-rad'
      print '(a)','INFO: (prgen_map_plasmastate) Missing aux. power stored in qione,qioni'
   endif
