@@ -36,7 +36,6 @@ program prgen
   read(1,'(a)') file_g
   read(1,'(a)') file_cer
   read(1,*) efit_method
-  read(1,*) neut_flag
   read(1,*) verbose_flag
   read(1,*) ipccw
   read(1,*) btccw

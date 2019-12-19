@@ -294,7 +294,9 @@ subroutine prgen_map_plasmastate
   if (true_aux_flag == 1) then
      print '(a)','INFO: (prgen_map_plasmastate) Setting aux. power as ohmic+NB+RF.'
   else
-     ! WARNING: put missing auxiliary power into cx, giving correct total powers
+     ! DEFAULT:
+     ! Put missing auxiliary power into cx, giving correct total powers
+     ! This assumes that total powers are correct.
      expro_qione = qpow_e-qspow_e
      expro_qioni = qpow_i-qspow_i
      print '(a)','INFO: (prgen_map_plasmastate) Setting aux. power as total-fus-rad'
