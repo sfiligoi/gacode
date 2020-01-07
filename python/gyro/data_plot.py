@@ -35,7 +35,7 @@ class gyrodata_plot(data.GYROData):
 
       #======================================
       ax = fig.add_subplot(121)
-      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(TIME)
       ax.set_ylabel(r'$(a/c_s)\gamma$',color='k')
@@ -50,7 +50,7 @@ class gyrodata_plot(data.GYROData):
 
       #======================================
       ax = fig.add_subplot(122)
-      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(TIME)
       ax.set_ylabel(r'$(a/c_s)\omega$',color='k')
@@ -105,7 +105,7 @@ class gyrodata_plot(data.GYROData):
 
       #======================================
       ax = fig.add_subplot(111)
-      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(r'$\theta_*/\pi$')
       ax.set_ylabel(ytitle)
@@ -171,7 +171,7 @@ class gyrodata_plot(data.GYROData):
       #----------------------------------------------------
 
       ax = fig.add_subplot(111)
-      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(TIME)
       ax.set_ylabel(ylabel)
@@ -204,7 +204,7 @@ class gyrodata_plot(data.GYROData):
 
       #======================================
       ax = fig.add_subplot(111)
-      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(TIME)
       ax.set_ylabel(r'$\langle e \phi/T_e \rangle/\rho_\star $',color='k')
@@ -288,7 +288,7 @@ class gyrodata_plot(data.GYROData):
       # Otherwise plot
       fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
       ax = fig.add_subplot(111)
-      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(TIME)
 
@@ -391,7 +391,7 @@ class gyrodata_plot(data.GYROData):
          mnorm = '^\mathrm{norm}'
 
       ax = fig.add_subplot(111)
-      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(r'$r/a$')
 
@@ -541,7 +541,7 @@ class gyrodata_plot(data.GYROData):
 
       #======================================
       ax = fig.add_subplot(111)
-      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(TIME)
       #=====================================
@@ -644,7 +644,7 @@ class gyrodata_plot(data.GYROData):
 
       # Compare moment versus corresponding source
       ax = fig.add_subplot(111)
-      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(r'$r/a$')
       ax.set_ylabel(r'$'+mtag+'_'+u+'/\\rho_s$')
@@ -721,7 +721,7 @@ class gyrodata_plot(data.GYROData):
       
       # Compare moment versus corresponding source
       ax = fig.add_subplot(111)
-      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(r'$r/a$')
       ax.set_ylabel(r'$'+mtag+'_'+u+'$')
