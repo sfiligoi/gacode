@@ -251,10 +251,12 @@ module cgyro_globals
   ! error checking
   integer :: error_status = 0
   character(len=80) :: error_message
+  integer :: debug = 0
   !
   integer :: io_control
   integer :: signal
   integer :: restart_flag
+  logical :: printout=.true.
   character(len=2) :: mpiio_small_stripe_str
   character(len=3) :: mpiio_stripe_str
   !
