@@ -25,6 +25,7 @@ module timer_lib
   public :: timer_lib_init
   public :: timer_lib_in
   public :: timer_lib_out
+  public :: timer_lib_cleanup
 
   real, dimension(64) :: timer_cpu=0.0
   real, dimension(64) :: timer_cpu_in
@@ -91,4 +92,15 @@ contains
 
   end function timer_lib_time
 
+  subroutine timer_lib_cleanup
+
+    implicit none
+
+    timer_cpu_maxindx = 0
+    timer_cpu_tag = ''
+    timer_cpu=0.0
+    timer_cpu_in=0.0
+
+  end subroutine timer_lib_cleanup
+  
 end module timer_lib
