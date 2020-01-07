@@ -259,7 +259,6 @@ contains
 
     j1 = 1+iproc*nj_loc
     j2 = (1+iproc)*nj_loc
-
 !$omp parallel do if (size(fsendr) >= default_size) default(none) &
 !$omp& shared(nproc,j1,j2,ni_loc) &
 !$omp& private(j,j_loc,i) &
@@ -557,8 +556,20 @@ contains
     integer, intent(inout) :: nj_loc_in
 
     nj_loc_in = nj_loc
-    
+
   end subroutine parallel_lib_nj_loc
+
+  subroutine parallel_lib_cleanup
+
+    use mpi
+    
+    implicit none
+
+    if (allocated(fsendf)) deallocate(fsendf)
+    if (allocated(fsendr)) deallocate(fsendr)
+    if (allocated(fsendr_real)) deallocate(fsendr_real)
+  
+  end subroutine parallel_lib_cleanup
 
 end module parallel_lib
 
