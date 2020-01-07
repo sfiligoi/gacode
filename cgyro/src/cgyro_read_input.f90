@@ -86,6 +86,7 @@ subroutine cgyro_read_input
   call cgyro_readbc_int(mpiio_small_stripe_factor)
   call cgyro_readbc_int(mpiio_stripe_factor)
   call cgyro_readbc_int(gpu_bigmem_flag)
+  call cgyro_readbc_real(px0)
 
   call cgyro_readbc_real(rmin)
   call cgyro_readbc_real(rmaj)

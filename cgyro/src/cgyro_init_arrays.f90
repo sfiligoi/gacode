@@ -324,7 +324,7 @@ subroutine cgyro_init_arrays
         ! (d/dr) components from drifts
         
         omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) & 
-             - (n_radial/length)*(i_c*u) &
+             - (n_radial/length)*(i_c*(u+2*pi*px0/n_radial)) &
              * (omega_rdrift(it,is)*energy(ie)*(1.0+xi(ix)**2) &
              + omega_cdrift_r(it,is)*vel(ie)*xi(ix) &
              + omega_rot_drift_r(it,is) &
