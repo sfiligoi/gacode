@@ -8,6 +8,7 @@ subroutine cgyro_check
   integer :: is
   logical :: lfe
   character(len=1), dimension(7) :: ctag
+  character(len=7) :: floatstr
 
   !-----------------------------------------------------------------------
   ! Grid parameter checks
@@ -46,6 +47,15 @@ subroutine cgyro_check
         return
      endif
   endif
+
+  if (abs(px0) > 0.0) then
+     if (box_size > 1) then
+        call cgyro_error('Nonzero PXO not available for box_size > 1')
+     else
+        write(floatstr,'(f5.3)') 2*px0
+        call cgyro_info('Finite-theta0 mode: theta0 = '//trim(floatstr)//' pi')
+     endif
+  endif
   !------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------
@@ -59,8 +69,8 @@ subroutine cgyro_check
   case default
      call cgyro_error('Invalid value for ae_flag')
      return
-  end select 
-  
+  end select
+
   !-----------------------------------------------------------------------
   ! Profile checks
   !
@@ -90,7 +100,7 @@ subroutine cgyro_check
         return
      end select
   endif
-  
+
   !------------------------------------------------------------------------
   ! Equilibrium model
   !
@@ -266,7 +276,7 @@ subroutine cgyro_check
         call cgyro_error('Invalid value for collision_kperp')
         return
      end select
-     
+
   endif
 
   if (collision_model /= 5 .and. collision_model /= 1) then

@@ -53,8 +53,7 @@ program locpargen
 
   endif
 
-  call expro_locsim_profiles('./',&
-       -1,&
+  call expro_locsim_profiles(&
        hasgeo,&
        0,&
        qnflag,&
