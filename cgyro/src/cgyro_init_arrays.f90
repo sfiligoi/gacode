@@ -319,12 +319,13 @@ subroutine cgyro_init_arrays
              + omega_cdrift(it,is)*vel(ie)*xi(ix) + omega_rot_drift(it,is) &
              + omega_rot_edrift(it))
         
-        u = (2.0*pi/n_radial)*px(ir)
+        ! Note that we shift the dissipation with px0 (ballooning angle linear mode)
+        u = (2.0*pi/n_radial)*(px(ir)+px0)
 
         ! (d/dr) components from drifts
         
         omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) & 
-             - (n_radial/length)*(i_c*(u+2*pi*px0/n_radial)) &
+             - (n_radial/length)*i_c*u &
              * (omega_rdrift(it,is)*energy(ie)*(1.0+xi(ix)**2) &
              + omega_cdrift_r(it,is)*vel(ie)*xi(ix) &
              + omega_rot_drift_r(it,is) &
