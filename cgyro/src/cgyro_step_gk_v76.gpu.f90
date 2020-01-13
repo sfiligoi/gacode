@@ -175,7 +175,7 @@ subroutine cgyro_step_gk_v76
      endif
      scale_old = scale_x
 
-     if (i_proc == 0 ) write(*,*) " deltah2 gpu ", deltah2
+     !! if (i_proc == 0 ) write(*,*) " deltah2 gpu ", deltah2
      
      if (( conv .eq. 0 ) .and. (iiter .ge. 1)) then
         call timer_lib_in('str_mem')
