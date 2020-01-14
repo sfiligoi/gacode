@@ -129,11 +129,7 @@ subroutine cgyro_kernel
         call cgyro_step_gk_ck
      case(2)
         call cgyro_step_gk_bs5
-!!     case(3)
-!!        call cgyro_step_gk_ss
-!!     case(4)
-!!        call cgyro_step_gk_ts
-     case(5)
+     case(3)
         call cgyro_step_gk_v76 
      case default
         ! Normal timestep
