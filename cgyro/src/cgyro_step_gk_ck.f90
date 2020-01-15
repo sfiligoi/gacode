@@ -1,12 +1,14 @@
+! Cash-Karp 6:5(4) adaptive integrator  |  multithreaded version
+
 subroutine cgyro_step_gk_ck
 
-  use timer_lib
   use mpi
+  use timer_lib
   use cgyro_globals
-
+  use cgyro_io
+  
   implicit none
 
-  ! RK4(5) time-advance for the distribution ; cash-karp method of embedded rk
   !
   !           z e             vpar            z e  vperp^2
   !  h = H - ----- G0 ( phi - ----- Apar ) + ----- ---------- Gperp Bpar
@@ -20,25 +22,19 @@ subroutine cgyro_step_gk_ck
   ! Apar -> field(2)
   ! Bpar -> field(3)
 
-  !! cash_karp rk45 ... with changes in discontinuity or oscillatory behavior
-  !! not not best for stiff
-  !!
-
-  real, parameter :: EPS = 2.D-12
+  real, parameter :: EPS = 2e-12
   
-  real deltah2, orig_delta_t
-  real delta_x_min, delta_x_max, local_max_error
-  real tol_ck, total_delta_step
-  real error_x(5), error_sum(5)
-  real tau_ck, delta_t_old, delta_t_gk_old, delta_t_last, delta_t_last_step
-  real last_total_error, rel_error, var_error
-  real deltah2_min, deltah2_max, scale_x, scale_old
+  real :: deltah2, orig_delta_t
+  real :: delta_x_min, delta_x_max, local_max_error
+  real :: tol_ck, total_delta_step
+  real :: error_x(5), error_sum(5)
+  real :: tau_ck, delta_t_old, delta_t_gk_old, delta_t_last, delta_t_last_step
+  real :: last_total_error, rel_error, var_error
+  real :: deltah2_min, deltah2_max, scale_x, scale_old
   
-  integer conv, iiter, rk_count, rkMAXITER, converged, err_x
-
-  call timer_lib_in('str')
-
-  orig_delta_t = delta_t       !! keep track of delta_t for exiting of subroutine  
+  integer :: conv, iiter, rk_count, rkMAXITER, converged, err_x
+  
+  orig_delta_t = delta_t       ! keep track of delta_t for exiting of subroutine  
   tol_ck = delta_t_tol
   delta_t_gk_old = delta_t_gk
 
@@ -63,12 +59,14 @@ subroutine cgyro_step_gk_ck
   deltah2_min = 1.d10
   deltah2_max = -1.d0
 
+  call timer_lib_in('str_mem')
 !$omp parallel do collapse(2)
   do iv_loc=1,nv_loc
      do ic_loc=1,nc
         h0_old(ic_loc,iv_loc) = h_x(ic_loc,iv_loc)
      enddo
   enddo
+  call timer_lib_out('str_mem')
         
   delta_t_gk = 0.d0
   delta_t_last = deltah2
@@ -76,7 +74,8 @@ subroutine cgyro_step_gk_ck
   conv = 1
 
   do while (total_delta_step .lt. orig_delta_t )
-
+     
+     call timer_lib_in('str')
      if ( total_delta_step + deltah2 .gt. orig_delta_t ) then
         deltah2 = orig_delta_t - total_delta_step
         delta_t_last_step = deltah2
@@ -87,11 +86,7 @@ subroutine cgyro_step_gk_ck
      endif
      scale_old = scale_x
 
-!!     if ( i_proc .eq. 0 ) then
-!!        write(*,*) " paper ck4 current iiter, deltah2 ", iiter, deltah2, total_delta_step
-!!     endif
-
-     if (conv == 1 ) then
+     if (conv == 1) then
 !$omp parallel do collapse(2)
         do iv_loc=1,nv_loc
            do ic_loc=1,nc
@@ -107,10 +102,12 @@ subroutine cgyro_step_gk_ck
            enddo
         enddo
      endif
+     call timer_lib_out('str')
      
      call cgyro_field_c
      call cgyro_rhs(1)
 
+     call timer_lib_in('str')
 !$omp parallel do collapse(2)
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
@@ -118,10 +115,12 @@ subroutine cgyro_step_gk_ck
                 + 0.2d0*deltah2*rhs(ic_loc, iv_loc, 1)
         enddo
      enddo
+     call timer_lib_out('str')
      
      call cgyro_field_c
      call cgyro_rhs(2)
 
+     call timer_lib_in('str')
 !$omp parallel do collapse(2)
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
@@ -130,10 +129,12 @@ subroutine cgyro_step_gk_ck
                 + 9.d0*rhs(ic_loc, iv_loc, 2))
         enddo
      enddo
+     call timer_lib_out('str')
 
      call cgyro_field_c
      call cgyro_rhs(3)
 
+     call timer_lib_in('str')
 !$omp parallel do collapse(2)
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
@@ -143,10 +144,12 @@ subroutine cgyro_step_gk_ck
                 + 6.d0/5.d0*rhs(ic_loc, iv_loc, 3))
         enddo
      enddo
+     call timer_lib_out('str')
      
      call cgyro_field_c
      call cgyro_rhs(4) 
 
+     call timer_lib_in('str')
 !$omp parallel do collapse(2)
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
@@ -157,11 +160,12 @@ subroutine cgyro_step_gk_ck
                 + 35.d0/27.d0*rhs(ic_loc, iv_loc, 4))
         enddo
      enddo
+     call timer_lib_out('str')
      
-
      call cgyro_field_c
      call cgyro_rhs(5)
 
+     call timer_lib_in('str')
 !$omp parallel do collapse(2)
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
@@ -173,12 +177,14 @@ subroutine cgyro_step_gk_ck
                 + 253.d0/4096.d0*rhs(ic_loc, iv_loc, 5))
         enddo
      enddo
+     call timer_lib_out('str')
      
      call cgyro_field_c
      call cgyro_rhs(6)
      
-     !! soln of order 5
+     ! Solution of order 5
 
+     call timer_lib_in('str')
 !$omp parallel do collapse(2)
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
@@ -189,8 +195,10 @@ subroutine cgyro_step_gk_ck
                 + 512.d0/1771.d0*rhs(ic_loc, iv_loc, 6))
         enddo
      enddo
+     call timer_lib_out('str')
 
 
+     call timer_lib_in('str')
 !$omp parallel do collapse(2)
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
@@ -203,13 +211,16 @@ subroutine cgyro_step_gk_ck
         enddo
      enddo
 
-     error_sum = 0.
-     error_x(1) = sum(abs(rhs(:, :, 1)))
+     error_sum = 0.0
+     error_x(1) = sum(abs(rhs(:,:,1)))
      error_x(2) = sum(abs(h_x))
+     call timer_lib_out('str')
 
+     call timer_lib_in('str_comm')
      call MPI_ALLREDUCE(error_x, error_sum, 2, &
           MPI_DOUBLE_PRECISION,&
           MPI_SUM, MPI_COMM_WORLD, err_x)
+     call timer_lib_out('str_comm')
 
      error_x = error_sum
      
@@ -217,17 +228,10 @@ subroutine cgyro_step_gk_ck
      
      rel_error = error_x(1)/(error_x(2) +1.d-12)
 
-     !!     var_error = sqrt(total_local_error + rel_error*rel_error)/max(sqrt(abs(iiter-1.)), 1.)
-     
      var_error = sqrt(total_local_error + rel_error*rel_error)
-
-     !! error_mode = 0 ; local error
-     !! fro local error if ( error_x(1) .lt. tau_ck ) then
-     !! for variance tight control if ( var_error .lt. tol_ck ) then
      
      if ( var_error .lt. tol_ck ) then
         call cgyro_field_c
-        call cgyro_filter
 
         total_delta_step = total_delta_step + deltah2
         total_local_error = total_local_error + rel_error*rel_error
@@ -241,21 +245,18 @@ subroutine cgyro_step_gk_ck
         conv = 1
         converged=converged+1
 
+        call timer_lib_in('str_mem')
 !$omp parallel do collapse(2)
         do iv_loc=1,nv_loc
            do ic_loc=1,nc
               h0_old(ic_loc,iv_loc) = h0_x(ic_loc, iv_loc)
            enddo
         enddo
+        call timer_lib_out('str_mem')
 
      else
         deltah2 = .5d0*deltah2
         conv = 0
-        if ( i_proc .eq. 0 ) then
-           write(*,*) " *** backing up not converged step = ", rk_count
-           write(*,*) " new deltah2 ", deltah2
-           flush(6)
-        endif
      endif
 
      deltah2 = min(deltah2, delta_x_max)
@@ -264,30 +265,24 @@ subroutine cgyro_step_gk_ck
      iiter = iiter + 1
     
      if ( iiter .gt. rkMAXITER) then
-        write(*,*) " **gk ck4(5) step exceeded max iteration count ", rk_count
-        write(*,*) " **gk ck4(5) deltah2 ", deltah2
-        stop
+        call cgyro_error('Cash-Carp step exceeded max iteration count')
+        return
      endif
 
-  end do
-
-  call timer_lib_out('str')
+  enddo
 
   delta_t_gk = max(delta_t_last, deltah2)
 
-  if (delta_t_last_step .eq. 0.d0) delta_t_last_step = delta_t_last
+  if (delta_t_last_step == 0.0) delta_t_last_step = delta_t_last
 
-  if ( delta_t_last_step .lt. .1d0*delta_t_gk ) then
-     delta_t_gk = delta_t_last + &
-          delta_t_last_step
+  if ( delta_t_last_step < 0.1*delta_t_gk ) then
+     delta_t_gk = delta_t_last + delta_t_last_step
   else
-     if ( delta_t_last_step/iiter .lt. .1d0*delta_t_gk ) then
+     if ( delta_t_last_step/iiter < 0.1*delta_t_gk ) then
         delta_t_gk = delta_t_gk + delta_t_last_step/iiter
      endif
   endif
   delta_t_gk = min(delta_t, delta_t_gk)
   total_local_error = var_error
-
-  call timer_lib_out('str')
 
 end subroutine cgyro_step_gk_ck

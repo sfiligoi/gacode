@@ -430,7 +430,6 @@ subroutine cgyro_step_gk_v76
      
      if ( var_error .lt. tol ) then
         call cgyro_field_c_gpu
-        call cgyro_filter
         
 !$acc parallel loop collapse(2) independent present(h0_x,h0_old)
         do iv_loc=1,nv_loc

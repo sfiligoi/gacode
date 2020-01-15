@@ -30,11 +30,7 @@ module cgyro_globals
   integer :: e_method
   integer :: delta_t_method
   real    :: delta_t
-  real    :: delta_t_gk
-  real    :: delta_t_tol
-  integer :: error_mode
-  integer :: delta_gk_method
-  real    :: total_local_error
+  real    :: error_tol
   real    :: max_time
   integer :: print_step
   integer :: restart_step
@@ -85,8 +81,6 @@ module cgyro_globals
   real :: gamma_p
   real :: mach
   integer :: rotation_model
-  real :: error_tol
-  real :: adapt_tol
   integer :: mpi_rank_order
   integer :: hiprec_flag
   integer :: udsymmetry_flag
@@ -271,10 +265,15 @@ module cgyro_globals
   integer :: i_time
   integer :: n_time
   integer :: i_current
-  real :: t_current
+  real    :: t_current
+  real    :: gtime
   complex :: freq
   complex :: freq_err
-  real :: gtime
+  !
+  ! adaptive integrator parameters
+  real    :: delta_t_gk
+  real    :: delta_t_tol
+  real    :: total_local_error
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------

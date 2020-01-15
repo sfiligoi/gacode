@@ -42,11 +42,14 @@ class cgyrodata:
          return
       
       #-----------------------------------------------------------------
-      # Read time vector.
+      # Read time vector (detecting old [3] or new [4] number of cols)
       #
+      ncol = len(open(self.dir+'out.cgyro.time','r').readline().split())
+      
       data = np.fromfile(self.dir+'out.cgyro.time',dtype='float',sep=' ')
-      nt = len(data)//3
-      data = np.reshape(data,(3,nt),'F')
+      nt = len(data)//ncol
+      data = np.reshape(data,(ncol,nt),'F')
+
       self.t    = data[0,:]
       self.err1 = data[1,:]
       try:

@@ -324,18 +324,10 @@ subroutine cgyro_step_gk_bs5
 
      rel_error = error_x(1)/(error_x(2)+EPS)
      var_error = sqrt(total_local_error + rel_error*rel_error)
-
-     !! method 1 local error
-     
-     !!if ( error_x(1) .lt. tau ) then
-        
-     !! method 2 "variance" error
      
      if ( var_error .lt. tol ) then
         call cgyro_field_c
-        call cgyro_filter
         
-
 !$omp parallel do collapse(2)
         do iv_loc=1,nv_loc
            do ic_loc=1,nc
@@ -348,18 +340,9 @@ subroutine cgyro_step_gk_bs5
         
         total_delta_x_step = total_delta_x_step + deltah2
         total_local_error = total_local_error + rel_error*rel_error
-
-        !! scale_x = 0.95*max((tol/(delta_x + EPS )*1./delta_t)**(.2), &
-        !! (tol/(delta_x + EPS )*1./delta_t)**(.25))
-        
+       
         scale_x = max((tol/(delta_x + EPS )*1./delta_t)**(.2d0), &
              (tol/(delta_x + EPS )*1./delta_t)**(.25d0))
-
-
-!!        if ( i_proc == 0 ) &
-!!             write(*,*) " paper dt ", deltah2, &
-!!             " BS5(4) **** var error mode ", rel_error, &
-!!             " variance error", var_error, " scale_x ", scale_x
 
         deltah2 = deltah2*max(1., min(6.d0, scale_x))
         local_max_error = max(local_max_error, rel_error)
@@ -407,15 +390,5 @@ subroutine cgyro_step_gk_bs5
   delta_t_gk = min(delta_t, delta_t_gk)
 
   total_local_error = var_error
-
-  
-!!  if ( i_proc == 0 ) then
-!!     write(*,*) i_proc , " paper bst deltah2_min, max converged ", &
-!!          " dt last ", delta_t_last, " dt_last_step ",delta_t_last_step
-!!  endif
-  !!  
-  ! Filter special spectral components
-  
-
 
 end subroutine cgyro_step_gk_bs5

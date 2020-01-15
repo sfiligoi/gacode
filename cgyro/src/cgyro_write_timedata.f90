@@ -15,7 +15,7 @@ subroutine cgyro_write_timedata
   integer :: i_field,i_moment
   integer :: ir,it
   integer :: p_field
-  real :: vec(3)
+  real :: vec(4)
   complex :: a_norm
   complex :: ftemp(n_theta,n_radial)
   complex :: field_plot(n_radial,theta_plot)
@@ -140,8 +140,8 @@ subroutine cgyro_write_timedata
   call print_scrdata()
 
   ! Output to files
-  vec(1) = t_current ; vec(2:3) = integration_error(:)
-  call write_ascii(trim(path)//runfile_time,3,vec(1:3))
+  vec(1) = t_current ; vec(2:3) = integration_error(:) ; vec(4) = delta_t_gk
+  call write_ascii(trim(path)//runfile_time,4,vec(1:4))
 
   call MPI_BCAST(signal,1,MPI_INTEGER,0,CGYRO_COMM_WORLD,i_err)
 

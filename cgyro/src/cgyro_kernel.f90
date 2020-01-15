@@ -103,7 +103,7 @@ subroutine cgyro_kernel
 
   ! setting adaptive time-stepping parameters
   
-  delta_t_tol = min(adapt_tol, error_tol)
+  delta_t_tol = error_tol
   delta_t_gk = delta_t
   
   do i_time=1,n_time
@@ -122,8 +122,6 @@ subroutine cgyro_kernel
 
      ! Collisionless step: returns new h_x, cap_h_x, fields
      
-     !! call cgyro_step_gk
-     
      select case(delta_t_method)
      case(1)
         call cgyro_step_gk_ck
@@ -137,6 +135,7 @@ subroutine cgyro_kernel
      end select
      
      call timer_lib_in('str_mem')
+     call cgyro_filter
 !$acc update host(rhs(:,:,1))
      call timer_lib_out('str_mem')
 
@@ -151,17 +150,11 @@ subroutine cgyro_kernel
 !$acc update host(field,psi,cap_h_c,chi,h_x)
      call timer_lib_out('coll_mem')
 
-     ! Hammett method for ExB shear
      if (shear_method == 1) then
         ! Discrete shift (Hammett) 
-        call timer_lib_in('shear')
         call cgyro_shear_hammett
-        call timer_lib_out('shear')
      endif
-
-     call timer_lib_in('shear')
      call cgyro_source
-     call timer_lib_out('shear')
     !------------------------------------------------------------
 
      !------------------------------------------------------------

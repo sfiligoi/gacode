@@ -408,7 +408,6 @@ subroutine cgyro_step_gk_v76
 
      if ( var_error .lt. tol ) then
         call cgyro_field_c        
-        call cgyro_filter
       
         converged = converged + 1
         conv = 1

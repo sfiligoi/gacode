@@ -59,6 +59,24 @@ subroutine cgyro_check
   !------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------
+  ! Time integration
+  !
+  select case (delta_t_method)
+  case(0)
+     call cgyro_info('Time integrator: RK4 4:4(3) [non-adaptive]')
+  case(1)
+     call cgyro_info('Time integrator: Cash-Karp 6:5(4) [adaptive]')
+  case(2)
+     call cgyro_info('Time integrator: Bogacki-Shampine 7:5(4) [adaptive]')
+  case(3)
+     call cgyro_info('Time integrator: Verner 10:7(6) [adaptive]')
+  case default
+     call cgyro_error('Invalid value for ae_flag')
+     return
+  end select
+  !-----------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------
   ! Electrons
   !
   select case (ae_flag)
@@ -70,6 +88,7 @@ subroutine cgyro_check
      call cgyro_error('Invalid value for ae_flag')
      return
   end select
+  !-----------------------------------------------------------------------
 
   !-----------------------------------------------------------------------
   ! Profile checks

@@ -343,7 +343,6 @@ subroutine cgyro_step_gk_bs5
      
      if ( var_error .lt. tol ) then
         call cgyro_field_c_gpu
-        call cgyro_filter
         
 !$acc parallel loop collapse(2) independent present(h0_x,h0_old)
         do iv_loc=1,nv_loc
@@ -359,17 +358,8 @@ subroutine cgyro_step_gk_bs5
         total_delta_x_step = total_delta_x_step + deltah2
         total_local_error = total_local_error + rel_error*rel_error
 
-        !! scale_x = 0.95*max((tol/(delta_x + EPS )*1./delta_t)**(.2), &
-        !! (tol/(delta_x + EPS )*1./delta_t)**(.25))
-        
         scale_x = max((tol/(delta_x + EPS )*1./delta_t)**(.2d0), &
              (tol/(delta_x + EPS )*1./delta_t)**(.25d0))
-
-
-!!        if ( i_proc == 0 ) &
-!!             write(*,*) " paper dt ", deltah2, &
-!!             " BS5(4) **** var error mode ", rel_error, &
-!!             " variance error", var_error, " scale_x ", scale_x
 
         deltah2 = deltah2*max(1., min(6.d0, scale_x))
         local_max_error = max(local_max_error, rel_error)
