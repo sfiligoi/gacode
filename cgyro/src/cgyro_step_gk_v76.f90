@@ -25,7 +25,7 @@ subroutine cgyro_step_gk_v76
   real :: orig_delta_x_t, total_delta_x_step, delta_x_min, delta_x_max
   real :: error_sum(2), error_x(2)
   
-  real :: delta_x, tau, deltah2, local_max_error
+  real :: delta_x, deltah2, local_max_error
   real :: rel_error, delta_t_last
   real :: delta_t_last_step
   real :: deltah2_max, deltah2_min
@@ -171,8 +171,6 @@ subroutine cgyro_step_gk_v76
         deltah2_max = max(deltah2, deltah2_max)
      endif
      scale_old = scale_x
-
-     !! if ( i_proc .eq. 0 ) write(*,*) " paper v76_effi deltah2 ", iiter, deltah2
      
      call timer_lib_in('str_mem')             
      if (( conv .eq. 0 ) .and. (iiter .ge. 1)) then
@@ -199,10 +197,6 @@ subroutine cgyro_step_gk_v76
      endif
 
      call cgyro_field_c
-
-
-     ! Stage 1
-     !
      call cgyro_rhs(1)
 
      call timer_lib_in('str')
@@ -395,16 +389,8 @@ subroutine cgyro_step_gk_v76
      error_x = error_sum
 
      delta_x = error_x(1)
-     tau = tol*max(error_x(2), 1.d0)
-
      rel_error = error_x(1)/(error_x(2)+EPS)
      var_error = sqrt(total_local_error + rel_error*rel_error)
-
-     !! method 1 local error
-     
-     !!if ( error_x(1) .lt. tau ) then
-        
-     !! method 2 "variance" error
 
      if ( var_error .lt. tol ) then
         call cgyro_field_c        
@@ -462,10 +448,6 @@ subroutine cgyro_step_gk_v76
   if ( delta_t_last_step .lt. .1d0*delta_t_gk ) then
      delta_t_gk = delta_t_last + &
           delta_t_last_step
-!  else
-!     if ( delta_t_last_step/iiter .lt. .1d0*delta_t_gk ) then
-!        delta_t_gk = delta_t_gk + delta_t_last_step/iiter
-!     endif
   endif
 
   delta_t_gk = min(delta_t, delta_t_gk)

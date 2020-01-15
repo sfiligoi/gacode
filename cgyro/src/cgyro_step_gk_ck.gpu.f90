@@ -29,36 +29,36 @@ subroutine cgyro_step_gk_ck
   real tol_ck, total_delta_step
   real error_x(5), error_sum(5)
   real error_rhs, error_hx
-  real tau_ck, delta_t_old, delta_t_gk_old, delta_t_last, delta_t_last_step
+  real delta_t_old, delta_t_gk_old, delta_t_last, delta_t_last_step
   real last_total_error, rel_error, var_error
   real deltah2_min, deltah2_max, scale_x, scale_old
   
-  integer conv, iiter, rk_count, rkMAXITER, converged, err_x
+  integer conv, iiter, rkMAXITER, converged, err_x
 
   orig_delta_t = delta_t       ! keep track of delta_t for exiting of subroutine  
   tol_ck = delta_t_tol
   delta_t_gk_old = delta_t_gk
 
-  scale_old = 0.d0
-  scale_x = 0.d0
+  scale_old = 0.0
+  scale_x = 0.0
   deltah2 = delta_t_gk
-  delta_t_last_step = 0.d0
+  delta_t_last_step = 0.0
 
-  delta_x_min = orig_delta_t*1.D-10
+  delta_x_min = orig_delta_t*1e-10
   delta_x_max = delta_t
   delta_t_old = delta_t_gk
 
-  total_delta_step = 0.d0
-  total_local_error = 0.d0
-  last_total_error = 0.d0
-  var_error = 0.d0
+  total_delta_step = 0.0
+  total_local_error = 0.0
+  last_total_error = 0.0
+  var_error = 0.0
   conv = 0
   iiter = 0
-  rk_count = 0
   rkMAXITER = 1000
   converged = 0
-  deltah2_min = 1.d10
-  deltah2_max = -1.d0
+  
+  deltah2_min = 1e10
+  deltah2_max = -1.0
 
   call timer_lib_in('str_mem')
 !$acc parallel loop collapse(2) independent present(h0_old,h_x)
@@ -69,9 +69,9 @@ subroutine cgyro_step_gk_ck
   enddo
   call timer_lib_out('str_mem')
         
-  delta_t_gk = 0.d0
+  delta_t_gk = 0.0
   delta_t_last = deltah2
-  local_max_error=0.d0
+  local_max_error=0.0
   conv = 1
 
   do while (total_delta_step .lt. orig_delta_t )
@@ -126,8 +126,8 @@ subroutine cgyro_step_gk_ck
      do iv_loc=1,nv_loc
         do ic_loc=1,nc
            h_x(ic_loc, iv_loc) = h0_x(ic_loc,iv_loc) &
-                + 1.d0/40.d0*deltah2*(3.d0*rhs(ic_loc, iv_loc, 1) &
-                + 9.d0*rhs(ic_loc, iv_loc, 2))
+                + 1.0/40.0*deltah2*(3.0*rhs(ic_loc, iv_loc, 1) &
+                + 9.0*rhs(ic_loc, iv_loc, 2))
         enddo
      enddo
      call timer_lib_out('str')
@@ -236,13 +236,9 @@ subroutine cgyro_step_gk_ck
           MPI_SUM, MPI_COMM_WORLD, err_x)
      call timer_lib_out('str_comm')
 
-     error_x = error_sum
-     
-     tau_ck = tol_ck*max(error_x(2), 1.0d0)
-     
-     rel_error = error_x(1)/(error_x(2) +1.d-12)
-     
-     var_error = sqrt(total_local_error + rel_error*rel_error)
+     error_x = error_sum    
+     rel_error = error_x(1)/(error_x(2)+1.d-12)
+     var_error = sqrt(total_local_error+rel_error*rel_error)
      
      if ( var_error .lt. tol_ck ) then
         call cgyro_field_c_gpu

@@ -113,7 +113,7 @@ subroutine cgyro_step_gk_v76
   integer converged, conv, rk_MAX , iiter
   double precision orig_delta_x_t, total_delta_x_step, delta_x_min, delta_x_max
   double precision error_sum(2), error_x(2)
-  double precision delta_x, tau, deltah2, local_max_error
+  double precision delta_x, deltah2, local_max_error
   double precision rel_error, delta_t_last
   double precision delta_t_last_step
   double precision deltah2_max, deltah2_min
@@ -401,33 +401,15 @@ subroutine cgyro_step_gk_v76
      error_x(2) = error_hx
 
      call timer_lib_in('str_comm')
-
-!! !$acc host_data use_device(error_rhs,error_hx, error_x, error_sum)
-     
      call MPI_ALLREDUCE(error_x, error_sum, 2, MPI_DOUBLE_PRECISION, &
           MPI_SUM, MPI_COMM_WORLD, i_err)
-
-!! !$acc end host_data
-
      call timer_lib_out('str_comm')
 
      error_x = error_sum
      delta_x = error_x(1)
-     tau = tol*max(error_x(2), 1.d0)
-
      rel_error = error_x(1)/(error_x(2)+EPS)
      var_error = sqrt(total_local_error + rel_error*rel_error)
-
-!!     if ( i_proc == 0 ) &
-!!          write(*,*) " paper V76effic **** rhs_error ", &
-!!          error_x(1), " hx_error ", error_x(2), " rel_error ", rel_error
-
-
-     !! method 1 local error
-     
-     !!if ( error_x(1) .lt. tau ) then
-     !! method 2 "variance" error
-     
+    
      if ( var_error .lt. tol ) then
         call cgyro_field_c_gpu
         
@@ -446,11 +428,7 @@ subroutine cgyro_step_gk_v76
         scale_x = max((tol/(delta_x + EPS )*1.d0/delta_t)**(1.d0/6.d0), &
              (tol/(delta_x + EPS )*1.d0/delta_t)**(1.d0/7.d0))
         
-        deltah2 = max(min(scale_x, 8.d0), 1.d0)*deltah2
-
-!!        if ( i_proc == 0 ) &
-!!             write(*,*) " paper V76effic gpu **** scale_x", scale_x, deltah2
-        
+        deltah2 = max(min(scale_x, 8.d0), 1.d0)*deltah2        
         local_max_error = max(local_max_error, rel_error)
 
      else

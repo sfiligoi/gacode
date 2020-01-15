@@ -70,7 +70,7 @@ subroutine cgyro_error_estimate
 
   integration_error = integration_error/norm
 
-  if (integration_error(2) > error_tol .and. i_time > 2) then
+  if (integration_error(2) > 1e2*error_tol .and. i_time > 2) then
      call cgyro_error('Integration error exceeded limit.')
   endif
 
