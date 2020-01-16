@@ -25,6 +25,7 @@ subroutine cgyro_step_gk_bs5
   ! Butcher table
 
   real, parameter :: a21  =  1.d0/6.d0
+  
   real, parameter :: a31  = 2.d0/27.d0
   real, parameter :: a32  = 4.d0/27.d0
   
@@ -108,8 +109,6 @@ subroutine cgyro_step_gk_bs5
   itrk = 0
   conv = 0
 
-  orig_delta_t = delta_t
-
   scale_x = 0.0
   deltah2 = delta_t_gk
   delta_t_last_step = 0.0
@@ -124,7 +123,6 @@ subroutine cgyro_step_gk_bs5
   deltah2_min = 1.0
   deltah2_max = 0.0
  
-  delta_t_gk = 0.0
   delta_t_last = 0.0
 
   call timer_lib_in('str_mem')
@@ -133,11 +131,11 @@ subroutine cgyro_step_gk_bs5
 !$omp end parallel workshare
   call timer_lib_out('str_mem')
 
-  do while (delta_t_tot < orig_delta_t .and. itrk <= itrk_max)
+  do while (delta_t_tot < delta_t .and. itrk <= itrk_max)
     
      call timer_lib_in('str')
-     if (delta_t_tot + deltah2 > orig_delta_t) then
-        deltah2 = orig_delta_t-delta_t_tot
+     if (delta_t_tot + deltah2 > delta_t) then
+        deltah2 = delta_t-delta_t_tot
         delta_t_last_step = deltah2
      else
         delta_t_last = deltah2
@@ -186,7 +184,7 @@ subroutine cgyro_step_gk_bs5
 !$omp parallel do collapse(2)
      do iv_loc=1,nv_loc
         do ic=1,nc
-           h_x(ic, iv_loc) = h0_x(ic,iv_loc) &
+           h_x(ic,iv_loc) = h0_x(ic,iv_loc) &
                 + deltah2*(a31*rhs(ic,iv_loc,1) &
                 + a32*rhs(ic,iv_loc,2))
         enddo
@@ -200,8 +198,8 @@ subroutine cgyro_step_gk_bs5
 !$omp parallel do collapse(2)
      do iv_loc=1,nv_loc
         do ic=1,nc
-           h_x(ic, iv_loc) = h0_x(ic, iv_loc) &
-                + deltah2*(a41*rhs(ic, iv_loc,1) &
+           h_x(ic,iv_loc) = h0_x(ic,iv_loc) &
+                + deltah2*(a41*rhs(ic,iv_loc,1) &
                 + a42*rhs(ic,iv_loc,2) &
                 + a43*rhs(ic,iv_loc,3))
         enddo
@@ -215,7 +213,7 @@ subroutine cgyro_step_gk_bs5
 !$omp parallel do collapse(2)
      do iv_loc=1,nv_loc
         do ic=1,nc
-           h_x(ic, iv_loc) = h0_x(ic,iv_loc)  &
+           h_x(ic,iv_loc) = h0_x(ic,iv_loc)  &
                 + deltah2*(a51*rhs(ic,iv_loc,1) &
                 + a52*rhs(ic,iv_loc,2) &
                 + a53*rhs(ic,iv_loc,3) &
@@ -231,8 +229,8 @@ subroutine cgyro_step_gk_bs5
 !$omp parallel do collapse(2)
      do iv_loc=1,nv_loc
         do ic=1,nc
-           h_x(ic, iv_loc) = h0_x(ic,iv_loc) &
-                + deltah2*(a61*rhs(ic, iv_loc, 1) &
+           h_x(ic,iv_loc) = h0_x(ic,iv_loc) &
+                + deltah2*(a61*rhs(ic,iv_loc,1) &
                 + a62*rhs(ic,iv_loc,2) &
                 + a63*rhs(ic,iv_loc,3) &
                 + a64*rhs(ic,iv_loc,4) &
@@ -248,7 +246,7 @@ subroutine cgyro_step_gk_bs5
 !$omp parallel do collapse(2)
      do iv_loc=1,nv_loc
         do ic=1,nc
-           h_x(ic, iv_loc) = h0_x(ic,iv_loc) + &
+           h_x(ic,iv_loc) = h0_x(ic,iv_loc) + &
                 deltah2*(a71*rhs(ic, iv_loc,1) &
                 + a72*rhs(ic,iv_loc,2) &
                 + a73*rhs(ic,iv_loc,3) &
@@ -270,7 +268,7 @@ subroutine cgyro_step_gk_bs5
 !$omp parallel do collapse(2)
      do iv_loc=1,nv_loc
         do ic=1,nc
-           h_x(ic, iv_loc) = h0_x(ic,iv_loc) &
+           h_x(ic,iv_loc) = h0_x(ic,iv_loc) &
                 + deltah2*(b1*rhs(ic,iv_loc,1) &
                 + b3*rhs(ic,iv_loc,3) &
                 + b4*rhs(ic,iv_loc,4) &
@@ -289,7 +287,7 @@ subroutine cgyro_step_gk_bs5
 !$omp parallel do collapse(2)
      do iv_loc=1,nv_loc
         do ic=1,nc
-           rhs(ic,iv_loc,1) = deltah2*(e1*rhs(ic, iv_loc,1) &
+           rhs(ic,iv_loc,1) = deltah2*(e1*rhs(ic,iv_loc,1) &
                 + e3*rhs(ic,iv_loc,3) &
                 + e4*rhs(ic,iv_loc,4) &
                 + e5*rhs(ic,iv_loc,5) &

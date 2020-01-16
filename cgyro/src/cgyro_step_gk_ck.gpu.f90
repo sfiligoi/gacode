@@ -28,8 +28,6 @@ subroutine cgyro_step_gk_ck
   itrk = 0
   conv = 1
 
-  orig_delta_t = delta_t  
-
   scale_x = 0.0
   deltah2 = delta_t_gk
   delta_t_last_step = 0.0
@@ -44,7 +42,6 @@ subroutine cgyro_step_gk_ck
   deltah2_min = 1.0
   deltah2_max = 0.0
 
-  delta_t_gk = 0.0
   delta_t_last = deltah2
 
   call timer_lib_in('str_mem')
@@ -57,11 +54,11 @@ subroutine cgyro_step_gk_ck
   call timer_lib_out('str_mem')
         
 
-  do while (delta_t_tot < orig_delta_t)
+  do while (delta_t_tot < delta_t)
 
      call timer_lib_in('str')
-     if (delta_t_tot + deltah2 > orig_delta_t) then
-        deltah2 = orig_delta_t-delta_t_tot
+     if (delta_t_tot + deltah2 > delta_t) then
+        deltah2 = delta_t-delta_t_tot
         delta_t_last_step = deltah2
      else
         delta_t_last = deltah2

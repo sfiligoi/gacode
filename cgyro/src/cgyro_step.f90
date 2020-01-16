@@ -10,7 +10,6 @@ module cgyro_step
   integer :: itrk,conv
 
   real :: tol
-  real :: orig_delta_t
   real :: delta_t_last,delta_t_last_step
   real :: deltah2
   real :: deltah2_max,deltah2_min
