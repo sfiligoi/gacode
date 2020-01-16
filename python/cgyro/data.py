@@ -51,7 +51,7 @@ class cgyrodata:
    
       if ncol == 3:
          newlines = [] 
-         for line in file(tfile,'r').readlines():
+         for line in open(tfile,'r').readlines():
             newlines.append(line.strip()+'  0.0')
          outfile = open(tfile,'w')
          outfile.write("\n".join(newlines)) ; outfile.close()
