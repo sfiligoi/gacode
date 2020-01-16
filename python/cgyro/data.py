@@ -44,11 +44,23 @@ class cgyrodata:
       #-----------------------------------------------------------------
       # Read time vector -- autodetect number of columns (ncol)
       #
-      ncol = len(open(self.dir+'out.cgyro.time','r').readline().split())
-      
+
+      # START: 3-column output (delete this code eventually)
+      tfile = self.dir+'out.cgyro.time'
+      ncol = len(open(tfile,'r').readline().split())
+   
+      if ncol == 3:
+         newlines = [] 
+         for line in file(tfile,'r').readlines():
+            newlines.append(line.strip()+'  0.0')
+         outfile = open(tfile,'w')
+         outfile.write("\n".join(newlines)) ; outfile.close()
+         print('INFO: (data.py) Updated to 4-column format for out.cgyro.time')
+        
       data = np.fromfile(self.dir+'out.cgyro.time',dtype='float',sep=' ')
-      nt = len(data)//ncol
-      data = np.reshape(data,(ncol,nt),'F')
+      nt = len(data)//4
+      data = np.reshape(data,(4,nt),'F')
+      # END: 3-column output (delete this code eventually)
 
       self.t    = data[0,:]
       self.err1 = data[1,:]
