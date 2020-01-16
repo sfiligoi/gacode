@@ -1,14 +1,15 @@
+! Verner 10:7(6) adaptive integrator  |  GPU version
+
 subroutine cgyro_step_gk_v76
 
   use timer_lib
   use mpi
   use cgyro_globals
+  use cgyro_io
+  use cgyro_step
 
   implicit none
 
-  ! V7(6), Vernier, ?2010 paper
-  ! efficient
-  !
   !           z e             vpar            z e  vperp^2
   !  h = H - ----- G0 ( phi - ----- Apar ) + ----- ---------- Gperp Bpar
   !            T               c               T   omega_a c
@@ -20,6 +21,17 @@ subroutine cgyro_step_gk_v76
   ! phi  -> field(1)
   ! Apar -> field(2)
   ! Bpar -> field(3)
+
+
+  real :: total_delta_x_step, delta_x_min, delta_x_max
+  real :: delta_x, local_max_error
+  real :: rel_error, delta_t_last
+  real :: delta_t_last_step
+  real :: var_error, scale_x, scale_old
+  real :: error_rhs, error_hx
+  real :: local_error_rhs, local_error_hx
+
+  ! Butcher table
 
   real, parameter :: a21  = .5d-2
   
@@ -108,379 +120,341 @@ subroutine cgyro_step_gk_v76
   real, parameter :: b9h = 0.d0
   real, parameter :: b10h = 0.20295184663356282227670547938d-1
 
-  real, parameter :: EPS  = 2.2d-12
+  itrk = 0
+  conv = 0
 
-  integer converged, conv, rk_MAX , iiter
-  double precision orig_delta_x_t, total_delta_x_step, delta_x_min, delta_x_max
-  double precision error_sum(2), error_x(2)
-  double precision delta_x, deltah2, local_max_error
-  double precision rel_error, delta_t_last
-  double precision delta_t_last_step
-  double precision deltah2_max, deltah2_min
-  double precision var_error, scale_x, tol, scale_old
-  double precision gt_error(2)
-  double precision error_rhs, error_hx
-  double precision local_error_rhs, local_error_hx
+  local_max_error = 0.0
+  delta_t_last = 0.0
+  delta_t_last_step = 0.0
+  orig_delta_t = delta_t
 
-  !! butcher table
-
-
-!acc enter data copyin(error_rhs, error_hx)
-
-  call timer_lib_in('str')
-
-  local_max_error = 0.d0
-  delta_t_last = 0.d0
-  delta_t_last_step = 0.d0
-  orig_delta_x_t = delta_t
-
-  iiter = 0
-  total_delta_x_step = 0.d0
-  total_local_error = 0.d0
-  var_error = 0.d0
+  total_delta_x_step = 0.0
+  total_local_error = 0.0
+  var_error = 0.0
 
   tol = delta_t_tol
   deltah2 = delta_t_gk
 
-  delta_x_min = 1.d-10*orig_delta_x_t
-  delta_x_max = orig_delta_x_t
+  delta_x_min = 1.d-10*orig_delta_t
+  delta_x_max = orig_delta_t
 
-  converged = 0
-  conv = 0
-  total_local_error = 0.
+  total_local_error = 0.0
   
-  rk_MAX = 1000
-
+  call timer_lib_in('str_mem')
 !$acc parallel loop collapse(2) independent present(h0_old,h_x)
   do iv_loc=1,nv_loc
-     do ic_loc=1,nc
-        h0_old(ic_loc,iv_loc) = h_x(ic_loc,iv_loc)
+     do ic=1,nc
+        h0_old(ic,iv_loc) = h_x(ic,iv_loc)
      enddo
   enddo
+  call timer_lib_out('str_mem')
 
-  conv = 0
   delta_t_gk = 0.d0
   deltah2_min = 1.d10
   deltah2_max = 0.d0
 
-  do while (total_delta_x_step .lt. orig_delta_x_t .and. iiter .le. rk_MAX )
+  do while (total_delta_x_step < orig_delta_t .and. itrk <= itrk_max)
     
-     if ( total_delta_x_step + deltah2 .gt. orig_delta_x_t ) then
-        deltah2 = orig_delta_x_t - total_delta_x_step
+     call timer_lib_in('str')
+     if (total_delta_x_step + deltah2 > orig_delta_t) then
+        deltah2 = orig_delta_t-total_delta_x_step
         delta_t_last_step = deltah2
      else
         delta_t_last = deltah2
-        deltah2_min = min(deltah2, deltah2_min)
-        deltah2_max = max(deltah2, deltah2_max)
+        deltah2_min = min(deltah2,deltah2_min)
+        deltah2_max = max(deltah2,deltah2_max)
      endif
      scale_old = scale_x
-
-     !! if (i_proc == 0 ) write(*,*) " deltah2 gpu ", deltah2
      
-     if (( conv .eq. 0 ) .and. (iiter .ge. 1)) then
-        call timer_lib_in('str_mem')
-        
+     if ((conv == 0) .and. (itrk >= 1)) then
+
+        ! not converged so backing up
+   
 !$acc parallel loop collapse(2) independent present(h0_x,h0_old,h_x)
         do iv_loc=1,nv_loc
-           do ic_loc=1,nc
-              h0_x(ic_loc,iv_loc) = h0_old(ic_loc,iv_loc)
-              h_x(ic_loc,iv_loc) = h0_old(ic_loc,iv_loc)
+           do ic=1,nc
+              h0_x(ic,iv_loc) = h0_old(ic,iv_loc)
+              h_x(ic,iv_loc) = h0_old(ic,iv_loc)
            enddo
-        enddo
-  
-        call timer_lib_out('str_mem')        
+        enddo     
      else
-        call timer_lib_in('str_mem')
 !$acc parallel loop collapse(2) independent present(h0_x,h_x)
         do iv_loc=1,nv_loc
-           do ic_loc=1,nc
-              h0_x(ic_loc,iv_loc) = h_x(ic_loc,iv_loc)
+           do ic=1,nc
+              h0_x(ic,iv_loc) = h_x(ic,iv_loc)
            enddo
         enddo
      endif
-     call timer_lib_out('str_mem')        
+     call timer_lib_out('str')        
      
-     call cgyro_field_c_gpu
-     
-     !! if ( i_proc .eq. 0 ) write(*,*) " paper v76_effi deltah2 ", iiter, deltah2
-
-     ! Stage 1
-     !
+     call cgyro_field_c_gpu     
      call cgyro_rhs(1)
 
      call timer_lib_in('str')
-
 !$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs(:,:,1))
      do iv_loc=1,nv_loc
-        do ic_loc=1,nc
-           h_x(ic_loc,iv_loc) = h0_x(ic_loc,iv_loc) &
-                + a21*deltah2*rhs(ic_loc,iv_loc,1)
+        do ic=1,nc
+           h_x(ic,iv_loc) = h0_x(ic,iv_loc) &
+                + a21*deltah2*rhs(ic,iv_loc,1)
         enddo
      enddo
-
      call timer_lib_out('str')
+
      call cgyro_field_c_gpu
-
-     ! Stage 2 ! k2
-
      call cgyro_rhs(2)
-     call timer_lib_in('str')
-     
-!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs)
-     do iv_loc=1,nv_loc
-        do ic_loc=1,nc
-           h_x(ic_loc, iv_loc) = h0_x(ic_loc,iv_loc) &
-                + deltah2*(a31*rhs(ic_loc,iv_loc,1) &
-                + a32*rhs(ic_loc,iv_loc,2))
-        enddo
-     enddo
-     call timer_lib_out('str')
-     call cgyro_field_c_gpu
 
-     ! Stage 3
-     
-     call cgyro_rhs(3)
-     call timer_lib_in('str')     
-     ! k4
+     call timer_lib_in('str')
 !$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs)
      do iv_loc=1,nv_loc
-        do ic_loc=1,nc
-           h_x(ic_loc, iv_loc) = h0_x(ic_loc, iv_loc) &
-                + deltah2*(a41*rhs(ic_loc, iv_loc, 1) &
-                + a43*rhs(ic_loc,iv_loc,3))
+        do ic=1,nc
+           h_x(ic,iv_loc) = h0_x(ic,iv_loc) &
+                + deltah2*(a31*rhs(ic,iv_loc,1) &
+                + a32*rhs(ic,iv_loc,2))
         enddo
      enddo
      call timer_lib_out('str')
-     call cgyro_field_c_gpu
      
+     call cgyro_field_c_gpu
+     call cgyro_rhs(3)
+     
+     call timer_lib_in('str')     
+!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs)
+     do iv_loc=1,nv_loc
+        do ic=1,nc
+           h_x(ic,iv_loc) = h0_x(ic,iv_loc) &
+                + deltah2*(a41*rhs(ic, iv_loc,1) &
+                + a43*rhs(ic,iv_loc,3))
+        enddo
+     enddo
+     call timer_lib_out('str')
+
+     call cgyro_field_c_gpu
      call cgyro_rhs(4)
 
+     call timer_lib_in('str')
 !$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs)
      do iv_loc=1,nv_loc
-        do ic_loc=1,nc
-           h_x(ic_loc, iv_loc) = h0_x(ic_loc,iv_loc)  &
-                + deltah2*(a51*rhs(ic_loc, iv_loc, 1) &
-                + a53*rhs(ic_loc,iv_loc,3) &
-                + a54*rhs(ic_loc,iv_loc,4))
+        do ic=1,nc
+           h_x(ic, iv_loc) = h0_x(ic,iv_loc)  &
+                + deltah2*(a51*rhs(ic, iv_loc, 1) &
+                + a53*rhs(ic,iv_loc,3) &
+                + a54*rhs(ic,iv_loc,4))
         enddo
      enddo
+     call timer_lib_out('str')
 
      call cgyro_field_c_gpu
      call cgyro_rhs(5)
 
+     call timer_lib_in('str')
 !$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs)
      do iv_loc=1,nv_loc
-        do ic_loc=1,nc
-           h_x(ic_loc, iv_loc) = h0_x(ic_loc,iv_loc) &
-                + deltah2*(a61*rhs(ic_loc, iv_loc, 1) &
-                + a63*rhs(ic_loc,iv_loc,3) &
-                + a64*rhs(ic_loc,iv_loc,4) &
-                + a65*rhs(ic_loc,iv_loc,5))
+        do ic=1,nc
+           h_x(ic, iv_loc) = h0_x(ic,iv_loc) &
+                + deltah2*(a61*rhs(ic, iv_loc, 1) &
+                + a63*rhs(ic,iv_loc,3) &
+                + a64*rhs(ic,iv_loc,4) &
+                + a65*rhs(ic,iv_loc,5))
         enddo
      enddo
+     call timer_lib_out('str')
 
      call cgyro_field_c_gpu
      call cgyro_rhs(6)
 
+     call timer_lib_in('str')
 !$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs)
      do iv_loc=1,nv_loc
-        do ic_loc=1,nc
-           h_x(ic_loc, iv_loc) = h0_x(ic_loc,iv_loc) + &
-                deltah2*(a71*rhs(ic_loc, iv_loc, 1) &
-                + a73*rhs(ic_loc,iv_loc,3) &
-                + a74*rhs(ic_loc,iv_loc,4) &
-                + a75*rhs(ic_loc,iv_loc,5) &
-                + a76*rhs(ic_loc,iv_loc,6))
+        do ic=1,nc
+           h_x(ic, iv_loc) = h0_x(ic,iv_loc) + &
+                deltah2*(a71*rhs(ic, iv_loc, 1) &
+                + a73*rhs(ic,iv_loc,3) &
+                + a74*rhs(ic,iv_loc,4) &
+                + a75*rhs(ic,iv_loc,5) &
+                + a76*rhs(ic,iv_loc,6))
         enddo
      enddo
-
+     call timer_lib_out('str')
      
      call cgyro_field_c_gpu
      call cgyro_rhs(7)
 
-     !! soln = h_x of order 4
-     !! error_x(2) = sum(abs(h0_x(ic_loc,iv_loc)))
-
+     call timer_lib_in('str')
 !$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs)
      do iv_loc=1,nv_loc
-        do ic_loc=1,nc
-           h_x(ic_loc, iv_loc) = h0_x(ic_loc,iv_loc)  &
-                + deltah2*(a81*rhs(ic_loc, iv_loc, 1) &
-                + a83*rhs(ic_loc,iv_loc,3) &
-                + a84*rhs(ic_loc,iv_loc,4) &
-                + a85*rhs(ic_loc,iv_loc,5) &
-                + a86*rhs(ic_loc,iv_loc,6) &
-                + a87*rhs(ic_loc,iv_loc,7))
+        do ic=1,nc
+           h_x(ic, iv_loc) = h0_x(ic,iv_loc)  &
+                + deltah2*(a81*rhs(ic, iv_loc, 1) &
+                + a83*rhs(ic,iv_loc,3) &
+                + a84*rhs(ic,iv_loc,4) &
+                + a85*rhs(ic,iv_loc,5) &
+                + a86*rhs(ic,iv_loc,6) &
+                + a87*rhs(ic,iv_loc,7))
         enddo
      enddo
+     call timer_lib_out('str')
 
      call cgyro_field_c_gpu
      call cgyro_rhs(8)
 
+     call timer_lib_in('str')
 !$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs)
      do iv_loc=1,nv_loc
-        do ic_loc=1,nc
-           h_x(ic_loc, iv_loc) = h0_x(ic_loc,iv_loc)  &
-                + deltah2*(a91*rhs(ic_loc, iv_loc, 1) &
-                + a93*rhs(ic_loc,iv_loc,3) &
-                + a94*rhs(ic_loc,iv_loc,4) &
-                + a95*rhs(ic_loc,iv_loc,5) &
-                + a96*rhs(ic_loc,iv_loc,6) &
-                + a97*rhs(ic_loc,iv_loc,7) &
-                + a98*rhs(ic_loc,iv_loc,8))
+        do ic=1,nc
+           h_x(ic, iv_loc) = h0_x(ic,iv_loc)  &
+                + deltah2*(a91*rhs(ic, iv_loc, 1) &
+                + a93*rhs(ic,iv_loc,3) &
+                + a94*rhs(ic,iv_loc,4) &
+                + a95*rhs(ic,iv_loc,5) &
+                + a96*rhs(ic,iv_loc,6) &
+                + a97*rhs(ic,iv_loc,7) &
+                + a98*rhs(ic,iv_loc,8))
         enddo
      enddo
+     call timer_lib_out('str')
 
      call cgyro_field_c_gpu
      call cgyro_rhs(9)
      
+     call timer_lib_in('str')
 !$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs)
      do iv_loc=1,nv_loc
-        do ic_loc=1,nc
-           h_x(ic_loc, iv_loc) = h0_x(ic_loc,iv_loc)  &
-                + deltah2*(a101*rhs(ic_loc, iv_loc, 1) &
-                + a103*rhs(ic_loc,iv_loc,3) &
-                + a104*rhs(ic_loc,iv_loc,4) &
-                + a105*rhs(ic_loc,iv_loc,5) &
-                + a106*rhs(ic_loc,iv_loc,6) &
-                + a107*rhs(ic_loc,iv_loc,7))
+        do ic=1,nc
+           h_x(ic, iv_loc) = h0_x(ic,iv_loc)  &
+                + deltah2*(a101*rhs(ic, iv_loc, 1) &
+                + a103*rhs(ic,iv_loc,3) &
+                + a104*rhs(ic,iv_loc,4) &
+                + a105*rhs(ic,iv_loc,5) &
+                + a106*rhs(ic,iv_loc,6) &
+                + a107*rhs(ic,iv_loc,7))
         enddo
      enddo
+     call timer_lib_out('str')
 
      call cgyro_field_c_gpu
      call cgyro_rhs(10)
 
-     ! order 7 solution
+     !---------
+     ! SOLUTION
+     !---------
      
+     call timer_lib_in('str')
 !$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs)
      do iv_loc=1,nv_loc
-        do ic_loc=1,nc
-           h_x(ic_loc,iv_loc) = h0_x(ic_loc,iv_loc) &
-                + deltah2*(b1*rhs(ic_loc, iv_loc, 1) &
-                + b4*rhs(ic_loc,iv_loc,4) &
-                + b5*rhs(ic_loc,iv_loc,5) &
-                + b6*rhs(ic_loc,iv_loc,6) &
-                + b7*rhs(ic_loc,iv_loc,7) &
-                + b8*rhs(ic_loc,iv_loc,8) &
-                + b9*rhs(ic_loc,iv_loc,9))
+        do ic=1,nc
+           h_x(ic,iv_loc) = h0_x(ic,iv_loc) &
+                + deltah2*(b1*rhs(ic,iv_loc,1) &
+                + b4*rhs(ic,iv_loc,4) &
+                + b5*rhs(ic,iv_loc,5) &
+                + b6*rhs(ic,iv_loc,6) &
+                + b7*rhs(ic,iv_loc,7) &
+                + b8*rhs(ic,iv_loc,8) &
+                + b9*rhs(ic,iv_loc,9))
         enddo
      enddo
+     call timer_lib_out('str')
 
-!! !$acc data create(error_rhs, error_hx, error_x, error_sum) present(rhs, h_x)
+     !---------
+     ! ERROR
+     !---------
 
-     error_x = 0.d0
-     error_rhs=0.d0
-     error_hx=0.d0
-
+     call timer_lib_in('str')
+     error_rhs = 0.0
 !$acc parallel loop collapse(2) gang present(rhs) reduction(+:error_rhs)
      do iv_loc=1,nv_loc
-        do ic_loc=1,nc
-           rhs(ic_loc, iv_loc, 1) = deltah2*( &
-                (b1-b1h)*rhs(ic_loc, iv_loc, 1) &
-                + (b4-b4h)*rhs(ic_loc,iv_loc,4) &
-                + (b5-b5h)*rhs(ic_loc,iv_loc,5) &
-                + (b6-b6h)*rhs(ic_loc,iv_loc,6) &
-                + (b7-b7h)*rhs(ic_loc,iv_loc,7) &
-                + (b8-b8h)*rhs(ic_loc,iv_loc,8) &
-                + (b9-b9h)*rhs(ic_loc,iv_loc,9) &
-                + (b10-b10h)*rhs( ic_loc, iv_loc, 10))
-           error_rhs = error_rhs + abs(rhs(ic_loc, iv_loc, 1))
+        do ic=1,nc
+           rhs(ic,iv_loc,1) = deltah2*( &
+                (b1-b1h)*rhs(ic,iv_loc,1) &
+                + (b4-b4h)*rhs(ic,iv_loc,4) &
+                + (b5-b5h)*rhs(ic,iv_loc,5) &
+                + (b6-b6h)*rhs(ic,iv_loc,6) &
+                + (b7-b7h)*rhs(ic,iv_loc,7) &
+                + (b8-b8h)*rhs(ic,iv_loc,8) &
+                + (b9-b9h)*rhs(ic,iv_loc,9) &
+                + (b10-b10h)*rhs(ic,iv_loc,10))
+           error_rhs = error_rhs + abs(rhs(ic,iv_loc,1))
+        enddo
+     enddo
+    
+     error_hx = 0.0
+!$acc parallel loop collapse(2) independent present(h_x) reduction(+:error_hx)
+     do iv_loc=1,nv_loc
+        do ic=1,nc
+           error_hx = error_hx + abs(h_x(ic,iv_loc))
         enddo
      enddo
      
-     error_hx = 0.d0
-!$acc parallel loop collapse(2) independent present(h_x) reduction(+:error_hx)
-     do iv_loc=1,nv_loc
-        do ic_loc=1,nc
-           error_hx = error_hx + abs(h_x(ic_loc,iv_loc))
-        enddo
-     enddo
-
-     error_sum = 0.d0
      error_x(1) = error_rhs
      error_x(2) = error_hx
+     call timer_lib_out('str')
 
      call timer_lib_in('str_comm')
-     call MPI_ALLREDUCE(error_x, error_sum, 2, MPI_DOUBLE_PRECISION, &
-          MPI_SUM, MPI_COMM_WORLD, i_err)
+     call MPI_ALLREDUCE(error_x,error_sum,2,MPI_DOUBLE_PRECISION, &
+          MPI_SUM,CGYRO_COMM_WORLD,i_err)
      call timer_lib_out('str_comm')
 
      error_x = error_sum
      delta_x = error_x(1)
-     rel_error = error_x(1)/(error_x(2)+EPS)
-     var_error = sqrt(total_local_error + rel_error*rel_error)
+     rel_error = error_x(1)/(error_x(2)+eps)
+     var_error = sqrt(total_local_error+rel_error*rel_error)
     
-     if ( var_error .lt. tol ) then
+     if (var_error < tol) then
+
         call cgyro_field_c_gpu
         
-!$acc parallel loop collapse(2) independent present(h0_x,h0_old)
-        do iv_loc=1,nv_loc
-           do ic_loc=1,nc
-              h0_old(ic_loc,iv_loc) = h0_x(ic_loc,iv_loc)
-           enddo
-        enddo
-
-        converged = converged + 1
         conv = 1
         total_delta_x_step = total_delta_x_step + deltah2
         total_local_error = total_local_error + rel_error*rel_error
 
-        scale_x = max((tol/(delta_x + EPS )*1.d0/delta_t)**(1.d0/6.d0), &
-             (tol/(delta_x + EPS )*1.d0/delta_t)**(1.d0/7.d0))
+        scale_x = max((tol/(delta_x+eps)*1.0/delta_t)**(1.0/6.0), &
+             (tol/(delta_x+eps)*1.0/delta_t)**(1.0/7.0))
         
-        deltah2 = max(min(scale_x, 8.d0), 1.d0)*deltah2        
-        local_max_error = max(local_max_error, rel_error)
+        deltah2 = max(min(scale_x,8.0),1.0)*deltah2        
+        local_max_error = max(local_max_error,rel_error)
+
+        call timer_lib_in('str_mem')
+!$acc parallel loop collapse(2) independent present(h0_x,h0_old)
+        do iv_loc=1,nv_loc
+           do ic=1,nc
+              h0_old(ic,iv_loc) = h0_x(ic,iv_loc)
+           enddo
+        enddo
+        call timer_lib_out('str_mem')
 
      else
+        
         conv = 0
-        deltah2 = .5d0*deltah2
-        if (i_proc == 0 ) then
-           write(*,*) " v76 ***  error backing up, not converged ", &
-                " total delta_x step ", total_delta_x_step, " new deltah2 ", deltah2
-        endif
-        flush(6)
-        if ( deltah2 .lt. 1.e-8) then
-           if ( i_proc == 0 ) write(*,*) " v76 stopping, step size too small "
-           flush(6)
-           stop
-        endif
+        deltah2 = 0.5*deltah2
+
      endif
 
-     deltah2 = min(deltah2, delta_x_max)
-     deltah2 = max(delta_x_min, deltah2)
+     deltah2 = min(deltah2,delta_x_max)
+     deltah2 = max(delta_x_min,deltah2)
 
-     iiter = iiter + 1
+     itrk = itrk + 1
 
-     if ( iiter .gt. rk_MAX ) then
-        if ( i_proc .eq. 0 ) then
-           write(*,*) " v76 max count  exceeded, rel_error, var_error ", &
-                iiter, rel_error, var_error
-           flush(6)           
-        endif
-        stop
+     if (itrk > itrk_max) then
+        call cgyro_error('Verner step exceeded max iteration count')
+        return
      endif
 
   enddo
 
   call timer_lib_out('str')
 
-  delta_t_gk = max(delta_t_last, 6.0/7.0*deltah2)
+  delta_t_gk = max(delta_t_last,6.0/7.0*deltah2)
   
-  if (delta_t_last_step .eq. 0.) delta_t_last_step = delta_t_last
+  if (delta_t_last_step == 0.0) delta_t_last_step = delta_t_last
 
-  if ( delta_t_last_step .lt. .1d0*delta_t_last ) then
-     delta_t_gk = delta_t_last + &
-          delta_t_last_step
+  if (delta_t_last_step < 0.1*delta_t_last) then
+     delta_t_gk = delta_t_last+delta_t_last_step
   else
-     if ( delta_t_last_step/iiter .lt. .1d0*delta_t_last ) then
-        delta_t_gk = delta_t_last + delta_t_last_step/iiter
+     if (delta_t_last_step/itrk < 0.1*delta_t_last) then
+        delta_t_gk = delta_t_last+delta_t_last_step/itrk
      endif
   endif
 
-  delta_t_gk =min(delta_t_gk, delta_t)
+  delta_t_gk = min(delta_t_gk,delta_t)
   total_local_error = var_error
-
-!!  if ( i_proc == 0 ) &
-!!       write(*,*) " out paper V76effic gpu **** scale_x", total_delta_x_step, scale_x, deltah2
 
 end subroutine cgyro_step_gk_v76

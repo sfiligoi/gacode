@@ -21,6 +21,8 @@ subroutine cgyro_error_estimate
   real, dimension(2) :: error_loc
   
 
+
+  
   ! 1. Estimate of total (field) error via quadratic interpolation
 
   field_loc = 3.0*field_old-3.0*field_old2+field_old3
@@ -68,8 +70,11 @@ subroutine cgyro_error_estimate
 
   call timer_lib_out('str_comm')
 
+  ! 1: total (field) error
+  ! 2: collisionless error
   integration_error = integration_error/norm
 
+  ! Trigger code shutdown on large collisionless error
   if (integration_error(2) > 1e2*error_tol .and. i_time > 2) then
      call cgyro_error('Integration error exceeded limit.')
   endif

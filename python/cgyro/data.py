@@ -42,7 +42,7 @@ class cgyrodata:
          return
       
       #-----------------------------------------------------------------
-      # Read time vector (detecting old [3] or new [4] number of cols)
+      # Read time vector -- autodetect number of columns (ncol)
       #
       ncol = len(open(self.dir+'out.cgyro.time','r').readline().split())
       

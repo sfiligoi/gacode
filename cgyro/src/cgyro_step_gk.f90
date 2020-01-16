@@ -23,8 +23,8 @@ subroutine cgyro_step_gk
   call timer_lib_in('str_mem')
 !$omp parallel do collapse(2)
   do iv_loc=1,nv_loc
-     do ic_loc=1,nc
-       h0_x(ic_loc,iv_loc) = h_x(ic_loc,iv_loc)
+     do ic=1,nc
+       h0_x(ic,iv_loc) = h_x(ic,iv_loc)
      enddo
   enddo
   call timer_lib_out('str_mem')
@@ -35,8 +35,8 @@ subroutine cgyro_step_gk
   call timer_lib_in('str')
 !$omp parallel do collapse(2)
   do iv_loc=1,nv_loc
-     do ic_loc=1,nc
-       h_x(ic_loc,iv_loc) = h0_x(ic_loc,iv_loc) + 0.5 * delta_t * rhs(ic_loc,iv_loc,1)
+     do ic=1,nc
+       h_x(ic,iv_loc) = h0_x(ic,iv_loc) + 0.5 * delta_t * rhs(ic,iv_loc,1)
      enddo
   enddo
   call timer_lib_out('str')
@@ -47,8 +47,8 @@ subroutine cgyro_step_gk
   call timer_lib_in('str')
 !$omp parallel do collapse(2)
   do iv_loc=1,nv_loc
-     do ic_loc=1,nc
-       h_x(ic_loc,iv_loc) = h0_x(ic_loc,iv_loc) + 0.5 * delta_t * rhs(ic_loc,iv_loc,2)
+     do ic=1,nc
+       h_x(ic,iv_loc) = h0_x(ic,iv_loc) + 0.5 * delta_t * rhs(ic,iv_loc,2)
      enddo
   enddo
   call timer_lib_out('str')
@@ -59,8 +59,8 @@ subroutine cgyro_step_gk
   call timer_lib_in('str')
 !$omp parallel do collapse(2)
   do iv_loc=1,nv_loc
-     do ic_loc=1,nc
-        h_x(ic_loc,iv_loc) = h0_x(ic_loc,iv_loc) + delta_t * rhs(ic_loc,iv_loc,3)
+     do ic=1,nc
+        h_x(ic,iv_loc) = h0_x(ic,iv_loc) + delta_t * rhs(ic,iv_loc,3)
      enddo
   enddo
   call timer_lib_out('str')
@@ -71,10 +71,12 @@ subroutine cgyro_step_gk
   call timer_lib_in('str')
 !$omp parallel do collapse(2)
   do iv_loc=1,nv_loc
-     do ic_loc=1,nc
-       h_x(ic_loc,iv_loc) = h0_x(ic_loc,iv_loc) &
-                          + delta_t*( rhs(ic_loc,iv_loc,1)+2*rhs(ic_loc,iv_loc,2)+ &
-                                      2*rhs(ic_loc,iv_loc,3)+rhs(ic_loc,iv_loc,4) )/6  
+     do ic=1,nc
+        h_x(ic,iv_loc) = h0_x(ic,iv_loc)+delta_t*(&
+                rhs(ic,iv_loc,1) &
+             +2*rhs(ic,iv_loc,2) &
+             +2*rhs(ic,iv_loc,3) &
+               +rhs(ic,iv_loc,4))/6  
      enddo
   enddo
   call timer_lib_out('str')
@@ -84,10 +86,11 @@ subroutine cgyro_step_gk
   call timer_lib_in('str')
 !$omp parallel do collapse(2)
   do iv_loc=1,nv_loc
-     do ic_loc=1,nc
-       rhs(ic_loc,iv_loc,1) = h0_x(ic_loc,iv_loc) &
-                            + delta_t*(rhs(ic_loc,iv_loc,2)+2*rhs(ic_loc,iv_loc,3))/3 &
-                            - h_x(ic_loc,iv_loc)
+     do ic=1,nc
+        rhs(ic,iv_loc,1) = h0_x(ic,iv_loc) +delta_t*( &
+             rhs(ic,iv_loc,2)&
+            +2*rhs(ic,iv_loc,3))/3 &
+                            - h_x(ic,iv_loc)
      enddo
   enddo
   call timer_lib_out('str')
