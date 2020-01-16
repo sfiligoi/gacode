@@ -22,39 +22,30 @@ subroutine cgyro_step_gk_ck
   ! phi  -> field(1)
   ! Apar -> field(2)
   ! Bpar -> field(3)
-  
-  real delta_x_min, delta_x_max, local_max_error
-  real total_delta_step
-  real error_rhs, error_hx
-  real delta_t_old, delta_t_gk_old, delta_t_last, delta_t_last_step
-  real last_total_error, rel_error, var_error
-  real scale_x, scale_old
-  
-  integer :: err_x
+
+  tol = error_tol
 
   itrk = 0
   conv = 1
 
-  orig_delta_t = delta_t       ! keep track of delta_t for exiting of subroutine  
-  tol = delta_t_tol
-  delta_t_gk_old = delta_t_gk
+  orig_delta_t = delta_t  
 
-  scale_old = 0.0
   scale_x = 0.0
   deltah2 = delta_t_gk
   delta_t_last_step = 0.0
 
-  delta_x_min = orig_delta_t*1e-10
+  delta_x_min = delta_t*1e-10
   delta_x_max = delta_t
-  delta_t_old = delta_t_gk
 
-  total_delta_step = 0.0
+  delta_t_tot = 0.0
   total_local_error = 0.0
-  last_total_error = 0.0
-  var_error = 0.0
+  local_max_error = 0.0
   
-  deltah2_min = 1e10
-  deltah2_max = -1.0
+  deltah2_min = 1.0
+  deltah2_max = 0.0
+
+  delta_t_gk = 0.0
+  delta_t_last = deltah2
 
   call timer_lib_in('str_mem')
 !$acc parallel loop collapse(2) independent present(h0_old,h_x)
@@ -65,24 +56,20 @@ subroutine cgyro_step_gk_ck
   enddo
   call timer_lib_out('str_mem')
         
-  delta_t_gk = 0.0
-  delta_t_last = deltah2
-  local_max_error = 0.0
 
-  do while (total_delta_step < orig_delta_t)
+  do while (delta_t_tot < orig_delta_t)
 
      call timer_lib_in('str')
-     if (total_delta_step + deltah2 > orig_delta_t) then
-        deltah2 = orig_delta_t-total_delta_step
+     if (delta_t_tot + deltah2 > orig_delta_t) then
+        deltah2 = orig_delta_t-delta_t_tot
         delta_t_last_step = deltah2
      else
         delta_t_last = deltah2
         deltah2_min = min(deltah2, deltah2_min)
         deltah2_max = max(deltah2, deltah2_max)
      endif
-     scale_old = scale_x
 
-     if (conv == 1 ) then
+     if (conv == 1) then
 !$acc parallel loop collapse(2) independent present(h0_x,h_x)
         do iv_loc=1,nv_loc
            do ic=1,nc
@@ -120,7 +107,7 @@ subroutine cgyro_step_gk_ck
 !$acc parallel loop collapse(2) independent present(h_x,h0_x,h0_old,rhs)
      do iv_loc=1,nv_loc
         do ic=1,nc
-           h_x(ic, iv_loc) = h0_x(ic,iv_loc) &
+           h_x(ic,iv_loc) = h0_x(ic,iv_loc) &
                 + 1.0/40.0*deltah2*(3.0*rhs(ic, iv_loc, 1) &
                 + 9.0*rhs(ic, iv_loc, 2))
         enddo
@@ -134,10 +121,10 @@ subroutine cgyro_step_gk_ck
 !$acc parallel loop collapse(2) independent present(h_x,h0_x,rhs)
      do iv_loc=1,nv_loc
         do ic=1,nc
-           h_x(ic, iv_loc) = h0_x(ic,iv_loc) &
-                + deltah2*( 3.d0/10.d0*rhs(ic, iv_loc, 1) &
-                - 9.d0/10.d0*rhs(ic, iv_loc, 2) &
-                + 6.d0/5.d0*rhs(ic, iv_loc, 3))
+           h_x(ic,iv_loc) = h0_x(ic,iv_loc) &
+                + deltah2*( 3.d0/10.d0*rhs(ic,iv_loc,1) &
+                - 9.d0/10.d0*rhs(ic,iv_loc, 2) &
+                + 6.d0/5.d0*rhs(ic,iv_loc, 3))
         enddo
      enddo
      call timer_lib_out('str')
@@ -226,21 +213,22 @@ subroutine cgyro_step_gk_ck
 
      call timer_lib_in('str_comm')
      call MPI_ALLREDUCE(error_x,error_sum,2,MPI_DOUBLE_PRECISION,&
-          MPI_SUM,CGYRO_COMM_WORLD,err_x)
+          MPI_SUM,CGYRO_COMM_WORLD,i_err)
      call timer_lib_out('str_comm')
 
      error_x = error_sum    
+     delta_x = error_x(1)+eps
      rel_error = error_x(1)/(error_x(2)+eps)
      var_error = sqrt(total_local_error+rel_error*rel_error)
      
      if (var_error < tol) then
         call cgyro_field_c_gpu
 
-        total_delta_step = total_delta_step + deltah2
+        delta_t_tot = delta_t_tot + deltah2
         total_local_error = total_local_error + rel_error*rel_error
 
-        scale_x = max((tol/(error_x(1) + eps)*1.0/delta_t)**(.2d0), &
-             (tol/(error_x(1) + eps)*1.0/delta_t)**(.25d0))
+        scale_x = max((tol/delta_x*1.0/delta_t)**0.2, &
+             (tol/delta_x*1.0/delta_t)**0.25)
 
         deltah2 = deltah2*max(1.0,min(6.0,scale_x))
         
@@ -277,13 +265,14 @@ subroutine cgyro_step_gk_ck
 
   if (delta_t_last_step == 0.0) delta_t_last_step = delta_t_last
 
-  if (delta_t_last_step < 0.1*delta_t_gk ) then
+  if (delta_t_last_step < 0.1*delta_t_gk) then
      delta_t_gk = delta_t_last+delta_t_last_step
   else
-     if (delta_t_last_step/itrk < 0.1*delta_t_gk ) then
+     if (delta_t_last_step/itrk < 0.1*delta_t_gk) then
         delta_t_gk = delta_t_gk+delta_t_last_step/itrk
      endif
   endif
+  
   delta_t_gk = min(delta_t,delta_t_gk)
   total_local_error = var_error
 

@@ -11,8 +11,18 @@ module cgyro_step
 
   real :: tol
   real :: orig_delta_t
+  real :: delta_t_last,delta_t_last_step
   real :: deltah2
-  real :: deltah2_max, deltah2_min
+  real :: deltah2_max,deltah2_min
+  real :: delta_x,delta_x_min,delta_x_max
+  real :: local_max_error
+  real :: rel_error,var_error,scale_x
+  real :: delta_t_tot
+
+  !---------------------------------
+  ! GPU-only
+  real :: error_rhs,error_hx
+  !---------------------------------
 
   real, dimension(2) :: error_sum,error_x
   

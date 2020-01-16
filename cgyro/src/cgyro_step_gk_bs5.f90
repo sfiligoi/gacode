@@ -21,12 +21,6 @@ subroutine cgyro_step_gk_bs5
   ! phi  -> field(1)
   ! Apar -> field(2)
   ! Bpar -> field(3)
-  
-  real total_delta_x_step, delta_x_min, delta_x_max
-  real delta_x, local_max_error
-  real rel_error, delta_t_last
-  real delta_t_last_step
-  real var_error, scale_x, scale_old
 
   ! Butcher table
 
@@ -109,27 +103,29 @@ subroutine cgyro_step_gk_bs5
   real, parameter :: e6 = -1.d0/95.d0
   real, parameter :: e7 = 0.d0
 
+  tol = error_tol
+
   itrk = 0
   conv = 0
-  
-  scale_old = 0.0
-  scale_x = 0.0
-  local_max_error = 0.0
-  delta_t_last = 0.0
-  delta_t_last_step = 0.0
+
   orig_delta_t = delta_t
 
-  total_delta_x_step = 0.0
-  total_local_error = 0.0
-  var_error = 0.0
-
-  tol = delta_t_tol
+  scale_x = 0.0
   deltah2 = delta_t_gk
-  
-  delta_x_min = 1.e-10*orig_delta_t
-  delta_x_max = orig_delta_t
+  delta_t_last_step = 0.0
 
+  delta_x_min = delta_t*1e-10
+  delta_x_max = delta_t
+
+  delta_t_tot = 0.0
   total_local_error = 0.0
+  local_max_error = 0.0
+
+  deltah2_min = 1.0
+  deltah2_max = 0.0
+ 
+  delta_t_gk = 0.0
+  delta_t_last = 0.0
 
   call timer_lib_in('str_mem')
 !$omp parallel workshare
@@ -137,39 +133,34 @@ subroutine cgyro_step_gk_bs5
 !$omp end parallel workshare
   call timer_lib_out('str_mem')
 
-  delta_t_gk = 0.0
-  deltah2_min = 1e10
-  deltah2_max = 0.0
-
-  do while (total_delta_x_step < orig_delta_t .and. itrk <= itrk_max )
+  do while (delta_t_tot < orig_delta_t .and. itrk <= itrk_max)
     
      call timer_lib_in('str')
-     if ( total_delta_x_step + deltah2 .gt. orig_delta_t ) then
-        deltah2 = orig_delta_t - total_delta_x_step
+     if (delta_t_tot + deltah2 > orig_delta_t) then
+        deltah2 = orig_delta_t-delta_t_tot
         delta_t_last_step = deltah2
      else
         delta_t_last = deltah2
-        deltah2_min = min(deltah2, deltah2_min)
-        deltah2_max = max(deltah2, deltah2_max)
+        deltah2_min = min(deltah2,deltah2_min)
+        deltah2_max = max(deltah2,deltah2_max)
      endif
-     scale_old = scale_x
      
-     if (( conv == 0 ) .and. (itrk >= 1)) then
+     if ((conv == 0) .and. (itrk >= 1)) then
 
         ! not converged so backing up
         
 !$omp parallel do collapse(2)
         do iv_loc=1,nv_loc
            do ic=1,nc
-              h0_x(ic,iv_loc) = h0_old(ic, iv_loc)
-              h_x(ic,iv_loc) = h0_old(ic, iv_loc)
+              h0_x(ic,iv_loc) = h0_old(ic,iv_loc)
+              h_x(ic,iv_loc) = h0_old(ic,iv_loc)
            enddo
         enddo
      else
 !$omp parallel do collapse(2)
         do iv_loc=1,nv_loc
            do ic=1,nc
-              h0_x(ic,iv_loc) = h_x(ic, iv_loc)
+              h0_x(ic,iv_loc) = h_x(ic,iv_loc)
            enddo
         enddo        
      endif
@@ -210,7 +201,7 @@ subroutine cgyro_step_gk_bs5
      do iv_loc=1,nv_loc
         do ic=1,nc
            h_x(ic, iv_loc) = h0_x(ic, iv_loc) &
-                + deltah2*(a41*rhs(ic, iv_loc, 1) &
+                + deltah2*(a41*rhs(ic, iv_loc,1) &
                 + a42*rhs(ic,iv_loc,2) &
                 + a43*rhs(ic,iv_loc,3))
         enddo
@@ -225,7 +216,7 @@ subroutine cgyro_step_gk_bs5
      do iv_loc=1,nv_loc
         do ic=1,nc
            h_x(ic, iv_loc) = h0_x(ic,iv_loc)  &
-                + deltah2*(a51*rhs(ic, iv_loc, 1) &
+                + deltah2*(a51*rhs(ic,iv_loc,1) &
                 + a52*rhs(ic,iv_loc,2) &
                 + a53*rhs(ic,iv_loc,3) &
                 + a54*rhs(ic,iv_loc,4))
@@ -258,7 +249,7 @@ subroutine cgyro_step_gk_bs5
      do iv_loc=1,nv_loc
         do ic=1,nc
            h_x(ic, iv_loc) = h0_x(ic,iv_loc) + &
-                deltah2*(a71*rhs(ic, iv_loc, 1) &
+                deltah2*(a71*rhs(ic, iv_loc,1) &
                 + a72*rhs(ic,iv_loc,2) &
                 + a73*rhs(ic,iv_loc,3) &
                 + a74*rhs(ic,iv_loc,4) &
@@ -280,7 +271,7 @@ subroutine cgyro_step_gk_bs5
      do iv_loc=1,nv_loc
         do ic=1,nc
            h_x(ic, iv_loc) = h0_x(ic,iv_loc) &
-                + deltah2*(b1*rhs(ic, iv_loc, 1) &
+                + deltah2*(b1*rhs(ic,iv_loc,1) &
                 + b3*rhs(ic,iv_loc,3) &
                 + b4*rhs(ic,iv_loc,4) &
                 + b5*rhs(ic,iv_loc,5) &
@@ -298,7 +289,7 @@ subroutine cgyro_step_gk_bs5
 !$omp parallel do collapse(2)
      do iv_loc=1,nv_loc
         do ic=1,nc
-           rhs(ic,iv_loc,1)= deltah2*(e1*rhs(ic, iv_loc,1) &
+           rhs(ic,iv_loc,1) = deltah2*(e1*rhs(ic, iv_loc,1) &
                 + e3*rhs(ic,iv_loc,3) &
                 + e4*rhs(ic,iv_loc,4) &
                 + e5*rhs(ic,iv_loc,5) &
@@ -311,17 +302,28 @@ subroutine cgyro_step_gk_bs5
      call timer_lib_out('str')
 
      call timer_lib_in('str_comm')
-     call MPI_ALLREDUCE(error_x, error_sum, 2, MPI_DOUBLE_PRECISION,&
+     call MPI_ALLREDUCE(error_x,error_sum,2,MPI_DOUBLE_PRECISION,&
           MPI_SUM,CGYRO_COMM_WORLD, i_err)
      call timer_lib_out('str_comm')
 
      error_x = error_sum
-     delta_x = error_x(1)
-     rel_error = error_x(1)/(error_x(2)+EPS)
-     var_error = sqrt(total_local_error + rel_error*rel_error)
+     delta_x = error_x(1)+eps
+     rel_error = error_x(1)/(error_x(2)+eps)
+     var_error = sqrt(total_local_error+rel_error*rel_error)
      
      if (var_error < tol) then
+
         call cgyro_field_c
+
+        conv = 1
+        delta_t_tot = delta_t_tot+deltah2
+        total_local_error = total_local_error + rel_error*rel_error
+       
+        scale_x = max((tol/delta_x*1.0/delta_t)**0.2, &
+             (tol/delta_x*1.0/delta_t)**0.25)
+
+        deltah2 = deltah2*max(1.0,min(6.0,scale_x))
+        local_max_error = max(local_max_error,rel_error)
 
         call timer_lib_in('str_mem')
 !$omp parallel do collapse(2)
@@ -332,19 +334,11 @@ subroutine cgyro_step_gk_bs5
         enddo
         call timer_lib_out('str_mem')
 
-        conv = 1
-        
-        total_delta_x_step = total_delta_x_step + deltah2
-        total_local_error = total_local_error + rel_error*rel_error
-       
-        scale_x = max((tol/(delta_x + EPS )*1./delta_t)**(.2d0), &
-             (tol/(delta_x + EPS )*1./delta_t)**(.25d0))
-
-        deltah2 = deltah2*max(1.0, min(6.0, scale_x))
-        local_max_error = max(local_max_error, rel_error)
      else
+
         conv = 0
         deltah2 = 0.5*deltah2
+
      endif
      
      deltah2 = min(deltah2,delta_x_max)

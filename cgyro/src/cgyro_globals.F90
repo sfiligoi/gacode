@@ -271,9 +271,8 @@ module cgyro_globals
   complex :: freq_err
   !
   ! adaptive integrator parameters
-  real    :: delta_t_gk
-  real    :: delta_t_tol
-  real    :: total_local_error
+  real :: delta_t_gk
+  real :: total_local_error
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------

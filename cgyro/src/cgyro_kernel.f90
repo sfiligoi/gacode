@@ -101,9 +101,7 @@ subroutine cgyro_kernel
     close(statusfd)
   endif
 
-  ! setting adaptive time-stepping parameters
-  
-  delta_t_tol = error_tol
+  ! Set adaptive time-stepping parameters
   delta_t_gk = delta_t
   
   do i_time=1,n_time

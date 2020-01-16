@@ -23,14 +23,6 @@ subroutine cgyro_step_gk_v76
   ! Bpar -> field(3)
 
 
-  real :: total_delta_x_step, delta_x_min, delta_x_max
-  real :: delta_x, local_max_error
-  real :: rel_error, delta_t_last
-  real :: delta_t_last_step
-  real :: var_error, scale_x, scale_old
-  real :: error_rhs, error_hx
-  real :: local_error_rhs, local_error_hx
-
   ! Butcher table
 
   real, parameter :: a21  = .5d-2
@@ -120,26 +112,30 @@ subroutine cgyro_step_gk_v76
   real, parameter :: b9h = 0.d0
   real, parameter :: b10h = 0.20295184663356282227670547938d-1
 
+  tol = error_tol
+
   itrk = 0
   conv = 0
 
-  local_max_error = 0.0
-  delta_t_last = 0.0
-  delta_t_last_step = 0.0
   orig_delta_t = delta_t
 
-  total_delta_x_step = 0.0
-  total_local_error = 0.0
-  var_error = 0.0
-
-  tol = delta_t_tol
+  scale_x = 0.0
   deltah2 = delta_t_gk
+  delta_t_last_step = 0.0
 
-  delta_x_min = 1.d-10*orig_delta_t
-  delta_x_max = orig_delta_t
+  delta_x_min = delta_t*1e-10
+  delta_x_max = delta_t
 
+  delta_t_tot = 0.0
   total_local_error = 0.0
-  
+  local_max_error = 0.0
+
+  deltah2_min = 1.0
+  deltah2_max = 0.0
+ 
+  delta_t_gk = 0.0
+  delta_t_last = 0.0
+
   call timer_lib_in('str_mem')
 !$acc parallel loop collapse(2) independent present(h0_old,h_x)
   do iv_loc=1,nv_loc
@@ -149,22 +145,17 @@ subroutine cgyro_step_gk_v76
   enddo
   call timer_lib_out('str_mem')
 
-  delta_t_gk = 0.d0
-  deltah2_min = 1.d10
-  deltah2_max = 0.d0
-
-  do while (total_delta_x_step < orig_delta_t .and. itrk <= itrk_max)
+  do while (delta_t_tot < orig_delta_t .and. itrk <= itrk_max)
     
      call timer_lib_in('str')
-     if (total_delta_x_step + deltah2 > orig_delta_t) then
-        deltah2 = orig_delta_t-total_delta_x_step
+     if (delta_t_tot + deltah2 > orig_delta_t) then
+        deltah2 = orig_delta_t-delta_t_tot
         delta_t_last_step = deltah2
      else
         delta_t_last = deltah2
         deltah2_min = min(deltah2,deltah2_min)
         deltah2_max = max(deltah2,deltah2_max)
      endif
-     scale_old = scale_x
      
      if ((conv == 0) .and. (itrk >= 1)) then
 
@@ -394,7 +385,7 @@ subroutine cgyro_step_gk_v76
      call timer_lib_out('str_comm')
 
      error_x = error_sum
-     delta_x = error_x(1)
+     delta_x = error_x(1)+eps
      rel_error = error_x(1)/(error_x(2)+eps)
      var_error = sqrt(total_local_error+rel_error*rel_error)
     
@@ -403,11 +394,11 @@ subroutine cgyro_step_gk_v76
         call cgyro_field_c_gpu
         
         conv = 1
-        total_delta_x_step = total_delta_x_step + deltah2
+        delta_t_tot = delta_t_tot + deltah2
         total_local_error = total_local_error + rel_error*rel_error
 
-        scale_x = max((tol/(delta_x+eps)*1.0/delta_t)**(1.0/6.0), &
-             (tol/(delta_x+eps)*1.0/delta_t)**(1.0/7.0))
+        scale_x = max((tol/delta_x*1.0/delta_t)**(1.0/6.0), &
+             (tol/delta_x*1.0/delta_t)**(1.0/7.0))
         
         deltah2 = max(min(scale_x,8.0),1.0)*deltah2        
         local_max_error = max(local_max_error,rel_error)
@@ -431,7 +422,7 @@ subroutine cgyro_step_gk_v76
      deltah2 = min(deltah2,delta_x_max)
      deltah2 = max(delta_x_min,deltah2)
 
-     itrk = itrk + 1
+     itrk = itrk+1
 
      if (itrk > itrk_max) then
         call cgyro_error('Verner step exceeded max iteration count')
@@ -439,8 +430,6 @@ subroutine cgyro_step_gk_v76
      endif
 
   enddo
-
-  call timer_lib_out('str')
 
   delta_t_gk = max(delta_t_last,6.0/7.0*deltah2)
   
@@ -454,7 +443,7 @@ subroutine cgyro_step_gk_v76
      endif
   endif
 
-  delta_t_gk = min(delta_t_gk,delta_t)
+  delta_t_gk = min(delta_t,delta_t_gk)
   total_local_error = var_error
 
 end subroutine cgyro_step_gk_v76
