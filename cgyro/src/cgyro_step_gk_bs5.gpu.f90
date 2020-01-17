@@ -279,6 +279,7 @@ subroutine cgyro_step_gk_bs5
                 + b7*rhs(ic,iv_loc,7))
         enddo
      enddo
+     call cgyro_filter()
      call timer_lib_out('str')
    
      !---------
