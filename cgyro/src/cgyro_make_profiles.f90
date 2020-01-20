@@ -61,8 +61,7 @@ subroutine cgyro_make_profiles
 
      ! Experimental profiles
 
-     call expro_locsim_profiles(path,&
-          CGYRO_COMM_WORLD,&
+     call expro_locsim_profiles(&
           geo_numeq_flag,&
           udsymmetry_flag,&
           quasineutral_flag,&
@@ -347,7 +346,7 @@ subroutine cgyro_make_profiles
      call cgyro_info('Triggered zonal flow test')
 
      if (n_radial /= 1) then
-        call cgyro_info('Zonal flow test with n_radial>1')
+        call cgyro_info('Zonal flow test with n_radial > 1')
      endif
 
      n = 0

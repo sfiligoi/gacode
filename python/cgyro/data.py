@@ -6,19 +6,18 @@ from gacodefuncs import *
 
 BYTE='float32'
 
+# class to read cgyro output data
 class cgyrodata:
 
-   """CGYRO output data class."""
-
+   # constructor reads in basic (not all) simulation data
    def __init__(self,sim_directory,silent=False):
-
-      """Constructor reads in basic (not all) simulation data."""
 
       self.silent = silent
       self.dir = sim_directory
       self.getgrid()
       self.getdata()
-
+      
+   # standard routine to read binary or ASCII data 
    def extract(self,f):
 
       start = time.time()
@@ -38,18 +37,31 @@ class cgyrodata:
 
    def getdata(self):
 
-      """Initialize smaller data objects (don't load larger ones)"""
-
       if not os.path.isfile(self.dir+'out.cgyro.time'):
          print('INFO: (data.py) No time record exists.')
          return
       
       #-----------------------------------------------------------------
-      # Read time vector.
+      # Read time vector -- autodetect number of columns (ncol)
       #
+
+      # START: 3-column output (delete this code eventually)
+      tfile = self.dir+'out.cgyro.time'
+      ncol = len(open(tfile,'r').readline().split())
+   
+      if ncol == 3:
+         newlines = [] 
+         for line in open(tfile,'r').readlines():
+            newlines.append(line.strip()+'  0.0')
+         outfile = open(tfile,'w')
+         outfile.write("\n".join(newlines)) ; outfile.close()
+         print('INFO: (data.py) Updated to 4-column format for out.cgyro.time')
+        
       data = np.fromfile(self.dir+'out.cgyro.time',dtype='float',sep=' ')
-      nt = len(data)//3
-      data = np.reshape(data,(3,nt),'F')
+      nt = len(data)//4
+      data = np.reshape(data,(4,nt),'F')
+      # END: 3-column output (delete this code eventually)
+
       self.t    = data[0,:]
       self.err1 = data[1,:]
       try:
@@ -426,3 +438,58 @@ class cgyrodata:
          print('INFO: (data.py) Read data in out.cgyro.equilibrium.')
 
       #-----------------------------------------------------------------
+
+   def getnorm(self,norm):
+
+      if norm == 'elec':
+
+         # Standard normalizations
+
+         self.tnorm  = self.t
+         self.tstr   = TIME
+
+         self.fnorm  = self.freq 
+         self.fstr   = [r'$(a/c_{sD})\, \omega$',r'$(a/c_{sD})\, \gamma$']
+
+         self.rhonorm = self.rho
+         self.rhostr = r'$\rho_{sD}$'
+
+         self.kynorm = self.ky
+         self.kstr   = r'$k_y \rho_{sD}$'
+
+         self.qc     = 1.0
+         self.gbnorm = '_\mathrm{GBD}'
+         
+      else:
+
+         # Species-i normalizations
+         
+         i = int(norm)
+
+         te = 1.0
+         for j in range(self.n_species):
+            if self.z[j] < 0.0:
+               te = self.temp[j]
+
+         # Convert csD=sqrt(Te/mD) to vi=sqrt(Ti/mi)
+         vc = np.sqrt(self.temp[i]/te/self.mass[i])
+ 
+         self.tnorm = self.t*vc
+         self.tstr  = r'$(v_'+str(i)+'/a) \, t$'
+
+         self.fnorm = self.freq/vc
+         self.fstr  = [r'$(a/v_'+str(i)+') \, \omega$',r'$(a/v_'+str(i)+') \, \gamma$']
+
+         # Convert rho_sD=csD/Omega_i to rho_i=vi/Omega_i
+         rhoc = vc/(self.z[i]/self.mass[i])
+
+         self.rhonorm = self.rho*rhoc
+         self.rhostr  = r'$\rho_'+str(i)+'$'
+
+         self.kynorm = self.ky*rhoc
+         self.kstr   = r'$k_y \rho_'+str(i)+'$'
+
+          # Convert Q_GBD to Q_GBi
+         self.qc = vc*(self.temp[i]/te)*rhoc**2
+         self.gbnorm = '_\mathrm{GB'+str(i)+'}'
+

@@ -104,9 +104,7 @@ subroutine cgyro_kernel
     close(statusfd)
   endif
 
-  ! setting adaptive time-stepping parameters
-  
-  delta_t_tol = min(adapt_tol, error_tol)
+  ! Initialize adaptive time-stepping parameter
   delta_t_gk = delta_t
   
   do i_time=1,n_time
@@ -123,10 +121,22 @@ subroutine cgyro_kernel
 !$acc update device(field,psi,cap_h_c,chi,h_x)
      call timer_lib_out('str_mem')
 
-     ! Collisionless step: returns new h_x, cap_h_x, fields 
-     call cgyro_step_gk
-   
+     ! Collisionless step: returns new h_x, cap_h_x, fields
+     
+     select case(delta_t_method)
+     case(1)
+        call cgyro_step_gk_ck
+     case(2)
+        call cgyro_step_gk_bs5
+     case(3)
+        call cgyro_step_gk_v76 
+     case default
+        ! Normal timestep
+        call cgyro_step_gk
+     end select
+     
      call timer_lib_in('str_mem')
+     call cgyro_filter
 !$acc update host(rhs(:,:,1))
      call timer_lib_out('str_mem')
 
@@ -142,17 +152,11 @@ subroutine cgyro_kernel
 !$acc update host(field,psi,cap_h_c,chi,h_x)
      call timer_lib_out('coll_mem')
 
-     ! Hammett method for ExB shear
      if (shear_method == 1) then
         ! Discrete shift (Hammett) 
-        call timer_lib_in('shear')
         call cgyro_shear_hammett
-        call timer_lib_out('shear')
      endif
-
-     call timer_lib_in('shear')
      call cgyro_source
-     call timer_lib_out('shear')
     !------------------------------------------------------------
 
      !------------------------------------------------------------
@@ -276,6 +280,8 @@ subroutine cgyro_kernel
   if(allocated(xi_lor_mat))    deallocate(xi_lor_mat)
   if(allocated(xi_deriv_mat))  deallocate(xi_deriv_mat)
   if(allocated(h_x))           deallocate(h_x)
+  if(allocated(h0_x))          deallocate(h0_x)
+  if(allocated(h0_old))          deallocate(h0_old)
   if(allocated(cap_h_c))       deallocate(cap_h_c)
   if(allocated(cap_h_v))       deallocate(cap_h_v)
 

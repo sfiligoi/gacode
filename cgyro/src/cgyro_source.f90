@@ -18,6 +18,8 @@ subroutine cgyro_source
 
   if (nonlinear_flag == 0 .or. source_flag == 0) return
 
+  call timer_lib_in('shear')
+
   nu_eff = nu_global*(abs(gamma_e)+maxval(abs(sdlnndr(:)))+maxval(abs(sdlntdr(:))))
   sa = 1.0+exp(-delta_t/tau_ave)*sa
 
@@ -39,5 +41,7 @@ subroutine cgyro_source
      enddo
 
   endif
+
+  call timer_lib_out('shear')
 
 end subroutine cgyro_source

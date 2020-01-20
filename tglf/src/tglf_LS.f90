@@ -423,8 +423,8 @@
        intensity = cnorm*(wd0**2)*(gnet**exponent1 &
         + c1*gnet)/(kp**4)
        if(alpha_quench_in.eq.0.0.and.ABS(kx0_e).gt.0.0)then
-         intensity = intensity/(1.0+0.56*(kx_geo0_out*kx0_e)**2)**2
-         intensity = intensity/(1.0+(1.15*(kx_geo0_out*kx0_e))**4)**2
+         intensity = intensity/(1.0+0.56*kx0_e**2)**2
+         intensity = intensity/(1.0+(1.15*kx0_e)**4)**2
        endif
          intensity = intensity*SAT_geo0_out
       elseif(sat_rule_in.eq.1)then
@@ -572,6 +572,7 @@
       USE tglf_eigen
       USE tglf_coeff
       USE tglf_weight
+      USE tglf_sgrid
 ! 
       IMPLICIT NONE
 !
@@ -652,9 +653,9 @@
 !  compute the electromagnetic potentials
 !
       betae_psi = 0.0
-      if(use_bper_in)betae_psi = 0.5*betae_in/(ky*ky)
+      if(use_bper_in)betae_psi = 0.5*betae_s/(ky*ky)
       betae_sig = 0.0
-      if(use_bpar_in)betae_sig = 0.5*betae_in
+      if(use_bpar_in)betae_sig = 0.5*betae_s
       do i=1,nbasis
         phi(i)=0.0
         psi(i)=0.0

@@ -74,7 +74,7 @@
       !   write(*,*)" ax= ",ax," ay= ",ay
       do i=1,nky
          kx=spectral_shift_out(i)
-         gamma_net(i) = eigenvalue_spectrum_out(1,i,1)/(1.0 + (ax*kx_geo0_out*kx)**4)
+         gamma_net(i) = eigenvalue_spectrum_out(1,i,1)/(1.0 + (ax*kx)**4)
       !   write(*,*)i,"gamma_net = ",gamma_net(i)
       enddo
       if(USE_MIX)then
@@ -90,7 +90,7 @@
         cz2 = 1.0*czf  
         etg_streamer=1.05
         if(alpha_quench_in .ne. 0.0)etg_streamer=2.1
-        kyetg=etg_streamer*ABS(zs(2))/SQRT(taus(2)*mass(2))  ! fixed to ion gyroradius
+        kyetg=etg_streamer*ABS(zs(2))*grad_r0_out/SQRT(taus(2)*mass(2))  ! fixed to ion gyroradius
         if(USE_X3)then
            bz1=1.0
            bz2=0.18
@@ -277,7 +277,7 @@
           else
             if(ky0.gt.kyetg)gammaeff = gammaeff*SQRT(ky0/kyetg)
           endif
-          field_spectrum_out(2,j,i) = SAT_geo0_out*(cnorm*gammaeff*gammaeff/ky0**4)/(1.0+ay*(kx_geo0_out*kx)**2)**2
+field_spectrum_out(2,j,i) = SAT_geo0_out*(cnorm*gammaeff*gammaeff/ky0**4)/(1.0+ay*kx**2)**2
         enddo
      enddo
      ! recompute the intensity and flux spectra

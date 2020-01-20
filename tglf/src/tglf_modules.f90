@@ -59,7 +59,7 @@
       LOGICAL,EXTERNAL :: tglf_isnan
       LOGICAL,EXTERNAL :: tglf_isinf
 ! input units switch
-      CHARACTER (len=4) :: units_in = 'TGLF'
+      CHARACTER (len=8) :: units_in = 'GYRO'
 ! Input Gaussian width
       REAL :: width_in=1.65
       REAL :: width_min_in=0.3
@@ -448,6 +448,7 @@
       REAL :: Rmaj_s, Zmaj_s,rmin_s, q_s
       REAL :: p_prime_s, q_prime_s
       REAL :: p_prime_zero_s
+      REAL :: betae_s, debye_s
 ! OUTPUT
       REAL,DIMENSION(0:ms) :: costheta_geo, sintheta_geo
       REAL,DIMENSION(0:ms) :: costheta_p_geo, s_p

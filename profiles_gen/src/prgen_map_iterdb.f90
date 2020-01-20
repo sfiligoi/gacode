@@ -209,10 +209,10 @@ subroutine prgen_map_iterdb
   !---------------------------------------------------------
   ! Current densities
   !
-  expro_johm = johm*1e-6
-  expro_jbs = jbs*1e-6
-  expro_jnb = jnb*1e-6
-  expro_jrf = jrf*1e-6
+  expro_johm = -ipccw*johm*1e-6
+  expro_jbs = -ipccw*jbs*1e-6
+  expro_jnb = -ipccw*jnb*1e-6
+  expro_jrf = -ipccw*jrf*1e-6
   !---------------------------------------------------------
 
 end subroutine prgen_map_iterdb

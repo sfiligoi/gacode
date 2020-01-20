@@ -1013,6 +1013,7 @@
       USE tglf_hermite
       USE tglf_xgrid
       USE tglf_coeff
+      USE tglf_sgrid
 !
       IMPLICIT NONE
       INTEGER :: i,j,k,is
@@ -1028,14 +1029,18 @@
 ! note that pol is set in get_species
 !
       do i=1,nx
-        debye = debye_factor_in*b0x(i)*(ky*debye_in)**2  ! (k_per*debye length unit)^2
+        debye = debye_factor_in*b0x(i)*(ky*debye_s)**2  ! (k_per*debye length unit)^2
         p0x(i) = debye + pol
       enddo
 !debug
 !      write(*,*)"check p0",nx
 !      do i=1,nx
-!        write(*,*)i,p0x(i)
+!        write(*,*)i,b0x(i)
 !      enddo
+!      write(*,*)"debye_s = ",debye_s
+!      write(*,*)"pol = ",pol
+!      write(*,*)"ky = ", ky
+!      write(*,*)"width_in =",width_in
 !debug
 !
 !  compute the guass-hermite intregrals
@@ -1141,7 +1146,7 @@
        enddo
 !
        if(vpar_model_in.eq.0.and.use_bper_in)then
-         betaU = 0.5*betae_in/(ky*ky)
+         betaU = 0.5*betae_s/(ky*ky)
          betaU = betaU*U0*U0
          do i=1,nbasis
          do j=1,nbasis

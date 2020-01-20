@@ -2,32 +2,26 @@ import sys
 import string
 
 inputfile = sys.argv[1]
-outfile = open('profile_shot','w')
 
-index = 0
+shot = '0'
+time = '0'
 for line in open(inputfile,'r').readlines():
    if 'SHOT' in line:
-      index = 1
-
-   if index > 0:
-      line = string.strip(line)
+      line = line.strip()
       if len(line) > 1:
          x = line.split()
-         outfile.write(' '+x[4]+'\n')
-      else:
-         break
+         shot = x[4]
 
-index = 0
-for line in open(inputfile,'r').readlines():
    if 'EFITD' in line:
-      index = 1
+       line = line.strip()
+       if len(line) > 1:
+          x = line.split()
+          y = x[4].split('ms')
+          time = y[0]
+          if shot == '0':
+             shot = x[3].split('#')[1]
 
-   if index > 0:
-      line = string.strip(line)
-      if len(line) > 1:
-         x = line.split()
-         x[4] = x[4].strip('ms')
-         outfile.write(' '+x[4]+'\n')
-      else:
-         sys.exit()
-
+outfile = open('profile_shot','w')
+outfile.write(shot+'\n')
+outfile.write(time+'\n')
+outfile.close()

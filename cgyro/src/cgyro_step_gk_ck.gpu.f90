@@ -1,15 +1,16 @@
-! Cash-Karp 6:5(4) adaptive integrator  |  multithreaded version
+! Cash-Karp 6:5(4) adaptive integrator  |  GPU version
 
 subroutine cgyro_step_gk_ck
 
-  use mpi
   use timer_lib
+  use mpi
   use cgyro_globals
   use cgyro_io
   use cgyro_step
-  
+
   implicit none
 
+  !
   !           z e             vpar            z e  vperp^2
   !  h = H - ----- G0 ( phi - ----- Apar ) + ----- ---------- Gperp Bpar
   !            T               c               T   omega_a c
@@ -21,7 +22,7 @@ subroutine cgyro_step_gk_ck
   ! phi  -> field(1)
   ! Apar -> field(2)
   ! Bpar -> field(3)
-  
+
   tol = error_tol
 
   itrk = 0
@@ -37,39 +38,43 @@ subroutine cgyro_step_gk_ck
   delta_t_tot = 0.0
   total_local_error = 0.0
   local_max_error = 0.0
-
+  
   deltah2_min = 1.0
   deltah2_max = 0.0
 
   delta_t_last = deltah2
 
   call timer_lib_in('str_mem')
-!$omp parallel workshare
-  h0_old(:,:) = h_x(:,:)
-!$omp end parallel workshare
- call timer_lib_out('str_mem')
+!$acc parallel loop collapse(2) independent present(h0_old,h_x)
+  do iv_loc=1,nv_loc
+     do ic=1,nc
+        h0_old(ic,iv_loc) = h_x(ic,iv_loc)
+     enddo
+  enddo
+  call timer_lib_out('str_mem')
         
+
   do while (delta_t_tot < delta_t)
-     
+
      call timer_lib_in('str')
      if (delta_t_tot + deltah2 > delta_t) then
         deltah2 = delta_t-delta_t_tot
         delta_t_last_step = deltah2
      else
         delta_t_last = deltah2
-        deltah2_min = min(deltah2,deltah2_min)
-        deltah2_max = max(deltah2,deltah2_max)
+        deltah2_min = min(deltah2, deltah2_min)
+        deltah2_max = max(deltah2, deltah2_max)
      endif
 
      if (conv == 1) then
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h0_x,h_x)
         do iv_loc=1,nv_loc
            do ic=1,nc
               h0_x(ic,iv_loc) = h_x(ic,iv_loc)
            enddo
         enddo
      else
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h0_x,h0_old,h_x)
         do iv_loc=1,nv_loc
            do ic=1,nc
               h0_x(ic,iv_loc) = h0_old(ic,iv_loc)
@@ -79,11 +84,11 @@ subroutine cgyro_step_gk_ck
      endif
      call timer_lib_out('str')
      
-     call cgyro_field_c
+     call cgyro_field_c_gpu
      call cgyro_rhs(1)
 
      call timer_lib_in('str')
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs(:,:,1))
      do iv_loc=1,nv_loc
         do ic=1,nc
            h_x(ic, iv_loc) = h0_x(ic, iv_loc) &
@@ -92,40 +97,40 @@ subroutine cgyro_step_gk_ck
      enddo
      call timer_lib_out('str')
      
-     call cgyro_field_c
+     call cgyro_field_c_gpu
      call cgyro_rhs(2)
 
      call timer_lib_in('str')
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h_x,h0_x,h0_old,rhs)
      do iv_loc=1,nv_loc
         do ic=1,nc
-           h_x(ic, iv_loc) = h0_x(ic,iv_loc) &
+           h_x(ic,iv_loc) = h0_x(ic,iv_loc) &
                 + 1.0/40.0*deltah2*(3.0*rhs(ic, iv_loc, 1) &
                 + 9.0*rhs(ic, iv_loc, 2))
         enddo
      enddo
      call timer_lib_out('str')
 
-     call cgyro_field_c
+     call cgyro_field_c_gpu
      call cgyro_rhs(3)
 
      call timer_lib_in('str')
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h_x,h0_x,rhs)
      do iv_loc=1,nv_loc
         do ic=1,nc
-           h_x(ic, iv_loc) = h0_x(ic,iv_loc) &
-                + deltah2*( 3.d0/10.d0*rhs(ic, iv_loc, 1) &
-                - 9.d0/10.d0*rhs(ic, iv_loc, 2) &
-                + 6.d0/5.d0*rhs(ic, iv_loc, 3))
+           h_x(ic,iv_loc) = h0_x(ic,iv_loc) &
+                + deltah2*( 3.d0/10.d0*rhs(ic,iv_loc,1) &
+                - 9.d0/10.d0*rhs(ic,iv_loc, 2) &
+                + 6.d0/5.d0*rhs(ic,iv_loc, 3))
         enddo
      enddo
      call timer_lib_out('str')
-     
-     call cgyro_field_c
+    
+     call cgyro_field_c_gpu
      call cgyro_rhs(4) 
 
      call timer_lib_in('str')
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h_x,h0_x,rhs)
      do iv_loc=1,nv_loc
         do ic=1,nc
            h_x(ic, iv_loc) = h0_x(ic,iv_loc) &
@@ -136,12 +141,12 @@ subroutine cgyro_step_gk_ck
         enddo
      enddo
      call timer_lib_out('str')
-     
-     call cgyro_field_c
+ 
+     call cgyro_field_c_gpu
      call cgyro_rhs(5)
 
      call timer_lib_in('str')
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs)
      do iv_loc=1,nv_loc
         do ic=1,nc
            h_x(ic,iv_loc) = h0_x(ic,iv_loc) &
@@ -154,20 +159,18 @@ subroutine cgyro_step_gk_ck
      enddo
      call timer_lib_out('str')
      
-     call cgyro_field_c
+     call cgyro_field_c_gpu
      call cgyro_rhs(6)
-
-     !---------
+     
      ! SOLUTION
-     !---------
 
      call timer_lib_in('str')
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs)
      do iv_loc=1,nv_loc
         do ic=1,nc
            h_x(ic, iv_loc) = h0_x(ic,iv_loc) &
                 + deltah2*( 37.d0/378.d0*rhs(ic, iv_loc, 1) &
-                + 250.d0/621.d0 * rhs(ic, iv_loc, 3) &
+                + 250.d0/621.d0*rhs(ic, iv_loc, 3) &
                 + 125.d0/594.d0*rhs(ic, iv_loc, 4) &
                 + 512.d0/1771.d0*rhs(ic, iv_loc, 6))
         enddo
@@ -175,12 +178,11 @@ subroutine cgyro_step_gk_ck
      call cgyro_filter()
      call timer_lib_out('str')
 
-     !---------
      ! ERROR
-     !---------
-     
+
      call timer_lib_in('str')
-!$omp parallel do collapse(2)
+     error_rhs = 0.0
+!$acc parallel loop collapse(2) gang present(rhs) reduction(+:error_rhs)
      do iv_loc=1,nv_loc
         do ic=1,nc
            rhs(ic,iv_loc,1) = deltah2*(& 
@@ -189,11 +191,22 @@ subroutine cgyro_step_gk_ck
                 + (125.d0/594.d0-13525.d0/55296.d0)*rhs(ic, iv_loc, 4) &
                 + (-277.d0/14336.d0)*rhs(ic, iv_loc, 5) &
                 + (512.d0/1771.d0-1.d0/4.d0)*rhs(ic, iv_loc, 6))
+           error_rhs = error_rhs+abs(rhs(ic,iv_loc,1))
+        enddo
+     enddo
+     call timer_lib_out('str')
+
+     call timer_lib_in('str')
+     error_hx = 0.0
+!$acc parallel loop collapse(2) independent present(h_x) reduction(+:error_hx)     
+     do iv_loc=1,nv_loc
+        do ic=1,nc
+           error_hx = error_hx + abs(h_x(ic,iv_loc))
         enddo
      enddo
 
-     error_x(1) = sum(abs(rhs(:,:,1)))
-     error_x(2) = sum(abs(h_x))
+     error_x(1) = error_rhs
+     error_x(2) = error_hx
      call timer_lib_out('str')
 
      call timer_lib_in('str_comm')
@@ -201,19 +214,18 @@ subroutine cgyro_step_gk_ck
           MPI_SUM,CGYRO_COMM_WORLD,i_err)
      call timer_lib_out('str_comm')
 
-     error_x = error_sum
+     error_x = error_sum    
      delta_x = error_x(1)+eps
-
      rel_error = error_x(1)/(error_x(2)+eps)
      var_error = sqrt(total_local_error+rel_error*rel_error)
      
      if (var_error < tol) then
-        call cgyro_field_c
+        call cgyro_field_c_gpu
 
-        delta_t_tot = delta_t_tot+deltah2
-        total_local_error = total_local_error+rel_error*rel_error
+        delta_t_tot = delta_t_tot + deltah2
+        total_local_error = total_local_error + rel_error*rel_error
 
-        scale_x = max((tol/delta_x*1.0/delta_t)**0.2,&
+        scale_x = max((tol/delta_x*1.0/delta_t)**0.2, &
              (tol/delta_x*1.0/delta_t)**0.25)
 
         deltah2 = deltah2*max(1.0,min(6.0,scale_x))
@@ -222,7 +234,7 @@ subroutine cgyro_step_gk_ck
         conv = 1
 
         call timer_lib_in('str_mem')
-!$omp parallel do collapse(2)
+!$acc parallel loop collapse(2) independent present(h_x,h0_old)
         do iv_loc=1,nv_loc
            do ic=1,nc
               h0_old(ic,iv_loc) = h0_x(ic,iv_loc)
@@ -239,7 +251,7 @@ subroutine cgyro_step_gk_ck
      deltah2 = max(delta_x_min,deltah2)
 
      itrk = itrk+1
-    
+
      if (itrk > itrk_max) then
         call cgyro_error('Cash-Carp step exceeded max iteration count')
         return
@@ -261,5 +273,5 @@ subroutine cgyro_step_gk_ck
   
   delta_t_gk = min(delta_t,delta_t_gk)
   total_local_error = var_error
-     
+
 end subroutine cgyro_step_gk_ck

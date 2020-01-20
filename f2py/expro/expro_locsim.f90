@@ -186,8 +186,6 @@ end subroutine expro_locsim_alloc
 !----------------------------------------------------------------
 
 subroutine expro_locsim_profiles(&
-     path,&
-     comm,&
      numeq_flag,&
      udsymmetry_flag,&
      quasineutral_flag,&
@@ -202,8 +200,6 @@ subroutine expro_locsim_profiles(&
 
   implicit none
 
-  character(len=*), intent(in) :: path 
-  integer, intent(in) :: comm
   integer, intent(in) :: numeq_flag
   integer, intent(in) :: udsymmetry_flag
   integer, intent(in) :: quasineutral_flag
