@@ -517,7 +517,7 @@ contains
     write(1,20) 'N_TOROIDAL', cgyro_n_toroidal_in
     write(1,20) 'N_FIELD', cgyro_n_field_in
     write(1,30) 'E_MAX', cgyro_e_max_in
-    write(1,20) 'ALPHA_POLY', cgyro_alpha_poly_in
+    write(1,30) 'ALPHA_POLY', cgyro_alpha_poly_in
     write(1,20) 'E_METHOD', cgyro_e_method_in
     write(1,20) 'DELTA_T_METHOD', cgyro_delta_t_method_in
     write(1,30) 'DELTA_T', cgyro_delta_t_in
@@ -528,14 +528,14 @@ contains
     write(1,20) 'RESTART_MODE',cgyro_restart_mode_in
     write(1,30) 'UP_RADIAL',cgyro_up_radial_in
     write(1,30) 'UP_THETA',cgyro_up_theta_in
-    write(1,20) 'UP_ALPHA',cgyro_up_alpha_in
+    write(1,30) 'UP_ALPHA',cgyro_up_alpha_in
     write(1,20) 'NUP_RADIAL',cgyro_nup_radial_in
     write(1,20) 'NUP_THETA',cgyro_nup_theta_in
     write(1,20) 'NUP_ALPHA',cgyro_nup_alpha_in
     write(1,20) 'N_WAVE',cgyro_n_wave_in
     write(1,20) 'CONSTANT_STREAM_FLAG',cgyro_constant_stream_flag_in
     write(1,30) 'KY',cgyro_ky_in
-    write(1,30) 'BOX_SIZE',cgyro_box_size_in
+    write(1,20) 'BOX_SIZE',cgyro_box_size_in
     write(1,30) 'IPCCW',cgyro_ipccw_in
     write(1,30) 'BTCCW',cgyro_btccw_in
     write(1,20) 'SILENT_FLAG',cgyro_silent_flag_in
@@ -663,7 +663,7 @@ contains
     write(1,30) 'SDLNNDR_6',cgyro_sdlnndr_in(6)
     write(1,30) 'SDLNTDR_6',cgyro_sdlntdr_in(6)
     
-    write(1,30) 'QUASINEUTRAL_FLAG',cgyro_quasineutral_flag_in
+    write(1,20) 'QUASINEUTRAL_FLAG',cgyro_quasineutral_flag_in
     write(1,30) 'LAMBDA_STAR_SCALE',cgyro_lambda_star_scale_in
     write(1,30) 'GAMMA_E_SCALE',cgyro_gamma_e_scale_in
     write(1,30) 'GAMMA_P_SCALE',cgyro_gamma_p_scale_in
