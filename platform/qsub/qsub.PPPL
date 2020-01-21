@@ -6,6 +6,10 @@ echo "#SBATCH -o $SIMDIR/batch.out" >> $bfile
 echo "#SBATCH -e $SIMDIR/batch.err" >> $bfile
 echo "#SBATCH -t $WALLTIME" >> $bfile
 echo "#SBATCH -n $cores_used" >> $bfile
+echo "#SBATCH -x dawson200,dawson201,dawson202,dawson203,dawson204,dawson205," >> $bfile
+echo "           dawson206,dawson207,dawson208,dawson209,dawson210,dawson211," >> $bfile
+echo "           dawson212,dawson213,dawson214,dawson215,dawson216,dawson217," >> $bfile
+echo "           dawson218,dawson219,dawson220,dawson221" >> $bfile
 if [ "$QUEUE" = "null_queue" ]
 then
   echo "#SBATCH -p sque" >> $bfile
