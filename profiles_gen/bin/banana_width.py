@@ -5,7 +5,7 @@ try:
    import gacode
    hasgapy = True
 except:
-   print('WARNING: (banana_width.py) gapy.so not found.  Using circular geometry.')
+   print('WARNING: (banana_width.py) gacode.so not found.  Using circular geometry.')
    hasgapy = False
 
 data=np.loadtxt('out.locpargen')
@@ -15,14 +15,14 @@ n = 32
 theta = np.linspace(0,2*np.pi,n)-np.pi
 
 if hasgapy:
-   gapy.geo.geo_q_in = data[0]
-   gapy.geo.geo_rmin_in = data[1]
-   gapy.geo.geo_rmaj_in = data[2]
-   gapy.geo.geo_drmaj_in = data[3]
-   gapy.geo.geo_kappa_in = data[4]
-   gapy.geo.geo_interp(theta,True)
-   b_gapy = gapy.geo.geo_b
-   s_gapy = gapy.geo.geo_gsin*gapy.geo.geo_g_theta*gapy.geo.geo_grad_r
+   gacode.geo.geo_q_in = data[0]
+   gacode.geo.geo_rmin_in = data[1]
+   gacode.geo.geo_rmaj_in = data[2]
+   gacode.geo.geo_drmaj_in = data[3]
+   gacode.geo.geo_kappa_in = data[4]
+   gacode.geo.geo_interp(theta,True)
+   b_gapy = gacode.geo.geo_b
+   s_gapy = gacode.geo.geo_gsin*gacode.geo.geo_g_theta*gacode.geo.geo_grad_r
    s_gapy[0] = 0.0 ; s_gapy[-1] = 0.0
 else:
    eps = data[1]/data[2]
