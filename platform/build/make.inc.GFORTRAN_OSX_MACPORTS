@@ -8,7 +8,7 @@ IDENTITY="OSX gfortran+openmpi from MacPorts"
 MAKE = make
 
 NETCDF_PATH=/opt/local
-MF90 = mpif90
+MF90 = mpif90-openmpi-mp
 
 # Compilers and flags
 #
