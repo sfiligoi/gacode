@@ -1,3 +1,5 @@
+__all__ = ['Gapy']
+
 import sys
 from gacode import expro
 import numpy
@@ -31,11 +33,12 @@ def sort_key(x):
     return x.lower()
 
 
-class gapy(dict):
+class Gapy(dict):
     def __init__(self, filename, input_profiles_compatibility_mode=True):
         self.filename = filename
         self.input_profiles_compatibility_mode = input_profiles_compatibility_mode
         self.load()
+        self.sort()
 
     def load(self):
         getattr(expro, 'expro_name')[:] = gapystr_set([''])
@@ -135,3 +138,16 @@ class gapy(dict):
         self.clear()
         for item in keys:
             self[item] = tmp[item]
+
+#--------------------------
+if '__main__' in __name__:
+    import os
+    import gacode
+
+    print(gacode)
+
+    for compatibility_mode in [False, True]:
+        for times in range(2):
+            tmp = Gapy(os.environ['GACODE_ROOT'] + '/tgyro/tools/input/treg01/input.gacode', compatibility_mode)
+            print(tmp.keys())
+            tmp.save()
