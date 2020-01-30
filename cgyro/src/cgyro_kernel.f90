@@ -133,7 +133,6 @@ subroutine cgyro_kernel
      end select
      
      call timer_lib_in('str_mem')
-     call cgyro_filter
 !$acc update host(rhs(:,:,1))
      call timer_lib_out('str_mem')
 
