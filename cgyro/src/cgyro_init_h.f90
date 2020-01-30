@@ -180,6 +180,8 @@ subroutine cgyro_filter
   integer :: ir
 
   if (zf_test_mode == 0 .and. n == 0) then
+!$acc parallel loop gang vector private(ir) &
+!$acc          present(ir_c,px,h_x,cap_h_c) default(none)
      do ic=1,nc
         ir = ir_c(ic)
         if (ir == 1 .or. px(ir) == 0) then
