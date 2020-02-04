@@ -14,6 +14,7 @@ class cgyrodata:
 
       self.silent = silent
       self.dir = sim_directory
+      self.gettime()
       self.getgrid()
       self.getdata()
       
@@ -35,7 +36,7 @@ class cgyrodata:
 
       return t,fmt,data
 
-   def getdata(self):
+   def gettime(self):
 
       if not os.path.isfile(self.dir+'out.cgyro.time'):
          print('INFO: (data.py) No time record exists.')
@@ -71,7 +72,10 @@ class cgyrodata:
       self.n_time = nt
       if not self.silent:
          print('INFO: (data.py) Read time vector in out.cgyro.time.')
+
       #-----------------------------------------------------------------
+ 
+   def getdata(self):
 
       #-----------------------------------------------------------------
       # Linear frequency
