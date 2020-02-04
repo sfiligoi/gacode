@@ -177,6 +177,14 @@ subroutine cgyro_write_restart_one
     close(statusfd)
   endif
 
+  ! Re-set h(0,0)=0
+  if (source_flag == 1 .and. n == 0) then
+     ic0 = (n_radial/2)*n_theta
+     do j=1,n_theta
+        h_x(ic0+j,:) = 0.0
+     enddo
+  endif
+  
 end subroutine cgyro_write_restart_one
 
 subroutine cgyro_write_restart_header_part

@@ -8,7 +8,7 @@ wrapper = Extension('gacode_ext',
                              'vis/vis.f90'])
 
 setup(name='gacode',
-      version='0.31',
+      version='0.40',
       description='Python interface to gacode profile and geometry tools.',
       url='https://gafusion.github.io/doc',
       author='General Atomics Theory Group',
