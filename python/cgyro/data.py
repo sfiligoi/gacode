@@ -77,6 +77,8 @@ class cgyrodata:
  
    def getdata(self):
 
+      nt = self.n_time
+      
       #-----------------------------------------------------------------
       # Linear frequency
       #
