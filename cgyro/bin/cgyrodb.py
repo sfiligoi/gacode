@@ -1,12 +1,14 @@
+#!/usr/bin/env python
+
 import os
-import yaml
+#import yaml
 import numpy as np
 import pandas as pd
 from gacodeinput import *
 from gacodefuncs import *
 from cgyro.data import cgyrodata
 
-mode = 'enum'
+mode = 'flux'
 
 meta = {}
 
@@ -15,7 +17,6 @@ def gendict(sim,mode):
    mydict = {}
 
    mydict['n_radial'] = sim.n_radial
-   mydict['n_theta'] = sim.n_theta
    mydict['n_theta'] = sim.n_theta
 
    if mode == 'flux':
@@ -34,13 +35,11 @@ def gendict(sim,mode):
 for mdir in next(os.walk('./'))[1]:
    sim = cgyrodata(mdir+'/',silent=True)
    meta[mdir]=gendict(sim,mode)
-   if mode == 'enum':
-      print mdir
 
-#print meta
+print(meta)
 
-#df = pd.DataFrame(meta) 
-#print df
+df = pd.DataFrame(meta) 
+print(df.T[['n_radial','q0']])
 
-with open('data.yml','w') as outfile:
-   yaml.dump(meta,outfile,default_flow_style=False)
+#with open('data.yml','w') as outfile:
+#   yaml.dump(meta,outfile,default_flow_style=False)
