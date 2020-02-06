@@ -1,14 +1,28 @@
 #!/usr/bin/env python
 
 import os
-#import yaml
+import sys, getopt
 import numpy as np
 import pandas as pd
+from tqdm import tqdm
 from gacodeinput import *
 from gacodefuncs import *
 from cgyro.data import cgyrodata
 
-mode = 'flux'
+mode = 'enum'
+
+try:
+   opts, args = getopt.getopt(sys.argv[1:],"hm:",[])
+except getopt.GetoptError:
+   print('cgyrodb -m <mode>')
+   sys.exit(2)
+
+for opt, arg in opts:
+   if opt == '-h':
+      print('cgyrodb -m <mode>')
+      sys.exit()
+   elif opt == '-m':
+      mode = 'flux'
 
 meta = {}
 
@@ -18,6 +32,8 @@ def gendict(sim,mode):
 
    mydict['n_radial'] = sim.n_radial
    mydict['n_theta'] = sim.n_theta
+   mydict['q'] = sim.q
+   mydict['s'] = sim.shear
 
    if mode == 'flux':
       sim.getflux()
@@ -32,14 +48,16 @@ def gendict(sim,mode):
 
    return mydict
 
-for mdir in next(os.walk('./'))[1]:
-   sim = cgyrodata(mdir+'/',silent=True)
-   meta[mdir]=gendict(sim,mode)
+# First locate all directories
+y = []
+for root,xd,xf in os.walk('./'):
+   if xd == []:
+      y.append(root)
 
-print(meta)
-
+# Create master dictionary
+for mdir in tqdm(y):
+    sim = cgyrodata(mdir+'/',silent=True)
+    meta[mdir]=gendict(sim,mode)
+   
 df = pd.DataFrame(meta) 
-print(df.T[['n_radial','q0']])
-
-#with open('data.yml','w') as outfile:
-#   yaml.dump(meta,outfile,default_flow_style=False)
+print(df.T[['n_radial','q','s']])
