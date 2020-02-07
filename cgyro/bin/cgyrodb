@@ -22,7 +22,7 @@ for opt, arg in opts:
       print('cgyrodb -m <mode>')
       sys.exit()
    elif opt == '-m':
-      mode = 'flux'
+      mode = arg
 
 meta = {}
 

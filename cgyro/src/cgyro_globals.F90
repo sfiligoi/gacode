@@ -94,6 +94,8 @@ module cgyro_globals
   integer :: mpiio_stripe_factor
   integer :: gpu_bigmem_flag
   real :: px0
+  integer :: stream_term
+  real :: stream_factor
   !
   ! Geometry input
   !
