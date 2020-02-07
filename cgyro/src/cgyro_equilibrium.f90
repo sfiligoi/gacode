@@ -235,6 +235,9 @@ subroutine cgyro_equilibrium
         omega_stream(:,1) = stream_factor*omega_stream(:,1)
         omega_trap(:,1) = stream_factor*omega_trap(:,1)
      endif
+  case (12)
+        omega_stream(:,1) = stream_factor*omega_stream(:,1)
+        omega_trap(:,1) = stream_factor*omega_trap(:,1)
   case (3)
      if (n == 0 .and. n_species > 1) then
         omega_stream(:,2) = stream_factor*omega_stream(:,2)
