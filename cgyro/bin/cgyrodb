@@ -36,8 +36,12 @@ def gendict(sim,mode):
    mydict['s'] = sim.shear
    mydict['a/Ln0'] = sim.dlnndr[0]
    mydict['a/Lt0'] = sim.dlntdr[0]
-   mydict['a/Ln1'] = sim.dlnndr[1]
-   mydict['a/Lt1'] = sim.dlntdr[1]
+   if sim.n_species > 1:
+      mydict['a/Ln1'] = sim.dlnndr[1]
+      mydict['a/Lt1'] = sim.dlntdr[1]
+   else:
+      mydict['a/Ln1'] = 0.0
+      mydict['a/Lt1'] = 0.0
 
    if mode == 'flux':
       sim.getflux()
