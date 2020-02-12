@@ -431,7 +431,7 @@
                         ,ierr)
       call MPI_ALLREDUCE(sat_geo_spectrum_save       &
                         ,sat_geo_spectrum_out        &
-                        ,4*nkym*maxmodes             &
+                        ,nkym*maxmodes             &
                         ,MPI_DOUBLE_PRECISION        &
                         ,MPI_SUM                     &
                         ,iCommTglf                   &

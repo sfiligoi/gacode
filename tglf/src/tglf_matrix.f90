@@ -1061,7 +1061,7 @@
         ave_wdh(i,j) = 0.0
         ave_wdg(i,j)=0.0
         ave_b0(i,j) = 0.0
-        ave_sat_geo(i,j) = 0.0
+        ave_sat_geo_inv(i,j) = 0.0
         ave_lnB(i,j) = 0.0
         ave_p0inv(i,j) = 0.0
         ave_p0(i,j) = 0.0
@@ -1075,7 +1075,7 @@
          ave_wdh(i,j)    = ave_wdh(i,j)  + ww*wdx(k)
          ave_wdg(i,j)   = ave_wdg(i,j) + ww*(wdx(k)+wdpx(k)*(1.0-ft2)/(1.0+ft2))
          ave_b0(i,j)    = ave_b0(i,j)  + ww*b0x(k)
-         ave_sat_geo(i,j) = ave_sat_geo(i,j) + ww*sat_geox(k)
+         ave_sat_geo_inv(i,j) = ave_sat_geo_inv(i,j) + ww*sat_geo_invx(k)
 !         ave_lnB(i,j)   = ave_lnB(i,j) + ww*DLOG(Bx(k))
          ave_p0inv(i,j) = ave_p0inv(i,j) + ww/p0x(k)
          ave_p0(i,j) = ave_p0(i,j) + ww*p0x(k)
@@ -1091,7 +1091,7 @@
         if(ABS(ave_p0inv(i,j)).lt.zero_cut)ave_p0inv(i,j) = 0.0
         if(ABS(ave_p0(i,j)).lt.zero_cut)ave_p0(i,j) = 0.0
         if(ABS(ave_kx(i,j)).lt.zero_cut)ave_kx(i,j) = 0.0
-        if(ABS(ave_sat_geo(i,j)).lt.zero_cut)ave_sat_geo(i,j) = 0.0
+        if(ABS(ave_sat_geo_inv(i,j)).lt.zero_cut)ave_sat_geo_inv(i,j) = 0.0
         if(ABS(ave_c_tor_par(i,j)).lt.zero_cut)ave_c_tor_par(i,j) = 0.0
         if(ABS(ave_c_tor_per(i,j)).lt.zero_cut)ave_c_tor_per(i,j) = 0.0
         if(ABS(ave_c_par_par(i,j)).lt.zero_cut)ave_c_par_par(i,j) = 0.0
@@ -1103,7 +1103,7 @@
         ave_p0inv(j,i) = ave_p0inv(i,j)
         ave_p0(j,i) = ave_p0(i,j)
         ave_kx(j,i) = ave_kx(i,j)
-        ave_sat_geo(j,i) = ave_sat_geo(i,j)
+        ave_sat_geo_inv(j,i) = ave_sat_geo_inv(i,j)
         ave_c_tor_par(j,i) = ave_c_tor_par(i,j)
         ave_c_tor_per(j,i) = ave_c_tor_per(i,j)
         ave_c_par_par(j,i) = ave_c_par_par(i,j)
@@ -1115,7 +1115,7 @@
 !       write(*,*)"ave_p0(1,1) = ",ave_p0(1,1)
 !       write(*,*)"ave_b0(1,1) = ",ave_b0(1,1)
 !       write(*,*)"ave_kx(1,1) = ",ave_kx(1,1)
-!       write(*,*)"ave_sat_geo(1,1) = ",ave_sat_geo(1,1)
+!       write(*,*)"ave_sat_geo_inv(1,1) = ",ave_sat_geo_inv(1,1)
 !       write(*,*)"ave_tor_par(1,1) = ",ave_c_tor_par(1,1)
 !       write(*,*)"ave_tor_per(1,1) = ",ave_c_tor_per(1,1)
 !       write(*,*)"ave_par_par(1,1) = ",ave_c_par_par(1,1)
@@ -1204,10 +1204,10 @@
 !        write(*,*)i,j,ave_gradB(i,j)
 !       enddo
 !       enddo
-!       write(*,*)"check ave_sat_geo "
+!       write(*,*)"check ave_sat_geo_inv "
 !       do i=1,nbasis
 !       do j=1,nbasis
-!        write(*,*)i,j,ave_sat_geo(i,j)
+!        write(*,*)i,j,ave_sat_geo_inv(i,j)
 !       enddo
 !       enddo
 !

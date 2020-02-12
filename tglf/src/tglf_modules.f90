@@ -402,7 +402,7 @@
       REAL,DIMENSION(nxm) :: wdx, wdpx, b0x, b2x, kxx
       REAL,DIMENSION(nxm) :: cx_tor_par, cx_tor_per
       REAL,DIMENSION(nxm) :: cx_par_par
-      REAL,DIMENSION(nxm) :: p0x, Bx, sat_geox
+      REAL,DIMENSION(nxm) :: p0x, Bx, sat_geo_invx
       INTEGER,DIMENSION(nkym) :: mask_save
       REAL,DIMENSION(nkym) :: gamma_nb_min_save
       REAL,DIMENSION(nkym) :: width_save, ft_save
@@ -695,7 +695,7 @@
       REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gradBgu33
 !  ave_theta
       REAL :: gradB
-      REAL,ALLOCATABLE,DIMENSION(:,:) :: ave_sat_geo
+      REAL,ALLOCATABLE,DIMENSION(:,:) :: ave_sat_geo_inv
       REAL,ALLOCATABLE,DIMENSION(:,:) :: ave_kx
       REAL,ALLOCATABLE,DIMENSION(:,:) :: ave_c_tor_par, ave_c_tor_per
       REAL,ALLOCATABLE,DIMENSION(:,:) :: ave_c_par_par

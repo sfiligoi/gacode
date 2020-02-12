@@ -742,7 +742,7 @@
            modB_phi = modB_phi +ave_c_par_par(i,j)*phi(j)
            kx_phi = kx_phi +ave_kx(i,j)*phi(j)
            kpar_phi = kpar_phi +xi*ave_kpar(i,j)*phi(j)
-           sat_geo_phi = sat_geo_phi + ave_sat_geo(i,j)*phi(j)
+           sat_geo_phi = sat_geo_phi + ave_sat_geo_inv(i,j)*phi(j)
          enddo
          phi_wd_phi = phi_wd_phi + CONJG(phi(i))*wd_phi
          phi_b0_phi = phi_b0_phi + CONJG(phi(i))*b0_phi
