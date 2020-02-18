@@ -40,7 +40,15 @@ for k in range(3):
     print('nexp  : ' + str(expro.expro_n_exp))
     print('bunit : ' + str(expro.expro_bunit))
 
-    # write the file without making chages
+    # update the ions labels
+    new_name = ['D', 'C', 'D']
+    new_type = ['[therm]', '[therm]', '[fast]']
+    expro.expro_name[:] = gapystr_set(new_name)
+    expro.expro_type[:] = gapystr_set(new_type)
+    assert gapystr_get(expro.expro_name)[:3] == new_name, error_message
+    assert gapystr_get(expro.expro_type)[:3] == new_type, error_message
+
+    # write a new file
     tmpdir = tempfile.gettempdir() + os.sep
     filename = tmpdir + 'input.gacode'
     print('WRITE: ' + filename)
