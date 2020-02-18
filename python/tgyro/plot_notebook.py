@@ -17,7 +17,7 @@ from matplotlib import rc
 from gacodefuncs import *
 from tgyro.data import tgyrodata
 from matplotlib.colors import LogNorm
-from gacode import expro
+from pygacode import expro
 
 rc('text', usetex=True)
 rc('font', size=18)

@@ -14,10 +14,10 @@ setup(name='gacode',
       author='General Atomics Theory Group',
       author_email='candy@fusion.gat.com',
       license='MIT',
-      py_modules=['gacode.__init__', 'gacode.test.test_install'],
-      package_data={'gacode.test': ['input.gacode']},
-      packages=['gacode.test'],
+      py_modules=['pygacode.__init__', 'pygacode.test.test_install'],
+      package_data={'pygacode.test': ['input.gacode']},
+      packages=['pygacode.test'],
       ext_modules=[wrapper]
       )
 
-from gacode.test import test_install
+from pygacode.test import test_install

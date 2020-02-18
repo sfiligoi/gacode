@@ -1,4 +1,4 @@
-from gacode import geo
+from pygacode import geo
 import numpy as np
 
 np.set_printoptions(precision=16)

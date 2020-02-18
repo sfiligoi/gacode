@@ -1,13 +1,16 @@
-import sys
 import os
+import sys
 import numpy
-from gacode import expro
+import tempfile
+from pygacode import *
+from pygacode import expro
 
-error_message = 'gacode installation not successful'
+error_message = 'pygacode installation not successful'
 
 filename = os.path.split(__file__)[0] + '/input.gacode'
 
 for k in range(3):
+    # read the file
     print('READ: ' + filename)
     expro.expro_read(filename)
 
@@ -22,17 +25,27 @@ for k in range(3):
     # they are bytes (true both in Python 2 and 3)
     assert isinstance(expro.expro_name[0], bytes), error_message
 
-    print(expro.expro_name)
-    print(expro.expro_type)
+    # test that expro_list returns some fields
+    assert len(expro.expro_list) > 0, error_message
 
+    # test gapystr_get returns list
+    assert isinstance(gapystr_get(expro.expro_list), list), error_message
+    # test gapystr_get returns list of strings
+    assert all([isinstance(x, str) for x in gapystr_get(expro.expro_list)]), error_message
+
+    # print some content
+    print(gapystr_get(expro.expro_list))
+    print(gapystr_get(expro.expro_name))
+    print(gapystr_get(expro.expro_type))
     print('nexp  : ' + str(expro.expro_n_exp))
     print('bunit : ' + str(expro.expro_bunit))
 
-    import tempfile
-
+    # write the file without making chages
     tmpdir = tempfile.gettempdir() + os.sep
     filename = tmpdir + 'input.gacode'
     print('WRITE: ' + filename)
     expro.expro_write(filename)
 
     print('')
+
+print('SUCCESS: pygacode installation tests have passed')

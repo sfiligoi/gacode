@@ -1,4 +1,4 @@
-from gacode import expro
+from pygacode import expro
 import sys
 import string
 import numpy as np

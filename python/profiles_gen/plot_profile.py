@@ -14,8 +14,8 @@ matplotlib.use('WXAgg')
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
 import matplotlib.pyplot as plt
 from gacodefuncs import *
-from gacode import expro
-from gacode.gapy import gapystr_get as gapystr
+from pygacode import expro
+from pygacode import gapystr_get as gapystr
 
 matplotlib.rc('text',usetex=True)
 matplotlib.rc('font',size=18)
