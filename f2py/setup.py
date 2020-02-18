@@ -14,6 +14,6 @@ setup(name='gacode',
       author='General Atomics Theory Group',
       author_email='candy@fusion.gat.com',
       license='MIT',
-      py_modules=['gacode.gapy'],
+      py_modules=[],
       ext_modules=[wrapper]
 )
