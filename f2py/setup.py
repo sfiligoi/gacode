@@ -1,4 +1,5 @@
 from numpy.distutils.core import setup, Extension
+import sys
 
 wrapper = Extension('gacode_ext',
                     sources=['expro/expro.f90',
@@ -20,4 +21,6 @@ setup(name='gacode',
       ext_modules=[wrapper]
       )
 
-from pygacode.test import test_install
+# only run tests when installing
+if 'install' in sys.argv:
+    from pygacode.test import test_install
