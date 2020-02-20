@@ -54,7 +54,7 @@ subroutine cgyro_equilibrium
   geo_shape_s_cos2_in = shape_s_cos2
   geo_shape_s_cos3_in = shape_s_cos3
   geo_shape_s_sin3_in = shape_s_sin3
- 
+
   geo_fourier_in(:,0:geo_nfourier_in) = geo_yin(:,:)
 
   ! Get initial geo solution, then set R,dR/dr at theta=0 
@@ -106,7 +106,7 @@ subroutine cgyro_equilibrium
      ! used for finite-difference stencils.
 
   endif
-  
+
   ! This theta grid is:
   !
   ! 1. NOT EQUALLY SPACED if constant_stream_flag == 1
@@ -173,7 +173,7 @@ subroutine cgyro_equilibrium
   w_theta(:) = w_theta(:)/sum(w_theta) 
 
   mach_one_fac = 1.0
-  
+
   ! 1. Compute rotation (M^2) terms IF required
   !
   ! NOTE: this changes beta_star and thus GEO (which affects gcos2 
@@ -183,16 +183,16 @@ subroutine cgyro_equilibrium
 
   ! 2. Compute terms required for O(M) rotation, and no rotation.
   !
-  
+
   do it=1,n_theta
 
      do is=1,n_species
-  
+
         omega_stream(it,is) = sqrt(2.0)*vth(is)/(q*rmaj*g_theta(it))
-        
+
         omega_trap(it,is) = -0.5*sqrt(2.0)*vth(is) &
              *(geo_dbdt(it)/geo_b(it))/(q*rmaj*geo_g_theta(it)) 
-        
+
         omega_rdrift(it,is) = -rho*vth(is)**2*mass(is)/(Z(is)*geo_b(it)) &
              *geo_grad_r(it)/rmaj*geo_gsin(it) 
 
@@ -201,17 +201,17 @@ subroutine cgyro_equilibrium
 
         omega_aprdrift(it,is) = 2.0*rho*vth(is)**2 &
              *mass(is)/(Z(is)*geo_b(it))*geo_gq(it)/rmaj*geo_gcos2(it)
-        
+
         omega_cdrift(it,is) = -2.0*sqrt(2.0)*rho*vth(is) &
              * mass(is)/(Z(is)*geo_b(it))*geo_gq(it)/rmaj &
              *(geo_ucos(it)+geo_captheta(it)*geo_usin(it))*mach*mach_one_fac
-        
+
         omega_cdrift_r(it,is) = -2.0*sqrt(2.0)*rho*vth(is) &
              * mass(is)/(Z(is)*geo_b(it))*geo_grad_r(it)/rmaj*geo_usin(it) &
              * mach*mach_one_fac
- 
+
      enddo
-     
+
      omega_gammap(it) = geo_bt(it)/geo_b(it)*geo_bigr(it)/rmaj*gamma_p*mach_one_fac
 
      do ir=1,n_radial
@@ -221,7 +221,7 @@ subroutine cgyro_equilibrium
         k_x(ic_c(ir,it)) = 2.0*pi*(px(ir)+px0)*geo_grad_r(it)/length &
              + k_theta*geo_gq(it)*geo_captheta(it)
      enddo
-     
+
   enddo
 
   select case (stream_term)
@@ -236,8 +236,8 @@ subroutine cgyro_equilibrium
         omega_trap(:,1) = stream_factor*omega_trap(:,1)
      endif
   case (12)
-        omega_stream(:,1) = stream_factor*omega_stream(:,1)
-        omega_trap(:,1) = stream_factor*omega_trap(:,1)
+     omega_stream(:,1) = stream_factor*omega_stream(:,1)
+     omega_trap(:,1) = stream_factor*omega_trap(:,1)
   case (3)
      if (n == 0 .and. n_species > 1) then
         omega_stream(:,2) = stream_factor*omega_stream(:,2)
@@ -248,10 +248,13 @@ subroutine cgyro_equilibrium
         omega_stream(:,2) = stream_factor*omega_stream(:,2)
         omega_trap(:,2) = stream_factor*omega_trap(:,2)
      endif
+  case (34)
+     omega_stream(:,2) = stream_factor*omega_stream(:,2)
+     omega_trap(:,2) = stream_factor*omega_trap(:,2)
   end select
-  
-!$acc enter data copyin(xi,vel,omega_stream)
-    
+
+  !$acc enter data copyin(xi,vel,omega_stream)
+
 end subroutine cgyro_equilibrium
 
 
