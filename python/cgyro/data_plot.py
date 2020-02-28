@@ -403,7 +403,6 @@ class cgyrodata_plot(data.cgyrodata):
       
       # f[p,n,t]
       f,ft = self.kxky_select(theta,0,moment,spec)
-      ax.set_ylabel(r'$\left|'+ft+'^\prime\\right|/\\rho_s$')
 
       # complex n=0 amplitudes
       yr = average_n(np.real(f[:,0,:]),t,w,wmax,nx)
@@ -420,9 +419,12 @@ class cgyrodata_plot(data.cgyrodata):
       yave = 2*yave*(2*np.pi/self.length)
       y0ave = 2*y0ave*(2*np.pi/self.length)
          
-      ax.plot(x/(2*np.pi),y0ave,color='k')
-      #ax.plot(x/(2*np.pi),yave,color='b')
-
+      ax.plot(x/(2*np.pi),y0ave,color='k',
+              label=r'$\left|'+ft+'\\right|/\\rho_s$')
+      ax.plot(x/(2*np.pi),yave*self.rho,color='b',
+              label=r'$\left|'+ft+'^\prime\\right|$')
+      ax.legend()
+      
       ax.set_xlim([0,1])
 
       if ymax != 'auto':
