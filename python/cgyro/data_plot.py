@@ -410,14 +410,18 @@ class cgyrodata_plot(data.cgyrodata):
       yi = average_n(np.imag(f[:,0,:]),t,w,wmax,nx)
       nxp = 8*nx
       yave = np.zeros(nxp)
+      y0ave = np.zeros(nxp)
       x = np.linspace(0,2*np.pi,num=nxp)
       y = yr+1j*yi
       for i in range(nx):
          p = i-nx//2
+         y0ave = y0ave + np.real(np.exp(1j*p*x)*y[i])
          yave = yave + np.real(1j*p*np.exp(1j*p*x)*y[i])
       yave = 2*yave*(2*np.pi/self.length)
+      y0ave = 2*y0ave*(2*np.pi/self.length)
          
-      ax.plot(x/(2*np.pi),yave)
+      ax.plot(x/(2*np.pi),y0ave,color='k')
+      #ax.plot(x/(2*np.pi),yave,color='b')
 
       ax.set_xlim([0,1])
 
