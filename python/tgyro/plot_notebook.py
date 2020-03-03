@@ -80,12 +80,16 @@ def setprof(exp, tag):
         y = expro.expro_ni[0, :]
     elif tag == 'ni_2':
         y = expro.expro_ni[1, :]
+    elif tag == 'ni_3':
+        y = expro.expro_ni[2, :]
     elif tag == 'dlntedr':
         y = expro.expro_dlntedr
     elif tag == 'dlnnedr':
         y = expro.expro_dlnnedr
     elif tag == 'dlntidr_1':
         y = expro.expro_dlntidr[0, :]
+    else:
+        raise NotImplementedError('Mapping of tag %s has not been implemented'%tag)
 
     return y
 
