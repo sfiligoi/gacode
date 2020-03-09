@@ -18,7 +18,9 @@ export EXTRA_LIBS = \
        ${GACODE_ROOT}/f2py/expro/expro_lib.a \
        ${GACODE_ROOT}/f2py/geo/geo_lib.a \
        ${GACODE_ROOT}/shared/math/math_lib.a \
-       ${GACODE_ROOT}/shared/UMFPACK/UMFPACK_lib.a
+       ${GACODE_ROOT}/shared/UMFPACK/UMFPACK_lib.a \
+       ${GACODE_ROOT}/shared/landau/landau.o \
+       ${GACODE_ROOT}/shared/landau/gyrotransformation.o
 
 all:
 	gacode_getversion > .VERSION
