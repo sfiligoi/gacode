@@ -803,8 +803,9 @@ contains
        print '(A,G24.16)','tbes:',tbes
        cost(9)=1
        do i=1,11
-          print "(I2,9(' ',A,ES9.2))",i,'t(i):',t(i),'cost(i):',cost(i),'t(i)/cost(i):',t(i)/cost(i),'flops/cycle(i):',2*cost(i)&
-               /(t(i)*3.9d9)
+          if (t(i)>0 .and. cost(i)>0) &
+               print "(I2,9(' ',A,ES9.2))",i,'t(i):',t(i),'cost(i):',cost(i),'t(i)/cost(i):',&
+               t(i)/cost(i),'flops/cycle(i):',2*cost(i)/(t(i)*3.9d9)
        end do
        print '(A,2(G24.16))','tot',tto,tbes+sum(t)
     end if
@@ -1407,7 +1408,7 @@ contains
        print '(A,ES9.2)','tbes:',tbes
        cost(9)=1
        do i=1,11
-          if (t(i)/=0) &
+          if (t(i)>0 .and. cost(i)>0) &
                print "(I2,9(' ',A,ES9.2))",i,'t(i):',t(i),'cost(i):',cost(i),'t(i)/cost(i):',&
                t(i)/cost(i),'flops/cycle(i):',2*cost(i)/(t(i)*3.9d9) ! for I7-3770
        end do
