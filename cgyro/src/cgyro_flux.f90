@@ -1,14 +1,30 @@
-!-----------------------------------------------------------------
+!---------------------------------------------------------------------------
 ! cgyro_flux.f90
 !
 ! PURPOSE:
 !  Compute flux and mean-square fluctuation amplitudes as
 !  functions of (kx,ky).
 !
-! The fluxes are:
-!  gflux(ky) = (l,ky)-dependent fluxes
-!  cflux(ky) = ky-dependent "interior" fluxes
-!-----------------------------------------------------------------
+! NOTES:
+!
+!  Flux definitions (these are all broken down by ky) 
+!
+!   gflux(l,ky) = Radial Fourier expansion of flux (l is the Fourier harmonic)
+!   gflux(0,ky) = Domain-averaged flux [this is the standard flux-tube flux]
+!     cflux(ky) = Interior-averaged flux [this is the "central" flux]
+!
+!  Global flux logic:
+!
+!   Retain radial harmonics l = [0,...,N_GLOBAL], where N_GLOBAL=4 by default
+!
+!   To trigger output of the global flux (viewable by -plot xflux),
+!    set GFLUX_PRINT_FLAG=1
+!
+! NOTE:
+!  cflux is only of interest when profile or ExB shear is active
+!  cflux(ky) is the average flux in the "positive-shear region"
+!  gflux(ky,0)-cflux is the flux in the "negative-shear region"
+!---------------------------------------------------------------------------
 
 subroutine cgyro_flux
 

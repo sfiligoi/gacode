@@ -17,7 +17,6 @@ module prgen_globals
   integer :: nx
   integer :: format_type
   integer :: efit_method
-  integer :: neut_flag
   integer :: verbose_flag
   integer :: ipccw
   integer :: btccw
@@ -229,6 +228,7 @@ module prgen_globals
 
   real, dimension(:), allocatable :: plst_curr_ohmic
   real, dimension(:), allocatable :: plst_curr_bootstrap
+  real, dimension(:), allocatable :: plst_curt
   !---------------------------------------------------------
 
   !---------------------------------------------------------

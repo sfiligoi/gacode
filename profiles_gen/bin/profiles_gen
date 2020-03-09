@@ -104,8 +104,8 @@ then
    echo "             -lf"
    echo "             Lump fast ions into a single species."
    echo
-   echo "             -sub_aux"
-   echo "             Toggles subtractive auxiliary power (rather than true sum of RF and NBI)"
+   echo "             -true_aux"
+   echo "             Toggles true auxiliary power (sum of individual powers)"
    echo
    echo "CORSICA Options"
    echo
@@ -257,8 +257,7 @@ VERBOSE_FLAG=0
 ORDER_FLAG=0
 LUMP_FLAG=0
 LUMP_FAST_FLAG=0
-TRUE_AUX_FLAG=1
-NEUT_FLAG=0
+TRUE_AUX_FLAG=0
 
 # Number of points for -i null option
 N_NULL=40
@@ -332,7 +331,7 @@ while [ $# -gt 0 ] ; do
   -narc) shift ; NARC=$1 ;;
   -npsi) shift ; NPSI=$1 ;;
 
-  -sub_aux) TRUE_AUX_FLAG=0 ;;
+  -true_aux) TRUE_AUX_FLAG=1 ;;
   
   -V) VERBOSE_FLAG=1 ;;
 
@@ -427,7 +426,15 @@ else
 
 fi
 #=============================================================
-
+# If file is GACODE LEGACY (input.profiles), parse header
+# to get ion masses, charge, names
+#
+if [ "$itype" == "LEGACY" ] ; then
+  echo "INFO: (profiles_gen) Parsing input.profiles header."
+#  python $PRGEN_BIN/profile_parse.py $FILE
+  python $PRGEN_BIN/profile_header_dump.py $FILE
+  python $PRGEN_BIN/profile_header_shot.py $FILE
+fi
 #=============================================================
 # Managing input file (also catches UFILE mode)
 
@@ -697,7 +704,7 @@ fi
 
 if [ $VERBOSE_FLAG -eq 0 ]
 then
-   rm -f $CONFIG fluxfit.* success
+   rm -f $CONFIG fluxfit.* success profile_header profile_shot
    rm -f *.ave out.com out.dim out.data out.ufile.log
    rm -f gfile out.expro.run pfile.*
 fi

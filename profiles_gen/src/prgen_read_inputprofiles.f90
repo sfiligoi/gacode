@@ -15,13 +15,13 @@ subroutine prgen_read_inputprofiles
   integer :: nexp,nion
   character(len=99) :: line
   real :: x(5)
-  real :: b_ref,arho
+  real :: b_ref,arho,rvbv
 
   expro_ctrl_quasineutral_flag = 0
   expro_ctrl_numeq_flag = 0 
-  
+
   !----------------------------------------------
-  
+
   open(unit=1,file='input.profiles',status='old')
   do while (line(1:2) /= '#r')
      read(1,'(a)') line
@@ -33,6 +33,12 @@ subroutine prgen_read_inputprofiles
      endif
      if (line(1:6) == 'BT_EXP') then
         read(line(8:),*) b_ref
+     endif
+     if (line(1:6) == 'IP_EXP') then
+        read(line(8:),*) ip_tot
+     endif
+     if (line(1:4) == 'RVBV') then
+        read(line(6:),*) rvbv
      endif
      if (line(1:8) == 'ARHO_EXP') then
         read(line(10:),*) arho
@@ -152,7 +158,7 @@ subroutine prgen_read_inputprofiles
      read(1,*) x
   enddo
   close(1)
-  
+
   ! Needed for diagnostic printing
   rmin(:) = expro_rmin(:)
   rmaj(:) = expro_rmaj(:)
@@ -160,5 +166,22 @@ subroutine prgen_read_inputprofiles
   ! Missing stuff
   expro_name = 'unknown'
   expro_type = 'unknown'
-  
+
+  bcentr = b_ref
+  rcentr = rvbv/b_ref
+  current = ip_tot
+  expro_rho(:) = rho
+
+  open(unit=1,file='profile_shot',status='old')
+  read(1,*) expro_shot
+  read(1,*) expro_time
+  close(1)
+
+  open(unit=1,file='profile_header',status='old')
+  do i=1,nion
+     read(1,*) expro_z(i),expro_mass(i),expro_type(i)
+     call prgen_ion_name(nint(expro_mass(i)),nint(expro_z(i)),expro_name(i))
+  enddo
+  close(1)
+
 end subroutine prgen_read_inputprofiles

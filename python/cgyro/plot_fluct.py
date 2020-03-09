@@ -9,11 +9,11 @@ from gacodefuncs import *
 from cgyro.data import cgyrodata
 
 try:
-   import gacode
-   hasgapy = True
+   import pygacode
+   haspygacode = True
 except:
    print("BAD: (plot_fluct) Please 'make so' in gacode/f2py")
-   hasgapy = False
+   haspygacode = False
 
 PREC='f' ; BIT=4
 
@@ -70,8 +70,8 @@ if usefft:
       x[i] = i*2*np.pi/nx
    for j in range(ny):
       y[j] = j*2*np.pi/ny
-elif hasgapy:
-   mode = 'gapy'
+elif haspygacode:
+   mode = 'pygacode'
    for i in range(nx):
       x[i] = i*2*np.pi/(nx-1)
    for j in range(ny):
@@ -93,7 +93,7 @@ else:
    eny[:,0] = 0.5*eny[:,0]
 
 #------------------------------------------------------------------------
-# Real-space field reconstruction (if no gapy)
+# Real-space field reconstruction (if no pygacode)
 def maptoreal(nr,nn,nx,ny,c):
 
     import numpy as np
@@ -183,9 +183,9 @@ def frame():
       f = np.zeros([nx,ny],order='F')
       if usefft:
          f,t = maptoreal_fft(nr,nn,nx,ny,c)
-      elif hasgapy:
+      elif haspygacode:
          start = time.time()
-         gacode.realfluct(c,f)
+         pygacode.realfluct(c,f)
          end = time.time()
          t = end-start
       else:

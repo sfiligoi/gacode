@@ -21,6 +21,12 @@ subroutine prgen_map_iterdb
   integer :: n0
 
   !----------------------------------------------------------------------
+  ! shot number and time slice (ms)
+  !
+  expro_shot = onetwo_ishot
+  expro_time = int(onetwo_time*1e3)
+
+  !----------------------------------------------------------------------
   ! Construct ion densities and temperatures, manage naming and numbering
   !
   onetwo_enion_vec(:,:) = 0.0
@@ -203,10 +209,10 @@ subroutine prgen_map_iterdb
   !---------------------------------------------------------
   ! Current densities
   !
-  expro_johm = johm*1e-6
-  expro_jbs = jbs*1e-6
-  expro_jnb = jnb*1e-6
-  expro_jrf = jrf*1e-6
+  expro_johm = -ipccw*johm*1e-6
+  expro_jbs = -ipccw*jbs*1e-6
+  expro_jnb = -ipccw*jnb*1e-6
+  expro_jrf = -ipccw*jrf*1e-6
   !---------------------------------------------------------
 
 end subroutine prgen_map_iterdb

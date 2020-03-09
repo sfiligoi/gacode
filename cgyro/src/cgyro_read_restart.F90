@@ -201,7 +201,8 @@ subroutine cgyro_read_restart_one
   if (source_flag == 1 .and. n == 0) then
      ic0 = (n_radial/2)*n_theta
      do j=1,n_theta
-        source(j,:) = h_x(ic0+j,:) 
+        source(j,:) = h_x(ic0+j,:)
+        h_x(ic0+j,:) = 0.0
      enddo
      sa = 0.0
      do j=1,nint(t_current/delta_t)

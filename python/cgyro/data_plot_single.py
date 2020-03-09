@@ -30,9 +30,10 @@ if plot_type == 'freq':
 
    w     = float(sys.argv[2])
    wmax  = float(sys.argv[3])
-   ftype = sys.argv[4]
+   norm  = sys.argv[4]
+   ftype = sys.argv[5]
 
-   data_in.plot_freq(w=w,wmax=wmax)
+   data_in.plot_freq(w=w,wmax=wmax,norm=norm)
 
    outfile = 'out.cgyro.freq.'+ftype
 
@@ -40,9 +41,10 @@ elif plot_type == 'ky_freq':
 
    w     = float(sys.argv[2])
    wmax  = float(sys.argv[3])
-   ftype = sys.argv[4]
+   norm  = sys.argv[4]
+   ftype = sys.argv[5]
 
-   data_in.plot_ky_freq(w=w,wmax=wmax)
+   data_in.plot_ky_freq(w=w,wmax=wmax,norm=norm)
 
    outfile = 'out.cgyro.ky_freq.'+ftype
 
@@ -53,9 +55,10 @@ elif plot_type == 'ky_phi':
    ymin  = sys.argv[4]
    ymax  = sys.argv[5]
    nstr  = sys.argv[6]
-   ftype = sys.argv[7]
+   norm  = sys.argv[7]
+   ftype = sys.argv[8]
 
-   data_in.plot_ky_phi(field=field,theta=theta,ymin=ymin,ymax=ymax,nstr=nstr)
+   data_in.plot_ky_phi(field=field,theta=theta,ymin=ymin,ymax=ymax,nstr=nstr,norm=norm)
 
    outfile = 'out.cgyro.ky_phi.'+ftype
 
@@ -114,10 +117,13 @@ elif plot_type == 'phi':
    w     = float(sys.argv[2])
    wmax  = float(sys.argv[3])
    field = int(sys.argv[4])
-   ftype = sys.argv[5]
    theta = 0.0
+   ymin  = sys.argv[6]
+   ymax  = sys.argv[7]
+   rms   = int(sys.argv[8])
+   ftype = sys.argv[9]
 
-   head,x,y1,y2 = data_in.plot_phi(w=w,wmax=wmax,field=field,theta=theta)
+   head,x,y1,y2 = data_in.plot_phi(w=w,wmax=wmax,field=field,theta=theta,ymin=ymin,ymax=ymax,rms=rms)
 
    outfile = 'out.cgyro.phi.'+ftype
 
@@ -151,6 +157,19 @@ elif plot_type == 'corrug':
 
    outfile = 'out.cgyro.corrug.'+ftype
 
+elif plot_type == 'shift':
+
+   w     = float(sys.argv[2])
+   wmax  = float(sys.argv[3])
+   ftype = sys.argv[4]
+   theta = 0.0
+   ymin  = sys.argv[5]
+   ymax  = sys.argv[6]
+
+   data_in.plot_shift(w=w,wmax=wmax,theta=theta,ymin=ymin,ymax=ymax)
+
+   outfile = 'out.cgyro.shift.'+ftype
+
 elif plot_type == 'flux':
 
    w      = float(sys.argv[2])
@@ -164,13 +183,14 @@ elif plot_type == 'flux':
    loc    = int(sys.argv[10])
    nscale = int(sys.argv[11])
    cflux  = sys.argv[12]
+   norm   = sys.argv[13]
 
    if ftype == 'dump':
       cgyrodata_dump('./').dump_flux(fc=fc)
       doplot=False
    else:
       data_in.plot_flux(w=w,wmax=wmax,field=field,moment=moment,
-                        ymin=ymin,ymax=ymax,fc=fc,loc=loc,nscale=nscale,cflux=cflux)
+                        ymin=ymin,ymax=ymax,fc=fc,loc=loc,nscale=nscale,cflux=cflux,norm=norm)
 
    outfile = 'out.cgyro.flux.'+ftype
 

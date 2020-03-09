@@ -13,7 +13,6 @@ subroutine prgen_read_omfit
   implicit none
 
   integer :: npsi,nf,i,j,ip
-  real :: fa,fb
   real, dimension(:,:), allocatable :: efit_si,efit_ci
   real, dimension(:), allocatable :: efit_rho,efit_psi,efit_q,efit_p
   real, dimension(:), allocatable :: efit_rmin,efit_rmaj,efit_kappa,efit_zmaj  

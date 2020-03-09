@@ -14,7 +14,8 @@ matplotlib.use('WXAgg')
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
 import matplotlib.pyplot as plt
 from gacodefuncs import *
-from gacode import expro
+from pygacode import expro
+from pygacode import gapystr_get as gapystr
 
 matplotlib.rc('text',usetex=True)
 matplotlib.rc('font',size=18)
@@ -106,19 +107,19 @@ def plot_select(ax,tag):
 
    if tag == 'Ln':
       # Lne
-      y = expro.expro_dlnnedr ; ystr = 'a/L_{ne}' ; plotit(ax,x,y,ystr)
+      y = a*expro.expro_dlnnedr ; ystr = 'a/L_{ne}' ; plotit(ax,x,y,ystr)
       # Lni
       for p in range(n):
          if alls or stype[p] == '[therm]':
-            y = expro.expro_dlnnidr[p,:] ; ystr = 'a/L_{ni}~['+sname[p]+']' ; plotit(ax,x,y,ystr)
+            y = a*expro.expro_dlnnidr[p,:] ; ystr = 'a/L_{ni}~['+sname[p]+']' ; plotit(ax,x,y,ystr)
 
    if tag == 'sn':
       # sne
-      y = expro.expro_sdlnnedr ; ystr = 's_{ne}' ; plotit(ax,x,y,ystr)
+      y = a*expro.expro_sdlnnedr ; ystr = 's_{ne}' ; plotit(ax,x,y,ystr)
       # sni
       for p in range(n):
          if alls or stype[p] == '[therm]':
-            y = expro.expro_sdlnnidr[p,:] ; ystr = 's_{ni}~['+sname[p]+']' ; plotit(ax,x,y,ystr)
+            y = a*expro.expro_sdlnnidr[p,:] ; ystr = 's_{ni}~['+sname[p]+']' ; plotit(ax,x,y,ystr)
 
    if tag == 'T':
       y = expro.expro_te ; ystr = 'T_e' ; plotit(ax,x,y,ystr)
@@ -127,20 +128,21 @@ def plot_select(ax,tag):
             y = expro.expro_ti[p,:] ; ystr = 'T_i~['+sname[p]+']' ; plotit(ax,x,y,ystr)
 
    if tag == 'LT':
-      y = expro.expro_dlntedr ; ystr = 'a/L_{Te}' ; plotit(ax,x,y,ystr)
+      y = a*expro.expro_dlntedr ; ystr = 'a/L_{Te}' ; plotit(ax,x,y,ystr)
       for p in range(n):
          if alls or stype[p] == '[therm]':
-            y = expro.expro_dlntidr[p,:] ; ystr = 'a/L_{Ti}~['+sname[p]+']' ; plotit(ax,x,y,ystr)
+            y = a*expro.expro_dlntidr[p,:] ; ystr = 'a/L_{Ti}~['+sname[p]+']' ; plotit(ax,x,y,ystr)
 
    if tag == 'sT':
-      y = expro.expro_sdlntedr ; ystr = 's_{Te}' ; plotit(ax,x,y,ystr)
+      y = a*expro.expro_sdlntedr ; ystr = 's_{Te}' ; plotit(ax,x,y,ystr)
       for p in range(n):
          if alls or stype[p] == '[therm]':
-            y = expro.expro_sdlntidr[p,:] ; ystr = 's_{Ti}~['+sname[p]+']' ; plotit(ax,x,y,ystr)
+            y = a*expro.expro_sdlntidr[p,:] ; ystr = 's_{Ti}~['+sname[p]+']' ; plotit(ax,x,y,ystr)
 
    if tag == 'j':
        y = expro.expro_jbs ; ystr = 'J_\mathrm{bs}' ; plotit(ax,x,y,ystr)
        y = expro.expro_johm ; ystr = 'J_\mathrm{ohm}' ; plotit(ax,x,y,ystr)
+       y = expro.expro_jbstor ; ystr = 'J_\mathrm{tor}' ; plotit(ax,x,y,ystr)
 
    if tag == 'sin':
        y = np.arcsin(expro.expro_delta) ; ystr = 's_1 = \sin^{-1}\delta' ; plotit(ax,x,y,ystr)

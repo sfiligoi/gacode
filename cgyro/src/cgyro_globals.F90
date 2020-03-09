@@ -30,16 +30,11 @@ module cgyro_globals
   integer :: e_method
   integer :: delta_t_method
   real    :: delta_t
-  real    :: delta_t_gk
-  real    :: delta_t_tol
-  integer :: error_mode
-  integer :: delta_gk_method
-  real    :: total_local_error
+  real    :: error_tol
   real    :: max_time
   integer :: print_step
   integer :: restart_step
   real    :: freq_tol
-  integer :: restart_mode
   real    :: up_radial
   real    :: up_theta
   real    :: up_alpha
@@ -86,8 +81,6 @@ module cgyro_globals
   real :: gamma_p
   real :: mach
   integer :: rotation_model
-  real :: error_tol
-  real :: adapt_tol
   integer :: mpi_rank_order
   integer :: hiprec_flag
   integer :: udsymmetry_flag
@@ -97,9 +90,10 @@ module cgyro_globals
   integer :: psym_flag
   integer :: profile_shear_flag
   integer :: theta_plot
-  integer :: mpiio_small_stripe_factor
-  integer :: mpiio_stripe_factor
   integer :: gpu_bigmem_flag
+  real :: px0
+  integer :: stream_term
+  real :: stream_factor
   !
   ! Geometry input
   !
@@ -256,6 +250,8 @@ module cgyro_globals
   integer :: io_control
   integer :: signal
   integer :: restart_flag
+  integer, parameter :: mpiio_small_stripe_factor = 4
+  integer, parameter :: mpiio_stripe_factor = 24
   character(len=2) :: mpiio_small_stripe_str
   character(len=3) :: mpiio_stripe_str
   !
@@ -271,10 +267,14 @@ module cgyro_globals
   integer :: i_time
   integer :: n_time
   integer :: i_current
-  real :: t_current
+  real    :: t_current
+  real    :: gtime
   complex :: freq
   complex :: freq_err
-  real :: gtime
+  !
+  ! adaptive integrator parameters
+  real :: delta_t_gk
+  real :: total_local_error
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------
@@ -328,6 +328,7 @@ module cgyro_globals
   complex, dimension(:,:), allocatable :: h_x
   complex, dimension(:,:), allocatable :: g_x
   complex, dimension(:,:), allocatable :: h0_x
+  complex, dimension(:,:), allocatable :: h0_old
   complex, dimension(:,:), allocatable :: psi
   complex, dimension(:,:), allocatable :: chi
   complex, dimension(:,:,:), allocatable :: f_nl

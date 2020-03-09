@@ -599,6 +599,24 @@ subroutine expro_writes(x,xs1,xs2)
 
 end subroutine expro_writes
 
+subroutine expro_writei(i,xs1)
+
+  use expro, only : ident
+
+  implicit none
+
+  integer, intent(in) :: i
+  character(len=*), intent(in) :: xs1
+
+  if (i > 0) then
+     write(1,'(a)') ident//trim(xs1)
+     write(1,10) i
+  endif
+
+10 format(i0)
+
+end subroutine expro_writei
+
 subroutine expro_writev(x,n,xs1,xs2)
 
   use expro, only : ident

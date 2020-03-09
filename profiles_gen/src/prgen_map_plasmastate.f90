@@ -24,6 +24,11 @@ subroutine prgen_map_plasmastate
   real :: z_eff_lump
   real :: m_eff_lump
 
+  !----------------------------------------------------------------------
+  ! shot number
+  !
+  expro_shot = plst_shot_number
+
   !--------------------------------------------------------------------
   ! COORDINATES: set sign of poloidal flux 
   dpsi(:) = abs(dpsi(:))*(-ipccw)
@@ -280,7 +285,9 @@ subroutine prgen_map_plasmastate
   expro_qline(1)  = expro_qline(2)
   expro_qmom(1)   = expro_qmom(2)
   expro_qpar(1)   = expro_qpar(2)
-
+  qpow_e(1)       = qpow_e(2)
+  qpow_i(1)       = qpow_i(2)
+  
   qspow_e = expro_qohme+expro_qbeame+expro_qrfe+expro_qfuse-expro_qei &
        -expro_qsync-expro_qbrem-expro_qline
   qspow_i =             expro_qbeami+expro_qrfi+expro_qfusi+expro_qei
@@ -289,9 +296,12 @@ subroutine prgen_map_plasmastate
   if (true_aux_flag == 1) then
      print '(a)','INFO: (prgen_map_plasmastate) Setting aux. power as ohmic+NB+RF.'
   else
-     ! WARNING: put missing auxiliary power into cx, giving correct total powers
+     ! DEFAULT:
+     ! Put missing auxiliary power into cx, giving correct total powers
+     ! This assumes that total powers are correct.
      expro_qione = qpow_e-qspow_e
      expro_qioni = qpow_i-qspow_i
+ 
      print '(a)','INFO: (prgen_map_plasmastate) Setting aux. power as total-fus-rad'
      print '(a)','INFO: (prgen_map_plasmastate) Missing aux. power stored in qione,qioni'
   endif
@@ -299,18 +309,16 @@ subroutine prgen_map_plasmastate
 
   !--------------------------------------------------------------------
   ! Convert SWIM currents (MA) to current densities (MA/m^2)
-  expro_johm=0 ; expro_jbs = 0
+  expro_johm=0 ; expro_jbs = 0 ; expro_jbstor = 0
   do i=2,nx
-     expro_johm(i) = expro_johm(i-1)+plst_curr_ohmic(i-1)
-     expro_jbs(i) = expro_jbs(i-1)+plst_curr_bootstrap(i-1)
+     dvol = (plst_vol(i)-plst_vol(i-1))/(2*pi*rmaj(i))
+     expro_johm(i) = plst_curr_ohmic(i)/dvol*1e-6
+     expro_jbs(i) = plst_curr_bootstrap(i)/dvol*1e-6
+     expro_jbstor(i) = (plst_curt(i)-plst_curt(i-1))/dvol*1e-6
   enddo
-  do i=2,nx
-     dvol = plst_surf(i)
-     expro_johm(i) = expro_johm(i)/dvol*1e-6
-     expro_jbs(i) = expro_jbs(i)/dvol*1e-6
-  enddo
-  expro_johm(1) = expro_johm(2) 
-  expro_jbs(1) = expro_jbs(2) 
+  expro_johm(1) = expro_johm(2)
+  expro_jbs(1) = expro_jbs(2)
+  expro_jbstor(1) = expro_jbstor(2)
   !--------------------------------------------------------------------
 
 end subroutine prgen_map_plasmastate

@@ -181,12 +181,15 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
                 path.vertices[0,0] = path.vertices[-1,0] = (path.vertices[0,0]+path.vertices[-1,0])*0.5
                 path.vertices[0,1] = path.vertices[-1,1] = (path.vertices[0,1]+path.vertices[-1,1])*0.5
                 simplePath=mp.Path(path.vertices[::len(path.vertices[:,0])//10+1,:])
-                if np.max(simplePath.vertices[:,0]) > raxis_new and np.min(simplePath.vertices[:,0]) < raxis_new and np.max(simplePath.vertices[:,1]) > zaxis_new and np.min(simplePath.vertices[:,1]) < zaxis_new:
+                if (np.max(simplePath.vertices[:,0]) > raxis_new and
+                    np.min(simplePath.vertices[:,0]) < raxis_new and
+                    np.max(simplePath.vertices[:,1]) > zaxis_new and
+                    np.min(simplePath.vertices[:,1]) < zaxis_new):
                     if simplePath.contains_point((raxis_new,zaxis_new)):
                         dR = path.vertices[1,0]-path.vertices[0,0]
                         dZ = path.vertices[1,1]-path.vertices[0,1]
                         orientation = int(np.sign((path.vertices[0,1]-zaxis_new)*dR-(path.vertices[0,0]-raxis_new)*dZ))
-                        line=line=path.vertices[::orientation,:]
+                        line=path.vertices[::orientation,:]
                         break
             
         if len(line):
@@ -234,6 +237,9 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
     RI = np.zeros([narc,levels]) ; ZI = np.zeros([narc,levels])
     r1 = np.zeros([narc])        ; z1 = np.zeros([narc])
     
+    fig = plt.figure(figsize=(8,10))
+    ax = fig.add_subplot(111,aspect='equal')
+
     for k,item1 in enumerate(contours):
         if k==0:
             # axis
@@ -244,6 +250,12 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
             # Reverse order (compared to original OMFIT order)
             r=path.vertices[::-1,0] ; r[-1] = r[0]
             z=path.vertices[::-1,1] ; z[-1] = z[0]
+            # check for contour above separatrix
+            if np.average(z) > np.max(sep[:,1]) or np.average(z) < np.min(sep[:,1]):
+                path=item1[-2]
+                r=path.vertices[::-1,0] ; r[-1] = r[0]
+                z=path.vertices[::-1,1] ; z[-1] = z[0]
+                
             if any(np.isnan(r*z)):
                 print('ERROR: (prgen_contour) NaN encountered')
 
@@ -262,7 +274,8 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
             z1[0:-1] = np.roll(z1[0:-1],-s) ; z1[-1] = z1[0]
             
         RI[:,k] = r1[:] ; ZI[:,k] = z1[:]
-            
+
+        
     efitpsi = np.linspace(out_psi[0],out_psi[-1],len(efitp))
     cs = interpolate.interp1d(efitpsi,efitp,kind='quadratic') ; out_p = cs(out_psi)
     cs = interpolate.interp1d(efitpsi,efitf,kind='quadratic') ; out_f = cs(out_psi)
@@ -272,9 +285,9 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
     loopint = np.zeros([levels])
     for i in range(narc-1):
        loopint[:] = loopint[:]+(RI[i+1,:]-RI[i,:])*(ZI[i+1,:]+ZI[i,:])/(RI[i+1,:]+RI[i,:])
-                    
+      
     cs = interpolate.splrep(out_psi,loopint) ; out_q = interpolate.splev(out_psi,cs,der=1)
     out_q = out_f*out_q/(2*np.pi)
-   
+    
     return RI,ZI,out_psi,out_q,out_p,out_f
 

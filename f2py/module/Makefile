@@ -2,11 +2,7 @@ include ${GACODE_ROOT}/platform/build/make.inc.${GACODE_PLATFORM}
 
 OBJ=gacode
 
-SRC= 	../vis/gapy_realfluct.f90 \
-	../vis/gapy_wheel1.f90 \
-	../vis/gapy_wheel2.f90 \
-	../vis/gapy_torcut.f90 \
-	../vis/gapy_surfpar.f90 \
+SRC= 	../vis/vis.f90 \
 	../geo/geo.f90 \
 	../expro/expro.f90 \
 	../expro/expro_util.f90 \

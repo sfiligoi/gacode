@@ -172,9 +172,8 @@ subroutine neo_make_profiles
         geo_numeq_flag = 0
      endif
 
-     do ir=1, n_radial
-        call EXPRO_locsim_profiles(path,&
-             NEO_COMM_WORLD,&
+     do ir=1,n_radial
+        call EXPRO_locsim_profiles(&
              geo_numeq_flag,&
              udsymmetry_flag,&
              quasineutral_flag,&

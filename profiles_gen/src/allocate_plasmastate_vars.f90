@@ -57,5 +57,6 @@ subroutine allocate_plasmastate_vars
 
   allocate(plst_curr_ohmic(nx))
   allocate(plst_curr_bootstrap(nx))
+  allocate(plst_curt(nx))
 
 end subroutine allocate_plasmastate_vars
