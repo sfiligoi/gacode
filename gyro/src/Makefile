@@ -141,7 +141,8 @@ OBJECTS += gyro_globals.o \
           gyro_write_step.o \
           gyro_write_timedata.o \
           gyro_write_timers.o \
-          gyro_velocity_sum.o 
+          gyro_velocity_sum.o \
+          i0.o
 
 
 .SUFFIXES : .o .f90
