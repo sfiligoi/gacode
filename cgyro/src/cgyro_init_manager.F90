@@ -81,7 +81,6 @@ subroutine cgyro_init_manager
           alpha_poly) ! only write results on i_proc zero.
   endif
 
-
   vel(:) = sqrt(energy(:))
 
   allocate(xi(n_xi))

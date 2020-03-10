@@ -316,6 +316,8 @@ subroutine cgyro_check
      end select
   endif
 
+  if (collision_model > 5) ctag = 'x'
+  
   call cgyro_info('Collision terms: L D Rm Re kp ions field')
   call cgyro_info('               '// &
        '  '//ctag(1)// &
@@ -325,7 +327,7 @@ subroutine cgyro_check
        '  '//ctag(5)// &
        '   '//ctag(6)// &
        '     '//ctag(7))
-
+  
   if (collision_model == 5 .or. collision_model == 1) then
      select case(z_eff_method)
      case(1)
