@@ -64,34 +64,23 @@ subroutine cgyro_init_manager
   allocate(w_e(n_energy))
   allocate(e_deriv1_mat(n_energy,n_energy))
 
-  ! Construct energy nodes and weights
-  if (e_method<=2) then
-     call pseudo_maxwell_new(n_energy,&
+  if (i_proc==0) then
+     call pseudo_maxwell_pliocene(n_energy,&
           e_max,&
           energy,&
           w_e,&
           e_deriv1_mat,&
+          alpha_poly,& ! weight fct=x^alpha_poly*exp(-x**2)
           trim(path)//'out.cgyro.egrid')
-  else if (e_method==3) then
-     ! interface function in module half_hermite
-     if (i_proc==0) then
-        call pseudo_maxwell_pliocene(n_energy,&
-             e_max,&
-             energy,&
-             w_e,&
-             e_deriv1_mat,&
-             alpha_poly,& ! weight fct=x^alpha_poly*exp(-x**2)
-             trim(path)//'out.cgyro.egrid')
-     else
-        call pseudo_maxwell_pliocene(n_energy,&
-             e_max,&
-             energy,&
-             w_e,&
-             e_deriv1_mat,&
-             alpha_poly) ! only write results on i_proc zero.
-     end if
-  end if
-     
+  else
+     call pseudo_maxwell_pliocene(n_energy,&
+          e_max,&
+          energy,&
+          w_e,&
+          e_deriv1_mat,&
+          alpha_poly) ! only write results on i_proc zero.
+  endif
+
 
   vel(:) = sqrt(energy(:))
 
@@ -187,8 +176,8 @@ subroutine cgyro_init_manager
      case default
         ! Normal timestep
         allocate(rhs(nc,nv_loc,4))
-     end select 
-     
+     end select
+
      allocate(h_x(nc,nv_loc))
      allocate(g_x(nc,nv_loc))
      allocate(psi(nc,nv_loc))
@@ -293,7 +282,7 @@ subroutine cgyro_init_manager
      ! 3/2-rule for dealiasing the nonlinear product
      nx = (3*nx0)/2
      ny = (3*ny0)/2
-     
+
 #ifndef _OPENACC
      allocate(fx(0:ny/2,0:nx-1,n_omp))
      allocate(gx(0:ny/2,0:nx-1,n_omp))
