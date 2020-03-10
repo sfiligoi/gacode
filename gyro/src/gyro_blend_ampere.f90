@@ -11,7 +11,6 @@ subroutine gyro_blend_ampere
   use mpi
   use gyro_globals
   use gyro_pointers
-  use math_constants
 
   !---------------------------------------------------
   implicit none

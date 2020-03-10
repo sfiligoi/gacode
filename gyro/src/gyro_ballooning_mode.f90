@@ -11,7 +11,6 @@
 subroutine gyro_ballooning_mode(datafile,io,index,is_in)
 
   use gyro_globals
-  use math_constants
 
   !--------------------------------------------------
   implicit none

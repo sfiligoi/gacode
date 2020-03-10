@@ -11,7 +11,6 @@ subroutine gyro_make_ampere_matrix
 
   use gyro_globals
   use gyro_collision_private
-  use math_constants
 
   !------------------------
   implicit none

@@ -9,7 +9,6 @@
 subroutine gyro_make_poisson_matrix
 
   use gyro_globals
-  use math_constants
   use gyro_poisson_private
 
   !------------------------

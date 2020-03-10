@@ -82,11 +82,12 @@ end subroutine invert_p32
 
 real function p32(x)
 
-  use math_constants
-
   implicit none
 
   real, intent(in) :: x
+  real :: pi
+
+  pi = 4.0*atan(1.0)
  
   p32 = erf(sqrt(x))-sqrt(x)*exp(-x)/(0.5*sqrt(pi))
 
@@ -226,8 +227,6 @@ end subroutine pascal
 !---------------------------------------------------------
 
 subroutine energy_integral(n_energy,energy_max,energy,w_energy)
-
-  use math_constants
 
   !------------------------------------------
   implicit none

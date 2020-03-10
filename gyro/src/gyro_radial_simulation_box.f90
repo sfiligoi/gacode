@@ -13,7 +13,6 @@
 subroutine gyro_radial_simulation_box
 
   use gyro_globals
-  use math_constants
 
   !--------------------------
   implicit none

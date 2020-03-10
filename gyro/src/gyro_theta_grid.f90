@@ -1,7 +1,6 @@
 subroutine gyro_theta_grid
 
   use gyro_globals
-  use math_constants
 
   implicit none
 
@@ -53,7 +52,7 @@ subroutine gyro_theta_grid
   d_tau(2) = 2.0/n_tau(2)
   !-------------------------------------------------------
 
-  d_theta = pi_2/n_blend
+  d_theta = 2*pi/n_blend
 
   ! Real theta grid (arbitrary size)
   n_theta_int = 2*n_blend

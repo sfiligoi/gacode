@@ -13,7 +13,6 @@ subroutine gyro_field_time_derivative
 
   use mpi
   use gyro_globals
-  use math_constants
   use ompdata
 
   !---------------------------------------------------

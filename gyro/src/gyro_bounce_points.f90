@@ -18,7 +18,6 @@
 
 subroutine gyro_bounce_points(lambda,theta_bp,theta_bm)
 
-  use math_constants
   use geo
 
   !---------------------------------
@@ -41,8 +40,11 @@ subroutine gyro_bounce_points(lambda,theta_bp,theta_bm)
   real :: dtheta
   !  
   real :: b0
+  real :: pi
   !---------------------------------
   
+  pi = 4.0*atan(1.0)
+
   theta_b = 0.0
   call geo_interp(1,theta_b,.false.) ; b0 = GEO_b(1)
   lambda_max = 1.0/b0

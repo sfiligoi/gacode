@@ -18,7 +18,6 @@ subroutine gyro_write_freq(datafile,io)
 
   use mpi
   use gyro_globals
-  use math_constants
 
   !--------------------------------------------------
   implicit none 

@@ -39,7 +39,6 @@
 subroutine gyro_banana_operators
 
   use gyro_globals
-  use math_constants
 
   !-------------------------------------------
   implicit none
@@ -210,7 +209,7 @@ subroutine gyro_banana_operators
   ! (evenly-spaced on [-pi,pi])
   !
   do j=1,n_theta_int
-     theta_int(j) = -pi+(j-1)*pi_2/n_theta_int
+     theta_int(j) = -pi+(j-1)*2*pi/n_theta_int
   enddo
 
   if (n_theta_plot > 1) then
@@ -218,7 +217,7 @@ subroutine gyro_banana_operators
      ! Span [-pi,pi]
 
      do j=1,n_theta_plot
-        theta_plot(j) = -pi+(j-1)*pi_2/n_theta_plot
+        theta_plot(j) = -pi+(j-1)*2*pi/n_theta_plot
      enddo
 
   else

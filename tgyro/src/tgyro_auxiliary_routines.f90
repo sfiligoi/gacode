@@ -91,16 +91,15 @@ end function sigv
 
 real function sivukhin(x)
 
-  use math_constants
-
   implicit none
 
   real, intent(in) :: x
   integer :: i
-  real :: f,dy,yi
+  real :: f,dy,yi,pi
 
   integer, parameter :: n=12
 
+  pi = 4.0*atan(1.0)
 
   if (x > 0.1) then
 

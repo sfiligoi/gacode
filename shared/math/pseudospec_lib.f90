@@ -113,8 +113,6 @@ end subroutine pseudo_legendre
 
 subroutine pseudo_maxwell_new(n,emax,e,w,d1,datafile)
 
-  use math_constants
-
   implicit none
 
   character (len=*), intent(in) :: datafile

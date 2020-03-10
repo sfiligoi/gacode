@@ -12,7 +12,6 @@ subroutine gyro_nl_direct
   use gyro_globals
   use gyro_pointers
   use gyro_nl_private
-  use math_constants
   use ompdata
 
   !--------------------------------------------
