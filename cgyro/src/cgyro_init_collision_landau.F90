@@ -648,28 +648,26 @@ contains
        ib=idx+1
        if (proc(ik,ia,ib)==0) exit
        if (i_proc==proc(ik,ia,ib)-1 .and. ia>ib .and. temp(ia)==temp(ib)) then
-          do ik=1,nk(ia,ib)
 #if !(defined(NO_DIMATCOPY)|defined(__PGI)|defined(__APPLE__))
 #ifdef __INTEL_COMPILER
-             !use MKL
-             call mkl_domatcopy('c','t',n_xi*n_energy,n_xi*n_energy,1.,&
-                  gyrocolmat(:,:,:,:,ia,ib,ik),n_xi*n_energy,&
-                  gyrocolmat(:,:,:,:,ib,ia,ik),n_xi*n_energy)
+          !use MKL
+          call mkl_domatcopy('c','t',n_xi*n_energy,n_xi*n_energy,1.,&
+               gyrocolmat(:,:,:,:,ia,ib,ik),n_xi*n_energy,&
+               gyrocolmat(:,:,:,:,ib,ia,ik),n_xi*n_energy)
 #else
-             !use openBLAS
-             call domatcopy('c','t',n_xi*n_energy,n_xi*n_energy,1.,&
-                  gyrocolmat(:,:,:,:,ia,ib,ik),n_xi*n_energy,&
-                  gyrocolmat(:,:,:,:,ib,ia,ik),n_xi*n_energy)
+          !use openBLAS
+          call domatcopy('c','t',n_xi*n_energy,n_xi*n_energy,1.,&
+               gyrocolmat(:,:,:,:,ia,ib,ik),n_xi*n_energy,&
+               gyrocolmat(:,:,:,:,ib,ia,ik),n_xi*n_energy)
 #endif
 #else
-             !alternative to domatcopy
-             do k=1,n_xi*n_energy
-                do j=1,n_xi*n_energy
-                   gyrocolmat(j,1,k,1,ib,ia,ik)=gyrocolmat(k,1,j,1,ia,ib,ik)
-                end do
+          !alternative to domatcopy
+          do k=1,n_xi*n_energy
+             do j=1,n_xi*n_energy
+                gyrocolmat(j,1,k,1,ib,ia,ik)=gyrocolmat(k,1,j,1,ia,ib,ik)
              end do
-#endif
           end do
+#endif
        end if
     end do
     call cpu_time(t2)
