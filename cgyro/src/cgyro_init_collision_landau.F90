@@ -1,6 +1,9 @@
 module cgyro_init_collision_landau
   implicit none
   logical, parameter :: DIFF_OFF=.false.
+  ! ^^ Switch off restoration for diffusion term for new Sugama op
+  logical, parameter :: KPERP_FIELD_OFF=.false.
+  ! ^^ Switch off gyrotrafo of field part, i.e., treat that one drift-kinetic
   integer, parameter :: verbose=1000
   real, parameter :: eps=1e-13
   integer,parameter :: ng2=8 ! number of Gauss points for inner integration
@@ -21,7 +24,7 @@ module cgyro_init_collision_landau
 contains
   subroutine cgyro_init_landau(cmat1)
     ! populate cmat with Galerkin based gyrokinetic Landau operator.
-
+    ! cmat1 is only for comparison purposes
     use cgyro_globals, only : vth,temp,mass,dens,temp_ele,mass_ele,dens_ele,rho,z,&
          n_energy,e_max,n_xi,n_radial,n_theta,n_species,nc_loc,nc1,nc2,nc,&
          nu_ee,&
@@ -46,7 +49,7 @@ contains
     real, dimension(:,:), allocatable :: projsteen,projleg,L2xi,xi2L,poly2v,v2poly,Landau2v,&
          lor,lor1,lor_self,dif,dif1,dif_self,t1t2,t1t21,energymatrix
     real, dimension(:,:,:), allocatable :: field,field2
-    real, dimension(:,:,:,:), allocatable :: Landauop
+    real, dimension(:,:,:,:), allocatable :: Landauop,dk_self_field !<- only for KPERP_FIELD_OFF
     real, dimension(:,:,:,:,:,:,:), allocatable :: gyrocolmat
     ! for Lapack
     real, dimension(:),allocatable :: work
@@ -205,6 +208,7 @@ contains
 
     ! now we go for the real space Landauop collision matrix (Galerkin coefficients)
     allocate(Landauop(nmaxpoly,nmaxpoly,lmax,ns))
+    if (KPERP_FIELD_OFF) allocate(dk_self_field(nmaxpoly,nmaxpoly,lmax,n_species))
     allocate(lor_self(nmaxpoly,nmaxpoly),dif_self(nmaxpoly,nmaxpoly),&
          lor(nmaxpoly,nmaxpoly),dif(nmaxpoly,nmaxpoly),&
          lor1(nmaxpoly,nmaxpoly),dif1(nmaxpoly,nmaxpoly),field(nmaxpoly,nmaxpoly,lmax))
@@ -240,14 +244,14 @@ contains
     else
        call genfieldkernel(nmaxpoly,lmax,a1,b1,c1,xmax,1.,1.,gp,gw,ngauss,gp2,gw2,ng2,field)
     end if
-    do ia=1,n_species
+    ialoop: do ia=1,n_species
        is=ispec(ia,ia)
        normalization=z(ia)**4*dens(ia)**2/&
             (sqrt(mass(ia))*temp(ia)**1.5) !*normcol <- this we save for later.
        lor=lor_self*normalization
        dif=dif_self*normalization
        if (t1t2flag) t1t2=0
-       do ib=1,n_species
+       ibloop: do ib=1,n_species
           if (ib==ia) cycle
           t1t2ratio=temp(ia)/temp(ib)
           beta=sqrt(mass(ib)/mass(ia)*t1t2ratio)
@@ -307,11 +311,16 @@ contains
                 end do
              end if
           end if
-       end do
+       end do ibloop
        do l=1,lmax
-          Landauop(:,:,l,is)=((l-1)*l)*lor+dif-field(:,:,l)*normalization
+          if (KPERP_FIELD_OFF) then
+             dk_self_field(:,:,l,ia)=-field(:,:,l)*normalization
+             Landauop(:,:,l,is)=((l-1)*l)*lor+dif
+          else
+             Landauop(:,:,l,is)=((l-1)*l)*lor+dif-field(:,:,l)*normalization
+          end if
        end do
-    end do
+    end do ialoop
     if (collision_model==4 .or. collision_model==7) then
 !!$       ! **Now** normalize interspecies Sugama field terms
 !!$       do ia=1,n_species
@@ -325,7 +334,7 @@ contains
 !!$                  /(sqrt(temp(ia)*mass(ia))*dens(ia))*sqrt(temp(ib)*mass(ib))*dens(ib)
 !!$          end do
 !!$       end do
-       !Now check momentum and energy conservation
+       !Now check momentum and energy conservation (purely for diagnostics)
        if (i_proc==0) then
           allocate(loss(nmaxpoly),dist(nmaxpoly))
           l=1;k=3 !energy
@@ -339,7 +348,7 @@ contains
                 end if
              end do
 6            format ("init_collision_landau: ",A,5(G24.16))
-             
+
              print 9,'spec',ib,' energy:'
              print 6,'loss',loss
              print 6,'dist',dist
@@ -362,7 +371,7 @@ contains
           end do
           deallocate(loss,dist)
        end if
-    endif
+    end if
     ! Now the interspecies collision matrices
     call cpu_time(t2)
     t(5)=t2-t1
@@ -432,7 +441,7 @@ contains
                          end do
                       end do
                    end do
-                endif
+                end if
              else if (ia>ib) then ! Ta /= Tb
                 ! in this case genfieldkernel calculates ab and ba field simultaneously
                 call genfieldkernel(nmaxpoly,lmax,a1,b1,c1,xmax,beta,t1t2ratio,&
@@ -482,6 +491,8 @@ contains
     t(4)=t2-t1
     t1=t2
     call dscal(nmaxpoly**2*lmax*ns,normcolcgyro*nu_ee*sqrt(mass_ele)*temp_ele**1.5/dens_ele,Landauop,1)
+    if (KPERP_FIELD_OFF) &
+         call dscal(nmaxpoly**2*lmax*n_species,normcolcgyro*nu_ee*sqrt(mass_ele)*temp_ele**1.5/dens_ele,dk_self_field,1)
     ! Got the Landauop
     ! The only thing left is its gyro-transformation.
     ! now need to find out how many Chebyshev points for k we need to compute for each combination of species.
@@ -499,7 +510,7 @@ contains
                (abs(rho_spec(ia))+abs(rho_spec(ib))),eps)
           if (i_proc==0 .and. verbose>0) then
              print 7,'number Chebyshev k-points nk(',ia,',',ib,')=',nk(ia,ib)
-          endif
+          end if
        end do
     end do
 
@@ -549,7 +560,7 @@ contains
                 if (i_proc==0 .and. verbose>0) then
                    print '("init_collision_landau: ",3(A,I0),A,G24.16E3)',&
                         'cost estimate for ia=',ia,' ib=',ib,' ik=',ik,' is',gtcost(ik,ia,ib)
-                endif
+                end if
                 if (i_proc==0 .and. gtcost(ik,ia,ib)==0) then
                    print 7,'WARNING: gtcost for ia=',ia,'ib=',ib,'ik=',ik,'is zero!'
                 end if
@@ -609,7 +620,7 @@ contains
              max_load=max(max_load,load(j))
              min_load=minval(load)
              exit
-          endif
+          end if
        end do
     enddo
     call cpu_time(t2)
@@ -628,12 +639,26 @@ contains
           ! in gyrotrafo the a species are the source of the perturbation, and the b species
           ! the recipient. But b is on the left of the operator and a on the right.
           ! in the landauoperator here it is oposite.
-
-          call gyrotrafo(gyrocolmat(:,:,:,:,ia,ib,ik),n_energy,n_xi,&
-               Landauop(:,:,:,ispec(ia,ib)),nmaxpoly,lmax,&
-               projsteen,sp,nmaxpoly,xmax,&
-               kperp_arr(ik,ib,ia),kperp_arr(ik,ia,ib),eps=eps)
-       endif
+          if (.not. KPERP_FIELD_OFF .or. ia==ib) then
+             call gyrotrafo(gyrocolmat(:,:,:,:,ia,ib,ik),n_energy,n_xi,&
+                  Landauop(:,:,:,ispec(ia,ib)),nmaxpoly,lmax,&
+                  projsteen,sp,nmaxpoly,xmax,&
+                  kperp_arr(ik,ib,ia),kperp_arr(ik,ia,ib),eps=eps)
+          end if
+          if (KPERP_FIELD_OFF) then
+             if (ia==ib) then
+                do l=1,n_xi
+                   gyrocolmat(:,l,:,l,ia,ia,ik)=gyrocolmat(:,l,:,l,ia,ia,ik)+&
+                        dk_self_field(:n_energy,:n_energy,l,ia)
+                end do
+             else
+                gyrocolmat(:,:,:,:,ia,ib,ik)=0
+                do l=1,n_xi
+                   gyrocolmat(:,l,:,l,ia,ib,ik)=Landauop(:n_energy,:n_energy,l,ispec(ia,ib))
+                end do
+             end if
+          end if
+       end if
     enddo
     call cpu_time(t2)
     t(3)=t2-t1
@@ -824,7 +849,7 @@ contains
              call  dgemm('N','N',n_xi*n_energy**2,n_xi,n_xi,1.,m1,n_xi*n_energy&
                   **2,xi2L,n_xi,0.,gyrocolmat(:,:,:,:,ib,ia,ik),n_xi*n_energy**2)
           end if
-       endif
+       end if
     enddo
     !deallocate(m1)
     deallocate(m2)
@@ -835,7 +860,7 @@ contains
        do i=1,n_proc
           if (i>1) then
              call MPI_Recv(t,11,MPI_REAL8,i-1,i-1,MPI_COMM_WORLD,status,ierror)
-          endif
+          end if
 5         format("init_collision_landau: ",A,I0,A,7G24.16E3,A,I0,A,G24.16E3)
           print 5,'i_proc=',i-1,' took',t(1:7),' load ',load(i),' rel',t(3)/load(i)
        end do
@@ -860,7 +885,6 @@ contains
 !!$          !          end if
 !!$             call MPI_BARRIER(MPI_COMM_WORLD,ierror)
 !!$          end do
-
           call MPI_Bcast(gyrocolmat(:,:,:,:,ia,ib,ik),n_xi**2*n_energy**2,&
                MPI_REAL8,proc(ik,ia,ib)-1,MPI_COMM_WORLD,ierror)
           if (ia>ib .and. temp(ia)==temp(ib)) then
@@ -926,7 +950,7 @@ contains
        do i=1,n_proc
           if (i>1) then
              call MPI_Recv(t,11,MPI_REAL8,i-1,i-1,MPI_COMM_WORLD,status,ierror)
-          endif
+          end if
           print *,'i_proc=',i-1,'took',t(1:10),'load',load(i),'rel',t(3)/load(i)
        end do
     else
@@ -999,7 +1023,7 @@ contains
                    end do
                    if (i_proc/=0) then
                       call MPI_SEND(c,size(c),MPI_REAL8,0,1234,MPI_COMM_WORLD,ierror)
-                   endif
+                   end if
                 else
                    if (i_proc==0) then
                       call MPI_RECV(c,size(c),MPI_REAL8,proc_c(ic),1234,MPI_COMM_WORLD,status,ierror)
@@ -1037,7 +1061,7 @@ contains
                                   md=d
                                end if
                                print '(A,3I3,G14.6,2(A,I3,I4),A,G25.16E3,A,2G25.16E3)','ia,ib,ic_loc,kp',ia,&
-                                      ib,ic_loc,k_perp(ic)/bmag(it_c(ic))*rho*sqrt(2.),&
+                                    ib,ic_loc,k_perp(ic)/bmag(it_c(ic))*rho*sqrt(2.),&
                                     'jx,je',jx,je,' ix,ie',ix,ie,' d',d,' c,c1',s,s1
                             end do
                          end do
@@ -1127,7 +1151,7 @@ contains
                    end do
                    if (i_proc/=0) then
                       call MPI_SEND(c,size(c),MPI_REAL8,0,1234,MPI_COMM_WORLD,ierror)
-                   endif
+                   end if
                 else
                    if (i_proc==0) then
                       call MPI_RECV(c,size(c),MPI_REAL8,proc_c(ic),1234,MPI_COMM_WORLD,status,ierror)
@@ -1256,7 +1280,7 @@ contains
              sp=sp+1
              isstack(sp)=j+1
              iestack(sp)=ie
-          endif
+          end if
           ie=i-1
        else if (j+1<ie) then
           is=j+1
