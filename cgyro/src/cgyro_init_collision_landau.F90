@@ -1,7 +1,7 @@
 module cgyro_init_collision_landau
   implicit none
   logical, parameter :: DIFF_OFF=.false.
-  ! ^^ Switch off restoration for diffusion term for new Sugama op
+  ! ^^ Switch off energy restoration for new Sugama op
   logical, parameter :: KPERP_FIELD_OFF=.false.
   ! ^^ Switch off gyrotrafo of field part, i.e., treat that one drift-kinetic
   integer, parameter :: verbose=1000
