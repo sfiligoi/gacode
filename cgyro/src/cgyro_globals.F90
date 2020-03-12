@@ -35,7 +35,6 @@ module cgyro_globals
   integer :: print_step
   integer :: restart_step
   real    :: freq_tol
-  integer :: restart_mode
   real    :: up_radial
   real    :: up_theta
   real    :: up_alpha
@@ -90,10 +89,10 @@ module cgyro_globals
   integer :: psym_flag
   integer :: profile_shear_flag
   integer :: theta_plot
-  integer :: mpiio_small_stripe_factor
-  integer :: mpiio_stripe_factor
   integer :: gpu_bigmem_flag
   real :: px0
+  integer :: stream_term
+  real :: stream_factor
   !
   ! Geometry input
   !
@@ -251,7 +250,12 @@ module cgyro_globals
   integer :: io_control
   integer :: signal
   integer :: restart_flag
+
   logical :: printout=.true.
+
+  integer, parameter :: mpiio_small_stripe_factor = 4
+  integer, parameter :: mpiio_stripe_factor = 24
+
   character(len=2) :: mpiio_small_stripe_str
   character(len=3) :: mpiio_stripe_str
   !

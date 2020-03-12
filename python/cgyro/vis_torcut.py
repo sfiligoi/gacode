@@ -9,8 +9,8 @@ from gacodefuncs import *
 from cgyro.data import cgyrodata
 from mayavi import mlab
 try:
-   from gacode import vis
-   from gacode import geo
+   from pygacode import vis
+   from pygacode import geo
 except:
    print("ERROR: (vis_torcut) Please type 'make so' in gacode/f2py")
    sys.exit()

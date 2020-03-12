@@ -229,7 +229,7 @@ fi
 
 #============================================================
 # datafile check
-if [ -f 'out.cgyro.time' ] ; then
+if [ -s 'out.cgyro.time' ] ; then
    ncol=`awk '{print NF}' out.cgyro.time | sort -nu | tail -n 1`
    if [ $ncol -eq 3 ] ; then
       echo 'ERROR: (CGYRO) Run cgyro_plot -plot text to update number of columns in out.cgyro.time'

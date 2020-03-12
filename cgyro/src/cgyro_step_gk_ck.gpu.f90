@@ -175,7 +175,6 @@ subroutine cgyro_step_gk_ck
                 + 512.d0/1771.d0*rhs(ic, iv_loc, 6))
         enddo
      enddo
-     call cgyro_filter()
      call timer_lib_out('str')
 
      ! ERROR

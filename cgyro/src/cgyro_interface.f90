@@ -78,7 +78,6 @@ module cgyro_interface
   real :: cgyro_mach_in = 0.0
   integer :: cgyro_rotation_model_in = 1
   real :: cgyro_error_tol_in = 5e-2
-  real :: cgyro_adapt_tol_in = 5e-3
   integer :: cgyro_mpi_rank_order_in = 1
   integer :: cgyro_hiprec_flag_in = 0
   integer :: cgyro_udsymmetry_flag_in = 0
@@ -249,7 +248,6 @@ contains
     cgyro_mach_in = mach
     cgyro_rotation_model_in = rotation_model
     cgyro_error_tol_in = error_tol
-    cgyro_adapt_tol_in = adapt_tol
     cgyro_mpi_rank_order_in = mpi_rank_order
     cgyro_hiprec_flag_in = hiprec_flag
     cgyro_udsymmetry_flag_in = udsymmetry_flag
@@ -418,7 +416,6 @@ contains
     mach = cgyro_mach_in
     rotation_model = cgyro_rotation_model_in
     error_tol = cgyro_error_tol_in
-    adapt_tol = cgyro_adapt_tol_in
     mpi_rank_order = cgyro_mpi_rank_order_in
     hiprec_flag = cgyro_hiprec_flag_in
     udsymmetry_flag = cgyro_udsymmetry_flag_in
@@ -572,7 +569,6 @@ contains
     write(1,30) 'MACH',cgyro_mach_in
     write(1,20) 'ROTATION_MODEL',cgyro_rotation_model_in
     write(1,30) 'ERROR_TOL',cgyro_error_tol_in
-    write(1,30) 'ADAPT_TOL',cgyro_adapt_tol_in
     write(1,20) 'MPI_RANK_ORDER',cgyro_mpi_rank_order_in
     write(1,20) 'HIPREC_FLAG',cgyro_hiprec_flag_in
     write(1,20) 'UDSYMMETRY_FLAG',cgyro_udsymmetry_flag_in

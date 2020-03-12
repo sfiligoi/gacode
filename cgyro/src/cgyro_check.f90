@@ -379,18 +379,4 @@ subroutine cgyro_check
   endif
   !------------------------------------------------------------------------
 
-  !------------------------------------------------------------------------
-  ! Check for existence of restart file
-  !
-  if (restart_mode == 1) then
-
-     inquire(file=trim(path)//runfile_restart,exist=lfe)
-     if (lfe .eqv. .false.) then
-        call cgyro_error('Missing restart file')
-        return
-     endif
-
-  endif
-  !------------------------------------------------------------------------
-
 end subroutine cgyro_check
