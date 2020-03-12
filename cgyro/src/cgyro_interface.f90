@@ -31,7 +31,7 @@ module cgyro_interface
   integer :: cgyro_print_step_in = 100
   integer :: cgyro_restart_step_in = 10
   real :: cgyro_freq_tol_in = 0.001
-  integer :: cgyro_restart_mode_in = 0
+  integer :: cgyro_restart_flag_in = 0
   real :: cgyro_up_radial_in = 1.0
   real :: cgyro_up_theta_in = 1.0
   real :: cgyro_up_alpha_in = 0.0
@@ -87,8 +87,6 @@ module cgyro_interface
   integer :: cgyro_psym_flag_in = 0
   integer :: cgyro_profile_shear_flag_in = 0
   integer :: cgyro_theta_plot_in = 1
-  integer :: cgyro_mpiio_small_stripe_factor_in = 4
-  integer :: cgyro_mpiio_stripe_factor_in = 24
   integer :: cgyro_gpu_bigmem_flag_in = 1
 
   real :: cgyro_rmin_in = 0.5
@@ -201,7 +199,7 @@ contains
     cgyro_print_step_in = print_step
     cgyro_restart_step_in = restart_step
     cgyro_freq_tol_in = freq_tol
-    cgyro_restart_mode_in = restart_mode
+    cgyro_restart_flag_in = restart_flag
     cgyro_up_radial_in = up_radial
     cgyro_up_theta_in = up_theta
     cgyro_up_alpha_in = up_alpha
@@ -257,8 +255,6 @@ contains
     cgyro_psym_flag_in = psym_flag
     cgyro_profile_shear_flag_in = profile_shear_flag
     cgyro_theta_plot_in = theta_plot
-    cgyro_mpiio_small_stripe_factor_in = mpiio_small_stripe_factor
-    cgyro_mpiio_stripe_factor_in = mpiio_stripe_factor
     cgyro_gpu_bigmem_flag_in = gpu_bigmem_flag
     
     cgyro_rmin_in = rmin
@@ -369,7 +365,7 @@ contains
     print_step = cgyro_print_step_in
     restart_step = cgyro_restart_step_in
     freq_tol = cgyro_freq_tol_in
-    restart_mode = cgyro_restart_mode_in
+    restart_flag = cgyro_restart_flag_in
     up_radial = cgyro_up_radial_in
     up_theta = cgyro_up_theta_in
     up_alpha = cgyro_up_alpha_in
@@ -425,8 +421,6 @@ contains
     psym_flag = cgyro_psym_flag_in
     profile_shear_flag = cgyro_profile_shear_flag_in
     theta_plot = cgyro_theta_plot_in
-    mpiio_small_stripe_factor = cgyro_mpiio_small_stripe_factor_in
-    mpiio_stripe_factor = cgyro_mpiio_stripe_factor_in
     gpu_bigmem_flag = cgyro_gpu_bigmem_flag_in
     
     rmin = cgyro_rmin_in
@@ -522,7 +516,7 @@ contains
     write(1,20) 'PRINT_STEP',cgyro_print_step_in
     write(1,20) 'RESTART_STEP',cgyro_restart_step_in
     write(1,30) 'FREQ_TOL',cgyro_freq_tol_in
-    write(1,20) 'RESTART_MODE',cgyro_restart_mode_in
+    write(1,20) 'RESTART_FLAG',cgyro_restart_flag_in
     write(1,30) 'UP_RADIAL',cgyro_up_radial_in
     write(1,30) 'UP_THETA',cgyro_up_theta_in
     write(1,30) 'UP_ALPHA',cgyro_up_alpha_in
@@ -578,8 +572,6 @@ contains
     write(1,20) 'PSYM_FLAG',cgyro_psym_flag_in
     write(1,20) 'PROFILE_SHEAR_FLAG',cgyro_profile_shear_flag_in
     write(1,20) 'THETA_PLOT', cgyro_theta_plot_in
-    write(1,20) 'MPIIO_SMALL_STRIPE_FACTOR',cgyro_mpiio_small_stripe_factor_in
-    write(1,20) 'MPIIO_STRIPE_FACTOR', cgyro_mpiio_stripe_factor_in
     write(1,20) 'GPU_BIGMEM_FLAG',cgyro_gpu_bigmem_flag_in
 
     write(1,30) 'RMIN',cgyro_rmin_in
