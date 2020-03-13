@@ -50,6 +50,8 @@ subroutine cgyro_read_input
   call cgyro_readbc_int(collision_ion_model)
   call cgyro_readbc_real(collision_ele_scale)
   call cgyro_readbc_int(collision_test_mode)
+  call cgyro_readbc_int(collision_field_max_l)
+  call cgyro_readbc_int(collision_test_max_l)
   call cgyro_readbc_real(z_eff)
   call cgyro_readbc_int(z_eff_method)
   call cgyro_readbc_int(zf_test_mode)

@@ -239,6 +239,17 @@ subroutine cgyro_check
 
   end select
 
+  if (collision_model == 6 .or. collision_model == 7) then
+     ! if any is below -1 the l-numbers are unlimited.
+     if (collision_field_max_l>=-1) then
+        write(outstr,*) collision_field_max_l
+        cgyro_info('Field particle collisions limited to l<='//trim(outstr)//' collisions')
+     endif
+     if (collision_test_max_l>=-1) then
+        write(outstr,*) collision_test_max_l
+        cgyro_info('Test particle collisions limited to l<='//trim(outstr)//' collisions')
+     endif
+  end if
   if (collision_model /= 5) then
 
      if(collision_model /= 1) then

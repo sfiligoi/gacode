@@ -30,6 +30,7 @@ contains
          nu_ee,&
          xi,w_xi,& !needed for projleg calc
          collision_model,&   ! if this is 7, we switch to calculating Sugama.
+         collision_field_max_l,collision_test_max_l,&
          ic_c,it_c,iv_v,&
          k_perp,bmag,&
          alpha_poly,&
@@ -88,7 +89,7 @@ contains
     integer i,j,k,l,m
     real xmax,kperp_bmag_max,rhomax,kperprhomax
     real kperp_bmag,md,d,md1,d1,devi,s,s1
-    integer nmaxpoly,lmax
+    integer nmaxpoly,lmax,lmax_field,lmax_test
     integer totalcost,lneeded
     real beta,t1t2ratio,normalization,fieldnormalization,fieldnormalization_ba,testnormalization
     logical t1t2flag
@@ -143,6 +144,10 @@ contains
     lmax=lmax+mod(lmax,2)
     if (verbose>1 .and. i_proc==0) print 7,'using nmaxpoly',nmaxpoly,'lmax=',lmax
 
+    lmax_field=lmax
+    if (collision_field_max_l>=-1) lmax_field=min(lmax_field,collision_field_max_l+1)
+    lmax_test=lmax
+    if (collision_test_max_l>=-1) lmax_test=min(lmax_test,collision_test_max_l+1)
     allocate(a1(nmaxpoly+1),b1(nmaxpoly+1),c1(nmaxpoly+1),a(nmaxpoly+1),bsq(nmaxpoly+1),lg(nmaxpoly+1))
     call half_hermite_norm(nmaxpoly+1,0.,xmax,1.,alpha_poly,a1,b1,c1,a,bsq,lg)
     allocate(sp(nmaxpoly),sw(nmaxpoly),projsteen(nmaxpoly,nmaxpoly))
@@ -222,27 +227,31 @@ contains
     call cpu_time(t2)
     t(6)=t2-t1
     t1=t2
-
+    
     call gentestkernel(nmaxpoly,a1,b1,c1,xmax,1.,gp,gw,ngauss,lor_self,dif_self)
     if (collision_model==4 .or. collision_model==7) then
        ! calc. mock up Sugama field op.
        field=0
        ! cancel l=2 (lphys=1) v^1 and l=1 (lphys=0) v^2 polynomial.
-       if (.not. DIFF_OFF) then
+       if (.not. DIFF_OFF .and. lmax_field>=1) then
           l=1;k=3
           do i=1,nmaxpoly
              field(:,i,l)=matmul(dif_self,polyrep(k,:))*dot_product(polyrep(k,:),dif_self(:,i))&
                   /dot_product(polyrep(k,:),matmul(dif_self,polyrep(k,:)))
           end do
        end if
-       l=2;k=2
-       do i=1,nmaxpoly
-          field(:,i,l)=matmul(dif_self+lor_self*l*(l-1),polyrep(k,:))*&
-               dot_product(polyrep(k,:),dif_self(:,i)+lor_self(:,i)*l*(l-1))&
-               /dot_product(polyrep(k,:),matmul(dif_self+lor_self*l*(l-1),polyrep(k,:)))
-       end do
+       if (lmax_field>=2) then
+          l=2;k=2
+          do i=1,nmaxpoly
+             field(:,i,l)=matmul(dif_self+lor_self*l*(l-1),polyrep(k,:))*&
+                  dot_product(polyrep(k,:),dif_self(:,i)+lor_self(:,i)*l*(l-1))&
+                  /dot_product(polyrep(k,:),matmul(dif_self+lor_self*l*(l-1),polyrep(k,:)))
+          end do
+       end if
     else
-       call genfieldkernel(nmaxpoly,lmax,a1,b1,c1,xmax,1.,1.,gp,gw,ngauss,gp2,gw2,ng2,field)
+       if (lmax_field>=1) &
+            call genfieldkernel(nmaxpoly,lmax_field,a1,b1,c1,xmax,1.,1.,gp,gw,ngauss,gp2,gw2,ng2,field)
+       field(:,:,lmax_field+1:lmax)=0
     end if
     ialoop: do ia=1,n_species
        is=ispec(ia,ia)
@@ -275,7 +284,7 @@ contains
                 Landauop(:,:,:,ispec(ia,ib))=0
                 Landauop(:,:,:,ispec(ib,ia))=0
              end if
-             if (.not. DIFF_OFF) then
+             if (.not. DIFF_OFF .and. lmax_field>=1) then
                 l=1;k=3
                 if (ib>ia) then !first half
                    Landauop(:,1,l,ispec(ia,ib))=-matmul(dif1,polyrep(k,:)-polyrep(1,:)*1.5)/&
@@ -296,34 +305,38 @@ contains
                    end do
                 end if
              end if
-             l=2;k=2
-             if (ib>ia) then !first half
-                Landauop(:,1,l,ispec(ia,ib))=-matmul(dif1+lor1*l*(l-1),polyrep(k,:))/&
-                     dot_product(polyrep(k,:),matmul(dif1+lor1*l*(l-1),polyrep(k,:)))&
-                     /(dens(ia)*sqrt(temp(ia)*mass(ia)))
-                Landauop(1,:,l,ispec(ib,ia))=-matmul(polyrep(k,:),dif1+lor1*l*(l-1))&
-                     *testnormalization*dens(ia)*sqrt(temp(ia)*mass(ia))
-             else
-                do i=nmaxpoly,1,-1
-                   Landauop(i,:,l,ispec(ia,ib))=Landauop(1,:,l,ispec(ia,ib))*&
-                        dot_product(dif1(i,:)+lor1(i,:)*l*(l-1),polyrep(k,:))/&
+             if (.not. DIFF_OFF .and. lmax_field>=2) then
+                l=2;k=2
+                if (ib>ia) then !first half
+                   Landauop(:,1,l,ispec(ia,ib))=-matmul(dif1+lor1*l*(l-1),polyrep(k,:))/&
                         dot_product(polyrep(k,:),matmul(dif1+lor1*l*(l-1),polyrep(k,:)))&
                         /(dens(ia)*sqrt(temp(ia)*mass(ia)))
-                   Landauop(:,i,l,ispec(ib,ia))=dot_product(polyrep(k,:),dif1(:,i)+lor1(:,i)*l*(l-1))&
-                        *Landauop(:,1,l,ispec(ib,ia))&
+                   Landauop(1,:,l,ispec(ib,ia))=-matmul(polyrep(k,:),dif1+lor1*l*(l-1))&
                         *testnormalization*dens(ia)*sqrt(temp(ia)*mass(ia))
-                end do
+                else
+                   do i=nmaxpoly,1,-1
+                      Landauop(i,:,l,ispec(ia,ib))=Landauop(1,:,l,ispec(ia,ib))*&
+                           dot_product(dif1(i,:)+lor1(i,:)*l*(l-1),polyrep(k,:))/&
+                           dot_product(polyrep(k,:),matmul(dif1+lor1*l*(l-1),polyrep(k,:)))&
+                           /(dens(ia)*sqrt(temp(ia)*mass(ia)))
+                      Landauop(:,i,l,ispec(ib,ia))=dot_product(polyrep(k,:),dif1(:,i)+lor1(:,i)*l*(l-1))&
+                           *Landauop(:,1,l,ispec(ib,ia))&
+                           *testnormalization*dens(ia)*sqrt(temp(ia)*mass(ia))
+                   end do
+                end if
              end if
           end if
        end do ibloop
-       do l=1,lmax
-          if (KPERP_FIELD_OFF) then
-             dk_self_field(:,:,l,ia)=-field(:,:,l)*normalization
-             Landauop(:,:,l,is)=((l-1)*l)*lor+dif
-          else
-             Landauop(:,:,l,is)=((l-1)*l)*lor+dif-field(:,:,l)*normalization
-          end if
+       Landauop(:,:,lmax_test+1:,is)=0
+       do l=1,lmax_test
+          Landauop(:,:,l,is)=((l-1)*l)*lor+dif
        end do
+       if (KPERP_FIELD_OFF) then
+          dk_self_field(:,:,:lmax_field,ia)=-field(:,:,:lmax_field)*normalization
+          dk_self_field(:,:,lmax_field+1:,ia)=0
+       else
+          Landauop(:,:,:lmax_field,is)=Landauop(:,:,:lmax_field,is)-field(:,:,:lmax_field)*normalization
+       end if
     end do ialoop
     if (collision_model==4 .or. collision_model==7) then
 !!$       ! **Now** normalize interspecies Sugama field terms
@@ -395,9 +408,12 @@ contains
              Ta_eq_Tb:          if (temp(ia)==temp(ib)) then
 !!$             if (ia>ib .or. (i_proc==0 .and. verbose>4)) then
                 if (ia>ib) then
-                   call genfieldkernel(nmaxpoly,lmax,a1,b1,c1,xmax,beta,1.,&
-                        gp,gw,ngauss,gp2,gw2,ng2,Landauop(:,:,:,is))
-                   call dscal(nmaxpoly**2*lmax,-fieldnormalization,Landauop(:,:,:,is),1)
+                   if (lmax_field>=1) then
+                      call genfieldkernel(nmaxpoly,lmax_field,a1,b1,c1,xmax,beta,1.,&
+                           gp,gw,ngauss,gp2,gw2,ng2,Landauop(:,:,:,is))
+                      call dscal(nmaxpoly**2*lmax_field,-fieldnormalization,Landauop(:,:,:,is),1)
+                   end if
+                   Landauop(:,:,lmax_field+1:,is)=0
                 end if
 !!$             if (ia>ib .and. .not. (i_proc==0 .and. verbose>4)) then
                 if (ia>ib) then
@@ -448,16 +464,20 @@ contains
                 end if
              else if (ia>ib) then ! Ta /= Tb
                 ! in this case genfieldkernel calculates ab and ba field simultaneously
-                call genfieldkernel(nmaxpoly,lmax,a1,b1,c1,xmax,beta,t1t2ratio,&
-                     gp,gw,ngauss,gp2,gw2,ng2,Landauop(:,:,:,is),intkernel2=Landauop(:,:,:,is1))
-                if (verbose>4 .and. i_proc==0) then
+                if (lmax_field>=1) then
+                   call genfieldkernel(nmaxpoly,lmax_field,a1,b1,c1,xmax,beta,t1t2ratio,&
+                        gp,gw,ngauss,gp2,gw2,ng2,Landauop(:,:,:,is),intkernel2=Landauop(:,:,:,is1))
+                end if
+                Landauop(:,:,lmax_field+1:,is)=0
+                Landauop(:,:,lmax_field+1:,is1)=0
+                if (verbose>4 .and. i_proc==0 .and. lmax_field>=1) then
                    print '("init_collision_landau: ",2(A,I0),2(A,G24.16))',&
                         'Checking symmetries of field kernel at ia=',ia,' ib=',ib,' Ta',temp(ia),' Tb',temp(ib)
-                   call genfieldkernel(nmaxpoly,lmax,a1,b1,c1,xmax,1./beta,1./t1t2ratio,&
+                   call genfieldkernel(nmaxpoly,lmax_field,a1,b1,c1,xmax,1./beta,1./t1t2ratio,&
                         gp,gw,ngauss,gp2,gw2,ng2,field,intkernel2=field2)
                    md=-1
                    md1=-1
-                   do l=1,lmax
+                   do l=1,lmax_field
                       do i=1,nmaxpoly
                          do j=1,nmaxpoly
                             d=abs(Landauop(i,j,l,is)-field2(i,j,l))
@@ -483,8 +503,8 @@ contains
                    end do
                 end if
 
-                call dscal(nmaxpoly**2*lmax,-fieldnormalization,Landauop(:,:,:,is),1)
-                call dscal(nmaxpoly**2*lmax,-fieldnormalization_ba,Landauop(:,:,:,is1),1)
+                call dscal(nmaxpoly**2*lmax_field,-fieldnormalization,Landauop(:,:,:,is),1)
+                call dscal(nmaxpoly**2*lmax_field,-fieldnormalization_ba,Landauop(:,:,:,is1),1)
 
              end if Ta_eq_Tb
           end do
