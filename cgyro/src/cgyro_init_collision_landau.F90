@@ -271,6 +271,10 @@ contains
              ! left out for the moment t1t2ratio !!!!
              ! cancel l=2 (lphys=1) v^1 and l=1 (lphys=0) v^2 polynomial.
              ! at this point for every pair a,b with b>a we first have (ia,ib)=(b,a) and then (a,b)
+             if (ib>ia) then
+                Landauop(:,:,:,ispec(ia,ib))=0
+                Landauop(:,:,:,ispec(ib,ia))=0
+             end if
              if (.not. DIFF_OFF) then
                 l=1;k=3
                 if (ib>ia) then !first half
