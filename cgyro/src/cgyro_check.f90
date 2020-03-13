@@ -243,11 +243,11 @@ subroutine cgyro_check
      ! if any is below -1 the l-numbers are unlimited.
      if (collision_field_max_l>=-1) then
         write(outstr,*) collision_field_max_l
-        cgyro_info('Field particle collisions limited to l<='//trim(outstr)//' collisions')
+        call cgyro_info('Field particle collisions limited to l<='//trim(outstr)//' collisions')
      endif
      if (collision_test_max_l>=-1) then
         write(outstr,*) collision_test_max_l
-        cgyro_info('Test particle collisions limited to l<='//trim(outstr)//' collisions')
+        call cgyro_info('Test particle collisions limited to l<='//trim(outstr)//' collisions')
      endif
   end if
   if (collision_model /= 5) then
