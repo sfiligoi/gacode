@@ -158,6 +158,10 @@ module cgyro_interface
   real, dimension(:,:), allocatable :: cgyro_ion_eflux_out
   real, dimension(:,:), allocatable :: cgyro_ion_expwd_out
 
+
+  complex, dimension(:, :), allocatable :: cgyro_wavefunction_out
+  real, dimension(:), allocatable :: cgyro_thetab_out
+  
   real, dimension(:), allocatable :: cgyro_r_out
 
   real, dimension(:, :, :), allocatable :: cgyro_gbflux_out
@@ -337,6 +341,9 @@ contains
 
     if(.not.allocated(cgyro_gbflux_out)) allocate(cgyro_gbflux_out(3, n_species, n_field))
 
+    if (.not.allocated(cgyro_wavefunction_out)) allocate(cgyro_wavefunction_out(n_field, n_theta*n_radial))
+    if (.not.allocated(cgyro_thetab_out)) allocate(cgyro_thetab_out(n_theta*n_radial))
+    
     if (i_proc == 0 .and. debug .eq. 1) then
        print *, '[map_global2interface done]'
     endif

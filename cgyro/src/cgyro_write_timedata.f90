@@ -9,7 +9,8 @@ subroutine cgyro_write_timedata
 
   use mpi
   use cgyro_globals
-
+  use cgyro_interface
+  
   implicit none
 
   integer :: i_field,i_moment
@@ -121,6 +122,10 @@ subroutine cgyro_write_timedata
            a_norm = 1.0
         endif
 
+        ! Wavefunction needed for QLGYRO
+        cgyro_wavefunction_out(i_field, :) = reshape(ftemp, (/n_theta*n_radial/))
+        cgyro_thetab_out = reshape(thetab, (/n_theta * n_radial/))
+        
         call write_binary(trim(path)//binfile_fieldb(i_field),&
              ftemp(:,:)/a_norm,size(ftemp))
      enddo
