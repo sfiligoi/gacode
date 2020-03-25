@@ -28,5 +28,10 @@ subroutine prgen_allocate
   allocate(shape_cos1(nx)) ; shape_cos1 = 0.0
   allocate(shape_cos2(nx)) ; shape_cos2 = 0.0
   allocate(shape_cos3(nx)) ; shape_cos3 = 0.0
- 
+
+  allocate(qspow_e(nx))
+  allocate(qspow_i(nx))
+  allocate(qpow_e(nx))
+  allocate(qpow_i(nx))
+
 end subroutine prgen_allocate

@@ -16,8 +16,6 @@ subroutine prgen_map_plasmastate
   integer :: ix
   real :: dvol
   real, dimension(nx) :: dphidpsi
-  real, dimension(nx) :: qpow_e,qpow_i
-  real, dimension(nx) :: qspow_e,qspow_i
   real, dimension(:), allocatable :: f1_therm,f2_therm
   real, dimension(:), allocatable :: f1_lump,f2_lump,f3_lump
   real, dimension(:), allocatable :: f1_fast,f2_fast,f3_fast,f4_fast
