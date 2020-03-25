@@ -70,6 +70,11 @@ module prgen_globals
   real :: rcentr
   real :: bcentr
   real :: current
+
+  ! Power diagnostics
+  real, dimension(:), allocatable :: qpow_e,qpow_i
+  real, dimension(:), allocatable :: qspow_e,qspow_i 
+
   !---------------------------------------------------------
   ! ONETWO variables
   !
@@ -251,13 +256,6 @@ module prgen_globals
   real, dimension(n_ion_max) :: peqdsk_m
   character (len=7), dimension(5)  :: peqdsk_type
   !---------------------------------------------------------
-
-  !--------------------------------------------------------
-  ! Some GATO variables
-  !
-  integer :: nsurf
-  integer :: narc
-  !--------------------------------------------------------
 
   !---------------------------------------------------------
   ! CORSICA variables

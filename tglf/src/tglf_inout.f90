@@ -513,7 +513,8 @@ SUBROUTINE put_Miller_geometry(rmin,rmaj,zmaj,drmindx,drmajdx,dzmajdx, &
   !
   ! validatiy checks
   !
-  if(rmin_loc.ge.rmaj_loc)rmin_loc = 0.999*rmaj_loc     
+  if(rmin_loc.ge.rmaj_loc)rmin_loc = 0.999*rmaj_loc
+  if(drmajdx_loc.le.-1.0)drmajdx_loc=-0.999
   !
 END SUBROUTINE put_Miller_geometry
 !

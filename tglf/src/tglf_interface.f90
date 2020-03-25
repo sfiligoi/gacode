@@ -237,6 +237,7 @@ contains
     write(1,*) '#---------------------------------------------------'
     write(1,*) '# Control parameters:'
     write(1,*) '#---------------------------------------------------'
+    write(1,50) 'UNITS', tglf_units_in
     write(1,20) 'NS',tglf_ns_in
     write(1,10) 'USE_TRANSPORT_MODEL',tglf_use_transport_model_in
     write(1,20) 'GEOMETRY_FLAG',tglf_geometry_flag_in
@@ -374,6 +375,7 @@ contains
 20  format(t2,a,'=',i3)
 30  format(t2,a,'=',1pe12.5)
 40  format(t2,a,i1,'=',1pe12.5)
+50  format(t2,a,'=',a8)
 
   end subroutine tglf_dump_local
 
@@ -401,6 +403,7 @@ contains
     write(1,*) '#---------------------------------------------------'
     write(1,*) '# Control parameters:'
     write(1,*) '#---------------------------------------------------'
+    write(1,50) 'UNITS',tglf_units_in
     write(1,20) 'NS',ns_in
     write(1,10) 'USE_TRANSPORT_MODEL',.TRUE.
     write(1,20) 'GEOMETRY_FLAG',igeo
@@ -538,6 +541,7 @@ contains
 20  format(t2,a,'=',i3)
 30  format(t2,a,'=',1pe12.5)
 40  format(t2,a,i1,'=',1pe12.5)
+50  format(t2,a,'=',a8)
 
   end subroutine tglf_dump_global
 

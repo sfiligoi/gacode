@@ -4,11 +4,11 @@ subroutine expro_compute_derived
   use geo
 
   implicit none
-
+  
   integer :: n
   integer :: i
   integer :: is
-
+  
   double precision, parameter :: k  = 1.6022d-12 ! erg/eV
   double precision, parameter :: e  = 4.8032d-10 ! statcoul
   double precision, parameter :: c  = 2.9979d10  ! cm/s
@@ -339,7 +339,7 @@ subroutine expro_compute_derived
   temp = expro_qohme+expro_qbeame+expro_qrfe+expro_qione
   call volint(temp,expro_pow_e_aux,expro_n_exp)
   ! Total electron power 
-  temp = temp+expro_qbrem+expro_qsync+expro_qline-expro_qei+expro_qfuse
+  temp = temp-expro_qbrem-expro_qsync-expro_qline-expro_qei+expro_qfuse
   call volint(temp,expro_pow_e,expro_n_exp)
   ! Total auxiliary ion power 
   temp = expro_qbeami+expro_qrfi+expro_qioni+expro_qcxi
@@ -364,7 +364,7 @@ subroutine expro_compute_derived
   call volint(expro_qpar,expro_flow_beam,expro_n_exp)
   call volint(expro_qmom,expro_flow_mom,expro_n_exp)
   !--------------------------------------------------------------
- 
+  
   ! Clean up
   deallocate(torflux)
 
