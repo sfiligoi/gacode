@@ -402,7 +402,7 @@ contains
     write(1,*) '#---------------------------------------------------'
     write(1,*) '# Control parameters:'
     write(1,*) '#---------------------------------------------------'
-    write(1,20) 'UNITS',units_in
+    write(1,20) 'UNITS',tglf_units_in
     write(1,20) 'NS',ns_in
     write(1,10) 'USE_TRANSPORT_MODEL',.TRUE.
     write(1,20) 'GEOMETRY_FLAG',igeo
