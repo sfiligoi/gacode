@@ -13,6 +13,13 @@ subroutine neo_make_profiles
   
   real :: cc
   real :: loglam
+
+  !-------------------------------------------------------------
+  ! Adiabatic-electron logic
+  if (n_species == 1) then
+     ae_flag = 1
+  endif
+  !-------------------------------------------------------------
   
   call PROFILE_SIM_alloc(1)
   
