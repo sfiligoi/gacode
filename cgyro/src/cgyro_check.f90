@@ -72,7 +72,7 @@ subroutine cgyro_check
   case(3)
      call cgyro_info('Time integrator: Verner 10:7(6) [adaptive]')
   case default
-     call cgyro_error('Invalid value for ae_flag')
+     call cgyro_error('Invalid value for delta_t_method')
      return
   end select
   !-----------------------------------------------------------------------
