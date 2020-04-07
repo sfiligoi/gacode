@@ -7,12 +7,14 @@ else
 endif
 
 export EXTRA_LIBS = \
-	${GACODE_ROOT}/shared/fluxfit/fluxfit_lib.a \
-   	${GACODE_ROOT}/shared/math/math_lib.a
+	${GACODE_ROOT}/le3/fluxfit/fluxfit_lib.a \
+   	${GACODE_ROOT}/shared/math/math_lib.a 
 
 EXEC = profiles_3d
 
-OBJECTS = profiles_3d.o
+OBJECTS = bound_deriv.o \
+	cub_spline.o \
+	profiles_3d.o
 
 .SUFFIXES : .o .f90
 
