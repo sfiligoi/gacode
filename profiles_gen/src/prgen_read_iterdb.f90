@@ -44,8 +44,8 @@ subroutine prgen_read_iterdb
   read(1,*) t ; read(1,*) x
   read(1,*) t ; read(1,*) onetwo_volo
   read(1,*) t ; read(1,*) onetwo_cxareao
-  read(1,*) t ; read(1,*) onetwo_Btor
-  read(1,*) t ; read(1,*) ip_tot
+  read(1,*) t ; read(1,*) bcentr
+  read(1,*) t ; read(1,*) current
   read(1,*) t ; read(1,*) x
   read(1,*) t ; read(1,*) x
   read(1,*) t ; read(1,*) x
@@ -213,9 +213,7 @@ subroutine prgen_read_iterdb
   dpsi(:) = onetwo_psi(:)-onetwo_psi(1)
 
   ! Compute torflux(a) [will be overwritten by gfile]
-  bcentr = onetwo_btor
   rcentr = onetwo_R0
-  current = ip_tot
-  torfluxa = 0.5*onetwo_btor*onetwo_rho_grid(nx)**2
+  torfluxa = 0.5*bcentr*onetwo_rho_grid(nx)**2
   
 end subroutine prgen_read_iterdb
