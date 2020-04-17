@@ -5,7 +5,7 @@ module landau
 #ifndef __PGI
   !can't use quad precision with frumpy pgi compiler
   real(16), parameter,private :: pi1=atan(1._16)*4
-  real, parameter :: intnorm=pi1**(-1.5)*4*pi1
+  ! real, parameter :: intnorm=pi1**(-1.5)*4*pi1
   ! int gphys(v) d^3v=1=int g(x) x^2 dx *intnor
   ! Maybe one should normalise this once for a given xmax and density 1?
   real, parameter :: vunit=sqrt(2._16)
@@ -13,9 +13,9 @@ module landau
   ! v itself is v in units of sqrt(2T/m) ("collision operator units")
 #else
   real, parameter,private :: pi1=atan(1.)*4
-  real, parameter :: intnorm=sqrt(pi1)*4
   real, parameter :: vunit=sqrt(2.)
 #endif
+  real, parameter :: intnorm=4/sqrt(pi1)
   real, parameter :: normcol=sqrt(8/pi1)
   ! Normalisation of ctest/emat cfield/emat for the self-collisions of the
   ! reference species without caa or cab.
