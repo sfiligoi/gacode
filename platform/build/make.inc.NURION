@@ -10,7 +10,7 @@ NUMAS_PER_NODE=1
 
 # Compilers and flags
 #FC     = mpiifort -gen-interfaces -mod ${GACODE_ROOT}/modules -I ${GACODE_ROOT}/modules
-FC     = mpiifort -gen-interfaces -mod ${GACODE_ROOT}/modules -I ${GACODE_ROOT}/modules
+FC     = mpiifort -gen-interfaces -mod ${GACODE_ROOT}/modules -I ${GACODE_ROOT}/modules -I${MKLROOT}/include/fftw
 F77    = ${FC}
 
 FOMP   = -qopenmp
