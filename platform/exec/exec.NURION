@@ -23,4 +23,4 @@ export KMP_AFFINITY=compact
 #export OMP_STACKSIZE=32M
 #secho ibrun $exec
 
-mpiexec -env OMP_NUM_THREADS $nomp -n $nmpi $exec
+mpirun -env OMP_NUM_THREADS $nomp -n $nmpi $exec
