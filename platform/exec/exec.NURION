@@ -1,5 +1,5 @@
 #! /usr/bin/env bash 
-# GACODE Parallel execution script (STAMPEDE2_KNL_IFORT)
+# GACODE Parallel execution script (KISTI NURION - Cray)
 
 simdir=${1}
 nmpi=${2}
@@ -11,7 +11,7 @@ mpinuma=${6}
 # nmpi = MPI tasks
 # nomp = OpenMP threads per MPI task
 # numa = NUMAs active per node
-# mpinuma = MPI tasks per active NUMA 
+# mpinuma = MPI tasks per active NUMA
 
 . $GACODE_ROOT/shared/bin/gacode_mpi_tool
 
@@ -19,8 +19,5 @@ cd $simdir
 
 export OMP_NUM_THREADS=$nomp
 export KMP_AFFINITY=compact
-#export KMP_HW_SUBSET=1t
-#export OMP_STACKSIZE=32M
-#secho ibrun $exec
 
 mpirun -env OMP_NUM_THREADS $nomp -n $nmpi $exec
