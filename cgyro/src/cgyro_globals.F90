@@ -245,7 +245,6 @@ module cgyro_globals
   ! error checking
   integer :: error_status = 0
   character(len=80) :: error_message
-  integer :: debug = 0
   !
   integer :: io_control
   integer :: signal
@@ -255,7 +254,6 @@ module cgyro_globals
 
   integer, parameter :: mpiio_small_stripe_factor = 4
   integer, parameter :: mpiio_stripe_factor = 24
-
   character(len=2) :: mpiio_small_stripe_str
   character(len=3) :: mpiio_stripe_str
   !

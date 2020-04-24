@@ -9,7 +9,6 @@ subroutine cgyro_init(path_in,mpi_comm_in)
 
   use mpi
   use cgyro_globals
-  use cgyro_interface
   use timer_lib
  
   implicit none
@@ -39,7 +38,7 @@ subroutine cgyro_init(path_in,mpi_comm_in)
   call MPI_COMM_RANK(CGYRO_COMM_WORLD,i_proc,i_err)
   call MPI_COMM_SIZE(CGYRO_COMM_WORLD,n_proc,i_err)
   !-----------------------------------------------------------------
-  
+
   ! Check if input.cgyro.gen file exists and set:
   !
   !   inputdat_flag=TRUE  if input.cgyro.gen does exist, 
@@ -49,8 +48,8 @@ subroutine cgyro_init(path_in,mpi_comm_in)
      inquire(file=trim(path)//'input.cgyro.gen',exist=inputdat_flag)
   endif
 
-  call MPI_BCAST(inputdat_flag,1,MPI_LOGICAL,0,CGYRO_COMM_WORLD,i_err) 
-  
+  call MPI_BCAST(inputdat_flag,1,MPI_LOGICAL,0,CGYRO_COMM_WORLD,i_err)
+
   if (inputdat_flag .eqv. .false.) then
      if (i_proc == 0) then
      open(unit=io,file=trim(path)//runfile_info,status='old',position='append')
@@ -65,6 +64,5 @@ subroutine cgyro_init(path_in,mpi_comm_in)
   call timer_lib_in('input')
   call cgyro_read_input
   call timer_lib_out('input')
-  call map_global2interface
 
 end subroutine cgyro_init

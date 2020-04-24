@@ -26,19 +26,19 @@ subroutine cgyro_make_profiles
      ! s-alpha
      geo_numeq_flag = -1
      geo_ny = 0      
-     if (.not. allocated(geo_yin)) allocate(geo_yin(8,0:geo_ny))
+     allocate(geo_yin(8,0:geo_ny))
      geo_yin(:,:) = 0.0
   else if (equilibrium_model == 2) then
      ! HAM
      geo_numeq_flag = 0
      geo_ny = 0
-     if (.not. allocated(geo_yin)) allocate(geo_yin(8,0:geo_ny))
+     allocate(geo_yin(8,0:geo_ny))
      geo_yin(:,:) = 0.0
   else
      ! Fourier
      geo_numeq_flag = 1
      geo_ny = geo_ny_in  
-     if (.not. allocated(geo_yin)) allocate(geo_yin(8,0:geo_ny))
+     allocate(geo_yin(8,0:geo_ny))
      do j=0,geo_ny
         geo_yin(:,j) = geo_yin_in(:,j)
      enddo
@@ -428,7 +428,7 @@ subroutine cgyro_make_profiles
   !-------------------------------------------------------------
   ! Fourier index mapping
   !
-  if (.not. allocated(px)) allocate(px(n_radial))
+  allocate(px(n_radial))
   if (zf_test_mode > 0) then
      ! Need positive k_r Fourier coefficients only
      do ir=1,n_radial
