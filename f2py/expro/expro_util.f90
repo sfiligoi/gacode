@@ -8,6 +8,7 @@ subroutine expro_compute_derived
   integer :: n
   integer :: i
   integer :: is
+  integer :: nx
   
   double precision, parameter :: k  = 1.6022d-12 ! erg/eV
   double precision, parameter :: e  = 4.8032d-10 ! statcoul
@@ -25,7 +26,7 @@ subroutine expro_compute_derived
   double precision :: r_min
   double precision :: fa,fb
   double precision :: theta(1)
-  double precision :: p_ave
+  double precision :: p_ave,ne_ave,eps0,m0
   double precision :: bt2_ave
   double precision :: bp2_ave
   
@@ -412,28 +413,54 @@ subroutine expro_compute_derived
      if (minval(expro_ni(is,:)) <= 0d0) expro_error=1
   enddo
 
-  ! Compute scalars
+  !-------------------------------------------------------------------------------
+  ! Compute expro scalars
 
-  ! p_ave = <p> in Pa 
+  nx = expro_n_exp
+  
+  ! Aspect ratio and mass (JC: need to generalize)
+  eps0 = expro_rmin(nx)/expro_rmaj(nx)
+  m0   = 2d0
+
+  !  p_ave = <p>  in Pa 
+  ! ne_ave = <ne> in 10^19/m^3
   p_ave = 0d0
   ! bt2_ave/bp2_ave = <B^2> in T^2 
   bt2_ave = 0d0 ; bp2_ave = 0d0
-  do i=2,expro_n_exp
-     p_ave = p_ave+(expro_vol(i)-expro_vol(i-1))*(expro_ptot(i)+expro_ptot(i-1))/2
+  do i=2,nx
+     ne_ave  = ne_ave+(expro_rmin(i)-expro_rmin(i-1))*(expro_ne(i)+expro_ne(i-1))/2
+     p_ave   = p_ave+(expro_vol(i)-expro_vol(i-1))*(expro_ptot(i)+expro_ptot(i-1))/2
      bt2_ave = bt2_ave+(expro_vol(i)-expro_vol(i-1))*(expro_bt2(i)+expro_bt2(i-1))/2
      bp2_ave = bp2_ave+(expro_vol(i)-expro_vol(i-1))*(expro_bp2(i)+expro_bp2(i-1))/2     
   enddo
-  p_ave = p_ave/expro_vol(expro_n_exp)
-  bt2_ave = bt2_ave/expro_vol(expro_n_exp)
-  bp2_ave = bp2_ave/expro_vol(expro_n_exp)
+  ne_ave  = ne_ave/expro_rmin(nx)
+  p_ave   = p_ave/expro_vol(nx)
+  bt2_ave = bt2_ave/expro_vol(nx)
+  bp2_ave = bp2_ave/expro_vol(nx)
 
   ! SI unit calculation (B [T] and p [Pa])
   ! NOTE: 1/beta = 1/betap + 1/betat 
   expro_betap = 2*mu0*p_ave/bp2_ave
   expro_betat = 2*mu0*p_ave/bt2_ave
-  ! For beta_n, use EFIT normalization factor a*Bt/Ip=a*BCENTR/CURRENT
-  expro_betan = 1/(1/expro_betap+1/expro_betat)*(r_min*expro_bcentr/(1d6*expro_current))
-    
+  ! For beta_n, use EFIT normalization factor a[m]*Bt[T]/Ip[MA]=a*BCENTR/CURRENT
+  expro_betan = 1/(1/expro_betap+1/expro_betat)*(r_min*expro_bcentr/expro_current)
+  ! Greenwald density (current [MA])
+  expro_greenwald = expro_current/(pi*r_min**2)
+  ! Transport power (MW)
+  expro_ptransp = expro_pow_e(nx)+expro_pow_i(nx)
+  ! tau = W[MJ]/P[MW]
+  expro_tau = (1.5*p_ave*expro_vol(nx)*1d-6)/expro_ptransp
+
+  expro_tau98y2 = 0.05621     * &
+       expro_current**0.93    * &
+       sqrt(bt2_ave)**0.15    * &
+       expro_ptransp**(-0.69) * &
+       ne_ave**0.41           * &
+       m0**0.19               * &
+       expro_rmaj(nx)**1.97   * &
+       eps0**0.59             * &
+       expro_kappa(nx)**0.78
+
 end subroutine expro_compute_derived
 
 !-------------------------------------------------------

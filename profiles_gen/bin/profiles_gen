@@ -165,6 +165,9 @@ then
    echo "             -i <data>"
    echo "             Data in input.gacode format."
    echo
+   echo "             -info"
+   echo "             Toggle info generation."
+   echo
    echo "VELOCITY GENERATION (VGEN) MODE"
    echo
    echo "             -vgen"
@@ -253,6 +256,7 @@ SIMROOT=$PWD
 CONFIG=.prgenconfig
 
 FILE_FLAG=0
+INFO_FLAG=0
 VERBOSE_FLAG=0
 ORDER_FLAG=0
 LUMP_FLAG=0
@@ -336,6 +340,7 @@ while [ $# -gt 0 ] ; do
   -V) VERBOSE_FLAG=1 ;;
 
   -neut) NEUT_FLAG=1 ;;
+  -info) INFO_FLAG=1 ;;
 
   -r) shift ; ORDER="$1" ; ORDER_FLAG=1 ;;
 
@@ -431,9 +436,16 @@ fi
 #
 if [ "$itype" == "LEGACY" ] ; then
   echo "INFO: (profiles_gen) Parsing input.profiles header."
-#  python $PRGEN_BIN/profile_parse.py $FILE
   python $PRGEN_BIN/profile_header_dump.py $FILE
   python $PRGEN_BIN/profile_header_shot.py $FILE
+fi
+#=============================================================
+#=============================================================
+# If file is input.gacode and -info set, generate info
+#
+if [ "$itype" == "GACODE" ] && [ $INFO_FLAG == 1 ] ; then
+    python $PRGEN_BIN/pygacode_info.py $FILE
+    exit 0
 fi
 #=============================================================
 # Managing input file (also catches UFILE mode)
