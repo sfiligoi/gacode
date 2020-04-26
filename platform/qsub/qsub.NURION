@@ -14,7 +14,7 @@ echo "#PBS -A $REPO" >> $bfile
 echo "#PBS -o $SIMDIR/batch.out" >> $bfile
 echo "#PBS -e $SIMDIR/batch.err" >> $bfile
 echo "#PBS -q $QUEUE" >> $bfile
-echo "#PBS -l select=$nodes:ncpus=$cores_used:mpiprocs=$nmpi:ompthreads=$nomp" >> $bfile
+echo "#PBS -l select=$nodes:ncpus=$CORES_PER_NODE:mpiprocs=$mpinode:ompthreads=$nomp" >> $bfile
 echo "#PBS -l walltime=$WALLTIME" >> $bfile
 
 echo "module purge" >> $bfile
