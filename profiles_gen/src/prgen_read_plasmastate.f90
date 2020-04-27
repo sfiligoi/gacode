@@ -110,6 +110,11 @@ subroutine prgen_read_plasmastate
   err = nf90_inq_varid(ncid,trim(plst_tag),varid)
   err = nf90_get_var(ncid,varid,plst_m_all(1:plst_dp1_nspec_all))
 
+  ! Total current
+  err = nf90_inq_varid(ncid,trim('curt'),varid)
+  err = nf90_get_var(ncid,varid,plst_vol(:))
+  current = plst_vol(nx)*1e-6
+  
   ! Flux-surface volume
   err = nf90_inq_varid(ncid,trim('vol'),varid)
   err = nf90_get_var(ncid,varid,plst_vol(:))
@@ -118,9 +123,13 @@ subroutine prgen_read_plasmastate
   err = nf90_inq_varid(ncid,trim('area'),varid)
   err = nf90_get_var(ncid,varid,plst_surf(:))
 
-  ! Normalizing B for toroidal flux
-  err = nf90_inq_varid(ncid,trim('B_axis_vac'),varid)
-  err = nf90_get_var(ncid,varid,plst_b_axis_vac)
+  ! R_axis (proxy for EFIT rcentr -- will be overwritten by EFIT)
+  err = nf90_inq_varid(ncid,trim('R_axis'),varid)
+  err = nf90_get_var(ncid,varid,rcentr)
+
+  ! B_axis (proxy for EFIT bcentr -- will be overwritten by EFIT)
+  err = nf90_inq_varid(ncid,trim('B_axis'),varid)
+  err = nf90_get_var(ncid,varid,bcentr)
 
   ! B_phi orientation
   err = nf90_inq_varid(ncid,trim('kccw_Bphi'),varid)
@@ -474,6 +483,9 @@ subroutine prgen_read_plasmastate
   err = nf90_inq_varid(ncid,trim('curt'),varid)
   err = nf90_get_var(ncid,varid,plst_curt(1:nx-1))
   plst_curt(nx) = 0.0
+  !
+  ! Total current (scalar)
+  
   !------------------------------------------------------------
   
   ! Angular momentum source torque

@@ -586,7 +586,7 @@ class cgyrodata_plot(data.cgyrodata):
             a = 1.0/self.rho
          y = a*self.geo[:,p1]
 
-         ax = fig.add_subplot(gs[p/3,np.mod(p,3)])
+         ax = fig.add_subplot(gs[p//3,np.mod(p,3)])
          ax.grid(which="both",ls=":")
          ax.grid(which="major",ls=":")
          ax.set_xlabel(r'$\theta/\pi$')

@@ -166,8 +166,8 @@ program prgen
   !--------------------------------------------------------------------
   ! High-resolution geometry
   !
-  if (efit_method /= 0) then
-     if ((format_type == 1 .or. format_type == 2)) then
+  if (efit_method == 1) then
+     if (format_type == 1 .or. format_type == 2) then
         print '(a,2(f10.8,a))', &
              'INFO: (prgen) dpsi = ',dpsi_data,' (statefile) ',dpsi_efit,' (new)'
      endif

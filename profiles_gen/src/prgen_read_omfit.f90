@@ -62,7 +62,7 @@ subroutine prgen_read_omfit
      ! We have rho on statefile grid
      call cub_spline(efit_rho,efit_psi,npsi,rho,dpsi,nx)
   else
-     ! We have psinorm on statefile grid
+     ! We have psinorm on statefile grid (peqdsk)
      dpsi = dpsi*dpsi_efit
      call cub_spline(efit_psi,efit_q,npsi,dpsi,q,nx)
      call prgen_get_chi(nx,q,dpsi,rho,torfluxa)

@@ -15,7 +15,7 @@ subroutine prgen_map_inputprofiles
   integer :: i
   real :: xnew(nx)
   
-  if (efit_method > 1) then
+  if (efit_method == 1) then
 
      call prgen_get_chi(nx,q,dpsi,rho,torfluxa)
 

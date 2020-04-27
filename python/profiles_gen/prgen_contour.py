@@ -2,7 +2,6 @@ import numpy as np
 from scipy import interpolate
 import matplotlib.path as mp
 import matplotlib._contour as _contour
-import matplotlib.pyplot as plt
 
 def contourPaths(x, y, Z, levels):
     '''
@@ -237,9 +236,6 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
     RI = np.zeros([narc,levels]) ; ZI = np.zeros([narc,levels])
     r1 = np.zeros([narc])        ; z1 = np.zeros([narc])
     
-    fig = plt.figure(figsize=(8,10))
-    ax = fig.add_subplot(111,aspect='equal')
-
     for k,item1 in enumerate(contours):
         if k==0:
             # axis
