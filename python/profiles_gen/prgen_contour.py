@@ -2,7 +2,6 @@ import numpy as np
 from scipy import interpolate
 import matplotlib.path as mp
 import matplotlib._contour as _contour
-import matplotlib.pyplot as plt
 
 def contourPaths(x, y, Z, levels):
     '''
@@ -281,8 +280,6 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
     cs = interpolate.interp1d(efitpsi,efitf,kind='quadratic') ; out_f = cs(out_psi)
     cs = interpolate.interp1d(efitpsi,efitq,kind='quadratic') ; out_q = cs(out_psi)
 
-    '''
-    # BSP - Had to comment out as psi isn't well defined outside my boundary
     # Recalculate q based on definition (and some identities)
     loopint = np.zeros([levels])
     for i in range(narc-1):
@@ -290,7 +287,6 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
       
     cs = interpolate.splrep(out_psi,loopint) ; out_q = interpolate.splev(out_psi,cs,der=1)
     out_q = out_f*out_q/(2*np.pi)
-    '''
 
     return RI,ZI,out_psi,out_q,out_p,out_f
 

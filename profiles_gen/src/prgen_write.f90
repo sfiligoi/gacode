@@ -19,25 +19,30 @@ subroutine prgen_write
      print '(t6,i2,2(1x,a))',i,trim(expro_name(i)),trim(expro_type(i))
   enddo
 
+
   !-------------------------------------------------------------------------------------
-  ! Map (common) data from EFIT analysis 
-  expro_rcentr   = rcentr
-  expro_bcentr   = -btccw*abs(bcentr)
-  expro_current  = -ipccw*abs(current)
-  expro_torfluxa = -btccw*abs(torfluxa)
+  ! Map (common) data from EFIT analysis [skip if reading input.* without gfile]
 
-  expro_q          = ipccw*btccw*abs(q)
-  expro_polflux    = -ipccw*abs(dpsi)
-  expro_kappa      = kappa
-  expro_delta      = delta
-  expro_zeta       = zeta
-  expro_zmag       = zmag
+  if (format_type < 7) then 
+     expro_torfluxa = -btccw*abs(torfluxa)
+     expro_rcentr   = rcentr
+     expro_bcentr   = -btccw*abs(bcentr)
+     expro_current  = -ipccw*abs(current)
 
-  expro_shape_sin3 = shape_sin3
-  expro_shape_cos0 = shape_cos0
-  expro_shape_cos1 = shape_cos1
-  expro_shape_cos2 = shape_cos2
-  expro_shape_cos3 = shape_cos3
+     expro_q          = ipccw*btccw*abs(q)
+     expro_polflux    = -ipccw*abs(dpsi)
+     expro_kappa      = kappa
+     expro_delta      = delta
+     expro_zeta       = zeta
+     expro_zmag       = zmag
+
+     expro_shape_sin3 = shape_sin3
+     expro_shape_cos0 = shape_cos0
+     expro_shape_cos1 = shape_cos1
+     expro_shape_cos2 = shape_cos2
+     expro_shape_cos3 = shape_cos3
+  endif
+
   !-------------------------------------------------------------------------------------
   
   !-------------------------------------------------------------------------------------

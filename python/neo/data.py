@@ -364,7 +364,7 @@ class NEOData:
         theta = self.grid['theta']
         
         
-        m_theta = (n_theta-1)/2-1
+        m_theta = (n_theta-1)//2-1
 
         data = data.reshape(n_radial, nbspecies, 6, m_theta+1)
 

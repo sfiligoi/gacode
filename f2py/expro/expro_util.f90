@@ -4,16 +4,18 @@ subroutine expro_compute_derived
   use geo
 
   implicit none
-
+  
   integer :: n
   integer :: i
   integer :: is
-
+  
   double precision, parameter :: k  = 1.6022d-12 ! erg/eV
   double precision, parameter :: e  = 4.8032d-10 ! statcoul
   double precision, parameter :: c  = 2.9979d10  ! cm/s
   double precision, parameter :: pi = 3.1415926535897932d0
-  double precision :: mp  ! mass_deuterium/2.0 (g)
+  double precision, parameter :: mu0 = 1.2566e-6 ! permeability [SI: H/m]
+
+  double precision :: mp ! mass_deuterium/2.0 (g)
   
   double precision, dimension(:), allocatable :: torflux
   double precision, dimension(:), allocatable :: temp
@@ -23,7 +25,10 @@ subroutine expro_compute_derived
   double precision :: r_min
   double precision :: fa,fb
   double precision :: theta(1)
-
+  double precision :: p_ave
+  double precision :: bt2_ave
+  double precision :: bp2_ave
+  
   mp = expro_mass_deuterium/2d0  ! mass_deuterium/2.0 (g)
   
   if (expro_ctrl_n_ion == -1) expro_ctrl_n_ion = expro_n_ion
@@ -132,7 +137,7 @@ subroutine expro_compute_derived
   expro_sdlntidr = 0d0
 
   do is=1,expro_n_ion
-     if (minval(expro_ni(is,:)) > 0d0) then
+     if (minval(expro_ni(is,:)) > 0d0 .and. minval(expro_ti(is,:)) > 0d0) then
         ! 1/L_ni = -dln(ni)/dr (1/m)
         call bound_deriv(expro_dlnnidr(is,:),-log(expro_ni(is,:)),expro_rmin,expro_n_exp)
 
@@ -252,6 +257,10 @@ subroutine expro_compute_derived
      expro_bp0(i) = geo_bp(1)*expro_bunit(i)
      expro_bt0(i) = geo_bt(1)*expro_bunit(i)
 
+     ! <B_p^2> and <Bt^2> for betap and betat calculations
+     expro_bp2(i) = geo_fluxsurfave_bp2*expro_bunit(i)**2
+     expro_bt2(i) = geo_fluxsurfave_bt2*expro_bunit(i)**2
+
      expro_thetascale(i) = geo_thetascale
 
      expro_fpol(i) = geo_f*expro_bunit(i)*r_min
@@ -339,7 +348,7 @@ subroutine expro_compute_derived
   temp = expro_qohme+expro_qbeame+expro_qrfe+expro_qione
   call volint(temp,expro_pow_e_aux,expro_n_exp)
   ! Total electron power 
-  temp = temp+expro_qbrem+expro_qsync+expro_qline-expro_qei+expro_qfuse
+  temp = temp-expro_qbrem-expro_qsync-expro_qline-expro_qei+expro_qfuse
   call volint(temp,expro_pow_e,expro_n_exp)
   ! Total auxiliary ion power 
   temp = expro_qbeami+expro_qrfi+expro_qioni+expro_qcxi
@@ -364,7 +373,7 @@ subroutine expro_compute_derived
   call volint(expro_qpar,expro_flow_beam,expro_n_exp)
   call volint(expro_qmom,expro_flow_mom,expro_n_exp)
   !--------------------------------------------------------------
- 
+  
   ! Clean up
   deallocate(torflux)
 
@@ -402,7 +411,29 @@ subroutine expro_compute_derived
   do is=1,expro_ctrl_n_ion
      if (minval(expro_ni(is,:)) <= 0d0) expro_error=1
   enddo
- 
+
+  ! Compute scalars
+
+  ! p_ave = <p> in Pa 
+  p_ave = 0d0
+  ! bt2_ave/bp2_ave = <B^2> in T^2 
+  bt2_ave = 0d0 ; bp2_ave = 0d0
+  do i=2,expro_n_exp
+     p_ave = p_ave+(expro_vol(i)-expro_vol(i-1))*(expro_ptot(i)+expro_ptot(i-1))/2
+     bt2_ave = bt2_ave+(expro_vol(i)-expro_vol(i-1))*(expro_bt2(i)+expro_bt2(i-1))/2
+     bp2_ave = bp2_ave+(expro_vol(i)-expro_vol(i-1))*(expro_bp2(i)+expro_bp2(i-1))/2     
+  enddo
+  p_ave = p_ave/expro_vol(expro_n_exp)
+  bt2_ave = bt2_ave/expro_vol(expro_n_exp)
+  bp2_ave = bp2_ave/expro_vol(expro_n_exp)
+
+  ! SI unit calculation (B [T] and p [Pa])
+  ! NOTE: 1/beta = 1/betap + 1/betat 
+  expro_betap = 2*mu0*p_ave/bp2_ave
+  expro_betat = 2*mu0*p_ave/bt2_ave
+  ! For beta_n, use EFIT normalization factor a*Bt/Ip=a*BCENTR/CURRENT
+  expro_betan = 1/(1/expro_betap+1/expro_betat)*(r_min*expro_bcentr/(1d6*expro_current))
+    
 end subroutine expro_compute_derived
 
 !-------------------------------------------------------

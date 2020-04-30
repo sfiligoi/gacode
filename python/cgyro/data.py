@@ -14,9 +14,10 @@ class cgyrodata:
 
       self.silent = silent
       self.dir = sim_directory
-      self.gettime()
+      hastime = self.gettime()
       self.getgrid()
-      self.getdata()
+      if hastime:
+         self.getdata()
       
    # standard routine to read binary or ASCII data 
    def extract(self,f):
@@ -40,7 +41,7 @@ class cgyrodata:
 
       if not os.path.isfile(self.dir+'out.cgyro.time'):
          print('INFO: (data.py) No time record exists.')
-         return
+         return False
       
       #-----------------------------------------------------------------
       # Read time vector -- autodetect number of columns (ncol)
@@ -75,6 +76,8 @@ class cgyrodata:
 
       #-----------------------------------------------------------------
  
+      return True
+   
    def getdata(self):
 
       nt = self.n_time

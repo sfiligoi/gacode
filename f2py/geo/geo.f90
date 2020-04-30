@@ -70,6 +70,8 @@ module geo
   double precision :: geo_surf
   double precision :: geo_fluxsurfave_grad_r2
   double precision :: geo_fluxsurfave_grad_r
+  double precision :: geo_fluxsurfave_bt2
+  double precision :: geo_fluxsurfave_bp2
   double precision :: geo_grad_r0
   double precision :: geo_thetascale
   double precision :: geo_bl
@@ -692,6 +694,12 @@ contains
          geov_b(1:n_theta-1))/denom
 
     geo_fluxsurfave_grad_r2 = sum(geov_grad_r(1:n_theta-1)**2*geov_g_theta(1:n_theta-1)/ &
+         geov_b(1:n_theta-1))/denom
+
+    geo_fluxsurfave_bp2 = sum(geov_bp(1:n_theta-1)**2*geov_g_theta(1:n_theta-1)/ &
+         geov_b(1:n_theta-1))/denom
+
+    geo_fluxsurfave_bt2 = sum(geov_bt(1:n_theta-1)**2*geov_g_theta(1:n_theta-1)/ &
          geov_b(1:n_theta-1))/denom
 
     ! theta(i) = 0 for i = n_theta/2+1
