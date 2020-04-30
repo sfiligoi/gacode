@@ -212,7 +212,7 @@ subroutine cgyro_kernel
   endif
  
   if(allocated(theta))          deallocate(theta)
-  !if(allocated(thetab))         deallocate(thetab)
+  if(allocated(thetab))         deallocate(thetab)
   if(allocated(w_theta))        deallocate(w_theta)
   if(allocated(g_theta))        deallocate(g_theta)
   if(allocated(g_theta_geo))    deallocate(g_theta_geo)
@@ -249,7 +249,7 @@ subroutine cgyro_kernel
   if(allocated(omega_rot_edrift_r))  deallocate(omega_rot_edrift_r)
   if(allocated(omega_rot_star))      deallocate(omega_rot_star)
 
-  !if(allocated(px))            deallocate(px)
+  if(allocated(px))            deallocate(px)
   if(allocated(energy))        then
 !$acc exit data delete(energy)
      deallocate(energy)
@@ -268,7 +268,7 @@ subroutine cgyro_kernel
   if(allocated(h0_old))          deallocate(h0_old)
   if(allocated(cap_h_c))       deallocate(cap_h_c)
   if(allocated(cap_h_v))       deallocate(cap_h_v)
-  !if(allocated(field))         deallocate(field)
+  if(allocated(field))         deallocate(field)
   if(allocated(field_loc))     deallocate(field_loc)
   if(allocated(field_old))     deallocate(field_old)
   if(allocated(hzf))           deallocate(hzf)
