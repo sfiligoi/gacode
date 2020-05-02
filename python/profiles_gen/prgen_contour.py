@@ -216,7 +216,8 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
         (np.abs(np.max(sep[:,0])-np.max(r2d)) < 1e-3) or
         (np.abs(np.min(sep[:,1])-np.min(z2d)) < 1e-3) or
         (np.abs(np.max(sep[:,1])-np.max(z2d)) < 1e-3)):
-        print('WARNING: (prgen_contour) New separatrix hits computation boundary')
+        print('WARNING: (prgen_contour) New separatrix hits computation boundary: using EFIT separatrix')
+        psi0 = efitpsi0 ; psi1 = efitpsi1
             
     #-----------------------------------------------------------
     # Find surfaces
