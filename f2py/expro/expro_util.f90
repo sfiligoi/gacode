@@ -4,12 +4,12 @@ subroutine expro_compute_derived
   use geo
 
   implicit none
-  
+
   integer :: n
   integer :: i
   integer :: is
   integer :: nx
-  
+
   double precision, parameter :: k  = 1.6022d-12 ! erg/eV
   double precision, parameter :: e  = 4.8032d-10 ! statcoul
   double precision, parameter :: c  = 2.9979d10  ! cm/s
@@ -17,7 +17,7 @@ subroutine expro_compute_derived
   double precision, parameter :: mu0 = 1.2566e-6 ! permeability [SI: H/m]
 
   double precision :: mp ! mass_deuterium/2.0 (g)
-  
+
   double precision, dimension(:), allocatable :: torflux
   double precision, dimension(:), allocatable :: temp
   double precision, dimension(:), allocatable :: cc
@@ -26,12 +26,13 @@ subroutine expro_compute_derived
   double precision :: r_min
   double precision :: fa,fb
   double precision :: theta(1)
-  double precision :: p_ave,ne_ave,eps0,m0
+  double precision :: p_ave,ne_ave
+  double precision :: eps0,m0,ipma
   double precision :: bt2_ave
   double precision :: bp2_ave
-  
+
   mp = expro_mass_deuterium/2d0  ! mass_deuterium/2.0 (g)
-  
+
   if (expro_ctrl_n_ion == -1) expro_ctrl_n_ion = expro_n_ion
 
   !---------------------------------------------------------------------
@@ -63,7 +64,7 @@ subroutine expro_compute_derived
   !
   allocate(torflux(expro_n_exp))
   allocate(temp(expro_n_exp))
- 
+
   torflux(:) = expro_torfluxa*expro_rho(:)**2
 
   ! b_unit
@@ -115,7 +116,7 @@ subroutine expro_compute_derived
   expro_shape_scos3(:) = expro_rmin(:)*temp(:)
   call bound_deriv(temp,expro_shape_sin3,expro_rmin,expro_n_exp)
   expro_shape_ssin3(:) = expro_rmin(:)*temp(:)
-  
+
   ! 1/L_ne = -dln(ne)/dr (1/m)
   call bound_deriv(expro_dlnnedr,-log(expro_ne),expro_rmin,expro_n_exp)
 
@@ -374,7 +375,7 @@ subroutine expro_compute_derived
   call volint(expro_qpar,expro_flow_beam,expro_n_exp)
   call volint(expro_qmom,expro_flow_mom,expro_n_exp)
   !--------------------------------------------------------------
-  
+
   ! Clean up
   deallocate(torflux)
 
@@ -398,7 +399,7 @@ subroutine expro_compute_derived
      expro_sdlnnidr_new(:) = expro_sdlnnidr_new(:)/expro_ni_new(:)*expro_rhos(:)
 
      if (minval(expro_ni_new(:)) <= 0d0) expro_error = 1
- 
+
   else
 
      expro_ni_new(:) = expro_ni(1,:)
@@ -417,10 +418,11 @@ subroutine expro_compute_derived
   ! Compute expro scalars
 
   nx = expro_n_exp
-  
+
   ! Aspect ratio and mass (JC: need to generalize)
   eps0 = expro_rmin(nx)/expro_rmaj(nx)
   m0   = 2d0
+  ipma = abs(expro_current)
 
   !  p_ave = <p>  in Pa 
   ! ne_ave = <ne> in 10^19/m^3
@@ -443,23 +445,26 @@ subroutine expro_compute_derived
   expro_betap = 2*mu0*p_ave/bp2_ave
   expro_betat = 2*mu0*p_ave/bt2_ave
   ! For beta_n, use EFIT normalization factor a[m]*Bt[T]/Ip[MA]=a*BCENTR/CURRENT
-  expro_betan = 1/(1/expro_betap+1/expro_betat)*(r_min*expro_bcentr/expro_current)
+  expro_betan = 1/(1/expro_betap+1/expro_betat)*(r_min*expro_bcentr/ipma)
   ! Greenwald density (current [MA])
-  expro_greenwald = expro_current/(pi*r_min**2)
-  ! Transport power (MW)
-  expro_ptransp = expro_pow_e(nx)+expro_pow_i(nx)
-  ! tau = W[MJ]/P[MW]
-  expro_tau = (1.5*p_ave*expro_vol(nx)*1d-6)/expro_ptransp
+  expro_greenwald = ipma/(pi*r_min**2)
 
-  expro_tau98y2 = 0.05621     * &
-       expro_current**0.93    * &
-       sqrt(bt2_ave)**0.15    * &
-       expro_ptransp**(-0.69) * &
-       ne_ave**0.41           * &
-       m0**0.19               * &
-       expro_rmaj(nx)**1.97   * &
-       eps0**0.59             * &
-       expro_kappa(nx)**0.78
+  if (expro_pow_e(nx) > 1e-6) then
+     ! Transport power (MW)
+     expro_ptransp = expro_pow_e(nx)+expro_pow_i(nx)
+     ! tau = W[MJ]/P[MW]
+     expro_tau = (1.5*p_ave*expro_vol(nx)*1d-6)/expro_ptransp
+
+     expro_tau98y2 = 0.05621     * &
+          ipma**0.93             * &
+          sqrt(bt2_ave)**0.15    * &
+          expro_ptransp**(-0.69) * &
+          ne_ave**0.41           * &
+          m0**0.19               * &
+          expro_rmaj(nx)**1.97   * &
+          eps0**0.59             * &
+          expro_kappa(nx)**0.78
+  endif
 
 end subroutine expro_compute_derived
 
