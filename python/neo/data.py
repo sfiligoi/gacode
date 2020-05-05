@@ -79,7 +79,6 @@ class NEOData:
 
     #-------------------------------------------------------------------------#
     
-
     def read_neoinputgeo(self):
         """Load shape of magnetics flux surfaces"""                
         
@@ -132,10 +131,9 @@ class NEOData:
 
         self.geo['R'] = r
         self.geo['z'] = z
-        
 
+    #-------------------------------------------------------------------------#
 
-    
     def read_grid(self):
         """Reads out.neo.grid"""
 

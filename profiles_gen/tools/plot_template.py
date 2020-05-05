@@ -31,7 +31,7 @@ alls = not bool(therm)
 #=====================================
 fig = plt.figure(figsize=(6.5,5))
 ax = fig.add_subplot(111)
-ax.grid(which="majorminor",ls=":",alpha=0.3)
+ax.grid(which="both",ls=":",alpha=0.3)
 ax.grid(which="major",ls=":",alpha=0.3)
 ax.set_xlabel(r'$r/a$')
 #=====================================

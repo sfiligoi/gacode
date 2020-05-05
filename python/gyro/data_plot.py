@@ -35,7 +35,7 @@ class gyrodata_plot(data.GYROData):
 
       #======================================
       ax = fig.add_subplot(121)
-      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(TIME)
       ax.set_ylabel(r'$(a/c_s)\gamma$',color='k')
@@ -50,7 +50,7 @@ class gyrodata_plot(data.GYROData):
 
       #======================================
       ax = fig.add_subplot(122)
-      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(TIME)
       ax.set_ylabel(r'$(a/c_s)\omega$',color='k')
@@ -63,7 +63,6 @@ class gyrodata_plot(data.GYROData):
 
       plt.tight_layout(pad=0.2)
 
-      
    def plot_balloon(self,index='phi',tmax=-1,fig=None):
       '''
       Plot the ballooning eigenmode structure
@@ -105,7 +104,7 @@ class gyrodata_plot(data.GYROData):
 
       #======================================
       ax = fig.add_subplot(111)
-      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(r'$\theta_*/\pi$')
       ax.set_ylabel(ytitle)
@@ -129,7 +128,6 @@ class gyrodata_plot(data.GYROData):
         
       return key
 
-   
    def plot_zf(self,w=0.5,fig=None):
       '''
       Plot the zonal (n=0) potential versus time.
@@ -171,7 +169,7 @@ class gyrodata_plot(data.GYROData):
       #----------------------------------------------------
 
       ax = fig.add_subplot(111)
-      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(TIME)
       ax.set_ylabel(ylabel)
@@ -188,7 +186,7 @@ class gyrodata_plot(data.GYROData):
 
       ax.legend()
       plt.tight_layout(pad=0.2)
-      
+
    def plot_phi(self,ymax='auto',fig=None):
       '''
       Plot the n=0 AND n>0 potentials versus time.
@@ -204,7 +202,7 @@ class gyrodata_plot(data.GYROData):
 
       #======================================
       ax = fig.add_subplot(111)
-      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(TIME)
       ax.set_ylabel(r'$\langle e \phi/T_e \rangle/\rho_\star $',color='k')
@@ -224,13 +222,16 @@ class gyrodata_plot(data.GYROData):
       ax.legend()
       plt.tight_layout(pad=0.2)
 
-      
-   def plot_gbflux(self,w=0.5,wmax=0.0,field='s',moment=0,ymin='0.0',ymax='auto',loc=2):
+   def plot_gbflux(self,w=0.5,wmax=0.0,field='s',moment=0,ymin='0.0',ymax='auto',loc=2, fig=None):
       '''
       Plot the gyrobohm flux versus time.
       '''
 
       self.read_gbflux_i()
+
+      if fig is None:
+         fig = plt.figure(MYDIR, figsize=(self.lx, self.ly))
+
 
       ns = int(self.profile['n_kinetic'])
 
@@ -286,9 +287,8 @@ class gyrodata_plot(data.GYROData):
       imin,imax=iwindow(t,w,wmax)
 
       # Otherwise plot
-      fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
       ax = fig.add_subplot(111)
-      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(TIME)
 
@@ -315,7 +315,7 @@ class gyrodata_plot(data.GYROData):
          ax.set_ylim([float(ymin),float(ymax)])
 
       fig.tight_layout()
-            
+
    def plot_gbflux_i(self,w=0.5,aw=0,field='s',moment=0,ymin='0.0',ymax='auto',loc=2,fig=None):
       '''
       Plot flux versus radius
@@ -391,7 +391,7 @@ class gyrodata_plot(data.GYROData):
          mnorm = '^\mathrm{norm}'
 
       ax = fig.add_subplot(111)
-      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(r'$r/a$')
 
@@ -440,7 +440,6 @@ class gyrodata_plot(data.GYROData):
 
       ax.legend()
       plt.tight_layout()
-      
 
    def plot_gbflux_n(self,w=0.5,wmax=0.0,field='s',moment=0,ymin='auto',ymax='auto',fig=None):
       '''
@@ -525,7 +524,6 @@ class gyrodata_plot(data.GYROData):
 
       plt.tight_layout()
 
-      
    def plot_gbflux_exc(self,w=0.5,fig=None):
 
       if fig is None:
@@ -541,7 +539,7 @@ class gyrodata_plot(data.GYROData):
 
       #======================================
       ax = fig.add_subplot(111)
-      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(TIME)
       #=====================================
@@ -562,7 +560,7 @@ class gyrodata_plot(data.GYROData):
 
       ax.legend()
       plt.tight_layout()
-        
+
    def plot_gbflux_rt(self,w=0.5,wmax=0.0,field='s',moment=0,fig=None):
 
       ns = int(self.profile['n_kinetic'])
@@ -605,7 +603,7 @@ class gyrodata_plot(data.GYROData):
            ax.set_ylim([self.profile['r'][0],self.profile['r'][-1]])
 
       plt.tight_layout()
-         
+
    def plot_moment_zero(self,w=0.5,species=0,moment=0,fig=None):
 
       if fig is None:
@@ -644,7 +642,7 @@ class gyrodata_plot(data.GYROData):
 
       # Compare moment versus corresponding source
       ax = fig.add_subplot(111)
-      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(r'$r/a$')
       ax.set_ylabel(r'$'+mtag+'_'+u+'/\\rho_s$')
@@ -667,8 +665,7 @@ class gyrodata_plot(data.GYROData):
       
       ax.legend()
       plt.tight_layout()
-    
-      
+
    def plot_profile_tot(self,w=0.5,species=0,moment=0,fig=None):
 
       if fig is None:
@@ -721,7 +718,7 @@ class gyrodata_plot(data.GYROData):
       
       # Compare moment versus corresponding source
       ax = fig.add_subplot(111)
-      ax.grid(which="majorminor",ls=":")
+      ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(r'$r/a$')
       ax.set_ylabel(r'$'+mtag+'_'+u+'$')

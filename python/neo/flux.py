@@ -31,7 +31,7 @@ elif moment == 2:
 #======================================
 fig = plt.figure(figsize=(12,8))
 ax = fig.add_subplot(111)
-ax.grid(which="majorminor",ls=":")
+ax.grid(which="both",ls=":")
 ax.grid(which="major",ls=":")
 ax.set_xlabel('$r/a$',fontsize=GFONTSIZE)
 ax.set_ylabel(label,fontsize=GFONTSIZE)
