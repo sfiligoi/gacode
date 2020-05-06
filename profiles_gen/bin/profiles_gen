@@ -29,7 +29,7 @@ VGEN_EXE=${GACODE_ROOT}/vgen/src
 # - profiles_gen converter executable
 EXEC=${GACODE_ROOT}/profiles_gen/src/prgen
 # - OMFIT fitter script
-OMFIT=${GACODE_ROOT}/python/profiles_gen/prgen_shapeprofile.py
+OMFIT=${GACODE_ROOT}/f2py/pygacode/profiles_gen/prgen_shapeprofile.py
 # - locpargen executable
 LOCPARGEN=${GACODE_ROOT}/profiles_gen/locpargen/locpargen
 # - profiles_gen bin directory

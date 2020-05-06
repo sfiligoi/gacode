@@ -4,7 +4,7 @@ import numpy as np
 import os
 from matplotlib import rc
 import matplotlib.pyplot as plt
-from ..gacodefuncs import *
+from gacodefuncs import *
 from .data import cgyrodata
 from mpi4py import MPI
 
@@ -13,7 +13,7 @@ nproc = MPI.COMM_WORLD.Get_size()
 
 print(nproc)
 
-PREC='f' ; BIT=4  
+PREC='f' ; BIT=4
 
 ext = sys.argv[1]
 moment = sys.argv[2]

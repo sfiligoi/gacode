@@ -5,7 +5,7 @@ import os
 import matplotlib.pyplot as plt
 from matplotlib import rc
 from matplotlib import cm
-from ..gacodefuncs import *
+from gacodefuncs import *
 from .data import cgyrodata
 from mayavi import mlab
 try:

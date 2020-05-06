@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from matplotlib import rc
-from ..gacodefuncs import *
+from gacodefuncs import *
 from . import data
 
 MYDIR=os.path.basename(os.getcwd())

@@ -3,7 +3,7 @@ import sys
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-from ..gacodefuncs import *
+from gacodefuncs import *
 from .data import GYROData
 
 MYDIR=os.path.basename(os.getcwd())
