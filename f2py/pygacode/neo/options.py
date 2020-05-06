@@ -1,4 +1,4 @@
-from pyrats.neo.data import NEOData
+from .data import NEOData
 import sys
 import numpy as np
 

@@ -5,7 +5,7 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import rc
-from gyro.data_plot import gyrodata_plot
+from .data_plot import gyrodata_plot
 
 data_in = gyrodata_plot('./')
 

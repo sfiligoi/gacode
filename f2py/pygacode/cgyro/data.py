@@ -2,7 +2,7 @@ import os
 import numpy as np
 import sys
 import time
-from gacodefuncs import *
+from ..gacodefuncs import *
 
 BYTE='float32'
 

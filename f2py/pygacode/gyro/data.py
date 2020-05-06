@@ -68,12 +68,12 @@ class GYROData:
       else:
          fmt  = 'null'
          data = []
-         
+
       if int(sys.version_info[2]) > 6:
          t = 'TIME = '+"{:.3e}".format(time.time()-start)+' s.'
-      else:        
+      else:
          t = 'TIME = '+str(time.time()-start)
- 
+
       return t,fmt,data
 
    def getdata(self):
@@ -97,7 +97,7 @@ class GYROData:
 
       #-----------------------------------------------------------------
       # Read grid data, then unpack
-      # 
+      #
       data = np.fromfile(self.dir+'out.gyro.profile',dtype='float32',sep=' ')
 
       n_x    = int(data[0])
@@ -171,11 +171,11 @@ class GYROData:
       self.profile['rho_s']      = data[mark+self.profile['n_n']]
       mark = mark + self.profile['n_n'] + 1
       self.profile['z']          = data[mark:(mark+n_spec)]
-      mark = mark + n_spec 
+      mark = mark + n_spec
       self.profile['mu']         = data[mark:(mark+n_spec)]
       self.profile['n_fine']     = int(data[mark+n_spec])
       # Done
-      
+
       if self.profile['n_theta_plot'] == 1:
           self.profile['theta_plot'] = 0.0
       else:
@@ -196,7 +196,7 @@ class GYROData:
          self.freq['(a/c_s)gamma']    = temp[1,:,:]
          self.freq['err(a/c_s)w']     = temp[2,:,:]
          self.freq['err(a/c_s)gamma'] = temp[3,:,:]
-         print('INFO: (data.py) Read data in '+fmt+'.gyro.freq. '+t) 
+         print('INFO: (data.py) Read data in '+fmt+'.gyro.freq. '+t)
       #-----------------------------------------------------------------
 
       #-----------------------------------------------------------------
@@ -206,9 +206,8 @@ class GYROData:
       t,fmt,data = self.extract('.gyro.field_rms')
       if fmt != 'null':
          self.field_rms = np.reshape(data[0:nd],(2,nt),'F')
-         print('INFO: (data.py) Read data in '+fmt+'.gyro.field_rms. '+t) 
+         print('INFO: (data.py) Read data in '+fmt+'.gyro.field_rms. '+t)
       #-----------------------------------------------------------------
-   
 
    def read_units(self):
       """Read out.gyro.units ."""
@@ -224,7 +223,6 @@ class GYROData:
       for fi in fl[0:13]:
           units.append(float(fi.strip().split()[0]))
       self.units=units
-
 
    def read_geometry(self):
 
@@ -324,7 +322,6 @@ class GYROData:
 
         self.kxkyspec = kxkyspec.reshape((n_x,n_n,nt),order='F')
 
-
     #---------------------------------------------------------------------------#
 
    def read_moment(self,indx):
@@ -338,7 +335,7 @@ class GYROData:
       n_n          = self.profile['n_n']
       n_kinetic    = self.profile['n_kinetic']
 
-        
+
       t,fmt,data = self.extract('.gyro.moment_'+indx)
 
       if fmt != 'null' and indx == 'u':
@@ -364,14 +361,13 @@ class GYROData:
          print("INFO: (data.py) Read data in "+fmt+".gyro.moment_v. "+t)
          self.moment_v = self.moment_v[0] + 1j*self.moment_v[1]
 
-
    def read_moment_zero(self):
 
       nt   = self.n
       n_x  = self.profile['n_x']
       ns   = self.profile['n_kinetic']
       nd   = n_x*ns*3*nt
-      
+
       t,fmt,data = self.extract('.gyro.moment_zero')
       if fmt == 'bin':
          self.moment_zero = np.reshape(data[0:2*nd],(n_x,ns,6,nt),'F')
@@ -379,7 +375,7 @@ class GYROData:
       if fmt == 'out':
          self.moment_zero = np.reshape(data[0:nd],(n_x,ns,3,nt),'F')
          print("INFO: (data.py) Read data in "+fmt+".gyro.moment_zero. "+t)
-      
+
    def read_balloon(self):
         """Reads out.gyro.balloon*.  Data is stored in self.balloon"""
 
@@ -400,7 +396,6 @@ class GYROData:
             u = data.reshape((2,n_ang,m,self.t['n_time']),order='F')
             ext = filename.split('.')[-1]
             self.balloon[ext] = u[0,...]+1j*u[1,...]
-            
 
    def make_tags(self):
         """Generate tags for fields, moments and species"""
@@ -468,7 +463,7 @@ class GYROData:
                     2 - Flow [unit] # Not implemented, need input.profiles.extra
         """
         import math
-        
+
         gbflux = self.gbflux
         if field_num==None:
           gbflux = np.sum(gbflux,axis=1)
@@ -513,4 +508,3 @@ class GYROData:
             sim[tg] = gbflux_m[ti]*fac_gyro
             sim[tg+'_uncertainty'] = gbflux_u[ti]*fac_gyro
         return (xp,sim)
-

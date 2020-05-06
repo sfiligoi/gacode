@@ -3,7 +3,7 @@
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
-from pyrats.neo.data import NEOData
+from .data import NEOData
 
 GFONTSIZE=16
 

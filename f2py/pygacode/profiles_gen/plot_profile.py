@@ -13,7 +13,7 @@ import numpy as np
 matplotlib.use('WXAgg')
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
 import matplotlib.pyplot as plt
-from gacodefuncs import *
+from ..gacodefuncs import *
 from pygacode import expro
 from pygacode import gapystr_get as gapystr
 

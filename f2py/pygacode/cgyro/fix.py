@@ -3,8 +3,8 @@
 import os
 import sys
 import numpy as np
-from gacodefuncs import *
-from cgyro.data import cgyrodata
+from ..gacodefuncs import *
+from .data import cgyrodata
 
 
 # Remove old parameters

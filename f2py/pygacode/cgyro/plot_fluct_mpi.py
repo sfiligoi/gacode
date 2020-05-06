@@ -4,8 +4,8 @@ import numpy as np
 import os
 from matplotlib import rc
 import matplotlib.pyplot as plt
-from gacodefuncs import *
-from cgyro.data import cgyrodata
+from ..gacodefuncs import *
+from .data import cgyrodata
 from mpi4py import MPI
 
 iproc = MPI.COMM_WORLD.Get_rank()

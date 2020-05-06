@@ -1,5 +1,5 @@
 import sys
-from pyrats.neo.data import NEOData
+from .data import NEOData
 import matplotlib.pyplot as plt
 import math
 
