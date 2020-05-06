@@ -1,7 +1,7 @@
 import sys
 import numpy as np
-from gacodefuncs import *
-from gyro.data import GYROData
+from ..gacodefuncs import *
+from .data import GYROData
 
 sim       = GYROData('./')
 w         = float(sys.argv[1])

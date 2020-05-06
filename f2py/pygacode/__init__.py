@@ -4,6 +4,12 @@ from gacode_ext import expro
 from gacode_ext import geo
 from gacode_ext import vis
 
+from . import gyro
+from . import cgyro
+from . import tgyro
+from . import neo
+from . import profiles_gen
+
 def gapystr_get(s):
     u = []
 
@@ -24,4 +30,4 @@ def gapystr_set(s, l=10, n=20):
     return [item.ljust(l) for item in s + [''] * n][:n]
 
 
-__all__ = ['expro', 'geo', 'vis', 'gapystr_get', 'gapystr_set']
+__all__ = ['expro', 'geo', 'vis', 'gapystr_get', 'gapystr_set', 'gyro', 'cgyro', 'tgyro', 'neo', 'profiles_gen']

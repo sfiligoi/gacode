@@ -2,7 +2,7 @@ import sys
 import string
 import numpy as np
 
-from gacodefuncs import *
+from ..gacodefuncs import *
 from prgen_shape_util import *
 
 def prgen_shape(r,z,narc,nf,xplot):

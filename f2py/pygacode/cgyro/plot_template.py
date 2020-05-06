@@ -6,8 +6,8 @@
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
-from gacodefuncs import *
-from cgyro.data import cgyrodata
+from ..gacodefuncs import *
+from .data import cgyrodata
 
 # Get data directory from command line
 data_dir=sys.argv[1]

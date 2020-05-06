@@ -2,7 +2,7 @@ import sys
 import numpy as np
 import scipy.interpolate
 import matplotlib.pyplot as plt
-from gyro.data import GYROData
+from .data import GYROData
 
 GFONTSIZE=18
 

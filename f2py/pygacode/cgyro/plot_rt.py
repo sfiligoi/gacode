@@ -4,8 +4,8 @@ import numpy as np
 import os
 from matplotlib import rc
 import matplotlib.pyplot as plt
-from gacodefuncs import *
-from cgyro.data import cgyrodata
+from ..gacodefuncs import *
+from .data import cgyrodata
 
 PREC='f' ; BIT=4
 

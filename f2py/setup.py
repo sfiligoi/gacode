@@ -9,15 +9,15 @@ wrapper = Extension('gacode_ext',
                              'vis/vis.f90'])
 
 setup(name='pygacode',
-      version='0.51',
-      description='Python interface to gacode profile and geometry tools',
+      version='0.1.0',
+      description='Python interface to GACODE profile, geometry, and code tools',
       url='https://gacode.io',
       author='General Atomics Theory Group',
       author_email='candy@fusion.gat.com',
       license='MIT',
-      py_modules=['pygacode.__init__', 'pygacode.test.test_install'],
+      py_modules=['pygacode.__init__', 'pygacode.gacodefuncs', 'pygacode.gacodeinput'],
       package_data={'pygacode.test': ['input.gacode']},
-      packages=['pygacode.test'],
+      packages=['pygacode.test', 'pygacode.gyro', 'pygacode.cgyro', 'pygacode.tgyro', 'pygacode.neo', 'pygacode.profiles_gen'],
       ext_modules=[wrapper]
       )
 
