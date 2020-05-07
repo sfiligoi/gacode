@@ -1,7 +1,7 @@
 # Example usage:
 # python template.py <simdir>
 #
-# see gacode/python/cgyro/data.py for available data objects
+# see gacode/f2py/pygacode/cgyro/data.py for available data objects
 
 import sys
 import numpy as np
