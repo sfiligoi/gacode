@@ -5,7 +5,7 @@ import os
 import time
 from matplotlib import rc
 import matplotlib.pyplot as plt
-from gacodefuncs import *
+from ..gacodefuncs import *
 from .data import cgyrodata
 
 try:

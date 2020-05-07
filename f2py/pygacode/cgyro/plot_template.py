@@ -6,7 +6,7 @@
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
-from gacodefuncs import *
+from ..gacodefuncs import *
 from .data import cgyrodata
 
 # Get data directory from command line
