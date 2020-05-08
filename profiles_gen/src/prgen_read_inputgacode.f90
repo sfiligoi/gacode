@@ -13,10 +13,10 @@ subroutine prgen_read_inputgacode
   implicit none
 
   expro_ctrl_quasineutral_flag = 0
-  expro_ctrl_numeq_flag = 0 
-  
-  call expro_read('input.gacode')
-  
+  expro_ctrl_numeq_flag = 0
+
+  call expro_read(file_state)
+
   nx = expro_n_exp
 
   call prgen_allocate
@@ -24,5 +24,5 @@ subroutine prgen_read_inputgacode
   ! Needed for diagnostic printing
   rmin(:) = expro_rmin(:)
   rmaj(:) = expro_rmaj(:)
-   
+
 end subroutine prgen_read_inputgacode
