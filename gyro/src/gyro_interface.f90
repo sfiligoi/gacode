@@ -205,7 +205,12 @@ module gyro_interface
 
   real, dimension(:), allocatable :: gyro_r_out
 
+  complex :: gyro_fieldeigen_omega_out
+  real :: gyro_fieldeigen_error_out
+
   real, dimension(:, :, :), allocatable :: gyro_gbflux_out
+  complex, dimension(:, :), allocatable :: gyro_wavefunction_out
+  real, dimension(:), allocatable :: gyro_thetab_out
 
   complex :: gyro_omega_out
   complex :: gyro_omega_error_out
@@ -399,8 +404,8 @@ contains
     gyro_rhos_norm_in = rhos_norm
     gyro_csda_norm_in = csda_norm
 
-
     gyro_path_in = path
+
     ! Allocate output arrays (deallocated in gyro_cleanup)
     if (.not.allocated(gyro_elec_pflux_out)) allocate(gyro_elec_pflux_out(n_x))
     if (.not.allocated(gyro_elec_mflux_out)) allocate(gyro_elec_mflux_out(n_x))
@@ -601,7 +606,7 @@ contains
     den_norm = gyro_den_norm_in
     rhos_norm = gyro_rhos_norm_in
     csda_norm = gyro_csda_norm_in
-    
+
     if (debug_flag == 1 .and. i_proc == 0) then
        print *, '[map_interface2global done]'
     endif

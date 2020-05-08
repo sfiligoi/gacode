@@ -61,7 +61,7 @@ subroutine gyro_run(&
 
   ! Map INTERFACE parameters -> GLOBAL variables and allocate output arrays
   call map_interface2global
-  
+
   ! Run GYRO
   call gyro_do
   call send_line('STATUS: '//gyro_exit_message)
@@ -80,28 +80,11 @@ subroutine gyro_run(&
      return
   endif
 
-  if(.not.allocated(gyro_gbflux_out)) allocate(gyro_gbflux_out(p_moment, n_kinetic, n_field))
-
-
-  ! Re order output for QL-GYRO
-  do i=1,p_moment
-     gyro_gbflux_out(i, :, :) = gbflux(:, :, i)
-  end do
-  !gyro_gbflux_out = reshape(gbflux, shape(gyro_gbflux_out))
-
   ! Linear stability (FIELDEIGEN)
   if (linsolve_method == 3) then
 
-    
-     gyro_omega_out = omega_eigen
-     gyro_omega_error_out = error_eigen
-
-     call gyro_cleanup
-     return
-
-  else if (linsolve_method == 1) then
-     gyro_omega_out = omega_linear(n_n, 1)
-     gyro_omega_error_out = omega_linear(n_n, 2)
+     gyro_fieldeigen_omega_out = omega_eigen
+     gyro_fieldeigen_error_out = error_eigen
 
      call gyro_cleanup
      return
