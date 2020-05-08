@@ -249,6 +249,9 @@ module cgyro_globals
   integer :: io_control
   integer :: signal
   integer :: restart_flag
+
+  logical :: printout=.true.
+
   integer, parameter :: mpiio_small_stripe_factor = 4
   integer, parameter :: mpiio_stripe_factor = 24
   character(len=2) :: mpiio_small_stripe_str

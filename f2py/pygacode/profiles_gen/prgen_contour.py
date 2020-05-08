@@ -236,7 +236,7 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
 
     RI = np.zeros([narc,levels]) ; ZI = np.zeros([narc,levels])
     r1 = np.zeros([narc])        ; z1 = np.zeros([narc])
-    
+
     for k,item1 in enumerate(contours):
         if k==0:
             # axis
