@@ -80,7 +80,7 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
     zaxis    = geqdsk['ZMAXIS']
     rlim     = geqdsk['RLIM']
     zlim     = geqdsk['ZLIM']
-    
+
     if any(np.isnan(rlim)) or any(np.isnan(zlim)):
         print('ERROR: (prgen_contour) rlim/zlim arrays contain NaNs')
         return
@@ -235,9 +235,6 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
 
     RI = np.zeros([narc,levels]) ; ZI = np.zeros([narc,levels])
     r1 = np.zeros([narc])        ; z1 = np.zeros([narc])
-    
-    fig = plt.figure(figsize=(8,10))
-    ax = fig.add_subplot(111,aspect='equal')
 
     for k,item1 in enumerate(contours):
         if k==0:
@@ -278,7 +275,7 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
     efitpsi = np.linspace(out_psi[0],out_psi[-1],len(efitp))
     cs = interpolate.interp1d(efitpsi,efitp,kind='quadratic') ; out_p = cs(out_psi)
     cs = interpolate.interp1d(efitpsi,efitf,kind='quadratic') ; out_f = cs(out_psi)
-    cs = interpolate.interp1d(efitpsi,efitq,kind='quadratic') ; out_q = cs(out_psi)
+    #cs = interpolate.interp1d(efitpsi,efitq,kind='quadratic') ; out_q = cs(out_psi)
 
     # Recalculate q based on definition (and some identities)
     loopint = np.zeros([levels])
@@ -287,6 +284,6 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
       
     cs = interpolate.splrep(out_psi,loopint) ; out_q = interpolate.splev(out_psi,cs,der=1)
     out_q = out_f*out_q/(2*np.pi)
-
+    
     return RI,ZI,out_psi,out_q,out_p,out_f
 

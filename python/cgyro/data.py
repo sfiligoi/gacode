@@ -75,7 +75,7 @@ class cgyrodata:
          print('INFO: (data.py) Read time vector in out.cgyro.time.')
 
       #-----------------------------------------------------------------
- 
+
       return True
    
    def getdata(self):
