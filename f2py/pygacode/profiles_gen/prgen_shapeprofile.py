@@ -4,9 +4,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import rc
 
-from prgen_geqdsk import *
-from prgen_contour import *
-from prgen_shape import *
+from .prgen_geqdsk import *
+from .prgen_contour import *
+from .prgen_shape import *
 
 if len(sys.argv) > 1:
    gfile   = sys.argv[1]
@@ -23,7 +23,7 @@ nf = 3
 
 # Call OMFIT mapper
 ri,zi,psi,q,p,fpol = prgen_contour(efit,nrz=nrz,levels=npsi,psinorm=0.996,narc=narc,quiet=False)
-   
+
 pnorm = ((psi[:]-psi[0])/(psi[-1]-psi[0]))
 rnorm = np.sqrt(pnorm)
 
@@ -85,4 +85,3 @@ if nfourier > 0:
    oldfourier(ri,zi,nfourier,rnorm)
    # Plot radial profiles of cos,sin,etc
    plot_coef(pnorm,ci,si,xi)
-

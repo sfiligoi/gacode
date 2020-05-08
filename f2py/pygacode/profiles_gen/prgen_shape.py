@@ -2,11 +2,11 @@ import sys
 import string
 import numpy as np
 
-from gacodefuncs import *
-from prgen_shape_util import *
+from ..gacodefuncs import *
+from .prgen_shape_util import *
 
 def prgen_shape(r,z,narc,nf,xplot):
-   
+
    # Number of theta-points for plotting
    dx = np.zeros(narc)
    ur = np.zeros(narc) ; uz = np.zeros(narc)
@@ -19,7 +19,7 @@ def prgen_shape(r,z,narc,nf,xplot):
    ra = r[n2] ; rb = r[m2]
    zmaj = 0.5*(za+zb) ; zmin = 0.5*(za-zb)
    rmaj = 0.5*(ra+rb) ; rmin = 0.5*(ra-rb)
-     
+
    if z[1] < z[0]:
       # Reverse order (may be needed)
       r = np.flip(r,0) ; z = np.flip(z,0)
@@ -45,7 +45,7 @@ def prgen_shape(r,z,narc,nf,xplot):
 
    # Define vr as deviation from vz
    vr = vr-vz ; vr[-1] = vr[0]
-   
+
    x = vz
    # Now:
    #
@@ -67,8 +67,8 @@ def prgen_shape(r,z,narc,nf,xplot):
 
    # Compute expansion coefficients (cr):
    #  vr = sum cr*cos(nx)+sr*sin(nx)
-   cr = np.zeros(nf+1) 
-   sr = np.zeros(nf+1) 
+   cr = np.zeros(nf+1)
+   sr = np.zeros(nf+1)
 
    cr[0] = moment(narc,vr,np.ones(narc),dx)
    for p in range(1,nf+1):
@@ -84,11 +84,11 @@ def prgen_shape(r,z,narc,nf,xplot):
 def prgen_fshape(rd,zd,nf):
 
     nd = len(rd)
-   
+
     # Construct equally-spaced poloidal angle
     theta  = np.linspace(0,1,nd)*2*np.pi
     dtheta = theta[1]-theta[0]
-    
+
     ar = np.zeros(nf+1) ; br = np.zeros(nf+1)
     az = np.zeros(nf+1) ; bz = np.zeros(nf+1)
 
@@ -110,7 +110,7 @@ def oldfourier(ri,zi,nf,rnorm):
 
    print("INFO: (oldfourier) Generating legacy Fourier coefficients")
    npsi = len(rnorm)
-   
+
    ari = np.zeros([nf+1,npsi]) ; bri = np.zeros([nf+1,npsi])
    azi = np.zeros([nf+1,npsi]) ; bzi = np.zeros([nf+1,npsi])
 
@@ -121,11 +121,11 @@ def oldfourier(ri,zi,nf,rnorm):
       azi[:,i+1] = az[:] ; bzi[:,i+1] = bz[:]
 
    # Repair origin
-   ari[0,:] = extrap(rnorm,ari[0,:]) 
-   azi[0,:] = extrap(rnorm,azi[0,:]) 
+   ari[0,:] = extrap(rnorm,ari[0,:])
+   azi[0,:] = extrap(rnorm,azi[0,:])
    for i in range(1,nf+1):
-      ari[i,:] = zero(rnorm,ari[i,:]) ; bri[i,:] = zero(rnorm,bri[i,:]) 
-      azi[i,:] = zero(rnorm,azi[i,:]) ; bzi[i,:] = zero(rnorm,bzi[i,:]) 
+      ari[i,:] = zero(rnorm,ari[i,:]) ; bri[i,:] = zero(rnorm,bri[i,:])
+      azi[i,:] = zero(rnorm,azi[i,:]) ; bzi[i,:] = zero(rnorm,bzi[i,:])
 
    u = ari
    u = np.append(u,bri)
