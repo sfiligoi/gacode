@@ -99,7 +99,7 @@ while [ $# -gt 0 ] ; do
 done
 #==============================================================================
 
-PYROOT=$GACODE_ROOT/python/profiles_gen
+PYROOT=$GACODE_ROOT/f2py/pygacode/profiles_gen
 
 #==============================================================================
 # Plotting control

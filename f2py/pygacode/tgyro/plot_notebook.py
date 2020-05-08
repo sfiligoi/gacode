@@ -14,7 +14,7 @@ matplotlib.use('WXAgg')
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
 import matplotlib.pyplot as plt
 from matplotlib import rc
-from gacodefuncs import *
+from ..gacodefuncs import *
 from .data import tgyrodata
 from matplotlib.colors import LogNorm
 from pygacode import expro

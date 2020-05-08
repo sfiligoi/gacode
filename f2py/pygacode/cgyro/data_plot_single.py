@@ -2,8 +2,8 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import rc
-from cgyro.data_plot import cgyrodata_plot
-from cgyro.data_dump import cgyrodata_dump
+from .data_plot import cgyrodata_plot
+from .data_dump import cgyrodata_dump
 
 data_in = cgyrodata_plot('./')
 

@@ -32,5 +32,5 @@ elif hash ffmpeg 2>/dev/null ; then
 	   -metadata creation_time="$TIMESTAMP" \
 	   -crf $QUALITY $OUT
 else
-    echo Need avconv or ffmpeg in gacode/python/cgyro/avconv_wrapper
+    echo Need avconv or ffmpeg in gacode/f2py/pygacode/cgyro/avconv_wrapper
 fi

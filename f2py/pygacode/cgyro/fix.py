@@ -3,7 +3,7 @@
 import os
 import sys
 import numpy as np
-from gacodefuncs import *
+from ..gacodefuncs import *
 from .data import cgyrodata
 
 

@@ -1,12 +1,12 @@
 # Example usage:
 # python template.py <simdir>
 #
-# see gacode/python/cgyro/data.py for available data objects
+# see gacode/f2py/pygacode/cgyro/data.py for available data objects
 
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
-from gacodefuncs import *
+from ..gacodefuncs import *
 from .data import cgyrodata
 
 # Get data directory from command line

@@ -1,4 +1,4 @@
-#!/task/imd/anaconda/bin/python
+#!python
 import os, sys
 def make_clean():
     ret = os.system('cd $GACODE_ROOT; make clean')
