@@ -28,9 +28,9 @@ def extract0d(infile):
         # CSV format for 0d file.
         data = np.loadtxt(infile,delimiter=',',dtype=str)
 
-        tag = data[:, 0]
-        val = data[:, 1]
-        
+        tag = data[0]
+        val = data[1]
+
         n_tag = len(tag)
 
         for i in range(n_tag):
@@ -117,7 +117,7 @@ def extract0d(infile):
                 mf3 = x[6]
 
     # Now write the tags to "out.com"
-    
+
     f=open('out.com','w')
     f.write(infile.split('_0d')[0]+'\n')
     f.write(tok+'\n')
@@ -148,6 +148,7 @@ def extract1d(infile,t0):
 
     data_region = 0
     for line in open(infile,'r').readlines():
+
         if line.count("END-OF-DATA") == 1:
             data_region = 0
             if t0 >= vt[0] and t0 <= vt[-1]:
@@ -167,18 +168,7 @@ def extract1d(infile,t0):
                 # Extract current variable name
                 var=line.split('  ')[0].strip()
 
-            if line.count("X0 PTS") == 1:
-                # Get length of radial grid
-                nt=int(line.split(";-# OF X0 PTS")[0].strip())
-                vt = np.zeros(nt)
-                vy = np.zeros(nt)
-                # Signal header end
-                data_region = 1
-                it = 0
-                iy = 0
-
-            
-            if line.count("PTS-  X") == 1:
+            if line.count("OF PTS") == 1:
                 # Get length of radial grid
                 nt=int(line.split(";-# OF PTS")[0].strip())
                 vt = np.zeros(nt)
@@ -194,6 +184,7 @@ def extract1d(infile,t0):
 
             # Number of columns
             n = np.max([line.count("E"),line.count("e")])
+
             if it < nt:
                 # Read the time grid [nt points]
                 for i in range(n):
@@ -209,6 +200,7 @@ def extract2d(infile,t0):
 
     data_region = 0
     for line in open(infile,'r').readlines():
+        #print line
         if line.count("END-OF-DATA") == 1:
             data_region = 0
             if t0 >= vt[0] and t0 <= vt[-1]:
@@ -220,7 +212,7 @@ def extract2d(infile,t0):
                     yave[i] = np.interp(t0,vt,fxt[i,:])
                     # Write the averaged data for current profile (var)
                     # Output filename: "out.TAG.ave"
-                np.savetxt('out.'+var+'.ave',np.transpose((vx,yave)),fmt='%1.6e')
+                    np.savetxt('out.'+var+'.ave',np.transpose((vx,yave)),fmt='%1.6e')
             else:
                 print('INFO: (ufile_tool) Time window: '+'t=['+str(vt[0])+','+str(vt[-1])+']')
                 return
@@ -248,30 +240,10 @@ def extract2d(infile,t0):
                 iy = 0
                 # Write dimensions
                 if var=="NE":
-                    f=open('out.ufile.dim','w')
+                    f=open('out.dim','w')
                     f.write(str(nx)+'\n')
                     f.close()
 
-            if line.count("X0 PTS") == 1:
-                # Get length of radial grid
-                nx=int(line.split(";-# OF X0")[0].strip())
-                vx = np.zeros(nx)
-
-            if line.count("X1 PTS") == 1:
-                # Get size of time grid
-                nt=int(line.split(";-# OF X1")[0].strip())
-                vy = np.zeros(nx*nt)
-                vt = np.zeros(nt)
-                # Signal header end
-                data_region = 1
-                ix = 0
-                it = 0
-                iy = 0
-                # Write dimensions
-                if var=="NE":
-                    f=open('out.ufile.dim','w')
-                    f.write(str(nx)+'\n')
-                    f.close()
         else:
 
             # Here we are reading numbers
@@ -299,27 +271,24 @@ def extract2d(infile,t0):
 # Manage input parameters
 
 # <datafile>
-
 try:
-    infiles=sys.argv[1:-1]
+    infile=sys.argv[1]
     infileval='0'
-    if infiles[-1].split("_")[-1]=='1d.dat':
+    if infile.split("_")[-1]=='1d.dat':
         infileval='1'
-    if infiles[-1].split("_")[-1]=='2d.dat':
+    if infile.split("_")[-1]=='2d.dat':
         infileval='2'
-
 except:
     print('Usage: python split.py <datafile> <time>')
     sys.exit()
 
-if infileval == '0':
-    for infile in infiles:
-        extract0d(infile)
+if infile.split("_")[-1]=='0d.dat':
+    extract0d(infile)
     sys.exit()
 
 # <time> Time-point for desired radial output
 try:
-    t0=float(sys.argv[-1])
+    t0=float(sys.argv[2])
 except:
     # GENERATE DIAGNOSTICS IF NO TIME SPECIFIED
     varlist = []
@@ -335,13 +304,8 @@ except:
     for i in np.arange(start=0,stop=len(varlist),step=10):
         print('       '+' '.join(varlist[i:i+10]))
 
+if infile.split("_")[-1]=='1d.dat':
+    extract1d(infile,t0)
 
-if infileval == '1':
-
-    for infile in infiles:
-        extract1d(infile,t0)
-
-
-if infileval == '2':
-    for infile in infiles:
-        extract2d(infile,t0)
+if infile.split("_")[-1]=='2d.dat':
+    extract2d(infile,t0)

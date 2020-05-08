@@ -42,10 +42,6 @@ subroutine prgen_map_ufile
   do i=1,ufile_nion
      expro_ni(i,:) = ufile_ni(:,i)*1e-19
      expro_ti(i,:) = ufile_ti(:,i)*1e-3
-     expro_mass(i) = ufile_m(i)
-     expro_z(i)    = ufile_z(i)
-     expro_type(i) =  ufile_type(i)
-     call prgen_ion_name(nint(expro_mass(i)),nint(expro_z(i)),expro_name(i))
   enddo
 
   ! vphi
@@ -76,12 +72,12 @@ subroutine prgen_map_ufile
   expro_qfusi = ufile_qfusi
 
   expro_qei = ufile_qei
-  !expro_qbeami = -ufile_qwalli
+  expro_qbeami = -ufile_qwalli
   
   print '(a)','INFO: (prgen) i-power: Setting expro_qbeami = -QWALLI'
   print '(a)','INFO: (prgen) i-power: (QNBII+QICHRI+QLHI+QECHI)+QEI-QWALLI'
 
-  !expro_qbeame = -ufile_qwalle
+  expro_qbeame = -ufile_qwalle
  
   ! JC: need radiated power breakdown
   !  ? = ufile_qrad(:)
