@@ -9,7 +9,7 @@ wrapper = Extension('gacode_ext',
                              'vis/vis.f90'])
 
 setup(name='pygacode',
-      version='0.1.0',
+      version='0.52',
       description='Python interface to GACODE profile, geometry, and code tools',
       url='https://gacode.io',
       author='General Atomics Theory Group',

@@ -27,9 +27,9 @@ clean:
 	rm -f f2py/*/*.pyc
 	rm -f f2py/*.pyc
 	rm -f f2py/pygacode/*/*.pyc
-	rm -f f2py/*/__pycache__
-	rm -f f2py/__pycache__
-	rm -f f2py/pygacode/*/__pycache__
+	rm -rf f2py/*/__pycache__
+	rm -rf f2py/__pycache__
+	rm -rf f2py/pygacode/*/__pycache__
 	rm -f modules/*genmod*
 	rm -f *.log
 	rm -rf *regression_test/
