@@ -4,11 +4,12 @@ subroutine expro_compute_derived
   use geo
 
   implicit none
-  
+
   integer :: n
   integer :: i
   integer :: is
-  
+  integer :: nx
+
   double precision, parameter :: k  = 1.6022d-12 ! erg/eV
   double precision, parameter :: e  = 4.8032d-10 ! statcoul
   double precision, parameter :: c  = 2.9979d10  ! cm/s
@@ -16,7 +17,7 @@ subroutine expro_compute_derived
   double precision, parameter :: mu0 = 1.2566e-6 ! permeability [SI: H/m]
 
   double precision :: mp ! mass_deuterium/2.0 (g)
-  
+
   double precision, dimension(:), allocatable :: torflux
   double precision, dimension(:), allocatable :: temp
   double precision, dimension(:), allocatable :: cc
@@ -25,12 +26,13 @@ subroutine expro_compute_derived
   double precision :: r_min
   double precision :: fa,fb
   double precision :: theta(1)
-  double precision :: p_ave
+  double precision :: p_ave,ne_ave
+  double precision :: eps0,m0,ipma
   double precision :: bt2_ave
   double precision :: bp2_ave
-  
+
   mp = expro_mass_deuterium/2d0  ! mass_deuterium/2.0 (g)
-  
+
   if (expro_ctrl_n_ion == -1) expro_ctrl_n_ion = expro_n_ion
 
   !---------------------------------------------------------------------
@@ -62,7 +64,7 @@ subroutine expro_compute_derived
   !
   allocate(torflux(expro_n_exp))
   allocate(temp(expro_n_exp))
- 
+
   torflux(:) = expro_torfluxa*expro_rho(:)**2
 
   ! b_unit
@@ -114,7 +116,7 @@ subroutine expro_compute_derived
   expro_shape_scos3(:) = expro_rmin(:)*temp(:)
   call bound_deriv(temp,expro_shape_sin3,expro_rmin,expro_n_exp)
   expro_shape_ssin3(:) = expro_rmin(:)*temp(:)
-  
+
   ! 1/L_ne = -dln(ne)/dr (1/m)
   call bound_deriv(expro_dlnnedr,-log(expro_ne),expro_rmin,expro_n_exp)
 
@@ -373,7 +375,7 @@ subroutine expro_compute_derived
   call volint(expro_qpar,expro_flow_beam,expro_n_exp)
   call volint(expro_qmom,expro_flow_mom,expro_n_exp)
   !--------------------------------------------------------------
-  
+
   ! Clean up
   deallocate(torflux)
 
@@ -397,7 +399,7 @@ subroutine expro_compute_derived
      expro_sdlnnidr_new(:) = expro_sdlnnidr_new(:)/expro_ni_new(:)*expro_rhos(:)
 
      if (minval(expro_ni_new(:)) <= 0d0) expro_error = 1
- 
+
   else
 
      expro_ni_new(:) = expro_ni(1,:)
@@ -412,28 +414,58 @@ subroutine expro_compute_derived
      if (minval(expro_ni(is,:)) <= 0d0) expro_error=1
   enddo
 
-  ! Compute scalars
+  !-------------------------------------------------------------------------------
+  ! Compute expro scalars
 
-  ! p_ave = <p> in Pa 
+  nx = expro_n_exp
+
+  ! Aspect ratio and mass (JC: need to generalize)
+  eps0 = expro_rmin(nx)/expro_rmaj(nx)
+  m0   = 2d0
+  ipma = abs(expro_current)
+
+  !  p_ave = <p>  in Pa 
+  ! ne_ave = <ne> in 10^19/m^3
   p_ave = 0d0
   ! bt2_ave/bp2_ave = <B^2> in T^2 
   bt2_ave = 0d0 ; bp2_ave = 0d0
-  do i=2,expro_n_exp
-     p_ave = p_ave+(expro_vol(i)-expro_vol(i-1))*(expro_ptot(i)+expro_ptot(i-1))/2
+  do i=2,nx
+     ne_ave  = ne_ave+(expro_rmin(i)-expro_rmin(i-1))*(expro_ne(i)+expro_ne(i-1))/2
+     p_ave   = p_ave+(expro_vol(i)-expro_vol(i-1))*(expro_ptot(i)+expro_ptot(i-1))/2
      bt2_ave = bt2_ave+(expro_vol(i)-expro_vol(i-1))*(expro_bt2(i)+expro_bt2(i-1))/2
      bp2_ave = bp2_ave+(expro_vol(i)-expro_vol(i-1))*(expro_bp2(i)+expro_bp2(i-1))/2     
   enddo
-  p_ave = p_ave/expro_vol(expro_n_exp)
-  bt2_ave = bt2_ave/expro_vol(expro_n_exp)
-  bp2_ave = bp2_ave/expro_vol(expro_n_exp)
+  ne_ave  = ne_ave/expro_rmin(nx)
+  p_ave   = p_ave/expro_vol(nx)
+  bt2_ave = bt2_ave/expro_vol(nx)
+  bp2_ave = bp2_ave/expro_vol(nx)
 
   ! SI unit calculation (B [T] and p [Pa])
   ! NOTE: 1/beta = 1/betap + 1/betat 
   expro_betap = 2*mu0*p_ave/bp2_ave
   expro_betat = 2*mu0*p_ave/bt2_ave
-  ! For beta_n, use EFIT normalization factor a*Bt/Ip=a*BCENTR/CURRENT
-  expro_betan = 1/(1/expro_betap+1/expro_betat)*(r_min*expro_bcentr/(1d6*expro_current))
-    
+  ! For beta_n, use EFIT normalization factor a[m]*Bt[T]/Ip[MA]=a*BCENTR/CURRENT
+  expro_betan = 1/(1/expro_betap+1/expro_betat)*(r_min*expro_bcentr/ipma)
+  ! Greenwald density (current [MA])
+  expro_greenwald = ipma/(pi*r_min**2)
+
+  if (expro_pow_e(nx) > 1e-6) then
+     ! Transport power (MW)
+     expro_ptransp = expro_pow_e(nx)+expro_pow_i(nx)
+     ! tau = W[MJ]/P[MW]
+     expro_tau = (1.5*p_ave*expro_vol(nx)*1d-6)/expro_ptransp
+
+     expro_tau98y2 = 0.05621     * &
+          ipma**0.93             * &
+          sqrt(bt2_ave)**0.15    * &
+          expro_ptransp**(-0.69) * &
+          ne_ave**0.41           * &
+          m0**0.19               * &
+          expro_rmaj(nx)**1.97   * &
+          eps0**0.59             * &
+          expro_kappa(nx)**0.78
+  endif
+
 end subroutine expro_compute_derived
 
 !-------------------------------------------------------

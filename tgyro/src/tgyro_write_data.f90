@@ -60,19 +60,19 @@ subroutine tgyro_write_data(i_print)
      call tgyro_profile_reintegrate
 
      ! First, hose the original profiles 
-     EXPRO_ni = 0.0
-     EXPRO_ti = 0.0
+     expro_ni = 0.0
+     expro_ti = 0.0
 
-     EXPRO_ptot = ptot_exp
-     EXPRO_ne   = exp_ne*1e-13
-     EXPRO_te   = exp_te*1e-3
+     expro_ptot = ptot_exp
+     expro_ne   = exp_ne*1e-13
+     expro_te   = exp_te*1e-3
     
-     EXPRO_ni(1:loc_n_ion,:) = exp_ni(1:loc_n_ion,:)*1e-13
-     EXPRO_ti(1:loc_n_ion,:) = exp_ti(1:loc_n_ion,:)*1e-3
-     EXPRO_w0   = exp_w0
-     EXPRO_ptot = ptot_exp ! already in Pa
-     do i_exp=1,EXPRO_n_exp
-        EXPRO_z_eff(i_exp) = sum(exp_ni(1:loc_n_ion,i_exp)*zi_vec(1:loc_n_ion)**2)/&
+     expro_ni(1:loc_n_ion,:) = exp_ni(1:loc_n_ion,:)*1e-13
+     expro_ti(1:loc_n_ion,:) = exp_ti(1:loc_n_ion,:)*1e-3
+     expro_w0   = exp_w0
+     expro_ptot = ptot_exp ! already in Pa
+     do i_exp=1,expro_n_exp
+        expro_z_eff(i_exp) = sum(exp_ni(1:loc_n_ion,i_exp)*zi_vec(1:loc_n_ion)**2)/&
              sum(exp_ni(1:loc_n_ion,i_exp)*zi_vec(1:loc_n_ion))
      enddo
   

@@ -3,7 +3,7 @@
 # profiles_gen
 #
 # PURPOSE:
-#  Top-level script for conversion of raw data into GYRO 
+#  Top-level script for conversion of raw data into GYRO
 #  format (input.gacode).
 #
 #  Autodetected profile formats:
@@ -11,13 +11,13 @@
 #   ITERDB      (ASCII iterdb)
 #   ITERDBNC    (netCDF iterdb)
 #   SWIM        (plasmastate)
-#   CORSICA     (Corsica) 
+#   CORSICA     (Corsica)
 #   PFILE       (peqdsk)
 #   UFILE       (ITPA profile database format)
 #
 #  Autodetected geometry formats:
 #   GFILE       (geqdsk equilibrium data)
-#============================================================= 
+#=============================================================
 
 #=============================================================
 # EXECUTABLE AND CONFIG FILE LOCATIONS:
@@ -29,7 +29,8 @@ VGEN_EXE=${GACODE_ROOT}/vgen/src
 # - profiles_gen converter executable
 EXEC=${GACODE_ROOT}/profiles_gen/src/prgen
 # - OMFIT fitter script
-OMFIT=${GACODE_ROOT}/python/profiles_gen/prgen_shapeprofile.py
+OMFIT='-m pygacode.profiles_gen.prgen_shapeprofile'
+#${GACODE_ROOT}/f2py/pygacode/profiles_gen/prgen_shapeprofile.py
 # - locpargen executable
 LOCPARGEN=${GACODE_ROOT}/profiles_gen/locpargen/locpargen
 # - profiles_gen bin directory
@@ -44,7 +45,7 @@ n=$#
 if [ $n -eq 0 ]
 then
    echo "Usage:       profiles_gen [options]"
-   echo 
+   echo
    echo "             Autodetected profile formats:"
    echo "               GACODE      (input.gacode)"
    echo "               LEGACY      (legacy input.profiles)"
@@ -54,50 +55,50 @@ then
    echo "               PFILE       (peqdsk)"
    echo "               CORSICA     (Corsica) "
    echo "               UFILE       (ITPA profile database format)"
-   echo 
+   echo
    echo "             Autodetected geometry formats:"
    echo "               GFILE       (geqdsk equilibrium data)"
-   echo 
+   echo
    echo "             -p <path>"
    echo "             Set optional path to simulation directory."
    echo "             [The default path is the current directory]"
    echo
    echo "             -e <workdir>"
    echo "             Working directory (default is present directory)"
-   echo 
+   echo
    echo "             -g <GFILE>"
    echo "             GFILE (geqdsk) containing flux-surface data [required]."
    echo
    echo "             -ipccw <val>"
    echo "             Specify direction of current (as seen from above)"
    echo "             (1=counter-clockwise,-1=clockwise)"
-   echo 
+   echo
    echo "             -btccw <val>"
    echo "             Specify direction of toroidal field (as seen from above)"
    echo "             (1=counter-clockwise,-1=clockwise)"
-   echo 
+   echo
    echo "             -neut"
    echo "             Toggle extraction of neutral profiles (input.gacode.neutral)"
-   echo 
+   echo
    echo "             -V"
    echo "             Verbose (for debugging; use this if you get an error)."
    echo
    echo "ITERDB Options"
-   echo 
+   echo
    echo "             -i <data>"
    echo "             Specify text or NetCDF data file."
-   echo 
+   echo
    echo "             -cer <vpol>"
    echo "             Merge data Er and velocity data from Solomon's cer datafile."
-   echo 
+   echo
    echo "PLASMA STATE Options"
    echo
    echo "             -i <data>"
    echo "             Specify NetCDF data file."
-   echo 
+   echo
    echo "             -r <i1,i2,i3,i4,i5>"
    echo "             Reorder ions."
-   echo 
+   echo
    echo "             -l <i1,i2,...>"
    echo "             Lump ions before reordering."
    echo
@@ -111,7 +112,7 @@ then
    echo
    echo "             -i <data.corsica>"
    echo "             Specify Corsica data file."
-   echo 
+   echo
    echo "             -r <reorder sequence>"
    echo "             Reorder ions."
    echo
@@ -130,7 +131,7 @@ then
    echo "                      current directory, then type:"
    echo
    echo "                       $ profiles_gen -i UFILE -t <time>"
-   echo                   
+   echo
    echo "                      Leaving out the -t option will print time window"
    echo
    echo "PEQDSK/PFILE Options (gfile required)"
@@ -147,7 +148,7 @@ then
    echo "             Number of radial gridpoints (default: 40)"
    echo
    echo "Flux-surface mapper control options"
-   echo 
+   echo
    echo "             -npsi <int>"
    echo "              Number of flux-surfaces to contout"
    echo
@@ -165,34 +166,37 @@ then
    echo "             -i <data>"
    echo "             Data in input.gacode format."
    echo
+   echo "             -info"
+   echo "             Toggle info generation."
+   echo
    echo "VELOCITY GENERATION (VGEN) MODE"
    echo
    echo "             -vgen"
    echo "             Toggle vgen mode."
    echo
-   echo "             -in <number of ion species or input.neo> " 
+   echo "             -in <number of ion species or input.neo> "
    echo "             If number specified (>=1), uses default neo template"
    echo "             Otherwise, input.neo must exist."
    echo "             See"
    echo "             $VGEN_DIR/input.neo.*"
    echo "             for examples."
    echo
-   echo "             -er <val>" 
+   echo "             -er <val>"
    echo "             Method to compute Er."
    echo "             1=Force balance, 2=NEO (weak rot), 3=NEO (strong rot), 4=Return given"
    echo
-   echo "             -vel <val>" 
+   echo "             -vel <val>"
    echo "             Method to compute velocities."
    echo "             1=NEO (weak rot), 2=NEO (strong rot), 3=Return given"
    echo
-   echo "             -epar <val>" 
+   echo "             -epar <val>"
    echo "             Flag to compute conductivity."
    echo "             0=yes, 1=no"
    echo
-   echo "             -ix <index>" 
+   echo "             -ix <index>"
    echo "             Index of ion species to match NEO and given velocities."
    echo
-   echo "             -nth <min,max>" 
+   echo "             -nth <min,max>"
    echo "             Minimum and maximum theta resolutions.  Default -nth 17,39"
    echo
    echo "             -n <mpi tasks>"
@@ -201,22 +205,22 @@ then
    echo "             Use the NEO neural network instead of NEO DKE solve."
    echo
    echo "LOCAL INPUT GENERATION MODE"
-   echo 
+   echo
    echo "             -loc_rad <r/a>"
    echo "             Reference radius, r/a."
-   echo 
+   echo
    echo "             -loc_rho <rho>"
    echo "             Reference rho=sqrt[chi/chi(a)]"
-   echo 
+   echo
    echo "             -loc_psi <psi_N>"
    echo "             Reference psi_N=psi/psi(a)"
-   echo 
+   echo
    echo "             -qn"
    echo "             Toggle quasineutrality."
-   echo 
+   echo
    echo "             -banana"
    echo "             Include banana-width diagnostic"
-   echo 
+   echo
    echo "             -append"
    echo "             Append to existing input.*.locpargen files"
    echo
@@ -226,19 +230,19 @@ then
    echo "(1) Typical usage for DIII-D plasmas with iterdbfile only (2 steps)"
    echo "    NEO will generate Er and all velocities:"
    echo "    (2 ions + electrons)"
-   echo 
+   echo
    echo "    profiles_gen -i iterdb -g gfile"
    echo "    profiles_gen -vgen -i input.gacode -er 2 -vel 1 -in 2 -ix 2"
    echo
    echo "    if using your own input.neo, use '-in input.neo'"
-   echo 
+   echo
    echo "(2) Typical usage for DIII-D plasmas with CER file available (2 steps)"
    echo "    NEO will take Er from CER file and generate all velocities:"
    echo "    (2 ions + electrons)"
-   echo 
+   echo
    echo "    profiles_gen -i iterdb -g gfile -cer cerfile"
    echo "    profiles_gen -vgen -i input.gacode -er 4 -vel 2 -in 2 -ix 2"
-   echo 
+   echo
 
    exit 1
 fi
@@ -253,6 +257,7 @@ SIMROOT=$PWD
 CONFIG=.prgenconfig
 
 FILE_FLAG=0
+INFO_FLAG=0
 VERBOSE_FLAG=0
 ORDER_FLAG=0
 LUMP_FLAG=0
@@ -290,7 +295,7 @@ NOMP=1
 NUMA=0
 MPINUMA=0
 
-# UFILE 
+# UFILE
 UFILETIME=null
 
 # LOCAL PARAMETER MODE variables
@@ -332,10 +337,11 @@ while [ $# -gt 0 ] ; do
   -npsi) shift ; NPSI=$1 ;;
 
   -true_aux) TRUE_AUX_FLAG=1 ;;
-  
+
   -V) VERBOSE_FLAG=1 ;;
 
   -neut) NEUT_FLAG=1 ;;
+  -info) INFO_FLAG=1 ;;
 
   -r) shift ; ORDER="$1" ; ORDER_FLAG=1 ;;
 
@@ -403,18 +409,18 @@ if [ "$itype" == "NOT_FOUND" ] ; then
 fi
 if [ "$itype" == "UNKNOWN" ] ; then
    echo "ERROR: (profiles_gen) $FILE is an unknown type."
-   exit 1 
+   exit 1
 fi
 
 if [ $EFIT -eq 0 ] ; then
 
    gtype="none"
    if [ "$itype" == "PFILE" ] ; then
-      echo "ERROR: (profiles_gen) A GFILE (-g) must be used with a PFILE."  
+      echo "ERROR: (profiles_gen) A GFILE (-g) must be used with a PFILE."
       exit 1
    fi
    if [ "$itype" == "CORSICA" ] ; then
-      echo "ERROR: (profiles_gen) A GFILE (-g) must be used with a CORSICA file."  
+      echo "ERROR: (profiles_gen) A GFILE (-g) must be used with a CORSICA file."
       exit 1
    fi
 
@@ -431,9 +437,16 @@ fi
 #
 if [ "$itype" == "LEGACY" ] ; then
   echo "INFO: (profiles_gen) Parsing input.profiles header."
-#  python $PRGEN_BIN/profile_parse.py $FILE
   python $PRGEN_BIN/profile_header_dump.py $FILE
   python $PRGEN_BIN/profile_header_shot.py $FILE
+fi
+#=============================================================
+#=============================================================
+# If file is input.gacode and -info set, generate info
+#
+if [ "$itype" == "GACODE" ] && [ $INFO_FLAG == 1 ] ; then
+    python $PRGEN_BIN/pygacode_info.py $FILE
+    exit 0
 fi
 #=============================================================
 # Managing input file (also catches UFILE mode)
@@ -468,7 +481,7 @@ else
 fi
 
 #=============================================================
-# Trap a p-file and split into components 
+# Trap a p-file and split into components
 #
 if [ "$itype" == "PFILE" ] ; then
    # Now, strip pfile into parts.  Rename $FILE so pfile detected in prgen.
@@ -548,7 +561,7 @@ then
    fi
 
    # Tell NEO that its being run in subroutine mode by vgen.
-   echo "SUBROUTINE_FLAG=1" >> input.neo 
+   echo "SUBROUTINE_FLAG=1" >> input.neo
 
    cp ../$FILE input.gacode
    if [ -f "../$FILE.geo" ]
@@ -573,7 +586,7 @@ then
       p=$(($p+1))
       echo $i >> vgen.dat
    done
-   if [ $p -eq 1 ] 
+   if [ $p -eq 1 ]
    then
       echo $i >> vgen.dat
    fi
@@ -612,7 +625,7 @@ echo $FILE >> $CONFIG
 echo $itype >> $CONFIG
 
 # Optional data files
-echo $GFILE ${harr[1]} ${harr[5]} ${harr[6]} >> $CONFIG 
+echo $GFILE ${harr[1]} ${harr[5]} ${harr[6]} >> $CONFIG
 echo $CER_FILE >> $CONFIG
 
 # EFIT data control
@@ -668,7 +681,7 @@ fi
 #==============================================================
 
 #==============================================================
-# Ion lumping parameters: 
+# Ion lumping parameters:
 #
 if [ $LUMP_FLAG -eq 1 ]
 then
@@ -683,7 +696,7 @@ then
 else
    echo "1" >> $CONFIG
    echo "0" >> $CONFIG
-fi 
+fi
 #==============================================================
 
 #==============================================================

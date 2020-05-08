@@ -1,7 +1,7 @@
 module expro
 
   ! List of all useful interface objects
-  character*12, dimension(99) :: expro_list 
+  character*12, dimension(106) :: expro_list 
 
   character(len=2) :: ident='# '
   double precision :: expro_mass_deuterium=3.34358e-24  ! md (g)
@@ -79,6 +79,10 @@ module expro
   double precision :: expro_betap
   double precision :: expro_betat
   double precision :: expro_betan
+  double precision :: expro_greenwald
+  double precision :: expro_ptransp
+  double precision :: expro_tau
+  double precision :: expro_tau98y2 
 
   != 1D Derived quantities
   double precision, dimension(:), allocatable :: expro_bunit
@@ -796,7 +800,15 @@ subroutine expro_list_set
   expro_list(97) = 'polflux'
   expro_list(98) = 'shot'
   expro_list(99) = 'time'
-
+  ! new scalars
+  expro_list(100) = 'betap'
+  expro_list(101) = 'betat'
+  expro_list(102) = 'betan'
+  expro_list(103) = 'greenwald'
+  expro_list(104) = 'ptransp'
+  expro_list(105) = 'tau'
+  expro_list(106) = 'tau98y2'
+  
 end subroutine expro_list_set
 
 end module expro
