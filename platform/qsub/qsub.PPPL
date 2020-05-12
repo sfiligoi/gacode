@@ -9,7 +9,7 @@ echo "#SBATCH -n $cores_used" >> $bfile
 echo "#SBATCH --mem=2GB" >> $bfile
 if [ "$QUEUE" = "null_queue" ]
 then
-  echo "#SBATCH -p sque" >> $bfile
+  echo "#SBATCH -p general" >> $bfile
 else
   echo "#SBATCH -p $QUEUE" >> $bfile
 fi
