@@ -33,6 +33,7 @@ clean:
 	rm -f modules/*genmod*
 	rm -f *.log
 	rm -rf *regression_test/
+	rm -rf python
 
 distclean:
 	cd shared ; make distclean
