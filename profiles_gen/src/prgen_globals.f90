@@ -65,7 +65,6 @@ module prgen_globals
   character (len=7) :: type_fast  = '[fast] '
 
   real :: quasi_err
-  real :: ip_tot
   real :: torfluxa
   real :: rcentr
   real :: bcentr
@@ -102,7 +101,6 @@ module prgen_globals
   real :: onetwo_delta
   real :: onetwo_volo
   real :: onetwo_cxareao
-  real :: onetwo_btor
   !
   real, dimension(:), allocatable :: onetwo_rho_grid
   real, dimension(:), allocatable :: onetwo_volume
@@ -182,7 +180,6 @@ module prgen_globals
   character (len=32) :: plst_tag
   character (len=32), dimension(:), allocatable :: plst_all_name
   character (len=32), dimension(:), allocatable :: plst_alla_name
-  real :: plst_b_axis_vac
   real, dimension(:), allocatable :: plst_q_all
   real, dimension(:), allocatable :: plst_m_all
   real, dimension(:,:), allocatable :: plst_ts

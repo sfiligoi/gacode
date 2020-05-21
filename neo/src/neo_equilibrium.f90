@@ -221,15 +221,13 @@ contains
        do it=1,n_theta
           gradpar_gradr(it)  = 0.0
           do id=-2,2
-             if (id /= 0) then
-                jt = thcyc(it+id)
-                gradpar_gradr(it) = gradpar_gradr(it) &
-                     + gradr(jt) * cderiv(id) / (12.0*d_theta)
-             endif
+             jt = thcyc(it+id)
+             gradpar_gradr(it) = gradpar_gradr(it) &
+                  + gradr(jt) * cderiv(id) / (12.0*d_theta)
           enddo
           gradpar_gradr(it) = gradpar_gradr(it) * k_par(it)
        enddo
-
+          
        ! 1/J dJ/dr
        allocate(ttmp(n_theta))
        ttmp(:) = theta(:)

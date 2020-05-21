@@ -82,10 +82,10 @@ subroutine prgen_read_iterdb_nc
   err = nf90_get_var(ncid,varid,onetwo_cxareao)
 
   err = nf90_inq_varid(ncid,trim('btor'),varid)
-  err = nf90_get_var(ncid,varid,onetwo_Btor)
+  err = nf90_get_var(ncid,varid,bcentr)
 
   err = nf90_inq_varid(ncid,trim('tot_cur'),varid)
-  err = nf90_get_var(ncid,varid,ip_tot)
+  err = nf90_get_var(ncid,varid,current)
 
   err = nf90_inq_varid(ncid,trim('Ipsign'),varid)
   if (err == 0) then
@@ -296,7 +296,7 @@ subroutine prgen_read_iterdb_nc
   dpsi(:) = onetwo_psi(:)-onetwo_psi(1)
 
   ! Compute torflux(a) [will be overwritten by gfile]
-  torfluxa = 0.5*onetwo_btor*onetwo_rho_grid(nx)**2
+  torfluxa = 0.5*bcentr*onetwo_rho_grid(nx)**2
 
 end subroutine prgen_read_iterdb_nc
 

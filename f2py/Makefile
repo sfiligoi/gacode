@@ -11,8 +11,7 @@ pip:
 	python ./setup.py sdist
 
 so:
-	python ./setup.py install --home=${GACODE_ROOT}/python
-	mv ${GACODE_ROOT}/python/lib/python/* ${GACODE_ROOT}/python/
+	python ./setup.py install --home=${GACODE_ROOT}/f2py/pygacode/
 
 clean:
 	cd geo ; make clean
@@ -20,7 +19,7 @@ clean:
 	cd module ; make clean
 	cd test ; make clean
 	rm -rf dist build MANIFEST sgn.pyf
-	cd ${GACODE_ROOT}/python ; rm -rf gacode *-info *.so
+	cd ${GACODE_ROOT}/f2py/pygacode ; rm -rf gacode *-info *.so
 
 .IGNORE:
 

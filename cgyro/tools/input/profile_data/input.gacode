@@ -1,4 +1,4 @@
-#  *original : Mon Mar  2 09:39:52 PST 2020                           
+#  *original : Fri May  8 11:21:09 PDT 2020                           
 # *statefile : iterdb_kinefit_128913.01500                            
 #     *gfile : g128913.01500 08/02/2006 65 65                         
 #   *cerfile : dplasma_cer_format.128913.1500                         
@@ -660,7 +660,7 @@ D C
 # shape_cos2 | -
   1  0.0000000E+00
   2 -2.3849975E-05
-  3 -6.1734136E-05
+  3 -6.1734137E-05
   4 -1.1365248E-04
   5 -1.8254661E-04
   6 -2.6972842E-04

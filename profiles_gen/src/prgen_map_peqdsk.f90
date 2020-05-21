@@ -18,8 +18,6 @@ subroutine prgen_map_peqdsk
   real, dimension(nx) :: ni_b
   real, dimension(nx) :: z_eff
 
-  if (efit_method == -1) call prgen_get_chi(nx,q,dpsi,rho,torfluxa)
-
   ni_d(:) = 10*peqdsk_ni(:)
   if (peqdsk_fmt == 0) then
      ! old p-file, assume missing density is carbon

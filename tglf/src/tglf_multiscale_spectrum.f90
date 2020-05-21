@@ -40,7 +40,7 @@
       REAL :: mix1,mix2,mixnorm,gamma_ave
       REAL :: vzf,dvzf,vzf1,vzf2,vzf3,vzf4
       REAL :: bz1,bz2
-      REAL :: etg_streamer
+      REAL :: etg_streamer, ky_factor
       REAL,DIMENSION(nkym) :: gamma_net=0.0
       REAL,DIMENSION(nkym) :: gamma=0.0
       REAL,DIMENSION(nkym) :: gamma_mix=0.0
@@ -55,7 +55,11 @@
       bz2=0.0
       kyetg=1.28
       cnorm=14.21
-      
+      if(units_in.eq.'GYRO')then
+        ky_factor=1.0
+      else
+        ky_factor=grad_r0_out
+      endif
       if(USE_SUB1)then
         
         cnorm=12.12       
@@ -90,7 +94,7 @@
         cz2 = 1.0*czf  
         etg_streamer=1.05
         if(alpha_quench_in .ne. 0.0)etg_streamer=2.1
-        kyetg=etg_streamer*ABS(zs(2))*grad_r0_out/SQRT(taus(2)*mass(2))  ! fixed to ion gyroradius 
+        kyetg=etg_streamer*ABS(zs(2))*ky_factor/SQRT(taus(2)*mass(2))  ! fixed to ion gyroradius
         if(USE_X3)then
 !           bz1=1.0
 !           bz2=0.18
@@ -102,7 +106,7 @@
 !           cz1=0.48*czf*((3.0*2.0/0.5)*(rmin_input/(Rmaj_input*q_in)))**2
 !           cz2=1.35*czf*((3.098143*1.563824/0.600049)*(rmin_input/(Rmaj_input*q_in)))
            etg_streamer = 1.0
-           kyetg=etg_streamer*ABS(zs(2))*grad_r0_out/SQRT(taus(2)*mass(2))  ! fixed to ion gyroradius
+           kyetg=etg_streamer*ABS(zs(2))*ky_factor/SQRT(taus(2)*mass(2))  ! fixed to ion gyroradius
            cky=3.0
            sqcky=SQRT(cky)
         endif  
@@ -120,8 +124,8 @@
       testmax2 = 0.0
       jmax1=1
       jmax2=0
-      kycut=0.8*grad_r0_out*ABS(zs(2))/SQRT(taus_in(2)*mass_in(2))
-      kyhigh=0.15*grad_r0_out*ABS(zs(1))/SQRT(taus_in(1)*mass_in(1))
+      kycut=0.8*ky_factor*ABS(zs(2))/SQRT(taus_in(2)*mass_in(2))
+      kyhigh=0.15*ky_factor*ABS(zs(1))/SQRT(taus_in(1)*mass_in(1))
 !      write(*,*)" kycut = ",kycut," kyhigh = ",kyhigh
       j1=1
       j2=1
