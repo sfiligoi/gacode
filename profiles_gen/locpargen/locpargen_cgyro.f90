@@ -81,6 +81,7 @@ subroutine locpargen_cgyro
   write(1,*)
   write(1,11) 'N_FIELD=', 2
   write(1,10) 'BETAE_UNIT=',betae_unit
+  write(1,10) 'LAMBDA_STAR=',lambda_star
   write(1,*)
   
   !---------------------------------------------------------

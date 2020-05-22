@@ -97,6 +97,8 @@ program locpargen
   nu_ee  = cc*loglam*dens_loc(ise)/(sqrt(mass_loc(ise)/2.0)*temp_loc(ise)**1.5)
 
   betae_unit = 4.027e-3*dens_loc(ise)*temp_loc(ise)/b_unit_loc**2
+  
+  lambda_star = 7.43 * sqrt((1e3*temp_loc(ise))/(1e13*dens_loc(ise)))/rhos_loc
 
   tag(:) = (/'1','2','3','4','5','6','7','8','9'/)
 
