@@ -34,6 +34,7 @@ then
   echo 
   echo "         -plot <type>"
   echo "         <type> = text     (text summary of fluxes)"
+  echo "                = distill  (data distillation)"
   echo "                = freq     (frequency versus time)"
   echo "                = ky_freq  (frequency versus ky)"
   echo "                = ball     (ballooning modes OR ZF test)"
@@ -399,7 +400,7 @@ PLT="-m pygacode.cgyro.data_plot_single $TEX $FONTSIZE $LX $LY"
 case "$VIS_TYPE" in
 
    null) ;;
-
+   
    slices)
 	python $PYROOT/vis_slices.py ;;
 
@@ -416,6 +417,9 @@ esac
 case "$PLOT_TYPE" in
 
    null) ;;
+
+   distill)
+       python -m pygacode.cgyro.data_distill $W $THETA ;;
 
    ball)
 	python $PLT $PLOT_TYPE $TIME $FIELD $TMAX $EXT ;;

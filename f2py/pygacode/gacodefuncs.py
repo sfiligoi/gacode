@@ -383,3 +383,12 @@ def quadratic_max(x,g):
 
     return xs,fs
 #---------------------------------------------------------------
+
+#---------------------------------------------------------------
+def theta_index(theta,n_theta):
+    # Compute index for theta value in pitch angle and energy plots
+    i0 = int(round((1.0+theta)*n_theta/2.0))
+    if i0 > n_theta-1:
+        i0 = n_theta-1
+
+    return i0
