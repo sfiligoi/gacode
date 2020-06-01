@@ -113,6 +113,7 @@ program locpargen
 
   call fileopen('input.cgyro.locpargen') ; call locpargen_cgyro
   call fileopen('input.tglf.locpargen')  ; call locpargen_tglf
+  call fileopen('input.tglf.locpargen_stack') ; call locpargen_tglf_stack
   call fileopen('input.neo.locpargen')   ; call locpargen_neo
   print 10,'INFO: (locpargen) Wrote input.*.locpargen'
 
@@ -132,7 +133,7 @@ subroutine fileopen(fname)
      open(unit=1,file=trim(fname),status='replace')
   else
      open(unit=1,file=trim(fname),position='append')
-     write(1,*) '# **************** CUT HERE **********************'
+     write(1,*) '#---------------------------------------------------------'
   endif
 
 end subroutine fileopen
