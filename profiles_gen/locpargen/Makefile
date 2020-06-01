@@ -15,6 +15,7 @@ OBJECTS = locpargen_globals.o \
           locpargen_geo.o \
           locpargen_neo.o \
           locpargen_tglf.o \
+	  locpargen_tglf_stack.o \
           locpargen_cgyro.o \
           $(EXEC).o 
 
