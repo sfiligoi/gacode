@@ -2,8 +2,11 @@ import os
 import numpy as np
 import sys
 import time
-from ..gacodefuncs import *
-
+try:
+   from gacodefuncs import *
+except:
+   from ..gacodefuncs import *
+   
 BYTE='float32'
 
 # class to read cgyro output data
