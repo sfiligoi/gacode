@@ -99,17 +99,15 @@ while [ $# -gt 0 ] ; do
 done
 #==============================================================================
 
-PYROOT=$GACODE_ROOT/f2py/pygacode/profiles_gen
-
 #==============================================================================
 # Plotting control
 
 if [ $PLOT = null ] ; then
    exit 0
 elif [ $PLOT = surf ] ; then 
-   python $PYROOT/plot_surf.py $PLOT $N $EXT
+   python -m pygacode.profiles_gen.plot_surf $PLOT $N $EXT
 else
-   python $PYROOT/plot_profile.py $RVAR $RMIN $RMAX $EXT $LOC $DOT $THERM
+   python -m pygacode.profiles_gen.plot_profile $RVAR $RMIN $RMAX $EXT $LOC $DOT $THERM
 fi
 #==============================================================================
 
