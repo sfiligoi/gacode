@@ -4,7 +4,7 @@
 #---------------------------------------------------
 
 IDENTITY="Azure HC"
-CORES_PER_NODE=40
+CORES_PER_NODE=44
 NUMAS_PER_NODE=1
 
 FC  = mpif90 -std=f2008 -fall-intrinsics -I$(GACODE_ROOT)/modules -J $(GACODE_ROOT)/modules

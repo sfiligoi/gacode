@@ -7,12 +7,8 @@ if [ "$QUEUE" == "null_queue" ] ; then
    QUEUE=debug
 fi
 
-#
-# Note: Will always put 8 mpi ranks per node
-#
-
 bfile=$SIMDIR/batch.src
 echo "#!/bin/bash " > $bfile
-echo "#SBATCH --time $WALLTIME -p hpc --ntasks-per-node=8 --cpus-per-task=5 --mem=310G -n $nmpi" >> $bfile
+echo "#SBATCH --time $WALLTIME -p hpc --mem=310G -n $nmpi" >> $bfile
 
 echo "$CODE -e $LOCDIR -n $nmpi -nomp $nomp -numa $numa -mpinuma $mpinuma -p $SIMROOT" >> $bfile
