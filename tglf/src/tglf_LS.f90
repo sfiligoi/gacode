@@ -941,8 +941,8 @@
 !
 ! set up the theta-grid
 ! npi is the number of pi intervals for the plot from -npi Pi to +npi Pi
-     npi=5  !npi <= 5 limited by max_plot = 10*ms/8+1
-     np = ms/8   ! number of points per 1/2 period = 16 for ms=128
+     npi=9  !npi <= 9 limited by max_plot = 2*npi*ms/8+1
+     np = ms/8   ! number of points per 1/2 period = 16 for ms=12
      if(igeo.eq.0)then
        dx = REAL(npi)*2.0*pi/REAL(max_plot-1)
        do i=1,max_plot
@@ -967,16 +967,16 @@
              j = j - 2*np
              k = k + 1
            endif
-           xp(j0+i) = (REAL(k)*y(ms) + y(4*j))*dx  ! remember y is positive
-           xp(j0-i) = -(REAL(k)*y(ms) + y(4*j))*dx
-           plot_angle_out(j0-i) = REAL(k)*t_s(ms) + t_s(4*j)  ! remember t_s is negative
-           plot_angle_out(j0+i) = -REAL(k)*t_s(ms) - t_s(4*j)
+           xp(j0+i) = (REAL(k)*y(ms) + y(4*j))*dx  ! remember y is positive 0 <= y <= Ly
+           xp(j0-i) = -(REAL(k+1)*y(ms) - y(ms-4*j))*dx ! ok for up/down assymetric cases
+           plot_angle_out(j0+i) = -(REAL(k)*t_s(ms) + t_s(4*j))  ! remember t_s is negative  0 <= t_s <= -2 Pi
+           plot_angle_out(j0-i) = REAL(k+1)*t_s(ms) - t_s(ms-4*j)
        enddo
      endif
  !     write(*,*)"t_s = ",(t_s(i),i=0,ms)
- !   do i=1,max_plot
+ !   do i=1,imax
  !     write(*,*)i,"xp=",xp(i),"tp=",plot_angle_out(i)
-!    enddo
+ !   enddo
 ! compute the hermite polynomials on the theta-grid using recursion
       hp0 = sqrt_two/pi**0.25
       do i=1,max_plot
