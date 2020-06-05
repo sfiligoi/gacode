@@ -211,6 +211,7 @@
 !
       do i=1,nky
        spectral_shift_save(i) = 0.0
+       width_save(i) = 0.0
        do k=1,nmodes_in
         do t = 1,2
           eigenvalue_spectrum_save(t,i,k) = 0.0
@@ -466,6 +467,13 @@
                         ,ierr)
       call MPI_ALLREDUCE(spectral_shift_save         &
                         ,spectral_shift_out          &
+                        ,nkym                        &
+                        ,MPI_DOUBLE_PRECISION        &
+                        ,MPI_SUM                     &
+                        ,iCommTglf                   &
+                        ,ierr)
+     call MPI_ALLREDUCE(width_save                   &
+                        ,width_out                   &
                         ,nkym                        &
                         ,MPI_DOUBLE_PRECISION        &
                         ,MPI_SUM                     &

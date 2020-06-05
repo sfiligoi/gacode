@@ -2170,6 +2170,37 @@ END SUBROUTINE write_tglf_nsts_crossphase_spectrum
   CLOSE(33)
 !
  END SUBROUTINE write_tglf_spectral_shift
+!
+!______________________________________________________________
+!
+ SUBROUTINE write_tglf_width_spectrum
+!
+  USE tglf_dimensions
+  USE tglf_global
+  USE tglf_species
+  USE tglf_kyspectrum
+!
+  IMPLICIT NONE
+  CHARACTER(33) :: fluxfile="out.tglf.width_spectrum"
+  INTEGER :: i
+  !
+  if(new_start)then
+     write(*,*)"error: tglf_TM must be called before write_tglf_width_spectrum"
+     write(*,*)"       NN doesn't compute spectra -> if needed set tglf_nn_max_error_in=-1"
+  endif
+  !
+  OPEN(unit=33,file=fluxfile,status='replace')
+!
+  write(33,*)"width of the Gaussian envelope for the Hermite basis functions"
+  write(33,*)"index limits: nky"
+  write(33,*)nky
+!
+  do i=1,nky
+    write(33,*)width_out(i)
+  enddo
+  CLOSE(33)
+!
+ END SUBROUTINE write_tglf_width_spectrum
 !-----------------------------------------------------------------
 !
  SUBROUTINE write_tglf_scalar_saturation_parameters

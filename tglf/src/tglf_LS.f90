@@ -934,49 +934,49 @@
 !
       IMPLICIT NONE
 !
-      INTEGER :: n,i,j,k,np
+      INTEGER :: n,i,j,k,np,npi,j0,imax
       REAL :: dx,hp0
       REAL :: hp(nb,max_plot)
       REAL :: xp(max_plot)
 !
-! set up the theta-grid 
+! set up the theta-grid
+! npi is the number of pi intervals for the plot from -npi Pi to +npi Pi
+     npi=5  !npi <= 5 limited by max_plot = 10*ms/8+1
+     np = ms/8   ! number of points per 1/2 period = 16 for ms=128
      if(igeo.eq.0)then
-       dx = 6.0*pi/REAL(max_plot-1)
+       dx = REAL(npi)*2.0*pi/REAL(max_plot-1)
        do i=1,max_plot
-         xp(i) = -3*pi + REAL(i-1)*dx
+         xp(i) = -REAL(npi)*pi + REAL(i-1)*dx
          plot_angle_out(i) = xp(i)        
        enddo
      else
 ! general geometry case 0<y<Ly one loop counterclockwise 
-! y is the the straight field line coordiant of the Hermite basis
-! t_s is the mapping of the original theta coordinate that will be
-! used for plotting, Note that t_s has the opposite sign to y.
+! y is the the straight field line coordinant of the Hermite basis
+! t_s is the mapping of the original theta coordinate 0 < t_s < -2Pi with t_s(0)=0, t_s(ms)=-2 Pi
+! this will be used for plotting, Note that t_s has the opposite sign to y.
        dx = 2.0*pi/(y(ms)*width_in)
-       np = ms/8   ! number of points per 1/2 period = 16 for ms=128
-       xp(3*np+1)=0.0
-       plot_angle_out(3*np+1)=0.0
-       do i=1,np
-         j=4*(i-1)
-         xp(i) = -(y(ms) +y(ms/2-j))*dx
-         xp(i+np) = -y(ms-j)*dx
-         xp(i+2*np) = -y(ms/2-j)*dx
-         j=4*i
-         xp(i+3*np+1) = y(j)*dx 
-         xp(i+4*np+1) = y(ms/2+j)*dx
-         xp(i+5*np+1) = (y(ms)+y(j))*dx
-         j=4*(i-1)
-         plot_angle_out(i) = t_s(ms) +t_s(ms/2-j)
-         plot_angle_out(i+np) = t_s(ms-j)
-         plot_angle_out(i+2*np) = t_s(ms/2-j)
-         j=4*i
-         plot_angle_out(i+3*np+1) = -t_s(j)
-         plot_angle_out(i+4*np+1) = -t_s(ms/2+j)
-         plot_angle_out(i+5*np+1) = -(t_s(ms)+t_s(j))
+       j0 = npi*np+1 ! the index of the midpoint
+       xp(j0) = 0.0
+       plot_angle_out(j0) = 0.0
+       j = 0  ! j is the local index for one circuit poloidally
+       k = 0  ! counts the number of 2 pi  intervals
+       imax=np*npi
+       do i=1,imax
+           j = j+1
+           if(j.gt.2*np)then
+             j = j - 2*np
+             k = k + 1
+           endif
+           xp(j0+i) = (REAL(k)*y(ms) + y(4*j))*dx  ! remember y is positive
+           xp(j0-i) = -(REAL(k)*y(ms) + y(4*j))*dx
+           plot_angle_out(j0-i) = REAL(k)*t_s(ms) + t_s(4*j)  ! remember t_s is negative
+           plot_angle_out(j0+i) = -REAL(k)*t_s(ms) - t_s(4*j)
        enddo
      endif
-!     do i=1,max_plot
-!       write(*,*)i,"xp=",xp(i),"tp=",plot_angle_out(i)
-!     enddo
+ !     write(*,*)"t_s = ",(t_s(i),i=0,ms)
+ !   do i=1,max_plot
+ !     write(*,*)i,"xp=",xp(i),"tp=",plot_angle_out(i)
+!    enddo
 ! compute the hermite polynomials on the theta-grid using recursion
       hp0 = sqrt_two/pi**0.25
       do i=1,max_plot

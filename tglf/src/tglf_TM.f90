@@ -299,6 +299,7 @@
         endif
         if(sat_rule_in.eq.1)reduce=1.0
 !
+        width_out(i) = width_save(i)
         if(unstable)then
 ! save the spectral shift of the radial wavenumber due to VEXB_SHEAR
          spectral_shift_out(i) = kx0_e

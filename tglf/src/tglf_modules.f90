@@ -13,7 +13,7 @@
       INTEGER, PARAMETER :: max_ELITE=700
       INTEGER, PARAMETER :: max_fourier = 24
       INTEGER, PARAMETER :: ms = 128  ! ms needs to be divisible by 8
-      INTEGER, PARAMETER :: max_plot =6*ms/8+1
+      INTEGER, PARAMETER :: max_plot =10*ms/8+1
 !
       END MODULE tglf_max_dimensions
 !
@@ -242,6 +242,7 @@
       REAl,DIMENSION(nsm,nkym,maxmodes) :: nsts_phase_spectrum_out=0.0
       REAL,DIMENSION(nkym,maxmodes) :: sat_geo_out=0.0
       REAL,DIMENSION(nkym) :: spectral_shift_out=0.0
+      REAL,DIMENSION(nkym) :: width_out=0.0
       REAL :: phi_bar_sum_out=0.0
       REAL :: v_bar_sum_out=0.0
       REAL :: gamma_nb_min_out=0.0

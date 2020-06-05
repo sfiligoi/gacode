@@ -129,6 +129,9 @@ program tglf
      ! write intensity fluctuation amplitude spectrum per mode to file out.tglf.scalar_saturation_parameters
      CALL write_tglf_scalar_saturation_parameters
 
+     ! write Gaussian width spectrum to file out.tglf.width_spectrum
+     CALL write_tglf_width_spectrum
+
   else
 
      print 10,'     ky:',tglf_ky_in
