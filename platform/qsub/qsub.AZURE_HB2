@@ -7,13 +7,8 @@ if [ "$QUEUE" == "null_queue" ] ; then
    QUEUE=debug
 fi
 
-#
-# 114 is a good compromise between 120 and a power of 2
-# 9*114 = 1026
-#
-
 bfile=$SIMDIR/batch.src
 echo "#!/bin/bash " > $bfile
-echo "#SBATCH --time $WALLTIME -p hpc --ntasks-per-node=114 --mem=400G -n $nmpi" >> $bfile
+echo "#SBATCH --time $WALLTIME -p hpc --mem=400G -n $nmpi" >> $bfile
 
 echo "$CODE -e $LOCDIR -n $nmpi -nomp $nomp -numa $numa -mpinuma $mpinuma -p $SIMROOT" >> $bfile

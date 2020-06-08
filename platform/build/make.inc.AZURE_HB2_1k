@@ -4,7 +4,7 @@
 #---------------------------------------------------
 
 IDENTITY="Azure HBv2"
-CORES_PER_NODE=120
+CORES_PER_NODE=114 
 NUMAS_PER_NODE=1
 
 FC  = mpif90 -std=f2008 -fall-intrinsics -I$(GACODE_ROOT)/modules -J $(GACODE_ROOT)/modules
