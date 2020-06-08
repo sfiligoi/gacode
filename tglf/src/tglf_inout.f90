@@ -2048,34 +2048,50 @@ END SUBROUTINE write_tglf_nsts_crossphase_spectrum
 ! 
   IMPLICIT NONE
   CHARACTER(33) :: fluxfile="out.tglf.QL_flux_spectrum"
-  INTEGER :: i,j,k,is
+  INTEGER :: i,j,k,is,m,jflds
   REAL,PARAMETER :: small=1.0E-10
   !
   if(new_start)then
      write(*,*)"error: tglf_TM must be called before write_tglf_QL_weight_spectrum"
      write(*,*)"       NN doesn't compute spectra -> if needed set tglf_nn_max_error_in=-1"
   endif
+  jflds=1
+  if(use_bper_in)jflds = jflds+1
+  if(use_bpar_in)jflds = jflds+1
   !
   OPEN(unit=33,file=fluxfile,status='replace')
 !
   write(33,*)"QL weights per mode:"
-  write(33,*)"type: 1=particle,2=energy,3=toroidal stress,4=parallel stress,5=exchange"
-  write(33,*)"index limits: nky,nmodes,ns,field,type"
-  write(33,*)nky,nmodes_in,ns,3,5
+!  write(33,*)"type: 1=particle,2=energy,3=toroidal stress,4=parallel stress,5=exchange"
+  write(33,*)"QL_flux_spectrum_out(type,nspecies,field,ky,mode)"
+  write(33,*)"index limits: type,ns,field,nky,nmodes"
+  write(33,*)5,ns,3,nky,nmodes_in
 !
-      do j=1,nky
-         do i=1,nmodes_in
-            do is=1,ns
-               do k=1,3
-                  write(33,*)QL_flux_spectrum_out(1,is,k,j,i)
-                  write(33,*)QL_flux_spectrum_out(2,is,k,j,i)
-                  write(33,*)QL_flux_spectrum_out(3,is,k,j,i)
-                  write(33,*)QL_flux_spectrum_out(4,is,k,j,i)
-                  write(33,*)QL_flux_spectrum_out(5,is,k,j,i)
-              enddo
-           enddo
-        enddo
-      enddo
+!      do j=1,nky
+!         do i=1,nmodes_in
+!            do is=1,ns
+!             do k=1,3
+!                  write(33,*)QL_flux_spectrum_out(1,is,k,j,i)
+!                  write(33,*)QL_flux_spectrum_out(2,is,k,j,i)
+!                  write(33,*)QL_flux_spectrum_out(3,is,k,j,i)
+!                  write(33,*)QL_flux_spectrum_out(4,is,k,j,i)
+!                  write(33,*)QL_flux_spectrum_out(5,is,k,j,i)
+!              enddo
+!           enddo
+!        enddo
+!      enddo
+do is=ns0,ns
+    do j=1,jflds
+       write(33,*)"species = ",is,"field =",j
+       do m=1,nmodes_in
+         write(33,*)"mode = ",m
+         do i=1,nky
+           write(33,*)(QL_flux_spectrum_out(k,is,j,i,m),k=1,5)
+         enddo  ! i
+      enddo ! m
+    enddo  ! j
+ enddo  ! is
+
   CLOSE(33)
 !
  END SUBROUTINE write_tglf_QL_flux_spectrum
