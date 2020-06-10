@@ -49,7 +49,7 @@
       ! model fit parameters
       ! need to set alpha_zf_in = 1.0
       ! Miller geometry values igeo=1
-      if(xnu_model_in.eq.3)USE_X3=.TRUE.
+      if(xnu_model_in.eq.3.or.xnu_model_in.eq.4)USE_X3=.TRUE.
       czf = ABS(alpha_zf_in)
       bz1=0.0
       bz2=0.0
