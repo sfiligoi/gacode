@@ -16,6 +16,10 @@ program ptglf
   call MPI_COMM_SIZE(MPI_COMM_WORLD,n_proc,i_err)
   !---------------------------------------------------------------------
 
+  !---------------------------------------------------------------------
+  ! Split MPI_COMM_WORLD into sub-communicators of size 1: loc_comm
+  ! NOTE: this is trivial, and would be unnecessary if calling a
+  !       serial version of TGLF
   ntot = n_proc
   splitkey = i_proc
   color = 0
@@ -24,43 +28,69 @@ program ptglf
        splitkey,&
        loc_comm,&
        i_err)
+  !---------------------------------------------------------------------
 
   ! Path is cwd:
   path= './'
 
+  !---------------------------------------------------------------------
+  ! Allocate input and output data containers
+  ! NOTE: will need to be expanded to cover all inputs/outputs
+  allocate(indata_loc(2,ntot))
+  allocate(outdata_loc(3,ntot))
+  allocate(indata(2,ntot))
+  allocate(outdata(3,ntot))
+  !---------------------------------------------------------------------
+
   call tglf_init(path,loc_comm)
   call ptglf_init()
-  
-  if (i_proc == 0) print '(a,i5)','NTOT = ',ntot
 
-  do p=1+i_proc,ntot,n_proc
+  if (i_proc == 0) print '(a,i0)','ntot = ',ntot
 
-     if (i_proc == 0) print '(i5,a,i5)',p,' - ',p+n_proc-1
+  !---------------------------------------------------------------------
+  ! Set some task-dependent values
+  p = 1+i_proc
+  tglf_rlts_in(:) = 3.0+real(p)/ntot
 
-     call tglf_run()
-     
-  enddo
+  ! Set some inputs
+  indata_loc(1,p) = tglf_rlts_in(1)
+  indata_loc(2,p) = tglf_rlts_in(2)
+  !---------------------------------------------------------------------
+
+  !---------------------------------------------------------------------
+  ! Run TGLF
+  call tglf_run()
+
+  ! Capture outputs
+  outdata_loc(1,p) = tglf_elec_pflux_out
+  outdata_loc(2,p) = tglf_elec_eflux_out
+  outdata_loc(3,p) = tglf_elec_mflux_out
+  !---------------------------------------------------------------------
 
   ! Collect all data 
-  !call MPI_ALLREDUCE(indata_loc,indata,size(indata), &
-  !     MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,i_err)
-  !call MPI_ALLREDUCE(outdata_j_loc,outdata_j,size(outdata_j), &
-  !     MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,i_err)
-  
-  !if (i_proc == 0) then
+  call MPI_ALLREDUCE(indata_loc,indata,size(indata), &
+       MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,i_err)
+  call MPI_ALLREDUCE(outdata_loc,outdata,size(outdata), &
+       MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,i_err)
 
-   !  open(unit=1,file='out.pneo.indata',status='replace')
-   !  write(1,10) indata(:,:)
-   !  close(1)
+  if (i_proc == 0) then
 
-   !  open(unit=1,file='out.pneo.c_j',status='replace')
-   !  write(1,10) outdata_j(:,:)
-   !  close(1)
-     
-  !endif
+     open(unit=1,file='out.ptglf.indata',status='replace')
+     do p=1,ntot
+        write(1,10) indata(:,p)
+     enddo
+     close(1)
+
+     open(unit=1,file='out.ptglf.outdata',status='replace')
+     do p=1,ntot
+        write(1,10) outdata(:,p)
+     enddo
+     close(1)
+
+  endif
 
   call MPI_finalize(i_err)
 
-10 format(1pe17.10)
+10 format(20(1pe17.10,1x))
 
 end program ptglf

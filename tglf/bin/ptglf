@@ -87,8 +87,9 @@ echo `gacode_getversion` > $VERBASE
 echo $GACODE_PLATFORM >> $VERBASE
 date >> $VERBASE
 
+rm out.tglf.*
+
 $GACODE_ROOT/platform/exec/exec.$GACODE_PLATFORM \
     $SIMDIR $NPROC $TGLF_DIR/tools/ptglf/src/ptglf $NOMP $NUMA $MPINUMA >> $RUNBASE
   
-cat $RUNBASE
 #===========================================================
