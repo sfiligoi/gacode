@@ -1,4 +1,5 @@
 from numpy.distutils.core import setup, Extension
+import os
 import sys
 
 wrapper = Extension('gacode_ext',
@@ -8,8 +9,11 @@ wrapper = Extension('gacode_ext',
                              'geo/geo.f90',
                              'vis/vis.f90'])
 
+with open(os.path.dirname(__file__) + '/pygacode/version', 'r') as f:
+    __version__ = f.read().strip()
+
 setup(name='pygacode',
-      version='0.52',
+      version=__version__,
       description='Python interface to GACODE profile, geometry, and code tools',
       url='https://gacode.io',
       author='General Atomics Theory Group',
