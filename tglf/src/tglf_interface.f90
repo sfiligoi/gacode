@@ -177,9 +177,6 @@ module tglf_interface
   real     :: tglf_Z_elite_in(max_ELITE) 
   real     :: tglf_Bp_elite_in(max_ELITE) 
   
-  ! Extra HARVEST parameters
-  character (len=2000) :: tglf_harvest_extra_in = CHAR(0)
-
   ! TRANSPORT OUTPUT PARAMETERS
   real :: tglf_elec_pflux_out = 0.0
   real :: tglf_elec_eflux_out = 0.0
