@@ -48,11 +48,11 @@ program ptglf
   if (i_proc == 0) print '(a,i0)','ntot = ',ntot
 
   !---------------------------------------------------------------------
-  ! Set some task-dependent values
+  ! Set inputs depending in task rank
   p = 1+i_proc
   tglf_rlts_in(:) = 3.0+real(p)/ntot
 
-  ! Set some inputs
+  ! Pack inputs into array
   indata_loc(1,p) = tglf_rlts_in(1)
   indata_loc(2,p) = tglf_rlts_in(2)
   !---------------------------------------------------------------------
