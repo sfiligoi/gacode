@@ -86,7 +86,8 @@ subroutine prgen_map_ufile
   print '(a)','INFO: (prgen) e-power: (QNBIE+QICHRE+QLHE+QECHE+QOHM)-QE-QRAD-QWALLE'
 
   ! No particle or momentum source
-  expro_qpar = 0.0
+  expro_qpar_beam = 0.0
+  expro_qpar_wall = 0.0
   expro_qmom = 0.0
 
 end subroutine prgen_map_ufile

@@ -372,7 +372,8 @@ subroutine expro_compute_derived
   call volint(expro_qline,expro_pow_e_line,expro_n_exp)
 
   ! Particle/momentum
-  call volint(expro_qpar,expro_flow_beam,expro_n_exp)
+  call volint(expro_qpar_beam,expro_flow_beam,expro_n_exp)
+  call volint(expro_qpar_wall,expro_flow_wall,expro_n_exp)
   call volint(expro_qmom,expro_flow_mom,expro_n_exp)
   !--------------------------------------------------------------
 
