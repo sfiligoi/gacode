@@ -1,7 +1,7 @@
 module expro
 
   ! List of all useful interface objects
-  character*12, dimension(106) :: expro_list 
+  character*12, dimension(107) :: expro_list 
 
   character(len=2) :: ident='# '
   double precision :: expro_mass_deuterium=3.34358e-24  ! md (g)
@@ -72,7 +72,8 @@ module expro
   double precision, dimension(:), allocatable :: expro_qione
   double precision, dimension(:), allocatable :: expro_qioni
   double precision, dimension(:), allocatable :: expro_qcxi
-  double precision, dimension(:), allocatable :: expro_qpar
+  double precision, dimension(:), allocatable :: expro_qpar_beam
+  double precision, dimension(:), allocatable :: expro_qpar_wall
   double precision, dimension(:), allocatable :: expro_qmom
 
   != 0D Derived quantities
@@ -230,7 +231,8 @@ contains
        allocate(expro_qione(nexp))  ; expro_qione = 0.0
        allocate(expro_qioni(nexp))  ; expro_qioni = 0.0
        allocate(expro_qcxi(nexp))   ; expro_qcxi = 0.0
-       allocate(expro_qpar(nexp))   ; expro_qpar = 0.0
+       allocate(expro_qpar_beam(nexp))   ; expro_qpar_beam = 0.0
+       allocate(expro_qpar_wall(nexp))   ; expro_qpar_wall = 0.0
        allocate(expro_qmom(nexp))   ; expro_qmom = 0.0
 
        allocate(expro_ni(nion,nexp))   ; expro_ni = 0.0
@@ -342,7 +344,8 @@ contains
        deallocate(expro_qione)
        deallocate(expro_qioni)
        deallocate(expro_qcxi)
-       deallocate(expro_qpar)
+       deallocate(expro_qpar_beam)
+       deallocate(expro_qpar_wall)
        deallocate(expro_qmom)
 
        deallocate(expro_ni,expro_ti,expro_vpol,expro_vtor)
@@ -568,9 +571,13 @@ contains
        case ('qioni')
           call expro_vcomm(expro_qioni,nexp) 
        case ('qcxi')
-          call expro_vcomm(expro_qcxi,nexp) 
-       case ('qpar')
-          call expro_vcomm(expro_qpar,nexp) 
+          call expro_vcomm(expro_qcxi,nexp)
+       case ('qpar') ! for backward compatibility
+          call expro_vcomm(expro_qpar_beam,nexp)
+       case ('qpar_beam')
+          call expro_vcomm(expro_qpar_beam,nexp)
+       case ('qpar_wall')
+          call expro_vcomm(expro_qpar_wall,nexp)
        case ('qmom')
           call expro_vcomm(expro_qmom,nexp) 
        end select
@@ -687,8 +694,9 @@ contains
     call expro_writev(expro_qione,nexp,'qione','MW/m^3')
     call expro_writev(expro_qioni,nexp,'qioni','MW/m^3')
     call expro_writev(expro_qcxi,nexp,'qcxi','MW/m^3')
-    call expro_writev(expro_qpar,nexp,'qpar','MW/m^3')
-    call expro_writev(expro_qmom,nexp,'qmom','MW/m^3')
+    call expro_writev(expro_qpar_beam,nexp,'qpar_beam','MW/m^3') ! WRONG UNITS
+    call expro_writev(expro_qpar_wall,nexp,'qpar_wall','MW/m^3') ! WRONG UNITS
+    call expro_writev(expro_qmom,nexp,'qmom','MW/m^3') ! WRONG UNITS
 
     close(1)
 
@@ -751,63 +759,66 @@ subroutine expro_list_set
   expro_list(48) = 'qione'
   expro_list(49) = 'qioni'
   expro_list(50) = 'qcxi'
-  expro_list(51) = 'qpar'
-  expro_list(52) = 'qmom'
-  expro_list(53) = 'bunit'
-  expro_list(54) = 'gamma_e'
-  expro_list(55) = 'gamma_p'
-  expro_list(56) = 's'
-  expro_list(57) = 'drmaj'
-  expro_list(58) = 'dzmag'
-  expro_list(59) = 'skappa'
-  expro_list(60) = 'sdelta'
-  expro_list(61) = 'szeta'
-  expro_list(62) = 'shape_scos0'
-  expro_list(63) = 'shape_scos1'
-  expro_list(64) = 'shape_scos2'
-  expro_list(65) = 'shape_scos3'
-  expro_list(66) = 'shape_ssin3'
-  expro_list(67) = 'dlnnedr'
-  expro_list(68) = 'dlntedr'
-  expro_list(69) = 'dlnnidr'
-  expro_list(70) = 'dlntidr'
-  expro_list(71) = 'w0p'
-  expro_list(72) = 'surf'
-  expro_list(73) = 'vol'
-  expro_list(74) = 'volp'
-  expro_list(75) = 'cs'
-  expro_list(76) = 'rhos'
-  expro_list(77) = 'nuee'
-  expro_list(78) = 'grad_r0'
-  expro_list(79) = 'ave_grad_r'
-  expro_list(80) = 'bp0'
-  expro_list(81) = 'bt0'
-  expro_list(82) = 'fpol'
-  expro_list(83) = 'mach'
-  expro_list(84) = 'flow_beam'
-  expro_list(85) = 'flow_wall'
-  expro_list(86) = 'flow_mom'
-  expro_list(87) = 'pow_e'
-  expro_list(88) = 'pow_i'
-  expro_list(89) = 'pow_ei'
-  expro_list(90) = 'pow_e_aux'
-  expro_list(91) = 'pow_i_aux'
-  expro_list(92) = 'pow_e_fus'
-  expro_list(93) = 'pow_i_fus'
-  expro_list(94) = 'pow_e_sync'
-  expro_list(95) = 'pow_e_brem'
-  expro_list(96) = 'pow_e_line'
-  expro_list(97) = 'polflux'
-  expro_list(98) = 'shot'
-  expro_list(99) = 'time'
+  expro_list(51) = 'qpar_beam'
+  expro_list(52) = 'qpar_wall'
+  expro_list(53) = 'qmom'
+  expro_list(54) = 'bunit'
+  expro_list(55) = 'gamma_e'
+  expro_list(56) = 'gamma_p'
+  expro_list(57) = 's'
+  expro_list(58) = 'drmaj'
+  expro_list(59) = 'dzmag'
+  expro_list(60) = 'skappa'
+  expro_list(61) = 'sdelta'
+  expro_list(62) = 'szeta'
+  expro_list(63) = 'shape_scos0'
+  expro_list(64) = 'shape_scos1'
+  expro_list(65) = 'shape_scos2'
+  expro_list(66) = 'shape_scos3'
+  expro_list(67) = 'shape_ssin3'
+  expro_list(68) = 'dlnnedr'
+  expro_list(69) = 'dlntedr'
+  expro_list(70) = 'dlnnidr'
+  expro_list(71) = 'dlntidr'
+  expro_list(72) = 'w0p'
+  expro_list(73) = 'surf'
+  expro_list(74) = 'vol'
+  expro_list(75) = 'volp'
+  expro_list(76) = 'cs'
+  expro_list(77) = 'rhos'
+  expro_list(78) = 'nuee'
+  expro_list(79) = 'grad_r0'
+  expro_list(80) = 'ave_grad_r'
+  expro_list(81) = 'bp0'
+  expro_list(82) = 'bt0'
+  expro_list(83) = 'fpol'
+  expro_list(84) = 'mach'
+  expro_list(85) = 'flow_beam'
+  expro_list(86) = 'flow_wall'
+  expro_list(87) = 'flow_mom'
+  expro_list(88) = 'pow_e'
+  expro_list(89) = 'pow_i'
+  expro_list(90) = 'pow_ei'
+  expro_list(91) = 'pow_e_aux'
+  expro_list(92) = 'pow_i_aux'
+  expro_list(93) = 'pow_e_fus'
+  expro_list(94) = 'pow_i_fus'
+  expro_list(95) = 'pow_e_sync'
+  expro_list(96) = 'pow_e_brem'
+  expro_list(97) = 'pow_e_line'
+  expro_list(98) = 'polflux'
+  expro_list(99) = 'shot'
+  expro_list(100) = 'time'
+
   ! new scalars
-  expro_list(100) = 'betap'
-  expro_list(101) = 'betat'
-  expro_list(102) = 'betan'
-  expro_list(103) = 'greenwald'
-  expro_list(104) = 'ptransp'
-  expro_list(105) = 'tau'
-  expro_list(106) = 'tau98y2'
+  
+  expro_list(101) = 'betap'
+  expro_list(102) = 'betat'
+  expro_list(103) = 'betan'
+  expro_list(104) = 'greenwald'
+  expro_list(105) = 'ptransp'
+  expro_list(106) = 'tau'
+  expro_list(107) = 'tau98y2'
   
 end subroutine expro_list_set
 

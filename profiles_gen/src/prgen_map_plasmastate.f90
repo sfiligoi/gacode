@@ -267,7 +267,8 @@ subroutine prgen_map_plasmastate
      expro_qmom(i) = -ipccw*plst_tq_trans(i-1)/dvol
 
      ! Particle source
-     expro_qpar(i) = plst_sn_trans(i-1)/dvol
+     expro_qpar_beam(i) = plst_sn_trans(i-1)/dvol
+     expro_qpar_wall(i) = 0.0
 
   enddo
   expro_qei(1)    = expro_qei(2)
@@ -282,7 +283,8 @@ subroutine prgen_map_plasmastate
   expro_qbrem(1)  = expro_qbrem(2)
   expro_qline(1)  = expro_qline(2)
   expro_qmom(1)   = expro_qmom(2)
-  expro_qpar(1)   = expro_qpar(2)
+  expro_qpar_beam(1)   = expro_qpar_beam(2)
+  expro_qpar_wall(1)   = expro_qpar_wall(2)
   qpow_e(1)       = qpow_e(2)
   qpow_i(1)       = qpow_i(2)
   

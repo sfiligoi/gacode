@@ -56,7 +56,8 @@ subroutine prgen_map_inputprofiles
      call cub_spline(expro_rho,expro_qioni,nx,rho,xnew,nx) ; expro_qioni = xnew
      call cub_spline(expro_rho,expro_qcxi,nx,rho,xnew,nx)  ; expro_qcxi = xnew
      call cub_spline(expro_rho,expro_qmom,nx,rho,xnew,nx)  ; expro_qmom = xnew
-     call cub_spline(expro_rho,expro_qpar,nx,rho,xnew,nx)  ; expro_qpar = xnew
+     call cub_spline(expro_rho,expro_qpar_wall,nx,rho,xnew,nx)  ; expro_qpar_wall = xnew
+     call cub_spline(expro_rho,expro_qpar_beam,nx,rho,xnew,nx)  ; expro_qpar_beam = xnew
 
      !---------------------------------------------------------
      ! Map profile data into expro interface.
