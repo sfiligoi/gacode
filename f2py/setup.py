@@ -2,15 +2,15 @@ from numpy.distutils.core import setup, Extension
 import os
 import sys
 
+with open(os.path.dirname(os.path.abspath(__file__)) + '/pygacode/version', 'r') as f:
+    __version__ = f.read().strip()
+
 wrapper = Extension('gacode_ext',
                     sources=['expro/expro.f90',
                              'expro/expro_util.f90',
                              'expro/expro_pycomm.f90',
                              'geo/geo.f90',
                              'vis/vis.f90'])
-
-with open(os.path.dirname(__file__) + '/pygacode/version', 'r') as f:
-    __version__ = f.read().strip()
 
 setup(name='pygacode',
       version=__version__,
