@@ -479,8 +479,8 @@
       cb5 =0.0
 !recalibrated 8/20/14      cb1 = 0.114*SQRT(kparvthe*cnuei*(1.0 + 0.82*zeff_in))
       cb1 = 0.163*SQRT(kparvthe*cnuei*(1.0 + 0.82*zeff_in))
-      if(xnu_model_in.eq.3)cb1 = 0.50*(kparvthe**0.34)*(cnuei*(1.0 + 0.82*zeff_in))**0.66
-      if(xnu_model_in.eq.4)cb1 = 0.852*(kparvthe**0.5)*(cnuei*(1.0 + 0.82*zeff_in))**0.5  ! 1.55 for Zeff=1
+       if(xnu_model_in.eq.3)cb1 = 0.50*(kparvthe**0.34)*(cnuei*(1.0 + 0.82*zeff_in))**0.66
+       if(xnu_model_in.eq.4)cb1 = 0.852*(kparvthe**0.5)*(cnuei*(1.0 + 0.82*zeff_in))**0.5  ! 1.55 for Zeff=1
       cb1 = cb1*xnu_factor_in
       cb2 = cb1
       cb4 = cb1
