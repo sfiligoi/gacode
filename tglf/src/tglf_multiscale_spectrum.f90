@@ -42,6 +42,7 @@
       REAL :: vzf,dvzf,vzf1,vzf2,vzf3,vzf4
       REAL :: bz1,bz2
       REAL :: etg_streamer, ky_factor
+      REAL :: kxzf, sat_geo_factor
       REAL,DIMENSION(nkym) :: gamma_net=0.0
       REAL,DIMENSION(nkym) :: gamma=0.0
       REAL,DIMENSION(nkym) :: gamma_mix=0.0
@@ -107,7 +108,7 @@
            sqcky=SQRT(cky)
         endif
         if(USE_X4)then
-           cnorm = 14.37  ! note this is normed to GASTD CGYRO units XNU=0.05
+           cnorm = 14.44  !normed to GASTD CGYRO units XNU=0.05, with sat_geo from Gaussian envelope average
            cz1 = 0.0
            cz2=1.4*czf
            etg_streamer = 1.0
@@ -258,17 +259,22 @@
         ky0 = ky_spectrum(j)
         kx = spectral_shift_out(j)
         do i=1,nmodes_in
+          sat_geo_factor = SAT_geo0_out*sat_geo_spectrum_out(j,i)
           gammaeff = 0.0
           if(gamma0.gt.small)gammaeff = &
                gamma_mix(j)*(eigenvalue_spectrum_out(1,j,i)/gamma0)**expsub
           if(USE_X3)then
             if(ky0.le.kymax1)gammaeff = gammaeff*ky0/(kymax1)
           elseif(USE_X4)then
-            if(ky0.le.0.5*kymax1)gammaeff = gammaeff*ky0/(0.5*kymax1)
+            sat_geo_factor = sat_geo_spectrum_out(j,i)
+            kxzf = 0.5*kymax1
+            if(ky0.le.kxzf)gammaeff = gammaeff*ky0/kxzf
+            if(ky0.lt.kymax1)sat_geo_factor= 1.0+(sat_geo_spectrum_out(j,i)-1.0)*ky0/kymax1
           endif
+          sat_geo_spectrum_out(j,i)=sat_geo_factor
           if(ky0.gt.kyetg)gammaeff = gammaeff*SQRT(ky0/kyetg)
           field_spectrum_out(2,j,i) = (cnorm*gammaeff*gammaeff/ky0**4)/(1.0+ay*kx**2)**2
-          if(units_in.ne.'GYRO')field_spectrum_out(2,j,i) = SAT_geo0_out*sat_geo_spectrum_out(j,i)*field_spectrum_out(2,j,i)
+          if(units_in.ne.'GYRO')field_spectrum_out(2,j,i) = sat_geo_factor*field_spectrum_out(2,j,i)
         enddo
      enddo
      ! recompute the intensity and flux spectra

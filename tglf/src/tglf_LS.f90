@@ -757,6 +757,7 @@
       kx_bar = REAL(phi_kx_phi)/phi_norm
       kpar_bar = REAL(phi_kpar_phi)/phi_norm
       sat_geo_bar = 1.0/MAX(REAL(phi_sat_geo_phi)/phi_norm,epsilon1)
+      if(xnu_model_in.eq.4)sat_geo_bar = 1.0/MAX(ave_sat_geo_inv(1,1),epsilon1)
 !      write(*,*)"wd_bar = ",wd_bar
 !      write(*,*)"b0_bar = ",b0_bar
 !       write(*,*)"modB_bar = ",modB_bar
