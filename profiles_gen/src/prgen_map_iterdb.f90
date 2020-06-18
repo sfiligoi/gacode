@@ -200,8 +200,8 @@ subroutine prgen_map_iterdb
   ! Particle/momentum sources
   !
   ! particles
-  expro_qpar_beam = kevdsecpmw*onetwo_sbeame
-  expro_qpar_wall = kevdsecpmw*sion_d
+  expro_qpar_beam = onetwo_sbeame
+  expro_qpar_wall = sion_d
   !
   ! Torque (TAM flow) (nt-m)
   expro_qmom = -ipccw*onetwo_storqueb

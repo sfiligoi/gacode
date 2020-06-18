@@ -1,7 +1,6 @@
 module prgen_globals
 
   ! Parameters
-  real, parameter :: kevdsecpmw=1.6022e-19*1e3*1e-6
   real, parameter :: pi=3.14159265358979323846
 
   ! List of possible data files
