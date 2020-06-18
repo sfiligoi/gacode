@@ -1876,7 +1876,7 @@ SUBROUTINE write_tglf_intensity_spectrum
   !
   OPEN(unit=33,file=fluxfile,status='replace')
 !
-  write(33,*)"gyro-bohm normalized intensity fluctuation amplitude spectra per mode"
+  write(33,*)"gyro-bohm normalized fluctuation intensity spectra per mode"
   write(33,*)"density,temperature,parallel velocity,parallel energy"
   write(33,*)"index limits: ns,nky,nmodes"
   write(33,*)ns,nky,nmodes_in
