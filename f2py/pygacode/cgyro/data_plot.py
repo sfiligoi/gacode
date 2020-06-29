@@ -32,7 +32,7 @@ class cgyrodata_plot(data.cgyrodata):
       else:
          # theta=0 check just to be safe
          if theta == 0.0:
-            itheta = self.theta_plot/2
+            itheta = self.theta_plot//2
          else:
             itheta = int((theta+1.0)/2.0*self.theta_plot)
 

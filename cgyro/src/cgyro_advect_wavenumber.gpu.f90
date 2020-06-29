@@ -18,7 +18,7 @@ subroutine cgyro_advect_wavenumber(ij)
 
   if (nonlinear_flag == 0) return
 
-  if (profile_shear_flag == 1 .or. shear_method == 2) then
+  if (source_flag == 1) then
      call timer_lib_in('shear')
      allocate(he(n_theta,1-2*n_wave:n_radial+2*n_wave))
 

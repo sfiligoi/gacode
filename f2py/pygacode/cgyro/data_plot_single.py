@@ -117,7 +117,7 @@ elif plot_type == 'phi':
    w     = float(sys.argv[2])
    wmax  = float(sys.argv[3])
    field = int(sys.argv[4])
-   theta = 0.0
+   theta = float(sys.argv[5])
    ymin  = sys.argv[6]
    ymax  = sys.argv[7]
    rms   = int(sys.argv[8])
