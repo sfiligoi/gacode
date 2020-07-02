@@ -170,6 +170,18 @@ subroutine tgyro_init_profiles
   call cub_spline(expro_rmin(:)/r_min,expro_zeta(:),n_exp,r,zeta,n_r)
   call cub_spline(expro_rmin(:)/r_min,expro_szeta(:),n_exp,r,s_zeta,n_r)
 
+  ! New geometry (HAM)
+  call cub_spline(expro_rmin(:)/r_min,expro_shape_sin3(:),n_exp,r,shape_sin3,n_r)
+  call cub_spline(expro_rmin(:)/r_min,expro_shape_ssin3(:),n_exp,r,shape_ssin3,n_r)
+  call cub_spline(expro_rmin(:)/r_min,expro_shape_cos0(:),n_exp,r,shape_cos0,n_r)
+  call cub_spline(expro_rmin(:)/r_min,expro_shape_scos0(:),n_exp,r,shape_scos0,n_r)
+  call cub_spline(expro_rmin(:)/r_min,expro_shape_cos1(:),n_exp,r,shape_cos1,n_r)
+  call cub_spline(expro_rmin(:)/r_min,expro_shape_scos1(:),n_exp,r,shape_scos1,n_r)
+  call cub_spline(expro_rmin(:)/r_min,expro_shape_cos2(:),n_exp,r,shape_cos2,n_r)
+  call cub_spline(expro_rmin(:)/r_min,expro_shape_scos2(:),n_exp,r,shape_scos2,n_r)
+  call cub_spline(expro_rmin(:)/r_min,expro_shape_cos3(:),n_exp,r,shape_cos3,n_r)
+  call cub_spline(expro_rmin(:)/r_min,expro_shape_scos3(:),n_exp,r,shape_scos3,n_r)
+
   ! b_ref in Gauss (used for wce in Synchroton rad)
   call cub_spline(expro_rmin(:)/r_min,1e4*expro_bt0(:),n_exp,r,b_ref,n_r)
   

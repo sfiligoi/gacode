@@ -184,6 +184,17 @@ module tgyro_globals
   real, dimension(:), allocatable :: zeta
   real, dimension(:), allocatable :: s_zeta
 
+  real, dimension(:), allocatable :: shape_sin3
+  real, dimension(:), allocatable :: shape_ssin3
+  real, dimension(:), allocatable :: shape_cos0
+  real, dimension(:), allocatable :: shape_scos0
+  real, dimension(:), allocatable :: shape_cos1
+  real, dimension(:), allocatable :: shape_scos1
+  real, dimension(:), allocatable :: shape_cos2
+  real, dimension(:), allocatable :: shape_scos2
+  real, dimension(:), allocatable :: shape_cos3
+  real, dimension(:), allocatable :: shape_scos3
+  
   real, dimension(:), allocatable :: b_ref
   real, dimension(:), allocatable :: b_unit
   real, dimension(:), allocatable :: volp

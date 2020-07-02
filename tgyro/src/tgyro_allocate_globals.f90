@@ -108,6 +108,18 @@ subroutine tgyro_allocate_globals
   allocate(dzmag(n_r))
   allocate(zeta(n_r))
   allocate(s_zeta(n_r))
+
+  allocate(shape_sin3(n_r))
+  allocate(shape_ssin3(n_r))
+  allocate(shape_cos0(n_r))
+  allocate(shape_scos0(n_r))
+  allocate(shape_cos1(n_r))
+  allocate(shape_scos1(n_r))
+  allocate(shape_cos2(n_r))
+  allocate(shape_scos2(n_r))
+  allocate(shape_cos3(n_r))
+  allocate(shape_scos3(n_r))
+
   allocate(b_ref(n_r))
   allocate(b_unit(n_r))
   allocate(volp(n_r))

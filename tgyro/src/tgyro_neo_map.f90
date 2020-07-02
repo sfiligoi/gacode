@@ -43,6 +43,18 @@ subroutine tgyro_neo_map
   neo_zmag_over_a_in       = zmag(i_r)
   neo_s_zmag_in            = dzmag(i_r)
 
+  ! New HAM shape parameters
+  neo_shape_sin3_in        = shape_sin3(i_r)
+  neo_shape_s_sin3_in      = shape_ssin3(i_r)
+  neo_shape_cos0_in        = shape_cos0(i_r)
+  neo_shape_s_cos0_in      = shape_scos0(i_r)
+  neo_shape_cos1_in        = shape_cos1(i_r)
+  neo_shape_s_cos1_in      = shape_scos1(i_r)
+  neo_shape_cos2_in        = shape_cos2(i_r)
+  neo_shape_s_cos2_in      = shape_scos2(i_r)
+  neo_shape_cos3_in        = shape_cos3(i_r)
+  neo_shape_s_cos3_in      = shape_scos3(i_r)
+  
   neo_ipccw_in = -signb*signq
   neo_btccw_in = -signb
 
