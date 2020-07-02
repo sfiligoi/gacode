@@ -17,7 +17,7 @@ echo "#SBATCH -o $SIMDIR/batch.out" >> $bfile
 echo "#SBATCH -e $SIMDIR/batch.err" >> $bfile
 echo "#SBATCH -q $QUEUE" >> $bfile
 if [ "$QUEUE" == "flex" ] ; then
-   echo "#SBATCH --time-min=1:59:00"
+   echo "#SBATCH --time-min=1:59:00" >> $bfile
 fi
 echo "#SBATCH -t $WALLTIME" >> $bfile
 echo "#SBATCH -N $nodes" >> $bfile
