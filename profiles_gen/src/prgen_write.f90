@@ -19,10 +19,9 @@ subroutine prgen_write
      print '(t6,i2,2(1x,a))',i,trim(expro_name(i)),trim(expro_type(i))
   enddo
 
-
   !-------------------------------------------------------------------------------------
   ! Map (common) data from EFIT analysis [skip if reading input.* without gfile]
-
+  !
   if (format_type < 7) then 
      expro_torfluxa = -btccw*abs(torfluxa)
      expro_rcentr   = rcentr
@@ -42,7 +41,6 @@ subroutine prgen_write
      expro_shape_cos2 = shape_cos2
      expro_shape_cos3 = shape_cos3
   endif
-
   !-------------------------------------------------------------------------------------
 
   !-------------------------------------------------------------------------------------

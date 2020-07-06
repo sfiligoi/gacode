@@ -14,7 +14,7 @@ subroutine prgen_map_inputgacode
 
   integer :: i
   real :: xnew(nx)
-  
+
   if (efit_method == 1) then
 
      call prgen_get_chi(nx,q,dpsi,rho,expro_torfluxa)
@@ -70,11 +70,28 @@ subroutine prgen_map_inputgacode
 
   endif
 
+  if (format_type == 8) then
+     
+     ipccw = 1
+     btccw = -1
+     
+     ! LEGACY (input.profiles input)
+     expro_torfluxa = -btccw*abs(torfluxa)
+     expro_q          = ipccw*btccw*abs(q)
+     expro_polflux    = -ipccw*abs(dpsi)
+     expro_kappa      = kappa
+     expro_delta      = delta
+     expro_zeta       = zeta
+     expro_zmag       = zmag
+     expro_current  = -ipccw*abs(current)
+
+  endif
+  
   !---------------------------------------------------------
   ! Notification about CER file
   !
   if (file_cer /= "null") then
-    print '(a)','INFO: (prgen_map_inputprofiles) IGNORING cer file'
+    print '(a)','INFO: (prgen_map_inputgacode) IGNORING cer file'
   endif
   !---------------------------------------------------------
 
