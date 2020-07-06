@@ -74,6 +74,12 @@ subroutine prgen_map_inputgacode
      
      ipccw = 1
      btccw = -1
+     if (bt_exp < 0.0) then
+        btccw = 1
+     endif
+     if (current > 0.0) then
+        ipccw = -1
+     endif
      
      ! LEGACY (input.profiles input)
      expro_torfluxa = -btccw*abs(torfluxa)
