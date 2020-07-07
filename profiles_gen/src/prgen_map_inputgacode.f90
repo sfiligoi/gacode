@@ -72,24 +72,27 @@ subroutine prgen_map_inputgacode
 
   if (format_type == 8) then
      
+     ! LEGACY (input.profiles input)
+
      ipccw = 1
      btccw = -1
-     if (bt_exp < 0.0) then
+     if (bcentr < 0.0) then
         btccw = 1
      endif
      if (current > 0.0) then
         ipccw = -1
      endif
      
-     ! LEGACY (input.profiles input)
      expro_torfluxa = -btccw*abs(torfluxa)
-     expro_q          = ipccw*btccw*abs(q)
-     expro_polflux    = -ipccw*abs(dpsi)
-     expro_kappa      = kappa
-     expro_delta      = delta
-     expro_zeta       = zeta
-     expro_zmag       = zmag
+     expro_q        = ipccw*btccw*abs(q)
+     expro_polflux  = -ipccw*abs(dpsi)
+     expro_kappa    = kappa
+     expro_delta    = delta
+     expro_zeta     = zeta
+     expro_zmag     = zmag
      expro_current  = -ipccw*abs(current)
+     expro_bcentr   = bcentr
+     expro_rcentr   = rcentr
 
   endif
   
