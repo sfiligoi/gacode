@@ -45,7 +45,7 @@ subroutine gyro_field_interpolation
   !-----------------------------------------------------------------
 
   call gyro_timer_in('Field-interp.a')
-!$omp parallel do default(shared) private(cmplx_phase,j_int,x,vtemp,j)
+!$omp parallel do default(shared) private(i,cmplx_phase,j_int,x,vtemp,j)
   do i=1,n_x
      cmplx_phase = phase(in_1,i)
      do j_int=1,n_theta_int
@@ -55,7 +55,9 @@ subroutine gyro_field_interpolation
         vtemp(:) = (0.0,0.0)
 
         do j=1,n_blend
-           vtemp(:) = vtemp(:)+field_blend(j,i,:)*BLEND_F(j,x,cmplx_phase)
+           do ix=1,n_field
+           vtemp(ix) = vtemp(ix)+field_blend(j,i,ix)*BLEND_F(j,x,cmplx_phase)
+           enddo
         enddo
         phi(j_int,i,:) = vtemp(:) 
 

@@ -49,7 +49,7 @@ subroutine gyro_read_experimental_profiles
   btccw = -EXPRO_signb
   ipccw = -EXPRO_signq*EXPRO_signb
   !
-  call send_message('INFO: (GYRO) Resetting IPCCW and BTCCW based on input.profiles.')
+  call send_message('INFO: (GYRO) Resetting IPCCW and BTCCW based on input.gacode.')
   !
   rhogrid_exp(:)    = EXPRO_rho(:)
   rmin_exp(:)       = EXPRO_rmin(:)

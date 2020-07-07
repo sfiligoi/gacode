@@ -6,6 +6,8 @@ else
    FFLAGS=${FOPT}
 endif
 
+FC += ${FOMP}
+
 LLIB=BLEND_lib
 
 OBJECTS = BLEND_private.o \
