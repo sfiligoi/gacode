@@ -45,8 +45,7 @@ subroutine gyro_field_interpolation
   !-----------------------------------------------------------------
 
   call gyro_timer_in('Field-interp.a')
-! WARNING: This loop seems to cause problems in BLEND_F line
-!!$omp parallel do default(shared) private(cmplx_phase,j_int,x,vtemp,j)
+!$omp parallel do default(shared) private(cmplx_phase,j_int,x,vtemp,j)
   do i=1,n_x
      cmplx_phase = phase(in_1,i)
      do j_int=1,n_theta_int
