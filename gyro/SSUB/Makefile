@@ -27,4 +27,3 @@ lib: $(OBJECTS)
 clean:
 	rm -rf *.o $(LLIB).a
 	rm -rf ${GACODE_ROOT}/modules/ssub*.mod
-                

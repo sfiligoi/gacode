@@ -6,6 +6,8 @@ else
    FFLAGS=${FOPT}
 endif
 
+FC += ${FOMP}
+
 LLIB=TRANSP_lib
 
 OBJECTS = fTRANSP_GLOBALS.o \
@@ -29,4 +31,3 @@ clean:
 	rm -rf *.o $(LLIB).a
 	rm -rf ${GACODE_ROOT}/modules/ftransp*.mod
 	rm -rf ${GACODE_ROOT}/modules/rtransp*.mod
-	                

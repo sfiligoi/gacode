@@ -6,6 +6,8 @@ else
    FFLAGS=${FOPT} -fPIC
 endif
 
+FC += ${FOMP}
+
 LLIB=math_lib
 
 OBJECTS = math_constants.o \
