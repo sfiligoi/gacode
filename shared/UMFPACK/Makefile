@@ -8,8 +8,6 @@ else
    FFLAGS=${FOPT}
 endif
 
-FC += ${FOMP}
-
 LLIB = UMFPACK_lib
 
 HARWELL	= mc21b.o mc13e.o
