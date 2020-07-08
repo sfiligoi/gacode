@@ -115,14 +115,6 @@ subroutine gyro_read_input
   call readbc_real(x) ; dlnndr_vec(5) = x
   call readbc_real(x) ; dlnndr_vec(0) = x
 
-  sdlnndr_vec = 0.0
-  call readbc_real(x) ; sdlnndr_vec(1) = x
-  call readbc_real(x) ; sdlnndr_vec(2) = x
-  call readbc_real(x) ; sdlnndr_vec(3) = x
-  call readbc_real(x) ; sdlnndr_vec(4) = x
-  call readbc_real(x) ; sdlnndr_vec(5) = x
-  call readbc_real(x) ; sdlnndr_vec(0) = x
-
   dlntdr_vec = 0.0
   call readbc_real(x) ; dlntdr_vec(1) = x
   call readbc_real(x) ; dlntdr_vec(2) = x
@@ -130,14 +122,6 @@ subroutine gyro_read_input
   call readbc_real(x) ; dlntdr_vec(4) = x
   call readbc_real(x) ; dlntdr_vec(5) = x
   call readbc_real(x) ; dlntdr_vec(0) = x
-
-  sdlntdr_vec = 0.0
-  call readbc_real(x) ; sdlntdr_vec(1) = x
-  call readbc_real(x) ; sdlntdr_vec(2) = x
-  call readbc_real(x) ; sdlntdr_vec(3) = x
-  call readbc_real(x) ; sdlntdr_vec(4) = x
-  call readbc_real(x) ; sdlntdr_vec(5) = x
-  call readbc_real(x) ; sdlntdr_vec(0) = x
 
   n_vec = 0.0
   call readbc_real(x) ; n_vec(1) = x

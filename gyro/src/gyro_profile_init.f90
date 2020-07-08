@@ -151,14 +151,6 @@ subroutine gyro_profile_init
      ! Explicit sign convention
      q0 = q0*(ipccw)*(btccw)
 
-     ! Profile shears (constant)
-     do is=1,n_ion
-        sdlnndr(is) = sdlnndr_vec(is) 
-        sdlntdr(is) = sdlntdr_vec(is)
-     enddo
-     sdlnndr(n_spec) = sdlnndr_vec(0)
-     sdlntdr(n_spec) = sdlntdr_vec(0)
-
      do i=1,n_x
 
         shat_s(i) = s0
@@ -325,8 +317,6 @@ subroutine gyro_profile_init
      tem_s(1:n_spec,:)    = tem_s(n_spec:1:-1,:)
      dlntdr_s(1:n_spec,:) = dlntdr_s(n_spec:1:-1,:)
      dlnndr_s(1:n_spec,:) = dlnndr_s(n_spec:1:-1,:)
-     sdlntdr(1:n_spec)    = sdlntdr(n_spec:1:-1)
-     sdlnndr(1:n_spec)    = sdlnndr(n_spec:1:-1)
   endif
   !------------------------------------------------------------------
 
