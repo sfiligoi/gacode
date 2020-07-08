@@ -429,7 +429,7 @@ subroutine expro_compute_derived
   ! ne_ave = <ne> in 10^19/m^3
   p_ave = 0d0
   ! bt2_ave/bp2_ave = <B^2> in T^2 
-  bt2_ave = 0d0 ; bp2_ave = 0d0
+  bt2_ave = 0d0 ; bp2_ave = 0d0 ; ne_ave = 0d0
   do i=2,nx
      ne_ave  = ne_ave+(expro_rmin(i)-expro_rmin(i-1))*(expro_ne(i)+expro_ne(i-1))/2
      p_ave   = p_ave+(expro_vol(i)-expro_vol(i-1))*(expro_ptot(i)+expro_ptot(i-1))/2
