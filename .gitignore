@@ -4,19 +4,18 @@ shared/neural
 # Object files and modules
 modules/*.mod
 modules/*genmod*
-*/*.o*y
 */*.o
-*/*/*.a
-*/*/*/*.a
+*/*/*.o
 */*/*/*.o
 */*/*/*/*.o
+*/*/*.a
+*/*/*/*.a
 */*.pyc
 */*/*.pyc
 */*/*/*.pyc
 */*/*/*/*.pyc
 cgyro/src/*.gpu
 cgyro/src/*.h
-*.so
 *.pyf
 
 # OSX garbage
