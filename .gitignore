@@ -19,11 +19,11 @@ cgyro/src/*.h
 *.pyf
 
 # OSX garbage
-#*.dSYM/
-#.DS_Store
-#.idea
-#\#*\#
-#.\#*
+*.dSYM/
+.DS_Store
+.idea
+\#*\#
+.\#*
 
 # Version tags
 gyro/.VERSION
