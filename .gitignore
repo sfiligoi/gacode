@@ -1,12 +1,10 @@
 *~
-
 shared/neural
 
 # Object files and modules
 modules/*.mod
 modules/*genmod*
 */*.o*y
-
 */*.o
 */*/*.a
 */*/*.o*
@@ -23,11 +21,11 @@ cgyro/src/*.h
 *.pyf
 
 # OSX garbage
-*.dSYM/
-.DS_Store
-.idea
-\#*\#
-.\#*
+#*.dSYM/
+#.DS_Store
+#.idea
+#\#*\#
+#.\#*
 
 # Version tags
 gyro/.VERSION
@@ -38,11 +36,9 @@ neo/.VERSION
 le3/.VERSION
 
 # Executables
-gato/gato
 glf23/src/glf23
 gyro/src/gyro
 cgyro/src/cgyro
-cgyro/tools/globalmap/src/globalmap
 neo/src/neo
 neo/tools/pneo/src/pneo
 neo/tools/pneo/src/pneo_rbf
@@ -58,9 +54,6 @@ tglf/src/tglf_driver_mpi
 tgyro/src/tgyro_main
 le3/src/le3
 le3/profiles_3d/profiles_3d
-quick/src/quick
-gapy/test/test_geo/test
-gapy/test/test_expro/test
 f2py/build
 f2py/gacode.egg-info
 f2py/pygacode.egg-info
@@ -74,8 +67,4 @@ f2py/MANIFEST
 
 # local working files not to be shared
 tmp.py
-
 *.optrpt
-
-# Legacy directories
-shared/profiles_gen
