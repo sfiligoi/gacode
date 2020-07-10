@@ -7,10 +7,11 @@ subroutine cgyro_equilibrium
 
   integer :: m
   integer :: it,ir,is
-  real :: gtheta_ave,gtheta0,err
-  real, dimension(n_theta+1) :: x,y
-  real, dimension(n_theta) :: ttmp
+  integer :: nyy
+  real, dimension(:), allocatable :: x,y,ttmp
+  real :: gtheta_ave,gtheta0,err,dy
   real, parameter :: tol=1e-14
+  integer, parameter :: nrefine=1
 
   ! Compute equilibrium quantities (even in test mode)
   geo_model_in    = geo_numeq_flag
@@ -23,6 +24,11 @@ subroutine cgyro_equilibrium
   else
      it0 = n_theta/3+1
   endif
+
+  nyy = nrefine*n_theta
+  allocate(x(nyy+1))
+  allocate(y(nyy+1))
+  allocate(ttmp(nyy))
 
   ! Parameters needed for equilibrium
   ! geo_numeq_flag, geo_ny, and geo_yin already set 
@@ -67,9 +73,10 @@ subroutine cgyro_equilibrium
   ! Generate theta-grid (equally-spaced or constant-wind-speed)
   !
   !
-  d_theta = (2*pi/n_theta)
-  do it=1,n_theta+1
-     y(it) = -pi+(it-1)*d_theta
+  dy = 2*pi/nyy
+  d_theta = 2*pi/n_theta
+  do it=1,nyy+1
+     y(it) = -pi+(it-1)*dy
      x(it) = y(it)
   enddo
 
@@ -89,15 +96,15 @@ subroutine cgyro_equilibrium
      gtheta_ave = geo_g_theta(1)
 
      do while (err > tol)
-        do it=1,n_theta
+        do it=1,nyy
            ttmp(it) = 0.5*(y(it)+y(it+1))
         enddo
-        call geo_interp(n_theta,ttmp,.false.)
-        do it=1,n_theta
-           x(it+1) = x(it)+d_theta/geo_g_theta(it)
+        call geo_interp(nyy,ttmp,.false.)
+        do it=1,nyy
+           x(it+1) = x(it)+dy/geo_g_theta(it)
         enddo
         gtheta0 = gtheta_ave
-        gtheta_ave  = (2*pi)/(x(n_theta+1)-x(1))
+        gtheta_ave  = (2*pi)/(x(nyy+1)-x(1))
         y   = (x-x(1))*gtheta_ave-pi
         err = abs((gtheta_ave-gtheta0)/gtheta_ave)
      enddo
@@ -112,7 +119,9 @@ subroutine cgyro_equilibrium
   ! 1. NOT EQUALLY SPACED if constant_stream_flag == 1
   ! 2. Actually the real theta.
   !
-  theta(:) = y(1:n_theta)
+  do it=1,n_theta
+     theta(it) = y(nrefine*it)
+  enddo
 
   !--------------------------------------------------------
   ! Manage subset of theta-values for plotting output
