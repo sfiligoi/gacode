@@ -1,10 +1,12 @@
 #---------------------------------------------------
-# Azure HC
+# Azure HBv2 (AMD Rome)
 #
 #---------------------------------------------------
 
 IDENTITY="Azure HBv2"
-CORES_PER_NODE=114 
+
+# use 29 out of 30 chiplets, since they woudl be wasted else on multiples of 512
+CORES_PER_NODE=116
 NUMAS_PER_NODE=1
 
 FC  = mpif90 -std=f2008 -fall-intrinsics -I$(GACODE_ROOT)/modules -J $(GACODE_ROOT)/modules

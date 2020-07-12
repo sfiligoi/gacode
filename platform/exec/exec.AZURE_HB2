@@ -23,6 +23,6 @@ export MPICH_MAX_THREAD_SAFETY=funneled
 
 export OMP_NUM_THREADS=$nomp
 
-echo ">mpirun -n $nmpi $exec"
+echo ">mpirun -cpus-per-proc $nomp --bind-to core -n $nmpi $exec"
 #mpiexec -n $nmpi $exec
-mpirun -n $nmpi $exec
+mpirun -cpus-per-proc $nomp --bind-to core -n $nmpi $exec
