@@ -231,6 +231,9 @@ def extract(d,sd,key,w,spec,moment,norm=False,wmax=0.0,cflux='auto',dovar=False)
          y = np.sum(sim.ky_flux,axis=(2,3))
          # Flux for input (spec,moment) window w
          ave,var = variance(y[spec,moment,:],sim.t,w,wmax)
+         if norm == True:
+             var = var/sim.dens[spec]
+             ave = ave/sim.dens[spec]
          if dovar:
             f.append(var)
          else:
@@ -238,10 +241,7 @@ def extract(d,sd,key,w,spec,moment,norm=False,wmax=0.0,cflux='auto',dovar=False)
          print('INFO: (extract) Processed data in '+sub)
 
    # return (scan parameter, flux, variance)
-   if norm == True:
-      return np.array(x),np.array(f)/sim.dens[spec]
-   else:
-      return np.array(x),np.array(f)
+   return np.array(x),np.array(f)
 #---------------------------------------------------------------
 
 #---------------------------------------------------------------
