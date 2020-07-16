@@ -251,9 +251,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       print('INFO: (data_plot.py) l_corr = {:.3f}'.format(l_corr[0]))
 
-   def plot_phi(self,w=0.5,wmax=0.0,field=0,theta=0.0,ymin='auto',ymax='auto',rms=0,fig=None):
-
-      print(rms)
+   def plot_phi(self,w=0.5,wmax=0.0,field=0,theta=0.0,ymin='auto',ymax='auto',norms=1,fig=None):
       
       if fig is None:
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
@@ -295,7 +293,7 @@ class cgyrodata_plot(data.cgyrodata):
       print('INFO: (plot_phi) sqrt[ <|phi_n|^2> ]/rho_*D = {:.4f}'.format(np.sqrt(sn_ave)))
 
       s = np.ones(imax-imin+1)
-      if rms == 1:
+      if norms == 0:
          lab0=r'$\sqrt{\left\langle\left|'+ft+r'_0\right|^2\right\rangle}/\rho_{*D}$'
          labn=r'$\sqrt{\left\langle\left|'+ft+r'_n\right|^2\right\rangle}/\rho_{*D}$'
          ax.plot(self.t,np.sqrt(s0),label=lab0,linewidth=2)

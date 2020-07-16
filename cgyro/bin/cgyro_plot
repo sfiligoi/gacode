@@ -145,8 +145,8 @@ then
   echo "         -norm <int>"
   echo "         Species index for normalization (starts at 0)"  
   echo
-  echo "         -rms"
-  echo "         Toggle RMS normalization (rather than abs) in -plot phi"  
+  echo "         -norms"
+  echo "         Toggle ABS rather than RMS normalization in -plot phi"  
   echo
   echo "OPTIONS FOR -plot fluct, -vis"
   echo
@@ -284,7 +284,7 @@ PX=800
 PY=800
 DISS=0
 NORM='elec'
-RMS=0
+NO_RMS=1
 
 CFLUX=auto
 DN=1
@@ -319,7 +319,7 @@ while [ $# -gt 0 ] ; do
 
   -diss) DISS=1 ;;
   -notex) TEX=0 ;;
-  -rms) RMS=1 ;;
+  -norms) NO_RMS=0 ;;
   -norm) shift ; NORM=$1 ;;
 
   -moment) shift ; MOMENT=$1 ;;
@@ -449,7 +449,7 @@ case "$PLOT_TYPE" in
 	python $PLT $PLOT_TYPE $W $WMAX $FIELD $MOMENT $YMIN $YMAX $FC $EXT $DISS $CFLUX ;;
 
    phi)
-	python $PLT $PLOT_TYPE $W $WMAX $FIELD $THETA $YMIN $YMAX $RMS $EXT ;;
+	python $PLT $PLOT_TYPE $W $WMAX $FIELD $THETA $YMIN $YMAX $NO_RMS $EXT ;;
 
    low | corrug)
        python $PLT $PLOT_TYPE $W $WMAX $SPECIES $MOMENT $EXT $YMIN $YMAX ;;
