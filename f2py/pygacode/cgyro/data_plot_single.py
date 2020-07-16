@@ -185,9 +185,11 @@ elif plot_type == 'flux':
    cflux  = sys.argv[12]
    norm   = sys.argv[13]
 
+   if ftype == 'nox' or ftype == 'dump':
+       doplot=False
+  
    if ftype == 'dump':
       cgyrodata_dump('./').dump_flux(fc=fc)
-      doplot=False
    else:
       data_in.plot_flux(w=w,wmax=wmax,field=field,moment=moment,
                         ymin=ymin,ymax=ymax,fc=fc,loc=loc,nscale=nscale,cflux=cflux,norm=norm)
@@ -212,7 +214,7 @@ elif plot_type == 'ky_flux':
       doplot=False
    else:
       data_in.plot_ky_flux(w=w,field=field,moment=moment,
-                           ymin=ymin,ymax=ymax,fc=fc,diss=diss,cflux=cflux)
+                           ymin=ymin,ymax=ymax,fc=fc,fig=ftype,diss=diss,cflux=cflux)
 
    outfile = 'out.cgyro.ky_flux.'+ftype
 

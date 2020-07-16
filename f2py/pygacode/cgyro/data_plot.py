@@ -745,17 +745,18 @@ class cgyrodata_plot(data.cgyrodata):
       # Get index for average window
       imin,imax=iwindow(t,w,wmax)
 
-      # Otherwise plot
-      ax = fig.add_subplot(111)
-      ax.grid(which="both",ls=":")
-      ax.grid(which="major",ls=":")
-      ax.set_xlabel(self.tstr)
-
       color = ['k','m','b','c','g','r']
-
       windowtxt = '['+str(t[imin])+' < (c_s/a) t < '+str(t[imax])+']'
 
-      ax.set_title(r'$\mathrm{'+ntag+'} \quad '+windowtxt+'\quad ['+field_tag+']$')
+      print('INFO: (text.py) Average Window:'+windowtxt)
+
+      # Otherwise plot
+      if not fig == 'nox':
+         ax = fig.add_subplot(111)
+         ax.grid(which="both",ls=":")
+         ax.grid(which="major",ls=":")
+         ax.set_xlabel(self.tstr)
+         ax.set_title(r'$\mathrm{'+ntag+'} \quad '+windowtxt+'\quad ['+field_tag+']$')
 
       for ispec in range(ns):
          y_norm = y[ispec,:]*norm_vec[ispec]
@@ -763,21 +764,35 @@ class cgyrodata_plot(data.cgyrodata):
          y_ave   = ave*np.ones(len(t))
          u = specmap(self.mass[ispec],self.z[ispec])
          label = r'$'+mtag+mnorm+'_'+u+'/'+mtag+self.gbnorm+': '+str(round(ave,3))+'$'
-         # Average
-         ax.plot(t[imin:imax+1],y_ave[imin:imax+1],'--',color=color[ispec])
-         # Time trace
-         ax.plot(t,y_norm,label=label,color=color[ispec])
+         if not fig == 'nox':
+            # Average
+            ax.plot(t[imin:imax+1],y_ave[imin:imax+1],'--',color=color[ispec])
+            # Time trace
+            ax.plot(t,y_norm,label=label,color=color[ispec])
 
-         print('Var('+mtag+'_'+u+'): '+str(round(var,3)))
+      if not fig == 'nox':
+         ax.legend(loc=loc)
+         if ymax != 'auto':
+            ax.set_ylim(top=float(ymax))
+         if ymin != 'auto':
+            ax.set_ylim(bottom=float(ymin))
+         fig.tight_layout(pad=0.3)
 
-      ax.legend(loc=loc)
+      title = '        '
+      for ispec in range(ns):
+         title = title+'       '+specmap(self.mass[ispec],self.z[ispec])+'       '
+      print(title)
 
-      if ymax != 'auto':
-         ax.set_ylim(top=float(ymax))
-      if ymin != 'auto':
-         ax.set_ylim(bottom=float(ymin))
-
-      fig.tight_layout(pad=0.3)
+      tag = [
+         'GAMMA [GB]',
+         'Q     [GB]',
+         'PI    [GB]']
+      for i in range(3):
+         bstr=''
+         for ispec in range(ns):
+            ave,var = variance(ys[ispec,i,:],t,w,wmax)
+            bstr = bstr+"{:7.3f}".format(ave)+' '+"({:4.1f})".format(var/ave)+' '
+         print(tag[i]+' '+bstr)
 
    def plot_xflux(self,w=0.5,wmax=0.0,moment='e',ymin='auto',ymax='auto',fig=None,nscale=0):
 

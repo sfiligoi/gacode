@@ -25,7 +25,7 @@ then
   echo
   echo "         -ext <prefix.filetype>"
   echo "         Output file type (and optional prefix)"
-  echo "         <filetype>=eps, pdf, png, svg, dump"
+  echo "         <filetype>=eps, pdf, png, svg, dump, nox"
   echo
   echo "         -notex"
   echo "         Disable latex fonts"
