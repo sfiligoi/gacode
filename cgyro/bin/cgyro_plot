@@ -33,8 +33,7 @@ then
   echo "PLOT MODE"
   echo 
   echo "         -plot <type>"
-  echo "         <type> = text     (text summary of fluxes)"
-  echo "                = distill  (data distillation)"
+  echo "         <type> = distill  (data distillation)"
   echo "                = freq     (frequency versus time)"
   echo "                = ky_freq  (frequency versus ky)"
   echo "                = ball     (ballooning modes OR ZF test)"
@@ -59,7 +58,6 @@ then
   echo "                = rt       (x-t fluctuation contours)"
   echo "                = vid      (create video from png files)"
   echo "                = template (create simple template file to read data)"
-  echo "                = fix      (fix old simulation directory)"
   echo
   echo "VISUALIZATION MODE (requires Mayavi)"
   echo 
@@ -485,12 +483,6 @@ case "$PLOT_TYPE" in
        export OMP_NUM_THREADS=$NOMP ; \
        python $PYROOT/plot_rt.py \
 	      $EXT $MOMENT $SPECIES $YMIN $YMAX $NX $ND $TIME $FMIN $FMAX $CMAP $FONTSIZE $THETA ;;
-
-   text)
-   	python -m pygacode.cgyro.plot_text $W $WMAX $EXT ;;
-
-   fix)
-   	python $PYROOT/fix.py ;;
 
    template)
    	cp $PYROOT/plot_template.py . ;;
