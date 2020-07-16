@@ -186,13 +186,13 @@ elif plot_type == 'flux':
    norm   = sys.argv[13]
 
    if ftype == 'nox' or ftype == 'dump':
-       doplot=False
+       doplot = False
   
    if ftype == 'dump':
       cgyrodata_dump('./').dump_flux(fc=fc)
    else:
       data_in.plot_flux(w=w,wmax=wmax,field=field,moment=moment,
-                        ymin=ymin,ymax=ymax,fc=fc,loc=loc,nscale=nscale,cflux=cflux,norm=norm)
+                        ymin=ymin,ymax=ymax,fc=fc,ftype=ftype,loc=loc,nscale=nscale,cflux=cflux,norm=norm)
 
    outfile = 'out.cgyro.flux.'+ftype
 
@@ -209,12 +209,14 @@ elif plot_type == 'ky_flux':
    diss   = int(sys.argv[10])
    cflux  = sys.argv[11]
 
+   if ftype == 'nox' or ftype == 'dump':
+       doplot = False
+
    if ftype == 'dump':
       cgyrodata_dump('./').dump_ky_flux(w=w,wmax=wmax,field=field,moment=moment,fc=fc)
-      doplot=False
    else:
       data_in.plot_ky_flux(w=w,field=field,moment=moment,
-                           ymin=ymin,ymax=ymax,fc=fc,fig=ftype,diss=diss,cflux=cflux)
+                           ymin=ymin,ymax=ymax,fc=fc,ftype=ftype,diss=diss,cflux=cflux)
 
    outfile = 'out.cgyro.ky_flux.'+ftype
 

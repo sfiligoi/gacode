@@ -683,9 +683,9 @@ class cgyrodata_plot(data.cgyrodata):
       return 'ang  Re(f)  Im(f)',x,y1,y2
          
    def plot_flux(self,w=0.5,wmax=0.0,field=0,moment='e',ymin='auto',ymax='auto',
-                 fc=0,fig=None,loc=2,nscale=0,cflux='auto',norm='elec'):
-         
-      if fig is None:
+                 fc=0,fig=None,ftype='screen',loc=2,nscale=0,cflux='auto',norm='elec'):
+      
+      if fig is None and ftype is not 'nox':
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       usec = self.getflux(cflux)
@@ -751,7 +751,7 @@ class cgyrodata_plot(data.cgyrodata):
       print('INFO: (text.py) Average Window:'+windowtxt)
 
       # Otherwise plot
-      if not fig == 'nox':
+      if not ftype == 'nox':
          ax = fig.add_subplot(111)
          ax.grid(which="both",ls=":")
          ax.grid(which="major",ls=":")
@@ -770,7 +770,7 @@ class cgyrodata_plot(data.cgyrodata):
             # Time trace
             ax.plot(t,y_norm,label=label,color=color[ispec])
 
-      if not fig == 'nox':
+      if not ftype == 'nox':
          ax.legend(loc=loc)
          if ymax != 'auto':
             ax.set_ylim(top=float(ymax))
@@ -912,7 +912,7 @@ class cgyrodata_plot(data.cgyrodata):
       fig.tight_layout(pad=0.3)
 
    def plot_ky_flux(self,w=0.5,wmax=0.0,field=0,moment='e',ymin='auto',ymax='auto',
-                    fc=0,diss=0,fig=None,cflux='auto'):
+                    fc=0,ftype='screen',diss=0,fig=None,cflux='auto'):
 
       if self.n_n == 1:
          raise ValueError('(plot_ky_flux.py) Plot not available with a single mode.')
@@ -920,7 +920,7 @@ class cgyrodata_plot(data.cgyrodata):
       ns = self.n_species
       t  = self.t
 
-      if fig is None:
+      if fig is None and ftype is not 'nox':
          fig = plt.figure(MYDIR,figsize=(self.ly*ns,self.ly))
 
       usec = self.getflux(cflux)
@@ -974,7 +974,6 @@ class cgyrodata_plot(data.cgyrodata):
          
       windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[imax])+']'+cstr+'$'
 
-
       if ky[-1] < 0.0:
          ky = -ky
          xlabel=r'$-k_\theta \rho_s$'
@@ -989,18 +988,26 @@ class cgyrodata_plot(data.cgyrodata):
 
       # One plot per species
       for ispec in range(ns):
-         ax = fig.add_subplot(1,ns,ispec+1)
-         ax.set_xlabel(xlabel)
          u = specmap(self.mass[ispec],self.z[ispec])
-         ax.set_ylabel(r'$'+mtag+'_'+u+'$',color='k')
-         ax.set_title(windowtxt)
-         ax.bar(ky,ave[:,ispec],width=dk/1.1,color=color[ispec],
-                alpha=0.5,edgecolor='black',align='center')
+         if not ftype == 'nox':
+            ax = fig.add_subplot(1,ns,ispec+1)
+            ax.set_xlabel(xlabel)
+            ax.set_ylabel(r'$'+mtag+'_'+u+'$',color='k')
+            ax.set_title(windowtxt)
+            ax.bar(ky,ave[:,ispec],width=dk/1.1,color=color[ispec],
+                   alpha=0.5,edgecolor='black',align='center')
          
-         # Dissipation curve             
-         if diss == 1:
-            ax.plot(ky,self.alphadiss*ax.get_ylim()[1]*0.5,linewidth=2,color='k',alpha=0.2)
+            # Dissipation curve             
+            if diss == 1:
+               ax.plot(ky,self.alphadiss*ax.get_ylim()[1]*0.5,linewidth=2,color='k',alpha=0.2)
 
+            # Set axis ranges
+            ax.set_xlim([0,ky[-1]+dk])
+            if ymax != 'auto':
+               ax.set_ylim(top=float(ymax))
+            if ymin != 'auto':
+               ax.set_ylim(bottom=float(ymin))
+               
          # Maximum
          j = np.argmax(ave[:,ispec])
          if j < len(ky)-1:
@@ -1008,15 +1015,9 @@ class cgyrodata_plot(data.cgyrodata):
          else:
             xs = ky[-1]
          print('INFO: (data_plot.py) Max(flux) occurs at ky*rho = {:.3f}'.format(xs))
-         
-         # Set axis ranges
-         ax.set_xlim([0,ky[-1]+dk])
-         if ymax != 'auto':
-            ax.set_ylim(top=float(ymax))
-         if ymin != 'auto':
-            ax.set_ylim(bottom=float(ymin))
 
-      fig.tight_layout(pad=0.3)
+      if not ftype == 'nox':
+         fig.tight_layout(pad=0.3)
 
    def plot_kxky_phi(self,field=0,theta=0.0,w=0.5,wmax=0.0,fig=None):
 
