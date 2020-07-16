@@ -284,7 +284,7 @@ PX=800
 PY=800
 DISS=0
 NORM='elec'
-NO_RMS=1
+NO_RMS=0
 
 CFLUX=auto
 DN=1
@@ -319,7 +319,7 @@ while [ $# -gt 0 ] ; do
 
   -diss) DISS=1 ;;
   -notex) TEX=0 ;;
-  -norms) NO_RMS=0 ;;
+  -norms) NO_RMS=1 ;;
   -norm) shift ; NORM=$1 ;;
 
   -moment) shift ; MOMENT=$1 ;;

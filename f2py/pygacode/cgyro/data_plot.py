@@ -251,7 +251,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       print('INFO: (data_plot.py) l_corr = {:.3f}'.format(l_corr[0]))
 
-   def plot_phi(self,w=0.5,wmax=0.0,field=0,theta=0.0,ymin='auto',ymax='auto',norms=1,fig=None):
+   def plot_phi(self,w=0.5,wmax=0.0,field=0,theta=0.0,ymin='auto',ymax='auto',norms=0,fig=None):
       
       if fig is None:
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
