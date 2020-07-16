@@ -281,19 +281,12 @@ class cgyrodata_plot(data.cgyrodata):
       yn = np.sum(abs(f[:,1:,:]),axis=(0,1))/self.rho 
       sn = np.sum(abs(f[:,1:,:])**2,axis=(0,1))/self.rho**2
          
-      # Averages
-      y0_ave = average(y0,self.t,w,wmax)
-      yn_ave = average(yn,self.t,w,wmax)
-      print('INFO: (plot_phi) <|phi_0|>/rho_*D = {:.4f}'.format(y0_ave))
-      print('INFO: (plot_phi) <|phi_n|>/rho_*D = {:.4f}'.format(yn_ave))
-      
-      s0_ave = average(s0,self.t,w,wmax)
-      sn_ave = average(sn,self.t,w,wmax)
-      print('INFO: (plot_phi) sqrt[ <|phi_0|^2> ]/rho_*D = {:.4f}'.format(np.sqrt(s0_ave)))
-      print('INFO: (plot_phi) sqrt[ <|phi_n|^2> ]/rho_*D = {:.4f}'.format(np.sqrt(sn_ave)))
-
       s = np.ones(imax-imin+1)
       if norms == 0:
+         s0_ave = average(s0,self.t,w,wmax)
+         sn_ave = average(sn,self.t,w,wmax)
+         print('INFO: (plot_phi) sqrt[ <|phi_0|^2> ]/rho_*D = {:.4f}'.format(np.sqrt(s0_ave)))
+         print('INFO: (plot_phi) sqrt[ <|phi_n|^2> ]/rho_*D = {:.4f}'.format(np.sqrt(sn_ave)))
          lab0=r'$\sqrt{\left\langle\left|'+ft+r'_0\right|^2\right\rangle}/\rho_{*D}$'
          labn=r'$\sqrt{\left\langle\left|'+ft+r'_n\right|^2\right\rangle}/\rho_{*D}$'
          ax.plot(self.t,np.sqrt(s0),label=lab0,linewidth=2)
@@ -301,6 +294,10 @@ class cgyrodata_plot(data.cgyrodata):
          ax.plot(self.t[imin:imax+1],np.sqrt(s0_ave)*s,'--k')
          ax.plot(self.t[imin:imax+1],np.sqrt(sn_ave)*s,'--k')
       else:
+         y0_ave = average(y0,self.t,w,wmax)
+         yn_ave = average(yn,self.t,w,wmax)
+         print('INFO: (plot_phi) <|phi_0|>/rho_*D = {:.4f}'.format(y0_ave))
+         print('INFO: (plot_phi) <|phi_n|>/rho_*D = {:.4f}'.format(yn_ave))
          lab0=r'$\left\langle \left|'+ft+r'_0\right|\right\rangle/\rho_{*D}$'
          labn=r'$\left\langle \left|'+ft+r'_n\right|\right\rangle/\rho_{*D}$'
          ax.plot(self.t,y0,label=lab0,linewidth=2)
