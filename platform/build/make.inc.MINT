@@ -8,7 +8,7 @@ NUMAS_PER_NODE=1
 
 FFTWDIR=/usr/lib/x86_64-linux-gnu
 
-ROOT=${HOME}/GIT
+ROOT=/home/candy/GIT
 
 # Compilers
 
