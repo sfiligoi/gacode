@@ -764,7 +764,7 @@ class cgyrodata_plot(data.cgyrodata):
          y_ave   = ave*np.ones(len(t))
          u = specmap(self.mass[ispec],self.z[ispec])
          label = r'$'+mtag+mnorm+'_'+u+'/'+mtag+self.gbnorm+': '+str(round(ave,3))+'$'
-         if not fig == 'nox':
+         if not ftype == 'nox':
             # Average
             ax.plot(t[imin:imax+1],y_ave[imin:imax+1],'--',color=color[ispec])
             # Time trace
