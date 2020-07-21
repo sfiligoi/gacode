@@ -8,6 +8,8 @@ from .prgen_geqdsk import *
 from .prgen_contour import *
 from .prgen_shape import *
 
+plotpng = False
+
 if len(sys.argv) > 1:
    gfile   = sys.argv[1]
    nrz     = int(sys.argv[2])
@@ -37,7 +39,7 @@ si = np.zeros([nf+1,npsi])
 xi = np.zeros([4,npsi])
 for i in range(npsi-1):
    r=ri[:,i+1] ; z=zi[:,i+1]
-   if (np.mod(i,4) == 0) and (nfourier > 0):
+   if np.mod(i,4) == 0 and nfourier > 0 and plotpng:
       xplot = pnorm[i+1]
    else:
       xplot = 0.0
@@ -83,5 +85,6 @@ u.tofile('out.data')
 if nfourier > 0:
    # Generate pure Fourier expansion coefficients, write to fluxfit.geo
    oldfourier(ri,zi,nfourier,rnorm)
-   # Plot radial profiles of cos,sin,etc
-   plot_coef(pnorm,ci,si,xi)
+   if plotpng:
+      # Plot radial profiles of cos,sin,etc
+      plot_coef(pnorm,ci,si,xi)
