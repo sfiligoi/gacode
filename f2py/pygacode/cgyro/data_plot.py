@@ -685,7 +685,7 @@ class cgyrodata_plot(data.cgyrodata):
    def plot_flux(self,w=0.5,wmax=0.0,field=0,moment='e',ymin='auto',ymax='auto',
                  fc=0,fig=None,ftype='screen',loc=2,nscale=0,cflux='auto',norm='elec'):
       
-      if fig is None and ftype is not 'nox':
+      if fig is None and ftype != 'nox':
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       usec = self.getflux(cflux)
@@ -920,7 +920,7 @@ class cgyrodata_plot(data.cgyrodata):
       ns = self.n_species
       t  = self.t
 
-      if fig is None and ftype is not 'nox':
+      if fig is None and ftype != 'nox':
          fig = plt.figure(MYDIR,figsize=(self.ly*ns,self.ly))
 
       usec = self.getflux(cflux)
@@ -1114,7 +1114,7 @@ class cgyrodata_plot(data.cgyrodata):
          for n in nvec:
             num = r'$n='+str(n)+'$'
             ave[:] = average_n(abs(f[:,n,:]),self.t,w,wmax,nx)
-            ax.plot(kx+dk/2,ave[:],ls='steps',label=num)
+            ax.step(kx+dk/2,ave[:],label=num)
             if self.n_n > 16:
                ax.legend(loc=4, ncol=5, prop={'size':12})
             else:
