@@ -54,55 +54,45 @@ print(imbpaver)
 # writing time traces of poloidal averages into files
 # Time
 
-fphi= open("PhiAv.txt","w+")
-fapa= open("ApaAv.txt","w+")
-fbpa= open("BpaAv.txt","w+")
-cosbpa= open("BpaCos.txt","w+")
-rebpcosaver=0.0
-for i in range(ntime):
-     rephifsa=math.fsum(data.phib[0,:,i])/ntheta
-     imphifsa=math.fsum(data.phib[1,:,i])/ntheta
+with open("PhiAv.txt","w+") as fphi, open("ApaAv.txt","w+") as fapa, open("BpaAv.txt","w+") as fbpa, open("BpaCos.txt","w+") as cosbpa:
+   rebpcosaver=0.0
+   for i in range(ntime):
+        rephifsa=math.fsum(data.phib[0,:,i])/ntheta
+        imphifsa=math.fsum(data.phib[1,:,i])/ntheta
 
-     fphi.write("%11.3e"% (data.t[i]))
-     fphi.write("%11.3e"% (rephifsa))
-     fphi.write("%11.3e\n"% (imphifsa))
+        fphi.write("%11.3e"% (data.t[i]))
+        fphi.write("%11.3e"% (rephifsa))
+        fphi.write("%11.3e\n"% (imphifsa))
 
-     reapafsa=math.fsum(data.aparb[0,:,i])/ntheta 
-     imapafsa=math.fsum(data.aparb[1,:,i])/ntheta
+        reapafsa=math.fsum(data.aparb[0,:,i])/ntheta 
+        imapafsa=math.fsum(data.aparb[1,:,i])/ntheta
 
-     fapa.write("%11.3e"% (data.t[i]))
-     fapa.write("%11.3e"% (reapafsa))
-     fapa.write("%11.3e\n"% (imapafsa))
+        fapa.write("%11.3e"% (data.t[i]))
+        fapa.write("%11.3e"% (reapafsa))
+        fapa.write("%11.3e\n"% (imapafsa))
 
-     rebpafsa=math.fsum(data.bparb[0,:,i])/ntheta 
-     imbpafsa=math.fsum(data.bparb[1,:,i])/ntheta
+        rebpafsa=math.fsum(data.bparb[0,:,i])/ntheta 
+        imbpafsa=math.fsum(data.bparb[1,:,i])/ntheta
 
-     fbpa.write("%11.3e"% (data.t[i]))
-     fbpa.write("%11.3e"% (rebpafsa))
-     fbpa.write("%11.3e\n"% (imbpafsa))
+        fbpa.write("%11.3e"% (data.t[i]))
+        fbpa.write("%11.3e"% (rebpafsa))
+        fbpa.write("%11.3e\n"% (imbpafsa))
 
-     rebpacos=0.0
-     imbpacos=0.0
-     for j in range(ntheta):
-        rebpacos=rebpacos+2.0*math.cos(data.theta[j])*data.bparb[0,j,i]/ntheta 
-        imbpacos=imbpacos+2.0*math.cos(data.theta[j])*data.bparb[1,j,i]/ntheta
+        rebpacos=0.0
+        imbpacos=0.0
+        for j in range(ntheta):
+           rebpacos=rebpacos+2.0*math.cos(data.theta[j])*data.bparb[0,j,i]/ntheta 
+           imbpacos=imbpacos+2.0*math.cos(data.theta[j])*data.bparb[1,j,i]/ntheta
 
-     cosbpa.write("%11.3e"% (data.t[i]))
-     cosbpa.write("%11.3e"% (rebpacos))
-     cosbpa.write("%11.3e\n"% (imbpacos))
+        cosbpa.write("%11.3e"% (data.t[i]))
+        cosbpa.write("%11.3e"% (rebpacos))
+        cosbpa.write("%11.3e\n"% (imbpacos))
 
-     if i >= tmin:
-         rebpcosaver=rebpcosaver+rebpacos/tlength
+        if i >= tmin:
+            rebpcosaver=rebpcosaver+rebpacos/tlength
 
 print("Average cos component of Re[delta B||] during time interval")
 print(rebpcosaver)
 
-fphi.close()
-fapa.close()
-fbpa.close()
-cosbpa.close()
-
 # print "theta dependence of Re[delta B||] at last time point"
 # print data.bparb[0,:,ntime-1]
-
-

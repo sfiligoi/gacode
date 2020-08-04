@@ -45,62 +45,61 @@ else:
 # Generate customized header and footer
 
 os.system("basename `pwd` > sim_label")
-f = open('sim_label','r')
-line = f.readlines()
-f.close()
+with open('sim_label','r') as f:
+   line = f.readlines()
 os.system("rm sim_label")
 
-f = open('out.gyro.version','r')
-tag = f.readlines()
-f.close()
+with open('out.gyro.version','r') as f:
+   tag = f.readlines()
 
-f = open('head.tex','w')
-f.write('\\rhead{{\\tt '+line[0].strip()+'}}\n')
-f.write('\\lfoot{GYRO '+tag[0].strip()+'}\n')
-f.write('\\rfoot{'+tag[1].strip()+'}\n')
-f.close()
+with open('head.tex','w') as f:
+   f.write('\\rhead{{\\tt '+line[0].strip()+'}}\n')
+   f.write('\\lfoot{GYRO '+tag[0].strip()+'}\n')
+   f.write('\\rfoot{'+tag[1].strip()+'}\n')
 
 # Genrate body
 
-f = open('body.tex','w')
+with open('body.tex','w') as f:
 
-# (insert figures)
+   # (insert figures)
 
-print "---------------------------------------------------"
+   print "---------------------------------------------------"
 
-n=0 
-for line in open('list','r').readlines():
-    n = 1-n;
-    line = line.strip()
-    
-    if os.path.isfile(line) == 1:
-        print "ADDING "+line
-        f.write('\includegraphics[width=\\figsize]{'+line+'}\n')
-    else:
-        print "** MISSING "+line
-        f.write('\includegraphics[width=\\figsize]{missing.ps}\n')
-    
-    if n == 0:
-        f.write('\n')
+   n=0
+   with open('list','r') as fin:
+      in_lines = fin.readlines()
+   for line in in_lines:
+       n = 1-n;
+       line = line.strip()
 
-#f.close()
-print "---------------------------------------------------"
+       if os.path.isfile(line) == 1:
+           print "ADDING "+line
+           f.write('\includegraphics[width=\\figsize]{'+line+'}\n')
+       else:
+           print "** MISSING "+line
+           f.write('\includegraphics[width=\\figsize]{missing.ps}\n')
 
-# Generate input data page (two columns)
+       if n == 0:
+           f.write('\n')
 
-f.write('\\begin{multicols}{2}')
-f.write('{\small')
-f.write('\\begin{verbatim}')
+   print "---------------------------------------------------"
 
-for line in open('out.gyro.run','r').readlines():
-    line = line.strip()
-    f.write(line+'\n')
+   # Generate input data page (two columns)
 
-f.write('\\end{verbatim}')
-f.write('}')
-f.write('\\end{multicols}')
+   f.write('\\begin{multicols}{2}')
+   f.write('{\small')
+   f.write('\\begin{verbatim}')
 
-f.close()
+   with open('out.gyro.run','r') as fin:
+      in_lines = fin.readlines()
+   for line in in_lines:
+       line = line.strip()
+       f.write(line+'\n')
+
+   f.write('\\end{verbatim}')
+   f.write('}')
+   f.write('\\end{multicols}')
+
 
 # Cure underscore problem:
 os.system("cp head.tex temp.tex")

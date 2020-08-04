@@ -218,10 +218,9 @@ for item in tg:
 
 #print(tin)
 # write input.tglf
-f = open('input.tglf','w')
-for item in tin:
-    f.write(item+'='+str(tin[item]))
-    f.write('\n')
+with open('input.tglf','w') as f:
+    for item in tin:
+        f.write(item+'='+str(tin[item]))
+        f.write('\n')
 
-f.close
 print('parameters_gene.txt succesfully converted to input.tglf')

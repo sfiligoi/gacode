@@ -64,13 +64,13 @@ ci[1,:] = zero(rnorm,ci[1,:]) # c1
 ci[2,:] = zero(pnorm,ci[2,:]) # c2
 ci[3,:] = zero(pnorm,ci[3,:]) # c3
 
-f=open('out.dim','w')
-f.write(str(npsi)+'\n')
-f.write(str(nf+1)+'\n')
-f.write(str(efit['RCENTR'])+'\n')
-f.write(str(efit['BCENTR'])+'\n')
-f.write(str(efit['CURRENT']*1e-6)+'\n')
-f.close()
+with open('out.dim','w') as f:
+   f.write(str(npsi)+'\n')
+   f.write(str(nf+1)+'\n')
+   f.write(str(efit['RCENTR'])+'\n')
+   f.write(str(efit['BCENTR'])+'\n')
+   f.write(str(efit['CURRENT']*1e-6)+'\n')
+
 u = psi
 u = np.append(u,q)
 u = np.append(u,p)

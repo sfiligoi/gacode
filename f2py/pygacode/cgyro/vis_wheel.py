@@ -198,18 +198,17 @@ def frame():
 PREC='f' ; BIT=4
 
 # Open binary file
-fbin = open(fdata,'rb') 
+with open(fdata,'rb') as fbin:
+   i = 0
+   while True:
+      try:
+         aa = struct.unpack(PREC*n_chunk,fbin.read(BIT*n_chunk))
+      except:
+         sys.exit()
 
-i = 0
-while True:
-   try:
-      aa = struct.unpack(PREC*n_chunk,fbin.read(BIT*n_chunk))
-   except:
-      sys.exit()
-
-   i += 1
-   print('INFO: (vis_torcut) Time index '+str(i))
-   if i in ivec:
-      frame()
-   if i == max(ivec):
-      sys.exit()
+      i += 1
+      print('INFO: (vis_wheel) Time index '+str(i))
+      if i in ivec:
+         frame()
+      if i == max(ivec):
+         sys.exit()

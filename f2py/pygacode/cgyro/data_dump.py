@@ -102,11 +102,10 @@ class cgyrodata_dump(data.cgyrodata):
             arr[j,ispec+1] = ave
          stag = stag+' , s'+str(ispec)
             
-      fid = open(fname,'w')
-      fid.write('# Moment  : '+mtag+'\n')
-      fid.write('# Time    : '+str(self.t[imin])+' < (c_s/a) t < '+str(self.t[imax])+'\n')
-      fid.write(stag+')\n')
-      np.savetxt(fid,arr,fmt='%.5e')
-      fid.close()
+      with open(fname,'w') as fid:
+         fid.write('# Moment  : '+mtag+'\n')
+         fid.write('# Time    : '+str(self.t[imin])+' < (c_s/a) t < '+str(self.t[imax])+'\n')
+         fid.write(stag+')\n')
+         np.savetxt(fid,arr,fmt='%.5e')
 
       print('INFO: (dump_ky_flux) Created '+fname)

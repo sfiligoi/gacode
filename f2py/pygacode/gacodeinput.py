@@ -52,19 +52,20 @@ class SimpleInput:
 
     def read_input(self,inputfile):
         # 1. read user input file
-        for line in open(inputfile,'r').readlines():
+        with open(inputfile,'r') as fin:
+           for line in fin.readlines():
 
-            # Remove leading and trailing whitespace from line
-            line = line.strip()
+               # Remove leading and trailing whitespace from line
+               line = line.strip()
 
-            # Skip blank lines
-            if len(line) > 0 and line[0] != '#':
-                x = line.split('=')
-                y = x[1].split('#')
-                arg = x[0].strip()
-                val = y[0].strip()
+               # Skip blank lines
+               if len(line) > 0 and line[0] != '#':
+                   x = line.split('=')
+                   y = x[1].split('#')
+                   arg = x[0].strip()
+                   val = y[0].strip()
 
-                self.user_dict[arg] = val
+                   self.user_dict[arg] = val
 
         # 2. build complete input file, looking for errors
         for x in list(self.user_dict.keys()):
@@ -79,9 +80,9 @@ class SimpleInput:
                 self.error_msg=self.error_msg+"ERROR: (gacodeinput) Bogus parameter "+x+'\n'
 
         if self.error == 0:
-            f=open(inputfile+self.extension,'w')
-            for x in self.data_orderlist:
-                f.write(self.data_dict[x]+'  '+x+'\n')
+            with open(inputfile+self.extension,'w') as f:
+               for x in self.data_orderlist:
+                   f.write(self.data_dict[x]+'  '+x+'\n')
         
 #--------------------------------------------------------------------
 # PARSER FOR input.tgyro
@@ -116,71 +117,71 @@ class ManagerInput:
             print(self.error_msg)
 
     def write_proc(self,datafile):
-        f = open(datafile,'w')
-        f.write(str(len(self.slavepath))+'\n')
-        f.write(str(self.sum_proc))
-        f.close()
+        with open(datafile,'w') as f:
+           f.write(str(len(self.slavepath))+'\n')
+           f.write(str(self.sum_proc))
 
     def set_extension(self,text):
         self.extension = text
 
     def strip_tag(self,datafile):
 
-        file_input = open(datafile+'.input','w')
+        with open(datafile+'.input','w') as file_input:
 
-        n = 0
-        for line in open(datafile,'r').readlines():
-            line_s = line.strip()
+           n = 0
+           with open(datafile,'r') as fdata:
+              datalines = fdata.readlines()
 
-            # Look for occurence of tag and put item in list.
-            if (line_s[0:3] == 'DIR'):   
-                n = n+1
-                data = line_s.split(' ')
+           for line in datalines:
+               line_s = line.strip()
 
-                # data[0] -> DIR
-                # data[1] -> directory1, etc
-                # data[2] -> <n_cores>
-                # data[3,...] -> OVERLAY_VARIABLE [special option X=<xmin>]
+               # Look for occurence of tag and put item in list.
+               if (line_s[0:3] == 'DIR'):   
+                   n = n+1
+                   data = line_s.split(' ')
 
-                # slavepath stores directory
-                self.slavepath.append(data[1])
-                # slaveproc stores number of cores
-                self.slaveproc.append(data[2])
+                   # data[0] -> DIR
+                   # data[1] -> directory1, etc
+                   # data[2] -> <n_cores>
+                   # data[3,...] -> OVERLAY_VARIABLE [special option X=<xmin>]
 
-                # Now manage overlays and optional radii
-                if (len(data) > 3):
-                    # Overlay or optional radius
-                    if data[3][0:1] == 'X':
-                        # This is the special option X=<xmin> for min(r/a) or min(rho)
-                        self.slaveradius.append(data[3].split('=')[1])
-                        # Need to subtract 4 because X is not an overlay
-                        nover = len(data)-4
-                        nj    = 4
-                    else:
-                        nover = len(data)-3
-                        nj    = 3
-                        self.slaveradius.append("-1")
-                else:
-                    # No overlay
-                    self.slaveradius.append("-1")
-                    nover = 0
-                        
-                # Overlay parameters reside in data[3], ... 
-                self.overlayfile.append('overlay.'+str(n))
-                file_overlay = open('overlay.'+str(n),'w')
+                   # slavepath stores directory
+                   self.slavepath.append(data[1])
+                   # slaveproc stores number of cores
+                   self.slaveproc.append(data[2])
 
-                #----------------------------------------------------------
-                # This loop writes each overlay parameter list to overlay.*
-                for j in range(nover):
-                    file_overlay.write(data[j+nj]+'\n')
-                file_overlay.close()
-                #----------------------------------------------------------
- 
-            else:
+                   # Now manage overlays and optional radii
+                   if (len(data) > 3):
+                       # Overlay or optional radius
+                       if data[3][0:1] == 'X':
+                           # This is the special option X=<xmin> for min(r/a) or min(rho)
+                           self.slaveradius.append(data[3].split('=')[1])
+                           # Need to subtract 4 because X is not an overlay
+                           nover = len(data)-4
+                           nj    = 4
+                       else:
+                           nover = len(data)-3
+                           nj    = 3
+                           self.slaveradius.append("-1")
+                   else:
+                       # No overlay
+                       self.slaveradius.append("-1")
+                       nover = 0
 
-                file_input.write(line)
+                   # Overlay parameters reside in data[3], ... 
+                   self.overlayfile.append('overlay.'+str(n))
+                   with open('overlay.'+str(n),'w') as file_overlay:
 
-        file_input.close()
+                      #----------------------------------------------------------
+                      # This loop writes each overlay parameter list to overlay.*
+                      for j in range(nover):
+                          file_overlay.write(data[j+nj]+'\n')
+
+                   #----------------------------------------------------------
+
+               else:
+
+                   file_input.write(line)
 
 
     def read_input(self,datafile):
@@ -218,69 +219,65 @@ class ManagerInput:
 
         os.system('mv '+genfile+' '+outfile)
         os.system('rm '+datafile+'.input')
-        file_outfile = open(outfile,'a')
-        file_outfile.write(str(n_path)+'\n')
+        with open(outfile,'a') as file_outfile:
+           file_outfile.write(str(n_path)+'\n')
 
-        # Logging
-        print('INFO: (gacodeinput) Number of code instances: '+str(n_path))
+           # Logging
+           print('INFO: (gacodeinput) Number of code instances: '+str(n_path))
 
-        for p in range(len(self.slavepath)):
-            self.sum_proc = self.sum_proc + int(self.slaveproc[p])
-            basedir = self.slavepath[p]
+           for p in range(len(self.slavepath)):
+               self.sum_proc = self.sum_proc + int(self.slaveproc[p])
+               basedir = self.slavepath[p]
 
-            # Detect the code to be run in each directory            
-            if os.path.isfile(basedir+'/input.gyro'):
-                code='gyro'
-            elif os.path.isfile(basedir+'/input.cgyro'):
-                code='cgyro'
-            elif os.path.isfile(basedir+'/input.tglf'):
-                code='tglf'
-            elif os.path.isfile(basedir+'/input.ifs'):
-                code='ifs'
-            elif os.path.isfile(basedir+'/input.glf23'):
-                code='glf23'
-            elif os.path.isfile(basedir+'/input.etg'):
-                code='etg'
-            else:
-                code='unknown'
-                self.error=1
-                self.error_message='Could not identify code'
+               # Detect the code to be run in each directory            
+               if os.path.isfile(basedir+'/input.gyro'):
+                   code='gyro'
+               elif os.path.isfile(basedir+'/input.cgyro'):
+                   code='cgyro'
+               elif os.path.isfile(basedir+'/input.tglf'):
+                   code='tglf'
+               elif os.path.isfile(basedir+'/input.ifs'):
+                   code='ifs'
+               elif os.path.isfile(basedir+'/input.glf23'):
+                   code='glf23'
+               elif os.path.isfile(basedir+'/input.etg'):
+                   code='etg'
+               else:
+                   code='unknown'
+                   self.error=1
+                   self.error_message='Could not identify code'
 
-            file_outfile.write(basedir+' '+self.slaveproc[p]+' '+self.slaveradius[p]+' '+code+'\n') 
+               file_outfile.write(basedir+' '+self.slaveproc[p]+' '+self.slaveradius[p]+' '+code+'\n') 
 
-            if code == 'unknown':
-                print('ERROR: (gacodeinput.py) No code found in '+basedir)
-                continue
-            if code == 'ifs':
-                print('INFO: (gacodeinput.py) Found ifs input in '+basedir)
-                continue
-            else:
-                print('INFO: (gacodeinput.py) Found '+code+' input in '+basedir)
+               if code == 'unknown':
+                   print('ERROR: (gacodeinput.py) No code found in '+basedir)
+                   continue
+               if code == 'ifs':
+                   print('INFO: (gacodeinput.py) Found ifs input in '+basedir)
+                   continue
+               else:
+                   print('INFO: (gacodeinput.py) Found '+code+' input in '+basedir)
 
-            basefile = basedir+'/input.'+code
-            tempfile = basefile+'.temp'
+               basefile = basedir+'/input.'+code
+               tempfile = basefile+'.temp'
 
-            file_base = open(basefile,'r')
-            file_temp = open(tempfile,'w')
+               with open(basefile,'r') as file_base, open(tempfile,'w') as file_temp:
 
-            for line in file_base.readlines():
-                if line[0:18] != "# -- Begin overlay":
-                    file_temp.write(line)
-                else:
-                    break
+                  for line in file_base.readlines():
+                      if line[0:18] != "# -- Begin overlay":
+                          file_temp.write(line)
+                      else:
+                          break
 
-            file_base.close()
-            file_temp.close()
+               # Overlay parameters
+               os.system('echo "# -- Begin overlay" >> '+tempfile)
+               os.system('cat '+self.overlayfile[p]+' >> '+tempfile)
+               os.system('mv '+tempfile+' '+basefile)
 
-            # Overlay parameters
-            os.system('echo "# -- Begin overlay" >> '+tempfile)
-            os.system('cat '+self.overlayfile[p]+' >> '+tempfile)
-            os.system('mv '+tempfile+' '+basefile)
+               # Run code in test mode
+               os.system(code+' -i '+basedir+' -n 1 -p $PWD > out.log')
 
-            # Run code in test mode
-            os.system(code+' -i '+basedir+' -n 1 -p $PWD > out.log')
-                  
-            os.system('rm '+self.overlayfile[p])
+               os.system('rm '+self.overlayfile[p])
 
         print('INFO: (gacodeinput) Required MPI tasks in TGYRO: '+str(self.sum_proc))
 

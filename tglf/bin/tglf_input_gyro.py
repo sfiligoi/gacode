@@ -19,21 +19,20 @@ import tglf_defaults
 # read the input.gyro file
 
 g = {}
-f = open('input.gyro.gen','r')
-for line in f.readlines():
-     
-   # Remove leading and trailing whitespace from line
-    line = line.strip()
-#    print(line)
-    # Skip blank lines
-    if len(line) > 0 :
-        tmp = line.split('  ')
-        if len(tmp) == 2 :
-            val = eval(tmp[0])
-            arg = tmp[1]
-            g[arg] = val
+with open('input.gyro.gen','r') as f:
+    for line in f.readlines():
 
-f.close
+       # Remove leading and trailing whitespace from line
+        line = line.strip()
+    #    print(line)
+        # Skip blank lines
+        if len(line) > 0 :
+            tmp = line.split('  ')
+            if len(tmp) == 2 :
+                val = eval(tmp[0])
+                arg = tmp[1]
+                g[arg] = val
+
 #print(g)
 
 # map gyro to tglf
@@ -193,10 +192,9 @@ for item in tg:
 
 #print(tin)
 # write input.tglf
-f = open('input.tglf','w')
-for item in tin:
-    f.write(item+'='+str(tin[item]))
-    f.write('\n')
+with open('input.tglf','w') as f:
+    for item in tin:
+        f.write(item+'='+str(tin[item]))
+        f.write('\n')
 
-f.close
 print('input.gyro succesfully converted to input.tglf')

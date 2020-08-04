@@ -213,12 +213,11 @@ class GYROData:
       """Read out.gyro.units ."""
 
       try:
-          f = open(self.dir+'/out.gyro.units')
+          with open(self.dir+'/out.gyro.units') as f:
+             fl = f.readlines()
       except IOError:
           raise IOError('ERROR (GYROData): Fatal error!  Missing out.gyro.units.')
 
-      fl = f.readlines()
-      f.close()
       units=[]
       for fi in fl[0:13]:
           units.append(float(fi.strip().split()[0]))

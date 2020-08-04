@@ -23,10 +23,12 @@ def run_regressions():
             ret = os.system('%s -r %s > %s'%(code,parallel,logfile))/256
             if ret:
                 sys.exit(ret)
-        num_tests = len(open(os.environ['GACODE_ROOT']+'/%s/tools/input/reg_list'%code,'r').read().strip().splitlines())
-        if open(logfile,'r').read().count('PASS') < num_tests:
-            print('Regression testing of the %s code failed'%code)
-            raise RegressionError()
+        with open(os.environ['GACODE_ROOT']+'/%s/tools/input/reg_list'%code,'r') as f:
+            num_tests = len(f.read().strip().splitlines())
+        with open(logfile,'r') as f:
+            if f.read().count('PASS') < num_tests:
+                print('Regression testing of the %s code failed'%code)
+                raise RegressionError()
         print('Regression testing of the %s code PASSED %d tests'%(code,num_tests))
 if '-clean' in sys.argv:
     make_clean()

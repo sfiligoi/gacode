@@ -24,7 +24,9 @@ class CgyroInput:
 
     def readInput(self,fdir):
         inputfile=os.path.join(fdir,self.def_fname)
-        for line in open(inputfile,'r').readlines():
+        with open(inputfile,'r') as fin:
+            in_lines = fin.readlines()
+        for line in in_lines:
             # Remove leading and trailing whitespace from line
             line = line.strip()
 

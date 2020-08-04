@@ -12,7 +12,9 @@ except:
     sys.exit()
 
 outfile = open('pfile.ne','w')
-for line in open(infile,'r').readlines():
+with open(infile,'r') as fin:
+    in_lines = fin.readlines()
+for line in in_lines:
     if 'psinorm' in line:
         # split() with no argument splits on whitespace
         x   = line.split()
@@ -33,5 +35,4 @@ for line in open(infile,'r').readlines():
         outfile.write(n+'\n')
     else:
         outfile.write(line)
-
-
+outfile.close()

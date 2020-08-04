@@ -23,10 +23,12 @@ if 'conda' in sys.argv:
     sha = str(sha.stdout, 'utf8').strip().split(':')[-1]
 
     subprocess.run('git clone git@github.com:conda-forge/pygacode-feedstock.git', stdout=subprocess.PIPE, shell=True)
-    tmp = open('pygacode-feedstock/recipe/meta.yaml').read()
+    with open('pygacode-feedstock/recipe/meta.yaml') as fin:
+        tmp = fin.read()
     mod = re.sub('{% set version.*', '{% set version = "' + __version__ + '" %}', tmp)
     mod = re.sub(".*sha256.*", "  sha256: %s" % sha, mod)
-    open('pygacode-feedstock/recipe/meta.yaml', "w").write(mod)
+    with open('pygacode-feedstock/recipe/meta.yaml', "w") as fout:
+        fout.write(mod)
     subprocess.run('cd pygacode-feedstock; git diff', shell=True)
 
     print('WORKING DIRECTORY IS: ' + tmpdir)
