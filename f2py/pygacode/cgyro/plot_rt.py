@@ -125,32 +125,32 @@ else:
     n_chunk = 2*nr*nth*ns*nn
  
 # Open binary file
-fbin = open(fdata,'rb')
+with open(fdata,'rb') as fbin:
 
-f = np.zeros([nt,nx])
+   f = np.zeros([nt,nx])
 
-for i in range(nt):
-   aa = struct.unpack(PREC*n_chunk,fbin.read(BIT*n_chunk))
-   print('INFO: (plot_fluct) Time index '+str(i)) 
+   for i in range(nt):
+      aa = struct.unpack(PREC*n_chunk,fbin.read(BIT*n_chunk))
+      print('INFO: (plot_fluct) Time index '+str(i)) 
 
-   if isfield:
-      a = np.reshape(aa,(2,nr,nth,nn),order='F')
-      c = a[0,:,itheta,0]+1j*a[1,:,itheta,0]
-   else:
-      a = np.reshape(aa,(2,nr,nth,ns,nn),order='F')
-      c = a[0,:,itheta,species,0]+1j*a[1,:,itheta,species,0]
+      if isfield:
+         a = np.reshape(aa,(2,nr,nth,nn),order='F')
+         c = a[0,:,itheta,0]+1j*a[1,:,itheta,0]
+      else:
+         a = np.reshape(aa,(2,nr,nth,ns,nn),order='F')
+         c = a[0,:,itheta,species,0]+1j*a[1,:,itheta,species,0]
 
-   # Derivative (d/dx)**nd
-   for p in range(-nr//2,nr//2):
-      c[p+nr//2] = c[p+nr//2]*(1j*p)**nd
+      # Derivative (d/dx)**nd
+      for p in range(-nr//2,nr//2):
+         c[p+nr//2] = c[p+nr//2]*(1j*p)**nd
 
-   ff = np.zeros([nx],order='F')
-   if usefft:
-      ff,t = maptoreal_fft(nr,nx,c)
-   else:
-      ff,t = maptoreal(nr,nx,c)
+      ff = np.zeros([nx],order='F')
+      if usefft:
+         ff,t = maptoreal_fft(nr,nx,c)
+      else:
+         ff,t = maptoreal(nr,nx,c)
 
-   f[i,:] = ff[:]
+      f[i,:] = ff[:]
 
 xp = x/(2*np.pi)*sim.length
 tp = np.arange(nt)

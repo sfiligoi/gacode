@@ -177,18 +177,17 @@ i = 0
 # Binary data
 work = True
 # Open binary file
-fbin = open(fdata,'rb') 
+with open(fdata,'rb') as fbin:
+   while work:
+      try:
+         aa = struct.unpack(PREC*n_chunk,fbin.read(BIT*n_chunk))
+      except:
+         sys.exit()
 
-while work:
-   try:
-      aa = struct.unpack(PREC*n_chunk,fbin.read(BIT*n_chunk))
-   except:
-      sys.exit()
-      
-   i = i+1
-   if np.mod(i,nproc) == iproc:
-      print('INFO: (plot_fluct_mpi) Time index '+str(i),'[',iproc,']') 
-      if i in ivec:
-         frame() 
-   if i == max(ivec):
-      sys.exit()
+      i = i+1
+      if np.mod(i,nproc) == iproc:
+         print('INFO: (plot_fluct_mpi) Time index '+str(i),'[',iproc,']') 
+         if i in ivec:
+            frame() 
+      if i == max(ivec):
+         sys.exit()

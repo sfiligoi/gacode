@@ -243,29 +243,29 @@ if hasbin:
    # Binary data
    work = True
    # Open binary file
-   fbin = open(fdata,'rb') 
+   with open(fdata,'rb') as fbin:
+       while work:
+          try:
+             aa = struct.unpack(PREC*n_chunk,fbin.read(BIT*n_chunk))
+          except:
+             sys.exit()
 
-   while work:
-      try:
-         aa = struct.unpack(PREC*n_chunk,fbin.read(BIT*n_chunk))
-      except:
-         sys.exit()
-      
-      i = i+1
-      print('INFO: (plot_fluct) Time index '+str(i)) 
-      frame()
+          i = i+1
+          print('INFO: (plot_fluct) Time index '+str(i)) 
+          frame()
 
 else:
 
    m = 0
 
    aa = np.zeros([n_chunk])
-   for line in open(fdata):
-      aa[m] = float(line)
-      m = m+1
-      if m == n_chunk:
-         i = i+1
-         m = 0
-         print('INFO: (plot_fluct) Time index '+str(i)) 
-         frame()
+   with open(fdata) as f:
+      for line in f:
+         aa[m] = float(line)
+         m = m+1
+         if m == n_chunk:
+            i = i+1
+            m = 0
+            print('INFO: (plot_fluct) Time index '+str(i)) 
+            frame()
 

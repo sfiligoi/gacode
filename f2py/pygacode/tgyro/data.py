@@ -58,7 +58,8 @@ class tgyrodata:
 
     def get_tag_value(self, tag):
 
-        datafile = open(self.dir+'/input.tgyro.gen','r').readlines()
+        with open(self.dir+'/input.tgyro.gen','r') as f:
+            datafile = f.readlines()
 
         for line in datafile:
             try:
@@ -79,7 +80,8 @@ class tgyrodata:
             print("WARNING: (data.py) "+file+" does not exist.")
             return 0
 
-        data = open(self.dir+'/'+file,'r').readlines()
+        with open(self.dir+'/'+file,'r') as f:
+            data = f.readlines()
 
         if not len(''.join(data).strip()):
             print("WARNING: (data.py) "+file+" is empty.")

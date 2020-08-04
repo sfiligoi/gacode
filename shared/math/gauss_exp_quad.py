@@ -131,12 +131,10 @@ for k in range(n-1):
 wg[n-2] = wg[n-2]+mp.mpf(1)-s
 
 # Write to datafile
-fout = open('out.cgyro.egrid','w')
-for k in range(n-1):
-    fout.write(mp.nstr(xk[k]**2,17)+' '+mp.nstr(wg[k],17)+'\n')
-for k in range(n-1):
-    for kp in range(n-1):
-        fout.write(mp.nstr(zp[k,kp],17)+' ')
-    fout.write('\n')
-
-fout.close()
+with open('out.cgyro.egrid','w') as fout:
+    for k in range(n-1):
+        fout.write(mp.nstr(xk[k]**2,17)+' '+mp.nstr(wg[k],17)+'\n')
+    for k in range(n-1):
+        for kp in range(n-1):
+            fout.write(mp.nstr(zp[k,kp],17)+' ')
+        fout.write('\n')

@@ -57,48 +57,47 @@ list = ['DLNNDR_1',
 
 # Open input.neo, append parameters, close
 
-neoin = open(workdir+'/input.neo','a') 
+with open(workdir+'/input.neo','a') as neoin:
 
-# Set input: r_min
-neoin.write('RMIN_OVER_A='+rmin+'\n')
+   # Set input: r_min
+   neoin.write('RMIN_OVER_A='+rmin+'\n')
 
-# Set input: q
-neoin.write('Q='+q+'\n')
+   # Set input: q
+   neoin.write('Q='+q+'\n')
 
-# Set input: nu_ee/(cs/a)
-neoin.write('NU_1='+nuee+'\n')
+   # Set input: nu_ee/(cs/a)
+   neoin.write('NU_1='+nuee+'\n')
 
-# Set input: shift
-neoin.write('SHIFT='+shift+'\n')
+   # Set input: shift
+   neoin.write('SHIFT='+shift+'\n')
 
-# Set input: kappa
-neoin.write('KAPPA='+kappa+'\n')
+   # Set input: kappa
+   neoin.write('KAPPA='+kappa+'\n')
 
-# Set input: skappa
-neoin.write('S_KAPPA='+skappa+'\n')
+   # Set input: skappa
+   neoin.write('S_KAPPA='+skappa+'\n')
 
-# Set input: delta
-neoin.write('DELTA='+delta+'\n')
+   # Set input: delta
+   neoin.write('DELTA='+delta+'\n')
 
-# Set input: sdelta
-neoin.write('S_DELTA='+sdelta+'\n')
+   # Set input: sdelta
+   neoin.write('S_DELTA='+sdelta+'\n')
 
-# Set input: main ion charge, mass, temperature, density
-neoin.write('Z_2='+zi1+'\n')
-neoin.write('MASS_2='+mi1+'\n')
-neoin.write('TEMP_2='+ti1+'\n')
-neoin.write('DENS_2='+ni1+'\n')
+   # Set input: main ion charge, mass, temperature, density
+   neoin.write('Z_2='+zi1+'\n')
+   neoin.write('MASS_2='+mi1+'\n')
+   neoin.write('TEMP_2='+ti1+'\n')
+   neoin.write('DENS_2='+ni1+'\n')
 
-# Set input: impurity ion charge, mass, temperature, density
-neoin.write('Z_3='+zi2+'\n')
-neoin.write('MASS_3='+mi2+'\n')
-neoin.write('TEMP_3='+ti2+'\n')
-# compute ni2/ne from quasi-neutrality
-ni2 = (1.0-float(zi1)*float(ni1))/(1.0*float(zi2))
-ni2 = str(ni2)
-neoin.write('DENS_3='+ni2+'\n')
+   # Set input: impurity ion charge, mass, temperature, density
+   neoin.write('Z_3='+zi2+'\n')
+   neoin.write('MASS_3='+mi2+'\n')
+   neoin.write('TEMP_3='+ti2+'\n')
+   # compute ni2/ne from quasi-neutrality
+   ni2 = (1.0-float(zi1)*float(ni1))/(1.0*float(zi2))
+   ni2 = str(ni2)
+   neoin.write('DENS_3='+ni2+'\n')
 
-neoin.close()
 
 z_all = [-1,float(zi1),float(zi2),-1,float(zi1),float(zi2)]
 n_all = [1.0,float(ni1),float(ni2),1.0,float(ni1),float(ni2)]
@@ -107,24 +106,20 @@ cneo = []
 
 # Run NEO
 for i in range(6):
-   neoin = open(workdir+'/input.neo','a') 
-   # Overlay gradients
-   neoin.write('# '+str(i)+'\n')
-   for j in range(6):
-      if j == i:
-         neoin.write(list[j]+'=1\n')
-      else:        
-         neoin.write(list[j]+'=0\n')
-   neoin.close()
+   with open(workdir+'/input.neo','a')  as neoin:
+      # Overlay gradients
+      neoin.write('# '+str(i)+'\n')
+      for j in range(6):
+         if j == i:
+            neoin.write(list[j]+'=1\n')
+         else:        
+            neoin.write(list[j]+'=0\n')
    os.system('neo -e '+workdir)
 
    # load output
    neoout = np.loadtxt(workdir+'/out.neo.transport') 
    jneo=neoout[2]
 
-   #neoout = open(workdir+'/out.neo.diagnostic_geo2','r') 
-   #line = neoout.readlines()[0]
-   #ipsi = float(string.splitfields(line,'=')[1].rstrip())
    neoout = np.loadtxt(workdir+'/out.neo.diagnostic_geo2') 
    ipsi   = neoout[0]
    geo1   = neoout[1]

@@ -14,8 +14,8 @@ import numpy as np
 def extract0d(infile):
 
     # Test for csv or block format
-    f = open(infile,'r')
-    line = f.readline()
+    with open(infile,'r') as f:
+        line = f.readline()
     if line[0] == 'A':
         csv = 1
     else:
@@ -85,7 +85,9 @@ def extract0d(infile):
 
         # Block format for 0d file
         p=0
-        for line in open(infile,'r').readlines():
+        with open(infile,'r') as fin:
+            in_lines = fin.readlines()
+        for line in in_lines:
             x = line.split()
             p = p+1
             if p == 1:
@@ -118,36 +120,37 @@ def extract0d(infile):
 
     # Now write the tags to "out.com"
 
-    f=open('out.com','w')
-    f.write(infile.split('_0d')[0]+'\n')
-    f.write(tok+'\n')
-    f.write(update+'\n')
-    f.write(date+'\n')
-    f.write(shot+'\n')
-    f.write(time+'\n')
-    f.write(phase+'\n')
-    f.write(z1+'\n')
-    f.write(m1+'\n')
-    f.write(z2+'\n')
-    f.write(m2+'\n')
-    f.write(z3+'\n')
-    f.write(m3+'\n')
-    f.write(z4+'\n')
-    f.write(m4+'\n')
-    f.write(z5+'\n')
-    f.write(m5+'\n')
-    f.write(zf1+'\n')
-    f.write(mf1+'\n')
-    f.write(zf2+'\n')
-    f.write(mf2+'\n')
-    f.write(zf3+'\n')
-    f.write(mf3+'\n')
-    f.close()
+    with open('out.com','w') as f:
+        f.write(infile.split('_0d')[0]+'\n')
+        f.write(tok+'\n')
+        f.write(update+'\n')
+        f.write(date+'\n')
+        f.write(shot+'\n')
+        f.write(time+'\n')
+        f.write(phase+'\n')
+        f.write(z1+'\n')
+        f.write(m1+'\n')
+        f.write(z2+'\n')
+        f.write(m2+'\n')
+        f.write(z3+'\n')
+        f.write(m3+'\n')
+        f.write(z4+'\n')
+        f.write(m4+'\n')
+        f.write(z5+'\n')
+        f.write(m5+'\n')
+        f.write(zf1+'\n')
+        f.write(mf1+'\n')
+        f.write(zf2+'\n')
+        f.write(mf2+'\n')
+        f.write(zf3+'\n')
+        f.write(mf3+'\n')
 
 def extract1d(infile,t0):
 
     data_region = 0
-    for line in open(infile,'r').readlines():
+    with open(infile,'r') as fin:
+        in_lines = fin.readlines()
+    for line in in_lines:
 
         if line.count("END-OF-DATA") == 1:
             data_region = 0
@@ -199,7 +202,9 @@ def extract1d(infile,t0):
 def extract2d(infile,t0):
 
     data_region = 0
-    for line in open(infile,'r').readlines():
+    with open(infile,'r') as fin:
+        in_lines = fin.readlines()
+    for line in in_lines:
         #print line
         if line.count("END-OF-DATA") == 1:
             data_region = 0
@@ -240,9 +245,8 @@ def extract2d(infile,t0):
                 iy = 0
                 # Write dimensions
                 if var=="NE":
-                    f=open('out.dim','w')
-                    f.write(str(nx)+'\n')
-                    f.close()
+                    with open('out.dim','w') as f:
+                        f.write(str(nx)+'\n')
 
         else:
 
@@ -294,7 +298,9 @@ except:
     varlist = []
     t0 = -1.0
     # Generate list of included profiles (tags)
-    for line in open(infile,'r').readlines():
+    with open(infile,'r') as fin:
+        in_lines = fin.readlines()
+    for line in in_lines:
         if line.count("-DEP") == 1:
             # Extract current variable name
             var=line.split('  ')[0].strip()

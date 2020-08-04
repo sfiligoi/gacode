@@ -52,14 +52,16 @@ class cgyrodata:
 
       # START: 3-column output (delete this code eventually)
       tfile = self.dir+'out.cgyro.time'
-      ncol = len(open(tfile,'r').readline().split())
+      with open(tfile,'r') as f:
+          ncol = len(f.readline().split())
    
       if ncol == 3:
-         newlines = [] 
-         for line in open(tfile,'r').readlines():
-            newlines.append(line.strip()+'  0.0')
-         outfile = open(tfile,'w')
-         outfile.write("\n".join(newlines)) ; outfile.close()
+         newlines = []
+         with open(tfile,'r') as f:
+            for line in f.readlines():
+               newlines.append(line.strip()+'  0.0')
+         with open(tfile,'w') as outfile:
+             outfile.write("\n".join(newlines))
          print('INFO: (data.py) Updated to 4-column format for out.cgyro.time')
         
       data = np.fromfile(self.dir+'out.cgyro.time',dtype='float',sep=' ')

@@ -221,9 +221,10 @@ def extract(d,sd,key,w,spec,moment,norm=False,wmax=0.0,cflux='auto',dovar=False)
       sub = d+'/'+sd+str(i)+'/'
       if os.path.isdir(sub) == True:
          # If this is a directory, get the key value
-         for line in open(sub+'/input.cgyro').readlines():
-            if re.match(key,line):
-               found = float(line.split('=')[1])
+         with open(sub+'/input.cgyro') as in_cgyro:
+            for line in in_cgyro.readlines():
+               if re.match(key,line):
+                  found = float(line.split('=')[1])
          x.append(found)
          # Get the corresponding flux
          sim = cgyrodata(sub+'/')
@@ -359,11 +360,11 @@ def mkfile(ext):
 def parameter_val(infile,par):
 
    val = 'null'
-   f = open(infile,'r')
-   for line in f:
-      x = line.split()
-      if x[1] == par:
-         val = x[0]
+   with open(infile,'r') as f:
+      for line in f:
+         x = line.split()
+         if x[1] == par:
+            val = x[0]
 
    return val
 #---------------------------------------------------------------
