@@ -1,3 +1,4 @@
+
 !------------------------------------------------------------
 ! tgyro_tglf_map.f90
 !
@@ -277,6 +278,18 @@ subroutine tgyro_tglf_map
      tglf_xnu_model_in    = 2
      tglf_alpha_e_in = 1.0
      tglf_alpha_p_in = 1.0
+
+  case (4)
+
+   ! Momentum transport without EM terms.
+
+   tglf_alpha_quench_in = 0.0
+   tglf_xnu_model_in    = 2
+   tglf_alpha_e_in = 1.0
+   tglf_alpha_p_in = 1.0
+   tglf_alpha_mach_in = 1.0
+   tglf_use_bper_in = .false.
+   tglf_use_bpar_in = .false.
 
   end select
 
