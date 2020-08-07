@@ -17,8 +17,6 @@ subroutine tgyro_source
   real, external :: dtrate_dv
   real :: n_d,n_t
   real :: s_alpha
-  real :: g,phi,wpe,wce
-  real, parameter :: r_coeff=0.8
 
   !-------------------------------------------------------
   ! Source terms (erg/cm^3/s):
@@ -54,25 +52,6 @@ subroutine tgyro_source
      !-------------------------------------------------------
 
      !-------------------------------------------------------
-     ! Bremsstrahlung radiation
-     ! - From NRL formulary 
-     ! - 1 W/cm^3 = 1e7 erg/cm^3/s
-
-     s_brem(i) = 1e7*1.69e-32*ne(i)**2*sqrt(te(i))*z_eff(i)
-     !-------------------------------------------------------
-
-     !-------------------------------------------------------
-     ! Synchrotron radiation
-     ! - Trubnikov, JETP Lett. 16 (1972) 25.
-     wpe = sqrt(4*pi*ne(i)*e**2/me)
-     wce = e*abs(b_ref(i))/(me*c)
-     g   = k*te(i)/(me*c**2)
-     phi = 60*g**1.5*sqrt((1.0-r_coeff)*(1+1/aspect_rat/sqrt(g))/(r_min*wpe**2/c/wce))
-
-     s_sync(i) = me/(3*pi*c)*g*(wpe*wce)**2*phi
-     !-------------------------------------------------------
-
-     !-------------------------------------------------------
      ! Classical electron-ion energy exchange
      ! - Positive as defined on RHS of ion equation
      ! - Multiply formulary expression by (3/2)ne:
@@ -97,6 +76,16 @@ subroutine tgyro_source
   !-------------------------------------------------------
 
   !-------------------------------------------------------
+  ! Bremsstrahlung radiation (s_brem)
+  call rad_brem(ne,te,z_eff,s_brem,n_r)
+  !-------------------------------------------------------
+
+  !-------------------------------------------------------
+  ! Synchrotron radiation (s_sync)
+  call rad_sync(b_ref,ne,te,s_sync,n_r)
+  !-------------------------------------------------------
+
+  !-------------------------------------------------------
   ! Powers in units of erg/s
 
   ! Get integrated alpha-power
@@ -106,7 +95,7 @@ subroutine tgyro_source
 
   ! Get integrated collisional exchange power
   call tgyro_volume_int(s_exch,p_exch)
-  
+
   ! Get integrated anomalous exchange power
   call tgyro_volume_int(s_expwd,p_expwd)
 
@@ -138,7 +127,7 @@ subroutine tgyro_source
      p_e(:) = p_e_in(:) &              ! Total electron input power 
           -(p_exch(:)-p_exch_in(:)) &  ! Consistent e-i exchange
           -p_expwd(:)*tgyro_expwd_flag ! Turbulent exchange
-     
+
   case (3)
 
      ! Reactor with consistent alpha power, exchange and radiation.

@@ -140,3 +140,50 @@ real function sivukhin(x)
 
 end function sivukhin
 
+subroutine rad_brem(ne,te,zeff,s_brem,n)
+
+  integer, intent(in) :: n
+  real, intent(in) :: ne(n)
+  real, intent(in) :: te(n)
+  real, intent(in) :: zeff(n)
+  real, intent(inout) :: s_brem(n)
+  
+  
+  ! Bremsstrahlung radiation [erg/cm^3/s]
+  ! - From NRL formulary
+  ! - 1 W/cm^3 = 1e7 erg/cm^3/s
+  
+  s_brem = 1e7*1.69e-32*ne**2*sqrt(te)*zeff
+  
+end subroutine rad_brem
+
+subroutine rad_sync(b_ref,ne,te,s_sync,n)
+
+  use tgyro_globals , only : pi,e,me,c,k,aspect_rat
+  
+  integer, intent(in) :: n
+  real, intent(in) :: b_ref(n)
+  real, intent(in) :: ne(n)
+  real, intent(in) :: te(n)
+  real, intent(inout) :: s_sync(n)
+
+  real :: g,phi,wpe,wce
+  ! Reflection coefficient (Rosenbluth)
+  real, parameter :: r_coeff=0.8
+
+  integer :: i
+
+  !-------------------------------------------------------
+  ! Synchrotron radiation
+  ! - Trubnikov, JETP Lett. 16 (1972) 25.
+  do i=1,n   
+     wpe = sqrt(4*pi*ne(i)*e**2/me)
+     wce = e*abs(b_ref(i))/(me*c)
+     g   = k*te(i)/(me*c**2)
+     phi = 60*g**1.5*sqrt((1.0-r_coeff)*(1+1/aspect_rat/sqrt(g))/(r_min*wpe**2/c/wce))
+
+     s_sync(i) = me/(3*pi*c)*g*(wpe*wce)**2*phi
+  enddo
+  !-------------------------------------------------------
+
+end subroutine rad_sync

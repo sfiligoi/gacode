@@ -22,13 +22,14 @@ matplotlib.rc('font',size=18)
 
 simdir = './'
 wdir = os.path.realpath(simdir)
-rvar = sys.argv[1]
-rmin = sys.argv[2]
-rmax = sys.argv[3]
-ext = sys.argv[4]
-loc = int(sys.argv[5])
-dot = int(sys.argv[6])
-therm = int(sys.argv[7])
+infile = sys.argv[1]
+rvar = sys.argv[2]
+rmin = sys.argv[3]
+rmax = sys.argv[4]
+ext = sys.argv[5]
+loc = int(sys.argv[6])
+dot = int(sys.argv[7])
+therm = int(sys.argv[8])
 
 m1 = 0 ; m2 = 0
 
@@ -45,7 +46,7 @@ def plotit(ax,x,y,ystr):
 def plot_select(ax,tag):
    global m1,m2
    
-   expro.expro_read('input.gacode')
+   expro.expro_read(infile)
 
    x = expro.expro_rmin ; x = x/max(x)
    n = expro.expro_n_ion
@@ -174,6 +175,9 @@ def plot_select(ax,tag):
        y = expro.expro_volp ; ystr = 'V^\prime/a^2' ; plotit(ax,x,y/a**2,ystr)
        y = expro.expro_surf ; ystr = 'S/a^2' ; plotit(ax,x,y/a**2,ystr)
 
+   if tag == 'pow':
+      y = expro.expro_qbrem ; ystr = 'q_\mathrm{brem}~[MW/m^3]' ; plotit(ax,x,y,ystr)
+
    ax.legend(loc=loc)
        
 
@@ -212,7 +216,7 @@ class DemoFrame(wx.Frame):
 
         mytabs = ['r','R','Z','kappa','sin','cos','q','Bunit',
                   'n','Ln','sn','T','LT','sT','gam_e','gam_p','Mach',
-                  'j','nu','rhos','V']
+                  'j','nu','rhos','V','pow']
 
         for x in mytabs:
            tab = TabPanel(notebook)

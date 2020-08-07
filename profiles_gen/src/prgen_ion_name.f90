@@ -52,5 +52,5 @@ subroutine prgen_ion_name(m,z,name)
      name = 'LUMPED'
 
   end select
-
+  
 end subroutine prgen_ion_name

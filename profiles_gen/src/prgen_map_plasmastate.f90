@@ -221,7 +221,7 @@ subroutine prgen_map_plasmastate
   do i=1,expro_n_ion
      expro_mass(i) = plst_m_all(i+1)/1.66e-27
      expro_z(i)    = nint(plst_q_all(i+1)/1.6022e-19)
-     call prgen_ion_name(nint(expro_mass(i)),expro_z(i),expro_name(i))     
+     call prgen_ion_name(nint(expro_mass(i)),nint(expro_z(i)),expro_name(i))     
      if (i+1 > plst_dp1_nspec_th) then
         expro_type(i) = type_fast
      else

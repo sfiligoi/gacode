@@ -28,6 +28,8 @@ then
    echo 
    echo " PROFILE PLOTTING MODE (-plot pro):"
    echo
+   echo "          -i <input.gacode file>"
+   echo
    echo "          -r <flux-surface coordinate for plotting>"
    echo "          Choices are r,r/a,rho"
    echo
@@ -56,6 +58,7 @@ fi
 #==============================================================================
 # Define variables for flag capture
 #
+INFILE=input.gacode
 PLOT=pro
 EXT=screen
 LOC=1
@@ -76,6 +79,8 @@ N=16
 #
 while [ $# -gt 0 ] ; do
   case "$1" in
+
+  -i) shift ; INFILE="$1" ;;
 
   -plot) shift ; PLOT="$1" ;;
 
@@ -107,7 +112,7 @@ if [ $PLOT = null ] ; then
 elif [ $PLOT = surf ] ; then 
    python -m pygacode.profiles_gen.plot_surf $PLOT $N $EXT
 else
-   python -m pygacode.profiles_gen.plot_profile $RVAR $RMIN $RMAX $EXT $LOC $DOT $THERM
+   python -m pygacode.profiles_gen.plot_profile $INFILE $RVAR $RMIN $RMAX $EXT $LOC $DOT $THERM
 fi
 #==============================================================================
 

@@ -75,7 +75,16 @@ subroutine tgyro_write_data(i_print)
         expro_z_eff(i_exp) = sum(exp_ni(1:loc_n_ion,i_exp)*zi_vec(1:loc_n_ion)**2)/&
              sum(exp_ni(1:loc_n_ion,i_exp)*zi_vec(1:loc_n_ion))
      enddo
-  
+
+     ! Bremsstrahlung radiation
+     call rad_brem(exp_ne,exp_te,expro_z_eff,expro_qbrem,expro_n_exp)
+     ! Synchrotron radiation
+     call rad_brem(1e-4*expro_bt0,exp_ne,exp_te,expro_qsync,expro_n_exp)
+
+     ! Convert erg/cm^3/s -> W/cm^3 = MW/m^3
+     expro_qbrem = expro_qbrem*1e-7
+     expro_qsync = expro_qsync*1e-7
+
      if (i_proc_global == 0) then
 
         call date_and_time(DATE=date_str,TIME=time_str)
