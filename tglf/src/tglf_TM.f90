@@ -297,7 +297,7 @@
 !            write(*,*)"phi reduced",ky_in,gamma_nb_min_out,gamma_out(1)
           endif
         endif
-        if(sat_rule_in.eq.1)reduce=1.0
+        if(sat_rule_in.ge.1)reduce=1.0
 !
         width_out(i) = width_save(i)
         if(unstable)then
@@ -378,7 +378,7 @@
       enddo  ! i 
 !
 ! recompute spectrum using non-local in ky multiscale model
-     if(sat_rule_in .eq. 1) call get_multiscale_spectrum
+     if(sat_rule_in .ge. 1) call get_multiscale_spectrum
 !
       if(new_eikonal_in)eikonal_unsaved=.FALSE.
       gamma_out(1) = gmax

@@ -66,9 +66,9 @@ SUBROUTINE xgrid_functions_sa
        wE=0.0
      endif
      kx0_e = -(0.36*vexb_shear_kx0/gamma_reference_kx0(1) + 0.38*wE*TANH((0.69*wE)**6))
-     if(sat_rule_in.eq.1)kx0_e = -(0.53*vexb_shear_kx0/gamma_reference_kx0(1) + 0.25*wE*TANH((0.69*wE)**6))
+     if(sat_rule_in.ge.1)kx0_e = -(0.53*vexb_shear_kx0/gamma_reference_kx0(1) + 0.25*wE*TANH((0.69*wE)**6))
      a0 = 1.3
-     if(sat_rule_in.eq.1)a0=1.45
+     if(sat_rule_in.ge.1)a0=1.45
      if(ABS(kx0_e).gt.a0)kx0_e = a0*kx0_e/ABS(kx0_e)
 !     a0 = alpha_e_in*2.0
 !     if(alpha_e_in.ne.0.0)then
@@ -158,6 +158,9 @@ SUBROUTINE xgrid_functions_sa
   Grad_r_ave_out = 1.0
   kx_geo0_out = 1.0
   SAT_geo0_out = 1.0
+  SAT_geo1_out = 1.0
+  SAT_geo2_out = 1.0
+  grad_r0_out = 1.0
   !
   ! poloidal magnetic field at outboard midplane
   !
@@ -259,7 +262,7 @@ SUBROUTINE xgrid_functions_geo
        wE = 0.0
      endif
      kx0_e = -(0.36*vexb_shear_kx0/gamma_reference_kx0(1) + 0.38*wE*TANH((0.69*wE)**6))
-     if(sat_rule_in.eq.1)kx0_e = -(0.53*vexb_shear_kx0/gamma_reference_kx0(1) + 0.25*wE*TANH((0.69*wE)**6))
+     if(sat_rule_in.ge.1)kx0_e = -(0.53*vexb_shear_kx0/gamma_reference_kx0(1) + 0.25*wE*TANH((0.69*wE)**6))
 !     a0 = alpha_e_in*2.0
 !     if(alpha_e_in.ne.0.0)then
 !        kx0_e = a0*TANH(kx0_e/a0)
@@ -267,9 +270,10 @@ SUBROUTINE xgrid_functions_geo
 !        kx0_e = 0.0
 !     endif
      a0 = 1.3
-     if(sat_rule_in.eq.1)a0=1.45
+     if(sat_rule_in.ge.1)a0=1.45
      if(ABS(kx0_e).gt.a0)kx0_e = a0*kx0_e/ABS(kx0_e)
      grad_r0_out = B_geo(0)/qrat_geo(0)
+     B_geo0_out = b_geo(0)
      kx_geo0_out= 1.0/qrat_geo(0)
      !write(*,*)"kx_geo0_out = ",kx_geo0_out
      !write(*,*)"grad_r0_out = ",grad_r0_out
@@ -412,6 +416,8 @@ SUBROUTINE xgrid_functions_geo
   SAT_geo_ave_out=0.0
   kykx_geo_ave=0.0
   norm_ave=0.0
+  SAT_geo1_out = 0.0
+  SAT_geo2_out = 0.0
   do i=1,ms
      dlp = s_p(i)*ds*(0.5/Bp(i)+0.5/Bp(i-1))
      norm_ave = norm_ave + dlp
@@ -426,6 +432,8 @@ SUBROUTINE xgrid_functions_geo
      Grad_r_ave_out = Grad_r_ave_out + dlp*0.5*((R(i-1)*Bp(i-1))**2+(R(i)*Bp(i))**2)*(q_s/rmin_s)**2
      SAT_geo_ave_out = SAT_geo_ave_out + dlp*0.5*(1.0/qrat_geo(i-1)**2 + 1.0/qrat_geo(i)**2)
      kykx_geo_ave = kykx_geo_ave + dlp*0.5*(B_geo(i-1)**2/qrat_geo(i-1)**4+B_geo(i)**2/qrat_geo(i)**4)
+     SAT_geo1_out = SAT_geo1_out +dlp*((b_geo(0)/b_geo(i-1))**4 +(b_geo(0)/b_geo(i))**4)/2.0
+     SAT_geo2_out = SAT_geo2_out +dlp*((qrat_geo(0)/qrat_geo(i-1))**4 +(qrat_geo(0)/qrat_geo(i))**4)/2.0
  enddo
   R2_ave_out = R2_ave_out/norm_ave
   B2_ave_out = B2_ave_out/norm_ave
@@ -435,17 +443,27 @@ SUBROUTINE xgrid_functions_geo
   Grad_r_ave_out = Grad_r_ave_out/norm_ave
   SAT_geo_ave_out = SAT_geo_ave_out/norm_ave
   kykx_geo_ave = kykx_geo_ave/norm_ave
+  SAT_geo1_out = SAT_geo1_out/norm_ave
+  SAT_geo2_out = SAT_geo2_out/norm_ave
+  !write(*,*)"SAT_geo1_out = ", SAT_geo1_out
+  !write(*,*)"SAT_geo2_out = ", SAT_geo2_out
    !
   ! poloidal magnetic field on outboard midplane
   !
   Bp0_out = Bp(0)/B_unit
-  if(units_in.eq.'GYRO') then
+   if(units_in.eq.'GYRO') then
     SAT_geo0_out = 1.0
+    SAT_geo1_out = 1.0
+    SAT_geo2_out = 1.0
   else
- ! Nov 2019     SAT_geo0_out = 0.946*kx_geo0_out      ! normed to GASTD with CGYRO
-     SAT_geo0_out = 0.941    ! normed to GASTD with CGYRO
-    !write(*,*)"kx_geo0 = ",kx_geo0_out
-    !write(*,*)"SAT_geo0 = ",SAT_geo0_out
+ ! Nov 2019     SAT_geo0_out = 0.946/qrat_geo(0) ! normed to GASTD with CGYRO
+    SAT_geo0_out = 0.946/qrat_geo(0)          ! normed to GASTD with CGYRO
+    if(sat_rule_in.eq.2)SAT_geo0_out = 1.0
+!    write(*,*)"SAT_geo0_out = ",SAT_geo0_out
+    grad_r0_out = B_geo(0)/qrat_geo(0)
+    B_geo0_out = b_geo(0)
+!    write(*,*)"B_geo0 = ",b_geo(0)
+    kx_geo0_out= 1.0/qrat_geo(0)
   endif
 ! for GENE units need to multiply intensity by (Bref/Bunit)**2
   if(units_in.eq.'GENE')then

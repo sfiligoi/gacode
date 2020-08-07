@@ -12,7 +12,9 @@
 !  April 8, 2016: G.M. Staebler, J. Candy, N. T. Howard, and C. Holland
 !                  Physics of Plasmas, 23 (2016) 062518
 !  June 22, 2017: Retuned after coding error to Laplacian terms in Ampere 
-!                 and Poisson equations was fixed 
+!                 and Poisson equations was fixed
+!  TGLF multiscale saturation rule: sat_rule_in = 2 option
+!  Aug. 6, 2020 based on paper submitted to PPCF
 !
 !***********************************************************************
 !
@@ -39,10 +41,10 @@
       REAL :: kyhigh, kycut
       REAL :: cky,sqcky,delta,ax,ay,kx
       REAL :: mix1,mix2,mixnorm,gamma_ave
-      REAL :: vzf,dvzf,vzf1,vzf2,vzf3,vzf4
-      REAL :: bz1,bz2
-      REAL :: etg_streamer, ky_factor
+      REAL :: vzf,dvzf,vzf1,vzf2
+      REAL :: etg_streamer
       REAL :: kxzf, sat_geo_factor
+      REAL :: b0,b1,b2,b3,d1,d2,Gq,kx_width
       REAL,DIMENSION(nkym) :: gamma_net=0.0
       REAL,DIMENSION(nkym) :: gamma=0.0
       REAL,DIMENSION(nkym) :: gamma_mix=0.0
@@ -53,24 +55,61 @@
       ! Miller geometry values igeo=1
       if(xnu_model_in.eq.3)USE_X3=.TRUE.
       if(xnu_model_in.eq.4)USE_X4=.TRUE.
-      czf = ABS(alpha_zf_in)
-      bz1=0.0
-      bz2=0.0
-      kyetg=1.28
-      cnorm=14.21
-      if(units_in.eq.'GYRO')then
-        ky_factor=1.0
-      else
-        ky_factor=grad_r0_out
+! coefficients for SAT_RULE = 1
+      if(sat_rule_in.eq.1) then
+         czf = ABS(alpha_zf_in)
+         kyetg=1.28
+         cnorm=14.21
+        if(USE_SUB1)then
+          cnorm=12.12
+          expsub=1
+        endif
+        cz1=0.48*czf
+        cz2=1.0*czf
+        cnorm = 14.29
+        if(USE_X3)then
+         cnorm = 12.94  ! note this is normed to GASTD CGYRO units
+         cz1 = 0.0
+         cz2=1.4*czf
+         etg_streamer = 1.0
+         kyetg=etg_streamer*ABS(zs(2))/SQRT(taus(2)*mass(2))  ! fixed to ion gyroradius
+         cky=3.0
+         sqcky=SQRT(cky)
+        endif
+        if(USE_MIX)then
+!original        kyetg=1.9*ABS(zs(2))/SQRT(taus(2)*mass(2))  ! fixed to ion gyroradius
+          cky=3.0
+          sqcky=SQRT(cky)
+          if(USE_SUB1)cnorm=12.12
+          cz1=0.48*czf
+!original         cz2=0.92*czf
+! retuned June 22,2017
+          cz2 = 1.0*czf
+          etg_streamer=1.05
+          if(alpha_quench_in .ne. 0.0)etg_streamer=2.1
+          kyetg=etg_streamer*ABS(zs(2))/SQRT(taus(2)*mass(2))  ! fixed to ion gyroradius
+        endif
+        if(igeo.eq.0)then ! s-alpha
+           cnorm=14.63
+           cz1=0.90*czf
+           cz2=1.0*czf
+        endif
+     endif
+! coefficents for SAT_RULE = 2
+     if(sat_rule_in.eq.2)then
+        b0 = 0.72
+        b1 = 1.22
+        b2 = 4.93
+        b3 = 0.88
+        d1 = 1.0/grad_r0_out**2
+        Gq = B_geo0_out/grad_r0_out
+        d2 = 1.0/Gq**2
+        cnorm = b2**2
+        kyetg = 1.0*ABS(zs(2))/SQRT(taus(2)*mass(2))
+        cky=3.0
+        sqcky=SQRT(cky)
       endif
-      if(USE_SUB1)then
-        
-        cnorm=12.12       
-        expsub=1
-      
-      endif
-      cz1=0.48*czf
-      cz2=1.0*czf
+! coefficients for spectral shift model for ExB shear
       ax=0.0
       ay=0.0
       if(alpha_quench_in.eq.0.0)then
@@ -84,45 +123,7 @@
          gamma_net(i) = eigenvalue_spectrum_out(1,i,1)/(1.0 + (ax*kx)**4)
       !   write(*,*)i,"gamma_net = ",gamma_net(i)
       enddo
-      if(USE_MIX)then
-!original        kyetg=1.9*ABS(zs(2))/SQRT(taus(2)*mass(2))  ! fixed to ion gyroradius
-        cky=3.0
-        sqcky=SQRT(cky)
-        cnorm = 14.29
-
-        if(USE_SUB1)cnorm=12.12
-        cz1=0.48*czf
-!original         cz2=0.92*czf  
-! retuned June 22,2017
-        cz2 = 1.0*czf  
-        etg_streamer=1.05
-        if(alpha_quench_in .ne. 0.0)etg_streamer=2.1
-        kyetg=etg_streamer*ABS(zs(2))*ky_factor/SQRT(taus(2)*mass(2))  ! fixed to ion gyroradius
-        if(USE_X3)then
-           cnorm = 12.94  ! note this is normed to GASTD CGYRO units
-           cz1 = 0.0
-           cz2=1.4*czf
-           etg_streamer = 1.0
-           kyetg=etg_streamer*ABS(zs(2))*ky_factor/SQRT(taus(2)*mass(2))  ! fixed to ion gyroradius
-           cky=3.0
-           sqcky=SQRT(cky)
-        endif
-        if(USE_X4)then
-           cnorm = 14.44  !normed to GASTD CGYRO units XNU=0.05, with sat_geo from Gaussian envelope average
-           cz1 = 0.0
-           cz2=1.4*czf
-           etg_streamer = 1.0
-           kyetg=etg_streamer*ABS(zs(2))*ky_factor/SQRT(taus(2)*mass(2))  ! fixed to ion gyroradius
-           cky=3.0
-           sqcky=SQRT(cky)
-        endif
-      endif   
-      if(igeo.eq.0)then ! s-alpha 
-       cnorm=14.63
-       cz1=0.90*czf
-       cz2=1.0*czf
-      endif
-      !
+     !
       ! find the maximum of gamma/ky
       gammamax1= gamma_net(1)
       kymax1 = ky_spectrum(1)
@@ -130,8 +131,8 @@
       testmax2 = 0.0
       jmax1=1
       jmax2=0
-      kycut=0.8*ky_factor*ABS(zs(2))/SQRT(taus_in(2)*mass_in(2))
-      kyhigh=0.15*ky_factor*ABS(zs(1))/SQRT(taus_in(1)*mass_in(1))
+      kycut=0.8*ABS(zs(2))/SQRT(taus_in(2)*mass_in(2))
+      kyhigh=0.15*ABS(zs(1))/SQRT(taus_in(1)*mass_in(1))
 !      write(*,*)" kycut = ",kycut," kyhigh = ",kyhigh
       j1=1
       j2=1
@@ -209,27 +210,27 @@
       dvzf = MAX(vzf2-vzf1,0.0)
       dgamma= dvzf*kymax1
       gamma1=gammamax1
+      kycut = b0*kymax1
 !      write(*,*)"dvzf = ",dvzf," vzf1 = ",vzf1," vzf2 = ",vzf2
 !      write(*,*)"gamma1 = ",gamma1
-      vzf3 = MAX(vzf1 - bz1*dvzf,0.0)
-      vzf4 = MAX(vzf1 - bz2*dvzf,0.0)
       do j=1,nky
 ! include zonal flow effects on growthrate model
 !          gamma=0.0
           gamma0 = gamma_net(j)
           ky0=ky_spectrum(j)
-          if(USE_X3.or.USE_X4)then
-            if(ky0.lt.kymax1)then
-              gamma(j) = MAX(gamma0  - cz1*(kymax1 - ky0)*vzf3,0.0)
-            else
-              gamma(j) = MAX(gamma0  - cz2*vzf4*ky0 ,gamma1)          
-            endif 
-          else
+          if(sat_rule_in.eq.1)then
             if(ky0.lt.kymax1)then
               gamma(j) = MAX(gamma0  - cz1*(kymax1 - ky0)*vzf1,0.0)
             else
               gamma(j) = cz2*gammamax1  +  Max(gamma0 - cz2*vzf1*ky0,0.0)          
-            endif 
+            endif
+          elseif(sat_rule_in.eq.2)then
+! note that the gamma mixing is for gamma_model not G*gamma_model
+            if(ky0.lt.kymax1)then
+              gamma(j) = gamma0
+            else
+              gamma(j) = gammamax1
+            endif
           endif
           gamma_mix(j) = gamma(j)
       enddo
@@ -258,22 +259,27 @@
         gamma0 = eigenvalue_spectrum_out(1,j,1)
         ky0 = ky_spectrum(j)
         kx = spectral_shift_out(j)
+        if(sat_rule_in.eq.1)then
+          sat_geo_factor = SAT_geo0_out
+          kx_width = ky0
+        endif
+        if(sat_rule_in.eq.2)then
+          if(ky0.lt. kycut)then
+            kx_width = kycut/grad_r0_out
+            sat_geo_factor = SAT_geo0_out*d1*SAT_geo1_out
+           else
+             kx_width = kycut/grad_r0_out + b1*(ky0 - kycut)*Gq
+             sat_geo_factor = SAT_geo0_out*(d1*SAT_geo1_out*kycut +  &
+                              b3*(ky0 - kycut)*d2*SAT_geo2_out)/ky0
+           endif
+    !       write(*,*)"sat2 ",B_geo0_out,grad_r0_out,SAT_geo1_out,SAT_geo2_out,sat_geo_factor
+        endif
         do i=1,nmodes_in
-          sat_geo_factor = SAT_geo0_out*sat_geo_spectrum_out(j,i)
           gammaeff = 0.0
           if(gamma0.gt.small)gammaeff = &
                gamma_mix(j)*(eigenvalue_spectrum_out(1,j,i)/gamma0)**expsub
-          if(USE_X3)then
-            if(ky0.le.kymax1)gammaeff = gammaeff*ky0/(kymax1)
-          elseif(USE_X4)then
-            sat_geo_factor = sat_geo_spectrum_out(j,i)
-            kxzf = 0.5*kymax1
-            if(ky0.le.kxzf)gammaeff = gammaeff*ky0/kxzf
-            if(ky0.lt.kymax1)sat_geo_factor= 1.0+(sat_geo_spectrum_out(j,i)-1.0)*ky0/kymax1
-          endif
-          sat_geo_spectrum_out(j,i)=sat_geo_factor
           if(ky0.gt.kyetg)gammaeff = gammaeff*SQRT(ky0/kyetg)
-          field_spectrum_out(2,j,i) = (cnorm*gammaeff*gammaeff/ky0**4)/(1.0+ay*kx**2)**2
+          field_spectrum_out(2,j,i) = cnorm*((gammaeff/(kx_width*ky0))/(1.0+ay*kx**2))**2
           if(units_in.ne.'GYRO')field_spectrum_out(2,j,i) = sat_geo_factor*field_spectrum_out(2,j,i)
         enddo
      enddo

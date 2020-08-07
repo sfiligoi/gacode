@@ -353,7 +353,7 @@ SUBROUTINE put_model_parameters(adi_elec,alpha_e,alpha_p,alpha_mach,  &
   if(adi_elec .NEQV. adiabatic_elec_in)new_matrix = .TRUE.
   if(kygrid_model.lt.0.or.kygrid_model.gt.5)kygrid_model = kygrid_model_in
   if(xnu_model.lt.0.or.xnu_model.gt.4)xnu_model = xnu_model_in
-  if(sat_rule.lt.0.or.sat_rule.gt.1)sat_rule=sat_rule_in
+  if(sat_rule.lt.0.or.sat_rule.gt.2)sat_rule=sat_rule_in
   !if(vpar_model.lt.-1.or.vpar_model.gt.1)vpar_model=vpar_model_in
   if(vpar_shear_model.lt.0.or.vpar_shear_model.gt.1)vpar_shear_model=vpar_shear_model_in
   !
@@ -2241,8 +2241,8 @@ do is=ns0,ns
   write(33,*)"SAT_RULE, UNITS, ALPHA_ZF"
   write(33,*)sat_rule_in, units_in, alpha_zf_in
 !
-  write(33,*)"ave_p0_out, B_unit, R_unit, q_unit, SAT_geo0_out, kx_geo0_out"
-  write(33,*) ave_p0_out, B_unit, R_unit, q_unit, SAT_geo0_out, kx_geo0_out
+  write(33,*)"ave_p0_out, B_unit, R_unit, q_unit, SAT_geo0_out, SAT_geo1_out, SAT_geo2_out"
+  write(33,*) ave_p0_out, B_unit, R_unit, q_unit, SAT_geo0_out, SAT_geo1_out, SAT_geo2_out
 !
   CLOSE(33)
 !

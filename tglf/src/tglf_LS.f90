@@ -318,7 +318,7 @@
             phi2_bar = 0.0
           else
             v_bar_out(imax) = get_intensity(kyi,gamma_out(imax))
-            if(units_in.ne.'GYRO')v_bar_out(imax) = sat_geo_bar_out(imax)*v_bar_out(imax)
+!            if(units_in.ne.'GYRO')v_bar_out(imax) = sat_geo_bar_out(imax)*v_bar_out(imax)
             phi2_bar = v_bar_out(imax)/v_QL_out(imax)
           endif
 !
@@ -434,7 +434,8 @@
          intensity = intensity/(1.0+(1.15*kx0_e)**4)**2
        endif
          intensity = intensity*SAT_geo0_out
-      elseif(sat_rule_in.eq.1)then
+!       write(*,*)" sat0 ",SAT_geo0_out
+      elseif(sat_rule_in.ge.1)then
 !
 !   will be computed later by get_multiscale_spectrum
 !
@@ -757,7 +758,6 @@
       kx_bar = REAL(phi_kx_phi)/phi_norm
       kpar_bar = REAL(phi_kpar_phi)/phi_norm
       sat_geo_bar = 1.0/MAX(REAL(phi_sat_geo_phi)/phi_norm,epsilon1)
-      if(xnu_model_in.eq.4)sat_geo_bar = 1.0/MAX(ave_sat_geo_inv(1,1),epsilon1)
 !      write(*,*)"wd_bar = ",wd_bar
 !      write(*,*)"b0_bar = ",b0_bar
 !       write(*,*)"modB_bar = ",modB_bar

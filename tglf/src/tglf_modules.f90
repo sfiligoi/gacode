@@ -254,8 +254,11 @@
       REAL :: RBt_ave_out=1.0
       REAL :: Grad_r_ave_out=1.0
       REAL :: grad_r0_out=1.0
+      REAL :: B_geo0_out = 1.0
       REAL :: SAT_geo_ave_out=1.0
       REAL :: SAT_geo0_out=1.0
+      REAL :: SAT_geo1_out=1.0
+      REAL :: SAT_geo2_out=1.0
       REAL :: kx_geo0_out=1.0
       REAL :: DM_out = 0.25
       REAL :: DR_out = 0.0
