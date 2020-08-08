@@ -17,9 +17,6 @@ subroutine tgyro_profile_functions
   integer :: i_ion
   real :: c_exch
   real, dimension(n_r) :: loglam
-  real, dimension(n_r) :: c_a
-  real, dimension(n_r) :: x_a
-  real, external :: sivukhin
   real :: p_ave
 
   ! Note flag to only evolve only gradients
@@ -124,21 +121,6 @@ subroutine tgyro_profile_functions
              *ni(i_ion,:)*loglam(:)/(me*ti(i_ion,:)+mi(i_ion)*te(:))**1.5
      endif
   enddo
-
-  ! Alpha heating coefficients [Stix, Plasma Phys. 14 (1972) 367] 
-  ! See in particular Eqs. 15 and 17.
-  c_a(:) = 0.0
-  do i_ion=1,loc_n_ion
-     if (therm_flag(i_ion) == 1) then
-        c_a(:) = c_a(:)+(ni(i_ion,:)/ne(:))*zi_vec(i_ion)**2/(mi(i_ion)/malpha)
-     endif
-  enddo
-  e_cross(:) = k*te(:)*(4*sqrt(me/malpha)/(3*sqrt(pi)*c_a(:)))**(-2.0/3.0)
-  x_a(:) = e_alpha/e_cross(:)
-  do i=1,n_r
-     frac_ai(i) = sivukhin(x_a(i))
-  enddo
-  frac_ae(:) = 1.0-frac_ai(:)
 
   ! Total pressure [Ba] and beta [dimensionless]
   pr(:) = pext(:)+ne(:)*k*te(:)

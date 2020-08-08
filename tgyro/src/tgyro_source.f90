@@ -13,97 +13,65 @@ subroutine tgyro_source
   implicit none
 
   integer :: i,i_ion
-  real, external :: sigv
-  real, external :: dtrate_dv
-  real :: n_d,n_t
-  real :: s_alpha
 
   !-------------------------------------------------------
   ! Source terms (erg/cm^3/s):
-  !
-  do i=1,n_r
-
-     if (loc_scenario > 2) then
-        !-------------------------------------------------------
-        ! Alpha power
-        !  - sigv in cm^3/s
-        if (tgyro_dt_method == 1) then
-           ! Assume D and T given by ion 1 and ion 2 
-           ! (order doesn't matter)
-           n_d = ni(1,i)
-           n_t = ni(2,i)
-        else
-           ! Assume ion 1 is DT hybrid.
-           n_d = 0.5*ni(1,i)
-           n_t = 0.5*ni(1,i)
-        endif
-        ! Alpha particle source and power 
-        ! - Can use 'hively' or 'bosch' formulae.
-        sn_alpha(i) = n_d*n_t*sigv(ti(1,i)/1e3,'bosch') * tgyro_input_fusion_scale
-
-        s_alpha      = sn_alpha(i)*e_alpha
-        s_alpha_i(i) = s_alpha*frac_ai(i)
-        s_alpha_e(i) = s_alpha*frac_ae(i)
-     else
-        sn_alpha(i)  = 0.0
-        s_alpha_i(i) = 0.0
-        s_alpha_e(i) = 0.0
-     endif
-     !-------------------------------------------------------
-
-     !-------------------------------------------------------
-     ! Classical electron-ion energy exchange
-     ! - Positive as defined on RHS of ion equation
-     ! - Multiply formulary expression by (3/2)ne:
-
-     s_exch(i) = 1.5*nu_exch(i)*ne(i)*k*(te(i)-ti(1,i))
-     !-------------------------------------------------------
-
-     !-------------------------------------------------------
-     ! Anomalous electron-ion energy exchange
-     ! - Positive as defined on RHS of ion equation
-     ! - Skip exchange with fast ions
-
-     s_expwd(i) = 0.0
-     do i_ion=1,loc_n_ion
-        if (therm_flag(i_ion) == 1) then
-           s_expwd(i) = s_expwd(i)+expwd_i_tur(i_ion,i)*s_gb(i)
-        endif
-     enddo
-     !-------------------------------------------------------
-
-  enddo
   !-------------------------------------------------------
 
   !-------------------------------------------------------
-  ! Bremsstrahlung radiation (s_brem)
+  ! 1. Alpha power
+  call rad_alpha(ne,ni,te,ti,s_alpha_i,s_alpha_e,frac_ai,e_cross,n_r,loc_n_ion)
+  frac_ae = 1-frac_ai
+  !-------------------------------------------------------
+
+  !-------------------------------------------------------
+  ! 2. Bremsstrahlung radiation (s_brem)
   call rad_brem(ne,te,z_eff,s_brem,n_r)
   !-------------------------------------------------------
 
   !-------------------------------------------------------
-  ! Synchrotron radiation (s_sync)
+  ! 3. Synchrotron radiation (s_sync) with reflection co.
   call rad_sync(b_ref,ne,te,s_sync,n_r)
+  !-------------------------------------------------------
+
+  !-------------------------------------------------------
+  ! 4. Classical electron-ion energy exchange
+  !  - Positive as defined on RHS of ion equation
+  !  - Multiply formulary expression by (3/2)ne:
+  s_exch(:) = 1.5*nu_exch(:)*ne(:)*k*(te(:)-ti(1,:))
+  !-------------------------------------------------------
+
+  !-------------------------------------------------------
+  ! 5. Anomalous electron-ion energy exchange
+  !  - Positive as defined on RHS of ion equation
+  !  - Skip exchange with fast ions
+  s_expwd(:) = 0.0
+  do i_ion=1,loc_n_ion
+     if (therm_flag(i_ion) == 1) then
+        s_expwd(:) = s_expwd(:)+expwd_i_tur(i_ion,:)*s_gb(:)
+     endif
+  enddo
   !-------------------------------------------------------
 
   !-------------------------------------------------------
   ! Powers in units of erg/s
 
-  ! Get integrated alpha-power
+  ! Integrated alpha-power
   call tgyro_volume_int(s_alpha_i,p_i_fus)
   call tgyro_volume_int(s_alpha_e,p_e_fus)
   call tgyro_volume_int(sn_alpha,f_he_fus)
 
-  ! Get integrated collisional exchange power
-  call tgyro_volume_int(s_exch,p_exch)
-
-  ! Get integrated anomalous exchange power
-  call tgyro_volume_int(s_expwd,p_expwd)
-
-  ! Get integrated Bremsstrahlung power
+  ! Integrated Bremsstrahlung power
   call tgyro_volume_int(s_brem,p_brem)
 
-  ! Get integrated Synchrotron power
+  ! Integrated Synchrotron power
   call tgyro_volume_int(s_sync,p_sync)
+
+  ! Integrated collisional exchange power
+  call tgyro_volume_int(s_exch,p_exch)
+
+  ! Integrated anomalous exchange power
+  call tgyro_volume_int(s_expwd,p_expwd)
   !-------------------------------------------------------
 
   !-------------------------------------------------------

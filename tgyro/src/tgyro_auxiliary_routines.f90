@@ -142,6 +142,8 @@ end function sivukhin
 
 subroutine rad_brem(ne,te,zeff,s_brem,n)
 
+  implicit none
+  
   integer, intent(in) :: n
   real, intent(in) :: ne(n)
   real, intent(in) :: te(n)
@@ -159,7 +161,9 @@ end subroutine rad_brem
 
 subroutine rad_sync(b_ref,ne,te,s_sync,n)
 
-  use tgyro_globals , only : pi,e,me,c,k,aspect_rat
+  use tgyro_globals , only : pi,e,me,c,k,aspect_rat,r_min
+
+  implicit none
   
   integer, intent(in) :: n
   real, intent(in) :: b_ref(n)
@@ -187,3 +191,82 @@ subroutine rad_sync(b_ref,ne,te,s_sync,n)
   !-------------------------------------------------------
 
 end subroutine rad_sync
+
+subroutine rad_alpha(ne,ni,te,ti,s_alpha_i,s_alpha_e,frac_ai,e_cross,n,nion)
+
+  use tgyro_globals, only : &
+       pi,&
+       me,&
+       mi,&
+       malpha,&
+       therm_flag,&
+       zi_vec,&
+       tgyro_dt_method,&
+       e_alpha,&
+       k,&
+       tgyro_input_fusion_scale
+
+  implicit none
+
+  integer, intent(in) :: n
+  integer, intent(in) :: nion
+  real, intent(in) :: ni(nion,n)
+  real, intent(in) :: ne(n)
+  real, intent(in) :: ti(nion,n)
+  real, intent(in) :: te(n)
+  real, intent(inout) :: s_alpha_i(n)
+  real, intent(inout) :: s_alpha_e(n)
+  real, intent(inout) :: frac_ai(n)
+  real, intent(inout) :: e_cross(n)
+
+  real, external :: sivukhin
+  real, external :: sigv
+
+  real :: x_a
+  real :: n_d,n_t
+  real :: s_alpha,sn_alpha
+  real, dimension(:), allocatable :: c_a
+
+  integer :: i
+
+  allocate(c_a(n))
+
+  ! Alpha heating coefficients [Stix, Plasma Phys. 14 (1972) 367] 
+  ! See in particular Eqs. 15 and 17.
+  c_a(:) = 0.0
+  do i=1,nion
+     if (therm_flag(i) == 1) then
+        c_a(:) = c_a(:)+(ni(i,:)/ne(:))*zi_vec(i)**2/(mi(i)/malpha)
+     endif
+  enddo
+
+  do i=1,n
+
+     e_cross(i) = k*te(i)*(4*sqrt(me/malpha)/(3*sqrt(pi)*c_a(i)))**(-2.0/3.0)
+     x_a = e_alpha/e_cross(i)
+     frac_ai(i) = sivukhin(x_a)
+
+     if (tgyro_dt_method == 1) then
+        ! Assume D and T given by ion 1 and ion 2 (order doesn't matter)
+        n_d = ni(1,i)
+        n_t = ni(2,i)
+     else
+        ! Assume ion 1 is DT hybrid.
+        n_d = 0.5*ni(1,i)
+        n_t = 0.5*ni(1,i)
+     endif
+
+     ! Alpha particle source and power 
+     !  - Can use 'hively' or 'bosch' formulae.
+     !  - sigv in cm^3/s
+     sn_alpha = n_d*n_t*sigv(ti(1,i)/1e3,'bosch') * tgyro_input_fusion_scale
+
+     s_alpha      = sn_alpha*e_alpha
+     s_alpha_i(i) = s_alpha*frac_ai(i)
+     s_alpha_e(i) = s_alpha*(1-frac_ai(i))
+
+  enddo
+
+  deallocate(c_a)
+
+end subroutine rad_alpha
