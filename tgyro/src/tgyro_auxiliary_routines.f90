@@ -150,7 +150,6 @@ subroutine rad_brem(ne,te,zeff,s_brem,n)
   real, intent(in) :: zeff(n)
   real, intent(inout) :: s_brem(n)
   
-  
   ! Bremsstrahlung radiation [erg/cm^3/s]
   ! - From NRL formulary
   ! - 1 W/cm^3 = 1e7 erg/cm^3/s

@@ -176,9 +176,12 @@ def plot_select(ax,tag):
        y = expro.expro_surf ; ystr = 'S/a^2' ; plotit(ax,x,y/a**2,ystr)
 
    if tag == 'pow':
-      y = expro.expro_qbrem ; ystr = 'q_\mathrm{brem}~[MW/m^3]' ; plotit(ax,x,y,ystr)
+      y = expro.expro_qbrem ; ystr = 'q_\mathrm{brem}~\mathrm{[MW/m^3]}' ; plotit(ax,x,y,ystr)
+      y = expro.expro_qsync ; ystr = 'q_\mathrm{sync}~\mathrm{[MW/m^3]}' ; plotit(ax,x,y,ystr)
+      y = expro.expro_qfusi ; ystr = 'q_{\\alpha i}~\mathrm{[MW/m^3]}' ; plotit(ax,x,y,ystr)
+      y = expro.expro_qfuse ; ystr = 'q_{\\alpha e}~\mathrm{[MW/m^3]}' ; plotit(ax,x,y,ystr)
 
-   ax.legend(loc=loc)
+   ax.legend(loc=loc,ncol=2)
        
 
 #-------------------------------------------------------------------------------------

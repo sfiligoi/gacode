@@ -12,7 +12,7 @@ subroutine tgyro_source
 
   implicit none
 
-  integer :: i,i_ion
+  integer :: i_ion
 
   !-------------------------------------------------------
   ! Source terms (erg/cm^3/s):
@@ -155,7 +155,7 @@ subroutine tgyro_source
   mflux_target(1) = 0.0 
   mflux_target(2:n_r) = mf_in(2:n_r)/volp(2:n_r)
   !------------------------------------------------
-
+  
   !------------------------------------------------
   ! Target He ash flux in 1/s/cm^2
   !

@@ -29,9 +29,9 @@ subroutine tgyro_write_data(i_print)
   character(len=50) :: date_str,time_str
   logical :: converged
   real :: res_norm(p_max)
-  
+
   ! Renormalize residuals so the error estimates are comparable
-  
+
   select case (loc_residual_method) 
 
   case (2)
@@ -66,7 +66,7 @@ subroutine tgyro_write_data(i_print)
      expro_ptot = ptot_exp
      expro_ne   = exp_ne*1e-13
      expro_te   = exp_te*1e-3
-    
+
      expro_ni(1:loc_n_ion,:) = exp_ni(1:loc_n_ion,:)*1e-13
      expro_ti(1:loc_n_ion,:) = exp_ti(1:loc_n_ion,:)*1e-3
      expro_w0   = exp_w0
@@ -76,14 +76,27 @@ subroutine tgyro_write_data(i_print)
              sum(exp_ni(1:loc_n_ion,i_exp)*zi_vec(1:loc_n_ion))
      enddo
 
+     ! Alpha power density
+     call rad_alpha(exp_ne,&
+          exp_ni(1:loc_n_ion,:),&
+          exp_te,&
+          exp_ti(1:loc_n_ion,:),&
+          expro_qfusi,&
+          expro_qfuse,&
+          expro_qbrem,& ! dummy arg
+          expro_qsync,& ! dummy arg
+          expro_n_exp,&
+          loc_n_ion)
      ! Bremsstrahlung radiation
      call rad_brem(exp_ne,exp_te,expro_z_eff,expro_qbrem,expro_n_exp)
      ! Synchrotron radiation
-     call rad_brem(1e-4*expro_bt0,exp_ne,exp_te,expro_qsync,expro_n_exp)
+     call rad_sync(1e4*expro_bt0,exp_ne,exp_te,expro_qsync,expro_n_exp)
 
      ! Convert erg/cm^3/s -> W/cm^3 = MW/m^3
      expro_qbrem = expro_qbrem*1e-7
      expro_qsync = expro_qsync*1e-7
+     expro_qfuse = expro_qfuse*1e-7
+     expro_qfusi = expro_qfusi*1e-7
 
      if (i_proc_global == 0) then
 
