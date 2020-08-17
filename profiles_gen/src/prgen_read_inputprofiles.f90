@@ -35,7 +35,7 @@ subroutine prgen_read_inputprofiles
         read(line(8:),*) b_ref
      endif
      if (line(1:6) == 'IP_EXP') then
-        read(line(8:),*) ip_tot
+        read(line(8:),*) current
      endif
      if (line(1:4) == 'RVBV') then
         read(line(6:),*) rvbv
@@ -169,7 +169,6 @@ subroutine prgen_read_inputprofiles
 
   bcentr = b_ref
   rcentr = rvbv/b_ref
-  current = ip_tot
   expro_rho(:) = rho
 
   open(unit=1,file='profile_shot',status='old')

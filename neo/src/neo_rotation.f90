@@ -316,11 +316,9 @@ module neo_rotation
          do it=1,n_theta
             phi_rot_deriv(it) = 0.0
             do id=-2,2
-               if (id /= 0) then
-                  jt = thcyc(it+id)
-                  phi_rot_deriv(it) = phi_rot_deriv(it) &
-                       + phi_rot(jt) * cderiv(id) / (12.0*d_theta)
-               endif
+               jt = thcyc(it+id)
+               phi_rot_deriv(it) = phi_rot_deriv(it) &
+                    + phi_rot(jt) * cderiv(id) / (12.0*d_theta)
             enddo
          enddo
 

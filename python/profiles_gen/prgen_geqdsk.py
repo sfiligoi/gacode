@@ -114,7 +114,6 @@ def prgen_geqdsk(filename):
         pres = integrate.cumtrapz(slf['PPRIME'], np.linspace(slf['SIMAG'], slf['SIBRY'], len(slf['PPRIME'])), initial=0)
         slf['PRES'] = pres - pres[-1]
 
-
     slf['PSI'] = np.linspace(slf['SIMAG'],slf['SIBRY'],len(slf['PRES']))
     
     return slf

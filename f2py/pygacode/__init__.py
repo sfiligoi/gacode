@@ -4,9 +4,14 @@ from gacode_ext import expro
 from gacode_ext import geo
 from gacode_ext import vis
 
-
 def gapystr_get(s):
     u = []
+
+    try:
+        n = len(s)
+    except:
+        return str(s,'utf-8')
+    
     for i in range(len(s)):
         if sys.version_info[0] == 2:
             u.append(str(s[i]).strip())
