@@ -658,7 +658,11 @@ contains
        if (i<n) then 
           !preliminary settings a1(i+1)=a(i)  ,  b1(i+1)=b(i)^.5  , logg.
           a1(i+1)=s1x/s1
-          if (i>1) b1(i+1)=sqrt(s1)
+          if (i>1) then
+             b1(i+1)=sqrt(s1)
+          else
+             b1(i+1)=0
+          end if
           c1(i+1)=1
           logg(i+1)=logg(i)
        end if
