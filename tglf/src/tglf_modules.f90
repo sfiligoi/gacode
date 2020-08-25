@@ -465,7 +465,7 @@
       REAL,DIMENSION(0:ms) :: pk_geo, epsl_geo, qrat_geo
       REAL,DIMENSION(0:ms) :: kxoky_geo, b_geo, t_s
       REAL,DIMENSION(0:ms) :: S_prime, kx_factor, y
-      REAL :: f,ff_prime
+      REAL :: f,ff_prime, g1, g2
 !
       END MODULE tglf_sgrid  
 !

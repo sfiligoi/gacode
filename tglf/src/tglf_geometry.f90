@@ -445,6 +445,8 @@ SUBROUTINE xgrid_functions_geo
   kykx_geo_ave = kykx_geo_ave/norm_ave
   SAT_geo1_out = SAT_geo1_out/norm_ave
   SAT_geo2_out = SAT_geo2_out/norm_ave
+  g1 = SAT_geo1_out
+  g2 = SAT_geo2_out
   !write(*,*)"SAT_geo1_out = ", SAT_geo1_out
   !write(*,*)"SAT_geo2_out = ", SAT_geo2_out
    !
