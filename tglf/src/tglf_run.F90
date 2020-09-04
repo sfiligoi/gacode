@@ -69,6 +69,7 @@ subroutine tglf_run()
        tglf_nky_in)
        
   call put_rare_switches(tglf_theta_trapped_in, &
+       tglf_wdia_trapped_in, &
        tglf_park_in, &
        tglf_ghat_in, &
        tglf_gchat_in, &

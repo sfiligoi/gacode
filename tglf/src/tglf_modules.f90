@@ -86,6 +86,7 @@
       INTEGER :: nky_in=12
 ! input rare switches
       REAL :: theta_trapped_in=0.7
+      REAL :: wdia_trapped_in=0.0
       REAL :: park_in=1.0
       REAL :: ghat_in=1.0
       REAL :: gchat_in=1.0
@@ -95,10 +96,6 @@
       REAL :: filter_in=2.0
       REAL :: damp_psi_in = 0.0
       REAL :: damp_sig_in = 0.0
-      REAL :: alpha_kx_e_in=0.0  !not used
-      REAL :: alpha_kx_p_in=0.0  !not used
-      REAL :: alpha_kx_n_in=0.0  !not used
-      REAL :: alpha_kx_t_in=0.0  !not used
 ! Input model paramaters
       LOGICAL :: adiabatic_elec_in=.FALSE.
       REAL :: alpha_e_in=1.0
@@ -324,7 +321,7 @@
       IMPLICIT NONE
 !
       REAL,ALLOCATABLE,DIMENSION(:,:) :: ei_exch, resist
-      REAL,ALLOCATABLE,DIMENSION(:) :: zs, mass, vs
+      REAL,ALLOCATABLE,DIMENSION(:) :: zs, mass, vs, fts
       REAL,ALLOCATABLE,DIMENSION(:) :: rlts, rlns, vpar_shear_s
       REAL,ALLOCATABLE,DIMENSION(:) :: as, taus, vpar_s
       REAL :: vexb_shear_s
@@ -802,6 +799,7 @@
       REAL :: Linsker_factor_tg=0.0
       REAL :: gradB_factor_tg=0.0
       REAL :: theta_trapped_tg=0.7
+      REAL :: wdia_trapped_tg=0.0
       REAL :: xnu_factor_tg=1.0
       REAL :: debye_factor_tg=1.0
       REAL :: etg_factor_tg = 1.25
@@ -858,7 +856,7 @@
         nmodes_tg, iflux_tg, ky_tg, width_max_tg, width_min_tg, &
         nwidth_tg, park_tg, ghat_tg, gchat_tg, &
         alpha_e_tg, alpha_n_tg, alpha_t_tg, alpha_p_tg, alpha_mach_tg, &
-        vexb_shear_tg, vpar_shear_tg, alpha_quench_tg, alpha_zf_tg, igeo_tg, theta_trapped_tg, &
+        vexb_shear_tg, vpar_shear_tg, alpha_quench_tg, alpha_zf_tg, igeo_tg, theta_trapped_tg, wdia_trapped_tg, &
         theta0_tg,taus_tg,as_tg,rlns_tg,rlts_tg,mass_tg,zs_tg, &
         rmin_tg, rmaj_tg, zmaj_tg,use_bisection_tg,vpar_tg, &
         q_tg, xnue_tg, wd_zero_tg, betae_tg, shat_tg, alpha_tg, &

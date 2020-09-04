@@ -26,6 +26,7 @@ subroutine tglf_read_input
 
   ! Data passed to: put_rare_switches
   read(1,*) tglf_theta_trapped_in
+  read(1,*) tglf_wdia_trapped_in
   read(1,*) tglf_park_in
   read(1,*) tglf_ghat_in
   read(1,*) tglf_gchat_in

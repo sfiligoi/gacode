@@ -56,6 +56,7 @@ module tglf_interface
 
   ! Data passed to: put_rare_switches
   real    :: tglf_theta_trapped_in  = 0.7
+  real    :: tglf_wdia_trapped_in   = 0.0
   real    :: tglf_park_in           = 1.0
   real    :: tglf_ghat_in           = 1.0
   real    :: tglf_gchat_in          = 1.0

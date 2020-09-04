@@ -21,8 +21,8 @@
       CLOSE(3)
 !
       CALL put_signs(sign_Bt_tg,sign_It_tg)
-      CALL put_rare_switches(theta_trapped_tg,park_tg,ghat_tg,gchat_tg, &
-       wd_zero_tg,Linsker_factor_tg,gradB_factor_tg,filter_tg,damp_psi_tg,damp_sig_tg)
+      CALL put_rare_switches(theta_trapped_tg,wdia_trapped_tg,park_tg,ghat_tg,gchat_tg, &
+ wd_zero_tg,Linsker_factor_tg,gradB_factor_tg,filter_tg,damp_psi_tg,damp_sig_tg)
       CALL put_switches(iflux_tg,use_bper_tg,use_bpar_tg,use_mhd_rule_tg,use_bisection_tg, &
        ibranch_tg,nmodes_tg,nbasis_max_tg,nbasis_min_tg,nxgrid_tg,nky_tg)
 !

@@ -19,8 +19,7 @@
       REAL :: save_width,dtmin
       REAL :: gamma_n(nt0),freq_n(nt0),width_n(nt0)
       REAL :: save_vexb_shear
-      REAL :: save_alpha_kx_p
-      REAL :: wgp_max,width_p_max 
+      REAL :: wgp_max,width_p_max
       REAL :: kyi,ft2
 !
       CALL tglf_setup_geometry
@@ -35,8 +34,6 @@
       save_width = width_in
       save_vexb_shear = vexb_shear_in
       if(alpha_quench_in.eq.0.0)vexb_shear_in = 0.0
-      save_alpha_kx_p = alpha_kx_p_in
-      alpha_kx_p_in=0.0
       ibranch_in = -1
       width_min = width_min_in
       width_max = ABS(width_in)
@@ -278,7 +275,6 @@
                  freq_reference_kx0(i) = freq_out(i)
                enddo
                vexb_shear_in = save_vexb_shear
-               alpha_kx_p_in = save_alpha_kx_p
                iflux_in=save_iflux
                new_width=.TRUE.
                call tglf_LS
@@ -311,6 +307,5 @@
        nbasis=save_nbasis
        iflux_in=save_iflux
        vexb_shear_in = save_vexb_shear
-       alpha_kx_p_in = save_alpha_kx_p
 !
       END SUBROUTINE tglf_max   

@@ -20,6 +20,7 @@ def set_defaults() :
      t.add('SIGN_BT','1.0')
      t.add('SIGN_IT','1.0')
      t.add('THETA_TRAPPED','0.7')
+     t.add('WDIA_TRAPPED','0.0')
      t.add('PARK','1.0')
      t.add('GHAT','1.0')
      t.add('GCHAT','1.0')
@@ -156,16 +157,5 @@ def set_defaults() :
      t.add('NN_MAX_ERROR','-1.0')
 
      # Deprecated parameters
-     t.dep('X1','never really existed')
-     t.dep('ALPHA_KX0','replaced with alpha_kx_e')
-     t.dep('ALPHA_KX1','replaced with alpha_kx_p')
-     t.dep('SHEAR_NS_*','replaced with vns_shear')
-     t.dep('SHEAR_TS_*','replaced with vts_shear')
-     t.dep('ALPHA_N','eliminated')
-     t.dep('ALPHA_T','eliminated')
-     t.dep('ALPHA_KX_E','eliminated')
-     t.dep('ALPHA_KX_P','eliminated')
-     t.dep('ALPHA_KX_N','eliminated')
-     t.dep('ALPHA_KX_T','eliminated')
      t.dep('NN_THRSH_ENERGY','replaced with NN_MAX_ERROR')
      return t

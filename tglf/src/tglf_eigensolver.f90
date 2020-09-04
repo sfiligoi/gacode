@@ -62,7 +62,7 @@
       REAL :: c06,c07,c08,c09,c010
       REAL :: cb1,cb2,cb3,cb4,cb5,cb6,cb7,cb8
       REAL :: an,ap3,ap1,bn,bp3,bp1
-      REAL :: cnuei,kparvthe
+      REAL :: cnuei,kparvthe,cxf
       REAL :: nuei_p1_p1_1,nuei_p1_p3_1
       REAL :: nuei_u_u_1,nuei_u_q3_1
       REAL :: nuei_q1_u_1,nuei_q1_q1_1,nuei_q1_q3_1
@@ -104,6 +104,7 @@
 !      write(*,*)"eigensolver allocation done"
 !
       c35 = 3.0/5.0
+      ft = fts(1)  ! electrons
       ft2 = ft*ft
       ft3 = ft*ft2
       ft4 = ft*ft3
@@ -249,29 +250,6 @@
 !  GLF toroidal closure coefficients
 !
        call get_v
-       if(nroot.gt.6)then
-        call get_u(ft)
-         u2_r = u2_r*ft2
-         u2_i = u2_i*ft2
-         u3_r = u3_r/ft2
-         u3_i = u3_i/ft2
-         u5_r = u5_r*ft2
-         u5_i = u5_i*ft2
-         u7_r = u7_r*ft2
-         u7_i = u7_i*ft2
-         u9_r = u9_r/ft2
-         u9_i = u9_i/ft2
-         ub2_r = ub2_r*ft2
-         ub2_i = ub2_i*ft2
-         ub3_r = ub3_r/ft2
-         ub3_i = ub3_i/ft2
-         ub5_r = ub5_r*ft2
-         ub5_i = ub5_i*ft2
-         ub7_r = ub7_r*ft2
-         ub7_i = ub7_i*ft2
-         ub9_r = ub9_r/ft2
-         ub9_i = ub9_i/ft2
-       endif
 !
 ! GLF parallel closure coefficients
 !
@@ -403,7 +381,6 @@
       cnuei = 0.0
 !     if(xnu_model.eq.2.or.xnu_model.eq.3)cnuei = xnue_in
       if(xnu_model.ge.2)cnuei = xnue_in
-!      kparvthe = ABS(k_par0)*vs(1)*xnu_factor_in/sqrt_two
       kparvthe = ABS(k_par0)*vs(1)/sqrt_two
       kparvthe=MAX(kparvthe,1.0E-10)
 !      write(*,*)"cnuei=",cnuei,"kparvthe=",kparvthe,"ft=",ft
@@ -479,11 +456,17 @@
       cb5 =0.0
 !recalibrated 8/20/14      cb1 = 0.114*SQRT(kparvthe*cnuei*(1.0 + 0.82*zeff_in))
       cb1 = 0.163*SQRT(kparvthe*cnuei*(1.0 + 0.82*zeff_in))
-       if(xnu_model_in.eq.3)cb1 = 0.50*(kparvthe**0.34)*(cnuei*(1.0 + 0.82*zeff_in))**0.66
-       if(xnu_model_in.eq.4)cb1 = 0.852*(kparvthe**0.5)*(cnuei*(1.0 + 0.82*zeff_in))**0.5  ! 1.55 for Zeff=1
+      if(xnu_model_in.eq.3)then
+          if(wdia_trapped_in.eq.0.0)then
+             cb1 = 0.50*(kparvthe**0.34)*(cnuei*(1.0 + 0.82*zeff_in))**0.66
+          else
+            cb1 = 0.315*(kparvthe**0.34)*(cnuei*(1.0 + 0.82*zeff_in))**0.66
+          endif
+      endif
       cb1 = cb1*xnu_factor_in
       cb2 = cb1
       cb4 = cb1
+ !     write(*,*)"ky = ",ky,"cb1 = ",cb1," fts(1) = ",ft
 ! even trapped region terms
       nuei_n_n = (1.0 -ft2)*cb1
 !      nuei_n_n = (1.0 -ft2)*cnuei*cb1
@@ -557,6 +540,35 @@
 !
       do is = ns0,ns
 !
+        ft = fts(is)
+ !       write(*,*)"fts = ",is,fts(is)
+        ft2 = ft*ft
+        ft3 = ft*ft2
+        ft4 = ft*ft3
+        ft5 = ft*ft4
+        if(nroot.gt.6)then
+          call get_u(ft)
+          u2_r = u2_r*ft2
+          u2_i = u2_i*ft2
+          u3_r = u3_r/ft2
+          u3_i = u3_i/ft2
+          u5_r = u5_r*ft2
+          u5_i = u5_i*ft2
+          u7_r = u7_r*ft2
+          u7_i = u7_i*ft2
+          u9_r = u9_r/ft2
+          u9_i = u9_i/ft2
+          ub2_r = ub2_r*ft2
+          ub2_i = ub2_i*ft2
+          ub3_r = ub3_r/ft2
+          ub3_i = ub3_i/ft2
+          ub5_r = ub5_r*ft2
+          ub5_i = ub5_i*ft2
+          ub7_r = ub7_r*ft2
+          ub7_i = ub7_i*ft2
+          ub9_r = ub9_r/ft2
+          ub9_i = ub9_i/ft2
+        endif
       do js = ns0,ns
 !
 ! start of loop over basis ib,jb for amat

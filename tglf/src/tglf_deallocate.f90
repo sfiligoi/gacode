@@ -17,6 +17,7 @@
       IF(ALLOCATED(zs))DEALLOCATE(zs)
       IF(ALLOCATED(mass))DEALLOCATE(mass)
       IF(ALLOCATED(vs))DEALLOCATE(vs)
+      IF(ALLOCATED(fts))DEALLOCATE(fts)
       IF(ALLOCATED(rlts))DEALLOCATE(rlts)
       IF(ALLOCATED(rlns))DEALLOCATE(rlns)
       IF(ALLOCATED(vpar_shear_s))DEALLOCATE(vpar_shear_s)

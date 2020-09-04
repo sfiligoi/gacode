@@ -307,20 +307,21 @@ END SUBROUTINE put_switches
 !
 !-----------------------------------------------------------------
 !
-SUBROUTINE put_rare_switches(rtheta_trap,rpark,rghat,rgchat,rwd_zero,   &
-     rLinsker,rgradB,rfilter,rdamp_psi,rdamp_sig)
+SUBROUTINE put_rare_switches(rtheta_trap,rwdia_trap,rpark,rghat,rgchat, &
+     rwd_zero,rLinsker,rgradB,rfilter,rdamp_psi,rdamp_sig)
   !
   USE tglf_global
   USE tglf_dimensions
   !
   IMPLICIT NONE
-  REAL,INTENT(IN) :: rtheta_trap,rpark,rghat,rgchat,rwd_zero
+  REAL,INTENT(IN) :: rtheta_trap,rwdia_trap,rpark,rghat,rgchat,rwd_zero
   REAL,INTENT(IN) :: rLinsker,rgradB,rfilter
   REAL,INTENT(IN) :: rdamp_psi,rdamp_sig
   !
   ! transfer values
   !
   theta_trapped_in = rtheta_trap
+  wdia_trapped_in = rwdia_trap
   park_in = rpark
   ghat_in = rghat
   gchat_in = rgchat
@@ -352,7 +353,7 @@ SUBROUTINE put_model_parameters(adi_elec,alpha_e,alpha_p,alpha_mach,  &
   !
   if(adi_elec .NEQV. adiabatic_elec_in)new_matrix = .TRUE.
   if(kygrid_model.lt.0.or.kygrid_model.gt.5)kygrid_model = kygrid_model_in
-  if(xnu_model.lt.0.or.xnu_model.gt.4)xnu_model = xnu_model_in
+  if(xnu_model.lt.0.or.xnu_model.gt.3)xnu_model = xnu_model_in
   if(sat_rule.lt.0.or.sat_rule.gt.2)sat_rule=sat_rule_in
   !if(vpar_model.lt.-1.or.vpar_model.gt.1)vpar_model=vpar_model_in
   if(vpar_shear_model.lt.0.or.vpar_shear_model.gt.1)vpar_shear_model=vpar_shear_model_in
@@ -1579,6 +1580,7 @@ SUBROUTINE write_tglf_input
   write(11,*)"      zeff_tg= ",zeff_in
   write(11,*)"      xnue_tg= ",xnue_in
   write(11,*)"      theta_trapped_tg= ",theta_trapped_in
+  write(11,*)"      wdia_trapped_tg = ",wdia_trapped_in
   write(11,*)"      Linsker_factor_tg= ",Linsker_factor_in
   write(11,*)"      gradB_factor_tg= ", gradB_factor_in
   write(11,*)"      wd_zero_tg= ",wd_zero_in
@@ -1588,10 +1590,6 @@ SUBROUTINE write_tglf_input
   write(11,*)"      alpha_mach_tg= ",alpha_mach_in
   write(11,*)"      alpha_n_tg= ",alpha_n_in
   write(11,*)"      alpha_t_tg= ",alpha_t_in
-  write(11,*)"      alpha_kx_e_tg= ",alpha_kx_e_in
-  write(11,*)"      alpha_kx_p_tg= ", alpha_kx_p_in
-  write(11,*)"      alpha_kx_n_tg= ",alpha_kx_n_in
-  write(11,*)"      alpha_kx_t_tg= ", alpha_kx_t_in
   write(11,*)"      alpha_quench_tg= ",alpha_quench_in
   write(11,*)"      xnu_factor_tg= ",xnu_factor_in
   write(11,*)"      debye_factor_tg= ",debye_factor_in

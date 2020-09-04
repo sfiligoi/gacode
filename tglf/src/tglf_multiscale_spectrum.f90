@@ -213,6 +213,7 @@
       kycut = b0*kymax1
 !      write(*,*)"dvzf = ",dvzf," vzf1 = ",vzf1," vzf2 = ",vzf2
 !      write(*,*)"gamma1 = ",gamma1
+!       write(*,*)"kymax1 = ",kymax1,"  kycut = ",kycut
       do j=1,nky
 ! include zonal flow effects on growthrate model
 !          gamma=0.0

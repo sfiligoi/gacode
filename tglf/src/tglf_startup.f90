@@ -132,6 +132,7 @@
         vs(is) = SQRT(taus(is)/mass(is))
         pol = pol +  zs(is)*zs(is)*as(is)/taus(is)
         U0 = U0 + as(is)*vpar_s(is)*zs(is)*zs(is)/taus(is)
+        fts(is) = 0.0
 !        write(*,*)"species",is
 !        write(*,*)rlns(is),rlts(is)
 !        write(*,*)taus(is),as(is)

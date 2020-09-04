@@ -2196,7 +2196,7 @@
 !          write(*,*)"hxw133 = ",hxw133(is,i)
 !          write(*,*)"hxw333 = ",hxw333(is,i)
 !
-          ftx=ft
+          ftx=fts(is)
           if(ftx.ge.ft_min)then
            ft2 = ftx**2
            gxn(is,i)    = FLR_Hn(ftx,b)

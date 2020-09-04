@@ -19,6 +19,7 @@
       ALLOCATE(zs(ns))
       ALLOCATE(mass(ns))
       ALLOCATE(vs(ns))
+      ALLOCATE(fts(ns))
       ALLOCATE(rlts(ns))
       ALLOCATE(rlns(ns))
       ALLOCATE(vpar_shear_s(ns))

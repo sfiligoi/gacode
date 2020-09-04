@@ -503,9 +503,10 @@ SUBROUTINE get_ft_sa
   USE tglf_dimensions
   USE tglf_global
   USE tglf_hermite
+  USE tglf_species
   !
   IMPLICIT NONE
-  INTEGER :: i
+  INTEGER :: i,is
   REAL :: norm,ww
   REAL :: eps,theta_max
   REAL :: cn,thx,ftx,Bmax,Bmin
@@ -582,6 +583,9 @@ SUBROUTINE get_ft_sa
      enddo
      ! write(*,*)"ft = ",ft,"ft0=",SQRT(1.0-Bmin/Bmax)
   endif
+  do is=ns0,ns
+    fts(is) = ft
+  enddo
   ! write(*,*)"ft = ",ft,"ft_model_sa =",ft_model_sa
   !
 END SUBROUTINE get_ft_sa
@@ -593,16 +597,18 @@ SUBROUTINE get_ft_geo
   USE tglf_dimensions
   USE tglf_global
   USE tglf_sgrid
+  USE tglf_species
   !
   IMPLICIT NONE
   !
   INTEGER,PARAMETER :: nb_grid=25
-  INTEGER :: i,j,m,m_max,m_min,j_max
+  INTEGER :: i,j,m,m_max,m_min,j_max,is
   INTEGER :: pm(2,0:nb_grid),qm
   REAL :: Bmax,Bmin,By(0:nb_grid),delta_y(0:nb_grid)
   REAL :: Ly
   REAL :: B_bounce,kpar
   REAL :: db,test1,test2,bounce_y
+  REAL :: wdia, cdt, ft0
   !
   !*************************************************************
   ! begin trapped fraction model
@@ -739,6 +745,30 @@ SUBROUTINE get_ft_geo
   ft = SQRT(1.0 - Bmin/B_bounce)
   modB_min = ABS(Bmin)
   modB_test = 0.5*(Bmax + Bmin)/Bmin
+  do is=ns0,ns
+  fts(is) = ft
+  enddo
+  if(wdia_trapped_in.gt.0.0) then
+    do is=ns0,ns
+      wdia = ABS(ky*rlns_in(is))/vs(is)
+      kpar= pi_2/(Ly*sqrt_two*width_in)
+      ft0 = SQRT(1.0 - Bmin/Bmax)
+      cdt = wdia_trapped_in*3.0*(1.0-ft0*ft0)
+      kpar = kpar/MAX(theta_trapped_in,0.0001) + wdia*cdt
+      bounce_y = MIN(Ly,pi/kpar)
+      B_bounce = Bmax
+      if(bounce_y.lt.Ly)then
+        do i=1,nb_grid
+          if(delta_y(i).gt.bounce_y)exit
+        enddo
+        B_bounce = By(i-1)+(By(i)-By(i-1))* &
+        (bounce_y-delta_y(i-1))/(delta_y(i)-delta_y(i-1))
+!    write(*,*)i,"B_bounce =",B_bounce,Bmax
+      endif
+      fts(is) = SQRT(1.0 - Bmin/B_bounce)
+!    write(*,*)"fts(is) = ",is,fts(is)
+    enddo
+  endif
   ! write(*,*)"ft = ",ft
   !*************************************************************
   ! end of trapped fraction model
