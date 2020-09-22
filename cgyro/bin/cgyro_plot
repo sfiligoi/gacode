@@ -400,13 +400,13 @@ case "$VIS_TYPE" in
    null) ;;
    
    slices)
-	python $PYROOT/vis_slices.py ;;
+	python -m pygacode.cgyro.vis_slices ;;
 
    torcut)
-	export OMP_NUM_THREADS=$NOMP ; python $PYROOT/vis_torcut.py $EXT $MOMENT $SPECIES $NX $NZ $TIME $FMIN $FMAX $CMAP $FONTSIZE $LEGACY_FLAG $DN $MAG $NOZONAL $ONLYZONAL ;;
+	export OMP_NUM_THREADS=$NOMP ; python -m pygacode.cgyro.vis_torcut $EXT $MOMENT $SPECIES $NX $NZ $TIME $FMIN $FMAX $CMAP $FONTSIZE $LEGACY_FLAG $DN $MAG $NOZONAL $ONLYZONAL ;;
 
    wheel)
-	export OMP_NUM_THREADS=$NOMP ; python $PYROOT/vis_wheel.py $EXT $MOMENT $SPECIES $NX $NY $NZ $TIME $FMIN $FMAX $CMAP $FONTSIZE ;;
+	export OMP_NUM_THREADS=$NOMP ; python -m pygacode.cgyro.vis_wheel $EXT $MOMENT $SPECIES $NX $NY $NZ $TIME $FMIN $FMAX $CMAP $FONTSIZE ;;
 
     *)
         echo "Unrecognized argument to -vis" ; exit 1 ;;
@@ -472,16 +472,16 @@ case "$PLOT_TYPE" in
 
    fluct)
        export OMP_NUM_THREADS=$NOMP ; \
-       python $PYROOT/plot_fluct.py \
+       python -m pygacode.cgyro.plot_fluct \
 	      $EXT $MOMENT $SPECIES $PX $PY $NX $NY $TIME $FMIN $FMAX $CMAP $FONTSIZE $LAND_FLAG $THETA ;;
 
    fluct_mpi)
-       mpiexec -np $NMPI python $PYROOT/plot_fluct_mpi.py \
+       mpiexec -np $NMPI python -m pygacode.cgyro.plot_fluct_mpi \
 	       $EXT $MOMENT $SPECIES $PX $PY $NX $NY $TIME $FMIN $FMAX $CMAP $FONTSIZE $LAND_FLAG $THETA ;;
 
    rt)
        export OMP_NUM_THREADS=$NOMP ; \
-       python $PYROOT/plot_rt.py \
+       python -m pygacode.cgyro.plot_rt \
 	      $EXT $MOMENT $SPECIES $YMIN $YMAX $NX $ND $TIME $FMIN $FMAX $CMAP $FONTSIZE $THETA ;;
 
    template)
