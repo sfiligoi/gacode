@@ -312,7 +312,10 @@ if doplot:
    if ftype == 'screen':
       plt.show()
    elif ftype == 'dump':
-      data = np.column_stack((x,y1,y2))
+      if y2 is None:
+         data = np.column_stack((x,y1))
+      else:
+         data = np.column_stack((x,y1,y2))
       np.savetxt(outfile,data,fmt='%.8e',header=head)
    else:
       plt.savefig(outfile)

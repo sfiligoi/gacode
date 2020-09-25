@@ -500,7 +500,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       fig.tight_layout(pad=0.3)
 
-      return 'stack',ky,y,y
+      return '   ky*rho       kx*rho',ky,y,None
 
    def plot_zf(self,w=0.5,wmax=0.0,field=0,fig=None):
 
