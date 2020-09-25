@@ -500,7 +500,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       fig.tight_layout(pad=0.3)
 
-      return
+      return 'stack',ky,y,y
 
    def plot_zf(self,w=0.5,wmax=0.0,field=0,fig=None):
 
@@ -558,6 +558,8 @@ class cgyrodata_plot(data.cgyrodata):
 
       fig.tight_layout(pad=0.3)
 
+      return
+
    def plot_geo(self,fig=None):
 
       self.getgeo()
@@ -613,6 +615,8 @@ class cgyrodata_plot(data.cgyrodata):
    
       fig.tight_layout(pad=0.3)
 
+      return
+
    def plot_error(self,fig=None):
 
       if fig is None:
@@ -632,6 +636,8 @@ class cgyrodata_plot(data.cgyrodata):
       ax.legend()
 
       fig.tight_layout(pad=0.3)
+
+      return
 
    def plot_ball(self,itime=-1,field=0,tmax=-1.0,fig=None):
 
@@ -1072,6 +1078,9 @@ class cgyrodata_plot(data.cgyrodata):
 
       fig.tight_layout(pad=0.5)
 
+      return
+   
+      
    def plot_kx_phi(self,field=0,theta=0.0,w=0.5,wmax=0.0,ymin='auto',ymax='auto',nstr='null',diss=0,fig=None):
 
       if fig is None:
@@ -1135,6 +1144,9 @@ class cgyrodata_plot(data.cgyrodata):
          ax.plot(kx,self.radialdiss*ax.get_ylim()[1]*0.5,linewidth=2,color='k',alpha=0.2)
 
       fig.tight_layout(pad=0.3)
+
+      return
+   
 
    def plot_hb(self,itime=-1,spec=0,tmax=-1.0,mesh=0,fig=None):
             
@@ -1227,6 +1239,8 @@ class cgyrodata_plot(data.cgyrodata):
          #======================================
 
       fig.tight_layout(pad=0.3)
+
+      return
 
    def plot_hbcut(self,itime=-1,spec=0,tmax=-1.0,theta=0.0,fig=None):
 
@@ -1345,6 +1359,8 @@ class cgyrodata_plot(data.cgyrodata):
 
       fig.tight_layout(pad=0.3)
 
+      return
+
    def plot_hball(self,itime=-1,spec=0,tmax=-1.0,ymin='auto',ymax='auto',nstr='null',ie=0,fig=None):
 
       if nstr == 'null':
@@ -1404,3 +1420,5 @@ class cgyrodata_plot(data.cgyrodata):
 
       ax.legend(loc=1)
       fig.tight_layout(pad=0.3)
+
+      return

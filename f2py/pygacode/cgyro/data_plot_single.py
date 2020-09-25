@@ -166,7 +166,7 @@ elif plot_type == 'shift':
    ymin  = sys.argv[5]
    ymax  = sys.argv[6]
 
-   data_in.plot_shift(w=w,wmax=wmax,theta=theta,ymin=ymin,ymax=ymax)
+   head,x,y1,y2 = data_in.plot_shift(w=w,wmax=wmax,theta=theta,ymin=ymin,ymax=ymax)
 
    outfile = 'out.cgyro.shift.'+ftype
 
