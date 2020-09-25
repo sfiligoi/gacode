@@ -14,7 +14,7 @@
 !  June 22, 2017: Retuned after coding error to Laplacian terms in Ampere 
 !                 and Poisson equations was fixed
 !  TGLF multiscale saturation rule: sat_rule_in = 2 option
-!  Aug. 6, 2020 based on paper submitted to PPCF
+!  Aug. 6, 2020 based on papers submitted to PPCF & NF
 !
 !***********************************************************************
 !
@@ -44,7 +44,8 @@
       REAL :: vzf,dvzf,vzf1,vzf2
       REAL :: etg_streamer
       REAL :: kxzf, sat_geo_factor
-      REAL :: b0,b1,b2,b3,d1,d2,Gq,kx_width
+      REAL :: b0,b1,b2,b3
+      REAL :: d1,d2,Gq,kx_width,dlnpdr,ptot
       REAL,DIMENSION(nkym) :: gamma_net=0.0
       REAL,DIMENSION(nkym) :: gamma=0.0
       REAL,DIMENSION(nkym) :: gamma_mix=0.0
@@ -55,6 +56,19 @@
       ! Miller geometry values igeo=1
       if(xnu_model_in.eq.3)USE_X3=.TRUE.
       if(xnu_model_in.eq.4)USE_X4=.TRUE.
+      dlnpdr = 0.0
+      ptot = 0.0
+      do is=1,ns
+        ptot = ptot + as(is)*taus(is)
+        dlnpdr = dlnpdr + as(is)*taus(is)*(rlns(is)+rlts(is))
+      enddo
+      if(ptot*dlnpdr.eq.0.0)then
+         write(*,*)"error: total pressure is zero"
+         stop
+      else
+         dlnpdr = rmaj_input*dlnpdr/ptot
+!         write(*,*)"dlnpdr = ",dlnpdr
+      endif
 ! coefficients for SAT_RULE = 1
       if(sat_rule_in.eq.1) then
          czf = ABS(alpha_zf_in)
@@ -97,15 +111,16 @@
      endif
 ! coefficents for SAT_RULE = 2
      if(sat_rule_in.eq.2)then
+       ! SAT2 fit for CGYRO linear modes
         b0 = 0.72
         b1 = 1.22
-        b2 = 4.93
+        b2 = 24.52  ! note this is b2**2 in PPCF paper. This is NF paper value
         b3 = 0.88
-        d1 = 1.0/grad_r0_out**2
+        d1 = 0.5475*((Bt0_out/B_geo0_out)**4)/grad_r0_out**2   ! NF paper version that removes rmin/rmaj dependence
         Gq = B_geo0_out/grad_r0_out
         d2 = 1.0/Gq**2
-        cnorm = b2**2
-        kyetg = 1.0*ABS(zs(2))/SQRT(taus(2)*mass(2))
+        cnorm = b2*12.0/dlnpdr
+        kyetg = 2.0*ABS(zs(2))/SQRT(taus(2)*mass(2))
         cky=3.0
         sqcky=SQRT(cky)
       endif
@@ -267,10 +282,10 @@
         if(sat_rule_in.eq.2)then
           if(ky0.lt. kycut)then
             kx_width = kycut/grad_r0_out
-            sat_geo_factor = SAT_geo0_out*d1*SAT_geo1_out
+            sat_geo_factor = d1*SAT_geo1_out
            else
              kx_width = kycut/grad_r0_out + b1*(ky0 - kycut)*Gq
-             sat_geo_factor = SAT_geo0_out*(d1*SAT_geo1_out*kycut +  &
+             sat_geo_factor = (d1*SAT_geo1_out*kycut +  &
                               b3*(ky0 - kycut)*d2*SAT_geo2_out)/ky0
            endif
     !       write(*,*)"sat2 ",B_geo0_out,grad_r0_out,SAT_geo1_out,SAT_geo2_out,sat_geo_factor

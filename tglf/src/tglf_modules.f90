@@ -252,6 +252,7 @@
       REAL :: Grad_r_ave_out=1.0
       REAL :: grad_r0_out=1.0
       REAL :: B_geo0_out = 1.0
+      REAL :: Bt0_out = 1.0
       REAL :: SAT_geo_ave_out=1.0
       REAL :: SAT_geo0_out=1.0
       REAL :: SAT_geo1_out=1.0

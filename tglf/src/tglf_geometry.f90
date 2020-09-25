@@ -165,6 +165,8 @@ SUBROUTINE xgrid_functions_sa
   ! poloidal magnetic field at outboard midplane
   !
   Bp0_out = rmin_sa/(q_sa*(rmaj_sa+rmin_sa))
+  Bt0_out = f/Rmaj_input
+  B_geo0_out = Bt0_out
   !
 END SUBROUTINE xgrid_functions_sa
 !
@@ -261,8 +263,14 @@ SUBROUTINE xgrid_functions_geo
        kx0_factor = 1.0
        wE = 0.0
      endif
+     grad_r0_out = B_geo(0)/qrat_geo(0)
+     B_geo0_out = b_geo(0)
+     kx_geo0_out= 1.0/qrat_geo(0)
+!write(*,*)"kx_geo0_out = ",kx_geo0_out
+!write(*,*)"grad_r0_out = ",grad_r0_out
      kx0_e = -(0.36*vexb_shear_kx0/gamma_reference_kx0(1) + 0.38*wE*TANH((0.69*wE)**6))
-     if(sat_rule_in.ge.1)kx0_e = -(0.53*vexb_shear_kx0/gamma_reference_kx0(1) + 0.25*wE*TANH((0.69*wE)**6))
+     if(sat_rule_in.eq.1)kx0_e = -(0.53*vexb_shear_kx0/gamma_reference_kx0(1) + 0.25*wE*TANH((0.69*wE)**6))
+     if(sat_rule_in.eq.2)kx0_e = -0.40*grad_r0_out*vexb_shear_kx0/gamma_reference_kx0(1)
 !     a0 = alpha_e_in*2.0
 !     if(alpha_e_in.ne.0.0)then
 !        kx0_e = a0*TANH(kx0_e/a0)
@@ -272,15 +280,12 @@ SUBROUTINE xgrid_functions_geo
      a0 = 1.3
      if(sat_rule_in.ge.1)a0=1.45
      if(ABS(kx0_e).gt.a0)kx0_e = a0*kx0_e/ABS(kx0_e)
-     grad_r0_out = B_geo(0)/qrat_geo(0)
-     B_geo0_out = b_geo(0)
-     kx_geo0_out= 1.0/qrat_geo(0)
-     !write(*,*)"kx_geo0_out = ",kx_geo0_out
-     !write(*,*)"grad_r0_out = ",grad_r0_out
      if(units_in.eq.'GYRO')then
         kx0 = sign_Bt_in*kx0_e ! cancel the sign_Bt_in factor in kxx below
      else
-       kx0 = sign_Bt_in*kx0_e/(2.1)  ! note kx0 = alpha_e*gamma_ExB_HB/gamma Hahm - Burrell form of gamma_ExB
+       if(sat_rule_in.eq.1)kx0 = sign_Bt_in*kx0_e/(2.1)  ! goes with xnu_model=2
+       if(sat_rule_in.eq.2)kx0 = sign_Bt_in*kx0_e/(1.8*grad_r0_out)  ! goes with xnu_model=3
+       ! note kx0 = alpha_e*gamma_ExB_HB/gamma Hahm - Burrell form of gamma_ExB
        ! The 2.1 effectively increases ay0 & ax0 and reduces toroidal stress to agree with CGYRO
      endif
      !
@@ -769,7 +774,7 @@ SUBROUTINE get_ft_geo
 !    write(*,*)"fts(is) = ",is,fts(is)
     enddo
   endif
-  ! write(*,*)"ft = ",ft
+!  write(*,*)"fts(1) = ",fts(1)
   !*************************************************************
   ! end of trapped fraction model
   !*************************************************************
@@ -923,6 +928,7 @@ SUBROUTINE mercier_luc
   f = pi_2*q_s/f
   ! write(*,*)"f = ",f,q_s
   ! write(*,*)"ds=",ds
+  Bt0_out = f/Rmaj_input
   Bref_out = 1.0
   betae_s = betae_in
   debye_s = debye_in
