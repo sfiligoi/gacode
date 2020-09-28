@@ -251,12 +251,12 @@
         do j1=1,nmodes_in
           gamma_out(j1) = get_gamma_net(gamma_out(j1))
         enddo
-      elseif(find_width_in.and.vexb_shear_in.ne.0.0)then
-! use spectral shift model
-        do j1=1,nmodes_in
+      elseif(vexb_shear_in.ne.0.0)then
+! use spectral shift model for second pass
+       do j1=1,nmodes_in
           gamma_out(j1) = gamma_reference_kx0(j1)
           freq_out(j1) = freq_reference_kx0(j1)
-        enddo 
+        enddo
       endif
 !      
 !  get the fluxes for the most unstable modes
@@ -618,6 +618,7 @@
 !      xi=(0.0,1.0)
       epsilon1 = 1.E-12
       freq_QL = eigenvalue
+!      write(*,*)"freq_QL = ",freq_QL
 !
 !  fill the density and total pressure vectors
 !

@@ -190,8 +190,9 @@
       REAL :: Rmaj_input = 3.0
       REAL :: q_in = 2.0
       REAL :: rmin_input=0.5
-      REAL,DIMENSION(maxmodes) :: gamma_reference_kx0=0.0
-      REAL,DIMENSION(maxmodes) :: freq_reference_kx0=0.0
+      REAL,DIMENSION(maxmodes) :: gamma_reference_kx0 =0.0
+      REAL,DIMENSION(maxmodes) :: freq_reference_kx0 =0.0
+      REAL,DIMENSION(2,nkym,maxmodes) :: eigenvalue_first_pass =0.0
       REAL :: pol=1.0
       REAL :: U0=0.0
       REAL :: kx0=0.0
@@ -240,6 +241,7 @@
       REAL,DIMENSION(nkym,maxmodes) :: sat_geo_out=0.0
       REAL,DIMENSION(nkym) :: spectral_shift_out=0.0
       REAL,DIMENSION(nkym) :: width_out=0.0
+      REAL :: Vzf_out, kymax_out
       REAL :: phi_bar_sum_out=0.0
       REAL :: v_bar_sum_out=0.0
       REAL :: gamma_nb_min_out=0.0

@@ -18,22 +18,22 @@
       REAL :: tmax,tmin,gamma_max,gmax
       REAL :: save_width,dtmin
       REAL :: gamma_n(nt0),freq_n(nt0),width_n(nt0)
-      REAL :: save_vexb_shear
+!      REAL :: save_vexb_shear
       REAL :: wgp_max,width_p_max
       REAL :: kyi,ft2
 !
       CALL tglf_setup_geometry
 !
-      do i=1,nmodes_in
-        gamma_reference_kx0(i)=0.0
-        freq_reference_kx0(i)=0.0
-      enddo
+!      do i=1,nmodes_in
+!        gamma_reference_kx0(i)=0.0
+!        freq_reference_kx0(i)=0.0
+!      enddo
       save_iflux = iflux_in
       save_ibranch = ibranch_in
       save_nbasis = nbasis_max_in
       save_width = width_in
-      save_vexb_shear = vexb_shear_in
-      if(alpha_quench_in.eq.0.0)vexb_shear_in = 0.0
+!      save_vexb_shear = vexb_shear_in
+!      if(alpha_quench_in.eq.0.0)vexb_shear_in = 0.0
       ibranch_in = -1
       width_min = width_min_in
       width_max = ABS(width_in)
@@ -268,18 +268,18 @@
              new_matrix = .TRUE.
              call tglf_LS
            endif
-           if(alpha_quench_in.eq.0.0)then
-             if(save_vexb_shear.ne.0.0.or.wgp_max.ne.0.0)then
-               do i=1,nmodes_out
-                 gamma_reference_kx0(i) = gamma_out(i)
-                 freq_reference_kx0(i) = freq_out(i)
-               enddo
-               vexb_shear_in = save_vexb_shear
-               iflux_in=save_iflux
-               new_width=.TRUE.
-               call tglf_LS
-             endif
-           endif
+!           if(alpha_quench_in.eq.0.0)then
+!             if(save_vexb_shear.ne.0.0.or.wgp_max.ne.0.0)then
+!               do i=1,nmodes_out
+!                 gamma_reference_kx0(i) = gamma_out(i)
+!                 freq_reference_kx0(i) = freq_out(i)
+!               enddo
+!               vexb_shear_in = save_vexb_shear
+!               iflux_in=save_iflux
+!               new_width=.TRUE.
+!               call tglf_LS
+!             endif
+!           endif
          endif  ! ibranch_in == -1
          gamma_max = MAX(gamma_out(1),gamma_out(2))  ! works for both ibranch_in cases
 !
@@ -299,13 +299,13 @@
          do i=1,nmodes_in
           gamma_out(i)=0.0
           freq_out(i)=0.0
-          gamma_reference_kx0(i)=0.0
-          freq_reference_kx0(i)=0.0
+ !         gamma_reference_kx0(i)=0.0
+ !         freq_reference_kx0(i)=0.0
          enddo
        endif
 !
        nbasis=save_nbasis
        iflux_in=save_iflux
-       vexb_shear_in = save_vexb_shear
+!       vexb_shear_in = save_vexb_shear
 !
       END SUBROUTINE tglf_max   

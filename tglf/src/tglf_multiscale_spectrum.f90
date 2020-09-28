@@ -216,8 +216,8 @@
            gammamax1 = (a+b*xmax+c*xmax*xmax)*kymax1
          endif     
       endif
-!      write(*,*)"gammamax1 = ",gammamax1," kymax1 = ",kymax1
-!      write(*,*)"gammamax2 = ",gammamax2," kymax2 = ",kymax2
+      write(*,*)"gammamax1 = ",gammamax1," kymax1 = ",kymax1
+      write(*,*)"gammamax2 = ",gammamax2," kymax2 = ",kymax2
       ! compute multi-scale phi-intensity spectrum field_spectrum(2,,) = phi_bar_out
       ! note that the field_spectrum(1,,) = v_bar_out = 1.0 for sat_rule_in = 1
       vzf1 = gammamax1/kymax1

@@ -13,6 +13,7 @@
       IMPLICIT NONE
 !
       INTEGER :: i,j,is,imax
+      LOGICAL :: save_iflux, save_find_width
       REAL :: dky
       REAL :: phi_bar0,phi_bar1
       REAl :: v_bar0,v_bar1
@@ -25,6 +26,9 @@
       REAL :: stress_par1(nsm,3),stress_tor1(nsm,3)
       REAL :: exch1(nsm,3)
       REAL :: nsum1(nsm),tsum1(nsm)
+      REAL :: save_vexb_shear
+      REAL :: vzf_mix, kymax_mix
+      REAL,DIMENSION(nkym) :: ky_mix, gamma_mix
 !
       CALL tglf_startup
 !
@@ -52,11 +56,40 @@
       phi_bar_sum_out = 0.0
       v_bar_sum_out = 0.0
       v_bar0 = 0.0
-      phi_bar0 = 0.0     
+      phi_bar0 = 0.0
+      do i=1,nky
+       width_out(i) = width_in ! needed for spectral shift model double pass
+      enddo
 !
 ! compute the flux spectrum
 !
-      CALL get_bilinear_spectrum_mpi
+    if(alpha_quench_in .eq. 0.0 .and. vexb_shear_in .ne.0.0)then
+!  spectral shift model double pass
+       save_vexb_shear = vexb_shear_in
+       save_find_width = find_width_in
+       save_iflux = iflux_in
+       iflux_in=.FALSE.     ! do not compute eigenvectors on first pass
+       vexb_shear_in = 0.0  ! do not use spectral shift on first pass
+       CALL get_bilinear_spectrum_mpi
+       eigenvalue_first_pass(:,:,:) = eigenvalue_spectrum_out(:,:,:)
+       vexb_shear_in = save_vexb_shear
+       if(sat_rule_in.eq.2)then
+         ky_mix(:) = ky_spectrum(:)
+         gamma_mix(:) = eigenvalue_spectrum_out(1,:,1)
+         CALL get_zonal_mixing(nky,ky_mix,gamma_mix,vzf_mix,kymax_mix)
+         vzf_out = vzf_mix
+         kymax_out = kymax_mix
+       endif
+       find_width_in = .FALSE.
+       iflux_in = save_iflux
+       CALL get_bilinear_spectrum_mpi
+!  reset eigenvalues to the values with vexb_shear=0.
+!  note ql weights are with vexb_shear
+       eigenvalue_spectrum_out(:,:,:) = eigenvalue_first_pass(:,:,:)
+       find_width_in = save_find_width
+      else
+        CALL get_bilinear_spectrum_mpi
+      endif
 !
 ! sum over ky spectrum
 !
@@ -180,7 +213,6 @@
 !
       LOGICAL :: unstable
       INTEGER :: i,j,k,is,imax,t
-      REAL :: width_max
       REAL :: gmax,fmax
       REAL :: phi_bar
       REAL :: gamma_cutoff,reduce,rexp
@@ -188,6 +220,7 @@
       REAL :: pflux1,eflux1
       REAL :: stress_tor1,stress_par1
       REAL :: exch1, gamma_max
+      REAL :: save_width
       ! mpi 
       REAL :: ne_te_phase_spectrum_save(nkym,maxmodes)
       REAL :: sat_geo_spectrum_save(nkym,maxmodes)
@@ -241,7 +274,7 @@
 ! loop over ky spectrum
 !
 ! save maximum width
-      width_max = width_in
+      save_width = width_in
       iflux_in=.TRUE.
       gmax = 0.0
       fmax = 0.0
@@ -254,6 +287,11 @@
           if(find_width_in)then
             CALL tglf_max
           else
+            gamma_reference_kx0(:) = eigenvalue_first_pass(1,i,:)
+            freq_reference_kx0(:) = eigenvalue_first_pass(2,i,:)
+            width_in = width_out(i)
+            nbasis = nbasis_max_in
+            new_width=.TRUE.
             CALL tglf_LS
             gamma_nb_min_out = gamma_out(1)
           endif
@@ -360,7 +398,7 @@
               eflux1 = energy_QL_out(imax,is,j)
               stress_tor1 = stress_tor_QL_out(imax,is,j)
               stress_par1 = stress_par_QL_out(imax,is,j)
-              exch1 = phi_bar*exchange_QL_out(imax,is,j)
+              exch1 = exchange_QL_out(imax,is,j)
               QL_flux_spectrum_save(1,is,j,i,imax) = pflux1
               QL_flux_spectrum_save(2,is,j,i,imax) = eflux1
               QL_flux_spectrum_save(3,is,j,i,imax) = stress_tor1
@@ -388,7 +426,7 @@
         endif !unstable .T.
 !
 ! reset width to maximum if used tglf_max
-        if(find_width_in)width_in=width_max
+        if(find_width_in)width_in=save_width
 !
       enddo  ! i 
 !
@@ -495,3 +533,107 @@
 !-------------------------------------------------------------------------------
 !
 
+ SUBROUTINE get_zonal_mixing(nmix,ky_mix, gamma_mix,vzf_mix,kymax_mix)
+!
+!  finds the maximum of gamma/ky spectrum vzf_out and kymax_out
+!
+    USE tglf_dimensions
+    USE tglf_global
+    USE tglf_species
+    IMPLICIT NONE
+    INTEGER :: nmix,i,k,j,j1,j2,jmax1,jmax2
+    REAL :: test,testmax1,testmax2
+    REAL :: kx, kyhigh, kycut
+    REAL :: gammamax1,kymax1,gammamax2,kymax2,ky0,ky1,ky2
+    REAL :: f0,f1,f2,a,b,c,x0,x02,dky,xmax
+    REAL :: gamma0,gamma1,gammaeff,dgamma
+    REAL :: kymax_mix, vzf_mix
+    REAL, DIMENSION(nkym) :: gamma_mix, ky_mix
+!  initialize output of subroutine
+    vzf_mix = 0.0
+    kymax_mix = 0.0
+!
+! find the maximum of gamma_mix/ky_mix
+!
+      gammamax1= gamma_mix(1)
+      kymax1 = ky_mix(1)
+      testmax1 = gammamax1/kymax1
+      testmax2 = 0.0
+      jmax1=1
+      jmax2=0
+      kycut=0.8*ABS(zs(2))/SQRT(taus_in(2)*mass_in(2))
+      kyhigh=0.15*ABS(zs(1))/SQRT(taus_in(1)*mass_in(1))
+!      write(*,*)" kycut = ",kycut," kyhigh = ",kyhigh
+      j1=1
+      j2=1
+      ! find the low and high ky peaks of gamma/ky
+      do j=2,nky
+         ky0 = ky_mix(j)
+         if(ky0 .lt. kycut)j1=j1+1
+         if(ky0 .lt. kyhigh)j2=j2+1
+!         write(*,*)"j=",j,"ky = ",ky0," gamma_net = ",gamma_net(j)
+         test = gamma_mix(j)/ky0
+         if(ky0 .lt. kycut)then
+            if(test .gt. testmax1)then
+              testmax1=test
+              jmax1=j
+            endif
+         endif
+         if(ky0 .gt. kycut)then
+           if(test .gt. testmax2)then
+             testmax2 = test
+             jmax2=j
+           endif
+         endif
+      enddo
+!      write(*,*)"j1 = ",j1," j2 = ",j2
+      ! handle exceptions
+      if(j1.eq.nky)then  ! the maximum ky in the ky-spectrum is less than kycut
+         j1=nky-1        ! note that j2=nky in this case
+      endif
+      if(jmax2.eq.0)jmax2=j2    ! there was no high-k peak set kymax2 to kyhigh or the highest ky
+!      if(jmax1.lt.nky)then
+!        test=gamma_net(jmax1+1)/ky_spectrum(jmax1+1)
+!        if(testmax1.le.test)then
+          ! there is no low-k peak
+!          write(*,*)" gammamax1/kymax1 = ",gammamax1/kymax1, test
+!          jmax1=jmax2
+!        endif
+!      endif
+      gammamax2 = gamma_mix(jmax2)
+      kymax2 = ky_mix(jmax2)
+      gammamax1 = gamma_mix(jmax1)
+      kymax1 = ky_mix(jmax1)
+ !     write(*,*)" jmax1 = ",jmax1," jmax2= ",jmax2
+ !     write(*,*)" g/k 1 = ",gammamax1/kymax1," g/k 2 = ",gammamax2/kymax2
+      !interpolate to find a more accurate low-k maximum gamma/ky
+      ! this is cut of at j1 since a maximum may not exist in the low-k range
+      if(jmax1.gt.1.and.jmax1.lt.j1)then
+!      write(*,*)"refining low-k maximum"
+         f0 =  gamma_mix(jmax1-1)/ky_mix(jmax1-1)
+         f1 =  gamma_mix(jmax1)/ky_mix(jmax1)
+         f2 =  gamma_mix(jmax1+1)/ky_mix(jmax1+1)
+         dky = (ky_mix(jmax1+1)-ky_mix(jmax1-1))
+         x0 = (ky_mix(jmax1)-ky_mix(jmax1-1))/dky
+         a = f0
+         x02 = x0*x0
+         b = (f1 - f0*(1-x02)-f2*x02)/(x0-x02)
+         c = f2 - f0 - b
+         xmax = -b/(2.0*c)
+         if(xmax .ge. 1.0)then
+           kymax1 = ky_mix(jmax1+1)
+           gammamax1 = f2*kymax1
+         elseif(xmax.lt.0.0)then
+           kymax1 = ky_mix(jmax1-1)
+           gammamax1 = f0*kymax1
+         else
+           kymax1 = ky_mix(jmax1-1)+dky*xmax
+           gammamax1 = (a+b*xmax+c*xmax*xmax)*kymax1
+         endif
+      endif
+      vzf_mix = gammamax1/kymax1
+      kymax_mix = kymax1
+      write(*,*)"get_zonal_mxing"
+      write(*,*)"gammamax1 = ",gammamax1," kymax1 = ",kymax1
+
+ END SUBROUTINE get_zonal_mixing

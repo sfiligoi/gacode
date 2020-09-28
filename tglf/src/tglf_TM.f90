@@ -13,6 +13,7 @@
       IMPLICIT NONE
 !
       INTEGER :: i,j,is,imax
+      LOGICAL :: save_iflux, save_find_width
       REAL :: dky
       REAL :: phi_bar0,phi_bar1
       REAl :: v_bar0,v_bar1
@@ -25,6 +26,9 @@
       REAL :: stress_par1(nsm,3),stress_tor1(nsm,3)
       REAL :: exch1(nsm,3)
       REAL :: nsum1(nsm),tsum1(nsm)
+      REAL :: save_vexb_shear
+      REAL :: vzf_mix, kymax_mix
+      REAL,DIMENSION(nkym) :: ky_mix, gamma_mix
 !
       CALL tglf_startup
 !
@@ -56,7 +60,37 @@
 !
 ! compute the flux spectrum
 !
-      CALL get_bilinear_spectrum
+    write(*,*)"vexb_shear = ",vexb_shear_in
+    if(alpha_quench_in .eq. 0.0 .and. vexb_shear_in .ne.0.0)then
+      write(*,*)"spectral shift"
+!  spectral shift model double pass
+       save_vexb_shear = vexb_shear_in
+       save_find_width = find_width_in
+       save_iflux = iflux_in
+       iflux_in=.FALSE.     ! do not compute eigenvectors on first pass
+       vexb_shear_in = 0.0  ! do not use spectral shift on first pass
+       CALL get_bilinear_spectrum
+       eigenvalue_first_pass(:,:,:) = eigenvalue_spectrum_out(:,:,:)
+       vexb_shear_in = save_vexb_shear
+       vzf_out = 0.0
+       kymax_out = 0.0
+       if(sat_rule_in.eq.2)then
+         ky_mix(:) = ky_spectrum(:)
+         gamma_mix(:) = eigenvalue_spectrum_out(1,:,1)
+         CALL get_zonal_mixing(nky,ky_mix,gamma_mix,vzf_mix,kymax_mix)
+         vzf_out = vzf_mix
+         kymax_out = kymax_mix
+       endif
+       find_width_in = .FALSE.
+       iflux_in = save_iflux
+       CALL get_bilinear_spectrum
+!  reset eigenvalues to the values with vexb_shear=0.
+!  note ql weights are with vexb_shear
+       eigenvalue_spectrum_out(:,:,:) = eigenvalue_first_pass(:,:,:)
+       find_width_in = save_find_width
+      else
+        CALL get_bilinear_spectrum
+      endif
 !
 ! sum over ky spectrum
 !
@@ -237,6 +271,11 @@
           if(find_width_in)then
             CALL tglf_max
           else
+            gamma_reference_kx0(:) = eigenvalue_first_pass(1,i,:)
+            freq_reference_kx0(:) = eigenvalue_first_pass(2,i,:)
+            width_in = width_out(i)
+            nbasis = nbasis_max_in
+            new_width=.TRUE.
             CALL tglf_LS
             gamma_nb_min_out = gamma_out(1)
           endif
@@ -345,7 +384,7 @@
               eflux1 = energy_QL_out(imax,is,j)
               stress_tor1 = stress_tor_QL_out(imax,is,j)
               stress_par1 = stress_par_QL_out(imax,is,j)
-              exch1 = phi_bar*exchange_QL_out(imax,is,j)
+              exch1 = exchange_QL_out(imax,is,j)
               QL_flux_spectrum_out(1,is,j,i,imax) = pflux1
               QL_flux_spectrum_out(2,is,j,i,imax) = eflux1
               QL_flux_spectrum_out(3,is,j,i,imax) = stress_tor1
