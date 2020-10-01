@@ -12,7 +12,7 @@
       USE tglf_kyspectrum
       IMPLICIT NONE
 !
-      INTEGER :: i,j,is,imax
+      INTEGER :: i,j,is,imax, jmax_mix
       LOGICAL :: save_iflux, save_find_width
       REAL :: dky
       REAL :: phi_bar0,phi_bar1
@@ -27,9 +27,6 @@
       REAL :: exch1(nsm,3)
       REAL :: nsum1(nsm),tsum1(nsm)
       REAL :: save_vexb_shear
-      REAL :: vzf_mix, kymax_mix
-      REAL,DIMENSION(nkym) :: ky_mix, gamma_mix
-!
       CALL tglf_startup
 !
 ! initialize fluxes
@@ -60,29 +57,22 @@
 !
 ! compute the flux spectrum
 !
-    write(*,*)"vexb_shear = ",vexb_shear_in
+!    write(*,*)"vexb_shear = ",vexb_shear_in
     if(alpha_quench_in .eq. 0.0 .and. vexb_shear_in .ne.0.0)then
-      write(*,*)"spectral shift"
+!      write(*,*)"spectral shift"
 !  spectral shift model double pass
        save_vexb_shear = vexb_shear_in
        save_find_width = find_width_in
        save_iflux = iflux_in
        iflux_in=.FALSE.     ! do not compute eigenvectors on first pass
        vexb_shear_in = 0.0  ! do not use spectral shift on first pass
+       jmax_out = 0         ! ID for first pass
        CALL get_bilinear_spectrum
        eigenvalue_first_pass(:,:,:) = eigenvalue_spectrum_out(:,:,:)
        vexb_shear_in = save_vexb_shear
-       vzf_out = 0.0
-       kymax_out = 0.0
-       if(sat_rule_in.eq.2)then
-         ky_mix(:) = ky_spectrum(:)
-         gamma_mix(:) = eigenvalue_spectrum_out(1,:,1)
-         CALL get_zonal_mixing(nky,ky_mix,gamma_mix,vzf_mix,kymax_mix)
-         vzf_out = vzf_mix
-         kymax_out = kymax_mix
-       endif
        find_width_in = .FALSE.
        iflux_in = save_iflux
+       if(sat_rule_in.eq.0)jmax_out = 1   ! flag for second pass
        CALL get_bilinear_spectrum
 !  reset eigenvalues to the values with vexb_shear=0.
 !  note ql weights are with vexb_shear
@@ -268,16 +258,20 @@
         new_width=.TRUE.
 !
         if(new_eikonal_in)then
-          if(find_width_in)then
-            CALL tglf_max
-          else
-            gamma_reference_kx0(:) = eigenvalue_first_pass(1,i,:)
-            freq_reference_kx0(:) = eigenvalue_first_pass(2,i,:)
-            width_in = width_out(i)
-            nbasis = nbasis_max_in
-            new_width=.TRUE.
-            CALL tglf_LS
-            gamma_nb_min_out = gamma_out(1)
+          if(jmax_out.eq.0)then   ! first pass
+            if(find_width_in)then
+              CALL tglf_max
+            else
+              CALL tglf_LS
+            endif
+          else   ! second pass
+              gamma_reference_kx0(:) = eigenvalue_first_pass(1,i,:)
+              freq_reference_kx0(:) = eigenvalue_first_pass(2,i,:)
+              width_in = width_out(i)
+              nbasis = nbasis_max_in
+              new_width=.TRUE.
+              CALL tglf_LS
+              gamma_nb_min_out = gamma_out(1)
           endif
           mask_save(i) = 1
           if(gamma_out(1).eq.0.0)mask_save(i)=0

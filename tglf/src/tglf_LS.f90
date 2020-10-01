@@ -20,6 +20,7 @@
 !
       IMPLICIT NONE
       REAL,PARAMETER :: epsilon1 = 1.E-12
+      LOGICAL :: USE_PRESETS = .TRUE.
       INTEGER :: j1, j, i, jmax(maxmodes), iroot
       INTEGER :: imax,is
       INTEGER :: mi,me
@@ -36,16 +37,26 @@
 ! 
 !      cputime0=MPI_WTIME()
 !
-!
-!
 ! set ky in units of k_theta*rho_s  rho_s=C_s/omega_s
 ! C_s=sqrt(Te/mi), omega_s=eB/(mi c)
 !
       ky = ky_in
 !      write(*,*)"ky = ",ky
 !
-! check co-dependencies 
+! check co-dependencies
 !
+      if(USE_PRESETS)then
+        wdia_trapped_in=0.0
+        if(sat_rule_in.eq.2)then
+          xnu_model_in=3
+          wdia_trapped_in = 1.0
+          if(units_in.eq."GYRO")units_in = "CGYRO"
+        endif
+        if(sat_rule_in.eq.1)then
+          xnu_model_in = 2
+        endif
+        if(use_bper_in)alpha_mach_in=0.0
+      endif
       if(new_geometry)new_width=.TRUE.
       if(new_width)new_matrix=.TRUE.
 !      write(*,*)"new_start=",new_start

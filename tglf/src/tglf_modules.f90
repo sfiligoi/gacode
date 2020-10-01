@@ -266,6 +266,7 @@
       REAL :: ave_p0_out=1.0
       INTEGER :: nmodes_out
       INTEGER :: nfields_out
+      INTEGER :: jmax_out
       character (len=80) :: error_msg='null' 
 ! NN activation parameters (thresholds)  
       REAL :: nn_max_error_in = -1.0
