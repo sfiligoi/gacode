@@ -236,7 +236,6 @@ SUBROUTINE put_averages(tsp,asp,vpar,vexb,betae,xnue,zeff,debye)
     if(tglf_isnan(debye))call tglf_error(1,"input debye_in is NAN")
     if(tglf_isinf(debye))call tglf_error(1,"input debye_in is INF")
     if(debye.lt.0.0)call tglf_error(1,"input debye_in is < 0")
-
   !
   ! set flow control switch
   new_matrix = .TRUE.
@@ -246,6 +245,16 @@ SUBROUTINE put_averages(tsp,asp,vpar,vexb,betae,xnue,zeff,debye)
      as_in(is) = asp(is)
      vpar_in(is) = vpar(is)
   enddo
+  if(as_in(1) .le. 0.0 .or. as_in(2) .le. 0.0)then
+     write(*,*)"error: electron or ion density <= zero. Setting them both to 1.0"
+      as_in(1) = 1.0
+      as_in(2) = 1.0
+  endif
+  if(taus_in(1) .le. 0.0 .or. taus_in(2) .le. 0.0)then
+     write(*,*)"error: electron or ion temperature <= zero. Setting them both to 1.0"
+      taus_in(1) = 1.0
+      taus_in(2) = 1.0
+  endif
   vexb_in = vexb
   betae_in = betae
   xnue_in = xnue

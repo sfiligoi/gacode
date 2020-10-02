@@ -117,16 +117,16 @@
       REAL :: sign_Bt_in = 1.0
       REAL :: sign_It_in = 1.0
 ! Input field gradients
-      REAL,DIMENSION(nsm) :: rlns_in=1.0
-      REAL,DIMENSION(nsm) :: rlts_in=3.0
+      REAL,DIMENSION(nsm) :: rlns_in=0.0
+      REAL,DIMENSION(nsm) :: rlts_in=0.0
       REAL,DIMENSION(nsm) :: vpar_shear_in=0.0
       REAL :: vexb_shear_in=0.0
 ! Input profile shear
       REAL,DIMENSION(nsm) :: vns_shear_in=0.0
       REAL,DIMENSION(nsm) :: vts_shear_in=0.0
 ! Input field averages
-      REAL,DIMENSION(nsm) :: as_in
-      REAL,DIMENSION(nsm) :: taus_in
+      REAL,DIMENSION(nsm) :: as_in=0.0
+      REAL,DIMENSION(nsm) :: taus_in=0.0
       REAL,DIMENSION(nsm) :: vpar_in=0.0
       REAL :: vexb_in = 0.0
       REAL :: betae_in=0.0

@@ -38,7 +38,7 @@
 !      REAL :: f0,f1,f2,a,b,c,x0,x02,dky,xmax
       REAL :: gamma0,gamma1,gammaeff,dgamma
       REAL :: cnorm, phinorm, czf, cz1, cz2, kyetg
-      REAL :: kycut
+      REAL :: kycut, ckx
       REAL :: cky,sqcky,delta,ax,ay,kx
       REAL :: mix1,mix2,mixnorm,gamma_ave
       REAL :: vzf,dvzf,vzf1,vzf2
@@ -75,8 +75,8 @@
       dlnpdr = 0.0
       ptot = 0.0
       do is=1,nsm   ! include all species even non-kinetic ones like fast ions
-        ptot = ptot + as(is)*taus(is)
-        dlnpdr = dlnpdr + as(is)*taus(is)*(rlns(is)+rlts(is))
+        ptot = ptot + as_in(is)*taus_in(is)
+        dlnpdr = dlnpdr + as_in(is)*taus_in(is)*(rlns_in(is)+rlts_in(is))
       enddo
       if(ptot*dlnpdr.le.0.0)then
          write(*,*)"error: total pressure is zero"
@@ -87,6 +87,7 @@
       endif
 !
       czf = ABS(alpha_zf_in)
+      ckx=1.0
 !
 ! coefficients for SAT_RULE = 1
       if(sat_rule_in.eq.1) then
@@ -104,12 +105,12 @@
          cz1 = 0.0
          cz2=1.4*czf
          etg_streamer = 1.0
-         kyetg=etg_streamer*ABS(zs(2))/SQRT(taus(2)*mass(2))  ! fixed to ion gyroradius
+         kyetg=etg_streamer*ABS(zs_in(2))/SQRT(taus_in(2)*mass_in(2))  ! fixed to ion gyroradius
          cky=3.0
          sqcky=SQRT(cky)
         endif
         if(USE_MIX)then
-!original        kyetg=1.9*ABS(zs(2))/SQRT(taus(2)*mass(2))  ! fixed to ion gyroradius
+!original        kyetg=1.9*ABS(zs_in(2))/SQRT(taus_in(2)*mass_in(2))  ! fixed to ion gyroradius
           cky=3.0
           sqcky=SQRT(cky)
           if(USE_SUB1)cnorm=12.12
@@ -119,7 +120,7 @@
           cz2 = 1.0*czf
           etg_streamer=1.05
           if(alpha_quench_in .ne. 0.0)etg_streamer=2.1
-          kyetg=etg_streamer*ABS(zs(2))/SQRT(taus(2)*mass(2))  ! fixed to ion gyroradius
+          kyetg=etg_streamer*ABS(zs_in(2))/SQRT(taus_in(2)*mass_in(2))  ! fixed to ion gyroradius
         endif
         if(igeo.eq.0)then ! s-alpha
            cnorm=14.63
@@ -141,9 +142,12 @@
         kyetg = 1000.0   ! does not impact SAT2
         cky=3.0
         sqcky=SQRT(cky)
-        kycut = b0*kymax_out
+        ckx= SQRT(mass_in(2)*taus_in(2))/zs_in(2)
+        ckx=1.0
+        kycut = b0*kymax_out*ckx
         cz1 = 1.1*czf
       endif
+!      write(*,*)"ckx = ",ckx
 ! coefficients for spectral shift model for ExB shear
       ax=0.0
       ay=0.0
@@ -325,8 +329,8 @@
       testmax2 = 0.0
       jmax1=1
       jmax2=0
-      kycut=0.8*ABS(zs(2))/SQRT(taus_in(2)*mass_in(2))
-      kyhigh=0.15*ABS(zs(1))/SQRT(taus_in(1)*mass_in(1))
+      kycut=0.8*ABS(zs_in(2))/SQRT(taus_in(2)*mass_in(2))
+      kyhigh=0.15*ABS(zs_in(1))/SQRT(taus_in(1)*mass_in(1))
 !      write(*,*)" kycut = ",kycut," kyhigh = ",kyhigh
       j1=1
       j2=1
