@@ -74,7 +74,7 @@
       if(xnu_model_in.eq.4)USE_X4=.TRUE.
       dlnpdr = 0.0
       ptot = 0.0
-      do is=1,ns
+      do is=1,nsm   ! include all species even non-kinetic ones like fast ions
         ptot = ptot + as(is)*taus(is)
         dlnpdr = dlnpdr + as(is)*taus(is)*(rlns(is)+rlts(is))
       enddo

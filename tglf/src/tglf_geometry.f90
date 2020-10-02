@@ -773,7 +773,7 @@ SUBROUTINE get_ft_geo
   do is=ns0,ns
   fts(is) = ft
   enddo
-  if(wdia_trapped_in.gt.0.0) then
+  if(xnu_model_in .eq.3 .and. wdia_trapped_in.gt.0.0) then
     do is=ns0,ns
       wdia = ABS(ky*rlns_in(is))/vs(is)
       kpar= pi_2/(Ly*sqrt_two*width_in)
