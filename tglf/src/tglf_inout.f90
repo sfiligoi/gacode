@@ -2072,7 +2072,7 @@ END SUBROUTINE write_tglf_nsts_crossphase_spectrum
 !  write(33,*)"type: 1=particle,2=energy,3=toroidal stress,4=parallel stress,5=exchange"
   write(33,*)"QL_flux_spectrum_out(type,nspecies,field,ky,mode)"
   write(33,*)"index limits: type,ns,field,nky,nmodes"
-  write(33,*)5,ns,3,nky,nmodes_in
+  write(33,*)5,ns,jflds,nky,nmodes_in
 !
 !      do j=1,nky
 !         do i=1,nmodes_in

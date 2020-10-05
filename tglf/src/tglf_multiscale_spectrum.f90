@@ -78,9 +78,9 @@
         ptot = ptot + as_in(is)*taus_in(is)
         dlnpdr = dlnpdr + as_in(is)*taus_in(is)*(rlns_in(is)+rlts_in(is))
       enddo
-      if(ptot*dlnpdr.le.0.0)then
-         write(*,*)"error: total pressure is zero"
-         stop
+      if(ptot*dlnpdr.le.0.01)then
+!         write(*,*)"error: total pressure is zero"
+          dlnpdr = 0.01
       else
          dlnpdr = rmaj_input*dlnpdr/ptot
 !         write(*,*)"dlnpdr = ",dlnpdr
