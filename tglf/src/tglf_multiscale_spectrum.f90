@@ -38,7 +38,7 @@
 !      REAL :: f0,f1,f2,a,b,c,x0,x02,dky,xmax
       REAL :: gamma0,gamma1,gammaeff,dgamma
       REAL :: cnorm, phinorm, czf, cz1, cz2, kyetg
-      REAL :: kycut, ckx
+      REAL :: kycut
       REAL :: cky,sqcky,delta,ax,ay,kx
       REAL :: mix1,mix2,mixnorm,gamma_ave
       REAL :: vzf,dvzf,vzf1,vzf2
@@ -74,20 +74,19 @@
       if(xnu_model_in.eq.4)USE_X4=.TRUE.
       dlnpdr = 0.0
       ptot = 0.0
-      do is=1,nsm   ! include all species even non-kinetic ones like fast ions
+      do is=1,nstotal_in   ! include all species even non-kinetic ones like fast ions
         ptot = ptot + as_in(is)*taus_in(is)
         dlnpdr = dlnpdr + as_in(is)*taus_in(is)*(rlns_in(is)+rlts_in(is))
       enddo
-      if(ptot*dlnpdr.le.0.01)then
-!         write(*,*)"error: total pressure is zero"
-          dlnpdr = 0.01
+      if(ptot*dlnpdr.gt.0.01)then
+        dlnpdr = rmaj_input*dlnpdr/ptot
       else
-         dlnpdr = rmaj_input*dlnpdr/ptot
-!         write(*,*)"dlnpdr = ",dlnpdr
+!         write(*,*)"error: total pressure is invalid",ptot,dlnpdr
+        dlnpdr = 0.01
       endif
+!         write(*,*)"dlnpdr = ",dlnpdr
 !
       czf = ABS(alpha_zf_in)
-      ckx=1.0
 !
 ! coefficients for SAT_RULE = 1
       if(sat_rule_in.eq.1) then
@@ -142,12 +141,9 @@
         kyetg = 1000.0   ! does not impact SAT2
         cky=3.0
         sqcky=SQRT(cky)
-        ckx= SQRT(mass_in(2)*taus_in(2))/zs_in(2)
-        ckx=1.0
-        kycut = b0*kymax_out*ckx
+        kycut = b0*kymax_out
         cz1 = 1.1*czf
       endif
-!      write(*,*)"ckx = ",ckx
 ! coefficients for spectral shift model for ExB shear
       ax=0.0
       ay=0.0

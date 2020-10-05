@@ -116,7 +116,7 @@
 !
       pol = 0.0
       U0 = 0.0
-      do is=1,ns
+      do is=1,ns  ! include only kinetic species inputs
         rlns(is) = rlns_in(is)
         rlts(is) = rlts_in(is)
         taus(is) = taus_in(is)

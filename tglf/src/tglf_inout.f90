@@ -210,7 +210,7 @@ SUBROUTINE put_averages(tsp,asp,vpar,vexb,betae,xnue,zeff,debye)
   IMPLICIT NONE
   REAL,INTENT(IN) :: tsp(nsm),asp(nsm),vpar(nsm)
   REAL,INTENT(IN) :: vexb,betae,xnue,zeff,debye
-  INTEGER :: is
+  INTEGER :: is, count
 
   do is=1,nsm
     if(tglf_isnan(tsp(is)))call tglf_error(1,"input taus_in is NAN")
@@ -240,11 +240,14 @@ SUBROUTINE put_averages(tsp,asp,vpar,vexb,betae,xnue,zeff,debye)
   ! set flow control switch
   new_matrix = .TRUE.
   ! transfer values
+  count = 0
   do is=1,nsm
      taus_in(is) = tsp(is)
      as_in(is) = asp(is)
      vpar_in(is) = vpar(is)
+      if(as_in(is) .gt. 0.0) count = count +1
   enddo
+  nstotal_in = count
   if(as_in(1) .le. 0.0 .or. as_in(2) .le. 0.0)then
      write(*,*)"error: electron or ion density <= zero. Setting them both to 1.0"
       as_in(1) = 1.0
