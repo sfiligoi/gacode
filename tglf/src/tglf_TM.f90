@@ -58,7 +58,7 @@
 ! compute the flux spectrum
 !
 !    write(*,*)"vexb_shear = ",vexb_shear_in
-    if(alpha_quench_in .eq. 0.0 .and. vexb_shear_in .ne.0.0)then
+    if(alpha_quench_in .eq. 0.0 .and. vexb_shear_in .ne. 0.0)then
 !      write(*,*)"spectral shift"
 !  spectral shift model double pass
        save_vexb_shear = vexb_shear_in
@@ -262,7 +262,10 @@
             if(find_width_in)then
               CALL tglf_max
             else
+              nbasis = nbasis_max_in
+              new_width = .TRUE.
               CALL tglf_LS
+              gamma_nb_min_out = gamma_out(1)
             endif
           else   ! second pass
               gamma_reference_kx0(:) = eigenvalue_first_pass(1,i,:)
