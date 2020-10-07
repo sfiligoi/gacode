@@ -94,15 +94,11 @@
         ky1=ky_in
         if(i.eq.1)then
           dky1=ky1
-        else
-          dky = LOG(ky1/ky0)/(ky1-ky0)
-          dky1 = ky1*(1.0 - ky0*dky)
-          dky0 = ky0*(ky1*dky - 1.0)
+        elseif(kygrid_model_in.ne.0)then
+            dky = LOG(ky1/ky0)/(ky1-ky0)
+            dky1 = ky1*(1.0 - ky0*dky)
+            dky0 = ky0*(ky1*dky - 1.0)
         endif
-! normalize the ky integral to make it independent of the 
-! choice of temperature and mass scales 
-        dky0 = dky0*SQRT(taus_in(1)*mass_in(2))
-        dky1 = dky1*SQRT(taus_in(1)*mass_in(2))
 !
 ! compute the field integrals
 !
@@ -175,7 +171,7 @@
              stress_tor0(is,j) = stress_tor1(is,j)
              exch0(is,j) = exch1(is,j)
            enddo  ! j
-           if(ky_in*SQRT(taus_in(2)*mass_in(2)).le.1.0)then
+           if(ky_in.le.1.0)then
              q_low_out(is) = energy_flux_out(is,1)+energy_flux_out(is,2)
            endif
          enddo  ! is 
