@@ -78,11 +78,10 @@
         ptot = ptot + as_in(is)*taus_in(is)
         dlnpdr = dlnpdr + as_in(is)*taus_in(is)*(rlns_in(is)+rlts_in(is))
       enddo
-      if(ptot*dlnpdr.gt.0.01)then
+      if(rmaj_input*dlnpdr/MAX(ptot,0.01) .gt. 1.0)then
         dlnpdr = rmaj_input*dlnpdr/ptot
       else
-!         write(*,*)"error: total pressure is invalid",ptot,dlnpdr
-        dlnpdr = 0.01
+        dlnpdr = 1.0
       endif
 !         write(*,*)"dlnpdr = ",dlnpdr
 !
@@ -250,10 +249,10 @@
         if(sat_rule_in.eq.2)then
           if(ky0.lt. kycut)then
             kx_width = kycut/grad_r0_out
-            sat_geo_factor = d1*SAT_geo1_out
+            sat_geo_factor = SAT_geo0_out*d1*SAT_geo1_out
            else
              kx_width = kycut/grad_r0_out + b1*(ky0 - kycut)*Gq
-             sat_geo_factor = (d1*SAT_geo1_out*kycut +  &
+             sat_geo_factor = SAT_geo0_out*(d1*SAT_geo1_out*kycut +  &
                               b3*(ky0 - kycut)*d2*SAT_geo2_out)/ky0
            endif
            kx = kx*ky0/kx_width
