@@ -99,6 +99,12 @@
             dky1 = ky1*(1.0 - ky0*dky)
             dky0 = ky0*(ky1*dky - 1.0)
         endif
+! backward comatiblily for UNITS=GYRO
+        if(units_in.eq."GYRO")then
+! this is an error in the original integrator
+           dky0 = dky0*SQRT(taus_in(1)*mass_in(2))
+           dky1 = dky1*SQRT(taus_in(1)*mass_in(2))
+        endif
 !
 ! compute the field integrals
 !
