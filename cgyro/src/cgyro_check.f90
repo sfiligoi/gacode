@@ -6,7 +6,6 @@ subroutine cgyro_check
   implicit none
 
   integer :: is
-  logical :: lfe
   character(len=1), dimension(7) :: ctag
   character(len=7) :: floatstr
 

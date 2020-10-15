@@ -87,14 +87,33 @@ subroutine tgyro_write_data(i_print)
           expro_qsync,& ! dummy arg
           expro_n_exp,&
           loc_n_ion)
-     ! Bremsstrahlung radiation
-     call rad_brem(exp_ne,exp_te,expro_z_eff,expro_qbrem,expro_n_exp)
-     ! Synchrotron radiation
-     call rad_sync(1e4*expro_bt0,exp_ne,exp_te,expro_qsync,expro_n_exp)
+
+     if (tgyro_rad_method == 1) then
+        ! Bremsstrahlung radiation
+        call rad_brem(exp_ne,exp_te,expro_z_eff,expro_qbrem,expro_n_exp)
+        ! Synchrotron radiation
+        call rad_sync(1e4*expro_bt0,exp_ne,exp_te,expro_qsync,expro_n_exp)
+     else
+        call radiation(&
+             exp_te/1e3,&  ! keV
+             exp_ne*1e6,& ! 1/m^3
+             transpose(exp_ni(therm_vec(:),:))*1e6,&  ! 1/m^3   
+             zi_vec(therm_vec(:)),&
+             expro_rmin,&
+             expro_rmaj,&
+             expro_bt0,&
+             expro_name(therm_vec(:)),&
+             size(therm_vec),&
+             expro_n_exp,&
+             expro_qbrem,&
+             expro_qsync,&
+             expro_qline)
+     endif
 
      ! Convert erg/cm^3/s -> W/cm^3 = MW/m^3
      expro_qbrem = expro_qbrem*1e-7
      expro_qsync = expro_qsync*1e-7
+     expro_qline = expro_qline*1e-7
      expro_qfuse = expro_qfuse*1e-7
      expro_qfusi = expro_qfusi*1e-7
 

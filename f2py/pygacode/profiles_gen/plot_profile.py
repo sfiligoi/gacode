@@ -178,6 +178,7 @@ def plot_select(ax,tag):
    if tag == 'pow':
       y = expro.expro_qbrem ; ystr = 'q_\mathrm{brem}~\mathrm{[MW/m^3]}' ; plotit(ax,x,y,ystr)
       y = expro.expro_qsync ; ystr = 'q_\mathrm{sync}~\mathrm{[MW/m^3]}' ; plotit(ax,x,y,ystr)
+      y = expro.expro_qline ; ystr = 'q_\mathrm{line}~\mathrm{[MW/m^3]}' ; plotit(ax,x,y,ystr)
       y = expro.expro_qfusi ; ystr = 'q_{\\alpha i}~\mathrm{[MW/m^3]}' ; plotit(ax,x,y,ystr)
       y = expro.expro_qfuse ; ystr = 'q_{\\alpha e}~\mathrm{[MW/m^3]}' ; plotit(ax,x,y,ystr)
 

@@ -13,7 +13,6 @@ subroutine tgyro_profile_functions
 
   implicit none
 
-  integer :: i
   integer :: i_ion
   real :: c_exch
   real, dimension(n_r) :: loglam
