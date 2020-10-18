@@ -506,7 +506,8 @@ subroutine tgyro_write_input
         if (calc_flag(i_ion) == 0) then
            ttext = trim(ttext)//' passthrough'
         endif
-        write(1,40) 'ion '//trim(ion_tag(i_ion))//' [mass,charge,type]',mi_vec(i_ion),zi_vec(i_ion),ttext
+        write(1,40) 'ion '//trim(ion_tag(i_ion))//' [mass,charge,type]',&
+             ion_name(i_ion),mi_vec(i_ion),zi_vec(i_ion),ttext
      enddo
      write(1,*) 
      write(1,10) 'INFO: (tgyro)','GyroBohm factors defined by ion 1 mass.'
@@ -557,7 +558,7 @@ subroutine tgyro_write_input
 10 format(t2,a,t33,':',t35,a)
 20 format(t2,a,t33,':',t35,f8.4,1x,a)
 30 format(t2,a,t33,':',t35,i4)
-40 format(t2,a,t33,':',t35,f6.2,1x,f6.2,3x,a)
+40 format(t2,a,t33,':',t35,a,2x,f6.2,1x,f6.2,3x,a)
 
 end subroutine tgyro_write_input
 

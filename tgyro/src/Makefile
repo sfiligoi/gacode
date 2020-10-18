@@ -46,6 +46,7 @@ OBJECTS += tgyro_globals.o \
            tgyro_profile_set.o \
            tgyro_pressure.o \
            tgyro_quasigrad.o \
+           tgyro_rad.o \
            tgyro_read_input.o \
            tgyro_read_routines.o \
            tgyro_residual.o \

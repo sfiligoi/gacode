@@ -39,11 +39,6 @@ subroutine tgyro_init_profiles
   !------------------------------------------------------
 
   !------------------------------------------------------
-  ! Convert dimensionless mass to grams.
-  mi(:) = mi_vec(:)*mp
-  !------------------------------------------------------
-
-  !------------------------------------------------------
   ! Construct vector of thermal ions
   !
   ! For example, if ions 1 and 3 are thermal, we have
@@ -138,6 +133,13 @@ subroutine tgyro_init_profiles
 
   call expro_read('input.gacode') 
 
+  ! Mass and charge taken from input.gacode
+  mi_vec(:) = expro_mass(1:loc_n_ion)
+  zi_vec(:) = expro_z(1:loc_n_ion)
+
+  ! Get ion names (truncated to 3 characters)
+  ion_name = expro_name(1:loc_n_ion)
+  
   shot = 0
   
   n_exp = expro_n_exp
@@ -147,6 +149,11 @@ subroutine tgyro_init_profiles
 
   ! Aspect ratio
   aspect_rat = expro_rmaj(n_exp)/expro_rmin(n_exp)
+
+  !------------------------------------------------------
+  ! Convert dimensionless mass to grams.
+  mi(:) = mi_vec(:)*mp
+  !------------------------------------------------------
 
   !------------------------------------------------------------------------------------------
   ! Direct input of simple profiles:

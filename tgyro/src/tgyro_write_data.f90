@@ -73,7 +73,7 @@ subroutine tgyro_write_data(i_print)
      expro_ptot = ptot_exp ! already in Pa
      do i_exp=1,expro_n_exp
         expro_z_eff(i_exp) = sum(exp_ni(1:loc_n_ion,i_exp)*zi_vec(1:loc_n_ion)**2)/&
-             sum(exp_ni(1:loc_n_ion,i_exp)*zi_vec(1:loc_n_ion))
+             exp_ne(i_exp)
      enddo
 
      ! Alpha power density
@@ -88,28 +88,20 @@ subroutine tgyro_write_data(i_print)
           expro_n_exp,&
           loc_n_ion)
 
-     if (tgyro_rad_method == 1) then
-        ! Bremsstrahlung radiation
-        call rad_brem(exp_ne,exp_te,expro_z_eff,expro_qbrem,expro_n_exp)
-        ! Synchrotron radiation
-        call rad_sync(1e4*expro_bt0,exp_ne,exp_te,expro_qsync,expro_n_exp)
-     else
-        call radiation(&
-             exp_te/1e3,&  ! keV
-             exp_ne*1e6,& ! 1/m^3
-             transpose(exp_ni(therm_vec(:),:))*1e6,&  ! 1/m^3   
-             zi_vec(therm_vec(:)),&
-             expro_rmin,&
-             expro_rmaj,&
-             expro_bt0,&
-             expro_name(therm_vec(:)),&
-             size(therm_vec),&
-             expro_n_exp,&
-             expro_qbrem,&
-             expro_qsync,&
-             expro_qline)
-     endif
-
+     ! Synchrotron radiation
+     call rad_sync(aspect_rat,r_min,1e4*expro_bt0,exp_ne,exp_te,expro_qsync,expro_n_exp)
+     ! Bremsstrahlung and line radiation (Post 1977) 
+     call rad_ion(&
+          exp_te,&       ! keV
+          exp_ne,&       ! 1/m^3
+          exp_ni(1:loc_n_ion,:),&  ! 1/m^3   
+          zi_vec(1:loc_n_ion),&
+          ion_name,&
+          expro_qbrem,&
+          expro_qline,&
+          loc_n_ion,&
+          expro_n_exp)
+     
      ! Convert erg/cm^3/s -> W/cm^3 = MW/m^3
      expro_qbrem = expro_qbrem*1e-7
      expro_qsync = expro_qsync*1e-7
@@ -305,7 +297,7 @@ subroutine tgyro_write_data(i_print)
              +p_e_aux_in(i)*1e-7*1e-6,&
              -p_brem(i)*1e-7*1e-6,&
              -p_sync(i)*1e-7*1e-6,&
-             -p_line_in(i)*1e-7*1e-6, &
+             -p_line(i)*1e-7*1e-6, &
              -p_exch(i)*1e-7*1e-6,&
              -p_expwd(i)*1e-7*1e-6,&
              +p_e(i)*1e-7*1e-6

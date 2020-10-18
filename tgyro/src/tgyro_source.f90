@@ -25,13 +25,13 @@ subroutine tgyro_source
   !-------------------------------------------------------
 
   !-------------------------------------------------------
-  ! 2. Bremsstrahlung radiation (s_brem)
-  call rad_brem(ne,te,z_eff,s_brem,n_r)
+  ! 2. Bremsstrahlung and line radiation (s_brem,s_line)
+  call rad_ion(te,ne,ni,zi_vec,ion_name,s_brem,s_line,loc_n_ion,n_r)
   !-------------------------------------------------------
 
   !-------------------------------------------------------
   ! 3. Synchrotron radiation (s_sync) with reflection co.
-  call rad_sync(b_ref,ne,te,s_sync,n_r)
+  call rad_sync(aspect_rat,r_min,b_ref,ne,te,s_sync,n_r)
   !-------------------------------------------------------
 
   !-------------------------------------------------------
@@ -66,6 +66,9 @@ subroutine tgyro_source
 
   ! Integrated Synchrotron power
   call tgyro_volume_int(s_sync,p_sync)
+
+  ! Integrated line power
+  call tgyro_volume_int(s_line,p_line)
 
   ! Integrated collisional exchange power
   call tgyro_volume_int(s_exch,p_exch)
@@ -112,7 +115,7 @@ subroutine tgyro_source
           -p_exch(:)   &               ! Collisional exchange
           -p_brem(:) &                 ! Bremsstrahlung radiation
           -p_sync(:) &                 ! Synchrotron radiation
-          -p_line_in(:) &              ! Line radiation [fixed] 
+          -p_line(:) &                 ! Line radiation 
           -p_expwd(:)*tgyro_expwd_flag ! Turbulent exchange
 
   end select

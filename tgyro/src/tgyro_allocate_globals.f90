@@ -146,9 +146,10 @@ subroutine tgyro_allocate_globals
   allocate(p_brem(n_r))
   allocate(s_sync(n_r))
   allocate(p_sync(n_r))
+  allocate(s_line(n_r))
   allocate(p_line(n_r))
-  allocate(p_sync_in(n_r))
   allocate(p_brem_in(n_r))
+  allocate(p_sync_in(n_r))
   allocate(p_line_in(n_r))
   allocate(s_exch(n_r))
   allocate(p_exch(n_r))
@@ -163,6 +164,11 @@ subroutine tgyro_allocate_globals
   allocate(res0(p_max))
   allocate(relax(p_max))
   allocate(therm_vec(sum(therm_flag(1:loc_n_ion))))
+
+  allocate(ion_name(loc_n_ion))
+  allocate(zi_vec(loc_n_ion))
+  allocate(mi_vec(loc_n_ion))
+  allocate(mi(loc_n_ion))
 
   allocate(a_fourier_geo(8,0:32,n_r))
 

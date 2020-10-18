@@ -227,6 +227,7 @@ module tgyro_globals
   real, dimension(:), allocatable :: sn_alpha
   real, dimension(:), allocatable :: s_brem
   real, dimension(:), allocatable :: s_sync
+  real, dimension(:), allocatable :: s_line
   real, dimension(:), allocatable :: s_exch
   real, dimension(:), allocatable :: s_expwd
   real, dimension(:), allocatable :: f_b_in
@@ -239,8 +240,10 @@ module tgyro_globals
   real, dimension(:), allocatable :: relax
 
   integer, dimension(:), allocatable :: therm_vec
+  character(len=3), dimension(:), allocatable :: ion_name
+  real, dimension(:), allocatable :: zi_vec,mi_vec,mi
 
-  real, dimension(n_ion_max) :: mi
+ !real, dimension(n_ion_max) :: mi
   real, dimension(n_ion_max) :: n_ratio,t_ratio
 
   ! Physical constants
@@ -284,8 +287,6 @@ module tgyro_globals
   integer :: loc_scenario
   integer :: tgyro_neo_method
   integer :: loc_n_ion
-  real, dimension(n_ion_max) :: zi_vec
-  real, dimension(n_ion_max) :: mi_vec
   integer, dimension(n_ion_max) :: therm_flag
   integer, dimension(n_ion_max) :: calc_flag
   integer, dimension(0:n_ion_max) :: evo_e
@@ -338,7 +339,6 @@ module tgyro_globals
   integer :: tgyro_zero_dens_grad_flag
   real :: tgyro_residual_tol
   real :: tgyro_input_fusion_scale
-  integer :: tgyro_rad_method=2
   !
   ! Iteration variables (global)
   !
