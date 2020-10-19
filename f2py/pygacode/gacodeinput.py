@@ -72,10 +72,13 @@ class SimpleInput:
             if x in self.data_dict:
                 self.data_dict[x] = self.user_dict[x]
             elif x in self.dep_dict:
-                self.error=1
-                self.error_msg=self.error_msg+'ERROR: (gacodeinput) Deprecated parameter '+x+'\n'
-                self.error_msg=self.error_msg+'       '+self.dep_dict[x]+'\n'
-            else:
+                 if self.dep_dict[x] == 'ignore':
+                     print('WARNING: (gacodeinput.py) Ignoring parameter '+x)
+                 else:
+                     self.error=1
+                     self.error_msg=self.error_msg+'ERROR: (gacodeinput) Deprecated parameter '+x+'\n'
+                     self.error_msg=self.error_msg+'       '+self.dep_dict[x]+'\n'
+            else: 
                 self.error=1
                 self.error_msg=self.error_msg+"ERROR: (gacodeinput) Bogus parameter "+x+'\n'
 
