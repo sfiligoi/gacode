@@ -466,7 +466,7 @@ REAL,DIMENSION(nsm) :: mass_in
       REAL,DIMENSION(0:ms) :: pk_geo, epsl_geo, qrat_geo
       REAL,DIMENSION(0:ms) :: kxoky_geo, b_geo, t_s
       REAL,DIMENSION(0:ms) :: S_prime, kx_factor, y
-      REAL :: f,ff_prime
+      REAL :: f,ff_prime, field_theta_av, gradr_theta_av
 !
       END MODULE tglf_sgrid  
 !
