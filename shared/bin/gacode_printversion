@@ -7,8 +7,6 @@
 #  Echo version message.
 #------------------------------
 
-GITINFO=`git show -s --format=%ci`
-
 VERSION=`gacode_getversion`
 
 echo "=========================================================="
