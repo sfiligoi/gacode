@@ -368,7 +368,7 @@ subroutine cgyro_check
      call cgyro_error('Invalid value for nup_theta')
      return
   endif
-  if (nup_radial < 1 .or. nup_theta > 4) then
+  if (nup_radial < 1 .or. nup_radial > 4) then
      call cgyro_error('Invalid value for nup_radial')
      return
   endif
