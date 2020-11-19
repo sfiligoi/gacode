@@ -27,16 +27,15 @@ F2PY  = f2py
 
 # System math libraries
 
-LMATH =  
-#       -L${FFTW_DIR}/lib -lfftw3_threads -lfftw3f_threads -lfftw3 -lfftw3f -mkl=cluster
+LMATH = -L${FFTW_DIR}/lib -lfftw3_threads -lfftw3f_threads -lfftw3 -lfftw3f -mkl=cluster
 #       -L${FFTW_DIR}/lib -lfftw3_threads -lfftw3 -mkl=cluster
 
 # NetCDF
 #NETCDF = -K${NETCDF_LIB} -l${NETCDF_LIB}netcdf -lnetcdff
 #NETCDF  = ${NETCDFF_LIB}/libnetcdff.a ${NETCDF_LIB}/libnetcdf.a -L{HDF5_LIB} -lhdf5_hl -lhdf5 -lcurl
 #NETCDF not tested since not needed for [c]gyro
-NETCDF  = -L${NETCDF_LIB} -lnetcdf
-NETCDF_INC = ${NETCDF_INCLUDE}
+NETCDF  = -L${NETCDF_LIB} -lnetcdf -L${NETCDFF_LIB} -lnetcdff
+NETCDF_INC = ${NETCDFF_INCLUDE}
 
 GATOFLAGS = -r8 -i8
 
