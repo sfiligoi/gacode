@@ -23,13 +23,14 @@ conda:
 
 so:
 	python ./setup.py install --home=${GACODE_ROOT}/f2py/pygacode/
+	cd pygacode ; ln -s lib/python/gacode*.so .
 
 clean:
 	cd geo ; make clean
 	cd expro ; make clean
 	cd module ; make clean
 	cd test ; make clean
-	rm -rf dist build MANIFEST sgn.pyf
+	rm -rf dist build MANIFEST sgn.pyf pygacode/lib
 	cd ${GACODE_ROOT}/f2py/pygacode ; rm -rf gacode *-info *.so
 
 .IGNORE:

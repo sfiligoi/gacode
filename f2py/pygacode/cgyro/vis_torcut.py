@@ -11,6 +11,7 @@ from mayavi import mlab
 try:
    from pygacode import vis
    from pygacode import geo
+   print("INFO: (vis_torcut) Successfully imported vis")
 except:
    print("ERROR: (vis_torcut) Please type 'make so' in gacode/f2py")
    sys.exit()
