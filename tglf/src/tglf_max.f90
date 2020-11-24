@@ -32,8 +32,8 @@
       save_ibranch = ibranch_in
       save_nbasis = nbasis_max_in
       save_width = width_in
-!      save_vexb_shear = vexb_shear_in
-!      if(alpha_quench_in.eq.0.0)vexb_shear_in = 0.0
+!      save_vexb_shear = vexb_shear_s
+!      if(alpha_quench_in.eq.0.0)vexb_shear_s = 0.0
       ibranch_in = -1
       width_min = width_min_in
       width_max = ABS(width_in)
@@ -43,7 +43,7 @@
     if(alpha_p_in.gt.0.0)then
       do is=ns0,ns
         kyi = ky_in*SQRT(taus(is)*mass(is))/ABS(zs(is))
-        wgp_max = ABS((taus(is)/zs(is))*vpar_shear_in(is)/vs(is))*ky_in/(1+kyi**2)
+        wgp_max = ABS((taus(is)/zs(is))*vpar_shear_s(is)/vs(is))*ky_in/(1+kyi**2)
         width_p_max = 3.6*vs(is)/(sqrt_two*R_unit*q_unit*MAX(wgp_max,0.001))
         width_p_max=MAX(width_p_max,0.1)
          if(width_p_max.lt.width_min_in)then
@@ -51,7 +51,7 @@
         endif
       enddo
     endif
-!        kyi = ky_in*SQRT(taus_in(2)*mass_in(2))/ABS(zs_in(2))
+!        kyi = ky_in*SQRT(taus(2)*mass(2))/ABS(zs(2))
 !        wgp_max = ABS(vpar_shear_in(2)/vs(2))*kyi/(1+kyi**2)
 !        width_p_max = 3.6/(sqrt_two*R_unit*q_unit*MAX(wgp_max,0.001))
 !        width_p_max=MAX(width_p_max,0.01)
@@ -274,7 +274,7 @@
 !                 gamma_reference_kx0(i) = gamma_out(i)
 !                 freq_reference_kx0(i) = freq_out(i)
 !               enddo
-!               vexb_shear_in = save_vexb_shear
+!               vexb_shear_s = save_vexb_shear
 !               iflux_in=save_iflux
 !               new_width=.TRUE.
 !               call tglf_LS
@@ -306,6 +306,6 @@
 !
        nbasis=save_nbasis
        iflux_in=save_iflux
-!       vexb_shear_in = save_vexb_shear
+!       vexb_shear_s = save_vexb_shear
 !
       END SUBROUTINE tglf_max   

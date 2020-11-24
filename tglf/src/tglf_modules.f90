@@ -200,6 +200,9 @@ REAL,DIMENSION(nsm) :: mass_in
       REAL :: kx0_p = 0.0
       REAL :: midplane_shear=1.0
       REAL :: kx0_factor=1.0
+! internal normalization conversions
+      REAL :: as_norm,taus_norm,mass_norm,zs_norm,B_norm,L_norm
+      REAL :: cs_norm, rhos_norm, freq_norm
 ! output
       COMPLEX,DIMENSION(3,nb) :: field_weight_QL_out=0.0
       COMPLEX,DIMENSION(maxmodes,3,nb) :: field_weight_out=0.0
@@ -326,10 +329,11 @@ REAL,DIMENSION(nsm) :: mass_in
 !
       REAL,ALLOCATABLE,DIMENSION(:,:) :: ei_exch, resist
       REAL,ALLOCATABLE,DIMENSION(:) :: zs, mass, vs, fts
-      REAL,ALLOCATABLE,DIMENSION(:) :: rlts, rlns, vpar_shear_s
-      REAL,ALLOCATABLE,DIMENSION(:) :: as, taus, vpar_s
-      REAL :: vexb_shear_s
-! 
+      REAL,ALLOCATABLE,DIMENSION(:) :: rlts, rlns
+      REAL,ALLOCATABLE,DIMENSION(:) :: as, taus
+      REAL,ALLOCATABLE,DIMENSION(:) :: vpar_s, vpar_shear_s
+      REAL :: xnue_s, vexb_shear_s, ky_s
+!
       END MODULE tglf_species  
 !-------------------------------------------------
       MODULE tglf_kyspectrum

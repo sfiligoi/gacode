@@ -1746,15 +1746,15 @@ SUBROUTINE write_tglf_sum_flux_spectrum
            ky1=ky_in
            if(i.eq.1)then
               dky1=ky1
-           else
+           elseif(kygrid_model_in.ne.0)then
               dky = LOG(ky1/ky0)/(ky1-ky0)
               dky1 = ky1*(1.0 - ky0*dky)
               dky0 = ky0*(ky1*dky - 1.0)
            endif
            ! normalize the ky integral to make it independent of the 
            ! choice of temperature and mass scales 
-           dky0 = dky0*SQRT(taus_in(1)*mass_in(2))
-           dky1 = dky1*SQRT(taus_in(1)*mass_in(2))
+!           dky0 = dky0*SQRT(taus_in(1)*mass_in(2))
+!           dky1 = dky1*SQRT(taus_in(1)*mass_in(2))
            !
            ! compute the fluxes in the same way as tglf_TM.f90 
            !
@@ -1789,7 +1789,7 @@ SUBROUTINE write_tglf_sum_flux_spectrum
   enddo  ! is 
   !
   CLOSE(33)
-  !    
+  !
 END SUBROUTINE write_tglf_sum_flux_spectrum
 !-----------------------------------------------------------------
 
@@ -1980,7 +1980,8 @@ SUBROUTINE write_tglf_eigenvalue_spectrum
   write(33,*)"gyro-bohm normalized eigenvalue spectra"
   write(33,*)"(gamma(n),freq(n),n=1,nmodes_in)"
   do i=1,nky
-    write(33,*)(eigenvalue_spectrum_out(1,i,n),eigenvalue_spectrum_out(2,i,n),n=1,nmodes_in)
+    write(33,*)(eigenvalue_spectrum_out(1,i,n), &
+              eigenvalue_spectrum_out(2,i,n),n=1,nmodes_in)
   enddo
 !
   CLOSE(33)

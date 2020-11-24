@@ -253,6 +253,7 @@
             freq_out(j1)=-ri(jmax(j1))
           endif
         enddo
+!       write(*,*)"gamma_out = ",gamma_out(1)
 !      write(*,*)"debug jmax =",jmax(1),jmax(2)
 !      write(*,*)"debug nmodes_out = ",nmodes_out
       endif ! ibranch_in .eq. -1
@@ -262,7 +263,7 @@
         do j1=1,nmodes_in
           gamma_out(j1) = get_gamma_net(gamma_out(j1))
         enddo
-      elseif(vexb_shear_in.ne.0.0)then
+      elseif(vexb_shear_s.ne.0.0)then
 ! use spectral shift model for second pass
        do j1=1,nmodes_in
           gamma_out(j1) = gamma_reference_kx0(j1)
@@ -408,7 +409,7 @@
       REAL :: intensity
 !
       pols = (ave_p0(1,1)/ABS(as(1)*zs(1)*zs(1)))**2 ! scale invariant pol
-      ks = kp*SQRT(taus(1)*mass(2))   ! scale invariant gyroradius * poloidal wavenumber
+      ks = kp*SQRT(taus(1)*mass(2))/ABS(zs(1))   ! scale invariant gyroradius * poloidal wavenumber
       if(sat_rule_in.eq.0)then
        if(igeo.eq.0)then
         if(nmodes_in.le.2)then

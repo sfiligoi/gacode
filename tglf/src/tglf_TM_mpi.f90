@@ -27,6 +27,7 @@
       REAL :: exch1(nsm,3)
       REAL :: nsum1(nsm),tsum1(nsm)
       REAL :: save_vexb_shear
+!
       CALL tglf_startup
 !
 ! initialize fluxes
@@ -60,17 +61,17 @@
 !
 ! compute the flux spectrum
 !
-    if(alpha_quench_in .eq. 0.0 .and. vexb_shear_in .ne.0.0)then
+    if(alpha_quench_in .eq. 0.0 .and. vexb_shear_s .ne.0.0)then
 !  spectral shift model double pass
-       save_vexb_shear = vexb_shear_in
+       save_vexb_shear = vexb_shear_s
        save_find_width = find_width_in
        save_iflux = iflux_in
        iflux_in=.FALSE.     ! do not compute eigenvectors on first pass
-       vexb_shear_in = 0.0  ! do not use spectral shift on first pass
+       vexb_shear_s = 0.0  ! do not use spectral shift on first pass
        jmax_out = 0         ! ID for first pass
        CALL get_bilinear_spectrum_mpi
        eigenvalue_first_pass(:,:,:) = eigenvalue_spectrum_out(:,:,:)
-       vexb_shear_in = save_vexb_shear
+       vexb_shear_s = save_vexb_shear
        find_width_in = .FALSE.
        iflux_in = save_iflux
        if(sat_rule_in.eq.0)jmax_out = 1   ! flag for second pass
@@ -100,11 +101,11 @@
             dky0 = ky0*(ky1*dky - 1.0)
         endif
 ! backward comatiblily for UNITS=GYRO
-        if(units_in.eq."GYRO")then
+!        if(units_in.eq.'GYRO')then
 ! this is an error in the original integrator
-           dky0 = dky0*SQRT(taus_in(1)*mass_in(2))
-           dky1 = dky1*SQRT(taus_in(1)*mass_in(2))
-        endif
+!           dky0 = dky0*SQRT(taus_in(1)*mass_in(2))
+!           dky1 = dky1*SQRT(taus_in(1)*mass_in(2))
+!        endif
 !
 ! compute the field integrals
 !
@@ -341,7 +342,8 @@
         gamma_max = MAX(gamma_out(1),gamma_out(2)) ! this covers ibranch=-1,0
         if(gamma_max.eq.0.0.or.gamma_nb_min_out.eq.0.0)unstable=.FALSE.      
         gamma_net_1 = gamma_nb_min_out 
-        gamma_cutoff = (0.1*ky_in/R_unit)*SQRT(taus(1)*mass(2))  ! scaled like gamma
+!       gamma_cutoff = (0.1*ky_in/R_unit)*SQRT(taus(1)*mass(2))  ! scaled like gamma
+        gamma_cutoff = 0.1*ky_in/R_unit
         rexp = 1.0
         reduce = 1.0
         if(nbasis_max_in.ne.nbasis_min_in)then

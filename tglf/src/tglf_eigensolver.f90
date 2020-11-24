@@ -81,6 +81,7 @@
       REAL :: ki,ks0,charge_tot,gradne,gradne_s
       REAL :: beta2,bs
       REAL :: damp_psi,damp_sig
+      REAL,DIMENSION(nsm) :: vpar, vpar_shear
       COMPLEX :: phi_A,phi_B,phi_AU,phi_BU
       COMPLEX :: psi_A,psi_B,psi_AN,psi_BN  
       COMPLEX :: sig_A,sig_B
@@ -268,8 +269,8 @@
 !       if(vpar_shear_model_in.eq.1)then  
 ! include R(theta)/R0 factor like gyro convetions. Note that sign_Bt_in is in ave_c_tor_par
          do is=1,ns
-           vpar_shear_s(is)=sign_It_in*alpha_p_in*vpar_shear_in(is)*ave_c_tor_par(1,1)/Rmaj_input
-           if(vpar_model_in.eq.0)vpar_s(is) = alpha_mach_in*sign_It_in*vpar_in(is)*ave_c_tor_par(1,1)/Rmaj_input
+           vpar_shear(is)=vpar_shear_s(is)*ave_c_tor_par(1,1)/Rmaj_input
+           if(vpar_model_in.eq.0)vpar(is) = vpar_s(is)*ave_c_tor_par(1,1)/Rmaj_input
          enddo
 !       endif
 !
@@ -280,7 +281,7 @@
 ! xnu_model = 0  version 1.80 large xnu limit = 0.0
 ! xnu_model = 1  version 1.81 used for APS07 , large xnu limit = adiabatic
 ! xnu_model = 2  version 1.85 large xnu_limit = circulating response 
-! xnu_model = 3  retuned trapped boundary term to fit CGYRO with Lorentz operator2/8/2017
+! xnu_model = 3  retuned trapped boundary term to fit CGYRO with Lorentz operator2/8/2017 & with wdia_trapped 9/15/20
 ! xnu_model = 4  best fit to response function Phys. Plasmas 17, (2010) 122309.
        k1=0.0
        k2=0.0
@@ -321,7 +322,7 @@
 !         xnu_bndry=(1.0 -ft2)* &
 !          (1.96*ky/R_unit+0.60*xnue_in)/ &
 !          (0.75*ky/R_unit + xnue_in)
-         xnu_hat = xnue_in/(ky*taus(1)/R_unit)
+         xnu_hat = xnue_s/(ky*taus(1)/R_unit)
 !         xnu_bndry = (1.0 - ft2)*(((9.34*xnu_hat)**4)/(1+(9.34*xnu_hat)**4))* &
 !                      (3.21 + 1.64*xnu_hat)/(1.0 + 2.40*xnu_hat)
 !
@@ -380,7 +381,7 @@
 !
       cnuei = 0.0
 !     if(xnu_model.eq.2.or.xnu_model.eq.3)cnuei = xnue_in
-      if(xnu_model.ge.2)cnuei = xnue_in
+      if(xnu_model.ge.2)cnuei = xnue_s
       kparvthe = ABS(k_par0)*vs(1)/sqrt_two
       kparvthe=MAX(kparvthe,1.0E-10)
 !      write(*,*)"cnuei=",cnuei,"kparvthe=",kparvthe,"ft=",ft
@@ -584,7 +585,7 @@
 !
         xnuei = 0.0
         if(is.eq.1)then
-          xnuei = xnue_in
+          xnuei = xnue_s
         endif
         xnuion = 0.0
         d_ab=0.0
@@ -1150,7 +1151,7 @@
 !
       phi_A = N_j*xi*w_s*(rlns(is)*hn + rlts(is)*1.5*(hp3-hn)) 
       if(vpar_model_in.eq.0)then
-        phi_A = phi_A + N_j*E_i*kpar_hnp0*vpar_s(is)
+        phi_A = phi_A + N_j*E_i*kpar_hnp0*vpar(is)
       endif
       phi_B = -hn*E_i*N_j
       sig_A = 0.0
@@ -1169,15 +1170,15 @@
         sig_A = sig_A - damp_sig*sig_B
       endif
       if(use_bper_in)then
-       psi_A = -betae_psi*J_j*xi*w_s*vpar_shear_s(is)*hp1b0
+       psi_A = -betae_psi*J_j*xi*w_s*vpar_shear(is)*hp1b0
        if(vpar_model_in.eq.0)then
-         psi_A = psi_A -betae_psi*J_j*xi*w_cd*vpar_s(is)*wdhp1b0
-         psi_B = betae_psi*M_i*J_j*vpar_s(is)*hp1b0/vs(is)
+         psi_A = psi_A -betae_psi*J_j*xi*w_cd*vpar(is)*wdhp1b0
+         psi_B = betae_psi*M_i*J_j*vpar(is)*hp1b0/vs(is)
          phi_AU = betae_psi*U0*J_j*(xi*w_s*(rlns(is)*hnbp + rlts(is)*1.5*(hp3bp-hnbp)) &
-          + E_i*kpar_hnbp*vpar_s(is)) 
-         phi_BU = -betae_psi*U0*E_i*J_j*vpar_s(is)*hp1bp
-         psi_AN = betae_psi*U0*N_j*xi*(w_cd*vpar_s(is)*wdhp1bp+w_s*vpar_shear_s(is)*hp1bp)
-         psi_BN = -betae_psi*U0*M_i*N_j*vpar_s(is)*hp1bp/vs(is)
+          + E_i*kpar_hnbp*vpar(is))
+         phi_BU = -betae_psi*U0*E_i*J_j*vpar(is)*hp1bp
+         psi_AN = betae_psi*U0*N_j*xi*(w_cd*vpar(is)*wdhp1bp+w_s*vpar_shear(is)*hp1bp)
+         psi_BN = -betae_psi*U0*M_i*N_j*vpar(is)*hp1bp/vs(is)
        endif
       endif
 !
@@ -1252,12 +1253,12 @@
 !
       ia = nbasis+ib + ia0
 !
-      phi_A = N_j*xi*w_s*vpar_shear_s(is)*hp1/vs(is)
+      phi_A = N_j*xi*w_s*vpar_shear(is)*hp1/vs(is)
       phi_B = 0.0 
       if(vpar_model_in.eq.0)then
-        phi_A = phi_A  +N_j*xi*w_cd*wdhp1p0*vpar_s(is)/vs(is)  &
-          + d_1*(nuei_u_u_1+nuei_u_q3_1*5.0/3.0)*hp1*E_i*N_j*vpar_s(is)/vs(is)
-        phi_B = -E_i*N_j*hp1*vpar_s(is)/vs(is)
+        phi_A = phi_A  +N_j*xi*w_cd*wdhp1p0*vpar(is)/vs(is)  &
+          + d_1*(nuei_u_u_1+nuei_u_q3_1*5.0/3.0)*hp1*E_i*N_j*vpar(is)/vs(is)
+        phi_B = -E_i*N_j*hp1*vpar(is)/vs(is)
       endif
       sig_A = 0.0
       sig_B = 0.0
@@ -1272,12 +1273,12 @@
        psi_B = betae_psi*M_i*J_j*hp1b0
        psi_A = psi_A - damp_psi*psi_B
        if(vpar_model_in.eq.0)then
-        psi_A = psi_A  -betae_psi*J_j*M_i*kpar_hp1b0*vpar_s(is)
-        phi_AU = betae_psi*U0*J_j*xi*(w_s*vpar_shear_s(is)*hp1bp +w_cd*wdhp1bp*vpar_s(is))/vs(is) &
-          + d_1*(nuei_u_u_1+nuei_u_q3_1*5.0/3.0)*hp1*E_i*betae_psi*U0*J_j*vpar_s(is)/vs(is)
-        phi_BU = -betae_psi*U0*E_i*J_j*hp1bp*vpar_s(is)/vs(is)
+        psi_A = psi_A  -betae_psi*J_j*M_i*kpar_hp1b0*vpar(is)
+        phi_AU = betae_psi*U0*J_j*xi*(w_s*vpar_shear(is)*hp1bp +w_cd*wdhp1bp*vpar(is))/vs(is) &
+          + d_1*(nuei_u_u_1+nuei_u_q3_1*5.0/3.0)*hp1*E_i*betae_psi*U0*J_j*vpar(is)/vs(is)
+        phi_BU = -betae_psi*U0*E_i*J_j*hp1bp*vpar(is)/vs(is)
         psi_AN = betae_psi*U0*N_j*(vs(is)*xi*w_s*(rlns(is)*hp1bp+1.5*rlts(is)*(hr13bp-hp1bp))  &
-          + M_i*kpar_hp1bp*vpar_s(is))
+          + M_i*kpar_hp1bp*vpar(is))
         psi_BN = -betae_psi*U0*M_i*N_j*hp1bp
        endif
       endif
@@ -1365,7 +1366,7 @@
 !
       phi_A = N_j*xi*w_s*(rlns(is)*hp1 + rlts(is)*1.5*(hr13-hp1))  
       if(vpar_model_in.eq.0)then
-        phi_A = phi_A +N_j*E_i*kpar_hp1p0*vpar_s(is)
+        phi_A = phi_A +N_j*E_i*kpar_hp1p0*vpar(is)
       endif
       phi_B = -hp1*E_i*N_j
       sig_A = 0.0
@@ -1384,15 +1385,15 @@
         sig_A = sig_A - damp_sig*sig_B
       endif
       if(use_bper_in)then
-       psi_A = -betae_psi*J_j*xi*w_s*vpar_shear_s(is)*hr11b0
+       psi_A = -betae_psi*J_j*xi*w_s*vpar_shear(is)*hr11b0
        if(vpar_model_in.eq.0)then
-        psi_A = psi_A -betae_psi*J_j*xi*w_cd*vpar_s(is)*wdhr11b0
-        psi_B = betae_psi*M_i*J_j*vpar_s(is)*hr11b0/vs(is)
+        psi_A = psi_A -betae_psi*J_j*xi*w_cd*vpar(is)*wdhr11b0
+        psi_B = betae_psi*M_i*J_j*vpar(is)*hr11b0/vs(is)
         phi_AU = betae_psi*U0*J_j*(xi*w_s*(rlns(is)*hp1bp + rlts(is)*1.5*(hr13bp-hp1bp)) &
-         +E_i*kpar_hp1bp*vpar_s(is))
+         +E_i*kpar_hp1bp*vpar(is))
         phi_BU = -betae_psi*U0*hp1bp*E_i*J_j
-        psi_AN = betae_psi*U0*N_j*xi*(w_cd*vpar_s(is)*wdhr11bp+w_s*vpar_shear_s(is)*hr11bp)
-        psi_BN = -betae_psi*U0*M_i*N_j*vpar_s(is)*hr11bp/vs(is)
+        psi_AN = betae_psi*U0*N_j*xi*(w_cd*vpar(is)*wdhr11bp+w_s*vpar_shear(is)*hr11bp)
+        psi_BN = -betae_psi*U0*M_i*N_j*vpar(is)*hr11bp/vs(is)
        endif
       endif
 !
@@ -1482,7 +1483,7 @@
 !
       phi_A = N_j*xi*w_s*(rlns(is)*hp3+rlts(is)*1.5*(hr33-hp3))  
       if(vpar_model_in.eq.0)then
-        phi_A = phi_A + N_j*E_i*kpar_hp3p0*vpar_s(is)
+        phi_A = phi_A + N_j*E_i*kpar_hp3p0*vpar(is)
       endif
       phi_B = -hp3*E_i*N_j
       sig_A = 0.0
@@ -1501,15 +1502,15 @@
         sig_A = sig_A - damp_sig*sig_B
       endif
       if(use_bper_in)then
-       psi_A = -betae_psi*J_j*xi*w_s*vpar_shear_s(is)*hr13b0
+       psi_A = -betae_psi*J_j*xi*w_s*vpar_shear(is)*hr13b0
        if(vpar_model_in.eq.0)then
-         psi_A = psi_A -betae_psi*J_j*xi*w_cd*vpar_s(is)*wdhr13b0
-         psi_B = betae_psi*M_i*J_j*vpar_s(is)*hr13b0/vs(is)
+         psi_A = psi_A -betae_psi*J_j*xi*w_cd*vpar(is)*wdhr13b0
+         psi_B = betae_psi*M_i*J_j*vpar(is)*hr13b0/vs(is)
          phi_AU = betae_psi*U0*J_j*(xi*w_s*(rlns(is)*hp3bp+rlts(is)*1.5*(hr33bp-hp3bp))    &
-          + E_i*kpar_hp3bp*vpar_s(is))
+          + E_i*kpar_hp3bp*vpar(is))
          phi_BU = -betae_psi*U0*hp3bp*E_i*J_j
-         psi_AN = betae_psi*U0*N_j*xi*(w_cd*vpar_s(is)*wdhr13bp +w_s*vpar_shear_s(is)*hr13bp)
-         psi_BN = -betae_psi*U0*M_i*N_j*vpar_s(is)*hr13bp/vs(is)
+         psi_AN = betae_psi*U0*N_j*xi*(w_cd*vpar(is)*wdhr13bp +w_s*vpar_shear(is)*hr13bp)
+         psi_BN = -betae_psi*U0*M_i*N_j*vpar(is)*hr13bp/vs(is)
         endif
       endif
 !
@@ -1593,12 +1594,12 @@
 !
       ia = 4*nbasis+ib + ia0
 !
-      phi_A = N_j*xi*w_s*hr11*vpar_shear_s(is)/vs(is) 
+      phi_A = N_j*xi*w_s*hr11*vpar_shear(is)/vs(is)
       phi_B = 0.0
       if(vpar_model_in.eq.0)then
-        phi_A = phi_A +N_j*xi*w_cd*wdhr11p0*vpar_s(is)/vs(is) &
-         + d_1*(nuei_q1_u_1 + (5.0/3.0)*nuei_q1_q3_1+3.0*nuei_q1_q1_1)*hr11*E_i*N_j*vpar_s(is)/vs(is)
-        phi_B = -E_i*N_j*hr11*vpar_s(is)/vs(is)
+        phi_A = phi_A +N_j*xi*w_cd*wdhr11p0*vpar(is)/vs(is) &
+         + d_1*(nuei_q1_u_1 + (5.0/3.0)*nuei_q1_q3_1+3.0*nuei_q1_q1_1)*hr11*E_i*N_j*vpar(is)/vs(is)
+        phi_B = -E_i*N_j*hr11*vpar(is)/vs(is)
       endif
       sig_A = 0.0
       sig_B = 0.0
@@ -1613,12 +1614,12 @@
        psi_B =betae_psi*M_i*J_j*hr11b0
        psi_A = psi_A - damp_psi*psi_B
        if(vpar_model_in.eq.0)then
-        psi_A = psi_A  -betae_psi*J_j*M_i*kpar_hr11b0*vpar_s(is)
-        phi_AU = betae_psi*U0*J_j*xi*(w_s*hr11bp*vpar_shear_s(is) +w_cd*wdhr11bp*vpar_s(is))/vs(is) &
-         + d_1*(nuei_q1_u_1 + (5.0/3.0)*nuei_q1_q3_1+3.0*nuei_q1_q1_1)*hr11bp*E_i*betae_psi*U0*J_j*vpar_s(is)/vs(is)
-        phi_BU = -betae_psi*U0*E_i*J_j*hr11bp*vpar_s(is)/vs(is)
+        psi_A = psi_A  -betae_psi*J_j*M_i*kpar_hr11b0*vpar(is)
+        phi_AU = betae_psi*U0*J_j*xi*(w_s*hr11bp*vpar_shear(is) +w_cd*wdhr11bp*vpar(is))/vs(is) &
+         + d_1*(nuei_q1_u_1 + (5.0/3.0)*nuei_q1_q3_1+3.0*nuei_q1_q1_1)*hr11bp*E_i*betae_psi*U0*J_j*vpar(is)/vs(is)
+        phi_BU = -betae_psi*U0*E_i*J_j*hr11bp*vpar(is)/vs(is)
         psi_AN = betae_psi*U0*N_j*(vs(is)*xi*w_s*(rlns(is)*hr11bp+1.5*rlts(is)*(hw113bp-hr11bp)) &
-         +M_i*kpar_hr11bp*vpar_s(is))
+         +M_i*kpar_hr11bp*vpar(is))
         psi_BN =-betae_psi*U0*M_i*N_j*hr11bp
        endif
       endif
@@ -1710,12 +1711,12 @@
 !
       ia = 5*nbasis+ib + ia0
 !
-      phi_A = N_j*xi*w_s*vpar_shear_s(is)*hr13/vs(is) 
+      phi_A = N_j*xi*w_s*vpar_shear(is)*hr13/vs(is)
       phi_B = 0.0
       if(vpar_model_in.eq.0)then
-        phi_A = phi_A +N_j*xi*w_cd*wdhr13p0*vpar_s(is)/vs(is) &
-         + d_1*(nuei_q3_u_1 + (5.0/3.0)*nuei_q3_q3_1)*hr13*E_i*N_j*vpar_s(is)/vs(is)
-        phi_B = -E_i*N_j*hr13*vpar_s(is)/vs(is)
+        phi_A = phi_A +N_j*xi*w_cd*wdhr13p0*vpar(is)/vs(is) &
+         + d_1*(nuei_q3_u_1 + (5.0/3.0)*nuei_q3_q3_1)*hr13*E_i*N_j*vpar(is)/vs(is)
+        phi_B = -E_i*N_j*hr13*vpar(is)/vs(is)
       endif
       sig_A = 0.0
       sig_B = 0.0
@@ -1730,12 +1731,12 @@
        psi_B = hr13b0*betae_psi*M_i*J_j
        psi_A = psi_A - damp_psi*psi_B
        if(vpar_model_in.eq.0)then
-        psi_A = psi_A -betae_psi*J_j*M_i*kpar_hr13b0*vpar_s(is)
-        phi_AU = betae_psi*U0*J_j*xi*(w_s*vpar_shear_s(is)*hr13bp +w_cd*wdhr13bp*vpar_s(is))/vs(is) &
-        + d_1*(nuei_q3_u_1 + (5.0/3.0)*nuei_q3_q3_1)*hr13bp*E_i*betae_psi*U0*J_j*vpar_s(is)/vs(is)
-        phi_BU = -betae_psi*U0*E_i*J_j*hr13bp*vpar_s(is)/vs(is)
+        psi_A = psi_A -betae_psi*J_j*M_i*kpar_hr13b0*vpar(is)
+        phi_AU = betae_psi*U0*J_j*xi*(w_s*vpar_shear(is)*hr13bp +w_cd*wdhr13bp*vpar(is))/vs(is) &
+        + d_1*(nuei_q3_u_1 + (5.0/3.0)*nuei_q3_q3_1)*hr13bp*E_i*betae_psi*U0*J_j*vpar(is)/vs(is)
+        phi_BU = -betae_psi*U0*E_i*J_j*hr13bp*vpar(is)/vs(is)
         psi_AN = betae_psi*U0*N_j*(vs(is)*xi*w_s*(rlns(is)*hr13bp+1.5*rlts(is)*(hw133bp-hr13bp)) &
-         + M_i*kpar_hr13bp*vpar_s(is))
+         + M_i*kpar_hr13bp*vpar(is))
         psi_BN = -betae_psi*U0*hr13bp*M_i*N_j
        endif
       endif
@@ -1831,7 +1832,7 @@
 !
       phi_A = N_j*xi*w_s*(rlns(is)*gn + rlts(is)*1.5*(gp3-gn))  
       if(vpar_model_in.eq.0)then
-        phi_A = phi_A + N_j*E_i*kpar_gnp0*vpar_s(is)
+        phi_A = phi_A + N_j*E_i*kpar_gnp0*vpar(is)
       endif
       phi_B = -E_i*N_j*gn
       phi_A = phi_A +xnu_phi_b*xnuei*xnu_n_b*phi_B
@@ -1851,15 +1852,15 @@
         sig_A = sig_A - damp_sig*sig_B
       endif
       if(use_bper_in)then
-       psi_A = -betae_psi*J_j*xi*w_s*vpar_shear_s(is)*gp1b0
+       psi_A = -betae_psi*J_j*xi*w_s*vpar_shear(is)*gp1b0
        if(vpar_model_in.eq.0)then
-        psi_A = psi_A -betae_psi*J_j*xi*w_cd*vpar_s(is)*wdgp1b0
-        psi_B = betae_psi*M_i*J_j*vpar_s(is)*gp1b0/vs(is)
+        psi_A = psi_A -betae_psi*J_j*xi*w_cd*vpar(is)*wdgp1b0
+        psi_B = betae_psi*M_i*J_j*vpar(is)*gp1b0/vs(is)
         phi_AU = betae_psi*U0*J_j*(xi*w_s*(rlns(is)*gnbp + rlts(is)*1.5*(gp3bp-gnbp))  &
-          + E_i*kpar_gnbp*vpar_s(is))
+          + E_i*kpar_gnbp*vpar(is))
         phi_BU = -betae_psi*U0*E_i*J_j*gnbp
-        psi_AN = betae_psi*U0*N_j*xi*(w_cd*vpar_s(is)*wdgp1bp+w_s*vpar_shear_s(is)*gp1bp)
-        psi_BN = -betae_psi*U0*M_i*N_j*vpar_s(is)*gp1bp/vs(is)
+        psi_AN = betae_psi*U0*N_j*xi*(w_cd*vpar(is)*wdgp1bp+w_s*vpar_shear(is)*gp1bp)
+        psi_BN = -betae_psi*U0*M_i*N_j*vpar(is)*gp1bp/vs(is)
        endif
       endif
 !
@@ -1941,10 +1942,10 @@
 !
       ia = 7*nbasis+ib + ia0
 !
-      phi_A = N_j*xi*w_s*vpar_shear_s(is)*gp1/vs(is)
+      phi_A = N_j*xi*w_s*vpar_shear(is)*gp1/vs(is)
       if(vpar_model_in.eq.0)then
-        phi_A = phi_A  + N_j*xi*w_cd*wdgp1p0*vpar_s(is)/vs(is)
-        phi_B = -E_i*N_j*gp1*vpar_s(is)/vs(is)
+        phi_A = phi_A  + N_j*xi*w_cd*wdgp1p0*vpar(is)/vs(is)
+        phi_B = -E_i*N_j*gp1*vpar(is)/vs(is)
       endif
       sig_A = 0.0
       sig_B = 0.0
@@ -1959,11 +1960,11 @@
        psi_B =betae_psi*M_i*J_j*gp1b0
        psi_A = psi_A - damp_psi*psi_B
        if(vpar_model_in.eq.0)then
-        psi_A = psi_A  -betae_psi*J_j*M_i*kpar_gp1b0*vpar_s(is)
-        phi_AU = betae_psi*U0*J_j*xi*(w_s*vpar_shear_s(is)*gp1bp +w_cd*wdgp1bp*vpar_s(is))/vs(is)
-        phi_BU = -betae_psi*U0*E_i*J_j*gp1bp*vpar_s(is)/vs(is)
+        psi_A = psi_A  -betae_psi*J_j*M_i*kpar_gp1b0*vpar(is)
+        phi_AU = betae_psi*U0*J_j*xi*(w_s*vpar_shear(is)*gp1bp +w_cd*wdgp1bp*vpar(is))/vs(is)
+        phi_BU = -betae_psi*U0*E_i*J_j*gp1bp*vpar(is)/vs(is)
         psi_AN = betae_psi*U0*N_j*(vs(is)*xi*w_s*(rlns(is)*gp1bp+1.5*rlts(is)*(gr13bp-gp1bp)) &
-         + M_i*kpar_gp1bp*vpar_s(is)) 
+         + M_i*kpar_gp1bp*vpar(is))
         psi_BN = -betae_psi*U0*M_i*N_j*gp1bp
        endif
       endif
@@ -2053,7 +2054,7 @@
 !
       phi_A = N_j*xi*w_s*(rlns(is)*gp1 + rlts(is)*1.5*(gr13-gp1))  
       if(vpar_model_in.eq.0)then
-        phi_A = phi_A  +N_j*E_i*kpar_gp1p0*vpar_s(is)
+        phi_A = phi_A  +N_j*E_i*kpar_gp1p0*vpar(is)
       endif
       phi_B = -E_i*N_j*gp1
       phi_A = phi_A +xnu_phi_b*xnuei*xnu_p1_b*phi_B
@@ -2073,15 +2074,15 @@
         sig_A = sig_A - damp_sig*sig_B
       endif
       if(use_bper_in)then
-       psi_A = -betae_psi*J_j*xi*w_s*vpar_shear_s(is)*gr11b0
+       psi_A = -betae_psi*J_j*xi*w_s*vpar_shear(is)*gr11b0
        if(vpar_model_in.eq.0)then
-        psi_A = psi_A  -betae_psi*J_j*xi*w_cd*vpar_s(is)*wdgr11b0
-        psi_B = betae_psi*M_i*J_j*vpar_s(is)*gr11b0/vs(is)
+        psi_A = psi_A  -betae_psi*J_j*xi*w_cd*vpar(is)*wdgr11b0
+        psi_B = betae_psi*M_i*J_j*vpar(is)*gr11b0/vs(is)
         phi_AU = betae_psi*U0*J_j*(xi*w_s*(rlns(is)*gp1bp + rlts(is)*1.5*(gr13bp-gp1bp)) &
-          + E_i*kpar_gp1bp*vpar_s(is))
+          + E_i*kpar_gp1bp*vpar(is))
         phi_BU = -betae_psi*U0*E_i*J_j*gp1bp
-        psi_AN = betae_psi*U0*N_j*xi*(w_cd*vpar_s(is)*wdgr11bp+w_s*vpar_shear_s(is)*gr11bp)
-        psi_BN = -betae_psi*U0*M_i*N_j*vpar_s(is)*gr11bp/vs(is)
+        psi_AN = betae_psi*U0*N_j*xi*(w_cd*vpar(is)*wdgr11bp+w_s*vpar_shear(is)*gr11bp)
+        psi_BN = -betae_psi*U0*M_i*N_j*vpar(is)*gr11bp/vs(is)
        endif
       endif
 !
@@ -2171,7 +2172,7 @@
 !
       phi_A = N_j*xi*w_s*(rlns(is)*gp3+rlts(is)*1.5*(gr33-gp3))
       if(vpar_model_in.eq.0)then 
-        phi_A = phi_A + N_j*E_i*kpar_gp3p0*vpar_s(is) 
+        phi_A = phi_A + N_j*E_i*kpar_gp3p0*vpar(is)
       endif
       phi_B = -gp3*E_i*N_j
       phi_A = phi_A +xnu_phi_b*xnuei*xnu_p3_b*phi_B
@@ -2191,15 +2192,15 @@
         sig_A = sig_A - damp_sig*sig_B
       endif
       if(use_bper_in)then
-       psi_A = -betae_psi*J_j*xi*w_s*vpar_shear_s(is)*gr13b0
+       psi_A = -betae_psi*J_j*xi*w_s*vpar_shear(is)*gr13b0
        if(vpar_model_in.eq.0)then
-        psi_A = psi_A -betae_psi*J_j*xi*w_cd*vpar_s(is)*wdgr13b0
-        psi_B = betae_psi*M_i*J_j*vpar_s(is)*gr13b0/vs(is)
+        psi_A = psi_A -betae_psi*J_j*xi*w_cd*vpar(is)*wdgr13b0
+        psi_B = betae_psi*M_i*J_j*vpar(is)*gr13b0/vs(is)
         phi_AU = betae_psi*U0*J_j*(xi*w_s*(rlns(is)*gp3bp+rlts(is)*1.5*(gr33bp-gp3bp))  &
-         + E_i*kpar_gp3bp*vpar_s(is)) 
+         + E_i*kpar_gp3bp*vpar(is))
         phi_BU = -betae_psi*U0*gp3bp*E_i*J_j
-        psi_AN = betae_psi*U0*N_j*xi*(w_cd*vpar_s(is)*wdgr13bp+w_s*vpar_shear_s(is)*gr13bp)
-        psi_BN = -betae_psi*U0*M_i*N_j*vpar_s(is)*gr13bp/vs(is)
+        psi_AN = betae_psi*U0*N_j*xi*(w_cd*vpar(is)*wdgr13bp+w_s*vpar_shear(is)*gr13bp)
+        psi_BN = -betae_psi*U0*M_i*N_j*vpar(is)*gr13bp/vs(is)
        endif
       endif
 !
@@ -2285,10 +2286,10 @@
 !
       ia = 10*nbasis+ib + ia0
 !
-      phi_A = N_j*xi*w_s*vpar_shear_s(is)*gr11/vs(is)
+      phi_A = N_j*xi*w_s*vpar_shear(is)*gr11/vs(is)
       if(vpar_model_in.eq.0)then
-        phi_A = phi_A + N_j*xi*w_cd*wdgr11p0*vpar_s(is)/vs(is)
-        phi_B = -E_i*N_j*gr11*vpar_s(is)/vs(is)
+        phi_A = phi_A + N_j*xi*w_cd*wdgr11p0*vpar(is)/vs(is)
+        phi_B = -E_i*N_j*gr11*vpar(is)/vs(is)
       endif
       sig_A = 0.0
       sig_B = 0.0
@@ -2303,11 +2304,11 @@
        psi_B = gr11b0*betae_psi*M_i*J_j
        psi_A = psi_A - damp_psi*psi_B
        if(vpar_model_in.eq.0)then
-        psi_A = psi_A  -betae_psi*J_j*M_i*kpar_gr11b0*vpar_s(is)
-        phi_AU = betae_psi*U0*J_j*xi*(w_s*vpar_shear_s(is)*gr11bp +w_cd*wdgr11bp*vpar_s(is))/vs(is)
-        phi_BU = -betae_psi*U0*E_i*J_j*gr11bp*vpar_s(is)/vs(is)
+        psi_A = psi_A  -betae_psi*J_j*M_i*kpar_gr11b0*vpar(is)
+        phi_AU = betae_psi*U0*J_j*xi*(w_s*vpar_shear(is)*gr11bp +w_cd*wdgr11bp*vpar(is))/vs(is)
+        phi_BU = -betae_psi*U0*E_i*J_j*gr11bp*vpar(is)/vs(is)
         psi_AN = -betae_psi*U0*N_j*(vs(is)*xi*w_s*(rlns(is)*gr11bp+1.5*rlts(is)*(gw113bp-gr11bp)) &
-         +M_i*kpar_gr11bp*vpar_s(is))
+         +M_i*kpar_gr11bp*vpar(is))
         psi_BN = -gr11bp*betae_psi*U0*M_i*N_j
        endif
       endif
@@ -2395,10 +2396,10 @@
 !
       ia = 11*nbasis+ib + ia0
 !
-      phi_A = N_j*xi*w_s*vpar_shear_s(is)*gr13/vs(is)
+      phi_A = N_j*xi*w_s*vpar_shear(is)*gr13/vs(is)
       if(vpar_model_in.eq.0)then
-        phi_A = phi_A + N_j*xi*w_cd*wdgr13p0*vpar_s(is)/vs(is)
-        phi_B = -E_i*N_j*gr13*vpar_s(is)/vs(is)
+        phi_A = phi_A + N_j*xi*w_cd*wdgr13p0*vpar(is)/vs(is)
+        phi_B = -E_i*N_j*gr13*vpar(is)/vs(is)
       endif
       sig_A = 0.0
       sig_B = 0.0
@@ -2413,11 +2414,11 @@
        psi_B = gr13b0*betae_psi*M_i*J_j
        psi_A = psi_A - damp_psi*psi_B
        if(vpar_model_in.eq.0)then
-        psi_A = psi_A  -betae_psi*J_j*M_i*kpar_gr13b0*vpar_s(is)
-        phi_AU = betae_psi*U0*J_j*xi*(w_s*vpar_shear_s(is)*gr13bp +w_cd*wdgr13bp*vpar_s(is))/vs(is)
-        phi_BU = -betae_psi*U0*E_i*J_j*gr13bp*vpar_s(is)/vs(is)
+        psi_A = psi_A  -betae_psi*J_j*M_i*kpar_gr13b0*vpar(is)
+        phi_AU = betae_psi*U0*J_j*xi*(w_s*vpar_shear(is)*gr13bp +w_cd*wdgr13bp*vpar(is))/vs(is)
+        phi_BU = -betae_psi*U0*E_i*J_j*gr13bp*vpar(is)/vs(is)
         psi_AN = betae_psi*U0*N_j*(vs(is)*xi*w_s*(rlns(is)*gr13bp+1.5*rlts(is)*(gw133bp-gr13bp)) &
-         +M_i*kpar_gr13bp*vpar_s(is)) 
+         +M_i*kpar_gr13bp*vpar(is))
         psi_BN = -gr13bp*betae_psi*U0*M_i*N_j
        endif
       endif
@@ -2525,14 +2526,14 @@
         sig_A = sig_A - damp_sig*sig_B
       endif
       if(use_bper_in)then
-       psi_A = -betae_psi*J_j*xi*w_s*vpar_shear_s(is)*gp1b0
+       psi_A = -betae_psi*J_j*xi*w_s*vpar_shear(is)*gp1b0
        if(vpar_model_in.eq.0)then
-        psi_A = psi_A -betae_psi*J_j*xi*w_cd*vpar_s(is)*wdgp1b0
-        psi_B = betae_psi*M_i*J_j*vpar_s(is)*gp1b0/vs(is)
+        psi_A = psi_A -betae_psi*J_j*xi*w_cd*vpar(is)*wdgp1b0
+        psi_B = betae_psi*M_i*J_j*vpar(is)*gp1b0/vs(is)
         phi_AU = betae_psi*U0*J_j*xi*w_s*(rlns(is)*gnbp + rlts(is)*1.5*(gp3bp-gnbp))
         phi_BU = -betae_psi*U0*gnbp*E_i*J_j
-        psi_AN = betae_psi*U0*N_j*xi*(w_cd*vpar_s(is)*wdgp1bp+w_s*vpar_shear_s(is)*gp1bp)
-        psi_BN = -betae_psi*U0*M_i*N_j*vpar_s(is)*gp1bp/vs(is)
+        psi_AN = betae_psi*U0*N_j*xi*(w_cd*vpar(is)*wdgp1bp+w_s*vpar_shear(is)*gp1bp)
+        psi_BN = -betae_psi*U0*M_i*N_j*vpar(is)*gp1bp/vs(is)
        endif
       endif
 !
@@ -2631,14 +2632,14 @@
         sig_A = sig_A - damp_sig*sig_B
       endif
       if(use_bper_in)then
-       psi_A = -betae_psi*J_j*xi*w_s*vpar_shear_s(is)*gr11b0
+       psi_A = -betae_psi*J_j*xi*w_s*vpar_shear(is)*gr11b0
        if(vpar_model_in.eq.0)then
-        psi_A = psi_A  -betae_psi*J_j*xi*w_cd*vpar_s(is)*wdgr11b0
-        psi_B = betae_psi*M_i*J_j*vpar_s(is)*gr11b0/vs(is)
+        psi_A = psi_A  -betae_psi*J_j*xi*w_cd*vpar(is)*wdgr11b0
+        psi_B = betae_psi*M_i*J_j*vpar(is)*gr11b0/vs(is)
         phi_AU = betae_psi*U0*J_j*xi*w_s*(rlns(is)*gp1bp + rlts(is)*1.5*(gr13bp-gp1bp))
         phi_BU = -betae_psi*U0*gp1bp*E_i*J_j
-        psi_AN = betae_psi*U0*N_j*xi*(w_cd*vpar_s(is)*wdgr11bp+ w_s*vpar_shear_s(is)*gr11bp)
-        psi_BN = -betae_psi*U0*M_i*N_j*vpar_s(is)*gr11bp/vs(is) 
+        psi_AN = betae_psi*U0*N_j*xi*(w_cd*vpar(is)*wdgr11bp+ w_s*vpar_shear(is)*gr11bp)
+        psi_BN = -betae_psi*U0*M_i*N_j*vpar(is)*gr11bp/vs(is)
        endif
       endif
 !
@@ -2745,14 +2746,14 @@
         sig_A = sig_A - damp_sig*sig_B
       endif
       if(use_bper_in)then
-       psi_A = -betae_psi*J_j*xi*w_s*vpar_shear_s(is)*gr13b0
+       psi_A = -betae_psi*J_j*xi*w_s*vpar_shear(is)*gr13b0
        if(vpar_model_in.eq.0)then
-        psi_A = psi_A -betae_psi*J_j*xi*w_cd*vpar_s(is)*wdgr13b0
-        psi_B = betae_psi*M_i*J_j*vpar_s(is)*gr13b0/vs(is)
+        psi_A = psi_A -betae_psi*J_j*xi*w_cd*vpar(is)*wdgr13b0
+        psi_B = betae_psi*M_i*J_j*vpar(is)*gr13b0/vs(is)
         phi_AU = betae_psi*U0*J_j*xi*w_s*(rlns(is)*gp3bp+rlts(is)*1.5*(gr33bp-gp3bp)) 
         phi_BU = -betae_psi*U0*gp3bp*E_i*J_j
-        psi_AN = betae_psi*U0*N_j*xi*(w_cd*vpar_s(is)*wdgr13bp+w_s*vpar_shear_s(is)*gr13bp) 
-        psi_BN = -betae_psi*U0*M_i*N_j*vpar_s(is)*gr13bp/vs(is)
+        psi_AN = betae_psi*U0*N_j*xi*(w_cd*vpar(is)*wdgr13bp+w_s*vpar_shear(is)*gr13bp)
+        psi_BN = -betae_psi*U0*M_i*N_j*vpar(is)*gr13bp/vs(is)
        endif
       endif
 !
@@ -2888,13 +2889,13 @@
           endif
         endif
         do j2=1,iur
-          if(iflux_in)then
-            vr(j1,j2) = REAL(vright(j1,j2))
-            vi(j1,j2) = AIMAG(vright(j1,j2))
-          else
+!          if(iflux_in)then
+!            vr(j1,j2) = REAL(vright(j1,j2))
+!            vi(j1,j2) = AIMAG(vright(j1,j2))
+!          else
             vr(j1,j2) = 0.0
             vi(j1,j2) = 0.0
-          endif
+!          endif
         enddo
       enddo
 !

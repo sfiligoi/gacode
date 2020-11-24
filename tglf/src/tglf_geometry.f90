@@ -542,7 +542,7 @@ SUBROUTINE get_ft_sa
   ! compute pitch angle at bounce average boundary
   !
   eps = rmin_sa/rmaj_sa
-  ! vshear_eff = 2.0*(ky/R_unit)*ABS(vpar_in)*sqrt_two*width_in
+  ! vshear_eff = 2.0*(ky/R_unit)*ABS(vpar_s)*sqrt_two*width_in
   ! theta_eff = width_in/MAX(1.0-vshear_eff,0.1)
   ! theta_max = theta_trapped_in*theta_eff*pi/sqrt_two
   theta_max = theta_trapped_in*width_in*pi/sqrt_two
@@ -756,7 +756,7 @@ SUBROUTINE get_ft_geo
   kpar= pi_2/(Ly*sqrt_two*width_in)
   bounce_y = MIN(Ly,pi*theta_trapped_in/kpar)
   ! kpar = pi_2/(Ly*sqrt_two*width_in*theta_trapped_in) &
-  ! +xnu_factor_in*xnuei_in*(Ly/pi)*SQRT(mass_in(1))
+  ! +xnu_factor_in*xnuei_in*(Ly/pi)*SQRT(mass(1))
   ! bounce_y = MIN(Ly,pi/kpar)
   ! write(*,*)"bounce_y =",bounce_y,"kpar =",kpar,"Ly=",Ly
   ! write(*,*)"pi*theta_trapped/kpar =",pi*theta_trapped_in/kpar

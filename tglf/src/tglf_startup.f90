@@ -86,9 +86,9 @@
 !
 !
       SUBROUTINE get_species
-!*********************************************
-!
-!*********************************************
+!******************************************************************************
+!  assign species arrays
+!******************************************************************************
       USE tglf_dimensions
       USE tglf_global
       USE tglf_species
@@ -108,44 +108,64 @@
        as_in(2) = 1.0
        taus_in(1)=1.0
        taus_in(2)=1.0
+       ns_in = 2
+       nstotal_in = 2
       endif
 !
       nfields_out = 1
       if(use_bper_in)nfields_out = nfields_out + 1
       if(use_bpar_in)nfields_out = nfields_out + 1
 !
+!  set the internal units
+!
+      if(units_in.eq.'GYRO')then
+        as_norm = 1.0
+        taus_norm = 1.0
+        mass_norm = 1.0
+        zs_norm = 1.0
+        B_norm = 1.0
+        L_norm = 1.0
+      else
+        as_norm = as_in(2)
+        taus_norm = taus_in(2)
+        mass_norm = mass_in(2)
+        zs_norm = ABS(zs_in(2))
+        B_norm = 1.0
+        L_norm = 1.0
+      endif
+! compute conversion factors
+      cs_norm = SQRT(taus_norm/mass_norm)
+      rhos_norm =SQRT(taus_norm*mass_norm)/ABS(zs_norm*B_norm)
+      freq_norm = cs_norm/L_norm
+!      ky_in = ky_in*rhos_norm
+!      write(*,*)"ky_in = ",ky_in
+!  inputs
+      vexb_shear_s = vexb_shear_in*sign_It_in
+      xnue_s = xnue_in
       pol = 0.0
       U0 = 0.0
-      do is=1,ns  ! include only kinetic species inputs
+      do is=1,nstotal_in  ! include all species inputs
         rlns(is) = rlns_in(is)
         rlts(is) = rlts_in(is)
         taus(is) = taus_in(is)
         as(is) = as_in(is)
-        vpar_s(is)=0.0
-        if(vpar_model_in.eq.0)vpar_s(is)=alpha_mach_in*vpar_in(is)
-        vpar_shear_s(is)=alpha_p_in*vpar_shear_in(is)
-!        if(nbasis_min_in.eq.1.and.(vpar_shear_s(is).ne.0.0.or.vpar_s(is).ne.0.0))then
-!          nbasis_min_in = 2      
-!        endif
         zs(is) = zs_in(is)
         mass(is) = mass_in(is)
+        vpar_s(is) = alpha_mach_in*sign_It_in*vpar_in(is)
+        vpar_shear_s(is) = alpha_p_in*sign_It_in*vpar_shear_in(is)
         vs(is) = SQRT(taus(is)/mass(is))
         pol = pol +  zs(is)*zs(is)*as(is)/taus(is)
         U0 = U0 + as(is)*vpar_s(is)*zs(is)*zs(is)/taus(is)
         fts(is) = 0.0
 !        write(*,*)"species",is
+!        write(*,*)" vs = ",vs(is)
 !        write(*,*)rlns(is),rlts(is)
-!        write(*,*)taus(is),as(is)
-!        write(*,*)zs(is),mass(is)
+!        write(*,*)"taus = ",taus(is),"   mass = ",mass(is)
+!        write(*,*)zs(is),as(is)
       enddo
 !
-      vexb_shear_s = vexb_shear_in*sign_It_in
-!      if(vpar_shear_model_in.eq.1)then  
-!        vexb_shear_s = sign_Bt_in*vexb_shear_in
-!      endif
 !
-!
-      xnu = 0.0
+      xnu = 0.0   ! not used
 ! energy exchange
       ei_exch(1,1) = -3.0*xnu*taus(1)*mass(1)/mass(2)
       ei_exch(1,2) =  3.0*xnu*mass(1)/mass(2)

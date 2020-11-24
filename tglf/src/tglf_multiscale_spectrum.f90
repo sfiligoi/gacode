@@ -75,8 +75,8 @@
       dlnpdr = 0.0
       ptot = 0.0
       do is=1,nstotal_in   ! include all species even non-kinetic ones like fast ions
-        ptot = ptot + as_in(is)*taus_in(is)
-        dlnpdr = dlnpdr + as_in(is)*taus_in(is)*(rlns_in(is)+rlts_in(is))
+        ptot = ptot + as(is)*taus(is)
+        dlnpdr = dlnpdr + as(is)*taus(is)*(rlns(is)+rlts(is))
       enddo
       if(rmaj_input*dlnpdr/MAX(ptot,0.01) .gt. 1.0)then
         dlnpdr = rmaj_input*dlnpdr/ptot
@@ -103,12 +103,12 @@
          cz1 = 0.0
          cz2=1.4*czf
          etg_streamer = 1.0
-         kyetg=etg_streamer*ABS(zs_in(2))/SQRT(taus_in(2)*mass_in(2))  ! fixed to ion gyroradius
+         kyetg=etg_streamer*ABS(zs(2))/SQRT(taus(2)*mass(2))  ! fixed to ion gyroradius
          cky=3.0
          sqcky=SQRT(cky)
         endif
         if(USE_MIX)then
-!original        kyetg=1.9*ABS(zs_in(2))/SQRT(taus_in(2)*mass_in(2))  ! fixed to ion gyroradius
+!original        kyetg=1.9*ABS(zs(2))/SQRT(taus(2)*mass(2))  ! fixed to ion gyroradius
           cky=3.0
           sqcky=SQRT(cky)
           if(USE_SUB1)cnorm=12.12
@@ -118,7 +118,7 @@
           cz2 = 1.0*czf
           etg_streamer=1.05
           if(alpha_quench_in .ne. 0.0)etg_streamer=2.1
-          kyetg=etg_streamer*ABS(zs_in(2))/SQRT(taus_in(2)*mass_in(2))  ! fixed to ion gyroradius
+          kyetg=etg_streamer*ABS(zs(2))/SQRT(taus(2)*mass(2))  ! fixed to ion gyroradius
         endif
         if(igeo.eq.0)then ! s-alpha
            cnorm=14.63
@@ -176,7 +176,7 @@
 !         write(*,*)ky0,kx,(ax*kx)**4
 !         write(*,*)i,"gamma_net = ",gamma_net(i)
         enddo
-!     write(*,*)"gammamax_out = ",vzf_out*kymax_out, gamma_net(jmax_out),"  vexb_shear = ",vexb_shear_in!!
+!     write(*,*)"gammamax_out = ",vzf_out*kymax_out, gamma_net(jmax_out),"  vexb_shear = ",vexb_shear_s!!
 ! find the maximum of gamma_net/ky
         CALL get_zonal_mixing(nky,ky_spectrum,gamma_net,vzf_mix,kymax_mix,jmax_mix)
         vzf_out = vzf_mix
@@ -324,8 +324,8 @@
       testmax2 = 0.0
       jmax1=1
       jmax2=0
-      kycut=0.8*ABS(zs_in(2))/SQRT(taus_in(2)*mass_in(2))
-      kyhigh=0.15*ABS(zs_in(1))/SQRT(taus_in(1)*mass_in(1))
+      kycut=0.8*ABS(zs(2))/SQRT(taus(2)*mass(2))
+      kyhigh=0.15*ABS(zs(1))/SQRT(taus(1)*mass(1))
 !      write(*,*)" kycut = ",kycut," kyhigh = ",kyhigh
       j1=1
       j2=1
@@ -404,7 +404,7 @@
       vzf_mix = gammamax1/kymax1
       kymax_mix = kymax1
       jmax_mix = jmax1
-!      write(*,*)"get_zonal_mxing"
-!      write(*,*)"gammamax1 = ",gammamax1," kymax1 = ",kymax1
+      write(*,*)"get_zonal_mxing"
+      write(*,*)"gammamax1 = ",gammamax1," kymax1 = ",kymax1
 
  END SUBROUTINE get_zonal_mixing
