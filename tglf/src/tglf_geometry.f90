@@ -470,11 +470,7 @@ SUBROUTINE xgrid_functions_geo
   kykx_geo_ave = kykx_geo_ave/norm_ave
   SAT_geo1_out = SAT_geo1_out/norm_ave
   SAT_geo2_out = SAT_geo2_out/norm_ave
-  field_theta_av = SAT_geo1_out
-  gradr_theta_av = SAT_geo2_out
-  !write(*,*)"SAT_geo1_out = ", SAT_geo1_out
-  !write(*,*)"SAT_geo2_out = ", SAT_geo2_out
-   !
+  !
   ! poloidal magnetic field on outboard midplane
   !
   Bp0_out = Bp(0)/B_unit
@@ -518,7 +514,6 @@ SUBROUTINE xgrid_functions_geo
   !
   ! compute the effective trapped fraction
   call get_ft_geo
-  ! write(*,*)"ft_geo=",ft
   !
 END SUBROUTINE xgrid_functions_geo
 !
