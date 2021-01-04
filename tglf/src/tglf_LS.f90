@@ -20,7 +20,6 @@
 !
       IMPLICIT NONE
       REAL,PARAMETER :: epsilon1 = 1.E-12
-      LOGICAL :: USE_PRESETS = .TRUE.
       INTEGER :: j1, j, i, jmax(maxmodes), iroot
       INTEGER :: imax,is
       INTEGER :: mi,me
@@ -42,21 +41,9 @@
 !
       ky = ky_in
 !      write(*,*)"ky = ",ky
-!
-! check co-dependencies
-!
-      if(USE_PRESETS)then
-        wdia_trapped_in=0.0
-        if(sat_rule_in.eq.2)then
-          xnu_model_in=3
-          wdia_trapped_in = 1.0
-          if(units_in.eq."GYRO")units_in = "CGYRO"
-        endif
-        if(sat_rule_in.eq.1)then
-          xnu_model_in = 2
-        endif
-        if(use_bper_in)alpha_mach_in=0.0
-      endif
+      !
+      ! check co-dependencies
+      !
       if(new_geometry)new_width=.TRUE.
       if(new_width)new_matrix=.TRUE.
 !      write(*,*)"new_start=",new_start

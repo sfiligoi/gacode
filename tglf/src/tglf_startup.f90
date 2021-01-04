@@ -9,6 +9,7 @@
 !
       IMPLICIT NONE
       INTEGER :: i
+      LOGICAL :: USE_PRESETS = .TRUE.
 !
 ! initialized trace_path that records the flow of tglf internal calls
 !
@@ -35,6 +36,27 @@
       endif
       if(use_default_species)ns_in=2
       ns = ns_in
+!
+      ! restrict user settings to three preset versions
+      ! SAT0 + GYRO + XNU 2
+      ! SAT1 + XNU 2
+      ! SAT2 + XNU 3 + UNITS != GYRO
+      if(USE_PRESETS)then
+        wdia_trapped_in=0.0
+        if(sat_rule_in.eq.2)then
+          xnu_model_in=3
+          wdia_trapped_in = 1.0
+          if(units_in.eq."GYRO")units_in = "CGYRO"
+        endif
+        if(sat_rule_in.eq.1)then
+          xnu_model_in = 2
+        endif
+        if(sat_rule_in.eq.0)then
+          units_in = 'GYRO'
+          xnu_model_in = 2
+        endif
+        if(use_bper_in)alpha_mach_in=0.0
+      endif
 ! SAT_RULE=0 has different fits for nmodes=2 and nmodes=4
       if(sat_rule_in.eq.0)then
         if(nmodes_in.gt.2)nmodes_in=4
