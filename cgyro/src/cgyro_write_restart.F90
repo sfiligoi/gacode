@@ -76,10 +76,13 @@ subroutine cgyro_write_restart_one
   ! Pack source into h(0,0)
   if (source_flag == 1 .and. n == 0) then
      ic0 = (n_radial/2)*n_theta
+!$acc parallel loop present(h_x,source)
      do j=1,n_theta
         h_x(ic0+j,:) = source(j,:)
      enddo
   endif
+
+!$acc update host(h_x) async(2)
 
   offset1 = size(h_x,kind=MPI_OFFSET_KIND)*(i_proc_1+i_proc_2*n_proc_1) + restart_header_size
   if (offset1 < restart_header_size) then
@@ -111,6 +114,9 @@ subroutine cgyro_write_restart_one
           'native',&
           finfo,&
           i_err)
+
+  ! need h_x here
+!$acc wait(2)
 
   call MPI_FILE_WRITE_AT(fhv,&
           offset1,&
@@ -180,6 +186,7 @@ subroutine cgyro_write_restart_one
   ! Re-set h(0,0)=0
   if (source_flag == 1 .and. n == 0) then
      ic0 = (n_radial/2)*n_theta
+!$acc parallel loop present(h_x)
      do j=1,n_theta
         h_x(ic0+j,:) = 0.0
      enddo

@@ -31,8 +31,9 @@ subroutine cgyro_source
      icm = (ir-1-1)*n_theta
      icp = (ir-1+1)*n_theta
 
-$omp parallel do private(j)
+!$acc parallel loop gang private(j) present(h_x,source)
      do iv_loc=1,nv_loc
+!$acc loop seq
       do j=1,n_theta
         ! Recursive update of p=+1 source 
         source(j,iv_loc) = source(j,iv_loc)+(h_x(icp+j,iv_loc)-source(j,iv_loc))/sa

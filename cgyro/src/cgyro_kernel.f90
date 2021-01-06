@@ -104,6 +104,11 @@ subroutine cgyro_kernel
   ! Initialize adaptive time-stepping parameter
   delta_t_gk = delta_t
   
+  ! GPU versions of step_gk and coll work on the following in the GPU memory
+  call timer_lib_in('str_mem')
+!$acc update device(field,psi,cap_h_c,chi,h_x,source)
+  call timer_lib_out('str_mem')
+
   do i_time=1,n_time
 
      call timer_lib_in('TOTAL')
@@ -112,11 +117,6 @@ subroutine cgyro_kernel
      ! Time advance
      !
      t_current = t_current+delta_t
-
-     ! GPU versions of step_gk and coll work on the following in the GPU memory
-     call timer_lib_in('str_mem')
-!$acc update device(field,psi,cap_h_c,chi,h_x)
-     call timer_lib_out('str_mem')
 
      ! Collisionless step: returns new h_x, cap_h_x, fields
      
@@ -132,10 +132,6 @@ subroutine cgyro_kernel
         call cgyro_step_gk
      end select
      
-     call timer_lib_in('str_mem')
-!$acc update host(rhs(:,:,1))
-     call timer_lib_out('str_mem')
-
      ! Collision step: returns new h_x, cap_h_x, fields
      if (collision_model == 5) then
         call cgyro_step_collision_simple
@@ -143,14 +139,19 @@ subroutine cgyro_kernel
         call cgyro_step_collision
      endif
 
-     call timer_lib_in('coll_mem')
-!$acc update host(field,psi,cap_h_c,chi,h_x)
-     call timer_lib_out('coll_mem')
-
      if (shear_method == 1) then
         ! Discrete shift (Hammett) 
         call cgyro_shear_hammett
      endif
+
+     ! field will not be modified in GPU memory for the rest fo the loop
+!$acc update host(field) async(3)
+
+     if (mod(i_time,print_step) == 0) then
+       ! cap_h_c will not be modified in GPU memory for the rest of the loop
+!$acc update host(cap_h_c) async(4)
+     endif
+
      call cgyro_source
     !------------------------------------------------------------
 
@@ -158,6 +159,11 @@ subroutine cgyro_kernel
      ! Diagnostics
      !
      ! NOTE: Fluxes are calculated in cgyro_write_timedata
+
+  call timer_lib_in('coll_mem')
+  ! wait for fields to be synched into system memory, used by cgyro_error_estimate
+!$acc wait(3)
+  call timer_lib_out('coll_mem')
 
      ! Error estimate
      call cgyro_error_estimate
@@ -168,10 +174,21 @@ subroutine cgyro_kernel
      !---------------------------------------
      ! IO
      !
-     call timer_lib_in('io')
+     if (mod(i_time,print_step) == 0) then
+       call timer_lib_in('coll_mem')
+       ! wait for cap_h_c to be synched into system memory, used by cgyro_write_timedata
+!$acc wait(4)
+       call timer_lib_out('coll_mem')
 
-     ! Write simulation data
-     call cgyro_write_timedata
+       call timer_lib_in('io')
+
+       ! Write simulation data
+       call cgyro_write_timedata
+
+       call timer_lib_out('io')
+     endif
+
+     call timer_lib_in('io')
 
      ! Write restart data
      call cgyro_write_restart
@@ -191,6 +208,11 @@ subroutine cgyro_kernel
   !---------------------------------------------------------------------------
 
 100 continue
+
+
+  call timer_lib_in('coll_mem')
+!$acc update host(field,psi,cap_h_c,chi,h_x,source,rhs(:,:,1))
+  call timer_lib_out('coll_mem')
 
   ! Manage exit message
 
