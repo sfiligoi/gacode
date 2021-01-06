@@ -20,6 +20,7 @@ subroutine cgyro_error_estimate
   real, dimension(2) :: pair_loc,pair
   real, dimension(2) :: error_loc
   
+  call timer_lib_in('str')
 
   ! 1. Estimate of total (field) error via quadratic interpolation
 
@@ -33,6 +34,8 @@ subroutine cgyro_error_estimate
 
   pair_loc(1) = sum(abs(h_x))
   pair_loc(2) = sum(abs(rhs(:,:,1)))
+
+  call timer_lib_out('str')
 
   call timer_lib_in('str_comm')
 
@@ -77,8 +80,12 @@ subroutine cgyro_error_estimate
      call cgyro_error('Integration error exceeded limit.')
   endif
 
+  call timer_lib_in('field')
+
   field_old3 = field_old2
   field_old2 = field_old
   field_old  = field
+
+  call timer_lib_out('field')
 
 end subroutine cgyro_error_estimate
