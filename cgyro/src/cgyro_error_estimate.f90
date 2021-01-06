@@ -20,7 +20,7 @@ subroutine cgyro_error_estimate
   real, dimension(2) :: pair_loc,pair
   real, dimension(2) :: error_loc
   
-  call timer_lib_in('str')
+  call timer_lib_in('field')
 
   ! 1. Estimate of total (field) error via quadratic interpolation
 
@@ -30,7 +30,11 @@ subroutine cgyro_error_estimate
   norm_loc(1)  = sum(abs(field))
   error_loc(1) = sum(abs(field-field_loc))
 
+  call timer_lib_out('field')
+
   ! 2. Estimate of collisionless error via 3rd-order linear estimate
+
+  call timer_lib_in('str')
 
   pair_loc(1) = sum(abs(h_x))
   pair_loc(2) = sum(abs(rhs(:,:,1)))
