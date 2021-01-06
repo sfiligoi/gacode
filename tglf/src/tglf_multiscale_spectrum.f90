@@ -30,6 +30,7 @@
       LOGICAL :: USE_X4=.FALSE.
       LOGICAL :: first_pass = .TRUE.
       LOGICAL :: USE_SUB1=.FALSE.
+      LOGICAL :: USE_PRESSURE = .TRUE.
       INTEGER :: i,is,k,j,j1,j2,jmax1,jmax2
       
       INTEGER :: expsub=2, exp_ax, jmax_mix
@@ -47,6 +48,7 @@
       REAL :: kxzf, sat_geo_factor
       REAL :: b0,b1,b2,b3
       REAL :: d1,d2,Gq,kx_width,dlnpdr,ptot
+      REAL :: measure
       REAL,DIMENSION(nkym) :: gamma_net=0.0
       REAL,DIMENSION(nkym) :: gamma=0.0
       REAL,DIMENSION(nkym) :: gamma_kymix=0.0
@@ -58,6 +60,13 @@
       else
         first_pass = .FALSE.
       endif
+!
+      if(sat_rule_in .lt. 2)then
+        measure = SQRT(taus(1)*mass(2))
+      else
+        measure = SQRT(taus(2)*mass(2)/zs(2)**2)/grad_r0_out
+      endif
+!
       if(first_pass)then  ! first pass for spectral shift model or only pass for quench rule
         gamma_net(:) = eigenvalue_spectrum_out(1,:,1)
         CALL get_zonal_mixing(nky,ky_spectrum,gamma_net,vzf_mix,kymax_mix,jmax_mix)
@@ -72,16 +81,18 @@
       ! Miller geometry values igeo=1
       if(xnu_model_in.eq.3)USE_X3=.TRUE.
       if(xnu_model_in.eq.4)USE_X4=.TRUE.
-      dlnpdr = 0.0
-      ptot = 0.0
-      do is=1,nstotal_in   ! include all species even non-kinetic ones like fast ions
-        ptot = ptot + as(is)*taus(is)
-        dlnpdr = dlnpdr + as(is)*taus(is)*(rlns(is)+rlts(is))
-      enddo
-      if(rmaj_input*dlnpdr/MAX(ptot,0.01) .gt. 1.0)then
-        dlnpdr = rmaj_input*dlnpdr/ptot
+      if(USE_PRESSURE)then
+         dlnpdr = 0.0
+         ptot = 0.0
+         do is=1,nstotal_in   ! include all species even non-kinetic ones like fast ions
+           ptot = ptot + as(is)*taus(is)
+           dlnpdr = dlnpdr + as(is)*taus(is)*(rlns(is)+rlts(is))
+         enddo
+         dlnpdr = rmaj_input*dlnpdr/MAX(ptot,0.01)
+         if(dlnpdr .gt. 20.0)dlnpdr = 20.0
+         if(dlnpdr .lt. 4.0)dlnpdr = 4.0
       else
-        dlnpdr = 1.0
+         dlnpdr = 12.0
       endif
 !         write(*,*)"dlnpdr = ",dlnpdr
 !
@@ -131,21 +142,28 @@
        ! SAT2 fit for CGYRO linear modes
         b0 = 0.72
         b1 = 1.22
-        b2 = 24.52  ! note this is b2**2 in PPCF paper. This is NF paper value
-        b3 = 0.88
-        d1 = 0.5475*((Bt0_out/B_geo0_out)**4)/grad_r0_out**2   ! NF paper version that removes rmin/rmaj dependence
+!        b2 = 24.52  ! note this is b2**2 in PPCF paper 2020
+        b2 = 11.21
+!        b3 = 0.88
+        b3 = 2.4
+!        d1 = 0.5475*((Bt0_out/B_geo0_out)**4)/grad_r0_out**2
+        d1 = (Bt0_out/B_geo0_out)**4    ! PPCF paper 2020
         Gq = B_geo0_out/grad_r0_out
-        d2 = 1.0/Gq**2
-        cnorm = b2*12.0/dlnpdr
+        d2 = b3/Gq**2
+        cnorm = b2*(q_in/2.0)*(12.0/dlnpdr)
         kyetg = 1000.0   ! does not impact SAT2
         cky=3.0
         sqcky=SQRT(cky)
         kycut = b0*kymax_out
         cz1 = 1.1*czf
       endif
+!      write(*,*)"Bt0 = ",Bt0_out," B0 = ",B_geo0_out," gradr0 = ",grad_r0_out
+!      write(*,*)"G1 = ",sat_geo1_out,"  G2 = ",sat_geo2_out,"  sat_geo0 = ",sat_geo0_out
+!      write(*,*)"d1 = ",d1,"  d2 = ",d2
 ! coefficients for spectral shift model for ExB shear
       ax=0.0
       ay=0.0
+      exp_ax = 1
       if(alpha_quench_in.eq.0.0)then
       !spectral shift model parameters
         ax = 1.15
@@ -253,7 +271,7 @@
            else
              kx_width = kycut/grad_r0_out + b1*(ky0 - kycut)*Gq
              sat_geo_factor = SAT_geo0_out*(d1*SAT_geo1_out*kycut +  &
-                              b3*(ky0 - kycut)*d2*SAT_geo2_out)/ky0
+                              (ky0 - kycut)*d2*SAT_geo2_out)/ky0
            endif
            kx = kx*ky0/kx_width
     !       write(*,*)"sat2 ",B_geo0_out,grad_r0_out,SAT_geo1_out,SAT_geo2_out,sat_geo_factor
@@ -263,7 +281,7 @@
           if(gamma0.gt.small)gammaeff = &
                gamma_kymix(j)*(eigenvalue_spectrum_out(1,j,i)/gamma0)**expsub
           if(ky0.gt.kyetg)gammaeff = gammaeff*SQRT(ky0/kyetg)
-          field_spectrum_out(2,j,i) = cnorm*((gammaeff/(kx_width*ky0))/(1.0+ay*kx**2))**2
+          field_spectrum_out(2,j,i) = measure*cnorm*((gammaeff/(kx_width*ky0))/(1.0+ay*kx**2))**2
           if(units_in.ne.'GYRO')field_spectrum_out(2,j,i) = sat_geo_factor*field_spectrum_out(2,j,i)
         enddo
      enddo
@@ -404,7 +422,7 @@
       vzf_mix = gammamax1/kymax1
       kymax_mix = kymax1
       jmax_mix = jmax1
-      write(*,*)"get_zonal_mxing"
-      write(*,*)"gammamax1 = ",gammamax1," kymax1 = ",kymax1
+!      write(*,*)"get_zonal_mxing"
+!      write(*,*)"gammamax1 = ",gammamax1," kymax1 = ",kymax1
 
  END SUBROUTINE get_zonal_mixing

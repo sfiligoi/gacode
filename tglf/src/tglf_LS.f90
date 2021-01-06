@@ -392,11 +392,13 @@
       REAL :: cnorm,exponent1
       REAL :: wd0,gnet
       REAL :: c1,pols,ks
+      REAL :: measure
       REAL :: get_GAM_freq
       REAL :: intensity
 !
       pols = (ave_p0(1,1)/ABS(as(1)*zs(1)*zs(1)))**2 ! scale invariant pol
       ks = kp*SQRT(taus(1)*mass(2))/ABS(zs(1))   ! scale invariant gyroradius * poloidal wavenumber
+      measure = SQRT(taus(1)*mass(2))
       if(sat_rule_in.eq.0)then
        if(igeo.eq.0)then
         if(nmodes_in.le.2)then
@@ -432,7 +434,7 @@
          intensity = intensity/(1.0+0.56*kx0_e**2)**2
          intensity = intensity/(1.0+(1.15*kx0_e)**4)**2
        endif
-         intensity = intensity*SAT_geo0_out
+         intensity = intensity*SAT_geo0_out*measure
 !       write(*,*)" sat0 ",SAT_geo0_out
       elseif(sat_rule_in.ge.1)then
 !
