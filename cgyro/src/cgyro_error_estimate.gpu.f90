@@ -21,16 +21,16 @@ subroutine cgyro_error_estimate
   real, dimension(2) :: pair_loc,pair
   real, dimension(2) :: error_loc
   
-  real : norm_loc_s,error_loc_s,h_s,r_s
+  real :: norm_loc_s,error_loc_s,h_s,r_s
 
   ! launch Estimate of collisionless error via 3rd-order linear estimate async ahead of time
   h_s=0.0
   r_s=0.0
-!$acc parallel loop collapse(2) independent present(h_x,rsh(:,:,1)) reduction(+:h_s,r_s) async(2)
+!$acc parallel loop collapse(2) independent present(h_x,rhs(:,:,1)) reduction(+:h_s,r_s) async(2)
   do iv_loc=1,nv_loc
      do ic=1,nc
        h_s = h_s + abs(h_x(ic,iv_loc))
-       r_s = r_s + abs(rhs(ic_iv_loc,1))
+       r_s = r_s + abs(rhs(ic,iv_loc,1))
      enddo
   enddo
 

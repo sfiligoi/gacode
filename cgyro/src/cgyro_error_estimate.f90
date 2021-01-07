@@ -21,7 +21,7 @@ subroutine cgyro_error_estimate
   real, dimension(2) :: pair_loc,pair
   real, dimension(2) :: error_loc
   
-  real : norm_loc_s,error_loc_s,h_s,r_s
+  real :: norm_loc_s,error_loc_s,h_s,r_s
 
   call timer_lib_in('field')
 
@@ -62,7 +62,7 @@ subroutine cgyro_error_estimate
   do iv_loc=1,nv_loc
      do ic=1,nc
        h_s = h_s + abs(h_x(ic,iv_loc))
-       r_s = r_s + abs(rhs(ic_iv_loc,1))
+       r_s = r_s + abs(rhs(ic,iv_loc,1))
      enddo
   enddo
   pair_loc(1) = h_s

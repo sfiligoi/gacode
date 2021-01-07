@@ -41,6 +41,7 @@ subroutine cgyro_source
         h_x(icp+j,iv_loc) = h_x(icp+j,iv_loc)-nu_eff*delta_t*source(j,iv_loc)
         ! Subtract source from h(0,-1)
         h_x(icm+j,iv_loc) = h_x(icm+j,iv_loc)-nu_eff*delta_t*conjg(source(j,iv_loc))
+      enddo
      enddo
 
   endif

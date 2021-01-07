@@ -32,7 +32,7 @@ subroutine cgyro_shear_hammett
      gtime = gtime-1.0
 
 
-!$acc parallel loop gang private(a1,ir) present(h_x,ic_c)
+!$acc parallel loop independent gang private(a1,ir) present(h_x,ic_c)
      do iv_loc=1,nv_loc
        a1(:) = h_x(ic_c(1,:),iv_loc)
 
@@ -56,7 +56,7 @@ subroutine cgyro_shear_hammett
      call timer_lib_in('shear')
      gtime = gtime+1.0
 
-!$acc parallel loop gang private(a1,ir) present(h_x,ic_c)
+!$acc parallel loop independent gang private(a1,ir) present(h_x,ic_c)
      do iv_loc=1,nv_loc
        a1(:) = h_x(ic_c(n_radial,:),iv_loc) 
 
