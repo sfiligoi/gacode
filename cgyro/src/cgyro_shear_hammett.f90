@@ -31,7 +31,7 @@ subroutine cgyro_shear_hammett
      call timer_lib_in('shear')
      gtime = gtime-1.0
 
-$omp parallel do private(a1,ir)
+!$omp parallel do private(a1,ir)
      do iv_loc=1,nv_loc
        a1(:) = h_x(ic_c(1,:),iv_loc)
 
@@ -54,7 +54,7 @@ $omp parallel do private(a1,ir)
      call timer_lib_in('shear')
      gtime = gtime+1.0
 
-$omp parallel do private(a1,ir)
+!$omp parallel do private(a1,ir)
      do iv_loc=1,nv_loc
        a1(:) = h_x(ic_c(n_radial,:),iv_loc) 
 
