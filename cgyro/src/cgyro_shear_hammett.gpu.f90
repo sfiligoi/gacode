@@ -31,10 +31,12 @@ subroutine cgyro_shear_hammett
      call timer_lib_in('shear')
      gtime = gtime-1.0
 
-!$omp parallel do private(a1,ir)
+
+!$acc parallel loop independent gang private(a1,ir) present(h_x,ic_c)
      do iv_loc=1,nv_loc
        a1(:) = h_x(ic_c(1,:),iv_loc)
 
+!acc loop seq
        do ir=2,n_radial
          h_x(ic_c(ir-1,:),iv_loc) = h_x(ic_c(ir,:),iv_loc)
        enddo
@@ -44,7 +46,7 @@ subroutine cgyro_shear_hammett
 
      call timer_lib_out('shear')
 
-     call cgyro_field_c
+     call cgyro_field_c_gpu
 
   endif
 
@@ -54,10 +56,11 @@ subroutine cgyro_shear_hammett
      call timer_lib_in('shear')
      gtime = gtime+1.0
 
-!$omp parallel do private(a1,ir)
+!$acc parallel loop independent gang private(a1,ir) present(h_x,ic_c)
      do iv_loc=1,nv_loc
        a1(:) = h_x(ic_c(n_radial,:),iv_loc) 
 
+!acc loop seq
        do ir=n_radial-1,1,-1
          h_x(ic_c(ir+1,:),iv_loc) = h_x(ic_c(ir,:),iv_loc)
        enddo
@@ -66,7 +69,7 @@ subroutine cgyro_shear_hammett
      enddo
      call timer_lib_out('shear')
 
-     call cgyro_field_c
+     call cgyro_field_c_gpu
 
   endif
 

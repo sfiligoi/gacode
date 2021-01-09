@@ -170,7 +170,7 @@ subroutine cgyro_init_manager
      allocate(dtheta_up(-nup_theta:nup_theta, nc))
      allocate(source(n_theta,nv_loc))
 
-!$acc enter data create(fcoef,gcoef,field,field_loc)
+!$acc enter data create(fcoef,gcoef,field,field_loc,source)
 
      ! Velocity-distributed arrays
 

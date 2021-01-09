@@ -18,3 +18,9 @@ cgyro_step_collision_simple.o : cgyro_step_collision_simple.gpu.f90
 	$(FC) $(FMATH) $(FFLAGS) -o cgyro_step_collision_simple.o -c cgyro_step_collision_simple.gpu.f90
 cgyro_step_collision.o : cgyro_step_collision.gpu.f90
 	$(FC) $(FMATH) $(FFLAGS) -o cgyro_step_collision.o -c cgyro_step_collision.gpu.f90
+cgyro_source.o : cgyro_source.gpu.f90
+	$(FC) $(FMATH) $(FFLAGS) -o cgyro_source.o -c cgyro_source.gpu.f90
+cgyro_shear_hammett.o : cgyro_shear_hammett.gpu.f90
+	$(FC) $(FMATH) $(FFLAGS) -o cgyro_shear_hammett.o -c cgyro_shear_hammett.gpu.f90
+cgyro_error_estimate.o : cgyro_error_estimate.gpu.f90
+	$(FC) $(FMATH) $(FFLAGS) -o cgyro_error_estimate.o -c cgyro_error_estimate.gpu.f90

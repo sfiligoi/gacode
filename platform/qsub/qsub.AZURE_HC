@@ -1,0 +1,14 @@
+#!/bin/bash
+
+echo "-queue: debug, batch"
+
+# Default queue
+if [ "$QUEUE" == "null_queue" ] ; then
+   QUEUE=debug
+fi
+
+bfile=$SIMDIR/batch.src
+echo "#!/bin/bash " > $bfile
+echo "#SBATCH --time $WALLTIME -p hpc --mem=310G -n $nmpi" >> $bfile
+
+echo "$CODE -e $LOCDIR -n $nmpi -nomp $nomp -numa $numa -mpinuma $mpinuma -p $SIMROOT" >> $bfile
