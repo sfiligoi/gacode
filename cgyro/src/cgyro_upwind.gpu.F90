@@ -170,7 +170,7 @@ subroutine cgyro_upwind_r32
   call MPI_ALLREDUCE(upwind32_res_loc(:,:,:),&
        upwind32_res(:,:,:),&
        2*size(upwind32_res(:,:,:)),&
-       MPI_PRECISION,&
+       MPI_REAL,&
        MPI_SUM,&
        NEW_COMM_1,&
        i_err)
