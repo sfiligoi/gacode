@@ -14,7 +14,7 @@
 !
 !-----------------------------------------------------------------
 
-subroutine cgyro_upwind
+subroutine cgyro_upwind_r64
 
   use cgyro_globals
   use mpi
@@ -23,19 +23,17 @@ subroutine cgyro_upwind
   implicit none
 
   integer :: is,ie,ix
-  complex, dimension(nc,n_species,2) :: res_loc 
-  complex, dimension(nc,n_species,2) :: res
 
   call timer_lib_in('str')
-  res_loc(:,:,:) = (0.0,0.0)
+  upwind_res_loc(:,:,:) = (0.0,0.0)
 
 !$omp parallel private(iv_loc,ic,is)
-!$omp do reduction(+:res_loc)
+!$omp do reduction(+:upwind_res_loc)
   do iv=nv1,nv2
      iv_loc = iv-nv1+1
      is = is_v(iv)
      do ic=1,nc
-        res_loc(ic,is,:) = res_loc(ic,is,:)+upfac1(ic,iv_loc,:)*g_x(ic,iv_loc)
+        upwind_res_loc(ic,is,:) = upwind_res_loc(ic,is,:)+upfac1(ic,iv_loc,:)*g_x(ic,iv_loc)
      enddo
   enddo
 !$omp end do
@@ -44,9 +42,9 @@ subroutine cgyro_upwind
   call timer_lib_out('str')
 
   call timer_lib_in('str_comm')
-  call MPI_ALLREDUCE(res_loc(:,:,:),&
-       res(:,:,:),&
-       size(res(:,:,:)),&
+  call MPI_ALLREDUCE(upwind_res_loc(:,:,:),&
+       upwind_res(:,:,:),&
+       size(upwind_res(:,:,:)),&
        MPI_DOUBLE_COMPLEX,&
        MPI_SUM,&
        NEW_COMM_1,&
@@ -63,11 +61,81 @@ subroutine cgyro_upwind
      ie = ie_v(iv)
      do ic=1,nc
         g_x(ic,iv_loc) = abs(xi(ix))*vel(ie)*g_x(ic,iv_loc) &
-             -upfac2(ic,iv_loc,1)*res(ic,is,1) &
-             -upfac2(ic,iv_loc,2)*res(ic,is,2)
+             -upfac2(ic,iv_loc,1)*upwind_res(ic,is,1) &
+             -upfac2(ic,iv_loc,2)*upwind_res(ic,is,2)
      enddo
   enddo
 
   call timer_lib_out('str')
+
+end subroutine cgyro_upwind_r64
+
+subroutine cgyro_upwind_r32
+
+  use cgyro_globals
+  use mpi
+  use timer_lib
+
+  implicit none
+
+  integer :: is,ie,ix
+
+  call timer_lib_in('str')
+  upwind32_res_loc(:,:,:) = (0.0,0.0)
+
+!$omp parallel private(iv_loc,ic,is)
+!$omp do reduction(+:upwind32_res_loc)
+  do iv=nv1,nv2
+     iv_loc = iv-nv1+1
+     is = is_v(iv)
+     do ic=1,nc
+        upwind32_res_loc(ic,is,:) = upwind32_res_loc(ic,is,:)+upfac1(ic,iv_loc,:)*g_x(ic,iv_loc)
+     enddo
+  enddo
+!$omp end do
+!$omp end parallel
+
+  call timer_lib_out('str')
+
+  call timer_lib_in('str_comm')
+  call MPI_ALLREDUCE(upwind32_res_loc(:,:,:),&
+       upwind32_res(:,:,:),&
+       size(upwind32_res(:,:,:)),&
+       MPI_COMPLEX,&
+       MPI_SUM,&
+       NEW_COMM_1,&
+       i_err)
+  call timer_lib_out('str_comm')
+
+  call timer_lib_in('str')
+
+!$omp parallel do private(iv_loc,is,ix,ie,ic)
+  do iv=nv1,nv2
+     iv_loc = iv-nv1+1
+     is = is_v(iv)
+     ix = ix_v(iv)
+     ie = ie_v(iv)
+     do ic=1,nc
+        g_x(ic,iv_loc) = abs(xi(ix))*vel(ie)*g_x(ic,iv_loc) &
+             -upfac2(ic,iv_loc,1)*upwind32_res(ic,is,1) &
+             -upfac2(ic,iv_loc,2)*upwind32_res(ic,is,2)
+     enddo
+  enddo
+
+  call timer_lib_out('str')
+
+end subroutine cgyro_upwind_r32
+
+subroutine cgyro_upwind
+
+  use cgyro_globals
+
+  implicit none
+
+  if (unwind_single_flag == 0) then
+    call cgyro_upwind_r64
+  else
+    call cgyro_upwind_r32
+  endif
 
 end subroutine cgyro_upwind

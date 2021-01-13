@@ -12,6 +12,7 @@ module cgyro_globals
 #ifdef _OPENACC
   use cuFFT
 #endif
+  use, intrinsic :: iso_fortran_env
 
   ! Data output precision setting
   integer, parameter :: BYTE=4 ! Change to 8 for double precision
@@ -90,6 +91,7 @@ module cgyro_globals
   integer :: profile_shear_flag
   integer :: theta_plot
   integer :: gpu_bigmem_flag
+  integer :: upwind_single_flag
   real :: px0
   integer :: stream_term
   real :: stream_factor
@@ -401,6 +403,11 @@ module cgyro_globals
   !
   ! Work arrays
   real, dimension(2) :: integration_error
+  ! Upwind work arrays
+  complex, dimension(:,:,:) :: upwind_res_loc
+  complex, dimension(:,:,:) :: upwind_res
+  complex(KIND=REAL32), dimension(:,:,:) :: upwind32_res_loc
+  complex(KIND=REAL32), dimension(:,:,:) :: upwind32_res
   !
   ! LAPACK work arrays 
   real, dimension(:), allocatable :: work  

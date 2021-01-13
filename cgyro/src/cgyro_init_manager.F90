@@ -194,6 +194,8 @@ subroutine cgyro_init_manager
      allocate(psi(nc,nv_loc))
      allocate(chi(nc,nv_loc))
      allocate(h0_x(nc,nv_loc))
+!$acc enter data create(rhs,h_x,g_x,psi,chi,h0_x,h0_old)
+
      allocate(cap_h_c(nc,nv_loc))
      allocate(cap_h_ct(nv_loc,nc))
      allocate(omega_cap_h(nc,nv_loc))
@@ -211,7 +213,11 @@ subroutine cgyro_init_manager
      allocate(cap_h_v(nc_loc,nv))
      allocate(cap_h_v_prime(nc_loc,nv))
 
-!$acc enter data create(rhs,h_x,g_x,psi,chi,h0_x,h0_old,cap_h_c,cap_h_ct,cap_h_v,dvjvec_c,dvjvec_v,jxvec_c)
+!$acc enter data create(cap_h_c,cap_h_ct,cap_h_v,dvjvec_c,dvjvec_v,jxvec_c)
+
+     allocate(upwind_res_loc(nc,n_species,2))
+     allocate(upwind_res(nc,n_species,2))
+!$acc enter data create(res,res_loc)
 
      ! Nonlinear arrays
      if (nonlinear_flag == 1) then
@@ -243,6 +249,7 @@ subroutine cgyro_init_manager
 #ifndef _OPENACC
   gpu_bigmem_flag = 0
 #endif
+  unwind_single_flag = 0
 
   if (test_flag == 0) then
 
