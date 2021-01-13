@@ -255,7 +255,6 @@ subroutine cgyro_init_manager
 #ifndef _OPENACC
   gpu_bigmem_flag = 0
 #endif
-  upwind_single_flag = 0
 
   if (test_flag == 0) then
 
