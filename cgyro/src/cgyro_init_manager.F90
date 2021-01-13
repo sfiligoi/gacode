@@ -215,9 +215,15 @@ subroutine cgyro_init_manager
 
 !$acc enter data create(cap_h_c,cap_h_ct,cap_h_v,dvjvec_c,dvjvec_v,jxvec_c)
 
-     allocate(upwind_res_loc(nc,n_species,2))
-     allocate(upwind_res(nc,n_species,2))
-!$acc enter data create(res,res_loc)
+     if (upwind_single_flag == 0) then
+       allocate(upwind_res_loc(nc,n_species,2))
+       allocate(upwind_res(nc,n_species,2))
+!$acc enter data create(upwind_res,upwind_res_loc)
+     else
+       allocate(upwind32_res_loc(nc,n_species,2))
+       allocate(upwind32_res(nc,n_species,2))
+!$acc enter data create(upwind32_res,upwind_res_loc)
+     endif
 
      ! Nonlinear arrays
      if (nonlinear_flag == 1) then
