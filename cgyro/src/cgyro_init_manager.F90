@@ -222,7 +222,7 @@ subroutine cgyro_init_manager
      else
        allocate(upwind32_res_loc(nc,n_species,2))
        allocate(upwind32_res(nc,n_species,2))
-!$acc enter data create(upwind32_res,upwind_res_loc)
+!$acc enter data create(upwind32_res,upwind32_res_loc)
      endif
 
      ! Nonlinear arrays
