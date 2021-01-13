@@ -132,7 +132,7 @@ subroutine cgyro_upwind
 
   implicit none
 
-  if (unwind_single_flag == 0) then
+  if (upwind_single_flag == 0) then
     call cgyro_upwind_r64
   else
     call cgyro_upwind_r32
