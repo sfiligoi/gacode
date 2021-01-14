@@ -82,6 +82,7 @@ module cgyro_globals
   real :: mach
   integer :: rotation_model
   integer :: mpi_rank_order
+  integer :: velocity_order
   integer :: hiprec_flag
   integer :: udsymmetry_flag
   integer :: shear_method
@@ -182,6 +183,7 @@ module cgyro_globals
   integer :: NEW_COMM_2
   integer :: nv1,nv2,nc1,nc2
   integer :: nsplit
+  integer :: ns1,ns2
   integer, dimension(:), allocatable :: recv_status
   logical :: is_staggered_comm_2
   !
@@ -190,6 +192,7 @@ module cgyro_globals
   integer :: nv_loc,iv_loc
   integer :: nc,ic
   integer :: nc_loc,ic_loc
+  integer :: ns_loc
   integer, dimension(:), allocatable :: ie_v
   integer, dimension(:), allocatable :: ix_v
   integer, dimension(:), allocatable :: is_v

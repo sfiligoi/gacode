@@ -30,7 +30,7 @@ subroutine cgyro_upwind_r64
 !$acc parallel loop collapse(2) gang &
 !$acc&         private(res_loc_one,iv) &
 !$acc&         present(g_x,upfac1,is_v,upwind_res_loc) default(none)
-  do is=1,n_species
+  do is=ns1,ns2
      do ic=1,nc
        res_loc_one = (0.0,0.0)
        res_loc_two = (0.0,0.0)
@@ -130,7 +130,7 @@ subroutine cgyro_upwind_r32
 !$acc parallel loop collapse(2) gang &
 !$acc&         private(res_loc_one,iv) &
 !$acc&         present(g_x,upfac1,is_v,upwind32_res_loc) default(none)
-  do is=1,n_species
+  do is=ns1,ns2
      do ic=1,nc
        res_loc_one = (0.0,0.0)
        res_loc_two = (0.0,0.0)

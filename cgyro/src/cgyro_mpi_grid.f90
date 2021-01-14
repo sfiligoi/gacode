@@ -66,10 +66,15 @@ subroutine cgyro_mpi_grid
   allocate(ic_c(n_radial,n_theta))
   allocate(iv_v(n_energy,n_xi,n_species))
 
+  ! TODO: Make it a parameter
+  velocity_order=1
+
   ! Velocity pointers
   iv = 0
-  do ie=1,n_energy
-     do ix=1,n_xi
+  if (velocity_order==1) then
+    !original
+    do ie=1,n_energy
+      do ix=1,n_xi
         do is=1,n_species
            iv = iv+1
            ie_v(iv) = ie
@@ -77,8 +82,26 @@ subroutine cgyro_mpi_grid
            is_v(iv) = is
            iv_v(ie,ix,is) = iv
         enddo
-     enddo
-  enddo
+      enddo
+    enddo
+  elif (velocity_order==2) then
+    ! optimized for minimizing species
+    do is=1,n_species
+      do ie=1,n_energy
+        do ix=1,n_xi
+           iv = iv+1
+           ie_v(iv) = ie
+           ix_v(iv) = ix
+           is_v(iv) = is
+           iv_v(ie,ix,is) = iv
+        enddo
+      enddo
+    enddo
+  else
+     call cgyro_error('Unknown VELOCITY_ORDER.')
+     return
+  endif
+
 !$acc enter data copyin(ie_v,ix_v,is_v,iv_v)
 
   ! Configuration pointers
@@ -191,6 +214,23 @@ subroutine cgyro_mpi_grid
 
   nv1 = 1+i_proc_1*nv_loc
   nv2 = (1+i_proc_1)*nv_loc
+
+  ns1 = 1
+  ns2 = n_species
+  if (velocity_order==2) then
+    ! Paricles are contiguous in this order
+    ns1 = is_v(nv1)
+    ns2 = is_v(nv2)
+    ! Warn ifI cannot do a clean split and some ranks will have more species than others
+    ! Not fatal, but suboptimal
+    if ( (n_proc_1 < n_species) .and. ( modulo(n_species, n_proc_1) /= 0 ))
+      call cgyro_info('WARNING: nv_species not a multiple of n_proc_1')
+    endif
+    if ( (n_proc_1 > n_species) .and. ( modulo(n_proc_1, n_species) /= 0 )
+      call cgyro_info('WARNING: nv_proc_1 not a multiple of n_species')
+    endif
+  endif
+  ns_loc = ns2-ns1+1
 
   nc1 = 1+i_proc_1*nc_loc
   nc2 = (1+i_proc_1)*nc_loc
