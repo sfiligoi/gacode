@@ -84,7 +84,7 @@ subroutine cgyro_mpi_grid
         enddo
       enddo
     enddo
-  elif (velocity_order==2) then
+  else if (velocity_order==2) then
     ! optimized for minimizing species
     do is=1,n_species
       do ie=1,n_energy
@@ -223,10 +223,10 @@ subroutine cgyro_mpi_grid
     ns2 = is_v(nv2)
     ! Warn ifI cannot do a clean split and some ranks will have more species than others
     ! Not fatal, but suboptimal
-    if ( (n_proc_1 < n_species) .and. ( modulo(n_species, n_proc_1) /= 0 ))
+    if ( (n_proc_1 < n_species) .and. ( modulo(n_species, n_proc_1) /= 0 )) then
       call cgyro_info('WARNING: nv_species not a multiple of n_proc_1')
     endif
-    if ( (n_proc_1 > n_species) .and. ( modulo(n_proc_1, n_species) /= 0 )
+    if ( (n_proc_1 > n_species) .and. ( modulo(n_proc_1, n_species) /= 0 ) then
       call cgyro_info('WARNING: nv_proc_1 not a multiple of n_species')
     endif
   endif
