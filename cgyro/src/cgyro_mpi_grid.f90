@@ -66,9 +66,6 @@ subroutine cgyro_mpi_grid
   allocate(ic_c(n_radial,n_theta))
   allocate(iv_v(n_energy,n_xi,n_species))
 
-  ! TODO: Make it a parameter
-  velocity_order=1
-
   ! Velocity pointers
   iv = 0
   if (velocity_order==1) then
