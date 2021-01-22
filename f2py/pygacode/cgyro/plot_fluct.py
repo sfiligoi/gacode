@@ -9,10 +9,10 @@ from ..gacodefuncs import *
 from .data import cgyrodata
 
 try:
-   import pygacode
+   from pygacode import vis
    haspygacode = True
 except:
-   print("BAD: (plot_fluct) Please 'make so' in gacode/f2py")
+   print("BAD: (plot_fluct) Please 'pip install pygacode'")
    haspygacode = False
 
 PREC='f' ; BIT=4
@@ -185,7 +185,8 @@ def frame():
          f,t = maptoreal_fft(nr,nn,nx,ny,c)
       elif haspygacode:
          start = time.time()
-         pygacode.realfluct(c,f)
+         # see f2py/vis/vis.f90
+         vis.realfluct(c,f)
          end = time.time()
          t = end-start
       else:
