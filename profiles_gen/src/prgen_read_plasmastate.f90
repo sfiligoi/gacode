@@ -215,7 +215,7 @@ subroutine prgen_read_plasmastate
   allocate(vec(nx,ntop))
   do i=1,nx
      if (i == 1) then
-        vec(i,:) = 2*plst_ts(1,1:ntop)-plst_ts(2,1:ntop)
+        vec(i,:) = 1.5*plst_ts(1,1:ntop)-0.5*plst_ts(2,1:ntop)
      else if (i < nx) then
         vec(i,:) = 0.5*(plst_ts(i-1,1:ntop)+plst_ts(i,1:ntop))
      else
@@ -234,7 +234,7 @@ subroutine prgen_read_plasmastate
   err = nf90_get_var(ncid,varid,plst_ns(nx,1:ntop))
   do i=1,nx
      if (i == 1) then
-        vec(i,:) = 2*plst_ns(1,1:ntop)-plst_ns(2,1:ntop)
+        vec(i,:) = 1.5*plst_ns(1,1:ntop)-0.5*plst_ns(2,1:ntop)
      else if (i < nx) then
         vec(i,:) = 0.5*(plst_ns(i-1,1:ntop)+plst_ns(i,1:ntop))
      else
