@@ -5,8 +5,6 @@ subroutine locpargen_tglf_stack
 
   implicit none
 
-  integer :: isr
-  
   write(1,10) 'RMIN_LOC=',r0, 'RMAJ_LOC=',rmaj_loc, 'DRMAJDX_LOC=',shift_loc, &
        'ZMAJ_LOC=',zmag_loc, 'DZMAJDX_LOC=',dzmag_loc, 'Q_LOC=',abs(q_loc), &
        'Q_PRIME_LOC=',(q_loc/r0)**2*s_loc, 'KAPPA_LOC=',kappa_loc, 'S_KAPPA_LOC=',s_kappa_loc, &
