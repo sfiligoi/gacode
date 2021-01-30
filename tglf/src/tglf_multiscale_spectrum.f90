@@ -64,7 +64,7 @@
       if(sat_rule_in .lt. 2)then
         measure = SQRT(taus(1)*mass(2))
       else
-        measure = SQRT(taus(2)*mass(2)/zs(2)**2)/grad_r0_out
+        measure = SQRT(2.0*taus(2)*mass(2)/zs(2)**2)/grad_r0_out
       endif
 !
       if(first_pass)then  ! first pass for spectral shift model or only pass for quench rule
@@ -143,7 +143,8 @@
         b0 = 0.72
         b1 = 1.22
 !        b2 = 24.52  ! note this is b2**2 in PPCF paper 2020
-        b2 = 11.21
+!        b2 = 11.21
+        b2 = 8.44
 !        b3 = 0.88
         b3 = 2.4
 !        d1 = 0.5475*((Bt0_out/B_geo0_out)**4)/grad_r0_out**2
