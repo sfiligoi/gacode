@@ -326,23 +326,6 @@ def time_vector(istr,nt):
 #---------------------------------------------------------------
 
 #---------------------------------------------------------------
-def theta_indx(theta,theta_plot):
-
-   # Select theta index
-   if theta_plot == 1:
-      itheta = 0
-   else:
-       # theta=0 check just to be safe
-       if theta == 0.0:
-           itheta = theta_plot/2
-       else:
-           itheta = int((theta+1.0)/2.0*theta_plot)
-
-   print('INFO: (theta_indx) Selected index',itheta+1,'of',theta_plot)
-   return itheta
-#---------------------------------------------------------------
-
-#---------------------------------------------------------------
 def mkfile(ext):
 
     s=ext.split('.')
@@ -393,3 +376,20 @@ def theta_index(theta,n_theta):
         i0 = n_theta-1
 
     return i0
+
+#---------------------------------------------------------------
+def theta_indx(theta,theta_plot):
+
+   # Select theta index
+   if theta_plot == 1:
+      itheta = 0
+   else:
+       # theta=0 check just to be safe
+       if theta == 0.0:
+           itheta = theta_plot//2
+       else:
+           itheta = int((theta+1.0)/2.0*theta_plot)
+
+   print('INFO: (theta_indx) Selected index',itheta+1,'of',theta_plot)
+   return itheta
+#---------------------------------------------------------------

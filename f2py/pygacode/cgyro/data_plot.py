@@ -1016,7 +1016,7 @@ class cgyrodata_plot(data.cgyrodata):
                
          # Maximum
          j = np.argmax(ave[:,ispec])
-         if j < len(ky)-1:
+         if j < len(ky)-1 and j > 0:
             xs,ys = quadratic_max(ky[j-1:j+2],ave[j-1:j+2,ispec])
          else:
             xs = ky[-1]

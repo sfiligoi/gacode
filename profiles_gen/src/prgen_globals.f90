@@ -199,7 +199,7 @@ module prgen_globals
   real, dimension(:), allocatable :: plst_phit
   real, dimension(:), allocatable :: plst_psipol
   real, dimension(:), allocatable :: plst_elong
-  real, dimension(:), allocatable :: plst_triang
+  real, dimension(:), allocatable :: plst_triang,plst_triangu
   real, dimension(:), allocatable :: plst_iota
   real, dimension(:), allocatable :: plst_r_midp_in
   real, dimension(:), allocatable :: plst_r_midp_out
