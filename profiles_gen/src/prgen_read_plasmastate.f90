@@ -18,8 +18,9 @@ subroutine prgen_read_plasmastate
   integer :: varid
   integer :: err
   real :: dummy
+  real, dimension(:,:), allocatable :: vec
   real, parameter :: idiag=0
-
+  
   ! Open the file (NF90_NOWRITE means read-only)
   err = nf90_open(file_state,NF90_NOWRITE,ncid)
 
@@ -114,7 +115,7 @@ subroutine prgen_read_plasmastate
   err = nf90_inq_varid(ncid,trim('curt'),varid)
   err = nf90_get_var(ncid,varid,plst_vol(:))
   current = plst_vol(nx)*1e-6
-  
+
   ! Flux-surface volume
   err = nf90_inq_varid(ncid,trim('vol'),varid)
   err = nf90_get_var(ncid,varid,plst_vol(:))
@@ -158,8 +159,10 @@ subroutine prgen_read_plasmastate
   err = nf90_get_var(ncid,varid,plst_elong(:))
 
   ! Triangularity
-  err = nf90_inq_varid(ncid,trim('triang'),varid)
+  err = nf90_inq_varid(ncid,trim('triangL'),varid)
   err = nf90_get_var(ncid,varid,plst_triang(:))
+  err = nf90_inq_varid(ncid,trim('triangU'),varid)
+  err = nf90_get_var(ncid,varid,plst_triangu(:))
 
   ! 1/q
   err = nf90_inq_varid(ncid,trim('iota'),varid)
@@ -183,9 +186,19 @@ subroutine prgen_read_plasmastate
   err = nf90_get_var(ncid,varid,plst_zeff(1:nx-1))
   plst_zeff(nx) = plst_zeff(nx-1)
 
+  !---------------------------------------------------------------
+  ! Density and temperature mapping
+  !
+  ! NOTE: code below corrects an error discovered by P. Rodriguez
+  !       that existed prior to 25 Jan 2021.
+  !
+  ! Species counter (ntop) will start at n_thermal and increase
+  ! when processing fast ions
+  ntop = plst_dp1_nspec_th
+
   ! Temperatures
   err = nf90_inq_varid(ncid,trim('Ts'),varid)
-  err = nf90_get_var(ncid,varid,plst_ts(1:nx-1,1:plst_dp1_nspec_th))
+  err = nf90_get_var(ncid,varid,plst_ts(1:nx-1,1:ntop))
 
   ! Temperature (Te at r/a=1)
   err = nf90_inq_varid(ncid,trim('Te_bdy'),varid)
@@ -197,19 +210,43 @@ subroutine prgen_read_plasmastate
   err = nf90_inq_varid(ncid,trim('Ti_bdy'),varid)
   err = nf90_get_var(ncid,varid,dummy)
 
-  plst_ts(nx,2:plst_dp1_nspec_th) = dummy
+  plst_ts(nx,2:ntop) = dummy
+
+  allocate(vec(nx,ntop))
+  do i=1,nx
+     if (i == 1) then
+        vec(i,:) = 1.5*plst_ts(1,1:ntop)-0.5*plst_ts(2,1:ntop)
+     else if (i < nx) then
+        vec(i,:) = 0.5*(plst_ts(i-1,1:ntop)+plst_ts(i,1:ntop))
+     else
+        vec(i,:) = plst_ts(i,1:ntop)
+     endif
+  enddo
+  ! Set temperatures
+  plst_ts(:,1:ntop) = vec
 
   ! Thermal species densities
   err = nf90_inq_varid(ncid,trim('ns'),varid)
-  err = nf90_get_var(ncid,varid,plst_ns(1:nx-1,1:plst_dp1_nspec_th))
+  err = nf90_get_var(ncid,varid,plst_ns(1:nx-1,1:ntop))
 
   ! Densities (n at r/a=1)
   err = nf90_inq_varid(ncid,trim('ns_bdy'),varid)
-  err = nf90_get_var(ncid,varid,plst_ns(nx,1:plst_dp1_nspec_th))
+  err = nf90_get_var(ncid,varid,plst_ns(nx,1:ntop))
+  do i=1,nx
+     if (i == 1) then
+        vec(i,:) = 1.5*plst_ns(1,1:ntop)-0.5*plst_ns(2,1:ntop)
+     else if (i < nx) then
+        vec(i,:) = 0.5*(plst_ns(i-1,1:ntop)+plst_ns(i,1:ntop))
+     else
+        vec(i,:) = plst_ns(i,1:ntop)
+     endif
+  enddo
+  ! Set densities
+  plst_ns(:,1:ntop) = vec
+  deallocate(vec)
+  !---------------------------------------------------------------
 
   ! Fast-ion handling
-
-  ntop = plst_dp1_nspec_th
   !------------------------------------------------------------------
   ! 1. Beams
   err = nf90_inq_varid(ncid,trim('nbeami'),varid)
@@ -485,9 +522,9 @@ subroutine prgen_read_plasmastate
   plst_curt(nx) = 0.0
   !
   ! Total current (scalar)
-  
+
   !------------------------------------------------------------
-  
+
   ! Angular momentum source torque
   err = nf90_inq_varid(ncid,trim('tq_trans'),varid)
   err = nf90_get_var(ncid,varid,plst_tq_trans(1:nx-1))
@@ -512,7 +549,7 @@ subroutine prgen_read_plasmastate
 
   zmag(:)  = plst_z_midp(:)
   kappa(:) = plst_elong(:)
-  delta(:) = plst_triang(:)
+  delta(:) = 0.5*(plst_triang(:)+plst_triangu(:))
 
   !----------------------------------------------
   ! Error check for missing/zero boundary (n,T)

@@ -223,12 +223,12 @@ then
   echo "  $ cgyro_plot -e . -plot ky_flux           [energy flux versus ky]"
   echo
   echo "VISUALIZATIONS [build gapy for speed]"
-  echo "  $ cyro_plot -plot fluct -t 16 -moment phi"
-  echo "  $ cyro_plot -plot fluct -t 16 -moment phi -land -nx 512 -ny 1024"
+  echo "  $ cgyro_plot -plot fluct -t 16 -moment phi"
+  echo "  $ cgyro_plot -plot fluct -t 16 -moment phi -land -nx 512 -ny 1024"
   echo
   echo "VISUALIZATIONS [*requires Mayavi*]"
-  echo "  $ cyro_plot -vis torcut -moment n -nx 256 -nz 512"
-  echo "  $ cyro_plot -vis wheel  -moment n -land -nx 256 -ny 256 -nz 256"
+  echo "  $ cgyro_plot -vis torcut -moment n -nx 256 -nz 512"
+  echo "  $ cgyro_plot -vis wheel  -moment n -land -nx 256 -ny 256 -nz 256"
 
   exit 1
 fi

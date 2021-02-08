@@ -26,6 +26,7 @@ subroutine allocate_plasmastate_vars
   allocate(plst_psipol(nx))
   allocate(plst_elong(nx))
   allocate(plst_triang(nx))
+  allocate(plst_triangu(nx))
   allocate(plst_iota(nx))
   allocate(plst_r_midp_in(nx))
   allocate(plst_r_midp_out(nx))

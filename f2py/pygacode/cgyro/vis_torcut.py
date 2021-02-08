@@ -13,7 +13,7 @@ try:
    from pygacode import geo
    print("INFO: (vis_torcut) Successfully imported vis")
 except:
-   print("ERROR: (vis_torcut) Please type 'make so' in gacode/f2py")
+   print("ERROR: (vis_torcut) Please type 'pip install pygacode'")
    sys.exit()
 
 ext      = sys.argv[1]
