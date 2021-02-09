@@ -167,7 +167,8 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
     flxm=np.nanmin(psi2d)
     flxM=np.nanmax(psi2d)
         
-    kdbgmax=100
+    kdbgmax=50
+    forbidden=[]
     psi1 = None
     for kdbg in range(kdbgmax):
 
@@ -179,17 +180,21 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
             if not np.isnan(path.vertices[:]).any() and np.allclose(path.vertices[0,0],path.vertices[-1,0]) and np.allclose(path.vertices[0,1],path.vertices[-1,1]):
                 path.vertices[0,0] = path.vertices[-1,0] = (path.vertices[0,0]+path.vertices[-1,0])*0.5
                 path.vertices[0,1] = path.vertices[-1,1] = (path.vertices[0,1]+path.vertices[-1,1])*0.5
-                simplePath=mp.Path(path.vertices[::len(path.vertices[:,0])//10+1,:])
-                if (np.max(simplePath.vertices[:,0]) > raxis_new and
-                    np.min(simplePath.vertices[:,0]) < raxis_new and
-                    np.max(simplePath.vertices[:,1]) > zaxis_new and
-                    np.min(simplePath.vertices[:,1]) < zaxis_new):
-                    if simplePath.contains_point((raxis_new,zaxis_new)):
-                        dR = path.vertices[1,0]-path.vertices[0,0]
-                        dZ = path.vertices[1,1]-path.vertices[0,1]
-                        orientation = int(np.sign((path.vertices[0,1]-zaxis_new)*dR-(path.vertices[0,0]-raxis_new)*dZ))
-                        line=path.vertices[::orientation,:]
-                        break
+                simplePath=mp.Path(path.vertices)
+                if np.max(simplePath.vertices[:,0])>raxis_new and np.min(simplePath.vertices[:,0])<raxis_new and  np.max(simplePath.vertices[:,1])>zaxis_new and min(simplePath.vertices[:,1])<zaxis_new and simplePath.contains_point((raxis_new,zaxis_new)) and not any([simplePath.contains_point((Rf,Zf)) for Rf,Zf in forbidden]):
+                    dR = path.vertices[1,0]-path.vertices[0,0]
+                    dZ = path.vertices[1,1]-path.vertices[0,1]
+                    orientation = int(np.sign((path.vertices[0,1]-zaxis_new)*dR-(path.vertices[0,0]-raxis_new)*dZ))
+                    line=path.vertices[::signTheta*orientation,:]
+                else:
+                    Rf=np.mean(path.vertices[:,0])
+                    Zf=np.mean(path.vertices[:,1])
+                    if any([simplePath.contains_point((Rf,Zf)) for Rf,Zf in forbidden]):
+                        pass
+                    elif sep is not None and mp.Path(sep).contains_point((Rf,Zf)):
+                        pass
+                    else:
+                        forbidden.append([Rf,Zf])
             
         if len(line):
             try:
