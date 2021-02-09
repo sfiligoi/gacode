@@ -72,7 +72,7 @@ subroutine cgyro_upwind_r64
        2*size(upwind_res(:,:,:)),&
        MPI_DOUBLE_PRECISION,&
        MPI_SUM,&
-       NEW_COMM_1,&
+       NEW_COMM_3,&
        i_err)
 #else
   call MPI_ALLREDUCE(upwind_res_loc(:,:,:),&
@@ -80,7 +80,7 @@ subroutine cgyro_upwind_r64
        size(upwind_res(:,:,:)),&
        MPI_DOUBLE_COMPLEX,&
        MPI_SUM,&
-       NEW_COMM_1,&
+       NEW_COMM_3,&
        i_err)
 #endif
 
@@ -172,7 +172,7 @@ subroutine cgyro_upwind_r32
        2*size(upwind32_res(:,:,:)),&
        MPI_REAL,&
        MPI_SUM,&
-       NEW_COMM_1,&
+       NEW_COMM_3,&
        i_err)
 #else
   call MPI_ALLREDUCE(upwind32_res_loc(:,:,:),&
@@ -180,7 +180,7 @@ subroutine cgyro_upwind_r32
        size(upwind32_res(:,:,:)),&
        MPI_COMPLEX,&
        MPI_SUM,&
-       NEW_COMM_1,&
+       NEW_COMM_3,&
        i_err)
 #endif
 

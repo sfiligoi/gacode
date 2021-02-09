@@ -69,6 +69,7 @@ subroutine cgyro_mpi_grid
   ! Velocity pointers
   iv = 0
   if (velocity_order==1) then
+    call cgyro_info('Velocity order 1')
     !original
     do ie=1,n_energy
       do ix=1,n_xi
@@ -82,6 +83,7 @@ subroutine cgyro_mpi_grid
       enddo
     enddo
   else if (velocity_order==2) then
+    call cgyro_info('Velocity order 2')
     ! optimized for minimizing species
     do is=1,n_species
       do ie=1,n_energy
@@ -214,20 +216,37 @@ subroutine cgyro_mpi_grid
 
   ns1 = 1
   ns2 = n_species
+  i_group_3 = 1
   if (velocity_order==2) then
     ! Paricles are contiguous in this order
     ns1 = is_v(nv1)
     ns2 = is_v(nv2)
-    ! Warn ifI cannot do a clean split and some ranks will have more species than others
-    ! Not fatal, but suboptimal
+    ! We need a clean split, so that all ranks have the same number of species
     if ( (n_proc_1 < n_species) .and. ( modulo(n_species, n_proc_1) /= 0 ) ) then
-      call cgyro_info('WARNING: nv_species not a multiple of n_proc_1')
+      call cgyro_error('nv_species not a multiple of n_proc_1')
+      return
     endif
     if ( (n_proc_1 > n_species) .and. ( modulo(n_proc_1, n_species) /= 0 ) ) then
-      call cgyro_info('WARNING: nv_proc_1 not a multiple of n_species')
+      call cgyro_error('nv_proc_1 not a multiple of n_species')
+      return
     endif
+    i_group_3 = ns1
   endif
   ns_loc = ns2-ns1+1
+
+  ! when exchaning only specific species, we need a dedicated comm
+  call MPI_COMM_SPLIT(NEW_COMM_1,&
+       i_group_3,&
+       splitkey,&
+       NEW_COMM_3, &
+       i_err)
+  if (i_err /= 0) then
+     call cgyro_error('NEW_COMM_3 not created')
+     return
+  endif
+  !
+  call MPI_COMM_RANK(NEW_COMM_3,i_proc_3,i_err)
+
 
   nc1 = 1+i_proc_1*nc_loc
   nc2 = (1+i_proc_1)*nc_loc
