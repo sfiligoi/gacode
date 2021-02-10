@@ -63,6 +63,11 @@ subroutine cgyro_kernel
   !    NOTE: On exit, field_old = field 
 
   call cgyro_init_manager
+  if (error_status /=0 ) then
+     ! something went terribly wrong, hard abort, as things may be
+     ! in weird state
+     call abort
+  endif
   if (test_flag == 1) return
 
   !---------------------------------------------------------------------------

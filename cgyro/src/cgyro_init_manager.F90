@@ -291,6 +291,7 @@ subroutine cgyro_init_manager
   ! Initialize h (via restart or analytic IC)
   call timer_lib_in('str_init')
   call cgyro_init_h
+  if (error_status /=0 ) return
   call timer_lib_out('str_init')
 
   ! Initialize nonlinear dimensions and arrays 

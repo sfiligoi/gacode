@@ -49,12 +49,14 @@ subroutine cgyro_init_h
 
      call cgyro_info('Restart data found.')
      call cgyro_read_restart
+     if (error_status /=0 ) return
      gtime = 0.0
 
   case (2)
 
      call cgyro_info('Initializing with restart data.')
      call cgyro_read_restart
+     if (error_status /=0 ) return
      i_current = 0
      t_current = 0.0
      gtime = 0.0
