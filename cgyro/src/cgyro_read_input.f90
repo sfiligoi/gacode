@@ -73,6 +73,7 @@ subroutine cgyro_read_input
   call cgyro_readbc_real(mach)
   call cgyro_readbc_int(rotation_model)
   call cgyro_readbc_int(mpi_rank_order)
+  call cgyro_readbc_int(velocity_order)
   call cgyro_readbc_int(hiprec_flag)
   call cgyro_readbc_int(udsymmetry_flag)
   call cgyro_readbc_int(shear_method)

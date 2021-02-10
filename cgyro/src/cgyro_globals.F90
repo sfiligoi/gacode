@@ -82,6 +82,7 @@ module cgyro_globals
   real :: mach
   integer :: rotation_model
   integer :: mpi_rank_order
+  integer :: velocity_order
   integer :: hiprec_flag
   integer :: udsymmetry_flag
   integer :: shear_method
@@ -169,6 +170,7 @@ module cgyro_globals
   integer :: i_proc
   integer :: i_proc_1
   integer :: i_proc_2
+  integer :: i_proc_3
   integer :: i_proc_restart_io
   integer :: n_proc
   integer :: n_proc_1
@@ -176,12 +178,15 @@ module cgyro_globals
   integer :: n_proc_restart_io
   integer :: i_group_1
   integer :: i_group_2
+  integer :: i_group_3
   integer :: i_group_restart_io
   integer :: CGYRO_COMM_WORLD
   integer :: NEW_COMM_1
   integer :: NEW_COMM_2
+  integer :: NEW_COMM_3
   integer :: nv1,nv2,nc1,nc2
   integer :: nsplit
+  integer :: ns1,ns2
   integer, dimension(:), allocatable :: recv_status
   logical :: is_staggered_comm_2
   !
@@ -190,6 +195,7 @@ module cgyro_globals
   integer :: nv_loc,iv_loc
   integer :: nc,ic
   integer :: nc_loc,ic_loc
+  integer :: ns_loc
   integer, dimension(:), allocatable :: ie_v
   integer, dimension(:), allocatable :: ix_v
   integer, dimension(:), allocatable :: is_v
@@ -242,7 +248,7 @@ module cgyro_globals
   character(len=8) :: fmt='(I2.2)'
   character(len=6), dimension(100) :: rtag
   integer, parameter :: restart_header_size = 1024
-  integer, parameter :: restart_magic = 140906808
+  integer  :: restart_magic
   !
   ! error checking
   integer :: error_status = 0

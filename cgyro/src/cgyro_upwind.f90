@@ -47,7 +47,7 @@ subroutine cgyro_upwind_r64
        size(upwind_res(:,:,:)),&
        MPI_DOUBLE_COMPLEX,&
        MPI_SUM,&
-       NEW_COMM_1,&
+       NEW_COMM_3,&
        i_err)
   call timer_lib_out('str_comm')
 
@@ -103,7 +103,7 @@ subroutine cgyro_upwind_r32
        size(upwind32_res(:,:,:)),&
        MPI_COMPLEX,&
        MPI_SUM,&
-       NEW_COMM_1,&
+       NEW_COMM_3,&
        i_err)
   call timer_lib_out('str_comm')
 

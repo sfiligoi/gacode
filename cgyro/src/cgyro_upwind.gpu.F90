@@ -30,7 +30,7 @@ subroutine cgyro_upwind_r64
 !$acc parallel loop collapse(2) gang &
 !$acc&         private(res_loc_one,iv) &
 !$acc&         present(g_x,upfac1,is_v,upwind_res_loc) default(none)
-  do is=1,n_species
+  do is=ns1,ns2
      do ic=1,nc
        res_loc_one = (0.0,0.0)
        res_loc_two = (0.0,0.0)
@@ -72,7 +72,7 @@ subroutine cgyro_upwind_r64
        2*size(upwind_res(:,:,:)),&
        MPI_DOUBLE_PRECISION,&
        MPI_SUM,&
-       NEW_COMM_1,&
+       NEW_COMM_3,&
        i_err)
 #else
   call MPI_ALLREDUCE(upwind_res_loc(:,:,:),&
@@ -80,7 +80,7 @@ subroutine cgyro_upwind_r64
        size(upwind_res(:,:,:)),&
        MPI_DOUBLE_COMPLEX,&
        MPI_SUM,&
-       NEW_COMM_1,&
+       NEW_COMM_3,&
        i_err)
 #endif
 
@@ -130,7 +130,7 @@ subroutine cgyro_upwind_r32
 !$acc parallel loop collapse(2) gang &
 !$acc&         private(res_loc_one,iv) &
 !$acc&         present(g_x,upfac1,is_v,upwind32_res_loc) default(none)
-  do is=1,n_species
+  do is=ns1,ns2
      do ic=1,nc
        res_loc_one = (0.0,0.0)
        res_loc_two = (0.0,0.0)
@@ -172,7 +172,7 @@ subroutine cgyro_upwind_r32
        2*size(upwind32_res(:,:,:)),&
        MPI_REAL,&
        MPI_SUM,&
-       NEW_COMM_1,&
+       NEW_COMM_3,&
        i_err)
 #else
   call MPI_ALLREDUCE(upwind32_res_loc(:,:,:),&
@@ -180,7 +180,7 @@ subroutine cgyro_upwind_r32
        size(upwind32_res(:,:,:)),&
        MPI_COMPLEX,&
        MPI_SUM,&
-       NEW_COMM_1,&
+       NEW_COMM_3,&
        i_err)
 #endif
 

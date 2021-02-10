@@ -216,12 +216,12 @@ subroutine cgyro_init_manager
 !$acc enter data create(cap_h_c,cap_h_ct,cap_h_v,dvjvec_c,dvjvec_v,jxvec_c)
 
      if (upwind_single_flag == 0) then
-       allocate(upwind_res_loc(nc,n_species,2))
-       allocate(upwind_res(nc,n_species,2))
+       allocate(upwind_res_loc(nc,ns1:ns2,2))
+       allocate(upwind_res(nc,ns1:ns2,2))
 !$acc enter data create(upwind_res,upwind_res_loc)
      else
-       allocate(upwind32_res_loc(nc,n_species,2))
-       allocate(upwind32_res(nc,n_species,2))
+       allocate(upwind32_res_loc(nc,ns1:ns2,2))
+       allocate(upwind32_res(nc,ns1:ns2,2))
 !$acc enter data create(upwind32_res,upwind32_res_loc)
      endif
 
@@ -270,6 +270,14 @@ subroutine cgyro_init_manager
 
   call cgyro_check_memory(trim(path)//runfile_memory)
 
+  if (velocity_order==1) then
+    ! traditional ordering
+    restart_magic = 140906808
+  else
+    ! alternative ordering, need different magic
+    restart_magic = 140916753
+  endif
+
   call timer_lib_out('str_init')
 
   ! Write initial data
@@ -283,6 +291,7 @@ subroutine cgyro_init_manager
   ! Initialize h (via restart or analytic IC)
   call timer_lib_in('str_init')
   call cgyro_init_h
+  if (error_status /=0 ) return
   call timer_lib_out('str_init')
 
   ! Initialize nonlinear dimensions and arrays 
