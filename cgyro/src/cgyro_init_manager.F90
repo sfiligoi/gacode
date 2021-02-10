@@ -270,6 +270,14 @@ subroutine cgyro_init_manager
 
   call cgyro_check_memory(trim(path)//runfile_memory)
 
+  if (velocity_order==1) then
+    ! traditional ordering
+    restart_magic = 140906808
+  else
+    ! alternative ordering, need different magic
+    restart_magic = 140916753
+  endif
+
   call timer_lib_out('str_init')
 
   ! Write initial data
