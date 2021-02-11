@@ -185,7 +185,7 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
                     dR = path.vertices[1,0]-path.vertices[0,0]
                     dZ = path.vertices[1,1]-path.vertices[0,1]
                     orientation = int(np.sign((path.vertices[0,1]-zaxis_new)*dR-(path.vertices[0,0]-raxis_new)*dZ))
-                    line=path.vertices[::signTheta*orientation,:]
+                    line=path.vertices[::orientation,:]
                 else:
                     Rf=np.mean(path.vertices[:,0])
                     Zf=np.mean(path.vertices[:,1])
