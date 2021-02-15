@@ -292,7 +292,6 @@ module tgyro_globals
   integer, dimension(0:n_ion_max) :: evo_e
   real, dimension(0:n_ion_max) :: evo_c
   real :: loc_betae_scale
-  integer :: loc_chang_hinton
   real :: loc_me_multiplier
   integer :: loc_bc_offset
   integer :: tgyro_tglf_revision

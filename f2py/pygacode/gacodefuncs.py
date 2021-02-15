@@ -267,7 +267,7 @@ def specmap(m_in,z_in):
      else:
         name = '?'
   elif m == 4:
-     name = 'He4'
+     name = 'He'
   elif m == 7:
      name = 'Li'
   elif m == 9:

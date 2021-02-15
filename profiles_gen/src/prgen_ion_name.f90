@@ -22,7 +22,8 @@ subroutine prgen_ion_name(m,z,name)
      endif
 
   case (4)
-     name = 'He4'
+     ! 2021/02/15: Changed alpha name to He from He4
+     name = 'He'
 
   case (7)
      name = 'Li'

@@ -102,12 +102,16 @@ subroutine tgyro_write_data(i_print)
           loc_n_ion,&
           expro_n_exp)
      
+     ! Exchange power density (see s_exch in tgyro_source)
+     expro_qei = 1.5*nu_exch*exp_ne*k*(exp_te-exp_ti(1,:))
+     
      ! Convert erg/cm^3/s -> W/cm^3 = MW/m^3
      expro_qbrem = expro_qbrem*1e-7
      expro_qsync = expro_qsync*1e-7
      expro_qline = expro_qline*1e-7
      expro_qfuse = expro_qfuse*1e-7
      expro_qfusi = expro_qfusi*1e-7
+     expro_qei   = expro_qei*1e-7
 
      if (i_proc_global == 0) then
 

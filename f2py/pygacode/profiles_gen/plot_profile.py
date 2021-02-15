@@ -55,15 +55,19 @@ def plot_select(ax,tag):
    a = expro.expro_rmin[-1]
    csa = expro.expro_cs/a
 
-   sname = gapystr(expro.expro_name) 
+   sname = gapystr(expro.expro_name)
    stype = gapystr(expro.expro_type)
+
+   # Set roman font
+   for p in range(n):
+      sname[p] = '\mathrm{'+sname[p]+'}'
    
    # Set x-range
    m1 = 0 ; m2 = len(x)
    if rmax != 'auto':
-      m2 = np.argmin(np.abs(x-np.float(rmax)))
+      m2 = np.argmin(np.abs(x-float(rmax)))
    if rmin != 'auto':
-      m1 = np.argmin(np.abs(x-np.float(rmin)))
+      m1 = np.argmin(np.abs(x-float(rmin)))
       
    ax.set_xlim([x[m1],x[m2-1]])
 
@@ -181,6 +185,7 @@ def plot_select(ax,tag):
       y = expro.expro_qline ; ystr = 'q_\mathrm{line}~\mathrm{[MW/m^3]}' ; plotit(ax,x,y,ystr)
       y = expro.expro_qfusi ; ystr = 'q_{\\alpha i}~\mathrm{[MW/m^3]}' ; plotit(ax,x,y,ystr)
       y = expro.expro_qfuse ; ystr = 'q_{\\alpha e}~\mathrm{[MW/m^3]}' ; plotit(ax,x,y,ystr)
+      y = -expro.expro_qei ; ystr = '-q_{ei}~\mathrm{[MW/m^3]}' ; plotit(ax,x,y,ystr)
 
    ax.legend(loc=loc,ncol=2)
        

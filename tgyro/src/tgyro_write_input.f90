@@ -23,7 +23,7 @@ subroutine tgyro_write_input
   !
   if (tgyro_iteration_method /= 1 .and. tgyro_relax_iterations == 0) then
      error_flag = 1
-     error_msg = 'ERROR: (TGYRO) TGYRO_ITERATION_METHOD /= 4 requires TGYRO_RELAX_ITERATIONS > 0.'
+     error_msg = 'ERROR: (TGYRO) TGYRO_ITERATION_METHOD /= 1 requires TGYRO_RELAX_ITERATIONS > 0.'
   endif
   !
   ! - Need rotation physics to evolve Er
