@@ -14,6 +14,8 @@
 
 module tgyro_globals
 
+  integer :: quasifix = 0
+
   !===============================================================
   ! SHARED parameters for both transport methods:
   !

@@ -18,6 +18,9 @@ subroutine tgyro_quasigrad
   integer :: n_off
   real, dimension(n_r) :: delta_n
 
+  ! Don't want this correction to happen during restart
+  if (quasifix == 1) return
+  
   ! Compute density offset that needs to be corrected
   delta_n = 0.0
   if (evo_e(0) > -1) then

@@ -53,6 +53,8 @@ subroutine tgyro_iteration_diagonal
   allocate(fn0(p_max))
   allocate(fn(p_max))
 
+  quasifix = 0
+  
   do i_tran_loop=1,tgyro_relax_iterations
 
      i_tran = i_tran+1

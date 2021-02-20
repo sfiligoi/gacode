@@ -50,6 +50,8 @@ subroutine tgyro_iteration_simplerelax
      call tgyro_write_data(1)
   endif
   !----------------------------------------------------
+
+  quasifix = 0
   
   do i_tran_loop=1,tgyro_relax_iterations
 

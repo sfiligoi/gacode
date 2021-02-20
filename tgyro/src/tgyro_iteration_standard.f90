@@ -38,6 +38,7 @@ subroutine tgyro_iteration_standard
      call tgyro_flux_set(f_vec)
      ! GYRO restart data available
   endif
+
   res0 = 0.0
   if (gyrotest_flag == 0) call tgyro_residual(f_vec,g_vec,res,p_max,loc_residual_method)
 
@@ -46,6 +47,8 @@ subroutine tgyro_iteration_standard
   endif
   !----------------------------------------------------
 
+  quasifix = 0
+  
   do i_tran_loop=1,tgyro_relax_iterations
 
      i_tran = i_tran+1
@@ -85,7 +88,7 @@ subroutine tgyro_iteration_standard
      ! Reset profiles to be consistent with gradient.
      call tgyro_profile_set(x_vec,0.0,0)
      call tgyro_profile_functions 
- 
+
      ! Build dQ/dz (block diagonal matrix)
      !
      ! (p  ,p) (p  ,p+1) (p  ,p+2)
@@ -102,7 +105,7 @@ subroutine tgyro_iteration_standard
            enddo
         enddo
      enddo
- 
+
      !-----------------------------------------------------------
      ! END FLUX JACOBIAN
      !-----------------------------------------------------------
@@ -180,7 +183,7 @@ subroutine tgyro_iteration_standard
         ! Recompute solution
         call tgyro_target_vector(x_vec,g_vec)
         call tgyro_flux_vector(x_vec,f_vec,0.0,0)
-     
+
         ! Recompute residual
         call tgyro_residual(f_vec,g_vec,res,p_max,loc_residual_method)
         call tgyro_write_intermediate(1,res)

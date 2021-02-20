@@ -127,7 +127,7 @@ subroutine rad_ion(&
   !       (thus requires subtraction).
   do i=1,nion
      qbrem = qbrem+qbremi(i,:)
-     if (z(i) > 1.0) then
+     if ( z(i) > 1.0 .and. maxval(abs(qpost(i,:))) > 0.0 ) then
         qline = qline+qpost(i,:)-qbremi(i,:)          
      endif
   enddo
@@ -201,8 +201,9 @@ subroutine post77(te,name,lz,n)
      c(3,:) = (/2.000e+00,2.000e+01,-1.47488e+01,-1.43954e+01,2.10585e+01,-4.39475e+00,-1.10601e+01, 5.61699e+00/)
      c(4,:) = (/2.000e+01,1.000e+02,-2.62426e+02, 7.12559e+02,-8.25017e+02, 4.74241e+02,-1.35517e+02, 1.54189e+01/)
   else
-     print *,'ERROR: (post77) '//name//'not found'
-     stop
+     print *,'WARNING: (post77) '//name//'not found. Ignoring line radiation.'
+     lz = 0.0
+     return
   endif
 
   do j=1,n

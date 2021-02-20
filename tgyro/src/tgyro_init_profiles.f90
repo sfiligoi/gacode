@@ -556,6 +556,7 @@ subroutine tgyro_init_profiles
 
   !----------------------------------------------------------
   if (loc_restart_flag == 1) then
+     quasifix = 1
      call tgyro_restart
      w0p(:) = w0_norm*f_rot(:)
   else
