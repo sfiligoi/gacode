@@ -49,6 +49,7 @@ profiles_gen/exprotools/expromake
 tglf/src/tglf
 tglf/src/tglf_mpi
 tglf/src/tglf_driver_mpi
+tglf/tools/ptglf/src/ptglf
 tgyro/src/tgyro_main
 le3/src/le3
 le3/profiles_3d/profiles_3d

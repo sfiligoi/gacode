@@ -26,7 +26,7 @@ F2PY   = f2py
 LMATH = -mkl
 
 # NetCDF
-NETCDF = -L${NETCDF_FORTRAN_HOME}/lib -lnetcdff -L${NETCDF_C_HOME} -lnetcdf
+NETCDF = -L${NETCDF_FORTRAN_HOME}/lib -lnetcdff -L${NETCDF_C_HOME}/lib -lnetcdf
 NETCDF_INC =-I${NETCDF_FORTRAN_HOME}/include -I${NETCDF_C_HOME}/include
 
 # Mapping

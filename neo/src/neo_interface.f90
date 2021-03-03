@@ -357,7 +357,7 @@ contains
     write(1,20) 'ROTATION_MODEL=',neo_rotation_model_in
     write(1,30) 'OMEGA_ROT=',neo_omega_rot_in
     write(1,30) 'OMEGA_ROT_DERIV=',neo_omega_rot_deriv_in
-    write(1,50) 'RBF_DIR_IN=',neo_rbf_dir_in
+    write(1,50) 'RBF_DIR=',neo_rbf_dir_in
     write(1,20) 'SPITZER_MODEL=',neo_spitzer_model_in
     write(1,30) 'EPAR0_SPITZER=',neo_epar0_spitzer_in
     write(1,20) 'COLL_UNCOUPLEDEI_MODEL=',neo_coll_uncoupledei_model_in
