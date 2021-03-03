@@ -114,10 +114,10 @@ subroutine rad_ion(&
      if (z(i) > 1.0) then
         ! lz is Post 1977 cooling rate in erg cm^3/s
         call post77(te/1e3,name(i),lz,n)
+        qpost(i,:) = ne*ni(i,:)*lz
      else
         qpost(i,:) = 0.0
      endif
-     qpost(i,:) = ne*ni(i,:)*lz
 
   enddo
 

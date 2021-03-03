@@ -57,7 +57,7 @@ module tgyro_globals
   !
   integer :: transport_method
   integer :: gyrotest_flag
-  integer :: gyro_restart_method
+  integer :: gyro_restart_method=1
   !
   integer :: error_flag
   character(len=80) :: error_msg
@@ -237,10 +237,6 @@ module tgyro_globals
   real, dimension(:), allocatable :: f_he_fus
   real, dimension(:), allocatable :: mf_in
 
-  real, dimension(:), allocatable :: res
-  real, dimension(:), allocatable :: res0
-  real, dimension(:), allocatable :: relax
-
   integer, dimension(:), allocatable :: therm_vec
   character(len=3), dimension(:), allocatable :: ion_name
   real, dimension(:), allocatable :: zi_vec,mi_vec,mi
@@ -340,6 +336,11 @@ module tgyro_globals
   integer :: tgyro_zero_dens_grad_flag
   real :: tgyro_residual_tol
   real :: tgyro_input_fusion_scale
+  !
+  real, dimension(:), allocatable :: res
+  real, dimension(:), allocatable :: res_norm
+  real, dimension(:), allocatable :: res0
+  real, dimension(:), allocatable :: relax
   !
   ! Iteration variables (global)
   !

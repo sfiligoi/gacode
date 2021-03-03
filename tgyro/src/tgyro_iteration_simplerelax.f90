@@ -34,14 +34,11 @@ subroutine tgyro_iteration_simplerelax
   call tgyro_target_vector(x_vec,g_vec)
   if (loc_restart_flag == 0 .or. tgyro_relax_iterations == 0) then
      ! Need to determine initial fluxes
-     gyro_restart_method = 1
      call tgyro_flux_vector(x_vec,f_vec,0.0,0)
-     gyro_restart_method = 2
   else
      ! Initial fluxes already computed
      call tgyro_flux_set(f_vec)
      ! GYRO restart data available
-     gyro_restart_method = 2
   endif
   res0 = 0.0
   call tgyro_residual(f_vec,g_vec,res,p_max,loc_residual_method)

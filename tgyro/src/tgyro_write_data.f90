@@ -28,8 +28,7 @@ subroutine tgyro_write_data(i_print)
   character(len=6) :: ntag,ttag
   character(len=50) :: date_str,time_str
   logical :: converged
-  real :: res_norm(p_max)
-
+  
   ! Renormalize residuals so the error estimates are comparable
 
   select case (loc_residual_method) 
@@ -47,8 +46,8 @@ subroutine tgyro_write_data(i_print)
   end select
 
   ! Convergence status
-  converged = sum(res_norm)/size(res_norm) < tgyro_residual_tol
-
+   converged = (sum(res_norm)/size(res_norm) < tgyro_residual_tol)
+ 
   !====================================================
   ! input.gacode
   !====================================================
@@ -651,7 +650,7 @@ subroutine tgyro_write_data(i_print)
      call MPI_FINALIZE(ierr)
      stop
   endif
-
+  
   ! Data
 10 format(t1,11(1pe13.6,2x))
   ! Text headers

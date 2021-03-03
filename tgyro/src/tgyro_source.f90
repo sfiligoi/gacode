@@ -20,7 +20,7 @@ subroutine tgyro_source
 
   !-------------------------------------------------------
   ! 1. Alpha power
-  call rad_alpha(ne,ni,te,ti,s_alpha_i,s_alpha_e,frac_ai,e_cross,n_r,loc_n_ion)
+  call rad_alpha(ne,ni,te,ti,sn_alpha,s_alpha_i,s_alpha_e,frac_ai,e_cross,n_r,loc_n_ion)
   frac_ae = 1-frac_ai
   !-------------------------------------------------------
 
@@ -60,7 +60,7 @@ subroutine tgyro_source
   call tgyro_volume_int(s_alpha_i,p_i_fus)
   call tgyro_volume_int(s_alpha_e,p_e_fus)
   call tgyro_volume_int(sn_alpha,f_he_fus)
-
+  
   ! Integrated Bremsstrahlung power
   call tgyro_volume_int(s_brem,p_brem)
 
@@ -158,7 +158,7 @@ subroutine tgyro_source
   mflux_target(1) = 0.0 
   mflux_target(2:n_r) = mf_in(2:n_r)/volp(2:n_r)
   !------------------------------------------------
-  
+ 
   !------------------------------------------------
   ! Target He ash flux in 1/s/cm^2
   !

@@ -15,6 +15,7 @@ subroutine tgyro_comm_sync
 
   real, dimension(n_r-1) :: collect
   integer :: i_ion
+  integer :: ix
 
   ! Only a single flux and root (gradient) was computed 
   ! on a given processor.  Do an allgather to make these 
@@ -283,5 +284,11 @@ subroutine tgyro_comm_sync
        ierr)
 
   expwd_e_tur(2:n_r) = collect(:)
+
+  !if (i_proc_global == 0) then
+  !   do ix=2,n_r
+  !      print '(i2,2x,2(a,1x,1pe12.5,2x))',ix,'TGLF',eflux_i_tur(1,ix),'NEO',eflux_i_neo(1,ix)
+  !   enddo
+  !endif
 
 end subroutine tgyro_comm_sync

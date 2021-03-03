@@ -104,10 +104,10 @@ subroutine tgyro_iteration_driver
   endif
 
   if (loc_restart_flag == 0) then
+     ! Initialize relaxation parameters to starting value.
+     relax(:) = 1.0 ; res(:) = 0.0
      ! Create, but do not write to, datafiles.
      call tgyro_write_data(0)
-     ! Initialize relaxation parameters to starting value.
-     relax(:) = 1.0
   endif
   if (i_proc_global == 0) then
      open(unit=1,file=trim(runfile),position='append')

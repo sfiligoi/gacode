@@ -139,7 +139,7 @@ real function sivukhin(x)
 
 end function sivukhin
 
-subroutine rad_alpha(ne,ni,te,ti,s_alpha_i,s_alpha_e,frac_ai,e_cross,n,nion)
+subroutine rad_alpha(ne,ni,te,ti,s_alpha_he,s_alpha_i,s_alpha_e,frac_ai,e_cross,n,nion)
 
   use tgyro_globals, only : &
        pi,&
@@ -161,6 +161,7 @@ subroutine rad_alpha(ne,ni,te,ti,s_alpha_i,s_alpha_e,frac_ai,e_cross,n,nion)
   real, intent(in) :: ne(n)
   real, intent(in) :: ti(nion,n)
   real, intent(in) :: te(n)
+  real, intent(inout) :: s_alpha_he(n)
   real, intent(inout) :: s_alpha_i(n)
   real, intent(inout) :: s_alpha_e(n)
   real, intent(inout) :: frac_ai(n)
@@ -171,7 +172,7 @@ subroutine rad_alpha(ne,ni,te,ti,s_alpha_i,s_alpha_e,frac_ai,e_cross,n,nion)
 
   real :: x_a
   real :: n_d,n_t
-  real :: s_alpha,sn_alpha
+  real :: s_alpha
   real, dimension(:), allocatable :: c_a
 
   integer :: i
@@ -206,9 +207,9 @@ subroutine rad_alpha(ne,ni,te,ti,s_alpha_i,s_alpha_e,frac_ai,e_cross,n,nion)
      ! Alpha particle source and power 
      !  - Can use 'hively' or 'bosch' formulae.
      !  - sigv in cm^3/s
-     sn_alpha = n_d*n_t*sigv(ti(1,i)/1e3,'bosch') * tgyro_input_fusion_scale
+     s_alpha_he(i) = n_d*n_t*sigv(ti(1,i)/1e3,'bosch') * tgyro_input_fusion_scale
 
-     s_alpha      = sn_alpha*e_alpha
+     s_alpha      = s_alpha_he(i)*e_alpha
      s_alpha_i(i) = s_alpha*frac_ai(i)
      s_alpha_e(i) = s_alpha*(1-frac_ai(i))
 

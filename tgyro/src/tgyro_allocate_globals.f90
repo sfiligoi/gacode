@@ -161,6 +161,7 @@ subroutine tgyro_allocate_globals
   allocate(mf_in(n_r))
 
   allocate(res(p_max))
+  allocate(res_norm(p_max))
   allocate(res0(p_max))
   allocate(relax(p_max))
   allocate(therm_vec(sum(therm_flag(1:loc_n_ion))))
