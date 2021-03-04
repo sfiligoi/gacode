@@ -14,7 +14,7 @@ subroutine rad_sync(aspect_rat,r_min,b_ref,ne,te,qsync,n)
   ! b_ref      = B   [G]
   !
   ! ne [1/cm^3]
-  ! te [keV]
+  ! te [eV]
   !
   ! OUT:
   !
@@ -72,7 +72,7 @@ subroutine rad_ion(&
 
   ! IN:
   !
-  ! te    [keV]
+  ! te    [eV]
   ! ne    [1/cm^3]
   ! ni    [1/cm^3]
   ! z (charge) [-]
@@ -113,6 +113,7 @@ subroutine rad_ion(&
 
      if (z(i) > 1.0) then
         ! lz is Post 1977 cooling rate in erg cm^3/s
+        ! convert input te to keV
         call post77(te/1e3,name(i),lz,n)
         qpost(i,:) = ne*ni(i,:)*lz
      else
@@ -136,6 +137,10 @@ end subroutine rad_ion
 
 subroutine post77(te,name,lz,n)
 
+  ! IN:
+  !
+  ! te    [keV]
+
   implicit none
 
   integer, intent(in) :: n
@@ -154,7 +159,7 @@ subroutine post77(te,name,lz,n)
   c = 0.0
 
   if (name == 'He') then
-     ! Helium 4 (A=4,Z=2) [Agrees with Post for Te > 20]
+     ! Helium 4 (A=4,Z=2) [Agrees with Post for Te > 20keV]
      c(1,:) = (/2.000e-03,1.000e-02, 3.84322e+03, 8.93072e+03,8.17947e+03, 3.71287e+03, 8.35739e+02, 7.46792e+01/)
      c(2,:) = (/1.000e-02,2.000e-01,-2.25831e+01, 1.15730e-02,-8.32355e-01,-1.17916e+00,-4.74033e-01,-8.64483e-02/)
      c(3,:) = (/2.000e-01,2.000e+00,-2.25560e+01, 3.28276e-01,1.39226e-01,-1.22085e-01,-2.76602e-01,-2.90494e-01/)

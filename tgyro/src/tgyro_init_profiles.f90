@@ -435,7 +435,7 @@ subroutine tgyro_init_profiles
   allocate(exp_ti(loc_n_ion,n_exp))
   allocate(exp_ni(loc_n_ion,n_exp))
   allocate(exp_w0(n_exp))
-  allocate(exp_nu(n_exp))
+  allocate(exp_nu_exch(n_exp))
   ! exp_ne, exp_ni: [1/cm^3]
   exp_ne = expro_ne*1e13
   exp_ni(1:loc_n_ion,:) = expro_ni(1:loc_n_ion,:)*1e13
@@ -444,7 +444,7 @@ subroutine tgyro_init_profiles
   exp_ti(1:loc_n_ion,:) = expro_ti(1:loc_n_ion,:)*1e3
   ! exp_w0 [1/s]
   exp_w0 = expro_w0
-  exp_nu = 0.0
+  exp_nu_exch = 0.0
 
   allocate(volp_exp(n_exp))
   volp_exp = expro_volp

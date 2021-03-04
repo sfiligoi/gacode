@@ -77,35 +77,45 @@ subroutine tgyro_write_data(i_print)
 
      ! Alpha power density
      call rad_alpha(exp_ne,&
-          exp_ni(1:loc_n_ion,:),&
-          exp_te,&
-          exp_ti(1:loc_n_ion,:),&
-          expro_qei,&   ! dummy arg
-          expro_qfusi,& ! used (out)
-          expro_qfuse,& ! used (out)
-          expro_qbrem,& ! dummy arg
-          expro_qsync,& ! dummy arg
+          exp_ni(1:loc_n_ion,:),& ! 1/cm^3
+          exp_te,               & ! eV
+          exp_ti(1:loc_n_ion,:),& ! eV
+          expro_qei,&             ! dummy arg
+          expro_qfusi,&           ! used (out) erg/cm^3/s
+          expro_qfuse,&           ! used (out) erg/cm^3/s
+          expro_qbrem,&           ! dummy arg
+          expro_qsync,&           ! dummy arg
           expro_n_exp,&
           loc_n_ion)
 
+     ! Collisional exchange power density
+     call collision_rates(&
+          exp_ne,&       ! 1/cm^3
+          exp_ni,&       ! 1/cm^3
+          exp_te,&       ! eV
+          exp_ti,&       ! eV
+          expro_qbrem,&  ! dummy arg
+          expro_qsync,&  ! dummy arg
+          exp_nu_exch, & ! 1/s  
+          expro_n_exp,&
+          loc_n_ion)
+
+     expro_qei = 1.5*exp_nu_exch(:)*exp_ne(:)*k*(exp_te(:)-exp_ti(1,:))
+
      ! Synchrotron radiation
      call rad_sync(aspect_rat,r_min,1e4*expro_bt0,exp_ne,exp_te,expro_qsync,expro_n_exp)
+
      ! Bremsstrahlung and line radiation (Post 1977) 
      call rad_ion(&
-          exp_te,&       ! keV
-          exp_ne,&       ! 1/m^3
-          exp_ni(1:loc_n_ion,:),&  ! 1/m^3   
+          exp_te,&                ! eV
+          exp_ne,&                ! 1/cm^3
+          exp_ni(1:loc_n_ion,:),& ! 1/cm^3   
           zi_vec(1:loc_n_ion),&
           ion_name,&
           expro_qbrem,&
           expro_qline,&
           loc_n_ion,&
           expro_n_exp)
-
-     ! JC: Needs work!
-     ! Exchange power density (see s_exch in tgyro_source)
-     exp_nu = 0.0
-     expro_qei = 0.0
      
      ! Convert erg/cm^3/s -> W/cm^3 = MW/m^3
      expro_qbrem = expro_qbrem*1e-7

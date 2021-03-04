@@ -218,3 +218,63 @@ subroutine rad_alpha(ne,ni,te,ti,s_alpha_he,s_alpha_i,s_alpha_e,frac_ai,e_cross,
   deallocate(c_a)
 
 end subroutine rad_alpha
+
+subroutine collision_rates(ne,ni,te,ti,nui,nue,nu_exch,n,nion)
+
+  use tgyro_globals, only : &
+       pi,&
+       me,&
+       mi,&
+       e, &
+       k, &
+       malpha,&
+       therm_flag,&
+       zi_vec
+
+  implicit none
+
+  integer, intent(in) :: n
+  integer, intent(in) :: nion
+  real, intent(in) :: ni(nion,n)
+  real, intent(in) :: ne(n)
+  real, intent(in) :: ti(nion,n)
+  real, intent(in) :: te(n)
+  real, intent(inout) :: nui(nion,n)
+  real, intent(inout) :: nue(n)
+  real, intent(inout) :: nu_exch(n)
+
+  real, dimension(:), allocatable :: loglam
+  real :: c_exch
+  
+  integer :: i
+
+  allocate(loglam(n))
+  
+  ! Coulomb logarithm
+  loglam(:) = 24.0-log(sqrt(ne(:))/te(:))
+
+  ! 1/tau_ii (Belli 2008) in 1/s
+  do i=1,nion
+     nui(i,:) = sqrt(2.0)*pi*ni(i,:)*(zi_vec(i)*e)**4*loglam(:) &
+          /(sqrt(mi(i))*(k*ti(i,:))**1.5)
+  enddo
+
+  ! 1/tau_ee (Belli 2008) in 1/s
+  nue(:) = sqrt(2.0)*pi*ne(:)*e**4*loglam(:)/(sqrt(me)*(k*te(:))**1.5)
+
+  ! NOTE: 
+  ! c_exch = 1.8e-19 is the formulary exch. coefficient
+  c_exch = 2.0*(4.0/3)*sqrt(2.0*pi)*e**4/k**1.5
+
+  ! nu_exch in 1/s
+  nu_exch(:) = 0.0
+  do i=1,nion
+     if (therm_flag(i) == 1) then
+        nu_exch(:) = nu_exch(:)+c_exch*sqrt(me*mi(i))*zi_vec(i)**2 &
+             *ni(i,:)*loglam(:)/(me*ti(i,:)+mi(i)*te(:))**1.5
+     endif
+  enddo
+
+  deallocate(loglam)
+
+end subroutine collision_rates

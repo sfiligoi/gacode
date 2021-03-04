@@ -14,8 +14,6 @@ subroutine tgyro_profile_functions
   implicit none
 
   integer :: i_ion
-  real :: c_exch
-  real, dimension(n_r) :: loglam
   real :: p_ave
 
   ! Note flag to only evolve only gradients
@@ -87,19 +85,9 @@ subroutine tgyro_profile_functions
   ! Gyrobohm unit exchange power density (erg/cm^3/s)
   s_gb(:) = ne(:)*k*te(:)*(c_s(:)/r_min)*(rho_s(:)/r_min)**2
 
-  ! Coulomb logarithm
-  loglam(:) = 24.0-log(sqrt(ne(:))/te(:))
-
-  ! 1/tau_ii (Belli 2008) in 1/s
-  do i_ion=1,loc_n_ion
-     nui(i_ion,:) = sqrt(2.0)*pi*ni(i_ion,:)*(zi_vec(i_ion)*e)**4*loglam(:) &
-          /(sqrt(mi(i_ion))*(k*ti(i_ion,:))**1.5)
-  enddo
-
-  ! 1/tau_ee (Belli 2008) in 1/s
-  nue(:) = sqrt(2.0)*pi*ne(:)*e**4*loglam(:) &
-       /(sqrt(me)*(k*te(:))**1.5)
-
+  ! Get fundamental collision and exchange rates
+  call collision_rates(ne,ni,te,ti,nui,nue,nu_exch,n_r,loc_n_ion)
+  
   ! Hinton-Hazeltine scattering rates (one ion):
   nui_HH(:) = 4.0/(3*sqrt(2.0*pi))*nui(1,:)
   nue_HH(:) = 4.0/(3*sqrt(pi))*nue(:)*(ni(1,:)*zi_vec(1)**2/ne(:))
@@ -107,19 +95,6 @@ subroutine tgyro_profile_functions
   ! INVERSE of nue_star
   nue_star(:) = (r(:)/r_maj(:))**1.5/abs(q(:))/nue_HH(:)* &
        (c_s(:)*sqrt(mi(1)/me))/r_maj(:)/z_eff(:)
-
-  ! NOTE: 
-  ! c_exch = 1.8e-19 is the formulary exch. coefficient
-  c_exch = 2.0*(4.0/3)*sqrt(2.0*pi)*e**4/k**1.5
-
-  ! nu_exch in 1/s
-  nu_exch(:) = 0.0
-  do i_ion=1,loc_n_ion
-     if (therm_flag(i_ion) == 1) then
-        nu_exch(:) = nu_exch(:)+c_exch*sqrt(me*mi(i_ion))*zi_vec(i_ion)**2 &
-             *ni(i_ion,:)*loglam(:)/(me*ti(i_ion,:)+mi(i_ion)*te(:))**1.5
-     endif
-  enddo
 
   ! Total pressure [Ba] and beta [dimensionless]
   pr(:) = pext(:)+ne(:)*k*te(:)
