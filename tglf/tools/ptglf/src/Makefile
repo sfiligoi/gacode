@@ -17,7 +17,7 @@ OBJECTS = ptglf_globals.o \
 all: exec
 
 exec: $(OBJECTS)
-	$(FC) $(FFLAGS) -o $(EXEC) $(OBJECTS) ${GACODE_ROOT}/tglf/src/tglf_lib.a $(EXTRA_LIBS) $(LMATH)  $(NN_LIB)
+	$(FC) $(FFLAGS) -o $(EXEC) $(OBJECTS) ${GACODE_ROOT}/tglf/src/tglf_lib.a $(LMATH) $(NN_LIB)
 
 .f90.o :
 	$(FC) $(FMATH) $(FFLAGS) -c $<

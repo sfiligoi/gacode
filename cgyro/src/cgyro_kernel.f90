@@ -30,6 +30,9 @@ subroutine cgyro_kernel
   real :: mpi_dt,init_dt,exit_dt
   integer :: statusfd
 
+  ! initialize tiny float
+  small = tiny(0.0)
+  
   ! the time_lib relies on MPI being initalized, so need to use lower level functions for this
   call system_clock(start_time,count_rate,count_max)
 

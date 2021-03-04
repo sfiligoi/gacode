@@ -72,5 +72,6 @@ cgyro_lib.a: $(OBJECTS)
 
 clean:
 	rm -rf *.o cgyro_lib.a $(EXEC) *~ *.cub *.ptx *.gpu *.h *lst
+	cd ${GACODE_ROOT}/modules ; rm -f timer_lib.mod
 
 -include ../install/make.ext.${GACODE_PLATFORM}

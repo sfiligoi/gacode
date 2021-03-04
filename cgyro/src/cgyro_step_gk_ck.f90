@@ -248,7 +248,7 @@ subroutine cgyro_step_gk_ck
 
   delta_t_gk = max(delta_t_last,deltah2)
 
-  if (delta_t_last_step == 0.0) delta_t_last_step = delta_t_last
+  if (delta_t_last_step <= small) delta_t_last_step = delta_t_last
 
   if (delta_t_last_step < 0.1*delta_t_gk) then
      delta_t_gk = delta_t_last+delta_t_last_step

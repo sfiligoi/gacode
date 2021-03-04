@@ -489,5 +489,6 @@ module cgyro_globals
   !---------------------------------------------------------------
 
   real :: total_memory
+  real :: small
 
 end module cgyro_globals

@@ -1,6 +1,7 @@
 ! Verner 10:7(6) adaptive integrator  |  multithreaded version
 
 subroutine cgyro_step_gk_v76
+
   use mpi
   use timer_lib
   use cgyro_globals
@@ -29,29 +30,24 @@ subroutine cgyro_step_gk_v76
   real, parameter :: a32  = 1.185679012345679012d0
   
   real, parameter :: a41  = 0.4083333333333333333d-1
-  real, parameter :: a42  = 0.d0
   real, parameter :: a43 =  0.1225d0
   
   real, parameter :: a51 = 0.638913923625572678d0
-  real, parameter :: a52 = 0.d0
   real, parameter :: a53 = -2.4556726382236568097d0
   real, parameter :: a54 = 2.27225871459808413161d0
   
   real, parameter :: a61   = -2.661577375018757131d0
-  real, parameter :: a62   = 0.d0
   real, parameter :: a63   = 10.804513886456137696d0
   real, parameter :: a64  = -8.35391465739619941197d0
   real, parameter :: a65  = 0.8204875949566569791420d0
   
   real, parameter :: a71  = 6.067741434696770992718d0
-  real, parameter :: a72  = 0.d0
   real, parameter :: a73  = -24.7112736359110857973d0
   real, parameter :: a74  =  20.427517930788893940467d0
   real, parameter :: a75  = -1.9061579788166471506241d0
   real, parameter :: a76  = 1.00617224924206801479004d0
   
   real, parameter :: a81  = 12.0546700762532029950911d0
-  real, parameter :: a82  = 0.d0
   real, parameter :: a83  = -49.754784950468989328073d0
   real, parameter :: a84  = 41.14288863860467663259698d0
   real, parameter :: a85  = -4.46176014997400418564191d0
@@ -59,7 +55,6 @@ subroutine cgyro_step_gk_v76
   real, parameter :: a87  = -0.983484366540610737953080d-1
 
   real, parameter :: a91  = 10.138146522881807876418451d0
-  real, parameter :: a92  = 0.d0
   real, parameter :: a93  = -42.64113603171750214622846d0
   real, parameter :: a94  = 35.7638400399225700713502118d0
   real, parameter :: a95  = -4.3480228403929076533403703d0
@@ -68,29 +63,13 @@ subroutine cgyro_step_gk_v76
   real, parameter :: a98  = -0.27143900510483128423715871d0
 
   real, parameter :: a101  = -45.03007203429867712435322d0
-  real, parameter :: a102  = 0.d0
   real, parameter :: a103  = 187.32724376545888407524182d0
   real, parameter :: a104  = -154.02882369350186905967286d0
   real, parameter :: a105  = 18.56465306347536233859492333d0
   real, parameter :: a106  = -7.141809679295078854925420497d0
   real, parameter :: a107  = 1.30880857816137862511476270601d0
-  real, parameter :: a108 = 0.d0
-  real, parameter :: a109 = 0.d0
-
-  real, parameter :: c1   = 0.d0
-  real, parameter :: c2   = 5.d-2
-  real, parameter :: c3   =0.108888888888888888888888889d0
-  real, parameter :: c4   =0.163333333333333333333333333d0
-  real, parameter :: c5   =0.4555d0
-  real, parameter :: c6   =0.609509448997838131708700442d0
-  real, parameter :: c7   =0.884d0
-  real, parameter :: c8   =0.925d0
-  real, parameter :: c9   = 1.d0
-  real, parameter :: c10   =1.d0
 
   real, parameter :: b1 = 0.4715561848627222170431765108d-1
-  real, parameter :: b2 = 0.d0
-  real, parameter :: b3 = 0.d0
   real, parameter :: b4 = 0.2575056429843415189596436101d0
   real, parameter :: b5 = 0.26216653977412620477138630958d0
   real, parameter :: b6 = 0.15216092656738557403231331992d0
@@ -100,8 +79,6 @@ subroutine cgyro_step_gk_v76
   real, parameter :: b10 = 0.d0
 
   real, parameter :: b1h = 0.446086066063411762873181759748d-1
-  real, parameter :: b2h = 0.d0
-  real, parameter :: b3h = 0.d0
   real, parameter :: b4h = 0.267164037857137268050910226094d0
   real, parameter :: b5h = 0.220101830017729301997971577665d0
   real, parameter :: b6h = 0.2188431703143156830983120833513d0
@@ -330,12 +307,12 @@ subroutine cgyro_step_gk_v76
         do ic=1,nc
            h_x(ic,iv_loc) = h0_x(ic,iv_loc) &
                 + deltah2*((b1)*rhs(ic,iv_loc,1) &
-                + (b4)*rhs(ic,iv_loc,4) &
-                + (b5)*rhs(ic,iv_loc,5) &
-                + (b6)*rhs(ic,iv_loc,6) &
-                + (b7)*rhs(ic,iv_loc,7) &
-                + (b8)*rhs(ic,iv_loc,8) &
-                + (b9)*rhs(ic,iv_loc,9))
+                + b4*rhs(ic,iv_loc,4) &
+                + b5*rhs(ic,iv_loc,5) &
+                + b6*rhs(ic,iv_loc,6) &
+                + b7*rhs(ic,iv_loc,7) &
+                + b8*rhs(ic,iv_loc,8) &
+                + b9*rhs(ic,iv_loc,9))
         enddo
      enddo
      call timer_lib_out('str')
@@ -418,7 +395,7 @@ subroutine cgyro_step_gk_v76
   
   delta_t_gk = max(delta_t_last,6.0/7.0*deltah2)
 
-  if (delta_t_last_step == 0.0) delta_t_last_step = delta_t_last
+  if (delta_t_last_step <= small) delta_t_last_step = delta_t_last
 
   if (delta_t_last_step < 0.1*delta_t_last) then
      delta_t_gk = delta_t_last+delta_t_last_step

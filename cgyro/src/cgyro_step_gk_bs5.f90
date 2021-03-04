@@ -29,8 +29,8 @@ subroutine cgyro_step_gk_bs5
   real, parameter :: a31  = 2.d0/27.d0
   real, parameter :: a32  = 4.d0/27.d0
   
-  real, parameter :: a41  = 183.d0/1372.d0
-  real, parameter :: a42  = -162.d0/343.d0
+  real, parameter :: a41 = 183.d0/1372.d0
+  real, parameter :: a42 = -162.d0/343.d0
   real, parameter :: a43 =  1053.d0/1372.d0
   
   real, parameter :: a51 =  68.0d0/297.d0
@@ -38,9 +38,9 @@ subroutine cgyro_step_gk_bs5
   real, parameter :: a53 = 42.d0/143.d0
   real, parameter :: a54 = 1960.d0/3861.d0
   
-  real, parameter :: a61   = 597.d0/22528.d0
-  real, parameter :: a62   = 81.d0/352.d0
-  real, parameter :: a63   = 63099.d0/585728.d0
+  real, parameter :: a61  = 597.d0/22528.d0
+  real, parameter :: a62  = 81.d0/352.d0
+  real, parameter :: a63  = 63099.d0/585728.d0
   real, parameter :: a64  = 58653.d0/366080.d0
   real, parameter :: a65  = 4617.d0/20480.d0
   
@@ -51,58 +51,20 @@ subroutine cgyro_step_gk_bs5
   real, parameter :: a75  = -29421.d0/29068.d0
   real, parameter :: a76  = 482048.d0/414219.d0
   
-  real, parameter :: a81  = 587.d0/8064.d0
-  real, parameter :: a82  = 0.d0
-  real, parameter :: a83  = 4440339.d0/15491840.d0
-  real, parameter :: a84  = 24353.d0/124800.d0
-  real, parameter :: a85  = 387.d0/44800.d0
-  real, parameter :: a86  = 2152.d0/5985.d0
-  real, parameter :: a87  = 7267.d0/94080.d0
-
-  real, parameter :: c2   = 1.d0/6.d0
-  real, parameter :: c3   = 2.d0/9.d0
-  real, parameter :: c4   = 3.d0/7.d0
-  real, parameter :: c5   = 2.d0/3.d0
-  real, parameter :: c6   = 3.d0/4.d0
-  real, parameter :: c7   = 1.d0
-  real, parameter :: c8   = 1.d0
-
   real, parameter :: b1 =587.d0/8064.d0
-  real, parameter :: b2 =0.d0
   real, parameter :: b3 =4440339.d0/15491840.d0
   real, parameter :: b4 =24353.d0/124800.d0 
   real, parameter :: b5 =387.d0/44800.d0
   real, parameter :: b6 =2152.d0/5985.d0
   real, parameter :: b7 =7267.d0/94080.d0
-  real, parameter :: b8 = 0.d0
-
-  real, parameter :: b1h =6059.d0/80640.d0
-  real, parameter :: b2h =0.d0
-  real, parameter :: b3h =8559189.d0/30983680.d0
-  real, parameter :: b4h =26411.d0/124800.d0
-  real, parameter :: b5h =-927.d0/89600.d0
-  real, parameter :: b6h =443.d0/1197.d0
-  real, parameter :: b7h =7267.d0/94080.d0
-  real, parameter :: b8h =0.d0
-
-  real, parameter :: b1p = 2479.d0/34992.d0
-  real, parameter :: b2p = 0.d0
-  real, parameter :: b3p = 123.d0/416.d0
-  real, parameter :: b4p = 612941.d0/3411720.d0
-  real, parameter :: b5p = 43.d0/1440.d0
-  real, parameter :: b6p = 2272.d0/6561.d0
-  real, parameter :: b7p = 79937.d0/1113912.d0
-  real, parameter :: b8p = 3293.d0/556956.d0
 
   ! b1 - b1h
   
   real, parameter :: e1 = -3.d0/1280.d0
-  real, parameter :: e2 = 0.d0
   real, parameter :: e3 = 6561.d0/632320.d0
   real, parameter :: e4 = -343.d0/20800.d0
   real, parameter :: e5 = 243.d0/12800.d0
   real, parameter :: e6 = -1.d0/95.d0
-  real, parameter :: e7 = 0.d0
 
   tol = error_tol
 
@@ -353,7 +315,7 @@ subroutine cgyro_step_gk_bs5
  
   delta_t_gk = max(delta_t_last,4.0/5.0*deltah2)
   
-  if (delta_t_last_step == 0.0) delta_t_last_step = delta_t_last
+  if (delta_t_last_step <= small) delta_t_last_step = delta_t_last
 
   if ( delta_t_last_step < 0.1*delta_t_gk ) then
      delta_t_gk = delta_t_last+delta_t_last_step
