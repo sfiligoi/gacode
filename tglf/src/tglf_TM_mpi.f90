@@ -81,6 +81,7 @@
        eigenvalue_spectrum_out(:,:,:) = eigenvalue_first_pass(:,:,:)
        find_width_in = save_find_width
       else
+        ! only one pass for alpha_quench_in .ne. 0.0 or vexb_shear_s .eq. 0.0
         jmax_out = 0
         CALL get_bilinear_spectrum_mpi
       endif
@@ -358,6 +359,7 @@
        if(sat_rule_in.ge.1)reduce=1.0
 !
        width_out_save(i) = width_in
+!
        if(unstable)then
 ! save the spectral shift of the radial wavenumber due to VEXB_SHEAR
          spectral_shift_save(i) = kx0_e

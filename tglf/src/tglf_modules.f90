@@ -241,7 +241,8 @@ REAL,DIMENSION(nsm) :: mass_in
       REAL,DIMENSION(nkym,maxmodes) :: sat_geo_out=0.0
       REAL,DIMENSION(nkym) :: spectral_shift_out=0.0
       REAL,DIMENSION(nkym) :: width_out=0.0
-      REAL :: Vzf_out, kymax_out
+      REAL :: Vzf_out = 0.0
+      REAL :: kymax_out = 0.0
       REAL :: phi_bar_sum_out=0.0
       REAL :: v_bar_sum_out=0.0
       REAL :: gamma_nb_min_out=0.0
@@ -264,9 +265,9 @@ REAL,DIMENSION(nsm) :: mass_in
       REAL :: DR_out = 0.0
       REAL :: Bref_out = 1.0
       REAL :: ave_p0_out=1.0
-      INTEGER :: nmodes_out
-      INTEGER :: nfields_out
-      INTEGER :: jmax_out
+      INTEGER :: nmodes_out = 2
+      INTEGER :: nfields_out = 1
+      INTEGER :: jmax_out = 0
       character (len=80) :: error_msg='null' 
 ! NN activation parameters (thresholds)  
       REAL :: nn_max_error_in = -1.0
