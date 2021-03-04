@@ -55,6 +55,9 @@
       v_bar_sum_out = 0.0
       v_bar0 = 0.0
       phi_bar0 = 0.0     
+      do i=1,nky
+        width_out(i) = width_in ! needed for spectral shift model double pass
+      enddo
 !
 ! compute the flux spectrum
 !
@@ -80,6 +83,7 @@
        eigenvalue_spectrum_out(:,:,:) = eigenvalue_first_pass(:,:,:)
        find_width_in = save_find_width
       else
+        jmax_out = 0
         CALL get_bilinear_spectrum
       endif
 !
@@ -206,7 +210,7 @@
 !
       LOGICAL :: unstable
       INTEGER :: i,j,k,is,imax,t
-      REAL :: width_max
+      REAL :: save_width
       REAL :: gmax,fmax
       REAL :: phi_bar
       REAL :: gamma_cutoff,reduce,rexp
@@ -251,7 +255,7 @@
 ! loop over ky spectrum
 !
 ! save maximum width
-      width_max = width_in
+      save_width = width_in
       iflux_in=.TRUE. 
       gmax = 0.0
       fmax=0.0
@@ -339,7 +343,8 @@
         endif
         if(sat_rule_in.ge.1)reduce=1.0
 !
-        width_out(i) = width_save(i)
+!        width_out(i) = width_save(i)
+        width_out(i) = width_in
         if(unstable)then
 ! save the spectral shift of the radial wavenumber due to VEXB_SHEAR
          spectral_shift_out(i) = kx0_e
@@ -413,7 +418,7 @@
         endif !unstable .T.
 !
 ! reset width to maximum if used tglf_max
-        if(find_width_in)width_in=width_max
+        if(find_width_in)width_in=save_width
 !
       enddo  ! i 
 !

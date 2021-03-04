@@ -200,9 +200,6 @@ REAL,DIMENSION(nsm) :: mass_in
       REAL :: kx0_p = 0.0
       REAL :: midplane_shear=1.0
       REAL :: kx0_factor=1.0
-! internal normalization conversions
-      REAL :: as_norm,taus_norm,mass_norm,zs_norm,B_norm,L_norm
-      REAL :: cs_norm, rhos_norm, freq_norm
 ! output
       COMPLEX,DIMENSION(3,nb) :: field_weight_QL_out=0.0
       COMPLEX,DIMENSION(maxmodes,3,nb) :: field_weight_out=0.0

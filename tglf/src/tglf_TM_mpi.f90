@@ -81,6 +81,7 @@
        eigenvalue_spectrum_out(:,:,:) = eigenvalue_first_pass(:,:,:)
        find_width_in = save_find_width
       else
+        jmax_out = 0
         CALL get_bilinear_spectrum_mpi
       endif
 !
@@ -208,6 +209,7 @@
 !
       LOGICAL :: unstable
       INTEGER :: i,j,k,is,imax,t
+      REAL :: save_width
       REAL :: gmax,fmax
       REAL :: phi_bar
       REAL :: gamma_cutoff,reduce,rexp
@@ -215,8 +217,7 @@
       REAL :: pflux1,eflux1
       REAL :: stress_tor1,stress_par1
       REAL :: exch1, gamma_max
-      REAL :: save_width
-      ! mpi 
+      ! mpi
       REAL :: ne_te_phase_spectrum_save(nkym,maxmodes)
       REAL :: sat_geo_spectrum_save(nkym,maxmodes)
       REAL :: nsts_phase_spectrum_save(nsm,nkym,maxmodes)
@@ -228,6 +229,7 @@
       REAL :: flux_spectrum_save(5,nsm,3,nkym,maxmodes)
       REAL :: QL_flux_spectrum_save(5,nsm,3,nkym,maxmodes)
       REAL :: spectral_shift_save(nkym)
+      REAL :: width_out_save(nkym)
       INTEGER :: ierr
 !
 !
@@ -239,7 +241,7 @@
 !
       do i=1,nky
        spectral_shift_save(i) = 0.0
-       width_save(i) = 0.0
+       width_out_save(i)=0.0
        do k=1,nmodes_in
         do t = 1,2
           eigenvalue_spectrum_save(t,i,k) = 0.0
@@ -354,7 +356,8 @@
           endif
        endif
        if(sat_rule_in.ge.1)reduce=1.0
-! 
+!
+       width_out_save(i) = width_in
        if(unstable)then
 ! save the spectral shift of the radial wavenumber due to VEXB_SHEAR
          spectral_shift_save(i) = kx0_e
@@ -513,7 +516,7 @@
                         ,MPI_SUM                     &
                         ,iCommTglf                   &
                         ,ierr)
-     call MPI_ALLREDUCE(width_save                   &
+     call MPI_ALLREDUCE(width_out_save               &
                         ,width_out                   &
                         ,nkym                        &
                         ,MPI_DOUBLE_PRECISION        &

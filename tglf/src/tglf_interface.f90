@@ -456,7 +456,6 @@ contains
     write(1,30) 'XNU_FACTOR',xnu_factor_in
     write(1,30) 'DEBYE_FACTOR',debye_factor_in
     write(1,30) 'ETG_FACTOR',etg_factor_in
-    write(1,20) 'WRITE_WAVEFUNCTION_FLAG',.FALSE.
     write(1,*) ' '
     write(1,*) '#---------------------------------------------------'
     write(1,*) '# Species vectors:'

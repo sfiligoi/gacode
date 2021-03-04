@@ -141,30 +141,6 @@
       nfields_out = 1
       if(use_bper_in)nfields_out = nfields_out + 1
       if(use_bpar_in)nfields_out = nfields_out + 1
-!
-!  set the internal units
-!
-      if(units_in.eq.'GYRO')then
-        as_norm = 1.0
-        taus_norm = 1.0
-        mass_norm = 1.0
-        zs_norm = 1.0
-        B_norm = 1.0
-        L_norm = 1.0
-      else
-        as_norm = as_in(2)
-        taus_norm = taus_in(2)
-        mass_norm = mass_in(2)
-        zs_norm = ABS(zs_in(2))
-        B_norm = 1.0
-        L_norm = 1.0
-      endif
-! compute conversion factors
-      cs_norm = SQRT(taus_norm/mass_norm)
-      rhos_norm =SQRT(taus_norm*mass_norm)/ABS(zs_norm*B_norm)
-      freq_norm = cs_norm/L_norm
-!      ky_in = ky_in*rhos_norm
-!      write(*,*)"ky_in = ",ky_in
 !  inputs
       vexb_shear_s = vexb_shear_in*sign_It_in
       xnue_s = xnue_in
