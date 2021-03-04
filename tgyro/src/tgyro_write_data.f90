@@ -80,8 +80,9 @@ subroutine tgyro_write_data(i_print)
           exp_ni(1:loc_n_ion,:),&
           exp_te,&
           exp_ti(1:loc_n_ion,:),&
-          expro_qfusi,&
-          expro_qfuse,&
+          expro_qei,&   ! dummy arg
+          expro_qfusi,& ! used (out)
+          expro_qfuse,& ! used (out)
           expro_qbrem,& ! dummy arg
           expro_qsync,& ! dummy arg
           expro_n_exp,&
@@ -100,9 +101,11 @@ subroutine tgyro_write_data(i_print)
           expro_qline,&
           loc_n_ion,&
           expro_n_exp)
-     
+
+     ! JC: Needs work!
      ! Exchange power density (see s_exch in tgyro_source)
-     expro_qei = 1.5*nu_exch*exp_ne*k*(exp_te-exp_ti(1,:))
+     exp_nu = 0.0
+     expro_qei = 0.0
      
      ! Convert erg/cm^3/s -> W/cm^3 = MW/m^3
      expro_qbrem = expro_qbrem*1e-7

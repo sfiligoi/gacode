@@ -53,6 +53,7 @@ module tgyro_ped
   real, dimension(:,:), allocatable :: exp_ni
   real, dimension(:,:), allocatable :: exp_ti
   real, dimension(:), allocatable :: exp_w0
+  real, dimension(:), allocatable :: exp_nu
 
   ! Pedestal top scale lengths
   real :: zn_top,zt_top
