@@ -227,7 +227,6 @@ subroutine collision_rates(ne,ni,te,ti,nui,nue,nu_exch,n,nion)
        mi,&
        e, &
        k, &
-       malpha,&
        therm_flag,&
        zi_vec
 

@@ -28,7 +28,8 @@ subroutine tgyro_write_data(i_print)
   character(len=6) :: ntag,ttag
   character(len=50) :: date_str,time_str
   logical :: converged
-  
+  real, dimension(:,:), allocatable :: dum2d
+
   ! Renormalize residuals so the error estimates are comparable
 
   select case (loc_residual_method) 
@@ -46,8 +47,8 @@ subroutine tgyro_write_data(i_print)
   end select
 
   ! Convergence status
-   converged = (sum(res_norm)/size(res_norm) < tgyro_residual_tol)
- 
+  converged = (sum(res_norm)/size(res_norm) < tgyro_residual_tol)
+
   !====================================================
   ! input.gacode
   !====================================================
@@ -88,17 +89,21 @@ subroutine tgyro_write_data(i_print)
           expro_n_exp,&
           loc_n_ion)
 
+     allocate(dum2d(loc_n_ion,expro_n_exp))
+
      ! Collisional exchange power density
      call collision_rates(&
           exp_ne,&       ! 1/cm^3
           exp_ni,&       ! 1/cm^3
           exp_te,&       ! eV
           exp_ti,&       ! eV
-          expro_qbrem,&  ! dummy arg
-          expro_qsync,&  ! dummy arg
+          dum2d,&        ! dummy arg (nui)
+          expro_qsync,&  ! dummy arg (nue)
           exp_nu_exch, & ! 1/s  
           expro_n_exp,&
           loc_n_ion)
+
+     deallocate(dum2d)
 
      expro_qei = 1.5*exp_nu_exch(:)*exp_ne(:)*k*(exp_te(:)-exp_ti(1,:))
 
@@ -116,7 +121,7 @@ subroutine tgyro_write_data(i_print)
           expro_qline,&
           loc_n_ion,&
           expro_n_exp)
-     
+
      ! Convert erg/cm^3/s -> W/cm^3 = MW/m^3
      expro_qbrem = expro_qbrem*1e-7
      expro_qsync = expro_qsync*1e-7
@@ -663,7 +668,7 @@ subroutine tgyro_write_data(i_print)
      call MPI_FINALIZE(ierr)
      stop
   endif
-  
+
   ! Data
 10 format(t1,11(1pe13.6,2x))
   ! Text headers
