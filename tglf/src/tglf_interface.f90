@@ -38,6 +38,7 @@ module tglf_interface
 
   ! CONTROL PARAMETERS
   character (len=256)  :: tglf_path_in       = ''
+  character (len=20)   :: file_dump_local = 'out.tglf.localdump'
   logical              :: tglf_dump_flag_in  = .false.
   logical              :: tglf_quiet_flag_in = .true.
   integer              :: tglf_test_flag_in  = 0
@@ -234,7 +235,7 @@ contains
 
     integer :: ierr, i
 
-    open(unit=1,file=trim(tglf_path_in)//'out.tglf.localdump',&
+    open(unit=1,file=trim(tglf_path_in)//trim(file_dump_local),&
          status='replace',iostat=ierr)
 
     if (tglf_geometry_flag_in == 2 ) then
