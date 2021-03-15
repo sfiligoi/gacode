@@ -179,13 +179,31 @@ def plot_select(ax,tag):
        y = expro.expro_volp ; ystr = 'V^\prime/a^2' ; plotit(ax,x,y/a**2,ystr)
        y = expro.expro_surf ; ystr = 'S/a^2' ; plotit(ax,x,y/a**2,ystr)
 
-   if tag == 'pow':
-      y = expro.expro_qbrem ; ystr = 'q_\mathrm{brem}~\mathrm{[MW/m^3]}' ; plotit(ax,x,y,ystr)
-      y = expro.expro_qsync ; ystr = 'q_\mathrm{sync}~\mathrm{[MW/m^3]}' ; plotit(ax,x,y,ystr)
-      y = expro.expro_qline ; ystr = 'q_\mathrm{line}~\mathrm{[MW/m^3]}' ; plotit(ax,x,y,ystr)
-      y = expro.expro_qfusi ; ystr = 'q_{\\alpha i}~\mathrm{[MW/m^3]}' ; plotit(ax,x,y,ystr)
+   if tag == 'Pe':
+      y = expro.expro_qohme+expro.expro_qbeame+expro.expro_qrfe+expro.expro_qione
+      yt = y
+      ystr = 'q_{e,\mathrm{aux}}~\mathrm{[MW/m^3]}' ; plotit(ax,x,y,ystr)
       y = expro.expro_qfuse ; ystr = 'q_{\\alpha e}~\mathrm{[MW/m^3]}' ; plotit(ax,x,y,ystr)
+      yt = yt+y
+      y = -expro.expro_qbrem ; ystr = '-q_\mathrm{brem}~\mathrm{[MW/m^3]}' ; plotit(ax,x,y,ystr)
+      yt = yt+y
+      y = -expro.expro_qsync ; ystr = '-q_\mathrm{sync}~\mathrm{[MW/m^3]}' ; plotit(ax,x,y,ystr)
+      yt = yt+y
+      y = -expro.expro_qline ; ystr = '-q_\mathrm{line}~\mathrm{[MW/m^3]}' ; plotit(ax,x,y,ystr)
+      yt = yt+y
       y = -expro.expro_qei ; ystr = '-q_{ei}~\mathrm{[MW/m^3]}' ; plotit(ax,x,y,ystr)
+      yt = yt+y
+      ystr = 'q_{e}^\mathrm{TOT}~\mathrm{[MW/m^3]}' ; plotit(ax,x,yt,ystr)
+      
+   if tag == 'Pi':
+      y = expro.expro_qcxi+expro.expro_qbeami+expro.expro_qrfi+expro.expro_qioni
+      yt = y
+      ystr = 'q_{i,\mathrm{aux}}~\mathrm{[MW/m^3]}' ; plotit(ax,x,y,ystr)
+      y = expro.expro_qfusi ; ystr = 'q_{\\alpha i}~\mathrm{[MW/m^3]}' ; plotit(ax,x,y,ystr)
+      yt = yt+y
+      y = expro.expro_qei ; ystr = 'q_{ei}~\mathrm{[MW/m^3]}' ; plotit(ax,x,y,ystr)
+      yt = yt+y
+      ystr = 'q_{i}^\mathrm{TOT}~\mathrm{[MW/m^3]}' ; plotit(ax,x,yt,ystr)
 
    ax.legend(loc=loc,ncol=2)
        
@@ -225,7 +243,7 @@ class DemoFrame(wx.Frame):
 
         mytabs = ['r','R','Z','kappa','sin','cos','q','Bunit',
                   'n','Ln','sn','T','LT','sT','gam_e','gam_p','Mach',
-                  'j','nu','rhos','V','pow']
+                  'j','nu','rhos','V','Pe','Pi']
 
         for x in mytabs:
            tab = TabPanel(notebook)
