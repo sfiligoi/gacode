@@ -16,7 +16,7 @@ MF90 = mpif90-openmpi-mp
 #
 
 FC  = ${MF90} -std=f2008 -fall-intrinsics -I$(GACODE_ROOT)/modules -J$(GACODE_ROOT)/modules -I/opt/local/include -fPIC
-F77 = ${MF90}
+F77 = ${MF90} -w -fallow-argument-mismatch
 
 FOMP	= -fopenmp
 FMATH	= -fdefault-real-8 -fdefault-double-8
