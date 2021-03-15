@@ -194,6 +194,10 @@ subroutine tgyro_write_input
 
         select case (tgyro_dt_method)
 
+        case (0)
+
+           write(1,10) 'TGYRO_DT_METHOD','Not a DT plasma. Fusion power is zero.'
+
         case (1)
 
            write(1,10) 'TGYRO_DT_METHOD','Reaction cross section <n1*n2> (use with separate D and T)'

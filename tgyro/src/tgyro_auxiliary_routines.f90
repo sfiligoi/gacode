@@ -194,7 +194,11 @@ subroutine rad_alpha(ne,ni,te,ti,s_alpha_he,s_alpha_i,s_alpha_e,frac_ai,e_cross,
      x_a = e_alpha/e_cross(i)
      frac_ai(i) = sivukhin(x_a)
 
-     if (tgyro_dt_method == 1) then
+     if (tgyro_dt_method == 0) then
+        ! No fusion power
+        n_d = 0.0
+        n_t = 0.0
+     else if (tgyro_dt_method == 1) then
         ! Assume D and T given by ion 1 and ion 2 (order doesn't matter)
         n_d = ni(1,i)
         n_t = ni(2,i)
