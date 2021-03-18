@@ -111,7 +111,7 @@ subroutine tgyro_write_data(i_print)
      call rad_sync(aspect_rat,r_min,1e4*expro_bt0,exp_ne,exp_te,expro_qsync,expro_n_exp)
 
      ! Bremsstrahlung and line radiation (Post 1977) 
-     call rad_ion(&
+     call rad_ion_adas(&
           exp_te,&                ! eV
           exp_ne,&                ! 1/cm^3
           exp_ni(1:loc_n_ion,:),& ! 1/cm^3   

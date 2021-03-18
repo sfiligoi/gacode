@@ -26,7 +26,7 @@ subroutine tgyro_source
 
   !-------------------------------------------------------
   ! 2. Bremsstrahlung and line radiation (s_brem,s_line)
-  call rad_ion(te,ne,ni,zi_vec,ion_name,s_brem,s_line,loc_n_ion,n_r)
+  call rad_ion_adas(te,ne,ni,zi_vec,ion_name,s_brem,s_line,loc_n_ion,n_r)
   !-------------------------------------------------------
 
   !-------------------------------------------------------
