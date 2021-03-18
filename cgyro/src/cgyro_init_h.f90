@@ -60,7 +60,7 @@ subroutine cgyro_init_h
      i_current = 0
      t_current = 0.0
      gtime = 0.0
-         
+
   case (0)
 
      i_current = 0
@@ -124,7 +124,11 @@ subroutine cgyro_init_h
                  ir = ir_c(ic) 
                  it = it_c(ic)
                  ang = theta(it)+2*pi*px(ir)
-                 h_x(ic,iv_loc) = rho/(1.0+ang**4) 
+                 if (amp >  0.0) then
+                    h_x(ic,iv_loc) = rho/(1.0+ang**4)
+                 else
+                    h_x(ic,iv_loc) = rho*ang/(1.0+ang**4)
+                 endif
               enddo
            endif
 
