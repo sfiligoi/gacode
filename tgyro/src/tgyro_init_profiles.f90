@@ -150,6 +150,11 @@ subroutine tgyro_init_profiles
   ! Aspect ratio
   aspect_rat = expro_rmaj(n_exp)/expro_rmin(n_exp)
 
+  ! Is this a DT plasma
+  dt_flag = 0
+  if (ion_name(1) == 'D' .and. ion_name(2) == 'T') dt_flag = 1
+  if (ion_name(1) == 'T' .and. ion_name(2) == 'D') dt_flag = 1
+
   !------------------------------------------------------
   ! Convert dimensionless mass to grams.
   mi(:) = mi_vec(:)*mp

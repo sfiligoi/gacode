@@ -152,13 +152,21 @@ def specmap(m_in,z_in):
      else:
         name = '?'
   elif m == 4:
-     name = 'He4'
+     name = 'He'
   elif m == 7:
      name = 'Li'
   elif m == 9:
      name = 'Be'
   elif m == 12:
      name = 'C'
+  elif m == 14:
+     name = 'N'
+  elif m == 16:
+     name = 'O'
+  elif m == 20:
+     name = 'Ne'
+  elif m == 40:
+     name = 'Ar'
   elif m > 180:
      name = 'W'
   else:

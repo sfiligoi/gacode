@@ -190,37 +190,6 @@ subroutine tgyro_write_input
      !--------------------------------------------------------
 
      !--------------------------------------------------------
-     if (loc_scenario > 2) then
-
-        select case (tgyro_dt_method)
-
-        case (0)
-
-           write(1,10) 'TGYRO_DT_METHOD','Not a DT plasma. Fusion power is zero.'
-
-        case (1)
-
-           write(1,10) 'TGYRO_DT_METHOD','Reaction cross section <n1*n2> (use with separate D and T)'
-           if (loc_n_ion == 1) then
-              error_flag = 1
-              error_msg = 'ERROR: (tgyro) Need LOC_N_ION > 1 for D-T reaction cross-section'
-           endif
-
-        case (2)
-
-           write(1,10) 'TGYRO_DT_METHOD','Reaction cross section <n1*n1>/4 (use with single main ion)'
-
-        case default
-
-           error_flag = 1
-           error_msg = 'Error: TGYRO_DT_METHOD'
-
-        end select
-
-     endif
-     !--------------------------------------------------------
-
-     !--------------------------------------------------------
      select case (tgyro_neo_method)
 
      case (0)
@@ -515,6 +484,9 @@ subroutine tgyro_write_input
      enddo
      write(1,*) 
      write(1,10) 'INFO: (tgyro)','GyroBohm factors defined by ion 1 mass.'
+     if (dt_flag == 1) then
+        write(1,10) 'INFO: (tgyro)','DT plasma detected; computing DT fusion power.'
+     endif
      write(1,*)
      !--------------------------------------------------------
 

@@ -148,9 +148,9 @@ subroutine rad_alpha(ne,ni,te,ti,s_alpha_he,s_alpha_i,s_alpha_e,frac_ai,e_cross,
        malpha,&
        therm_flag,&
        zi_vec,&
-       tgyro_dt_method,&
        e_alpha,&
        k,&
+       dt_flag,&
        tgyro_input_fusion_scale
 
   implicit none
@@ -188,25 +188,20 @@ subroutine rad_alpha(ne,ni,te,ti,s_alpha_he,s_alpha_i,s_alpha_e,frac_ai,e_cross,
      endif
   enddo
 
+  n_d = 0.0
+  n_t = 0.0
+  
   do i=1,n
+
+     if (dt_flag == 1) then
+        ! D and T given by ion 1 and ion 2 (order doesn't matter)
+        n_d = ni(1,i)
+        n_t = ni(2,i)
+     endif
 
      e_cross(i) = k*te(i)*(4*sqrt(me/malpha)/(3*sqrt(pi)*c_a(i)))**(-2.0/3.0)
      x_a = e_alpha/e_cross(i)
      frac_ai(i) = sivukhin(x_a)
-
-     if (tgyro_dt_method == 0) then
-        ! No fusion power
-        n_d = 0.0
-        n_t = 0.0
-     else if (tgyro_dt_method == 1) then
-        ! Assume D and T given by ion 1 and ion 2 (order doesn't matter)
-        n_d = ni(1,i)
-        n_t = ni(2,i)
-     else
-        ! Assume ion 1 is DT hybrid.
-        n_d = 0.5*ni(1,i)
-        n_t = 0.5*ni(1,i)
-     endif
 
      ! Alpha particle source and power 
      !  - Can use 'hively' or 'bosch' formulae.
