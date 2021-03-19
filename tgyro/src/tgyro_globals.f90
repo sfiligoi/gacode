@@ -58,6 +58,7 @@ module tgyro_globals
   integer :: transport_method
   integer :: gyrotest_flag
   integer :: gyro_restart_method=1
+  integer :: dt_flag
   !
   integer :: error_flag
   character(len=80) :: error_msg
@@ -319,7 +320,6 @@ module tgyro_globals
   integer :: tgyro_er_bc
   integer :: tgyro_noturb_flag
   integer :: tgyro_use_rho
-  integer :: tgyro_dt_method
   integer :: tgyro_gyro_restart_flag
   integer :: tgyro_write_profiles_flag
   integer :: tgyro_neo_n_theta
