@@ -134,6 +134,7 @@ subroutine neo_read_input
         read(1,*) n_tpvarphi
         read(1,*) tpmatsize
         read(1,*) indx_c00
+        read(1,*) threed_bmag2_avg
         close(1)
      endif
 

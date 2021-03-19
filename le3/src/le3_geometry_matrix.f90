@@ -204,7 +204,7 @@ subroutine le3_geometry_matrix
   write (1,'(i3)') nps
   write (1,'(i3)') matsize
   write (1,'(i3)') indx_c00
-  write (1,'(e16.8)') q
+  write (1,'(e16.8)') bsq_avg
   close(1)
 
   open(unit=1,file='out.le3.geoindx',status='replace')

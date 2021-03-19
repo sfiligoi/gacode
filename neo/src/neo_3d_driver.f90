@@ -484,6 +484,11 @@ contains
                   * evec_e1(ie,ix) &
                   + src_F0_Lt * evec_e2(ie,ix) )
 
+          else if (ix == 1) then
+             g_loc(i_loc) = sqrt(2.0) * vth(is,ir) * evec_e05(ie,ix) &
+                  * (1.0*Z(is))/temp(is,ir) * epar0(ir) * tpvec_bmag(it) &
+                  / threed_bmag2_avg
+
           endif
 
        endif

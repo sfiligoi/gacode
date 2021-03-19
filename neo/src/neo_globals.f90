@@ -120,6 +120,7 @@ module neo_globals
   integer :: n_tptheta
   integer :: n_tpvarphi
   integer :: indx_c00
+  real    :: threed_bmag2_avg
   !
   ! LAPACK VARIABLES
   integer :: bw
