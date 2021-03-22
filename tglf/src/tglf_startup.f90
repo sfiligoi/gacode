@@ -36,6 +36,7 @@
       endif
       if(use_default_species)ns_in=2
       ns = ns_in
+!      write(*,*)"ns = ",ns,"   ns0 = ",ns0
 !
       ! restrict user settings to three preset versions
       ! SAT0 + GYRO + XNU 2
@@ -146,7 +147,8 @@
       xnue_s = xnue_in
       pol = 0.0
       U0 = 0.0
-      do is=1,nstotal_in  ! include all species inputs
+!      do is=1,nstotal_in  ! include all species inputs
+      do is=1,ns
         rlns(is) = rlns_in(is)
         rlts(is) = rlts_in(is)
         taus(is) = taus_in(is)
