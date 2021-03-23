@@ -147,13 +147,13 @@ then
    echo "Flux-surface mapper control options"
    echo
    echo "             -npsi <int>"
-   echo "              Number of flux-surfaces to contout"
+   echo "              Number of flux-surfaces to contour (default=200)"
    echo
    echo "             -nrz <int>"
-   echo "              R-Z resolution for psi contours."
+   echo "              R-Z resolution for psi contours (default=1600)"
    echo
    echo "             -narc <int>"
-   echo "              Equal-arc contour points."
+   echo "              Equal-arc contour points (default=600)"
    echo
    echo "             -nfourier <int>"
    echo "             General legacy Fourier geometry coefficents in input.gacode.geo (off by default)"
