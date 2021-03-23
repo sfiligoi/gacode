@@ -84,7 +84,8 @@
       if(USE_PRESSURE)then
          dlnpdr = 0.0
          ptot = 0.0
-         do is=1,nstotal_in   ! include all species even non-kinetic ones like fast ions
+ !        do is=1,nstotal_in   ! include all species even non-kinetic ones like fast ions
+         do is=1,ns
            ptot = ptot + as(is)*taus(is)
            dlnpdr = dlnpdr + as(is)*taus(is)*(rlns(is)+rlts(is))
          enddo
