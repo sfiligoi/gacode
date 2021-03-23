@@ -77,9 +77,6 @@ then
    echo "             Specify direction of toroidal field (as seen from above)"
    echo "             (1=counter-clockwise,-1=clockwise)"
    echo
-   echo "             -neut"
-   echo "             Toggle extraction of neutral profiles (input.gacode.neutral)"
-   echo
    echo "             -V"
    echo "             Verbose (for debugging; use this if you get an error)."
    echo
@@ -340,7 +337,6 @@ while [ $# -gt 0 ] ; do
 
   -V) VERBOSE_FLAG=1 ;;
 
-  -neut) NEUT_FLAG=1 ;;
   -info) INFO_FLAG=1 ;;
 
   -r) shift ; ORDER="$1" ; ORDER_FLAG=1 ;;
@@ -630,13 +626,9 @@ echo $CER_FILE >> $CONFIG
 
 # EFIT data control
 echo $EFIT >> $CONFIG
-echo $NEUT_FLAG >> $CONFIG
 
 # Verbosity
 echo $VERBOSE_FLAG >> $CONFIG
-
-# GFILE MERGE
-echo $GMERGE_FLAG >> $CONFIG
 
 # FIELD ORIENTATION
 echo $IPCCW >> $CONFIG
