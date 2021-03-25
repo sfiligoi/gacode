@@ -189,8 +189,7 @@ subroutine prgen_read_peqdsk
      open(unit=1,file='pfile.species',status='old')
      read(1,*) num
      if (num > (1 + peqdsk_nimp + peqdsk_nbeams)) then
-        print '(a)','ERROR: (prgen) Species number in pfile incorrect'
-        stop
+        print '(a)','WARNING: (prgen) One or more ions densities is zero/missing. Ignoring.'
      endif
      do i=1,peqdsk_nimp
         read(1,*) y1, y2, y3
