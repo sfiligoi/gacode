@@ -226,6 +226,9 @@ subroutine tgyro_init_profiles
      ! Define default ratios (these will change if tgyro_ped_ratio < 0.0)
      n_ratio(i_ion) = ni(i_ion,n_r)/ne(n_r)
      t_ratio(i_ion) = ti(i_ion,n_r)/te(n_r)
+     if (ni(i_ion,1) < 1e-10) then
+        call tgyro_catch_error('ERROR (tgyro_init_profiles) Zero density in ion '//ion_name(i_ion))
+     endif
   enddo
 
   if (tgyro_consistent_flag == 1) then
