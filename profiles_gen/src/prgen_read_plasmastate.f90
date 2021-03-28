@@ -20,7 +20,7 @@ subroutine prgen_read_plasmastate
   real :: dummy
   real, dimension(:,:), allocatable :: vec
   real, parameter :: idiag=0
-  
+
   ! Open the file (NF90_NOWRITE means read-only)
   err = nf90_open(file_state,NF90_NOWRITE,ncid)
 
@@ -246,8 +246,9 @@ subroutine prgen_read_plasmastate
   deallocate(vec)
   !---------------------------------------------------------------
 
-  ! Fast-ion handling
   !------------------------------------------------------------------
+  ! Fast-ion handling
+  !
   ! 1. Beams
   err = nf90_inq_varid(ncid,trim('nbeami'),varid)
   if (err == 0) then
@@ -265,19 +266,24 @@ subroutine prgen_read_plasmastate
      plst_tb(nx,:)     = plst_tb(nx-1,:)
 
      do i=1,plst_dim_nspec_beam
-        print '(a,i2)','INFO: (prgen_read_plasmastate) Found beam ',i
-        ntop = ntop+1
-        plst_ns(:,ntop) = plst_nb(:,i)
-        plst_ts(:,ntop) = plst_tb(:,i)
+        if (plst_nb(1,i) > 0.0) then
+           print '(a,i2)','INFO: (prgen_read_plasmastate) Beam added: ',i
+           ntop = ntop+1
+           plst_ns(:,ntop) = plst_nb(:,i)
+           plst_ts(:,ntop) = plst_tb(:,i)
+        else
+           ! Zero density profile - remove ion from total
+           print '(a,i2)','INFO: (prgen_read_plasmastate) Beam ignored (zero density): ',i
+           plst_dp1_nspec_all = plst_dp1_nspec_all-1
+        endif
      enddo
   else
      plst_nb = 0.0
      plst_tb = 0.0
   endif
-  !------------------------------------------------------------------
-
-  !------------------------------------------------------------------
+  !
   ! 2. Minority ions
+  !
   err = nf90_inq_varid(ncid,trim('nmini'),varid)
   if (err == 0) then
      err = nf90_get_var(ncid,varid,plst_nmini(1:nx-1))
@@ -299,10 +305,9 @@ subroutine prgen_read_plasmastate
      plst_nmini = 0.0
      plst_tmini = 0.0
   endif
-  !------------------------------------------------------------------
-
-  !------------------------------------------------------------------
+  !
   ! 3. Fusion alphas
+  !
   err = nf90_inq_varid(ncid,trim('nfusi'),varid)
   if (err == 0) then
      err = nf90_get_var(ncid,varid,plst_nfusi(1:nx-1))
