@@ -173,7 +173,7 @@ subroutine prgen_map_plasmastate
   !-------------------------------------------------------------------------------
 
   !---------------------------------------------------------
-  ! Map profile data into expro interface variables
+  ! * Begin nmapping profile data into expro interface variables
   !
   expro_n_exp = nx
   expro_n_ion = plst_dp1_nspec_all-1

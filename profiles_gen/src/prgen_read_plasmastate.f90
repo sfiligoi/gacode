@@ -275,6 +275,10 @@ subroutine prgen_read_plasmastate
            ! Zero density profile - remove ion from total
            print '(a,i2)','INFO: (prgen_read_plasmastate) Beam ignored (zero density): ',i
            plst_dp1_nspec_all = plst_dp1_nspec_all-1
+           if (ntop < plst_dp1_nspec_all) then
+              plst_m_all(ntop+1:plst_dp1_nspec_all) =  plst_m_all(ntop+2:plst_dp1_nspec_all+1)
+              plst_q_all(ntop+1:plst_dp1_nspec_all) =  plst_q_all(ntop+2:plst_dp1_nspec_all+1)
+           endif
         endif
      enddo
   else
