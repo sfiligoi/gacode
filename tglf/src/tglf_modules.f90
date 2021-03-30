@@ -8,7 +8,7 @@
       INTEGER, PARAMETER :: nb=32
       INTEGER, PARAMETER :: nxm=2*32-1
       INTEGER, PARAMETER :: nsm=12, nt0=40
-      INTEGER, PARAMETER :: nkym=480
+      INTEGER, PARAMETER :: nkym=512
       INTEGER, PARAMETER :: maxmodes=16
       INTEGER, PARAMETER :: max_ELITE=700
       INTEGER, PARAMETER :: max_fourier = 24
