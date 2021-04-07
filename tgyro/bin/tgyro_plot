@@ -28,32 +28,19 @@ then
   echo "          -u <units>"
   echo "          Plot units (0=GB,1=Physical)."
   echo 
-  echo "          -plot <type>"
-  echo "          Generate plot of given type."
-  echo "           <type> = note (notebook plot of quantities for r <= r_*),"
-  echo "                    glob (global data from input.profiles)"
-  echo
   echo "          -loc <Legend location: 1,2,3,4>"
   echo 
-  echo " OPTIONS FOR <type>=note"
-  echo
   echo "          -n <iteration number (default -1 = last)>"
   echo
   echo "          -dots"
   echo "          Toggle dot overlay."
   echo
-  echo " OPTIONS FOR <type>=glob"
-  echo
-  echo "          -f <func>"
-  echo "          <f> = quantity to plot (Te, Ti_1, etc)"
-  echo
-  echo "          -r <flux-surface coordinate for plotting>"
-  echo "          Choices are r,r/a,rho"
+  echo "          -notex"
+  echo "          Disable latex fonts"
   echo
   echo "Example:"
   echo
-  echo "   tgyro_plot -e . -plot note"
-  echo "   tgyro_plot -e . -plot glob -f Te"
+  echo "   tgyro_plot -dots"
 
   exit 1
 fi
@@ -66,13 +53,11 @@ fi
 LOCDIR=.
 EXT=screen
 SIMROOT=$PWD
-PLOT_TYPE=null
 UNITS=0
 DOTS=0
-F=ne
-RVAR=r/a
 LOC=1
 N=-1
+TEX=1
 #==============================================================================
 
 #==============================================================================
@@ -89,10 +74,6 @@ while [ $# -gt 0 ] ; do
 
   -ext) shift ; EXT=$1 ;;
 
-  -f) shift ; F=$1 ;;
-
-  -r) shift ; RVAR=$1 ;;
-
   -loc) shift ; LOC=$1 ;;
 
   -u) shift ; UNITS=$1 ;;
@@ -100,6 +81,8 @@ while [ $# -gt 0 ] ; do
   -n) shift ; N=$1 ;;
 
   -dots) DOTS=1 ;;
+
+  -notex) TEX=0 ;;
 
   *) echo "ERROR: incorrect tgyro_plot syntax." ; exit 1 ;;
 
@@ -118,23 +101,6 @@ cd $SIMDIR
 
 PYROOT=$GACODE_ROOT/f2py/pygacode/tgyro
 
-#==============================================================================
-#
-#
-case "$PLOT_TYPE" in
-
-   note)
-	python $PYROOT/plot_notebook.py $SIMDIR $UNITS $EXT $N $LOC ;;
-
-   glob)
-	python $PYROOT/plot_global.py $SIMDIR $F $EXT $RVAR $LOC $DOTS ;;
-
-   null)
-        echo "Please specify a plot type via -plot." ;;
-
-   *)
-        echo "Unrecognized plot type: $PLOT_TYPE" ;;
-
-esac
+python $PYROOT/plot_notebook.py $SIMDIR $UNITS $EXT $N $LOC $TEX
 
 exit 0

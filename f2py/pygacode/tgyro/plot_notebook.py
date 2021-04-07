@@ -19,14 +19,19 @@ from data import tgyrodata
 from matplotlib.colors import LogNorm
 from pygacode import expro
 
-rc('text', usetex=True)
-rc('font', size=18)
-
 simdir = sys.argv[1]
 units = int(sys.argv[2])
 ext = sys.argv[3]
 nstr = sys.argv[4]
 loc = int(sys.argv[5])
+hastex = int(sys.argv[6])
+
+if hastex == 0:
+    rc('text',usetex=False)
+else:
+    rc('text',usetex=True)
+    
+rc('font',size=18)
 
 n = int(nstr)
 
