@@ -456,7 +456,6 @@ contains
                + x*cos(theta) &
                - 2*geo_zeta_in*cos(2*theta) &
                + 3*geo_shape_sin3_in*cos(3*theta)
-          print *,a_t
           a_tt = -geo_shape_cos1_in*cos(theta) &
                - 4*geo_shape_cos2_in*cos(2*theta) &
                - 9*geo_shape_cos3_in*cos(3*theta) &
