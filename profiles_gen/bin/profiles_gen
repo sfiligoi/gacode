@@ -221,6 +221,9 @@ then
    echo "             -append"
    echo "             Append to existing input.*.locpargen files"
    echo
+   echo "             -ntheta <int>"
+   echo "             Toggle geometry plot with number of theta points"
+   echo
    echo "EXAMPLES:"
    echo " "
    echo
@@ -303,6 +306,7 @@ HASGEO=0
 QNFLAG=0
 BANANA=0
 APPENDFLAG=0
+NTHETA=0
 #=============================================================
 
 #=============================================================
@@ -367,6 +371,7 @@ while [ $# -gt 0 ] ; do
   -loc_rad) shift ; LOC_RAD=$1 ;;
   -loc_rho) shift ; LOC_RHO=$1 ;;
   -loc_psi) shift ; LOC_PSI=$1 ;;
+  -ntheta) shift ; NTHETA=$1 ;;
   -append) APPENDFLAG=1 ;;
   -qn) QNFLAG=1 ;;
   -banana) BANANA=1 ;;
@@ -506,11 +511,15 @@ then
   echo $HASGEO >> input.locpargen
   echo $QNFLAG >> input.locpargen
   echo $APPENDFLAG >> input.locpargen
+  echo $NTHETA >> input.locpargen
   $LOCPARGEN
   if [ $BANANA -eq 1 ] ; then
      python ${PRGEN_BIN}/banana_width.py
   fi
-  #rm input.locpargen
+  rm input.locpargen
+  if [ $NTHETA -gt 0 ] ; then
+     python $PRGEN_BIN/locpargen_plot.py
+  fi
   exit 0
 fi
 

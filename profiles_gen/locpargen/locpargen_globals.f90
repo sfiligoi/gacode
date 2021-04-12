@@ -9,6 +9,8 @@ module locpargen_globals
   integer :: hasgeo
   integer :: qnflag
   integer :: appendflag
+  integer :: ntheta
+  real, dimension(:), allocatable :: theta
   
   character(len=2) :: tag(9)
 

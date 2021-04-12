@@ -11,8 +11,11 @@ program locpargen
   use locpargen_globals
   use expro
   use expro_locsim_interface
+  use geo
 
   implicit none
+
+  integer :: i
 
   open(unit=1,file='input.locpargen',status='old')
   read(1,*) r0
@@ -21,6 +24,7 @@ program locpargen
   read(1,*) hasgeo
   read(1,*) qnflag
   read(1,*) appendflag
+  read(1,*) ntheta
   close(1)
 
   expro_ctrl_quasineutral_flag = qnflag
@@ -69,19 +73,14 @@ program locpargen
   !if (hasgeo == 1) call locpargen_geo
   !------------------------------------------------------------
 
-  if (qnflag == 0) then 
-     print 10,'INFO: (locpargen) Quasineutrality NOT enforced.'
-  else
-     print 10,'INFO: (locpargen) Quasineutrality enforced.'
-  endif
-
+  print 10,'INFO: (locpargen) rmin/a   =',rmin_loc
   print 10,'INFO: (locpargen) rhos/a   =',rhos_loc/a
   !print 10,'rhoi/a   =',rhos_loc/a*sqrt(temp_loc(ise)/temp_loc(1))
   print 10,'INFO: (locpargen) Te [keV] =',temp_loc(ise)
   print 10,'INFO: (locpargen) Ti [keV] =',temp_loc(1)
   print 10,'INFO: (locpargen) Bunit    =',b_unit_loc
   print 10,'INFO: (locpargen) beta_*   =',beta_star_loc
-  print 10,'INFO: ----->  n=1: ky*rhos =',q_loc/rmin_loc*rhos_loc/a
+  print 10,'INFO: (locpargen) ky*rhos (n=1) =',abs(q_loc/rmin_loc*rhos_loc/a)
 
   ! Compute collision frequency
   !
@@ -97,11 +96,12 @@ program locpargen
   nu_ee  = cc*loglam*dens_loc(ise)/(sqrt(mass_loc(ise)/2.0)*temp_loc(ise)**1.5)
 
   betae_unit = 4.027e-3*dens_loc(ise)*temp_loc(ise)/b_unit_loc**2
-  
+
   lambda_star = 7.43 * sqrt((1e3*temp_loc(ise))/(1e13*dens_loc(ise)))/rhos_loc
 
   tag(:) = (/'1','2','3','4','5','6','7','8','9'/)
 
+  ! Write data for banana width calculation
   open(unit=1,file='out.locpargen',status='replace')
   write(1,*) q_loc
   write(1,*) r0
@@ -115,9 +115,31 @@ program locpargen
   call fileopen('input.tglf.locpargen')  ; call locpargen_tglf
   call fileopen('input.tglf.locpargen_stack') ; call locpargen_tglf_stack
   call fileopen('input.neo.locpargen')   ; call locpargen_neo
+  if (qnflag == 0) then 
+     print 10,'INFO: (locpargen) Quasineutrality NOT enforced.'
+  else
+     print 10,'INFO: (locpargen) Quasineutrality enforced.'
+  endif
   print 10,'INFO: (locpargen) Wrote input.*.locpargen'
 
-10 format(a,sp,1pe12.5)
+  !---------------------------------------------------------------------------
+  ! GEO output
+  if (ntheta > 0) then
+     allocate(theta(ntheta))
+     do i=1,ntheta
+        theta(i) = -pi+(i-1)*2*pi/ntheta
+     enddo
+     call geo_interp(ntheta,theta,.true.)
+
+     open(unit=1,file='out.locpargen.theta',status='replace')
+     do i=1,ntheta
+        write(1,'(5(1pe12.5,1x))') theta(i),geo_bigr_r(i),geo_bigr_t(i),geo_bigz_r(i),geo_bigz_t(i)
+     enddo
+     close(1)
+     deallocate(theta)
+  endif
+
+10 format(a,1x,f7.5)
 
 end program locpargen
 
