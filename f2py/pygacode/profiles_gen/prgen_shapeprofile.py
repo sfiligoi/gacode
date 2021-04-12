@@ -39,7 +39,7 @@ si = np.zeros([nf+1,npsi])
 xi = np.zeros([4,npsi])
 for i in range(npsi-1):
    r=ri[:,i+1] ; z=zi[:,i+1]
-   if np.mod(i,4) == 0 and nfourier > 0 and plotpng:
+   if i > 192 and plotpng:
       xplot = pnorm[i+1]
    else:
       xplot = 0.0

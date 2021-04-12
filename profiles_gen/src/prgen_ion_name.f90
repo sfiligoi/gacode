@@ -31,6 +31,10 @@ subroutine prgen_ion_name(m,z,name)
   case (9)
      name = 'Be'
 
+  case (11)
+     ! 2021/04/12: Added Boron
+     name = 'B'
+
   case (12)
      name = 'C'
 

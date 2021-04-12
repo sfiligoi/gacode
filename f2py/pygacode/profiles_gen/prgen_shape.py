@@ -26,7 +26,7 @@ def prgen_shape(r,z,narc,nf,xplot):
       r = np.flip(r,0) ; z = np.flip(z,0)
 
    # Compute generalized angles
-   eps = 1.0-1e-9
+   eps = 1.0-1e-10
    for i in range(narc):
       # (ur,uz): principle angles (discontinuous)
       uz[i] = np.arcsin(eps*(z[i]-zmaj)/zmin)
@@ -77,7 +77,7 @@ def prgen_shape(r,z,narc,nf,xplot):
       sr[p] = moment(narc,vr,np.sin(p*x),dx)
 
    if xplot > 0.0:
-      outfile = '{:.3f}'.format(xplot)+'.png'
+      outfile = '{:.3f}'.format(xplot)
       plot_ang(r,z,x,vr,xr,cr,sr,outfile)
 
    return cr,sr,xr
@@ -179,17 +179,42 @@ def plot_ang(r,z,x,vr,xr,cr,sr,outfile):
 
     # PLOT contour
     ax = fig.add_subplot(121,aspect='equal')
+    ax.set_title(r'$\psi='+outfile+'$')
     ax.set_xlabel(r'$R$')
     ax.set_ylabel(r'$Z$')
     ax.grid(which="both",ls=":")
 
     # Data
-    ax.plot(r,z,'-k',linewidth=2,alpha=0.3)
+    ax.plot(r,z,'--k',linewidth=1)
+
     # Parameterized contour
+    #rp = rmaj+rmin*np.cos(x+pr)
+    #zp = zmaj+zmin*np.sin(x)
+    #ax.plot(rp,zp,'-m',linewidth=1)
+
+    #True area
+    #area1 = 0.0
+    #for i in range(len(r)-1):
+    #   area1 = area1 + 0.5*(r[i]+r[i+1])*(z[i+1]-z[i])
+
+    # Fit area
+    #area2 = 0.0
+    #for i in range(len(rp)-1):
+    #   area2 = area2 + 0.5*(rp[i]+rp[i+1])*(zp[i+1]-zp[i])
+
+    #inflate = np.sqrt(area1/area2)
+    #rmin = inflate*rmin
+    #zmin = inflate*zmin
+    #rmaj = inflate*rmaj
+    #zmaj = inflate*zmaj
+    #print(inflate)
+    
+     # Parameterized contour
     rp = rmaj+rmin*np.cos(x+pr)
     zp = zmaj+zmin*np.sin(x)
-    ax.plot(rp,zp,'-m',linewidth=1)
-
+    ax.plot(rp,zp,'-g',linewidth=1)
+   #-------------------------------------------------------
+    
     # PLOT angle 
     ax = fig.add_subplot(122)
     ax.set_xlabel(r'$x = \theta_Z/(2\pi)$')
@@ -222,8 +247,8 @@ def plot_ang(r,z,x,vr,xr,cr,sr,outfile):
     ax.plot(x,vr,'-k',linewidth=2,alpha=0.3)
 
     plt.tight_layout()
-    print('INFO: (plot_ang) Writing '+outfile)
-    plt.savefig(outfile)
+    print('INFO: (plot_ang) Writing '+outfile+'.png')
+    plt.savefig(outfile+'.png')
     plt.close()
 
     return
