@@ -520,7 +520,7 @@ then
   fi
   rm input.locpargen
   if [ $NTHETA -gt 0 ] ; then
-     python $LOCPARGEN_PLOT/plot_locpargen_geo.py
+     python $LOCPARGEN_PLOT/plot_locpargen_geo.py $NTHETA
   fi
   exit 0
 fi

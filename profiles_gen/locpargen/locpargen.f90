@@ -131,10 +131,13 @@ program locpargen
      enddo
      call geo_interp(ntheta,theta,.true.)
 
-     open(unit=1,file='out.locpargen.theta',status='replace')
-     do i=1,ntheta
-        write(1,'(5(1pe12.5,1x))') theta(i),geo_bigr_r(i),geo_bigr_t(i),geo_bigz_r(i),geo_bigz_t(i)
-     enddo
+     open(unit=1,file='bin.locpargen.theta',status='replace',access='stream')
+     write(1) real(theta,kind=4)
+     write(1) real(geo_bigr_r,kind=4)
+     write(1) real(geo_bigr_t,kind=4)
+     write(1) real(geo_bigz_r,kind=4)
+     write(1) real(geo_bigz_t,kind=4)
+     write(1) real(geo_gsin,kind=4)
      close(1)
      deallocate(theta)
   endif

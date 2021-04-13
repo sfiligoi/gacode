@@ -1,38 +1,53 @@
 import os
+import sys
 import wx
 import matplotlib
 import numpy as np
 matplotlib.use('WXAgg')
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
 import matplotlib.pyplot as plt
-#from ..gacodefuncs import *
 
 matplotlib.rc('text',usetex=True)
 matplotlib.rc('font',size=18)
+ntheta = int(sys.argv[1])
+print(ntheta)
 
-data = np.genfromtxt('out.locpargen.theta')
-simdir = './'
-wdir = os.path.realpath(simdir)
+wdir = os.path.realpath('./')
+
+data = np.fromfile('bin.locpargen.theta',dtype='float32')
+data = np.reshape(data,(6,ntheta),'F')
+x = data[0,:]/np.pi
 
 def plot_select(ax,tag):
+
+    ax.set_xlabel(r'$\theta$')
+    ax.grid(which="both",ls=":")
+    ax.grid(which="major",ls=":")
     
-    if tag == 'J':
-        x =data[:,0]/np.pi
+    if tag == 'Jr':
+        rr=data[1,:]
+        rt=data[2,:]
+        zr=data[3,:]
+        zt=data[4,:]
+
+        ax.plot(x,rr*zt-zr*rt,color='k',label=r'$R_r Z_\theta - Z_r R_\theta$')
+        ax.plot(x,rr*zt,color='r',alpha=0.4,label=r'$R_r Z_\theta$')
+        ax.plot(x,-zr*rt,color='b',alpha=0.4,label=r'$-Z_r R_\theta$')
+        ax.plot(x,x*0.0,linestyle='--',color='k')
+        ax.legend()
+    elif tag == 'gsin':
         rr=data[:,1]
         rt=data[:,2]
         zr=data[:,3]
         zt=data[:,4]
 
-        ax.set_xlabel(r'$\theta$')
-        ax.set_ylabel(r'$F$')
-        ax.grid(which="both",ls=":")
-        ax.grid(which="major",ls=":")
-
-        ax.plot(x,rr*zt-zr*rt,color='k')
-        ax.plot(x,rr*zt,color='r')
-        ax.plot(x,-zr*rt,color='b')
+        ax.plot(x,rr*zt-zr*rt,color='k',label=r'$R_r Z_\theta - Z_r R_\theta$')
+        ax.plot(x,rr*zt,color='r',alpha=0.4,label=r'$R_r Z_\theta$')
+        ax.plot(x,-zr*rt,color='b',alpha=0.4,label=r'$-Z_r R_\theta$')
         ax.plot(x,x*0.0,linestyle='--')
+        ax.legend()
 
+        
     ax.set_xlim([-1,1])
     plt.tight_layout()
     
@@ -69,7 +84,7 @@ class DemoFrame(wx.Frame):
  
         notebook = wx.Notebook(panel)
 
-        mytabs = ['J']
+        mytabs = ['Jr','gsin']
 
         for x in mytabs:
            tab = TabPanel(notebook)
