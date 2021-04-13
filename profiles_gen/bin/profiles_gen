@@ -35,6 +35,8 @@ OMFIT='-m pygacode.profiles_gen.prgen_shapeprofile'
 LOCPARGEN=${GACODE_ROOT}/profiles_gen/locpargen/locpargen
 # - profiles_gen bin directory
 PRGEN_BIN=${GACODE_ROOT}/profiles_gen/bin
+# - locpargen plot directory
+LOCPARGEN_PLOT=${GACODE_ROOT}/f2py/pygacode/profiles_gen
 #=============================================================
 
 #=============================================================
@@ -518,7 +520,7 @@ then
   fi
   rm input.locpargen
   if [ $NTHETA -gt 0 ] ; then
-     python $PRGEN_BIN/locpargen_plot.py
+     python $LOCPARGEN_PLOT/plot_locpargen_geo.py
   fi
   exit 0
 fi
