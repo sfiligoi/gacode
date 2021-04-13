@@ -129,6 +129,33 @@ program locpargen
      do i=1,ntheta
         theta(i) = -pi+(i-1)*2*pi/ntheta
      enddo
+     geo_rmin_in = rmin_loc
+     geo_rmaj_in = rmaj_loc
+     geo_drmaj_in = shift_loc
+     geo_zmag_in = zmag_loc
+     geo_dzmag_in = dzmag_loc
+     geo_q_in = q_loc
+     geo_s_in = s_loc
+     geo_kappa_in = kappa_loc
+     geo_s_kappa_in = s_kappa_loc
+     geo_delta_in = delta_loc
+     geo_s_delta_in = s_delta_loc
+     geo_zeta_in = zeta_loc
+     geo_s_zeta_in = s_zeta_loc
+     geo_shape_cos0_in = shape_cos0_loc
+     geo_shape_s_cos0_in = shape_s_cos0_loc
+     geo_shape_cos1_in = shape_cos1_loc
+     geo_shape_s_cos1_in =  shape_s_cos1_loc
+     geo_shape_cos2_in = shape_cos2_loc
+     geo_shape_s_cos2_in = shape_s_cos2_loc
+     geo_shape_cos3_in = shape_cos3_loc
+     geo_shape_s_cos3_in = shape_s_cos3_loc
+     geo_shape_sin3_in = shape_sin3_loc
+     geo_shape_s_sin3_in = shape_s_sin3_loc
+     geo_beta_star_in = beta_star_loc
+     geo_beta_star_1_in = 0.0 
+     geo_beta_star_2_in = 0.0
+
      call geo_interp(ntheta,theta,.true.)
 
      open(unit=1,file='bin.locpargen.theta',status='replace',access='stream')
@@ -138,6 +165,10 @@ program locpargen
      write(1) real(geo_bigz_r,kind=4)
      write(1) real(geo_bigz_t,kind=4)
      write(1) real(geo_gsin,kind=4)
+     write(1) real(geo_gcos1,kind=4)
+     write(1) real(geo_bt,kind=4)
+     write(1) real(geo_bp,kind=4)
+     write(1) real(geo_captheta,kind=4)
      close(1)
      deallocate(theta)
   endif

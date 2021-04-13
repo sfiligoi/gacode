@@ -10,32 +10,20 @@ import matplotlib.pyplot as plt
 matplotlib.rc('text',usetex=True)
 matplotlib.rc('font',size=18)
 ntheta = int(sys.argv[1])
-print(ntheta)
 
 wdir = os.path.realpath('./')
 
 data = np.fromfile('bin.locpargen.theta',dtype='float32')
-data = np.reshape(data,(6,ntheta),'F')
-x = data[0,:]/np.pi
+data = np.reshape(data,(ntheta,10),'F')
+x = data[:,0]/np.pi
 
 def plot_select(ax,tag):
 
-    ax.set_xlabel(r'$\theta$')
+    ax.set_xlabel(r'$\theta/\pi$')
     ax.grid(which="both",ls=":")
     ax.grid(which="major",ls=":")
     
     if tag == 'Jr':
-        rr=data[1,:]
-        rt=data[2,:]
-        zr=data[3,:]
-        zt=data[4,:]
-
-        ax.plot(x,rr*zt-zr*rt,color='k',label=r'$R_r Z_\theta - Z_r R_\theta$')
-        ax.plot(x,rr*zt,color='r',alpha=0.4,label=r'$R_r Z_\theta$')
-        ax.plot(x,-zr*rt,color='b',alpha=0.4,label=r'$-Z_r R_\theta$')
-        ax.plot(x,x*0.0,linestyle='--',color='k')
-        ax.legend()
-    elif tag == 'gsin':
         rr=data[:,1]
         rt=data[:,2]
         zr=data[:,3]
@@ -44,10 +32,36 @@ def plot_select(ax,tag):
         ax.plot(x,rr*zt-zr*rt,color='k',label=r'$R_r Z_\theta - Z_r R_\theta$')
         ax.plot(x,rr*zt,color='r',alpha=0.4,label=r'$R_r Z_\theta$')
         ax.plot(x,-zr*rt,color='b',alpha=0.4,label=r'$-Z_r R_\theta$')
-        ax.plot(x,x*0.0,linestyle='--')
-        ax.legend()
+        ax.plot(x,x*0.0,linestyle='--',color='k')
+    elif tag == 'gsin':
+        y=data[:,5]
 
+        ax.plot(x,y,color='k',label=r'$\mathrm{gsin}$')
+        ax.plot(x,x*0.0,linestyle='--')
+    elif tag == 'gcos1':
+        y=data[:,6]
+
+        ax.plot(x,y,color='k',label=r'$\mathrm{gcos}$')
+        ax.plot(x,x*0.0,linestyle='--')
         
+    elif tag == 'Bt':
+        y=data[:,7]
+
+        ax.plot(x,y,color='k',label=r'$B_T$')
+        ax.plot(x,x*0.0,linestyle='--')
+    elif tag == 'Bp':
+        y=data[:,8]
+
+        ax.plot(x,y,color='k',label=r'$B_p$')
+        ax.plot(x,x*0.0,linestyle='--')
+    elif tag == 'captheta':
+        y=data[:,9]
+
+        ax.plot(x,y,color='k',label=r'$\Theta$')
+        ax.plot(x,x*0.0,linestyle='--')
+
+
+    ax.legend()
     ax.set_xlim([-1,1])
     plt.tight_layout()
     
@@ -84,7 +98,7 @@ class DemoFrame(wx.Frame):
  
         notebook = wx.Notebook(panel)
 
-        mytabs = ['Jr','gsin']
+        mytabs = ['Jr','gsin','gcos1','Bt','Bp','captheta']
 
         for x in mytabs:
            tab = TabPanel(notebook)
