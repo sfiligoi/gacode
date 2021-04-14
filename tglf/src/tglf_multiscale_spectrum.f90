@@ -26,11 +26,10 @@
       IMPLICIT NONE
       !
       LOGICAL :: USE_MIX=.TRUE.
-      LOGICAL :: USE_X3=.FALSE.
-      LOGICAL :: USE_X4=.FALSE.
       LOGICAL :: first_pass = .TRUE.
       LOGICAL :: USE_SUB1=.FALSE.
       LOGICAL :: USE_PRESSURE = .TRUE.
+      LOGICAL :: USE_Q = .TRUE.
       INTEGER :: i,is,k,j,j1,j2,jmax1,jmax2
       
       INTEGER :: expsub=2, exp_ax, jmax_mix
@@ -79,8 +78,8 @@
       ! model fit parameters
       ! need to set alpha_zf_in = 1.0
       ! Miller geometry values igeo=1
-      if(xnu_model_in.eq.3)USE_X3=.TRUE.
-      if(xnu_model_in.eq.4)USE_X4=.TRUE.
+      if(etg_factor_in .eq. -1.0)USE_PRESSURE = .FALSE.
+      if(alpha_zf_in.eq.-1.0)USE_Q = .FALSE.
       if(USE_PRESSURE)then
          dlnpdr = 0.0
          ptot = 0.0
@@ -89,6 +88,9 @@
            ptot = ptot + as(is)*taus(is)
            dlnpdr = dlnpdr + as(is)*taus(is)*(rlns(is)+rlts(is))
          enddo
+         if(etg_factor_in .eq.-2.0)then
+          dlnpdr = ABS(p_prime_loc)*(rmin_loc/q_loc)*(8.0*pi)/MAX(betae_in,1.0E-12)
+         endif
          dlnpdr = rmaj_input*dlnpdr/MAX(ptot,0.01)
          if(dlnpdr .gt. 20.0)dlnpdr = 20.0
          if(dlnpdr .lt. 4.0)dlnpdr = 4.0
@@ -110,15 +112,15 @@
         cz1=0.48*czf
         cz2=1.0*czf
         cnorm = 14.29
-        if(USE_X3)then
-         cnorm = 12.94  ! note this is normed to GASTD CGYRO units
-         cz1 = 0.0
-         cz2=1.4*czf
-         etg_streamer = 1.0
-         kyetg=etg_streamer*ABS(zs(2))/SQRT(taus(2)*mass(2))  ! fixed to ion gyroradius
-         cky=3.0
-         sqcky=SQRT(cky)
-        endif
+!        if(USE_X3)then
+!         cnorm = 12.94  ! note this is normed to GASTD CGYRO units
+!         cz1 = 0.0
+!         cz2=1.4*czf
+!         etg_streamer = 1.0
+!         kyetg=etg_streamer*ABS(zs(2))/SQRT(taus(2)*mass(2))  ! fixed to ion gyroradius
+!         cky=3.0
+!         sqcky=SQRT(cky)
+!        endif
         if(USE_MIX)then
 !original        kyetg=1.9*ABS(zs(2))/SQRT(taus(2)*mass(2))  ! fixed to ion gyroradius
           cky=3.0
@@ -152,7 +154,11 @@
         d1 = (Bt0_out/B_geo0_out)**4    ! PPCF paper 2020
         Gq = B_geo0_out/grad_r0_out
         d2 = b3/Gq**2
-        cnorm = b2*(q_in/2.0)*(12.0/dlnpdr)
+        if(USE_Q)then
+          cnorm = b2*(q_in/2.0)*(12.0/dlnpdr)
+        else
+          cnorm = b2*(12.0/dlnpdr)
+        endif
         kyetg = 1000.0   ! does not impact SAT2
         cky=3.0
         sqcky=SQRT(cky)
