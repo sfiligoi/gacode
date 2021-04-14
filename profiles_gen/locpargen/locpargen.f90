@@ -129,6 +129,13 @@ program locpargen
      do i=1,ntheta
         theta(i) = -pi+(i-1)*2*pi/ntheta
      enddo
+     if (hasgeo == 1) then
+        geo_model_in = 1
+        geo_nfourier_in = geo_ny_loc
+        geo_fourier_in = geo_yin_loc
+     else
+        geo_model_in = 0
+     endif
      geo_rmin_in = rmin_loc
      geo_rmaj_in = rmaj_loc
      geo_drmaj_in = shift_loc
@@ -169,6 +176,7 @@ program locpargen
      write(1) real(geo_bt,kind=4)
      write(1) real(geo_bp,kind=4)
      write(1) real(geo_captheta,kind=4)
+     write(1) real(geo_chi2,kind=4)
      close(1)
      deallocate(theta)
   endif

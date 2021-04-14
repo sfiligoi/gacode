@@ -14,7 +14,7 @@ ntheta = int(sys.argv[1])
 wdir = os.path.realpath('./')
 
 data = np.fromfile('bin.locpargen.theta',dtype='float32')
-data = np.reshape(data,(ntheta,10),'F')
+data = np.reshape(data,(ntheta,11),'F')
 x = data[:,0]/np.pi
 
 def plot_select(ax,tag):
@@ -59,6 +59,11 @@ def plot_select(ax,tag):
 
         ax.plot(x,y,color='k',label=r'$\Theta$')
         ax.plot(x,x*0.0,linestyle='--')
+    elif tag == 'ang':
+        y=data[:,10]
+
+        ax.plot(x,y,color='k',label=r'$\partial \theta_R/\partial \theta$')
+        ax.plot(x,x*0.0,linestyle='--')
 
 
     ax.legend()
@@ -98,7 +103,7 @@ class DemoFrame(wx.Frame):
  
         notebook = wx.Notebook(panel)
 
-        mytabs = ['Jr','gsin','gcos1','Bt','Bp','captheta']
+        mytabs = ['Jr','gsin','gcos1','Bt','Bp','captheta','ang']
 
         for x in mytabs:
            tab = TabPanel(notebook)
