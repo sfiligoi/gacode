@@ -22,8 +22,12 @@ module geo
   double precision :: geo_shape_s_cos2_in = 0.0
   double precision :: geo_shape_cos3_in = 0.0
   double precision :: geo_shape_s_cos3_in = 0.0
+  double precision :: geo_shape_cos4_in = 0.0
+  double precision :: geo_shape_s_cos4_in = 0.0
   double precision :: geo_shape_sin3_in = 0.0
   double precision :: geo_shape_s_sin3_in = 0.0
+  double precision :: geo_shape_sin4_in = 0.0
+  double precision :: geo_shape_s_sin4_in = 0.0
   double precision :: geo_beta_star_in = 0.0
   double precision :: geo_beta_star_1_in = 0.0
   double precision :: geo_beta_star_2_in = 0.0
@@ -446,22 +450,28 @@ contains
                + geo_shape_cos1_in*cos(theta) &
                + geo_shape_cos2_in*cos(2*theta) &
                + geo_shape_cos3_in*cos(3*theta) &
+               + geo_shape_cos4_in*cos(4*theta) &
                + x*sin(theta) &
                - geo_zeta_in*sin(2*theta) &
-               + geo_shape_sin3_in*sin(3*theta) 
+               + geo_shape_sin3_in*sin(3*theta) &
+               + geo_shape_sin4_in*sin(4*theta) 
           a_t  = 1.0 &
                - geo_shape_cos1_in*sin(theta) &
                - 2*geo_shape_cos2_in*sin(2*theta) &
                - 3*geo_shape_cos3_in*sin(3*theta) &
+               - 4*geo_shape_cos4_in*sin(4*theta) &
                + x*cos(theta) &
                - 2*geo_zeta_in*cos(2*theta) &
-               + 3*geo_shape_sin3_in*cos(3*theta)
+               + 3*geo_shape_sin3_in*cos(3*theta) &
+               + 4*geo_shape_sin4_in*cos(4*theta)
           a_tt = -geo_shape_cos1_in*cos(theta) &
                - 4*geo_shape_cos2_in*cos(2*theta) &
                - 9*geo_shape_cos3_in*cos(3*theta) &
+               - 16*geo_shape_cos4_in*cos(4*theta) &
                - x*sin(theta) &
                + 4*geo_zeta_in*sin(2*theta) &
-               - 9*geo_shape_sin3_in*sin(3*theta)
+               - 9*geo_shape_sin3_in*sin(3*theta) &
+               - 16*geo_shape_sin4_in*sin(4*theta)
 
           ! R(theta)
           ! dR/dr
@@ -474,9 +484,11 @@ contains
                + geo_shape_s_cos1_in*cos(theta) &
                + geo_shape_s_cos2_in*cos(2*theta) &
                + geo_shape_s_cos3_in*cos(3*theta) &
+               + geo_shape_s_cos4_in*cos(4*theta) &
                + geo_s_delta_in/cos(x)*sin(theta) &
                - geo_s_zeta_in*sin(2*theta) &
-               + geo_shape_s_sin3_in*sin(3*theta))
+               + geo_shape_s_sin3_in*sin(3*theta) &
+               + geo_shape_s_sin4_in*sin(4*theta))
           geov_bigr_t(i) = -geo_rmin_in * a_t * sin(a)
           bigr_tt = &
                -geo_rmin_in*a_t**2*cos(a) &

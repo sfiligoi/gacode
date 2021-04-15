@@ -74,15 +74,29 @@ subroutine prgen_read_omfit
   call bound_interp(efit_rho,efit_zmaj,npsi,rho,zmag,nx)
   call bound_interp(efit_rho,efit_rmaj,npsi,rho,rmaj,nx)
   call bound_interp(efit_rho,efit_kappa,npsi,rho,kappa,nx)
-  call bound_interp(efit_rho,efit_si(:,2),npsi,rho,delta,nx) ; delta = sin(delta)
-  call bound_interp(efit_rho,efit_si(:,3),npsi,rho,zeta,nx) ; zeta = -zeta
 
   ! New shape coefficients
-  call bound_interp(efit_rho,efit_si(:,4),npsi,rho,shape_sin3,nx)
   call bound_interp(efit_rho,efit_ci(:,1),npsi,rho,shape_cos0,nx)
-  call bound_interp(efit_rho,efit_ci(:,2),npsi,rho,shape_cos1,nx)
-  call bound_interp(efit_rho,efit_ci(:,3),npsi,rho,shape_cos2,nx)
-  call bound_interp(efit_rho,efit_ci(:,4),npsi,rho,shape_cos3,nx)
+
+  if(nf > 1) then
+     call bound_interp(efit_rho,efit_si(:,2),npsi,rho,delta,nx) ; delta = sin(delta)
+     call bound_interp(efit_rho,efit_ci(:,2),npsi,rho,shape_cos1,nx)
+  endif
+
+  if(nf > 2) then
+     call bound_interp(efit_rho,efit_si(:,3),npsi,rho,zeta,nx) ; zeta = -zeta
+     call bound_interp(efit_rho,efit_ci(:,3),npsi,rho,shape_cos2,nx)
+  endif
+  
+  if(nf > 3) then
+     call bound_interp(efit_rho,efit_si(:,4),npsi,rho,shape_sin3,nx)
+     call bound_interp(efit_rho,efit_ci(:,4),npsi,rho,shape_cos3,nx)
+  endif
+  if(nf > 4) then
+     call bound_interp(efit_rho,efit_si(:,5),npsi,rho,shape_sin4,nx)
+     call bound_interp(efit_rho,efit_ci(:,5),npsi,rho,shape_cos4,nx)
+  endif
+ 
 
   !==============================================================================
 

@@ -36,10 +36,13 @@ subroutine prgen_write
      expro_zmag       = zmag
 
      expro_shape_sin3 = shape_sin3
+     expro_shape_sin4 = shape_sin4
      expro_shape_cos0 = shape_cos0
      expro_shape_cos1 = shape_cos1
      expro_shape_cos2 = shape_cos2
      expro_shape_cos3 = shape_cos3
+     expro_shape_cos4 = shape_cos4
+     
   endif
   !-------------------------------------------------------------------------------------
 

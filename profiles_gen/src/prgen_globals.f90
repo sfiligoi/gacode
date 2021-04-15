@@ -47,10 +47,12 @@ module prgen_globals
   real, dimension(:), allocatable :: zmag
   real, dimension(:), allocatable :: zeta
   real, dimension(:), allocatable :: shape_sin3
+  real, dimension(:), allocatable :: shape_sin4
   real, dimension(:), allocatable :: shape_cos0
   real, dimension(:), allocatable :: shape_cos1
   real, dimension(:), allocatable :: shape_cos2
   real, dimension(:), allocatable :: shape_cos3
+  real, dimension(:), allocatable :: shape_cos4
   real, dimension(:), allocatable :: vpolc_exp
   real, dimension(:), allocatable :: vtorc_exp
 
