@@ -14,8 +14,8 @@ ntheta = int(sys.argv[1])
 wdir = os.path.realpath('./')
 
 data = np.fromfile('bin.locpargen.theta',dtype='float32')
-n = len(data)/ntheta
-data = np.reshape(data,(ntheta,n),'F')
+#n = len(data)/ntheta
+data = np.reshape(data,(ntheta,12),'F')
 x = data[:,0]/np.pi
 
 def plot_select(ax,tag):
