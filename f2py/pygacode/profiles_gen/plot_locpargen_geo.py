@@ -14,7 +14,8 @@ ntheta = int(sys.argv[1])
 wdir = os.path.realpath('./')
 
 data = np.fromfile('bin.locpargen.theta',dtype='float32')
-data = np.reshape(data,(ntheta,11),'F')
+n = len(data)/ntheta
+data = np.reshape(data,(ntheta,n),'F')
 x = data[:,0]/np.pi
 
 def plot_select(ax,tag):
@@ -22,6 +23,8 @@ def plot_select(ax,tag):
     ax.set_xlabel(r'$\theta/\pi$')
     ax.grid(which="both",ls=":")
     ax.grid(which="major",ls=":")
+
+    ax.plot(x,x*0.0,linestyle='--',color='k')
     
     if tag == 'Jr':
         rr=data[:,1]
@@ -32,39 +35,34 @@ def plot_select(ax,tag):
         ax.plot(x,rr*zt-zr*rt,color='k',label=r'$R_r Z_\theta - Z_r R_\theta$')
         ax.plot(x,rr*zt,color='r',alpha=0.4,label=r'$R_r Z_\theta$')
         ax.plot(x,-zr*rt,color='b',alpha=0.4,label=r'$-Z_r R_\theta$')
-        ax.plot(x,x*0.0,linestyle='--',color='k')
+
     elif tag == 'gsin':
         y=data[:,5]
-
         ax.plot(x,y,color='k',label=r'$\mathrm{gsin}$')
-        ax.plot(x,x*0.0,linestyle='--')
+
     elif tag == 'gcos1':
         y=data[:,6]
+        ax.plot(x,y,color='k',label=r'$\mathrm{gcos}_1$')
 
-        ax.plot(x,y,color='k',label=r'$\mathrm{gcos}$')
-        ax.plot(x,x*0.0,linestyle='--')
+    elif tag == 'gcos2':
+        y=data[:,7]
+        ax.plot(x,y,color='k',label=r'$\mathrm{gcos}_2$')
         
     elif tag == 'Bt':
-        y=data[:,7]
-
-        ax.plot(x,y,color='k',label=r'$B_T$')
-        ax.plot(x,x*0.0,linestyle='--')
-    elif tag == 'Bp':
         y=data[:,8]
-
-        ax.plot(x,y,color='k',label=r'$B_p$')
-        ax.plot(x,x*0.0,linestyle='--')
-    elif tag == 'captheta':
+        ax.plot(x,y,color='k',label=r'$B_t$')
+ 
+    elif tag == 'Bp':
         y=data[:,9]
+        ax.plot(x,y,color='k',label=r'$B_p$')
 
-        ax.plot(x,y,color='k',label=r'$\Theta$')
-        ax.plot(x,x*0.0,linestyle='--')
-    elif tag == 'ang':
+    elif tag == 'g_theta':
         y=data[:,10]
+        ax.plot(x,y,color='k',label=r'$G_\theta$')
 
-        ax.plot(x,y,color='k',label=r'$\partial \theta_R/\partial \theta$')
-        ax.plot(x,x*0.0,linestyle='--')
-
+    elif tag == 'captheta':
+        y=data[:,11]
+        ax.plot(x,y,color='k',label=r'$\Theta$')
 
     ax.legend()
     ax.set_xlim([-1,1])
@@ -103,7 +101,7 @@ class DemoFrame(wx.Frame):
  
         notebook = wx.Notebook(panel)
 
-        mytabs = ['Jr','gsin','gcos1','Bt','Bp','captheta','ang']
+        mytabs = ['Jr','gsin','gcos1','gcos2','Bt','Bp','g_theta','captheta']
 
         for x in mytabs:
            tab = TabPanel(notebook)
