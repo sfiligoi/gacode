@@ -28,20 +28,20 @@ subroutine prgen_write
      expro_bcentr   = -btccw*abs(bcentr)
      expro_current  = -ipccw*abs(current)
 
-     expro_q          = ipccw*btccw*abs(q)
-     expro_polflux    = -ipccw*abs(dpsi)
-     expro_kappa      = kappa
-     expro_delta      = delta
-     expro_zeta       = zeta
-     expro_zmag       = zmag
+     expro_q       = ipccw*btccw*abs(q)
+     expro_polflux = -ipccw*abs(dpsi)
+     expro_kappa   = kappa
+     expro_delta   = delta
+     expro_zeta    = zeta
+     expro_zmag    = zmag
 
-     expro_shape_sin3 = shape_sin3
-     expro_shape_sin4 = shape_sin4
-     expro_shape_cos0 = shape_cos0
-     expro_shape_cos1 = shape_cos1
-     expro_shape_cos2 = shape_cos2
-     expro_shape_cos3 = shape_cos3
-     expro_shape_cos4 = shape_cos4
+     expro_shape_sin3 = shape_sin(3,:)
+     expro_shape_sin4 = shape_sin(4,:)
+     expro_shape_cos0 = shape_cos(0,:)
+     expro_shape_cos1 = shape_cos(1,:)
+     expro_shape_cos2 = shape_cos(2,:)
+     expro_shape_cos3 = shape_cos(3,:)
+     expro_shape_cos4 = shape_cos(4,:)
      
   endif
   !-------------------------------------------------------------------------------------
