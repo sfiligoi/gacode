@@ -34,8 +34,12 @@ module expro_locsim_interface
   double precision :: shape_cos2_loc
   double precision :: shape_cos3_loc
   double precision :: shape_cos4_loc
+  double precision :: shape_cos5_loc
+  double precision :: shape_cos6_loc
   double precision :: shape_sin3_loc
   double precision :: shape_sin4_loc
+  double precision :: shape_sin5_loc
+  double precision :: shape_sin6_loc
   double precision :: s_kappa_loc
   double precision :: s_delta_loc
   double precision :: s_zeta_loc
@@ -44,8 +48,12 @@ module expro_locsim_interface
   double precision :: shape_s_cos2_loc
   double precision :: shape_s_cos3_loc
   double precision :: shape_s_cos4_loc
+  double precision :: shape_s_cos5_loc
+  double precision :: shape_s_cos6_loc
   double precision :: shape_s_sin3_loc
   double precision :: shape_s_sin4_loc
+  double precision :: shape_s_sin5_loc
+  double precision :: shape_s_sin6_loc
   double precision :: zmag_loc
   double precision :: dzmag_loc
   double precision :: gamma_e_loc
@@ -158,8 +166,12 @@ end subroutine expro_locsim_alloc
 !  real :: shape_cos2_loc
 !  real :: shape_cos3_loc
 !  real :: shape_cos4_loc
+!  real :: shape_cos5_loc
+!  real :: shape_cos6_loc
 !  real :: shape_sin3_loc
 !  real :: shape_sin4_loc
+!  real :: shape_sin5_loc
+!  real :: shape_sin6_loc
 !  real :: s_kappa_loc
 !  real :: s_delta_loc
 !  real :: s_zeta_loc
@@ -168,8 +180,12 @@ end subroutine expro_locsim_alloc
 !  real :: shape_s_cos2_loc
 !  real :: shape_s_cos3_loc
 !  real :: shape_s_cos4_loc
+!  real :: shape_s_cos5_loc
+!  real :: shape_s_cos6_loc
 !  real :: shape_s_sin3_loc
 !  real :: shape_s_sin4_loc
+!  real :: shape_s_sin5_loc
+!  real :: shape_s_sin6_loc
 !  real :: zmag_loc
 !  real :: dzmag_loc
 !  real :: gamma_e_loc
@@ -314,10 +330,18 @@ subroutine expro_locsim_profiles(&
   call cub_spline1(rmin_exp,expro_shape_scos3,expro_n_exp,rmin,shape_s_cos3_loc)
   call cub_spline1(rmin_exp,expro_shape_cos4,expro_n_exp,rmin,shape_cos4_loc)
   call cub_spline1(rmin_exp,expro_shape_scos4,expro_n_exp,rmin,shape_s_cos4_loc)
+  call cub_spline1(rmin_exp,expro_shape_cos5,expro_n_exp,rmin,shape_cos5_loc)
+  call cub_spline1(rmin_exp,expro_shape_scos5,expro_n_exp,rmin,shape_s_cos5_loc)
+  call cub_spline1(rmin_exp,expro_shape_cos6,expro_n_exp,rmin,shape_cos6_loc)
+  call cub_spline1(rmin_exp,expro_shape_scos6,expro_n_exp,rmin,shape_s_cos6_loc)
   call cub_spline1(rmin_exp,expro_shape_sin3,expro_n_exp,rmin,shape_sin3_loc)
   call cub_spline1(rmin_exp,expro_shape_ssin3,expro_n_exp,rmin,shape_s_sin3_loc)
   call cub_spline1(rmin_exp,expro_shape_sin4,expro_n_exp,rmin,shape_sin4_loc)
   call cub_spline1(rmin_exp,expro_shape_ssin4,expro_n_exp,rmin,shape_s_sin4_loc)
+  call cub_spline1(rmin_exp,expro_shape_sin5,expro_n_exp,rmin,shape_sin5_loc)
+  call cub_spline1(rmin_exp,expro_shape_ssin5,expro_n_exp,rmin,shape_s_sin5_loc)
+  call cub_spline1(rmin_exp,expro_shape_sin6,expro_n_exp,rmin,shape_sin6_loc)
+  call cub_spline1(rmin_exp,expro_shape_ssin6,expro_n_exp,rmin,shape_s_sin6_loc)
   call cub_spline1(rmin_exp,expro_zmag/a_meters,expro_n_exp,rmin,zmag_loc)
   call cub_spline1(rmin_exp,expro_dzmag,expro_n_exp,rmin,dzmag_loc)
   call cub_spline1(rmin_exp,gamma_e_exp,expro_n_exp,rmin,gamma_e_loc)

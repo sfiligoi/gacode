@@ -1,7 +1,7 @@
 module expro
 
   ! List of all useful interface objects
-  character*12, dimension(111) :: expro_list 
+  character*12, dimension(119) :: expro_list 
 
   character(len=2) :: ident='# '
   double precision :: expro_mass_deuterium=3.34358e-24  ! md (g)
@@ -44,8 +44,12 @@ module expro
   double precision, dimension(:), allocatable :: expro_shape_cos2
   double precision, dimension(:), allocatable :: expro_shape_cos3
   double precision, dimension(:), allocatable :: expro_shape_cos4
+  double precision, dimension(:), allocatable :: expro_shape_cos5
+  double precision, dimension(:), allocatable :: expro_shape_cos6
   double precision, dimension(:), allocatable :: expro_shape_sin3
   double precision, dimension(:), allocatable :: expro_shape_sin4
+  double precision, dimension(:), allocatable :: expro_shape_sin5
+  double precision, dimension(:), allocatable :: expro_shape_sin6
   double precision, dimension(:), allocatable :: expro_ne
   double precision, dimension(:,:), allocatable :: expro_ni
   double precision, dimension(:), allocatable :: expro_te
@@ -103,8 +107,12 @@ module expro
        expro_shape_scos2,&
        expro_shape_scos3,&
        expro_shape_scos4,&
+       expro_shape_scos5,&
+       expro_shape_scos6,&
        expro_shape_ssin3,&
        expro_shape_ssin4,&
+       expro_shape_ssin5,&
+       expro_shape_ssin6,&
        expro_dlnnedr,&
        expro_dlntedr,&
        expro_sdlnnedr,&
@@ -210,8 +218,12 @@ contains
        allocate(expro_shape_cos2(nexp))   ; expro_shape_cos2 = 0.0
        allocate(expro_shape_cos3(nexp))   ; expro_shape_cos3 = 0.0
        allocate(expro_shape_cos4(nexp))   ; expro_shape_cos4 = 0.0
+       allocate(expro_shape_cos5(nexp))   ; expro_shape_cos5 = 0.0
+       allocate(expro_shape_cos6(nexp))   ; expro_shape_cos6 = 0.0
        allocate(expro_shape_sin3(nexp))   ; expro_shape_sin3 = 0.0
        allocate(expro_shape_sin4(nexp))   ; expro_shape_sin4 = 0.0
+       allocate(expro_shape_sin5(nexp))   ; expro_shape_sin5 = 0.0
+       allocate(expro_shape_sin6(nexp))   ; expro_shape_sin6 = 0.0
        allocate(expro_ne(nexp))      ; expro_ne = 0.0
        allocate(expro_te(nexp))      ; expro_te = 0.0
        allocate(expro_ptot(nexp))    ; expro_ptot = 0.0
@@ -260,8 +272,12 @@ contains
        allocate(expro_shape_scos2(nexp))  ; expro_shape_scos2 = 0.0
        allocate(expro_shape_scos3(nexp))  ; expro_shape_scos3 = 0.0
        allocate(expro_shape_scos4(nexp))  ; expro_shape_scos4 = 0.0
+       allocate(expro_shape_scos5(nexp))  ; expro_shape_scos5 = 0.0
+       allocate(expro_shape_scos6(nexp))  ; expro_shape_scos6 = 0.0
        allocate(expro_shape_ssin3(nexp))  ; expro_shape_ssin3 = 0.0
        allocate(expro_shape_ssin4(nexp))  ; expro_shape_ssin4 = 0.0
+       allocate(expro_shape_ssin5(nexp))  ; expro_shape_ssin5 = 0.0
+       allocate(expro_shape_ssin6(nexp))  ; expro_shape_ssin6 = 0.0
        allocate(expro_dlnnedr(nexp))      ; expro_dlnnedr = 0.0
        allocate(expro_dlntedr(nexp))      ; expro_dlntedr = 0.0
        allocate(expro_sdlnnedr(nexp))     ; expro_sdlnnedr = 0.0
@@ -327,8 +343,12 @@ contains
        deallocate(expro_shape_cos2)
        deallocate(expro_shape_cos3)
        deallocate(expro_shape_cos4)
+       deallocate(expro_shape_cos5)
+       deallocate(expro_shape_cos6)
        deallocate(expro_shape_sin3)
        deallocate(expro_shape_sin4)
+       deallocate(expro_shape_sin5)
+       deallocate(expro_shape_sin6)
        deallocate(expro_ne)
        deallocate(expro_te)
        deallocate(expro_ptot)
@@ -374,8 +394,12 @@ contains
        deallocate(expro_shape_scos2)
        deallocate(expro_shape_scos3)
        deallocate(expro_shape_scos4)
+       deallocate(expro_shape_scos5)
+       deallocate(expro_shape_scos6)
        deallocate(expro_shape_ssin3)
        deallocate(expro_shape_ssin4)
+       deallocate(expro_shape_ssin5)
+       deallocate(expro_shape_ssin6)
        deallocate(expro_dlnnedr)      
        deallocate(expro_dlntedr)      
        deallocate(expro_sdlnnedr)      
@@ -528,10 +552,18 @@ contains
           call expro_vcomm(expro_shape_cos3,nexp)
        case ('shape_cos4')
           call expro_vcomm(expro_shape_cos4,nexp)
+       case ('shape_cos5')
+          call expro_vcomm(expro_shape_cos5,nexp)
+       case ('shape_cos6')
+          call expro_vcomm(expro_shape_cos6,nexp)
        case ('shape_sin3')
           call expro_vcomm(expro_shape_sin3,nexp)
        case ('shape_sin4')
           call expro_vcomm(expro_shape_sin4,nexp)
+       case ('shape_sin5')
+          call expro_vcomm(expro_shape_sin5,nexp)
+       case ('shape_sin6')
+          call expro_vcomm(expro_shape_sin6,nexp) 
        case ('ne')
           call expro_vcomm(expro_ne,nexp) 
        case ('te')
@@ -682,8 +714,12 @@ contains
     call expro_writev(expro_shape_cos2,nexp,'shape_cos2','-')
     call expro_writev(expro_shape_cos3,nexp,'shape_cos3','-')
     call expro_writev(expro_shape_cos4,nexp,'shape_cos4','-')
+    call expro_writev(expro_shape_cos5,nexp,'shape_cos5','-')
+    call expro_writev(expro_shape_cos6,nexp,'shape_cos6','-')
     call expro_writev(expro_shape_sin3,nexp,'shape_sin3','-')
     call expro_writev(expro_shape_sin4,nexp,'shape_sin4','-')
+    call expro_writev(expro_shape_sin5,nexp,'shape_sin5','-')
+    call expro_writev(expro_shape_sin6,nexp,'shape_sin6','-')
     call expro_writev(expro_ne,nexp,'ne','10^19/m^3')
     call expro_writea(expro_ni(:,:),nion,nexp,'ni','10^19/m^3')
     call expro_writev(expro_te,nexp,'te','keV')
@@ -749,98 +785,106 @@ subroutine expro_list_set
   expro_list(20) = 'shape_cos2'
   expro_list(21) = 'shape_cos3'
   expro_list(22) = 'shape_cos4'
-  expro_list(23) = 'shape_sin3'
-  expro_list(24) = 'shape_sin4'
-  expro_list(25) = 'ne'
-  expro_list(26) = 'ni'
-  expro_list(27) = 'te'
-  expro_list(28) = 'ti'
-  expro_list(29) = 'ptot'
-  expro_list(30) = 'johm'
-  expro_list(31) = 'jbs'
-  expro_list(32) = 'jrf'
-  expro_list(33) = 'jnb'
-  expro_list(34) = 'jbstor'
-  expro_list(35) = 'sigmapar'
-  expro_list(36) = 'z_eff'
-  expro_list(37) = 'vpol'
-  expro_list(38) = 'vtor'
-  expro_list(39) = 'qohme'
-  expro_list(40) = 'qbeame'
-  expro_list(41) = 'qbeami'
-  expro_list(42) = 'qrfe'
-  expro_list(43) = 'qrfi'
-  expro_list(44) = 'qfuse'
-  expro_list(45) = 'qfusi'
-  expro_list(46) = 'qbrem'
-  expro_list(47) = 'qsync'
-  expro_list(48) = 'qline'
-  expro_list(49) = 'qei'
-  expro_list(50) = 'qione'
-  expro_list(51) = 'qioni'
-  expro_list(52) = 'qcxi'
-  expro_list(53) = 'qpar_beam'
-  expro_list(54) = 'qpar_wall'
-  expro_list(55) = 'qmom'
-  expro_list(56) = 'bunit'
-  expro_list(57) = 'gamma_e'
-  expro_list(58) = 'gamma_p'
-  expro_list(59) = 's'
-  expro_list(60) = 'drmaj'
-  expro_list(61) = 'dzmag'
-  expro_list(62) = 'skappa'
-  expro_list(63) = 'sdelta'
-  expro_list(64) = 'szeta'
-  expro_list(65) = 'shape_scos0'
-  expro_list(66) = 'shape_scos1'
-  expro_list(67) = 'shape_scos2'
-  expro_list(68) = 'shape_scos3'
-  expro_list(69) = 'shape_scos4'
-  expro_list(70) = 'shape_ssin3'
-  expro_list(71) = 'shape_ssin4'
-  expro_list(72) = 'dlnnedr'
-  expro_list(73) = 'dlntedr'
-  expro_list(74) = 'dlnnidr'
-  expro_list(75) = 'dlntidr'
-  expro_list(76) = 'w0p'
-  expro_list(77) = 'surf'
-  expro_list(78) = 'vol'
-  expro_list(79) = 'volp'
-  expro_list(80) = 'cs'
-  expro_list(81) = 'rhos'
-  expro_list(82) = 'nuee'
-  expro_list(83) = 'grad_r0'
-  expro_list(84) = 'ave_grad_r'
-  expro_list(85) = 'bp0'
-  expro_list(86) = 'bt0'
-  expro_list(87) = 'fpol'
-  expro_list(88) = 'mach'
-  expro_list(89) = 'flow_beam'
-  expro_list(90) = 'flow_wall'
-  expro_list(91) = 'flow_mom'
-  expro_list(92) = 'pow_e'
-  expro_list(93) = 'pow_i'
-  expro_list(94) = 'pow_ei'
-  expro_list(95) = 'pow_e_aux'
-  expro_list(96) = 'pow_i_aux'
-  expro_list(97) = 'pow_e_fus'
-  expro_list(98) = 'pow_i_fus'
-  expro_list(99) = 'pow_e_sync'
-  expro_list(100) = 'pow_e_brem'
-  expro_list(101) = 'pow_e_line'
-  expro_list(102) = 'polflux'
-  expro_list(103) = 'shot'
-  expro_list(104) = 'time'
+  expro_list(23) = 'shape_cos5'
+  expro_list(24) = 'shape_cos6'
+  expro_list(25) = 'shape_sin3'
+  expro_list(26) = 'shape_sin4'
+  expro_list(27) = 'shape_sin5'
+  expro_list(28) = 'shape_sin6'
+  expro_list(29) = 'ne'
+  expro_list(30) = 'ni'
+  expro_list(31) = 'te'
+  expro_list(32) = 'ti'
+  expro_list(33) = 'ptot'
+  expro_list(34) = 'johm'
+  expro_list(35) = 'jbs'
+  expro_list(36) = 'jrf'
+  expro_list(37) = 'jnb'
+  expro_list(38) = 'jbstor'
+  expro_list(39) = 'sigmapar'
+  expro_list(40) = 'z_eff'
+  expro_list(41) = 'vpol'
+  expro_list(42) = 'vtor'
+  expro_list(43) = 'qohme'
+  expro_list(44) = 'qbeame'
+  expro_list(45) = 'qbeami'
+  expro_list(46) = 'qrfe'
+  expro_list(47) = 'qrfi'
+  expro_list(48) = 'qfuse'
+  expro_list(49) = 'qfusi'
+  expro_list(50) = 'qbrem'
+  expro_list(51) = 'qsync'
+  expro_list(52) = 'qline'
+  expro_list(53) = 'qei'
+  expro_list(54) = 'qione'
+  expro_list(55) = 'qioni'
+  expro_list(56) = 'qcxi'
+  expro_list(57) = 'qpar_beam'
+  expro_list(58) = 'qpar_wall'
+  expro_list(59) = 'qmom'
+  expro_list(60) = 'bunit'
+  expro_list(61) = 'gamma_e'
+  expro_list(62) = 'gamma_p'
+  expro_list(63) = 's'
+  expro_list(64) = 'drmaj'
+  expro_list(65) = 'dzmag'
+  expro_list(66) = 'skappa'
+  expro_list(67) = 'sdelta'
+  expro_list(68) = 'szeta'
+  expro_list(69) = 'shape_scos0'
+  expro_list(70) = 'shape_scos1'
+  expro_list(71) = 'shape_scos2'
+  expro_list(72) = 'shape_scos3'
+  expro_list(73) = 'shape_scos4'
+  expro_list(74) = 'shape_scos5'
+  expro_list(75) = 'shape_scos6'
+  expro_list(76) = 'shape_ssin3'
+  expro_list(77) = 'shape_ssin4'
+  expro_list(78) = 'shape_ssin5'
+  expro_list(79) = 'shape_ssin6'
+  expro_list(80) = 'dlnnedr'
+  expro_list(81) = 'dlntedr'
+  expro_list(82) = 'dlnnidr'
+  expro_list(83) = 'dlntidr'
+  expro_list(84) = 'w0p'
+  expro_list(85) = 'surf'
+  expro_list(86) = 'vol'
+  expro_list(87) = 'volp'
+  expro_list(88) = 'cs'
+  expro_list(89) = 'rhos'
+  expro_list(90) = 'nuee'
+  expro_list(91) = 'grad_r0'
+  expro_list(92) = 'ave_grad_r'
+  expro_list(93) = 'bp0'
+  expro_list(94) = 'bt0'
+  expro_list(95) = 'fpol'
+  expro_list(96) = 'mach'
+  expro_list(97) = 'flow_beam'
+  expro_list(98) = 'flow_wall'
+  expro_list(99) = 'flow_mom'
+  expro_list(100) = 'pow_e'
+  expro_list(101) = 'pow_i'
+  expro_list(102) = 'pow_ei'
+  expro_list(103) = 'pow_e_aux'
+  expro_list(104) = 'pow_i_aux'
+  expro_list(105) = 'pow_e_fus'
+  expro_list(106) = 'pow_i_fus'
+  expro_list(107) = 'pow_e_sync'
+  expro_list(108) = 'pow_e_brem'
+  expro_list(109) = 'pow_e_line'
+  expro_list(110) = 'polflux'
+  expro_list(111) = 'shot'
+  expro_list(112) = 'time'
 
   ! new scalars
   
-  expro_list(105) = 'betap'
-  expro_list(106) = 'betat'
-  expro_list(107) = 'betan'
-  expro_list(108) = 'greenwald'
-  expro_list(109) = 'ptransp'
-  expro_list(110) = 'tau'
-  expro_list(111) = 'tau98y2'
+  expro_list(113) = 'betap'
+  expro_list(114) = 'betat'
+  expro_list(115) = 'betan'
+  expro_list(116) = 'greenwald'
+  expro_list(117) = 'ptransp'
+  expro_list(118) = 'tau'
+  expro_list(119) = 'tau98y2'
   
 end subroutine expro_list_set
 

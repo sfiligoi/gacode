@@ -78,11 +78,16 @@ subroutine prgen_read_omfit
   ! Miller extended harmonic shape coefficients
   call bound_interp(efit_rho,efit_ci(:,0),npsi,rho,shape_cos(0,:),nx)
 
+  if(nf-1 > 6) then
+     print '(a)','ERROR: (prgen) max nharm is 6'
+     stop
+  endif
+  
   do i=1,nf-1
      call bound_interp(efit_rho,efit_si(:,i),npsi,rho,shape_sin(i,:),nx)
      call bound_interp(efit_rho,efit_ci(:,i),npsi,rho,shape_cos(i,:),nx)
   enddo
-
+  
   delta = sin(shape_sin(1,:))
   zeta  = -shape_sin(2,:)
   !==============================================================================

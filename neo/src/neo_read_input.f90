@@ -78,20 +78,14 @@ subroutine neo_read_input
   read(1,*) s_delta_in 
   read(1,*) zeta_in        
   read(1,*) s_zeta_in
-  read(1,*) shape_sin3_in        
-  read(1,*) shape_s_sin3_in
-  read(1,*) shape_sin4_in        
-  read(1,*) shape_s_sin4_in
-  read(1,*) shape_cos0_in        
-  read(1,*) shape_s_cos0_in
-  read(1,*) shape_cos1_in
-  read(1,*) shape_s_cos1_in
-  read(1,*) shape_cos2_in        
-  read(1,*) shape_s_cos2_in
-  read(1,*) shape_cos3_in        
-  read(1,*) shape_s_cos3_in
-  read(1,*) shape_cos4_in        
-  read(1,*) shape_s_cos4_in
+  do is=3,n_shape
+     read(1,*) shape_sin_in(is)        
+     read(1,*) shape_s_sin_in(is)
+  enddo
+  do is=0,n_shape
+     read(1,*) shape_cos_in(is)        
+     read(1,*) shape_s_cos_in(is)
+  enddo
   read(1,*) beta_star_in
 
   read(1,*) subroutine_flag

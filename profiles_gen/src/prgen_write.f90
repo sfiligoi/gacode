@@ -37,11 +37,16 @@ subroutine prgen_write
 
      expro_shape_sin3 = shape_sin(3,:)
      expro_shape_sin4 = shape_sin(4,:)
+     expro_shape_sin5 = shape_sin(5,:)
+     expro_shape_sin6 = shape_sin(6,:)
      expro_shape_cos0 = shape_cos(0,:)
      expro_shape_cos1 = shape_cos(1,:)
      expro_shape_cos2 = shape_cos(2,:)
      expro_shape_cos3 = shape_cos(3,:)
      expro_shape_cos4 = shape_cos(4,:)
+     expro_shape_cos5 = shape_cos(5,:)
+     expro_shape_cos6 = shape_cos(6,:)
+     
      
   endif
   !-------------------------------------------------------------------------------------
