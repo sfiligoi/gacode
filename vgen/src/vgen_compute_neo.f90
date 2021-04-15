@@ -63,6 +63,8 @@ subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, &
   neo_s_zeta_in       = EXPRO_szeta(i)
   neo_shape_sin3_in   = EXPRO_shape_sin3(i) 
   neo_shape_s_sin3_in = EXPRO_shape_ssin3(i)
+  neo_shape_sin4_in   = EXPRO_shape_sin4(i) 
+  neo_shape_s_sin4_in = EXPRO_shape_ssin4(i)
   neo_shape_cos0_in   = EXPRO_shape_cos0(i) 
   neo_shape_s_cos0_in = EXPRO_shape_scos0(i)
   neo_shape_cos1_in   = EXPRO_shape_cos1(i) 
@@ -71,6 +73,8 @@ subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, &
   neo_shape_s_cos2_in = EXPRO_shape_scos2(i)
   neo_shape_cos3_in   = EXPRO_shape_cos3(i) 
   neo_shape_s_cos3_in = EXPRO_shape_scos3(i)
+  neo_shape_cos4_in   = EXPRO_shape_cos4(i) 
+  neo_shape_s_cos4_in = EXPRO_shape_scos4(i)
   neo_zmag_over_a_in = EXPRO_zmag(i)/EXPRO_rmin(EXPRO_n_exp)
   neo_s_zmag_in      = EXPRO_dzmag(i) 
   

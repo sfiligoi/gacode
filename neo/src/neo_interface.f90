@@ -77,6 +77,8 @@ module neo_interface
   real    :: neo_s_zeta_in = 0.0
   real    :: neo_shape_sin3_in = 0.0
   real    :: neo_shape_s_sin3_in = 0.0
+  real    :: neo_shape_sin4_in = 0.0
+  real    :: neo_shape_s_sin4_in = 0.0
   real    :: neo_shape_cos0_in = 0.0
   real    :: neo_shape_s_cos0_in = 0.0
   real    :: neo_shape_cos1_in = 0.0
@@ -85,6 +87,8 @@ module neo_interface
   real    :: neo_shape_s_cos2_in = 0.0
   real    :: neo_shape_cos3_in = 0.0
   real    :: neo_shape_s_cos3_in = 0.0
+  real    :: neo_shape_cos4_in = 0.0
+  real    :: neo_shape_s_cos4_in = 0.0
   real    :: neo_beta_star_in = 0.0
   integer :: neo_threed_model_in = 0
   integer :: neo_threed_exb_model_in = 0
@@ -208,6 +212,8 @@ contains
     neo_s_zeta_in = s_zeta_in
     neo_shape_sin3_in = shape_sin3_in
     neo_shape_s_sin3_in = shape_s_sin3_in
+    neo_shape_sin4_in = shape_sin4_in
+    neo_shape_s_sin4_in = shape_s_sin4_in
     neo_shape_cos0_in = shape_cos0_in
     neo_shape_s_cos0_in = shape_s_cos0_in
     neo_shape_cos1_in = shape_cos1_in
@@ -216,6 +222,8 @@ contains
     neo_shape_s_cos2_in = shape_s_cos2_in
     neo_shape_cos3_in = shape_cos3_in
     neo_shape_s_cos3_in = shape_s_cos3_in
+    neo_shape_cos4_in = shape_cos4_in
+    neo_shape_s_cos4_in = shape_s_cos4_in
     neo_beta_star_in = beta_star_in
     neo_threed_model_in = threed_model
     neo_threed_exb_model_in = threed_exb_model
@@ -298,6 +306,8 @@ contains
     s_zeta_in = neo_s_zeta_in
     shape_sin3_in = neo_shape_sin3_in
     shape_s_sin3_in = neo_shape_s_sin3_in
+    shape_sin4_in = neo_shape_sin4_in
+    shape_s_sin4_in = neo_shape_s_sin4_in
     shape_cos0_in = neo_shape_cos0_in
     shape_s_cos0_in = neo_shape_s_cos0_in
     shape_cos1_in = neo_shape_cos1_in
@@ -306,6 +316,8 @@ contains
     shape_s_cos2_in = neo_shape_s_cos2_in
     shape_cos3_in = neo_shape_cos3_in
     shape_s_cos3_in = neo_shape_s_cos3_in
+    shape_cos4_in = neo_shape_cos4_in
+    shape_s_cos4_in = neo_shape_s_cos4_in
     beta_star_in = neo_beta_star_in
     threed_model = neo_threed_model_in
     threed_exb_model = neo_threed_exb_model_in
@@ -550,6 +562,8 @@ contains
     write(1,30) 'S_ZETA=',neo_s_zeta_in
     write(1,30) 'SHAPE_SIN3=',neo_shape_sin3_in
     write(1,30) 'SHAPE_S_SIN3=',neo_shape_s_sin3_in
+    write(1,30) 'SHAPE_SIN4=',neo_shape_sin4_in
+    write(1,30) 'SHAPE_S_SIN4=',neo_shape_s_sin4_in
     write(1,30) 'SHAPE_COS0=',neo_shape_cos0_in
     write(1,30) 'SHAPE_S_COS0=',neo_shape_s_cos0_in
     write(1,30) 'SHAPE_COS1=',neo_shape_cos1_in
@@ -558,6 +572,8 @@ contains
     write(1,30) 'SHAPE_S_COS2=',neo_shape_s_cos2_in
     write(1,30) 'SHAPE_COS3=',neo_shape_cos3_in
     write(1,30) 'SHAPE_S_COS3=',neo_shape_s_cos3_in
+    write(1,30) 'SHAPE_COS4=',neo_shape_cos4_in
+    write(1,30) 'SHAPE_S_COS4=',neo_shape_s_cos4_in
     write(1,30) 'BETA_STAR=',neo_beta_star_in
 
     write(1,20) 'LAGUERRE_METHOD=',neo_laguerre_method_in
