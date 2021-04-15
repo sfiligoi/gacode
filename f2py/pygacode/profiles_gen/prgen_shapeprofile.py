@@ -8,20 +8,19 @@ from .prgen_geqdsk import *
 from .prgen_contour import *
 from .prgen_shape import *
 
-plotpng = False
-
 if len(sys.argv) > 1:
    gfile   = sys.argv[1]
    nrz     = int(sys.argv[2])
    narc    = int(sys.argv[3])
    npsi    = int(sys.argv[4])
-   nfourier = int(sys.argv[5])
+   nharm   = int(sys.argv[5])
+   nfourier = int(sys.argv[6])
+   plotpng = bool(int(sys.argv[7]))
 else:
    print('Usage: python prgen_shapeprofile.py <gfile> <nrz> <narc> <npsi> <nfourier>')
    sys.exit()
 
 efit = prgen_geqdsk(gfile)
-nf = 3
 
 # Call OMFIT mapper
 ri,zi,psi,q,p,fpol = prgen_contour(efit,nrz=nrz,levels=npsi,psinorm=0.996,narc=narc,quiet=False)
@@ -33,13 +32,15 @@ rnorm = np.sqrt(pnorm)
 # si -> sin terms
 # xi -> rmin,rmaj,kappa,zmaj
 
+nf = nharm
+
 # Standard contour mode
 ci = np.zeros([nf+1,npsi])
 si = np.zeros([nf+1,npsi])
 xi = np.zeros([4,npsi])
 for i in range(npsi-1):
    r=ri[:,i+1] ; z=zi[:,i+1]
-   if i > 192 and plotpng:
+   if i > npsi-10 and plotpng:
       xplot = pnorm[i+1]
    else:
       xplot = 0.0
@@ -55,14 +56,14 @@ xi[1,:] = extrap(pnorm,xi[1,:]) # rmaj
 xi[2,:] = extrap(rnorm,xi[2,:]) # kappa
 xi[3,:] = extrap(rnorm,xi[3,:]) # zmaj
 
-si[1,:] = zero(rnorm,si[1,:]) # delta
-si[2,:] = zero(pnorm,si[2,:]) # zeta
-si[3,:] = zero(pnorm,si[3,:]) # s3
-
 ci[0,:] = extrap(pnorm,ci[0,:]) # tilt
+
+si[1,:] = zero(rnorm,si[1,:]) # delta
 ci[1,:] = zero(rnorm,ci[1,:]) # c1
-ci[2,:] = zero(pnorm,ci[2,:]) # c2
-ci[3,:] = zero(pnorm,ci[3,:]) # c3
+
+for i in np.arange(2,nf+1):
+   si[i,:] = zero(pnorm,si[i,:]) 
+   ci[i,:] = zero(pnorm,ci[i,:])
 
 with open('out.dim','w') as f:
    f.write(str(npsi)+'\n')

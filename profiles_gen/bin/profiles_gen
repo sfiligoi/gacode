@@ -157,8 +157,14 @@ then
    echo "             -narc <int>"
    echo "              Equal-arc contour points (default=600)"
    echo
+   echo "             -nharm <int>"
+   echo "             Harmonic geometry coefficents (default=3)"
+   echo
    echo "             -nfourier <int>"
    echo "             General legacy Fourier geometry coefficents in input.gacode.geo (off by default)"
+   echo
+   echo "             -plotpng"
+   echo "             Generate diagnostic plots"
    echo
    echo "input.gacode (simple passthrough if no gfile specified)"
    echo
@@ -277,7 +283,9 @@ EFIT=0
 NRZ=1600
 NPSI=200
 NARC=600
+NHARM=3
 NFOURIER=0
+PLOTPNG=0
 
 # Extra datafiles
 GFILE=null
@@ -332,6 +340,8 @@ while [ $# -gt 0 ] ; do
   -g) shift ; GFILE="$1" ; EFIT=1 ;;
 
   -nfourier) shift ; NFOURIER=$1 ;;
+  -nharm) shift ; NHARM=$1 ;;
+  -plotpng) PLOTPNG=1 ;;
 
   -n_null) shift ; N_NULL=$1 ;;
 
@@ -657,7 +667,7 @@ echo $TRUE_AUX_FLAG >> $CONFIG
 
 #==============================================================
 if [ $EFIT -eq 1 ] ; then
-   python $OMFIT $GFILE $NRZ $NARC $NPSI $NFOURIER
+   python $OMFIT $GFILE $NRZ $NARC $NPSI $NHARM $NFOURIER $PLOTPNG
 fi
 #==============================================================
 
