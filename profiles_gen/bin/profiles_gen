@@ -459,6 +459,15 @@ fi
 #
 if [ "$itype" == "GACODE" ] && [ $INFO_FLAG == 1 ] ; then
     python $PRGEN_BIN/pygacode_info.py $FILE
+    echo "0.5" > input.locpargen
+    echo "0" >> input.locpargen
+    echo "0" >> input.locpargen
+    echo "0" >> input.locpargen
+    echo "0" >> input.locpargen
+    echo "0" >> input.locpargen
+    echo "-1" >> input.locpargen
+    $LOCPARGEN
+   
     exit 0
 fi
 #=============================================================

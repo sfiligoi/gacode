@@ -31,7 +31,7 @@ program locpargen
   ! We don't need the numerical eq. flag set for this routine.
   expro_ctrl_numeq_flag = hasgeo
 
-  call expro_read('input.gacode') 
+  call expro_read('input.gacode')
 
   ! Minor radius
   a = expro_rmin(expro_n_exp)
@@ -67,12 +67,10 @@ program locpargen
        ipccw,&
        a)
 
-  !------------------------------------------------------------
-  ! Create input.geo with local parameters for general geometry
-  !
-  !if (hasgeo == 1) call locpargen_geo
-  !------------------------------------------------------------
-
+  if (ntheta < 0) then
+     goto 100
+  endif
+     
   print 10,'INFO: (locpargen) rmin/a   =',rmin_loc
   print 10,'INFO: (locpargen) rhos/a   =',rhos_loc/a
   !print 10,'rhoi/a   =',rhos_loc/a*sqrt(temp_loc(ise)/temp_loc(1))
@@ -149,6 +147,7 @@ program locpargen
      geo_s_delta_in = s_delta_loc
      geo_zeta_in = zeta_loc
      geo_s_zeta_in = s_zeta_loc
+
      geo_shape_cos0_in = shape_cos0_loc
      geo_shape_s_cos0_in = shape_s_cos0_loc
      geo_shape_cos1_in = shape_cos1_loc
@@ -163,6 +162,15 @@ program locpargen
      geo_shape_s_cos4_in = shape_s_cos4_loc
      geo_shape_sin4_in = shape_sin4_loc
      geo_shape_s_sin4_in = shape_s_sin4_loc
+     geo_shape_cos5_in = shape_cos5_loc
+     geo_shape_s_cos5_in = shape_s_cos5_loc
+     geo_shape_sin5_in = shape_sin5_loc
+     geo_shape_s_sin5_in = shape_s_sin5_loc
+     geo_shape_cos6_in = shape_cos6_loc
+     geo_shape_s_cos6_in = shape_s_cos6_loc
+     geo_shape_sin6_in = shape_sin6_loc
+     geo_shape_s_sin6_in = shape_s_sin6_loc
+
      geo_beta_star_in = beta_star_loc
      geo_beta_star_1_in = 0.0 
      geo_beta_star_2_in = 0.0
@@ -188,6 +196,8 @@ program locpargen
 
 10 format(a,1x,f7.5)
 
+100 continue
+  
 end program locpargen
 
 subroutine fileopen(fname)

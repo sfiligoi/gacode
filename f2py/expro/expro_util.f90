@@ -128,7 +128,7 @@ subroutine expro_compute_derived
   expro_shape_ssin5(:) = expro_rmin(:)*temp(:)
   call bound_deriv(temp,expro_shape_sin6,expro_rmin,expro_n_exp)
   expro_shape_ssin6(:) = expro_rmin(:)*temp(:)
-  
+
   ! 1/L_ne = -dln(ne)/dr (1/m)
   call bound_deriv(expro_dlnnedr,-log(expro_ne),expro_rmin,expro_n_exp)
 
@@ -254,18 +254,17 @@ subroutine expro_compute_derived
      !
      theta(1) = 0d0
      if (expro_ctrl_numeq_flag == 0) then
-        ! Call geo with model shape
+        ! Call geo with extended harmonic shape
         geo_model_in = 0
-        call geo_interp(1,theta,.true.)
      else
-        ! Call geo with general (numerical) shape
+        ! Call geo with Fourier shape
         geo_model_in = 1
         geo_fourier_in(1:4,0:geo_nfourier_in) = expro_geo(:,:,i)/r_min
         geo_fourier_in(5:8,0:geo_nfourier_in) = expro_dgeo(:,:,i)
-        call geo_interp(1,theta,.true.)
-        if (minval(geov_jac_r) <= 0d0) then
-           print '(a,i3,a)','WARNING: (expro) Negative geo Jacobian for i =',i,' in input.gacode'
-        endif
+     endif
+     call geo_interp(1,theta,.true.)
+     if (minval(geov_jac_r) <= 0d0) then
+        print '(a,i3,a)','WARNING: (expro_util) Negative Jacobian for i =',i,' in input.gacode'
      endif
 
      ! V, dV/dr and S (note that S=dV/dr only in a circle)
