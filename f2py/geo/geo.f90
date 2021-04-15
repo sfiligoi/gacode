@@ -59,6 +59,7 @@ module geo
   double precision, dimension(:), allocatable :: geo_usin
   double precision, dimension(:), allocatable :: geo_ucos
   double precision, dimension(:), allocatable :: geo_bigr
+  double precision, dimension(:), allocatable :: geo_bigz
   double precision, dimension(:), allocatable :: geo_bigr_r
   double precision, dimension(:), allocatable :: geo_bigr_t
   double precision, dimension(:), allocatable :: geo_bigz_r
@@ -107,6 +108,7 @@ module geo
   double precision, dimension(:), allocatable :: geov_usin
   double precision, dimension(:), allocatable :: geov_ucos
   double precision, dimension(:), allocatable :: geov_bigr
+  double precision, dimension(:), allocatable :: geov_bigz
   double precision, dimension(:), allocatable :: geov_bigr_r
   double precision, dimension(:), allocatable :: geov_bigr_t
   double precision, dimension(:), allocatable :: geov_bigz_r
@@ -281,6 +283,7 @@ contains
           geo_captheta(itheta) = geov_captheta(i1)+(geov_captheta(i2)-geov_captheta(i1))*z
           geo_nu(itheta)       = geov_nu(i1)+(geov_nu(i2)-geov_nu(i1))*z
           geo_bigr(itheta)     = geov_bigr(i1)+(geov_bigr(i2)-geov_bigr(i1))*z
+          geo_bigz(itheta)     = geov_bigz(i1)+(geov_bigz(i2)-geov_bigz(i1))*z
           geo_l_r(itheta)      = geov_l_r(i1)+(geov_l_r(i2)-geov_l_r(i1))*z
           geo_l_t(itheta)      = geov_l_t(i1)+(geov_l_t(i2)-geov_l_t(i1))*z
           geo_nsin(itheta)     = geov_nsin(i1)+(geov_nsin(i2)-geov_nsin(i1))*z
@@ -333,7 +336,6 @@ contains
     double precision :: b4
     double precision :: b5
     !
-    double precision, dimension(:), allocatable :: bigz
     double precision, dimension(:), allocatable :: bigz_l
     double precision, dimension(:), allocatable :: bigr_l
     double precision, dimension(:), allocatable :: r_c
@@ -397,7 +399,6 @@ contains
     !
     allocate(ic(2-n_theta:2*n_theta-2))
     !
-    allocate(bigz(n_theta))
     allocate(bigz_l(n_theta))
     allocate(bigr_l(n_theta))
     allocate(r_c(n_theta))
@@ -507,7 +508,7 @@ contains
           ! dZ/dr
           ! dZ/dtheta
           ! d^2Z/dtheta^2
-          bigz(i)   = geo_zmag_in+geo_kappa_in*geo_rmin_in*sin(a)
+          geov_bigz(i)   = geo_zmag_in+geo_kappa_in*geo_rmin_in*sin(a)
           geov_bigz_r(i) = geo_dzmag_in + geo_kappa_in*(1.0+geo_s_kappa_in)*sin(a) 
           geov_bigz_t(i) = geo_kappa_in*geo_rmin_in*cos(a)*a_t
           bigz_tt   = -geo_kappa_in*geo_rmin_in*sin(a)*a_t**2+&
@@ -530,12 +531,12 @@ contains
              bigr_tt = bigr_tt-n*n*(a_R(n)*cos(n*theta)+b_R(n)*sin(n*theta)) 
           enddo
 
-          bigz(i)  = 0.5*a_Z(0)
-          geov_bigz_r(i)= 0.5*a_Zp(0)
+          geov_bigz(i)   = 0.5*a_Z(0)
+          geov_bigz_r(i) = 0.5*a_Zp(0)
           geov_bigz_t(i) = 0.0
           bigz_tt   = 0.0
           do n=1,ny
-             bigz(i)   = bigz(i)+a_Z(n)*cos(n*theta)+b_Z(n)*sin(n*theta)        
+             geov_bigz(i)   = geov_bigz(i)+a_Z(n)*cos(n*theta)+b_Z(n)*sin(n*theta)        
              geov_bigz_r(i) = geov_bigz_r(i)+a_Zp(n)*cos(n*theta)+b_Zp(n)*sin(n*theta)        
              geov_bigz_t(i) = geov_bigz_t(i)-n*a_Z(n)*sin(n*theta)+n*b_Z(n)*cos(n*theta) 
              bigz_tt   = bigz_tt-n*n*(a_Z(n)*cos(n*theta)+b_Z(n)*sin(n*theta)) 
@@ -778,7 +779,6 @@ contains
     !
     deallocate(ic)
     !
-    deallocate(bigz)
     deallocate(bigz_l)
     deallocate(bigr_l)
     deallocate(r_c)
@@ -839,6 +839,7 @@ contains
        allocate(geov_usin(geo_ntheta_in))
        allocate(geov_ucos(geo_ntheta_in))
        allocate(geov_bigr(geo_ntheta_in))
+       allocate(geov_bigz(geo_ntheta_in))
        allocate(geov_bigr_r(geo_ntheta_in))
        allocate(geov_bigr_t(geo_ntheta_in))
        allocate(geov_bigz_r(geo_ntheta_in))
@@ -870,6 +871,7 @@ contains
        deallocate(geov_usin)
        deallocate(geov_ucos)
        deallocate(geov_bigr)
+       deallocate(geov_bigz)
        deallocate(geov_bigr_r)
        deallocate(geov_bigr_t)
        deallocate(geov_bigz_r)
@@ -911,6 +913,7 @@ contains
        allocate(geo_usin(n))
        allocate(geo_ucos(n))
        allocate(geo_bigr(n))
+       allocate(geo_bigz(n))
        allocate(geo_bigr_r(n))
        allocate(geo_bigr_t(n))
        allocate(geo_bigz_r(n))
@@ -938,6 +941,7 @@ contains
        deallocate(geo_usin)
        deallocate(geo_ucos)
        deallocate(geo_bigr)
+       deallocate(geo_bigz)
        deallocate(geo_bigr_r)
        deallocate(geo_bigr_t)
        deallocate(geo_bigz_r)
