@@ -67,6 +67,8 @@ subroutine neo_make_profiles
      s_zeta(ir)       = s_zeta_in
      shape_sin3(ir)   = shape_sin3_in
      shape_s_sin3(ir) = shape_s_sin3_in
+     shape_sin4(ir)   = shape_sin4_in
+     shape_s_sin4(ir) = shape_s_sin4_in
      shape_cos0(ir)   = shape_cos0_in
      shape_s_cos0(ir) = shape_s_cos0_in
      shape_cos1(ir)   = shape_cos1_in
@@ -75,6 +77,8 @@ subroutine neo_make_profiles
      shape_s_cos2(ir) = shape_s_cos2_in
      shape_cos3(ir)   = shape_cos3_in
      shape_s_cos3(ir) = shape_s_cos3_in
+     shape_cos4(ir)   = shape_cos4_in
+     shape_s_cos4(ir) = shape_s_cos4_in
      beta_star(ir) = beta_star_in
      
      ! general geometry -- accessible only from interface 
@@ -222,6 +226,8 @@ subroutine neo_make_profiles
         s_zeta(ir)  = s_zeta_loc   
         shape_sin3(ir)   = shape_sin3_loc
         shape_s_sin3(ir) = shape_s_sin3_loc
+        shape_sin4(ir)   = shape_sin4_loc
+        shape_s_sin4(ir) = shape_s_sin4_loc
         shape_cos0(ir)   = shape_cos0_loc
         shape_s_cos0(ir) = shape_s_cos0_loc
         shape_cos1(ir)   = shape_cos1_loc
@@ -230,6 +236,8 @@ subroutine neo_make_profiles
         shape_s_cos2(ir) = shape_s_cos2_loc
         shape_cos3(ir)   = shape_cos3_loc
         shape_s_cos3(ir) = shape_s_cos3_loc
+        shape_cos4(ir)   = shape_cos4_loc
+        shape_s_cos4(ir) = shape_s_cos4_loc
         b_unit(ir)  = b_unit_loc
 
         dens(1:n_species,ir)   = dens_loc(1:n_species)     

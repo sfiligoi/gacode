@@ -436,10 +436,12 @@ subroutine neo_check
         write(io_neoout,20) '    delta:',delta(ir),'  s_delta:',s_delta(ir)
         write(io_neoout,20) '     zeta:',zeta(ir), '   s_zeta:',s_zeta(ir)
         write(io_neoout,20) '     sin3:',shape_sin3(ir), '   s_sin3:',shape_s_sin3(ir)
+        write(io_neoout,20) '     sin4:',shape_sin4(ir), '   s_sin4:',shape_s_sin4(ir)
         write(io_neoout,20) '     cos0:',shape_cos0(ir), '   s_cos0:',shape_s_cos0(ir)
         write(io_neoout,20) '     cos1:',shape_cos1(ir), '   s_cos1:',shape_s_cos1(ir)
         write(io_neoout,20) '     cos2:',shape_cos2(ir), '   s_cos2:',shape_s_cos2(ir)
         write(io_neoout,20) '     cos3:',shape_cos3(ir), '   s_cos3:',shape_s_cos3(ir)
+        write(io_neoout,20) '     cos4:',shape_cos4(ir), '   s_cos4:',shape_s_cos4(ir)
         
         write(io_neoout,*)
         write(io_neoout,20) ' dphi0/dr:',dphi0dr(ir)
