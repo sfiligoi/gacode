@@ -159,6 +159,10 @@ program locpargen
      geo_shape_s_cos3_in = shape_s_cos3_loc
      geo_shape_sin3_in = shape_sin3_loc
      geo_shape_s_sin3_in = shape_s_sin3_loc
+     geo_shape_cos4_in = shape_cos4_loc
+     geo_shape_s_cos4_in = shape_s_cos4_loc
+     geo_shape_sin4_in = shape_sin4_loc
+     geo_shape_s_sin4_in = shape_s_sin4_loc
      geo_beta_star_in = beta_star_loc
      geo_beta_star_1_in = 0.0 
      geo_beta_star_2_in = 0.0
@@ -173,10 +177,11 @@ program locpargen
      write(1) real(geo_bigz_t,kind=4)
      write(1) real(geo_gsin,kind=4)
      write(1) real(geo_gcos1,kind=4)
+     write(1) real(geo_gcos2,kind=4)
      write(1) real(geo_bt,kind=4)
      write(1) real(geo_bp,kind=4)
+     write(1) real(geo_g_theta,kind=4)
      write(1) real(geo_captheta,kind=4)
-     write(1) real(geo_chi2,kind=4)
      close(1)
      deallocate(theta)
   endif
