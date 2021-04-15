@@ -25,6 +25,9 @@ efit = prgen_geqdsk(gfile)
 # Call OMFIT mapper
 ri,zi,psi,q,p,fpol = prgen_contour(efit,nrz=nrz,levels=npsi,psinorm=0.996,narc=narc,quiet=False)
 
+# Need to reset npsi just in case a contour level was deleted
+npsi = len(psi)
+
 pnorm = ((psi[:]-psi[0])/(psi[-1]-psi[0]))
 rnorm = np.sqrt(pnorm)
 

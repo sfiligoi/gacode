@@ -214,7 +214,7 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
     if kdbg == kdbgmax-1:
         print('WARNING: (prgen_contour) Finding LCFS aborted after %d iterations!'%kdbgmax)
 
-    print('INFO  (prgen_contour) dpsi = {:.9f} [EFIT] {:.9f} [new]'.format(efitpsi1-efitpsi0,psi1-psi0))
+    print('INFO: (prgen_contour) dpsi = {:.9f} [EFIT] {:.9f} [new]'.format(efitpsi1-efitpsi0,psi1-psi0))
 
     # Separatrix hits edges of computation domain
     if ((np.abs(np.min(sep[:,0])-np.min(r2d)) < 1e-3) or
@@ -242,6 +242,8 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
     RI = np.zeros([narc,levels]) ; ZI = np.zeros([narc,levels])
     r1 = np.zeros([narc])        ; z1 = np.zeros([narc])
 
+    kbad = []
+    
     for k,item1 in enumerate(contours):
         if k==0:
             # axis
@@ -252,11 +254,10 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
             # Reverse order (compared to original OMFIT order)
             r=path.vertices[::-1,0] ; r[-1] = r[0]
             z=path.vertices[::-1,1] ; z[-1] = z[0]
-            # check for contour above separatrix
+
+            # check for contour above/below separatrix
             if np.average(z) > np.max(sep[:,1]) or np.average(z) < np.min(sep[:,1]):
-                path=item1[-2]
-                r=path.vertices[::-1,0] ; r[-1] = r[0]
-                z=path.vertices[::-1,1] ; z[-1] = z[0]
+                kbad.append(k)
                 
             if any(np.isnan(r*z)):
                 print('ERROR: (prgen_contour) NaN encountered')
@@ -277,7 +278,13 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
             
         RI[:,k] = r1[:] ; ZI[:,k] = z1[:]
 
-        
+
+    # Delete bad contours (outside separatrix)
+    out_psi = np.delete(out_psi,kbad)
+    RI = np.delete(RI,kbad,1)
+    ZI = np.delete(ZI,kbad,1)
+    levels = len(out_psi)
+    
     efitpsi = np.linspace(out_psi[0],out_psi[-1],len(efitp))
     cs = interpolate.interp1d(efitpsi,efitp,kind='quadratic') ; out_p = cs(out_psi)
     cs = interpolate.interp1d(efitpsi,efitf,kind='quadratic') ; out_f = cs(out_psi)
@@ -287,7 +294,7 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
     loopint = np.zeros([levels])
     for i in range(narc-1):
        loopint[:] = loopint[:]+(RI[i+1,:]-RI[i,:])*(ZI[i+1,:]+ZI[i,:])/(RI[i+1,:]+RI[i,:])
-      
+   
     cs = interpolate.splrep(out_psi,loopint) ; out_q = interpolate.splev(out_psi,cs,der=1)
     out_q = out_f*out_q/(2*np.pi)
     
