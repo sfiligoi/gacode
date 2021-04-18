@@ -35,12 +35,15 @@ rc('font',size=18)
 
 n = int(nstr)
 
-sim = tgyrodata(simdir, verbose=True)
+sim = tgyrodata(simdir,verbose=True)
 
 print('Number of ions  : '+str(sim.n_ion))
 print('Number of radii : '+str(sim.n_r))
 print('Evolution eqns  : '+str(sim.n_evolve))
 print('Completed iter  : '+str(sim.n_iterations))
+
+# Minor radius
+a = sim.data['rmin'][0][-1]/sim.data['r/a'][0][-1]
 
 x = sim.data['r/a'][0]
 ggb = sim.data['Gamma_GB'][n]
@@ -73,7 +76,7 @@ def plot_select(ax, tag):
         plot_smooth(ax, tag)
 
 
-def setprof(exp, tag):
+def setprof(tag):
 
     if tag == 'ne':
         y = expro.expro_ne
@@ -87,6 +90,8 @@ def setprof(exp, tag):
         y = expro.expro_ni[1, :]
     elif tag == 'ni_3':
         y = expro.expro_ni[2, :]
+    elif tag == 'w0':
+        y = expro.expro_w0/1e4
     elif tag == 'dlntedr':
         y = expro.expro_dlntedr
     elif tag == 'dlnnedr':
@@ -99,51 +104,24 @@ def setprof(exp, tag):
     return y
 
 
-def plot_input_profiles(ax, tag, scale=0):
+def plot_input_gacode(ax,tag):
 
-    # Helper routine to plot data (tag) from input.profiles
+    # Helper routine to plot data (tag) from input.gacode
 
-    f0 = 'input.profiles.'+str(0)
-    fn = 'input.profiles.'+str(n)
+    list = ['input.gacode','input.gacode.new']
+    c    = ['black','magenta']
+    
+    for i,myfile in enumerate(list):
+        expro.expro_read(myfile)
+        a = max(expro.expro_rmin)
+        xp = expro.expro_rmin/a
+        y = setprof(tag)
+        if 'dln' in tag:
+            y = y*a 
+        ax.plot(xp,y,color=c[i],alpha=0.25,linewidth=2,linestyle='--',
+                label=r'$\mathbf{'+myfile+'}$')
 
-    color = 'black'
-    width = 5
-    alpha = 0.2
-    label = 'input.gacode'
-
-    if os.path.isfile(f0):
-        expro.expro_read(f0)
-    else:
-        expro.expro_read('input.gacode')
-
-    xp = expro.expro_rmin
-
-    snorm = max(xp)**scale
-
-    xp = xp/max(xp)
-
-    y = setprof(expro, tag)
-
-    ax.plot(xp,
-            y*snorm,
-            color=color,
-            alpha=alpha,
-            linewidth=width,
-            label=r'$\mathbf{'+label+'}$')
-
-    if os.path.isfile(fn):
-        expro.expro_read(fn)
-        y = setprof(expro, tag)
-
-        ax.plot(xp,
-                y*snorm,
-                color=color,
-                alpha=alpha,
-                linewidth=width,
-                label=r'$\mathbf{'+label+'}$')
-
-
-def plot_z(ax, tag):
+def plot_z(ax,tag):
 
     # Gradient scale lengths
 
@@ -155,24 +133,24 @@ def plot_z(ax, tag):
         ax.plot(x, sim.data['a/Lte'][0], color='k', label=init)
         ax.plot(x, sim.data['a/Lte'][n], color='magenta', label=fin)
         ax.set_ylabel('$z_\mathrm{Te} = a/L_\mathrm{Te}$', color='k')
-        plot_input_profiles(ax, 'dlntedr', 1)
+        plot_input_gacode(ax,'dlntedr')
     elif tag == 'zti':
         ax.plot(x, sim.data['a/Lti1'][0], color='k', label=init)
         ax.plot(x, sim.data['a/Lti1'][n], color='magenta', label=fin)
         ax.set_ylabel('$z_\mathrm{Ti} = a/L_\mathrm{Ti}$', color='k')
-        plot_input_profiles(ax, 'dlntidr_1', 1)
+        plot_input_gacode(ax,'dlntidr_1')
     elif tag == 'zne':
         ax.plot(x, sim.data['a/Lne'][0], color='k', label=init)
         ax.plot(x, sim.data['a/Lne'][n], color='magenta', label=fin)
         ax.set_ylabel('$z_\mathrm{ne} = a/L_\mathrm{ne}$', color='k')
-        plot_input_profiles(ax, 'dlnnedr', 1)
+        plot_input_gacode(ax,'dlnnedr')
 
     ax.set_ylim([0.0, 10.0])
     ax.legend(loc=loc)
     plt.tight_layout
 
 
-def plot_residual(ax, tag):
+def plot_residual(ax,tag):
 
     if tag == 'res_tot':
         ax.grid(which="major", ls="-", alpha=0.1, linewidth=2)
@@ -215,7 +193,7 @@ def plot_residual(ax, tag):
     plt.tight_layout
 
 
-def plot_flux(ax, tag):
+def plot_flux(ax,tag):
 
     # Fluxes
 
@@ -294,9 +272,9 @@ def plot_smooth(ax, tag):
         ax.plot(xf, pf, color='magenta', label=fin)
         ax.set_ylabel(r'$\mathrm{T_e~[keV]}$')
         # Dots
-        ax.plot(x, sim.data['te'][0], 'o', color='k')
-        ax.plot(x, sim.data['te'][n], 'o', color='k')
-        plot_input_profiles(ax, 'Te')
+        ax.plot(x,sim.data['te'][0], 'o', color='k')
+        ax.plot(x,sim.data['te'][n], 'o', color='k')
+        plot_input_gacode(ax,'Te')
     elif tag == 'ti':
         xf, pf = smooth_pro(x, sim.data['a/Lti1'][0], sim.data['ti1'][0], 64)
         ax.plot(xf, pf, color='black', label=init)
@@ -304,9 +282,9 @@ def plot_smooth(ax, tag):
         ax.plot(xf, pf, color='magenta', label=fin)
         ax.set_ylabel(r'$\mathrm{T_i~[keV]}$')
         # Dots
-        ax.plot(x, sim.data['ti1'][0], 'o', color='k')
-        ax.plot(x, sim.data['ti1'][n], 'o', color='k')
-        plot_input_profiles(ax, 'Ti_1')
+        ax.plot(x,sim.data['ti1'][0], 'o', color='k')
+        ax.plot(x,sim.data['ti1'][n], 'o', color='k')
+        plot_input_gacode(ax,'Ti_1')
     elif tag == 'ne':
         xf, pf = smooth_pro(x, sim.data['a/Lne'][0], sim.data['ne'][0], 64)
         ax.plot(xf, pf/1e13, color='black', label=init)
@@ -314,23 +292,39 @@ def plot_smooth(ax, tag):
         ax.plot(xf, pf/1e13, color='magenta', label=fin)
         ax.set_ylabel(r'$\mathrm{n_e~[10^{19}/m^3]}$')
         # Dots
-        ax.plot(x, sim.data['ne'][0]/1e13, 'o', color='k')
-        ax.plot(x, sim.data['ne'][n]/1e13, 'o', color='k')
-        plot_input_profiles(ax, 'ne')
+        ax.plot(x,sim.data['ne'][0]/1e13, 'o', color='k')
+        ax.plot(x,sim.data['ne'][n]/1e13, 'o', color='k')
+        plot_input_gacode(ax,'ne')
+    elif tag == 'w0':
+        cs = 100*sim.data['c_s']
+        # w0_norm = cs/R0
+        w0_norm = cs[0][0]/(a*sim.data['rmaj/a'][0][0])
+        w0 = sim.data['M=wR/cs'][0]/(a*sim.data['rmaj/a'][0])*cs[0]
+        xf,pf = smooth_pro(x,sim.data['a*f_rot'][0]*w0_norm,w0,64,type='lin')
+        ax.plot(xf,pf/1e4,color='black',label=init)
+        ax.plot(x,w0/1e4,'o',color='k')
+
+        w0_norm = cs[n][0]/(a*sim.data['rmaj/a'][n][0])
+        w0 = sim.data['M=wR/cs'][n]/(a*sim.data['rmaj/a'][n])*cs[n]
+        xf,pf = smooth_pro(x,sim.data['a*f_rot'][n]*w0_norm,w0,64,type='lin')
+        ax.plot(xf,pf/1e4,color='magenta',label=init)
+        ax.plot(x,w0/1e4,'o',color='k')
+
+        plot_input_gacode(ax,'w0')
+        ax.set_ylabel(r'$\omega_0~\mathrm{[10^4/s]}$')
 
     for i in range(n_ion):
         if tag == 'ni'+str(i+1):
-            xf, pf = smooth_pro(x, sim.data['a/L'+tag][0], sim.data[tag][0],
-                                64)
+            xf, pf = smooth_pro(x,sim.data['a/L'+tag][0], sim.data[tag][0],64)
             ax.plot(xf, pf/1e13, color='black', label=init)
-            xf, pf = smooth_pro(x, sim.data['a/L'+tag][n], sim.data[tag][n],
-                                64)
+
+            xf, pf = smooth_pro(x,sim.data['a/L'+tag][n], sim.data[tag][n],64)
             ax.plot(xf, pf/1e13, color='magenta', label=fin)
             ax.set_ylabel(r'$\mathrm{n_i~[10^{19}/m^3]}$')
             # Dots
-            ax.plot(x, sim.data[tag][0]/1e13, 'o', color='k')
-            ax.plot(x, sim.data[tag][n]/1e13, 'o', color='k')
-            plot_input_profiles(ax, 'ni_'+str(i+1))
+            ax.plot(x,sim.data[tag][0]/1e13, 'o', color='k')
+            ax.plot(x,sim.data[tag][n]/1e13, 'o', color='k')
+            plot_input_gacode(ax,'ni_'+str(i+1))
             break
 
     ax.legend(loc=loc)
@@ -400,6 +394,10 @@ class DemoFrame(wx.Frame):
         tab = TabPanel(notebook)
         tab.draw('ti')
         notebook.AddPage(tab, 'Ti')
+
+        tab = TabPanel(notebook)
+        tab.draw('w0')
+        notebook.AddPage(tab,'w0')
 
         tab = TabPanel(notebook)
         tab.draw('ne')

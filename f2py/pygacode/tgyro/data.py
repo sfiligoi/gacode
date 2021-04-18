@@ -127,5 +127,6 @@ class tgyrodata:
         for ic in range(nc):
             self.data[tags[ic]] = numdata[ic,:,:]
 
-        if self.verbose: print('INFO: (data.py) Read data in '+file)
+        if self.verbose:
+            print('INFO: (data.py) Read data in '+file)
         return 1

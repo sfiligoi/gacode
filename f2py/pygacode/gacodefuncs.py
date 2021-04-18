@@ -176,7 +176,7 @@ def specmap(m_in,z_in):
 #---------------------------------------------------------------
 
 #---------------------------------------------------------------
-def smooth_pro(x,z,p,n):
+def smooth_pro(x,z,p,n,type='log'):
 
     import numpy as np
 
@@ -197,10 +197,13 @@ def smooth_pro(x,z,p,n):
     pf[j] = p[nx-1]
 
     # Exponential integration to obtain smooth profiles
-    for i in np.arange(j,0,-1):
-        pf[i-1] = pf[i]*np.exp(0.5*(xf[i]-xf[i-1])*(zf[i]+zf[i-1]))
-
-
+    if type == 'log':
+        for i in np.arange(j,0,-1):
+            pf[i-1] = pf[i]*np.exp(0.5*(xf[i]-xf[i-1])*(zf[i]+zf[i-1]))
+    else:
+        for i in np.arange(j,0,-1):
+            pf[i-1] = pf[i]-0.5*(xf[i]-xf[i-1])*(zf[i]+zf[i-1])
+            
     return xf,pf
 #---------------------------------------------------------------
 
