@@ -37,10 +37,10 @@ n = int(nstr)
 
 sim = tgyrodata(simdir,verbose=True)
 
-print('Number of ions  : '+str(sim.n_ion))
-print('Number of radii : '+str(sim.n_r))
-print('Evolution eqns  : '+str(sim.n_evolve))
-print('Completed iter  : '+str(sim.n_iterations))
+print('INFO: (plot_notebook.py) Number of ions : '+str(sim.n_ion))
+print('INFO: (plot_notebook.py) Number of radii: '+str(sim.n_r))
+print('INFO: (plot_notebook.py) Evolution eqns : '+str(sim.n_evolve))
+print('INFO: (plot_notebook.py) Iterations     : '+str(sim.n_iterations))
 
 # Minor radius
 a = sim.data['rmin'][0][-1]/sim.data['r/a'][0][-1]

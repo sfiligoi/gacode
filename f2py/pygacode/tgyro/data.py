@@ -21,7 +21,7 @@ class tgyrodata:
         self.n_ion = int(self.get_tag_value("LOC_N_ION"))
 
         data = np.genfromtxt(self.dir+'/out.tgyro.control')
-        self.n_r         = int(data[0])
+        self.n_r          = int(data[0])
         self.n_evolve     = int(data[1])
         self.n_iterations = int(data[2])
 
@@ -53,7 +53,8 @@ class tgyrodata:
             for root in ['evo_n','flux_i','profile_i']:
                 self.fileparser('out.tgyro.'+root+str(i+1))
 
-        if self.verbose: print(list(self.data.keys()))
+        if self.verbose:
+            print('INFO: (data.py) Objects: ',list(self.data.keys()))
 
 
     def get_tag_value(self, tag):
@@ -66,15 +67,12 @@ class tgyrodata:
                 if line.split()[1] == tag:
                     return float(line.split()[0])
             except IndexError:
-                print("WARNING: Cannot find specified input parameter: ", tag)
+                print("WARNING (data.py): Cannot find specified input parameter: ", tag)
                 return 0
 
 
-    def fileparser(self,file,onerow=False,ped=False):
+    def fileparser(self,file,ped=False):
         """Generic parser for standard TGYRO iteration-based file format"""
-
-        import os
-        import numpy as np
 
         if not os.path.exists(self.dir+'/'+file) :
             print("WARNING: (data.py) "+file+" does not exist.")
@@ -87,17 +85,13 @@ class tgyrodata:
             print("WARNING: (data.py) "+file+" is empty.")
             return 0
 
-        # Data dimensions
-        if onerow == False:
-            ix = 2
-        else:
-            ix = 1
-
         if ped == False:
             nrad = self.n_r
         else:
             nrad = 1
 
+        # Add 2 rows for text header
+        ix = 2
         nr = nrad+ix
         nc = len(data[0].split())
         nb = self.n_iterations+1
@@ -116,12 +110,8 @@ class tgyrodata:
                     try:
                         numdata[ic, ib, ir] = float(row[ic])
                     except ValueError:
-                        # parse badly formatted numbers like this 3.952525-323
-                        tmp = re.match('([\-\+]*[\.0-9]+)([\-\+])([0-9]+)', row[ic])
-                        if tmp.groups():
-                            numdata[ic, ib, ir] = float('%sE%s%s' % (tmp.groups()[0], tmp.groups()[1], tmp.groups()[2]))
-                        else:
-                            raise
+                        print("WARNING: (data.py) Encountered bad float in "+file)
+                        raise
 
         # Populate data list
         for ic in range(nc):
