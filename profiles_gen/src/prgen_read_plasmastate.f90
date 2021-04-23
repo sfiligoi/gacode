@@ -266,7 +266,6 @@ subroutine prgen_read_plasmastate
      plst_tb(nx,:)     = plst_tb(nx-1,:)
 
      do i=1,plst_dim_nspec_beam
-        print *,plst_nb(1,i)
         if (plst_nb(1,i) > 0.0) then
            print '(a,i2)','INFO: (prgen_read_plasmastate) Beam added: ',i
            ntop = ntop+1
