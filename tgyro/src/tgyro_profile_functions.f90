@@ -50,7 +50,7 @@ subroutine tgyro_profile_functions
            f_rot(1) = f_rot(2)
         end select
      endif
-     print *,w0_norm
+ 
      ! NOTE (see tgyro_init_profiles)
      ! f_rot [1/cm] = w0p/w0_norm
      !
@@ -58,7 +58,6 @@ subroutine tgyro_profile_functions
 
      w0p(:) = f_rot(:)*w0_norm
      call math_scaleintv(w0p,r,n_r,w0,'lin')
-     print *,w0
      !-------------------------------------------
 
   endif
