@@ -170,6 +170,8 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
     kdbgmax=50
     forbidden=[]
     psi1 = None
+    sep = None
+    
     for kdbg in range(kdbgmax):
 
         flx=0.5*(flxM+flxm)
