@@ -12,13 +12,6 @@ subroutine tgyro_write_input
   !----------------------------------------------------------------
   ! Trap miscellaneous errors
   !
-  ! - Bogus matching radius
-  !
-  if (i_bc < 0) then
-     error_flag = 1
-     error_msg = 'ERROR: (TGYRO) Problem with matching radius.'
-  endif
-  !
   ! - Advanced iteration methods cannot do zero iterations:
   !
   if (tgyro_iteration_method /= 1 .and. tgyro_relax_iterations == 0) then
@@ -355,7 +348,6 @@ subroutine tgyro_write_input
 
      write(1,20) 'LOC_RMIN',r(2)/r_min
      write(1,20) 'LOC_RMAX',r(n_r)/r_min
-     write(1,20) 'Pivot radius',r(i_bc)/r_min
      write(1,20) 'LOC_NU_SCALE',loc_nu_scale
      write(1,20) 'LOC_BETAE_SCALE',loc_betae_scale
      if (loc_betae_scale > 0.0) then

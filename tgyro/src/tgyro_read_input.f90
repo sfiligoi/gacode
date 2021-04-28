@@ -88,7 +88,6 @@ subroutine tgyro_read_input
   call tgyro_readbc_real(evo_c(0)) 
   call tgyro_readbc_real(loc_betae_scale) 
   call tgyro_readbc_real(loc_me_multiplier) 
-  call tgyro_readbc_int(loc_bc_offset)
   call tgyro_readbc_int(tgyro_tglf_revision)
   call tgyro_readbc_int(tgyro_tglf_dump_flag)
   call tgyro_readbc_int(tgyro_glf23_revision)

@@ -121,12 +121,6 @@ subroutine tgyro_init_profiles
   endif
   !----------------------------------------------
   
-  !----------------------------------------------
-  ! Radius where profiles will be matched.
-  !
-  i_bc = n_r-loc_bc_offset
-  !----------------------------------------------
-
   expro_ctrl_n_ion = loc_n_ion
   expro_ctrl_quasineutral_flag = 0
   expro_ctrl_numeq_flag = loc_num_equil_flag

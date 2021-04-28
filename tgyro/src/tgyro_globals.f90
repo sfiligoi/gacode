@@ -292,7 +292,6 @@ module tgyro_globals
   real, dimension(0:n_ion_max) :: evo_c
   real :: loc_betae_scale
   real :: loc_me_multiplier
-  integer :: loc_bc_offset
   integer :: tgyro_tglf_revision
   integer :: tgyro_tglf_dump_flag
   integer :: tgyro_glf23_revision
@@ -351,7 +350,6 @@ module tgyro_globals
   integer :: flux_method
   integer, dimension(:), allocatable :: flux_method_vec
   integer :: i_tran
-  integer :: i_bc
   integer :: flux_counter
   integer :: i_ash
   integer :: evolve_indx(5)
