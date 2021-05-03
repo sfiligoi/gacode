@@ -112,14 +112,15 @@ def plot_input_gacode(ax,tag):
     c    = ['black','magenta']
     
     for i,myfile in enumerate(list):
-        expro.expro_read(myfile)
-        a = max(expro.expro_rmin)
-        xp = expro.expro_rmin/a
-        y = setprof(tag)
-        if 'dln' in tag:
-            y = y*a 
-        ax.plot(xp,y,color=c[i],alpha=0.25,linewidth=2,linestyle='--',
-                label=r'$\mathbf{'+myfile+'}$')
+        if os.path.isfile(myfile):
+            expro.expro_read(myfile)
+            a = max(expro.expro_rmin)
+            xp = expro.expro_rmin/a
+            y = setprof(tag)
+            if 'dln' in tag:
+                y = y*a 
+            ax.plot(xp,y,color=c[i],alpha=0.25,linewidth=2,linestyle='--',
+                    label=r'$\mathbf{'+myfile+'}$')
 
 def plot_z(ax,tag):
 
