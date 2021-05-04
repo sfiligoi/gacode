@@ -5,6 +5,14 @@ subroutine locpargen_tglf_stack
 
   implicit none
 
+  real :: ge
+
+  if(q_loc < 0.0) then
+     ge = ipccw*gamma_e_loc*a/cs_loc
+  else
+     ge = -ipccw*gamma_e_loc*a/cs_loc
+  endif
+
   write(1,10) 'RMIN_LOC=',r0, 'RMAJ_LOC=',rmaj_loc, 'DRMAJDX_LOC=',shift_loc, &
        'ZMAJ_LOC=',zmag_loc, 'DZMAJDX_LOC=',dzmag_loc, 'Q_LOC=',abs(q_loc), &
        'Q_PRIME_LOC=',(q_loc/r0)**2*s_loc, 'KAPPA_LOC=',kappa_loc, 'S_KAPPA_LOC=',s_kappa_loc, &
@@ -13,7 +21,7 @@ subroutine locpargen_tglf_stack
        'ZEFF=',z_eff_loc, 'XNUE=',nu_ee*a/cs_loc, &
        'DEBYE=',7.43*sqrt(1e3*temp_loc(ise)/(1e13*dens_loc(ise)))/abs(rhos_loc), &
        'BETAE=',betae_unit, 'P_PRIME_LOC=',(abs(q_loc)/r0)*(-beta_star_loc/(8*pi)), &
-       'VEXB_SHEAR=',gamma_e_loc*a/cs_loc, &
+       'VEXB_SHEAR=',ge, &
        'NS=',ise, &
        'ZS_2=',int(z_loc(1)), &
        'MASS_2=',mass_loc(1)/2.0,  &
@@ -21,8 +29,8 @@ subroutine locpargen_tglf_stack
        'TAUS_2=',temp_loc(1)/temp_loc(ise), &
        'RLNS_2=',dlnndr_loc(1), &
        'RLTS_2=',dlntdr_loc(1), &
-       'VPAR_SHEAR_2=',gamma_p_loc*a/cs_loc, &
-       'VPAR_2=',mach_loc/cs_loc, &
+       'VPAR_SHEAR_2=',-ipccw*gamma_p_loc*a/cs_loc, &
+       'VPAR_2=',-ipccw*mach_loc/cs_loc, &
        'ZS_3=',int(z_loc(2)), &
        'MASS_3=',mass_loc(2)/2.0,  &
        'AS_3=',dens_loc(2)/dens_loc(ise), &

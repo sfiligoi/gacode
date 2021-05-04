@@ -33,8 +33,12 @@ subroutine locpargen_tglf
   write(1,10) 'P_PRIME_LOC=',(abs(q_loc)/r0)*(-beta_star_loc/(8*pi))
   write(1,*)
   write(1,'(a)')  '# Rotation'
-  write(1,10) 'VEXB_SHEAR=',gamma_e_loc*a/cs_loc
-
+  if(q_loc < 0.0) then
+     write(1,10) 'VEXB_SHEAR=',ipccw*gamma_e_loc*a/cs_loc
+  else
+     write(1,10) 'VEXB_SHEAR=',-ipccw*gamma_e_loc*a/cs_loc
+  endif
+     
   !---------------------------------------------------------
   ! Species data
   
@@ -56,8 +60,8 @@ subroutine locpargen_tglf
      write(1,10) 'TAUS_'//tag(isr)//'=',temp_loc(is)/temp_loc(ise)
      write(1,10) 'RLNS_'//tag(isr)//'=',dlnndr_loc(is)
      write(1,10) 'RLTS_'//tag(isr)//'=',dlntdr_loc(is)
-     write(1,10) 'VPAR_SHEAR_'//tag(isr)//'=',gamma_p_loc*a/cs_loc
-     write(1,10) 'VPAR_'//tag(isr)//'=',mach_loc/cs_loc
+     write(1,10) 'VPAR_SHEAR_'//tag(isr)//'=',-ipccw*gamma_p_loc*a/cs_loc
+     write(1,10) 'VPAR_'//tag(isr)//'=',-ipccw*mach_loc/cs_loc
   enddo
   close(1)
 
