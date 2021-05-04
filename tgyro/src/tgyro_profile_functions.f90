@@ -63,11 +63,11 @@ subroutine tgyro_profile_functions
   endif
 
   ! Thermal velocities in cm/s
-  v_i(:) = sqrt(k*ti(1,:)/md)
+  v_i(:) = sqrt(k*ti(1,:)/mi(1))
   c_s(:) = sqrt(k*te(:)/md)
 
   ! Thermal gyroradii in cm
-  rho_i(:) = v_i(:)/(e*b_unit(:)/(md*c)) 
+  rho_i(:) = v_i(:)/(e*b_unit(:)/(mi(1)*c)) 
   rho_s(:) = c_s(:)/(e*b_unit(:)/(md*c))
 
   ! Gyrobohm unit diffusivity (cm^2/s)
