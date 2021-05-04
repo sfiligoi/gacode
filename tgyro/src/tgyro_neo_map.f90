@@ -66,9 +66,9 @@ subroutine tgyro_neo_map
      call tgyro_catch_error('ERROR: (TGYRO) n_species > 9 not supported in NEO interface.') 
   endif
 
-  ! Assuming NEO mass and temp norm based on first ion
+  ! Assuming NEO mass norm is m_deuterium and temp norm is based on first ion
   ! dens norm based on electrons
-  m_norm = mi(1)
+  m_norm = md
   t_norm = ti(1,i_r)
   n_norm = ne(i_r)
   

@@ -251,7 +251,7 @@ module tgyro_globals
   real :: e
   real :: k
   real :: me
-  real :: mp
+  real :: md
   real :: malpha
   real :: c
   real :: aspect_rat

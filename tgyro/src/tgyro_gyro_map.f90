@@ -40,17 +40,17 @@ subroutine tgyro_gyro_map
      error_msg  = 'Error: GYRO cannot use ptot via TGYRO.'
   endif
 
-  gyro_mu_electron_in = sqrt(mi(1)/(me*loc_me_multiplier))
+  gyro_mu_electron_in = sqrt(md/(me*loc_me_multiplier))
   gyro_nu_ei_in = nue(i_r)*r_min/c_s(i_r)*loc_nu_scale
   gyro_dlnndr_electron_in = r_min*dlnnedr(i_r)
   gyro_dlntdr_electron_in = r_min*dlntedr(i_r)
 
-  ! Note that GYRO normalizing mass is mD = 2*mp.
+  ! Note that GYRO normalizing mass is mD.
 
   gyro_z_in          = zi_vec(1)
   gyro_ni_over_ne_in = ni(1,i_r)/ne(i_r)
   gyro_ti_over_te_in = ti(1,i_r)/te(i_r)
-  gyro_mu_1_in       = sqrt(2*mp/mi(1))
+  gyro_mu_1_in       = sqrt(md/mi(1))
   gyro_dlnndr_in     = r_min*dlnnidr(1,i_r)
   gyro_dlntdr_in     = r_min*dlntidr(1,i_r)
 
@@ -58,7 +58,7 @@ subroutine tgyro_gyro_map
      gyro_z_2_in          = zi_vec(2)
      gyro_ni_over_ne_2_in = ni(2,i_r)/ne(i_r)
      gyro_ti_over_te_2_in = ti(2,i_r)/te(i_r)
-     gyro_mu_2_in         = sqrt(2*mp/mi(2))
+     gyro_mu_2_in         = sqrt(md/mi(2))
      gyro_dlnndr_2_in     = r_min*dlnnidr(2,i_r)
      gyro_dlntdr_2_in     = r_min*dlntidr(2,i_r)
   endif
@@ -67,7 +67,7 @@ subroutine tgyro_gyro_map
      gyro_z_3_in          = zi_vec(3)
      gyro_ni_over_ne_3_in = ni(3,i_r)/ne(i_r)
      gyro_ti_over_te_3_in = ti(3,i_r)/te(i_r)
-     gyro_mu_3_in         = sqrt(2*mp/mi(3))
+     gyro_mu_3_in         = sqrt(md/mi(3))
      gyro_dlnndr_3_in     = r_min*dlnnidr(3,i_r)
      gyro_dlntdr_3_in     = r_min*dlntidr(3,i_r)
   endif
@@ -76,7 +76,7 @@ subroutine tgyro_gyro_map
      gyro_z_4_in          = zi_vec(4)
      gyro_ni_over_ne_4_in = ni(4,i_r)/ne(i_r)
      gyro_ti_over_te_4_in = ti(4,i_r)/te(i_r)
-     gyro_mu_4_in         = sqrt(2*mp/mi(4))
+     gyro_mu_4_in         = sqrt(md/mi(4))
      gyro_dlnndr_4_in     = r_min*dlnnidr(4,i_r)
      gyro_dlntdr_4_in     = r_min*dlntidr(4,i_r)
   endif
@@ -85,7 +85,7 @@ subroutine tgyro_gyro_map
      gyro_z_5_in          = zi_vec(5)
      gyro_ni_over_ne_5_in = ni(5,i_r)/ne(i_r)
      gyro_ti_over_te_5_in = ti(5,i_r)/te(i_r)
-     gyro_mu_5_in         = sqrt(2*mp/mi(5))
+     gyro_mu_5_in         = sqrt(md/mi(5))
      gyro_dlnndr_5_in     = r_min*dlnnidr(5,i_r)
      gyro_dlntdr_5_in     = r_min*dlntidr(5,i_r)
   endif

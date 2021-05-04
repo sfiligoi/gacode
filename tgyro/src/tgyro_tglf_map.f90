@@ -54,9 +54,9 @@ subroutine tgyro_tglf_map
   ! Charges: e,i,z
   tglf_zs_in(1) = -1.0
   !
-  ! Mass ratios: me/mi(1),mi(1)/mi(1),m(2)/mi(1), ... 
-  !              [assume mi(1) is normalizing mass]
-  tglf_mass_in(1) = (me*loc_me_multiplier)/mi(1)
+  ! Mass ratios: me/md,m(1)/md,m(2)/md, ... 
+  !              [assume md is normalizing mass]
+  tglf_mass_in(1) = (me*loc_me_multiplier)/md
   !
   ! Density ratios: ne/ne,ni(1)/ne,ni(2)/ne, ...
   tglf_as_in(1) = 1.0
@@ -75,7 +75,7 @@ subroutine tgyro_tglf_map
      if (calc_flag(i_ion) == 0) cycle
      i0 = i0+1 
      tglf_zs_in(i0)   = zi_vec(i_ion)
-     tglf_mass_in(i0) = mi(i_ion)/mi(1)
+     tglf_mass_in(i0) = mi(i_ion)/md
      tglf_as_in(i0)   = ni(i_ion,i_r)/ne(i_r) 
      tglf_rlns_in(i0) = r_min*dlnnidr(i_ion,i_r)
      tglf_rlts_in(i0) = r_min*dlntidr(i_ion,i_r)

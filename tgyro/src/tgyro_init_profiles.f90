@@ -31,8 +31,8 @@ subroutine tgyro_init_profiles
   e       = 4.8032e-10 ! statcoul
   k       = 1.6022e-12 ! erg/eV
   me      = 9.1094e-28 ! g
-  mp      = 1.6726e-24 ! g
-  malpha  = 4*mp       ! g
+  md      = expro_mass_deuterium ! g
+  malpha  = 2*md       ! g
   c       = 2.9979e10  ! cm/s
   !
   mu_0    = 4*pi*1e-7  ! N/A^2
@@ -151,7 +151,7 @@ subroutine tgyro_init_profiles
 
   !------------------------------------------------------
   ! Convert dimensionless mass to grams.
-  mi(:) = mi_vec(:)*mp
+  mi(:) = mi_vec(:)*(md*0.5)
   !------------------------------------------------------
 
   !------------------------------------------------------------------------------------------
@@ -493,7 +493,7 @@ subroutine tgyro_init_profiles
      delta_in = expro_delta(n_exp-3)  
      ! Elongation [-]
      kappa_in = expro_kappa(n_exp-3) 
-     ! Main ion mass [mp]
+     ! Main ion mass [0.5*md]
      m_in = mi_vec(1)
      ! R0(a) [m]
      r_in = expro_rmaj(n_exp)
@@ -553,7 +553,7 @@ subroutine tgyro_init_profiles
   !
   ! w0_norm = c_s/R_maj at r=0.
   !
-  w0_norm = sqrt(k*te(1)/mi(1))/r_maj(1)
+  w0_norm = sqrt(k*te(1)/md)/r_maj(1)
   !
   f_rot(:) = w0p(:)/w0_norm
   !----------------------------------------------------------

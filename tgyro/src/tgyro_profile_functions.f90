@@ -63,12 +63,12 @@ subroutine tgyro_profile_functions
   endif
 
   ! Thermal velocities in cm/s
-  v_i(:) = sqrt(k*ti(1,:)/mi(1))
-  c_s(:) = sqrt(k*te(:)/mi(1))
+  v_i(:) = sqrt(k*ti(1,:)/md)
+  c_s(:) = sqrt(k*te(:)/md)
 
   ! Thermal gyroradii in cm
-  rho_i(:) = v_i(:)/(e*b_unit(:)/(mi(1)*c)) 
-  rho_s(:) = c_s(:)/(e*b_unit(:)/(mi(1)*c))
+  rho_i(:) = v_i(:)/(e*b_unit(:)/(md*c)) 
+  rho_s(:) = c_s(:)/(e*b_unit(:)/(md*c))
 
   ! Gyrobohm unit diffusivity (cm^2/s)
   chi_gb(:) = rho_s(:)**2*c_s(:)/r_min
@@ -94,7 +94,7 @@ subroutine tgyro_profile_functions
 
   ! INVERSE of nue_star
   nue_star(:) = (r(:)/r_maj(:))**1.5/abs(q(:))/nue_HH(:)* &
-       (c_s(:)*sqrt(mi(1)/me))/r_maj(:)/z_eff(:)
+       (c_s(:)*sqrt(md/me))/r_maj(:)/z_eff(:)
 
   ! Total pressure [Ba] and beta [dimensionless]
   pr(:) = pext(:)+ne(:)*k*te(:)
