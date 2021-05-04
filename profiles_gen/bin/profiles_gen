@@ -317,6 +317,7 @@ QNFLAG=0
 BANANA=0
 APPENDFLAG=0
 NTHETA=0
+NION=0
 #=============================================================
 
 #=============================================================
@@ -387,6 +388,7 @@ while [ $# -gt 0 ] ; do
   -append) APPENDFLAG=1 ;;
   -qn) QNFLAG=1 ;;
   -banana) BANANA=1 ;;
+  -nion) shift ; NION=$1 ;;
 
   esac
   shift
@@ -533,6 +535,7 @@ then
   echo $QNFLAG >> input.locpargen
   echo $APPENDFLAG >> input.locpargen
   echo $NTHETA >> input.locpargen
+  echo $NION >> input.locpargen
   $LOCPARGEN
   if [ $BANANA -eq 1 ] ; then
      python ${PRGEN_BIN}/banana_width.py

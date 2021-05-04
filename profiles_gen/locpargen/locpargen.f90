@@ -25,6 +25,7 @@ program locpargen
   read(1,*) qnflag
   read(1,*) appendflag
   read(1,*) ntheta
+  read(1,*) nion
   close(1)
 
   expro_ctrl_quasineutral_flag = qnflag
@@ -36,9 +37,14 @@ program locpargen
   ! Minor radius
   a = expro_rmin(expro_n_exp)
 
-  ! Electron index
-  ise = expro_n_ion+1
+  ! Number of ions to retain
+  if(nion .le. 0) then
+     nion = expro_n_ion
+  endif
 
+  ! Electron index
+  ise = nion+1
+  
   if (rho0 > 0.0) then
 
      ! Use local rho
@@ -57,11 +63,13 @@ program locpargen
 
   endif
 
+  print *, nion+1
+  
   call expro_locsim_profiles(&
        hasgeo,&
        0,&
        qnflag,&
-       expro_n_ion+1,&
+       nion+1,&
        r0,&
        btccw,&
        ipccw,&

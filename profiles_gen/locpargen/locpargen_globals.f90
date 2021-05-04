@@ -10,6 +10,7 @@ module locpargen_globals
   integer :: qnflag
   integer :: appendflag
   integer :: ntheta
+  integer :: nion
   real, dimension(:), allocatable :: theta
   
   character(len=2) :: tag(9)
