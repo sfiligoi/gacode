@@ -280,7 +280,7 @@ subroutine tgyro_init_profiles
   !------------------------------------------------------------------------------------------
 
   !------------------------------------------------------------------------------------------
-  ! Helium ash option
+  ! Helium ash detection (diagnostic only -- set alpha source with evo_e=2)
   !
   i_ash = 0
   do i=1,loc_n_ion

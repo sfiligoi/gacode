@@ -334,6 +334,8 @@ subroutine tgyro_write_input
            write(1,10) 'TGYRO_DEN_METHOD'//itag,'ni'//itag//' evolution ON'
         case (2)
            write(1,10) 'TGYRO_DEN_METHOD'//itag,'ni'//itag//' evolution ON (alpha source)'
+        case (-2)
+           write(1,10) 'TGYRO_DEN_METHOD'//itag,'ni'//itag//' lock to shape of electron density'
         case default
            error_flag = 1
            error_msg = 'Error: TGYRO_DEN_METHOD'//itag//': invalid value.'

@@ -50,5 +50,12 @@ subroutine tgyro_quasigrad
      endif
   enddo
 
+  ! OPTION: Set to electron gradients
+   do is=1,loc_n_ion
+     if (evo_e(is) == -2) then
+        dlnnidr(is,:) = dlnnedr(:)
+     endif
+  enddo
+ 
 end subroutine tgyro_quasigrad
 
