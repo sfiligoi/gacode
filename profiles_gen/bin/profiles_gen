@@ -158,7 +158,7 @@ then
    echo "              Equal-arc contour points (default=600)"
    echo
    echo "             -nharm <int>"
-   echo "             Harmonic geometry coefficents (default=3)"
+   echo "             Harmonic geometry coefficents (default=5)"
    echo
    echo "             -nfourier <int>"
    echo "             General legacy Fourier geometry coefficents in input.gacode.geo (off by default)"
@@ -283,7 +283,7 @@ EFIT=0
 NRZ=1600
 NPSI=200
 NARC=600
-NHARM=3
+NHARM=5
 NFOURIER=0
 PLOTPNG=0
 
