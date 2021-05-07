@@ -30,13 +30,19 @@ module vgen_globals
   character(len=8) :: fmt='(I2.2)' 
   character(len=2), dimension(100) :: tag
 
-    real, dimension(:), allocatable :: pflux_sum
+  real, dimension(:), allocatable :: pflux_sum
+  
   real, dimension(:), allocatable :: jbs_neo
-  real, dimension(:), allocatable :: jbs_sauter
   real, dimension(:), allocatable :: jsigma_neo
-  real, dimension(:), allocatable :: jsigma_sauter
   real, dimension(:), allocatable :: jtor_neo
+  
+  real, dimension(:), allocatable :: jbs_sauter
+  real, dimension(:), allocatable :: jsigma_sauter
   real, dimension(:), allocatable :: jtor_sauter
+  
+  real, dimension(:), allocatable :: jbs_sauter_mod
+  real, dimension(:), allocatable :: jsigma_sauter_mod
+  real, dimension(:), allocatable :: jtor_sauter_mod
   
   integer :: n_ions
 

@@ -233,11 +233,17 @@ subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, &
   
   jbs_norm = charge_norm_fac*dens_norm*vth_norm &
        *EXPRO_rmin(EXPRO_n_exp)/1e6
-  jbs_neo(i)     = neo_jpar_dke_out*jbs_norm
-  jbs_sauter(i)  = neo_jpar_thS_out*jbs_norm
-  jtor_neo(i)    = neo_jtor_dke_out*jbs_norm
-  jtor_sauter(i) = neo_jtor_thS_out*jbs_norm
-  pflux_sum(i)   = 0.0
+  
+  jbs_neo(i)         = neo_jpar_dke_out*jbs_norm
+  jtor_neo(i)        = neo_jtor_dke_out*jbs_norm
+  
+  jbs_sauter(i)      = neo_jpar_thS_out*jbs_norm
+  jtor_sauter(i)     = neo_jtor_thS_out*jbs_norm
+  
+  jbs_sauter_mod(i)  = neo_jpar_thSmod_out*jbs_norm
+  jtor_sauter_mod(i) = neo_jtor_thSmod_out*jbs_norm
+  
+  pflux_sum(i)       = 0.0
   do j=1,neo_n_species_in
      pflux_sum(i) = pflux_sum(i) + neo_z_in(j)*neo_pflux_dke_out(j)
   enddo
@@ -259,8 +265,9 @@ subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, &
         stop
      endif
 
-     jsigma_neo(i)     = neo_jpar_dke_out*jbs_norm
-     jsigma_sauter(i)  = neo_jpar_thS_out*jbs_norm
+     jsigma_neo(i)         = neo_jpar_dke_out*jbs_norm
+     jsigma_sauter(i)      = neo_jpar_thS_out*jbs_norm
+     jsigma_sauter_mod(i)  = neo_jpar_thSmod_out*jbs_norm
      
      neo_epar0_in = etemp
      

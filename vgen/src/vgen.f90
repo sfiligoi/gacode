@@ -157,6 +157,11 @@ program vgen
         print '(a)','INFO: (VGEN) Bootstrap current from NEO NN'
         j_tag=' -jbs (NEO NN)'
      endif
+  case(5)
+     if (i_proc == 0) then
+        print '(a)','INFO: (VGEN) Bootstrap current from modified Sauter'
+        j_tag=' -jbs (Sauter mod)'
+     endif
   case default
      if (i_proc == 0) then
         print '(a)','ERROR: Invalid neo_sim_model'
@@ -390,11 +395,14 @@ program vgen
   ! Additional reductions
   call vgen_reduce(pflux_sum(2:EXPRO_n_exp-1),EXPRO_n_exp-2)
   call vgen_reduce(jbs_neo(2:EXPRO_n_exp-1),EXPRO_n_exp-2)
-  call vgen_reduce(jbs_sauter(2:EXPRO_n_exp-1),EXPRO_n_exp-2)
   call vgen_reduce(jsigma_neo(2:EXPRO_n_exp-1),EXPRO_n_exp-2)
-  call vgen_reduce(jsigma_sauter(2:EXPRO_n_exp-1),EXPRO_n_exp-2)
   call vgen_reduce(jtor_neo(2:EXPRO_n_exp-1),EXPRO_n_exp-2)
+  call vgen_reduce(jbs_sauter(2:EXPRO_n_exp-1),EXPRO_n_exp-2)
+  call vgen_reduce(jsigma_sauter(2:EXPRO_n_exp-1),EXPRO_n_exp-2)
   call vgen_reduce(jtor_sauter(2:EXPRO_n_exp-1),EXPRO_n_exp-2)
+  call vgen_reduce(jbs_sauter_mod(2:EXPRO_n_exp-1),EXPRO_n_exp-2)
+  call vgen_reduce(jsigma_sauter_mod(2:EXPRO_n_exp-1),EXPRO_n_exp-2)
+  call vgen_reduce(jtor_sauter_mod(2:EXPRO_n_exp-1),EXPRO_n_exp-2)
   
   !------------------------------------------------------------------------
   ! Extrapolation for r=0 and r=n_exp boundary points
@@ -433,21 +441,30 @@ program vgen
   call bound_extrap(ya,yb,jbs_neo,EXPRO_rmin,EXPRO_n_exp)
   jbs_neo(1)           = ya
   jbs_neo(EXPRO_n_exp) = yb
-  call bound_extrap(ya,yb,jbs_sauter,EXPRO_rmin,EXPRO_n_exp)
-  jbs_sauter(1)           = ya
-  jbs_sauter(EXPRO_n_exp) = yb
   call bound_extrap(ya,yb,jsigma_neo,EXPRO_rmin,EXPRO_n_exp)
   jsigma_neo(1)           = ya
   jsigma_neo(EXPRO_n_exp) = yb
-  call bound_extrap(ya,yb,jsigma_sauter,EXPRO_rmin,EXPRO_n_exp)
-  jsigma_sauter(1)           = ya
-  jsigma_sauter(EXPRO_n_exp) = yb
   call bound_extrap(ya,yb,jtor_neo,EXPRO_rmin,EXPRO_n_exp)
   jtor_neo(1)           = ya
   jtor_neo(EXPRO_n_exp) = yb
+  call bound_extrap(ya,yb,jbs_sauter,EXPRO_rmin,EXPRO_n_exp)
+  jbs_sauter(1)           = ya
+  jbs_sauter(EXPRO_n_exp) = yb
+  call bound_extrap(ya,yb,jsigma_sauter,EXPRO_rmin,EXPRO_n_exp)
+  jsigma_sauter(1)           = ya
+  jsigma_sauter(EXPRO_n_exp) = yb
   call bound_extrap(ya,yb,jtor_sauter,EXPRO_rmin,EXPRO_n_exp)
   jtor_sauter(1)           = ya
   jtor_sauter(EXPRO_n_exp) = yb
+  call bound_extrap(ya,yb,jbs_sauter_mod,EXPRO_rmin,EXPRO_n_exp)
+  jbs_sauter_mod(1)           = ya
+  jbs_sauter_mod(EXPRO_n_exp) = yb
+  call bound_extrap(ya,yb,jsigma_sauter_mod,EXPRO_rmin,EXPRO_n_exp)
+  jsigma_sauter_mod(1)           = ya
+  jsigma_sauter_mod(EXPRO_n_exp) = yb
+  call bound_extrap(ya,yb,jtor_sauter_mod,EXPRO_rmin,EXPRO_n_exp)
+  jtor_sauter_mod(1)           = ya
+  jtor_sauter_mod(EXPRO_n_exp) = yb
   call bound_extrap(ya,yb,pflux_sum,EXPRO_rmin,EXPRO_n_exp)
   pflux_sum(1)           = ya
   pflux_sum(EXPRO_n_exp) = yb
@@ -457,6 +474,10 @@ program vgen
      EXPRO_jbs(:)      = jbs_sauter(:)
      EXPRO_jbstor(:)   = jtor_sauter(:)
      EXPRO_sigmapar(:) = jsigma_sauter(:)
+  else if(neo_sim_model_in == 5) then
+     EXPRO_jbs(:)      = jbs_sauter_mod(:)
+     EXPRO_jbstor(:)   = jtor_sauter_mod(:)
+     EXPRO_sigmapar(:) = jsigma_sauter_mod(:)
   else
      EXPRO_jbs(:)      = jbs_neo(:)
      EXPRO_jbstor(:)   = jtor_neo(:)

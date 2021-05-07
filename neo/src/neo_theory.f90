@@ -9,7 +9,8 @@ module neo_theory
   public :: THEORY_alloc, THEORY_do
   real :: pflux_HH, efluxi_HH, efluxe_HH, jpar_HH, kpar_HH, uparB_HH, &
        vpol_ion_HH,  efluxi_CH, efluxi_TG, &
-       jpar_S, kpar_S, uparB_S, vpol_ion_S, jtor_S, phi_HR, jpar_K
+       jpar_S, kpar_S, uparB_S, vpol_ion_S, jtor_S, phi_HR, jpar_K, &
+       jpar_Smod, jtor_Smod
   real, dimension(:), allocatable :: pflux_multi_HS, eflux_multi_HS
 
   real, private :: eps ! r/rmaj
@@ -140,6 +141,7 @@ contains
     call compute_HR(ir,phi_HR)
     call compute_HS(ir,pflux_multi_HS, eflux_multi_HS)
     call compute_Koh(ir,jpar_K)
+    call compute_Sauter_mod(ir,jpar_Smod,jtor_Smod)
 
     if(silent_flag == 0 .and. i_proc == 0) then
        open(io,file=trim(path)//runfile,status='old',position='append')
@@ -163,6 +165,7 @@ contains
           write(io,'(e16.8)',advance='no') eflux_multi_HS(is)
        enddo
        write(io,'(e16.8)',advance='no') jpar_K
+       write(io,'(e16.8)',advance='no') jpar_Smod
        write (io,*)
        close(io)
     end if
@@ -539,6 +542,8 @@ contains
        jpar = jpar + L34_S * alpha_S * I_div_psip * rho(ir) &
             * dlntdr(is_ion,ir) * press_sum
 
+       !print *, 'Sauter', L31_S, L32_S, L34_S, alpha_S, sigma_S
+       
        ! Compute <jtor/R>/<1/R> (formula is exact)
        jtor = jpar*Btor2_avg/Bmag2_avg
        do is=1,n_species
@@ -551,6 +556,112 @@ contains
 
   end subroutine compute_Sauter
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  ! Modified Sauter bootstrap current model
+  ! Redl, Phys. Plasmas, vol. 18, 022501 (2021)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  subroutine compute_Sauter_mod(ir,jpar,jtor)
+    use neo_globals
+    use neo_equilibrium
+    implicit none
+    integer, intent (in) :: ir
+    real, intent (out) :: jpar, jtor
+    real :: X31, L31_S, X32e, F32_ee, X32i, F32_ei, L32_S, alpha_0, alpha_S, &
+         X34, L34_S, X33, sigma_S, sigma_spitzer
+    real :: nue_S, nue_star_S, nui_star_S
+    integer :: is
+    real :: dens_sum, press_sum
+
+    press_sum = 0.0
+    dens_sum = 0.0
+    do is=1,n_species
+       if(is /= is_ele) then
+          dens_sum  = dens_sum + dens(is,ir)
+          press_sum = press_sum + dens(is,ir)*temp(is,ir)
+       endif
+    enddo
+    nui_star_S = nui_star_HH / dens(is_ion,ir) * dens_sum
+
+    alpha_0 = -(0.62 + 0.055*(zeff-1.0)) / (0.53 + 0.17*(zeff-1.0)) &
+         * (1.0-ftrap) / (1.0 - ftrap*(0.31-0.065*(zeff-1)) - 0.25*ftrap**2)
+
+    alpha_S = ( (alpha_0 + 0.7*zeff * (ftrap*nui_star_S)**0.5) &
+         / (1.0 + 0.18 * nui_star_S**0.5) - 0.002 * nui_star_S**2 * ftrap**6) &
+         / (1.0 + 0.004 * nui_star_S**2 * ftrap**6)
+
+    if(ae_flag == 1) then
+       jpar = 0.0
+       jtor = 0.0
+    else
+
+       nue_S  = nue_HH * (dens_ele/dens(is_ion,ir)) &
+            * (1.0*zeff) / (1.0* Z(is_ion))**2 
+       nue_star_S = nue_S * rmaj(ir) * abs(q(ir)) &
+            / (sqrt(eps)*sqrt(eps)*sqrt(eps) * vth(is_ele,ir))
+
+       X31    = ftrap / (1.0 + 0.67*(1.0-0.7*ftrap)*sqrt(nue_star_S)/(0.56+0.44*zeff) &
+            + (0.52+0.086*sqrt(nue_star_S))*(1.0+0.87*ftrap)*nue_star_S &
+            / (1.0+1.13*(zeff-1.0)**0.5) )
+
+       L31_S  =   X31 + (0.15 * X31 - 0.22 * X31**2 + 0.01 * X31**3 + 0.06 * X31**4) &
+            / (zeff**1.2 - 0.71)
+
+       X32e   = ftrap / (1.0 + 0.23*(1.0-0.96*ftrap)*sqrt(nue_star_S / zeff)  &
+            + 0.13*(1.0-0.38*ftrap)*nue_star_S/zeff**2 * (sqrt(1.0+2.0*sqrt(zeff-1)) &
+            + ftrap**2 * sqrt(nue_star_S * (0.075+0.25*(zeff-1.0)**2)) ) )
+
+       F32_ee = (0.1 + 0.6*zeff)/(zeff * (0.77+0.63*(1.0+(zeff-1.0)**1.1))) * (X32e - X32e**4) &
+            + 0.7/(1.0+0.2*zeff) * (X32e**2 - X32e**4 - 1.2*(X32e**3 - X32e**4)) &
+            + 1.3/(1.0+0.5*zeff) * X32e**4
+
+       X32i   = ftrap / (1.0 + 0.87*(1.0+0.39*ftrap)*sqrt(nue_star_S)/(1.0+2.95*(zeff-1.0)**2) &
+            + 1.53*(1.0-0.37*ftrap)*nue_star_S*(2.0+0.375*(zeff-1.0)))
+
+       F32_ei = -(0.4+1.93*zeff)/(zeff*(0.8+0.6*zeff)) * (X32i - X32i**4) &
+            + 5.5/(1.5+2.0*zeff) * (X32i**2 - X32i**4 - 0.8*(X32i**3 - X32i**4)) &
+            - 1.3/(1.0+0.5*zeff)*X32i**4
+
+       L32_S  = F32_ee + F32_ei
+
+       L34_S = L31_S
+
+       X33 = ftrap / (1.0 + 0.25*(1.0-0.7*ftrap)*sqrt(nue_star_S) &
+            * (1.0+0.45*sqrt(zeff-1.0)) + 0.61*(1.0-0.41*ftrap)*nue_star_S/sqrt(zeff))
+
+       sigma_spitzer = dens_ele / ( mass(is_ele) * nue_S ) &
+            * 0.58 * 32 / (3.0*pi) / (0.58 + 0.74/(0.76+zeff))
+
+       sigma_S = sigma_spitzer * (1.0 - (1.0+0.21/zeff)*X33 + (0.54/zeff) * X33**2 &
+            - (0.33/zeff)*X33**3)
+
+       jpar = sigma_S * EparB_avg &
+            + L32_S * I_div_psip * rho(ir) * &
+            dens(is_ele,ir) * temp(is_ele,ir) * dlntdr(is_ele,ir)
+       
+
+       do is=1,n_species
+          jpar = jpar + L31_S * I_div_psip * rho(ir) &
+               * dens(is,ir) * temp(is,ir) &
+               * (dlntdr(is,ir) + dlnndr(is,ir))
+       enddo
+ 
+       jpar = jpar + L34_S * alpha_S * I_div_psip * rho(ir) &
+            * dlntdr(is_ion,ir) * press_sum
+
+       !print *, 'Sauter new', L31_S, L32_S, L34_S, alpha_S, sigma_S, ftrap, nue_star_S
+
+       ! Compute <jtor/R>/<1/R> (formula is exact)
+       jtor = jpar*Btor2_avg/Bmag2_avg
+       do is=1,n_species
+          jtor = jtor + rho(ir)*I_div_psip*dens(is,ir)*temp(is,ir) &
+               * (dlnndr(is,ir) + dlntdr(is,ir))*(1.0-Btor2_avg/Bmag2_avg)
+       enddo
+       jtor = jtor/(Btor_th0*bigR_th0*bigRinv_avg)
+
+    end if
+
+  end subroutine compute_Sauter_mod
+  
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   ! Hirshman-Sigmar fluxes
   ! Phys. Fluids, vol. 20, 418 (1977)

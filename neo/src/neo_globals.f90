@@ -260,7 +260,8 @@ module neo_globals
 
   ! pure plasma theory
   ! Gamma_HH, Qi_HH, Qe_HH, Qi_CH, jpar_S, jpar_K, jpar_N, jtor_S
-  real, dimension(8)   :: neo_th_out=0.0
+  ! jpar_Smod, jtor_Smod
+  real, dimension(10)   :: neo_th_out=0.0
 
   ! nclass (n_species_max, transport coeff)
   ! transport coeff: 1-> gamma, 2-> Q, 3-> vpol,  4-> vtor, 5-> visc coeff

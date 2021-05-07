@@ -123,6 +123,8 @@ module neo_interface
   real    :: neo_jpar_thK_out    = 0.0
   real    :: neo_jpar_thN_out    = 0.0
   real    :: neo_jtor_thS_out    = 0.0
+  real    :: neo_jpar_thSmod_out = 0.0
+  real    :: neo_jtor_thSmod_out = 0.0
   ! drift-kinetic soln
   real, dimension(11) :: neo_pflux_dke_out    = 0.0
   real, dimension(11) :: neo_efluxtot_dke_out = 0.0
