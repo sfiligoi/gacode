@@ -42,11 +42,8 @@ subroutine tgyro_iteration_simplerelax
         if (abs(simpledz) > loc_dx_max) then
            simpledz = loc_dx_max*simpledz/abs(simpledz)
         endif
-        if (mask(p,3) == 1) then 
-           x_vec(p) = x_vec(p)*(1.0+simpledz)
-        else
-           x_vec(p) = x_vec(p)*(1.0-simpledz)
-        endif
+        x_vec(p) = x_vec(p)*(1.0-simpledz*sign(1.0,g_vec(p)))
+
      enddo
 
      ! Update targets/profiles
