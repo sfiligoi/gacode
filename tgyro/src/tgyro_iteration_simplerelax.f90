@@ -41,7 +41,7 @@ subroutine tgyro_iteration_simplerelax
         simpledz = relax(p)*(f_vec(p)-g_vec(p))/sqrt(f_vec(p)**2+g_vec(p)**2)                   
         if (abs(simpledz) > loc_dx_max) then
            simpledz = loc_dx_max*simpledz/abs(simpledz)
-        endifs
+        endif
         x_vec(p) = x_vec(p)*(1.0-simpledz*sign(1.0,g_vec(p)))
 
      enddo
