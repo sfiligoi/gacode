@@ -1,0 +1,38 @@
+# FIXED Hardware parameters
+IDENTITY="IPP linux cluster (ifort+lapack+FFTW, no MKL)"
+CORES_PER_NODE=16
+NUMAS_PER_NODE=1
+
+# Compilers and flags
+FC  = mpiifort -gen-interfaces -module ${GACODE_ROOT}/modules
+F77 = ${FC}
+
+FOMP   =-qopenmp
+FMATH  =-real-size 64
+FOPT   =-Ofast
+FDEBUG =-eD -Ktrap=fp -m 1
+
+# System math libraries (FFTW 3.3.8, Intel-16.0, IMPI 5.1.1)
+SOFT=/work/imas/opt/EasyBuild/software
+FFTW_HOME=${SOFT}/FFTW/3.3.8-intel-2020b
+FFTW_LIBDIR=${FFTW_HOME}/lib64
+
+FFTW_INC=${FFTW_HOME}/include
+
+LMATH = -L${FFTW_LIBDIR} -lfftw3_threads -lfftw3f_threads -lfftw3 -lfftw3f -mkl=sequential
+
+
+# NetCDF
+HDF5_HOME=${SOFT}/HDF5/1.10.7-iimpi-2020b
+NCDF_HOME=${SOFT}/netCDF/4.7.4-iimpi-2020b
+NCDF_HOME2=${SOFT}/netCDF-Fortran/4.5.3-iimpi-2020b
+NETCDF=-L${HDF5_HOME}/lib64 -lhdf5 -lhdf5_hl -L${NCDF_HOME}/lib64 -lnetcdf -L${NCDF_HOME2}/lib64 -lnetcdff /lib64/libz.so.1 -Wl,-rpath,${NCDF_HOME}/lib64
+NETCDF_INC=${NCDF_HOME2}/include
+
+# Archive 
+ARCH = ar cr
+
+ifdef FANN_ROOT
+   # neural net libraries
+   NN_LIB=-L$(GACODE_ROOT)/../neural/ -I$(GACODE_ROOT)/../neural/ -lbrainfuse -L$(FANN_ROOT)/lib -lfann
+endif
