@@ -42,7 +42,12 @@ subroutine tgyro_iteration_simplerelax
         if (abs(simpledz) > loc_dx_max) then
            simpledz = loc_dx_max*simpledz/abs(simpledz)
         endif
-        x_vec(p) = x_vec(p)*(1.0-simpledz*sign(1.0,g_vec(p)))
+
+        if (mask(p,3) == 1) then !evolving rotation, need to take a bit of extra care
+           x_vec(p) = x_vec(p)*(1.0-simpledz*sign(1.0,g_vec(p)))
+        else
+           x_vec(p) = x_vec(p)*(1.0-simpledz)
+        endif
 
      enddo
 
