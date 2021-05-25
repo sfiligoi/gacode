@@ -769,5 +769,7 @@ subroutine cgyro_init_collision
   deallocate(rsvect0)
   deallocate(rsvect1)
   deallocate(ctest)
+  deallocate(klor_fac)
+  deallocate(kdiff_fac)
 
 end subroutine cgyro_init_collision

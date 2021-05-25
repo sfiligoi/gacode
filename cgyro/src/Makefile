@@ -39,6 +39,7 @@ OBJECTS = cgyro_globals.o \
 	  cgyro_step_collision_simple.o \
           cgyro_step_collision.o \
 	  cgyro_kernel.o \
+	  cgyro_cleanup.o \
           cgyro_mpi_grid.o \
 	  cgyro_make_profiles.o \
 	  cgyro_nl_direct.o \

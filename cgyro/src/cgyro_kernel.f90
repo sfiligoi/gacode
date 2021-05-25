@@ -240,71 +240,8 @@ subroutine cgyro_kernel
         close(io)
      endif
   endif
- 
-  if(allocated(theta))          deallocate(theta)
-  if(allocated(thetab))         deallocate(thetab)
-  if(allocated(w_theta))        deallocate(w_theta)
-  if(allocated(g_theta))        deallocate(g_theta)
-  if(allocated(g_theta_geo))    deallocate(g_theta_geo)
-  if(allocated(bmag))           deallocate(bmag)
-  if(allocated(btor))           deallocate(btor)
-  if(allocated(bpol))           deallocate(bpol)
-  if(allocated(k_perp))         deallocate(k_perp)
-  if(allocated(k_x))            deallocate(k_x)
-  if(allocated(bigr))           deallocate(bigr)
-  if(allocated(bigr_r))         deallocate(bigr_r)
-  if(allocated(omega_stream))   then
-!$acc exit data delete(omega_stream)
-     deallocate(omega_stream)
-  endif
-  if(allocated(omega_trap))     deallocate(omega_trap)
-  if(allocated(omega_rdrift))   deallocate(omega_rdrift)
-  if(allocated(omega_adrift))   deallocate(omega_adrift)
-  if(allocated(omega_aprdrift)) deallocate(omega_aprdrift)
-  if(allocated(omega_cdrift))   deallocate(omega_cdrift)
-  if(allocated(omega_cdrift_r)) deallocate(omega_cdrift_r)
-  if(allocated(omega_gammap))   deallocate(omega_gammap)
 
-  if(allocated(lambda_rot))          deallocate(lambda_rot)
-  if(allocated(dlambda_rot))         deallocate(dlambda_rot)
-  if(allocated(dens_rot))            deallocate(dens_rot)
-  if(allocated(dens_ele_rot))        deallocate(dens_ele_rot)
-  if(allocated(dens_avg_rot))        deallocate(dens_avg_rot)
-  if(allocated(dlnndr_avg_rot))      deallocate(dlnndr_avg_rot)
-  if(allocated(omega_rot_trap))      deallocate(omega_rot_trap)
-  if(allocated(omega_rot_u))         deallocate(omega_rot_u)
-  if(allocated(omega_rot_drift))     deallocate(omega_rot_drift)
-  if(allocated(omega_rot_drift_r))   deallocate(omega_rot_drift_r)
-  if(allocated(omega_rot_edrift))    deallocate(omega_rot_edrift)
-  if(allocated(omega_rot_edrift_r))  deallocate(omega_rot_edrift_r)
-  if(allocated(omega_rot_star))      deallocate(omega_rot_star)
-
-  if(allocated(px))            deallocate(px)
-  if(allocated(energy))        then
-!$acc exit data delete(energy)
-     deallocate(energy)
-  endif
-  if(allocated(w_e))           deallocate(w_e)
-  if(allocated(e_deriv1_mat))  deallocate(e_deriv1_mat)
-  if(allocated(xi))            then
-!$acc exit data delete(xi)
-     deallocate(xi)
-  endif
-  if(allocated(w_xi))          deallocate(w_xi)
-  if(allocated(xi_lor_mat))    deallocate(xi_lor_mat)
-  if(allocated(xi_deriv_mat))  deallocate(xi_deriv_mat)
-  if(allocated(h_x))           deallocate(h_x)
-  if(allocated(h0_x))          deallocate(h0_x)
-  if(allocated(h0_old))          deallocate(h0_old)
-  if(allocated(cap_h_c))       deallocate(cap_h_c)
-  if(allocated(cap_h_v))       deallocate(cap_h_v)
-  if(allocated(field))         deallocate(field)
-  if(allocated(field_loc))     deallocate(field_loc)
-  if(allocated(field_old))     deallocate(field_old)
-  if(allocated(hzf))           deallocate(hzf)
-  if(allocated(xzf))           deallocate(xzf)
-
-  if (allocated(cmat)) deallocate(cmat)
+  call cgyro_cleanup
 
   call system_clock(exit_time,count_rate,count_max)
   if (exit_time.gt.start_time) then

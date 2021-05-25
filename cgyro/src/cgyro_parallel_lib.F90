@@ -560,5 +560,22 @@ contains
     
   end subroutine parallel_lib_nj_loc
 
+  subroutine parallel_lib_clean
+    implicit none
+    
+    if(allocated(fsendf)) then
+!$acc exit data delete(fsendf)
+       deallocate(fsendf)
+    endif
+
+    if(allocated(fsendr)) then
+!$acc exit data delete(fsendr)
+       deallocate(fsendr)
+    endif
+
+    if(allocated(fsendr_real))     deallocate(fsendr_real)
+    
+  end subroutine parallel_lib_clean
+  
 end module parallel_lib
 

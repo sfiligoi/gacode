@@ -453,4 +453,8 @@ subroutine domain_renorm(u,w,n)
 
   w = w+b
 
+  deallocate(i_piv)
+  deallocate(b)
+  deallocate(a)
+
 end subroutine domain_renorm

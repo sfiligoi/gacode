@@ -362,7 +362,6 @@ module cgyro_globals
   ! Fields
   real, dimension(:,:), allocatable :: fcoef
   real, dimension(:,:), allocatable :: gcoef
-  real, dimension(:,:,:), allocatable :: res_norm
   complex, dimension(:,:), allocatable :: field
   complex, dimension(:,:), allocatable :: field_loc
   complex, dimension(:,:), allocatable :: field_old
