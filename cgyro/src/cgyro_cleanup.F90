@@ -1,4 +1,4 @@
-! This is called from cgyro_kernel to perform clean-ups from CPU and GPU (deallocate)
+! This is called after cgyro_kernel to perform clean-ups from CPU and GPU (deallocate)
 
 subroutine cgyro_cleanup
   use cgyro_globals
@@ -85,6 +85,8 @@ subroutine cgyro_cleanup
   if(allocated(cflux_loc))           deallocate(cflux_loc)
   if(allocated(gflux))               deallocate(gflux)
   if(allocated(gflux_loc))           deallocate(gflux_loc)
+  if(allocated(cflux_tave))          deallocate(cflux_tave)
+  if(allocated(gflux_tave))          deallocate(gflux_tave)
   if(allocated(recv_status))         deallocate(recv_status)
   if(allocated(icd_c))  then
 !$acc exit data delete(icd_c)     

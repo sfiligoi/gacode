@@ -11,7 +11,7 @@
 !   call cgyro_run
 !-------------------------------------------------------------
 
-subroutine cgyro_run(test_flag_in)
+subroutine cgyro_run(test_flag_in,var_in,n_species_out,flux_tave_out,tave_min_out,tave_max_out)
 
   use mpi
   use cgyro_globals
@@ -20,7 +20,11 @@ subroutine cgyro_run(test_flag_in)
   implicit none
 
   ! Input parameters (IN) - REQUIRED
-  integer, intent(in) :: test_flag_in
+  integer, intent(in)  :: test_flag_in
+  integer, intent(in)  :: var_in           
+  integer, intent(out) :: n_species_out
+  real, intent(out)    :: tave_min_out, tave_max_out
+  real, intent(out)    :: flux_tave_out(11,3)
 
   ! Set corresponding global variables
   test_flag = test_flag_in
@@ -28,4 +32,18 @@ subroutine cgyro_run(test_flag_in)
   ! Run GYRO
   call cgyro_kernel
 
+  ! Return time-averaged flux data
+  n_species_out = n_species
+  tave_min_out = tave_min
+  tave_max_out = tave_max
+  flux_tave_out(:,:) = 0.0
+  if(abs(gamma_e) > 1e-10) then
+     flux_tave_out(1:n_species,3) = cflux_tave(1:n_species,3)/(1.0*tave_step)
+  else
+     flux_tave_out(1:n_species,3) = gflux_tave(1:n_species,3)/(1.0*tave_step)
+  endif
+  
+  ! Clean-up
+  call cgyro_cleanup
+  
 end subroutine cgyro_run

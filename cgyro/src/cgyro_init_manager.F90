@@ -163,6 +163,15 @@ subroutine cgyro_init_manager
      allocate(cflux_loc(n_species,3,n_field))
      allocate(    gflux(0:n_global,n_species,3,n_field))
      allocate(gflux_loc(0:n_global,n_species,3,n_field))
+
+     allocate(cflux_tave(n_species,3))
+     allocate(gflux_tave(n_species,3))
+     cflux_tave = 0.0
+     gflux_tave = (0.0,0.0)
+     tave_step  = 0
+     tave_min   = t_current
+     tave_max   = t_current
+     
      allocate(recv_status(MPI_STATUS_SIZE))
 
      allocate(icd_c(-nup_theta:nup_theta, nc))

@@ -357,4 +357,11 @@ module tgyro_globals
   integer :: use_trap
   !---------------------------------------------------------
 
+  ! Variable for cgyro iteration
+  integer :: cgyro_var_in           
+  integer :: cgyro_n_species_out
+  real    :: cgyro_tave_min_out, cgyro_tave_max_out
+  real    :: cgyro_flux_tave_out(11,3)
+  character(len=21)    :: runfile_cgyro_eflux='out.tgyro.cgyro_eflux'
+  
 end module tgyro_globals

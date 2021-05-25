@@ -34,7 +34,8 @@ subroutine tgyro_multi_driver
      call cgyro_init(lpath,gyro_comm)
 
      ! Run CGYRO
-     call cgyro_run(gyrotest_flag)
+     call cgyro_run(gyrotest_flag,cgyro_var_in,cgyro_n_species_out, &
+          cgyro_flux_tave_out,cgyro_tave_min_out,cgyro_tave_max_out)
 
   endif
 

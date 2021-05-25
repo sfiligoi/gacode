@@ -375,6 +375,9 @@ module cgyro_globals
   real, dimension(:,:,:), allocatable :: cflux
   complex, dimension(:,:,:,:), allocatable :: gflux_loc
   complex, dimension(:,:,:,:), allocatable :: gflux
+  real, dimension(:,:), allocatable :: cflux_tave, gflux_tave
+  real :: tave_min, tave_max
+  integer :: tave_step
   !
   ! Nonlinear plans
   type(C_PTR) :: plan_r2c

@@ -33,7 +33,7 @@ subroutine cgyro_flux
 
   implicit none
 
-  integer :: ie,ix,is,it,ir
+  integer :: ie,ix,is,it,ir,i_field
   integer :: l,icl
   real :: dv,cn
   real :: vpar
@@ -229,4 +229,13 @@ subroutine cgyro_flux
        NEW_COMM_1, &
        i_err)
 
+  tave_step = tave_step + 1
+  tave_max  = t_current
+  do i_field=1,n_field
+     cflux_tave(:,:) = cflux_tave(:,:) + cflux(:,:,i_field)
+  enddo
+  do i_field=1,n_field
+     gflux_tave(:,:) = gflux_tave(:,:) + real(gflux(0,:,:,i_field))
+  enddo
+     
 end subroutine cgyro_flux

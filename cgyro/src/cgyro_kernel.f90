@@ -241,8 +241,6 @@ subroutine cgyro_kernel
      endif
   endif
 
-  call cgyro_cleanup
-
   call system_clock(exit_time,count_rate,count_max)
   if (exit_time.gt.start_time) then
     exit_dt = (exit_time-start_time)/real(count_rate)

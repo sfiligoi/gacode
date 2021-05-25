@@ -76,6 +76,21 @@ program tgyro_main
 
      call tgyro_multi_driver
 
+  case (4)
+
+     if (i_proc_global == 0) then
+        open(unit=1,file=trim(runfile_cgyro_eflux),status='replace')
+        write(1,*) '# tmin tmax Q'
+        write(1,*)
+        close(1)
+     endif
+     
+     ! Multi-job cgyro utility with iteration
+     call tgyro_multi_driver
+     ! call MPI_ALLGATHER(...)
+     
+     
+     
   case default
 
      call tgyro_catch_error('ERROR: (TGYRO) Bad value for tgyro_mode')
