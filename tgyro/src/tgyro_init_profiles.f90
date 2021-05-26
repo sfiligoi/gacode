@@ -127,6 +127,11 @@ subroutine tgyro_init_profiles
 
   call expro_read('input.gacode') 
 
+  ! Check for acceptable number of ions
+  if (expro_n_ion < loc_n_ion) then
+     call tgyro_catch_error('ERROR: (tgyro_init_profiles) LOC_N_ION > expro_n_ion')
+  endif
+
   ! Mass and charge taken from input.gacode
   mi_vec(:) = expro_mass(1:loc_n_ion)
   zi_vec(:) = expro_z(1:loc_n_ion)
