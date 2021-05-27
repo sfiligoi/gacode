@@ -117,6 +117,11 @@ subroutine cgyro_kernel
 !$acc update device(field,psi,cap_h_c,chi,h_x,source)
   call timer_lib_out('str_mem')
 
+  tave_step  = 0
+  tave_min   = t_current
+  tave_max   = t_current
+  
+  
   do i_time=1,n_time
 
      call timer_lib_in('TOTAL')

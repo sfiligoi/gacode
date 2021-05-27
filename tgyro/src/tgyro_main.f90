@@ -10,7 +10,7 @@ program tgyro_main
   !
   integer :: supported
   integer, external :: omp_get_max_threads, omp_get_thread_num
-  integer :: i, is
+
   !-----------------------------------------------------------------
 
   !----------------------------------------------------------------
@@ -79,53 +79,7 @@ program tgyro_main
 
   case (4)
 
-     allocate(cgyro_n_species_vec(n_inst))
-     allocate(cgyro_tave_min_vec(n_inst))
-     allocate(cgyro_tave_max_vec(n_inst))
-     allocate(cgyro_flux_tave_vec(n_inst,11,3))
-     allocate(cgyro_flux_tave_out(11,3))
-     cgyro_nflux=33
-     
-     if (i_proc_global == 0) then
-        open(unit=1,file=trim(runfile_cgyro_eflux),status='replace')
-        write(1,*) '# tmin tmax Q'
-        write(1,*)
-        close(1)
-     endif
-     
-     ! Multi-job cgyro utility with iteration
-     call tgyro_multi_driver
-     
-     call MPI_GATHER(cgyro_n_species_out,1,MPI_INTEGER,&
-          cgyro_n_species_vec,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
-     call MPI_GATHER(cgyro_tave_min_out,1,MPI_DOUBLE_PRECISION,&
-          cgyro_tave_min_vec,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
-     call MPI_GATHER(cgyro_tave_max_out,1,MPI_DOUBLE_PRECISION,&
-          cgyro_tave_max_vec,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
-     call MPI_GATHER(cgyro_flux_tave_out(1,2),cgyro_nflux,MPI_DOUBLE_PRECISION,&
-          cgyro_flux_tave_vec(:,1,2),cgyro_nflux,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
-     
-     if (i_proc_global == 0) then
-        open(unit=1,file=trim(runfile_cgyro_eflux),position='append')
-        do i=1,n_inst
-           write(1,'(a)',advance='no')        trim(paths(i))
-           write(1,'(f7.3)',advance='no')     cgyro_tave_min_vec(i)
-           write(1,'(f7.3)',advance='no')     cgyro_tave_max_vec(i)
-           write(1,'(i2)',  advance='no')     cgyro_n_species_vec(i)
-           !do is=1,cgyro_n_species_vec(i)
-           !   write(1,'(e11.5)',advance='no') cgyro_flux_tave_vec(is,2,i)
-           !enddo
-           !write(1,'(e11.5)',advance='no') cgyro_flux_tave_vec(i,1,2)
-           write(1,*)
-        enddo
-        close(1)
-     endif
-
-     if(allocated(cgyro_n_species_vec)) deallocate(cgyro_n_species_vec)
-     if(allocated(cgyro_tave_min_vec))  deallocate(cgyro_tave_min_vec)
-     if(allocated(cgyro_tave_max_vec))  deallocate(cgyro_tave_max_vec)
-     if(allocated(cgyro_flux_tave_vec)) deallocate(cgyro_flux_tave_vec)
-     if(allocated(cgyro_flux_tave_out)) deallocate(cgyro_flux_tave_out)
+     call tgyro_cgyro_iterate
      
   case default
 

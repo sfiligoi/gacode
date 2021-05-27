@@ -336,6 +336,8 @@ module tgyro_globals
   real :: tgyro_residual_tol
   real :: tgyro_input_fusion_scale
   !
+  integer :: tgyro_cgyro_n_iterate
+  !
   real, dimension(:), allocatable :: res
   real, dimension(:), allocatable :: res_norm
   real, dimension(:), allocatable :: res0

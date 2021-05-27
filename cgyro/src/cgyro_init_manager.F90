@@ -168,9 +168,6 @@ subroutine cgyro_init_manager
      allocate(gflux_tave(n_species,3))
      cflux_tave = 0.0
      gflux_tave = (0.0,0.0)
-     tave_step  = 0
-     tave_min   = t_current
-     tave_max   = t_current
      
      allocate(recv_status(MPI_STATUS_SIZE))
 

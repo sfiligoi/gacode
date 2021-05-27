@@ -29,6 +29,9 @@ subroutine cgyro_run(test_flag_in,var_in,n_species_out,flux_tave_out,tave_min_ou
   ! Set corresponding global variables
   test_flag = test_flag_in
 
+  ! Re-set max time
+  max_time = var_in
+  
   ! Run GYRO
   call cgyro_kernel
 
@@ -38,9 +41,9 @@ subroutine cgyro_run(test_flag_in,var_in,n_species_out,flux_tave_out,tave_min_ou
   tave_max_out = tave_max
   flux_tave_out(:,:) = 0.0
   if(abs(gamma_e) > 1e-10) then
-     flux_tave_out(1:n_species,3) = cflux_tave(1:n_species,3)/(1.0*tave_step)
+     flux_tave_out(1:n_species,:) = cflux_tave(1:n_species,:)/(1.0*tave_step)
   else
-     flux_tave_out(1:n_species,3) = gflux_tave(1:n_species,3)/(1.0*tave_step)
+     flux_tave_out(1:n_species,:) = gflux_tave(1:n_species,:)/(1.0*tave_step)
   endif
   
   ! Clean-up
