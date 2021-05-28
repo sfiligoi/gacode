@@ -281,6 +281,7 @@ module cgyro_globals
   real    :: gtime
   complex :: freq
   complex :: freq_err
+  integer(KIND=8) :: kernel_start_time, kernel_exit_time, kernel_count_rate, kernel_count_max
   !
   ! adaptive integrator parameters
   real :: delta_t_gk

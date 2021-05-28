@@ -8,10 +8,12 @@
 ! NOTES:
 ! - To run CGYRO as a subroutine, do this:
 !   call cgyro_init
+!   call cgyro_init_kernel
 !   call cgyro_run
+!   call cgyro_final_kernel
 !-------------------------------------------------------------
 
-subroutine cgyro_run(test_flag_in,var_in,n_species_out,flux_tave_out,tave_min_out,tave_max_out)
+subroutine cgyro_run(test_flag_in,var_in,n_species_out,flux_tave_out,tave_min_out,tave_max_out,status_out)
 
   use mpi
   use cgyro_globals
@@ -20,11 +22,12 @@ subroutine cgyro_run(test_flag_in,var_in,n_species_out,flux_tave_out,tave_min_ou
   implicit none
 
   ! Input parameters (IN) - REQUIRED
-  integer, intent(in)  :: test_flag_in
-  integer, intent(in)  :: var_in           
-  integer, intent(out) :: n_species_out
-  real, intent(out)    :: tave_min_out, tave_max_out
-  real, intent(out)    :: flux_tave_out(11,3)
+  integer, intent(in)   :: test_flag_in
+  integer, intent(in)   :: var_in           
+  integer, intent(out)  :: n_species_out
+  real, intent(out)     :: tave_min_out, tave_max_out
+  real, intent(out)     :: flux_tave_out(11,3)
+  integer, intent (out) :: status_out  ! 0 is good to continue; > 0 means stop
 
   ! Set corresponding global variables
   test_flag = test_flag_in
@@ -34,6 +37,19 @@ subroutine cgyro_run(test_flag_in,var_in,n_species_out,flux_tave_out,tave_min_ou
   
   ! Run GYRO
   call cgyro_kernel
+
+  if(error_status == 0) then
+     if(nonlinear_flag == 0 .and. signal == 1) then
+        ! linear converged
+        status_out = 1
+     endif
+     ! no errors
+     status_out = 0
+  else
+     ! something wrong
+     status_out = 2
+  endif
+
 
   ! Return time-averaged flux data
   n_species_out = n_species
@@ -45,8 +61,5 @@ subroutine cgyro_run(test_flag_in,var_in,n_species_out,flux_tave_out,tave_min_ou
   else
      flux_tave_out(1:n_species,:) = gflux_tave(1:n_species,:)/(1.0*tave_step)
   endif
-  
-  ! Clean-up
-  call cgyro_cleanup
   
 end subroutine cgyro_run

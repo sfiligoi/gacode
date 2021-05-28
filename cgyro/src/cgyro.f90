@@ -62,9 +62,9 @@ program cgyro
   call cgyro_read_input
   call timer_lib_out('input')
 
+  call cgyro_init_kernel
   call cgyro_kernel
-  
-  call cgyro_cleanup
+  call cgyro_final_kernel
   call MPI_FINALIZE(i_err)
 
 end program cgyro

@@ -5,7 +5,8 @@ subroutine tgyro_cgyro_iterate
   use tgyro_globals
   implicit none
   integer :: i, j, p, is
-  
+
+  allocate(cgyro_status_vec(n_inst))
   allocate(cgyro_n_species_vec(n_inst))
   allocate(cgyro_tave_min_vec(n_inst))
   allocate(cgyro_tave_max_vec(n_inst))
@@ -22,14 +23,16 @@ subroutine tgyro_cgyro_iterate
 
   ! Initialize CGYRO
   call cgyro_init(lpath,gyro_comm)
+  call cgyro_init_kernel
   
   do i=0,tgyro_cgyro_n_iterate
   
      ! Run multiple cgyro's
-     cgyro_var_in = 2.0        ! max time
+     cgyro_var_in = 4.0        ! max time
      call cgyro_run(gyrotest_flag,cgyro_var_in,cgyro_n_species_out, &
-          cgyro_flux_tave_out,cgyro_tave_min_out,cgyro_tave_max_out)
-
+          cgyro_flux_tave_out,cgyro_tave_min_out,cgyro_tave_max_out,&
+          cgyro_status_out)
+     
      ! Collect flux data
      call MPI_GATHER(cgyro_n_species_out,1,MPI_INTEGER,&
           cgyro_n_species_vec,1,MPI_INTEGER,0,gyro_adj,ierr)
@@ -57,8 +60,39 @@ subroutine tgyro_cgyro_iterate
         close(1)
      endif
 
-  enddo
+     ! Check status
+     call MPI_ALLGATHER(cgyro_status_out,1,MPI_INTEGER,&
+          cgyro_status_vec,1,MPI_INTEGER,gyro_adj,ierr)
+     ! all cgyro's exit if even one has problem
+     do j=1,n_inst
+        if(cgyro_status_vec(j) == 2) then
+           open(unit=1,file=trim(runfile),status='old',position='append')
+           write(1,'(a,i3)') 'INFO: (TGYRO) CGYRO iteration error on #',i
+           write(1,*)
+           close(1)
+           goto 100
+        endif
+     enddo
+     ! all cgyro's exit if all are linearly converged
+     if(sum(cgyro_status_vec) == n_inst) then
+        open(unit=1,file=trim(runfile),status='old',position='append')
+        write(1,'(a,i3)') 'INFO: (TGYRO) CGYRO iteration complete #', i
+        write(1,*) 'INFO: (TGYRO) All CGYROs linearly converged'
+        close(1)
+        goto 100
+     endif
+     open(unit=1,file=trim(runfile),status='old',position='append')
+     write(1,'(a,i3)') 'INFO: (TGYRO) CGYRO iteration complete #', i
+     write(1,*)
+     close(1)
      
+  enddo
+
+100 continue
+  
+  call cgyro_final_kernel
+  
+  if(allocated(cgyro_status_vec))    deallocate(cgyro_status_vec)
   if(allocated(cgyro_n_species_vec)) deallocate(cgyro_n_species_vec)
   if(allocated(cgyro_tave_min_vec))  deallocate(cgyro_tave_min_vec)
   if(allocated(cgyro_tave_max_vec))  deallocate(cgyro_tave_max_vec)

@@ -365,7 +365,9 @@ module tgyro_globals
   real    :: cgyro_tave_min_out
   real    :: cgyro_tave_max_out
   real,dimension(:,:), allocatable :: cgyro_flux_tave_out
+  integer :: cgyro_status_out
   integer :: cgyro_nflux
+  integer, dimension(:), allocatable   :: cgyro_status_vec
   integer, dimension(:), allocatable   :: cgyro_n_species_vec
   real, dimension(:), allocatable      :: cgyro_tave_min_vec
   real, dimension(:), allocatable      :: cgyro_tave_max_vec

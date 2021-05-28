@@ -36,10 +36,12 @@ OBJECTS = cgyro_globals.o \
 	  cgyro_init_collision_simple.o \
           cgyro_init_collision.o \
           cgyro_init_manager.o \
+	  cgyro_init_kernel.o \
 	  cgyro_step_collision_simple.o \
           cgyro_step_collision.o \
 	  cgyro_kernel.o \
 	  cgyro_cleanup.o \
+          cgyro_final_kernel.o \
           cgyro_mpi_grid.o \
 	  cgyro_make_profiles.o \
 	  cgyro_nl_direct.o \
