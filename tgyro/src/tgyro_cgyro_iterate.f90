@@ -66,25 +66,31 @@ subroutine tgyro_cgyro_iterate
      ! all cgyro's exit if even one has problem
      do j=1,n_inst
         if(cgyro_status_vec(j) == 2) then
-           open(unit=1,file=trim(runfile),status='old',position='append')
-           write(1,'(a,i3)') 'INFO: (TGYRO) CGYRO iteration error on #',i
-           write(1,*)
-           close(1)
+           if(i_proc_global == 0) then
+              open(unit=1,file=trim(runfile),status='old',position='append')
+              write(1,'(a,i3)') 'INFO: (TGYRO) CGYRO iteration error on #',i
+              write(1,*)
+              close(1)
+           endif
            goto 100
         endif
      enddo
      ! all cgyro's exit if all are linearly converged
      if(sum(cgyro_status_vec) == n_inst) then
-        open(unit=1,file=trim(runfile),status='old',position='append')
-        write(1,'(a,i3)') 'INFO: (TGYRO) CGYRO iteration complete #', i
-        write(1,*) 'INFO: (TGYRO) All CGYROs linearly converged'
-        close(1)
+        if(i_proc_global == 0) then
+           open(unit=1,file=trim(runfile),status='old',position='append')
+           write(1,'(a,i3)') 'INFO: (TGYRO) CGYRO iteration complete #', i
+           write(1,*) 'INFO: (TGYRO) All CGYROs linearly converged'
+           close(1)
+        endif
         goto 100
      endif
-     open(unit=1,file=trim(runfile),status='old',position='append')
-     write(1,'(a,i3)') 'INFO: (TGYRO) CGYRO iteration complete #', i
-     write(1,*)
-     close(1)
+     if(i_proc_global == 0) then
+        open(unit=1,file=trim(runfile),status='old',position='append')
+        write(1,'(a,i3)') 'INFO: (TGYRO) CGYRO iteration complete #', i
+        write(1,*)
+        close(1)
+     endif
      
   enddo
 
