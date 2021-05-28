@@ -32,10 +32,13 @@ subroutine tgyro_multi_driver
 
      ! Initialize CGYRO
      call cgyro_init(lpath,gyro_comm)
+     call cgyro_init_kernel
 
      ! Run CGYRO
      call cgyro_run(gyrotest_flag,cgyro_var_in,cgyro_n_species_out, &
-          cgyro_flux_tave_out,cgyro_tave_min_out,cgyro_tave_max_out)
+          cgyro_flux_tave_out,cgyro_tave_min_out,cgyro_tave_max_out,&
+          cgyro_status_out)
+     call cgyro_final_kernel
 
   endif
 
