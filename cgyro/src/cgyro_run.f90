@@ -28,6 +28,7 @@ subroutine cgyro_run(test_flag_in,var_in,n_species_out,flux_tave_out,tave_min_ou
   real, intent(out)     :: tave_min_out, tave_max_out
   real, intent(out)     :: flux_tave_out(11,3)
   integer, intent (out) :: status_out  ! 0 is good to continue; > 0 means stop
+  real, dimension(:,:), allocatable :: sum_out
 
   ! Set corresponding global variables
   test_flag = test_flag_in
@@ -51,15 +52,30 @@ subroutine cgyro_run(test_flag_in,var_in,n_species_out,flux_tave_out,tave_min_ou
   endif
 
 
-  ! Return time-averaged flux data
+  ! Return time-averaged flux data (need to reduce across n first)
+  flux_tave_out(:,:) = 0.0
+  allocate(sum_out(n_species,3))
+  if(abs(gamma_e) > 1e-10) then
+     call MPI_ALLREDUCE(cflux_tave(:,:), &
+       sum_out(:,:), &
+       size(sum_out), &
+       MPI_DOUBLE_PRECISION, &
+       MPI_SUM, &
+       NEW_COMM_2, &
+       i_err)
+  else
+     call MPI_ALLREDUCE(gflux_tave(:,:), &
+       sum_out(:,:), &
+       size(sum_out), &
+       MPI_DOUBLE_PRECISION, &
+       MPI_SUM, &
+       NEW_COMM_2, &
+       i_err)
+  endif
   n_species_out = n_species
   tave_min_out = tave_min
   tave_max_out = tave_max
-  flux_tave_out(:,:) = 0.0
-  if(abs(gamma_e) > 1e-10) then
-     flux_tave_out(1:n_species,:) = cflux_tave(1:n_species,:)/(1.0*tave_step)
-  else
-     flux_tave_out(1:n_species,:) = gflux_tave(1:n_species,:)/(1.0*tave_step)
-  endif
+  flux_tave_out(1:n_species,:) = sum_out(1:n_species,:)/(1.0*tave_step)
+  deallocate(sum_out)
   
 end subroutine cgyro_run
