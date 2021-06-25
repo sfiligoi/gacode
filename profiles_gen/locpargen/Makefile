@@ -17,6 +17,7 @@ OBJECTS = locpargen_globals.o \
           locpargen_tglf.o \
 	  locpargen_tglf_stack.o \
           locpargen_cgyro.o \
+          locpargen_gyro.o \
           $(EXEC).o 
 
 .SUFFIXES : .o .f90
