@@ -117,6 +117,7 @@ program locpargen
   close(1)
 
   call fileopen('input.cgyro.locpargen') ; call locpargen_cgyro
+  call fileopen('input.gyro.locpargen') ; call locpargen_gyro
   call fileopen('input.tglf.locpargen')  ; call locpargen_tglf
   call fileopen('input.tglf.locpargen_stack') ; call locpargen_tglf_stack
   call fileopen('input.neo.locpargen')   ; call locpargen_neo
