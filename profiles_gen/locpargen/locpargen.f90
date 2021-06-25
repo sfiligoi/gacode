@@ -38,7 +38,7 @@ program locpargen
   a = expro_rmin(expro_n_exp)
 
   ! Number of ions to retain
-  if(nion .le. 0) then
+  if (nion <= 0) then
      nion = expro_n_ion
   endif
 
@@ -62,8 +62,6 @@ program locpargen
      r0 = y(1)
 
   endif
-
-  print *, nion+1
   
   call expro_locsim_profiles(&
        hasgeo,&
@@ -79,6 +77,7 @@ program locpargen
      goto 100
   endif
      
+  print '(a,i2,a,i2,a)','INFO: (locpargen) Keeping',nion,' of',expro_n_ion,' ions'
   print 10,'INFO: (locpargen) rmin/a   =',rmin_loc
   print 10,'INFO: (locpargen) rhos/a   =',rhos_loc/a
   !print 10,'rhoi/a   =',rhos_loc/a*sqrt(temp_loc(ise)/temp_loc(1))
