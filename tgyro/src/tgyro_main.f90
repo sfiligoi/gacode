@@ -10,6 +10,7 @@ program tgyro_main
   !
   integer :: supported
   integer, external :: omp_get_max_threads, omp_get_thread_num
+
   !-----------------------------------------------------------------
 
   !----------------------------------------------------------------
@@ -76,6 +77,10 @@ program tgyro_main
 
      call tgyro_multi_driver
 
+  case (4)
+
+     call tgyro_cgyro_iterate
+     
   case default
 
      call tgyro_catch_error('ERROR: (TGYRO) Bad value for tgyro_mode')

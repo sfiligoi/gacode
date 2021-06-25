@@ -163,6 +163,9 @@ subroutine cgyro_init_manager
      allocate(cflux_loc(n_species,3,n_field))
      allocate(    gflux(0:n_global,n_species,3,n_field))
      allocate(gflux_loc(0:n_global,n_species,3,n_field))
+     allocate(cflux_tave(n_species,3))
+     allocate(gflux_tave(n_species,3))
+     
      allocate(recv_status(MPI_STATUS_SIZE))
 
      allocate(icd_c(-nup_theta:nup_theta, nc))
@@ -452,5 +455,9 @@ subroutine domain_renorm(u,w,n)
   call DGESV(n,1,a,n,i_piv,b,n,info)
 
   w = w+b
+
+  deallocate(i_piv)
+  deallocate(b)
+  deallocate(a)
 
 end subroutine domain_renorm

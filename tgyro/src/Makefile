@@ -41,6 +41,7 @@ OBJECTS += tgyro_globals.o \
            tgyro_iteration_simplerelax.o \
            tgyro_iteration_zero.o \
            tgyro_multi_driver.o \
+	   tgyro_cgyro_iterate.o \
            tgyro_neo_map.o \
            tgyro_profile_functions.o \
            tgyro_profile_reintegrate.o \

@@ -281,6 +281,7 @@ module cgyro_globals
   real    :: gtime
   complex :: freq
   complex :: freq_err
+  integer(KIND=8) :: kernel_start_time, kernel_exit_time, kernel_count_rate, kernel_count_max
   !
   ! adaptive integrator parameters
   real :: delta_t_gk
@@ -362,7 +363,6 @@ module cgyro_globals
   ! Fields
   real, dimension(:,:), allocatable :: fcoef
   real, dimension(:,:), allocatable :: gcoef
-  real, dimension(:,:,:), allocatable :: res_norm
   complex, dimension(:,:), allocatable :: field
   complex, dimension(:,:), allocatable :: field_loc
   complex, dimension(:,:), allocatable :: field_old
@@ -376,6 +376,9 @@ module cgyro_globals
   real, dimension(:,:,:), allocatable :: cflux
   complex, dimension(:,:,:,:), allocatable :: gflux_loc
   complex, dimension(:,:,:,:), allocatable :: gflux
+  real, dimension(:,:), allocatable :: cflux_tave, gflux_tave
+  real :: tave_min, tave_max
+  integer :: tave_step
   !
   ! Nonlinear plans
   type(C_PTR) :: plan_r2c

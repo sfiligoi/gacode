@@ -336,6 +336,8 @@ module tgyro_globals
   real :: tgyro_residual_tol
   real :: tgyro_input_fusion_scale
   !
+  integer :: tgyro_cgyro_n_iterate
+  !
   real, dimension(:), allocatable :: res
   real, dimension(:), allocatable :: res_norm
   real, dimension(:), allocatable :: res0
@@ -357,4 +359,19 @@ module tgyro_globals
   integer :: use_trap
   !---------------------------------------------------------
 
+  ! Variable for cgyro iteration
+  integer :: cgyro_var_in           
+  integer :: cgyro_n_species_out
+  real    :: cgyro_tave_min_out
+  real    :: cgyro_tave_max_out
+  real,dimension(:,:), allocatable :: cgyro_flux_tave_out
+  integer :: cgyro_status_out
+  integer :: cgyro_nflux
+  integer, dimension(:), allocatable   :: cgyro_status_vec
+  integer, dimension(:), allocatable   :: cgyro_n_species_vec
+  real, dimension(:), allocatable      :: cgyro_tave_min_vec
+  real, dimension(:), allocatable      :: cgyro_tave_max_vec
+  real, dimension(:,:,:), allocatable  :: cgyro_flux_tave_vec
+  character(len=21)       :: runfile_cgyro_eflux='out.tgyro.cgyro_eflux'
+  
 end module tgyro_globals

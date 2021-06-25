@@ -131,6 +131,7 @@ subroutine tgyro_read_input
   call tgyro_readbc_int(tgyro_zero_dens_grad_flag)
   call tgyro_readbc_real(tgyro_residual_tol)
   call tgyro_readbc_real(tgyro_input_fusion_scale)
+  call tgyro_readbc_int(tgyro_cgyro_n_iterate)
   ! ** END input read; ADD NEW PARAMETERS ABOVE HERE!!
   call tgyro_readbc_int(n_inst)
   !-------------------------------------------------------

@@ -82,7 +82,7 @@ subroutine tgyro_comm_setup
 
      endif
 
-  case (3)
+  case (3,4)
 
      !-----------------------------
      ! Multi-job 

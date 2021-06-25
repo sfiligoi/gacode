@@ -17,6 +17,7 @@ subroutine cgyro_init_arrays
   complex :: thfac,carg
   real, dimension(nc,n_species,2) :: res_loc
   real, dimension(:,:), allocatable :: jloc_c
+  real, dimension(:,:,:), allocatable :: res_norm
   real, external :: spectraldiss
 
   !-------------------------------------------------------------------------
@@ -148,6 +149,8 @@ subroutine cgyro_init_arrays
      enddo
   enddo
 
+  deallocate(res_norm)
+  
 !$acc enter data copyin(upfac1,upfac2,jvec_c)
 
   !------------------------------------------------------------------------------
