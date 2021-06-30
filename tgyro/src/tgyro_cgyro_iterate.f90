@@ -28,7 +28,7 @@ subroutine tgyro_cgyro_iterate
   do i=0,tgyro_cgyro_n_iterate
   
      ! Run multiple cgyro's
-     cgyro_var_in = 4.0        ! max time
+     cgyro_var_in = 100.0        ! time window
      call cgyro_run(gyrotest_flag,cgyro_var_in,cgyro_n_species_out, &
           cgyro_flux_tave_out,cgyro_tave_min_out,cgyro_tave_max_out,&
           cgyro_status_out)
