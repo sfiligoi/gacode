@@ -34,7 +34,9 @@ subroutine cgyro_run(test_flag_in,var_in,n_species_out,flux_tave_out,tave_min_ou
   test_flag = test_flag_in
 
   ! Re-set max time
-  max_time = var_in
+  if(var_in > 0.0) then
+     max_time = var_in
+  endif
   
   ! Run GYRO
   call cgyro_kernel
