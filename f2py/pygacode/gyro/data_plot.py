@@ -128,7 +128,7 @@ class gyrodata_plot(data.GYROData):
         
       return key
 
-   def plot_zf(self,w=0.5,fig=None):
+   def plot_zf(self,w=0.5,wmax=0.0,fig=None):
       '''
       Plot the zonal (n=0) potential versus time.
 
@@ -145,7 +145,7 @@ class gyrodata_plot(data.GYROData):
       ntheta = self.profile['n_theta_plot']
       nx = self.profile['n_x']
 
-      y = np.real(self.moment_u[ntheta/3,nx/3,0,0,:])
+      y = np.real(self.moment_u[ntheta//3,nx//3,0,0,:])
 
       if abs(y[0]) > 1e-6:
          y = y[:]/y[0]
