@@ -1279,8 +1279,8 @@ class cgyrodata_plot(data.cgyrodata):
             ie = 0
             ix = 0
          if row == 1:
-            ie = self.n_energy/2
-            ix = self.n_xi/2
+            ie = self.n_energy//2
+            ix = self.n_xi//2
          if row == 2:
             ie = self.n_energy-1
             ix = self.n_xi-1
@@ -1294,10 +1294,10 @@ class cgyrodata_plot(data.cgyrodata):
          ax.set_xlabel(r'$\theta/\pi$')
 
          if self.n_xi%2 == 0:
-            hp = np.array(func[:,:,spec,self.n_xi/2,ie,itime]+
-                          func[:,:,spec,self.n_xi/2-1,ie,itime])*0.5
+            hp = np.array(func[:,:,spec,self.n_xi//2,ie,itime]+
+                          func[:,:,spec,self.n_xi//2-1,ie,itime])*0.5
          else:
-            hp = np.array(func[:,:,spec,self.n_xi/2,ie,itime])
+            hp = np.array(func[:,:,spec,self.n_xi//2,ie,itime])
             
          ax.plot(x,hp[0,:],'-o',color='black',markersize=2)
          ax.plot(x,hp[1,:],'-o',color='blue',markersize=2)
@@ -1315,7 +1315,7 @@ class cgyrodata_plot(data.cgyrodata):
          ax.set_title(r'$'+u+': \\theta/\pi='+str(theta)+' \quad \mathrm{ie}='+str(ie)+'$')
          ax.set_xlabel(r'$\xi = v_\parallel/v$')
 
-         n0 = (self.n_radial/2)*self.n_theta+i0
+         n0 = (self.n_radial//2)*self.n_theta+i0
          
          hp = np.array(func[0,:,spec,:,ie,itime])
          ax.plot(self.xi,hp[n0,:],'-o',color='black',markersize=2)
@@ -1334,7 +1334,7 @@ class cgyrodata_plot(data.cgyrodata):
          ax.set_title(r'$'+u+': \\theta/\pi='+str(theta)+' \quad \mathrm{ix}='+str(ix)+'$')
          ax.set_xlabel(r'$x=\sqrt{\varepsilon}$')
 
-         n0 = (self.n_radial/2)*self.n_theta+i0
+         n0 = (self.n_radial//2)*self.n_theta+i0
 
          hpa = np.array(func[0,n0,spec,:,:,itime])
          hpb = np.array(func[1,n0,spec,:,:,itime])
