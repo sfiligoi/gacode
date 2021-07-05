@@ -1,0 +1,28 @@
+# Created by Giovanni Tardini git@ipp.mpg.de 6/29/2021
+# Compilers and flags
+FC  = mpiifort -gen-interfaces -module ${GACODE_ROOT}/modules
+F77 = ${FC}
+
+FOMP   =-qopenmp
+FMATH  =-real-size 64
+FOPT   =-Ofast
+FDEBUG =-eD -Ktrap=fp -m 1
+
+# System math libraries (FFTW 3.3.4, Intel-16.0, IMPI 5.1.1)
+
+NETCDF_HOME=/sw/netcdf/4.2.1.1
+LMATH=-mkl=cluster
+MKL_PATH=/sw/intel/mkl
+FFTW_INC=${MKL_PATH}/include/fftw
+
+# NetCDF
+NETCDF=-L${NETCDF_HOME}/lib -lnetcdff -lnetcdf
+NETCDF_INC=${NETCDF_HOME}/include
+
+# Archive 
+ARCH = ar cr
+
+ifdef FANN_ROOT
+   # neural net libraries
+   NN_LIB=-L$(GACODE_ROOT)/../neural/ -I$(GACODE_ROOT)/../neural/ -lbrainfuse -L$(FANN_ROOT)/lib -lfann
+endif
