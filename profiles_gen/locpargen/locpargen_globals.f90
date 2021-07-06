@@ -14,6 +14,7 @@ module locpargen_globals
   real, dimension(:), allocatable :: theta
   
   character(len=2) :: tag(9)
+  character(len=2) :: mytag
 
   real :: btccw,ipccw
   real :: pi
