@@ -9,7 +9,7 @@ program tglf
 
   integer :: i
   integer :: n
-  character (len=4) :: tag(5)=(/'ion1','ion2','ion3','ion4','ion5'/)
+  character (len=4) :: tag(6)=(/'ion1','ion2','ion3','ion4','ion5','ion6'/)
   real(8) :: prec
   integer :: ierr
 

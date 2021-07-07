@@ -69,7 +69,7 @@
       REAL :: ky_in=0.3
 ! Input species 
       INTEGER :: ns_in=2, nstotal_in = 2
-REAL,DIMENSION(nsm) :: mass_in 
+      REAL,DIMENSION(nsm) :: mass_in
       REAL,DIMENSION(nsm) :: zs_in
 ! input switches
       LOGICAL :: iflux_in=.TRUE.
