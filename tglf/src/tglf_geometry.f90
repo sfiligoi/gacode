@@ -606,7 +606,7 @@ SUBROUTINE get_ft_sa
      ! write(*,*)"ft = ",ft,"ft0=",SQRT(1.0-Bmin/Bmax)
   endif
   do is=ns0,ns
-    fts(is) = ft
+    fts(is) = MAX(ft,ft_min)
   enddo
   ! write(*,*)"ft = ",ft,"ft_model_sa =",ft_model_sa
   !
@@ -768,11 +768,12 @@ SUBROUTINE get_ft_geo
   modB_min = ABS(Bmin)
   modB_test = 0.5*(Bmax + Bmin)/Bmin
   do is=ns0,ns
-  fts(is) = ft
+  fts(is) = MAX(ft,ft_min)
   enddo
   if(xnu_model_in .eq.3 .and. wdia_trapped_in.gt.0.0) then
     do is=ns0,ns
       wdia = ABS(ky*rlns_in(is))/vs(is)
+!      write(*,*)is,"wdia = ",wdia
       kpar= pi_2/(Ly*sqrt_two*width_in)
       ft0 = SQRT(1.0 - Bmin/Bmax)
       cdt = wdia_trapped_in*3.0*(1.0-ft0*ft0)
@@ -785,10 +786,10 @@ SUBROUTINE get_ft_geo
         enddo
         B_bounce = By(i-1)+(By(i)-By(i-1))* &
         (bounce_y-delta_y(i-1))/(delta_y(i)-delta_y(i-1))
-!    write(*,*)i,"B_bounce =",B_bounce,Bmax
+!       write(*,*)i,"B_bounce =",B_bounce,Bmax
       endif
-      fts(is) = SQRT(1.0 - Bmin/B_bounce)
-!    write(*,*)"fts(is) = ",is,fts(is)
+      fts(is) = MAX(SQRT(1.0 - Bmin/B_bounce),ft_min)
+!     write(*,*)is,"fts(is) = ",fts(is)
     enddo
   endif
 !  write(*,*)"fts(1) = ",fts(1)

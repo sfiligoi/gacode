@@ -20,6 +20,7 @@
 !
       IMPLICIT NONE
       REAL,PARAMETER :: epsilon1 = 1.E-12
+      LOGICAL :: NO_TRAPPED = .false.
       INTEGER :: j1, j, i, jmax(maxmodes), iroot
       INTEGER :: imax,is
       INTEGER :: mi,me
@@ -103,19 +104,20 @@
       endif  !new_eikonal_in
 !      write(*,*)"eikonal done"
 !
-      if(new_matrix)then
+      !
+      !  compute the rank of the eigenmatrix iur
+      !
+      nroot=15
+      if(NO_TRAPPED)nroot=6
+      iur  = (ns-ns0+1)*nroot*nbasis
+      !      write(*,*)"iur = ",iur,"nroot=",nroot,"ns0=",ns0,"ft=",ft
+!
+if(new_matrix)then
         trace_path(7)=1
         call get_matrix
       endif
 !      write(*,*)"matrix done"
 !
-!  compute the rank of the eigenmatrix iur
-!
-      nroot=15
-      if(ft.lt.ft_min)nroot=6
-      iur  = (ns-ns0+1)*nroot*nbasis
-!      write(*,*)"iur = ",iur,"nroot=",nroot,"ns0=",ns0,"ft=",ft
-! 
 ! allocate eigenvalues, eigenvectors
 !
 !   tglf_LS local 

@@ -25,7 +25,7 @@
       IMPLICIT NONE
       SAVE
 !
-      INTEGER nx,nbasis,nbasis_max,ns0,ns,nky,iur
+      INTEGER nx,nbasis,nbasis_max,ns0,ns,nky,iur,nroot
 !
       END MODULE tglf_dimensions
 !
@@ -356,7 +356,7 @@
 !      USE tglf_dimensions
       IMPLICIT NONE
 !
-      INTEGER matz,nroot
+      INTEGER matz
       REAL,ALLOCATABLE,DIMENSION(:) :: fv1, fv2, fv3
       REAL,ALLOCATABLE,DIMENSION(:) :: rr, ri
       REAL,ALLOCATABLE,DIMENSION(:,:) :: ar, ai

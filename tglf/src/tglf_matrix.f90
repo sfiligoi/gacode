@@ -103,7 +103,7 @@
 !
        if(gradB_factor_in.ne.0.0)call gradB_h
 !
-       if(ft.gt.ft_min)then
+       if(nroot.gt.6)then
          call ave_g
 ! debug
 !       write(*,*)"check gp1"
