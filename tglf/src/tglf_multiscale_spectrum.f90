@@ -148,6 +148,7 @@
 !        b2 = 24.52  ! note this is b2**2 in PPCF paper 2020
 !        b2 = 11.21
         b2 = 8.44
+        if(nmodes_in.gt.1)b2 = 7.93
 !        b3 = 0.88
         b3 = 2.4
 !        d1 = 0.5475*((Bt0_out/B_geo0_out)**4)/grad_r0_out**2
