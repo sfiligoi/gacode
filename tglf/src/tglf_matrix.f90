@@ -1023,7 +1023,8 @@
       REAL :: ft2
 !
       zero_cut = 1.E-12
-      ft2 = ft*ft
+!      ft2 = ft*ft
+      ft2=fts(1)**2
 !
 ! fill the Poisson equation phi multiplier px0 x-grid array
 ! note that pol is set in get_species
@@ -2197,7 +2198,8 @@
 !          write(*,*)"hxw333 = ",hxw333(is,i)
 !
           ftx=fts(is)
-          if(ftx.ge.ft_min)then
+!          if(ftx.ge.ft_min)then
+          if(nroot.gt.6)then
            ft2 = ftx**2
            gxn(is,i)    = FLR_Hn(ftx,b)
            gxp1(is,i)   = FLR_dHp1(ftx,b)  + ft2*gxn(is,i)

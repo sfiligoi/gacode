@@ -261,7 +261,7 @@
 !         write(*,*)"modB_test = ",modB_test
 !         write(*,*)"ft_test = ",ft_test
            if(use_inboard_detrapped_in.and.ft_test.gt.modB_test)then
-             ft =  0.0
+             fts(:) =  ft_min
 !           write(*,*)"changed ft",ft
              new_geometry = .FALSE.
              new_width = .FALSE.
