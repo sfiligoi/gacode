@@ -25,7 +25,7 @@ program tglf
 
   call tglf_read_input()
   call tglf_run()
-
+  call tglf_dump_global()
   if(units_in.eq.'GENE')then
      print 30,'GENE reference units used'
      print 30,'Conversion to TGLF units:'
