@@ -748,9 +748,9 @@ contains
     call expro_writev(expro_qione,nexp,'qione','MW/m^3')
     call expro_writev(expro_qioni,nexp,'qioni','MW/m^3')
     call expro_writev(expro_qcxi,nexp,'qcxi','MW/m^3')
-    call expro_writev(expro_qpar_beam,nexp,'qpar_beam','MW/m^3') ! WRONG UNITS
-    call expro_writev(expro_qpar_wall,nexp,'qpar_wall','MW/m^3') ! WRONG UNITS
-    call expro_writev(expro_qmom,nexp,'qmom','MW/m^3') ! WRONG UNITS
+    call expro_writev(expro_qpar_beam,nexp,'qpar_beam','1/m^3/s') ! WRONG UNITS
+    call expro_writev(expro_qpar_wall,nexp,'qpar_wall','1/m^3/s') ! WRONG UNITS
+    call expro_writev(expro_qmom,nexp,'qmom','Nm') ! WRONG UNITS
 
     close(1)
 
