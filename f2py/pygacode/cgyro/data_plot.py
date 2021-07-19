@@ -1277,13 +1277,13 @@ class cgyrodata_plot(data.cgyrodata):
 
          if row == 0:
             ie = 0
-            ix = 0
+            ix = 2
          if row == 1:
             ie = self.n_energy//2
-            ix = self.n_xi//2
+            ix = 3
          if row == 2:
             ie = self.n_energy-1
-            ix = self.n_xi-1
+            ix = 5
 
          #========================================================
          ax = fig.add_subplot(3,3,p)
@@ -1340,21 +1340,9 @@ class cgyrodata_plot(data.cgyrodata):
          hpb = np.array(func[1,n0,spec,:,:,itime])
          p0 = np.zeros(self.n_energy)
          p1 = np.zeros(self.n_energy)
-         if row == 0:
-            for ix in range(self.n_xi):
-               p0 = p0+hpa[ix,:]*0.5
-               p1 = p1+hpb[ix,:]*0.5
-         elif row == 1:
-            for ix in range(self.n_xi):
-               p0 = p0+hpa[ix,:]*self.xi[ix]*1.5
-               p1 = p1+hpb[ix,:]*self.xi[ix]*1.5
-         elif row == 2:
-            for ix in range(self.n_xi):
-               p0 = p0+hpa[ix,:]*(3*self.xi[ix]**2-1)/2*2.5
-               p1 = p1+hpb[ix,:]*(3*self.xi[ix]**2-1)/2*2.5
-            
-         ax.plot(np.sqrt(self.energy),p0,'-o',color='black',markersize=2)
-         ax.plot(np.sqrt(self.energy),p1,'-o',color='blue',markersize=2)
+                        
+         ax.plot(np.sqrt(self.energy),hpa[ix,:],'-o',color='black',markersize=2)
+         ax.plot(np.sqrt(self.energy),hpb[ix,:],'-o',color='blue',markersize=2)
          #========================================================
 
       fig.tight_layout(pad=0.3)
