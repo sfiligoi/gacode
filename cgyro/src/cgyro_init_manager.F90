@@ -63,6 +63,7 @@ subroutine cgyro_init_manager
   allocate(vel(n_energy))
   allocate(w_e(n_energy))
   allocate(e_deriv1_mat(n_energy,n_energy))
+  allocate(e_deriv1_rot_mat(n_energy,n_energy))
 
   ! Construct energy nodes and weights
   if (e_method<=2) then
@@ -95,6 +96,15 @@ subroutine cgyro_init_manager
 
   vel(:) = sqrt(energy(:))
 
+  e_deriv1_rot_mat(:,:) = e_deriv1_mat(:,:)
+  if(e_fix == 2) then
+     e_deriv1_rot_mat(n_energy,:) = 0.0
+  endif
+  if(e_fix == 3) then
+     e_deriv1_rot_mat(n_energy,:) = 0.0
+     e_deriv1_mat(n_energy,:) = 0.0
+  endif
+  
   allocate(xi(n_xi))
   allocate(w_xi(n_xi))
   allocate(xi_lor_mat(n_xi,n_xi))

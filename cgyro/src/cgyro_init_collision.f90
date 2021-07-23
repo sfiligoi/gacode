@@ -584,7 +584,7 @@ subroutine cgyro_init_collision
 !$omp& shared(betae_unit,sum_den_h) &
 !$omp& shared(it_c,ir_c,px,is_v,ix_v,ie_v,ctest,xi_deriv_mat) &
 !$omp& shared(temp,jvec_v,omega_trap,dens,energy,vel) &
-!$omp& shared(omega_rot_trap,omega_rot_u,e_deriv1_mat,e_max) &
+!$omp& shared(omega_rot_trap,omega_rot_u,e_deriv1_mat,e_deriv1_rot_mat,e_max) &
 !$omp& shared(xi_lor_mat) &
 !$omp& shared(k_perp,vth,mass,z,bmag,nu_d,xi,nu_par,w_e,w_xi) &
 !$omp& shared(klor_fac,kdiff_fac) &
@@ -658,10 +658,10 @@ subroutine cgyro_init_collision
               if (is == js .and. ix == jx) then
                  cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
                       + (0.5*delta_t) * omega_rot_u(it,is) * xi(ix) &
-                      * e_deriv1_mat(ie,je)/sqrt(1.0*e_max)
+                      * e_deriv1_rot_mat(ie,je)/sqrt(1.0*e_max)
                  amat(iv,jv) = amat(iv,jv) &
                       - (0.5*delta_t) * omega_rot_u(it,is) * xi(ix) &
-                      * e_deriv1_mat(ie,je)/sqrt(1.0*e_max)
+                      * e_deriv1_rot_mat(ie,je)/sqrt(1.0*e_max)
               endif
 
               ! Finite-kperp test particle corrections 
