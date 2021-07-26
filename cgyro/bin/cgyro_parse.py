@@ -107,7 +107,6 @@ x.add('SHAPE_S_COS2','0.0')
 x.add('SHAPE_COS3','0.0')
 x.add('SHAPE_S_COS3','0.0')
 x.add('BETAE_UNIT','0.0')
-x.add('SUBROUTINE_FLAG','0')
 
 x.add('N_SPECIES','1')
 x.add('NU_EE','0.1')

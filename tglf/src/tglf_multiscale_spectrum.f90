@@ -353,6 +353,10 @@
       jmax2=0
       kycut=0.8*ABS(zs(2))/SQRT(taus(2)*mass(2))
       kyhigh=0.15*ABS(zs(1))/SQRT(taus(1)*mass(1))
+      if(sat_rule_in.eq.2)then
+        kycut = grad_r0_out*kycut
+        kyhigh= grad_r0_out*kyhigh
+      endif
 !      write(*,*)" kycut = ",kycut," kyhigh = ",kyhigh
       j1=1
       j2=1

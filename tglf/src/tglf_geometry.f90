@@ -1333,6 +1333,7 @@ END SUBROUTINE mercier_write
 ! 15 June 2010: updated to GYRO conventions with squarness (zeta_loc) and
 ! squarness shear s_zeta_loc = rmin*d(zeta)/dx. Included elevation Zmaj_loc.
 ! Also changed definition of s_delta = rmin*d(delta)/dx from Waltz-Miller convention to GYRO's.
+! July 26, 2021 set elevation Zmaj_loc =0.0 and DZMAJDX_LOC=0.0 since these break the up/down symmetry of Miller by contributing to Grad_r
 !---------------------------------------------------------------
 
 SUBROUTINE miller_geo
@@ -1361,7 +1362,9 @@ SUBROUTINE miller_geo
   !
   rmin_input = rmin_loc
   Rmaj_input = rmaj_loc
-
+  ! set elevation to zero
+  zmaj_loc = 0.0
+  dzmajdx_loc=0.0
   ! write(*,*)"miller_geo"
   x_delta = ASIN(delta_loc)
   ! write(*,*)"pi = ",pi," x_delta = ",x_delta
