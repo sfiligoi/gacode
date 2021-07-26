@@ -174,7 +174,7 @@ subroutine neo_make_profiles
      endif
 
      do ir=1,n_radial
-        call EXPRO_locsim_profiles(&
+        call expro_locsim_profiles(&
              geo_numeq_flag,&
              udsymmetry_flag,&
              quasineutral_flag,&
@@ -182,7 +182,8 @@ subroutine neo_make_profiles
              r(ir),&
              btccw_exp,&
              ipccw_exp,&
-             a_meters)
+             a_meters,&
+             path)
 
         do is=1,n_species
            z(is)    = z_loc(is)

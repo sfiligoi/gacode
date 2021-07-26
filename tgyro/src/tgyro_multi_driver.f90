@@ -31,12 +31,9 @@ subroutine tgyro_multi_driver
   else 
 
      ! Initialize CGYRO
-     print *, 'calling cgyro_init'
      call cgyro_init(lpath,gyro_comm)
-     print *, 'calling cgyro_init_kernel'
      call cgyro_init_kernel
 
-     print *, 'calling cgyro_run'
      ! Run CGYRO
      cgyro_var_in = -1.0
      call cgyro_run(gyrotest_flag,cgyro_var_in,cgyro_n_species_out, &

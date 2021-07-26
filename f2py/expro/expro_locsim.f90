@@ -217,7 +217,8 @@ subroutine expro_locsim_profiles(&
      rmin,&
      btccw,&
      ipccw,&
-     a_meters)
+     a_meters,&
+     path)
 
   use expro
   use expro_locsim_interface
@@ -228,6 +229,7 @@ subroutine expro_locsim_profiles(&
   integer, intent(in) :: udsymmetry_flag
   integer, intent(in) :: quasineutral_flag
   integer, intent(in) :: n_species_in
+  character(len=80), intent(in) :: path
   double precision, intent(in) :: rmin
   double precision, intent(inout) :: btccw,ipccw,a_meters
   integer :: i,j,i_ion
@@ -245,7 +247,7 @@ subroutine expro_locsim_profiles(&
   expro_ctrl_numeq_flag = numeq_flag
   expro_ctrl_n_ion = n_species_exp-1
 
-  call expro_read('input.gacode')
+  call expro_read(trim(path)//'input.gacode')
   if (allocated(rmin_exp)) call expro_locsim_alloc(0)
   call expro_locsim_alloc(1)
   !--------------------------------------------------------------
