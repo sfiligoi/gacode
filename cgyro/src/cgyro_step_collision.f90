@@ -68,19 +68,23 @@ subroutine cgyro_step_collision
        enddo
     enddo
 
-     if (collision_field_model == 1) then
-       ! cap_h_v not re-used else
-       do iv=1,nv
-          cap_h_v(ic_loc,iv) = bvec(iv)
-        enddo
-     endif
-  enddo
+    if (collision_field_model == 1) then
+       if (.not.(n == 0 .and. ae_flag == 1)) then
+          ! cap_h_v not re-used else
+          do iv=1,nv
+             cap_h_v(ic_loc,iv) = bvec(iv)
+          enddo
+       endif
+    endif
+ enddo
 
   call timer_lib_out('coll')
 
   ! Compute the new phi
   if (collision_field_model == 1) then
-     call cgyro_field_v
+     if (.not.(n == 0 .and. ae_flag == 1)) then
+        call cgyro_field_v
+     endif
   endif
 
   call timer_lib_in('coll_comm')
@@ -110,7 +114,7 @@ subroutine cgyro_step_collision
 
   call timer_lib_out('coll')
 
-  if (collision_field_model == 0) then
+  if (collision_field_model == 0 .or. (n == 0 .and. ae_flag == 1)) then
      call cgyro_field_c
   endif
 

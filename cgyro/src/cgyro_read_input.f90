@@ -36,6 +36,7 @@ subroutine cgyro_read_input
   call cgyro_readbc_int(nup_alpha)
   call cgyro_readbc_int(n_wave)
   call cgyro_readbc_int(constant_stream_flag)
+  call cgyro_readbc_int(explicit_trap_flag)
   call cgyro_readbc_real(ky)
   call cgyro_readbc_int(box_size)
   call cgyro_readbc_real(ipccw)

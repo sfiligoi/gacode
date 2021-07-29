@@ -1,16 +1,20 @@
 subroutine cgyro_rhs(ij)
 
   use timer_lib
+  use parallel_lib
   use cgyro_globals
 
   implicit none
 
   integer, intent(in) :: ij
-  integer :: is
+  integer :: is, ix, ie, js, jx, je, jv, it, j, k
   integer :: id,jc
   real :: rval,rval2
   complex :: rhs_stream
   complex :: rhs_ij(nc,nv_loc)
+  complex, dimension(:,:), allocatable :: rhs_trap
+  complex, dimension(:), allocatable   :: bvec_trap
+  integer :: nj_loc
 
   call timer_lib_in('str_mem')
 
@@ -79,6 +83,65 @@ subroutine cgyro_rhs(ij)
      enddo
   enddo
 
+  ! Explicit trapping term
+  if (explicit_trap_flag == 1) then
+
+     allocate(rhs_trap(nc,nv_loc))
+     allocate(bvec_trap(nv))
+     call parallel_lib_rtrans_pack(cap_h_c)
+     call parallel_lib_r_do(cap_h_v)
+     call parallel_lib_nj_loc(nj_loc)
+     
+     do ic=nc1,nc2
+        ic_loc = ic-nc1+1
+        it = it_c(ic)
+        
+        bvec_trap(:) = (0.0,0.0)
+        do iv=1,nv
+           is = is_v(iv)
+           ix = ix_v(iv)
+           ie = ie_v(iv)
+           do jv=1,nv
+              js = is_v(jv)
+              jx = ix_v(jv)
+              je = ie_v(jv)
+              if (is == js) then
+                 if (ie == je) then
+                    bvec_trap(iv) = bvec_trap(iv) - (omega_trap(it,is) * vel(ie) &
+                         + omega_rot_trap(it,is) / vel(ie)) &
+                         * (1.0 - xi(ix)**2) * xi_deriv_mat(ix,jx) * cap_h_v(ic_loc,jv)
+                 endif
+                 if (ix == jx) then
+                    bvec_trap(iv) = bvec_trap(iv) - omega_rot_u(it,is) * xi(ix) &
+                         * e_deriv1_rot_mat(ie,je)/sqrt(1.0*e_max) * cap_h_v(ic_loc,jv)
+                 endif
+              endif
+           enddo
+        enddo
+
+        do k=1,nproc
+           do j=1,nj_loc
+              fsendf(j,ic_loc,k) = bvec_trap(j+(k-1)*nj_loc)
+           enddo
+        enddo
+
+     enddo
+     
+     call parallel_lib_f_i_do(cap_h_ct)
+     do iv=nv1,nv2
+        iv_loc = iv-nv1+1
+        do ic=1,nc
+           rhs_trap(ic,iv_loc) = cap_h_ct(iv_loc,ic)
+        enddo
+     enddo
+
+     rhs(:,:,ij) = rhs(:,:,ij) +  rhs_trap(:,:)
+     
+     deallocate(rhs_trap)
+     deallocate(bvec_trap)
+     
+  endif
+  
   call timer_lib_out('str')
 
   ! Wavenumber advection shear terms

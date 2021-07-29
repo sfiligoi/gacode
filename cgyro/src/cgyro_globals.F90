@@ -45,6 +45,7 @@ module cgyro_globals
   integer :: nup_alpha
   integer :: n_wave
   integer :: constant_stream_flag
+  integer :: explicit_trap_flag
   real    :: ky
   integer :: box_size
   real    :: ipccw

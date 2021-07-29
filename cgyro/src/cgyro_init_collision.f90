@@ -578,7 +578,7 @@ subroutine cgyro_init_collision
 
 !$omp  parallel do  default(none) &
 !$omp& shared(nc1,nc2,nv,n,delta_t,n_species,rho,is_ele,n_field) &
-!$omp& shared(collision_kperp,collision_field_model) &
+!$omp& shared(collision_kperp,collision_field_model,explicit_trap_flag) &
 !$omp& firstprivate(collision_model) &
 !$omp& shared(ae_flag,lambda_debye,dens_ele,temp_ele,dens_rot) &
 !$omp& shared(betae_unit,sum_den_h) &
@@ -642,7 +642,7 @@ subroutine cgyro_init_collision
 
               ! Trapping 
               ! (not part of collision operator but contains xi-derivative)
-              if (is == js .and. ie == je) then
+              if (explicit_trap_flag == 0 .and. is == js .and. ie == je) then
                  cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
                       + (0.5*delta_t) * (omega_trap(it,is) * vel(ie) &
                       + omega_rot_trap(it,is) / vel(ie)) &
@@ -655,7 +655,7 @@ subroutine cgyro_init_collision
 
               ! Rotation energy derivative
               ! (not part of collision operator but contains e-derivative)
-              if (is == js .and. ix == jx) then
+              if (explicit_trap_flag == 0 .and. is == js .and. ix == jx) then
                  cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
                       + (0.5*delta_t) * omega_rot_u(it,is) * xi(ix) &
                       * e_deriv1_rot_mat(ie,je)/sqrt(1.0*e_max)
