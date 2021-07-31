@@ -73,7 +73,8 @@
         kymax_out = kymax_mix
         jmax_out = jmax_mix
         gamma_net(:) = eigenvalue_spectrum_out(1,:,1)
-!        write(*,*)"vzf_out = ",vzf_out,"  jmax_out = ",jmax_out
+!        write(*,*)"FIRST PASS: vzf_out = ",vzf_out,"  jmax_out = ",jmax_out
+!        write(*,*)"FIRST PASS: kymax_out = ",kymax_out,"  gammamax_out = ",kymax_out*vzf_out
       endif
       ! model fit parameters
       ! need to set alpha_zf_in = 1.0
@@ -179,7 +180,7 @@
         ay = 0.56
         exp_ax = 4
        if(sat_rule_in.eq.2)then
-         ax = 1.55
+         ax = 1.21
          ay = 1.0
          exp_ax = 2
        endif
@@ -199,17 +200,26 @@
             endif
             kx = kx*ky0/kx_width
           endif
-          gamma_net(i) = eigenvalue_spectrum_out(1,i,1)/(1.0 + (ax*kx)**exp_ax)
+          gamma_net(i) = eigenvalue_spectrum_out(1,i,1)/(1.0 + ABS(ax*kx)**exp_ax)
 !         write(*,*)ky0,kx,(ax*kx)**4
-!         write(*,*)i,"gamma_net = ",gamma_net(i)
+!          write(*,*)i,"gamma_net = ",gamma_net(i)
         enddo
 !     write(*,*)"gammamax_out = ",vzf_out*kymax_out, gamma_net(jmax_out),"  vexb_shear = ",vexb_shear_s!!
 ! find the maximum of gamma_net/ky
-        CALL get_zonal_mixing(nky,ky_spectrum,gamma_net,vzf_mix,kymax_mix,jmax_mix)
-        vzf_out = vzf_mix
-        kymax_out = kymax_mix
-        jmax_out = jmax_mix
+        if(sat_rule_in.eq.1)then
+          CALL get_zonal_mixing(nky,ky_spectrum,gamma_net,vzf_mix,kymax_mix,jmax_mix)
+          vzf_out = vzf_mix
+          kymax_out = kymax_mix
+          jmax_out = jmax_mix
+        else
+          vzf_out = vzf_out*gamma_net(jmax_out)/MAX(eigenvalue_spectrum_out(1,jmax_out,1),small)
+        endif
+!        write(*,*)"2nd PASS: vzf_out = ",vzf_out,"  jmax_out = ",jmax_out
+!        write(*,*)"2nd PASS: kymax_out = ",kymax_out,"  gammamax_out = ",kymax_out*vzf_out
+!        write(*,*)"2nd PASS: gamma_net(jmax) = ",gamma_net(jmax_out)
       endif   ! second pass complete
+
+
 ! compute multi-scale phi-intensity spectrum field_spectrum(2,,) = phi_bar_out
       ! note that the field_spectrum(1,,) = v_bar_out = 1.0 for sat_rule_in = 1
       gammamax1= vzf_out*kymax_out
@@ -342,6 +352,7 @@
 !  initialize output of subroutine
     vzf_mix = 0.0
     kymax_mix = 0.0
+    jmax_mix = 1
 !
 ! find the maximum of gamma_mix/ky_mix
 !
@@ -353,6 +364,10 @@
       jmax2=0
       kycut=0.8*ABS(zs(2))/SQRT(taus(2)*mass(2))
       kyhigh=0.15*ABS(zs(1))/SQRT(taus(1)*mass(1))
+      if(sat_rule_in.eq.2)then
+        kycut = grad_r0_out*kycut/2.0
+        kyhigh= grad_r0_out*kyhigh
+      endif
 !      write(*,*)" kycut = ",kycut," kyhigh = ",kyhigh
       j1=1
       j2=1

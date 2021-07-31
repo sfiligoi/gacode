@@ -16,7 +16,10 @@ program locpargen
   implicit none
 
   integer :: i
+  character(len=80) :: path
 
+  path = './'
+  
   open(unit=1,file='input.locpargen',status='old')
   read(1,*) r0
   read(1,*) rho0
@@ -71,7 +74,8 @@ program locpargen
        r0,&
        btccw,&
        ipccw,&
-       a)
+       a,&
+       path)
 
   if (ntheta < 0) then
      goto 100

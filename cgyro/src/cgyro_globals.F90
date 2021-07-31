@@ -29,6 +29,7 @@ module cgyro_globals
   real    :: e_max
   real    :: alpha_poly
   integer :: e_method
+  integer :: e_fix
   integer :: delta_t_method
   real    :: delta_t
   real    :: error_tol
@@ -44,6 +45,7 @@ module cgyro_globals
   integer :: nup_alpha
   integer :: n_wave
   integer :: constant_stream_flag
+  integer :: explicit_trap_flag
   real    :: ky
   integer :: box_size
   real    :: ipccw
@@ -316,7 +318,7 @@ module cgyro_globals
   real, dimension(:), allocatable :: energy, vel, w_e
   real, dimension(:), allocatable :: xi, w_xi
   real, dimension(:,:), allocatable :: xi_deriv_mat, xi_lor_mat
-  real, dimension(:,:), allocatable :: e_deriv1_mat
+  real, dimension(:,:), allocatable :: e_deriv1_mat, e_deriv1_rot_mat
   !
   ! Parallel streaming
   real :: d_theta

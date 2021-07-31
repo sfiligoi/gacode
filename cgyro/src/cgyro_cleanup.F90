@@ -15,6 +15,7 @@ subroutine cgyro_cleanup
   endif
   if(allocated(w_e))           deallocate(w_e)
   if(allocated(e_deriv1_mat))  deallocate(e_deriv1_mat)
+  if(allocated(e_deriv1_rot_mat))  deallocate(e_deriv1_rot_mat)
   if(allocated(xi))            then
 !$acc exit data delete(xi)
      deallocate(xi)

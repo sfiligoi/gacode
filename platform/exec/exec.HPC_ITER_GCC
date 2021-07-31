@@ -10,5 +10,4 @@ mpinuma=${6}
 
 cd $simdir
 
-#mpiexec -env OMP_NUM_THREADS $nomp -env MV2_ENABLE_AFFINITY 0 -np $nmpi $exec
-$exec
+mpiexec -env OMP_NUM_THREADS $nomp -env MV2_ENABLE_AFFINITY 0 -np $nmpi $exec

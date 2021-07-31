@@ -10,7 +10,7 @@ subroutine cgyro_init(path_in,mpi_comm_in)
   use mpi
   use cgyro_globals
   use timer_lib
- 
+
   implicit none
 
   ! Input parameters (IN) - REQUIRED
@@ -52,9 +52,9 @@ subroutine cgyro_init(path_in,mpi_comm_in)
 
   if (inputdat_flag .eqv. .false.) then
      if (i_proc == 0) then
-     open(unit=io,file=trim(path)//runfile_info,status='old',position='append')
-     write(io,*) 'input.cgyro.gen missing'
-     close(io)
+        open(unit=io,file=trim(path)//runfile_info,status='old',position='append')
+        write(io,*) 'input.cgyro.gen missing'
+        close(io)
      endif
      call MPI_FINALIZE(i_err)
      stop

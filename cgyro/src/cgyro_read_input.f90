@@ -20,6 +20,7 @@ subroutine cgyro_read_input
   call cgyro_readbc_real(e_max)
   call cgyro_readbc_real(alpha_poly)
   call cgyro_readbc_int(e_method)
+  call cgyro_readbc_int(e_fix)
   call cgyro_readbc_int(delta_t_method)
   call cgyro_readbc_real(delta_t)
   call cgyro_readbc_real(error_tol)
@@ -35,6 +36,7 @@ subroutine cgyro_read_input
   call cgyro_readbc_int(nup_alpha)
   call cgyro_readbc_int(n_wave)
   call cgyro_readbc_int(constant_stream_flag)
+  call cgyro_readbc_int(explicit_trap_flag)
   call cgyro_readbc_real(ky)
   call cgyro_readbc_int(box_size)
   call cgyro_readbc_real(ipccw)
@@ -111,7 +113,6 @@ subroutine cgyro_read_input
   call cgyro_readbc_real(shape_cos3)     
   call cgyro_readbc_real(shape_s_cos3)
   call cgyro_readbc_real(betae_unit)
-  call cgyro_readbc_int(subroutine_flag)
   call cgyro_readbc_int(n_species)
 
   call cgyro_readbc_real(nu_ee)
@@ -141,29 +142,6 @@ subroutine cgyro_read_input
   enddo
 
   if (i_proc == 0) close(1)
-
-  ! GEO fourier coefficients
-  geo_ny_in = 0
-  geo_yin_in(:,:) = 0.0
-  if (subroutine_flag == 0 .and. equilibrium_model == 3 & 
-       .and. profile_model == 1) then
-     if (i_proc == 0) then
-        open(unit=1,file=trim(path)//'input.geo',status='old')
-        ! header skip
-        do
-           read(1,'(a)') cdummy
-           if (cdummy /= '#') exit
-        enddo
-        backspace 1
-        ! n_fourier
-        read(1,*) geo_ny_in
-        ! fourier coefficients
-        read(1,*) geo_yin_in(:,0:geo_ny_in)
-        close(1)
-     endif
-     call MPI_BCAST(geo_ny_in,1,MPI_INTEGER,0,CGYRO_COMM_WORLD,i_err)
-     call MPI_BCAST(geo_yin_in,size(geo_yin_in),MPI_DOUBLE_PRECISION,0,CGYRO_COMM_WORLD,i_err)
-  endif
 
 end subroutine cgyro_read_input
 

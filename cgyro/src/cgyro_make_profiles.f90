@@ -69,7 +69,8 @@ subroutine cgyro_make_profiles
           rmin,&
           btccw,&
           ipccw,&
-          a_meters)
+          a_meters,&
+          path)
 
      do is=1,n_species
         z(is)    = z_loc(is)

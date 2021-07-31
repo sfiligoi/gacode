@@ -8,7 +8,7 @@ NUMAS_PER_NODE=1
 
 # Compilers
 
-FC	= mpif90 -gen-interfaces -module $(GACODE_ROOT)/modules -I $(GACODE_ROOT)/modules -I $(FFTWDIR)/include #-mkl=sequential 
+FC	= mpiifort -gen-interfaces -module $(GACODE_ROOT)/modules -I $(GACODE_ROOT)/modules -I $(FFTWDIR)/include #-mkl=sequential
 F77	= ${FC}
 
 FOMP    = -qopenmp
