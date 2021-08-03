@@ -198,7 +198,7 @@ then
    N2=$[ NPROC / 2 ]
    if [ $[ NPROC - 2 * N2 ] -eq 1 ]
    then
-      echo "ERROR: (CGYRO) For regression test, number of processors must be multiple of 2." 
+      echo "ERROR: (CGYRO) For regression test, number of processors must be multiple of 2."
       exit 1
    fi
    # NOMP=1 RESET=0
@@ -272,7 +272,7 @@ if [ $emethod -eq 2 ]
 then
    PREC=0
    python $GACODE_ROOT/shared/math/gauss_exp_quad.py $emax $ne $PREC
-   echo "INFO: (cgyro) Generated energy mesh data"
+   echo "INFO: (gauss_exp_quad.py) Generated energy mesh data"
 elif [ $emethod -ne 3 ]
 then
    data=$GACODE_ROOT/cgyro/tools/egrid/egrid.$ne.${emax%.*}
