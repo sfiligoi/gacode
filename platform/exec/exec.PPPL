@@ -10,6 +10,7 @@ mpinuma=${6}
 
 cd $simdir
 
-echo "export OMP_NUM_THREADS=$nomp ; mpirun -np $nmpi --oversubscribe $exec "
-export OMP_NUM_THREADS=$nomp ; mpirun -np $nmpi --oversubscribe  $exec
+# Had to remove --oversubscribe for NEO to run for Tom Osborne
+echo "export OMP_NUM_THREADS=$nomp ; mpirun -np $nmpi $exec "
+export OMP_NUM_THREADS=$nomp ; mpirun -np $nmpi  $exec
 exit
