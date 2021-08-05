@@ -1,0 +1,29 @@
+# FIXED Hardware parameters
+IDENTITY="KFE KAIROS (ifort)"
+CORES_PER_NODE=16
+NUMAS_PER_NODE=2
+
+# Compilers and flags
+%.o: %.mod
+FC     = ftn -module ${GACODE_ROOT}/modules
+F77    = ${FC}
+CC     = CC
+
+FOMP   = -qopenmp
+FMATH  = -real-size 64
+FOPT   = -O3 
+FDEBUG = -g -check all -debug all
+#F2PY   = f2py
+
+# System math libraries
+LMATH = -mkl
+#FFTW_INC = ${MKLROOT}/include/fftw 
+
+# NetCDF
+NETCDF=-L${NETCDF_DIR}/lib -lnetcdff -lnetcdf
+#NETCDF=-L${NETCDF_DIR}/lib -lnetcdff -lnetcdf -lm
+NETCDF_INC=${NETCDF_DIR}/include
+ 
+# Archive 
+ARCH = ar cr
+
