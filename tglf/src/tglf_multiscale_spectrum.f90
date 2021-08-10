@@ -29,7 +29,6 @@
       LOGICAL :: first_pass = .TRUE.
       LOGICAL :: USE_SUB1=.FALSE.
       LOGICAL :: USE_PRESSURE = .TRUE.
-      LOGICAL :: USE_Q = .TRUE.
       INTEGER :: i,is,k,j,j1,j2,jmax1,jmax2
       
       INTEGER :: expsub=2, exp_ax, jmax_mix
@@ -59,13 +58,6 @@
       else
         first_pass = .FALSE.
       endif
-!
-      if(sat_rule_in .lt. 2)then
-        measure = SQRT(taus(1)*mass(2))
-      else
-        measure = SQRT(2.0*taus(2)*mass(2)/zs(2)**2)/grad_r0_out
-      endif
-!
       if(first_pass)then  ! first pass for spectral shift model or only pass for quench rule
         gamma_net(:) = eigenvalue_spectrum_out(1,:,1)
         CALL get_zonal_mixing(nky,ky_spectrum,gamma_net,vzf_mix,kymax_mix,jmax_mix)
@@ -80,7 +72,6 @@
       ! need to set alpha_zf_in = 1.0
       ! Miller geometry values igeo=1
       if(etg_factor_in .eq. -1.0)USE_PRESSURE = .FALSE.
-      if(alpha_zf_in.eq.-1.0)USE_Q = .FALSE.
       if(USE_PRESSURE)then
          dlnpdr = 0.0
          ptot = 0.0
@@ -93,7 +84,7 @@
           dlnpdr = ABS(p_prime_loc)*(rmin_loc/q_loc)*(8.0*pi)/MAX(betae_in,1.0E-12)
          endif
          dlnpdr = rmaj_input*dlnpdr/MAX(ptot,0.01)
-         if(dlnpdr .gt. 20.0)dlnpdr = 20.0
+ !        if(dlnpdr .gt. 20.0)dlnpdr = 20.0
          if(dlnpdr .lt. 4.0)dlnpdr = 4.0
       else
          dlnpdr = 12.0
@@ -113,6 +104,8 @@
         cz1=0.48*czf
         cz2=1.0*czf
         cnorm = 14.29
+        measure = SQRT(taus(1)*mass(2))
+!
 !        if(USE_X3)then
 !         cnorm = 12.94  ! note this is normed to GASTD CGYRO units
 !         cz1 = 0.0
@@ -145,27 +138,30 @@
      if(sat_rule_in.eq.2)then
        ! SAT2 fit for CGYRO linear modes
         b0 = 0.72
+        b0 = 0.76
         b1 = 1.22
 !        b2 = 24.52  ! note this is b2**2 in PPCF paper 2020
 !        b2 = 11.21
         b2 = 8.44
-        if(nmodes_in.gt.1)b2 = 7.93
+        b2 = 2.13
+        b2 = 3.74
+ !       if(nmodes_in.gt.1)b2 = 7.93
 !        b3 = 0.88
         b3 = 2.4
+        b3 = 1.0
 !        d1 = 0.5475*((Bt0_out/B_geo0_out)**4)/grad_r0_out**2
         d1 = (Bt0_out/B_geo0_out)**4    ! PPCF paper 2020
+        d1 = d1/grad_r0_out
         Gq = B_geo0_out/grad_r0_out
         d2 = b3/Gq**2
-        if(USE_Q)then
-          cnorm = b2*(q_in/2.0)*(12.0/dlnpdr)
-        else
-          cnorm = b2*(12.0/dlnpdr)
-        endif
+        cnorm = b2*(12.0/dlnpdr)
         kyetg = 1000.0   ! does not impact SAT2
         cky=3.0
         sqcky=SQRT(cky)
         kycut = b0*kymax_out
-        cz1 = 1.1*czf
+        cz1=0.0
+        cz2 = 1.05*czf
+        measure = 1.0/kymax_out
       endif
 !      write(*,*)"Bt0 = ",Bt0_out," B0 = ",B_geo0_out," gradr0 = ",grad_r0_out
 !      write(*,*)"G1 = ",sat_geo1_out,"  G2 = ",sat_geo2_out,"  sat_geo0 = ",sat_geo0_out
@@ -249,7 +245,7 @@
             if(ky0.lt.kymax1)then
               gamma(j) = gamma0
             else
-              gamma(j) = gammamax1 +Max(gamma0 - cz1*vzf1*ky0,0.0)
+              gamma(j) = gammamax1 +Max(gamma0 - cz2*vzf1*ky0,0.0)
             endif
           endif
           gamma_kymix(j) = gamma(j)     ! used if USE_MIX=F 
@@ -340,68 +336,57 @@
     USE tglf_global
     USE tglf_species
     IMPLICIT NONE
-    INTEGER :: nmix,i,k,j,j1,j2,jmax1,jmax2
-    REAL :: test,testmax1,testmax2
+    INTEGER :: nmix,i,k,j,j1,j2,jmax1
+    REAL :: test,testmax,peakmax
     REAL :: kx, kyhigh, kycut
-    REAL :: gammamax1,kymax1,gammamax2,kymax2,ky0,ky1,ky2
-    REAL :: f0,f1,f2,a,b,c,x0,x02,dky,xmax
+    REAL :: gammamax1,kymax1,testmax1,ky0,ky1,ky2
+    REAL :: f0,f1,f2,a,b,c,x1,deltaky,xmax
     REAL :: vzf1, vzf2
     REAL :: kymax_mix, vzf_mix
-    INTEGER :: jmax_mix
+    INTEGER :: jmax_mix, down
     REAL, DIMENSION(nkym) :: gamma_mix, ky_mix
 !  initialize output of subroutine
     vzf_mix = 0.0
     kymax_mix = 0.0
     jmax_mix = 1
 !
-! find the maximum of gamma_mix/ky_mix
+! find the local maximum of gamma_mix/ky_mix with the largest gamma_mix/ky_mix^2
 !
       gammamax1= gamma_mix(1)
       kymax1 = ky_mix(1)
-      testmax1 = gammamax1/kymax1
-      testmax2 = 0.0
-      jmax1=1
-      jmax2=0
+      testmax = 0.0
+      peakmax=0.0
+      jmax_mix=1
+!      testmax2 = 0.0
+!      jmax1=1
+!     jmax2=0
       kycut=0.8*ABS(zs(2))/SQRT(taus(2)*mass(2))
-      kyhigh=0.15*ABS(zs(1))/SQRT(taus(1)*mass(1))
       if(sat_rule_in.eq.2)then
-        kycut = grad_r0_out*kycut/2.0
-        kyhigh= grad_r0_out*kyhigh
+        kycut = grad_r0_out*kycut
       endif
 !      write(*,*)" kycut = ",kycut," kyhigh = ",kyhigh
-      j1=1
-      j2=1
       ! find the low and high ky peaks of gamma/ky
-      do j=2,nky
-         ky0 = ky_mix(j)
-         if(ky0 .lt. kycut)j1=j1+1
-         if(ky0 .lt. kyhigh)j2=j2+1
+      do j=1,nky
+       if(ky_mix(j).lt.kycut)then
+         kymax1 = ky_mix(j)
+         testmax1 = gamma_mix(j)/kymax1
 !         write(*,*)"j=",j,"ky = ",ky0," gamma_net = ",gamma_net(j)
-         test = gamma_mix(j)/ky0
-         if(ky0 .lt. kycut)then
-            if(test .gt. testmax1)then
-              testmax1=test
-              kymax1 = ky0
-              jmax1=j
-            endif
-         endif
-         if(ky0 .gt. kycut)then
-           if(test .gt. testmax2)then
-             testmax2 = test
-             kymax2 = ky0
-             jmax2=j
-           endif
+         if(testmax1.gt.testmax)then
+           testmax = testmax1
+           jmax_mix = j
+          endif
          endif
       enddo
+!      write(*,*) "testmax = ",testmax
+!
 !      write(*,*)"testmax2 = ",testmax2,"  testmax1*SQRT(kymax1/kymax2) = ",testmax1*SQRT(kymax1/kymax2)
-!      write(*,*)"kymax1 = ",kymax1,"  kymax2 = ",kymax2
-!      write(*,*)"testmax1 = ",testmax1,"  testmax2 = ",testmax2
-!      write(*,*)"j1 = ",j1," j2 = ",j2
+!      write(*,*)"jmax_mix = ",jmax_mix
+!      write(*,*)"j1 = ",j1," j2 = ",j
       ! handle exceptions
-      if(j1.eq.nky)then  ! the maximum ky in the ky-spectrum is less than kycut
-         j1=nky-1        ! note that j2=nky in this case
-      endif
-      if(jmax2.eq.0)jmax2=j2    ! there was no high-k peak set kymax2 to kyhigh or the highest ky
+!      if(j1.eq.nky)then  ! the maximum ky in the ky-spectrum is less than kycut
+!         j1=nky-1        ! note that j2=nky in this case
+!      endif
+!      if(jmax2.eq.0)jmax2=j2    ! there was no high-k peak set kymax2 to kyhigh or the highest ky
 !      if(jmax1.lt.nky)then
 !        test=gamma_net(jmax1+1)/ky_spectrum(jmax1+1)
 !        if(testmax1.le.test)then
@@ -410,26 +395,30 @@
 !          jmax1=jmax2
 !        endif
 !      endif
-      gammamax2 = gamma_mix(jmax2)
-      kymax2 = ky_mix(jmax2)
-      gammamax1 = gamma_mix(jmax1)
-      kymax1 = ky_mix(jmax1)
-      vzf1 = gammamax1/kymax1
-      vzf2 = gammamax2/kymax2
+!      gammamax2 = gamma_mix(jmax2)
+!      kymax2 = ky_mix(jmax2)
+ !     gammamax1 = gamma_mix(jmax1)
+ !     kymax1 = ky_mix(jmax1)
+ !     vzf1 = gammamax1/kymax1
+ !     vzf2 = gammamax2/kymax2
  !     write(*,*)" jmax1 = ",jmax1," jmax2= ",jmax2
  !     write(*,*)" g/k 1 = ",gammamax1/kymax1," g/k 2 = ",gammamax2/kymax2
       !interpolate to find a more accurate low-k maximum gamma/ky
       ! this is cut of at j1 since a maximum may not exist in the low-k range
-      if(jmax1.gt.1.and.jmax1.lt.j1)then
-!      write(*,*)"refining low-k maximum"
+ !     if(jmax1.gt.1.and.jmax1.lt.j1)then
+      kymax1 = ky_mix(jmax_mix)
+      gammamax1 = gamma_mix(jmax_mix)
+ !     write(*,*)"gammamax1 = ",gammamax1," kymax1 = ",kymax1,"  jmax_mix = ",jmax_mix
+      if(jmax_mix .gt. 1 .and. jmax_mix .lt. nky)then
+ !        write(*,*)"refining low-k maximum"
+         jmax1 = jmax_mix
          f0 =  gamma_mix(jmax1-1)/ky_mix(jmax1-1)
          f1 =  gamma_mix(jmax1)/ky_mix(jmax1)
          f2 =  gamma_mix(jmax1+1)/ky_mix(jmax1+1)
-         dky = (ky_mix(jmax1+1)-ky_mix(jmax1-1))
-         x0 = (ky_mix(jmax1)-ky_mix(jmax1-1))/dky
+         deltaky = ky_mix(jmax1+1)-ky_mix(jmax1-1)
+         x1 = (ky_mix(jmax1)-ky_mix(jmax1-1))/deltaky
          a = f0
-         x02 = x0*x0
-         b = (f1 - f0*(1-x02)-f2*x02)/(x0-x02)
+         b = (f1 - f0*(1-x1*x1)-f2*x1*x1)/(x1-x1*x1)
          c = f2 - f0 - b
          xmax = -b/(2.0*c)
          if(xmax .ge. 1.0)then
@@ -439,14 +428,15 @@
            kymax1 = ky_mix(jmax1-1)
            gammamax1 = f0*kymax1
          else
-           kymax1 = ky_mix(jmax1-1)+dky*xmax
+           kymax1 = ky_mix(jmax1-1)+deltaky*xmax
            gammamax1 = (a+b*xmax+c*xmax*xmax)*kymax1
          endif
       endif
       vzf_mix = gammamax1/kymax1
       kymax_mix = kymax1
-      jmax_mix = jmax1
+!      jmax_mix = jmax1
 !      write(*,*)"get_zonal_mxing"
+!      write(*,*)"xmax = ",xmax
 !      write(*,*)"gammamax1 = ",gammamax1," kymax1 = ",kymax1
 
  END SUBROUTINE get_zonal_mixing
