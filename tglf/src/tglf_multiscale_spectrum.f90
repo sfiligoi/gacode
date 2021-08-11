@@ -136,18 +136,18 @@
      endif
 ! coefficents for SAT_RULE = 2
      if(sat_rule_in.eq.2)then
-       ! SAT2 fit for CGYRO linear modes
-        b0 = 0.72
+       ! SAT2 fit for CGYRO linear modes NF 2021 paper
+!        b0 = 0.72
         b0 = 0.76
         b1 = 1.22
 !        b2 = 24.52  ! note this is b2**2 in PPCF paper 2020
 !        b2 = 11.21
-        b2 = 8.44
-        b2 = 2.13
+!        b2 = 8.44
+!        b2 = 2.13
         b2 = 3.74
- !       if(nmodes_in.gt.1)b2 = 7.93
+        if(nmodes_in.gt.1)b2 = 3.55
 !        b3 = 0.88
-        b3 = 2.4
+!        b3 = 2.4
         b3 = 1.0
 !        d1 = 0.5475*((Bt0_out/B_geo0_out)**4)/grad_r0_out**2
         d1 = (Bt0_out/B_geo0_out)**4    ! PPCF paper 2020
@@ -161,7 +161,7 @@
         kycut = b0*kymax_out
         cz1=0.0
         cz2 = 1.05*czf
-        measure = 1.0/kymax_out
+        measure = 1.0/kymax_out     ! changed from alpha_i on Aug 8, 2021
       endif
 !      write(*,*)"Bt0 = ",Bt0_out," B0 = ",B_geo0_out," gradr0 = ",grad_r0_out
 !      write(*,*)"G1 = ",sat_geo1_out,"  G2 = ",sat_geo2_out,"  sat_geo0 = ",sat_geo0_out
