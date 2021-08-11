@@ -368,6 +368,7 @@
       ! find the low and high ky peaks of gamma/ky
       do j=1,nky
        if(ky_mix(j).lt.kycut)then
+         j1=j
          kymax1 = ky_mix(j)
          testmax1 = gamma_mix(j)/kymax1
 !         write(*,*)"j=",j,"ky = ",ky0," gamma_net = ",gamma_net(j)
@@ -409,7 +410,7 @@
       kymax1 = ky_mix(jmax_mix)
       gammamax1 = gamma_mix(jmax_mix)
  !     write(*,*)"gammamax1 = ",gammamax1," kymax1 = ",kymax1,"  jmax_mix = ",jmax_mix
-      if(jmax_mix .gt. 1 .and. jmax_mix .lt. nky)then
+      if(jmax_mix .gt. 1 .and. jmax_mix .lt. j1)then
  !        write(*,*)"refining low-k maximum"
          jmax1 = jmax_mix
          f0 =  gamma_mix(jmax1-1)/ky_mix(jmax1-1)
