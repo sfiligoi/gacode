@@ -84,6 +84,7 @@
       INTEGER :: nbasis_min_in=2
       INTEGER :: nxgrid_in=16
       INTEGER :: nky_in=12
+      INTEGER :: mainion=2
 ! input rare switches
       REAL :: theta_trapped_in=0.7
       REAL :: wdia_trapped_in=0.0
@@ -200,6 +201,8 @@
       REAL :: kx0_p = 0.0
       REAL :: midplane_shear=1.0
       REAL :: kx0_factor=1.0
+      REAL :: rho_ion=1.0
+      REAL :: rho_e=1.0
 ! output
       COMPLEX,DIMENSION(3,nb) :: field_weight_QL_out=0.0
       COMPLEX,DIMENSION(maxmodes,3,nb) :: field_weight_out=0.0

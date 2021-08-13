@@ -122,7 +122,7 @@
 !
       IMPLICIT NONE
       INTEGER :: is
-      REAL :: xnu
+      REAL :: xnu, charge
 !
 ! electrons=1, ions =2,...
 !
@@ -147,6 +147,8 @@
       xnue_s = xnue_in
       pol = 0.0
       U0 = 0.0
+      charge = 0.0
+      rho_ion = 0.0
 !      do is=1,nstotal_in  ! include all species inputs
       do is=1,ns
         rlns(is) = rlns_in(is)
@@ -161,12 +163,24 @@
         pol = pol +  zs(is)*zs(is)*as(is)/taus(is)
         U0 = U0 + as(is)*vpar_s(is)*zs(is)*zs(is)/taus(is)
         fts(is) = 0.0
+        if(zs(is).gt.0.0)then
+          charge = charge + zs(is)*as(is)
+          rho_ion = rho_ion + as(is)*SQRT(mass(is)*taus(is))  ! charge weighted average ion gyroradius
+        else
+          rho_e = SQRT(mass(is)*taus(is))/ABS(zs(is))
+        endif
 !        write(*,*)"species",is
 !        write(*,*)" vs = ",vs(is)
 !        write(*,*)rlns(is),rlts(is)
 !        write(*,*)"taus = ",taus(is),"   mass = ",mass(is)
 !        write(*,*)zs(is),as(is)
       enddo
+      rho_ion = rho_ion/charge
+      if(sat_rule_in.le.1)then
+        rho_ion = SQRT(mass(2)*taus(2))/zs(2)
+      endif
+!      write(*,*)"rho_ion = ",rho_ion
+!      write(*,*)"rho_e = ",rho_e
 !
 !
       xnu = 0.0   ! not used

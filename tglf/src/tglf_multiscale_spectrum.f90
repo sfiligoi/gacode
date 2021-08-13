@@ -126,7 +126,8 @@
           cz2 = 1.0*czf
           etg_streamer=1.05
           if(alpha_quench_in .ne. 0.0)etg_streamer=2.1
-          kyetg=etg_streamer*ABS(zs(2))/SQRT(taus(2)*mass(2))  ! fixed to ion gyroradius
+!          kyetg=etg_streamer*ABS(zs(2))/SQRT(taus(2)*mass(2))  ! fixed to ion gyroradius
+          kyetg=etg_streamer/rho_ion  ! fixed to ion gyroradius
         endif
         if(igeo.eq.0)then ! s-alpha
            cnorm=14.63
@@ -360,7 +361,8 @@
 !      testmax2 = 0.0
 !      jmax1=1
 !     jmax2=0
-      kycut=0.8*ABS(zs(2))/SQRT(taus(2)*mass(2))
+!      kycut=0.8*ABS(zs(2))/SQRT(taus(2)*mass(2))
+      kycut=0.8/rho_ion
       if(sat_rule_in.eq.2)then
         kycut = grad_r0_out*kycut
       endif
