@@ -171,7 +171,7 @@
         ky_min = ky_spectrum(4)
 !        ky_max = 1.0*ky_factor*ABS(zs(2))/SQRT(taus(2)*mass(2))
         ky_max = 1.0*ky_factor/rho_ion
-        dky0 = 0.1*ky_factor*ABS(zs(2))/SQRT(taus(2)*mass(2))
+!        dky0 = 0.1*ky_factor*ABS(zs(2))/SQRT(taus(2)*mass(2))
         dky0 = 0.1*ky_factor/rho_ion
         do i=5,nky
           ky_spectrum(i) = ky_min + REAL(i-4)*dky0
@@ -180,7 +180,7 @@
 !        ky0 = 1.0*ky_factor*ABS(zs(2))/SQRT(taus(2)*mass(2))
 !        ky1 = 0.4*ky_factor*ABS(zs(1))/SQRT(taus(1)*mass(1))  !k_theta*rho_e = 0.4
         ky0 = 1.0*ky_factor/rho_ion
-        ky1 = 0.4*ky_factor/rho_ion  !k_theta*rho_e = 0.4
+        ky1 = 0.4*ky_factor/rho_e  !k_theta*rho_e = 0.4
         dky0 = LOG(ky1/ky0)/REAL(nky_in-1)
         lnky = LOG(ky0)
         if(nky_in.gt.0)then
