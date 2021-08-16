@@ -8,6 +8,8 @@
 !
       IMPLICIT NONE
       LOGICAL :: save_iflux
+      LOGICAL :: save_bper
+      LOGICAL :: save_bpar
       INTEGER :: nt,i,is,imax
       INTEGER :: save_nbasis
       INTEGER :: save_ibranch
@@ -32,6 +34,8 @@
       save_ibranch = ibranch_in
       save_nbasis = nbasis_max_in
       save_width = width_in
+      save_bper = use_bper_in
+      save_bpar = use_bpar_in
 !      save_vexb_shear = vexb_shear_s
 !      if(alpha_quench_in.eq.0.0)vexb_shear_s = 0.0
       ibranch_in = -1
@@ -69,6 +73,10 @@
       iflux_in=.FALSE.
       if(nbasis_min_in.ne.0)then
         nbasis = nbasis_min_in
+      endif
+      if(sat_rule_in.eq.2)then
+        use_bper_in = .false.
+        use_bpar_in = .false.
       endif
 !       write(*,*)"nbasis = ",nbasis
       tmin=LOG10(width_min)
@@ -251,6 +259,10 @@
        if(gamma_max.ne.0.0)then
 ! refine eigenvalue with more basis functions
          nbasis = save_nbasis
+         if(sat_rule_in.eq.2)then
+          use_bper_in = save_bper
+          use_bpar_in = save_bpar
+         endif
 !         write(*,*)"nbasis=",nbasis
          iflux_in=save_iflux
          new_width=.TRUE.

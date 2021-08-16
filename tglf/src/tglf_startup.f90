@@ -165,9 +165,9 @@
         fts(is) = 0.0
         if(zs(is).gt.0.0)then
           charge = charge + zs(is)*as(is)
-          rho_ion = rho_ion + as(is)*SQRT(mass(is)*taus(is))  ! charge weighted average ion gyroradius
+          rho_ion = rho_ion + as(is)*mass(is)*taus(is)/zs(is)  ! charge weighted average ion gyroradius^2
         else
-          rho_e = SQRT(mass(is)*taus(is))/ABS(zs(is))
+          rho_e =SQRT(mass(is)*taus(is))/ABS(zs(is))
         endif
 !        write(*,*)"species",is
 !        write(*,*)" vs = ",vs(is)
@@ -175,12 +175,13 @@
 !        write(*,*)"taus = ",taus(is),"   mass = ",mass(is)
 !        write(*,*)zs(is),as(is)
       enddo
-      rho_ion = rho_ion/charge
+      rho_ion = SQRT(rho_ion/charge)
       if(sat_rule_in.le.1)then
         rho_ion = SQRT(mass(2)*taus(2))/zs(2)
       endif
 !      write(*,*)"rho_ion = ",rho_ion
 !      write(*,*)"rho_e = ",rho_e
+!      write(*,*)"charge = ",charge
 !
 !
       xnu = 0.0   ! not used
