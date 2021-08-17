@@ -2108,36 +2108,6 @@ do is=ns0,ns
  END SUBROUTINE write_tglf_QL_flux_spectrum
 !-----------------------------------------------------------------
 !
- SUBROUTINE write_tglf_sat_geo_spectrum
-!
-  USE tglf_dimensions
-  USE tglf_global
-  USE tglf_species
-  USE tglf_kyspectrum
-!
-  IMPLICIT NONE
-  CHARACTER(33) :: fluxfile="out.tglf.sat_geo_spectrum"
-  INTEGER :: i,j
-  !
-  if(new_start)then
-     write(*,*)"error: tglf_TM must be called before write_tglf_sat_geo_spectrum"
-     write(*,*)"       NN doesn't compute spectra -> if needed set tglf_nn_max_error_in=-1"
-  endif
-  !
-  OPEN(unit=33,file=fluxfile,status='replace')
-!
-  write(33,*)"saturation model geometry factor 1/(<phi|(B/(B_unit grad_r))**2\phi>/<phi|phi>) per mode:"
-  write(33,*)"index limits: nky,nmodes"
-  write(33,*)nky,nmodes_in
-!
-  do i=1,nky
-    write(33,*)(sat_geo_spectrum_out(i,j),j=1,nmodes_in)
-  enddo
-  CLOSE(33)
-!
- END SUBROUTINE write_tglf_sat_geo_spectrum
-!-----------------------------------------------------------------
-!
  SUBROUTINE write_tglf_ky_spectrum
 !
   USE tglf_dimensions
@@ -2167,7 +2137,7 @@ do is=ns0,ns
  END SUBROUTINE write_tglf_ky_spectrum
 !-----------------------------------------------------------------
 !
- SUBROUTINE write_tglf_spectral_shift
+ SUBROUTINE write_tglf_spectral_shift_spectrum
 !
   USE tglf_dimensions
   USE tglf_global
@@ -2175,7 +2145,7 @@ do is=ns0,ns
   USE tglf_kyspectrum
 !
   IMPLICIT NONE
-  CHARACTER(33) :: fluxfile="out.tglf.spectral_shift"
+  CHARACTER(33) :: fluxfile="out.tglf.spectral_shift_spectrum"
   INTEGER :: i
   !
   if(new_start)then
@@ -2196,7 +2166,7 @@ do is=ns0,ns
   enddo
   CLOSE(33)
 !
- END SUBROUTINE write_tglf_spectral_shift
+ END SUBROUTINE write_tglf_spectral_shift_spectrum
 !
 !______________________________________________________________
 !
@@ -2247,13 +2217,26 @@ do is=ns0,ns
   !
   OPEN(unit=33,file=fluxfile,status='replace')
 !
-  write(33,*)"kx spectral shift model is used when ALPHA_QUENCH=0 and ALPHA_E=1.0"
-  write(33,*)"note: This file has all of the scalar staturation parameters used for different SAT_RULE UNITS and ALPHA_ZF settings"
-  write(33,*)"SAT_RULE, UNITS, ALPHA_ZF"
-  write(33,*)sat_rule_in, units_in, alpha_zf_in
-!
-  write(33,*)"ave_p0_out, B_unit, R_unit, q_unit, SAT_geo0_out, SAT_geo1_out, SAT_geo2_out"
-  write(33,*) ave_p0_out, B_unit, R_unit, q_unit, SAT_geo0_out, SAT_geo1_out, SAT_geo2_out
+  write(33,*)"!This file has all of the scalar staturation parameters used for different SAT_RULE options"
+  write(33,*)"SAT_RULE = ", sat_rule_in
+  write(33,*)"UNITS = ", units_in
+  write(33,*)"XNU_MODEL = ",xnu_model_in
+  write(33,*)"!   SAT0 model "
+  write(33,*)"ETG_FACTOR = ",etg_factor_in
+  write(33,*)"ave_p0_out = ",ave_p0_out
+  write(33,*)"B_unit = ",B_unit
+  write(33,*)"R_unit = ",R_unit
+  write(33,*)"q_unit = ",q_unit
+  write(33,*)"!   SAT1 & SAT2 models "
+  write(33,*)"ALPHA_ZF = ",alpha_zf_in
+  write(33,*)"SAT_geo0_out = ",SAT_geo0_out
+  write(33,*)"SAT_geo1_out = ",SAT_geo1_out
+  write(33,*)"SAT_geo2_out = ",SAT_geo2_out
+  write(33,*)"Bt0_out = ",Bt0_out
+  write(33,*)"rho_ion = ",rho_ion
+  write(33,*)"rho_e = ",rho_e
+  write(33,*)"kymax_out = ",kymax_out
+  write(33,*)"vzf_out = ",vzf_out
 !
   CLOSE(33)
 !

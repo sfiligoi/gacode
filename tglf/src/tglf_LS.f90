@@ -284,7 +284,6 @@ if(new_matrix)then
 !
           wd_bar_out(imax)=wd_bar
           b0_bar_out(imax)=b0_bar
-          sat_geo_bar_out(imax)=sat_geo_bar
           modB_bar_out(imax)=modB_bar
           v_QL_out(imax)=v_weight
           a_par_QL_out(imax)=a_par_weight
@@ -319,7 +318,6 @@ if(new_matrix)then
             phi2_bar = 0.0
           else
             v_bar_out(imax) = get_intensity(kyi,gamma_out(imax))
-!            if(units_in.ne.'GYRO')v_bar_out(imax) = sat_geo_bar_out(imax)*v_bar_out(imax)
             phi2_bar = v_bar_out(imax)/v_QL_out(imax)
           endif
 !
@@ -611,7 +609,6 @@ if(new_matrix)then
       COMPLEX :: phi_modB_phi,modB_phi
       COMPLEX :: phi_kx_phi,kx_phi
       COMPLEX :: phi_kpar_phi,kpar_phi
-      COMPLEX :: phi_sat_geo_phi,sat_geo_phi
       COMPLEX :: freq_QL
       REAL :: betae_psi,betae_sig
       REAL :: phi_norm,psi_norm,bsig_norm,vnorm
@@ -733,41 +730,35 @@ if(new_matrix)then
       phi_modB_phi = 0.0
       phi_kx_phi = 0.0
       phi_kpar_phi = 0.0
-      phi_sat_geo_phi = 0.0
       do i=1,nbasis
          wd_phi = 0.0
          b0_phi = 0.0
          modB_phi = 0.0
          kx_phi = 0.0
          kpar_phi = 0.0
-         sat_geo_phi = 0.0
          do j=1,nbasis
            wd_phi = wd_phi +ave_wdh(i,j)*phi(j)
            b0_phi = b0_phi +ave_b0(i,j)*phi(j)
            modB_phi = modB_phi +ave_c_par_par(i,j)*phi(j)
            kx_phi = kx_phi +ave_kx(i,j)*phi(j)
            kpar_phi = kpar_phi +xi*ave_kpar(i,j)*phi(j)
-           sat_geo_phi = sat_geo_phi + ave_sat_geo_inv(i,j)*phi(j)
          enddo
          phi_wd_phi = phi_wd_phi + CONJG(phi(i))*wd_phi
          phi_b0_phi = phi_b0_phi + CONJG(phi(i))*b0_phi
          phi_modB_phi = phi_modB_phi + CONJG(phi(i))*modB_phi
          phi_kx_phi = phi_kx_phi + CONJG(phi(i))*kx_phi
          phi_kpar_phi = phi_kpar_phi + CONJG(phi(i))*kpar_phi
-         phi_sat_geo_phi = phi_sat_geo_phi + CONJG(phi(i))*sat_geo_phi
       enddo
       wd_bar = REAL(phi_wd_phi)/phi_norm
       b0_bar = REAL(phi_b0_phi)/phi_norm
       modB_bar = ABS(REAL(phi_modB_phi)/phi_norm)
       kx_bar = REAL(phi_kx_phi)/phi_norm
       kpar_bar = REAL(phi_kpar_phi)/phi_norm
-      sat_geo_bar = 1.0/MAX(REAL(phi_sat_geo_phi)/phi_norm,epsilon1)
 !      write(*,*)"wd_bar = ",wd_bar
 !      write(*,*)"b0_bar = ",b0_bar
 !       write(*,*)"modB_bar = ",modB_bar
 !      write(*,*)"kx_bar = ",kx_bar
 !      write(*,*)"kpar_bar = ",kpar_bar
-!      write(*,*)"sat_geo_bar = ",sat_geo_bar
 !
 ! fill the stress moments
 !

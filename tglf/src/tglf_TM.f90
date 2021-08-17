@@ -247,7 +247,6 @@
           enddo ! j
           nsts_phase_spectrum_out(is,i,k) = 0.0
         enddo ! is
-        sat_geo_spectrum_out(i,k)=0.0
         ne_te_phase_spectrum_out(i,k)=0.0
        enddo  !k
       enddo  !i
@@ -404,9 +403,8 @@
             enddo !imax
            enddo ! j
          enddo  ! is 
-! save sat_geo and ne_te crossphase
+! save ne_te crossphase
          do imax=1,nmodes_out
-           sat_geo_spectrum_out(i,imax) = sat_geo_bar_out(imax)
            ne_te_phase_spectrum_out(i,imax) = ne_te_phase_out(imax)
          enddo  !imax
 ! save ns_ts crossphase

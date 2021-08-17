@@ -220,7 +220,6 @@
       REAL :: exch1, gamma_max
       ! mpi
       REAL :: ne_te_phase_spectrum_save(nkym,maxmodes)
-      REAL :: sat_geo_spectrum_save(nkym,maxmodes)
       REAL :: nsts_phase_spectrum_save(nsm,nkym,maxmodes)
       REAL :: eigenvalue_spectrum_save(2,nkym,maxmodes)
       REAL :: field_spectrum_save(4,nkym,maxmodes)
@@ -264,7 +263,6 @@
           enddo ! j
           nsts_phase_spectrum_save(is,i,k)=0.0
         enddo ! is
-        sat_geo_spectrum_out(i,k)=0.0
         ne_te_phase_spectrum_save(i,k)=0.0
        enddo  !k
       enddo  !i
@@ -375,7 +373,6 @@
            field_spectrum_save(4,i,imax) = reduce*b_par_bar_out(imax)
            eigenvalue_spectrum_save(1,i,imax)=gamma_out(imax)
            eigenvalue_spectrum_save(2,i,imax)=freq_out(imax)
-           sat_geo_spectrum_save(i,imax) = sat_geo_bar_out(imax)
            if(ky_in.le.1.0.and.gamma_out(imax).gt.gmax)then
              gmax=gamma_out(imax)
              fmax=freq_out(imax)
@@ -472,13 +469,6 @@
       call MPI_ALLREDUCE(QL_field_spectrum_save      &
                         ,QL_field_spectrum_out       &
                         ,4*nkym*maxmodes             &
-                        ,MPI_DOUBLE_PRECISION        &
-                        ,MPI_SUM                     &
-                        ,iCommTglf                   &
-                        ,ierr)
-      call MPI_ALLREDUCE(sat_geo_spectrum_save       &
-                        ,sat_geo_spectrum_out        &
-                        ,nkym*maxmodes             &
                         ,MPI_DOUBLE_PRECISION        &
                         ,MPI_SUM                     &
                         ,iCommTglf                   &

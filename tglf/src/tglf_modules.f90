@@ -226,7 +226,7 @@
       REAL,DIMENSION(maxmodes) :: phi_bar_out=0.0,v_bar_out=0.0
       REAL,DIMENSION(maxmodes) :: a_par_bar_out=0.0,b_par_bar_out=0.0
       REAL,DIMENSION(maxmodes) :: wd_bar_out=0.0,b0_bar_out=0.0
-      REAL,DIMENSION(maxmodes) :: sat_geo_bar_out=0.0, ne_te_phase_out=0.0
+      REAL,DIMENSION(maxmodes) :: ne_te_phase_out=0.0
       REAL,DIMENSION(maxmodes) :: kx_bar_out=0.0,kpar_bar_out=0.0
       REAL,DIMENSION(maxmodes) :: modB_bar_out=0.0
       REAL,DIMENSION(nsm) :: n_bar_sum_out=0.0,t_bar_sum_out=0.0
@@ -238,10 +238,8 @@
       REAL,DIMENSION(5,nsm,3,nkym,maxmodes) :: flux_spectrum_out=0.0
       REAL,DIMENSION(5,nsm,3,nkym,maxmodes) :: QL_flux_spectrum_out=0.0
       REAL,DIMENSION(2,nkym,maxmodes) :: eigenvalue_spectrum_out=0.0
-      REAL,DIMENSION(nkym,maxmodes) :: sat_geo_spectrum_out = 0.0
       REAl,DIMENSION(nkym,maxmodes) :: ne_te_phase_spectrum_out=0.0
       REAl,DIMENSION(nsm,nkym,maxmodes) :: nsts_phase_spectrum_out=0.0
-      REAL,DIMENSION(nkym,maxmodes) :: sat_geo_out=0.0
       REAL,DIMENSION(nkym) :: spectral_shift_out=0.0
       REAL,DIMENSION(nkym) :: width_out=0.0
       REAL :: Vzf_out = 0.0
@@ -259,7 +257,6 @@
       REAL :: grad_r0_out=1.0
       REAL :: B_geo0_out = 1.0
       REAL :: Bt0_out = 1.0
-      REAL :: SAT_geo_ave_out=1.0
       REAL :: SAT_geo0_out=1.0
       REAL :: SAT_geo1_out=1.0
       REAL :: SAT_geo2_out=1.0
@@ -389,7 +386,7 @@
       REAL :: phi_weight,a_par_weight,b_par_weight,v_weight
       REAL :: Ne_Te_phase,Ne_Te_cos,Ne_Te_sin
       REAL :: Ns_Ts_phase(nsm),Ns_Ts_cos,Ns_Ts_sin
-      REAL :: wd_bar,b0_bar,modB_bar,kx_bar,kpar_bar,sat_geo_bar
+      REAL :: wd_bar,b0_bar,modB_bar,kx_bar,kpar_bar
 !      
       END MODULE tglf_weight
 !
@@ -412,7 +409,7 @@
       REAL,DIMENSION(nxm) :: wdx, wdpx, b0x, b2x, kxx
       REAL,DIMENSION(nxm) :: cx_tor_par, cx_tor_per
       REAL,DIMENSION(nxm) :: cx_par_par
-      REAL,DIMENSION(nxm) :: p0x, Bx, sat_geo_invx
+      REAL,DIMENSION(nxm) :: p0x, Bx
       INTEGER,DIMENSION(nkym) :: mask_save
       REAL,DIMENSION(nkym) :: gamma_nb_min_save
       REAL,DIMENSION(nkym) :: width_save, ft_save
@@ -705,7 +702,6 @@
       REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gradBgu33
 !  ave_theta
       REAL :: gradB
-      REAL,ALLOCATABLE,DIMENSION(:,:) :: ave_sat_geo_inv
       REAL,ALLOCATABLE,DIMENSION(:,:) :: ave_kx
       REAL,ALLOCATABLE,DIMENSION(:,:) :: ave_c_tor_par, ave_c_tor_per
       REAL,ALLOCATABLE,DIMENSION(:,:) :: ave_c_par_par

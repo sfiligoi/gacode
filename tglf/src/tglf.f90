@@ -122,11 +122,8 @@ program tglf
      ! write QL flux (weight) spectrum per mode to file out.tglf.QL_weight_spectrum
      CALL write_tglf_QL_flux_spectrum
 
-     ! write saturation geometry facotor spectrum per mode to file out.tglf.
-     CALL write_tglf_sat_geo_spectrum
-
      ! write kx/ky-spectral shift spectrum to file out.tglf.spectral_shift
-     CALL write_tglf_spectral_shift
+     CALL write_tglf_spectral_shift_spectrum
 
      ! write intensity fluctuation amplitude spectrum per mode to file out.tglf.scalar_saturation_parameters
      CALL write_tglf_scalar_saturation_parameters

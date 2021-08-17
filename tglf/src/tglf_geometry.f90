@@ -118,7 +118,6 @@ endif
      ! b0x(i) = 1.0+(shat_sa*(thx-theta0_sa) - alpha_sa*sn)**2
      b0x(i) = 1.0+(kxx(i))**2
      b2x(i) = 1.0
-     sat_geo_invx(i) = 1.0
      wdpx(i) = 0.0   ! not used for s-alpha
      if(b_model_sa.eq.1)then
         ! put B dependence into k_per**2
@@ -208,7 +207,6 @@ SUBROUTINE xgrid_functions_geo
   REAL :: b1,b2
   REAL :: y1,y2
   REAL :: kxx1,kxx2
-  REAL :: sat_geo_inv1,sat_geo_inv2
   REAL :: cxtorper1,cxtorper2
   REAL :: B2x1,B2x2,R2x1,R2x2,norm_ave,dlp
   REAL :: kyi
@@ -410,10 +408,6 @@ SUBROUTINE xgrid_functions_geo
         write(*,*)"interpolation error b0x < 0",i,b0x(i),b1,b2
         b0x(i)=(b1+b2)/2.0
      endif
-     ! interpolate sat_geo_invx
-     sat_geo_inv1 = qrat_geo(m1)**2
-     sat_geo_inv2 = qrat_geo(m2)**2
-     sat_geo_invx(i) = sat_geo_inv1 + (sat_geo_inv2-sat_geo_inv1)*(y_x-y1)/(y2-y1)
      !
      ! interpolate viscous stress projection coefficients
      !
@@ -438,7 +432,6 @@ SUBROUTINE xgrid_functions_geo
   B_ave_out = 0.0
   Bt_ave_out = 0.0
   Grad_r_ave_out = 0.0
-  SAT_geo_ave_out=0.0
   kykx_geo_ave=0.0
   norm_ave=0.0
   SAT_geo1_out = 0.0
@@ -455,7 +448,6 @@ SUBROUTINE xgrid_functions_geo
      B_ave_out = B_ave_out + dlp*(b_geo(i-1)+b_geo(i))/2.0
      Bt_ave_out = Bt_ave_out + dlp*(f/b_geo(i-1)+f/b_geo(i))/(2.0*Rmaj_s)
      Grad_r_ave_out = Grad_r_ave_out + dlp*0.5*((R(i-1)*Bp(i-1))**2+(R(i)*Bp(i))**2)*(q_s/rmin_s)**2
-     SAT_geo_ave_out = SAT_geo_ave_out + dlp*0.5*(1.0/qrat_geo(i-1)**2 + 1.0/qrat_geo(i)**2)
      kykx_geo_ave = kykx_geo_ave + dlp*0.5*(B_geo(i-1)**2/qrat_geo(i-1)**4+B_geo(i)**2/qrat_geo(i)**4)
      SAT_geo1_out = SAT_geo1_out +dlp*((b_geo(0)/b_geo(i-1))**4 +(b_geo(0)/b_geo(i))**4)/2.0
      SAT_geo2_out = SAT_geo2_out +dlp*((qrat_geo(0)/qrat_geo(i-1))**4 +(qrat_geo(0)/qrat_geo(i))**4)/2.0
@@ -466,7 +458,6 @@ SUBROUTINE xgrid_functions_geo
   B_ave_out = B_ave_out/norm_ave
   Bt_ave_out = Bt_ave_out/norm_ave
   Grad_r_ave_out = Grad_r_ave_out/norm_ave
-  SAT_geo_ave_out = SAT_geo_ave_out/norm_ave
   kykx_geo_ave = kykx_geo_ave/norm_ave
   SAT_geo1_out = SAT_geo1_out/norm_ave
   SAT_geo2_out = SAT_geo2_out/norm_ave
@@ -497,7 +488,6 @@ SUBROUTINE xgrid_functions_geo
   ! write(*,*)"B2_ave_out=",B2_ave_out
   ! write(*,*)"B_ave_out=",B_ave_out
   ! write(*,*)"Bt_ave_out=",Bt_ave_out
-  ! write(*,*)"SAT_geo_ave_out=",1.0/SAT_geo_ave_out
   ! write(*,*)"Grad_r_ave_out =",Grad_r_ave_out
   ! write(*,*)"kykx_geo_ave = ",kykx_geo_ave
   ! write(*,*)"SAT_geo0_out=",SAT_geo0_out
