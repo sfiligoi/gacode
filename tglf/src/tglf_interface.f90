@@ -74,7 +74,8 @@ module tglf_interface
   logical :: tglf_use_bpar_in       = .false.
   logical :: tglf_use_mhd_rule_in   = .true.
   logical :: tglf_use_bisection_in  = .true.
-  logical :: tglf_use_inboard_detrapped_in = .false. 
+  logical :: tglf_use_inboard_detrapped_in = .false.
+  logical :: tglf_use_ave_ion_grid_in = .false.
   integer :: tglf_ibranch_in        = -1
   integer :: tglf_nmodes_in         = 2
   integer :: tglf_nbasis_max_in     = 4
@@ -260,6 +261,7 @@ contains
     write(1,10) 'USE_MHD_RULE',tglf_use_mhd_rule_in
     write(1,10) 'USE_BISECTION',tglf_use_bisection_in
     write(1,10) 'USE_INBOARD_DETRAPPED',tglf_use_inboard_detrapped_in
+    write(1,10) 'USE_AVE_ION_GRID',tglf_use_ave_ion_grid_in
     write(1,20) 'SAT_RULE',tglf_sat_rule_in
     write(1,20) 'KYGRID_MODEL',tglf_kygrid_model_in
     write(1,20) 'XNU_MODEL',tglf_xnu_model_in
@@ -426,6 +428,7 @@ contains
     write(1,10) 'USE_MHD_RULE',use_mhd_rule_in
     write(1,10) 'USE_BISECTION',use_bisection_in
     write(1,10) 'USE_INBOARD_DETRAPPED',use_inboard_detrapped_in
+    write(1,10) 'USE_AVE_ION_GRID',use_ave_ion_grid_in
     write(1,20) 'SAT_RULE',sat_rule_in
     write(1,20) 'KYGRID_MODEL',kygrid_model_in
     write(1,20) 'XNU_MODEL',xnu_model_in

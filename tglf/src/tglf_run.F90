@@ -66,7 +66,8 @@ subroutine tglf_run()
        tglf_nbasis_max_in, &
        tglf_nbasis_min_in, &
        tglf_nxgrid_in, &
-       tglf_nky_in)
+       tglf_nky_in, &
+       tglf_use_ave_ion_grid_in)  
 
   call put_rare_switches(tglf_theta_trapped_in, &
        tglf_wdia_trapped_in, &

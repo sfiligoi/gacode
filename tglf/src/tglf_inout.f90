@@ -269,14 +269,14 @@ END SUBROUTINE put_averages
 !-----------------------------------------------------------------
 !
 SUBROUTINE put_switches(iflux,use_bper,use_bpar,use_mhd_rule,use_bisection, &
-     use_inboard_detrapped,ibranch,nmodes,nb_max,nb_min,nxgrid,nkys)
+     use_inboard_detrapped,ibranch,nmodes,nb_max,nb_min,nxgrid,nkys,use_ave_ion_grid)
   !
   USE tglf_global
   USE tglf_dimensions
   !
   IMPLICIT NONE
   LOGICAL :: iflux,use_bper,use_bpar,use_mhd_rule,use_bisection
-  LOGICAL :: use_inboard_detrapped
+  LOGICAL :: use_inboard_detrapped, use_ave_ion_grid
   INTEGER :: ibranch,nmodes,nb_max,nb_min
   INTEGER :: nxgrid,nkys
   !
@@ -314,6 +314,7 @@ SUBROUTINE put_switches(iflux,use_bper,use_bpar,use_mhd_rule,use_bisection, &
   nxgrid_in = nxgrid
   nky_in = nkys
   use_inboard_detrapped_in = use_inboard_detrapped
+  use_ave_ion_grid_in = use_ave_ion_grid
   !
 END SUBROUTINE put_switches
 !

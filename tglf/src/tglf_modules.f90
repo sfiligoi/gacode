@@ -78,6 +78,7 @@
       LOGICAL :: use_mhd_rule_in=.TRUE.
       LOGICAL :: use_bisection_in=.TRUE.
       LOGICAL :: use_inboard_detrapped_in=.FALSE.
+      LOGICAL :: use_ave_ion_grid_in=.FALSE.
       INTEGER :: ibranch_in=-1
       INTEGER :: nmodes_in=2
       INTEGER :: nbasis_max_in=4
@@ -760,6 +761,7 @@
       LOGICAL :: find_width_tg=.TRUE.
       LOGICAL :: adiabatic_elec_tg=.FALSE.
       LOGICAL :: new_eikonal_tg=.TRUE.
+      LOGICAL :: use_ave_ion_grid_tg=.false.
       INTEGER :: ibranch_tg=-1
       INTEGER :: nmodes_tg=2
       INTEGER :: nky_tg=12
