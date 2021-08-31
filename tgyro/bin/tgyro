@@ -310,7 +310,7 @@ echo "INFO: (tgyro script) See $RUNBASE for TGYRO run summary."
 
 if [ $EXEC_FLAG -eq 1 ]
 then
-   if [ $NPROC -ne $EPROC ] && [ "$GACODE_PLATFORM" != "SUMMIT_JC" ]
+   if [ $NPROC -ne $EPROC ] && [ "$GACODE_PLATFORM" != "SUMMIT" ]
    then
        #cat $LOG_FILE
        echo "ERROR: (tgyro script) processor count mismatch."
