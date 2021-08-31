@@ -50,6 +50,7 @@ subroutine tglf_read_input
   read(1,*) tglf_nbasis_min_in
   read(1,*) tglf_nxgrid_in
   read(1,*) tglf_nky_in
+  read(1,*) tglf_use_ave_ion_grid_in
 
   ! Data passed to: put_model_parameters
   read(1,*) tglf_adiabatic_elec_in

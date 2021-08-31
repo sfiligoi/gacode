@@ -163,20 +163,20 @@
         pol = pol +  zs(is)*zs(is)*as(is)/taus(is)
         U0 = U0 + as(is)*vpar_s(is)*zs(is)*zs(is)/taus(is)
         fts(is) = 0.0
-        if(zs(is).gt.0.0)then
+        if(is.gt.1.and.zs(is)*as(is)/ABS(as(1)*zs(1)).gt.0.1)then
           charge = charge + zs(is)*as(is)
-          rho_ion = rho_ion + as(is)*mass(is)*taus(is)/zs(is)  ! charge weighted average ion gyroradius^2
-        else
-          rho_e =SQRT(mass(is)*taus(is))/ABS(zs(is))
+          rho_ion = rho_ion + zs(is)*as(is)*SQRT(mass(is)*taus(is))/zs(is) ! charge weighted average ion gyroradius
         endif
+        rho_e =SQRT(mass(1)*taus(1))/ABS(zs(1))
 !        write(*,*)"species",is
 !        write(*,*)" vs = ",vs(is)
 !        write(*,*)rlns(is),rlts(is)
 !        write(*,*)"taus = ",taus(is),"   mass = ",mass(is)
 !        write(*,*)zs(is),as(is)
       enddo
-      rho_ion = SQRT(rho_ion/charge)
-      if(sat_rule_in.le.1)then
+      if(charge.eq.0.0)call tglf_error(1,"total ion charge = 0.0")
+      rho_ion = rho_ion/charge
+      if(use_ave_ion_grid_in .eqv. .false.)then
         rho_ion = SQRT(mass(2)*taus(2))/zs(2)
       endif
 !      write(*,*)"rho_ion = ",rho_ion

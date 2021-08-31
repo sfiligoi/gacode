@@ -42,6 +42,7 @@ def set_defaults() :
      t.add('NBASIS_MIN','2')
      t.add('NXGRID','16')
      t.add('NKY','12')
+     t.add('USE_AVE_ION_GRID','.false.')
      t.add('ADIABATIC_ELEC','.false.')
      t.add('ALPHA_MACH','0.0')
      t.add('ALPHA_E','1.0')
