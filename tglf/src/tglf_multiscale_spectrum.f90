@@ -369,7 +369,7 @@
 !      write(*,*)" kycut = ",kycut," kyhigh = ",kyhigh
       ! find the low and high ky peaks of gamma/ky
       do j=1,nky
-       if(ky_mix(j).lt.kycut)then
+       if(ky_mix(j).le.kycut)then
          j1=j
          kymax1 = ky_mix(j)
          testmax1 = gamma_mix(j)/kymax1
@@ -380,6 +380,7 @@
           endif
          endif
       enddo
+      if(testmax.eq.0.0)jmax_mix=j1  ! no unstable modes in range set kymax index to end of range
 !      write(*,*) "testmax = ",testmax
 !
 !      write(*,*)"testmax2 = ",testmax2,"  testmax1*SQRT(kymax1/kymax2) = ",testmax1*SQRT(kymax1/kymax2)
