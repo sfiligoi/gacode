@@ -114,7 +114,7 @@
 !      write(*,*)"B_unit = ",B_unit
 !      write(*,*)"q_unit = ",q_unit
 !
-       ky = ky_in
+       ky = ky_s
        k_par0 = park_in/(R_unit*q_unit*width_in)
        w_d0 = ky/R_unit
        w_cd = -gchat_in*w_d0
@@ -335,7 +335,7 @@
            ki = ki + taus(is)*mass(is)*as(is)*zs(is)
            charge_tot = charge_tot + as(is)*zs(is)
          enddo
-         ki = SQRT(ki/charge_tot)*ky_in
+         ki = SQRT(ki/charge_tot)*ky_s
          ks0 = ky*SQRT(taus(1)*mass(2))
 !
 !         write(*,*)"ki=",ki,SQRT(taus(2))*ky

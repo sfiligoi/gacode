@@ -93,9 +93,9 @@
       dky0=0.0
       ky0=0.0 
       do i=1,nky
-        ky_in = ky_spectrum(i)
+        ky_s = ky_spectrum(i)
         dky = dky_spectrum(i)
-        ky1=ky_in
+        ky1=ky_s
         if(i.eq.1)then
           dky1=ky1
         elseif(kygrid_model_in.ne.0)then
@@ -181,7 +181,7 @@
              stress_tor0(is,j) = stress_tor1(is,j)
              exch0(is,j) = exch1(is,j)
            enddo  ! j
-           if(ky_in.le.1.0)then
+           if(ky_s.le.1.0)then
              q_low_out(is) = energy_flux_out(is,1)+energy_flux_out(is,2)
            endif
          enddo  ! is 
@@ -259,7 +259,7 @@
       gmax = 0.0
       fmax=0.0
       do i=1,nky
-        ky_in = ky_spectrum(i)
+        ky_s = ky_spectrum(i)
 !
         new_width=.TRUE.
 !
@@ -284,7 +284,7 @@
           endif
           mask_save(i) = 1
           if(gamma_out(1).eq.0.0)mask_save(i)=0
-!          write(*,*)i,"ky=",ky_in,mask_save(i),gamma_out(1)
+!          write(*,*)i,"ky=",ky_s,mask_save(i),gamma_out(1)
           gamma_nb_min_save(i) = gamma_nb_min_out
           width_save(i) = width_in
           ft_save(i) = ft
@@ -320,7 +320,7 @@
             gamma_out(1)=0.0
           endif
         endif
-!        write(*,*)i,"ky=",ky_in,"width=",width_in
+!        write(*,*)i,"ky=",ky_s,"width=",width_in
 !        write(*,*)"nbasis=",nbasis_max_in,nbasis_min_in
 !        write(*,*)"ft=",ft,"R=",R_unit,"q=",q_unit
 !        write(*,*)"wdx=",wdx(1),"b0x=",b0x(1)
@@ -329,15 +329,15 @@
         gamma_max = MAX(gamma_out(1),gamma_out(2)) ! this covers ibranch=-1,0
         if(gamma_max.eq.0.0.or.gamma_nb_min_out.eq.0.0)unstable=.FALSE.      
         gamma_net_1 = gamma_nb_min_out 
-!       gamma_cutoff = (0.1*ky_in/R_unit)*SQRT(taus(1)*mass(2))  ! scaled like gamma
-        gamma_cutoff = 0.1*ky_in/R_unit
+!       gamma_cutoff = (0.1*ky_s/R_unit)*SQRT(taus(1)*mass(2))  ! scaled like gamma
+        gamma_cutoff = 0.1*ky_s/R_unit
         rexp = 1.0
         reduce = 1.0
         if(nbasis_max_in.ne.nbasis_min_in)then
           if(gamma_net_1.lt.gamma_out(1) &
              .and.gamma_net_1.lt.gamma_cutoff)then
           reduce = (gamma_net_1/gamma_cutoff)**rexp
-!            write(*,*)"phi reduced",ky_in,gamma_nb_min_out,gamma_out(1)
+!            write(*,*)"phi reduced",ky_s,gamma_nb_min_out,gamma_out(1)
           endif
         endif
         if(sat_rule_in.ge.1)reduce=1.0
@@ -359,11 +359,11 @@
            field_spectrum_out(4,i,imax) = reduce*b_par_bar_out(imax)
            eigenvalue_spectrum_out(1,i,imax)=gamma_out(imax)
            eigenvalue_spectrum_out(2,i,imax)=freq_out(imax)
-           if(ky_in.le.1.0.and.gamma_out(imax).gt.gmax)then
+           if(ky_s.le.1.0.and.gamma_out(imax).gt.gmax)then
              gmax=gamma_out(imax)
              fmax=freq_out(imax)
            endif
-!          write(*,*)ky_in,width_in
+!          write(*,*)ky_s,width_in
 !          write(*,*)"modes",imax,phi_QL_out(imax)
 !          write(*,*)gamma_out(imax),freq_out(imax)
          enddo

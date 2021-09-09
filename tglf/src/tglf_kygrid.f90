@@ -46,6 +46,7 @@
 !        dky0 = (ky_max-ky_min)/REAL(nky-1)
         ky1=ky_in
         dky0=ky1/REAL(nky)
+!        write(*,*)" ky_in = ", ky_in
         do i=1,nky
 !          ky_spectrum(i) = ky0 + REAL(i-1)*dky0
           ky_spectrum(i) = REAL(i)*dky0

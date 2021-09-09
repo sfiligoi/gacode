@@ -143,6 +143,7 @@
       if(use_bper_in)nfields_out = nfields_out + 1
       if(use_bpar_in)nfields_out = nfields_out + 1
 !  inputs
+      ky_s = ky_in
       vexb_shear_s = vexb_shear_in*sign_It_in
       xnue_s = xnue_in
       pol = 0.0

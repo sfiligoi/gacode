@@ -43,11 +43,11 @@
       width_max = ABS(width_in)
 !
 !      write(*,*)"R_unit=",R_unit,"q_unit=",q_unit
-!      write(*,*)ns0,ns,ky_in
+!      write(*,*)ns0,ns,ky_s
     if(alpha_p_in.gt.0.0)then
       do is=ns0,ns
-        kyi = ky_in*SQRT(taus(is)*mass(is))/ABS(zs(is))
-        wgp_max = ABS((taus(is)/zs(is))*vpar_shear_s(is)/vs(is))*ky_in/(1+kyi**2)
+        kyi = ky_s*SQRT(taus(is)*mass(is))/ABS(zs(is))
+        wgp_max = ABS((taus(is)/zs(is))*vpar_shear_s(is)/vs(is))*ky_s/(1+kyi**2)
         width_p_max = 3.6*vs(is)/(sqrt_two*R_unit*q_unit*MAX(wgp_max,0.001))
         width_p_max=MAX(width_p_max,0.1)
          if(width_p_max.lt.width_min_in)then
@@ -55,7 +55,7 @@
         endif
       enddo
     endif
-!        kyi = ky_in*SQRT(taus(2)*mass(2))/ABS(zs(2))
+!        kyi = ky_s*SQRT(taus(2)*mass(2))/ABS(zs(2))
 !        wgp_max = ABS(vpar_shear_in(2)/vs(2))*kyi/(1+kyi**2)
 !        width_p_max = 3.6/(sqrt_two*R_unit*q_unit*MAX(wgp_max,0.001))
 !        width_p_max=MAX(width_p_max,0.01)
@@ -269,7 +269,7 @@
          call tglf_LS
          if(ibranch_in.eq.-1)then
 ! check for inward ballooning modes
-!         write(*,*) ky_in,use_inboard_detrapped_in
+!         write(*,*) ky_s,use_inboard_detrapped_in
 !         write(*,*)"modB_test = ",modB_test
 !         write(*,*)"ft_test = ",ft_test
            if(use_inboard_detrapped_in.and.ft_test.gt.modB_test)then
