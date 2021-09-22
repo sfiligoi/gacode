@@ -308,6 +308,10 @@
 !
        if(gamma_max.eq.0.0)then
          width_in=save_width
+         if(sat_rule_in.eq.2)then
+          use_bper_in = save_bper
+          use_bpar_in = save_bpar
+         endif
          do i=1,nmodes_in
           gamma_out(i)=0.0
           freq_out(i)=0.0
