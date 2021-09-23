@@ -52,6 +52,7 @@ def set_defaults() :
      t.add('XNU_FACTOR','1.0')
      t.add('DEBYE_FACTOR','1.0')
      t.add('ETG_FACTOR','1.25')
+     t.add('RLNP_CUTOFF','18.0')
      t.add('SAT_RULE','0')
      t.add('KYGRID_MODEL','1')
      t.add('XNU_MODEL','2')

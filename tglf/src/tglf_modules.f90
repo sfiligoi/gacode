@@ -108,6 +108,7 @@
       REAL :: xnu_factor_in=1.0
       REAL :: debye_factor_in=1.0
       REAL :: etg_factor_in=1.25
+      REAL :: rlnp_cutoff_in = 18.0
       INTEGER :: sat_rule_in=0
       INTEGER :: kygrid_model_in=1
       INTEGER :: xnu_model_in=2
@@ -810,6 +811,7 @@
       REAL :: xnu_factor_tg=1.0
       REAL :: debye_factor_tg=1.0
       REAL :: etg_factor_tg = 1.25
+      REAL :: rlnp_cutoff_tg = 18.0
       REAL :: filter_tg = 2.0
       REAL :: alpha_kx_e_tg=0.0
       REAL :: alpha_kx_p_tg=0.0
@@ -872,7 +874,7 @@
         use_bpar_tg,use_mhd_rule_tg,q_prime_tg,damp_psi_tg,damp_sig_tg, &
         p_prime_tg, filter_tg, Linsker_factor_tg, gradB_factor_tg,  &
         b_model_tg, ft_model_tg, xnu_factor_tg, debye_factor_tg, &
-        nky_tg,etg_factor_tg,use_TM_tg,kygrid_model_tg,xnu_model_tg, &
+        nky_tg,etg_factor_tg,use_TM_tg,kygrid_model_tg,xnu_model_tg,rlnp_cutoff_tg, &
         sat_rule_tg,alpha_kx_e_tg,alpha_kx_p_tg,alpha_kx_n_tg, alpha_kx_t_tg, &
         vpar_shear_model_tg, j_surface_tg,vpar_model_tg,sign_Bt_tg,sign_It_tg, &
         vns_shear_tg,vts_shear_tg, nfourier_tg,fourier_tg,vexb_tg,kx0_tg, &

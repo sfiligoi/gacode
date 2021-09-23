@@ -71,6 +71,7 @@
       REAL :: xnuei_fac_tg=1.0           ! multiplies the trapped-passing boundary terms in the electron-ion collisions
       REAL :: debye_fac_tg=1.0           ! multiplies the debye length
       REAL :: etg_fac_tg = 4.0           ! exponent parameter for ETG saturation rule
+      REAL :: rlnp_cutoff_tg = 18.0      ! parameter of SAT_RULE=2 model
       REAL :: filter_tg = 2.0            ! filter to remove spurious high-frequency magnetic fluctuations
       REAL :: x_psi_tg=0.0               ! shift polorization current due to magnetic fluctuations
 ! Shifted cicle geometry inputs

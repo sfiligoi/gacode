@@ -90,6 +90,7 @@ subroutine tglf_run()
        tglf_xnu_factor_in, &
        tglf_debye_factor_in, &
        tglf_etg_factor_in, &
+       tglf_rlnp_cutoff_in, &
        tglf_sat_rule_in, &
        tglf_kygrid_model_in, &
        tglf_xnu_model_in, &
