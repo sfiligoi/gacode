@@ -31,7 +31,7 @@
 ! set ky in units of k_theta*rho_s  rho_s=C_s/omega_s
 ! C_s=sqrt(Te/mi), omega_s=eB/(mi c)
 !
-      ky = ky_s
+!     ky = ky_s
 !      write(*,*)"ky = ",ky
 !
 ! check co-dependencies 
