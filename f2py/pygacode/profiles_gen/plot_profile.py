@@ -35,6 +35,8 @@ m1 = 0 ; m2 = 0
 
 alls = not bool(therm)
 
+expro.expro_read(infile)
+
 def plotit(ax,x,y,ystr):
    global m1,m2,dot
    
@@ -46,8 +48,6 @@ def plotit(ax,x,y,ystr):
 def plot_select(ax,tag):
    global m1,m2
    
-   expro.expro_read(infile)
-
    x = expro.expro_rmin ; x = x/max(x)
    n = expro.expro_n_ion
    
