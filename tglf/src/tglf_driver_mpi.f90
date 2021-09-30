@@ -34,7 +34,7 @@
 !
       CALL put_model_parameters(adiabatic_elec_tg,alpha_e_tg,alpha_p_tg,alpha_mach_tg    &
       ,alpha_quench_tg,alpha_zf_tg,xnu_factor_tg,debye_factor_tg                       &
-      ,etg_factor_tg,sat_rule_tg,kygrid_model_tg,xnu_model_tg              &
+      ,etg_factor_tg,rlnp_cutoff_tg,sat_rule_tg,kygrid_model_tg,xnu_model_tg       &
       ,vpar_model_tg,vpar_shear_model_tg)
 !      
       CALL put_kys(ky_tg)

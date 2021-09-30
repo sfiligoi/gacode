@@ -93,6 +93,7 @@ module tglf_interface
   real    :: tglf_xnu_factor_in     = 1.0
   real    :: tglf_debye_factor_in   = 1.0
   real    :: tglf_etg_factor_in     = 1.25
+  real    :: tglf_rlnp_cutoff_in     = 18.0
   integer :: tglf_sat_rule_in       = 0
   integer :: tglf_kygrid_model_in   = 1
   integer :: tglf_xnu_model_in      = 2
@@ -293,6 +294,7 @@ contains
     write(1,30) 'XNU_FACTOR',tglf_xnu_factor_in
     write(1,30) 'DEBYE_FACTOR',tglf_debye_factor_in
     write(1,30) 'ETG_FACTOR',tglf_etg_factor_in
+    write(1,30) 'RLNP_CUTOFF',tglf_rlnp_cutoff_in
     write(1,20) 'WRITE_WAVEFUNCTION_FLAG',tglf_write_wavefunction_flag_in
     write(1,*) ' '
     write(1,*) '#---------------------------------------------------'
@@ -460,6 +462,7 @@ contains
     write(1,30) 'XNU_FACTOR',xnu_factor_in
     write(1,30) 'DEBYE_FACTOR',debye_factor_in
     write(1,30) 'ETG_FACTOR',etg_factor_in
+    write(1,30) 'RLNP_CUTOFF',rlnp_cutoff_in
     write(1,*) ' '
     write(1,*) '#---------------------------------------------------'
     write(1,*) '# Species vectors:'

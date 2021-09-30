@@ -28,7 +28,6 @@
       LOGICAL :: USE_MIX=.TRUE.
       LOGICAL :: first_pass = .TRUE.
       LOGICAL :: USE_SUB1=.FALSE.
-      LOGICAL :: USE_PRESSURE = .TRUE.
       INTEGER :: i,is,k,j,j1,j2,jmax1,jmax2
       
       INTEGER :: expsub=2, exp_ax, jmax_mix
@@ -71,8 +70,7 @@
       ! model fit parameters
       ! need to set alpha_zf_in = 1.0
       ! Miller geometry values igeo=1
-      if(etg_factor_in .eq. -1.0)USE_PRESSURE = .FALSE.
-      if(USE_PRESSURE)then
+      if(rlnp_cutoff_in.gt.0.0)then
          dlnpdr = 0.0
          ptot = 0.0
  !        do is=1,nstotal_in   ! include all species even non-kinetic ones like fast ions
@@ -80,11 +78,8 @@
            ptot = ptot + as(is)*taus(is)
            dlnpdr = dlnpdr + as(is)*taus(is)*(rlns(is)+rlts(is))
          enddo
-         if(etg_factor_in .eq.-2.0)then
-          dlnpdr = ABS(p_prime_loc)*(rmin_loc/q_loc)*(8.0*pi)/MAX(betae_in,1.0E-12)
-         endif
          dlnpdr = rmaj_input*dlnpdr/MAX(ptot,0.01)
- !        if(dlnpdr .gt. 20.0)dlnpdr = 20.0
+         if(dlnpdr .ge. rlnp_cutoff_in)dlnpdr = rlnp_cutoff_in
          if(dlnpdr .lt. 4.0)dlnpdr = 4.0
       else
          dlnpdr = 12.0

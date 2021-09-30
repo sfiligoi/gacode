@@ -350,7 +350,7 @@ END SUBROUTINE put_rare_switches
 !-----------------------------------------------------------------
 !
 SUBROUTINE put_model_parameters(adi_elec,alpha_e,alpha_p,alpha_mach,  &
-     alpha_quench,alpha_zf,xnu_fac,debye_fac,etg_fac, &
+     alpha_quench,alpha_zf,xnu_fac,debye_fac,etg_fac,rlnp_cut,        &
      sat_rule,kygrid_model,xnu_model,vpar_model,vpar_shear_model)
   !
   USE tglf_global
@@ -360,7 +360,7 @@ SUBROUTINE put_model_parameters(adi_elec,alpha_e,alpha_p,alpha_mach,  &
   INTEGER :: sat_rule,xnu_model,kygrid_model
   INTEGER :: vpar_model,vpar_shear_model
   REAL,INTENT(IN) :: alpha_e,alpha_p,alpha_mach,alpha_zf
-  REAL,INTENT(IN) :: alpha_quench,xnu_fac,debye_fac,etg_fac
+  REAL,INTENT(IN) :: alpha_quench,xnu_fac,debye_fac,etg_fac,rlnp_cut
   !
   ! check for changes and update flow controls
   !
@@ -382,6 +382,7 @@ SUBROUTINE put_model_parameters(adi_elec,alpha_e,alpha_p,alpha_mach,  &
   xnu_factor_in = xnu_fac
   debye_factor_in = debye_fac
   etg_factor_in = etg_fac
+  rlnp_cutoff_in = rlnp_cut
   sat_rule_in = sat_rule
   xnu_model_in = xnu_model
   kygrid_model_in = kygrid_model
@@ -2234,6 +2235,8 @@ do is=ns0,ns
   write(33,*)"SAT_geo1_out = ",SAT_geo1_out
   write(33,*)"SAT_geo2_out = ",SAT_geo2_out
   write(33,*)"Bt0_out = ",Bt0_out
+  write(33,*)"B_geo0_out = ",B_geo0_out
+  write(33,*)"grad_r0_out = ",grad_r0_out
   write(33,*)"rho_ion = ",rho_ion
   write(33,*)"rho_e = ",rho_e
   write(33,*)"kymax_out = ",kymax_out

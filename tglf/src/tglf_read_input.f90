@@ -62,6 +62,7 @@ subroutine tglf_read_input
   read(1,*) tglf_xnu_factor_in
   read(1,*) tglf_debye_factor_in
   read(1,*) tglf_etg_factor_in
+  read(1,*) tglf_rlnp_cutoff_in
   read(1,*) tglf_sat_rule_in
   read(1,*) tglf_kygrid_model_in
   read(1,*) tglf_xnu_model_in

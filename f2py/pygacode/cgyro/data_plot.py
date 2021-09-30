@@ -99,6 +99,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       fig.tight_layout(pad=0.3)
 
+
    def plot_ky_freq(self,w=0.5,wmax=0.0,norm='elec',fig=None):
 
       if fig is None:
@@ -114,8 +115,9 @@ class cgyrodata_plot(data.cgyrodata):
       ax.set_xlabel(self.kstr)
       ax.set_ylabel(self.fstr[0])
 
-      ax.plot(ky,self.fnorm[0,:,-1],color='blue')
-      ax.plot(ky,self.fnorm[0,:,-1],"o",color='k')
+      y1 = self.fnorm[0,:,-1] 
+      ax.plot(ky,y1,color='blue')
+      ax.plot(ky,y1,"o",color='k')
       if len(ky) > 1:
          ax.set_xlim([0,ky[-1]])
       #======================================
@@ -128,13 +130,16 @@ class cgyrodata_plot(data.cgyrodata):
       ax.set_xlabel(self.kstr)
       ax.set_ylabel(self.fstr[1])
 
-      ax.plot(ky,self.fnorm[1,:,-1],color='red')
-      ax.plot(ky,self.fnorm[1,:,-1],"o",color='k')
+      y2 = self.fnorm[1,:,-1] 
+      ax.plot(ky,y2,color='red')
+      ax.plot(ky,y2,"o",color='k')
       if len(ky) > 1:
          ax.set_xlim([0,ky[-1]])
       #======================================
 
       fig.tight_layout(pad=0.3)
+
+      return 'ky            omega            gamma',ky,y1,y2
 
    def plot_ky_phi(self,field=0,theta=0.0,ymin='auto',ymax='auto',nstr='null',norm='elec',fig=None):
 
