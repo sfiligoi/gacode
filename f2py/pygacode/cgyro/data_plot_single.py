@@ -215,7 +215,7 @@ elif plot_type == 'ky_flux':
    if ftype == 'dump':
       cgyrodata_dump('./').dump_ky_flux(w=w,wmax=wmax,field=field,moment=moment,fc=fc)
    else:
-      data_in.plot_ky_flux(w=w,field=field,moment=moment,
+      data_in.plot_ky_flux(w=w,wmax=wmax,field=field,moment=moment,
                            ymin=ymin,ymax=ymax,fc=fc,ftype=ftype,diss=diss,cflux=cflux)
 
    outfile = 'out.cgyro.ky_flux.'+ftype
