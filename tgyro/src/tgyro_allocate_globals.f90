@@ -171,8 +171,6 @@ subroutine tgyro_allocate_globals
   allocate(mi_vec(loc_n_ion))
   allocate(mi(loc_n_ion))
 
-  allocate(a_fourier_geo(8,0:32,n_r))
-
   allocate(b_flag(p_max))
 
   allocate(pmap(2:n_r,n_evolve))

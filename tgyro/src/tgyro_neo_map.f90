@@ -117,17 +117,7 @@ subroutine tgyro_neo_map
   neo_omega_rot_deriv_in = -gamma_p0 * r_min**2 / r_maj(i_r) &
        / (c_s(i_r) * sqrt(t_norm/te(i_r)))
 
-  ! Parameter only used for global runs.
+  ! Parameter only used for global runs
   neo_rmin_over_a_2_in = neo_rmin_over_a_in
-
-  ! General geometry Fourier coefficients
-
-  if (loc_num_equil_flag == 1) then
-     ! Resetting if numerical equilibrium wanted.
-     neo_equilibrium_model_in = 3
-  endif
-
-  neo_geo_ny_in = n_fourier_geo
-  neo_geo_yin_in(:,:) = a_fourier_geo(:,:,i_r)
 
 end subroutine tgyro_neo_map

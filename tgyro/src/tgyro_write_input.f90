@@ -382,24 +382,6 @@ subroutine tgyro_write_input
      end select
      !--------------------------------------------------------
      !--------------------------------------------------------
-     select case (loc_num_equil_flag)
-
-     case (0)
-
-        write(1,10) 'LOC_NUM_EQUIL_FLAG','Using Miller model equilibrium in TGLF/GYRO/NEO.'
-
-     case (1)
-
-        write(1,10) 'LOC_NUM_EQUIL_FLAG','Using general Fourier equilibrium in TGLF/GYRO/NEO.'
-
-     case default
-
-        error_flag = 1
-        error_msg = 'Error: LOC_NUM_EQUIL_FLAG'
-
-     end select
-     !--------------------------------------------------------
-     !--------------------------------------------------------
      select case (loc_lock_profile_flag)
 
      case (0)

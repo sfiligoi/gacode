@@ -67,7 +67,6 @@ x.add('LOC_ER_FEEDBACK_FLAG','0')
 x.add('LOC_ZEFF_FLAG','1')
 x.add('LOC_PFLUX_METHOD','1')
 x.add('LOC_RESIDUAL_METHOD','2')
-x.add('LOC_NUM_EQUIL_FLAG','0')
 x.add('TGYRO_NEO_GV_FLAG','1')
 x.add('TGYRO_CONSISTENT_FLAG','0')
 x.add('TGYRO_ITERATION_METHOD','1')
@@ -121,6 +120,7 @@ x.dep('TGYRO_HE_FEEDBACK_FLAG','Use new TGYRO_DEN_METHOD*=2 option (2 for ash ev
 x.dep('TGYRO_QUICKFAST_FLAG','Use new TGYRO_CALC_FLAG* masks).')
 x.dep('LOC_NEO_METHOD','Use new TGYRO_NEO_METHOD variable).')
 x.dep('TGYRO_DT_METHOD','DT plasma is now autodetected.')
+x.dep('LOC_NUM_EQUIL_FLAG','New harmonic geometry method takes the place of Miller and general shape.')
 
 # Ignored parameters
 x.dep('LOC_Z','ignore')

@@ -262,11 +262,6 @@ module tgyro_globals
   integer, dimension(:,:), allocatable :: pmap,mask
   character(len=1), dimension(:), allocatable :: b_flag
   !
-  ! Geometry
-  !
-  integer :: n_fourier_geo
-  real, dimension(:,:,:), allocatable :: a_fourier_geo
-  !
   ! Orientation
   !
   integer :: signb
@@ -302,7 +297,6 @@ module tgyro_globals
   integer :: loc_zeff_flag
   integer :: loc_pflux_method
   integer :: loc_residual_method
-  integer :: loc_num_equil_flag
   integer :: tgyro_neo_gv_flag
   integer :: tgyro_consistent_flag
   integer :: tgyro_iteration_method

@@ -97,12 +97,7 @@ subroutine tgyro_gyro_map
   gyro_s_zeta_in = s_zeta(i_r)
 
   ! General geometry Fourier coefficients
-
-  gyro_num_equil_flag_in = loc_num_equil_flag
-
-  gyro_n_fourier_geo_in = n_fourier_geo
-  gyro_a_fourier_geo_in(:,:) = a_fourier_geo(:,:,i_r)
-
+  gyro_num_equil_flag_in = 0
 
   if (tgyro_rotation_flag == 1) then
 

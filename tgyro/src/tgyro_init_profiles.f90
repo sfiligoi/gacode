@@ -123,7 +123,7 @@ subroutine tgyro_init_profiles
   
   expro_ctrl_n_ion = loc_n_ion
   expro_ctrl_quasineutral_flag = 0
-  expro_ctrl_numeq_flag = loc_num_equil_flag
+  expro_ctrl_numeq_flag = 0
 
   call expro_read('input.gacode') 
 
@@ -388,49 +388,6 @@ subroutine tgyro_init_profiles
   ! (3) Angular momentum flow -- convert to erg (dyne-cm) from N-m.
   !
   call cub_spline(expro_rmin(:)/r_min,expro_flow_mom(:)*1e7,n_exp,r,mf_in,n_r)
-  !------------------------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------------------------
-  ! Fourier coefficients for plasma shape
-  if (expro_nfourier > 0) then
-
-     if (i_proc_global == 0) then
-        open(unit=1,file=trim(runfile),position='append')
-        write(1,*) 'INFO: (TGYRO) Passing input.gacode.geo information to components'
-        write(1,*)
-        close(1)
-     endif
-
-     n_fourier_geo = expro_nfourier
-
-     do n=0,n_fourier_geo
-        do i=1,4  
-
-           ! aR_n = expro_geo(1,n,:)
-           ! bR_n = expro_geo(2,n,:)
-           ! aZ_n = expro_geo(3,n,:)
-           ! bZ_n = expro_geo(4,n,:)
-           ! d(aR_n)/dr
-           ! d(bR_n)/dr
-           ! d(aZ_n)/dr
-           ! d(bZ_n)/dr
-
-           call cub_spline(expro_rmin(:)/r_min,expro_geo(i,n,:)/r_min,&
-                n_exp,r,a_fourier_geo(i,n,:),n_r)
-           call cub_spline(expro_rmin(:)/r_min,expro_dgeo(i,n,:),&
-                n_exp,r,a_fourier_geo(i+4,n,:),n_r)
-
-        enddo
-     enddo
-
-  else
-
-     ! Numerical equilibrium not available
-
-     n_fourier_geo      = 0
-     loc_num_equil_flag = 0
-
-  endif
   !------------------------------------------------------------------------------------------
 
   !-----------------------------------------------------------------
