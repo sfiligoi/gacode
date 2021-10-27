@@ -60,16 +60,29 @@ subroutine cgyro_nl_fftw_comm2
 
   call timer_lib_in('nl_mem')
 
+  if (nonlinear_field .ne. 0) then
 !$omp parallel do private(iv_loc,it,iexch,ir)
-  do iv_loc_m=1,nv_loc
-     iexch = (iv_loc_m-1)*n_theta
-     do it=1,n_theta
-        iexch = iexch+1
-        do ir=1,n_radial
-           gpack(ir,iexch) = psi(ic_c(ir,it),iv_loc_m)
+     do iv_loc_m=1,nv_loc
+        iexch = (iv_loc_m-1)*n_theta
+        do it=1,n_theta
+           iexch = iexch+1
+           do ir=1,n_radial
+              gpack(ir,iexch) = jvec_c(nonlinear_field,ic_c(ir,it),iv_loc_m)*field(nonlinear_field,ic_c(ir,it))
+           enddo
         enddo
      enddo
-  enddo
+  else
+!$omp parallel do private(iv_loc,it,iexch,ir)
+     do iv_loc_m=1,nv_loc
+        iexch = (iv_loc_m-1)*n_theta
+        do it=1,n_theta
+           iexch = iexch+1
+           do ir=1,n_radial
+              gpack(ir,iexch) = psi(ic_c(ir,it),iv_loc_m)
+           enddo
+        enddo
+     enddo
+  end if
 
   do iexch=nv_loc*n_theta+1,nsplit*n_toroidal
      gpack(:,iexch) = (0.0,0.0)
@@ -385,7 +398,7 @@ subroutine cgyro_nl_fftw(ij)
      do it=1,n_theta
         iexch = iexch+1
         do ir=1,n_radial
-           psi(ic_c(ir,it),iv_loc) = gpack(ir,iexch) 
+           psi(ic_c(ir,it),iv_loc) = gpack(ir,iexch)
         enddo
      enddo
   enddo

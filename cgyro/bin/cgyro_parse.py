@@ -180,6 +180,7 @@ x.add('DLNNDR_5_SCALE','1.0')
 x.add('DLNTDR_5_SCALE','1.0')
 x.add('DLNNDR_6_SCALE','1.0')
 x.add('DLNTDR_6_SCALE','1.0')
+x.add('NONLINEAR_FIELD','0')
 
 # Deprecated parameters
 x.dep('X1','never really existed')
