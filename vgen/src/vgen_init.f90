@@ -29,7 +29,7 @@ subroutine vgen_init
      EXPRO_ctrl_numeq_flag = 0
   endif
 
-  call expro_read('input.gacode')
+  call expro_read('input.gacode',MPI_COMM_WORLD)
    
   if (EXPRO_error == 1) then
      if (i_proc == 0) then
