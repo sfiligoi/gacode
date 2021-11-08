@@ -11,6 +11,8 @@ module expro
   !
   != Header entries
 
+  logical :: hasmpi
+  integer :: expro_comm
   integer :: expro_n_exp
   integer :: expro_n_ion
   integer :: expro_shot=0
@@ -193,7 +195,7 @@ contains
 
     integer :: nexp,nion
     integer, intent(in) :: flag
-
+        
     if (flag == 1) then
 
        nexp = expro_n_exp
@@ -449,14 +451,22 @@ contains
 
   end subroutine expro_init
 
-  subroutine expro_read(thisinfile)
+  subroutine expro_read(thisinfile,comm)
 
     implicit none
 
-    character(len=*), intent(in) :: thisinfile 
+    character(len=*), intent(in) :: thisinfile
+    integer, intent(in) :: comm
     integer :: nexp,nion,ierr,i,nd
     character(len=70) :: ytag
     character(len=22) :: c
+
+    if (comm == 0) then
+       hasmpi = .false.
+    else
+       hasmpi = .true.
+       expro_comm = comm
+    endif
 
     ! ORDERING NOTE: nexp should appear before any profile arrays
     
