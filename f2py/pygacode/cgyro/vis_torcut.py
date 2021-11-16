@@ -73,7 +73,7 @@ for i in range(nx):
    x[i] = i*2*np.pi/(nx-1.0)/dn
 for k in range(nz):
    z[k] = k*2*np.pi/(nz-1.0)-np.pi
-
+   
 xp = np.zeros([nx,nz])
 yp = np.zeros([nx,nz])
 zp = np.zeros([nx,nz])
@@ -81,13 +81,13 @@ zp = np.zeros([nx,nz])
 for i in range(nx):
    r = sim.rmin+(dn*x[i]/(2*np.pi)-0.5)*lovera
    for k in range(nz):
-      a = z[k] + sim.shape_cos0 
-      + sim.shape_cos1*np.cos(z[k]) 
-      + sim.shape_cos2*np.cos(2*z[k]) 
-      + sim.shape_cos3*np.cos(3*z[k]) 
-      + np.arcsin(sim.delta)*np.sin(z[k]) 
-      - sim.zeta*np.sin(2*z[k]) 
-      + sim.shape_sin3*np.sin(3*z[k]) 
+      a = z[k] + (sim.shape_cos0
+         + sim.shape_cos1*np.cos(z[k]) 
+         + sim.shape_cos2*np.cos(2*z[k]) 
+         + sim.shape_cos3*np.cos(3*z[k])
+         + np.arcsin(sim.delta)*np.sin(z[k]) 
+         - sim.zeta*np.sin(2*z[k]) 
+         + sim.shape_sin3*np.sin(3*z[k]))
       xp[i,k] = sim.rmaj+r*np.cos(a)
       yp[i,k] = sim.zmag+sim.kappa*r*np.sin(z[k])
       zp[i,k] = 0.0
