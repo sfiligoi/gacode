@@ -125,7 +125,7 @@ subroutine tgyro_init_profiles
   expro_ctrl_quasineutral_flag = 0
   expro_ctrl_numeq_flag = 0
 
-  call expro_read('input.gacode') 
+  call expro_read('input.gacode',MPI_COMM_WORLD) 
 
   ! Check for acceptable number of ions
   if (expro_n_ion < loc_n_ion) then

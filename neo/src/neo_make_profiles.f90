@@ -183,7 +183,8 @@ subroutine neo_make_profiles
              btccw_exp,&
              ipccw_exp,&
              a_meters,&
-             path)
+             path,&
+             NEO_COMM_WORLD)
 
         do is=1,n_species
            z(is)    = z_loc(is)
