@@ -66,6 +66,7 @@ module cgyro_globals
   integer :: zf_test_mode 
   integer :: nonlinear_flag 
   integer :: nonlinear_method
+  integer :: nonlinear_field
   real :: temp_ae
   real :: dens_ae
   real :: mass_ae

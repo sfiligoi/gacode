@@ -140,6 +140,7 @@ subroutine cgyro_read_input
      call cgyro_readbc_real(x)   ; dlnndr_scale(is) = x
      call cgyro_readbc_real(x)   ; dlntdr_scale(is) = x
   enddo
+  call cgyro_readbc_int(nonlinear_field)
 
   if (i_proc == 0) close(1)
 
