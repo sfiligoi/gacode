@@ -113,7 +113,7 @@ def plot_input_gacode(ax,tag):
     
     for i,myfile in enumerate(list):
         if os.path.isfile(myfile):
-            expro.expro_read(myfile)
+            expro.expro_read(myfile,0)
             a = max(expro.expro_rmin)
             xp = expro.expro_rmin/a
             y = setprof(tag)

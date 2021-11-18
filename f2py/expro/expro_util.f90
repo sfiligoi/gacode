@@ -490,6 +490,46 @@ subroutine expro_compute_derived
           expro_kappa(nx)**0.78
   endif
 
+  ! Reset geo variables to standard values to prevent expro from leaving
+  ! geo in a "mysterious" state
+  
+  geo_rmin_in      = 1d0
+  geo_rmaj_in      = 0.5d0
+  geo_drmaj_in     = 3d0
+  geo_zmag_in      = 0d0
+  geo_dzmag_in     = 0d0
+  geo_q_in         = 2d0
+  geo_s_in         = 1d0
+  geo_kappa_in     = 1d0
+  geo_s_kappa_in   = 0d0
+  geo_delta_in     = 0d0
+  geo_s_delta_in   = 0d0
+  geo_zeta_in      = 0d0
+  geo_s_zeta_in    = 0d0
+  geo_shape_cos0_in   = 0d0
+  geo_shape_s_cos0_in = 0d0
+  geo_shape_cos1_in   = 0d0
+  geo_shape_s_cos1_in = 0d0
+  geo_shape_cos2_in   = 0d0
+  geo_shape_s_cos2_in = 0d0
+  geo_shape_cos3_in   = 0d0
+  geo_shape_s_cos3_in = 0d0
+  geo_shape_cos4_in   = 0d0
+  geo_shape_s_cos4_in = 0d0
+  geo_shape_cos5_in   = 0d0
+  geo_shape_s_cos5_in = 0d0
+  geo_shape_cos6_in   = 0d0
+  geo_shape_s_cos6_in = 0d0
+  geo_shape_sin3_in   = 0d0
+  geo_shape_s_sin3_in = 0d0
+  geo_shape_sin4_in   = 0d0
+  geo_shape_s_sin4_in = 0d0
+  geo_shape_sin5_in   = 0d0
+  geo_shape_s_sin5_in = 0d0
+  geo_shape_sin6_in   = 0d0
+  geo_shape_s_sin6_in = 0d0
+  geo_beta_star_in = 0d0
+
 end subroutine expro_compute_derived
 
 !-------------------------------------------------------

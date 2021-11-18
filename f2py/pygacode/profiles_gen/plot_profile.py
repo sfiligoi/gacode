@@ -35,7 +35,7 @@ m1 = 0 ; m2 = 0
 
 alls = not bool(therm)
 
-expro.expro_read(infile)
+expro.expro_read(infile,0)
 
 def plotit(ax,x,y,ystr):
    global m1,m2,dot
