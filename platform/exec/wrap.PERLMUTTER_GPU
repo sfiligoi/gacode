@@ -1,0 +1,13 @@
+#! /usr/bin/env bash
+# GACODE Parallel execution script (PERLMUTTER_GPU)
+
+#env 1>&2
+
+# TBD: Improve GPU selection based on CPU affinity
+#echo $SLURM_LOCALID
+let r4=SLURM_LOCALID/4
+let ACC_DEVICE_NUM="$SLURM_LOCALID-($r4*4)"
+export ACC_DEVICE_NUM
+
+echo "`uname -n` $ACC_DEVICE_NUM LL $LD_LIBRARY_PATH"
+exec  "$@"

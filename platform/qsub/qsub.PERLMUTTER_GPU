@@ -1,0 +1,29 @@
+#!/bin/bash
+
+echo "-queue: default [default], debug, premium"
+
+# Default queue
+if [ "$QUEUE" == "null_queue" ] ; then
+   QUEUE=default
+fi
+
+bfile=$SIMDIR/batch.src
+
+echo "#!/bin/bash -l" > $bfile
+echo "#SBATCH -J $LOCDIR" >> $bfile
+echo "#SBATCH -A $REPO" >> $bfile
+echo "#SBATCH -C gpu" >> $bfile
+echo "#SBATCH -o $SIMDIR/batch.out" >> $bfile
+echo "#SBATCH -e $SIMDIR/batch.err" >> $bfile
+echo "#SBATCH -q $QUEUE" >> $bfile
+if [ "$QUEUE" == "flex" ] ; then
+   echo "#SBATCH --time-min=1:59:00" >> $bfile
+fi
+echo "#SBATCH -t $WALLTIME" >> $bfile
+echo "#SBATCH -n $nmpi" >> $bfile
+echo "#SBATCH -c $nomp" >> $bfile
+# temporary hack, fix 4 processes per node
+echo "#SBATCH --ntasks-per-node=4" >> $bfile
+echo "#SBATCH --gpus-per-task=1" >> $bfile
+echo 'export SLURM_CPU_BIND="cores"' >> $bfile
+echo "$CODE -e $LOCDIR -n $nmpi -nomp $nomp -numa $numa -mpinuma $mpinuma -p $SIMROOT" >> $bfile 
