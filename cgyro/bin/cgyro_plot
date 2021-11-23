@@ -62,8 +62,9 @@ then
   echo "VISUALIZATION MODE (requires Mayavi)"
   echo 
   echo "         -vis <type>"
-  echo "         <type> = torcut   (toroidal cut: nx,nz)"
-  echo "                = wheel    (fluctuation wheel: nx,ny,nz)"
+  echo "         <type> = torcut     (toroidal cut: nx,nz)"
+  echo "                = wheel      (fluctuation wheel: nx,ny,nz)"
+  echo "                = supertorus (partial torus: nx,nz,nphi)"
   echo
   echo "OPTIONS"
   echo
@@ -157,6 +158,12 @@ then
   echo "         -ny <int>"
   echo "         Number of alpha interpolation points (default FFT)"
   echo
+  echo "         -nphi <int>"
+  echo "         Number of toroidal points for supertorus"
+  echo
+  echo "         -phimax <float>"
+  echo "         End toroidal angle for supertorus (-2*pi*phimax)"
+  echo
   echo "         -px <int>"
   echo "         Number of horixontal pixels (default 800)"
   echo
@@ -229,6 +236,7 @@ then
   echo "VISUALIZATIONS [*requires Mayavi*]"
   echo "  $ cgyro_plot -vis torcut -moment n -nx 256 -nz 512"
   echo "  $ cgyro_plot -vis wheel  -moment n -land -nx 256 -ny 256 -nz 256"
+  echo "  $ cgyro_plot -vis supertorus -moment n -nx 256 -nz 512 -nphi 50 -phimax 0.5"
 
   exit 1
 fi
@@ -267,6 +275,8 @@ MESH=0
 NX=-1
 NY=-1
 NZ=-1
+NPHI=50
+PHIMAX=0.5
 ND=0
 NOMP=1
 NMPI=1
@@ -354,6 +364,8 @@ while [ $# -gt 0 ] ; do
   -nx) shift ; NX=$1 ;;
   -ny) shift ; NY=$1 ;;
   -nz) shift ; NZ=$1 ;;
+  -nphi) shift ; NPHI=$1 ;;
+  -phimax) shift ; PHIMAX=$1 ;;
   -nd) shift ; ND=$1 ;;
   -fmin) shift ; FMIN=$1 ;;
   -fmax) shift ; FMAX=$1 ;;
@@ -404,10 +416,13 @@ case "$VIS_TYPE" in
 
    torcut)
 	export OMP_NUM_THREADS=$NOMP ; python -m pygacode.cgyro.vis_torcut $EXT $MOMENT $SPECIES $NX $NZ $TIME $FMIN $FMAX $CMAP $FONTSIZE $LEGACY_FLAG $DN $MAG $NOZONAL $ONLYZONAL ;;
-
+   
    wheel)
 	export OMP_NUM_THREADS=$NOMP ; python -m pygacode.cgyro.vis_wheel $EXT $MOMENT $SPECIES $NX $NY $NZ $TIME $FMIN $FMAX $CMAP $FONTSIZE ;;
 
+   supertorus)
+	export OMP_NUM_THREADS=$NOMP ; python -m pygacode.cgyro.vis_supertorus $EXT $MOMENT $SPECIES $NX $NZ $NPHI $PHIMAX $TIME $FMIN $FMAX $CMAP $FONTSIZE $LEGACY_FLAG $DN $MAG $NOZONAL $ONLYZONAL ;;
+   
     *)
         echo "Unrecognized argument to -vis" ; exit 1 ;;
 esac
