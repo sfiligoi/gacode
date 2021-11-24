@@ -2225,7 +2225,8 @@ do is=ns0,ns
   write(33,*)"XNU_MODEL = ",xnu_model_in
   write(33,*)"!   SAT0 model "
   write(33,*)"ETG_FACTOR = ",etg_factor_in
-  write(33,*)"ave_p0_out = ",ave_p0_out
+  write(33,*)"pol_out = ",pol_out
+  write(33,*)"ave_b0_out = ",ave_b0_out
   write(33,*)"B_unit = ",B_unit
   write(33,*)"R_unit = ",R_unit
   write(33,*)"q_unit = ",q_unit
