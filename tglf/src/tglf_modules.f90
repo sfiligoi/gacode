@@ -266,7 +266,8 @@
       REAL :: DM_out = 0.25
       REAL :: DR_out = 0.0
       REAL :: Bref_out = 1.0
-      REAL :: ave_p0_out=1.0
+      REAL :: pol_out = 1.0
+      REAL :: ave_b0_out = 1.0
       INTEGER :: nmodes_out = 2
       INTEGER :: nfields_out = 1
       INTEGER :: jmax_out = 0
