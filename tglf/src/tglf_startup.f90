@@ -169,6 +169,7 @@
           rho_ion = rho_ion + zs(is)*as(is)*SQRT(mass(is)*taus(is))/zs(is) ! charge weighted average ion gyroradius
         endif
         rho_e =SQRT(mass(1)*taus(1))/ABS(zs(1))
+        pol_out = pol
 !        write(*,*)"species",is
 !        write(*,*)" vs = ",vs(is)
 !        write(*,*)rlns(is),rlts(is)

@@ -1106,7 +1106,7 @@
         ave_c_par_par(j,i) = ave_c_par_par(i,j)
         enddo
        enddo
-       ave_p0_out = ave_p0(1,1)
+       ave_b0_out = ave_b0(1,1)
 !       write(*,*)"ave_wd(1,1)=",ave_wd(1,1)
 !       write(*,*)"ave_p0inv(1,1) = ",ave_p0inv(1,1)
 !       write(*,*)"ave_p0(1,1) = ",ave_p0(1,1)

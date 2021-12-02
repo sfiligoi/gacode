@@ -15,7 +15,7 @@ FC = ftn -module ${GACODE_ROOT}/modules -Mpreprocess -DUSE_INLINE -craype-verbos
 F77 = ${FC}
 
 # Compiler options/flags
-FACC   =-acc -Minfo=accel -target-accel=nvidia80 -gpu=cc80,pinned -Mcudalib=cufft
+FACC   =-acc -Minfo=accel -target-accel=nvidia80 -Mcudalib=cufft
 FOMP   =-mp -Mstack_arrays 
 FMATH  =-r8 
 FOPT   =-fast
