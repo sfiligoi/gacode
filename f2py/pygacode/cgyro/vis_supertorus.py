@@ -162,7 +162,7 @@ if isfield:
     n_chunk = 2*nr*nn*nth
 else:
     n_chunk = 2*nr*ns*nn*nth
-   
+    
 def frame():
    global c
    
@@ -183,26 +183,27 @@ def frame():
       c[:,:,1:] = 0.0
    
 # This is the logic to generate an (r,theta) frame
-def subframe_rt():
-   global xp,yp,zp,g1,g2,c
+def subframe_rt(iframe):
+   global xp,yp,zp,g1,g2,c,fmin_all,fmax_all
    
    f = np.zeros([nx,nz],order='F')
    
    vis.torcut(dn,sim.m_box,sim.q,sim.thetap,g1,g2,c,f)
 
-   if fmin == 'auto':
-      f0=np.min(f)
-      f1=np.max(f)
-   else:
-      f0=float(fmin)
-      f1=float(fmax)
-
-   image = mlab.mesh(xp,yp,zp,scalars=f,colormap=colormap,vmin=f0,vmax=f1,opacity=1.0)
-   print('INFO: (vis_supertorus) min={:.3f} | max={:.3f}'.format(f0,f1))
+   if iframe == 0:
+      if fmin == 'auto':
+         fmin_all=np.min(f)
+         fmax_all=np.max(f)
+      else:
+         fmin_all=float(fmin)
+         fmax_all=float(fmax)
+         
+   image = mlab.mesh(xp,yp,zp,scalars=f,colormap=colormap,vmin=fmin_all,vmax=fmax_all,opacity=1.0)
+   print('INFO: (vis_supertorus) min={:.3f} | max={:.3f}'.format(fmin_all,fmax_all))
 
 # This is the logic to generate an (theta,phi) frame
 def subframe_tp():
-   global xp,yp,zp,g1,g2,c, g10, xp0
+   global xp,yp,zp,g1,g2,c,g10,xp0,fmin_all,fmax_all
 
    dphi = 2*np.pi*phimax/(nphi-1)
    
@@ -231,18 +232,12 @@ def subframe_tp():
          f_all[1,k,j] = f[1,k]
 
    for i in range(2):
-      
-      if fmin == 'auto':
-         f0=np.min(f_all[i,:,:])
-         f1=np.max(f_all[i,:,:])
-      else:
-         f0=float(fmin)
-         f1=float(fmax)
-         
-      image = mlab.mesh(xpp[i,:,:],ypp[i,:,:],zpp[i,:,:],scalars=f_all[i,:],colormap=colormap,vmin=f0,vmax=f1,opacity=1.0)
-      print('INFO: (vis_supertorus) min={:.3f} | max={:.3f}'.format(f0,f1))   
+      image = mlab.mesh(xpp[i,:,:],ypp[i,:,:],zpp[i,:,:],scalars=f_all[i,:,:],colormap=colormap,vmin=fmin_all,vmax=fmax_all,opacity=1.0) 
 
 PREC='f' ; BIT=4
+
+print("ivec")
+print(ivec)
 
 # Open binary file
 with open(fdata,'rb') as fbin:
@@ -265,14 +260,14 @@ with open(fdata,'rb') as fbin:
          g1 = g10 - phi
          xp = xp0 * np.cos(phi)
          zp = xp0 * np.sin(phi)
-         subframe_rt()
+         subframe_rt(0)
          ##################
          # cap at phi=phimax
          phi = -2*np.pi*phimax
          g1 = g10 - phi
          xp = xp0 * np.cos(phi)
          zp = xp0 * np.sin(phi)
-         subframe_rt()
+         subframe_rt(1)
          ##################
          # inner and outer body of torus
          subframe_tp()

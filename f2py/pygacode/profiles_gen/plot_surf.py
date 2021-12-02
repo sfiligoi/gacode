@@ -16,7 +16,7 @@ n     = int(sys.argv[2])
 ftype = sys.argv[3]
 
 # Read profiles
-expro.expro_read('input.gacode')
+expro.expro_read('input.gacode',0)
 nexp = int(expro.expro_n_exp)
 nfourier = int(expro.expro_nfourier)
 
