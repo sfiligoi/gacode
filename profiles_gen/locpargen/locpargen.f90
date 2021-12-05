@@ -30,13 +30,13 @@ program locpargen
   read(1,*) ntheta
   read(1,*) nion
   close(1)
-
+  
   expro_ctrl_quasineutral_flag = qnflag
   ! We don't need the numerical eq. flag set for this routine.
   expro_ctrl_numeq_flag = hasgeo
 
   call expro_read('input.gacode',0)
-
+  
   ! Minor radius
   a = expro_rmin(expro_n_exp)
 
@@ -75,8 +75,8 @@ program locpargen
        btccw,&
        ipccw,&
        a,&
-       path)
-
+       path,0)
+       
   if (ntheta < 0) then
      goto 100
   endif
