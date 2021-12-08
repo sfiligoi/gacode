@@ -2172,6 +2172,37 @@ do is=ns0,ns
 !
 !______________________________________________________________
 !
+SUBROUTINE write_tglf_ave_p0_spectrum
+!
+  USE tglf_dimensions
+  USE tglf_global
+  USE tglf_species
+  USE tglf_kyspectrum
+!
+  IMPLICIT NONE
+  CHARACTER(33) :: fluxfile="out.tglf.ave_p0_spectrum"
+  INTEGER :: i
+!
+  if(new_start)then
+     write(*,*)"error: tglf_TM must be called before write_tglf_ave_p0_spectrum"
+     write(*,*)"       NN doesn't compute spectra -> if needed set tglf_nn_max_error_in=-1"
+  endif
+!
+  OPEN(unit=33,file=fluxfile,status='replace')
+!
+  write(33,*)"ave_p0 is used for normalization of SAT0"
+  write(33,*)"index limits: nky"
+  write(33,*)nky
+!
+  do i=1,nky
+    write(33,*)ave_p0_spectrum_out(i)
+  enddo
+  CLOSE(33)
+!
+ END SUBROUTINE write_tglf_ave_p0_spectrum
+!
+!______________________________________________________________
+!
  SUBROUTINE write_tglf_width_spectrum
 !
   USE tglf_dimensions
@@ -2225,8 +2256,6 @@ do is=ns0,ns
   write(33,*)"XNU_MODEL = ",xnu_model_in
   write(33,*)"!   SAT0 model "
   write(33,*)"ETG_FACTOR = ",etg_factor_in
-  write(33,*)"pol_out = ",pol_out
-  write(33,*)"ave_b0_out = ",ave_b0_out
   write(33,*)"B_unit = ",B_unit
   write(33,*)"R_unit = ",R_unit
   write(33,*)"q_unit = ",q_unit

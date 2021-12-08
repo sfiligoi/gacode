@@ -229,6 +229,7 @@
       REAL :: flux_spectrum_save(5,nsm,3,nkym,maxmodes)
       REAL :: QL_flux_spectrum_save(5,nsm,3,nkym,maxmodes)
       REAL :: spectral_shift_save(nkym)
+      REAL :: ave_p0_spectrum_save(nkym)
       REAL :: width_out_save(nkym)
       INTEGER :: ierr
 !
@@ -241,6 +242,7 @@
 !
       do i=1,nky
        spectral_shift_save(i) = 0.0
+       ave_p0_spectrum_save(i) = 0.0
        width_out_save(i)=0.0
        do k=1,nmodes_in
         do t = 1,2
@@ -361,6 +363,7 @@
        if(unstable)then
 ! save the spectral shift of the radial wavenumber due to VEXB_SHEAR
          spectral_shift_save(i) = kx0_e
+         ave_p0_spectrum_save(i) = ave_p0_out
 ! save field_spectrum_out and eigenvalue_spectrum_out
          do imax=1,nmodes_out
            QL_field_spectrum_save(1,i,imax) = v_QL_out(imax)
@@ -503,6 +506,13 @@
                         ,ierr)
       call MPI_ALLREDUCE(spectral_shift_save         &
                         ,spectral_shift_out          &
+                        ,nkym                        &
+                        ,MPI_DOUBLE_PRECISION        &
+                        ,MPI_SUM                     &
+                        ,iCommTglf                   &
+                        ,ierr)
+      call MPI_ALLREDUCE(ave_p0_spectrum_save         &
+                        ,ave_p0_spectrum_out          &
                         ,nkym                        &
                         ,MPI_DOUBLE_PRECISION        &
                         ,MPI_SUM                     &

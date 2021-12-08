@@ -229,6 +229,7 @@
 !
       do i=1,nky
        spectral_shift_out(i) = 0.0
+       ave_p0_spectrum_out(i) = 0.0
        do k=1,nmodes_in
         do t = 1,2
           eigenvalue_spectrum_out(t,i,k) = 0.0
@@ -347,6 +348,7 @@
         if(unstable)then
 ! save the spectral shift of the radial wavenumber due to VEXB_SHEAR
          spectral_shift_out(i) = kx0_e
+         ave_p0_spectrum_out(i) = ave_p0_out
 ! save field_spectrum_out and eigenvalue_spectrum_out
          do imax=1,nmodes_out
            QL_field_spectrum_out(1,i,imax) = v_QL_out(imax)

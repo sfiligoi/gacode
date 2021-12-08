@@ -125,6 +125,9 @@ program tglf
      ! write kx/ky-spectral shift spectrum to file out.tglf.spectral_shift
      CALL write_tglf_spectral_shift_spectrum
 
+     ! write ave_p0 spectrum to file out.tglf.ave_p0_spectrum
+     CALL write_tglf_ave_p0_spectrum
+
      ! write intensity fluctuation amplitude spectrum per mode to file out.tglf.scalar_saturation_parameters
      CALL write_tglf_scalar_saturation_parameters
 
