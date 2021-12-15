@@ -264,13 +264,14 @@ class ManagerInput:
                basefile = basedir+'/input.'+code
                tempfile = basefile+'.temp'
 
-               with open(basefile,'r') as file_base, open(tempfile,'w') as file_temp:
+               with open(basefile,'r') as file_base:
+                   with open(tempfile,'w') as file_temp:
 
-                  for line in file_base.readlines():
-                      if line[0:18] != "# -- Begin overlay":
-                          file_temp.write(line)
-                      else:
-                          break
+                      for line in file_base.readlines():
+                          if line[0:18] != "# -- Begin overlay":
+                              file_temp.write(line)
+                          else:
+                              break
 
                # Overlay parameters
                os.system('echo "# -- Begin overlay" >> '+tempfile)
