@@ -115,16 +115,11 @@ module cgyro_globals
   real :: s_zeta
   real :: zmag
   real :: dzmag
-  real :: shape_sin3        
-  real :: shape_s_sin3
-  real :: shape_cos0    
-  real :: shape_s_cos0
-  real :: shape_cos1
-  real :: shape_s_cos1
-  real :: shape_cos2    
-  real :: shape_s_cos2
-  real :: shape_cos3    
-  real :: shape_s_cos3
+  integer, parameter :: n_shape=6
+  real, dimension(0:n_shape) :: shape_sin
+  real, dimension(0:n_shape) :: shape_s_sin
+  real, dimension(0:n_shape) :: shape_cos
+  real, dimension(0:n_shape) :: shape_s_cos
   real :: betae_unit
   !
   ! Species parameters

@@ -102,16 +102,14 @@ subroutine cgyro_read_input
   call cgyro_readbc_real(s_zeta)
   call cgyro_readbc_real(zmag)       
   call cgyro_readbc_real(dzmag)
-  call cgyro_readbc_real(shape_sin3)        
-  call cgyro_readbc_real(shape_s_sin3)
-  call cgyro_readbc_real(shape_cos0)     
-  call cgyro_readbc_real(shape_s_cos0)
-  call cgyro_readbc_real(shape_cos1)
-  call cgyro_readbc_real(shape_s_cos1)
-  call cgyro_readbc_real(shape_cos2)     
-  call cgyro_readbc_real(shape_s_cos2)
-  call cgyro_readbc_real(shape_cos3)     
-  call cgyro_readbc_real(shape_s_cos3)
+  do is=3,n_shape
+     call cgyro_readbc_real(shape_sin(is))
+     call cgyro_readbc_real(shape_s_sin(is))
+  enddo
+  do is=0,n_shape
+     call cgyro_readbc_real(shape_cos(is))
+     call cgyro_readbc_real(shape_s_cos(is))
+  enddo
   call cgyro_readbc_real(betae_unit)
   call cgyro_readbc_int(n_species)
 
