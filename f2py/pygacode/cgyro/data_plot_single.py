@@ -65,10 +65,10 @@ elif plot_type == 'ky_phi':
 elif plot_type == 'rcorr_phi':
 
    field = int(sys.argv[2])
-   theta = float(sys.argv[3])
-   w     = float(sys.argv[4])
-   wmax  = float(sys.argv[5])
-   ftype = sys.argv[6]
+   theta = float(sys.argv[5])
+   w     = float(sys.argv[6])
+   wmax  = float(sys.argv[7])
+   ftype = sys.argv[8]
 
    head = data_in.plot_rcorr_phi(field=field,theta=theta,w=w,wmax=wmax)
 
@@ -237,12 +237,14 @@ elif plot_type == 'xflux':
 elif plot_type == 'kxky_phi':
 
    field = int(sys.argv[2])
-   theta = float(sys.argv[3])
-   w     = float(sys.argv[4])
-   wmax  = float(sys.argv[5])
-   ftype = sys.argv[6]
+   moment = sys.argv[3]
+   spec   = int(sys.argv[4])
+   theta = float(sys.argv[5])
+   w     = float(sys.argv[6])
+   wmax  = float(sys.argv[7])
+   ftype = sys.argv[8]
 
-   head = data_in.plot_kxky_phi(field=field,theta=theta,w=w,wmax=wmax)
+   head = data_in.plot_kxky_phi(field=field,theta=theta,moment=moment,spec=spec,w=w,wmax=wmax)
 
    outfile = 'out.cgyro.kxky_phi.'+ftype
 
