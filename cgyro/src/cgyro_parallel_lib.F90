@@ -118,17 +118,6 @@ contains
 !$acc host_data use_device(fsendf,ft)
 #endif
 
-#ifdef SUMMIT
-    
-    call MPI_ALLTOALL(fsendf, &
-         2*nsend, &
-         MPI_DOUBLE_PRECISION, &
-         ft, &
-         2*nsend, &
-         MPI_DOUBLE_PRECISION, &
-         lib_comm, &
-         ierr)
-#else
     call MPI_ALLTOALL(fsendf, &
          nsend, &
          MPI_DOUBLE_COMPLEX, &
@@ -137,7 +126,6 @@ contains
          MPI_DOUBLE_COMPLEX, &
          lib_comm, &
          ierr)
-#endif
 
 #ifdef DISABLE_GPUDIRECT_MPI
 !$acc update device(ft)
@@ -187,16 +175,6 @@ contains
 !$acc host_data use_device(fsendr,f)
 #endif
 
-#ifdef SUMMIT
-    call MPI_ALLTOALL(fsendr, &
-         2*nsend, &
-         MPI_DOUBLE_PRECISION, &
-         f, &
-         2*nsend, &
-         MPI_DOUBLE_PRECISION, &
-         lib_comm, &
-         ierr)
-#else
     call MPI_ALLTOALL(fsendr, &
          nsend, &
          MPI_DOUBLE_COMPLEX, &
@@ -205,7 +183,6 @@ contains
          MPI_DOUBLE_COMPLEX, &
          lib_comm, &
          ierr)
-#endif
 
 #ifdef DISABLE_GPUDIRECT_MPI
 !$acc update device(f)
@@ -446,16 +423,6 @@ contains
 !$acc host_data use_device(x,xt)
 #endif
  
-#ifdef SUMMIT
-   call MPI_ALLTOALL(x, &
-        2*nkeep*nsplit, &
-        MPI_DOUBLE_PRECISION, &
-        xt, &
-        2*nkeep*nsplit, &
-        MPI_DOUBLE_PRECISION, &
-        slib_comm, &
-        ierr)
-#else
    call MPI_ALLTOALL(x, &
          nkeep*nsplit, &
          MPI_DOUBLE_COMPLEX, &
@@ -464,7 +431,6 @@ contains
          MPI_DOUBLE_COMPLEX, &
          slib_comm, &
          ierr)
-#endif
 
 #ifdef DISABLE_GPUDIRECT_MPI
 !$acc update device(xt)
@@ -523,16 +489,6 @@ contains
 !$acc host_data use_device(xt,x)
 #endif
 
-#ifdef SUMMIT
-    call MPI_ALLTOALL(xt, &
-         2*nkeep*nsplit, &
-         MPI_DOUBLE_PRECISION, &
-         x, &
-         2*nkeep*nsplit, &
-         MPI_DOUBLE_PRECISION, &
-         slib_comm, &
-         ierr)
-#else
     call MPI_ALLTOALL(xt, &
          nkeep*nsplit, &
          MPI_DOUBLE_COMPLEX, &
@@ -541,7 +497,6 @@ contains
          MPI_DOUBLE_COMPLEX, &
          slib_comm, &
          ierr)
-#endif
 
 #ifdef DISABLE_GPUDIRECT_MPI
 !$acc update device(x)
