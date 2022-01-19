@@ -1040,9 +1040,9 @@ class cgyrodata_plot(data.cgyrodata):
       if not ftype == 'nox':
          fig.tight_layout(pad=0.3)
 
-   def plot_kxky_phi(self,field=0,theta=0.0,w=0.5,wmax=0.0,fig=None):
+   def plot_kxky_phi(self,field=0,theta=0.0,moment='phi',spec=0,w=0.5,wmax=0.0,fig=None):
 
-      from mpl_toolkits.mplot3d import Axes3D
+      #from mpl_toolkits.mplot3d import Axes3D
 
       x0 = max(abs(self.kx))*0.25
       y0 = max(abs(self.ky))
@@ -1065,7 +1065,7 @@ class cgyrodata_plot(data.cgyrodata):
       f = np.zeros([nx-1,ny])
 
       # Field data selector
-      fx,ft = self.kxky_select(theta,field,'phi',0)
+      fx,ft = self.kxky_select(theta,field,moment,spec)
 
       imin,imax=iwindow(t,w,wmax)
       for i in np.arange(imin,self.n_time):

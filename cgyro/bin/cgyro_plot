@@ -477,7 +477,7 @@ case "$PLOT_TYPE" in
 	python $PLT $PLOT_TYPE $FIELD $THETA $W $WMAX $YMIN $YMAX $N $EXT $DISS ;;
 
    kxky_phi | rcorr_phi)
-	python $PLT $PLOT_TYPE $FIELD $THETA $W $WMAX $EXT ;;
+	python $PLT $PLOT_TYPE $FIELD $MOMENT $SPECIES $THETA $W $WMAX $EXT ;;
 
    zf)
 	python $PLT $PLOT_TYPE $W $WMAX $FIELD $EXT ;;
