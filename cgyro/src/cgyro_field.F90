@@ -109,15 +109,6 @@ subroutine cgyro_field_v_gpu
 !$acc host_data use_device(field_loc,field)
 #endif
 
-#ifdef SUMMIT
-  call MPI_ALLREDUCE(field_loc,&
-       field,&
-       2*size(field(:,:)),&
-       MPI_DOUBLE_PRECISION,&
-       MPI_SUM,&
-       NEW_COMM_1,&
-       i_err)
-#else
   call MPI_ALLREDUCE(field_loc(:,:),&
        field(:,:),&
        size(field(:,:)),&
@@ -125,7 +116,6 @@ subroutine cgyro_field_v_gpu
        MPI_SUM,&
        NEW_COMM_1,&
        i_err)
-#endif
 
 #ifdef DISABLE_GPUDIRECT_MPI
 !$acc update device(field)
@@ -281,15 +271,6 @@ subroutine cgyro_field_c_gpu
 !$acc host_data use_device(field_loc,field)
 #endif
 
-#ifdef SUMMIT
-  call MPI_ALLREDUCE(field_loc,&
-       field,&
-       2*size(field(:,:)),&
-       MPI_DOUBLE_PRECISION,&
-       MPI_SUM,&
-       NEW_COMM_1,&
-       i_err)
-#else
   call MPI_ALLREDUCE(field_loc(:,:),&
        field(:,:),&
        size(field(:,:)),&
@@ -297,7 +278,6 @@ subroutine cgyro_field_c_gpu
        MPI_SUM,&
        NEW_COMM_1,&
        i_err)
-#endif
 
 #ifdef DISABLE_GPUDIRECT_MPI
 !$acc update device(field)

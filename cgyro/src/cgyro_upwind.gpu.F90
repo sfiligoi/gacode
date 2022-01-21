@@ -66,15 +66,6 @@ subroutine cgyro_upwind_r64
 !$acc host_data use_device(upwind_res_loc,upwind_res)
 #endif
 
-#ifdef SUMMIT
-  call MPI_ALLREDUCE(upwind_res_loc(:,:,:),&
-       upwind_res(:,:,:),&
-       2*size(upwind_res(:,:,:)),&
-       MPI_DOUBLE_PRECISION,&
-       MPI_SUM,&
-       NEW_COMM_3,&
-       i_err)
-#else
   call MPI_ALLREDUCE(upwind_res_loc(:,:,:),&
        upwind_res(:,:,:),&
        size(upwind_res(:,:,:)),&
@@ -82,7 +73,6 @@ subroutine cgyro_upwind_r64
        MPI_SUM,&
        NEW_COMM_3,&
        i_err)
-#endif
 
 #ifdef DISABLE_GPUDIRECT_MPI
 !$acc update device(upwind_res)
@@ -166,15 +156,6 @@ subroutine cgyro_upwind_r32
 !$acc host_data use_device(upwind32_res_loc,upwind32_res)
 #endif
 
-#ifdef SUMMIT
-  call MPI_ALLREDUCE(upwind32_res_loc(:,:,:),&
-       upwind32_res(:,:,:),&
-       2*size(upwind32_res(:,:,:)),&
-       MPI_REAL,&
-       MPI_SUM,&
-       NEW_COMM_3,&
-       i_err)
-#else
   call MPI_ALLREDUCE(upwind32_res_loc(:,:,:),&
        upwind32_res(:,:,:),&
        size(upwind32_res(:,:,:)),&
@@ -182,7 +163,6 @@ subroutine cgyro_upwind_r32
        MPI_SUM,&
        NEW_COMM_3,&
        i_err)
-#endif
 
 #ifdef DISABLE_GPUDIRECT_MPI
 !$acc update device(upwind32_res)
