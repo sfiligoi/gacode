@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 from scipy import interpolate
 import matplotlib.path as mp
@@ -18,7 +19,11 @@ def contourPaths(x, y, Z, levels):
     allsegs = []
     for level in levels:
         segs_=contour_generator.create_contour(level)
-        segs=list(map(mp.Path,segs_))
+        if sys.version_info[1] < 8:
+            iseg = segs_
+        else:
+            iseg = segs_[0]
+        segs=list(map(mp.Path,iseg))
         allsegs.append(segs)
 
     return allsegs
