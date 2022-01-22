@@ -178,10 +178,10 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
     sep = None
     
     for kdbg in range(kdbgmax):
-
+        
         flx=0.5*(flxM+flxm)
     
-        line=[]
+        line=None
         paths=contourPaths(r2d,z2d,psi2d,[flx])[0]
         for path in paths:
             if not np.isnan(path.vertices[:]).any() and np.allclose(path.vertices[0,0],path.vertices[-1,0]) and np.allclose(path.vertices[0,1],path.vertices[-1,1]):
@@ -203,7 +203,7 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
                     else:
                         forbidden.append([Rf,Zf])
             
-        if len(line):
+        if line is not None:
             try:
                 # stop condition
                 np.testing.assert_array_almost_equal(sep/raxis_new,line/raxis_new,accuracy)
@@ -212,17 +212,19 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
                 pass
             finally:
                 sep = line
-                psi1 = flx
-                flxm = flx
+                psi1 = flxm = flx
         else:
             open_sep=paths
             flxM=flx
 
     if kdbg == kdbgmax-1:
         print('WARNING: (prgen_contour) Finding LCFS aborted after %d iterations!'%kdbgmax)
+    else:
+        print('INFO: (prgen_contour) LCFS found after %d iterations!'%(kdbg+1))
 
     print('INFO: (prgen_contour) dpsi = {:.9f} [EFIT] {:.9f} [new]'.format(efitpsi1-efitpsi0,psi1-psi0))
-
+    
+    
     # Separatrix hits edges of computation domain
     if ((np.abs(np.min(sep[:,0])-np.min(r2d)) < 1e-3) or
         (np.abs(np.max(sep[:,0])-np.max(r2d)) < 1e-3) or
