@@ -80,8 +80,7 @@ program prgen
 
      format_type = 0
 
-     ! Minimal processing required to merge gfile data into otherwise
-     ! empty input.profiles output file.
+     ! Minimal processing required to merge gfile data into otherwise empty input.gacode 
      call prgen_read_null
 
   else if (trim(raw_data_type) == 'ITERDBNC') then

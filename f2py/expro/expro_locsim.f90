@@ -539,12 +539,12 @@ subroutine cub_spline1(x,y,n,xi,yi)
   ! Check to see that interpolated point is inside data interval
   !
   if (xi > x(n)) then
-     print *,'ERROR: (cub_spline) Data above upper bound'
-     print *,'xi(ni) > x(n)',xi,x(n) 
+     print '(a)','ERROR: (cub_spline1) Data above upper bound'
+     print '(a)','xi(ni) > x(n)',xi,x(n) 
   endif 
   if (xi < x(1)) then
-     print *,'ERROR: (cub_spline) Data below lower bound'
-     print *,'xi(1) < x(1)',xi,x(1) 
+     print '(a)','ERROR: (cub_spline1) Data below lower bound'
+     print '(a)','xi(1) < x(1)',xi,x(1) 
   endif 
   !-------------------------------------------------------------
 

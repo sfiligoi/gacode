@@ -57,7 +57,7 @@ subroutine prgen_read_omfit
 
   ! Get rho on efit mesh (so have psi,rho,q)
   call prgen_get_chi(npsi,efit_q,efit_psi,efit_rho,torfluxa)
-
+  
   if (format_type /= 3) then
      ! We have rho on input grid from prgen_globals
      call cub_spline(efit_rho,efit_psi,npsi,rho,dpsi,nx)
@@ -78,8 +78,8 @@ subroutine prgen_read_omfit
   ! Miller extended harmonic shape coefficients
   call bound_interp(efit_rho,efit_ci(:,0),npsi,rho,shape_cos(0,:),nx)
 
-  if(nf-1 > 6) then
-     print '(a)','ERROR: (prgen) max nharm is 6'
+  if (nf-1 > 6) then
+     print '(a)','ERROR: (prgen_read_omfit) max nharm is 6'
      stop
   endif
   

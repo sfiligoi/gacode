@@ -169,8 +169,8 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
         
     # separatrix is found by looking for the largest closed path enclosing the magnetic axis
 
-    flxm=np.nanmin(psi2d)
-    flxM=np.nanmax(psi2d)
+    flxm = 0.2*efitpsi0+0.8*efitpsi1
+    flxM = efitpsi1
         
     kdbgmax=50
     forbidden=[]
@@ -202,7 +202,7 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
                         pass
                     else:
                         forbidden.append([Rf,Zf])
-            
+
         if line is not None:
             try:
                 # stop condition
@@ -218,9 +218,9 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
             flxM=flx
 
     if kdbg == kdbgmax-1:
-        print('WARNING: (prgen_contour) Finding LCFS aborted after %d iterations!'%kdbgmax)
+        print('WARNING: (prgen_contour) Finding LCFS aborted after %d iterations'%kdbgmax)
     else:
-        print('INFO: (prgen_contour) LCFS found after %d iterations!'%(kdbg+1))
+        print('INFO: (prgen_contour) LCFS found after %d iterations'%(kdbg+1))
 
     print('INFO: (prgen_contour) dpsi = {:.9f} [EFIT] {:.9f} [new]'.format(efitpsi1-efitpsi0,psi1-psi0))
     
@@ -298,12 +298,12 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
     cs = interpolate.interp1d(efitpsi,efitp,kind='quadratic') ; out_p = cs(out_psi)
     cs = interpolate.interp1d(efitpsi,efitf,kind='quadratic') ; out_f = cs(out_psi)
     #cs = interpolate.interp1d(efitpsi,efitq,kind='quadratic') ; out_q = cs(out_psi)
-
+    
     # Recalculate q based on definition (and some identities)
     loopint = np.zeros([levels])
     for i in range(narc-1):
        loopint[:] = loopint[:]+(RI[i+1,:]-RI[i,:])*(ZI[i+1,:]+ZI[i,:])/(RI[i+1,:]+RI[i,:])
-   
+
     cs = interpolate.splrep(out_psi,loopint) ; out_q = interpolate.splev(out_psi,cs,der=1)
     out_q = out_f*out_q/(2*np.pi)
     
