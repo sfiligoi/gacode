@@ -25,6 +25,12 @@ subroutine cgyro_init_kernel
   integer(KIND=8) :: aftermpi_time, beforetotal_time
   real :: mpi_dt,init_dt
   integer :: statusfd
+
+  ! Need to initialize the info runfile very early
+  if (silent_flag == 0 .and. i_proc == 0) then
+     open(unit=io,file=trim(path)//runfile_info,status='replace')
+     close(io)
+  endif
   
   ! initialize tiny float
   small = tiny(0.0)
@@ -33,11 +39,6 @@ subroutine cgyro_init_kernel
   call system_clock(kernel_start_time,kernel_count_rate,kernel_count_max)
   
   i_time = 0
-  
-  ! Need to initialize the info runfile very early
-  if (silent_flag == 0 .and. i_proc == 0) then
-     open(unit=io,file=trim(path)//runfile_info,status='replace')
-  endif
   
   ! 1. MPI setup
   call cgyro_mpi_grid
