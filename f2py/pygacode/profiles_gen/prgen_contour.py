@@ -19,7 +19,7 @@ def contourPaths(x, y, Z, levels):
     allsegs = []
     for level in levels:
         segs_=contour_generator.create_contour(level)
-        if sys.version_info[1] > 8 and sys.version_info[2] > 3:
+        if sys.version_info[1] >= 8 and sys.version_info[2] >= 3:
             iseg = segs_[0]
         else:
             iseg = segs_
