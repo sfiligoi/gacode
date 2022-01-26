@@ -24,18 +24,9 @@ subroutine prgen_map_null
   expro_name(1) = 'D'
   expro_type(1) = '[therm]'
   expro_rho  = rho
-  expro_q = q
   expro_rmin = rmin
   expro_rmaj = rmaj
-  expro_kappa = kappa
-  expro_delta = delta
   expro_ptot = p_tot
-  expro_te = 1.0
-  expro_ne = 1.0
-
-  ! Ion temperatures and densities
-  expro_ni(1,:) = 1.0
-  expro_ti(1,:) = 1.0
 
  end subroutine prgen_map_null
 

@@ -18,14 +18,14 @@ subroutine prgen_map_corsica
   !---------------------------------------------------------
   ! Map profile data onto single array:
   !
-  expro_n_exp = corsica_nvals
+  expro_n_exp = nx
   expro_n_ion = 2
   call expro_init(1)
   !
   expro_rho(:)       = rho(:)
   expro_rmin(:)      = rmin(:)
   expro_rmaj(:)      = rmaj(:)
-  expro_te(:)        = corsica_te(:)
+  expro_te(:)        = te_kev(:)
   expro_ne(:)        = corsica_ne(:)*10.0
   expro_z_eff(:)     = corsica_zeff(:)
   expro_w0(:)        = 0.0      ! omega
@@ -44,8 +44,8 @@ subroutine prgen_map_corsica
   expro_ni(2,:) = 0.5 * corsica_ndt(:)*10.0
   
   ! ti
-  expro_ti(1,:) = corsica_ti(:)
-  expro_ti(2,:) = corsica_ti(:)
+  expro_ti(1,:) = ti_kev(:)
+  expro_ti(2,:) = ti_kev(:)
 
   expro_vtor(:,:) = 0.0
   expro_vpol(:,:) = 0.0

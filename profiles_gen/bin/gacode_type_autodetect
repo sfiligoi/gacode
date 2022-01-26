@@ -10,6 +10,7 @@
 #  ITERDBNC    (netCDF iterdb)
 #  SWIM        (plasmastate)
 #  PFILE       (peqdsk)
+#  GENF        (General Fusion)
 #  CORSICA
 #  GFILE       (geqdsk equilibrium data)
 #  DSKGATO_OLD (old-type dskgato flux-surface data)
@@ -74,7 +75,7 @@ if [[ "$x" == "NetCDF Data Format data" ]] ; then
    exit 0
 
 else
-   # pfile, gfile, iterdb text
+   # pfile, gfile, genf, iterdb text
 
    y=`grep -c psinorm $1`
    if [[ $y -gt 0 ]] ; then
@@ -82,11 +83,11 @@ else
       exit 0
    fi
 
-#   y=`grep -c BT_EXP $1`
-#   if [[ $y -gt 0 ]] ; then
-#      echo "GACODE"
-#      exit 0
-#   fi
+   y=`grep -c psibar $1`
+   if [[ $y -gt 0 ]] ; then
+      echo "GENF"
+      exit 0
+   fi
 
    y=`grep -c cxareao $1`
    if [[ $y -gt 0 ]] ; then

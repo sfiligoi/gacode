@@ -23,7 +23,6 @@ subroutine allocate_ufile_vars
   allocate(ufile_qrad(nx))
   allocate(ufile_qeche(nx))
   allocate(ufile_qechi(nx))
-  allocate(ufile_qohm(nx))
   allocate(ufile_qwalli(nx))
   allocate(ufile_qwalle(nx))
 

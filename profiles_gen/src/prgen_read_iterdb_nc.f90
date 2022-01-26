@@ -160,7 +160,7 @@ subroutine prgen_read_iterdb_nc
 !    )))
 !--------------------------------------------------------------
   err = nf90_inq_varid(ncid,trim('qohm'),varid)
-  err = nf90_get_var(ncid,varid,onetwo_qohm)
+  err = nf90_get_var(ncid,varid,qohm)
 
 ! QUESTION: qdelt flipped sign after ONETWO v5.8
 !           version info is contained in netcdf global 'title' variable

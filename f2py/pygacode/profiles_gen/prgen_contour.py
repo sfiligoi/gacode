@@ -306,6 +306,6 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
 
     cs = interpolate.splrep(out_psi,loopint) ; out_q = interpolate.splev(out_psi,cs,der=1)
     out_q = out_f*out_q/(2*np.pi)
-    
+
     return RI,ZI,out_psi,out_q,out_p,out_f
 

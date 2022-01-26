@@ -12,6 +12,7 @@
 #   ITERDBNC    (netCDF iterdb)
 #   SWIM        (plasmastate)
 #   CORSICA     (Corsica)
+#   GENF        (General Fusion)
 #   PFILE       (peqdsk)
 #   UFILE       (ITPA profile database format)
 #
@@ -55,6 +56,7 @@ then
    echo "               ITERDBNC    (netCDF iterdb)"
    echo "               SWIM        (plasmastate)"
    echo "               PFILE       (peqdsk)"
+   echo "               GENF        (General Fusion)"
    echo "               CORSICA     (Corsica) "
    echo "               UFILE       (ITPA profile database format)"
    echo

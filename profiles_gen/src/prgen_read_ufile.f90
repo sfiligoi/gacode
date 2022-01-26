@@ -76,7 +76,7 @@ subroutine prgen_read_ufile
   call ufile_mapper('out.QECHI.ave',rho,ufile_qechi,nx,0)
   call ufile_mapper('out.QLHE.ave',rho,ufile_qlhe,nx,0)
   call ufile_mapper('out.QLHI.ave',rho,ufile_qlhi,nx,0)
-  call ufile_mapper('out.QOHM.ave',rho,ufile_qohm,nx,0)
+  call ufile_mapper('out.QOHM.ave',rho,qohm,nx,0)
   call ufile_mapper('out.QWALLI.ave',rho,ufile_qwalli,nx,0)
   call ufile_mapper('out.QWALLE.ave',rho,ufile_qwalle,nx,0)
   call ufile_mapper('out.TORQ.ave',rho,ufile_torq,nx,0)

@@ -24,6 +24,7 @@ module prgen_globals
   integer :: lump_fast_flag
   real :: dpsi_efit
   real :: dpsi_data
+
   integer :: n_reorder
   integer, dimension(n_ion_max) :: reorder_vec
   integer :: n_null
@@ -52,6 +53,9 @@ module prgen_globals
   real, dimension(:), allocatable :: vpolc_exp
   real, dimension(:), allocatable :: vtorc_exp
 
+  real, allocatable :: te_kev(:)
+  real, allocatable :: ti_kev(:)
+
   real, dimension(:), allocatable :: johm
   real, dimension(:), allocatable :: jbs
   real, dimension(:), allocatable :: jnb
@@ -68,9 +72,10 @@ module prgen_globals
   real :: bcentr
   real :: current
 
-  ! Power diagnostics
+  ! Power diagnostics (all MW/m^3)
   real, dimension(:), allocatable :: qpow_e,qpow_i
-  real, dimension(:), allocatable :: qspow_e,qspow_i 
+  real, dimension(:), allocatable :: qspow_e,qspow_i
+  real, dimension(:), allocatable :: qohm
 
   !---------------------------------------------------------
   ! ONETWO variables
@@ -105,7 +110,6 @@ module prgen_globals
   real, dimension(:), allocatable :: onetwo_hcap
   real, dimension(:), allocatable :: onetwo_qbeame
   real, dimension(:), allocatable :: onetwo_qrfe
-  real, dimension(:), allocatable :: onetwo_qohm
   real, dimension(:), allocatable :: onetwo_qrad
   real, dimension(:), allocatable :: onetwo_qione
   real, dimension(:), allocatable :: onetwo_qioni
@@ -272,19 +276,14 @@ module prgen_globals
   real :: corsica_betap
   real :: corsica_li3
 
-  integer, parameter :: corsica_nvals = 81
   real, allocatable :: corsica_rho(:)
   real, allocatable :: corsica_r_a(:)
-  real, allocatable :: corsica_psin(:)
   real, allocatable :: corsica_vl(:)
-  real, allocatable :: corsica_te(:)
-  real, allocatable :: corsica_ti(:)
   real, allocatable :: corsica_ne(:)
   real, allocatable :: corsica_ndt(:)
   real, allocatable :: corsica_nz(:)
   real, allocatable :: corsica_nalpha(:)
   real, allocatable :: corsica_zeff(:)
-  real, allocatable :: corsica_q(:)
   real, allocatable :: corsica_j(:)
   real, allocatable :: corsica_jbs(:)
   !---------------------------------------------------------
@@ -316,7 +315,6 @@ module prgen_globals
   real, dimension(:), allocatable :: ufile_qrad
   real, dimension(:), allocatable :: ufile_qeche
   real, dimension(:), allocatable :: ufile_qechi
-  real, dimension(:), allocatable :: ufile_qohm
   real, dimension(:), allocatable :: ufile_qwalli
   real, dimension(:), allocatable :: ufile_qwalle
 

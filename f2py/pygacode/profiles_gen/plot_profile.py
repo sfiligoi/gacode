@@ -54,6 +54,9 @@ def plot_select(ax,tag):
    # normalization
    a = expro.expro_rmin[-1]
    csa = expro.expro_cs/a
+   if csa[0] == 0.0:
+      # csa may be zero if profile=null
+      csa[:] = 1.0
 
    sname = gapystr(expro.expro_name)
    stype = gapystr(expro.expro_type)

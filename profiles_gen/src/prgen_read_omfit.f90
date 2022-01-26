@@ -52,17 +52,17 @@ subroutine prgen_read_omfit
   close(1)
 
   efit_psi  = efit_psi-efit_psi(1)
-  dpsi_data = dpsi(nx)
   dpsi_efit = efit_psi(npsi)
+  dpsi_data = dpsi(nx)
 
   ! Get rho on efit mesh (so have psi,rho,q)
   call prgen_get_chi(npsi,efit_q,efit_psi,efit_rho,torfluxa)
   
-  if (format_type /= 3) then
+  if (format_type /= 3 .and. format_type /= 9) then
      ! We have rho on input grid from prgen_globals
      call cub_spline(efit_rho,efit_psi,npsi,rho,dpsi,nx)
   else
-     ! We have psinorm on input grid (peqdsk) from prgen_globals
+     ! We have psinorm on input grid (peqdsk=3 or genf=9) from prgen_globals
      dpsi = dpsi*dpsi_efit
      call cub_spline(efit_psi,efit_q,npsi,dpsi,q,nx)
      call prgen_get_chi(nx,q,dpsi,rho,torfluxa)
@@ -138,5 +138,16 @@ subroutine prgen_read_omfit
      deallocate(g3rho)
 
   endif
+
+  deallocate(efit_si)
+  deallocate(efit_ci)
+  deallocate(efit_rmin)
+  deallocate(efit_rmaj)
+  deallocate(efit_kappa)
+  deallocate(efit_zmaj)
+  deallocate(efit_psi)
+  deallocate(efit_q)
+  deallocate(efit_p)
+  deallocate(efit_rho)
 
 end subroutine prgen_read_omfit

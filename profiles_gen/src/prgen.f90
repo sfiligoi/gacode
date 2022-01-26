@@ -11,6 +11,7 @@
 !   ITERDBNC    (netCDF iterdb)
 !   SWIM        (plasmastate)
 !   PFILE       (peqdsk)
+!   GENF        (General Fusion)
 !   CORSICA     (Corsica) 
 !   UFILE       (ITPA profile database format)
 !
@@ -127,6 +128,15 @@ program prgen
      format_type = 6
 
      call prgen_read_ufile
+
+  else if (trim(raw_data_type) == 'GENF') then
+
+     ! General Fusion format
+     print '(a)','INFO: (prgen) Assuming GENF (General Fusion) format.'
+
+     format_type = 9
+
+     call prgen_read_genf
 
   else if (trim(raw_data_type) == 'ITERDB') then
 

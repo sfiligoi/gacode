@@ -37,6 +37,7 @@ OBJECTS = prgen_globals.o \
 	  prgen_read_peqdsk.o \
 	  prgen_read_corsica.o \
 	  prgen_read_ufile.o \
+	  prgen_read_genf.o \
 	  prgen_read_inputgacode.o \
 	  prgen_read_inputprofiles.o \
           prgen_swap.o \

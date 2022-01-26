@@ -11,6 +11,8 @@ subroutine prgen_read_corsica
 
   implicit none
 
+  integer, parameter :: corsica_nvals = 81
+
   integer :: i
   real :: index
   character(len=16) :: buf
@@ -18,23 +20,26 @@ subroutine prgen_read_corsica
   ! profile lengths are always the same (I think)
   ! so arrays can be allocated ahead of time
   nx = corsica_nvals
-  call allocate_corsica_vars
 
-  open(unit=1, file=file_state, action='read', status='old')
+  call allocate_corsica_vars
+  call prgen_allocate
+
+  open(unit=1,file=file_state,status='old')
 
   ! skip header
   do 
-     read(1,'(A)',err=10) buf
-     if(buf.eq.'#New time slice ') goto 99
-  end do
+     read(1,'(a)',err=10) buf
+     if (buf == '#New time slice ') goto 99
+  enddo
 10 continue
-  print *, 'Error: could not find time slice data'
+
+  print '(a)','ERROR: (prgen_read_corsica) Could not find time slice data'
   close(1)
   return
 
 99 continue
+
   ! read scalar data
-100 format (1e12.5)
   read(1,100) corsica_time
   read(1,100) corsica_current
   read(1,100) corsica_loop_voltage
@@ -53,27 +58,26 @@ subroutine prgen_read_corsica
   read(1,100) corsica_li3
 
   ! skip comments
-  do i=1, 4
+  do i=1,4
      read(1,*)
-  end do
+  enddo
 
   ! read profiles
-101 format (15e13.5)
-  do i=1, corsica_nvals
-     read(1, 101) index, corsica_rho(i), corsica_r_a(i), corsica_psin(i), &
-          corsica_vl(i), corsica_te(i), corsica_ti(i), corsica_ne(i), &
+  do i=1,nx
+     read(1,101) index, corsica_rho(i), corsica_r_a(i), dpsi(i), &
+          corsica_vl(i), te_kev(i), ti_kev(i), corsica_ne(i), &
           corsica_ndt(i), corsica_nz(i), corsica_nalpha(i), &
-          corsica_zeff(i), corsica_q(i), corsica_j(i), corsica_jbs(i)
-  end do
+          corsica_zeff(i), q(i), corsica_j(i), corsica_jbs(i)
+  enddo
 
   close(1)
   
-  call prgen_allocate
-
-  dpsi(:)   = corsica_psin(:)
   rmin(:)   = 0.0
   rmaj(:)   = 0.0
   rho(:)    = 0.0
   omega0(:) = 0.0
+
+100 format (1e12.5)
+101 format (15e13.5)
 
 end subroutine prgen_read_corsica

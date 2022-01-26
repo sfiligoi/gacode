@@ -60,7 +60,7 @@ subroutine prgen_map_ufile
 
   ! Heating powers
   
-  expro_qohme = ufile_qohm
+  expro_qohme = qohm
   
   expro_qbeami = ufile_qnbii
   expro_qrfi   = ufile_qicrhi+ufile_qechi+ufile_qlhi

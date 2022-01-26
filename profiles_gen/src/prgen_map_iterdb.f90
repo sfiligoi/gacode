@@ -174,7 +174,7 @@ subroutine prgen_map_iterdb
   ! Power densities (q*) : source > 0, sink < 0
   !
   ! Ohmic
-  expro_qohme = 1e-6*onetwo_qohm
+  expro_qohme = qohm
   ! NBI
   expro_qbeame = 1e-6*onetwo_qbeame
   expro_qbeami = 1e-6*onetwo_qbeami

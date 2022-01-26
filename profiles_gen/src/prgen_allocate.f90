@@ -13,6 +13,8 @@ subroutine prgen_allocate
   allocate(omega0(nx))
   allocate(vpolc_exp(nx))
   allocate(vtorc_exp(nx))
+  allocate(te_kev(nx))
+  allocate(ti_kev(nx))
 
   allocate(johm(nx))
   allocate(jbs(nx))
@@ -30,5 +32,6 @@ subroutine prgen_allocate
   allocate(qspow_i(nx))
   allocate(qpow_e(nx))
   allocate(qpow_i(nx))
+  allocate(qohm(nx))
 
 end subroutine prgen_allocate

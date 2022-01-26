@@ -39,7 +39,6 @@ subroutine allocate_iterdb_vars
   allocate(onetwo_hcap(nx)) 
   allocate(onetwo_qbeame(nx)) 
   allocate(onetwo_qrfe(nx)) 
-  allocate(onetwo_qohm(nx)) 
   allocate(onetwo_qrad(nx)) 
   allocate(onetwo_qione(nx)) 
   allocate(onetwo_qioni(nx)) 
