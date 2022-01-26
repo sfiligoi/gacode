@@ -57,16 +57,22 @@ subroutine prgen_read_omfit
 
   ! Get rho on efit mesh (so have psi,rho,q)
   call prgen_get_chi(npsi,efit_q,efit_psi,efit_rho,torfluxa)
-  
-  if (format_type /= 3 .and. format_type /= 9) then
-     ! We have rho on input grid from prgen_globals
-     call cub_spline(efit_rho,efit_psi,npsi,rho,dpsi,nx)
-  else
-     ! We have psinorm on input grid (peqdsk=3 or genf=9) from prgen_globals
+
+  select case (format_type)
+
+  case (3,5,9)
+     ! Statefile (required) supplies psi_norm (dpsi)
+     ! PEQDSK=3, CORSICA=5, GENF=9
      dpsi = dpsi*dpsi_efit
+     ! Get q
      call cub_spline(efit_psi,efit_q,npsi,dpsi,q,nx)
+     ! Get rho
      call prgen_get_chi(nx,q,dpsi,rho,torfluxa)
-  endif
+  case (0,1,2,6,7,8)
+     ! Statefile supplies rho
+     ! Get dpsi
+     call cub_spline(efit_rho,efit_psi,npsi,rho,dpsi,nx)
+  end select
 
   call bound_interp(efit_rho,efit_rmin,npsi,rho,rmin,nx)
   call bound_interp(efit_psi,efit_q,npsi,dpsi,q,nx)

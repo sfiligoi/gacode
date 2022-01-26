@@ -11,7 +11,7 @@ subroutine prgen_read_corsica
 
   implicit none
 
-  integer, parameter :: corsica_nvals = 81
+  integer, parameter :: corsica_nx = 81
 
   integer :: i
   real :: index
@@ -19,7 +19,7 @@ subroutine prgen_read_corsica
 
   ! profile lengths are always the same (I think)
   ! so arrays can be allocated ahead of time
-  nx = corsica_nvals
+  nx = corsica_nx
 
   call allocate_corsica_vars
   call prgen_allocate
@@ -71,11 +71,6 @@ subroutine prgen_read_corsica
   enddo
 
   close(1)
-  
-  rmin(:)   = 0.0
-  rmaj(:)   = 0.0
-  rho(:)    = 0.0
-  omega0(:) = 0.0
 
 100 format (1e12.5)
 101 format (15e13.5)

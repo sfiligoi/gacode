@@ -12,9 +12,6 @@ subroutine prgen_map_corsica
   
   implicit none
 
-  ! Ignore corsica input "rho", "rmin", and "q"; use gato and corsica poloidal flux
-  call prgen_get_chi(nx,q,dpsi,rho,torfluxa)
-
   !---------------------------------------------------------
   ! Map profile data onto single array:
   !
@@ -22,14 +19,14 @@ subroutine prgen_map_corsica
   expro_n_ion = 2
   call expro_init(1)
   !
-  expro_rho(:)       = rho(:)
-  expro_rmin(:)      = rmin(:)
-  expro_rmaj(:)      = rmaj(:)
-  expro_te(:)        = te_kev(:)
-  expro_ne(:)        = corsica_ne(:)*10.0
-  expro_z_eff(:)     = corsica_zeff(:)
-  expro_w0(:)        = 0.0      ! omega
-  expro_ptot(:)      = p_tot(:)
+  expro_rho(:)   = rho(:)
+  expro_rmin(:)  = rmin(:)
+  expro_rmaj(:)  = rmaj(:)
+  expro_te(:)    = te_kev(:)
+  expro_ne(:)    = corsica_ne(:)*10.0
+  expro_z_eff(:) = corsica_zeff(:)
+  expro_w0(:)    = 0.0     
+  expro_ptot(:)  = p_tot(:)
 
   ! Construct ion densities and temperatures assuming corsica ion species
   ! (n D+T) is two species, each with 1/2 n_corsica and same temperature
@@ -40,8 +37,8 @@ subroutine prgen_map_corsica
   expro_type(:) = type_therm
   
   ! ni
-  expro_ni(1,:) = 0.5 * corsica_ndt(:)*10.0
-  expro_ni(2,:) = 0.5 * corsica_ndt(:)*10.0
+  expro_ni(1,:) = 0.5*corsica_ndt(:)*10.0
+  expro_ni(2,:) = 0.5*corsica_ndt(:)*10.0
   
   ! ti
   expro_ti(1,:) = ti_kev(:)
