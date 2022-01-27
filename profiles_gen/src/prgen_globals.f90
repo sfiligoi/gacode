@@ -55,6 +55,8 @@ module prgen_globals
 
   real, allocatable :: te_kev(:)
   real, allocatable :: ti_kev(:)
+  real, allocatable :: ne_e19m3(:)
+  real, allocatable :: ni_e19m3(:)
 
   real, dimension(:), allocatable :: johm
   real, dimension(:), allocatable :: jbs

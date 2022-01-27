@@ -134,7 +134,7 @@ program prgen
      ! General Fusion format
      print '(a)','INFO: (prgen) Assuming GENF (General Fusion) format.'
 
-     format_type = 9
+     format_type = 4
 
      call prgen_read_genf
 
@@ -200,6 +200,8 @@ program prgen
      call prgen_map_plasmastate
   case (3) 
      call prgen_map_peqdsk
+  case (4)
+     call prgen_map_genf
   case (5) 
      call prgen_map_corsica
   case (6)

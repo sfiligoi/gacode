@@ -24,6 +24,7 @@ subroutine prgen_read_genf
   enddo
   close(1)
 
+  call prgen_allocate
   allocate(dummy(nx))
 
   open(unit=1,file=file_state,status='old')
@@ -36,9 +37,18 @@ subroutine prgen_read_genf
           p_tot(i),&
           q(i),&
           te_kev(i),&
-          ti_kev(i)
+          ti_kev(i),&
+          ne_e19m3(i),&
+          ni_e19m3(i)
   enddo
 
-  call prgen_allocate
+  ! Units conversions
+  te_kev = te_kev*1e-3
+  ti_kev = ti_kev*1e-3
+  
+  ne_e19m3 = ne_e19m3*1e-19
+  ni_e19m3 = ni_e19m3*1e-19
 
+  deallocate(dummy)
+  
 end subroutine prgen_read_genf

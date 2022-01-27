@@ -60,7 +60,7 @@ subroutine prgen_read_omfit
 
   select case (format_type)
 
-  case (3,5,9)
+  case (3,4,5)
      ! Statefile (required) supplies psi_norm (dpsi)
      ! PEQDSK=3, CORSICA=5, GENF=9
      dpsi = dpsi*dpsi_efit

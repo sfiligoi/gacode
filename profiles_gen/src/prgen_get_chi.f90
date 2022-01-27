@@ -21,7 +21,7 @@ subroutine prgen_get_chi(nx,q,psi,rho,torfluxa)
   do i=2,nx
      chi_t(i) = chi_t(i-1) + 0.5*(q(i)+q(i-1))*(psi(i)-psi(i-1))
   enddo
-  !
+  ! 
   torfluxa = chi_t(nx)
   !
   ! Normalized root of chi_t:

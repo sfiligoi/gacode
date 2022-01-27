@@ -115,6 +115,8 @@ def prgen_geqdsk(filename):
         slf['PRES'] = pres - pres[-1]
 
     slf['PSI'] = np.linspace(slf['SIMAG'],slf['SIBRY'],len(slf['PRES']))
+
+    print(slf['RCENTR'])
     
     return slf
 

@@ -2,7 +2,7 @@
 ! prgen_map_corsica.f90
 !
 ! PURPOSE:
-!  Map native corsica data onto input.profiles standard.  
+!  Map native CORSICA data onto input.gacode standard
 !------------------------------------------------------------
 
 subroutine prgen_map_corsica
