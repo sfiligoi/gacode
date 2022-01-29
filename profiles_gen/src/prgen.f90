@@ -57,104 +57,73 @@ program prgen
   !
   ! Note that nx will be the experimental vector length in ALL cases:
   !
-  if (trim(raw_data_type) == 'GACODE') then
+  select case (trim(raw_data_type))
 
-     ! Note (we may or may not have gmerge_flag == 1)
-     print '(a)','INFO: (prgen) Assuming input.gacode (GACODE) format.'
-
-     call prgen_read_inputgacode
-
-     format_type = 7
-
-  else if (trim(raw_data_type) == 'LEGACY') then
-
-     ! Note (we may or may not have gmerge_flag == 1)
-     print '(a)','INFO: (prgen) Assuming input.profiles (LEGACY GACODE) format.'
-
-     call prgen_read_inputprofiles
-
-     format_type = 8
-
-  else if (trim(raw_data_type) == 'null') then
-
-     ! Pure gfile parsing
-
+  case('null') ! gfile only
+     print '(a)','INFO: (prgen) Merging gfile data into otherwise empty input.gacode.'
      format_type = 0
-
-     ! Minimal processing required to merge gfile data into otherwise empty input.gacode 
      call prgen_read_null
 
-  else if (trim(raw_data_type) == 'ITERDBNC') then
-
-     ! New NetCDF format
-     print '(a)','INFO: (prgen) Assuming iterdb NetCDF format.'
-
-     format_type = 1
-
-     call prgen_read_iterdb_nc
-
-  else if (trim(raw_data_type) == 'SWIM') then
-
-     ! Plasmastate format
-     print '(a)','INFO: (prgen) Assuming SWIM (plasmastate) format.'
-
-     format_type = 2
-
-     call prgen_read_plasmastate
-
-  else if (trim(raw_data_type) == 'PFILE') then
-
-     ! peqdsk format
-     print '(a)','INFO: (prgen) Assuming PFILE (peqdsk) format.'
-
-     format_type = 3
-
-     call prgen_read_peqdsk
-
-  else if (trim(raw_data_type) == 'CORSICA') then
-
-     ! corsica format
-     print '(a)','INFO: (prgen) Assuming CORSICA format.'
-
-     format_type = 5
-
-     call prgen_read_corsica
-
-  else if (trim(raw_data_type) == 'UFILE') then
-
-     ! UFILE format
-     print '(a)','INFO: (prgen) Assuming UFILE format.'
-
-     format_type = 6
-
-     call prgen_read_ufile
-
-  else if (trim(raw_data_type) == 'GENF') then
-
-     ! General Fusion format
-     print '(a)','INFO: (prgen) Assuming GENF (General Fusion) format.'
-
-     format_type = 4
-
-     call prgen_read_genf
-
-  else if (trim(raw_data_type) == 'ITERDB') then
-
-     ! Old text format
+  case ('ITERDB') ! Old text format
      print '(a)','INFO: (prgen) Assuming old iterdb text format.'
 
      format_type = 1
-
      call prgen_read_iterdb 
 
-  else
+  case ('ITERDBNC') ! New NetCDF format
+     print '(a)','INFO: (prgen) Assuming iterdb NetCDF format.'
 
-     ! No case matched
+     format_type = 1
+     call prgen_read_iterdb_nc
+
+  case ('SWIM') ! Plasmastate format
+     print '(a)','INFO: (prgen) Assuming SWIM (plasmastate) format.'
+
+     format_type = 2
+     call prgen_read_plasmastate
+
+  case ('PFILE') ! peqdsk format
+     print '(a)','INFO: (prgen) Assuming PFILE (peqdsk) format.'
+
+     format_type = 3
+     call prgen_read_peqdsk
+
+  case ('GENF') ! General Fusion format
+     print '(a)','INFO: (prgen) Assuming GENF (General Fusion) format.'
+
+     format_type = 4
+     call prgen_read_genf
+
+  case ('CORSICA') ! corsica format
+     print '(a)','INFO: (prgen) Assuming CORSICA format.'
+
+     format_type = 5
+     call prgen_read_corsica
+
+  case ('UFILE') ! UFILE format
+     print '(a)','INFO: (prgen) Assuming UFILE format.'
+
+     format_type = 6
+     call prgen_read_ufile
+
+  case('GACODE') ! Note (we may or may not have gmerge_flag == 1)
+     print '(a)','INFO: (prgen) Assuming input.gacode (GACODE) format.'
+
+     format_type = 7
+     call prgen_read_inputgacode
+
+  case('LEGACY') ! Note (we may or may not have gmerge_flag == 1)
+     print '(a)','INFO: (prgen) Assuming input.profiles (LEGACY GACODE) format.'
+
+     format_type = 8
+     call prgen_read_inputprofiles
+
+  case default ! No case matched
 
      print '(a)','ERROR: (prgen) Unmatched options.'
      stop
 
-  endif
+  end select
   !--------------------------------------------------------------------
 
   !--------------------------------------------------------------------
