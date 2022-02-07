@@ -90,7 +90,7 @@ subroutine cgyro_write_initdata
 
      write(io,*) 
      write(io,21) 'r/a',rmin,'R/a',rmaj,'q',q,'zmag',zmag,'kappa',kappa   
-     write(io,22) 'shift',shift,'s',s,'dzmag',dzmag,'s_kappa',s_kappa\
+     write(io,22) 'shift',shift,'s',s,'dzmag',dzmag,'s_kappa',s_kappa
      write(io,*)
      if (abs(shape_cos(0))+abs(shape_s_cos(0)) > 1e-6) then
         write(io,23) 'c0',shape_cos(0),'s_c0',shape_s_cos(0)
