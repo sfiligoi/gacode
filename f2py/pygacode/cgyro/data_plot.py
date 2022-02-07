@@ -290,10 +290,10 @@ class cgyrodata_plot(data.cgyrodata):
       if norms == 0:
          s0_ave = average(s0,self.t,w,wmax)
          sn_ave = average(sn,self.t,w,wmax)
-         print('INFO: (plot_phi) sqrt[ <|phi_0|^2> ]/rho_*D = {:.4f}'.format(np.sqrt(s0_ave)))
-         print('INFO: (plot_phi) sqrt[ <|phi_n|^2> ]/rho_*D = {:.4f}'.format(np.sqrt(sn_ave)))
+         print('INFO: (plot_phi) sqrt[       <|phi_0|^2> ]/rho_*D = {:.4f}'.format(np.sqrt(s0_ave)))
+         print('INFO: (plot_phi) sqrt[ <sum_n |phi_n|^2> ]/rho_*D = {:.4f}'.format(np.sqrt(sn_ave)))
          lab0=r'$\sqrt{\left\langle\left|'+ft+r'_0\right|^2\right\rangle}/\rho_{*D}$'
-         labn=r'$\sqrt{\left\langle\left|'+ft+r'_n\right|^2\right\rangle}/\rho_{*D}$'
+         labn=r'$\sqrt{\left\langle\sum_{n>0} \left|'+ft+r'_n\right|^2\right\rangle}/\rho_{*D}$'
          ax.plot(self.t,np.sqrt(s0),label=lab0,linewidth=2)
          ax.plot(self.t,np.sqrt(sn),label=labn)
          ax.plot(self.t[imin:imax+1],np.sqrt(s0_ave)*s,'--k')
@@ -301,10 +301,10 @@ class cgyrodata_plot(data.cgyrodata):
       else:
          y0_ave = average(y0,self.t,w,wmax)
          yn_ave = average(yn,self.t,w,wmax)
-         print('INFO: (plot_phi) <|phi_0|>/rho_*D = {:.4f}'.format(y0_ave))
-         print('INFO: (plot_phi) <|phi_n|>/rho_*D = {:.4f}'.format(yn_ave))
+         print('INFO: (plot_phi)       <|phi_0|>/rho_*D = {:.4f}'.format(y0_ave))
+         print('INFO: (plot_phi) <sum_n |phi_n|>/rho_*D = {:.4f}'.format(yn_ave))
          lab0=r'$\left\langle \left|'+ft+r'_0\right|\right\rangle/\rho_{*D}$'
-         labn=r'$\left\langle \left|'+ft+r'_n\right|\right\rangle/\rho_{*D}$'
+         labn=r'$\left\langle \sum_{n>0} \left|'+ft+r'_n\right|\right\rangle/\rho_{*D}$'
          ax.plot(self.t,y0,label=lab0,linewidth=2)
          ax.plot(self.t,yn,label=labn)
          ax.plot(self.t[imin:imax+1],y0_ave*s,'--k')
@@ -315,7 +315,7 @@ class cgyrodata_plot(data.cgyrodata):
          ax.set_ylim(top=float(ymax))
       if ymin != 'auto':
          ax.set_ylim(bottom=float(ymin))
-      ax.legend(loc=4)
+      ax.legend(loc=3)
     
       head = '(cs/a) t     Phi_0/rho_*    Phi_n/rho_*'
 
@@ -438,6 +438,8 @@ class cgyrodata_plot(data.cgyrodata):
 
    def plot_shift(self,w=0.5,wmax=0.0,theta=0.0,ymin='auto',ymax='auto',fig=None):
 
+      import time
+
       if fig is None:
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
       
@@ -468,34 +470,39 @@ class cgyrodata_plot(data.cgyrodata):
       y = np.zeros([nn])
       x = np.zeros([nx])
 
+      ivec = []
       for i in range(nx):
          x[i] = i*2*np.pi/nx-np.pi
-
+         if abs(x[i]) < np.pi/2:
+            ivec.append(i)
+         
       f,ft = self.kxky_select(theta,0,'phi',0)
 
+      print('INFO: (plot_shift) This could take a while!')
       for n in range(nn):
 
+         start = time.time()
          # phi[p,t]
          phit = f[:,n,:]
 
          phi  = np.zeros([nx,nt],dtype=np.complex_)
          phip = np.zeros([nx,nt],dtype=np.complex_)
-         phis = np.zeros([nx,nt],dtype=np.complex_)
 
-         for p in range(-nx//2,nx//2):
-            for i in range(nx):
-               if abs(x[i]) < np.pi/2: 
-                  u = phit[p+nx//2,:]*np.exp(1j*p*x[i]) 
-                  phi[i,:]  = phi[i,:]+u[:] 
-                  phis[i,:] = phis[i,:]+np.conj(u[:]) 
-                  phip[i,:] = phip[i,:]-p*u[:] 
+         for i in ivec:
+            for p in range(-nx//2,nx//2):
+               u = phit[p+nx//2,:]*np.exp(1j*p*x[i]) 
+               phi[i,:]  = phi[i,:]+u[:] 
+               phip[i,:] = phip[i,:]-p*u[:] 
 
-         pn = average(np.sum(phis[:,:]*phip[:,:],axis=0),t,w,0.0)
-         pd = average(np.sum(phis[:,:]*phi[:,:],axis=0),t,w,0.0)
+         pn = average(np.sum(np.conj(phi[:,:])*phip[:,:],axis=0),t,w,0.0)
+         pd = average(np.sum(np.conj(phi[:,:])*phi[:,:],axis=0),t,w,0.0)
 
          ky[n] = self.ky[n]
          y[n] = (2*np.pi/self.length)*np.real(pn/pd)
-   
+
+         dt = 'TIME = '+'{:.3e}'.format(time.time()-start)+' s.'
+         print(n,dt)
+         
       ax.plot(ky,y)
 
       if ymax != 'auto':
@@ -518,7 +525,7 @@ class cgyrodata_plot(data.cgyrodata):
       t  = self.t
       k0 = self.kx[0]
 
-      print('INFO: (plot_zf.py) Using index theta index n_theta/3+1')
+      print('INFO: (plot_zf) Using index theta index n_theta/3+1')
       if field == 0:
          f = self.phib[0,self.n_theta//3,:]
       elif field == 1:
@@ -1128,13 +1135,13 @@ class cgyrodata_plot(data.cgyrodata):
          y = np.sum(abs(f[:,:,:]),axis=1)/self.rho
          for j in range(nx):
             ave[j] = average(y[j,:],self.t,w,wmax)
-         ax.set_ylabel(r'$\overline{'+ft+'_\mathrm{tot}}/\\rho_s$',color='k')
+         ax.set_ylabel(r'$\left\langle \sum_n \left|'+ft+r'_n\right|\right\rangle/\rho_{*D}$')
          ax.step(kx+dk/2,ave[:],color=color[0])
       else:
          y = np.zeros([nx,self.n_time])
          nvec = str2list(nstr)
          print('INFO: (plot_kx_phi) n = '+str(nvec))
-         ax.set_ylabel(r'$\overline{'+ft+'_n}/\\rho_s$',color='k')
+         ax.set_ylabel(r'$\left\langle\left|'+ft+r'_n\right|\right\rangle/\rho_{*D}$')
          for n in nvec:
             num = r'$n='+str(n)+'$'
             ave[:] = average_n(abs(f[:,n,:]),self.t,w,wmax,nx)
