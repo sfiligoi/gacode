@@ -14,7 +14,7 @@ NUMAS_PER_NODE=2
 FFTW_INC=${OLCF_FFTW_ROOT}/include
 LAPACK=${OLCF_PGI_ROOT}/linuxpower/20.4/lib
 
-FC=mpif90 -m64 -module ${GACODE_ROOT}/modules -Mpreprocess -DUSE_INLINE -fpic -Mhugetlb
+FC=mpif90 -m64 -module ${GACODE_ROOT}/modules -Mpreprocess -DUSE_INLINE -fpic -Mhugetlb -Mdefaultunit
 
 # -DDISABLE_GPUDIRECT_MPI to disable GPU
 

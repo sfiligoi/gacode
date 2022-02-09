@@ -9,7 +9,7 @@ CORES_PER_NODE=128
 NUMAS_PER_NODE=4
 
 # Fortran 90/95 compiler
-FC = ftn -module ${GACODE_ROOT}/modules -Mpreprocess -DUSE_INLINE -craype-verbose
+FC = ftn -module ${GACODE_ROOT}/modules -Mpreprocess -DUSE_INLINE -craype-verbose -Mdefaultunit
 
 # Fortran 77 compiler
 F77 = ${FC}
