@@ -30,7 +30,7 @@ clean:
 	cd expro ; make clean
 	cd module ; make clean
 	cd test ; make clean
-	rm -rf dist build MANIFEST sgn.pyf pygacode/lib
+	rm -rf dist build MANIFEST sgn.pyf pygacode/lib *-info
 	cd ${GACODE_ROOT}/f2py/pygacode ; rm -rf gacode *-info *.so
 
 .IGNORE:
