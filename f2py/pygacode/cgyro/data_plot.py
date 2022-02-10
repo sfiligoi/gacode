@@ -940,7 +940,7 @@ class cgyrodata_plot(data.cgyrodata):
       fig.tight_layout(pad=0.3)
 
    def plot_ky_flux(self,w=0.5,wmax=0.0,field=0,moment='e',ymin='auto',ymax='auto',
-                    fc=0,ftype='screen',diss=0,fig=None,cflux='auto'):
+                    fc=0,ftype='screen',diss=0,bar=True,fig=None,cflux='auto'):
 
       if self.n_n == 1:
          raise ValueError('(plot_ky_flux.py) Plot not available with a single mode.')
@@ -1022,15 +1022,22 @@ class cgyrodata_plot(data.cgyrodata):
             ax.set_xlabel(xlabel)
             ax.set_ylabel(r'$'+mtag+'_'+u+'$',color='k')
             ax.set_title(windowtxt)
-            ax.bar(ky,ave[:,ispec],width=dk/1.1,color=color[ispec],
-                   alpha=0.5,edgecolor='black',align='center')
-         
+            if bar == True:
+               ax.bar(ky,ave[:,ispec],width=dk/1.1,color=color[ispec],
+                      alpha=0.5,edgecolor='black',align='center')
+               # Set axis ranges
+               ax.set_xlim([0,ky[-1]+dk])
+            else:
+               ax.grid(which="both",ls=":")
+               ax.grid(which="major",ls=":")
+               ax.set_xscale('log')
+               ax.set_yscale('log')
+               ax.plot(ky[1:],ave[1:,ispec],'-o',color=color[ispec])
+               
             # Dissipation curve             
             if diss == 1:
                ax.plot(ky,self.alphadiss*ax.get_ylim()[1]*0.5,linewidth=2,color='k',alpha=0.2)
 
-            # Set axis ranges
-            ax.set_xlim([0,ky[-1]+dk])
             if ymax != 'auto':
                ax.set_ylim(top=float(ymax))
             if ymin != 'auto':

@@ -147,6 +147,9 @@ then
   echo "         -norms"
   echo "         Toggle ABS rather than RMS normalization in -plot phi"  
   echo
+  echo "         -nobar"
+  echo "         Don't use barplot for -plot ky_flux"  
+  echo
   echo "OPTIONS FOR -plot fluct, -vis"
   echo
   echo "         -nomp <threads>"
@@ -293,6 +296,7 @@ PY=800
 DISS=0
 NORM='elec'
 NO_RMS=0
+BAR=1
 
 CFLUX=auto
 DN=1
@@ -326,6 +330,7 @@ while [ $# -gt 0 ] ; do
   -fc) FC=1 ;;
 
   -diss) DISS=1 ;;
+  -nobar) BAR=0 ;;
   -notex) TEX=0 ;;
   -norms) NO_RMS=1 ;;
   -norm) shift ; NORM=$1 ;;
@@ -459,7 +464,7 @@ case "$PLOT_TYPE" in
         python $PLT $PLOT_TYPE $W $WMAX $FIELD $MOMENT $YMIN $YMAX $FC $EXT $LOC $NSCALE $CFLUX $NORM ;;
 
    ky_flux)
-	python $PLT $PLOT_TYPE $W $WMAX $FIELD $MOMENT $YMIN $YMAX $FC $EXT $DISS $CFLUX ;;
+	python $PLT $PLOT_TYPE $W $WMAX $FIELD $MOMENT $YMIN $YMAX $FC $EXT $DISS $BAR $CFLUX ;;
 
    phi)
 	python $PLT $PLOT_TYPE $W $WMAX $FIELD $THETA $YMIN $YMAX $NO_RMS $EXT ;;
