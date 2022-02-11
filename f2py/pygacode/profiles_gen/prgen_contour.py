@@ -264,6 +264,12 @@ def prgen_contour(geqdsk,nrz,levels,psinorm,narc,quiet):
             r=path.vertices[::-1,0] ; r[-1] = r[0]
             z=path.vertices[::-1,1] ; z[-1] = z[0]
 
+            if len(r) < 50:
+               print('WARNING: (prgen_contour) Rejecting short contour')
+               path=item1[-2]
+               r=path.vertices[::-1,0] ; r[-1] = r[0]
+               z=path.vertices[::-1,1] ; z[-1] = z[0]
+
             # check for contour above/below separatrix
             if np.average(z) > np.max(sep[:,1]) or np.average(z) < np.min(sep[:,1]):
                 kbad.append(k)
