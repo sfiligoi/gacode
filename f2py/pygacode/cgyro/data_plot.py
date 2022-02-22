@@ -1197,7 +1197,7 @@ class cgyrodata_plot(data.cgyrodata):
          i0 = self.n_theta-1
 
       if self.n_radial > 1:
-         n0 = (self.n_radial/2)*self.n_theta+i0
+         n0 = (self.n_radial//2)*self.n_theta+i0
          x = self.thetab/np.pi
       else:
          n0 = self.n_theta/3
@@ -1217,7 +1217,7 @@ class cgyrodata_plot(data.cgyrodata):
          if row == 0:
             ie = 0
          if row == 1:
-            ie = self.n_energy/2
+            ie = self.n_energy//2
          if row == 2:
             ie = self.n_energy-1
 
@@ -1229,7 +1229,7 @@ class cgyrodata_plot(data.cgyrodata):
          ax.set_ylabel(r'$\xi = v_\parallel/v$')
 
          hp = np.transpose(np.array(self.hb[0,:,spec,:,ie,itime]))
-         h_norm = 0.5*(hp[self.n_xi/2-1,n0]+hp[self.n_xi/2,n0])
+         h_norm = 0.5*(hp[self.n_xi//2-1,n0]+hp[self.n_xi//2,n0])
          hp = hp/h_norm
          hmin = hp.min()
          hmax = hp.max()
