@@ -222,6 +222,9 @@ then
    echo "             -loc_psi <psi_N>"
    echo "             Reference psi_N=psi/psi(a)"
    echo
+   echo "             -nion <int>"
+   echo "             Number of ions to retain"
+   echo
    echo "             -qn"
    echo "             Toggle quasineutrality."
    echo
