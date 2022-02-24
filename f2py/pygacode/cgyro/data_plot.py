@@ -485,8 +485,8 @@ class cgyrodata_plot(data.cgyrodata):
          # phi[p,t]
          phit = f[:,n,:]
 
-         phi  = np.zeros([nx,nt],dtype=np.complex_)
-         phip = np.zeros([nx,nt],dtype=np.complex_)
+         phi  = np.zeros([nx,nt],dtype=complex)
+         phip = np.zeros([nx,nt],dtype=complex)
 
          for i in ivec:
             for p in range(-nx//2,nx//2):
