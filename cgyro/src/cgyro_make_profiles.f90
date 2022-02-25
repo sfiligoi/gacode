@@ -403,6 +403,12 @@ subroutine cgyro_make_profiles
   else
      sign_qs = 1
   endif
+
+  if (q*rho < 0.0) then
+     call cgyro_info('Ion direction: omega > 0') 
+  else
+     call cgyro_info('Ion direction: omega < 0') 
+  endif
   !-------------------------------------------------------------
 
   !------------------------------------------------------------------------
