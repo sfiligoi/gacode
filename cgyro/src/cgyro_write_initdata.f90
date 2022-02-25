@@ -13,7 +13,7 @@ subroutine cgyro_write_initdata
   implicit none
 
   integer :: p,in,is,it
-  real :: kymax
+  real :: kymax,kyrat,dn
   real, external :: spectraldiss
   character(len=7),dimension(4) :: sv 
 
@@ -117,9 +117,23 @@ subroutine cgyro_write_initdata
      enddo
 
      if (profile_model == 2) then
+        dn = rho/(rhos/a_meters)
+        kyrat = abs(q/rmin*rhos/a_meters)
         write(io,*)
-        write(io,10) '           a[m]:',a_meters,'  b_unit[T]:',b_unit,  '     rhos/a:',rhos/a_meters,' dn:',rho/(rhos/a_meters)
+        write(io,10) '           a[m]:',a_meters,'  b_unit[T]:',b_unit,  '     rhos/a:',rhos/a_meters,' dn:',dn
         write(io,10) 'n_norm[e19/m^3]:',dens_norm,'v_norm[m/s]:',vth_norm,'T_norm[keV]:',temp_norm
+        write(io,*)
+        write(io,'(t2,a)') ' n = 1         2         3         4         5         6         7         8'      
+        write(io,'(t2,a,8(1pe9.3,1x))') 'KY = ',kyrat,2*kyrat,3*kyrat,4*kyrat,5*kyrat,6*kyrat,7*kyrat,8*kyrat        
+        write(io,'(t2,a,8(1pe9.3,1x))') 'LY = ',&
+             2*pi/kyrat,&
+             2*pi/(2*kyrat),&
+             2*pi/(3*kyrat),&
+             2*pi/(4*kyrat),&
+             2*pi/(5*kyrat),& 
+             2*pi/(6*kyrat),& 
+             2*pi/(7*kyrat),& 
+             2*pi/(8*kyrat) 
      endif
      write(io,*)
 
