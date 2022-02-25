@@ -216,22 +216,24 @@ subroutine cgyro_make_profiles
              * sqrt(mass_ele/mass(is)) * (temp_ele/temp(is))**1.5
      enddo
 
-     ! Always compute beta_* consistently
-     call set_betastar
-
      ! Re-scaling
-     lambda_star      = lambda_star * lambda_star_scale
-     gamma_e          = gamma_e      * gamma_e_scale
-     gamma_p          = gamma_p      * gamma_p_scale
-     mach             = mach         * mach_scale    
-     beta_star(0)     = beta_star(0) * beta_star_scale
-     betae_unit       = betae_unit   * betae_unit_scale
+     lambda_star      = lambda_star   * lambda_star_scale
+     gamma_e          = gamma_e       * gamma_e_scale
+     gamma_p          = gamma_p       * gamma_p_scale
+     mach             = mach          * mach_scale    
+     betae_unit       = betae_unit    * betae_unit_scale
      do is=1,n_species
         dlnndr(is) = dlnndr(is)  * dlnndr_scale(is) 
         dlntdr(is) = dlntdr(is)  * dlntdr_scale(is)  
         nu(is)     = nu(is)      * nu_ee_scale
      enddo
 
+     ! Set beta_* consistent with re-scaled beta and gradients and then re-scale
+     ! note: beta_star(0) will be over-written with sonic rotation
+     call set_betastar
+     beta_star(0)     = beta_star(0)  * beta_star_scale
+     beta_star_fac    = beta_star_fac * beta_star_scale
+     
   else
 
      a_meters      = 0.0
@@ -286,9 +288,11 @@ subroutine cgyro_make_profiles
 
      enddo
 
-     ! Always compute beta_* consistently
+     ! Always compute beta_* consistently with parameters in input.cgyro and then re-scale
+     ! note: beta_star(0) will be over-written with sonic rotation
      call set_betastar
-     beta_star(0) = beta_star(0)*beta_star_scale
+     beta_star(0)   = beta_star(0)  * beta_star_scale
+     beta_star_fac  = beta_star_fac * beta_star_scale
 
   endif
 
@@ -477,6 +481,6 @@ subroutine set_betastar
   endif
   beta_star(0)  = beta_star(0)*betae_unit
   ! 8*pi/Bunit^2 * scaling factor
-  beta_star_fac = -betae_unit/(dens_ele*temp_ele)*beta_star_scale  
+  beta_star_fac = -betae_unit/(dens_ele*temp_ele)
   
 end subroutine set_betastar
