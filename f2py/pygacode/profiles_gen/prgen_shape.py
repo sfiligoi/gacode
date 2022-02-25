@@ -186,34 +186,12 @@ def plot_ang(r,z,x,vr,xr,cr,sr,outfile):
 
     # Data
     ax.plot(r,z,'--k',linewidth=1)
-
-    # Parameterized contour
-    #rp = rmaj+rmin*np.cos(x+pr)
-    #zp = zmaj+zmin*np.sin(x)
-    #ax.plot(rp,zp,'-m',linewidth=1)
-
-    #True area
-    #area1 = 0.0
-    #for i in range(len(r)-1):
-    #   area1 = area1 + 0.5*(r[i]+r[i+1])*(z[i+1]-z[i])
-
-    # Fit area
-    #area2 = 0.0
-    #for i in range(len(rp)-1):
-    #   area2 = area2 + 0.5*(rp[i]+rp[i+1])*(zp[i+1]-zp[i])
-
-    #inflate = np.sqrt(area1/area2)
-    #rmin = inflate*rmin
-    #zmin = inflate*zmin
-    #rmaj = inflate*rmaj
-    #zmaj = inflate*zmaj
-    #print(inflate)
     
-     # Parameterized contour
+    # Parameterized contour
     rp = rmaj+rmin*np.cos(x+pr)
     zp = zmaj+zmin*np.sin(x)
     ax.plot(rp,zp,'-g',linewidth=1)
-   #-------------------------------------------------------
+    #-------------------------------------------------------
     
     # PLOT angle 
     ax = fig.add_subplot(122)
