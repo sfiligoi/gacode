@@ -195,9 +195,6 @@ subroutine gftm_read_input
   read(1,*) gftm_p_prime_loc_in
   read(1,*) gftm_kx0_loc_in
 
-  ! Set threshold for gftm-NN execution versus full gftm calculation
-  read(1,*) gftm_nn_max_error_in
-
   close(1)
 
 end subroutine gftm_read_input

@@ -71,7 +71,7 @@ RUNBASE='out.gftm.run'
 VERBASE='out.gftm.version'
 #
 SIMROOT=$PWD
-GLFTM_DIR=$GACODE_ROOT/gftm
+GFTM_DIR=$GACODE_ROOT/gftm
 # Parallelization parameters
 NPROC=1
 NOMP=1
