@@ -40,7 +40,7 @@ if nx < 0:
 else:
    usefft = False
 
-epx = np.zeros([nx,nr],dtype=np.complex)
+epx = np.zeros([nx,nr],dtype=complex)
 x = np.zeros([nx])
 
 itheta = theta_indx(theta,nth)
@@ -83,7 +83,7 @@ def maptoreal_fft(nr,nx,c):
    import numpy as np
    import time
 
-   d = np.zeros([nx],dtype=np.complex)
+   d = np.zeros([nx],dtype=complex)
 
    # Mapping
    # d[ ix,0 ] = c[ ix,0]
