@@ -150,6 +150,10 @@ then
   echo "         -nobar"
   echo "         Don't use barplot for -plot ky_flux"  
   echo
+  echo "         -deriv"
+  echo "         Plot second derivative"  
+  echo "         *Affects: kx_phi"  
+  echo
   echo "OPTIONS FOR -plot fluct, -vis"
   echo
   echo "         -nomp <threads>"
@@ -297,6 +301,7 @@ DISS=0
 NORM='elec'
 NO_RMS=0
 BAR=1
+DERIV=0
 
 CFLUX=auto
 DN=1
@@ -329,6 +334,7 @@ while [ $# -gt 0 ] ; do
 
   -fc) FC=1 ;;
 
+  -deriv) DERIV=1 ;;
   -diss) DISS=1 ;;
   -nobar) BAR=0 ;;
   -notex) TEX=0 ;;
@@ -479,7 +485,7 @@ case "$PLOT_TYPE" in
 	python $PLT $PLOT_TYPE $FIELD $THETA $YMIN $YMAX $N $NORM $EXT ;;
 
    kx_phi)
-	python $PLT $PLOT_TYPE $FIELD $THETA $W $WMAX $YMIN $YMAX $N $EXT $DISS ;;
+	python $PLT $PLOT_TYPE $FIELD $THETA $W $WMAX $YMIN $YMAX $N $EXT $DISS $DERIV ;;
 
    kxky_phi | rcorr_phi)
 	python $PLT $PLOT_TYPE $FIELD $MOMENT $SPECIES $THETA $W $WMAX $EXT ;;

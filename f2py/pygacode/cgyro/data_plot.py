@@ -1110,7 +1110,7 @@ class cgyrodata_plot(data.cgyrodata):
       return
    
       
-   def plot_kx_phi(self,field=0,theta=0.0,w=0.5,wmax=0.0,ymin='auto',ymax='auto',nstr='null',diss=0,fig=None):
+   def plot_kx_phi(self,field=0,theta=0.0,w=0.5,wmax=0.0,ymin='auto',ymax='auto',nstr='null',diss=0,deriv=False,fig=None):
 
       if fig is None:
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
@@ -1137,12 +1137,18 @@ class cgyrodata_plot(data.cgyrodata):
       ax.set_xlabel(xlabel)
 
       f,ft = self.kxky_select(theta,field,'phi',0)
-  
+
+      if deriv:
+         dfac = kx**2
+      else:
+         dfac = 1
+      
       if nstr == 'null':
          y = np.sum(abs(f[:,:,:]),axis=1)/self.rho
          for j in range(nx):
             ave[j] = average(y[j,:],self.t,w,wmax)
          ax.set_ylabel(r'$\left\langle \sum_n \left|'+ft+r'_n\right|\right\rangle/\rho_{*D}$')
+         ave = dfac*ave
          ax.step(kx+dk/2,ave[:],color=color[0])
       else:
          y = np.zeros([nx,self.n_time])
@@ -1151,7 +1157,7 @@ class cgyrodata_plot(data.cgyrodata):
          ax.set_ylabel(r'$\left\langle\left|'+ft+r'_n\right|\right\rangle/\rho_{*D}$')
          for n in nvec:
             num = r'$n='+str(n)+'$'
-            ave[:] = average_n(abs(f[:,n,:]),self.t,w,wmax,nx)
+            ave[:] = dfac*average_n(abs(f[:,n,:]),self.t,w,wmax,nx)
             ax.step(kx+dk/2,ave[:],label=num)
             if self.n_n > 16:
                ax.legend(loc=4, ncol=5, prop={'size':12})

@@ -261,9 +261,10 @@ elif plot_type == 'kx_phi':
    ymax  = sys.argv[7]
    nstr  = sys.argv[8]
    ftype = sys.argv[9]
-   diss = int(sys.argv[10])
-
-   head = data_in.plot_kx_phi(field=field,theta=theta,w=w,wmax=wmax,ymin=ymin,ymax=ymax,nstr=nstr,diss=diss)
+   diss  = int(sys.argv[10])
+   deriv = bool(int(sys.argv[11]))
+   
+   head = data_in.plot_kx_phi(field=field,theta=theta,w=w,wmax=wmax,ymin=ymin,ymax=ymax,nstr=nstr,diss=diss,deriv=deriv)
 
    outfile = 'out.cgyro.kx_phi.'+ftype
 
