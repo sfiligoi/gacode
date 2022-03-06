@@ -562,11 +562,17 @@ class cgyrodata_plot(data.cgyrodata):
          for p in range(nx):
             phi[p,:] = f[p,n,:]
             phip[p,:] = -(p-nx//2)*f[p,n,:]
- 
+
+         # NOTE: We use *inverse* FFT (ifft) for correct +sign convention of
+         #       the exponent. Also note order convention:
+         #       - a[0] = p=0
+         #       - a[1:nx/2] = p > 0
+         #       - a[nx/2:n] = p < 0
+         
          # Shift in -gamma domain (standard order: p=0 is 0th index)
          phi_T = np.fft.ifft(np.fft.ifftshift(phi,axes=0),axis=0)
          phip_T = np.fft.ifft(np.fft.ifftshift(phip,axes=0),axis=0)
-
+ 
          i1 = nx//4 ; i2 = (3*nx)//4
 
          pn = average(np.sum(np.conj(phi_T[i1:i2,:])*phip_T[i1:i2,:],axis=0),t,w,0.0)
