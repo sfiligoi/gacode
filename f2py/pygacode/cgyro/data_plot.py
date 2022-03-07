@@ -1239,7 +1239,6 @@ class cgyrodata_plot(data.cgyrodata):
          jm[m,:] = sp.jv(m,pvec)
       
       for n in range(self.n_n):
-         print(n)
          phip[:] = average_n(np.real(f[:,n,:]),self.t,w,wmax,nx)+1j*average_n(np.imag(f[:,n,:]),self.t,w,wmax,nx)
          psum = np.dot(jm,phip)
          for m in range(nm):
