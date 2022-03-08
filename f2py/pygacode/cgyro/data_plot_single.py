@@ -209,8 +209,6 @@ elif plot_type == 'ky_flux':
    diss   = int(sys.argv[10])
    bar    = bool(int(sys.argv[11]))
    cflux  = sys.argv[12]
-
-   print(bar,diss)
    
    if ftype == 'nox' or ftype == 'dump':
        doplot = False

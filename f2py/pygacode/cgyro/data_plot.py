@@ -1034,10 +1034,16 @@ class cgyrodata_plot(data.cgyrodata):
       t  = self.t
 
       if fig is None and ftype != 'nox':
-         fig = plt.figure(MYDIR,figsize=(self.ly*ns,self.ly))
+         if ns < 4:
+            nrow = 1 ; ncol = ns
+         elif ns == 4:
+            nrow = 2 ; ncol = 2
+         elif ns > 4:
+            nrow = 2 ; ncol = 3
+         fig = plt.figure(MYDIR,figsize=(self.ly*ncol,self.ly*nrow))
 
       usec = self.getflux(cflux)
-
+      
       ky  = self.ky
       ave = np.zeros((self.n_n,ns))
 
@@ -1078,7 +1084,7 @@ class cgyrodata_plot(data.cgyrodata):
       # Determine tmin
       imin,imax=iwindow(t,w,wmax)
 
-      color = ['m','k','b','c']
+      color = ['magenta','k','blue','cyan','red','green']
 
       if usec:
          cstr = '~\mathrm{(central)}'
@@ -1103,7 +1109,8 @@ class cgyrodata_plot(data.cgyrodata):
       for ispec in range(ns):
          u = specmap(self.mass[ispec],self.z[ispec])
          if not ftype == 'nox':
-            ax = fig.add_subplot(1,ns,ispec+1)
+            ax = fig.add_subplot(nrow,ncol,ispec+1)
+               
             ax.set_xlabel(xlabel)
             ax.set_ylabel(r'$'+mtag+'_'+u+'$',color='k')
             ax.set_title(windowtxt)
