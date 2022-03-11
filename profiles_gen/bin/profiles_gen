@@ -285,7 +285,7 @@ BTCCW=0
 
 # OMFIT mapper variables
 EFIT=0
-NRZ=1600
+NRZ=1
 NPSI=200
 NARC=600
 NHARM=5
