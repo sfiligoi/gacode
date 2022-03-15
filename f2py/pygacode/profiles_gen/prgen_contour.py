@@ -64,7 +64,7 @@ def prgen_contour(g,mag,nc,psinorm,narc):
    #    (ixc,iyc)=contour, (ixa,iya)=axis, (ixs,iys)=separatrix
    dpsi = psi1-psi0
    z0 = psi1-0.5*dpsi
-   dz = dpsi/4
+   dz = dpsi/20
    tol = 1e-14
    err = 1.0
    while dz > tol:
@@ -75,8 +75,10 @@ def prgen_contour(g,mag,nc,psinorm,narc):
          if contour[0,0] == contour[-1,0] and contour[0,1] == contour[-1,1]:
             ixc = contour[:,1] ; iyc = contour[:,0]
             if min(ixc) < ixa < max(ixc) and min(iyc) < iya < max(iyc):
+               print((max(ixc)-min(ixc))/dz)
                found = 1
                ixs = ixc ; iys = iyc
+               
       if found == 0:
          z0 = z0-dz
          dz = dz/2
@@ -112,7 +114,6 @@ def prgen_contour(g,mag,nc,psinorm,narc):
                # Arc length
                dl = np.sqrt(np.diff(ixc)**2+np.diff(iyc)**2)
                larc = np.zeros([len(ixc)]) ; larc[1:] = np.cumsum(dl)
-
                # Cubic interpolation from fine contour mesh to coarse t-mesh
                t = np.linspace(0,1,narc)*larc[-1]
                cs = interpolate.splrep(larc,ixc,per=True) ; r=interpolate.splev(t,cs) 
