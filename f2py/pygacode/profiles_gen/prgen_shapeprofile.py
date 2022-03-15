@@ -10,22 +10,24 @@ from .prgen_shape import *
 
 if len(sys.argv) > 1:
    gfile   = sys.argv[1]
-   nrz     = int(sys.argv[2])
+   mag     = int(sys.argv[2])
    narc    = int(sys.argv[3])
    npsi    = int(sys.argv[4])
    nharm   = int(sys.argv[5])
    nfourier = int(sys.argv[6])
    plotpng = bool(int(sys.argv[7]))
 else:
-   print('Usage: python prgen_shapeprofile.py <gfile> <nrz> <narc> <npsi> <nfourier>')
+   print('Usage: python prgen_shapeprofile.py <gfile> <mag> <narc> <npsi> <nfourier>')
    sys.exit()
 
 efit = prgen_geqdsk(gfile)
+psi0 = efit['SIMAG']
+psi1 = efit['SIBRY']
 
-# Call OMFIT mapper
-ri,zi,psi,p,fpol,qe,q = prgen_contour(efit,mult=nrz,nc=npsi,psinorm=0.999,narc=narc,quiet=False)
+# Call GACODE mapper (uses n=npsi-1 and excludes magnetic axis)
+ri,zi,psi,p,fpol,q = prgen_contour(efit,mag=mag,nc=npsi,psinorm=0.997,narc=narc)
 
-pnorm = ((psi[:]-psi[0])/(psi[-1]-psi[0]))
+pnorm = (psi[:]-psi0)/(psi1-psi0)
 rnorm = np.sqrt(pnorm)
 
 # ci -> cos terms
@@ -38,16 +40,17 @@ nf = nharm
 ci = np.zeros([nf+1,npsi])
 si = np.zeros([nf+1,npsi])
 xi = np.zeros([4,npsi])
-for i in range(npsi-1):
-   r=ri[:,i+1] ; z=zi[:,i+1]
-   if i > npsi-10 and plotpng:
-      xplot = pnorm[i+1]
+for i in range(1,npsi):
+   r=ri[:,i] ; z=zi[:,i]
+   if plotpng:
+      xplot = pnorm[i]
    else:
       xplot = 0.0
    cr,sr,xr = prgen_shape(r,z,narc,nf,xplot)
-   ci[:,i+1] = cr[:]
-   si[:,i+1] = sr[:]
-   xi[:,i+1] = xr[:]
+   # Use i+1 to make room for magnetic axis (i=0)
+   ci[:,i] = cr[:]
+   si[:,i] = sr[:]
+   xi[:,i] = xr[:]
 
 # Repair functions near origin
 

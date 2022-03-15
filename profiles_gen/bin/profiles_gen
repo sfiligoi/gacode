@@ -153,8 +153,8 @@ then
    echo "             -npsi <int>"
    echo "              Number of flux-surfaces to contour (default=200)"
    echo
-   echo "             -nrz <int>"
-   echo "              R-Z resolution for psi contours (default=1600)"
+   echo "             -mag <int>"
+   echo "              Resolution multiplier for EFIT contouring (default=2)"
    echo
    echo "             -narc <int>"
    echo "              Equal-arc contour points (default=600)"
@@ -285,7 +285,7 @@ BTCCW=0
 
 # OMFIT mapper variables
 EFIT=0
-NRZ=1
+MAG=2
 NPSI=200
 NARC=600
 NHARM=5
@@ -351,7 +351,7 @@ while [ $# -gt 0 ] ; do
 
   -n_null) shift ; N_NULL=$1 ;;
 
-  -nrz) shift ; NRZ=$1 ;;
+  -mag) shift ; MAG=$1 ;;
   -narc) shift ; NARC=$1 ;;
   -npsi) shift ; NPSI=$1 ;;
 
@@ -684,7 +684,7 @@ echo $TRUE_AUX_FLAG >> $CONFIG
 
 #==============================================================
 if [ $EFIT -eq 1 ] ; then
-   python $OMFIT $GFILE $NRZ $NARC $NPSI $NHARM $NFOURIER $PLOTPNG
+   python $OMFIT $GFILE $MAG $NARC $NPSI $NHARM $NFOURIER $PLOTPNG
 fi
 #==============================================================
 
