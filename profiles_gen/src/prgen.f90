@@ -12,13 +12,9 @@
 !   SWIM        (plasmastate)
 !   PFILE       (peqdsk)
 !   GENF        (General Fusion)
-!   CORSICA     (Corsica) 
-!   UFILE       (ITPA profile database format)
 !
 !  Autodetected geometry formats:
 !   GFILE       (geqdsk equilibrium data)
-!   DSKGATO_OLD (old-type dskgato flux-surface data)
-!   DSKGATO_NEW (new-type dskgato flux-surface data)
 !--------------------------------------------------------------------
 
 program prgen
@@ -93,18 +89,6 @@ program prgen
 
      format_type = 4
      call prgen_read_genf
-
-  case ('CORSICA') ! corsica format
-     print '(a)','INFO: (prgen) Assuming CORSICA format.'
-
-     format_type = 5
-     call prgen_read_corsica
-
-  case ('UFILE') ! UFILE format
-     print '(a)','INFO: (prgen) Assuming UFILE format.'
-
-     format_type = 6
-     call prgen_read_ufile
 
   case('GACODE') ! Note (we may or may not have gmerge_flag == 1)
      print '(a)','INFO: (prgen) Assuming input.gacode (GACODE) format.'

@@ -16,6 +16,7 @@ if len(sys.argv) > 1:
    nharm   = int(sys.argv[5])
    nfourier = int(sys.argv[6])
    plotpng = bool(int(sys.argv[7]))
+   psinorm = float(sys.argv[8])
 else:
    print('Usage: python prgen_shapeprofile.py <gfile> <mag> <narc> <npsi> <nfourier>')
    sys.exit()
@@ -25,7 +26,7 @@ psi0 = efit['SIMAG']
 psi1 = efit['SIBRY']
 
 # Call GACODE mapper (uses n=npsi-1 and excludes magnetic axis)
-ri,zi,psi,p,fpol,q = prgen_contour(efit,mag=mag,nc=npsi,psinorm=0.999,narc=narc)
+ri,zi,psi,p,fpol,q = prgen_contour(efit,mag=mag,nc=npsi,psinorm=psinorm,narc=narc)
 
 pnorm = (psi[:]-psi0)/(psi1-psi0)
 rnorm = np.sqrt(pnorm)

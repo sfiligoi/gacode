@@ -30,7 +30,7 @@ VGEN_EXE=${GACODE_ROOT}/vgen/src
 # - profiles_gen converter executable
 EXEC=${GACODE_ROOT}/profiles_gen/src/prgen
 # - OMFIT fitter script
-OMFIT='-m pygacode.profiles_gen.prgen_shapeprofile'
+MAPPER='-m pygacode.profiles_gen.prgen_shapeprofile'
 #${GACODE_ROOT}/f2py/pygacode/profiles_gen/prgen_shapeprofile.py
 # - locpargen executable
 LOCPARGEN=${GACODE_ROOT}/profiles_gen/locpargen/locpargen
@@ -151,17 +151,21 @@ then
    echo "Flux-surface mapper control options"
    echo
    echo "             -npsi <int>"
-   echo "              Number of flux-surfaces to contour (default=200)"
+   echo "             Number of flux-surfaces to contour (default=200)"
+   echo
+   echo "             -psinorm <float>"
+   echo "             Last flux-surface to retain (default=0.999)"
+   echo "             NOTE: psinorm=1.0 refers to EFIT separatrix, which may be inaccurate."
    echo
    echo "             -mag <int>"
-   echo "              Resolution multiplier for EFIT contouring (default=2)"
+   echo "             Resolution multiplier for EFIT contouring (default=2)"
    echo
    echo "             -narc <int>"
-   echo "              Equal-arc contour points (default=600)"
+   echo "             Equal-arc contour points (default=600)"
    echo
    echo "             -nharm <int>"
    echo "             Harmonic geometry coefficents (default=5)"
-   echo
+   echo 
    echo "             -nfourier <int>"
    echo "             General legacy Fourier geometry coefficents in input.gacode.geo (off by default)"
    echo
@@ -287,6 +291,7 @@ BTCCW=0
 EFIT=0
 MAG=2
 NPSI=200
+PSINORM=0.999
 NARC=600
 NHARM=5
 NFOURIER=0
@@ -354,6 +359,7 @@ while [ $# -gt 0 ] ; do
   -mag) shift ; MAG=$1 ;;
   -narc) shift ; NARC=$1 ;;
   -npsi) shift ; NPSI=$1 ;;
+  -psinorm) shift ; PSINORM=$1 ;;
 
   -true_aux) TRUE_AUX_FLAG=1 ;;
 
@@ -683,8 +689,9 @@ echo $TRUE_AUX_FLAG >> $CONFIG
 
 
 #==============================================================
+# Run Scikit-based mapper 
 if [ $EFIT -eq 1 ] ; then
-   python $OMFIT $GFILE $MAG $NARC $NPSI $NHARM $NFOURIER $PLOTPNG
+   python $MAPPER $GFILE $MAG $NARC $NPSI $NHARM $NFOURIER $PLOTPNG $PSINORM
 fi
 #==============================================================
 

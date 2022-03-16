@@ -63,22 +63,33 @@ def prgen_contour(g,mag,nc,psinorm,narc):
    # Notation:
    #    (ixc,iyc)=contour, (ixa,iya)=axis, (ixs,iys)=separatrix
    dpsi = psi1-psi0
-   z0 = psi1-0.5*dpsi
-   dz = dpsi/20
-   tol = 1e-14
-   err = 1.0
-   while dz > tol:
+   z0 = psi1-0.9*dpsi
+   dz = dpsi/10
+   tol = 1e-15
+   iycv = []
+   
+   while dz > tol: 
       z0 = z0+dz
+      frac = (z0-psi0)/(psi1-psi0)
       contours = measure.find_contours(psi_efit,z0)
       found = 0
       for contour in contours:
+         # Test for closed contour
          if contour[0,0] == contour[-1,0] and contour[0,1] == contour[-1,1]:
             ixc = contour[:,1] ; iyc = contour[:,0]
+            # Test for circling the origin
             if min(ixc) < ixa < max(ixc) and min(iyc) < iya < max(iyc):
-               print((max(ixc)-min(ixc))/dz)
-               found = 1
-               ixs = ixc ; iys = iyc
-               
+               iycv.append(min(iyc))
+               if len(iycv) > 3:
+                  d1 = iycv[-1]-iycv[-2] ; d2 = iycv[-2]-iycv[-3]
+                  # Test for large jump in contour
+                  if abs(d1) > 2*abs(d2):
+                     del iycv[-1]
+                  else:
+                     # Success: this is a legitimate flux-surface
+                     found = 1
+                     ixs = ixc ; iys = iyc
+
       if found == 0:
          z0 = z0-dz
          dz = dz/2
@@ -153,17 +164,21 @@ def prgen_contour(g,mag,nc,psinorm,narc):
       ax.imshow(g['PSIRZ'],cmap=plt.cm.hsv,aspect=asp,origin='lower')
       ax.set_xlabel('EFIT cell')
       ax.set_ylabel('EFIT cell')
-      # Separatrix
-      ax.plot(ixs/mag,iys/mag,'--w',linewidth=1)
       # A few contours
       for i in [1,nc//3,(2*nc)//3,nc-1]:
          x,y = efit_rzmapi(g,rv[:,i],zv[:,i],mx,my)
          ax.plot(x/mag,y/mag,'--k',linewidth=1)
          
-      x,y = efit_rzmapi(g,rv[:,-1],zv[:,-1],mx,my)
-      ax.plot(x/mag,y/mag,'--k',linewidth=1)
+      contours = measure.find_contours(psi_efit,psi1)
+      for contour in contours:
+         ixc = contour[:,1] ; iyc = contour[:,0]        
+         ax.plot(ixc/mag,iyc/mag,color='b',linewidth=1)
+               
+      # Separatrix
+      ax.plot(ixs/mag,iys/mag,'w',linewidth=1)
+
       plt.tight_layout()
-      plt.savefig('prgen_efit.png')
+      plt.savefig('prgen_efit.pdf')
       
       # q-profiles
       fig,ax = plt.subplots(figsize=(8,5))
@@ -177,6 +192,6 @@ def prgen_contour(g,mag,nc,psinorm,narc):
       ax.legend()
       
       plt.tight_layout()
-      plt.savefig('prgen_q.png')
-   
+      plt.savefig('prgen_q.pdf')
+      
    return rv,zv,psic,out_p,out_f,out_q
