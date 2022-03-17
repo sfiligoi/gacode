@@ -259,7 +259,7 @@ subroutine prgen_map_plasmastate
 
      ! Radiation
      expro_qsync(i) = 1e-6*plst_prad_cy(i-1)/dvol
-     expro_qbrem(i) = 1e-6*plst_prad_br(i-1)/dvol
+     expro_qbrem(i) = 1e-6*(plst_prad(i-1) - plst_prad_cy(i-1) - plst_prad_li(i-1))/dvol
      expro_qline(i) = 1e-6*plst_prad_li(i-1)/dvol
 
      ! Momentum source (tq_trans already in Nm)
