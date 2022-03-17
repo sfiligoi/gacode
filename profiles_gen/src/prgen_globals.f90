@@ -226,6 +226,7 @@ module prgen_globals
   real, dimension(:), allocatable :: plst_pfusi
   real, dimension(:), allocatable :: plst_pfusth
   real, dimension(:), allocatable :: plst_pfuse
+  real, dimension(:), allocatable :: plst_prad
   real, dimension(:), allocatable :: plst_prad_br
   real, dimension(:), allocatable :: plst_prad_cy
   real, dimension(:), allocatable :: plst_prad_li
