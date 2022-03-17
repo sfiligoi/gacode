@@ -492,6 +492,14 @@ subroutine prgen_read_plasmastate
      plst_prad_li(:) = 0.0
   endif
 
+  ! Radiated power: total
+  err = nf90_inq_varid(ncid,trim('prad'),varid)
+  if (err == 0) then
+     err = nf90_get_var(ncid,varid,plst_prad(1:nx-1))
+  else
+     plst_prad(:) = 0.0
+  endif
+
   ! Electron power balance diagnostic
   if (idiag == 1) then
      open(unit=11,file='out.prgen.power_e',status='replace')
