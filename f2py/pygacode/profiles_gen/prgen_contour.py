@@ -44,6 +44,15 @@ def prgen_contour(g,mag,nc,psinorm,narc):
    # Pixel representation
    xv = np.linspace(0,1,nx) ; yv = np.linspace(0,1,ny)
 
+   if mag == 'auto':
+      mag = int(np.rint(512/np.sqrt(nx*ny)))
+      if mag < 1:
+         mag = 1
+   else:
+      mag = int(mag)
+
+   print('INFO: (prgen_contour) Contour magnification (mag) = {:d}'.format(mag))
+  
    if mag > 1:
       # spline interpolation (quadratic, not cubic, to avoid oscillation)
       spl = interpolate.RectBivariateSpline(yv,xv,psi_efit,kx=2,ky=2)

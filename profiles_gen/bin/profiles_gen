@@ -259,7 +259,7 @@ BTCCW=0
 
 # OMFIT mapper variables
 EFIT=0
-MAG=2
+MAG=auto
 NPSI=256
 PSINORM=0.999
 NARC=600

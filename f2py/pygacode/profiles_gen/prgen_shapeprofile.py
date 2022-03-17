@@ -10,7 +10,7 @@ from .prgen_shape import *
 
 if len(sys.argv) > 1:
    gfile   = sys.argv[1]
-   mag     = int(sys.argv[2])
+   mag     = sys.argv[2]
    narc    = int(sys.argv[3])
    npsi    = int(sys.argv[4])
    nharm   = int(sys.argv[5])
