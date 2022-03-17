@@ -19,7 +19,7 @@ subroutine prgen_geometry
   real, dimension(:,:,:), allocatable :: g3vec
   real, dimension(:,:,:), allocatable :: g3rho
   real :: psi_sep
-  
+
   !----------------------------------------------------------------
   open(unit=1,file='out.dim',status='old')
   read(1,*) npsi
@@ -62,17 +62,25 @@ subroutine prgen_geometry
 
   efit_psi = efit_psi-efit_psi(1)
 
-  print 10,'   GACODE delta-psi:',(psi_sep-psi0)/(psi1-psi0)
-  print 10,'   MAPPED delta-psi:',efit_psi(npsi)/(psi1-psi0)
-  print 10,'STATEFILE delta-psi:',dpsi(nx)/(psi1-psi0)
-10 format(t2,a,f9.6)
+  !--------------------------------------------------------------------------------------
+  ! Flux diagnostics 
+  print 10,'INFO: (prgen_geometry)    GACODE/EFIT dpsi:',(psi_sep-psi0)/(psi1-psi0)
+  print 10,'INFO: (prgen_geometry)    MAPPED/EFIT dpsi:',efit_psi(npsi)/(psi1-psi0),' (adjust with -psinorm)'
+  print 10,'INFO: (prgen_geometry) STATEFILE/EFIT dpsi:',dpsi(nx)/(psi1-psi0)
 
-  ! Correction for dpsi(nx) > efit_psi(npsi) 
+  ! Problem condition: dpsi(nx) > efit_psi(npsi) 
   if (dpsi(nx) > efit_psi(npsi)) then
-     print '(a)','Setting dpsi(nx) = efit_psi_max'
-     dpsi(nx) = efit_psi(npsi)
+     if (dpsi(nx)/efit_psi(npsi) > 1.05) then
+        print '(a)','ERROR: (prgen_geometry) Detected statefile dpsi(nx) >> mapped dpsi_max'
+        stop
+     else
+        print '(a)','WARNING: (prgen_geometry) Detected statefile dpsi(nx) > mapped dpsi_max'
+        print '(a)','WARNING: (prgen_geometry) Compressing statefile flux to match mapped flux'
+        dpsi(:) = dpsi(:)*efit_psi(npsi)/dpsi(nx)
+     endif
   endif
-  
+  !--------------------------------------------------------------------------------------
+
   ! Get rho on efit mesh (so have psi,rho,q)
   call prgen_get_chi(npsi,efit_q,efit_psi,efit_rho,torfluxa)
   ! Get q
@@ -94,12 +102,12 @@ subroutine prgen_geometry
      print '(a)','ERROR: (prgen_geometry) max nharm is 6'
      stop
   endif
-  
+
   do i=1,nf-1
      call bound_interp(efit_rho,efit_si(:,i),npsi,rho,shape_sin(i,:),nx)
      call bound_interp(efit_rho,efit_ci(:,i),npsi,rho,shape_cos(i,:),nx)
   enddo
-  
+
   delta = sin(shape_sin(1,:))
   zeta  = -shape_sin(2,:)
   !==============================================================================
@@ -161,5 +169,7 @@ subroutine prgen_geometry
   deallocate(efit_q)
   deallocate(efit_p)
   deallocate(efit_rho)
+
+10 format(t1,a,f9.6,a)
 
 end subroutine prgen_geometry
