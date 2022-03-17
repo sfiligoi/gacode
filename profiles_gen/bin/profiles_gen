@@ -11,10 +11,8 @@
 #   ITERDB      (ASCII iterdb)
 #   ITERDBNC    (netCDF iterdb)
 #   SWIM        (plasmastate)
-#   CORSICA     (Corsica)
 #   GENF        (General Fusion)
 #   PFILE       (peqdsk)
-#   UFILE       (ITPA profile database format)
 #
 #  Autodetected geometry formats:
 #   GFILE       (geqdsk equilibrium data)
@@ -57,8 +55,6 @@ then
    echo "               SWIM        (plasmastate)"
    echo "               PFILE       (peqdsk)"
    echo "               GENF        (General Fusion)"
-   echo "               CORSICA     (Corsica) "
-   echo "               UFILE       (ITPA profile database format)"
    echo
    echo "             Autodetected geometry formats:"
    echo "               GFILE       (geqdsk equilibrium data)"
@@ -108,32 +104,6 @@ then
    echo
    echo "             -true_aux"
    echo "             Toggles true auxiliary power (sum of individual powers)"
-   echo
-   echo "CORSICA Options"
-   echo
-   echo "             -i <data.corsica>"
-   echo "             Specify Corsica data file."
-   echo
-   echo "             -r <reorder sequence>"
-   echo "             Reorder ions."
-   echo
-   echo "UFILE Options"
-   echo
-   echo "             -i UFILE"
-   echo "             Toggle UFILE mode."
-   echo
-   echo "             -t <time>"
-   echo "             Time for averaging."
-   echo
-   echo "             -r <reorder sequence>"
-   echo "             Reorder ions."
-   echo
-   echo "             Example: To invoke UFILE mode, ensure the *d.dat files exist in the"
-   echo "                      current directory, then type:"
-   echo
-   echo "                       $ profiles_gen -i UFILE -t <time>"
-   echo
-   echo "                      Leaving out the -t option will print time window"
    echo
    echo "PEQDSK/PFILE Options (gfile required)"
    echo
