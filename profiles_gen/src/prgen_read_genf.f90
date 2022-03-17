@@ -31,8 +31,8 @@ subroutine prgen_read_genf
   read(1,*)
   do i=1,nx
      read(1,*) &
-          dpsi(i),&
           dummy(i),&
+          dpsi(i),&
           dummy(i),&
           p_tot(i),&
           q(i),&
@@ -42,6 +42,8 @@ subroutine prgen_read_genf
           ni_e19m3(i)
   enddo
 
+  dpsi = (-dpsi+dpsi(1))/(2*pi)
+ 
   ! Units conversions
   te_kev = te_kev*1e-3
   ti_kev = ti_kev*1e-3

@@ -26,7 +26,7 @@ psi0 = efit['SIMAG']
 psi1 = efit['SIBRY']
 
 # Call GACODE mapper (uses n=npsi-1 and excludes magnetic axis)
-ri,zi,psi,p,fpol,q = prgen_contour(efit,mag=mag,nc=npsi,psinorm=psinorm,narc=narc)
+ri,zi,psi,p,fpol,q,psi_sep = prgen_contour(efit,mag=mag,nc=npsi,psinorm=psinorm,narc=narc)
 
 pnorm = (psi[:]-psi0)/(psi1-psi0)
 rnorm = np.sqrt(pnorm)
@@ -75,6 +75,9 @@ with open('out.dim','w') as f:
    f.write(str(efit['RCENTR'])+'\n')
    f.write(str(efit['BCENTR'])+'\n')
    f.write(str(efit['CURRENT']*1e-6)+'\n')
+   f.write(str(psi0)+'\n')
+   f.write(str(psi1)+'\n')
+   f.write(str(psi_sep)+'\n')
 
 u = psi
 u = np.append(u,q)

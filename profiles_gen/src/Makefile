@@ -18,6 +18,7 @@ OBJECTS = prgen_globals.o \
           allocate_plasmastate_vars.o \
 	  allocate_peqdsk_vars.o \
           prgen_get_chi.o \
+          prgen_geometry.o \
           prgen_ion_name.o \
           prgen_map_iterdb.o \
           prgen_map_null.o \
@@ -26,7 +27,6 @@ OBJECTS = prgen_globals.o \
 	  prgen_map_genf.o \
 	  prgen_map_inputgacode.o \
           prgen_read_cer.o \
-          prgen_read_omfit.o \
           prgen_read_iterdb.o \
           prgen_read_iterdb_nc.o \
           prgen_read_null.o \

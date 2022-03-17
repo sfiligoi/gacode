@@ -98,7 +98,6 @@ def prgen_contour(g,mag,nc,psinorm,narc):
    #-------------------------------------------------------------------------
 
    psi_efit_min = np.min(psi_efit[int(iya)-8:int(iya)+8,int(ixa)-8:int(ixa)+8])
-   print('INFO: (prgen_contour) psi_min (% efit) = {:.3f}'.format(100*psi_efit_min/psi0))
    print('INFO: (prgen_contour) psi_sep (% efit) = {:.3f}'.format(100*(psi_sep-psi0)/(psi1-psi0)))
 
    #-------------------------------------------------------------------------
@@ -160,7 +159,7 @@ def prgen_contour(g,mag,nc,psinorm,narc):
    
       # Flux contours
       asp = ly/lx*(nx/ny)
-      fig,ax = plt.subplots(figsize=(5,5*asp))
+      fig,ax = plt.subplots(figsize=(5*lx/ly,5))
       ax.imshow(g['PSIRZ'],cmap=plt.cm.hsv,aspect=asp,origin='lower')
       ax.set_xlabel('EFIT cell')
       ax.set_ylabel('EFIT cell')
@@ -194,4 +193,4 @@ def prgen_contour(g,mag,nc,psinorm,narc):
       plt.tight_layout()
       plt.savefig('prgen_q.pdf')
       
-   return rv,zv,psic,out_p,out_f,out_q
+   return rv,zv,psic,out_p,out_f,out_q,psi_sep

@@ -118,22 +118,11 @@ program prgen
   select case (efit_method)
   case (0)
      ! Use geometry data contained in profile data 
-     print '(a)','INFO: (prgen) Using original geometry data.'
+     print '(a)','WARNING: (prgen) Using original geometry data. Better to use gfile.'
   case (1)
-     ! Use OMFIT-EFIT mapper
-     call prgen_read_omfit
+     ! Use EFIT mapper
+     call prgen_geometry
   end select
-  !--------------------------------------------------------------------
-
-  !--------------------------------------------------------------------
-  ! High-resolution geometry
-  !
-  if (efit_method == 1) then
-     if (format_type == 1 .or. format_type == 2) then
-        print '(a,2(f10.8,a))', &
-             'INFO: (prgen) dpsi = ',dpsi_data,' (statefile) ',dpsi_efit,' (new)'
-     endif
-  endif
   !--------------------------------------------------------------------
 
   !-----------------------------------------------------

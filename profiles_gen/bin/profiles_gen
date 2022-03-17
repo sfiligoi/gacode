@@ -252,7 +252,7 @@ LUMP_FAST_FLAG=0
 TRUE_AUX_FLAG=0
 
 # Number of points for -i null option
-N_NULL=40
+N_NULL=128
 
 IPCCW=0
 BTCCW=0
@@ -260,7 +260,7 @@ BTCCW=0
 # OMFIT mapper variables
 EFIT=0
 MAG=2
-NPSI=200
+NPSI=256
 PSINORM=0.999
 NARC=600
 NHARM=5
@@ -702,7 +702,7 @@ fi
 
 if [ $VERBOSE_FLAG -eq 0 ]
 then
-   rm -f $CONFIG fluxfit.* success profile_header profile_shot
+   rm -f $CONFIG profile_header profile_shot
    rm -f *.ave out.com out.dim out.data out.expro.run pfile.*
 fi
 #==============================================================

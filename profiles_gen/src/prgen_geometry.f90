@@ -1,11 +1,11 @@
 !----------------------------------------------------------------
-! prgen_read_omfit.f90
+! prgen_geometry.f90
 !
 ! PURPOSE:
-!  Read data from OMFIT/GACODE flux-surface mapper
+!  Read data from flux-surface mapper
 !----------------------------------------------------------------
 
-subroutine prgen_read_omfit
+subroutine prgen_geometry
 
   use prgen_globals
   use expro
@@ -18,7 +18,8 @@ subroutine prgen_read_omfit
   real, dimension(:), allocatable :: efit_rmin,efit_rmaj,efit_kappa,efit_zmaj
   real, dimension(:,:,:), allocatable :: g3vec
   real, dimension(:,:,:), allocatable :: g3rho
-
+  real :: psi_sep
+  
   !----------------------------------------------------------------
   open(unit=1,file='out.dim',status='old')
   read(1,*) npsi
@@ -26,6 +27,9 @@ subroutine prgen_read_omfit
   read(1,*) rcentr
   read(1,*) bcentr
   read(1,*) current
+  read(1,*) psi0
+  read(1,*) psi1
+  read(1,*) psi_sep
   close(1)
 
   allocate(efit_si(npsi,0:nf-1))
@@ -51,28 +55,30 @@ subroutine prgen_read_omfit
   read(1) efit_zmaj
   close(1)
 
-  efit_psi  = efit_psi-efit_psi(1)
-  dpsi_efit = efit_psi(npsi)
-  dpsi_data = dpsi(nx)
+  ! PFILE only contains normalized flux
+  if (format_type == 3) then
+     dpsi = (psi1-psi0)*dpsi
+  endif
 
+  efit_psi = efit_psi-efit_psi(1)
+
+  print 10,'   GACODE delta-psi:',(psi_sep-psi0)/(psi1-psi0)
+  print 10,'   MAPPED delta-psi:',efit_psi(npsi)/(psi1-psi0)
+  print 10,'STATEFILE delta-psi:',dpsi(nx)/(psi1-psi0)
+10 format(t2,a,f9.6)
+
+  ! Correction for dpsi(nx) > efit_psi(npsi) 
+  if (dpsi(nx) > efit_psi(npsi)) then
+     print '(a)','Setting dpsi(nx) = efit_psi_max'
+     dpsi(nx) = efit_psi(npsi)
+  endif
+  
   ! Get rho on efit mesh (so have psi,rho,q)
   call prgen_get_chi(npsi,efit_q,efit_psi,efit_rho,torfluxa)
-
-  select case (format_type)
-
-  case (3,4)
-     ! Statefile (required) supplies psi_norm (dpsi)
-     ! PEQDSK=3, GENF=4
-     dpsi = dpsi*dpsi_efit
-     ! Get q
-     call cub_spline(efit_psi,efit_q,npsi,dpsi,q,nx)
-     ! Get rho
-     call prgen_get_chi(nx,q,dpsi,rho,torfluxa)
-  case (0,1,2,6,7,8)
-     ! Statefile supplies rho
-     ! Get dpsi
-     call cub_spline(efit_rho,efit_psi,npsi,rho,dpsi,nx)
-  end select
+  ! Get q
+  call cub_spline(efit_psi,efit_q,npsi,dpsi,q,nx)
+  ! Get rho
+  call prgen_get_chi(nx,q,dpsi,rho,torfluxa)
 
   call bound_interp(efit_rho,efit_rmin,npsi,rho,rmin,nx)
   call bound_interp(efit_psi,efit_q,npsi,dpsi,q,nx)
@@ -85,7 +91,7 @@ subroutine prgen_read_omfit
   call bound_interp(efit_rho,efit_ci(:,0),npsi,rho,shape_cos(0,:),nx)
 
   if (nf-1 > 6) then
-     print '(a)','ERROR: (prgen_read_omfit) max nharm is 6'
+     print '(a)','ERROR: (prgen_geometry) max nharm is 6'
      stop
   endif
   
@@ -156,4 +162,4 @@ subroutine prgen_read_omfit
   deallocate(efit_p)
   deallocate(efit_rho)
 
-end subroutine prgen_read_omfit
+end subroutine prgen_geometry
