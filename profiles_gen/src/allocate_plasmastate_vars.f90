@@ -50,6 +50,7 @@ subroutine allocate_plasmastate_vars
   allocate(plst_pfusi(nx))
   allocate(plst_pfusth(nx))
   allocate(plst_pfuse(nx))
+  allocate(plst_prad(nx))
   allocate(plst_prad_br(nx))
   allocate(plst_prad_cy(nx))
   allocate(plst_prad_li(nx))
