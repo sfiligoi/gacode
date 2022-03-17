@@ -415,10 +415,6 @@ if [ $EFIT -eq 0 ] ; then
       echo "ERROR: (profiles_gen) A GFILE (-g) must be used with a PFILE."
       exit 1
    fi
-   if [ "$itype" == "CORSICA" ] ; then
-      echo "ERROR: (profiles_gen) A GFILE (-g) must be used with a CORSICA file."
-      exit 1
-   fi
 
 else
 
@@ -456,25 +452,7 @@ fi
 #=============================================================
 # Managing input file (also catches UFILE mode)
 
-if [ "$itype" == "UFILE" ] ; then
-
-   #-----------------------------------------------
-   # UFILE mode
-   #-----------------------------------------------
-
-   echo "INFO: (profiles_gen) Extracting UFILE 0d data."
-   python $PRGEN_BIN/gacode_ufile_tool.py *0d.dat $UFILETIME >> out.ufile.log
-   echo "INFO: (profiles_gen) Extracting and averaging UFILE 1d data."
-   python $PRGEN_BIN/gacode_ufile_tool.py *1d.dat $UFILETIME >> out.ufile.log
-   echo "INFO: (profiles_gen) Extracting and averaging UFILE 2d data."
-   python $PRGEN_BIN/gacode_ufile_tool.py *2d.dat $UFILETIME >> out.ufile.log
-   if [ "$UFILETIME" == "null" ]
-   then
-      cat out.ufile.log
-      exit 1
-   fi
-
-elif [ "$itype" == "null" ] ; then
+if [ "$itype" == "null" ] ; then
 
    # gfile-only mode
    echo "INFO: (profiles_gen) Parsing GFILE only."
@@ -725,8 +703,7 @@ fi
 if [ $VERBOSE_FLAG -eq 0 ]
 then
    rm -f $CONFIG fluxfit.* success profile_header profile_shot
-   rm -f *.ave out.com out.dim out.data out.ufile.log
-   rm -f gfile out.expro.run pfile.*
+   rm -f *.ave out.com out.dim out.data out.expro.run pfile.*
 fi
 #==============================================================
 

@@ -155,10 +155,6 @@ program prgen
      call prgen_map_peqdsk
   case (4)
      call prgen_map_genf
-  case (5) 
-     call prgen_map_corsica
-  case (6)
-     call prgen_map_ufile
   case (7,8)
      call prgen_map_inputgacode
   end select

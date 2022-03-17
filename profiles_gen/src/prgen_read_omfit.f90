@@ -60,9 +60,9 @@ subroutine prgen_read_omfit
 
   select case (format_type)
 
-  case (3,4,5)
+  case (3,4)
      ! Statefile (required) supplies psi_norm (dpsi)
-     ! PEQDSK=3, CORSICA=5, GENF=4
+     ! PEQDSK=3, GENF=4
      dpsi = dpsi*dpsi_efit
      ! Get q
      call cub_spline(efit_psi,efit_q,npsi,dpsi,q,nx)
