@@ -406,6 +406,15 @@ subroutine prgen_read_plasmastate
      plst_peech(:) = 0.0
   endif
 
+  ! Total ICRF power (to grab the ICRF direct power to electrons)
+  err = nf90_inq_varid(ncid,trim('picrf_totals'),varid)
+  if (err == 0) then
+     err = nf90_get_var(ncid,varid,plst_picrf_totals(1:nx-1,1))
+  else
+     plst_picrf_totals(:,:) = 0.0
+  endif
+
+
   ! Ohmic heating power to electrons
   err = nf90_inq_varid(ncid,trim('pohme'),varid)
   if (err == 0) then
