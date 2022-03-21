@@ -48,6 +48,7 @@ then
   echo "                = phi      (time-dependent ZF vs. finite-n intensities)"
   echo "                = ky_phi   (time-dependent ky-phi intensities)"
   echo "                = kx_phi   (average kx-phi intensities)"
+  echo "                = cheb_phi (average Chebyshev intensities)"
   echo "                = kxky_phi (kx-ky spectra of ave(|phi|))"
   echo "                = rcorr_phi (time-average radial correlation function)"
   echo "                = xflux    (radial profile of fluxes for all species)"
@@ -485,6 +486,9 @@ case "$PLOT_TYPE" in
 	python $PLT $PLOT_TYPE $FIELD $THETA $YMIN $YMAX $N $NORM $EXT ;;
 
    kx_phi)
+	python $PLT $PLOT_TYPE $FIELD $THETA $W $WMAX $YMIN $YMAX $N $EXT $DISS $DERIV ;;
+
+   cheb_phi)
 	python $PLT $PLOT_TYPE $FIELD $THETA $W $WMAX $YMIN $YMAX $N $EXT $DISS $DERIV ;;
 
    kxky_phi | rcorr_phi)

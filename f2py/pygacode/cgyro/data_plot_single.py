@@ -266,6 +266,23 @@ elif plot_type == 'kx_phi':
 
    outfile = 'out.cgyro.kx_phi.'+ftype
 
+elif plot_type == 'cheb_phi':
+
+   field = int(sys.argv[2])
+   theta = float(sys.argv[3])
+   w     = float(sys.argv[4])
+   wmax  = float(sys.argv[5])
+   ymin  = sys.argv[6]
+   ymax  = sys.argv[7]
+   nstr  = sys.argv[8]
+   ftype = sys.argv[9]
+   diss  = int(sys.argv[10])
+   deriv = bool(int(sys.argv[11]))
+   
+   head = data_in.plot_cheb_phi(field=field,theta=theta,w=w,wmax=wmax,ymin=ymin,ymax=ymax,nstr=nstr,diss=diss,deriv=deriv)
+
+   outfile = 'out.cgyro.cheb_phi.'+ftype
+
 elif plot_type == 'hb':
 
    itime = int(sys.argv[2])

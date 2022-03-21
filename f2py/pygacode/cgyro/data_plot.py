@@ -1,6 +1,9 @@
 import sys
 import os
 import numpy as np
+import scipy.special as sp
+import scipy.signal as signal
+from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from matplotlib import rc
@@ -193,9 +196,6 @@ class cgyrodata_plot(data.cgyrodata):
 
       # FUNCTION: plot radial correlation
  
-      import scipy as scipy
-      import scipy.signal as signal
-      from scipy.optimize import curve_fit
 
       def absexp(x,tau):
          return np.exp(-np.abs(x)/tau)
@@ -435,89 +435,6 @@ class cgyrodata_plot(data.cgyrodata):
       fig.tight_layout(pad=0.3)
 
       return
-
-   def plot_shift_old(self,w=0.5,wmax=0.0,theta=0.0,ymin='auto',ymax='auto',fig=None):
-
-      import time
-
-      if fig is None:
-         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
-      
-      #======================================
-      # Set figure size and axes
-      ax = fig.add_subplot(111)
-      ax.grid(which="both",ls=":")
-      ax.grid(which="major",ls=":")
-      ax.set_xlabel(r'$k_y \rho_s$')
-      ax.set_ylabel(r'$\left\langle k_x \rho_s \right\rangle$')
-      #======================================
-
-      color = ['k','m','b','c','g','r']
-      
-      self.getbigfield()
-      nx = self.n_radial
-      nt = self.n_time
-      nn = self.n_n
-
-      t = self.t
-
-      # Get index for average window
-      imin,imax=iwindow(t,w,wmax)
-      windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[imax])+']$'
-      ax.set_title(windowtxt)
-
-      ky = np.zeros([nn])
-      y = np.zeros([nn])
-      x = np.zeros([nx])
-
-      ivec = []
-      for i in range(nx):
-         x[i] = i*2*np.pi/nx-np.pi
-         if abs(x[i]) < np.pi/2:
-            ivec.append(i)
-         
-      f,ft = self.kxky_select(theta,0,'phi',0)
-
-      print('INFO: (plot_shift) This could take a while!')
-      for n in range(nn):
-
-         start = time.time()
-         # phi[p,t]
-         phit = f[:,n,:]
-
-         phi  = np.zeros([nx,nt],dtype=complex)
-         phip = np.zeros([nx,nt],dtype=complex)
-
-         for i in ivec:
-            for p in range(-nx//2,nx//2):
-               u = phit[p+nx//2,:]*np.exp(1j*p*x[i]) 
-               phi[i,:]  = phi[i,:]+u[:] 
-               phip[i,:] = phip[i,:]-p*u[:] 
-
-         dt = 'TIME1 = '+'{:.3e}'.format(time.time()-start)+' s.'
-         print(n,dt)
-         start = time.time()
-
-         pn = average(np.sum(np.conj(phi[:,:])*phip[:,:],axis=0),t,w,0.0)
-         pd = average(np.sum(np.conj(phi[:,:])*phi[:,:],axis=0),t,w,0.0)
-
-         ky[n] = self.ky[n]
-         y[n] = (2*np.pi/self.length)*np.real(pn/pd)
-
-         dt = 'TIME2 = '+'{:.3e}'.format(time.time()-start)+' s.'
-         print(n,dt)
-
-      print(y)
-      ax.plot(ky,y)
-
-      if ymax != 'auto':
-         ax.set_ylim(top=float(ymax))
-      if ymin != 'auto':
-         ax.set_ylim(bottom=float(ymin))
-
-      fig.tight_layout(pad=0.3)
-
-      return '   ky*rho       kx*rho',ky,y,None
 
    def plot_shift(self,w=0.5,wmax=0.0,theta=0.0,ymin='auto',ymax='auto',fig=None):
 
@@ -1202,8 +1119,6 @@ class cgyrodata_plot(data.cgyrodata):
       
    def plot_kx_phi(self,field=0,theta=0.0,w=0.5,wmax=0.0,ymin='auto',ymax='auto',nstr='null',diss=0,deriv=False,fig=None):
 
-      import scipy.special as sp
-      
       if fig is None:
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
@@ -1234,23 +1149,7 @@ class cgyrodata_plot(data.cgyrodata):
          dfac = kx**2
       else:
          dfac = 1
-
-      nm = nx//2
-      phip = np.zeros([nx],dtype=complex)
-      cm = np.zeros([nm])
-      jm = np.zeros([nm,nx])
-      pvec = (np.arange(nx)-nx//2)*np.pi/2
-      sigma = np.ones([nm])*2
-      sigma[0] = 1
-      for m in range(nm):
-         jm[m,:] = sp.jv(m,pvec)
-      
-      for n in range(self.n_n):
-         phip[:] = average_n(np.real(f[:,n,:]),self.t,w,wmax,nx)+1j*average_n(np.imag(f[:,n,:]),self.t,w,wmax,nx)
-         psum = np.dot(jm,phip)
-         for m in range(nm):
-            psum[m] = psum[m]*sigma[m]*1j**m
-            
+                 
       if nstr == 'null':
          y = np.sum(abs(f[:,:,:]),axis=1)/self.rho
          for j in range(nx):
@@ -1289,6 +1188,43 @@ class cgyrodata_plot(data.cgyrodata):
 
       return
    
+
+   def plot_cheb_phi(self,field=0,theta=0.0,w=0.5,wmax=0.0,ymin='auto',ymax='auto',nstr='null',diss=0,deriv=False,fig=None):
+
+      if fig is None:
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
+
+      self.getbigfield()
+
+      n0 = 256
+      nk = 256
+
+      phip = np.zeros([n0],dtype=complex)
+      phim = np.zeros([n0],dtype=complex)
+
+      c = np.zeros([nk],dtype=complex)
+      mat = np.zeros([nk,n0])
+      kvec = np.arange(nk)
+      z = np.arange(1,n0+1)*np.pi/2
+      for k in kvec:
+         mat[k,:] = sp.spherical_jn(k,z)
+
+         x = np.linspace(0.1,1,n0)
+         phip[140] = (1+1j)/x[10]**2
+         phim[140] = (1-1j)/x[10]**2
+
+         sphip = np.matmul(mat,phip)
+         sphim = np.matmul(mat,phim)
+
+      for k in np.arange(nk):
+         c[k] = (k+0.5)*(sphip[k]*1j**k+sphim[k]*(-1j)**k)
+
+      ax.bar(np.arange(nk),np.abs(c),alpha=0.5)
+      ax.plot([150,150],[-1000,1000],color='magenta')
+
+      ax.set_ylim(0,max(abs(c)))
+
+      return
 
    def plot_hb(self,itime=-1,spec=0,tmax=-1.0,mesh=0,fig=None):
             
