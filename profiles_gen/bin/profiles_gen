@@ -703,7 +703,7 @@ fi
 if [ $VERBOSE_FLAG -eq 0 ]
 then
    rm -f $CONFIG profile_header profile_shot
-   rm -f *.ave out.com out.dim out.data out.expro.run pfile.*
+   rm -f *.ave out.com out.dim out.data out.expro.run pfile.* success
 fi
 #==============================================================
 
