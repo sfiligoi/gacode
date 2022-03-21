@@ -38,6 +38,7 @@ subroutine allocate_plasmastate_vars
   allocate(plst_pe_trans(nx))
   allocate(plst_pi_trans(nx))
   allocate(plst_peech(nx))
+  allocate(plst_picrf_totals(nx,plst_dp1_nspec_all))
   allocate(plst_pmini(nx))
   allocate(plst_pminth(nx))
   allocate(plst_picth(nx))

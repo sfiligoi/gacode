@@ -217,6 +217,7 @@ module prgen_globals
   real, dimension(:), allocatable :: plst_pbth
   real, dimension(:), allocatable :: plst_qie
   real, dimension(:), allocatable :: plst_peech
+  real, dimension(:,:), allocatable :: plst_picrf_totals     
   real, dimension(:), allocatable :: plst_pohme
   real, dimension(:), allocatable :: plst_pmine
   real, dimension(:), allocatable :: plst_pmini
