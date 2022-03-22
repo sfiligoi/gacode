@@ -1207,6 +1207,7 @@ class cgyrodata_plot(data.cgyrodata):
       imin,imax=iwindow(t,w,wmax)
     
       ax = fig.add_subplot(1,1,1)
+      ax.set_yscale('log')
 
       color = ['m','k','b','c']
       xlabel=r'$k$'
@@ -1217,13 +1218,17 @@ class cgyrodata_plot(data.cgyrodata):
 
       f,ft = self.kxky_select(theta,field,'phi',0)
 
-      yr[:] = average_n(np.real(f[:,0,:]),t,w,wmax,nx)
-      yi[:] = average_n(np.imag(f[:,0,:]),t,w,wmax,nx)
+      #yr[:] = average_n(np.real(f[:,0,:]),t,w,wmax,nx)
+      #yi[:] = average_n(np.imag(f[:,0,:]),t,w,wmax,nx)
+      yr = np.real(f[:,0,-1])
+      yi = np.imag(f[:,0,-1])
       y = yr+1j*yi
       
-      phim = y[1:n0]
+      phim = y[n0-1:0:-1]
       phi0 = y[n0]
       phip = y[n0+1:]
+      print(np.abs(phim))
+      print(np.abs(phip))
       c = np.zeros([nk],dtype=complex)
 
       mat = np.zeros([nk,n0-1])
@@ -1241,7 +1246,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       ax.bar(np.arange(nk),np.abs(c),alpha=0.5)
 
-      ax.set_ylim(0,max(abs(c)))
+      ax.set_ylim(1e-5,max(abs(c)))
 
       return
 
