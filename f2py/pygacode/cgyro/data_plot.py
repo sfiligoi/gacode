@@ -1196,31 +1196,50 @@ class cgyrodata_plot(data.cgyrodata):
 
       self.getbigfield()
 
-      n0 = 256
-      nk = 256
+      t  = self.t
+      kx = self.kx
+      nx = int(self.n_radial)
+      n0 = nx//2
+      nk = 2*n0
+      yr = np.zeros(nx)
+      yi = np.zeros(nx)
 
-      phip = np.zeros([n0],dtype=complex)
-      phim = np.zeros([n0],dtype=complex)
+      imin,imax=iwindow(t,w,wmax)
+    
+      ax = fig.add_subplot(1,1,1)
 
+      color = ['m','k','b','c']
+      xlabel=r'$k$'
+      windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[imax])+']$'
+
+      ax.set_title(r'$\mathrm{Average~fluctuation~intensity} \quad $'+windowtxt)
+      ax.set_xlabel(xlabel)
+
+      f,ft = self.kxky_select(theta,field,'phi',0)
+
+      yr[:] = average_n(np.real(f[:,0,:]),t,w,wmax,nx)
+      yi[:] = average_n(np.imag(f[:,0,:]),t,w,wmax,nx)
+      y = yr+1j*yi
+      
+      phim = y[1:n0]
+      phi0 = y[n0]
+      phip = y[n0+1:]
       c = np.zeros([nk],dtype=complex)
-      mat = np.zeros([nk,n0])
+
+      mat = np.zeros([nk,n0-1])
       kvec = np.arange(nk)
-      z = np.arange(1,n0+1)*np.pi/2
+      z = np.arange(1,n0)*np.pi/2
       for k in kvec:
          mat[k,:] = sp.spherical_jn(k,z)
 
-         x = np.linspace(0.1,1,n0)
-         phip[140] = (1+1j)/x[10]**2
-         phim[140] = (1-1j)/x[10]**2
-
-         sphip = np.matmul(mat,phip)
-         sphim = np.matmul(mat,phim)
+      sphip = np.matmul(mat,phip)
+      sphim = np.matmul(mat,phim)
 
       for k in np.arange(nk):
          c[k] = (k+0.5)*(sphip[k]*1j**k+sphim[k]*(-1j)**k)
+      c[0] = c[0]+phi0
 
       ax.bar(np.arange(nk),np.abs(c),alpha=0.5)
-      ax.plot([150,150],[-1000,1000],color='magenta')
 
       ax.set_ylim(0,max(abs(c)))
 
