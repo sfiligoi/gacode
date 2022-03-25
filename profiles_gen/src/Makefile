@@ -29,7 +29,6 @@ OBJECTS = prgen_globals.o \
           prgen_read_cer.o \
           prgen_read_iterdb.o \
           prgen_read_iterdb_nc.o \
-          prgen_read_null.o \
           prgen_read_plasmastate.o \
 	  prgen_read_peqdsk.o \
 	  prgen_read_genf.o \

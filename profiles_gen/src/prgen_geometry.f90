@@ -59,8 +59,15 @@ subroutine prgen_geometry
   if (format_type == 3) then
      dpsi = (psi1-psi0)*dpsi
   endif
-
+  
   efit_psi = efit_psi-efit_psi(1)
+
+  ! Deal with null statefile
+  if (format_type == 0) then
+     nx = npsi
+     call prgen_allocate
+     dpsi = efit_psi
+  endif
 
   !--------------------------------------------------------------------------------------
   ! Flux diagnostics 

@@ -157,6 +157,8 @@ def plot_select(ax,tag):
        y = -expro.expro_zeta         ; ystr = 's_2 = -\zeta' ; plotit(ax,x,y,ystr)
        y = expro.expro_shape_sin3    ; ystr = 's_3' ; plotit(ax,x,y,ystr)
        y = expro.expro_shape_sin4    ; ystr = 's_4' ; plotit(ax,x,y,ystr)
+       y = expro.expro_shape_sin5    ; ystr = 's_5' ; plotit(ax,x,y,ystr)
+       y = expro.expro_shape_sin6    ; ystr = 's_6' ; plotit(ax,x,y,ystr)
          
    if tag == 'cos':
        y = expro.expro_shape_cos0 ; ystr = 'c_0' ; plotit(ax,x,y,ystr)
@@ -164,12 +166,16 @@ def plot_select(ax,tag):
        y = expro.expro_shape_cos2 ; ystr = 'c_2' ; plotit(ax,x,y,ystr)
        y = expro.expro_shape_cos3 ; ystr = 'c_3' ; plotit(ax,x,y,ystr)
        y = expro.expro_shape_cos4 ; ystr = 'c_4' ; plotit(ax,x,y,ystr)
+       y = expro.expro_shape_cos5 ; ystr = 'c_5' ; plotit(ax,x,y,ystr)
+       y = expro.expro_shape_cos6 ; ystr = 'c_6' ; plotit(ax,x,y,ystr)
 
    if tag == 'ssin':
        y = expro.expro_sdelta       ; ystr = 's_1 = \sin^{-1}\delta' ; plotit(ax,x,y,ystr)
        y = -expro.expro_szeta       ; ystr = 's_2 = -\zeta' ; plotit(ax,x,y,ystr)
        y = expro.expro_shape_ssin3  ; ystr = 's_3' ; plotit(ax,x,y,ystr)
        y = expro.expro_shape_ssin4  ; ystr = 's_4' ; plotit(ax,x,y,ystr)
+       y = expro.expro_shape_ssin5  ; ystr = 's_5' ; plotit(ax,x,y,ystr)
+       y = expro.expro_shape_ssin6  ; ystr = 's_6' ; plotit(ax,x,y,ystr)
 
    if tag == 'scos':
        y = expro.expro_shape_scos0 ; ystr = 'c_0' ; plotit(ax,x,y,ystr)
@@ -177,6 +183,8 @@ def plot_select(ax,tag):
        y = expro.expro_shape_scos2 ; ystr = 'c_2' ; plotit(ax,x,y,ystr)
        y = expro.expro_shape_scos3 ; ystr = 'c_3' ; plotit(ax,x,y,ystr)
        y = expro.expro_shape_scos4 ; ystr = 'c_4' ; plotit(ax,x,y,ystr)
+       y = expro.expro_shape_scos5 ; ystr = 'c_5' ; plotit(ax,x,y,ystr)
+       y = expro.expro_shape_scos6 ; ystr = 'c_6' ; plotit(ax,x,y,ystr)
 
    if tag == 'q':
        y = expro.expro_q ; ystr = 'q'

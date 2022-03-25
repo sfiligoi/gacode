@@ -58,7 +58,7 @@ program prgen
   case('null') ! gfile only
      print '(a)','INFO: (prgen) Merging gfile data into otherwise empty input.gacode.'
      format_type = 0
-     call prgen_read_null
+     ! Nothing to read
 
   case ('ITERDB') ! Old text format
      print '(a)','INFO: (prgen) Assuming old iterdb text format.'
