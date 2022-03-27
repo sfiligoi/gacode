@@ -22,6 +22,9 @@ then
   echo
   echo "TEST MODE"
   echo
+  echo "         -i <simdir>"
+  echo "         Print acceptable MPI tasks."
+  echo
   echo "         -t <simdir>"
   echo "         Sanity test for INPUT data in <simdir>."
   echo
