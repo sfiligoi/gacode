@@ -56,8 +56,8 @@ if nx < 0 or ny < 0:
 else:
    usefft = False
 
-epx = np.zeros([nx,nr],dtype=np.complex)
-eny = np.zeros([ny,nn],dtype=np.complex)
+epx = np.zeros([nx,nr],dtype=complex)
+eny = np.zeros([ny,nn],dtype=complex)
 x = np.zeros([nx])
 y = np.zeros([ny])
 
@@ -119,7 +119,7 @@ def maptoreal_fft(nr,nn,nx,ny,c):
    import numpy as np
    import time
 
-   d = np.zeros([nx,ny],dtype=np.complex)
+   d = np.zeros([nx,ny],dtype=complex)
 
    # Mapping
    # d[ ix, iy] = c[ ix,iy]

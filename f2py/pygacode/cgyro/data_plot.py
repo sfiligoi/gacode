@@ -1,6 +1,9 @@
 import sys
 import os
 import numpy as np
+import scipy.special as sp
+import scipy.signal as signal
+from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from matplotlib import rc
@@ -193,9 +196,6 @@ class cgyrodata_plot(data.cgyrodata):
 
       # FUNCTION: plot radial correlation
  
-      import scipy as scipy
-      import scipy.signal as signal
-      from scipy.optimize import curve_fit
 
       def absexp(x,tau):
          return np.exp(-np.abs(x)/tau)
@@ -290,10 +290,10 @@ class cgyrodata_plot(data.cgyrodata):
       if norms == 0:
          s0_ave = average(s0,self.t,w,wmax)
          sn_ave = average(sn,self.t,w,wmax)
-         print('INFO: (plot_phi) sqrt[ <|phi_0|^2> ]/rho_*D = {:.4f}'.format(np.sqrt(s0_ave)))
-         print('INFO: (plot_phi) sqrt[ <|phi_n|^2> ]/rho_*D = {:.4f}'.format(np.sqrt(sn_ave)))
+         print('INFO: (plot_phi) sqrt[       <|phi_0|^2> ]/rho_*D = {:.4f}'.format(np.sqrt(s0_ave)))
+         print('INFO: (plot_phi) sqrt[ <sum_n |phi_n|^2> ]/rho_*D = {:.4f}'.format(np.sqrt(sn_ave)))
          lab0=r'$\sqrt{\left\langle\left|'+ft+r'_0\right|^2\right\rangle}/\rho_{*D}$'
-         labn=r'$\sqrt{\left\langle\left|'+ft+r'_n\right|^2\right\rangle}/\rho_{*D}$'
+         labn=r'$\sqrt{\left\langle\sum_{n>0} \left|'+ft+r'_n\right|^2\right\rangle}/\rho_{*D}$'
          ax.plot(self.t,np.sqrt(s0),label=lab0,linewidth=2)
          ax.plot(self.t,np.sqrt(sn),label=labn)
          ax.plot(self.t[imin:imax+1],np.sqrt(s0_ave)*s,'--k')
@@ -301,10 +301,10 @@ class cgyrodata_plot(data.cgyrodata):
       else:
          y0_ave = average(y0,self.t,w,wmax)
          yn_ave = average(yn,self.t,w,wmax)
-         print('INFO: (plot_phi) <|phi_0|>/rho_*D = {:.4f}'.format(y0_ave))
-         print('INFO: (plot_phi) <|phi_n|>/rho_*D = {:.4f}'.format(yn_ave))
+         print('INFO: (plot_phi)       <|phi_0|>/rho_*D = {:.4f}'.format(y0_ave))
+         print('INFO: (plot_phi) <sum_n |phi_n|>/rho_*D = {:.4f}'.format(yn_ave))
          lab0=r'$\left\langle \left|'+ft+r'_0\right|\right\rangle/\rho_{*D}$'
-         labn=r'$\left\langle \left|'+ft+r'_n\right|\right\rangle/\rho_{*D}$'
+         labn=r'$\left\langle \sum_{n>0} \left|'+ft+r'_n\right|\right\rangle/\rho_{*D}$'
          ax.plot(self.t,y0,label=lab0,linewidth=2)
          ax.plot(self.t,yn,label=labn)
          ax.plot(self.t[imin:imax+1],y0_ave*s,'--k')
@@ -315,7 +315,7 @@ class cgyrodata_plot(data.cgyrodata):
          ax.set_ylim(top=float(ymax))
       if ymin != 'auto':
          ax.set_ylim(bottom=float(ymin))
-      ax.legend(loc=4)
+      ax.legend(loc=3)
     
       head = '(cs/a) t     Phi_0/rho_*    Phi_n/rho_*'
 
@@ -438,6 +438,8 @@ class cgyrodata_plot(data.cgyrodata):
 
    def plot_shift(self,w=0.5,wmax=0.0,theta=0.0,ymin='auto',ymax='auto',fig=None):
 
+      import time
+
       if fig is None:
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
       
@@ -464,39 +466,46 @@ class cgyrodata_plot(data.cgyrodata):
       windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[imax])+']$'
       ax.set_title(windowtxt)
 
-      ky = np.zeros([nn])
-      y = np.zeros([nn])
-      x = np.zeros([nx])
-
-      for i in range(nx):
-         x[i] = i*2*np.pi/nx-np.pi
-
+      ky = abs(self.ky)
+      y1 = np.zeros([nn])
+      y2 = np.zeros([nn])
+        
       f,ft = self.kxky_select(theta,0,'phi',0)
 
       for n in range(nn):
 
-         # phi[p,t]
-         phit = f[:,n,:]
+         phi  = np.zeros([nx,nt],dtype=complex)
+         phip = np.zeros([nx,nt],dtype=complex)
+         for p in range(nx):
+            phi[p,:] = f[p,n,:]
+            phip[p,:] = -(p-nx//2)*f[p,n,:]
 
-         phi  = np.zeros([nx,nt],dtype=np.complex_)
-         phip = np.zeros([nx,nt],dtype=np.complex_)
-         phis = np.zeros([nx,nt],dtype=np.complex_)
+         # NOTE: We use *inverse* FFT (ifft) for correct +sign convention of
+         #       the exponent. Also note order convention:
+         #       - a[0] = p=0
+         #       - a[1:nx/2] = p > 0
+         #       - a[nx/2:n] = p < 0
+         
+         # Shift in -gamma domain (standard order: p=0 is 0th index)
+         phi_T = np.fft.ifft(np.fft.ifftshift(phi,axes=0),axis=0)
+         phip_T = np.fft.ifft(np.fft.ifftshift(phip,axes=0),axis=0)
+ 
+         i1 = nx//4 ; i2 = (3*nx)//4
 
-         for p in range(-nx//2,nx//2):
-            for i in range(nx):
-               if abs(x[i]) < np.pi/2: 
-                  u = phit[p+nx//2,:]*np.exp(1j*p*x[i]) 
-                  phi[i,:]  = phi[i,:]+u[:] 
-                  phis[i,:] = phis[i,:]+np.conj(u[:]) 
-                  phip[i,:] = phip[i,:]-p*u[:] 
+         pn = average(np.sum(np.conj(phi_T[i1:i2,:])*phip_T[i1:i2,:],axis=0),t,w,0.0)
+         pd = average(np.sum(np.conj(phi_T[i1:i2,:])*phi_T[i1:i2,:],axis=0),t,w,0.0)
+         y2[n] = (2*np.pi/self.length)*np.real(pn/pd)
 
-         pn = average(np.sum(phis[:,:]*phip[:,:],axis=0),t,w,0.0)
-         pd = average(np.sum(phis[:,:]*phi[:,:],axis=0),t,w,0.0)
+         # Shift in central domain (code order: p=0 is middle of array)
+         phi_T = np.fft.fftshift(phi_T,axes=0) 
+         phip_T = np.fft.fftshift(phip_T,axes=0) 
 
-         ky[n] = self.ky[n]
-         y[n] = (2*np.pi/self.length)*np.real(pn/pd)
-   
-      ax.plot(ky,y)
+         pn = average(np.sum(np.conj(phi_T[i1:i2,:])*phip_T[i1:i2,:],axis=0),t,w,0.0)
+         pd = average(np.sum(np.conj(phi_T[i1:i2,:])*phi_T[i1:i2,:],axis=0),t,w,0.0)
+         y1[n] = (2*np.pi/self.length)*np.real(pn/pd)
+
+      ax.plot(ky,y1,color='k')
+      ax.plot(ky,-y2,linestyle='--',color='k')
 
       if ymax != 'auto':
          ax.set_ylim(top=float(ymax))
@@ -505,7 +514,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       fig.tight_layout(pad=0.3)
 
-      return '   ky*rho       kx*rho',ky,y,None
+      return '   ky*rho       kx*rho',ky,y1,None
 
    def plot_zf(self,w=0.5,wmax=0.0,field=0,fig=None):
 
@@ -518,7 +527,7 @@ class cgyrodata_plot(data.cgyrodata):
       t  = self.t
       k0 = self.kx[0]
 
-      print('INFO: (plot_zf.py) Using index theta index n_theta/3+1')
+      print('INFO: (plot_zf) Using index theta index n_theta/3+1')
       if field == 0:
          f = self.phib[0,self.n_theta//3,:]
       elif field == 1:
@@ -933,7 +942,7 @@ class cgyrodata_plot(data.cgyrodata):
       fig.tight_layout(pad=0.3)
 
    def plot_ky_flux(self,w=0.5,wmax=0.0,field=0,moment='e',ymin='auto',ymax='auto',
-                    fc=0,ftype='screen',diss=0,fig=None,cflux='auto'):
+                    fc=0,ftype='screen',diss=0,bar=True,fig=None,cflux='auto'):
 
       if self.n_n == 1:
          raise ValueError('(plot_ky_flux.py) Plot not available with a single mode.')
@@ -942,10 +951,16 @@ class cgyrodata_plot(data.cgyrodata):
       t  = self.t
 
       if fig is None and ftype != 'nox':
-         fig = plt.figure(MYDIR,figsize=(self.ly*ns,self.ly))
+         if ns < 4:
+            nrow = 1 ; ncol = ns
+         elif ns == 4:
+            nrow = 2 ; ncol = 2
+         elif ns > 4:
+            nrow = 2 ; ncol = 3
+         fig = plt.figure(MYDIR,figsize=(self.ly*ncol,self.ly*nrow))
 
       usec = self.getflux(cflux)
-
+      
       ky  = self.ky
       ave = np.zeros((self.n_n,ns))
 
@@ -986,7 +1001,7 @@ class cgyrodata_plot(data.cgyrodata):
       # Determine tmin
       imin,imax=iwindow(t,w,wmax)
 
-      color = ['m','k','b','c']
+      color = ['magenta','k','blue','cyan','red','green']
 
       if usec:
          cstr = '~\mathrm{(central)}'
@@ -1011,19 +1026,27 @@ class cgyrodata_plot(data.cgyrodata):
       for ispec in range(ns):
          u = specmap(self.mass[ispec],self.z[ispec])
          if not ftype == 'nox':
-            ax = fig.add_subplot(1,ns,ispec+1)
+            ax = fig.add_subplot(nrow,ncol,ispec+1)
+               
             ax.set_xlabel(xlabel)
             ax.set_ylabel(r'$'+mtag+'_'+u+'$',color='k')
             ax.set_title(windowtxt)
-            ax.bar(ky,ave[:,ispec],width=dk/1.1,color=color[ispec],
-                   alpha=0.5,edgecolor='black',align='center')
-         
+            if bar == True:
+               ax.bar(ky,ave[:,ispec],width=dk/1.1,color=color[ispec],
+                      alpha=0.5,edgecolor='black',align='center')
+               # Set axis ranges
+               ax.set_xlim([0,ky[-1]+dk])
+            else:
+               ax.grid(which="both",ls=":")
+               ax.grid(which="major",ls=":")
+               ax.set_xscale('log')
+               ax.set_yscale('log')
+               ax.plot(ky[1:],ave[1:,ispec],'-o',color=color[ispec])
+               
             # Dissipation curve             
             if diss == 1:
                ax.plot(ky,self.alphadiss*ax.get_ylim()[1]*0.5,linewidth=2,color='k',alpha=0.2)
 
-            # Set axis ranges
-            ax.set_xlim([0,ky[-1]+dk])
             if ymax != 'auto':
                ax.set_ylim(top=float(ymax))
             if ymin != 'auto':
@@ -1041,8 +1064,6 @@ class cgyrodata_plot(data.cgyrodata):
          fig.tight_layout(pad=0.3)
 
    def plot_kxky_phi(self,field=0,theta=0.0,moment='phi',spec=0,w=0.5,wmax=0.0,fig=None):
-
-      #from mpl_toolkits.mplot3d import Axes3D
 
       x0 = max(abs(self.kx))*0.25
       y0 = max(abs(self.ky))
@@ -1096,7 +1117,7 @@ class cgyrodata_plot(data.cgyrodata):
       return
    
       
-   def plot_kx_phi(self,field=0,theta=0.0,w=0.5,wmax=0.0,ymin='auto',ymax='auto',nstr='null',diss=0,fig=None):
+   def plot_kx_phi(self,field=0,theta=0.0,w=0.5,wmax=0.0,ymin='auto',ymax='auto',nstr='null',diss=0,deriv=False,fig=None):
 
       if fig is None:
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
@@ -1123,21 +1144,26 @@ class cgyrodata_plot(data.cgyrodata):
       ax.set_xlabel(xlabel)
 
       f,ft = self.kxky_select(theta,field,'phi',0)
-  
+
+      if deriv:
+         dfac = kx**2
+      else:
+         dfac = 1
+                 
       if nstr == 'null':
          y = np.sum(abs(f[:,:,:]),axis=1)/self.rho
          for j in range(nx):
             ave[j] = average(y[j,:],self.t,w,wmax)
-         ax.set_ylabel(r'$\overline{'+ft+'_\mathrm{tot}}/\\rho_s$',color='k')
+         ax.set_ylabel(r'$\left\langle \sum_n \left|'+ft+r'_n\right|\right\rangle/\rho_{*D}$')
+         ave = dfac*ave
          ax.step(kx+dk/2,ave[:],color=color[0])
       else:
-         y = np.zeros([nx,self.n_time])
          nvec = str2list(nstr)
          print('INFO: (plot_kx_phi) n = '+str(nvec))
-         ax.set_ylabel(r'$\overline{'+ft+'_n}/\\rho_s$',color='k')
+         ax.set_ylabel(r'$\left\langle\left|'+ft+r'_n\right|\right\rangle/\rho_{*D}$')
          for n in nvec:
             num = r'$n='+str(n)+'$'
-            ave[:] = average_n(abs(f[:,n,:]),self.t,w,wmax,nx)
+            ave[:] = dfac*average_n(abs(f[:,n,:]),self.t,w,wmax,nx)
             ax.step(kx+dk/2,ave[:],label=num)
             if self.n_n > 16:
                ax.legend(loc=4, ncol=5, prop={'size':12})
@@ -1163,6 +1189,67 @@ class cgyrodata_plot(data.cgyrodata):
       return
    
 
+   def plot_cheb_phi(self,field=0,theta=0.0,w=0.5,wmax=0.0,ymin='auto',ymax='auto',nstr='null',diss=0,deriv=False,fig=None):
+
+      if fig is None:
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
+
+      self.getbigfield()
+
+      t  = self.t
+      kx = self.kx
+      nx = int(self.n_radial)
+      n0 = nx//2
+      nk = 2*n0
+      yr = np.zeros(nx)
+      yi = np.zeros(nx)
+
+      imin,imax=iwindow(t,w,wmax)
+    
+      ax = fig.add_subplot(1,1,1)
+      ax.set_yscale('log')
+
+      color = ['m','k','b','c']
+      xlabel=r'$k$'
+      windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[imax])+']$'
+
+      ax.set_title(r'$\mathrm{Average~fluctuation~intensity} \quad $'+windowtxt)
+      ax.set_xlabel(xlabel)
+
+      f,ft = self.kxky_select(theta,field,'phi',0)
+
+      #yr[:] = average_n(np.real(f[:,0,:]),t,w,wmax,nx)
+      #yi[:] = average_n(np.imag(f[:,0,:]),t,w,wmax,nx)
+      yr = np.real(f[:,0,-1])
+      yi = np.imag(f[:,0,-1])
+      y = yr+1j*yi
+      
+      phim = y[n0-1:0:-1]
+      phi0 = y[n0]
+      phip = y[n0+1:]
+      print(np.abs(phim))
+      print(np.abs(phip))
+      c = np.zeros([nk],dtype=complex)
+
+      mat = np.zeros([nk,n0-1])
+      kvec = np.arange(nk)
+      z = np.arange(1,n0)*np.pi/2
+      for k in kvec:
+         mat[k,:] = sp.spherical_jn(k,z)
+
+      sphip = np.matmul(mat,phip)
+      sphim = np.matmul(mat,phim)
+
+      for k in np.arange(nk):
+         c[k] = (k+0.5)*(sphip[k]*1j**k+sphim[k]*(-1j)**k)
+      c[0] = c[0]+phi0
+
+      ax.bar(np.arange(nk),np.abs(c),alpha=0.5)
+
+      ax.set_ylim(1e-5,max(abs(c)))
+
+      return
+
    def plot_hb(self,itime=-1,spec=0,tmax=-1.0,mesh=0,fig=None):
             
       import matplotlib.cm as cm
@@ -1183,7 +1270,7 @@ class cgyrodata_plot(data.cgyrodata):
          i0 = self.n_theta-1
 
       if self.n_radial > 1:
-         n0 = (self.n_radial/2)*self.n_theta+i0
+         n0 = (self.n_radial//2)*self.n_theta+i0
          x = self.thetab/np.pi
       else:
          n0 = self.n_theta/3
@@ -1203,7 +1290,7 @@ class cgyrodata_plot(data.cgyrodata):
          if row == 0:
             ie = 0
          if row == 1:
-            ie = self.n_energy/2
+            ie = self.n_energy//2
          if row == 2:
             ie = self.n_energy-1
 
@@ -1215,7 +1302,7 @@ class cgyrodata_plot(data.cgyrodata):
          ax.set_ylabel(r'$\xi = v_\parallel/v$')
 
          hp = np.transpose(np.array(self.hb[0,:,spec,:,ie,itime]))
-         h_norm = 0.5*(hp[self.n_xi/2-1,n0]+hp[self.n_xi/2,n0])
+         h_norm = 0.5*(hp[self.n_xi//2-1,n0]+hp[self.n_xi//2,n0])
          hp = hp/h_norm
          hmin = hp.min()
          hmax = hp.max()

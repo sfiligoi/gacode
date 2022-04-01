@@ -145,7 +145,7 @@ subroutine prgen_read_iterdb
   read(1,*) t ; read(1,*) xv ! sawtooth electron heating
   read(1,*) t ; read(1,*) xv ! sawtooth ion heating
   read(1,*) t ; read(1,*) onetwo_qrad ! 59
-  read(1,*) t ; read(1,*) qohm ; qohm = 1e-6*qohm ! (W/m^3 = MW/m^3) 60
+  read(1,*) t ; read(1,*) qohm ; qohm = 1e-6*qohm ! (W/m^3 -> MW/m^3) 60
   read(1,*) t ; read(1,*) rmaj ! 61
   read(1,*) t ; read(1,*) rmin ! 62
   read(1,*) t ; read(1,*) onetwo_volume ! 63

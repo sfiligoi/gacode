@@ -12,13 +12,9 @@
 !   SWIM        (plasmastate)
 !   PFILE       (peqdsk)
 !   GENF        (General Fusion)
-!   CORSICA     (Corsica) 
-!   UFILE       (ITPA profile database format)
 !
 !  Autodetected geometry formats:
 !   GFILE       (geqdsk equilibrium data)
-!   DSKGATO_OLD (old-type dskgato flux-surface data)
-!   DSKGATO_NEW (new-type dskgato flux-surface data)
 !--------------------------------------------------------------------
 
 program prgen
@@ -62,7 +58,7 @@ program prgen
   case('null') ! gfile only
      print '(a)','INFO: (prgen) Merging gfile data into otherwise empty input.gacode.'
      format_type = 0
-     call prgen_read_null
+     ! Nothing to read
 
   case ('ITERDB') ! Old text format
      print '(a)','INFO: (prgen) Assuming old iterdb text format.'
@@ -94,18 +90,6 @@ program prgen
      format_type = 4
      call prgen_read_genf
 
-  case ('CORSICA') ! corsica format
-     print '(a)','INFO: (prgen) Assuming CORSICA format.'
-
-     format_type = 5
-     call prgen_read_corsica
-
-  case ('UFILE') ! UFILE format
-     print '(a)','INFO: (prgen) Assuming UFILE format.'
-
-     format_type = 6
-     call prgen_read_ufile
-
   case('GACODE') ! Note (we may or may not have gmerge_flag == 1)
      print '(a)','INFO: (prgen) Assuming input.gacode (GACODE) format.'
 
@@ -134,22 +118,11 @@ program prgen
   select case (efit_method)
   case (0)
      ! Use geometry data contained in profile data 
-     print '(a)','INFO: (prgen) Using original geometry data.'
+     print '(a)','WARNING: (prgen) Using original geometry data. Better to use gfile.'
   case (1)
-     ! Use OMFIT-EFIT mapper
-     call prgen_read_omfit
+     ! Use EFIT mapper
+     call prgen_geometry
   end select
-  !--------------------------------------------------------------------
-
-  !--------------------------------------------------------------------
-  ! High-resolution geometry
-  !
-  if (efit_method == 1) then
-     if (format_type == 1 .or. format_type == 2) then
-        print '(a,2(f10.8,a))', &
-             'INFO: (prgen) dpsi = ',dpsi_data,' (statefile) ',dpsi_efit,' (new)'
-     endif
-  endif
   !--------------------------------------------------------------------
 
   !-----------------------------------------------------
@@ -171,10 +144,6 @@ program prgen
      call prgen_map_peqdsk
   case (4)
      call prgen_map_genf
-  case (5) 
-     call prgen_map_corsica
-  case (6)
-     call prgen_map_ufile
   case (7,8)
      call prgen_map_inputgacode
   end select

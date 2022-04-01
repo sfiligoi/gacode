@@ -36,16 +36,21 @@ nc = n_radial*n_theta
 
 d = gcd(nv,nc)
 
-print('          [coll]     [str]      [NL] ')
-print(' n_MPI    nc_loc    nv_loc   n_split ')
-print('------    ------    ------   ------- ')
+print('          [coll]     [str]      [NL]  ')
+print(' n_MPI    nc_loc    nv_loc   n_split  v_ord')
+print('------    ------    ------   -------  -----')
 for it in range(d*n_toroidal):
    j = it+1
    if np.mod(d*n_toroidal,j) == 0 and np.mod(j,n_toroidal) == 0:
+      if np.mod(j,n_species*n_toroidal) == 0:
+         extra = '   1,2'
+      else:
+         extra = '   1'
+
       n_proc_1 = j//n_toroidal
-      nc_loc = nc//n_proc_1           
+      nc_loc = nc//n_proc_1          
       nv_loc = nv//n_proc_1           
       nsplit = 1+(nv_loc*n_theta-1)//n_toroidal
-      print(' {:5d}     {:5d}     {:5d}     {:5d}'.format(j,nc_loc,nv_loc,nsplit))
+      print(' {:5d}     {:5d}     {:5d}     {:5d}'.format(j,nc_loc,nv_loc,nsplit)+extra)
 
 

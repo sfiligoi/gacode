@@ -207,8 +207,9 @@ elif plot_type == 'ky_flux':
    fc     = int(sys.argv[8])
    ftype  = sys.argv[9]
    diss   = int(sys.argv[10])
-   cflux  = sys.argv[11]
-
+   bar    = bool(int(sys.argv[11]))
+   cflux  = sys.argv[12]
+   
    if ftype == 'nox' or ftype == 'dump':
        doplot = False
 
@@ -216,7 +217,7 @@ elif plot_type == 'ky_flux':
       cgyrodata_dump('./').dump_ky_flux(w=w,wmax=wmax,field=field,moment=moment,fc=fc)
    else:
       data_in.plot_ky_flux(w=w,wmax=wmax,field=field,moment=moment,
-                           ymin=ymin,ymax=ymax,fc=fc,ftype=ftype,diss=diss,cflux=cflux)
+                           ymin=ymin,ymax=ymax,fc=fc,ftype=ftype,diss=diss,bar=bar,cflux=cflux)
 
    outfile = 'out.cgyro.ky_flux.'+ftype
 
@@ -258,11 +259,29 @@ elif plot_type == 'kx_phi':
    ymax  = sys.argv[7]
    nstr  = sys.argv[8]
    ftype = sys.argv[9]
-   diss = int(sys.argv[10])
-
-   head = data_in.plot_kx_phi(field=field,theta=theta,w=w,wmax=wmax,ymin=ymin,ymax=ymax,nstr=nstr,diss=diss)
+   diss  = int(sys.argv[10])
+   deriv = bool(int(sys.argv[11]))
+   
+   head = data_in.plot_kx_phi(field=field,theta=theta,w=w,wmax=wmax,ymin=ymin,ymax=ymax,nstr=nstr,diss=diss,deriv=deriv)
 
    outfile = 'out.cgyro.kx_phi.'+ftype
+
+elif plot_type == 'cheb_phi':
+
+   field = int(sys.argv[2])
+   theta = float(sys.argv[3])
+   w     = float(sys.argv[4])
+   wmax  = float(sys.argv[5])
+   ymin  = sys.argv[6]
+   ymax  = sys.argv[7]
+   nstr  = sys.argv[8]
+   ftype = sys.argv[9]
+   diss  = int(sys.argv[10])
+   deriv = bool(int(sys.argv[11]))
+   
+   head = data_in.plot_cheb_phi(field=field,theta=theta,w=w,wmax=wmax,ymin=ymin,ymax=ymax,nstr=nstr,diss=diss,deriv=deriv)
+
+   outfile = 'out.cgyro.cheb_phi.'+ftype
 
 elif plot_type == 'hb':
 

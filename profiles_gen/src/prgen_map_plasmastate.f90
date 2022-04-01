@@ -254,12 +254,12 @@ subroutine prgen_map_plasmastate
      expro_qohme(i)  = 1e-6*plst_pohme(i-1)/dvol
      expro_qbeame(i) = 1e-6*plst_pbe(i-1)/dvol
      expro_qbeami(i) = 1e-6*(plst_pbi(i-1)+plst_pbth(i-1))/dvol
-     expro_qrfe(i)   = 1e-6*(plst_peech(i-1)+plst_pmine(i-1))/dvol
+     expro_qrfe(i)   = 1e-6*(plst_peech(i-1)+plst_pmine(i-1)+plst_picrf_totals(i-1,1))/dvol ! ECH + ICRF minority + ICRF direct
      expro_qrfi(i)   = 1e-6*(plst_pmini(i-1)+plst_pminth(i-1)+plst_picth(i-1))/dvol
 
      ! Radiation
      expro_qsync(i) = 1e-6*plst_prad_cy(i-1)/dvol
-     expro_qbrem(i) = 1e-6*plst_prad_br(i-1)/dvol
+     expro_qbrem(i) = 1e-6*(plst_prad(i-1) - plst_prad_cy(i-1) - plst_prad_li(i-1))/dvol
      expro_qline(i) = 1e-6*plst_prad_li(i-1)/dvol
 
      ! Momentum source (tq_trans already in Nm)
