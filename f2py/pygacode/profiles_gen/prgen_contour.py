@@ -155,7 +155,7 @@ def prgen_contour(g,mag,nc,psinorm,narc):
    cs = interpolate.interp1d(efitpsi,efitf,kind='quadratic') ; out_f = cs(psic)
    cs = interpolate.interp1d(efitpsi,efitq,kind='quadratic') ; out_q = cs(psic)
 
-   # Recalculate q based on definition (and some identities)
+   # Recalculate q (as a check) based on definition (and some identities)
    loopint = np.zeros(nc-1)
    for k in range(1,narc-1):
       loopint[:] = loopint[:]+(rv[k+1,1:]-rv[k,1:])*(zv[k+1,1:]+zv[k,1:])/(rv[k+1,1:]+rv[k,1:])
@@ -168,25 +168,33 @@ def prgen_contour(g,mag,nc,psinorm,narc):
    
       # Flux contours
       asp = ly/lx*(nx/ny)
-      fig,ax = plt.subplots(figsize=(5*lx/ly,5))
+      fig,ax = plt.subplots(figsize=(8*lx/ly,6))
       ax.imshow(g['PSIRZ'],cmap=plt.cm.hsv,aspect=asp,origin='lower')
       ax.set_xlabel('EFIT cell')
       ax.set_ylabel('EFIT cell')
+
+      # Rescaling factor for resampled contours
+      xscale = (nx-1)/(mx-1)
+      yscale = (ny-1)/(my-1)
+      
       # A few contours
       for i in [1,nc//3,(2*nc)//3,nc-1]:
          x,y = efit_rzmapi(g,rv[:,i],zv[:,i],mx,my)
-         ax.plot(x/mag,y/mag,'--k',linewidth=1)
+         ax.plot(x*xscale,y*yscale,'--k',linewidth=1)
          
       contours = measure.find_contours(psi_efit,psi1)
       for contour in contours:
          ixc = contour[:,1] ; iyc = contour[:,0]        
-         ax.plot(ixc/mag,iyc/mag,color='b',linewidth=1)
+         ax.plot(ixc*xscale,iyc*yscale,color='b',linewidth=1)
                
       # Separatrix
-      ax.plot(ixs/mag,iys/mag,'w',linewidth=1)
+      ax.plot(ixs*xscale,iys*yscale,'w',linewidth=1)
 
       plt.tight_layout()
-      plt.savefig('prgen_efit.pdf')
+      
+      ofile = 'prgen_efit.pdf'
+      print('INFO: (prgen_contour) Writing '+ofile)
+      plt.savefig(ofile)
       
       # q-profiles
       fig,ax = plt.subplots(figsize=(8,5))
@@ -200,6 +208,9 @@ def prgen_contour(g,mag,nc,psinorm,narc):
       ax.legend()
       
       plt.tight_layout()
-      plt.savefig('prgen_q.pdf')
+
+      ofile = 'prgen_q.pdf'
+      print('INFO: (prgen_contour) Writing '+ofile)
+      plt.savefig(ofile)
       
    return rv,zv,psic,out_p,out_f,out_q,psi_sep
