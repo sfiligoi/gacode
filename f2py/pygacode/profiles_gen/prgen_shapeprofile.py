@@ -43,7 +43,7 @@ si = np.zeros([nf+1,npsi])
 xi = np.zeros([4,npsi])
 for i in range(1,npsi):
    r=ri[:,i] ; z=zi[:,i]
-   if plotpng:
+   if i == npsi-1:
       xplot = pnorm[i]
    else:
       xplot = 0.0
