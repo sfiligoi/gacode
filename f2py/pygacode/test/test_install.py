@@ -12,7 +12,7 @@ filename = os.path.split(__file__)[0] + '/input.gacode'
 for k in range(3):
     # read the file
     print('READ: ' + filename)
-    expro.expro_read(filename)
+    expro.expro_read(filename, 0)
 
     # test that expro_name is a numpy array
     assert isinstance(expro.expro_name, numpy.ndarray), error_message
