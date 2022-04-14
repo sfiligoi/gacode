@@ -506,6 +506,8 @@ class cgyrodata_plot(data.cgyrodata):
 
       ax.plot(ky,y1,color='k')
       ax.plot(ky,-y2,linestyle='--',color='k')
+      for n in range(nn):
+         print(y1[n],y2[n])
 
       if ymax != 'auto':
          ax.set_ylim(top=float(ymax))
@@ -777,7 +779,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       color = ['k','m','b','c','g','r']
       windowtxt = '['+str(t[imin])+' < (c_s/a) t < '+str(t[imax])+']'
-
+      
       print('INFO: (text.py) Average Window:'+windowtxt)
 
       # Otherwise plot
@@ -1196,6 +1198,13 @@ class cgyrodata_plot(data.cgyrodata):
 
       self.getbigfield()
 
+      if nstr == 'null':
+         nvec = list(range(self.n_n))
+      else:
+         nvec = str2list(nstr)
+      myn = nvec[0]
+      print(myn)
+
       t  = self.t
       kx = self.kx
       nx = int(self.n_radial)
@@ -1211,42 +1220,90 @@ class cgyrodata_plot(data.cgyrodata):
 
       color = ['m','k','b','c']
       xlabel=r'$k$'
-      windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[imax])+']$'
+      windowtxt = r'$n='+str(myn)+'$'
 
       ax.set_title(r'$\mathrm{Average~fluctuation~intensity} \quad $'+windowtxt)
       ax.set_xlabel(xlabel)
 
       f,ft = self.kxky_select(theta,field,'phi',0)
 
-      #yr[:] = average_n(np.real(f[:,0,:]),t,w,wmax,nx)
-      #yi[:] = average_n(np.imag(f[:,0,:]),t,w,wmax,nx)
-      yr = np.real(f[:,0,-1])
-      yi = np.imag(f[:,0,-1])
-      y = yr+1j*yi
+      d_all1 = np.zeros([nk])
+      d_all2 = np.zeros([nk])
+      shift_all1 = 0.0
+      shift_all2 = 0.0
+
+      for jt in np.arange(imin,imax+1):
+         yr = np.real(f[:,myn,-1-jt])
+         yi = np.imag(f[:,myn,-1-jt])
+         y = yr+1j*yi
       
-      phim = y[n0-1:0:-1]
-      phi0 = y[n0]
-      phip = y[n0+1:]
-      print(np.abs(phim))
-      print(np.abs(phip))
-      c = np.zeros([nk],dtype=complex)
+         phim = y[n0-1:0:-1]
+         phi0 = y[n0]
+         phip = y[n0+1:]
 
-      mat = np.zeros([nk,n0-1])
-      kvec = np.arange(nk)
-      z = np.arange(1,n0)*np.pi/2
-      for k in kvec:
-         mat[k,:] = sp.spherical_jn(k,z)
+         c1 = np.zeros([nk],dtype=complex)
+         d1 = np.zeros([nk])
+         c2 = np.zeros([nk],dtype=complex)
+         d2 = np.zeros([nk])
 
-      sphip = np.matmul(mat,phip)
-      sphim = np.matmul(mat,phim)
+         mat1 = np.zeros([nk,n0-1])
+         mat2 = np.zeros([nk,n0-1])
+         kvec = np.arange(nk)
+         pvec = np.arange(1,n0)
+         z = pvec*np.pi/2
+         for k in kvec:
+            mat1[k,:]  = sp.spherical_jn(k,z)
+            mat2[k,:]  = mat1[k,:]*(-1)**pvec[:]
+            
 
-      for k in np.arange(nk):
-         c[k] = (k+0.5)*(sphip[k]*1j**k+sphim[k]*(-1j)**k)
-      c[0] = c[0]+phi0
+         sphip1 = np.matmul(mat1,phip)
+         sphim1 = np.matmul(mat1,phim)
+         sphip2 = np.matmul(mat2,phip)
+         sphim2 = np.matmul(mat2,phim)
 
-      ax.bar(np.arange(nk),np.abs(c),alpha=0.5)
+         for k in np.arange(nk):
+            c1[k] = (2.0*k+1.0)*(sphip1[k]*1j**k+sphim1[k]*(-1j)**k)
+            d1[k] = np.abs(c1[k])*np.sqrt(2.0/(2.0*k+1.0))
+            c2[k] = (2.0*k+1.0)*(sphip2[k]*1j**k+sphim2[k]*(-1j)**k)
+            d2[k] = np.abs(c2[k])*np.sqrt(2.0/(2.0*k+1.0))
+            
+         c1[0] = c1[0]+phi0
+         d1[0] = np.abs(c1[0])*np.sqrt(2.0)
+         c2[0] = c2[0]+phi0
+         d2[0] = np.abs(c2[0])*np.sqrt(2.0)
 
-      ax.set_ylim(1e-5,max(abs(c)))
+         shift1 = 0.0
+         shift2 = 0.0
+         for mp in np.arange(1,nk):
+            for m in range(mp-1,-1,-2):
+               shift1 = shift1 + 2.0*c1[m]*np.conj(c1[mp])
+               shift2 = shift2 + 2.0*c2[m]*np.conj(c2[mp])
+
+         shift_all1 = shift_all1 + np.imag(shift1)
+         shift_all2 = shift_all2 + np.imag(shift2)
+         d_all1 = d_all1 + d1
+         d_all2 = d_all2 + d2
+
+      nt_avg = (imax-imin+1)
+      d_all1     = d_all1/nt_avg
+      d_all2     = d_all2/nt_avg
+
+      # Derivative
+      # demoninator is <phi | phi> = sum_m 2/(2m+1) |cm|^2 
+      itot1 = sum((d_all1)**2)
+      itot2 = sum((d_all2)**2)
+      
+      shift_all1 = shift_all1/nt_avg/itot1*(2*np.pi/self.length)
+      shift_all2 = shift_all2/nt_avg/itot2*(2*np.pi/self.length)
+      print(shift_all1,shift_all2)
+      
+      ax.plot(np.arange(nk),d_all1,alpha=0.5,color='blue')
+      ax.plot(np.arange(nk),d_all2,alpha=0.5,color='red')
+
+      max1 =  max(d_all1)
+      max2 =  max(d_all2)
+      maxy = max(max1,max2)
+      ax.set_ylim(1e-5,maxy)      
 
       return
 
