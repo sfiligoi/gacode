@@ -172,7 +172,7 @@ def plot_ang(r,z,x,vr,xr,cr,sr,outfile):
         pr = pr+cr[p]*np.cos(p*x)+sr[p]*np.sin(p*x)
 
     # Latex fonts
-    rc('text',usetex=True)
+    #rc('text',usetex=True)
     rc('font',size=18)
 
     fig = plt.figure(figsize=(18,9))
@@ -236,7 +236,7 @@ def plot_ang(r,z,x,vr,xr,cr,sr,outfile):
 def plot_coef(pnorm,ci,si,xi):
    
    # Latex fonts
-   rc('text',usetex=True)
+   #rc('text',usetex=True)
    rc('font',size=18)
 
    fig = plt.figure(figsize=(14,12))
