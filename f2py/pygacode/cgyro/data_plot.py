@@ -471,14 +471,27 @@ class cgyrodata_plot(data.cgyrodata):
       y2 = np.zeros([nn])
         
       f,ft = self.kxky_select(theta,0,'phi',0)
-
+ 
       for n in range(nn):
 
          phi  = np.zeros([nx,nt],dtype=complex)
          phip = np.zeros([nx,nt],dtype=complex)
-         for p in range(nx):
+         for p in range(1,nx):
             phi[p,:] = f[p,n,:]
             phip[p,:] = -(p-nx//2)*f[p,n,:]
+            
+         ephi  = np.zeros([2*nx,nt],dtype=complex)
+         ephip = np.zeros([2*nx,nt],dtype=complex)
+         ephi[nx//2:3*nx//2,:]  = phi[:,:]
+         ephip[nx//2:3*nx//2,:] = phip[:,:]
+
+         wpos = np.zeros([2*nx])
+         wneg = np.zeros([2*nx])
+         wneg[nx//2+1:3*nx//2] = 1.0
+         wneg[nx//2]  = 0.5
+         wneg[3*nx//2] = 0.5
+         wpos[:] = 1-wneg[:]
+            
 
          # NOTE: We use *inverse* FFT (ifft) for correct +sign convention of
          #       the exponent. Also note order convention:
@@ -487,27 +500,53 @@ class cgyrodata_plot(data.cgyrodata):
          #       - a[nx/2:n] = p < 0
          
          # Shift in -gamma domain (standard order: p=0 is 0th index)
-         phi_T = np.fft.ifft(np.fft.ifftshift(phi,axes=0),axis=0)
-         phip_T = np.fft.ifft(np.fft.ifftshift(phip,axes=0),axis=0)
+         phi_T = np.fft.ifft(np.fft.ifftshift(ephi,axes=0),axis=0)
+         phip_T = np.fft.ifft(np.fft.ifftshift(ephip,axes=0),axis=0)
  
-         i1 = nx//4 ; i2 = (3*nx)//4
+         i1 = nx//2 ; i2 = (3*nx)//2
 
-         pn = average(np.sum(np.conj(phi_T[i1:i2,:])*phip_T[i1:i2,:],axis=0),t,w,0.0)
-         pd = average(np.sum(np.conj(phi_T[i1:i2,:])*phi_T[i1:i2,:],axis=0),t,w,0.0)
-         y2[n] = (2*np.pi/self.length)*np.real(pn/pd)
+         # EAB
+         #pn = average(np.sum(np.conj(phi_T[i1:i2,:])*phip_T[i1:i2,:],axis=0),t,w,0.0)
+         #pd = average(np.sum(np.conj(phi_T[i1:i2,:])*phi_T[i1:i2,:],axis=0),t,w,0.0)
+         #pn = np.sum(np.sum(np.conj(phi_T[:,imin:imax+1])*phip_T[:,imin:imax+1],axis=1)*wneg[:])
+         #pd = np.sum(np.sum(np.conj(phi_T[:,imin:imax+1])*phi_T[:,imin:imax+1],axis=1)*wneg[:])
+         pn_t = np.zeros([2*nx])
+         pd_t = np.zeros([2*nx])
+         for jt in np.arange(imin,imax+1):
+            pn_t[:] = pn_t[:] + np.conj(phi_T[:,jt])*phip_T[:,jt]
+            pd_t[:] = pd_t[:] + np.conj(phi_T[:,jt])*phi_T[:,jt]
+         pn = np.sum(pn_t[:]*wneg[:])
+         pd = np.sum(pd_t[:]*wneg[:])
+            
+         #y2[n] = (2*np.pi/self.length)*np.real(pn/pd)
+         y2[n] = np.real(pn/pd)
 
          # Shift in central domain (code order: p=0 is middle of array)
-         phi_T = np.fft.fftshift(phi_T,axes=0) 
-         phip_T = np.fft.fftshift(phip_T,axes=0) 
+         #phi_T = np.fft.fftshift(phi_T,axes=0) 
+         #phip_T = np.fft.fftshift(phip_T,axes=0) 
 
-         pn = average(np.sum(np.conj(phi_T[i1:i2,:])*phip_T[i1:i2,:],axis=0),t,w,0.0)
-         pd = average(np.sum(np.conj(phi_T[i1:i2,:])*phi_T[i1:i2,:],axis=0),t,w,0.0)
-         y1[n] = (2*np.pi/self.length)*np.real(pn/pd)
+         # EAB
+         #pn = average(np.sum(np.conj(phi_T[i1:i2,:])*phip_T[i1:i2,:],axis=0),t,w,0.0)
+         #pd = average(np.sum(np.conj(phi_T[i1:i2,:])*phi_T[i1:i2,:],axis=0),t,w,0.0)
+         #pn = np.sum(np.sum(np.conj(phi_T[:,imin:imax+1])*phip_T[:,imin:imax+1],axis=1)*wpos[:])
+         #pd = np.sum(np.sum(np.conj(phi_T[:,imin:imax+1])*phi_T[:,imin:imax+1],axis=1)*wpos[:])
+         pn_t[:] = 0.0
+         pd_t[:] = 0.0
+         for jt in np.arange(imin,imax+1):
+            pn_t[:] = pn_t[:] + np.conj(phi_T[:,jt])*phip_T[:,jt]
+            pd_t[:] = pd_t[:] + np.conj(phi_T[:,jt])*phi_T[:,jt]
+         pn = np.sum(pn_t[:]*wpos[:])
+         pd = np.sum(pd_t[:]*wpos[:])
+         
+         #y1[n] = (2*np.pi/self.length)*np.real(pn/pd)
+         y1[n] = np.real(pn/pd)
+         
+         print(n,y1[n],y2[n])
 
       ax.plot(ky,y1,color='k')
       ax.plot(ky,-y2,linestyle='--',color='k')
-      for n in range(nn):
-         print(y1[n],y2[n])
+      #for n in range(nn):
+      #   print(y1[n],y2[n])
 
       if ymax != 'auto':
          ax.set_ylim(top=float(ymax))
@@ -1203,7 +1242,6 @@ class cgyrodata_plot(data.cgyrodata):
       else:
          nvec = str2list(nstr)
       myn = nvec[0]
-      print(myn)
 
       t  = self.t
       kx = self.kx
@@ -1233,10 +1271,10 @@ class cgyrodata_plot(data.cgyrodata):
       shift_all2 = 0.0
 
       for jt in np.arange(imin,imax+1):
-         yr = np.real(f[:,myn,-1-jt])
-         yi = np.imag(f[:,myn,-1-jt])
+         yr = np.real(f[:,myn,jt])
+         yi = np.imag(f[:,myn,jt])
          y = yr+1j*yi
-      
+
          phim = y[n0-1:0:-1]
          phi0 = y[n0]
          phip = y[n0+1:]
@@ -1263,14 +1301,14 @@ class cgyrodata_plot(data.cgyrodata):
 
          for k in np.arange(nk):
             c1[k] = (2.0*k+1.0)*(sphip1[k]*1j**k+sphim1[k]*(-1j)**k)
-            d1[k] = np.abs(c1[k])*np.sqrt(2.0/(2.0*k+1.0))
+            d1[k] = (np.abs(c1[k]))**2 * (2.0/(2.0*k+1.0))
             c2[k] = (2.0*k+1.0)*(sphip2[k]*1j**k+sphim2[k]*(-1j)**k)
-            d2[k] = np.abs(c2[k])*np.sqrt(2.0/(2.0*k+1.0))
+            d2[k] = (np.abs(c2[k]))**2 * (2.0/(2.0*k+1.0))
             
          c1[0] = c1[0]+phi0
-         d1[0] = np.abs(c1[0])*np.sqrt(2.0)
+         d1[0] = (np.abs(c1[0]))**2 * 2.0
          c2[0] = c2[0]+phi0
-         d2[0] = np.abs(c2[0])*np.sqrt(2.0)
+         d2[0] = (np.abs(c2[0]))**2 *2.0
 
          shift1 = 0.0
          shift2 = 0.0
@@ -1285,17 +1323,17 @@ class cgyrodata_plot(data.cgyrodata):
          d_all2 = d_all2 + d2
 
       nt_avg = (imax-imin+1)
-      d_all1     = d_all1/nt_avg
-      d_all2     = d_all2/nt_avg
-
       # Derivative
       # demoninator is <phi | phi> = sum_m 2/(2m+1) |cm|^2 
-      itot1 = sum((d_all1)**2)
-      itot2 = sum((d_all2)**2)
-      
-      shift_all1 = shift_all1/nt_avg/itot1*(2*np.pi/self.length)
-      shift_all2 = shift_all2/nt_avg/itot2*(2*np.pi/self.length)
-      print(shift_all1,shift_all2)
+      itot1 = sum(d_all1)/nt_avg
+      itot2 = sum(d_all2)/nt_avg
+
+      # EAB
+      #shift_all1 = shift_all1/nt_avg/itot1*(2.0/np.pi)*(2*np.pi/self.length)
+      #shift_all2 = shift_all2/nt_avg/itot2*(2.0/np.pi)*(2*np.pi/self.length)
+      shift_all1 = shift_all1/nt_avg/itot1*(2.0/np.pi)
+      shift_all2 = shift_all2/nt_avg/itot2*(2.0/np.pi)
+      print(myn,shift_all1,shift_all2)
       
       ax.plot(np.arange(nk),d_all1,alpha=0.5,color='blue')
       ax.plot(np.arange(nk),d_all2,alpha=0.5,color='red')
