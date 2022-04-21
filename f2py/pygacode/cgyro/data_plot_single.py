@@ -266,7 +266,7 @@ elif plot_type == 'kx_phi':
 
    outfile = 'out.cgyro.kx_phi.'+ftype
 
-elif plot_type == 'cheb_phi':
+elif plot_type == 'poly_phi':
 
    field = int(sys.argv[2])
    theta = float(sys.argv[3])
@@ -279,7 +279,7 @@ elif plot_type == 'cheb_phi':
    diss  = int(sys.argv[10])
    deriv = bool(int(sys.argv[11]))
    
-   head = data_in.plot_cheb_phi(field=field,theta=theta,w=w,wmax=wmax,ymin=ymin,ymax=ymax,nstr=nstr,diss=diss,deriv=deriv)
+   head = data_in.plot_poly_phi(field=field,theta=theta,w=w,wmax=wmax,ymin=ymin,ymax=ymax,nstr=nstr,diss=diss,deriv=deriv)
 
    outfile = 'out.cgyro.cheb_phi.'+ftype
 
