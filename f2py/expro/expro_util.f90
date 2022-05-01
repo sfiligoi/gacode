@@ -287,8 +287,6 @@ subroutine expro_compute_derived
      expro_bt2(i) = geo_fluxsurfave_bt2*expro_bunit(i)**2
 
      expro_thetascale(i) = geo_thetascale
-
-     expro_fpol(i) = geo_f*expro_bunit(i)*r_min
   enddo
 
   !--------------------------------------------------------------

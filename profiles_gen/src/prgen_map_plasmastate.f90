@@ -186,7 +186,6 @@ subroutine prgen_map_plasmastate
   expro_ne = plst_ns(:,1)*1e-19
   expro_z_eff = plst_zeff(:)
   expro_w0 = omega0(:) 
-  expro_ptot = p_tot ! total pressure, thermal + fast ion
 
   expro_ni = 0.0
   expro_ti = 0.0

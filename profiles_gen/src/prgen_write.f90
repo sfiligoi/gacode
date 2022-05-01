@@ -46,6 +46,10 @@ subroutine prgen_write
      expro_shape_cos4 = shape_cos(4,:)
      expro_shape_cos5 = shape_cos(5,:)
      expro_shape_cos6 = shape_cos(6,:)
+
+     ! EFIT passthrough functions
+     expro_ptot = p_tot
+     expro_fpol = fpol
   endif
   !-------------------------------------------------------------------------------------
 

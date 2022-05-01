@@ -41,6 +41,7 @@ module prgen_globals
   real, dimension(:), allocatable :: rmaj
   real, dimension(:), allocatable :: q
   real, dimension(:), allocatable :: p_tot
+  real, dimension(:), allocatable :: fpol
   real, dimension(:), allocatable :: omega0
   real, dimension(:), allocatable :: kappa
   real, dimension(:), allocatable :: delta

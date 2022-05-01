@@ -10,6 +10,7 @@ subroutine prgen_allocate
   allocate(rmaj(nx))
   allocate(q(nx))
   allocate(p_tot(nx))
+  allocate(fpol(nx))
   allocate(omega0(nx))
   allocate(vpolc_exp(nx))
   allocate(vtorc_exp(nx))

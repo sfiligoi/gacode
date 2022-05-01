@@ -14,7 +14,7 @@ subroutine prgen_geometry
 
   integer :: npsi,nf,i,j,ip
   real, dimension(:,:), allocatable :: efit_si,efit_ci
-  real, dimension(:), allocatable :: efit_rho,efit_psi,efit_q,efit_p
+  real, dimension(:), allocatable :: efit_rho,efit_psi,efit_q,efit_p,efit_fpol
   real, dimension(:), allocatable :: efit_rmin,efit_rmaj,efit_kappa,efit_zmaj
   real, dimension(:,:,:), allocatable :: g3vec
   real, dimension(:,:,:), allocatable :: g3rho
@@ -41,12 +41,14 @@ subroutine prgen_geometry
   allocate(efit_psi(npsi))
   allocate(efit_q(npsi))
   allocate(efit_p(npsi))
+  allocate(efit_fpol(npsi))
   allocate(efit_rho(npsi))
 
   open(unit=1,file='out.data',status='old',access='stream')
   read(1) efit_psi
   read(1) efit_q
   read(1) efit_p
+  read(1) efit_fpol
   read(1) efit_si
   read(1) efit_ci
   read(1) efit_rmin
@@ -98,6 +100,7 @@ subroutine prgen_geometry
   call bound_interp(efit_rho,efit_rmin,npsi,rho,rmin,nx)
   call bound_interp(efit_psi,efit_q,npsi,dpsi,q,nx)
   call bound_interp(efit_psi,efit_p,npsi,dpsi,p_tot,nx)
+  call bound_interp(efit_psi,efit_fpol,npsi,dpsi,fpol,nx)
   call bound_interp(efit_rho,efit_zmaj,npsi,rho,zmag,nx)
   call bound_interp(efit_rho,efit_rmaj,npsi,rho,rmaj,nx)
   call bound_interp(efit_rho,efit_kappa,npsi,rho,kappa,nx)
@@ -175,6 +178,7 @@ subroutine prgen_geometry
   deallocate(efit_psi)
   deallocate(efit_q)
   deallocate(efit_p)
+  deallocate(efit_fpol)
   deallocate(efit_rho)
 
 10 format(t1,a,f9.6,a)

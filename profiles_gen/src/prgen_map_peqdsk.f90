@@ -62,7 +62,7 @@ subroutine prgen_map_peqdsk
   expro_te(:)    = peqdsk_te(:)
   expro_ne(:)    = peqdsk_ne(:)*10
   expro_z_eff(:) = z_eff(:)
-  expro_ptot(:)  = p_tot(:)      
+  
   ! COORDINATES: -ipccw accounts for DIII-D toroidal angle convention
   ! (wrt Ip direction)
   expro_w0(:) = -ipccw*1e3*peqdsk_omgeb(:) 

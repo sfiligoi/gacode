@@ -26,7 +26,6 @@ subroutine prgen_map_null
   expro_rho  = rho
   expro_rmin = rmin
   expro_rmaj = rmaj
-  expro_ptot = p_tot
 
  end subroutine prgen_map_null
 

@@ -57,6 +57,7 @@ module expro
   double precision, dimension(:), allocatable :: expro_te
   double precision, dimension(:,:), allocatable :: expro_ti
   double precision, dimension(:), allocatable :: expro_ptot
+  double precision, dimension(:), allocatable :: expro_fpol
   double precision, dimension(:), allocatable :: expro_johm
   double precision, dimension(:), allocatable :: expro_jbs
   double precision, dimension(:), allocatable :: expro_jrf
@@ -136,7 +137,6 @@ module expro
        expro_bt0,&
        expro_bp2,&
        expro_bt2,&
-       expro_fpol,&
        expro_mach,&
        expro_thetascale,&
        expro_flow_beam,&
@@ -580,6 +580,8 @@ contains
           call expro_vcomm(expro_te,nexp)  
        case ('ptot')
           call expro_vcomm(expro_ptot,nexp)  
+       case ('fpol')
+          call expro_vcomm(expro_fpol,nexp)  
        case ('johm')
           call expro_vcomm(expro_johm,nexp)  
        case ('jbs')
@@ -735,6 +737,7 @@ contains
     call expro_writev(expro_te,nexp,'te','keV')
     call expro_writea(expro_ti(:,:),nion,nexp,'ti','keV')
     call expro_writev(expro_ptot,nexp,'ptot','Pa')
+    call expro_writev(expro_fpol,nexp,'fpol','T-m')
     call expro_writev(expro_johm,nexp,'johm','MA/m^2')
     call expro_writev(expro_jbs,nexp,'jbs','MA/m^2')
     call expro_writev(expro_jrf,nexp,'jrf','MA/m^2')
@@ -806,68 +809,68 @@ subroutine expro_list_set
   expro_list(31) = 'te'
   expro_list(32) = 'ti'
   expro_list(33) = 'ptot'
-  expro_list(34) = 'johm'
-  expro_list(35) = 'jbs'
-  expro_list(36) = 'jrf'
-  expro_list(37) = 'jnb'
-  expro_list(38) = 'jbstor'
-  expro_list(39) = 'sigmapar'
-  expro_list(40) = 'z_eff'
-  expro_list(41) = 'vpol'
-  expro_list(42) = 'vtor'
-  expro_list(43) = 'qohme'
-  expro_list(44) = 'qbeame'
-  expro_list(45) = 'qbeami'
-  expro_list(46) = 'qrfe'
-  expro_list(47) = 'qrfi'
-  expro_list(48) = 'qfuse'
-  expro_list(49) = 'qfusi'
-  expro_list(50) = 'qbrem'
-  expro_list(51) = 'qsync'
-  expro_list(52) = 'qline'
-  expro_list(53) = 'qei'
-  expro_list(54) = 'qione'
-  expro_list(55) = 'qioni'
-  expro_list(56) = 'qcxi'
-  expro_list(57) = 'qpar_beam'
-  expro_list(58) = 'qpar_wall'
-  expro_list(59) = 'qmom'
-  expro_list(60) = 'bunit'
-  expro_list(61) = 'gamma_e'
-  expro_list(62) = 'gamma_p'
-  expro_list(63) = 's'
-  expro_list(64) = 'drmaj'
-  expro_list(65) = 'dzmag'
-  expro_list(66) = 'skappa'
-  expro_list(67) = 'sdelta'
-  expro_list(68) = 'szeta'
-  expro_list(69) = 'shape_scos0'
-  expro_list(70) = 'shape_scos1'
-  expro_list(71) = 'shape_scos2'
-  expro_list(72) = 'shape_scos3'
-  expro_list(73) = 'shape_scos4'
-  expro_list(74) = 'shape_scos5'
-  expro_list(75) = 'shape_scos6'
-  expro_list(76) = 'shape_ssin3'
-  expro_list(77) = 'shape_ssin4'
-  expro_list(78) = 'shape_ssin5'
-  expro_list(79) = 'shape_ssin6'
-  expro_list(80) = 'dlnnedr'
-  expro_list(81) = 'dlntedr'
-  expro_list(82) = 'dlnnidr'
-  expro_list(83) = 'dlntidr'
-  expro_list(84) = 'w0p'
-  expro_list(85) = 'surf'
-  expro_list(86) = 'vol'
-  expro_list(87) = 'volp'
-  expro_list(88) = 'cs'
-  expro_list(89) = 'rhos'
-  expro_list(90) = 'nuee'
-  expro_list(91) = 'grad_r0'
-  expro_list(92) = 'ave_grad_r'
-  expro_list(93) = 'bp0'
-  expro_list(94) = 'bt0'
-  expro_list(95) = 'fpol'
+  expro_list(34) = 'fpol'
+  expro_list(35) = 'johm'
+  expro_list(36) = 'jbs'
+  expro_list(37) = 'jrf'
+  expro_list(38) = 'jnb'
+  expro_list(39) = 'jbstor'
+  expro_list(40) = 'sigmapar'
+  expro_list(41) = 'z_eff'
+  expro_list(42) = 'vpol'
+  expro_list(43) = 'vtor'
+  expro_list(44) = 'qohme'
+  expro_list(45) = 'qbeame'
+  expro_list(46) = 'qbeami'
+  expro_list(47) = 'qrfe'
+  expro_list(48) = 'qrfi'
+  expro_list(49) = 'qfuse'
+  expro_list(50) = 'qfusi'
+  expro_list(51) = 'qbrem'
+  expro_list(52) = 'qsync'
+  expro_list(53) = 'qline'
+  expro_list(54) = 'qei'
+  expro_list(55) = 'qione'
+  expro_list(56) = 'qioni'
+  expro_list(57) = 'qcxi'
+  expro_list(58) = 'qpar_beam'
+  expro_list(59) = 'qpar_wall'
+  expro_list(60) = 'qmom'
+  expro_list(61) = 'bunit'
+  expro_list(62) = 'gamma_e'
+  expro_list(63) = 'gamma_p'
+  expro_list(64) = 's'
+  expro_list(65) = 'drmaj'
+  expro_list(66) = 'dzmag'
+  expro_list(67) = 'skappa'
+  expro_list(68) = 'sdelta'
+  expro_list(69) = 'szeta'
+  expro_list(70) = 'shape_scos0'
+  expro_list(71) = 'shape_scos1'
+  expro_list(72) = 'shape_scos2'
+  expro_list(73) = 'shape_scos3'
+  expro_list(74) = 'shape_scos4'
+  expro_list(75) = 'shape_scos5'
+  expro_list(76) = 'shape_scos6'
+  expro_list(77) = 'shape_ssin3'
+  expro_list(78) = 'shape_ssin4'
+  expro_list(79) = 'shape_ssin5'
+  expro_list(80) = 'shape_ssin6'
+  expro_list(81) = 'dlnnedr'
+  expro_list(82) = 'dlntedr'
+  expro_list(83) = 'dlnnidr'
+  expro_list(84) = 'dlntidr'
+  expro_list(85) = 'w0p'
+  expro_list(86) = 'surf'
+  expro_list(87) = 'vol'
+  expro_list(88) = 'volp'
+  expro_list(89) = 'cs'
+  expro_list(90) = 'rhos'
+  expro_list(91) = 'nuee'
+  expro_list(92) = 'grad_r0'
+  expro_list(93) = 'ave_grad_r'
+  expro_list(94) = 'bp0'
+  expro_list(95) = 'bt0'
   expro_list(96) = 'mach'
   expro_list(97) = 'flow_beam'
   expro_list(98) = 'flow_wall'
