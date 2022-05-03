@@ -16,7 +16,6 @@ subroutine prgen_map_peqdsk
   real, dimension(nx) :: ni_d
   real, dimension(3,nx) :: ni_imp
   real, dimension(nx) :: ni_b
-  real, dimension(nx) :: z_eff
 
   ni_d(:) = 10*peqdsk_ni(:)
   if (peqdsk_fmt == 0) then
@@ -40,12 +39,12 @@ subroutine prgen_map_peqdsk
   ni_b(:) = 10*peqdsk_nb(:)
 
   ! Compute Z_eff
-  z_eff(:) = peqdsk_z(1)**2 * ni_d(:)
+  zeff(:) = peqdsk_z(1)**2 * ni_d(:)
   do i=1,peqdsk_nimp
-     z_eff(:) = z_eff(:)+peqdsk_z(1+i)**2 * ni_imp(i,:)
+     zeff(:) = zeff(:)+peqdsk_z(1+i)**2 * ni_imp(i,:)
   enddo
-  z_eff(:) = z_eff(:)+peqdsk_z(1+peqdsk_nimp+1)**2 * ni_b(:)
-  z_eff(:) = z_eff(:)/(10*peqdsk_ne(:))
+  zeff(:) = zeff(:)+peqdsk_z(1+peqdsk_nimp+1)**2 * ni_b(:)
+  zeff(:) = zeff(:)/(10*peqdsk_ne(:))
 
   !---------------------------------------------------------
   ! Map profile data onto single array:
@@ -61,7 +60,6 @@ subroutine prgen_map_peqdsk
   expro_rmaj(:)  = rmaj(:)
   expro_te(:)    = peqdsk_te(:)
   expro_ne(:)    = peqdsk_ne(:)*10
-  expro_z_eff(:) = z_eff(:)
   
   ! COORDINATES: -ipccw accounts for DIII-D toroidal angle convention
   ! (wrt Ip direction)

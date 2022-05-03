@@ -279,7 +279,7 @@ subroutine prgen_read_iterdb_nc
 !==============================================================
 
   err = nf90_inq_varid(ncid,trim('zeff'),varid)
-  err = nf90_get_var(ncid,varid,onetwo_zeff)
+  err = nf90_get_var(ncid,varid,zeff)
 
   err = nf90_inq_varid(ncid,trim('angrot'),varid)
   err = nf90_get_var(ncid,varid,onetwo_angrot)

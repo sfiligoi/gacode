@@ -18,7 +18,9 @@ subroutine prgen_allocate
   allocate(ti_kev(nx))
   allocate(ne_e19m3(nx))
   allocate(ni_e19m3(nx))
+  allocate(zeff(nx))
 
+  allocate(jtot(nx))
   allocate(johm(nx))
   allocate(jbs(nx))
   allocate(jnb(nx))

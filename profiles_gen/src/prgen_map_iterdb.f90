@@ -102,7 +102,6 @@ subroutine prgen_map_iterdb
   expro_rmaj = rmaj(:)
   expro_te = onetwo_te(:)
   expro_ne = onetwo_ene(:)*1e-19
-  expro_z_eff = onetwo_zeff(:)
 
   do i=1,expro_n_ion
      expro_ni(i,:) = onetwo_enion_vec(i,:)

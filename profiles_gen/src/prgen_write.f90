@@ -12,6 +12,7 @@ subroutine prgen_write
 
   implicit none
   integer :: i
+  real, dimension(nx) :: jtot_efit,dptot,dfpol
 
   print '(a)','INFO: (prgen_write) Created these species'
 
@@ -47,6 +48,8 @@ subroutine prgen_write
      expro_shape_cos5 = shape_cos(5,:)
      expro_shape_cos6 = shape_cos(6,:)
 
+     expro_z_eff = zeff
+     
      ! EFIT passthrough functions
      expro_ptot = p_tot
      expro_fpol = fpol
@@ -65,5 +68,14 @@ subroutine prgen_write
   print '(a)','INFO: (prgen_write) Wrote input.gacode.'
   !-------------------------------------------------------------------------------------
 
+  call bound_deriv(dfpol,fpol,dpsi,nx)
+  call bound_deriv(dptot,p_tot,dpsi,nx)
+
+  jtot_efit = rmaj*dptot+fpol*dfpol/rmaj/(4*pi*1e-7)
+  
+  do i=1,nx
+     print '(t2,4(1pe12.5,1x))',dpsi(i),jtot(i),johm(i)+jbs(i)+jnb(i)+jrf(i),jtot_efit(i)
+  enddo
+  
 end subroutine prgen_write
 
