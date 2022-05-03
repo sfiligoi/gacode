@@ -472,6 +472,9 @@ class cgyrodata_plot(data.cgyrodata):
       y1,y2 = shift_legendre(f,imin,imax)
       ax.plot(ky,k0*y1,color='m')
       ax.plot(ky,-k0*y2,linestyle='--',color='m')
+      # EAB print
+      #for i in range(len(ky)):
+      #   print(ky[i],k0*y1[i],-k0*y2[i])
 
       if ymax != 'auto':
          ax.set_ylim(top=float(ymax))
@@ -1050,17 +1053,26 @@ class cgyrodata_plot(data.cgyrodata):
       ny = self.n_n
 
       f = np.zeros([nx-1,ny])
-
+         
       # Field data selector
       fx,ft = self.kxky_select(theta,field,moment,spec)
 
       imin,imax=iwindow(t,w,wmax)
       for i in np.arange(imin,self.n_time):
          f = f+abs(fx[1:,:,i])
-      
+
+      af = np.zeros([nx-1,ny])
+      bf = np.zeros([nx-1,ny])
+      for i in np.arange(nx-1):
+         af[i,:] = self.kx[i+1]
+      for i in np.arange(ny):
+         bf[:,i] = self.ky[i]
+         
+      f = f * np.sqrt(af**2 + bf**2)
+         
       # Fix (0,0)
       i0 = nx//2-1
-      f[i0,0] = 1e-6
+      f[i0,0] = f[i0+1,0]
 
       # Reverse y order for image plotting
       f = f[:,::-1]
@@ -1076,7 +1088,8 @@ class cgyrodata_plot(data.cgyrodata):
       ax.set_ylabel(r'$k_y \rho_s$')
       ax.set_title(r'$\mathrm{Time}$-$\mathrm{averaged~'+ft+'~intensity} \quad $'+windowtxt)
 
-      ax.imshow(np.transpose(f),extent=[-x0,x0,0,y0],interpolation='none')
+      ax.imshow(np.transpose(f),extent=[-x0,x0,0,y0],interpolation='none',cmap='jet')
+      print(np.min(f),np.max(f))
 
       fig.tight_layout(pad=0.5)
 
@@ -1110,6 +1123,7 @@ class cgyrodata_plot(data.cgyrodata):
       ax.set_xlabel(xlabel)
 
       f,ft = self.kxky_select(theta,field,'phi',0)
+      #f,ft = self.kxky_select(theta,field,'n',2)
 
       if deriv:
          dfac = kx**2
@@ -1237,11 +1251,20 @@ class cgyrodata_plot(data.cgyrodata):
          if not nsum:
             ax.plot(kvec,d1)
             ax.plot(kvec,d2)
+            # EAB print
+            #for i in range(nk):
+            #   print(kvec[i],d1[i],d2[i],n)
+            c1[:] = 0.0
+            c2[:] = 0.0
+            d1[:] = 0.0
+            d2[:] = 0.0
 
             
       if nsum:
          ax.plot(kvec,d1,color='k')
          ax.plot(kvec,d2,color='m')
+         for i in range(nk):
+            print(kvec[i],d1[i],d2[i])
 
       ax.axvspan(1.5*n0,nk,alpha=0.2)
          
