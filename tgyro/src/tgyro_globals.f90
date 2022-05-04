@@ -167,6 +167,8 @@ module tgyro_globals
   real, dimension(:), allocatable :: dlnptotdr
   real, dimension(:), allocatable :: beta_unit
   real, dimension(:), allocatable :: betae_unit
+  real, dimension(:), allocatable :: fpol
+  real, dimension(:), allocatable :: sigmapar
   real, dimension(:), allocatable :: c_s
   real, dimension(:), allocatable :: v_i
   real, dimension(:), allocatable :: rho_s
@@ -242,7 +244,6 @@ module tgyro_globals
   character(len=3), dimension(:), allocatable :: ion_name
   real, dimension(:), allocatable :: zi_vec,mi_vec,mi
 
- !real, dimension(n_ion_max) :: mi
   real, dimension(n_ion_max) :: n_ratio,t_ratio
 
   ! Physical constants

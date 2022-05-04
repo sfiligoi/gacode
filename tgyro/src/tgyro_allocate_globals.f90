@@ -137,6 +137,7 @@ subroutine tgyro_allocate_globals
   allocate(p_e_fus_in(n_r))
   allocate(p_i_aux_in(n_r))
   allocate(p_e_aux_in(n_r))
+  allocate(p_e_ohmic_in(n_r))
   allocate(p_i(n_r))
   allocate(p_e(n_r))
   allocate(s_alpha_i(n_r))

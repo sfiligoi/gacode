@@ -1,7 +1,7 @@
 module expro
 
   ! List of all useful interface objects
-  character*12, dimension(119) :: expro_list 
+  character*12, dimension(120) :: expro_list 
 
   character(len=2) :: ident='# '
   double precision :: expro_mass_deuterium=3.34358e-24  ! md (g)
@@ -151,7 +151,8 @@ module expro
        expro_pow_i_fus,&
        expro_pow_e_sync,&
        expro_pow_e_brem,&
-       expro_pow_e_line
+       expro_pow_e_line,&
+       expro_pow_e_ohmic
 
   != 2D Derived quantities
   double precision, dimension(:,:), allocatable :: &
@@ -319,6 +320,7 @@ contains
        allocate(expro_pow_e_sync(nexp)) ; expro_pow_e_sync = 0.0
        allocate(expro_pow_e_brem(nexp)) ; expro_pow_e_brem = 0.0
        allocate(expro_pow_e_line(nexp)) ; expro_pow_e_line = 0.0
+       allocate(expro_pow_e_ohmic(nexp)) ; expro_pow_e_ohmic = 0.0
 
        allocate(expro_dlnnidr(nion,nexp))  ; expro_dlnnidr = 0.0
        allocate(expro_dlntidr(nion,nexp))  ; expro_dlntidr = 0.0
@@ -441,6 +443,7 @@ contains
        deallocate(expro_pow_e_sync)
        deallocate(expro_pow_e_brem)
        deallocate(expro_pow_e_line)
+       deallocate(expro_pow_e_ohmic)
 
        deallocate(expro_dlnnidr)
        deallocate(expro_dlntidr)  
@@ -885,19 +888,20 @@ subroutine expro_list_set
   expro_list(107) = 'pow_e_sync'
   expro_list(108) = 'pow_e_brem'
   expro_list(109) = 'pow_e_line'
-  expro_list(110) = 'polflux'
-  expro_list(111) = 'shot'
-  expro_list(112) = 'time'
+  expro_list(110) = 'pow_e_ohmic'
+  expro_list(111) = 'polflux'
+  expro_list(112) = 'shot'
+  expro_list(113) = 'time'
 
   ! new scalars
   
-  expro_list(113) = 'betap'
-  expro_list(114) = 'betat'
-  expro_list(115) = 'betan'
-  expro_list(116) = 'greenwald'
-  expro_list(117) = 'ptransp'
-  expro_list(118) = 'tau'
-  expro_list(119) = 'tau98y2'
+  expro_list(114) = 'betap'
+  expro_list(115) = 'betat'
+  expro_list(116) = 'betan'
+  expro_list(117) = 'greenwald'
+  expro_list(118) = 'ptransp'
+  expro_list(119) = 'tau'
+  expro_list(120) = 'tau98y2'
   
 end subroutine expro_list_set
 

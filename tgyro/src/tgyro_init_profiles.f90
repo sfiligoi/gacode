@@ -199,6 +199,9 @@ subroutine tgyro_init_profiles
   ! Convert ptot to Ba from Pascals (1 Pa = 10 Ba)
   call cub_spline(expro_rmin(:)/r_min,expro_ptot(:)*10.0,n_exp,r,ptot,n_r)
 
+  ! Convert fpol to G-cm from T-m (1 T-m = 10^6 G-cm)
+  call cub_spline(expro_rmin(:)/r_min,expro_fpol(:)*1e6,n_exp,r,fpol,n_r)
+
   ! Convert V and dV/dr from m^3 to cm^3
   call cub_spline(expro_rmin(:)/r_min,expro_vol(:)*1e6,n_exp,r,vol,n_r)
   call cub_spline(expro_rmin(:)/r_min,expro_volp(:)*1e4,n_exp,r,volp,n_r)
@@ -368,6 +371,7 @@ subroutine tgyro_init_profiles
   ! Integrated auxiliary heating powers (NB + RF + Ohmic)
   call cub_spline(expro_rmin(:)/r_min,expro_pow_e_aux(:)*1e13,n_exp,r,p_e_aux_in,n_r)
   call cub_spline(expro_rmin(:)/r_min,expro_pow_i_aux(:)*1e13,n_exp,r,p_i_aux_in,n_r)
+  call cub_spline(expro_rmin(:)/r_min,expro_pow_e_ohmic(:)*1e13,n_exp,r,p_e_ohmic_in,n_r)
 
   ! Apply auxiliary power rescale
   ! 1. subtract off
