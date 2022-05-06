@@ -193,14 +193,20 @@ subroutine tgyro_init_profiles
   call cub_spline(expro_rmin(:)/r_min,expro_shape_cos3(:),n_exp,r,shape_cos3,n_r)
   call cub_spline(expro_rmin(:)/r_min,expro_shape_scos3(:),n_exp,r,shape_scos3,n_r)
 
+  ! Convert psi in Weber to Maxwell (1 Weber = 10^8 Maxwell)  
+  call cub_spline(expro_rmin(:)/r_min,expro_polflux(:)*1e8,n_exp,r,polflux,n_r)
+
   ! b_ref in Gauss (used for wce in Synchroton rad)
   call cub_spline(expro_rmin(:)/r_min,1e4*expro_bt0(:),n_exp,r,b_ref,n_r)
   
   ! Convert ptot to Ba from Pascals (1 Pa = 10 Ba)
   call cub_spline(expro_rmin(:)/r_min,expro_ptot(:)*10.0,n_exp,r,ptot,n_r)
 
-  ! Convert fpol to G-cm from T-m (1 T-m = 10^6 G-cm)
+  ! Convert fpol to Gauss-cm from T-m (1 T-m = 10^6 G-cm)
   call cub_spline(expro_rmin(:)/r_min,expro_fpol(:)*1e6,n_exp,r,fpol,n_r)
+
+  ! Convert sigmapar from MSiemens/m to 1/s (1 S/m = 9e9 1/s) 
+  call cub_spline(expro_rmin(:)/r_min,expro_sigmapar(:)*9e15,n_exp,r,sigmapar,n_r)
 
   ! Convert V and dV/dr from m^3 to cm^3
   call cub_spline(expro_rmin(:)/r_min,expro_vol(:)*1e6,n_exp,r,vol,n_r)
@@ -536,7 +542,6 @@ subroutine tgyro_init_profiles
 
   ! Axis boundary conditions
   call tgyro_init_profiles_axis
-
 
 end subroutine tgyro_init_profiles
 

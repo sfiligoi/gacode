@@ -13,6 +13,7 @@ subroutine tgyro_source
   implicit none
 
   integer :: i_ion
+  real :: dfpol(n_r),dptot(n_r),jpar(n_r)
 
   !-------------------------------------------------------
   ! Source terms (erg/cm^3/s):
@@ -54,6 +55,17 @@ subroutine tgyro_source
   !-------------------------------------------------------
 
   !-------------------------------------------------------
+  ! 6. Ohmic heating (resistive heating)
+  !
+  !     P = I^2*R where I ~ jpar and R ~ 1/sigmapar
+  call bound_deriv(dfpol,fpol,polflux,n_r)
+  call bound_deriv(dptot,ptot,polflux,n_r)
+  
+  jpar = (c/r_maj)*(r_maj**2*dptot+fpol*dfpol/(4*pi))
+  s_ohmic = jpar**2/sigmapar
+  !-------------------------------------------------------
+  
+  !-------------------------------------------------------
   ! Powers in units of erg/s
 
   ! Integrated alpha-power
@@ -75,6 +87,9 @@ subroutine tgyro_source
 
   ! Integrated anomalous exchange power
   call tgyro_volume_int(s_expwd,p_expwd)
+
+  ! Integrated Ohmic heating power
+  call tgyro_volume_int(s_ohmic,p_e_ohmic)
   !-------------------------------------------------------
 
   !-------------------------------------------------------
@@ -112,7 +127,7 @@ subroutine tgyro_source
      p_e(:) = &
           +p_e_fus(:) &                ! Fusion power to electrons
           +p_e_aux_in(:) &             ! Auxiliary electron heating [fixed]
-          +p_e_ohmic(:) &           ! Ohmic heating
+          +p_e_ohmic_in(:) &           ! Ohmic heating
           -p_exch(:)   &               ! Collisional exchange
           -p_brem(:) &                 ! Bremsstrahlung radiation
           -p_sync(:) &                 ! Synchrotron radiation

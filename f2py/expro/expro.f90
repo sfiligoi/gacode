@@ -746,7 +746,7 @@ contains
     call expro_writev(expro_jrf,nexp,'jrf','MA/m^2')
     call expro_writev(expro_jnb,nexp,'jnb','MA/m^2')
     call expro_writev(expro_jbstor,nexp,'jbstor','MA/m^2')
-    call expro_writev(expro_sigmapar,nexp,'sigmapar','MS/m')
+    call expro_writev(expro_sigmapar,nexp,'sigmapar','MSiemens/m')
     call expro_writev(expro_z_eff,nexp,'z_eff','-')
     call expro_writea(expro_vpol(:,:),nion,nexp,'vpol','m/s')
     call expro_writea(expro_vtor(:,:),nion,nexp,'vtor','m/s')
