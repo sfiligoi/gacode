@@ -176,7 +176,8 @@ subroutine tgyro_init_profiles
   call cub_spline(expro_rmin(:)/r_min,expro_skappa(:),n_exp,r,s_kappa,n_r)
   call cub_spline(expro_rmin(:)/r_min,expro_sdelta(:),n_exp,r,s_delta,n_r)
   call cub_spline(expro_rmin(:)/r_min,expro_drmaj(:),n_exp,r,shift,n_r)
-  call cub_spline(expro_rmin(:)/r_min,expro_zmag(:),n_exp,r,zmag,n_r)
+  ! Convert zmag to cm (from m):
+  call cub_spline(expro_rmin(:)/r_min,100*expro_zmag(:),n_exp,r,zmag,n_r)
   call cub_spline(expro_rmin(:)/r_min,expro_dzmag(:),n_exp,r,dzmag,n_r)
   call cub_spline(expro_rmin(:)/r_min,expro_zeta(:),n_exp,r,zeta,n_r)
   call cub_spline(expro_rmin(:)/r_min,expro_szeta(:),n_exp,r,s_zeta,n_r)
