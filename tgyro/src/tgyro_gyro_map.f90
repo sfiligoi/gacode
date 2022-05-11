@@ -91,7 +91,7 @@ subroutine tgyro_gyro_map
   endif
 
   gyro_z_eff_in  = z_eff(i_r)
-  gyro_zmag_in   = zmag(i_r)
+  gyro_zmag_in   = zmag(i_r)/r_min
   gyro_dzmag_in  = dzmag(i_r)
   gyro_zeta_in   = zeta(i_r)
   gyro_s_zeta_in = s_zeta(i_r)

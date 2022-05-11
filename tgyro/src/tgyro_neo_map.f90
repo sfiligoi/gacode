@@ -40,7 +40,7 @@ subroutine tgyro_neo_map
   neo_s_delta_in           = s_delta(i_r)
   neo_zeta_in              = zeta(i_r)
   neo_s_zeta_in            = s_zeta(i_r)
-  neo_zmag_over_a_in       = zmag(i_r)
+  neo_zmag_over_a_in       = zmag(i_r)/r_min
   neo_s_zmag_in            = dzmag(i_r)
 
   ! New HAM shape parameters
