@@ -12,7 +12,7 @@ subroutine tgyro_source
 
   implicit none
 
-  integer :: i_ion
+  integer :: i_ion,i
   real :: dfpol(n_r),dptot(n_r),jpar(n_r)
 
   !-------------------------------------------------------
@@ -92,6 +92,10 @@ subroutine tgyro_source
   call tgyro_volume_int(s_ohmic,p_e_ohmic)
   !-------------------------------------------------------
 
+  do i=1,n_r
+     print '(t2,i2,2(1pe12.5,1x))',i,p_e_ohmic(i),p_e_ohmic_in(i)
+  enddo
+  
   !-------------------------------------------------------
   select case (loc_scenario)
 

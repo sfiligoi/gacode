@@ -175,6 +175,8 @@ subroutine tgyro_init_profiles
   call cub_spline(expro_rmin(:)/r_min,expro_delta(:),n_exp,r,delta,n_r)
   call cub_spline(expro_rmin(:)/r_min,expro_skappa(:),n_exp,r,s_kappa,n_r)
   call cub_spline(expro_rmin(:)/r_min,expro_sdelta(:),n_exp,r,s_delta,n_r)
+  ! Convert r_maj to cm (from m):
+  call cub_spline(expro_rmin(:)/r_min,100*expro_rmaj(:),n_exp,r,r_maj,n_r)
   call cub_spline(expro_rmin(:)/r_min,expro_drmaj(:),n_exp,r,shift,n_r)
   ! Convert zmag to cm (from m):
   call cub_spline(expro_rmin(:)/r_min,100*expro_zmag(:),n_exp,r,zmag,n_r)
@@ -217,9 +219,6 @@ subroutine tgyro_init_profiles
 
   ! Convert B to Gauss (from T):
   call cub_spline(expro_rmin(:)/r_min,1e4*expro_bunit(:),n_exp,r,b_unit,n_r)
-
-  ! Convert r_maj to cm (from m):
-  call cub_spline(expro_rmin(:)/r_min,100*expro_rmaj(:),n_exp,r,r_maj,n_r)
 
   ! Convert T to eV (from keV) and length to cm (from m):
   call cub_spline(expro_rmin(:)/r_min,1e3*expro_te(:),n_exp,r,te,n_r)
