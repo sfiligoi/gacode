@@ -92,9 +92,9 @@ subroutine tgyro_source
   call tgyro_volume_int(s_ohmic,p_e_ohmic)
   !-------------------------------------------------------
 
-  do i=1,n_r
-     print '(t2,i2,4(1pe12.5,1x))',i,jpar(i),p_e_ohmic(i),p_e_ohmic_in(i),p_e_aux_in(i)
-  enddo
+  !do i=1,n_r
+  !   print '(t2,i2,4(1pe12.5,1x))',i,jpar(i),p_e_ohmic(i),p_e_ohmic_in(i),p_e_aux_in(i)
+  !enddo
   
   !-------------------------------------------------------
   select case (loc_scenario)
@@ -131,7 +131,7 @@ subroutine tgyro_source
      p_e(:) = &
           +p_e_fus(:) &                ! Fusion power to electrons
           +p_e_aux_in(:) &             ! Auxiliary electron heating [fixed]
-          +p_e_ohmic_in(:) &           ! Ohmic heating
+          +p_e_ohmic(:) &              ! Ohmic heating
           -p_exch(:)   &               ! Collisional exchange
           -p_brem(:) &                 ! Bremsstrahlung radiation
           -p_sync(:) &                 ! Synchrotron radiation
