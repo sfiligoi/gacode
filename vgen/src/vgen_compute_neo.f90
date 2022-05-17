@@ -265,9 +265,10 @@ subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, &
         stop
      endif
 
-     jsigma_neo(i)         = neo_jpar_dke_out*jbs_norm
-     jsigma_sauter(i)      = neo_jpar_thS_out*jbs_norm
-     jsigma_sauter_mod(i)  = neo_jpar_thSmod_out*jbs_norm
+     e_norm    = temp_norm*1000.0/EXPRO_rmin(EXPRO_n_exp)    ! V/m = Tnorm[ev]/(e a[m])
+     jsigma_neo(i)         = neo_jpar_dke_out*jbs_norm/e_norm
+     jsigma_sauter(i)      = neo_jpar_thS_out*jbs_norm/e_norm
+     jsigma_sauter_mod(i)  = neo_jpar_thSmod_out*jbs_norm/e_norm
      
      neo_epar0_in = etemp
      
