@@ -472,10 +472,10 @@ subroutine expro_compute_derived
   expro_betan = 1/(1/expro_betap+1/expro_betat)*(r_min*expro_bcentr/ipma)
   ! Greenwald density (current [MA])
   expro_greenwald = ipma/(pi*r_min**2)
+  ! Transport power (MW)
+  expro_ptransp = expro_pow_e(nx)+expro_pow_i(nx)
 
-  if (expro_pow_e(nx) > 1e-6) then
-     ! Transport power (MW)
-     expro_ptransp = expro_pow_e(nx)+expro_pow_i(nx)
+  if (expro_ptransp > 1e-6) then
      ! tau = W[MJ]/P[MW]
      expro_tau = (1.5*p_ave*expro_vol(nx)*1d-6)/expro_ptransp
 
