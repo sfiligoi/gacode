@@ -93,7 +93,7 @@ subroutine tgyro_source
   !-------------------------------------------------------
 
   do i=1,n_r
-     print '(t2,i2,3(1pe12.5,1x))',i,jpar(i),p_e_ohmic(i),p_e_ohmic_in(i)
+     print '(t2,i2,4(1pe12.5,1x))',i,jpar(i),p_e_ohmic(i),p_e_ohmic_in(i),p_e_aux_in(i)
   enddo
   
   !-------------------------------------------------------
