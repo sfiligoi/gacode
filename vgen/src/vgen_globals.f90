@@ -23,7 +23,7 @@ module vgen_globals
   real, parameter :: temp_norm_fac   = 1602.2
   real, parameter :: charge_norm_fac = 1.6022
   
-  real :: dens_norm, temp_norm, mass_norm, vth_norm, jbs_norm
+  real :: dens_norm, temp_norm, mass_norm, vth_norm, jbs_norm, e_norm
 
   real, dimension(:), allocatable :: vtor_measured
 
