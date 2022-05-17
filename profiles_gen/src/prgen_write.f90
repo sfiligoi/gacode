@@ -72,9 +72,9 @@ subroutine prgen_write
   call bound_deriv(dptot,p_tot,dpsi,nx)
 
   jtot_efit = rmaj*dptot+fpol*dfpol/rmaj/(4*pi*1e-7)
-  
+
   do i=1,nx
-     print '(t2,4(1pe12.5,1x))',dpsi(i),jtot(i),johm(i)+jbs(i)+jnb(i)+jrf(i),jtot_efit(i)
+     print '(t2,4(1pe12.5,1x))',dpsi(i),jtot(i)*3e5,(johm(i)+jbs(i)+jnb(i)+jrf(i))*3e5,jtot_efit(i)*3e5
   enddo
   
 end subroutine prgen_write
