@@ -60,11 +60,11 @@ subroutine tgyro_source
   !     P = I^2*R where I ~ jpar and R ~ 1/sigmapar
   call bound_deriv(dfpol,fpol,polflux,n_r)
   call bound_deriv(dptot,ptot,polflux,n_r)
-  
+
   jpar = (c/r_maj)*(r_maj**2*dptot+fpol*dfpol/(4*pi))
   s_ohmic = jpar**2/sigmapar
   !-------------------------------------------------------
-  
+
   !-------------------------------------------------------
   ! Powers in units of erg/s
 
@@ -72,7 +72,7 @@ subroutine tgyro_source
   call tgyro_volume_int(s_alpha_i,p_i_fus)
   call tgyro_volume_int(s_alpha_e,p_e_fus)
   call tgyro_volume_int(sn_alpha,f_he_fus)
-  
+
   ! Integrated Bremsstrahlung power
   call tgyro_volume_int(s_brem,p_brem)
 
@@ -89,13 +89,13 @@ subroutine tgyro_source
   call tgyro_volume_int(s_expwd,p_expwd)
 
   ! Integrated Ohmic heating power
-  call tgyro_volume_int(s_ohmic,p_e_ohmic)
+  if (tgyro_dynamic_ohmic == 1) then
+     call tgyro_volume_int(s_ohmic,p_e_ohmic)
+  else
+     p_e_ohmic = p_e_ohmic_in
+  endif
   !-------------------------------------------------------
 
-  !do i=1,n_r
-  !   print '(t2,i2,4(1pe12.5,1x))',i,jpar(i),p_e_ohmic(i),p_e_ohmic_in(i),p_e_aux_in(i)
-  !enddo
-  
   !-------------------------------------------------------
   select case (loc_scenario)
 
@@ -120,7 +120,7 @@ subroutine tgyro_source
 
   case (3)
 
-     ! Reactor with consistent alpha power, exchange and radiation.
+     ! Reactor with consistent alpha power, exchange, radiation and Ohmic heating
 
      p_i(:) = &
           +p_i_fus(:) &                ! Fusion power to ions
@@ -178,7 +178,7 @@ subroutine tgyro_source
   mflux_target(1) = 0.0 
   mflux_target(2:n_r) = mf_in(2:n_r)/volp(2:n_r)
   !------------------------------------------------
- 
+
   !------------------------------------------------
   ! Target He ash flux in 1/s/cm^2
   !

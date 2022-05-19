@@ -334,8 +334,8 @@ module tgyro_globals
   integer :: tgyro_zero_dens_grad_flag
   real :: tgyro_residual_tol
   real :: tgyro_input_fusion_scale
-  !
   integer :: tgyro_cgyro_n_iterate
+  real :: tgyro_dynamic_ohmic
   !
   real, dimension(:), allocatable :: res
   real, dimension(:), allocatable :: res_norm
