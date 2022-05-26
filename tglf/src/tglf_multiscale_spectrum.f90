@@ -46,31 +46,31 @@
       REAL :: b0,b1,b2,b3
       REAL :: d1,d2,Gq,kx_width,dlnpdr,ptot
       REAL :: measure
-      REAL :: QLA_P, QLA_E, QLA_O
       ! SAT3
       REAL :: kmax, gmax, kmin, aoverb, coverb, k0, kP, c_1
-      REAL :: x_ITG, x_TEM, Y_ITG, Y_TEM, x, Y, sig_ratio
-      REAL,DIMENSION(nkym) :: sum_W_i, W_ratio
+      REAL :: x_ITG, x_TEM, Y_ITG, Y_TEM, x, Y, sig_ratio, Fky
+      REAL,DIMENSION(nkym) :: sum_W_i, abs_W_ratio
+      REAL,DIMENSION(nmodes_in) :: Ys, xs, QLA_P, QLA_E, QLA_O
       !
       REAL,DIMENSION(nkym) :: gamma_net=0.0
       REAL,DIMENSION(nkym) :: gamma=0.0
       REAL,DIMENSION(nkym) :: gamma_kymix=0.0
       REAL,PARAMETER :: small=1.0E-10
       !
-       
+      
       if(jmax_out.eq.0)then
          first_pass = .TRUE.
       else
         first_pass = .FALSE.
       endif
       if(first_pass)then  ! first pass for spectral shift model or only pass for quench rule
-        gamma_net(:) = eigenvalue_spectrum_out(1,:,1) !!! HGD: growth rates
-        CALL get_zonal_mixing(nky,ky_spectrum,gamma_net,vzf_mix,kymax_mix,jmax_mix) !!! HGD: gets kmax, gmax
-        vzf_out = vzf_mix !!! HGD: gmax / kmax
-        kymax_out = kymax_mix !!! HGD: kmax
+        gamma_net(:) = eigenvalue_spectrum_out(1,:,1) 
+        CALL get_zonal_mixing(nky,ky_spectrum,gamma_net,vzf_mix,kymax_mix,jmax_mix) 
+        vzf_out = vzf_mix 
+        kymax_out = kymax_mix 
         jmax_out = jmax_mix
         gamma_net(:) = eigenvalue_spectrum_out(1,:,1)
-        write(*,*)"FIRST PASS: vzf_out = ",vzf_out,"  jmax_out = ",jmax_out
+!        write(*,*)"FIRST PASS: vzf_out = ",vzf_out,"  jmax_out = ",jmax_out
 !        write(*,*)"FIRST PASS: kymax_out = ",kymax_out,"  gammamax_out = ",kymax_out*vzf_out
       endif
       ! model fit parameters
@@ -169,6 +169,7 @@
 !      write(*,*)"G1 = ",sat_geo1_out,"  G2 = ",sat_geo2_out,"  sat_geo0 = ",sat_geo0_out
 !      write(*,*)"d1 = ",d1,"  d2 = ",d2
       if(sat_rule_in.eq.3)then
+       USE_MIX=.FALSE.
        kmax = kymax_out
        gmax = vzf_out * kymax_out
        kmin = 0.685 * kmax
@@ -180,16 +181,33 @@
        x_ITG = 0.8
        x_TEM = 1.0
        Y_ITG = 3.3 * (gmax ** 2) / (kmax ** 5)
-       Y_TEM = 12.7 * (gmax ** 2) / (kmax ** 4) 
-       sum_W_i = 0
-       do is = 2, ns ! sum over ion species, requires electrons to be species 1
-        sum_W_i = sum_W_i + QL_flux_spectrum_out(2,is,1,:,1)
-       end do
-       W_ratio = QL_flux_spectrum_out(2,1,1,:,1) / sum_W_i
-       ! linear interpolation
-       x = linear_interpolation(ky_spectrum, W_ratio, kmax)
-       Y = mode_transition_function(x, Y_ITG, Y_TEM)  
-       write(*,*)"test pls 1 = ",x 
+       Y_TEM = 12.7 * (gmax ** 2) / (kmax ** 4)
+       Ys = 0
+       xs = 0
+       do k=1,nmodes_in
+        sum_W_i = 0
+        do is = 2, ns ! sum over ion species, requires electrons to be species 1
+         sum_W_i = sum_W_i + QL_flux_spectrum_out(2,is,1,:,k)
+        end do
+        ! check for singularities in weight ratio near kmax
+        i = 1
+        do while (ky_spectrum(i) < kmax)
+	     i = i + 1
+	    end do
+	    if(sum_W_i(i).eq.0.0 .OR. sum_W_i(i-1).eq.0.0)then
+	     x = 0.5
+	    else
+	     abs_W_ratio = abs(QL_flux_spectrum_out(2,1,1,:,k) / sum_W_i)
+         x = linear_interpolation(ky_spectrum, abs_W_ratio, kmax)
+	    end if
+	    xs(k) = x
+        Y = mode_transition_function(x, Y_ITG, Y_TEM)  
+        Ys(k) = Y
+       enddo
+       b0 = 0.76
+       b1 = 1.22
+       kycut = b0*kymax_out
+       Gq = B_geo0_out/grad_r0_out
       endif 
 ! coefficients for spectral shift model for ExB shear
       ax=0.0
@@ -297,9 +315,9 @@
     endif      
 ! intensity model  
        do j=1,nky 
-        gamma0 = eigenvalue_spectrum_out(1,j,1) !!! gamma_ky
-        ky0 = ky_spectrum(j) !!! ky
-        kx = spectral_shift_out(j) !!! < kx >
+        gamma0 = eigenvalue_spectrum_out(1,j,1) 
+        ky0 = ky_spectrum(j) 
+        kx = spectral_shift_out(j) 
         if(sat_rule_in.eq.1)then
           sat_geo_factor = SAT_geo0_out
           kx_width = ky0
@@ -326,27 +344,31 @@
            if(units_in.ne.'GYRO')field_spectrum_out(2,j,i) = sat_geo_factor*field_spectrum_out(2,j,i)
          enddo
          
-        elseif(sat_rule_in.eq.3)then !!! SAT3
+        elseif(sat_rule_in.eq.3)then ! SAT3
          if (ky0 < kP) then
 		  sig_ratio = (aoverb * (ky0 ** 2) + ky0 + coverb) / (aoverb * (k0 ** 2) + k0 + coverb)
 		 else
 		  sig_ratio = ((2.0 * aoverb * kP + 1) * ky0 + coverb - aoverb * (kP ** 2)) / (aoverb * (k0 ** 2) + k0 + coverb)
 		 end if
-		 field_spectrum_out(2,j,1) = Y * (sig_ratio ** c_1)
-		! write(*,*)"test pls = ",field_spectrum_out(2,j,1)
-		 if(nmodes_in>1)then
-		  do i=2,nmodes_in
-		   field_spectrum_out(2,j,i) = 0.0 ! model tuned to most unstable mode only
-		  end do
-		 end if
+		 Fky = 1.0 / (((1.0 + ABS(ax*kx)**exp_ax)**2)*((1.0 + ay*(kx**2))**2))
+		 do i=1,nmodes_in
+           field_spectrum_out(2,j,i) = 0.0
+           if(gamma0.gt.small) then
+            field_spectrum_out(2,j,i) = Ys(i) * (sig_ratio ** c_1) * Fky *(eigenvalue_spectrum_out(1,j,i)/gamma0)**(2 * expsub)
+           end if
+         enddo 
         endif
        enddo
-	 !QLA things here
+       
+	  !SAT3 QLA here
+	  QLA_P=0.0
+	  QLA_E=0.0
 	  if(sat_rule_in.eq.3)then
-	   write(*,*)"test pls 2 = ",x
-	   ! factor of 2 included for real symmetry
-	   QLA_P = 2 * mode_transition_function(x, 1.1, 0.6)
-	   QLA_E = 2 * mode_transition_function(x, 0.75, 0.6)
+	   do k=1,nmodes_in
+	    ! factor of 2 included for real symmetry
+	    QLA_P(k) = 2 * mode_transition_function(xs(k), 1.1, 0.6)
+	    QLA_E(k) = 2 * mode_transition_function(xs(k), 0.75, 0.6)
+	   enddo
 	   QLA_O = 2 * 0.8
 	  else
 	   QLA_P = 1.0
@@ -367,11 +389,11 @@
                intensity_spectrum_out(3,is,j,i) = QL_intensity_spectrum_out(3,is,j,i)*phinorm
                intensity_spectrum_out(4,is,j,i) = QL_intensity_spectrum_out(4,is,j,i)*phinorm
                do k=1,3
-                  flux_spectrum_out(1,is,k,j,i) = QL_flux_spectrum_out(1,is,k,j,i)*phinorm*QLA_P
-                  flux_spectrum_out(2,is,k,j,i) = QL_flux_spectrum_out(2,is,k,j,i)*phinorm*QLA_E
-                  flux_spectrum_out(3,is,k,j,i) = QL_flux_spectrum_out(3,is,k,j,i)*phinorm*QLA_O
-                  flux_spectrum_out(4,is,k,j,i) = QL_flux_spectrum_out(4,is,k,j,i)*phinorm*QLA_O
-                  flux_spectrum_out(5,is,k,j,i) = QL_flux_spectrum_out(5,is,k,j,i)*phinorm*QLA_O
+                  flux_spectrum_out(1,is,k,j,i) = QL_flux_spectrum_out(1,is,k,j,i)*phinorm*QLA_P(i)
+                  flux_spectrum_out(2,is,k,j,i) = QL_flux_spectrum_out(2,is,k,j,i)*phinorm*QLA_E(i)
+                  flux_spectrum_out(3,is,k,j,i) = QL_flux_spectrum_out(3,is,k,j,i)*phinorm*QLA_O(i)
+                  flux_spectrum_out(4,is,k,j,i) = QL_flux_spectrum_out(4,is,k,j,i)*phinorm*QLA_O(i)
+                  flux_spectrum_out(5,is,k,j,i) = QL_flux_spectrum_out(5,is,k,j,i)*phinorm*QLA_O(i)
               enddo
            enddo
         enddo
@@ -451,7 +473,7 @@
 !     jmax2=0
 !      kycut=0.8*ABS(zs(2))/SQRT(taus(2)*mass(2))
       kycut=0.8/rho_ion
-      if(sat_rule_in.eq.2)then
+      if(sat_rule_in.eq.2 .OR. sat_rule_in.eq.3)then
         kycut = grad_r0_out*kycut
       endif
 !      write(*,*)" kycut = ",kycut," kyhigh = ",kyhigh
