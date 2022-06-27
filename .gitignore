@@ -67,3 +67,7 @@ f2py/MANIFEST
 # local working files not to be shared
 tmp.py
 *.optrpt
+
+# Vim Backup Files
+*.swp
+*.swo
