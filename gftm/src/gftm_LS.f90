@@ -518,7 +518,6 @@ if(new_matrix)then
       REAL :: stress_correction,wp
       REAL :: one
 !
-!      xi=(0.0,1.0)
       epsilon1 = 1.E-12
 !
 !  compute the electromagnetic potentials
@@ -556,9 +555,9 @@ if(new_matrix)then
 !
 ! save the field weights
       do i=1,nbasis
-        field_weight_QL_out(1,i) = xi*phi(i)/SQRT(phi_norm)
-        field_weight_QL_out(2,i) = xi*psi(i)/SQRT(phi_norm)
-        field_weight_QL_out(3,i) = xi*sig(i)/SQRT(phi_norm)
+        field_weight_QL_out(1,i) = phi(i)/SQRT(phi_norm)
+        field_weight_QL_out(2,i) = psi(i)/SQRT(phi_norm)
+        field_weight_QL_out(3,i) = sig(i)/SQRT(phi_norm)
 !        write(*,*)i,"field_weight=",field_weight_QL_out(1,i),field_weight_QL_out(2,i),field_weight_QL_out(3,i)
        enddo
 !
@@ -667,10 +666,10 @@ if(new_matrix)then
 !
       do is=1,ns
         do kp = 1, nphase
-          PSIpu1pe1(is,kp) = CONJG(pwns(is,kp))
-          PSIpu2pe1(is,kp) = CONJG(pwps(is,kp))
-          PSIpu3pe1(is,kp) = CONJG(pwtpars(is,kp))
-          PSIpu1pe2(is,kp) = CONJG(pwtpers(is,kp))
+          PSIpu1pe1(is,kp) = pwns(is,kp)
+          PSIpu2pe1(is,kp) = pwps(is,kp)
+          PSIpu3pe1(is,kp) = pwtpars(is,kp)
+          PSIpu1pe2(is,kp) = pwtpers(is,kp)
 !          write(*,*)is,kp,"  phipu2pe1j0 = ",PHIpu2pe1j0(is,kp)
         enddo
       enddo
@@ -684,39 +683,41 @@ if(new_matrix)then
           fluxe(is,j) = 0.0
         enddo
         do kp=1,nphase
-        rwn(is,1) = rwn(is,1) + PSIpu1pe1(is,kp)*hwns(is,kp)
-        rwtpar(is,1) = rwtpar(is,1) + PSIpu1pe1(is,kp)*hwtpars(is,kp)
-        rwtper(is,1) = rwtper(is,1) + PSIpu1pe1(is,kp)*hwtpers(is,kp)
-        rwp(is,1) = rwp(is,1) + PSIpu1pe1(is,kp)*hwps(is,kp)
-        fluxe(is,1) = fluxe(is,1) + PSIpu1pe1(is,kp)*hes(is,kp)
-        rwn(is,2) = rwn(is,2) + PSIpu3pe1(is,kp)*hwns(is,kp)
-        rwtpar(is,2) = rwtpar(is,2) + PSIpu3pe1(is,kp)*hwtpars(is,kp)
-        rwtper(is,2) = rwtper(is,2) + PSIpu3pe1(is,kp)*hwtpers(is,kp)
-        rwp(is,2) = rwp(is,2) + PSIpu3pe1(is,kp)*hwps(is,kp)
-        fluxe(is,2) = fluxe(is,2) + PSIpu3pe1(is,kp)*hes(is,kp)
-        rwn(is,3) = rwn(is,3) + PSIpu1pe2(is,kp)*hwns(is,kp)
-        rwtpar(is,3) = rwtpar(is,3) + PSIpu1pe2(is,kp)*hwtpars(is,kp)
-        rwtper(is,3) = rwtper(is,3) + PSIpu1pe2(is,kp)*hwtpers(is,kp)
-        rwp(is,3) = rwp(is,3) + PSIpu1pe2(is,kp)*hwps(is,kp)
-        fluxe(is,3) = fluxe(is,3) + PSIpu1pe2(is,kp)*hes(is,kp)
+        rwn(is,1) = rwn(is,1) + PSIpu1pe1(is,kp)*CONJG(hwns(is,kp))
+        rwtpar(is,1) = rwtpar(is,1) + PSIpu1pe1(is,kp)*CONJG(hwtpars(is,kp))
+        rwtper(is,1) = rwtper(is,1) + PSIpu1pe1(is,kp)*CONJG(hwtpers(is,kp))
+        rwp(is,1) = rwp(is,1) + PSIpu1pe1(is,kp)*CONJG(hwps(is,kp))
+        fluxe(is,1) = fluxe(is,1) + PSIpu1pe1(is,kp)*CONJG(hes(is,kp))
+        rwn(is,2) = rwn(is,2) + PSIpu3pe1(is,kp)*CONJG(hwns(is,kp))
+        rwtpar(is,2) = rwtpar(is,2) + PSIpu3pe1(is,kp)*CONJG(hwtpars(is,kp))
+        rwtper(is,2) = rwtper(is,2) + PSIpu3pe1(is,kp)*CONJG(hwtpers(is,kp))
+        rwp(is,2) = rwp(is,2) + PSIpu3pe1(is,kp)*CONJG(hwps(is,kp))
+        fluxe(is,2) = fluxe(is,2) + PSIpu3pe1(is,kp)*CONJG(hes(is,kp))
+        rwn(is,3) = rwn(is,3) + PSIpu1pe2(is,kp)*CONJG(hwns(is,kp))
+        rwtpar(is,3) = rwtpar(is,3) + PSIpu1pe2(is,kp)*CONJG(hwtpars(is,kp))
+        rwtper(is,3) = rwtper(is,3) + PSIpu1pe2(is,kp)*CONJG(hwtpers(is,kp))
+        rwp(is,3) = rwp(is,3) + PSIpu1pe2(is,kp)*CONJG(hwps(is,kp))
+        fluxe(is,3) = fluxe(is,3) + PSIpu1pe2(is,kp)*CONJG(hes(is,kp))
         rwn(is,4) = rwn(is,4) + PSIpu2pe1(is,kp)*hwns(is,kp)
-        rwtpar(is,4) = rwtpar(is,4) + PSIpu2pe1(is,kp)*hwtpars(is,kp)
-        rwtper(is,4) = rwtper(is,4) + PSIpu2pe1(is,kp)*hwtpers(is,kp)
-        rwp(is,4) = rwp(is,4) + PSIpu2pe1(is,kp)*hwps(is,kp)
-        fluxe(is,4) = fluxe(is,4) + PSIpu2pe1(is,kp)*hes(is,kp)
+        rwtpar(is,4) = rwtpar(is,4) + PSIpu2pe1(is,kp)*CONJG(hwtpars(is,kp))
+        rwtper(is,4) = rwtper(is,4) + PSIpu2pe1(is,kp)*CONJG(hwtpers(is,kp))
+        rwp(is,4) = rwp(is,4) + PSIpu2pe1(is,kp)*CONJG(hwps(is,kp))
+        fluxe(is,4) = fluxe(is,4) + PSIpu2pe1(is,kp)*CONJG(hes(is,kp))
         enddo
       enddo
 !
       do is = 1,ns  ! species index
       do j = 1,4    ! gradient drive index
-        diff_out(is,j,1) = as(is)*REAL(xi*ky*rwn(is,j))/phi_norm
-        diff_out(is,j,2) = as(is)*REAL(xi*ky*rwtpar(is,j))/phi_norm
-        diff_out(is,j,3) = as(is)*REAL(xi*ky*rwtper(is,j))/phi_norm
-        diff_out(is,j,4) = as(is)*REAL(xi*ky*rwp(is,j))/phi_norm
-        conv_out(is,j) = as(is)*REAL(xi*ky*we*rwn(is,j))/phi_norm
-        flux_out(is,j) = as(is)*REAL(xi*ky*fluxe(is,j)/phi_norm)
+        diff_out(is,j,1) = -as(is)*REAL(xi*ky*rwn(is,j))/phi_norm
+        diff_out(is,j,2) = -as(is)*REAL(xi*ky*rwtpar(is,j))/phi_norm
+        diff_out(is,j,3) = -as(is)*REAL(xi*ky*rwtper(is,j))/phi_norm
+        diff_out(is,j,4) = -as(is)*REAL(xi*ky*rwp(is,j))/phi_norm
+        conv_out(is,j) = -as(is)*REAL(xi*ky*we*rwn(is,j))/phi_norm
+        flux_out(is,j) = -as(is)*REAL(xi*ky*fluxe(is,j)/phi_norm)
       enddo
         delta_out(is) = -zs(is)*as(is)*REAL(we)*REAL(xi*fluxe(is,1))
+!        flux_out(is,1) = flux_out(is,1)      &
+!        -damp_sig_in*ABS(zs(1)/zs(is))*rlts(1)*diff_out(1,2,1)/sqrt_two
       enddo
 !
 ! debug
@@ -732,13 +733,13 @@ if(new_matrix)then
 !        write(*,*)(flux_out(is,j),j=1,4)
 !      enddo
 ! check summ of coefficients
-       do is=1,ns
-       do j=1,4
-         write(*,*)is,j,"  flux = ",   &
-         diff_out(is,j,1)*ky*rlns(is)+(diff_out(is,j,2)/sqrt_two+diff_out(is,j,3))*ky*rlts(is) &
-         +diff_out(is,j,4)*ky*vpar_shear_s(is)/sqrt_two+conv_out(is,j)*zs(is)/taus(is),flux_out(is,j)
-       enddo
-       enddo
+!       do is=1,ns
+!       do j=1,1
+!         write(*,*)is,j,"particle  flux = ",   &
+!         diff_out(is,j,1)*ky*rlns(is),(diff_out(is,j,2)/sqrt_two+diff_out(is,j,3))*ky*rlts(is) &
+!         !,diff_out(is,j,4)*ky*vpar_shear_s(is)/sqrt_two,conv_out(is,j)*zs(is)/taus(is),flux_out(is,j)
+!       enddo
+!       enddo
 !
       END SUBROUTINE get_QL_weights
 !

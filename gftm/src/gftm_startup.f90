@@ -1,4 +1,4 @@
-      SUBROUTINE gftm_startup
+       SUBROUTINE gftm_startup
 !*********************************************
 !
 !     initalization of gftm
@@ -36,10 +36,50 @@
       ns = ns_in
 !      write(*,*)"ns = ",ns,"   ns0 = ",ns0
       nx = 2*nxgrid_in-1
+      nbasis_max_in = 8
       nbasis = nbasis_max_in
       nbasis_max = nbasis
-      nu = 9
-      ne = 5
+! case 1
+!      nu = 3
+!      ne = 2
+!      damp_psi_in = 0.06
+!      damp_sig_in = 0.15
+! case 2
+      nu = 5
+      ne = 3
+ !     damp_psi_in = 0.028
+ !     damp_sig_in = 0.18
+ !     damp_psi_in = 0.015
+ !     damp_sig_in = 0.15
+ ! for width = 1.65, nbasis = 6
+ !     damp_psi_in = 0.0075
+ !     damp_sig_in = 0.083
+ ! for width = 1.75, nbasis = 6
+ !     damp_psi_in = 0.020
+ !     damp_sig_in = 0.15
+ !     etg_factor_in = 0.391827
+ !     damp_psi_in = 0.0
+ !     damp_sig_in = 0.5
+ !     etg_factor_in = 0.33
+ !     damp_psi_in = 0.0
+ !      damp_sig_in = 0.75
+ !      etg_factor_in = 0.25
+!
+! case 3
+ !     nu = 7
+ !     ne = 4
+!      damp_psi_in = 0.006
+ !     damp_sig_in = 0.12
+! case 4
+!      nu = 12
+!      ne = 6
+!      damp_psi_in = 0.005
+!      damp_sig_in = 0.09
+!
+!   values used for 5-9
+!      damp_psi_in = 0.005
+!      damp_sig_in = 0.087
+!
       nune = nu*ne
       nphase = nu*ne*nbasis
       ntot = (ns-ns0+1)*nu*ne*nbasis
