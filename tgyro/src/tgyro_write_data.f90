@@ -316,7 +316,7 @@ subroutine tgyro_write_data(i_print)
              r(i)/r_min,&
              +p_e_fus(i)*1e-7*1e-6,&
              +p_e_aux_in(i)*1e-7*1e-6,&
-             +p_e_ohmic(i)*1e-7*1e-6,&
+             +p_e_ohmic_in(i)*1e-7*1e-6,&
              -p_brem(i)*1e-7*1e-6,&
              -p_sync(i)*1e-7*1e-6,&
              -p_line(i)*1e-7*1e-6, &
