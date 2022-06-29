@@ -66,9 +66,6 @@ subroutine prgen_write
   call expro_write('input.gacode')
   print '(a)','INFO: (prgen_write) Wrote input.gacode.'
   !-------------------------------------------------------------------------------------
-
-  call bound_deriv(dfpol,fpol,dpsi,nx)
-  call bound_deriv(dptot,p_tot,dpsi,nx)
-  
+   
 end subroutine prgen_write
 

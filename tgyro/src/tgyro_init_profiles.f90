@@ -208,9 +208,6 @@ subroutine tgyro_init_profiles
   ! Convert fpol to Gauss-cm from T-m (1 T-m = 10^6 G-cm)
   call cub_spline(expro_rmin(:)/r_min,expro_fpol(:)*1e6,n_exp,r,fpol,n_r)
 
-  ! Convert sigmapar from MSiemens/m to 1/s (1 S/m = 9e9 1/s) 
-  call cub_spline(expro_rmin(:)/r_min,expro_sigmapar(:)*9e15,n_exp,r,sigmapar,n_r)
-
   ! Convert V and dV/dr from m^3 to cm^3
   call cub_spline(expro_rmin(:)/r_min,expro_vol(:)*1e6,n_exp,r,vol,n_r)
   call cub_spline(expro_rmin(:)/r_min,expro_volp(:)*1e4,n_exp,r,volp,n_r)

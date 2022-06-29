@@ -168,7 +168,6 @@ module tgyro_globals
   real, dimension(:), allocatable :: beta_unit
   real, dimension(:), allocatable :: betae_unit
   real, dimension(:), allocatable :: fpol
-  real, dimension(:), allocatable :: sigmapar
   real, dimension(:), allocatable :: c_s
   real, dimension(:), allocatable :: v_i
   real, dimension(:), allocatable :: rho_s
@@ -221,7 +220,6 @@ module tgyro_globals
   real, dimension(:), allocatable :: p_e_aux_in
   real, dimension(:), allocatable :: p_i_aux_in
   real, dimension(:), allocatable :: p_e_ohmic_in
-  real, dimension(:), allocatable :: p_e_ohmic
   real, dimension(:), allocatable :: p_brem
   real, dimension(:), allocatable :: p_sync
   real, dimension(:), allocatable :: p_line
@@ -238,7 +236,6 @@ module tgyro_globals
   real, dimension(:), allocatable :: s_line
   real, dimension(:), allocatable :: s_exch
   real, dimension(:), allocatable :: s_expwd
-  real, dimension(:), allocatable :: s_ohmic
   real, dimension(:), allocatable :: f_b_in
   real, dimension(:), allocatable :: f_w_in
   real, dimension(:), allocatable :: f_he_fus
