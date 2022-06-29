@@ -7,6 +7,7 @@ else
 endif
 
 EXEC1=gftm
+EXEC2=gftm_mpi
 
 LLIB=gftm_lib
 
@@ -42,16 +43,18 @@ OBJECTS = gftm_isnan.o      \
 
 .SUFFIXES : .o .f90 .F90
 
-all: $(LLIB).a $(EXEC1)  Makefile
+all: $(LLIB).a $(EXEC1) $(EXEC2) Makefile
 
 $(EXEC1): $(LLIB).a $(EXEC1).o
 	$(FC) $(FFLAGS) -o $(EXEC1) $(EXEC1).o $(LLIB).a $(LMATH) 
+$(EXEC2): $(LLIB).a $(EXEC2).o
+	$(FC) $(FFLAGS) -o $(EXEC2) $(EXEC2).o $(LLIB).a $(LMATH) $(NN_LIB)
 
 $(LLIB).a: $(OBJECTS)
 	$(ARCH) $(LLIB).a $(OBJECTS)
 
 gftm_run_mpi.o: gftm_run.F90
-	$(FC) -o gftm_run_mpi.o $(FMATH) $(FFLAGS) -c $<
+	$(FC) -o gftm_run_mpi.o $(FMATH) $(FFLAGS) -DMPI_GFTM=1 -c $<
 
 .f90.o:
 	$(FC) $(FMATH) $(FFLAGS) -c $<
@@ -59,7 +62,7 @@ gftm_run_mpi.o: gftm_run.F90
 	$(FC) $(FMATH) $(FFLAGS) -c $<
 
 clean:
-	rm -f *.o *.lst $(LLIB).a $(EXEC1) 
+	rm -f *.o *.lst $(LLIB).a $(EXEC1) $(EXEC2)
 	rm -f ${GACODE_ROOT}/modules/gftm*.mod
 
 -include ${GACODE_ROOT}/platform/build/make.inc.${GACODE_PLATFORM}

@@ -145,7 +145,8 @@ endif
      kxx(i) = sign_Bt_in*kxx(i)
      ! wdx(i) = -xwell_sa*MIN(1.0,alpha_sa)+ &
      ! cn+sn*(shat_sa*(thx-theta0_sa) - alpha_sa*sn)
-     wdx(i) = -xwell_sa*MIN(1.0,alpha_sa)+ cn - sn*kxx(i)
+     ! wdx(i) = -xwell_sa*MIN(1.0,alpha_sa)+ cn - sn*kxx(i)
+     wdx(i) = cn - sn*kxx(i)
      ! b0x(i) = 1.0+(shat_sa*(thx-theta0_sa) - alpha_sa*sn)**2
      b0x(i) = 1.0+(kxx(i))**2
      b2x(i) = 1.0
@@ -201,7 +202,7 @@ endif
   ! poloidal magnetic field at outboard midplane
   !
   Bp0_out = rmin_sa/(q_sa*(rmaj_sa+rmin_sa))
-  Bt0_out = f/Rmaj_input
+  Bt0_out = 1.0/Rmaj_input
   B_geo0_out = Bt0_out
   !
 END SUBROUTINE xgrid_functions_sa
@@ -244,9 +245,9 @@ SUBROUTINE xgrid_functions_geo
   ! find length along magnetic field y
   !
   y(0)=0.0
-  ! pk_geo = 2 Bp/B = 2 ds/dy
+  ! pk_geo = Bp/Bt0 = ds/dy
   do m=1,ms
-     y(m) = y(m-1)+s_p(m)*ds*4.0/(pk_geo(m)+pk_geo(m-1))
+     y(m) = y(m-1)+s_p(m)*ds*2.0/(pk_geo(m)+pk_geo(m-1))
   enddo
   ! set the global units
   Ly=y(ms)
@@ -430,6 +431,10 @@ SUBROUTINE xgrid_functions_geo
         write(*,*)"interpolation error b0x < 0",i,b0x(i),b1,b2
         b0x(i)=(b1+b2)/2.0
      endif
+     ! factor needed for k_par matrix
+     b1 = b_geo(m1)/Bt0_out
+     b2 = B_geo(m2)/Bt0_out
+     Bx(i) = b1 +(b2-b1)*(y_x-y1)/(y2-y1)
      !
      ! interpolate viscous stress projection coefficients
      !
@@ -750,7 +755,7 @@ SUBROUTINE mercier_luc
   !
   ! - b_geo replaces bmaj(j)=b_theta(j)/b_unit
   !
-  ! - pk_geo is close to pk=2*rmin/(rmaj*q), the coefficient
+  ! - pk_geo is close to pk = rmin/(rmaj*q), the coefficient
   ! of d/dtheta
   !
   ! - qrat_geo -> 1 in a circle
@@ -774,8 +779,8 @@ SUBROUTINE mercier_luc
   !
   do m=0,ms
      b_geo(m) = B(m)
-!     pk_geo(m) = 2.0*Bp(m)/B(m)
-     pk_geo(m) = 2.0*Bp(m)          ! note this includes the factor B from the map dz = dtheta/B
+!     pk_geo(m) = Bp(m)/B(m)
+     pk_geo(m) = Bp(m)/Bt0_out         ! note this includes the factor B from the map dz = dtheta Bt0/B
      qrat_geo(m) = (rmin_s/R(m))*(B(m)/Bp(m))/q_s
   enddo
   !---------------------------------------------------------------
@@ -1263,7 +1268,7 @@ SUBROUTINE miller_geo
      grad_r = ABS(l_t/det)
 
      if(m.eq.0)then
-        B_unit = 1.0/grad_r ! B_unit choosen to make bx(0)=ky**2 i.e. qrat_geo(0)/b_geo(0)=1.0
+        B_unit = 1.0/grad_r ! B_unit choosen to make b0x(0)=ky**2 i.e. qrat_geo(0)/b_geo(0)=1.0
         if(drmindx_loc.eq.1.0)B_unit=1.0 ! Waltz-Miller convention
         ! write(*,*)"B_unit = ",B_unit
      endif
