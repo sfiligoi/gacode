@@ -87,13 +87,6 @@ subroutine tgyro_source
 
   ! Integrated anomalous exchange power
   call tgyro_volume_int(s_expwd,p_expwd)
-
-  ! Integrated Ohmic heating power
-  if (tgyro_dynamic_ohmic == 1) then
-     call tgyro_volume_int(s_ohmic,p_e_ohmic)
-  else
-     p_e_ohmic = p_e_ohmic_in
-  endif
   !-------------------------------------------------------
 
   !-------------------------------------------------------
@@ -131,7 +124,7 @@ subroutine tgyro_source
      p_e(:) = &
           +p_e_fus(:) &                ! Fusion power to electrons
           +p_e_aux_in(:) &             ! Auxiliary electron heating [fixed]
-          +p_e_ohmic(:) &              ! Ohmic heating
+          +p_e_ohmic_in(:) &           ! Ohmic heating
           -p_exch(:)   &               ! Collisional exchange
           -p_brem(:) &                 ! Bremsstrahlung radiation
           -p_sync(:) &                 ! Synchrotron radiation
