@@ -441,6 +441,73 @@ contains
 !$acc end data
 
   end subroutine parallel_slib_f_nc_gpu
+
+  subroutine parallel_slib_f_nc_async_gpu(x,xt,req)
+    use mpi
+    !-------------------------------------------------------
+    implicit none
+    !
+    complex, intent(in), dimension(nkeep,nsplit*nn) :: x
+    complex, intent(inout), dimension(nkeep,nsplit,nn) :: xt
+    integer, intent(inout) :: req
+    !
+    integer :: ierr
+    !-------------------------------------------------------
+!$acc data present(x,xt)
+
+#ifdef DISABLE_GPUDIRECT_MPI
+!$acc update host(x)
+#else
+!$acc host_data use_device(x,xt)
+#endif
+
+   call MPI_IALLTOALL(x, &
+         nkeep*nsplit, &
+         MPI_DOUBLE_COMPLEX, &
+         xt, &
+         nkeep*nsplit, &
+         MPI_DOUBLE_COMPLEX, &
+         slib_comm, &
+         req, &
+         ierr)
+
+#ifdef DISABLE_GPUDIRECT_MPI
+   !do nothing yeet, async
+#else
+!$acc end host_data
+#endif
+
+!$acc end data
+
+  end subroutine parallel_slib_f_nc_async_gpu
+
+  ! require x and xt to ensure they exist until this finishes
+  subroutine parallel_slib_f_nc_wait_gpu(x,xt,req)
+    use mpi
+    !-------------------------------------------------------
+    implicit none
+    !
+    complex, intent(in), dimension(nkeep,nsplit*nn) :: x
+    complex, intent(inout), dimension(nkeep,nsplit,nn) :: xt
+    integer, intent(inout) :: req
+    !
+    integer :: ierr
+    integer :: istat(MPI_STATUS_SIZE)
+    !-------------------------------------------------------
+
+   call MPI_WAIT(req, &
+         istat, &
+         ierr)
+
+#ifdef DISABLE_GPUDIRECT_MPI
+!$acc update device(xt)
+#endif
+
+!$acc end data
+
+  end subroutine parallel_slib_f_nc_wait_gpu
+
+
 #endif
 
  !=========================================================
