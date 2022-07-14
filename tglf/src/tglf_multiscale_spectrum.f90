@@ -28,7 +28,7 @@
       LOGICAL :: USE_MIX=.TRUE.
       LOGICAL :: first_pass = .TRUE.
       LOGICAL :: USE_SUB1=.FALSE.
-      INTEGER :: i,is,k,j,j1,j2,jmax1,jmax2
+      INTEGER :: i,is,k,l,j,j1,j2,jmax1,jmax2,m
       
       INTEGER :: expsub=2, exp_ax, jmax_mix
       REAL :: test,testmax1,testmax2
@@ -48,9 +48,11 @@
       REAL :: measure
       ! SAT3
       REAL :: kmax, gmax, kmin, aoverb, coverb, k0, kP, c_1
-      REAL :: x_ITG, x_TEM, Y_ITG, Y_TEM, x, Y, sig_ratio, Fky
-      REAL,DIMENSION(nkym) :: sum_W_i, abs_W_ratio
-      REAL,DIMENSION(nmodes_in) :: Ys, xs, QLA_P, QLA_E, QLA_O
+      REAL :: kT, doversig0, eoversig0, foversig0, vzf_out_fp, scal
+      REAL :: x_ITG, x_TEM, Y_ITG, Y_TEM, x, Y, sig_ratio, Fky, YT
+      REAL,DIMENSION(nkym) :: sum_W_i, abs_W_ratio, dummy_interp
+      REAL,DIMENSION(nkym) :: gamma_fp=0.0
+      REAL,DIMENSION(nmodes_in) :: Ys, xs, QLA_P, QLA_E, QLA_O, YTs
       !
       REAL,DIMENSION(nkym) :: gamma_net=0.0
       REAL,DIMENSION(nkym) :: gamma=0.0
@@ -137,7 +139,7 @@
         endif
      endif
 ! coefficents for SAT_RULE = 2
-     if(sat_rule_in.eq.2)then
+     if(sat_rule_in.eq.2 .OR. sat_rule_in.eq.3)then
        ! SAT2 fit for CGYRO linear modes NF 2021 paper
 !        b0 = 0.72
         b0 = 0.76
@@ -169,12 +171,12 @@
 !      write(*,*)"G1 = ",sat_geo1_out,"  G2 = ",sat_geo2_out,"  sat_geo0 = ",sat_geo0_out
 !      write(*,*)"d1 = ",d1,"  d2 = ",d2
       if(sat_rule_in.eq.3)then
-       USE_MIX=.FALSE.
        kmax = kymax_out
        gmax = vzf_out * kymax_out
        kmin = 0.685 * kmax
        aoverb = - 1.0 / (2 * kmin)
        coverb = - 0.751 * kmax
+       kT = 1.0 / rho_ion ! SAT3 used up to ky rho_av = 1.0, then SAT2
        k0 = 0.6 * kmin
        kP = 2.0 * kmin
        c_1 = - 2.42
@@ -182,6 +184,7 @@
        x_TEM = 1.0
        Y_ITG = 3.3 * (gmax ** 2) / (kmax ** 5)
        Y_TEM = 12.7 * (gmax ** 2) / (kmax ** 4)
+       scal = 0.82 ! Q(SAT3 GA D) / (2 * QLA(ITG,Q) * Q(SAT2 GA D))
        Ys = 0
        xs = 0
        do k=1,nmodes_in
@@ -204,10 +207,6 @@
         Y = mode_transition_function(x, Y_ITG, Y_TEM)  
         Ys(k) = Y
        enddo
-       b0 = 0.76
-       b1 = 1.22
-       kycut = b0*kymax_out
-       Gq = B_geo0_out/grad_r0_out
       endif 
 ! coefficients for spectral shift model for ExB shear
       ax=0.0
@@ -251,6 +250,7 @@
           kymax_out = kymax_mix
           jmax_out = jmax_mix
         else
+          vzf_out_fp = vzf_out ! used for recreation of first pass for SAT3
           vzf_out = vzf_out*gamma_net(jmax_out)/MAX(eigenvalue_spectrum_out(1,jmax_out,1),small)
         endif
 !        write(*,*)"2nd PASS: vzf_out = ",vzf_out,"  jmax_out = ",jmax_out
@@ -283,7 +283,7 @@
             else
               gamma(j) = cz2*gammamax1  +  Max(gamma0 - cz2*vzf1*ky0,0.0)          
             endif
-          elseif(sat_rule_in.eq.2)then
+          elseif(sat_rule_in.eq.2 .OR. sat_rule_in.eq.3)then
 ! note that the gamma mixing is for gamma_model not G*gamma_model
             if(ky0.lt.kymax1)then
               gamma(j) = gamma0
@@ -312,7 +312,90 @@
         gamma_kymix(j) = gamma_ave/mixnorm
 !        write(*,*)j,ky0,gamma(j),gamma_kymix(j)
       enddo  
-    endif      
+    endif
+    
+    ! recreate first pass for ExB rule in SAT3
+    if(sat_rule_in.eq.3)then
+     if(first_pass .eqv. .FALSE.)then
+      gamma_fp=0.0
+      do j=1,nky
+       gamma0 = eigenvalue_spectrum_out(1,j,1)
+       ky0=ky_spectrum(j)
+       if(ky0.lt.kymax1)then
+        gamma(j) = gamma0
+       else
+        gamma(j) = (gammamax1 * (vzf_out_fp/vzf_out)) + Max(gamma0 - cz2*vzf_out_fp*ky0,0.0)
+       endif
+       gamma_fp(j) = gamma(j)
+      enddo
+      if(USE_MIX)then
+       do j=jmax1+2,nky
+        gamma_ave = 0.0
+        ky0 = ky_spectrum(j)
+        mixnorm = ky0*(ATAN(sqcky*(ky_spectrum(nky)/ky0-1.0))-  &
+                  ATAN(sqcky*(ky_spectrum(jmax1+1)/ky0-1.0)))
+        do i=jmax1+1,nky-1
+         ky1 = ky_spectrum(i)
+         ky2 = ky_spectrum(i+1)
+         mix1 = ky0*(ATAN(sqcky*(ky2/ky0-1.0))- ATAN(sqcky*(ky1/ky0-1.0)))
+         delta = (gamma(i+1)-gamma(i))/(ky2-ky1)
+         mix2 = ky0*mix1 + (ky0*ky0/(2.0*sqcky))*(LOG(cky*(ky2-ky0)**2+ky0**2)- &
+                 LOG(cky*(ky1-ky0)**2+ky0**2))
+         gamma_ave = gamma_ave + (gamma(i)-ky1*delta)*mix1 + delta*mix2
+        enddo  
+        gamma_fp(j) = gamma_ave/mixnorm
+       enddo  
+      endif 
+     else
+      gamma_fp = gamma_kymix
+     end if
+    end if
+    
+    ! generate SAT2 potential for SAT3 to connect to for electron scale
+    if(sat_rule_in.eq.3)then 
+     if(ky_spectrum(nky) >= kT)then
+      dummy_interp=0.0
+      k = 1
+      do while (ky_spectrum(k) < kT)
+       k=k+1
+      end do
+      do l=k-1,k
+       gamma0 = eigenvalue_spectrum_out(1,l,1)
+	   ky0 = ky_spectrum(l)
+	   kx = spectral_shift_out(l)
+	   if(ky0.lt. kycut)then
+	    kx_width = kycut/grad_r0_out
+	    sat_geo_factor = SAT_geo0_out*d1*SAT_geo1_out
+	   else
+	    kx_width = kycut/grad_r0_out + b1*(ky0 - kycut)*Gq
+	    sat_geo_factor = SAT_geo0_out*(d1*SAT_geo1_out*kycut +  &
+					 (ky0 - kycut)*d2*SAT_geo2_out)/ky0
+	   endif
+	   kx = kx*ky0/kx_width
+	   gammaeff = 0.0
+	   if(gamma0.gt.small)gammaeff = gamma_fp(l)
+	   ! potentials without multimode and ExB effects, added later
+	   dummy_interp(l) = scal*measure*cnorm*(gammaeff/(kx_width*ky0))**2
+	   if(units_in.ne.'GYRO')dummy_interp(l) = sat_geo_factor*dummy_interp(l)
+	  end do
+	  YT = linear_interpolation(ky_spectrum, dummy_interp, kT)
+	  do l=1,nmodes_in
+	   YTs(l) = YT
+	  end do
+	 else
+	  if(aoverb*(kP**2)+kP+coverb-((kP-kT)*(2*aoverb*kP+1))==0)then
+	   YTs=0.0
+	  else
+	   do l=1,nmodes_in
+	    YTs(l) = Ys(l)*(((aoverb*(k0**2)+k0+coverb)/(aoverb*(kP**2)+ &
+	                  kP+coverb-((kP-kT)*(2*aoverb*kP+1))))**abs(c_1))
+	   end do
+	  end if
+	 end if
+	end if
+  
+    
+    
 ! intensity model  
        do j=1,nky 
         gamma0 = eigenvalue_spectrum_out(1,j,1) 
@@ -342,20 +425,37 @@
            if(ky0.gt.kyetg)gammaeff = gammaeff*SQRT(ky0/kyetg)
            field_spectrum_out(2,j,i) = measure*cnorm*((gammaeff/(kx_width*ky0))/(1.0+ay*kx**2))**2
            if(units_in.ne.'GYRO')field_spectrum_out(2,j,i) = sat_geo_factor*field_spectrum_out(2,j,i)
-         enddo
-         
+         enddo       
         elseif(sat_rule_in.eq.3)then ! SAT3
-         if (ky0 < kP) then
-		  sig_ratio = (aoverb * (ky0 ** 2) + ky0 + coverb) / (aoverb * (k0 ** 2) + k0 + coverb)
-		 else
-		  sig_ratio = ((2.0 * aoverb * kP + 1) * ky0 + coverb - aoverb * (kP ** 2)) / (aoverb * (k0 ** 2) + k0 + coverb)
+         if(gamma_fp(j)==0)then
+          Fky=0.0
+         else
+		  Fky =  ((gamma_kymix(j) / gamma_fp(j))**2) / ((1.0 + ay*(kx**2))**2)
 		 end if
-		 Fky = 1.0 / (((1.0 + ABS(ax*kx)**exp_ax)**2)*((1.0 + ay*(kx**2))**2))
-		 do i=1,nmodes_in
-           field_spectrum_out(2,j,i) = 0.0
-           if(gamma0.gt.small) then
-            field_spectrum_out(2,j,i) = Ys(i) * (sig_ratio ** c_1) * Fky *(eigenvalue_spectrum_out(1,j,i)/gamma0)**(2 * expsub)
-           end if
+         do i=1,nmodes_in
+          field_spectrum_out(2,j,i) = 0.0  
+          if(gamma0.gt.small) then
+           if (ky0 <= kP) then ! initial quadratic
+			sig_ratio = (aoverb * (ky0 ** 2) + ky0 + coverb) / (aoverb * (k0 ** 2) + k0 + coverb)	
+			field_spectrum_out(2,j,i) = Ys(i) * (sig_ratio ** c_1) * Fky *(eigenvalue_spectrum_out(1,j,i)/gamma0)**(2 * expsub)
+		   else if (ky0 <= kT) then ! connecting quadratic
+		    if(YTs(i)==0.0 .OR. kP==kT)then
+		     field_spectrum_out(2,j,i) = 0.0
+		    else
+			 doversig0 = ((Ys(i) / YTs(i))**(1.0/abs(c_1)))-((aoverb*(kP**2)+kP+coverb-((kP-kT)*(2*aoverb*kP+1)))/(aoverb*(k0**2)+k0+coverb))
+			 doversig0 = doversig0 * (1.0/((kP-kT)**2))
+			 eoversig0 = - 2 * doversig0 * kP + ((2 * aoverb * kP + 1)/(aoverb * (k0 ** 2) + k0 + coverb))
+			 foversig0 = ((Ys(i) / YTs(i))**(1.0/abs(c_1))) - eoversig0 * kT - doversig0 * (kT ** 2)
+			 sig_ratio = doversig0 * (ky0 ** 2) + eoversig0 * ky0 + foversig0
+			 field_spectrum_out(2,j,i) = Ys(i) * (sig_ratio ** c_1) * Fky *(eigenvalue_spectrum_out(1,j,i)/gamma0)**(2 * expsub)
+			end if
+		   else ! SAT2 for electron scale
+			gammaeff = gamma_kymix(j)*(eigenvalue_spectrum_out(1,j,i)/gamma0)**expsub
+			if(ky0.gt.kyetg)gammaeff = gammaeff*SQRT(ky0/kyetg)
+			field_spectrum_out(2,j,i) = scal*measure*cnorm*((gammaeff/(kx_width*ky0))/(1.0+ay*kx**2))**2
+			if(units_in.ne.'GYRO')field_spectrum_out(2,j,i) = sat_geo_factor*field_spectrum_out(2,j,i)
+		   end if
+          end if
          enddo 
         endif
        enddo
