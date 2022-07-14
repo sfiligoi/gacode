@@ -472,7 +472,7 @@ contains
          ierr)
 
 #ifdef DISABLE_GPUDIRECT_MPI
-   !do nothing yeet, async
+   !do nothing yet, async
 #else
 !$acc end host_data
 #endif
@@ -505,7 +505,7 @@ contains
 
 !$acc end data
 
-  end subroutine parallel_slib_f_nc_wait_gpu
+  end subroutine parallel_slib_f_nc_async_gpu
 
 
 #endif
