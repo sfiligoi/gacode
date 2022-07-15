@@ -46,6 +46,17 @@ subroutine cgyro_nl_fftw_comm1_async
 
 end subroutine cgyro_nl_fftw_comm1_async
 
+! Note: Calling test propagates the async operations in some MPI implementations
+subroutine cgyro_nl_fftw_comm1_test
+  use parallel_lib
+  use cgyro_globals
+
+  implicit none
+
+  call parallel_slib_test(f_req)
+
+end subroutine cgyro_nl_fftw_comm1_test
+
 subroutine cgyro_nl_fftw_comm2_async
   use timer_lib
   use parallel_lib
@@ -80,6 +91,17 @@ subroutine cgyro_nl_fftw_comm2_async
   call timer_lib_out('nl_mem')
 
 end subroutine cgyro_nl_fftw_comm2_async
+
+! Note: Calling test propagates the async operations in some MPI implementations
+subroutine cgyro_nl_fftw_comm2_test
+  use parallel_lib
+  use cgyro_globals
+
+  implicit none
+
+  call parallel_slib_test(g_req)
+
+end subroutine cgyro_nl_fftw_comm2_test
 
 subroutine cgyro_nl_fftw_zero4(sz,v1,v2,v3,v4)
   implicit none
@@ -139,6 +161,8 @@ subroutine cgyro_nl_fftw(ij)
   ! time to wait for the F_nl to become avaialble
   call timer_lib_in('nl_comm')
   call parallel_slib_f_nc_wait_gpu(fpack,f_nl,f_req)
+  ! make sure g_req progresses
+  call parallel_slib_test(g_req)
   call timer_lib_out('nl_comm')
 
   call timer_lib_in('nl_mem')
@@ -170,7 +194,8 @@ subroutine cgyro_nl_fftw(ij)
      enddo
   enddo
 
-  ! TODO: MPI_test to progress async ops
+  ! make sure g_req progresses
+  call parallel_slib_test(g_req)
 
      ! --------------------------------------
      ! perform many Fourier Transforms at once
@@ -181,7 +206,8 @@ subroutine cgyro_nl_fftw(ij)
 !$acc& use_device(uxmany,uymany)
 
   rc = cufftExecZ2D(cu_plan_c2r_many,fxmany,uxmany)
-  ! TODO: MPI_test to progress async ops
+  ! make sure g_req progresses
+  call parallel_slib_test(g_req)
   rc = cufftExecZ2D(cu_plan_c2r_many,fymany,uymany)
 
 !$acc wait

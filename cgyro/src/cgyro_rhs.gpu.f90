@@ -1,3 +1,41 @@
+! TODO: Propagate to CPU version
+subroutine cgyro_rhs_comm_async(which)
+  use cgyro_globals
+
+  implicit none
+
+  integer, intent(in) :: which
+
+  if ( (nonlinear_flag == 1) .and. (nonlinear_method /= 1)) then
+     if (which == 1) then
+       call cgyro_nl_fftw_comm1_async
+     else
+       call cgyro_nl_fftw_comm2_async
+     endif
+  endif
+
+end subroutine cgyro_rhs_comm_async
+
+! Note: Calling test propagates the async operations in some MPI implementations
+! TODO: Propagate to CPU version
+subroutine cgyro_rhs_comm_test(which)
+  use cgyro_globals
+
+  implicit none
+
+  integer, intent(in) :: which
+
+  if ( (nonlinear_flag == 1) .and. (nonlinear_method /= 1)) then
+     if (which == 1) then
+       call cgyro_nl_fftw_comm1_test
+     else
+       call cgyro_nl_fftw_comm2_test
+     endif
+  endif
+
+end subroutine cgyro_rhs_comm_test
+
+
 subroutine cgyro_rhs(ij)
 
   use timer_lib
@@ -11,14 +49,11 @@ subroutine cgyro_rhs(ij)
   real :: rval,rval2
   complex :: rhs_stream
 
-  call timer_lib_in('str_mem')
+  ! h_x is not modified after this and before nl_fftw
+  ! TODO: See if we can invoke cgyro_nl_fftw_comm1_async even sooner, e.g. in cgyro_step
+  call cgyro_rhs_comm_sync(1)
 
-  if ( (nonlinear_flag == 1) .and. (nonlinear_method /= 1)) then
-     ! h_x is not modified after this and before nl_fftw
-     ! TODO: See if we can invoke cgyro_nl_fftw_comm1_async even sooner, e.g. in cgyro_step
-     ! TODO: Propagate to CPU version
-     call cgyro_nl_fftw_comm1_async
-  endif
+  call timer_lib_in('str_mem')
 
 !$acc data present(h_x,g_x,psi,rhs,field)
 
@@ -30,7 +65,7 @@ subroutine cgyro_rhs(ij)
      call timer_lib_in('str')
 
 !$acc parallel loop  collapse(2) independent private(iv_loc,is) &
-!$acc&         present(is_v,z,temp,jvec_c) default(none)
+!$acc&         present(is_v,z,temp,jvec_c) default(none) async()
      do iv=nv1,nv2
         do ic=1,nc
            iv_loc = iv-nv1+1
@@ -41,11 +76,15 @@ subroutine cgyro_rhs(ij)
         enddo
      enddo
 
+     call cgyro_rhs_comm_test(1)
+!$acc wait
+     call cgyro_rhs_comm_test(1)
+
      call timer_lib_out('str')
   else
      call timer_lib_in('str_mem')
 
-!$acc parallel loop  collapse(2) independent private(iv_loc) default(none)
+!$acc parallel loop  collapse(2) independent private(iv_loc) default(none) async()
      do iv=nv1,nv2
         do ic=1,nc
            iv_loc = iv-nv1+1
@@ -53,17 +92,18 @@ subroutine cgyro_rhs(ij)
         enddo
      enddo
 
+     call cgyro_rhs_comm_test(1)
+!$acc wait
+     call cgyro_rhs_comm_test(1)
+
      call timer_lib_out('str_mem')
   endif
 
   ! TODO: Move creation of g_x inside cgyro_upwind for mmory locality (both here and in CPU code)
   call cgyro_upwind
 
-  if ( (nonlinear_flag == 1) .and. (nonlinear_method /= 1)) then
-     ! cgyro_upwind updates g_x
-     ! TODO: Propagate to CPU version
-     call cgyro_nl_fftw_comm2_async
-  endif
+  call cgyro_rhs_comm_test(1)
+  call cgyro_rhs_comm_sync(2)
 
   call timer_lib_in('str_mem')
 
@@ -106,8 +146,10 @@ subroutine cgyro_rhs(ij)
      enddo
   enddo
 
-  !TODO: Add MPI_Test to advance the async operations
+  call cgyro_rhs_comm_test(1)
 !$acc wait
+  call cgyro_rhs_comm_test(1)
+  call cgyro_rhs_comm_test(2)
 
   call timer_lib_out('str')
 
