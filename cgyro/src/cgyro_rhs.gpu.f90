@@ -51,7 +51,7 @@ subroutine cgyro_rhs(ij)
 
   ! h_x is not modified after this and before nl_fftw
   ! TODO: See if we can invoke cgyro_nl_fftw_comm1_async even sooner, e.g. in cgyro_step
-  call cgyro_rhs_comm_sync(1)
+  call cgyro_rhs_comm_async(1)
 
   call timer_lib_in('str_mem')
 
@@ -65,7 +65,7 @@ subroutine cgyro_rhs(ij)
      call timer_lib_in('str')
 
 !$acc parallel loop  collapse(2) independent private(iv_loc,is) &
-!$acc&         present(is_v,z,temp,jvec_c) default(none) async()
+!$acc&         present(is_v,z,temp,jvec_c) default(none) async(1)
      do iv=nv1,nv2
         do ic=1,nc
            iv_loc = iv-nv1+1
@@ -77,14 +77,14 @@ subroutine cgyro_rhs(ij)
      enddo
 
      call cgyro_rhs_comm_test(1)
-!$acc wait
+!$acc wait(1)
      call cgyro_rhs_comm_test(1)
 
      call timer_lib_out('str')
   else
      call timer_lib_in('str_mem')
 
-!$acc parallel loop  collapse(2) independent private(iv_loc) default(none) async()
+!$acc parallel loop  collapse(2) independent private(iv_loc) default(none) async(1)
      do iv=nv1,nv2
         do ic=1,nc
            iv_loc = iv-nv1+1
@@ -93,7 +93,7 @@ subroutine cgyro_rhs(ij)
      enddo
 
      call cgyro_rhs_comm_test(1)
-!$acc wait
+!$acc wait(1)
      call cgyro_rhs_comm_test(1)
 
      call timer_lib_out('str_mem')
@@ -103,7 +103,7 @@ subroutine cgyro_rhs(ij)
   call cgyro_upwind
 
   call cgyro_rhs_comm_test(1)
-  call cgyro_rhs_comm_sync(2)
+  call cgyro_rhs_comm_async(2)
 
   call timer_lib_in('str_mem')
 
@@ -119,7 +119,7 @@ subroutine cgyro_rhs(ij)
   call timer_lib_in('str')
 
 !$acc  parallel loop gang vector collapse(2) & 
-!$acc& private(iv,ic,iv_loc,is,rval,rval2,rhs_stream,id,jc) async()
+!$acc& private(iv,ic,iv_loc,is,rval,rval2,rhs_stream,id,jc) async(1)
   do iv=nv1,nv2
      do ic=1,nc
         iv_loc = iv-nv1+1
@@ -147,7 +147,7 @@ subroutine cgyro_rhs(ij)
   enddo
 
   call cgyro_rhs_comm_test(1)
-!$acc wait
+!$acc wait(1)
   call cgyro_rhs_comm_test(1)
   call cgyro_rhs_comm_test(2)
 

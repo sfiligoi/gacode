@@ -178,7 +178,7 @@ subroutine cgyro_nl_fftw(ij)
   call cgyro_nl_fftw_zero4(size(fxmany,1)*size(fxmany,2)*size(fxmany,3), &
                            fxmany,fymany,gxmany,gymany)
 
-!$acc parallel loop independent collapse(3) private(j,ir,p,ix,in,iy,f0,g0) async()
+!$acc parallel loop independent collapse(3) private(j,ir,p,ix,in,iy,f0,g0) async
   do j=1,nsplit
      do ir=1,n_radial
         do in=1,n_toroidal
