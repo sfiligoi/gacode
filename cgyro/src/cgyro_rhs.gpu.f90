@@ -13,6 +13,13 @@ subroutine cgyro_rhs(ij)
 
   call timer_lib_in('str_mem')
 
+  if ( (nonlinear_flag == 1) .and. (nonlinear_method /= 1)) then
+     ! h_x is not modified after this and before nl_fftw
+     ! TODO: See if we can invoke cgyro_nl_fftw_comm1_async even sooner, e.g. in cgyro_step
+     ! TODO: Propagate to CPU version
+     call cgyro_nl_fftw_comm1_async
+  endif
+
 !$acc data present(h_x,g_x,psi,rhs,field)
 
   call timer_lib_out('str_mem')
@@ -49,11 +56,13 @@ subroutine cgyro_rhs(ij)
      call timer_lib_out('str_mem')
   endif
 
+  ! TODO: Move creation of g_x inside cgyro_upwind for mmory locality (both here and in CPU code)
   call cgyro_upwind
 
-  if ( (nonlinear_flag == 1) .and. (nonlinear_method /= 1) .and. is_staggered_comm_2) then 
-     ! stagger comm1, to load ballance network traffic
-     call cgyro_nl_fftw_comm1
+  if ( (nonlinear_flag == 1) .and. (nonlinear_method /= 1)) then
+     ! cgyro_upwind updates g_x
+     ! TODO: Propagate to CPU version
+     call cgyro_nl_fftw_comm2_async
   endif
 
   call timer_lib_in('str_mem')
@@ -70,7 +79,7 @@ subroutine cgyro_rhs(ij)
   call timer_lib_in('str')
 
 !$acc  parallel loop gang vector collapse(2) & 
-!$acc& private(iv,ic,iv_loc,is,rval,rval2,rhs_stream,id,jc)
+!$acc& private(iv,ic,iv_loc,is,rval,rval2,rhs_stream,id,jc) async()
   do iv=nv1,nv2
      do ic=1,nc
         iv_loc = iv-nv1+1
@@ -97,15 +106,14 @@ subroutine cgyro_rhs(ij)
      enddo
   enddo
 
+  !TODO: Add MPI_Test to advance the async operations
+!$acc wait
+
   call timer_lib_out('str')
 
   ! Wavenumber advection shear terms
+  ! TODO: Consider moving this after cgyro_nl_fftw once we have async reverse nl_comm
   call cgyro_advect_wavenumber(ij)
-
-  if ( (nonlinear_flag == 1) .and. (nonlinear_method /= 1) .and. (.not. is_staggered_comm_2)) then 
-     ! stagger comm1, to load ballance network traffic
-     call cgyro_nl_fftw_comm1
-  endif
 
   ! Nonlinear evaluation [f,g]
   if (nonlinear_flag == 1) then     
