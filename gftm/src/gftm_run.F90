@@ -6,7 +6,7 @@
 !  TGYRO usage.
 !---------------------------------------------------------
 
-#ifdef MPI_gftm
+#ifdef MPI_GFTM
 subroutine gftm_run_mpi()
 #else
 subroutine gftm_run()
@@ -16,7 +16,7 @@ subroutine gftm_run()
   use gftm_interface
   use gftm_global
 
-#ifdef MPI_gftm
+#ifdef MPI_GFTM
   use gftm_mpi
 #endif
 
@@ -125,7 +125,7 @@ subroutine gftm_run()
           gftm_fourier_in)
 
   else
-
+     write(*,*)"geometry_flag = ", gftm_geometry_flag_in
      call put_s_alpha_geometry(gftm_rmin_sa_in, &
           gftm_rmaj_sa_in, &
           gftm_q_sa_in, &
@@ -147,7 +147,7 @@ subroutine gftm_run()
 
   if (gftm_use_transport_model_in) then
 
-#ifdef MPI_gftm
+#ifdef MPI_GFTM
         call gftm_tm_mpi
 #else
         call gftm_tm
@@ -204,7 +204,7 @@ subroutine gftm_run()
      enddo
 
      ! Print eigenfunction if flag set
-#ifdef MPI_gftm
+#ifdef MPI_GFTM
      if (iProcgftm == iProc0gftm .and. gftm_write_wavefunction_flag_in == 1) then
         call write_wavefunction_out(trim(gftm_path_in)//'out.gftm.wavefunction')
      endif
@@ -220,7 +220,7 @@ subroutine gftm_run()
   interchange_DR = get_DR()
   interchange_DM = get_DM()
 
-#ifdef MPI_gftm
+#ifdef MPI_GFTM
 end subroutine gftm_run_mpi
 #else
 end subroutine gftm_run

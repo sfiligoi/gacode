@@ -12,7 +12,7 @@ subroutine tgyro_source
 
   implicit none
 
-  integer :: i_ion
+  integer :: i_ion,i
 
   !-------------------------------------------------------
   ! Source terms (erg/cm^3/s):
@@ -60,7 +60,7 @@ subroutine tgyro_source
   call tgyro_volume_int(s_alpha_i,p_i_fus)
   call tgyro_volume_int(s_alpha_e,p_e_fus)
   call tgyro_volume_int(sn_alpha,f_he_fus)
-  
+
   ! Integrated Bremsstrahlung power
   call tgyro_volume_int(s_brem,p_brem)
 
@@ -101,7 +101,7 @@ subroutine tgyro_source
 
   case (3)
 
-     ! Reactor with consistent alpha power, exchange and radiation.
+     ! Reactor with consistent alpha power, exchange, radiation and Ohmic heating
 
      p_i(:) = &
           +p_i_fus(:) &                ! Fusion power to ions
@@ -112,6 +112,7 @@ subroutine tgyro_source
      p_e(:) = &
           +p_e_fus(:) &                ! Fusion power to electrons
           +p_e_aux_in(:) &             ! Auxiliary electron heating [fixed]
+          +p_e_ohmic_in(:) &           ! Ohmic heating
           -p_exch(:)   &               ! Collisional exchange
           -p_brem(:) &                 ! Bremsstrahlung radiation
           -p_sync(:) &                 ! Synchrotron radiation
@@ -158,7 +159,7 @@ subroutine tgyro_source
   mflux_target(1) = 0.0 
   mflux_target(2:n_r) = mf_in(2:n_r)/volp(2:n_r)
   !------------------------------------------------
- 
+
   !------------------------------------------------
   ! Target He ash flux in 1/s/cm^2
   !

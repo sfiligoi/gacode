@@ -26,13 +26,20 @@ def prgen_contour(g,mag,nc,psinorm,narc):
    
    #-------------------------------------------------------------------------
    # Extract data from gfile
+   #
+   # Del* psi = -mu R J_phi = -mu R^2 p' 
+   #
+   # J_phi = R p' + II'/R
+   
+   # phi [Wb/rad]
+   
    nx    = g['NW']
    ny    = g['NH']
-   psi0  = g['SIMAG']
-   psi1  = g['SIBRY']
-   efitp = g['PRES']
-   efitq = g['QPSI']
-   efitf = g['FPOL']
+   psi0  = g['SIMAG'] # Poloidal flux at EFIT magnetic axis
+   psi1  = g['SIBRY'] # Poloidal flux at EFIT separatrix
+   efitp = g['PRES']  # Plasma pressure [Pa]
+   efitq = g['QPSI']  # Safety factor
+   efitf = g['FPOL']  # Poloidal current function I = R Bt [T-m]
    lx    = g['RDIM']
    ly    = g['ZDIM']
 

@@ -167,12 +167,14 @@ module tgyro_globals
   real, dimension(:), allocatable :: dlnptotdr
   real, dimension(:), allocatable :: beta_unit
   real, dimension(:), allocatable :: betae_unit
+  real, dimension(:), allocatable :: fpol
   real, dimension(:), allocatable :: c_s
   real, dimension(:), allocatable :: v_i
   real, dimension(:), allocatable :: rho_s
   real, dimension(:), allocatable :: rho_i
 
   real, dimension(:), allocatable :: rho
+  real, dimension(:), allocatable :: polflux
   real, dimension(:), allocatable :: r
   real, dimension(:), allocatable :: r_maj
   real, dimension(:), allocatable :: q
@@ -217,6 +219,7 @@ module tgyro_globals
   real, dimension(:), allocatable :: p_i_fus_in
   real, dimension(:), allocatable :: p_e_aux_in
   real, dimension(:), allocatable :: p_i_aux_in
+  real, dimension(:), allocatable :: p_e_ohmic_in
   real, dimension(:), allocatable :: p_brem
   real, dimension(:), allocatable :: p_sync
   real, dimension(:), allocatable :: p_line
@@ -242,7 +245,6 @@ module tgyro_globals
   character(len=3), dimension(:), allocatable :: ion_name
   real, dimension(:), allocatable :: zi_vec,mi_vec,mi
 
- !real, dimension(n_ion_max) :: mi
   real, dimension(n_ion_max) :: n_ratio,t_ratio
 
   ! Physical constants
@@ -329,7 +331,6 @@ module tgyro_globals
   integer :: tgyro_zero_dens_grad_flag
   real :: tgyro_residual_tol
   real :: tgyro_input_fusion_scale
-  !
   integer :: tgyro_cgyro_n_iterate
   !
   real, dimension(:), allocatable :: res
