@@ -495,7 +495,9 @@ contains
     integer :: istat(MPI_STATUS_SIZE)
     !-------------------------------------------------------
 
-   call MPI_WAIT(req, &
+!$acc data present(xt)
+
+call MPI_WAIT(req, &
          istat, &
          ierr)
 
@@ -505,7 +507,7 @@ contains
 
 !$acc end data
 
-  end subroutine parallel_slib_f_nc_async_gpu
+  end subroutine parallel_slib_f_nc_wait_gpu
 
 
 #endif
