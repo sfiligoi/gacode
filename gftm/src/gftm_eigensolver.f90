@@ -59,32 +59,21 @@
 !       ndamp = damp_psi_in*B_geo0_out**2
 !       tdamp = damp_sig_in/B_geo0_out**2
 !       write(*,*)"Rmaj_input = ",Rmaj_input," rmin_input = ",rmin_input
-       Rmin = 1.0 - rmin_input/Rmaj_input
-       Rmax = 1.0 + rmin_input/Rmaj_input
-       if(ne.eq.2)then
-         ndamp = 0.067*(Rmin/Rmax)**1.5 ! fit to nbasis=10,  QLGYRO
-         tdamp = 0.15*(Rmin/Rmax)**1.5  ! fit to nbasis=10, QLGYRO
-       endif
-       if(ne.eq.3)then
+!       Rmin = 1.0 - rmin_input/Rmaj_input
+!       Rmax = 1.0 + rmin_input/Rmaj_input
 !          ndamp = 0.035*(Rmin/Rmax)**2
 !          tdamp = 0.21*(Rmin/Rmax)**2
 !         ndamp = 0.031*(Rmin/Rmax)**2
 !         tdamp = 0.153*(Rmin/Rmax)**2
-          if(nu.eq.5) then
-            ndamp = 0.029*(Rmin/Rmax)**1.5 ! fit to nbasis=10,  QLGYRO
-            tdamp = 0.15*(Rmin/Rmax)**1.5  ! fit to nbasis=10,  QLGYRO
-          endif
-          if(nu.eq.7) then
-            ndamp = 0.022*(Rmin/Rmax)**1.5 ! fit to nbasis=10,  QLGYRO
-            tdamp = 0.12*(Rmin/Rmax)**1.5  ! fit to nbasis=10,  QLGYRO
-          endif
-       endif
-       if(ne.eq.4)then
-!         ndamp = 0.023*(Rmin/Rmax)**1.5   ! fit to nbasis=8, QLGYRO
-         ndamp = 0.022*(Rmin/Rmax)**1.5   ! fit to nbasis=8, QLGYRO
-         tdamp = 0.11*(Rmin/Rmax)**1.5    ! fit to nbasis=8, QLGYRO
-       endif
-!       write(*,*)"Bmin/Bmax = ",Bmin/Bmax
+!
+! this closure works for ne >= 3 and nu = 2 ne -1
+!
+        tdamp = 0.514
+        ndamp = 0.0028
+        tdamp = 0.510
+        ndamp = 0.0028
+        tdamp = 0.639
+ !       write(*,*)"Bmin/Bmax = ",Bmin/Bmax
 !       ndamp = damp_psi_in
 !       tdamp = damp_sig_in
 !       pdamp = etg_factor_in*pi/2.0
@@ -119,29 +108,36 @@
          iue = iu + nu*(ie-1)
          hN(iue) = 0.0
          hT(iue) = 0.0
-         if(ie.eq.1)then
-           if(iu.eq.1)hN(iue) = 1.0
-           if(iu.eq.3)hT(iue) = SQRT(2.0/3.0)
+ !        if(ie.eq.ne)hT(ie) = 1.0
+         if(iu.eq.nu)hN(iu) = 1.0
+!         if(ie.eq.1)then
+ !          if(iu.eq.1)hN(iu) = 1.0
+!           if(iu.eq.3)hT(iue) = SQRT(2.0/3.0)
 !           if(iu.eq.3)hT(iue) = COS(pdamp)
-         endif
-         if(ie.eq.2)then
-           if(iu.eq.1)hT(iue) = SQRT(1.0/3.0)
+ !        endif
+ !        if(ie.eq.2)then
+!           if(iu.eq.1)hT(iue) = SQRT(1.0/3.0)
 !           if(iu.eq.1)hT(iue) = SIN(pdamp)
-         endif
+!         endif
         enddo
-     enddo
-     do iu = 1,nu
-     do ju = 1,nu
-       matuu(iu,ju) = 0.0
-       do ku = 1,nu
-         matuu(iu,ju) =  matuu(iu,ju) + matu(iu,ku)*matu(ku,ju)
-       enddo
-     enddo
      enddo
      do ie = 1,ne
      do je = 1,ne
        mate(ie,je) = mat_eper(ie,je)
        matde(ie,je) = mat_deper(ie,je)
+     enddo
+     enddo
+!
+! add the matu "closure"
+!
+     matu(nu-1,nu) = (1.0-tdamp)*matu(nu-1,nu)
+     matu(nu,nu-1) = (1.0-tdamp)*matu(nu,nu-1)
+     do iu = 1,nu
+     do ju = 1,nu
+       matuu(iu,ju) = 0.0
+       do ku = 1,nu
+        matuu(iu,ju) =  matuu(iu,ju) + matu(iu,ku)*matu(ku,ju)
+       enddo
      enddo
      enddo
 !
@@ -294,9 +290,8 @@
         jtot = jb+nbasis*(ju-1)+nbasis*nu*(je-1)+nbasis*nu*ne*(js-ns0)
         iue = iu + nu*(ie-1)
         jue = ju + nu*(je-1)
-        mateq(itot,jtot) = (-xi*(vs(is)/(Rmaj_input*q_in))*                      &
-        (ndamp*hN(iue)*hN(jue) + tdamp*hT(iue)*hT(jue))*one(ib,jb)               &
-        - xi*vs(is)*k_par0*ave_kpar(ib,jb)*matu(iu,ju)*one(ie,je)                &
+        mateq(itot,jtot) = (-xi*vs(is)*k_par0*(ave_kpar(ib,jb)*matu(iu,ju)       &
+        + ndamp*ave_modkpar(ib,jb)*one(iu,ju))*one(ie,je)                                &
         - 2.0*w_d0*(taus(is)/zs(is))*ave_wdpar(ib,jb)*matuu(iu,ju)*one(ie,je)    &
         - w_d0*(taus(is)/zs(is))*ave_wdper(ib,jb)*mate(ie,je)*one(iu,ju)         &
         - xi*vs(is)*k_par0*ave_gradb(ib,jb)*matmirror(iue,jue)                   &

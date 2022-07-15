@@ -46,6 +46,7 @@
       ibranch_in = -1
       width_min = width_min_in
       width_max = ABS(width_in)
+!      write(*,*)"width_min = ",width_min,"  width_max = ", width_max
 !
 !      write(*,*)"R_unit=",R_unit,"q_unit=",q_unit
 !      write(*,*)ns0,ns,ky_s
@@ -83,7 +84,7 @@
 !        use_bper_in = .false.
 !        use_bpar_in = .false.
 !      endif
-       write(*,*)"nbasis = ",nbasis
+!       write(*,*)"nbasis = ",nbasis
       tmin=LOG10(width_min)
       tmax=LOG10(width_max)
       nt=nwidth_in
@@ -102,7 +103,7 @@
 !       write(*,*)"width_in = ",width_in
        new_width = .TRUE.
        call gftm_LS
-!       write(*,*)i,width_in,gamma_out(1),freq_out(1)
+       write(*,*)i,width_in,nbasis,gamma_out(1),freq_out(1)
        width_n(i)=width_in
        gamma_n(i) = gamma_out(1)
        freq_n(i) = freq_out(1)

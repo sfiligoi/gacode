@@ -252,7 +252,7 @@
              b(i,j) = b(i,j)+ ABS(w(k))*a(i,k)*CONJG(a(j,k))
            enddo
 !         write(*,*)i,j,b(i,j)
-           ave_modkpar(i,j)=REAl(b(i,j))
+           ave_modkpar(i,j)=REAL(b(i,j))
          enddo
          enddo
 !
