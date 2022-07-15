@@ -378,6 +378,24 @@ contains
 
   end subroutine parallel_slib_init
 
+  ! test an async req, to progress async operations
+  subroutine parallel_slib_test(req)
+    use mpi
+    !-------------------------------------------------------
+    implicit none
+    !
+    integer, intent(inout) :: req
+    !
+    logical :: iflag
+    integer :: ierr
+    integer :: istat(MPI_STATUS_SIZE)
+    !-------------------------------------------------------
+
+    call MPI_REQUEST_GET_STATUS(req, iflag, istat, ierr)
+    ! we discard all the outputs... it is just a way to progress async mpi
+
+  end subroutine parallel_slib_test
+
 !=========================================================
 
   subroutine parallel_slib_f_nc(x,xt)
@@ -508,7 +526,6 @@ call MPI_WAIT(req, &
 !$acc end data
 
   end subroutine parallel_slib_f_nc_wait_gpu
-
 
 #endif
 
