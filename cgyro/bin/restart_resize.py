@@ -1,9 +1,5 @@
-# file processed by 2to3
-from __future__ import print_function, absolute_import
-from builtins import map, filter, range
-#
-# cgyro_restart_resize module
-#
+# restart_resize module
+
 import sys,os
 import struct
 
@@ -224,9 +220,6 @@ def add_species(org_dir, new_dir, grid, org_pre_species, org_post_species, new_s
                 if (org_post_species>0):
                     tmp=org_fd.read(ncbytes*org_post_species)
                     new_fd.write(tmp)
-
-    with open(new_tag_fname,"w") as tag_fd:
-        tag_fd.write("           0\n 0.0000E+00\n")
 
 
     new_header = org_header

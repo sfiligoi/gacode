@@ -1,8 +1,4 @@
 #!/usr/bin/env python
-# file processed by 2to3
-from __future__ import print_function, absolute_import
-from builtins import map, filter, range
-
 #
 # This tool upgrades the cgyro restart file version
 # Given an original (input.gen,restart) pair
@@ -13,8 +9,7 @@ from builtins import map, filter, range
 #
 
 import sys,os
-
-import cgyro_restart_resize
+import restart_resize
 
 class CgyroInput:
     """Input parser for input.cgyro.gen file"""
@@ -37,7 +32,7 @@ class CgyroInput:
 
     def getNSpecies(self):
         return int(self.user_dict["N_SPECIES"])
-    
+
     def getMpiRankOrder(self):
         return int(self.user_dict["MPI_RANK_ORDER"])
 
@@ -64,15 +59,15 @@ except:
     print("Unexpected error:", sys.exc_info()[0])
     sys.exit(22)
 
-grid_obj =  cgyro_restart_resize.CGyroGrid()
+grid_obj=restart_resize.CGyroGrid()
 grid_obj.load_from_dict(old_cfg.user_dict)
 
-n_species = old_cfg.getNSpecies()
-mpi_rank_order =  old_cfg.getMpiRankOrder()
+n_species=old_cfg.getNSpecies()
+mpi_rank_order=old_cfg.getMpiRankOrder()
 
 if mpi_rank_order==1:
     try:
-        cgyro_restart_resize.upgrade_v1v2_ro1(old_dir, new_dir, grid_obj, n_species, n_proc)
+        restart_resize.upgrade_v1v2_ro1(old_dir, new_dir, grid_obj, n_species, n_proc)
     except IOError as err:
         print("IO error: {0}".format(err))
         sys.exit(21)
@@ -81,7 +76,7 @@ if mpi_rank_order==1:
         sys.exit(22)
 elif mpi_rank_order==2:
     try:
-        cgyro_restart_resize.upgrade_v1v2_ro2(old_dir, new_dir, grid_obj, n_species, n_proc)
+        restart_resize.upgrade_v1v2_ro2(old_dir, new_dir, grid_obj, n_species, n_proc)
     except IOError as err:
         print("IO error: {0}".format(err))
         sys.exit(21)
