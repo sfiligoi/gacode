@@ -16,7 +16,7 @@ CC  = gcc
 
 FMATH  = -fdefault-real-8 -fdefault-double-8 
 FOPT   = -Ofast
-FDEBUG = -Wall -W fcheck=mem,bounds -g -fbacktrace -ffpe-trap=invalid,zero,overflow
+FDEBUG = -Wall -W -fcheck=mem,bounds -g -fbacktrace -ffpe-trap=invalid,zero,overflow
 F2PY   = f2py
 FOMP   = -fopenmp
 
