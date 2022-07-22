@@ -156,7 +156,8 @@ subroutine prgen_map_plasmastate
 
   endif
 
-  plst_zeff(:) = (f2_therm(:)+f2_fast(:))/(f1_therm(:)+f1_fast(:))
+  ! Overwrite zeff from statefile
+  zeff(:) = (f2_therm(:)+f2_fast(:))/(f1_therm(:)+f1_fast(:))
 
   ! Compute the quasineutrality error with max 9 ions:
 
@@ -184,9 +185,7 @@ subroutine prgen_map_plasmastate
   expro_rmaj = rmaj
   expro_te = plst_ts(:,1)
   expro_ne = plst_ns(:,1)*1e-19
-  expro_z_eff = plst_zeff(:)
   expro_w0 = omega0(:) 
-  expro_ptot = p_tot ! total pressure, thermal + fast ion
 
   expro_ni = 0.0
   expro_ti = 0.0

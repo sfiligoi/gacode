@@ -103,6 +103,12 @@
       REAL :: gradz(nb,nb)
       REAL :: zero_cut
       REAL :: debye
+      INTEGER :: lwork,info
+      REAL :: w(nbasis)
+      REAL :: rwork(3*nbasis-2)
+      COMPLEX :: work(34*nbasis)
+      COMPLEX :: a(nbasis,nbasis),b(nbasis,nbasis)
+
 !
       zero_cut = 1.E-12
 
@@ -140,7 +146,7 @@
        enddo
 !
        do i=1,nbasis
-       do j=1,nbasis
+       do j=i,nbasis
 !   initialize the averages
         ave_kpar(i,j) = 0.0
         ave_wdpar(i,j) = 0.0
@@ -157,8 +163,8 @@
         do k=1,nx
          ww=wx(k)*h(i,k)*h(j,k)
            ave_kpar(i,j) = ave_kpar(i,j) + 0.5*wx(k)*   &
-           (h(i+1,k)*SQRT(2.0*REAL(i))*h(j,k)          &
-           -h(i,k)*SQRT(2.0*REAL(j))*h(j+1,k))/SQRT(b2x(k))
+           (h(i+1,k)*SQRT(2.0*REAL(i))*h(j,k)           &
+           -h(i,k)*SQRT(2.0*REAL(j))*h(j+1,k))/Bx(k)
          ave_wdpar(i,j)    = ave_wdpar(i,j)  + ww*wdx(k)
          ave_wdper(i,j)   = ave_wdper(i,j) + ww*(wdx(k)+wdpx(k))
          ave_b0(i,j)    = ave_b0(i,j)  + ww*b0x(k)*ky*ky
@@ -182,16 +188,17 @@
         if(ABS(ave_c_tor_per(i,j)).lt.zero_cut)ave_c_tor_per(i,j) = 0.0
         if(ABS(ave_c_par_par(i,j)).lt.zero_cut)ave_c_par_par(i,j) = 0.0
 ! symmetrize
-!        ave_wdpar(j,i)    = ave_wdpar(i,j)
-!        ave_wdper(j,i)    = ave_wdper(i,j)
-!        ave_b0(j,i)    = ave_b0(i,j)
-!        ave_lnB(j,i)   = ave_lnB(i,j)
-!        ave_p0inv(j,i) = ave_p0inv(i,j)
-!        ave_p0(j,i) = ave_p0(i,j)
-!        ave_kx(j,i) = ave_kx(i,j)
-!        ave_c_tor_par(j,i) = ave_c_tor_par(i,j)
-!        ave_c_tor_per(j,i) = ave_c_tor_per(i,j)
-!        ave_c_par_par(j,i) = ave_c_par_par(i,j)
+        ave_kpar(j,i) = -ave_kpar(i,j)
+        ave_wdpar(j,i)    = ave_wdpar(i,j)
+        ave_wdper(j,i)    = ave_wdper(i,j)
+        ave_b0(j,i)    = ave_b0(i,j)
+        ave_lnB(j,i)   = ave_lnB(i,j)
+        ave_p0inv(j,i) = ave_p0inv(i,j)
+        ave_p0(j,i) = ave_p0(i,j)
+        ave_kx(j,i) = ave_kx(i,j)
+        ave_c_tor_par(j,i) = ave_c_tor_par(i,j)
+        ave_c_tor_per(j,i) = ave_c_tor_per(i,j)
+        ave_c_par_par(j,i) = ave_c_par_par(i,j)
         enddo
        enddo
        ave_p0_out = ave_p0(1,1)
@@ -215,6 +222,39 @@
          ave_gradB(i,j) = gradB
        enddo
        enddo
+!
+        do i=1,nbasis
+        do j=i,nbasis
+          a(i,j) = xi*ave_kpar(i,j)
+        enddo
+        enddo
+        lwork=34*nbasis
+        call ZHEEV('V','U',nbasis,a,nbasis,w,work,lwork,rwork,info)
+        if(info.ne.0)CALL gftm_error(1,"ZHEEV failed in modkpar")
+!       write(*,*)"kpar eigenvalues"
+!       do i=1,nbasis
+!       write(*,*)i,w(i)
+!       enddo
+!       write(*,*)"kpar eigenvectors"
+!       do i=1,nbasis
+!       write(*,*)"******",i
+!       do j=1,nbasis
+!       write(*,*)j,a(i,j)
+!       enddo
+!       enddo
+! construct mod_kpar
+! note modkpar is a real symmetric matrix
+!       write(*,*)"modkpar"
+         do i=1,nbasis
+         do j=1,nbasis
+           b(i,j) = 0.0
+           do k=1,nbasis
+             b(i,j) = b(i,j)+ ABS(w(k))*a(i,k)*CONJG(a(j,k))
+           enddo
+!         write(*,*)i,j,b(i,j)
+           ave_modkpar(i,j)=REAL(b(i,j))
+         enddo
+         enddo
 !
 !
 !
@@ -666,4 +706,78 @@
 !
       END SUBROUTINE get_gyro_average_xgrid
 !
-! **************** end 
+! **************** end
+!
+      SUBROUTINE get_mat_uparc
+!***************************************************************
+!
+!   compute the regularized mat_upar matrix
+!
+!***************************************************************
+      USE gftm_dimensions
+      USE gftm_global
+      USE gftm_velocity_matrix
+!
+      IMPLICIT NONE
+      INTEGER :: i,j,k
+      INTEGER :: lwork,info
+      REAL :: a(nu,nu)
+      REAL :: w(nu)
+      REAL :: work(34*nu)
+!
+!  find the eigenvalues of matu
+!
+       do i=1,nu
+       do j=i,nu
+         a(i,j) = mat_upar(i,j)
+       enddo
+       enddo
+       lwork=34*nu
+! call LAPACK routine for symmetric real eigenvalue problem DSYEV
+       call DSYEV('V','U',nu,a,nu,w,work,lwork,info)
+       if(info.ne.0)CALL gftm_error(1,"DSYEV failed in mat_uparc")
+! debug
+!       write(*,*)"mat_upar eigenvalues"
+!       do i=1,nu
+!       write(*,*)i,w(i)
+!       enddo
+!       write(*,*)"mat_upar eigenvectors"
+!       do i=1,nu
+!       write(*,*)"******",i
+!       do j=1,nu
+!       write(*,*)j,a(j,i)
+!       enddo
+!       enddo
+!
+! regularize the eigenvalues
+!
+       do k=1,nu
+         if(ABS(w(k)).lt.0.01)then
+          write(*,*)"w = ",w(k),"  etg_factor_in = ",etg_factor_in
+          w(k) = etg_factor_in
+         endif
+       enddo
+! compute mat_uparc with regularized eigenvalues
+! note that the DSYEV normalized eigenvectors are now in a(i,j)
+       do i=1,nu
+       do j=1,nu
+         mat_uparc(i,j) = 0.0
+         do k=1,nu
+           mat_uparc(i,j) = mat_uparc(i,j) + w(k)*a(i,k)*a(j,k)
+         enddo
+       enddo
+       enddo
+!
+! debug check mat_uparc eigenvalues
+!       do i=1,nu
+!       do j=i,nu
+!         a(i,j) = mat_uparc(i,j)
+!       enddo
+!       enddo
+!       call DSYEV('V','U',nu,a,nu,w,work,lwork,info)
+!       write(*,*)"mat_uparc eigenvalues"
+!       do i=1,nu
+!       write(*,*)i,w(i)
+!       enddo
+!
+      END SUBROUTINE get_mat_uparc

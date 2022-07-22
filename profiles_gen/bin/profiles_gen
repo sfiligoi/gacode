@@ -172,7 +172,7 @@ then
    echo
    echo "             -epar <val>"
    echo "             Flag to compute conductivity."
-   echo "             0=yes, 1=no"
+   echo "             0=no (default), 1=yes"
    echo
    echo "             -ix <index>"
    echo "             Index of ion species to match NEO and given velocities."

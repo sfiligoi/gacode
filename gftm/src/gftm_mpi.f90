@@ -158,4 +158,7 @@ program gftm
 30 format(a,1pe11.4,a,1pe11.4)
 40 format(a,I10,a,I10)
 
+! finalize MPI
+call MPI_FINALIZE(ierr)
+
 end program gftm

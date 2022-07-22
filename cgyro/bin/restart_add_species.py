@@ -1,20 +1,16 @@
 #!/usr/bin/env python
-# file processed by 2to3
-from __future__ import print_function, absolute_import
-from builtins import map, filter, range
-
 #
 # This tool evolves the cgyro restart file
 # Given an original (input.gen,restart) pair
-#   and a new input.gen,
-#   it generates a new restart file that keeps the old info
+# and a new input.gen,it generates a new restart file
+# that keeps the old info
 #
 # Currently limited to adding an additional species
 #
 
 import sys,os
-
-import cgyro_restart_resize
+import argparse
+import restart_resize
 
 class CgyroInput:
     """Input parser for input.cgyro.gen file"""
@@ -114,17 +110,29 @@ class CgyroInput:
 
         return True
 
-old_dir="."
-new_dir="t1/"
+def get_arguments():
 
-if len(sys.argv)!=3:
-    print("ERROR: Wrong argument count")
-    print("Usage:")
-    print("  restart_evolve.py org_dir new_dir")
-    sys.exit(10)
+   parser=argparse.ArgumentParser(description="Utility to add species to CGYRO restart file")
 
-old_dir=sys.argv[1]
-new_dir=sys.argv[2]
+   parser.add_argument('-o',
+                       metavar='ORIG',
+                       help="Original directory containing input.cgyro.gen and bin.cgyro.restart",
+                       type=str,
+                       required=True)
+    
+   parser.add_argument('-n',
+                       metavar='NEW',
+                       help="New directory containing input.cgyro.gen with added species",
+                       type=str,
+                       required=True)
+    
+   args=parser.parse_args()
+
+   return args.o,args.n
+
+
+old_dir,new_dir=get_arguments()
+
 try:
     old_cfg = CgyroInput()
     new_cfg = CgyroInput()
@@ -142,7 +150,7 @@ if (not new_cfg.isSameGrid(old_cfg)):
     print("ERROR: Grids not the same")
     sys.exit(11)
 
-grid_obj =  cgyro_restart_resize.CGyroGrid()
+grid_obj =  restart_resize.CGyroGrid()
 grid_obj.load_from_dict(new_cfg.user_dict)
 
 if (new_cfg.isSameSpecies(old_cfg)):
@@ -156,7 +164,7 @@ if (not new_cfg.isSpeciesSuperset(old_cfg,diff_species)):
 
 print("INFO: Adding %i species"%diff_species["new_species"])
 try:
-  cgyro_restart_resize.add_species(old_dir, new_dir, grid_obj,
+  restart_resize.add_species(old_dir, new_dir, grid_obj,
                                    diff_species["org_pre"],diff_species["org_post"],diff_species["new_species"])
 except IOError as err:
     print("IO error: {0}".format(err))

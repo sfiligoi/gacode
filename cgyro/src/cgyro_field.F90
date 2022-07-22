@@ -224,7 +224,6 @@ subroutine cgyro_field_c
      is = is_v(iv)
      do ic=1,nc
         psi(ic,iv_loc) = sum( jvec_c(:,ic,iv_loc)*field(:,ic))
-        chi(ic,iv_loc) = sum(jxvec_c(:,ic,iv_loc)*field(:,ic))
         cap_h_c(ic,iv_loc) = h_x(ic,iv_loc)+psi(ic,iv_loc)*z(is)/temp(is)
      enddo
   enddo
@@ -243,7 +242,7 @@ subroutine cgyro_field_c_gpu
   complex :: tmp,field_loc_l
 
   call timer_lib_in('field')
-!$acc data present(h_x,psi,chi,cap_h_c)
+!$acc data present(h_x,psi,cap_h_c)
 
 !$acc data present(field,field_loc)
 
@@ -319,13 +318,12 @@ subroutine cgyro_field_c_gpu
   endif
 
 !$acc parallel loop collapse(2) gang vector private(iv_loc,is) &
-!$acc&         present(jvec_c,jxvec_c,z,temp,is_v) default(none)
+!$acc&         present(jvec_c,z,temp,is_v) default(none)
   do iv=nv1,nv2
      do ic=1,nc
         iv_loc = iv-nv1+1
         is = is_v(iv)
         psi(ic,iv_loc) = sum( jvec_c(:,ic,iv_loc)*field(:,ic))
-        chi(ic,iv_loc) = sum(jxvec_c(:,ic,iv_loc)*field(:,ic))
         cap_h_c(ic,iv_loc) = h_x(ic,iv_loc)+psi(ic,iv_loc)*z(is)/temp(is)
      enddo
   enddo

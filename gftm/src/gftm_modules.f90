@@ -456,7 +456,7 @@
       REAL,ALLOCATABLE,DIMENSION(:,:) :: ave_wdper
       REAL,ALLOCATABLE,DIMENSION(:,:) :: ave_gradB, ave_lnB
       REAL,ALLOCATABLE,DIMENSION(:,:) :: ave_b0, ave_b0inv
-      REAL,ALLOCATABLE,DIMENSION(:,:) :: ave_kpar
+      REAL,ALLOCATABLE,DIMENSION(:,:) :: ave_kpar, ave_modkpar
       REAL,ALLOCATABLE,DIMENSION(:,:) :: ave_p0, ave_p0inv
       REAL,ALLOCATABLE,DIMENSION(:,:) :: ave_bp, ave_bpinv
 !
@@ -466,7 +466,7 @@
 !
        MODULE gftm_GFS
        REAL,ALLOCATABLE,DIMENSION(:,:) :: matmirror
-       REAL,ALLOCATABLE,DIMENSION(:,:) :: matu, matdu, matuu
+       REAL,ALLOCATABLE,DIMENSION(:,:) :: matu, matuc,matdu, matuu
        REAL,ALLOCATABLE,DIMENSION(:,:) :: mate, matde
        REAL,ALLOCATABLE,DIMENSION(:,:) :: phib, psib, sigb
        REAL,ALLOCATABLE,DIMENSION(:,:,:,:) :: pe1j0phib, pe1j0psib, pe1j1sigb
@@ -526,6 +526,7 @@
       IMPLICIT NONE
 !
       REAL,DIMENSION(num,num) :: mat_upar
+      REAL,DIMENSION(num,num) :: mat_uparc
       REAL,DIMENSION(num,num) :: mat_dupar
 !
       REAL,DIMENSION(nem,nem) :: mat_eper

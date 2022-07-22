@@ -22,7 +22,7 @@ subroutine cgyro_final_kernel
   real :: exit_dt
   
   call timer_lib_in('coll_mem')
-!$acc update host(field,psi,cap_h_c,chi,h_x,source,rhs(:,:,1))
+!$acc update host(field,psi,cap_h_c,h_x,source,rhs(:,:,1))
   call timer_lib_out('coll_mem')
 
   ! Manage exit message

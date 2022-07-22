@@ -41,6 +41,7 @@ module prgen_globals
   real, dimension(:), allocatable :: rmaj
   real, dimension(:), allocatable :: q
   real, dimension(:), allocatable :: p_tot
+  real, dimension(:), allocatable :: fpol
   real, dimension(:), allocatable :: omega0
   real, dimension(:), allocatable :: kappa
   real, dimension(:), allocatable :: delta
@@ -52,11 +53,13 @@ module prgen_globals
   real, dimension(:), allocatable :: vpolc_exp
   real, dimension(:), allocatable :: vtorc_exp
 
-  real, allocatable :: te_kev(:)
-  real, allocatable :: ti_kev(:)
-  real, allocatable :: ne_e19m3(:)
-  real, allocatable :: ni_e19m3(:)
+  real, dimension(:), allocatable :: te_kev
+  real, dimension(:), allocatable :: ti_kev
+  real, dimension(:), allocatable :: ne_e19m3
+  real, dimension(:), allocatable :: ni_e19m3
+  real, dimension(:), allocatable :: zeff
 
+  real, dimension(:), allocatable :: jtot
   real, dimension(:), allocatable :: johm
   real, dimension(:), allocatable :: jbs
   real, dimension(:), allocatable :: jnb
@@ -131,7 +134,6 @@ module prgen_globals
   real, dimension(:), allocatable :: onetwo_talp
   real, dimension(:), allocatable :: onetwo_q
   real, dimension(:), allocatable :: onetwo_angrot
-  real, dimension(:), allocatable :: onetwo_zeff
   real, dimension(:), allocatable :: onetwo_ene
   real, dimension(:), allocatable :: onetwo_enalp
   real, dimension(:), allocatable :: onetwo_psi
@@ -207,7 +209,6 @@ module prgen_globals
   real, dimension(:), allocatable :: plst_r_midp_in
   real, dimension(:), allocatable :: plst_r_midp_out
   real, dimension(:), allocatable :: plst_z_midp
-  real, dimension(:), allocatable :: plst_zeff
   real, dimension(:), allocatable :: plst_epot
   real, dimension(:), allocatable :: plst_omegat
   real, dimension(:), allocatable :: plst_pe_trans

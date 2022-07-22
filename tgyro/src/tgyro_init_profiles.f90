@@ -175,6 +175,8 @@ subroutine tgyro_init_profiles
   call cub_spline(expro_rmin(:)/r_min,expro_delta(:),n_exp,r,delta,n_r)
   call cub_spline(expro_rmin(:)/r_min,expro_skappa(:),n_exp,r,s_kappa,n_r)
   call cub_spline(expro_rmin(:)/r_min,expro_sdelta(:),n_exp,r,s_delta,n_r)
+  ! Convert r_maj to cm (from m):
+  call cub_spline(expro_rmin(:)/r_min,100*expro_rmaj(:),n_exp,r,r_maj,n_r)
   call cub_spline(expro_rmin(:)/r_min,expro_drmaj(:),n_exp,r,shift,n_r)
   ! Convert zmag to cm (from m):
   call cub_spline(expro_rmin(:)/r_min,100*expro_zmag(:),n_exp,r,zmag,n_r)
@@ -194,11 +196,17 @@ subroutine tgyro_init_profiles
   call cub_spline(expro_rmin(:)/r_min,expro_shape_cos3(:),n_exp,r,shape_cos3,n_r)
   call cub_spline(expro_rmin(:)/r_min,expro_shape_scos3(:),n_exp,r,shape_scos3,n_r)
 
+  ! Convert psi in Weber to Maxwell (1 Weber = 10^8 Maxwell)  
+  call cub_spline(expro_rmin(:)/r_min,expro_polflux(:)*1e8,n_exp,r,polflux,n_r)
+
   ! b_ref in Gauss (used for wce in Synchroton rad)
   call cub_spline(expro_rmin(:)/r_min,1e4*expro_bt0(:),n_exp,r,b_ref,n_r)
   
   ! Convert ptot to Ba from Pascals (1 Pa = 10 Ba)
   call cub_spline(expro_rmin(:)/r_min,expro_ptot(:)*10.0,n_exp,r,ptot,n_r)
+
+  ! Convert fpol to Gauss-cm from T-m (1 T-m = 10^6 G-cm)
+  call cub_spline(expro_rmin(:)/r_min,expro_fpol(:)*1e6,n_exp,r,fpol,n_r)
 
   ! Convert V and dV/dr from m^3 to cm^3
   call cub_spline(expro_rmin(:)/r_min,expro_vol(:)*1e6,n_exp,r,vol,n_r)
@@ -208,9 +216,6 @@ subroutine tgyro_init_profiles
 
   ! Convert B to Gauss (from T):
   call cub_spline(expro_rmin(:)/r_min,1e4*expro_bunit(:),n_exp,r,b_unit,n_r)
-
-  ! Convert r_maj to cm (from m):
-  call cub_spline(expro_rmin(:)/r_min,100*expro_rmaj(:),n_exp,r,r_maj,n_r)
 
   ! Convert T to eV (from keV) and length to cm (from m):
   call cub_spline(expro_rmin(:)/r_min,1e3*expro_te(:),n_exp,r,te,n_r)
@@ -369,6 +374,7 @@ subroutine tgyro_init_profiles
   ! Integrated auxiliary heating powers (NB + RF + Ohmic)
   call cub_spline(expro_rmin(:)/r_min,expro_pow_e_aux(:)*1e13,n_exp,r,p_e_aux_in,n_r)
   call cub_spline(expro_rmin(:)/r_min,expro_pow_i_aux(:)*1e13,n_exp,r,p_i_aux_in,n_r)
+  call cub_spline(expro_rmin(:)/r_min,expro_pow_e_ohmic(:)*1e13,n_exp,r,p_e_ohmic_in,n_r)
 
   ! Apply auxiliary power rescale
   ! 1. subtract off
@@ -533,7 +539,6 @@ subroutine tgyro_init_profiles
 
   ! Axis boundary conditions
   call tgyro_init_profiles_axis
-
 
 end subroutine tgyro_init_profiles
 

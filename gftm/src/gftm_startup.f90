@@ -1,4 +1,4 @@
-      SUBROUTINE gftm_startup
+       SUBROUTINE gftm_startup
 !*********************************************
 !
 !     initalization of gftm
@@ -36,10 +36,13 @@
       ns = ns_in
 !      write(*,*)"ns = ",ns,"   ns0 = ",ns0
       nx = 2*nxgrid_in-1
+!      nbasis_max_in = 10
       nbasis = nbasis_max_in
       nbasis_max = nbasis
-      nu = 9
-      ne = 5
+! velocity space resolution
+      nu = 5
+      ne = 3
+!
       nune = nu*ne
       nphase = nu*ne*nbasis
       ntot = (ns-ns0+1)*nu*ne*nbasis

@@ -341,7 +341,6 @@ module cgyro_globals
   complex, dimension(:,:), allocatable :: h0_x
   complex, dimension(:,:), allocatable :: h0_old
   complex, dimension(:,:), allocatable :: psi
-  complex, dimension(:,:), allocatable :: chi
   complex, dimension(:,:,:), allocatable :: f_nl
   complex, dimension(:,:,:), allocatable :: g_nl
   complex, dimension(:,:), allocatable :: fpack
