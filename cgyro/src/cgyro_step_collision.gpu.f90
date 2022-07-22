@@ -165,14 +165,13 @@ subroutine cgyro_step_collision
   ! Compute H given h and [phi(h), apar(h)]
 
 !$acc parallel loop collapse(2) gang vector private(iv_loc,is) &
-!$acc&         present(is_v,psi,chi,cap_h_c,cap_h_ct,cap_h_c,jvec_c,jxvec_c,field,z,temp,h_x) &
+!$acc&         present(is_v,psi,cap_h_c,cap_h_ct,cap_h_c,jvec_c,field,z,temp,h_x) &
 !$acc&         default(none)
   do iv=nv1,nv2
      do ic=1,nc
         iv_loc = iv-nv1+1
         is = is_v(iv)
         psi(ic,iv_loc) = sum(jvec_c(:,ic,iv_loc)*field(:,ic))
-        chi(ic,iv_loc) = sum(jxvec_c(:,ic,iv_loc)*field(:,ic))
         cap_h_c(ic,iv_loc) = cap_h_ct(iv_loc,ic)
         h_x(ic,iv_loc) = cap_h_c(ic,iv_loc)-psi(ic,iv_loc)*(z(is)/temp(is))
      enddo

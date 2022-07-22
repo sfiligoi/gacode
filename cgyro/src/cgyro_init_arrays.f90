@@ -97,8 +97,6 @@ subroutine cgyro_init_arrays
      enddo
   enddo
  
-!$acc update device(jxvec_c)
- 
   deallocate(jloc_c)
   do i_field=1,n_field
      call parallel_lib_rtrans_real(jvec_c(i_field,:,:),jvec_v(i_field,:,:))

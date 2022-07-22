@@ -205,9 +205,8 @@ subroutine cgyro_init_manager
      allocate(h_x(nc,nv_loc))
      allocate(g_x(nc,nv_loc))
      allocate(psi(nc,nv_loc))
-     allocate(chi(nc,nv_loc))
      allocate(h0_x(nc,nv_loc))
-!$acc enter data create(rhs,h_x,g_x,psi,chi,h0_x,h0_old)
+!$acc enter data create(rhs,h_x,g_x,psi,h0_x,h0_old)
 
      allocate(cap_h_c(nc,nv_loc))
      allocate(cap_h_ct(nv_loc,nc))
@@ -226,7 +225,7 @@ subroutine cgyro_init_manager
      allocate(cap_h_v(nc_loc,nv))
      allocate(cap_h_v_prime(nc_loc,nv))
 
-!$acc enter data create(cap_h_c,cap_h_ct,cap_h_v,dvjvec_c,dvjvec_v,jxvec_c)
+!$acc enter data create(cap_h_c,cap_h_ct,cap_h_v,dvjvec_c,dvjvec_v)
 
      if (upwind_single_flag == 0) then
        allocate(upwind_res_loc(nc,ns1:ns2,2))
