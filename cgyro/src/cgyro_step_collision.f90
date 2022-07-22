@@ -100,7 +100,6 @@ subroutine cgyro_step_collision
      iv_loc = iv-nv1+1
      do ic=1,nc
         psi(ic,iv_loc) = sum(jvec_c(:,ic,iv_loc)*field(:,ic))
-        chi(ic,iv_loc) = sum(jxvec_c(:,ic,iv_loc)*field(:,ic))
      enddo
      ! this should be coll_mem timer , but not easy with OMP
      do ic=1,nc

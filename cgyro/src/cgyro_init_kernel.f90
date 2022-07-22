@@ -104,7 +104,7 @@ subroutine cgyro_init_kernel
 
   ! GPU versions of step_gk and coll work on the following in the GPU memory
   call timer_lib_in('str_mem')
-!$acc update device(field,psi,cap_h_c,chi,h_x,source)
+!$acc update device(field,psi,cap_h_c,h_x,source)
   call timer_lib_out('str_mem')
 
   ! Initialize adaptive time-stepping parameter
