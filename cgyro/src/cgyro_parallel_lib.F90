@@ -423,42 +423,6 @@ contains
   end subroutine parallel_slib_f_nc
 
 #ifdef _OPENACC
-  subroutine parallel_slib_f_nc_gpu(x,xt)
-    use mpi
-    !-------------------------------------------------------
-    implicit none
-    !
-    complex, intent(in), dimension(nkeep,nsplit*nn) :: x
-    complex, intent(inout), dimension(nkeep,nsplit,nn) :: xt
-    !
-    integer :: ierr
-    !-------------------------------------------------------
-!$acc data present(x,xt)
-
-#ifdef DISABLE_GPUDIRECT_MPI
-!$acc update host(x)
-#else
-!$acc host_data use_device(x,xt)
-#endif
- 
-   call MPI_ALLTOALL(x, &
-         nkeep*nsplit, &
-         MPI_DOUBLE_COMPLEX, &
-         xt, &
-         nkeep*nsplit, &
-         MPI_DOUBLE_COMPLEX, &
-         slib_comm, &
-         ierr)
-
-#ifdef DISABLE_GPUDIRECT_MPI
-!$acc update device(xt)
-#else
-!$acc end host_data
-#endif
-
-!$acc end data
-
-  end subroutine parallel_slib_f_nc_gpu
 
   subroutine parallel_slib_f_nc_async_gpu(x,xt,req)
     use mpi

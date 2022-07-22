@@ -50,7 +50,6 @@ subroutine cgyro_rhs(ij)
   complex :: rhs_stream
 
   ! h_x is not modified after this and before nl_fftw
-  ! TODO: See if we can invoke cgyro_nl_fftw_comm1_async even sooner, e.g. in cgyro_step
   call cgyro_rhs_comm_async(1)
 
   call timer_lib_in('str_mem')
@@ -99,7 +98,6 @@ subroutine cgyro_rhs(ij)
      call timer_lib_out('str_mem')
   endif
 
-  ! TODO: Move creation of g_x inside cgyro_upwind for mmory locality (both here and in CPU code)
   call cgyro_upwind
 
   call cgyro_rhs_comm_test(1)
@@ -154,7 +152,6 @@ subroutine cgyro_rhs(ij)
   call timer_lib_out('str')
 
   ! Wavenumber advection shear terms
-  ! TODO: Consider moving this after cgyro_nl_fftw once we have async reverse nl_comm
   call cgyro_advect_wavenumber(ij)
 
   ! Nonlinear evaluation [f,g]
