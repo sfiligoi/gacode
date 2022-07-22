@@ -191,22 +191,26 @@ subroutine cgyro_init_manager
      case(1)
         allocate(h0_old(nc,nv_loc))     
         allocate(rhs(nc,nv_loc,6))
+!$acc enter data create(rhs,h0_old)
      case(2)
         allocate(h0_old(nc,nv_loc))
         allocate(rhs(nc,nv_loc,7))
+!$acc enter data create(rhs,h0_old)
      case(3)
         allocate(h0_old(nc,nv_loc))
         allocate(rhs(nc,nv_loc,10))
+!$acc enter data create(rhs,h0_old)
      case default
         ! Normal timestep
         allocate(rhs(nc,nv_loc,4))
+!$acc enter data create(rhs)
      end select 
      
      allocate(h_x(nc,nv_loc))
      allocate(g_x(nc,nv_loc))
      allocate(psi(nc,nv_loc))
      allocate(h0_x(nc,nv_loc))
-!$acc enter data create(rhs,h_x,g_x,psi,h0_x,h0_old)
+!$acc enter data create(h_x,g_x,psi,h0_x)
 
      allocate(cap_h_c(nc,nv_loc))
      allocate(cap_h_ct(nv_loc,nc))
