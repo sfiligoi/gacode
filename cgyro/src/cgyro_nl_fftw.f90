@@ -120,7 +120,7 @@ subroutine cgyro_nl_fftw_stepr(j, i_omp)
   ! NOTE: The FFT will generate an unwanted n=0,p=-nr/2 component
   ! that will be filtered in the main time-stepping loop
 
-  ! this should really bea accounted against nl_mem, but hard to do with OMP
+  ! this should really be accounted against nl_mem, but hard to do with OMP
   do ir=1,n_radial
      ix = ir-1-nx0/2
      if (ix < 0) ix = ix+nx
@@ -391,8 +391,9 @@ subroutine cgyro_nl_fftw(ij)
   call parallel_slib_r_nc(g_nl,gpack)
   call timer_lib_out('nl_comm')
 
-  call timer_lib_in('nl_mem')
-!$omp parallel do private(iv_loc,it,iexch,ir)
+  call timer_lib_in('nl')
+
+!$omp parallel do private(iv_loc,it,iexch,ir,ic)
   do iv_loc=1,nv_loc
      iexch = (iv_loc-1)*n_theta
      do it=1,n_theta
@@ -401,23 +402,22 @@ subroutine cgyro_nl_fftw(ij)
            psi(ic_c(ir,it),iv_loc) = gpack(ir,iexch)
         enddo
      enddo
-  enddo
-  call timer_lib_out('nl_mem')
 
-  ! Filter
-  if (n == 0) then
-     do ic=1,nc
+     ! Filter
+     if (n == 0) then
+      do ic=1,nc
         ir = ir_c(ic)
         if (ir == 1 .or. px(ir) == 0) then
-           psi(ic,:) = 0.0
+           psi(ic,iv_loc) = 0.0
         endif
-     enddo
-  endif
+      enddo
+     endif
 
-  ! RHS -> -[f,g] = [f,g]_{r,-alpha}
+     ! RHS -> -[f,g] = [f,g]_{r,-alpha}
 
-  call timer_lib_in('nl')
-  rhs(:,:,ij) = rhs(:,:,ij)+(q*rho/rmin)*(2*pi/length)*psi(:,:)
+     rhs(:,iv_loc,ij) = rhs(:,iv_loc,ij)+(q*rho/rmin)*(2*pi/length)*psi(:,iv_loc)
+  enddo
+
   call timer_lib_out('nl')
 
 end subroutine cgyro_nl_fftw
