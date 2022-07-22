@@ -10,7 +10,8 @@
 ! NOTE: Need to be careful with (p=-nr/2,n=0) component.
 !-----------------------------------------------------------------
 
-subroutine cgyro_nl_fftw_comm1
+! NOTE: call cgyro_nl_fftw_comm1/2_async before cgyro_nl_fftw
+subroutine cgyro_nl_fftw_comm1_async
 
   use timer_lib
   use parallel_lib
@@ -38,16 +39,24 @@ subroutine cgyro_nl_fftw_comm1
      fpack(:,iexch) = (0.0,0.0)
   enddo
 
+  call parallel_slib_f_nc_async(fpack,f_nl,f_req)
+
   call timer_lib_out('nl_mem')
-  call timer_lib_in('nl_comm')
 
-  call parallel_slib_f_nc(fpack,f_nl)
+end subroutine cgyro_nl_fftw_comm1_async
 
-  call timer_lib_out('nl_comm')
+! Note: Calling test propagates the async operations in some MPI implementations
+subroutine cgyro_nl_fftw_comm1_test
+  use parallel_lib
+  use cgyro_globals
 
-end subroutine cgyro_nl_fftw_comm1
+  implicit none
 
-subroutine cgyro_nl_fftw_comm2
+  call parallel_slib_test(f_req)
+
+end subroutine cgyro_nl_fftw_comm1_test
+
+subroutine cgyro_nl_fftw_comm2_async
 
   use timer_lib
   use parallel_lib
@@ -88,14 +97,22 @@ subroutine cgyro_nl_fftw_comm2
      gpack(:,iexch) = (0.0,0.0)
   enddo
 
+  call parallel_slib_f_nc_async(gpack,g_nl,g_req)
+
   call timer_lib_out('nl_mem')
-  call timer_lib_in('nl_comm')
 
-  call parallel_slib_f_nc(gpack,g_nl)
+end subroutine cgyro_nl_fftw_comm2_async
 
-  call timer_lib_out('nl_comm')
+! Note: Calling test propagates the async operations in some MPI implementations
+subroutine cgyro_nl_fftw_comm2_test
+  use parallel_lib
+  use cgyro_globals
 
-end subroutine cgyro_nl_fftw_comm2
+  implicit none
+
+  call parallel_slib_test(g_req)
+
+end subroutine cgyro_nl_fftw_comm2_test
 
 subroutine cgyro_nl_fftw_stepr(j, i_omp)
 
@@ -159,9 +176,18 @@ subroutine cgyro_nl_fftw(ij)
   force_early_comm2 = (n_omp>=(4*nsplit)) 
   one_pass_fft = force_early_comm2
 
-  if (is_staggered_comm_2 .or. force_early_comm2) then
-     ! stagger comm2, to load ballance network traffic
-     call cgyro_nl_fftw_comm2
+  ! time to wait for the F_nl to become avaialble
+  call timer_lib_in('nl_comm')
+  call parallel_slib_f_nc_wait(fpack,f_nl,f_req)
+  ! make sure g_req progresses
+  call parallel_slib_test(g_req)
+  call timer_lib_out('nl_comm')
+
+  if (force_early_comm2) then
+     ! time to wait for the g_nl to become avaialble
+     call timer_lib_in('nl_comm')
+     call parallel_slib_f_nc_wait(gpack,g_nl,g_req)
+     call timer_lib_out('nl_comm')
   endif
 
   call timer_lib_in('nl')
@@ -289,8 +315,11 @@ subroutine cgyro_nl_fftw(ij)
   call timer_lib_out('nl')
   
   ! stagger comm2, to load ballance network traffic
-  if (.not. (is_staggered_comm_2 .or. force_early_comm2)) then 
-     call cgyro_nl_fftw_comm2
+  if (.not. force_early_comm2) then
+     ! time to wait for the g_nl to become avaialble
+     call timer_lib_in('nl_comm')
+     call parallel_slib_f_nc_wait(gpack,g_nl,g_req)
+     call timer_lib_out('nl_comm')
   endif
 
   call timer_lib_in('nl')

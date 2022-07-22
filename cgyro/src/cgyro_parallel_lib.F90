@@ -422,6 +422,54 @@ contains
 
   end subroutine parallel_slib_f_nc
 
+  subroutine parallel_slib_f_nc_async(x,xt,req)
+
+    use mpi
+
+    !-------------------------------------------------------
+    implicit none
+    !
+    complex, intent(in), dimension(nkeep,nsplit*nn) :: x
+    complex, intent(inout), dimension(nkeep,nsplit,nn) :: xt
+    integer, intent(inout) :: req
+    !
+    integer :: ierr
+    !-------------------------------------------------------
+
+    call MPI_IALLTOALL(x, &
+         nkeep*nsplit, &
+         MPI_DOUBLE_COMPLEX, &
+         xt, &
+         nkeep*nsplit, &
+         MPI_DOUBLE_COMPLEX, &
+         slib_comm, &
+         req, &
+         ierr)
+
+  end subroutine parallel_slib_f_nc_async
+
+  ! require x and xt to ensure they exist until this finishes
+  subroutine parallel_slib_f_nc_wait(x,xt,req)
+
+    use mpi
+
+    !-------------------------------------------------------
+    implicit none
+    !
+    complex, intent(in), dimension(nkeep,nsplit*nn) :: x
+    complex, intent(inout), dimension(nkeep,nsplit,nn) :: xt
+    integer, intent(inout) :: req
+    !
+    integer :: ierr
+    integer :: istat(MPI_STATUS_SIZE)
+    !-------------------------------------------------------
+
+    call MPI_WAIT(req, &
+         istat, &
+         ierr)
+
+  end subroutine parallel_slib_f_nc_wait
+
 #ifdef _OPENACC
 
   subroutine parallel_slib_f_nc_async_gpu(x,xt,req)
@@ -479,7 +527,7 @@ contains
 
 !$acc data present(xt)
 
-call MPI_WAIT(req, &
+    call MPI_WAIT(req, &
          istat, &
          ierr)
 

@@ -1,4 +1,3 @@
-! TODO: Propagate to CPU version
 subroutine cgyro_rhs_comm_async(which)
   use cgyro_globals
 
@@ -17,7 +16,6 @@ subroutine cgyro_rhs_comm_async(which)
 end subroutine cgyro_rhs_comm_async
 
 ! Note: Calling test propagates the async operations in some MPI implementations
-! TODO: Propagate to CPU version
 subroutine cgyro_rhs_comm_test(which)
   use cgyro_globals
 
