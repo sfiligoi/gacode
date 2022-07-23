@@ -186,8 +186,6 @@ module cgyro_globals
   integer :: nsplit
   integer :: ns1,ns2
   integer, dimension(:), allocatable :: recv_status
-  ! TODO: Deprecate is_staggered_comm_2, replaced by async
-  logical :: is_staggered_comm_2
   integer :: f_req, g_req
   !
   ! Pointers
