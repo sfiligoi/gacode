@@ -10,8 +10,8 @@
 ! NOTE: Need to be careful with (p=-nr/2,n=0) component.
 !-----------------------------------------------------------------
 
-! NOTE: call cgyro_nl_fftw_comm1 before cgyro_nl_fftw
-subroutine cgyro_nl_fftw_comm1
+! NOTE: call cgyro_nl_fftw_comm1/2_async before cgyro_nl_fftw
+subroutine cgyro_nl_fftw_comm1_async
   use timer_lib
   use parallel_lib
   use cgyro_globals
@@ -40,16 +40,24 @@ subroutine cgyro_nl_fftw_comm1
      fpack(:,iexch) = (0.0,0.0)
   enddo
 
+  call parallel_slib_f_nc_async_gpu(fpack,f_nl,f_req)
+
   call timer_lib_out('nl_mem')
-  call timer_lib_in('nl_comm')
 
-  call parallel_slib_f_nc_gpu(fpack,f_nl)
+end subroutine cgyro_nl_fftw_comm1_async
 
-  call timer_lib_out('nl_comm')
+! Note: Calling test propagates the async operations in some MPI implementations
+subroutine cgyro_nl_fftw_comm1_test
+  use parallel_lib
+  use cgyro_globals
 
-end subroutine cgyro_nl_fftw_comm1
+  implicit none
 
-subroutine cgyro_nl_fftw_comm2
+  call parallel_slib_test(f_req)
+
+end subroutine cgyro_nl_fftw_comm1_test
+
+subroutine cgyro_nl_fftw_comm2_async
   use timer_lib
   use parallel_lib
   use cgyro_globals
@@ -78,14 +86,22 @@ subroutine cgyro_nl_fftw_comm2
      gpack(:,iexch) = (0.0,0.0)
   enddo
 
+  call parallel_slib_f_nc_async_gpu(gpack,g_nl,g_req)
+
   call timer_lib_out('nl_mem')
-  call timer_lib_in('nl_comm')
 
-  call parallel_slib_f_nc_gpu(gpack,g_nl)
+end subroutine cgyro_nl_fftw_comm2_async
 
-  call timer_lib_out('nl_comm')
+! Note: Calling test propagates the async operations in some MPI implementations
+subroutine cgyro_nl_fftw_comm2_test
+  use parallel_lib
+  use cgyro_globals
 
-end subroutine cgyro_nl_fftw_comm2
+  implicit none
+
+  call parallel_slib_test(g_req)
+
+end subroutine cgyro_nl_fftw_comm2_test
 
 subroutine cgyro_nl_fftw_zero4(sz,v1,v2,v3,v4)
   implicit none
@@ -142,9 +158,12 @@ subroutine cgyro_nl_fftw(ij)
   real :: inv_nxny
 
 
-  if (is_staggered_comm_2) then ! stagger comm2, to load ballance network traffic
-     call cgyro_nl_fftw_comm2
-  endif
+  ! time to wait for the F_nl to become avaialble
+  call timer_lib_in('nl_comm')
+  call parallel_slib_f_nc_wait_gpu(fpack,f_nl,f_req)
+  ! make sure g_req progresses
+  call parallel_slib_test(g_req)
+  call timer_lib_out('nl_comm')
 
   call timer_lib_in('nl_mem')
 !$acc  data present(f_nl)  &
@@ -159,7 +178,7 @@ subroutine cgyro_nl_fftw(ij)
   call cgyro_nl_fftw_zero4(size(fxmany,1)*size(fxmany,2)*size(fxmany,3), &
                            fxmany,fymany,gxmany,gymany)
 
-!$acc parallel loop independent collapse(3) private(j,ir,p,ix,in,iy,f0,g0)
+!$acc parallel loop independent collapse(3) private(j,ir,p,ix,in,iy,f0,g0) async
   do j=1,nsplit
      do ir=1,n_radial
         do in=1,n_toroidal
@@ -175,6 +194,9 @@ subroutine cgyro_nl_fftw(ij)
      enddo
   enddo
 
+  ! make sure g_req progresses
+  call parallel_slib_test(g_req)
+
      ! --------------------------------------
      ! perform many Fourier Transforms at once
      ! --------------------------------------
@@ -184,15 +206,18 @@ subroutine cgyro_nl_fftw(ij)
 !$acc& use_device(uxmany,uymany)
 
   rc = cufftExecZ2D(cu_plan_c2r_many,fxmany,uxmany)
+  ! make sure g_req progresses
+  call parallel_slib_test(g_req)
   rc = cufftExecZ2D(cu_plan_c2r_many,fymany,uymany)
 
 !$acc wait
 !$acc end host_data
   call timer_lib_out('nl')
 
-  if (.not. is_staggered_comm_2) then ! stagger comm2, to load ballance network traffic
-     call cgyro_nl_fftw_comm2
-  endif
+  ! time to wait for the g_nl to become avaialble
+  call timer_lib_in('nl_comm')
+  call parallel_slib_f_nc_wait_gpu(gpack,g_nl,g_req)
+  call timer_lib_out('nl_comm')
 
   call timer_lib_in('nl_mem')
 !$acc data present(g_nl)  

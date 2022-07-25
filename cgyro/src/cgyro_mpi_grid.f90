@@ -259,11 +259,6 @@ subroutine cgyro_mpi_grid
      call parallel_slib_init(n_toroidal,nv_loc*n_theta,n_radial,nsplit,NEW_COMM_2)
   endif
 
-  ! Stagger COMM2 communication based on i_proc_1
-  ! Get the first half together, and second half together
-  ! This makes it more likely to have both types on all nodes
-  is_staggered_comm_2 = (modulo((i_proc_1*2)/n_proc_1,2) == 0)
-
   ! OMP code
   n_omp = omp_get_max_threads()
 

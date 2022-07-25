@@ -1,3 +1,38 @@
+subroutine cgyro_rhs_comm_async(which)
+  use cgyro_globals
+
+  implicit none
+
+  integer, intent(in) :: which
+
+  if ( (nonlinear_flag == 1) .and. (nonlinear_method /= 1)) then
+     if (which == 1) then
+       call cgyro_nl_fftw_comm1_async
+     else
+       call cgyro_nl_fftw_comm2_async
+     endif
+  endif
+
+end subroutine cgyro_rhs_comm_async
+
+! Note: Calling test propagates the async operations in some MPI implementations
+subroutine cgyro_rhs_comm_test(which)
+  use cgyro_globals
+
+  implicit none
+
+  integer, intent(in) :: which
+
+  if ( (nonlinear_flag == 1) .and. (nonlinear_method /= 1)) then
+     if (which == 1) then
+       call cgyro_nl_fftw_comm1_test
+     else
+       call cgyro_nl_fftw_comm2_test
+     endif
+  endif
+
+end subroutine cgyro_rhs_comm_test
+
 subroutine cgyro_rhs(ij)
 
   use timer_lib
@@ -16,13 +51,10 @@ subroutine cgyro_rhs(ij)
   complex, dimension(:), allocatable   :: bvec_trap
   integer :: nj_loc
 
-  call timer_lib_in('str_mem')
+  ! h_x is not modified after this and before nl_fftw
+  call cgyro_rhs_comm_async(1)
 
   ! Prepare suitable distribution (g, not h) for conservative upwind method
-  g_x(:,:) = h_x(:,:)
-
-  call timer_lib_out('str_mem')
-
   if (n_field > 1) then
      call timer_lib_in('str')
 
@@ -31,20 +63,25 @@ subroutine cgyro_rhs(ij)
         iv_loc = iv-nv1+1
         is = is_v(iv)
         do ic=1,nc
-           g_x(ic,iv_loc) = g_x(ic,iv_loc)+ & 
+           g_x(ic,iv_loc) = h_x(ic,iv_loc)+ & 
                 (z(is)/temp(is))*jvec_c(2,ic,iv_loc)*field(2,ic)
         enddo
      enddo
      call timer_lib_out('str')
+  else
+     call timer_lib_in('str_mem')
+
+      g_x(:,:) = h_x(:,:)
+
+     call timer_lib_out('str_mem')
   endif
+  call cgyro_rhs_comm_test(1)
 
   ! Correct g_x for number conservation
   call cgyro_upwind
 
-  if ( (nonlinear_flag == 1) .and. (nonlinear_method /= 1) .and. is_staggered_comm_2) then 
-     ! stagger comm1, to load ballance network traffic
-     call cgyro_nl_fftw_comm1
-  endif
+  call cgyro_rhs_comm_test(1)
+  call cgyro_rhs_comm_async(2)
 
   call timer_lib_in('str')
 
@@ -82,6 +119,7 @@ subroutine cgyro_rhs(ij)
 
      enddo
   enddo
+  call cgyro_rhs_comm_test(1)
 
   ! Explicit trapping term
   if (explicit_trap_flag == 1) then
@@ -143,14 +181,10 @@ subroutine cgyro_rhs(ij)
   endif
   
   call timer_lib_out('str')
+  call cgyro_rhs_comm_test(1)
 
   ! Wavenumber advection shear terms
   call cgyro_advect_wavenumber(ij)
-
-  if ( (nonlinear_flag == 1) .and. (nonlinear_method /= 1) .and. (.not. is_staggered_comm_2)) then 
-     ! stagger comm1, to load ballance network traffic
-     call cgyro_nl_fftw_comm1
-  endif
 
   ! Nonlinear evaluation [f,g]
   if (nonlinear_flag == 1) then     

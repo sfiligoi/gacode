@@ -10,7 +10,8 @@
 ! NOTE: Need to be careful with (p=-nr/2,n=0) component.
 !-----------------------------------------------------------------
 
-subroutine cgyro_nl_fftw_comm1
+! NOTE: call cgyro_nl_fftw_comm1/2_async before cgyro_nl_fftw
+subroutine cgyro_nl_fftw_comm1_async
 
   use timer_lib
   use parallel_lib
@@ -38,16 +39,24 @@ subroutine cgyro_nl_fftw_comm1
      fpack(:,iexch) = (0.0,0.0)
   enddo
 
+  call parallel_slib_f_nc_async(fpack,f_nl,f_req)
+
   call timer_lib_out('nl_mem')
-  call timer_lib_in('nl_comm')
 
-  call parallel_slib_f_nc(fpack,f_nl)
+end subroutine cgyro_nl_fftw_comm1_async
 
-  call timer_lib_out('nl_comm')
+! Note: Calling test propagates the async operations in some MPI implementations
+subroutine cgyro_nl_fftw_comm1_test
+  use parallel_lib
+  use cgyro_globals
 
-end subroutine cgyro_nl_fftw_comm1
+  implicit none
 
-subroutine cgyro_nl_fftw_comm2
+  call parallel_slib_test(f_req)
+
+end subroutine cgyro_nl_fftw_comm1_test
+
+subroutine cgyro_nl_fftw_comm2_async
 
   use timer_lib
   use parallel_lib
@@ -88,14 +97,22 @@ subroutine cgyro_nl_fftw_comm2
      gpack(:,iexch) = (0.0,0.0)
   enddo
 
+  call parallel_slib_f_nc_async(gpack,g_nl,g_req)
+
   call timer_lib_out('nl_mem')
-  call timer_lib_in('nl_comm')
 
-  call parallel_slib_f_nc(gpack,g_nl)
+end subroutine cgyro_nl_fftw_comm2_async
 
-  call timer_lib_out('nl_comm')
+! Note: Calling test propagates the async operations in some MPI implementations
+subroutine cgyro_nl_fftw_comm2_test
+  use parallel_lib
+  use cgyro_globals
 
-end subroutine cgyro_nl_fftw_comm2
+  implicit none
+
+  call parallel_slib_test(g_req)
+
+end subroutine cgyro_nl_fftw_comm2_test
 
 subroutine cgyro_nl_fftw_stepr(j, i_omp)
 
@@ -120,7 +137,7 @@ subroutine cgyro_nl_fftw_stepr(j, i_omp)
   ! NOTE: The FFT will generate an unwanted n=0,p=-nr/2 component
   ! that will be filtered in the main time-stepping loop
 
-  ! this should really bea accounted against nl_mem, but hard to do with OMP
+  ! this should really be accounted against nl_mem, but hard to do with OMP
   do ir=1,n_radial
      ix = ir-1-nx0/2
      if (ix < 0) ix = ix+nx
@@ -159,9 +176,18 @@ subroutine cgyro_nl_fftw(ij)
   force_early_comm2 = (n_omp>=(4*nsplit)) 
   one_pass_fft = force_early_comm2
 
-  if (is_staggered_comm_2 .or. force_early_comm2) then
-     ! stagger comm2, to load ballance network traffic
-     call cgyro_nl_fftw_comm2
+  ! time to wait for the F_nl to become avaialble
+  call timer_lib_in('nl_comm')
+  call parallel_slib_f_nc_wait(fpack,f_nl,f_req)
+  ! make sure g_req progresses
+  call parallel_slib_test(g_req)
+  call timer_lib_out('nl_comm')
+
+  if (force_early_comm2) then
+     ! time to wait for the g_nl to become avaialble
+     call timer_lib_in('nl_comm')
+     call parallel_slib_f_nc_wait(gpack,g_nl,g_req)
+     call timer_lib_out('nl_comm')
   endif
 
   call timer_lib_in('nl')
@@ -289,8 +315,11 @@ subroutine cgyro_nl_fftw(ij)
   call timer_lib_out('nl')
   
   ! stagger comm2, to load ballance network traffic
-  if (.not. (is_staggered_comm_2 .or. force_early_comm2)) then 
-     call cgyro_nl_fftw_comm2
+  if (.not. force_early_comm2) then
+     ! time to wait for the g_nl to become avaialble
+     call timer_lib_in('nl_comm')
+     call parallel_slib_f_nc_wait(gpack,g_nl,g_req)
+     call timer_lib_out('nl_comm')
   endif
 
   call timer_lib_in('nl')
@@ -391,8 +420,9 @@ subroutine cgyro_nl_fftw(ij)
   call parallel_slib_r_nc(g_nl,gpack)
   call timer_lib_out('nl_comm')
 
-  call timer_lib_in('nl_mem')
-!$omp parallel do private(iv_loc,it,iexch,ir)
+  call timer_lib_in('nl')
+
+!$omp parallel do private(iv_loc,it,iexch,ir,ic)
   do iv_loc=1,nv_loc
      iexch = (iv_loc-1)*n_theta
      do it=1,n_theta
@@ -401,23 +431,22 @@ subroutine cgyro_nl_fftw(ij)
            psi(ic_c(ir,it),iv_loc) = gpack(ir,iexch)
         enddo
      enddo
-  enddo
-  call timer_lib_out('nl_mem')
 
-  ! Filter
-  if (n == 0) then
-     do ic=1,nc
+     ! Filter
+     if (n == 0) then
+      do ic=1,nc
         ir = ir_c(ic)
         if (ir == 1 .or. px(ir) == 0) then
-           psi(ic,:) = 0.0
+           psi(ic,iv_loc) = 0.0
         endif
-     enddo
-  endif
+      enddo
+     endif
 
-  ! RHS -> -[f,g] = [f,g]_{r,-alpha}
+     ! RHS -> -[f,g] = [f,g]_{r,-alpha}
 
-  call timer_lib_in('nl')
-  rhs(:,:,ij) = rhs(:,:,ij)+(q*rho/rmin)*(2*pi/length)*psi(:,:)
+     rhs(:,iv_loc,ij) = rhs(:,iv_loc,ij)+(q*rho/rmin)*(2*pi/length)*psi(:,iv_loc)
+  enddo
+
   call timer_lib_out('nl')
 
 end subroutine cgyro_nl_fftw
