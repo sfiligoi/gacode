@@ -16,6 +16,8 @@ EXEC = cgyro
 
 OBJECTS = cgyro_globals.o \
 	  cgyro_timer_lib.o \
+	  cgyro_math.o \
+	  cgyro_globals_math.o \
           cgyro_parallel_lib.o \
           cgyro_io.o \
           cgyro_advect_wavenumber.o \

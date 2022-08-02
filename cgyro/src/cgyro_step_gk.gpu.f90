@@ -2,10 +2,11 @@ subroutine cgyro_step_gk
 
   use timer_lib
   use cgyro_globals
+  use cgyro_globals_math
 
   implicit none
 
-  ! RK4 time-advance for the distribution 
+  ! RK4 time-advance for the distribution
   !
   !           z e             vpar            z e  vperp^2
   !  h = H - ----- G0 ( phi - ----- Apar ) + ----- ---------- Gperp Bpar
@@ -20,76 +21,51 @@ subroutine cgyro_step_gk
   ! Bpar -> field(3)
 
   call timer_lib_in('str_mem')
-!$acc parallel loop collapse(2) independent present(h0_x,h_x)
-  do iv_loc=1,nv_loc
-     do ic_loc=1,nc
-       h0_x(ic_loc,iv_loc) = h_x(ic_loc,iv_loc)
-     enddo
-  enddo
+  call cgyro_vel_copy(h0_x, h_x)
   call timer_lib_out('str_mem')
 
   
   ! Stage 1
   call cgyro_rhs(1)
   call timer_lib_in('str')
-!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs(:,:,1))
-  do iv_loc=1,nv_loc
-     do ic_loc=1,nc
-       h_x(ic_loc,iv_loc) = h0_x(ic_loc,iv_loc) + 0.5 * delta_t * rhs(ic_loc,iv_loc,1)
-     enddo
-  enddo
+  call cgyro_vel_fma2(h_x, h0_x, 0.5 * delta_t, rhs(:,:,1))
   call timer_lib_out('str')
   call cgyro_field_c_gpu
 
   ! Stage 2
   call cgyro_rhs(2)
   call timer_lib_in('str')
-!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs(:,:,2))
-  do iv_loc=1,nv_loc
-     do ic_loc=1,nc
-       h_x(ic_loc,iv_loc) = h0_x(ic_loc,iv_loc) + 0.5 * delta_t * rhs(ic_loc,iv_loc,2)
-     enddo
-  enddo
+  call cgyro_vel_fma2(h_x, h0_x, 0.5 * delta_t, rhs(:,:,2))
   call timer_lib_out('str')
   call cgyro_field_c_gpu
 
   ! Stage 3
   call cgyro_rhs(3)
   call timer_lib_in('str')
-!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs(:,:,3))
-  do iv_loc=1,nv_loc
-     do ic_loc=1,nc
-        h_x(ic_loc,iv_loc) = h0_x(ic_loc,iv_loc) + delta_t * rhs(ic_loc,iv_loc,3)
-     enddo
-  enddo
+  call cgyro_vel_fma2(h_x, h0_x, delta_t, rhs(:,:,3))
   call timer_lib_out('str')
   call cgyro_field_c_gpu
 
   ! Stage 4
   call cgyro_rhs(4)
   call timer_lib_in('str')
-!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs)
-  do iv_loc=1,nv_loc
-     do ic_loc=1,nc
-       h_x(ic_loc,iv_loc) = h0_x(ic_loc,iv_loc) &
-                          + delta_t*( rhs(ic_loc,iv_loc,1)+2*rhs(ic_loc,iv_loc,2)+ &
-                                      2*rhs(ic_loc,iv_loc,3)+rhs(ic_loc,iv_loc,4) )/6  
-     enddo
-  enddo
+  call cgyro_vel_fma5(h_x, &
+          h0_x, &
+          delta_t/6, rhs(:,:,1), &
+          2*delta_t/6, rhs(:,:,2), &
+          2*delta_t/6, rhs(:,:,3), &
+          delta_t/6, rhs(:,:,4))
   call timer_lib_out('str')
   call cgyro_field_c_gpu
 
   ! rhs(1) = 3rd-order error estimate
   call timer_lib_in('str')
-!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs)
-  do iv_loc=1,nv_loc
-     do ic_loc=1,nc
-       rhs(ic_loc,iv_loc,1) = h0_x(ic_loc,iv_loc) &
-                            + delta_t*(rhs(ic_loc,iv_loc,2)+2*rhs(ic_loc,iv_loc,3))/3 &
-                            - h_x(ic_loc,iv_loc)
-     enddo
-  enddo
+  call cgyro_vel_fma4(rhs(:,:,1), &
+          h0_x, &
+          delta_t/3, rhs(:,:,2), &
+          2*delta_t/3, rhs(:,:,3), &
+          -1.0, h_x)
   call timer_lib_out('str')
-  
+
 end subroutine cgyro_step_gk
- 
+
