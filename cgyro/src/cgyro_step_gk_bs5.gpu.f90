@@ -129,7 +129,7 @@ subroutine cgyro_step_gk_bs5
      endif
      call timer_lib_out('str')
 
-     call cgyro_field_c_gpu
+     call cgyro_field_c
      call cgyro_rhs(1)
 
      call timer_lib_in('str')
@@ -142,7 +142,7 @@ subroutine cgyro_step_gk_bs5
      enddo
      call timer_lib_out('str')
 
-     call cgyro_field_c_gpu
+     call cgyro_field_c
      call cgyro_rhs(2)
 
      call timer_lib_in('str')
@@ -156,7 +156,7 @@ subroutine cgyro_step_gk_bs5
      enddo
      call timer_lib_out('str')
 
-     call cgyro_field_c_gpu
+     call cgyro_field_c
      call cgyro_rhs(3)
 
      call timer_lib_in('str')
@@ -171,7 +171,7 @@ subroutine cgyro_step_gk_bs5
      enddo
      call timer_lib_out('str')
 
-     call cgyro_field_c_gpu
+     call cgyro_field_c
      call cgyro_rhs(4)
      
      call timer_lib_in('str')
@@ -187,7 +187,7 @@ subroutine cgyro_step_gk_bs5
      enddo
      call timer_lib_out('str')
 
-     call cgyro_field_c_gpu
+     call cgyro_field_c
      call cgyro_rhs(5)
 
      call timer_lib_in('str')
@@ -204,7 +204,7 @@ subroutine cgyro_step_gk_bs5
      enddo
      call timer_lib_out('str')
 
-     call cgyro_field_c_gpu
+     call cgyro_field_c
      call cgyro_rhs(6)
 
      call timer_lib_in('str')
@@ -222,7 +222,7 @@ subroutine cgyro_step_gk_bs5
      enddo
      call timer_lib_out('str')
 
-     call cgyro_field_c_gpu
+     call cgyro_field_c
      call cgyro_rhs(7)
 
      !---------
@@ -285,7 +285,7 @@ subroutine cgyro_step_gk_bs5
      var_error = sqrt(total_local_error+rel_error*rel_error)
     
      if (var_error < tol) then
-        call cgyro_field_c_gpu
+        call cgyro_field_c
         
         call timer_lib_in('str_mem')
 !$acc parallel loop collapse(2) independent present(h0_x,h0_old)

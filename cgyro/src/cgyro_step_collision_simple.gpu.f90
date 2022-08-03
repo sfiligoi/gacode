@@ -140,6 +140,6 @@ subroutine cgyro_step_collision_simple
 
   call timer_lib_out('coll')
 
-  call cgyro_field_c_gpu
+  call cgyro_field_c
 
 end subroutine cgyro_step_collision_simple

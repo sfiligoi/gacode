@@ -180,7 +180,7 @@ subroutine cgyro_step_collision
   call timer_lib_out('coll')
 
   if (collision_field_model == 0 .or. (n == 0 .and. ae_flag == 1)) then
-     call cgyro_field_c_gpu
+     call cgyro_field_c
   endif
 
 end subroutine cgyro_step_collision

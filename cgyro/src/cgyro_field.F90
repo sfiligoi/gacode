@@ -151,7 +151,7 @@ end subroutine cgyro_field_v_gpu
 !-----------------------------------------------------------------
 ! Configuration (velocity-distributed) field solve
 !-----------------------------------------------------------------
-subroutine cgyro_field_c
+subroutine cgyro_field_c_cpu
 
   use mpi
   use timer_lib
@@ -230,7 +230,7 @@ subroutine cgyro_field_c
 
   call timer_lib_out('field')
 
-end subroutine cgyro_field_c
+end subroutine cgyro_field_c_cpu
 
 #ifdef _OPENACC
 subroutine cgyro_field_c_gpu
@@ -337,6 +337,15 @@ end subroutine cgyro_field_c_gpu
 
 #endif
 
+
+subroutine cgyro_field_c
+  implicit none
+#ifdef _OPENACC
+   call cgyro_field_c_gpu
+#else
+   call cgyro_field_c_cpu
+#endif
+end subroutine cgyro_field_c
 
 !-----------------------------------------------------------------
 ! Adiabatic electron field solves for n=0

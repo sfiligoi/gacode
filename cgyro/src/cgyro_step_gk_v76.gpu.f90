@@ -151,7 +151,7 @@ subroutine cgyro_step_gk_v76
      endif
      call timer_lib_out('str')        
      
-     call cgyro_field_c_gpu     
+     call cgyro_field_c
      call cgyro_rhs(1)
 
      call timer_lib_in('str')
@@ -164,7 +164,7 @@ subroutine cgyro_step_gk_v76
      enddo
      call timer_lib_out('str')
 
-     call cgyro_field_c_gpu
+     call cgyro_field_c
      call cgyro_rhs(2)
 
      call timer_lib_in('str')
@@ -178,7 +178,7 @@ subroutine cgyro_step_gk_v76
      enddo
      call timer_lib_out('str')
      
-     call cgyro_field_c_gpu
+     call cgyro_field_c
      call cgyro_rhs(3)
      
      call timer_lib_in('str')     
@@ -192,7 +192,7 @@ subroutine cgyro_step_gk_v76
      enddo
      call timer_lib_out('str')
 
-     call cgyro_field_c_gpu
+     call cgyro_field_c
      call cgyro_rhs(4)
 
      call timer_lib_in('str')
@@ -207,7 +207,7 @@ subroutine cgyro_step_gk_v76
      enddo
      call timer_lib_out('str')
 
-     call cgyro_field_c_gpu
+     call cgyro_field_c
      call cgyro_rhs(5)
 
      call timer_lib_in('str')
@@ -223,7 +223,7 @@ subroutine cgyro_step_gk_v76
      enddo
      call timer_lib_out('str')
 
-     call cgyro_field_c_gpu
+     call cgyro_field_c
      call cgyro_rhs(6)
 
      call timer_lib_in('str')
@@ -240,7 +240,7 @@ subroutine cgyro_step_gk_v76
      enddo
      call timer_lib_out('str')
      
-     call cgyro_field_c_gpu
+     call cgyro_field_c
      call cgyro_rhs(7)
 
      call timer_lib_in('str')
@@ -258,7 +258,7 @@ subroutine cgyro_step_gk_v76
      enddo
      call timer_lib_out('str')
 
-     call cgyro_field_c_gpu
+     call cgyro_field_c
      call cgyro_rhs(8)
 
      call timer_lib_in('str')
@@ -277,7 +277,7 @@ subroutine cgyro_step_gk_v76
      enddo
      call timer_lib_out('str')
 
-     call cgyro_field_c_gpu
+     call cgyro_field_c
      call cgyro_rhs(9)
      
      call timer_lib_in('str')
@@ -295,7 +295,7 @@ subroutine cgyro_step_gk_v76
      enddo
      call timer_lib_out('str')
 
-     call cgyro_field_c_gpu
+     call cgyro_field_c
      call cgyro_rhs(10)
 
      !---------
@@ -364,7 +364,7 @@ subroutine cgyro_step_gk_v76
     
      if (var_error < tol) then
 
-        call cgyro_field_c_gpu
+        call cgyro_field_c
         
         conv = 1
         delta_t_tot = delta_t_tot + deltah2

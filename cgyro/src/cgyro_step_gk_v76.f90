@@ -353,7 +353,7 @@ subroutine cgyro_step_gk_v76
 
      if (var_error < tol) then
 
-        call cgyro_field_c        
+        call cgyro_field_c
       
         conv = 1
         delta_t_tot = delta_t_tot+deltah2

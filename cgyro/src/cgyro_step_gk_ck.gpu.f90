@@ -84,7 +84,7 @@ subroutine cgyro_step_gk_ck
      endif
      call timer_lib_out('str')
      
-     call cgyro_field_c_gpu
+     call cgyro_field_c
      call cgyro_rhs(1)
 
      call timer_lib_in('str')
@@ -97,7 +97,7 @@ subroutine cgyro_step_gk_ck
      enddo
      call timer_lib_out('str')
      
-     call cgyro_field_c_gpu
+     call cgyro_field_c
      call cgyro_rhs(2)
 
      call timer_lib_in('str')
@@ -111,7 +111,7 @@ subroutine cgyro_step_gk_ck
      enddo
      call timer_lib_out('str')
 
-     call cgyro_field_c_gpu
+     call cgyro_field_c
      call cgyro_rhs(3)
 
      call timer_lib_in('str')
@@ -126,7 +126,7 @@ subroutine cgyro_step_gk_ck
      enddo
      call timer_lib_out('str')
     
-     call cgyro_field_c_gpu
+     call cgyro_field_c
      call cgyro_rhs(4) 
 
      call timer_lib_in('str')
@@ -142,7 +142,7 @@ subroutine cgyro_step_gk_ck
      enddo
      call timer_lib_out('str')
  
-     call cgyro_field_c_gpu
+     call cgyro_field_c
      call cgyro_rhs(5)
 
      call timer_lib_in('str')
@@ -159,7 +159,7 @@ subroutine cgyro_step_gk_ck
      enddo
      call timer_lib_out('str')
      
-     call cgyro_field_c_gpu
+     call cgyro_field_c
      call cgyro_rhs(6)
      
      ! SOLUTION
@@ -219,7 +219,7 @@ subroutine cgyro_step_gk_ck
      var_error = sqrt(total_local_error+rel_error*rel_error)
      
      if (var_error < tol) then
-        call cgyro_field_c_gpu
+        call cgyro_field_c
 
         delta_t_tot = delta_t_tot + deltah2
         total_local_error = total_local_error + rel_error*rel_error

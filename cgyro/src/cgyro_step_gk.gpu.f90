@@ -30,21 +30,21 @@ subroutine cgyro_step_gk
   call timer_lib_in('str')
   call cgyro_vel_fma2(h_x, h0_x, 0.5 * delta_t, rhs(:,:,1))
   call timer_lib_out('str')
-  call cgyro_field_c_gpu
+  call cgyro_field_c
 
   ! Stage 2
   call cgyro_rhs(2)
   call timer_lib_in('str')
   call cgyro_vel_fma2(h_x, h0_x, 0.5 * delta_t, rhs(:,:,2))
   call timer_lib_out('str')
-  call cgyro_field_c_gpu
+  call cgyro_field_c
 
   ! Stage 3
   call cgyro_rhs(3)
   call timer_lib_in('str')
   call cgyro_vel_fma2(h_x, h0_x, delta_t, rhs(:,:,3))
   call timer_lib_out('str')
-  call cgyro_field_c_gpu
+  call cgyro_field_c
 
   ! Stage 4
   call cgyro_rhs(4)
@@ -56,7 +56,7 @@ subroutine cgyro_step_gk
           2*delta_t/6, rhs(:,:,3), &
           delta_t/6, rhs(:,:,4))
   call timer_lib_out('str')
-  call cgyro_field_c_gpu
+  call cgyro_field_c
 
   ! rhs(1) = 3rd-order error estimate
   call timer_lib_in('str')
