@@ -29,7 +29,7 @@ class CGyroGrid:
         self.n_xi =       int(adict["N_XI"])
         self.n_energy =   int(adict["N_ENERGY"])
         self.n_toroidal = int(adict["N_TOROIDAL"])
-        if 'VELOCITY_ORDER' in adist:
+        if 'VELOCITY_ORDER' in adict:
            # some old versions did not have the option of changing the velocity order
            self.velocity_order = int(adict["VELOCITY_ORDER"])
 
@@ -53,7 +53,6 @@ class CGyroRestartHeader:
         self.n_species = 0
         self.mpi_rank_order = 0
         self.n_proc = 0
-        self.velocity_order = 1
 
     def load(self,fdir):
         fname = os.path.join(fdir,restart_fname)
@@ -61,9 +60,9 @@ class CGyroRestartHeader:
             magic_b = fd.read(4)
             [magic] = struct.unpack('i',magic_b)
             if (magic==140906808):
-                self.velocity_order = 1
+                self.grid.velocity_order = 1
             elif (magic==140916753):
-                self.velocity_order = 2
+                self.grid.velocity_order = 2
             else:
                 raise IOError("Wrong CGyroRestartHeader magic number %i"%magic)
             magic1=magic
@@ -89,7 +88,7 @@ class CGyroRestartHeader:
     def savev2(self,fdir):
         fname = os.path.join(fdir,restart_fname)
         with open(fname,"rb+") as fd:
-            magic = 140906808 if (self.velocity_order == 1) else 140916753
+            magic = 140906808 if (self.grid.velocity_order == 1) else 140916753
             magic_b= struct.pack('i',magic)
             fd.write(magic_b)
             version_b= struct.pack('i',2)
@@ -222,7 +221,7 @@ def add_species(org_dir, new_dir, grid, org_pre_species, org_post_species, new_s
             new_fd.write(tmp)
 
             for t in range(grid.n_toroidal):
-              if org_header.velocity_order==1:
+              if org_header.grid.velocity_order==1:
                 if (org_pre_species>0):
                     tmp=org_fd.read(ncbytes*org_pre_species)
                     new_fd.write(tmp)
