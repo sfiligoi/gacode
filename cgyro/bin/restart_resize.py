@@ -3,7 +3,7 @@
 import sys,os
 import struct
 
-header_size = 1024
+header_size = 1024*16 # 2xDouble precisio
 restart_v1_fname="out.cgyro.restart"
 restart_fname="bin.cgyro.restart"
 
