@@ -15,91 +15,140 @@ contains
   ! Multiple-add of array, updating left in place
   !=========================================================
 
-subroutine cgyro_cmpl_inplace_fma1(sz, left, c1, r1)
+subroutine cgyro_cmpl_inplace_fma1(sz, left, cleft, c1, r1, abssum)
     !-------------------------------------------------------
     implicit none
     !
     integer, intent(in) :: sz
     complex, intent(inout), dimension(*) :: left
+    real, intent(in) :: cleft
     real, intent(in) :: c1
     complex, intent(in), dimension(*) :: r1
+    real, intent(inout), optional :: abssum
     !
     integer :: i
+    complex :: tmp
+    real :: s
     !-------------------------------------------------------
+    if (present(abssum)) then
+      s = 0.0
+#ifdef _OPENACC
+!$acc parallel loop independent present(left,r1) private(tmp) reduction(+:s)
+#else
+!$omp parallel do private(tmp) reduction(+:s)
+#endif
+      do i=1,sz
+        tmp = cleft*left(i) + c1 * r1(i)
+        left(i) = tmp
+        s = s + abs(tmp)
+      enddo
+      abssum = s
+    else
 #ifdef _OPENACC
 !$acc parallel loop independent present(left,r1)
-    do i=1,sz
-       left(i) = left(i) + c1 * r1(i)
-    enddo
 #else
-!$omp parallel do 
-    do i=1,sz
-       left(i) = left(i) + c1 * r1(i)
-    enddo
+!$omp parallel do
 #endif
+      do i=1,sz
+        left(i) = cleft*left(i) + c1 * r1(i)
+      enddo
+    endif
 end subroutine cgyro_cmpl_inplace_fma1
 
-subroutine cgyro_cmpl_inplace_fma2(sz, left, c1, r1, c2, r2)
+subroutine cgyro_cmpl_inplace_fma2(sz, left, cleft, c1, r1, c2, r2, abssum)
     !-------------------------------------------------------
     implicit none
     !
     integer, intent(in) :: sz
     complex, intent(inout), dimension(*) :: left
+    real, intent(in) :: cleft
     real, intent(in) :: c1
     complex, intent(in), dimension(*) :: r1
     real, intent(in) :: c2
     complex, intent(in), dimension(*) :: r2
+    real, intent(inout), optional :: abssum
     !
     integer :: i
+    complex :: tmp
+    real :: s
     !-------------------------------------------------------
+    if (present(abssum)) then
+      s = 0.0
+#ifdef _OPENACC
+!$acc parallel loop independent present(left,r1,r2) private(tmp) reduction(+:s)
+#else
+!$omp parallel do private(tmp) reduction(+:s)
+#endif
+      do i=1,sz
+        tmp = cleft*left(i) + c1 * r1(i) + c2 * r2(i)
+        left(i) = tmp
+        s = s + abs(tmp)
+      enddo
+      abssum = s
+    else
 #ifdef _OPENACC
 !$acc parallel loop independent present(left,r1,r2)
-    do i=1,sz
-       left(i) = left(i) + c1 * r1(i) + c2 * r2(i)
-    enddo
 #else
-!$omp parallel do 
-    do i=1,sz
-       left(i) = left(i) + c1 * r1(i) + c2 * r2(i)
-    enddo
+!$omp parallel do
 #endif
+      do i=1,sz
+        left(i) = cleft*left(i) + c1 * r1(i) + c2 * r2(i)
+      enddo
+    endif
 end subroutine cgyro_cmpl_inplace_fma2
 
-subroutine cgyro_cmpl_inplace_fma3(sz, left, c1, r1, c2, r2, c3, r3)
+subroutine cgyro_cmpl_inplace_fma3(sz, left, cleft, c1, r1, c2, r2, c3, r3, abssum)
     !-------------------------------------------------------
     implicit none
     !
     integer, intent(in) :: sz
     complex, intent(inout), dimension(*) :: left
+    real, intent(in) :: cleft
     real, intent(in) :: c1
     complex, intent(in), dimension(*) :: r1
     real, intent(in) :: c2
     complex, intent(in), dimension(*) :: r2
     real, intent(in) :: c3
     complex, intent(in), dimension(*) :: r3
+    real, intent(inout), optional :: abssum
     !
     integer :: i
+    complex :: tmp
+    real :: s
     !-------------------------------------------------------
+    if (present(abssum)) then
+      s = 0.0
+#ifdef _OPENACC
+!$acc parallel loop independent present(left,r1,r2,r3) private(tmp) reduction(+:s)
+#else
+!$omp parallel do private(tmp) reduction(+:s)
+#endif
+      do i=1,sz
+        tmp = cleft*left(i) + c1 * r1(i) + c2 * r2(i) + c3 * r3(i)
+        left(i) = tmp
+        s = s + abs(tmp)
+      enddo
+      abssum = s
+    else
 #ifdef _OPENACC
 !$acc parallel loop independent present(left,r1,r2,r3)
-    do i=1,sz
-       left(i) = left(i) + c1 * r1(i) + c2 * r2(i) + c3 * r3(i)
-    enddo
 #else
-!$omp parallel do 
-    do i=1,sz
-       left(i) = left(i) + c1 * r1(i) + c2 * r2(i) + c3 * r3(i)
-    enddo
+!$omp parallel do
 #endif
+      do i=1,sz
+        left(i) = cleft*left(i) + c1 * r1(i) + c2 * r2(i) + c3 * r3(i)
+      enddo
+    endif
 end subroutine cgyro_cmpl_inplace_fma3
 
 
-subroutine cgyro_cmpl_inplace_fma4(sz, left, c1, r1, c2, r2, c3, r3, c4, r4)
+subroutine cgyro_cmpl_inplace_fma4(sz, left, cleft, c1, r1, c2, r2, c3, r3, c4, r4, abssum)
     !-------------------------------------------------------
     implicit none
     !
     integer, intent(in) :: sz
     complex, intent(inout), dimension(*) :: left
+    real, intent(in) :: cleft
     real, intent(in) :: c1
     complex, intent(in), dimension(*) :: r1
     real, intent(in) :: c2
@@ -108,20 +157,35 @@ subroutine cgyro_cmpl_inplace_fma4(sz, left, c1, r1, c2, r2, c3, r3, c4, r4)
     complex, intent(in), dimension(*) :: r3
     real, intent(in) :: c4
     complex, intent(in), dimension(*) :: r4
+    real, intent(inout), optional :: abssum
     !
     integer :: i
+    complex :: tmp
+    real :: s
     !-------------------------------------------------------
+    if (present(abssum)) then
+      s = 0.0
+#ifdef _OPENACC
+!$acc parallel loop independent present(left,r1,r2,r3,r4) private(tmp) reduction(+:s)
+#else
+!$omp parallel do private(tmp) reduction(+:s)
+#endif
+      do i=1,sz
+        tmp = cleft*left(i) + c1 * r1(i) + c2 * r2(i) + c3 * r3(i) + c4 * r4(i)
+        left(i) = tmp
+        s = s + abs(tmp)
+      enddo
+      abssum = s
+    else
 #ifdef _OPENACC
 !$acc parallel loop independent present(left,r1,r2,r3,r4)
-    do i=1,sz
-       left(i) = left(i) + c1 * r1(i) + c2 * r2(i) + c3 * r3(i)+ c4 * r4(i)
-    enddo
 #else
-!$omp parallel do 
-    do i=1,sz
-       left(i) = left(i) + c1 * r1(i) + c2 * r2(i) + c3 * r3(i)+ c4 * r4(i)
-    enddo
+!$omp parallel do
 #endif
+      do i=1,sz
+        left(i) = cleft*left(i) + c1 * r1(i) + c2 * r2(i) + c3 * r3(i) + c4 * r4(i)
+      enddo
+    endif
 end subroutine cgyro_cmpl_inplace_fma4
 
 

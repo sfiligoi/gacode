@@ -21,59 +21,66 @@ contains
   ! Multiple-add of array, updating left in place
   !-------------------------------------------------------
 
-subroutine cgyro_vel_inplace_fma1(left, c1, r1)
+subroutine cgyro_vel_inplace_fma1(left, cleft, c1, r1, abssum)
     use cgyro_globals
     use cgyro_math
     !-------------------------------------------------------
     implicit none
     !
     complex, intent(inout), dimension(nc,nv_loc) :: left
+    real, intent(in) :: cleft
     real, intent(in) :: c1
     complex, intent(in), dimension(nc,nv_loc) :: r1
+    real, intent(inout), optional :: abssum
     !-------------------------------------------------------
-    call cgyro_cmpl_inplace_fma1(nc*nv_loc, left,c1,r1)
+    call cgyro_cmpl_inplace_fma1(nc*nv_loc, left,cleft,c1,r1,abssum)
 end subroutine cgyro_vel_inplace_fma1
 
-subroutine cgyro_vel_inplace_fma2(left, c1, r1, c2, r2)
+subroutine cgyro_vel_inplace_fma2(left, cleft, c1, r1, c2, r2,abssum)
     use cgyro_globals
     use cgyro_math
     !-------------------------------------------------------
     implicit none
     !
     complex, intent(inout), dimension(nc,nv_loc) :: left
+    real, intent(in) :: cleft
     real, intent(in) :: c1
     complex, intent(in), dimension(nc,nv_loc) :: r1
     real, intent(in) :: c2
     complex, intent(in), dimension(nc,nv_loc) :: r2
+    real, intent(inout), optional :: abssum
     !-------------------------------------------------------
-    call cgyro_cmpl_inplace_fma2(nc*nv_loc, left,c1,r1,c2,r2)
+    call cgyro_cmpl_inplace_fma2(nc*nv_loc, left,cleft,c1,r1,c2,r2,abssum)
 end subroutine cgyro_vel_inplace_fma2
 
 
-subroutine cgyro_vel_inplace_fma3(left, c1, r1, c2, r2, c3, r3)
+subroutine cgyro_vel_inplace_fma3(left, cleft, c1, r1, c2, r2, c3, r3, abssum)
     use cgyro_globals
     use cgyro_math
     !-------------------------------------------------------
     implicit none
     !
     complex, intent(inout), dimension(nc,nv_loc) :: left
+    real, intent(in) :: cleft
     real, intent(in) :: c1
     complex, intent(in), dimension(nc,nv_loc) :: r1
     real, intent(in) :: c2
     complex, intent(in), dimension(nc,nv_loc) :: r2
     real, intent(in) :: c3
     complex, intent(in), dimension(nc,nv_loc) :: r3
+    real, intent(inout), optional :: abssum
     !-------------------------------------------------------
-    call cgyro_cmpl_inplace_fma3(nc*nv_loc, left,c1,r1,c2,r2,c3,r3)
+    call cgyro_cmpl_inplace_fma3(nc*nv_loc, left,cleft,c1,r1,c2,r2,c3,r3,abssum)
 end subroutine cgyro_vel_inplace_fma3
 
-subroutine cgyro_vel_inplace_fma4(left, c1, r1, c2, r2, c3, r3, c4, r4)
+subroutine cgyro_vel_inplace_fma4(left, cleft, c1, r1, c2, r2, c3, r3, c4, r4, abssum)
     use cgyro_globals
     use cgyro_math
     !-------------------------------------------------------
     implicit none
     !
     complex, intent(inout), dimension(nc,nv_loc) :: left
+    real, intent(in) :: cleft
     real, intent(in) :: c1
     complex, intent(in), dimension(nc,nv_loc) :: r1
     real, intent(in) :: c2
@@ -82,8 +89,9 @@ subroutine cgyro_vel_inplace_fma4(left, c1, r1, c2, r2, c3, r3, c4, r4)
     complex, intent(in), dimension(nc,nv_loc) :: r3
     real, intent(in) :: c4
     complex, intent(in), dimension(nc,nv_loc) :: r4
+    real, intent(inout), optional :: abssum
     !-------------------------------------------------------
-    call cgyro_cmpl_inplace_fma4(nc*nv_loc, left,c1,r1,c2,r2,c3,r3,c4,r4)
+    call cgyro_cmpl_inplace_fma4(nc*nv_loc, left,cleft,c1,r1,c2,r2,c3,r3,c4,r4,abssum)
 end subroutine cgyro_vel_inplace_fma4
 
   !-------------------------------------------------------
