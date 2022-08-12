@@ -1,10 +1,11 @@
-! Bogacki-Shampine (1996) 7:5(4) adaptive method  |  GPU version
+! Bogacki-Shampine (1996) 7:5(4) adaptive method
 
 subroutine cgyro_step_gk_bs5
 
   use mpi
   use timer_lib
   use cgyro_globals
+  use cgyro_globals_math
   use cgyro_io
   use cgyro_step
 
@@ -88,12 +89,7 @@ subroutine cgyro_step_gk_bs5
   delta_t_last = 0.0
  
   call timer_lib_in('str_mem')
-!$acc parallel loop collapse(2) independent present(h0_old,h_x)
-  do iv_loc=1,nv_loc
-     do ic=1,nc
-        h0_old(ic,iv_loc) = h_x(ic,iv_loc)
-     enddo
-  enddo
+  call cgyro_vel_copy(h0_old, h_x)
   call timer_lib_out('str_mem')
 
   do while (delta_t_tot < delta_t .and. itrk <= itrk_max)
@@ -109,23 +105,10 @@ subroutine cgyro_step_gk_bs5
      endif
 
      if ((conv == 0) .and. (itrk >= 1)) then
-
         ! not converged so backing up
-        
-!$acc parallel loop collapse(2) independent present(h0_x,h0_old,h_x)
-        do iv_loc=1,nv_loc
-           do ic=1,nc
-              h0_x(ic,iv_loc) = h0_old(ic,iv_loc)
-              h_x(ic,iv_loc) = h0_old(ic,iv_loc)
-           enddo
-        enddo
+        call cgyro_vel_copy2(h0_x, h_x, h0_old)
      else
-!$acc parallel loop collapse(2) independent present(h0_x,h_x)
-        do iv_loc=1,nv_loc
-           do ic=1,nc
-              h0_x(ic,iv_loc) = h_x(ic,iv_loc)
-           enddo
-        enddo 
+        call cgyro_vel_copy(h0_x, h_x)
      endif
      call timer_lib_out('str')
 
@@ -133,93 +116,58 @@ subroutine cgyro_step_gk_bs5
      call cgyro_rhs(1)
 
      call timer_lib_in('str')
-!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs(:,:,1))
-     do iv_loc=1,nv_loc
-        do ic=1,nc
-           h_x(ic,iv_loc) = h0_x(ic,iv_loc) &
-                + a21*deltah2*rhs(ic,iv_loc,1)
-        enddo
-     enddo
+     call cgyro_vel_fma2(h_x, h0_x, a21*deltah2, rhs(:,:,1))
      call timer_lib_out('str')
 
      call cgyro_field_c
      call cgyro_rhs(2)
 
      call timer_lib_in('str')
-!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs)
-     do iv_loc=1,nv_loc
-        do ic=1,nc
-           h_x(ic,iv_loc) = h0_x(ic,iv_loc) &
-                + deltah2*(a31*rhs(ic,iv_loc,1) &
-                + a32*rhs(ic,iv_loc,2))
-        enddo
-     enddo
+     call cgyro_vel_fmaN(2,h_x, &
+            h0_x, &
+            (/ deltah2*a31, deltah2*a32 /), &
+            rhs(:,:,1:2))
      call timer_lib_out('str')
 
      call cgyro_field_c
      call cgyro_rhs(3)
 
      call timer_lib_in('str')
-!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs)
-     do iv_loc=1,nv_loc
-        do ic=1,nc
-           h_x(ic,iv_loc) = h0_x(ic,iv_loc) &
-                + deltah2*(a41*rhs(ic,iv_loc,1) &
-                + a42*rhs(ic,iv_loc,2) &
-                + a43*rhs(ic,iv_loc,3))
-        enddo
-     enddo
+     call cgyro_vel_fmaN(3,h_x, &
+            h0_x, &
+            (/ deltah2*a41, deltah2*a42, deltah2*a43 /), &
+            rhs(:,:,1:3))
      call timer_lib_out('str')
 
      call cgyro_field_c
      call cgyro_rhs(4)
      
      call timer_lib_in('str')
-!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs) 
-     do iv_loc=1,nv_loc
-        do ic=1,nc
-           h_x(ic, iv_loc) = h0_x(ic,iv_loc)  &
-                + deltah2*(a51*rhs(ic,iv_loc,1) &
-                + a52*rhs(ic,iv_loc,2) &
-                + a53*rhs(ic,iv_loc,3) &
-                + a54*rhs(ic,iv_loc,4))
-        enddo
-     enddo
+     call cgyro_vel_fmaN(4,h_x, &
+            h0_x, &
+            (/ deltah2*a51, deltah2*a52, deltah2*a53, deltah2*a54 /), &
+            rhs(:,:,1:4))
      call timer_lib_out('str')
 
      call cgyro_field_c
      call cgyro_rhs(5)
 
      call timer_lib_in('str')
-!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs)
-     do iv_loc=1,nv_loc
-        do ic=1,nc
-           h_x(ic, iv_loc) = h0_x(ic,iv_loc) &
-                + deltah2*(a61*rhs(ic, iv_loc, 1) &
-                + a62*rhs(ic,iv_loc,2) &
-                + a63*rhs(ic,iv_loc,3) &
-                + a64*rhs(ic,iv_loc,4) &
-                + a65*rhs(ic,iv_loc,5))
-        enddo
-     enddo
+     call cgyro_vel_fmaN(5,h_x, &
+            h0_x, &
+            (/ deltah2*a61, deltah2*a62, deltah2*a63, deltah2*a64, deltah2*a65 /), &
+            rhs(:,:,1:5))
      call timer_lib_out('str')
 
      call cgyro_field_c
      call cgyro_rhs(6)
 
      call timer_lib_in('str')
-!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs)
-     do iv_loc=1,nv_loc
-        do ic=1,nc
-           h_x(ic, iv_loc) = h0_x(ic,iv_loc) + &
-                deltah2*(a71*rhs(ic, iv_loc,1) &
-                + a72*rhs(ic,iv_loc,2) &
-                + a73*rhs(ic,iv_loc,3) &
-                + a74*rhs(ic,iv_loc,4) &
-                + a75*rhs(ic,iv_loc,5) &
-                + a76*rhs(ic,iv_loc,6))
-        enddo
-     enddo
+     call cgyro_vel_fmaN(6,h_x, &
+            h0_x, &
+            (/ deltah2*a71, deltah2*a72, deltah2*a73, &
+               deltah2*a74, deltah2*a75, deltah2*a76 /), &
+            rhs(:,:,1:6))
      call timer_lib_out('str')
 
      call cgyro_field_c
@@ -288,12 +236,7 @@ subroutine cgyro_step_gk_bs5
         call cgyro_field_c
         
         call timer_lib_in('str_mem')
-!$acc parallel loop collapse(2) independent present(h0_x,h0_old)
-        do iv_loc=1,nv_loc
-           do ic=1,nc
-              h0_old(ic,iv_loc) = h0_x(ic,iv_loc)
-           enddo
-        enddo
+        call cgyro_vel_copy(h0_old, h0_x)
         call timer_lib_out('str_mem')
 
         conv = 1
