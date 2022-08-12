@@ -178,7 +178,9 @@ subroutine cgyro_step_gk_v76
      call timer_lib_out('str')
      
      call cgyro_field_c
-     call cgyro_rhs(3)
+
+     ! rhs(*,2) is not used again, so shift down all the subsequent indexes
+     call cgyro_rhs(3-1)
      
      call timer_lib_in('str')     
 !$omp parallel do collapse(2)
@@ -186,13 +188,13 @@ subroutine cgyro_step_gk_v76
         do ic=1,nc
            h_x(ic,iv_loc) = h0_x(ic,iv_loc) &
                 + deltah2*(a41*rhs(ic,iv_loc,1) &
-                + a43*rhs(ic,iv_loc,3))
+                + a43*rhs(ic,iv_loc,3-1))
         enddo
      enddo
      call timer_lib_out('str')
 
      call cgyro_field_c
-     call cgyro_rhs(4)
+     call cgyro_rhs(4-1)
 
      call timer_lib_in('str')
 !$omp parallel do collapse(2)
@@ -200,14 +202,14 @@ subroutine cgyro_step_gk_v76
         do ic=1,nc
            h_x(ic, iv_loc) = h0_x(ic,iv_loc)  &
                 + deltah2*(a51*rhs(ic, iv_loc, 1) &
-                + a53*rhs(ic,iv_loc,3) &
-                + a54*rhs(ic,iv_loc,4))
+                + a53*rhs(ic,iv_loc,3-1) &
+                + a54*rhs(ic,iv_loc,4-1))
         enddo
      enddo
      call timer_lib_out('str')
 
      call cgyro_field_c
-     call cgyro_rhs(5)
+     call cgyro_rhs(5-1)
 
      call timer_lib_in('str')
 !$omp parallel do collapse(2)
@@ -215,15 +217,15 @@ subroutine cgyro_step_gk_v76
         do ic=1,nc
            h_x(ic, iv_loc) = h0_x(ic,iv_loc) &
                 + deltah2*(a61*rhs(ic, iv_loc, 1) &
-                + a63*rhs(ic,iv_loc,3) &
-                + a64*rhs(ic,iv_loc,4) &
-                + a65*rhs(ic,iv_loc,5))
+                + a63*rhs(ic,iv_loc,3-1) &
+                + a64*rhs(ic,iv_loc,4-1) &
+                + a65*rhs(ic,iv_loc,5-1))
         enddo
      enddo
      call timer_lib_out('str')
 
      call cgyro_field_c
-     call cgyro_rhs(6)
+     call cgyro_rhs(6-1)
 
      call timer_lib_in('str')
 !$omp parallel do collapse(2)
@@ -231,16 +233,16 @@ subroutine cgyro_step_gk_v76
         do ic=1,nc
            h_x(ic, iv_loc) = h0_x(ic,iv_loc) + &
                 deltah2*(a71*rhs(ic, iv_loc, 1) &
-                + a73*rhs(ic,iv_loc,3) &
-                + a74*rhs(ic,iv_loc,4) &
-                + a75*rhs(ic,iv_loc,5) &
-                + a76*rhs(ic,iv_loc,6))
+                + a73*rhs(ic,iv_loc,3-1) &
+                + a74*rhs(ic,iv_loc,4-1) &
+                + a75*rhs(ic,iv_loc,5-1) &
+                + a76*rhs(ic,iv_loc,6-1))
         enddo
      enddo
      call timer_lib_out('str')
    
      call cgyro_field_c
-     call cgyro_rhs(7)
+     call cgyro_rhs(7-1)
 
      call timer_lib_in('str')
 !$omp parallel do collapse(2)
@@ -248,17 +250,17 @@ subroutine cgyro_step_gk_v76
         do ic=1,nc
            h_x(ic, iv_loc) = h0_x(ic,iv_loc)  &
                 + deltah2*(a81*rhs(ic, iv_loc, 1) &
-                + a83*rhs(ic,iv_loc,3) &
-                + a84*rhs(ic,iv_loc,4) &
-                + a85*rhs(ic,iv_loc,5) &
-                + a86*rhs(ic,iv_loc,6) &
-                + a87*rhs(ic,iv_loc,7))
+                + a83*rhs(ic,iv_loc,3-1) &
+                + a84*rhs(ic,iv_loc,4-1) &
+                + a85*rhs(ic,iv_loc,5-1) &
+                + a86*rhs(ic,iv_loc,6-1) &
+                + a87*rhs(ic,iv_loc,7-1))
         enddo
      enddo
      call timer_lib_out('str')
 
      call cgyro_field_c
-     call cgyro_rhs(8)
+     call cgyro_rhs(8-1)
 
      call timer_lib_in('str')
 !$omp parallel do collapse(2)
@@ -266,18 +268,18 @@ subroutine cgyro_step_gk_v76
         do ic=1,nc
            h_x(ic, iv_loc) = h0_x(ic,iv_loc)  &
                 + deltah2*(a91*rhs(ic, iv_loc, 1) &
-                + a93*rhs(ic,iv_loc,3) &
-                + a94*rhs(ic,iv_loc,4) &
-                + a95*rhs(ic,iv_loc,5) &
-                + a96*rhs(ic,iv_loc,6) &
-                + a97*rhs(ic,iv_loc,7) &
-                + a98*rhs(ic,iv_loc,8))
+                + a93*rhs(ic,iv_loc,3-1) &
+                + a94*rhs(ic,iv_loc,4-1) &
+                + a95*rhs(ic,iv_loc,5-1) &
+                + a96*rhs(ic,iv_loc,6-1) &
+                + a97*rhs(ic,iv_loc,7-1) &
+                + a98*rhs(ic,iv_loc,8-1))
         enddo
      enddo
      call timer_lib_out('str')
 
      call cgyro_field_c
-     call cgyro_rhs(9)
+     call cgyro_rhs(9-1)
      
      call timer_lib_in('str')
 !$omp parallel do collapse(2)
@@ -285,17 +287,17 @@ subroutine cgyro_step_gk_v76
         do ic=1,nc
            h_x(ic, iv_loc) = h0_x(ic,iv_loc)  &
                 + deltah2*(a101*rhs(ic, iv_loc, 1) &
-                + a103*rhs(ic,iv_loc,3) &
-                + a104*rhs(ic,iv_loc,4) &
-                + a105*rhs(ic,iv_loc,5) &
-                + a106*rhs(ic,iv_loc,6) &
-                + a107*rhs(ic,iv_loc,7))
+                + a103*rhs(ic,iv_loc,3-1) &
+                + a104*rhs(ic,iv_loc,4-1) &
+                + a105*rhs(ic,iv_loc,5-1) &
+                + a106*rhs(ic,iv_loc,6-1) &
+                + a107*rhs(ic,iv_loc,7-1))
         enddo
      enddo
      call timer_lib_out('str')
 
      call cgyro_field_c
-     call cgyro_rhs(10)
+     call cgyro_rhs(10-1)
 
      !---------
      ! SOLUTION
@@ -306,13 +308,13 @@ subroutine cgyro_step_gk_v76
      do iv_loc=1,nv_loc
         do ic=1,nc
            h_x(ic,iv_loc) = h0_x(ic,iv_loc) &
-                + deltah2*((b1)*rhs(ic,iv_loc,1) &
-                + b4*rhs(ic,iv_loc,4) &
-                + b5*rhs(ic,iv_loc,5) &
-                + b6*rhs(ic,iv_loc,6) &
-                + b7*rhs(ic,iv_loc,7) &
-                + b8*rhs(ic,iv_loc,8) &
-                + b9*rhs(ic,iv_loc,9))
+                + deltah2*(b1*rhs(ic,iv_loc,1) &
+                + b4*rhs(ic,iv_loc,4-1) &
+                + b5*rhs(ic,iv_loc,5-1) &
+                + b6*rhs(ic,iv_loc,6-1) &
+                + b7*rhs(ic,iv_loc,7-1) &
+                + b8*rhs(ic,iv_loc,8-1) &
+                + b9*rhs(ic,iv_loc,9-1))
         enddo
      enddo
      call timer_lib_out('str')
@@ -327,13 +329,13 @@ subroutine cgyro_step_gk_v76
         do ic=1,nc
            rhs(ic,iv_loc,1) = deltah2*( &
                 (b1-b1h)*rhs(ic,iv_loc,1) &
-                + (b4-b4h)*rhs(ic,iv_loc,4) &
-                + (b5-b5h)*rhs(ic,iv_loc,5) &
-                + (b6-b6h)*rhs(ic,iv_loc,6) &
-                + (b7-b7h)*rhs(ic,iv_loc,7) &
-                + (b8-b8h)*rhs(ic,iv_loc,8) &
-                + (b9-b9h)*rhs(ic,iv_loc,9) &
-                + (b10-b10h)*rhs(ic,iv_loc,10))
+                + (b4-b4h)*rhs(ic,iv_loc,4-1) &
+                + (b5-b5h)*rhs(ic,iv_loc,5-1) &
+                + (b6-b6h)*rhs(ic,iv_loc,6-1) &
+                + (b7-b7h)*rhs(ic,iv_loc,7-1) &
+                + (b8-b8h)*rhs(ic,iv_loc,8-1) &
+                + (b9-b9h)*rhs(ic,iv_loc,9-1) &
+                + (b10-b10h)*rhs(ic,iv_loc,10-1))
         enddo
      enddo
   
