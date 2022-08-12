@@ -49,17 +49,16 @@ subroutine cgyro_step_gk
   ! Stage 4
   call cgyro_rhs(4)
   call timer_lib_in('str')
-  call cgyro_vel_fma5(h_x, &
+  call cgyro_vel_fmaN(4, h_x, &
           h0_x, &
-          delta_t/6, rhs(:,:,1), &
-          2*delta_t/6, rhs(:,:,2), &
-          2*delta_t/6, rhs(:,:,3), &
-          delta_t/6, rhs(:,:,4))
+          (/ delta_t/6, 2*delta_t/6, 2*delta_t/6, delta_t/6 /), &
+          rhs(:,:,1:4))
   call timer_lib_out('str')
   call cgyro_field_c
 
   ! rhs(1) = 3rd-order error estimate
   call timer_lib_in('str')
+  ! cannot use cgyro_vel_fmaN, as the 3 arrays are not contiguous
   call cgyro_vel_fma4(rhs(:,:,1), &
           h0_x, &
           delta_t/3, rhs(:,:,2), &

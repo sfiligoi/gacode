@@ -89,36 +89,39 @@ subroutine cgyro_step_gk_ck
      call cgyro_rhs(3)
 
      call timer_lib_in('str')
-     call cgyro_vel_fma4(h_x, &
+     call cgyro_vel_fmaN(3, h_x, &
             h0_x, &
-            deltah2*( 3.d0/10.d0), rhs(:,:,1), &
-            deltah2*(-9.d0/10.d0), rhs(:,:,2), &
-            deltah2*( 6.d0/ 5.d0), rhs(:,:,3))
+            (/ deltah2*( 3.d0/10.d0), &
+               deltah2*(-9.d0/10.d0), &
+               deltah2*( 6.d0/ 5.d0) /), &
+             rhs(:,:,1:3))
      call timer_lib_out('str')
 
      call cgyro_field_c
      call cgyro_rhs(4) 
 
      call timer_lib_in('str')
-     call cgyro_vel_fma5(h_x, &
+     call cgyro_vel_fmaN(4, h_x, &
             h0_x, &
-            deltah2*(-11.d0/54.d0), rhs(:,:,1), &
-            deltah2*(  5.d0/ 2.d0), rhs(:,:,2), &
-            deltah2*(-70.d0/27.d0), rhs(:,:,3), &
-            deltah2*( 35.d0/27.d0), rhs(:,:,4))
+            (/ deltah2*(-11.d0/54.d0), &
+               deltah2*(  5.d0/ 2.d0), &
+               deltah2*(-70.d0/27.d0), &
+               deltah2*( 35.d0/27.d0) /), &
+            rhs(:,:,1:4))
      call timer_lib_out('str')
 
      call cgyro_field_c
      call cgyro_rhs(5)
 
      call timer_lib_in('str')
-     call cgyro_vel_fma6(h_x, &
+     call cgyro_vel_fmaN(5, h_x, &
             h0_x, &
-            deltah2*( 1631.d0/ 55296.d0), rhs(:,:,1), &
-            deltah2*(  175.d0/   512.d0), rhs(:,:,2), &
-            deltah2*(  575.d0/ 13824.d0), rhs(:,:,3), &
-            deltah2*(44275.d0/110592.d0), rhs(:,:,4), &
-            deltah2*(  253.d0/  4096.d0), rhs(:,:,5))
+            (/ deltah2*( 1631.d0/ 55296.d0), &
+               deltah2*(  175.d0/   512.d0), &
+               deltah2*(  575.d0/ 13824.d0), &
+               deltah2*(44275.d0/110592.d0), &
+               deltah2*(  253.d0/  4096.d0) /), &
+            rhs(:,:,1:5))
      call timer_lib_out('str')
 
      call cgyro_field_c
@@ -127,6 +130,7 @@ subroutine cgyro_step_gk_ck
      ! SOLUTION
 
      call timer_lib_in('str')
+     ! cannot use cgyro_vel_fmaN, as the 4 arrays are not contiguous
      call cgyro_vel_fma5(h_x, &
             h0_x, &
             deltah2*( 37.d0/ 378.d0), rhs(:,:,1), &

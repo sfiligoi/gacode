@@ -20,10 +20,10 @@ subroutine cgyro_cmpl_inplace_fma1(sz, left, cleft, c1, r1, abssum)
     implicit none
     !
     integer, intent(in) :: sz
-    complex, intent(inout), dimension(*) :: left
+    complex, intent(inout), contiguous, dimension(*) :: left
     real, intent(in) :: cleft
     real, intent(in) :: c1
-    complex, intent(in), dimension(*) :: r1
+    complex, intent(in), contiguous, dimension(*) :: r1
     real, intent(inout), optional :: abssum
     !
     integer :: i
@@ -60,12 +60,12 @@ subroutine cgyro_cmpl_inplace_fma2(sz, left, cleft, c1, r1, c2, r2, abssum)
     implicit none
     !
     integer, intent(in) :: sz
-    complex, intent(inout), dimension(*) :: left
+    complex, intent(inout), contiguous, dimension(*) :: left
     real, intent(in) :: cleft
     real, intent(in) :: c1
-    complex, intent(in), dimension(*) :: r1
+    complex, intent(in), contiguous, dimension(*) :: r1
     real, intent(in) :: c2
-    complex, intent(in), dimension(*) :: r2
+    complex, intent(in), contiguous, dimension(*) :: r2
     real, intent(inout), optional :: abssum
     !
     integer :: i
@@ -102,14 +102,14 @@ subroutine cgyro_cmpl_inplace_fma3(sz, left, cleft, c1, r1, c2, r2, c3, r3, abss
     implicit none
     !
     integer, intent(in) :: sz
-    complex, intent(inout), dimension(*) :: left
+    complex, intent(inout), contiguous, dimension(*) :: left
     real, intent(in) :: cleft
     real, intent(in) :: c1
-    complex, intent(in), dimension(*) :: r1
+    complex, intent(in), contiguous, dimension(*) :: r1
     real, intent(in) :: c2
-    complex, intent(in), dimension(*) :: r2
+    complex, intent(in), contiguous, dimension(*) :: r2
     real, intent(in) :: c3
-    complex, intent(in), dimension(*) :: r3
+    complex, intent(in), contiguous, dimension(*) :: r3
     real, intent(inout), optional :: abssum
     !
     integer :: i
@@ -147,16 +147,16 @@ subroutine cgyro_cmpl_inplace_fma4(sz, left, cleft, c1, r1, c2, r2, c3, r3, c4, 
     implicit none
     !
     integer, intent(in) :: sz
-    complex, intent(inout), dimension(*) :: left
+    complex, intent(inout), contiguous, dimension(*) :: left
     real, intent(in) :: cleft
     real, intent(in) :: c1
-    complex, intent(in), dimension(*) :: r1
+    complex, intent(in), contiguous, dimension(*) :: r1
     real, intent(in) :: c2
-    complex, intent(in), dimension(*) :: r2
+    complex, intent(in), contiguous, dimension(*) :: r2
     real, intent(in) :: c3
-    complex, intent(in), dimension(*) :: r3
+    complex, intent(in), contiguous, dimension(*) :: r3
     real, intent(in) :: c4
-    complex, intent(in), dimension(*) :: r4
+    complex, intent(in), contiguous, dimension(*) :: r4
     real, intent(inout), optional :: abssum
     !
     integer :: i
@@ -198,8 +198,8 @@ subroutine cgyro_cmpl_copy(sz, left, r1)
     implicit none
     !
     integer, intent(in) :: sz
-    complex, intent(out), dimension(*) :: left
-    complex, intent(in), dimension(*) :: r1
+    complex, intent(out), contiguous, dimension(*) :: left
+    complex, intent(in), contiguous, dimension(*) :: r1
     !
     integer :: i
     !-------------------------------------------------------
@@ -221,8 +221,8 @@ subroutine cgyro_cmpl_copy2(sz, left1, left2, r1)
     implicit none
     !
     integer, intent(in) :: sz
-    complex, intent(out), dimension(*) :: left1
-    complex, intent(out), dimension(*) :: left2
+    complex, intent(out), contiguous, dimension(*) :: left1
+    complex, intent(out), contiguous, dimension(*) :: left2
     complex, intent(in), dimension(*) :: r1
     !
     integer :: i
@@ -254,10 +254,10 @@ subroutine cgyro_cmpl_fma2(sz, left, r1, c2, r2, abssum)
     implicit none
     !
     integer, intent(in) :: sz
-    complex, intent(out), dimension(*) :: left
-    complex, intent(in), dimension(*) :: r1
+    complex, intent(out), contiguous, dimension(*) :: left
+    complex, intent(in), contiguous, dimension(*) :: r1
     real, intent(in) :: c2
-    complex, intent(in), dimension(*) :: r2
+    complex, intent(in), contiguous, dimension(*) :: r2
     real, intent(inout), optional :: abssum
     !
     integer :: i
@@ -294,12 +294,12 @@ subroutine cgyro_cmpl_fma3(sz, left, r1, c2, r2, c3, r3, abssum)
     implicit none
     !
     integer, intent(in) :: sz
-    complex, intent(out), dimension(*) :: left
-    complex, intent(in), dimension(*) :: r1
+    complex, intent(out), contiguous, dimension(*) :: left
+    complex, intent(in), contiguous, dimension(*) :: r1
     real, intent(in) :: c2
-    complex, intent(in), dimension(*) :: r2
+    complex, intent(in), contiguous, dimension(*) :: r2
     real, intent(in) :: c3
-    complex, intent(in), dimension(*) :: r3
+    complex, intent(in), contiguous, dimension(*) :: r3
     real, intent(inout), optional :: abssum
     !
     integer :: i
@@ -336,14 +336,14 @@ subroutine cgyro_cmpl_fma4(sz, left, r1, c2, r2, c3, r3, c4, r4, abssum)
     implicit none
     !
     integer, intent(in) :: sz
-    complex, intent(out), dimension(*) :: left
-    complex, intent(in), dimension(*) :: r1
+    complex, intent(out), contiguous, dimension(*) :: left
+    complex, intent(in), contiguous, dimension(*) :: r1
     real, intent(in) :: c2
-    complex, intent(in), dimension(*) :: r2
+    complex, intent(in), contiguous, dimension(*) :: r2
     real, intent(in) :: c3
-    complex, intent(in), dimension(*) :: r3
+    complex, intent(in), contiguous, dimension(*) :: r3
     real, intent(in) :: c4
-    complex, intent(in), dimension(*) :: r4
+    complex, intent(in), contiguous, dimension(*) :: r4
     real, intent(inout), optional :: abssum
     !
     integer :: i
@@ -380,16 +380,16 @@ subroutine cgyro_cmpl_fma5(sz, left, r1, c2, r2, c3, r3, c4, r4, c5, r5, abssum)
     implicit none
     !
     integer, intent(in) :: sz
-    complex, intent(out), dimension(*) :: left
-    complex, intent(in), dimension(*) :: r1
+    complex, intent(out), contiguous, dimension(*) :: left
+    complex, intent(in), contiguous, dimension(*) :: r1
     real, intent(in) :: c2
-    complex, intent(in), dimension(*) :: r2
+    complex, intent(in), contiguous, dimension(*) :: r2
     real, intent(in) :: c3
-    complex, intent(in), dimension(*) :: r3
+    complex, intent(in), contiguous, dimension(*) :: r3
     real, intent(in) :: c4
-    complex, intent(in), dimension(*) :: r4
+    complex, intent(in), contiguous, dimension(*) :: r4
     real, intent(in) :: c5
-    complex, intent(in), dimension(*) :: r5
+    complex, intent(in), contiguous, dimension(*) :: r5
     real, intent(inout), optional :: abssum
     !
     integer :: i
@@ -426,18 +426,18 @@ subroutine cgyro_cmpl_fma6(sz, left, r1, c2, r2, c3, r3, c4, r4, c5, r5, c6, r6,
     implicit none
     !
     integer, intent(in) :: sz
-    complex, intent(out), dimension(*) :: left
-    complex, intent(in), dimension(*) :: r1
+    complex, intent(out), contiguous, dimension(*) :: left
+    complex, intent(in), contiguous, dimension(*) :: r1
     real, intent(in) :: c2
-    complex, intent(in), dimension(*) :: r2
+    complex, intent(in), contiguous, dimension(*) :: r2
     real, intent(in) :: c3
-    complex, intent(in), dimension(*) :: r3
+    complex, intent(in), contiguous, dimension(*) :: r3
     real, intent(in) :: c4
-    complex, intent(in), dimension(*) :: r4
+    complex, intent(in), contiguous, dimension(*) :: r4
     real, intent(in) :: c5
-    complex, intent(in), dimension(*) :: r5
+    complex, intent(in), contiguous, dimension(*) :: r5
     real, intent(in) :: c6
-    complex, intent(in), dimension(*) :: r6
+    complex, intent(in), contiguous, dimension(*) :: r6
     real, intent(inout), optional :: abssum
     !
     integer :: i
@@ -468,6 +468,57 @@ subroutine cgyro_cmpl_fma6(sz, left, r1, c2, r2, c3, r3, c4, r4, c5, r5, c6, r6,
       enddo
     endif
 end subroutine cgyro_cmpl_fma6
+
+! rN should logically be (sz,n) in size,
+subroutine cgyro_cmpl_fmaN(sz, n, left, r1, cN, rN, abssum)
+    !-------------------------------------------------------
+    implicit none
+    !
+    integer, intent(in) :: sz
+    integer, intent(in) :: n
+    complex, intent(out), contiguous, dimension(*) :: left
+    complex, intent(in), contiguous, dimension(*) :: r1
+    real, intent(in), contiguous, dimension(n) :: cN
+    complex, intent(in), contiguous, dimension(*) :: rN
+    real, intent(inout), optional :: abssum
+    !
+    integer :: i,j
+    complex :: tmp
+    real :: s
+    !-------------------------------------------------------
+    if (present(abssum)) then
+      s = 0.0
+#ifdef _OPENACC
+!$acc parallel loop independent present(left,r1,rN) copyin(cN) private(tmp) reduction(+:s)
+#else
+!$omp parallel do private(tmp) reduction(+:s)
+#endif
+      do i=1,sz
+        tmp = r1(i)
+!$acc loop seq
+        do j=1,n
+           tmp = tmp + cN(j) * rN((j-1)*sz+i)
+        enddo
+        left(i) = tmp
+        s = s + abs(tmp)
+      enddo
+      abssum = s
+    else
+#ifdef _OPENACC
+!$acc parallel loop independent present(left,r1,rN) copyin(cN) private(tmp)
+#else
+!$omp parallel do
+#endif
+      do i=1,sz
+        tmp = r1(i)
+!$acc loop seq
+        do j=1,n
+           tmp = tmp + cN(j) * rN((j-1)*sz+i)
+        enddo
+        left(i) = tmp
+      enddo
+    endif
+end subroutine cgyro_cmpl_fmaN
 
 end module cgyro_math
 
