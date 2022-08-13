@@ -18,83 +18,6 @@ contains
   !=========================================================
 
   !-------------------------------------------------------
-  ! Multiple-add of array, updating left in place
-  !-------------------------------------------------------
-
-subroutine cgyro_vel_inplace_fma1(left, cleft, c1, r1, abssum)
-    use cgyro_globals
-    use cgyro_math
-    !-------------------------------------------------------
-    implicit none
-    !
-    complex, intent(inout), contiguous, dimension(nc,nv_loc) :: left
-    real, intent(in) :: cleft
-    real, intent(in) :: c1
-    complex, intent(in), contiguous, dimension(nc,nv_loc) :: r1
-    real, intent(inout), optional :: abssum
-    !-------------------------------------------------------
-    call cgyro_cmpl_inplace_fma1(nc*nv_loc, left,cleft,c1,r1,abssum)
-end subroutine cgyro_vel_inplace_fma1
-
-subroutine cgyro_vel_inplace_fma2(left, cleft, c1, r1, c2, r2,abssum)
-    use cgyro_globals
-    use cgyro_math
-    !-------------------------------------------------------
-    implicit none
-    !
-    complex, intent(inout), contiguous, dimension(nc,nv_loc) :: left
-    real, intent(in) :: cleft
-    real, intent(in) :: c1
-    complex, intent(in), contiguous, dimension(nc,nv_loc) :: r1
-    real, intent(in) :: c2
-    complex, intent(in), contiguous, dimension(nc,nv_loc) :: r2
-    real, intent(inout), optional :: abssum
-    !-------------------------------------------------------
-    call cgyro_cmpl_inplace_fma2(nc*nv_loc, left,cleft,c1,r1,c2,r2,abssum)
-end subroutine cgyro_vel_inplace_fma2
-
-
-subroutine cgyro_vel_inplace_fma3(left, cleft, c1, r1, c2, r2, c3, r3, abssum)
-    use cgyro_globals
-    use cgyro_math
-    !-------------------------------------------------------
-    implicit none
-    !
-    complex, intent(inout), contiguous, dimension(nc,nv_loc) :: left
-    real, intent(in) :: cleft
-    real, intent(in) :: c1
-    complex, intent(in), contiguous, dimension(nc,nv_loc) :: r1
-    real, intent(in) :: c2
-    complex, intent(in), contiguous, dimension(nc,nv_loc) :: r2
-    real, intent(in) :: c3
-    complex, intent(in), contiguous, dimension(nc,nv_loc) :: r3
-    real, intent(inout), optional :: abssum
-    !-------------------------------------------------------
-    call cgyro_cmpl_inplace_fma3(nc*nv_loc, left,cleft,c1,r1,c2,r2,c3,r3,abssum)
-end subroutine cgyro_vel_inplace_fma3
-
-subroutine cgyro_vel_inplace_fma4(left, cleft, c1, r1, c2, r2, c3, r3, c4, r4, abssum)
-    use cgyro_globals
-    use cgyro_math
-    !-------------------------------------------------------
-    implicit none
-    !
-    complex, intent(inout), contiguous, dimension(nc,nv_loc) :: left
-    real, intent(in) :: cleft
-    real, intent(in) :: c1
-    complex, intent(in), contiguous, dimension(nc,nv_loc) :: r1
-    real, intent(in) :: c2
-    complex, intent(in), contiguous, dimension(nc,nv_loc) :: r2
-    real, intent(in) :: c3
-    complex, intent(in), contiguous, dimension(nc,nv_loc) :: r3
-    real, intent(in) :: c4
-    complex, intent(in), contiguous, dimension(nc,nv_loc) :: r4
-    real, intent(inout), optional :: abssum
-    !-------------------------------------------------------
-    call cgyro_cmpl_inplace_fma4(nc*nv_loc, left,cleft,c1,r1,c2,r2,c3,r3,c4,r4,abssum)
-end subroutine cgyro_vel_inplace_fma4
-
-  !-------------------------------------------------------
   ! Copy one or more arrays
   !-------------------------------------------------------
 
@@ -237,6 +160,31 @@ subroutine cgyro_vel_fmaN(n, left, r1, cN, rN, abssum)
     !-------------------------------------------------------
     call cgyro_cmpl_fmaN(nc*nv_loc,n, left,r1,cN,rN,abssum)
 end subroutine cgyro_vel_fmaN
+
+  !=========================================================
+  ! Specialized merge of 2 FMA with abssum used in gk
+  !=========================================================
+
+subroutine cgyro_vel_solution_werror(n, left, r0, c1, m1, cN, rN, ec1, ecN, abssum_left, abssum_m)
+    use cgyro_globals
+    use cgyro_math
+    !-------------------------------------------------------
+    implicit none
+    !
+    integer, intent(in) :: n
+    complex, intent(inout), contiguous, dimension(nc,nv_loc) :: left
+    complex, intent(in), contiguous, dimension(nc,nv_loc) :: r0
+    real, intent(in) :: c1
+    complex, intent(inout), contiguous, dimension(nc,nv_loc) :: m1
+    real, intent(in), contiguous, dimension(n) :: cN
+    complex, intent(in), contiguous, dimension(nc,nv_loc,n) :: rN
+    real, intent(in) :: ec1
+    real, intent(in), contiguous, dimension(n) :: ecN
+    real, intent(inout) :: abssum_left
+    real, intent(inout) :: abssum_m
+    !-------------------------------------------------------
+    call cgyro_cmpl_solution_werror(nc*nv_loc,n, left,r0,c1,m1,cN,rN,ec1,ecN,abssum_left,abssum_m)
+end subroutine cgyro_vel_solution_werror
 
 end module cgyro_globals_math
 

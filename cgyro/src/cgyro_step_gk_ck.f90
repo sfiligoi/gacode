@@ -127,27 +127,25 @@ subroutine cgyro_step_gk_ck
      call cgyro_field_c
      call cgyro_rhs(6)
 
-     ! SOLUTION
+     !-------------------
+     ! SOLUTION and ERROR
+     !-------------------
 
      call timer_lib_in('str')
-     ! cannot use cgyro_vel_fmaN, as the 4 arrays are not contiguous
-     call cgyro_vel_fma5(h_x, &
+     ! using a multiplication by 0 in one element is still efffienct, since the matrix element was read for the 2nd equation
+     call cgyro_vel_solution_werror(4, h_x, &
             h0_x, &
-            deltah2*( 37.d0/ 378.d0), rhs(:,:,1), &
-            deltah2*(250.d0/ 621.d0), rhs(:,:,3), &
-            deltah2*(125.d0/ 594.d0), rhs(:,:,4), &
-            deltah2*(512.d0/1771.d0), rhs(:,:,6), &
-            error_hx)
-
-     ! ERROR
-
-     call cgyro_vel_inplace_fma4(rhs(:,:,1), &
-            deltah2*(  37.d0/378.d0- 2825.d0/27648.d0), &
-            deltah2*( 250.d0/621.d0-18575.d0/48384.d0), rhs(:,:,3), &
-            deltah2*( 125.d0/594.d0-13525.d0/55296.d0), rhs(:,:,4), &
-            deltah2*(-277.d0/14336.d0),                 rhs(:,:,5), &
-            deltah2*( 512.d0/1771.d0-  1.d0/4.d0),      rhs(:,:,6), &
-            error_rhs)
+            deltah2*(    37.d0/ 378.d0), rhs(:,:,1), &
+            (/ deltah2*(250.d0/ 621.d0), &
+               deltah2*(125.d0/ 594.d0), 0.d0, &
+               deltah2*(512.d0/1771.d0) /), &
+            rhs(:,:,3:6), &
+            deltah2*(     37.d0/378.d0- 2825.d0/27648.d0), &
+            (/ deltah2*( 250.d0/621.d0-18575.d0/48384.d0), &
+               deltah2*( 125.d0/594.d0-13525.d0/55296.d0), &
+               deltah2*(-277.d0/14336.d0), &
+               deltah2*( 512.d0/1771.d0-1.d0/4.d0) /), &
+            error_hx, error_rhs)
      call timer_lib_out('str')
 
      call timer_lib_in('str_comm')

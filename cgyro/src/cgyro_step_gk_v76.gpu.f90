@@ -229,61 +229,28 @@ subroutine cgyro_step_gk_v76
      call cgyro_field_c
      call cgyro_rhs(10-1)
 
-     !---------
-     ! SOLUTION
-     !---------
+     !-------------------
+     ! SOLUTION and ERROR
+     !-------------------
      
      call timer_lib_in('str')
-!$acc parallel loop collapse(2) independent present(h0_x,h_x,rhs)
-     do iv_loc=1,nv_loc
-        do ic=1,nc
-           h_x(ic,iv_loc) = h0_x(ic,iv_loc) &
-                + deltah2*(b1*rhs(ic,iv_loc,1) &
-                + b4*rhs(ic,iv_loc,4-1) &
-                + b5*rhs(ic,iv_loc,5-1) &
-                + b6*rhs(ic,iv_loc,6-1) &
-                + b7*rhs(ic,iv_loc,7-1) &
-                + b8*rhs(ic,iv_loc,8-1) &
-                + b9*rhs(ic,iv_loc,9-1))
-        enddo
-     enddo
-     call timer_lib_out('str')
-
-     !---------
-     ! ERROR
-     !---------
-
-     call timer_lib_in('str')
-     error_rhs = 0.0
-!$acc parallel loop collapse(2) gang present(rhs) reduction(+:error_rhs)
-     do iv_loc=1,nv_loc
-        do ic=1,nc
-           rhs(ic,iv_loc,1) = deltah2*( &
-                (b1-b1h)*rhs(ic,iv_loc,1) &
-                + (b4-b4h)*rhs(ic,iv_loc,4-1) &
-                + (b5-b5h)*rhs(ic,iv_loc,5-1) &
-                + (b6-b6h)*rhs(ic,iv_loc,6-1) &
-                + (b7-b7h)*rhs(ic,iv_loc,7-1) &
-                + (b8-b8h)*rhs(ic,iv_loc,8-1) &
-                + (b9-b9h)*rhs(ic,iv_loc,9-1) &
-                + (b10-b10h)*rhs(ic,iv_loc,10-1))
-           error_rhs = error_rhs + abs(rhs(ic,iv_loc,1))
-        enddo
-     enddo
-    
-     error_hx = 0.0
-!$acc parallel loop collapse(2) independent present(h_x) reduction(+:error_hx)
-     do iv_loc=1,nv_loc
-        do ic=1,nc
-           error_hx = error_hx + abs(h_x(ic,iv_loc))
-        enddo
-     enddo
-     
-     error_x(1) = error_rhs
-     error_x(2) = error_hx
+     ! using a multiplication by 0 in one element is still efffienct, since the matrix element was read for the 2nd equation
+     call cgyro_vel_solution_werror(7, h_x, &
+            h0_x, &
+            deltah2*b1, rhs(:,:,1), &
+            (/ deltah2*b4, deltah2*b5, deltah2*b6, deltah2*b7, &
+               deltah2*b8, deltah2*b9, deltah2*b10 /), &
+            rhs(:,:,(4-1):(10-1)), &
+            deltah2*(b1-b1h), &
+            (/ deltah2*(b4-b4h), deltah2*(b5-b5h), deltah2*(b6-b6h), deltah2*(b7-b7h), &
+               deltah2*(b8-b8h), deltah2*(b9-b9h), deltah2*(b10-b10h) /), &
+            error_hx, error_rhs)
      call timer_lib_out('str')
 
      call timer_lib_in('str_comm')
+     error_x(1) = error_rhs
+     error_x(2) = error_hx
+
      call MPI_ALLREDUCE(error_x,error_sum,2,MPI_DOUBLE_PRECISION, &
           MPI_SUM,CGYRO_COMM_WORLD,i_err)
      call timer_lib_out('str_comm')
