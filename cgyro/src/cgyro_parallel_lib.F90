@@ -378,6 +378,24 @@ contains
 
   end subroutine parallel_slib_init
 
+  ! test an async req, to progress async operations
+  subroutine parallel_slib_test(req)
+    use mpi
+    !-------------------------------------------------------
+    implicit none
+    !
+    integer, intent(inout) :: req
+    !
+    logical :: iflag
+    integer :: ierr
+    integer :: istat(MPI_STATUS_SIZE)
+    !-------------------------------------------------------
+
+    call MPI_REQUEST_GET_STATUS(req, iflag, istat, ierr)
+    ! we discard all the outputs... it is just a way to progress async mpi
+
+  end subroutine parallel_slib_test
+
 !=========================================================
 
   subroutine parallel_slib_f_nc(x,xt)
@@ -404,14 +422,64 @@ contains
 
   end subroutine parallel_slib_f_nc
 
+  subroutine parallel_slib_f_nc_async(x,xt,req)
+
+    use mpi
+
+    !-------------------------------------------------------
+    implicit none
+    !
+    complex, intent(in), dimension(nkeep,nsplit*nn) :: x
+    complex, intent(inout), dimension(nkeep,nsplit,nn) :: xt
+    integer, intent(inout) :: req
+    !
+    integer :: ierr
+    !-------------------------------------------------------
+
+    call MPI_IALLTOALL(x, &
+         nkeep*nsplit, &
+         MPI_DOUBLE_COMPLEX, &
+         xt, &
+         nkeep*nsplit, &
+         MPI_DOUBLE_COMPLEX, &
+         slib_comm, &
+         req, &
+         ierr)
+
+  end subroutine parallel_slib_f_nc_async
+
+  ! require x and xt to ensure they exist until this finishes
+  subroutine parallel_slib_f_nc_wait(x,xt,req)
+
+    use mpi
+
+    !-------------------------------------------------------
+    implicit none
+    !
+    complex, intent(in), dimension(nkeep,nsplit*nn) :: x
+    complex, intent(inout), dimension(nkeep,nsplit,nn) :: xt
+    integer, intent(inout) :: req
+    !
+    integer :: ierr
+    integer :: istat(MPI_STATUS_SIZE)
+    !-------------------------------------------------------
+
+    call MPI_WAIT(req, &
+         istat, &
+         ierr)
+
+  end subroutine parallel_slib_f_nc_wait
+
 #ifdef _OPENACC
-  subroutine parallel_slib_f_nc_gpu(x,xt)
+
+  subroutine parallel_slib_f_nc_async_gpu(x,xt,req)
     use mpi
     !-------------------------------------------------------
     implicit none
     !
     complex, intent(in), dimension(nkeep,nsplit*nn) :: x
     complex, intent(inout), dimension(nkeep,nsplit,nn) :: xt
+    integer, intent(inout) :: req
     !
     integer :: ierr
     !-------------------------------------------------------
@@ -422,25 +490,55 @@ contains
 #else
 !$acc host_data use_device(x,xt)
 #endif
- 
-   call MPI_ALLTOALL(x, &
+
+   call MPI_IALLTOALL(x, &
          nkeep*nsplit, &
          MPI_DOUBLE_COMPLEX, &
          xt, &
          nkeep*nsplit, &
          MPI_DOUBLE_COMPLEX, &
          slib_comm, &
+         req, &
          ierr)
 
 #ifdef DISABLE_GPUDIRECT_MPI
-!$acc update device(xt)
+   !do nothing yet, async
 #else
 !$acc end host_data
 #endif
 
 !$acc end data
 
-  end subroutine parallel_slib_f_nc_gpu
+  end subroutine parallel_slib_f_nc_async_gpu
+
+  ! require x and xt to ensure they exist until this finishes
+  subroutine parallel_slib_f_nc_wait_gpu(x,xt,req)
+    use mpi
+    !-------------------------------------------------------
+    implicit none
+    !
+    complex, intent(in), dimension(nkeep,nsplit*nn) :: x
+    complex, intent(inout), dimension(nkeep,nsplit,nn) :: xt
+    integer, intent(inout) :: req
+    !
+    integer :: ierr
+    integer :: istat(MPI_STATUS_SIZE)
+    !-------------------------------------------------------
+
+!$acc data present(xt)
+
+    call MPI_WAIT(req, &
+         istat, &
+         ierr)
+
+#ifdef DISABLE_GPUDIRECT_MPI
+!$acc update device(xt)
+#endif
+
+!$acc end data
+
+  end subroutine parallel_slib_f_nc_wait_gpu
+
 #endif
 
  !=========================================================

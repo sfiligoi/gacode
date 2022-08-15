@@ -48,7 +48,7 @@ all: $(LLIB).a $(EXEC1) $(EXEC2) Makefile
 $(EXEC1): $(LLIB).a $(EXEC1).o
 	$(FC) $(FFLAGS) -o $(EXEC1) $(EXEC1).o $(LLIB).a $(LMATH) 
 $(EXEC2): $(LLIB).a $(EXEC2).o
-	$(FC) $(FFLAGS) -o $(EXEC2) $(EXEC2).o $(LLIB).a $(LMATH) $(NN_LIB)
+	$(FC) $(FFLAGS) -o $(EXEC2) $(EXEC2).o $(LLIB).a $(LMATH)
 
 $(LLIB).a: $(OBJECTS)
 	$(ARCH) $(LLIB).a $(OBJECTS)

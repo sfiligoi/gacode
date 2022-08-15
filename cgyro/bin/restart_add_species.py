@@ -32,7 +32,7 @@ class CgyroInput:
                 self.user_dict[arg] = val
 
     def isSameGrid(self, other):
-         cmpArgs=["N_ENERGY","N_XI","N_THETA","N_RADIAL","N_TOROIDAL"]
+         cmpArgs=["N_ENERGY","N_XI","N_THETA","N_RADIAL","N_TOROIDAL","VELOCITY_ORDER"]
          isSame=True
          for arg in cmpArgs: isSame = isSame and (self.user_dict[arg]==other.user_dict[arg])
          return isSame
@@ -162,7 +162,11 @@ if (not new_cfg.isSpeciesSuperset(old_cfg,diff_species)):
     print("ERROR: New species are not a superset of the old ones")
     sys.exit(11)
 
+if diff_species["org_pre"]>0:
+  print("INFO: Keeping first %i species"%diff_species["org_pre"])
 print("INFO: Adding %i species"%diff_species["new_species"])
+if diff_species["org_post"]>0:
+  print("INFO: Keeping last %i species"%diff_species["org_post"])
 try:
   restart_resize.add_species(old_dir, new_dir, grid_obj,
                                    diff_species["org_pre"],diff_species["org_post"],diff_species["new_species"])
