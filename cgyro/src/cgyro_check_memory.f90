@@ -88,9 +88,9 @@ subroutine cgyro_check_memory(datafile)
      case(2)
         call cgyro_alloc_add(io,nc*nv_loc*16.0,'h0_old')
         call cgyro_alloc_add(io,7*nc*nv_loc*16.0,'rhs')
-     case(5)
+     case(3)
         call cgyro_alloc_add(io,nc*nv_loc*16.0,'h0_old')
-        call cgyro_alloc_add(io,10*nc*nv_loc*16.0,'rhs')
+        call cgyro_alloc_add(io,9*nc*nv_loc*16.0,'rhs')
      case default
         ! Normal timestep
         call cgyro_alloc_add(io,4*nc*nv_loc*16.0,'rhs')

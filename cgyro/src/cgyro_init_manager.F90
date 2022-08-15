@@ -198,7 +198,7 @@ subroutine cgyro_init_manager
 !$acc enter data create(rhs,h0_old)
      case(3)
         allocate(h0_old(nc,nv_loc))
-        allocate(rhs(nc,nv_loc,10))
+        allocate(rhs(nc,nv_loc,9))
 !$acc enter data create(rhs,h0_old)
      case default
         ! Normal timestep

@@ -46,7 +46,7 @@ subroutine cgyro_shear_hammett
 
      call timer_lib_out('shear')
 
-     call cgyro_field_c_gpu
+     call cgyro_field_c
 
   endif
 
@@ -69,7 +69,7 @@ subroutine cgyro_shear_hammett
      enddo
      call timer_lib_out('shear')
 
-     call cgyro_field_c_gpu
+     call cgyro_field_c
 
   endif
 

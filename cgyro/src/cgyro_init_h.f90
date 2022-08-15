@@ -175,7 +175,7 @@ subroutine cgyro_init_h
      endif
   end select
 
-  call cgyro_field_c
+  call cgyro_field_c_cpu
 
   ! Initialize time-history of fields (-3,-2,-1) to initial field.
   field_old  = field
