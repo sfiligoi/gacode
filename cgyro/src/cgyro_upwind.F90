@@ -23,10 +23,13 @@ subroutine cgyro_upwind_r64
   implicit none
 
   integer :: is,ie,ix
+#ifdef _OPENACC
   complex :: res_loc_one, res_loc_two
+#endif
 
   call timer_lib_in('str')
 
+#ifdef _OPENACC
 !$acc parallel loop collapse(2) gang &
 !$acc&         private(res_loc_one,iv) &
 !$acc&         present(g_x,upfac1,is_v,upwind_res_loc) default(none)
@@ -55,6 +58,21 @@ subroutine cgyro_upwind_r64
     enddo
 
   enddo
+#else
+  upwind_res_loc(:,:,:) = (0.0,0.0)
+
+!$omp parallel private(iv_loc,ic,is)
+!$omp do reduction(+:upwind_res_loc)
+  do iv=nv1,nv2
+     iv_loc = iv-nv1+1
+     is = is_v(iv)
+     do ic=1,nc
+        upwind_res_loc(ic,is,:) = upwind_res_loc(ic,is,:)+upfac1(ic,iv_loc,:)*g_x(ic,iv_loc)
+     enddo
+  enddo
+!$omp end do
+!$omp end parallel
+#endif
 
   call timer_lib_out('str')
 
@@ -84,9 +102,13 @@ subroutine cgyro_upwind_r64
 
   call timer_lib_in('str')
 
+#ifdef _OPENACC
 !$acc parallel loop collapse(2) independent &
 !$acc&         present(is_v,ix_v,ie_v,xi,vel,upfac2,g_x,upwind_res) &
 !$acc&         private(iv_loc,is,ix,ie) default(none)
+#else
+!$omp parallel do private(iv_loc,is,ix,ie,ic)
+#endif
   do iv=nv1,nv2
      do ic=1,nc
         iv_loc = iv-nv1+1
@@ -113,10 +135,13 @@ subroutine cgyro_upwind_r32
   implicit none
 
   integer :: is,ie,ix
+#ifdef _OPENACC
   complex(KIND=REAL32) :: res_loc_one, res_loc_two
+#endif
 
   call timer_lib_in('str')
 
+#ifdef _OPENACC
 !$acc parallel loop collapse(2) gang &
 !$acc&         private(res_loc_one,iv) &
 !$acc&         present(g_x,upfac1,is_v,upwind32_res_loc) default(none)
@@ -145,6 +170,21 @@ subroutine cgyro_upwind_r32
     enddo
 
   enddo
+#else
+  upwind32_res_loc(:,:,:) = (0.0,0.0)
+
+!$omp parallel private(iv_loc,ic,is)
+!$omp do reduction(+:upwind32_res_loc)
+  do iv=nv1,nv2
+     iv_loc = iv-nv1+1
+     is = is_v(iv)
+     do ic=1,nc
+        upwind32_res_loc(ic,is,:) = upwind32_res_loc(ic,is,:)+upfac1(ic,iv_loc,:)*g_x(ic,iv_loc)
+     enddo
+  enddo
+!$omp end do
+!$omp end parallel
+#endif
 
   call timer_lib_out('str')
 
@@ -174,9 +214,13 @@ subroutine cgyro_upwind_r32
 
   call timer_lib_in('str')
 
+#ifdef _OPENACC
 !$acc parallel loop collapse(2) independent &
 !$acc&         present(is_v,ix_v,ie_v,xi,vel,upfac2,g_x,upwind32_res) &
 !$acc&         private(iv_loc,is,ix,ie) default(none)
+#else
+!$omp parallel do private(iv_loc,is,ix,ie,ic)
+#endif
   do iv=nv1,nv2
      do ic=1,nc
         iv_loc = iv-nv1+1
