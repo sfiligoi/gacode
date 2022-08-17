@@ -215,8 +215,16 @@ subroutine cgyro_cleanup
      deallocate(gpack)
   endif
   if (allocated(cmat)) then
-!$acc exit data delete(cmat) if (gpu_bigmem_flag == 1)     
+!$acc exit data delete(cmat) if (gpu_bigmem_flag == 1)
      deallocate(cmat)
+  endif
+  if (allocated(cmat_fp32)) then
+!$acc exit data delete(cmat_fp32) if (gpu_bigmem_flag == 1)
+     deallocate(cmat_fp32)
+  endif
+  if (allocated(cmat_stripes)) then
+!$acc exit data delete(cmat_stripes) if (gpu_bigmem_flag == 1)
+     deallocate(cmat_stripes)
   endif
     if (allocated(cmat_simple)) then
 !$acc exit data delete(cmat_simple)     

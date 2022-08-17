@@ -8,7 +8,7 @@
 !                       H = h + ze/T G phi
 !------------------------------------------------------------------------------
 
-subroutine cgyro_calc_collision_cpu(nj_loc,update_chv)
+subroutine cgyro_calc_collision_cpu_fp64(nj_loc,update_chv)
 
   use parallel_lib
   use cgyro_globals
@@ -60,6 +60,84 @@ subroutine cgyro_calc_collision_cpu(nj_loc,update_chv)
           enddo
     endif
  enddo
+
+end subroutine cgyro_calc_collision_cpu_fp64
+
+subroutine cgyro_calc_collision_cpu_fp32(nj_loc,update_chv)
+
+  use parallel_lib
+  use cgyro_globals
+
+  ! --------------------------------------------------
+  implicit none
+  !
+  integer, intent(in) :: nj_loc
+  logical, intent(in) :: update_chv
+  !
+  integer :: ivp,j,k,dv
+  complex, dimension(nv) :: bvec,cvec
+  real :: cvec_re,cvec_im
+  real :: cval
+  ! --------------------------------------------------
+
+!$omp parallel do private(ic,ic_loc,iv,ivp,cvec,bvec,cvec_re,cvec_im,cval,j,k,dv) &
+!$omp&            shared(cap_h_v,fsendf,cmat_fp32,cmat_stripes)
+  do ic=nc1,nc2
+
+     ic_loc = ic-nc1+1
+     ! Set-up the RHS: H = f + ze/T G phi
+
+     do iv=1,nv
+        cvec(iv) = cap_h_v(ic_loc,iv)
+     enddo
+
+     bvec(:) = (0.0,0.0)
+
+     ! This is a key loop for performance
+     do ivp=1,nv
+        cvec_re = real(cvec(ivp))
+        cvec_im = aimag(cvec(ivp))
+        do iv=1,nv
+           dv = iv-ivp
+           if (abs(dv) .GT. cmat_full_stripes) then
+              cval = cmat_fp32(iv,ivp,ic_loc)
+           else
+              cval = cmat_stripes(dv,ivp,ic_loc)
+           endif
+           bvec(iv) = bvec(iv)+ cmplx(cval*cvec_re, cval*cvec_im)
+        enddo
+     enddo
+
+    do k=1,nproc
+       do j=1,nj_loc
+          fsendf(j,ic_loc,k) = bvec(j+(k-1)*nj_loc)
+       enddo
+    enddo
+
+    if (update_chv) then
+          do iv=1,nv
+             cap_h_v(ic_loc,iv) = bvec(iv)
+          enddo
+    endif
+ enddo
+end subroutine cgyro_calc_collision_cpu_fp32
+
+subroutine cgyro_calc_collision_cpu(nj_loc,update_chv)
+
+  use cgyro_globals
+
+  ! --------------------------------------------------
+  implicit none
+  !
+  integer, intent(in) :: nj_loc
+  logical, intent(in) :: update_chv
+  ! --------------------------------------------------
+
+  if (cmat_full_stripes .GT. 0) then
+     call cgyro_calc_collision_cpu_fp32(nj_loc,update_chv)
+  else
+     call cgyro_calc_collision_cpu_fp64(nj_loc,update_chv)
+  endif
 
 end subroutine cgyro_calc_collision_cpu
 
@@ -227,7 +305,7 @@ end subroutine cgyro_step_collision_cpu
 
   ! ==================================================
 
-subroutine cgyro_calc_collision_gpu(nj_loc,update_chv)
+subroutine cgyro_calc_collision_gpu_fp64(nj_loc,update_chv)
 
   use parallel_lib
   use cgyro_globals
@@ -275,6 +353,80 @@ subroutine cgyro_calc_collision_gpu(nj_loc,update_chv)
         enddo
      endif
   enddo
+end subroutine cgyro_calc_collision_gpu_fp64
+
+subroutine cgyro_calc_collision_gpu_fp32(nj_loc,update_chv)
+
+  use parallel_lib
+  use cgyro_globals
+
+  ! --------------------------------------------------
+  implicit none
+  !
+  integer, intent(in) :: nj_loc
+  logical, intent(in) :: update_chv
+  !
+
+  integer :: j,k,ivp,dv
+  real :: b_re,b_im
+  real :: cval
+  ! --------------------------------------------------
+
+!$acc parallel loop gang &
+!$acc& present(cmat_fp32,cmat_stripes,cap_h_v,fsendf)  private(k,ic,j,ic_loc)
+  do ic=nc1,nc2
+     ic_loc = ic-nc1+1
+!$acc loop vector collapse(2) private(b_re,b_im,cval,ivp,iv)
+     do k=1,nproc
+        do j=1,nj_loc
+           iv = j+(k-1)*nj_loc
+           b_re = 0.0
+           b_im = 0.0
+!$acc loop seq private(cval,dv)
+           do ivp=1,nv
+              dv = iv-ivp
+              if (abs(dv) .GT. cmat_full_stripes) then
+                 cval = cmat_fp32(iv,ivp,ic_loc)
+              else
+                 cval = cmat_stripes(dv,ivp,ic_loc)
+              endif
+              b_re = b_re + cval*real(cap_h_v(ic_loc,ivp))
+              b_im = b_im + cval*aimag(cap_h_v(ic_loc,ivp))
+           enddo
+
+           fsendf(j,ic_loc,k) = cmplx(b_re,b_im)
+        enddo
+     enddo
+
+     if (update_chv) then
+!$acc loop collapse(2) vector private(iv)
+        do k=1,nproc
+           do j=1,nj_loc
+              iv = j+(k-1)*nj_loc
+              cap_h_v(ic_loc,iv) = fsendf(j,ic_loc,k)
+           enddo
+        enddo
+     endif
+  enddo
+end subroutine cgyro_calc_collision_gpu_fp32
+
+subroutine cgyro_calc_collision_gpu(nj_loc,update_chv)
+
+  use cgyro_globals
+
+  ! --------------------------------------------------
+  implicit none
+  !
+  integer, intent(in) :: nj_loc
+  logical, intent(in) :: update_chv
+  ! --------------------------------------------------
+
+  if (cmat_full_stripes .GT. 0) then
+     call cgyro_calc_collision_gpu_fp32(nj_loc,update_chv)
+  else
+     call cgyro_calc_collision_gpu_fp64(nj_loc,update_chv)
+  endif
+
 end subroutine cgyro_calc_collision_gpu
 
 subroutine cgyro_calc_collision_simple_gpu(nj_loc)

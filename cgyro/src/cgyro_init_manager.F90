@@ -38,6 +38,8 @@ subroutine cgyro_init_manager
   integer, parameter :: singlePrecision = selected_real_kind(6,30)
 #endif
 
+  character(len=128) :: msg
+
   if (hiprec_flag == 1) then
      fmtstr  = '(es16.9)'
      fmtstr_len = 17
@@ -258,10 +260,21 @@ subroutine cgyro_init_manager
 !$acc enter data create(fpack,gpack,f_nl,g_nl)
      endif
 
+     ! TODO: hardcoded for now, should be read from the input file
+     cmat_full_stripes = 8
+
      if (collision_model == 5) then
         allocate(cmat_simple(n_xi,n_xi,n_energy,n_species,n_theta))
      else
-        allocate(cmat(nv,nv,nc_loc))
+        if (cmat_full_stripes .GT. 0) then
+           allocate(cmat_stripes(-cmat_full_stripes:cmat_full_stripes,nv,nc_loc))
+           allocate(cmat_fp32(nv,nv,nc_loc))
+
+           write (msg, "(A20,I4,A9)") "Using cmat_fp32 with ",cmat_full_stripes, " stripes."
+           call cgyro_info(msg)
+        else
+           allocate(cmat(nv,nv,nc_loc))
+        endif
      endif
 
   endif

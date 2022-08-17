@@ -16,6 +16,7 @@ subroutine cgyro_init_collision
   real :: mo1,mo2,en1,en2 ! von mir
   integer :: jv
   integer :: is,ir,it,ix,ie,js,je,jx,ks
+  integer :: dv
   ! parameters for matrix solve
   real, dimension(:,:), allocatable :: amat
   real, dimension(:,:,:,:,:,:), allocatable :: ctest
@@ -167,6 +168,13 @@ subroutine cgyro_init_collision
   allocate(rsvec(n_species,n_species,n_xi,n_energy))
   allocate(rsvect0(n_species,n_species,n_xi,n_energy))
   allocate(rsvect1(n_species,n_species,n_xi,n_energy))
+
+  if (cmat_full_stripes .GT. 0) then
+     ! cmat is a temp variable in this case
+     allocate(cmat(nv,nv,nc_loc))
+  endif
+  ! else it is a global one
+
   allocate(amat(nv,nv))
 
   ! Collision test particle component
@@ -591,7 +599,8 @@ subroutine cgyro_init_collision
 !$omp& private(ic,ic_loc,it,ir,info) &
 !$omp& private(iv,is,ix,ie,jv,js,jx,je,ks) &
 !$omp& private(amat,i_piv) &
-!$omp& shared(cmat)
+!$omp& private(dv) firstprivate(cmat_full_stripes) &
+!$omp& shared(cmat,cmat_fp32,cmat_stripes)
   do ic=nc1,nc2
    
      ic_loc = ic-nc1+1
@@ -755,12 +764,48 @@ subroutine cgyro_init_collision
      ! Lapack factorization and inverse of LHS
      call DGESV(nv,nv,cmat(:,:,ic_loc),size(cmat,1), &
           i_piv,amat,size(amat,1),info)
-     cmat(:,:,ic_loc) = amat(:,:)
+
+
+     ! result in amat, transfer to the right cmat matrix
+     if (cmat_full_stripes .GT. 0) then
+        do jv=1,nv
+           cmat_stripes(:,jv,ic_loc) = 0.0
+           do iv=1,nv
+              dv = iv-jv
+              if (abs(dv) .GT. cmat_full_stripes) then
+                 ! far from diagonal, keep low precision only
+                 cmat_fp32(iv,jv,ic_loc) = amat(iv,jv)
+              else
+                 ! close to the diagonal, keep full precision
+                 cmat_stripes(dv,jv,ic_loc) = amat(iv,jv)
+                 ! set main matrix to 0, for ease of compute later
+                 cmat_fp32(iv,jv,ic_loc) = 0.0
+              endif
+           enddo
+        enddo
+     else
+        ! keep all cmat in full precision
+        cmat(:,:,ic_loc) = amat(:,:)
+     endif
 
   enddo
-!$acc enter data copyin(cmat) if (gpu_bigmem_flag == 1)
-
   deallocate(amat)
+
+  if (cmat_full_stripes .GT. 0) then
+     ! cmat was a temp variable
+     deallocate(cmat)
+     ! create a small dummy one, so we have something in GPU memory
+     allocate(cmat(1,1,1))
+  else
+     ! keep all cmat in full precision
+     ! but create dummy low-precision ones to have something in gpu memory
+     allocate(cmat_stripes(1,1,1))
+     allocate(cmat_fp32(1,1,1))
+  endif
+
+!$acc enter data copyin(cmat_stripes,cmat_fp32,cmat) if (gpu_bigmem_flag == 1)
+
+
   deallocate(i_piv)
   deallocate(nu_d)
   deallocate(nu_par)
