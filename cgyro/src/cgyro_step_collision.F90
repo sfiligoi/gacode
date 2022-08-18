@@ -64,7 +64,78 @@ subroutine cgyro_calc_collision_cpu(nj_loc)
 end subroutine cgyro_calc_collision_cpu
 
 #ifndef _OPENACC
-subroutine cgyro_step_collision_cpu
+
+subroutine cgyro_calc_collision_simple_cpu(nj_loc)
+
+  use parallel_lib
+  use cgyro_globals
+
+  implicit none
+  !
+  integer, intent(in) :: nj_loc
+  !
+
+  integer :: is,ie,ix,jx,it,ir,j,k
+  integer :: ivp
+  complex, dimension(:,:,:),allocatable :: bvec,cvec
+  complex :: bvec_flat(nv)
+  real :: cvec_re,cvec_im
+
+  allocate(bvec(n_xi,n_energy,n_species))
+  allocate(cvec(n_xi,n_energy,n_species))
+
+!$omp parallel do private(ic_loc,ivp,iv,is,ix,jx,ie,ir,it,cvec_re,cvec_im,bvec,cvec,bvec_flat,k,j)
+  do ic=nc1,nc2
+     ic_loc = ic-nc1+1
+     ir = ir_c(ic)
+     it = it_c(ic)
+
+     ! Set-up the RHS: H = f + ze/T G phi
+
+     do iv=1,nv
+        cvec(ix_v(iv),ie_v(iv),is_v(iv)) = cap_h_v(ic_loc,iv)
+     enddo
+
+     ! Avoid singularity of n=0,p=0:
+     if (px(ir) == 0 .and. n == 0) then
+        bvec = cvec
+     else
+
+        bvec = 0.0
+
+        do is=1,n_species
+           do ie=1,n_energy              
+              do jx=1,n_xi
+
+                 cvec_re = real(cvec(jx,ie,is))
+                 cvec_im = aimag(cvec(jx,ie,is))
+
+                 do ix=1,n_xi
+                    bvec(ix,ie,is) = bvec(ix,ie,is)+ &
+                         cmplx(cmat_simple(ix,jx,ie,is,it)*cvec_re, &
+                         cmat_simple(ix,jx,ie,is,it)*cvec_im)
+                 enddo
+              enddo
+           enddo
+        enddo
+     endif
+
+     do iv=1,nv
+        bvec_flat(iv) = bvec(ix_v(iv),ie_v(iv),is_v(iv))
+     enddo
+
+     do k=1,nproc
+        do j=1,nj_loc
+           fsendf(j,ic_loc,k) = bvec_flat(j+(k-1)*nj_loc)
+        enddo
+     enddo
+
+  enddo
+
+  deallocate(bvec,cvec)
+end subroutine cgyro_calc_collision_simple_cpu
+
+subroutine cgyro_step_collision_cpu(use_simple)
 
   use parallel_lib
   use timer_lib
@@ -72,6 +143,9 @@ subroutine cgyro_step_collision_cpu
   use cgyro_globals
 
   implicit none
+  !
+  logical, intent(in) :: use_simple
+  !
 
   integer :: is,nj_loc
 
@@ -88,15 +162,21 @@ subroutine cgyro_step_collision_cpu
   call timer_lib_in('coll')
 
   call parallel_lib_nj_loc(nj_loc)
-  call cgyro_calc_collision_cpu(nj_loc)
+  if (use_simple) then
+     call cgyro_calc_collision_simple_cpu(nj_loc)
+  else
+     call cgyro_calc_collision_cpu(nj_loc)
+  endif
 
   call timer_lib_out('coll')
 
-  ! Compute the new phi
-  if (collision_field_model == 1) then
-     if (.not.(n == 0 .and. ae_flag == 1)) then
+  if (.not. use_simple) then
+    ! Compute the new phi
+    if (collision_field_model == 1) then
+      if (.not.(n == 0 .and. ae_flag == 1)) then
         call cgyro_field_v
-     endif
+      endif
+    endif
   endif
 
   call timer_lib_in('coll_comm')
@@ -194,7 +274,103 @@ subroutine cgyro_calc_collision_gpu(nj_loc)
   enddo
 end subroutine cgyro_calc_collision_gpu
 
-subroutine cgyro_step_collision_gpu
+subroutine cgyro_calc_collision_simple_gpu(nj_loc)
+
+  use parallel_lib
+
+  use cgyro_globals
+
+  implicit none
+  !
+  integer, intent(in) :: nj_loc
+  !
+
+  integer :: is,ie,ix,jx,it,ir,j,k
+  integer :: ivp
+  complex, dimension(:,:,:),allocatable :: bvec,cvec
+  complex :: bvec_flat(nv)
+  real :: cvec_re,cvec_im
+
+  allocate(bvec(n_xi,n_energy,n_species))
+  allocate(cvec(n_xi,n_energy,n_species))
+
+!$acc parallel loop gang num_workers(4) vector_length(32) &
+!$acc&         present(ix_v,ie_v,is_v,ir_c,it_c,px,cap_h_v,cmat_simple,fsendf) &
+!$acc&         private(bvec,cvec,bvec_flat) &
+!$acc&         private(ic_loc,ir,it,cvec_re,cvec_im) 
+  do ic=nc1,nc2
+
+     ic_loc = ic-nc1+1
+     ir = ir_c(ic)
+     it = it_c(ic)
+
+     ! Set-up the RHS: H = f + ze/T G phi
+
+!$acc loop worker vector
+     do iv=1,nv
+        cvec(ix_v(iv),ie_v(iv),is_v(iv)) = cap_h_v(ic_loc,iv)
+     enddo
+
+     ! Avoid singularity of n=0,p=0:
+     if (px(ir) == 0 .and. n == 0) then
+
+!$acc loop worker collapse(2)
+        do is=1,n_species
+           do ie=1,n_energy              
+!$acc loop vector
+             do ix=1,n_xi
+               bvec(ix,ie,is) = cvec(ix,ie,is)
+             enddo
+           enddo
+        enddo
+     else
+
+!$acc loop worker collapse(2)
+        do is=1,n_species
+           do ie=1,n_energy              
+
+!$acc loop vector
+              do ix=1,n_xi
+                 bvec(ix,ie,is) = 0.0
+              enddo
+
+!$acc loop seq
+              do jx=1,n_xi
+
+                 cvec_re = real(cvec(jx,ie,is))
+                 cvec_im = aimag(cvec(jx,ie,is))
+
+!$acc loop vector
+                 do ix=1,n_xi
+                    bvec(ix,ie,is) = bvec(ix,ie,is)+ &
+                         cmplx(cmat_simple(ix,jx,ie,is,it)*cvec_re, &
+                         cmat_simple(ix,jx,ie,is,it)*cvec_im)
+                 enddo
+              enddo
+           enddo
+        enddo
+     endif
+
+!$acc loop worker vector
+     do iv=1,nv
+        bvec_flat(iv) = bvec(ix_v(iv),ie_v(iv),is_v(iv))
+     enddo
+
+!$acc loop worker
+     do k=1,nproc
+!$acc loop vector
+        do j=1,nj_loc
+           fsendf(j,ic_loc,k) = bvec_flat(j+(k-1)*nj_loc)
+        enddo
+     enddo
+
+  enddo
+
+  deallocate(bvec,cvec)
+
+end subroutine cgyro_calc_collision_simple_gpu
+
+subroutine cgyro_step_collision_gpu(use_simple)
 
   use parallel_lib
   use timer_lib
@@ -202,6 +378,9 @@ subroutine cgyro_step_collision_gpu
   use cgyro_globals
 
   implicit none
+  !
+  logical, intent(in) :: use_simple
+  !
 
   integer :: is,nj_loc
 
@@ -218,40 +397,48 @@ subroutine cgyro_step_collision_gpu
 
   call parallel_lib_nj_loc(nj_loc)
 
-  ! Note that if GPU is absent, gpu_bibmem_flag will be reset to 0
-
-  if (gpu_bigmem_flag == 1) then
-     call timer_lib_in('coll')
-     call cgyro_calc_collision_gpu(nj_loc)
-     call timer_lib_out('coll')
+  if (use_simple) then
+      call timer_lib_in('coll')
+      call cgyro_calc_collision_simple_gpu(nj_loc)
+      call timer_lib_out('coll')
 
   else
 
-     call timer_lib_in('coll_mem')
+    ! Note that if GPU is absent, gpu_bibmem_flag will be reset to 0
+    if (gpu_bigmem_flag == 1) then
+      call timer_lib_in('coll')
+      call cgyro_calc_collision_gpu(nj_loc)
+      call timer_lib_out('coll')
+
+    else
+
+      call timer_lib_in('coll_mem')
 !$acc update host(cap_h_v)
-     call timer_lib_out('coll_mem')
+      call timer_lib_out('coll_mem')
 
-     call timer_lib_in('coll')
-     call cgyro_calc_collision_cpu(nj_loc)
-     call timer_lib_out('coll')
+      call timer_lib_in('coll')
+      call cgyro_calc_collision_cpu(nj_loc)
+      call timer_lib_out('coll')
 
-    call timer_lib_in('coll_mem')
+      call timer_lib_in('coll_mem')
 !$acc update device(fsendf)
-    if (collision_field_model == 1) then
-       if (.not.(n == 0 .and. ae_flag == 1)) then
+      if (collision_field_model == 1) then
+        if (.not.(n == 0 .and. ae_flag == 1)) then
 !$acc update device (cap_h_v)
-       endif
-    endif
-    call timer_lib_out('coll_mem')
+        endif
+      endif
+      call timer_lib_out('coll_mem')
 
-  endif
+    endif !bigmem
 
-  ! Compute the new phi
-  if (collision_field_model == 1) then
-     if (.not.(n == 0 .and. ae_flag == 1)) then
+    ! Compute the new phi
+    if (collision_field_model == 1) then
+      if (.not.(n == 0 .and. ae_flag == 1)) then
         call cgyro_field_v_gpu
-     endif
-  endif
+      endif
+    endif
+
+  endif ! use_simple
 
   call timer_lib_in('coll_comm')
   call parallel_lib_f_i_do_gpu(cap_h_ct)
@@ -289,9 +476,9 @@ subroutine cgyro_step_collision
   implicit none
 
 #ifdef _OPENACC
-  call cgyro_step_collision_gpu
+  call cgyro_step_collision_gpu(.FALSE.)
 #else
-  call cgyro_step_collision_cpu
+  call cgyro_step_collision_cpu(.FALSE.)
 #endif
 
   if (collision_field_model == 0 .or. (n == 0 .and. ae_flag == 1)) then
@@ -299,4 +486,21 @@ subroutine cgyro_step_collision
   endif
 
 end subroutine cgyro_step_collision
+
+subroutine cgyro_step_collision_simple
+
+  use timer_lib
+  use cgyro_globals
+
+  implicit none
+
+#ifdef _OPENACC
+  call cgyro_step_collision_gpu(.TRUE.)
+#else
+  call cgyro_step_collision_cpu(.TRUE.)
+#endif
+
+  call cgyro_field_c
+
+end subroutine cgyro_step_collision_simple
 
