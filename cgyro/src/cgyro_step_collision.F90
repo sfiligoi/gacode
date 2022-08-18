@@ -23,7 +23,7 @@ subroutine cgyro_calc_collision_cpu(nj_loc)
   real :: cval
 
 !$omp parallel do private(ic,ic_loc,iv,ivp,cvec,bvec,cvec_re,cvec_im,cval,j,k) &
-!$omp&            shared(cap_h_v,fsendf,cmat) firstprivate(nv,nproc,nj_loc)
+!$omp&            shared(cap_h_v,fsendf,cmat)
   do ic=nc1,nc2
 
      ic_loc = ic-nc1+1
@@ -140,16 +140,15 @@ subroutine cgyro_calc_collision_gpu(nj_loc)
   integer, intent(in) :: nj_loc
   !
 
-  integer :: j,k
-  integer :: ivp
-
-  complex, dimension(nv) :: bvec,cvec
-  real :: cvec_re,cvec_im
+  integer :: j,k,ivp
+  real, dimension(nv) :: bvec_re,cvec_re
+  real, dimension(nv) :: bvec_im,cvec_im
+  real :: b_re,b_im
   real :: cval
 
-!$acc parallel loop gang private(bvec,cvec) &
-!$acc& present(cmat,cap_h_v,fsendf) 
-     do ic=nc1,nc2
+!$acc parallel loop gang private(bvec_re,cvec_re,bvec_im,cvec_im) &
+!$acc& present(cmat,cap_h_v,fsendf)  private(iv,ivp,k,j,ic_loc)
+  do ic=nc1,nc2
 
         ic_loc = ic-nc1+1
 
@@ -157,27 +156,30 @@ subroutine cgyro_calc_collision_gpu(nj_loc)
 
 !$acc loop vector
         do iv=1,nv
-           bvec(iv) = (0.0,0.0)
-           cvec(iv) = cap_h_v(ic_loc,iv)
+           cvec_re(iv) = real(cap_h_v(ic_loc,iv))
+           cvec_im(iv) = aimag(cap_h_v(ic_loc,iv))
         enddo
 
         ! This is a key loop for performance
-!$acc loop seq
-        do ivp=1,nv
-           cvec_re = real(cvec(ivp))
-           cvec_im = aimag(cvec(ivp))
-!$acc loop vector
-           do iv=1,nv
+!$acc loop vector private(b_re,b_im,cval,ivp)
+        do iv=1,nv
+           b_re = 0.0
+           b_im = 0.0
+!$acc loop seq private(cval)
+           do ivp=1,nv
               cval = cmat(iv,ivp,ic_loc)
-              bvec(iv) = bvec(iv)+ cmplx(cval*cvec_re,cval*cvec_im)
+              b_re = b_re + cval*cvec_re(ivp)
+              b_im = b_im + cval*cvec_im(ivp)
            enddo
+           bvec_re(iv) = b_re
+           bvec_im(iv) = b_im
         enddo
 
         ! pack communication array while bvec still in cache
         do k=1,nproc
 !$acc loop vector
            do j=1,nj_loc
-              fsendf(j,ic_loc,k) = bvec(j+(k-1)*nj_loc)
+              fsendf(j,ic_loc,k) = cmplx(bvec_re(j+(k-1)*nj_loc),bvec_im(j+(k-1)*nj_loc))
            enddo
         enddo
 
@@ -185,11 +187,11 @@ subroutine cgyro_calc_collision_gpu(nj_loc)
            if (.not.(n == 0 .and. ae_flag == 1)) then
 !$acc loop vector
               do iv=1,nv
-                 cap_h_v(ic_loc,iv) = bvec(iv)
+                 cap_h_v(ic_loc,iv) = cmplx(bvec_re(iv),bvec_im(iv))
               enddo
            endif
         endif
-     enddo
+  enddo
 end subroutine cgyro_calc_collision_gpu
 
 subroutine cgyro_step_collision_gpu
