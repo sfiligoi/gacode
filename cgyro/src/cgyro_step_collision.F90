@@ -287,17 +287,17 @@ subroutine cgyro_calc_collision_simple_gpu(nj_loc)
 
   integer :: is,ie,ix,jx,it,ir,j,k
   integer :: ivp
-  complex, dimension(:,:,:),allocatable :: bvec,cvec
-  complex :: bvec_flat(nv)
-  real :: cvec_re,cvec_im
 
-  allocate(bvec(n_xi,n_energy,n_species))
-  allocate(cvec(n_xi,n_energy,n_species))
+  real, dimension(n_xi,n_energy,n_species) :: bvec_re,cvec_re
+  real, dimension(n_xi,n_energy,n_species) :: bvec_im,cvec_im
+  real :: b_re,b_im
+  real :: cval
 
-!$acc parallel loop gang num_workers(4) vector_length(32) &
+!$acc parallel loop gang &
 !$acc&         present(ix_v,ie_v,is_v,ir_c,it_c,px,cap_h_v,cmat_simple,fsendf) &
-!$acc&         private(bvec,cvec,bvec_flat) &
-!$acc&         private(ic_loc,ir,it,cvec_re,cvec_im) 
+!$acc&         private(bvec_re,bvec_im,cvec_re,cvec_im) &
+!$acc&         private(ic_loc,ir,it,b_re,b_im,cval) &
+!$acc&         private(is,ie,ix,jx,iv,k,j)
   do ic=nc1,nc2
 
      ic_loc = ic-nc1+1
@@ -306,67 +306,52 @@ subroutine cgyro_calc_collision_simple_gpu(nj_loc)
 
      ! Set-up the RHS: H = f + ze/T G phi
 
-!$acc loop worker vector
-     do iv=1,nv
-        cvec(ix_v(iv),ie_v(iv),is_v(iv)) = cap_h_v(ic_loc,iv)
-     enddo
-
      ! Avoid singularity of n=0,p=0:
      if (px(ir) == 0 .and. n == 0) then
 
-!$acc loop worker collapse(2)
-        do is=1,n_species
-           do ie=1,n_energy              
-!$acc loop vector
-             do ix=1,n_xi
-               bvec(ix,ie,is) = cvec(ix,ie,is)
-             enddo
+        ! shortcut all the logic, just fill fsenf
+        do k=1,nproc
+!$acc loop vector private(iv)
+           do j=1,nj_loc
+              iv=j+(k-1)*nj_loc
+              fsendf(j,ic_loc,k) = cap_h_v(ic_loc,iv)
            enddo
         enddo
      else
+!$acc loop vector
+        do iv=1,nv
+           cvec_re(ix_v(iv),ie_v(iv),is_v(iv)) = real(cap_h_v(ic_loc,iv))
+           cvec_im(ix_v(iv),ie_v(iv),is_v(iv)) = aimag(cap_h_v(ic_loc,iv))
+        enddo
 
-!$acc loop worker collapse(2)
+!$acc loop vector collapse(3) private(b_re,b_im,cval,jx)
         do is=1,n_species
            do ie=1,n_energy              
-
-!$acc loop vector
               do ix=1,n_xi
-                 bvec(ix,ie,is) = 0.0
-              enddo
-
-!$acc loop seq
-              do jx=1,n_xi
-
-                 cvec_re = real(cvec(jx,ie,is))
-                 cvec_im = aimag(cvec(jx,ie,is))
-
-!$acc loop vector
-                 do ix=1,n_xi
-                    bvec(ix,ie,is) = bvec(ix,ie,is)+ &
-                         cmplx(cmat_simple(ix,jx,ie,is,it)*cvec_re, &
-                         cmat_simple(ix,jx,ie,is,it)*cvec_im)
+                 b_re = 0.0
+                 b_im = 0.0
+!$acc loop seq private(cval)
+                 do jx=1,n_xi
+                     cval = cmat_simple(ix,jx,ie,is,it)
+                     b_re = b_re + cval*cvec_re(jx,ie,is)
+                     b_im = b_im + cval*cvec_im(jx,ie,is)
                  enddo
+                 bvec_re(ix,ie,is) = b_re
+                 bvec_im(ix,ie,is) = b_im
               enddo
+           enddo
+        enddo
+
+        do k=1,nproc
+!$acc loop vector private(iv)
+           do j=1,nj_loc
+              iv=j+(k-1)*nj_loc
+              fsendf(j,ic_loc,k) = cmplx(bvec_re(ix_v(iv),ie_v(iv),is_v(iv)),bvec_im(ix_v(iv),ie_v(iv),is_v(iv)))
            enddo
         enddo
      endif
 
-!$acc loop worker vector
-     do iv=1,nv
-        bvec_flat(iv) = bvec(ix_v(iv),ie_v(iv),is_v(iv))
-     enddo
-
-!$acc loop worker
-     do k=1,nproc
-!$acc loop vector
-        do j=1,nj_loc
-           fsendf(j,ic_loc,k) = bvec_flat(j+(k-1)*nj_loc)
-        enddo
-     enddo
-
   enddo
-
-  deallocate(bvec,cvec)
 
 end subroutine cgyro_calc_collision_simple_gpu
 
