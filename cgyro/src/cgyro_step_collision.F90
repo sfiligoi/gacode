@@ -114,10 +114,6 @@ subroutine cgyro_step_collision_cpu
 
   call timer_lib_out('coll')
 
-  if (collision_field_model == 0 .or. (n == 0 .and. ae_flag == 1)) then
-     call cgyro_field_c
-  endif
-
 end subroutine cgyro_step_collision_cpu
 
   ! else _OPENACC
@@ -294,16 +290,15 @@ subroutine cgyro_step_collision_gpu
 
   call timer_lib_out('coll')
 
-  if (collision_field_model == 0 .or. (n == 0 .and. ae_flag == 1)) then
-     call cgyro_field_c
-  endif
-
 end subroutine cgyro_step_collision_gpu
 
   ! endif infdef _OPENACC
 #endif
 
 subroutine cgyro_step_collision
+
+  use timer_lib
+  use cgyro_globals
 
   implicit none
 
@@ -312,6 +307,10 @@ subroutine cgyro_step_collision
 #else
   call cgyro_step_collision_cpu
 #endif
+
+  if (collision_field_model == 0 .or. (n == 0 .and. ae_flag == 1)) then
+     call cgyro_field_c
+  endif
 
 end subroutine cgyro_step_collision
 
