@@ -153,6 +153,7 @@ subroutine cgyro_step_collision_cpu(use_simple)
   !
 
   integer :: is,nj_loc
+  logical :: update_chv
   ! --------------------------------------------------
 
   !----------------------------------------------------------------
