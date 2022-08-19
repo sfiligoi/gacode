@@ -243,7 +243,7 @@ subroutine cgyro_calc_collision_gpu(nj_loc,update_chv)
   real :: cval
   ! --------------------------------------------------
 
-!$acc parallel loop gang collapse(2) &
+!$acc parallel loop gang worker collapse(2) &
 !$acc& present(cmat,cap_h_v,fsendf)  private(iv,ivp,j,ic_loc,b_re,b_im,cval,ivp)
   do k=1,nproc
      do ic=nc1,nc2
