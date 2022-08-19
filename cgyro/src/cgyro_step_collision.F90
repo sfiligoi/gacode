@@ -239,55 +239,34 @@ subroutine cgyro_calc_collision_gpu(nj_loc,update_chv)
   !
 
   integer :: j,k,ivp
-  real, dimension(nv) :: bvec_re,cvec_re
-  real, dimension(nv) :: bvec_im,cvec_im
   real :: b_re,b_im
   real :: cval
   ! --------------------------------------------------
 
-!$acc parallel loop gang private(bvec_re,cvec_re,bvec_im,cvec_im) &
-!$acc& present(cmat,cap_h_v,fsendf)  private(iv,ivp,k,j,ic_loc)
-  do ic=nc1,nc2
-
-        ic_loc = ic-nc1+1
-
-        ! Set-up the RHS: H = f + ze/T G phi
-
-!$acc loop vector
-        do iv=1,nv
-           cvec_re(iv) = real(cap_h_v(ic_loc,iv))
-           cvec_im(iv) = aimag(cap_h_v(ic_loc,iv))
-        enddo
-
-        ! This is a key loop for performance
-!$acc loop vector private(b_re,b_im,cval,ivp)
-        do iv=1,nv
+!$acc parallel loop gang collapse(2) &
+!$acc& present(cmat,cap_h_v,fsendf)  private(iv,ivp,j,ic_loc,b_re,b_im,cval,ivp)
+  do k=1,nproc
+     do ic=nc1,nc2
+!$acc loop vector private(b_re,b_im,cval,ivp,iv)
+        do j=1,nj_loc
+           ic_loc = ic-nc1+1
+           iv = j+(k-1)*nj_loc
            b_re = 0.0
            b_im = 0.0
 !$acc loop seq private(cval)
            do ivp=1,nv
               cval = cmat(iv,ivp,ic_loc)
-              b_re = b_re + cval*cvec_re(ivp)
-              b_im = b_im + cval*cvec_im(ivp)
+              b_re = b_re + cval*real(cap_h_v(ic_loc,ivp))
+              b_im = b_im + cval*aimag(cap_h_v(ic_loc,ivp))
            enddo
-           bvec_re(iv) = b_re
-           bvec_im(iv) = b_im
+
+           fsendf(j,ic_loc,k) = cmplx(b_re,b_im)
+           if (update_chv) then
+              cap_h_v(ic_loc,iv) = cmplx(b_re,b_im)
+           endif
         enddo
 
-        ! pack communication array while bvec still in cache
-!$acc loop collapse(2) vector
-        do k=1,nproc
-           do j=1,nj_loc
-              fsendf(j,ic_loc,k) = cmplx(bvec_re(j+(k-1)*nj_loc),bvec_im(j+(k-1)*nj_loc))
-           enddo
-        enddo
-
-        if (update_chv) then
-!$acc loop vector
-              do iv=1,nv
-                 cap_h_v(ic_loc,iv) = cmplx(bvec_re(iv),bvec_im(iv))
-              enddo
-        endif
+     enddo
   enddo
 end subroutine cgyro_calc_collision_gpu
 
