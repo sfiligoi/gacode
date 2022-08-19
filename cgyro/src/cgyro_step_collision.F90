@@ -244,10 +244,10 @@ subroutine cgyro_calc_collision_gpu(nj_loc,update_chv)
   ! --------------------------------------------------
 
 !$acc parallel loop gang worker collapse(2) &
-!$acc& present(cmat,cap_h_v,fsendf)  private(iv,ivp,j,ic_loc,b_re,b_im,cval,ivp)
+!$acc& present(cmat,cap_h_v,fsendf)  private(k,ic,j)
   do k=1,nproc
      do ic=nc1,nc2
-!$acc loop vector private(b_re,b_im,cval,ivp,iv)
+!$acc loop vector private(b_re,b_im,cval,ivp,iv,ic_loc)
         do j=1,nj_loc
            ic_loc = ic-nc1+1
            iv = j+(k-1)*nj_loc
@@ -261,13 +261,25 @@ subroutine cgyro_calc_collision_gpu(nj_loc,update_chv)
            enddo
 
            fsendf(j,ic_loc,k) = cmplx(b_re,b_im)
-           if (update_chv) then
-              cap_h_v(ic_loc,iv) = cmplx(b_re,b_im)
-           endif
         enddo
 
      enddo
   enddo
+
+  if (update_chv) then
+!$acc parallel loop gang worker collapse(2) &
+!$acc& present(cmat,cap_h_v,fsendf)  private(k,ic,j)
+     do k=1,nproc
+        do j=1,nj_loc
+!$acc loop vector private(iv,ic_loc)
+           do ic=nc1,nc2
+              ic_loc = ic-nc1+1
+              iv = j+(k-1)*nj_loc
+              cap_h_v(ic_loc,iv) = fsendf(j,ic_loc,k)
+           enddo
+        enddo
+     enddo
+  endif
 end subroutine cgyro_calc_collision_gpu
 
 subroutine cgyro_calc_collision_simple_gpu(nj_loc)
