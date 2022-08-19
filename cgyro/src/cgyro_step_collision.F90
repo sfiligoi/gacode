@@ -256,8 +256,8 @@ subroutine cgyro_calc_collision_gpu(nj_loc)
         enddo
 
         ! pack communication array while bvec still in cache
+!$acc loop collapse(2) vector
         do k=1,nproc
-!$acc loop vector
            do j=1,nj_loc
               fsendf(j,ic_loc,k) = cmplx(bvec_re(j+(k-1)*nj_loc),bvec_im(j+(k-1)*nj_loc))
            enddo
@@ -310,8 +310,8 @@ subroutine cgyro_calc_collision_simple_gpu(nj_loc)
      if (px(ir) == 0 .and. n == 0) then
 
         ! shortcut all the logic, just fill fsenf
+!$acc loop collapse(2) vector private(iv)
         do k=1,nproc
-!$acc loop vector private(iv)
            do j=1,nj_loc
               iv=j+(k-1)*nj_loc
               fsendf(j,ic_loc,k) = cap_h_v(ic_loc,iv)
@@ -342,8 +342,8 @@ subroutine cgyro_calc_collision_simple_gpu(nj_loc)
            enddo
         enddo
 
+!$acc loop collapse(2) vector private(iv)
         do k=1,nproc
-!$acc loop vector private(iv)
            do j=1,nj_loc
               iv=j+(k-1)*nj_loc
               fsendf(j,ic_loc,k) = cmplx(bvec_re(ix_v(iv),ie_v(iv),is_v(iv)),bvec_im(ix_v(iv),ie_v(iv),is_v(iv)))
