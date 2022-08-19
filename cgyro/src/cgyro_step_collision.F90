@@ -8,19 +8,22 @@
 !                       H = h + ze/T G phi
 !------------------------------------------------------------------------------
 
-subroutine cgyro_calc_collision_cpu(nj_loc)
+subroutine cgyro_calc_collision_cpu(nj_loc,update_chv)
 
   use parallel_lib
   use cgyro_globals
 
+  ! --------------------------------------------------
   implicit none
   !
   integer, intent(in) :: nj_loc
+  logical, intent(in) :: update_chv
   !
   integer :: ivp,j,k
   complex, dimension(nv) :: bvec,cvec
   real :: cvec_re,cvec_im
   real :: cval
+  ! --------------------------------------------------
 
 !$omp parallel do private(ic,ic_loc,iv,ivp,cvec,bvec,cvec_re,cvec_im,cval,j,k) &
 !$omp&            shared(cap_h_v,fsendf,cmat)
@@ -51,13 +54,10 @@ subroutine cgyro_calc_collision_cpu(nj_loc)
        enddo
     enddo
 
-    if (collision_field_model == 1) then
-       if (.not.(n == 0 .and. ae_flag == 1)) then
-          ! cap_h_v not re-used else
+    if (update_chv) then
           do iv=1,nv
              cap_h_v(ic_loc,iv) = bvec(iv)
           enddo
-       endif
     endif
  enddo
 
@@ -70,6 +70,7 @@ subroutine cgyro_calc_collision_simple_cpu(nj_loc)
   use parallel_lib
   use cgyro_globals
 
+  ! --------------------------------------------------
   implicit none
   !
   integer, intent(in) :: nj_loc
@@ -80,6 +81,7 @@ subroutine cgyro_calc_collision_simple_cpu(nj_loc)
   complex, dimension(:,:,:),allocatable :: bvec,cvec
   complex :: bvec_flat(nv)
   real :: cvec_re,cvec_im
+  ! --------------------------------------------------
 
   allocate(bvec(n_xi,n_energy,n_species))
   allocate(cvec(n_xi,n_energy,n_species))
@@ -135,6 +137,8 @@ subroutine cgyro_calc_collision_simple_cpu(nj_loc)
   deallocate(bvec,cvec)
 end subroutine cgyro_calc_collision_simple_cpu
 
+  ! ==================================================
+
 subroutine cgyro_step_collision_cpu(use_simple)
 
   use parallel_lib
@@ -142,12 +146,14 @@ subroutine cgyro_step_collision_cpu(use_simple)
 
   use cgyro_globals
 
+  ! --------------------------------------------------
   implicit none
   !
   logical, intent(in) :: use_simple
   !
 
   integer :: is,nj_loc
+  ! --------------------------------------------------
 
   !----------------------------------------------------------------
   ! Perform data tranpose from _c to _v data layouts:
@@ -165,7 +171,15 @@ subroutine cgyro_step_collision_cpu(use_simple)
   if (use_simple) then
      call cgyro_calc_collision_simple_cpu(nj_loc)
   else
-     call cgyro_calc_collision_cpu(nj_loc)
+     update_chv = .FALSE.
+     if (collision_field_model == 1) then
+       if (.not.(n == 0 .and. ae_flag == 1)) then
+          ! cap_h_v not re-used else
+          update_chv = .TRUE.
+       endif
+     endif
+
+     call cgyro_calc_collision_cpu(nj_loc, update_chv)
   endif
 
   call timer_lib_out('coll')
@@ -210,14 +224,18 @@ end subroutine cgyro_step_collision_cpu
   ! else _OPENACC
 #else
 
-subroutine cgyro_calc_collision_gpu(nj_loc)
+  ! ==================================================
+
+subroutine cgyro_calc_collision_gpu(nj_loc,update_chv)
 
   use parallel_lib
   use cgyro_globals
 
+  ! --------------------------------------------------
   implicit none
   !
   integer, intent(in) :: nj_loc
+  logical, intent(in) :: update_chv
   !
 
   integer :: j,k,ivp
@@ -225,6 +243,7 @@ subroutine cgyro_calc_collision_gpu(nj_loc)
   real, dimension(nv) :: bvec_im,cvec_im
   real :: b_re,b_im
   real :: cval
+  ! --------------------------------------------------
 
 !$acc parallel loop gang private(bvec_re,cvec_re,bvec_im,cvec_im) &
 !$acc& present(cmat,cap_h_v,fsendf)  private(iv,ivp,k,j,ic_loc)
@@ -263,13 +282,11 @@ subroutine cgyro_calc_collision_gpu(nj_loc)
            enddo
         enddo
 
-        if (collision_field_model == 1) then
-           if (.not.(n == 0 .and. ae_flag == 1)) then
+        if (update_chv) then
 !$acc loop vector
               do iv=1,nv
                  cap_h_v(ic_loc,iv) = cmplx(bvec_re(iv),bvec_im(iv))
               enddo
-           endif
         endif
   enddo
 end subroutine cgyro_calc_collision_gpu
@@ -280,6 +297,7 @@ subroutine cgyro_calc_collision_simple_gpu(nj_loc)
 
   use cgyro_globals
 
+  ! --------------------------------------------------
   implicit none
   !
   integer, intent(in) :: nj_loc
@@ -292,6 +310,7 @@ subroutine cgyro_calc_collision_simple_gpu(nj_loc)
   real, dimension(n_xi,n_energy,n_species) :: bvec_im,cvec_im
   real :: b_re,b_im
   real :: cval
+  ! --------------------------------------------------
 
 !$acc parallel loop gang &
 !$acc&         present(ix_v,ie_v,is_v,ir_c,it_c,px,cap_h_v,cmat_simple,fsendf) &
@@ -355,6 +374,8 @@ subroutine cgyro_calc_collision_simple_gpu(nj_loc)
 
 end subroutine cgyro_calc_collision_simple_gpu
 
+  ! ==================================================
+
 subroutine cgyro_step_collision_gpu(use_simple)
 
   use parallel_lib
@@ -362,12 +383,15 @@ subroutine cgyro_step_collision_gpu(use_simple)
 
   use cgyro_globals
 
+  ! --------------------------------------------------
   implicit none
   !
   logical, intent(in) :: use_simple
   !
 
   integer :: is,nj_loc
+  logical :: update_chv
+  ! --------------------------------------------------
 
   !----------------------------------------------------------------
   ! Perform data tranpose from _c to _v data layouts:
@@ -389,10 +413,18 @@ subroutine cgyro_step_collision_gpu(use_simple)
 
   else
 
+    update_chv = .FALSE.
+    if (collision_field_model == 1) then
+       if (.not.(n == 0 .and. ae_flag == 1)) then
+          ! cap_h_v not re-used else
+          update_chv = .TRUE.
+       endif
+    endif
+
     ! Note that if GPU is absent, gpu_bibmem_flag will be reset to 0
     if (gpu_bigmem_flag == 1) then
       call timer_lib_in('coll')
-      call cgyro_calc_collision_gpu(nj_loc)
+      call cgyro_calc_collision_gpu(nj_loc, update_chv)
       call timer_lib_out('coll')
 
     else
@@ -402,7 +434,7 @@ subroutine cgyro_step_collision_gpu(use_simple)
       call timer_lib_out('coll_mem')
 
       call timer_lib_in('coll')
-      call cgyro_calc_collision_cpu(nj_loc)
+      call cgyro_calc_collision_cpu(nj_loc, update_chv)
       call timer_lib_out('coll')
 
       call timer_lib_in('coll_mem')
@@ -452,6 +484,8 @@ end subroutine cgyro_step_collision_gpu
 
   ! endif infdef _OPENACC
 #endif
+
+  ! ==================================================
 
 subroutine cgyro_step_collision
 
