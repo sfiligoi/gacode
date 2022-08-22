@@ -39,7 +39,6 @@ OBJECTS = cgyro_globals.o \
           cgyro_init_collision.o \
           cgyro_init_manager.o \
 	  cgyro_init_kernel.o \
-	  cgyro_step_collision_simple.o \
           cgyro_step_collision.o \
 	  cgyro_kernel.o \
 	  cgyro_cleanup.o \
