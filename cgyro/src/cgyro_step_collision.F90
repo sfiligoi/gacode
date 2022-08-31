@@ -74,13 +74,13 @@ subroutine cgyro_calc_collision_cpu_fp32(nj_loc,update_chv)
   integer, intent(in) :: nj_loc
   logical, intent(in) :: update_chv
   !
-  integer :: ivp,j,k,dv
+  integer :: ivp,j,k,v1,v2
   complex, dimension(nv) :: bvec,cvec
   real :: cvec_re,cvec_im
   real :: cval
   ! --------------------------------------------------
 
-!$omp parallel do private(ic,ic_loc,iv,ivp,cvec,bvec,cvec_re,cvec_im,cval,j,k,dv) &
+!$omp parallel do private(ic,ic_loc,iv,ivp,cvec,bvec,cvec_re,cvec_im,cval,j,k,v1,v2) &
 !$omp&            shared(cap_h_v,fsendf,cmat_fp32,cmat_stripes)
   do ic=nc1,nc2
 
@@ -97,13 +97,18 @@ subroutine cgyro_calc_collision_cpu_fp32(nj_loc,update_chv)
      do ivp=1,nv
         cvec_re = real(cvec(ivp))
         cvec_im = aimag(cvec(ivp))
-        do iv=1,nv
-           dv = iv-ivp
-           if (abs(dv) .GT. collision_full_stripes) then
-              cval = cmat_fp32(iv,ivp,ic_loc)
-           else
-              cval = cmat_stripes(dv,ivp,ic_loc)
-           endif
+        v1=max(1,ivp-collision_full_stripes)
+        v2=min(ivp+collision_full_stripes,nv)
+        do iv=1,v1-1
+           cval = cmat_fp32(iv,ivp,ic_loc)
+           bvec(iv) = bvec(iv)+ cmplx(cval*cvec_re, cval*cvec_im)
+        enddo
+        do iv=v2+1,nv
+           cval = cmat_fp32(iv,ivp,ic_loc)
+           bvec(iv) = bvec(iv)+ cmplx(cval*cvec_re, cval*cvec_im)
+        enddo
+        do iv=v1,v2
+           cval = cmat_stripes(iv-ivp,ivp,ic_loc)
            bvec(iv) = bvec(iv)+ cmplx(cval*cvec_re, cval*cvec_im)
         enddo
      enddo
