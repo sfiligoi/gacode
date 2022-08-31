@@ -99,7 +99,7 @@ subroutine cgyro_calc_collision_cpu_fp32(nj_loc,update_chv)
         cvec_im = aimag(cvec(ivp))
         do iv=1,nv
            dv = iv-ivp
-           if (abs(dv) .GT. cmat_full_stripes) then
+           if (abs(dv) .GT. collision_full_stripes) then
               cval = cmat_fp32(iv,ivp,ic_loc)
            else
               cval = cmat_stripes(dv,ivp,ic_loc)
@@ -133,10 +133,10 @@ subroutine cgyro_calc_collision_cpu(nj_loc,update_chv)
   logical, intent(in) :: update_chv
   ! --------------------------------------------------
 
-  if (cmat_full_stripes .GT. 0) then
-     call cgyro_calc_collision_cpu_fp32(nj_loc,update_chv)
-  else
+  if (collision_precision_mode == 0) then
      call cgyro_calc_collision_cpu_fp64(nj_loc,update_chv)
+  else
+     call cgyro_calc_collision_cpu_fp32(nj_loc,update_chv)
   endif
 
 end subroutine cgyro_calc_collision_cpu
@@ -385,7 +385,7 @@ subroutine cgyro_calc_collision_gpu_fp32(nj_loc,update_chv)
 !$acc loop seq private(cval,dv)
            do ivp=1,nv
               dv = iv-ivp
-              if (abs(dv) .GT. cmat_full_stripes) then
+              if (abs(dv) .GT. collision_full_stripes) then
                  cval = cmat_fp32(iv,ivp,ic_loc)
               else
                  cval = cmat_stripes(dv,ivp,ic_loc)
@@ -421,10 +421,10 @@ subroutine cgyro_calc_collision_gpu(nj_loc,update_chv)
   logical, intent(in) :: update_chv
   ! --------------------------------------------------
 
-  if (cmat_full_stripes .GT. 0) then
-     call cgyro_calc_collision_gpu_fp32(nj_loc,update_chv)
-  else
+  if (collision_precision_mode == 0) then
      call cgyro_calc_collision_gpu_fp64(nj_loc,update_chv)
+  else
+     call cgyro_calc_collision_gpu_fp32(nj_loc,update_chv)
   endif
 
 end subroutine cgyro_calc_collision_gpu

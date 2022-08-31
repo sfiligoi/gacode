@@ -260,17 +260,14 @@ subroutine cgyro_init_manager
 !$acc enter data create(fpack,gpack,f_nl,g_nl)
      endif
 
-     ! TODO: hardcoded for now, should be read from the input file
-     cmat_full_stripes = 8
-
      if (collision_model == 5) then
         allocate(cmat_simple(n_xi,n_xi,n_energy,n_species,n_theta))
      else
-        if (cmat_full_stripes .GT. 0) then
-           allocate(cmat_stripes(-cmat_full_stripes:cmat_full_stripes,nv,nc_loc))
+        if (collision_precision_mode /= 0) then
+           allocate(cmat_stripes(-collision_full_stripes:collision_full_stripes,nv,nc_loc))
            allocate(cmat_fp32(nv,nv,nc_loc))
 
-           write (msg, "(A20,I4,A9)") "Using cmat_fp32 with ",cmat_full_stripes, " stripes."
+           write (msg, "(A35,I4,A14)") "Using fp32 collision precision with ",collision_full_stripes, " fp64 stripes."
            call cgyro_info(msg)
         else
            allocate(cmat(nv,nv,nc_loc))

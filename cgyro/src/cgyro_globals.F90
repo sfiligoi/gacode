@@ -61,6 +61,8 @@ module cgyro_globals
   integer :: collision_field_model
   integer :: collision_ion_model
   real    :: collision_ele_scale
+  integer :: collision_precision_mode
+  integer :: collision_full_stripes
   real    :: z_eff
   integer :: z_eff_method
   integer :: zf_test_mode 
@@ -96,7 +98,6 @@ module cgyro_globals
   integer :: theta_plot
   integer :: gpu_bigmem_flag
   integer :: upwind_single_flag
-  integer :: cmat_full_stripes
   real :: px0
   integer :: stream_term
   real :: stream_factor
@@ -430,9 +431,9 @@ module cgyro_globals
   real, dimension(:,:,:), allocatable :: hzf, xzf 
   !
   ! Collision operator
-  real, dimension(:,:,:), allocatable :: cmat ! only used if cmat_full_stripes=0
-  real, dimension(:,:,:), allocatable :: cmat_stripes
-  real(KIND=REAL32), dimension(:,:,:), allocatable :: cmat_fp32
+  real, dimension(:,:,:), allocatable :: cmat ! only used if collision_precision_mode=0
+  real, dimension(:,:,:), allocatable :: cmat_stripes ! only used if collision_precision_mod/=0
+  real(KIND=REAL32), dimension(:,:,:), allocatable :: cmat_fp32 ! only used if collision_precision_mod/=0
   real, dimension(:,:,:,:,:), allocatable :: cmat_simple ! only used in collision_model=5
   ! 
   ! Equilibrium/geometry arrays

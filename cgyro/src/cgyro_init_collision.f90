@@ -169,7 +169,7 @@ subroutine cgyro_init_collision
   allocate(rsvect0(n_species,n_species,n_xi,n_energy))
   allocate(rsvect1(n_species,n_species,n_xi,n_energy))
 
-  if (cmat_full_stripes .GT. 0) then
+  if (collision_precision_mode /= 0) then
      ! cmat is a temp variable in this case
      allocate(cmat(nv,nv,nc_loc))
   endif
@@ -599,7 +599,7 @@ subroutine cgyro_init_collision
 !$omp& private(ic,ic_loc,it,ir,info) &
 !$omp& private(iv,is,ix,ie,jv,js,jx,je,ks) &
 !$omp& private(amat,i_piv) &
-!$omp& private(dv) firstprivate(cmat_full_stripes) &
+!$omp& private(dv) firstprivate(collision_precision_mode, collision_full_stripes) &
 !$omp& shared(cmat,cmat_fp32,cmat_stripes)
   do ic=nc1,nc2
    
@@ -767,12 +767,12 @@ subroutine cgyro_init_collision
 
 
      ! result in amat, transfer to the right cmat matrix
-     if (cmat_full_stripes .GT. 0) then
+     if (collision_precision_mode /= 0) then
         do jv=1,nv
            cmat_stripes(:,jv,ic_loc) = 0.0
            do iv=1,nv
               dv = iv-jv
-              if (abs(dv) .GT. cmat_full_stripes) then
+              if (abs(dv) .GT. collision_full_stripes) then
                  ! far from diagonal, keep low precision only
                  cmat_fp32(iv,jv,ic_loc) = amat(iv,jv)
               else
@@ -791,20 +791,13 @@ subroutine cgyro_init_collision
   enddo
   deallocate(amat)
 
-  if (cmat_full_stripes .GT. 0) then
+  if (collision_precision_mode /= 0) then
      ! cmat was a temp variable
      deallocate(cmat)
-     ! create a small dummy one, so we have something in GPU memory
-     allocate(cmat(1,1,1))
+!$acc enter data copyin(cmat_stripes,cmat_fp32) if (gpu_bigmem_flag == 1)
   else
-     ! keep all cmat in full precision
-     ! but create dummy low-precision ones to have something in gpu memory
-     allocate(cmat_stripes(1,1,1))
-     allocate(cmat_fp32(1,1,1))
+!$acc enter data copyin(cmat) if (gpu_bigmem_flag == 1)
   endif
-
-!$acc enter data copyin(cmat_stripes,cmat_fp32,cmat) if (gpu_bigmem_flag == 1)
-
 
   deallocate(i_piv)
   deallocate(nu_d)
