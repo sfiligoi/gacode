@@ -18,8 +18,8 @@ subroutine cgyro_init_manager
   use cgyro_globals
   use half_hermite
 
-#ifdef _OPENACC
   use cgyro_io
+#ifdef _OPENACC
   use cufft, only : cufftPlanMany, &
        CUFFT_C2R,CUFFT_Z2D,CUFFT_R2C,CUFFT_D2Z
 #endif
