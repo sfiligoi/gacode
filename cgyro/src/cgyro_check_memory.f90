@@ -140,7 +140,12 @@ subroutine cgyro_check_memory(datafile)
      if(collision_model == 5) then
         call cgyro_alloc_add(io,(8.0*n_xi)*n_xi*n_species*n_energy*n_theta,'cmat')
      else
-        call cgyro_alloc_add(io,(8.0*nv)*nv*nc_loc,'cmat')
+        if (collision_precision_mode == 0) then
+           call cgyro_alloc_add(io,(8.0*nv)*nv*nc_loc,'cmat')
+        else
+           call cgyro_alloc_add(io,(4.0*nv)*nv*nc_loc,'cmat_fp32')
+           call cgyro_alloc_add(io,(8.0*nv)*(collision_full_stripes*2+1)*nc_loc,'cmat_stripes')
+        endif
      endif
 
      write(io,*)
