@@ -68,7 +68,7 @@ subroutine cgyro_check_memory(datafile)
 
      write(io,*)
      write(io,*) 'TOTAL'
-     write(io,10) total_memory/1e6,' MB [persistent memory per core]'
+     write(io,10) total_memory/1e6,' MB [persistent memory per MPI process]'
      write(io,*)
 
      total_memory = 0
@@ -152,13 +152,13 @@ subroutine cgyro_check_memory(datafile)
      write(io,*) 'TOTAL'
      if (test_flag == 1) then
         write(io,10) total_memory/1e9,&
-             ' GB [per toroidal mode ; halved with every doubling of cores]'
+             ' GB [per toroidal mode ; halved with every doubling of MPI processes]'
         write(io,*) ' '
         do mult=2,16,2
-           write(io,20) total_memory/1e9/mult,' GB ',mult*n_toroidal,' cores'
+           write(io,20) total_memory/1e9/mult,' GB ',mult*n_toroidal,' MPI processes'
         enddo           
      else
-        write(io,10) total_memory/1e9,' GB [per core]'
+        write(io,10) total_memory/1e9,' GB [per MPI process]'
      endif    
      close(io)
 
