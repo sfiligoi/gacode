@@ -225,13 +225,93 @@ subroutine cgyro_init_collision
      enddo
   endif
 
-  ! Collision field particle component
-  amat(:,:)   = 0.0
-  cmat(:,:,:) = 0.0
+  if (test_coll_flag == 1) then
+     !Ausgabe eines sinnvollen Testwerts:
+     !if (it_c(0) == 0) then
+     !if (i_proc==1) then
+     print *,'energy',energy(2),vel(2),vth(1)
+     do is=1,2
+        do js=1,2
+           mo1=0 !ctest
+           mo2=0 !cmat
+           !addiere Impulsbeitrag für jx,je=1,1 für species 1
+           en1=0
+           en2=0
+           do ix=1,n_xi
+              do ie=1,n_energy
+                 mo1=mo1+mass(is)*dens(is)*vth(is)*vel(ie)*xi(ix)*w_xi(ix)*w_e(ie)*dens_rot(it_c(1),is) &
+                      * (ctest(is,js,ix,4,ie,4) &
+                      -0.25*(k_perp(1)*rho*vth(is)*mass(is) &
+                      / (z(is)*bmag(it_c(1))))**2 &
+                      * 2.0*energy(ie) &
+                      * (klor_fac(is,js)*nu_d(ie,is,js) * (1+xi(ix)**2) &
+                      + kdiff_fac(is,js)*nu_par(ie,is,js) * (1-xi(ix)**2)))
+                 en1=en1+temp(is)*dens(is)*energy(ie)*w_xi(ix)*w_e(ie) &
+                      *dens_rot(it_c(1),is) &
+                      *(ctest(is,js,ix,4,ie,4) &
+                      -0.25*(k_perp(1)*rho*vth(is)*mass(is) &
+                      / (z(is)*bmag(it_c(1))))**2 &
+                      * 2.0*energy(ie) &
+                      * (klor_fac(is,js)*nu_d(ie,is,js) * (1+xi(ix)**2) &
+                      + kdiff_fac(is,js)*nu_par(ie,is,js) * (1-xi(ix)**2)))
+                 jv=iv_v(4,4,is)
+                 iv=iv_v(ie,ix,js)
+                 mo2=mo2+mass(js)*dens(js)*vth(js)*cmat(iv,jv,it_c(1))*vel(ie)*xi(ix)*w_xi(ix)*w_e(ie)*dens_rot(it_c(1),js)
+                 en2=en2+temp(js)*dens(js)*cmat(iv,jv,it_c(1))*energy(ie)*w_xi(ix)*w_e(ie)*dens_rot(it_c(1),js)
+              enddo
+           enddo
+           if (nc1==1) then
+              print *,'is=',is,' js=',js,' mo1 ',mo1,' mo2 ',mo2,' nc1 ', &
+                   nc1,' nc2 ',nc2,' itc ',it_c(nc1),' dr ',dens_rot(it_c(1),1)
+           endif
+           if (nc1==1) then
+              print *,'is=',is,' js=',js,' en1 ',en1,' en2 ',en2,' nc1 ',&
+                   nc1,' nc2 ',nc2,' itc ',it_c(nc1),' dr ',dens_rot(it_c(1),1)
+           endif
+        enddo
+     enddo
+     if (nc1==1) print *,'w_e ',w_e
+     if (nc1==1) print *,'vel ',vel
+     if (nc1==1) print *,'ctest',ctest(is,js,:,2,1:3,2)  
+     !endif
+  endif
+  
+  ! matrix solve parameters
+  allocate(i_piv(nv))
 
-  select case (collision_model)
+  ! Construct the collision matrix
 
-  case(2)
+!$omp  parallel do  default(none) &
+!$omp& shared(nc1,nc2,nv,n,delta_t,n_species,rho,is_ele,n_field,n_energy,n_xi) &
+!$omp& shared(collision_kperp,collision_field_model,explicit_trap_flag) &
+!$omp& firstprivate(collision_model,collision_mom_restore,collision_ene_restore) &
+!$omp& shared(ae_flag,lambda_debye,dens_ele,temp_ele,dens_rot) &
+!$omp& shared(betae_unit,sum_den_h) &
+!$omp& shared(it_c,ir_c,px,is_v,ix_v,ie_v,ctest,xi_deriv_mat) &
+!$omp& shared(temp,jvec_v,omega_trap,dens,energy,vel) &
+!$omp& shared(omega_rot_trap,omega_rot_u,e_deriv1_mat,e_deriv1_rot_mat,e_max,bessel) &
+!$omp& shared(xi_lor_mat) &
+!$omp& shared(k_perp,vth,mass,z,bmag,nu_d,xi,nu_par,w_e,w_xi) &
+!$omp& shared(klor_fac,kdiff_fac) &
+!$omp& private(ic,ic_loc,it,ir,info) &
+!$omp& private(iv,is,ix,ie,jv,js,jx,je,ks) &
+!$omp& private(amat,i_piv,rs,rsvec,rsvect0,rsvect1) &
+!$omp& private(dv) firstprivate(collision_precision_mode, collision_full_stripes) &
+!$omp& shared(cmat,cmat_fp32,cmat_stripes)
+  do ic=nc1,nc2
+   
+     ic_loc = ic-nc1+1
+
+     it = it_c(ic)
+     ir = ir_c(ic)
+
+     ! Collision field particle component
+     amat(:,:)   = 0.0
+     cmat(:,:,ic_loc) = 0.0
+
+     select case (collision_model)
+
+     case(2)
      if (collision_mom_restore == 1) then
         do is=1,n_species
            do js=1,n_species
@@ -242,11 +322,6 @@ subroutine cgyro_init_collision
            enddo
         enddo
 
-        ic_loc = 0
-        do ic=nc1,nc2
-           ic_loc = ic_loc+1
-           it = it_c(ic)
-           
            do iv=1,nv  
               is = is_v(iv)
               ix = ix_v(iv)
@@ -269,11 +344,10 @@ subroutine cgyro_init_collision
                  endif
               enddo
            enddo
-        enddo
 
      endif
 
-  case(4)
+     case(4)
 
      ! Momentum Restoring
 
@@ -314,11 +388,6 @@ subroutine cgyro_init_collision
         enddo
 
         if (collision_kperp == 0) then
-           ic_loc = 0
-           do ic=nc1,nc2
-              ic_loc = ic_loc+1
-              it = it_c(ic)
-              
               do iv=1,nv  
                  is = is_v(iv)
                  ix = ix_v(iv)
@@ -338,15 +407,8 @@ subroutine cgyro_init_collision
                     endif
                  enddo
               enddo
-           enddo
 
         else
-           ic_loc = 0
-           do ic=nc1,nc2
-              ic_loc = ic_loc+1
-              it = it_c(ic)
-              ir = ir_c(ic)
-
               rsvect0(:,:,:,:) = 0.0
               rsvect1(:,:,:,:) = 0.0
               do is=1,n_species
@@ -402,8 +464,6 @@ subroutine cgyro_init_collision
                     endif
                  enddo
               enddo
-           enddo
-
         endif
 
      endif
@@ -445,11 +505,6 @@ subroutine cgyro_init_collision
         enddo
 
         if (collision_kperp == 0) then
-           ic_loc = 0
-           do ic=nc1,nc2
-              ic_loc = ic_loc+1
-              it = it_c(ic)
-              
               do iv=1,nv  
                  is = is_v(iv)
                  ix = ix_v(iv)
@@ -469,15 +524,8 @@ subroutine cgyro_init_collision
                     endif
                  enddo
               enddo
-           enddo
 
         else
-           ic_loc = 0
-           do ic=nc1,nc2
-              ic_loc = ic_loc+1
-              it = it_c(ic)
-              ir = ir_c(ic)
-
               rsvect0(:,:,:,:) = 0.0
               do is=1,n_species
                  do js=1,n_species
@@ -516,100 +564,11 @@ subroutine cgyro_init_collision
                     endif
                  enddo
               enddo
-           enddo
         endif
         
      endif
      
-  end select
-
-  if (test_coll_flag == 1) then
-     !Ausgabe eines sinnvollen Testwerts:
-     !if (it_c(0) == 0) then
-     !if (i_proc==1) then
-     print *,'energy',energy(2),vel(2),vth(1)
-     do is=1,2
-        do js=1,2
-           mo1=0 !ctest
-           mo2=0 !cmat
-           !addiere Impulsbeitrag für jx,je=1,1 für species 1
-           en1=0
-           en2=0
-           do ix=1,n_xi
-              do ie=1,n_energy
-                 mo1=mo1+mass(is)*dens(is)*vth(is)*vel(ie)*xi(ix)*w_xi(ix)*w_e(ie)*dens_rot(it_c(1),is) &
-                      * (ctest(is,js,ix,4,ie,4) &
-                      -0.25*(k_perp(1)*rho*vth(is)*mass(is) &
-                      / (z(is)*bmag(it_c(1))))**2 &
-                      * 2.0*energy(ie) &
-                      * (klor_fac(is,js)*nu_d(ie,is,js) * (1+xi(ix)**2) &
-                      + kdiff_fac(is,js)*nu_par(ie,is,js) * (1-xi(ix)**2)))
-                 en1=en1+temp(is)*dens(is)*energy(ie)*w_xi(ix)*w_e(ie) &
-                      *dens_rot(it_c(1),is) &
-                      *(ctest(is,js,ix,4,ie,4) &
-                      -0.25*(k_perp(1)*rho*vth(is)*mass(is) &
-                      / (z(is)*bmag(it_c(1))))**2 &
-                      * 2.0*energy(ie) &
-                      * (klor_fac(is,js)*nu_d(ie,is,js) * (1+xi(ix)**2) &
-                      + kdiff_fac(is,js)*nu_par(ie,is,js) * (1-xi(ix)**2)))
-                 jv=iv_v(4,4,is)
-                 iv=iv_v(ie,ix,js)
-                 mo2=mo2+mass(js)*dens(js)*vth(js)*cmat(iv,jv,it_c(1))*vel(ie)*xi(ix)*w_xi(ix)*w_e(ie)*dens_rot(it_c(1),js)
-                 en2=en2+temp(js)*dens(js)*cmat(iv,jv,it_c(1))*energy(ie)*w_xi(ix)*w_e(ie)*dens_rot(it_c(1),js)
-              enddo
-           enddo
-           if (nc1==1) then
-              print *,'is=',is,' js=',js,' mo1 ',mo1,' mo2 ',mo2,' nc1 ', &
-                   nc1,' nc2 ',nc2,' itc ',it_c(nc1),' dr ',dens_rot(it_c(1),1)
-           endif
-           if (nc1==1) then
-              print *,'is=',is,' js=',js,' en1 ',en1,' en2 ',en2,' nc1 ',&
-                   nc1,' nc2 ',nc2,' itc ',it_c(nc1),' dr ',dens_rot(it_c(1),1)
-           endif
-        enddo
-     enddo
-     if (nc1==1) print *,'w_e ',w_e
-     if (nc1==1) print *,'vel ',vel
-     if (nc1==1) print *,'ctest',ctest(is,js,:,2,1:3,2)  
-     !endif
-  endif
-  
-  if (collision_model == 4 .and. collision_kperp == 1 .and. &
-       (collision_mom_restore == 1 .or. collision_ene_restore == 1)) then
-     deallocate(bessel)
-  end if
-
-  ! matrix solve parameters
-  allocate(i_piv(nv))
-
-  ! Construct the collision matrix
-
-!$omp  parallel do  default(none) &
-!$omp& shared(nc1,nc2,nv,n,delta_t,n_species,rho,is_ele,n_field) &
-!$omp& shared(collision_kperp,collision_field_model,explicit_trap_flag) &
-!$omp& firstprivate(collision_model) &
-!$omp& shared(ae_flag,lambda_debye,dens_ele,temp_ele,dens_rot) &
-!$omp& shared(betae_unit,sum_den_h) &
-!$omp& shared(it_c,ir_c,px,is_v,ix_v,ie_v,ctest,xi_deriv_mat) &
-!$omp& shared(temp,jvec_v,omega_trap,dens,energy,vel) &
-!$omp& shared(omega_rot_trap,omega_rot_u,e_deriv1_mat,e_deriv1_rot_mat,e_max) &
-!$omp& shared(xi_lor_mat) &
-!$omp& shared(k_perp,vth,mass,z,bmag,nu_d,xi,nu_par,w_e,w_xi) &
-!$omp& shared(klor_fac,kdiff_fac) &
-!$omp& private(ic,ic_loc,it,ir,info) &
-!$omp& private(iv,is,ix,ie,jv,js,jx,je,ks) &
-!$omp& private(amat,i_piv) &
-!$omp& private(dv) firstprivate(collision_precision_mode, collision_full_stripes) &
-!$omp& shared(cmat,cmat_fp32,cmat_stripes)
-  do ic=nc1,nc2
-   
-     ic_loc = ic-nc1+1
-
-     it = it_c(ic)
-     ir = ir_c(ic)
-
-     ! Initialize work array
-     amat(:,:) = 0.0
+     end select
 
      ! Avoid singularity of n=0,p=0:
      if (px(ir) == 0 .and. n == 0) then
@@ -790,6 +749,12 @@ subroutine cgyro_init_collision
 
   enddo
   deallocate(amat)
+
+  if (collision_model == 4 .and. collision_kperp == 1 .and. &
+       (collision_mom_restore == 1 .or. collision_ene_restore == 1)) then
+     deallocate(bessel)
+  end if
+
 
   if (collision_precision_mode /= 0) then
      ! cmat was a temp variable
