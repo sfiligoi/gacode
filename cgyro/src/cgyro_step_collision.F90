@@ -327,7 +327,7 @@ subroutine cgyro_calc_collision_gpu_fp64(nj_loc,update_chv)
   real :: cval
   ! --------------------------------------------------
 
-!$acc parallel loop gang &
+!$acc parallel loop gang firstprivate(nproc,nj_loc,nv,update_chv) &
 !$acc& present(cmat,cap_h_v,fsendf)  private(k,ic,j,ic_loc)
   do ic=nc1,nc2
      ic_loc = ic-nc1+1
@@ -360,6 +360,84 @@ subroutine cgyro_calc_collision_gpu_fp64(nj_loc,update_chv)
   enddo
 end subroutine cgyro_calc_collision_gpu_fp64
 
+subroutine cgyro_calc_collision_gpu_b2_fp64(nj_loc,update_chv)
+
+  use parallel_lib
+  use cgyro_globals
+
+  ! --------------------------------------------------
+  implicit none
+  !
+  integer, intent(in) :: nj_loc
+  logical, intent(in) :: update_chv
+  !
+
+  integer :: bsplit
+  integer :: j,k,ivp,b
+  integer :: n_ic_loc,d_ic_loc
+  integer, dimension((gpu_bigmem_flag*2)+1) :: bic
+  integer :: bs,be,bb
+  real :: b_re,b_im
+  real :: cval
+  ! --------------------------------------------------
+
+  bsplit = gpu_bigmem_flag*2
+
+  n_ic_loc = nc2-nc1+1
+  d_ic_loc = n_ic_loc/bsplit
+
+  bic(1) = nc1
+  do b=2,bsplit
+     bic(b) = bic(b-1) + d_ic_loc
+  enddo
+  bic(bsplit+1) = nc2+1
+
+  do b=1,bsplit
+    bs = bic(b)-nc1+1
+    be = bic(b+1)-nc1
+    ! by keeping only 2 alive at any time, we limit GPU memory use
+    bb = modulo(b,2)+2
+    ! ensure there is not another even/odd already runnning
+!$acc wait(bb)
+    ! now launch myself
+!$acc parallel loop gang firstprivate(nproc,nj_loc,nv,update_chv) &
+!$acc& copyin(cmat(:,:,bs:be)) present(cap_h_v,fsendf)  private(k,j,ic_loc) async(bb)
+    do ic_loc=bs,be
+!$acc loop vector collapse(2) private(b_re,b_im,cval,ivp,iv)
+      do k=1,nproc
+        do j=1,nj_loc
+           iv = j+(k-1)*nj_loc
+           b_re = 0.0
+           b_im = 0.0
+!$acc loop seq private(cval)
+           do ivp=1,nv
+              cval = cmat(iv,ivp,ic_loc)
+              b_re = b_re + cval*real(cap_h_v(ic_loc,ivp))
+              b_im = b_im + cval*aimag(cap_h_v(ic_loc,ivp))
+           enddo
+
+           fsendf(j,ic_loc,k) = cmplx(b_re,b_im)
+        enddo
+      enddo
+
+      if (update_chv) then
+!$acc loop collapse(2) vector private(iv)
+        do k=1,nproc
+           do j=1,nj_loc
+              iv = j+(k-1)*nj_loc
+              cap_h_v(ic_loc,iv) = fsendf(j,ic_loc,k)
+           enddo
+        enddo
+      endif
+    enddo ! ic
+  enddo ! b
+
+  ! wait for all the async kernels to terminate
+!$acc wait(2)
+!$acc wait(3)
+
+end subroutine cgyro_calc_collision_gpu_b2_fp64
+
 subroutine cgyro_calc_collision_gpu_fp32(nj_loc,update_chv)
 
   use parallel_lib
@@ -377,7 +455,7 @@ subroutine cgyro_calc_collision_gpu_fp32(nj_loc,update_chv)
   real :: cval
   ! --------------------------------------------------
 
-!$acc parallel loop gang &
+!$acc parallel loop gang firstprivate(nproc,nj_loc,nv,collision_full_stripes,update_chv) &
 !$acc& present(cmat_fp32,cmat_stripes,cap_h_v,fsendf)  private(k,ic,j,ic_loc)
   do ic=nc1,nc2
      ic_loc = ic-nc1+1
@@ -415,6 +493,89 @@ subroutine cgyro_calc_collision_gpu_fp32(nj_loc,update_chv)
   enddo
 end subroutine cgyro_calc_collision_gpu_fp32
 
+subroutine cgyro_calc_collision_gpu_b2_fp32(nj_loc,update_chv)
+
+  use parallel_lib
+  use cgyro_globals
+
+  ! --------------------------------------------------
+  implicit none
+  !
+  integer, intent(in) :: nj_loc
+  logical, intent(in) :: update_chv
+  !
+
+  integer :: bsplit
+  integer :: j,k,ivp,b,dv
+  integer :: n_ic_loc,d_ic_loc
+  integer, dimension((gpu_bigmem_flag*2)+1) :: bic
+  integer :: bs,be,bb
+  real :: b_re,b_im
+  real :: cval
+  ! --------------------------------------------------
+
+  bsplit = gpu_bigmem_flag*2
+
+  n_ic_loc = nc2-nc1+1
+  d_ic_loc = n_ic_loc/bsplit
+
+  bic(1) = nc1
+  do b=2,bsplit
+     bic(b) = bic(b-1) + d_ic_loc
+  enddo
+  bic(bsplit+1) = nc2+1
+
+  do b=1,bsplit
+    bs = bic(b)-nc1+1
+    be = bic(b+1)-nc1
+    ! by keeping only 2 alive at any time, we limit GPU memory use
+    bb = modulo(b,2)+2
+    ! ensure there is not another even/odd already runnning
+!$acc wait(bb)
+    ! now launch myself
+!$acc parallel loop gang firstprivate(nproc,nj_loc,nv,collision_full_stripes,update_chv) &
+!$acc& copyin(cmat_fp32(:,:,bs:be),cmat_stripes(:,:,bs:be)) present(cap_h_v,fsendf)  private(k,j,ic_loc) async(bb)
+    do ic_loc=bs,be
+!$acc loop vector collapse(2) private(b_re,b_im,cval,ivp,iv)
+       do k=1,nproc
+         do j=1,nj_loc
+           iv = j+(k-1)*nj_loc
+           b_re = 0.0
+           b_im = 0.0
+!$acc loop seq private(cval,dv)
+           do ivp=1,nv
+              dv = iv-ivp
+              if (abs(dv) .GT. collision_full_stripes) then
+                 cval = cmat_fp32(iv,ivp,ic_loc)
+              else
+                 cval = cmat_stripes(dv,ivp,ic_loc)
+              endif
+              b_re = b_re + cval*real(cap_h_v(ic_loc,ivp))
+              b_im = b_im + cval*aimag(cap_h_v(ic_loc,ivp))
+           enddo
+
+           fsendf(j,ic_loc,k) = cmplx(b_re,b_im)
+         enddo
+       enddo
+
+       if (update_chv) then
+!$acc loop collapse(2) vector private(iv)
+         do k=1,nproc
+           do j=1,nj_loc
+              iv = j+(k-1)*nj_loc
+              cap_h_v(ic_loc,iv) = fsendf(j,ic_loc,k)
+           enddo
+         enddo
+      endif
+    enddo ! ic
+  enddo ! b
+
+  ! wait for all the async kernels to terminate
+!$acc wait(2)
+!$acc wait(3)
+
+end subroutine cgyro_calc_collision_gpu_b2_fp32
+
 subroutine cgyro_calc_collision_gpu(nj_loc,update_chv)
 
   use cgyro_globals
@@ -433,6 +594,25 @@ subroutine cgyro_calc_collision_gpu(nj_loc,update_chv)
   endif
 
 end subroutine cgyro_calc_collision_gpu
+
+subroutine cgyro_calc_collision_gpu_b2(nj_loc,update_chv)
+
+  use cgyro_globals
+
+  ! --------------------------------------------------
+  implicit none
+  !
+  integer, intent(in) :: nj_loc
+  logical, intent(in) :: update_chv
+  ! --------------------------------------------------
+
+  if (collision_precision_mode == 0) then
+     call cgyro_calc_collision_gpu_b2_fp64(nj_loc,update_chv)
+  else
+     call cgyro_calc_collision_gpu_b2_fp32(nj_loc,update_chv)
+  endif
+
+end subroutine cgyro_calc_collision_gpu_b2
 
 subroutine cgyro_calc_collision_simple_gpu(nj_loc)
 
@@ -568,6 +748,11 @@ subroutine cgyro_step_collision_gpu(use_simple)
     if (gpu_bigmem_flag == 1) then
       call timer_lib_in('coll')
       call cgyro_calc_collision_gpu(nj_loc, update_chv)
+      call timer_lib_out('coll')
+
+    elseif (gpu_bigmem_flag .GT. 1) then
+      call timer_lib_in('coll')
+      call cgyro_calc_collision_gpu_b2(nj_loc, update_chv)
       call timer_lib_out('coll')
 
     else

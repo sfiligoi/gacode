@@ -21,6 +21,7 @@ RMIN=0.6
 
 # Collisions
 COLLISION_MODEL=4
+GPU_BIGMEM_FLAG=4
 
 # Profiles
 PROFILE_MODEL=2
