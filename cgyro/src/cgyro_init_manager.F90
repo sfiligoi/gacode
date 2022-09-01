@@ -18,8 +18,8 @@ subroutine cgyro_init_manager
   use cgyro_globals
   use half_hermite
 
-#ifdef _OPENACC
   use cgyro_io
+#ifdef _OPENACC
   use cufft, only : cufftPlanMany, &
        CUFFT_C2R,CUFFT_Z2D,CUFFT_R2C,CUFFT_D2Z
 #endif
@@ -37,6 +37,8 @@ subroutine cgyro_init_manager
   integer :: idist,odist,istride,ostride
   integer, parameter :: singlePrecision = selected_real_kind(6,30)
 #endif
+
+  character(len=128) :: msg
 
   if (hiprec_flag == 1) then
      fmtstr  = '(es16.9)'
@@ -261,7 +263,15 @@ subroutine cgyro_init_manager
      if (collision_model == 5) then
         allocate(cmat_simple(n_xi,n_xi,n_energy,n_species,n_theta))
      else
-        allocate(cmat(nv,nv,nc_loc))
+        if (collision_precision_mode /= 0) then
+           allocate(cmat_stripes(-collision_full_stripes:collision_full_stripes,nv,nc_loc))
+           allocate(cmat_fp32(nv,nv,nc_loc))
+
+           write (msg, "(A35,I4,A14)") "Using fp32 collision precision with ",collision_full_stripes, " fp64 stripes."
+           call cgyro_info(msg)
+        else
+           allocate(cmat(nv,nv,nc_loc))
+        endif
      endif
 
   endif
