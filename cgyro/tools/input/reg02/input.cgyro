@@ -22,6 +22,7 @@ S=1.0
 # Collisions
 COLLISION_MODEL=4
 NU_EE=0.1
+GPU_BIGMEM_FLAG=0
 
 # Profiles
 N_SPECIES=2

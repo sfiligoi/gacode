@@ -54,6 +54,7 @@ subroutine cgyro_check_memory(datafile)
            ny0 = 2*n_toroidal-1
            nx = (3*nx0)/2
            ny = (3*ny0)/2
+#ifndef _OPENACC
            call cgyro_alloc_add(io,(ny/2+1)*nx*16.0*n_omp,'fx')
            call cgyro_alloc_add(io,(ny/2+1)*nx*16.0*n_omp,'gx')
            call cgyro_alloc_add(io,(ny/2+1)*nx*16.0*n_omp,'fy')
@@ -63,12 +64,23 @@ subroutine cgyro_check_memory(datafile)
            call cgyro_alloc_add(io,ny*nx*8.0*nsplit,'uy')
            call cgyro_alloc_add(io,ny*nx*8.0*n_omp,'vy')
            call cgyro_alloc_add(io,ny*nx*8.0*n_omp,'uv')
+#else
+           call cgyro_alloc_add(io,(ny/2+1)*nx*16.0*nsplit,'fx')
+           call cgyro_alloc_add(io,(ny/2+1)*nx*16.0*nsplit,'gx')
+           call cgyro_alloc_add(io,(ny/2+1)*nx*16.0*nsplit,'fy')
+           call cgyro_alloc_add(io,(ny/2+1)*nx*16.0*nsplit,'gy')
+           call cgyro_alloc_add(io,ny*nx*8.0*nsplit,'ux')
+           call cgyro_alloc_add(io,ny*nx*8.0*nsplit,'vx')
+           call cgyro_alloc_add(io,ny*nx*8.0*nsplit,'uy')
+           call cgyro_alloc_add(io,ny*nx*8.0*nsplit,'vy')
+           call cgyro_alloc_add(io,ny*nx*8.0*nsplit,'uv')
+#endif
         endif
      endif
 
      write(io,*)
      write(io,*) 'TOTAL'
-     write(io,10) total_memory/1e6,' MB [persistent memory per core]'
+     write(io,10) total_memory/1e6,' MB [persistent memory per MPI process]'
      write(io,*)
 
      total_memory = 0
@@ -146,19 +158,24 @@ subroutine cgyro_check_memory(datafile)
            call cgyro_alloc_add(io,(4.0*nv)*nv*nc_loc,'cmat_fp32')
            call cgyro_alloc_add(io,(8.0*nv)*(collision_full_stripes*2+1)*nc_loc,'cmat_stripes')
         endif
+#ifdef _OPENACC
+        if (gpu_bigmem_flag /= 1) then
+           write(io,*) 'Note: cmat is not in GPU memory'
+        endif
+#endif
      endif
 
      write(io,*)
      write(io,*) 'TOTAL'
      if (test_flag == 1) then
         write(io,10) total_memory/1e9,&
-             ' GB [per toroidal mode ; halved with every doubling of cores]'
+             ' GB [per toroidal mode ; halved with every doubling of MPI processes]'
         write(io,*) ' '
         do mult=2,16,2
-           write(io,20) total_memory/1e9/mult,' GB ',mult*n_toroidal,' cores'
+           write(io,20) total_memory/1e9/mult,' GB ',mult*n_toroidal,' MPI processes'
         enddo           
      else
-        write(io,10) total_memory/1e9,' GB [per core]'
+        write(io,10) total_memory/1e9,' GB [per MPI process]'
      endif    
      close(io)
 
