@@ -73,11 +73,18 @@
         tdamp = 0.510
         ndamp = 0.0028
         tdamp = 0.639
+        ndamp = 0.005*rmin_input/Rmaj_input
+        tdamp = 0.65
+! 35
+        ndamp = 0.0026
+        tdamp = 0.648
+        pdamp = 0.648
+
  !       write(*,*)"Bmin/Bmax = ",Bmin/Bmax
-!       ndamp = damp_psi_in
-!       tdamp = damp_sig_in
+ !      ndamp = damp_psi_in
+ !      tdamp = damp_sig_in
 !       pdamp = etg_factor_in*pi/2.0
-       pdamp = 0.0
+!       pdamp = 0.0
        nus(1)=1.0
        nus(2)=SQRT(mass(1)/mass(2))*(taus(1)/taus(2))**1.5
 !       if(igeo.gt.0)then
@@ -100,7 +107,7 @@
 !     call get_mat_uparc
      do iu = 1,nu
        do ju = 1,nu
-!         matuc(iu,ju)= mat_uparc(iu,ju)
+         matuc(iu,ju)= mat_upar(iu,ju)
          matu(iu,ju) = mat_upar(iu,ju)
          matdu(iu,ju) = mat_dupar(iu,ju)
        enddo
@@ -130,8 +137,10 @@
 !
 ! add the matu "closure"
 !
-     matu(nu-1,nu) = (1.0-tdamp)*matu(nu-1,nu)
-     matu(nu,nu-1) = (1.0-tdamp)*matu(nu,nu-1)
+     matuc(nu-1,nu) = (1.0 - tdamp)*matu(nu-1,nu)
+     matuc(nu,nu-1) = (1.0 - tdamp)*matu(nu,nu-1)
+     matdu(nu-1,nu) = (1.0 + pdamp)*matdu(nu-1,nu)
+     matdu(nu,nu-1) = (1.0 + pdamp)*matdu(nu,nu-1)
      do iu = 1,nu
      do ju = 1,nu
        matuu(iu,ju) = 0.0
@@ -149,7 +158,7 @@
      do ju = 1,nu
        iue = iu + nu*(ie-1)
        jue = ju + nu*(je-1)
-       matmirror(iue,jue) = matu(iu,ju)*matde(ie,je)-0.5*mate(ie,je)*matdu(iu,ju)
+       matmirror(iue,jue) = matuc(iu,ju)*matde(ie,je)-0.5*mate(ie,je)*matdu(iu,ju) 
 !       write(*,*)"matmirror",iue,jue,matmirror(iue,jue)
      enddo
      enddo
@@ -290,8 +299,8 @@
         jtot = jb+nbasis*(ju-1)+nbasis*nu*(je-1)+nbasis*nu*ne*(js-ns0)
         iue = iu + nu*(ie-1)
         jue = ju + nu*(je-1)
-        mateq(itot,jtot) = (-xi*vs(is)*k_par0*(ave_kpar(ib,jb)*matu(iu,ju)       &
-        + ndamp*ave_modkpar(ib,jb)*one(iu,ju))*one(ie,je)                                &
+        mateq(itot,jtot) = (-xi*vs(is)*k_par0*(ave_kpar(ib,jb)*matuc(iu,ju)      &
+        + ndamp*one(ib,jb)*one(iu,ju))*one(ie,je)                                &
         - 2.0*w_d0*(taus(is)/zs(is))*ave_wdpar(ib,jb)*matuu(iu,ju)*one(ie,je)    &
         - w_d0*(taus(is)/zs(is))*ave_wdper(ib,jb)*mate(ie,je)*one(iu,ju)         &
         - xi*vs(is)*k_par0*ave_gradb(ib,jb)*matmirror(iue,jue)                   &
