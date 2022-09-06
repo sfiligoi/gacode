@@ -10,6 +10,15 @@
 ! NOTE: Need to be careful with (p=-nr/2,n=0) component.
 !-----------------------------------------------------------------
 
+!
+! Comm is a transpose
+! First half of the transpose is done locally
+!  from (theta,radial,nv_loc) -> (radial, theta, nv_lov)
+! Then AlltoAll finishes the transpose
+!  from (radial, theta, nv_loc_1, nv_loc_2) x toroidal -> (radial, theta, nv_loc_1 , toroidal) x nv_loc_2
+! Implies nv_loc_2 == toroidal
+!
+
 ! NOTE: call cgyro_nl_fftw_comm1/2_async before cgyro_nl_fftw
 subroutine cgyro_nl_fftw_comm1_async
 
