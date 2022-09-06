@@ -246,10 +246,8 @@ subroutine cgyro_init_manager
      ! Nonlinear arrays
      if (nonlinear_flag == 1) then
         if (nonlinear_method == 1) then
-           allocate(f_nl(nc,nsplit,n_toroidal))
-           allocate(g_nl(nc,nsplit,n_toroidal))
-           allocate(fpack(nc,nsplit*n_toroidal))
-           allocate(gpack(nc,nsplit*n_toroidal))
+           call cgyro_error("nonlinear_method==1 has been deprecated")
+           return
         else
            allocate(f_nl(n_radial,nsplit,n_toroidal))
            allocate(g_nl(n_radial,nsplit,n_toroidal))
@@ -323,14 +321,8 @@ subroutine cgyro_init_manager
   ! Initialize nonlinear dimensions and arrays 
   call timer_lib_in('nl_init')
   if (nonlinear_method == 1) then
-
-     ! Direct convolution
-
-     ny0 = n_toroidal-1
-     nx0 = n_radial/2
-     ny = int(1.5*ny0)+1
-     nx = int(1.5*nx0)+1
-
+     call cgyro_error("nonlinear_method==1 has been deprecated")
+     return
   else
 
      ! 2D FFT lengths 

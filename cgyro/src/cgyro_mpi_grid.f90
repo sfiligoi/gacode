@@ -253,11 +253,7 @@ subroutine cgyro_mpi_grid
 
   ! Nonlinear parallelization dimensions (returns nsplit)
 
-  if (nonlinear_method == 1) then
-     call parallel_slib_init(n_toroidal,nv_loc,nc,nsplit,NEW_COMM_2)
-  else
-     call parallel_slib_init(n_toroidal,nv_loc*n_theta,n_radial,nsplit,NEW_COMM_2)
-  endif
+  call parallel_slib_init(n_toroidal,nv_loc*n_theta,n_radial,nsplit,NEW_COMM_2)
 
   ! OMP code
   n_omp = omp_get_max_threads()

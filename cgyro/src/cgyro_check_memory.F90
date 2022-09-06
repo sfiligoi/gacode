@@ -132,17 +132,10 @@ subroutine cgyro_check_memory(datafile)
         write(io,*) 'Nonlinear bracket'
         write(io,*)
         ! nsplit * n_toroidal = nv_loc * n_theta
-        if (nonlinear_method == 1) then
-           call cgyro_alloc_add(io,nc*nsplit*n_toroidal*16.0,'f_nl')
-           call cgyro_alloc_add(io,nc*nsplit*n_toroidal*16.0,'g_nl')
-           call cgyro_alloc_add(io,nc*nsplit*n_toroidal*16.0,'fpack')
-           call cgyro_alloc_add(io,nc*nsplit*n_toroidal*16.0,'gpack')
-        else
-           call cgyro_alloc_add(io,n_radial*nsplit*n_toroidal*16.0,'f_nl')
-           call cgyro_alloc_add(io,n_radial*nsplit*n_toroidal*16.0,'g_nl')
-           call cgyro_alloc_add(io,n_radial*nsplit*n_toroidal*16.0,'fpack')
-           call cgyro_alloc_add(io,n_radial*nsplit*n_toroidal*16.0,'gpack')
-        endif
+        call cgyro_alloc_add(io,n_radial*nsplit*n_toroidal*16.0,'f_nl')
+        call cgyro_alloc_add(io,n_radial*nsplit*n_toroidal*16.0,'g_nl')
+        call cgyro_alloc_add(io,n_radial*nsplit*n_toroidal*16.0,'fpack')
+        call cgyro_alloc_add(io,n_radial*nsplit*n_toroidal*16.0,'gpack')
      endif
 
      write(io,*)

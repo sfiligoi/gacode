@@ -5,7 +5,7 @@ subroutine cgyro_rhs_comm_async(which)
 
   integer, intent(in) :: which
 
-  if ( (nonlinear_flag == 1) .and. (nonlinear_method /= 1)) then
+  if (nonlinear_flag == 1) then
      if (which == 1) then
        call cgyro_nl_fftw_comm1_async
      else
@@ -23,7 +23,7 @@ subroutine cgyro_rhs_comm_test(which)
 
   integer, intent(in) :: which
 
-  if ( (nonlinear_flag == 1) .and. (nonlinear_method /= 1)) then
+  if (nonlinear_flag == 1) then
      if (which == 1) then
        call cgyro_nl_fftw_comm1_test
      else
@@ -188,11 +188,7 @@ subroutine cgyro_rhs(ij)
 
   ! Nonlinear evaluation [f,g]
   if (nonlinear_flag == 1) then     
-     if (nonlinear_method == 1) then
-        call cgyro_nl_direct(ij)
-     else
         call cgyro_nl_fftw(ij)
-     endif
   endif
 
 end subroutine cgyro_rhs
