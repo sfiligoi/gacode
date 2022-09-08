@@ -154,8 +154,8 @@ subroutine cgyro_vel_fmaN(nr, left, r1, cN, rN, abssum)
     integer, intent(in) :: nr
     complex, intent(out), dimension(nc,nv_loc) :: left
     complex, intent(in), dimension(nc,nv_loc) :: r1
-    real, intent(in), dimension(n) :: cN
-    complex, intent(in), dimension(nc,nv_loc,n) :: rN
+    real, intent(in), dimension(nr) :: cN
+    complex, intent(in), dimension(nc,nv_loc,nr) :: rN
     real, intent(inout), optional :: abssum
     !-------------------------------------------------------
     call cgyro_cmpl_fmaN(nc*nv_loc,nr, left,r1,cN,rN,abssum)
@@ -176,10 +176,10 @@ subroutine cgyro_vel_solution_werror(nr, left, r0, c1, m1, cN, rN, ec1, ecN, abs
     complex, intent(in), dimension(nc,nv_loc) :: r0
     real, intent(in) :: c1
     complex, intent(inout), dimension(nc,nv_loc) :: m1
-    real, intent(in), dimension(n) :: cN
-    complex, intent(in), dimension(nc,nv_loc,n) :: rN
+    real, intent(in), dimension(nr) :: cN
+    complex, intent(in), dimension(nc,nv_loc,nr) :: rN
     real, intent(in) :: ec1
-    real, intent(in), dimension(n) :: ecN
+    real, intent(in), dimension(nr) :: ecN
     real, intent(inout) :: abssum_left
     real, intent(inout) :: abssum_m
     !-------------------------------------------------------
