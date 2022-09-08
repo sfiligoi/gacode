@@ -145,7 +145,6 @@ x.add('MACH_SCALE','1.0')
 x.add('BETA_STAR_SCALE','1.0')
 x.add('BETAE_UNIT_SCALE','1.0')
 x.add('NU_EE_SCALE','1.0')
-x.add('NONLINEAR_FIELD','0')
 
 # Deprecated parameters
 x.dep('BETA_STAR','use BETA_STAR_SCALE')

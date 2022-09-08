@@ -291,16 +291,16 @@ subroutine cgyro_cmpl_fma6(sz, left, r1, c2, r2, c3, r3, c4, r4, c5, r5, c6, r6,
     endif
 end subroutine cgyro_cmpl_fma6
 
-! rN should logically be (sz,n) in size,
-subroutine cgyro_cmpl_fmaN(sz, n, left, r1, cN, rN, abssum)
+! rN should logically be (sz,nr) in size,
+subroutine cgyro_cmpl_fmaN(sz, nr, left, r1, cN, rN, abssum)
     !-------------------------------------------------------
     implicit none
     !
     integer, intent(in) :: sz
-    integer, intent(in) :: n
+    integer, intent(in) :: nr
     complex, intent(out), dimension(*) :: left
     complex, intent(in), dimension(*) :: r1
-    real, intent(in), dimension(n) :: cN
+    real, intent(in), dimension(nr) :: cN
     complex, intent(in), dimension(*) :: rN
     real, intent(inout), optional :: abssum
     !
@@ -318,7 +318,7 @@ subroutine cgyro_cmpl_fmaN(sz, n, left, r1, cN, rN, abssum)
       do i=1,sz
         tmp = r1(i)
 !$acc loop seq
-        do j=1,n
+        do j=1,nr
            tmp = tmp + cN(j) * rN((j-1)*sz+i)
         enddo
         left(i) = tmp
@@ -334,7 +334,7 @@ subroutine cgyro_cmpl_fmaN(sz, n, left, r1, cN, rN, abssum)
       do i=1,sz
         tmp = r1(i)
 !$acc loop seq
-        do j=1,n
+        do j=1,nr
            tmp = tmp + cN(j) * rN((j-1)*sz+i)
         enddo
         left(i) = tmp
@@ -346,21 +346,21 @@ end subroutine cgyro_cmpl_fmaN
   ! Specialized merge of 2 FMA with abssum used in gk
   !=========================================================
 
-! rN should logically be (sz,n) in size,
-subroutine cgyro_cmpl_solution_werror(sz, n, left, r0, c1, m1, cN, rN, ec1, ecN, abssum_left, abssum_m)
+! rN should logically be (sz,nr) in size,
+subroutine cgyro_cmpl_solution_werror(sz, nr, left, r0, c1, m1, cN, rN, ec1, ecN, abssum_left, abssum_m)
     !-------------------------------------------------------
     implicit none
     !
     integer, intent(in) :: sz
-    integer, intent(in) :: n
+    integer, intent(in) :: nr
     complex, intent(inout), dimension(*) :: left
     complex, intent(in), dimension(*) :: r0
     real, intent(in) :: c1
     complex, intent(inout), dimension(*) :: m1
-    real, intent(in), dimension(n) :: cN
+    real, intent(in), dimension(nr) :: cN
     complex, intent(in), dimension(*) :: rN
     real, intent(in) :: ec1
-    real, intent(in), dimension(n) :: ecN
+    real, intent(in), dimension(nr) :: ecN
     real, intent(inout) :: abssum_left
     real, intent(inout) :: abssum_m
     !
@@ -382,7 +382,7 @@ subroutine cgyro_cmpl_solution_werror(sz, n, left, r0, c1, m1, cN, rN, ec1, ecN,
        tmpl = r0(i) + c1 * tmp
        tmpm = ec1*tmp
 !$acc loop seq private(tmp)
-       do j=1,n
+       do j=1,nr
           tmp = rN((j-1)*sz+i)
           tmpl = tmpl +  cN(j) * tmp
           tmpm = tmpm + ecN(j) * tmp
