@@ -182,7 +182,7 @@ subroutine cgyro_calc_collision_simple_cpu(nj_loc)
      enddo
 
      ! Avoid singularity of n=0,p=0:
-     if (px(ir) == 0 .and. n == 0) then
+     if (px(ir) == 0 .and. my_toroidal == 0) then
         bvec = cvec
      else
 
@@ -257,7 +257,7 @@ subroutine cgyro_step_collision_cpu(use_simple)
   else
      update_chv = .FALSE.
      if (collision_field_model == 1) then
-       if (.not.(n == 0 .and. ae_flag == 1)) then
+       if (.not.(my_toroidal == 0 .and. ae_flag == 1)) then
           ! cap_h_v not re-used else
           update_chv = .TRUE.
        endif
@@ -271,7 +271,7 @@ subroutine cgyro_step_collision_cpu(use_simple)
   if (.not. use_simple) then
     ! Compute the new phi
     if (collision_field_model == 1) then
-      if (.not.(n == 0 .and. ae_flag == 1)) then
+      if (.not.(my_toroidal == 0 .and. ae_flag == 1)) then
         call cgyro_field_v
       endif
     endif
@@ -649,7 +649,7 @@ subroutine cgyro_calc_collision_simple_gpu(nj_loc)
      ! Set-up the RHS: H = f + ze/T G phi
 
      ! Avoid singularity of n=0,p=0:
-     if (px(ir) == 0 .and. n == 0) then
+     if (px(ir) == 0 .and. my_toroidal == 0) then
 
         ! shortcut all the logic, just fill fsenf
 !$acc loop collapse(2) vector private(iv)
@@ -738,7 +738,7 @@ subroutine cgyro_step_collision_gpu(use_simple)
 
     update_chv = .FALSE.
     if (collision_field_model == 1) then
-       if (.not.(n == 0 .and. ae_flag == 1)) then
+       if (.not.(my_toroidal == 0 .and. ae_flag == 1)) then
           ! cap_h_v not re-used else
           update_chv = .TRUE.
        endif
@@ -768,7 +768,7 @@ subroutine cgyro_step_collision_gpu(use_simple)
       call timer_lib_in('coll_mem')
 !$acc update device(fsendf)
       if (collision_field_model == 1) then
-        if (.not.(n == 0 .and. ae_flag == 1)) then
+        if (.not.(my_toroidal == 0 .and. ae_flag == 1)) then
 !$acc update device (cap_h_v)
         endif
       endif
@@ -778,7 +778,7 @@ subroutine cgyro_step_collision_gpu(use_simple)
 
     ! Compute the new phi
     if (collision_field_model == 1) then
-      if (.not.(n == 0 .and. ae_flag == 1)) then
+      if (.not.(my_toroidal == 0 .and. ae_flag == 1)) then
         call cgyro_field_v_gpu
       endif
     endif
@@ -828,7 +828,7 @@ subroutine cgyro_step_collision
   call cgyro_step_collision_cpu(.FALSE.)
 #endif
 
-  if (collision_field_model == 0 .or. (n == 0 .and. ae_flag == 1)) then
+  if (collision_field_model == 0 .or. (my_toroidal == 0 .and. ae_flag == 1)) then
      call cgyro_field_c
   endif
 

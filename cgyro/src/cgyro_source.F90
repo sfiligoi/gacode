@@ -24,7 +24,7 @@ subroutine cgyro_source
   sa = 1.0+exp(-delta_t/tau_ave)*sa
 
   ! Time-delay source
-  if (n == 0) then
+  if (my_toroidal == 0) then
 
      ir = 1+n_radial/2
 

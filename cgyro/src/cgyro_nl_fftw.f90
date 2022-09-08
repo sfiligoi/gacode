@@ -429,7 +429,7 @@ subroutine cgyro_nl_fftw(ij)
      enddo
 
      ! Filter
-     if (n == 0) then
+     if (my_toroidal == 0) then
       do ic=1,nc
         ir = ir_c(ic)
         if (ir == 1 .or. px(ir) == 0) then

@@ -329,7 +329,7 @@ subroutine cgyro_nl_fftw(ij)
   call timer_lib_out('nl_mem')
 
   ! Filter
-  if (n == 0) then
+  if (my_toroidal == 0) then
 !$acc parallel loop gang vector private(ir) &
 !$acc          present(ir_c,psi,px) default(none)
       do ic=1,nc

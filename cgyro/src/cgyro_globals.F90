@@ -204,7 +204,7 @@ module cgyro_globals
   integer, dimension(:,:,:), allocatable :: iv_v
   integer, dimension(:), allocatable :: ica_c,icb_c
   !
-  integer :: n
+  integer :: my_toroidal  ! used to be called n
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------

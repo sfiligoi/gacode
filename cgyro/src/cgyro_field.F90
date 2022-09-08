@@ -51,7 +51,7 @@ subroutine cgyro_field_v
   call timer_lib_in('field')
 
   ! Poisson LHS factors
-  if (n == 0 .and. ae_flag == 1) then
+  if (my_toroidal == 0 .and. ae_flag == 1) then
      call cgyro_field_ae('v')
   else
      field(:,:) = fcoef(:,:)*field(:,:)
@@ -127,7 +127,7 @@ subroutine cgyro_field_v_gpu
 
   call timer_lib_in('field')
   ! Poisson LHS factors
-  if (n == 0 .and. ae_flag == 1) then
+  if (my_toroidal == 0 .and. ae_flag == 1) then
     ! Note: Called rarely, use the CPU version
 !$acc update host(field)
      call cgyro_field_ae('v')
@@ -201,7 +201,7 @@ subroutine cgyro_field_c_cpu
   endif
 
   ! Poisson LHS factors
-  if (n == 0 .and. ae_flag == 1) then
+  if (my_toroidal == 0 .and. ae_flag == 1) then
     call cgyro_field_ae('c')
   else
      if (n_field > 2) then
@@ -293,7 +293,7 @@ subroutine cgyro_field_c_gpu
      enddo
   endif
   ! Poisson LHS factors
-  if (n == 0 .and. ae_flag == 1) then
+  if (my_toroidal == 0 .and. ae_flag == 1) then
     ! Note: Called rarely, use the CPu version
 !$acc update host(field)
     call cgyro_field_ae('c')

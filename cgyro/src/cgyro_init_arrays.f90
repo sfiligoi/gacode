@@ -84,7 +84,7 @@ subroutine cgyro_init_arrays
            jxvec_c(2,ic,iv_loc) = efac * fac * (bmag(it) * jloc_c(2,ic))
            
            if (n_field > 2) then
-              if(n==0) then
+              if(my_toroidal == 0) then
                  jxvec_c(3,ic,iv_loc) = 0.0
               else
                  jxvec_c(3,ic,iv_loc) = fac * z(is)*bmag(it)/mass(is) &
@@ -194,7 +194,7 @@ subroutine cgyro_init_arrays
   !-------------------------------------------------------------------------
   ! Zonal flow with adiabatic electrons:
   !
-  if (n == 0 .and. ae_flag == 1) then
+  if (my_toroidal == 0 .and. ae_flag == 1) then
 
      allocate(hzf(n_radial,n_theta,n_theta))
      hzf(:,:,:) = 0.0      
@@ -272,10 +272,10 @@ subroutine cgyro_init_arrays
            jt = modulo(it+id-1,n_theta)+1
            if (it+id < 1) then
               thfac = exp(2*pi*i_c*k_theta*rmin)
-              jr = modulo(ir-n*box_size*sign_qs-1,n_radial)+1
+              jr = modulo(ir-my_toroidal*box_size*sign_qs-1,n_radial)+1
            else if (it+id > n_theta) then
               thfac = exp(-2*pi*i_c*k_theta*rmin)
-              jr = modulo(ir+n*box_size*sign_qs-1,n_radial)+1
+              jr = modulo(ir+my_toroidal*box_size*sign_qs-1,n_radial)+1
            else
               thfac = (1.0,0.0)
               jr = ir
@@ -302,7 +302,7 @@ subroutine cgyro_init_arrays
         ir = ir_c(ic) 
         it = it_c(ic)
 
-        u = (pi/n_toroidal)*n
+        u = (pi/n_toroidal)*my_toroidal
 
         ! omega_dalpha
         omega_cap_h(ic,iv_loc) = &
