@@ -263,14 +263,14 @@ subroutine cgyro_mpi_grid
      do iv_loc=1,nv_loc
         do it=1,n_theta
            iexch = iv_loc + (it-1)*nv_loc
+           ! all processes on slib use the same nv1:nv2 range, so using iv_loc OK
            iv_e(iexch) = iv_loc
            it_e(iexch) = it
         enddo
      enddo
-     ! any padding should contain consecutive but valid values
      do iexch=nv_loc*n_theta+1,nsplit*n_toroidal
-        iv_e(iexch) = nv_loc
-        it_e(iexch) = n_theta
+        iv_e(iexch) = 0       ! special value for padding
+        it_e(iexch) = n_theta ! padding must contain consecutive but valid values (minmax)
      enddo
 
      allocate(iv_j(nsplit,n_toroidal))
@@ -292,13 +292,10 @@ subroutine cgyro_mpi_grid
      ! find what theta do I need to send
      allocate(it_jf(n_jtheta,n_toroidal))
      do il=1,n_toroidal
+        it_jf(:,il) = 0 ! special value for padding
         do it=jtheta_min,jtheta_max
            ! these are the ones I will need
            it_jf(it-jtheta_min+1,il) = it
-        enddo
-        ! any padding should use consecutive but valid theta
-        do it=jtheta_max+1,n_jtheta
-           it_jf(it-jtheta_min+1,il) = jtheta_max
         enddo
      enddo
 

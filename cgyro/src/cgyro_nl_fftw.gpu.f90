@@ -28,26 +28,25 @@ subroutine cgyro_nl_fftw_comm1_async
 
   implicit none
 
-  integer :: ir,it,iv_loc_m,ic_loc_m
+  integer :: ir,it,iv_loc_m
   integer :: iexch
 
   call timer_lib_in('nl_mem')
 
-!$acc parallel loop collapse(3) independent private(iexch,ic_loc_m) &
-!$acc&         present(h_x,fpack) default(none)
-  do iv_loc_m=1,nv_loc
-     do it=1,n_theta
+!$acc parallel loop gang independent private(it,iv_loc_m) &
+!$acc&         present(iv_e,it_e,ic_c,h_x,fpack) default(none)
+  do iexch=1,nsplit*n_toroidal
+     it = it_e(iexch)
+     iv_loc_m = iv_e(iexch)
+     if (iv_loc_m == 0) then
+        ! padding
+        fpack(1:n_radial,iexch) = (0.0,0.0)
+     else
+!$acc loop vector
         do ir=1,n_radial
-           iexch = it + (iv_loc_m-1)*n_theta
-           ic_loc_m = it + (ir-1)*n_theta
-           fpack(ir,iexch) = h_x(ic_loc_m,iv_loc_m)
+           fpack(ir,iexch) = h_x(ic_c(ir,it),iv_loc_m)
         enddo
-     enddo
-  enddo
-
-!$acc parallel loop gang present(fpack) if(nv_loc*n_theta+1>=nsplit*n_toroidal)
-  do iexch=nv_loc*n_theta+1,nsplit*n_toroidal
-     fpack(:,iexch) = (0.0,0.0)
+     endif
   enddo
 
   call parallel_slib_f_nc_async_gpu(fpack,f_nl,f_req)
@@ -67,7 +66,7 @@ subroutine cgyro_nl_fftw_comm1_test
 
 end subroutine cgyro_nl_fftw_comm1_test
 
-subroutine cgyro_nl_fftw_comm2_async
+subroutine cgyro_nl_fftw_comm1_r
   use timer_lib
   use parallel_lib
   use cgyro_globals
@@ -76,24 +75,63 @@ subroutine cgyro_nl_fftw_comm2_async
 
   integer :: ir,it,iv_loc_m,ic_loc_m
   integer :: iexch
+  complex :: val
+
+  call timer_lib_in('nl_comm')
+  call parallel_slib_r_nc_gpu(f_nl,fpack)
+  call timer_lib_out('nl_comm')
 
   call timer_lib_in('nl_mem')
 
-!$acc parallel loop collapse(3) independent private(iexch,ic_loc_m) &
-!$acc&         present(psi,gpack) default(none)
-  do iv_loc_m=1,nv_loc
-     do it=1,n_theta
+!$acc parallel loop gang independent private(it,iv_loc_m) &
+!$acc&         present(iv_e,it_e,ic_c,psi,px,fpack) default(none)
+  do iexch=1,nsplit*n_toroidal
+     it = it_e(iexch)
+     iv_loc_m = iv_e(iexch)
+     if (iv_loc_m /= 0 ) then ! else it is padding and can be ignored
+!$acc loop vector private(val,ic_loc_m)
         do ir=1,n_radial
-           iexch = it + (iv_loc_m-1)*n_theta
-           ic_loc_m = it + (ir-1)*n_theta
-           gpack(ir,iexch) = psi(ic_loc_m,iv_loc_m)
+           ic_loc_m = ic_c(ir,it)
+           if ( (my_toroidal == 0) .and.  (ir == 1 .or. px(ir) == 0) ) then
+              ! filter
+              val = (0.0,0.0)
+           else
+              val = fpack(ir,iexch)
+           endif
+           psi(ic_loc_m,iv_loc_m) = val
         enddo
-     enddo
+     endif
   enddo
 
-!$acc parallel loop gang present(gpack) if(nv_loc*n_theta+1>=nsplit*n_toroidal)
-  do iexch=nv_loc*n_theta+1,nsplit*n_toroidal
-     gpack(:,iexch) = (0.0,0.0)
+  call timer_lib_out('nl_mem')
+end subroutine cgyro_nl_fftw_comm1_r
+
+subroutine cgyro_nl_fftw_comm2_async
+  use timer_lib
+  use parallel_lib
+  use cgyro_globals
+
+  implicit none
+
+  integer :: ir,it,iv_loc_m
+  integer :: iexch
+
+  call timer_lib_in('nl_mem')
+
+!$acc parallel loop gang independent private(it,iv_loc_m) &
+!$acc&         present(iv_e,it_e,ic_c,psi,gpack) default(none)
+  do iexch=1,nsplit*n_toroidal
+     it = it_e(iexch)
+     iv_loc_m = iv_e(iexch)
+     if (iv_loc_m == 0) then
+        ! padding
+        gpack(1:n_radial,iexch) = (0.0,0.0)
+     else
+!$acc loop vector
+        do ir=1,n_radial
+           gpack(ir,iexch) = psi(ic_c(ir,it),iv_loc_m)
+        enddo
+     endif
   enddo
 
   call parallel_slib_f_nc_async_gpu(gpack,g_nl,g_req)
@@ -229,14 +267,11 @@ subroutine cgyro_nl_fftw(ij)
   call parallel_slib_f_nc_wait_gpu(gpack,g_nl,g_req)
   call timer_lib_out('nl_comm')
 
-  call timer_lib_in('nl_mem')
-!$acc data present(g_nl)  
-
-  call timer_lib_out('nl_mem')
   call timer_lib_in('nl')
 
 
-!$acc parallel loop independent collapse(3) private(j,ir,p,ix,in,iy,f0,g0)
+!$acc parallel loop independent collapse(3) private(j,ir,p,ix,in,iy,f0,g0) &
+!$acc&         present(g_nl)
   do j=1,nsplit
      do ir=1,n_radial
         do in=1,n_toroidal
@@ -295,50 +330,17 @@ subroutine cgyro_nl_fftw(ij)
            if (ix < 0) ix = ix+nx
 
            iy = in-1
-           g_nl(ir,j,in) = fxmany(iy,ix,j)
+           f_nl(ir,j,in) = fxmany(iy,ix,j)
         enddo
      enddo
   enddo
-
-  ! end data g_nl
-!$acc end data
 
   ! end data f_nl
 !$acc end data
 
   call timer_lib_out('nl_mem')
 
-  call timer_lib_in('nl_comm')
-  call parallel_slib_r_nc_gpu(g_nl,gpack)
-  call timer_lib_out('nl_comm')
-
-  call timer_lib_in('nl_mem')
-
-!$acc parallel loop collapse(3) independent private(iexch,ic_loc) &
-!$acc&         present(psi,gpack) default(none)
-  do iv_loc=1,nv_loc
-     do it=1,n_theta
-        do ir=1,n_radial
-           iexch = it + (iv_loc-1)*n_theta
-           ic_loc = it + (ir-1)*n_theta
-           psi(ic_loc,iv_loc) = gpack(ir,iexch) 
-        enddo
-     enddo
-  enddo
-
-  call timer_lib_out('nl_mem')
-
-  ! Filter
-  if (my_toroidal == 0) then
-!$acc parallel loop gang vector private(ir) &
-!$acc          present(ir_c,psi,px) default(none)
-      do ic=1,nc
-        ir = ir_c(ic)
-        if (ir == 1 .or. px(ir) == 0) then
-           psi(ic,:) = 0.0
-        endif
-     enddo
-  endif
+  call cgyro_nl_fftw_comm1_r
 
   ! RHS -> -[f,g] = [f,g]_{r,-alpha}
 
