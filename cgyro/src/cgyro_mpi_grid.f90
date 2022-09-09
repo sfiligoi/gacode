@@ -17,6 +17,7 @@ subroutine cgyro_mpi_grid
   implicit none
 
   integer :: ie,ix,is,ir,it
+  integer :: iexch,il
   integer :: d
   integer :: splitkey
 
@@ -254,6 +255,60 @@ subroutine cgyro_mpi_grid
   ! Nonlinear parallelization dimensions (returns nsplit)
 
   call parallel_slib_init(n_toroidal,nv_loc*n_theta,n_radial,nsplit,NEW_COMM_2)
+
+  if (nonlinear_flag == 1) then
+     ! nsplit NL mapping after AllToAll
+     allocate(iv_e(nsplit*n_toroidal))
+     allocate(it_e(nsplit*n_toroidal))
+     do iv_loc=1,nv_loc
+        do it=1,n_theta
+           iexch = iv_loc + (it-1)*nv_loc
+           iv_e(iexch) = iv_loc
+           it_e(iexch) = it
+        enddo
+     enddo
+     ! any padding should contain consecutive but valid values
+     do iexch=nv_loc*n_theta+1,nsplit*n_toroidal
+        iv_e(iexch) = nv_loc
+        it_e(iexch) = n_theta
+     enddo
+
+     allocate(iv_j(nsplit,n_toroidal))
+     allocate(it_j(nsplit,n_toroidal))
+     call parallel_slib_f_idxs(nsplit,iv_e,iv_j)
+     call parallel_slib_f_idxs(nsplit,it_e,it_j)
+
+!$acc enter data copyin(iv_j,it_j,it_e,iv_e)
+
+     jtheta_min = minval(it_j(:,:))
+     jtheta_max = maxval(it_j(:,:))
+
+     ! find max n_jtheta among all processes
+     ! since we will need that for have equal number of rows
+     ! in all the gpack buffers
+     n_jtheta = jtheta_max-jtheta_min+1
+     call parallel_slib_cpu_maxval_int(n_jtheta)
+
+     ! find what theta do I need to send
+     allocate(it_jf(n_jtheta,n_toroidal))
+     do il=1,n_toroidal
+        do it=jtheta_min,jtheta_max
+           ! these are the ones I will need
+           it_jf(it-jtheta_min+1,il) = it
+        enddo
+        ! any padding should use consecutive but valid theta
+        do it=jtheta_max+1,n_jtheta
+           it_jf(it-jtheta_min+1,il) = jtheta_max
+        enddo
+     enddo
+
+     ! now send them to the others and get theirs
+     allocate(it_f(n_jtheta*n_toroidal))
+     call parallel_slib_r_idxs(n_jtheta,it_jf,it_f)
+
+     deallocate(it_jf)
+!$acc enter data copyin(it_f)
+  endif
 
   ! OMP code
   n_omp = omp_get_max_threads()

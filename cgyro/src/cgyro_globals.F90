@@ -188,6 +188,9 @@ module cgyro_globals
   integer :: ns1,ns2
   integer, dimension(:), allocatable :: recv_status
   integer :: f_req, g_req
+  ! Thetas present in the process after NL AllToAll
+  integer :: jtheta_min,jtheta_max
+  integer :: n_jtheta
   !
   ! Pointers
   integer :: nv,iv
@@ -203,6 +206,12 @@ module cgyro_globals
   integer, dimension(:,:), allocatable :: ic_c
   integer, dimension(:,:,:), allocatable :: iv_v
   integer, dimension(:), allocatable :: ica_c,icb_c
+  integer, dimension(:), allocatable :: iv_e
+  integer, dimension(:), allocatable :: it_e
+  integer, dimension(:,:), allocatable :: iv_j
+  integer, dimension(:,:), allocatable :: it_j
+  integer, dimension(:), allocatable :: it_f
+  integer, dimension(:,:), allocatable :: it_jf
   !
   integer :: my_toroidal  ! used to be called n
   !---------------------------------------------------------------

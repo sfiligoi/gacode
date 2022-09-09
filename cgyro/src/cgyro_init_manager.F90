@@ -254,7 +254,6 @@ subroutine cgyro_init_manager
            allocate(fpack(n_radial,nsplit*n_toroidal))
            allocate(gpack(n_radial,nsplit*n_toroidal))
         endif
-
 !$acc enter data create(fpack,gpack,f_nl,g_nl)
      endif
 
