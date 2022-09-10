@@ -33,19 +33,18 @@ subroutine cgyro_nl_fftw_comm1_async
 
   call timer_lib_in('nl_mem')
 
-!$omp parallel do private(iv_loc,it,iexch,ir)
-  do iv_loc_m=1,nv_loc
-     iexch = (iv_loc_m-1)*n_theta
-     do it=1,n_theta
-        iexch = iexch+1
+!$omp parallel do private(iv_loc_m,it,ir)
+  do iexch=1,nsplit*n_toroidal
+     it = it_e(iexch)
+     iv_loc_m = iv_e(iexch)
+     if (iv_loc_m == 0) then
+        ! padding
+        fpack(1:n_radial,iexch) = (0.0,0.0)
+     else
         do ir=1,n_radial
            fpack(ir,iexch) = h_x(ic_c(ir,it),iv_loc_m)
         enddo
-     enddo
-  enddo
-
-  do iexch=nv_loc*n_theta+1,nsplit*n_toroidal
-     fpack(:,iexch) = (0.0,0.0)
+     endif
   enddo
 
   call parallel_slib_f_nc_async(fpack,f_nl,f_req)
@@ -65,6 +64,44 @@ subroutine cgyro_nl_fftw_comm1_test
 
 end subroutine cgyro_nl_fftw_comm1_test
 
+subroutine cgyro_nl_fftw_comm1_r
+  use timer_lib
+  use parallel_lib
+  use cgyro_globals
+
+  implicit none
+
+  integer :: ir,it,iv_loc_m,ic_loc_m
+  integer :: iexch
+  complex :: val
+
+  call timer_lib_in('nl_comm')
+  call parallel_slib_r_nc(f_nl,fpack)
+  call timer_lib_out('nl_comm')
+
+  call timer_lib_in('nl_mem')
+
+!$omp parallel do private(iv_loc_m,it,ir,ic_loc_m,val)
+  do iexch=1,nsplit*n_toroidal
+     it = it_e(iexch)
+     iv_loc_m = iv_e(iexch)
+     if (iv_loc_m /= 0 ) then ! else it is padding and can be ignored
+        do ir=1,n_radial
+           ic_loc_m = ic_c(ir,it)
+           if ( (my_toroidal == 0) .and.  (ir == 1 .or. px(ir) == 0) ) then
+              ! filter
+              val = (0.0,0.0)
+           else
+              val = fpack(ir,iexch)
+           endif
+           psi(ic_loc_m,iv_loc_m) = val
+        enddo
+     endif
+  enddo
+
+  call timer_lib_out('nl_mem')
+end subroutine cgyro_nl_fftw_comm1_r
+
 subroutine cgyro_nl_fftw_comm2_async
 
   use timer_lib
@@ -78,19 +115,18 @@ subroutine cgyro_nl_fftw_comm2_async
 
   call timer_lib_in('nl_mem')
 
-!$omp parallel do private(iv_loc,it,iexch,ir)
-  do iv_loc_m=1,nv_loc
-     iexch = (iv_loc_m-1)*n_theta
-     do it=1,n_theta
-        iexch = iexch+1
+!$omp parallel do private(iv_loc_m,it,ir)
+  do iexch=1,nsplit*n_toroidal
+     it = it_e(iexch)
+     iv_loc_m = iv_e(iexch)
+     if (iv_loc_m == 0) then
+        ! padding
+        gpack(1:n_radial,iexch) = (0.0,0.0)
+     else
         do ir=1,n_radial
            gpack(ir,iexch) = psi(ic_c(ir,it),iv_loc_m)
         enddo
-     enddo
-  enddo
-
-  do iexch=nv_loc*n_theta+1,nsplit*n_toroidal
-     gpack(:,iexch) = (0.0,0.0)
+     endif
   enddo
 
   call parallel_slib_f_nc_async(gpack,g_nl,g_req)
@@ -139,7 +175,7 @@ subroutine cgyro_nl_fftw_stepr(j, i_omp)
      if (ix < 0) ix = ix+nx
      do in=1,n_toroidal
         iy = in-1
-        g_nl(ir,j,in) = fx(iy,ix,i_omp)
+        f_nl(ir,j,in) = fx(iy,ix,i_omp)
      enddo
   enddo
 
@@ -413,33 +449,16 @@ subroutine cgyro_nl_fftw(ij)
   call timer_lib_out('nl')
 
   call timer_lib_in('nl_comm')
-  call parallel_slib_r_nc(g_nl,gpack)
+  call parallel_slib_r_nc(f_nl,fpack)
   call timer_lib_out('nl_comm')
+
+  call cgyro_nl_fftw_comm1_r
 
   call timer_lib_in('nl')
 
-!$omp parallel do private(iv_loc,it,iexch,ir,ic)
+  ! RHS -> -[f,g] = [f,g]_{r,-alpha}
+!$omp parallel do
   do iv_loc=1,nv_loc
-     iexch = (iv_loc-1)*n_theta
-     do it=1,n_theta
-        iexch = iexch+1
-        do ir=1,n_radial
-           psi(ic_c(ir,it),iv_loc) = gpack(ir,iexch)
-        enddo
-     enddo
-
-     ! Filter
-     if (my_toroidal == 0) then
-      do ic=1,nc
-        ir = ir_c(ic)
-        if (ir == 1 .or. px(ir) == 0) then
-           psi(ic,iv_loc) = 0.0
-        endif
-      enddo
-     endif
-
-     ! RHS -> -[f,g] = [f,g]_{r,-alpha}
-
      rhs(:,iv_loc,ij) = rhs(:,iv_loc,ij)+(q*rho/rmin)*(2*pi/length)*psi(:,iv_loc)
   enddo
 
