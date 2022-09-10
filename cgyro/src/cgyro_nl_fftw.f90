@@ -115,7 +115,7 @@ subroutine cgyro_nl_fftw_comm2_async
 
   call timer_lib_in('nl_mem')
 
-!$omp parallel do private(iv_loc_m,it,ir)
+!$omp parallel do private(iv_loc_m,it,ir,ic)
   do iexch=1,nsplit*n_toroidal
      it = it_e(iexch)
      iv_loc_m = iv_e(iexch)
@@ -124,7 +124,8 @@ subroutine cgyro_nl_fftw_comm2_async
         gpack(1:n_radial,iexch) = (0.0,0.0)
      else
         do ir=1,n_radial
-           gpack(ir,iexch) = psi(ic_c(ir,it),iv_loc_m)
+           ic = ic_c(ir,it)
+           gpack(ir,iexch) = sum( jvec_c(:,ic,iv_loc_m)*field(:,ic))
         enddo
      endif
   enddo
