@@ -505,9 +505,7 @@ contains
   end subroutine parallel_slib_f_nc
 
   subroutine parallel_slib_f_nc_async(x,xt,req)
-
     use mpi
-
     !-------------------------------------------------------
     implicit none
     !
@@ -517,60 +515,14 @@ contains
     !
     integer :: ierr
     !-------------------------------------------------------
-
-    call MPI_IALLTOALL(x, &
-         nkeep*nsplit, &
-         MPI_DOUBLE_COMPLEX, &
-         xt, &
-         nkeep*nsplit, &
-         MPI_DOUBLE_COMPLEX, &
-         slib_comm, &
-         req, &
-         ierr)
-
-  end subroutine parallel_slib_f_nc_async
-
-  ! require x and xt to ensure they exist until this finishes
-  subroutine parallel_slib_f_nc_wait(x,xt,req)
-
-    use mpi
-
-    !-------------------------------------------------------
-    implicit none
-    !
-    complex, intent(in), dimension(nkeep,nsplit*nn) :: x
-    complex, intent(inout), dimension(nkeep,nsplit,nn) :: xt
-    integer, intent(inout) :: req
-    !
-    integer :: ierr
-    integer :: istat(MPI_STATUS_SIZE)
-    !-------------------------------------------------------
-
-    call MPI_WAIT(req, &
-         istat, &
-         ierr)
-
-  end subroutine parallel_slib_f_nc_wait
-
 #ifdef _OPENACC
-
-  subroutine parallel_slib_f_nc_async_gpu(x,xt,req)
-    use mpi
-    !-------------------------------------------------------
-    implicit none
-    !
-    complex, intent(in), dimension(nkeep,nsplit*nn) :: x
-    complex, intent(inout), dimension(nkeep,nsplit,nn) :: xt
-    integer, intent(inout) :: req
-    !
-    integer :: ierr
-    !-------------------------------------------------------
 !$acc data present(x,xt)
 
 #ifdef DISABLE_GPUDIRECT_MPI
 !$acc update host(x)
 #else
 !$acc host_data use_device(x,xt)
+#endif
 #endif
 
    call MPI_IALLTOALL(x, &
@@ -583,6 +535,7 @@ contains
          req, &
          ierr)
 
+#ifdef _OPENACC
 #ifdef DISABLE_GPUDIRECT_MPI
    !do nothing yet, async
 #else
@@ -590,11 +543,12 @@ contains
 #endif
 
 !$acc end data
+#endif
 
-  end subroutine parallel_slib_f_nc_async_gpu
+  end subroutine parallel_slib_f_nc_async
 
   ! require x and xt to ensure they exist until this finishes
-  subroutine parallel_slib_f_nc_wait_gpu(x,xt,req)
+  subroutine parallel_slib_f_nc_wait(x,xt,req)
     use mpi
     !-------------------------------------------------------
     implicit none
@@ -607,51 +561,27 @@ contains
     integer :: istat(MPI_STATUS_SIZE)
     !-------------------------------------------------------
 
+#ifdef _OPENACC
 !$acc data present(xt)
+#endif
 
     call MPI_WAIT(req, &
          istat, &
          ierr)
 
+#ifdef _OPENACC
 #ifdef DISABLE_GPUDIRECT_MPI
 !$acc update device(xt)
 #endif
 
 !$acc end data
-
-  end subroutine parallel_slib_f_nc_wait_gpu
-
 #endif
+
+  end subroutine parallel_slib_f_nc_wait
 
  !=========================================================
 
   subroutine parallel_slib_r_nc (xt,x)
-
-    use mpi
-
-    !-------------------------------------------------------
-    implicit none
-    !
-    complex, intent(in), dimension(nkeep,nsplit,nn) :: xt
-    complex, intent(inout), dimension(nkeep,nsplit*nn) :: x
-    !
-    integer :: ierr
-    !-------------------------------------------------------
-
-    call MPI_ALLTOALL(xt, &
-         nkeep*nsplit, &
-         MPI_DOUBLE_COMPLEX, &
-         x, &
-         nkeep*nsplit, &
-         MPI_DOUBLE_COMPLEX, &
-         slib_comm, &
-         ierr)
-
-  end subroutine parallel_slib_r_nc
-
- !=========================================================
-
-  subroutine parallel_slib_r_nc_gpu (xt,x)
     use mpi
     !-------------------------------------------------------
     implicit none
@@ -662,12 +592,14 @@ contains
     integer :: ierr
     !-------------------------------------------------------
 
+#ifdef _OPENACC
 !$acc data present(xt,x)
 #ifdef DISABLE_GPUDIRECT_MPI
 !$acc update host(xt)
 #else
 !$acc host_data use_device(xt,x)
 #endif
+#endif
 
     call MPI_ALLTOALL(xt, &
          nkeep*nsplit, &
@@ -678,14 +610,16 @@ contains
          slib_comm, &
          ierr)
 
+#ifdef _OPENACC
 #ifdef DISABLE_GPUDIRECT_MPI
 !$acc update device(x)
 #else
 !$acc end host_data
 #endif
 !$acc end data
+#endif
 
-  end subroutine parallel_slib_r_nc_gpu
+  end subroutine parallel_slib_r_nc
 
   subroutine parallel_lib_nj_loc(nj_loc_in)
 

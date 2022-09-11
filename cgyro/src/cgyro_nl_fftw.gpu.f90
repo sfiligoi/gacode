@@ -10,147 +10,6 @@
 ! NOTE: Need to be careful with (p=-nr/2,n=0) component.
 !-----------------------------------------------------------------
 
-!
-! Comm is a transpose
-! First half of the transpose is done locally
-!  from (theta,radial,nv_loc) -> (radial, theta, nv_lov)
-! Then AlltoAll finishes the transpose
-!  from (radial, theta, nv_loc_1, nv_loc_2) x toroidal -> (radial, theta, nv_loc_1 , toroidal) x nv_loc_2
-! Implies nv_loc_2 == toroidal
-!
-
-
-! NOTE: call cgyro_nl_fftw_comm1/2_async before cgyro_nl_fftw
-subroutine cgyro_nl_fftw_comm1_async
-  use timer_lib
-  use parallel_lib
-  use cgyro_globals
-
-  implicit none
-
-  integer :: ir,it,iv_loc_m
-  integer :: iexch
-
-  call timer_lib_in('nl_mem')
-
-!$acc parallel loop gang independent private(it,iv_loc_m) &
-!$acc&         present(iv_e,it_e,ic_c,h_x,fpack) default(none)
-  do iexch=1,nsplit*n_toroidal
-     it = it_e(iexch)
-     iv_loc_m = iv_e(iexch)
-     if (iv_loc_m == 0) then
-        ! padding
-        fpack(1:n_radial,iexch) = (0.0,0.0)
-     else
-!$acc loop vector
-        do ir=1,n_radial
-           fpack(ir,iexch) = h_x(ic_c(ir,it),iv_loc_m)
-        enddo
-     endif
-  enddo
-
-  call parallel_slib_f_nc_async_gpu(fpack,f_nl,f_req)
-
-  call timer_lib_out('nl_mem')
-
-end subroutine cgyro_nl_fftw_comm1_async
-
-! Note: Calling test propagates the async operations in some MPI implementations
-subroutine cgyro_nl_fftw_comm1_test
-  use parallel_lib
-  use cgyro_globals
-
-  implicit none
-
-  call parallel_slib_test(f_req)
-
-end subroutine cgyro_nl_fftw_comm1_test
-
-subroutine cgyro_nl_fftw_comm1_r
-  use timer_lib
-  use parallel_lib
-  use cgyro_globals
-
-  implicit none
-
-  integer :: ir,it,iv_loc_m,ic_loc_m
-  integer :: iexch
-  complex :: val
-
-  call timer_lib_in('nl_comm')
-  call parallel_slib_r_nc_gpu(f_nl,fpack)
-  call timer_lib_out('nl_comm')
-
-  call timer_lib_in('nl_mem')
-
-!$acc parallel loop gang independent private(it,iv_loc_m) &
-!$acc&         present(iv_e,it_e,ic_c,psi,px,fpack) default(none)
-  do iexch=1,nsplit*n_toroidal
-     it = it_e(iexch)
-     iv_loc_m = iv_e(iexch)
-     if (iv_loc_m /= 0 ) then ! else it is padding and can be ignored
-!$acc loop vector private(val,ic_loc_m)
-        do ir=1,n_radial
-           ic_loc_m = ic_c(ir,it)
-           if ( (my_toroidal == 0) .and.  (ir == 1 .or. px(ir) == 0) ) then
-              ! filter
-              val = (0.0,0.0)
-           else
-              val = fpack(ir,iexch)
-           endif
-           psi(ic_loc_m,iv_loc_m) = val
-        enddo
-     endif
-  enddo
-
-  call timer_lib_out('nl_mem')
-end subroutine cgyro_nl_fftw_comm1_r
-
-subroutine cgyro_nl_fftw_comm2_async
-  use timer_lib
-  use parallel_lib
-  use cgyro_globals
-
-  implicit none
-
-  integer :: ir,it,iv_loc_m
-  integer :: iexch
-
-  call timer_lib_in('nl_mem')
-
-!$acc parallel loop gang independent private(it,iv_loc_m) &
-!$acc&         present(iv_e,it_e,ic_c,psi,gpack) default(none)
-  do iexch=1,nsplit*n_toroidal
-     it = it_e(iexch)
-     iv_loc_m = iv_e(iexch)
-     if (iv_loc_m == 0) then
-        ! padding
-        gpack(1:n_radial,iexch) = (0.0,0.0)
-     else
-!$acc loop vector
-        do ir=1,n_radial
-           gpack(ir,iexch) = psi(ic_c(ir,it),iv_loc_m)
-        enddo
-     endif
-  enddo
-
-  call parallel_slib_f_nc_async_gpu(gpack,g_nl,g_req)
-
-  call timer_lib_out('nl_mem')
-
-end subroutine cgyro_nl_fftw_comm2_async
-
-! Note: Calling test propagates the async operations in some MPI implementations
-subroutine cgyro_nl_fftw_comm2_test
-  use parallel_lib
-  use cgyro_globals
-
-  implicit none
-
-  call parallel_slib_test(g_req)
-
-end subroutine cgyro_nl_fftw_comm2_test
-
 subroutine cgyro_nl_fftw_zero4(sz,v1,v2,v3,v4)
   implicit none
 
@@ -208,7 +67,7 @@ subroutine cgyro_nl_fftw(ij)
 
   ! time to wait for the F_nl to become avaialble
   call timer_lib_in('nl_comm')
-  call parallel_slib_f_nc_wait_gpu(fpack,f_nl,f_req)
+  call parallel_slib_f_nc_wait(fpack,f_nl,f_req)
   ! make sure g_req progresses
   call parallel_slib_test(g_req)
   call timer_lib_out('nl_comm')
@@ -264,7 +123,7 @@ subroutine cgyro_nl_fftw(ij)
 
   ! time to wait for the g_nl to become avaialble
   call timer_lib_in('nl_comm')
-  call parallel_slib_f_nc_wait_gpu(gpack,g_nl,g_req)
+  call parallel_slib_f_nc_wait(gpack,g_nl,g_req)
   call timer_lib_out('nl_comm')
 
   call timer_lib_in('nl')
