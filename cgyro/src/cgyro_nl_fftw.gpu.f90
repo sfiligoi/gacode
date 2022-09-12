@@ -86,7 +86,7 @@ subroutine cgyro_nl_fftw(ij)
   call cgyro_nl_fftw_zero4(size(fxmany,1)*size(fxmany,2)*size(fxmany,3), &
                            fxmany,fymany,gxmany,gymany)
 
-!$acc parallel loop independent collapse(3) private(j,ir,p,ix,in,iy,f0,g0) async
+!$acc parallel loop gang vector independent collapse(3) private(j,ir,p,ix,in,iy,f0,g0) async
   do j=1,nsplit
      do ir=1,n_radial
         do in=1,n_toroidal
@@ -130,7 +130,7 @@ subroutine cgyro_nl_fftw(ij)
   call timer_lib_in('nl')
 
 
-!$acc parallel loop independent collapse(3) private(j,ir,p,ix,in,iy,f0,g0,it,iv_loc,it_loc) &
+!$acc parallel loop gang vector independent collapse(3) private(j,ir,p,ix,in,iy,f0,g0,it,iv_loc,it_loc) &
 !$acc&         present(g_nl)
   do j=1,nsplit
      do ir=1,n_radial
@@ -147,7 +147,7 @@ subroutine cgyro_nl_fftw(ij)
               g0 = (0.0,0.0)
            else
               it_loc = it-jtheta_min+1
-              g0 = i_c*sum( jvec_c_nl(:,ir,it_loc,iv_loc,in)*g_nl(:,ir,it_loc,in))
+              g0 = i_c*sum( jvec_c_nl(1:n_field,ir,it_loc,iv_loc,in)*g_nl(1:n_field,ir,it_loc,in))
            endif
            gxmany(iy,ix,j) = p*g0
            gymany(iy,ix,j) = iy*g0
