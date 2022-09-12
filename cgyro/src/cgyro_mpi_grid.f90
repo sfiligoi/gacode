@@ -300,7 +300,7 @@ subroutine cgyro_mpi_grid
      enddo
 
      ! now send them to the others and get theirs
-     allocate(it_f(n_jtheta*n_toroidal))
+     allocate(it_f(n_jtheta,n_toroidal))
      call parallel_slib_r_idxs(n_jtheta,it_jf,it_f)
 
      deallocate(it_jf)

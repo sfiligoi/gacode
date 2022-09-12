@@ -250,11 +250,12 @@ subroutine cgyro_init_manager
            return
         else
            allocate(f_nl(n_radial,nsplit,n_toroidal))
-           allocate(g_nl(n_radial,nsplit,n_toroidal))
+           allocate(g_nl(n_field,n_radial,n_jtheta,n_toroidal))
            allocate(fpack(n_radial,nsplit*n_toroidal))
-           allocate(gpack(n_radial,nsplit*n_toroidal))
+           allocate(gpack(n_field,n_radial,n_jtheta,n_toroidal))
         endif
-!$acc enter data create(fpack,gpack,f_nl,g_nl)
+        allocate(jvec_c_nl(n_field,n_radial,n_jtheta,nv_loc,n_toroidal))
+!$acc enter data create(fpack,gpack,f_nl,g_nl,jvec_c_nl)
      endif
 
      if (collision_model == 5) then

@@ -157,6 +157,10 @@ subroutine cgyro_cleanup
 !$acc exit data delete(jvec_c)     
      deallocate(jvec_c)
   endif
+  if(allocated(jvec_c_nl))  then
+!$acc exit data delete(jvec_c_nl)
+     deallocate(jvec_c_nl)
+  endif
   if(allocated(jvec_v))              deallocate(jvec_v)
   if(allocated(dvjvec_c)) then
 !$acc exit data delete(dvjvec_c)     

@@ -11,6 +11,7 @@ subroutine cgyro_init_arrays
   real :: u
   real :: fac
   integer :: ir,it,is,ie,ix
+  integer :: il, it_loc
   integer :: jr,jt,id
   integer :: i_field
   integer :: l,ll
@@ -98,9 +99,33 @@ subroutine cgyro_init_arrays
   enddo
  
   deallocate(jloc_c)
+!$acc enter data copyin(jvec_c)
+
   do i_field=1,n_field
      call parallel_lib_rtrans_real(jvec_c(i_field,:,:),jvec_v(i_field,:,:))
   enddo
+
+  if (nonlinear_flag == 1) then
+!$acc parallel loop gang independent collapse(3) private(it) present(jvec_c_nl,jvec_c,ic_c,it_f) default(none)
+  do il=1,n_toroidal
+    do iv_loc=1,nv_loc
+      do it_loc=1,n_jtheta
+        it = it_f(it_loc,il)
+        if (it /= 0) then
+!$acc loop vector
+          do ir=1,n_radial
+            jvec_c_nl(1:n_field,ir,it_loc,iv_loc,il) = jvec_c(1:n_field,ic_c(ir,it),iv_loc)
+          enddo
+        else
+          ! just padding
+          jvec_c_nl(1:n_field,1:n_radial,it_loc,iv_loc,il) = 0.0
+        endif
+      enddo
+    enddo
+  enddo
+  call parallel_slib_distribute_real(n_field*n_radial*n_jtheta*nv_loc,jvec_c_nl)
+  endif
+
   !-------------------------------------------------------------------------
 
   !-------------------------------------------------------------------------
@@ -149,7 +174,7 @@ subroutine cgyro_init_arrays
 
   deallocate(res_norm)
   
-!$acc enter data copyin(upfac1,upfac2,jvec_c)
+!$acc enter data copyin(upfac1,upfac2)
 
   !------------------------------------------------------------------------------
 

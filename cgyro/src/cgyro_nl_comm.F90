@@ -108,41 +108,47 @@ subroutine cgyro_nl_fftw_comm1_r
   call timer_lib_out('nl_mem')
 end subroutine cgyro_nl_fftw_comm1_r
 
-subroutine cgyro_nl_fftw_comm2_async
+!
+! Comm2 is a transpose
+! First half of the transpose is done locally
+!  from (field,:,n_radial) -> (field,n_radial, :)
+! Then AlltoAll finishes the transpose
+! 
 
+subroutine cgyro_nl_fftw_comm2_async
   use timer_lib
   use parallel_lib
   use cgyro_globals
 
   implicit none
 
-  integer :: ir,it,iv_loc_m
+  integer :: ir,it,il,it_loc
   integer :: iexch
 
   call timer_lib_in('nl_mem')
 
 #ifdef _OPENACC
-!$acc parallel loop gang independent private(it,iv_loc_m) &
-!$acc&         present(iv_e,it_e,ic_c,jvec_c,field,gpack) default(none)
+!$acc parallel loop gang collapse(2) independent private(it) &
+!$acc&         present(ic_c,it_f,field,gpack) default(none)
 #else
-!$omp parallel do private(iv_loc_m,it,ir,ic)
+!$omp parallel do collapse(2) private(it,ir)
 #endif
-  do iexch=1,nsplit*n_toroidal
-     it = it_e(iexch)
-     iv_loc_m = iv_e(iexch)
-     if (iv_loc_m == 0) then
-        ! padding
-        gpack(1:n_radial,iexch) = (0.0,0.0)
+  do il=1,n_toroidal
+   do it_loc=1,n_jtheta
+     it = it_f(it_loc,il)
+     if (it == 0) then
+        ! just padding
+        gpack(1:n_field,1:n_radial,it_loc,il) = (0.0,0.0)
      else
-!$acc loop vector private(ic)
+!$acc loop vector
         do ir=1,n_radial
-           ic = ic_c(ir,it)
-           gpack(ir,iexch) = sum( jvec_c(:,ic,iv_loc_m)*field(:,ic))
+           gpack(1:n_field,ir,it_loc,il) = field(1:n_field,ic_c(ir,it))
         enddo
      endif
+   enddo
   enddo
 
-  call parallel_slib_f_nc_async(gpack,g_nl,g_req)
+  call parallel_slib_f_fd_async(n_field,n_radial,n_jtheta,gpack,g_nl,g_req)
 
   call timer_lib_out('nl_mem')
 

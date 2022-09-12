@@ -56,7 +56,7 @@ subroutine cgyro_nl_fftw(ij)
 
   integer, intent(in) :: ij
   integer :: ix,iy
-  integer :: ir,it,in
+  integer :: ir,it,in,it_loc
   integer :: j,p,iexch
   integer :: i_omp
   logical :: force_early_comm2, one_pass_fft
@@ -122,7 +122,7 @@ subroutine cgyro_nl_fftw(ij)
      if (one_pass_fft) then
         num_one_pass = 4
      endif
-!$omp parallel private(in,iy,ir,p,ix,f0,i_omp,j,o)
+!$omp parallel private(in,iy,ir,p,ix,f0,i_omp,j,o,it,iv_loc,it_loc)
 !$omp do schedule(dynamic,1) collapse(2)
      do j=1,nsplit
         do o=1,num_one_pass
@@ -174,8 +174,16 @@ subroutine cgyro_nl_fftw(ij)
                  ix = p
                  if (ix < 0) ix = ix+nx
                  do in=1,n_toroidal
+                    it = it_j(j,in)
+                    iv_loc =iv_j(j,in)
+
                     iy = in-1
-                    g0 = i_c*g_nl(ir,j,in)
+                    if (iv_loc == 0) then
+                       g0 = (0.0,0.0)
+                    else
+                       it_loc = it-jtheta_min+1
+                       g0 = i_c*sum( jvec_c_nl(:,ir,it_loc,iv_loc,in)*g_nl(:,ir,it_loc,in))
+                    endif
                     gx(iy,ix,i_omp) = p*g0
                  enddo
               enddo
@@ -192,8 +200,16 @@ subroutine cgyro_nl_fftw(ij)
                  ix = p
                  if (ix < 0) ix = ix+nx
                  do in=1,n_toroidal
+                    it = it_j(j,in)
+                    iv_loc =iv_j(j,in)
+
                     iy = in-1
-                    g0 = i_c*g_nl(ir,j,in)
+                    if (iv_loc == 0) then
+                       g0 = (0.0,0.0)
+                    else
+                       it_loc = it-jtheta_min+1
+                       g0 = i_c*sum( jvec_c_nl(:,ir,it_loc,iv_loc,in)*g_nl(:,ir,it_loc,in))
+                    endif
                     gy(iy,ix,i_omp) = iy*g0
                  enddo
               enddo
@@ -221,7 +237,7 @@ subroutine cgyro_nl_fftw(ij)
   call timer_lib_in('nl')
 
   if (n_omp <= nsplit) then
-!$omp parallel private(in,iy,ir,p,ix,g0,i_omp,j)
+!$omp parallel private(in,iy,ir,p,ix,g0,i_omp,j,it,iv_loc,it_loc)
 !$omp do schedule(dynamic,1)
      do j=1,nsplit
         i_omp = omp_get_thread_num()+1
@@ -235,8 +251,16 @@ subroutine cgyro_nl_fftw(ij)
            ix = p
            if (ix < 0) ix = ix+nx  
            do in=1,n_toroidal
+             it = it_j(j,in)
+             iv_loc =iv_j(j,in)
+
               iy = in-1
-              g0 = i_c*g_nl(ir,j,in)
+              if (iv_loc == 0) then
+                 g0 = (0.0,0.0)
+              else
+                 it_loc = it-jtheta_min+1
+                 g0 = i_c*sum( jvec_c_nl(:,ir,it_loc,iv_loc,in)*g_nl(:,ir,it_loc,in))
+              endif
               gx(iy,ix,i_omp) = p*g0
               gy(iy,ix,i_omp) = iy*g0
            enddo
@@ -253,7 +277,7 @@ subroutine cgyro_nl_fftw(ij)
 !$omp end parallel
   else ! n_omp>nsplit
      if (.not. one_pass_fft) then
-!$omp parallel private(in,iy,ir,p,ix,g0,i_omp,j)
+!$omp parallel private(in,iy,ir,p,ix,g0,i_omp,j,it,iv_loc,it_loc)
 !$omp do schedule(dynamic,1) collapse(2)
         do j=1,nsplit
            do o=1,2
@@ -268,8 +292,16 @@ subroutine cgyro_nl_fftw(ij)
                     ix = p
                     if (ix < 0) ix = ix+nx
                     do in=1,n_toroidal
+                       it = it_j(j,in)
+                       iv_loc =iv_j(j,in)
+
                        iy = in-1
-                       g0 = i_c*g_nl(ir,j,in)
+                       if (iv_loc == 0) then
+                          g0 = (0.0,0.0)
+                       else
+                          it_loc = it-jtheta_min+1
+                          g0 = i_c*sum( jvec_c_nl(:,ir,it_loc,iv_loc,in)*g_nl(:,ir,it_loc,in))
+                       endif
                        gx(iy,ix,i_omp) = p*g0
                     enddo
                  enddo
@@ -285,8 +317,16 @@ subroutine cgyro_nl_fftw(ij)
                     ix = p
                     if (ix < 0) ix = ix+nx
                     do in=1,n_toroidal
+                       it = it_j(j,in)
+                       iv_loc =iv_j(j,in)
+
                        iy = in-1
-                       g0 = i_c*g_nl(ir,j,in)
+                       if (iv_loc == 0) then
+                          g0 = (0.0,0.0)
+                       else
+                          it_loc = it-jtheta_min+1
+                          g0 = i_c*sum( jvec_c_nl(:,ir,it_loc,iv_loc,in)*g_nl(:,ir,it_loc,in))
+                       endif
                        gy(iy,ix,i_omp) = iy*g0
                     enddo
                  enddo

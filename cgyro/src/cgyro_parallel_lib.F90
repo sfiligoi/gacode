@@ -416,7 +416,7 @@ contains
     !
     integer, intent(in) :: nels
     integer, intent(in), dimension(nels,nn) :: xt
-    integer, intent(inout), dimension(nels*nn) :: x
+    integer, intent(inout), dimension(nels,nn) :: x
     !
     integer :: ierr
     !-------------------------------------------------------
@@ -620,6 +620,145 @@ contains
 #endif
 
   end subroutine parallel_slib_r_nc
+
+!=========================================================
+
+  ! Automaticallt use CPU or GPU version, based on presence of ACC
+  subroutine parallel_slib_f_fd(nels1,nels2,nels3,x,xt)
+
+    use mpi
+
+    !-------------------------------------------------------
+    implicit none
+    !
+    integer, intent(in) :: nels1,nels2,nels3
+    complex, intent(in), dimension(nels1,nels2,nels3,nn) :: x
+    complex, intent(inout), dimension(nels1,nels2,nels3,nn) :: xt
+    !
+    integer :: ierr
+    !-------------------------------------------------------
+
+#ifdef _OPENACC
+!$acc data present(xt,x)
+!$acc host_data use_device(xt,x)
+#endif
+
+    call MPI_ALLTOALL(x, &
+         nels1*nels2*nels3, &
+         MPI_DOUBLE_COMPLEX, &
+         xt, &
+         nels1*nels2*nels3, &
+         MPI_DOUBLE_COMPLEX, &
+         slib_comm, &
+         ierr)
+
+#ifdef _OPENACC
+!$acc end host_data
+!$acc end data
+#endif
+
+  end subroutine parallel_slib_f_fd
+
+  subroutine parallel_slib_f_fd_async(nels1,nels2,nels3,x,xt,req)
+    use mpi
+    !-------------------------------------------------------
+    implicit none
+    !
+    integer, intent(in) :: nels1,nels2,nels3
+    complex, intent(in), dimension(nels1,nels2,nels3,nn) :: x
+    complex, intent(inout), dimension(nels1,nels2,nels3,nn) :: xt
+    integer, intent(inout) :: req
+    !
+    integer :: ierr
+    !-------------------------------------------------------
+
+#ifdef _OPENACC
+!$acc data present(xt,x)
+!$acc host_data use_device(xt,x)
+#endif
+
+   call MPI_IALLTOALL(x, &
+         nels1*nels2*nels3, &
+         MPI_DOUBLE_COMPLEX, &
+         xt, &
+         nels1*nels2*nels3, &
+         MPI_DOUBLE_COMPLEX, &
+         slib_comm, &
+         req, &
+         ierr)
+
+#ifdef _OPENACC
+!$acc end host_data
+!$acc end data
+#endif
+
+  end subroutine parallel_slib_f_fd_async
+
+  ! require x and xt to ensure they exist until this finishes
+  subroutine parallel_slib_f_fd_wait(nels1,nels2,nels3,x,xt,req)
+    use mpi
+    !-------------------------------------------------------
+    implicit none
+    !
+    integer, intent(in) :: nels1,nels2,nels3
+    complex, intent(in), dimension(nels1,nels2,nels3,nn) :: x
+    complex, intent(inout), dimension(nels1,nels2,nels3,nn) :: xt
+    integer, intent(inout) :: req
+    !
+    integer :: ierr
+    integer :: istat(MPI_STATUS_SIZE)
+    !-------------------------------------------------------
+
+#ifdef _OPENACC
+!$acc data present(x,xt)
+#endif
+
+    call MPI_WAIT(req, &
+         istat, &
+         ierr)
+
+#ifdef _OPENACC
+!$acc end data
+#endif
+
+  end subroutine parallel_slib_f_fd_wait
+
+!=========================================================
+
+  ! x is logically (nels,nn)
+  subroutine parallel_slib_distribute_real(nels,x)
+
+    use mpi
+
+    !-------------------------------------------------------
+    implicit none
+    !
+    integer, intent(in) :: nels
+    real, intent(inout), dimension(*) :: x
+    !
+    integer :: ierr
+    !-------------------------------------------------------
+
+#ifdef _OPENACC
+!$acc host_data use_device(x)
+#endif
+
+    call MPI_ALLTOALL(MPI_IN_PLACE, &
+         nels, &
+         MPI_DOUBLE, &
+         x, &
+         nels, &
+         MPI_DOUBLE, &
+         slib_comm, &
+         ierr)
+
+#ifdef _OPENACC
+!$acc end host_data
+#endif
+
+  end subroutine parallel_slib_distribute_real
+
+!=========================================================
 
   subroutine parallel_lib_nj_loc(nj_loc_in)
 
