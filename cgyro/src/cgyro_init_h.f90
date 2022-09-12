@@ -115,7 +115,7 @@ subroutine cgyro_init_h
 
         call cgyro_zftest_em
 
-     else if (n_toroidal == 1 .and. n > 0) then
+     else if (n_toroidal == 1 .and. my_toroidal > 0) then
 
         ! 3. LINEAR n>0 SIMULATION
 
@@ -148,7 +148,7 @@ subroutine cgyro_init_h
            ir = ir_c(ic) 
            it = it_c(ic)
 
-           if (n == 0) then
+           if (my_toroidal == 0) then
 
               ! Zonal-flow initial condition
 
@@ -165,7 +165,7 @@ subroutine cgyro_init_h
               if (amp > 0.0) then
                  h_x(ic,:) = amp*rho
               else
-                 h_x(ic,:) = amp*rho/n**2
+                 h_x(ic,:) = amp*rho/my_toroidal**2
               endif
 
            endif

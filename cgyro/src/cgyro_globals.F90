@@ -188,6 +188,9 @@ module cgyro_globals
   integer :: ns1,ns2
   integer, dimension(:), allocatable :: recv_status
   integer :: f_req, g_req
+  ! Thetas present in the process after NL AllToAll
+  integer :: jtheta_min,jtheta_max
+  integer :: n_jtheta
   !
   ! Pointers
   integer :: nv,iv
@@ -203,8 +206,14 @@ module cgyro_globals
   integer, dimension(:,:), allocatable :: ic_c
   integer, dimension(:,:,:), allocatable :: iv_v
   integer, dimension(:), allocatable :: ica_c,icb_c
+  integer, dimension(:), allocatable :: iv_e
+  integer, dimension(:), allocatable :: it_e
+  integer, dimension(:,:), allocatable :: iv_j
+  integer, dimension(:,:), allocatable :: it_j
+  integer, dimension(:,:), allocatable :: it_f
+  integer, dimension(:,:), allocatable :: it_jf
   !
-  integer :: n
+  integer :: my_toroidal  ! used to be called n
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------
@@ -339,11 +348,10 @@ module cgyro_globals
   complex, dimension(:,:), allocatable :: g_x
   complex, dimension(:,:), allocatable :: h0_x
   complex, dimension(:,:), allocatable :: h0_old
-  complex, dimension(:,:), allocatable :: psi
   complex, dimension(:,:,:), allocatable :: f_nl
-  complex, dimension(:,:,:), allocatable :: g_nl
+  complex, dimension(:,:,:,:), allocatable :: g_nl
   complex, dimension(:,:), allocatable :: fpack
-  complex, dimension(:,:), allocatable :: gpack
+  complex, dimension(:,:,:,:), allocatable :: gpack
   complex, dimension(:,:), allocatable :: omega_cap_h
   complex, dimension(:,:), allocatable :: omega_h
   complex, dimension(:,:,:), allocatable :: omega_s,omega_ss
@@ -352,6 +360,7 @@ module cgyro_globals
   complex, dimension(:,:), allocatable :: cap_h_v
   complex, dimension(:,:), allocatable :: cap_h_v_prime
   real, dimension(:,:,:), allocatable :: jvec_c
+  real, dimension(:,:,:,:,:), allocatable :: jvec_c_nl ! used by NL only
   real, dimension(:,:,:), allocatable :: jvec_v
   real, dimension(:,:,:), allocatable :: dvjvec_c
   real, dimension(:,:,:), allocatable :: dvjvec_v

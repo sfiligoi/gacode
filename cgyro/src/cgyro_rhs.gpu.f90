@@ -1,4 +1,5 @@
 subroutine cgyro_rhs_comm_async(which)
+  use cgyro_nl_comm
   use cgyro_globals
 
   implicit none
@@ -17,6 +18,7 @@ end subroutine cgyro_rhs_comm_async
 
 ! Note: Calling test propagates the async operations in some MPI implementations
 subroutine cgyro_rhs_comm_test(which)
+  use cgyro_nl_comm
   use cgyro_globals
 
   implicit none
@@ -52,7 +54,7 @@ subroutine cgyro_rhs(ij)
 
   call timer_lib_in('str_mem')
 
-!$acc data present(h_x,g_x,psi,rhs,field)
+!$acc data present(h_x,g_x,rhs,field)
 
   call timer_lib_out('str_mem')
 

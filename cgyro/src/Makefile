@@ -45,6 +45,7 @@ OBJECTS = cgyro_globals.o \
           cgyro_final_kernel.o \
           cgyro_mpi_grid.o \
 	  cgyro_make_profiles.o \
+	  cgyro_nl_comm.o \
 	  cgyro_nl_fftw.o \
           cgyro_read_input.o \
           cgyro_rhs.o \

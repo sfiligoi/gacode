@@ -226,7 +226,7 @@ subroutine cgyro_init_collision
   ! Construct the collision matrix
 
 !$omp  parallel do  default(none) &
-!$omp& shared(nc1,nc2,nv,n,delta_t,n_species,rho,is_ele,n_field,n_energy,n_xi) &
+!$omp& shared(nc1,nc2,nv,my_toroidal,delta_t,n_species,rho,is_ele,n_field,n_energy,n_xi) &
 !$omp& shared(collision_kperp,collision_field_model,explicit_trap_flag) &
 !$omp& firstprivate(collision_model,collision_mom_restore,collision_ene_restore) &
 !$omp& shared(ae_flag,lambda_debye,dens_ele,temp_ele,dens_rot) &
@@ -515,7 +515,7 @@ subroutine cgyro_init_collision
      end select
 
      ! Avoid singularity of n=0,p=0:
-     if (px(ir) == 0 .and. n == 0) then
+     if (px(ir) == 0 .and. my_toroidal == 0) then
 
         do iv=1,nv
            cmat_loc(iv,iv) =  1.0
@@ -592,7 +592,7 @@ subroutine cgyro_init_collision
               if (collision_field_model == 1) then
 
                  ! Poisson component l
-                 if (n == 0 .and. ae_flag == 1) then
+                 if (my_toroidal == 0 .and. ae_flag == 1) then
                     ! Cannot include Poisson in collision matrix
                     ! for n=0 with ade because depends on theta
                     ! i.e. ne0 ~ phi - <phi>

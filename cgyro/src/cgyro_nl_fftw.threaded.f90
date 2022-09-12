@@ -10,106 +10,6 @@
 ! NOTE: Need to be careful with (p=-nr/2,n=0) component.
 !-----------------------------------------------------------------
 
-!
-! Comm is a transpose
-! First half of the transpose is done locally
-!  from (theta,radial,nv_loc) -> (radial, theta, nv_lov)
-! Then AlltoAll finishes the transpose
-!  from (radial, theta, nv_loc_1, nv_loc_2) x toroidal -> (radial, theta, nv_loc_1 , toroidal) x nv_loc_2
-! Implies nv_loc_2 == toroidal
-!
-
-! NOTE: call cgyro_nl_fftw_comm1/2_async before cgyro_nl_fftw
-subroutine cgyro_nl_fftw_comm1_async
-
-  use timer_lib
-  use parallel_lib
-  use cgyro_globals
-
-  implicit none
-
-  integer :: ir,it,iv_loc_m
-  integer :: iexch
-
-  call timer_lib_in('nl_mem')
-
-!$omp parallel do private(iv_loc,it,iexch,ir)
-  do iv_loc_m=1,nv_loc
-     iexch = (iv_loc_m-1)*n_theta
-     do it=1,n_theta
-        iexch = iexch+1
-        do ir=1,n_radial
-           fpack(ir,iexch) = h_x(ic_c(ir,it),iv_loc_m)
-        enddo
-     enddo
-  enddo
-
-  do iexch=nv_loc*n_theta+1,nsplit*n_toroidal
-     fpack(:,iexch) = (0.0,0.0)
-  enddo
-
-  call parallel_slib_f_nc_async(fpack,f_nl,f_req)
-
-  call timer_lib_out('nl_mem')
-
-end subroutine cgyro_nl_fftw_comm1_async
-
-! Note: Calling test propagates the async operations in some MPI implementations
-subroutine cgyro_nl_fftw_comm1_test
-  use parallel_lib
-  use cgyro_globals
-
-  implicit none
-
-  call parallel_slib_test(f_req)
-
-end subroutine cgyro_nl_fftw_comm1_test
-
-subroutine cgyro_nl_fftw_comm2_async
-
-  use timer_lib
-  use parallel_lib
-  use cgyro_globals
-
-  implicit none
-
-  integer :: ir,it,iv_loc_m
-  integer :: iexch
-
-  call timer_lib_in('nl_mem')
-
-!$omp parallel do private(iv_loc,it,iexch,ir)
-  do iv_loc_m=1,nv_loc
-     iexch = (iv_loc_m-1)*n_theta
-     do it=1,n_theta
-        iexch = iexch+1
-        do ir=1,n_radial
-           gpack(ir,iexch) = psi(ic_c(ir,it),iv_loc_m)
-        enddo
-     enddo
-  enddo
-
-  do iexch=nv_loc*n_theta+1,nsplit*n_toroidal
-     gpack(:,iexch) = (0.0,0.0)
-  enddo
-
-  call parallel_slib_f_nc_async(gpack,g_nl,g_req)
-
-  call timer_lib_out('nl_mem')
-
-end subroutine cgyro_nl_fftw_comm2_async
-
-! Note: Calling test propagates the async operations in some MPI implementations
-subroutine cgyro_nl_fftw_comm2_test
-  use parallel_lib
-  use cgyro_globals
-
-  implicit none
-
-  call parallel_slib_test(g_req)
-
-end subroutine cgyro_nl_fftw_comm2_test
-
 subroutine cgyro_nl_fftw_stepr(j, i_omp)
 
   use timer_lib
@@ -141,7 +41,7 @@ subroutine cgyro_nl_fftw_stepr(j, i_omp)
      if (ix < 0) ix = ix+nx
      do in=1,n_toroidal
         iy = in-1
-        g_nl(ir,j,in) = fx(iy,ix,i_omp)
+        f_nl(ir,j,in) = fx(iy,ix,i_omp)
      enddo
   enddo
 
@@ -152,13 +52,17 @@ subroutine cgyro_nl_fftw(ij)
 
   use timer_lib
   use parallel_lib
+  use cgyro_nl_comm
   use cgyro_globals
 
   implicit none
 
+  !-----------------------------------
   integer, intent(in) :: ij
+  !-----------------------------------
   integer :: ix,iy
   integer :: ir,it,in
+  integer :: it_loc
   integer :: j,p,iexch
   integer :: i_omp
   logical :: force_early_comm2, one_pass_fft
@@ -189,7 +93,7 @@ subroutine cgyro_nl_fftw(ij)
   if (force_early_comm2) then
      ! time to wait for the g_nl to become avaialble
      call timer_lib_in('nl_comm')
-     call parallel_slib_f_nc_wait(gpack,g_nl,g_req)
+     call parallel_slib_f_fd_wait(n_field,n_radial,n_jtheta,gpack,g_nl,g_req)
      call timer_lib_out('nl_comm')
   endif
 
@@ -240,7 +144,7 @@ subroutine cgyro_nl_fftw(ij)
   if (.not. force_early_comm2) then
      ! time to wait for the g_nl to become avaialble
      call timer_lib_in('nl_comm')
-     call parallel_slib_f_nc_wait(gpack,g_nl,g_req)
+     call parallel_slib_f_fd_wait(n_field,n_radial,n_jtheta,gpack,g_nl,g_req)
      call timer_lib_out('nl_comm')
   endif
 
@@ -252,7 +156,7 @@ subroutine cgyro_nl_fftw(ij)
     c2 = c*n_omp
     if (c2>nsplit) c2=nsplit
 
-!$omp parallel do schedule(static,1) private(in,iy,ir,p,ix,g0,i_omp,j)
+!$omp parallel do schedule(static,1) private(in,iy,ir,p,ix,g0,i_omp,j,it,iv_loc,it_loc)
     do j=c1,c2
         i_omp = j-c1+1
 
@@ -265,8 +169,16 @@ subroutine cgyro_nl_fftw(ij)
            ix = p
            if (ix < 0) ix = ix+nx  
            do in=1,n_toroidal
+              it = it_j(j,in)
+              iv_loc =iv_j(j,in)
+
               iy = in-1
-              g0 = i_c*g_nl(ir,j,in)
+              if (iv_loc == 0) then
+                 g0 = (0.0,0.0)
+              else
+                 it_loc = it-jtheta_min+1
+                 g0 = i_c*sum( jvec_c_nl(:,ir,it_loc,iv_loc,in)*g_nl(:,ir,it_loc,in))
+              endif
               gx(iy,ix,i_omp) = p*g0
               gy(iy,ix,i_omp) = iy*g0
            enddo
@@ -289,37 +201,10 @@ subroutine cgyro_nl_fftw(ij)
   call timer_lib_out('nl')
 
   call timer_lib_in('nl_comm')
-  call parallel_slib_r_nc(g_nl,gpack)
+  call parallel_slib_r_nc(f_nl,fpack)
   call timer_lib_out('nl_comm')
 
-  call timer_lib_in('nl')
-
-!$omp parallel do private(iv_loc,it,iexch,ir,ic)
-  do iv_loc=1,nv_loc
-     iexch = (iv_loc-1)*n_theta
-     do it=1,n_theta
-        iexch = iexch+1
-        do ir=1,n_radial
-           psi(ic_c(ir,it),iv_loc) = gpack(ir,iexch) 
-        enddo
-     enddo
-
-     ! Filter
-     if (n == 0) then
-      do ic=1,nc
-        ir = ir_c(ic)
-        if (ir == 1 .or. px(ir) == 0) then
-           psi(ic,iv_loc) = 0.0
-        endif
-      enddo
-     endif
-
-     ! RHS -> -[f,g] = [f,g]_{r,-alpha}
-
-     rhs(:,iv_loc,ij) = rhs(:,iv_loc,ij)+(q*rho/rmin)*(2*pi/length)*psi(:,iv_loc)
-  enddo
-
-  call timer_lib_out('nl')
+  call cgyro_nl_fftw_comm1_r(ij)
 
 end subroutine cgyro_nl_fftw
 

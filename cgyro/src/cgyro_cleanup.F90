@@ -121,10 +121,6 @@ subroutine cgyro_cleanup
 !$acc exit data delete(g_x)       
      deallocate(g_x)
   endif
-  if(allocated(psi)) then
-!$acc exit data delete(psi)       
-     deallocate(psi)
-  endif
   if(allocated(h0_x)) then
 !$acc exit data delete(h0_x)        
      deallocate(h0_x)
@@ -156,6 +152,10 @@ subroutine cgyro_cleanup
   if(allocated(jvec_c))  then
 !$acc exit data delete(jvec_c)     
      deallocate(jvec_c)
+  endif
+  if(allocated(jvec_c_nl))  then
+!$acc exit data delete(jvec_c_nl)
+     deallocate(jvec_c_nl)
   endif
   if(allocated(jvec_v))              deallocate(jvec_v)
   if(allocated(dvjvec_c)) then
