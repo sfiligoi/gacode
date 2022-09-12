@@ -50,11 +50,13 @@ subroutine cgyro_nl_fftw(ij)
   use cufft
   use timer_lib
   use parallel_lib
-
+  use cgyro_nl_comm
   use cgyro_globals
+
   implicit none
-  include 'mpif.h'
+  !-----------------------------------
   integer, intent(in) :: ij
+  !-----------------------------------
   integer :: j,p,iexch
   integer :: it,ir,in,ix,iy
   integer :: i1,i2
@@ -208,19 +210,6 @@ subroutine cgyro_nl_fftw(ij)
 
   call timer_lib_out('nl_mem')
 
-  call cgyro_nl_fftw_comm1_r
-
-  ! RHS -> -[f,g] = [f,g]_{r,-alpha}
-
-  call timer_lib_in('nl')
-
-!$acc parallel loop collapse(2) independent present(rhs(:,:,ij),psi)
-  do iv_loc=1,nv_loc
-     do ic_loc=1,nc
-        rhs(ic_loc,iv_loc,ij) = rhs(ic_loc,iv_loc,ij)+((q*rho/rmin)*(2*pi/length))*psi(ic_loc,iv_loc)
-     enddo
-  enddo
-
-  call timer_lib_out('nl')
+  call cgyro_nl_fftw_comm1_r(ij)
 
 end subroutine cgyro_nl_fftw

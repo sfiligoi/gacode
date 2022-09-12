@@ -52,11 +52,14 @@ subroutine cgyro_nl_fftw(ij)
 
   use timer_lib
   use parallel_lib
+  use cgyro_nl_comm
   use cgyro_globals
 
   implicit none
 
+  !-----------------------------------
   integer, intent(in) :: ij
+  !-----------------------------------
   integer :: ix,iy
   integer :: ir,it,in
   integer :: it_loc
@@ -201,17 +204,7 @@ subroutine cgyro_nl_fftw(ij)
   call parallel_slib_r_nc(f_nl,fpack)
   call timer_lib_out('nl_comm')
 
-  call cgyro_nl_fftw_comm1_r
-
-  call timer_lib_in('nl')
-
-  ! RHS -> -[f,g] = [f,g]_{r,-alpha}
-!$omp parallel do
-  do iv_loc=1,nv_loc
-     rhs(:,iv_loc,ij) = rhs(:,iv_loc,ij)+(q*rho/rmin)*(2*pi/length)*psi(:,iv_loc)
-  enddo
-
-  call timer_lib_out('nl')
+  call cgyro_nl_fftw_comm1_r(ij)
 
 end subroutine cgyro_nl_fftw
 

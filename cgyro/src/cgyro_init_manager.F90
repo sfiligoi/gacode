@@ -210,9 +210,8 @@ subroutine cgyro_init_manager
      
      allocate(h_x(nc,nv_loc))
      allocate(g_x(nc,nv_loc))
-     allocate(psi(nc,nv_loc))
      allocate(h0_x(nc,nv_loc))
-!$acc enter data create(h_x,g_x,psi,h0_x)
+!$acc enter data create(h_x,g_x,h0_x)
 
      allocate(cap_h_c(nc,nv_loc))
      allocate(cap_h_ct(nv_loc,nc))

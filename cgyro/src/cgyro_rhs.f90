@@ -1,4 +1,5 @@
 subroutine cgyro_rhs_comm_async(which)
+  use cgyro_nl_comm
   use cgyro_globals
 
   implicit none
@@ -17,6 +18,7 @@ end subroutine cgyro_rhs_comm_async
 
 ! Note: Calling test propagates the async operations in some MPI implementations
 subroutine cgyro_rhs_comm_test(which)
+  use cgyro_nl_comm
   use cgyro_globals
 
   implicit none

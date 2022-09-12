@@ -5,6 +5,12 @@
 !  Nonlinear communication routines
 !-----------------------------------------------------------------
 
+module cgyro_nl_comm
+
+  implicit none
+
+contains
+
 !
 ! Comm is a transpose
 ! First half of the transpose is done locally
@@ -64,48 +70,56 @@ subroutine cgyro_nl_fftw_comm1_test
 
 end subroutine cgyro_nl_fftw_comm1_test
 
-subroutine cgyro_nl_fftw_comm1_r
+subroutine cgyro_nl_fftw_comm1_r(ij)
   use timer_lib
   use parallel_lib
   use cgyro_globals
 
   implicit none
 
+  !-----------------------------------
+  integer, intent(in) :: ij
+  !-----------------------------------
+
   integer :: ir,it,iv_loc_m,ic_loc_m
   integer :: iexch
-  complex :: val
+  complex :: my_psi
+  real :: psi_mul
 
   call timer_lib_in('nl_comm')
   call parallel_slib_r_nc(f_nl,fpack)
   call timer_lib_out('nl_comm')
 
-  call timer_lib_in('nl_mem')
+  call timer_lib_in('nl')
+
+  psi_mul = ((q*rho/rmin)*(2*pi/length))
 
 #ifdef _OPENACC
 !$acc parallel loop gang independent private(it,iv_loc_m) &
-!$acc&         present(iv_e,it_e,ic_c,px,psi,fpack) default(none)
+!$acc&         present(iv_e,it_e,ic_c,px,rhs,fpack) default(none)
 #else
-!$omp parallel do private(iv_loc_m,it,ir,ic_loc_m,val)
+!$omp parallel do private(iv_loc_m,it,ir,ic_loc_m,my_psi)
 #endif
   do iexch=1,nsplit*n_toroidal
      it = it_e(iexch)
      iv_loc_m = iv_e(iexch)
      if (iv_loc_m /= 0 ) then ! else it is padding and can be ignored
-!$acc loop vector private(ic_loc_m,val)
+!$acc loop vector private(ic_loc_m,my_psi)
         do ir=1,n_radial
            ic_loc_m = ic_c(ir,it)
            if ( (my_toroidal == 0) .and.  (ir == 1 .or. px(ir) == 0) ) then
               ! filter
-              val = (0.0,0.0)
+              my_psi = (0.0,0.0)
            else
-              val = fpack(ir,iexch)
+              my_psi = fpack(ir,iexch)
            endif
-           psi(ic_loc_m,iv_loc_m) = val
+           ! RHS -> -[f,g] = [f,g]_{r,-alpha}
+           rhs(ic_loc_m,iv_loc_m,ij) = rhs(ic_loc_m,iv_loc_m,ij)+psi_mul*my_psi
         enddo
      endif
   enddo
 
-  call timer_lib_out('nl_mem')
+  call timer_lib_out('nl')
 end subroutine cgyro_nl_fftw_comm1_r
 
 !
@@ -164,4 +178,6 @@ subroutine cgyro_nl_fftw_comm2_test
   call parallel_slib_test(g_req)
 
 end subroutine cgyro_nl_fftw_comm2_test
+
+end module cgyro_nl_comm
 
