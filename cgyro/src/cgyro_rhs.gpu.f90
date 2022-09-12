@@ -52,7 +52,7 @@ subroutine cgyro_rhs(ij)
 
   call timer_lib_in('str_mem')
 
-!$acc data present(h_x,g_x,psi,rhs,field)
+!$acc data present(h_x,g_x,rhs,field)
 
   call timer_lib_out('str_mem')
 

@@ -237,6 +237,7 @@ subroutine cgyro_step_collision_cpu(use_simple)
 
   integer :: is,nj_loc
   logical :: update_chv
+  complex :: my_psi,my_ch
   ! --------------------------------------------------
 
   !----------------------------------------------------------------
@@ -285,19 +286,16 @@ subroutine cgyro_step_collision_cpu(use_simple)
 
   ! Compute H given h and [phi(h), apar(h)]
 
-!$omp parallel do private(iv_loc,is,ic,iv) firstprivate(nc)
+!$omp parallel do private(iv_loc,is,ic,iv,my_psi,my_ch) firstprivate(nc)
   do iv=nv1,nv2
      iv_loc = iv-nv1+1
-     do ic=1,nc
-        psi(ic,iv_loc) = sum(jvec_c(:,ic,iv_loc)*field(:,ic))
-     enddo
+     is = is_v(iv)
      ! this should be coll_mem timer , but not easy with OMP
      do ic=1,nc
-        cap_h_c(ic,iv_loc) = cap_h_ct(iv_loc,ic)
-     enddo
-     is = is_v(iv)
-     do ic=1,nc
-        h_x(ic,iv_loc) = cap_h_c(ic,iv_loc)-psi(ic,iv_loc)*(z(is)/temp(is))
+        my_ch = cap_h_ct(iv_loc,ic)
+        my_psi = sum(jvec_c(:,ic,iv_loc)*field(:,ic))
+        h_x(ic,iv_loc) = my_ch-my_psi*(z(is)/temp(is))
+        cap_h_c(ic,iv_loc) = my_ch
      enddo
   enddo
 
@@ -714,6 +712,7 @@ subroutine cgyro_step_collision_gpu(use_simple)
 
   integer :: is,nj_loc
   logical :: update_chv
+  complex :: my_psi,my_ch
   ! --------------------------------------------------
 
   !----------------------------------------------------------------
@@ -793,16 +792,17 @@ subroutine cgyro_step_collision_gpu(use_simple)
 
   ! Compute H given h and [phi(h), apar(h)]
 
-!$acc parallel loop collapse(2) gang vector private(iv_loc,is) &
-!$acc&         present(is_v,psi,cap_h_c,cap_h_ct,cap_h_c,jvec_c,field,z,temp,h_x) &
+!$acc parallel loop collapse(2) gang vector private(iv_loc,is,my_psi,my_ch) &
+!$acc&         present(is_v,cap_h_c,cap_h_ct,cap_h_c,jvec_c,field,z,temp,h_x) &
 !$acc&         default(none)
   do iv=nv1,nv2
      do ic=1,nc
         iv_loc = iv-nv1+1
         is = is_v(iv)
-        psi(ic,iv_loc) = sum(jvec_c(:,ic,iv_loc)*field(:,ic))
-        cap_h_c(ic,iv_loc) = cap_h_ct(iv_loc,ic)
-        h_x(ic,iv_loc) = cap_h_c(ic,iv_loc)-psi(ic,iv_loc)*(z(is)/temp(is))
+        my_psi = sum(jvec_c(:,ic,iv_loc)*field(:,ic))
+        my_ch = cap_h_ct(iv_loc,ic)
+        h_x(ic,iv_loc) = my_ch-my_psi*(z(is)/temp(is))
+        cap_h_c(ic,iv_loc) = my_ch
      enddo
   enddo
 
