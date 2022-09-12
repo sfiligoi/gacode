@@ -82,7 +82,7 @@ subroutine cgyro_nl_fftw(ij)
   if (force_early_comm2) then
      ! time to wait for the g_nl to become avaialble
      call timer_lib_in('nl_comm')
-     call parallel_slib_f_nc_wait(gpack,g_nl,g_req)
+     call parallel_slib_f_fd_wait(n_field,n_radial,n_jtheta,gpack,g_nl,g_req)
      call timer_lib_out('nl_comm')
   endif
 
@@ -230,7 +230,7 @@ subroutine cgyro_nl_fftw(ij)
   if (.not. force_early_comm2) then
      ! time to wait for the g_nl to become avaialble
      call timer_lib_in('nl_comm')
-     call parallel_slib_f_nc_wait(gpack,g_nl,g_req)
+     call parallel_slib_f_fd_wait(n_field,n_radial,n_jtheta,gpack,g_nl,g_req)
      call timer_lib_out('nl_comm')
   endif
 
@@ -251,8 +251,8 @@ subroutine cgyro_nl_fftw(ij)
            ix = p
            if (ix < 0) ix = ix+nx  
            do in=1,n_toroidal
-             it = it_j(j,in)
-             iv_loc =iv_j(j,in)
+              it = it_j(j,in)
+              iv_loc =iv_j(j,in)
 
               iy = in-1
               if (iv_loc == 0) then

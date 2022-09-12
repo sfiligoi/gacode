@@ -59,6 +59,7 @@ subroutine cgyro_nl_fftw(ij)
   integer, intent(in) :: ij
   integer :: ix,iy
   integer :: ir,it,in
+  integer :: it_loc
   integer :: j,p,iexch
   integer :: i_omp
   logical :: force_early_comm2, one_pass_fft
@@ -89,7 +90,7 @@ subroutine cgyro_nl_fftw(ij)
   if (force_early_comm2) then
      ! time to wait for the g_nl to become avaialble
      call timer_lib_in('nl_comm')
-     call parallel_slib_f_nc_wait(gpack,g_nl,g_req)
+     call parallel_slib_f_fd_wait(n_field,n_radial,n_jtheta,gpack,g_nl,g_req)
      call timer_lib_out('nl_comm')
   endif
 
@@ -140,7 +141,7 @@ subroutine cgyro_nl_fftw(ij)
   if (.not. force_early_comm2) then
      ! time to wait for the g_nl to become avaialble
      call timer_lib_in('nl_comm')
-     call parallel_slib_f_nc_wait(gpack,g_nl,g_req)
+     call parallel_slib_f_fd_wait(n_field,n_radial,n_jtheta,gpack,g_nl,g_req)
      call timer_lib_out('nl_comm')
   endif
 
@@ -152,7 +153,7 @@ subroutine cgyro_nl_fftw(ij)
     c2 = c*n_omp
     if (c2>nsplit) c2=nsplit
 
-!$omp parallel do schedule(static,1) private(in,iy,ir,p,ix,g0,i_omp,j)
+!$omp parallel do schedule(static,1) private(in,iy,ir,p,ix,g0,i_omp,j,it,iv_loc,it_loc)
     do j=c1,c2
         i_omp = j-c1+1
 
@@ -165,8 +166,16 @@ subroutine cgyro_nl_fftw(ij)
            ix = p
            if (ix < 0) ix = ix+nx  
            do in=1,n_toroidal
+              it = it_j(j,in)
+              iv_loc =iv_j(j,in)
+
               iy = in-1
-              g0 = i_c*g_nl(ir,j,in)
+              if (iv_loc == 0) then
+                 g0 = (0.0,0.0)
+              else
+                 it_loc = it-jtheta_min+1
+                 g0 = i_c*sum( jvec_c_nl(:,ir,it_loc,iv_loc,in)*g_nl(:,ir,it_loc,in))
+              endif
               gx(iy,ix,i_omp) = p*g0
               gy(iy,ix,i_omp) = iy*g0
            enddo

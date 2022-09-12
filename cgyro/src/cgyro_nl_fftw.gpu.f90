@@ -58,6 +58,7 @@ subroutine cgyro_nl_fftw(ij)
   integer :: j,p,iexch
   integer :: it,ir,in,ix,iy
   integer :: i1,i2
+  integer :: it_loc
   integer :: ierr
   integer :: rc
   complex :: f0,g0
@@ -123,23 +124,31 @@ subroutine cgyro_nl_fftw(ij)
 
   ! time to wait for the g_nl to become avaialble
   call timer_lib_in('nl_comm')
-  call parallel_slib_f_nc_wait(gpack,g_nl,g_req)
+  call parallel_slib_f_fd_wait(n_field,n_radial,n_jtheta,gpack,g_nl,g_req)
   call timer_lib_out('nl_comm')
 
   call timer_lib_in('nl')
 
 
-!$acc parallel loop independent collapse(3) private(j,ir,p,ix,in,iy,f0,g0) &
+!$acc parallel loop independent collapse(3) private(j,ir,p,ix,in,iy,f0,g0,it,iv_loc,it_loc) &
 !$acc&         present(g_nl)
   do j=1,nsplit
      do ir=1,n_radial
         do in=1,n_toroidal
+           it = it_j(j,in)
+           iv_loc =iv_j(j,in)
+
            p  = ir-1-nx0/2
            ix = p
            if (ix < 0) ix = ix+nx
 
            iy = in-1
-           g0 = i_c*g_nl(ir,j,in)
+           if (iv_loc == 0) then
+              g0 = (0.0,0.0)
+           else
+              it_loc = it-jtheta_min+1
+              g0 = i_c*sum( jvec_c_nl(:,ir,it_loc,iv_loc,in)*g_nl(:,ir,it_loc,in))
+           endif
            gxmany(iy,ix,j) = p*g0
            gymany(iy,ix,j) = iy*g0
         enddo
