@@ -100,7 +100,6 @@
       IMPLICIT NONE
       INTEGER :: i,j,k,is
       REAL :: ww
-      REAL :: gradz(nb,nb)
       REAL :: zero_cut
       REAL :: debye
       INTEGER :: lwork,info
@@ -134,25 +133,25 @@
 !
        do i=1,nbasis
        do j=1,nbasis
-         gradz(i,j) = 0.0
+         ave_kpar(i,j) = 0.0
        enddo
        enddo
        do i=1,nbasis        
         if(i.lt.nbasis)then
-         gradz(i,i+1)=SQRT(REAL(i)/2.0)
-! gradz is an odd function
-          gradz(i+1,i)=-gradz(i,i+1)
+         ave_kpar(i,i+1)=SQRT(REAL(i)/2.0)
+! ave_kpar is an odd function
+          ave_kpar(i+1,i)=-ave_kpar(i,i+1)
         endif
        enddo
 !
        do i=1,nbasis
        do j=i,nbasis
 !   initialize the averages
-        ave_kpar(i,j) = 0.0
         ave_wdpar(i,j) = 0.0
-        ave_wdper(i,j)=0.0
+        ave_wdper(i,j)= 0.0
+        ave_wb(i,j) = 0.0
         ave_b0(i,j) = 0.0
-        ave_lnB(i,j) = 0.0
+        ave_Binv(i,j) = 0.0
         ave_p0inv(i,j) = 0.0
         ave_p0(i,j) = 0.0
         ave_kx(i,j) = 0.0
@@ -162,13 +161,14 @@
 !
         do k=1,nx
          ww=wx(k)*h(i,k)*h(j,k)
-           ave_kpar(i,j) = ave_kpar(i,j) + 0.5*wx(k)*   &
-           (h(i+1,k)*SQRT(2.0*REAL(i))*h(j,k)           &
-           -h(i,k)*SQRT(2.0*REAL(j))*h(j+1,k))/Bx(k)
+!           ave_kpar(i,j) = ave_kpar(i,j) + 0.5*wx(k)*   &
+!           (h(i+1,k)*SQRT(2.0*REAL(i))*h(j,k)           &
+!           -h(i,k)*SQRT(2.0*REAL(j))*h(j+1,k))/Bx(k)
          ave_wdpar(i,j)    = ave_wdpar(i,j)  + ww*wdx(k)
          ave_wdper(i,j)   = ave_wdper(i,j) + ww*(wdx(k)+wdpx(k))
+         ave_wb(i,j)   = ave_wb(i,j) + ww*wbx(k)
          ave_b0(i,j)    = ave_b0(i,j)  + ww*b0x(k)*ky*ky
-         ave_lnB(i,j)   = ave_lnB(i,j) + ww*LOG(SQRT(b2x(k)))
+         ave_Binv(i,j)   = ave_Binv(i,j) + ww*Log(SQRT(b2x(k)))
          ave_p0inv(i,j) = ave_p0inv(i,j) + ww/p0x(k)
          ave_p0(i,j) = ave_p0(i,j) + ww*p0x(k)
          ave_kx(i,j) = ave_kx(i,j) + ww*kxx(k)
@@ -176,11 +176,12 @@
          ave_c_tor_per(i,j) = ave_c_tor_per(i,j) + ww*cx_tor_per(k)
          ave_c_par_par(i,j) = ave_c_par_par(i,j) + ww*cx_par_par(k)
         enddo
-        if(ABS(ave_kpar(i,j)).lt.zero_cut)ave_kpar(i,j) = 0.0
+!        if(ABS(ave_kpar(i,j)).lt.zero_cut)ave_kpar(i,j) = 0.0
         if(ABS(ave_wdpar(i,j)).lt.zero_cut)ave_wdpar(i,j) = 0.0
         if(ABS(ave_wdper(i,j)).lt.zero_cut)ave_wdper(i,j) = 0.0
+        if(ABS(ave_wb(i,j)).lt.zero_cut)ave_wb(i,j) = 0.0
         if(ABS(ave_b0(i,j)).lt.zero_cut)ave_b0(i,j) = 0.0
-        if(ABS(ave_lnB(i,j)).lt.zero_cut)ave_lnB(i,j) = 0.0
+        if(ABS(ave_Binv(i,j)).lt.zero_cut)ave_Binv(i,j) = 0.0
         if(ABS(ave_p0inv(i,j)).lt.zero_cut)ave_p0inv(i,j) = 0.0
         if(ABS(ave_p0(i,j)).lt.zero_cut)ave_p0(i,j) = 0.0
         if(ABS(ave_kx(i,j)).lt.zero_cut)ave_kx(i,j) = 0.0
@@ -188,11 +189,11 @@
         if(ABS(ave_c_tor_per(i,j)).lt.zero_cut)ave_c_tor_per(i,j) = 0.0
         if(ABS(ave_c_par_par(i,j)).lt.zero_cut)ave_c_par_par(i,j) = 0.0
 ! symmetrize
-        ave_kpar(j,i) = -ave_kpar(i,j)
         ave_wdpar(j,i)    = ave_wdpar(i,j)
         ave_wdper(j,i)    = ave_wdper(i,j)
+        ave_wb(j,i)    = ave_wb(i,j)
         ave_b0(j,i)    = ave_b0(i,j)
-        ave_lnB(j,i)   = ave_lnB(i,j)
+        ave_Binv(j,i)   = ave_Binv(i,j)
         ave_p0inv(j,i) = ave_p0inv(i,j)
         ave_p0(j,i) = ave_p0(i,j)
         ave_kx(j,i) = ave_kx(i,j)
@@ -204,6 +205,7 @@
        ave_p0_out = ave_p0(1,1)
 !       write(*,*)"ave_wdpar(1,1)=",ave_wdpar(1,1)
 !       write(*,*)"ave_wdper(1,1)=",ave_wdper(1,1)
+!       write(*,*)"ave_wb(1,1)=",ave_wb(1,1)
 !       write(*,*)"ave_p0inv(1,1) = ",ave_p0inv(1,1)
 !       write(*,*)"ave_p0(1,1) = ",ave_p0(1,1)
 !       write(*,*)"ave_b0(1,1) = ",ave_b0(1,1)
@@ -216,10 +218,11 @@
        do j=1,nbasis
          gradB = 0.0
          do k=1,nbasis
-           gradB = gradB + gradz(i,k)*ave_lnB(k,j) &
-           - ave_lnB(i,k)*gradz(k,j)
+           gradB = gradB + ave_kpar(i,k)*ave_Binv(k,j)         &
+           - ave_Binv(i,k)*ave_kpar(k,j)
          enddo
          ave_gradB(i,j) = gradB
+!         write(*,*)i,j,"gradB = ",gradB,"  wb = ",ave_wb(i,j)
        enddo
        enddo
 !

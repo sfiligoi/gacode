@@ -113,7 +113,7 @@ SUBROUTINE put_gaussian_width(width,width_min,nwidth,find_width)
   width_in = width
   width_min_in=width_min
   find_width_in = find_width
-  width_in = 1.75
+  width_in = 1.74
   width_min_in = width_in
   find_width_in = .false.
   nwidth_in=MIN(nwidth,nt0)
