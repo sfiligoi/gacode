@@ -391,7 +391,7 @@ SUBROUTINE xgrid_functions_geo
      ! interpolate wdpx
      wdp1 = (qrat_geo(m1)/b_geo(m1))*costheta_p_geo(m1)
      wdp2 = (qrat_geo(m2)/b_geo(m2))*costheta_p_geo(m2)
-     wdpx(i) = wdp1 + (wdp1-wdp2)*(y_x-y1)/(y2-y1)
+     wdpx(i) = wdp1 + (wdp2-wdp1)*(y_x-y1)/(y2-y1)
      wdpx(i) = (R_unit/Rmaj_s)*wdpx(i)
      ! interpolate b2x = b_geo**2
      b1 = b_geo(m1)**2
