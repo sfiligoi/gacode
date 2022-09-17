@@ -367,7 +367,7 @@
         kycut = grad_r0_out*kycut
         kymin = grad_r0_out*kymin
       endif
-      write(*,*)" kycut = ",kycut," kymin = ",kymin
+!      write(*,*)" kycut = ",kycut," kymin = ",kymin
       ! find the low and high ky peaks of gamma/ky
       do j=1,nky-1
        if(ky_mix(j+1).ge.kymin.and.ky_mix(j).le.kycut)then
