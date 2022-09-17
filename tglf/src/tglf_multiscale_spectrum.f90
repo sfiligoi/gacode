@@ -332,11 +332,12 @@
     USE tglf_global
     USE tglf_species
     IMPLICIT NONE
+    LOGICAL :: use_kymin = .false.
     INTEGER :: nmix,i,k,j,j1,j2,jmax1
     REAL :: test,testmax,peakmax
-    REAL :: kx, kyhigh, kycut
+    REAL :: kx, kyhigh, kycut, kymin
     REAL :: gammamax1,kymax1,testmax1,ky0,ky1,ky2
-    REAL :: f0,f1,f2,a,b,c,x1,deltaky,xmax
+    REAL :: f0,f1,f2,a,b,c,x1,deltaky,xmax, xmin
     REAL :: vzf1, vzf2
     REAL :: kymax_mix, vzf_mix
     INTEGER :: jmax_mix, down
@@ -345,6 +346,8 @@
     vzf_mix = 0.0
     kymax_mix = 0.0
     jmax_mix = 1
+    xmin = 0.0
+    if(alpha_zf_in.lt.0.0)use_kymin = .true. 
 !
 ! find the local maximum of gamma_mix/ky_mix with the largest gamma_mix/ky_mix^2
 !
@@ -358,13 +361,16 @@
 !     jmax2=0
 !      kycut=0.8*ABS(zs(2))/SQRT(taus(2)*mass(2))
       kycut=0.8/rho_ion
+      kymin = 0.0
+      if(use_kymin)kymin = 0.173/rho_ion
       if(sat_rule_in.eq.2)then
         kycut = grad_r0_out*kycut
+        kymin = grad_r0_out*kymin
       endif
-!      write(*,*)" kycut = ",kycut," kyhigh = ",kyhigh
+      write(*,*)" kycut = ",kycut," kymin = ",kymin
       ! find the low and high ky peaks of gamma/ky
-      do j=1,nky
-       if(ky_mix(j).le.kycut)then
+      do j=1,nky-1
+       if(ky_mix(j+1).ge.kymin.and.ky_mix(j).le.kycut)then
          j1=j
          kymax1 = ky_mix(j)
          testmax1 = gamma_mix(j)/kymax1
@@ -420,12 +426,22 @@
          b = (f1 - f0*(1-x1*x1)-f2*x1*x1)/(x1-x1*x1)
          c = f2 - f0 - b
          xmax = -b/(2.0*c)
+         if(ky_mix(jmax1-1).lt.kymin)then
+           xmin = (kymin - ky_mix(jmax1-1))/deltaky
+         else
+           xmin = 0.0
+         endif
          if(xmax .ge. 1.0)then
            kymax1 = ky_mix(jmax1+1)
            gammamax1 = f2*kymax1
-         elseif(xmax.lt.0.0)then
-           kymax1 = ky_mix(jmax1-1)
-           gammamax1 = f0*kymax1
+         elseif(xmax.lt.xmin)then
+           if(xmin .gt. 0.0)then
+             kymax1 = kymin
+             gammamax1 = (a + b*xmin + c*xmin*xmin)*kymin
+           else
+             kymax1 = ky_mix(jmax1-1)
+             gammamax1 = f0*kymax1
+           endif
          else
            kymax1 = ky_mix(jmax1-1)+deltaky*xmax
            gammamax1 = (a+b*xmax+c*xmax*xmax)*kymax1
@@ -435,7 +451,7 @@
       kymax_mix = kymax1
 !      jmax_mix = jmax1
 !      write(*,*)"get_zonal_mxing"
-!      write(*,*)"xmax = ",xmax
+!      write(*,*)"xmax = ",xmax, "  xmin = ",xmin
 !      write(*,*)"gammamax1 = ",gammamax1," kymax1 = ",kymax1
 
  END SUBROUTINE get_zonal_mixing
