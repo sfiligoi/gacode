@@ -36,7 +36,7 @@
       ns = ns_in
 !      write(*,*)"ns = ",ns,"   ns0 = ",ns0
       nx = 2*nxgrid_in-1
-!      nbasis_max_in = 10
+      nbasis_max_in = 12
       nbasis = nbasis_max_in
       nbasis_max = nbasis
 ! velocity space resolution
