@@ -69,7 +69,7 @@ subroutine tgyro_profile_functions
   ! Thermal gyroradii in cm
   rho_i(:) = v_i(:)/(e*b_unit(:)/(mi(1)*c)) 
   rho_s(:) = c_s(:)/(e*b_unit(:)/(md*c))
-
+  
   ! Gyrobohm unit diffusivity (cm^2/s)
   chi_gb(:) = rho_s(:)**2*c_s(:)/r_min
 
@@ -86,7 +86,7 @@ subroutine tgyro_profile_functions
   s_gb(:) = ne(:)*k*te(:)*(c_s(:)/r_min)*(rho_s(:)/r_min)**2
 
   ! Get fundamental collision and exchange rates
-  call collision_rates(ne,ni,te,ti,nui,nue,nu_exch,n_r,loc_n_ion)
+  call collision_rates(ne,ni,te,ti,nui,nue,nu_exch,taus,n_r,loc_n_ion)
   
   ! Hinton-Hazeltine scattering rates (one ion):
   nui_HH(:) = 4.0/(3*sqrt(2.0*pi))*nui(1,:)

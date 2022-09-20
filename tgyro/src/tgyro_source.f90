@@ -12,7 +12,7 @@ subroutine tgyro_source
 
   implicit none
 
-  integer :: i_ion,i
+  integer :: i_ion
 
   !-------------------------------------------------------
   ! Source terms (erg/cm^3/s):
@@ -20,7 +20,7 @@ subroutine tgyro_source
 
   !-------------------------------------------------------
   ! 1. Alpha power
-  call rad_alpha(ne,ni,te,ti,sn_alpha,s_alpha_i,s_alpha_e,frac_ai,e_cross,n_r,loc_n_ion)
+  call rad_alpha(ne,ni,te,ti,sn_alpha,s_alpha_i,s_alpha_e,frac_ai,e_cross,n_alpha,t_alpha,n_r,loc_n_ion)
   frac_ae = 1-frac_ai
   !-------------------------------------------------------
 

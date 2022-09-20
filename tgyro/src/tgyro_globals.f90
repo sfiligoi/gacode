@@ -134,10 +134,15 @@ module tgyro_globals
   ! Formulary exchange rate
   real, dimension(:), allocatable :: nu_exch
 
+  ! Alpha slowing-down time
+  real, dimension(:), allocatable :: taus
+  
   ! Alpha heating coefficients
   real, dimension(:), allocatable :: frac_ae
   real, dimension(:), allocatable :: frac_ai
   real, dimension(:), allocatable :: e_cross
+  real, dimension(:), allocatable :: n_alpha
+  real, dimension(:), allocatable :: t_alpha
 
   ! Electron and ion temperatures
   real, dimension(:), allocatable :: te

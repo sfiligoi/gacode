@@ -57,10 +57,15 @@ subroutine tgyro_allocate_globals
   ! Formulary exchange rate
   allocate(nu_exch(n_r))
 
+  ! Alpha slowing-down time
+  allocate(taus(n_r))
+
   ! Alpha heating parameters
   allocate(frac_ai(n_r))
   allocate(frac_ae(n_r))
   allocate(e_cross(n_r))
+  allocate(n_alpha(n_r))
+  allocate(t_alpha(n_r))
 
   ! Electron and ion temperatures
   allocate(te(n_r))
