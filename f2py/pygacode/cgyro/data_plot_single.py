@@ -244,8 +244,9 @@ elif plot_type == 'kxky_phi':
    w     = float(sys.argv[6])
    wmax  = float(sys.argv[7])
    ftype = sys.argv[8]
+   deriv = bool(int(sys.argv[9]))
 
-   head = data_in.plot_kxky_phi(field=field,theta=theta,moment=moment,spec=spec,w=w,wmax=wmax)
+   head = data_in.plot_kxky_phi(field=field,theta=theta,moment=moment,spec=spec,w=w,wmax=wmax,deriv=deriv)
 
    outfile = 'out.cgyro.kxky_phi.'+ftype
 

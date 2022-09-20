@@ -1032,7 +1032,7 @@ class cgyrodata_plot(data.cgyrodata):
       if not ftype == 'nox':
          fig.tight_layout(pad=0.3)
 
-   def plot_kxky_phi(self,field=0,theta=0.0,moment='phi',spec=0,w=0.5,wmax=0.0,fig=None):
+   def plot_kxky_phi(self,field=0,theta=0.0,moment='phi',spec=0,w=0.5,wmax=0.0,deriv=False,fig=None):
 
       x0 = max(abs(self.kx))*0.25
       y0 = max(abs(self.ky))
@@ -1068,7 +1068,12 @@ class cgyrodata_plot(data.cgyrodata):
       for i in np.arange(ny):
          bf[:,i] = self.ky[i]
          
-      f = f * np.sqrt(af**2 + bf**2)
+      if deriv:
+         dfac = np.sqrt(af**2 + bf**2)
+      else:
+         dfac = 1
+         
+      f = f * dfac
          
       # Fix (0,0)
       i0 = nx//2-1

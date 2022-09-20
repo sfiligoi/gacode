@@ -153,7 +153,7 @@ then
   echo
   echo "         -deriv"
   echo "         Plot second derivative"  
-  echo "         *Affects: kx_phi"  
+  echo "         *Affects: kx_phi and kxky_phi"  
   echo
   echo "OPTIONS FOR -plot fluct, -vis"
   echo
@@ -489,10 +489,13 @@ case "$PLOT_TYPE" in
 	python $PLT $PLOT_TYPE $FIELD $THETA $W $WMAX $YMIN $YMAX $N $EXT $DISS $DERIV ;;
 
    poly_phi)
-	python $PLT $PLOT_TYPE $FIELD $THETA $W $WMAX $YMIN $YMAX $N $EXT $DISS $DERIV ;;
+        python $PLT $PLOT_TYPE $FIELD $THETA $W $WMAX $YMIN $YMAX $N $EXT $DISS $DERIV ;;
 
-   kxky_phi | rcorr_phi)
-	python $PLT $PLOT_TYPE $FIELD $MOMENT $SPECIES $THETA $W $WMAX $EXT ;;
+   rcorr_phi)
+       python $PLT $PLOT_TYPE $FIELD $MOMENT $SPECIES $THETA $W $WMAX $EXT ;;
+   
+   kxky_phi)
+       python $PLT $PLOT_TYPE $FIELD $MOMENT $SPECIES $THETA $W $WMAX $EXT $DERIV ;;    
 
    zf)
 	python $PLT $PLOT_TYPE $W $WMAX $FIELD $EXT ;;
