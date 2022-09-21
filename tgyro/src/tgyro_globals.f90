@@ -354,6 +354,7 @@ module tgyro_globals
   integer :: i_tran
   integer :: flux_counter
   integer :: i_ash
+  integer :: i_alpha
   integer :: evolve_indx(5)
   !
   integer :: use_trap

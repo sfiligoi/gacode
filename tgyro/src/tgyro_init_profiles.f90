@@ -293,10 +293,14 @@ subroutine tgyro_init_profiles
   !------------------------------------------------------------------------------------------
   ! Helium ash detection (diagnostic only -- set alpha source with evo_e=2)
   !
-  i_ash = 0
+  i_ash   = 0
+  i_alpha = 0
   do i=1,loc_n_ion
-     if (nint(zi_vec(i)) == 2 .and. nint(mi_vec(i)) == 4 .and. therm_flag(i) == 1) then
+     if (trim(ion_name(i)) == 'He' .and. therm_flag(i) == 1) then
         i_ash = i
+     endif
+     if (trim(ion_name(i)) == 'He' .and. therm_flag(i) == 0) then
+        i_alpha = i
      endif
   enddo
   !------------------------------------------------------------------------------------------
@@ -542,6 +546,10 @@ subroutine tgyro_init_profiles
 
 end subroutine tgyro_init_profiles
 
+
+!------------------------------------------------------------
+! Subroutine to compute z that corresponds to profile
+!------------------------------------------------------------
 subroutine math_zfind(n,p,r,z)
 
   implicit none

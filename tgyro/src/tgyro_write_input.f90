@@ -451,6 +451,7 @@ subroutine tgyro_write_input
            if (i_ion == i_ash) ttext = 'ash'
         else
            ttext = 'fast'
+           if (i_ion == i_alpha) ttext = 'alpha'
         endif
         if (calc_flag(i_ion) == 0) then
            ttext = trim(ttext)//' passthrough'
