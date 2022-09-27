@@ -13,7 +13,7 @@ FC += ${FOMP} ${FACC}
 all: cgyro_test_alltoall
 
 cgyro_test_alltoall: cgyro_test_alltoall.F90
-	$(FC) $(FFLAGS) -o cgyro_test_alltoall $(EXTRA_LIBS) $(LMATH) cgyro_test_alltoall.F90
+	$(FC) $(FMATH) $(FFLAGS) -o cgyro_test_alltoall cgyro_test_alltoall.F90
 
 clean:
 	rm -f cgyro_test_alltoall *.o
