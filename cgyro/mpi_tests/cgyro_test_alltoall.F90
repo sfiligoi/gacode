@@ -144,8 +144,8 @@ do n=1, n_proc
   ! Now run many times for benchmark purposes
   m2 = MPI_Wtime()
 
-  do j=1,10000
-    if ((i_proc==0) .AND. (modulo(j,1000) == 0)) then
+  do j=1,1000
+    if ((i_proc==0) .AND. (modulo(j,100) == 0)) then
       m1 = MPI_Wtime()
       write(*,*) m1, "j=", j, "dt=", m1-m2
       call flush(6)
