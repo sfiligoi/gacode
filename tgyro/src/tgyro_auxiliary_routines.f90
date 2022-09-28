@@ -149,7 +149,6 @@ subroutine rad_alpha(ne,ni,te,ti,s_alpha_he,s_alpha_i,s_alpha_e,frac_ai,e_cross,
        therm_flag,&
        zi_vec,&
        e_alpha,&
-       taus,&
        k,&
        dt_flag,&
        tgyro_input_fusion_scale
@@ -174,7 +173,7 @@ subroutine rad_alpha(ne,ni,te,ti,s_alpha_he,s_alpha_i,s_alpha_e,frac_ai,e_cross,
   real, external :: sigv
 
   real :: x_a
-  real :: a,i2,i4
+  real :: a,i2,i4,taus
   real :: n_d,n_t
   real :: s_alpha
   real, dimension(:), allocatable :: c_a
@@ -194,9 +193,9 @@ subroutine rad_alpha(ne,ni,te,ti,s_alpha_he,s_alpha_i,s_alpha_e,frac_ai,e_cross,
 
   n_d = 0.0
   n_t = 0.0
-  
-  do i=1,n
 
+  do i=1,n
+     
      if (dt_flag == 1) then
         ! D and T given by ion 1 and ion 2 (order doesn't matter)
         n_d = ni(1,i)
@@ -226,12 +225,16 @@ subroutine rad_alpha(ne,ni,te,ti,s_alpha_he,s_alpha_i,s_alpha_e,frac_ai,e_cross,
      i4 = 0.5-a**2*((1/6.0)*log((1-a+a**2)/(1+a)**2)+ &
           1/sqrt(3.0)*(atan((2-a)/(a*sqrt(3.0)))+pi/6))
 
-     ! Eqs (7),(15)
-     n_alpha(i) = s_alpha_he(i)*taus(i)*i2
-     t_alpha(i) = 2*i4/(3*i2)*e_alpha
+     taus = 0.0
 
+     ! Eqs (7),(15)
+     !n_alpha(i) = s_alpha_he(i)*taus*i2
+     !t_alpha(i) = 2*i4/(3*i2)*e_alpha
+
+     n_alpha(i) = 1.0 ; t_alpha(i) = 1.0
+     
   enddo
-  
+
   deallocate(c_a)
 
 end subroutine rad_alpha

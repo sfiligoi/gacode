@@ -16,7 +16,6 @@ subroutine tgyro_init_profiles
 
   integer :: i_ion
   integer :: i
-  integer :: n
   real :: tmp_ped
   real :: p_ave
   real :: x0(1),y0(1)
@@ -72,24 +71,22 @@ subroutine tgyro_init_profiles
   !----------------------------------------------
   ! Generate radial vector:
   !
-  if (tgyro_rmin > 0.0) then
+  if (tgyro_rmin > 0.0 .and. n_r > 2) then
 
-     r(1) = 0.0
+     r(:) = 0.0
+
      do i=2,n_r
-
         ! Normalized r (dimensionless)
         r(i) = tgyro_rmin+(i-2)/(n_r-2.0)*(tgyro_rmax-tgyro_rmin)
-
      enddo
 
   else
 
      do i=1,n_r
-
         ! Normalized r (dimensionless)
         r(i) = (i-1)/(n_r-1.0)*tgyro_rmax
-
      enddo
+     
   endif
 
   ! Overwrite radii with special values
@@ -151,14 +148,16 @@ subroutine tgyro_init_profiles
 
   ! Is this a DT plasma
   dt_flag = 0
-  if (ion_name(1) == 'D' .and. ion_name(2) == 'T') dt_flag = 1
-  if (ion_name(1) == 'T' .and. ion_name(2) == 'D') dt_flag = 1
-
+  if (loc_n_ion > 1) then
+     if (ion_name(1) == 'D' .and. ion_name(2) == 'T') dt_flag = 1
+     if (ion_name(1) == 'T' .and. ion_name(2) == 'D') dt_flag = 1
+  endif
+  
   !------------------------------------------------------
   ! Convert dimensionless mass to grams.
   mi(:) = mi_vec(:)*(md*0.5)
   !------------------------------------------------------
-
+  
   !------------------------------------------------------------------------------------------
   ! Direct input of simple profiles:
   !

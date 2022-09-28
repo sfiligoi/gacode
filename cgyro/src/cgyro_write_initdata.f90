@@ -15,7 +15,6 @@ subroutine cgyro_write_initdata
   integer :: p,in,is,it
   real :: kymax,kyrat,dn
   real, external :: spectraldiss
-  character(len=7),dimension(4) :: sv 
 
   !----------------------------------------------------------------------------
   ! Runfile to give complete summary to user

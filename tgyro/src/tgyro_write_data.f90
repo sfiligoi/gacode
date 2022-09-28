@@ -48,7 +48,7 @@ subroutine tgyro_write_data(i_print)
 
   ! Convergence status
   converged = (sum(res_norm)/size(res_norm) < tgyro_residual_tol)
-
+  
   !====================================================
   ! input.gacode
   !====================================================
@@ -76,6 +76,8 @@ subroutine tgyro_write_data(i_print)
              exp_ne(i_exp)
      enddo
 
+     call tgyro_mpi_info('rad_alpha')
+
      ! Alpha power density
      call rad_alpha(exp_ne,&
           exp_ni(1:loc_n_ion,:),& ! 1/cm^3
@@ -86,11 +88,15 @@ subroutine tgyro_write_data(i_print)
           expro_qfuse,&           ! used (out) erg/cm^3/s
           expro_qbrem,&           ! dummy arg
           expro_qsync,&           ! dummy arg
+          expro_qei,&             ! dummy arg
+          expro_qline,&           ! dummy arg
           expro_n_exp,&
           loc_n_ion)
 
-     allocate(dum2d(loc_n_ion,expro_n_exp))
+     call tgyro_mpi_info('out')
 
+     allocate(dum2d(loc_n_ion,expro_n_exp))
+     
      ! Collisional exchange power density
      call collision_rates(&
           exp_ne,&       ! 1/cm^3
@@ -99,7 +105,8 @@ subroutine tgyro_write_data(i_print)
           exp_ti,&       ! eV
           dum2d,&        ! dummy arg (nui)
           expro_qsync,&  ! dummy arg (nue)
-          exp_nu_exch, & ! 1/s  
+          exp_nu_exch, & ! 1/s
+          expro_qline, & ! dummy arg (taus)
           expro_n_exp,&
           loc_n_ion)
 

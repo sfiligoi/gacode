@@ -13,7 +13,6 @@ subroutine cgyro_init_collision
 
   real :: arg
   real :: xa, xb, tauinv_ab
-  real :: mo1,mo2,en1,en2 ! von mir
   real :: rval
   integer :: jv
   integer :: is,ir,it,ix,ie,js,je,jx,ks

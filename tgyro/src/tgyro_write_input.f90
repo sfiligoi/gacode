@@ -197,7 +197,7 @@ subroutine tgyro_write_input
 
         write(1,10) 'TGYRO_NEO_METHOD','(2) NEO code'
         if (loc_n_ion >= 4) then
-           write(1,10) 'INFO: (tgyro) Using reduced energy resolution to cope with so many ions'
+           write(1,'(t2,a)') 'INFO: (tgyro) Using reduced energy resolution to cope with so many ions'
         endif
 
      case default

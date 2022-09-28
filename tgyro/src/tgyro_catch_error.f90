@@ -27,3 +27,19 @@ subroutine tgyro_catch_error(message)
 10 format(a)
 
 end subroutine tgyro_catch_error
+
+subroutine tgyro_mpi_info(message)
+
+  use tgyro_globals
+
+  implicit none
+
+  character (len=*), intent(in) :: message
+
+  if (i_proc_global == 0) then
+     open(unit=1,file=trim(runfile),position='append')
+     write(1,'(t2,a)') message
+     close(1)
+  endif
+
+end subroutine tgyro_mpi_info

@@ -38,7 +38,7 @@ subroutine tgyro_iteration_driver
   allocate(b(p_max))
 
   call tgyro_allocate_globals
-
+ 
   !---------------------------------------
   ! Error monitoring variables
   !
@@ -71,16 +71,6 @@ subroutine tgyro_iteration_driver
      ! TGLF
      flux_method = 2
 
-  else if (lcode == 'glf23') then
-
-     ! GLF23
-     flux_method = 3
-
-  else if (lcode == 'gyro') then
-
-     ! GYRO
-     flux_method = 4
-
   else if (lcode == 'etg') then
      
      ! ETG critical gradient
@@ -92,26 +82,13 @@ subroutine tgyro_iteration_driver
   call MPI_ALLGATHER(flux_method,1,MPI_INTEGER,flux_method_vec,1,MPI_INTEGER,gyro_adj,ierr)
   call tgyro_write_input
 
-  ! NOTE: See gyro/src/gyro_globals.f90 for definition of transport_method
-
-  ! Standard transport calculation
-  if (tgyro_gyro_restart_flag == 0) then
-     transport_method = 2
-  else
-     transport_method = 3
-  endif
-
   if (loc_restart_flag == 0) then
      ! Initialize relaxation parameters to starting value.
      relax(:) = 1.0 ; res(:) = 0.0
      ! Create, but do not write to, datafiles.
      call tgyro_write_data(0)
   endif
-  if (i_proc_global == 0) then
-     open(unit=1,file=trim(runfile),position='append')
-     write(1,'(t2,a)') 'INFO: (TGYRO) Survived initialization and starting iterations'
-     close(1)
-  endif
+  call tgyro_mpi_info('INFO: (tgyro_iteration_driver) Survived initialization, starting iterations')
 
   correct_flag = 0
 

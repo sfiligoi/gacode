@@ -29,7 +29,6 @@ OBJECTS += tgyro_globals.o \
            tgyro_flux.o \
            tgyro_flux_set.o \
            tgyro_flux_vector.o \
-           tgyro_gyro_map.o \
            tgyro_ifs_pppl.o \
            tgyro_init_profiles.o \
            tgyro_init_profiles_axis.o \
@@ -56,7 +55,6 @@ OBJECTS += tgyro_globals.o \
            tgyro_source.o \
            tgyro_target_vector.o \
            tgyro_tglf_map.o \
-           tgyro_glf23_map.o \
            tgyro_trap_component_error.o \
            tgyro_volume_int.o \
            tgyro_write_input.o \
