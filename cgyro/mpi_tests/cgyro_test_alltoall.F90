@@ -68,7 +68,8 @@ program cgyro_test_alltotall
   ! Initialize buffers
   !-------------------
 
-  total_bufsize = 8*6*9*64*1024
+  total_bufsize = 8*6*9*64
+  total_bufsize = total_bufsize * ALLTOALLBUFMUL
   bufsize = total_bufsize/n_proc
 
   if (modulo(total_bufsize, n_proc*2) /=  0) then
