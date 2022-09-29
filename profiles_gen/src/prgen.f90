@@ -22,6 +22,13 @@ program prgen
   use prgen_globals
 
   implicit none
+  
+  integer :: i
+
+  ! Default reordering vector
+  do i=1,n_ion_max
+     reorder_vec(i) = i
+  enddo
 
   !--------------------------------------------------------------------
   ! Parse the config file
@@ -40,13 +47,12 @@ program prgen
   read(1,*) n_null
   read(1,*) lump_fast_flag
   read(1,*) true_aux_flag
-  read(1,*) reorder_vec(:)
+  read(1,*) reorder_vec(1:10)
   read(1,*) n_lump
   allocate(lump_vec(n_lump))
   read(1,*) lump_vec(:)
   close(1)
   !--------------------------------------------------------------------
-
 
   !--------------------------------------------------------------------
   ! Read the iterdb file and define standard variables.

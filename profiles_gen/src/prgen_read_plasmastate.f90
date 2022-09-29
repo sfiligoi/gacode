@@ -578,7 +578,8 @@ subroutine prgen_read_plasmastate
   !----------------------------------------------
   ! Error check for missing/zero boundary (n,T)
   !
-  do i=1,plst_dp1_nspec_th     
+  do i=1,plst_dp1_nspec_th
+     print *,i,plst_dp1_nspec_th
      call boundary_fix(rho,plst_ts(:,i),nx)
      call boundary_fix(rho,plst_ns(:,i),nx)
   enddo
@@ -606,6 +607,11 @@ subroutine boundary_fix(x,f,n)
   real, intent(inout), dimension(n) :: f
   real, parameter :: edge_tol = 1e-6
 
+  if (f(1) == 0.0) then
+     print *,'issue'
+     return
+  endif
+     
   if (f(n)/f(1) > edge_tol) then
 
      ! Exit if boundary point needs no correction

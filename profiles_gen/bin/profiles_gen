@@ -635,7 +635,6 @@ echo $TRUE_AUX_FLAG >> $CONFIG
 # NOTE: reorder flags will be appended later.
 #=============================================================
 
-
 #==============================================================
 # Run Scikit-based mapper 
 if [ $EFIT -eq 1 ] ; then

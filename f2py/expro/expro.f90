@@ -17,8 +17,9 @@ module expro
   integer :: expro_n_ion
   integer :: expro_shot=0
   integer :: expro_time=0
-  character*10, dimension(20) :: expro_name
-  character*10, dimension(20) :: expro_type
+  integer, parameter :: expro_ion_max=200
+  character*10, dimension(expro_ion_max) :: expro_name
+  character*10, dimension(expro_ion_max) :: expro_type
 
   double precision :: expro_masse=5.44887413e-4   ! me/m_H
   double precision, dimension(:), allocatable :: expro_mass

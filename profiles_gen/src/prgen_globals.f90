@@ -13,7 +13,7 @@ module prgen_globals
   !----------------------------------------------------------
   ! Internal control variables
   !
-  integer, parameter :: n_ion_max = 10
+  integer, parameter :: n_ion_max = 200
   integer :: nx
   integer :: format_type
   integer :: efit_method

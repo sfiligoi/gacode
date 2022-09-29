@@ -50,6 +50,9 @@ subroutine prgen_ion_name(m,z,name)
   case (40)
      name = 'Ar'
 
+  case (58:64)
+     name = 'Ni'
+
   case (180:188)
      name = 'W'
 
