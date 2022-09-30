@@ -230,7 +230,7 @@ fi
 if [ $MTEST_FLAG -eq 1 ]
 then
    if [ -z "${MCASE}" ]; then
-      MCASE="cgyro_test_alltoall cgyro_test_alltoall_nosplit"
+      MCASE="cgyro_test_alltoall cgyro_test_alltoall_nosplit cgyro_test_allreduce_4"
    fi
    for c in ${MCASE}; do
       if [ -f $CGYRO_DIR/mpi_tests/$c ] ; then
