@@ -23,12 +23,14 @@
       INTEGER :: itot,jtot
       INTEGER :: ib,jb,kb
       REAL :: one
-      REAL :: k_par0, w_d0, betapsi, betasig
-      REAL :: gcut = 0.001
-      REAL :: beta2,max_freq
+      REAL :: k_par0, k_par1, w_d0, betapsi, betasig
+      REAL :: ndamp, tdamp, pdamp
+      REAL :: beta2, max_freq
       REAL,DIMENSION(nsm) :: vpar, vpar_shear
       REAL :: collision1, collision2
       REAL :: nuei1,nuei2
+      REAL :: Rmax, Rmin
+      REAL :: nus(nsm)
 ! zggev
       INTEGER :: lwork, info, ifail
       REAL,ALLOCATABLE,DIMENSION(:) :: rwork
@@ -36,6 +38,10 @@
       COMPLEX,ALLOCATABLE,DIMENSION(:,:) :: vleft,vright
       COMPLEX,ALLOCATABLE,DIMENSION(:) :: work
 !
+      REAL,ALLOCATABLE,DIMENSION(:) :: hN, hT
+!
+!       write(*,*)"nu = ",nu," ne = ", ne," ntot = ",ntot
+!       write(*,*)"nbasis = ",nbasis," ns0 = ",ns0,"  ns = ", ns
        ifail = 0
        lwork = 8*ntot
 !       write(*,*)" nu = ",nu," ne = ",ne," nbasis = ",nbasis
@@ -47,8 +53,56 @@
        ALLOCATE(vright(ntot,ntot))
        lwork = 33*ntot
        ALLOCATE(work(lwork))
+       ALLOCATE(hN(nu*ne))
+       ALLOCATE(hT(nu*ne))
 !
-       k_par0 = sqrt_two/(R_unit*q_unit*width_in)
+!       ndamp = damp_psi_in*B_geo0_out**2
+!       tdamp = damp_sig_in/B_geo0_out**2
+!       write(*,*)"Rmaj_input = ",Rmaj_input," rmin_input = ",rmin_input
+!       Rmin = 1.0 - rmin_input/Rmaj_input
+!       Rmax = 1.0 + rmin_input/Rmaj_input
+!          ndamp = 0.035*(Rmin/Rmax)**2
+!          tdamp = 0.21*(Rmin/Rmax)**2
+!         ndamp = 0.031*(Rmin/Rmax)**2
+!         tdamp = 0.153*(Rmin/Rmax)**2
+!
+! this closure works for ne >= 3 and nu = 2 ne -1
+!
+        tdamp = 0.514
+        ndamp = 0.0028
+        tdamp = 0.510
+        ndamp = 0.0028
+        tdamp = 0.639
+        ndamp = 0.005*rmin_input/Rmaj_input
+        tdamp = 0.65
+! NUEE/2
+        ndamp = 0.0057
+        tdamp = 0.69
+        pdamp = 0.69
+! 35
+        ndamp = 0.0028
+        tdamp = 0.648
+        pdamp = 1.0
+
+! changed to dz=  ds B/Bp and added p_prime
+       ndamp = 0.0016
+       tdamp = 0.651
+
+ !       write(*,*)"Bmin/Bmax = ",Bmin/Bmax
+ !      ndamp = damp_psi_in
+ !      tdamp = damp_sig_in
+!       pdamp = etg_factor_in*pi/2.0
+!       pdamp = 0.0
+!       nus(1)=1.0
+!       nus(2)=SQRT(mass(1)/mass(2))*(taus(1)/taus(2))**1.5
+!       nus(2)=0.0
+!       if(igeo.gt.0)then
+!        ndamp = ndamp*(grad_r0_out/kappa_loc)**2
+!       endif
+!
+!       gcut = 0.06  ! for nu=5, ne=3
+!
+      k_par0 = sqrt_two/(R_unit*q_unit*width_in)
 !       write(*,*)"R_unit = ",R_unit," q_unit = ",q_unit," width_in = ",width_in
        w_d0 = ky/R_unit
        betapsi = 0.0
@@ -59,24 +113,49 @@
 ! load velocity subspace matricies
 !
      call get_velocity_matrix
+!     call get_mat_uparc
      do iu = 1,nu
-     do ju = 1,nu
-       matu(iu,ju) = mat_upar(iu,ju)
-       matdu(iu,ju) = mat_dupar(iu,ju)
-     enddo
-     enddo
-     do iu = 1,nu
-     do ju = 1,nu
-       matuu(iu,ju) = 0.0
-       do ku = 1,nu
-         matuu(iu,ju) =  matuu(iu,ju) + matu(iu,ku)*matu(ku,ju)
+       do ju = 1,nu
+         matuc(iu,ju)= mat_upar(iu,ju)
+         matu(iu,ju) = mat_upar(iu,ju)
+         matdu(iu,ju) = mat_dupar(iu,ju)
        enddo
-     enddo
+       do ie = 1,ne
+         iue = iu + nu*(ie-1)
+         hN(iue) = 0.0
+         hT(iue) = 0.0
+ !        if(ie.eq.ne)hT(ie) = 1.0
+         if(iu.eq.nu)hN(iu) = 1.0
+!         if(ie.eq.1)then
+ !          if(iu.eq.1)hN(iu) = 1.0
+!           if(iu.eq.3)hT(iue) = SQRT(2.0/3.0)
+!           if(iu.eq.3)hT(iue) = COS(pdamp)
+ !        endif
+ !        if(ie.eq.2)then
+!           if(iu.eq.1)hT(iue) = SQRT(1.0/3.0)
+!           if(iu.eq.1)hT(iue) = SIN(pdamp)
+!         endif
+        enddo
      enddo
      do ie = 1,ne
      do je = 1,ne
        mate(ie,je) = mat_eper(ie,je)
        matde(ie,je) = mat_deper(ie,je)
+     enddo
+     enddo
+!
+! add the matu "closure"
+!
+     matuc(nu-1,nu) = (1.0 - tdamp)*matu(nu-1,nu)
+     matuc(nu,nu-1) = (1.0 - tdamp)*matu(nu,nu-1)
+     matdu(nu-1,nu) = (1.0 + tdamp)*matdu(nu-1,nu)
+     matdu(nu,nu-1) = (1.0 + tdamp)*matdu(nu,nu-1)
+     do iu = 1,nu
+     do ju = 1,nu
+       matuu(iu,ju) = 0.0
+       do ku = 1,nu
+        matuu(iu,ju) =  matuu(iu,ju) + matu(iu,ku)*matu(ku,ju)
+       enddo
      enddo
      enddo
 !
@@ -88,7 +167,7 @@
      do ju = 1,nu
        iue = iu + nu*(ie-1)
        jue = ju + nu*(je-1)
-       matmirror(iue,jue) = matu(iu,ju)*matde(ie,je)-0.5*mate(ie,je)*matdu(iu,ju)
+       matmirror(iue,jue) = matuc(iu,ju)*matde(ie,je)-0.5*mate(ie,je)*matdu(iu,ju) 
 !       write(*,*)"matmirror",iue,jue,matmirror(iue,jue)
      enddo
      enddo
@@ -229,12 +308,12 @@
         jtot = jb+nbasis*(ju-1)+nbasis*nu*(je-1)+nbasis*nu*ne*(js-ns0)
         iue = iu + nu*(ie-1)
         jue = ju + nu*(je-1)
-        mateq(itot,jtot) = -xi*gcut*vs(is)*k_par0*one(itot,jtot)               &
-        + (-xi*ave_kpar(ib,jb)*matu(iu,ju)*one(ie,je)*vs(is)*k_par0              &
+        mateq(itot,jtot) = (-xi*vs(is)*k_par0*(ave_kpar(ib,jb)*matuc(iu,ju)      &
+        + ndamp*one(ib,jb)*one(iu,ju))*one(ie,je)                                &
         - 2.0*w_d0*(taus(is)/zs(is))*ave_wdpar(ib,jb)*matuu(iu,ju)*one(ie,je)    &
         - w_d0*(taus(is)/zs(is))*ave_wdper(ib,jb)*mate(ie,je)*one(iu,ju)         &
-        - xi*vs(is)*k_par0*ave_gradb(ib,jb)*matmirror(iue,jue)                     &
-        - xi*one(1,is)*one(ib,jb)*xnue_in*(zeff_in*collision1(ie,iu,je,ju)     &
+        - xi*vs(is)*k_par0*ave_wb(ib,jb)*matmirror(iue,jue)                      &
+        - xi*one(ib,jb)*xnue_in*one(is,1)*(zeff_in*collision1(ie,iu,je,ju)       &
         + collision2(ie,iu,je,ju)))*one(is,js)
 !        if((is.eq.1.and.js.eq.1).and.(ib.eq.1.and.jb.eq.1))then
 !        nuei1 = collision1(ie,iu,je,ju)
@@ -349,7 +428,9 @@
       if(ALLOCATED(vleft))DEALLOCATE(vleft)
       if(ALLOCATED(vright))DEALLOCATE(vright)
       if(ALLOCATED(work))DEALLOCATE(work)
-!
+      if(ALLOCATED(hN))DEALLOCATE(hN)
+      if(ALLOCATED(hT))DEALLOCATE(hT)
+ !
       END SUBROUTINE gftm_eigensolver
 ! ___________________________________________
 !

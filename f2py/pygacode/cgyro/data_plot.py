@@ -1,7 +1,6 @@
 import sys
 import os
 import numpy as np
-import scipy.special as sp
 import scipy.signal as signal
 from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
@@ -451,14 +450,9 @@ class cgyrodata_plot(data.cgyrodata):
       ax.set_xlabel(r'$k_y \rho_s$')
       ax.set_ylabel(r'$\left\langle k_x \rho_s \right\rangle$')
       #======================================
-
-      color = ['k','m','b','c','g','r']
       
       self.getbigfield()
-      nx = self.n_radial
-      nt = self.n_time
-      nn = self.n_n
-
+   
       t = self.t
 
       # Get index for average window
@@ -467,47 +461,20 @@ class cgyrodata_plot(data.cgyrodata):
       ax.set_title(windowtxt)
 
       ky = abs(self.ky)
-      y1 = np.zeros([nn])
-      y2 = np.zeros([nn])
-        
+      k0 = 2*np.pi/self.length
+
       f,ft = self.kxky_select(theta,0,'phi',0)
 
-      for n in range(nn):
+      #y1,y2 = shift_fourier(f,imin,imax)
+      #ax.plot(ky,k0*y1,color='k')
+      #ax.plot(ky,-k0*y2,linestyle='--',color='k')
 
-         phi  = np.zeros([nx,nt],dtype=complex)
-         phip = np.zeros([nx,nt],dtype=complex)
-         for p in range(nx):
-            phi[p,:] = f[p,n,:]
-            phip[p,:] = -(p-nx//2)*f[p,n,:]
-
-         # NOTE: We use *inverse* FFT (ifft) for correct +sign convention of
-         #       the exponent. Also note order convention:
-         #       - a[0] = p=0
-         #       - a[1:nx/2] = p > 0
-         #       - a[nx/2:n] = p < 0
-         
-         # Shift in -gamma domain (standard order: p=0 is 0th index)
-         phi_T = np.fft.ifft(np.fft.ifftshift(phi,axes=0),axis=0)
-         phip_T = np.fft.ifft(np.fft.ifftshift(phip,axes=0),axis=0)
- 
-         i1 = nx//4 ; i2 = (3*nx)//4
-
-         pn = average(np.sum(np.conj(phi_T[i1:i2,:])*phip_T[i1:i2,:],axis=0),t,w,0.0)
-         pd = average(np.sum(np.conj(phi_T[i1:i2,:])*phi_T[i1:i2,:],axis=0),t,w,0.0)
-         y2[n] = (2*np.pi/self.length)*np.real(pn/pd)
-
-         # Shift in central domain (code order: p=0 is middle of array)
-         phi_T = np.fft.fftshift(phi_T,axes=0) 
-         phip_T = np.fft.fftshift(phip_T,axes=0) 
-
-         pn = average(np.sum(np.conj(phi_T[i1:i2,:])*phip_T[i1:i2,:],axis=0),t,w,0.0)
-         pd = average(np.sum(np.conj(phi_T[i1:i2,:])*phi_T[i1:i2,:],axis=0),t,w,0.0)
-         y1[n] = (2*np.pi/self.length)*np.real(pn/pd)
-
-      ax.plot(ky,y1,color='k')
-      ax.plot(ky,-y2,linestyle='--',color='k')
-      for n in range(nn):
-         print(y1[n],y2[n])
+      y1,y2 = shift_legendre(f,imin,imax)
+      ax.plot(ky,k0*y1,color='m')
+      ax.plot(ky,-k0*y2,linestyle='--',color='m')
+      # EAB print
+      #for i in range(len(ky)):
+      #   print(ky[i],k0*y1[i],-k0*y2[i])
 
       if ymax != 'auto':
          ax.set_ylim(top=float(ymax))
@@ -1065,7 +1032,7 @@ class cgyrodata_plot(data.cgyrodata):
       if not ftype == 'nox':
          fig.tight_layout(pad=0.3)
 
-   def plot_kxky_phi(self,field=0,theta=0.0,moment='phi',spec=0,w=0.5,wmax=0.0,fig=None):
+   def plot_kxky_phi(self,field=0,theta=0.0,moment='phi',spec=0,w=0.5,wmax=0.0,deriv=False,fig=None):
 
       x0 = max(abs(self.kx))*0.25
       y0 = max(abs(self.ky))
@@ -1086,17 +1053,31 @@ class cgyrodata_plot(data.cgyrodata):
       ny = self.n_n
 
       f = np.zeros([nx-1,ny])
-
+         
       # Field data selector
       fx,ft = self.kxky_select(theta,field,moment,spec)
 
       imin,imax=iwindow(t,w,wmax)
       for i in np.arange(imin,self.n_time):
          f = f+abs(fx[1:,:,i])
-      
+
+      af = np.zeros([nx-1,ny])
+      bf = np.zeros([nx-1,ny])
+      for i in np.arange(nx-1):
+         af[i,:] = self.kx[i+1]
+      for i in np.arange(ny):
+         bf[:,i] = self.ky[i]
+         
+      if deriv:
+         dfac = np.sqrt(af**2 + bf**2)
+      else:
+         dfac = 1
+         
+      f = f * dfac
+         
       # Fix (0,0)
       i0 = nx//2-1
-      f[i0,0] = 1e-6
+      f[i0,0] = f[i0+1,0]
 
       # Reverse y order for image plotting
       f = f[:,::-1]
@@ -1112,7 +1093,8 @@ class cgyrodata_plot(data.cgyrodata):
       ax.set_ylabel(r'$k_y \rho_s$')
       ax.set_title(r'$\mathrm{Time}$-$\mathrm{averaged~'+ft+'~intensity} \quad $'+windowtxt)
 
-      ax.imshow(np.transpose(f),extent=[-x0,x0,0,y0],interpolation='none')
+      ax.imshow(np.transpose(f),extent=[-x0,x0,0,y0],interpolation='none',cmap='jet')
+      print(np.min(f),np.max(f))
 
       fig.tight_layout(pad=0.5)
 
@@ -1146,6 +1128,7 @@ class cgyrodata_plot(data.cgyrodata):
       ax.set_xlabel(xlabel)
 
       f,ft = self.kxky_select(theta,field,'phi',0)
+      #f,ft = self.kxky_select(theta,field,'n',2)
 
       if deriv:
          dfac = kx**2
@@ -1189,121 +1172,117 @@ class cgyrodata_plot(data.cgyrodata):
       fig.tight_layout(pad=0.3)
 
       return
-   
+      
 
-   def plot_cheb_phi(self,field=0,theta=0.0,w=0.5,wmax=0.0,ymin='auto',ymax='auto',nstr='null',diss=0,deriv=False,fig=None):
+   def plot_poly_phi(self,field=0,theta=0.0,w=0.5,wmax=0.0,ymin='auto',ymax='auto',nstr='null',diss=0,deriv=False,fig=None):
+
+      import scipy.special as sp
 
       if fig is None:
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       self.getbigfield()
-
-      if nstr == 'null':
-         nvec = list(range(self.n_n))
-      else:
-         nvec = str2list(nstr)
-      myn = nvec[0]
-      print(myn)
-
-      t  = self.t
-      kx = self.kx
-      nx = int(self.n_radial)
+      nx = self.n_radial
+      nt = self.n_time
+      nn = self.n_n
       n0 = nx//2
       nk = 2*n0
-      yr = np.zeros(nx)
-      yi = np.zeros(nx)
+      t = self.t
 
-      imin,imax=iwindow(t,w,wmax)
-    
+      imin,imax=iwindow(self.t,w,wmax)
+
       ax = fig.add_subplot(1,1,1)
-      ax.set_yscale('log')
 
       color = ['m','k','b','c']
       xlabel=r'$k$'
-      windowtxt = r'$n='+str(myn)+'$'
+      windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[imax])+']$'
 
-      ax.set_title(r'$\mathrm{Average~fluctuation~intensity} \quad $'+windowtxt)
+      ax.set_title(r'$\mathrm{Average~fluctuation~intensity~(Legendre)} \quad $'+windowtxt)
       ax.set_xlabel(xlabel)
+
+      y1 = np.zeros([nn])
+      y2 = np.zeros([nn])
 
       f,ft = self.kxky_select(theta,field,'phi',0)
 
-      d_all1 = np.zeros([nk])
-      d_all2 = np.zeros([nk])
-      shift_all1 = 0.0
-      shift_all2 = 0.0
+      c1 = np.zeros([nk],dtype=complex)
+      d1 = np.zeros([nk])
+      c2 = np.zeros([nk],dtype=complex)
+      d2 = np.zeros([nk])
 
-      for jt in np.arange(imin,imax+1):
-         yr = np.real(f[:,myn,-1-jt])
-         yi = np.imag(f[:,myn,-1-jt])
-         y = yr+1j*yi
-      
-         phim = y[n0-1:0:-1]
-         phi0 = y[n0]
-         phip = y[n0+1:]
+      mat1 = np.zeros([nk,n0-1])
+      mat2 = np.zeros([nk,n0-1])
+      kvec = np.arange(nk)
+      pvec = np.arange(1,n0)
+      z = pvec*np.pi/2
+      for k in kvec:
+         mat1[k,:]  = sp.spherical_jn(k,z)
+         mat2[k,:]  = mat1[k,:]*(-1)**pvec[:]
 
-         c1 = np.zeros([nk],dtype=complex)
-         d1 = np.zeros([nk])
-         c2 = np.zeros([nk],dtype=complex)
-         d2 = np.zeros([nk])
+      ai = 1j**kvec   
+      ak = 2*kvec+1   
 
-         mat1 = np.zeros([nk,n0-1])
-         mat2 = np.zeros([nk,n0-1])
-         kvec = np.arange(nk)
-         pvec = np.arange(1,n0)
-         z = pvec*np.pi/2
-         for k in kvec:
-            mat1[k,:]  = sp.spherical_jn(k,z)
-            mat2[k,:]  = mat1[k,:]*(-1)**pvec[:]
+      if nstr == 'null':
+         nvec = np.arange(nn)
+         nsum =  True
+      else:
+         nvec = str2list(nstr)
+         print('INFO: (plot_kx_phi) n = '+str(nvec))
+         nsum = False
+         
+      for n in nvec:
+         for jt in np.arange(imin,imax+1):
+
+            y = f[:,n,jt]
+
+            phim = y[n0-1:0:-1]
+            phi0 = y[n0]
+            phip = y[n0+1:]
+
+            mp1 = np.matmul(mat1,phip)
+            mm1 = np.matmul(mat1,phim)
+            mp2 = np.matmul(mat2,phip)
+            mm2 = np.matmul(mat2,phim)
+
+            c1[:] = ak[:]*(mp1[:]*ai[:]+mm1[:]*np.conj(ai[:]))
+            c2[:] = ak[:]*(mp2[:]*ai[:]+mm2[:]*np.conj(ai[:]))
             
-
-         sphip1 = np.matmul(mat1,phip)
-         sphim1 = np.matmul(mat1,phim)
-         sphip2 = np.matmul(mat2,phip)
-         sphim2 = np.matmul(mat2,phim)
-
-         for k in np.arange(nk):
-            c1[k] = (2.0*k+1.0)*(sphip1[k]*1j**k+sphim1[k]*(-1j)**k)
-            d1[k] = np.abs(c1[k])*np.sqrt(2.0/(2.0*k+1.0))
-            c2[k] = (2.0*k+1.0)*(sphip2[k]*1j**k+sphim2[k]*(-1j)**k)
-            d2[k] = np.abs(c2[k])*np.sqrt(2.0/(2.0*k+1.0))
+            c1[0] = c1[0]+phi0
+            c2[0] = c2[0]+phi0
             
-         c1[0] = c1[0]+phi0
-         d1[0] = np.abs(c1[0])*np.sqrt(2.0)
-         c2[0] = c2[0]+phi0
-         d2[0] = np.abs(c2[0])*np.sqrt(2.0)
+            d1[:] = d1[:]+(np.abs(c1[:]))**2/ak[:]
+            d2[:] = d2[:]+(np.abs(c2[:]))**2/ak[:]
 
-         shift1 = 0.0
-         shift2 = 0.0
-         for mp in np.arange(1,nk):
-            for m in range(mp-1,-1,-2):
-               shift1 = shift1 + 2.0*c1[m]*np.conj(c1[mp])
-               shift2 = shift2 + 2.0*c2[m]*np.conj(c2[mp])
+         if not nsum:
+            ax.plot(kvec,d1)
+            ax.plot(kvec,d2)
+            # EAB print
+            #for i in range(nk):
+            #   print(kvec[i],d1[i],d2[i],n)
+            c1[:] = 0.0
+            c2[:] = 0.0
+            d1[:] = 0.0
+            d2[:] = 0.0
 
-         shift_all1 = shift_all1 + np.imag(shift1)
-         shift_all2 = shift_all2 + np.imag(shift2)
-         d_all1 = d_all1 + d1
-         d_all2 = d_all2 + d2
+            
+      if nsum:
+         ax.plot(kvec,d1,color='k')
+         ax.plot(kvec,d2,color='m')
+         for i in range(nk):
+            print(kvec[i],d1[i],d2[i])
 
-      nt_avg = (imax-imin+1)
-      d_all1     = d_all1/nt_avg
-      d_all2     = d_all2/nt_avg
-
-      # Derivative
-      # demoninator is <phi | phi> = sum_m 2/(2m+1) |cm|^2 
-      itot1 = sum((d_all1)**2)
-      itot2 = sum((d_all2)**2)
-      
-      shift_all1 = shift_all1/nt_avg/itot1*(2*np.pi/self.length)
-      shift_all2 = shift_all2/nt_avg/itot2*(2*np.pi/self.length)
-      print(shift_all1,shift_all2)
-      
-      ax.plot(np.arange(nk),d_all1,alpha=0.5,color='blue')
-      ax.plot(np.arange(nk),d_all2,alpha=0.5,color='red')
-
-      max1 =  max(d_all1)
-      max2 =  max(d_all2)
-      maxy = max(max1,max2)
-      ax.set_ylim(1e-5,maxy)      
+      ax.axvspan(1.5*n0,nk,alpha=0.2)
+         
+      ax.set_xlim([0,nk])
+      ax.set_xlim([0,nk])
+      ax.set_yscale('log')
+ 
+      if ymin != 'auto':
+         ax.set_ylim(bottom=float(ymin))
+      if ymax != 'auto':
+         ax.set_ylim(top=float(ymax))
+  
+      fig.tight_layout(pad=0.3)
 
       return
 

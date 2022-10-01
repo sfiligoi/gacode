@@ -15,6 +15,7 @@ program gftm
   use gftm_pkg
   use gftm_interface
   use gftm_global
+  use gftm_dimensions
 
   implicit none
 
@@ -89,6 +90,8 @@ program gftm
      open(unit=1,file='out.gftm.grid',status='replace')
      write(1,'(i2)') gftm_ns_in,gftm_nxgrid_in
      close(1)
+
+     write(*,*)"nbasis = ",nbasis,"  nu = ",nu,"  ne = ",ne
 
      ! write ky spectrum to file out.gftm.ky_spectrum
      CALL write_gftm_ky_spectrum

@@ -48,7 +48,7 @@ then
   echo "                = phi      (time-dependent ZF vs. finite-n intensities)"
   echo "                = ky_phi   (time-dependent ky-phi intensities)"
   echo "                = kx_phi   (average kx-phi intensities)"
-  echo "                = cheb_phi (average Chebyshev intensities)"
+  echo "                = poly_phi (average Legendre intensities)"
   echo "                = kxky_phi (kx-ky spectra of ave(|phi|))"
   echo "                = rcorr_phi (time-average radial correlation function)"
   echo "                = xflux    (radial profile of fluxes for all species)"
@@ -153,7 +153,7 @@ then
   echo
   echo "         -deriv"
   echo "         Plot second derivative"  
-  echo "         *Affects: kx_phi"  
+  echo "         *Affects: kx_phi and kxky_phi"  
   echo
   echo "OPTIONS FOR -plot fluct, -vis"
   echo
@@ -488,11 +488,14 @@ case "$PLOT_TYPE" in
    kx_phi)
 	python $PLT $PLOT_TYPE $FIELD $THETA $W $WMAX $YMIN $YMAX $N $EXT $DISS $DERIV ;;
 
-   cheb_phi)
-	python $PLT $PLOT_TYPE $FIELD $THETA $W $WMAX $YMIN $YMAX $N $EXT $DISS $DERIV ;;
+   poly_phi)
+        python $PLT $PLOT_TYPE $FIELD $THETA $W $WMAX $YMIN $YMAX $N $EXT $DISS $DERIV ;;
 
-   kxky_phi | rcorr_phi)
-	python $PLT $PLOT_TYPE $FIELD $MOMENT $SPECIES $THETA $W $WMAX $EXT ;;
+   rcorr_phi)
+       python $PLT $PLOT_TYPE $FIELD $MOMENT $SPECIES $THETA $W $WMAX $EXT ;;
+   
+   kxky_phi)
+       python $PLT $PLOT_TYPE $FIELD $MOMENT $SPECIES $THETA $W $WMAX $EXT $DERIV ;;    
 
    zf)
 	python $PLT $PLOT_TYPE $W $WMAX $FIELD $EXT ;;

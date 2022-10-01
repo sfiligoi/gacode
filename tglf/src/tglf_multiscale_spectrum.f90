@@ -323,7 +323,6 @@
 !
 !-------------------------------------------------------------------------------
 !
-
  SUBROUTINE get_zonal_mixing(nmix,ky_mix,gamma_mix,vzf_mix,kymax_mix,jmax_mix)
 !
 !  finds the maximum of gamma/ky spectrum vzf_out and kymax_out
@@ -332,11 +331,12 @@
     USE tglf_global
     USE tglf_species
     IMPLICIT NONE
-    INTEGER :: nmix,i,k,j,j1,j2,jmax1
+    LOGICAL :: use_kymin = .false.
+    INTEGER :: nmix,i,k,j,j1,j2,jmax1,jmin
     REAL :: test,testmax,peakmax
-    REAL :: kx, kyhigh, kycut
+    REAL :: kx, kyhigh, kycut, kymin
     REAL :: gammamax1,kymax1,testmax1,ky0,ky1,ky2
-    REAL :: f0,f1,f2,a,b,c,x1,deltaky,xmax
+    REAL :: f0,f1,f2,a,b,c,x1,deltaky,xmax,xmin
     REAL :: vzf1, vzf2
     REAL :: kymax_mix, vzf_mix
     INTEGER :: jmax_mix, down
@@ -345,6 +345,8 @@
     vzf_mix = 0.0
     kymax_mix = 0.0
     jmax_mix = 1
+    xmin = 0.0
+    if(alpha_zf_in.lt.0.0)use_kymin = .true. 
 !
 ! find the local maximum of gamma_mix/ky_mix with the largest gamma_mix/ky_mix^2
 !
@@ -353,18 +355,19 @@
       testmax = 0.0
       peakmax=0.0
       jmax_mix=1
-!      testmax2 = 0.0
-!      jmax1=1
-!     jmax2=0
-!      kycut=0.8*ABS(zs(2))/SQRT(taus(2)*mass(2))
       kycut=0.8/rho_ion
+      kymin = 0.0
+      jmin = 0
+      if(use_kymin)kymin = 0.173*sqrt(2.0)/rho_ion
       if(sat_rule_in.eq.2)then
         kycut = grad_r0_out*kycut
+        kymin = grad_r0_out*kymin
       endif
-!      write(*,*)" kycut = ",kycut," kyhigh = ",kyhigh
+!      write(*,*)" kycut = ",kycut," kymin = ",kymin
       ! find the low and high ky peaks of gamma/ky
-      do j=1,nky
-       if(ky_mix(j).le.kycut)then
+      do j=1,nky-1
+       if(ky_mix(j).lt.kymin)jmin = j
+       if((ky_mix(j+1).ge.kymin).and.(ky_mix(j).le.kycut))then
          j1=j
          kymax1 = ky_mix(j)
          testmax1 = gamma_mix(j)/kymax1
@@ -375,41 +378,22 @@
           endif
          endif
       enddo
-      if(testmax.eq.0.0)jmax_mix=j1  ! no unstable modes in range set kymax index to end of range
-!      write(*,*) "testmax = ",testmax
-!
-!      write(*,*)"testmax2 = ",testmax2,"  testmax1*SQRT(kymax1/kymax2) = ",testmax1*SQRT(kymax1/kymax2)
-!      write(*,*)"jmax_mix = ",jmax_mix
-!      write(*,*)"j1 = ",j1," j2 = ",j
-      ! handle exceptions
-!      if(j1.eq.nky)then  ! the maximum ky in the ky-spectrum is less than kycut
-!         j1=nky-1        ! note that j2=nky in this case
-!      endif
-!      if(jmax2.eq.0)jmax2=j2    ! there was no high-k peak set kymax2 to kyhigh or the highest ky
-!      if(jmax1.lt.nky)then
-!        test=gamma_net(jmax1+1)/ky_spectrum(jmax1+1)
-!        if(testmax1.le.test)then
-          ! there is no low-k peak
-!          write(*,*)" gammamax1/kymax1 = ",gammamax1/kymax1, test
-!          jmax1=jmax2
-!        endif
-!      endif
-!      gammamax2 = gamma_mix(jmax2)
-!      kymax2 = ky_mix(jmax2)
- !     gammamax1 = gamma_mix(jmax1)
- !     kymax1 = ky_mix(jmax1)
- !     vzf1 = gammamax1/kymax1
- !     vzf2 = gammamax2/kymax2
- !     write(*,*)" jmax1 = ",jmax1," jmax2= ",jmax2
- !     write(*,*)" g/k 1 = ",gammamax1/kymax1," g/k 2 = ",gammamax2/kymax2
-      !interpolate to find a more accurate low-k maximum gamma/ky
-      ! this is cut of at j1 since a maximum may not exist in the low-k range
- !     if(jmax1.gt.1.and.jmax1.lt.j1)then
+      if(testmax.eq.0.0)jmax_mix=j1
+! no unstable modes in range set kymax index to end of range
+! this is cut of at j1 since a maximum may not exist in the low-k range
       kymax1 = ky_mix(jmax_mix)
       gammamax1 = gamma_mix(jmax_mix)
- !     write(*,*)"gammamax1 = ",gammamax1," kymax1 = ",kymax1,"  jmax_mix = ",jmax_mix
+      if(kymax1.lt.kymin)then
+          kymax1 = kymin
+!interpolate to find a more accurate low-k maximum gamma/ky
+         gammamax1 = gamma_mix(1)   &
+          +(gamma_mix(2)-gamma_mix(1))*(kymin-ky_mix(1))/(ky_mix(2)-ky_mix(1))
+      endif
+!        write(*,*)" jmax_mix = ",jmax_mix,"  gammamax1 = ",gammamax1," kymax1 = ",kymax1
       if(jmax_mix .gt. 1 .and. jmax_mix .lt. j1)then
  !        write(*,*)"refining low-k maximum"
+! determine kymax1 and gammamax1 bounded by the tree points f0,f1,f2
+! use a quadratic fit: f = a + b x + c x^2  to f = gamma/ky centered at jmax1
          jmax1 = jmax_mix
          f0 =  gamma_mix(jmax1-1)/ky_mix(jmax1-1)
          f1 =  gamma_mix(jmax1)/ky_mix(jmax1)
@@ -419,23 +403,53 @@
          a = f0
          b = (f1 - f0*(1-x1*x1)-f2*x1*x1)/(x1-x1*x1)
          c = f2 - f0 - b
-         xmax = -b/(2.0*c)
-         if(xmax .ge. 1.0)then
-           kymax1 = ky_mix(jmax1+1)
-           gammamax1 = f2*kymax1
-         elseif(xmax.lt.0.0)then
-           kymax1 = ky_mix(jmax1-1)
-           gammamax1 = f0*kymax1
-         else
-           kymax1 = ky_mix(jmax1-1)+deltaky*xmax
-           gammamax1 = (a+b*xmax+c*xmax*xmax)*kymax1
-         endif
-      endif
-      vzf_mix = gammamax1/kymax1
-      kymax_mix = kymax1
+!         write(*,*)"f0 = ",f0,"  f1 = ",f1,"  f2 = ",f2,"  x1 = ",x1
+         if(f0 .ge.f1)then
+! if f0>f1 then f1 is not a local maximum
+             kymax1 = ky_mix(jmax1-1)
+             gammamax1 = f0*kymax1
+             if(kymax1.lt.kymin)then
+!interpolate to find the value of gammamax1 at kymin
+               kymax1 = kymin
+               xmin = (kymin - ky_mix(jmax1-1))/deltaky
+               gammamax1 = (a + b*xmin + c*xmin*xmin)*kymin
+             endif
+        endif
+        if(f0.lt.f1  )then
+!        if f0<f1 then f1>f2 due to the maximum search
+! use the quadratic fit to refine the local maximum:
+             xmax = -b/(2.0*c)
+             xmin = 0.0
+             if(ky_mix(jmax1-1).lt.kymin)then
+               xmin = (kymin - ky_mix(jmax1-1))/deltaky
+             endif
+             if(xmax .ge. 1.0)then
+! if xmax >= 1  use f2 as the maximum
+               kymax1 = ky_mix(jmax1+1)
+               gammamax1 = f2*kymax1
+             elseif(xmax.le.xmin)then
+               if(xmin .gt. 0.0)then
+                 kymax1 = kymin
+! use the quadratic fit to determine gammamax1 at kymin
+                 gammamax1 = (a + b*xmin + c*xmin*xmin)*kymin
+               elseif(xmax .le. 0.0)then
+! if xmax<=0 use f0 as the maximum
+                 kymax1 = ky_mix(jmax1-1)
+                 gammamax1 = f0*kymax1
+               endif
+             else
+! the conditions f0<f1<f2 and xmin<xmax<1 are satisfied
+! use the quadratic fit to determine gammamax1 and kymax1
+               kymax1 = ky_mix(jmax1-1)+deltaky*xmax
+               gammamax1 = (a+b*xmax+c*xmax*xmax)*kymax1
+             endif !xmax tests
+           endif !f0 < f1
+       endif  ! jmax_mix > 1
+       vzf_mix = gammamax1/kymax1
+       kymax_mix = kymax1
 !      jmax_mix = jmax1
 !      write(*,*)"get_zonal_mxing"
-!      write(*,*)"xmax = ",xmax
-!      write(*,*)"gammamax1 = ",gammamax1," kymax1 = ",kymax1
-
+!      write(*,*)"xmax = ",xmax, "  xmin = ",xmin
+!      write(*,*)"gammamax1 = ",gammamax1," kymax1 = ",kymax1, "  kymin = ",kymin
+ 
  END SUBROUTINE get_zonal_mixing

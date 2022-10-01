@@ -10,83 +10,6 @@
 ! NOTE: Need to be careful with (p=-nr/2,n=0) component.
 !-----------------------------------------------------------------
 
-! NOTE: call cgyro_nl_fftw_comm1 before cgyro_nl_fftw
-subroutine cgyro_nl_fftw_comm1
-  use timer_lib
-  use parallel_lib
-  use cgyro_globals
-
-  implicit none
-
-  integer :: ir,it,iv_loc_m,ic_loc_m
-  integer :: iexch
-
-  call timer_lib_in('nl_mem')
-
-!$acc parallel loop collapse(3) independent private(iexch,ic_loc_m) &
-!$acc&         present(h_x,fpack) default(none)
-  do iv_loc_m=1,nv_loc
-     do it=1,n_theta
-        do ir=1,n_radial
-           iexch = it + (iv_loc_m-1)*n_theta
-           ic_loc_m = it + (ir-1)*n_theta
-           fpack(ir,iexch) = h_x(ic_loc_m,iv_loc_m)
-        enddo
-     enddo
-  enddo
-
-!$acc parallel loop gang present(fpack) if(nv_loc*n_theta+1>=nsplit*n_toroidal)
-  do iexch=nv_loc*n_theta+1,nsplit*n_toroidal
-     fpack(:,iexch) = (0.0,0.0)
-  enddo
-
-  call timer_lib_out('nl_mem')
-  call timer_lib_in('nl_comm')
-
-  call parallel_slib_f_nc_gpu(fpack,f_nl)
-
-  call timer_lib_out('nl_comm')
-
-end subroutine cgyro_nl_fftw_comm1
-
-subroutine cgyro_nl_fftw_comm2
-  use timer_lib
-  use parallel_lib
-  use cgyro_globals
-
-  implicit none
-
-  integer :: ir,it,iv_loc_m,ic_loc_m
-  integer :: iexch
-
-  call timer_lib_in('nl_mem')
-
-!$acc parallel loop collapse(3) independent private(iexch,ic_loc_m) &
-!$acc&         present(psi,gpack) default(none)
-  do iv_loc_m=1,nv_loc
-     do it=1,n_theta
-        do ir=1,n_radial
-           iexch = it + (iv_loc_m-1)*n_theta
-           ic_loc_m = it + (ir-1)*n_theta
-           gpack(ir,iexch) = psi(ic_loc_m,iv_loc_m)
-        enddo
-     enddo
-  enddo
-
-!$acc parallel loop gang present(gpack) if(nv_loc*n_theta+1>=nsplit*n_toroidal)
-  do iexch=nv_loc*n_theta+1,nsplit*n_toroidal
-     gpack(:,iexch) = (0.0,0.0)
-  enddo
-
-  call timer_lib_out('nl_mem')
-  call timer_lib_in('nl_comm')
-
-  call parallel_slib_f_nc_gpu(gpack,g_nl)
-
-  call timer_lib_out('nl_comm')
-
-end subroutine cgyro_nl_fftw_comm2
-
 subroutine cgyro_nl_fftw_zero4(sz,v1,v2,v3,v4)
   implicit none
 
@@ -127,14 +50,17 @@ subroutine cgyro_nl_fftw(ij)
   use cufft
   use timer_lib
   use parallel_lib
-
+  use cgyro_nl_comm
   use cgyro_globals
+
   implicit none
-  include 'mpif.h'
+  !-----------------------------------
   integer, intent(in) :: ij
+  !-----------------------------------
   integer :: j,p,iexch
   integer :: it,ir,in,ix,iy
   integer :: i1,i2
+  integer :: it_loc
   integer :: ierr
   integer :: rc
   complex :: f0,g0
@@ -142,9 +68,12 @@ subroutine cgyro_nl_fftw(ij)
   real :: inv_nxny
 
 
-  if (is_staggered_comm_2) then ! stagger comm2, to load ballance network traffic
-     call cgyro_nl_fftw_comm2
-  endif
+  ! time to wait for the F_nl to become avaialble
+  call timer_lib_in('nl_comm')
+  call parallel_slib_f_nc_wait(fpack,f_nl,f_req)
+  ! make sure g_req progresses
+  call parallel_slib_test(g_req)
+  call timer_lib_out('nl_comm')
 
   call timer_lib_in('nl_mem')
 !$acc  data present(f_nl)  &
@@ -159,7 +88,7 @@ subroutine cgyro_nl_fftw(ij)
   call cgyro_nl_fftw_zero4(size(fxmany,1)*size(fxmany,2)*size(fxmany,3), &
                            fxmany,fymany,gxmany,gymany)
 
-!$acc parallel loop independent collapse(3) private(j,ir,p,ix,in,iy,f0,g0)
+!$acc parallel loop gang vector independent collapse(3) private(j,ir,p,ix,in,iy,f0,g0) async
   do j=1,nsplit
      do ir=1,n_radial
         do in=1,n_toroidal
@@ -175,6 +104,9 @@ subroutine cgyro_nl_fftw(ij)
      enddo
   enddo
 
+  ! make sure g_req progresses
+  call parallel_slib_test(g_req)
+
      ! --------------------------------------
      ! perform many Fourier Transforms at once
      ! --------------------------------------
@@ -184,33 +116,41 @@ subroutine cgyro_nl_fftw(ij)
 !$acc& use_device(uxmany,uymany)
 
   rc = cufftExecZ2D(cu_plan_c2r_many,fxmany,uxmany)
+  ! make sure g_req progresses
+  call parallel_slib_test(g_req)
   rc = cufftExecZ2D(cu_plan_c2r_many,fymany,uymany)
 
 !$acc wait
 !$acc end host_data
   call timer_lib_out('nl')
 
-  if (.not. is_staggered_comm_2) then ! stagger comm2, to load ballance network traffic
-     call cgyro_nl_fftw_comm2
-  endif
+  ! time to wait for the g_nl to become avaialble
+  call timer_lib_in('nl_comm')
+  call parallel_slib_f_fd_wait(n_field,n_radial,n_jtheta,gpack,g_nl,g_req)
+  call timer_lib_out('nl_comm')
 
-  call timer_lib_in('nl_mem')
-!$acc data present(g_nl)  
-
-  call timer_lib_out('nl_mem')
   call timer_lib_in('nl')
 
 
-!$acc parallel loop independent collapse(3) private(j,ir,p,ix,in,iy,f0,g0)
+!$acc parallel loop gang vector independent collapse(3) private(j,ir,p,ix,in,iy,f0,g0,it,iv_loc,it_loc) &
+!$acc&         present(g_nl)
   do j=1,nsplit
      do ir=1,n_radial
         do in=1,n_toroidal
+           it = it_j(j,in)
+           iv_loc =iv_j(j,in)
+
            p  = ir-1-nx0/2
            ix = p
            if (ix < 0) ix = ix+nx
 
            iy = in-1
-           g0 = i_c*g_nl(ir,j,in)
+           if (iv_loc == 0) then
+              g0 = (0.0,0.0)
+           else
+              it_loc = it-jtheta_min+1
+              g0 = i_c*sum( jvec_c_nl(1:n_field,ir,it_loc,iv_loc,in)*g_nl(1:n_field,ir,it_loc,in))
+           endif
            gxmany(iy,ix,j) = p*g0
            gymany(iy,ix,j) = iy*g0
         enddo
@@ -260,62 +200,16 @@ subroutine cgyro_nl_fftw(ij)
            if (ix < 0) ix = ix+nx
 
            iy = in-1
-           g_nl(ir,j,in) = fxmany(iy,ix,j)
+           f_nl(ir,j,in) = fxmany(iy,ix,j)
         enddo
      enddo
   enddo
-
-  ! end data g_nl
-!$acc end data
 
   ! end data f_nl
 !$acc end data
 
   call timer_lib_out('nl_mem')
 
-  call timer_lib_in('nl_comm')
-  call parallel_slib_r_nc_gpu(g_nl,gpack)
-  call timer_lib_out('nl_comm')
-
-  call timer_lib_in('nl_mem')
-
-!$acc parallel loop collapse(3) independent private(iexch,ic_loc) &
-!$acc&         present(psi,gpack) default(none)
-  do iv_loc=1,nv_loc
-     do it=1,n_theta
-        do ir=1,n_radial
-           iexch = it + (iv_loc-1)*n_theta
-           ic_loc = it + (ir-1)*n_theta
-           psi(ic_loc,iv_loc) = gpack(ir,iexch) 
-        enddo
-     enddo
-  enddo
-
-  call timer_lib_out('nl_mem')
-
-  ! Filter
-  if (n == 0) then
-!$acc parallel loop gang vector private(ir) &
-!$acc          present(ir_c,psi,px) default(none)
-      do ic=1,nc
-        ir = ir_c(ic)
-        if (ir == 1 .or. px(ir) == 0) then
-           psi(ic,:) = 0.0
-        endif
-     enddo
-  endif
-
-  ! RHS -> -[f,g] = [f,g]_{r,-alpha}
-
-  call timer_lib_in('nl')
-
-!$acc parallel loop collapse(2) independent present(rhs(:,:,ij),psi)
-  do iv_loc=1,nv_loc
-     do ic_loc=1,nc
-        rhs(ic_loc,iv_loc,ij) = rhs(ic_loc,iv_loc,ij)+((q*rho/rmin)*(2*pi/length))*psi(ic_loc,iv_loc)
-     enddo
-  enddo
-
-  call timer_lib_out('nl')
+  call cgyro_nl_fftw_comm1_r(ij)
 
 end subroutine cgyro_nl_fftw

@@ -121,14 +121,6 @@ subroutine cgyro_cleanup
 !$acc exit data delete(g_x)       
      deallocate(g_x)
   endif
-  if(allocated(psi)) then
-!$acc exit data delete(psi)       
-     deallocate(psi)
-  endif
-  if(allocated(chi)) then
-!$acc exit data delete(chi)            
-     deallocate(chi)
-  endif
   if(allocated(h0_x)) then
 !$acc exit data delete(h0_x)        
      deallocate(h0_x)
@@ -161,6 +153,10 @@ subroutine cgyro_cleanup
 !$acc exit data delete(jvec_c)     
      deallocate(jvec_c)
   endif
+  if(allocated(jvec_c_nl))  then
+!$acc exit data delete(jvec_c_nl)
+     deallocate(jvec_c_nl)
+  endif
   if(allocated(jvec_v))              deallocate(jvec_v)
   if(allocated(dvjvec_c)) then
 !$acc exit data delete(dvjvec_c)     
@@ -171,7 +167,6 @@ subroutine cgyro_cleanup
      deallocate(dvjvec_v)
   endif
   if(allocated(jxvec_c))  then
-!$acc exit data delete(jxvec_c)     
      deallocate(jxvec_c)
   endif
   if(allocated(upfac1))   then
@@ -220,8 +215,16 @@ subroutine cgyro_cleanup
      deallocate(gpack)
   endif
   if (allocated(cmat)) then
-!$acc exit data delete(cmat) if (gpu_bigmem_flag == 1)     
+!$acc exit data delete(cmat) if (gpu_bigmem_flag == 1)
      deallocate(cmat)
+  endif
+  if (allocated(cmat_fp32)) then
+!$acc exit data delete(cmat_fp32) if (gpu_bigmem_flag == 1)
+     deallocate(cmat_fp32)
+  endif
+  if (allocated(cmat_stripes)) then
+!$acc exit data delete(cmat_stripes) if (gpu_bigmem_flag == 1)
+     deallocate(cmat_stripes)
   endif
     if (allocated(cmat_simple)) then
 !$acc exit data delete(cmat_simple)     

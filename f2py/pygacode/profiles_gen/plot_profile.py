@@ -150,7 +150,10 @@ def plot_select(ax,tag):
    if tag == 'j':
        y = expro.expro_jbs ; ystr = 'J_\mathrm{bs}' ; plotit(ax,x,y,ystr)
        y = expro.expro_johm ; ystr = 'J_\mathrm{ohm}' ; plotit(ax,x,y,ystr)
-       y = expro.expro_jbstor ; ystr = 'J_\mathrm{tor}' ; plotit(ax,x,y,ystr)
+       y = expro.expro_jbstor ; ystr = 'J_\mathrm{bs,tor}' ; plotit(ax,x,y,ystr)
+
+   if tag == 'sigma':
+       y = expro.expro_sigmapar ; ystr = '\sigma_\parallel' ; plotit(ax,x,y,ystr)
 
    if tag == 'sin':
        y = np.arcsin(expro.expro_delta) ; ystr = 's_1 = \sin^{-1}\delta' ; plotit(ax,x,y,ystr)
@@ -267,9 +270,9 @@ class DemoFrame(wx.Frame):
  
         notebook = wx.Notebook(panel)
 
-        mytabs = ['r','R','Z','kappa','sin','cos','scos','ssin','q','Bunit',
-                  'n','Ln','sn','T','LT','sT','gam_e','gam_p','Mach',
-                  'j','nu','rhos','V','Pe','Pi']
+        mytabs = ['r','R','Z','kappa','sin','cos','scos','ssin','V','q','Bunit',
+                  'n','Ln','sn','T','LT','sT','gam_e','gam_p','Mach','rhos','nu',
+                  'j','sigma','Pe','Pi']
 
         for x in mytabs:
            tab = TabPanel(notebook)

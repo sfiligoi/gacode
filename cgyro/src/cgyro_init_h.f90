@@ -52,6 +52,11 @@ subroutine cgyro_init_h
      if (error_status /=0 ) return
      gtime = 0.0
 
+     ! Rescale to prevent overflow
+     if (nonlinear_flag == 0) then
+        h_x = h_x/sum(abs(h_x))
+     endif
+     
   case (2)
 
      call cgyro_info('Initializing with restart data.')
@@ -110,7 +115,7 @@ subroutine cgyro_init_h
 
         call cgyro_zftest_em
 
-     else if (n_toroidal == 1 .and. n > 0) then
+     else if (n_toroidal == 1 .and. my_toroidal > 0) then
 
         ! 3. LINEAR n>0 SIMULATION
 
@@ -143,7 +148,7 @@ subroutine cgyro_init_h
            ir = ir_c(ic) 
            it = it_c(ic)
 
-           if (n == 0) then
+           if (my_toroidal == 0) then
 
               ! Zonal-flow initial condition
 
@@ -160,7 +165,7 @@ subroutine cgyro_init_h
               if (amp > 0.0) then
                  h_x(ic,:) = amp*rho
               else
-                 h_x(ic,:) = amp*rho/n**2
+                 h_x(ic,:) = amp*rho/my_toroidal**2
               endif
 
            endif
@@ -170,7 +175,7 @@ subroutine cgyro_init_h
      endif
   end select
 
-  call cgyro_field_c
+  call cgyro_field_c_cpu
 
   ! Initialize time-history of fields (-3,-2,-1) to initial field.
   field_old  = field

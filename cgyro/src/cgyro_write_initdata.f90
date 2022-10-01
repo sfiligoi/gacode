@@ -15,7 +15,6 @@ subroutine cgyro_write_initdata
   integer :: p,in,is,it
   real :: kymax,kyrat,dn
   real, external :: spectraldiss
-  character(len=7),dimension(4) :: sv 
 
   !----------------------------------------------------------------------------
   ! Runfile to give complete summary to user
@@ -31,8 +30,13 @@ subroutine cgyro_write_initdata
      write(io,'(t4,i3,t16,i1,t26,i2,t36,i2)') n_theta,n_species,n_energy,n_xi
      if (test_flag == 0) then
         write(io,*) 
-        write(io,'(a)') ' nc_loc | nv_loc | nsplit | n_MPI | n_OMP'
-        write(io,'(t3,i4,t12,i4,t21,i4,t29,i5,t36,i3)') nc_loc,nv_loc,nsplit,n_proc,n_omp
+        if (nonlinear_flag == 1) then
+          write(io,'(a)') ' nc_loc | nv_loc | nsplit | n_jtheta | n_MPI | n_OMP'
+          write(io,'(t3,i4,t12,i4,t21,i4,t33,i3,t40,i5,t47,i3)') nc_loc,nv_loc,nsplit,n_jtheta,n_proc,n_omp
+        else
+          write(io,'(a)') ' nc_loc | nv_loc | nsplit | n_MPI | n_OMP'
+          write(io,'(t3,i4,t12,i4,t21,i4,t29,i5,t36,i3)') nc_loc,nv_loc,nsplit,n_proc,n_omp
+        endif
      endif
 
      if (zf_test_mode == 0) then

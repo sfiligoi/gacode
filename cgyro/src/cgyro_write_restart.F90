@@ -74,7 +74,7 @@ subroutine cgyro_write_restart_one
   disp     = 0
 
   ! Pack source into h(0,0)
-  if (source_flag == 1 .and. n == 0) then
+  if (source_flag == 1 .and. my_toroidal == 0) then
      ic0 = (n_radial/2)*n_theta
 !$acc parallel loop present(h_x,source)
      do j=1,n_theta
@@ -184,7 +184,7 @@ subroutine cgyro_write_restart_one
   endif
 
   ! Re-set h(0,0)=0
-  if (source_flag == 1 .and. n == 0) then
+  if (source_flag == 1 .and. my_toroidal == 0) then
      ic0 = (n_radial/2)*n_theta
 !$acc parallel loop present(h_x)
      do j=1,n_theta

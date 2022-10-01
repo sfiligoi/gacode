@@ -51,7 +51,7 @@ subroutine cgyro_field_v
   call timer_lib_in('field')
 
   ! Poisson LHS factors
-  if (n == 0 .and. ae_flag == 1) then
+  if (my_toroidal == 0 .and. ae_flag == 1) then
      call cgyro_field_ae('v')
   else
      field(:,:) = fcoef(:,:)*field(:,:)
@@ -127,7 +127,7 @@ subroutine cgyro_field_v_gpu
 
   call timer_lib_in('field')
   ! Poisson LHS factors
-  if (n == 0 .and. ae_flag == 1) then
+  if (my_toroidal == 0 .and. ae_flag == 1) then
     ! Note: Called rarely, use the CPU version
 !$acc update host(field)
      call cgyro_field_ae('v')
@@ -151,7 +151,7 @@ end subroutine cgyro_field_v_gpu
 !-----------------------------------------------------------------
 ! Configuration (velocity-distributed) field solve
 !-----------------------------------------------------------------
-subroutine cgyro_field_c
+subroutine cgyro_field_c_cpu
 
   use mpi
   use timer_lib
@@ -160,6 +160,7 @@ subroutine cgyro_field_c
   implicit none
 
   integer :: is
+  complex :: my_psi
   
   complex, dimension(nc) :: tmp
   
@@ -201,7 +202,7 @@ subroutine cgyro_field_c
   endif
 
   ! Poisson LHS factors
-  if (n == 0 .and. ae_flag == 1) then
+  if (my_toroidal == 0 .and. ae_flag == 1) then
     call cgyro_field_ae('c')
   else
      if (n_field > 2) then
@@ -218,20 +219,19 @@ subroutine cgyro_field_c
      endif
   endif
 
-!$omp parallel do private(iv_loc,is,ic)
+!$omp parallel do private(iv_loc,is,ic,my_psi)
   do iv=nv1,nv2
      iv_loc = iv-nv1+1
      is = is_v(iv)
      do ic=1,nc
-        psi(ic,iv_loc) = sum( jvec_c(:,ic,iv_loc)*field(:,ic))
-        chi(ic,iv_loc) = sum(jxvec_c(:,ic,iv_loc)*field(:,ic))
-        cap_h_c(ic,iv_loc) = h_x(ic,iv_loc)+psi(ic,iv_loc)*z(is)/temp(is)
+        my_psi = sum( jvec_c(:,ic,iv_loc)*field(:,ic))
+        cap_h_c(ic,iv_loc) = h_x(ic,iv_loc)+my_psi*z(is)/temp(is)
      enddo
   enddo
 
   call timer_lib_out('field')
 
-end subroutine cgyro_field_c
+end subroutine cgyro_field_c_cpu
 
 #ifdef _OPENACC
 subroutine cgyro_field_c_gpu
@@ -241,9 +241,10 @@ subroutine cgyro_field_c_gpu
   implicit none
   integer :: is,i_f
   complex :: tmp,field_loc_l
+  complex :: my_psi
 
   call timer_lib_in('field')
-!$acc data present(h_x,psi,chi,cap_h_c)
+!$acc data present(h_x,cap_h_c)
 
 !$acc data present(field,field_loc)
 
@@ -294,7 +295,7 @@ subroutine cgyro_field_c_gpu
      enddo
   endif
   ! Poisson LHS factors
-  if (n == 0 .and. ae_flag == 1) then
+  if (my_toroidal == 0 .and. ae_flag == 1) then
     ! Note: Called rarely, use the CPu version
 !$acc update host(field)
     call cgyro_field_ae('c')
@@ -318,15 +319,14 @@ subroutine cgyro_field_c_gpu
      endif
   endif
 
-!$acc parallel loop collapse(2) gang vector private(iv_loc,is) &
-!$acc&         present(jvec_c,jxvec_c,z,temp,is_v) default(none)
+!$acc parallel loop collapse(2) gang vector private(iv_loc,is,my_psi) &
+!$acc&         present(jvec_c,z,temp,is_v) default(none)
   do iv=nv1,nv2
      do ic=1,nc
         iv_loc = iv-nv1+1
         is = is_v(iv)
-        psi(ic,iv_loc) = sum( jvec_c(:,ic,iv_loc)*field(:,ic))
-        chi(ic,iv_loc) = sum(jxvec_c(:,ic,iv_loc)*field(:,ic))
-        cap_h_c(ic,iv_loc) = h_x(ic,iv_loc)+psi(ic,iv_loc)*z(is)/temp(is)
+        my_psi = sum( jvec_c(:,ic,iv_loc)*field(:,ic))
+        cap_h_c(ic,iv_loc) = h_x(ic,iv_loc)+my_psi*z(is)/temp(is)
      enddo
   enddo
 
@@ -339,6 +339,15 @@ end subroutine cgyro_field_c_gpu
 
 #endif
 
+
+subroutine cgyro_field_c
+  implicit none
+#ifdef _OPENACC
+   call cgyro_field_c_gpu
+#else
+   call cgyro_field_c_cpu
+#endif
+end subroutine cgyro_field_c
 
 !-----------------------------------------------------------------
 ! Adiabatic electron field solves for n=0

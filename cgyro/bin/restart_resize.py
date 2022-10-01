@@ -1,13 +1,9 @@
-# file processed by 2to3
-from __future__ import print_function, absolute_import
-from builtins import map, filter, range
-#
-# cgyro_restart_resize module
-#
+# restart_resize module
+
 import sys,os
 import struct
 
-header_size = 1024
+header_size = 1024*16 # 2xDouble precisio
 restart_v1_fname="out.cgyro.restart"
 restart_fname="bin.cgyro.restart"
 
@@ -24,12 +20,18 @@ class CGyroGrid:
         # toroidal
         self.n_toroidal = 0
 
+        # velocity_order
+        self.velocity_order = 1
+
     def load_from_dict(self,adict):
         self.n_theta =    int(adict["N_THETA"])
         self.n_radial =   int(adict["N_RADIAL"])
         self.n_xi =       int(adict["N_XI"])
         self.n_energy =   int(adict["N_ENERGY"])
         self.n_toroidal = int(adict["N_TOROIDAL"])
+        if 'VELOCITY_ORDER' in adict:
+           # some old versions did not have the option of changing the velocity order
+           self.velocity_order = int(adict["VELOCITY_ORDER"])
 
     def get_nc(self):
         return self.n_radial*self.n_theta
@@ -42,7 +44,8 @@ class CGyroGrid:
                  (self.n_radial==other.n_radial) and
                  (self.n_xi==other.n_xi) and
                  (self.n_energy==other.n_energy) and
-                 (self.n_toroidal==other.n_toroidal))
+                 (self.n_toroidal==other.n_toroidal) and
+                 (self.velocity_order==other.velocity_order))
 
 class CGyroRestartHeader:
     def __init__(self):
@@ -56,8 +59,13 @@ class CGyroRestartHeader:
         with open(fname,"rb") as fd:
             magic_b = fd.read(4)
             [magic] = struct.unpack('i',magic_b)
-            if (magic!=140906808):
+            if (magic==140906808):
+                self.grid.velocity_order = 1
+            elif (magic==140916753):
+                self.grid.velocity_order = 2
+            else:
                 raise IOError("Wrong CGyroRestartHeader magic number %i"%magic)
+            magic1=magic
             version_b = fd.read(4)
             [version] = struct.unpack('i',version_b)
             if (version!=2):
@@ -74,13 +82,14 @@ class CGyroRestartHeader:
 
             magic_b = fd.read(4)
             [magic] = struct.unpack('i',magic_b)
-            if (magic!=140906808):
-                raise IOError("Wrong CGyroRestartHeader magic(2) number %i"%magic)
+            if (magic!=magic1):
+                raise IOError("Wrong CGyroRestartHeader magic(2) number %i!=%i"%(magic,magic1))
 
     def savev2(self,fdir):
         fname = os.path.join(fdir,restart_fname)
         with open(fname,"rb+") as fd:
-            magic_b= struct.pack('i',140906808)
+            magic = 140906808 if (self.grid.velocity_order == 1) else 140916753
+            magic_b= struct.pack('i',magic)
             fd.write(magic_b)
             version_b= struct.pack('i',2)
             fd.write(version_b)
@@ -183,7 +192,10 @@ def add_species(org_dir, new_dir, grid, org_pre_species, org_post_species, new_s
 
 
     # Data structure (in fortran terms)
-    # doublex2 h_x[nc,n_species,nvg,n_toroidal]
+    # if velocity_order==1
+    #   doublex2 h_x[nc,n_species,nvg,n_toroidal]
+    # else
+    #   doublex2 h_x[nc,nvg,n_species,n_toroidal]
 
     el_size = 16 # 2xDouble precision
     nc =      grid.get_nc()
@@ -209,6 +221,7 @@ def add_species(org_dir, new_dir, grid, org_pre_species, org_post_species, new_s
             new_fd.write(tmp)
 
             for t in range(grid.n_toroidal):
+              if org_header.grid.velocity_order==1:
                 if (org_pre_species>0):
                     tmp=org_fd.read(ncbytes*org_pre_species)
                     new_fd.write(tmp)
@@ -224,9 +237,22 @@ def add_species(org_dir, new_dir, grid, org_pre_species, org_post_species, new_s
                 if (org_post_species>0):
                     tmp=org_fd.read(ncbytes*org_post_species)
                     new_fd.write(tmp)
+              else: # velocity_order==2
+                if (org_pre_species>0):
+                    # keep memory footprint small
+                    for n in range(nvg):
+                        tmp=org_fd.read(ncbytes*org_pre_species)
+                        new_fd.write(tmp)
 
-    with open(new_tag_fname,"w") as tag_fd:
-        tag_fd.write("           0\n 0.0000E+00\n")
+                # keep memory footprint small
+                for n in range(nvg):
+                    new_fd.write(zerobuf)
+
+                if (org_post_species>0):
+                    # keep memory footprint small
+                    for n in range(nvg):
+                        tmp=org_fd.read(ncbytes*org_post_species)
+                        new_fd.write(tmp)
 
 
     new_header = org_header

@@ -22,7 +22,7 @@ subroutine tgyro_iteration_zero
   if (tgyro_relax_iterations == 0 .and. loc_restart_flag == 1) i_tran=i_tran+1
   !
   call tgyro_target_vector(x_vec,g_vec)
-  if (loc_restart_flag == 0 .or. tgyro_relax_iterations == 0) then
+   if (loc_restart_flag == 0 .or. tgyro_relax_iterations == 0) then
      ! Need to determine initial fluxes
      call tgyro_flux_vector(x_vec,f_vec,0.0,0)
   else

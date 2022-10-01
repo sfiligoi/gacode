@@ -56,6 +56,14 @@ then
   echo "         -reset"
   echo "         Reset regression data."
   echo
+  echo "MPI TESTING"
+  echo
+  echo "         -m"
+  echo "         Run full MPI test suite."
+  echo
+  echo "         -ms <test>"
+  echo "         Run specified MPI test."
+  echo
   echo "TEMPLATE GENERATION"
   echo
   echo "         -g"
@@ -96,12 +104,14 @@ MPINUMA=0
 TEST_FLAG=0
 GENERATE_FLAG=0
 REGRESS_FLAG=0
+MTEST_FLAG=0
 CLEAN=0
 COMPRESS_FLAG=0
 RESET=0
 INIT_FLAG=0
 HELP_TAG=null
 SCASE=
+MCASE=
 #=============================================================
 
 #=============================================================
@@ -134,6 +144,10 @@ while [ $# -gt 0 ] ; do
 
   -reset) RESET=1 ;;
 
+  -m) MTEST_FLAG=1 ;;
+
+  -ms) MTEST_FLAG=1 ; shift ; MCASE=$1 ;;
+
   -h) gacode_printversion CGYRO ; exit 0 ;;
 
   -help) shift ; HELP_TAG=$1 ;;
@@ -161,10 +175,10 @@ fi
 #============================================================
 # Check for inconsistent flags:
 FLAG_SUM=$[ $EXEC_FLAG + $TEST_FLAG + $GENERATE_FLAG
-                       + $REGRESS_FLAG + $INIT_FLAG ]
+                       + $REGRESS_FLAG + $MTEST_FLAG + $INIT_FLAG ]
 if [ $FLAG_SUM -gt 1 ]
 then
-   echo "ERROR: Can only specify one of -e, -t, -i, -g, -r"
+   echo "ERROR: Can only specify one of -e, -t, -i, -g, -r, -m"
    exit 1
 fi
 #============================================================
@@ -206,6 +220,28 @@ then
    fi
    # NOMP=1 RESET=0
    gacode_reg_do $NPROC $NOMP $RESET cgyro 1e-6 $SCASE
+   exit 0
+fi
+#============================================================
+
+#============================================================
+# Do the mpi test if -m set, then exit.
+#
+if [ $MTEST_FLAG -eq 1 ]
+then
+   if [ -z "${MCASE}" ]; then
+      MCASE="cgyro_test_alltoall cgyro_test_alltoall_nosplit cgyro_test_allreduce_4"
+   fi
+   for c in ${MCASE}; do
+      if [ -f $CGYRO_DIR/mpi_tests/$c ] ; then
+	 echo "Running MPI case: $c"
+         $GACODE_ROOT/platform/exec/exec.$GACODE_PLATFORM \
+            $SIMDIR $NPROC $CGYRO_DIR/mpi_tests/$c $NOMP $NUMA $MPINUMA
+      else
+         echo "ERROR: MPI case $c executable not found."
+         exit 1
+      fi
+   done
    exit 0
 fi
 #============================================================

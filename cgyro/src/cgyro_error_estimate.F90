@@ -23,7 +23,9 @@ subroutine cgyro_error_estimate
   
   real :: norm_loc_s,error_loc_s,h_s,r_s
 
-  ! launch Estimate of collisionless error via 3rd-order linear estimate async ahead of time
+#ifdef _OPENACC
+  ! launch Estimate of collisionless error via 3rd-order linear estimate async ahead of time on GPU
+  ! CPU-only code will work on it later
   h_s=0.0
   r_s=0.0
 !$acc parallel loop collapse(2) independent present(h_x,rhs(:,:,1)) reduction(+:h_s,r_s) async(2)
@@ -33,14 +35,14 @@ subroutine cgyro_error_estimate
        r_s = r_s + abs(rhs(ic,iv_loc,1))
      enddo
   enddo
-
+#endif
 
   call timer_lib_in('field')
 
   norm_loc_s = 0.0
   error_loc_s = 0.0
 
-  ! field_olds are only in system memory... too expensive to keep in GPU memory
+  ! field_olds are always only in system memory... too expensive to keep in GPU memory
   ! assuming field was already synched to system memory
 !$omp parallel do collapse(2) reduction(+:norm_loc_s,error_loc_s)
   do ic=1,nc
@@ -70,8 +72,21 @@ subroutine cgyro_error_estimate
 
   call timer_lib_in('str')
 
+#ifdef _OPENACC
   ! wait for the async GPU compute to be completed
 !$acc wait(2)
+#else
+  h_s=0.0
+  r_s=0.0
+!$omp parallel do collapse(2) reduction(+:h_s,r_s)
+  do iv_loc=1,nv_loc
+     do ic=1,nc
+       h_s = h_s + abs(h_x(ic,iv_loc))
+       r_s = r_s + abs(rhs(ic,iv_loc,1))
+     enddo
+  enddo
+#endif
+
   pair_loc(1) = h_s
   pair_loc(2) = r_s
 

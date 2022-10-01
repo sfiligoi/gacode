@@ -1,4 +1,4 @@
-      SUBROUTINE gftm_startup
+       SUBROUTINE gftm_startup
 !*********************************************
 !
 !     initalization of gftm
@@ -36,10 +36,13 @@
       ns = ns_in
 !      write(*,*)"ns = ",ns,"   ns0 = ",ns0
       nx = 2*nxgrid_in-1
+      nbasis_max_in = 12
       nbasis = nbasis_max_in
       nbasis_max = nbasis
-      nu = 9
-      ne = 5
+! velocity space resolution
+      nu = 5
+      ne = 3
+!
       nune = nu*ne
       nphase = nu*ne*nbasis
       ntot = (ns-ns0+1)*nu*ne*nbasis
@@ -155,7 +158,8 @@
       IMPLICIT NONE
       INTEGER :: is
       REAL :: charge
-!
+      REAL :: p_prime_factor
+
 ! electrons=1, ions =2,...
 !
       if(use_default_species)then
@@ -215,4 +219,15 @@
 !      write(*,*)"rho_ion = ",rho_ion
 !      write(*,*)"rho_e = ",rho_e
 !      write(*,*)"charge = ",charge
+!
+!  p_prime like CGYRO
+!
+      if(betae_in.eq.0.0)betae_in=0.0005
+      p_prime_factor = -(q_loc/rmin_loc)*betae_in/(8.0*pi)
+      p_prime_loc = 0.0
+      do is=1,ns
+        p_prime_loc = p_prime_loc + p_prime_factor*as(is)*taus(is)*(rlns(is)+rlts(is))
+      enddo
+!      write(*,*)" p_prime_loc = ",p_prime_loc,"   betae_in = ",betae_in
+!
       END SUBROUTINE get_species

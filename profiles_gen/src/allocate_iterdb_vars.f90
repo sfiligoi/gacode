@@ -9,7 +9,6 @@ subroutine allocate_iterdb_vars
   allocate(onetwo_rho_grid(nx))
   allocate(onetwo_ene(nx))
   allocate(onetwo_enalp(nx))
-  allocate(onetwo_zeff(nx))
   allocate(onetwo_angrot(nx))
   allocate(onetwo_psi(nx))
 

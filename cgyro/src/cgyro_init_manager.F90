@@ -18,8 +18,8 @@ subroutine cgyro_init_manager
   use cgyro_globals
   use half_hermite
 
-#ifdef _OPENACC
   use cgyro_io
+#ifdef _OPENACC
   use cufft, only : cufftPlanMany, &
        CUFFT_C2R,CUFFT_Z2D,CUFFT_R2C,CUFFT_D2Z
 #endif
@@ -37,6 +37,8 @@ subroutine cgyro_init_manager
   integer :: idist,odist,istride,ostride
   integer, parameter :: singlePrecision = selected_real_kind(6,30)
 #endif
+
+  character(len=128) :: msg
 
   if (hiprec_flag == 1) then
      fmtstr  = '(es16.9)'
@@ -191,23 +193,25 @@ subroutine cgyro_init_manager
      case(1)
         allocate(h0_old(nc,nv_loc))     
         allocate(rhs(nc,nv_loc,6))
+!$acc enter data create(rhs,h0_old)
      case(2)
         allocate(h0_old(nc,nv_loc))
         allocate(rhs(nc,nv_loc,7))
+!$acc enter data create(rhs,h0_old)
      case(3)
         allocate(h0_old(nc,nv_loc))
-        allocate(rhs(nc,nv_loc,10))
+        allocate(rhs(nc,nv_loc,9))
+!$acc enter data create(rhs,h0_old)
      case default
         ! Normal timestep
         allocate(rhs(nc,nv_loc,4))
+!$acc enter data create(rhs)
      end select 
      
      allocate(h_x(nc,nv_loc))
      allocate(g_x(nc,nv_loc))
-     allocate(psi(nc,nv_loc))
-     allocate(chi(nc,nv_loc))
      allocate(h0_x(nc,nv_loc))
-!$acc enter data create(rhs,h_x,g_x,psi,chi,h0_x,h0_old)
+!$acc enter data create(h_x,g_x,h0_x)
 
      allocate(cap_h_c(nc,nv_loc))
      allocate(cap_h_ct(nv_loc,nc))
@@ -226,7 +230,7 @@ subroutine cgyro_init_manager
      allocate(cap_h_v(nc_loc,nv))
      allocate(cap_h_v_prime(nc_loc,nv))
 
-!$acc enter data create(cap_h_c,cap_h_ct,cap_h_v,dvjvec_c,dvjvec_v,jxvec_c)
+!$acc enter data create(cap_h_c,cap_h_ct,cap_h_v,dvjvec_c,dvjvec_v)
 
      if (upwind_single_flag == 0) then
        allocate(upwind_res_loc(nc,ns1:ns2,2))
@@ -241,24 +245,30 @@ subroutine cgyro_init_manager
      ! Nonlinear arrays
      if (nonlinear_flag == 1) then
         if (nonlinear_method == 1) then
-           allocate(f_nl(nc,nsplit,n_toroidal))
-           allocate(g_nl(nc,nsplit,n_toroidal))
-           allocate(fpack(nc,nsplit*n_toroidal))
-           allocate(gpack(nc,nsplit*n_toroidal))
+           call cgyro_error("nonlinear_method==1 has been deprecated")
+           return
         else
            allocate(f_nl(n_radial,nsplit,n_toroidal))
-           allocate(g_nl(n_radial,nsplit,n_toroidal))
+           allocate(g_nl(n_field,n_radial,n_jtheta,n_toroidal))
            allocate(fpack(n_radial,nsplit*n_toroidal))
-           allocate(gpack(n_radial,nsplit*n_toroidal))
+           allocate(gpack(n_field,n_radial,n_jtheta,n_toroidal))
         endif
-
-!$acc enter data create(fpack,gpack,f_nl,g_nl)
+        allocate(jvec_c_nl(n_field,n_radial,n_jtheta,nv_loc,n_toroidal))
+!$acc enter data create(fpack,gpack,f_nl,g_nl,jvec_c_nl)
      endif
 
      if (collision_model == 5) then
         allocate(cmat_simple(n_xi,n_xi,n_energy,n_species,n_theta))
      else
-        allocate(cmat(nv,nv,nc_loc))
+        if (collision_precision_mode /= 0) then
+           allocate(cmat_stripes(-collision_full_stripes:collision_full_stripes,nv,nc_loc))
+           allocate(cmat_fp32(nv,nv,nc_loc))
+
+           write (msg, "(A35,I4,A14)") "Using fp32 collision precision with ",collision_full_stripes, " fp64 stripes."
+           call cgyro_info(msg)
+        else
+           allocate(cmat(nv,nv,nc_loc))
+        endif
      endif
 
   endif
@@ -310,14 +320,8 @@ subroutine cgyro_init_manager
   ! Initialize nonlinear dimensions and arrays 
   call timer_lib_in('nl_init')
   if (nonlinear_method == 1) then
-
-     ! Direct convolution
-
-     ny0 = n_toroidal-1
-     nx0 = n_radial/2
-     ny = int(1.5*ny0)+1
-     nx = int(1.5*nx0)+1
-
+     call cgyro_error("nonlinear_method==1 has been deprecated")
+     return
   else
 
      ! 2D FFT lengths 

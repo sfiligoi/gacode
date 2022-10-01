@@ -287,8 +287,6 @@ subroutine expro_compute_derived
      expro_bt2(i) = geo_fluxsurfave_bt2*expro_bunit(i)**2
 
      expro_thetascale(i) = geo_thetascale
-
-     expro_fpol(i) = geo_f*expro_bunit(i)*r_min
   enddo
 
   !--------------------------------------------------------------
@@ -369,8 +367,11 @@ subroutine expro_compute_derived
   !--------------------------------------------------------------
   ! Transport particle, momentum and energy sources
   !
+  ! Ohmic electron power  
+  temp = expro_qohme
+  call volint(temp,expro_pow_e_ohmic,expro_n_exp)
   ! Total auxiliary electron power  
-  temp = expro_qohme+expro_qbeame+expro_qrfe+expro_qione
+  temp = expro_qbeame+expro_qrfe+expro_qione
   call volint(temp,expro_pow_e_aux,expro_n_exp)
   ! Total electron power 
   temp = temp-expro_qbrem-expro_qsync-expro_qline-expro_qei+expro_qfuse
@@ -472,10 +473,10 @@ subroutine expro_compute_derived
   expro_betan = 1/(1/expro_betap+1/expro_betat)*(r_min*expro_bcentr/ipma)
   ! Greenwald density (current [MA])
   expro_greenwald = ipma/(pi*r_min**2)
+  ! Transport power (MW)
+  expro_ptransp = expro_pow_e(nx)+expro_pow_i(nx)
 
-  if (expro_pow_e(nx) > 1e-6) then
-     ! Transport power (MW)
-     expro_ptransp = expro_pow_e(nx)+expro_pow_i(nx)
+  if (expro_ptransp > 1e-6) then
      ! tau = W[MJ]/P[MW]
      expro_tau = (1.5*p_ave*expro_vol(nx)*1d-6)/expro_ptransp
 

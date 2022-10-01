@@ -24,8 +24,6 @@ subroutine prgen_map_genf
   expro_rmaj(:)  = rmaj(:)
   expro_te(:)    = te_kev(:)
   expro_ne(:)    = ne_e19m3(:)
-  expro_z_eff(:) = 1.0
-  expro_ptot(:)  = p_tot(:)
 
   expro_mass(1) = 2.0
   expro_z(1) = 1.0

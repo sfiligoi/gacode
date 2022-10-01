@@ -51,6 +51,8 @@ subroutine prgen_read_genf
   ne_e19m3 = ne_e19m3*1e-19
   ni_e19m3 = ni_e19m3*1e-19
 
+  zeff = 1.0
+  
   deallocate(dummy)
   
 end subroutine prgen_read_genf

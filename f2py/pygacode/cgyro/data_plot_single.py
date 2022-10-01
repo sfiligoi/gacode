@@ -244,8 +244,9 @@ elif plot_type == 'kxky_phi':
    w     = float(sys.argv[6])
    wmax  = float(sys.argv[7])
    ftype = sys.argv[8]
+   deriv = bool(int(sys.argv[9]))
 
-   head = data_in.plot_kxky_phi(field=field,theta=theta,moment=moment,spec=spec,w=w,wmax=wmax)
+   head = data_in.plot_kxky_phi(field=field,theta=theta,moment=moment,spec=spec,w=w,wmax=wmax,deriv=deriv)
 
    outfile = 'out.cgyro.kxky_phi.'+ftype
 
@@ -266,7 +267,7 @@ elif plot_type == 'kx_phi':
 
    outfile = 'out.cgyro.kx_phi.'+ftype
 
-elif plot_type == 'cheb_phi':
+elif plot_type == 'poly_phi':
 
    field = int(sys.argv[2])
    theta = float(sys.argv[3])
@@ -279,7 +280,7 @@ elif plot_type == 'cheb_phi':
    diss  = int(sys.argv[10])
    deriv = bool(int(sys.argv[11]))
    
-   head = data_in.plot_cheb_phi(field=field,theta=theta,w=w,wmax=wmax,ymin=ymin,ymax=ymax,nstr=nstr,diss=diss,deriv=deriv)
+   head = data_in.plot_poly_phi(field=field,theta=theta,w=w,wmax=wmax,ymin=ymin,ymax=ymax,nstr=nstr,diss=diss,deriv=deriv)
 
    outfile = 'out.cgyro.cheb_phi.'+ftype
 

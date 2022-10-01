@@ -363,7 +363,7 @@ subroutine cgyro_make_profiles
         call cgyro_info('Zonal flow test with n_radial > 1')
      endif
 
-     n = 0
+     my_toroidal = 0
 
   else if (n_toroidal == 1) then
 
@@ -373,7 +373,7 @@ subroutine cgyro_make_profiles
      rho     = abs(ky/k_theta)*(-btccw)
      length  = abs(box_size/(s*k_theta))
 
-     n = 1
+     my_toroidal = 1
 
      call cgyro_info('Single-mode linear analysis')
 
@@ -387,9 +387,9 @@ subroutine cgyro_make_profiles
 
      ! Now define individual k_thetas
 
-     n = i_group_1
+     my_toroidal = i_group_1
 
-     k_theta = n*k_theta
+     k_theta = my_toroidal*k_theta
 
      call cgyro_info('Multiple toroidal harmonics')
 

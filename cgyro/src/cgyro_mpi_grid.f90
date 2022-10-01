@@ -17,6 +17,7 @@ subroutine cgyro_mpi_grid
   implicit none
 
   integer :: ie,ix,is,ir,it
+  integer :: iexch,il
   integer :: d
   integer :: splitkey
 
@@ -144,7 +145,7 @@ subroutine cgyro_mpi_grid
   ! Check that n_proc is a multiple of n_toroidal
   !
   if (modulo(n_proc,n_toroidal) /= 0) then
-     call cgyro_error('Number of processors must be a multiple of N_TOROIDAL.')
+     call cgyro_error('Number of MPI processes must be a multiple of N_TOROIDAL.')
      return
   endif
 
@@ -153,10 +154,10 @@ subroutine cgyro_mpi_grid
   n_proc_1 = n_proc/n_toroidal
   n_proc_2 = n_toroidal
 
-  ! Check that nv and nc are multiples of the local processor count
+  ! Check that nv and nc are multiples of toroidal MPI multiplier
 
   if (modulo(nv,n_proc_1) /= 0 .or. modulo(nc,n_proc_1) /= 0) then
-     call cgyro_error('nv or nc not a multiple of the local processor count.')
+     call cgyro_error('nv or nc not a multiple of toroidal MPI multiplier.')
      return
   endif
 
@@ -253,16 +254,58 @@ subroutine cgyro_mpi_grid
 
   ! Nonlinear parallelization dimensions (returns nsplit)
 
-  if (nonlinear_method == 1) then
-     call parallel_slib_init(n_toroidal,nv_loc,nc,nsplit,NEW_COMM_2)
-  else
-     call parallel_slib_init(n_toroidal,nv_loc*n_theta,n_radial,nsplit,NEW_COMM_2)
-  endif
+  call parallel_slib_init(n_toroidal,nv_loc*n_theta,n_radial,nsplit,NEW_COMM_2)
 
-  ! Stagger COMM2 communication based on i_proc_1
-  ! Get the first half together, and second half together
-  ! This makes it more likely to have both types on all nodes
-  is_staggered_comm_2 = (modulo((i_proc_1*2)/n_proc_1,2) == 0)
+  if (nonlinear_flag == 1) then
+     ! nsplit NL mapping after AllToAll
+     allocate(iv_e(nsplit*n_toroidal))
+     allocate(it_e(nsplit*n_toroidal))
+     do iv_loc=1,nv_loc
+        do it=1,n_theta
+           iexch = iv_loc + (it-1)*nv_loc
+           ! all processes on slib use the same nv1:nv2 range, so using iv_loc OK
+           iv_e(iexch) = iv_loc
+           it_e(iexch) = it
+        enddo
+     enddo
+     do iexch=nv_loc*n_theta+1,nsplit*n_toroidal
+        iv_e(iexch) = 0       ! special value for padding
+        it_e(iexch) = n_theta ! padding must contain consecutive but valid values (minmax)
+     enddo
+
+     allocate(iv_j(nsplit,n_toroidal))
+     allocate(it_j(nsplit,n_toroidal))
+     call parallel_slib_f_idxs(nsplit,iv_e,iv_j)
+     call parallel_slib_f_idxs(nsplit,it_e,it_j)
+
+!$acc enter data copyin(iv_j,it_j,it_e,iv_e)
+
+     jtheta_min = minval(it_j(:,:))
+     jtheta_max = maxval(it_j(:,:))
+
+     ! find max n_jtheta among all processes
+     ! since we will need that for have equal number of rows
+     ! in all the gpack buffers
+     n_jtheta = jtheta_max-jtheta_min+1
+     call parallel_slib_cpu_maxval_int(n_jtheta)
+
+     ! find what theta do I need to send
+     allocate(it_jf(n_jtheta,n_toroidal))
+     do il=1,n_toroidal
+        it_jf(:,il) = 0 ! special value for padding
+        do it=jtheta_min,jtheta_max
+           ! these are the ones I will need
+           it_jf(it-jtheta_min+1,il) = it
+        enddo
+     enddo
+
+     ! now send them to the others and get theirs
+     allocate(it_f(n_jtheta,n_toroidal))
+     call parallel_slib_r_idxs(n_jtheta,it_jf,it_f)
+
+     deallocate(it_jf)
+!$acc enter data copyin(it_f)
+  endif
 
   ! OMP code
   n_omp = omp_get_max_threads()

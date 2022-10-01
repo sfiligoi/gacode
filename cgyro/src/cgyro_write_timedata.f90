@@ -102,7 +102,7 @@ subroutine cgyro_write_timedata
   ! Ballooning mode (or ZF) output for linear runs with a single mode
   ! (can both be plotted with cgyro_plot -plot ball)
   !
-  has_balloon = (n_toroidal == 1) .and. ((n > 0)  .and. (box_size == 1))
+  has_balloon = (n_toroidal == 1) .and. ((my_toroidal > 0)  .and. (box_size == 1))
   has_zf      = zf_test_mode > 0
   if (has_zf .or. has_balloon) then
 

@@ -10,6 +10,7 @@ subroutine prgen_allocate
   allocate(rmaj(nx))
   allocate(q(nx))
   allocate(p_tot(nx))
+  allocate(fpol(nx))
   allocate(omega0(nx))
   allocate(vpolc_exp(nx))
   allocate(vtorc_exp(nx))
@@ -17,7 +18,9 @@ subroutine prgen_allocate
   allocate(ti_kev(nx))
   allocate(ne_e19m3(nx))
   allocate(ni_e19m3(nx))
+  allocate(zeff(nx))
 
+  allocate(jtot(nx))
   allocate(johm(nx))
   allocate(jbs(nx))
   allocate(jnb(nx))

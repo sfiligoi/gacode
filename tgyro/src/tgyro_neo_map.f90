@@ -40,7 +40,7 @@ subroutine tgyro_neo_map
   neo_s_delta_in           = s_delta(i_r)
   neo_zeta_in              = zeta(i_r)
   neo_s_zeta_in            = s_zeta(i_r)
-  neo_zmag_over_a_in       = zmag(i_r)
+  neo_zmag_over_a_in       = zmag(i_r)/r_min
   neo_s_zmag_in            = dzmag(i_r)
 
   ! New HAM shape parameters
@@ -61,7 +61,7 @@ subroutine tgyro_neo_map
   neo_rho_star_in  = 0.001
 
   neo_n_species_in = sum(calc_flag(1:loc_n_ion))+1
-
+ 
   if (neo_n_species_in > 9) then
      call tgyro_catch_error('ERROR: (TGYRO) n_species > 9 not supported in NEO interface.') 
   endif
@@ -96,6 +96,12 @@ subroutine tgyro_neo_map
      neo_dlnndr_in(i0) = r_min*dlnnidr(is,i_r)
      neo_dlntdr_in(i0) = r_min*dlntidr(is,i_r)
   enddo
+
+  ! Force quasineutrality
+  if (loc_n_ion == 1) then
+     !sum_nz = sum(neo_dens_in(:)*neo_z_in(:))
+     neo_dens_in(2) = neo_dens_in(1)
+  endif
 
   ! Setting density gradient artificially to zero to compute D and v
   if (tgyro_zero_dens_grad_flag /= 0) then

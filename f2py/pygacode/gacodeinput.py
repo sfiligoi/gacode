@@ -26,10 +26,16 @@ class SimpleInput:
         self.error_msg = ""
         self.extension = ".gen"
 
-    def add(self,param,default):
-        self.data_dict[param]=default
-        self.data_orderlist.append(param)
-
+    def add(self,param,default,n=1):
+        if n == 1:
+            self.data_dict[param]=default
+            self.data_orderlist.append(param)
+        else:
+            for i in range(n):
+                p = param+'_'+str(i+1)
+                self.data_dict[p]=default
+                self.data_orderlist.append(p)
+              
     def dep(self,param,default):
         self.dep_dict[param]=default
         self.dep_orderlist.append(param)
