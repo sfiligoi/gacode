@@ -316,7 +316,7 @@ subroutine tgyro_write_data(i_print)
 
      open(unit=1,file='out.tgyro.power_e',status='old',position='append')
 
-     write(1,20) 'r/a','p_e_fus','p_e_ohm','p_e_aux','p_brem','p_sync','p_line','p_exch[-]','p_expwd[-]','p_e_tot'
+     write(1,20) 'r/a','p_e_fus','p_e_aux','p_e_ohm','p_brem','p_sync','p_line','p_exch[-]','p_expwd[-]','p_e_tot'
      write(1,20) '','(MW)','(MW)','(MW)','(MW)','(MW)','(MW)','(MW)','(MW)','(MW)'
      do i=1,n_r
         write(1,10) &

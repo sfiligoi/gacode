@@ -112,7 +112,7 @@ subroutine tgyro_source
      p_e(:) = &
           +p_e_fus(:) &                ! Fusion power to electrons
           +p_e_aux_in(:) &             ! Auxiliary electron heating [fixed]
-          +p_e_ohmic_in(:) &           ! Ohmic heating
+          +p_e_ohmic_in(:) &           ! Ohmic heating [fixed]
           -p_exch(:)   &               ! Collisional exchange
           -p_brem(:) &                 ! Bremsstrahlung radiation
           -p_sync(:) &                 ! Synchrotron radiation

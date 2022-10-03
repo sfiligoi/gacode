@@ -4,10 +4,11 @@ subroutine tgyro_neo_map
   use neo_interface
 
   implicit none
-  real :: gamma_p0, u000
-  integer :: is, i0
-  real :: m_norm, t_norm, n_norm
-
+  real :: gamma_p0,u000
+  integer :: is,i0
+  real :: m_norm,t_norm,n_norm
+  real :: sum_nz
+  
   ! Initialize NEO
   call neo_init(paths(i_r-1),gyro_comm)
 
@@ -99,8 +100,10 @@ subroutine tgyro_neo_map
 
   ! Force quasineutrality
   if (loc_n_ion == 1) then
-     !sum_nz = sum(neo_dens_in(:)*neo_z_in(:))
-     neo_dens_in(2) = neo_dens_in(1)
+     ! Quasineutrality offset
+     sum_nz = sum(neo_dens_in(:)*neo_z_in(:))
+     ! Modify main ion to force quasineutrality
+     neo_dens_in(2) = neo_dens_in(2)-sum_nz/neo_z_in(2)
   endif
 
   ! Setting density gradient artificially to zero to compute D and v
@@ -114,8 +117,8 @@ subroutine tgyro_neo_map
   ! inherited (unchanged) from input.profiles.  In general NEO expects 
   ! these to be correctly signed/oriented.
 
-  gamma_p0  = -r_maj(i_r)*w0p(i_r)
-  u000      = r_maj(i_r)*w0(i_r)
+  gamma_p0 = -r_maj(i_r)*w0p(i_r)
+  u000     = r_maj(i_r)*w0(i_r)
 
   neo_rotation_model_in = 2
   neo_omega_rot_in = u000 * r_min / r_maj(i_r) &

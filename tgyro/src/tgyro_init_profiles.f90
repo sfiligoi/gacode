@@ -183,7 +183,7 @@ subroutine tgyro_init_profiles
   call cub_spline(expro_rmin(:)/r_min,expro_zeta(:),n_exp,r,zeta,n_r)
   call cub_spline(expro_rmin(:)/r_min,expro_szeta(:),n_exp,r,s_zeta,n_r)
 
-  ! New geometry (HAM)
+  ! Miller Extended Harmonic (MXH) geometry
   call cub_spline(expro_rmin(:)/r_min,expro_shape_sin3(:),n_exp,r,shape_sin3,n_r)
   call cub_spline(expro_rmin(:)/r_min,expro_shape_ssin3(:),n_exp,r,shape_ssin3,n_r)
   call cub_spline(expro_rmin(:)/r_min,expro_shape_cos0(:),n_exp,r,shape_cos0,n_r)
@@ -378,7 +378,7 @@ subroutine tgyro_init_profiles
   call cub_spline(expro_rmin(:)/r_min,expro_pow_e_aux(:)*1e13,n_exp,r,p_e_aux_in,n_r)
   call cub_spline(expro_rmin(:)/r_min,expro_pow_i_aux(:)*1e13,n_exp,r,p_i_aux_in,n_r)
   call cub_spline(expro_rmin(:)/r_min,expro_pow_e_ohmic(:)*1e13,n_exp,r,p_e_ohmic_in,n_r)
-
+  
   ! Apply auxiliary power rescale
   ! 1. subtract off
   p_e_in = p_e_in-p_e_aux_in

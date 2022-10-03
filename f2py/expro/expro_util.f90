@@ -374,7 +374,7 @@ subroutine expro_compute_derived
   temp = expro_qbeame+expro_qrfe+expro_qione
   call volint(temp,expro_pow_e_aux,expro_n_exp)
   ! Total electron power 
-  temp = temp-expro_qbrem-expro_qsync-expro_qline-expro_qei+expro_qfuse
+  temp = temp+expro_qohme-(expro_qbrem-expro_qsync-expro_qline)-expro_qei+expro_qfuse
   call volint(temp,expro_pow_e,expro_n_exp)
   ! Total auxiliary ion power 
   temp = expro_qbeami+expro_qrfi+expro_qioni+expro_qcxi
