@@ -276,6 +276,25 @@ subroutine tgyro_tglf_map
      tglf_use_bper_in = .false.
      tglf_use_bpar_in = .false.
 
+  case (5)
+
+     ! SAT_RULE=2 settings determined for JET DTE2 
+
+     tglf_sat_rule_in = 2
+     tglf_alpha_quench_in = 0.0
+     tglf_alpha_e_in = 1.0
+     tglf_alpha_p_in = 1.0
+     tglf_alpha_mach_in = 0.0
+     tglf_use_bper_in = .true.
+     tglf_use_bpar_in = .false.
+     tglf_use_ave_ion_grid_in = .true.
+     tglf_kygrid_model_in = 4
+     tglf_nbasis_max_in = 6
+     tglf_nmodes_in = 8
+     tglf_geometry_flag_in = 1
+     tglf_use_mhd_rule_in = .false.
+     tglf_nky_in = 18
+
   end select
 
   !----------------------------------------------------------------
