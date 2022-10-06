@@ -311,6 +311,15 @@ subroutine tgyro_init_profiles
   call cub_spline(expro_rmin(:)/r_min,expro_w0(:),n_exp,r,w0,n_r)
   ! w0p = d(w0)/dr (1/s/cm)
   call cub_spline(expro_rmin(:)/r_min,expro_w0p(:)/100.0,n_exp,r,w0p,n_r)
+  ! v_pol
+  do i_ion=1,loc_n_ion
+    call cub_spline(expro_rmin(:)/r_min,1e2*expro_vpol(i_ion,:),n_exp,r,v_pol(i_ion,:),n_r)
+  enddo  
+  ! vtor_p = d(vtor)/dr 
+  call bound_deriv(vtor_p, w0*r_maj, r, n_r)
+  ! vpol_p = d(vpol)/dr 
+  call bound_deriv(vpol_p, v_pol, r, n_r)
+
   !------------------------------------------------------------------------------------------
 
   !------------------------------------------------------------------------------------------
