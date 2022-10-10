@@ -58,58 +58,51 @@ else:
 
 epx = np.zeros([nx,nr],dtype=complex)
 eny = np.zeros([ny,nn],dtype=complex)
-x = np.zeros([nx])
-y = np.zeros([ny])
+
+# FFT-consistent real-space meshpoints
+x = np.arange(nx)*2*np.pi/nx
+y = np.arange(ny)*2*np.pi/ny
 
 #------------------------------------------------------------------------
 # Some setup
 #
+
 if usefft:
    mode = 'FFT'
-   for i in range(nx):
-      x[i] = i*2*np.pi/nx
-   for j in range(ny):
-      y[j] = j*2*np.pi/ny
 elif haspygacode:
    mode = 'pygacode'
-   for i in range(nx):
-      x[i] = i*2*np.pi/(nx-1)
-   for j in range(ny):
-      y[j] = j*2*np.pi/(ny-1)
 else:
    mode = 'slow'
    # Fourier arrays
    for i in range(nx):
-      x[i] = i*2*np.pi/(nx-1)
       for p in range(nr):
          epx[i,p]=np.exp(1j*(p-nr/2)*x[i])
 
    for j in range(ny):
-      y[j] = j*2*np.pi/(ny-1)
       for n in range(nn):
          eny[j,n]=np.exp(-1j*n*y[j])
 
-   # factor of 1/2 for n=0
-   eny[:,0] = 0.5*eny[:,0]
-
+   # Only computing half sum 
+   eny[:,0] = 0.5
+   
 #------------------------------------------------------------------------
 # Real-space field reconstruction (if no pygacode)
 def maptoreal(nr,nn,nx,ny,c):
 
-    import numpy as np
-    import time
+   import numpy as np
+   import time
 
-    start = time.time()
+   start = time.time()
 
-    # This needs to be fast, so we use numpy.outer
-    f = np.zeros([nx,ny])
-    for p in range(nr):
-        for n in range(nn):
-            f[:,:] = f[:,:]+np.real(c[p,n]*np.outer(epx[:,p],eny[:,n]))
+   # This needs to be fast, so we use numpy.outer
+   f = np.zeros([nx,ny])
+   for p in range(nr):
+      for n in range(nn):
+         f[:,:] = f[:,:]+np.real(c[p,n]*np.outer(epx[:,p],eny[:,n]))
 
-    end = time.time()
+   end = time.time()
 
-    return f,end-start
+   return f,end-start
 #------------------------------------------------------------------------
 
 #------------------------------------------------------------------------
@@ -119,29 +112,22 @@ def maptoreal_fft(nr,nn,nx,ny,c):
    import numpy as np
    import time
 
-   d = np.zeros([nx,ny],dtype=complex)
-
-   # Mapping
-   # d[ ix, iy] = c[ ix,iy]
-   # d[ ix,-iy] = c[-ix,iy]^*
+   # Storage for numpy inverse real transform (irfft2)
+   d = np.zeros([nx,nn],dtype=complex)
 
    start = time.time()
 
-   for ix in range(-nr//2+1,nr//2):
-      i = ix
-      if ix < 0:
-         i = ix+nx
-      d[i,0:nn] = c[-ix+nr//2,0:nn]
+   for i in range(nr):
+      p = i-nr//2
+      if p < 0:
+         k = p+nx
+      else:
+         k = p
+      d[k,0:nn] = c[i,0:nn]
 
-   for ix in range(-nr//2,nr//2-1):
-      i = ix
-      if ix < 0:
-         i = ix+nx
-      for iy in range(1,nn):
-         d[i,ny-iy] = np.conj(c[ix+nr//2,iy])
-
-   # Sign convention negative exponent exp(-inx)
-   f = np.real(np.fft.fft2(d))*0.5
+   # 2D inverse real Hermitian transform
+   # NOTE: need factor of 0.5 to match direct half-sum
+   f = np.fft.irfft2(d,s=[nx,2*nn-1],norm='forward')*0.5
 
    end = time.time()
 
@@ -192,6 +178,9 @@ def frame():
       else:
          f,t = maptoreal(nr,nn,nx,ny,c)
 
+      # Correct for half-sum
+      f = 2*f
+      
       if fmin == 'auto':
          f0=np.min(f)
          f1=np.max(f)
@@ -220,6 +209,7 @@ def frame():
          ax.contourf(yp,xp,f,levels,cmap=plt.get_cmap(colormap))
 
       print('INFO: (plot_fluct '+mode+') min=%e , max=%e  (t=%e)' % (f0,f1,t))
+      print('INFO: (plot_fluct) Shape = '+str(f.shape))
 
       ax.set_title(title)
       ax.set_aspect('equal')
