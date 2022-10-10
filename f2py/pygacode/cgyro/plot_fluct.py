@@ -124,13 +124,13 @@ def maptoreal_fft(nr,nn,nx,ny,c):
          k = -p+nx
       else:
          k = -p
-      # Use identity f(-n,p) = f(n,-p)* 
+      # Use identity f(p,-n) = f(-p,n)* 
       d[k,0:nn] = np.conj(c[i,0:nn])
 
    # 2D inverse real Hermitian transform
    # NOTE: using inverse FFT with convention exp(ipx+iny), so need n -> -n 
    # NOTE: need factor of 0.5 to match half-sum method of slow maptoreal()
-   f = np.fft.irfft2(d,s=[nx,2*nn-1],norm='forward')*0.5
+   f = np.fft.irfft2(d,s=[nx,ny],norm='forward')*0.5
    
    end = time.time()
 
@@ -191,25 +191,37 @@ def frame():
          f0=float(fmin)
          f1=float(fmax)
 
-      xp = x/(2*np.pi)*sim.length
-      # ky[1] < 0 is possible
-      yp = y/np.abs(sim.ky[1])
-      aspect = max(abs(yp))/max(abs(xp))
+      # Physical maxima
+      xmax = sim.length
+      ymax = (2*np.pi)/np.abs(sim.ky[1])
+      xp = x/(2*np.pi)*xmax
+      yp = y/(2*np.pi)*ymax
 
+      # Periodic extensions
+      xp = np.append(xp,xmax)
+      yp = np.append(yp,ymax)
+      fp = np.zeros([nx+1,ny+1])
+      fp[0:nx,0:ny] = f[:,:]
+      fp[-1,:] = fp[0,:]
+      fp[:,-1] = fp[:,0]
+      
       levels = np.arange(f0,f1,(f1-f0)/256)
       if land == 0:
          fig = plt.figure(figsize=(px/100.0,py/100.0))
          ax = fig.add_subplot(111)
          ax.set_xlabel(r'$x/\rho_s$')
          ax.set_ylabel(r'$y/\rho_s$')
-         ax.contourf(xp,yp,np.transpose(f),levels,cmap=plt.get_cmap(colormap))
-         plt.subplots_adjust(top=0.94)
+         ax.set_xlim([0,xmax])
+         ax.set_ylim([0,ymax])
+         ax.contourf(xp,yp,np.transpose(fp),levels,cmap=plt.get_cmap(colormap))
       else:
          fig = plt.figure(figsize=(px/100.0,py/100.0))
          ax = fig.add_subplot(111)
          ax.set_xlabel(r'$y/\rho_s$')
          ax.set_ylabel(r'$x/\rho_s$')
-         ax.contourf(yp,xp,f,levels,cmap=plt.get_cmap(colormap))
+         ax.set_xlim([0,ymax])
+         ax.set_ylim([0,xmax])
+         ax.contourf(yp,xp,fp,levels,cmap=plt.get_cmap(colormap))
 
       print('INFO: (plot_fluct '+mode+') min=%e , max=%e  (t=%e)' % (f0,f1,t))
       print('INFO: (plot_fluct) Shape = '+str(f.shape))
