@@ -76,14 +76,14 @@ else:
    # Fourier arrays
    for i in range(nx):
       for p in range(nr):
-         epx[i,p]=np.exp(1j*(p-nr/2)*x[i])
+         epx[i,p]=np.exp(1j*(p-nr//2)*x[i])
 
    for j in range(ny):
       for n in range(nn):
          eny[j,n]=np.exp(-1j*n*y[j])
 
    # Only computing half sum 
-   eny[:,0] = 0.5
+   eny[:,0] = 0.5*eny[:,0]
    
 #------------------------------------------------------------------------
 # Real-space field reconstruction (if no pygacode)
@@ -119,16 +119,19 @@ def maptoreal_fft(nr,nn,nx,ny,c):
 
    for i in range(nr):
       p = i-nr//2
-      if p < 0:
-         k = p+nx
+      # k is the "standard FFT index"
+      if -p < 0:
+         k = -p+nx
       else:
-         k = p
-      d[k,0:nn] = c[i,0:nn]
+         k = -p
+      # Use identity f(-n,p) = f(n,-p)* 
+      d[k,0:nn] = np.conj(c[i,0:nn])
 
    # 2D inverse real Hermitian transform
-   # NOTE: need factor of 0.5 to match direct half-sum
+   # NOTE: using inverse FFT with convention exp(ipx+iny), so need n -> -n 
+   # NOTE: need factor of 0.5 to match half-sum method of slow maptoreal()
    f = np.fft.irfft2(d,s=[nx,2*nn-1],norm='forward')*0.5
-
+   
    end = time.time()
 
    return f,end-start
@@ -180,7 +183,7 @@ def frame():
 
       # Correct for half-sum
       f = 2*f
-      
+            
       if fmin == 'auto':
          f0=np.min(f)
          f1=np.max(f)
