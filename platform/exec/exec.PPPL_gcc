@@ -1,5 +1,5 @@
 #!/bin/sh
-# GACODE Parallel execution script (PPPL)
+# GACODE Parallel execution script (PPPL_gcc)
 
 simdir=${1}
 nmpi=${2}
