@@ -223,8 +223,6 @@ subroutine cgyro_flux
        MPI_SUM, &
        NEW_COMM_1, &
        i_err)
-
-  print *,gflux(0,:,4,:)
   
   ! Reduced real cflux(ky), below, is still distributed over n 
 
