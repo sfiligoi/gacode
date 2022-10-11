@@ -165,18 +165,19 @@ subroutine cgyro_init_manager
         allocate(gcoef(5,nc))
      endif
      allocate(field(n_field,nc))
+     allocate(field_dot(n_field,nc))
      allocate(field_loc(n_field,nc))
      allocate(field_old(n_field,nc))
      allocate(field_old2(n_field,nc))
      allocate(field_old3(n_field,nc))
      allocate(    moment(n_radial,theta_plot,n_species,3))
      allocate(moment_loc(n_radial,theta_plot,n_species,3))
-     allocate(    cflux(n_species,3,n_field))
-     allocate(cflux_loc(n_species,3,n_field))
-     allocate(    gflux(0:n_global,n_species,3,n_field))
-     allocate(gflux_loc(0:n_global,n_species,3,n_field))
-     allocate(cflux_tave(n_species,3))
-     allocate(gflux_tave(n_species,3))
+     allocate(    cflux(n_species,4,n_field))
+     allocate(cflux_loc(n_species,4,n_field))
+     allocate(    gflux(0:n_global,n_species,4,n_field))
+     allocate(gflux_loc(0:n_global,n_species,4,n_field))
+     allocate(cflux_tave(n_species,4))
+     allocate(gflux_tave(n_species,4))
      
      allocate(recv_status(MPI_STATUS_SIZE))
 
@@ -215,6 +216,10 @@ subroutine cgyro_init_manager
 
      allocate(cap_h_c(nc,nv_loc))
      allocate(cap_h_ct(nv_loc,nc))
+     allocate(cap_h_c_dot(nc,nv_loc))
+     allocate(cap_h_c_old(nc,nv_loc))
+     allocate(cap_h_c_old2(nc,nv_loc))
+     allocate(cap_h_v(nc_loc,nv))
      allocate(omega_cap_h(nc,nv_loc))
      allocate(omega_h(nc,nv_loc))
      allocate(omega_s(n_field,nc,nv_loc))
@@ -226,9 +231,6 @@ subroutine cgyro_init_manager
      allocate(jxvec_c(n_field,nc,nv_loc))
      allocate(upfac1(nc,nv_loc,2))
      allocate(upfac2(nc,nv_loc,2))
-     ! Real-space distributed arrays
-     allocate(cap_h_v(nc_loc,nv))
-     allocate(cap_h_v_prime(nc_loc,nv))
 
 !$acc enter data create(cap_h_c,cap_h_ct,cap_h_v,dvjvec_c,dvjvec_v)
 
@@ -293,7 +295,7 @@ subroutine cgyro_init_manager
 
   call cgyro_check_memory(trim(path)//runfile_memory)
 
-  if (velocity_order==1) then
+  if (velocity_order == 1) then
     ! traditional ordering
     restart_magic = 140906808
   else
@@ -427,51 +429,3 @@ subroutine cgyro_init_manager
   call timer_lib_out('nl_init')
 
 end subroutine cgyro_init_manager
-
-!---------------------------------------------------
-! Calculate weight correction to integrate function
-! over interval [0,inf] instead of [0,b]
-!
-! Do this by calculating offsets to match
-!
-! Int[1/u^2], Int[1/u], Int[1], Int[u], ...
-!
-! We start from 1/u^2 not 1 since these are the
-! total polynomials of the original scheme without
-! u^2 weighting.
-!----------------------------------------------------
-
-subroutine domain_renorm(u,w,n)
-
-  implicit none
-
-  integer, intent(in) :: n
-  real, intent(in), dimension(n) :: u
-  real, intent(inout), dimension(n) :: w
-  integer, dimension(:), allocatable :: i_piv
-  real, dimension(:,:), allocatable :: a
-  real, dimension(:), allocatable :: b
-  real :: pi
-  integer :: info,m,i
-
-  pi = 4*atan(1.0)
-
-  allocate(i_piv(n))
-  allocate(b(n))
-  allocate(a(n,n))
-  do m=0,n-1
-     b(m+1) = 2*gamma((1+m)/2.0)/sqrt(pi)-sum(w*u**(m-2))    
-     do i=1,n
-        a(m+1,i) = u(i)**(m-2)
-     enddo
-  enddo
-
-  call DGESV(n,1,a,n,i_piv,b,n,info)
-
-  w = w+b
-
-  deallocate(i_piv)
-  deallocate(b)
-  deallocate(a)
-
-end subroutine domain_renorm

@@ -93,7 +93,8 @@ subroutine cgyro_write_timedata
   ! Checksum for regression testing
   ! Note that checksum is a distributed real scalar
   if (zf_test_mode == 0) then
-     call write_precision(trim(path)//runfile_prec,sum(abs(real(gflux(0,:,:,:)))))
+     ! Do not include exchange in precision
+     call write_precision(trim(path)//runfile_prec,sum(abs(real(gflux(0,:,1:3,:)))))
   else
      call write_precision(trim(path)//runfile_prec,sum(abs(field)))
   endif

@@ -77,6 +77,7 @@ subroutine cgyro_cleanup
 !$acc exit data delete(field_loc)     
      deallocate(field_loc)
   endif
+  if(allocated(field_dot))           deallocate(field_dot)
   if(allocated(field_old))           deallocate(field_old)
   if(allocated(field_old2))          deallocate(field_old2)
   if(allocated(field_old3))          deallocate(field_old3)
@@ -133,6 +134,9 @@ subroutine cgyro_cleanup
 !$acc exit data delete(cap_h_ct)       
      deallocate(cap_h_ct)
   endif
+  if(allocated(cap_h_c_dot))              deallocate(cap_h_c_dot)
+  if(allocated(cap_h_c_old))              deallocate(cap_h_c_old)
+  if(allocated(cap_h_c_old2))             deallocate(cap_h_c_old2)  
   if(allocated(omega_cap_h)) then
 !$acc exit data delete(omega_cap_h)        
      deallocate(omega_cap_h)
@@ -181,7 +185,6 @@ subroutine cgyro_cleanup
 !$acc exit data delete(cap_h_v)     
      deallocate(cap_h_v)
   endif
-  if(allocated(cap_h_v_prime))       deallocate(cap_h_v_prime)
   if(allocated(upwind_res_loc))   then
 !$acc exit data delete(upwind_res_loc)
      deallocate(upwind_res_loc)

@@ -50,7 +50,8 @@ subroutine cgyro_error_estimate
 
       ! 1. Estimate of total (field) error via quadratic interpolation
 
-      field_loc(i_f,ic) = 3.0*field_old(i_f,ic)-3.0*field_old2(i_f,ic)+field_old3(i_f,ic)
+      field_loc(i_f,ic) = 3*field_old(i_f,ic)-3*field_old2(i_f,ic)+field_old3(i_f,ic)
+      field_dot(i_f,ic) = (3*field(i_f,ic)-4*field_old(i_f,ic)+field_old2(i_f,ic))/(2*delta_t)
 
       ! Define norm and error for each mode number n
       norm_loc_s  = norm_loc_s  + abs(field(i_f,ic))
@@ -66,6 +67,11 @@ subroutine cgyro_error_estimate
   norm_loc(1)  = norm_loc_s
   error_loc(1) = error_loc_s
 
+  ! JC: Optimize?
+  cap_h_c_dot = (3*cap_h_c-4*cap_h_c_old+cap_h_c_old2)/(2*delta_t)
+  cap_h_c_old = cap_h_c
+  cap_h_c_old2 = cap_h_c_old
+  
   call timer_lib_out('field')
 
   ! 2. Estimate of collisionless error via 3rd-order linear estimate

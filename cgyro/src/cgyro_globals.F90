@@ -356,9 +356,11 @@ module cgyro_globals
   complex, dimension(:,:), allocatable :: omega_h
   complex, dimension(:,:,:), allocatable :: omega_s,omega_ss
   complex, dimension(:,:), allocatable :: cap_h_c
+  complex, dimension(:,:), allocatable :: cap_h_c_dot
+  complex, dimension(:,:), allocatable :: cap_h_c_old
+  complex, dimension(:,:), allocatable :: cap_h_c_old2
   complex, dimension(:,:), allocatable :: cap_h_ct
   complex, dimension(:,:), allocatable :: cap_h_v
-  complex, dimension(:,:), allocatable :: cap_h_v_prime
   real, dimension(:,:,:), allocatable :: jvec_c
   real, dimension(:,:,:,:,:), allocatable :: jvec_c_nl ! used by NL only
   real, dimension(:,:,:), allocatable :: jvec_v
@@ -371,6 +373,7 @@ module cgyro_globals
   real, dimension(:,:), allocatable :: fcoef
   real, dimension(:,:), allocatable :: gcoef
   complex, dimension(:,:), allocatable :: field
+  complex, dimension(:,:), allocatable :: field_dot
   complex, dimension(:,:), allocatable :: field_loc
   complex, dimension(:,:), allocatable :: field_old
   complex, dimension(:,:), allocatable :: field_old2

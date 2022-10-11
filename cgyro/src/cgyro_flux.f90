@@ -37,7 +37,7 @@ subroutine cgyro_flux
   integer :: l,icl
   real :: dv,cn
   real :: vpar
-  complex, dimension(0:n_global,n_field) :: prod1,prod2
+  complex, dimension(0:n_global,n_field) :: prod1,prod2,prod3
   real :: dvr
   real :: erot
   real :: flux_norm
@@ -119,6 +119,7 @@ subroutine cgyro_flux
 
         prod1 = 0.0 
         prod2 = 0.0
+        prod3 = 0.0
 
         ! Global fluxes (complex)
         do l=0,n_global
@@ -127,17 +128,17 @@ subroutine cgyro_flux
 
            if (ir-l > 0) then
               icl = ic_c(ir-l,it)
-              prod1(l,:) = prod1(l,:)+i_c*cap_h_c(ic,iv_loc)*&
-                   conjg(jvec_c(:,icl,iv_loc)*field(:,icl))
-              prod2(l,:) = prod2(l,:)+i_c*cap_h_c(ic,iv_loc)*&
-                   conjg(i_c*jxvec_c(:,icl,iv_loc)*field(:,icl))
+              prod1(l,:) = prod1(l,:)+i_c*cap_h_c(ic,iv_loc)*conjg(jvec_c(:,icl,iv_loc)*field(:,icl))
+              prod2(l,:) = prod2(l,:)+i_c*cap_h_c(ic,iv_loc)*conjg(i_c*jxvec_c(:,icl,iv_loc)*field(:,icl))
+              prod3(l,:) = prod3(l,:)-cap_h_c_dot(ic,iv_loc)*conjg(jvec_c(:,icl,iv_loc)*field(:,icl)) &
+                                     +cap_h_c(ic,iv_loc)*conjg(jvec_c(:,icl,iv_loc)*field_dot(:,icl))
            endif
            if (ir+l <= n_radial) then
               icl = ic_c(ir+l,it)
-              prod1(l,:) = prod1(l,:)-i_c*conjg(cap_h_c(ic,iv_loc))*&
-                   jvec_c(:,icl,iv_loc)*field(:,icl)
-              prod2(l,:) = prod2(l,:)-i_c*conjg(cap_h_c(ic,iv_loc))*&
-                   i_c*jxvec_c(:,icl,iv_loc)*field(:,icl)
+              prod1(l,:) = prod1(l,:)-i_c*conjg(cap_h_c(ic,iv_loc))*jvec_c(:,icl,iv_loc)*field(:,icl)
+              prod2(l,:) = prod2(l,:)-i_c*conjg(cap_h_c(ic,iv_loc))*i_c*jxvec_c(:,icl,iv_loc)*field(:,icl)
+              prod3(l,:) = prod3(l,:)+conjg(cap_h_c_dot(ic,iv_loc))*jvec_c(:,icl,iv_loc)*field(:,icl) &
+                                     -conjg(cap_h_c(ic,iv_loc))*jvec_c(:,icl,iv_loc)*field_dot(:,icl)
            endif
 
         enddo
@@ -145,17 +146,21 @@ subroutine cgyro_flux
         dvr  = w_theta(it)*dens_rot(it,is)*dens(is)*dv
         erot = (energy(ie)+lambda_rot(it,is))*temp(is)
 
-        ! Density flux: Gamma_a
+        ! 1. Density flux: Gamma_a
         gflux_loc(:,is,1,:) = gflux_loc(:,is,1,:)+prod1(:,:)*dvr
 
-        ! Energy flux : Q_a
+        ! 2. Energy flux : Q_a
         gflux_loc(:,is,2,:) = gflux_loc(:,is,2,:)+prod1(:,:)*dvr*erot
 
         prod1(:,:) = prod1(:,:)*(mach*bigr(it)/rmaj+btor(it)/bmag(it)*vpar)+prod2(:,:)
 
-        ! Momentum flux: Pi_a
+        ! 3. Momentum flux: Pi_a
         gflux_loc(:,is,3,:) = gflux_loc(:,is,3,:)+prod1(:,:)*dvr*bigr(it)*mass(is)
 
+        ! 4. Exchange
+        gflux_loc(:,is,4,:) = gflux_loc(:,is,4,:)+prod3(:,:)*dvr
+
+        
         ! Construct "positive/interior" flux:
         cflux_loc = real(gflux_loc(0,:,:,:))
         do l=1,n_global
@@ -219,6 +224,8 @@ subroutine cgyro_flux
        NEW_COMM_1, &
        i_err)
 
+  print *,gflux(0,:,4,:)
+  
   ! Reduced real cflux(ky), below, is still distributed over n 
 
   call MPI_ALLREDUCE(cflux_loc, &
