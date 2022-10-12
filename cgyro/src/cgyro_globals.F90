@@ -13,7 +13,7 @@ module cgyro_globals
   use cuFFT
 #endif
   use, intrinsic :: iso_fortran_env
-
+  
   ! Data output precision setting
   integer, parameter :: BYTE=4 ! Change to 8 for double precision
   

@@ -124,7 +124,7 @@ subroutine cgyro_flux
         ! Global fluxes (complex)
         do l=0,n_global
 
-           ! i H J0 phi^* - i H^* J0 phi
+           ! H w^* + H^* w
 
            if (ir-l > 0) then
               icl = ic_c(ir-l,it)
@@ -137,8 +137,8 @@ subroutine cgyro_flux
               icl = ic_c(ir+l,it)
               prod1(l,:) = prod1(l,:)-i_c*conjg(cap_h_c(ic,iv_loc))*jvec_c(:,icl,iv_loc)*field(:,icl)
               prod2(l,:) = prod2(l,:)-i_c*conjg(cap_h_c(ic,iv_loc))*i_c*jxvec_c(:,icl,iv_loc)*field(:,icl)
-              prod3(l,:) = prod3(l,:)+conjg(cap_h_c_dot(ic,iv_loc))*jvec_c(:,icl,iv_loc)*field(:,icl) &
-                                     -conjg(cap_h_c(ic,iv_loc))*jvec_c(:,icl,iv_loc)*field_dot(:,icl)
+              prod3(l,:) = prod3(l,:)-conjg(cap_h_c_dot(ic,iv_loc))*jvec_c(:,icl,iv_loc)*field(:,icl) &
+                                     +conjg(cap_h_c(ic,iv_loc))*jvec_c(:,icl,iv_loc)*field_dot(:,icl)
            endif
 
         enddo
@@ -158,7 +158,7 @@ subroutine cgyro_flux
         gflux_loc(:,is,3,:) = gflux_loc(:,is,3,:)+prod1(:,:)*dvr*bigr(it)*mass(is)
 
         ! 4. Exchange
-        gflux_loc(:,is,4,:) = gflux_loc(:,is,4,:)+prod3(:,:)*dvr
+        gflux_loc(:,is,4,:) = gflux_loc(:,is,4,:)+0.5*prod3(:,:)*dvr*z(is)
 
         
         ! Construct "positive/interior" flux:
@@ -192,13 +192,13 @@ subroutine cgyro_flux
 
   else
 
-     ! Complete definition of fluxes
-     gflux_loc = gflux_loc*(k_theta*rho)
-     cflux_loc = cflux_loc*(k_theta*rho)
+     ! Complete definition of fluxes (not exchange)
+     gflux_loc(:,:,1:3,:) = gflux_loc(:,:,1:3,:)*(k_theta*rho)
+     cflux_loc(:,1:3,:)   = cflux_loc(:,1:3,:)*(k_theta*rho)
 
      ! GyroBohm normalizations
-     gflux_loc  = gflux_loc/rho**2
-     cflux_loc  = cflux_loc/rho**2
+     gflux_loc = gflux_loc/rho**2
+     cflux_loc = cflux_loc/rho**2
 
   endif
 

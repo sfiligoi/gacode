@@ -71,7 +71,7 @@ subroutine cgyro_init_kernel
 
   if (test_flag == 1) return
   
-    if (restart_flag == 1) then
+  if (restart_flag == 1) then
      io_control = 3*(1-silent_flag)
   else
      io_control = 1*(1-silent_flag)

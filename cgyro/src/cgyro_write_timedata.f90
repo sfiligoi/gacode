@@ -12,6 +12,9 @@ subroutine cgyro_write_timedata
 
   implicit none
 
+  integer, parameter :: n_flux=3
+
+  logical :: has_zf, has_balloon
   integer :: i_field,i_moment
   integer :: ir,it
   integer :: p_field
@@ -19,7 +22,6 @@ subroutine cgyro_write_timedata
   complex :: a_norm
   complex :: ftemp(n_theta,n_radial)
   complex :: field_plot(n_radial,theta_plot)
-  logical :: has_zf, has_balloon
 
   ! Print this data on print steps only; otherwise exit now
   if (mod(i_time,print_step) /= 0) return
@@ -38,14 +40,14 @@ subroutine cgyro_write_timedata
   ! ky flux for all species with field breakdown
   call cgyro_write_distributed_breal(&
        trim(path)//binfile_ky_flux,&
-       size(gflux(0,:,:,:)),&
-       real(gflux(0,:,:,:)))
+       size(gflux(0,:,1:n_flux,:)),&
+       real(gflux(0,:,1:n_flux,:)))
 
   ! central ky flux for all species with field breakdown
   call cgyro_write_distributed_breal(&
        trim(path)//binfile_ky_cflux,&
-       size(cflux(:,:,:)),&
-       cflux(:,:,:))
+       size(cflux(:,1:n_flux,:)),&
+       cflux(:,1:n_flux,:))
 
   if (gflux_print_flag == 1) then
      ! Global (n,e,v) fluxes for all species
@@ -274,16 +276,16 @@ subroutine cgyro_write_distributed_bcomplex(datafile,n_fn,fn)
 
         open(unit=io,file=datafile,status='old',access='stream',iostat=i_err)
         if (i_err/=0) then
-          call cgyro_error('[REWIND] Failed to open '//datafile)
-          return
+           call cgyro_error('[REWIND] Failed to open '//datafile)
+           return
         endif
         if (disp>0) then
-          read(io,pos=disp, iostat=i_err) cdummy
-          if (i_err/=0) then
-            call cgyro_error('[REWIND] Failed to rewind '//datafile)
-            close(io)
-            return
-          endif
+           read(io,pos=disp, iostat=i_err) cdummy
+           if (i_err/=0) then
+              call cgyro_error('[REWIND] Failed to rewind '//datafile)
+              close(io)
+              return
+           endif
         endif
         endfile(io)
         close(io)
@@ -384,7 +386,7 @@ subroutine cgyro_write_distributed_breal(datafile,n_fn,fn)
              fstatus,&
              i_err)
      else
-        
+
         call MPI_FILE_SET_VIEW(fh,&
              disp,&
              MPI_REAL8,&
@@ -417,16 +419,16 @@ subroutine cgyro_write_distributed_breal(datafile,n_fn,fn)
 
         open(unit=io,file=datafile,status='old',access='stream',iostat=i_err)
         if (i_err/=0) then
-          call cgyro_error('[REWIND] Failed to open '//datafile)
-          return
+           call cgyro_error('[REWIND] Failed to open '//datafile)
+           return
         endif
         if (disp>0) then
-          read(io,pos=disp, iostat=i_err) cdummy
-          if (i_err/=0) then
-            call cgyro_error('[REWIND] Failed to rewind '//datafile)
-            close(io)
-            return
-          endif
+           read(io,pos=disp, iostat=i_err) cdummy
+           if (i_err/=0) then
+              call cgyro_error('[REWIND] Failed to rewind '//datafile)
+              close(io)
+              return
+           endif
         endif
         endfile(io)
         close(io)
@@ -834,16 +836,16 @@ subroutine write_binary(datafile,fn,n_fn)
 
      open(unit=io,file=datafile,status='old',access='stream', iostat=i_err)
      if (i_err/=0) then
-       call cgyro_error('[REWIND] Failed to open '//datafile)
-       return
+        call cgyro_error('[REWIND] Failed to open '//datafile)
+        return
      endif
      if (disp>0) then
-       read(io,pos=disp, iostat=i_err) cdummy
-       if (i_err/=0) then
-         call cgyro_error('[REWIND] Failed to rewind '//datafile)
-         close(io)
-         return
-       endif
+        read(io,pos=disp, iostat=i_err) cdummy
+        if (i_err/=0) then
+           call cgyro_error('[REWIND] Failed to rewind '//datafile)
+           close(io)
+           return
+        endif
      endif
      endfile(io)
      close(io)
@@ -871,7 +873,7 @@ subroutine extended_ang(f2d)
   complex, dimension(n_theta,n_radial) :: f1d 
 
   ! Assumption is that box_size=1
-  
+
   do ir=1,n_radial
      f1d(:,ir) = f2d(:,ir)*exp(-2*pi*i_c*(px(ir)+px0)*k_theta*rmin*sign_qs)
   enddo
@@ -884,5 +886,5 @@ subroutine extended_ang(f2d)
   else
      f2d = f1d
   endif
-  
+
 end subroutine extended_ang

@@ -727,6 +727,12 @@ class cgyrodata_plot(data.cgyrodata):
          ttag = 'Pi'
          ftag = 'flux_v'
          y = ys[:,2,:]
+      elif moment == 's':
+         ntag = 'Exchange'
+         mtag = 'S'
+         ttag = 'S'
+         ftag = 'exch'
+         y = ys[:,3,:]
       else:
          raise ValueError('(plot_flux.py) Invalid moment.')
 
@@ -785,8 +791,9 @@ class cgyrodata_plot(data.cgyrodata):
       tag = [
          'GAMMA [GB]',
          'Q     [GB]',
-         'PI    [GB]']
-      for i in range(3):
+         'PI    [GB]',
+         'S     [GB]']
+      for i in range(self.n_flux):
          bstr=''
          for ispec in range(ns):
             ave,var = variance(ys[ispec,i,:],t,w,wmax)
@@ -964,6 +971,12 @@ class cgyrodata_plot(data.cgyrodata):
          ttag = 'Pi'
          ftag = 'flux_v'
          y = ys[:,2,:,:]
+      elif moment == 's':
+         ntag = 'Exchange'
+         mtag = 'S'
+         ttag = 'S'
+         ftag = 'exch'
+         y = ys[:,3,:,:]
       else:
          raise ValueError('(plot_ky_flux.py) Invalid moment.')
       

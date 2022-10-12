@@ -20,7 +20,7 @@ subroutine cgyro_error_estimate
   real, dimension(2) :: norm_loc,norm
   real, dimension(2) :: pair_loc,pair
   real, dimension(2) :: error_loc
-  
+
   real :: norm_loc_s,error_loc_s,h_s,r_s
 
 #ifdef _OPENACC
@@ -31,8 +31,8 @@ subroutine cgyro_error_estimate
 !$acc parallel loop collapse(2) independent present(h_x,rhs(:,:,1)) reduction(+:h_s,r_s) async(2)
   do iv_loc=1,nv_loc
      do ic=1,nc
-       h_s = h_s + abs(h_x(ic,iv_loc))
-       r_s = r_s + abs(rhs(ic,iv_loc,1))
+        h_s = h_s + abs(h_x(ic,iv_loc))
+        r_s = r_s + abs(rhs(ic,iv_loc,1))
      enddo
   enddo
 #endif
@@ -46,22 +46,22 @@ subroutine cgyro_error_estimate
   ! assuming field was already synched to system memory
 !$omp parallel do collapse(2) reduction(+:norm_loc_s,error_loc_s)
   do ic=1,nc
-    do i_f=1,n_field
+     do i_f=1,n_field
 
-      ! 1. Estimate of total (field) error via quadratic interpolation
+        ! 1. Estimate of total (field) error via quadratic interpolation
 
-      field_loc(i_f,ic) = 3*field_old(i_f,ic)-3*field_old2(i_f,ic)+field_old3(i_f,ic)
-      field_dot(i_f,ic) = (3*field(i_f,ic)-4*field_old(i_f,ic)+field_old2(i_f,ic))/(2*delta_t)
+        field_loc(i_f,ic) = 3*field_old(i_f,ic)-3*field_old2(i_f,ic)+field_old3(i_f,ic)
+        field_dot(i_f,ic) = (3*field(i_f,ic)-4*field_old(i_f,ic)+field_old2(i_f,ic))/(2*delta_t)
 
-      ! Define norm and error for each mode number n
-      norm_loc_s  = norm_loc_s  + abs(field(i_f,ic))
-      error_loc_s = error_loc_s + abs(field(i_f,ic)-field_loc(i_f,ic))
+        ! Define norm and error for each mode number n
+        norm_loc_s  = norm_loc_s  + abs(field(i_f,ic))
+        error_loc_s = error_loc_s + abs(field(i_f,ic)-field_loc(i_f,ic))
 
-      ! save old values for next iteration
-      field_old3(i_f,ic) = field_old2(i_f,ic)
-      field_old2(i_f,ic) = field_old(i_f,ic)
-      field_old(i_f,ic)  = field(i_f,ic)
-    enddo
+        ! save old values for next iteration
+        field_old3(i_f,ic) = field_old2(i_f,ic)
+        field_old2(i_f,ic) = field_old(i_f,ic)
+        field_old(i_f,ic)  = field(i_f,ic)
+     enddo
   enddo
 
   norm_loc(1)  = norm_loc_s
@@ -71,7 +71,7 @@ subroutine cgyro_error_estimate
   cap_h_c_dot = (3*cap_h_c-4*cap_h_c_old+cap_h_c_old2)/(2*delta_t)
   cap_h_c_old = cap_h_c
   cap_h_c_old2 = cap_h_c_old
-  
+
   call timer_lib_out('field')
 
   ! 2. Estimate of collisionless error via 3rd-order linear estimate
@@ -87,8 +87,8 @@ subroutine cgyro_error_estimate
 !$omp parallel do collapse(2) reduction(+:h_s,r_s)
   do iv_loc=1,nv_loc
      do ic=1,nc
-       h_s = h_s + abs(h_x(ic,iv_loc))
-       r_s = r_s + abs(rhs(ic,iv_loc,1))
+        h_s = h_s + abs(h_x(ic,iv_loc))
+        r_s = r_s + abs(rhs(ic,iv_loc,1))
      enddo
   enddo
 #endif
@@ -111,7 +111,7 @@ subroutine cgyro_error_estimate
 
   norm_loc(2) = pair(1)
   error_loc(2) = pair(2)
-  
+
   ! Get sum of all errors
   call MPI_ALLREDUCE(error_loc, &
        integration_error, &

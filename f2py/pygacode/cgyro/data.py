@@ -145,24 +145,28 @@ class cgyrodata:
          usec = False
 
       #-----------------------------------------------------------------
-      # Particle, momentum and energy fluxes
-      #
+      # Particle, momentum, energy fluxes, and exchange (autodetected)
+      #      
       nt = self.n_time
-      nd = self.n_species*3*self.n_field*self.n_n*nt
+      nd = self.n_species*self.n_field*self.n_n*nt
 
       if usec:
          t,fmt,data = self.extract('.cgyro.ky_cflux')
+         m = data.shape[0]//nd
          if fmt != 'null':
-            self.ky_flux = np.reshape(data[0:nd],(self.n_species,3,self.n_field,self.n_n,nt),'F')
+            self.ky_flux = np.reshape(data[0:nd*m],(self.n_species,m,self.n_field,self.n_n,nt),'F')
             if not self.silent:
                print('INFO: (data.py) Read data in '+fmt+'.cgyro.ky_cflux. '+t)
 
       if not usec or fmt == 'null':
          t,fmt,data = self.extract('.cgyro.ky_flux')
+         m = data.shape[0]//nd
          if fmt != 'null':  
-            self.ky_flux = np.reshape(data[0:nd],(self.n_species,3,self.n_field,self.n_n,nt),'F')
+            self.ky_flux = np.reshape(data[0:nd*m],(self.n_species,m,self.n_field,self.n_n,nt),'F')
             if not self.silent:
                print('INFO: (data.py) Read data in '+fmt+'.cgyro.ky_flux. '+t)
+
+      self.n_flux = m
       #-----------------------------------------------------------------
 
       return usec
