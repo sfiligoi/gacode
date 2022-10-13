@@ -121,7 +121,7 @@ subroutine cgyro_flux
         prod2 = 0.0
         prod3 = 0.0
 
-        ! Global fluxes (complex)
+        ! Global flux coefficients (complex coefficients required to compute radial profile)
         do l=0,n_global
 
            ! H w^* + H^* w
@@ -161,7 +161,7 @@ subroutine cgyro_flux
         gflux_loc(:,is,4,:) = gflux_loc(:,is,4,:)+0.5*prod3(:,:)*dvr*z(is)
 
         
-        ! Construct "positive/interior" flux:
+        ! Construct "positive/interior" flux (real quantities)
         cflux_loc = real(gflux_loc(0,:,:,:))
         do l=1,n_global
            u = 2*pi*l*x_fraction
