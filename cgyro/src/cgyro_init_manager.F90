@@ -45,7 +45,7 @@ subroutine cgyro_init_manager
      fmtstr_len = 17
      fmtstrn = '(10(es16.9,1x))'
   endif
-
+  
   !------------------------------------------------------
   ! Initialize startup timers 
   !  NOTE: "Runtime" timers are initialized in cgyro_write_timedata,

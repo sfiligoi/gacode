@@ -390,6 +390,7 @@ module cgyro_globals
   real, dimension(:,:), allocatable :: cflux_tave, gflux_tave
   real :: tave_min, tave_max
   integer :: tave_step
+  integer :: nflux
   !
   ! Nonlinear plans
   type(C_PTR) :: plan_r2c
@@ -436,11 +437,11 @@ module cgyro_globals
   !
   ! Field solve variables
   real, dimension(:), allocatable :: sum_den_h
-  real, dimension(:), allocatable :: sum_den_x, sum_cur_x
+  real, dimension(:), allocatable :: sum_den_x,sum_cur_x
   real, dimension(:), allocatable :: vfac
   !
   ! n=0 test variables
-  real, dimension(:,:,:), allocatable :: hzf, xzf 
+  real, dimension(:,:,:), allocatable :: hzf,xzf 
   !
   ! Collision operator
   real, dimension(:,:,:), allocatable :: cmat ! only used if collision_precision_mode=0

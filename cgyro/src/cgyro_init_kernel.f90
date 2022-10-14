@@ -39,7 +39,10 @@ subroutine cgyro_init_kernel
   call system_clock(kernel_start_time,kernel_count_rate,kernel_count_max)
   
   i_time = 0
-  
+
+  ! Number of fluxes to output
+  nflux = 3+exch_flag
+
   ! 1. MPI setup
   call cgyro_mpi_grid
   if (error_status > 0) call cgyro_final_kernel

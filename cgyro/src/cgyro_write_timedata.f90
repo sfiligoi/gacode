@@ -12,8 +12,6 @@ subroutine cgyro_write_timedata
 
   implicit none
 
-  integer, parameter :: n_flux=4
-
   logical :: has_zf, has_balloon
   integer :: i_field,i_moment
   integer :: ir,it
@@ -40,14 +38,14 @@ subroutine cgyro_write_timedata
   ! ky flux for all species with field breakdown
   call cgyro_write_distributed_breal(&
        trim(path)//binfile_ky_flux,&
-       size(gflux(0,:,1:n_flux,:)),&
-       real(gflux(0,:,1:n_flux,:)))
+       size(gflux(0,:,1:nflux,:)),&
+       real(gflux(0,:,1:nflux,:)))
 
   ! central ky flux for all species with field breakdown
   call cgyro_write_distributed_breal(&
        trim(path)//binfile_ky_cflux,&
-       size(cflux(:,1:n_flux,:)),&
-       cflux(:,1:n_flux,:))
+       size(cflux(:,1:nflux,:)),&
+       cflux(:,1:nflux,:))
 
   if (gflux_print_flag == 1) then
      ! Global (n,e,v) fluxes for all species
