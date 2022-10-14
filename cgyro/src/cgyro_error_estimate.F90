@@ -69,8 +69,8 @@ subroutine cgyro_error_estimate
 
   ! JC: Optimize?
   cap_h_c_dot = (3*cap_h_c-4*cap_h_c_old+cap_h_c_old2)/(2*delta_t)
-  cap_h_c_old = cap_h_c
   cap_h_c_old2 = cap_h_c_old
+  cap_h_c_old = cap_h_c
 
   call timer_lib_out('field')
 

@@ -12,7 +12,7 @@ subroutine cgyro_write_timedata
 
   implicit none
 
-  integer, parameter :: n_flux=3
+  integer, parameter :: n_flux=4
 
   logical :: has_zf, has_balloon
   integer :: i_field,i_moment

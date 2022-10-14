@@ -89,6 +89,7 @@ subroutine cgyro_read_input
   call cgyro_readbc_real(px0)
   call cgyro_readbc_int(stream_term)
   call cgyro_readbc_real(stream_factor)
+  call cgyro_readbc_int(exch_flag)
 
   call cgyro_readbc_real(rmin)
   call cgyro_readbc_real(rmaj)

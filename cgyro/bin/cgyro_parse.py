@@ -85,6 +85,7 @@ x.add('UPWIND_SINGLE_FLAG','0')
 x.add('PX0','0.0')
 x.add('STREAM_TERM','0')
 x.add('STREAM_FACTOR','1.0')
+x.add('EXCH_FLAG','0')
 
 x.add('RMIN','0.5')
 x.add('RMAJ','3.0')

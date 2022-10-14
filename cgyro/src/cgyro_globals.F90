@@ -100,6 +100,7 @@ module cgyro_globals
   real :: px0
   integer :: stream_term
   real :: stream_factor
+  integer :: exch_flag
   !
   ! Geometry input
   !
