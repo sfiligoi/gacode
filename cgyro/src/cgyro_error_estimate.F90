@@ -73,7 +73,7 @@ subroutine cgyro_error_estimate
 !$acc&         default(none)
 #else
 !$omp parallel do collapse(2) private(iv_loc) present(deta_t,cap_h_c_dot,cap_h_c,cap_h_c_old,cap_h_c_old2) default(none)
-#end
+#endif
   do iv=nv1,nv2
      do ic=1,nc
         iv_loc = iv-nv1+1
