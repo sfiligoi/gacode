@@ -67,10 +67,21 @@ subroutine cgyro_error_estimate
   norm_loc(1)  = norm_loc_s
   error_loc(1) = error_loc_s
 
-  ! JC: Optimize?
-  cap_h_c_dot = (3*cap_h_c-4*cap_h_c_old+cap_h_c_old2)/(2*delta_t)
-  cap_h_c_old2 = cap_h_c_old
-  cap_h_c_old = cap_h_c
+#ifdef _OPENACC
+!$acc parallel loop collapse(2) gang vector private(iv_loc) &
+!$acc&         present(cap_h_c_dot,cap_h_c,cap_h_c_old,cap_h_c_old2) &
+!$acc&         default(none)
+#else
+!$omp parallel do collapse(2) private(iv_loc) present(deta_t,cap_h_c_dot,cap_h_c,cap_h_c_old,cap_h_c_old2) default(none)
+#end
+  do iv=nv1,nv2
+     do ic=1,nc
+        iv_loc = iv-nv1+1
+        cap_h_c_dot(ic,iv_loc) = (3*cap_h_c(ic,iv_loc)-4*cap_h_c_old(ic,iv_loc)+cap_h_c_old2(ic,iv_loc))/(2*delta_t)
+        cap_h_c_old2(ic,iv_loc) = cap_h_c_old(ic,iv_loc)
+        cap_h_c_old(ic,iv_loc) = cap_h_c(ic,iv_loc)
+     enddo
+  enddo
 
   call timer_lib_out('field')
 

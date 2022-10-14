@@ -100,6 +100,7 @@ subroutine cgyro_kernel
      !
      if (mod(i_time,print_step) == 0) then
        call timer_lib_in('coll_mem')
+!$acc update host(cap_h_c_dot)
        ! wait for cap_h_c to be synched into system memory, used by cgyro_write_timedata
 !$acc wait(4)
        call timer_lib_out('coll_mem')

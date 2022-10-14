@@ -134,9 +134,18 @@ subroutine cgyro_cleanup
 !$acc exit data delete(cap_h_ct)       
      deallocate(cap_h_ct)
   endif
-  if(allocated(cap_h_c_dot))              deallocate(cap_h_c_dot)
-  if(allocated(cap_h_c_old))              deallocate(cap_h_c_old)
-  if(allocated(cap_h_c_old2))             deallocate(cap_h_c_old2)  
+  if(allocated(cap_h_c_dot)) then
+!$acc exit data delete(cap_h_c_dot)
+     deallocate(cap_h_c_dot)
+  endif
+  if(allocated(cap_h_c_old)) then
+!$acc exit data delete(cap_h_c_old)
+     deallocate(cap_h_c_old)
+  endif
+  if(allocated(cap_h_c_old2)) then
+!$acc exit data delete(cap_h_c_old2)
+     deallocate(cap_h_c_old2)
+  endif
   if(allocated(omega_cap_h)) then
 !$acc exit data delete(omega_cap_h)        
      deallocate(omega_cap_h)

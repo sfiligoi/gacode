@@ -232,7 +232,8 @@ subroutine cgyro_init_manager
      allocate(upfac1(nc,nv_loc,2))
      allocate(upfac2(nc,nv_loc,2))
 
-!$acc enter data create(cap_h_c,cap_h_ct,cap_h_v,dvjvec_c,dvjvec_v)
+!$acc enter data create(cap_h_c,cap_h_ct,cap_h_c_dot,cap_h_c_old,cap_h_c_old2)
+!$acc enter data create(cap_h_v,dvjvec_c,dvjvec_v)
 
      if (upwind_single_flag == 0) then
        allocate(upwind_res_loc(nc,ns1:ns2,2))
