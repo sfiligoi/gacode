@@ -18,7 +18,7 @@ subroutine prgen_geometry
   real, dimension(:), allocatable :: efit_rmin,efit_rmaj,efit_kappa,efit_zmaj
   real, dimension(:,:,:), allocatable :: g3vec
   real, dimension(:,:,:), allocatable :: g3rho
-  real :: psi_sep
+  real :: psi_sep,pratio
 
   !----------------------------------------------------------------
   open(unit=1,file='out.dim',status='old')
@@ -78,15 +78,15 @@ subroutine prgen_geometry
   print 10,'INFO: (prgen_geometry) STATEFILE/EFIT dpsi:',dpsi(nx)/(psi1-psi0)
 
   ! Problem condition: dpsi(nx) > efit_psi(npsi) 
-  if (dpsi(nx) > efit_psi(npsi)) then
-     if (dpsi(nx)/efit_psi(npsi) > 1.05) then
-        print '(a)','ERROR: (prgen_geometry) Detected statefile dpsi(nx) >> mapped dpsi_max'
-        stop
+  pratio = dpsi(nx)/efit_psi(npsi)
+  if (pratio > 1.0) then
+     if (pratio > 1.05) then
+     print '(a)','WARNING: (prgen_geometry) Detected statefile dpsi(nx) >> mapped dpsi_max [BAD]'
      else
-        print '(a)','WARNING: (prgen_geometry) Detected statefile dpsi(nx) > mapped dpsi_max'
-        print '(a)','WARNING: (prgen_geometry) Compressing statefile flux to match mapped flux'
-        dpsi(:) = dpsi(:)*efit_psi(npsi)/dpsi(nx)
+     print '(a)','WARNING: (prgen_geometry) Detected statefile dpsi(nx) > mapped dpsi_max'
      endif
+     print '(a,f4.2,a)','WARNING: (prgen_geometry) Compressing statefile flux by ',pratio,' to match mapped flux'
+     dpsi(:) = dpsi(:)/pratio
   endif
   !--------------------------------------------------------------------------------------
 
