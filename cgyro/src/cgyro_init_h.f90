@@ -51,11 +51,6 @@ subroutine cgyro_init_h
      call cgyro_read_restart
      if (error_status /=0 ) return
      gtime = 0.0
-
-     ! Rescale to prevent overflow
-     if (nonlinear_flag == 0) then
-        h_x = h_x/sum(abs(h_x))
-     endif
      
   case (2)
 
