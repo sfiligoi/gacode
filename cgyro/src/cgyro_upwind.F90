@@ -104,7 +104,7 @@ subroutine cgyro_upwind_r64
 
 #ifdef _OPENACC
 !$acc parallel loop collapse(2) independent &
-!$acc&         present(is_v,ix_v,ie_v,xi,vel,upfac2,g_x,upwind_res) &
+!$acc&         present(is_v,ix_v,ie_v,xi,vel,upfac2,g_x,upwind_res,up_cutoff) &
 !$acc&         private(iv_loc,is,ix,ie) default(none)
 #else
 !$omp parallel do private(iv_loc,is,ix,ie,ic)
@@ -117,7 +117,7 @@ subroutine cgyro_upwind_r64
         ie = ie_v(iv)
         g_x(ic,iv_loc) = abs(xi(ix))*vel(ie)*g_x(ic,iv_loc) &
              -upfac2(ic,iv_loc,1)*upwind_res(ic,is,1) &
-             -upfac2(ic,iv_loc,2)*upwind_res(ic,is,2) 
+             -upfac2(ic,iv_loc,2)*upwind_res(ic,is,2)*up_cutoff
      enddo
   enddo
 
@@ -216,7 +216,7 @@ subroutine cgyro_upwind_r32
 
 #ifdef _OPENACC
 !$acc parallel loop collapse(2) independent &
-!$acc&         present(is_v,ix_v,ie_v,xi,vel,upfac2,g_x,upwind32_res) &
+!$acc&         present(is_v,ix_v,ie_v,xi,vel,upfac2,g_x,upwind32_res,up_cutoff) &
 !$acc&         private(iv_loc,is,ix,ie) default(none)
 #else
 !$omp parallel do private(iv_loc,is,ix,ie,ic)
@@ -229,7 +229,7 @@ subroutine cgyro_upwind_r32
         ie = ie_v(iv)
         g_x(ic,iv_loc) = abs(xi(ix))*vel(ie)*g_x(ic,iv_loc) &
              -upfac2(ic,iv_loc,1)*upwind32_res(ic,is,1) &
-             -upfac2(ic,iv_loc,2)*upwind32_res(ic,is,2)
+             -upfac2(ic,iv_loc,2)*upwind32_res(ic,is,2)*up_cutoff
      enddo
   enddo
 

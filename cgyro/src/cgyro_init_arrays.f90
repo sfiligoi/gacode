@@ -21,6 +21,11 @@ subroutine cgyro_init_arrays
   real, dimension(:,:,:), allocatable :: res_norm
   real, external :: spectraldiss
 
+  ! Parallel conservation cutoff
+  up_cutoff = 1.0-betae_unit/0.01
+  if (up_cutoff < 0.0) up_cutoff = 0.0
+!$acc enter data copyin(up_cutoff)   
+
   !-------------------------------------------------------------------------
   ! Distributed Bessel-function Gyroaverages
 

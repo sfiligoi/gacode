@@ -152,6 +152,7 @@ module cgyro_globals
 
   real :: lambda_debye
   real :: rhos
+  real :: up_cutoff
 
   ! Global conversion variables
   real :: b_unit

@@ -90,9 +90,6 @@ subroutine cgyro_check_memory(datafile)
      write(io,*)
      write(io,*) 'Distribution-like arrays'
      write(io,*)
-!     call cgyro_alloc_add(io,4*nc*nv_loc*16.0,'rhs')
-
-     ! call cgyro_alloc_add(io,10*nc*nv_loc*16.0,'rhs')
 
      select case(delta_t_method)
      case(1)
