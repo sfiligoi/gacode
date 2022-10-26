@@ -37,6 +37,12 @@ if 'conda' in sys.argv:
 # ================================
 # pip
 # ================================
+import setuptools
+
+setuptools.setup(
+    setup_requires=[
+        'numpy'
+    ],)
 from numpy.distutils.core import setup, Extension
 
 wrapper = Extension('gacode_ext',
