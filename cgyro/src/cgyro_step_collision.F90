@@ -460,7 +460,7 @@ subroutine cgyro_calc_collision_gpu_fp32(nj_loc,update_chv)
   real :: cval
   ! --------------------------------------------------
 
-!$acc parallel loop gang firstprivate(nproc,nj_loc,nv,collision_full_stripes,update_chv) &
+!$acc parallel loop gang firstprivate(nproc,nj_loc,nv,update_chv) &
 !$acc& present(cmat_fp32,cmat_stripes,cmat_e1,cap_h_v,fsendf,ie_v,is_v,ix_v)  private(k,ic,j,ic_loc,ie,is,ix)
   do ic=nc1,nc2
      ic_loc = ic-nc1+1
@@ -484,7 +484,7 @@ subroutine cgyro_calc_collision_gpu_fp32(nj_loc,update_chv)
                  iep = ie_v(ivp)
                  isp = is_v(ivp)
                  ixp = ix_v(ivp)
-                 if ((ie==iep) .AND. (is==isp))
+                 if ((ie==iep) .AND. (is==isp)) then
                     cval = cval + cmat_stripes(ix,is,ie,ixp,ic_loc)
                  endif
               endif
@@ -550,9 +550,9 @@ subroutine cgyro_calc_collision_gpu_b2_fp32(nj_loc,update_chv)
     ! ensure there is not another even/odd already runnning
 !$acc wait(bb)
     ! now launch myself
-!$acc parallel loop gang firstprivate(nproc,nj_loc,nv,collision_full_stripes,update_chv) &
+!$acc parallel loop gang firstprivate(nproc,nj_loc,nv,update_chv) &
 !$acc& present(cap_h_v,fsendf,ie_v,is_v,ix_v)  private(k,ic,j,ic_loc,ie,is,ix) &
-!$acc& copyin(cmat_fp32(:,:,bs:be),cmat_stripes(:,:,bs:be),cmat_e1(:,:,bs:be)) async(bb)
+!$acc& copyin(cmat_fp32(:,:,bs:be),cmat_stripes(:,:,:,:,bs:be),cmat_e1(:,:,:,bs:be)) async(bb)
     do ic_loc=bs,be
 !$acc loop vector collapse(2) private(b_re,b_im,cval,ivp,iv)
        do k=1,nproc
@@ -574,7 +574,7 @@ subroutine cgyro_calc_collision_gpu_b2_fp32(nj_loc,update_chv)
                  iep = ie_v(ivp)
                  isp = is_v(ivp)
                  ixp = ix_v(ivp)
-                 if ((ie==iep) .AND. (is==isp))
+                 if ((ie==iep) .AND. (is==isp)) then
                     cval = cval + cmat_stripes(ix,is,ie,ixp,ic_loc)
                  endif
               endif
