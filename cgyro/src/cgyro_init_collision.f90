@@ -16,7 +16,6 @@ subroutine cgyro_init_collision
   real :: rval
   integer :: jv
   integer :: is,ir,it,ix,ie,js,je,jx,ks
-  integer :: dv
   ! parameters for matrix solve
   real, dimension(:,:), allocatable :: amat,cmat_loc
   real, dimension(:,:,:,:,:,:), allocatable :: ctest
@@ -239,8 +238,8 @@ subroutine cgyro_init_collision
 !$omp& private(ic,ic_loc,it,ir,info,rval) &
 !$omp& private(iv,is,ix,ie,jv,js,jx,je,ks) &
 !$omp& private(amat,cmat_loc,i_piv,rs,rsvec,rsvect0,rsvect1) &
-!$omp& private(dv) firstprivate(collision_precision_mode, collision_full_stripes) &
-!$omp& shared(cmat,cmat_fp32,cmat_stripes)
+!$omp& firstprivate(collision_precision_mode, collision_full_stripes) &
+!$omp& shared(cmat,cmat_fp32,cmat_stripes,cmat_e1)
   do ic=nc1,nc2
    
      ic_loc = ic-nc1+1
@@ -649,18 +648,23 @@ subroutine cgyro_init_collision
 
      ! result in amat, transfer to the right cmat matrix
      if (collision_precision_mode /= 0) then
+        ! keep all cmat in fp32 precision
+        cmat_fp32(:,:,ic_loc) = amat(:,:)
+        ! keep the remaining precision for select elements
         do jv=1,nv
-           cmat_stripes(:,jv,ic_loc) = 0.0
+           je = ie_v(jv)
+           js = is_v(jv)
+           jx = ix_v(jv)
            do iv=1,nv
-              dv = iv-jv
-              if (abs(dv) .GT. collision_full_stripes) then
-                 ! far from diagonal, keep low precision only
-                 cmat_fp32(iv,jv,ic_loc) = amat(iv,jv)
-              else
-                 ! close to the diagonal, keep full precision
-                 cmat_stripes(dv,jv,ic_loc) = amat(iv,jv)
-                 ! set main matrix to 0, for ease of compute later
-                 cmat_fp32(iv,jv,ic_loc) = 0.0
+              ie = ie_v(iv)
+              is = is_v(iv)
+              ix = ix_v(iv)
+              if (ie==1) then ! always keep all detail for top energy
+                 cmat_e1(ix,is,jv,ic_loc) = amat(iv,jv) - cmat_fp32(iv,jv,ic_loc)
+              else ! only keep if energy and species the same
+                 if ((je == ie) .AND. (js == is)) then
+                    cmat_stripes(ix,is,ie,jx,ic_loc) = amat(iv,jv) - cmat_fp32(iv,jv,ic_loc)
+                 endif
               endif
            enddo
         enddo
@@ -680,7 +684,7 @@ subroutine cgyro_init_collision
 
 
   if (collision_precision_mode /= 0) then
-!$acc enter data copyin(cmat_stripes,cmat_fp32) if (gpu_bigmem_flag == 1)
+!$acc enter data copyin(cmat_fp32,cmat_stripes,cmat_e1) if (gpu_bigmem_flag == 1)
   else
 !$acc enter data copyin(cmat) if (gpu_bigmem_flag == 1)
   endif
