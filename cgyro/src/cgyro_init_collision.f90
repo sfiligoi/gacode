@@ -3,6 +3,8 @@ subroutine cgyro_init_collision
   use timer_lib
 
   use cgyro_globals
+  use mpi
+  use cgyro_io
 
   implicit none
 
@@ -11,6 +13,7 @@ subroutine cgyro_init_collision
   real, dimension(:,:,:,:), allocatable :: rsvec, rsvect0, rsvect1
   real, dimension(:,:), allocatable :: klor_fac, kdiff_fac
 
+  character(len=128) :: msg
   real :: arg
   real :: xa, xb, tauinv_ab
   real :: rval
@@ -20,11 +23,20 @@ subroutine cgyro_init_collision
   real, dimension(:,:), allocatable :: amat,cmat_loc
   real, dimension(:,:,:,:,:,:), allocatable :: ctest
   real, dimension(:,:,:,:,:), allocatable :: bessel
-  
+  ! diagnostics
+  real :: amat_sum, cmat_sum, cmat_diff, cmat_rel_diff
+  integer, dimension(7:10) :: cmap_fp32_error_abs_cnt_loc
+  integer, dimension(7:10) :: cmap_fp32_error_rel_cnt_loc
+  integer, dimension(7:10) :: cmap_fp32_error_abs_cnt
+  integer, dimension(7:10) :: cmap_fp32_error_rel_cnt
+
   if (collision_model == 5) then
      call cgyro_init_collision_simple
      return
   endif
+
+  cmap_fp32_error_abs_cnt_loc(:) = 0
+  cmap_fp32_error_rel_cnt_loc(:) = 0
 
   allocate(nu_d(n_energy,n_species,n_species))
   allocate(nu_par(n_energy,n_species,n_species))
@@ -237,6 +249,7 @@ subroutine cgyro_init_collision
 !$omp& shared(klor_fac,kdiff_fac) &
 !$omp& private(ic,ic_loc,it,ir,info,rval) &
 !$omp& private(iv,is,ix,ie,jv,js,jx,je,ks) &
+!$omp& private(amat_sum,cmat_sum,cmat_diff,cmat_rel_diff) shared (cmap_fp32_error_abs_cnt_loc,cmap_fp32_error_rel_cnt_loc) &
 !$omp& private(amat,cmat_loc,i_piv,rs,rsvec,rsvect0,rsvect1) &
 !$omp& firstprivate(collision_precision_mode, collision_full_stripes) &
 !$omp& shared(cmat,cmat_fp32,cmat_stripes,cmat_e1)
@@ -655,17 +668,41 @@ subroutine cgyro_init_collision
            je = ie_v(jv)
            js = is_v(jv)
            jx = ix_v(jv)
+           amat_sum = 0.0
+           cmat_sum = 0.0
            do iv=1,nv
+              ! using abs values, as I am gaugung precision errors, and this avoid symmetry cancellations
+              amat_sum = amat_sum + abs(amat(iv,jv))
               ie = ie_v(iv)
               is = is_v(iv)
               ix = ix_v(iv)
               if (ie==1) then ! always keep all detail for top energy
                  cmat_e1(ix,is,jv,ic_loc) = amat(iv,jv) - cmat_fp32(iv,jv,ic_loc)
+                 cmat_sum = cmat_sum + abs(cmat_fp32(iv,jv,ic_loc) + cmat_e1(ix,is,jv,ic_loc))
               else ! only keep if energy and species the same
                  if ((je == ie) .AND. (js == is)) then
                     cmat_stripes(ix,is,ie,jx,ic_loc) = amat(iv,jv) - cmat_fp32(iv,jv,ic_loc)
+                    cmat_sum = cmat_sum + abs(cmat_fp32(iv,jv,ic_loc) + cmat_stripes(ix,is,ie,jx,ic_loc))
+                 else
+                    cmat_sum = cmat_sum + abs(cmat_fp32(iv,jv,ic_loc))
                  endif
               endif
+           enddo
+           cmat_diff = abs(amat_sum-cmat_sum)
+           cmat_rel_diff = cmat_diff/abs(amat_sum)
+           ! reuse amt_sum as 10^-(ie), to reduce numbe rof variables in use 
+           do ie=7,10
+             amat_sum = 10.0 ** (-ie)
+             if (cmat_diff>amat_sum) then
+!$omp atomic update
+               cmap_fp32_error_abs_cnt_loc(ie) = cmap_fp32_error_abs_cnt_loc(ie) + 1
+!$omp end atomic
+             endif
+             if (cmat_rel_diff>amat_sum) then
+!$omp atomic update
+               cmap_fp32_error_rel_cnt_loc(ie) = cmap_fp32_error_rel_cnt_loc(ie) + 1
+!$omp end atomic
+             endif
            enddo
         enddo
      else
@@ -684,7 +721,39 @@ subroutine cgyro_init_collision
 
 
   if (collision_precision_mode /= 0) then
-!$acc enter data copyin(cmat_fp32,cmat_stripes,cmat_e1) if (gpu_bigmem_flag == 1)
+!$acc enter data copyin(cmat_fp32,cmat_stripes,cmat_e1) async() if (gpu_bigmem_flag == 1)
+     call MPI_ALLREDUCE(cmap_fp32_error_abs_cnt_loc,&
+          cmap_fp32_error_abs_cnt,&
+          4,&
+          MPI_INTEGER,&
+          MPI_SUM,&
+          CGYRO_COMM_WORLD,&
+          i_err)
+     call MPI_ALLREDUCE(cmap_fp32_error_rel_cnt_loc,&
+          cmap_fp32_error_rel_cnt,&
+          4,&
+          MPI_INTEGER,&
+          MPI_SUM,&
+          CGYRO_COMM_WORLD,&
+          i_err)
+
+     if (i_proc==0) then
+        ! reuse amat_sum to reduce number of variables
+        amat_sum = 0.01 * nv * nv *nc
+        write (msg, "(A,F5.1,A,F5.1,A,F5.1,A,F5.1,A)") &
+                    "Abs cmat_fp32 error rates 1.e-7: ", cmap_fp32_error_abs_cnt(7)/amat_sum, &
+                    "% 1.e-8: ",cmap_fp32_error_abs_cnt(8)/amat_sum, &
+                    "% 1.e-9: ",cmap_fp32_error_abs_cnt(9)/amat_sum, &
+                    "% 1.e-10: ",cmap_fp32_error_abs_cnt(10)/amat_sum, "%"
+        call cgyro_info(msg)
+        write (msg, "(A,F5.1,A,F5.1,A,F5.1,A,F5.1,A)") &
+                    "Rel cmat_fp32 error rates 1.e-7: ", cmap_fp32_error_rel_cnt(7)/amat_sum, &
+                    "% 1.e-8: ",cmap_fp32_error_rel_cnt(8)/amat_sum, &
+                    "% 1.e-9: ",cmap_fp32_error_rel_cnt(9)/amat_sum, &
+                    "% 1.e-10: ",cmap_fp32_error_rel_cnt(10)/amat_sum, "%"
+        call cgyro_info(msg)
+     endif
+!$acc wait
   else
 !$acc enter data copyin(cmat) if (gpu_bigmem_flag == 1)
   endif
