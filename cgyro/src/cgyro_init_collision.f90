@@ -251,7 +251,7 @@ subroutine cgyro_init_collision
 !$omp& private(iv,is,ix,ie,jv,js,jx,je,ks) &
 !$omp& private(amat_sum,cmat_sum,cmat_diff,cmat_rel_diff) shared (cmap_fp32_error_abs_cnt_loc,cmap_fp32_error_rel_cnt_loc) &
 !$omp& private(amat,cmat_loc,i_piv,rs,rsvec,rsvect0,rsvect1) &
-!$omp& firstprivate(collision_precision_mode, collision_full_stripes) &
+!$omp& firstprivate(collision_precision_mode) &
 !$omp& shared(cmat,cmat_fp32,cmat_stripes,cmat_e1)
   do ic=nc1,nc2
    

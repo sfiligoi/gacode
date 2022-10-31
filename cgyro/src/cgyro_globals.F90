@@ -62,7 +62,6 @@ module cgyro_globals
   integer :: collision_ion_model
   real    :: collision_ele_scale
   integer :: collision_precision_mode
-  integer :: collision_full_stripes
   real    :: z_eff
   integer :: z_eff_method
   integer :: zf_test_mode 
