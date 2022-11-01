@@ -38,7 +38,6 @@ subroutine cgyro_init_manager
   integer, parameter :: singlePrecision = selected_real_kind(6,30)
 #endif
 
-  character(len=128) :: msg
 
   if (hiprec_flag == 1) then
      fmtstr  = '(es16.9)'
@@ -264,11 +263,11 @@ subroutine cgyro_init_manager
         allocate(cmat_simple(n_xi,n_xi,n_energy,n_species,n_theta))
      else
         if (collision_precision_mode /= 0) then
-           allocate(cmat_stripes(-collision_full_stripes:collision_full_stripes,nv,nc_loc))
            allocate(cmat_fp32(nv,nv,nc_loc))
+           allocate(cmat_stripes(n_xi,n_species,2:n_energy,n_xi,nc_loc))
+           allocate(cmat_e1(n_xi,n_species,nv,nc_loc))
 
-           write (msg, "(A35,I4,A14)") "Using fp32 collision precision with ",collision_full_stripes, " fp64 stripes."
-           call cgyro_info(msg)
+           call cgyro_info("Using fp32 collision precision except e=1 or same e&s.")
         else
            allocate(cmat(nv,nv,nc_loc))
         endif
