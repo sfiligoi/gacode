@@ -33,7 +33,8 @@ land = int(sys.argv[13])
 theta = float(sys.argv[14])
 
 # Use first 3 args to define plot and font size
-rc('text',usetex=True)
+#rc('text',usetex=True)
+rc('text',usetex=False)
 rc('font',size=font)
 
 # Extension handling

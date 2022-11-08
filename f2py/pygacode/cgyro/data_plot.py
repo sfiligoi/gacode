@@ -1106,7 +1106,7 @@ class cgyrodata_plot(data.cgyrodata):
       ax.set_ylabel(r'$k_y \rho_s$')
       ax.set_title(r'$\mathrm{Time}$-$\mathrm{averaged~'+ft+'~intensity} \quad $'+windowtxt)
 
-      ax.imshow(np.transpose(f),extent=[-x0,x0,0,y0],interpolation='none',cmap='jet')
+      ax.imshow(np.transpose(f),extent=[-x0,x0,0,y0],interpolation='none',cmap='plasma') #'jet')
       print(np.min(f),np.max(f))
 
       fig.tight_layout(pad=0.5)
