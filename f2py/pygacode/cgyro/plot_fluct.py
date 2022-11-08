@@ -33,7 +33,6 @@ land = int(sys.argv[13])
 theta = float(sys.argv[14])
 
 # Use first 3 args to define plot and font size
-#rc('text',usetex=True)
 rc('text',usetex=False)
 rc('font',size=font)
 
@@ -139,7 +138,17 @@ def maptoreal_fft(nr,nn,nx,ny,c):
 #------------------------------------------------------------------------
 
 # Get filename and tags
-fdata,title,isfield = tag_helper(sim.mass[species],sim.z[species],moment)
+if moment == 't':
+	fdata,title,isfield = tag_helper(sim.mass[species],sim.z[species],'n')
+	fdata_n = 'bin' + fdata
+	fdata,title,isfield = tag_helper(sim.mass[species],sim.z[species],'e')	
+	fdata_e = 'bin' + fdata
+	u = specmap(sim.mass[species],sim.z[species])
+	title = r'${\delta \mathrm{T}}_'+u+'$'
+	print('trying T fluctuation')
+else:
+	fdata,title,isfield = tag_helper(sim.mass[species],sim.z[species],moment)
+	print('standard fluctation')
 
 # Check to see if data exists (try binary data first)
 if os.path.isfile('bin'+fdata):
@@ -166,6 +175,11 @@ def frame():
       if isfield:
          a = np.reshape(aa,(2,nr,nth,nn),order='F')
          c = a[0,:,itheta,:]+1j*a[1,:,itheta,:]
+      elif moment == 't':
+         a = np.reshape(aa,(2,nr,nth,ns,nn),order='F')
+         b = np.reshape(bb,(2,nr,nth,ns,nn),order='F')
+         a = ((2./3)*b - sim.temp[species]*a)/sim.dens[species] #dE = (3/2)*(T*delta n + n*deltaT)
+         c = a[0,:,itheta,species,:]+1j*a[1,:,itheta,species,:]
       else:
          a = np.reshape(aa,(2,nr,nth,ns,nn),order='F')
          c = a[0,:,itheta,species,:]+1j*a[1,:,itheta,species,:]
@@ -188,6 +202,12 @@ def frame():
       if fmin == 'auto':
          f0=np.min(f)
          f1=np.max(f)
+
+         #CH alternate suggestion ensure even range around 0 for fluctuations
+         flim = max(abs(f0),abs(f1))
+         f0=-flim
+         f1=flim
+
       else:
          f0=float(fmin)
          f1=float(fmax)
@@ -245,8 +265,23 @@ def frame():
     
 i = 0
 
-if hasbin:
+if moment == 't':
+   # Binary data
+   work = True
+   # Open binary file
+   with open(fdata_n,'rb') as fbin_n, open(fdata_e,'rb') as fbin_e:
+       while work:
+          try:
+             aa = struct.unpack(PREC*n_chunk,fbin_n.read(BIT*n_chunk))
+             bb = struct.unpack(PREC*n_chunk,fbin_e.read(BIT*n_chunk))
+          except:
+             sys.exit()
 
+          i = i+1
+          print('INFO: (plot_fluct) Time index '+str(i)) 
+          frame()
+
+elif hasbin:
    # Binary data
    work = True
    # Open binary file
