@@ -304,6 +304,10 @@ def tag_helper(mass,z,moment):
       fdata = '.cgyro.kxky_e'
       title = r'${\delta \mathrm{E}}_'+u+'$'
       isfield = False
+  elif (moment == 'v'):
+      fdata = '.cgyro.kxky_v'
+      title = r'${\delta \mathrm{v}}_'+u+'$'
+      isfield = False
   elif (moment == 'phi'):
       fdata = '.cgyro.kxky_phi'
       title = r'$\delta\phi$'
