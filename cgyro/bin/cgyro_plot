@@ -264,6 +264,7 @@ LY=6
 
 PLOT_TYPE=null
 VIS_TYPE=null
+CONV_TYPE=null
 EXT=screen
 
 SPECIES=0
@@ -324,6 +325,7 @@ while [ $# -gt 0 ] ; do
 
   -plot) shift ; PLOT_TYPE=$1 ;;
   -vis)  shift ; VIS_TYPE=$1 ;;
+  -conv) shift ; CONV_TYPE=$1 ;;
 
   -e) shift ; LOCDIR=$1 ;;
 
@@ -418,6 +420,17 @@ PYROOT=$GACODE_ROOT/f2py/pygacode/cgyro
 
 #==============================================================================
 PLT="-m pygacode.cgyro.data_plot_single $TEX $FONTSIZE $LX $LY"
+
+case "$CONV_TYPE" in
+
+   null) ;;
+   
+   gs2)
+	python -m pygacode.cgyro.conv_gs2 ;;
+   
+    *)
+        echo "Unrecognized argument to -conv" ; exit 1 ;;
+esac
 
 case "$VIS_TYPE" in
 
