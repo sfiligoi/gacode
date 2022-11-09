@@ -329,6 +329,19 @@ class cgyrodata:
          self.geotag.append('\omega_\mathrm{gammap')
          self.geotag.append('k_\perp')
 
+
+   # Function to pull elements out of array, checking for end of array
+   def eget(self,data,p):
+      
+      if p >= len(data) or p == -1:
+         p = -1
+         d0 = 0
+      else:
+         d0 = data[p]
+         p = p+1
+
+      return d0,p
+      
    def getgrid(self):
 
       #-----------------------------------------------------------------
@@ -398,49 +411,51 @@ class cgyrodata:
       ns = self.n_species
       p = 0
       data = np.fromfile(self.dir+'out.cgyro.equilibrium',dtype='float32',sep=' ')
-      self.rmin          = data[p] ; p=p+1
-      self.rmaj          = data[p] ; p=p+1  
-      self.q             = data[p] ; p=p+1 
-      self.shear         = data[p] ; p=p+1 
-      self.shift         = data[p] ; p=p+1 
-      self.kappa         = data[p] ; p=p+1 
-      self.s_kappa       = data[p] ; p=p+1 
-      self.delta         = data[p] ; p=p+1 
-      self.s_delta       = data[p] ; p=p+1 
-      self.zeta          = data[p] ; p=p+1 
-      self.s_zeta        = data[p] ; p=p+1 
-      self.zmag          = data[p] ; p=p+1 
-      self.dzmag         = data[p] ; p=p+1 
+      self.rmin,p    = self.eget(data,p)
+      self.rmaj,p    = self.eget(data,p)        
+      self.q,p       = self.eget(data,p)           
+      self.shear,p   = self.eget(data,p)         
+      self.shift,p   = self.eget(data,p)       
+      self.kappa,p   = self.eget(data,p)     
+      self.s_kappa,p = self.eget(data,p)       
+      self.delta,p   = self.eget(data,p)       
+      self.s_delta,p = self.eget(data,p)     
+      self.zeta,p    = self.eget(data,p)     
+      self.s_zeta,p  = self.eget(data,p)    
+      self.zmag,p    = self.eget(data,p)      
+      self.dzmag,p   = self.eget(data,p)    
       
       self.shape_sin   = np.zeros(nshape)
       self.shape_s_sin = np.zeros(nshape)
       self.shape_cos   = np.zeros(nshape)
       self.shape_s_cos = np.zeros(nshape)
       for i in range(3,nshape):
-         self.shape_sin[i]   = data[p] ; p=p+1 
-         self.shape_s_sin[i] = data[p] ; p=p+1 
+         self.shape_sin[i],p   = self.eget(data,p)   
+         self.shape_s_sin[i],p = self.eget(data,p)  
       for i in range(nshape):
-         self.shape_cos[i]   = data[p] ; p=p+1 
-         self.shape_s_cos[i] = data[p] ; p=p+1
+         self.shape_cos[i],p   = self.eget(data,p)
+         self.shape_s_cos[i],p = self.eget(data,p)
          
-      self.rho           = data[p] ; p=p+1 
-      self.ky0           = data[p] ; p=p+1 
-      self.betae_unit    = data[p] ; p=p+1 
-      self.beta_star     = data[p] ; p=p+1 
-      self.lambda_star   = data[p] ; p=p+1 
-      self.gamma_e       = data[p] ; p=p+1 
-      self.gamma_p       = data[p] ; p=p+1 
-      self.mach          = data[p] ; p=p+1 
-      self.a_meters      = data[p] ; p=p+1 
-      self.b_unit        = data[p] ; p=p+1 
-      self.dens_norm     = data[p] ; p=p+1 
-      self.temp_norm     = data[p] ; p=p+1 
-      self.vth_norm      = data[p] ; p=p+1 
-      self.mass_norm     = data[p] ; p=p+1 
-      self.rho_star_norm = data[p] ; p=p+1 
-      self.gamma_gb_norm = data[p] ; p=p+1 
-      self.q_gb_norm     = data[p] ; p=p+1 
-      self.pi_gb_norm    = data[p] ; p=p+1 
+      self.rho,p           = self.eget(data,p) 
+      self.ky0,p           = self.eget(data,p) 
+      self.betae_unit,p    = self.eget(data,p) 
+      self.beta_star,p     = self.eget(data,p) 
+      self.lambda_star,p   = self.eget(data,p) 
+      self.gamma_e,p       = self.eget(data,p) 
+      self.gamma_p,p       = self.eget(data,p) 
+      self.mach,p          = self.eget(data,p) 
+      self.a_meters,p      = self.eget(data,p) 
+      self.b_unit,p        = self.eget(data,p) 
+      self.b_gs2,p         = self.eget(data,p) 
+      self.dens_norm,p     = self.eget(data,p) 
+      self.temp_norm,p     = self.eget(data,p) 
+      self.vth_norm,p      = self.eget(data,p) 
+      self.mass_norm,p     = self.eget(data,p) 
+      self.rho_star_norm,p = self.eget(data,p) 
+      self.gamma_gb_norm,p = self.eget(data,p) 
+      self.q_gb_norm,p     = self.eget(data,p) 
+      self.pi_gb_norm,p    = self.eget(data,p) 
+
       # Define species vectors
       self.z      = np.zeros(ns)
       self.mass   = np.zeros(ns)
@@ -450,13 +465,18 @@ class cgyrodata:
       self.dlntdr = np.zeros(ns)
       self.nu     = np.zeros(ns)
       for i in range(ns):
-         self.z[i]      = data[p] ; p=p+1 
-         self.mass[i]   = data[p] ; p=p+1 
-         self.dens[i]   = data[p] ; p=p+1 
-         self.temp[i]   = data[p] ; p=p+1 
-         self.dlnndr[i] = data[p] ; p=p+1 
-         self.dlntdr[i] = data[p] ; p=p+1 
-         self.nu[i]     = data[p] ; p=p+1 
+         self.z[i],p      = self.eget(data,p)
+         self.mass[i],p   = self.eget(data,p) 
+         self.dens[i],p   = self.eget(data,p) 
+         self.temp[i],p   = self.eget(data,p) 
+         self.dlnndr[i],p = self.eget(data,p) 
+         self.dlntdr[i],p = self.eget(data,p) 
+         self.nu[i],p     = self.eget(data,p) 
+
+      if p == -1:
+         print('ERROR: (data.py) Data format outdated. Please run cgyro -t')
+         sys.exit()
+         
       if not self.silent:
          print('INFO: (data.py) Read {:d} entries out.cgyro.equilibrium.'.format(p))
 

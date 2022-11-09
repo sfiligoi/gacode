@@ -185,6 +185,7 @@ subroutine cgyro_write_initdata
      write (io,fmtstr) mach
      write (io,fmtstr) a_meters
      write (io,fmtstr) b_unit
+     write (io,fmtstr) b_gs2
      write (io,fmtstr) dens_norm
      write (io,fmtstr) temp_norm
      write (io,fmtstr) vth_norm

@@ -184,6 +184,9 @@ subroutine cgyro_equilibrium
 
   w_theta(:) = w_theta(:)/sum(w_theta) 
 
+  ! GS2 normalizing magnetic field
+  b_gs2 = b_unit*geo_f/rmaj
+  
   mach_one_fac = 1.0
 
   ! 1. Compute rotation (M^2) terms IF required

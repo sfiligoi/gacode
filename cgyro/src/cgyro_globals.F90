@@ -154,11 +154,11 @@ module cgyro_globals
   real :: up_cutoff
 
   ! Global conversion variables
-  real :: b_unit
+  real :: b_unit, b_gs2
   real :: a_meters
   real :: dens_norm, temp_norm, vth_norm, mass_norm, rho_star_norm
   real :: gamma_gb_norm, q_gb_norm, pi_gb_norm
-
+  
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------
