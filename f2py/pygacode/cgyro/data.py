@@ -394,66 +394,71 @@ class cgyrodata:
       #-----------------------------------------------------------------
       # Equil file
       #
+      nshape = 7
+      ns = self.n_species
+      p = 0
       data = np.fromfile(self.dir+'out.cgyro.equilibrium',dtype='float32',sep=' ')
-      self.rmin          = data[0]
-      self.rmaj          = data[1]
-      self.q             = data[2]
-      self.shear         = data[3]
-      self.shift         = data[4]
-      self.kappa         = data[5]
-      self.s_kappa       = data[6]
-      self.delta         = data[7]
-      self.s_delta       = data[8]
-      self.zeta          = data[9]
-      self.s_zeta        = data[10]
-      self.zmag          = data[11]
-      self.dzmag         = data[12]
-      self.shape_sin3    = data[13]
-      self.shape_s_sin3  = data[14]
-      self.shape_cos0    = data[15]
-      self.shape_s_cos0  = data[16]
-      self.shape_cos1    = data[17]
-      self.shape_s_cos1  = data[18]
-      self.shape_cos2    = data[19]
-      self.shape_s_cos2  = data[20]
-      self.shape_cos3    = data[21]
-      self.shape_s_cos3  = data[22]
-      self.rho           = data[23]
-      self.ky0           = data[24]
-      self.betae_unit    = data[25]
-      self.beta_star     = data[26]
-      self.lambda_star   = data[27]
-      self.gamma_e       = data[28]
-      self.gamma_p       = data[29]
-      self.mach          = data[30]
-      self.a_meters      = data[31]
-      self.b_unit        = data[32]
-      self.dens_norm     = data[33]
-      self.temp_norm     = data[34]
-      self.vth_norm      = data[35]
-      self.mass_norm     = data[36]
-      self.rho_star_norm = data[37]
-      self.gamma_gb_norm = data[38]
-      self.q_gb_norm     = data[39]
-      self.pi_gb_norm    = data[40]
+      self.rmin          = data[p] ; p=p+1
+      self.rmaj          = data[p] ; p=p+1  
+      self.q             = data[p] ; p=p+1 
+      self.shear         = data[p] ; p=p+1 
+      self.shift         = data[p] ; p=p+1 
+      self.kappa         = data[p] ; p=p+1 
+      self.s_kappa       = data[p] ; p=p+1 
+      self.delta         = data[p] ; p=p+1 
+      self.s_delta       = data[p] ; p=p+1 
+      self.zeta          = data[p] ; p=p+1 
+      self.s_zeta        = data[p] ; p=p+1 
+      self.zmag          = data[p] ; p=p+1 
+      self.dzmag         = data[p] ; p=p+1 
+      
+      self.shape_sin   = np.zeros(nshape)
+      self.shape_s_sin = np.zeros(nshape)
+      self.shape_cos   = np.zeros(nshape)
+      self.shape_s_cos = np.zeros(nshape)
+      for i in range(3,nshape):
+         self.shape_sin[i]   = data[p] ; p=p+1 
+         self.shape_s_sin[i] = data[p] ; p=p+1 
+      for i in range(nshape):
+         self.shape_cos[i]   = data[p] ; p=p+1 
+         self.shape_s_cos[i] = data[p] ; p=p+1
+         
+      self.rho           = data[p] ; p=p+1 
+      self.ky0           = data[p] ; p=p+1 
+      self.betae_unit    = data[p] ; p=p+1 
+      self.beta_star     = data[p] ; p=p+1 
+      self.lambda_star   = data[p] ; p=p+1 
+      self.gamma_e       = data[p] ; p=p+1 
+      self.gamma_p       = data[p] ; p=p+1 
+      self.mach          = data[p] ; p=p+1 
+      self.a_meters      = data[p] ; p=p+1 
+      self.b_unit        = data[p] ; p=p+1 
+      self.dens_norm     = data[p] ; p=p+1 
+      self.temp_norm     = data[p] ; p=p+1 
+      self.vth_norm      = data[p] ; p=p+1 
+      self.mass_norm     = data[p] ; p=p+1 
+      self.rho_star_norm = data[p] ; p=p+1 
+      self.gamma_gb_norm = data[p] ; p=p+1 
+      self.q_gb_norm     = data[p] ; p=p+1 
+      self.pi_gb_norm    = data[p] ; p=p+1 
       # Define species vectors
-      self.z      = np.zeros(self.n_species)
-      self.mass   = np.zeros(self.n_species)
-      self.dens   = np.zeros(self.n_species)
-      self.temp   = np.zeros(self.n_species)
-      self.dlnndr = np.zeros(self.n_species)
-      self.dlntdr = np.zeros(self.n_species)
-      self.nu     = np.zeros(self.n_species)
-      for i in range(self.n_species):
-         self.z[i]      = data[41+7*i]
-         self.mass[i]   = data[42+7*i]
-         self.dens[i]   = data[43+7*i]
-         self.temp[i]   = data[44+7*i]
-         self.dlnndr[i] = data[45+7*i]
-         self.dlntdr[i] = data[46+7*i]
-         self.nu[i]     = data[47+7*i]
+      self.z      = np.zeros(ns)
+      self.mass   = np.zeros(ns)
+      self.dens   = np.zeros(ns)
+      self.temp   = np.zeros(ns)
+      self.dlnndr = np.zeros(ns)
+      self.dlntdr = np.zeros(ns)
+      self.nu     = np.zeros(ns)
+      for i in range(ns):
+         self.z[i]      = data[p] ; p=p+1 
+         self.mass[i]   = data[p] ; p=p+1 
+         self.dens[i]   = data[p] ; p=p+1 
+         self.temp[i]   = data[p] ; p=p+1 
+         self.dlnndr[i] = data[p] ; p=p+1 
+         self.dlntdr[i] = data[p] ; p=p+1 
+         self.nu[i]     = data[p] ; p=p+1 
       if not self.silent:
-         print('INFO: (data.py) Read data in out.cgyro.equilibrium.')
+         print('INFO: (data.py) Read {:d} entries out.cgyro.equilibrium.'.format(p))
 
       #-----------------------------------------------------------------
 

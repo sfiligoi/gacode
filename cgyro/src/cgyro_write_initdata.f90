@@ -103,6 +103,8 @@ subroutine cgyro_write_initdata
      write(io,23) 'c2',shape_cos(2),'s_c2',shape_s_cos(2),'zeta' ,zeta ,'s_zeta' ,s_zeta
      if (abs(shape_cos(3))+abs(shape_s_cos(3))+abs(shape_sin(3))+abs(shape_s_sin(3)) > 1e-6) then
         write(io,23) 'c3',shape_cos(3),'s_c3',shape_s_cos(3),'s3',shape_sin(3),'s_s3',shape_sin(3)
+     endif
+     if (abs(shape_cos(4))+abs(shape_s_cos(4))+abs(shape_sin(4))+abs(shape_s_sin(4)) > 1e-6) then
         write(io,23) 'c4',shape_cos(4),'s_c4',shape_s_cos(4),'s4',shape_sin(4),'s_s4',shape_sin(4)
         write(io,23) 'c5',shape_cos(5),'s_c5',shape_s_cos(5),'s5',shape_sin(5),'s_s5',shape_sin(5)
         write(io,23) 'c6',shape_cos(6),'s_c6',shape_s_cos(6),'s6',shape_sin(6),'s_s6',shape_sin(6)
@@ -165,28 +167,14 @@ subroutine cgyro_write_initdata
      write (io,fmtstr) s_zeta
      write (io,fmtstr) zmag
      write (io,fmtstr) dzmag
-     write (io,fmtstr) shape_sin(3)
-     write (io,fmtstr) shape_s_sin(3)
-     !write (io,fmtstr) shape_sin(4)
-     !write (io,fmtstr) shape_s_sin(4)
-     !write (io,fmtstr) shape_sin(5)
-     !write (io,fmtstr) shape_s_sin(5)
-     !write (io,fmtstr) shape_sin(6)
-     !write (io,fmtstr) shape_s_sin(6)
-     write (io,fmtstr) shape_cos(0)
-     write (io,fmtstr) shape_s_cos(0)
-     write (io,fmtstr) shape_cos(1)
-     write (io,fmtstr) shape_s_cos(1)
-     write (io,fmtstr) shape_cos(2)
-     write (io,fmtstr) shape_s_cos(2)
-     write (io,fmtstr) shape_cos(3)
-     write (io,fmtstr) shape_s_cos(3)
-     !write (io,fmtstr) shape_cos(4)
-     !write (io,fmtstr) shape_s_cos(4)
-     !write (io,fmtstr) shape_cos(5)
-     !write (io,fmtstr) shape_s_cos(5)
-     !write (io,fmtstr) shape_cos(6)
-     !write (io,fmtstr) shape_s_cos(6)
+     do p=3,6
+        write (io,fmtstr) shape_sin(p)
+        write (io,fmtstr) shape_s_sin(p)
+     enddo
+     do p=0,6
+        write (io,fmtstr) shape_cos(p)
+        write (io,fmtstr) shape_s_cos(p)
+     enddo
      write (io,fmtstr) rho
      write (io,fmtstr) ky
      write (io,fmtstr) betae_unit

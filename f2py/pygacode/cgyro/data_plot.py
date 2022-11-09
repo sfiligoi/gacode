@@ -586,22 +586,16 @@ class cgyrodata_plot(data.cgyrodata):
       zmaj = self.zmag
       r = self.rmin
       k = self.kappa
-      s1 = np.arcsin(self.delta)
-      s2 = -self.zeta
-      s3 = self.shape_sin3
-      s4 = s5 = s6 = 0
-      c0 = self.shape_cos0
-      c1 = self.shape_cos1
-      c2 = self.shape_cos2
-      c3 = self.shape_cos3
-      c4 = c5 = c6 = 0
-      x = rmaj+r*np.cos(t+c0
-                        +s1*np.sin(t)  +c1*np.cos(t)
-                        +s2*np.sin(2*t)+c2*np.cos(2*t)
-                        +s3*np.sin(3*t)+c3*np.cos(3*t)
-                        +s4*np.sin(4*t)+c4*np.cos(4*t)
-                        +s5*np.sin(5*t)+c5*np.cos(5*t)
-                        +s6*np.sin(6*t)+c6*np.cos(6*t))
+
+      # Map legacy shape parameters
+      self.shape_sin[1] = np.arcsin(self.delta)
+      self.shape_sin[2] = -self.zeta
+
+      arg = t+self.shape_cos[0]
+      for p in range(1,7):
+         arg = arg+self.shape_sin[p]*np.sin(p*t)+self.shape_cos[p]*np.cos(p*t)
+
+      x = rmaj+r*np.cos(arg)
       y = zmaj+k*r*np.sin(t)
       
       ax.plot(x,y,'k')
