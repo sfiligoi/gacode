@@ -52,13 +52,8 @@ subroutine cgyro_init_collision
         do js=1,n_species
 
            xa = vel(ie)
-           xb = xa * vth(is) / vth(js)
-           tauinv_ab = nu(is) * z(js)**2 / z(is)**2 &
-                * dens(js)/dens(is)
-           ! re-scale only electron collisions (ee,ei,ie)
-           if(is == is_ele .or. js == is_ele) then
-              tauinv_ab = tauinv_ab * collision_ele_scale
-           endif
+           xb = xa*vth(is)/vth(js)
+           tauinv_ab = nu(is)*z(js)**2/z(is)**2*dens(js)/dens(is)
               
            select case (collision_model)
 

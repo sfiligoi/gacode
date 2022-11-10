@@ -91,10 +91,9 @@ subroutine cgyro_init_manager
              w_e,&
              e_deriv1_mat,&
              alpha_poly) ! only write results on i_proc zero.
-     end if
-  end if
+     endif
+  endif
      
-
   vel(:) = sqrt(energy(:))
 
   e_deriv1_rot_mat(:,:) = e_deriv1_mat(:,:)
