@@ -57,15 +57,14 @@ subroutine cgyro_init_h
      call cgyro_info('Initializing with restart data.')
      call cgyro_read_restart
 
-     call MPI_ALLREDUCE(sum(abs(h_x)), &
-          arg, &
-          1, &
-          MPI_DOUBLE_PRECISION, &
-          MPI_SUM, &
-          NEW_COMM_1, &
-          i_err)
-
-     h_x = h_x/arg
+     !call MPI_ALLREDUCE(sum(abs(h_x)), &
+     !     arg, &
+     !     1, &
+     !     MPI_DOUBLE_PRECISION, &
+     !     MPI_SUM, &
+     !     NEW_COMM_1, &
+     !     i_err)
+     !h_x = h_x/arg
      
      if (error_status /=0 ) return
      i_current = 0
