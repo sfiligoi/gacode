@@ -84,7 +84,7 @@ def prgen_contour(g,mag,nc,psinorm,narc):
    tol = 1e-15
    iycv = []
    
-   while dz > tol: 
+   while abs(dz) > tol: 
       z0 = z0+dz
       frac = (z0-psi0)/(psi1-psi0)
       contours = measure.find_contours(psi_efit,z0)
@@ -167,8 +167,14 @@ def prgen_contour(g,mag,nc,psinorm,narc):
    for k in range(1,narc-1):
       loopint[:] = loopint[:]+(rv[k+1,1:]-rv[k,1:])*(zv[k+1,1:]+zv[k,1:])/(rv[k+1,1:]+rv[k,1:])
 
-   cs = interpolate.splrep(psic[1:],loopint) ; qi = interpolate.splev(psic[1:],cs,der=1)
-   qi = out_f[1:]*qi/(2*np.pi)
+   cs,tck,ier,msg = interpolate.splrep(psic[1:],loopint,full_output=True)
+   if ier <= 0:
+      qi = interpolate.splev(psic[1:],cs,der=1)
+      qi = out_f[1:]*qi/(2*np.pi)
+   else:
+      print('WARNING: (prgen_contour) Problem in splrep')
+      qi = 0
+            
    #-------------------------------------------------------------------------
 
    if plot:      
@@ -206,8 +212,9 @@ def prgen_contour(g,mag,nc,psinorm,narc):
       # q-profiles
       fig,ax = plt.subplots(figsize=(8,5))
       x = np.sqrt((psic-psi0)/(psi1-psi0))
-      ax.plot(x[1:],np.sqrt(abs(qi)),color='magenta',linewidth=1,
-              label=r'$\mathbf{GACODE~integral}$')
+      if ier <= 0:
+         ax.plot(x[1:],np.sqrt(abs(qi)),color='magenta',linewidth=1,
+                 label=r'$\mathbf{GACODE~integral}$')
       ax.plot(x,np.sqrt(abs(out_q)),color='black',marker='o',markersize=2,linestyle='--',linewidth=1,
               label=r'$\mathbf{EFIT}$')
       ax.set_xlabel(r'$\sqrt{\psi/\psi_\mathrm{sep}}$')
