@@ -275,6 +275,10 @@ subroutine cgyro_init_manager
   endif
 
   call cgyro_equilibrium
+  if (error_status /=0 ) then
+     ! something went terribly wrong
+     return
+  endif
 
 #ifndef _OPENACC
   gpu_bigmem_flag = 0
@@ -284,10 +288,18 @@ subroutine cgyro_init_manager
 
      call cgyro_init_arrays
      call timer_lib_out('str_init')
+     if (error_status /=0 ) then
+        ! something went terribly wrong
+        return
+     endif
 
      call timer_lib_in('coll_init')
      call cgyro_init_collision
      call timer_lib_out('coll_init')
+     if (error_status /=0 ) then
+        ! something went terribly wrong
+        return
+     endif
 
      call timer_lib_in('str_init')
   endif
