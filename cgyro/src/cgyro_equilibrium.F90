@@ -204,9 +204,9 @@ subroutine cgyro_equilibrium
 
      do is=1,n_species
 
-        omega_stream(it,is) = sqrt(2.0)*vth(is)/(q*rmaj*g_theta(it))
+        omega_stream(it,is,my_toroidal) = sqrt(2.0)*vth(is)/(q*rmaj*g_theta(it))
 
-        omega_trap(it,is) = -0.5*sqrt(2.0)*vth(is) &
+        omega_trap(it,is,my_toroidal) = -0.5*sqrt(2.0)*vth(is) &
              *(geo_dbdt(it)/geo_b(it))/(q*rmaj*geo_g_theta(it)) 
 
         omega_rdrift(it,is) = -rho*vth(is)**2*mass(is)/(Z(is)*geo_b(it)) &
@@ -245,30 +245,30 @@ subroutine cgyro_equilibrium
   select case (stream_term)
   case (1)
      if (my_toroidal == 0) then
-        omega_stream(:,1) = stream_factor*omega_stream(:,1)
-        omega_trap(:,1) = stream_factor*omega_trap(:,1)
+        omega_stream(:,1,my_toroidal) = stream_factor*omega_stream(:,1,my_toroidal)
+        omega_trap(:,1,my_toroidal) = stream_factor*omega_trap(:,1,my_toroidal)
      endif
   case (2)
      if (my_toroidal > 0) then
-        omega_stream(:,1) = stream_factor*omega_stream(:,1)
-        omega_trap(:,1) = stream_factor*omega_trap(:,1)
+        omega_stream(:,1,my_toroidal) = stream_factor*omega_stream(:,1,my_toroidal)
+        omega_trap(:,1,my_toroidal) = stream_factor*omega_trap(:,1,my_toroidal)
      endif
   case (12)
-     omega_stream(:,1) = stream_factor*omega_stream(:,1)
-     omega_trap(:,1) = stream_factor*omega_trap(:,1)
+     omega_stream(:,1,my_toroidal) = stream_factor*omega_stream(:,1,my_toroidal)
+     omega_trap(:,1,my_toroidal) = stream_factor*omega_trap(:,1,my_toroidal)
   case (3)
      if (my_toroidal == 0 .and. n_species > 1) then
-        omega_stream(:,2) = stream_factor*omega_stream(:,2)
-        omega_trap(:,2) = stream_factor*omega_trap(:,2)
+        omega_stream(:,2,my_toroidal) = stream_factor*omega_stream(:,2,my_toroidal)
+        omega_trap(:,2,my_toroidal) = stream_factor*omega_trap(:,2,my_toroidal)
      endif
   case (4)
      if (my_toroidal > 0 .and. n_species > 1) then
-        omega_stream(:,2) = stream_factor*omega_stream(:,2)
-        omega_trap(:,2) = stream_factor*omega_trap(:,2)
+        omega_stream(:,2,my_toroidal) = stream_factor*omega_stream(:,2,my_toroidal)
+        omega_trap(:,2,my_toroidal) = stream_factor*omega_trap(:,2,my_toroidal)
      endif
   case (34)
-     omega_stream(:,2) = stream_factor*omega_stream(:,2)
-     omega_trap(:,2) = stream_factor*omega_trap(:,2)
+     omega_stream(:,2,my_toroidal) = stream_factor*omega_stream(:,2,my_toroidal)
+     omega_trap(:,2,my_toroidal) = stream_factor*omega_trap(:,2,my_toroidal)
   end select
 
 #ifdef _OPENACC

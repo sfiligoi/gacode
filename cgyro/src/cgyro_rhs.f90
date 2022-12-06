@@ -103,8 +103,8 @@ subroutine cgyro_rhs(ij)
         ! Don't need to recompute iv_loc, still valid from previous loop
         is = is_v(iv)
         ! Parallel streaming with upwind dissipation 
-        rval  = omega_stream(it_c(ic),is)*vel(ie_v(iv))*xi(ix_v(iv))
-        rval2 = abs(omega_stream(it_c(ic),is))
+        rval  = omega_stream(it_c(ic),is,my_toroidal)*vel(ie_v(iv))*xi(ix_v(iv))
+        rval2 = abs(omega_stream(it_c(ic),is,my_toroidal))
 
         rhs_stream = 0.0
         do id=-nup_theta,nup_theta
@@ -147,7 +147,7 @@ subroutine cgyro_rhs(ij)
               je = ie_v(jv)
               if (is == js) then
                  if (ie == je) then
-                    bvec_trap(iv) = bvec_trap(iv) - (omega_trap(it,is) * vel(ie) &
+                    bvec_trap(iv) = bvec_trap(iv) - (omega_trap(it,is,my_toroidal) * vel(ie) &
                          + omega_rot_trap(it,is) / vel(ie)) &
                          * (1.0 - xi(ix)**2) * xi_deriv_mat(ix,jx) * cap_h_v(ic_loc,jv)
                  endif

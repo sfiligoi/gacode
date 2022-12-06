@@ -564,7 +564,7 @@ subroutine cgyro_init_collision
               ! Trapping 
               ! (not part of collision operator but contains xi-derivative)
               if (explicit_trap_flag == 0 .and. is == js .and. ie == je) then
-                 rval = (0.5*delta_t) * (omega_trap(it,is) * vel(ie) &
+                 rval = (0.5*delta_t) * (omega_trap(it,is,my_toroidal) * vel(ie) &
                       + omega_rot_trap(it,is) / vel(ie)) &
                       * (1.0 - xi(ix)**2) * xi_deriv_mat(ix,jx)
                  cmat_loc(iv,jv) = cmat_loc(iv,jv) + rval

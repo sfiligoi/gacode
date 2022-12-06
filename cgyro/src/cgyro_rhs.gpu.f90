@@ -128,8 +128,8 @@ subroutine cgyro_rhs(ij)
 
         is = is_v(iv)
         ! Parallel streaming with upwind dissipation 
-        rval  = omega_stream(it_c(ic),is)*vel(ie_v(iv))*xi(ix_v(iv))
-        rval2 = abs(omega_stream(it_c(ic),is))
+        rval  = omega_stream(it_c(ic),is,my_toroidal)*vel(ie_v(iv))*xi(ix_v(iv))
+        rval2 = abs(omega_stream(it_c(ic),is,my_toroidal))
 
         rhs_stream = 0.0
         do id=-nup_theta,nup_theta
