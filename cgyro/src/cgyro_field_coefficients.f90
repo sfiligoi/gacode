@@ -52,9 +52,9 @@ subroutine cgyro_field_coefficients
      if (my_toroidal == 0 .and. (px(ir) == 0 .or. ir == 1) .and. zf_test_mode == 0) then
         fcoef(:,ic) = 0.0
      else
-        fcoef(1,ic) = 1.0/(k_perp(ic)**2*lambda_debye**2*dens_ele/temp_ele &
+        fcoef(1,ic) = 1.0/(k_perp(ic,my_toroidal)**2*lambda_debye**2*dens_ele/temp_ele &
              + sum_den_h(it))
-        if (n_field > 1) fcoef(2,ic) = 1.0/(-2.0*k_perp(ic)**2* &
+        if (n_field > 1) fcoef(2,ic) = 1.0/(-2.0*k_perp(ic,my_toroidal)**2* &
              rho**2/betae_unit*dens_ele*temp_ele)
         if (n_field > 2) fcoef(3,ic) = -betae_unit/(2.0*dens_ele*temp_ele)
      endif
@@ -89,8 +89,8 @@ subroutine cgyro_field_coefficients
 
   if (n_field == 1 .or. n_field == 2) then
      do ic=1,nc
-        if (k_perp(ic) > 0.0) then
-           gcoef(1,ic) = 1.0/(k_perp(ic)**2*lambda_debye**2*&
+        if (k_perp(ic,my_toroidal) > 0.0) then
+           gcoef(1,ic) = 1.0/(k_perp(ic,my_toroidal)**2*lambda_debye**2*&
                 dens_ele/temp_ele+sum_den_x(ic))
         endif
      enddo
@@ -98,8 +98,8 @@ subroutine cgyro_field_coefficients
 
   if (n_field > 1) then
      do ic=1,nc
-        if (k_perp(ic) > 0.0) then
-           gcoef(2,ic) = 1.0/(-2.0*k_perp(ic)**2*&
+        if (k_perp(ic,my_toroidal) > 0.0) then
+           gcoef(2,ic) = 1.0/(-2.0*k_perp(ic,my_toroidal)**2*&
                 rho**2/betae_unit*dens_ele*temp_ele-sum_cur_x(ic))
         endif
      enddo
@@ -112,7 +112,7 @@ subroutine cgyro_field_coefficients
      allocate(pb22(nc))
 
      do ic=1,nc
-        pb11(ic) = k_perp(ic)**2*lambda_debye**2* &
+        pb11(ic) = k_perp(ic,my_toroidal)**2*lambda_debye**2* &
              dens_ele/temp_ele+sum_den_x(ic)
      enddo
 
@@ -168,7 +168,7 @@ subroutine cgyro_field_coefficients
 
      ! Determinant
      do ic=1,nc
-        if (k_perp(ic) > 0.0) then
+        if (k_perp(ic,my_toroidal) > 0.0) then
            sum_loc(ic) = pb11(ic)*pb22(ic)-pb12(ic)*pb21(ic)
         else
            sum_loc(ic) = 1.0

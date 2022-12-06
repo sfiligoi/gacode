@@ -17,7 +17,7 @@ subroutine cgyro_init_arrays
   integer :: l,ll
   complex :: thfac,carg
   real, dimension(nc,n_species,2) :: res_loc
-  real, dimension(:,:), allocatable :: jloc_c
+  real, dimension(:,:,:), allocatable :: jloc_c
   real, dimension(:,:,:), allocatable :: res_norm
   real, external :: spectraldiss
 
@@ -29,7 +29,7 @@ subroutine cgyro_init_arrays
   !-------------------------------------------------------------------------
   ! Distributed Bessel-function Gyroaverages
 
-  allocate(jloc_c(2,nc))
+  allocate(jloc_c(2,nc,my_toroidal:my_toroidal))
 
   iv_loc = 0
   do iv=nv1,nv2
@@ -45,16 +45,16 @@ subroutine cgyro_init_arrays
         it = it_c(ic)
         ir = ir_c(ic)
 
-        arg = k_perp(ic)*rho*vth(is)*mass(is)/(z(is)*bmag(it)) &
+        arg = k_perp(ic,my_toroidal)*rho*vth(is)*mass(is)/(z(is)*bmag(it)) &
              *sqrt(2.0*energy(ie))*sqrt(1.0-xi(ix)**2)
 
         ! Need this for (Phi, A_parallel) terms in GK and field equations
 
-        jloc_c(1,ic) = bessel_j0(arg)
+        jloc_c(1,ic,my_toroidal) = bessel_j0(arg)
 
         ! Needed for B_parallel in GK and field equations
 
-        jloc_c(2,ic) = 0.5*(jloc_c(1,ic) + bessel_jn(2,arg))/bmag(it)
+        jloc_c(2,ic,my_toroidal) = 0.5*(jloc_c(1,ic,my_toroidal) + bessel_jn(2,arg))/bmag(it)
         
      enddo
 
@@ -62,17 +62,17 @@ subroutine cgyro_init_arrays
 
      ! J0 phi
      efac = 1.0
-     jvec_c(1,:,iv_loc) = efac*jloc_c(1,:)
+     jvec_c(1,:,iv_loc) = efac*jloc_c(1,:,my_toroidal)
      
      if (n_field > 1) then
         ! J0 vpar Apar
         efac = -xi(ix)*sqrt(2.0*energy(ie))*vth(is)
-        jvec_c(2,:,iv_loc) = efac*jloc_c(1,:)
+        jvec_c(2,:,iv_loc) = efac*jloc_c(1,:,my_toroidal)
         
         if (n_field > 2) then
            ! J2 bpar
            efac = 2.0*energy(ie)*(1-xi(ix)**2)*temp(is)/z(is)
-           jvec_c(3,:,iv_loc) = efac*jloc_c(2,:)
+           jvec_c(3,:,iv_loc) = efac*jloc_c(2,:,my_toroidal)
         endif
 
      endif
@@ -81,21 +81,21 @@ subroutine cgyro_init_arrays
      do ic=1,nc
         it = it_c(ic)
         fac = rho * temp(is)/(z(is) * bmag(it)) * bpol(it)/bmag(it) &
-             * 2.0 * energy(ie)*(1-xi(ix)**2) * k_x(ic)
+             * 2.0 * energy(ie)*(1-xi(ix)**2) * k_x(ic,my_toroidal)
         
-        jxvec_c(1,ic,iv_loc) =  fac * (bmag(it) * jloc_c(2,ic))
+        jxvec_c(1,ic,iv_loc) =  fac * (bmag(it) * jloc_c(2,ic,my_toroidal))
         
         if (n_field > 1) then
            efac = -xi(ix)*sqrt(2.0*energy(ie))*vth(is)
-           jxvec_c(2,ic,iv_loc) = efac * fac * (bmag(it) * jloc_c(2,ic))
+           jxvec_c(2,ic,iv_loc) = efac * fac * (bmag(it) * jloc_c(2,ic,my_toroidal))
            
            if (n_field > 2) then
               if(my_toroidal == 0) then
                  jxvec_c(3,ic,iv_loc) = 0.0
               else
                  jxvec_c(3,ic,iv_loc) = fac * z(is)*bmag(it)/mass(is) &
-                      /(k_perp(ic)*rho)**2 &
-                      * (bmag(it) * jloc_c(2,ic) - jloc_c(1,ic))
+                      /(k_perp(ic,my_toroidal)*rho)**2 &
+                      * (bmag(it) * jloc_c(2,ic,my_toroidal) - jloc_c(1,ic,my_toroidal))
               endif
            endif
            
@@ -230,7 +230,7 @@ subroutine cgyro_init_arrays
      hzf(:,:,:) = 0.0      
      do ir=1,n_radial
         do it=1,n_theta
-           hzf(ir,it,it) = k_perp(ic_c(ir,it))**2 * lambda_debye**2 &
+           hzf(ir,it,it) = k_perp(ic_c(ir,it),my_toroidal)**2 * lambda_debye**2 &
                 * dens_ele/temp_ele + sum_den_h(it)
            do jt=1,n_theta
               hzf(ir,it,jt) = hzf(ir,it,jt) &
@@ -252,7 +252,7 @@ subroutine cgyro_init_arrays
      xzf(:,:,:) = 0.0     
      do ir=1,n_radial
         do it=1,n_theta
-           xzf(ir,it,it) = k_perp(ic_c(ir,it))**2*lambda_debye**2 &
+           xzf(ir,it,it) = k_perp(ic_c(ir,it),my_toroidal)**2*lambda_debye**2 &
                 * dens_ele/temp_ele+sum_den_x(ic_c(ir,it))
            do jt=1,n_theta
               xzf(ir,it,jt) = xzf(ir,it,jt) &

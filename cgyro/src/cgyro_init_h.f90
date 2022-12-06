@@ -100,7 +100,7 @@ subroutine cgyro_init_h
               it = it_c(ic)
 
               if (is == 1 .and. px(ir) /= 0) then
-                 arg = k_perp(ic)*rho*vth(is)*mass(is)/(z(is)*bmag(it)) &
+                 arg = k_perp(ic,my_toroidal)*rho*vth(is)*mass(is)/(z(is)*bmag(it)) &
                       *sqrt(2.0*energy(ie))*sqrt(1.0-xi(ix)**2)
                  h_x(ic,iv_loc) = 1e-6*bessel_j0(abs(arg))
 

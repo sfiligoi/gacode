@@ -225,7 +225,7 @@ subroutine cgyro_write_initdata
      write(io) real(omega_cdrift(:,1),kind=4)
      write(io) real(omega_cdrift_r(:,1),kind=4)
      write(io) real(omega_gammap(:),kind=4)
-     write(io) real(k_perp(ic_c(n_radial/2+1,:)),kind=4)
+     write(io) real(k_perp(ic_c(n_radial/2+1,:),my_toroidal),kind=4)
      close(io)
 
   endif

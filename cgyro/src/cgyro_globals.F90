@@ -461,8 +461,8 @@ module cgyro_globals
   real, dimension(:), allocatable   :: w_theta
   real, dimension(:), allocatable   :: g_theta
   real, dimension(:), allocatable   :: g_theta_geo
-  real, dimension(:), allocatable   :: k_perp
-  real, dimension(:), allocatable   :: k_x
+  real, dimension(:,:), allocatable :: k_perp
+  real, dimension(:,:), allocatable :: k_x
   real, dimension(:), allocatable   :: bmag
   real, dimension(:), allocatable   :: btor
   real, dimension(:), allocatable   :: bpol

@@ -35,7 +35,7 @@ subroutine cgyro_zftest_em
      do ic=1,nc
         it = it_c(ic)
 
-        arg = k_perp(ic)*rho*vth(is)*mass(is)/(z(is)*bmag(it)) &
+        arg = k_perp(ic,my_toroidal)*rho*vth(is)*mass(is)/(z(is)*bmag(it)) &
              *sqrt(2.0*energy(ie))*sqrt(1.0-xi(ix)**2)
 
         sum_loc(is,it) = sum_loc(is,it) & 
@@ -66,7 +66,7 @@ subroutine cgyro_zftest_em
      do ic=1,nc
         it = it_c(ic)
 
-        arg = k_perp(ic)*rho*vth(is)*mass(is)/(z(is)*bmag(it)) &
+        arg = k_perp(ic,my_toroidal)*rho*vth(is)*mass(is)/(z(is)*bmag(it)) &
              *sqrt(2.0*energy(ie))*sqrt(1.0-xi(ix)**2)
 
         sum_loc(is,it) = sum_loc(is,it) & 
@@ -101,7 +101,7 @@ subroutine cgyro_zftest_em
         ie = ie_v(iv)
 
         if (px(ir) /= 0) then
-           arg = k_perp(ic)*rho*vth(is)*mass(is)/(z(is)*bmag(it)) &
+           arg = k_perp(ic,my_toroidal)*rho*vth(is)*mass(is)/(z(is)*bmag(it)) &
                 *sqrt(2.0*energy(ie))*sqrt(1.0-xi(ix)**2)           
 
 

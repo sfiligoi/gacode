@@ -22,7 +22,7 @@ subroutine cgyro_init_collision
   ! parameters for matrix solve
   real, dimension(:,:), allocatable :: amat,cmat_loc
   real, dimension(:,:,:,:,:,:), allocatable :: ctest
-  real, dimension(:,:,:,:,:), allocatable :: bessel
+  real, dimension(:,:,:,:,:,:), allocatable :: bessel
   ! diagnostics
   real :: amat_sum, cmat_sum, cmat_diff, cmat_rel_diff
   integer, dimension(7:10) :: cmap_fp32_error_abs_cnt_loc
@@ -149,7 +149,7 @@ subroutine cgyro_init_collision
 
   if ( collision_model == 4 .and. collision_kperp == 1 .and. &
        (collision_mom_restore == 1 .or. collision_ene_restore == 1)) then
-     allocate(bessel(n_species,n_xi,n_energy,nc_loc,0:1))
+     allocate(bessel(n_species,n_xi,n_energy,nc_loc,0:1,my_toroidal:my_toroidal))
 !$omp parallel do private(ic_loc,it,ie,ix,is,arg)
      do ic=nc1,nc2
         ic_loc = ic-nc1+1
@@ -157,11 +157,11 @@ subroutine cgyro_init_collision
         do ie=1,n_energy
            do ix=1,n_xi
               do is=1,n_species   
-                 arg = k_perp(ic)*rho*vth(is)*mass(is)&
+                 arg = k_perp(ic,my_toroidal)*rho*vth(is)*mass(is)&
                       /(z(is)*bmag(it)) *sqrt(2.0*energy(ie)) &
                       *sqrt(1.0-xi(ix)**2)
-                 bessel(is,ix,ie,ic_loc,0) = bessel_j0(arg)
-                 bessel(is,ix,ie,ic_loc,1) = bessel_j1(arg)
+                 bessel(is,ix,ie,ic_loc,0,my_toroidal) = bessel_j0(arg)
+                 bessel(is,ix,ie,ic_loc,1,my_toroidal) = bessel_j1(arg)
               enddo
            enddo
         enddo
@@ -371,12 +371,12 @@ subroutine cgyro_init_collision
                                      + ctest(is,js,jx,ix,je,ie) &
                                      * sqrt(2.0*energy(je)) * xi(jx) &
                                      * w_e(je)*w_xi(jx) * vth(is) &
-                                     * bessel(is,ix,ie,ic_loc,0)
+                                     * bessel(is,ix,ie,ic_loc,0,my_toroidal)
                                 rsvect1(is,js,ix,ie) = rsvect1(is,js,ix,ie) &
                                      + ctest(is,js,jx,ix,je,ie) &
                                      * sqrt(2.0*energy(je)) * xi(jx) &
                                      * w_e(je)*w_xi(jx) * vth(is) &
-                                     * bessel(is,ix,ie,ic_loc,1) &
+                                     * bessel(is,ix,ie,ic_loc,1,my_toroidal) &
                                      * sqrt(1.0-xi(ix)**2)/xi(ix)
                              enddo
                           enddo
@@ -401,14 +401,14 @@ subroutine cgyro_init_collision
                             - mass(js)/mass(is) &
                             * dens(js) * dens_rot(it,js) &
                             * rsvec(is,js,ix,ie) &
-                            * bessel(is,ix,ie,ic_loc,0) / rs(is,js) &
+                            * bessel(is,ix,ie,ic_loc,0,my_toroidal) / rs(is,js) &
                             * rsvect0(js,is,jx,je)
                        cmat_loc(iv,jv) &
                             = cmat_loc(iv,jv) &
                             - mass(js)/mass(is) &
                             * dens(js) * dens_rot(it,js) &
                             * rsvec(is,js,ix,ie) / rs(is,js) &
-                            * bessel(is,ix,ie,ic_loc,1) &
+                            * bessel(is,ix,ie,ic_loc,1,my_toroidal) &
                             * sqrt(1.0-xi(ix)**2)/xi(ix) &
                             * rsvect1(js,is,jx,je) 
                     endif
@@ -486,7 +486,7 @@ subroutine cgyro_init_collision
                                 rsvect0(is,js,ix,ie) = rsvect0(is,js,ix,ie) &
                                      + ctest(is,js,jx,ix,je,ie) * energy(je) &
                                      * w_e(je)*w_xi(jx) &
-                                     * bessel(is,ix,ie,ic_loc,0) 
+                                     * bessel(is,ix,ie,ic_loc,0,my_toroidal) 
                              enddo
                           enddo
                        enddo
@@ -509,7 +509,7 @@ subroutine cgyro_init_collision
                             = cmat_loc(iv,jv) &
                             - temp(js)/temp(is) * dens(js) * dens_rot(it,js) &
                             * rsvec(is,js,ix,ie) &
-                            * bessel(is,ix,ie,ic_loc,0) / rs(is,js) &
+                            * bessel(is,ix,ie,ic_loc,0,my_toroidal) / rs(is,js) &
                             * rsvect0(js,is,jx,je)
                     endif
                  enddo
@@ -585,7 +585,7 @@ subroutine cgyro_init_collision
                  if (is == js .and. jx == ix .and. je == ie) then
                     do ks=1,n_species
                        rval = (0.5*delta_t) &
-                            * (-0.25*(k_perp(ic)*rho*vth(is)*mass(is) &
+                            * (-0.25*(k_perp(ic,my_toroidal)*rho*vth(is)*mass(is) &
                             / (z(is)*bmag(it)))**2 * 2.0*energy(ie) &
                             * (klor_fac(is,ks)*nu_d(ie,is,ks) * (1+xi(ix)**2) &
                             + kdiff_fac(is,ks)*nu_par(ie,is,ks)* (1-xi(ix)**2)))
@@ -606,7 +606,7 @@ subroutine cgyro_init_collision
                     !amat(iv,jv)        = amat(iv,jv) + 0.0
                  else
                     rval =  z(is)/temp(is) * jvec_v(1,ic_loc,iv) &
-                         / (k_perp(ic)**2 * lambda_debye**2 &
+                         / (k_perp(ic,my_toroidal)**2 * lambda_debye**2 &
                          * dens_ele / temp_ele + sum_den_h(it)) &
                          * z(js)*dens(js)*dens_rot(it,js) &
                          * jvec_v(1,ic_loc,jv) * w_e(je) * w_xi(jx) 
@@ -617,7 +617,7 @@ subroutine cgyro_init_collision
                  ! Ampere component
                  if (n_field > 1) then
                     rval =  z(is)/temp(is) * (jvec_v(2,ic_loc,iv) &
-                         / (2.0*k_perp(ic)**2 * rho**2 / betae_unit & 
+                         / (2.0*k_perp(ic,my_toroidal)**2 * rho**2 / betae_unit & 
                          * dens_ele * temp_ele)) &
                          * z(js)*dens(js)*dens_rot(it,js) &
                          * jvec_v(2,ic_loc,jv) * w_e(je) * w_xi(jx)  
