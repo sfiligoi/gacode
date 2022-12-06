@@ -151,6 +151,12 @@ subroutine cgyro_rhs(ij)
 
   call timer_lib_out('str')
 
+  if (explicit_trap_flag == 1) then
+     ! we should never get in here... should have failed during init
+     ! hard abort if we somehow end up here
+     call abort
+  endif
+
   ! Wavenumber advection shear terms
   call cgyro_advect_wavenumber(ij)
 
