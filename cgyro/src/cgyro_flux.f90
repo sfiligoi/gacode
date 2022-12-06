@@ -193,8 +193,8 @@ subroutine cgyro_flux
   else
 
      ! Complete definition of fluxes (not exchange)
-     gflux_loc(:,:,1:3,:) = gflux_loc(:,:,1:3,:)*(k_theta*rho)
-     cflux_loc(:,1:3,:)   = cflux_loc(:,1:3,:)*(k_theta*rho)
+     gflux_loc(:,:,1:3,:) = gflux_loc(:,:,1:3,:)*(k_theta_base*my_toroidal*rho)
+     cflux_loc(:,1:3,:)   = cflux_loc(:,1:3,:)*(k_theta_base*my_toroidal*rho)
 
      ! GyroBohm normalizations
      gflux_loc = gflux_loc/rho**2

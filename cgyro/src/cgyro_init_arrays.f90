@@ -301,10 +301,10 @@ subroutine cgyro_init_arrays
         do id=-nup_theta,nup_theta
            jt = modulo(it+id-1,n_theta)+1
            if (it+id < 1) then
-              thfac = exp(2*pi*i_c*k_theta*rmin)
+              thfac = exp(2*pi*i_c*k_theta_base*my_toroidal*rmin)
               jr = modulo(ir-my_toroidal*box_size*sign_qs-1,n_radial)+1
            else if (it+id > n_theta) then
-              thfac = exp(-2*pi*i_c*k_theta*rmin)
+              thfac = exp(-2*pi*i_c*k_theta_base*my_toroidal*rmin)
               jr = modulo(ir+my_toroidal*box_size*sign_qs-1,n_radial)+1
            else
               thfac = (1.0,0.0)
@@ -346,7 +346,7 @@ subroutine cgyro_init_arrays
 
         ! (i ktheta) components from drifts        
         omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
-             - i_c * k_theta * (omega_aprdrift(it,is)*energy(ie)*xi(ix)**2 &
+             - i_c*k_theta_base*my_toroidal*(omega_aprdrift(it,is)*energy(ie)*xi(ix)**2 &
              + omega_cdrift(it,is)*vel(ie)*xi(ix) + omega_rot_drift(it,is) &
              + omega_rot_edrift(it))
         
@@ -371,16 +371,16 @@ subroutine cgyro_init_arrays
              + abs(omega_rot_edrift_r(it)))          
              
         ! omega_star 
-        carg = -i_c*k_theta*rho*(dlnndr(is)+dlntdr(is)*(energy(ie)-1.5)) &
-             -i_c*k_theta*rho*(sqrt(2.0*energy(ie))*xi(ix)/vth(is) &
-             *omega_gammap(it)) -i_c*k_theta*rho*omega_rot_star(it,is)
+        carg = -i_c*k_theta_base*my_toroidal*rho*(dlnndr(is)+dlntdr(is)*(energy(ie)-1.5)) &
+             -i_c*k_theta_base*my_toroidal*rho*(sqrt(2.0*energy(ie))*xi(ix)/vth(is) &
+             *omega_gammap(it)) -i_c*k_theta_base*my_toroidal*rho*omega_rot_star(it,is)
 
         omega_s(:,ic,iv_loc) = carg*jvec_c(:,ic,iv_loc)
 
         ! Profile curvature via wavenumber advection (ix -> d/dp)
         ! See whiteboard notes.
         ! JC: Re-checked sign and normalization (Oct 2019)
-        carg = -k_theta*length*(sdlnndr(is)+sdlntdr(is)*(energy(ie)-1.5))/(2*pi)
+        carg = -k_theta_base*my_toroidal*length*(sdlnndr(is)+sdlntdr(is)*(energy(ie)-1.5))/(2*pi)
 
         omega_ss(:,ic,iv_loc) = carg*jvec_c(:,ic,iv_loc)
 

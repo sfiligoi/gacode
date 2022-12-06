@@ -23,7 +23,7 @@ subroutine cgyro_shear_hammett
   complex, dimension(n_theta) :: a1
 
   
-  gtime = gtime+omega_eb*delta_t
+  gtime = gtime+omega_eb_base*my_toroidal*delta_t
 
   ! Forward shearing
   if (gtime > 0.5) then

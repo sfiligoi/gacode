@@ -232,10 +232,10 @@ subroutine cgyro_equilibrium
 
      do ir=1,n_radial
         k_perp(ic_c(ir,it)) = sqrt((2.0*pi*(px(ir)+px0)*geo_grad_r(it)/length &
-             + k_theta*geo_gq(it)*geo_captheta(it))**2 &
-             + (k_theta*geo_gq(it))**2)
+             + k_theta_base*my_toroidal*geo_gq(it)*geo_captheta(it))**2 &
+             + (k_theta_base*my_toroidal*geo_gq(it))**2)
         k_x(ic_c(ir,it)) = 2.0*pi*(px(ir)+px0)*geo_grad_r(it)/length &
-             + k_theta*geo_gq(it)*geo_captheta(it)
+             + k_theta_base*my_toroidal*geo_gq(it)*geo_captheta(it)
      enddo
 
   enddo

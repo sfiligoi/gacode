@@ -310,10 +310,12 @@ module cgyro_globals
   real, dimension(11) :: vth  
   real, dimension(11) :: nu
   real :: rho
-  real :: k_theta
   real :: length
-  real :: omega_eb
   integer :: sign_qs
+  ! k_theta = k_theta_base * my_toroidal
+  real :: k_theta_base
+  ! omega_eb = omega_eb_base * my_toroidal
+  real :: omega_eb_base
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------

@@ -351,11 +351,12 @@ subroutine cgyro_make_profiles
 
      ! Zonal flow (n=0) test
 
-     k_theta = q/rmin
-     rho     = abs(ky/k_theta)*(-btccw)
-     length  = abs(box_size/(s*k_theta))
+     k_theta_base = q/rmin
+     rho     = abs(ky/k_theta_base)*(-btccw)
+     length  = abs(box_size/(s*k_theta_base))
 
-     k_theta = 0
+     my_toroidal = 0
+     ! k_theta = 0
 
      call cgyro_info('Triggered zonal flow test')
 
@@ -363,17 +364,16 @@ subroutine cgyro_make_profiles
         call cgyro_info('Zonal flow test with n_radial > 1')
      endif
 
-     my_toroidal = 0
-
   else if (n_toroidal == 1) then
 
      ! Single linear mode (assume n=1, compute rho)
 
-     k_theta = q/rmin
-     rho     = abs(ky/k_theta)*(-btccw)
-     length  = abs(box_size/(s*k_theta))
+     k_theta_base = q/rmin
+     rho     = abs(ky/k_theta_base)*(-btccw)
+     length  = abs(box_size/(s*k_theta_base))
 
      my_toroidal = 1
+     ! k_theta = k_theta_base
 
      call cgyro_info('Single-mode linear analysis')
 
@@ -381,15 +381,14 @@ subroutine cgyro_make_profiles
 
      ! Multiple modes (n=0,1,2,...,n_toroidal-1)
 
-     k_theta = q/rmin
-     rho     = abs(ky/k_theta)*(-btccw)
-     length  = abs(box_size/(s*k_theta))
+     k_theta_base = q/rmin
+     rho     = abs(ky/k_theta_base)*(-btccw)
+     length  = abs(box_size/(s*k_theta_base))
 
      ! Now define individual k_thetas
 
      my_toroidal = i_group_1
-
-     k_theta = my_toroidal*k_theta
+     ! k_theta = my_toroidal*k_theta_base
 
      call cgyro_info('Multiple toroidal harmonics')
 
@@ -416,7 +415,7 @@ subroutine cgyro_make_profiles
   !
   source_flag = 0
   if (abs(gamma_e) > 1e-10 .and. nonlinear_flag > 0) then
-     omega_eb = k_theta*length*gamma_e/(2*pi)
+     omega_eb_base = k_theta_base*length*gamma_e/(2*pi)
      select case (shear_method)
      case (1)
         call cgyro_info('ExB shear: Hammett discrete shift') 
@@ -427,7 +426,7 @@ subroutine cgyro_make_profiles
         call cgyro_error('Unknown ExB shear method') 
      end select
   else
-     omega_eb = 0.0
+     omega_eb_base = 0.0
      shear_method = 0
      call cgyro_info('ExB shear: OFF') 
   endif
