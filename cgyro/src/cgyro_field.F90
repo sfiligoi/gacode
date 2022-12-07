@@ -54,7 +54,7 @@ subroutine cgyro_field_v
   if (my_toroidal == 0 .and. ae_flag == 1) then
      call cgyro_field_ae('v')
   else
-     field(:,:) = fcoef(:,:)*field(:,:)
+     field(:,:) = fcoef(:,:,my_toroidal)*field(:,:)
   endif
 
   call timer_lib_out('field')
@@ -136,7 +136,7 @@ subroutine cgyro_field_v_gpu
 !$acc parallel loop collapse(2) independent present(fcoef) default(none)
      do ic=1,nc
        do i_f=1,n_field
-        field(i_f,ic) = fcoef(i_f,ic)*field(i_f,ic)
+        field(i_f,ic) = fcoef(i_f,ic,my_toroidal)*field(i_f,ic)
        enddo
      enddo
   endif
@@ -198,7 +198,7 @@ subroutine cgyro_field_c_cpu
   call timer_lib_in('field')
 
   if (n_field > 2) then
-     field(3,:) = field(3,:)*fcoef(3,:)
+     field(3,:) = field(3,:)*fcoef(3,:,my_toroidal)
   endif
 
   ! Poisson LHS factors
@@ -208,13 +208,13 @@ subroutine cgyro_field_c_cpu
      if (n_field > 2) then
 !$omp workshare 
         tmp(:) = field(1,:)
-        field(1,:) = gcoef(1,:)*field(1,:)+gcoef(4,:)*field(3,:)
-        field(2,:) = gcoef(2,:)*field(2,:)
-        field(3,:) = gcoef(3,:)*field(3,:)+gcoef(5,:)*tmp(:)
+        field(1,:) = gcoef(1,:,my_toroidal)*field(1,:)+gcoef(4,:,my_toroidal)*field(3,:)
+        field(2,:) = gcoef(2,:,my_toroidal)*field(2,:)
+        field(3,:) = gcoef(3,:,my_toroidal)*field(3,:)+gcoef(5,:,my_toroidal)*tmp(:)
 !$omp end workshare
      else
 !$omp workshare
-        field(:,:) = gcoef(:,:)*field(:,:)
+        field(:,:) = gcoef(:,:,my_toroidal)*field(:,:)
 !$omp end workshare
      endif
   endif
@@ -291,7 +291,7 @@ subroutine cgyro_field_c_gpu
   if (n_field > 2) then
 !$acc parallel loop independent present(fcoef) default(none)
      do ic=1,nc
-       field(3,ic) = field(3,ic)*fcoef(3,ic)
+       field(3,ic) = field(3,ic)*fcoef(3,ic,my_toroidal)
      enddo
   endif
   ! Poisson LHS factors
@@ -305,15 +305,17 @@ subroutine cgyro_field_c_gpu
 !$acc parallel loop independent private(tmp) present(gcoef) default(none)
         do ic=1,nc
           tmp = field(1,ic)
-          field(1,ic) = gcoef(1,ic)*field(1,ic)+gcoef(4,ic)*field(3,ic)
-          field(2,ic) = gcoef(2,ic)*field(2,ic)
-          field(3,ic) = gcoef(3,ic)*field(3,ic)+gcoef(5,ic)*tmp
+          field(1,ic) = gcoef(1,ic,my_toroidal)*field(1,ic)+ &
+                  gcoef(4,ic,my_toroidal)*field(3,ic)
+          field(2,ic) = gcoef(2,ic,my_toroidal)*field(2,ic)
+          field(3,ic) = gcoef(3,ic,my_toroidal)*field(3,ic)+ &
+                  gcoef(5,ic,my_toroidal)*tmp
         enddo
      else
 !$acc parallel loop collapse(2) independent present(gcoef) default(none)
         do ic=1,nc
           do i_f=1,n_field
-            field(i_f,ic) = gcoef(i_f,ic)*field(i_f,ic)
+            field(i_f,ic) = gcoef(i_f,ic,my_toroidal)*field(i_f,ic)
           enddo
         enddo
      endif

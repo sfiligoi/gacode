@@ -50,13 +50,13 @@ subroutine cgyro_field_coefficients
      ir = ir_c(ic) 
      it = it_c(ic)
      if (my_toroidal == 0 .and. (px(ir) == 0 .or. ir == 1) .and. zf_test_mode == 0) then
-        fcoef(:,ic) = 0.0
+        fcoef(:,ic,my_toroidal) = 0.0
      else
-        fcoef(1,ic) = 1.0/(k_perp(ic,my_toroidal)**2*lambda_debye**2*dens_ele/temp_ele &
+        fcoef(1,ic,my_toroidal) = 1.0/(k_perp(ic,my_toroidal)**2*lambda_debye**2*dens_ele/temp_ele &
              + sum_den_h(it))
-        if (n_field > 1) fcoef(2,ic) = 1.0/(-2.0*k_perp(ic,my_toroidal)**2* &
+        if (n_field > 1) fcoef(2,ic,my_toroidal) = 1.0/(-2.0*k_perp(ic,my_toroidal)**2* &
              rho**2/betae_unit*dens_ele*temp_ele)
-        if (n_field > 2) fcoef(3,ic) = -betae_unit/(2.0*dens_ele*temp_ele)
+        if (n_field > 2) fcoef(3,ic,my_toroidal) = -betae_unit/(2.0*dens_ele*temp_ele)
      endif
   enddo
 
@@ -90,7 +90,7 @@ subroutine cgyro_field_coefficients
   if (n_field == 1 .or. n_field == 2) then
      do ic=1,nc
         if (k_perp(ic,my_toroidal) > 0.0) then
-           gcoef(1,ic) = 1.0/(k_perp(ic,my_toroidal)**2*lambda_debye**2*&
+           gcoef(1,ic,my_toroidal) = 1.0/(k_perp(ic,my_toroidal)**2*lambda_debye**2*&
                 dens_ele/temp_ele+sum_den_x(ic,my_toroidal))
         endif
      enddo
@@ -99,7 +99,7 @@ subroutine cgyro_field_coefficients
   if (n_field > 1) then
      do ic=1,nc
         if (k_perp(ic,my_toroidal) > 0.0) then
-           gcoef(2,ic) = 1.0/(-2.0*k_perp(ic,my_toroidal)**2*&
+           gcoef(2,ic,my_toroidal) = 1.0/(-2.0*k_perp(ic,my_toroidal)**2*&
                 rho**2/betae_unit*dens_ele*temp_ele-sum_cur_x(ic,my_toroidal))
         endif
      enddo
@@ -180,11 +180,10 @@ subroutine cgyro_field_coefficients
      pb21 = pb21/sum_loc
      pb22 = pb22/sum_loc
 
-     ! TODO: add dimension to gcoef
-     gcoef(3,:) = pb11(:,my_toroidal)
-     gcoef(1,:) = pb22(:,my_toroidal)
-     gcoef(4,:) = -pb12(:,my_toroidal)
-     gcoef(5,:) = -pb21(:,my_toroidal)
+     gcoef(3,:,:) = pb11
+     gcoef(1,:,:) = pb22
+     gcoef(4,:,:) = -pb12
+     gcoef(5,:,:) = -pb21
 
      deallocate(pb11)
      deallocate(pb12)
@@ -196,7 +195,7 @@ subroutine cgyro_field_coefficients
   do ic=1,nc
      ir = ir_c(ic) 
      if (my_toroidal == 0 .and. (px(ir) == 0 .or. ir == 1) .and. zf_test_mode == 0) then
-        gcoef(:,ic) = 0.0
+        gcoef(:,ic,my_toroidal) = 0.0
      endif
   enddo
 

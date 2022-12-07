@@ -372,8 +372,8 @@ module cgyro_globals
   real, dimension(:,:,:,:), allocatable :: upfac1,upfac2
   !
   ! Fields
-  real, dimension(:,:), allocatable :: fcoef
-  real, dimension(:,:), allocatable :: gcoef
+  real, dimension(:,:,:), allocatable :: fcoef
+  real, dimension(:,:,:), allocatable :: gcoef
   complex, dimension(:,:), allocatable :: field
   complex, dimension(:,:), allocatable :: field_dot
   complex, dimension(:,:), allocatable :: field_loc

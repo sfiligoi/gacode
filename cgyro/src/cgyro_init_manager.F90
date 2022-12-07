@@ -160,11 +160,11 @@ subroutine cgyro_init_manager
      !----------------------------------------------------
 
      ! Global (undistributed) arrays
-     allocate(fcoef(n_field,nc))
+     allocate(fcoef(n_field,nc,my_toroidal))
      if (n_field < 3) then
-        allocate(gcoef(n_field,nc))
+        allocate(gcoef(n_field,nc,my_toroidal))
      else
-        allocate(gcoef(5,nc))
+        allocate(gcoef(5,nc,my_toroidal))
      endif
      allocate(field(n_field,nc))
      allocate(field_dot(n_field,nc))
