@@ -107,8 +107,8 @@ subroutine cgyro_calc_collision_cpu_fp32(nj_loc,update_chv)
            ie = ie_v(iv)
            is = is_v(iv)
            ix = ix_v(iv)
-           if (ie==1) then
-             cval = cval + cmat_e1(ix,is,ivp,ic_loc)
+           if (ie<=n_low_energy) then
+             cval = cval + cmat_e1(ix,is,ie,ivp,ic_loc)
            else
              if ((iep==ie) .AND. (isp==is)) then
                cval = cval + cmat_stripes(ix,is,ie,ixp,ic_loc)
@@ -478,8 +478,8 @@ subroutine cgyro_calc_collision_gpu_fp32(nj_loc,update_chv)
               cval = cmat_fp32(iv,ivp,ic_loc)
               h_re = real(cap_h_v(ic_loc,ivp))
               h_im = aimag(cap_h_v(ic_loc,ivp))
-              if (ie==1) then
-                 cval = cval + cmat_e1(ix,is,ivp,ic_loc)
+              if (ie<=n_low_energy) then
+                 cval = cval + cmat_e1(ix,is,ie,ivp,ic_loc)
               else
                  iep = ie_v(ivp)
                  isp = is_v(ivp)
@@ -568,8 +568,8 @@ subroutine cgyro_calc_collision_gpu_b2_fp32(nj_loc,update_chv)
               cval = cmat_fp32(iv,ivp,ic_loc)
               h_re = real(cap_h_v(ic_loc,ivp))
               h_im = aimag(cap_h_v(ic_loc,ivp))
-              if (ie==1) then
-                 cval = cval + cmat_e1(ix,is,ivp,ic_loc)
+              if (ie<=n_low_energy) then
+                 cval = cval + cmat_e1(ix,is,ie,ivp,ic_loc)
               else
                  iep = ie_v(ivp)
                  isp = is_v(ivp)

@@ -149,8 +149,8 @@ subroutine cgyro_check_memory(datafile)
            call cgyro_alloc_add(io,(8.0*nv)*nv*nc_loc,'cmat')
         else
            call cgyro_alloc_add(io,4.0*nv*nv*nc_loc,'cmat_fp32')
-           call cgyro_alloc_add(io,4.0*n_xi*n_species*(n_energy-1)*n_xi*nc_loc,'cmat_stripes')
-           call cgyro_alloc_add(io,4.0*n_xi*n_species*nv*nc_loc,'cmat_e1')
+           call cgyro_alloc_add(io,4.0*n_xi*n_species*(n_energy-n_low_energy)*n_xi*nc_loc,'cmat_stripes')
+           call cgyro_alloc_add(io,4.0*n_xi*n_species*nv*nc_loc*n_low_energy,'cmat_e1')
         endif
 #ifdef _OPENACC
         if (gpu_bigmem_flag /= 1) then
