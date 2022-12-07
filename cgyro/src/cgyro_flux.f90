@@ -74,7 +74,7 @@ subroutine cgyro_flux
         erot  = (energy(ie)+lambda_rot(it,is))*temp(is)
 
         if (itp(it) > 0) then
-           cprod = cap_h_c(ic,iv_loc)*dvjvec_c(1,ic,iv_loc)/z(is)
+           cprod = cap_h_c(ic,iv_loc)*dvjvec_c(1,ic,iv_loc,my_toroidal)/z(is)
            cn    = dv*z(is)*dens(is)*dens_rot(it,is)/temp(is)
 
            ! Density moment: (delta n_a)/(n_norm rho_norm)
@@ -128,17 +128,17 @@ subroutine cgyro_flux
 
            if (ir-l > 0) then
               icl = ic_c(ir-l,it)
-              prod1(l,:) = prod1(l,:)+i_c*cap_h_c(ic,iv_loc)*conjg(jvec_c(:,icl,iv_loc)*field(:,icl))
-              prod2(l,:) = prod2(l,:)+i_c*cap_h_c(ic,iv_loc)*conjg(i_c*jxvec_c(:,icl,iv_loc)*field(:,icl))
-              prod3(l,:) = prod3(l,:)-cap_h_c_dot(ic,iv_loc)*conjg(jvec_c(:,icl,iv_loc)*field(:,icl)) &
-                                     +cap_h_c(ic,iv_loc)*conjg(jvec_c(:,icl,iv_loc)*field_dot(:,icl))
+              prod1(l,:) = prod1(l,:)+i_c*cap_h_c(ic,iv_loc)*conjg(jvec_c(:,icl,iv_loc,my_toroidal)*field(:,icl))
+              prod2(l,:) = prod2(l,:)+i_c*cap_h_c(ic,iv_loc)*conjg(i_c*jxvec_c(:,icl,iv_loc,my_toroidal)*field(:,icl))
+              prod3(l,:) = prod3(l,:)-cap_h_c_dot(ic,iv_loc)*conjg(jvec_c(:,icl,iv_loc,my_toroidal)*field(:,icl)) &
+                                     +cap_h_c(ic,iv_loc)*conjg(jvec_c(:,icl,iv_loc,my_toroidal)*field_dot(:,icl))
            endif
            if (ir+l <= n_radial) then
               icl = ic_c(ir+l,it)
-              prod1(l,:) = prod1(l,:)-i_c*conjg(cap_h_c(ic,iv_loc))*jvec_c(:,icl,iv_loc)*field(:,icl)
-              prod2(l,:) = prod2(l,:)-i_c*conjg(cap_h_c(ic,iv_loc))*i_c*jxvec_c(:,icl,iv_loc)*field(:,icl)
-              prod3(l,:) = prod3(l,:)-conjg(cap_h_c_dot(ic,iv_loc))*jvec_c(:,icl,iv_loc)*field(:,icl) &
-                                     +conjg(cap_h_c(ic,iv_loc))*jvec_c(:,icl,iv_loc)*field_dot(:,icl)
+              prod1(l,:) = prod1(l,:)-i_c*conjg(cap_h_c(ic,iv_loc))*jvec_c(:,icl,iv_loc,my_toroidal)*field(:,icl)
+              prod2(l,:) = prod2(l,:)-i_c*conjg(cap_h_c(ic,iv_loc))*i_c*jxvec_c(:,icl,iv_loc,my_toroidal)*field(:,icl)
+              prod3(l,:) = prod3(l,:)-conjg(cap_h_c_dot(ic,iv_loc))*jvec_c(:,icl,iv_loc,my_toroidal)*field(:,icl) &
+                                     +conjg(cap_h_c(ic,iv_loc))*jvec_c(:,icl,iv_loc,my_toroidal)*field_dot(:,icl)
            endif
 
         enddo

@@ -6,13 +6,13 @@ subroutine cgyro_field_coefficients
   implicit none
 
   integer :: ir,it,is,ie,ix
-  real, dimension(nc) :: sum_loc
-  real, dimension(:), allocatable :: pb11,pb12,pb21,pb22
+  real, dimension(nc,my_toroidal:my_toroidal) :: sum_loc
+  real, dimension(:,:), allocatable :: pb11,pb12,pb21,pb22
  
   !-------------------------------------------------------------------------
   ! Field equation prefactors, sums.
   !
-  sum_loc(:) = 0.0
+  sum_loc(:,:) = 0.0
 !$omp parallel private(iv_loc,is,ic,it)
 !$omp do reduction(+:sum_loc)
   do iv=nv1,nv2
@@ -20,8 +20,8 @@ subroutine cgyro_field_coefficients
      is = is_v(iv)
      do ic=1,nc
         it = it_c(ic)
-        sum_loc(ic) = sum_loc(ic)+vfac(iv_loc)*dens_rot(it,is) &
-             *(1.0-jvec_c(1,ic,iv_loc)**2) 
+        sum_loc(ic,my_toroidal) = sum_loc(ic,my_toroidal)+vfac(iv_loc)*dens_rot(it,is) &
+             *(1.0-jvec_c(1,ic,iv_loc,my_toroidal)**2) 
      enddo
   enddo
 !$omp end do
@@ -38,7 +38,7 @@ subroutine cgyro_field_coefficients
   if (ae_flag == 1) then
      do ic=1,nc
         it = it_c(ic)
-        sum_den_x(ic) = sum_den_x(ic)+dens_ele*dens_ele_rot(it)/temp_ele
+        sum_den_x(ic,my_toroidal) = sum_den_x(ic,my_toroidal)+dens_ele*dens_ele_rot(it)/temp_ele
      enddo
   endif
   !----------------------------------------------------------------------
@@ -62,7 +62,7 @@ subroutine cgyro_field_coefficients
 
   if (n_field > 1) then
 
-     sum_loc(:) = 0.0
+     sum_loc(:,:) = 0.0
 !$omp parallel private(iv,iv_loc,is,ic,it)
 !$omp do reduction(+:sum_loc)
      do iv=nv1,nv2
@@ -70,8 +70,8 @@ subroutine cgyro_field_coefficients
         is = is_v(iv)
         do ic=1,nc
            it = it_c(ic)
-           sum_loc(ic) = sum_loc(ic)+vfac(iv_loc)*dens_rot(it,is) &
-                *jvec_c(2,ic,iv_loc)**2 
+           sum_loc(ic,my_toroidal) = sum_loc(ic,my_toroidal)+vfac(iv_loc)*dens_rot(it,is) &
+                *jvec_c(2,ic,iv_loc,my_toroidal)**2 
         enddo
      enddo
 !$omp end do
@@ -91,7 +91,7 @@ subroutine cgyro_field_coefficients
      do ic=1,nc
         if (k_perp(ic,my_toroidal) > 0.0) then
            gcoef(1,ic) = 1.0/(k_perp(ic,my_toroidal)**2*lambda_debye**2*&
-                dens_ele/temp_ele+sum_den_x(ic))
+                dens_ele/temp_ele+sum_den_x(ic,my_toroidal))
         endif
      enddo
   endif
@@ -100,23 +100,23 @@ subroutine cgyro_field_coefficients
      do ic=1,nc
         if (k_perp(ic,my_toroidal) > 0.0) then
            gcoef(2,ic) = 1.0/(-2.0*k_perp(ic,my_toroidal)**2*&
-                rho**2/betae_unit*dens_ele*temp_ele-sum_cur_x(ic))
+                rho**2/betae_unit*dens_ele*temp_ele-sum_cur_x(ic,my_toroidal))
         endif
      enddo
   endif
 
   if (n_field > 2) then
-     allocate(pb11(nc))
-     allocate(pb12(nc))
-     allocate(pb21(nc))
-     allocate(pb22(nc))
+     allocate(pb11(nc,my_toroidal:my_toroidal))
+     allocate(pb12(nc,my_toroidal:my_toroidal))
+     allocate(pb21(nc,my_toroidal:my_toroidal))
+     allocate(pb22(nc,my_toroidal:my_toroidal))
 
      do ic=1,nc
-        pb11(ic) = k_perp(ic,my_toroidal)**2*lambda_debye**2* &
-             dens_ele/temp_ele+sum_den_x(ic)
+        pb11(ic,my_toroidal) = k_perp(ic,my_toroidal)**2*lambda_debye**2* &
+             dens_ele/temp_ele+sum_den_x(ic,my_toroidal)
      enddo
 
-     sum_loc(:)  = 0.0
+     sum_loc(:,:)  = 0.0
      do iv=nv1,nv2
         iv_loc = iv-nv1+1
         is = is_v(iv)
@@ -125,8 +125,8 @@ subroutine cgyro_field_coefficients
         do ic=1,nc
            ir = ir_c(ic) 
            it = it_c(ic)
-           sum_loc(ic) = sum_loc(ic)-w_xi(ix)*w_e(ie)*dens(is) &
-                *z(is)*jvec_c(1,ic,iv_loc)*jvec_c(3,ic,iv_loc) &
+           sum_loc(ic,my_toroidal) = sum_loc(ic,my_toroidal)-w_xi(ix)*w_e(ie)*dens(is) &
+                *z(is)*jvec_c(1,ic,iv_loc,my_toroidal)*jvec_c(3,ic,iv_loc,my_toroidal) &
                 *z(is)/temp(is)*dens_rot(it,is)
         enddo
      enddo
@@ -139,9 +139,9 @@ subroutine cgyro_field_coefficients
           NEW_COMM_1,&
           i_err)
 
-     pb21(:) = pb12(:)*betae_unit/(-2*dens_ele*temp_ele)
+     pb21(:,:) = pb12(:,:)*betae_unit/(-2*dens_ele*temp_ele)
 
-     sum_loc(:)  = 0.0
+     sum_loc(:,:)  = 0.0
      iv_loc = 0
      do iv=nv1,nv2
         iv_loc = iv_loc+1
@@ -151,8 +151,8 @@ subroutine cgyro_field_coefficients
         do ic=1,nc
            ir = ir_c(ic) 
            it = it_c(ic)
-           sum_loc(ic) = sum_loc(ic)+w_xi(ix)*w_e(ie)*dens(is) &
-                *temp(is)*jvec_c(3,ic,iv_loc)**2 &
+           sum_loc(ic,my_toroidal) = sum_loc(ic,my_toroidal)+w_xi(ix)*w_e(ie)*dens(is) &
+                *temp(is)*jvec_c(3,ic,iv_loc,my_toroidal)**2 &
                 *(z(is)/temp(is))**2 * dens_rot(it,is)
         enddo
      enddo
@@ -164,14 +164,14 @@ subroutine cgyro_field_coefficients
           NEW_COMM_1,&
           i_err)
 
-     pb22(:) = 1.0-pb22(:)*betae_unit/(-2*dens_ele*temp_ele) 
+     pb22(:,:) = 1.0-pb22(:,:)*betae_unit/(-2*dens_ele*temp_ele) 
 
      ! Determinant
      do ic=1,nc
         if (k_perp(ic,my_toroidal) > 0.0) then
-           sum_loc(ic) = pb11(ic)*pb22(ic)-pb12(ic)*pb21(ic)
+           sum_loc(ic,my_toroidal) = pb11(ic,my_toroidal)*pb22(ic,my_toroidal)-pb12(ic,my_toroidal)*pb21(ic,my_toroidal)
         else
-           sum_loc(ic) = 1.0
+           sum_loc(ic,my_toroidal) = 1.0
         endif
      enddo
 
@@ -180,10 +180,11 @@ subroutine cgyro_field_coefficients
      pb21 = pb21/sum_loc
      pb22 = pb22/sum_loc
 
-     gcoef(3,:) = pb11
-     gcoef(1,:) = pb22
-     gcoef(4,:) = -pb12
-     gcoef(5,:) = -pb21
+     ! TODO: add dimension to gcoef
+     gcoef(3,:) = pb11(:,my_toroidal)
+     gcoef(1,:) = pb22(:,my_toroidal)
+     gcoef(4,:) = -pb12(:,my_toroidal)
+     gcoef(5,:) = -pb21(:,my_toroidal)
 
      deallocate(pb11)
      deallocate(pb12)
@@ -207,8 +208,8 @@ subroutine cgyro_field_coefficients
      ix = ix_v(iv)
      do ic=1,nc
         it = it_c(ic)
-        dvjvec_c(:,ic,iv_loc) = dens_rot(it,is)*w_e(ie)*w_xi(ix)*z(is)*dens(is)* &
-             jvec_c(:,ic,iv_loc)
+        dvjvec_c(:,ic,iv_loc,my_toroidal) = dens_rot(it,is)*w_e(ie)*w_xi(ix)*z(is)*dens(is)* &
+             jvec_c(:,ic,iv_loc,my_toroidal)
      enddo
   enddo
   do ic=nc1,nc2
@@ -218,8 +219,8 @@ subroutine cgyro_field_coefficients
         is = is_v(iv)
         ix = ix_v(iv)
         ie = ie_v(iv)
-        dvjvec_v(:,ic_loc,iv) = dens_rot(it,is)*w_e(ie)*w_xi(ix)*z(is)*dens(is)* &
-             jvec_v(:,ic_loc,iv)
+        dvjvec_v(:,ic_loc,iv,my_toroidal) = dens_rot(it,is)*w_e(ie)*w_xi(ix)*z(is)*dens(is)* &
+             jvec_v(:,ic_loc,iv,my_toroidal)
      enddo
   enddo
   !-------------------------------------------------------------------------

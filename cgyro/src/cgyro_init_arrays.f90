@@ -16,9 +16,9 @@ subroutine cgyro_init_arrays
   integer :: i_field
   integer :: l,ll
   complex :: thfac,carg
-  real, dimension(nc,n_species,2) :: res_loc
+  real, dimension(:,:,:,:), allocatable :: res_loc
   real, dimension(:,:,:), allocatable :: jloc_c
-  real, dimension(:,:,:), allocatable :: res_norm
+  real, dimension(:,:,:,:), allocatable :: res_norm
   real, external :: spectraldiss
 
   ! Parallel conservation cutoff
@@ -62,17 +62,17 @@ subroutine cgyro_init_arrays
 
      ! J0 phi
      efac = 1.0
-     jvec_c(1,:,iv_loc) = efac*jloc_c(1,:,my_toroidal)
+     jvec_c(1,:,iv_loc,my_toroidal) = efac*jloc_c(1,:,my_toroidal)
      
      if (n_field > 1) then
         ! J0 vpar Apar
         efac = -xi(ix)*sqrt(2.0*energy(ie))*vth(is)
-        jvec_c(2,:,iv_loc) = efac*jloc_c(1,:,my_toroidal)
+        jvec_c(2,:,iv_loc,my_toroidal) = efac*jloc_c(1,:,my_toroidal)
         
         if (n_field > 2) then
            ! J2 bpar
            efac = 2.0*energy(ie)*(1-xi(ix)**2)*temp(is)/z(is)
-           jvec_c(3,:,iv_loc) = efac*jloc_c(2,:,my_toroidal)
+           jvec_c(3,:,iv_loc,my_toroidal) = efac*jloc_c(2,:,my_toroidal)
         endif
 
      endif
@@ -83,17 +83,17 @@ subroutine cgyro_init_arrays
         fac = rho * temp(is)/(z(is) * bmag(it)) * bpol(it)/bmag(it) &
              * 2.0 * energy(ie)*(1-xi(ix)**2) * k_x(ic,my_toroidal)
         
-        jxvec_c(1,ic,iv_loc) =  fac * (bmag(it) * jloc_c(2,ic,my_toroidal))
+        jxvec_c(1,ic,iv_loc,my_toroidal) =  fac * (bmag(it) * jloc_c(2,ic,my_toroidal))
         
         if (n_field > 1) then
            efac = -xi(ix)*sqrt(2.0*energy(ie))*vth(is)
-           jxvec_c(2,ic,iv_loc) = efac * fac * (bmag(it) * jloc_c(2,ic,my_toroidal))
+           jxvec_c(2,ic,iv_loc,my_toroidal) = efac * fac * (bmag(it) * jloc_c(2,ic,my_toroidal))
            
            if (n_field > 2) then
               if(my_toroidal == 0) then
-                 jxvec_c(3,ic,iv_loc) = 0.0
+                 jxvec_c(3,ic,iv_loc,my_toroidal) = 0.0
               else
-                 jxvec_c(3,ic,iv_loc) = fac * z(is)*bmag(it)/mass(is) &
+                 jxvec_c(3,ic,iv_loc,my_toroidal) = fac * z(is)*bmag(it)/mass(is) &
                       /(k_perp(ic,my_toroidal)*rho)**2 &
                       * (bmag(it) * jloc_c(2,ic,my_toroidal) - jloc_c(1,ic,my_toroidal))
               endif
@@ -107,7 +107,7 @@ subroutine cgyro_init_arrays
 !$acc enter data copyin(jvec_c)
 
   do i_field=1,n_field
-     call parallel_lib_rtrans_real(jvec_c(i_field,:,:),jvec_v(i_field,:,:))
+     call parallel_lib_rtrans_real(jvec_c(i_field,:,:,my_toroidal),jvec_v(i_field,:,:,my_toroidal))
   enddo
 
   if (nonlinear_flag == 1) then
@@ -119,7 +119,8 @@ subroutine cgyro_init_arrays
         if (it /= 0) then
 !$acc loop vector
           do ir=1,n_radial
-            jvec_c_nl(1:n_field,ir,it_loc,iv_loc,il) = jvec_c(1:n_field,ic_c(ir,it),iv_loc)
+            ! TODO: How do il and my_toroidal interplay
+            jvec_c_nl(1:n_field,ir,it_loc,iv_loc,il) = jvec_c(1:n_field,ic_c(ir,it),iv_loc,my_toroidal)
           enddo
         else
           ! just padding
@@ -136,9 +137,10 @@ subroutine cgyro_init_arrays
   !-------------------------------------------------------------------------
   ! Conservative upwind factor
   !
-  allocate(res_norm(nc,n_species,2))
+  allocate(res_loc(nc,n_species,my_toroidal:my_toroidal,2))
+  allocate(res_norm(nc,n_species,my_toroidal:my_toroidal,2))
 
-  res_loc(:,:,:) = 0.0
+  res_loc(:,:,:,:) = 0.0
 
 !$omp parallel private(ic,iv_loc,is,ix,ie)
 !$omp do reduction(+:res_loc)
@@ -148,8 +150,10 @@ subroutine cgyro_init_arrays
      ix = ix_v(iv)
      ie = ie_v(iv)
      do ic=1,nc
-        res_loc(ic,is,1) = res_loc(ic,is,1)+w_xi(ix)*w_e(ie)*jvec_c(1,ic,iv_loc)**2 
-        res_loc(ic,is,2) = res_loc(ic,is,2)+w_xi(ix)*w_e(ie)*jvec_c(1,ic,iv_loc)**2*(xi(ix)*vel(ie))**2
+        res_loc(ic,is,my_toroidal,1) = res_loc(ic,is,my_toroidal,1) + &
+                w_xi(ix)*w_e(ie)*jvec_c(1,ic,iv_loc,my_toroidal)**2 
+        res_loc(ic,is,my_toroidal,2) = res_loc(ic,is,my_toroidal,2) + &
+                w_xi(ix)*w_e(ie)*jvec_c(1,ic,iv_loc,my_toroidal)**2*(xi(ix)*vel(ie))**2
      enddo
   enddo
 !$omp end do
@@ -170,14 +174,18 @@ subroutine cgyro_init_arrays
      ix = ix_v(iv)
      ie = ie_v(iv)
      do ic=1,nc
-        upfac1(ic,iv_loc,1) = w_e(ie)*w_xi(ix)*abs(xi(ix))*vel(ie)*jvec_c(1,ic,iv_loc)
-        upfac2(ic,iv_loc,1) = jvec_c(1,ic,iv_loc)/res_norm(ic,is,1)
-        upfac1(ic,iv_loc,2) = w_e(ie)*w_xi(ix)*abs(xi(ix))*vel(ie)*jvec_c(1,ic,iv_loc)*xi(ix)*vel(ie)
-        upfac2(ic,iv_loc,2) = jvec_c(1,ic,iv_loc)/res_norm(ic,is,2)*xi(ix)*vel(ie)
+        upfac1(ic,iv_loc,my_toroidal,1) = w_e(ie)*w_xi(ix)*abs(xi(ix))*vel(ie) * &
+                jvec_c(1,ic,iv_loc,my_toroidal)
+        upfac2(ic,iv_loc,my_toroidal,1) = jvec_c(1,ic,iv_loc,my_toroidal)/res_norm(ic,is,my_toroidal,1)
+        upfac1(ic,iv_loc,my_toroidal,2) = w_e(ie)*w_xi(ix)*abs(xi(ix))*vel(ie) * &
+                jvec_c(1,ic,iv_loc,my_toroidal)*xi(ix)*vel(ie)
+        upfac2(ic,iv_loc,my_toroidal,2) = jvec_c(1,ic,iv_loc,my_toroidal)/res_norm(ic,is,my_toroidal,2) * &
+                xi(ix)*vel(ie)
      enddo
   enddo
 
   deallocate(res_norm)
+  deallocate(res_loc)
   
 !$acc enter data copyin(upfac1,upfac2)
 
@@ -215,8 +223,8 @@ subroutine cgyro_init_arrays
      sum_den_h(:) = sum_den_h(:) + dens_ele*dens_ele_rot(:)/temp_ele
   endif
 
-  allocate(sum_den_x(nc))
-  if (n_field > 1) allocate(sum_cur_x(nc))
+  allocate(sum_den_x(nc,my_toroidal:my_toroidal))
+  if (n_field > 1) allocate(sum_cur_x(nc,my_toroidal:my_toroidal))
 
   call cgyro_field_coefficients
   !------------------------------------------------------------------------------
@@ -225,12 +233,13 @@ subroutine cgyro_init_arrays
   ! Zonal flow with adiabatic electrons:
   !
   if (my_toroidal == 0 .and. ae_flag == 1) then
-
+     ! since this applies only to my_toroidal == 0, we do not need to extend the matrix
      allocate(hzf(n_radial,n_theta,n_theta))
      hzf(:,:,:) = 0.0      
      do ir=1,n_radial
         do it=1,n_theta
-           hzf(ir,it,it) = k_perp(ic_c(ir,it),my_toroidal)**2 * lambda_debye**2 &
+           ! my_toroidal==0
+           hzf(ir,it,it) = k_perp(ic_c(ir,it),0)**2 * lambda_debye**2 &
                 * dens_ele/temp_ele + sum_den_h(it)
            do jt=1,n_theta
               hzf(ir,it,jt) = hzf(ir,it,jt) &
@@ -252,8 +261,9 @@ subroutine cgyro_init_arrays
      xzf(:,:,:) = 0.0     
      do ir=1,n_radial
         do it=1,n_theta
-           xzf(ir,it,it) = k_perp(ic_c(ir,it),my_toroidal)**2*lambda_debye**2 &
-                * dens_ele/temp_ele+sum_den_x(ic_c(ir,it))
+           ! my_toroidal==0
+           xzf(ir,it,it) = k_perp(ic_c(ir,it),0)**2*lambda_debye**2 &
+                * dens_ele/temp_ele+sum_den_x(ic_c(ir,it),0)
            do jt=1,n_theta
               xzf(ir,it,jt) = xzf(ir,it,jt) &
                    - dens_ele*dens_ele_rot(it)/temp_ele*w_theta(jt)
@@ -271,6 +281,10 @@ subroutine cgyro_init_arrays
      deallocate(work)
 
   endif
+
+  if (n_field > 1) deallocate(sum_cur_x)
+  deallocate(sum_den_x)
+
   !-------------------------------------------------------------------------
 
   !-------------------------------------------------------------------------
@@ -310,8 +324,8 @@ subroutine cgyro_init_arrays
               thfac = (1.0,0.0)
               jr = ir
            endif
-           dtheta(id, ic_c(ir,it))    = cderiv(id)*thfac
-           dtheta_up(id, ic_c(ir,it)) = uderiv(id)*thfac*up_theta
+           dtheta(id, ic_c(ir,it), my_toroidal)    = cderiv(id)*thfac
+           dtheta_up(id, ic_c(ir,it), my_toroidal) = uderiv(id)*thfac*up_theta
            icd_c(id, ic_c(ir,it))     = ic_c(jr,modulo(it+id-1,n_theta)+1)
         enddo
      enddo
@@ -335,17 +349,17 @@ subroutine cgyro_init_arrays
         u = (pi/n_toroidal)*my_toroidal
 
         ! omega_dalpha
-        omega_cap_h(ic,iv_loc) = &
+        omega_cap_h(ic,iv_loc,my_toroidal) = &
              -omega_adrift(it,is)*energy(ie)*(1.0+xi(ix)**2)*&
              (n_toroidal*q/pi/rmin)*(i_c*u)
 
         ! omega_dalpha [UPWIND: iu -> spectraldiss]
-        omega_h(ic,iv_loc) = &
+        omega_h(ic,iv_loc,my_toroidal) = &
              -abs(omega_adrift(it,is))*energy(ie)*(1.0+xi(ix)**2)*&
              (n_toroidal*q/pi/rmin)*spectraldiss(u,nup_alpha)*up_alpha
 
         ! (i ktheta) components from drifts        
-        omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
+        omega_cap_h(ic,iv_loc,my_toroidal) = omega_cap_h(ic,iv_loc,my_toroidal) &
              - i_c*k_theta_base*my_toroidal*(omega_aprdrift(it,is)*energy(ie)*xi(ix)**2 &
              + omega_cdrift(it,is)*vel(ie)*xi(ix) + omega_rot_drift(it,is) &
              + omega_rot_edrift(it))
@@ -355,7 +369,7 @@ subroutine cgyro_init_arrays
 
         ! (d/dr) components from drifts
         
-        omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) & 
+        omega_cap_h(ic,iv_loc,my_toroidal) = omega_cap_h(ic,iv_loc,my_toroidal) & 
              - (n_radial/length)*i_c*u &
              * (omega_rdrift(it,is)*energy(ie)*(1.0+xi(ix)**2) &
              + omega_cdrift_r(it,is)*vel(ie)*xi(ix) &
@@ -363,7 +377,7 @@ subroutine cgyro_init_arrays
              + omega_rot_edrift_r(it))
         
         ! (d/dr) upwind components from drifts [UPWIND: iu -> spectraldiss]
-        omega_h(ic,iv_loc) = omega_h(ic,iv_loc) &
+        omega_h(ic,iv_loc,my_toroidal) = omega_h(ic,iv_loc,my_toroidal) &
              - (n_radial/length)*spectraldiss(u,nup_radial)*up_radial &
              * (abs(omega_rdrift(it,is))*energy(ie)*(1.0+xi(ix)**2) &
              + abs(omega_cdrift_r(it,is)*xi(ix))*vel(ie) &
@@ -375,14 +389,14 @@ subroutine cgyro_init_arrays
              -i_c*k_theta_base*my_toroidal*rho*(sqrt(2.0*energy(ie))*xi(ix)/vth(is) &
              *omega_gammap(it)) -i_c*k_theta_base*my_toroidal*rho*omega_rot_star(it,is)
 
-        omega_s(:,ic,iv_loc) = carg*jvec_c(:,ic,iv_loc)
+        omega_s(:,ic,iv_loc,my_toroidal) = carg*jvec_c(:,ic,iv_loc,my_toroidal)
 
         ! Profile curvature via wavenumber advection (ix -> d/dp)
         ! See whiteboard notes.
         ! JC: Re-checked sign and normalization (Oct 2019)
         carg = -k_theta_base*my_toroidal*length*(sdlnndr(is)+sdlntdr(is)*(energy(ie)-1.5))/(2*pi)
 
-        omega_ss(:,ic,iv_loc) = carg*jvec_c(:,ic,iv_loc)
+        omega_ss(:,ic,iv_loc,my_toroidal) = carg*jvec_c(:,ic,iv_loc,my_toroidal)
 
      enddo
   enddo

@@ -66,7 +66,7 @@ subroutine cgyro_rhs(ij)
         is = is_v(iv)
         do ic=1,nc
            g_x(ic,iv_loc) = h_x(ic,iv_loc)+ & 
-                (z(is)/temp(is))*jvec_c(2,ic,iv_loc)*field(2,ic)
+                (z(is)/temp(is))*jvec_c(2,ic,iv_loc,my_toroidal)*field(2,ic)
         enddo
      enddo
      call timer_lib_out('str')
@@ -94,8 +94,8 @@ subroutine cgyro_rhs(ij)
         iv_loc = iv-nv1+1
         ! Diagonal terms
         rhs_ij(ic,iv_loc) = &
-             omega_cap_h(ic,iv_loc)*cap_h_c(ic,iv_loc)+&
-             omega_h(ic,iv_loc)*h_x(ic,iv_loc)
+             omega_cap_h(ic,iv_loc,my_toroidal)*cap_h_c(ic,iv_loc)+&
+             omega_h(ic,iv_loc,my_toroidal)*h_x(ic,iv_loc)
      enddo 
 
      ! CPUs vectorize better if separate loop
@@ -110,12 +110,12 @@ subroutine cgyro_rhs(ij)
         do id=-nup_theta,nup_theta
            jc = icd_c(id, ic)
            rhs_stream = rhs_stream &
-                -rval*dtheta(id, ic)*cap_h_c(jc,iv_loc)  &
-                -rval2*dtheta_up(id, ic)*g_x(jc,iv_loc) 
+                -rval*dtheta(id,ic,my_toroidal)*cap_h_c(jc,iv_loc)  &
+                -rval2*dtheta_up(id,ic,my_toroidal)*g_x(jc,iv_loc) 
         enddo
 
         rhs_ij(ic,iv_loc) = rhs_ij(ic,iv_loc) + &
-             sum(omega_s(:,ic,iv_loc)*field(:,ic))
+             sum(omega_s(:,ic,iv_loc,my_toroidal)*field(:,ic))
 
         rhs(ic,iv_loc,ij) = rhs_ij(ic,iv_loc)+rhs_stream
 

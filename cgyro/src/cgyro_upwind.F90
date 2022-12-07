@@ -42,7 +42,7 @@ subroutine cgyro_upwind_r64
        do iv=nv1,nv2
           iv_loc = iv-nv1+1
           if (is == is_v(iv)) then
-             res_loc_one = res_loc_one+upfac1(ic,iv_loc,1)*g_x(ic,iv_loc)
+             res_loc_one = res_loc_one+upfac1(ic,iv_loc,my_toroidal,1)*g_x(ic,iv_loc)
           endif
        enddo
        upwind_res_loc(ic,is,1) = res_loc_one
@@ -51,7 +51,7 @@ subroutine cgyro_upwind_r64
        do iv=nv1,nv2
           iv_loc = iv-nv1+1
           if (is == is_v(iv)) then
-             res_loc_two = res_loc_two+upfac1(ic,iv_loc,2)*g_x(ic,iv_loc)
+             res_loc_two = res_loc_two+upfac1(ic,iv_loc,my_toroidal,2)*g_x(ic,iv_loc)
           endif
        enddo
        upwind_res_loc(ic,is,2) = res_loc_two
@@ -67,7 +67,7 @@ subroutine cgyro_upwind_r64
      iv_loc = iv-nv1+1
      is = is_v(iv)
      do ic=1,nc
-        upwind_res_loc(ic,is,:) = upwind_res_loc(ic,is,:)+upfac1(ic,iv_loc,:)*g_x(ic,iv_loc)
+        upwind_res_loc(ic,is,:) = upwind_res_loc(ic,is,:)+upfac1(ic,iv_loc,my_toroidal,:)*g_x(ic,iv_loc)
      enddo
   enddo
 !$omp end do
@@ -116,8 +116,8 @@ subroutine cgyro_upwind_r64
         ix = ix_v(iv)
         ie = ie_v(iv)
         g_x(ic,iv_loc) = abs(xi(ix))*vel(ie)*g_x(ic,iv_loc) &
-             -upfac2(ic,iv_loc,1)*upwind_res(ic,is,1) &
-             -upfac2(ic,iv_loc,2)*upwind_res(ic,is,2)*up_cutoff
+             -upfac2(ic,iv_loc,my_toroidal,1)*upwind_res(ic,is,1) &
+             -upfac2(ic,iv_loc,my_toroidal,2)*upwind_res(ic,is,2)*up_cutoff
      enddo
   enddo
 
@@ -154,7 +154,7 @@ subroutine cgyro_upwind_r32
        do iv=nv1,nv2
           iv_loc = iv-nv1+1
           if (is == is_v(iv)) then
-             res_loc_one = res_loc_one+upfac1(ic,iv_loc,1)*g_x(ic,iv_loc)
+             res_loc_one = res_loc_one+upfac1(ic,iv_loc,my_toroidal,1)*g_x(ic,iv_loc)
           endif
        enddo
        upwind32_res_loc(ic,is,1) = res_loc_one
@@ -163,7 +163,7 @@ subroutine cgyro_upwind_r32
        do iv=nv1,nv2
           iv_loc = iv-nv1+1
           if (is == is_v(iv)) then
-             res_loc_two = res_loc_two+upfac1(ic,iv_loc,2)*g_x(ic,iv_loc)
+             res_loc_two = res_loc_two+upfac1(ic,iv_loc,my_toroidal,2)*g_x(ic,iv_loc)
           endif
        enddo
        upwind32_res_loc(ic,is,2) = res_loc_two
@@ -179,7 +179,7 @@ subroutine cgyro_upwind_r32
      iv_loc = iv-nv1+1
      is = is_v(iv)
      do ic=1,nc
-        upwind32_res_loc(ic,is,:) = upwind32_res_loc(ic,is,:)+upfac1(ic,iv_loc,:)*g_x(ic,iv_loc)
+        upwind32_res_loc(ic,is,:) = upwind32_res_loc(ic,is,:)+upfac1(ic,iv_loc,my_toroidal,:)*g_x(ic,iv_loc)
      enddo
   enddo
 !$omp end do
@@ -228,8 +228,8 @@ subroutine cgyro_upwind_r32
         ix = ix_v(iv)
         ie = ie_v(iv)
         g_x(ic,iv_loc) = abs(xi(ix))*vel(ie)*g_x(ic,iv_loc) &
-             -upfac2(ic,iv_loc,1)*upwind32_res(ic,is,1) &
-             -upfac2(ic,iv_loc,2)*upwind32_res(ic,is,2)*up_cutoff
+             -upfac2(ic,iv_loc,my_toroidal,1)*upwind32_res(ic,is,1) &
+             -upfac2(ic,iv_loc,my_toroidal,2)*upwind32_res(ic,is,2)*up_cutoff
      enddo
   enddo
 

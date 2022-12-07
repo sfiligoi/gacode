@@ -334,8 +334,8 @@ module cgyro_globals
   real, dimension(:), allocatable :: uderiv
   real, dimension(:), allocatable :: cderiv
   integer, dimension(:,:), allocatable :: icd_c
-  complex, dimension(:,:), allocatable :: dtheta
-  complex, dimension(:,:), allocatable :: dtheta_up
+  complex, dimension(:,:,:), allocatable :: dtheta
+  complex, dimension(:,:,:), allocatable :: dtheta_up
   !
   ! Wavenumber advection
   integer :: source_flag
@@ -354,22 +354,22 @@ module cgyro_globals
   complex, dimension(:,:,:,:), allocatable :: g_nl
   complex, dimension(:,:), allocatable :: fpack
   complex, dimension(:,:,:,:), allocatable :: gpack
-  complex, dimension(:,:), allocatable :: omega_cap_h
-  complex, dimension(:,:), allocatable :: omega_h
-  complex, dimension(:,:,:), allocatable :: omega_s,omega_ss
+  complex, dimension(:,:,:), allocatable :: omega_cap_h
+  complex, dimension(:,:,:), allocatable :: omega_h
+  complex, dimension(:,:,:,:), allocatable :: omega_s,omega_ss
   complex, dimension(:,:), allocatable :: cap_h_c
   complex, dimension(:,:), allocatable :: cap_h_c_dot
   complex, dimension(:,:), allocatable :: cap_h_c_old
   complex, dimension(:,:), allocatable :: cap_h_c_old2
   complex, dimension(:,:), allocatable :: cap_h_ct
   complex, dimension(:,:), allocatable :: cap_h_v
-  real, dimension(:,:,:), allocatable :: jvec_c
+  real, dimension(:,:,:,:), allocatable :: jvec_c
   real, dimension(:,:,:,:,:), allocatable :: jvec_c_nl ! used by NL only
-  real, dimension(:,:,:), allocatable :: jvec_v
-  real, dimension(:,:,:), allocatable :: dvjvec_c
-  real, dimension(:,:,:), allocatable :: dvjvec_v
-  real, dimension(:,:,:), allocatable :: jxvec_c
-  real, dimension(:,:,:), allocatable :: upfac1,upfac2
+  real, dimension(:,:,:,:), allocatable :: jvec_v
+  real, dimension(:,:,:,:), allocatable :: dvjvec_c
+  real, dimension(:,:,:,:), allocatable :: dvjvec_v
+  real, dimension(:,:,:,:), allocatable :: jxvec_c
+  real, dimension(:,:,:,:), allocatable :: upfac1,upfac2
   !
   ! Fields
   real, dimension(:,:), allocatable :: fcoef
@@ -438,7 +438,7 @@ module cgyro_globals
   !
   ! Field solve variables
   real, dimension(:), allocatable :: sum_den_h
-  real, dimension(:), allocatable :: sum_den_x,sum_cur_x
+  real, dimension(:,:), allocatable :: sum_den_x,sum_cur_x
   real, dimension(:), allocatable :: vfac
   !
   ! n=0 test variables

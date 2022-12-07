@@ -298,7 +298,7 @@ subroutine cgyro_step_collision_cpu(use_simple)
      ! this should be coll_mem timer , but not easy with OMP
      do ic=1,nc
         my_ch = cap_h_ct(iv_loc,ic)
-        my_psi = sum(jvec_c(:,ic,iv_loc)*field(:,ic))
+        my_psi = sum(jvec_c(:,ic,iv_loc,my_toroidal)*field(:,ic))
         h_x(ic,iv_loc) = my_ch-my_psi*(z(is)/temp(is))
         cap_h_c(ic,iv_loc) = my_ch
      enddo
@@ -829,7 +829,7 @@ subroutine cgyro_step_collision_gpu(use_simple)
      do ic=1,nc
         iv_loc = iv-nv1+1
         is = is_v(iv)
-        my_psi = sum(jvec_c(:,ic,iv_loc)*field(:,ic))
+        my_psi = sum(jvec_c(:,ic,iv_loc,my_toroidal)*field(:,ic))
         my_ch = cap_h_ct(iv_loc,ic)
         h_x(ic,iv_loc) = my_ch-my_psi*(z(is)/temp(is))
         cap_h_c(ic,iv_loc) = my_ch

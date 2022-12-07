@@ -42,8 +42,6 @@ subroutine cgyro_check_memory(datafile)
      else
         call cgyro_alloc_add(io,5*nc*8.0,'gcoef')
      endif
-     call cgyro_alloc_add(io,nc*8.0,'sum_den_x')
-     call cgyro_alloc_add(io,nc*8.0,'sum_cur_x')
 
      if (nonlinear_flag == 1) then
         write(io,*)

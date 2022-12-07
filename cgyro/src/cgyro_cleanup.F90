@@ -316,10 +316,6 @@ subroutine cgyro_cleanup
 
   if(allocated(vfac))             deallocate(vfac)
   if(allocated(sum_den_h))        deallocate(sum_den_h)
-  if(allocated(sum_den_x))        deallocate(sum_den_x)
-  if (n_field > 1) then
-     if(allocated(sum_cur_x))     deallocate(sum_cur_x)
-  end if
   if(allocated(cderiv))           deallocate(cderiv)
   if(allocated(uderiv))           deallocate(uderiv)
   if(allocated(c_wave)) then
