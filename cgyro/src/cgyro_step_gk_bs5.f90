@@ -116,7 +116,7 @@ subroutine cgyro_step_gk_bs5
      call cgyro_rhs(1)
 
      call timer_lib_in('str')
-     call cgyro_vel_fma2(h_x, h0_x, a21*deltah2, rhs(:,:,1))
+     call cgyro_vel_fma2(h_x, h0_x, a21*deltah2, rhs(:,:,:,1))
      call timer_lib_out('str')
 
      call cgyro_field_c
@@ -126,7 +126,7 @@ subroutine cgyro_step_gk_bs5
      call cgyro_vel_fmaN(2,h_x, &
             h0_x, &
             (/ deltah2*a31, deltah2*a32 /), &
-            rhs(:,:,1:2))
+            rhs(:,:,:,1:2))
      call timer_lib_out('str')
 
      call cgyro_field_c
@@ -136,7 +136,7 @@ subroutine cgyro_step_gk_bs5
      call cgyro_vel_fmaN(3,h_x, &
             h0_x, &
             (/ deltah2*a41, deltah2*a42, deltah2*a43 /), &
-            rhs(:,:,1:3))
+            rhs(:,:,:,1:3))
      call timer_lib_out('str')
 
      call cgyro_field_c
@@ -146,7 +146,7 @@ subroutine cgyro_step_gk_bs5
      call cgyro_vel_fmaN(4,h_x, &
             h0_x, &
             (/ deltah2*a51, deltah2*a52, deltah2*a53, deltah2*a54 /), &
-            rhs(:,:,1:4))
+            rhs(:,:,:,1:4))
      call timer_lib_out('str')
 
      call cgyro_field_c
@@ -156,7 +156,7 @@ subroutine cgyro_step_gk_bs5
      call cgyro_vel_fmaN(5,h_x, &
             h0_x, &
             (/ deltah2*a61, deltah2*a62, deltah2*a63, deltah2*a64, deltah2*a65 /), &
-            rhs(:,:,1:5))
+            rhs(:,:,:,1:5))
      call timer_lib_out('str')
 
      call cgyro_field_c
@@ -167,7 +167,7 @@ subroutine cgyro_step_gk_bs5
             h0_x, &
             (/ deltah2*a71, deltah2*a72, deltah2*a73, &
                deltah2*a74, deltah2*a75, deltah2*a76 /), &
-            rhs(:,:,1:6))
+            rhs(:,:,:,1:6))
      call timer_lib_out('str')
 
      call cgyro_field_c
@@ -181,9 +181,9 @@ subroutine cgyro_step_gk_bs5
      ! using a multiplication by 0 in one element is still efffienct, since the matrix element was read for the 1st equation
      call cgyro_vel_solution_werror(5, h_x, &
             h0_x, &
-            deltah2*b1, rhs(:,:,1), &
+            deltah2*b1, rhs(:,:,:,1), &
             (/ deltah2*b3, deltah2*b4, deltah2*b5, deltah2*b6, deltah2*b7 /), &
-            rhs(:,:,3:7), &
+            rhs(:,:,:,3:7), &
             deltah2*e1, &
             (/ deltah2*e3, deltah2*e4, deltah2*e5, deltah2*e6, 0.d0 /), &
             error_hx, error_rhs)

@@ -194,26 +194,26 @@ subroutine cgyro_init_manager
 
      select case(delta_t_method)
      case(1)
-        allocate(h0_old(nc,nv_loc))     
-        allocate(rhs(nc,nv_loc,6))
+        allocate(h0_old(nc,nv_loc,my_toroidal:my_toroidal))
+        allocate(rhs(nc,nv_loc,my_toroidal:my_toroidal,6))
 !$acc enter data create(rhs,h0_old)
      case(2)
-        allocate(h0_old(nc,nv_loc))
-        allocate(rhs(nc,nv_loc,7))
+        allocate(h0_old(nc,nv_loc,my_toroidal:my_toroidal))
+        allocate(rhs(nc,nv_loc,my_toroidal:my_toroidal,7))
 !$acc enter data create(rhs,h0_old)
      case(3)
-        allocate(h0_old(nc,nv_loc))
-        allocate(rhs(nc,nv_loc,9))
+        allocate(h0_old(nc,nv_loc,my_toroidal:my_toroidal))
+        allocate(rhs(nc,nv_loc,my_toroidal:my_toroidal,9))
 !$acc enter data create(rhs,h0_old)
      case default
         ! Normal timestep
-        allocate(rhs(nc,nv_loc,4))
+        allocate(rhs(nc,nv_loc,my_toroidal:my_toroidal,4))
 !$acc enter data create(rhs)
      end select 
      
      allocate(h_x(nc,nv_loc,my_toroidal:my_toroidal))
      allocate(g_x(nc,nv_loc))
-     allocate(h0_x(nc,nv_loc))
+     allocate(h0_x(nc,nv_loc,my_toroidal:my_toroidal))
 !$acc enter data create(h_x,g_x,h0_x)
 
      allocate(cap_h_c(nc,nv_loc))

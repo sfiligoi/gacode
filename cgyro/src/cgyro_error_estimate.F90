@@ -28,11 +28,11 @@ subroutine cgyro_error_estimate
   ! CPU-only code will work on it later
   h_s=0.0
   r_s=0.0
-!$acc parallel loop collapse(2) independent present(h_x,rhs(:,:,1)) reduction(+:h_s,r_s) async(2)
+!$acc parallel loop collapse(2) independent present(h_x,rhs(:,:,:,1)) reduction(+:h_s,r_s) async(2)
   do iv_loc=1,nv_loc
      do ic=1,nc
         h_s = h_s + abs(h_x(ic,iv_loc,my_toroidal))
-        r_s = r_s + abs(rhs(ic,iv_loc,1))
+        r_s = r_s + abs(rhs(ic,iv_loc,my_toroidal,1))
      enddo
   enddo
 #endif
@@ -99,7 +99,7 @@ subroutine cgyro_error_estimate
   do iv_loc=1,nv_loc
      do ic=1,nc
         h_s = h_s + abs(h_x(ic,iv_loc,my_toroidal))
-        r_s = r_s + abs(rhs(ic,iv_loc,1))
+        r_s = r_s + abs(rhs(ic,iv_loc,my_toroidal,1))
      enddo
   enddo
 #endif

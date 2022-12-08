@@ -48,7 +48,7 @@ subroutine cgyro_rhs(ij)
   integer :: id,jc
   real :: rval,rval2
   complex :: rhs_stream
-  complex :: rhs_ij(nc,nv_loc)
+  complex :: rhs_ij(nc,nv_loc,my_toroidal:my_toroidal)
   complex, dimension(:,:), allocatable :: rhs_trap
   complex, dimension(:), allocatable   :: bvec_trap
   integer :: nj_loc
@@ -94,7 +94,7 @@ subroutine cgyro_rhs(ij)
      do ic=1,nc
         iv_loc = iv-nv1+1
         ! Diagonal terms
-        rhs_ij(ic,iv_loc) = &
+        rhs_ij(ic,iv_loc,my_toroidal) = &
              omega_cap_h(ic,iv_loc,my_toroidal)*cap_h_c(ic,iv_loc)+&
              omega_h(ic,iv_loc,my_toroidal)*h_x(ic,iv_loc,my_toroidal)
      enddo 
@@ -115,10 +115,10 @@ subroutine cgyro_rhs(ij)
                 -rval2*dtheta_up(id,ic,my_toroidal)*g_x(jc,iv_loc) 
         enddo
 
-        rhs_ij(ic,iv_loc) = rhs_ij(ic,iv_loc) + &
+        rhs_ij(ic,iv_loc,my_toroidal) = rhs_ij(ic,iv_loc,my_toroidal) + &
              sum(omega_s(:,ic,iv_loc,my_toroidal)*field(:,ic))
 
-        rhs(ic,iv_loc,ij) = rhs_ij(ic,iv_loc)+rhs_stream
+        rhs(ic,iv_loc,my_toroidal,ij) = rhs_ij(ic,iv_loc,my_toroidal)+rhs_stream
 
      enddo
   enddo
@@ -176,7 +176,7 @@ subroutine cgyro_rhs(ij)
         enddo
      enddo
 
-     rhs(:,:,ij) = rhs(:,:,ij) +  rhs_trap(:,:)
+     rhs(:,:,my_toroidal,ij) = rhs(:,:,my_toroidal,ij) +  rhs_trap(:,:)
      
      deallocate(rhs_trap)
      deallocate(bvec_trap)

@@ -114,7 +114,7 @@ subroutine cgyro_nl_fftw_comm1_r(ij)
               my_psi = fpack(ir,iexch)
            endif
            ! RHS -> -[f,g] = [f,g]_{r,-alpha}
-           rhs(ic_loc_m,iv_loc_m,ij) = rhs(ic_loc_m,iv_loc_m,ij)+psi_mul*my_psi
+           rhs(ic_loc_m,iv_loc_m,my_toroidal,ij) = rhs(ic_loc_m,iv_loc_m,my_toroidal,ij)+psi_mul*my_psi
         enddo
      endif
   enddo

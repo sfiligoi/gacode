@@ -345,11 +345,11 @@ module cgyro_globals
   real :: sa
   !
   ! Distributions
-  complex, dimension(:,:,:), allocatable :: rhs
+  complex, dimension(:,:,:,:), allocatable :: rhs
   complex, dimension(:,:,:), allocatable :: h_x
   complex, dimension(:,:), allocatable :: g_x
-  complex, dimension(:,:), allocatable :: h0_x
-  complex, dimension(:,:), allocatable :: h0_old
+  complex, dimension(:,:,:), allocatable :: h0_x
+  complex, dimension(:,:,:), allocatable :: h0_old
   complex, dimension(:,:,:), allocatable :: f_nl
   complex, dimension(:,:,:,:), allocatable :: g_nl
   complex, dimension(:,:), allocatable :: fpack

@@ -24,7 +24,7 @@ subroutine cgyro_advect_wavenumber(ij)
 
 #ifdef _OPENACC
 !$acc parallel loop gang private(in,ir,l,icc,ll,he) &
-!$acc&                   present(rhs(:,:,ij),omega_ss,field,h_x,c_wave) &
+!$acc&                   present(rhs(:,:,:,ij),omega_ss,field,h_x,c_wave) &
 !$acc&                   vector_length(n_theta)
 #else
 !$omp parallel do private(in,ir,j,icc,l,ll,he)
@@ -55,7 +55,7 @@ subroutine cgyro_advect_wavenumber(ij)
                  do j=1,n_theta
                     ! Sign throughout paper is incorrect (or gamma -> - gamma)
                     ! Thus sign below has been checked and is correct
-                    rhs(icc+j,in,ij) = rhs(icc+j,in,ij)+c_wave(l)*(he(j,ir+ll)-he(j,ir-ll))
+                    rhs(icc+j,in,my_toroidal,ij) = rhs(icc+j,in,my_toroidal,ij)+c_wave(l)*(he(j,ir+ll)-he(j,ir-ll))
                  enddo
               enddo
            enddo
@@ -83,7 +83,7 @@ subroutine cgyro_advect_wavenumber(ij)
 !$acc loop vector private(j)
                  do j=1,n_theta
                     ! Note opposite sign to ExB shear
-                    rhs(icc+j,in,ij) = rhs(icc+j,in,ij)-c_wave(l)*(he(j,ir+ll)-he(j,ir-ll))
+                    rhs(icc+j,in,my_toroidal,ij) = rhs(icc+j,in,my_toroidal,ij)-c_wave(l)*(he(j,ir+ll)-he(j,ir-ll))
                  enddo
               enddo
            enddo

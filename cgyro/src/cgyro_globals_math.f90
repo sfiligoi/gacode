@@ -27,8 +27,8 @@ subroutine cgyro_vel_copy(left, r1)
     !-------------------------------------------------------
     implicit none
     !
-    complex, intent(out), dimension(nc,nv_loc) :: left
-    complex, intent(in), dimension(nc,nv_loc) :: r1
+    complex, intent(out), dimension(nc,nv_loc,my_toroidal:my_toroidal) :: left
+    complex, intent(in), dimension(nc,nv_loc,my_toroidal:my_toroidal) :: r1
     !-------------------------------------------------------
     call cgyro_cmpl_copy(nc*nv_loc, left, r1)
 end subroutine cgyro_vel_copy
@@ -39,9 +39,9 @@ subroutine cgyro_vel_copy2(left1, left2, r1)
     !-------------------------------------------------------
     implicit none
     !
-    complex, intent(out), dimension(nc,nv_loc) :: left1
-    complex, intent(out), dimension(nc,nv_loc) :: left2
-    complex, intent(in), dimension(nc,nv_loc) :: r1
+    complex, intent(out), dimension(nc,nv_loc,my_toroidal:my_toroidal) :: left1
+    complex, intent(out), dimension(nc,nv_loc,my_toroidal:my_toroidal) :: left2
+    complex, intent(in), dimension(nc,nv_loc,my_toroidal:my_toroidal) :: r1
     !-------------------------------------------------------
     call cgyro_cmpl_copy2(nc*nv_loc, left1, left2, r1)
 end subroutine cgyro_vel_copy2
@@ -56,10 +56,10 @@ subroutine cgyro_vel_fma2(left, r1, c2, r2, abssum)
     !-------------------------------------------------------
     implicit none
     !
-    complex, intent(out), dimension(nc,nv_loc) :: left
-    complex, intent(in), dimension(nc,nv_loc) :: r1
+    complex, intent(out), dimension(nc,nv_loc,my_toroidal:my_toroidal) :: left
+    complex, intent(in), dimension(nc,nv_loc,my_toroidal:my_toroidal) :: r1
     real, intent(in) :: c2
-    complex, intent(in), dimension(nc,nv_loc) :: r2
+    complex, intent(in), dimension(nc,nv_loc,my_toroidal:my_toroidal) :: r2
     real, intent(inout), optional :: abssum
     !-------------------------------------------------------
     call cgyro_cmpl_fma2(nc*nv_loc, left,r1,c2,r2,abssum)
@@ -71,12 +71,12 @@ subroutine cgyro_vel_fma3(left, r1, c2, r2, c3, r3, abssum)
     !-------------------------------------------------------
     implicit none
     !
-    complex, intent(out), dimension(nc,nv_loc) :: left
-    complex, intent(in), dimension(nc,nv_loc) :: r1
+    complex, intent(out), dimension(nc,nv_loc,my_toroidal:my_toroidal) :: left
+    complex, intent(in), dimension(nc,nv_loc,my_toroidal:my_toroidal) :: r1
     real, intent(in) :: c2
-    complex, intent(in), dimension(nc,nv_loc) :: r2
+    complex, intent(in), dimension(nc,nv_loc,my_toroidal:my_toroidal) :: r2
     real, intent(in) :: c3
-    complex, intent(in), dimension(nc,nv_loc) :: r3
+    complex, intent(in), dimension(nc,nv_loc,my_toroidal:my_toroidal) :: r3
     real, intent(inout), optional :: abssum
     !-------------------------------------------------------
     call cgyro_cmpl_fma3(nc*nv_loc, left,r1,c2,r2,c3,r3,abssum)
@@ -88,14 +88,14 @@ subroutine cgyro_vel_fma4(left, r1, c2, r2, c3, r3, c4, r4, abssum)
     !-------------------------------------------------------
     implicit none
     !
-    complex, intent(out), dimension(nc,nv_loc) :: left
-    complex, intent(in), dimension(nc,nv_loc) :: r1
+    complex, intent(out), dimension(nc,nv_loc,my_toroidal:my_toroidal) :: left
+    complex, intent(in), dimension(nc,nv_loc,my_toroidal:my_toroidal) :: r1
     real, intent(in) :: c2
-    complex, intent(in), dimension(nc,nv_loc) :: r2
+    complex, intent(in), dimension(nc,nv_loc,my_toroidal:my_toroidal) :: r2
     real, intent(in) :: c3
-    complex, intent(in), dimension(nc,nv_loc) :: r3
+    complex, intent(in), dimension(nc,nv_loc,my_toroidal:my_toroidal) :: r3
     real, intent(in) :: c4
-    complex, intent(in), dimension(nc,nv_loc) :: r4
+    complex, intent(in), dimension(nc,nv_loc,my_toroidal:my_toroidal) :: r4
     real, intent(inout), optional :: abssum
     !-------------------------------------------------------
     call cgyro_cmpl_fma4(nc*nv_loc, left,r1,c2,r2,c3,r3,c4,r4,abssum)
@@ -107,16 +107,16 @@ subroutine cgyro_vel_fma5(left, r1, c2, r2, c3, r3, c4, r4, c5, r5, abssum)
     !-------------------------------------------------------
     implicit none
     !
-    complex, intent(out), dimension(nc,nv_loc) :: left
-    complex, intent(in), dimension(nc,nv_loc) :: r1
+    complex, intent(out), dimension(nc,nv_loc,my_toroidal:my_toroidal) :: left
+    complex, intent(in), dimension(nc,nv_loc,my_toroidal:my_toroidal) :: r1
     real, intent(in) :: c2
-    complex, intent(in), dimension(nc,nv_loc) :: r2
+    complex, intent(in), dimension(nc,nv_loc,my_toroidal:my_toroidal) :: r2
     real, intent(in) :: c3
-    complex, intent(in), dimension(nc,nv_loc) :: r3
+    complex, intent(in), dimension(nc,nv_loc,my_toroidal:my_toroidal) :: r3
     real, intent(in) :: c4
-    complex, intent(in), dimension(nc,nv_loc) :: r4
+    complex, intent(in), dimension(nc,nv_loc,my_toroidal:my_toroidal) :: r4
     real, intent(in) :: c5
-    complex, intent(in), dimension(nc,nv_loc) :: r5
+    complex, intent(in), dimension(nc,nv_loc,my_toroidal:my_toroidal) :: r5
     real, intent(inout), optional :: abssum
     !-------------------------------------------------------
     call cgyro_cmpl_fma5(nc*nv_loc, left,r1,c2,r2,c3,r3,c4,r4,c5,r5,abssum)
@@ -128,18 +128,18 @@ subroutine cgyro_vel_fma6(left, r1, c2, r2, c3, r3, c4, r4, c5, r5, c6, r6, abss
     !-------------------------------------------------------
     implicit none
     !
-    complex, intent(out), dimension(nc,nv_loc) :: left
-    complex, intent(in), dimension(nc,nv_loc) :: r1
+    complex, intent(out), dimension(nc,nv_loc,my_toroidal:my_toroidal) :: left
+    complex, intent(in), dimension(nc,nv_loc,my_toroidal:my_toroidal) :: r1
     real, intent(in) :: c2
-    complex, intent(in), dimension(nc,nv_loc) :: r2
+    complex, intent(in), dimension(nc,nv_loc,my_toroidal:my_toroidal) :: r2
     real, intent(in) :: c3
-    complex, intent(in), dimension(nc,nv_loc) :: r3
+    complex, intent(in), dimension(nc,nv_loc,my_toroidal:my_toroidal) :: r3
     real, intent(in) :: c4
-    complex, intent(in), dimension(nc,nv_loc) :: r4
+    complex, intent(in), dimension(nc,nv_loc,my_toroidal:my_toroidal) :: r4
     real, intent(in) :: c5
-    complex, intent(in), dimension(nc,nv_loc) :: r5
+    complex, intent(in), dimension(nc,nv_loc,my_toroidal:my_toroidal) :: r5
     real, intent(in) :: c6
-    complex, intent(in), dimension(nc,nv_loc) :: r6
+    complex, intent(in), dimension(nc,nv_loc,my_toroidal:my_toroidal) :: r6
     real, intent(inout), optional :: abssum
     !-------------------------------------------------------
     call cgyro_cmpl_fma6(nc*nv_loc, left,r1,c2,r2,c3,r3,c4,r4,c5,r5,c6,r6,abssum)
@@ -152,10 +152,10 @@ subroutine cgyro_vel_fmaN(nr, left, r1, cN, rN, abssum)
     implicit none
     !
     integer, intent(in) :: nr
-    complex, intent(out), dimension(nc,nv_loc) :: left
-    complex, intent(in), dimension(nc,nv_loc) :: r1
+    complex, intent(out), dimension(nc,nv_loc,my_toroidal:my_toroidal) :: left
+    complex, intent(in), dimension(nc,nv_loc,my_toroidal:my_toroidal) :: r1
     real, intent(in), dimension(nr) :: cN
-    complex, intent(in), dimension(nc,nv_loc,nr) :: rN
+    complex, intent(in), dimension(nc,nv_loc,my_toroidal:my_toroidal,nr) :: rN
     real, intent(inout), optional :: abssum
     !-------------------------------------------------------
     call cgyro_cmpl_fmaN(nc*nv_loc,nr, left,r1,cN,rN,abssum)
@@ -172,12 +172,12 @@ subroutine cgyro_vel_solution_werror(nr, left, r0, c1, m1, cN, rN, ec1, ecN, abs
     implicit none
     !
     integer, intent(in) :: nr
-    complex, intent(inout), dimension(nc,nv_loc) :: left
-    complex, intent(in), dimension(nc,nv_loc) :: r0
+    complex, intent(inout), dimension(nc,nv_loc,my_toroidal:my_toroidal) :: left
+    complex, intent(in), dimension(nc,nv_loc,my_toroidal:my_toroidal) :: r0
     real, intent(in) :: c1
-    complex, intent(inout), dimension(nc,nv_loc) :: m1
+    complex, intent(inout), dimension(nc,nv_loc,my_toroidal:my_toroidal) :: m1
     real, intent(in), dimension(nr) :: cN
-    complex, intent(in), dimension(nc,nv_loc,nr) :: rN
+    complex, intent(in), dimension(nc,nv_loc,my_toroidal:my_toroidal,nr) :: rN
     real, intent(in) :: ec1
     real, intent(in), dimension(nr) :: ecN
     real, intent(inout) :: abssum_left
