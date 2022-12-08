@@ -175,7 +175,7 @@ subroutine cgyro_field_c_cpu
   do iv=nv1,nv2
      iv_loc = iv-nv1+1
      do ic=1,nc
-        field_loc(:,ic) = field_loc(:,ic)+dvjvec_c(:,ic,iv_loc,my_toroidal)*h_x(ic,iv_loc)
+        field_loc(:,ic) = field_loc(:,ic)+dvjvec_c(:,ic,iv_loc,my_toroidal)*h_x(ic,iv_loc,my_toroidal)
      enddo
   enddo
 !$omp end do
@@ -225,7 +225,7 @@ subroutine cgyro_field_c_cpu
      is = is_v(iv)
      do ic=1,nc
         my_psi = sum( jvec_c(:,ic,iv_loc,my_toroidal)*field(:,ic))
-        cap_h_c(ic,iv_loc) = h_x(ic,iv_loc)+my_psi*z(is)/temp(is)
+        cap_h_c(ic,iv_loc) = h_x(ic,iv_loc,my_toroidal)+my_psi*z(is)/temp(is)
      enddo
   enddo
 
@@ -258,7 +258,7 @@ subroutine cgyro_field_c_gpu
 !$acc loop seq private(iv_loc)
       do iv=nv1,nv2
          iv_loc = iv-nv1+1
-         field_loc_l = field_loc_l+dvjvec_c(i_f,ic,iv_loc,my_toroidal)*h_x(ic,iv_loc)
+         field_loc_l = field_loc_l+dvjvec_c(i_f,ic,iv_loc,my_toroidal)*h_x(ic,iv_loc,my_toroidal)
       enddo
       field_loc(i_f,ic) = field_loc_l
     enddo
@@ -328,7 +328,7 @@ subroutine cgyro_field_c_gpu
         iv_loc = iv-nv1+1
         is = is_v(iv)
         my_psi = sum( jvec_c(:,ic,iv_loc,my_toroidal)*field(:,ic))
-        cap_h_c(ic,iv_loc) = h_x(ic,iv_loc)+my_psi*z(is)/temp(is)
+        cap_h_c(ic,iv_loc) = h_x(ic,iv_loc,my_toroidal)+my_psi*z(is)/temp(is)
      enddo
   enddo
 

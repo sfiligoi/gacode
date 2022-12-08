@@ -41,7 +41,7 @@ subroutine cgyro_advect_wavenumber(ij)
               icc = (ir-1)*n_theta
 !$acc loop vector private(j)
               do j=1,n_theta
-                 he(j,ir) = omega_eb_base*my_toroidal*h_x(icc+j,in)
+                 he(j,ir) = omega_eb_base*my_toroidal*h_x(icc+j,in,my_toroidal)
               enddo
            enddo
 

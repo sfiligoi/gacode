@@ -605,10 +605,10 @@ subroutine write_distribution(datafile)
 
      ! Collect distribution onto process 0
      call MPI_GATHER(cap_h_c(:,:),&
-          size(h_x),&
+          size(cap_h_c),&
           MPI_DOUBLE_COMPLEX,&
           h_x_glob(:,:),&
-          size(h_x),&
+          size(cap_h_c),&
           MPI_DOUBLE_COMPLEX,&
           0,&
           NEW_COMM_1,&

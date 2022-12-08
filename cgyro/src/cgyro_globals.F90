@@ -341,12 +341,12 @@ module cgyro_globals
   integer :: source_flag
   real, parameter :: tau_ave=50.0
   real, dimension(:), allocatable :: c_wave
-  complex, dimension(:,:), allocatable :: source
+  complex, dimension(:,:,:), allocatable :: source
   real :: sa
   !
   ! Distributions
   complex, dimension(:,:,:), allocatable :: rhs
-  complex, dimension(:,:), allocatable :: h_x
+  complex, dimension(:,:,:), allocatable :: h_x
   complex, dimension(:,:), allocatable :: g_x
   complex, dimension(:,:), allocatable :: h0_x
   complex, dimension(:,:), allocatable :: h0_old

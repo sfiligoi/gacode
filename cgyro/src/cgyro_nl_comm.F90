@@ -48,7 +48,7 @@ subroutine cgyro_nl_fftw_comm1_async
      else
 !$acc loop vector
         do ir=1,n_radial
-           fpack(ir,iexch) = h_x(ic_c(ir,it),iv_loc_m)
+           fpack(ir,iexch) = h_x(ic_c(ir,it),iv_loc_m,my_toroidal)
         enddo
      endif
   enddo

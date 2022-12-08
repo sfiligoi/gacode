@@ -70,7 +70,7 @@ subroutine cgyro_rhs(ij)
            iv_loc = iv-nv1+1
            is = is_v(iv)
 
-           g_x(ic,iv_loc) = h_x(ic,iv_loc)+ & 
+           g_x(ic,iv_loc) = h_x(ic,iv_loc,my_toroidal)+ & 
                 (z(is)/temp(is))*jvec_c(2,ic,iv_loc,my_toroidal)*field(2,ic)
         enddo
      enddo
@@ -87,7 +87,7 @@ subroutine cgyro_rhs(ij)
      do iv=nv1,nv2
         do ic=1,nc
            iv_loc = iv-nv1+1
-           g_x(ic,iv_loc) = h_x(ic,iv_loc)
+           g_x(ic,iv_loc) = h_x(ic,iv_loc,my_toroidal)
         enddo
      enddo
 
@@ -124,7 +124,7 @@ subroutine cgyro_rhs(ij)
         ! Diagonal terms
         rhs(ic,iv_loc,ij) = &
              omega_cap_h(ic,iv_loc,my_toroidal)*cap_h_c(ic,iv_loc)+&
-             omega_h(ic,iv_loc,my_toroidal)*h_x(ic,iv_loc)
+             omega_h(ic,iv_loc,my_toroidal)*h_x(ic,iv_loc,my_toroidal)
 
         is = is_v(iv)
         ! Parallel streaming with upwind dissipation 

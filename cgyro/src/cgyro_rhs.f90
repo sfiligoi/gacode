@@ -65,7 +65,7 @@ subroutine cgyro_rhs(ij)
         iv_loc = iv-nv1+1
         is = is_v(iv)
         do ic=1,nc
-           g_x(ic,iv_loc) = h_x(ic,iv_loc)+ & 
+           g_x(ic,iv_loc) = h_x(ic,iv_loc,my_toroidal)+ & 
                 (z(is)/temp(is))*jvec_c(2,ic,iv_loc,my_toroidal)*field(2,ic)
         enddo
      enddo
@@ -73,7 +73,8 @@ subroutine cgyro_rhs(ij)
   else
      call timer_lib_in('str_mem')
 
-      g_x(:,:) = h_x(:,:)
+     ! TODO: remove my_toroidal for h_x when you add g_x dimension
+     g_x(:,:) = h_x(:,:,my_toroidal)
 
      call timer_lib_out('str_mem')
   endif
@@ -95,7 +96,7 @@ subroutine cgyro_rhs(ij)
         ! Diagonal terms
         rhs_ij(ic,iv_loc) = &
              omega_cap_h(ic,iv_loc,my_toroidal)*cap_h_c(ic,iv_loc)+&
-             omega_h(ic,iv_loc,my_toroidal)*h_x(ic,iv_loc)
+             omega_h(ic,iv_loc,my_toroidal)*h_x(ic,iv_loc,my_toroidal)
      enddo 
 
      ! CPUs vectorize better if separate loop

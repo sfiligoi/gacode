@@ -81,7 +81,7 @@ subroutine cgyro_init_h
      ! Generate analytic initial conditions
      !-------------------------------------------------------------------------
 
-     h_x(:,:) = (0.0,0.0)
+     h_x(:,:,:) = (0.0,0.0)
 
      if (zf_test_mode == 1) then
 
@@ -102,7 +102,7 @@ subroutine cgyro_init_h
               if (is == 1 .and. px(ir) /= 0) then
                  arg = k_perp(ic,my_toroidal)*rho*vth(is)*mass(is)/(z(is)*bmag(it)) &
                       *sqrt(2.0*energy(ie))*sqrt(1.0-xi(ix)**2)
-                 h_x(ic,iv_loc) = 1e-6*bessel_j0(abs(arg))
+                 h_x(ic,iv_loc,my_toroidal) = 1e-6*bessel_j0(abs(arg))
 
                  ! J0 here for the ions is equivalent to having
                  ! the electrons deviate in density.
@@ -135,9 +135,9 @@ subroutine cgyro_init_h
                  it = it_c(ic)
                  ang = theta(it)+2*pi*px(ir)
                  if (amp >  0.0) then
-                    h_x(ic,iv_loc) = rho/(1.0+ang**4)
+                    h_x(ic,iv_loc,my_toroidal) = rho/(1.0+ang**4)
                  else
-                    h_x(ic,iv_loc) = rho*ang/(1.0+ang**4)
+                    h_x(ic,iv_loc,my_toroidal) = rho*ang/(1.0+ang**4)
                  endif
               enddo
            endif
@@ -158,9 +158,9 @@ subroutine cgyro_init_h
               ! Zonal-flow initial condition
 
               arg = abs(px(ir))/real(n_radial)
-              h_x(ic,:) = amp0*rho*exp(-arg)
+              h_x(ic,:,my_toroidal) = amp0*rho*exp(-arg)
               if (ir == 1 .or. px(ir) == 0) then
-                 h_x(ic,:) = 0.0
+                 h_x(ic,:,my_toroidal) = 0.0
               endif
 
            else 
@@ -168,9 +168,9 @@ subroutine cgyro_init_h
               ! Finite-n initial condition
 
               if (amp > 0.0) then
-                 h_x(ic,:) = amp*rho
+                 h_x(ic,:,my_toroidal) = amp*rho
               else
-                 h_x(ic,:) = amp*rho/my_toroidal**2
+                 h_x(ic,:,my_toroidal) = amp*rho/my_toroidal**2
               endif
 
            endif

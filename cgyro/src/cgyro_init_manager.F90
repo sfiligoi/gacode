@@ -186,7 +186,7 @@ subroutine cgyro_init_manager
      allocate(icd_c(-nup_theta:nup_theta, nc))
      allocate(dtheta(-nup_theta:nup_theta, nc ,my_toroidal:my_toroidal))
      allocate(dtheta_up(-nup_theta:nup_theta, nc,my_toroidal:my_toroidal))
-     allocate(source(n_theta,nv_loc))
+     allocate(source(n_theta,nv_loc,my_toroidal:my_toroidal))
 
 !$acc enter data create(fcoef,gcoef,field,field_loc,source)
 
@@ -211,7 +211,7 @@ subroutine cgyro_init_manager
 !$acc enter data create(rhs)
      end select 
      
-     allocate(h_x(nc,nv_loc))
+     allocate(h_x(nc,nv_loc,my_toroidal:my_toroidal))
      allocate(g_x(nc,nv_loc))
      allocate(h0_x(nc,nv_loc))
 !$acc enter data create(h_x,g_x,h0_x)

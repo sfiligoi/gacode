@@ -78,7 +78,7 @@ subroutine cgyro_write_restart_one
      ic0 = (n_radial/2)*n_theta
 !$acc parallel loop present(h_x,source)
      do j=1,n_theta
-        h_x(ic0+j,:) = source(j,:)
+        h_x(ic0+j,:,:) = source(j,:,:)
      enddo
   endif
 
@@ -188,7 +188,7 @@ subroutine cgyro_write_restart_one
      ic0 = (n_radial/2)*n_theta
 !$acc parallel loop present(h_x)
      do j=1,n_theta
-        h_x(ic0+j,:) = 0.0
+        h_x(ic0+j,:,:) = 0.0
      enddo
   endif
   

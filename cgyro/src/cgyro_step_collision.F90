@@ -299,7 +299,7 @@ subroutine cgyro_step_collision_cpu(use_simple)
      do ic=1,nc
         my_ch = cap_h_ct(iv_loc,ic)
         my_psi = sum(jvec_c(:,ic,iv_loc,my_toroidal)*field(:,ic))
-        h_x(ic,iv_loc) = my_ch-my_psi*(z(is)/temp(is))
+        h_x(ic,iv_loc,my_toroidal) = my_ch-my_psi*(z(is)/temp(is))
         cap_h_c(ic,iv_loc) = my_ch
      enddo
   enddo
@@ -832,7 +832,7 @@ subroutine cgyro_step_collision_gpu(use_simple)
         is = is_v(iv)
         my_psi = sum(jvec_c(:,ic,iv_loc,my_toroidal)*field(:,ic))
         my_ch = cap_h_ct(iv_loc,ic)
-        h_x(ic,iv_loc) = my_ch-my_psi*(z(is)/temp(is))
+        h_x(ic,iv_loc,my_toroidal) = my_ch-my_psi*(z(is)/temp(is))
         cap_h_c(ic,iv_loc) = my_ch
      enddo
   enddo

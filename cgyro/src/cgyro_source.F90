@@ -40,11 +40,14 @@ subroutine cgyro_source
 !$acc loop seq
       do j=1,n_theta
         ! Recursive update of p=+1 source 
-        source(j,iv_loc) = source(j,iv_loc)+(h_x(icp+j,iv_loc)-source(j,iv_loc))/sa
+        source(j,iv_loc,my_toroidal) = source(j,iv_loc,my_toroidal) + &
+                (h_x(icp+j,iv_loc,my_toroidal)-source(j,iv_loc,my_toroidal))/sa
         ! Subtract source from h(0,+1)
-        h_x(icp+j,iv_loc) = h_x(icp+j,iv_loc)-nu_eff*delta_t*source(j,iv_loc)
+        h_x(icp+j,iv_loc,my_toroidal) = h_x(icp+j,iv_loc,my_toroidal) - &
+                nu_eff*delta_t*source(j,iv_loc,my_toroidal)
         ! Subtract source from h(0,-1)
-        h_x(icm+j,iv_loc) = h_x(icm+j,iv_loc)-nu_eff*delta_t*conjg(source(j,iv_loc))
+        h_x(icm+j,iv_loc,my_toroidal) = h_x(icm+j,iv_loc,my_toroidal) - &
+                nu_eff*delta_t*conjg(source(j,iv_loc,my_toroidal))
       enddo
      enddo
 

@@ -31,7 +31,7 @@ subroutine cgyro_error_estimate
 !$acc parallel loop collapse(2) independent present(h_x,rhs(:,:,1)) reduction(+:h_s,r_s) async(2)
   do iv_loc=1,nv_loc
      do ic=1,nc
-        h_s = h_s + abs(h_x(ic,iv_loc))
+        h_s = h_s + abs(h_x(ic,iv_loc,my_toroidal))
         r_s = r_s + abs(rhs(ic,iv_loc,1))
      enddo
   enddo
@@ -98,7 +98,7 @@ subroutine cgyro_error_estimate
 !$omp parallel do collapse(2) reduction(+:h_s,r_s)
   do iv_loc=1,nv_loc
      do ic=1,nc
-        h_s = h_s + abs(h_x(ic,iv_loc))
+        h_s = h_s + abs(h_x(ic,iv_loc,my_toroidal))
         r_s = r_s + abs(rhs(ic,iv_loc,1))
      enddo
   enddo
