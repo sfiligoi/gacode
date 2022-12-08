@@ -38,6 +38,8 @@ subroutine cgyro_init_manager
   integer, parameter :: singlePrecision = selected_real_kind(6,30)
 #endif
 
+  character(len=128) :: msg
+  integer :: ie
 
   if (hiprec_flag == 1) then
      fmtstr  = '(es16.9)'
@@ -93,7 +95,9 @@ subroutine cgyro_init_manager
              alpha_poly) ! only write results on i_proc zero.
      endif
   endif
-     
+  ! just a default value
+  n_low_energy = 0
+
   vel(:) = sqrt(energy(:))
 
   e_deriv1_rot_mat(:,:) = e_deriv1_mat(:,:)
@@ -262,11 +266,19 @@ subroutine cgyro_init_manager
         allocate(cmat_simple(n_xi,n_xi,n_energy,n_species,n_theta))
      else
         if (collision_precision_mode /= 0) then
+           ! the lowest energy(s) has the most spread, so treat differently
+           n_low_energy = 1
+           do ie=2,n_energy
+             if (ie<1.0e-2) then
+               n_low_energy = ie
+             endif
+           enddo
            allocate(cmat_fp32(nv,nv,nc_loc))
-           allocate(cmat_stripes(n_xi,n_species,2:n_energy,n_xi,nc_loc))
-           allocate(cmat_e1(n_xi,n_species,nv,nc_loc))
+           allocate(cmat_stripes(n_xi,n_species,(n_low_energy+1):n_energy,n_xi,nc_loc))
+           allocate(cmat_e1(n_xi,n_species,n_low_energy,nv,nc_loc))
 
-           call cgyro_info("Using fp32 collision precision except e=1 or same e&s.")
+           write (msg, "(A,I1,A)") "Using fp32 collision precision except e<=",n_low_energy," or same e&s."
+           call cgyro_info(msg)
         else
            allocate(cmat(nv,nv,nc_loc))
         endif

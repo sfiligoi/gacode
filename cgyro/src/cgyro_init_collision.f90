@@ -246,7 +246,7 @@ subroutine cgyro_init_collision
 !$omp& private(iv,is,ix,ie,jv,js,jx,je,ks) &
 !$omp& private(amat_sum,cmat_sum,cmat_diff,cmat_rel_diff) shared (cmap_fp32_error_abs_cnt_loc,cmap_fp32_error_rel_cnt_loc) &
 !$omp& private(amat,cmat_loc,i_piv,rs,rsvec,rsvect0,rsvect1) &
-!$omp& firstprivate(collision_precision_mode) &
+!$omp& firstprivate(collision_precision_mode,n_low_energy) &
 !$omp& shared(cmat,cmat_fp32,cmat_stripes,cmat_e1)
   do ic=nc1,nc2
    
@@ -671,9 +671,9 @@ subroutine cgyro_init_collision
               ie = ie_v(iv)
               is = is_v(iv)
               ix = ix_v(iv)
-              if (ie==1) then ! always keep all detail for top energy
-                 cmat_e1(ix,is,jv,ic_loc) = amat(iv,jv) - cmat_fp32(iv,jv,ic_loc)
-                 cmat_sum = cmat_sum + abs(cmat_fp32(iv,jv,ic_loc) + cmat_e1(ix,is,jv,ic_loc))
+              if (ie<=n_low_energy) then ! always keep all detail for lowest energy
+                 cmat_e1(ix,is,ie,jv,ic_loc) = amat(iv,jv) - cmat_fp32(iv,jv,ic_loc)
+                 cmat_sum = cmat_sum + abs(cmat_fp32(iv,jv,ic_loc) + cmat_e1(ix,is,ie,jv,ic_loc))
               else ! only keep if energy and species the same
                  if ((je == ie) .AND. (js == is)) then
                     cmat_stripes(ix,is,ie,jx,ic_loc) = amat(iv,jv) - cmat_fp32(iv,jv,ic_loc)
