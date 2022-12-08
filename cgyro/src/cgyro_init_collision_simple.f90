@@ -79,12 +79,12 @@ subroutine cgyro_init_collision_simple
      do is=1,n_species
         do ie=1,n_energy
 
-           cmat_simple(:,:,ie,is,it) = 0.0
+           cmat_simple(:,:,ie,is,it,my_toroidal) = 0.0
            amat(:,:) = 0.0
 
                  ! constant part
            do ix=1,n_xi
-              cmat_simple(ix,ix,ie,is,it) = 1.0
+              cmat_simple(ix,ix,ie,is,it,my_toroidal) = 1.0
               amat(ix,ix) = 1.0
            enddo
 
@@ -92,13 +92,13 @@ subroutine cgyro_init_collision_simple
               do ix=1,n_xi
 
                  ! Collision component: Test particle
-                 cmat_simple(ix,jx,ie,is,it) = cmat_simple(ix,jx,ie,is,it) &
+                 cmat_simple(ix,jx,ie,is,it,my_toroidal) = cmat_simple(ix,jx,ie,is,it,my_toroidal) &
                       - (0.5*delta_t) * ctest(is,ie,ix,jx)
                  amat(ix,jx) = amat(ix,jx) &
                       + (0.5*delta_t) * ctest(is,ie,ix,jx)
 
                  ! Trapping 
-                 cmat_simple(ix,jx,ie,is,it) = cmat_simple(ix,jx,ie,is,it) &
+                 cmat_simple(ix,jx,ie,is,it,my_toroidal) = cmat_simple(ix,jx,ie,is,it,my_toroidal) &
                       + (0.5*delta_t) * (omega_trap(it,is,my_toroidal) * vel(ie) &
                       + omega_rot_trap(it,is) / vel(ie)) &
                       * (1.0 - xi(ix)**2) * xi_deriv_mat(ix,jx) 
@@ -114,9 +114,9 @@ subroutine cgyro_init_collision_simple
 
            ! H_bar = (1 - dt/2 C)^(-1) * (1 + dt/2 C) H
            ! Lapack factorization and inverse of LHS
-           call DGESV(n_xi,n_xi,cmat_simple(:,:,ie,is,it),n_xi,&
+           call DGESV(n_xi,n_xi,cmat_simple(:,:,ie,is,it,my_toroidal),n_xi,&
                 i_piv,amat,n_xi,info)
-           cmat_simple(:,:,ie,is,it) = amat(:,:)
+           cmat_simple(:,:,ie,is,it,my_toroidal) = amat(:,:)
 
         enddo
      enddo

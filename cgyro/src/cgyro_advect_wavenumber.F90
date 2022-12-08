@@ -70,7 +70,7 @@ subroutine cgyro_advect_wavenumber(ij)
               icc = (ir-1)*n_theta
 !$acc loop vector private(j)
               do j=1,n_theta
-                 he(j,ir) = sum(omega_ss(:,icc+j,in)*field(:,icc+j))
+                 he(j,ir) = sum(omega_ss(:,icc+j,in,my_toroidal)*field(:,icc+j))
               enddo
            enddo
 

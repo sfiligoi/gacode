@@ -160,11 +160,11 @@ subroutine cgyro_init_manager
      !----------------------------------------------------
 
      ! Global (undistributed) arrays
-     allocate(fcoef(n_field,nc,my_toroidal))
+     allocate(fcoef(n_field,nc,my_toroidal:my_toroidal))
      if (n_field < 3) then
-        allocate(gcoef(n_field,nc,my_toroidal))
+        allocate(gcoef(n_field,nc,my_toroidal:my_toroidal))
      else
-        allocate(gcoef(5,nc,my_toroidal))
+        allocate(gcoef(5,nc,my_toroidal:my_toroidal))
      endif
      allocate(field(n_field,nc))
      allocate(field_dot(n_field,nc))
@@ -263,7 +263,7 @@ subroutine cgyro_init_manager
      endif
 
      if (collision_model == 5) then
-        allocate(cmat_simple(n_xi,n_xi,n_energy,n_species,n_theta))
+        allocate(cmat_simple(n_xi,n_xi,n_energy,n_species,n_theta,my_toroidal:my_toroidal))
      else
         if (collision_precision_mode /= 0) then
            ! the lowest energy(s) has the most spread, so treat differently
@@ -273,14 +273,14 @@ subroutine cgyro_init_manager
                n_low_energy = ie
              endif
            enddo
-           allocate(cmat_fp32(nv,nv,nc_loc))
-           allocate(cmat_stripes(n_xi,n_species,(n_low_energy+1):n_energy,n_xi,nc_loc))
-           allocate(cmat_e1(n_xi,n_species,n_low_energy,nv,nc_loc))
+           allocate(cmat_fp32(nv,nv,nc_loc,my_toroidal:my_toroidal))
+           allocate(cmat_stripes(n_xi,n_species,(n_low_energy+1):n_energy,n_xi,nc_loc,my_toroidal:my_toroidal))
+           allocate(cmat_e1(n_xi,n_species,n_low_energy,nv,nc_loc,my_toroidal:my_toroidal))
 
            write (msg, "(A,I1,A)") "Using fp32 collision precision except e<=",n_low_energy," or same e&s."
            call cgyro_info(msg)
         else
-           allocate(cmat(nv,nv,nc_loc))
+           allocate(cmat(nv,nv,nc_loc,my_toroidal:my_toroidal))
         endif
      endif
 

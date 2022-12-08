@@ -43,7 +43,7 @@ subroutine cgyro_calc_collision_cpu_fp64(nj_loc,update_chv)
         cvec_re = real(cvec(ivp))
         cvec_im = aimag(cvec(ivp))
         do iv=1,nv
-           cval = cmat(iv,ivp,ic_loc)
+           cval = cmat(iv,ivp,ic_loc,my_toroidal)
            bvec(iv) = bvec(iv)+ cmplx(cval*cvec_re, cval*cvec_im)
         enddo
      enddo
@@ -103,15 +103,15 @@ subroutine cgyro_calc_collision_cpu_fp32(nj_loc,update_chv)
         isp = is_v(ivp)
         ixp = ix_v(ivp)
         do iv=1,nv
-           cval = cmat_fp32(iv,ivp,ic_loc)
+           cval = cmat_fp32(iv,ivp,ic_loc,my_toroidal)
            ie = ie_v(iv)
            is = is_v(iv)
            ix = ix_v(iv)
            if (ie<=n_low_energy) then
-             cval = cval + cmat_e1(ix,is,ie,ivp,ic_loc)
+             cval = cval + cmat_e1(ix,is,ie,ivp,ic_loc,my_toroidal)
            else
              if ((iep==ie) .AND. (isp==is)) then
-               cval = cval + cmat_stripes(ix,is,ie,ixp,ic_loc)
+               cval = cval + cmat_stripes(ix,is,ie,ixp,ic_loc,my_toroidal)
              endif
            endif
            bvec(iv) = bvec(iv)+ cmplx(cval*cvec_re, cval*cvec_im)
@@ -202,8 +202,8 @@ subroutine cgyro_calc_collision_simple_cpu(nj_loc)
 
                  do ix=1,n_xi
                     bvec(ix,ie,is) = bvec(ix,ie,is)+ &
-                         cmplx(cmat_simple(ix,jx,ie,is,it)*cvec_re, &
-                         cmat_simple(ix,jx,ie,is,it)*cvec_im)
+                         cmplx(cmat_simple(ix,jx,ie,is,it,my_toroidal)*cvec_re, &
+                         cmat_simple(ix,jx,ie,is,it,my_toroidal)*cvec_im)
                  enddo
               enddo
            enddo
@@ -342,7 +342,7 @@ subroutine cgyro_calc_collision_gpu_fp64(nj_loc,update_chv)
            b_im = 0.0
 !$acc loop seq private(cval)
            do ivp=1,nv
-              cval = cmat(iv,ivp,ic_loc)
+              cval = cmat(iv,ivp,ic_loc,my_toroidal)
               b_re = b_re + cval*real(cap_h_v(ic_loc,ivp))
               b_im = b_im + cval*aimag(cap_h_v(ic_loc,ivp))
            enddo
@@ -404,7 +404,7 @@ subroutine cgyro_calc_collision_gpu_b2_fp64(nj_loc,update_chv)
 !$acc wait(bb)
     ! now launch myself
 !$acc parallel loop gang firstprivate(nproc,nj_loc,nv,update_chv) &
-!$acc& copyin(cmat(:,:,bs:be)) present(cap_h_v,fsendf)  private(k,j,ic_loc) async(bb)
+!$acc& copyin(cmat(:,:,bs:be,my_toroidal)) present(cap_h_v,fsendf)  private(k,j,ic_loc) async(bb)
     do ic_loc=bs,be
 !$acc loop vector collapse(2) private(b_re,b_im,cval,ivp,iv)
       do k=1,nproc
@@ -414,7 +414,7 @@ subroutine cgyro_calc_collision_gpu_b2_fp64(nj_loc,update_chv)
            b_im = 0.0
 !$acc loop seq private(cval)
            do ivp=1,nv
-              cval = cmat(iv,ivp,ic_loc)
+              cval = cmat(iv,ivp,ic_loc,my_toroidal)
               b_re = b_re + cval*real(cap_h_v(ic_loc,ivp))
               b_im = b_im + cval*aimag(cap_h_v(ic_loc,ivp))
            enddo
@@ -475,17 +475,17 @@ subroutine cgyro_calc_collision_gpu_fp32(nj_loc,update_chv)
            ix = ix_v(iv)
 !$acc loop seq private(cval,iep,isp,ixp,h_re,h_im)
            do ivp=1,nv
-              cval = cmat_fp32(iv,ivp,ic_loc)
+              cval = cmat_fp32(iv,ivp,ic_loc,my_toroidal)
               h_re = real(cap_h_v(ic_loc,ivp))
               h_im = aimag(cap_h_v(ic_loc,ivp))
               if (ie<=n_low_energy) then
-                 cval = cval + cmat_e1(ix,is,ie,ivp,ic_loc)
+                 cval = cval + cmat_e1(ix,is,ie,ivp,ic_loc,my_toroidal)
               else
                  iep = ie_v(ivp)
                  isp = is_v(ivp)
                  ixp = ix_v(ivp)
                  if ((ie==iep) .AND. (is==isp)) then
-                    cval = cval + cmat_stripes(ix,is,ie,ixp,ic_loc)
+                    cval = cval + cmat_stripes(ix,is,ie,ixp,ic_loc,my_toroidal)
                  endif
               endif
               b_re = b_re + cval*h_re
@@ -552,7 +552,8 @@ subroutine cgyro_calc_collision_gpu_b2_fp32(nj_loc,update_chv)
     ! now launch myself
 !$acc parallel loop gang firstprivate(nproc,nj_loc,nv,update_chv) &
 !$acc& present(cap_h_v,fsendf,ie_v,is_v,ix_v)  private(k,ic,j,ic_loc,ie,is,ix) &
-!$acc& copyin(cmat_fp32(:,:,bs:be),cmat_stripes(:,:,:,:,bs:be),cmat_e1(:,:,:,bs:be)) async(bb)
+!$acc& copyin(cmat_fp32(:,:,bs:be,my_toroidal),cmat_stripes(:,:,:,:,bs:be,my_toroidal)) &
+!$acc& copyin(cmat_e1(:,:,:,bs:be,my_toroidal)) async(bb)
     do ic_loc=bs,be
 !$acc loop vector collapse(2) private(b_re,b_im,cval,ivp,iv)
        do k=1,nproc
@@ -565,17 +566,17 @@ subroutine cgyro_calc_collision_gpu_b2_fp32(nj_loc,update_chv)
            ix = ix_v(iv)
 !$acc loop seq private(cval,iep,isp,ixp,h_re,h_im)
            do ivp=1,nv
-              cval = cmat_fp32(iv,ivp,ic_loc)
+              cval = cmat_fp32(iv,ivp,ic_loc,my_toroidal)
               h_re = real(cap_h_v(ic_loc,ivp))
               h_im = aimag(cap_h_v(ic_loc,ivp))
               if (ie<=n_low_energy) then
-                 cval = cval + cmat_e1(ix,is,ie,ivp,ic_loc)
+                 cval = cval + cmat_e1(ix,is,ie,ivp,ic_loc,my_toroidal)
               else
                  iep = ie_v(ivp)
                  isp = is_v(ivp)
                  ixp = ix_v(ivp)
                  if ((ie==iep) .AND. (is==isp)) then
-                    cval = cval + cmat_stripes(ix,is,ie,ixp,ic_loc)
+                    cval = cval + cmat_stripes(ix,is,ie,ixp,ic_loc,my_toroidal)
                  endif
               endif
               b_re = b_re + cval*h_re
@@ -702,7 +703,7 @@ subroutine cgyro_calc_collision_simple_gpu(nj_loc)
                  b_im = 0.0
 !$acc loop seq private(cval)
                  do jx=1,n_xi
-                     cval = cmat_simple(ix,jx,ie,is,it)
+                     cval = cmat_simple(ix,jx,ie,is,it,my_toroidal)
                      b_re = b_re + cval*cvec_re(jx,ie,is)
                      b_im = b_im + cval*cvec_im(jx,ie,is)
                  enddo

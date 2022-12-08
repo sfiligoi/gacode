@@ -657,7 +657,7 @@ subroutine cgyro_init_collision
      ! result in amat, transfer to the right cmat matrix
      if (collision_precision_mode /= 0) then
         ! keep all cmat in fp32 precision
-        cmat_fp32(:,:,ic_loc) = amat(:,:)
+        cmat_fp32(:,:,ic_loc,my_toroidal) = amat(:,:)
         ! keep the remaining precision for select elements
         do jv=1,nv
            je = ie_v(jv)
@@ -672,14 +672,14 @@ subroutine cgyro_init_collision
               is = is_v(iv)
               ix = ix_v(iv)
               if (ie<=n_low_energy) then ! always keep all detail for lowest energy
-                 cmat_e1(ix,is,ie,jv,ic_loc) = amat(iv,jv) - cmat_fp32(iv,jv,ic_loc)
-                 cmat_sum = cmat_sum + abs(cmat_fp32(iv,jv,ic_loc) + cmat_e1(ix,is,ie,jv,ic_loc))
+                 cmat_e1(ix,is,ie,jv,ic_loc,my_toroidal) = amat(iv,jv) - cmat_fp32(iv,jv,ic_loc,my_toroidal)
+                 cmat_sum = cmat_sum + abs(cmat_fp32(iv,jv,ic_loc,my_toroidal) + cmat_e1(ix,is,ie,jv,ic_loc,my_toroidal))
               else ! only keep if energy and species the same
                  if ((je == ie) .AND. (js == is)) then
-                    cmat_stripes(ix,is,ie,jx,ic_loc) = amat(iv,jv) - cmat_fp32(iv,jv,ic_loc)
-                    cmat_sum = cmat_sum + abs(cmat_fp32(iv,jv,ic_loc) + cmat_stripes(ix,is,ie,jx,ic_loc))
+                    cmat_stripes(ix,is,ie,jx,ic_loc,my_toroidal) = amat(iv,jv) - cmat_fp32(iv,jv,ic_loc,my_toroidal)
+                    cmat_sum = cmat_sum + abs(cmat_fp32(iv,jv,ic_loc,my_toroidal) + cmat_stripes(ix,is,ie,jx,ic_loc,my_toroidal))
                  else
-                    cmat_sum = cmat_sum + abs(cmat_fp32(iv,jv,ic_loc))
+                    cmat_sum = cmat_sum + abs(cmat_fp32(iv,jv,ic_loc,my_toroidal))
                  endif
               endif
            enddo
@@ -702,7 +702,7 @@ subroutine cgyro_init_collision
         enddo
      else
         ! keep all cmat in full precision
-        cmat(:,:,ic_loc) = amat(:,:)
+        cmat(:,:,ic_loc,my_toroidal) = amat(:,:)
      endif
 
   enddo
