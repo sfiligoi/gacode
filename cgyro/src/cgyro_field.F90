@@ -22,7 +22,7 @@ subroutine cgyro_field_v
   
   call timer_lib_in('field')
 
-  field_loc(:,:) = (0.0,0.0)
+  field_loc(:,:,:) = (0.0,0.0)
 
   ! Poisson and Ampere RHS integrals of H
 
@@ -30,7 +30,7 @@ subroutine cgyro_field_v
   do ic=nc1,nc2
      ic_loc = ic-nc1+1
      do iv=1,nv
-        field_loc(:,ic) = field_loc(:,ic)+dvjvec_v(:,ic_loc,iv,my_toroidal)*cap_h_v(ic_loc,iv)
+        field_loc(:,ic,my_toroidal) = field_loc(:,ic,my_toroidal)+dvjvec_v(:,ic_loc,iv,my_toroidal)*cap_h_v(ic_loc,iv)
      enddo
   enddo
 
@@ -38,9 +38,9 @@ subroutine cgyro_field_v
 
   call timer_lib_in('field_com')
 
-  call MPI_ALLREDUCE(field_loc(:,:),&
-       field(:,:),&
-       size(field(:,:)),&
+  call MPI_ALLREDUCE(field_loc(:,:,:),&
+       field(:,:,:),&
+       size(field(:,:,:)),&
        MPI_DOUBLE_COMPLEX,&
        MPI_SUM,&
        NEW_COMM_1,&
@@ -54,7 +54,7 @@ subroutine cgyro_field_v
   if (my_toroidal == 0 .and. ae_flag == 1) then
      call cgyro_field_ae('v')
   else
-     field(:,:) = fcoef(:,:,my_toroidal)*field(:,:)
+     field(:,:,:) = fcoef(:,:,:)*field(:,:,:)
   endif
 
   call timer_lib_out('field')
@@ -81,7 +81,7 @@ subroutine cgyro_field_v_gpu
 !$acc parallel loop collapse(2) independent default(none)
    do ic=1,nc
        do i_f=1,n_field
-        field_loc(i_f,ic) = (0.0,0.0)
+        field_loc(i_f,ic,my_toroidal) = (0.0,0.0)
        enddo
    enddo
 
@@ -95,7 +95,7 @@ subroutine cgyro_field_v_gpu
       do iv=1,nv
         field_loc_l = field_loc_l+dvjvec_v(i_f,ic_loc,iv,my_toroidal)*cap_h_v(ic_loc,iv)
      enddo
-     field_loc(i_f,ic) = field_loc_l
+     field_loc(i_f,ic,my_toroidal) = field_loc_l
     enddo
   enddo
 
@@ -109,9 +109,9 @@ subroutine cgyro_field_v_gpu
 !$acc host_data use_device(field_loc,field)
 #endif
 
-  call MPI_ALLREDUCE(field_loc(:,:),&
-       field(:,:),&
-       size(field(:,:)),&
+  call MPI_ALLREDUCE(field_loc(:,:,:),&
+       field(:,:,:),&
+       size(field(:,:,:)),&
        MPI_DOUBLE_COMPLEX,&
        MPI_SUM,&
        NEW_COMM_1,&
@@ -136,7 +136,7 @@ subroutine cgyro_field_v_gpu
 !$acc parallel loop collapse(2) independent present(fcoef) default(none)
      do ic=1,nc
        do i_f=1,n_field
-        field(i_f,ic) = fcoef(i_f,ic,my_toroidal)*field(i_f,ic)
+        field(i_f,ic,my_toroidal) = fcoef(i_f,ic,my_toroidal)*field(i_f,ic,my_toroidal)
        enddo
      enddo
   endif
@@ -166,7 +166,7 @@ subroutine cgyro_field_c_cpu
   
   call timer_lib_in('field')
 
-  field_loc(:,:) = (0.0,0.0)
+  field_loc(:,:,:) = (0.0,0.0)
 
   ! Poisson and Ampere RHS integrals of h
 
@@ -175,7 +175,7 @@ subroutine cgyro_field_c_cpu
   do iv=nv1,nv2
      iv_loc = iv-nv1+1
      do ic=1,nc
-        field_loc(:,ic) = field_loc(:,ic)+dvjvec_c(:,ic,iv_loc,my_toroidal)*h_x(ic,iv_loc,my_toroidal)
+        field_loc(:,ic,my_toroidal) = field_loc(:,ic,my_toroidal)+dvjvec_c(:,ic,iv_loc,my_toroidal)*h_x(ic,iv_loc,my_toroidal)
      enddo
   enddo
 !$omp end do
@@ -185,9 +185,9 @@ subroutine cgyro_field_c_cpu
 
   call timer_lib_in('field_com')
 
-  call MPI_ALLREDUCE(field_loc(:,:),&
-       field(:,:),&
-       size(field(:,:)),&
+  call MPI_ALLREDUCE(field_loc(:,:,:),&
+       field(:,:,:),&
+       size(field(:,:,:)),&
        MPI_DOUBLE_COMPLEX,&
        MPI_SUM,&
        NEW_COMM_1,&
@@ -198,7 +198,7 @@ subroutine cgyro_field_c_cpu
   call timer_lib_in('field')
 
   if (n_field > 2) then
-     field(3,:) = field(3,:)*fcoef(3,:,my_toroidal)
+     field(3,:,my_toroidal) = field(3,:,my_toroidal)*fcoef(3,:,my_toroidal)
   endif
 
   ! Poisson LHS factors
@@ -207,14 +207,16 @@ subroutine cgyro_field_c_cpu
   else
      if (n_field > 2) then
 !$omp workshare 
-        tmp(:) = field(1,:)
-        field(1,:) = gcoef(1,:,my_toroidal)*field(1,:)+gcoef(4,:,my_toroidal)*field(3,:)
-        field(2,:) = gcoef(2,:,my_toroidal)*field(2,:)
-        field(3,:) = gcoef(3,:,my_toroidal)*field(3,:)+gcoef(5,:,my_toroidal)*tmp(:)
+        tmp(:) = field(1,:,my_toroidal)
+        field(1,:,my_toroidal) = gcoef(1,:,my_toroidal)*field(1,:,my_toroidal) + &
+                gcoef(4,:,my_toroidal)*field(3,:,my_toroidal)
+        field(2,:,my_toroidal) = gcoef(2,:,my_toroidal)*field(2,:,my_toroidal)
+        field(3,:,my_toroidal) = gcoef(3,:,my_toroidal)*field(3,:,my_toroidal) + &
+                gcoef(5,:,my_toroidal)*tmp(:)
 !$omp end workshare
      else
 !$omp workshare
-        field(:,:) = gcoef(:,:,my_toroidal)*field(:,:)
+        field(:,:,my_toroidal) = gcoef(:,:,my_toroidal)*field(:,:,my_toroidal)
 !$omp end workshare
      endif
   endif
@@ -224,8 +226,8 @@ subroutine cgyro_field_c_cpu
      iv_loc = iv-nv1+1
      is = is_v(iv)
      do ic=1,nc
-        my_psi = sum( jvec_c(:,ic,iv_loc,my_toroidal)*field(:,ic))
-        cap_h_c(ic,iv_loc) = h_x(ic,iv_loc,my_toroidal)+my_psi*z(is)/temp(is)
+        my_psi = sum( jvec_c(:,ic,iv_loc,my_toroidal)*field(:,ic,my_toroidal))
+        cap_h_c(ic,iv_loc,my_toroidal) = h_x(ic,iv_loc,my_toroidal)+my_psi*z(is)/temp(is)
      enddo
   enddo
 
@@ -260,7 +262,7 @@ subroutine cgyro_field_c_gpu
          iv_loc = iv-nv1+1
          field_loc_l = field_loc_l+dvjvec_c(i_f,ic,iv_loc,my_toroidal)*h_x(ic,iv_loc,my_toroidal)
       enddo
-      field_loc(i_f,ic) = field_loc_l
+      field_loc(i_f,ic,my_toroidal) = field_loc_l
     enddo
   enddo
   call timer_lib_out('field')
@@ -272,9 +274,9 @@ subroutine cgyro_field_c_gpu
 !$acc host_data use_device(field_loc,field)
 #endif
 
-  call MPI_ALLREDUCE(field_loc(:,:),&
-       field(:,:),&
-       size(field(:,:)),&
+  call MPI_ALLREDUCE(field_loc(:,:,:),&
+       field(:,:,:),&
+       size(field(:,:,:)),&
        MPI_DOUBLE_COMPLEX,&
        MPI_SUM,&
        NEW_COMM_1,&
@@ -291,7 +293,7 @@ subroutine cgyro_field_c_gpu
   if (n_field > 2) then
 !$acc parallel loop independent present(fcoef) default(none)
      do ic=1,nc
-       field(3,ic) = field(3,ic)*fcoef(3,ic,my_toroidal)
+       field(3,ic,my_toroidal) = field(3,ic,my_toroidal)*fcoef(3,ic,my_toroidal)
      enddo
   endif
   ! Poisson LHS factors
@@ -304,18 +306,18 @@ subroutine cgyro_field_c_gpu
      if (n_field > 2) then
 !$acc parallel loop independent private(tmp) present(gcoef) default(none)
         do ic=1,nc
-          tmp = field(1,ic)
-          field(1,ic) = gcoef(1,ic,my_toroidal)*field(1,ic)+ &
-                  gcoef(4,ic,my_toroidal)*field(3,ic)
-          field(2,ic) = gcoef(2,ic,my_toroidal)*field(2,ic)
-          field(3,ic) = gcoef(3,ic,my_toroidal)*field(3,ic)+ &
+          tmp = field(1,ic,my_toroidal)
+          field(1,ic,my_toroidal) = gcoef(1,ic,my_toroidal)*field(1,ic,my_toroidal)+ &
+                  gcoef(4,ic,my_toroidal)*field(3,ic,my_toroidal)
+          field(2,ic,my_toroidal) = gcoef(2,ic,my_toroidal)*field(2,ic,my_toroidal)
+          field(3,ic,my_toroidal) = gcoef(3,ic,my_toroidal)*field(3,ic,my_toroidal)+ &
                   gcoef(5,ic,my_toroidal)*tmp
         enddo
      else
 !$acc parallel loop collapse(2) independent present(gcoef) default(none)
         do ic=1,nc
           do i_f=1,n_field
-            field(i_f,ic) = gcoef(i_f,ic,my_toroidal)*field(i_f,ic)
+            field(i_f,ic,my_toroidal) = gcoef(i_f,ic,my_toroidal)*field(i_f,ic,my_toroidal)
           enddo
         enddo
      endif
@@ -327,8 +329,8 @@ subroutine cgyro_field_c_gpu
      do ic=1,nc
         iv_loc = iv-nv1+1
         is = is_v(iv)
-        my_psi = sum( jvec_c(:,ic,iv_loc,my_toroidal)*field(:,ic))
-        cap_h_c(ic,iv_loc) = h_x(ic,iv_loc,my_toroidal)+my_psi*z(is)/temp(is)
+        my_psi = sum( jvec_c(:,ic,iv_loc,my_toroidal)*field(:,ic,my_toroidal))
+        cap_h_c(ic,iv_loc,my_toroidal) = h_x(ic,iv_loc,my_toroidal)+my_psi*z(is)/temp(is)
      enddo
   enddo
 
@@ -369,11 +371,11 @@ subroutine cgyro_field_ae(space)
   if (space == 'c') then
      do ir=1,n_radial
         if ((px(ir) == 0 .or. ir == 1) .and. zf_test_mode == 0) then
-           field(1,ic_c(ir,:)) = 0.0
+           field(1,ic_c(ir,:),0) = 0.0
         else
            do i=1,n_theta
               pvec_out(i) = 0.0
-              pvec_in(i)  = field(1,ic_c(ir,i))
+              pvec_in(i)  = field(1,ic_c(ir,i),0)
            enddo
            do j=1,n_theta
               do i=1,n_theta
@@ -381,18 +383,18 @@ subroutine cgyro_field_ae(space)
               enddo
            enddo
            do i=1,n_theta
-              field(1,ic_c(ir,i)) = pvec_out(i)
+              field(1,ic_c(ir,i),0) = pvec_out(i)
            enddo
         endif
      enddo
   else
      do ir=1,n_radial
         if ((px(ir) == 0 .or. ir == 1) .and. zf_test_mode == 0) then
-           field(1,ic_c(ir,:)) = 0.0
+           field(1,ic_c(ir,:),0) = 0.0
         else
            do i=1,n_theta
               pvec_out(i) = 0.0
-              pvec_in(i)  =  field(1,ic_c(ir,i))
+              pvec_in(i)  =  field(1,ic_c(ir,i),0)
            enddo
            do j=1,n_theta
               do i=1,n_theta
@@ -400,7 +402,7 @@ subroutine cgyro_field_ae(space)
               enddo
            enddo
            do i=1,n_theta
-              field(1,ic_c(ir,i)) = pvec_out(i)
+              field(1,ic_c(ir,i),0) = pvec_out(i)
            enddo
         endif
      enddo

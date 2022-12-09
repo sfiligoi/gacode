@@ -107,7 +107,7 @@ subroutine cgyro_init_arrays
 !$acc enter data copyin(jvec_c)
 
   do i_field=1,n_field
-     call parallel_lib_rtrans_real(jvec_c(i_field,:,:,my_toroidal),jvec_v(i_field,:,:,my_toroidal))
+     call parallel_lib_rtrans_real(jvec_c(i_field,:,:,:),jvec_v(i_field,:,:,:))
   enddo
 
   if (nonlinear_flag == 1) then

@@ -79,11 +79,12 @@ subroutine cgyro_write_timedata
         ir = ir_c(ic)
         it = it_c(ic)
         if (itp(it) > 0) then
-           field_plot(ir,itp(it)) = field(i_field,ic)
+           field_plot(ir,itp(it)) = field(i_field,ic,my_toroidal)
         endif
      enddo
 
      ! Complex potentials at selected thetas
+     ! TODO: Evaluate what happens when there is more than one toroidal per process
      call cgyro_write_distributed_bcomplex(&
           trim(path)//binfile_kxky_field(i_field),&
           size(field_plot),&
@@ -111,7 +112,7 @@ subroutine cgyro_write_timedata
 
         do ir=1,n_radial
            do it=1,n_theta
-              ftemp(it,ir) = field(i_field,ic_c(ir,it))
+              ftemp(it,ir) = field(i_field,ic_c(ir,it),my_toroidal)
            enddo
         enddo
 
@@ -120,11 +121,12 @@ subroutine cgyro_write_timedata
               it = maxloc(abs(ftemp(:,n_radial/2+1)),dim=1)
               a_norm = ftemp(it,n_radial/2+1)
            endif
-           call extended_ang(ftemp)    
+           call extended_ang(ftemp)
         else
            a_norm = 1.0
         endif
 
+        ! TODO: Evaluate what happens when there is more than one toroidal per process
         call write_binary(trim(path)//binfile_fieldb(i_field),&
              ftemp(:,:)/a_norm,size(ftemp))
      enddo
@@ -602,13 +604,14 @@ subroutine write_distribution(datafile)
      endif
 
      allocate(h_x_glob(nc,nv))
+     ! TODO: Consider how to treat multiple totoidals; likely only the first one
 
      ! Collect distribution onto process 0
-     call MPI_GATHER(cap_h_c(:,:),&
-          size(cap_h_c),&
+     call MPI_GATHER(cap_h_c(:,:,my_toroidal),&
+          size(cap_h_c(:,:,my_toroidal)),&
           MPI_DOUBLE_COMPLEX,&
           h_x_glob(:,:),&
-          size(cap_h_c),&
+          size(h_x_glob),&
           MPI_DOUBLE_COMPLEX,&
           0,&
           NEW_COMM_1,&

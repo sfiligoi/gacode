@@ -50,17 +50,21 @@ subroutine cgyro_error_estimate
 
         ! 1. Estimate of total (field) error via quadratic interpolation
 
-        field_loc(i_f,ic) = 3*field_old(i_f,ic)-3*field_old2(i_f,ic)+field_old3(i_f,ic)
-        field_dot(i_f,ic) = (3*field(i_f,ic)-4*field_old(i_f,ic)+field_old2(i_f,ic))/(2*delta_t)
+        field_loc(i_f,ic,my_toroidal) = 3*field_old(i_f,ic,my_toroidal) - &
+                3*field_old2(i_f,ic,my_toroidal) + &
+                field_old3(i_f,ic,my_toroidal)
+        field_dot(i_f,ic,my_toroidal) = (3*field(i_f,ic,my_toroidal) - &
+                4*field_old(i_f,ic,my_toroidal) + &
+                field_old2(i_f,ic,my_toroidal) )/(2*delta_t)
 
         ! Define norm and error for each mode number n
-        norm_loc_s  = norm_loc_s  + abs(field(i_f,ic))
-        error_loc_s = error_loc_s + abs(field(i_f,ic)-field_loc(i_f,ic))
+        norm_loc_s  = norm_loc_s  + abs(field(i_f,ic,my_toroidal))
+        error_loc_s = error_loc_s + abs(field(i_f,ic,my_toroidal)-field_loc(i_f,ic,my_toroidal))
 
         ! save old values for next iteration
-        field_old3(i_f,ic) = field_old2(i_f,ic)
-        field_old2(i_f,ic) = field_old(i_f,ic)
-        field_old(i_f,ic)  = field(i_f,ic)
+        field_old3(i_f,ic,my_toroidal) = field_old2(i_f,ic,my_toroidal)
+        field_old2(i_f,ic,my_toroidal) = field_old(i_f,ic,my_toroidal)
+        field_old(i_f,ic,my_toroidal)  = field(i_f,ic,my_toroidal)
      enddo
   enddo
 
@@ -77,9 +81,11 @@ subroutine cgyro_error_estimate
   do iv=nv1,nv2
      do ic=1,nc
         iv_loc = iv-nv1+1
-        cap_h_c_dot(ic,iv_loc) = (3*cap_h_c(ic,iv_loc)-4*cap_h_c_old(ic,iv_loc)+cap_h_c_old2(ic,iv_loc))/(2*delta_t)
-        cap_h_c_old2(ic,iv_loc) = cap_h_c_old(ic,iv_loc)
-        cap_h_c_old(ic,iv_loc) = cap_h_c(ic,iv_loc)
+        cap_h_c_dot(ic,iv_loc,my_toroidal) = (3*cap_h_c(ic,iv_loc,my_toroidal) - &
+                4*cap_h_c_old(ic,iv_loc,my_toroidal) + &
+                cap_h_c_old2(ic,iv_loc,my_toroidal) )/(2*delta_t)
+        cap_h_c_old2(ic,iv_loc,my_toroidal) = cap_h_c_old(ic,iv_loc,my_toroidal)
+        cap_h_c_old(ic,iv_loc,my_toroidal) = cap_h_c(ic,iv_loc,my_toroidal)
      enddo
   enddo
 

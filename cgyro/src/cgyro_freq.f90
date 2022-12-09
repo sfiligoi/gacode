@@ -16,7 +16,7 @@ subroutine cgyro_freq
 
   real :: total_weight,dfr,dfi
   real, dimension(nc) :: mode_weight
-  complex, dimension(nc) :: freq_loc
+  complex, dimension(nc,my_toroidal:my_toroidal) :: freq_loc
 
   if (i_time == 0) then
 
@@ -30,24 +30,24 @@ subroutine cgyro_freq
      !--------------------------------------------------
 
      ! Use potential to compute frequency
-     mode_weight(:) = abs(field_old(1,:))
+     mode_weight(:) = abs(field_old(1,:,my_toroidal))
 
      ! Define local frequencies
      do ic=1,nc
-        if (abs(field_old(1,ic)) > 1e-12 .and. abs(field_old2(1,ic)) > 1e-12) then
-           freq_loc(ic) = (i_c/delta_t)*log(field_old(1,ic)/field_old2(1,ic))
+        if (abs(field_old(1,ic,my_toroidal)) > 1e-12 .and. abs(field_old2(1,ic,my_toroidal)) > 1e-12) then
+           freq_loc(ic,my_toroidal) = (i_c/delta_t)*log(field_old(1,ic,my_toroidal)/field_old2(1,ic,my_toroidal))
         else
-           freq_loc(ic) = 0.0
+           freq_loc(ic,my_toroidal) = 0.0
         endif
      enddo
 
      total_weight = sum(mode_weight(:))
 
-     freq = sum(freq_loc(:)*mode_weight(:))/total_weight
+     freq = sum(freq_loc(:,my_toroidal)*mode_weight(:))/total_weight
 
      ! Fractional Frequency Error
-     dfr = sum(abs(real(freq_loc(:)-freq))*mode_weight(:))
-     dfi = sum(abs(aimag(freq_loc(:)-freq))*mode_weight(:))
+     dfr = sum(abs(real(freq_loc(:,my_toroidal)-freq))*mode_weight(:))
+     dfi = sum(abs(aimag(freq_loc(:,my_toroidal)-freq))*mode_weight(:))
 
      freq_err = (dfr+i_c*dfi)/total_weight/abs(freq)
 

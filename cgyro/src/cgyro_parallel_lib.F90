@@ -231,21 +231,25 @@ contains
 
     implicit none
 
-    complex, intent(in), dimension(:,:) :: fin
+    complex, intent(in), dimension(:,:,:) :: fin
     integer :: j_loc,i,j,k,j1,j2
+    integer :: my_toroidal
+
+    ! TODO: Make it more flexible, so it can support multiple toroidals
+    my_toroidal = LBOUND(fin,3)
 
     j1 = 1+iproc*nj_loc
     j2 = (1+iproc)*nj_loc
 
 !$omp parallel do if (size(fsendr) >= default_size) default(none) &
-!$omp& shared(nproc,j1,j2,ni_loc) &
+!$omp& shared(nproc,j1,j2,ni_loc,my_toroidal) &
 !$omp& private(j,j_loc,i) &
 !$omp& shared(fin,fsendr)
     do k=1,nproc
        do j=j1,j2
           j_loc = j-j1+1 
           do i=1,ni_loc
-             fsendr(i,j_loc,k) = fin(i+(k-1)*ni_loc,j_loc) 
+             fsendr(i,j_loc,k) = fin(i+(k-1)*ni_loc,j_loc,my_toroidal)
           enddo
        enddo
     enddo
@@ -263,8 +267,12 @@ contains
 
     implicit none
 
-    complex, intent(in), dimension(:,:) :: fin
+    complex, intent(in), dimension(:,:,:) :: fin
     integer :: j_loc,i,j,k,j1,j2
+    integer :: my_toroidal
+
+    ! TODO: Make it more flexible, so it can support multiple toroidals
+    my_toroidal = LBOUND(fin,3)
 
     j1 = 1+iproc*nj_loc
     j2 = (1+iproc)*nj_loc
@@ -274,7 +282,7 @@ contains
        do j=j1,j2
           do i=1,ni_loc
              j_loc = j-j1+1
-             fsendr(i,j_loc,k) = fin(i+(k-1)*ni_loc,j_loc)
+             fsendr(i,j_loc,k) = fin(i+(k-1)*ni_loc,j_loc,my_toroidal)
           enddo
        enddo
     enddo
@@ -291,7 +299,7 @@ contains
 
     implicit none
 
-    complex, intent(in), dimension(:,:) :: fin
+    complex, intent(in), dimension(:,:,:) :: fin
     complex, intent(inout), dimension(ni_loc,nj) :: f
 
     call parallel_lib_rtrans_pack(fin)
@@ -307,22 +315,26 @@ contains
 
     implicit none
 
-    real, intent(in), dimension(:,:) :: fin
-    real, intent(inout), dimension(ni_loc,nj) :: f
+    real, intent(in), dimension(:,:,:) :: fin
+    real, intent(inout), dimension(:,:,:) :: f
     integer :: ierr,j_loc,i,j,k,j1,j2
+    integer :: my_toroidal
+
+    ! TODO: Make it more flexible, so it can support multiple toroidals
+    my_toroidal = LBOUND(fin,3)
 
     j1 = 1+iproc*nj_loc
     j2 = (1+iproc)*nj_loc
 
 !$omp parallel do if (size(fsendr_real) >= default_size) default(none) &
-!$omp& shared(nproc,j1,j2,ni_loc) &
+!$omp& shared(nproc,j1,j2,ni_loc,my_toroidal) &
 !$omp& private(j,j_loc,i) &
 !$omp& shared(fin,fsendr_real)
     do k=1,nproc
        do j=j1,j2
           j_loc = j-j1+1
           do i=1,ni_loc
-             fsendr_real(i,j_loc,k) = fin(i+(k-1)*ni_loc,j_loc) 
+             fsendr_real(i,j_loc,k) = fin(i+(k-1)*ni_loc,j_loc,my_toroidal) 
           enddo
        enddo
     enddo

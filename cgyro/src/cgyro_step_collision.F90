@@ -298,9 +298,9 @@ subroutine cgyro_step_collision_cpu(use_simple)
      ! this should be coll_mem timer , but not easy with OMP
      do ic=1,nc
         my_ch = cap_h_ct(iv_loc,ic)
-        my_psi = sum(jvec_c(:,ic,iv_loc,my_toroidal)*field(:,ic))
+        my_psi = sum(jvec_c(:,ic,iv_loc,my_toroidal)*field(:,ic,my_toroidal))
         h_x(ic,iv_loc,my_toroidal) = my_ch-my_psi*(z(is)/temp(is))
-        cap_h_c(ic,iv_loc) = my_ch
+        cap_h_c(ic,iv_loc,my_toroidal) = my_ch
      enddo
   enddo
 
@@ -553,7 +553,7 @@ subroutine cgyro_calc_collision_gpu_b2_fp32(nj_loc,update_chv)
 !$acc parallel loop gang firstprivate(nproc,nj_loc,nv,update_chv) &
 !$acc& present(cap_h_v,fsendf,ie_v,is_v,ix_v)  private(k,ic,j,ic_loc,ie,is,ix) &
 !$acc& copyin(cmat_fp32(:,:,bs:be,my_toroidal),cmat_stripes(:,:,:,:,bs:be,my_toroidal)) &
-!$acc& copyin(cmat_e1(:,:,:,bs:be,my_toroidal)) async(bb)
+!$acc& copyin(cmat_e1(:,:,:,:,bs:be,my_toroidal)) async(bb)
     do ic_loc=bs,be
 !$acc loop vector collapse(2) private(b_re,b_im,cval,ivp,iv)
        do k=1,nproc
@@ -830,10 +830,10 @@ subroutine cgyro_step_collision_gpu(use_simple)
      do ic=1,nc
         iv_loc = iv-nv1+1
         is = is_v(iv)
-        my_psi = sum(jvec_c(:,ic,iv_loc,my_toroidal)*field(:,ic))
+        my_psi = sum(jvec_c(:,ic,iv_loc,my_toroidal)*field(:,ic,my_toroidal))
         my_ch = cap_h_ct(iv_loc,ic)
         h_x(ic,iv_loc,my_toroidal) = my_ch-my_psi*(z(is)/temp(is))
-        cap_h_c(ic,iv_loc) = my_ch
+        cap_h_c(ic,iv_loc,my_toroidal) = my_ch
      enddo
   enddo
 

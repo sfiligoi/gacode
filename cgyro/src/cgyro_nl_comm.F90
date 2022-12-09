@@ -156,7 +156,7 @@ subroutine cgyro_nl_fftw_comm2_async
      else
 !$acc loop vector
         do ir=1,n_radial
-           gpack(1:n_field,ir,it_loc,il) = field(1:n_field,ic_c(ir,it))
+           gpack(1:n_field,ir,it_loc,il) = field(1:n_field,ic_c(ir,it),my_toroidal)
         enddo
      endif
    enddo

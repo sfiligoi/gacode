@@ -74,17 +74,17 @@ subroutine cgyro_flux
         erot  = (energy(ie)+lambda_rot(it,is))*temp(is)
 
         if (itp(it) > 0) then
-           cprod = cap_h_c(ic,iv_loc)*dvjvec_c(1,ic,iv_loc,my_toroidal)/z(is)
+           cprod = cap_h_c(ic,iv_loc,my_toroidal)*dvjvec_c(1,ic,iv_loc,my_toroidal)/z(is)
            cn    = dv*z(is)*dens(is)*dens_rot(it,is)/temp(is)
 
            ! Density moment: (delta n_a)/(n_norm rho_norm)
-           moment_loc(ir,itp(it),is,1) = moment_loc(ir,itp(it),is,1)-(cn*field(1,ic)-cprod)
+           moment_loc(ir,itp(it),is,1) = moment_loc(ir,itp(it),is,1)-(cn*field(1,ic,my_toroidal)-cprod)
 
            ! Energy moment : (delta E_a)/(n_norm T_norm rho_norm)
-           moment_loc(ir,itp(it),is,2) = moment_loc(ir,itp(it),is,2)-(cn*field(1,ic)-cprod)*erot
+           moment_loc(ir,itp(it),is,2) = moment_loc(ir,itp(it),is,2)-(cn*field(1,ic,my_toroidal)-cprod)*erot
 
            ! Velocity moment : (delta v_a)/(n_norm v_norm rho_norm)
-           moment_loc(ir,itp(it),is,3) = moment_loc(ir,itp(it),is,3)-(cn*field(1,ic)-cprod)*vpar
+           moment_loc(ir,itp(it),is,3) = moment_loc(ir,itp(it),is,3)-(cn*field(1,ic,my_toroidal)-cprod)*vpar
         endif
 
      enddo
@@ -128,17 +128,23 @@ subroutine cgyro_flux
 
            if (ir-l > 0) then
               icl = ic_c(ir-l,it)
-              prod1(l,:) = prod1(l,:)+i_c*cap_h_c(ic,iv_loc)*conjg(jvec_c(:,icl,iv_loc,my_toroidal)*field(:,icl))
-              prod2(l,:) = prod2(l,:)+i_c*cap_h_c(ic,iv_loc)*conjg(i_c*jxvec_c(:,icl,iv_loc,my_toroidal)*field(:,icl))
-              prod3(l,:) = prod3(l,:)-cap_h_c_dot(ic,iv_loc)*conjg(jvec_c(:,icl,iv_loc,my_toroidal)*field(:,icl)) &
-                                     +cap_h_c(ic,iv_loc)*conjg(jvec_c(:,icl,iv_loc,my_toroidal)*field_dot(:,icl))
+              prod1(l,:) = prod1(l,:) &
+                      +i_c*cap_h_c(ic,iv_loc,my_toroidal)*conjg(jvec_c(:,icl,iv_loc,my_toroidal)*field(:,ic,my_toroidal))
+              prod2(l,:) = prod2(l,:) &
+                      +i_c*cap_h_c(ic,iv_loc,my_toroidal)*conjg(i_c*jxvec_c(:,icl,iv_loc,my_toroidal)*field(:,icl,my_toroidal))
+              prod3(l,:) = prod3(l,:) &
+                      -cap_h_c_dot(ic,iv_loc,my_toroidal)*conjg(jvec_c(:,icl,iv_loc,my_toroidal)*field(:,icl,my_toroidal)) &
+                      +cap_h_c(ic,iv_loc,my_toroidal)*conjg(jvec_c(:,icl,iv_loc,my_toroidal)*field_dot(:,icl,my_toroidal))
            endif
            if (ir+l <= n_radial) then
               icl = ic_c(ir+l,it)
-              prod1(l,:) = prod1(l,:)-i_c*conjg(cap_h_c(ic,iv_loc))*jvec_c(:,icl,iv_loc,my_toroidal)*field(:,icl)
-              prod2(l,:) = prod2(l,:)-i_c*conjg(cap_h_c(ic,iv_loc))*i_c*jxvec_c(:,icl,iv_loc,my_toroidal)*field(:,icl)
-              prod3(l,:) = prod3(l,:)-conjg(cap_h_c_dot(ic,iv_loc))*jvec_c(:,icl,iv_loc,my_toroidal)*field(:,icl) &
-                                     +conjg(cap_h_c(ic,iv_loc))*jvec_c(:,icl,iv_loc,my_toroidal)*field_dot(:,icl)
+              prod1(l,:) = prod1(l,:) &
+                      -i_c*conjg(cap_h_c(ic,iv_loc,my_toroidal))*jvec_c(:,icl,iv_loc,my_toroidal)*field(:,icl,my_toroidal)
+              prod2(l,:) = prod2(l,:) &
+                      -i_c*conjg(cap_h_c(ic,iv_loc,my_toroidal))*i_c*jxvec_c(:,icl,iv_loc,my_toroidal)*field(:,icl,my_toroidal)
+              prod3(l,:) = prod3(l,:) &
+                      -conjg(cap_h_c_dot(ic,iv_loc,my_toroidal))*jvec_c(:,icl,iv_loc,my_toroidal)*field(:,icl,my_toroidal) &
+                      +conjg(cap_h_c(ic,iv_loc,my_toroidal))*jvec_c(:,icl,iv_loc,my_toroidal)*field_dot(:,icl,my_toroidal)
            endif
 
         enddo
@@ -181,7 +187,7 @@ subroutine cgyro_flux
      ! Quasilinear normalization (divide by |phi|^2)
      flux_norm = 0.0
      do ir=1,n_radial
-        flux_norm = flux_norm+sum(abs(field(1,ic_c(ir,:)))**2*w_theta(:))
+        flux_norm = flux_norm+sum(abs(field(1,ic_c(ir,:),my_toroidal))**2*w_theta(:))
      enddo
 
      ! Correct for sign of q

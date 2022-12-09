@@ -71,7 +71,7 @@ subroutine cgyro_rhs(ij)
            is = is_v(iv)
 
            g_x(ic,iv_loc) = h_x(ic,iv_loc,my_toroidal)+ & 
-                (z(is)/temp(is))*jvec_c(2,ic,iv_loc,my_toroidal)*field(2,ic)
+                (z(is)/temp(is))*jvec_c(2,ic,iv_loc,my_toroidal)*field(2,ic,my_toroidal)
         enddo
      enddo
 
@@ -123,7 +123,7 @@ subroutine cgyro_rhs(ij)
         iv_loc = iv-nv1+1
         ! Diagonal terms
         rhs(ic,iv_loc,my_toroidal,ij) = &
-             omega_cap_h(ic,iv_loc,my_toroidal)*cap_h_c(ic,iv_loc)+&
+             omega_cap_h(ic,iv_loc,my_toroidal)*cap_h_c(ic,iv_loc,my_toroidal)+&
              omega_h(ic,iv_loc,my_toroidal)*h_x(ic,iv_loc,my_toroidal)
 
         is = is_v(iv)
@@ -135,12 +135,12 @@ subroutine cgyro_rhs(ij)
         do id=-nup_theta,nup_theta
            jc = icd_c(id, ic)
            rhs_stream = rhs_stream &
-                -rval*dtheta(id,ic,my_toroidal)*cap_h_c(jc,iv_loc)  &
+                -rval*dtheta(id,ic,my_toroidal)*cap_h_c(jc,iv_loc,my_toroidal)  &
                 -rval2*dtheta_up(id,ic,my_toroidal)*g_x(jc,iv_loc)
         enddo
 
         rhs(ic,iv_loc,my_toroidal,ij) = rhs(ic,iv_loc,my_toroidal,ij) + rhs_stream +&
-             sum(omega_s(:,ic,iv_loc,my_toroidal)*field(:,ic))
+             sum(omega_s(:,ic,iv_loc,my_toroidal)*field(:,ic,my_toroidal))
      enddo
   enddo
 
