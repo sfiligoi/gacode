@@ -26,6 +26,7 @@ subroutine cgyro_error_estimate
 #ifdef _OPENACC
   ! launch Estimate of collisionless error via 3rd-order linear estimate async ahead of time on GPU
   ! CPU-only code will work on it later
+  ! NOTE: If I have multiple my_toroidal, sum them all together
   h_s=0.0
   r_s=0.0
 !$acc parallel loop collapse(2) independent present(h_x,rhs(:,:,:,1)) reduction(+:h_s,r_s) async(2)
@@ -99,6 +100,7 @@ subroutine cgyro_error_estimate
   ! wait for the async GPU compute to be completed
 !$acc wait(2)
 #else
+  ! NOTE: If I have multiple my_toroidal, sum them all together
   h_s=0.0
   r_s=0.0
 !$omp parallel do collapse(2) reduction(+:h_s,r_s)

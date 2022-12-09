@@ -85,7 +85,6 @@ subroutine cgyro_write_timedata
      enddo
 
      ! Complex potentials at selected thetas
-     ! TODO: Evaluate what happens when there is more than one toroidal per process
      call cgyro_write_distributed_bcomplex(&
           trim(path)//binfile_kxky_field(i_field),&
           size(field_plot),&
@@ -569,6 +568,7 @@ subroutine write_ascii(datafile,n_fn,fn)
 
 end subroutine write_ascii
 
+! NOTE: Can only be called with a single my_toroidal
 subroutine write_distribution(datafile)
 
   use mpi
@@ -606,8 +606,6 @@ subroutine write_distribution(datafile)
      endif
 
      allocate(h_x_glob(nc,nv))
-     ! TODO: Consider how to treat multiple totoidals; likely only the first one
-
      ! Collect distribution onto process 0
      call MPI_GATHER(cap_h_c(:,:,my_toroidal),&
           size(cap_h_c(:,:,my_toroidal)),&
@@ -868,6 +866,7 @@ end subroutine write_binary
 !
 ! Map from (r,theta) to extended angle (f2d -> f1d)
 !----------------------------------------------------------------
+! NOTE: Can only be called with a single my_toroidal
 
 subroutine extended_ang(f2d)
 
