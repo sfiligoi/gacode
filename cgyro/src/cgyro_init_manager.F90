@@ -153,6 +153,9 @@ subroutine cgyro_init_manager
   allocate(omega_rot_edrift_r(n_theta))
   allocate(omega_rot_star(n_theta,n_species))
 
+  allocate(freq(my_toroidal:my_toroidal))
+  allocate(freq_err(my_toroidal:my_toroidal))
+
   if (test_flag == 0) then
 
      !----------------------------------------------------

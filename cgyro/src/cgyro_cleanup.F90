@@ -61,6 +61,8 @@ subroutine cgyro_cleanup
   if(allocated(omega_rot_edrift))    deallocate(omega_rot_edrift)
   if(allocated(omega_rot_edrift_r))  deallocate(omega_rot_edrift_r)
   if(allocated(omega_rot_star))      deallocate(omega_rot_star)
+  if(allocated(freq))                deallocate(freq)
+  if(allocated(freq_err))            deallocate(freq_err)
   if(allocated(fcoef))  then
 !$acc exit data delete(fcoef)     
      deallocate(fcoef)

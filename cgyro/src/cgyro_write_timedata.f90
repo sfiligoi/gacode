@@ -16,10 +16,11 @@ subroutine cgyro_write_timedata
   integer :: i_field,i_moment
   integer :: ir,it
   integer :: p_field
+  real :: fvec(2,my_toroidal:my_toroidal)
   real :: vec(4)
   complex :: a_norm
   complex :: ftemp(n_theta,n_radial)
-  complex :: field_plot(n_radial,theta_plot)
+  complex :: field_plot(n_radial,theta_plot,my_toroidal:my_toroidal)
 
   ! Print this data on print steps only; otherwise exit now
   if (mod(i_time,print_step) /= 0) return
@@ -79,7 +80,7 @@ subroutine cgyro_write_timedata
         ir = ir_c(ic)
         it = it_c(ic)
         if (itp(it) > 0) then
-           field_plot(ir,itp(it)) = field(i_field,ic,my_toroidal)
+           field_plot(ir,itp(it),my_toroidal) = field(i_field,ic,my_toroidal)
         endif
      enddo
 
@@ -135,11 +136,12 @@ subroutine cgyro_write_timedata
 
   ! Linear frequency diagnostics for every value of n
   call cgyro_freq
-  vec(1) = real(freq) ; vec(2) = aimag(freq)
+  fvec(1,:) = real(freq(:)) ; fvec(2,:) = aimag(freq(:))
   if (n_toroidal > 1) then
-     call cgyro_write_distributed_breal(trim(path)//binfile_freq,2,vec(1:2))
+     ! NOTE: Update counter when having more than one my_toroidal
+     call cgyro_write_distributed_breal(trim(path)//binfile_freq,2,fvec(:,:))
   else 
-     call write_ascii(trim(path)//runfile_freq,2,vec(1:2))
+     call write_ascii(trim(path)//runfile_freq,2,fvec(:,:))
   endif
 
   ! Output to screen
@@ -782,10 +784,11 @@ subroutine print_scrdata()
           '[t: ',t_current,&
           '][e: ',integration_error(:),']'
   else
+     ! NOTE: There could be only one my_toroidal when n_toroidal <=1
      print '(a,1pe9.3,a,1pe10.3,1x,1pe10.3,a,1pe10.3,a,1pe9.3,1x,1pe9.3,a)',&
           '[t: ',t_current,&
-          '][w: ',freq,&
-          '][dw:',abs(freq_err),&
+          '][w: ',freq(my_toroidal),&
+          '][dw:',abs(freq_err(my_toroidal)),&
           '][e: ',integration_error(:),']'
 
   endif

@@ -20,8 +20,8 @@ subroutine cgyro_freq
 
   if (i_time == 0) then
 
-     freq = 0.0
-     freq_err = 0.0
+     freq(:) = 0.0
+     freq_err(:) = 0.0
 
   else
 
@@ -30,6 +30,7 @@ subroutine cgyro_freq
      !--------------------------------------------------
 
      ! Use potential to compute frequency
+     ! NOTE: Do it once per my_toroidal
      mode_weight(:) = abs(field_old(1,:,my_toroidal))
 
      ! Define local frequencies
@@ -42,16 +43,14 @@ subroutine cgyro_freq
      enddo
 
      total_weight = sum(mode_weight(:))
-
-     freq = sum(freq_loc(:,my_toroidal)*mode_weight(:))/total_weight
+     freq(my_toroidal) = sum(freq_loc(:,my_toroidal)*mode_weight(:))/total_weight
 
      ! Fractional Frequency Error
      dfr = sum(abs(real(freq_loc(:,my_toroidal)-freq))*mode_weight(:))
      dfi = sum(abs(aimag(freq_loc(:,my_toroidal)-freq))*mode_weight(:))
+     freq_err(my_toroidal) = (dfr+i_c*dfi)/total_weight/abs(freq(my_toroidal))
 
-     freq_err = (dfr+i_c*dfi)/total_weight/abs(freq)
-
-     if (n_toroidal == 1 .and. abs(freq_err) < freq_tol) signal=1
+     if (n_toroidal == 1 .and. abs(freq_err(my_toroidal)) < freq_tol) signal=1
 
   endif
 
