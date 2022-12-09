@@ -380,14 +380,14 @@ module cgyro_globals
   complex, dimension(:,:,:), allocatable :: field_old
   complex, dimension(:,:,:), allocatable :: field_old2
   complex, dimension(:,:,:), allocatable :: field_old3
-  complex, dimension(:,:,:,:), allocatable :: moment_loc
-  complex, dimension(:,:,:,:), allocatable :: moment
+  complex, dimension(:,:,:,:,:), allocatable :: moment_loc
+  complex, dimension(:,:,:,:,:), allocatable :: moment
   !
   ! Nonlinear fluxes (f=standard,c=central,g=global)
-  real, dimension(:,:,:), allocatable :: cflux_loc
-  real, dimension(:,:,:), allocatable :: cflux
-  complex, dimension(:,:,:,:), allocatable :: gflux_loc
-  complex, dimension(:,:,:,:), allocatable :: gflux
+  real, dimension(:,:,:,:), allocatable :: cflux_loc
+  real, dimension(:,:,:,:), allocatable :: cflux
+  complex, dimension(:,:,:,:,:), allocatable :: gflux_loc
+  complex, dimension(:,:,:,:,:), allocatable :: gflux
   real, dimension(:,:), allocatable :: cflux_tave, gflux_tave
   real :: tave_min, tave_max
   integer :: tave_step

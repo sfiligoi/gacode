@@ -38,22 +38,22 @@ subroutine cgyro_write_timedata
   ! ky flux for all species with field breakdown
   call cgyro_write_distributed_breal(&
        trim(path)//binfile_ky_flux,&
-       size(gflux(0,:,1:nflux,:)),&
-       real(gflux(0,:,1:nflux,:)))
+       size(gflux(0,:,1:nflux,:,:)),&
+       real(gflux(0,:,1:nflux,:,:)))
 
   ! central ky flux for all species with field breakdown
   call cgyro_write_distributed_breal(&
        trim(path)//binfile_ky_cflux,&
-       size(cflux(:,1:nflux,:)),&
-       cflux(:,1:nflux,:))
+       size(cflux(:,1:nflux,:,:)),&
+       cflux(:,1:nflux,:,:))
 
   if (gflux_print_flag == 1) then
      ! Global (n,e,v) fluxes for all species
      do i_moment=1,3
         call cgyro_write_distributed_bcomplex(&
              trim(path)//binfile_lky_flux(i_moment),&
-             size(gflux(:,:,i_moment,:)),&
-             gflux(:,:,i_moment,:))
+             size(gflux(:,:,i_moment,:,:)),&
+             gflux(:,:,i_moment,:,:))
      enddo
   endif
 
@@ -62,8 +62,8 @@ subroutine cgyro_write_timedata
      do i_moment=1,3
         call cgyro_write_distributed_bcomplex(&
              trim(path)//binfile_kxky(i_moment),&
-             size(moment(:,:,:,i_moment)),&
-             moment(:,:,:,i_moment))
+             size(moment(:,:,:,:,i_moment)),&
+             moment(:,:,:,:,i_moment))
      enddo
   endif
 
@@ -95,7 +95,7 @@ subroutine cgyro_write_timedata
   ! Note that checksum is a distributed real scalar
   if (zf_test_mode == 0) then
      ! Do not include exchange in precision
-     call write_precision(trim(path)//runfile_prec,sum(abs(real(gflux(0,:,1:3,:)))))
+     call write_precision(trim(path)//runfile_prec,sum(abs(real(gflux(0,:,1:3,:,:)))))
   else
      call write_precision(trim(path)//runfile_prec,sum(abs(field)))
   endif
