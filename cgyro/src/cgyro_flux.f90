@@ -166,16 +166,15 @@ subroutine cgyro_flux
         ! 4. Exchange
         gflux_loc(:,is,4,:) = gflux_loc(:,is,4,:)+0.5*prod3(:,:)*dvr*z(is)
 
-        
-        ! Construct "positive/interior" flux (real quantities)
-        cflux_loc = real(gflux_loc(0,:,:,:))
-        do l=1,n_global
-           u = 2*pi*l*x_fraction
-           cflux_loc = cflux_loc+2*sin(u)*real(gflux_loc(l,:,:,:))/u
-        enddo
-
      enddo
 
+  enddo
+
+  ! Construct "positive/interior" flux (real quantities)
+  cflux_loc = real(gflux_loc(0,:,:,:))
+  do l=1,n_global
+     u = 2*pi*l*x_fraction
+     cflux_loc = cflux_loc+2*sin(u)*real(gflux_loc(l,:,:,:))/u
   enddo
 
   !-----------------------------------------------------
