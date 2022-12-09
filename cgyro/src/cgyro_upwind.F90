@@ -42,24 +42,24 @@ subroutine cgyro_upwind_r64
        do iv=nv1,nv2
           iv_loc = iv-nv1+1
           if (is == is_v(iv)) then
-             res_loc_one = res_loc_one+upfac1(ic,iv_loc,my_toroidal,1)*g_x(ic,iv_loc)
+             res_loc_one = res_loc_one+upfac1(ic,iv_loc,my_toroidal,1)*g_x(ic,iv_loc,my_toroidal)
           endif
        enddo
-       upwind_res_loc(ic,is,1) = res_loc_one
+       upwind_res_loc(ic,is,my_toroidal,1) = res_loc_one
 
 !$acc loop vector private(iv_loc) reduction(+:res_loc_two)
        do iv=nv1,nv2
           iv_loc = iv-nv1+1
           if (is == is_v(iv)) then
-             res_loc_two = res_loc_two+upfac1(ic,iv_loc,my_toroidal,2)*g_x(ic,iv_loc)
+             res_loc_two = res_loc_two+upfac1(ic,iv_loc,my_toroidal,2)*g_x(ic,iv_loc,my_toroidal)
           endif
        enddo
-       upwind_res_loc(ic,is,2) = res_loc_two
+       upwind_res_loc(ic,is,my_toroidal,2) = res_loc_two
     enddo
 
   enddo
 #else
-  upwind_res_loc(:,:,:) = (0.0,0.0)
+  upwind_res_loc(:,:,:,:) = (0.0,0.0)
 
 !$omp parallel private(iv_loc,ic,is)
 !$omp do reduction(+:upwind_res_loc)
@@ -67,7 +67,7 @@ subroutine cgyro_upwind_r64
      iv_loc = iv-nv1+1
      is = is_v(iv)
      do ic=1,nc
-        upwind_res_loc(ic,is,:) = upwind_res_loc(ic,is,:)+upfac1(ic,iv_loc,my_toroidal,:)*g_x(ic,iv_loc)
+        upwind_res_loc(ic,is,my_toroidal,:) = upwind_res_loc(ic,is,my_toroidal,:)+upfac1(ic,iv_loc,my_toroidal,:)*g_x(ic,iv_loc,my_toroidal)
      enddo
   enddo
 !$omp end do
@@ -84,9 +84,9 @@ subroutine cgyro_upwind_r64
 !$acc host_data use_device(upwind_res_loc,upwind_res)
 #endif
 
-  call MPI_ALLREDUCE(upwind_res_loc(:,:,:),&
-       upwind_res(:,:,:),&
-       size(upwind_res(:,:,:)),&
+  call MPI_ALLREDUCE(upwind_res_loc(:,:,:,:),&
+       upwind_res(:,:,:,:),&
+       size(upwind_res(:,:,:,:)),&
        MPI_DOUBLE_COMPLEX,&
        MPI_SUM,&
        NEW_COMM_3,&
@@ -115,9 +115,9 @@ subroutine cgyro_upwind_r64
         is = is_v(iv)
         ix = ix_v(iv)
         ie = ie_v(iv)
-        g_x(ic,iv_loc) = abs(xi(ix))*vel(ie)*g_x(ic,iv_loc) &
-             -upfac2(ic,iv_loc,my_toroidal,1)*upwind_res(ic,is,1) &
-             -upfac2(ic,iv_loc,my_toroidal,2)*upwind_res(ic,is,2)*up_cutoff
+        g_x(ic,iv_loc,my_toroidal) = abs(xi(ix))*vel(ie)*g_x(ic,iv_loc,my_toroidal) &
+             -upfac2(ic,iv_loc,my_toroidal,1)*upwind_res(ic,is,my_toroidal,1) &
+             -upfac2(ic,iv_loc,my_toroidal,2)*upwind_res(ic,is,my_toroidal,2)*up_cutoff
      enddo
   enddo
 
@@ -154,24 +154,24 @@ subroutine cgyro_upwind_r32
        do iv=nv1,nv2
           iv_loc = iv-nv1+1
           if (is == is_v(iv)) then
-             res_loc_one = res_loc_one+upfac1(ic,iv_loc,my_toroidal,1)*g_x(ic,iv_loc)
+             res_loc_one = res_loc_one+upfac1(ic,iv_loc,my_toroidal,1)*g_x(ic,iv_loc,my_toroidal)
           endif
        enddo
-       upwind32_res_loc(ic,is,1) = res_loc_one
+       upwind32_res_loc(ic,is,my_toroidal,1) = res_loc_one
 
 !$acc loop vector private(iv_loc) reduction(+:res_loc_two)
        do iv=nv1,nv2
           iv_loc = iv-nv1+1
           if (is == is_v(iv)) then
-             res_loc_two = res_loc_two+upfac1(ic,iv_loc,my_toroidal,2)*g_x(ic,iv_loc)
+             res_loc_two = res_loc_two+upfac1(ic,iv_loc,my_toroidal,2)*g_x(ic,iv_loc,my_toroidal)
           endif
        enddo
-       upwind32_res_loc(ic,is,2) = res_loc_two
+       upwind32_res_loc(ic,is,my_toroidal,2) = res_loc_two
     enddo
 
   enddo
 #else
-  upwind32_res_loc(:,:,:) = (0.0,0.0)
+  upwind32_res_loc(:,:,:,:) = (0.0,0.0)
 
 !$omp parallel private(iv_loc,ic,is)
 !$omp do reduction(+:upwind32_res_loc)
@@ -179,7 +179,7 @@ subroutine cgyro_upwind_r32
      iv_loc = iv-nv1+1
      is = is_v(iv)
      do ic=1,nc
-        upwind32_res_loc(ic,is,:) = upwind32_res_loc(ic,is,:)+upfac1(ic,iv_loc,my_toroidal,:)*g_x(ic,iv_loc)
+        upwind32_res_loc(ic,is,my_toroidal,:) = upwind32_res_loc(ic,is,my_toroidal,:)+upfac1(ic,iv_loc,my_toroidal,:)*g_x(ic,iv_loc,my_toroidal)
      enddo
   enddo
 !$omp end do
@@ -196,9 +196,9 @@ subroutine cgyro_upwind_r32
 !$acc host_data use_device(upwind32_res_loc,upwind32_res)
 #endif
 
-  call MPI_ALLREDUCE(upwind32_res_loc(:,:,:),&
-       upwind32_res(:,:,:),&
-       size(upwind32_res(:,:,:)),&
+  call MPI_ALLREDUCE(upwind32_res_loc(:,:,:,:),&
+       upwind32_res(:,:,:,:),&
+       size(upwind32_res(:,:,:,:)),&
        MPI_COMPLEX,&
        MPI_SUM,&
        NEW_COMM_3,&
@@ -227,9 +227,9 @@ subroutine cgyro_upwind_r32
         is = is_v(iv)
         ix = ix_v(iv)
         ie = ie_v(iv)
-        g_x(ic,iv_loc) = abs(xi(ix))*vel(ie)*g_x(ic,iv_loc) &
-             -upfac2(ic,iv_loc,my_toroidal,1)*upwind32_res(ic,is,1) &
-             -upfac2(ic,iv_loc,my_toroidal,2)*upwind32_res(ic,is,2)*up_cutoff
+        g_x(ic,iv_loc,my_toroidal) = abs(xi(ix))*vel(ie)*g_x(ic,iv_loc,my_toroidal) &
+             -upfac2(ic,iv_loc,my_toroidal,1)*upwind32_res(ic,is,my_toroidal,1) &
+             -upfac2(ic,iv_loc,my_toroidal,2)*upwind32_res(ic,is,my_toroidal,2)*up_cutoff
      enddo
   enddo
 

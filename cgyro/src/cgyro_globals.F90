@@ -347,7 +347,7 @@ module cgyro_globals
   ! Distributions
   complex, dimension(:,:,:,:), allocatable :: rhs
   complex, dimension(:,:,:), allocatable :: h_x
-  complex, dimension(:,:), allocatable :: g_x
+  complex, dimension(:,:,:), allocatable :: g_x
   complex, dimension(:,:,:), allocatable :: h0_x
   complex, dimension(:,:,:), allocatable :: h0_old
   complex, dimension(:,:,:), allocatable :: f_nl
@@ -426,10 +426,10 @@ module cgyro_globals
   ! Work arrays
   real, dimension(2) :: integration_error
   ! Upwind work arrays
-  complex, dimension(:,:,:),allocatable :: upwind_res_loc
-  complex, dimension(:,:,:),allocatable :: upwind_res
-  complex(KIND=REAL32), dimension(:,:,:),allocatable :: upwind32_res_loc
-  complex(KIND=REAL32), dimension(:,:,:),allocatable :: upwind32_res
+  complex, dimension(:,:,:,:),allocatable :: upwind_res_loc
+  complex, dimension(:,:,:,:),allocatable :: upwind_res
+  complex(KIND=REAL32), dimension(:,:,:,:),allocatable :: upwind32_res_loc
+  complex(KIND=REAL32), dimension(:,:,:,:),allocatable :: upwind32_res
   !
   ! LAPACK work arrays 
   real, dimension(:), allocatable :: work  

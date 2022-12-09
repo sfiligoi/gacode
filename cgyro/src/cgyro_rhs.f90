@@ -65,7 +65,7 @@ subroutine cgyro_rhs(ij)
         iv_loc = iv-nv1+1
         is = is_v(iv)
         do ic=1,nc
-           g_x(ic,iv_loc) = h_x(ic,iv_loc,my_toroidal)+ & 
+           g_x(ic,iv_loc,my_toroidal) = h_x(ic,iv_loc,my_toroidal)+ & 
                 (z(is)/temp(is))*jvec_c(2,ic,iv_loc,my_toroidal)*field(2,ic,my_toroidal)
         enddo
      enddo
@@ -73,8 +73,7 @@ subroutine cgyro_rhs(ij)
   else
      call timer_lib_in('str_mem')
 
-     ! TODO: remove my_toroidal for h_x when you add g_x dimension
-     g_x(:,:) = h_x(:,:,my_toroidal)
+     g_x(:,:,:) = h_x(:,:,:)
 
      call timer_lib_out('str_mem')
   endif
@@ -112,7 +111,7 @@ subroutine cgyro_rhs(ij)
            jc = icd_c(id, ic)
            rhs_stream = rhs_stream &
                 -rval*dtheta(id,ic,my_toroidal)*cap_h_c(jc,iv_loc,my_toroidal)  &
-                -rval2*dtheta_up(id,ic,my_toroidal)*g_x(jc,iv_loc) 
+                -rval2*dtheta_up(id,ic,my_toroidal)*g_x(jc,iv_loc,my_toroidal) 
         enddo
 
         rhs_ij(ic,iv_loc,my_toroidal) = rhs_ij(ic,iv_loc,my_toroidal) + &

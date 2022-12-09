@@ -212,7 +212,7 @@ subroutine cgyro_init_manager
      end select 
      
      allocate(h_x(nc,nv_loc,my_toroidal:my_toroidal))
-     allocate(g_x(nc,nv_loc))
+     allocate(g_x(nc,nv_loc,my_toroidal:my_toroidal))
      allocate(h0_x(nc,nv_loc,my_toroidal:my_toroidal))
 !$acc enter data create(h_x,g_x,h0_x)
 
@@ -238,12 +238,12 @@ subroutine cgyro_init_manager
 !$acc enter data create(cap_h_v,dvjvec_c,dvjvec_v)
 
      if (upwind_single_flag == 0) then
-       allocate(upwind_res_loc(nc,ns1:ns2,2))
-       allocate(upwind_res(nc,ns1:ns2,2))
+       allocate(upwind_res_loc(nc,ns1:ns2,my_toroidal:my_toroidal,2))
+       allocate(upwind_res(nc,ns1:ns2,my_toroidal:my_toroidal,2))
 !$acc enter data create(upwind_res,upwind_res_loc)
      else
-       allocate(upwind32_res_loc(nc,ns1:ns2,2))
-       allocate(upwind32_res(nc,ns1:ns2,2))
+       allocate(upwind32_res_loc(nc,ns1:ns2,my_toroidal:my_toroidal,2))
+       allocate(upwind32_res(nc,ns1:ns2,my_toroidal:my_toroidal,2))
 !$acc enter data create(upwind32_res,upwind32_res_loc)
      endif
 

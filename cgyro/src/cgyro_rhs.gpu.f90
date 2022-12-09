@@ -70,7 +70,7 @@ subroutine cgyro_rhs(ij)
            iv_loc = iv-nv1+1
            is = is_v(iv)
 
-           g_x(ic,iv_loc) = h_x(ic,iv_loc,my_toroidal)+ & 
+           g_x(ic,iv_loc,my_toroidal) = h_x(ic,iv_loc,my_toroidal)+ & 
                 (z(is)/temp(is))*jvec_c(2,ic,iv_loc,my_toroidal)*field(2,ic,my_toroidal)
         enddo
      enddo
@@ -87,7 +87,7 @@ subroutine cgyro_rhs(ij)
      do iv=nv1,nv2
         do ic=1,nc
            iv_loc = iv-nv1+1
-           g_x(ic,iv_loc) = h_x(ic,iv_loc,my_toroidal)
+           g_x(ic,iv_loc,my_toroidal) = h_x(ic,iv_loc,my_toroidal)
         enddo
      enddo
 
@@ -136,7 +136,7 @@ subroutine cgyro_rhs(ij)
            jc = icd_c(id, ic)
            rhs_stream = rhs_stream &
                 -rval*dtheta(id,ic,my_toroidal)*cap_h_c(jc,iv_loc,my_toroidal)  &
-                -rval2*dtheta_up(id,ic,my_toroidal)*g_x(jc,iv_loc)
+                -rval2*dtheta_up(id,ic,my_toroidal)*g_x(jc,iv_loc,my_toroidal)
         enddo
 
         rhs(ic,iv_loc,my_toroidal,ij) = rhs(ic,iv_loc,my_toroidal,ij) + rhs_stream +&
