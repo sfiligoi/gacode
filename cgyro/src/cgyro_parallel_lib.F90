@@ -21,11 +21,11 @@ module parallel_lib
   integer, private :: nsend
   integer, private :: nk_idx
 
-  real, dimension(:,:,:), allocatable, private :: fsendr_real
+  real, dimension(:,:,:,:), allocatable, private :: fsendr_real
 
   ! (expose these)
-  complex, dimension(:,:,:), allocatable :: fsendf
-  complex, dimension(:,:,:), allocatable :: fsendr
+  complex, dimension(:,:,:,:), allocatable :: fsendf
+  complex, dimension(:,:,:,:), allocatable :: fsendr
 
   ! slib
 
@@ -57,6 +57,7 @@ contains
     integer, intent(inout) :: ni_loc_out,nj_loc_out
     integer, external :: parallel_dim
     integer :: ierr
+    integer :: my_toroidal
 
     lib_comm = comm
 
@@ -66,6 +67,7 @@ contains
     ni = ni_in
     nj = nj_in
     nk_idx = nk_idx_in
+    my_toroidal = nk_idx
 
     ni_loc = parallel_dim(ni,nproc)
     nj_loc = parallel_dim(nj,nproc)
@@ -75,9 +77,9 @@ contains
 
     nsend = ni*nj/nproc**2
 
-    allocate(fsendf(nj_loc,ni_loc,nproc))
-    allocate(fsendr(ni_loc,nj_loc,nproc))
-    if (.not. allocated(fsendr_real)) allocate(fsendr_real(ni_loc,nj_loc,nproc))
+    allocate(fsendf(nj_loc,ni_loc,my_toroidal:my_toroidal,nproc))
+    allocate(fsendr(ni_loc,nj_loc,my_toroidal:my_toroidal,nproc))
+    if (.not. allocated(fsendr_real)) allocate(fsendr_real(ni_loc,nj_loc,my_toroidal:my_toroidal,nproc))
 
 !$acc enter data create(fsendf,fsendr)
 
@@ -91,7 +93,7 @@ contains
 
     implicit none
 
-    complex, intent(inout), dimension(nj_loc,ni) :: ft
+    complex, intent(inout), dimension(:,:,:) :: ft
     integer :: ierr
 
     call MPI_ALLTOALL(fsendf, &
@@ -113,7 +115,7 @@ contains
 
     implicit none
 
-    complex, intent(inout), dimension(nj_loc,ni) :: ft
+    complex, intent(inout), dimension(:,:,:) :: ft
     integer :: ierr
 
 #ifdef DISABLE_GPUDIRECT_MPI
@@ -147,7 +149,7 @@ contains
 
     implicit none
 
-    complex, intent(inout), dimension(ni_loc,nj) :: f
+    complex, intent(inout), dimension(:,:,:) :: f
     integer :: ierr
 
     call MPI_ALLTOALL(fsendr, &
@@ -169,7 +171,7 @@ contains
 
     implicit none
 
-    complex, intent(inout), dimension(ni_loc,nj) :: f
+    complex, intent(inout), dimension(:,:,:) :: f
 
     integer :: ierr
 
@@ -204,21 +206,25 @@ contains
 
     implicit none
 
-    complex, intent(in), dimension(nj_loc,ni) :: ft
+    complex, intent(in), dimension(:,:,:) :: ft
     integer :: j_loc,i,j,k,j1,j2
+    integer :: my_toroidal
+
+    ! TODO: Make it more flexible, so it can support multiple toroidals
+    my_toroidal = nk_idx
 
     j1 = 1+iproc*nj_loc
     j2 = (1+iproc)*nj_loc
 
 !$omp parallel do if (size(fsendr) >= default_size) default(none) &
-!$omp& shared(nproc,j1,j2,ni_loc) &
+!$omp& shared(nproc,j1,j2,ni_loc,my_toroidal) &
 !$omp& private(j,j_loc,i) &
 !$omp& shared(ft,fsendr)
     do k=1,nproc
        do j=j1,j2
           j_loc = j-j1+1 
           do i=1,ni_loc
-             fsendr(i,j_loc,k) = ft(j_loc,i+(k-1)*ni_loc) 
+             fsendr(i,j_loc,my_toroidal,k) = ft(j_loc,i+(k-1)*ni_loc,1+(my_toroidal-my_toroidal))
           enddo
        enddo
     enddo
@@ -253,7 +259,7 @@ contains
        do j=j1,j2
           j_loc = j-j1+1 
           do i=1,ni_loc
-             fsendr(i,j_loc,k) = fin(i+(k-1)*ni_loc,j_loc,1+(my_toroidal-my_toroidal))
+             fsendr(i,j_loc,my_toroidal,k) = fin(i+(k-1)*ni_loc,j_loc,1+(my_toroidal-my_toroidal))
           enddo
        enddo
     enddo
@@ -286,7 +292,7 @@ contains
        do j=j1,j2
           do i=1,ni_loc
              j_loc = j-j1+1
-             fsendr(i,j_loc,k) = fin(i+(k-1)*ni_loc,j_loc,1+(my_toroidal-my_toroidal))
+             fsendr(i,j_loc,my_toroidal,k) = fin(i+(k-1)*ni_loc,j_loc,1+(my_toroidal-my_toroidal))
           enddo
        enddo
     enddo
@@ -304,7 +310,7 @@ contains
     implicit none
 
     complex, intent(in), dimension(:,:,:) :: fin
-    complex, intent(inout), dimension(ni_loc,nj) :: f
+    complex, intent(inout), dimension(:,:,:) :: f
 
     call parallel_lib_rtrans_pack(fin)
     call parallel_lib_r_do(f)
@@ -338,7 +344,7 @@ contains
        do j=j1,j2
           j_loc = j-j1+1
           do i=1,ni_loc
-             fsendr_real(i,j_loc,k) = fin(i+(k-1)*ni_loc,j_loc,1+(my_toroidal-my_toroidal)) 
+             fsendr_real(i,j_loc,my_toroidal,k) = fin(i+(k-1)*ni_loc,j_loc,1+(my_toroidal-my_toroidal)) 
           enddo
        enddo
     enddo

@@ -33,7 +33,7 @@ subroutine cgyro_calc_collision_cpu_fp64(nj_loc,update_chv)
      ! Set-up the RHS: H = f + ze/T G phi
 
      do iv=1,nv
-        cvec(iv) = cap_h_v(ic_loc,iv)
+        cvec(iv) = cap_h_v(ic_loc,iv,my_toroidal)
      enddo
 
      bvec(:) = (0.0,0.0)
@@ -50,13 +50,13 @@ subroutine cgyro_calc_collision_cpu_fp64(nj_loc,update_chv)
 
     do k=1,nproc
        do j=1,nj_loc
-          fsendf(j,ic_loc,k) = bvec(j+(k-1)*nj_loc)
+          fsendf(j,ic_loc,my_toroidal,k) = bvec(j+(k-1)*nj_loc)
        enddo
     enddo
 
     if (update_chv) then
           do iv=1,nv
-             cap_h_v(ic_loc,iv) = bvec(iv)
+             cap_h_v(ic_loc,iv,my_toroidal) = bvec(iv)
           enddo
     endif
  enddo
@@ -90,7 +90,7 @@ subroutine cgyro_calc_collision_cpu_fp32(nj_loc,update_chv)
      ! Set-up the RHS: H = f + ze/T G phi
 
      do iv=1,nv
-        cvec(iv) = cap_h_v(ic_loc,iv)
+        cvec(iv) = cap_h_v(ic_loc,iv,my_toroidal)
      enddo
 
      bvec(:) = (0.0,0.0)
@@ -120,13 +120,13 @@ subroutine cgyro_calc_collision_cpu_fp32(nj_loc,update_chv)
 
     do k=1,nproc
        do j=1,nj_loc
-          fsendf(j,ic_loc,k) = bvec(j+(k-1)*nj_loc)
+          fsendf(j,ic_loc,my_toroidal,k) = bvec(j+(k-1)*nj_loc)
        enddo
     enddo
 
     if (update_chv) then
           do iv=1,nv
-             cap_h_v(ic_loc,iv) = bvec(iv)
+             cap_h_v(ic_loc,iv,my_toroidal) = bvec(iv)
           enddo
     endif
  enddo
@@ -183,7 +183,7 @@ subroutine cgyro_calc_collision_simple_cpu(nj_loc)
      ! Set-up the RHS: H = f + ze/T G phi
 
      do iv=1,nv
-        cvec(ix_v(iv),ie_v(iv),is_v(iv)) = cap_h_v(ic_loc,iv)
+        cvec(ix_v(iv),ie_v(iv),is_v(iv)) = cap_h_v(ic_loc,iv,my_toroidal)
      enddo
 
      ! Avoid singularity of n=0,p=0:
@@ -216,7 +216,7 @@ subroutine cgyro_calc_collision_simple_cpu(nj_loc)
 
      do k=1,nproc
         do j=1,nj_loc
-           fsendf(j,ic_loc,k) = bvec_flat(j+(k-1)*nj_loc)
+           fsendf(j,ic_loc,my_toroidal,k) = bvec_flat(j+(k-1)*nj_loc)
         enddo
      enddo
 
@@ -297,7 +297,7 @@ subroutine cgyro_step_collision_cpu(use_simple)
      is = is_v(iv)
      ! this should be coll_mem timer , but not easy with OMP
      do ic=1,nc
-        my_ch = cap_h_ct(iv_loc,ic)
+        my_ch = cap_h_ct(iv_loc,ic,my_toroidal)
         my_psi = sum(jvec_c(:,ic,iv_loc,my_toroidal)*field(:,ic,my_toroidal))
         h_x(ic,iv_loc,my_toroidal) = my_ch-my_psi*(z(is)/temp(is))
         cap_h_c(ic,iv_loc,my_toroidal) = my_ch
@@ -343,11 +343,11 @@ subroutine cgyro_calc_collision_gpu_fp64(nj_loc,update_chv)
 !$acc loop seq private(cval)
            do ivp=1,nv
               cval = cmat(iv,ivp,ic_loc,my_toroidal)
-              b_re = b_re + cval*real(cap_h_v(ic_loc,ivp))
-              b_im = b_im + cval*aimag(cap_h_v(ic_loc,ivp))
+              b_re = b_re + cval*real(cap_h_v(ic_loc,ivp,my_toroidal))
+              b_im = b_im + cval*aimag(cap_h_v(ic_loc,ivp,my_toroidal))
            enddo
 
-           fsendf(j,ic_loc,k) = cmplx(b_re,b_im)
+           fsendf(j,ic_loc,my_toroidal,k) = cmplx(b_re,b_im)
         enddo
      enddo
 
@@ -356,7 +356,7 @@ subroutine cgyro_calc_collision_gpu_fp64(nj_loc,update_chv)
         do k=1,nproc
            do j=1,nj_loc
               iv = j+(k-1)*nj_loc
-              cap_h_v(ic_loc,iv) = fsendf(j,ic_loc,k)
+              cap_h_v(ic_loc,iv,my_toroidal) = fsendf(j,ic_loc,my_toroidal,k)
            enddo
         enddo
      endif
@@ -415,11 +415,11 @@ subroutine cgyro_calc_collision_gpu_b2_fp64(nj_loc,update_chv)
 !$acc loop seq private(cval)
            do ivp=1,nv
               cval = cmat(iv,ivp,ic_loc,my_toroidal)
-              b_re = b_re + cval*real(cap_h_v(ic_loc,ivp))
-              b_im = b_im + cval*aimag(cap_h_v(ic_loc,ivp))
+              b_re = b_re + cval*real(cap_h_v(ic_loc,ivp,my_toroidal))
+              b_im = b_im + cval*aimag(cap_h_v(ic_loc,ivp,my_toroidal))
            enddo
 
-           fsendf(j,ic_loc,k) = cmplx(b_re,b_im)
+           fsendf(j,ic_loc,my_toroidal,k) = cmplx(b_re,b_im)
         enddo
       enddo
 
@@ -428,7 +428,7 @@ subroutine cgyro_calc_collision_gpu_b2_fp64(nj_loc,update_chv)
         do k=1,nproc
            do j=1,nj_loc
               iv = j+(k-1)*nj_loc
-              cap_h_v(ic_loc,iv) = fsendf(j,ic_loc,k)
+              cap_h_v(ic_loc,iv,my_toroidal) = fsendf(j,ic_loc,my_toroidal,k)
            enddo
         enddo
       endif
@@ -476,8 +476,8 @@ subroutine cgyro_calc_collision_gpu_fp32(nj_loc,update_chv)
 !$acc loop seq private(cval,iep,isp,ixp,h_re,h_im)
            do ivp=1,nv
               cval = cmat_fp32(iv,ivp,ic_loc,my_toroidal)
-              h_re = real(cap_h_v(ic_loc,ivp))
-              h_im = aimag(cap_h_v(ic_loc,ivp))
+              h_re = real(cap_h_v(ic_loc,ivp,my_toroidal))
+              h_im = aimag(cap_h_v(ic_loc,ivp,my_toroidal))
               if (ie<=n_low_energy) then
                  cval = cval + cmat_e1(ix,is,ie,ivp,ic_loc,my_toroidal)
               else
@@ -492,7 +492,7 @@ subroutine cgyro_calc_collision_gpu_fp32(nj_loc,update_chv)
               b_im = b_im + cval*h_im
            enddo
 
-           fsendf(j,ic_loc,k) = cmplx(b_re,b_im)
+           fsendf(j,ic_loc,my_toroidal,k) = cmplx(b_re,b_im)
         enddo
      enddo
 
@@ -501,7 +501,7 @@ subroutine cgyro_calc_collision_gpu_fp32(nj_loc,update_chv)
         do k=1,nproc
            do j=1,nj_loc
               iv = j+(k-1)*nj_loc
-              cap_h_v(ic_loc,iv) = fsendf(j,ic_loc,k)
+              cap_h_v(ic_loc,iv,my_toroidal) = fsendf(j,ic_loc,my_toroidal,k)
            enddo
         enddo
      endif
@@ -567,8 +567,8 @@ subroutine cgyro_calc_collision_gpu_b2_fp32(nj_loc,update_chv)
 !$acc loop seq private(cval,iep,isp,ixp,h_re,h_im)
            do ivp=1,nv
               cval = cmat_fp32(iv,ivp,ic_loc,my_toroidal)
-              h_re = real(cap_h_v(ic_loc,ivp))
-              h_im = aimag(cap_h_v(ic_loc,ivp))
+              h_re = real(cap_h_v(ic_loc,ivp,my_toroidal))
+              h_im = aimag(cap_h_v(ic_loc,ivp,my_toroidal))
               if (ie<=n_low_energy) then
                  cval = cval + cmat_e1(ix,is,ie,ivp,ic_loc,my_toroidal)
               else
@@ -583,7 +583,7 @@ subroutine cgyro_calc_collision_gpu_b2_fp32(nj_loc,update_chv)
               b_im = b_im + cval*h_im
            enddo
 
-           fsendf(j,ic_loc,k) = cmplx(b_re,b_im)
+           fsendf(j,ic_loc,my_toroidal,k) = cmplx(b_re,b_im)
          enddo
        enddo
 
@@ -592,7 +592,7 @@ subroutine cgyro_calc_collision_gpu_b2_fp32(nj_loc,update_chv)
          do k=1,nproc
            do j=1,nj_loc
               iv = j+(k-1)*nj_loc
-              cap_h_v(ic_loc,iv) = fsendf(j,ic_loc,k)
+              cap_h_v(ic_loc,iv,my_toroidal) = fsendf(j,ic_loc,my_toroidal,k)
            enddo
          enddo
       endif
@@ -685,14 +685,14 @@ subroutine cgyro_calc_collision_simple_gpu(nj_loc)
         do k=1,nproc
            do j=1,nj_loc
               iv=j+(k-1)*nj_loc
-              fsendf(j,ic_loc,k) = cap_h_v(ic_loc,iv)
+              fsendf(j,ic_loc,my_toroidal,k) = cap_h_v(ic_loc,iv,my_toroidal)
            enddo
         enddo
      else
 !$acc loop vector
         do iv=1,nv
-           cvec_re(ix_v(iv),ie_v(iv),is_v(iv)) = real(cap_h_v(ic_loc,iv))
-           cvec_im(ix_v(iv),ie_v(iv),is_v(iv)) = aimag(cap_h_v(ic_loc,iv))
+           cvec_re(ix_v(iv),ie_v(iv),is_v(iv)) = real(cap_h_v(ic_loc,iv,my_toroidal))
+           cvec_im(ix_v(iv),ie_v(iv),is_v(iv)) = aimag(cap_h_v(ic_loc,iv,my_toroidal))
         enddo
 
 !$acc loop vector collapse(3) private(b_re,b_im,cval,jx)
@@ -717,7 +717,7 @@ subroutine cgyro_calc_collision_simple_gpu(nj_loc)
         do k=1,nproc
            do j=1,nj_loc
               iv=j+(k-1)*nj_loc
-              fsendf(j,ic_loc,k) = cmplx(bvec_re(ix_v(iv),ie_v(iv),is_v(iv)),bvec_im(ix_v(iv),ie_v(iv),is_v(iv)))
+              fsendf(j,ic_loc,my_toroidal,k) = cmplx(bvec_re(ix_v(iv),ie_v(iv),is_v(iv)),bvec_im(ix_v(iv),ie_v(iv),is_v(iv)))
            enddo
         enddo
      endif
@@ -831,7 +831,7 @@ subroutine cgyro_step_collision_gpu(use_simple)
         iv_loc = iv-nv1+1
         is = is_v(iv)
         my_psi = sum(jvec_c(:,ic,iv_loc,my_toroidal)*field(:,ic,my_toroidal))
-        my_ch = cap_h_ct(iv_loc,ic)
+        my_ch = cap_h_ct(iv_loc,ic,my_toroidal)
         h_x(ic,iv_loc,my_toroidal) = my_ch-my_psi*(z(is)/temp(is))
         cap_h_c(ic,iv_loc,my_toroidal) = my_ch
      enddo

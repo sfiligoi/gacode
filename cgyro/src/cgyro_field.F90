@@ -30,7 +30,7 @@ subroutine cgyro_field_v
   do ic=nc1,nc2
      ic_loc = ic-nc1+1
      do iv=1,nv
-        field_loc(:,ic,my_toroidal) = field_loc(:,ic,my_toroidal)+dvjvec_v(:,ic_loc,iv,my_toroidal)*cap_h_v(ic_loc,iv)
+        field_loc(:,ic,my_toroidal) = field_loc(:,ic,my_toroidal)+dvjvec_v(:,ic_loc,iv,my_toroidal)*cap_h_v(ic_loc,iv,my_toroidal)
      enddo
   enddo
 
@@ -93,7 +93,7 @@ subroutine cgyro_field_v_gpu
       field_loc_l = (0.0,0.0)
 !$acc loop vector reduction(+:field_loc_l)
       do iv=1,nv
-        field_loc_l = field_loc_l+dvjvec_v(i_f,ic_loc,iv,my_toroidal)*cap_h_v(ic_loc,iv)
+        field_loc_l = field_loc_l+dvjvec_v(i_f,ic_loc,iv,my_toroidal)*cap_h_v(ic_loc,iv,my_toroidal)
      enddo
      field_loc(i_f,ic,my_toroidal) = field_loc_l
     enddo

@@ -150,11 +150,11 @@ subroutine cgyro_rhs(ij)
                  if (ie == je) then
                     bvec_trap(iv) = bvec_trap(iv) - (omega_trap(it,is,my_toroidal) * vel(ie) &
                          + omega_rot_trap(it,is) / vel(ie)) &
-                         * (1.0 - xi(ix)**2) * xi_deriv_mat(ix,jx) * cap_h_v(ic_loc,jv)
+                         * (1.0 - xi(ix)**2) * xi_deriv_mat(ix,jx) * cap_h_v(ic_loc,jv,my_toroidal)
                  endif
                  if (ix == jx) then
                     bvec_trap(iv) = bvec_trap(iv) - omega_rot_u(it,is) * xi(ix) &
-                         * e_deriv1_rot_mat(ie,je)/sqrt(1.0*e_max) * cap_h_v(ic_loc,jv)
+                         * e_deriv1_rot_mat(ie,je)/sqrt(1.0*e_max) * cap_h_v(ic_loc,jv,my_toroidal)
                  endif
               endif
            enddo
@@ -162,7 +162,7 @@ subroutine cgyro_rhs(ij)
 
         do k=1,nproc
            do j=1,nj_loc
-              fsendf(j,ic_loc,k) = bvec_trap(j+(k-1)*nj_loc)
+              fsendf(j,ic_loc,my_toroidal,k) = bvec_trap(j+(k-1)*nj_loc)
            enddo
         enddo
 
@@ -172,7 +172,7 @@ subroutine cgyro_rhs(ij)
      do iv=nv1,nv2
         iv_loc = iv-nv1+1
         do ic=1,nc
-           rhs_trap(ic,iv_loc) = cap_h_ct(iv_loc,ic)
+           rhs_trap(ic,iv_loc) = cap_h_ct(iv_loc,ic,my_toroidal)
         enddo
      enddo
 
