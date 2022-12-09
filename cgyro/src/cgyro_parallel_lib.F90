@@ -19,6 +19,8 @@ module parallel_lib
   integer, private :: nj_loc
   integer, private :: lib_comm
   integer, private :: nsend
+  integer, private :: nk_idx
+
   real, dimension(:,:,:), allocatable, private :: fsendr_real
 
   ! (expose these)
@@ -43,13 +45,14 @@ contains
   !  parallel_lib_r -> g(nj_loc,ni) -> f(ni_loc,nj)
   !=========================================================
 
-  subroutine parallel_lib_init(ni_in,nj_in,ni_loc_out,nj_loc_out,comm)
+  subroutine parallel_lib_init(ni_in,nj_in,nk_idx_in,ni_loc_out,nj_loc_out,comm)
 
     use mpi
 
     implicit none
 
     integer, intent(in) :: ni_in,nj_in
+    integer, intent(in) :: nk_idx_in
     integer, intent(in) :: comm
     integer, intent(inout) :: ni_loc_out,nj_loc_out
     integer, external :: parallel_dim
@@ -62,6 +65,7 @@ contains
 
     ni = ni_in
     nj = nj_in
+    nk_idx = nk_idx_in
 
     ni_loc = parallel_dim(ni,nproc)
     nj_loc = parallel_dim(nj,nproc)
@@ -236,7 +240,7 @@ contains
     integer :: my_toroidal
 
     ! TODO: Make it more flexible, so it can support multiple toroidals
-    my_toroidal = LBOUND(fin,3)
+    my_toroidal = nk_idx
 
     j1 = 1+iproc*nj_loc
     j2 = (1+iproc)*nj_loc
@@ -249,7 +253,7 @@ contains
        do j=j1,j2
           j_loc = j-j1+1 
           do i=1,ni_loc
-             fsendr(i,j_loc,k) = fin(i+(k-1)*ni_loc,j_loc,my_toroidal)
+             fsendr(i,j_loc,k) = fin(i+(k-1)*ni_loc,j_loc,1+(my_toroidal-my_toroidal))
           enddo
        enddo
     enddo
@@ -272,7 +276,7 @@ contains
     integer :: my_toroidal
 
     ! TODO: Make it more flexible, so it can support multiple toroidals
-    my_toroidal = LBOUND(fin,3)
+    my_toroidal = nk_idx
 
     j1 = 1+iproc*nj_loc
     j2 = (1+iproc)*nj_loc
@@ -282,7 +286,7 @@ contains
        do j=j1,j2
           do i=1,ni_loc
              j_loc = j-j1+1
-             fsendr(i,j_loc,k) = fin(i+(k-1)*ni_loc,j_loc,my_toroidal)
+             fsendr(i,j_loc,k) = fin(i+(k-1)*ni_loc,j_loc,1+(my_toroidal-my_toroidal))
           enddo
        enddo
     enddo
@@ -321,7 +325,7 @@ contains
     integer :: my_toroidal
 
     ! TODO: Make it more flexible, so it can support multiple toroidals
-    my_toroidal = LBOUND(fin,3)
+    my_toroidal = nk_idx
 
     j1 = 1+iproc*nj_loc
     j2 = (1+iproc)*nj_loc
@@ -334,7 +338,7 @@ contains
        do j=j1,j2
           j_loc = j-j1+1
           do i=1,ni_loc
-             fsendr_real(i,j_loc,k) = fin(i+(k-1)*ni_loc,j_loc,my_toroidal) 
+             fsendr_real(i,j_loc,k) = fin(i+(k-1)*ni_loc,j_loc,1+(my_toroidal-my_toroidal)) 
           enddo
        enddo
     enddo

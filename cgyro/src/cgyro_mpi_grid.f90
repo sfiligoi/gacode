@@ -206,11 +206,24 @@ subroutine cgyro_mpi_grid
   call MPI_COMM_RANK(NEW_COMM_2,i_proc_2,i_err)
   !-----------------------------------------------------------
 
+  ! Note: The same test is in cgyro_make_progiles, too
+  !       But we need my_toroidal early
+  if (zf_test_mode > 0) then
+     ! Zonal flow (n=0) test
+     my_toroidal = 0
+  else if (n_toroidal == 1) then
+     ! Single linear mode (assume n=1)
+     my_toroidal = 1
+  else
+     ! Multiple modes (n=0,1,2,...,n_toroidal-1)
+     my_toroidal = i_group_1
+  endif
+
   ! Linear parallelization dimensions
 
   ! ni -> nc
   ! nj -> nv  
-  call parallel_lib_init(nc,nv,nc_loc,nv_loc,NEW_COMM_1)
+  call parallel_lib_init(nc,nv,my_toroidal,nc_loc,nv_loc,NEW_COMM_1)
 
   nv1 = 1+i_proc_1*nv_loc
   nv2 = (1+i_proc_1)*nv_loc

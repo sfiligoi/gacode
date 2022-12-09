@@ -340,6 +340,8 @@ subroutine cgyro_make_profiles
   !-------------------------------------------------------------
   ! Manage simulation type (n=0,linear,nonlinear)
   !
+  ! Note: my_toroidal properly initialized in cgyro_mpi_grid
+  !
   if (zf_test_mode > 0) then
 
      if (zf_test_mode > 2) then
@@ -355,8 +357,8 @@ subroutine cgyro_make_profiles
      rho     = abs(ky/k_theta_base)*(-btccw)
      length  = abs(box_size/(s*k_theta_base))
 
-     my_toroidal = 0
-     ! k_theta = 0
+     ! my_toroidal == 0
+     ! k_theta == 0
 
      call cgyro_info('Triggered zonal flow test')
 
@@ -372,8 +374,8 @@ subroutine cgyro_make_profiles
      rho     = abs(ky/k_theta_base)*(-btccw)
      length  = abs(box_size/(s*k_theta_base))
 
-     my_toroidal = 1
-     ! k_theta = k_theta_base
+     ! my_toroidal == 1
+     ! k_theta == k_theta_base
 
      call cgyro_info('Single-mode linear analysis')
 
@@ -387,8 +389,8 @@ subroutine cgyro_make_profiles
 
      ! Now define individual k_thetas
 
-     my_toroidal = i_group_1
-     ! k_theta = my_toroidal*k_theta_base
+     ! my_toroidal == i_group_1
+     ! k_theta == my_toroidal*k_theta_base
 
      call cgyro_info('Multiple toroidal harmonics')
 
