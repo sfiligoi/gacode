@@ -106,7 +106,8 @@ subroutine cgyro_write_timedata
   !
   has_balloon = (n_toroidal == 1) .and. ((my_toroidal > 0)  .and. (box_size == 1))
   has_zf      = zf_test_mode > 0
-  if (has_zf .or. has_balloon) then
+  if ( (i_proc==0) .and. (has_zf .or. has_balloon) ) then
+     ! NOTE: Only process the first my_toroidal
 
      do i_field=1,n_field
 
@@ -126,7 +127,6 @@ subroutine cgyro_write_timedata
            a_norm = 1.0
         endif
 
-        ! TODO: Evaluate what happens when there is more than one toroidal per process
         call write_binary(trim(path)//binfile_fieldb(i_field),&
              ftemp(:,:)/a_norm,size(ftemp))
      enddo
