@@ -149,7 +149,7 @@ subroutine cgyro_init_collision
 
   if ( collision_model == 4 .and. collision_kperp == 1 .and. &
        (collision_mom_restore == 1 .or. collision_ene_restore == 1)) then
-     allocate(bessel(n_species,n_xi,n_energy,nc_loc,0:1,my_toroidal:my_toroidal))
+     allocate(bessel(n_species,n_xi,n_energy,nc_loc,0:1,nt1:nt2))
 !$omp parallel do private(ic_loc,it,ie,ix,is,arg)
      do ic=nc1,nc2
         ic_loc = ic-nc1+1

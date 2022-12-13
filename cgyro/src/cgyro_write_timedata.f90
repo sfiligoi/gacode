@@ -16,11 +16,11 @@ subroutine cgyro_write_timedata
   integer :: i_field,i_moment
   integer :: ir,it
   integer :: p_field
-  real :: fvec(2,my_toroidal:my_toroidal)
+  real :: fvec(2,nt1:nt2)
   real :: vec(4)
   complex :: a_norm
   complex :: ftemp(n_theta,n_radial)
-  complex :: field_plot(n_radial,theta_plot,my_toroidal:my_toroidal)
+  complex :: field_plot(n_radial,theta_plot,nt1:nt2)
 
   ! Print this data on print steps only; otherwise exit now
   if (mod(i_time,print_step) /= 0) return

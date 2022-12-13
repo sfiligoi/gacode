@@ -48,7 +48,7 @@ subroutine cgyro_rhs(ij)
   integer :: id,jc
   real :: rval,rval2
   complex :: rhs_stream
-  complex :: rhs_ij(nc,nv_loc,my_toroidal:my_toroidal)
+  complex :: rhs_ij(nc,nv_loc,nt1:nt2)
   complex, dimension(:,:), allocatable :: rhs_trap
   complex, dimension(:), allocatable   :: bvec_trap
   integer :: nj_loc

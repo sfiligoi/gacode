@@ -16,7 +16,7 @@ subroutine cgyro_freq
 
   real :: total_weight,dfr,dfi
   real, dimension(nc) :: mode_weight
-  complex, dimension(nc,my_toroidal:my_toroidal) :: freq_loc
+  complex, dimension(nc,nt1:nt2) :: freq_loc
 
   if (i_time == 0) then
 

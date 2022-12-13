@@ -29,7 +29,7 @@ subroutine cgyro_init_arrays
   !-------------------------------------------------------------------------
   ! Distributed Bessel-function Gyroaverages
 
-  allocate(jloc_c(2,nc,my_toroidal:my_toroidal))
+  allocate(jloc_c(2,nc,nt1:nt2))
 
   iv_loc = 0
   do iv=nv1,nv2
@@ -137,8 +137,8 @@ subroutine cgyro_init_arrays
   !-------------------------------------------------------------------------
   ! Conservative upwind factor
   !
-  allocate(res_loc(nc,n_species,my_toroidal:my_toroidal,2))
-  allocate(res_norm(nc,n_species,my_toroidal:my_toroidal,2))
+  allocate(res_loc(nc,n_species,nt1:nt2,2))
+  allocate(res_norm(nc,n_species,nt1:nt2,2))
 
   res_loc(:,:,:,:) = 0.0
 
@@ -223,8 +223,8 @@ subroutine cgyro_init_arrays
      sum_den_h(:) = sum_den_h(:) + dens_ele*dens_ele_rot(:)/temp_ele
   endif
 
-  allocate(sum_den_x(nc,my_toroidal:my_toroidal))
-  if (n_field > 1) allocate(sum_cur_x(nc,my_toroidal:my_toroidal))
+  allocate(sum_den_x(nc,nt1:nt2))
+  if (n_field > 1) allocate(sum_cur_x(nc,nt1:nt2))
 
   call cgyro_field_coefficients
   !------------------------------------------------------------------------------

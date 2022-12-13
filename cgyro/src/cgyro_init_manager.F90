@@ -125,13 +125,13 @@ subroutine cgyro_init_manager
   allocate(bmag(n_theta))
   allocate(btor(n_theta))
   allocate(bpol(n_theta))
-  allocate(k_perp(nc,my_toroidal:my_toroidal))
-  allocate(k_x(nc,my_toroidal:my_toroidal))
+  allocate(k_perp(nc,nt1:nt2))
+  allocate(k_x(nc,nt1:nt2))
   allocate(bigr(n_theta))
   allocate(bigr_r(n_theta))
   allocate(itp(n_theta))
-  allocate(omega_stream(n_theta,n_species,my_toroidal:my_toroidal))
-  allocate(omega_trap(n_theta,n_species,my_toroidal:my_toroidal))
+  allocate(omega_stream(n_theta,n_species,nt1:nt2))
+  allocate(omega_trap(n_theta,n_species,nt1:nt2))
   allocate(omega_rdrift(n_theta,n_species))
   allocate(omega_adrift(n_theta,n_species))
   allocate(omega_aprdrift(n_theta,n_species))
@@ -153,8 +153,8 @@ subroutine cgyro_init_manager
   allocate(omega_rot_edrift_r(n_theta))
   allocate(omega_rot_star(n_theta,n_species))
 
-  allocate(freq(my_toroidal:my_toroidal))
-  allocate(freq_err(my_toroidal:my_toroidal))
+  allocate(freq(nt1:nt2))
+  allocate(freq_err(nt1:nt2))
 
   if (test_flag == 0) then
 
@@ -163,33 +163,33 @@ subroutine cgyro_init_manager
      !----------------------------------------------------
 
      ! Global (undistributed) arrays
-     allocate(fcoef(n_field,nc,my_toroidal:my_toroidal))
+     allocate(fcoef(n_field,nc,nt1:nt2))
      if (n_field < 3) then
-        allocate(gcoef(n_field,nc,my_toroidal:my_toroidal))
+        allocate(gcoef(n_field,nc,nt1:nt2))
      else
-        allocate(gcoef(5,nc,my_toroidal:my_toroidal))
+        allocate(gcoef(5,nc,nt1:nt2))
      endif
-     allocate(field(n_field,nc,my_toroidal:my_toroidal))
-     allocate(field_dot(n_field,nc,my_toroidal:my_toroidal))
-     allocate(field_loc(n_field,nc,my_toroidal:my_toroidal))
-     allocate(field_old(n_field,nc,my_toroidal:my_toroidal))
-     allocate(field_old2(n_field,nc,my_toroidal:my_toroidal))
-     allocate(field_old3(n_field,nc,my_toroidal:my_toroidal))
-     allocate(    moment(n_radial,theta_plot,n_species,my_toroidal:my_toroidal,3))
-     allocate(moment_loc(n_radial,theta_plot,n_species,my_toroidal:my_toroidal,3))
-     allocate(    cflux(n_species,4,n_field,my_toroidal:my_toroidal))
-     allocate(cflux_loc(n_species,4,n_field,my_toroidal:my_toroidal))
-     allocate(    gflux(0:n_global,n_species,4,n_field,my_toroidal:my_toroidal))
-     allocate(gflux_loc(0:n_global,n_species,4,n_field,my_toroidal:my_toroidal))
+     allocate(field(n_field,nc,nt1:nt2))
+     allocate(field_dot(n_field,nc,nt1:nt2))
+     allocate(field_loc(n_field,nc,nt1:nt2))
+     allocate(field_old(n_field,nc,nt1:nt2))
+     allocate(field_old2(n_field,nc,nt1:nt2))
+     allocate(field_old3(n_field,nc,nt1:nt2))
+     allocate(    moment(n_radial,theta_plot,n_species,nt1:nt2,3))
+     allocate(moment_loc(n_radial,theta_plot,n_species,nt1:nt2,3))
+     allocate(    cflux(n_species,4,n_field,nt1:nt2))
+     allocate(cflux_loc(n_species,4,n_field,nt1:nt2))
+     allocate(    gflux(0:n_global,n_species,4,n_field,nt1:nt2))
+     allocate(gflux_loc(0:n_global,n_species,4,n_field,nt1:nt2))
      allocate(cflux_tave(n_species,4))
      allocate(gflux_tave(n_species,4))
      
      allocate(recv_status(MPI_STATUS_SIZE))
 
-     allocate(icd_c(-nup_theta:nup_theta, nc ,my_toroidal:my_toroidal))
-     allocate(dtheta(-nup_theta:nup_theta, nc ,my_toroidal:my_toroidal))
-     allocate(dtheta_up(-nup_theta:nup_theta, nc,my_toroidal:my_toroidal))
-     allocate(source(n_theta,nv_loc,my_toroidal:my_toroidal))
+     allocate(icd_c(-nup_theta:nup_theta, nc ,nt1:nt2))
+     allocate(dtheta(-nup_theta:nup_theta, nc ,nt1:nt2))
+     allocate(dtheta_up(-nup_theta:nup_theta, nc,nt1:nt2))
+     allocate(source(n_theta,nv_loc,nt1:nt2))
 
 !$acc enter data create(fcoef,gcoef,field,field_loc,source)
 
@@ -197,56 +197,56 @@ subroutine cgyro_init_manager
 
      select case(delta_t_method)
      case(1)
-        allocate(h0_old(nc,nv_loc,my_toroidal:my_toroidal))
-        allocate(rhs(nc,nv_loc,my_toroidal:my_toroidal,6))
+        allocate(h0_old(nc,nv_loc,nt1:nt2))
+        allocate(rhs(nc,nv_loc,nt1:nt2,6))
 !$acc enter data create(rhs,h0_old)
      case(2)
-        allocate(h0_old(nc,nv_loc,my_toroidal:my_toroidal))
-        allocate(rhs(nc,nv_loc,my_toroidal:my_toroidal,7))
+        allocate(h0_old(nc,nv_loc,nt1:nt2))
+        allocate(rhs(nc,nv_loc,nt1:nt2,7))
 !$acc enter data create(rhs,h0_old)
      case(3)
-        allocate(h0_old(nc,nv_loc,my_toroidal:my_toroidal))
-        allocate(rhs(nc,nv_loc,my_toroidal:my_toroidal,9))
+        allocate(h0_old(nc,nv_loc,nt1:nt2))
+        allocate(rhs(nc,nv_loc,nt1:nt2,9))
 !$acc enter data create(rhs,h0_old)
      case default
         ! Normal timestep
-        allocate(rhs(nc,nv_loc,my_toroidal:my_toroidal,4))
+        allocate(rhs(nc,nv_loc,nt1:nt2,4))
 !$acc enter data create(rhs)
      end select 
      
-     allocate(h_x(nc,nv_loc,my_toroidal:my_toroidal))
-     allocate(g_x(nc,nv_loc,my_toroidal:my_toroidal))
-     allocate(h0_x(nc,nv_loc,my_toroidal:my_toroidal))
+     allocate(h_x(nc,nv_loc,nt1:nt2))
+     allocate(g_x(nc,nv_loc,nt1:nt2))
+     allocate(h0_x(nc,nv_loc,nt1:nt2))
 !$acc enter data create(h_x,g_x,h0_x)
 
-     allocate(cap_h_c(nc,nv_loc,my_toroidal:my_toroidal))
-     allocate(cap_h_c_dot(nc,nv_loc,my_toroidal:my_toroidal))
-     allocate(cap_h_c_old(nc,nv_loc,my_toroidal:my_toroidal))
-     allocate(cap_h_c_old2(nc,nv_loc,my_toroidal:my_toroidal))
-     allocate(cap_h_ct(nv_loc,nc,my_toroidal:my_toroidal))
-     allocate(cap_h_v(nc_loc,nv,my_toroidal:my_toroidal))
-     allocate(omega_cap_h(nc,nv_loc,my_toroidal:my_toroidal))
-     allocate(omega_h(nc,nv_loc,my_toroidal:my_toroidal))
-     allocate(omega_s(n_field,nc,nv_loc,my_toroidal:my_toroidal))
-     allocate(omega_ss(n_field,nc,nv_loc,my_toroidal:my_toroidal))
-     allocate(jvec_c(n_field,nc,nv_loc,my_toroidal:my_toroidal))
-     allocate(jvec_v(n_field,nc_loc,nv,my_toroidal:my_toroidal))
-     allocate(dvjvec_c(n_field,nc,nv_loc,my_toroidal:my_toroidal))
-     allocate(dvjvec_v(n_field,nc_loc,nv,my_toroidal:my_toroidal))
-     allocate(jxvec_c(n_field,nc,nv_loc,my_toroidal:my_toroidal))
-     allocate(upfac1(nc,nv_loc,my_toroidal:my_toroidal,2))
-     allocate(upfac2(nc,nv_loc,my_toroidal:my_toroidal,2))
+     allocate(cap_h_c(nc,nv_loc,nt1:nt2))
+     allocate(cap_h_c_dot(nc,nv_loc,nt1:nt2))
+     allocate(cap_h_c_old(nc,nv_loc,nt1:nt2))
+     allocate(cap_h_c_old2(nc,nv_loc,nt1:nt2))
+     allocate(cap_h_ct(nv_loc,nc,nt1:nt2))
+     allocate(cap_h_v(nc_loc,nv,nt1:nt2))
+     allocate(omega_cap_h(nc,nv_loc,nt1:nt2))
+     allocate(omega_h(nc,nv_loc,nt1:nt2))
+     allocate(omega_s(n_field,nc,nv_loc,nt1:nt2))
+     allocate(omega_ss(n_field,nc,nv_loc,nt1:nt2))
+     allocate(jvec_c(n_field,nc,nv_loc,nt1:nt2))
+     allocate(jvec_v(n_field,nc_loc,nv,nt1:nt2))
+     allocate(dvjvec_c(n_field,nc,nv_loc,nt1:nt2))
+     allocate(dvjvec_v(n_field,nc_loc,nv,nt1:nt2))
+     allocate(jxvec_c(n_field,nc,nv_loc,nt1:nt2))
+     allocate(upfac1(nc,nv_loc,nt1:nt2,2))
+     allocate(upfac2(nc,nv_loc,nt1:nt2,2))
 
 !$acc enter data create(cap_h_c,cap_h_ct,cap_h_c_dot,cap_h_c_old,cap_h_c_old2)
 !$acc enter data create(cap_h_v,dvjvec_c,dvjvec_v)
 
      if (upwind_single_flag == 0) then
-       allocate(upwind_res_loc(nc,ns1:ns2,my_toroidal:my_toroidal,2))
-       allocate(upwind_res(nc,ns1:ns2,my_toroidal:my_toroidal,2))
+       allocate(upwind_res_loc(nc,ns1:ns2,nt1:nt2,2))
+       allocate(upwind_res(nc,ns1:ns2,nt1:nt2,2))
 !$acc enter data create(upwind_res,upwind_res_loc)
      else
-       allocate(upwind32_res_loc(nc,ns1:ns2,my_toroidal:my_toroidal,2))
-       allocate(upwind32_res(nc,ns1:ns2,my_toroidal:my_toroidal,2))
+       allocate(upwind32_res_loc(nc,ns1:ns2,nt1:nt2,2))
+       allocate(upwind32_res(nc,ns1:ns2,nt1:nt2,2))
 !$acc enter data create(upwind32_res,upwind32_res_loc)
      endif
 
@@ -266,7 +266,7 @@ subroutine cgyro_init_manager
      endif
 
      if (collision_model == 5) then
-        allocate(cmat_simple(n_xi,n_xi,n_energy,n_species,n_theta,my_toroidal:my_toroidal))
+        allocate(cmat_simple(n_xi,n_xi,n_energy,n_species,n_theta,nt1:nt2))
      else
         if (collision_precision_mode /= 0) then
            ! the lowest energy(s) has the most spread, so treat differently
@@ -276,14 +276,14 @@ subroutine cgyro_init_manager
                n_low_energy = ie
              endif
            enddo
-           allocate(cmat_fp32(nv,nv,nc_loc,my_toroidal:my_toroidal))
-           allocate(cmat_stripes(n_xi,n_species,(n_low_energy+1):n_energy,n_xi,nc_loc,my_toroidal:my_toroidal))
-           allocate(cmat_e1(n_xi,n_species,n_low_energy,nv,nc_loc,my_toroidal:my_toroidal))
+           allocate(cmat_fp32(nv,nv,nc_loc,nt1:nt2))
+           allocate(cmat_stripes(n_xi,n_species,(n_low_energy+1):n_energy,n_xi,nc_loc,nt1:nt2))
+           allocate(cmat_e1(n_xi,n_species,n_low_energy,nv,nc_loc,nt1:nt2))
 
            write (msg, "(A,I1,A)") "Using fp32 collision precision except e<=",n_low_energy," or same e&s."
            call cgyro_info(msg)
         else
-           allocate(cmat(nv,nv,nc_loc,my_toroidal:my_toroidal))
+           allocate(cmat(nv,nv,nc_loc,nt1:nt2))
         endif
      endif
 

@@ -17,7 +17,7 @@ subroutine cgyro_zftest_em
 
   integer :: ir,it,is,ie,ix
   real :: arg
-  real, dimension(n_species,n_theta,my_toroidal:my_toroidal) :: ansum,adsum,alphah,sum_loc
+  real, dimension(n_species,n_theta,nt1:nt2) :: ansum,adsum,alphah,sum_loc
 
   sum_loc(:,:,:) = 0.0
 

@@ -6,7 +6,7 @@ subroutine cgyro_field_coefficients
   implicit none
 
   integer :: ir,it,is,ie,ix
-  real, dimension(nc,my_toroidal:my_toroidal) :: sum_loc
+  real, dimension(nc,nt1:nt2) :: sum_loc
   real, dimension(:,:), allocatable :: pb11,pb12,pb21,pb22
  
   !-------------------------------------------------------------------------
@@ -106,10 +106,10 @@ subroutine cgyro_field_coefficients
   endif
 
   if (n_field > 2) then
-     allocate(pb11(nc,my_toroidal:my_toroidal))
-     allocate(pb12(nc,my_toroidal:my_toroidal))
-     allocate(pb21(nc,my_toroidal:my_toroidal))
-     allocate(pb22(nc,my_toroidal:my_toroidal))
+     allocate(pb11(nc,nt1:nt2))
+     allocate(pb12(nc,nt1:nt2))
+     allocate(pb21(nc,nt1:nt2))
+     allocate(pb22(nc,nt1:nt2))
 
      do ic=1,nc
         pb11(ic,my_toroidal) = k_perp(ic,my_toroidal)**2*lambda_debye**2* &
