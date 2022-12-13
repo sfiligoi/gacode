@@ -19,6 +19,7 @@ subroutine cgyro_init_collision
   real :: rval
   integer :: jv
   integer :: is,ir,it,ix,ie,js,je,jx,ks
+  integer :: itor
   ! parameters for matrix solve
   real, dimension(:,:), allocatable :: amat,cmat_loc
   real, dimension(:,:,:,:,:,:), allocatable :: ctest
@@ -150,21 +151,23 @@ subroutine cgyro_init_collision
   if ( collision_model == 4 .and. collision_kperp == 1 .and. &
        (collision_mom_restore == 1 .or. collision_ene_restore == 1)) then
      allocate(bessel(n_species,n_xi,n_energy,nc_loc,0:1,nt1:nt2))
-!$omp parallel do private(ic_loc,it,ie,ix,is,arg)
-     do ic=nc1,nc2
+!$omp parallel do collapse(2) private(ic_loc,it,ie,ix,is,arg)
+     do itor=nt1,nt2
+      do ic=nc1,nc2
         ic_loc = ic-nc1+1
         it = it_c(ic)
         do ie=1,n_energy
            do ix=1,n_xi
               do is=1,n_species   
-                 arg = k_perp(ic,my_toroidal)*rho*vth(is)*mass(is)&
+                 arg = k_perp(ic,itor)*rho*vth(is)*mass(is)&
                       /(z(is)*bmag(it)) *sqrt(2.0*energy(ie)) &
                       *sqrt(1.0-xi(ix)**2)
-                 bessel(is,ix,ie,ic_loc,0,my_toroidal) = bessel_j0(arg)
-                 bessel(is,ix,ie,ic_loc,1,my_toroidal) = bessel_j1(arg)
+                 bessel(is,ix,ie,ic_loc,0,itor) = bessel_j0(arg)
+                 bessel(is,ix,ie,ic_loc,1,itor) = bessel_j1(arg)
               enddo
            enddo
         enddo
+      enddo
      enddo
   endif
 
@@ -230,8 +233,8 @@ subroutine cgyro_init_collision
 
   ! Construct the collision matrix
 
-!$omp  parallel do  default(none) &
-!$omp& shared(nc1,nc2,nv,my_toroidal,delta_t,n_species,rho,is_ele,n_field,n_energy,n_xi) &
+!$omp  parallel do collapse(2) default(none) &
+!$omp& shared(nc1,nc2,nt1,nt2,nv,delta_t,n_species,rho,is_ele,n_field,n_energy,n_xi) &
 !$omp& shared(collision_kperp,collision_field_model,explicit_trap_flag) &
 !$omp& firstprivate(collision_model,collision_mom_restore,collision_ene_restore) &
 !$omp& shared(ae_flag,lambda_debye,dens_ele,temp_ele,dens_rot) &
@@ -248,7 +251,8 @@ subroutine cgyro_init_collision
 !$omp& private(amat,cmat_loc,i_piv,rs,rsvec,rsvect0,rsvect1) &
 !$omp& firstprivate(collision_precision_mode,n_low_energy) &
 !$omp& shared(cmat,cmat_fp32,cmat_stripes,cmat_e1)
-  do ic=nc1,nc2
+  do itor=nt1,nt2
+   do ic=nc1,nc2
    
      ic_loc = ic-nc1+1
 
@@ -371,12 +375,12 @@ subroutine cgyro_init_collision
                                      + ctest(is,js,jx,ix,je,ie) &
                                      * sqrt(2.0*energy(je)) * xi(jx) &
                                      * w_e(je)*w_xi(jx) * vth(is) &
-                                     * bessel(is,ix,ie,ic_loc,0,my_toroidal)
+                                     * bessel(is,ix,ie,ic_loc,0,itor)
                                 rsvect1(is,js,ix,ie) = rsvect1(is,js,ix,ie) &
                                      + ctest(is,js,jx,ix,je,ie) &
                                      * sqrt(2.0*energy(je)) * xi(jx) &
                                      * w_e(je)*w_xi(jx) * vth(is) &
-                                     * bessel(is,ix,ie,ic_loc,1,my_toroidal) &
+                                     * bessel(is,ix,ie,ic_loc,1,itor) &
                                      * sqrt(1.0-xi(ix)**2)/xi(ix)
                              enddo
                           enddo
@@ -401,14 +405,14 @@ subroutine cgyro_init_collision
                             - mass(js)/mass(is) &
                             * dens(js) * dens_rot(it,js) &
                             * rsvec(is,js,ix,ie) &
-                            * bessel(is,ix,ie,ic_loc,0,my_toroidal) / rs(is,js) &
+                            * bessel(is,ix,ie,ic_loc,0,itor) / rs(is,js) &
                             * rsvect0(js,is,jx,je)
                        cmat_loc(iv,jv) &
                             = cmat_loc(iv,jv) &
                             - mass(js)/mass(is) &
                             * dens(js) * dens_rot(it,js) &
                             * rsvec(is,js,ix,ie) / rs(is,js) &
-                            * bessel(is,ix,ie,ic_loc,1,my_toroidal) &
+                            * bessel(is,ix,ie,ic_loc,1,itor) &
                             * sqrt(1.0-xi(ix)**2)/xi(ix) &
                             * rsvect1(js,is,jx,je) 
                     endif
@@ -486,7 +490,7 @@ subroutine cgyro_init_collision
                                 rsvect0(is,js,ix,ie) = rsvect0(is,js,ix,ie) &
                                      + ctest(is,js,jx,ix,je,ie) * energy(je) &
                                      * w_e(je)*w_xi(jx) &
-                                     * bessel(is,ix,ie,ic_loc,0,my_toroidal) 
+                                     * bessel(is,ix,ie,ic_loc,0,itor) 
                              enddo
                           enddo
                        enddo
@@ -509,7 +513,7 @@ subroutine cgyro_init_collision
                             = cmat_loc(iv,jv) &
                             - temp(js)/temp(is) * dens(js) * dens_rot(it,js) &
                             * rsvec(is,js,ix,ie) &
-                            * bessel(is,ix,ie,ic_loc,0,my_toroidal) / rs(is,js) &
+                            * bessel(is,ix,ie,ic_loc,0,itor) / rs(is,js) &
                             * rsvect0(js,is,jx,je)
                     endif
                  enddo
@@ -521,7 +525,7 @@ subroutine cgyro_init_collision
      end select
 
      ! Avoid singularity of n=0,p=0:
-     if (px(ir) == 0 .and. my_toroidal == 0) then
+     if (px(ir) == 0 .and. itor == 0) then
 
         do iv=1,nv
            cmat_loc(iv,iv) =  1.0
@@ -564,7 +568,7 @@ subroutine cgyro_init_collision
               ! Trapping 
               ! (not part of collision operator but contains xi-derivative)
               if (explicit_trap_flag == 0 .and. is == js .and. ie == je) then
-                 rval = (0.5*delta_t) * (omega_trap(it,is,my_toroidal) * vel(ie) &
+                 rval = (0.5*delta_t) * (omega_trap(it,is,itor) * vel(ie) &
                       + omega_rot_trap(it,is) / vel(ie)) &
                       * (1.0 - xi(ix)**2) * xi_deriv_mat(ix,jx)
                  cmat_loc(iv,jv) = cmat_loc(iv,jv) + rval
@@ -585,7 +589,7 @@ subroutine cgyro_init_collision
                  if (is == js .and. jx == ix .and. je == ie) then
                     do ks=1,n_species
                        rval = (0.5*delta_t) &
-                            * (-0.25*(k_perp(ic,my_toroidal)*rho*vth(is)*mass(is) &
+                            * (-0.25*(k_perp(ic,itor)*rho*vth(is)*mass(is) &
                             / (z(is)*bmag(it)))**2 * 2.0*energy(ie) &
                             * (klor_fac(is,ks)*nu_d(ie,is,ks) * (1+xi(ix)**2) &
                             + kdiff_fac(is,ks)*nu_par(ie,is,ks)* (1-xi(ix)**2)))
@@ -598,39 +602,39 @@ subroutine cgyro_init_collision
               if (collision_field_model == 1) then
 
                  ! Poisson component l
-                 if (my_toroidal == 0 .and. ae_flag == 1) then
+                 if (itor == 0 .and. ae_flag == 1) then
                     ! Cannot include Poisson in collision matrix
                     ! for n=0 with ade because depends on theta
                     ! i.e. ne0 ~ phi - <phi>
                     !cmat_loc(iv,jv)    = cmat_loc(iv,jv) + 0.0
                     !amat(iv,jv)        = amat(iv,jv) + 0.0
                  else
-                    rval =  z(is)/temp(is) * jvec_v(1,ic_loc,iv,my_toroidal) &
-                         / (k_perp(ic,my_toroidal)**2 * lambda_debye**2 &
+                    rval =  z(is)/temp(is) * jvec_v(1,ic_loc,iv,itor) &
+                         / (k_perp(ic,itor)**2 * lambda_debye**2 &
                          * dens_ele / temp_ele + sum_den_h(it)) &
                          * z(js)*dens(js)*dens_rot(it,js) &
-                         * jvec_v(1,ic_loc,jv,my_toroidal) * w_e(je) * w_xi(jx) 
+                         * jvec_v(1,ic_loc,jv,itor) * w_e(je) * w_xi(jx) 
                     cmat_loc(iv,jv) = cmat_loc(iv,jv) - rval
                     amat(iv,jv) = amat(iv,jv) - rval
                  endif
 
                  ! Ampere component
                  if (n_field > 1) then
-                    rval =  z(is)/temp(is) * (jvec_v(2,ic_loc,iv,my_toroidal) &
-                         / (2.0*k_perp(ic,my_toroidal)**2 * rho**2 / betae_unit & 
+                    rval =  z(is)/temp(is) * (jvec_v(2,ic_loc,iv,itor) &
+                         / (2.0*k_perp(ic,itor)**2 * rho**2 / betae_unit & 
                          * dens_ele * temp_ele)) &
                          * z(js)*dens(js)*dens_rot(it,js) &
-                         * jvec_v(2,ic_loc,jv,my_toroidal) * w_e(je) * w_xi(jx)  
+                         * jvec_v(2,ic_loc,jv,itor) * w_e(je) * w_xi(jx)  
                     cmat_loc(iv,jv) = cmat_loc(iv,jv) + rval
                     amat(iv,jv) = amat(iv,jv) + rval
                  endif
 
                  ! Ampere Bpar component
                  if (n_field > 2) then
-                    rval = jvec_v(3,ic_loc,iv,my_toroidal) &
+                    rval = jvec_v(3,ic_loc,iv,itor) &
                          * (-0.5*betae_unit)/(dens_ele*temp_ele) &
                          * w_e(je)*w_xi(jx)*dens(js)*dens_rot(it,js)*temp(js) &
-                         * jvec_v(3,ic_loc,jv,my_toroidal)/(temp(is)/z(is))/(temp(js)/z(js))
+                         * jvec_v(3,ic_loc,jv,itor)/(temp(is)/z(is))/(temp(js)/z(js))
                     cmat_loc(iv,jv) = cmat_loc(iv,jv) - rval
                     amat(iv,jv) = amat(iv,jv) - rval
                  endif
@@ -657,7 +661,7 @@ subroutine cgyro_init_collision
      ! result in amat, transfer to the right cmat matrix
      if (collision_precision_mode /= 0) then
         ! keep all cmat in fp32 precision
-        cmat_fp32(:,:,ic_loc,my_toroidal) = amat(:,:)
+        cmat_fp32(:,:,ic_loc,itor) = amat(:,:)
         ! keep the remaining precision for select elements
         do jv=1,nv
            je = ie_v(jv)
@@ -672,14 +676,14 @@ subroutine cgyro_init_collision
               is = is_v(iv)
               ix = ix_v(iv)
               if (ie<=n_low_energy) then ! always keep all detail for lowest energy
-                 cmat_e1(ix,is,ie,jv,ic_loc,my_toroidal) = amat(iv,jv) - cmat_fp32(iv,jv,ic_loc,my_toroidal)
-                 cmat_sum = cmat_sum + abs(cmat_fp32(iv,jv,ic_loc,my_toroidal) + cmat_e1(ix,is,ie,jv,ic_loc,my_toroidal))
+                 cmat_e1(ix,is,ie,jv,ic_loc,itor) = amat(iv,jv) - cmat_fp32(iv,jv,ic_loc,itor)
+                 cmat_sum = cmat_sum + abs(cmat_fp32(iv,jv,ic_loc,itor) + cmat_e1(ix,is,ie,jv,ic_loc,itor))
               else ! only keep if energy and species the same
                  if ((je == ie) .AND. (js == is)) then
-                    cmat_stripes(ix,is,ie,jx,ic_loc,my_toroidal) = amat(iv,jv) - cmat_fp32(iv,jv,ic_loc,my_toroidal)
-                    cmat_sum = cmat_sum + abs(cmat_fp32(iv,jv,ic_loc,my_toroidal) + cmat_stripes(ix,is,ie,jx,ic_loc,my_toroidal))
+                    cmat_stripes(ix,is,ie,jx,ic_loc,itor) = amat(iv,jv) - cmat_fp32(iv,jv,ic_loc,itor)
+                    cmat_sum = cmat_sum + abs(cmat_fp32(iv,jv,ic_loc,itor) + cmat_stripes(ix,is,ie,jx,ic_loc,itor))
                  else
-                    cmat_sum = cmat_sum + abs(cmat_fp32(iv,jv,ic_loc,my_toroidal))
+                    cmat_sum = cmat_sum + abs(cmat_fp32(iv,jv,ic_loc,itor))
                  endif
               endif
            enddo
@@ -702,9 +706,10 @@ subroutine cgyro_init_collision
         enddo
      else
         ! keep all cmat in full precision
-        cmat(:,:,ic_loc,my_toroidal) = amat(:,:)
+        cmat(:,:,ic_loc,itor) = amat(:,:)
      endif
 
+   enddo
   enddo
   deallocate(cmat_loc)
   deallocate(amat)
