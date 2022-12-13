@@ -7,7 +7,7 @@ subroutine cgyro_equilibrium
   implicit none
 
   integer :: m
-  integer :: it,ir,is
+  integer :: it,ir,is,itor
   real :: gtheta_ave,gtheta0,err
   real, dimension(n_theta+1) :: x,y
   real, dimension(n_theta) :: ttmp
@@ -204,9 +204,9 @@ subroutine cgyro_equilibrium
 
      do is=1,n_species
 
-        omega_stream(it,is,my_toroidal) = sqrt(2.0)*vth(is)/(q*rmaj*g_theta(it))
+        omega_stream(it,is,:) = sqrt(2.0)*vth(is)/(q*rmaj*g_theta(it))
 
-        omega_trap(it,is,my_toroidal) = -0.5*sqrt(2.0)*vth(is) &
+        omega_trap(it,is,:) = -0.5*sqrt(2.0)*vth(is) &
              *(geo_dbdt(it)/geo_b(it))/(q*rmaj*geo_g_theta(it)) 
 
         omega_rdrift(it,is) = -rho*vth(is)**2*mass(is)/(Z(is)*geo_b(it)) &
@@ -230,46 +230,50 @@ subroutine cgyro_equilibrium
 
      omega_gammap(it) = geo_bt(it)/geo_b(it)*geo_bigr(it)/rmaj*gamma_p*mach_one_fac
 
-     do ir=1,n_radial
-        k_perp(ic_c(ir,it),my_toroidal) = &
+     do itor=nt1,nt2
+       do ir=1,n_radial
+        k_perp(ic_c(ir,it),itor) = &
                sqrt((2.0*pi*(px(ir)+px0)*geo_grad_r(it)/length &
-             + k_theta_base*my_toroidal*geo_gq(it)*geo_captheta(it))**2 &
-             + (k_theta_base*my_toroidal*geo_gq(it))**2)
-        k_x(ic_c(ir,it),my_toroidal) = &
+             + k_theta_base*itor*geo_gq(it)*geo_captheta(it))**2 &
+             + (k_theta_base*itor*geo_gq(it))**2)
+        k_x(ic_c(ir,it),itor) = &
                2.0*pi*(px(ir)+px0)*geo_grad_r(it)/length &
-             + k_theta_base*my_toroidal*geo_gq(it)*geo_captheta(it)
+             + k_theta_base*itor*geo_gq(it)*geo_captheta(it)
+       enddo
      enddo
 
   enddo
 
-  select case (stream_term)
-  case (1)
-     if (my_toroidal == 0) then
-        omega_stream(:,1,my_toroidal) = stream_factor*omega_stream(:,1,my_toroidal)
-        omega_trap(:,1,my_toroidal) = stream_factor*omega_trap(:,1,my_toroidal)
+  do itor=nt1,nt2
+   select case (stream_term)
+   case (1)
+     if (itor == 0) then
+        omega_stream(:,1,itor) = stream_factor*omega_stream(:,1,itor)
+        omega_trap(:,1,itor) = stream_factor*omega_trap(:,1,itor)
      endif
-  case (2)
-     if (my_toroidal > 0) then
-        omega_stream(:,1,my_toroidal) = stream_factor*omega_stream(:,1,my_toroidal)
-        omega_trap(:,1,my_toroidal) = stream_factor*omega_trap(:,1,my_toroidal)
+   case (2)
+     if (itor > 0) then
+        omega_stream(:,1,itor) = stream_factor*omega_stream(:,1,itor)
+        omega_trap(:,1,itor) = stream_factor*omega_trap(:,1,itor)
      endif
-  case (12)
-     omega_stream(:,1,my_toroidal) = stream_factor*omega_stream(:,1,my_toroidal)
-     omega_trap(:,1,my_toroidal) = stream_factor*omega_trap(:,1,my_toroidal)
-  case (3)
-     if (my_toroidal == 0 .and. n_species > 1) then
-        omega_stream(:,2,my_toroidal) = stream_factor*omega_stream(:,2,my_toroidal)
-        omega_trap(:,2,my_toroidal) = stream_factor*omega_trap(:,2,my_toroidal)
+   case (12)
+     omega_stream(:,1,itor) = stream_factor*omega_stream(:,1,itor)
+     omega_trap(:,1,itor) = stream_factor*omega_trap(:,1,itor)
+   case (3)
+     if (itor == 0 .and. n_species > 1) then
+        omega_stream(:,2,itor) = stream_factor*omega_stream(:,2,itor)
+        omega_trap(:,2,itor) = stream_factor*omega_trap(:,2,itor)
      endif
-  case (4)
-     if (my_toroidal > 0 .and. n_species > 1) then
-        omega_stream(:,2,my_toroidal) = stream_factor*omega_stream(:,2,my_toroidal)
-        omega_trap(:,2,my_toroidal) = stream_factor*omega_trap(:,2,my_toroidal)
+   case (4)
+     if (itor > 0 .and. n_species > 1) then
+        omega_stream(:,2,itor) = stream_factor*omega_stream(:,2,itor)
+        omega_trap(:,2,itor) = stream_factor*omega_trap(:,2,itor)
      endif
-  case (34)
-     omega_stream(:,2,my_toroidal) = stream_factor*omega_stream(:,2,my_toroidal)
-     omega_trap(:,2,my_toroidal) = stream_factor*omega_trap(:,2,my_toroidal)
-  end select
+   case (34)
+     omega_stream(:,2,itor) = stream_factor*omega_stream(:,2,itor)
+     omega_trap(:,2,itor) = stream_factor*omega_trap(:,2,itor)
+   end select
+  enddo
 
 #ifdef _OPENACC
 !$acc enter data copyin(xi,vel,omega_stream)
