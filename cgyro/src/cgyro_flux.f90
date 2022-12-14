@@ -33,7 +33,7 @@ subroutine cgyro_flux
 
   implicit none
 
-  integer :: ie,ix,is,it,ir,i_field
+  integer :: ie,ix,is,it,ir,i_field,itor
   integer :: l,icl
   real :: dv,cn
   real :: vpar
@@ -45,14 +45,18 @@ subroutine cgyro_flux
   real, parameter :: x_fraction=0.2
   real :: u
 
-  !-----------------------------------------------------
-  ! 1. Compute kx-ky moments (n,E)
-  !-----------------------------------------------------
+!$omp parallel do private(iv_loc,iv,is,ix,ie,dv,vpar,ic,ir,it,erot,cprod,cn) &
+!$omp&            private(prod1,prod2,prod3,l,icl,dvr,u,flux_norm) &
+!$omp&            shared(moment_loc,gflux_loc,cflux_loc)
+  do itor=nt1,nt2
+   !-----------------------------------------------------
+   ! 1. Compute kx-ky moments (n,E)
+   !-----------------------------------------------------
 
-  moment_loc(:,:,:,:,:) = 0.0
+   moment_loc(:,:,:,:,itor) = 0.0
 
-  iv_loc = 0
-  do iv=nv1,nv2
+   iv_loc = 0
+   do iv=nv1,nv2
 
      iv_loc = iv_loc+1
 
@@ -74,30 +78,32 @@ subroutine cgyro_flux
         erot  = (energy(ie)+lambda_rot(it,is))*temp(is)
 
         if (itp(it) > 0) then
-           cprod = cap_h_c(ic,iv_loc,my_toroidal)*dvjvec_c(1,ic,iv_loc,my_toroidal)/z(is)
+           cprod = cap_h_c(ic,iv_loc,itor)*dvjvec_c(1,ic,iv_loc,itor)/z(is)
            cn    = dv*z(is)*dens(is)*dens_rot(it,is)/temp(is)
 
            ! Density moment: (delta n_a)/(n_norm rho_norm)
-           moment_loc(ir,itp(it),is,my_toroidal,1) = moment_loc(ir,itp(it),is,my_toroidal,1)-(cn*field(1,ic,my_toroidal)-cprod)
+           moment_loc(ir,itp(it),is,itor,1) = moment_loc(ir,itp(it),is,itor,1)-(cn*field(1,ic,itor)-cprod)
 
            ! Energy moment : (delta E_a)/(n_norm T_norm rho_norm)
-           moment_loc(ir,itp(it),is,my_toroidal,2) = moment_loc(ir,itp(it),is,my_toroidal,2)-(cn*field(1,ic,my_toroidal)-cprod)*erot
+           moment_loc(ir,itp(it),is,itor,2) = moment_loc(ir,itp(it),is,itor,2)-(cn*field(1,ic,itor)-cprod)*erot
 
            ! Velocity moment : (delta v_a)/(n_norm v_norm rho_norm)
-           moment_loc(ir,itp(it),is,my_toroidal,3) = moment_loc(ir,itp(it),is,my_toroidal,3)-(cn*field(1,ic,my_toroidal)-cprod)*vpar
+           moment_loc(ir,itp(it),is,itor,3) = moment_loc(ir,itp(it),is,itor,3)-(cn*field(1,ic,itor)-cprod)*vpar
         endif
 
      enddo
-  enddo
+   enddo
 
-  !-------------------------------------------------------------
-  ! 2. Compute global ky-dependent fluxes (with field breakdown)
-  !-------------------------------------------------------------
+   moment_loc(:,:,:,:,itor) = moment_loc(:,:,:,:,itor)/rho
 
-  gflux_loc(:,:,:,:,:) = 0.0
+   !-------------------------------------------------------------
+   ! 2. Compute global ky-dependent fluxes (with field breakdown)
+   !-------------------------------------------------------------
 
-  iv_loc = 0
-  do iv=nv1,nv2
+   gflux_loc(:,:,:,:,itor) = 0.0
+
+   iv_loc = 0
+   do iv=nv1,nv2
 
      iv_loc = iv_loc+1
 
@@ -129,22 +135,22 @@ subroutine cgyro_flux
            if (ir-l > 0) then
               icl = ic_c(ir-l,it)
               prod1(l,:) = prod1(l,:) &
-                      +i_c*cap_h_c(ic,iv_loc,my_toroidal)*conjg(jvec_c(:,icl,iv_loc,my_toroidal)*field(:,ic,my_toroidal))
+                      +i_c*cap_h_c(ic,iv_loc,itor)*conjg(jvec_c(:,icl,iv_loc,itor)*field(:,ic,itor))
               prod2(l,:) = prod2(l,:) &
-                      +i_c*cap_h_c(ic,iv_loc,my_toroidal)*conjg(i_c*jxvec_c(:,icl,iv_loc,my_toroidal)*field(:,icl,my_toroidal))
+                      +i_c*cap_h_c(ic,iv_loc,itor)*conjg(i_c*jxvec_c(:,icl,iv_loc,itor)*field(:,icl,itor))
               prod3(l,:) = prod3(l,:) &
-                      -cap_h_c_dot(ic,iv_loc,my_toroidal)*conjg(jvec_c(:,icl,iv_loc,my_toroidal)*field(:,icl,my_toroidal)) &
-                      +cap_h_c(ic,iv_loc,my_toroidal)*conjg(jvec_c(:,icl,iv_loc,my_toroidal)*field_dot(:,icl,my_toroidal))
+                      -cap_h_c_dot(ic,iv_loc,itor)*conjg(jvec_c(:,icl,iv_loc,itor)*field(:,icl,itor)) &
+                      +cap_h_c(ic,iv_loc,itor)*conjg(jvec_c(:,icl,iv_loc,itor)*field_dot(:,icl,itor))
            endif
            if (ir+l <= n_radial) then
               icl = ic_c(ir+l,it)
               prod1(l,:) = prod1(l,:) &
-                      -i_c*conjg(cap_h_c(ic,iv_loc,my_toroidal))*jvec_c(:,icl,iv_loc,my_toroidal)*field(:,icl,my_toroidal)
+                      -i_c*conjg(cap_h_c(ic,iv_loc,itor))*jvec_c(:,icl,iv_loc,itor)*field(:,icl,itor)
               prod2(l,:) = prod2(l,:) &
-                      -i_c*conjg(cap_h_c(ic,iv_loc,my_toroidal))*i_c*jxvec_c(:,icl,iv_loc,my_toroidal)*field(:,icl,my_toroidal)
+                      -i_c*conjg(cap_h_c(ic,iv_loc,itor))*i_c*jxvec_c(:,icl,iv_loc,itor)*field(:,icl,itor)
               prod3(l,:) = prod3(l,:) &
-                      -conjg(cap_h_c_dot(ic,iv_loc,my_toroidal))*jvec_c(:,icl,iv_loc,my_toroidal)*field(:,icl,my_toroidal) &
-                      +conjg(cap_h_c(ic,iv_loc,my_toroidal))*jvec_c(:,icl,iv_loc,my_toroidal)*field_dot(:,icl,my_toroidal)
+                      -conjg(cap_h_c_dot(ic,iv_loc,itor))*jvec_c(:,icl,iv_loc,itor)*field(:,icl,itor) &
+                      +conjg(cap_h_c(ic,iv_loc,itor))*jvec_c(:,icl,iv_loc,itor)*field_dot(:,icl,itor)
            endif
 
         enddo
@@ -153,62 +159,61 @@ subroutine cgyro_flux
         erot = (energy(ie)+lambda_rot(it,is))*temp(is)
 
         ! 1. Density flux: Gamma_a
-        gflux_loc(:,is,1,:,my_toroidal) = gflux_loc(:,is,1,:,my_toroidal)+prod1(:,:)*dvr
+        gflux_loc(:,is,1,:,itor) = gflux_loc(:,is,1,:,itor)+prod1(:,:)*dvr
 
         ! 2. Energy flux : Q_a
-        gflux_loc(:,is,2,:,my_toroidal) = gflux_loc(:,is,2,:,my_toroidal)+prod1(:,:)*dvr*erot
+        gflux_loc(:,is,2,:,itor) = gflux_loc(:,is,2,:,itor)+prod1(:,:)*dvr*erot
 
         prod1(:,:) = prod1(:,:)*(mach*bigr(it)/rmaj+btor(it)/bmag(it)*vpar)+prod2(:,:)
 
         ! 3. Momentum flux: Pi_a
-        gflux_loc(:,is,3,:,my_toroidal) = gflux_loc(:,is,3,:,my_toroidal)+prod1(:,:)*dvr*bigr(it)*mass(is)
+        gflux_loc(:,is,3,:,itor) = gflux_loc(:,is,3,:,itor)+prod1(:,:)*dvr*bigr(it)*mass(is)
 
         ! 4. Exchange
-        gflux_loc(:,is,4,:,my_toroidal) = gflux_loc(:,is,4,:,my_toroidal)+0.5*prod3(:,:)*dvr*z(is)
+        gflux_loc(:,is,4,:,itor) = gflux_loc(:,is,4,:,itor)+0.5*prod3(:,:)*dvr*z(is)
 
      enddo
 
-  enddo
+   enddo
 
-  ! Construct "positive/interior" flux (real quantities)
-  cflux_loc = real(gflux_loc(0,:,:,:,:))
-  do l=1,n_global
+   ! Construct "positive/interior" flux (real quantities)
+   cflux_loc(:,:,:,itor) = real(gflux_loc(0,:,:,:,itor))
+   do l=1,n_global
      u = 2*pi*l*x_fraction
-     cflux_loc = cflux_loc+2*sin(u)*real(gflux_loc(l,:,:,:,:))/u
-  enddo
+     cflux_loc(:,:,:,itor) = cflux_loc(:,:,:,itor)+2*sin(u)*real(gflux_loc(l,:,:,:,itor))/u
+   enddo
 
-  !-----------------------------------------------------
-  ! 3. Renormalize fluxes to GB or quasilinear forms
-  !~----------------------------------------------------
+   !-----------------------------------------------------
+   ! 3. Renormalize fluxes to GB or quasilinear forms
+   !~----------------------------------------------------
 
-  if (nonlinear_flag == 0 .and. my_toroidal > 0) then
+   if (nonlinear_flag == 0 .and. itor > 0) then
 
      ! Quasilinear normalization (divide by |phi|^2)
-     ! Note: We assume we compute flux_norm once per my_toroidal
+     ! Note: We assume we compute flux_norm once per itor
      flux_norm = 0.0
      do ir=1,n_radial
-        flux_norm = flux_norm+sum(abs(field(1,ic_c(ir,:),my_toroidal))**2*w_theta(:))
+        flux_norm = flux_norm+sum(abs(field(1,ic_c(ir,:),itor))**2*w_theta(:))
      enddo
 
      ! Correct for sign of q
      flux_norm = flux_norm*q/abs(q)*2 ! need 2 for regression compatibility
 
-     gflux_loc(:,:,:,:,my_toroidal) = gflux_loc(:,:,:,:,my_toroidal)/flux_norm 
-     cflux_loc (:,:,:,my_toroidal)  = cflux_loc(:,:,:,my_toroidal)/flux_norm 
+     gflux_loc(:,:,:,:,itor) = gflux_loc(:,:,:,:,itor)/flux_norm 
+     cflux_loc (:,:,:,itor)  = cflux_loc(:,:,:,itor)/flux_norm 
 
-  else
+   else
 
      ! Complete definition of fluxes (not exchange)
-     gflux_loc(:,:,1:3,:,my_toroidal) = gflux_loc(:,:,1:3,:,my_toroidal)*(k_theta_base*my_toroidal*rho)
-     cflux_loc(:,1:3,:,my_toroidal)   = cflux_loc(:,1:3,:,my_toroidal)*(k_theta_base*my_toroidal*rho)
+     gflux_loc(:,:,1:3,:,itor) = gflux_loc(:,:,1:3,:,itor)*(k_theta_base*itor*rho)
+     cflux_loc(:,1:3,:,itor)   = cflux_loc(:,1:3,:,itor)*(k_theta_base*itor*rho)
 
      ! GyroBohm normalizations
-     gflux_loc = gflux_loc/rho**2
-     cflux_loc = cflux_loc/rho**2
+     gflux_loc(:,:,:,:,itor) = gflux_loc(:,:,:,:,itor)/rho**2
+     cflux_loc(:,:,:,itor) = cflux_loc(:,:,:,itor)/rho**2
 
-  endif
-
-  moment_loc = moment_loc/rho
+   endif
+  enddo
 
   ! Reduced complex moment(kx,ky), below, is still distributed over n 
 
@@ -242,12 +247,13 @@ subroutine cgyro_flux
 
   tave_step = tave_step + 1
   tave_max  = t_current
-  ! NOTE: If we had multiple my_toroidal, we would sum them all in ?flux_tave
-  do i_field=1,n_field
-     cflux_tave(:,:) = cflux_tave(:,:) + cflux(:,:,i_field,my_toroidal)
-  enddo
-  do i_field=1,n_field
-     gflux_tave(:,:) = gflux_tave(:,:) + real(gflux(0,:,:,i_field,my_toroidal))
+  do itor=nt1,nt2
+   do i_field=1,n_field
+     cflux_tave(:,:) = cflux_tave(:,:) + cflux(:,:,i_field,itor)
+   enddo
+   do i_field=1,n_field
+     gflux_tave(:,:) = gflux_tave(:,:) + real(gflux(0,:,:,i_field,itor))
+   enddo
   enddo
      
 end subroutine cgyro_flux
