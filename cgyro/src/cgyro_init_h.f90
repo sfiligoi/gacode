@@ -6,7 +6,7 @@ subroutine cgyro_init_h
 
   implicit none
 
-  integer :: ir,it,is,ie,ix
+  integer :: ir,it,is,ie,ix,itor
   real :: arg, ang
 
   !---------------------------------------------------------------------------
@@ -87,7 +87,9 @@ subroutine cgyro_init_h
 
         ! 1. ZONAL-FLOW TEST
 
-        do iv=nv1,nv2
+!$omp parallel do private(iv,iv_loc,is,ix,ie,ic,ir,it,arg) shared(h_x)
+        do itor=nt1,nt2
+         do iv=nv1,nv2
 
            iv_loc = iv-nv1+1
            is = is_v(iv)
@@ -100,9 +102,9 @@ subroutine cgyro_init_h
               it = it_c(ic)
 
               if (is == 1 .and. px(ir) /= 0) then
-                 arg = k_perp(ic,my_toroidal)*rho*vth(is)*mass(is)/(z(is)*bmag(it)) &
+                 arg = k_perp(ic,itor)*rho*vth(is)*mass(is)/(z(is)*bmag(it)) &
                       *sqrt(2.0*energy(ie))*sqrt(1.0-xi(ix)**2)
-                 h_x(ic,iv_loc,my_toroidal) = 1e-6*bessel_j0(abs(arg))
+                 h_x(ic,iv_loc,itor) = 1e-6*bessel_j0(abs(arg))
 
                  ! J0 here for the ions is equivalent to having
                  ! the electrons deviate in density.
@@ -112,6 +114,7 @@ subroutine cgyro_init_h
 
               endif
            enddo
+         enddo
         enddo
 
      else if (zf_test_mode >= 2) then
@@ -120,7 +123,7 @@ subroutine cgyro_init_h
 
         call cgyro_zftest_em
 
-     else if (n_toroidal == 1 .and. my_toroidal > 0) then
+     else if (n_toroidal == 1 .and. nt1 > 0) then
 
         ! 3. LINEAR n>0 SIMULATION
 
@@ -135,9 +138,9 @@ subroutine cgyro_init_h
                  it = it_c(ic)
                  ang = theta(it)+2*pi*px(ir)
                  if (amp >  0.0) then
-                    h_x(ic,iv_loc,my_toroidal) = rho/(1.0+ang**4)
+                    h_x(ic,iv_loc,nt1) = rho/(1.0+ang**4)
                  else
-                    h_x(ic,iv_loc,my_toroidal) = rho*ang/(1.0+ang**4)
+                    h_x(ic,iv_loc,nt1) = rho*ang/(1.0+ang**4)
                  endif
               enddo
            endif
@@ -148,19 +151,21 @@ subroutine cgyro_init_h
 
         ! 4. GENERAL CASE
 
-        do ic=1,nc
+!$omp parallel do private(ic,ir,it,arg) shared(h_x)
+        do itor=nt1,nt2
+         do ic=1,nc
 
            ir = ir_c(ic) 
            it = it_c(ic)
 
-           if (my_toroidal == 0) then
+           if (itor == 0) then
 
               ! Zonal-flow initial condition
 
               arg = abs(px(ir))/real(n_radial)
-              h_x(ic,:,my_toroidal) = amp0*rho*exp(-arg)
+              h_x(ic,:,itor) = amp0*rho*exp(-arg)
               if (ir == 1 .or. px(ir) == 0) then
-                 h_x(ic,:,my_toroidal) = 0.0
+                 h_x(ic,:,itor) = 0.0
               endif
 
            else 
@@ -168,13 +173,13 @@ subroutine cgyro_init_h
               ! Finite-n initial condition
 
               if (amp > 0.0) then
-                 h_x(ic,:,my_toroidal) = amp*rho
+                 h_x(ic,:,itor) = amp*rho
               else
-                 h_x(ic,:,my_toroidal) = amp*rho/my_toroidal**2
+                 h_x(ic,:,itor) = amp*rho/itor**2
               endif
 
            endif
-
+         enddo
         enddo
 
      endif
