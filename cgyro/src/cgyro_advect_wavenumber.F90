@@ -13,7 +13,7 @@ subroutine cgyro_advect_wavenumber(ij)
   implicit none
 
   integer, intent(in) :: ij
-  integer :: ir,l,ll,j,icc,in
+  integer :: ir,l,ll,j,icc,in,itor
   complex, dimension(:,:),allocatable :: he
 
   if (nonlinear_flag == 0) return
@@ -23,13 +23,14 @@ subroutine cgyro_advect_wavenumber(ij)
      allocate(he(n_theta,1-2*n_wave:n_radial+2*n_wave))
 
 #ifdef _OPENACC
-!$acc parallel loop gang private(in,ir,l,icc,ll,he) &
+!$acc parallel loop collapse(2) gang private(in,ir,l,icc,ll,he) &
 !$acc&                   present(rhs(:,:,:,ij),omega_ss,field,h_x,c_wave) &
 !$acc&                   vector_length(n_theta)
 #else
 !$omp parallel do private(in,ir,j,icc,l,ll,he)
 #endif
-     do in=1,nv_loc
+     do itor=nt1,nt2
+      do in=1,nv_loc
         he(:,1-2*n_wave:0) = 0.0
         he(:,n_radial+1:n_radial+2*n_wave) = 0.0
 
@@ -41,7 +42,7 @@ subroutine cgyro_advect_wavenumber(ij)
               icc = (ir-1)*n_theta
 !$acc loop vector private(j)
               do j=1,n_theta
-                 he(j,ir) = omega_eb_base*my_toroidal*h_x(icc+j,in,my_toroidal)
+                 he(j,ir) = omega_eb_base*itor*h_x(icc+j,in,itor)
               enddo
            enddo
 
@@ -55,7 +56,7 @@ subroutine cgyro_advect_wavenumber(ij)
                  do j=1,n_theta
                     ! Sign throughout paper is incorrect (or gamma -> - gamma)
                     ! Thus sign below has been checked and is correct
-                    rhs(icc+j,in,my_toroidal,ij) = rhs(icc+j,in,my_toroidal,ij)+c_wave(l)*(he(j,ir+ll)-he(j,ir-ll))
+                    rhs(icc+j,in,itor,ij) = rhs(icc+j,in,itor,ij)+c_wave(l)*(he(j,ir+ll)-he(j,ir-ll))
                  enddo
               enddo
            enddo
@@ -70,7 +71,7 @@ subroutine cgyro_advect_wavenumber(ij)
               icc = (ir-1)*n_theta
 !$acc loop vector private(j)
               do j=1,n_theta
-                 he(j,ir) = sum(omega_ss(:,icc+j,in,my_toroidal)*field(:,icc+j,my_toroidal))
+                 he(j,ir) = sum(omega_ss(:,icc+j,in,itor)*field(:,icc+j,itor))
               enddo
            enddo
 
@@ -83,13 +84,13 @@ subroutine cgyro_advect_wavenumber(ij)
 !$acc loop vector private(j)
                  do j=1,n_theta
                     ! Note opposite sign to ExB shear
-                    rhs(icc+j,in,my_toroidal,ij) = rhs(icc+j,in,my_toroidal,ij)-c_wave(l)*(he(j,ir+ll)-he(j,ir-ll))
+                    rhs(icc+j,in,itor,ij) = rhs(icc+j,in,itor,ij)-c_wave(l)*(he(j,ir+ll)-he(j,ir-ll))
                  enddo
               enddo
            enddo
 
         endif
-
+      enddo
      enddo
 
      deallocate(he)
