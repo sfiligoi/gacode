@@ -14,10 +14,12 @@ subroutine cgyro_freq
 
   implicit none
 
+  real :: mw
   real :: total_weight,dfr,dfi
   real, dimension(nc) :: mode_weight
   integer :: itor
   complex, dimension(nc) :: freq_loc
+  complex :: fl,myfr,df,total_weighted_freq
 
   if (i_time == 0) then
 
@@ -31,29 +33,41 @@ subroutine cgyro_freq
     !--------------------------------------------------
 
     do itor=nt1,nt2
-     ! Use potential to compute frequency
-     ! NOTE: Do it once per itor
-     mode_weight(:) = abs(field_old(1,:,itor))
 
-     ! Define local frequencies
+     total_weight = 0.0
+     total_weighted_freq = (0.0,0.0)
      do ic=1,nc
+        ! Use potential to compute frequency
+        mw = abs(field_old(1,ic,itor))
+        mode_weight(ic) =  mw
+        total_weight = total_weight + mw
+        ! Define local frequencies
         if (abs(field_old(1,ic,itor)) > 1e-12 .and. abs(field_old2(1,ic,itor)) > 1e-12) then
-           freq_loc(ic) = (i_c/delta_t)*log(field_old(1,ic,itor)/field_old2(1,ic,itor))
+           fl = (i_c/delta_t)*log(field_old(1,ic,itor)/field_old2(1,ic,itor))
         else
-           freq_loc(ic) = 0.0
+           fl = 0.0
         endif
+        freq_loc(ic) = fl
+        total_weighted_freq = total_weighted_freq + fl*mw
      enddo
 
-     total_weight = sum(mode_weight(:))
-     freq(itor) = sum(freq_loc(:)*mode_weight(:))/total_weight
+     myfr = total_weighted_freq/total_weight
+     freq(itor) = myfr
 
      ! Fractional Frequency Error
-     dfr = sum(abs(real(freq_loc(:)-freq(itor)))*mode_weight(:))
-     dfi = sum(abs(aimag(freq_loc(:)-freq(itor)))*mode_weight(:))
-     freq_err(itor) = (dfr+i_c*dfi)/total_weight/abs(freq(itor))
+     dfr = 0.0
+     dfi = 0.0
+     do ic=1,nc
+        mw = mode_weight(ic)
+        df = freq_loc(ic)-myfr
+        dfr = dfr + abs(real(df))*mw
+        dfi = dfi + abs(aimag(df))*mw
+     enddo
+     freq_err(itor) = (dfr+i_c*dfi)/total_weight/abs(myfr)
 
-     if (n_toroidal == 1 .and. abs(freq_err(itor)) < freq_tol) signal=1
     enddo
+
+    if (n_toroidal == 1 .and. abs(freq_err(nt1)) < freq_tol) signal=1
 
   endif
 
