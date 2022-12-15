@@ -22,7 +22,7 @@ subroutine cgyro_upwind_r64
 
   implicit none
 
-  integer :: is,ie,ix
+  integer :: is,ie,ix,itor
 #ifdef _OPENACC
   complex :: res_loc_one, res_loc_two
 #endif
@@ -30,10 +30,11 @@ subroutine cgyro_upwind_r64
   call timer_lib_in('str')
 
 #ifdef _OPENACC
-!$acc parallel loop collapse(2) gang &
+!$acc parallel loop collapse(3) gang &
 !$acc&         private(res_loc_one,iv) &
 !$acc&         present(g_x,upfac1,is_v,upwind_res_loc) default(none)
-  do is=ns1,ns2
+  do itor=nt1,nt2
+   do is=ns1,ns2
      do ic=1,nc
        res_loc_one = (0.0,0.0)
        res_loc_two = (0.0,0.0)
@@ -42,33 +43,35 @@ subroutine cgyro_upwind_r64
        do iv=nv1,nv2
           iv_loc = iv-nv1+1
           if (is == is_v(iv)) then
-             res_loc_one = res_loc_one+upfac1(ic,iv_loc,my_toroidal,1)*g_x(ic,iv_loc,my_toroidal)
+             res_loc_one = res_loc_one+upfac1(ic,iv_loc,itor,1)*g_x(ic,iv_loc,itor)
           endif
        enddo
-       upwind_res_loc(ic,is,my_toroidal,1) = res_loc_one
+       upwind_res_loc(ic,is,itor,1) = res_loc_one
 
 !$acc loop vector private(iv_loc) reduction(+:res_loc_two)
        do iv=nv1,nv2
           iv_loc = iv-nv1+1
           if (is == is_v(iv)) then
-             res_loc_two = res_loc_two+upfac1(ic,iv_loc,my_toroidal,2)*g_x(ic,iv_loc,my_toroidal)
+             res_loc_two = res_loc_two+upfac1(ic,iv_loc,itor,2)*g_x(ic,iv_loc,itor)
           endif
        enddo
-       upwind_res_loc(ic,is,my_toroidal,2) = res_loc_two
+       upwind_res_loc(ic,is,itor,2) = res_loc_two
     enddo
-
+   enddo
   enddo
 #else
   upwind_res_loc(:,:,:,:) = (0.0,0.0)
 
 !$omp parallel private(iv_loc,ic,is)
-!$omp do reduction(+:upwind_res_loc)
-  do iv=nv1,nv2
+!$omp do collapse(2) reduction(+:upwind_res_loc)
+  do itor=nt1,nt2
+   do iv=nv1,nv2
      iv_loc = iv-nv1+1
      is = is_v(iv)
      do ic=1,nc
-        upwind_res_loc(ic,is,my_toroidal,:) = upwind_res_loc(ic,is,my_toroidal,:)+upfac1(ic,iv_loc,my_toroidal,:)*g_x(ic,iv_loc,my_toroidal)
+        upwind_res_loc(ic,is,itor,:) = upwind_res_loc(ic,is,itor,:)+upfac1(ic,iv_loc,itor,:)*g_x(ic,iv_loc,itor)
      enddo
+   enddo
   enddo
 !$omp end do
 !$omp end parallel
@@ -103,22 +106,24 @@ subroutine cgyro_upwind_r64
   call timer_lib_in('str')
 
 #ifdef _OPENACC
-!$acc parallel loop collapse(2) independent &
+!$acc parallel loop collapse(3) independent &
 !$acc&         present(is_v,ix_v,ie_v,xi,vel,upfac2,g_x,upwind_res,up_cutoff) &
 !$acc&         private(iv_loc,is,ix,ie) default(none)
 #else
-!$omp parallel do private(iv_loc,is,ix,ie,ic)
+!$omp parallel do collapse(2) private(iv_loc,is,ix,ie,ic)
 #endif
-  do iv=nv1,nv2
+  do itor=nt1,nt2
+   do iv=nv1,nv2
      do ic=1,nc
         iv_loc = iv-nv1+1
         is = is_v(iv)
         ix = ix_v(iv)
         ie = ie_v(iv)
-        g_x(ic,iv_loc,my_toroidal) = abs(xi(ix))*vel(ie)*g_x(ic,iv_loc,my_toroidal) &
-             -upfac2(ic,iv_loc,my_toroidal,1)*upwind_res(ic,is,my_toroidal,1) &
-             -upfac2(ic,iv_loc,my_toroidal,2)*upwind_res(ic,is,my_toroidal,2)*up_cutoff
+        g_x(ic,iv_loc,itor) = abs(xi(ix))*vel(ie)*g_x(ic,iv_loc,itor) &
+             -upfac2(ic,iv_loc,itor,1)*upwind_res(ic,is,itor,1) &
+             -upfac2(ic,iv_loc,itor,2)*upwind_res(ic,is,itor,2)*up_cutoff
      enddo
+   enddo
   enddo
 
   call timer_lib_out('str')
@@ -134,7 +139,7 @@ subroutine cgyro_upwind_r32
 
   implicit none
 
-  integer :: is,ie,ix
+  integer :: is,ie,ix,itor
 #ifdef _OPENACC
   complex(KIND=REAL32) :: res_loc_one, res_loc_two
 #endif
@@ -142,10 +147,11 @@ subroutine cgyro_upwind_r32
   call timer_lib_in('str')
 
 #ifdef _OPENACC
-!$acc parallel loop collapse(2) gang &
+!$acc parallel loop collapse(3) gang &
 !$acc&         private(res_loc_one,iv) &
 !$acc&         present(g_x,upfac1,is_v,upwind32_res_loc) default(none)
-  do is=ns1,ns2
+  do itor=nt1,nt2
+   do is=ns1,ns2
      do ic=1,nc
        res_loc_one = (0.0,0.0)
        res_loc_two = (0.0,0.0)
@@ -154,33 +160,35 @@ subroutine cgyro_upwind_r32
        do iv=nv1,nv2
           iv_loc = iv-nv1+1
           if (is == is_v(iv)) then
-             res_loc_one = res_loc_one+upfac1(ic,iv_loc,my_toroidal,1)*g_x(ic,iv_loc,my_toroidal)
+             res_loc_one = res_loc_one+upfac1(ic,iv_loc,itor,1)*g_x(ic,iv_loc,itor)
           endif
        enddo
-       upwind32_res_loc(ic,is,my_toroidal,1) = res_loc_one
+       upwind32_res_loc(ic,is,itor,1) = res_loc_one
 
 !$acc loop vector private(iv_loc) reduction(+:res_loc_two)
        do iv=nv1,nv2
           iv_loc = iv-nv1+1
           if (is == is_v(iv)) then
-             res_loc_two = res_loc_two+upfac1(ic,iv_loc,my_toroidal,2)*g_x(ic,iv_loc,my_toroidal)
+             res_loc_two = res_loc_two+upfac1(ic,iv_loc,itor,2)*g_x(ic,iv_loc,itor)
           endif
        enddo
-       upwind32_res_loc(ic,is,my_toroidal,2) = res_loc_two
+       upwind32_res_loc(ic,is,itor,2) = res_loc_two
     enddo
-
+   enddo
   enddo
 #else
   upwind32_res_loc(:,:,:,:) = (0.0,0.0)
 
 !$omp parallel private(iv_loc,ic,is)
-!$omp do reduction(+:upwind32_res_loc)
-  do iv=nv1,nv2
+!$omp do collapse(2) reduction(+:upwind32_res_loc)
+  do itor=nt1,nt2
+   do iv=nv1,nv2
      iv_loc = iv-nv1+1
      is = is_v(iv)
      do ic=1,nc
-        upwind32_res_loc(ic,is,my_toroidal,:) = upwind32_res_loc(ic,is,my_toroidal,:)+upfac1(ic,iv_loc,my_toroidal,:)*g_x(ic,iv_loc,my_toroidal)
+        upwind32_res_loc(ic,is,itor,:) = upwind32_res_loc(ic,is,itor,:)+upfac1(ic,iv_loc,itor,:)*g_x(ic,iv_loc,itor)
      enddo
+   enddo
   enddo
 !$omp end do
 !$omp end parallel
@@ -215,22 +223,24 @@ subroutine cgyro_upwind_r32
   call timer_lib_in('str')
 
 #ifdef _OPENACC
-!$acc parallel loop collapse(2) independent &
+!$acc parallel loop collapse(3) independent &
 !$acc&         present(is_v,ix_v,ie_v,xi,vel,upfac2,g_x,upwind32_res,up_cutoff) &
 !$acc&         private(iv_loc,is,ix,ie) default(none)
 #else
-!$omp parallel do private(iv_loc,is,ix,ie,ic)
+!$omp parallel do collapse(2) private(iv_loc,is,ix,ie,ic)
 #endif
-  do iv=nv1,nv2
+  do itor=nt1,nt2
+   do iv=nv1,nv2
      do ic=1,nc
         iv_loc = iv-nv1+1
         is = is_v(iv)
         ix = ix_v(iv)
         ie = ie_v(iv)
-        g_x(ic,iv_loc,my_toroidal) = abs(xi(ix))*vel(ie)*g_x(ic,iv_loc,my_toroidal) &
-             -upfac2(ic,iv_loc,my_toroidal,1)*upwind32_res(ic,is,my_toroidal,1) &
-             -upfac2(ic,iv_loc,my_toroidal,2)*upwind32_res(ic,is,my_toroidal,2)*up_cutoff
+        g_x(ic,iv_loc,itor) = abs(xi(ix))*vel(ie)*g_x(ic,iv_loc,itor) &
+             -upfac2(ic,iv_loc,itor,1)*upwind32_res(ic,is,itor,1) &
+             -upfac2(ic,iv_loc,itor,2)*upwind32_res(ic,is,itor,2)*up_cutoff
      enddo
+   enddo
   enddo
 
   call timer_lib_out('str')
