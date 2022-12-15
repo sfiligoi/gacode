@@ -8,7 +8,7 @@
 !                       H = h + ze/T G phi
 !------------------------------------------------------------------------------
 
-subroutine cgyro_calc_collision_cpu_fp64(nj_loc,update_chv)
+subroutine cgyro_calc_collision_cpu_fp64(nj_loc)
 
   use parallel_lib
   use cgyro_globals
@@ -17,23 +17,24 @@ subroutine cgyro_calc_collision_cpu_fp64(nj_loc,update_chv)
   implicit none
   !
   integer, intent(in) :: nj_loc
-  logical, intent(in) :: update_chv
   !
-  integer :: ivp,j,k
+  integer :: ivp,j,k,itor
   complex, dimension(nv) :: bvec,cvec
   real :: cvec_re,cvec_im
   real :: cval
   ! --------------------------------------------------
 
-!$omp parallel do private(ic,ic_loc,iv,ivp,cvec,bvec,cvec_re,cvec_im,cval,j,k) &
+!$omp parallel do collapse(2) &
+!$omp&            private(ic,ic_loc,iv,ivp,cvec,bvec,cvec_re,cvec_im,cval,j,k) &
 !$omp&            shared(cap_h_v,fsendf,cmat)
-  do ic=nc1,nc2
+  do itor=nt1,nt2
+   do ic=nc1,nc2
 
      ic_loc = ic-nc1+1
      ! Set-up the RHS: H = f + ze/T G phi
 
      do iv=1,nv
-        cvec(iv) = cap_h_v(ic_loc,iv,my_toroidal)
+        cvec(iv) = cap_h_v(ic_loc,iv,itor)
      enddo
 
      bvec(:) = (0.0,0.0)
@@ -43,27 +44,31 @@ subroutine cgyro_calc_collision_cpu_fp64(nj_loc,update_chv)
         cvec_re = real(cvec(ivp))
         cvec_im = aimag(cvec(ivp))
         do iv=1,nv
-           cval = cmat(iv,ivp,ic_loc,my_toroidal)
+           cval = cmat(iv,ivp,ic_loc,itor)
            bvec(iv) = bvec(iv)+ cmplx(cval*cvec_re, cval*cvec_im)
         enddo
      enddo
 
     do k=1,nproc
        do j=1,nj_loc
-          fsendf(j,ic_loc,my_toroidal,k) = bvec(j+(k-1)*nj_loc)
+          fsendf(j,ic_loc,itor,k) = bvec(j+(k-1)*nj_loc)
        enddo
     enddo
 
-    if (update_chv) then
+    if (collision_field_model == 1) then
+       if (.not.(itor == 0 .and. ae_flag == 1)) then
+          ! cap_h_v not re-used else
           do iv=1,nv
-             cap_h_v(ic_loc,iv,my_toroidal) = bvec(iv)
+             cap_h_v(ic_loc,iv,itor) = bvec(iv)
           enddo
+       endif
     endif
+  enddo
  enddo
 
 end subroutine cgyro_calc_collision_cpu_fp64
 
-subroutine cgyro_calc_collision_cpu_fp32(nj_loc,update_chv)
+subroutine cgyro_calc_collision_cpu_fp32(nj_loc)
 
   use parallel_lib
   use cgyro_globals
@@ -72,25 +77,26 @@ subroutine cgyro_calc_collision_cpu_fp32(nj_loc,update_chv)
   implicit none
   !
   integer, intent(in) :: nj_loc
-  logical, intent(in) :: update_chv
   !
-  integer :: ivp,j,k
+  integer :: ivp,j,k,itor
   integer :: ie,is,ix,iep,isp,ixp
   complex, dimension(nv) :: bvec,cvec
   real :: cvec_re,cvec_im
   real :: cval
   ! --------------------------------------------------
 
-!$omp parallel do private(ic,ic_loc,iv,ivp,cvec,bvec,cvec_re,cvec_im,cval,j,k) &
+!$omp parallel do collapse(2) &
+!$omp&            private(ic,ic_loc,iv,ivp,cvec,bvec,cvec_re,cvec_im,cval,j,k) &
 !$omp&            private(ie,is,ix,iep,isp,ixp) &
 !$omp&            shared(cap_h_v,fsendf,cmat_fp32,cmat_stripes,cmat_e1,ie_v,is_v,ix_v)
-  do ic=nc1,nc2
+  do itor=nt1,nt2
+   do ic=nc1,nc2
 
      ic_loc = ic-nc1+1
      ! Set-up the RHS: H = f + ze/T G phi
 
      do iv=1,nv
-        cvec(iv) = cap_h_v(ic_loc,iv,my_toroidal)
+        cvec(iv) = cap_h_v(ic_loc,iv,itor)
      enddo
 
      bvec(:) = (0.0,0.0)
@@ -103,15 +109,15 @@ subroutine cgyro_calc_collision_cpu_fp32(nj_loc,update_chv)
         isp = is_v(ivp)
         ixp = ix_v(ivp)
         do iv=1,nv
-           cval = cmat_fp32(iv,ivp,ic_loc,my_toroidal)
+           cval = cmat_fp32(iv,ivp,ic_loc,itor)
            ie = ie_v(iv)
            is = is_v(iv)
            ix = ix_v(iv)
            if (ie<=n_low_energy) then
-             cval = cval + cmat_e1(ix,is,ie,ivp,ic_loc,my_toroidal)
+             cval = cval + cmat_e1(ix,is,ie,ivp,ic_loc,itor)
            else
              if ((iep==ie) .AND. (isp==is)) then
-               cval = cval + cmat_stripes(ix,is,ie,ixp,ic_loc,my_toroidal)
+               cval = cval + cmat_stripes(ix,is,ie,ixp,ic_loc,itor)
              endif
            endif
            bvec(iv) = bvec(iv)+ cmplx(cval*cvec_re, cval*cvec_im)
@@ -120,19 +126,23 @@ subroutine cgyro_calc_collision_cpu_fp32(nj_loc,update_chv)
 
     do k=1,nproc
        do j=1,nj_loc
-          fsendf(j,ic_loc,my_toroidal,k) = bvec(j+(k-1)*nj_loc)
+          fsendf(j,ic_loc,itor,k) = bvec(j+(k-1)*nj_loc)
        enddo
     enddo
 
-    if (update_chv) then
+    if (collision_field_model == 1) then
+       if (.not.(itor == 0 .and. ae_flag == 1)) then
+          ! cap_h_v not re-used else
           do iv=1,nv
-             cap_h_v(ic_loc,iv,my_toroidal) = bvec(iv)
+             cap_h_v(ic_loc,iv,itor) = bvec(iv)
           enddo
+     endif
     endif
+  enddo
  enddo
 end subroutine cgyro_calc_collision_cpu_fp32
 
-subroutine cgyro_calc_collision_cpu(nj_loc,update_chv)
+subroutine cgyro_calc_collision_cpu(nj_loc)
 
   use cgyro_globals
 
@@ -140,13 +150,12 @@ subroutine cgyro_calc_collision_cpu(nj_loc,update_chv)
   implicit none
   !
   integer, intent(in) :: nj_loc
-  logical, intent(in) :: update_chv
   ! --------------------------------------------------
 
   if (collision_precision_mode == 0) then
-     call cgyro_calc_collision_cpu_fp64(nj_loc,update_chv)
+     call cgyro_calc_collision_cpu_fp64(nj_loc)
   else
-     call cgyro_calc_collision_cpu_fp32(nj_loc,update_chv)
+     call cgyro_calc_collision_cpu_fp32(nj_loc)
   endif
 
 end subroutine cgyro_calc_collision_cpu
@@ -165,7 +174,7 @@ subroutine cgyro_calc_collision_simple_cpu(nj_loc)
   !
 
   integer :: is,ie,ix,jx,it,ir,j,k
-  integer :: ivp
+  integer :: ivp,itor
   complex, dimension(:,:,:),allocatable :: bvec,cvec
   complex :: bvec_flat(nv)
   real :: cvec_re,cvec_im
@@ -174,8 +183,10 @@ subroutine cgyro_calc_collision_simple_cpu(nj_loc)
   allocate(bvec(n_xi,n_energy,n_species))
   allocate(cvec(n_xi,n_energy,n_species))
 
-!$omp parallel do private(ic_loc,ivp,iv,is,ix,jx,ie,ir,it,cvec_re,cvec_im,bvec,cvec,bvec_flat,k,j)
-  do ic=nc1,nc2
+!$omp parallel do collapse(2) &
+!$omp&            private(ic_loc,ivp,iv,is,ix,jx,ie,ir,it,cvec_re,cvec_im,bvec,cvec,bvec_flat,k,j)
+  do itor=nt1,nt2
+   do ic=nc1,nc2
      ic_loc = ic-nc1+1
      ir = ir_c(ic)
      it = it_c(ic)
@@ -183,11 +194,11 @@ subroutine cgyro_calc_collision_simple_cpu(nj_loc)
      ! Set-up the RHS: H = f + ze/T G phi
 
      do iv=1,nv
-        cvec(ix_v(iv),ie_v(iv),is_v(iv)) = cap_h_v(ic_loc,iv,my_toroidal)
+        cvec(ix_v(iv),ie_v(iv),is_v(iv)) = cap_h_v(ic_loc,iv,itor)
      enddo
 
      ! Avoid singularity of n=0,p=0:
-     if (px(ir) == 0 .and. my_toroidal == 0) then
+     if (px(ir) == 0 .and. itor == 0) then
         bvec = cvec
      else
 
@@ -202,8 +213,8 @@ subroutine cgyro_calc_collision_simple_cpu(nj_loc)
 
                  do ix=1,n_xi
                     bvec(ix,ie,is) = bvec(ix,ie,is)+ &
-                         cmplx(cmat_simple(ix,jx,ie,is,it,my_toroidal)*cvec_re, &
-                         cmat_simple(ix,jx,ie,is,it,my_toroidal)*cvec_im)
+                         cmplx(cmat_simple(ix,jx,ie,is,it,itor)*cvec_re, &
+                         cmat_simple(ix,jx,ie,is,it,itor)*cvec_im)
                  enddo
               enddo
            enddo
@@ -216,10 +227,10 @@ subroutine cgyro_calc_collision_simple_cpu(nj_loc)
 
      do k=1,nproc
         do j=1,nj_loc
-           fsendf(j,ic_loc,my_toroidal,k) = bvec_flat(j+(k-1)*nj_loc)
+           fsendf(j,ic_loc,itor,k) = bvec_flat(j+(k-1)*nj_loc)
         enddo
      enddo
-
+   enddo
   enddo
 
   deallocate(bvec,cvec)
@@ -240,8 +251,7 @@ subroutine cgyro_step_collision_cpu(use_simple)
   logical, intent(in) :: use_simple
   !
 
-  integer :: is,nj_loc
-  logical :: update_chv
+  integer :: is,nj_loc,itor
   complex :: my_psi,my_ch
   ! --------------------------------------------------
 
@@ -261,15 +271,7 @@ subroutine cgyro_step_collision_cpu(use_simple)
   if (use_simple) then
      call cgyro_calc_collision_simple_cpu(nj_loc)
   else
-     update_chv = .FALSE.
-     if (collision_field_model == 1) then
-       if (.not.(my_toroidal == 0 .and. ae_flag == 1)) then
-          ! cap_h_v not re-used else
-          update_chv = .TRUE.
-       endif
-     endif
-
-     call cgyro_calc_collision_cpu(nj_loc, update_chv)
+     call cgyro_calc_collision_cpu(nj_loc)
   endif
 
   call timer_lib_out('coll')
@@ -277,9 +279,8 @@ subroutine cgyro_step_collision_cpu(use_simple)
   if (.not. use_simple) then
     ! Compute the new phi
     if (collision_field_model == 1) then
-      if (.not.(my_toroidal == 0 .and. ae_flag == 1)) then
-        call cgyro_field_v
-      endif
+        ! noop if (my_toroidal == 0 .and. ae_flag == 1))
+        call cgyro_field_v_notae
     endif
   endif
 
@@ -291,17 +292,19 @@ subroutine cgyro_step_collision_cpu(use_simple)
 
   ! Compute H given h and [phi(h), apar(h)]
 
-!$omp parallel do private(iv_loc,is,ic,iv,my_psi,my_ch) firstprivate(nc)
-  do iv=nv1,nv2
+!$omp parallel do collapse(2) &
+!$omp&            private(iv_loc,is,ic,iv,my_psi,my_ch) firstprivate(nc)
+  do itor=nt1,nt2
+   do iv=nv1,nv2
      iv_loc = iv-nv1+1
      is = is_v(iv)
-     ! this should be coll_mem timer , but not easy with OMP
      do ic=1,nc
-        my_ch = cap_h_ct(iv_loc,ic,my_toroidal)
-        my_psi = sum(jvec_c(:,ic,iv_loc,my_toroidal)*field(:,ic,my_toroidal))
-        h_x(ic,iv_loc,my_toroidal) = my_ch-my_psi*(z(is)/temp(is))
-        cap_h_c(ic,iv_loc,my_toroidal) = my_ch
+        my_ch = cap_h_ct(iv_loc,ic,itor)
+        my_psi = sum(jvec_c(:,ic,iv_loc,itor)*field(:,ic,itor))
+        h_x(ic,iv_loc,itor) = my_ch-my_psi*(z(is)/temp(is))
+        cap_h_c(ic,iv_loc,itor) = my_ch
      enddo
+   enddo
   enddo
 
   call timer_lib_out('coll')
@@ -313,7 +316,7 @@ end subroutine cgyro_step_collision_cpu
 
   ! ==================================================
 
-subroutine cgyro_calc_collision_gpu_fp64(nj_loc,update_chv)
+subroutine cgyro_calc_collision_gpu_fp64(nj_loc)
 
   use parallel_lib
   use cgyro_globals
@@ -322,17 +325,17 @@ subroutine cgyro_calc_collision_gpu_fp64(nj_loc,update_chv)
   implicit none
   !
   integer, intent(in) :: nj_loc
-  logical, intent(in) :: update_chv
   !
 
-  integer :: j,k,ivp
+  integer :: j,k,ivp,itor
   real :: b_re,b_im
   real :: cval
   ! --------------------------------------------------
 
-!$acc parallel loop gang firstprivate(nproc,nj_loc,nv,update_chv) &
+!$acc parallel loop collapse(2) gang firstprivate(nproc,nj_loc,nv) &
 !$acc& present(cmat,cap_h_v,fsendf)  private(k,ic,j,ic_loc)
-  do ic=nc1,nc2
+  do itor=nt1,nt2
+   do ic=nc1,nc2
      ic_loc = ic-nc1+1
 !$acc loop vector collapse(2) private(b_re,b_im,cval,ivp,iv)
      do k=1,nproc
@@ -342,28 +345,32 @@ subroutine cgyro_calc_collision_gpu_fp64(nj_loc,update_chv)
            b_im = 0.0
 !$acc loop seq private(cval)
            do ivp=1,nv
-              cval = cmat(iv,ivp,ic_loc,my_toroidal)
-              b_re = b_re + cval*real(cap_h_v(ic_loc,ivp,my_toroidal))
-              b_im = b_im + cval*aimag(cap_h_v(ic_loc,ivp,my_toroidal))
+              cval = cmat(iv,ivp,ic_loc,itor)
+              b_re = b_re + cval*real(cap_h_v(ic_loc,ivp,itor))
+              b_im = b_im + cval*aimag(cap_h_v(ic_loc,ivp,itor))
            enddo
 
-           fsendf(j,ic_loc,my_toroidal,k) = cmplx(b_re,b_im)
+           fsendf(j,ic_loc,itor,k) = cmplx(b_re,b_im)
         enddo
      enddo
 
-     if (update_chv) then
+    if (collision_field_model == 1) then
+      if (.not.(itor == 0 .and. ae_flag == 1)) then
+        ! cap_h_v not re-used else
 !$acc loop collapse(2) vector private(iv)
         do k=1,nproc
            do j=1,nj_loc
               iv = j+(k-1)*nj_loc
-              cap_h_v(ic_loc,iv,my_toroidal) = fsendf(j,ic_loc,my_toroidal,k)
+              cap_h_v(ic_loc,iv,itor) = fsendf(j,ic_loc,itor,k)
            enddo
         enddo
+       endif
      endif
+   enddo
   enddo
 end subroutine cgyro_calc_collision_gpu_fp64
 
-subroutine cgyro_calc_collision_gpu_b2_fp64(nj_loc,update_chv)
+subroutine cgyro_calc_collision_gpu_b2_fp64(nj_loc)
 
   use parallel_lib
   use cgyro_globals
@@ -372,11 +379,10 @@ subroutine cgyro_calc_collision_gpu_b2_fp64(nj_loc,update_chv)
   implicit none
   !
   integer, intent(in) :: nj_loc
-  logical, intent(in) :: update_chv
   !
 
   integer :: bsplit
-  integer :: j,k,ivp,b
+  integer :: j,k,ivp,b,itor
   integer :: n_ic_loc,d_ic_loc
   integer, dimension((gpu_bigmem_flag*2)+1) :: bic
   integer :: bs,be,bb
@@ -395,16 +401,17 @@ subroutine cgyro_calc_collision_gpu_b2_fp64(nj_loc,update_chv)
   enddo
   bic(bsplit+1) = nc2+1
 
-  do b=1,bsplit
+  do itor=nt1,nt2
+   do b=1,bsplit
     bs = bic(b)-nc1+1
     be = bic(b+1)-nc1
     ! by keeping only 2 alive at any time, we limit GPU memory use
-    bb = modulo(b,2)+2
+    bb = modulo(b+itor,2)+2
     ! ensure there is not another even/odd already runnning
 !$acc wait(bb)
     ! now launch myself
-!$acc parallel loop gang firstprivate(nproc,nj_loc,nv,update_chv) &
-!$acc& copyin(cmat(:,:,bs:be,my_toroidal)) present(cap_h_v,fsendf)  private(k,j,ic_loc) async(bb)
+!$acc parallel loop gang firstprivate(nproc,nj_loc,nv) &
+!$acc& copyin(cmat(:,:,bs:be,itor)) present(cap_h_v,fsendf)  private(k,j,ic_loc) async(bb)
     do ic_loc=bs,be
 !$acc loop vector collapse(2) private(b_re,b_im,cval,ivp,iv)
       do k=1,nproc
@@ -414,26 +421,31 @@ subroutine cgyro_calc_collision_gpu_b2_fp64(nj_loc,update_chv)
            b_im = 0.0
 !$acc loop seq private(cval)
            do ivp=1,nv
-              cval = cmat(iv,ivp,ic_loc,my_toroidal)
-              b_re = b_re + cval*real(cap_h_v(ic_loc,ivp,my_toroidal))
-              b_im = b_im + cval*aimag(cap_h_v(ic_loc,ivp,my_toroidal))
+              cval = cmat(iv,ivp,ic_loc,itor)
+              b_re = b_re + cval*real(cap_h_v(ic_loc,ivp,itor))
+              b_im = b_im + cval*aimag(cap_h_v(ic_loc,ivp,itor))
            enddo
 
-           fsendf(j,ic_loc,my_toroidal,k) = cmplx(b_re,b_im)
+           fsendf(j,ic_loc,itor,k) = cmplx(b_re,b_im)
         enddo
       enddo
 
-      if (update_chv) then
+      if (collision_field_model == 1) then
+       if (.not.(itor == 0 .and. ae_flag == 1)) then
+        ! cap_h_v not re-used else
 !$acc loop collapse(2) vector private(iv)
         do k=1,nproc
            do j=1,nj_loc
               iv = j+(k-1)*nj_loc
-              cap_h_v(ic_loc,iv,my_toroidal) = fsendf(j,ic_loc,my_toroidal,k)
+              cap_h_v(ic_loc,iv,itor) = fsendf(j,ic_loc,itor,k)
            enddo
         enddo
+       endif
       endif
     enddo ! ic
-  enddo ! b
+
+   enddo ! b
+  enddo ! itor
 
   ! wait for all the async kernels to terminate
 !$acc wait(2)
@@ -441,7 +453,7 @@ subroutine cgyro_calc_collision_gpu_b2_fp64(nj_loc,update_chv)
 
 end subroutine cgyro_calc_collision_gpu_b2_fp64
 
-subroutine cgyro_calc_collision_gpu_fp32(nj_loc,update_chv)
+subroutine cgyro_calc_collision_gpu_fp32(nj_loc)
 
   use parallel_lib
   use cgyro_globals
@@ -450,19 +462,19 @@ subroutine cgyro_calc_collision_gpu_fp32(nj_loc,update_chv)
   implicit none
   !
   integer, intent(in) :: nj_loc
-  logical, intent(in) :: update_chv
   !
 
-  integer :: j,k,ivp
+  integer :: j,k,ivp,itor
   integer :: ie,is,ix,iep,isp,ixp
   real :: b_re,b_im
   real :: h_re,h_im
   real :: cval
   ! --------------------------------------------------
 
-!$acc parallel loop gang firstprivate(nproc,nj_loc,nv,update_chv) &
+!$acc parallel loop collapse(2) gang firstprivate(nproc,nj_loc,nv) &
 !$acc& present(cmat_fp32,cmat_stripes,cmat_e1,cap_h_v,fsendf,ie_v,is_v,ix_v)  private(k,ic,j,ic_loc,ie,is,ix)
-  do ic=nc1,nc2
+  do itor=nt1,nt2
+   do ic=nc1,nc2
      ic_loc = ic-nc1+1
 !$acc loop vector collapse(2) private(b_re,b_im,cval,ivp,iv)
      do k=1,nproc
@@ -475,40 +487,44 @@ subroutine cgyro_calc_collision_gpu_fp32(nj_loc,update_chv)
            ix = ix_v(iv)
 !$acc loop seq private(cval,iep,isp,ixp,h_re,h_im)
            do ivp=1,nv
-              cval = cmat_fp32(iv,ivp,ic_loc,my_toroidal)
-              h_re = real(cap_h_v(ic_loc,ivp,my_toroidal))
-              h_im = aimag(cap_h_v(ic_loc,ivp,my_toroidal))
+              cval = cmat_fp32(iv,ivp,ic_loc,itor)
+              h_re = real(cap_h_v(ic_loc,ivp,itor))
+              h_im = aimag(cap_h_v(ic_loc,ivp,itor))
               if (ie<=n_low_energy) then
-                 cval = cval + cmat_e1(ix,is,ie,ivp,ic_loc,my_toroidal)
+                 cval = cval + cmat_e1(ix,is,ie,ivp,ic_loc,itor)
               else
                  iep = ie_v(ivp)
                  isp = is_v(ivp)
                  ixp = ix_v(ivp)
                  if ((ie==iep) .AND. (is==isp)) then
-                    cval = cval + cmat_stripes(ix,is,ie,ixp,ic_loc,my_toroidal)
+                    cval = cval + cmat_stripes(ix,is,ie,ixp,ic_loc,itor)
                  endif
               endif
               b_re = b_re + cval*h_re
               b_im = b_im + cval*h_im
            enddo
 
-           fsendf(j,ic_loc,my_toroidal,k) = cmplx(b_re,b_im)
+           fsendf(j,ic_loc,itor,k) = cmplx(b_re,b_im)
         enddo
      enddo
 
-     if (update_chv) then
+    if (collision_field_model == 1) then
+      if (.not.(itor == 0 .and. ae_flag == 1)) then
+        ! cap_h_v not re-used else
 !$acc loop collapse(2) vector private(iv)
         do k=1,nproc
            do j=1,nj_loc
               iv = j+(k-1)*nj_loc
-              cap_h_v(ic_loc,iv,my_toroidal) = fsendf(j,ic_loc,my_toroidal,k)
+              cap_h_v(ic_loc,iv,itor) = fsendf(j,ic_loc,itor,k)
            enddo
         enddo
+       endif
      endif
+   enddo
   enddo
 end subroutine cgyro_calc_collision_gpu_fp32
 
-subroutine cgyro_calc_collision_gpu_b2_fp32(nj_loc,update_chv)
+subroutine cgyro_calc_collision_gpu_b2_fp32(nj_loc)
 
   use parallel_lib
   use cgyro_globals
@@ -517,11 +533,10 @@ subroutine cgyro_calc_collision_gpu_b2_fp32(nj_loc,update_chv)
   implicit none
   !
   integer, intent(in) :: nj_loc
-  logical, intent(in) :: update_chv
   !
 
   integer :: bsplit
-  integer :: j,k,ivp,b
+  integer :: j,k,ivp,b,itor
   integer :: ie,is,ix,iep,isp,ixp
   integer :: n_ic_loc,d_ic_loc
   integer, dimension((gpu_bigmem_flag*2)+1) :: bic
@@ -542,18 +557,19 @@ subroutine cgyro_calc_collision_gpu_b2_fp32(nj_loc,update_chv)
   enddo
   bic(bsplit+1) = nc2+1
 
-  do b=1,bsplit
+  do itor=nt1,nt2
+   do b=1,bsplit
     bs = bic(b)-nc1+1
     be = bic(b+1)-nc1
     ! by keeping only 2 alive at any time, we limit GPU memory use
-    bb = modulo(b,2)+2
+    bb = modulo(b+itor,2)+2
     ! ensure there is not another even/odd already runnning
 !$acc wait(bb)
     ! now launch myself
-!$acc parallel loop gang firstprivate(nproc,nj_loc,nv,update_chv) &
+!$acc parallel loop gang firstprivate(nproc,nj_loc,nv) &
 !$acc& present(cap_h_v,fsendf,ie_v,is_v,ix_v)  private(k,ic,j,ic_loc,ie,is,ix) &
-!$acc& copyin(cmat_fp32(:,:,bs:be,my_toroidal),cmat_stripes(:,:,:,:,bs:be,my_toroidal)) &
-!$acc& copyin(cmat_e1(:,:,:,:,bs:be,my_toroidal)) async(bb)
+!$acc& copyin(cmat_fp32(:,:,bs:be,itor),cmat_stripes(:,:,:,:,bs:be,itor)) &
+!$acc& copyin(cmat_e1(:,:,:,:,bs:be,itor)) async(bb)
     do ic_loc=bs,be
 !$acc loop vector collapse(2) private(b_re,b_im,cval,ivp,iv)
        do k=1,nproc
@@ -566,38 +582,43 @@ subroutine cgyro_calc_collision_gpu_b2_fp32(nj_loc,update_chv)
            ix = ix_v(iv)
 !$acc loop seq private(cval,iep,isp,ixp,h_re,h_im)
            do ivp=1,nv
-              cval = cmat_fp32(iv,ivp,ic_loc,my_toroidal)
-              h_re = real(cap_h_v(ic_loc,ivp,my_toroidal))
-              h_im = aimag(cap_h_v(ic_loc,ivp,my_toroidal))
+              cval = cmat_fp32(iv,ivp,ic_loc,itor)
+              h_re = real(cap_h_v(ic_loc,ivp,itor))
+              h_im = aimag(cap_h_v(ic_loc,ivp,itor))
               if (ie<=n_low_energy) then
-                 cval = cval + cmat_e1(ix,is,ie,ivp,ic_loc,my_toroidal)
+                 cval = cval + cmat_e1(ix,is,ie,ivp,ic_loc,itor)
               else
                  iep = ie_v(ivp)
                  isp = is_v(ivp)
                  ixp = ix_v(ivp)
                  if ((ie==iep) .AND. (is==isp)) then
-                    cval = cval + cmat_stripes(ix,is,ie,ixp,ic_loc,my_toroidal)
+                    cval = cval + cmat_stripes(ix,is,ie,ixp,ic_loc,itor)
                  endif
               endif
               b_re = b_re + cval*h_re
               b_im = b_im + cval*h_im
            enddo
 
-           fsendf(j,ic_loc,my_toroidal,k) = cmplx(b_re,b_im)
+           fsendf(j,ic_loc,itor,k) = cmplx(b_re,b_im)
          enddo
        enddo
 
-       if (update_chv) then
+      if (collision_field_model == 1) then
+       if (.not.(itor == 0 .and. ae_flag == 1)) then
+         ! cap_h_v not re-used else
 !$acc loop collapse(2) vector private(iv)
          do k=1,nproc
            do j=1,nj_loc
               iv = j+(k-1)*nj_loc
-              cap_h_v(ic_loc,iv,my_toroidal) = fsendf(j,ic_loc,my_toroidal,k)
+              cap_h_v(ic_loc,iv,itor) = fsendf(j,ic_loc,itor,k)
            enddo
          enddo
+       endif
       endif
     enddo ! ic
-  enddo ! b
+
+   enddo ! b
+  enddo ! itor
 
   ! wait for all the async kernels to terminate
 !$acc wait(2)
@@ -605,7 +626,7 @@ subroutine cgyro_calc_collision_gpu_b2_fp32(nj_loc,update_chv)
 
 end subroutine cgyro_calc_collision_gpu_b2_fp32
 
-subroutine cgyro_calc_collision_gpu(nj_loc,update_chv)
+subroutine cgyro_calc_collision_gpu(nj_loc)
 
   use cgyro_globals
 
@@ -613,18 +634,17 @@ subroutine cgyro_calc_collision_gpu(nj_loc,update_chv)
   implicit none
   !
   integer, intent(in) :: nj_loc
-  logical, intent(in) :: update_chv
   ! --------------------------------------------------
 
   if (collision_precision_mode == 0) then
-     call cgyro_calc_collision_gpu_fp64(nj_loc,update_chv)
+     call cgyro_calc_collision_gpu_fp64(nj_loc)
   else
-     call cgyro_calc_collision_gpu_fp32(nj_loc,update_chv)
+     call cgyro_calc_collision_gpu_fp32(nj_loc)
   endif
 
 end subroutine cgyro_calc_collision_gpu
 
-subroutine cgyro_calc_collision_gpu_b2(nj_loc,update_chv)
+subroutine cgyro_calc_collision_gpu_b2(nj_loc)
 
   use cgyro_globals
 
@@ -632,13 +652,12 @@ subroutine cgyro_calc_collision_gpu_b2(nj_loc,update_chv)
   implicit none
   !
   integer, intent(in) :: nj_loc
-  logical, intent(in) :: update_chv
   ! --------------------------------------------------
 
   if (collision_precision_mode == 0) then
-     call cgyro_calc_collision_gpu_b2_fp64(nj_loc,update_chv)
+     call cgyro_calc_collision_gpu_b2_fp64(nj_loc)
   else
-     call cgyro_calc_collision_gpu_b2_fp32(nj_loc,update_chv)
+     call cgyro_calc_collision_gpu_b2_fp32(nj_loc)
   endif
 
 end subroutine cgyro_calc_collision_gpu_b2
@@ -656,7 +675,7 @@ subroutine cgyro_calc_collision_simple_gpu(nj_loc)
   !
 
   integer :: is,ie,ix,jx,it,ir,j,k
-  integer :: ivp
+  integer :: ivp,itor
 
   real, dimension(n_xi,n_energy,n_species) :: bvec_re,cvec_re
   real, dimension(n_xi,n_energy,n_species) :: bvec_im,cvec_im
@@ -664,12 +683,13 @@ subroutine cgyro_calc_collision_simple_gpu(nj_loc)
   real :: cval
   ! --------------------------------------------------
 
-!$acc parallel loop gang &
+!$acc parallel loop collapse(2) gang &
 !$acc&         present(ix_v,ie_v,is_v,ir_c,it_c,px,cap_h_v,cmat_simple,fsendf) &
 !$acc&         private(bvec_re,bvec_im,cvec_re,cvec_im) &
 !$acc&         private(ic_loc,ir,it,b_re,b_im,cval) &
 !$acc&         private(is,ie,ix,jx,iv,k,j)
-  do ic=nc1,nc2
+  do itor=nt1,nt2
+   do ic=nc1,nc2
 
      ic_loc = ic-nc1+1
      ir = ir_c(ic)
@@ -678,21 +698,21 @@ subroutine cgyro_calc_collision_simple_gpu(nj_loc)
      ! Set-up the RHS: H = f + ze/T G phi
 
      ! Avoid singularity of n=0,p=0:
-     if (px(ir) == 0 .and. my_toroidal == 0) then
+     if (px(ir) == 0 .and. itor == 0) then
 
         ! shortcut all the logic, just fill fsenf
 !$acc loop collapse(2) vector private(iv)
         do k=1,nproc
            do j=1,nj_loc
               iv=j+(k-1)*nj_loc
-              fsendf(j,ic_loc,my_toroidal,k) = cap_h_v(ic_loc,iv,my_toroidal)
+              fsendf(j,ic_loc,itor,k) = cap_h_v(ic_loc,iv,itor)
            enddo
         enddo
      else
 !$acc loop vector
         do iv=1,nv
-           cvec_re(ix_v(iv),ie_v(iv),is_v(iv)) = real(cap_h_v(ic_loc,iv,my_toroidal))
-           cvec_im(ix_v(iv),ie_v(iv),is_v(iv)) = aimag(cap_h_v(ic_loc,iv,my_toroidal))
+           cvec_re(ix_v(iv),ie_v(iv),is_v(iv)) = real(cap_h_v(ic_loc,iv,itor))
+           cvec_im(ix_v(iv),ie_v(iv),is_v(iv)) = aimag(cap_h_v(ic_loc,iv,itor))
         enddo
 
 !$acc loop vector collapse(3) private(b_re,b_im,cval,jx)
@@ -703,7 +723,7 @@ subroutine cgyro_calc_collision_simple_gpu(nj_loc)
                  b_im = 0.0
 !$acc loop seq private(cval)
                  do jx=1,n_xi
-                     cval = cmat_simple(ix,jx,ie,is,it,my_toroidal)
+                     cval = cmat_simple(ix,jx,ie,is,it,itor)
                      b_re = b_re + cval*cvec_re(jx,ie,is)
                      b_im = b_im + cval*cvec_im(jx,ie,is)
                  enddo
@@ -717,11 +737,12 @@ subroutine cgyro_calc_collision_simple_gpu(nj_loc)
         do k=1,nproc
            do j=1,nj_loc
               iv=j+(k-1)*nj_loc
-              fsendf(j,ic_loc,my_toroidal,k) = cmplx(bvec_re(ix_v(iv),ie_v(iv),is_v(iv)),bvec_im(ix_v(iv),ie_v(iv),is_v(iv)))
+              fsendf(j,ic_loc,itor,k) = cmplx(bvec_re(ix_v(iv),ie_v(iv),is_v(iv)),bvec_im(ix_v(iv),ie_v(iv),is_v(iv)))
            enddo
         enddo
      endif
 
+   enddo
   enddo
 
 end subroutine cgyro_calc_collision_simple_gpu
@@ -741,8 +762,7 @@ subroutine cgyro_step_collision_gpu(use_simple)
   logical, intent(in) :: use_simple
   !
 
-  integer :: is,nj_loc
-  logical :: update_chv
+  integer :: is,nj_loc,itor
   complex :: my_psi,my_ch
   ! --------------------------------------------------
 
@@ -766,23 +786,15 @@ subroutine cgyro_step_collision_gpu(use_simple)
 
   else
 
-    update_chv = .FALSE.
-    if (collision_field_model == 1) then
-       if (.not.(my_toroidal == 0 .and. ae_flag == 1)) then
-          ! cap_h_v not re-used else
-          update_chv = .TRUE.
-       endif
-    endif
-
     ! Note that if GPU is absent, gpu_bibmem_flag will be reset to 0
     if (gpu_bigmem_flag == 1) then
       call timer_lib_in('coll')
-      call cgyro_calc_collision_gpu(nj_loc, update_chv)
+      call cgyro_calc_collision_gpu(nj_loc)
       call timer_lib_out('coll')
 
     elseif (gpu_bigmem_flag .GT. 1) then
       call timer_lib_in('coll')
-      call cgyro_calc_collision_gpu_b2(nj_loc, update_chv)
+      call cgyro_calc_collision_gpu_b2(nj_loc)
       call timer_lib_out('coll')
 
     else
@@ -792,15 +804,14 @@ subroutine cgyro_step_collision_gpu(use_simple)
       call timer_lib_out('coll_mem')
 
       call timer_lib_in('coll')
-      call cgyro_calc_collision_cpu(nj_loc, update_chv)
+      call cgyro_calc_collision_cpu(nj_loc)
       call timer_lib_out('coll')
 
       call timer_lib_in('coll_mem')
 !$acc update device(fsendf)
       if (collision_field_model == 1) then
-        if (.not.(my_toroidal == 0 .and. ae_flag == 1)) then
+         ! harmless if (my_toroidal == 0 .and. ae_flag == 1))
 !$acc update device (cap_h_v)
-        endif
       endif
       call timer_lib_out('coll_mem')
 
@@ -808,9 +819,8 @@ subroutine cgyro_step_collision_gpu(use_simple)
 
     ! Compute the new phi
     if (collision_field_model == 1) then
-      if (.not.(my_toroidal == 0 .and. ae_flag == 1)) then
-        call cgyro_field_v_gpu
-      endif
+        ! noop if (my_toroidal == 0 .and. ae_flag == 1))
+        call cgyro_field_v_notae_gpu
     endif
 
   endif ! use_simple
@@ -823,18 +833,20 @@ subroutine cgyro_step_collision_gpu(use_simple)
 
   ! Compute H given h and [phi(h), apar(h)]
 
-!$acc parallel loop collapse(2) gang vector private(iv_loc,is,my_psi,my_ch) &
+!$acc parallel loop collapse(3) gang vector private(iv_loc,is,my_psi,my_ch) &
 !$acc&         present(is_v,cap_h_c,cap_h_ct,cap_h_c,jvec_c,field,z,temp,h_x) &
 !$acc&         default(none)
-  do iv=nv1,nv2
+  do itor=nt1,nt2
+   do iv=nv1,nv2
      do ic=1,nc
         iv_loc = iv-nv1+1
         is = is_v(iv)
-        my_psi = sum(jvec_c(:,ic,iv_loc,my_toroidal)*field(:,ic,my_toroidal))
-        my_ch = cap_h_ct(iv_loc,ic,my_toroidal)
-        h_x(ic,iv_loc,my_toroidal) = my_ch-my_psi*(z(is)/temp(is))
-        cap_h_c(ic,iv_loc,my_toroidal) = my_ch
+        my_psi = sum(jvec_c(:,ic,iv_loc,itor)*field(:,ic,itor))
+        my_ch = cap_h_ct(iv_loc,ic,itor)
+        h_x(ic,iv_loc,itor) = my_ch-my_psi*(z(is)/temp(is))
+        cap_h_c(ic,iv_loc,itor) = my_ch
      enddo
+   enddo
   enddo
 
   call timer_lib_out('coll')
@@ -859,8 +871,10 @@ subroutine cgyro_step_collision
   call cgyro_step_collision_cpu(.FALSE.)
 #endif
 
-  if (collision_field_model == 0 .or. (my_toroidal == 0 .and. ae_flag == 1)) then
+  if (collision_field_model == 0) then
      call cgyro_field_c
+  else if (nt1 == 0 .and. ae_flag == 1) then
+     call cgyro_field_c_ae
   endif
 
 end subroutine cgyro_step_collision
