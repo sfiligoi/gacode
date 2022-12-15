@@ -22,13 +22,13 @@ subroutine cgyro_shear_hammett
   integer :: ir
 
   
-  gtime = gtime+omega_eb_base*my_toroidal*delta_t
+  gtime(my_toroidal) = gtime(my_toroidal)+omega_eb_base*my_toroidal*delta_t
 
   ! Forward shearing
-  if (gtime > 0.5) then
+  if (gtime(my_toroidal) > 0.5) then
 
      call timer_lib_in('shear')
-     gtime = gtime-1.0
+     gtime(my_toroidal) = gtime(my_toroidal)-1.0
 
 #ifdef _OPENACC
 !$acc parallel loop independent gang private(ir) present(h_x,ic_c)
@@ -52,10 +52,10 @@ subroutine cgyro_shear_hammett
   endif
 
   ! Backward shearing
-  if (gtime < -0.5) then
+  if (gtime(my_toroidal) < -0.5) then
 
      call timer_lib_in('shear')
-     gtime = gtime+1.0
+     gtime(my_toroidal) = gtime(my_toroidal)+1.0
 
 #ifdef _OPENACC
 !$acc parallel loop independent gang private(ir) present(h_x,ic_c)

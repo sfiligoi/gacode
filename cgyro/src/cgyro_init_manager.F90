@@ -153,6 +153,7 @@ subroutine cgyro_init_manager
   allocate(omega_rot_edrift_r(n_theta))
   allocate(omega_rot_star(n_theta,n_species))
 
+  allocate(gtime(nt1:nt2))
   allocate(freq(nt1:nt2))
   allocate(freq_err(nt1:nt2))
 

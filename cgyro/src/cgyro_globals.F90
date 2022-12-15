@@ -287,7 +287,7 @@ module cgyro_globals
   integer :: n_time
   integer :: i_current
   real    :: t_current
-  real    :: gtime
+  real, dimension(:), allocatable    :: gtime
   complex, dimension(:), allocatable :: freq
   complex, dimension(:), allocatable :: freq_err
   integer(KIND=8) :: kernel_start_time, kernel_exit_time, kernel_count_rate, kernel_count_max

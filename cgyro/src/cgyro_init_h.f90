@@ -50,7 +50,7 @@ subroutine cgyro_init_h
      call cgyro_info('Restart data found.')
      call cgyro_read_restart
      if (error_status /=0 ) return
-     gtime = 0.0
+     gtime(:) = 0.0
      
   case (2)
 
@@ -69,13 +69,13 @@ subroutine cgyro_init_h
      if (error_status /=0 ) return
      i_current = 0
      t_current = 0.0
-     gtime = 0.0
+     gtime(:) = 0.0
 
   case (0)
 
      i_current = 0
      t_current = 0.0
-     gtime = 0.0
+     gtime(:) = 0.0
 
      !-------------------------------------------------------------------------
      ! Generate analytic initial conditions
