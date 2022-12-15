@@ -16,41 +16,44 @@ subroutine cgyro_freq
 
   real :: total_weight,dfr,dfi
   real, dimension(nc) :: mode_weight
-  complex, dimension(nc,nt1:nt2) :: freq_loc
+  integer :: itor
+  complex, dimension(nc) :: freq_loc
 
   if (i_time == 0) then
 
-     freq(:) = 0.0
-     freq_err(:) = 0.0
+    freq(:) = 0.0
+    freq_err(:) = 0.0
 
   else
 
-     !--------------------------------------------------
-     ! Standard method: sum all wavenumbers at a given n
-     !--------------------------------------------------
+    !--------------------------------------------------
+    ! Standard method: sum all wavenumbers at a given n
+    !--------------------------------------------------
 
+    do itor=nt1,nt2
      ! Use potential to compute frequency
-     ! NOTE: Do it once per my_toroidal
-     mode_weight(:) = abs(field_old(1,:,my_toroidal))
+     ! NOTE: Do it once per itor
+     mode_weight(:) = abs(field_old(1,:,itor))
 
      ! Define local frequencies
      do ic=1,nc
-        if (abs(field_old(1,ic,my_toroidal)) > 1e-12 .and. abs(field_old2(1,ic,my_toroidal)) > 1e-12) then
-           freq_loc(ic,my_toroidal) = (i_c/delta_t)*log(field_old(1,ic,my_toroidal)/field_old2(1,ic,my_toroidal))
+        if (abs(field_old(1,ic,itor)) > 1e-12 .and. abs(field_old2(1,ic,itor)) > 1e-12) then
+           freq_loc(ic) = (i_c/delta_t)*log(field_old(1,ic,itor)/field_old2(1,ic,itor))
         else
-           freq_loc(ic,my_toroidal) = 0.0
+           freq_loc(ic) = 0.0
         endif
      enddo
 
      total_weight = sum(mode_weight(:))
-     freq(my_toroidal) = sum(freq_loc(:,my_toroidal)*mode_weight(:))/total_weight
+     freq(itor) = sum(freq_loc(:)*mode_weight(:))/total_weight
 
      ! Fractional Frequency Error
-     dfr = sum(abs(real(freq_loc(:,my_toroidal)-freq))*mode_weight(:))
-     dfi = sum(abs(aimag(freq_loc(:,my_toroidal)-freq))*mode_weight(:))
-     freq_err(my_toroidal) = (dfr+i_c*dfi)/total_weight/abs(freq(my_toroidal))
+     dfr = sum(abs(real(freq_loc(:)-freq(itor)))*mode_weight(:))
+     dfi = sum(abs(aimag(freq_loc(:)-freq(itor)))*mode_weight(:))
+     freq_err(itor) = (dfr+i_c*dfi)/total_weight/abs(freq(itor))
 
-     if (n_toroidal == 1 .and. abs(freq_err(my_toroidal)) < freq_tol) signal=1
+     if (n_toroidal == 1 .and. abs(freq_err(itor)) < freq_tol) signal=1
+    enddo
 
   endif
 
