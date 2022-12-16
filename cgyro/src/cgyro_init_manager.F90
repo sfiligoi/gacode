@@ -186,7 +186,7 @@ subroutine cgyro_init_manager
      
      allocate(recv_status(MPI_STATUS_SIZE))
 
-     allocate(icd_c(-nup_theta:nup_theta, nc))
+     allocate(icd_c(-nup_theta:nup_theta, nc ,my_toroidal:my_toroidal))
      allocate(dtheta(-nup_theta:nup_theta, nc ,my_toroidal:my_toroidal))
      allocate(dtheta_up(-nup_theta:nup_theta, nc,my_toroidal:my_toroidal))
      allocate(source(n_theta,nv_loc,my_toroidal:my_toroidal))

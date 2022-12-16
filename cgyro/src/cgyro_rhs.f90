@@ -108,7 +108,7 @@ subroutine cgyro_rhs(ij)
 
         rhs_stream = 0.0
         do id=-nup_theta,nup_theta
-           jc = icd_c(id, ic)
+           jc = icd_c(id, ic,my_toroidal)
            rhs_stream = rhs_stream &
                 -rval*dtheta(id,ic,my_toroidal)*cap_h_c(jc,iv_loc,my_toroidal)  &
                 -rval2*dtheta_up(id,ic,my_toroidal)*g_x(jc,iv_loc,my_toroidal) 
