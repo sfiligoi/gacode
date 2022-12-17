@@ -53,7 +53,7 @@ subroutine cgyro_flux
    ! 1. Compute kx-ky moments (n,E)
    !-----------------------------------------------------
 
-   moment_loc(:,:,:,:,itor) = 0.0
+   moment_loc(:,:,:,itor,:) = 0.0
 
    iv_loc = 0
    do iv=nv1,nv2
@@ -94,7 +94,7 @@ subroutine cgyro_flux
      enddo
    enddo
 
-   moment_loc(:,:,:,:,itor) = moment_loc(:,:,:,:,itor)/rho
+   moment_loc(:,:,:,itor,:) = moment_loc(:,:,:,itor,:)/rho
 
    !-------------------------------------------------------------
    ! 2. Compute global ky-dependent fluxes (with field breakdown)
