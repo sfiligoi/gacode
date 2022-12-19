@@ -23,6 +23,8 @@ subroutine cgyro_mpi_grid
 
   integer, external :: omp_get_max_threads, omp_get_thread_num
 
+  nt_loc = 1
+
   ! Velocity-space (v) and configuration-space (c) dimensions
   nv = n_energy*n_xi*n_species
   nc = n_radial*n_theta
@@ -214,20 +216,17 @@ subroutine cgyro_mpi_grid
      my_toroidal = 0
      nt1 = 0
      nt2 = 0
-     nt_loc = 1
   else if (n_toroidal == 1) then
      ! Single linear mode (assume n=1)
      my_toroidal = 1
      nt1 = 1
      nt2 = 1
-     nt_loc = 1
   else
      ! TODO: Allow for more than a single toroidal
      ! Multiple modes (n=0,1,2,...,n_toroidal-1)
      my_toroidal = i_group_1
      nt1 = i_group_1
      nt2 = i_group_1
-     nt_loc = 1
   endif
 
   ! Linear parallelization dimensions
