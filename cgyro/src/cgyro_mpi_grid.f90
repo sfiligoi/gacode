@@ -20,6 +20,7 @@ subroutine cgyro_mpi_grid
   integer :: iexch,il
   integer :: d
   integer :: splitkey
+  integer :: n_toroidal_procs
 
   integer, external :: omp_get_max_threads, omp_get_thread_num
 
@@ -140,21 +141,37 @@ subroutine cgyro_mpi_grid
      nv_loc = nv
      nc_loc = nc
      nsplit = nv_loc*n_theta/n_toroidal
+     nt_loc = 1
+     my_toroidal = 0
+     nt1 = 0
+     nt2 = 0
      return
   endif
+
+  if (zf_test_mode > 0) then
+     ! Zonal flow (n=0) test
+     nt_loc = 1
+  endif
+
+  if (modulo(n_toroidal,nt_loc) /= 0) then
+     call cgyro_error('N_TOROIDAL must be a multiple of N_TOROIDAL_PER_PROCESS.')
+     return
+  endif
+
+  n_toroidal_procs = n_toroidal/nt_loc
 
   !-------------------------------------------------------------
   ! Check that n_proc is a multiple of n_toroidal
   !
-  if (modulo(n_proc,n_toroidal) /= 0) then
-     call cgyro_error('Number of MPI processes must be a multiple of N_TOROIDAL.')
+  if (modulo(n_proc,n_toroidal_procs) /= 0) then
+     call cgyro_error('Number of MPI processes must be a multiple of N_TOROIDAL/N_TOROIDAL_PER_PROCESS.')
      return
   endif
 
   ! Assign subgroup dimensions: n_proc = n_proc_1 * n_proc_2
 
-  n_proc_1 = n_proc/n_toroidal
-  n_proc_2 = n_toroidal
+  n_proc_1 = n_proc/n_toroidal_procs
+  n_proc_2 = n_toroidal_procs
 
   ! Check that nv and nc are multiples of toroidal MPI multiplier
 
@@ -225,15 +242,15 @@ subroutine cgyro_mpi_grid
      ! TODO: Allow for more than a single toroidal
      ! Multiple modes (n=0,1,2,...,n_toroidal-1)
      my_toroidal = i_group_1
-     nt1 = i_group_1
-     nt2 = i_group_1
+     nt1 = i_group_1*nt_loc
+     nt2 = nt1 + nt_loc -1
   endif
 
   ! Linear parallelization dimensions
 
   ! ni -> nc
   ! nj -> nv  
-  call parallel_lib_init(nc,nv,my_toroidal,nc_loc,nv_loc,NEW_COMM_1)
+  call parallel_lib_init(nc,nv,nt1,nt_loc,nc_loc,nv_loc,NEW_COMM_1)
 
   nv1 = 1+i_proc_1*nv_loc
   nv2 = (1+i_proc_1)*nv_loc

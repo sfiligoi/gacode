@@ -17,9 +17,10 @@ module parallel_lib
   integer, private :: ni,nj
   integer, private :: ni_loc
   integer, private :: nj_loc
+  integer, private :: nk_loc
+  integer, private :: nk1,nk2
   integer, private :: lib_comm
   integer, private :: nsend
-  integer, private :: nk_idx
 
   real, dimension(:,:,:,:), allocatable, private :: fsendr_real
 
@@ -45,19 +46,18 @@ contains
   !  parallel_lib_r -> g(nj_loc,ni) -> f(ni_loc,nj)
   !=========================================================
 
-  subroutine parallel_lib_init(ni_in,nj_in,nk_idx_in,ni_loc_out,nj_loc_out,comm)
+  subroutine parallel_lib_init(ni_in,nj_in,nk1_in,nk_loc_in,ni_loc_out,nj_loc_out,comm)
 
     use mpi
 
     implicit none
 
     integer, intent(in) :: ni_in,nj_in
-    integer, intent(in) :: nk_idx_in
+    integer, intent(in) :: nk1_in,nk_loc_in
     integer, intent(in) :: comm
     integer, intent(inout) :: ni_loc_out,nj_loc_out
     integer, external :: parallel_dim
     integer :: ierr
-    integer :: my_toroidal
 
     lib_comm = comm
 
@@ -66,20 +66,24 @@ contains
 
     ni = ni_in
     nj = nj_in
-    nk_idx = nk_idx_in
-    my_toroidal = nk_idx
 
+    ! parallel_dim(x,y) ~= x/y
     ni_loc = parallel_dim(ni,nproc)
     nj_loc = parallel_dim(nj,nproc)
+    nk_loc = nk_loc_in
+
+    ! nk1_in is typically iproc*nk_loc, but not always
+    nk1 = nk1_in
+    nk2 = nk1 + nk_loc -1
 
     ni_loc_out = ni_loc
     nj_loc_out = nj_loc
 
-    nsend = ni*nj/nproc**2
+    nsend = nj_loc*ni_loc*nk_loc
 
-    allocate(fsendf(nj_loc,ni_loc,my_toroidal:my_toroidal,nproc))
-    allocate(fsendr(ni_loc,nj_loc,my_toroidal:my_toroidal,nproc))
-    if (.not. allocated(fsendr_real)) allocate(fsendr_real(ni_loc,nj_loc,my_toroidal:my_toroidal,nproc))
+    allocate(fsendf(nj_loc,ni_loc,nk1:nk2,nproc))
+    allocate(fsendr(ni_loc,nj_loc,nk1:nk2,nproc))
+    if (.not. allocated(fsendr_real)) allocate(fsendr_real(ni_loc,nj_loc,nk1:nk2,nproc))
 
 !$acc enter data create(fsendf,fsendr)
 
@@ -207,26 +211,24 @@ contains
     implicit none
 
     complex, intent(in), dimension(:,:,:) :: ft
-    integer :: j_loc,i,j,k,j1,j2
-    integer :: my_toroidal
-
-    ! TODO: Make it more flexible, so it can support multiple toroidals
-    my_toroidal = nk_idx
+    integer :: j_loc,i,j,k,j1,j2,itor
 
     j1 = 1+iproc*nj_loc
     j2 = (1+iproc)*nj_loc
 
-!$omp parallel do if (size(fsendr) >= default_size) default(none) &
-!$omp& shared(nproc,j1,j2,ni_loc,my_toroidal) &
+!$omp parallel do collapse(2) if (size(fsendr) >= default_size) default(none) &
+!$omp& shared(nproc,j1,j2,ni_loc,nk1,nk2) &
 !$omp& private(j,j_loc,i) &
 !$omp& shared(ft,fsendr)
     do k=1,nproc
+     do itor=nk1,nk2
        do j=j1,j2
           j_loc = j-j1+1 
           do i=1,ni_loc
-             fsendr(i,j_loc,my_toroidal,k) = ft(j_loc,i+(k-1)*ni_loc,1+(my_toroidal-my_toroidal))
+             fsendr(i,j_loc,itor,k) = ft(j_loc,i+(k-1)*ni_loc,1+(itor-nk1))
           enddo
        enddo
+     enddo
     enddo
 
   end subroutine parallel_lib_r_pack
@@ -242,26 +244,24 @@ contains
     implicit none
 
     complex, intent(in), dimension(:,:,:) :: fin
-    integer :: j_loc,i,j,k,j1,j2
-    integer :: my_toroidal
-
-    ! TODO: Make it more flexible, so it can support multiple toroidals
-    my_toroidal = nk_idx
+    integer :: j_loc,i,j,k,j1,j2,itor
 
     j1 = 1+iproc*nj_loc
     j2 = (1+iproc)*nj_loc
 
-!$omp parallel do if (size(fsendr) >= default_size) default(none) &
-!$omp& shared(nproc,j1,j2,ni_loc,my_toroidal) &
+!$omp parallel do collapse(2) if (size(fsendr) >= default_size) default(none) &
+!$omp& shared(nproc,j1,j2,ni_loc,nk1,nk2) &
 !$omp& private(j,j_loc,i) &
 !$omp& shared(fin,fsendr)
     do k=1,nproc
+     do itor=nk1,nk2
        do j=j1,j2
           j_loc = j-j1+1 
           do i=1,ni_loc
-             fsendr(i,j_loc,my_toroidal,k) = fin(i+(k-1)*ni_loc,j_loc,1+(my_toroidal-my_toroidal))
+             fsendr(i,j_loc,itor,k) = fin(i+(k-1)*ni_loc,j_loc,1+(itor-nk1))
           enddo
        enddo
+     enddo
     enddo
 
   end subroutine parallel_lib_rtrans_pack
@@ -278,23 +278,21 @@ contains
     implicit none
 
     complex, intent(in), dimension(:,:,:) :: fin
-    integer :: j_loc,i,j,k,j1,j2
-    integer :: my_toroidal
-
-    ! TODO: Make it more flexible, so it can support multiple toroidals
-    my_toroidal = nk_idx
+    integer :: j_loc,i,j,k,j1,j2,itor
 
     j1 = 1+iproc*nj_loc
     j2 = (1+iproc)*nj_loc
-!$acc parallel loop collapse(3) independent private(j_loc) &
+!$acc parallel loop collapse(4) independent private(j_loc) &
 !$acc&         present(fsendr,fin) default(none)
     do k=1,nproc
+     do itor=nk1,nk2
        do j=j1,j2
           do i=1,ni_loc
              j_loc = j-j1+1
-             fsendr(i,j_loc,my_toroidal,k) = fin(i+(k-1)*ni_loc,j_loc,1+(my_toroidal-my_toroidal))
+             fsendr(i,j_loc,itor,k) = fin(i+(k-1)*ni_loc,j_loc,1+(itor-nk1))
           enddo
        enddo
+     enddo
     enddo
 
   end subroutine parallel_lib_rtrans_pack_gpu
@@ -327,26 +325,24 @@ contains
 
     real, intent(in), dimension(:,:,:) :: fin
     real, intent(inout), dimension(:,:,:) :: f
-    integer :: ierr,j_loc,i,j,k,j1,j2
-    integer :: my_toroidal
-
-    ! TODO: Make it more flexible, so it can support multiple toroidals
-    my_toroidal = nk_idx
+    integer :: ierr,j_loc,i,j,k,j1,j2,itor
 
     j1 = 1+iproc*nj_loc
     j2 = (1+iproc)*nj_loc
 
-!$omp parallel do if (size(fsendr_real) >= default_size) default(none) &
-!$omp& shared(nproc,j1,j2,ni_loc,my_toroidal) &
+!$omp parallel do collapse(2) if (size(fsendr_real) >= default_size) default(none) &
+!$omp& shared(nproc,j1,j2,ni_loc,nk1,nk2) &
 !$omp& private(j,j_loc,i) &
 !$omp& shared(fin,fsendr_real)
     do k=1,nproc
+     do itor=nk1,nk2
        do j=j1,j2
           j_loc = j-j1+1
           do i=1,ni_loc
-             fsendr_real(i,j_loc,my_toroidal,k) = fin(i+(k-1)*ni_loc,j_loc,1+(my_toroidal-my_toroidal)) 
+             fsendr_real(i,j_loc,itor,k) = fin(i+(k-1)*ni_loc,j_loc,1+(itor-nk1)) 
           enddo
        enddo
+     enddo
     enddo
 
     call MPI_ALLTOALL(fsendr_real, &
