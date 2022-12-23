@@ -35,13 +35,13 @@ subroutine cgyro_nl_fftw_comm1_async
 
 #ifdef _OPENACC
 !$acc parallel loop gang independent private(it,iv_loc_m) &
-!$acc&         present(iv_e,it_e,ic_c,h_x,fpack) default(none)
+!$acc&         present(ic_c,h_x,fpack) default(none)
 #else
 !$omp parallel do private(iv_loc_m,it,ir)
 #endif
   do iexch=1,nsplit*n_toroidal
-     it = it_e(iexch)
-     iv_loc_m = iv_e(iexch)
+     it = 1+(iexch-1)/nv_loc
+     iv_loc_m = 1+modulo((iexch-1),nv_loc)
      if (iv_loc_m == 0) then
         ! padding
         fpack(1:n_radial,iexch) = (0.0,0.0)
@@ -96,13 +96,13 @@ subroutine cgyro_nl_fftw_comm1_r(ij)
 
 #ifdef _OPENACC
 !$acc parallel loop gang independent private(it,iv_loc_m) &
-!$acc&         present(iv_e,it_e,ic_c,px,rhs,fpack) default(none)
+!$acc&         present(ic_c,px,rhs,fpack) default(none)
 #else
 !$omp parallel do private(iv_loc_m,it,ir,ic_loc_m,my_psi)
 #endif
   do iexch=1,nsplit*n_toroidal
-     it = it_e(iexch)
-     iv_loc_m = iv_e(iexch)
+     it = 1+(iexch-1)/nv_loc
+     iv_loc_m = 1+modulo(iexch-1,nv_loc)
      if (iv_loc_m /= 0 ) then ! else it is padding and can be ignored
 !$acc loop vector private(ic_loc_m,my_psi)
         do ir=1,n_radial
