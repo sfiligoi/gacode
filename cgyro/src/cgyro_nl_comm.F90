@@ -34,23 +34,25 @@ subroutine cgyro_nl_fftw_comm1_async
   call timer_lib_in('nl_mem')
 
 #ifdef _OPENACC
-!$acc parallel loop gang independent private(it,iv_loc_m) &
+!$acc parallel loop collapse(3) gang vector independent private(iexch) &
 !$acc&         present(ic_c,h_x,fpack) default(none)
 #else
-!$omp parallel do private(iv_loc_m,it,ir)
+!$omp parallel do collapse(3) private(iexch)
 #endif
-  do iexch=1,nsplit*n_toroidal
-     it = 1+(iexch-1)/nv_loc
-     iv_loc_m = 1+modulo((iexch-1),nv_loc)
-     if (iv_loc_m == 0) then
-        ! padding
-        fpack(1:n_radial,iexch) = (0.0,0.0)
-     else
-!$acc loop vector
-        do ir=1,n_radial
-           fpack(ir,iexch) = h_x(ic_c(ir,it),iv_loc_m,my_toroidal)
-        enddo
-     endif
+  do it=1,n_theta
+   do iv_loc_m=1,nv_loc
+     do ir=1,n_radial
+       iexch = iv_loc_m + (it-1)*nv_loc
+       fpack(ir,iexch) = h_x(ic_c(ir,it),iv_loc_m,my_toroidal)
+     enddo
+   enddo
+  enddo
+
+#ifdef _OPENACC
+!$acc parallel loop independent present(fpack) if ( (nv_loc*n_theta) < (nsplit*n_toroidal) )
+#endif
+  do iexch=nv_loc*n_theta+1,nsplit*n_toroidal
+      fpack(1:n_radial,iexch) = (0.0,0.0)
   enddo
 
   call parallel_slib_f_nc_async(fpack,f_nl,f_req)
@@ -95,17 +97,15 @@ subroutine cgyro_nl_fftw_comm1_r(ij)
   psi_mul = ((q*rho/rmin)*(2*pi/length))
 
 #ifdef _OPENACC
-!$acc parallel loop gang independent private(it,iv_loc_m) &
+!$acc parallel loop collapse(3) gang vector independent private(iexch,ic_loc_m,my_psi) &
 !$acc&         present(ic_c,px,rhs,fpack) default(none)
 #else
-!$omp parallel do private(iv_loc_m,it,ir,ic_loc_m,my_psi)
+!$omp parallel do collapse(3) private(iexch,ic_loc_m,my_psi)
 #endif
-  do iexch=1,nsplit*n_toroidal
-     it = 1+(iexch-1)/nv_loc
-     iv_loc_m = 1+modulo(iexch-1,nv_loc)
-     if (iv_loc_m /= 0 ) then ! else it is padding and can be ignored
-!$acc loop vector private(ic_loc_m,my_psi)
+  do it=1,n_theta
+     do iv_loc_m=1,nv_loc
         do ir=1,n_radial
+           iexch = iv_loc_m + (it-1)*nv_loc
            ic_loc_m = ic_c(ir,it)
            if ( (my_toroidal == 0) .and.  (ir == 1 .or. px(ir) == 0) ) then
               ! filter
@@ -116,7 +116,7 @@ subroutine cgyro_nl_fftw_comm1_r(ij)
            ! RHS -> -[f,g] = [f,g]_{r,-alpha}
            rhs(ic_loc_m,iv_loc_m,my_toroidal,ij) = rhs(ic_loc_m,iv_loc_m,my_toroidal,ij)+psi_mul*my_psi
         enddo
-     endif
+     enddo
   enddo
 
   call timer_lib_out('nl')
