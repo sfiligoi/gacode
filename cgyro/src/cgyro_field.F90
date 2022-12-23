@@ -508,7 +508,7 @@ subroutine cgyro_field_c_gpu
         enddo
       else
 !$acc parallel loop collapse(3) independent present(gcoef) default(none)
-        do itor=(nt+1),nt2
+        do itor=(nt1+1),nt2
          do ic=1,nc
           do i_f=1,n_field
             field(i_f,ic,itor) = gcoef(i_f,ic,itor)*field(i_f,ic,itor)
