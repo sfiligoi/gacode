@@ -58,7 +58,8 @@ subroutine cgyro_nl_fftw(ij)
   integer, intent(in) :: ij
   !-----------------------------------
   integer :: j,p,iexch
-  integer :: it,ir,in,ix,iy
+  integer :: it,ir,itm,itl,itor,ix,iy
+  integer :: in
   integer :: i1,i2
   integer :: it_loc
   integer :: ierr
@@ -88,19 +89,22 @@ subroutine cgyro_nl_fftw(ij)
   call cgyro_nl_fftw_zero4(size(fxmany,1)*size(fxmany,2)*size(fxmany,3), &
                            fxmany,fymany,gxmany,gymany)
 
-!$acc parallel loop gang vector independent collapse(3) private(j,ir,p,ix,in,iy,f0,g0) async
+!$acc parallel loop gang vector independent collapse(4) private(j,ir,p,ix,itor,iy,f0,g0) async
   do j=1,nsplit
      do ir=1,n_radial
-        do in=1,n_toroidal
+       do itm=1,n_toroidal_procs
+         do itl=1,nt_loc
+           itor=itl + (itm-1)*nt_loc
            p  = ir-1-nx0/2
            ix = p
            if (ix < 0) ix = ix+nx
 
-           iy = in-1
-           f0 = i_c*f_nl(ir,j,in)
+           iy = itor-1
+           f0 = i_c*f_nl(ir,itl,j,itm)
            fxmany(iy,ix,j) = p*f0
            fymany(iy,ix,j) = iy*f0
-        enddo
+         enddo
+       enddo
      enddo
   enddo
 
@@ -192,17 +196,20 @@ subroutine cgyro_nl_fftw(ij)
   ! NOTE: The FFT will generate an unwanted n=0,p=-nr/2 component
   ! that will be filtered in the main time-stepping loop
 
-!$acc parallel loop independent collapse(3) private(j,ir,in,ix,iy)
-  do j=1,nsplit
-     do ir=1,n_radial 
-        do in=1,n_toroidal
+!$acc parallel loop independent collapse(4) private(itor,ix,iy)
+  do itm=1,n_toroidal_procs
+     do itl=1,nt_loc
+       do j=1,nsplit
+         do ir=1,n_radial 
+           itor=itl + (itm-1)*nt_loc
            ix = ir-1-nx0/2
            if (ix < 0) ix = ix+nx
 
-           iy = in-1
-           f_nl(ir,j,in) = fxmany(iy,ix,j)
-        enddo
-     enddo
+           iy = itor-1
+           f_nl(ir,itl,j,itm) = fxmany(iy,ix,j)
+         enddo
+       enddo
+    enddo
   enddo
 
   ! end data f_nl

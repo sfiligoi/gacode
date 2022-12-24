@@ -30,7 +30,7 @@ module parallel_lib
 
   ! slib
 
-  integer, private :: nsproc,isproc
+  integer :: nsproc,isproc
   integer, private :: nn
   integer, private :: nexch
   integer, private :: nkeep
@@ -386,6 +386,7 @@ contains
     call MPI_COMM_SIZE(slib_comm,nsproc,ierr)
     !-----------------------------------------------
 
+    ! nn_in == nsproc
     nn  = nn_in
     nexch = nexch_in
     nkeep = nkeep_in
@@ -505,17 +506,17 @@ contains
     !-------------------------------------------------------
     implicit none
     !
-    complex, intent(in), dimension(nkeep,nsplit*nn) :: x
-    complex, intent(inout), dimension(nkeep,nsplit,nn) :: xt
+    complex, intent(in), dimension(nkeep,nk_loc,nsplit*nn) :: x
+    complex, intent(inout), dimension(nkeep,nk_loc,nsplit,nn) :: xt
     !
     integer :: ierr
     !-------------------------------------------------------
 
     call MPI_ALLTOALL(x, &
-         nkeep*nsplit, &
+         nkeep*nk_loc*nsplit, &
          MPI_DOUBLE_COMPLEX, &
          xt, &
-         nkeep*nsplit, &
+         nkeep*nk_loc*nsplit, &
          MPI_DOUBLE_COMPLEX, &
          slib_comm, &
          ierr)
@@ -527,8 +528,8 @@ contains
     !-------------------------------------------------------
     implicit none
     !
-    complex, intent(in), dimension(nkeep,nsplit*nn) :: x
-    complex, intent(inout), dimension(nkeep,nsplit,nn) :: xt
+    complex, intent(in), dimension(nkeep,nk_loc,nsplit*nn) :: x
+    complex, intent(inout), dimension(nkeep,nk_loc,nsplit,nn) :: xt
     integer, intent(inout) :: req
     !
     integer :: ierr
@@ -544,10 +545,10 @@ contains
 #endif
 
    call MPI_IALLTOALL(x, &
-         nkeep*nsplit, &
+         nkeep*nk_loc*nsplit, &
          MPI_DOUBLE_COMPLEX, &
          xt, &
-         nkeep*nsplit, &
+         nkeep*nk_loc*nsplit, &
          MPI_DOUBLE_COMPLEX, &
          slib_comm, &
          req, &
@@ -571,8 +572,8 @@ contains
     !-------------------------------------------------------
     implicit none
     !
-    complex, intent(in), dimension(nkeep,nsplit*nn) :: x
-    complex, intent(inout), dimension(nkeep,nsplit,nn) :: xt
+    complex, intent(in), dimension(nkeep,nk_loc,nsplit*nn) :: x
+    complex, intent(inout), dimension(nkeep,nk_loc,nsplit,nn) :: xt
     integer, intent(inout) :: req
     !
     integer :: ierr
@@ -604,8 +605,8 @@ contains
     !-------------------------------------------------------
     implicit none
     !
-    complex, intent(in), dimension(nkeep,nsplit,nn) :: xt
-    complex, intent(inout), dimension(nkeep,nsplit*nn) :: x
+    complex, intent(in), dimension(nkeep,nk_loc,nsplit,nn) :: xt
+    complex, intent(inout), dimension(nkeep,nk_loc,nsplit*nn) :: x
     !
     integer :: ierr
     !-------------------------------------------------------
@@ -620,10 +621,10 @@ contains
 #endif
 
     call MPI_ALLTOALL(xt, &
-         nkeep*nsplit, &
+         nkeep*nk_loc*nsplit, &
          MPI_DOUBLE_COMPLEX, &
          x, &
-         nkeep*nsplit, &
+         nkeep*nk_loc*nsplit, &
          MPI_DOUBLE_COMPLEX, &
          slib_comm, &
          ierr)

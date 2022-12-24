@@ -257,9 +257,9 @@ subroutine cgyro_init_manager
            call cgyro_error("nonlinear_method==1 has been deprecated")
            return
         else
-           allocate(f_nl(n_radial,nsplit,n_toroidal))
+           allocate(f_nl(n_radial,nt_loc,nsplit,n_toroidal_procs))
            allocate(g_nl(n_field,n_radial,n_jtheta,n_toroidal))
-           allocate(fpack(n_radial,nsplit*n_toroidal))
+           allocate(fpack(n_radial,nt_loc,nsplit*n_toroidal_procs))
            allocate(gpack(n_field,n_radial,n_jtheta,n_toroidal))
         endif
         allocate(jvec_c_nl(n_field,n_radial,n_jtheta,nv_loc,n_toroidal))

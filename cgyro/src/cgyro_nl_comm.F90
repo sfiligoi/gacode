@@ -28,31 +28,33 @@ subroutine cgyro_nl_fftw_comm1_async
 
   implicit none
 
-  integer :: ir,it,iv_loc_m
+  integer :: ir,it,iv_loc_m,itor
   integer :: iexch
 
   call timer_lib_in('nl_mem')
 
 #ifdef _OPENACC
-!$acc parallel loop collapse(3) gang vector independent private(iexch) &
+!$acc parallel loop collapse(4) gang vector independent private(iexch) &
 !$acc&         present(ic_c,h_x,fpack) default(none)
 #else
-!$omp parallel do collapse(3) private(iexch)
+!$omp parallel do collapse(4) private(iexch)
 #endif
   do it=1,n_theta
    do iv_loc_m=1,nv_loc
+    do itor=nt1,nt2
      do ir=1,n_radial
        iexch = iv_loc_m + (it-1)*nv_loc
-       fpack(ir,iexch) = h_x(ic_c(ir,it),iv_loc_m,my_toroidal)
+       fpack(ir,itor-nt1+1,iexch) = h_x(ic_c(ir,it),iv_loc_m,itor)
      enddo
+    enddo
    enddo
   enddo
 
 #ifdef _OPENACC
-!$acc parallel loop independent present(fpack) if ( (nv_loc*n_theta) < (nsplit*n_toroidal) )
+!$acc parallel loop independent present(fpack) if ( (nv_loc*n_theta) < (nsplit*n_toroidal_procs) )
 #endif
-  do iexch=nv_loc*n_theta+1,nsplit*n_toroidal
-      fpack(1:n_radial,iexch) = (0.0,0.0)
+  do iexch=nv_loc*n_theta+1,nsplit*n_toroidal_procs
+      fpack(1:n_radial,1:nt_loc,iexch) = (0.0,0.0)
   enddo
 
   call parallel_slib_f_nc_async(fpack,f_nl,f_req)
@@ -83,7 +85,7 @@ subroutine cgyro_nl_fftw_comm1_r(ij)
   integer, intent(in) :: ij
   !-----------------------------------
 
-  integer :: ir,it,iv_loc_m,ic_loc_m
+  integer :: ir,it,iv_loc_m,ic_loc_m,itor
   integer :: iexch
   complex :: my_psi
   real :: psi_mul
@@ -97,26 +99,28 @@ subroutine cgyro_nl_fftw_comm1_r(ij)
   psi_mul = ((q*rho/rmin)*(2*pi/length))
 
 #ifdef _OPENACC
-!$acc parallel loop collapse(3) gang vector independent private(iexch,ic_loc_m,my_psi) &
+!$acc parallel loop collapse(4) gang vector independent private(iexch,ic_loc_m,my_psi) &
 !$acc&         present(ic_c,px,rhs,fpack) default(none)
 #else
-!$omp parallel do collapse(3) private(iexch,ic_loc_m,my_psi)
+!$omp parallel do collapse(4) private(iexch,ic_loc_m,my_psi)
 #endif
-  do it=1,n_theta
-     do iv_loc_m=1,nv_loc
+  do itor=nt1,nt2
+    do iv_loc_m=1,nv_loc
+      do it=1,n_theta
         do ir=1,n_radial
            iexch = iv_loc_m + (it-1)*nv_loc
            ic_loc_m = ic_c(ir,it)
-           if ( (my_toroidal == 0) .and.  (ir == 1 .or. px(ir) == 0) ) then
+           if ( (itor == 0) .and.  (ir == 1 .or. px(ir) == 0) ) then
               ! filter
               my_psi = (0.0,0.0)
            else
-              my_psi = fpack(ir,iexch)
+              my_psi = fpack(ir,itor-nt1+1,iexch)
            endif
            ! RHS -> -[f,g] = [f,g]_{r,-alpha}
-           rhs(ic_loc_m,iv_loc_m,my_toroidal,ij) = rhs(ic_loc_m,iv_loc_m,my_toroidal,ij)+psi_mul*my_psi
+           rhs(ic_loc_m,iv_loc_m,itor,ij) = rhs(ic_loc_m,iv_loc_m,itor,ij)+psi_mul*my_psi
         enddo
-     enddo
+      enddo
+    enddo
   enddo
 
   call timer_lib_out('nl')

@@ -215,6 +215,7 @@ module cgyro_globals
   !
   integer :: nt1,nt2,nt_loc
   integer :: my_toroidal  ! used to be called n
+  integer :: n_toroidal_procs
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------
@@ -351,9 +352,9 @@ module cgyro_globals
   complex, dimension(:,:,:), allocatable :: g_x
   complex, dimension(:,:,:), allocatable :: h0_x
   complex, dimension(:,:,:), allocatable :: h0_old
-  complex, dimension(:,:,:), allocatable :: f_nl
+  complex, dimension(:,:,:,:), allocatable :: f_nl
   complex, dimension(:,:,:,:), allocatable :: g_nl
-  complex, dimension(:,:), allocatable :: fpack
+  complex, dimension(:,:,:), allocatable :: fpack
   complex, dimension(:,:,:,:), allocatable :: gpack
   complex, dimension(:,:,:), allocatable :: omega_cap_h
   complex, dimension(:,:,:), allocatable :: omega_h
