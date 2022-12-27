@@ -399,33 +399,6 @@ contains
 
   ! exchange indexes
   ! This is always done using CPU memory
-  subroutine parallel_slib_f_idxs(nels,x,xt)
-
-    use mpi
-
-    !-------------------------------------------------------
-    implicit none
-    !
-    integer, intent(in) :: nels
-    integer, intent(in), dimension(nels*nn) :: x
-    integer, intent(inout), dimension(nels,nn) :: xt
-    !
-    integer :: ierr
-    !-------------------------------------------------------
-
-    call MPI_ALLTOALL(x, &
-         nels, &
-         MPI_INTEGER, &
-         xt, &
-         nels, &
-         MPI_INTEGER, &
-         slib_comm, &
-         ierr)
-
-  end subroutine parallel_slib_f_idxs
-
-  ! exchange indexes
-  ! This is always done using CPU memory
   subroutine parallel_slib_r_idxs(nels,xt,x)
 
     use mpi

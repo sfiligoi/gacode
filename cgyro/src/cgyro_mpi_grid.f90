@@ -316,8 +316,12 @@ subroutine cgyro_mpi_grid
 
      allocate(iv_j(nsplit,n_toroidal))
      allocate(it_j(nsplit,n_toroidal))
-     call parallel_slib_f_idxs(nsplit,iv_e,iv_j)
-     call parallel_slib_f_idxs(nsplit,it_e,it_j)
+     !call parallel_slib_f_idxs(nsplit,iv_e,iv_j)
+     !call parallel_slib_f_idxs(nsplit,it_e,it_j)
+     do il=1,n_toroidal
+       iv_j(1:nsplit,il) = iv_e((my_toroidal*nsplit+1):((my_toroidal+1)*nsplit))
+       it_j(1:nsplit,il) = it_e((my_toroidal*nsplit+1):((my_toroidal+1)*nsplit))
+     enddo
 
 !$acc enter data copyin(iv_j,it_j,it_e,iv_e)
 
