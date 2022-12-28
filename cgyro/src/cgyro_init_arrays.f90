@@ -16,6 +16,7 @@ subroutine cgyro_init_arrays
   integer :: jr,jt,id
   integer :: i_field
   integer :: l,ll
+  integer :: iltheta_min,iltheta_max
   complex :: thfac,carg
   real, dimension(:,:,:,:), allocatable :: res_loc
   real, dimension(:,:,:), allocatable :: jloc_c
@@ -114,12 +115,16 @@ subroutine cgyro_init_arrays
   enddo
 
   if (nonlinear_flag == 1) then
-!$acc parallel loop gang independent collapse(3) private(it) present(jvec_c_nl,jvec_c,ic_c,it_f) default(none)
+!$acc parallel loop gang independent collapse(2) private(it_loc,it,iltheta_min,iltheta_max) &
+!$acc&         present(jvec_c_nl,jvec_c,ic_c) default(none)
   do il=1,n_toroidal
     do iv_loc=1,nv_loc
+      iltheta_min = 1+((il-1)*nsplit)/nv_loc
+      iltheta_max = 1+(il*nsplit-1)/nv_loc
+!$acc loop seq
       do it_loc=1,n_jtheta
-        it = it_f(it_loc,il)
-        if (it /= 0) then
+        it = it_loc+iltheta_min-1
+        if (it <= iltheta_max) then
 !$acc loop vector
           do ir=1,n_radial
             ! TODO: How do il and my_toroidal interplay
