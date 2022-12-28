@@ -17,7 +17,7 @@ subroutine cgyro_mpi_grid
   implicit none
 
   integer :: ie,ix,is,ir,it
-  integer :: iexch,il
+  integer :: iexch,il,j
   integer :: d
   integer :: splitkey
 
@@ -298,45 +298,30 @@ subroutine cgyro_mpi_grid
   call parallel_slib_init(n_toroidal_procs,nv_loc*n_theta,n_radial,nsplit,NEW_COMM_2)
 
   if (nonlinear_flag == 1) then
-     ! nsplit NL mapping after AllToAll
-     allocate(iv_e(nsplit*n_toroidal))
-     allocate(it_e(nsplit*n_toroidal))
-     do iv_loc=1,nv_loc
-        do it=1,n_theta
-           iexch = iv_loc + (it-1)*nv_loc
-           ! all processes on slib use the same nv1:nv2 range, so using iv_loc OK
-           iv_e(iexch) = iv_loc
-           it_e(iexch) = it
-        enddo
-     enddo
-     do iexch=nv_loc*n_theta+1,nsplit*n_toroidal
-        iv_e(iexch) = 0       ! special value for padding
-        it_e(iexch) = n_theta ! padding must contain consecutive but valid values (minmax)
-     enddo
-
      allocate(iv_j(nsplit,n_toroidal))
      allocate(it_j(nsplit,n_toroidal))
      n_jtheta = 0
      do il=1,n_toroidal
        ! my_toroidal is not always ==i_group_1
-       iv_j(1:nsplit,il) = iv_e((i_group_1*nsplit+1):((i_group_1+1)*nsplit))
-       it_j(1:nsplit,il) = it_e((i_group_1*nsplit+1):((i_group_1+1)*nsplit))
+       do j=1,nsplit
+         iv_j(j,il) = 1+modulo(i_group_1*nsplit+j-1,nv_loc)
+         it_j(j,il) = 1+(i_group_1*nsplit+j-1)/nv_loc
+       enddo
 
        ! find max n_jtheta among all processes
        ! since we will need that for have equal number of rows
        ! in all the gpack buffers
-       ! Note: it_e is ordered, so min max juts first and last element
-       jtheta_min = it_e((il-1)*nsplit+1)
-       jtheta_max = it_e((il-1++1)*nsplit)
+       jtheta_min = 1+((il-1)*nsplit)/nv_loc
+       jtheta_max = 1+(il*nsplit-1)/nv_loc
        n_jtheta = max(n_jtheta,jtheta_max-jtheta_min+1)
      enddo
 
-!$acc enter data copyin(iv_j,it_j,it_e,iv_e)
+!$acc enter data copyin(iv_j,it_j)
 
      allocate(it_f(n_jtheta,n_toroidal))
      do il=1,n_toroidal
-        jtheta_min = it_e((il-1)*nsplit+1)
-        jtheta_max = it_e((il-1++1)*nsplit)
+        jtheta_min = 1+((il-1)*nsplit)/nv_loc
+        jtheta_max = 1+(il*nsplit-1)/nv_loc
         it_f(:,il) = 0 ! special value for padding
         do it=jtheta_min,jtheta_max
            it_f(it-jtheta_min+1,il) = it
@@ -344,10 +329,9 @@ subroutine cgyro_mpi_grid
      enddo
 
      ! now save our min and max
-     ! Note: it_e is ordered, so min max juts first and last element
      ! my_toroidal is not always ==i_group_1
-     jtheta_min = it_e(i_group_1*nsplit+1)
-     jtheta_max = it_e((i_group_1+1)*nsplit)
+     jtheta_min = 1+(i_group_1*nsplit)/nv_loc
+     jtheta_max = 1+((i_group_1+1)*nsplit-1)/nv_loc
 
 !$acc enter data copyin(it_f)
   endif
