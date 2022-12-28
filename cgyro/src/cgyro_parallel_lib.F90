@@ -397,33 +397,6 @@ contains
 
   end subroutine parallel_slib_init
 
-  ! exchange indexes
-  ! This is always done using CPU memory
-  subroutine parallel_slib_r_idxs(nels,xt,x)
-
-    use mpi
-
-    !-------------------------------------------------------
-    implicit none
-    !
-    integer, intent(in) :: nels
-    integer, intent(in), dimension(nels,nn) :: xt
-    integer, intent(inout), dimension(nels,nn) :: x
-    !
-    integer :: ierr
-    !-------------------------------------------------------
-
-    call MPI_ALLTOALL(xt, &
-         nels, &
-         MPI_INTEGER, &
-         x, &
-         nels, &
-         MPI_INTEGER, &
-         slib_comm, &
-         ierr)
-
-  end subroutine parallel_slib_r_idxs
-
   ! test an async req, to progress async operations
   subroutine parallel_slib_test(req)
     use mpi

@@ -211,7 +211,6 @@ module cgyro_globals
   integer, dimension(:,:), allocatable :: iv_j
   integer, dimension(:,:), allocatable :: it_j
   integer, dimension(:,:), allocatable :: it_f
-  integer, dimension(:,:), allocatable :: it_jf
   !
   integer :: nt1,nt2,nt_loc
   integer :: my_toroidal  ! used to be called n

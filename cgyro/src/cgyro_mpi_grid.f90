@@ -326,12 +326,22 @@ subroutine cgyro_mpi_grid
        ! since we will need that for have equal number of rows
        ! in all the gpack buffers
        ! Note: it_e is ordered, so min max juts first and last element
-       jtheta_min = it_e(il*nsplit+1)
-       jtheta_max = it_e((il+1)*nsplit)
+       jtheta_min = it_e((il-1)*nsplit+1)
+       jtheta_max = it_e((il-1++1)*nsplit)
        n_jtheta = max(n_jtheta,jtheta_max-jtheta_min+1)
      enddo
 
 !$acc enter data copyin(iv_j,it_j,it_e,iv_e)
+
+     allocate(it_f(n_jtheta,n_toroidal))
+     do il=1,n_toroidal
+        jtheta_min = it_e((il-1)*nsplit+1)
+        jtheta_max = it_e((il-1++1)*nsplit)
+        it_f(:,il) = 0 ! special value for padding
+        do it=jtheta_min,jtheta_max
+           it_f(it-jtheta_min+1,il) = it
+        enddo
+     enddo
 
      ! now save our min and max
      ! Note: it_e is ordered, so min max juts first and last element
@@ -339,21 +349,6 @@ subroutine cgyro_mpi_grid
      jtheta_min = it_e(i_group_1*nsplit+1)
      jtheta_max = it_e((i_group_1+1)*nsplit)
 
-     ! find what theta do I need to send
-     allocate(it_jf(n_jtheta,n_toroidal))
-     do il=1,n_toroidal
-        it_jf(:,il) = 0 ! special value for padding
-        do it=jtheta_min,jtheta_max
-           ! these are the ones I will need
-           it_jf(it-jtheta_min+1,il) = it
-        enddo
-     enddo
-
-     ! now send them to the others and get theirs
-     allocate(it_f(n_jtheta,n_toroidal))
-     call parallel_slib_r_idxs(n_jtheta,it_jf,it_f)
-
-     deallocate(it_jf)
 !$acc enter data copyin(it_f)
   endif
 
