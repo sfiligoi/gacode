@@ -325,17 +325,19 @@ subroutine cgyro_mpi_grid
        ! find max n_jtheta among all processes
        ! since we will need that for have equal number of rows
        ! in all the gpack buffers
-       jtheta_min = minval(it_e((il*nsplit+1):((il+1)*nsplit)))
-       jtheta_max = maxval(it_e((il*nsplit+1):((il+1)*nsplit)))
+       ! Note: it_e is ordered, so min max juts first and last element
+       jtheta_min = it_e(il*nsplit+1)
+       jtheta_max = it_e((il+1)*nsplit)
        n_jtheta = max(n_jtheta,jtheta_max-jtheta_min+1)
      enddo
 
 !$acc enter data copyin(iv_j,it_j,it_e,iv_e)
 
      ! now save our min and max
+     ! Note: it_e is ordered, so min max juts first and last element
      ! my_toroidal is not always ==i_group_1
-     jtheta_min = minval(it_e((i_group_1*nsplit+1):((i_group_1+1)*nsplit)))
-     jtheta_max = maxval(it_e((i_group_1*nsplit+1):((i_group_1+1)*nsplit)))
+     jtheta_min = it_e(i_group_1*nsplit+1)
+     jtheta_max = it_e((i_group_1+1)*nsplit)
 
      ! find what theta do I need to send
      allocate(it_jf(n_jtheta,n_toroidal))
