@@ -298,16 +298,8 @@ subroutine cgyro_mpi_grid
   call parallel_slib_init(n_toroidal_procs,nv_loc*n_theta,n_radial,nsplit,NEW_COMM_2)
 
   if (nonlinear_flag == 1) then
-     allocate(iv_j(nsplit,n_toroidal))
-     allocate(it_j(nsplit,n_toroidal))
      n_jtheta = 0
      do il=1,n_toroidal
-       ! my_toroidal is not always ==i_group_1
-       do j=1,nsplit
-         iv_j(j,il) = 1+modulo(i_group_1*nsplit+j-1,nv_loc)
-         it_j(j,il) = 1+(i_group_1*nsplit+j-1)/nv_loc
-       enddo
-
        ! find max n_jtheta among all processes
        ! since we will need that for have equal number of rows
        ! in all the gpack buffers
@@ -315,8 +307,6 @@ subroutine cgyro_mpi_grid
        jtheta_max = 1+(il*nsplit-1)/nv_loc
        n_jtheta = max(n_jtheta,jtheta_max-jtheta_min+1)
      enddo
-
-!$acc enter data copyin(iv_j,it_j)
 
      allocate(it_f(n_jtheta,n_toroidal))
      do il=1,n_toroidal

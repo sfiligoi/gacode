@@ -175,10 +175,9 @@ subroutine cgyro_nl_fftw(ij)
            p  = ir-1-nx0/2
            ix = p
            if (ix < 0) ix = ix+nx  
+           it = 1+(i_group_1*nsplit+j-1)/nv_loc
+           iv_loc = 1+modulo(i_group_1*nsplit+j-1,nv_loc)
            do in=1,n_toroidal
-              it = it_j(j,in)
-              iv_loc =iv_j(j,in)
-
               iy = in-1
               if (iv_loc == 0) then
                  g0 = (0.0,0.0)

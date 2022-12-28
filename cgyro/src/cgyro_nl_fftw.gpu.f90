@@ -141,8 +141,8 @@ subroutine cgyro_nl_fftw(ij)
   do j=1,nsplit
      do ir=1,n_radial
         do in=1,n_toroidal
-           it = it_j(j,in)
-           iv_loc =iv_j(j,in)
+           it = 1+(i_group_1*nsplit+j-1)/nv_loc
+           iv_loc = 1+modulo(i_group_1*nsplit+j-1,nv_loc)
 
            p  = ir-1-nx0/2
            ix = p
