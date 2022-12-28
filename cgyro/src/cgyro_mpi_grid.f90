@@ -316,23 +316,24 @@ subroutine cgyro_mpi_grid
 
      allocate(iv_j(nsplit,n_toroidal))
      allocate(it_j(nsplit,n_toroidal))
-     !call parallel_slib_f_idxs(nsplit,iv_e,iv_j)
-     !call parallel_slib_f_idxs(nsplit,it_e,it_j)
+     n_jtheta = 0
      do il=1,n_toroidal
        iv_j(1:nsplit,il) = iv_e((my_toroidal*nsplit+1):((my_toroidal+1)*nsplit))
        it_j(1:nsplit,il) = it_e((my_toroidal*nsplit+1):((my_toroidal+1)*nsplit))
+
+       ! find max n_jtheta among all processes
+       ! since we will need that for have equal number of rows
+       ! in all the gpack buffers
+       jtheta_min = minval(it_e((il*nsplit+1):((il+1)*nsplit)))
+       jtheta_max = maxval(it_e((il*nsplit+1):((il+1)*nsplit)))
+       n_jtheta = max(n_jtheta,jtheta_max-jtheta_min+1)
      enddo
 
 !$acc enter data copyin(iv_j,it_j,it_e,iv_e)
 
-     jtheta_min = minval(it_j(:,:))
-     jtheta_max = maxval(it_j(:,:))
-
-     ! find max n_jtheta among all processes
-     ! since we will need that for have equal number of rows
-     ! in all the gpack buffers
-     n_jtheta = jtheta_max-jtheta_min+1
-     call parallel_slib_cpu_maxval_int(n_jtheta)
+     ! now save our min and max
+     jtheta_min = minval(it_e((my_toroidal*nsplit+1):((my_toroidal+1)*nsplit)))
+     jtheta_max = maxval(it_e((my_toroidal*nsplit+1):((my_toroidal+1)*nsplit)))
 
      ! find what theta do I need to send
      allocate(it_jf(n_jtheta,n_toroidal))

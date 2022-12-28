@@ -424,34 +424,6 @@ contains
 
   end subroutine parallel_slib_r_idxs
 
-  ! This is always done using CPU memory
-  subroutine parallel_slib_cpu_maxval_int(val)
-
-    use mpi
-
-    !-------------------------------------------------------
-    implicit none
-    !
-    integer, intent(inout) :: val
-    !
-    integer :: ierr
-    integer, dimension(1) :: valin,valout
-    !-------------------------------------------------------
-
-    valin(1) = val
-
-    call MPI_ALLREDUCE(valin, &
-         valout, &
-         1, &
-         MPI_INTEGER, &
-         MPI_MAX, &
-         slib_comm, &
-         ierr)
-
-    val = valout(1)
-
-  end subroutine parallel_slib_cpu_maxval_int
-
   ! test an async req, to progress async operations
   subroutine parallel_slib_test(req)
     use mpi
