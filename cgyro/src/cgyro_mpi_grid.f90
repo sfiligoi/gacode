@@ -318,8 +318,9 @@ subroutine cgyro_mpi_grid
      allocate(it_j(nsplit,n_toroidal))
      n_jtheta = 0
      do il=1,n_toroidal
-       iv_j(1:nsplit,il) = iv_e((my_toroidal*nsplit+1):((my_toroidal+1)*nsplit))
-       it_j(1:nsplit,il) = it_e((my_toroidal*nsplit+1):((my_toroidal+1)*nsplit))
+       ! my_toroidal is not always ==i_group_1
+       iv_j(1:nsplit,il) = iv_e((i_group_1*nsplit+1):((i_group_1+1)*nsplit))
+       it_j(1:nsplit,il) = it_e((i_group_1*nsplit+1):((i_group_1+1)*nsplit))
 
        ! find max n_jtheta among all processes
        ! since we will need that for have equal number of rows
@@ -332,8 +333,9 @@ subroutine cgyro_mpi_grid
 !$acc enter data copyin(iv_j,it_j,it_e,iv_e)
 
      ! now save our min and max
-     jtheta_min = minval(it_e((my_toroidal*nsplit+1):((my_toroidal+1)*nsplit)))
-     jtheta_max = maxval(it_e((my_toroidal*nsplit+1):((my_toroidal+1)*nsplit)))
+     ! my_toroidal is not always ==i_group_1
+     jtheta_min = minval(it_e((i_group_1*nsplit+1):((i_group_1+1)*nsplit)))
+     jtheta_max = maxval(it_e((i_group_1*nsplit+1):((i_group_1+1)*nsplit)))
 
      ! find what theta do I need to send
      allocate(it_jf(n_jtheta,n_toroidal))
