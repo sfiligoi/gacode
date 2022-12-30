@@ -298,21 +298,16 @@ subroutine cgyro_mpi_grid
 
   call parallel_slib_init(n_toroidal_procs,nv_loc*n_theta,n_radial,nsplit,NEW_COMM_2)
 
+  n_jtheta = 0
   if (nonlinear_flag == 1) then
-     n_jtheta = 0
      do il=1,n_toroidal
        ! find max n_jtheta among all processes
-       ! since we will need that for have equal number of rows
+       ! since we will need that to have equal number of rows
        ! in all the gpack buffers
        iltheta_min = 1+((il-1)*nsplit)/nv_loc
        iltheta_max = 1+(il*nsplit-1)/nv_loc
        n_jtheta = max(n_jtheta,iltheta_max-iltheta_min+1)
      enddo
-
-     ! now save our min and max
-     ! my_toroidal is not always ==i_group_1
-     jtheta_min = 1+(i_group_1*nsplit)/nv_loc
-     jtheta_max = 1+((i_group_1+1)*nsplit-1)/nv_loc
   endif
 
   ! OMP code

@@ -68,6 +68,7 @@ subroutine cgyro_nl_fftw(ij)
   integer :: in
   integer :: it_loc
   integer :: j,p,iexch
+  integer :: jtheta_min
   integer :: i_omp
   logical :: force_early_comm2, one_pass_fft
   integer :: o,num_one_pass
@@ -163,7 +164,7 @@ subroutine cgyro_nl_fftw(ij)
     c2 = c*n_omp
     if (c2>nsplit) c2=nsplit
 
-!$omp parallel do schedule(static,1) private(in,iy,ir,p,ix,g0,i_omp,j,it,iv_loc,it_loc)
+!$omp parallel do schedule(static,1) private(in,iy,ir,p,ix,g0,i_omp,j,it,iv_loc,it_loc,jtheta_min)
     do j=c1,c2
         i_omp = j-c1+1
 
@@ -175,9 +176,10 @@ subroutine cgyro_nl_fftw(ij)
            p  = ir-1-nx0/2
            ix = p
            if (ix < 0) ix = ix+nx  
-           it = 1+(i_group_1*nsplit+j-1)/nv_loc
-           iv_loc = 1+modulo(i_group_1*nsplit+j-1,nv_loc)
+           it = 1+(my_toroidal*nsplit+j-1)/nv_loc
+           iv_loc = 1+modulo(my_toroidal*nsplit+j-1,nv_loc)
            do in=1,n_toroidal
+              jtheta_min = 1+(my_toroidal*nsplit)/nv_loc
               iy = in-1
               if (iv_loc == 0) then
                  g0 = (0.0,0.0)

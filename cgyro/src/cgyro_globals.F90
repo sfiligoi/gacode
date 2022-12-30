@@ -189,7 +189,6 @@ module cgyro_globals
   integer, dimension(:), allocatable :: recv_status
   integer :: f_req, g_req
   ! Thetas present in the process after NL AllToAll
-  integer :: jtheta_min,jtheta_max
   integer :: n_jtheta
   !
   ! Pointers

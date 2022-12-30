@@ -68,6 +68,7 @@ subroutine cgyro_nl_fftw(ij)
   integer :: i_omp
   logical :: force_early_comm2, one_pass_fft
   integer :: o,num_one_pass
+  integer :: jtheta_min
 
   complex :: f0,g0
 
@@ -129,7 +130,7 @@ subroutine cgyro_nl_fftw(ij)
      if (one_pass_fft) then
         num_one_pass = 4
      endif
-!$omp parallel do collapse(2) private(in,itl,itm,itor,iy,ir,p,ix,f0,i_omp,j,o,it,iv_loc,it_loc)
+!$omp parallel do collapse(2) private(in,itl,itm,itor,iy,ir,p,ix,f0,i_omp,j,o,it,iv_loc,it_loc,jtheta_min)
      do j=1,nsplit
         do o=1,num_one_pass
            i_omp = j ! j<n_omp in this branch
@@ -185,9 +186,10 @@ subroutine cgyro_nl_fftw(ij)
                  p  = ir-1-nx0/2
                  ix = p
                  if (ix < 0) ix = ix+nx
-                 it = 1+(i_group_1*nsplit+j-1)/nv_loc
-                 iv_loc = 1+modulo(i_group_1*nsplit+j-1,nv_loc)
+                 it = 1+(my_toroidal*nsplit+j-1)/nv_loc
+                 iv_loc = 1+modulo(my_toroidal*nsplit+j-1,nv_loc)
                  do in=1,n_toroidal
+                    jtheta_min = 1+(my_toroidal*nsplit)/nv_loc
                     iy = in-1
                     if (iv_loc == 0) then
                        g0 = (0.0,0.0)
@@ -210,9 +212,10 @@ subroutine cgyro_nl_fftw(ij)
                  p  = ir-1-nx0/2
                  ix = p
                  if (ix < 0) ix = ix+nx
-                 it = 1+(i_group_1*nsplit+j-1)/nv_loc
-                 iv_loc = 1+modulo(i_group_1*nsplit+j-1,nv_loc)
+                 it = 1+(my_toroidal*nsplit+j-1)/nv_loc
+                 iv_loc = 1+modulo(my_toroidal*nsplit+j-1,nv_loc)
                  do in=1,n_toroidal
+                    jtheta_min = 1+(my_toroidal*nsplit)/nv_loc
                     iy = in-1
                     if (iv_loc == 0) then
                        g0 = (0.0,0.0)
@@ -245,7 +248,7 @@ subroutine cgyro_nl_fftw(ij)
   call timer_lib_in('nl')
 
   if (n_omp <= nsplit) then
-!$omp parallel private(in,iy,ir,p,ix,g0,i_omp,j,it,iv_loc,it_loc)
+!$omp parallel private(in,iy,ir,p,ix,g0,i_omp,j,it,iv_loc,it_loc,jtheta_min)
 !$omp do schedule(dynamic,1)
      do j=1,nsplit
         i_omp = omp_get_thread_num()+1
@@ -258,9 +261,10 @@ subroutine cgyro_nl_fftw(ij)
            p  = ir-1-nx0/2
            ix = p
            if (ix < 0) ix = ix+nx  
-           it = 1+(i_group_1*nsplit+j-1)/nv_loc
-           iv_loc = 1+modulo(i_group_1*nsplit+j-1,nv_loc)
+           it = 1+(my_toroidal*nsplit+j-1)/nv_loc
+           iv_loc = 1+modulo(my_toroidal*nsplit+j-1,nv_loc)
            do in=1,n_toroidal
+              jtheta_min = 1+(my_toroidal*nsplit)/nv_loc
               iy = in-1
               if (iv_loc == 0) then
                  g0 = (0.0,0.0)
@@ -284,7 +288,7 @@ subroutine cgyro_nl_fftw(ij)
 !$omp end parallel
   else ! n_omp>nsplit
      if (.not. one_pass_fft) then
-!$omp parallel private(in,iy,ir,p,ix,g0,i_omp,j,it,iv_loc,it_loc)
+!$omp parallel private(in,iy,ir,p,ix,g0,i_omp,j,it,iv_loc,it_loc,jtheta_min)
 !$omp do schedule(dynamic,1) collapse(2)
         do j=1,nsplit
            do o=1,2
@@ -298,9 +302,10 @@ subroutine cgyro_nl_fftw(ij)
                     p  = ir-1-nx0/2
                     ix = p
                     if (ix < 0) ix = ix+nx
-                    it = 1+(i_group_1*nsplit+j-1)/nv_loc
-                    iv_loc = 1+modulo(i_group_1*nsplit+j-1,nv_loc)
+                    it = 1+(my_toroidal*nsplit+j-1)/nv_loc
+                    iv_loc = 1+modulo(my_toroidal*nsplit+j-1,nv_loc)
                     do in=1,n_toroidal
+                       jtheta_min = 1+(my_toroidal*nsplit)/nv_loc
                        iy = in-1
                        if (iv_loc == 0) then
                           g0 = (0.0,0.0)
@@ -322,9 +327,10 @@ subroutine cgyro_nl_fftw(ij)
                     p  = ir-1-nx0/2
                     ix = p
                     if (ix < 0) ix = ix+nx
-                    it = 1+(i_group_1*nsplit+j-1)/nv_loc
-                    iv_loc = 1+modulo(i_group_1*nsplit+j-1,nv_loc)
+                    it = 1+(my_toroidal*nsplit+j-1)/nv_loc
+                    iv_loc = 1+modulo(my_toroidal*nsplit+j-1,nv_loc)
                     do in=1,n_toroidal
+                       jtheta_min = 1+(my_toroidal*nsplit)/nv_loc
                        iy = in-1
                        if (iv_loc == 0) then
                           g0 = (0.0,0.0)

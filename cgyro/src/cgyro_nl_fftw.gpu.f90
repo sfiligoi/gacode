@@ -65,6 +65,7 @@ subroutine cgyro_nl_fftw(ij)
   integer :: ierr
   integer :: rc
   complex :: f0,g0
+  integer :: jtheta_min
 
   real :: inv_nxny
 
@@ -136,13 +137,14 @@ subroutine cgyro_nl_fftw(ij)
   call timer_lib_in('nl')
 
 
-!$acc parallel loop gang vector independent collapse(3) private(j,ir,p,ix,in,iy,f0,g0,it,iv_loc,it_loc) &
+!$acc parallel loop gang vector independent collapse(3) private(j,ir,p,ix,in,iy,f0,g0,it,iv_loc,it_loc,jtheta_min) &
 !$acc&         present(g_nl)
   do j=1,nsplit
      do ir=1,n_radial
         do in=1,n_toroidal
-           it = 1+(i_group_1*nsplit+j-1)/nv_loc
-           iv_loc = 1+modulo(i_group_1*nsplit+j-1,nv_loc)
+           it = 1+(my_toroidal*nsplit+j-1)/nv_loc
+           iv_loc = 1+modulo(my_toroidal*nsplit+j-1,nv_loc)
+           jtheta_min = 1+(my_toroidal*nsplit)/nv_loc
 
            p  = ir-1-nx0/2
            ix = p
