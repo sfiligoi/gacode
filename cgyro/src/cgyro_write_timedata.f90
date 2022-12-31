@@ -80,7 +80,7 @@ subroutine cgyro_write_timedata
         ir = ir_c(ic)
         it = it_c(ic)
         if (itp(it) > 0) then
-           field_plot(ir,itp(it),my_toroidal) = field(i_field,ic,my_toroidal)
+           field_plot(ir,itp(it),nt1:nt2) = field(i_field,ic,nt1:nt2)
         endif
      enddo
 
@@ -104,7 +104,7 @@ subroutine cgyro_write_timedata
   ! Ballooning mode (or ZF) output for linear runs with a single mode
   ! (can both be plotted with cgyro_plot -plot ball)
   !
-  has_balloon = (n_toroidal == 1) .and. ((my_toroidal > 0)  .and. (box_size == 1))
+  has_balloon = (n_toroidal == 1) .and. ((nt1 > 0)  .and. (box_size == 1))
   has_zf      = zf_test_mode > 0
   if ( (i_proc==0) .and. (has_zf .or. has_balloon) ) then
      ! NOTE: Only process the first my_toroidal
@@ -113,7 +113,7 @@ subroutine cgyro_write_timedata
 
         do ir=1,n_radial
            do it=1,n_theta
-              ftemp(it,ir) = field(i_field,ic_c(ir,it),my_toroidal)
+              ftemp(it,ir) = field(i_field,ic_c(ir,it),nt1)
            enddo
         enddo
 
@@ -607,8 +607,8 @@ subroutine write_distribution(datafile)
 
      allocate(h_x_glob(nc,nv))
      ! Collect distribution onto process 0
-     call MPI_GATHER(cap_h_c(:,:,my_toroidal),&
-          size(cap_h_c(:,:,my_toroidal)),&
+     call MPI_GATHER(cap_h_c(:,:,nt1),&
+          size(cap_h_c(:,:,nt1)),&
           MPI_DOUBLE_COMPLEX,&
           h_x_glob(:,:),&
           size(h_x_glob),&
@@ -785,8 +785,8 @@ subroutine print_scrdata()
      ! NOTE: There could be only one my_toroidal when n_toroidal <=1
      print '(a,1pe9.3,a,1pe10.3,1x,1pe10.3,a,1pe10.3,a,1pe9.3,1x,1pe9.3,a)',&
           '[t: ',t_current,&
-          '][w: ',freq(my_toroidal),&
-          '][dw:',abs(freq_err(my_toroidal)),&
+          '][w: ',freq(nt1),&
+          '][dw:',abs(freq_err(nt1)),&
           '][e: ',integration_error(:),']'
 
   endif
@@ -881,7 +881,7 @@ subroutine extended_ang(f2d)
   ! Assumption is that box_size=1
 
   do ir=1,n_radial
-     f1d(:,ir) = f2d(:,ir)*exp(-2*pi*i_c*(px(ir)+px0)*k_theta_base*my_toroidal*rmin*sign_qs)
+     f1d(:,ir) = f2d(:,ir)*exp(-2*pi*i_c*(px(ir)+px0)*k_theta_base*nt1*rmin*sign_qs)
   enddo
 
   if (sign_qs < 0) then
