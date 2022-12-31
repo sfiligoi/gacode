@@ -151,7 +151,6 @@ subroutine cgyro_mpi_grid
      nc_loc = nc
      nsplit = nv_loc*n_theta/n_toroidal
      nt_loc = 1
-     my_toroidal = 0
      nt1 = 0
      nt2 = 0
      return
@@ -232,18 +231,15 @@ subroutine cgyro_mpi_grid
   !       But we need my_toroidal early
   if (zf_test_mode > 0) then
      ! Zonal flow (n=0) test
-     my_toroidal = 0
      nt1 = 0
      nt2 = 0
   else if (n_toroidal == 1) then
      ! Single linear mode (assume n=1)
-     my_toroidal = 1
      nt1 = 1
      nt2 = 1
   else
      ! TODO: Allow for more than a single toroidal
      ! Multiple modes (n=0,1,2,...,n_toroidal-1)
-     my_toroidal = i_group_1
      nt1 = i_group_1*nt_loc
      nt2 = nt1 + nt_loc -1
   endif

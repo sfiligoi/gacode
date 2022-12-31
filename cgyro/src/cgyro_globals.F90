@@ -207,7 +207,6 @@ module cgyro_globals
   integer, dimension(:), allocatable :: ica_c,icb_c
   !
   integer :: nt1,nt2,nt_loc
-  integer :: my_toroidal  ! used to be called n
   integer :: n_toroidal_procs
   !---------------------------------------------------------------
 
