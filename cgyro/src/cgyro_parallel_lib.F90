@@ -569,8 +569,8 @@ contains
     implicit none
     !
     integer, intent(in) :: nels1,nels2,nels3
-    complex, intent(in), dimension(nels1,nels2,nels3,nn) :: x
-    complex, intent(inout), dimension(nels1,nels2,nels3,nn) :: xt
+    complex, intent(in), dimension(nels1,nels2,nels3,nk_loc*nn) :: x
+    complex, intent(inout), dimension(nels1,nels2,nels3,nk_loc*nn) :: xt
     !
     integer :: ierr
     !-------------------------------------------------------
@@ -581,10 +581,10 @@ contains
 #endif
 
     call MPI_ALLTOALL(x, &
-         nels1*nels2*nels3, &
+         nels1*nels2*nels3*nk_loc, &
          MPI_DOUBLE_COMPLEX, &
          xt, &
-         nels1*nels2*nels3, &
+         nels1*nels2*nels3*nk_loc, &
          MPI_DOUBLE_COMPLEX, &
          slib_comm, &
          ierr)
@@ -602,8 +602,8 @@ contains
     implicit none
     !
     integer, intent(in) :: nels1,nels2,nels3
-    complex, intent(in), dimension(nels1,nels2,nels3,nn) :: x
-    complex, intent(inout), dimension(nels1,nels2,nels3,nn) :: xt
+    complex, intent(in), dimension(nels1,nels2,nels3,nk_loc*nn) :: x
+    complex, intent(inout), dimension(nels1,nels2,nels3,nk_loc*nn) :: xt
     integer, intent(inout) :: req
     !
     integer :: ierr
@@ -615,10 +615,10 @@ contains
 #endif
 
    call MPI_IALLTOALL(x, &
-         nels1*nels2*nels3, &
+         nels1*nels2*nels3*nk_loc, &
          MPI_DOUBLE_COMPLEX, &
          xt, &
-         nels1*nels2*nels3, &
+         nels1*nels2*nels3*nk_loc, &
          MPI_DOUBLE_COMPLEX, &
          slib_comm, &
          req, &
@@ -638,8 +638,8 @@ contains
     implicit none
     !
     integer, intent(in) :: nels1,nels2,nels3
-    complex, intent(in), dimension(nels1,nels2,nels3,nn) :: x
-    complex, intent(inout), dimension(nels1,nels2,nels3,nn) :: xt
+    complex, intent(in), dimension(nels1,nels2,nels3,nk_loc*nn) :: x
+    complex, intent(inout), dimension(nels1,nels2,nels3,nk_loc*nn) :: xt
     integer, intent(inout) :: req
     !
     integer :: ierr
