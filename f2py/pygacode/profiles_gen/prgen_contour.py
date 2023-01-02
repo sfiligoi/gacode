@@ -191,18 +191,22 @@ def prgen_contour(g,mag,nc,psinorm,narc):
       yscale = (ny-1)/(my-1)
       
       # A few contours
-      for i in [1,nc//3,(2*nc)//3,nc-1]:
+      for i in [nc//2,nc-1]:
          x,y = efit_rzmapi(g,rv[:,i],zv[:,i],mx,my)
-         ax.plot(x*xscale,y*yscale,'--k',linewidth=1)
+         label = r'$\psi = {:.4f}$'.format((psic[i]-psi0)/(psi1-psi0))
+         ax.plot(x*xscale,y*yscale,'--k',linewidth=1,label=label)
          
       contours = measure.find_contours(psi_efit,psi1)
       for contour in contours:
-         ixc = contour[:,1] ; iyc = contour[:,0]        
-         ax.plot(ixc*xscale,iyc*yscale,color='b',linewidth=1)
+         ixc = contour[:,1] ; iyc = contour[:,0]
+         label = r'$\psi_\mathrm{separatrix}^\mathrm{EFIT}$' 
+         ax.plot(ixc*xscale,iyc*yscale,color='b',linewidth=1,label=label)
                
-      # Separatrix
-      ax.plot(ixs*xscale,iys*yscale,'w',linewidth=1)
+      # GACODE-computed Separatrix
+      label = r'$\psi_\mathrm{separatrix}^\mathrm{GACODE}$' 
+      ax.plot(ixs*xscale,iys*yscale,'w',linewidth=1,label=label)
 
+      ax.legend()
       plt.tight_layout()
       
       ofile = 'prgen_efit.pdf'

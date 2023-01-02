@@ -81,12 +81,12 @@ subroutine prgen_geometry
   pratio = dpsi(nx)/efit_psi(npsi)
   if (pratio > 1.0) then
      if (pratio > 1.05) then
-     print '(a)','WARNING: (prgen_geometry) Detected statefile dpsi(nx) >> mapped dpsi_max [BAD]'
+        print '(a)','WARNING: (prgen_geometry) Detected statefile dpsi(nx) >> mapped dpsi_max [BAD]'
      else
-     print '(a)','WARNING: (prgen_geometry) Detected statefile dpsi(nx) > mapped dpsi_max'
+        print '(a)','WARNING: (prgen_geometry) Detected statefile dpsi(nx) > mapped dpsi_max'
      endif
-     print '(a,f4.2,a)','WARNING: (prgen_geometry) Compressing statefile flux by ',pratio,' to match mapped flux'
-     dpsi(:) = dpsi(:)/pratio
+     print '(a,f5.3,a)','WARNING: (prgen_geometry) Compressing statefile flux by ',pratio,' to match mapped flux'
+     dpsi(:) = dpsi(:)/(pratio+1e-10)
   endif
   !--------------------------------------------------------------------------------------
 
