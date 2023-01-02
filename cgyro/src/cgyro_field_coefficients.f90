@@ -158,10 +158,9 @@ subroutine cgyro_field_coefficients
      pb21(:,:) = pb12(:,:)*betae_unit/(-2*dens_ele*temp_ele)
 
      sum_loc(:,:)  = 0.0
-     iv_loc = 0
      do itor=nt1,nt2
       do iv=nv1,nv2
-        iv_loc = iv_loc+1
+        iv_loc = iv-nv1+1
         is = is_v(iv)
         ix = ix_v(iv)
         ie = ie_v(iv)
