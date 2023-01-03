@@ -542,7 +542,7 @@ subroutine cgyro_field_c_gpu
      endif
   endif
 
-!$acc parallel loop collapse(2) gang vector private(iv_loc,is,my_psi) &
+!$acc parallel loop collapse(3) gang vector private(iv_loc,is,my_psi) &
 !$acc&         present(jvec_c,z,temp,is_v) default(none)
   do itor=nt1,nt2
    do iv=nv1,nv2
@@ -633,7 +633,7 @@ subroutine cgyro_field_c_ae_gpu
     call cgyro_field_ae('c')
 !$acc update device(field(:,:,0:0))
 
-!$acc parallel loop collapse(2) gang vector private(iv_loc,is,my_psi) &
+!$acc parallel loop collapse(3) gang vector private(iv_loc,is,my_psi) &
 !$acc&         present(jvec_c,z,temp,is_v) default(none)
   do itor=0,0
    do iv=nv1,nv2
