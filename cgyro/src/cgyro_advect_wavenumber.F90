@@ -27,7 +27,7 @@ subroutine cgyro_advect_wavenumber(ij)
 !$acc&                   present(rhs(:,:,:,ij),omega_ss,field,h_x,c_wave) &
 !$acc&                   vector_length(n_theta)
 #else
-!$omp parallel do private(in,ir,j,icc,l,ll,he)
+!$omp parallel do collapse(2) private(in,ir,j,icc,l,ll,he)
 #endif
      do itor=nt1,nt2
       do in=1,nv_loc
