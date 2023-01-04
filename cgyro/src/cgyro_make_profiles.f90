@@ -340,7 +340,7 @@ subroutine cgyro_make_profiles
   !-------------------------------------------------------------
   ! Manage simulation type (n=0,linear,nonlinear)
   !
-  ! Note: my_toroidal properly initialized in cgyro_mpi_grid
+  ! Note: nt1,nt2,nt_loc properly initialized in cgyro_mpi_grid
   !
   if (zf_test_mode > 0) then
 
