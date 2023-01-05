@@ -26,6 +26,7 @@ subroutine cgyro_init_arrays
   ! Parallel conservation cutoff
   up_cutoff = 1.0-betae_unit/0.01
   if (up_cutoff < 0.0) up_cutoff = 0.0
+  up_cutoff = 0.0
 !$acc enter data copyin(up_cutoff)   
 
   !-------------------------------------------------------------------------
@@ -166,7 +167,7 @@ subroutine cgyro_init_arrays
      ie = ie_v(iv)
      do ic=1,nc
         res_loc(ic,is,itor,1) = res_loc(ic,is,itor,1) + &
-                w_xi(ix)*w_e(ie)*jvec_c(1,ic,iv_loc,itor)**2 
+                w_xi(ix)*w_e(ie)*jvec_c(1,ic,iv_loc,itor)**2*abs(xi(ix)*vel(ie))
         res_loc(ic,is,itor,2) = res_loc(ic,is,itor,2) + &
                 w_xi(ix)*w_e(ie)*jvec_c(1,ic,iv_loc,itor)**2*(xi(ix)*vel(ie))**2
      enddo
@@ -193,7 +194,8 @@ subroutine cgyro_init_arrays
      do ic=1,nc
         upfac1(ic,iv_loc,itor,1) = w_e(ie)*w_xi(ix)*abs(xi(ix))*vel(ie) * &
                 jvec_c(1,ic,iv_loc,itor)
-        upfac2(ic,iv_loc,itor,1) = jvec_c(1,ic,iv_loc,itor)/res_norm(ic,is,itor,1)
+        upfac2(ic,iv_loc,itor,1) = jvec_c(1,ic,iv_loc,itor)*abs(xi(ix))*vel(ie) / &
+                res_norm(ic,is,itor,1)
         upfac1(ic,iv_loc,itor,2) = w_e(ie)*w_xi(ix)*abs(xi(ix))*vel(ie) * &
                 jvec_c(1,ic,iv_loc,itor)*xi(ix)*vel(ie)
         upfac2(ic,iv_loc,itor,2) = jvec_c(1,ic,iv_loc,itor)/res_norm(ic,is,itor,2) * &
