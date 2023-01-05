@@ -46,7 +46,7 @@ subroutine cgyro_upwind_r64
              res_loc = res_loc+upfac1(ic,iv_loc,itor)*g_x(ic,iv_loc,itor)
           endif
        enddo
-       upwind_res_loc(ic,is,itor) = res_loc_one
+       upwind_res_loc(ic,is,itor) = res_loc
     enddo
    enddo
   enddo
@@ -131,7 +131,7 @@ subroutine cgyro_upwind_r32
 
   integer :: is,ie,ix,itor
 #ifdef _OPENACC
-  complex(KIND=REAL32) :: res_loc_one, res_loc_two
+  complex(KIND=REAL32) :: res_loc
 #endif
 
   call timer_lib_in('str')
@@ -145,14 +145,14 @@ subroutine cgyro_upwind_r32
      do ic=1,nc
        res_loc = (0.0,0.0)
 
-!$acc loop vector private(iv_loc) reduction(+:res_loc_one)
+!$acc loop vector private(iv_loc) reduction(+:res_loc)
        do iv=nv1,nv2
           iv_loc = iv-nv1+1
           if (is == is_v(iv)) then
              res_loc = res_loc+upfac1(ic,iv_loc,itor)*g_x(ic,iv_loc,itor)
           endif
        enddo
-       upwind32_res_loc(ic,is,itor) = res_loc_one
+       upwind32_res_loc(ic,is,itor) = res_loc
     enddo
    enddo
   enddo
