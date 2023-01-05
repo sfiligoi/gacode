@@ -4,14 +4,15 @@
 ! PURPOSE:
 !  Compute corrected distribution used in conservative advection scheme:
 !
-!                  /
-!              J0  | dv J0 |vp| g 
-!                  /
-!  |vp| g -  ----------------------
+!                      /
+!              J0 |vp| | dv J0 |vp| g 
+!                      /
+!  |vp| g -  --------------------------
 !                   /
-!                   | dv J0^2 
+!                   | dv J0^2 |vp|
 !                   /
 !
+! NOTE: |vp| prefactor in conserving term added on Jan 4 2023
 !-----------------------------------------------------------------
 
 subroutine cgyro_upwind_r64
