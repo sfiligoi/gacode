@@ -6,7 +6,6 @@ subroutine cgyro_read_input
   implicit none
 
   integer :: is
-  character (len=1) :: cdummy
 
   if (i_proc == 0) open(unit=1,file=trim(path)//'input.cgyro.gen',status='old')
 
