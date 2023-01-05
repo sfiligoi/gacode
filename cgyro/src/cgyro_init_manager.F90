@@ -235,19 +235,19 @@ subroutine cgyro_init_manager
      allocate(dvjvec_c(n_field,nc,nv_loc,nt1:nt2))
      allocate(dvjvec_v(n_field,nc_loc,nt1:nt2,nv))
      allocate(jxvec_c(n_field,nc,nv_loc,nt1:nt2))
-     allocate(upfac1(nc,nv_loc,nt1:nt2,2))
-     allocate(upfac2(nc,nv_loc,nt1:nt2,2))
+     allocate(upfac1(nc,nv_loc,nt1:nt2))
+     allocate(upfac2(nc,nv_loc,nt1:nt2))
 
 !$acc enter data create(cap_h_c,cap_h_ct,cap_h_c_dot,cap_h_c_old,cap_h_c_old2)
 !$acc enter data create(cap_h_v,dvjvec_c,dvjvec_v)
 
      if (upwind_single_flag == 0) then
-       allocate(upwind_res_loc(nc,ns1:ns2,nt1:nt2,2))
-       allocate(upwind_res(nc,ns1:ns2,nt1:nt2,2))
+       allocate(upwind_res_loc(nc,ns1:ns2,nt1:nt2))
+       allocate(upwind_res(nc,ns1:ns2,nt1:nt2))
 !$acc enter data create(upwind_res,upwind_res_loc)
      else
-       allocate(upwind32_res_loc(nc,ns1:ns2,nt1:nt2,2))
-       allocate(upwind32_res(nc,ns1:ns2,nt1:nt2,2))
+       allocate(upwind32_res_loc(nc,ns1:ns2,nt1:nt2))
+       allocate(upwind32_res(nc,ns1:ns2,nt1:nt2))
 !$acc enter data create(upwind32_res,upwind32_res_loc)
      endif
 

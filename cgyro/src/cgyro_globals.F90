@@ -150,7 +150,6 @@ module cgyro_globals
 
   real :: lambda_debye
   real :: rhos
-  real :: up_cutoff
 
   ! Global conversion variables
   real :: b_unit, b_gs2
@@ -363,7 +362,7 @@ module cgyro_globals
   real, dimension(:,:,:,:), allocatable :: dvjvec_c
   real, dimension(:,:,:,:), allocatable :: dvjvec_v
   real, dimension(:,:,:,:), allocatable :: jxvec_c
-  real, dimension(:,:,:,:), allocatable :: upfac1,upfac2
+  real, dimension(:,:,:), allocatable :: upfac1,upfac2
   !
   ! Fields
   real, dimension(:,:,:), allocatable :: fcoef
@@ -420,10 +419,10 @@ module cgyro_globals
   ! Work arrays
   real, dimension(2) :: integration_error
   ! Upwind work arrays
-  complex, dimension(:,:,:,:),allocatable :: upwind_res_loc
-  complex, dimension(:,:,:,:),allocatable :: upwind_res
-  complex(KIND=REAL32), dimension(:,:,:,:),allocatable :: upwind32_res_loc
-  complex(KIND=REAL32), dimension(:,:,:,:),allocatable :: upwind32_res
+  complex, dimension(:,:,:),allocatable :: upwind_res_loc
+  complex, dimension(:,:,:),allocatable :: upwind_res
+  complex(KIND=REAL32), dimension(:,:,:),allocatable :: upwind32_res_loc
+  complex(KIND=REAL32), dimension(:,:,:),allocatable :: upwind32_res
   !
   ! LAPACK work arrays 
   real, dimension(:), allocatable :: work  
