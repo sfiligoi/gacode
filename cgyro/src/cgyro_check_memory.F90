@@ -49,33 +49,31 @@ subroutine cgyro_check_memory(datafile)
         write(io,*) 'Nonlinear'
         write(io,*)
         ! nsplit * n_toroidal = nv_loc * n_theta
-        if (nonlinear_method /= 1) then
-           nx0 = n_radial
-           ny0 = 2*n_toroidal-1
-           nx = (3*nx0)/2
-           ny = (3*ny0)/2
+        nx0 = n_radial
+        ny0 = 2*n_toroidal-1
+        nx = (3*nx0)/2
+        ny = (3*ny0)/2
 #ifndef _OPENACC
-           call cgyro_alloc_add(io,(ny/2+1)*nx*16.0*n_omp,'fx')
-           call cgyro_alloc_add(io,(ny/2+1)*nx*16.0*n_omp,'gx')
-           call cgyro_alloc_add(io,(ny/2+1)*nx*16.0*n_omp,'fy')
-           call cgyro_alloc_add(io,(ny/2+1)*nx*16.0*n_omp,'gy')
-           call cgyro_alloc_add(io,ny*nx*8.0*nsplit,'ux')
-           call cgyro_alloc_add(io,ny*nx*8.0*n_omp,'vx')
-           call cgyro_alloc_add(io,ny*nx*8.0*nsplit,'uy')
-           call cgyro_alloc_add(io,ny*nx*8.0*n_omp,'vy')
-           call cgyro_alloc_add(io,ny*nx*8.0*n_omp,'uv')
+        call cgyro_alloc_add(io,(ny/2+1)*nx*16.0*n_omp,'fx')
+        call cgyro_alloc_add(io,(ny/2+1)*nx*16.0*n_omp,'gx')
+        call cgyro_alloc_add(io,(ny/2+1)*nx*16.0*n_omp,'fy')
+        call cgyro_alloc_add(io,(ny/2+1)*nx*16.0*n_omp,'gy')
+        call cgyro_alloc_add(io,ny*nx*8.0*nsplit,'ux')
+        call cgyro_alloc_add(io,ny*nx*8.0*n_omp,'vx')
+        call cgyro_alloc_add(io,ny*nx*8.0*nsplit,'uy')
+        call cgyro_alloc_add(io,ny*nx*8.0*n_omp,'vy')
+        call cgyro_alloc_add(io,ny*nx*8.0*n_omp,'uv')
 #else
-           call cgyro_alloc_add(io,(ny/2+1)*nx*16.0*nsplit,'fx')
-           call cgyro_alloc_add(io,(ny/2+1)*nx*16.0*nsplit,'gx')
-           call cgyro_alloc_add(io,(ny/2+1)*nx*16.0*nsplit,'fy')
-           call cgyro_alloc_add(io,(ny/2+1)*nx*16.0*nsplit,'gy')
-           call cgyro_alloc_add(io,ny*nx*8.0*nsplit,'ux')
-           call cgyro_alloc_add(io,ny*nx*8.0*nsplit,'vx')
-           call cgyro_alloc_add(io,ny*nx*8.0*nsplit,'uy')
-           call cgyro_alloc_add(io,ny*nx*8.0*nsplit,'vy')
-           call cgyro_alloc_add(io,ny*nx*8.0*nsplit,'uv')
+        call cgyro_alloc_add(io,(ny/2+1)*nx*16.0*nsplit,'fx')
+        call cgyro_alloc_add(io,(ny/2+1)*nx*16.0*nsplit,'gx')
+        call cgyro_alloc_add(io,(ny/2+1)*nx*16.0*nsplit,'fy')
+        call cgyro_alloc_add(io,(ny/2+1)*nx*16.0*nsplit,'gy')
+        call cgyro_alloc_add(io,ny*nx*8.0*nsplit,'ux')
+        call cgyro_alloc_add(io,ny*nx*8.0*nsplit,'vx')
+        call cgyro_alloc_add(io,ny*nx*8.0*nsplit,'uy')
+        call cgyro_alloc_add(io,ny*nx*8.0*nsplit,'vy')
+        call cgyro_alloc_add(io,ny*nx*8.0*nsplit,'uv')
 #endif
-        endif
      endif
 
      write(io,*)
