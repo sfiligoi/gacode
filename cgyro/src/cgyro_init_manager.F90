@@ -68,43 +68,34 @@ subroutine cgyro_init_manager
   allocate(e_deriv1_mat(n_energy,n_energy))
   allocate(e_deriv1_rot_mat(n_energy,n_energy))
 
-  ! Construct energy nodes and weights
-  if (e_method<=2) then
-     call pseudo_maxwell_new(n_energy,&
+  ! Construct energy nodes and weights (Hallatschek)
+  if (i_proc == 0) then
+     call pseudo_maxwell_pliocene(n_energy,&
           e_max,&
           energy,&
           w_e,&
           e_deriv1_mat,&
+          alpha_poly,& ! weight fct=x^alpha_poly*exp(-x**2)
           trim(path)//'out.cgyro.egrid')
-  else if (e_method==3) then
-     ! interface function in module half_hermite
-     if (i_proc==0) then
-        call pseudo_maxwell_pliocene(n_energy,&
-             e_max,&
-             energy,&
-             w_e,&
-             e_deriv1_mat,&
-             alpha_poly,& ! weight fct=x^alpha_poly*exp(-x**2)
-             trim(path)//'out.cgyro.egrid')
-     else
-        call pseudo_maxwell_pliocene(n_energy,&
-             e_max,&
-             energy,&
-             w_e,&
-             e_deriv1_mat,&
-             alpha_poly) ! only write results on i_proc zero.
-     endif
+  else
+     call pseudo_maxwell_pliocene(n_energy,&
+          e_max,&
+          energy,&
+          w_e,&
+          e_deriv1_mat,&
+          alpha_poly) ! only write results on i_proc zero.
   endif
-  ! just a default value
+  
+  ! Default value for collision data compression
   n_low_energy = 0
 
   vel(:) = sqrt(energy(:))
 
   e_deriv1_rot_mat(:,:) = e_deriv1_mat(:,:)
-  if(e_fix == 2) then
+  if (e_fix == 2) then
      e_deriv1_rot_mat(n_energy,:) = 0.0
   endif
-  if(e_fix == 3) then
+  if (e_fix == 3) then
      e_deriv1_rot_mat(n_energy,:) = 0.0
      e_deriv1_mat(n_energy,:) = 0.0
   endif
@@ -377,7 +368,6 @@ subroutine cgyro_init_manager
      i_err = fftw_init_threads()
      call fftw_plan_with_nthreads(n_omp)
 #endif
-
 
      ! Create plans once and for all, with global arrays fx,ux
      plan_c2r = fftw_plan_dft_c2r_2d(nx,ny,gx(:,:,1),vx(:,:,1),FFTW_PATIENT)
