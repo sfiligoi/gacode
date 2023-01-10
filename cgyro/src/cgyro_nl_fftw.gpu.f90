@@ -156,7 +156,7 @@ subroutine cgyro_nl_fftw(ij)
            if (ix < 0) ix = ix+nx
 
            iy = itor-1
-           if (iv_loc == 0) then
+           if (it_loc > n_jtheta) then
               g0 = (0.0,0.0)
            else
               g0 = i_c*sum( jvec_c_nl(1:n_field,ir,it_loc,iv_loc,itor)*g_nl(1:n_field,ir,it_loc,itor))
