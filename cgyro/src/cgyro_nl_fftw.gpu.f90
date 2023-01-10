@@ -139,7 +139,7 @@ subroutine cgyro_nl_fftw(ij)
 
 !$acc parallel loop gang vector independent collapse(4) &
 !$acc&         private(j,ir,p,ix,itor,mytor,iy,f0,g0,it,iv_loc,it_loc,jtheta_min) &
-!$acc&         present(g_nl)
+!$acc&         present(g_nl,jvec_c_nl)
   do j=1,nsplit
      do ir=1,n_radial
        do itm=1,n_toroidal_procs
