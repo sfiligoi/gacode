@@ -239,8 +239,8 @@ subroutine cgyro_field_coefficients
         is = is_v(iv)
         ix = ix_v(iv)
         ie = ie_v(iv)
-        dvjvec_v(:,ic_loc,iv,itor) = dens_rot(it,is)*w_e(ie)*w_xi(ix)*z(is)*dens(is)* &
-             jvec_v(:,ic_loc,iv,itor)
+        dvjvec_v(:,ic_loc,itor,iv) = dens_rot(it,is)*w_e(ie)*w_xi(ix)*z(is)*dens(is)* &
+             jvec_v(:,ic_loc,itor,iv)
      enddo
    enddo
   enddo

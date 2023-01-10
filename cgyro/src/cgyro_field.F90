@@ -33,7 +33,7 @@ subroutine cgyro_field_v
    do ic=nc1,nc2
      ic_loc = ic-nc1+1
      do iv=1,nv
-        field_loc(:,ic,itor) = field_loc(:,ic,itor)+dvjvec_v(:,ic_loc,iv,itor)*cap_h_v(ic_loc,iv,itor)
+        field_loc(:,ic,itor) = field_loc(:,ic,itor)+dvjvec_v(:,ic_loc,itor,iv)*cap_h_v(ic_loc,itor,iv)
      enddo
    enddo
   enddo
@@ -92,7 +92,7 @@ subroutine cgyro_field_v_notae_s(start_t)
    do ic=nc1,nc2
      ic_loc = ic-nc1+1
      do iv=1,nv
-        field_loc(:,ic,itor) = field_loc(:,ic,itor)+dvjvec_v(:,ic_loc,iv,itor)*cap_h_v(ic_loc,iv,itor)
+        field_loc(:,ic,itor) = field_loc(:,ic,itor)+dvjvec_v(:,ic_loc,itor,iv)*cap_h_v(ic_loc,itor,iv)
      enddo
    enddo
   enddo
@@ -187,7 +187,7 @@ subroutine cgyro_field_v_notae_s_gpu(start_t)
       field_loc_l = (0.0,0.0)
 !$acc loop vector reduction(+:field_loc_l)
       do iv=1,nv
-        field_loc_l = field_loc_l+dvjvec_v(i_f,ic_loc,iv,itor)*cap_h_v(ic_loc,iv,itor)
+        field_loc_l = field_loc_l+dvjvec_v(i_f,ic_loc,itor,iv)*cap_h_v(ic_loc,itor,iv)
      enddo
      field_loc(i_f,ic,itor) = field_loc_l
     enddo

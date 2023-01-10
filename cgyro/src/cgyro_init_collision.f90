@@ -609,32 +609,32 @@ subroutine cgyro_init_collision
                     !cmat_loc(iv,jv)    = cmat_loc(iv,jv) + 0.0
                     !amat(iv,jv)        = amat(iv,jv) + 0.0
                  else
-                    rval =  z(is)/temp(is) * jvec_v(1,ic_loc,iv,itor) &
+                    rval =  z(is)/temp(is) * jvec_v(1,ic_loc,itor,iv) &
                          / (k_perp(ic,itor)**2 * lambda_debye**2 &
                          * dens_ele / temp_ele + sum_den_h(it)) &
                          * z(js)*dens(js)*dens_rot(it,js) &
-                         * jvec_v(1,ic_loc,jv,itor) * w_e(je) * w_xi(jx) 
+                         * jvec_v(1,ic_loc,itor,jv) * w_e(je) * w_xi(jx) 
                     cmat_loc(iv,jv) = cmat_loc(iv,jv) - rval
                     amat(iv,jv) = amat(iv,jv) - rval
                  endif
 
                  ! Ampere component
                  if (n_field > 1) then
-                    rval =  z(is)/temp(is) * (jvec_v(2,ic_loc,iv,itor) &
+                    rval =  z(is)/temp(is) * (jvec_v(2,ic_loc,itor,iv) &
                          / (2.0*k_perp(ic,itor)**2 * rho**2 / betae_unit & 
                          * dens_ele * temp_ele)) &
                          * z(js)*dens(js)*dens_rot(it,js) &
-                         * jvec_v(2,ic_loc,jv,itor) * w_e(je) * w_xi(jx)  
+                         * jvec_v(2,ic_loc,itor,jv) * w_e(je) * w_xi(jx)  
                     cmat_loc(iv,jv) = cmat_loc(iv,jv) + rval
                     amat(iv,jv) = amat(iv,jv) + rval
                  endif
 
                  ! Ampere Bpar component
                  if (n_field > 2) then
-                    rval = jvec_v(3,ic_loc,iv,itor) &
+                    rval = jvec_v(3,ic_loc,itor,iv) &
                          * (-0.5*betae_unit)/(dens_ele*temp_ele) &
                          * w_e(je)*w_xi(jx)*dens(js)*dens_rot(it,js)*temp(js) &
-                         * jvec_v(3,ic_loc,jv,itor)/(temp(is)/z(is))/(temp(js)/z(js))
+                         * jvec_v(3,ic_loc,itor,jv)/(temp(is)/z(is))/(temp(js)/z(js))
                     cmat_loc(iv,jv) = cmat_loc(iv,jv) - rval
                     amat(iv,jv) = amat(iv,jv) - rval
                  endif

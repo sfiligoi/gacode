@@ -34,7 +34,7 @@ subroutine cgyro_calc_collision_cpu_fp64(nj_loc)
      ! Set-up the RHS: H = f + ze/T G phi
 
      do iv=1,nv
-        cvec(iv) = cap_h_v(ic_loc,iv,itor)
+        cvec(iv) = cap_h_v(ic_loc,itor,iv)
      enddo
 
      bvec(:) = (0.0,0.0)
@@ -59,7 +59,7 @@ subroutine cgyro_calc_collision_cpu_fp64(nj_loc)
        if (.not.(itor == 0 .and. ae_flag == 1)) then
           ! cap_h_v not re-used else
           do iv=1,nv
-             cap_h_v(ic_loc,iv,itor) = bvec(iv)
+             cap_h_v(ic_loc,itor,iv) = bvec(iv)
           enddo
        endif
     endif
@@ -96,7 +96,7 @@ subroutine cgyro_calc_collision_cpu_fp32(nj_loc)
      ! Set-up the RHS: H = f + ze/T G phi
 
      do iv=1,nv
-        cvec(iv) = cap_h_v(ic_loc,iv,itor)
+        cvec(iv) = cap_h_v(ic_loc,itor,iv)
      enddo
 
      bvec(:) = (0.0,0.0)
@@ -134,7 +134,7 @@ subroutine cgyro_calc_collision_cpu_fp32(nj_loc)
        if (.not.(itor == 0 .and. ae_flag == 1)) then
           ! cap_h_v not re-used else
           do iv=1,nv
-             cap_h_v(ic_loc,iv,itor) = bvec(iv)
+             cap_h_v(ic_loc,itor,iv) = bvec(iv)
           enddo
      endif
     endif
@@ -194,7 +194,7 @@ subroutine cgyro_calc_collision_simple_cpu(nj_loc)
      ! Set-up the RHS: H = f + ze/T G phi
 
      do iv=1,nv
-        cvec(ix_v(iv),ie_v(iv),is_v(iv)) = cap_h_v(ic_loc,iv,itor)
+        cvec(ix_v(iv),ie_v(iv),is_v(iv)) = cap_h_v(ic_loc,itor,iv)
      enddo
 
      ! Avoid singularity of n=0,p=0:
@@ -346,8 +346,8 @@ subroutine cgyro_calc_collision_gpu_fp64(nj_loc)
 !$acc loop seq private(cval)
            do ivp=1,nv
               cval = cmat(iv,ivp,ic_loc,itor)
-              b_re = b_re + cval*real(cap_h_v(ic_loc,ivp,itor))
-              b_im = b_im + cval*aimag(cap_h_v(ic_loc,ivp,itor))
+              b_re = b_re + cval*real(cap_h_v(ic_loc,itor,ivp))
+              b_im = b_im + cval*aimag(cap_h_v(ic_loc,itor,ivp))
            enddo
 
            fsendf(j,ic_loc,itor,k) = cmplx(b_re,b_im)
@@ -361,7 +361,7 @@ subroutine cgyro_calc_collision_gpu_fp64(nj_loc)
         do k=1,nproc
            do j=1,nj_loc
               iv = j+(k-1)*nj_loc
-              cap_h_v(ic_loc,iv,itor) = fsendf(j,ic_loc,itor,k)
+              cap_h_v(ic_loc,itor,iv) = fsendf(j,ic_loc,itor,k)
            enddo
         enddo
        endif
@@ -422,8 +422,8 @@ subroutine cgyro_calc_collision_gpu_b2_fp64(nj_loc)
 !$acc loop seq private(cval)
            do ivp=1,nv
               cval = cmat(iv,ivp,ic_loc,itor)
-              b_re = b_re + cval*real(cap_h_v(ic_loc,ivp,itor))
-              b_im = b_im + cval*aimag(cap_h_v(ic_loc,ivp,itor))
+              b_re = b_re + cval*real(cap_h_v(ic_loc,itor,ivp))
+              b_im = b_im + cval*aimag(cap_h_v(ic_loc,itor,ivp))
            enddo
 
            fsendf(j,ic_loc,itor,k) = cmplx(b_re,b_im)
@@ -437,7 +437,7 @@ subroutine cgyro_calc_collision_gpu_b2_fp64(nj_loc)
         do k=1,nproc
            do j=1,nj_loc
               iv = j+(k-1)*nj_loc
-              cap_h_v(ic_loc,iv,itor) = fsendf(j,ic_loc,itor,k)
+              cap_h_v(ic_loc,itor,iv) = fsendf(j,ic_loc,itor,k)
            enddo
         enddo
        endif
@@ -488,8 +488,8 @@ subroutine cgyro_calc_collision_gpu_fp32(nj_loc)
 !$acc loop seq private(cval,iep,isp,ixp,h_re,h_im)
            do ivp=1,nv
               cval = cmat_fp32(iv,ivp,ic_loc,itor)
-              h_re = real(cap_h_v(ic_loc,ivp,itor))
-              h_im = aimag(cap_h_v(ic_loc,ivp,itor))
+              h_re = real(cap_h_v(ic_loc,itor,ivp))
+              h_im = aimag(cap_h_v(ic_loc,itor,ivp))
               if (ie<=n_low_energy) then
                  cval = cval + cmat_e1(ix,is,ie,ivp,ic_loc,itor)
               else
@@ -515,7 +515,7 @@ subroutine cgyro_calc_collision_gpu_fp32(nj_loc)
         do k=1,nproc
            do j=1,nj_loc
               iv = j+(k-1)*nj_loc
-              cap_h_v(ic_loc,iv,itor) = fsendf(j,ic_loc,itor,k)
+              cap_h_v(ic_loc,itor,iv) = fsendf(j,ic_loc,itor,k)
            enddo
         enddo
        endif
@@ -583,8 +583,8 @@ subroutine cgyro_calc_collision_gpu_b2_fp32(nj_loc)
 !$acc loop seq private(cval,iep,isp,ixp,h_re,h_im)
            do ivp=1,nv
               cval = cmat_fp32(iv,ivp,ic_loc,itor)
-              h_re = real(cap_h_v(ic_loc,ivp,itor))
-              h_im = aimag(cap_h_v(ic_loc,ivp,itor))
+              h_re = real(cap_h_v(ic_loc,itor,ivp))
+              h_im = aimag(cap_h_v(ic_loc,itor,ivp))
               if (ie<=n_low_energy) then
                  cval = cval + cmat_e1(ix,is,ie,ivp,ic_loc,itor)
               else
@@ -610,7 +610,7 @@ subroutine cgyro_calc_collision_gpu_b2_fp32(nj_loc)
          do k=1,nproc
            do j=1,nj_loc
               iv = j+(k-1)*nj_loc
-              cap_h_v(ic_loc,iv,itor) = fsendf(j,ic_loc,itor,k)
+              cap_h_v(ic_loc,itor,iv) = fsendf(j,ic_loc,itor,k)
            enddo
          enddo
        endif
@@ -705,14 +705,14 @@ subroutine cgyro_calc_collision_simple_gpu(nj_loc)
         do k=1,nproc
            do j=1,nj_loc
               iv=j+(k-1)*nj_loc
-              fsendf(j,ic_loc,itor,k) = cap_h_v(ic_loc,iv,itor)
+              fsendf(j,ic_loc,itor,k) = cap_h_v(ic_loc,itor,iv)
            enddo
         enddo
      else
 !$acc loop vector
         do iv=1,nv
-           cvec_re(ix_v(iv),ie_v(iv),is_v(iv)) = real(cap_h_v(ic_loc,iv,itor))
-           cvec_im(ix_v(iv),ie_v(iv),is_v(iv)) = aimag(cap_h_v(ic_loc,iv,itor))
+           cvec_re(ix_v(iv),ie_v(iv),is_v(iv)) = real(cap_h_v(ic_loc,itor,iv))
+           cvec_im(ix_v(iv),ie_v(iv),is_v(iv)) = aimag(cap_h_v(ic_loc,itor,iv))
         enddo
 
 !$acc loop vector collapse(3) private(b_re,b_im,cval,jx)

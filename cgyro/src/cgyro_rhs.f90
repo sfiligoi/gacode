@@ -149,11 +149,11 @@ subroutine cgyro_rhs(ij)
                  if (ie == je) then
                     bvec_trap(iv) = bvec_trap(iv) - (omega_trap(it,is,itor) * vel(ie) &
                          + omega_rot_trap(it,is) / vel(ie)) &
-                         * (1.0 - xi(ix)**2) * xi_deriv_mat(ix,jx) * cap_h_v(ic_loc,jv,itor)
+                         * (1.0 - xi(ix)**2) * xi_deriv_mat(ix,jx) * cap_h_v(ic_loc,itor,jv)
                  endif
                  if (ix == jx) then
                     bvec_trap(iv) = bvec_trap(iv) - omega_rot_u(it,is) * xi(ix) &
-                         * e_deriv1_rot_mat(ie,je)/sqrt(1.0*e_max) * cap_h_v(ic_loc,jv,itor)
+                         * e_deriv1_rot_mat(ie,je)/sqrt(1.0*e_max) * cap_h_v(ic_loc,itor,jv)
                  endif
               endif
            enddo

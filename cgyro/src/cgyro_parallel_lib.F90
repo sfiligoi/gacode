@@ -82,8 +82,8 @@ contains
     nsend = nj_loc*ni_loc*nk_loc
 
     allocate(fsendf(nj_loc,ni_loc,nk1:nk2,nproc))
-    allocate(fsendr(ni_loc,nj_loc,nk1:nk2,nproc))
-    if (.not. allocated(fsendr_real)) allocate(fsendr_real(ni_loc,nj_loc,nk1:nk2,nproc))
+    allocate(fsendr(ni_loc,nk1:nk2,nj_loc,nproc))
+    if (.not. allocated(fsendr_real)) allocate(fsendr_real(ni_loc,nk1:nk2,nj_loc,nproc))
 
 !$acc enter data create(fsendf,fsendr)
 
@@ -225,7 +225,7 @@ contains
        do j=j1,j2
           j_loc = j-j1+1 
           do i=1,ni_loc
-             fsendr(i,j_loc,itor,k) = ft(j_loc,i+(k-1)*ni_loc,1+(itor-nk1))
+             fsendr(i,itor,j_loc,k) = ft(j_loc,i+(k-1)*ni_loc,1+(itor-nk1))
           enddo
        enddo
      enddo
@@ -258,7 +258,7 @@ contains
        do j=j1,j2
           j_loc = j-j1+1 
           do i=1,ni_loc
-             fsendr(i,j_loc,itor,k) = fin(i+(k-1)*ni_loc,j_loc,1+(itor-nk1))
+             fsendr(i,itor,j_loc,k) = fin(i+(k-1)*ni_loc,j_loc,1+(itor-nk1))
           enddo
        enddo
      enddo
@@ -289,7 +289,7 @@ contains
        do j=j1,j2
           do i=1,ni_loc
              j_loc = j-j1+1
-             fsendr(i,j_loc,itor,k) = fin(i+(k-1)*ni_loc,j_loc,1+(itor-nk1))
+             fsendr(i,itor,j_loc,k) = fin(i+(k-1)*ni_loc,j_loc,1+(itor-nk1))
           enddo
        enddo
      enddo
@@ -339,7 +339,7 @@ contains
        do j=j1,j2
           j_loc = j-j1+1
           do i=1,ni_loc
-             fsendr_real(i,j_loc,itor,k) = fin(i+(k-1)*ni_loc,j_loc,1+(itor-nk1)) 
+             fsendr_real(i,itor,j_loc,k) = fin(i+(k-1)*ni_loc,j_loc,1+(itor-nk1)) 
           enddo
        enddo
      enddo
