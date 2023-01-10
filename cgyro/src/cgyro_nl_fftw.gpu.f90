@@ -59,7 +59,7 @@ subroutine cgyro_nl_fftw(ij)
   !-----------------------------------
   integer :: j,p,iexch
   integer :: it,ir,itm,itl,ix,iy
-  integer :: itor,mytor
+  integer :: itor,mytm
   integer :: i1,i2
   integer :: it_loc
   integer :: ierr
@@ -138,17 +138,18 @@ subroutine cgyro_nl_fftw(ij)
 
 
 !$acc parallel loop gang vector independent collapse(4) &
-!$acc&         private(j,ir,p,ix,itor,mytor,iy,f0,g0,it,iv_loc,it_loc,jtheta_min) &
+!$acc&         private(j,ir,p,ix,itor,mytm,iy,f0,g0,it,iv_loc,it_loc,jtheta_min) &
 !$acc&         present(g_nl,jvec_c_nl)
   do j=1,nsplit
      do ir=1,n_radial
        do itm=1,n_toroidal_procs
          do itl=1,nt_loc
            itor = itl + (itm-1)*nt_loc
-           mytor = nt1 + itl -1
-           it = 1+(mytor*nsplit+j-1)/nv_loc
-           iv_loc = 1+modulo(mytor*nsplit+j-1,nv_loc)
-           jtheta_min = 1+(mytor*nsplit)/nv_loc
+           mytm = nt1/nt_loc + itl -1
+           it = 1+(mytm*nsplit+j-1)/nv_loc
+           iv_loc = 1+modulo(mym*nsplit+j-1,nv_loc)
+           jtheta_min = 1+(mytm*nsplit)/nv_loc
+           it_loc = it-jtheta_min+1
 
            p  = ir-1-nx0/2
            ix = p
@@ -158,7 +159,6 @@ subroutine cgyro_nl_fftw(ij)
            if (iv_loc == 0) then
               g0 = (0.0,0.0)
            else
-              it_loc = it-jtheta_min+1
               g0 = i_c*sum( jvec_c_nl(1:n_field,ir,it_loc,iv_loc,itor)*g_nl(1:n_field,ir,it_loc,itor))
            endif
            gxmany(iy,ix,j) = p*g0

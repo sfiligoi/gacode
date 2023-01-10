@@ -63,7 +63,7 @@ subroutine cgyro_nl_fftw(ij)
   !-----------------------------------
   integer :: ix,iy
   integer :: ir,it,itm,itl,it_loc
-  integer :: itor,mytor
+  integer :: itor,mytm
   integer :: j,p,iexch
   integer :: i_omp
   logical :: force_early_comm2, one_pass_fft
@@ -130,7 +130,7 @@ subroutine cgyro_nl_fftw(ij)
      if (one_pass_fft) then
         num_one_pass = 4
      endif
-!$omp parallel do collapse(2) private(itl,itm,itor,mytor,iy,ir,p,ix,f0,i_omp,j,o,it,iv_loc,it_loc,jtheta_min)
+!$omp parallel do collapse(2) private(itl,itm,itor,mytm,iy,ir,p,ix,f0,i_omp,j,o,it,iv_loc,it_loc,jtheta_min)
      do j=1,nsplit
         do o=1,num_one_pass
            i_omp = j ! j<n_omp in this branch
@@ -189,10 +189,10 @@ subroutine cgyro_nl_fftw(ij)
                  do itm=1,n_toroidal_procs
                   do itl=1,nt_loc
                     itor = itl + (itm-1)*nt_loc
-                    mytor = nt1 + itl -1
-                    it = 1+(mytor*nsplit+j-1)/nv_loc
-                    iv_loc = 1+modulo(mytor*nsplit+j-1,nv_loc)
-                    jtheta_min = 1+(mytor*nsplit)/nv_loc
+                    mytm = nt1/nt_loc + itl -1
+                    it = 1+(mytm*nsplit+j-1)/nv_loc
+                    iv_loc = 1+modulo(mytm*nsplit+j-1,nv_loc)
+                    jtheta_min = 1+(mytm*nsplit)/nv_loc
 
                     iy = itor-1
                     if (iv_loc == 0) then
@@ -220,10 +220,10 @@ subroutine cgyro_nl_fftw(ij)
                  do itm=1,n_toroidal_procs
                   do itl=1,nt_loc
                     itor = itl + (itm-1)*nt_loc
-                    mytor = nt1 + itl -1
-                    it = 1+(mytor*nsplit+j-1)/nv_loc
-                    iv_loc = 1+modulo(mytor*nsplit+j-1,nv_loc)
-                    jtheta_min = 1+(mytor*nsplit)/nv_loc
+                    mytm = nt1/nt_loc + itl -1
+                    it = 1+(mytm*nsplit+j-1)/nv_loc
+                    iv_loc = 1+modulo(mytm*nsplit+j-1,nv_loc)
+                    jtheta_min = 1+(mytm*nsplit)/nv_loc
 
                     iy = itor-1
                     if (iv_loc == 0) then
@@ -258,7 +258,7 @@ subroutine cgyro_nl_fftw(ij)
   call timer_lib_in('nl')
 
   if (n_omp <= nsplit) then
-!$omp parallel do private(itor,mytor,itm,itl,iy,ir,p,ix,g0,i_omp,j,it,iv_loc,it_loc,jtheta_min)
+!$omp parallel do private(itor,mytm,itm,itl,iy,ir,p,ix,g0,i_omp,j,it,iv_loc,it_loc,jtheta_min)
      do j=1,nsplit
         i_omp = omp_get_thread_num()+1
 
@@ -273,10 +273,10 @@ subroutine cgyro_nl_fftw(ij)
            do itm=1,n_toroidal_procs
             do itl=1,nt_loc
               itor = itl + (itm-1)*nt_loc
-              mytor = nt1 + itl -1
-              it = 1+(mytor*nsplit+j-1)/nv_loc
-              iv_loc = 1+modulo(mytor*nsplit+j-1,nv_loc)
-              jtheta_min = 1+(mytor*nsplit)/nv_loc
+              mytm = nt1/nt_loc + itl -1
+              it = 1+(mytm*nsplit+j-1)/nv_loc
+              iv_loc = 1+modulo(mytm*nsplit+j-1,nv_loc)
+              jtheta_min = 1+(mytm*nsplit)/nv_loc
 
               iy = itor-1
               if (iv_loc == 0) then
@@ -301,7 +301,7 @@ subroutine cgyro_nl_fftw(ij)
   else ! n_omp>nsplit
      if (.not. one_pass_fft) then
 !$omp parallel do collapse(2) &
-!$omp&            private(itm,itl,itor,mytor,iy,ir,p,ix,g0,i_omp,it,iv_loc,it_loc,jtheta_min)
+!$omp&            private(itm,itl,itor,mytm,iy,ir,p,ix,g0,i_omp,it,iv_loc,it_loc,jtheta_min)
         do j=1,nsplit
            do o=1,2
               i_omp = j ! j<n_omp in this branch, so we can do it
@@ -317,10 +317,10 @@ subroutine cgyro_nl_fftw(ij)
                     do itm=1,n_toroidal_procs
                      do itl=1,nt_loc
                        itor = itl + (itm-1)*nt_loc
-                       mytor = nt1 + itl -1
-                       it = 1+(mytor*nsplit+j-1)/nv_loc
-                       iv_loc = 1+modulo(mytor*nsplit+j-1,nv_loc)
-                       jtheta_min = 1+(mytor*nsplit)/nv_loc
+                       mytm = nt1/nt_loc + itl -1
+                       it = 1+(mytm*nsplit+j-1)/nv_loc
+                       iv_loc = 1+modulo(mytm*nsplit+j-1,nv_loc)
+                       jtheta_min = 1+(mytm*nsplit)/nv_loc
 
                        iy = itor-1
                        if (iv_loc == 0) then
@@ -347,10 +347,10 @@ subroutine cgyro_nl_fftw(ij)
                     do itm=1,n_toroidal_procs
                      do itl=1,nt_loc
                        itor = itl + (itm-1)*nt_loc
-                       mytor = nt1 + itl -1
-                       it = 1+(mytor*nsplit+j-1)/nv_loc
-                       iv_loc = 1+modulo(mytor*nsplit+j-1,nv_loc)
-                       jtheta_min = 1+(mytor*nsplit)/nv_loc
+                       mytm = nt1/nt_loc + itl -1
+                       it = 1+(mytm*nsplit+j-1)/nv_loc
+                       iv_loc = 1+modulo(mytm*nsplit+j-1,nv_loc)
+                       jtheta_min = 1+(mytm*nsplit)/nv_loc
 
                        iy = itor-1
                        if (iv_loc == 0) then

@@ -125,14 +125,14 @@ subroutine cgyro_init_arrays
     do itl=1,nt_loc
      do iv_loc=1,nv_loc
       do it_loc=1,n_jtheta
-        itor = itl+(itm-1)*nt_loc
-        iltheta_min = 1+((itor-1)*nsplit)/nv_loc
-        iltheta_max = 1+(itor*nsplit-1)/nv_loc
+        iltheta_min = 1+((itm-1)*nsplit)/nv_loc
+        iltheta_max = 1+(itm*nsplit-1)/nv_loc
         it = it_loc+iltheta_min-1
+        itor = itl+(itm-1)*nt_loc
         if (it <= iltheta_max) then
+          mytor = nt1+itl-1
 !$acc loop vector private(mytor)
           do ir=1,n_radial
-            mytor = nt1+itl-1
             jvec_c_nl(1:n_field,ir,it_loc,iv_loc,itor) = jvec_c(1:n_field,ic_c(ir,it),iv_loc,mytor)
           enddo
         else

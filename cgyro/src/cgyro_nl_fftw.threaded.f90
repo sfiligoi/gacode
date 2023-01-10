@@ -65,7 +65,7 @@ subroutine cgyro_nl_fftw(ij)
   !-----------------------------------
   integer :: ix,iy
   integer :: ir,it,itm,itl
-  integer :: itor,mytor
+  integer :: itor,mytm
   integer :: it_loc
   integer :: j,p,iexch
   integer :: jtheta_min
@@ -165,7 +165,7 @@ subroutine cgyro_nl_fftw(ij)
     if (c2>nsplit) c2=nsplit
 
 !$omp parallel do schedule(static,1) &
-!$omp&            private(itor,mytor,itm,itl,iy,ir,p,ix,g0,i_omp,j,it,iv_loc,it_loc,jtheta_min)
+!$omp&            private(itor,mytm,itm,itl,iy,ir,p,ix,g0,i_omp,j,it,iv_loc,it_loc,jtheta_min)
     do j=c1,c2
         i_omp = j-c1+1
 
@@ -180,10 +180,10 @@ subroutine cgyro_nl_fftw(ij)
            do itm=1,n_toroidal_procs
             do itl=1,nt_loc
               itor = itl + (itm-1)*nt_loc
-              mytor = nt1 + itl -1
-              it = 1+(mytor*nsplit+j-1)/nv_loc
-              iv_loc = 1+modulo(mytor*nsplit+j-1,nv_loc)
-              jtheta_min = 1+(mytor*nsplit)/nv_loc
+              mytm = nt1/nt_loc + itl -1
+              it = 1+(mytm*nsplit+j-1)/nv_loc
+              iv_loc = 1+modulo(mytm*nsplit+j-1,nv_loc)
+              jtheta_min = 1+(mytm*nsplit)/nv_loc
 
               iy = itor-1
               if (iv_loc == 0) then

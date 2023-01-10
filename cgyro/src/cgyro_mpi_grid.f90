@@ -17,7 +17,7 @@ subroutine cgyro_mpi_grid
   implicit none
 
   integer :: ie,ix,is,ir,it
-  integer :: iexch,il,j
+  integer :: iexch,itm,j
   integer :: iltheta_min,iltheta_max
   integer :: d
   integer :: splitkey
@@ -296,12 +296,12 @@ subroutine cgyro_mpi_grid
 
   n_jtheta = 0
   if (nonlinear_flag == 1) then
-     do il=1,n_toroidal
+     do itm=1,n_toroidal_procs
        ! find max n_jtheta among all processes
        ! since we will need that to have equal number of rows
        ! in all the gpack buffers
-       iltheta_min = 1+((il-1)*nsplit)/nv_loc
-       iltheta_max = 1+(il*nsplit-1)/nv_loc
+       iltheta_min = 1+((itm-1)*nsplit)/nv_loc
+       iltheta_max = 1+(itm*nsplit-1)/nv_loc
        n_jtheta = max(n_jtheta,iltheta_max-iltheta_min+1)
      enddo
   endif
