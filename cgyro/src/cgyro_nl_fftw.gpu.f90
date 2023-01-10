@@ -147,7 +147,7 @@ subroutine cgyro_nl_fftw(ij)
            itor = itl + (itm-1)*nt_loc
            mytm = nt1/nt_loc + itl -1
            it = 1+(mytm*nsplit+j-1)/nv_loc
-           iv_loc = 1+modulo(mym*nsplit+j-1,nv_loc)
+           iv_loc = 1+modulo(mytm*nsplit+j-1,nv_loc)
            jtheta_min = 1+(mytm*nsplit)/nv_loc
            it_loc = it-jtheta_min+1
 
