@@ -429,6 +429,7 @@ subroutine cgyro_field_c_gpu
   use cgyro_globals
   implicit none
   integer :: is,i_f,itor
+  integer :: itor1,itor2
   complex :: tmp,field_loc_l
   complex :: my_psi
 
@@ -487,40 +488,24 @@ subroutine cgyro_field_c_gpu
       enddo
      enddo
   endif
+
   ! Poisson LHS factors
+  itor1=nt1
+  itor2=nt2
+
   if (nt1 == 0 .and. ae_flag == 1) then
     ! Note: Called rarely, use the CPu version
 !$acc update host(field)
     call cgyro_field_ae('c')
 !$acc update device(field)
-     if ( (nt1+1) < nt2) then
-      if (n_field > 2) then
-!$acc parallel loop collapse(2) independent private(tmp) present(gcoef) default(none)
-        do itor=(nt1+1),nt2
-         do ic=1,nc
-          tmp = field(1,ic,itor)
-          field(1,ic,itor) = gcoef(1,ic,itor)*field(1,ic,itor)+ &
-                  gcoef(4,ic,itor)*field(3,ic,itor)
-          field(2,ic,itor) = gcoef(2,ic,itor)*field(2,ic,itor)
-          field(3,ic,itor) = gcoef(3,ic,itor)*field(3,ic,itor)+ &
-                  gcoef(5,ic,itor)*tmp
-         enddo
-        enddo
-      else
-!$acc parallel loop collapse(3) independent present(gcoef) default(none)
-        do itor=(nt1+1),nt2
-         do ic=1,nc
-          do i_f=1,n_field
-            field(i_f,ic,itor) = gcoef(i_f,ic,itor)*field(i_f,ic,itor)
-          enddo
-         enddo
-        enddo
-      endif
-     endif
-  else
+    ! mark we already processed ==0, nothing else to do there
+    itor1=1
+  endif
+
+  if (itor1<=itor2) then
      if (n_field > 2) then
 !$acc parallel loop collapse(2) independent private(tmp) present(gcoef) default(none)
-        do itor=nt1,nt2
+        do itor=itor1,itor2
          do ic=1,nc
           tmp = field(1,ic,itor)
           field(1,ic,itor) = gcoef(1,ic,itor)*field(1,ic,itor)+ &
@@ -532,7 +517,7 @@ subroutine cgyro_field_c_gpu
         enddo
      else
 !$acc parallel loop collapse(3) independent present(gcoef) default(none)
-        do itor=nt1,nt2
+        do itor=itor1,itor2
          do ic=1,nc
           do i_f=1,n_field
             field(i_f,ic,itor) = gcoef(i_f,ic,itor)*field(i_f,ic,itor)
