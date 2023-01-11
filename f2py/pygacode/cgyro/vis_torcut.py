@@ -81,13 +81,13 @@ zp = np.zeros([nx,nz])
 for i in range(nx):
    r = sim.rmin+(dn*x[i]/(2*np.pi)-0.5)*lovera
    for k in range(nz):
-      a = z[k] + (sim.shape_cos0
-         + sim.shape_cos1*np.cos(z[k]) 
-         + sim.shape_cos2*np.cos(2*z[k]) 
-         + sim.shape_cos3*np.cos(3*z[k])
+      a = z[k] + (sim.shape_cos[0]
+         + sim.shape_cos[1]*np.cos(z[k]) 
+         + sim.shape_cos[2]*np.cos(2*z[k]) 
+         + sim.shape_cos[3]*np.cos(3*z[k])
          + np.arcsin(sim.delta)*np.sin(z[k]) 
          - sim.zeta*np.sin(2*z[k]) 
-         + sim.shape_sin3*np.sin(3*z[k]))
+         + sim.shape_sin[3]*np.sin(3*z[k]))
       xp[i,k] = sim.rmaj+r*np.cos(a)
       yp[i,k] = sim.zmag+sim.kappa*r*np.sin(z[k])
       zp[i,k] = 0.0
@@ -108,25 +108,25 @@ geo.geo_s_kappa_in=sim.s_kappa
 geo.geo_s_delta_in=sim.s_delta
 geo.geo_s_zeta_in=sim.s_zeta
 geo.geo_beta_star_in=sim.beta_star
-geo.geo_shape_cos0_in = sim.shape_cos0
-geo.geo_shape_cos1_in = sim.shape_cos1
-geo.geo_shape_cos2_in = sim.shape_cos2
-geo.geo_shape_cos3_in = sim.shape_cos3
+geo.geo_shape_cos0_in = sim.shape_cos[0]
+geo.geo_shape_cos1_in = sim.shape_cos[1]
+geo.geo_shape_cos2_in = sim.shape_cos[2]
+geo.geo_shape_cos3_in = sim.shape_cos[3]
 geo.geo_shape_cos4_in = 0.0
 geo.geo_shape_cos5_in = 0.0
 geo.geo_shape_cos6_in = 0.0
-geo.geo_shape_sin3_in = sim.shape_sin3
+geo.geo_shape_sin3_in = sim.shape_sin[3]
 geo.geo_shape_sin4_in = 0.0
 geo.geo_shape_sin5_in = 0.0
 geo.geo_shape_sin6_in = 0.0
-geo.geo_shape_s_cos0_in = sim.shape_s_cos0
-geo.geo_shape_s_cos1_in = sim.shape_s_cos1
-geo.geo_shape_s_cos2_in = sim.shape_s_cos2
-geo.geo_shape_s_cos3_in = sim.shape_s_cos3
+geo.geo_shape_s_cos0_in = sim.shape_s_cos[0]
+geo.geo_shape_s_cos1_in = sim.shape_s_cos[1]
+geo.geo_shape_s_cos2_in = sim.shape_s_cos[2]
+geo.geo_shape_s_cos3_in = sim.shape_s_cos[3]
 geo.geo_shape_s_cos4_in = 0.0
 geo.geo_shape_s_cos5_in = 0.0
 geo.geo_shape_s_cos6_in = 0.0
-geo.geo_shape_s_sin3_in = sim.shape_s_sin3
+geo.geo_shape_s_sin3_in = sim.shape_s_sin[3]
 geo.geo_shape_s_sin4_in = 0.0
 geo.geo_shape_s_sin5_in = 0.0
 geo.geo_shape_s_sin6_in = 0.0
