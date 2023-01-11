@@ -31,7 +31,7 @@ subroutine cgyro_upwind_r64
 
 #ifdef _OPENACC
 !$acc parallel loop collapse(3) gang &
-!$acc&         private(res_loc_one,iv) &
+!$acc&         private(res_loc_one,res_loc_two,iv) &
 !$acc&         present(g_x,upfac1,is_v,upwind_res_loc) default(none)
   do itor=nt1,nt2
    do is=ns1,ns2
