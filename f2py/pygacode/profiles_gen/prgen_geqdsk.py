@@ -17,9 +17,9 @@ def prgen_geqdsk(filename):
     slf = {}
     with open(filename, 'r') as f:
         EQDSK = f.read().splitlines()
-
+     
     slf['CASE'] = np.array(splitter(EQDSK[0][0:48],8))
-
+    
     try:
         tmp = list([_f for _f in EQDSK[0][48:].split(' ') if _f])
         [IDUM, slf['NW'],slf['NH']] = list(map(int,tmp[:3]))
@@ -61,12 +61,12 @@ def prgen_geqdsk(filename):
     try:
         # official gEQDSK file format saves PSIRZ as a single flat array of size rowsXcols
         nlNWNH = int(np.ceil(slf['NW']*slf['NH'] / 5.))
-        slf['PSIRZ'] = np.reshape(np.fromiter(splitter(''.join(EQDSK[offset:offset+nlNWNH])),dtype=np.float),(slf['NH'],slf['NW']))
+        slf['PSIRZ'] = np.reshape(np.fromiter(splitter(''.join(EQDSK[offset:offset+nlNWNH])),dtype=float),(slf['NH'],slf['NW']))
         offset = offset+nlNWNH
     except ValueError:
         # sometimes gEQDSK files save row by row of the PSIRZ grid (eg. FIESTA code)
         nlNWNH = slf['NH']*nlNW
-        slf['PSIRZ'] = np.reshape(np.fromiter(splitter(''.join(EQDSK[offset:offset+nlNWNH])),dtype=np.float),(slf['NH'],slf['NW']))
+        slf['PSIRZ'] = np.reshape(np.fromiter(splitter(''.join(EQDSK[offset:offset+nlNWNH])),dtype=float),(slf['NH'],slf['NW']))
         offset = offset+nlNWNH
 
     slf['QPSI'] = np.array(list(map(float,splitter(merge(EQDSK[offset:offset+nlNW])))))

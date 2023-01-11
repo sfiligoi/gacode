@@ -2,6 +2,7 @@ subroutine cgyro_equilibrium
 
   use cgyro_globals
   use geo
+  use cgyro_io
 
   implicit none
 
@@ -268,7 +269,15 @@ subroutine cgyro_equilibrium
      omega_trap(:,2) = stream_factor*omega_trap(:,2)
   end select
 
+#ifdef _OPENACC
 !$acc enter data copyin(xi,vel,omega_stream)
+
+  if (explicit_trap_flag == 1) then
+     call cgyro_error("explicit_trap_flag=1 not supported in GPU code.")
+     return
+  endif
+
+#endif
 
 end subroutine cgyro_equilibrium
 
