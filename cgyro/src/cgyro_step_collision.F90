@@ -51,7 +51,7 @@ subroutine cgyro_calc_collision_cpu_fp64(nj_loc)
 
     do k=1,nproc
        do j=1,nj_loc
-          fsendf(j,ic_loc,itor,k) = bvec(j+(k-1)*nj_loc)
+          fsendf(j,itor,ic_loc,k) = bvec(j+(k-1)*nj_loc)
        enddo
     enddo
 
@@ -126,7 +126,7 @@ subroutine cgyro_calc_collision_cpu_fp32(nj_loc)
 
     do k=1,nproc
        do j=1,nj_loc
-          fsendf(j,ic_loc,itor,k) = bvec(j+(k-1)*nj_loc)
+          fsendf(j,itor,ic_loc,k) = bvec(j+(k-1)*nj_loc)
        enddo
     enddo
 
@@ -227,7 +227,7 @@ subroutine cgyro_calc_collision_simple_cpu(nj_loc)
 
      do k=1,nproc
         do j=1,nj_loc
-           fsendf(j,ic_loc,itor,k) = bvec_flat(j+(k-1)*nj_loc)
+           fsendf(j,itor,ic_loc,k) = bvec_flat(j+(k-1)*nj_loc)
         enddo
      enddo
    enddo
@@ -299,7 +299,7 @@ subroutine cgyro_step_collision_cpu(use_simple)
      iv_loc = iv-nv1+1
      is = is_v(iv)
      do ic=1,nc
-        my_ch = cap_h_ct(iv_loc,ic,itor)
+        my_ch = cap_h_ct(iv_loc,itor,ic)
         my_psi = sum(jvec_c(:,ic,iv_loc,itor)*field(:,ic,itor))
         h_x(ic,iv_loc,itor) = my_ch-my_psi*(z(is)/temp(is))
         cap_h_c(ic,iv_loc,itor) = my_ch
@@ -350,7 +350,7 @@ subroutine cgyro_calc_collision_gpu_fp64(nj_loc)
               b_im = b_im + cval*aimag(cap_h_v(ic_loc,itor,ivp))
            enddo
 
-           fsendf(j,ic_loc,itor,k) = cmplx(b_re,b_im)
+           fsendf(j,itor,ic_loc,k) = cmplx(b_re,b_im)
         enddo
      enddo
 
@@ -361,7 +361,7 @@ subroutine cgyro_calc_collision_gpu_fp64(nj_loc)
         do k=1,nproc
            do j=1,nj_loc
               iv = j+(k-1)*nj_loc
-              cap_h_v(ic_loc,itor,iv) = fsendf(j,ic_loc,itor,k)
+              cap_h_v(ic_loc,itor,iv) = fsendf(j,itor,ic_loc,k)
            enddo
         enddo
        endif
@@ -426,7 +426,7 @@ subroutine cgyro_calc_collision_gpu_b2_fp64(nj_loc)
               b_im = b_im + cval*aimag(cap_h_v(ic_loc,itor,ivp))
            enddo
 
-           fsendf(j,ic_loc,itor,k) = cmplx(b_re,b_im)
+           fsendf(j,itor,ic_loc,k) = cmplx(b_re,b_im)
         enddo
       enddo
 
@@ -437,7 +437,7 @@ subroutine cgyro_calc_collision_gpu_b2_fp64(nj_loc)
         do k=1,nproc
            do j=1,nj_loc
               iv = j+(k-1)*nj_loc
-              cap_h_v(ic_loc,itor,iv) = fsendf(j,ic_loc,itor,k)
+              cap_h_v(ic_loc,itor,iv) = fsendf(j,itor,ic_loc,k)
            enddo
         enddo
        endif
@@ -504,7 +504,7 @@ subroutine cgyro_calc_collision_gpu_fp32(nj_loc)
               b_im = b_im + cval*h_im
            enddo
 
-           fsendf(j,ic_loc,itor,k) = cmplx(b_re,b_im)
+           fsendf(j,itor,ic_loc,k) = cmplx(b_re,b_im)
         enddo
      enddo
 
@@ -515,7 +515,7 @@ subroutine cgyro_calc_collision_gpu_fp32(nj_loc)
         do k=1,nproc
            do j=1,nj_loc
               iv = j+(k-1)*nj_loc
-              cap_h_v(ic_loc,itor,iv) = fsendf(j,ic_loc,itor,k)
+              cap_h_v(ic_loc,itor,iv) = fsendf(j,itor,ic_loc,k)
            enddo
         enddo
        endif
@@ -599,7 +599,7 @@ subroutine cgyro_calc_collision_gpu_b2_fp32(nj_loc)
               b_im = b_im + cval*h_im
            enddo
 
-           fsendf(j,ic_loc,itor,k) = cmplx(b_re,b_im)
+           fsendf(j,itor,ic_loc,k) = cmplx(b_re,b_im)
          enddo
        enddo
 
@@ -610,7 +610,7 @@ subroutine cgyro_calc_collision_gpu_b2_fp32(nj_loc)
          do k=1,nproc
            do j=1,nj_loc
               iv = j+(k-1)*nj_loc
-              cap_h_v(ic_loc,itor,iv) = fsendf(j,ic_loc,itor,k)
+              cap_h_v(ic_loc,itor,iv) = fsendf(j,itor,ic_loc,k)
            enddo
          enddo
        endif
@@ -705,7 +705,7 @@ subroutine cgyro_calc_collision_simple_gpu(nj_loc)
         do k=1,nproc
            do j=1,nj_loc
               iv=j+(k-1)*nj_loc
-              fsendf(j,ic_loc,itor,k) = cap_h_v(ic_loc,itor,iv)
+              fsendf(j,itor,ic_loc,k) = cap_h_v(ic_loc,itor,iv)
            enddo
         enddo
      else
@@ -737,7 +737,7 @@ subroutine cgyro_calc_collision_simple_gpu(nj_loc)
         do k=1,nproc
            do j=1,nj_loc
               iv=j+(k-1)*nj_loc
-              fsendf(j,ic_loc,itor,k) = cmplx(bvec_re(ix_v(iv),ie_v(iv),is_v(iv)),bvec_im(ix_v(iv),ie_v(iv),is_v(iv)))
+              fsendf(j,itor,ic_loc,k) = cmplx(bvec_re(ix_v(iv),ie_v(iv),is_v(iv)),bvec_im(ix_v(iv),ie_v(iv),is_v(iv)))
            enddo
         enddo
      endif
@@ -842,7 +842,7 @@ subroutine cgyro_step_collision_gpu(use_simple)
         iv_loc = iv-nv1+1
         is = is_v(iv)
         my_psi = sum(jvec_c(:,ic,iv_loc,itor)*field(:,ic,itor))
-        my_ch = cap_h_ct(iv_loc,ic,itor)
+        my_ch = cap_h_ct(iv_loc,itor,ic)
         h_x(ic,iv_loc,itor) = my_ch-my_psi*(z(is)/temp(is))
         cap_h_c(ic,iv_loc,itor) = my_ch
      enddo

@@ -81,7 +81,7 @@ contains
 
     nsend = nj_loc*ni_loc*nk_loc
 
-    allocate(fsendf(nj_loc,ni_loc,nk1:nk2,nproc))
+    allocate(fsendf(nj_loc,nk1:nk2,ni_loc,nproc))
     allocate(fsendr(ni_loc,nk1:nk2,nj_loc,nproc))
     if (.not. allocated(fsendr_real)) allocate(fsendr_real(ni_loc,nk1:nk2,nj_loc,nproc))
 
