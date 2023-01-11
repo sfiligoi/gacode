@@ -84,6 +84,8 @@ else:
 
    # Only computing half sum 
    eny[:,0] = 0.5*eny[:,0]
+
+print('INFO: (plot_fluct) Computation method: '+mode)
    
 #------------------------------------------------------------------------
 # Real-space field reconstruction (if no pygacode)
@@ -138,6 +140,7 @@ def maptoreal_fft(nr,nn,nx,ny,c):
 #------------------------------------------------------------------------
 
 # Get filename and tags
+print('INFO: (plot_fluct) '+moment+' fluctuations')
 if moment == 't':
 	fdata,title,isfield = tag_helper(sim.mass[species],sim.z[species],'n')
 	fdata_n = 'bin' + fdata
@@ -145,10 +148,8 @@ if moment == 't':
 	fdata_e = 'bin' + fdata
 	u = specmap(sim.mass[species],sim.z[species])
 	title = r'${\delta \mathrm{T}}_'+u+'$'
-	print('trying T fluctuation')
 else:
 	fdata,title,isfield = tag_helper(sim.mass[species],sim.z[species],moment)
-	print('standard fluctation')
 
 # Check to see if data exists (try binary data first)
 if os.path.isfile('bin'+fdata):
