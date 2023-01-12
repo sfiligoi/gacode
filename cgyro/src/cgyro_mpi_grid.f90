@@ -241,7 +241,6 @@ subroutine cgyro_mpi_grid
      nt1 = 1
      nt2 = 1
   else
-     ! TODO: Allow for more than a single toroidal
      ! Multiple modes (n=0,1,2,...,n_toroidal-1)
      nt1 = i_group_1*nt_loc
      nt2 = nt1 + nt_loc -1
