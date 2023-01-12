@@ -24,7 +24,7 @@ subroutine cgyro_source
   sa = 1.0+exp(-delta_t/tau_ave)*sa
 
   ! Time-delay source
-  if (my_toroidal == 0) then
+  if (nt1 == 0) then
 
      ir = 1+n_radial/2
 
@@ -32,7 +32,7 @@ subroutine cgyro_source
      icp = (ir-1+1)*n_theta
 
 #ifdef _OPENACC
-!$acc parallel loop gang private(j) present(h_x,source)
+!$acc parallel loop private(j) present(h_x,source)
 #else
 !$omp parallel do private(j)
 #endif
@@ -40,11 +40,14 @@ subroutine cgyro_source
 !$acc loop seq
       do j=1,n_theta
         ! Recursive update of p=+1 source 
-        source(j,iv_loc) = source(j,iv_loc)+(h_x(icp+j,iv_loc)-source(j,iv_loc))/sa
+        source(j,iv_loc,0) = source(j,iv_loc,0) + &
+                (h_x(icp+j,iv_loc,0)-source(j,iv_loc,0))/sa
         ! Subtract source from h(0,+1)
-        h_x(icp+j,iv_loc) = h_x(icp+j,iv_loc)-nu_eff*delta_t*source(j,iv_loc)
+        h_x(icp+j,iv_loc,0) = h_x(icp+j,iv_loc,0) - &
+                nu_eff*delta_t*source(j,iv_loc,0)
         ! Subtract source from h(0,-1)
-        h_x(icm+j,iv_loc) = h_x(icm+j,iv_loc)-nu_eff*delta_t*conjg(source(j,iv_loc))
+        h_x(icm+j,iv_loc,0) = h_x(icm+j,iv_loc,0) - &
+                nu_eff*delta_t*conjg(source(j,iv_loc,0))
       enddo
      enddo
 

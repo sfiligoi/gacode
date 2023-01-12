@@ -198,11 +198,11 @@ subroutine cgyro_read_restart_one
   call MPI_INFO_FREE(finfo,i_err)
 
   ! Unpack h(0,0) into source 
-  if (source_flag == 1 .and. my_toroidal == 0) then
+  if (source_flag == 1 .and. nt1 == 0) then
      ic0 = (n_radial/2)*n_theta
      do j=1,n_theta
-        source(j,:) = h_x(ic0+j,:)
-        h_x(ic0+j,:) = 0.0
+        source(j,:,0) = h_x(ic0+j,:,0)
+        h_x(ic0+j,:,0) = 0.0
      enddo
      sa = 0.0
      do j=1,nint(t_current/delta_t)

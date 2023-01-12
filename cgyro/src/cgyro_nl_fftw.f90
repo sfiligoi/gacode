@@ -20,7 +20,7 @@ subroutine cgyro_nl_fftw_stepr(j, i_omp)
 
   integer, intent(in) :: j, i_omp
   integer :: ix,iy
-  integer :: ir,in
+  integer :: ir,itm,itl,itor
 
   include 'fftw3.f03'
 
@@ -34,13 +34,16 @@ subroutine cgyro_nl_fftw_stepr(j, i_omp)
   ! that will be filtered in the main time-stepping loop
 
   ! this should really be accounted against nl_mem, but hard to do with OMP
-  do ir=1,n_radial
+  do itm=1,n_toroidal_procs
+   do itl=1,nt_loc
+    itor=itl + (itm-1)*nt_loc
+    do ir=1,n_radial
      ix = ir-1-nx0/2
      if (ix < 0) ix = ix+nx
-     do in=1,n_toroidal
-        iy = in-1
-        f_nl(ir,j,in) = fx(iy,ix,i_omp)
-     enddo
+     iy = itor-1
+     f_nl(ir,itl,j,itm) = fx(iy,ix,i_omp)
+    enddo
+   enddo
   enddo
 
 end subroutine cgyro_nl_fftw_stepr
@@ -59,11 +62,13 @@ subroutine cgyro_nl_fftw(ij)
   integer, intent(in) :: ij
   !-----------------------------------
   integer :: ix,iy
-  integer :: ir,it,in,it_loc
+  integer :: ir,it,itm,itl,it_loc
+  integer :: itor,mytm
   integer :: j,p,iexch
   integer :: i_omp
   logical :: force_early_comm2, one_pass_fft
   integer :: o,num_one_pass
+  integer :: jtheta_min
 
   complex :: f0,g0
 
@@ -92,8 +97,7 @@ subroutine cgyro_nl_fftw(ij)
   call timer_lib_in('nl')
 
   if (n_omp<=nsplit) then
-!$omp parallel private(in,iy,ir,p,ix,f0,i_omp,j)
-!$omp do schedule(dynamic,1)
+!$omp parallel do private(itm,itl,itor,iy,ir,p,ix,f0,i_omp,j)
      do j=1,nsplit
         i_omp = omp_get_thread_num()+1
 
@@ -105,11 +109,14 @@ subroutine cgyro_nl_fftw(ij)
            p  = ir-1-nx0/2
            ix = p
            if (ix < 0) ix = ix+nx
-           do in=1,n_toroidal
-              iy = in-1
-              f0 = i_c*f_nl(ir,j,in)
+           do itm=1,n_toroidal_procs
+            do itl=1,nt_loc
+              itor=itl + (itm-1)*nt_loc
+              iy = itor-1
+              f0 = i_c*f_nl(ir,itl,j,itm)
               fx(iy,ix,i_omp) = p*f0
               fy(iy,ix,i_omp) = iy*f0
+            enddo
            enddo
         enddo
 
@@ -118,15 +125,12 @@ subroutine cgyro_nl_fftw(ij)
         call cleanx(fy(0,:,i_omp),nx)
         call fftw_execute_dft_c2r(plan_c2r,fy(:,:,i_omp),uymany(:,:,j))
      enddo ! j
-!$omp end do
-!$omp end parallel
   else ! (n_omp>nsplit), increase parallelism
      num_one_pass = 2
      if (one_pass_fft) then
         num_one_pass = 4
      endif
-!$omp parallel private(in,iy,ir,p,ix,f0,i_omp,j,o,it,iv_loc,it_loc)
-!$omp do schedule(dynamic,1) collapse(2)
+!$omp parallel do collapse(2) private(itl,itm,itor,mytm,iy,ir,p,ix,f0,i_omp,j,o,it,iv_loc,it_loc,jtheta_min)
      do j=1,nsplit
         do o=1,num_one_pass
            i_omp = j ! j<n_omp in this branch
@@ -140,10 +144,13 @@ subroutine cgyro_nl_fftw(ij)
                  p  = ir-1-nx0/2
                  ix = p
                  if (ix < 0) ix = ix+nx
-                 do in=1,n_toroidal
-                    iy = in-1
-                    f0 = i_c*f_nl(ir,j,in)
+                 do itm=1,n_toroidal_procs
+                   do itl=1,nt_loc
+                    itor=itl + (itm-1)*nt_loc
+                    iy = itor-1
+                    f0 = i_c*f_nl(ir,itl,j,itm)
                     fx(iy,ix,i_omp) = p*f0
+                   enddo
                  enddo
               enddo
 
@@ -158,10 +165,13 @@ subroutine cgyro_nl_fftw(ij)
                  p  = ir-1-nx0/2
                  ix = p
                  if (ix < 0) ix = ix+nx
-                 do in=1,n_toroidal
-                    iy = in-1
-                    f0 = i_c*f_nl(ir,j,in)
+                 do itm=1,n_toroidal_procs
+                   do itl=1,nt_loc
+                    itor=itl + (itm-1)*nt_loc
+                    iy = itor-1
+                    f0 = i_c*f_nl(ir,itl,j,itm)
                     fy(iy,ix,i_omp) = iy*f0
+                   enddo
                  enddo
               enddo
 
@@ -176,18 +186,23 @@ subroutine cgyro_nl_fftw(ij)
                  p  = ir-1-nx0/2
                  ix = p
                  if (ix < 0) ix = ix+nx
-                 do in=1,n_toroidal
-                    it = it_j(j,in)
-                    iv_loc =iv_j(j,in)
+                 do itm=1,n_toroidal_procs
+                  do itl=1,nt_loc
+                    itor = itl + (itm-1)*nt_loc
+                    mytm = nt1/nt_loc + itl -1
+                    iv_loc = 1+modulo(mytm*nsplit+j-1,nv_loc)
+                    it = 1+(mytm*nsplit+j-1)/nv_loc
+                    jtheta_min = 1+(mytm*nsplit)/nv_loc
+                    it_loc = it-jtheta_min+1
 
-                    iy = in-1
-                    if (iv_loc == 0) then
+                    iy = itor-1
+                    if (it_loc > n_jtheta) then
                        g0 = (0.0,0.0)
                     else
-                       it_loc = it-jtheta_min+1
-                       g0 = i_c*sum( jvec_c_nl(:,ir,it_loc,iv_loc,in)*g_nl(:,ir,it_loc,in))
+                       g0 = i_c*sum( jvec_c_nl(:,ir,it_loc,iv_loc,itor)*g_nl(:,ir,it_loc,itor))
                     endif
                     gx(iy,ix,i_omp) = p*g0
+                  enddo
                  enddo
               enddo
 
@@ -202,18 +217,23 @@ subroutine cgyro_nl_fftw(ij)
                  p  = ir-1-nx0/2
                  ix = p
                  if (ix < 0) ix = ix+nx
-                 do in=1,n_toroidal
-                    it = it_j(j,in)
-                    iv_loc =iv_j(j,in)
+                 do itm=1,n_toroidal_procs
+                  do itl=1,nt_loc
+                    itor = itl + (itm-1)*nt_loc
+                    mytm = nt1/nt_loc + itl -1
+                    iv_loc = 1+modulo(mytm*nsplit+j-1,nv_loc)
+                    it = 1+(mytm*nsplit+j-1)/nv_loc
+                    jtheta_min = 1+(mytm*nsplit)/nv_loc
+                    it_loc = it-jtheta_min+1
 
-                    iy = in-1
-                    if (iv_loc == 0) then
+                    iy = itor-1
+                    if (it_loc > n_jtheta) then
                        g0 = (0.0,0.0)
                     else
-                       it_loc = it-jtheta_min+1
-                       g0 = i_c*sum( jvec_c_nl(:,ir,it_loc,iv_loc,in)*g_nl(:,ir,it_loc,in))
+                       g0 = i_c*sum( jvec_c_nl(:,ir,it_loc,iv_loc,itor)*g_nl(:,ir,it_loc,itor))
                     endif
                     gy(iy,ix,i_omp) = iy*g0
+                  enddo
                  enddo
               enddo
 
@@ -223,8 +243,6 @@ subroutine cgyro_nl_fftw(ij)
            end select
         enddo ! o
      enddo ! j
-!$omp end do
-!$omp end parallel
   endif
 
   call timer_lib_out('nl')
@@ -240,8 +258,7 @@ subroutine cgyro_nl_fftw(ij)
   call timer_lib_in('nl')
 
   if (n_omp <= nsplit) then
-!$omp parallel private(in,iy,ir,p,ix,g0,i_omp,j,it,iv_loc,it_loc)
-!$omp do schedule(dynamic,1)
+!$omp parallel do private(itor,mytm,itm,itl,iy,ir,p,ix,g0,i_omp,j,it,iv_loc,it_loc,jtheta_min)
      do j=1,nsplit
         i_omp = omp_get_thread_num()+1
 
@@ -253,19 +270,24 @@ subroutine cgyro_nl_fftw(ij)
            p  = ir-1-nx0/2
            ix = p
            if (ix < 0) ix = ix+nx  
-           do in=1,n_toroidal
-              it = it_j(j,in)
-              iv_loc =iv_j(j,in)
+           do itm=1,n_toroidal_procs
+            do itl=1,nt_loc
+              itor = itl + (itm-1)*nt_loc
+              mytm = nt1/nt_loc + itl -1
+              iv_loc = 1+modulo(mytm*nsplit+j-1,nv_loc)
+              it = 1+(mytm*nsplit+j-1)/nv_loc
+              jtheta_min = 1+(mytm*nsplit)/nv_loc
+              it_loc = it-jtheta_min+1
 
-              iy = in-1
-              if (iv_loc == 0) then
+              iy = itor-1
+              if (it_loc > n_jtheta) then
                  g0 = (0.0,0.0)
               else
-                 it_loc = it-jtheta_min+1
-                 g0 = i_c*sum( jvec_c_nl(:,ir,it_loc,iv_loc,in)*g_nl(:,ir,it_loc,in))
+                 g0 = i_c*sum( jvec_c_nl(:,ir,it_loc,iv_loc,itor)*g_nl(:,ir,it_loc,itor))
               endif
               gx(iy,ix,i_omp) = p*g0
               gy(iy,ix,i_omp) = iy*g0
+            enddo
            enddo
         enddo
 
@@ -276,12 +298,10 @@ subroutine cgyro_nl_fftw(ij)
 
         call cgyro_nl_fftw_stepr(j, i_omp)
      enddo ! j
-!$omp end do
-!$omp end parallel
   else ! n_omp>nsplit
      if (.not. one_pass_fft) then
-!$omp parallel private(in,iy,ir,p,ix,g0,i_omp,j,it,iv_loc,it_loc)
-!$omp do schedule(dynamic,1) collapse(2)
+!$omp parallel do collapse(2) &
+!$omp&            private(itm,itl,itor,mytm,iy,ir,p,ix,g0,i_omp,it,iv_loc,it_loc,jtheta_min)
         do j=1,nsplit
            do o=1,2
               i_omp = j ! j<n_omp in this branch, so we can do it
@@ -294,18 +314,23 @@ subroutine cgyro_nl_fftw(ij)
                     p  = ir-1-nx0/2
                     ix = p
                     if (ix < 0) ix = ix+nx
-                    do in=1,n_toroidal
-                       it = it_j(j,in)
-                       iv_loc =iv_j(j,in)
+                    do itm=1,n_toroidal_procs
+                     do itl=1,nt_loc
+                       itor = itl + (itm-1)*nt_loc
+                       mytm = nt1/nt_loc + itl -1
+                       iv_loc = 1+modulo(mytm*nsplit+j-1,nv_loc)
+                       it = 1+(mytm*nsplit+j-1)/nv_loc
+                       jtheta_min = 1+(mytm*nsplit)/nv_loc
+                       it_loc = it-jtheta_min+1
 
-                       iy = in-1
-                       if (iv_loc == 0) then
+                       iy = itor-1
+                       if (it_loc > n_jtheta) then
                           g0 = (0.0,0.0)
                        else
-                          it_loc = it-jtheta_min+1
-                          g0 = i_c*sum( jvec_c_nl(:,ir,it_loc,iv_loc,in)*g_nl(:,ir,it_loc,in))
+                          g0 = i_c*sum( jvec_c_nl(:,ir,it_loc,iv_loc,itor)*g_nl(:,ir,it_loc,itor))
                        endif
                        gx(iy,ix,i_omp) = p*g0
+                     enddo
                     enddo
                  enddo
 
@@ -319,18 +344,23 @@ subroutine cgyro_nl_fftw(ij)
                     p  = ir-1-nx0/2
                     ix = p
                     if (ix < 0) ix = ix+nx
-                    do in=1,n_toroidal
-                       it = it_j(j,in)
-                       iv_loc =iv_j(j,in)
+                    do itm=1,n_toroidal_procs
+                     do itl=1,nt_loc
+                       itor = itl + (itm-1)*nt_loc
+                       mytm = nt1/nt_loc + itl -1
+                       iv_loc = 1+modulo(mytm*nsplit+j-1,nv_loc)
+                       it = 1+(mytm*nsplit+j-1)/nv_loc
+                       jtheta_min = 1+(mytm*nsplit)/nv_loc
+                       it_loc = it-jtheta_min+1
 
-                       iy = in-1
-                       if (iv_loc == 0) then
+                       iy = itor-1
+                       if (it_loc > n_jtheta) then
                           g0 = (0.0,0.0)
                        else
-                          it_loc = it-jtheta_min+1
-                          g0 = i_c*sum( jvec_c_nl(:,ir,it_loc,iv_loc,in)*g_nl(:,ir,it_loc,in))
+                          g0 = i_c*sum( jvec_c_nl(:,ir,it_loc,iv_loc,itor)*g_nl(:,ir,it_loc,itor))
                        endif
                        gy(iy,ix,i_omp) = iy*g0
+                     enddo
                     enddo
                  enddo
 
@@ -339,17 +369,12 @@ subroutine cgyro_nl_fftw(ij)
               endif
            enddo ! o
         enddo ! j
-!$omp end do
-!$omp end parallel
      endif
 
-!$omp parallel private(j)
-!$omp do schedule(dynamic,1)
+!$omp parallel do
      do j=1,nsplit
         call cgyro_nl_fftw_stepr(j, j) ! we used i_omp=j in the g section
      enddo ! j
-!$omp end do
-!$omp end parallel
 
   endif
 

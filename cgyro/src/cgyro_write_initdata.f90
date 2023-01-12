@@ -217,15 +217,15 @@ subroutine cgyro_write_initdata
      write(io) real(theta,kind=4)
      write(io) real(g_theta_geo,kind=4)
      write(io) real(bmag,kind=4)
-     write(io) real(omega_stream(:,1),kind=4)
-     write(io) real(omega_trap(:,1),kind=4)
+     write(io) real(omega_stream(:,1,nt1),kind=4)
+     write(io) real(omega_trap(:,1,nt1),kind=4)
      write(io) real(omega_rdrift(:,1),kind=4)
      write(io) real(omega_adrift(:,1),kind=4)
      write(io) real(omega_aprdrift(:,1),kind=4)
      write(io) real(omega_cdrift(:,1),kind=4)
      write(io) real(omega_cdrift_r(:,1),kind=4)
      write(io) real(omega_gammap(:),kind=4)
-     write(io) real(k_perp(ic_c(n_radial/2+1,:)),kind=4)
+     write(io) real(k_perp(ic_c(n_radial/2+1,:),nt1),kind=4)
      close(io)
 
   endif

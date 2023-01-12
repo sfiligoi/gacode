@@ -72,7 +72,7 @@ subroutine cgyro_step_gk_ck
      call cgyro_rhs(1)
 
      call timer_lib_in('str')
-     call cgyro_vel_fma2(h_x, h0_x, 0.2d0*deltah2, rhs(:,:,1))
+     call cgyro_vel_fma2(h_x, h0_x, 0.2d0*deltah2, rhs(:,:,:,1))
      call timer_lib_out('str')
 
      call cgyro_field_c
@@ -81,8 +81,8 @@ subroutine cgyro_step_gk_ck
      call timer_lib_in('str')
      call cgyro_vel_fma3(h_x, &
             h0_x, &
-            1.0/40.0*deltah2*3.0, rhs(:,:,1), &
-            1.0/40.0*deltah2*9.0, rhs(:,:,2))
+            1.0/40.0*deltah2*3.0, rhs(:,:,:,1), &
+            1.0/40.0*deltah2*9.0, rhs(:,:,:,2))
      call timer_lib_out('str')
 
      call cgyro_field_c
@@ -94,7 +94,7 @@ subroutine cgyro_step_gk_ck
             (/ deltah2*( 3.d0/10.d0), &
                deltah2*(-9.d0/10.d0), &
                deltah2*( 6.d0/ 5.d0) /), &
-             rhs(:,:,1:3))
+             rhs(:,:,:,1:3))
      call timer_lib_out('str')
 
      call cgyro_field_c
@@ -107,7 +107,7 @@ subroutine cgyro_step_gk_ck
                deltah2*(  5.d0/ 2.d0), &
                deltah2*(-70.d0/27.d0), &
                deltah2*( 35.d0/27.d0) /), &
-            rhs(:,:,1:4))
+            rhs(:,:,:,1:4))
      call timer_lib_out('str')
 
      call cgyro_field_c
@@ -121,7 +121,7 @@ subroutine cgyro_step_gk_ck
                deltah2*(  575.d0/ 13824.d0), &
                deltah2*(44275.d0/110592.d0), &
                deltah2*(  253.d0/  4096.d0) /), &
-            rhs(:,:,1:5))
+            rhs(:,:,:,1:5))
      call timer_lib_out('str')
 
      call cgyro_field_c
@@ -135,11 +135,11 @@ subroutine cgyro_step_gk_ck
      ! using a multiplication by 0 in one element is still efffienct, since the matrix element was read for the 2nd equation
      call cgyro_vel_solution_werror(4, h_x, &
             h0_x, &
-            deltah2*(    37.d0/ 378.d0), rhs(:,:,1), &
+            deltah2*(    37.d0/ 378.d0), rhs(:,:,:,1), &
             (/ deltah2*(250.d0/ 621.d0), &
                deltah2*(125.d0/ 594.d0), 0.d0, &
                deltah2*(512.d0/1771.d0) /), &
-            rhs(:,:,3:6), &
+            rhs(:,:,:,3:6), &
             deltah2*(     37.d0/378.d0- 2825.d0/27648.d0), &
             (/ deltah2*( 250.d0/621.d0-18575.d0/48384.d0), &
                deltah2*( 125.d0/594.d0-13525.d0/55296.d0), &

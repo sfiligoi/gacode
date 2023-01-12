@@ -61,6 +61,9 @@ subroutine cgyro_cleanup
   if(allocated(omega_rot_edrift))    deallocate(omega_rot_edrift)
   if(allocated(omega_rot_edrift_r))  deallocate(omega_rot_edrift_r)
   if(allocated(omega_rot_star))      deallocate(omega_rot_star)
+  if(allocated(gtime))               deallocate(gtime)
+  if(allocated(freq))                deallocate(freq)
+  if(allocated(freq_err))            deallocate(freq_err)
   if(allocated(fcoef))  then
 !$acc exit data delete(fcoef)     
      deallocate(fcoef)
@@ -316,10 +319,6 @@ subroutine cgyro_cleanup
 
   if(allocated(vfac))             deallocate(vfac)
   if(allocated(sum_den_h))        deallocate(sum_den_h)
-  if(allocated(sum_den_x))        deallocate(sum_den_x)
-  if (n_field > 1) then
-     if(allocated(sum_cur_x))     deallocate(sum_cur_x)
-  end if
   if(allocated(cderiv))           deallocate(cderiv)
   if(allocated(uderiv))           deallocate(uderiv)
   if(allocated(c_wave)) then

@@ -11,14 +11,16 @@ subroutine cgyro_init_arrays
   real :: u
   real :: fac
   integer :: ir,it,is,ie,ix
-  integer :: il, it_loc
+  integer :: itm,itl,itor,mytor
+  integer :: it_loc
   integer :: jr,jt,id
   integer :: i_field
   integer :: l,ll
+  integer :: iltheta_min,iltheta_max
   complex :: thfac,carg
-  real, dimension(nc,n_species,2) :: res_loc
-  real, dimension(:,:), allocatable :: jloc_c
-  real, dimension(:,:,:), allocatable :: res_norm
+  real, dimension(:,:,:,:), allocatable :: res_loc
+  real, dimension(:,:,:), allocatable :: jloc_c
+  real, dimension(:,:,:,:), allocatable :: res_norm
   real, external :: spectraldiss
 
   ! Parallel conservation cutoff
@@ -29,10 +31,11 @@ subroutine cgyro_init_arrays
   !-------------------------------------------------------------------------
   ! Distributed Bessel-function Gyroaverages
 
-  allocate(jloc_c(2,nc))
+  allocate(jloc_c(2,nc,nt1:nt2))
 
-  iv_loc = 0
-  do iv=nv1,nv2
+  do itor=nt1,nt2
+   iv_loc = 0
+   do iv=nv1,nv2
 
      iv_loc = iv_loc+1
 
@@ -45,16 +48,16 @@ subroutine cgyro_init_arrays
         it = it_c(ic)
         ir = ir_c(ic)
 
-        arg = k_perp(ic)*rho*vth(is)*mass(is)/(z(is)*bmag(it)) &
+        arg = k_perp(ic,itor)*rho*vth(is)*mass(is)/(z(is)*bmag(it)) &
              *sqrt(2.0*energy(ie))*sqrt(1.0-xi(ix)**2)
 
         ! Need this for (Phi, A_parallel) terms in GK and field equations
 
-        jloc_c(1,ic) = bessel_j0(arg)
+        jloc_c(1,ic,itor) = bessel_j0(arg)
 
         ! Needed for B_parallel in GK and field equations
 
-        jloc_c(2,ic) = 0.5*(jloc_c(1,ic) + bessel_jn(2,arg))/bmag(it)
+        jloc_c(2,ic,itor) = 0.5*(jloc_c(1,ic,itor) + bessel_jn(2,arg))/bmag(it)
         
      enddo
 
@@ -62,17 +65,17 @@ subroutine cgyro_init_arrays
 
      ! J0 phi
      efac = 1.0
-     jvec_c(1,:,iv_loc) = efac*jloc_c(1,:)
+     jvec_c(1,:,iv_loc,itor) = efac*jloc_c(1,:,itor)
      
      if (n_field > 1) then
         ! J0 vpar Apar
         efac = -xi(ix)*sqrt(2.0*energy(ie))*vth(is)
-        jvec_c(2,:,iv_loc) = efac*jloc_c(1,:)
+        jvec_c(2,:,iv_loc,itor) = efac*jloc_c(1,:,itor)
         
         if (n_field > 2) then
            ! J2 bpar
            efac = 2.0*energy(ie)*(1-xi(ix)**2)*temp(is)/z(is)
-           jvec_c(3,:,iv_loc) = efac*jloc_c(2,:)
+           jvec_c(3,:,iv_loc,itor) = efac*jloc_c(2,:,itor)
         endif
 
      endif
@@ -81,54 +84,66 @@ subroutine cgyro_init_arrays
      do ic=1,nc
         it = it_c(ic)
         fac = rho * temp(is)/(z(is) * bmag(it)) * bpol(it)/bmag(it) &
-             * 2.0 * energy(ie)*(1-xi(ix)**2) * k_x(ic)
+             * 2.0 * energy(ie)*(1-xi(ix)**2) * k_x(ic,itor)
         
-        jxvec_c(1,ic,iv_loc) =  fac * (bmag(it) * jloc_c(2,ic))
+        jxvec_c(1,ic,iv_loc,itor) =  fac * (bmag(it) * jloc_c(2,ic,itor))
         
         if (n_field > 1) then
            efac = -xi(ix)*sqrt(2.0*energy(ie))*vth(is)
-           jxvec_c(2,ic,iv_loc) = efac * fac * (bmag(it) * jloc_c(2,ic))
+           jxvec_c(2,ic,iv_loc,itor) = efac * fac * (bmag(it) * jloc_c(2,ic,itor))
            
            if (n_field > 2) then
-              if(my_toroidal == 0) then
-                 jxvec_c(3,ic,iv_loc) = 0.0
+              if(itor == 0) then
+                 jxvec_c(3,ic,iv_loc,itor) = 0.0
               else
-                 jxvec_c(3,ic,iv_loc) = fac * z(is)*bmag(it)/mass(is) &
-                      /(k_perp(ic)*rho)**2 &
-                      * (bmag(it) * jloc_c(2,ic) - jloc_c(1,ic))
+                 jxvec_c(3,ic,iv_loc,itor) = fac * z(is)*bmag(it)/mass(is) &
+                      /(k_perp(ic,itor)*rho)**2 &
+                      * (bmag(it) * jloc_c(2,ic,itor) - jloc_c(1,ic,itor))
               endif
            endif
            
         endif
      enddo
+   enddo
   enddo
  
   deallocate(jloc_c)
 !$acc enter data copyin(jvec_c)
 
   do i_field=1,n_field
-     call parallel_lib_rtrans_real(jvec_c(i_field,:,:),jvec_v(i_field,:,:))
+     call parallel_lib_rtrans_real(jvec_c(i_field,:,:,:),jvec_v(i_field,:,:,:))
   enddo
 
   if (nonlinear_flag == 1) then
-!$acc parallel loop gang independent collapse(3) private(it) present(jvec_c_nl,jvec_c,ic_c,it_f) default(none)
-  do il=1,n_toroidal
-    do iv_loc=1,nv_loc
+#ifdef _OPENACC
+!$acc parallel loop gang independent collapse(4) private(itor,it,iltheta_min,iltheta_max) &
+!$acc&         present(jvec_c_nl,jvec_c,ic_c) default(none)
+#else
+!$omp parallel do collapse(3) private(it_loc,itor,mytor,it,iltheta_min,iltheta_max)
+#endif
+   do itm=1,n_toroidal_procs
+    do itl=1,nt_loc
+     do iv_loc=1,nv_loc
       do it_loc=1,n_jtheta
-        it = it_f(it_loc,il)
-        if (it /= 0) then
-!$acc loop vector
+        iltheta_min = 1+((itm-1)*nsplit)/nv_loc
+        iltheta_max = 1+(itm*nsplit-1)/nv_loc
+        it = it_loc+iltheta_min-1
+        itor = itl+(itm-1)*nt_loc
+        if (it <= iltheta_max) then
+          mytor = nt1+itl-1
+!$acc loop vector private(mytor)
           do ir=1,n_radial
-            jvec_c_nl(1:n_field,ir,it_loc,iv_loc,il) = jvec_c(1:n_field,ic_c(ir,it),iv_loc)
+            jvec_c_nl(1:n_field,ir,it_loc,iv_loc,itor) = jvec_c(1:n_field,ic_c(ir,it),iv_loc,mytor)
           enddo
         else
           ! just padding
-          jvec_c_nl(1:n_field,1:n_radial,it_loc,iv_loc,il) = 0.0
+          jvec_c_nl(1:n_field,1:n_radial,it_loc,iv_loc,itor) = 0.0
         endif
       enddo
+     enddo
     enddo
-  enddo
-  call parallel_slib_distribute_real(n_field*n_radial*n_jtheta*nv_loc,jvec_c_nl)
+   enddo
+   call parallel_slib_distribute_real(n_field*n_radial*n_jtheta*nv_loc*nt_loc,jvec_c_nl)
   endif
 
   !-------------------------------------------------------------------------
@@ -136,21 +151,26 @@ subroutine cgyro_init_arrays
   !-------------------------------------------------------------------------
   ! Conservative upwind factor
   !
-  allocate(res_norm(nc,n_species,2))
+  allocate(res_loc(nc,n_species,nt1:nt2,2))
+  allocate(res_norm(nc,n_species,nt1:nt2,2))
 
-  res_loc(:,:,:) = 0.0
+  res_loc(:,:,:,:) = 0.0
 
 !$omp parallel private(ic,iv_loc,is,ix,ie)
-!$omp do reduction(+:res_loc)
-  do iv=nv1,nv2
+!$omp do collapse(2) reduction(+:res_loc)
+  do itor=nt1,nt2
+   do iv=nv1,nv2
      iv_loc = iv-nv1+1
      is = is_v(iv)
      ix = ix_v(iv)
      ie = ie_v(iv)
      do ic=1,nc
-        res_loc(ic,is,1) = res_loc(ic,is,1)+w_xi(ix)*w_e(ie)*jvec_c(1,ic,iv_loc)**2 
-        res_loc(ic,is,2) = res_loc(ic,is,2)+w_xi(ix)*w_e(ie)*jvec_c(1,ic,iv_loc)**2*(xi(ix)*vel(ie))**2
+        res_loc(ic,is,itor,1) = res_loc(ic,is,itor,1) + &
+                w_xi(ix)*w_e(ie)*jvec_c(1,ic,iv_loc,itor)**2 
+        res_loc(ic,is,itor,2) = res_loc(ic,is,itor,2) + &
+                w_xi(ix)*w_e(ie)*jvec_c(1,ic,iv_loc,itor)**2*(xi(ix)*vel(ie))**2
      enddo
+   enddo
   enddo
 !$omp end do
 !$omp end parallel
@@ -163,21 +183,27 @@ subroutine cgyro_init_arrays
        NEW_COMM_1,&
        i_err)
 
-!$omp parallel do private(iv_loc,is,ix,ie,ic)
-  do iv=nv1,nv2
+!$omp parallel do collapse(2) private(iv_loc,is,ix,ie,ic)
+  do itor=nt1,nt2
+   do iv=nv1,nv2
      iv_loc = iv-nv1+1
      is = is_v(iv)
      ix = ix_v(iv)
      ie = ie_v(iv)
      do ic=1,nc
-        upfac1(ic,iv_loc,1) = w_e(ie)*w_xi(ix)*abs(xi(ix))*vel(ie)*jvec_c(1,ic,iv_loc)
-        upfac2(ic,iv_loc,1) = jvec_c(1,ic,iv_loc)/res_norm(ic,is,1)
-        upfac1(ic,iv_loc,2) = w_e(ie)*w_xi(ix)*abs(xi(ix))*vel(ie)*jvec_c(1,ic,iv_loc)*xi(ix)*vel(ie)
-        upfac2(ic,iv_loc,2) = jvec_c(1,ic,iv_loc)/res_norm(ic,is,2)*xi(ix)*vel(ie)
+        upfac1(ic,iv_loc,itor,1) = w_e(ie)*w_xi(ix)*abs(xi(ix))*vel(ie) * &
+                jvec_c(1,ic,iv_loc,itor)
+        upfac2(ic,iv_loc,itor,1) = jvec_c(1,ic,iv_loc,itor)/res_norm(ic,is,itor,1)
+        upfac1(ic,iv_loc,itor,2) = w_e(ie)*w_xi(ix)*abs(xi(ix))*vel(ie) * &
+                jvec_c(1,ic,iv_loc,itor)*xi(ix)*vel(ie)
+        upfac2(ic,iv_loc,itor,2) = jvec_c(1,ic,iv_loc,itor)/res_norm(ic,is,itor,2) * &
+                xi(ix)*vel(ie)
      enddo
+   enddo
   enddo
 
   deallocate(res_norm)
+  deallocate(res_loc)
   
 !$acc enter data copyin(upfac1,upfac2)
 
@@ -215,8 +241,8 @@ subroutine cgyro_init_arrays
      sum_den_h(:) = sum_den_h(:) + dens_ele*dens_ele_rot(:)/temp_ele
   endif
 
-  allocate(sum_den_x(nc))
-  if (n_field > 1) allocate(sum_cur_x(nc))
+  allocate(sum_den_x(nc,nt1:nt2))
+  if (n_field > 1) allocate(sum_cur_x(nc,nt1:nt2))
 
   call cgyro_field_coefficients
   !------------------------------------------------------------------------------
@@ -224,13 +250,15 @@ subroutine cgyro_init_arrays
   !-------------------------------------------------------------------------
   ! Zonal flow with adiabatic electrons:
   !
-  if (my_toroidal == 0 .and. ae_flag == 1) then
-
+  do itor=nt1,nt2
+   if (itor == 0 .and. ae_flag == 1) then
+     ! since this applies only to itor == 0, we do not need to extend the matrix
      allocate(hzf(n_radial,n_theta,n_theta))
      hzf(:,:,:) = 0.0      
      do ir=1,n_radial
         do it=1,n_theta
-           hzf(ir,it,it) = k_perp(ic_c(ir,it))**2 * lambda_debye**2 &
+           ! my_toroidal==0
+           hzf(ir,it,it) = k_perp(ic_c(ir,it),0)**2 * lambda_debye**2 &
                 * dens_ele/temp_ele + sum_den_h(it)
            do jt=1,n_theta
               hzf(ir,it,jt) = hzf(ir,it,jt) &
@@ -252,8 +280,9 @@ subroutine cgyro_init_arrays
      xzf(:,:,:) = 0.0     
      do ir=1,n_radial
         do it=1,n_theta
-           xzf(ir,it,it) = k_perp(ic_c(ir,it))**2*lambda_debye**2 &
-                * dens_ele/temp_ele+sum_den_x(ic_c(ir,it))
+           ! my_toroidal==0
+           xzf(ir,it,it) = k_perp(ic_c(ir,it),0)**2*lambda_debye**2 &
+                * dens_ele/temp_ele+sum_den_x(ic_c(ir,it),0)
            do jt=1,n_theta
               xzf(ir,it,jt) = xzf(ir,it,jt) &
                    - dens_ele*dens_ele_rot(it)/temp_ele*w_theta(jt)
@@ -270,7 +299,12 @@ subroutine cgyro_init_arrays
      deallocate(i_piv)
      deallocate(work)
 
-  endif
+   endif
+  enddo
+
+  if (n_field > 1) deallocate(sum_cur_x)
+  deallocate(sum_den_x)
+
   !-------------------------------------------------------------------------
 
   !-------------------------------------------------------------------------
@@ -296,33 +330,36 @@ subroutine cgyro_init_arrays
   !-------------------------------------------------------------------------
   ! Streaming coefficient arrays
   !
-  do ir=1,n_radial
+  do itor=nt1,nt2
+   do ir=1,n_radial
      do it=1,n_theta
         do id=-nup_theta,nup_theta
            jt = modulo(it+id-1,n_theta)+1
            if (it+id < 1) then
-              thfac = exp(2*pi*i_c*k_theta*rmin)
-              jr = modulo(ir-my_toroidal*box_size*sign_qs-1,n_radial)+1
+              thfac = exp(2*pi*i_c*k_theta_base*itor*rmin)
+              jr = modulo(ir-itor*box_size*sign_qs-1,n_radial)+1
            else if (it+id > n_theta) then
-              thfac = exp(-2*pi*i_c*k_theta*rmin)
-              jr = modulo(ir+my_toroidal*box_size*sign_qs-1,n_radial)+1
+              thfac = exp(-2*pi*i_c*k_theta_base*itor*rmin)
+              jr = modulo(ir+itor*box_size*sign_qs-1,n_radial)+1
            else
               thfac = (1.0,0.0)
               jr = ir
            endif
-           dtheta(id, ic_c(ir,it))    = cderiv(id)*thfac
-           dtheta_up(id, ic_c(ir,it)) = uderiv(id)*thfac*up_theta
-           icd_c(id, ic_c(ir,it))     = ic_c(jr,modulo(it+id-1,n_theta)+1)
+           dtheta(id, ic_c(ir,it), itor)    = cderiv(id)*thfac
+           dtheta_up(id, ic_c(ir,it), itor) = uderiv(id)*thfac*up_theta
+           icd_c(id, ic_c(ir,it), itor)     = ic_c(jr,modulo(it+id-1,n_theta)+1)
         enddo
      enddo
+   enddo
   enddo
 !$acc enter data copyin(dtheta,dtheta_up,icd_c,c_wave)
 
   ! Streaming coefficients (for speed optimization)
 
-!$omp parallel do collapse(2) &
+!$omp parallel do collapse(3) &
 !$omp& private(iv,ic,iv_loc,is,ix,ie,ir,it,carg,u)
-  do iv=nv1,nv2
+  do itor=nt1,nt2
+   do iv=nv1,nv2
      do ic=1,nc
 
         iv_loc = iv-nv1+1
@@ -332,21 +369,21 @@ subroutine cgyro_init_arrays
         ir = ir_c(ic) 
         it = it_c(ic)
 
-        u = (pi/n_toroidal)*my_toroidal
+        u = (pi/n_toroidal)*itor
 
         ! omega_dalpha
-        omega_cap_h(ic,iv_loc) = &
+        omega_cap_h(ic,iv_loc,itor) = &
              -omega_adrift(it,is)*energy(ie)*(1.0+xi(ix)**2)*&
              (n_toroidal*q/pi/rmin)*(i_c*u)
 
         ! omega_dalpha [UPWIND: iu -> spectraldiss]
-        omega_h(ic,iv_loc) = &
+        omega_h(ic,iv_loc,itor) = &
              -abs(omega_adrift(it,is))*energy(ie)*(1.0+xi(ix)**2)*&
              (n_toroidal*q/pi/rmin)*spectraldiss(u,nup_alpha)*up_alpha
 
         ! (i ktheta) components from drifts        
-        omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
-             - i_c * k_theta * (omega_aprdrift(it,is)*energy(ie)*xi(ix)**2 &
+        omega_cap_h(ic,iv_loc,itor) = omega_cap_h(ic,iv_loc,itor) &
+             - i_c*k_theta_base*itor*(omega_aprdrift(it,is)*energy(ie)*xi(ix)**2 &
              + omega_cdrift(it,is)*vel(ie)*xi(ix) + omega_rot_drift(it,is) &
              + omega_rot_edrift(it))
         
@@ -355,7 +392,7 @@ subroutine cgyro_init_arrays
 
         ! (d/dr) components from drifts
         
-        omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) & 
+        omega_cap_h(ic,iv_loc,itor) = omega_cap_h(ic,iv_loc,itor) & 
              - (n_radial/length)*i_c*u &
              * (omega_rdrift(it,is)*energy(ie)*(1.0+xi(ix)**2) &
              + omega_cdrift_r(it,is)*vel(ie)*xi(ix) &
@@ -363,7 +400,7 @@ subroutine cgyro_init_arrays
              + omega_rot_edrift_r(it))
         
         ! (d/dr) upwind components from drifts [UPWIND: iu -> spectraldiss]
-        omega_h(ic,iv_loc) = omega_h(ic,iv_loc) &
+        omega_h(ic,iv_loc,itor) = omega_h(ic,iv_loc,itor) &
              - (n_radial/length)*spectraldiss(u,nup_radial)*up_radial &
              * (abs(omega_rdrift(it,is))*energy(ie)*(1.0+xi(ix)**2) &
              + abs(omega_cdrift_r(it,is)*xi(ix))*vel(ie) &
@@ -371,20 +408,21 @@ subroutine cgyro_init_arrays
              + abs(omega_rot_edrift_r(it)))          
              
         ! omega_star 
-        carg = -i_c*k_theta*rho*(dlnndr(is)+dlntdr(is)*(energy(ie)-1.5)) &
-             -i_c*k_theta*rho*(sqrt(2.0*energy(ie))*xi(ix)/vth(is) &
-             *omega_gammap(it)) -i_c*k_theta*rho*omega_rot_star(it,is)
+        carg = -i_c*k_theta_base*itor*rho*(dlnndr(is)+dlntdr(is)*(energy(ie)-1.5)) &
+             -i_c*k_theta_base*itor*rho*(sqrt(2.0*energy(ie))*xi(ix)/vth(is) &
+             *omega_gammap(it)) -i_c*k_theta_base*itor*rho*omega_rot_star(it,is)
 
-        omega_s(:,ic,iv_loc) = carg*jvec_c(:,ic,iv_loc)
+        omega_s(:,ic,iv_loc,itor) = carg*jvec_c(:,ic,iv_loc,itor)
 
         ! Profile curvature via wavenumber advection (ix -> d/dp)
         ! See whiteboard notes.
         ! JC: Re-checked sign and normalization (Oct 2019)
-        carg = -k_theta*length*(sdlnndr(is)+sdlntdr(is)*(energy(ie)-1.5))/(2*pi)
+        carg = -k_theta_base*itor*length*(sdlnndr(is)+sdlntdr(is)*(energy(ie)-1.5))/(2*pi)
 
-        omega_ss(:,ic,iv_loc) = carg*jvec_c(:,ic,iv_loc)
+        omega_ss(:,ic,iv_loc,itor) = carg*jvec_c(:,ic,iv_loc,itor)
 
      enddo
+   enddo
   enddo
 !$acc enter data copyin(omega_cap_h,omega_h,omega_s,omega_ss)
   !-------------------------------------------------------------------------
