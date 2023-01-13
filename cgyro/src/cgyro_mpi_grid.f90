@@ -24,11 +24,6 @@ subroutine cgyro_mpi_grid
 
   integer, external :: omp_get_max_threads, omp_get_thread_num
 
-  ! TODO: This value should now be hardcoded
-  !       In the current version it preserves the historical one-toroidal-per-process semantics
-  !       Should be an input, to be modified in the near future
-  nt_loc = 1
-
   ! Velocity-space (v) and configuration-space (c) dimensions
   nv = n_energy*n_xi*n_species
   nc = n_radial*n_theta
