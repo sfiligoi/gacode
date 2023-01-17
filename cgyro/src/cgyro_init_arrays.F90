@@ -16,7 +16,7 @@ subroutine cgyro_init_arrays
   integer :: jr,jt,id
   integer :: i_field
   integer :: l,ll
-  integer :: iltheta_min,iltheta_max
+  integer :: iltheta_min
   complex :: thfac,carg
   real, dimension(:,:,:), allocatable :: res_loc
   real, dimension(:,:,:), allocatable :: jloc_c
@@ -111,20 +111,19 @@ subroutine cgyro_init_arrays
 
   if (nonlinear_flag == 1) then
 #ifdef _OPENACC
-!$acc parallel loop gang independent collapse(4) private(itor,it,iltheta_min,iltheta_max) &
+!$acc parallel loop gang independent collapse(4) private(itor,it,iltheta_min) &
 !$acc&         present(jvec_c_nl,jvec_c,ic_c) default(none)
 #else
-!$omp parallel do collapse(3) private(it_loc,itor,mytor,it,iltheta_min,iltheta_max)
+!$omp parallel do collapse(3) private(it_loc,itor,mytor,it,iltheta_min)
 #endif
    do itm=1,n_toroidal_procs
     do itl=1,nt_loc
      do iv_loc=1,nv_loc
       do it_loc=1,n_jtheta
         iltheta_min = 1+((itm-1)*nsplit)/nv_loc
-        iltheta_max = 1+(itm*nsplit-1)/nv_loc
         it = it_loc+iltheta_min-1
         itor = itl+(itm-1)*nt_loc
-        if (it <= iltheta_max) then
+        if (it <= n_theta) then
           mytor = nt1+itl-1
 !$acc loop vector private(mytor)
           do ir=1,n_radial

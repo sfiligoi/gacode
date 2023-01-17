@@ -143,24 +143,23 @@ subroutine cgyro_nl_fftw_comm2_async
 
   integer :: ir,it,it_loc,itm,itl
   integer :: itor,mytor
-  integer :: iltheta_min,iltheta_max
+  integer :: iltheta_min
 
   call timer_lib_in('nl_mem')
 
 #ifdef _OPENACC
-!$acc parallel loop gang collapse(3) independent private(itor,it,iltheta_min,iltheta_max) &
+!$acc parallel loop gang collapse(3) independent private(itor,it,iltheta_min) &
 !$acc&         present(ic_c,field,gpack) default(none)
 #else
-!$omp parallel do collapse(2) private(it_loc,itor,mytor,it,iltheta_min,iltheta_max)
+!$omp parallel do collapse(2) private(it_loc,itor,mytor,it,iltheta_min)
 #endif
   do itm=1,n_toroidal_procs
    do itl=1,nt_loc
     do it_loc=1,n_jtheta
      iltheta_min = 1+((itm-1)*nsplit)/nv_loc
-     iltheta_max = 1+(itm*nsplit-1)/nv_loc
      it = it_loc+iltheta_min-1
      itor = itl+(itm-1)*nt_loc
-     if (it > iltheta_max) then
+     if (it > n_theta) then
         ! just padding
         gpack(1:n_field,1:n_radial,it_loc,itor) = (0.0,0.0)
      else
