@@ -835,7 +835,7 @@ subroutine cgyro_step_collision_gpu(use_simple)
 
 !$acc parallel loop collapse(3) gang vector private(iv_loc,is,my_psi,my_ch) &
 !$acc&         present(is_v,cap_h_c,cap_h_ct,cap_h_c,jvec_c,field,z,temp,h_x) &
-!$acc&         default(none)
+!$acc&         present(nt1,nt2,nv1,nv2,nc) default(none)
   do itor=nt1,nt2
    do iv=nv1,nv2
      do ic=1,nc

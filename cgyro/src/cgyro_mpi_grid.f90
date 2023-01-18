@@ -167,6 +167,9 @@ subroutine cgyro_mpi_grid
      return
   endif
 
+!$acc enter data copyin(nv,nc,n_toroidal,n_toroidal_procs)
+!$acc enter data copyin(n_radial,n_theta,n_field,n_energy,n_xi,n_species,n_field)
+
   ! Assign subgroup dimensions: n_proc = n_proc_1 * n_proc_2
 
   n_proc_1 = n_proc/n_toroidal_procs
@@ -270,7 +273,7 @@ subroutine cgyro_mpi_grid
   endif
   ns_loc = ns2-ns1+1
 
-  ! when exchaning only specific species, we need a dedicated comm
+! when exchaning only specific species, we need a dedicated comm
   call MPI_COMM_SPLIT(NEW_COMM_1,&
        i_group_3,&
        splitkey,&
@@ -302,6 +305,8 @@ subroutine cgyro_mpi_grid
        n_jtheta = max(n_jtheta,iltheta_max-iltheta_min+1)
      enddo
   endif
+
+!$acc enter data copyin(nt1,nt2,nt_loc,nv1,nv2,nv_loc,ns1,ns2,ns_loc,nc1,nc2,nc_loc,n_jtheta,nsplit)
 
   ! OMP code
   n_omp = omp_get_max_threads()

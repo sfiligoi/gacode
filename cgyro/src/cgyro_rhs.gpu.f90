@@ -64,7 +64,9 @@ subroutine cgyro_rhs(ij)
      call timer_lib_in('str')
 
 !$acc parallel loop  collapse(3) independent private(iv_loc,is) &
-!$acc&         present(is_v,z,temp,jvec_c) default(none) async(1)
+!$acc&         present(is_v,z,temp,jvec_c) &
+!$acc&         present(nt1,nt2,nv1,nv2,nc) &
+!$acc&         default(none) async(1)
      do itor=nt1,nt2
       do iv=nv1,nv2
         do ic=1,nc
@@ -85,7 +87,9 @@ subroutine cgyro_rhs(ij)
   else
      call timer_lib_in('str_mem')
 
-!$acc parallel loop  collapse(3) independent private(iv_loc) default(none) async(1)
+!$acc parallel loop  collapse(3) independent private(iv_loc) &
+!$acc&         present(nt1,nt2,nv1,nv2,nc)  &
+!$acc&         default(none) async(1)
      do itor=nt1,nt2
       do iv=nv1,nv2
         do ic=1,nc

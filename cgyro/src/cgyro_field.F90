@@ -169,7 +169,8 @@ subroutine cgyro_field_v_notae_s_gpu(start_t)
 
   ! Poisson and Ampere RHS integrals of H
 
-!$acc parallel loop collapse(3) independent default(none)
+!$acc parallel loop collapse(3) independent copyin(start_t) &
+!$acc&         present(nt2,nc,n_field) default(none)
   do itor=start_t,nt2
    do ic=1,nc
        do i_f=1,n_field
@@ -178,8 +179,9 @@ subroutine cgyro_field_v_notae_s_gpu(start_t)
    enddo
   enddo
 
-!$acc parallel loop collapse(3) gang private(ic_loc,field_loc_l) &
-!$acc&         present(dvjvec_v,cap_h_v,field_loc) default(none)
+!$acc parallel loop collapse(3) gang private(ic_loc,field_loc_l) copyin(start_t) &
+!$acc&         present(dvjvec_v,cap_h_v,field_loc) &
+!$acc&         present(nt2,nc1,nc2,n_field,nv) default(none)
   do itor=start_t,nt2
    do ic=nc1,nc2
     do i_f=1,n_field
@@ -222,7 +224,8 @@ subroutine cgyro_field_v_notae_s_gpu(start_t)
 
   call timer_lib_in('field')
   ! Poisson LHS factors
-!$acc parallel loop collapse(3) independent present(fcoef) default(none)
+!$acc parallel loop collapse(3) independent present(fcoef) copyin(start_t) &
+!$acc&         present(nt2,nc,n_field) default(none)
   do itor=start_t,nt2
      ! assuming  (.not.(itor == 0 .and. ae_flag == 1))
      do ic=1,nc
@@ -441,7 +444,7 @@ subroutine cgyro_field_c_gpu
   ! Poisson and Ampere RHS integrals of h
 
 !$acc parallel loop collapse(3) independent private(field_loc_l) &
-!$acc&         present(dvjvec_c) default(none)
+!$acc&         present(dvjvec_c) present(nt1,nt2,nc,n_field,nv1,nv2) default(none)
   do itor=nt1,nt2
    do ic=1,nc
     do i_f=1,n_field
@@ -481,7 +484,8 @@ subroutine cgyro_field_c_gpu
   call timer_lib_out('field_com')
   call timer_lib_in('field')
   if (n_field > 2) then
-!$acc parallel loop collapse(2) independent present(fcoef) default(none)
+!$acc parallel loop collapse(2) independent present(fcoef) &
+!$acc&         present(nt1,nt2,nc) default(none)
     do itor=nt1,nt2
       do ic=1,nc
        field(3,ic,itor) = field(3,ic,itor)*fcoef(3,ic,itor)
@@ -504,7 +508,8 @@ subroutine cgyro_field_c_gpu
 
   if (itor1<=itor2) then
      if (n_field > 2) then
-!$acc parallel loop collapse(2) independent private(tmp) present(gcoef) default(none)
+!$acc parallel loop collapse(2) independent private(tmp) present(gcoef) &
+!$acc&         copyin(itor1,itor2) present(nc) default(none)
         do itor=itor1,itor2
          do ic=1,nc
           tmp = field(1,ic,itor)
@@ -516,7 +521,8 @@ subroutine cgyro_field_c_gpu
          enddo
         enddo
      else
-!$acc parallel loop collapse(3) independent present(gcoef) default(none)
+!$acc parallel loop collapse(3) independent present(gcoef) &
+!$acc&         copyin(itor1,itor2) present(nc,n_field) default(none)
         do itor=itor1,itor2
          do ic=1,nc
           do i_f=1,n_field
@@ -528,7 +534,7 @@ subroutine cgyro_field_c_gpu
   endif
 
 !$acc parallel loop collapse(3) gang vector private(iv_loc,is,my_psi) &
-!$acc&         present(jvec_c,z,temp,is_v) default(none)
+!$acc&         present(jvec_c,z,temp,is_v) present(nt1,nt2,nv1,nv2,nc) default(none)
   do itor=nt1,nt2
    do iv=nv1,nv2
      do ic=1,nc
@@ -565,7 +571,7 @@ subroutine cgyro_field_c_ae_gpu
   ! Poisson and Ampere RHS integrals of h
 
 !$acc parallel loop collapse(3) independent private(field_loc_l) &
-!$acc&         present(dvjvec_c) default(none)
+!$acc&         present(dvjvec_c) present(nc,n_field,nv1,nv2) default(none)
   do itor=0,0
    do ic=1,nc
     do i_f=1,n_field
@@ -605,7 +611,7 @@ subroutine cgyro_field_c_ae_gpu
   call timer_lib_out('field_com')
   call timer_lib_in('field')
   if (n_field > 2) then
-!$acc parallel loop collapse(2) independent present(fcoef) default(none)
+!$acc parallel loop collapse(2) independent present(fcoef) present(nc) default(none)
     do itor=0,0
       do ic=1,nc
        field(3,ic,itor) = field(3,ic,itor)*fcoef(3,ic,itor)
@@ -619,7 +625,7 @@ subroutine cgyro_field_c_ae_gpu
 !$acc update device(field(:,:,0:0))
 
 !$acc parallel loop collapse(3) gang vector private(iv_loc,is,my_psi) &
-!$acc&         present(jvec_c,z,temp,is_v) default(none)
+!$acc&         present(jvec_c,z,temp,is_v) present(nv1,nv2,nc) default(none)
   do itor=0,0
    do iv=nv1,nv2
      do ic=1,nc

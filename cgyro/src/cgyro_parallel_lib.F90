@@ -86,6 +86,7 @@ contains
     if (.not. allocated(fsendr_real)) allocate(fsendr_real(ni_loc,nk1:nk2,nj_loc,nproc))
 
 !$acc enter data create(fsendf,fsendr)
+!$acc enter data copyin(nproc,nk1,nk2,ni_loc)
 
   end subroutine parallel_lib_init
 
@@ -283,7 +284,7 @@ contains
     j1 = 1+iproc*nj_loc
     j2 = (1+iproc)*nj_loc
 !$acc parallel loop collapse(4) independent private(j_loc) &
-!$acc&         present(fsendr,fin) default(none)
+!$acc&         present(fsendr,fin) present(nproc,nk1,nk2,ni_loc) copyin(j1,j2) default(none)
     do k=1,nproc
      do itor=nk1,nk2
        do j=j1,j2

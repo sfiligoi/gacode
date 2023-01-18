@@ -116,8 +116,10 @@ subroutine cgyro_init_arrays
 
   if (nonlinear_flag == 1) then
 #ifdef _OPENACC
-!$acc parallel loop gang independent collapse(4) private(itor,it,iltheta_min) &
-!$acc&         present(jvec_c_nl,jvec_c,ic_c) default(none)
+!$acc parallel loop gang independent collapse(4) private(itor,it,iltheta_min,mytor) &
+!$acc&         present(jvec_c_nl,jvec_c,ic_c) &
+!$acc&         present(n_toroidal_procs,nt_loc,nv_loc,n_jtheta,n_radial) &
+!$acc&         present(nt1,n_theta,n_field,nsplit) default(none)
 #else
 !$omp parallel do collapse(3) private(it_loc,itor,mytor,it,iltheta_min)
 #endif
@@ -130,7 +132,7 @@ subroutine cgyro_init_arrays
         itor = itl+(itm-1)*nt_loc
         if (it <= n_theta) then
           mytor = nt1+itl-1
-!$acc loop vector private(mytor)
+!$acc loop vector
           do ir=1,n_radial
             jvec_c_nl(1:n_field,ir,it_loc,iv_loc,itor) = jvec_c(1:n_field,ic_c(ir,it),iv_loc,mytor)
           enddo
