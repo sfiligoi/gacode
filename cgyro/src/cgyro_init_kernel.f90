@@ -40,7 +40,7 @@ subroutine cgyro_init_kernel
   
   i_time = 0
 
-  ! Number of fluxes to output
+  ! Number of fluxes to output 
   nflux = 3+exch_flag
 
   ! 1. MPI setup

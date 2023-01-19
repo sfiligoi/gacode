@@ -172,7 +172,7 @@ subroutine cgyro_rhs(ij)
 
   ! Nonlinear evaluation [f,g]
   if (nonlinear_flag == 1) then     
-        call cgyro_nl_fftw(ij)
+     call cgyro_nl_fftw(ij)
   endif
 
  call timer_lib_in('str_mem')

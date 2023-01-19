@@ -64,7 +64,7 @@ subroutine cgyro_nl_fftw(ij)
   integer :: ix,iy
   integer :: ir,it,itm,itl,it_loc
   integer :: itor,mytm
-  integer :: j,p,iexch
+  integer :: j,p
   integer :: i_omp
   logical :: force_early_comm2, one_pass_fft
   integer :: o,num_one_pass

@@ -68,43 +68,34 @@ subroutine cgyro_init_manager
   allocate(e_deriv1_mat(n_energy,n_energy))
   allocate(e_deriv1_rot_mat(n_energy,n_energy))
 
-  ! Construct energy nodes and weights
-  if (e_method<=2) then
-     call pseudo_maxwell_new(n_energy,&
+  ! Construct energy nodes and weights (Hallatschek)
+  if (i_proc == 0) then
+     call pseudo_maxwell_pliocene(n_energy,&
           e_max,&
           energy,&
           w_e,&
           e_deriv1_mat,&
+          alpha_poly,& ! weight fct=x^alpha_poly*exp(-x**2)
           trim(path)//'out.cgyro.egrid')
-  else if (e_method==3) then
-     ! interface function in module half_hermite
-     if (i_proc==0) then
-        call pseudo_maxwell_pliocene(n_energy,&
-             e_max,&
-             energy,&
-             w_e,&
-             e_deriv1_mat,&
-             alpha_poly,& ! weight fct=x^alpha_poly*exp(-x**2)
-             trim(path)//'out.cgyro.egrid')
-     else
-        call pseudo_maxwell_pliocene(n_energy,&
-             e_max,&
-             energy,&
-             w_e,&
-             e_deriv1_mat,&
-             alpha_poly) ! only write results on i_proc zero.
-     endif
+  else
+     call pseudo_maxwell_pliocene(n_energy,&
+          e_max,&
+          energy,&
+          w_e,&
+          e_deriv1_mat,&
+          alpha_poly) ! only write results on i_proc zero.
   endif
-  ! just a default value
+  
+  ! Default value for collision data compression
   n_low_energy = 0
 
   vel(:) = sqrt(energy(:))
 
   e_deriv1_rot_mat(:,:) = e_deriv1_mat(:,:)
-  if(e_fix == 2) then
+  if (e_fix == 2) then
      e_deriv1_rot_mat(n_energy,:) = 0.0
   endif
-  if(e_fix == 3) then
+  if (e_fix == 3) then
      e_deriv1_rot_mat(n_energy,:) = 0.0
      e_deriv1_mat(n_energy,:) = 0.0
   endif
@@ -235,33 +226,28 @@ subroutine cgyro_init_manager
      allocate(dvjvec_c(n_field,nc,nv_loc,nt1:nt2))
      allocate(dvjvec_v(n_field,nc_loc,nt1:nt2,nv))
      allocate(jxvec_c(n_field,nc,nv_loc,nt1:nt2))
-     allocate(upfac1(nc,nv_loc,nt1:nt2,2))
-     allocate(upfac2(nc,nv_loc,nt1:nt2,2))
+     allocate(upfac1(nc,nv_loc,nt1:nt2))
+     allocate(upfac2(nc,nv_loc,nt1:nt2))
 
 !$acc enter data create(cap_h_c,cap_h_ct,cap_h_c_dot,cap_h_c_old,cap_h_c_old2)
 !$acc enter data create(cap_h_v,dvjvec_c,dvjvec_v)
 
      if (upwind_single_flag == 0) then
-       allocate(upwind_res_loc(nc,ns1:ns2,nt1:nt2,2))
-       allocate(upwind_res(nc,ns1:ns2,nt1:nt2,2))
+       allocate(upwind_res_loc(nc,ns1:ns2,nt1:nt2))
+       allocate(upwind_res(nc,ns1:ns2,nt1:nt2))
 !$acc enter data create(upwind_res,upwind_res_loc)
      else
-       allocate(upwind32_res_loc(nc,ns1:ns2,nt1:nt2,2))
-       allocate(upwind32_res(nc,ns1:ns2,nt1:nt2,2))
+       allocate(upwind32_res_loc(nc,ns1:ns2,nt1:nt2))
+       allocate(upwind32_res(nc,ns1:ns2,nt1:nt2))
 !$acc enter data create(upwind32_res,upwind32_res_loc)
      endif
 
      ! Nonlinear arrays
      if (nonlinear_flag == 1) then
-        if (nonlinear_method == 1) then
-           call cgyro_error("nonlinear_method==1 has been deprecated")
-           return
-        else
-           allocate(f_nl(n_radial,nt_loc,nsplit,n_toroidal_procs))
-           allocate(g_nl(n_field,n_radial,n_jtheta,n_toroidal))
-           allocate(fpack(n_radial,nt_loc,nsplit*n_toroidal_procs))
-           allocate(gpack(n_field,n_radial,n_jtheta,n_toroidal))
-        endif
+        allocate(f_nl(n_radial,nt_loc,nsplit,n_toroidal_procs))
+        allocate(g_nl(n_field,n_radial,n_jtheta,n_toroidal))
+        allocate(fpack(n_radial,nt_loc,nsplit*n_toroidal_procs))
+        allocate(gpack(n_field,n_radial,n_jtheta,n_toroidal))
         allocate(jvec_c_nl(n_field,n_radial,n_jtheta,nv_loc,n_toroidal))
 !$acc enter data create(fpack,gpack,f_nl,g_nl,jvec_c_nl)
      endif
@@ -348,111 +334,105 @@ subroutine cgyro_init_manager
 
   ! Initialize nonlinear dimensions and arrays 
   call timer_lib_in('nl_init')
-  if (nonlinear_method == 1) then
-     call cgyro_error("nonlinear_method==1 has been deprecated")
-     return
-  else
 
-     ! 2D FFT lengths 
-     nx0 = n_radial
-     ny0 = 2*n_toroidal-1
+  ! 2D FFT lengths 
+  nx0 = n_radial
+  ny0 = 2*n_toroidal-1
 
-     ! 3/2-rule for dealiasing the nonlinear product
-     nx = (3*nx0)/2
-     ny = (3*ny0)/2
+  ! 3/2-rule for dealiasing the nonlinear product
+  nx = (3*nx0)/2
+  ny = (3*ny0)/2
      
 #ifndef _OPENACC
-     allocate(fx(0:ny/2,0:nx-1,n_omp))
-     allocate(gx(0:ny/2,0:nx-1,n_omp))
-     allocate(fy(0:ny/2,0:nx-1,n_omp))
-     allocate(gy(0:ny/2,0:nx-1,n_omp))
+  allocate(fx(0:ny/2,0:nx-1,n_omp))
+  allocate(gx(0:ny/2,0:nx-1,n_omp))
+  allocate(fy(0:ny/2,0:nx-1,n_omp))
+  allocate(gy(0:ny/2,0:nx-1,n_omp))
 
-     allocate(uxmany(0:ny-1,0:nx-1,nsplit))
-     allocate(uymany(0:ny-1,0:nx-1,nsplit))
-     allocate(vx(0:ny-1,0:nx-1,n_omp))
-     allocate(vy(0:ny-1,0:nx-1,n_omp))
-     allocate(uv(0:ny-1,0:nx-1,n_omp))
+  allocate(uxmany(0:ny-1,0:nx-1,nsplit))
+  allocate(uymany(0:ny-1,0:nx-1,nsplit))
+  allocate(vx(0:ny-1,0:nx-1,n_omp))
+  allocate(vy(0:ny-1,0:nx-1,n_omp))
+  allocate(uv(0:ny-1,0:nx-1,n_omp))
 
 #ifdef THREADED_FFT
-     i_err = fftw_init_threads()
-     call fftw_plan_with_nthreads(n_omp)
+  i_err = fftw_init_threads()
+  call fftw_plan_with_nthreads(n_omp)
 #endif
 
-
-     ! Create plans once and for all, with global arrays fx,ux
-     plan_c2r = fftw_plan_dft_c2r_2d(nx,ny,gx(:,:,1),vx(:,:,1),FFTW_PATIENT)
-     plan_r2c = fftw_plan_dft_r2c_2d(nx,ny,uv(:,:,1),fx(:,:,1),FFTW_PATIENT)
+  ! Create plans once and for all, with global arrays fx,ux
+  plan_c2r = fftw_plan_dft_c2r_2d(nx,ny,gx(:,:,1),vx(:,:,1),FFTW_PATIENT)
+  plan_r2c = fftw_plan_dft_r2c_2d(nx,ny,uv(:,:,1),fx(:,:,1),FFTW_PATIENT)
 #endif
 
 #ifdef _OPENACC
-     call cgyro_info('GPU-aware code triggered.')
+  call cgyro_info('GPU-aware code triggered.')
 
-     allocate( fxmany(0:ny/2,0:nx-1,nsplit) )
-     allocate( fymany(0:ny/2,0:nx-1,nsplit) )
-     allocate( gxmany(0:ny/2,0:nx-1,nsplit) )
-     allocate( gymany(0:ny/2,0:nx-1,nsplit) )
+  allocate( fxmany(0:ny/2,0:nx-1,nsplit) )
+  allocate( fymany(0:ny/2,0:nx-1,nsplit) )
+  allocate( gxmany(0:ny/2,0:nx-1,nsplit) )
+  allocate( gymany(0:ny/2,0:nx-1,nsplit) )
 
-     allocate( uxmany(0:ny-1,0:nx-1,nsplit) )
-     allocate( uymany(0:ny-1,0:nx-1,nsplit) )
-     allocate( vxmany(0:ny-1,0:nx-1,nsplit) )
-     allocate( vymany(0:ny-1,0:nx-1,nsplit) )
-     allocate( uvmany(0:ny-1,0:nx-1,nsplit) )
+  allocate( uxmany(0:ny-1,0:nx-1,nsplit) )
+  allocate( uymany(0:ny-1,0:nx-1,nsplit) )
+  allocate( vxmany(0:ny-1,0:nx-1,nsplit) )
+  allocate( vymany(0:ny-1,0:nx-1,nsplit) )
+  allocate( uvmany(0:ny-1,0:nx-1,nsplit) )
 
 !$acc enter data create(fxmany,fymany,gxmany,gymany) &
 !$acc&           create(uxmany,uymany,vxmany,vymany,uvmany)
 
-     !-------------------------------------------------------------------
-     ! 2D
-     !   input[ b*idist + (x * inembed[1] + y)*istride ]
-     !  output[ b*odist + (x * onembed[1] + y)*ostride ]
-     !  isign is the sign of the exponent in the formula that defines
-     !  Fourier transform  -1 == FFTW_FORWARD
-     !                      1 == FFTW_BACKWARD
-     !-------------------------------------------------------------------
+  !-------------------------------------------------------------------
+  ! 2D
+  !   input[ b*idist + (x * inembed[1] + y)*istride ]
+  !  output[ b*odist + (x * onembed[1] + y)*ostride ]
+  !  isign is the sign of the exponent in the formula that defines
+  !  Fourier transform  -1 == FFTW_FORWARD
+  !                      1 == FFTW_BACKWARD
+  !-------------------------------------------------------------------
 
-     ndim(1) = nx
-     ndim(2) = ny
-     idist = size(fxmany,1)*size(fxmany,2)
-     odist = size(uxmany,1)*size(uxmany,2)
-     istride = 1
-     ostride = 1
-     inembed = size(fxmany,1)
-     onembed = size(uxmany,1)
+  ndim(1) = nx
+  ndim(2) = ny
+  idist = size(fxmany,1)*size(fxmany,2)
+  odist = size(uxmany,1)*size(uxmany,2)
+  istride = 1
+  ostride = 1
+  inembed = size(fxmany,1)
+  onembed = size(uxmany,1)
 
-     istatus = cufftPlanMany(&
-          cu_plan_c2r_many, &
-          irank, &
-          ndim, &
-          inembed, &
-          istride, &
-          idist, &
-          onembed, &
-          ostride, &
-          odist, &
-          merge(CUFFT_C2R,CUFFT_Z2D,kind(uxmany) == singlePrecision), &
-          nsplit)
+  istatus = cufftPlanMany(&
+       cu_plan_c2r_many, &
+       irank, &
+       ndim, &
+       inembed, &
+       istride, &
+       idist, &
+       onembed, &
+       ostride, &
+       odist, &
+       merge(CUFFT_C2R,CUFFT_Z2D,kind(uxmany) == singlePrecision), &
+       nsplit)
 
-     idist = size(uxmany,1)*size(uxmany,2)
-     odist = size(fxmany,1)*size(fxmany,2)
-     inembed = size(uxmany,1)
-     onembed = size(fxmany,1) 
-     istride = 1
-     ostride = 1
-     istatus = cufftPlanMany(&
-          cu_plan_r2c_many, &
-          irank, &
-          ndim, &
-          inembed, &
-          istride, &
-          idist, &
-          onembed, &
-          ostride, &
-          odist, &
-          merge(CUFFT_R2C,CUFFT_D2Z,kind(uxmany) == singlePrecision), &
-          nsplit)
+  idist = size(uxmany,1)*size(uxmany,2)
+  odist = size(fxmany,1)*size(fxmany,2)
+  inembed = size(uxmany,1)
+  onembed = size(fxmany,1) 
+  istride = 1
+  ostride = 1
+  istatus = cufftPlanMany(&
+       cu_plan_r2c_many, &
+       irank, &
+       ndim, &
+       inembed, &
+       istride, &
+       idist, &
+       onembed, &
+       ostride, &
+       odist, &
+       merge(CUFFT_R2C,CUFFT_D2Z,kind(uxmany) == singlePrecision), &
+       nsplit)
 #endif
 
-  endif
   call timer_lib_out('nl_init')
 
 end subroutine cgyro_init_manager
