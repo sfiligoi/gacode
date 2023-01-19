@@ -115,6 +115,15 @@ subroutine cgyro_init_arrays
   enddo
 
   if (nonlinear_flag == 1) then
+!
+! This is a NL transpose
+! Reminder: nc ~= n_radial*n_theta
+! First half of the transpose is done locally with sub-sampling
+!  from (n_field,n_theta,n_radial,nv_loc,nt_loc) -> (n_field,n_radial,n_jtheta,nv_loc,nt_loc,n_toroidal_procs)
+! Then AlltoAll finishes the transpose, keeping
+!  (n_field,n_radial,n_jtheta,nv_loc,nt_loc,n_toroidal_procs)
+! 
+
 #ifdef _OPENACC
 !$acc parallel loop gang independent collapse(4) private(itor,it,iltheta_min,mytor) &
 !$acc&         present(jvec_c_nl,jvec_c,ic_c) &

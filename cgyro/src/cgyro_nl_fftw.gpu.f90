@@ -90,6 +90,8 @@ subroutine cgyro_nl_fftw(ij)
   call cgyro_nl_fftw_zero4(size(fxmany,1)*size(fxmany,2)*size(fxmany,3), &
                            fxmany,fymany,gxmany,gymany)
 
+! f_nl is (radial, nt_loc, theta, nv_loc1, toroidal_procs)
+! where nv_loc1 * toroidal_procs >= nv_loc
 !$acc parallel loop gang vector independent collapse(4) private(j,ir,p,ix,itor,iy,f0,g0) async
   do j=1,nsplit
      do ir=1,n_radial
@@ -136,19 +138,22 @@ subroutine cgyro_nl_fftw(ij)
 
   call timer_lib_in('nl')
 
+! g_nl      is (n_field,n_radial,n_jtheta,nt_loc,n_toroidal_procs)
+! jcev_c_nl is (n_field,n_radial,n_jtheta,nv_loc,nt_loc,n_toroidal_procs)
 
 !$acc parallel loop gang vector independent collapse(4) &
-!$acc&         private(j,ir,p,ix,itor,mytm,iy,f0,g0,it,iv_loc,it_loc,jtheta_min) &
-!$acc&         present(g_nl,jvec_c_nl)
+!$acc&         private(j,ir,p,ix,itor,mytm,iy,g0,it,iv_loc,it_loc,jtheta_min) &
+!$acc&         present(g_nl,jvec_c_nl) &
+!$acc&         present(nsplit,n_radial,n_toroidal_procs,nt_loc,nt1,n_theta,nv_loc)
   do j=1,nsplit
      do ir=1,n_radial
        do itm=1,n_toroidal_procs
          do itl=1,nt_loc
            itor = itl + (itm-1)*nt_loc
-           mytm = nt1/nt_loc + itl -1
-           it = 1+(mytm*nsplit+j-1)/nv_loc
-           iv_loc = 1+modulo(mytm*nsplit+j-1,nv_loc)
-           jtheta_min = 1+(mytm*nsplit)/nv_loc
+           mytm = 1 + nt1/nt_loc !my toroidal proc number
+           it = 1+((mytm-1)*nsplit+j-1)/nv_loc
+           iv_loc = 1+modulo((mytm-1)*nsplit+j-1,nv_loc)
+           jtheta_min = 1+((mytm-1)*nsplit)/nv_loc
            it_loc = it-jtheta_min+1
 
            p  = ir-1-nx0/2
@@ -156,7 +161,7 @@ subroutine cgyro_nl_fftw(ij)
            if (ix < 0) ix = ix+nx
 
            iy = itor-1
-           if (it_loc > n_jtheta) then
+           if (it > n_theta) then
               g0 = (0.0,0.0)
            else
               g0 = i_c*sum( jvec_c_nl(1:n_field,ir,it_loc,iv_loc,itor)*g_nl(1:n_field,ir,it_loc,itor))
