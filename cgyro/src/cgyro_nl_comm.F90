@@ -12,12 +12,13 @@ module cgyro_nl_comm
 contains
 
 !
-! Comm is a transpose
+! Comm is a transposea
+! Reminder: nc ~= n_radial*n_theta
 ! First half of the transpose is done locally
-!  from (theta,radial,nv_loc) -> (radial, theta, nv_lov)
+!  from (theta,radial,nv_loc,nt_loc) -> (radial, nt_loc, theta, nv_loc)
 ! Then AlltoAll finishes the transpose
-!  from (radial, theta, nv_loc_1, nv_loc_2) x toroidal -> (radial, theta, nv_loc_1 , toroidal) x nv_loc_2
-! Implies nv_loc_2 == toroidal
+!  from (radial, nt_loc, theta, nv_loc_1, nv_loc_2) x toroidal_procs -> (radial, nt_loc, theta, nv_loc_1 , toroidal_procs) x nv_loc_2
+! Implies nv_loc_2 == toroidal_procs
 !
 
 ! NOTE: call cgyro_nl_fftw_comm1/2_async before cgyro_nl_fftw
@@ -35,7 +36,8 @@ subroutine cgyro_nl_fftw_comm1_async
 
 #ifdef _OPENACC
 !$acc parallel loop collapse(4) gang vector independent private(iexch) &
-!$acc&         present(ic_c,h_x,fpack) default(none)
+!$acc&         present(ic_c,h_x,fpack) &
+!$acc&         present(n_theta,nv_loc,nt1,nt2,n_radial) default(none)
 #else
 !$omp parallel do collapse(4) private(iexch)
 #endif
@@ -100,7 +102,8 @@ subroutine cgyro_nl_fftw_comm1_r(ij)
 
 #ifdef _OPENACC
 !$acc parallel loop collapse(4) gang vector independent private(iexch,ic_loc_m,my_psi) &
-!$acc&         present(ic_c,px,rhs,fpack) default(none)
+!$acc&         present(ic_c,px,rhs,fpack) copyin(psi_mul) &
+!$acc&         present(nt1,nt2,nv_loc,n_theta,n_radial) copyin(ij) default(none)
 #else
 !$omp parallel do collapse(4) private(iexch,ic_loc_m,my_psi)
 #endif
@@ -127,11 +130,14 @@ subroutine cgyro_nl_fftw_comm1_r(ij)
 
 end subroutine cgyro_nl_fftw_comm1_r
 
+
 !
 ! Comm2 is a transpose
-! First half of the transpose is done locally
-!  from (field,:,n_radial) -> (field,n_radial, :)
+! Reminder: nc ~= n_radial*n_theta
+! First half of the transpose is done locally with sub-sampling
+!  from (n_field,n_theta,n_radial,nt_loc) -> (n_field,n_radial,n_jtheta,nt_loc,n_toroidal_procs)
 ! Then AlltoAll finishes the transpose
+!  (n_field,n_radial,n_jtheta,nt_loc,n_toroidal_proc)xn_toroidal_proc -> (n_field,n_radial,n_jtheta,nt_loc,n_toroida_procl)xn_toroidal_proc
 ! 
 
 subroutine cgyro_nl_fftw_comm2_async
@@ -148,8 +154,11 @@ subroutine cgyro_nl_fftw_comm2_async
   call timer_lib_in('nl_mem')
 
 #ifdef _OPENACC
-!$acc parallel loop gang collapse(3) independent private(itor,it,iltheta_min) &
-!$acc&         present(ic_c,field,gpack) default(none)
+!$acc parallel loop gang collapse(3) independent private(itor,it,iltheta_min,mytor) &
+!$acc&         present(ic_c,field,gpack) &
+!$acc&         present(n_toroidal_procs,nt_loc,n_jtheta,nv_loc,nt1) &
+!$acc&         present(n_theta,n_radial,n_field,nsplit) &
+!$acc&         default(none)
 #else
 !$omp parallel do collapse(2) private(it_loc,itor,mytor,it,iltheta_min)
 #endif
@@ -163,9 +172,9 @@ subroutine cgyro_nl_fftw_comm2_async
         ! just padding
         gpack(1:n_field,1:n_radial,it_loc,itor) = (0.0,0.0)
      else
-!$acc loop vector private(mytor)
+        mytor = nt1+itl-1
+!$acc loop vector
         do ir=1,n_radial
-           mytor = nt1+itl-1
            gpack(1:n_field,ir,it_loc,itor) = field(1:n_field,ic_c(ir,it),mytor)
         enddo
      endif

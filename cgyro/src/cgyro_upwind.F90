@@ -33,7 +33,8 @@ subroutine cgyro_upwind_r64
 #ifdef _OPENACC
 !$acc parallel loop collapse(3) gang &
 !$acc&         private(res_loc,iv) &
-!$acc&         present(g_x,upfac1,is_v,upwind_res_loc) default(none)
+!$acc&         present(g_x,upfac1,is_v,upwind_res_loc) &
+!$acc&        present(nt1,nt2,ns1,ns2,nc,nv1,nv2) default(none)
   do itor=nt1,nt2
    do is=ns1,ns2
      do ic=1,nc
@@ -99,7 +100,7 @@ subroutine cgyro_upwind_r64
 #ifdef _OPENACC
 !$acc parallel loop collapse(3) independent &
 !$acc&         present(is_v,ix_v,ie_v,xi,vel,upfac2,g_x,upwind_res) &
-!$acc&         private(iv_loc,is,ix,ie) default(none)
+!$acc&         private(iv_loc,is,ix,ie) present(nt1,nt2,nv1,nv2,nc) default(none)
 #else
 !$omp parallel do collapse(2) private(iv_loc,is,ix,ie,ic)
 #endif
@@ -139,7 +140,8 @@ subroutine cgyro_upwind_r32
 #ifdef _OPENACC
 !$acc parallel loop collapse(3) gang &
 !$acc&         private(res_loc,iv) &
-!$acc&         present(g_x,upfac1,is_v,upwind32_res_loc) default(none)
+!$acc&         present(g_x,upfac1,is_v,upwind32_res_loc) &
+!$acc&         present(nt1,nt2,ns1,ns2,nc,nv1,nv2) default(none)
   do itor=nt1,nt2
    do is=ns1,ns2
      do ic=1,nc
@@ -205,7 +207,8 @@ subroutine cgyro_upwind_r32
 #ifdef _OPENACC
 !$acc parallel loop collapse(3) independent &
 !$acc&         present(is_v,ix_v,ie_v,xi,vel,upfac2,g_x,upwind32_res) &
-!$acc&         private(iv_loc,is,ix,ie) default(none)
+!$acc&         private(iv_loc,is,ix,ie) &
+!$acc&         present(nt1,nt2,nv1,nv2,nc) default(none)
 #else
 !$omp parallel do collapse(2) private(iv_loc,is,ix,ie,ic)
 #endif
