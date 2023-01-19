@@ -301,7 +301,8 @@ subroutine cgyro_mpi_grid
        ! since we will need that to have equal number of rows
        ! in all the gpack buffers
        iltheta_min = 1+((itm-1)*nsplit)/nv_loc
-       iltheta_max = 1+(itm*nsplit-1)/nv_loc
+       ! use min since we have uneven splitting and compute can go past limit
+       iltheta_max = min(n_theta,1+(itm*nsplit-1)/nv_loc)
        n_jtheta = max(n_jtheta,iltheta_max-iltheta_min+1)
      enddo
   endif
