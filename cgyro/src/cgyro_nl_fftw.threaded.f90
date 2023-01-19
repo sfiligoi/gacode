@@ -104,6 +104,8 @@ subroutine cgyro_nl_fftw(ij)
 
   call timer_lib_in('nl')
 
+! f_nl is (radial, nt_loc, theta, nv_loc1, toroidal_procs)
+! where nv_loc1 * toroidal_procs >= nv_loc
   ! run in chunks to minimize temp storage costs
   do c=1,nsplit_chunks
     c1 = ((c-1)*n_omp)+1
@@ -158,6 +160,9 @@ subroutine cgyro_nl_fftw(ij)
 
   call timer_lib_in('nl')
 
+! g_nl      is (n_field,n_radial,n_jtheta,nt_loc,n_toroidal_procs)
+! jcev_c_nl is (n_field,n_radial,n_jtheta,nv_loc,nt_loc,n_toroidal_procs)
+
   ! run in chunks to minimize temp storage costs
   do c=1,nsplit_chunks
     c1 = ((c-1)*n_omp)+1
@@ -180,14 +185,14 @@ subroutine cgyro_nl_fftw(ij)
            do itm=1,n_toroidal_procs
             do itl=1,nt_loc
               itor = itl + (itm-1)*nt_loc
-              mytm = nt1/nt_loc + itl -1
-              iv_loc = 1+modulo(mytm*nsplit+j-1,nv_loc)
-              it = 1+(mytm*nsplit+j-1)/nv_loc
-              jtheta_min = 1+(mytm*nsplit)/nv_loc
+              mytm = 1 + nt1/nt_loc !my toroidal proc number
+              it = 1+((mytm-1)*nsplit+j-1)/nv_loc
+              iv_loc = 1+modulo((mytm-1)*nsplit+j-1,nv_loc)
+              jtheta_min = 1+((mytm-1)*nsplit)/nv_loc
               it_loc = it-jtheta_min+1
 
               iy = itor-1
-              if (it_loc > n_jtheta) then
+              if (it > n_theta) then
                  g0 = (0.0,0.0)
               else
                  g0 = i_c*sum( jvec_c_nl(:,ir,it_loc,iv_loc,itor)*g_nl(:,ir,it_loc,itor))
