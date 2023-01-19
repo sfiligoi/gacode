@@ -79,7 +79,7 @@ subroutine cgyro_error_estimate
 #ifdef _OPENACC
 !$acc parallel loop collapse(3) gang vector private(iv_loc) &
 !$acc&         present(cap_h_c_dot,cap_h_c,cap_h_c_old,cap_h_c_old2) &
-!$acc&         default(none)
+!$acc&         present(nt1,nt2,nv1,nv2,nc) copyin(delta_t) default(none)
 #else
 !$omp parallel do collapse(3) private(iv_loc)
 #endif
