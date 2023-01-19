@@ -12,12 +12,13 @@ module cgyro_nl_comm
 contains
 
 !
-! Comm is a transpose
+! Comm is a transposea
+! Reminder: nc ~= n_radial*n_theta
 ! First half of the transpose is done locally
-!  from (theta,radial,nv_loc) -> (radial, theta, nv_lov)
+!  from (theta,radial,nv_loc,nt_loc) -> (radial, nt_loc, theta, nv_loc)
 ! Then AlltoAll finishes the transpose
-!  from (radial, theta, nv_loc_1, nv_loc_2) x toroidal -> (radial, theta, nv_loc_1 , toroidal) x nv_loc_2
-! Implies nv_loc_2 == toroidal
+!  from (radial, nt_loc, theta, nv_loc_1, nv_loc_2) x toroidal_procs -> (radial, nt_loc, theta, nv_loc_1 , toroidal_procs) x nv_loc_2
+! Implies nv_loc_2 == toroidal_procs
 !
 
 ! NOTE: call cgyro_nl_fftw_comm1/2_async before cgyro_nl_fftw
@@ -133,9 +134,9 @@ end subroutine cgyro_nl_fftw_comm1_r
 ! Comm2 is a transpose
 ! Reminder: nc ~= n_radial*n_theta
 ! First half of the transpose is done locally with sub-sampling
-!  from (n_field,n_theta,n_radial) -> (n_field,n_radial, n_jtheta,n_toroidal)
+!  from (n_field,n_theta,n_radial,nt_loc) -> (n_field,n_radial,n_jtheta,nt_loc,n_toroidal_procs)
 ! Then AlltoAll finishes the transpose
-!  (n_field,n_radial, n_jtheta,n_toroidal)xn_toroidal -> (n_field,n_radial, n_jtheta,n_toroidal)xn_toroidal
+!  (n_field,n_radial,n_jtheta,nt_loc,n_toroidal_proc)xn_toroidal_proc -> (n_field,n_radial,n_jtheta,nt_loc,n_toroida_procl)xn_toroidal_proc
 ! 
 
 subroutine cgyro_nl_fftw_comm2_async
@@ -152,7 +153,7 @@ subroutine cgyro_nl_fftw_comm2_async
   call timer_lib_in('nl_mem')
 
 #ifdef _OPENACC
-!$acc parallel loop gang collapse(3) independent private(itor,it,iltheta_min) &
+!$acc parallel loop gang collapse(3) independent private(itor,it,iltheta_min,mytor) &
 !$acc&         present(ic_c,field,gpack) &
 !$acc&         present(n_toroidal_procs,nt_loc,n_jtheta,nv_loc,nt1) &
 !$acc&         present(n_theta,n_radial,n_field,nsplit) &
@@ -170,9 +171,9 @@ subroutine cgyro_nl_fftw_comm2_async
         ! just padding
         gpack(1:n_field,1:n_radial,it_loc,itor) = (0.0,0.0)
      else
-!$acc loop vector private(mytor)
+        mytor = nt1+itl-1
+!$acc loop vector
         do ir=1,n_radial
-           mytor = nt1+itl-1
            gpack(1:n_field,ir,it_loc,itor) = field(1:n_field,ic_c(ir,it),mytor)
         enddo
      endif
