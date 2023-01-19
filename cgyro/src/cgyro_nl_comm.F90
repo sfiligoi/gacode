@@ -128,11 +128,14 @@ subroutine cgyro_nl_fftw_comm1_r(ij)
   call timer_lib_out('nl')
 end subroutine cgyro_nl_fftw_comm1_r
 
+
 !
 ! Comm2 is a transpose
-! First half of the transpose is done locally
-!  from (field,:,n_radial) -> (field,n_radial, :)
+! Reminder: nc ~= n_radial*n_theta
+! First half of the transpose is done locally with sub-sampling
+!  from (n_field,n_theta,n_radial) -> (n_field,n_radial, n_jtheta,n_toroidal)
 ! Then AlltoAll finishes the transpose
+!  (n_field,n_radial, n_jtheta,n_toroidal)xn_toroidal -> (n_field,n_radial, n_jtheta,n_toroidal)xn_toroidal
 ! 
 
 subroutine cgyro_nl_fftw_comm2_async
