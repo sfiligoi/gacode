@@ -133,7 +133,7 @@ subroutine cgyro_flux
            ! H w^* + H^* w
 
            if (ir-l > 0) then
-              icl = ic_c(ir-l,it)x
+              icl = ic_c(ir-l,it)
               prod1(l,:) = prod1(l,:) &
                       +i_c*cap_h_c(ic,iv_loc,itor)*conjg(jvec_c(:,icl,iv_loc,itor)*field(:,icl,itor))
               prod2(l,:) = prod2(l,:) &
