@@ -112,7 +112,7 @@ subroutine cgyro_upwind_r64
         ix = ix_v(iv)
         ie = ie_v(iv)
         g_x(ic,iv_loc,itor) = abs(xi(ix))*vel(ie)*g_x(ic,iv_loc,itor) &
-             -upfac2(ic,iv_loc,itor)*upwind_res(ic,is,itor)*0
+             -upfac2(ic,iv_loc,itor)*upwind_res(ic,is,itor)
      enddo
    enddo
   enddo
@@ -220,7 +220,7 @@ subroutine cgyro_upwind_r32
         ix = ix_v(iv)
         ie = ie_v(iv)
         g_x(ic,iv_loc,itor) = abs(xi(ix))*vel(ie)*g_x(ic,iv_loc,itor) &
-             -upfac2(ic,iv_loc,itor)*upwind32_res(ic,is,itor)*0
+             -upfac2(ic,iv_loc,itor)*upwind32_res(ic,is,itor)
      enddo
    enddo
   enddo
