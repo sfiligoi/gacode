@@ -21,6 +21,7 @@ subroutine cgyro_init_arrays
   real, dimension(:,:,:), allocatable :: res_loc
   real, dimension(:,:,:), allocatable :: jloc_c
   real, dimension(:,:,:), allocatable :: res_norm
+  real, dimension(:,:), allocatable :: res_weight
   real, external :: spectraldiss
 
   !-------------------------------------------------------------------------
@@ -158,6 +159,17 @@ subroutine cgyro_init_arrays
   !
   allocate(res_loc(nc,n_species,nt1:nt2))
   allocate(res_norm(nc,n_species,nt1:nt2))
+  allocate(res_weight(n_xi,n_energy))
+
+  if (res_weight_power < 1e-2) then
+     res_weight(:,:) = 1.0
+  else
+     do ix=1,n_xi
+        do ie=1,n_energy
+           res_weight(ix,ie) = (abs(xi(ix))*vel(ie))**res_weight_power
+        enddo
+     enddo
+  endif
 
   res_loc(:,:,:) = 0.0
 
@@ -171,7 +183,7 @@ subroutine cgyro_init_arrays
      ie = ie_v(iv)
      do ic=1,nc
         res_loc(ic,is,itor) = res_loc(ic,is,itor) + &
-                w_xi(ix)*w_e(ie)*jvec_c(1,ic,iv_loc,itor)**2*abs(xi(ix)*vel(ie))
+                w_xi(ix)*w_e(ie)*jvec_c(1,ic,iv_loc,itor)**2*res_weight(ix,ie)
      enddo
    enddo
   enddo
@@ -196,12 +208,13 @@ subroutine cgyro_init_arrays
      do ic=1,nc
         upfac1(ic,iv_loc,itor) = w_e(ie)*w_xi(ix)*abs(xi(ix))*vel(ie) * &
                 jvec_c(1,ic,iv_loc,itor)
-        upfac2(ic,iv_loc,itor) = jvec_c(1,ic,iv_loc,itor)*abs(xi(ix))*vel(ie) / &
+        upfac2(ic,iv_loc,itor) = jvec_c(1,ic,iv_loc,itor)*res_weight(ix,ie)/ &
                 res_norm(ic,is,itor)
      enddo
    enddo
   enddo
 
+  deallocate(res_weight)
   deallocate(res_norm)
   deallocate(res_loc)
   

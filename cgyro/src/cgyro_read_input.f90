@@ -86,6 +86,7 @@ subroutine cgyro_read_input
   call cgyro_readbc_int(stream_term,'STREAM_TERM')
   call cgyro_readbc_real(stream_factor)
   call cgyro_readbc_int(exch_flag,'EXCH_FLAG')
+  call cgyro_readbc_real(res_weight_power)
 
   call cgyro_readbc_real(rmin)
   call cgyro_readbc_real(rmaj)
@@ -151,8 +152,6 @@ subroutine cgyro_readbc_int(p,label)
   implicit none
   integer, intent(inout) :: p
   character (len=*), intent(in) :: label
-
-
   character (len=40) :: actual_label
 
   if (i_proc == 0) then
@@ -163,8 +162,6 @@ subroutine cgyro_readbc_int(p,label)
           STOP 'Invalid label found in input file'
        endif
   endif
-
-
 
   call MPI_BCAST(p,1,MPI_INTEGER,0,CGYRO_COMM_WORLD,i_err)
 

@@ -97,6 +97,7 @@ module cgyro_globals
   integer :: stream_term
   real :: stream_factor
   integer :: exch_flag
+  real :: res_weight_power
   !
   ! Geometry input
   !
