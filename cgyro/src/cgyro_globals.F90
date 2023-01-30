@@ -10,7 +10,13 @@ module cgyro_globals
 
   use, intrinsic :: iso_c_binding
 #ifdef _OPENACC
+
+#ifdef HIPGPU
+  use hipfort_hipfft
+#else
   use cuFFT
+#endif
+
 #endif
   use, intrinsic :: iso_fortran_env
   
@@ -393,8 +399,15 @@ module cgyro_globals
   !
   ! GPU-FFTW plans
 #ifdef _OPENACC
+
+#ifdef HIPGPU
+  type(C_PTR) :: hip_plan_r2c_many
+  type(C_PTR) :: hip_plan_c2r_many
+#else
   integer(c_int) :: cu_plan_r2c_many
   integer(c_int) :: cu_plan_c2r_many
+#endif
+
   complex, dimension(:,:,:),allocatable :: fxmany,fymany,gxmany,gymany
   real, dimension(:,:,:), allocatable :: uxmany,uymany
   real, dimension(:,:,:), allocatable :: vxmany,vymany,uvmany

@@ -15,7 +15,7 @@ FC = ftn -J ${GACODE_ROOT}/modules
 F77 = ${FC}
 
 # Compiler options/flags
-FACC   =-hacc
+FACC   =-hacc -DHIPGPU -I${HIPFORT_DIR}/include/amdgcn
 FOMP   =-homp
 FMATH  =-s real64
 FOPT   =-Ofast
@@ -24,7 +24,7 @@ F2PY   = f2py --fcompiler=pg
 
 
 # System math libraries
-LMATH=-llapack -lblas
+LMATH=-llapack -lblas -L${ROCM_PATH}/lib -L${HIPFORT_DIR}/lib -lhipfort-amdgcn -lhipfft -lamdhip64
 
 # NetCDF
 NETCDF=-L${NETCDF_DIR}/lib -lnetcdff -lnetcdf

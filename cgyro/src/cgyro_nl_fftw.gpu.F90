@@ -1,5 +1,5 @@
 !-----------------------------------------------------------------
-! cgyro_nl_fftw.gpu.f90 [GPU (acc-cuFFT) version]
+! cgyro_nl_fftw.gpu.f90 [GPU (acc-cuFFT/hipFFT) version]
 !
 ! PURPOSE:
 !  Evaluate nonlinear bracket with dealiased FFT.  It is natural 
@@ -47,7 +47,11 @@ end subroutine
 
 subroutine cgyro_nl_fftw(ij)
 
+#ifdef HIPGPU
+  use hipfort_hipfft
+#else
   use cufft
+#endif
   use timer_lib
   use parallel_lib
   use cgyro_nl_comm
@@ -122,10 +126,18 @@ subroutine cgyro_nl_fftw(ij)
 !$acc& use_device(fxmany,fymany) &
 !$acc& use_device(uxmany,uymany)
 
+#ifdef HIPGPU
+  rc = hipfftExecZ2D(hip_plan_c2r_many,fxmany,uxmany)
+#else
   rc = cufftExecZ2D(cu_plan_c2r_many,fxmany,uxmany)
+#endif
   ! make sure g_req progresses
   call parallel_slib_test(g_req)
+#ifdef HIPGPU
+  rc = hipfftExecZ2D(hip_plan_c2r_many,fymany,uymany)
+#else
   rc = cufftExecZ2D(cu_plan_c2r_many,fymany,uymany)
+#endif
 
 !$acc wait
 !$acc end host_data
@@ -177,8 +189,13 @@ subroutine cgyro_nl_fftw(ij)
 !$acc& use_device(gxmany,gymany) &
 !$acc& use_device(vxmany,vymany)
 
+#ifdef HIPGPU
+  rc = hipfftExecZ2D(hip_plan_c2r_many,gxmany,vxmany)
+  rc = hipfftExecZ2D(hip_plan_c2r_many,gymany,vymany)
+#else
   rc = cufftExecZ2D(cu_plan_c2r_many,gxmany,vxmany)
   rc = cufftExecZ2D(cu_plan_c2r_many,gymany,vymany)
+#endif
 
 !$acc wait
 !$acc end host_data
@@ -197,7 +214,11 @@ subroutine cgyro_nl_fftw(ij)
 
 !$acc wait
 !$acc host_data use_device(uvmany,fxmany)
+#ifdef HIPGPU
+  rc = hipfftExecD2Z(hip_plan_r2c_many,uvmany,fxmany)
+#else
   rc = cufftExecD2Z(cu_plan_r2c_many,uvmany,fxmany)
+#endif
 !$acc wait
 !$acc end host_data
 !$acc wait
