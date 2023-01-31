@@ -6,7 +6,6 @@ subroutine cgyro_read_input
   implicit none
 
   integer :: is
-  character (len=1) :: cdummy
 
   if (i_proc == 0) open(unit=1,file=trim(path)//'input.cgyro.gen',status='old')
 
@@ -18,7 +17,6 @@ subroutine cgyro_read_input
   call cgyro_readbc_int(n_field,'N_FIELD')
   call cgyro_readbc_real(e_max)
   call cgyro_readbc_real(alpha_poly)
-  call cgyro_readbc_int(e_method,'E_METHOD')
   call cgyro_readbc_int(e_fix,'E_FIX')
   call cgyro_readbc_int(delta_t_method,'DELTA_T_METHOD')
   call cgyro_readbc_real(delta_t)
@@ -55,7 +53,6 @@ subroutine cgyro_read_input
   call cgyro_readbc_int(z_eff_method,'Z_EFF_METHOD')
   call cgyro_readbc_int(zf_test_mode,'ZF_TEST_MODE')
   call cgyro_readbc_int(nonlinear_flag,'NONLINEAR_FLAG')
-  call cgyro_readbc_int(nonlinear_method,'NONLINEAR_METHOD')
   call cgyro_readbc_int(ae_flag,'AE_FLAG')
   call cgyro_readbc_real(temp_ae)
   call cgyro_readbc_real(dens_ae)
@@ -89,6 +86,7 @@ subroutine cgyro_read_input
   call cgyro_readbc_int(stream_term,'STREAM_TERM')
   call cgyro_readbc_real(stream_factor)
   call cgyro_readbc_int(exch_flag,'EXCH_FLAG')
+  call cgyro_readbc_real(res_weight_power)
 
   call cgyro_readbc_real(rmin)
   call cgyro_readbc_real(rmaj)
@@ -154,8 +152,6 @@ subroutine cgyro_readbc_int(p,label)
   implicit none
   integer, intent(inout) :: p
   character (len=*), intent(in) :: label
-
-
   character (len=40) :: actual_label
 
   if (i_proc == 0) then
@@ -166,8 +162,6 @@ subroutine cgyro_readbc_int(p,label)
           STOP 'Invalid label found in input file'
        endif
   endif
-
-
 
   call MPI_BCAST(p,1,MPI_INTEGER,0,CGYRO_COMM_WORLD,i_err)
 

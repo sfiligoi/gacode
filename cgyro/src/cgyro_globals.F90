@@ -34,7 +34,6 @@ module cgyro_globals
   integer :: n_field
   real    :: e_max
   real    :: alpha_poly
-  integer :: e_method
   integer :: e_fix
   integer :: delta_t_method
   real    :: delta_t
@@ -71,7 +70,6 @@ module cgyro_globals
   integer :: z_eff_method
   integer :: zf_test_mode 
   integer :: nonlinear_flag 
-  integer :: nonlinear_method
   real :: temp_ae
   real :: dens_ae
   real :: mass_ae
@@ -105,6 +103,7 @@ module cgyro_globals
   integer :: stream_term
   real :: stream_factor
   integer :: exch_flag
+  real :: res_weight_power
   !
   ! Geometry input
   !
@@ -156,7 +155,6 @@ module cgyro_globals
 
   real :: lambda_debye
   real :: rhos
-  real :: up_cutoff
 
   ! Global conversion variables
   real :: b_unit, b_gs2
@@ -369,7 +367,7 @@ module cgyro_globals
   real, dimension(:,:,:,:), allocatable :: dvjvec_c
   real, dimension(:,:,:,:), allocatable :: dvjvec_v
   real, dimension(:,:,:,:), allocatable :: jxvec_c
-  real, dimension(:,:,:,:), allocatable :: upfac1,upfac2
+  real, dimension(:,:,:), allocatable :: upfac1,upfac2
   !
   ! Fields
   real, dimension(:,:,:), allocatable :: fcoef
@@ -433,10 +431,10 @@ module cgyro_globals
   ! Work arrays
   real, dimension(2) :: integration_error
   ! Upwind work arrays
-  complex, dimension(:,:,:,:),allocatable :: upwind_res_loc
-  complex, dimension(:,:,:,:),allocatable :: upwind_res
-  complex(KIND=REAL32), dimension(:,:,:,:),allocatable :: upwind32_res_loc
-  complex(KIND=REAL32), dimension(:,:,:,:),allocatable :: upwind32_res
+  complex, dimension(:,:,:),allocatable :: upwind_res_loc
+  complex, dimension(:,:,:),allocatable :: upwind_res
+  complex(KIND=REAL32), dimension(:,:,:),allocatable :: upwind32_res_loc
+  complex(KIND=REAL32), dimension(:,:,:),allocatable :: upwind32_res
   !
   ! LAPACK work arrays 
   real, dimension(:), allocatable :: work  

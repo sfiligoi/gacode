@@ -4,14 +4,15 @@
 ! PURPOSE:
 !  Compute corrected distribution used in conservative advection scheme:
 !
-!                  /
-!              J0  | dv J0 |vp| g 
-!                  /
-!  |vp| g -  ----------------------
+!                      /
+!              J0 |vp| | dv J0 |vp| g 
+!                      /
+!  |vp| g -  --------------------------
 !                   /
-!                   | dv J0^2 
+!                   | dv J0^2 |vp|
 !                   /
 !
+! NOTE: |vp| prefactor in conserving term added on Jan 4 2023
 !-----------------------------------------------------------------
 
 subroutine cgyro_upwind_r64
@@ -24,44 +25,34 @@ subroutine cgyro_upwind_r64
 
   integer :: is,ie,ix,itor
 #ifdef _OPENACC
-  complex :: res_loc_one, res_loc_two
+  complex :: res_loc
 #endif
 
   call timer_lib_in('str')
 
 #ifdef _OPENACC
 !$acc parallel loop collapse(3) gang &
-!$acc&         private(res_loc_one,res_loc_two,iv) &
+!$acc&         private(res_loc,iv) &
 !$acc&         present(g_x,upfac1,is_v,upwind_res_loc) &
 !$acc&        present(nt1,nt2,ns1,ns2,nc,nv1,nv2) default(none)
   do itor=nt1,nt2
    do is=ns1,ns2
      do ic=1,nc
-       res_loc_one = (0.0,0.0)
-       res_loc_two = (0.0,0.0)
+       res_loc = (0.0,0.0)
 
-!$acc loop vector private(iv_loc) reduction(+:res_loc_one)
+!$acc loop vector private(iv_loc) reduction(+:res_loc)
        do iv=nv1,nv2
           iv_loc = iv-nv1+1
           if (is == is_v(iv)) then
-             res_loc_one = res_loc_one+upfac1(ic,iv_loc,itor,1)*g_x(ic,iv_loc,itor)
+             res_loc = res_loc+upfac1(ic,iv_loc,itor)*g_x(ic,iv_loc,itor)
           endif
        enddo
-       upwind_res_loc(ic,is,itor,1) = res_loc_one
-
-!$acc loop vector private(iv_loc) reduction(+:res_loc_two)
-       do iv=nv1,nv2
-          iv_loc = iv-nv1+1
-          if (is == is_v(iv)) then
-             res_loc_two = res_loc_two+upfac1(ic,iv_loc,itor,2)*g_x(ic,iv_loc,itor)
-          endif
-       enddo
-       upwind_res_loc(ic,is,itor,2) = res_loc_two
+       upwind_res_loc(ic,is,itor) = res_loc
     enddo
    enddo
   enddo
 #else
-  upwind_res_loc(:,:,:,:) = (0.0,0.0)
+  upwind_res_loc(:,:,:) = (0.0,0.0)
 
 !$omp parallel private(iv_loc,ic,is)
 !$omp do collapse(2) reduction(+:upwind_res_loc)
@@ -70,7 +61,7 @@ subroutine cgyro_upwind_r64
      iv_loc = iv-nv1+1
      is = is_v(iv)
      do ic=1,nc
-        upwind_res_loc(ic,is,itor,:) = upwind_res_loc(ic,is,itor,:)+upfac1(ic,iv_loc,itor,:)*g_x(ic,iv_loc,itor)
+        upwind_res_loc(ic,is,itor) = upwind_res_loc(ic,is,itor)+upfac1(ic,iv_loc,itor)*g_x(ic,iv_loc,itor)
      enddo
    enddo
   enddo
@@ -88,9 +79,9 @@ subroutine cgyro_upwind_r64
 !$acc host_data use_device(upwind_res_loc,upwind_res)
 #endif
 
-  call MPI_ALLREDUCE(upwind_res_loc(:,:,:,:),&
-       upwind_res(:,:,:,:),&
-       size(upwind_res(:,:,:,:)),&
+  call MPI_ALLREDUCE(upwind_res_loc(:,:,:),&
+       upwind_res(:,:,:),&
+       size(upwind_res(:,:,:)),&
        MPI_DOUBLE_COMPLEX,&
        MPI_SUM,&
        NEW_COMM_3,&
@@ -108,7 +99,7 @@ subroutine cgyro_upwind_r64
 
 #ifdef _OPENACC
 !$acc parallel loop collapse(3) independent &
-!$acc&         present(is_v,ix_v,ie_v,xi,vel,upfac2,g_x,upwind_res,up_cutoff) &
+!$acc&         present(is_v,ix_v,ie_v,xi,vel,upfac2,g_x,upwind_res) &
 !$acc&         private(iv_loc,is,ix,ie) present(nt1,nt2,nv1,nv2,nc) default(none)
 #else
 !$omp parallel do collapse(2) private(iv_loc,is,ix,ie,ic)
@@ -121,8 +112,7 @@ subroutine cgyro_upwind_r64
         ix = ix_v(iv)
         ie = ie_v(iv)
         g_x(ic,iv_loc,itor) = abs(xi(ix))*vel(ie)*g_x(ic,iv_loc,itor) &
-             -upfac2(ic,iv_loc,itor,1)*upwind_res(ic,is,itor,1) &
-             -upfac2(ic,iv_loc,itor,2)*upwind_res(ic,is,itor,2)*up_cutoff
+             -upfac2(ic,iv_loc,itor)*upwind_res(ic,is,itor)
      enddo
    enddo
   enddo
@@ -142,44 +132,34 @@ subroutine cgyro_upwind_r32
 
   integer :: is,ie,ix,itor
 #ifdef _OPENACC
-  complex(KIND=REAL32) :: res_loc_one, res_loc_two
+  complex(KIND=REAL32) :: res_loc
 #endif
 
   call timer_lib_in('str')
 
 #ifdef _OPENACC
 !$acc parallel loop collapse(3) gang &
-!$acc&         private(res_loc_one,res_loc_two,iv) &
+!$acc&         private(res_loc,iv) &
 !$acc&         present(g_x,upfac1,is_v,upwind32_res_loc) &
 !$acc&         present(nt1,nt2,ns1,ns2,nc,nv1,nv2) default(none)
   do itor=nt1,nt2
    do is=ns1,ns2
      do ic=1,nc
-       res_loc_one = (0.0,0.0)
-       res_loc_two = (0.0,0.0)
+       res_loc = (0.0,0.0)
 
-!$acc loop vector private(iv_loc) reduction(+:res_loc_one)
+!$acc loop vector private(iv_loc) reduction(+:res_loc)
        do iv=nv1,nv2
           iv_loc = iv-nv1+1
           if (is == is_v(iv)) then
-             res_loc_one = res_loc_one+upfac1(ic,iv_loc,itor,1)*g_x(ic,iv_loc,itor)
+             res_loc = res_loc+upfac1(ic,iv_loc,itor)*g_x(ic,iv_loc,itor)
           endif
        enddo
-       upwind32_res_loc(ic,is,itor,1) = res_loc_one
-
-!$acc loop vector private(iv_loc) reduction(+:res_loc_two)
-       do iv=nv1,nv2
-          iv_loc = iv-nv1+1
-          if (is == is_v(iv)) then
-             res_loc_two = res_loc_two+upfac1(ic,iv_loc,itor,2)*g_x(ic,iv_loc,itor)
-          endif
-       enddo
-       upwind32_res_loc(ic,is,itor,2) = res_loc_two
+       upwind32_res_loc(ic,is,itor) = res_loc
     enddo
    enddo
   enddo
 #else
-  upwind32_res_loc(:,:,:,:) = (0.0,0.0)
+  upwind32_res_loc(:,:,:) = (0.0,0.0)
 
 !$omp parallel private(iv_loc,ic,is)
 !$omp do collapse(2) reduction(+:upwind32_res_loc)
@@ -188,7 +168,7 @@ subroutine cgyro_upwind_r32
      iv_loc = iv-nv1+1
      is = is_v(iv)
      do ic=1,nc
-        upwind32_res_loc(ic,is,itor,:) = upwind32_res_loc(ic,is,itor,:)+upfac1(ic,iv_loc,itor,:)*g_x(ic,iv_loc,itor)
+        upwind32_res_loc(ic,is,itor) = upwind32_res_loc(ic,is,itor)+upfac1(ic,iv_loc,itor)*g_x(ic,iv_loc,itor)
      enddo
    enddo
   enddo
@@ -206,9 +186,9 @@ subroutine cgyro_upwind_r32
 !$acc host_data use_device(upwind32_res_loc,upwind32_res)
 #endif
 
-  call MPI_ALLREDUCE(upwind32_res_loc(:,:,:,:),&
-       upwind32_res(:,:,:,:),&
-       size(upwind32_res(:,:,:,:)),&
+  call MPI_ALLREDUCE(upwind32_res_loc(:,:,:),&
+       upwind32_res(:,:,:),&
+       size(upwind32_res(:,:,:)),&
        MPI_COMPLEX,&
        MPI_SUM,&
        NEW_COMM_3,&
@@ -226,7 +206,7 @@ subroutine cgyro_upwind_r32
 
 #ifdef _OPENACC
 !$acc parallel loop collapse(3) independent &
-!$acc&         present(is_v,ix_v,ie_v,xi,vel,upfac2,g_x,upwind32_res,up_cutoff) &
+!$acc&         present(is_v,ix_v,ie_v,xi,vel,upfac2,g_x,upwind32_res) &
 !$acc&         private(iv_loc,is,ix,ie) &
 !$acc&         present(nt1,nt2,nv1,nv2,nc) default(none)
 #else
@@ -240,8 +220,7 @@ subroutine cgyro_upwind_r32
         ix = ix_v(iv)
         ie = ie_v(iv)
         g_x(ic,iv_loc,itor) = abs(xi(ix))*vel(ie)*g_x(ic,iv_loc,itor) &
-             -upfac2(ic,iv_loc,itor,1)*upwind32_res(ic,is,itor,1) &
-             -upfac2(ic,iv_loc,itor,2)*upwind32_res(ic,is,itor,2)*up_cutoff
+             -upfac2(ic,iv_loc,itor)*upwind32_res(ic,is,itor)
      enddo
    enddo
   enddo

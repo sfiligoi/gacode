@@ -192,7 +192,7 @@ subroutine cgyro_rhs(ij)
 
   ! Nonlinear evaluation [f,g]
   if (nonlinear_flag == 1) then     
-        call cgyro_nl_fftw(ij)
+     call cgyro_nl_fftw(ij)
   endif
 
 end subroutine cgyro_rhs

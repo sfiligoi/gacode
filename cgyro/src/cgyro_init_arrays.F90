@@ -18,15 +18,11 @@ subroutine cgyro_init_arrays
   integer :: l,ll
   integer :: iltheta_min
   complex :: thfac,carg
-  real, dimension(:,:,:,:), allocatable :: res_loc
+  real, dimension(:,:,:), allocatable :: res_loc
   real, dimension(:,:,:), allocatable :: jloc_c
-  real, dimension(:,:,:,:), allocatable :: res_norm
+  real, dimension(:,:,:), allocatable :: res_norm
+  real, dimension(:,:), allocatable :: res_weight
   real, external :: spectraldiss
-
-  ! Parallel conservation cutoff
-  up_cutoff = 1.0-betae_unit/0.01
-  if (up_cutoff < 0.0) up_cutoff = 0.0
-!$acc enter data copyin(up_cutoff)   
 
   !-------------------------------------------------------------------------
   ! Distributed Bessel-function Gyroaverages
@@ -161,10 +157,21 @@ subroutine cgyro_init_arrays
   !-------------------------------------------------------------------------
   ! Conservative upwind factor
   !
-  allocate(res_loc(nc,n_species,nt1:nt2,2))
-  allocate(res_norm(nc,n_species,nt1:nt2,2))
+  allocate(res_loc(nc,n_species,nt1:nt2))
+  allocate(res_norm(nc,n_species,nt1:nt2))
+  allocate(res_weight(n_xi,n_energy))
 
-  res_loc(:,:,:,:) = 0.0
+  if (res_weight_power < 1e-2) then
+     res_weight(:,:) = 1.0
+  else
+     do ix=1,n_xi
+        do ie=1,n_energy
+           res_weight(ix,ie) = (abs(xi(ix))*vel(ie))**res_weight_power
+        enddo
+     enddo
+  endif
+
+  res_loc(:,:,:) = 0.0
 
 !$omp parallel private(ic,iv_loc,is,ix,ie)
 !$omp do collapse(2) reduction(+:res_loc)
@@ -175,10 +182,8 @@ subroutine cgyro_init_arrays
      ix = ix_v(iv)
      ie = ie_v(iv)
      do ic=1,nc
-        res_loc(ic,is,itor,1) = res_loc(ic,is,itor,1) + &
-                w_xi(ix)*w_e(ie)*jvec_c(1,ic,iv_loc,itor)**2 
-        res_loc(ic,is,itor,2) = res_loc(ic,is,itor,2) + &
-                w_xi(ix)*w_e(ie)*jvec_c(1,ic,iv_loc,itor)**2*(xi(ix)*vel(ie))**2
+        res_loc(ic,is,itor) = res_loc(ic,is,itor) + &
+                w_xi(ix)*w_e(ie)*jvec_c(1,ic,iv_loc,itor)**2*res_weight(ix,ie)
      enddo
    enddo
   enddo
@@ -201,17 +206,15 @@ subroutine cgyro_init_arrays
      ix = ix_v(iv)
      ie = ie_v(iv)
      do ic=1,nc
-        upfac1(ic,iv_loc,itor,1) = w_e(ie)*w_xi(ix)*abs(xi(ix))*vel(ie) * &
+        upfac1(ic,iv_loc,itor) = w_e(ie)*w_xi(ix)*abs(xi(ix))*vel(ie) * &
                 jvec_c(1,ic,iv_loc,itor)
-        upfac2(ic,iv_loc,itor,1) = jvec_c(1,ic,iv_loc,itor)/res_norm(ic,is,itor,1)
-        upfac1(ic,iv_loc,itor,2) = w_e(ie)*w_xi(ix)*abs(xi(ix))*vel(ie) * &
-                jvec_c(1,ic,iv_loc,itor)*xi(ix)*vel(ie)
-        upfac2(ic,iv_loc,itor,2) = jvec_c(1,ic,iv_loc,itor)/res_norm(ic,is,itor,2) * &
-                xi(ix)*vel(ie)
+        upfac2(ic,iv_loc,itor) = jvec_c(1,ic,iv_loc,itor)*res_weight(ix,ie)/ &
+                res_norm(ic,is,itor)
      enddo
    enddo
   enddo
 
+  deallocate(res_weight)
   deallocate(res_norm)
   deallocate(res_loc)
   

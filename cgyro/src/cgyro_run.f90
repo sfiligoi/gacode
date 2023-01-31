@@ -41,8 +41,8 @@ subroutine cgyro_run(test_flag_in,var_in,n_species_out,flux_tave_out,tave_min_ou
   ! Run GYRO
   call cgyro_kernel
 
-  if(error_status == 0) then
-     if(nonlinear_flag == 0 .and. signal == 1) then
+  if (error_status == 0) then
+     if (nonlinear_flag == 0 .and. signal == 1) then
         ! linear converged
         status_out = 1
      endif
@@ -57,7 +57,7 @@ subroutine cgyro_run(test_flag_in,var_in,n_species_out,flux_tave_out,tave_min_ou
   ! Return time-averaged flux data (need to reduce across n first)
   flux_tave_out(:,:) = 0.0
   allocate(sum_out(n_species,3))
-  if(abs(gamma_e) > 1e-10) then
+  if (abs(gamma_e) > 1e-10) then
      call MPI_ALLREDUCE(cflux_tave(:,:), &
        sum_out(:,:), &
        size(sum_out), &
@@ -74,10 +74,12 @@ subroutine cgyro_run(test_flag_in,var_in,n_species_out,flux_tave_out,tave_min_ou
        NEW_COMM_2, &
        i_err)
   endif
+  
   n_species_out = n_species
   tave_min_out = tave_min
   tave_max_out = tave_max
-  flux_tave_out(1:n_species,:) = sum_out(1:n_species,:)/(1.0*tave_step)
+  flux_tave_out(1:n_species,:) = sum_out(1:n_species,:)/tave_step
+
   deallocate(sum_out)
   
 end subroutine cgyro_run

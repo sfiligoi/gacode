@@ -98,7 +98,7 @@ subroutine cgyro_nl_fftw_comm1_r(ij)
 
   call timer_lib_in('nl')
 
-  psi_mul = ((q*rho/rmin)*(2*pi/length))
+  psi_mul = (q*rho/rmin)*(2*pi/length)
 
 #ifdef _OPENACC
 !$acc parallel loop collapse(4) gang vector independent private(iexch,ic_loc_m,my_psi) &
@@ -127,6 +127,7 @@ subroutine cgyro_nl_fftw_comm1_r(ij)
   enddo
 
   call timer_lib_out('nl')
+
 end subroutine cgyro_nl_fftw_comm1_r
 
 
