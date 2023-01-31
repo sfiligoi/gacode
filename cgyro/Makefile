@@ -15,11 +15,13 @@ all:
 	cd ${GACODE_ROOT}/f2py ; make
 	cd src  && make
 	cd mpi_tests && make
+	cd fft_tests && make
 
 clean:
 	cd ${GACODE_ROOT}/modules ; rm -f cgyro*.mod
 	cd src && make clean
 	cd mpi_tests && make clean
+	cd fft_tests && make clean
 
 deepclean:
 	cd ${GACODE_ROOT}/shared/math ; make clean
@@ -27,5 +29,6 @@ deepclean:
 	cd ${GACODE_ROOT}/modules ; rm -f cgyro*.mod
 	cd src && make clean
 	cd mpi_tests && make clean
+	cd fft_tests && make clean
 
 .IGNORE:
