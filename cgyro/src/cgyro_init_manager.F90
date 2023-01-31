@@ -19,10 +19,18 @@ subroutine cgyro_init_manager
   use half_hermite
 
   use cgyro_io
+
 #ifdef _OPENACC
+
+#ifdef HIPGPU
+  use hipfort_hipfft, only : hipfftPlanMany, &
+       HIPFFT_C2R,HIPFFT_Z2D,HIPFFT_R2C,HIPFFT_D2Z
+#else
   use cufft, only : cufftPlanMany, &
        CUFFT_C2R,CUFFT_Z2D,CUFFT_R2C,CUFFT_D2Z
 #endif
+
+#endif !_OPENACC
 
   implicit none
 
@@ -400,6 +408,20 @@ subroutine cgyro_init_manager
   inembed = size(fxmany,1)
   onembed = size(uxmany,1)
 
+#ifdef HIPGPU
+  istatus = hipfftPlanMany(&
+       hip_plan_c2r_many, &
+       irank, &
+       ndim, &
+       inembed, &
+       istride, &
+       idist, &
+       onembed, &
+       ostride, &
+       odist, &
+       merge(HIPFFT_C2R,HIPFFT_Z2D,kind(uxmany) == singlePrecision), &
+       nsplit)
+#else
   istatus = cufftPlanMany(&
        cu_plan_c2r_many, &
        irank, &
@@ -412,6 +434,7 @@ subroutine cgyro_init_manager
        odist, &
        merge(CUFFT_C2R,CUFFT_Z2D,kind(uxmany) == singlePrecision), &
        nsplit)
+#endif
 
   idist = size(uxmany,1)*size(uxmany,2)
   odist = size(fxmany,1)*size(fxmany,2)
@@ -419,6 +442,20 @@ subroutine cgyro_init_manager
   onembed = size(fxmany,1) 
   istride = 1
   ostride = 1
+#ifdef HIPGPU
+  istatus = hipfftPlanMany(&
+       hip_plan_r2c_many, &
+       irank, &
+       ndim, &
+       inembed, &
+       istride, &
+       idist, &
+       onembed, &
+       ostride, &
+       odist, &
+       merge(HIPFFT_R2C,HIPFFT_D2Z,kind(uxmany) == singlePrecision), &
+       nsplit)
+#else
   istatus = cufftPlanMany(&
        cu_plan_r2c_many, &
        irank, &
@@ -432,6 +469,8 @@ subroutine cgyro_init_manager
        merge(CUFFT_R2C,CUFFT_D2Z,kind(uxmany) == singlePrecision), &
        nsplit)
 #endif
+
+#endif ! _OPENACC
 
   call timer_lib_out('nl_init')
 
