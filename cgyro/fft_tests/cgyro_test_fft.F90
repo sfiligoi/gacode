@@ -44,24 +44,24 @@ program cgyro_test_fft
 contains
   subroutine cgyro_do_fft(plan_c2r_many,plan_r2c_many,fxmany,uvmany,uxmany,fvmany)
 
-  use, intrinsic :: iso_c_binding
+     use, intrinsic :: iso_c_binding
 #ifdef HIPGPU
-  use hipfort_hipfft
+     use hipfort_hipfft
 #else
-  use cufft
+     use cufft
 #endif
-  implicit none
+     implicit none
   !-----------------------------------
 #ifdef HIPGPU
-  type(C_PTR), intent(inout) :: plan_c2r_many
-  type(C_PTR), intent(inout) :: plan_r2c_many
+     type(C_PTR), intent(inout) :: plan_c2r_many
+     type(C_PTR), intent(inout) :: plan_r2c_many
 #else
-  integer(c_int), intent(inout) :: plan_c2r_many
-  integer(c_int), intent(inout) :: plan_r2c_many
+     integer(c_int), intent(inout) :: plan_c2r_many
+     integer(c_int), intent(inout) :: plan_r2c_many
 #endif
-  complex, dimension(:,:,:), intent(inout) :: fxmany
-  real, dimension(:,:,:), intent(inout) :: uvmany
-  real, dimension(:,:,:), intent(inout) :: uxmany
+     complex, dimension(:,:,:), intent(inout) :: fxmany
+     real, dimension(:,:,:), intent(inout) :: uvmany
+     real, dimension(:,:,:), intent(inout) :: uxmany
      complex, dimension(:,:,:), intent(inout) :: fvmany
      !-----------------------------------
      integer :: rc
@@ -74,10 +74,17 @@ contains
 !$acc& use_device(fxmany,uxmany) 
 
 #ifdef HIPGPU
-  rc = hipfftExecZ2D(plan_c2r_many,fxmany,uxmany)
+     rc = hipfftExecZ2D(plan_c2r_many,fxmany,uxmany)
 #else
-  rc = cufftExecZ2D(plan_c2r_many,fxmany,uxmany)
+     rc = cufftExecZ2D(plan_c2r_many,fxmany,uxmany)
 #endif
+     if (rc/=0) then
+        write(*,*) "ERROR: fftExec D2Z failed! ", rc
+        call abort
+     else
+        write(*,*) "INFO: fftExec D2Z done."
+        call flush(6)
+     endif
 
 !$acc wait
 !$acc end host_data
@@ -89,12 +96,19 @@ contains
 !$acc wait
 !$acc host_data use_device(uvmany,fvmany)
 #ifdef HIPGPU
-  rc = hipfftExecD2Z(plan_r2c_many,uvmany,fvmany)
+     rc = hipfftExecD2Z(plan_r2c_many,uvmany,fvmany)
 #else
-  rc = cufftExecD2Z(plan_r2c_many,uvmany,fvmany)
+     rc = cufftExecD2Z(plan_r2c_many,uvmany,fvmany)
 #endif
 !$acc wait
 !$acc end host_data
+     if (rc/=0) then
+        write(*,*) "ERROR: fftExec Z2D failed! ", rc
+        call abort
+     else
+        write(*,*) "INFO: fftExec Z2D done."
+        call flush(6)
+     endif
 !$acc wait
 
   end subroutine cgyro_do_fft
@@ -136,7 +150,8 @@ contains
      onembed = 190
 
 #ifdef HIPGPU
-     istatus = hipfftCreate(plan_c2r_many)
+     !istatus = hipfftCreate(plan_c2r_many)
+     plan_c2r_many = c_null_ptr
      istatus = hipfftPlanMany(&
           plan_c2r_many, &
           irank, &
@@ -163,6 +178,14 @@ contains
           CUFFT_Z2D, &
           nsplit)
 #endif
+     if (istatus/=0) then
+        write(*,*) "ERROR: fftPlanMany Z2D failed! ", istatus
+        call abort
+     else
+        write(*,*) "INFO: fftPlanMany Z2D done."
+        call flush(6)
+     endif
+
      idist = 190*768
      odist = 96*768
      inembed = 190
@@ -170,7 +193,8 @@ contains
      istride = 1
      ostride = 1
 #ifdef HIPGPU
-     istatus = hipfftCreate(plan_r2c_many)
+     !istatus = hipfftCreate(plan_r2c_many)
+     plan_c2r_many = c_null_ptr
      istatus = hipfftPlanMany(&
           plan_r2c_many, &
           irank, &
@@ -197,6 +221,14 @@ contains
           CUFFT_D2Z, &
           nsplit)
 #endif
+     if (istatus/=0) then
+        write(*,*) "ERROR: fftPlanMany D2Z failed! ", istatus
+        call abort
+     else
+        write(*,*) "INFO: fftPlanMany D2Z done."
+        call flush(6)
+     endif
+
   end subroutine cgyro_setup_fft
 
 
