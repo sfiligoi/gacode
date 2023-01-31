@@ -7,7 +7,7 @@ program test
 
   real :: ipccw,btccw,a_meters
 
-  call expro_read('../data/input.gacode')
+  call expro_read('../../../cgyro/tools/input/profile_data/input.gacode',0)
 
   print '(2a)'              ,'name1    ',expro_name(1)
   print '(2a)'              ,'name2    ',expro_name(2)
