@@ -41,7 +41,47 @@ program cgyro_test_fft
 !$acc wait
   call cgyro_do_fft(plan_c2r_many,plan_r2c_many,fxmany,uvmany,comp_uxmany,comp_fvmany)
 
+  call cgyro_comp_D(190*768*72,comp_uxmany,exp_uxmany);
+  call cgyro_comp_Z(96*768*72,comp_fvmany,exp_fvmany);
+
+
 contains
+  subroutine cgyro_comp_D(nels,comp_many,exp_many)
+     implicit none
+     !-----------------------------------
+     integer, intent(in) :: nels
+     real, dimension(*), intent(in) :: comp_many,exp_many
+     !-----------------------------------
+     integer :: n
+
+!$acc parallel loop present(comp_many,exp_many) copyin(nels)
+     do n=1,nels
+       if (comp_many(n)/=exp_many(n)) then
+          write(*,*) "ERROR: cgyro_comp_D ",n,comp_many(n),exp_many(n)
+       endif
+     enddo
+     write(*,*) "cgyro_comp_D completed"
+
+  end subroutine cgyro_comp_D
+
+  subroutine cgyro_comp_Z(nels,comp_many,exp_many)
+     implicit none
+     !-----------------------------------
+     integer, intent(in) :: nels
+     complex, dimension(*), intent(in) :: comp_many,exp_many
+     !-----------------------------------
+     integer :: n
+
+!$acc parallel loop present(comp_many,exp_many) copyin(nels)
+     do n=1,nels
+       if (comp_many(n)/=exp_many(n)) then
+          write(*,*) "ERROR: cgyro_comp_Z ",n,comp_many(n),exp_many(n)
+       endif
+     enddo
+     write(*,*) "cgyro_comp_Z completed"
+
+  end subroutine cgyro_comp_Z
+
   subroutine cgyro_do_fft(plan_c2r_many,plan_r2c_many,fxmany,uvmany,uxmany,fvmany)
 
      use, intrinsic :: iso_c_binding
@@ -51,7 +91,7 @@ contains
      use cufft
 #endif
      implicit none
-  !-----------------------------------
+     !-----------------------------------
 #ifdef HIPGPU
      type(C_PTR), intent(inout) :: plan_c2r_many
      type(C_PTR), intent(inout) :: plan_r2c_many
