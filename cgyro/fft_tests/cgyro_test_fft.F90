@@ -18,7 +18,7 @@ program cgyro_test_fft
   complex, dimension(0:95,0:767,72) :: comp_fvmany
 
 !$acc enter data create(fxmany,uvmany, exp_uxmany, exp_fvmany) &
-!$acc&           create(comp_uxmany)
+!$acc&           create(comp_uxmany, comp_fvmany)
 
   open(unit=1,file="data/bin.fxmany.raw",form='unformatted',access='direct',recl=size(fxmany)*16)
   read(1,rec=1) fxmany
