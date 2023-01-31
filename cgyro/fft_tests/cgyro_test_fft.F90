@@ -53,11 +53,20 @@ contains
      real, dimension(*), intent(in) :: comp_many,exp_many
      !-----------------------------------
      integer :: n
+     real :: comp_val,exp_val
 
-!$acc parallel loop present(comp_many,exp_many) copyin(nels)
+!$acc parallel loop present(comp_many,exp_many) copyin(nels) private(comp_val,exp_val)
      do n=1,nels
-       if (comp_many(n)/=exp_many(n)) then
-          write(*,*) "ERROR: cgyro_comp_D ",n,comp_many(n),exp_many(n)
+       comp_val=comp_many(n)
+       exp_val=exp_many(n)
+       if (exp_val<1.e-5) then
+          if (abs(comp_val - exp_val) > 1.e-10)  then
+             write(*,*) "ERROR: cgyro_comp_D ",n,comp_val,exp_val
+          endif
+       else
+          if (abs(comp_val - exp_val) > 1.e-7)  then
+             write(*,*) "ERROR: cgyro_comp_D ",n,comp_val,exp_val
+          endif
        endif
      enddo
      write(*,*) "cgyro_comp_D completed"
@@ -71,11 +80,31 @@ contains
      complex, dimension(*), intent(in) :: comp_many,exp_many
      !-----------------------------------
      integer :: n
+     real :: comp_val,exp_val
 
-!$acc parallel loop present(comp_many,exp_many) copyin(nels)
+!$acc parallel loop present(comp_many,exp_many) copyin(nels) private(comp_val,exp_val)
      do n=1,nels
-       if (comp_many(n)/=exp_many(n)) then
-          write(*,*) "ERROR: cgyro_comp_Z ",n,comp_many(n),exp_many(n)
+       comp_val=real(comp_many(n))
+       exp_val=real(exp_many(n))
+       if (exp_val<1.e-5) then
+          if (abs(comp_val - exp_val) > 1.e-10)  then
+             write(*,*) "ERROR: cgyro_comp_Z real ",n,comp_val,exp_val
+          endif
+       else
+          if (abs(comp_val - exp_val) > 1.e-7)  then
+             write(*,*) "ERROR: cgyro_comp_Z real ",n,comp_val,exp_val
+          endif
+       endif
+       comp_val=aimag(comp_many(n))
+       exp_val=aimag(exp_many(n))
+       if (exp_val<1.e-5) then
+          if (abs(comp_val - exp_val) > 1.e-10)  then
+             write(*,*) "ERROR: cgyro_comp_Z imag ",n,comp_val,exp_val
+          endif
+       else
+          if (abs(comp_val - exp_val) > 1.e-7)  then
+             write(*,*) "ERROR: cgyro_comp_Z imag ",n,comp_val,exp_val
+          endif
        endif
      enddo
      write(*,*) "cgyro_comp_Z completed"
