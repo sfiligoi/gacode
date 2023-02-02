@@ -351,6 +351,8 @@ subroutine cgyro_init_manager
   nx = (3*nx0)/2
   ny = (3*ny0)/2
      
+!$acc enter data copyin(nx0,ny0,nx,ny)
+
 #ifndef _OPENACC
   allocate(fx(0:ny/2,0:nx-1,n_omp))
   allocate(gx(0:ny/2,0:nx-1,n_omp))
