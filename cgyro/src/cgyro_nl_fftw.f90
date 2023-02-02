@@ -10,31 +10,6 @@
 ! NOTE: Need to be careful with (p=-nr/2,n=0) component.
 !-----------------------------------------------------------------
 
-subroutine cleanx(f,r1,n)
-
-  implicit none
-
-  integer, intent(in) :: r1,n
-  complex, intent(inout) :: f(0:r1,0:n-1)
-
-  integer :: i
-  complex :: f0
-
-  ! Average elements so as to ensure
-  !
-  !   f(kx,ky=0) = f(-kx,ky=0)^*
-  !
-  ! This symmetry is required for complex input to the FFTW
-  ! c2r transform 
-  
-  do i=1,n/2-1
-     f0 = 0.5*( f(0,i)+conjg(f(0,n-i)) )
-     f(0,i)   = f0
-     f(0,n-i) = conjg(f0) 
-  enddo
-
-end subroutine cleanx
-
 subroutine cgyro_nl_fftw_stepr(j, i_omp)
 
   use timer_lib
@@ -145,9 +120,16 @@ subroutine cgyro_nl_fftw(ij)
               fy(iy,ix,i_omp) = iy*f0
             enddo
            enddo
+           if ((ix/=0) .and. (ix<(nx/2))) then ! happens after ix>nx/2
+             ! Average elements so as to ensure
+             !   f(kx,ky=0) = f(-kx,ky=0)^*
+             ! This symmetry is required for complex input to c2r
+             f0 = 0.5*( fx(0,ix,i_omp)+conjg(fx(0,nx-ix,i_omp)) )
+             fx(0,ix   ,i_omp) = f0
+             fx(0,nx-ix,i_omp) = conjg(f0)
+           endif
         enddo
 
-        call cleanx(fx(:,:,i_omp),ny/2,nx)
         call fftw_execute_dft_c2r(plan_c2r,fx(:,:,i_omp),uxmany(:,:,j))
         call fftw_execute_dft_c2r(plan_c2r,fy(:,:,i_omp),uymany(:,:,j))
      enddo ! j
@@ -178,9 +160,16 @@ subroutine cgyro_nl_fftw(ij)
                     fx(iy,ix,i_omp) = p*f0
                    enddo
                  enddo
+                 if ((ix/=0) .and. (ix<(nx/2))) then ! happens after ix>nx/2
+                    ! Average elements so as to ensure
+                    !   f(kx,ky=0) = f(-kx,ky=0)^*
+                    ! This symmetry is required for complex input to c2r
+                    f0 = 0.5*( fx(0,ix,i_omp)+conjg(fx(0,nx-ix,i_omp)) )
+                    fx(0,ix   ,i_omp) = f0
+                    fx(0,nx-ix,i_omp) = conjg(f0)
+                  endif
               enddo
 
-              call cleanx(fx(:,:,i_omp),ny/2,nx)
               call fftw_execute_dft_c2r(plan_c2r,fx(:,:,i_omp),uxmany(:,:,j))
 
            case (2)
@@ -229,9 +218,16 @@ subroutine cgyro_nl_fftw(ij)
                     gx(iy,ix,i_omp) = p*g0
                   enddo
                  enddo
+                 if ((ix/=0) .and. (ix<(nx/2))) then ! happens after ix>nx/2
+                    ! Average elements so as to ensure
+                    !   g(kx,ky=0) = g(-kx,ky=0)^*
+                    ! This symmetry is required for complex input to c2r
+                    g0 = 0.5*( gx(0,ix,i_omp)+conjg(gx(0,nx-ix,i_omp)) )
+                    gx(0,ix   ,i_omp) = g0
+                    gx(0,nx-ix,i_omp) = conjg(g0)
+                  endif
               enddo
 
-              call cleanx(gx(:,:,i_omp),ny/2,nx)
               call fftw_execute_dft_c2r(plan_c2r,gx(:,:,i_omp),vx(:,:,i_omp))
 
            case (4)
@@ -315,9 +311,16 @@ subroutine cgyro_nl_fftw(ij)
               gy(iy,ix,i_omp) = iy*g0
             enddo
            enddo
+           if ((ix/=0) .and. (ix<(nx/2))) then ! happens after ix>nx/2
+              ! Average elements so as to ensure
+              !   g(kx,ky=0) = g(-kx,ky=0)^*
+              ! This symmetry is required for complex input to c2r
+              g0 = 0.5*( gx(0,ix,i_omp)+conjg(gx(0,nx-ix,i_omp)) )
+              gx(0,ix   ,i_omp) = g0
+              gx(0,nx-ix,i_omp) = conjg(g0)
+            endif
         enddo
 
-        call cleanx(gx(:,:,i_omp),ny/2,nx)
         call fftw_execute_dft_c2r(plan_c2r,gx(:,:,i_omp),vx(:,:,i_omp))
         call fftw_execute_dft_c2r(plan_c2r,gy(:,:,i_omp),vy(:,:,i_omp))
 
@@ -357,9 +360,16 @@ subroutine cgyro_nl_fftw(ij)
                        gx(iy,ix,i_omp) = p*g0
                      enddo
                     enddo
+                    if ((ix/=0) .and. (ix<(nx/2))) then ! happens after ix>nx/2
+                       ! Average elements so as to ensure
+                       !   g(kx,ky=0) = g(-kx,ky=0)^*
+                       ! This symmetry is required for complex input to c2r
+                       g0 = 0.5*( gx(0,ix,i_omp)+conjg(gx(0,nx-ix,i_omp)) )
+                       gx(0,ix   ,i_omp) = g0
+                       gx(0,nx-ix,i_omp) = conjg(g0)
+                     endif
                  enddo
 
-                 call cleanx(gx(:,:,i_omp),ny/2,nx)
                  call fftw_execute_dft_c2r(plan_c2r,gx(:,:,i_omp),vx(:,:,i_omp))
               else
                  gy(:,:,i_omp) = 0.0
@@ -411,4 +421,3 @@ subroutine cgyro_nl_fftw(ij)
   call cgyro_nl_fftw_comm1_r(ij)
 
 end subroutine cgyro_nl_fftw
-
