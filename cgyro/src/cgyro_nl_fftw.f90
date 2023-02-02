@@ -10,6 +10,31 @@
 ! NOTE: Need to be careful with (p=-nr/2,n=0) component.
 !-----------------------------------------------------------------
 
+subroutine cleanx(f,r1,n)
+
+  implicit none
+
+  integer, intent(in) :: r1,n
+  complex, intent(inout) :: f(0:r1,0:n-1)
+
+  integer :: i
+  complex :: f0
+
+  ! Average elements so as to ensure
+  !
+  !   f(kx,ky=0) = f(-kx,ky=0)^*
+  !
+  ! This symmetry is required for complex input to the FFTW
+  ! c2r transform 
+  
+  do i=1,n/2-1
+     f0 = 0.5*( f(0,i)+conjg(f(0,n-i)) )
+     f(0,i)   = f0
+     f(0,n-i) = conjg(f0) 
+  enddo
+
+end subroutine cleanx
+
 subroutine cgyro_nl_fftw_stepr(j, i_omp)
 
   use timer_lib
@@ -122,9 +147,8 @@ subroutine cgyro_nl_fftw(ij)
            enddo
         enddo
 
-        call cleanx(fx(0,:,i_omp),nx)
+        call cleanx(fx(:,:,i_omp),ny/2,nx)
         call fftw_execute_dft_c2r(plan_c2r,fx(:,:,i_omp),uxmany(:,:,j))
-        call cleanx(fy(0,:,i_omp),nx)
         call fftw_execute_dft_c2r(plan_c2r,fy(:,:,i_omp),uymany(:,:,j))
      enddo ! j
   else ! (n_omp>nsplit), increase parallelism
@@ -132,7 +156,7 @@ subroutine cgyro_nl_fftw(ij)
      if (one_pass_fft) then
         num_one_pass = 4
      endif
-!$omp parallel do collapse(2) private(itl,itm,itor,mytm,iy,ir,p,ix,f0,i_omp,j,o,it,iv_loc,it_loc,jtheta_min)
+!$omp parallel do collapse(2) private(itl,itm,itor,mytm,iy,ir,p,ix,f0,g0,i_omp,j,o,it,iv_loc,it_loc,jtheta_min)
      do j=1,nsplit
         do o=1,num_one_pass
            i_omp = j ! j<n_omp in this branch
@@ -156,7 +180,7 @@ subroutine cgyro_nl_fftw(ij)
                  enddo
               enddo
 
-              call cleanx(fx(0,:,i_omp),nx)
+              call cleanx(fx(:,:,i_omp),ny/2,nx)
               call fftw_execute_dft_c2r(plan_c2r,fx(:,:,i_omp),uxmany(:,:,j))
 
            case (2)
@@ -177,7 +201,6 @@ subroutine cgyro_nl_fftw(ij)
                  enddo
               enddo
 
-              call cleanx(fy(0,:,i_omp),nx)
               call fftw_execute_dft_c2r(plan_c2r,fy(:,:,i_omp),uymany(:,:,j))
 
            case (3)
@@ -208,7 +231,7 @@ subroutine cgyro_nl_fftw(ij)
                  enddo
               enddo
 
-              call cleanx(gx(0,:,i_omp),nx)
+              call cleanx(gx(:,:,i_omp),ny/2,nx)
               call fftw_execute_dft_c2r(plan_c2r,gx(:,:,i_omp),vx(:,:,i_omp))
 
            case (4)
@@ -239,7 +262,6 @@ subroutine cgyro_nl_fftw(ij)
                  enddo
               enddo
 
-              call cleanx(gy(0,:,i_omp),nx)
               call fftw_execute_dft_c2r(plan_c2r,gy(:,:,i_omp),vy(:,:,i_omp))
 
            end select
@@ -295,9 +317,8 @@ subroutine cgyro_nl_fftw(ij)
            enddo
         enddo
 
-        call cleanx(gx(0,:,i_omp),nx)
+        call cleanx(gx(:,:,i_omp),ny/2,nx)
         call fftw_execute_dft_c2r(plan_c2r,gx(:,:,i_omp),vx(:,:,i_omp))
-        call cleanx(gy(0,:,i_omp),nx)
         call fftw_execute_dft_c2r(plan_c2r,gy(:,:,i_omp),vy(:,:,i_omp))
 
         call cgyro_nl_fftw_stepr(j, i_omp)
@@ -338,7 +359,7 @@ subroutine cgyro_nl_fftw(ij)
                     enddo
                  enddo
 
-                 call cleanx(gx(0,:,i_omp),nx)
+                 call cleanx(gx(:,:,i_omp),ny/2,nx)
                  call fftw_execute_dft_c2r(plan_c2r,gx(:,:,i_omp),vx(:,:,i_omp))
               else
                  gy(:,:,i_omp) = 0.0
@@ -368,7 +389,6 @@ subroutine cgyro_nl_fftw(ij)
                     enddo
                  enddo
 
-                 call cleanx(gy(0,:,i_omp),nx)
                  call fftw_execute_dft_c2r(plan_c2r,gy(:,:,i_omp),vy(:,:,i_omp))
               endif
            enddo ! o
@@ -392,25 +412,3 @@ subroutine cgyro_nl_fftw(ij)
 
 end subroutine cgyro_nl_fftw
 
-subroutine cleanx(f,n)
-
-  implicit none
-
-  integer, intent(in) :: n
-  complex, intent(inout) :: f(0:n-1)
-
-  integer :: i
-
-  ! Average elements so as to ensure
-  !
-  !   f(kx,ky=0) = f(-kx,ky=0)^*
-  !
-  ! This symmetry is required for complex input to the FFTW
-  ! c2r transform 
-  
-  do i=1,n/2-1
-     f(i)   = 0.5*( f(i)+conjg(f(n-i)) )
-     f(n-i) = conjg(f(i)) 
-  enddo
-
-end subroutine cleanx
