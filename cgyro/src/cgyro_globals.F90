@@ -392,11 +392,13 @@ module cgyro_globals
   integer :: nflux
   !
   ! Nonlinear plans
+#ifndef _OPENACC
+  ! CPU-FFTW plans
   type(C_PTR) :: plan_r2c
   type(C_PTR) :: plan_c2r
   !
+#else
   ! GPU-FFTW plans
-#ifdef _OPENACC
 
 #ifdef HIPGPU
   type(C_PTR) :: hip_plan_r2c_many
