@@ -26,6 +26,9 @@ program cgyro_test_fft
   complex, dimension(0:95,0:767,72) :: exp_fvmany
   real, dimension(0:189,0:767,72) :: comp_uxmany
   complex, dimension(0:95,0:767,72) :: comp_fvmany
+  integer :: i
+  integer :: start_count, end_count 
+  integer :: count_rate, count_max
 
 !$acc enter data create(fxmany,uvmany, exp_uxmany, exp_fvmany) &
 !$acc&           create(comp_uxmany, comp_fvmany)
@@ -65,6 +68,19 @@ program cgyro_test_fft
   call cgyro_comp_D(190*768*72,comp_uxmany,exp_uxmany);
   call cgyro_comp_Z(96*768*72,comp_fvmany,exp_fvmany);
 
+  open(unit=1,file="data/bin.fxmany.raw",form='unformatted',access='direct',recl=size(fxmany)*16)
+  read(1,rec=1) fxmany
+  close(1)
+!$acc update device(fxmany)
+
+  call SYSTEM_CLOCK(start_count, count_rate, count_max)
+  do i=1,100
+    call cgyro_ident_fft(plan_c2r_many,plan_r2c_many,fxmany,uvmany)
+  enddo
+  call SYSTEM_CLOCK(end_count, count_rate, count_max)
+
+  if ((end_count<start_count).and.(count_max>0)) end_count = end_count + count_max
+  write(*,*) "2x100 FFT took ", (1.0*(end_count-start_count))/count_rate, " seconds"
 
 contains
   subroutine cgyro_comp_D(nels,comp_many,exp_many)
@@ -131,6 +147,102 @@ contains
      write(*,*) "cgyro_comp_Z completed"
 
   end subroutine cgyro_comp_Z
+
+  subroutine cgyro_ident_fft(plan_c2r_many,plan_r2c_many,fxmany,uxmany)
+
+     use, intrinsic :: iso_c_binding
+#ifdef _OPENACC
+#ifdef HIPGPU
+     use hipfort_hipfft
+#else
+     use cufft
+#endif
+#endif
+
+     implicit none
+     !-----------------------------------
+#ifndef _OPENACC
+     include 'fftw3.f03'
+#endif
+
+#ifdef _OPENACC
+  
+#ifdef HIPGPU
+     type(C_PTR), intent(inout) :: plan_c2r_many
+     type(C_PTR), intent(inout) :: plan_r2c_many
+#else
+     integer(c_int), intent(inout) :: plan_c2r_many
+     integer(c_int), intent(inout) :: plan_r2c_many
+#endif
+
+#else
+     ! FFTW
+     type(C_PTR), intent(inout) :: plan_c2r_many
+     type(C_PTR), intent(inout) :: plan_r2c_many
+#endif
+     complex, dimension(:,:,:), intent(inout) :: fxmany
+     real, dimension(:,:,:), intent(inout) :: uxmany
+     !-----------------------------------
+     integer :: rc
+
+     ! --------------------------------------
+     ! Forward
+     ! --------------------------------------
+!$acc wait
+!$acc  host_data &
+!$acc& use_device(fxmany,uxmany) 
+
+#ifdef _OPENACC
+  
+#ifdef HIPGPU
+     rc = hipfftExecZ2D(plan_c2r_many,fxmany,uxmany)
+#else
+     rc = cufftExecZ2D(plan_c2r_many,fxmany,uxmany)
+#endif
+
+#else
+     ! FFTW
+     call fftw_execute_dft_c2r(plan_c2r_many,fxmany,uxmany) 
+     rc = 0
+#endif
+     if (rc/=0) then
+        write(*,*) "ERROR: fftExec D2Z failed! ", rc
+        call abort
+     endif
+
+!$acc wait
+!$acc end host_data
+
+     ! --------------------------------------
+     ! Backward
+     ! --------------------------------------
+
+!$acc wait
+!$acc host_data use_device(uxmany,fxmany)
+#ifdef _OPENACC
+  
+#ifdef HIPGPU
+     rc = hipfftExecD2Z(plan_r2c_many,uxmany,fxmany)
+#else
+     rc = cufftExecD2Z(plan_r2c_many,uxmany,fxmany)
+#endif
+
+#else
+     ! FFTW
+     call fftw_execute_dft_r2c(plan_r2c_many,uxmany,fxmany) 
+     rc = 0
+#endif
+
+!$acc wait
+!$acc end host_data
+     if (rc/=0) then
+        write(*,*) "ERROR: fftExec Z2D failed! ", rc
+        call abort
+     endif
+!$acc wait
+
+  end subroutine cgyro_ident_fft
+
 
   subroutine cgyro_do_fft(plan_c2r_many,plan_r2c_many,fxmany,uvmany,uxmany,fvmany)
 
@@ -250,6 +362,7 @@ contains
   implicit none
 #ifndef _OPENACC
      include 'fftw3.f03'
+     integer, external :: omp_get_max_threads
 #endif
   !-----------------------------------
 #ifdef _OPENACC
@@ -276,6 +389,11 @@ contains
   integer, parameter :: irank = 2
   integer, dimension(irank) :: ndim,inembed,onembed
   integer :: idist,odist,istride,ostride,nsplit
+
+#ifndef _OPENACC
+     istatus = fftw_init_threads()
+     call fftw_plan_with_nthreads(omp_get_max_threads())
+#endif
 
      nsplit = 72
 
