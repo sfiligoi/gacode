@@ -88,7 +88,7 @@
       else
          dlnpdr = 12.0
       endif
-         write(*,*)"dlnpdr = ",dlnpdr
+!         write(*,*)"dlnpdr = ",dlnpdr
 !
       czf = ABS(alpha_zf_in)
 !

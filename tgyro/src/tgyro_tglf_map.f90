@@ -99,8 +99,8 @@ subroutine tgyro_tglf_map
     beta = beta_unit(i_r)*ptot(i_r)/pr(i_r)
     p_prime = (q_abs/(r(i_r)/r_min))*(beta/(8*pi))*(-r_min*dlnptotdr(i_r))
   else
-    beta = beta_unit(i_r)
-    p_prime = (q_abs/(r(i_r)/r_min))*(beta/(8*pi))*(-r_min*dlnpdr(i_r))
+    beta = 0.0 ! tglf will compute its own dlnpdr
+    p_prime = (q_abs/(r(i_r)/r_min))*(beta_unit(i_r)/(8*pi))*(-r_min*dlnpdr(i_r))
   endif
   !----------------------------------------------------------------
 

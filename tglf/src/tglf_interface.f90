@@ -358,6 +358,7 @@ contains
     write(1,30) 'S_ZETA_LOC',tglf_s_zeta_loc_in
     write(1,30) 'P_PRIME_LOC',tglf_p_prime_loc_in
     write(1,30) 'Q_PRIME_LOC',tglf_q_prime_loc_in
+    write(1,30) 'BETA_LOC',tglf_beta_loc_in
     write(1,30) 'KX0_LOC',tglf_kx0_loc_in
     write(1,*) ' '
     write(1,*) '#---------------------------------------------------'
@@ -525,6 +526,7 @@ contains
     write(1,30) 'S_ZETA_LOC',s_zeta_loc
     write(1,30) 'P_PRIME_LOC',p_prime_loc
     write(1,30) 'Q_PRIME_LOC',q_prime_loc
+    write(1,30) 'BETA_LOC',tglf_beta_loc_in
     write(1,30) 'KX0_LOC',kx0_loc
     write(1,*) ' '
     write(1,*) '#---------------------------------------------------'
