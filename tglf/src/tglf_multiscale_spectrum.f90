@@ -71,20 +71,24 @@
       ! need to set alpha_zf_in = 1.0
       ! Miller geometry values igeo=1
       if(rlnp_cutoff_in.gt.0.0)then
-         dlnpdr = 0.0
-         ptot = 0.0
+        if(beta_loc.eq.0.0)then
+          dlnpdr = 0.0
+          ptot = 0.0
  !        do is=1,nstotal_in   ! include all species even non-kinetic ones like fast ions
-         do is=1,ns
-           ptot = ptot + as(is)*taus(is)
-           dlnpdr = dlnpdr + as(is)*taus(is)*(rlns(is)+rlts(is))
-         enddo
-         dlnpdr = rmaj_input*dlnpdr/MAX(ptot,0.01)
-         if(dlnpdr .ge. rlnp_cutoff_in)dlnpdr = rlnp_cutoff_in
-         if(dlnpdr .lt. 4.0)dlnpdr = 4.0
+          do is=1,ns
+            ptot = ptot + as(is)*taus(is)
+            dlnpdr = dlnpdr + as(is)*taus(is)*(rlns(is)+rlts(is))
+          enddo
+          dlnpdr = rmaj_input*dlnpdr/MAX(ptot,0.01)
+        else
+          dlnpdr = -p_prime_loc*(8.0*pi/beta_loc)*(rmin_input/q_loc)*rmaj_input
+        endif
+        if(dlnpdr .ge. rlnp_cutoff_in)dlnpdr = rlnp_cutoff_in
+        if(dlnpdr .lt. 4.0)dlnpdr = 4.0
       else
          dlnpdr = 12.0
       endif
-!         write(*,*)"dlnpdr = ",dlnpdr
+         write(*,*)"dlnpdr = ",dlnpdr
 !
       czf = ABS(alpha_zf_in)
 !

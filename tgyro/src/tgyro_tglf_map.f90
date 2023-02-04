@@ -18,6 +18,7 @@ subroutine tgyro_tglf_map
   real :: q_abs
   real :: q_prime
   real :: p_prime
+  real :: beta
   real :: gamma_eb0
   real :: gamma_p0
 
@@ -94,7 +95,13 @@ subroutine tgyro_tglf_map
   !----------------------------------------------------------------
   ! TGLF-specific quantities
   q_prime = (q_abs/(r(i_r)/r_min))**2*s(i_r)
-  p_prime = (q_abs/(r(i_r)/r_min))*(beta_unit(i_r)/(8*pi))*(-r_min*dlnpdr(i_r))
+  if(tgyro_tglf_ptot_flag == 1)then
+    beta = beta_unit(i_r)*ptot(i_r)/pr(i_r)
+    p_prime = (q_abs/(r(i_r)/r_min))*(beta/(8*pi))*(-r_min*dlnptotdr(i_r))
+  else
+    beta = beta_unit(i_r)
+    p_prime = (q_abs/(r(i_r)/r_min))*(beta/(8*pi))*(-r_min*dlnpdr(i_r))
+  endif
   !----------------------------------------------------------------
 
   !----------------------------------------------------------------
@@ -128,6 +135,7 @@ subroutine tgyro_tglf_map
   tglf_q_loc_in       = q_abs
   tglf_q_prime_loc_in = q_prime
   tglf_p_prime_loc_in = p_prime
+  tglf_beta_loc_in = beta
   !----------------------------------------------------------------
 
   !----------------------------------------------------------------

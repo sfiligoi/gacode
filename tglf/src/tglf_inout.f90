@@ -454,7 +454,7 @@ END SUBROUTINE put_s_alpha_geometry
 !
 
 SUBROUTINE put_Miller_geometry(rmin,rmaj,zmaj,drmindx,drmajdx,dzmajdx, &
-     kappa,s_kappa,delta,s_delta,zeta,s_zeta,q,q_prime,p_prime,kx0_m)
+  kappa,s_kappa,delta,s_delta,zeta,s_zeta,q,q_prime,p_prime,beta,kx0_m)
   !
   ! This routine eliminates the need for subroutine miller_init 
   ! and the miller.dat input file.
@@ -462,7 +462,7 @@ SUBROUTINE put_Miller_geometry(rmin,rmaj,zmaj,drmindx,drmajdx,dzmajdx, &
   USE tglf_global
   !
   IMPLICIT NONE
-  REAL,INTENT(IN) :: rmin,rmaj,zmaj,q,q_prime,p_prime,kx0_m
+  REAL,INTENT(IN) :: rmin,rmaj,zmaj,q,q_prime,p_prime,kx0_m,beta
   REAL,INTENT(IN) :: drmindx,drmajdx,dzmajdx
   REAL,INTENT(IN) :: kappa,s_kappa,delta,s_delta,zeta,s_zeta
 
@@ -494,6 +494,8 @@ SUBROUTINE put_Miller_geometry(rmin,rmaj,zmaj,drmindx,drmajdx,dzmajdx, &
   if(tglf_isinf(q_prime))call tglf_error(1,"input q_prime_loc is INF")
   if(tglf_isnan(p_prime))call tglf_error(1,"input p_prime_loc is NAN")
   if(tglf_isinf(p_prime))call tglf_error(1,"input p_prime_loc is INF")
+  if(tglf_isnan(beta))call tglf_error(1,"input beta_loc is NAN")
+  if(tglf_isinf(beta))call tglf_error(1,"input beta_loc is INF")
   if(tglf_isnan(kx0_m))call tglf_error(1,"input kx0_loc is NAN")
   if(tglf_isinf(kx0_m))call tglf_error(1,"input kx0_loc is INF")
 
@@ -524,6 +526,7 @@ SUBROUTINE put_Miller_geometry(rmin,rmaj,zmaj,drmindx,drmajdx,dzmajdx, &
   s_delta_loc = s_delta
   zeta_loc = zeta
   s_zeta_loc = s_zeta
+  beta_loc = beta
   kx0_loc = kx0_m
   !
   ! validatiy checks

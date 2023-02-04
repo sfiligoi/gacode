@@ -164,6 +164,7 @@ module tglf_interface
   real    :: tglf_q_loc_in          = 2.0
   real    :: tglf_q_prime_loc_in    = 16.0
   real    :: tglf_p_prime_loc_in    = 0.0
+  real    :: tglf_beta_loc_in       = 0.0
   real    :: tglf_kx0_loc_in        = 0.0
 
   ! Data passed to Fourier_geometry
