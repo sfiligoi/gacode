@@ -285,7 +285,7 @@ subroutine cgyro_nl_fftw(ij)
   ! NOTE: The FFT will generate an unwanted n=0,p=-nr/2 component
   ! that will be filtered in the main time-stepping loop
 
-!$acc parallel loop independent collapse(4) private(itor,ix,iy)
+!$acc parallel loop independent collapse(4) private(itor,ix,iy) present(f_nl,fxmany)
   do itm=1,n_toroidal_procs
      do itl=1,nt_loc
        do j=1,nsplit
