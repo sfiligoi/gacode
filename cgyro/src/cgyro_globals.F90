@@ -408,9 +408,9 @@ module cgyro_globals
   integer(c_int) :: cu_plan_c2r_many
 #endif
 
-  complex, dimension(:,:,:),allocatable :: fxmany,fymany,gxmany,gymany
-  real, dimension(:,:,:), allocatable :: uxmany,uymany
-  real, dimension(:,:,:), allocatable :: vxmany,vymany,uvmany
+  complex, dimension(:,:,:),allocatable, target :: fxmany,fymany,gxmany,gymany
+  real, dimension(:,:,:), allocatable, target :: uxmany,uymany
+  real, dimension(:,:,:), allocatable, target :: vxmany,vymany,uvmany
 #endif
   ! 
   ! 2D FFT dimensions 
