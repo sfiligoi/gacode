@@ -195,7 +195,7 @@ contains
 #ifdef _OPENACC
   
 #ifdef HIPGPU
-     rc = hipfftExecZ2D(plan_c2r_many,fxmany,uxmany)
+     rc = hipfftExecZ2D(plan_c2r_many,c_loc(fxmany),c_loc(uxmany))
 #else
      rc = cufftExecZ2D(plan_c2r_many,fxmany,uxmany)
 #endif
@@ -222,7 +222,7 @@ contains
 #ifdef _OPENACC
   
 #ifdef HIPGPU
-     rc = hipfftExecD2Z(plan_r2c_many,uxmany,fxmany)
+     rc = hipfftExecD2Z(plan_r2c_many,c_loc(uxmany),c_loc(fxmany))
 #else
      rc = cufftExecD2Z(plan_r2c_many,uxmany,fxmany)
 #endif
@@ -293,7 +293,7 @@ contains
 #ifdef _OPENACC
   
 #ifdef HIPGPU
-     rc = hipfftExecZ2D(plan_c2r_many,fxmany,uxmany)
+     rc = hipfftExecZ2D(plan_c2r_many,c_loc(fxmany),c_loc(uxmany))
 #else
      rc = cufftExecZ2D(plan_c2r_many,fxmany,uxmany)
 #endif
@@ -323,7 +323,7 @@ contains
 #ifdef _OPENACC
   
 #ifdef HIPGPU
-     rc = hipfftExecD2Z(plan_r2c_many,uvmany,fvmany)
+     rc = hipfftExecD2Z(plan_r2c_many,c_loc(uvmany),c_loc(fvmany))
 #else
      rc = cufftExecD2Z(plan_r2c_many,uvmany,fvmany)
 #endif
@@ -410,7 +410,6 @@ contains
 #ifdef _OPENACC
   
 #ifdef HIPGPU
-     !istatus = hipfftCreate(plan_c2r_many)
      plan_c2r_many = c_null_ptr
      istatus = hipfftPlanMany(&
           plan_c2r_many, &
@@ -473,8 +472,7 @@ contains
 #ifdef _OPENACC
   
 #ifdef HIPGPU
-     !istatus = hipfftCreate(plan_r2c_many)
-     plan_c2r_many = c_null_ptr
+     plan_r2c_many = c_null_ptr
      istatus = hipfftPlanMany(&
           plan_r2c_many, &
           irank, &
