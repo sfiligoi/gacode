@@ -500,7 +500,7 @@ subroutine advect_schemes(dx,n,d,f)
      d(0)  =  0.0/(2.0*dx)
      d(1)  =  1.0/(2.0*dx)
 
-     ! 2nd-derivative filter
+     ! 2nd-derivative filter (-1/2 * dx * d^2/dx^2)
      f(-1) = -1.0/(2.0*dx)
      f(0)  =  2.0/(2.0*dx)
      f(1)  = -1.0/(2.0*dx)
@@ -516,7 +516,7 @@ subroutine advect_schemes(dx,n,d,f)
      d(1)  =  8.0/(12.0*dx)
      d(2)  = -1.0/(12.0*dx)
 
-     ! 4th-derivative filter 
+     ! 4th-derivative filter (1/12 * dx^3 * d^4/dx^4)
      f(-2) =  1.0/(12.0*dx)
      f(-1) = -4.0/(12.0*dx)
      f(0)  =  6.0/(12.0*dx)
@@ -536,7 +536,7 @@ subroutine advect_schemes(dx,n,d,f)
      d(2)  =  -9.0/(60.0*dx)
      d(3)  =   1.0/(60.0*dx)
 
-     ! 6th-derivative filter 
+     ! 6th-derivative filter (-1/60 * dx^5 * d^6/dx^6)
      f(-3) =  -1.0/(60.0*dx)
      f(-2) =   6.0/(60.0*dx)
      f(-1) = -15.0/(60.0*dx)
