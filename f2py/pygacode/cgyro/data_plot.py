@@ -575,8 +575,21 @@ class cgyrodata_plot(data.cgyrodata):
          ax.plot(theta,y,'o',color='k',markersize=2)
          ax.set_xlim([-1,1])
 
+      # captheta 
+      if len(self.geo[0,:]) > 12:
+         y = self.geo[:,12]
+         ax = fig.add_subplot(gs[0,3])
+         ax.grid(which="both",ls=":")
+         ax.grid(which="major",ls=":")
+         ax.set_xlabel(r'$\theta/\pi$')
+         ax.set_title(r'$'+self.geotag[12]+'$')
+         ax.plot(theta,y,'m')
+         ax.plot(theta,y,'o',color='k',markersize=2)
+         ax.set_xlim([-1,1])
+         ax.set_ylim([y[0],-y[0]])
+
       # Flux surface
-      ax = fig.add_subplot(gs[:,3],aspect='equal')
+      ax = fig.add_subplot(gs[1:,3],aspect='equal')
       ax.set_title(r'$r/a='+str(self.rmin)+'$')
       ax.set_facecolor('lightcyan')
       ax.set_xlabel(r'$R$')

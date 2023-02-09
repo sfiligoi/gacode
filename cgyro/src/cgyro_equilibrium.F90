@@ -187,6 +187,9 @@ subroutine cgyro_equilibrium
 
   ! GS2 normalizing magnetic field (B_GS2/B_unit)
   b_gs2 = geo_f/rmaj
+
+  ! Geometry coefficient from plotting only
+  captheta = geo_captheta
   
   mach_one_fac = 1.0
 

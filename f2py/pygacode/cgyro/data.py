@@ -312,23 +312,28 @@ class cgyrodata:
 
       t,fmt,data = self.extract('.cgyro.geo')
       if fmt != 'null':
+         nfunc = len(data)//self.n_theta
          print('INFO: (data.py) Read data in '+fmt+'.cgyro.geo   '+t)
-         self.geo = np.reshape(data,(self.n_theta,12),'F')
+         self.geo = np.reshape(data,(self.n_theta,nfunc),'F')
+
+         tags = ['\theta',
+                 'G_\\theta',
+                 '|B|',
+                 '\omega_\mathrm{stream}',
+                 '\omega_\mathrm{trap}',
+                 '\omega_\mathrm{rdrift}',
+                 '\omega_\mathrm{adrift}',
+                 '\omega_\mathrm{aprdrift}',
+                 '\omega_\mathrm{cdrift}',
+                 '\omega_\mathrm{crdrift}',
+                 '\omega_\mathrm{gammap',
+                 'k_\perp',
+                 '\Theta']
 
          self.geotag = []
-         self.geotag.append('\theta')
-         self.geotag.append('G_\\theta')
-         self.geotag.append('|B|')
-         self.geotag.append('\omega_\mathrm{stream}')
-         self.geotag.append('\omega_\mathrm{trap}')
-         self.geotag.append('\omega_\mathrm{rdrift}')
-         self.geotag.append('\omega_\mathrm{adrift}')
-         self.geotag.append('\omega_\mathrm{aprdrift}')
-         self.geotag.append('\omega_\mathrm{cdrift}')
-         self.geotag.append('\omega_\mathrm{crdrift}')
-         self.geotag.append('\omega_\mathrm{gammap')
-         self.geotag.append('k_\perp')
-
+         for i in range(nfunc):
+            self.geotag.append(tags[i])
+            
 
    # Function to pull elements out of array, checking for end of array
    def eget(self,data,p):
