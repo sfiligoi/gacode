@@ -14,6 +14,8 @@ all:
 	cd ${GACODE_ROOT}/shared/math ; make
 	cd ${GACODE_ROOT}/f2py ; make
 	cd src  && make
+
+tests: all
 	cd mpi_tests && make
 	cd fft_tests && make
 
