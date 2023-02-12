@@ -1,6 +1,9 @@
 program cgyro_test_fft
 
   use, intrinsic :: iso_c_binding
+#ifdef TEST_MPI
+  use mpi
+#endif
   implicit none
 #ifdef _OPENACC
   
@@ -29,6 +32,20 @@ program cgyro_test_fft
   integer :: i,j
   integer :: start_count, end_count 
   integer :: count_rate, count_max
+  integer :: n1,n2,nloc
+  integer :: i_proc,n_proc
+#ifdef TEST_MPI
+  integer :: supported,i_err
+  call MPI_INIT_THREAD(MPI_THREAD_SINGLE,supported,i_err)
+  call MPI_COMM_RANK(MPI_COMM_WORLD,i_proc,i_err)
+  call MPI_COMM_SIZE(MPI_COMM_WORLD,n_proc,i_err)
+#else
+  i_proc = 0
+  n_proc = 1
+#endif
+  nloc = 72/n_proc
+  n1 = i_proc*nloc+1
+  n2 = (i_proc+1)*nloc
 
 !$acc enter data create(fxmany,uvmany, exp_uxmany, exp_fvmany) &
 !$acc&           create(comp_uxmany, comp_fvmany)
@@ -51,7 +68,7 @@ program cgyro_test_fft
 !$acc update device(exp_fvmany) async
 
 !$acc wait
-  call cgyro_setup_fft(plan_c2r_many,plan_r2c_many,fxmany,uvmany,comp_uxmany,comp_fvmany)
+  call cgyro_setup_fft(n_proc,plan_c2r_many,plan_r2c_many,fxmany,uvmany,comp_uxmany,comp_fvmany)
 
   open(unit=1,file="data/bin.fxmany.raw",form='unformatted',access='direct',recl=size(fxmany)*16)
   read(1,rec=1) fxmany
@@ -63,10 +80,11 @@ program cgyro_test_fft
 !$acc update device(uvmany) async
 
 !$acc wait
-  call cgyro_do_fft(plan_c2r_many,plan_r2c_many,fxmany,uvmany,comp_uxmany,comp_fvmany)
+  call cgyro_do_fft(plan_c2r_many,plan_r2c_many,&
+                    fxmany(:,:,n1:n2),uvmany(:,:,n1:n2),comp_uxmany(:,:,n1:n2),comp_fvmany(:,:,n1:n2))
 
-  call cgyro_comp_D(190*768*72,comp_uxmany,exp_uxmany);
-  call cgyro_comp_Z(96*768*72,comp_fvmany,exp_fvmany);
+  call cgyro_comp_D(i_proc,190*768*nloc,comp_uxmany(:,:,n1:n2),exp_uxmany(:,:,n1:n2));
+  call cgyro_comp_Z(i_proc,96*768*nloc,comp_fvmany(:,:,n1:n2),exp_fvmany(:,:,n1:n2));
 
   open(unit=1,file="data/bin.fxmany.raw",form='unformatted',access='direct',recl=size(fxmany)*16)
   read(1,rec=1) fxmany
@@ -76,19 +94,22 @@ program cgyro_test_fft
   do j=1,5
    call SYSTEM_CLOCK(start_count, count_rate, count_max)
    do i=1,100
-    call cgyro_ident_fft(plan_c2r_many,plan_r2c_many,fxmany,uvmany)
+#ifdef TEST_MPI
+    call MPI_BARRIER(MPI_COMM_WORLD,i_err)
+#endif
+    call cgyro_ident_fft(plan_c2r_many,plan_r2c_many,fxmany(:,:,n1:n2),uvmany(:,:,n1:n2))
    enddo
    call SYSTEM_CLOCK(end_count, count_rate, count_max)
 
    if ((end_count<start_count).and.(count_max>0)) end_count = end_count + count_max
-   write(*,*) "2x100 FFT took ", (1.0*(end_count-start_count))/count_rate, " seconds"
+   write(*,*) "[",i_proc,"] 2x100 FFT took ", (1.0*(end_count-start_count))/count_rate, " seconds"
   enddo
 
 contains
-  subroutine cgyro_comp_D(nels,comp_many,exp_many)
+  subroutine cgyro_comp_D(i_proc,nels,comp_many,exp_many)
      implicit none
      !-----------------------------------
-     integer, intent(in) :: nels
+     integer, intent(in) :: i_proc,nels
      real, dimension(*), intent(in) :: comp_many,exp_many
      !-----------------------------------
      integer :: n
@@ -108,14 +129,14 @@ contains
           endif
        endif
      enddo
-     write(*,*) "cgyro_comp_D completed"
+     write(*,*) "[",i_proc,"] cgyro_comp_D completed"
 
   end subroutine cgyro_comp_D
 
-  subroutine cgyro_comp_Z(nels,comp_many,exp_many)
+  subroutine cgyro_comp_Z(i_proc,nels,comp_many,exp_many)
      implicit none
      !-----------------------------------
-     integer, intent(in) :: nels
+     integer, intent(in) :: i_proc,nels
      complex, dimension(*), intent(in) :: comp_many,exp_many
      !-----------------------------------
      integer :: n
@@ -146,7 +167,7 @@ contains
           endif
        endif
      enddo
-     write(*,*) "cgyro_comp_Z completed"
+     write(*,*) "[",i_proc,"] cgyro_comp_Z completed"
 
   end subroutine cgyro_comp_Z
 
@@ -350,7 +371,7 @@ contains
   end subroutine cgyro_do_fft
 
 
-  subroutine cgyro_setup_fft(plan_c2r_many,plan_r2c_many,fxmany,uvmany,uxmany,fvmany)
+  subroutine cgyro_setup_fft(n_proc,plan_c2r_many,plan_r2c_many,fxmany,uvmany,uxmany,fvmany)
 
   use, intrinsic :: iso_c_binding
   use, intrinsic :: iso_fortran_env
@@ -367,6 +388,7 @@ contains
      integer, external :: omp_get_max_threads
 #endif
   !-----------------------------------
+   integer, intent(in) :: n_proc
 #ifdef _OPENACC
   
 #ifdef HIPGPU
@@ -397,7 +419,7 @@ contains
      call fftw_plan_with_nthreads(omp_get_max_threads())
 #endif
 
-     nsplit = 72
+     nsplit = 72/n_proc
 
      ! nl03
      ndim(1) = 768
