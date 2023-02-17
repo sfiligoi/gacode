@@ -1,12 +1,12 @@
 #----------------------------------------------------------
 # Cray (crusher.olcf.ornl.gov) [GPU nodes]
 #
-# - 128 CPU cores (AMD Epyc) + 4x2 GPUs (MI250X)
+# - 7*2*4 CPU cores (AMD Epyc) + 4x2 GPUs (MI250X)
 #----------------------------------------------------------
 
 IDENTITY="ORNL Crusher"
-CORES_PER_NODE=128
-NUMAS_PER_NODE=4
+CORES_PER_NODE=56
+NUMAS_PER_NODE=8
 
 # Fortran 90/95 compiler
 FC = ftn -J ${GACODE_ROOT}/modules
