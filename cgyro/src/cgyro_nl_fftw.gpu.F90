@@ -145,7 +145,7 @@ subroutine cgyro_nl_fftw(ij)
 !$acc& use_device(fymany) &
 !$acc& use_device(uymany)
 #ifdef HIPGPU
-  rc = hipfftExecZ2D(hip_plan_c2r_many,fymany,uymany)
+  rc = hipfftExecZ2D(hip_plan_c2r_many,c_loc(fymany),c_loc(uymany))
 #else
   rc = cufftExecZ2D(cu_plan_c2r_many,fymany,uymany)
 #endif
@@ -163,7 +163,7 @@ subroutine cgyro_nl_fftw(ij)
 !$acc& use_device(uxmany)
 
 #ifdef HIPGPU
-  rc = hipfftExecZ2D(hip_plan_c2r_many,fxmany,uxmany)
+  rc = hipfftExecZ2D(hip_plan_c2r_many,c_loc(fxmany),c_loc(uxmany))
 #else
   rc = cufftExecZ2D(cu_plan_c2r_many,fxmany,uxmany)
 #endif
@@ -233,7 +233,7 @@ subroutine cgyro_nl_fftw(ij)
 !$acc& use_device(vymany)
 
 #ifdef HIPGPU
-  rc = hipfftExecZ2D(hip_plan_c2r_many,gymany,vymany)
+  rc = hipfftExecZ2D(hip_plan_c2r_many,c_loc(gymany),c_loc(vymany))
 #else
   rc = cufftExecZ2D(cu_plan_c2r_many,gymany,vymany)
 #endif
@@ -248,7 +248,7 @@ subroutine cgyro_nl_fftw(ij)
 !$acc& use_device(vxmany)
 
 #ifdef HIPGPU
-  rc = hipfftExecZ2D(hip_plan_c2r_many,gxmany,vxmany)
+  rc = hipfftExecZ2D(hip_plan_c2r_many,c_loc(gxmany),c_loc(vxmany))
 #else
   rc = cufftExecZ2D(cu_plan_c2r_many,gxmany,vxmany)
 #endif
@@ -271,7 +271,7 @@ subroutine cgyro_nl_fftw(ij)
 !$acc wait
 !$acc host_data use_device(uvmany,fxmany)
 #ifdef HIPGPU
-  rc = hipfftExecD2Z(hip_plan_r2c_many,uvmany,fxmany)
+  rc = hipfftExecD2Z(hip_plan_r2c_many,c_loc(uvmany),c_loc(fxmany))
 #else
   rc = cufftExecD2Z(cu_plan_r2c_many,uvmany,fxmany)
 #endif
@@ -285,7 +285,7 @@ subroutine cgyro_nl_fftw(ij)
   ! NOTE: The FFT will generate an unwanted n=0,p=-nr/2 component
   ! that will be filtered in the main time-stepping loop
 
-!$acc parallel loop independent collapse(4) private(itor,ix,iy)
+!$acc parallel loop independent collapse(4) private(itor,ix,iy) present(f_nl,fxmany)
   do itm=1,n_toroidal_procs
      do itl=1,nt_loc
        do j=1,nsplit

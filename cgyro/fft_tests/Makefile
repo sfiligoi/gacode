@@ -12,18 +12,21 @@ endif
 
 FC += ${FOMP} ${FACC}
 
-EXEC = cgyro_test_fft
-
-OBJECTS = cgyro_test_fft.o 
-
 .SUFFIXES : .o .f90 .F90
 
-all: $(OBJECTS) $(EXTRA_LIBS)
-	$(FC) $(FFLAGS) -o $(EXEC) $(OBJECTS) $(EXTRA_LIBS) $(LMATH)
+all: cgyro_test_fft cgyro_test_fft_mpi
 
-.f90.o .F90.o :
-	$(FC) $(FMATH) $(FFLAGS) -c $<
+cgyro_test_fft: cgyro_test_fft.o $(EXTRA_LIBS)
+	$(FC) $(FFLAGS) -o cgyro_test_fft cgyro_test_fft.o $(EXTRA_LIBS) $(LMATH)
+
+cgyro_test_fft_mpi: cgyro_test_fft_mpi.o $(EXTRA_LIBS)
+	$(FC) $(FFLAGS) -o cgyro_test_fft_mpi cgyro_test_fft_mpi.o $(EXTRA_LIBS) $(LMATH)
+
+cgyro_test_fft.o: cgyro_test_fft.F90
+	$(FC) $(FMATH) $(FFLAGS) -o cgyro_test_fft.o -c cgyro_test_fft.F90
+
+cgyro_test_fft_mpi.o: cgyro_test_fft.F90
+	$(FC) $(FMATH) $(FFLAGS) -DTEST_MPI -o cgyro_test_fft_mpi.o -c cgyro_test_fft.F90
 
 clean:
-	rm -rf *.o $(EXEC)
-
+	rm -rf *.o cgyro_test_fft cgyro_test_fft_mpi

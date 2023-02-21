@@ -411,8 +411,13 @@ contains
     integer :: istat(MPI_STATUS_SIZE)
     !-------------------------------------------------------
 
+#ifndef NO_ASYNC_MPI
+
     call MPI_REQUEST_GET_STATUS(req, iflag, istat, ierr)
     ! we discard all the outputs... it is just a way to progress async mpi
+
+#endif
+    !else, noop
 
   end subroutine parallel_slib_test
 
@@ -453,6 +458,12 @@ contains
     !
     integer :: ierr
     !-------------------------------------------------------
+
+#ifdef NO_ASYNC_MPI
+   call parallel_slib_f_nc(x,xt)
+
+#else
+
 #ifdef _OPENACC
 !$acc data present(x,xt)
 
@@ -483,6 +494,8 @@ contains
 !$acc end data
 #endif
 
+#endif
+
   end subroutine parallel_slib_f_nc_async
 
   ! require x and xt to ensure they exist until this finishes
@@ -499,6 +512,9 @@ contains
     integer :: istat(MPI_STATUS_SIZE)
     !-------------------------------------------------------
 
+#ifndef NO_ASYNC_MPI
+
+
 #ifdef _OPENACC
 !$acc data present(xt)
 #endif
@@ -514,6 +530,9 @@ contains
 
 !$acc end data
 #endif
+
+#endif
+   !else, noop
 
   end subroutine parallel_slib_f_nc_wait
 
@@ -610,6 +629,10 @@ contains
     integer :: ierr
     !-------------------------------------------------------
 
+#ifdef NO_ASYNC_MPI
+    call parallel_slib_f_fd(nels1,nels2,nels3,x,xt)
+#else
+
 #ifdef _OPENACC
 !$acc data present(xt,x)
 !$acc host_data use_device(xt,x)
@@ -630,6 +653,8 @@ contains
 !$acc end data
 #endif
 
+#endif
+
   end subroutine parallel_slib_f_fd_async
 
   ! require x and xt to ensure they exist until this finishes
@@ -647,6 +672,8 @@ contains
     integer :: istat(MPI_STATUS_SIZE)
     !-------------------------------------------------------
 
+#ifndef NO_ASYNC_MPI
+
 #ifdef _OPENACC
 !$acc data present(x,xt)
 #endif
@@ -658,6 +685,10 @@ contains
 #ifdef _OPENACC
 !$acc end data
 #endif
+
+#endif
+  ! else noop
+
 
   end subroutine parallel_slib_f_fd_wait
 

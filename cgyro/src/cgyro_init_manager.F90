@@ -407,6 +407,7 @@ subroutine cgyro_init_manager
   onembed = size(uxmany,1)
 
 #ifdef HIPGPU
+  hip_plan_c2r_many = c_null_ptr
   istatus = hipfftPlanMany(&
        hip_plan_c2r_many, &
        irank, &
@@ -441,6 +442,7 @@ subroutine cgyro_init_manager
   istride = 1
   ostride = 1
 #ifdef HIPGPU
+  hip_plan_r2c_many = c_null_ptr
   istatus = hipfftPlanMany(&
        hip_plan_r2c_many, &
        irank, &

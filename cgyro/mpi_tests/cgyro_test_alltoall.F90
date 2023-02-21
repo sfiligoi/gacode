@@ -5,15 +5,23 @@ program cgyro_test_alltotall
   integer :: supported, i_err
   integer :: i_proc,n_proc
   integer :: i,n,j
+  integer :: cnt_err
 
   integer :: splitkey, i_group
   integer :: NEW_COMM_1
+  integer :: req
+  logical :: iflag
+  integer :: istat(MPI_STATUS_SIZE)
 
   integer :: total_bufsize
   integer :: bufsize
-  real, dimension(:,:), allocatable :: t1,t2
+  real, dimension(:,:), allocatable :: t1,t2,t3
+  real :: c100,m100
 
   real:: m1,m2,m3
+
+  c100 = 100.0
+  m100 = 0.01
 
   call MPI_INIT_THREAD(MPI_THREAD_FUNNELED,supported,i_err)
 
@@ -84,40 +92,46 @@ program cgyro_test_alltotall
 
   allocate(t1(bufsize,n_proc))
   allocate(t2(bufsize,n_proc))
+  allocate(t3(bufsize,n_proc))
 
 !$omp parallel do collapse(2)
   do n=1, n_proc
     do i=1,bufsize/2
-      t1(i,n) = 100.0*i_proc + i + 0.01*n
+      t1(i,n) = c100*i_proc + i + m100*n
       t2(i,n) = 0.0
+      t3(i,n) = 0.0
     enddo
   enddo
 
 !$acc enter data copyin(t2)
 !$acc enter data copyin(t1)
+!$acc enter data copyin(t3)
 
 #ifdef _OPENACC
-!$acc parallel loop collapse(2) gang vector independent present(t1,t2)
+!$acc parallel loop collapse(2) gang vector independent present(t1,t2,t3)
 #else
 !$omp parallel do collapse(2)
 #endif
 do n=1, n_proc
     do i=(1+bufsize/2),bufsize
-      t1(i,n) = 100.0*i_proc + i + 0.01*n
+      t1(i,n) = c100*i_proc + i + m100*n
       t2(i,n) = 0.0
+      t3(i,n) = 0.0
     enddo
   enddo
 
-!$acc update host(t1)
-  if (abs(t1(1+bufsize/2,n_proc/2) - (100.0*i_proc + 1+bufsize/2 + 0.01*n_proc/2)) .gt. 0.01) then
+!$acc kernels present(t1)
+  if (abs(t1(1+bufsize/2,n_proc/2) - (c100*i_proc + (1+bufsize/2) + m100*n_proc/2)) .gt. 0.00001) then
     write(*,*) i_proc, "WARNING: Initial t1(bufsize,n_proc) validation failed!", &
-               t1(1+bufsize/2,n_proc/2), (100.0*i_proc + 1+bufsize/2+ 0.01*n_proc/2)
-    call flush(6)
+               t1(1+bufsize/2,n_proc/2), (c100*i_proc + (1+bufsize/2)+ m100*n_proc/2)
   endif
+!$acc end kernels
+  call flush(6)
 
   m1 = MPI_Wtime()
 
 !$acc host_data use_device(t1,t2)
+#ifdef NO_ASYNC_MPI
     call MPI_ALLTOALL(t1, &
          bufsize, &
          MPI_DOUBLE, &
@@ -126,20 +140,92 @@ do n=1, n_proc
          MPI_DOUBLE, &
          NEW_COMM_1, &
          i_err)
+#else
+    call MPI_IALLTOALL(t1, &
+         bufsize, &
+         MPI_DOUBLE, &
+         t2, &
+         bufsize, &
+         MPI_DOUBLE, &
+         NEW_COMM_1, &
+         req, i_err)
+
+    call MPI_REQUEST_GET_STATUS(req, iflag, istat, i_err)
+
+    call MPI_WAIT(req, &
+         istat, &
+         i_err)
+#endif
 !$acc end host_data
 
-!$acc update host(t2)
-  if (abs(t2(1+bufsize/2,n_proc/2) - (100.0*(n_proc/2-1) + 1+bufsize/2 + 0.01*(i_proc+1))) .gt. 0.01) then
+!$acc kernels present(t2)
+  if (abs(t2(1+bufsize/2,n_proc/2) - (c100*(n_proc/2-1) + (1+bufsize/2) + m100*(i_proc+1))) .gt. 0.00001) then
     write(*,*) i_proc, "WARNING: Initial t2(bufsize,n_proc) validation failed!", &
-               t2(1+bufsize/2,n_proc/2), (100.0*(n_proc/2-1) + 1+bufsize/2+ 0.01*(i_proc+1))
-    call flush(6)
+               t2(1+bufsize/2,n_proc/2), (c100*(n_proc/2-1) + (1+bufsize/2)+ m100*(i_proc+1))
   endif
+!$acc end kernels
+  call flush(6)
 
   if (i_proc==0) then
      m1 = MPI_Wtime()
      write(*,*) m1, "Initial exchange succeeded"
      call flush(6)
   endif
+
+!$acc host_data use_device(t2,t3)
+#ifdef NO_ASYNC_MPI
+    call MPI_ALLTOALL(t2, &
+         bufsize, &
+         MPI_DOUBLE, &
+         t3, &
+         bufsize, &
+         MPI_DOUBLE, &
+         NEW_COMM_1, &
+         i_err)
+#else
+    call MPI_IALLTOALL(t2, &
+         bufsize, &
+         MPI_DOUBLE, &
+         t3, &
+         bufsize, &
+         MPI_DOUBLE, &
+         NEW_COMM_1, &
+         req, i_err)
+
+    call MPI_REQUEST_GET_STATUS(req, iflag, istat, i_err)
+
+    call MPI_WAIT(req, &
+         istat, &
+         i_err)
+#endif
+!$acc end host_data
+
+  cnt_err = 0
+#ifdef _OPENACC
+!$acc parallel loop collapse(2) gang vector independent present(t1,t3) copy(cnt_err) reduction(+:cnt_err)
+#else
+!$omp parallel do collapse(2) copy(cnt_err) reduction(+:cnt_err)
+#endif
+do n=1, n_proc
+    do i=1,bufsize
+      if (t3(i,n)/=t1(i,n)) then
+           write(*,*) i_proc, "WARNING: Initial t3 validation failed!",i,n,t3(i,n),t1(i,n)
+           cnt_err = cnt_err + 1
+       endif
+    enddo
+  enddo
+  if (cnt_err>0) then
+     write(*,*) i_proc, "WARNING: Initial t3 validation failed! CNT ",cnt_err
+  endif
+
+  call flush(6)
+
+  if (i_proc==0) then
+     m1 = MPI_Wtime()
+     write(*,*) m1, "Initial backwards exchange succeeded"
+     call flush(6)
+  endif
+
 
   ! -------------------
   ! Now run many times for benchmark purposes
@@ -164,6 +250,7 @@ do n=1, n_proc
     enddo
 
 !$acc host_data use_device(t1,t2)
+#ifdef NO_ASYNC_MPI
       call MPI_ALLTOALL(t2, &
            bufsize, &
            MPI_DOUBLE, &
@@ -172,6 +259,22 @@ do n=1, n_proc
            MPI_DOUBLE, &
            NEW_COMM_1, &
            i_err)
+#else
+      call MPI_IALLTOALL(t2, &
+           bufsize, &
+           MPI_DOUBLE, &
+           t1, &
+           bufsize, &
+           MPI_DOUBLE, &
+           NEW_COMM_1, &
+           req,i_err)
+
+    call MPI_REQUEST_GET_STATUS(req, iflag, istat, i_err)
+
+    call MPI_WAIT(req, &
+         istat, &
+         i_err)
+#endif
 !$acc end host_data
 
 #ifdef _OPENACC
@@ -187,6 +290,7 @@ do n=1, n_proc
     enddo
 
 !$acc host_data use_device(t1,t2)
+#ifdef NO_ASYNC_MPI
       call MPI_ALLTOALL(t1, &
            bufsize, &
            MPI_DOUBLE, &
@@ -195,6 +299,22 @@ do n=1, n_proc
            MPI_DOUBLE, &
            NEW_COMM_1, &
            i_err)
+#else
+      call MPI_IALLTOALL(t1, &
+           bufsize, &
+           MPI_DOUBLE, &
+           t2, &
+           bufsize, &
+           MPI_DOUBLE, &
+           NEW_COMM_1, &
+           req,i_err)
+
+    call MPI_REQUEST_GET_STATUS(req, iflag, istat, i_err)
+
+    call MPI_WAIT(req, &
+         istat, &
+         i_err)
+#endif
 !$acc end host_data
 
   enddo
