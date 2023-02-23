@@ -767,7 +767,7 @@ contains
     call expro_writev(expro_qcxi,nexp,'qcxi','MW/m^3')
     call expro_writev(expro_qpar_beam,nexp,'qpar_beam','1/m^3/s') 
     call expro_writev(expro_qpar_wall,nexp,'qpar_wall','1/m^3/s')
-    call expro_writev(expro_qmom,nexp,'qmom','Nm')
+    call expro_writev(expro_qmom,nexp,'qmom','N/m^2')
 
     close(1)
 
