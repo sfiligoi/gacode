@@ -76,6 +76,11 @@ subroutine tgyro_iteration_driver
      ! ETG critical gradient
      flux_method = 5
 
+  else if (lcode == 'mmm') then
+     
+     ! Multi-Mode model gradient
+     flux_method = 6
+
   endif
   !---------------------------------------------
   allocate(flux_method_vec(n_inst))

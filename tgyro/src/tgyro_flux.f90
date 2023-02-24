@@ -14,6 +14,7 @@ subroutine tgyro_flux
   use tgyro_globals
   use neo_interface
   use tglf_interface
+  use tgyro_mmm_mod
 
   implicit none
 
@@ -218,6 +219,25 @@ subroutine tgyro_flux
 
      call tgyro_trap_component_error(0,'null')
 
+  case (6) 
+     call tgyro_mmm_map(ierr)
+     if (ierr.ne.0) call tgyro_catch_error('ERROR: (TGYRO) error in TGYRO/MMM mapping')
+     call tgyro_mmm_run(ierr)
+     if (ierr.ne.0) call tgyro_catch_error('ERROR: Error in MMM subroutine')
+
+     eflux_e_tur(i_r) = (mmm_chi_e*dlntedr(i_r) + mmm_vheat_e)*r_min/chi_gb(i_r)
+     pflux_e_tur(i_r) = (mmm_chi_ne*dlnnedr(i_r) + mmm_vgx_ne)*r_min/chi_gb(i_r)
+     mflux_e_tur(i_r) = (-mmm_chi_phi*w0p(i_r) + mmm_vgx_phi*w0(i_r))*r_min/c_s(i_r)/chi_gb(i_r)
+
+     eflux_i_tur(1,i_r) = (mmm_chi_i*dlntidr(1, i_r) + mmm_vheat_i) &
+                           *r_min*ni(1,i_r)/ne(i_r)*ti(1,i_r)/te(i_r)/chi_gb(i_r)
+     do i_ion = 1, loc_n_ion
+       if (zi_vec(i_ion)>2.5) then
+         pflux_i_tur(i_ion,i_r) = (mmm_chi_nx*dlnnidr(i_ion,i_r) + mmm_vgx_nx)*r_min/chi_gb(i_r)
+       endif
+     enddo 
+     mflux_i_tur(1,i_r) =  (-mmm_chi_phi*w0p(i_r) + mmm_vgx_phi*w0(i_r))*r_min/c_s(i_r)/chi_gb(i_r) 
+          
   case default
 
      call tgyro_catch_error('ERROR: (TGYRO) No matching flux method in tgyro_flux.')

@@ -85,6 +85,9 @@ subroutine tgyro_allocate_globals
   allocate(gamma_eb(n_r))
   allocate(gamma_p(n_r))
   allocate(u00(n_r))
+  allocate(vtor_p(n_r))
+  allocate(vpol_p(n_r))
+  allocate(v_pol(loc_n_ion,n_r))
 
   allocate(pr(n_r))
   allocate(ptot(n_r))

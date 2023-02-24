@@ -162,6 +162,9 @@ module tgyro_globals
   real, dimension(:), allocatable :: gamma_eb
   real, dimension(:), allocatable :: gamma_p
   real, dimension(:), allocatable :: u00
+  real, dimension(:), allocatable :: vtor_p 
+  real, dimension(:), allocatable :: vpol_p 
+  real, dimension(:,:), allocatable :: v_pol 
   real :: w0_norm
 
   real, dimension(:), allocatable :: pr
