@@ -32,7 +32,7 @@ subroutine cgyro_source
      icp = (ir-1+1)*n_theta
 
 #ifdef _OPENACC
-!$acc parallel loop private(j) present(h_x,source)
+!$acc parallel loop gang vector private(j) present(h_x,source)
 #else
 !$omp parallel do private(j)
 #endif

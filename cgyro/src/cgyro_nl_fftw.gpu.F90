@@ -18,7 +18,8 @@ subroutine cgyro_nl_fftw_zero4(sz,v1,v2,v3,v4)
 
   integer :: i
 
-!$acc parallel loop independent present(v1,v2,v3,v4) private(i)
+!$acc parallel loop independent gang vector &
+!$acc&         present(v1,v2,v3,v4) private(i)
   do i=1,sz
     v1(i) = 0.0
     v2(i) = 0.0
@@ -38,7 +39,8 @@ subroutine cgyro_nl_fftw_mul(sz,uvm,uxm,vym,uym,vxm,inv_nxny)
 
   integer :: i
 
-!$acc parallel loop independent present(uvm,uxm,vym,uym,vxm) private(i)
+!$acc parallel loop independent gang vector &
+!$acc&         present(uvm,uxm,vym,uym,vxm) private(i)
   do i=1,sz
     uvm(i) = (uxm(i)*vym(i)-uym(i)*vxm(i))*inv_nxny
   enddo
@@ -285,7 +287,8 @@ subroutine cgyro_nl_fftw(ij)
   ! NOTE: The FFT will generate an unwanted n=0,p=-nr/2 component
   ! that will be filtered in the main time-stepping loop
 
-!$acc parallel loop independent collapse(4) private(itor,ix,iy) present(f_nl,fxmany)
+!$acc parallel loop independent collapse(4) gang vector &
+!$acc&         private(itor,ix,iy) present(f_nl,fxmany)
   do itm=1,n_toroidal_procs
      do itl=1,nt_loc
        do j=1,nsplit
