@@ -169,7 +169,8 @@ subroutine cgyro_field_v_notae_s_gpu(start_t)
 
   ! Poisson and Ampere RHS integrals of H
 
-!$acc parallel loop collapse(3) independent copyin(start_t) &
+!$acc parallel loop collapse(3) gang vector &
+!$acc&         independent copyin(start_t) &
 !$acc&         present(nt2,nc,n_field) default(none)
   do itor=start_t,nt2
    do ic=1,nc
@@ -224,7 +225,8 @@ subroutine cgyro_field_v_notae_s_gpu(start_t)
 
   call timer_lib_in('field')
   ! Poisson LHS factors
-!$acc parallel loop collapse(3) independent present(fcoef) copyin(start_t) &
+!$acc parallel loop collapse(3) gang vector &
+!$acc&         independent present(fcoef) copyin(start_t) &
 !$acc&         present(nt2,nc,n_field) default(none)
   do itor=start_t,nt2
      ! assuming  (.not.(itor == 0 .and. ae_flag == 1))
@@ -443,7 +445,8 @@ subroutine cgyro_field_c_gpu
 
   ! Poisson and Ampere RHS integrals of h
 
-!$acc parallel loop collapse(3) independent private(field_loc_l) &
+!$acc parallel loop collapse(3) gang vector &
+!$acc&         independent private(field_loc_l) &
 !$acc&         present(dvjvec_c) present(nt1,nt2,nc,n_field,nv1,nv2) default(none)
   do itor=nt1,nt2
    do ic=1,nc
@@ -484,7 +487,8 @@ subroutine cgyro_field_c_gpu
   call timer_lib_out('field_com')
   call timer_lib_in('field')
   if (n_field > 2) then
-!$acc parallel loop collapse(2) independent present(fcoef) &
+!$acc parallel loop collapse(2) gang vector &
+!$acc&         independent present(fcoef) &
 !$acc&         present(nt1,nt2,nc) default(none)
     do itor=nt1,nt2
       do ic=1,nc
@@ -508,7 +512,8 @@ subroutine cgyro_field_c_gpu
 
   if (itor1<=itor2) then
      if (n_field > 2) then
-!$acc parallel loop collapse(2) independent private(tmp) present(gcoef) &
+!$acc parallel loop collapse(2) gang vector &
+!$acc&         independent private(tmp) present(gcoef) &
 !$acc&         copyin(itor1,itor2) present(nc) default(none)
         do itor=itor1,itor2
          do ic=1,nc
@@ -521,7 +526,8 @@ subroutine cgyro_field_c_gpu
          enddo
         enddo
      else
-!$acc parallel loop collapse(3) independent present(gcoef) &
+!$acc parallel loop collapse(3) gang vector &
+!$acc&         independent present(gcoef) &
 !$acc&         copyin(itor1,itor2) present(nc,n_field) default(none)
         do itor=itor1,itor2
          do ic=1,nc
@@ -570,7 +576,8 @@ subroutine cgyro_field_c_ae_gpu
 
   ! Poisson and Ampere RHS integrals of h
 
-!$acc parallel loop collapse(3) independent private(field_loc_l) &
+!$acc parallel loop collapse(3) gang vector &
+!$acc&         independent private(field_loc_l) &
 !$acc&         present(dvjvec_c) present(nc,n_field,nv1,nv2) default(none)
   do itor=0,0
    do ic=1,nc
@@ -611,7 +618,8 @@ subroutine cgyro_field_c_ae_gpu
   call timer_lib_out('field_com')
   call timer_lib_in('field')
   if (n_field > 2) then
-!$acc parallel loop collapse(2) independent present(fcoef) present(nc) default(none)
+!$acc parallel loop collapse(2) gang vector &
+!$acc&         independent present(fcoef) present(nc) default(none)
     do itor=0,0
       do ic=1,nc
        field(3,ic,itor) = field(3,ic,itor)*fcoef(3,ic,itor)
