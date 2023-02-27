@@ -26,7 +26,8 @@ subroutine cgyro_cmpl_copy(sz, left, r1)
     integer :: i
     !-------------------------------------------------------
 #ifdef _OPENACC
-!$acc parallel loop independent present(left,r1)
+!$acc parallel loop independent gang vector &
+!$acc&         present(left,r1)
     do i=1,sz
        left(i) = r1(i)
     enddo
@@ -51,7 +52,8 @@ subroutine cgyro_cmpl_copy2(sz, left1, left2, r1)
     complex :: tmp
     !-------------------------------------------------------
 #ifdef _OPENACC
-!$acc parallel loop independent present(left1,left2,r1) private(tmp)
+!$acc parallel loop independent gang vector &
+!$acc&         present(left1,left2,r1) private(tmp)
     do i=1,sz
        tmp = r1(i)
        left1(i) = tmp
@@ -89,7 +91,8 @@ subroutine cgyro_cmpl_fma2(sz, left, r1, c2, r2, abssum)
     if (present(abssum)) then
       s = 0.0
 #ifdef _OPENACC
-!$acc parallel loop independent present(left,r1,r2) private(tmp) reduction(+:s)
+!$acc parallel loop independent gang vector &
+!$acc&         present(left,r1,r2) private(tmp) reduction(+:s)
 #else
 !$omp parallel do private(tmp) reduction(+:s)
 #endif
@@ -101,7 +104,8 @@ subroutine cgyro_cmpl_fma2(sz, left, r1, c2, r2, abssum)
       abssum = s
     else
 #ifdef _OPENACC
-!$acc parallel loop independent present(left,r1,r2)
+!$acc parallel loop independent gang vector &
+!$acc&         present(left,r1,r2)
 #else
 !$omp parallel do
 #endif
@@ -131,7 +135,8 @@ subroutine cgyro_cmpl_fma3(sz, left, r1, c2, r2, c3, r3, abssum)
     if (present(abssum)) then
       s = 0.0
 #ifdef _OPENACC
-!$acc parallel loop independent present(left,r1,r2,r3) private(tmp) reduction(+:s)
+!$acc parallel loop independent gang vector &
+!$acc&         present(left,r1,r2,r3) private(tmp) reduction(+:s)
 #else
 !$omp parallel do private(tmp) reduction(+:s)
 #endif
@@ -143,7 +148,8 @@ subroutine cgyro_cmpl_fma3(sz, left, r1, c2, r2, c3, r3, abssum)
       abssum = s
     else
 #ifdef _OPENACC
-!$acc parallel loop independent present(left,r1,r2,r3)
+!$acc parallel loop independent gang vector &
+!$acc&         present(left,r1,r2,r3)
 #else
 !$omp parallel do
 #endif
@@ -175,7 +181,8 @@ subroutine cgyro_cmpl_fma4(sz, left, r1, c2, r2, c3, r3, c4, r4, abssum)
     if (present(abssum)) then
       s = 0.0
 #ifdef _OPENACC
-!$acc parallel loop independent present(left,r1,r2,r3,r4) private(tmp) reduction(+:s)
+!$acc parallel loop independent gang vector &
+!$acc&         present(left,r1,r2,r3,r4) private(tmp) reduction(+:s)
 #else
 !$omp parallel do private(tmp) reduction(+:s)
 #endif
@@ -187,7 +194,8 @@ subroutine cgyro_cmpl_fma4(sz, left, r1, c2, r2, c3, r3, c4, r4, abssum)
       abssum = s
     else
 #ifdef _OPENACC
-!$acc parallel loop independent present(left,r1,r2,r3,r4)
+!$acc parallel loop independent gang vector &
+!$acc&         present(left,r1,r2,r3,r4)
 #else
 !$omp parallel do
 #endif
@@ -221,7 +229,8 @@ subroutine cgyro_cmpl_fma5(sz, left, r1, c2, r2, c3, r3, c4, r4, c5, r5, abssum)
     if (present(abssum)) then
       s = 0.0
 #ifdef _OPENACC
-!$acc parallel loop independent present(left,r1,r2,r3,r4,r5) private(tmp) reduction(+:s)
+!$acc parallel loop independent gang vector &
+!$acc&         present(left,r1,r2,r3,r4,r5) private(tmp) reduction(+:s)
 #else
 !$omp parallel do private(tmp) reduction(+:s)
 #endif
@@ -233,7 +242,8 @@ subroutine cgyro_cmpl_fma5(sz, left, r1, c2, r2, c3, r3, c4, r4, c5, r5, abssum)
       abssum = s
     else
 #ifdef _OPENACC
-!$acc parallel loop independent present(left,r1,r2,r3,r4,r5)
+!$acc parallel loop independent gang vector &
+!$acc&         present(left,r1,r2,r3,r4,r5)
 #else
 !$omp parallel do
 #endif
@@ -269,7 +279,8 @@ subroutine cgyro_cmpl_fma6(sz, left, r1, c2, r2, c3, r3, c4, r4, c5, r5, c6, r6,
     if (present(abssum)) then
       s = 0.0
 #ifdef _OPENACC
-!$acc parallel loop independent present(left,r1,r2,r3,r4,r5,r6) private(tmp) reduction(+:s)
+!$acc parallel loop independent gang vector &
+!$acc&         present(left,r1,r2,r3,r4,r5,r6) private(tmp) reduction(+:s)
 #else
 !$omp parallel do private(tmp) reduction(+:s)
 #endif
@@ -281,7 +292,8 @@ subroutine cgyro_cmpl_fma6(sz, left, r1, c2, r2, c3, r3, c4, r4, c5, r5, c6, r6,
       abssum = s
     else
 #ifdef _OPENACC
-!$acc parallel loop independent present(left,r1,r2,r3,r4,r5,r6)
+!$acc parallel loop independent gang vector &
+!$acc&         present(left,r1,r2,r3,r4,r5,r6)
 #else
 !$omp parallel do
 #endif
@@ -311,7 +323,8 @@ subroutine cgyro_cmpl_fmaN(sz, nr, left, r1, cN, rN, abssum)
     if (present(abssum)) then
       s = 0.0
 #ifdef _OPENACC
-!$acc parallel loop independent present(left,r1,rN) copyin(cN) private(tmp,j) reduction(+:s)
+!$acc parallel loop independent gang vector &
+!$acc&         present(left,r1,rN) copyin(cN) private(tmp,j) reduction(+:s)
 #else
 !$omp parallel do private(tmp,j) reduction(+:s)
 #endif
@@ -327,7 +340,8 @@ subroutine cgyro_cmpl_fmaN(sz, nr, left, r1, cN, rN, abssum)
       abssum = s
     else
 #ifdef _OPENACC
-!$acc parallel loop independent present(left,r1,rN) copyin(cN) private(tmp,j)
+!$acc parallel loop independent gang vector &
+!$acc&         present(left,r1,rN) copyin(cN) private(tmp,j)
 #else
 !$omp parallel do private(tmp,j)
 #endif
@@ -371,7 +385,9 @@ subroutine cgyro_cmpl_solution_werror(sz, nr, left, r0, c1, m1, cN, rN, ec1, ecN
     sl = 0.0
     sm = 0.0
 #ifdef _OPENACC
-!$acc parallel loop independent present(left,r0,m1,rN) copyin(cN,ecN) private(tmp,tmpl,tmpm,j) reduction(+:sl,sm)
+!$acc parallel loop independent gang vector &
+!$acc&         present(left,r0,m1,rN) copyin(cN,ecN) private(tmp,tmpl,tmpm,j) &
+!$acc&         reduction(+:sl,sm)
 #else
 !$omp parallel do private(tmp,tmpl,tmpm,j) reduction(+:sl,sm)
 #endif
