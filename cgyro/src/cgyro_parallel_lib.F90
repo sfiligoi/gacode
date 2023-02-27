@@ -283,8 +283,9 @@ contains
 
     j1 = 1+iproc*nj_loc
     j2 = (1+iproc)*nj_loc
-!$acc parallel loop collapse(4) independent private(j_loc) &
-!$acc&         present(fsendr,fin) present(nproc,nk1,nk2,ni_loc) copyin(j1,j2) default(none)
+!$acc parallel loop collapse(4) gang vector independent private(j_loc) &
+!$acc&         present(fsendr,fin) present(nproc,nk1,nk2,ni_loc) &
+!$acc&         copyin(j1,j2) default(none)
     do k=1,nproc
      do itor=nk1,nk2
        do j=j1,j2

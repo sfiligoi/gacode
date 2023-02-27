@@ -63,7 +63,8 @@ subroutine cgyro_rhs(ij)
   if (n_field > 1) then
      call timer_lib_in('str')
 
-!$acc parallel loop  collapse(3) independent private(iv_loc,is) &
+!$acc parallel loop  collapse(3) independent gang vector &
+!$acc&         private(iv_loc,is) &
 !$acc&         present(is_v,z,temp,jvec_c) &
 !$acc&         present(nt1,nt2,nv1,nv2,nc) &
 !$acc&         default(none) async(1)
@@ -87,7 +88,8 @@ subroutine cgyro_rhs(ij)
   else
      call timer_lib_in('str_mem')
 
-!$acc parallel loop  collapse(3) independent private(iv_loc) &
+!$acc parallel loop  collapse(3) gang vector &
+!$acc&         independent private(iv_loc) &
 !$acc&         present(nt1,nt2,nv1,nv2,nc)  &
 !$acc&         default(none) async(1)
      do itor=nt1,nt2

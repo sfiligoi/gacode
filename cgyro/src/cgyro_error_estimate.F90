@@ -29,7 +29,8 @@ subroutine cgyro_error_estimate
   ! NOTE: If I have multiple itor, sum them all together
   h_s=0.0
   r_s=0.0
-!$acc parallel loop collapse(3) independent present(h_x,rhs(:,:,:,1)) reduction(+:h_s,r_s) async(2)
+!$acc parallel loop collapse(3) independent gang vector &
+!$acc&         present(h_x,rhs(:,:,:,1)) reduction(+:h_s,r_s) async(2)
   do itor=nt1,nt2
    do iv_loc=1,nv_loc
      do ic=1,nc

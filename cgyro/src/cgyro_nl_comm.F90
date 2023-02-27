@@ -53,7 +53,8 @@ subroutine cgyro_nl_fftw_comm1_async
   enddo
 
 #ifdef _OPENACC
-!$acc parallel loop independent present(fpack) if ( (nv_loc*n_theta) < (nsplit*n_toroidal_procs) )
+!$acc parallel loop independent gang vector &
+!$acc&         present(fpack) if ( (nv_loc*n_theta) < (nsplit*n_toroidal_procs) )
 #endif
   do iexch=nv_loc*n_theta+1,nsplit*n_toroidal_procs
       fpack(1:n_radial,1:nt_loc,iexch) = (0.0,0.0)

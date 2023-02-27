@@ -98,7 +98,7 @@ subroutine cgyro_upwind_r64
   call timer_lib_in('str')
 
 #ifdef _OPENACC
-!$acc parallel loop collapse(3) independent &
+!$acc parallel loop collapse(3) independent gang vector &
 !$acc&         present(is_v,ix_v,ie_v,xi,vel,upfac2,g_x,upwind_res) &
 !$acc&         private(iv_loc,is,ix,ie) present(nt1,nt2,nv1,nv2,nc) default(none)
 #else
@@ -205,7 +205,7 @@ subroutine cgyro_upwind_r32
   call timer_lib_in('str')
 
 #ifdef _OPENACC
-!$acc parallel loop collapse(3) independent &
+!$acc parallel loop collapse(3) independent gang vector &
 !$acc&         present(is_v,ix_v,ie_v,xi,vel,upfac2,g_x,upwind32_res) &
 !$acc&         private(iv_loc,is,ix,ie) &
 !$acc&         present(nt1,nt2,nv1,nv2,nc) default(none)
