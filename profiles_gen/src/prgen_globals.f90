@@ -26,7 +26,6 @@ module prgen_globals
 
   integer :: n_reorder
   integer, dimension(n_ion_max) :: reorder_vec
-  integer :: n_null
   integer :: n_lump
   integer, dimension(:), allocatable :: lump_vec
   integer :: ntop

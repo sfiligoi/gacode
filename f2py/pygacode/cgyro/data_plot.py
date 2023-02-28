@@ -48,6 +48,9 @@ class cgyrodata_plot(data.cgyrodata):
          else:
             f  = self.kxky_bpar[0,:,itheta,:,:]+1j*self.kxky_bpar[1,:,itheta,:,:]
             ft = self.TEXBPAR
+      elif moment == 'k':
+            f  = self.kxky_phi[0,:,itheta,:,:]+1j*self.kxky_phi[1,:,itheta,:,:]
+            #ft = self.TEXPHI
       elif moment == 'n':
          f  = self.kxky_n[0,:,itheta,species,:,:]+1j*self.kxky_n[1,:,itheta,species,:,:]
          ft = self.TEXDN
@@ -464,6 +467,7 @@ class cgyrodata_plot(data.cgyrodata):
       k0 = 2*np.pi/self.length
 
       f,ft = self.kxky_select(theta,0,'phi',0)
+      periodize(f)
 
       #y1,y2 = shift_fourier(f,imin,imax)
       #ax.plot(ky,k0*y1,color='k')
