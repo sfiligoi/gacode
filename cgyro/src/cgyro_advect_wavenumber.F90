@@ -15,6 +15,7 @@ subroutine cgyro_advect_wavenumber(ij)
   integer, intent(in) :: ij
   integer :: ir,l,ll,j,icc,ivc,itor
   complex, dimension(:,:),allocatable :: he
+  complex :: rl
 
   if (nonlinear_flag == 0) return
 
@@ -24,10 +25,9 @@ subroutine cgyro_advect_wavenumber(ij)
 
 #ifdef _OPENACC
 !$acc parallel loop collapse(2) gang private(ivc,ir,l,icc,ll,he) &
-!$acc&                   present(rhs(:,:,:,ij),omega_ss,field,h_x,c_wave) &
-!$acc&                   vector_length(n_theta)
+!$acc&                   present(rhs(:,:,:,ij),omega_ss,field,h_x,c_wave)
 #else
-!$omp parallel do collapse(2) private(ivc,ir,j,icc,l,ll,he)
+!$omp parallel do collapse(2) private(ivc,ir,j,icc,l,ll,rl,he)
 #endif
      do itor=nt1,nt2
       do ivc=1,nv_loc
@@ -37,27 +37,27 @@ subroutine cgyro_advect_wavenumber(ij)
         ! Wavenumber advection ExB shear
         if (shear_method == 2) then
 
-!$acc loop seq
+!$acc loop collapse(2) vector private(ir,icc,j)
            do ir=1,n_radial
-              icc = (ir-1)*n_theta
-!$acc loop vector private(j)
               do j=1,n_theta
+                 icc = (ir-1)*n_theta
                  he(j,ir) = omega_eb_base*itor*h_x(icc+j,ivc,itor)
               enddo
            enddo
 
-!$acc loop seq
+!$acc loop collapse(2) vector private(ir,j,l,icc,ll,rl)
            do ir=1,n_radial
-              icc = (ir-1)*n_theta
+              do j=1,n_theta
+                 icc = (ir-1)*n_theta
+                 rl = rhs(icc+j,ivc,itor,ij)
 !$acc loop seq
-              do l=1,n_wave
-                 ll = 2*l-1
-!$acc loop vector private(j)
-                 do j=1,n_theta
+                 do l=1,n_wave
+                    ll = 2*l-1
                     ! Sign throughout paper is incorrect (or gamma -> - gamma)
                     ! Thus sign below has been checked and is correct
-                    rhs(icc+j,ivc,itor,ij) = rhs(icc+j,ivc,itor,ij)+c_wave(l)*(he(j,ir+ll)-he(j,ir-ll))
+                    rl = rl+c_wave(l)*(he(j,ir+ll)-he(j,ir-ll))
                  enddo
+                 rhs(icc+j,ivc,itor,ij) = rl
               enddo
            enddo
 
@@ -66,26 +66,26 @@ subroutine cgyro_advect_wavenumber(ij)
         ! Wavenumber advection profile shear
         if (profile_shear_flag == 1) then
 
-!$acc loop seq
+!$acc loop collapse(2) vector private(ir,icc,j)
            do ir=1,n_radial
-              icc = (ir-1)*n_theta
-!$acc loop vector private(j)
               do j=1,n_theta
+                 icc = (ir-1)*n_theta
                  he(j,ir) = sum(omega_ss(:,icc+j,ivc,itor)*field(:,icc+j,itor))
               enddo
            enddo
 
-!$acc loop seq
+!$acc loop collapse(2) vector private(ir,j,l,icc,ll,rl)
            do ir=1,n_radial
-              icc = (ir-1)*n_theta
+              do j=1,n_theta
+                 icc = (ir-1)*n_theta
+                 rl = rhs(icc+j,ivc,itor,ij)
 !$acc loop seq
-              do l=1,n_wave
-                 ll = 2*l-1
-!$acc loop vector private(j)
-                 do j=1,n_theta
+                 do l=1,n_wave
+                    ll = 2*l-1
                     ! Note opposite sign to ExB shear
-                    rhs(icc+j,ivc,itor,ij) = rhs(icc+j,ivc,itor,ij)-c_wave(l)*(he(j,ir+ll)-he(j,ir-ll))
+                    rl = rl-c_wave(l)*(he(j,ir+ll)-he(j,ir-ll))
                  enddo
+                 rhs(icc+j,ivc,itor,ij) = rl
               enddo
            enddo
 
