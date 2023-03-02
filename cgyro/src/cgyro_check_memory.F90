@@ -25,8 +25,8 @@ subroutine cgyro_check_memory(datafile)
      call cgyro_alloc_add(io,n_radial*n_theta*4.0,'ic_c')
      call cgyro_alloc_add(io,n_energy*n_xi*n_species*4.0,'iv_v')
      call cgyro_alloc_add(io,nc*(2*nup_theta+1)*nt_loc*4.0,'icd_c')
-     call cgyro_alloc_add(io,nc*(2*nup_theta+1)*nt_loc*16.0,'dtheta')
-     call cgyro_alloc_add(io,nc*(2*nup_theta+1)*nt_loc*16.0,'dtheta_up')
+     call cgyro_alloc_add_3d(io,(2*nup_theta+1),nc,nt_loc,16,'dtheta')
+     call cgyro_alloc_add_3d(io,(2*nup_theta+1),nc,nt_loc,16,'dtheta_up')
 
      write(io,*)
      write(io,*) 'Fields and field solve'
@@ -90,21 +90,21 @@ subroutine cgyro_check_memory(datafile)
 
      select case(delta_t_method)
      case(1)
-        call cgyro_alloc_add(io,nc*nv_loc*nt_loc*16.0,'h0_old')
-        call cgyro_alloc_add(io,6*nc*nv_loc*nt_loc*16.0,'rhs')
+        call cgyro_alloc_add_3d(io,nc,nv_loc,nt_loc,16,'h0_old')
+        call cgyro_alloc_add_4d(io,nc,nv_loc,nt_loc,6,16,'rhs')
      case(2)
-        call cgyro_alloc_add(io,nc*nv_loc*nt_loc*16.0,'h0_old')
-        call cgyro_alloc_add(io,7*nc*nv_loc*nt_loc*16.0,'rhs')
+        call cgyro_alloc_add_3d(io,nc,nv_loc,nt_loc,16,'h0_old')
+        call cgyro_alloc_add_4d(io,nc,nv_loc,nt_loc,7,16,'rhs')
      case(3)
-        call cgyro_alloc_add(io,nc*nv_loc*nt_loc*16.0,'h0_old')
-        call cgyro_alloc_add(io,9*nc*nv_loc*nt_loc*16.0,'rhs')
+        call cgyro_alloc_add_3d(io,nc,nv_loc,nt_loc,16,'h0_old')
+        call cgyro_alloc_add_4d(io,nc,nv_loc,nt_loc,9,16,'rhs')
      case default
         ! Normal timestep
-        call cgyro_alloc_add(io,4*nc*nv_loc*nt_loc*16.0,'rhs')
+        call cgyro_alloc_add_4d(io,nc,nv_loc,nt_loc,4,16,'rhs')
      end select
 
-     call cgyro_alloc_add(io,n_field*nc*nv_loc*nt_loc*16.0,'omega_s')
-     call cgyro_alloc_add(io,n_field*nc*nv_loc*nt_loc*16.0,'omega_ss')
+     call cgyro_alloc_add_4d(io,n_field,nc,nv_loc,nt_loc,16,'omega_s')
+     call cgyro_alloc_add_4d(io,n_field,nc,nv_loc,nt_loc,16,'omega_ss')
      call cgyro_alloc_add_3d(io,nc,nv_loc,nt_loc,16,'omega_cap_h')
      call cgyro_alloc_add_3d(io,nc,nv_loc,nt_loc,16,'omega_h')
      call cgyro_alloc_add_3d(io,nc,nv_loc,nt_loc,16,'h_x')
@@ -116,22 +116,22 @@ subroutine cgyro_check_memory(datafile)
      call cgyro_alloc_add_3d(io,nc,nv_loc,nt_loc,16,'cap_h_c_old')
      call cgyro_alloc_add_3d(io,nc,nv_loc,nt_loc,16,'cap_h_c_old2')
      call cgyro_alloc_add_3d(io,nc_loc,nv,nt_loc,16,'cap_h_v')
-     call cgyro_alloc_add(io,n_field*nc*nv_loc*nt_loc*8.0,'jvec_c')
+     call cgyro_alloc_add_4d(io,n_field,nc,nv_loc,nt_loc,8,'jvec_c')
      if (nonlinear_flag == 1) call cgyro_alloc_add(io,n_field*n_radial*n_jtheta*nv_loc*n_toroidal*8.0,'jvec_c_nl')
-     call cgyro_alloc_add(io,n_field*nc_loc*nv*nt_loc*8.0,'jvec_v')
-     call cgyro_alloc_add(io,n_field*nc*nv_loc*nt_loc*8.0,'jxvec_c')
-     call cgyro_alloc_add(io,nc*nv_loc*nt_loc*2*8.0,'upfac1')
-     call cgyro_alloc_add(io,nc*nv_loc*nt_loc*2*8.0,'upfac2')
+     call cgyro_alloc_add_4d(io,n_field,nc_loc,nv,nt_loc,8,'jvec_v')
+     call cgyro_alloc_add_4d(io,n_field,nc,nv_loc,nt_loc,8,'jxvec_c')
+     call cgyro_alloc_add_3d(io,nc,nv_loc,nt_loc,8,'upfac1')
+     call cgyro_alloc_add_3d(io,nc,nv_loc,nt_loc,8,'upfac2')
 
      if (nonlinear_flag == 1) then
         write(io,*)
         write(io,*) 'Nonlinear bracket'
         write(io,*)
         ! nsplit * n_toroidal = nv_loc * n_theta
-        call cgyro_alloc_add(io,n_radial*nsplit*n_toroidal_procs*nt_loc*16.0,'f_nl')
-        call cgyro_alloc_add(io,n_field*n_radial*n_jtheta*n_toroidal*16.0,'g_nl')
-        call cgyro_alloc_add(io,n_radial*nsplit*n_toroidal_procs*nt_loc*16.0,'fpack')
-        call cgyro_alloc_add(io,n_field*n_radial*n_jtheta*n_toroidal*16.0,'gpack')
+        call cgyro_alloc_add_4d(io,n_radial,nt_loc,nsplit,n_toroidal_procs,16,'f_nl')
+        call cgyro_alloc_add_4d(io,n_field,n_radial,n_jtheta,n_toroidal,16,'g_nl')
+        call cgyro_alloc_add_3d(io,n_radial,nt_loc,nsplit*n_toroidal_procs,16,'fpack')
+        call cgyro_alloc_add_4d(io,n_field,n_radial,n_jtheta,n_toroidal,16,'gpack')
      endif
 
      write(io,*)
@@ -142,9 +142,9 @@ subroutine cgyro_check_memory(datafile)
         call cgyro_alloc_add(io,(8.0*n_xi)*n_xi*n_species*n_energy*n_theta*nt_loc,'cmat')
      else
         if (collision_precision_mode == 0) then
-           call cgyro_alloc_add(io,(8.0*nv)*nv*nc_loc*nt_loc,'cmat')
+           call cgyro_alloc_add_4d(io,nv,nv,nc_loc,nt_loc,8,'cmat')
         else
-           call cgyro_alloc_add(io,4.0*nv*nv*nc_loc*nt_loc,'cmat_fp32')
+           call cgyro_alloc_add_4d(io,nv,nv,nc_loc,nt_loc,4,'cmat_fp32')
            call cgyro_alloc_add(io,4.0*n_xi*n_species*(n_energy-n_low_energy)*n_xi*nc_loc*nt_loc,'cmat_stripes')
            call cgyro_alloc_add(io,4.0*n_xi*n_species*nv*nc_loc*n_low_energy*nt_loc,'cmat_e1')
         endif
@@ -232,23 +232,25 @@ subroutine cgyro_alloc_add_3d(my_io,d1,d2,d3,elsize,name)
 
      name15 = name
      if ( (d1<=9999) .and. (d2<=9999) .and.(d3<=9999)) then
-       fmtnr=11
+       ASSIGN 11 to fmtnr
      else if ( (d1<=99999) .and. (d2<=99999) .and.(d3<=99999)) then
-       fmtnr=12
+       ASSIGN 12 to fmtnr
      else
-       fmtnr=13
+       ASSIGN 13 to fmtnr
      endif
 
-     if (elsize<9) then
+     if (elsize<5) then
+        typestr = 'real(4)'
+     else if (elsize<9) then
         typestr = 'real'
      else
         typestr = 'complex'
      endif
 
      if (bytes < 1e8) then 
-             write(my_io,11) bytes/1e6,' MB',name15,' (',d1,',',d2,',',d3,') ',typestr
+             write(my_io,fmtnr) bytes/1e6,' MB',name15,' (',d1,',',d2,',',d3,') ',typestr
      else
-             write(my_io,11) bytes/1e9,' GB',name15,' (',d1,',',d2,',',d3,') ',typestr
+             write(my_io,fmtnr) bytes/1e9,' GB',name15,' (',d1,',',d2,',',d3,') ',typestr
      endif
      
   endif
@@ -258,3 +260,55 @@ subroutine cgyro_alloc_add_3d(my_io,d1,d2,d3,elsize,name)
 13 format(t2,f8.3,a,3x,a15,3x,a,i7,a,i7,a,i7,a,a)
   
 end subroutine cgyro_alloc_add_3d
+
+subroutine cgyro_alloc_add_4d(my_io,d1,d2,d3,d4,elsize,name)
+
+  use cgyro_globals
+
+  implicit none
+  !
+  integer, intent(in) :: my_io
+  integer, intent(in) :: d1,d2,d3,d4,elsize
+  character (len=*), intent(in) :: name
+  !
+  real :: bytes
+  character (15) :: name15
+  character (8) :: typestr
+  integer :: fmtnr
+ 
+  if (i_proc == 0) then
+     bytes = elsize
+     bytes = (((bytes*d1)*d2)*d3)*d4
+     
+     total_memory = total_memory+bytes
+
+     name15 = name
+     if ( (d1<=9999) .and. (d2<=9999) .and.(d3<=9999) .and.(d4<=9999)) then
+       ASSIGN 21 to fmtnr
+     else if ( (d1<=99999) .and. (d2<=99999) .and.(d3<=99999) .and.(d4<=99999)) then
+       ASSIGN 22 to fmtnr
+     else
+       ASSIGN 23 to fmtnr
+     endif
+
+     if (elsize<5) then
+        typestr = 'real(4)'
+     else if (elsize<9) then
+        typestr = 'real'
+     else
+        typestr = 'complex'
+     endif
+
+     if (bytes < 1e8) then 
+             write(my_io,fmtnr) bytes/1e6,' MB',name15,' (',d1,',',d2,',',d3,',',d4,') ',typestr
+     else
+             write(my_io,fmtnr) bytes/1e9,' GB',name15,' (',d1,',',d2,',',d3,',',d4,') ',typestr
+     endif
+     
+  endif
+
+21 format(t2,f8.3,a,3x,a15,3x,a,i4,a,i4,a,i4,a,i4,a,a)
+22 format(t2,f8.3,a,3x,a15,3x,a,i5,a,i5,a,i5,a,i5,a,a)
+23 format(t2,f8.3,a,3x,a15,3x,a,i7,a,i7,a,i7,a,i7,a,a)
+  
+end subroutine cgyro_alloc_add_4d
