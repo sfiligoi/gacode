@@ -48,6 +48,7 @@ subroutine cgyro_init_manager
 
   character(len=128) :: msg
   integer :: ie
+  integer :: ptmp,p2,p3,p5,p7,prem
 
   if (hiprec_flag == 1) then
      fmtstr  = '(es16.9)'
@@ -351,7 +352,76 @@ subroutine cgyro_init_manager
   ! 3/2-rule for dealiasing the nonlinear product
   nx = (3*nx0)/2
   ny = (3*ny0)/2
-     
+
+  write (msg, "(A,I7,A,I7,A)") "NL using FFT of size (",nx,"x",ny,")"
+  call cgyro_info(msg)
+
+  p2 = 0
+  p3 = 0
+  p5 = 0
+  p7 = 0
+
+  ptmp = nx
+  do while ((ptmp>1) .and. (modulo(ptmp,2)==0) )
+    p2 = p2 + 1
+    ptmp = ptmp/2
+  end do
+  do while ((ptmp>1) .and. (modulo(ptmp,3)==0) )
+    p3 = p3 + 1
+    ptmp = ptmp/3
+  end do
+  do while ((ptmp>1) .and. (modulo(ptmp,5)==0) )
+    p5 = p5 + 1
+    ptmp = ptmp/5
+  end do
+  do while ((ptmp>1) .and. (modulo(ptmp,7)==0) )
+    p7 = p7 + 1
+    ptmp = ptmp/7
+  end do
+
+  if  (ptmp<2) then
+     write (msg, "(A,I7,A,I2,A,I2,A,I2,A,I2)") "   ",nx, " factorizes in 2^",p2," x 3^",p3," x 5^",p5," x 7^",p7
+     call cgyro_info(msg)
+  else
+     write (msg, "(A,I7,A,I2,A,I2,A,I2,A,I2)") "   ",nx, " has remainder after factorization of 2^",p2," x 3^",p3," x 5^",p5," x 7^",p7
+     call cgyro_info(msg)
+     call cgyro_info("WARNING: NL compute may be slow")
+  endif
+
+
+  p2 = 0
+  p3 = 0
+  p5 = 0
+  p7 = 0
+
+  ptmp = ny
+  do while ((ptmp>1) .and. (modulo(ptmp,2)==0) )
+    p2 = p2 + 1
+    ptmp = ptmp/2
+  end do
+  do while ((ptmp>1) .and. (modulo(ptmp,3)==0) )
+    p3 = p3 + 1
+    ptmp = ptmp/3
+  end do
+  do while ((ptmp>1) .and. (modulo(ptmp,5)==0) )
+    p5 = p5 + 1
+    ptmp = ptmp/5
+  end do
+  do while ((ptmp>1) .and. (modulo(ptmp,7)==0) )
+    p7 = p7 + 1
+    ptmp = ptmp/7
+  end do
+
+  if  (ptmp<2) then
+     write (msg, "(A,I7,A,I2,A,I2,A,I2,A,I2)") "   ",ny, " factorizes in 2^",p2," x 3^",p3," x 5^",p5," x 7^",p7
+     call cgyro_info(msg)
+  else
+     write (msg, "(A,I7,A,I2,A,I2,A,I2,A,I2)") "   ",ny, " has remainder after factorization of 2^",p2," x 3^",p3," x 5^",p5," x 7^",p7
+     call cgyro_info(msg)
+     call cgyro_info("WARNING: NL compute may be slow")
+  endif
+
+
 !$acc enter data copyin(nx0,ny0,nx,ny)
 
 #ifndef _OPENACC
@@ -384,6 +454,9 @@ subroutine cgyro_init_manager
   allocate( vxmany(0:ny-1,0:nx-1,nsplit) )
   allocate( vymany(0:ny-1,0:nx-1,nsplit) )
   allocate( uvmany(0:ny-1,0:nx-1,nsplit) )
+
+  write (msg, "(A,I7)") "NL using FFT batching of ",nsplit
+  call cgyro_info(msg)
 
 !$acc enter data create(fxmany,fymany,gxmany,gymany) &
 !$acc&           create(uxmany,uymany,vxmany,vymany,uvmany)
