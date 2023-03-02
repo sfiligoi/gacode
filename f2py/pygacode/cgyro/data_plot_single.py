@@ -244,9 +244,8 @@ elif plot_type == 'kxky_phi':
    w     = float(sys.argv[6])
    wmax  = float(sys.argv[7])
    ftype = sys.argv[8]
-   deriv = bool(int(sys.argv[9]))
 
-   head = data_in.plot_kxky_phi(field=field,theta=theta,moment=moment,spec=spec,w=w,wmax=wmax,deriv=deriv)
+   head = data_in.plot_kxky_phi(field=field,theta=theta,moment=moment,spec=spec,w=w,wmax=wmax)
 
    outfile = 'out.cgyro.kxky_phi.'+ftype
 
@@ -261,9 +260,25 @@ elif plot_type == 'kx_phi':
    nstr  = sys.argv[8]
    ftype = sys.argv[9]
    diss  = int(sys.argv[10])
-   deriv = bool(int(sys.argv[11]))
+   moment = sys.argv[11]
    
-   head = data_in.plot_kx_phi(field=field,theta=theta,w=w,wmax=wmax,ymin=ymin,ymax=ymax,nstr=nstr,diss=diss,deriv=deriv)
+   head = data_in.plot_kx_phi(field=field,theta=theta,w=w,wmax=wmax,ymin=ymin,ymax=ymax,nstr=nstr,diss=diss,moment=moment)
+
+   outfile = 'out.cgyro.kx_phi.'+ftype
+
+elif plot_type == 'kx_shift':
+
+   field = int(sys.argv[2])
+   theta = float(sys.argv[3])
+   w     = float(sys.argv[4])
+   wmax  = float(sys.argv[5])
+   ymin  = sys.argv[6]
+   ymax  = sys.argv[7]
+   nstr  = sys.argv[8]
+   ftype = sys.argv[9]
+   moment = sys.argv[10]
+   
+   head = data_in.plot_kx_shift(field=field,theta=theta,w=w,wmax=wmax,ymin=ymin,ymax=ymax,nstr=nstr,moment=moment)
 
    outfile = 'out.cgyro.kx_phi.'+ftype
 
@@ -278,9 +293,8 @@ elif plot_type == 'poly_phi':
    nstr  = sys.argv[8]
    ftype = sys.argv[9]
    diss  = int(sys.argv[10])
-   deriv = bool(int(sys.argv[11]))
    
-   head = data_in.plot_poly_phi(field=field,theta=theta,w=w,wmax=wmax,ymin=ymin,ymax=ymax,nstr=nstr,diss=diss,deriv=deriv)
+   head = data_in.plot_poly_phi(field=field,theta=theta,w=w,wmax=wmax,ymin=ymin,ymax=ymax,nstr=nstr,diss=diss)
 
    outfile = 'out.cgyro.cheb_phi.'+ftype
 

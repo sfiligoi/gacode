@@ -276,7 +276,7 @@ YMIN=auto
 YMAX=auto
 W=0.5
 WMAX=0.0
-MOMENT=e
+MOMENT=phi
 INDX=1
 THETA=0.0
 N=null
@@ -303,7 +303,6 @@ DISS=0
 NORM='elec'
 NO_RMS=0
 BAR=1
-DERIV=0
 
 CFLUX=auto
 DN=1
@@ -337,7 +336,6 @@ while [ $# -gt 0 ] ; do
 
   -fc) FC=1 ;;
 
-  -deriv) DERIV=1 ;;
   -diss) DISS=1 ;;
   -nobar) BAR=0 ;;
   -notex) TEX=0 ;;
@@ -499,16 +497,19 @@ case "$PLOT_TYPE" in
 	python $PLT $PLOT_TYPE $FIELD $THETA $YMIN $YMAX $N $NORM $EXT ;;
 
    kx_phi)
-	python $PLT $PLOT_TYPE $FIELD $THETA $W $WMAX $YMIN $YMAX $N $EXT $DISS $DERIV ;;
+	python $PLT $PLOT_TYPE $FIELD $THETA $W $WMAX $YMIN $YMAX $N $EXT $DISS $MOMENT ;;
+
+   kx_shift)
+	python $PLT $PLOT_TYPE $FIELD $THETA $W $WMAX $YMIN $YMAX $N $EXT $MOMENT ;;
 
    poly_phi)
-        python $PLT $PLOT_TYPE $FIELD $THETA $W $WMAX $YMIN $YMAX $N $EXT $DISS $DERIV ;;
+        python $PLT $PLOT_TYPE $FIELD $THETA $W $WMAX $YMIN $YMAX $N $EXT $DISS ;;
 
    rcorr_phi)
        python $PLT $PLOT_TYPE $FIELD $MOMENT $SPECIES $THETA $W $WMAX $EXT ;;
    
    kxky_phi)
-       python $PLT $PLOT_TYPE $FIELD $MOMENT $SPECIES $THETA $W $WMAX $EXT $DERIV ;;    
+       python $PLT $PLOT_TYPE $FIELD $MOMENT $SPECIES $THETA $W $WMAX $EXT ;;    
 
    zf)
 	python $PLT $PLOT_TYPE $W $WMAX $FIELD $EXT ;;

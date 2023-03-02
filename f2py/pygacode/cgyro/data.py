@@ -98,6 +98,7 @@ class cgyrodata:
             print('INFO: (data.py) Read data in '+fmt+'.cgyro.freq. '+t) 
       #-----------------------------------------------------------------
 
+      
       #-----------------------------------------------------------------
       # Ballooning potentials
       #
@@ -371,7 +372,8 @@ class cgyrodata:
       l=11
 
       self.p = np.array(data[l:l+self.n_radial],dtype=int)
-      self.kx = 2*np.pi*self.p/self.length
+      # Ignore leftmost "special" element
+      self.kx = 2*np.pi*self.p[1:]/self.length
 
       mark = l+self.n_radial
       self.theta = np.array(data[mark:mark+self.n_theta])
@@ -406,7 +408,14 @@ class cgyrodata:
       else:
          m = self.n_theta//self.theta_plot
          for i in range(self.theta_plot):
-            self.thetap[i] = self.theta[m*i] 
+            self.thetap[i] = self.theta[m*i]
+
+      # Construct k_perp
+      nx = self.n_radial-1
+      ny = self.n_n
+      self.kperp = np.sqrt(np.outer(self.kx[:]**2,np.ones(ny))+
+                           np.outer(np.ones(nx),self.ky[:]**2))
+      
       #-----------------------------------------------------------------
 
       #-----------------------------------------------------------------
