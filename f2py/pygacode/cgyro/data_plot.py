@@ -1183,7 +1183,7 @@ class cgyrodata_plot(data.cgyrodata):
       nx = self.n_radial
       nn = self.n_n
       nt = self.n_time
-      e = 0.15
+      e = 0.05
       dl = 2*(1-2*e)/nx
       nm = 2*int(0.5/dl)
       e  = 0.5*(1-nx/nm/2)
@@ -1210,8 +1210,8 @@ class cgyrodata_plot(data.cgyrodata):
       phip = np.zeros([nx,nt],dtype=complex)
 
       for p in range(1,nx):
-         phi[p,:] = f[p-1,4,:]
-         phip[p,:] = 1j*(p-nx//2)*f[p-1,4,:]
+         phi[p,:] = f[p-1,23,:]
+         phip[p,:] = 1j*(p-nx//2)*f[p-1,23,:]
             
       # NOTE: We use *inverse* FFT (ifft) for correct +sign convention of
       #       the exponent. Also note order convention:
@@ -1219,39 +1219,50 @@ class cgyrodata_plot(data.cgyrodata):
       #       - a[1:nx/2] = p > 0
       #       - a[nx/2:n] = p < 0
 
-      
       phi_T = np.fft.ifft(np.fft.ifftshift(phi,axes=0),axis=0)
       phip_T = np.fft.ifft(np.fft.ifftshift(phip,axes=0),axis=0)
 
       x = np.linspace(0.0,1.0,nm,endpoint=False)
       f = np.zeros([nm,nt],dtype=complex)
-
-      fint = phi_T[nx//4:3*nx//4,:]
-      #fneg = np.roll(phi_T,nx//2)[nx//4:3*nx//4]
-      f0 = phi_T[nx//4,:] 
-      g0 = phi_T[3*nx//4,:]
-      f1 = phip_T[nx//4,:]/(1-2*e)*np.pi 
-      g1 = phip_T[3*nx//4,:]/(1-2*e)*np.pi
-
-      c = (f1-g1)/(4*e)
-      a = (f0+g0)/2-c*e**2
-      d = (e*(f1+g1)-(f0-g0))/(4*e**3)
-      b = ((f0-g0)-2*d*e**3)/(2*e)
-
       i1 = np.argmin(abs(x[:]-e))
       i2 = np.argmin(abs(x[:]-1+e))
-      
-      u = x[:i1+1]
-      for i in range(nt):
-         f[:i1+1,i] = a[i]+b[i]*u+c[i]*u**2+d[i]*u**3
 
-      u = x[i2:]-1
-      for i in range(nt):
-         f[i2:,i] = a[i]+b[i]*u+c[i]*u**2+d[i]*u**3
+      for k in range(2):
+         if k == 1:
+            phi_T = np.roll(phi_T,nx//2,axis=0)
+            phip_T = np.roll(phip_T,nx//2,axis=0)
+            
+         fint = phi_T[nx//4:3*nx//4,:]
+         f0 = phi_T[nx//4,:] 
+         g0 = phi_T[3*nx//4,:]
+         f1 = phip_T[nx//4,:]/(1-2*e)*np.pi 
+         g1 = phip_T[3*nx//4,:]/(1-2*e)*np.pi
 
-      u = x[i1+1:i2] 
-      for i in range(nt):
-         f[i1+1:i2,i] = fint[1:,i]
+         c = (f1-g1)/(4*e)
+         a = (f0+g0)/2-c*e**2
+         d = (e*(f1+g1)-(f0-g0))/(4*e**3)
+         b = ((f0-g0)-2*d*e**3)/(2*e)
+
+         u = x[:i1+1]
+         for i in range(nt):
+            f[:i1+1,i] = a[i]+b[i]*u+c[i]*u**2+d[i]*u**3
+
+         u = x[i2:]-1
+         for i in range(nt):
+            f[i2:,i] = a[i]+b[i]*u+c[i]*u**2+d[i]*u**3
+
+         u = x[i1+1:i2] 
+         for i in range(nt):
+            f[i1+1:i2,i] = fint[1:,i]
+
+         phi = np.fft.fftshift(np.fft.fft(f,axis=0))
+
+         ave = average_n(np.abs(phi[:,:]),self.t,w,wmax,nm)
+         ax.plot(np.fft.fftshift(np.fft.fftfreq(nm,d=0.2)),ave)
+         #+ax.plot(np.real(f[:,-1]))
+
+         
+      ax.set_yscale('log')
 
       return
       
