@@ -24,23 +24,23 @@ subroutine cgyro_upwind_r64
   implicit none
 
   integer :: is,ie,ix,itor
-#ifdef _OPENACC
   complex :: res_loc
-#endif
 
   call timer_lib_in('str')
 
 #ifdef _OPENACC
-!$acc parallel loop collapse(3) gang &
-!$acc&         private(res_loc,iv) &
+!$acc parallel loop collapse(3) gang vector independent &
+!$acc&         private(res_loc,iv,iv_loc) &
 !$acc&         present(g_x,upfac1,is_v,upwind_res_loc) &
-!$acc&        present(nt1,nt2,ns1,ns2,nc,nv1,nv2) default(none)
+!$acc&         present(nt1,nt2,ns1,ns2,nc,nv1,nv2) default(none)
+#else
+!$omp parallel do collapse(3) &
+!$omp&         private(res_loc,iv,iv_loc) &
+#endif
   do itor=nt1,nt2
    do is=ns1,ns2
      do ic=1,nc
        res_loc = (0.0,0.0)
-
-!$acc loop vector private(iv_loc) reduction(+:res_loc)
        do iv=nv1,nv2
           iv_loc = iv-nv1+1
           if (is == is_v(iv)) then
@@ -51,23 +51,6 @@ subroutine cgyro_upwind_r64
     enddo
    enddo
   enddo
-#else
-  upwind_res_loc(:,:,:) = (0.0,0.0)
-
-!$omp parallel private(iv_loc,ic,is)
-!$omp do collapse(2) reduction(+:upwind_res_loc)
-  do itor=nt1,nt2
-   do iv=nv1,nv2
-     iv_loc = iv-nv1+1
-     is = is_v(iv)
-     do ic=1,nc
-        upwind_res_loc(ic,is,itor) = upwind_res_loc(ic,is,itor)+upfac1(ic,iv_loc,itor)*g_x(ic,iv_loc,itor)
-     enddo
-   enddo
-  enddo
-!$omp end do
-!$omp end parallel
-#endif
 
   call timer_lib_out('str')
 
@@ -131,23 +114,24 @@ subroutine cgyro_upwind_r32
   implicit none
 
   integer :: is,ie,ix,itor
-#ifdef _OPENACC
   complex(KIND=REAL32) :: res_loc
-#endif
 
   call timer_lib_in('str')
 
 #ifdef _OPENACC
-!$acc parallel loop collapse(3) gang &
-!$acc&         private(res_loc,iv) &
+!$acc parallel loop collapse(3) gang vector independent &
+!$acc&         private(res_loc,iv,iv_loc) &
 !$acc&         present(g_x,upfac1,is_v,upwind32_res_loc) &
 !$acc&         present(nt1,nt2,ns1,ns2,nc,nv1,nv2) default(none)
+#else
+!$omp parallel do collapse(3) &
+!$omp&         private(res_loc,iv,iv_loc) &
+#endif
   do itor=nt1,nt2
    do is=ns1,ns2
      do ic=1,nc
        res_loc = (0.0,0.0)
 
-!$acc loop vector private(iv_loc) reduction(+:res_loc)
        do iv=nv1,nv2
           iv_loc = iv-nv1+1
           if (is == is_v(iv)) then
@@ -158,23 +142,6 @@ subroutine cgyro_upwind_r32
     enddo
    enddo
   enddo
-#else
-  upwind32_res_loc(:,:,:) = (0.0,0.0)
-
-!$omp parallel private(iv_loc,ic,is)
-!$omp do collapse(2) reduction(+:upwind32_res_loc)
-  do itor=nt1,nt2
-   do iv=nv1,nv2
-     iv_loc = iv-nv1+1
-     is = is_v(iv)
-     do ic=1,nc
-        upwind32_res_loc(ic,is,itor) = upwind32_res_loc(ic,is,itor)+upfac1(ic,iv_loc,itor)*g_x(ic,iv_loc,itor)
-     enddo
-   enddo
-  enddo
-!$omp end do
-!$omp end parallel
-#endif
 
   call timer_lib_out('str')
 
