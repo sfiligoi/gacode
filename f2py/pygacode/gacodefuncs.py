@@ -538,14 +538,3 @@ def shift_legendre(f,imin,imax):
         y2[n] = n_all2/d_all2*(2.0/np.pi)
 
     return y1,y2
-
-
-def periodize(f):
-
-    nx = f.shape[0]
-    nn = f.shape[1]
-    nt = f.shape[2]
-    
-    print(nx,nn,nt)
-    
-    return 

@@ -49,10 +49,6 @@ subroutine cgyro_check_memory(datafile)
         write(io,*) 'Nonlinear'
         write(io,*)
         ! nsplit * n_toroidal = nv_loc * n_theta
-        nx0 = n_radial
-        ny0 = 2*n_toroidal-1
-        nx = (3*nx0)/2
-        ny = (3*ny0)/2
 #ifndef _OPENACC
         call cgyro_alloc_add_3d(io,(ny/2+1),nx,n_omp,16,'fx')
         call cgyro_alloc_add_3d(io,(ny/2+1),nx,n_omp,16,'gx')
@@ -222,21 +218,22 @@ subroutine cgyro_alloc_add_3d(my_io,d1,d2,d3,elsize,name)
   real :: bytes
   character (15) :: name15
   character (8) :: typestr
-  integer :: fmtnr
+  character(len=40) :: fstr
  
   if (i_proc == 0) then
+
      bytes = elsize
      bytes = ((bytes*d1)*d2)*d3
      
      total_memory = total_memory+bytes
 
      name15 = name
-     if ( (d1<=9999) .and. (d2<=9999) .and.(d3<=9999)) then
-       ASSIGN 11 to fmtnr
+     if ( (d1<=9999) .and. (d2<=9999) .and.(d3<=9999) ) then
+       fstr = '(t2,f8.3,a,3x,a15,3x,a,i4,a,i4,a,i4,a,a)'
      else if ( (d1<=99999) .and. (d2<=99999) .and.(d3<=99999)) then
-       ASSIGN 12 to fmtnr
+       fstr = '(t2,f8.3,a,3x,a15,3x,a,i5,a,i5,a,i5,a,a)'
      else
-       ASSIGN 13 to fmtnr
+       fstr = '(t2,f8.3,a,3x,a15,3x,a,i7,a,i7,a,i7,a,a)'
      endif
 
      if (elsize<5) then
@@ -248,16 +245,12 @@ subroutine cgyro_alloc_add_3d(my_io,d1,d2,d3,elsize,name)
      endif
 
      if (bytes < 1e8) then 
-             write(my_io,fmtnr) bytes/1e6,' MB',name15,' (',d1,',',d2,',',d3,') ',typestr
+        write(my_io,fstr) bytes/1e6,' MB',name15,' (',d1,',',d2,',',d3,') ',typestr
      else
-             write(my_io,fmtnr) bytes/1e9,' GB',name15,' (',d1,',',d2,',',d3,') ',typestr
+        write(my_io,fstr) bytes/1e9,' GB',name15,' (',d1,',',d2,',',d3,') ',typestr
      endif
      
   endif
-
-11 format(t2,f8.3,a,3x,a15,3x,a,i4,a,i4,a,i4,a,a)
-12 format(t2,f8.3,a,3x,a15,3x,a,i5,a,i5,a,i5,a,a)
-13 format(t2,f8.3,a,3x,a15,3x,a,i7,a,i7,a,i7,a,a)
   
 end subroutine cgyro_alloc_add_3d
 
@@ -274,21 +267,22 @@ subroutine cgyro_alloc_add_4d(my_io,d1,d2,d3,d4,elsize,name)
   real :: bytes
   character (15) :: name15
   character (8) :: typestr
-  integer :: fmtnr
+  character(len=45) :: fstr
  
   if (i_proc == 0) then
+
      bytes = elsize
      bytes = (((bytes*d1)*d2)*d3)*d4
      
      total_memory = total_memory+bytes
 
      name15 = name
-     if ( (d1<=9999) .and. (d2<=9999) .and.(d3<=9999) .and.(d4<=9999)) then
-       ASSIGN 21 to fmtnr
+     if ( (d1<=9999) .and. (d2<=9999) .and.(d3<=9999) .and.(d4<=9999) ) then
+        fstr = '(t2,f8.3,a,3x,a15,3x,a,i4,a,i4,a,i4,a,i4,a,a)'
      else if ( (d1<=99999) .and. (d2<=99999) .and.(d3<=99999) .and.(d4<=99999)) then
-       ASSIGN 22 to fmtnr
+        fstr = '(t2,f8.3,a,3x,a15,3x,a,i5,a,i5,a,i5,a,i5,a,a)'
      else
-       ASSIGN 23 to fmtnr
+        fstr = '(t2,f8.3,a,3x,a15,3x,a,i7,a,i7,a,i7,a,i7,a,a)'
      endif
 
      if (elsize<5) then
@@ -300,15 +294,11 @@ subroutine cgyro_alloc_add_4d(my_io,d1,d2,d3,d4,elsize,name)
      endif
 
      if (bytes < 1e8) then 
-             write(my_io,fmtnr) bytes/1e6,' MB',name15,' (',d1,',',d2,',',d3,',',d4,') ',typestr
+        write(my_io,fstr) bytes/1e6,' MB',name15,' (',d1,',',d2,',',d3,',',d4,') ',typestr
      else
-             write(my_io,fmtnr) bytes/1e9,' GB',name15,' (',d1,',',d2,',',d3,',',d4,') ',typestr
+        write(my_io,fstr) bytes/1e9,' GB',name15,' (',d1,',',d2,',',d3,',',d4,') ',typestr
      endif
      
   endif
 
-21 format(t2,f8.3,a,3x,a15,3x,a,i4,a,i4,a,i4,a,i4,a,a)
-22 format(t2,f8.3,a,3x,a15,3x,a,i5,a,i5,a,i5,a,i5,a,a)
-23 format(t2,f8.3,a,3x,a15,3x,a,i7,a,i7,a,i7,a,i7,a,a)
-  
 end subroutine cgyro_alloc_add_4d

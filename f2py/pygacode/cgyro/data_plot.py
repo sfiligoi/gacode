@@ -464,7 +464,6 @@ class cgyrodata_plot(data.cgyrodata):
       k0 = 2*np.pi/self.length
 
       f,ft = self.kxky_select(theta,0,'phi',0)
-      periodize(f)
 
       #y1,y2 = shift_legendre(f,imin,imax)
       y1,y2 = shift_fourier(f,imin,imax)
@@ -1183,11 +1182,6 @@ class cgyrodata_plot(data.cgyrodata):
       nx = self.n_radial
       nn = self.n_n
       nt = self.n_time
-      e = 0.05
-      dl = 2*(1-2*e)/nx
-      nm = 2*int(0.5/dl)
-      e  = 0.5*(1-nx/nm/2)
-      print('corrected e',e)
       
       ave = np.zeros(nx)
 
@@ -1205,63 +1199,36 @@ class cgyrodata_plot(data.cgyrodata):
       ax.set_xlabel(xlabel)
 
       f,ft = self.kxky_select(theta,field,moment,0)
-       
-      phi  = np.zeros([nx,nt],dtype=complex)
-      phip = np.zeros([nx,nt],dtype=complex)
 
-      for p in range(1,nx):
-         phi[p,:] = f[p-1,23,:]
-         phip[p,:] = 1j*(p-nx//2)*f[p-1,23,:]
+      lst = ['-','--']
+      color = ['black','magenta','blue','red','green','purple']
+      
+      x = kx[::2]
+      nvec = str2list(nstr)
+      for n in nvec:
+         phi  = np.zeros([nx,nt],dtype=complex)
+         for p in range(1,nx):
+            phi[p,:] = f[p-1,n,:]
+
+         phi_T = np.fft.ifft(np.fft.ifftshift(phi,axes=0),axis=0)
+
+         for k in range(2):
+            if k == 1:
+               phi_T = np.roll(phi_T,nx//2,axis=0)
             
-      # NOTE: We use *inverse* FFT (ifft) for correct +sign convention of
-      #       the exponent. Also note order convention:
-      #       - a[0] = p=0
-      #       - a[1:nx/2] = p > 0
-      #       - a[nx/2:n] = p < 0
+            fint = phi_T[nx//4:3*nx//4,:]
+            phi = np.fft.fftshift(np.fft.fft(fint,axis=0))
 
-      phi_T = np.fft.ifft(np.fft.ifftshift(phi,axes=0),axis=0)
-      phip_T = np.fft.ifft(np.fft.ifftshift(phip,axes=0),axis=0)
+            y = average_n(np.abs(phi[:,:]),self.t,w,wmax,nx//2)
+           
+            ax.plot(x,y,linestyle=lst[k],color=color[np.mod(n,len(color))])
 
-      x = np.linspace(0.0,1.0,nm,endpoint=False)
-      f = np.zeros([nm,nt],dtype=complex)
-      i1 = np.argmin(abs(x[:]-e))
-      i2 = np.argmin(abs(x[:]-1+e))
-
-      for k in range(2):
-         if k == 1:
-            phi_T = np.roll(phi_T,nx//2,axis=0)
-            phip_T = np.roll(phip_T,nx//2,axis=0)
+            i0 = np.argmax(y)
+            print(x[i0-1:i0+2],y[i0-1:i0+2])
+            xs,fs = quadratic_max(x[i0-1:i0+2],y[i0-1:i0+2])
+            print(xs,fs)
             
-         fint = phi_T[nx//4:3*nx//4,:]
-         f0 = phi_T[nx//4,:] 
-         g0 = phi_T[3*nx//4,:]
-         f1 = phip_T[nx//4,:]/(1-2*e)*np.pi 
-         g1 = phip_T[3*nx//4,:]/(1-2*e)*np.pi
-
-         c = (f1-g1)/(4*e)
-         a = (f0+g0)/2-c*e**2
-         d = (e*(f1+g1)-(f0-g0))/(4*e**3)
-         b = ((f0-g0)-2*d*e**3)/(2*e)
-
-         u = x[:i1+1]
-         for i in range(nt):
-            f[:i1+1,i] = a[i]+b[i]*u+c[i]*u**2+d[i]*u**3
-
-         u = x[i2:]-1
-         for i in range(nt):
-            f[i2:,i] = a[i]+b[i]*u+c[i]*u**2+d[i]*u**3
-
-         u = x[i1+1:i2] 
-         for i in range(nt):
-            f[i1+1:i2,i] = fint[1:,i]
-
-         phi = np.fft.fftshift(np.fft.fft(f,axis=0))
-
-         ave = average_n(np.abs(phi[:,:]),self.t,w,wmax,nm)
-         ax.plot(np.fft.fftshift(np.fft.fftfreq(nm,d=0.2)),ave)
-         #+ax.plot(np.real(f[:,-1]))
-
-         
+      ax.set_xlim([-x0,x0])
       ax.set_yscale('log')
 
       return

@@ -35,7 +35,7 @@ subroutine cgyro_upwind_r64
 !$acc&         present(nt1,nt2,ns1,ns2,nc,nv1,nv2) default(none)
 #else
 !$omp parallel do collapse(3) &
-!$omp&         private(res_loc,iv,iv_loc) &
+!$omp&         private(res_loc,iv,iv_loc) 
 #endif
   do itor=nt1,nt2
    do is=ns1,ns2
@@ -125,7 +125,7 @@ subroutine cgyro_upwind_r32
 !$acc&         present(nt1,nt2,ns1,ns2,nc,nv1,nv2) default(none)
 #else
 !$omp parallel do collapse(3) &
-!$omp&         private(res_loc,iv,iv_loc) &
+!$omp&         private(res_loc,iv,iv_loc) 
 #endif
   do itor=nt1,nt2
    do is=ns1,ns2

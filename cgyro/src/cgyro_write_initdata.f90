@@ -15,6 +15,7 @@ subroutine cgyro_write_initdata
   integer :: p,in,is,it
   real :: kymax,kyrat,dn
   real, external :: spectraldiss
+  character(len=40) :: msg
 
   !----------------------------------------------------------------------------
   ! Runfile to give complete summary to user
@@ -49,21 +50,25 @@ subroutine cgyro_write_initdata
         endif
 
         if (nonlinear_flag == 0) then
+
            write(io,*)
            write(io,*) '          n    Delta      Max     L/rho'
            write(io,'(a,i4,2x,2(f7.3,2x),2x,f6.2)') ' kx*rho:',&
                 n_radial,2*pi*rho/length,2*pi*rho*(n_radial/2-1)/length,length/rho
            write(io,'(a,i4,2x,2(f7.3,2x),2x,f6.2)') ' ky*rho:',&
                 n_toroidal,q/rmin*rho,kymax,2*pi/ky
+
         else
+           
 
            write(io,*)
            write(io,*) '          n    Delta      Max     L/rho    n_fft'
-           write(io,'(a,i4,2x,2(f7.3,2x),2x,f6.2,5x,i4)') ' kx*rho:',&
-                n_radial,2*pi*rho/length,2*pi*rho*(n_radial/2-1)/length,length/rho,&
-                (3*n_radial)/2
-           write(io,'(a,i4,2x,2(f7.3,2x),2x,f6.2,5x,i4)') ' ky*rho:',&
-                n_toroidal,q/rmin*rho,kymax,2*pi/ky,(3*(2*n_toroidal-1))/2
+           call prime_factors(nx,msg)
+           write(io,'(a,i4,2x,2(f7.3,2x),2x,f6.2,5x,i4,2a)') ' kx*rho:',&
+                n_radial,2*pi*rho/length,2*pi*rho*(n_radial/2-1)/length,length/rho,nx,'  ',trim(msg)
+           call prime_factors(ny,msg)
+           write(io,'(a,i4,2x,2(f7.3,2x),2x,f6.2,5x,i4,2a)') ' ky*rho:',&
+                n_toroidal,q/rmin*rho,kymax,2*pi/ky,ny,'  ',trim(msg)
         endif
 
      else
@@ -292,3 +297,37 @@ subroutine cgyro_write_initdata
 23 format(t2,a3,1x,f8.5,2(a7,1x,f8.5,1x),a8,1x,f8.5)
 
 end subroutine cgyro_write_initdata
+
+subroutine prime_factors(n,pout)
+
+  integer, intent(in) :: n
+  character(len=40), intent(inout) :: pout
+  integer, dimension(27) :: pvec,cvec
+  integer :: ptmp
+  character(len=4) :: fmt
+  character(len=3) :: s1,s2
+  
+  fmt = '(i0)'
+  
+  pvec = (/ 2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97,101,103 /)
+    
+  cvec = 0
+
+  ptmp = n
+  do i=1,size(pvec)
+     do while ((ptmp>1) .and. (modulo(ptmp,pvec(i))==0) )
+        cvec(i) = cvec(i) + 1
+        ptmp = ptmp/pvec(i)
+     enddo
+  enddo
+
+  pout = ''
+  do i=1,27
+     if (cvec(i) > 0) then
+        write(s1,fmt) pvec(i)
+        write(s2,fmt) cvec(i)
+        pout = trim(pout)//trim(s1)//trim('(')//trim(s2)//')'
+     endif
+  enddo
+ 
+end subroutine prime_factors
