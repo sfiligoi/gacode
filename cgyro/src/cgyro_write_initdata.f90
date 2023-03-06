@@ -15,7 +15,7 @@ subroutine cgyro_write_initdata
   integer :: p,in,is,it
   real :: kymax,kyrat,dn
   real, external :: spectraldiss
-  character(len=40) :: msg
+  character(len=50) :: msg
 
   !----------------------------------------------------------------------------
   ! Runfile to give complete summary to user
@@ -301,7 +301,8 @@ end subroutine cgyro_write_initdata
 subroutine prime_factors(n,pout)
 
   integer, intent(in) :: n
-  character(len=40), intent(inout) :: pout
+  character(len=50), intent(inout) :: pout
+  character(len=50) :: warn
   integer, dimension(27) :: pvec,cvec
   integer :: ptmp
   character(len=4) :: fmt
@@ -322,12 +323,17 @@ subroutine prime_factors(n,pout)
   enddo
 
   pout = ''
-  do i=1,27
+  warn = ''
+  do i=1,size(pvec)
      if (cvec(i) > 0) then
         write(s1,fmt) pvec(i)
         write(s2,fmt) cvec(i)
         pout = trim(pout)//trim(s1)//trim('(')//trim(s2)//')'
-     endif
+        if (pvec(i) > 7) then
+           warn = 'WARNING: large prime factor'
+        endif
+     endif  
   enddo
- 
+  pout = trim(pout)//'  '//trim(warn)
+  
 end subroutine prime_factors
