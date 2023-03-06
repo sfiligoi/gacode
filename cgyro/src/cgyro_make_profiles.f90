@@ -29,7 +29,7 @@ subroutine cgyro_make_profiles
      allocate(geo_yin(8,0:geo_ny))
      geo_yin(:,:) = 0.0
   else if (equilibrium_model == 2) then
-     ! HAM
+     ! MXH
      geo_numeq_flag = 0
      geo_ny = 0
      allocate(geo_yin(8,0:geo_ny))
@@ -86,7 +86,7 @@ subroutine cgyro_make_profiles
      s_delta = s_delta_loc
      s_zeta  = s_zeta_loc
 
-     ! HAM (cos's will be reset to 0.0 if udsymmetry_flag=1)
+     ! MXH (cos's will be reset to 0.0 if udsymmetry_flag=1)
      shape_sin(3)   = shape_sin3_loc
      shape_s_sin(3) = shape_s_sin3_loc
      shape_sin(4)   = shape_sin4_loc
