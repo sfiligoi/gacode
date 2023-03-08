@@ -1204,8 +1204,16 @@ class cgyrodata_plot(data.cgyrodata):
       color = ['black','magenta','blue','red','green','purple']
       
       x = kx[::2]
-      nvec = str2list(nstr)
-      for n in nvec:
+      if nstr == 'null' or nstr == '+':
+         nstr = '+'
+         nvec = np.arange(1,nn)
+         ax.set_ylabel(r'$\left\langle \sum_{n>0} \left|'+ft+r'_n\right|\right\rangle/\rho_{*D}$')
+      else:
+         nvec = str2list(nstr)
+         ax.set_ylabel(r'$\left\langle \left|'+ft+r'_n\right|\right\rangle/\rho_{*D}$')
+
+      y = np.zeros([2,len(x)])
+      for i,n in enumerate(nvec):
          phi  = np.zeros([nx,nt],dtype=complex)
          for p in range(1,nx):
             phi[p,:] = f[p-1,n,:]
@@ -1219,15 +1227,20 @@ class cgyrodata_plot(data.cgyrodata):
             fint = phi_T[nx//4:3*nx//4,:]
             phi = np.fft.fftshift(np.fft.fft(fint,axis=0))
 
-            y = average_n(np.abs(phi[:,:]),self.t,w,wmax,nx//2)
-           
-            ax.plot(x,y,linestyle=lst[k],color=color[np.mod(n,len(color))])
+            y[k,:] = y[k,:]+average_n(np.abs(phi[:,:]),self.t,w,wmax,nx//2)
 
-            i0 = np.argmax(y)
-            print(x[i0-1:i0+2],y[i0-1:i0+2])
-            xs,fs = quadratic_max(x[i0-1:i0+2],y[i0-1:i0+2])
-            print(xs,fs)
+         if nstr != '+':
+            mycol = color[np.mod(i,len(color))]
+            num = r'$n='+str(n)+'$'
+            ax.plot(x,y[0,:],linestyle='-',color=mycol,label=num)
+            ax.plot(x,y[1,:],linestyle='--',color=mycol)
+            y[:,:] = 0.0
+         elif nstr == '+' and n == nvec[-1]:
+            ax.plot(x,y[0,:],linestyle='-',color='k')
+            ax.plot(x,y[1,:],linestyle='--',color='k')
             
+
+      ax.legend(loc=4, ncol=6, prop={'size':12})
       ax.set_xlim([-x0,x0])
       ax.set_yscale('log')
 
