@@ -408,21 +408,26 @@ subroutine expro_compute_derived
 
   if (expro_ctrl_quasineutral_flag == 1) then
 
+     ! Accumulate density offsets (dummy variables below)
      expro_ni_new(:) = 0d0
+     expro_dlnnidr_new(:) = 0d0
      do is=2,expro_ctrl_n_ion
         expro_ni_new(:) = expro_ni_new(:)+expro_z(is)*expro_ni(is,:)
+        expro_dlnnidr_new(:) = expro_dlnnidr_new(:)+expro_z(is)*expro_ni(is,:)*expro_dlnnidr(is,:)
      enddo
+     
+     ! New quasineutral ion 1 profiles:
+     
+     ! density  
      expro_ni_new(:) = (expro_ne(:)-expro_ni_new(:))/expro_z(1)
-
-     ! 1/L_ni = -dln(ni)/dr (1/m)
-     call bound_deriv(expro_dlnnidr_new(:),-log(expro_ni_new(:)),&
-          expro_rmin,expro_n_exp)
+     ! gradient scale length 1/L_ni = -dln(ni)/dr (1/m)
+     expro_dlnnidr_new(:) = (expro_ne(:)*expro_dlnnedr(:)-expro_dlnnidr_new(:))/(expro_ni_new(:)*expro_z(1))
 
      ! sni = -ni''/ni (1/m^2)
      call bound_deriv(expro_sdlnnidr_new(:),expro_ni_new(:)*expro_dlnnidr_new(:),&
           expro_rmin,expro_n_exp)
      expro_sdlnnidr_new(:) = expro_sdlnnidr_new(:)/expro_ni_new(:)*expro_rhos(:)
-
+     
      if (minval(expro_ni_new(:)) <= 0d0) expro_error = 1
 
   else
