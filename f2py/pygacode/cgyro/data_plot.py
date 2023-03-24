@@ -21,17 +21,15 @@ class cgyrodata_plot(data.cgyrodata):
    TEXDE   = r'\delta E'
    TEXDV   = r'\delta v'
 
-   def kxky_select(self,theta,field,moment,species):
+   def kxky_select(self,xin):
 
       # Select theta index
       if self.theta_plot == 1:
          itheta = 0
+      elif xin['theta'] == -1:
+         itheta = self.theta_plot//2
       else:
-         # theta=0 check just to be safe
-         if theta == 0.0:
-            itheta = self.theta_plot//2
-         else:
-            itheta = int((theta+1.0)/2.0*self.theta_plot)
+         itheta = xin['theta']
 
       if moment == 'phi':
          if field == 0:
@@ -62,14 +60,16 @@ class cgyrodata_plot(data.cgyrodata):
             format(itheta+1,self.theta_plot))
       return f,ft
       
-   def plot_freq(self,w=0.5,wmax=0.0,norm='elec',fig=None):
+   def plot_freq(self,xin):
 
+      w = xin['w']
+      
       # Function: plot gamma and omega vs time
 
-      if fig is None:
+      if xin['fig'] is None:
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
-      self.getnorm(norm) ; t = self.tnorm
+      self.getnorm(xin['norm']) ; t = self.tnorm
          
       #======================================
       # Omega
@@ -102,12 +102,12 @@ class cgyrodata_plot(data.cgyrodata):
       fig.tight_layout(pad=0.3)
 
 
-   def plot_ky_freq(self,w=0.5,wmax=0.0,norm='elec',fig=None):
+   def plot_ky_freq(self,xin):
 
-      if fig is None:
+      if xin['fig'] is None:
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
-      self.getnorm(norm) ; t = self.tnorm ; ky = self.kynorm
+      self.getnorm(xin['norm']) ; t = self.tnorm ; ky = self.kynorm
 
       #======================================
       # Omega
@@ -142,6 +142,104 @@ class cgyrodata_plot(data.cgyrodata):
       fig.tight_layout(pad=0.3)
 
       return 'ky            omega            gamma',ky,y1,y2
+
+
+   def plot_error(self,xin):
+
+      if xin['fig'] is None:
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
+
+      ax = fig.add_subplot(111)
+      ax.grid(which="both",ls=":")
+      ax.grid(which="major",ls=":")
+      ax.set_xlabel(TIME)
+      ax.set_ylabel(r'$\mathrm{Integration~Error}$')
+      ax.set_yscale('log')
+
+      ax.plot(self.t[2:],self.err1[2:],label=r'$\mathrm{Total~error}$')
+      ax.plot(self.t[2:],self.err2[2:],label=r'$\mathrm{RK~error}$')
+      ax.set_xlim([0,self.t[-1]])
+
+      ax.legend()
+
+      fig.tight_layout(pad=0.3)
+
+      return
+
+   def plot_geo(self,xin):
+
+      self.getgeo()
+
+      if xin['fig'] is None:
+         fig = plt.figure(MYDIR,figsize=(1.2*self.lx,1.2*self.ly))
+
+      # Decrease font size a bit for this plot
+      rc('font',size=12)
+      # Create 3x4 subplot grid
+      gs = GridSpec(3,4)
+
+      theta = self.geo[:,0]/np.pi
+
+      # CGYRO geometry functions
+      for p in range(9):
+         p1 = p+1
+         if p < 4:
+            a = 1.0
+         else:
+            a = 1.0/self.rho
+         y = a*self.geo[:,p1]
+
+         ax = fig.add_subplot(gs[p//3,np.mod(p,3)])
+         ax.grid(which="both",ls=":")
+         ax.grid(which="major",ls=":")
+         ax.set_xlabel(r'$\theta/\pi$')
+         ax.set_title(r'$'+self.geotag[p1]+'$')
+         ax.plot(theta,y,'m')
+         ax.plot(theta,y,'o',color='k',markersize=2)
+         ax.set_xlim([-1,1])
+
+      # captheta 
+      if len(self.geo[0,:]) > 12:
+         y = self.geo[:,12]
+         ax = fig.add_subplot(gs[0,3])
+         ax.grid(which="both",ls=":")
+         ax.grid(which="major",ls=":")
+         ax.set_xlabel(r'$\theta/\pi$')
+         ax.set_title(r'$'+self.geotag[12]+'$')
+         ax.plot(theta,y,'m')
+         ax.plot(theta,y,'o',color='k',markersize=2)
+         ax.set_xlim([-1,1])
+         ax.set_ylim([y[0],-y[0]])
+
+      # Flux surface
+      ax = fig.add_subplot(gs[1:,3],aspect='equal')
+      ax.set_title(r'$r/a='+str(self.rmin)+'$')
+      ax.set_facecolor('lightcyan')
+      ax.set_xlabel(r'$R$')
+      ax.set_ylabel(r'$Z$')
+      t = 2*np.pi*np.linspace(0,1,200)
+      rmaj = self.rmin
+      zmaj = self.zmag
+      r = self.rmin
+      k = self.kappa
+
+      # Map legacy shape parameters
+      self.shape_sin[1] = np.arcsin(self.delta)
+      self.shape_sin[2] = -self.zeta
+
+      arg = t+self.shape_cos[0]
+      for p in range(1,7):
+         arg = arg+self.shape_sin[p]*np.sin(p*t)+self.shape_cos[p]*np.cos(p*t)
+
+      x = rmaj+r*np.cos(arg)
+      y = zmaj+k*r*np.sin(t)
+      
+      ax.plot(x,y,'k')
+   
+      fig.tight_layout(pad=0.3)
+
+      return
+
 
    def plot_ky_phi(self,field=0,theta=0.0,ymin='auto',ymax='auto',nstr='null',norm='elec',fig=None):
 
@@ -541,101 +639,6 @@ class cgyrodata_plot(data.cgyrodata):
 
       return
 
-   def plot_geo(self,fig=None):
-
-      self.getgeo()
-
-      if fig is None:
-         fig = plt.figure(MYDIR,figsize=(1.2*self.lx,1.2*self.ly))
-
-      # Decrease font size a bit for this plot
-      rc('font',size=12)
-      # Create 3x4 subplot grid
-      gs = GridSpec(3,4)
-
-      theta = self.geo[:,0]/np.pi
-
-      # CGYRO geometry functions
-      for p in range(9):
-         p1 = p+1
-         if p < 4:
-            a = 1.0
-         else:
-            a = 1.0/self.rho
-         y = a*self.geo[:,p1]
-
-         ax = fig.add_subplot(gs[p//3,np.mod(p,3)])
-         ax.grid(which="both",ls=":")
-         ax.grid(which="major",ls=":")
-         ax.set_xlabel(r'$\theta/\pi$')
-         ax.set_title(r'$'+self.geotag[p1]+'$')
-         ax.plot(theta,y,'m')
-         ax.plot(theta,y,'o',color='k',markersize=2)
-         ax.set_xlim([-1,1])
-
-      # captheta 
-      if len(self.geo[0,:]) > 12:
-         y = self.geo[:,12]
-         ax = fig.add_subplot(gs[0,3])
-         ax.grid(which="both",ls=":")
-         ax.grid(which="major",ls=":")
-         ax.set_xlabel(r'$\theta/\pi$')
-         ax.set_title(r'$'+self.geotag[12]+'$')
-         ax.plot(theta,y,'m')
-         ax.plot(theta,y,'o',color='k',markersize=2)
-         ax.set_xlim([-1,1])
-         ax.set_ylim([y[0],-y[0]])
-
-      # Flux surface
-      ax = fig.add_subplot(gs[1:,3],aspect='equal')
-      ax.set_title(r'$r/a='+str(self.rmin)+'$')
-      ax.set_facecolor('lightcyan')
-      ax.set_xlabel(r'$R$')
-      ax.set_ylabel(r'$Z$')
-      t = 2*np.pi*np.linspace(0,1,200)
-      rmaj = self.rmin
-      zmaj = self.zmag
-      r = self.rmin
-      k = self.kappa
-
-      # Map legacy shape parameters
-      self.shape_sin[1] = np.arcsin(self.delta)
-      self.shape_sin[2] = -self.zeta
-
-      arg = t+self.shape_cos[0]
-      for p in range(1,7):
-         arg = arg+self.shape_sin[p]*np.sin(p*t)+self.shape_cos[p]*np.cos(p*t)
-
-      x = rmaj+r*np.cos(arg)
-      y = zmaj+k*r*np.sin(t)
-      
-      ax.plot(x,y,'k')
-   
-      fig.tight_layout(pad=0.3)
-
-      return
-
-   def plot_error(self,fig=None):
-
-      if fig is None:
-         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
-
-      ax = fig.add_subplot(111)
-      ax.grid(which="both",ls=":")
-      ax.grid(which="major",ls=":")
-      ax.set_xlabel(TIME)
-      ax.set_ylabel(r'$\mathrm{Integration~Error}$')
-      ax.set_yscale('log')
-
-      ax.plot(self.t[2:],self.err1[2:],label=r'$\mathrm{Total~error}$')
-      ax.plot(self.t[2:],self.err2[2:],label=r'$\mathrm{RK4~error}$')
-      ax.set_xlim([0,self.t[-1]])
-
-      ax.legend()
-
-      fig.tight_layout(pad=0.3)
-
-      return
 
    def plot_ball(self,itime=-1,field=0,tmax=-1.0,fig=None):
 

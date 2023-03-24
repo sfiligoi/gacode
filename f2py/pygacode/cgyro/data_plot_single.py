@@ -7,6 +7,8 @@ from .data_dump import cgyrodata_dump
 
 data_in = cgyrodata_plot('./')
 
+doplot=True
+
 # Use first 4 args to define plot and font size
 
 # Use latex fonts if set
@@ -23,30 +25,30 @@ data_in.ly = int(sys.argv[4])
 sys.argv = sys.argv[4:]
 
 plot_type = sys.argv[1]
+ftype     = sys.argv[4]
+outfile = 'out.cgyro.'+plot_type+'.'+ftype
 
-doplot=True
+xin = {}
+xin['w']     = float(sys.argv[2])
+xin['norm']  = sys.argv[3]
+xin['ftype'] = ftype
+xin['fig']   = None
 
 if plot_type == 'freq':
-
-   w     = float(sys.argv[2])
-   wmax  = float(sys.argv[3])
-   norm  = sys.argv[4]
-   ftype = sys.argv[5]
-
-   head = data_in.plot_freq(w=w,wmax=wmax,norm=norm)
-
-   outfile = 'out.cgyro.freq.'+ftype
+   
+   head = data_in.plot_freq(xin)
 
 elif plot_type == 'ky_freq':
+   
+   head,x,y1,y2 = data_in.plot_ky_freq(xin)
 
-   w     = float(sys.argv[2])
-   wmax  = float(sys.argv[3])
-   norm  = sys.argv[4]
-   ftype = sys.argv[5]
+elif plot_type == 'error':
 
-   head,x,y1,y2 = data_in.plot_ky_freq(w=w,wmax=wmax,norm=norm)
+   head = data_in.plot_error(xin)
 
-   outfile = 'out.cgyro.ky_freq.'+ftype
+elif plot_type == 'geo':
+
+   head = data_in.plot_geo(xin)
 
 elif plot_type == 'ky_phi':
 
@@ -73,22 +75,6 @@ elif plot_type == 'rcorr_phi':
    head = data_in.plot_rcorr_phi(field=field,theta=theta,w=w,wmax=wmax)
 
    outfile = 'out.cgyro.rcorr_phi.'+ftype
-
-elif plot_type == 'geo':
-
-   ftype = sys.argv[2]
-
-   head = data_in.plot_geo()
-
-   outfile = 'out.cgyro.geo.'+ftype
-
-elif plot_type == 'error':
-
-   ftype = sys.argv[2]
-
-   head = data_in.plot_error()
-
-   outfile = 'out.cgyro.error.'+ftype
 
 elif plot_type == 'ball':
 
