@@ -25,14 +25,29 @@ data_in.ly = int(sys.argv[4])
 sys.argv = sys.argv[4:]
 
 plot_type = sys.argv[1]
-ftype     = sys.argv[4]
-outfile = 'out.cgyro.'+plot_type+'.'+ftype
 
 xin = {}
-xin['w']     = float(sys.argv[2])
-xin['norm']  = sys.argv[3]
-xin['ftype'] = ftype
-xin['fig']   = None
+xin['fig']    = None
+xin['w']      = float(sys.argv[2])
+xin['norm']   = sys.argv[3]
+xin['ftype']  = sys.argv[4]
+xin['itime']  = int(sys.argv[5])
+xin['field']  = int(sys.argv[6])
+xin['moment'] = sys.argv[7]
+xin['tmax']   = float(sys.argv[8])
+xin['theta']  = float(sys.argv[9])
+xin['ymin']   = sys.argv[10]
+xin['ymax']   = sys.argv[11]
+xin['nstr']   = sys.argv[12]
+xin['abs']    = int(sys.argv[13])
+xin['fc']     = int(sys.argv[14])
+xin['loc']    = int(sys.argv[15])
+xin['nscale'] = int(sys.argv[16])
+xin['cflux']  = sys.argv[17]
+xin['norm']   = sys.argv[18]
+
+ftype   = xin['ftype']
+outfile = 'out.cgyro.'+plot_type+'.'+ftype
 
 if plot_type == 'freq':
    
@@ -50,43 +65,32 @@ elif plot_type == 'geo':
 
    head = data_in.plot_geo(xin)
 
+elif plot_type == 'ball':
+
+   head,x,y1,y2 = data_in.plot_ball(xin)
+
 elif plot_type == 'ky_phi':
 
-   field = int(sys.argv[2])
-   theta = float(sys.argv[3])
-   ymin  = sys.argv[4]
-   ymax  = sys.argv[5]
-   nstr  = sys.argv[6]
-   norm  = sys.argv[7]
-   ftype = sys.argv[8]
+   head = data_in.plot_ky_phi(xin)
 
-   head = data_in.plot_ky_phi(field=field,theta=theta,ymin=ymin,ymax=ymax,nstr=nstr,norm=norm)
+elif plot_type == 'phi':
 
-   outfile = 'out.cgyro.ky_phi.'+ftype
+   head,x,y1,y2 = data_in.plot_phi(xin)
+
+elif plot_type == 'flux':
+
+   if ftype == 'nox' or ftype == 'dump':
+       doplot = False
+  
+   if ftype == 'dump':
+      cgyrodata_dump('./').dump_flux(fc=fc)
+   else:
+      data_in.plot_flux(xin)
 
 elif plot_type == 'rcorr_phi':
 
-   field = int(sys.argv[2])
-   theta = float(sys.argv[5])
-   w     = float(sys.argv[6])
-   wmax  = float(sys.argv[7])
-   ftype = sys.argv[8]
-
-   head = data_in.plot_rcorr_phi(field=field,theta=theta,w=w,wmax=wmax)
-
-   outfile = 'out.cgyro.rcorr_phi.'+ftype
-
-elif plot_type == 'ball':
-
-   itime = int(sys.argv[2])
-   field = int(sys.argv[3])
-   tmax  = float(sys.argv[4])
-   ftype = sys.argv[5]
-
-   head,x,y1,y2 = data_in.plot_ball(itime=itime,field=field,tmax=tmax)
-
-   outfile = 'out.cgyro.ball.'+ftype
-
+   head = data_in.plot_rcorr_phi(xin)
+                                 
 elif plot_type == 'zf':
 
    w     = float(sys.argv[2])
@@ -98,20 +102,6 @@ elif plot_type == 'zf':
 
    outfile = 'out.cgyro.zf.'+ftype
 
-elif plot_type == 'phi':
-
-   w     = float(sys.argv[2])
-   wmax  = float(sys.argv[3])
-   field = int(sys.argv[4])
-   theta = float(sys.argv[5])
-   ymin  = sys.argv[6]
-   ymax  = sys.argv[7]
-   norms = int(sys.argv[8])
-   ftype = sys.argv[9]
-
-   head,x,y1,y2 = data_in.plot_phi(w=w,wmax=wmax,field=field,theta=theta,ymin=ymin,ymax=ymax,norms=norms)
-
-   outfile = 'out.cgyro.phi.'+ftype
 
 elif plot_type == 'low':
 
@@ -155,32 +145,6 @@ elif plot_type == 'shift':
    head,x,y1,y2 = data_in.plot_shift(w=w,wmax=wmax,theta=theta,ymin=ymin,ymax=ymax)
 
    outfile = 'out.cgyro.shift.'+ftype
-
-elif plot_type == 'flux':
-
-   w      = float(sys.argv[2])
-   wmax   = float(sys.argv[3])
-   field  = int(sys.argv[4])
-   moment = sys.argv[5]
-   ymin   = sys.argv[6]
-   ymax   = sys.argv[7]
-   fc     = int(sys.argv[8])
-   ftype  = sys.argv[9]
-   loc    = int(sys.argv[10])
-   nscale = int(sys.argv[11])
-   cflux  = sys.argv[12]
-   norm   = sys.argv[13]
-
-   if ftype == 'nox' or ftype == 'dump':
-       doplot = False
-  
-   if ftype == 'dump':
-      cgyrodata_dump('./').dump_flux(fc=fc)
-   else:
-      data_in.plot_flux(w=w,wmax=wmax,field=field,moment=moment,
-                        ymin=ymin,ymax=ymax,fc=fc,ftype=ftype,loc=loc,nscale=nscale,cflux=cflux,norm=norm)
-
-   outfile = 'out.cgyro.flux.'+ftype
 
 elif plot_type == 'ky_flux':
 
