@@ -569,7 +569,9 @@ class cgyrodata_plot(data.cgyrodata):
 
 
    def plot_rcorr_phi(self,xin):
- 
+
+      # Should be checked by Chris after updated form of kxky_select to n_radial-1 points
+      
       def absexp(x,tau):
          return np.exp(-np.abs(x)/tau)
 
@@ -585,7 +587,9 @@ class cgyrodata_plot(data.cgyrodata):
 
       t   = self.t
       kx  = self.kx
-      ave = np.zeros(self.n_radial)
+      nx  = self.n_radial
+      
+      ave = np.zeros(nx)
 
       imin,imax=iwindow(self.t,w,wmax)
 
@@ -601,18 +605,20 @@ class cgyrodata_plot(data.cgyrodata):
       ax.set_xlabel(xlabel)
 
       f,ft = self.kxky_select(theta,field,'phi',0)
-      y = np.sum(abs(f[:,:,:]),axis=1)
+      # This puts the 0 element back in the radial direction
+      y = np.zeros([nx,self.n_time])
+      y[1:,:] = np.sum(abs(f[:,1:,:]),axis=1)
 
-      for j in range(self.n_radial):
+      for j in range(nx):
          ave[j] = average(y[j,:],self.t,w,wmax)
 
-      ave = np.roll(ave,-self.n_radial//2)
+      ave = np.roll(ave,-nx//2)
       ave[0] = 0.0
-      corr = np.fft.fft(ave,self.n_radial)
+      corr = np.fft.fft(ave,nx)
       corr = np.fft.fftshift(corr)
       corr /= np.max(np.abs(corr))
       corr = corr.real
-      delta_r = np.fft.fftfreq(self.n_radial)
+      delta_r = np.fft.fftfreq(nx)
       delta_r = np.fft.fftshift(delta_r)
       Lx = 2*np.pi/dk
       delta_r *= Lx
@@ -635,9 +641,19 @@ class cgyrodata_plot(data.cgyrodata):
       print('INFO: (rcorr_phi) l_corr = {:.3f}'.format(l_corr[0]))
 
 
-   def plot_low(self,w=0.5,wmax=0.0,spec=0,moment='n',theta=0.0,ymin='auto',ymax='auto',fig=None):
+   def plot_low(self,xin):
 
-      if fig is None:
+      w      = xin['w']
+      theta  = xin['theta']
+      moment = xin['moment']
+      ymin   = xin['ymin']
+      ymax   = xin['ymax']
+      ftype  = xin['ftype']
+      spec   = xin['spec']
+      wmax   = 0
+
+      
+      if xin['fig'] is None:
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       self.getbigfield()
@@ -686,6 +702,7 @@ class cgyrodata_plot(data.cgyrodata):
       fig.tight_layout(pad=0.3)
 
       return
+   
 
    def plot_corrug(self,w=0.5,wmax=0.0,spec=0,moment='n',theta=0.0,ymin='auto',ymax='auto',fig=None):
 
@@ -796,13 +813,18 @@ class cgyrodata_plot(data.cgyrodata):
 
       return '   ky*rho       kx*rho',ky,y1,None
 
-   def plot_zf(self,w=0.5,wmax=0.0,field=0,fig=None):
+   def plot_zf(self,xin):
 
-      if fig is None:
+      w     = xin['w']
+      field = xin['field']
+      wmax=0
+      
+      if xin['fig'] is None:
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       if self.n_n > 1:
-         raise ValueError('(plot_zf.py) This plot option valid for ZF test only.')
+         print('ERROR: (plot_zf) This plot option valid for ZF test only.')
+         sys.exit()
 
       t  = self.t
       k0 = self.kx[0]

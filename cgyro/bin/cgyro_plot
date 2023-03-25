@@ -420,7 +420,7 @@ PYROOT=$GACODE_ROOT/f2py/pygacode/cgyro
 
 PLT="-m pygacode.cgyro.data_plot_single $TEX $FONTSIZE $LX $LY"
 
-PFLAGS="$PLOT_TYPE $W $NORM $EXT $TIME $FIELD $MOMENT $TMAX $THETA $YMIN $YMAX $N $ABS $FC $LOC $NSCALE $CFLUX $NORM"
+PFLAGS="$PLOT_TYPE $W $NORM $EXT $TIME $FIELD $MOMENT $TMAX $THETA $YMIN $YMAX $N $ABS $FC $LOC $NSCALE $CFLUX $NORM $SPECIES"
 
 case "$CONV_TYPE" in
 
@@ -460,7 +460,7 @@ case "$PLOT_TYPE" in
    distill)
        python -m pygacode.cgyro.data_distill $W $THETA ;;
 
-   freq | ky_freq | error | geo | ball | ky_phi | phi | flux | rcorr_phi)
+   freq | ky_freq | error | geo | ball | ky_phi | phi | flux | rcorr_phi | low | zf)
        python $PLT $PFLAGS ;;
 
    hb)
@@ -478,9 +478,6 @@ case "$PLOT_TYPE" in
    ky_flux)
 	python $PLT $PLOT_TYPE $W $WMAX $FIELD $MOMENT $YMIN $YMAX $FC $EXT $DISS $BAR $CFLUX ;;
 
-   low | corrug)
-       python $PLT $PLOT_TYPE $W $WMAX $SPECIES $MOMENT $EXT $YMIN $YMAX ;;
-
    shift )
 	python $PLT $PLOT_TYPE $W $WMAX $EXT $YMIN $YMAX ;;
 
@@ -495,9 +492,6 @@ case "$PLOT_TYPE" in
   
    kxky_phi)
        python $PLT $PLOT_TYPE $FIELD $MOMENT $SPECIES $THETA $W $WMAX $EXT ;;    
-
-   zf)
-	python $PLT $PLOT_TYPE $W $WMAX $FIELD $EXT ;;
 
    fluct)
        export OMP_NUM_THREADS=$NOMP ; \

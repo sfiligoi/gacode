@@ -45,6 +45,7 @@ xin['loc']    = int(sys.argv[15])
 xin['nscale'] = int(sys.argv[16])
 xin['cflux']  = sys.argv[17]
 xin['norm']   = sys.argv[18]
+xin['spec']   = int(sys.argv[19])
 
 ftype   = xin['ftype']
 outfile = 'out.cgyro.'+plot_type+'.'+ftype
@@ -91,32 +92,13 @@ elif plot_type == 'rcorr_phi':
 
    head = data_in.plot_rcorr_phi(xin)
                                  
-elif plot_type == 'zf':
-
-   w     = float(sys.argv[2])
-   wmax  = float(sys.argv[3])
-   field = int(sys.argv[4])
-   ftype = sys.argv[5]
-
-   head = data_in.plot_zf(w=w,wmax=wmax,field=field)
-
-   outfile = 'out.cgyro.zf.'+ftype
-
-
 elif plot_type == 'low':
 
-   w     = float(sys.argv[2])
-   wmax  = float(sys.argv[3])
-   spec  = int(sys.argv[4])
-   moment = sys.argv[5]
-   ftype = sys.argv[6]
-   theta = 0.0
-   ymin  = sys.argv[7]
-   ymax  = sys.argv[8]
+   head = data_in.plot_low(xin)
 
-   head = data_in.plot_low(w=w,wmax=wmax,spec=spec,moment=moment,theta=theta,ymin=ymin,ymax=ymax)
+elif plot_type == 'zf':
 
-   outfile = 'out.cgyro.low.'+ftype
+   head = data_in.plot_zf(xin)
 
 elif plot_type == 'corrug':
 
