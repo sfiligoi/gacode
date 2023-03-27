@@ -112,9 +112,8 @@ then
   echo "         Scale the fluxes with ne/ni factor"
   echo "         *Affects: flux"
   echo
-  echo "         -theta <value>"
-  echo "         Value of theta/pi used in hbcut"
-  echo "         *Affects: hbcut"
+  echo "         -theta <int>"
+  echo "         Theta index to select"
   echo
   echo "         -tmax <float>"
   echo "         Maximum value of ballooning angle."
@@ -416,7 +415,7 @@ PYROOT=$GACODE_ROOT/f2py/pygacode/cgyro
 
 PLT="-m pygacode.cgyro.data_plot_single $TEX $FONTSIZE $LX $LY"
 
-PFLAGS="$PLOT_TYPE $W $NORM $EXT $TIME $FIELD $MOMENT $TMAX $THETA $YMIN $YMAX $N $ABS $FC $LOC $NSCALE $CFLUX $NORM $SPECIES $DISS $BAR $FC $IE"
+PFLAGS="$PLOT_TYPE $W $NORM $EXT $TIME $FIELD $MOMENT $TMAX $THETA $YMIN $YMAX $N $ABS $FC $LOC $NSCALE $CFLUX $NORM $SPECIES $DISS $BAR $FC $IE $MESH"
 
 case "$CONV_TYPE" in
 

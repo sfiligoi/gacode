@@ -28,7 +28,7 @@ def time_index(t,w):
 #---------------------------------------------------------------
 
 #---------------------------------------------------------------
-# Compute time average (of 1D or 2D array)
+# Compute time average (of 1D, 2D or 3D array)
 def time_average(f,t,imin,imax):
     
     T = t[imax]-t[imin]
@@ -38,9 +38,13 @@ def time_average(f,t,imin,imax):
         # 1D array
         sf = 0.5*(f[1:]+f[:-1])
         ave = np.sum(sf*dt)
-    else:
+    elif f.ndim ==2:
         # 2D array (average over last dimension)
         sf = 0.5*(f[:,1:]+f[:,:-1])
+        ave = np.sum(sf*dt,axis=-1)
+    else:
+        # 3D array (average over last dimension)
+        sf = 0.5*(f[:,:,1:]+f[:,:,:-1])
         ave = np.sum(sf*dt,axis=-1)
         
     return ave
@@ -328,29 +332,23 @@ def quadratic_max(x,g):
 #---------------------------------------------------------------
 
 #---------------------------------------------------------------
-def theta_index(theta,n_theta):
-    # Compute index for theta value in pitch angle and energy plots
-    i0 = int(round((1.0+theta)*n_theta/2.0))
-    if i0 > n_theta-1:
-        i0 = n_theta-1
-
-    return i0
-
-#---------------------------------------------------------------
-def theta_indx(theta,theta_plot):
+def indx_theta(i,n):
 
    # Select theta index
-   if theta_plot == 1:
+   if n == 1:
       itheta = 0
+      thetapi = 0.0
+   elif i == -1:
+      itheta = n//2
+      thetapi = 0.0
    else:
-       # theta=0 check just to be safe
-       if theta == 0.0:
-           itheta = theta_plot//2
-       else:
-           itheta = int((theta+1.0)/2.0*theta_plot)
+      itheta = i
+      thetapi = -1+2.0*itheta/n
 
-   print('INFO: (theta_indx) Selected index',itheta+1,'of',theta_plot)
-   return itheta
+   print('INFO: (indx_theta) Selected theta index {:d} of {:d}-{:d} : theta={:.3f}'.
+         format(itheta,0,n-1,thetapi))
+
+   return itheta,thetapi
 #---------------------------------------------------------------
 
 def shift_fourier(f,imin,imax):

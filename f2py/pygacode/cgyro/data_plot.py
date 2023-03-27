@@ -23,17 +23,8 @@ class cgyrodata_plot(data.cgyrodata):
 
    def kxky_select(self,theta,field,moment,species):
 
-      # Select theta index
-      if self.theta_plot == 1:
-         itheta  = 0
-         thetapi = 0.0
-      elif theta == -1:
-         itheta = self.theta_plot//2
-         thetapi = 0.0
-      else:
-         itheta = theta
-         thetapi = -1+2.0*itheta/self.theta_plot
-
+      itheta,thetapi = indx_theta(theta,self.theta_plot)
+      
       if moment == 'phi':
          if field == 0:
             f  = self.kxky_phi[0,1:,itheta,:,:]+1j*self.kxky_phi[1,1:,itheta,:,:]
@@ -58,9 +49,6 @@ class cgyrodata_plot(data.cgyrodata):
       elif moment == 'v':
          f  = self.kxky_v[0,1:,itheta,species,:,:]+1j*self.kxky_v[1,1:,itheta,species,:,:]
          ft = self.TEXDV
-
-      print('INFO: (kxky_select) Selected theta index {:d} of {:d}-{:d} : theta={:.3f}'.
-            format(itheta,0,self.theta_plot-1,thetapi))
 
       # 3D structure: f[r,n,time]
 
@@ -847,9 +835,9 @@ class cgyrodata_plot(data.cgyrodata):
       
       #----------------------------------------------------
       # Average calculations
-      imin,imax = time_average(t,w)
+      imin,imax=time_index(t,w)
       ave  = time_average(y,t,imin,imax)
-      print('INFO: (plot_zf) Integral time-average = %.6f' % ave)
+      print('INFO: (plot_zf) Integral time-average = {:.4f}'.format(ave))
 
       ave_vec = ave*np.ones(len(t))
       #----------------------------------------------------
@@ -882,7 +870,11 @@ class cgyrodata_plot(data.cgyrodata):
          
    def plot_xflux(self,xin):
 
+      w      = xin['w']
       moment = xin['moment']
+      nscale = xin['nscale']
+      ymin   = xin['ymin']
+      ymax   = xin['ymax']
 
       if xin['fig'] is None:
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
@@ -1489,27 +1481,23 @@ class cgyrodata_plot(data.cgyrodata):
    def plot_hb(self,xin):
             
       import matplotlib.cm as cm
-      
-      u = specmap(self.mass[spec],self.z[spec])
+
+      spec  = xin['spec']
+      itime = xin['itime']
+      tmax  = xin['tmax']
+      mesh  = xin['mesh']
 
       if xin['fig'] is None:
          fig = plt.figure(MYDIR,figsize=(self.lx,self.lx))
 
-      theta=0.0
+      u = specmap(self.mass[spec],self.z[spec])
 
       if itime > self.n_time-1:
          itime = self.n_time-1
 
-      # Compute index for theta value in pitch angle and energy plots
-      i0 = int(round((1.0+float(theta))*self.n_theta/2.0))
-      if i0 > self.n_theta-1:
-         i0 = self.n_theta-1
-
       if self.n_radial > 1:
-         n0 = (self.n_radial//2)*self.n_theta+i0
          x = self.thetab/np.pi
       else:
-         n0 = self.n_theta/3
          x = self.theta/np.pi
         
       if tmax < 0.0:
@@ -1517,7 +1505,7 @@ class cgyrodata_plot(data.cgyrodata):
             tmax = 1.0
          else:
             tmax = self.n_radial-1
-
+      
       p = 0
       for row in range(3):
 
@@ -1538,8 +1526,6 @@ class cgyrodata_plot(data.cgyrodata):
          ax.set_ylabel(r'$\xi = v_\parallel/v$')
 
          hp = np.transpose(np.array(self.hb[0,:,spec,:,ie,itime]))
-         h_norm = 0.5*(hp[self.n_xi//2-1,n0]+hp[self.n_xi//2,n0])
-         hp = hp/h_norm
          hmin = hp.min()
          hmax = hp.max()
          dh = (hmax-hmin)/100.0
@@ -1602,10 +1588,8 @@ class cgyrodata_plot(data.cgyrodata):
       func = self.hb
 
       # Compute index for theta value in pitch angle and energy plots
-      i0 = int(round((1.0+theta)*self.n_theta/2.0))
-      if i0 > self.n_theta-1:
-         i0 = self.n_theta-1
-
+      i0,thetapi = indx_theta(theta,self.n_theta)
+       
       if self.n_radial > 1:
          x = self.thetab/np.pi
       else:
@@ -1659,7 +1643,7 @@ class cgyrodata_plot(data.cgyrodata):
          ax.grid(which="both",ls=":")
          ax.grid(which="major",ls=":")
 
-         ax.set_title(r'$'+u+': \\theta/\pi='+str(theta)+' \quad \mathrm{ie}='+str(ie)+'$')
+         ax.set_title(r'$'+u+': \\theta/\pi='+str(thetapi)+' \quad \mathrm{ie}='+str(ie)+'$')
          ax.set_xlabel(r'$\xi = v_\parallel/v$')
 
          n0 = (self.n_radial//2)*self.n_theta+i0
@@ -1678,7 +1662,7 @@ class cgyrodata_plot(data.cgyrodata):
          ax.grid(which="both",ls=":")
          ax.grid(which="major",ls=":")
 
-         ax.set_title(r'$'+u+': \\theta/\pi='+str(theta)+' \quad \mathrm{ix}='+str(ix)+'$')
+         ax.set_title(r'$'+u+': \\theta/\pi='+str(thetapi)+' \quad \mathrm{ix}='+str(ix)+'$')
          ax.set_xlabel(r'$x=\sqrt{\varepsilon}$')
 
          n0 = (self.n_radial//2)*self.n_theta+i0

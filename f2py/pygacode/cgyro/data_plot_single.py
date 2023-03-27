@@ -50,6 +50,7 @@ xin['diss']   = int(sys.argv[20])
 xin['bar']    = bool(sys.argv[21])
 xin['fc']     = int(sys.argv[22])
 xin['ie']     = int(sys.argv[23])
+xin['mesh']   = int(sys.argv[24])
 
 ftype   = xin['ftype']
 outfile = 'out.cgyro.'+plot_type+'.'+ftype
