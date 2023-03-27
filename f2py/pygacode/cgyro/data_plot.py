@@ -32,7 +32,7 @@ class cgyrodata_plot(data.cgyrodata):
          thetapi = 0.0
       else:
          itheta = theta
-         thetapi = -1+itheta/self.theta_plot
+         thetapi = -1+2.0*itheta/self.theta_plot
 
       if moment == 'phi':
          if field == 0:
@@ -59,16 +59,14 @@ class cgyrodata_plot(data.cgyrodata):
          f  = self.kxky_v[0,1:,itheta,species,:,:]+1j*self.kxky_v[1,1:,itheta,species,:,:]
          ft = self.TEXDV
 
-      print('INFO: (kxky_select) Selected theta index {:d} of {:d} : theta/pi={:f}'.
-            format(itheta+1,self.theta_plot,thetapi))
+      print('INFO: (kxky_select) Selected theta index {:d} of {:d}-{:d} : theta={:.3f}'.
+            format(itheta,0,self.theta_plot-1,thetapi))
 
       # 3D structure: f[r,n,time]
 
       return f,ft
       
    def plot_freq(self,xin):
-
-      w = xin['w']
       
       # Function: plot gamma and omega vs time
 
@@ -249,13 +247,13 @@ class cgyrodata_plot(data.cgyrodata):
    
    def plot_ball(self,xin):
 
-      if xin['fig'] is None:
-         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
-
       itime = xin['itime']
       field = xin['field']
       tmax  = xin['tmax']
-      
+
+      if xin['fig'] is None:
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
+
       if itime > self.n_time-1:
          itime = self.n_time-1
 
@@ -303,10 +301,7 @@ class cgyrodata_plot(data.cgyrodata):
    
    def plot_ky_phi(self,xin):
 
-      # Plot fields versus time for particular values of ky
-
-      if xin['fig'] is None:
-         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
+      # Plot fields versus time for each ky
 
       norm  = xin['norm']
       theta = xin['theta']
@@ -314,7 +309,10 @@ class cgyrodata_plot(data.cgyrodata):
       nstr  = xin['nstr']
       ymin  = xin['ymin']
       ymax  = xin['ymax']
-      
+
+      if xin['fig'] is None:
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
+
       self.getbigfield()
       self.getnorm(norm) ; t = self.tnorm 
 
@@ -359,16 +357,15 @@ class cgyrodata_plot(data.cgyrodata):
 
    def plot_phi(self,xin):
       
-      if xin['fig'] is None:
-         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
-
       w       = xin['w']
-      wmax    = 0.0
       theta   = xin['theta']
       field   = xin['field']
       ymin    = xin['ymin']
       ymax    = xin['ymax']
       absnorm = xin['abs']
+
+      if xin['fig'] is None:
+         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       self.getbigfield()
 
@@ -385,8 +382,8 @@ class cgyrodata_plot(data.cgyrodata):
       #======================================
 
       # Get index for average window
-      imin,imax=iwindow(self.t,w,wmax)
-
+      imin,imax=time_index(self.t,w)
+      
       # n=0 intensity
       y0 = np.sum(abs(f[:,0,:]),axis=0)/self.rho      
       s0 = np.sum(abs(f[:,0,:])**2,axis=0)/self.rho**2      
@@ -397,8 +394,8 @@ class cgyrodata_plot(data.cgyrodata):
          
       s = np.ones(imax-imin+1)
       if absnorm == 0:
-         s0_ave = average(s0,self.t,w,wmax)
-         sn_ave = average(sn,self.t,w,wmax)
+         s0_ave = time_average(s0,self.t,imin,imax)
+         sn_ave = time_average(sn,self.t,imin,imax)
          print('INFO: (plot_phi) sqrt[       <|phi_0|^2> ]/rho_*D = {:.4f}'.format(np.sqrt(s0_ave)))
          print('INFO: (plot_phi) sqrt[ <sum_n |phi_n|^2> ]/rho_*D = {:.4f}'.format(np.sqrt(sn_ave)))
          lab0=r'$\sqrt{\left\langle\left|'+ft+r'_0\right|^2\right\rangle}/\rho_{*D}$'
@@ -408,8 +405,8 @@ class cgyrodata_plot(data.cgyrodata):
          ax.plot(self.t[imin:imax+1],np.sqrt(s0_ave)*s,'--k')
          ax.plot(self.t[imin:imax+1],np.sqrt(sn_ave)*s,'--k')
       else:
-         y0_ave = average(y0,self.t,w,wmax)
-         yn_ave = average(yn,self.t,w,wmax)
+         y0_ave = time_average(y0,self.t,imin,imax)
+         yn_ave = time_average(yn,self.t,imin,imax)
          print('INFO: (plot_phi)       <|phi_0|>/rho_*D = {:.4f}'.format(y0_ave))
          print('INFO: (plot_phi) <sum_n |phi_n|>/rho_*D = {:.4f}'.format(yn_ave))
          lab0=r'$\left\langle \left|'+ft+r'_0\right|\right\rangle/\rho_{*D}$'
@@ -446,8 +443,7 @@ class cgyrodata_plot(data.cgyrodata):
       nscale = xin['nscale']
       cflux  = xin['cflux']
       norm   = xin['norm']
-      wmax   = 0
-      
+ 
       if xin['fig'] is None and ftype != 'nox':
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
@@ -515,7 +511,7 @@ class cgyrodata_plot(data.cgyrodata):
          mnorm = '^\mathrm{norm}'
 
       # Get index for average window
-      imin,imax=iwindow(t,w,wmax)
+      imin,imax=time_index(t,w)
 
       color = ['k','m','b','c','g','r']
       windowtxt = '['+str(t[imin])+' < (c_s/a) t < '+str(t[imax])+']'
@@ -532,7 +528,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       for ispec in range(ns):
          y_norm = y[ispec,:]*norm_vec[ispec]
-         ave,var = variance(y_norm,t,w,wmax)
+         ave = time_average(y_norm,t,imin,imax)
          y_ave   = ave*np.ones(len(t))
          u = specmap(self.mass[ispec],self.z[ispec])
          label = r'$'+mtag+mnorm+'_'+u+'/'+mtag+self.gbnorm+': '+str(round(ave,3))+'$'
@@ -563,8 +559,8 @@ class cgyrodata_plot(data.cgyrodata):
       for i in range(self.n_flux):
          bstr=''
          for ispec in range(ns):
-            ave,var = variance(ys[ispec,i,:],t,w,wmax)
-            bstr = bstr+"{:7.3f}".format(ave)+' '+"({:4.1f})".format(var/ave)+' '
+            ave = time_average(ys[ispec,i,:],t,imin,imax) ; var=0
+            bstr = bstr+"{:7.3f}".format(ave)+' '
          print(tag[i]+' '+bstr)
 
 
@@ -575,10 +571,9 @@ class cgyrodata_plot(data.cgyrodata):
       def absexp(x,tau):
          return np.exp(-np.abs(x)/tau)
 
-      w       = xin['w']
-      wmax    = 0.0
-      theta   = xin['theta']
-      field   = xin['field']
+      w     = xin['w']
+      theta = xin['theta']
+      field = xin['field']
 
       if xin['fig'] is None:
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
@@ -589,9 +584,7 @@ class cgyrodata_plot(data.cgyrodata):
       kx  = self.kx
       nx  = self.n_radial
       
-      ave = np.zeros(nx)
-
-      imin,imax=iwindow(self.t,w,wmax)
+      imin,imax=time_index(self.t,w)
 
       dk = kx[1]-kx[0]
       x0 = kx[-1]+dk
@@ -609,8 +602,7 @@ class cgyrodata_plot(data.cgyrodata):
       y = np.zeros([nx,self.n_time])
       y[1:,:] = np.sum(abs(f[:,1:,:]),axis=1)
 
-      for j in range(nx):
-         ave[j] = average(y[j,:],self.t,w,wmax)
+      ave = time_average(y,self.t,imin,imax)
 
       ave = np.roll(ave,-nx//2)
       ave[0] = 0.0
@@ -650,9 +642,7 @@ class cgyrodata_plot(data.cgyrodata):
       ymax   = xin['ymax']
       ftype  = xin['ftype']
       spec   = xin['spec']
-      wmax   = 0
 
-      
       if xin['fig'] is None:
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
@@ -670,7 +660,7 @@ class cgyrodata_plot(data.cgyrodata):
       t  = self.t
 
       # Get index for average window
-      imin,imax=iwindow(t,w,wmax)
+      imin,imax=time_index(t,w)
 
       windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[imax])+']$'
 
@@ -684,11 +674,11 @@ class cgyrodata_plot(data.cgyrodata):
 
       yr = np.real(f[p0+1,0,:]) ; yi = np.imag(f[p0+1,0,:])
       # Re
-      ave,var = variance(yr,t,w,wmax) ; y_ave = ave*np.ones(len(t))
+      ave,var = time_average(yr,t,imin,imax) ; y_ave = ave*np.ones(len(t))
       ax.plot(self.t,yr,color=color[0],label=r'$\mathrm{Re:} '+str(round(ave,3))+'$')
       ax.plot(t[imin:imax+1],y_ave[imin:imax+1],'--',color=color[0])
       # Im
-      ave,var = variance(yi,t,w,wmax) ; y_ave = ave*np.ones(len(t))
+      ave,var = time_average(yi,t,imin,imax) ; y_ave = ave*np.ones(len(t))
       ax.plot(self.t,yi,color=color[1],label=r'$\mathrm{Im:} '+str(round(ave,3))+'$' )
       ax.plot(t[imin:imax+1],y_ave[imin:imax+1],'--',color=color[1])
 
@@ -704,13 +694,21 @@ class cgyrodata_plot(data.cgyrodata):
       return
    
 
-   def plot_corrug(self,w=0.5,wmax=0.0,spec=0,moment='n',theta=0.0,ymin='auto',ymax='auto',fig=None):
+   def plot_corrug(self,xin):
 
-      if fig is None:
+      w      = xin['w']
+      theta  = xin['theta']
+      moment = xin['moment']
+      ymin   = xin['ymin']
+      ymax   = xin['ymax']
+      ftype  = xin['ftype']
+      spec   = xin['spec']
+
+      if xin['fig'] is None:
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       self.getbigfield()
-      nx = self.n_radial
+      nx = self.n_radial-1
       
       #======================================
       # Set figure size and axes
@@ -724,7 +722,7 @@ class cgyrodata_plot(data.cgyrodata):
       t  = self.t
 
       # Get index for average window
-      imin,imax=iwindow(t,w,wmax)
+      imin,imax=time_index(t,w)
 
       windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[imax])+']$'
 
@@ -734,8 +732,9 @@ class cgyrodata_plot(data.cgyrodata):
       f,ft = self.kxky_select(theta,0,moment,spec)
 
       # complex n=0 amplitudes
-      yr = average_n(np.real(f[:,0,:]),t,w,wmax,nx)
-      yi = average_n(np.imag(f[:,0,:]),t,w,wmax,nx)
+      yr = time_average(np.real(f[:,0,:]),t,imin,imax)
+      yi = time_average(np.imag(f[:,0,:]),t,imin,imax)
+      
       nxp = 8*nx
       yave = np.zeros(nxp)
       y0ave = np.zeros(nxp)
@@ -765,11 +764,16 @@ class cgyrodata_plot(data.cgyrodata):
 
       return
 
-   def plot_shift(self,w=0.5,wmax=0.0,theta=0.0,ymin='auto',ymax='auto',fig=None):
+   def plot_shift(self,xin):
 
       import time
 
-      if fig is None:
+      w     = xin['w']
+      theta = xin['theta']
+      ymin  = xin['ymin']
+      ymax  = xin['ymax']
+
+      if xin['fig'] is None:
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
       
       #======================================
@@ -786,7 +790,7 @@ class cgyrodata_plot(data.cgyrodata):
       t = self.t
 
       # Get index for average window
-      imin,imax=iwindow(t,w,wmax)
+      imin,imax=time_window(t,w)
       windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[imax])+']$'
       ax.set_title(windowtxt)
 
@@ -817,17 +821,16 @@ class cgyrodata_plot(data.cgyrodata):
 
       w     = xin['w']
       field = xin['field']
-      wmax=0
-      
+    
       if xin['fig'] is None:
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       if self.n_n > 1:
          print('ERROR: (plot_zf) This plot option valid for ZF test only.')
-         sys.exit()
+         return
 
       t  = self.t
-      k0 = self.kx[0]
+      k0 = 2*np.pi/self.length
 
       print('INFO: (plot_zf) Using index theta index n_theta/3+1')
       if field == 0:
@@ -844,8 +847,8 @@ class cgyrodata_plot(data.cgyrodata):
       
       #----------------------------------------------------
       # Average calculations
-      imin,imax = iwindow(t,w,wmax)
-      ave  = average(y[:],t,w,wmax)
+      imin,imax = time_average(t,w)
+      ave  = time_average(y,t,imin,imax)
       print('INFO: (plot_zf) Integral time-average = %.6f' % ave)
 
       ave_vec = ave*np.ones(len(t))
@@ -877,9 +880,11 @@ class cgyrodata_plot(data.cgyrodata):
       return
 
          
-   def plot_xflux(self,w=0.5,wmax=0.0,moment='e',ymin='auto',ymax='auto',fig=None,nscale=0):
+   def plot_xflux(self,xin):
 
-      if fig is None:
+      moment = xin['moment']
+
+      if xin['fig'] is None:
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       self.getxflux()
@@ -890,6 +895,9 @@ class cgyrodata_plot(data.cgyrodata):
 
       ky  = self.ky
       ave = np.zeros((self.n_n,ns))
+
+      if moment == 'phi':
+         moment = 'e'
 
       # NOTE: lky_flux_* -> [ 2, nl , ns , n_n , nt ]
       #                       0  1    2     3    4 
@@ -910,7 +918,8 @@ class cgyrodata_plot(data.cgyrodata):
          z = np.sum(self.lky_flux_v,axis=3)
          ftag = 'xflux_v'
       else:
-         raise ValueError('(plot_xflux.py) Invalid moment.')
+         print('ERROR: (plot_xflux) Invalid moment.')
+         sys.exit()
 
 
       # Call routine for domain average
@@ -924,7 +933,7 @@ class cgyrodata_plot(data.cgyrodata):
          mnorm = ''
 
       # Determine tmin
-      imin,imax=iwindow(t,w,wmax)
+      imin,imax=time_index(t,w)
 
       #============================================================
       # Otherwise plot
@@ -988,17 +997,39 @@ class cgyrodata_plot(data.cgyrodata):
          ax.axvspan(-0.25,0.25,facecolor='g',alpha=0.1)
          ax.set_xlim([-0.5,0.5])
          ax.set_xticks([-0.5,-0.375,-0.25,-0.125,0,0.125,0.25,0.375,0.5])
-         ax.set_xticklabels([r'$-0.5$',r'$-0.375$',r'$-0.25$',r'$-0.125$',r'$0$',r'$0.125$',r'$0.25$',r'$0.375$',r'$0.5$'])
+         ax.set_xticklabels([r'$-0.5$',
+                             r'$-0.375$',
+                             r'$-0.25$',
+                             r'$-0.125$',
+                             r'$0$',
+                             r'$0.125$',
+                             r'$0.25$',
+                             r'$0.375$',
+                             r'$0.5$'])
 
          ax.legend(loc=2)
 
       fig.tight_layout(pad=0.3)
 
-   def plot_ky_flux(self,w=0.5,wmax=0.0,field=0,moment='e',ymin='auto',ymax='auto',
-                    fc=0,ftype='screen',diss=0,bar=True,fig=None,cflux='auto'):
+   def plot_ky_flux(self,xin):
+
+      w      = xin['w']
+      field  = xin['field']
+      moment = xin['moment']
+      ymin   = xin['ymin']
+      ymax   = xin['ymax']
+      fc     = xin['fc']
+      ftype  = xin['ftype']
+      loc    = xin['loc']
+      nscale = xin['nscale']
+      cflux  = xin['cflux']
+      norm   = xin['norm']
+      bar    = xin['bar']
+      diss   = xin['diss']
 
       if self.n_n == 1:
-         raise ValueError('(plot_ky_flux.py) Plot not available with a single mode.')
+         print('ERROR: (plot_ky_flux) Plot not available with a single mode.')
+         return
 
       if moment == 'phi':
          moment = 'e'
@@ -1006,7 +1037,7 @@ class cgyrodata_plot(data.cgyrodata):
       ns = self.n_species
       t  = self.t
 
-      if fig is None and ftype != 'nox':
+      if xin['fig'] is None and ftype != 'nox':
          if ns < 4:
             nrow = 1 ; ncol = ns
          elif ns == 4:
@@ -1018,7 +1049,6 @@ class cgyrodata_plot(data.cgyrodata):
       usec = self.getflux(cflux)
       
       ky  = self.ky
-      ave = np.zeros((self.n_n,ns))
 
       field_tag = '\mathrm{Total}'
 
@@ -1061,7 +1091,7 @@ class cgyrodata_plot(data.cgyrodata):
          raise ValueError('(plot_ky_flux.py) Invalid moment.')
       
       # Determine tmin
-      imin,imax=iwindow(t,w,wmax)
+      imin,imax=time_index(t,w)
 
       color = ['magenta','k','blue','cyan','red','green']
 
@@ -1080,9 +1110,9 @@ class cgyrodata_plot(data.cgyrodata):
     
       dk = ky[1]-ky[0]
     
+      ave = np.zeros((self.n_n,ns))
       for ispec in range(ns):
-         for j in range(self.n_n):
-            ave[j,ispec] = average(y[ispec,j,:],self.t,w,wmax)
+         ave[:,ispec] = time_average(y[ispec,:,:],self.t,imin,imax)
 
       # One plot per species
       for ispec in range(ns):
@@ -1125,14 +1155,20 @@ class cgyrodata_plot(data.cgyrodata):
       if not ftype == 'nox':
          fig.tight_layout(pad=0.3)
 
-   def plot_kxky_phi(self,field=0,theta=0.0,moment='phi',spec=0,w=0.5,wmax=0.0,fig=None):
+   def plot_kxky_phi(self,xin):
+
+      w      = xin['w']
+      field  = xin['field']
+      moment = xin['moment']
+      theta  = xin['theta']
+      spec   = xin['spec']
 
       x0 = max(abs(self.kx))*0.25
       y0 = max(abs(self.ky))
 
       asp=y0/(2*x0)
 
-      if fig is None:
+      if xin['fig'] is None:
          fig = plt.figure(MYDIR,figsize=(self.lx,self.lx*asp))
  
       self.getbigfield()
@@ -1150,7 +1186,7 @@ class cgyrodata_plot(data.cgyrodata):
       # Field data selector
       f,ft = self.kxky_select(theta,field,moment,spec)
 
-      imin,imax=iwindow(t,w,wmax)
+      imin,imax=time_index(t,w)
       for i in np.arange(imin,self.n_time):
          fplot = fplot+abs(f[:,:,i])
          
@@ -1177,9 +1213,18 @@ class cgyrodata_plot(data.cgyrodata):
       return
    
       
-   def plot_kx_phi(self,field=0,theta=0.0,w=0.5,wmax=0.0,ymin='auto',ymax='auto',nstr='null',diss=0,moment='phi',fig=None):
+   def plot_kx_phi(self,xin):
 
-      if fig is None:
+      w      = xin['w']
+      field  = xin['field']
+      moment = xin['moment']
+      theta  = xin['theta']
+      ymin   = xin['ymin']
+      ymax   = xin['ymax']
+      diss   = xin['diss']
+      nstr   = xin['nstr']
+
+      if xin['fig'] is None:
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       self.getbigfield()
@@ -1187,9 +1232,8 @@ class cgyrodata_plot(data.cgyrodata):
       t  = self.t
       kx = self.kx
       nx = self.n_radial-1 
-      ave = np.zeros(nx)
 
-      imin,imax=iwindow(self.t,w,wmax)
+      imin,imax=time_index(self.t,w)
     
       dk = kx[1]-kx[0]
       x0 = kx[-1]+dk
@@ -1206,7 +1250,7 @@ class cgyrodata_plot(data.cgyrodata):
                  
       if nstr == 'null':
          y = np.sum(abs(f[:,:,:]),axis=1)/self.rho
-         ave[:] = average_n(y,self.t,w,wmax,nx) 
+         ave = time_average(y,self.t,imin,imax) 
          ax.set_ylabel(r'$\left\langle \sum_n \left|'+ft+r'_n\right|\right\rangle/\rho_{*D}$')
          ax.step(kx+dk/2,ave[:],color='m')
       else:
@@ -1215,7 +1259,7 @@ class cgyrodata_plot(data.cgyrodata):
          ax.set_ylabel(r'$\left\langle\left|'+ft+r'_n\right|\right\rangle/\rho_{*D}$')
          for n in nvec:
             num = r'$n='+str(n)+'$'
-            ave[:] = average_n(abs(f[:,n,:]),self.t,w,wmax,nx)
+            ave = time_average(abs(f[:,n,:]),self.t,imin,imax)
             ax.step(kx+dk/2,ave[:],label=num)
             if self.n_n > 16:
                ax.legend(loc=4, ncol=5, prop={'size':12})
@@ -1239,9 +1283,15 @@ class cgyrodata_plot(data.cgyrodata):
 
       return
    
-   def plot_kx_shift(self,field=0,theta=0.0,w=0.5,wmax=0.0,ymin='auto',ymax='auto',nstr='null',moment='phi',fig=None):
+   def plot_kx_shift(self,xin):
 
-      if fig is None:
+      w      = xin['w']
+      field  = xin['field']
+      moment = xin['moment']
+      theta  = xin['theta']
+      nstr   = xin['nstr']
+
+      if xin['fig'] is None:
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       self.getbigfield()
@@ -1254,7 +1304,7 @@ class cgyrodata_plot(data.cgyrodata):
       
       ave = np.zeros(nx)
 
-      imin,imax=iwindow(self.t,w,wmax)
+      imin,imax=time_index(self.t,w)
     
       dk = kx[1]-kx[0]
       x0 = kx[-1]+dk
@@ -1296,7 +1346,7 @@ class cgyrodata_plot(data.cgyrodata):
             fint = phi_T[nx//4:3*nx//4,:]
             phi = np.fft.fftshift(np.fft.fft(fint,axis=0))
 
-            y[k,:] = y[k,:]+average_n(np.abs(phi[:,:]),self.t,w,wmax,nx//2)
+            y[k,:] = y[k,:]+time_average(np.abs(phi[:,:]),self.t,imin,imax)
 
          if nstr != '+':
             mycol = color[np.mod(i,len(color))]
@@ -1309,18 +1359,26 @@ class cgyrodata_plot(data.cgyrodata):
             ax.plot(x,y[1,:],linestyle='--',color='k')
             
 
-      ax.legend(loc=4, ncol=6, prop={'size':12})
+      #ax.legend(loc=4, ncol=6, prop={'size':12})
       ax.set_xlim([-x0,x0])
       ax.set_yscale('log')
 
       return
       
 
-   def plot_poly_phi(self,field=0,theta=0.0,w=0.5,wmax=0.0,ymin='auto',ymax='auto',nstr='null',diss=0,fig=None):
+   def plot_poly_phi(self,xin):
 
       import scipy.special as sp
 
-      if fig is None:
+      w      = xin['w']
+      field  = xin['field']
+      moment = xin['moment']
+      theta  = xin['theta']
+      nstr   = xin['nstr']
+      ymin   = xin['ymin']
+      ymax   = xin['ymax']
+
+      if xin['fig'] is None:
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
 
       self.getbigfield()
@@ -1331,7 +1389,7 @@ class cgyrodata_plot(data.cgyrodata):
       nk = 2*n0
       t = self.t
 
-      imin,imax=iwindow(self.t,w,wmax)
+      imin,imax=time_index(self.t,w)
 
       ax = fig.add_subplot(1,1,1)
 
@@ -1410,8 +1468,8 @@ class cgyrodata_plot(data.cgyrodata):
       if nsum:
          ax.plot(kvec,d1,color='k')
          ax.plot(kvec,d2,color='m')
-         for i in range(nk):
-            print(kvec[i],d1[i],d2[i])
+         #for i in range(nk):
+         #   print(kvec[i],d1[i],d2[i])
 
       ax.axvspan(1.5*n0,nk,alpha=0.2)
          
@@ -1428,13 +1486,13 @@ class cgyrodata_plot(data.cgyrodata):
 
       return
 
-   def plot_hb(self,itime=-1,spec=0,tmax=-1.0,mesh=0,fig=None):
+   def plot_hb(self,xin):
             
       import matplotlib.cm as cm
       
       u = specmap(self.mass[spec],self.z[spec])
 
-      if fig is None:
+      if xin['fig'] is None:
          fig = plt.figure(MYDIR,figsize=(self.lx,self.lx))
 
       theta=0.0
@@ -1522,11 +1580,20 @@ class cgyrodata_plot(data.cgyrodata):
 
       return
 
-   def plot_hbcut(self,itime=-1,spec=0,tmax=-1.0,theta=0.0,fig=None):
+   def plot_hbcut(self,xin):
+
+      w      = xin['w']
+      itime  = xin['itime']
+      tmax   = xin['tmax']
+      theta  = xin['theta']
+      nstr   = xin['nstr']
+      ymin   = xin['ymin']
+      ymax   = xin['ymax']
+      spec   = xin['spec']
 
       u = specmap(self.mass[spec],self.z[spec])
 
-      if fig is None:
+      if xin['fig'] is None:
          fig = plt.figure(MYDIR,figsize=(self.lx,self.lx))
        
       if itime > self.n_time-1:
@@ -1629,7 +1696,16 @@ class cgyrodata_plot(data.cgyrodata):
 
       return
 
-   def plot_hball(self,itime=-1,spec=0,tmax=-1.0,ymin='auto',ymax='auto',nstr='null',ie=0,fig=None):
+   def plot_hball(self,xin):
+
+      w      = xin['w']
+      tmax   = xin['tmax']
+      itime  = xin['itime']
+      nstr   = xin['nstr']
+      ymin   = xin['ymin']
+      ymax   = xin['ymax']
+      spec   = xin['spec']
+      ie     = xin['ie']
 
       if nstr == 'null':
          nvec = list(range(self.n_n))
@@ -1643,7 +1719,7 @@ class cgyrodata_plot(data.cgyrodata):
       print('e    = '+str(ie))
       print('spec = '+u)
 
-      if fig is None:
+      if xin['fig'] is None:
          fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
        
       if itime > self.n_time-1:

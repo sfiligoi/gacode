@@ -6,8 +6,10 @@ from .data import cgyrodata
 
 class cgyrodata_dump(data.cgyrodata):
 
-   def dump_flux(self,fc=0,fig=None):
+   def dump_flux(self,xin):
 
+      moment = xin['moment']
+      
       self.getflux()
 
       ns = self.n_species
@@ -45,8 +47,14 @@ class cgyrodata_dump(data.cgyrodata):
          np.savetxt(fname,data,fmt='%.8e',header=head)
          print('INFO: (dump_flux) Created '+fname)
 
-   def dump_ky_flux(self,w=0.5,wmax=0.0,field=0,moment='e',fc=0,fig=None):
+   def dump_ky_flux(self,xin):
 
+      w      = xin['w']
+      moment = xin['moment']
+      field  = xin['field']
+      fc     = xin['fc']
+      wmax = 0
+      
       self.getflux()
       ns = self.n_species
       t  = self.t

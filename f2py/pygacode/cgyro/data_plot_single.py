@@ -28,14 +28,14 @@ plot_type = sys.argv[1]
 
 xin = {}
 xin['fig']    = None
-xin['w']      = float(sys.argv[2])
+xin['w']      = sys.argv[2]
 xin['norm']   = sys.argv[3]
 xin['ftype']  = sys.argv[4]
 xin['itime']  = int(sys.argv[5])
 xin['field']  = int(sys.argv[6])
 xin['moment'] = sys.argv[7]
 xin['tmax']   = float(sys.argv[8])
-xin['theta']  = float(sys.argv[9])
+xin['theta']  = int(sys.argv[9])
 xin['ymin']   = sys.argv[10]
 xin['ymax']   = sys.argv[11]
 xin['nstr']   = sys.argv[12]
@@ -46,6 +46,10 @@ xin['nscale'] = int(sys.argv[16])
 xin['cflux']  = sys.argv[17]
 xin['norm']   = sys.argv[18]
 xin['spec']   = int(sys.argv[19])
+xin['diss']   = int(sys.argv[20])
+xin['bar']    = bool(sys.argv[21])
+xin['fc']     = int(sys.argv[22])
+xin['ie']     = int(sys.argv[23])
 
 ftype   = xin['ftype']
 outfile = 'out.cgyro.'+plot_type+'.'+ftype
@@ -84,7 +88,7 @@ elif plot_type == 'flux':
        doplot = False
   
    if ftype == 'dump':
-      cgyrodata_dump('./').dump_flux(fc=fc)
+      cgyrodata_dump('./').dump_flux(xin)
    else:
       data_in.plot_flux(xin)
 
@@ -102,172 +106,53 @@ elif plot_type == 'zf':
 
 elif plot_type == 'corrug':
 
-   w     = float(sys.argv[2])
-   wmax  = float(sys.argv[3])
-   spec  = int(sys.argv[4])
-   moment = sys.argv[5]
-   ftype = sys.argv[6]
-   theta = 0.0
-   ymin  = sys.argv[7]
-   ymax  = sys.argv[8]
-
-   head = data_in.plot_corrug(w=w,wmax=wmax,spec=spec,moment=moment,theta=theta,ymin=ymin,ymax=ymax)
-
-   outfile = 'out.cgyro.corrug.'+ftype
+   head = data_in.plot_corrug(xin)
 
 elif plot_type == 'shift':
 
-   w     = float(sys.argv[2])
-   wmax  = float(sys.argv[3])
-   ftype = sys.argv[4]
-   theta = 0.0
-   ymin  = sys.argv[5]
-   ymax  = sys.argv[6]
-
-   head,x,y1,y2 = data_in.plot_shift(w=w,wmax=wmax,theta=theta,ymin=ymin,ymax=ymax)
-
-   outfile = 'out.cgyro.shift.'+ftype
+   head,x,y1,y2 = data_in.plot_shift(xin)
 
 elif plot_type == 'ky_flux':
-
-   w      = float(sys.argv[2])
-   wmax   = float(sys.argv[3])
-   field  = int(sys.argv[4])
-   moment = sys.argv[5]
-   ymin   = sys.argv[6]
-   ymax   = sys.argv[7]
-   fc     = int(sys.argv[8])
-   ftype  = sys.argv[9]
-   diss   = int(sys.argv[10])
-   bar    = bool(int(sys.argv[11]))
-   cflux  = sys.argv[12]
-   
+  
    if ftype == 'nox' or ftype == 'dump':
        doplot = False
 
    if ftype == 'dump':
-      cgyrodata_dump('./').dump_ky_flux(w=w,wmax=wmax,field=field,moment=moment,fc=fc)
+      cgyrodata_dump('./').dump_ky_flux(xin)
    else:
-      data_in.plot_ky_flux(w=w,wmax=wmax,field=field,moment=moment,
-                           ymin=ymin,ymax=ymax,fc=fc,ftype=ftype,diss=diss,bar=bar,cflux=cflux)
-
-   outfile = 'out.cgyro.ky_flux.'+ftype
+      data_in.plot_ky_flux(xin)
 
 elif plot_type == 'xflux':
 
-   w      = float(sys.argv[2])
-   wmax   = float(sys.argv[3])
-   moment = sys.argv[4]
-   ymin   = sys.argv[5]
-   ymax   = sys.argv[6]
-   ftype  = sys.argv[7]
-   nscale = int(sys.argv[8])
-
-   head = data_in.plot_xflux(w=w,wmax=wmax,moment=moment,ymin=ymin,ymax=ymax,nscale=nscale)
-
-   outfile = 'out.cgyro.xflux.'+ftype
+   head = data_in.plot_xflux(xin)
 
 elif plot_type == 'kxky_phi':
 
-   field = int(sys.argv[2])
-   moment = sys.argv[3]
-   spec   = int(sys.argv[4])
-   theta = float(sys.argv[5])
-   w     = float(sys.argv[6])
-   wmax  = float(sys.argv[7])
-   ftype = sys.argv[8]
-
-   head = data_in.plot_kxky_phi(field=field,theta=theta,moment=moment,spec=spec,w=w,wmax=wmax)
-
-   outfile = 'out.cgyro.kxky_phi.'+ftype
+   head = data_in.plot_kxky_phi(xin)
 
 elif plot_type == 'kx_phi':
-
-   field = int(sys.argv[2])
-   theta = float(sys.argv[3])
-   w     = float(sys.argv[4])
-   wmax  = float(sys.argv[5])
-   ymin  = sys.argv[6]
-   ymax  = sys.argv[7]
-   nstr  = sys.argv[8]
-   ftype = sys.argv[9]
-   diss  = int(sys.argv[10])
-   moment = sys.argv[11]
-   
-   head = data_in.plot_kx_phi(field=field,theta=theta,w=w,wmax=wmax,ymin=ymin,ymax=ymax,nstr=nstr,diss=diss,moment=moment)
-
-   outfile = 'out.cgyro.kx_phi.'+ftype
+  
+   head = data_in.plot_kx_phi(xin)
 
 elif plot_type == 'kx_shift':
-
-   field = int(sys.argv[2])
-   theta = float(sys.argv[3])
-   w     = float(sys.argv[4])
-   wmax  = float(sys.argv[5])
-   ymin  = sys.argv[6]
-   ymax  = sys.argv[7]
-   nstr  = sys.argv[8]
-   ftype = sys.argv[9]
-   moment = sys.argv[10]
    
-   head = data_in.plot_kx_shift(field=field,theta=theta,w=w,wmax=wmax,ymin=ymin,ymax=ymax,nstr=nstr,moment=moment)
-
-   outfile = 'out.cgyro.kx_phi.'+ftype
+   head = data_in.plot_kx_shift(xin)
 
 elif plot_type == 'poly_phi':
-
-   field = int(sys.argv[2])
-   theta = float(sys.argv[3])
-   w     = float(sys.argv[4])
-   wmax  = float(sys.argv[5])
-   ymin  = sys.argv[6]
-   ymax  = sys.argv[7]
-   nstr  = sys.argv[8]
-   ftype = sys.argv[9]
-   diss  = int(sys.argv[10])
-   
-   head = data_in.plot_poly_phi(field=field,theta=theta,w=w,wmax=wmax,ymin=ymin,ymax=ymax,nstr=nstr,diss=diss)
-
-   outfile = 'out.cgyro.cheb_phi.'+ftype
+  
+   head = data_in.plot_poly_phi(xin)
 
 elif plot_type == 'hb':
 
-   itime = int(sys.argv[2])
-   spec  = int(sys.argv[3])
-   tmax  = float(sys.argv[4])
-   mesh  = int(sys.argv[5])
-   ftype = sys.argv[6]
-
-   head = data_in.plot_hb(itime=itime,spec=spec,tmax=tmax,mesh=mesh)
-
-   outfile = 'out.cgyro.hb.'+ftype
+   head = data_in.plot_hb(xin)
 
 elif plot_type == 'hbcut':
 
-   itime = int(sys.argv[2])
-   spec  = int(sys.argv[3])
-   tmax  = float(sys.argv[4])
-   theta = float(sys.argv[5])
-   ftype = sys.argv[6]
-
-   head = data_in.plot_hbcut(itime=itime,spec=spec,tmax=tmax,theta=theta)
-
-   outfile = 'out.cgyro.hbcut.'+ftype
+   head = data_in.plot_hbcut(xin)
 
 elif plot_type == 'hball':
 
-   itime = int(sys.argv[2])
-   spec  = int(sys.argv[3])
-   ymin  = sys.argv[4]
-   ymax  = sys.argv[5]
-   tmax  = float(sys.argv[6])
-   nstr  = sys.argv[7]
-   ie    = int(sys.argv[8])
-   ftype = sys.argv[9]
-
-   head = data_in.plot_hball(itime=itime,spec=spec,ymin=ymin,ymax=ymax,tmax=tmax,nstr=nstr,ie=ie)
-
-   outfile = 'out.cgyro.hball.'+ftype
+   head = data_in.plot_hball(xin)
 
 else:
 

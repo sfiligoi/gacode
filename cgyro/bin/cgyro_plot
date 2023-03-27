@@ -84,11 +84,8 @@ then
   echo "         -moment <value>"
   echo "         Specify moment to be plotted [n,e,v]."
   echo
-  echo "         -w <float>"
+  echo "         -w <float> OR <float>,<float>"
   echo "         Width of time-average window min (1.0 is entire time history)."
-  echo
-  echo "         -wmax <float>"
-  echo "         Width of time-average window max (0.0 is entire time history)."
   echo 
   echo "         -mesh"
   echo "         Add theta-xi mesh"
@@ -275,7 +272,7 @@ TMAX=-1.0
 YMIN=auto
 YMAX=auto
 W=0.5
-WMAX=0.0
+win=null
 MOMENT=phi
 INDX=1
 THETA=-1
@@ -367,7 +364,6 @@ while [ $# -gt 0 ] ; do
   -fontsize) shift ; FONTSIZE=$1 ;;
 
   -w) shift ; W=$1 ;;
-  -wmax) shift ; WMAX=$1 ;;
   -loc) shift ; LOC=$1 ;;
 
   -start) shift ; START=$1 ;;
@@ -420,7 +416,7 @@ PYROOT=$GACODE_ROOT/f2py/pygacode/cgyro
 
 PLT="-m pygacode.cgyro.data_plot_single $TEX $FONTSIZE $LX $LY"
 
-PFLAGS="$PLOT_TYPE $W $NORM $EXT $TIME $FIELD $MOMENT $TMAX $THETA $YMIN $YMAX $N $ABS $FC $LOC $NSCALE $CFLUX $NORM $SPECIES"
+PFLAGS="$PLOT_TYPE $W $NORM $EXT $TIME $FIELD $MOMENT $TMAX $THETA $YMIN $YMAX $N $ABS $FC $LOC $NSCALE $CFLUX $NORM $SPECIES $DISS $BAR $FC $IE"
 
 case "$CONV_TYPE" in
 
@@ -460,39 +456,9 @@ case "$PLOT_TYPE" in
    distill)
        python -m pygacode.cgyro.data_distill $W $THETA ;;
 
-   freq | ky_freq | error | geo | ball | ky_phi | phi | flux | rcorr_phi | low | zf)
+   freq | ky_freq | error | geo | ball | ky_phi | phi | flux | rcorr_phi | low | zf | ky_flux | shift | corrug | kx_phi | kxky_phi | kx_shift | poly_phi | xflux | hb | hbcut | hball )
        python $PLT $PFLAGS ;;
-
-   hb)
-	python $PLT $PLOT_TYPE $TIME $SPECIES $TMAX $MESH $EXT ;;
-
-   hbcut)
-	python $PLT $PLOT_TYPE $TIME $SPECIES $TMAX $THETA $EXT ;;
-
-   hball)
-	python $PLT $PLOT_TYPE $TIME $SPECIES $YMIN $YMAX $TMAX $N $IE $EXT ;;
-
-   xflux)
-	python $PLT $PLOT_TYPE $W $WMAX $MOMENT $YMIN $YMAX $EXT $NSCALE ;;
-
-   ky_flux)
-	python $PLT $PLOT_TYPE $W $WMAX $FIELD $MOMENT $YMIN $YMAX $FC $EXT $DISS $BAR $CFLUX ;;
-
-   shift )
-	python $PLT $PLOT_TYPE $W $WMAX $EXT $YMIN $YMAX ;;
-
-   kx_phi)
-	python $PLT $PLOT_TYPE $FIELD $THETA $W $WMAX $YMIN $YMAX $N $EXT $DISS $MOMENT ;;
-
-   kx_shift)
-	python $PLT $PLOT_TYPE $FIELD $THETA $W $WMAX $YMIN $YMAX $N $EXT $MOMENT ;;
-
-   poly_phi)
-        python $PLT $PLOT_TYPE $FIELD $THETA $W $WMAX $YMIN $YMAX $N $EXT $DISS ;;
   
-   kxky_phi)
-       python $PLT $PLOT_TYPE $FIELD $MOMENT $SPECIES $THETA $W $WMAX $EXT ;;    
-
    fluct)
        export OMP_NUM_THREADS=$NOMP ; \
        python -m pygacode.cgyro.plot_fluct \
