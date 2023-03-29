@@ -1,4 +1,5 @@
 import sys
+import time
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import rc
@@ -54,6 +55,8 @@ xin['mesh']   = int(sys.argv[24])
 
 ftype   = xin['ftype']
 outfile = 'out.cgyro.'+plot_type+'.'+ftype
+
+t0 = time.time()
 
 if plot_type == 'freq':
    
@@ -159,6 +162,9 @@ else:
 
    print('ERROR: (data_plot_single) Plot type not found')
 
+print('')
+print('TIMING: {:.2f}s'.format(time.time()-t0))
+   
 #---------------------------------------------------------------
 # Plot to screen or to image file
 
