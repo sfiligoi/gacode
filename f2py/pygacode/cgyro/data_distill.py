@@ -28,10 +28,10 @@ t = sim.t
 # Get index for average window
 imin,imax=time_index(t,w)
 
-i0 = indx_theta(theta,nth)
+i0,thetapi = indx_theta(theta,nth)
 
 header = 'Averaging over '+str(t[imin])+' < (c_s/a) t < '+str(t[imax])
-header = header+' | nkx = '+str(nr)+' | nky = '+str(nn)+'\n'
+header = header+' | nkx = '+str(nr)+' | nky = '+str(nn)
 
 # kxky_phi -> [2,self.n_radial,self.theta_plot,self.n_n,nt]
 
@@ -53,8 +53,7 @@ np.savetxt('out.cgyro.phi0kx',ave_phi0,fmt='%1.6e',header=header)
 
 # Diagnostic print
 
+print('INFO: (data_distill.py) Fields normalized to rho_{*D}')
+print('INFO: (data_distill.py) '+header)
 print('INFO: (data_distill.py) Wrote out.cgyro.phi2kxky = <|phi_k|^2>/rho^2_*D')
 print('INFO: (data_distill.py) Wrote out.cgyro.phi0kx   = <Re(phi_0)>/rho_*D, Im(phi_0)>/rho_{D*}')
-print('INFO: (data_distill.py) All field normalized to rho_{*D}')
-print('INFO: (data_distill.py) Selecting theta-index {} of {}'.format(i0,nth))
-print('INFO: (data_distill.py) '+header)

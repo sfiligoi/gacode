@@ -1,5 +1,4 @@
 import sys
-import time
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import rc
@@ -8,10 +7,6 @@ from .data_dump import cgyrodata_dump
 
 data_in = cgyrodata_plot('./')
 
-doplot=True
-
-# Use first 4 args to define plot and font size
-
 # Use latex fonts if set
 if int(sys.argv[1]) == 0:
    rc('text',usetex=False)
@@ -19,44 +14,42 @@ else:
    rc('text',usetex=True)
 
 rc('font',size=int(sys.argv[2]))
-data_in.lx = int(sys.argv[3])
-data_in.ly = int(sys.argv[4])
 
-# Shift list by 4
-sys.argv = sys.argv[4:]
-
-plot_type = sys.argv[1]
+plot_type = sys.argv[3]
 
 xin = {}
 xin['fig']    = None
-xin['w']      = sys.argv[2]
-xin['norm']   = sys.argv[3]
-xin['ftype']  = sys.argv[4]
-xin['itime']  = int(sys.argv[5])
-xin['field']  = int(sys.argv[6])
-xin['moment'] = sys.argv[7]
-xin['tmax']   = float(sys.argv[8])
-xin['theta']  = int(sys.argv[9])
-xin['ymin']   = sys.argv[10]
-xin['ymax']   = sys.argv[11]
-xin['nstr']   = sys.argv[12]
-xin['abs']    = int(sys.argv[13])
-xin['fc']     = int(sys.argv[14])
-xin['loc']    = int(sys.argv[15])
-xin['nscale'] = int(sys.argv[16])
-xin['cflux']  = sys.argv[17]
-xin['norm']   = sys.argv[18]
-xin['spec']   = int(sys.argv[19])
-xin['diss']   = int(sys.argv[20])
-xin['bar']    = bool(sys.argv[21])
-xin['fc']     = int(sys.argv[22])
-xin['ie']     = int(sys.argv[23])
-xin['mesh']   = int(sys.argv[24])
+xin['lx']     = int(sys.argv[4])
+xin['ly']     = int(sys.argv[5])
+xin['w']      = sys.argv[6]
+xin['norm']   = sys.argv[7]
+xin['ftype']  = sys.argv[8]
+xin['itime']  = int(sys.argv[9])
+xin['field']  = int(sys.argv[10])
+xin['moment'] = sys.argv[11]
+xin['tmax']   = float(sys.argv[12])
+xin['theta']  = int(sys.argv[13])
+xin['ymin']   = sys.argv[14]
+xin['ymax']   = sys.argv[15]
+xin['nstr']   = sys.argv[16]
+xin['abs']    = int(sys.argv[17])
+xin['fc']     = int(sys.argv[18])
+xin['loc']    = int(sys.argv[19])
+xin['nscale'] = int(sys.argv[20])
+xin['cflux']  = sys.argv[21]
+xin['norm']   = sys.argv[22]
+xin['spec']   = int(sys.argv[23])
+xin['diss']   = int(sys.argv[24])
+xin['bar']    = bool(sys.argv[25])
+xin['fc']     = int(sys.argv[26])
+xin['ie']     = int(sys.argv[27])
+xin['mesh']   = int(sys.argv[28])
 
+
+# plotting control
 ftype   = xin['ftype']
 outfile = 'out.cgyro.'+plot_type+'.'+ftype
-
-t0 = time.time()
+doplot  = True
 
 if plot_type == 'freq':
    
@@ -162,9 +155,6 @@ else:
 
    print('ERROR: (data_plot_single) Plot type not found')
 
-print('')
-print('TIMING: {:.2f}s'.format(time.time()-t0))
-   
 #---------------------------------------------------------------
 # Plot to screen or to image file
 

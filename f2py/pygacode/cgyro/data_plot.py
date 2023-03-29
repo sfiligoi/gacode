@@ -20,7 +20,7 @@ class cgyrodata_plot(data.cgyrodata):
    TEXDN   = r'\delta n'
    TEXDE   = r'\delta E'
    TEXDV   = r'\delta v'
-
+   
    def kxky_select(self,theta,field,moment,species):
 
       itheta,thetapi = indx_theta(theta,self.theta_plot)
@@ -59,7 +59,7 @@ class cgyrodata_plot(data.cgyrodata):
       # Function: plot gamma and omega vs time
 
       if xin['fig'] is None:
-         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(xin['lx'],xin['ly']))
 
       self.getnorm(xin['norm']) ; t = self.tnorm
          
@@ -97,7 +97,7 @@ class cgyrodata_plot(data.cgyrodata):
    def plot_ky_freq(self,xin):
 
       if xin['fig'] is None:
-         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(xin['lx'],xin['ly']))
 
       self.getnorm(xin['norm']) ; t = self.tnorm ; ky = self.kynorm
 
@@ -139,7 +139,7 @@ class cgyrodata_plot(data.cgyrodata):
    def plot_error(self,xin):
 
       if xin['fig'] is None:
-         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(xin['lx'],xin['ly']))
 
       ax = fig.add_subplot(111)
       ax.grid(which="both",ls=":")
@@ -240,7 +240,7 @@ class cgyrodata_plot(data.cgyrodata):
       tmax  = xin['tmax']
 
       if xin['fig'] is None:
-         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(xin['lx'],xin['ly']))
 
       if itime > self.n_time-1:
          itime = self.n_time-1
@@ -299,7 +299,7 @@ class cgyrodata_plot(data.cgyrodata):
       ymax  = xin['ymax']
 
       if xin['fig'] is None:
-         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(xin['lx'],xin['ly']))
 
       self.getbigfield()
       self.getnorm(norm) ; t = self.tnorm 
@@ -330,10 +330,10 @@ class cgyrodata_plot(data.cgyrodata):
 
       ax.set_xlim([0,max(self.t)])
 
-      if ymax != 'auto':
-         ax.set_ylim(top=float(ymax))
       if ymin != 'auto':
          ax.set_ylim(bottom=float(ymin))
+      if ymax != 'auto':
+         ax.set_ylim(top=float(ymax))
 
       if self.n_n > 16:
          ax.legend(loc=4, ncol=5, prop={'size':12})
@@ -353,7 +353,7 @@ class cgyrodata_plot(data.cgyrodata):
       absnorm = xin['abs']
 
       if xin['fig'] is None:
-         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(xin['lx'],xin['ly']))
 
       self.getbigfield()
 
@@ -433,7 +433,7 @@ class cgyrodata_plot(data.cgyrodata):
       norm   = xin['norm']
  
       if xin['fig'] is None and ftype != 'nox':
-         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(xin['lx'],xin['ly']))
 
       if moment == 'phi':
          moment = 'e'
@@ -564,7 +564,7 @@ class cgyrodata_plot(data.cgyrodata):
       field = xin['field']
 
       if xin['fig'] is None:
-         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(xin['lx'],xin['ly']))
 
       self.getbigfield()
 
@@ -632,7 +632,7 @@ class cgyrodata_plot(data.cgyrodata):
       spec   = xin['spec']
 
       if xin['fig'] is None:
-         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(xin['lx'],xin['ly']))
 
       self.getbigfield()
 
@@ -693,7 +693,7 @@ class cgyrodata_plot(data.cgyrodata):
       spec   = xin['spec']
 
       if xin['fig'] is None:
-         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(xin['lx'],xin['ly']))
 
       self.getbigfield()
       nx = self.n_radial-1
@@ -762,7 +762,7 @@ class cgyrodata_plot(data.cgyrodata):
       ymax  = xin['ymax']
 
       if xin['fig'] is None:
-         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(xin['lx'],xin['ly']))
       
       #======================================
       # Set figure size and axes
@@ -778,7 +778,7 @@ class cgyrodata_plot(data.cgyrodata):
       t = self.t
 
       # Get index for average window
-      imin,imax=time_window(t,w)
+      imin,imax=time_index(t,w)
       windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[imax])+']$'
       ax.set_title(windowtxt)
 
@@ -811,7 +811,7 @@ class cgyrodata_plot(data.cgyrodata):
       field = xin['field']
     
       if xin['fig'] is None:
-         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(xin['lx'],xin['ly']))
 
       if self.n_n > 1:
          print('ERROR: (plot_zf) This plot option valid for ZF test only.')
@@ -877,7 +877,7 @@ class cgyrodata_plot(data.cgyrodata):
       ymax   = xin['ymax']
 
       if xin['fig'] is None:
-         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(xin['lx'],xin['ly']))
 
       self.getxflux()
       
@@ -1036,7 +1036,7 @@ class cgyrodata_plot(data.cgyrodata):
             nrow = 2 ; ncol = 2
          elif ns > 4:
             nrow = 2 ; ncol = 3
-         fig = plt.figure(MYDIR,figsize=(self.ly*ncol,self.ly*nrow))
+         fig = plt.figure(MYDIR,figsize=(xin['ly']*ncol,xin['ly']*nrow))
 
       usec = self.getflux(cflux)
       
@@ -1217,7 +1217,7 @@ class cgyrodata_plot(data.cgyrodata):
       nstr   = xin['nstr']
 
       if xin['fig'] is None:
-         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(xin['lx'],xin['ly']))
 
       self.getbigfield()
 
@@ -1284,7 +1284,7 @@ class cgyrodata_plot(data.cgyrodata):
       nstr   = xin['nstr']
 
       if xin['fig'] is None:
-         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(xin['lx'],xin['ly']))
 
       self.getbigfield()
 
@@ -1371,7 +1371,7 @@ class cgyrodata_plot(data.cgyrodata):
       ymax   = xin['ymax']
 
       if xin['fig'] is None:
-         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(xin['lx'],xin['ly']))
 
       self.getbigfield()
       nx = self.n_radial
@@ -1704,7 +1704,7 @@ class cgyrodata_plot(data.cgyrodata):
       print('spec = '+u)
 
       if xin['fig'] is None:
-         fig = plt.figure(MYDIR,figsize=(self.lx,self.ly))
+         fig = plt.figure(MYDIR,figsize=(xin['lx'],xin['ly']))
        
       if itime > self.n_time-1:
          itime = self.n_time-1

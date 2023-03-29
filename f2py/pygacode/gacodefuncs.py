@@ -345,13 +345,13 @@ def indx_theta(i,n):
       itheta = i
       thetapi = -1+2.0*itheta/n
 
-   print('INFO: (indx_theta) Selected theta index {:d} of {:d}-{:d} : theta={:.3f}'.
+   print('INFO: (indx_theta) Selected theta index {:d} of {:d}-{:d} : theta={:.2f}pi'.
          format(itheta,0,n-1,thetapi))
 
    return itheta,thetapi
 #---------------------------------------------------------------
 
-def shift_fourier(f,imin,imax):
+def shift_fourier(f,t,imin,imax):
 
     nx = f.shape[0]+1
     nn = f.shape[1]
@@ -390,12 +390,13 @@ def shift_fourier(f,imin,imax):
         phi_T = np.fft.ifft(np.fft.ifftshift(ephi,axes=0),axis=0)
         phip_T = np.fft.ifft(np.fft.ifftshift(ephip,axes=0),axis=0)
 
+        # Not quite correct time-average (correct only for fixed dt)
         pn_t = np.zeros([2*nx])
         pd_t = np.zeros([2*nx])
         for jt in np.arange(imin,imax+1):
             pn_t[:] = pn_t[:] + np.real(np.conj(phi_T[:,jt])*phip_T[:,jt])
             pd_t[:] = pd_t[:] + np.real(np.conj(phi_T[:,jt])*phi_T[:,jt])
-
+    
         # Shift in -gamma domain (standard order: p=0 is 0th index)
         pn = np.sum(pn_t[:]*wneg[:])
         pd = np.sum(pd_t[:]*wneg[:])
