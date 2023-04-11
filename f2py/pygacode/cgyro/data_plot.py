@@ -534,9 +534,9 @@ class cgyrodata_plot(data.cgyrodata):
             ax.set_ylim(bottom=float(ymin))
          fig.tight_layout(pad=0.3)
 
-      title = '        '
+      title = '               '
       for ispec in range(ns):
-         title = title+'       '+specmap(self.mass[ispec],self.z[ispec])+'       '
+         title = title+specmap(self.mass[ispec],self.z[ispec])+'       '
       print(title)
 
       tag = [
