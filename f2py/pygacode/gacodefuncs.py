@@ -19,7 +19,7 @@ def time_index(t,w):
 
     if len(tvec) == 1:
         imax = len(t)-1
-        imin = np.argmin(abs(t-t[-1]*tvec[0]))
+        imin = np.argmin(abs(t-t[-1]*(1-tvec[0])))
     else:
         imax = np.argmin(abs(t-tvec[1]))
         imin = np.argmin(abs(t-tvec[0]))
