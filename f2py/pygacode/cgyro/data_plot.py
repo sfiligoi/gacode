@@ -516,8 +516,8 @@ class cgyrodata_plot(data.cgyrodata):
 
       for ispec in range(ns):
          y_norm = y[ispec,:]*norm_vec[ispec]
-         ave = time_average(y_norm,t,imin,imax)
-         y_ave   = ave*np.ones(len(t))
+         ave   = time_average(y_norm,t,imin,imax)
+         y_ave = ave*np.ones(len(t))
          u = specmap(self.mass[ispec],self.z[ispec])
          label = r'$'+mtag+mnorm+'_'+u+'/'+mtag+self.gbnorm+': '+str(round(ave,3))+'$'
          if not ftype == 'nox':

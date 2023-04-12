@@ -32,19 +32,19 @@ def time_index(t,w):
 def time_average(f,t,imin,imax):
     
     T = t[imax]-t[imin]
-    dt = np.diff(t)/T
+    dt = np.diff(t)[imin:imax]/T
 
     if f.ndim == 1:
         # 1D array
-        sf = 0.5*(f[1:]+f[:-1])
+        sf = 0.5*(f[imin:imax]+f[imin+1:imax+1])
         ave = np.sum(sf*dt)
     elif f.ndim ==2:
         # 2D array (average over last dimension)
-        sf = 0.5*(f[:,1:]+f[:,:-1])
+        sf = 0.5*(f[:,imin:imax]+f[:,imin+1:imax+1])
         ave = np.sum(sf*dt,axis=-1)
     else:
         # 3D array (average over last dimension)
-        sf = 0.5*(f[:,:,1:]+f[:,:,:-1])
+        sf = 0.5*(f[:,:,imin:imax]+f[:,:,imin+1:imax+1])
         ave = np.sum(sf*dt,axis=-1)
         
     return ave
