@@ -5,14 +5,15 @@
 #  Functions used for computing averages, manipulating strings, etc.
 #----------------------------------------------------------------------
 
+import numpy as np
+import time
+
 # Useful labels
 TIME=r'$(c_s/a)\,t$'
 
 #---------------------------------------------------------------
 # Generalization of average routine to include variance
 def variance(f,t,wmin,wmax):
-
-    import numpy as np
 
     n_time = len(t)
 
@@ -42,15 +43,9 @@ def variance(f,t,wmin,wmax):
 #---------------------------------------------------------------
 def average(f,t,wmin,wmax):
 
+    t0 = time.time()
+    
     n_time = len(t)
-
-    # Manage case with 2 time points (eigenvalue)
-    if len(t) == 2:
-        tmin = t[-1]
-        tmax = tmin
-        ave  = f[-1]
-        return ave
-
     tmin = (1.0-wmin)*t[-1]
     tmax = (1.0-wmax)*t[-1]
 
@@ -62,13 +57,11 @@ def average(f,t,wmin,wmax):
             t_window = t_window+t[i+1]-t[i]
 
     ave = ave/t_window
-
+    
     return ave
 #---------------------------------------------------------------
 #---------------------------------------------------------------
 def average_n(f,t,wmin,wmax,n):
-
-    import numpy as np
 
     ave = np.zeros(n)
 
@@ -178,8 +171,6 @@ def specmap(m_in,z_in):
 #---------------------------------------------------------------
 def smooth_pro(x,z,p,n,type='log'):
 
-    import numpy as np
-
     nx = len(x)
     xf = np.zeros((nx-1)*n+1)
     zf = np.zeros((nx-1)*n+1)
@@ -212,7 +203,6 @@ def extract(d,sd,key,w,spec,moment,norm=False,wmax=0.0,cflux='auto',dovar=False)
 
    import os
    import re
-   import numpy as np
    from cgyro.data import cgyrodata
 
    # d        = directory
@@ -309,6 +299,10 @@ def tag_helper(mass,z,moment):
       fdata = '.cgyro.kxky_e'
       title = r'${\delta \mathrm{E}}_'+u+'$'
       isfield = False
+  elif (moment == 'v'):
+      fdata = '.cgyro.kxky_v'
+      title = r'${\delta \mathrm{v}}_'+u+'$'
+      isfield = False
   elif (moment == 'phi'):
       fdata = '.cgyro.kxky_phi'
       title = r'$\delta\phi$'
@@ -404,3 +398,143 @@ def theta_indx(theta,theta_plot):
    print('INFO: (theta_indx) Selected index',itheta+1,'of',theta_plot)
    return itheta
 #---------------------------------------------------------------
+
+def shift_fourier(f,imin,imax):
+
+    nx = f.shape[0]+1
+    nn = f.shape[1]
+    nt = f.shape[2]
+    
+    y1 = np.zeros([nn])
+    y2 = np.zeros([nn])
+
+    ephi  = np.zeros([2*nx,nt],dtype=complex)
+    ephip = np.zeros([2*nx,nt],dtype=complex)
+
+    wpos = np.zeros([2*nx])
+    wneg = np.zeros([2*nx])
+    wneg[nx//2+1:3*nx//2] = 1.0
+    wneg[nx//2]  =  0.5
+    wneg[3*nx//2] = 0.5
+    wpos[:] = 1-wneg[:]
+        
+    phi  = np.zeros([nx,nt],dtype=complex)
+    phip = np.zeros([nx,nt],dtype=complex)
+
+    for n in range(nn):
+        for p in range(1,nx):
+            phi[p,:] = f[p-1,n,:]
+            phip[p,:] = -(p-nx//2)*f[p-1,n,:]
+            
+        ephi[nx//2:3*nx//2,:]  = phi[:,:]
+        ephip[nx//2:3*nx//2,:] = phip[:,:]            
+
+        # NOTE: We use *inverse* FFT (ifft) for correct +sign convention of
+        #       the exponent. Also note order convention:
+        #       - a[0] = p=0
+        #       - a[1:nx/2] = p > 0
+        #       - a[nx/2:n] = p < 0
+         
+        phi_T = np.fft.ifft(np.fft.ifftshift(ephi,axes=0),axis=0)
+        phip_T = np.fft.ifft(np.fft.ifftshift(ephip,axes=0),axis=0)
+
+        pn_t = np.zeros([2*nx])
+        pd_t = np.zeros([2*nx])
+        for jt in np.arange(imin,imax+1):
+            pn_t[:] = pn_t[:] + np.real(np.conj(phi_T[:,jt])*phip_T[:,jt])
+            pd_t[:] = pd_t[:] + np.real(np.conj(phi_T[:,jt])*phi_T[:,jt])
+
+        # Shift in -gamma domain (standard order: p=0 is 0th index)
+        pn = np.sum(pn_t[:]*wneg[:])
+        pd = np.sum(pd_t[:]*wneg[:])
+            
+        y2[n] = pn/pd
+
+        # Shift in central domain 
+        pn = np.sum(pn_t[:]*wpos[:])
+        pd = np.sum(pd_t[:]*wpos[:])
+         
+        y1[n] = pn/pd
+
+    return y1,y2
+
+
+def shift_legendre(f,imin,imax):
+
+    import scipy.special as sp
+
+    nx = f.shape[0]+1
+    nn = f.shape[1]
+    nt = f.shape[2]
+    n0 = nx//2
+    nk = 2*n0
+
+    y1 = np.zeros([nn])
+    y2 = np.zeros([nn])
+
+    c1 = np.zeros([nk],dtype=complex)
+    c2 = np.zeros([nk],dtype=complex)
+
+    mat1 = np.zeros([nk,n0-1])
+    mat2 = np.zeros([nk,n0-1])
+    kvec = np.arange(nk)
+    pvec = np.arange(1,n0)
+    z = pvec*np.pi/2
+    for k in kvec:
+        mat1[k,:] = sp.spherical_jn(k,z)
+        mat2[k,:] = mat1[k,:]*(-1)**pvec[:]
+
+    ai = 1j**kvec   
+    ak = 2*kvec+1   
+
+    c1m = np.zeros(nk,dtype=complex)
+    c2m = np.zeros(nk,dtype=complex)
+
+    for n in range(nn):
+        n_all1 = n_all2 = 0.0
+        d_all1 = d_all2 = 0.0
+        for jt in np.arange(imin,imax+1):
+
+            y = f[:,n,jt]
+
+            phim = np.flip(y[0:n0-1])
+            phi0 = y[n0-1]
+            phip = y[n0:]
+
+            #print(len(phim),len(phip))
+
+            mp1 = np.matmul(mat1,phip)
+            mm1 = np.matmul(mat1,phim)
+            mp2 = np.matmul(mat2,phip)
+            mm2 = np.matmul(mat2,phim)
+
+            c1[:] = ak[:]*(mp1[:]*ai[:]+mm1[:]*np.conj(ai[:]))
+            c2[:] = ak[:]*(mp2[:]*ai[:]+mm2[:]*np.conj(ai[:]))
+            
+            c1[0] = c1[0]+phi0
+            c2[0] = c2[0]+phi0
+
+            c1m[0:2] = c1[0:2]
+            c2m[0:2] = c2[0:2]
+            for m in range(2,nk):
+                c1m[m] = c1m[m-2]+c1[m]
+                c2m[m] = c2m[m-2]+c2[m]
+               
+            n1 = 2*np.sum(c1m[0:nk-1]*np.conj(c1[1:nk]))
+            n2 = 2*np.sum(c2m[0:nk-1]*np.conj(c2[1:nk]))
+            
+            d1 = 2*np.sum((np.abs(c1[:]))**2/ak[:])
+            d2 = 2*np.sum((np.abs(c2[:]))**2/ak[:])
+
+            n_all1 = n_all1 + np.imag(n1)
+            n_all2 = n_all2 + np.imag(n2)
+            d_all1 = d_all1 + d1
+            d_all2 = d_all2 + d2
+
+            # Derivative
+            # demoninator is <phi | phi> = sum_m 2/(2m+1) |cm|^2 
+
+        y1[n] = n_all1/d_all1*(2.0/np.pi)
+        y2[n] = n_all2/d_all2*(2.0/np.pi)
+
+    return y1,y2

@@ -29,7 +29,7 @@ subroutine cgyro_make_profiles
      allocate(geo_yin(8,0:geo_ny))
      geo_yin(:,:) = 0.0
   else if (equilibrium_model == 2) then
-     ! HAM
+     ! MXH
      geo_numeq_flag = 0
      geo_ny = 0
      allocate(geo_yin(8,0:geo_ny))
@@ -86,7 +86,7 @@ subroutine cgyro_make_profiles
      s_delta = s_delta_loc
      s_zeta  = s_zeta_loc
 
-     ! HAM (cos's will be reset to 0.0 if udsymmetry_flag=1)
+     ! MXH (cos's will be reset to 0.0 if udsymmetry_flag=1)
      shape_sin(3)   = shape_sin3_loc
      shape_s_sin(3) = shape_s_sin3_loc
      shape_sin(4)   = shape_sin4_loc
@@ -340,6 +340,8 @@ subroutine cgyro_make_profiles
   !-------------------------------------------------------------
   ! Manage simulation type (n=0,linear,nonlinear)
   !
+  ! Note: nt1,nt2,nt_loc properly initialized in cgyro_mpi_grid
+  !
   if (zf_test_mode > 0) then
 
      if (zf_test_mode > 2) then
@@ -351,11 +353,12 @@ subroutine cgyro_make_profiles
 
      ! Zonal flow (n=0) test
 
-     k_theta = q/rmin
-     rho     = abs(ky/k_theta)*(-btccw)
-     length  = abs(box_size/(s*k_theta))
+     k_theta_base = q/rmin
+     rho     = abs(ky/k_theta_base)*(-btccw)
+     length  = abs(box_size/(s*k_theta_base))
 
-     k_theta = 0
+     ! my_toroidal == 0
+     ! k_theta == 0
 
      call cgyro_info('Triggered zonal flow test')
 
@@ -363,17 +366,16 @@ subroutine cgyro_make_profiles
         call cgyro_info('Zonal flow test with n_radial > 1')
      endif
 
-     n = 0
-
   else if (n_toroidal == 1) then
 
      ! Single linear mode (assume n=1, compute rho)
 
-     k_theta = q/rmin
-     rho     = abs(ky/k_theta)*(-btccw)
-     length  = abs(box_size/(s*k_theta))
+     k_theta_base = q/rmin
+     rho     = abs(ky/k_theta_base)*(-btccw)
+     length  = abs(box_size/(s*k_theta_base))
 
-     n = 1
+     ! my_toroidal == 1
+     ! k_theta == k_theta_base
 
      call cgyro_info('Single-mode linear analysis')
 
@@ -381,15 +383,14 @@ subroutine cgyro_make_profiles
 
      ! Multiple modes (n=0,1,2,...,n_toroidal-1)
 
-     k_theta = q/rmin
-     rho     = abs(ky/k_theta)*(-btccw)
-     length  = abs(box_size/(s*k_theta))
+     k_theta_base = q/rmin
+     rho     = abs(ky/k_theta_base)*(-btccw)
+     length  = abs(box_size/(s*k_theta_base))
 
      ! Now define individual k_thetas
 
-     n = i_group_1
-
-     k_theta = n*k_theta
+     ! my_toroidal == i_group_1
+     ! k_theta == my_toroidal*k_theta_base
 
      call cgyro_info('Multiple toroidal harmonics')
 
@@ -416,7 +417,7 @@ subroutine cgyro_make_profiles
   !
   source_flag = 0
   if (abs(gamma_e) > 1e-10 .and. nonlinear_flag > 0) then
-     omega_eb = k_theta*length*gamma_e/(2*pi)
+     omega_eb_base = k_theta_base*length*gamma_e/(2*pi)
      select case (shear_method)
      case (1)
         call cgyro_info('ExB shear: Hammett discrete shift') 
@@ -427,7 +428,7 @@ subroutine cgyro_make_profiles
         call cgyro_error('Unknown ExB shear method') 
      end select
   else
-     omega_eb = 0.0
+     omega_eb_base = 0.0
      shear_method = 0
      call cgyro_info('ExB shear: OFF') 
   endif

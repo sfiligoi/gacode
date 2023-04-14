@@ -17,6 +17,8 @@ subroutine cgyro_mpi_grid
   implicit none
 
   integer :: ie,ix,is,ir,it
+  integer :: iexch,itm,j
+  integer :: iltheta_min,iltheta_max
   integer :: d
   integer :: splitkey
 
@@ -28,6 +30,13 @@ subroutine cgyro_mpi_grid
 
   call gcd(nv,nc,d)
 
+  if (modulo(n_toroidal,nt_loc) /= 0) then
+     call cgyro_error('N_TOROIDAL must be a multiple of N_TOROIDAL_PER_PROCESS.')
+     return
+  endif
+
+  n_toroidal_procs = n_toroidal/nt_loc
+
   !-------------------------------------------------------------------------
   ! MPI diagnostics need to come early
   !
@@ -38,18 +47,20 @@ subroutine cgyro_mpi_grid
      write(io,'(a,i5)') '         nv: ',nv
      write(io,'(a,i5)') '         nc: ',nc
      write(io,'(a,i5)') ' GCD(nv,nc): ',d
+     write(io,'(a,i5)') ' n_toroidal: ',n_toroidal
+     write(io,'(a,i5)') '     nt_loc: ',nt_loc
      write(io,*)
      write(io,*) '          [coll]     [str]      [NL]      [NL]      [NL]'
      write(io,*) ' n_MPI    nc_loc    nv_loc   n_split  atoa[MB] atoa proc'
      write(io,*) '------    ------    ------   -------  -------- ---------'
-     do it=1,d*n_toroidal
-        if (mod(d*n_toroidal,it) == 0 .and. mod(it,n_toroidal) == 0) then
-           n_proc_1 = it/n_toroidal
+     do it=1,d*n_toroidal_procs
+        if (mod(d*n_toroidal_procs,it) == 0 .and. mod(it,n_toroidal_procs) == 0) then
+           n_proc_1 = it/n_toroidal_procs
            nc_loc = nc/n_proc_1           
            nv_loc = nv/n_proc_1           
-           nsplit = 1+(nv_loc*n_theta-1)/n_toroidal
+           nsplit = 1+(nv_loc*n_theta-1)/n_toroidal_procs
            write(io,'(t2,4(i6,4x),f5.2,4x,i6)') &
-                it,nc_loc,nv_loc,nsplit,16.0*n_radial*nsplit/1e6,n_toroidal
+                it,nc_loc,nv_loc,nsplit,16.0*n_radial*nt_loc*nsplit/1e6,n_toroidal_procs
         endif
      enddo
      close(io)
@@ -137,26 +148,37 @@ subroutine cgyro_mpi_grid
      nv_loc = nv
      nc_loc = nc
      nsplit = nv_loc*n_theta/n_toroidal
+     nt_loc = 1
+     nt1 = 0
+     nt2 = 0
      return
+  endif
+
+  if (zf_test_mode > 0) then
+     ! Zonal flow (n=0) test
+     nt_loc = 1
   endif
 
   !-------------------------------------------------------------
-  ! Check that n_proc is a multiple of n_toroidal
+  ! Check that n_proc is a multiple of n_toroidal_procs
   !
-  if (modulo(n_proc,n_toroidal) /= 0) then
-     call cgyro_error('Number of processors must be a multiple of N_TOROIDAL.')
+  if (modulo(n_proc,n_toroidal_procs) /= 0) then
+     call cgyro_error('Number of MPI processes must be a multiple of N_TOROIDAL/N_TOROIDAL_PER_PROCESS.')
      return
   endif
 
+!$acc enter data copyin(nv,nc,n_toroidal,n_toroidal_procs)
+!$acc enter data copyin(n_radial,n_theta,n_field,n_energy,n_xi,n_species,n_field)
+
   ! Assign subgroup dimensions: n_proc = n_proc_1 * n_proc_2
 
-  n_proc_1 = n_proc/n_toroidal
-  n_proc_2 = n_toroidal
+  n_proc_1 = n_proc/n_toroidal_procs
+  n_proc_2 = n_toroidal_procs
 
-  ! Check that nv and nc are multiples of the local processor count
+  ! Check that nv and nc are multiples of toroidal MPI multiplier
 
   if (modulo(nv,n_proc_1) /= 0 .or. modulo(nc,n_proc_1) /= 0) then
-     call cgyro_error('nv or nc not a multiple of the local processor count.')
+     call cgyro_error('nv or nc not a multiple of toroidal MPI multiplier.')
      return
   endif
 
@@ -205,11 +227,28 @@ subroutine cgyro_mpi_grid
   call MPI_COMM_RANK(NEW_COMM_2,i_proc_2,i_err)
   !-----------------------------------------------------------
 
+  ! Define the toroidal range
+  ! Note: The same test is in cgyro_make_progiles, too
+  !       But we need my_toroidal early
+  if (zf_test_mode > 0) then
+     ! Zonal flow (n=0) test
+     nt1 = 0
+     nt2 = 0
+  else if (n_toroidal == 1) then
+     ! Single linear mode (assume n=1)
+     nt1 = 1
+     nt2 = 1
+  else
+     ! Multiple modes (n=0,1,2,...,n_toroidal-1)
+     nt1 = i_group_1*nt_loc
+     nt2 = nt1 + nt_loc -1
+  endif
+
   ! Linear parallelization dimensions
 
   ! ni -> nc
   ! nj -> nv  
-  call parallel_lib_init(nc,nv,nc_loc,nv_loc,NEW_COMM_1)
+  call parallel_lib_init(nc,nv,nt1,nt_loc,nc_loc,nv_loc,NEW_COMM_1)
 
   nv1 = 1+i_proc_1*nv_loc
   nv2 = (1+i_proc_1)*nv_loc
@@ -234,7 +273,7 @@ subroutine cgyro_mpi_grid
   endif
   ns_loc = ns2-ns1+1
 
-  ! when exchaning only specific species, we need a dedicated comm
+! when exchaning only specific species, we need a dedicated comm
   call MPI_COMM_SPLIT(NEW_COMM_1,&
        i_group_3,&
        splitkey,&
@@ -253,16 +292,22 @@ subroutine cgyro_mpi_grid
 
   ! Nonlinear parallelization dimensions (returns nsplit)
 
-  if (nonlinear_method == 1) then
-     call parallel_slib_init(n_toroidal,nv_loc,nc,nsplit,NEW_COMM_2)
-  else
-     call parallel_slib_init(n_toroidal,nv_loc*n_theta,n_radial,nsplit,NEW_COMM_2)
+  call parallel_slib_init(n_toroidal_procs,nv_loc*n_theta,n_radial,nsplit,NEW_COMM_2)
+
+  n_jtheta = 0
+  if (nonlinear_flag == 1) then
+     do itm=1,n_toroidal_procs
+       ! find max n_jtheta among all processes
+       ! since we will need that to have equal number of rows
+       ! in all the gpack buffers
+       iltheta_min = 1+((itm-1)*nsplit)/nv_loc
+       ! use min since we have uneven splitting and compute can go past limit
+       iltheta_max = min(n_theta,1+(itm*nsplit-1)/nv_loc)
+       n_jtheta = max(n_jtheta,iltheta_max-iltheta_min+1)
+     enddo
   endif
 
-  ! Stagger COMM2 communication based on i_proc_1
-  ! Get the first half together, and second half together
-  ! This makes it more likely to have both types on all nodes
-  is_staggered_comm_2 = (modulo((i_proc_1*2)/n_proc_1,2) == 0)
+!$acc enter data copyin(nt1,nt2,nt_loc,nv1,nv2,nv_loc,ns1,ns2,ns_loc,nc1,nc2,nc_loc,n_jtheta,nsplit)
 
   ! OMP code
   n_omp = omp_get_max_threads()

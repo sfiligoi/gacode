@@ -14,11 +14,11 @@ subroutine prgen_geometry
 
   integer :: npsi,nf,i,j,ip
   real, dimension(:,:), allocatable :: efit_si,efit_ci
-  real, dimension(:), allocatable :: efit_rho,efit_psi,efit_q,efit_p
+  real, dimension(:), allocatable :: efit_rho,efit_psi,efit_q,efit_p,efit_fpol
   real, dimension(:), allocatable :: efit_rmin,efit_rmaj,efit_kappa,efit_zmaj
   real, dimension(:,:,:), allocatable :: g3vec
   real, dimension(:,:,:), allocatable :: g3rho
-  real :: psi_sep
+  real :: psi_sep,pratio
 
   !----------------------------------------------------------------
   open(unit=1,file='out.dim',status='old')
@@ -41,12 +41,14 @@ subroutine prgen_geometry
   allocate(efit_psi(npsi))
   allocate(efit_q(npsi))
   allocate(efit_p(npsi))
+  allocate(efit_fpol(npsi))
   allocate(efit_rho(npsi))
 
   open(unit=1,file='out.data',status='old',access='stream')
   read(1) efit_psi
   read(1) efit_q
   read(1) efit_p
+  read(1) efit_fpol
   read(1) efit_si
   read(1) efit_ci
   read(1) efit_rmin
@@ -76,15 +78,15 @@ subroutine prgen_geometry
   print 10,'INFO: (prgen_geometry) STATEFILE/EFIT dpsi:',dpsi(nx)/(psi1-psi0)
 
   ! Problem condition: dpsi(nx) > efit_psi(npsi) 
-  if (dpsi(nx) > efit_psi(npsi)) then
-     if (dpsi(nx)/efit_psi(npsi) > 1.05) then
-        print '(a)','ERROR: (prgen_geometry) Detected statefile dpsi(nx) >> mapped dpsi_max'
-        stop
+  pratio = dpsi(nx)/efit_psi(npsi)
+  if (pratio > 1.0) then
+     if (pratio > 1.05) then
+        print '(a)','WARNING: (prgen_geometry) Detected statefile dpsi(nx) >> mapped dpsi_max [BAD]'
      else
         print '(a)','WARNING: (prgen_geometry) Detected statefile dpsi(nx) > mapped dpsi_max'
-        print '(a)','WARNING: (prgen_geometry) Compressing statefile flux to match mapped flux'
-        dpsi(:) = dpsi(:)*efit_psi(npsi)/dpsi(nx)
      endif
+     print '(a,f5.3,a)','WARNING: (prgen_geometry) Compressing statefile flux by ',pratio,' to match mapped flux'
+     dpsi(:) = dpsi(:)/(pratio+1e-10)
   endif
   !--------------------------------------------------------------------------------------
 
@@ -98,6 +100,7 @@ subroutine prgen_geometry
   call bound_interp(efit_rho,efit_rmin,npsi,rho,rmin,nx)
   call bound_interp(efit_psi,efit_q,npsi,dpsi,q,nx)
   call bound_interp(efit_psi,efit_p,npsi,dpsi,p_tot,nx)
+  call bound_interp(efit_psi,efit_fpol,npsi,dpsi,fpol,nx)
   call bound_interp(efit_rho,efit_zmaj,npsi,rho,zmag,nx)
   call bound_interp(efit_rho,efit_rmaj,npsi,rho,rmaj,nx)
   call bound_interp(efit_rho,efit_kappa,npsi,rho,kappa,nx)
@@ -175,6 +178,7 @@ subroutine prgen_geometry
   deallocate(efit_psi)
   deallocate(efit_q)
   deallocate(efit_p)
+  deallocate(efit_fpol)
   deallocate(efit_rho)
 
 10 format(t1,a,f9.6,a)

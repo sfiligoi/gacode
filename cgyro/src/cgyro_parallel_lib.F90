@@ -17,17 +17,20 @@ module parallel_lib
   integer, private :: ni,nj
   integer, private :: ni_loc
   integer, private :: nj_loc
+  integer, private :: nk_loc
+  integer, private :: nk1,nk2
   integer, private :: lib_comm
   integer, private :: nsend
-  real, dimension(:,:,:), allocatable, private :: fsendr_real
+
+  real, dimension(:,:,:,:), allocatable, private :: fsendr_real
 
   ! (expose these)
-  complex, dimension(:,:,:), allocatable :: fsendf
-  complex, dimension(:,:,:), allocatable :: fsendr
+  complex, dimension(:,:,:,:), allocatable :: fsendf
+  complex, dimension(:,:,:,:), allocatable :: fsendr
 
   ! slib
 
-  integer, private :: nsproc,isproc
+  integer :: nsproc,isproc
   integer, private :: nn
   integer, private :: nexch
   integer, private :: nkeep
@@ -43,13 +46,14 @@ contains
   !  parallel_lib_r -> g(nj_loc,ni) -> f(ni_loc,nj)
   !=========================================================
 
-  subroutine parallel_lib_init(ni_in,nj_in,ni_loc_out,nj_loc_out,comm)
+  subroutine parallel_lib_init(ni_in,nj_in,nk1_in,nk_loc_in,ni_loc_out,nj_loc_out,comm)
 
     use mpi
 
     implicit none
 
     integer, intent(in) :: ni_in,nj_in
+    integer, intent(in) :: nk1_in,nk_loc_in
     integer, intent(in) :: comm
     integer, intent(inout) :: ni_loc_out,nj_loc_out
     integer, external :: parallel_dim
@@ -63,19 +67,26 @@ contains
     ni = ni_in
     nj = nj_in
 
+    ! parallel_dim(x,y) ~= x/y
     ni_loc = parallel_dim(ni,nproc)
     nj_loc = parallel_dim(nj,nproc)
+    nk_loc = nk_loc_in
+
+    ! nk1_in is typically iproc*nk_loc, but not always
+    nk1 = nk1_in
+    nk2 = nk1 + nk_loc -1
 
     ni_loc_out = ni_loc
     nj_loc_out = nj_loc
 
-    nsend = ni*nj/nproc**2
+    nsend = nj_loc*ni_loc*nk_loc
 
-    allocate(fsendf(nj_loc,ni_loc,nproc))
-    allocate(fsendr(ni_loc,nj_loc,nproc))
-    if (.not. allocated(fsendr_real)) allocate(fsendr_real(ni_loc,nj_loc,nproc))
+    allocate(fsendf(nj_loc,nk1:nk2,ni_loc,nproc))
+    allocate(fsendr(ni_loc,nk1:nk2,nj_loc,nproc))
+    if (.not. allocated(fsendr_real)) allocate(fsendr_real(ni_loc,nk1:nk2,nj_loc,nproc))
 
 !$acc enter data create(fsendf,fsendr)
+!$acc enter data copyin(nproc,nk1,nk2,ni_loc)
 
   end subroutine parallel_lib_init
 
@@ -87,7 +98,7 @@ contains
 
     implicit none
 
-    complex, intent(inout), dimension(nj_loc,ni) :: ft
+    complex, intent(inout), dimension(:,:,:) :: ft
     integer :: ierr
 
     call MPI_ALLTOALL(fsendf, &
@@ -109,7 +120,7 @@ contains
 
     implicit none
 
-    complex, intent(inout), dimension(nj_loc,ni) :: ft
+    complex, intent(inout), dimension(:,:,:) :: ft
     integer :: ierr
 
 #ifdef DISABLE_GPUDIRECT_MPI
@@ -143,7 +154,7 @@ contains
 
     implicit none
 
-    complex, intent(inout), dimension(ni_loc,nj) :: f
+    complex, intent(inout), dimension(:,:,:) :: f
     integer :: ierr
 
     call MPI_ALLTOALL(fsendr, &
@@ -165,7 +176,7 @@ contains
 
     implicit none
 
-    complex, intent(inout), dimension(ni_loc,nj) :: f
+    complex, intent(inout), dimension(:,:,:) :: f
 
     integer :: ierr
 
@@ -200,23 +211,25 @@ contains
 
     implicit none
 
-    complex, intent(in), dimension(nj_loc,ni) :: ft
-    integer :: j_loc,i,j,k,j1,j2
+    complex, intent(in), dimension(:,:,:) :: ft
+    integer :: j_loc,i,j,k,j1,j2,itor
 
     j1 = 1+iproc*nj_loc
     j2 = (1+iproc)*nj_loc
 
-!$omp parallel do if (size(fsendr) >= default_size) default(none) &
-!$omp& shared(nproc,j1,j2,ni_loc) &
+!$omp parallel do collapse(2) if (size(fsendr) >= default_size) default(none) &
+!$omp& shared(nproc,j1,j2,ni_loc,nk1,nk2) &
 !$omp& private(j,j_loc,i) &
 !$omp& shared(ft,fsendr)
     do k=1,nproc
+     do itor=nk1,nk2
        do j=j1,j2
           j_loc = j-j1+1 
           do i=1,ni_loc
-             fsendr(i,j_loc,k) = ft(j_loc,i+(k-1)*ni_loc) 
+             fsendr(i,itor,j_loc,k) = ft(j_loc,i+(k-1)*ni_loc,1+(itor-nk1))
           enddo
        enddo
+     enddo
     enddo
 
   end subroutine parallel_lib_r_pack
@@ -231,23 +244,25 @@ contains
 
     implicit none
 
-    complex, intent(in), dimension(:,:) :: fin
-    integer :: j_loc,i,j,k,j1,j2
+    complex, intent(in), dimension(:,:,:) :: fin
+    integer :: j_loc,i,j,k,j1,j2,itor
 
     j1 = 1+iproc*nj_loc
     j2 = (1+iproc)*nj_loc
 
-!$omp parallel do if (size(fsendr) >= default_size) default(none) &
-!$omp& shared(nproc,j1,j2,ni_loc) &
+!$omp parallel do collapse(2) if (size(fsendr) >= default_size) default(none) &
+!$omp& shared(nproc,j1,j2,ni_loc,nk1,nk2) &
 !$omp& private(j,j_loc,i) &
 !$omp& shared(fin,fsendr)
     do k=1,nproc
+     do itor=nk1,nk2
        do j=j1,j2
           j_loc = j-j1+1 
           do i=1,ni_loc
-             fsendr(i,j_loc,k) = fin(i+(k-1)*ni_loc,j_loc) 
+             fsendr(i,itor,j_loc,k) = fin(i+(k-1)*ni_loc,j_loc,1+(itor-nk1))
           enddo
        enddo
+     enddo
     enddo
 
   end subroutine parallel_lib_rtrans_pack
@@ -263,20 +278,23 @@ contains
 
     implicit none
 
-    complex, intent(in), dimension(:,:) :: fin
-    integer :: j_loc,i,j,k,j1,j2
+    complex, intent(in), dimension(:,:,:) :: fin
+    integer :: j_loc,i,j,k,j1,j2,itor
 
     j1 = 1+iproc*nj_loc
     j2 = (1+iproc)*nj_loc
-!$acc parallel loop collapse(3) independent private(j_loc) &
-!$acc&         present(fsendr,fin) default(none)
+!$acc parallel loop collapse(4) gang vector independent private(j_loc) &
+!$acc&         present(fsendr,fin) present(nproc,nk1,nk2,ni_loc) &
+!$acc&         copyin(j1,j2) default(none)
     do k=1,nproc
+     do itor=nk1,nk2
        do j=j1,j2
           do i=1,ni_loc
              j_loc = j-j1+1
-             fsendr(i,j_loc,k) = fin(i+(k-1)*ni_loc,j_loc)
+             fsendr(i,itor,j_loc,k) = fin(i+(k-1)*ni_loc,j_loc,1+(itor-nk1))
           enddo
        enddo
+     enddo
     enddo
 
   end subroutine parallel_lib_rtrans_pack_gpu
@@ -291,8 +309,8 @@ contains
 
     implicit none
 
-    complex, intent(in), dimension(:,:) :: fin
-    complex, intent(inout), dimension(ni_loc,nj) :: f
+    complex, intent(in), dimension(:,:,:) :: fin
+    complex, intent(inout), dimension(:,:,:) :: f
 
     call parallel_lib_rtrans_pack(fin)
     call parallel_lib_r_do(f)
@@ -307,24 +325,26 @@ contains
 
     implicit none
 
-    real, intent(in), dimension(:,:) :: fin
-    real, intent(inout), dimension(ni_loc,nj) :: f
-    integer :: ierr,j_loc,i,j,k,j1,j2
+    real, intent(in), dimension(:,:,:) :: fin
+    real, intent(inout), dimension(:,:,:) :: f
+    integer :: ierr,j_loc,i,j,k,j1,j2,itor
 
     j1 = 1+iproc*nj_loc
     j2 = (1+iproc)*nj_loc
 
-!$omp parallel do if (size(fsendr_real) >= default_size) default(none) &
-!$omp& shared(nproc,j1,j2,ni_loc) &
+!$omp parallel do collapse(2) if (size(fsendr_real) >= default_size) default(none) &
+!$omp& shared(nproc,j1,j2,ni_loc,nk1,nk2) &
 !$omp& private(j,j_loc,i) &
 !$omp& shared(fin,fsendr_real)
     do k=1,nproc
+     do itor=nk1,nk2
        do j=j1,j2
           j_loc = j-j1+1
           do i=1,ni_loc
-             fsendr_real(i,j_loc,k) = fin(i+(k-1)*ni_loc,j_loc) 
+             fsendr_real(i,itor,j_loc,k) = fin(i+(k-1)*ni_loc,j_loc,1+(itor-nk1)) 
           enddo
        enddo
+     enddo
     enddo
 
     call MPI_ALLTOALL(fsendr_real, &
@@ -368,6 +388,7 @@ contains
     call MPI_COMM_SIZE(slib_comm,nsproc,ierr)
     !-----------------------------------------------
 
+    ! nn_in == nsproc
     nn  = nn_in
     nexch = nexch_in
     nkeep = nkeep_in
@@ -378,6 +399,29 @@ contains
 
   end subroutine parallel_slib_init
 
+  ! test an async req, to progress async operations
+  subroutine parallel_slib_test(req)
+    use mpi
+    !-------------------------------------------------------
+    implicit none
+    !
+    integer, intent(inout) :: req
+    !
+    logical :: iflag
+    integer :: ierr
+    integer :: istat(MPI_STATUS_SIZE)
+    !-------------------------------------------------------
+
+#ifndef NO_ASYNC_MPI
+
+    call MPI_REQUEST_GET_STATUS(req, iflag, istat, ierr)
+    ! we discard all the outputs... it is just a way to progress async mpi
+
+#endif
+    !else, noop
+
+  end subroutine parallel_slib_test
+
 !=========================================================
 
   subroutine parallel_slib_f_nc(x,xt)
@@ -387,34 +431,41 @@ contains
     !-------------------------------------------------------
     implicit none
     !
-    complex, intent(in), dimension(nkeep,nsplit*nn) :: x
-    complex, intent(inout), dimension(nkeep,nsplit,nn) :: xt
+    complex, intent(in), dimension(nkeep,nk_loc,nsplit*nn) :: x
+    complex, intent(inout), dimension(nkeep,nk_loc,nsplit,nn) :: xt
     !
     integer :: ierr
     !-------------------------------------------------------
 
     call MPI_ALLTOALL(x, &
-         nkeep*nsplit, &
+         nkeep*nk_loc*nsplit, &
          MPI_DOUBLE_COMPLEX, &
          xt, &
-         nkeep*nsplit, &
+         nkeep*nk_loc*nsplit, &
          MPI_DOUBLE_COMPLEX, &
          slib_comm, &
          ierr)
 
   end subroutine parallel_slib_f_nc
 
-#ifdef _OPENACC
-  subroutine parallel_slib_f_nc_gpu(x,xt)
+  subroutine parallel_slib_f_nc_async(x,xt,req)
     use mpi
     !-------------------------------------------------------
     implicit none
     !
-    complex, intent(in), dimension(nkeep,nsplit*nn) :: x
-    complex, intent(inout), dimension(nkeep,nsplit,nn) :: xt
+    complex, intent(in), dimension(nkeep,nk_loc,nsplit*nn) :: x
+    complex, intent(inout), dimension(nkeep,nk_loc,nsplit,nn) :: xt
+    integer, intent(inout) :: req
     !
     integer :: ierr
     !-------------------------------------------------------
+
+#ifdef NO_ASYNC_MPI
+   call parallel_slib_f_nc(x,xt)
+
+#else
+
+#ifdef _OPENACC
 !$acc data present(x,xt)
 
 #ifdef DISABLE_GPUDIRECT_MPI
@@ -422,90 +473,262 @@ contains
 #else
 !$acc host_data use_device(x,xt)
 #endif
- 
-   call MPI_ALLTOALL(x, &
-         nkeep*nsplit, &
+#endif
+
+   call MPI_IALLTOALL(x, &
+         nkeep*nk_loc*nsplit, &
          MPI_DOUBLE_COMPLEX, &
          xt, &
-         nkeep*nsplit, &
+         nkeep*nk_loc*nsplit, &
          MPI_DOUBLE_COMPLEX, &
          slib_comm, &
+         req, &
          ierr)
 
+#ifdef _OPENACC
 #ifdef DISABLE_GPUDIRECT_MPI
-!$acc update device(xt)
+   !do nothing yet, async
 #else
 !$acc end host_data
 #endif
 
 !$acc end data
-
-  end subroutine parallel_slib_f_nc_gpu
 #endif
+
+#endif
+
+  end subroutine parallel_slib_f_nc_async
+
+  ! require x and xt to ensure they exist until this finishes
+  subroutine parallel_slib_f_nc_wait(x,xt,req)
+    use mpi
+    !-------------------------------------------------------
+    implicit none
+    !
+    complex, intent(in), dimension(nkeep,nk_loc,nsplit*nn) :: x
+    complex, intent(inout), dimension(nkeep,nk_loc,nsplit,nn) :: xt
+    integer, intent(inout) :: req
+    !
+    integer :: ierr
+    integer :: istat(MPI_STATUS_SIZE)
+    !-------------------------------------------------------
+
+#ifndef NO_ASYNC_MPI
+
+
+#ifdef _OPENACC
+!$acc data present(xt)
+#endif
+
+    call MPI_WAIT(req, &
+         istat, &
+         ierr)
+
+#ifdef _OPENACC
+#ifdef DISABLE_GPUDIRECT_MPI
+!$acc update device(xt)
+#endif
+
+!$acc end data
+#endif
+
+#endif
+   !else, noop
+
+  end subroutine parallel_slib_f_nc_wait
 
  !=========================================================
 
   subroutine parallel_slib_r_nc (xt,x)
-
-    use mpi
-
-    !-------------------------------------------------------
-    implicit none
-    !
-    complex, intent(in), dimension(nkeep,nsplit,nn) :: xt
-    complex, intent(inout), dimension(nkeep,nsplit*nn) :: x
-    !
-    integer :: ierr
-    !-------------------------------------------------------
-
-    call MPI_ALLTOALL(xt, &
-         nkeep*nsplit, &
-         MPI_DOUBLE_COMPLEX, &
-         x, &
-         nkeep*nsplit, &
-         MPI_DOUBLE_COMPLEX, &
-         slib_comm, &
-         ierr)
-
-  end subroutine parallel_slib_r_nc
-
- !=========================================================
-
-  subroutine parallel_slib_r_nc_gpu (xt,x)
     use mpi
     !-------------------------------------------------------
     implicit none
     !
-    complex, intent(in), dimension(nkeep,nsplit,nn) :: xt
-    complex, intent(inout), dimension(nkeep,nsplit*nn) :: x
+    complex, intent(in), dimension(nkeep,nk_loc,nsplit,nn) :: xt
+    complex, intent(inout), dimension(nkeep,nk_loc,nsplit*nn) :: x
     !
     integer :: ierr
     !-------------------------------------------------------
 
+#ifdef _OPENACC
 !$acc data present(xt,x)
 #ifdef DISABLE_GPUDIRECT_MPI
 !$acc update host(xt)
 #else
 !$acc host_data use_device(xt,x)
 #endif
+#endif
 
     call MPI_ALLTOALL(xt, &
-         nkeep*nsplit, &
+         nkeep*nk_loc*nsplit, &
          MPI_DOUBLE_COMPLEX, &
          x, &
-         nkeep*nsplit, &
+         nkeep*nk_loc*nsplit, &
          MPI_DOUBLE_COMPLEX, &
          slib_comm, &
          ierr)
 
+#ifdef _OPENACC
 #ifdef DISABLE_GPUDIRECT_MPI
 !$acc update device(x)
 #else
 !$acc end host_data
 #endif
 !$acc end data
+#endif
 
-  end subroutine parallel_slib_r_nc_gpu
+  end subroutine parallel_slib_r_nc
+
+!=========================================================
+
+  ! Automaticallt use CPU or GPU version, based on presence of ACC
+  subroutine parallel_slib_f_fd(nels1,nels2,nels3,x,xt)
+
+    use mpi
+
+    !-------------------------------------------------------
+    implicit none
+    !
+    integer, intent(in) :: nels1,nels2,nels3
+    complex, intent(in), dimension(nels1,nels2,nels3,nk_loc*nn) :: x
+    complex, intent(inout), dimension(nels1,nels2,nels3,nk_loc*nn) :: xt
+    !
+    integer :: ierr
+    !-------------------------------------------------------
+
+#ifdef _OPENACC
+!$acc data present(xt,x)
+!$acc host_data use_device(xt,x)
+#endif
+
+    call MPI_ALLTOALL(x, &
+         nels1*nels2*nels3*nk_loc, &
+         MPI_DOUBLE_COMPLEX, &
+         xt, &
+         nels1*nels2*nels3*nk_loc, &
+         MPI_DOUBLE_COMPLEX, &
+         slib_comm, &
+         ierr)
+
+#ifdef _OPENACC
+!$acc end host_data
+!$acc end data
+#endif
+
+  end subroutine parallel_slib_f_fd
+
+  subroutine parallel_slib_f_fd_async(nels1,nels2,nels3,x,xt,req)
+    use mpi
+    !-------------------------------------------------------
+    implicit none
+    !
+    integer, intent(in) :: nels1,nels2,nels3
+    complex, intent(in), dimension(nels1,nels2,nels3,nk_loc*nn) :: x
+    complex, intent(inout), dimension(nels1,nels2,nels3,nk_loc*nn) :: xt
+    integer, intent(inout) :: req
+    !
+    integer :: ierr
+    !-------------------------------------------------------
+
+#ifdef NO_ASYNC_MPI
+    call parallel_slib_f_fd(nels1,nels2,nels3,x,xt)
+#else
+
+#ifdef _OPENACC
+!$acc data present(xt,x)
+!$acc host_data use_device(xt,x)
+#endif
+
+   call MPI_IALLTOALL(x, &
+         nels1*nels2*nels3*nk_loc, &
+         MPI_DOUBLE_COMPLEX, &
+         xt, &
+         nels1*nels2*nels3*nk_loc, &
+         MPI_DOUBLE_COMPLEX, &
+         slib_comm, &
+         req, &
+         ierr)
+
+#ifdef _OPENACC
+!$acc end host_data
+!$acc end data
+#endif
+
+#endif
+
+  end subroutine parallel_slib_f_fd_async
+
+  ! require x and xt to ensure they exist until this finishes
+  subroutine parallel_slib_f_fd_wait(nels1,nels2,nels3,x,xt,req)
+    use mpi
+    !-------------------------------------------------------
+    implicit none
+    !
+    integer, intent(in) :: nels1,nels2,nels3
+    complex, intent(in), dimension(nels1,nels2,nels3,nk_loc*nn) :: x
+    complex, intent(inout), dimension(nels1,nels2,nels3,nk_loc*nn) :: xt
+    integer, intent(inout) :: req
+    !
+    integer :: ierr
+    integer :: istat(MPI_STATUS_SIZE)
+    !-------------------------------------------------------
+
+#ifndef NO_ASYNC_MPI
+
+#ifdef _OPENACC
+!$acc data present(x,xt)
+#endif
+
+    call MPI_WAIT(req, &
+         istat, &
+         ierr)
+
+#ifdef _OPENACC
+!$acc end data
+#endif
+
+#endif
+  ! else noop
+
+
+  end subroutine parallel_slib_f_fd_wait
+
+!=========================================================
+
+  ! x is logically (nels,nn)
+  subroutine parallel_slib_distribute_real(nels,x)
+
+    use mpi
+
+    !-------------------------------------------------------
+    implicit none
+    !
+    integer, intent(in) :: nels
+    real, intent(inout), dimension(*) :: x
+    !
+    integer :: ierr
+    !-------------------------------------------------------
+
+#ifdef _OPENACC
+!$acc host_data use_device(x)
+#endif
+
+    call MPI_ALLTOALL(MPI_IN_PLACE, &
+         nels, &
+         MPI_DOUBLE, &
+         x, &
+         nels, &
+         MPI_DOUBLE, &
+         slib_comm, &
+         ierr)
+
+#ifdef _OPENACC
+!$acc end host_data
+#endif
+
+  end subroutine parallel_slib_distribute_real
+
+!=========================================================
 
   subroutine parallel_lib_nj_loc(nj_loc_in)
 

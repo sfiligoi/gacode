@@ -6,3 +6,4 @@ all:
 
 clean:
 	cd src ; make clean
+	cd tools/ptglf; make clean

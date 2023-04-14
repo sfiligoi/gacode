@@ -1,0 +1,29 @@
+#----------------------------------------------------------
+# Iris (General Atomics)
+#----------------------------------------------------------
+
+IDENTITY="IRIS (ifort)"
+CORES_PER_NODE=1
+NUMAS_PER_NODE=1
+
+# Compilers and flags
+FC     = mpif90 -gen-interfaces -module ${GACODE_ROOT}/modules
+F77    = ${FC}
+
+FOMP   = -qopenmp
+FMATH  = -real-size 64
+FOPT   = -O2
+FDEBUG = -check all -traceback
+F2PY   = f2py
+
+# System math libraries
+LMATH = -mkl
+FFTW_INC=${MKLROOT}/include/fftw/
+
+# NetCDF
+NETCDF = -L${NETCDF_DIR}/lib -lnetcdff -L${NETCDF_DIR}/lib -lnetcdf -lnetcdf -lz -lcurl -lm
+NETCDF_INC = ${NETCDF_DIR}/include
+
+# Archive 
+ARCH = ar cr
+

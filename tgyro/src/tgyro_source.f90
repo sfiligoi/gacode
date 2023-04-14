@@ -20,7 +20,7 @@ subroutine tgyro_source
 
   !-------------------------------------------------------
   ! 1. Alpha power
-  call rad_alpha(ne,ni,te,ti,sn_alpha,s_alpha_i,s_alpha_e,frac_ai,e_cross,n_r,loc_n_ion)
+  call rad_alpha(ne,ni,te,ti,sn_alpha,s_alpha_i,s_alpha_e,frac_ai,e_cross,n_alpha,t_alpha,n_r,loc_n_ion)
   frac_ae = 1-frac_ai
   !-------------------------------------------------------
 
@@ -60,7 +60,7 @@ subroutine tgyro_source
   call tgyro_volume_int(s_alpha_i,p_i_fus)
   call tgyro_volume_int(s_alpha_e,p_e_fus)
   call tgyro_volume_int(sn_alpha,f_he_fus)
-  
+
   ! Integrated Bremsstrahlung power
   call tgyro_volume_int(s_brem,p_brem)
 
@@ -101,7 +101,7 @@ subroutine tgyro_source
 
   case (3)
 
-     ! Reactor with consistent alpha power, exchange and radiation.
+     ! Reactor with consistent alpha power, exchange, radiation and Ohmic heating
 
      p_i(:) = &
           +p_i_fus(:) &                ! Fusion power to ions
@@ -112,6 +112,7 @@ subroutine tgyro_source
      p_e(:) = &
           +p_e_fus(:) &                ! Fusion power to electrons
           +p_e_aux_in(:) &             ! Auxiliary electron heating [fixed]
+          +p_e_ohmic_in(:) &           ! Ohmic heating [fixed]
           -p_exch(:)   &               ! Collisional exchange
           -p_brem(:) &                 ! Bremsstrahlung radiation
           -p_sync(:) &                 ! Synchrotron radiation
@@ -158,7 +159,7 @@ subroutine tgyro_source
   mflux_target(1) = 0.0 
   mflux_target(2:n_r) = mf_in(2:n_r)/volp(2:n_r)
   !------------------------------------------------
- 
+
   !------------------------------------------------
   ! Target He ash flux in 1/s/cm^2
   !

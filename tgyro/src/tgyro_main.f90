@@ -2,13 +2,12 @@ program tgyro_main
 
   use mpi
   use tgyro_globals
-  use gyro_globals, only : path, GYRO_COMM_WORLD
-  use ompdata
 
   !-----------------------------------------------------------------
   implicit none
   !
   integer :: supported
+  integer :: i_omp,n_omp
   integer, external :: omp_get_max_threads, omp_get_thread_num
 
   !-----------------------------------------------------------------
@@ -47,14 +46,6 @@ program tgyro_main
   ! At this stage, paths/procs information is only on process 0.
   !
   call tgyro_comm_setup
-  !-----------------------------------------------------------------
-
-  !-----------------------------------------------------------------
-  ! Set GYRO path to local path (per instance). 
-  path = lpath
-  !
-  ! Set GYRO communicator to local communicator (per instance).
-  GYRO_COMM_WORLD = gyro_comm
   !-----------------------------------------------------------------
 
   select case (tgyro_mode)

@@ -61,6 +61,9 @@ subroutine cgyro_cleanup
   if(allocated(omega_rot_edrift))    deallocate(omega_rot_edrift)
   if(allocated(omega_rot_edrift_r))  deallocate(omega_rot_edrift_r)
   if(allocated(omega_rot_star))      deallocate(omega_rot_star)
+  if(allocated(gtime))               deallocate(gtime)
+  if(allocated(freq))                deallocate(freq)
+  if(allocated(freq_err))            deallocate(freq_err)
   if(allocated(fcoef))  then
 !$acc exit data delete(fcoef)     
      deallocate(fcoef)
@@ -77,6 +80,7 @@ subroutine cgyro_cleanup
 !$acc exit data delete(field_loc)     
      deallocate(field_loc)
   endif
+  if(allocated(field_dot))           deallocate(field_dot)
   if(allocated(field_old))           deallocate(field_old)
   if(allocated(field_old2))          deallocate(field_old2)
   if(allocated(field_old3))          deallocate(field_old3)
@@ -121,14 +125,6 @@ subroutine cgyro_cleanup
 !$acc exit data delete(g_x)       
      deallocate(g_x)
   endif
-  if(allocated(psi)) then
-!$acc exit data delete(psi)       
-     deallocate(psi)
-  endif
-  if(allocated(chi)) then
-!$acc exit data delete(chi)            
-     deallocate(chi)
-  endif
   if(allocated(h0_x)) then
 !$acc exit data delete(h0_x)        
      deallocate(h0_x)
@@ -140,6 +136,18 @@ subroutine cgyro_cleanup
   if(allocated(cap_h_ct))  then
 !$acc exit data delete(cap_h_ct)       
      deallocate(cap_h_ct)
+  endif
+  if(allocated(cap_h_c_dot)) then
+!$acc exit data delete(cap_h_c_dot)
+     deallocate(cap_h_c_dot)
+  endif
+  if(allocated(cap_h_c_old)) then
+!$acc exit data delete(cap_h_c_old)
+     deallocate(cap_h_c_old)
+  endif
+  if(allocated(cap_h_c_old2)) then
+!$acc exit data delete(cap_h_c_old2)
+     deallocate(cap_h_c_old2)
   endif
   if(allocated(omega_cap_h)) then
 !$acc exit data delete(omega_cap_h)        
@@ -161,6 +169,10 @@ subroutine cgyro_cleanup
 !$acc exit data delete(jvec_c)     
      deallocate(jvec_c)
   endif
+  if(allocated(jvec_c_nl))  then
+!$acc exit data delete(jvec_c_nl)
+     deallocate(jvec_c_nl)
+  endif
   if(allocated(jvec_v))              deallocate(jvec_v)
   if(allocated(dvjvec_c)) then
 !$acc exit data delete(dvjvec_c)     
@@ -171,7 +183,6 @@ subroutine cgyro_cleanup
      deallocate(dvjvec_v)
   endif
   if(allocated(jxvec_c))  then
-!$acc exit data delete(jxvec_c)     
      deallocate(jxvec_c)
   endif
   if(allocated(upfac1))   then
@@ -186,7 +197,6 @@ subroutine cgyro_cleanup
 !$acc exit data delete(cap_h_v)     
      deallocate(cap_h_v)
   endif
-  if(allocated(cap_h_v_prime))       deallocate(cap_h_v_prime)
   if(allocated(upwind_res_loc))   then
 !$acc exit data delete(upwind_res_loc)
      deallocate(upwind_res_loc)
@@ -220,8 +230,16 @@ subroutine cgyro_cleanup
      deallocate(gpack)
   endif
   if (allocated(cmat)) then
-!$acc exit data delete(cmat) if (gpu_bigmem_flag == 1)     
+!$acc exit data delete(cmat) if (gpu_bigmem_flag == 1)
      deallocate(cmat)
+  endif
+  if (allocated(cmat_fp32)) then
+!$acc exit data delete(cmat_fp32) if (gpu_bigmem_flag == 1)
+     deallocate(cmat_fp32)
+  endif
+  if (allocated(cmat_stripes)) then
+!$acc exit data delete(cmat_stripes) if (gpu_bigmem_flag == 1)
+     deallocate(cmat_stripes)
   endif
     if (allocated(cmat_simple)) then
 !$acc exit data delete(cmat_simple)     
@@ -301,10 +319,6 @@ subroutine cgyro_cleanup
 
   if(allocated(vfac))             deallocate(vfac)
   if(allocated(sum_den_h))        deallocate(sum_den_h)
-  if(allocated(sum_den_x))        deallocate(sum_den_x)
-  if (n_field > 1) then
-     if(allocated(sum_cur_x))     deallocate(sum_cur_x)
-  end if
   if(allocated(cderiv))           deallocate(cderiv)
   if(allocated(uderiv))           deallocate(uderiv)
   if(allocated(c_wave)) then

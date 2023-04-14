@@ -33,7 +33,7 @@ land = int(sys.argv[13])
 theta = float(sys.argv[14])
 
 # Use first 3 args to define plot and font size
-rc('text',usetex=True)
+rc('text',usetex=False)
 rc('font',size=font)
 
 # Extension handling
@@ -58,58 +58,53 @@ else:
 
 epx = np.zeros([nx,nr],dtype=complex)
 eny = np.zeros([ny,nn],dtype=complex)
-x = np.zeros([nx])
-y = np.zeros([ny])
+
+# FFT-consistent real-space meshpoints
+x = np.arange(nx)*2*np.pi/nx
+y = np.arange(ny)*2*np.pi/ny
 
 #------------------------------------------------------------------------
 # Some setup
 #
+
 if usefft:
    mode = 'FFT'
-   for i in range(nx):
-      x[i] = i*2*np.pi/nx
-   for j in range(ny):
-      y[j] = j*2*np.pi/ny
 elif haspygacode:
    mode = 'pygacode'
-   for i in range(nx):
-      x[i] = i*2*np.pi/(nx-1)
-   for j in range(ny):
-      y[j] = j*2*np.pi/(ny-1)
 else:
    mode = 'slow'
    # Fourier arrays
    for i in range(nx):
-      x[i] = i*2*np.pi/(nx-1)
       for p in range(nr):
-         epx[i,p]=np.exp(1j*(p-nr/2)*x[i])
+         epx[i,p]=np.exp(1j*(p-nr//2)*x[i])
 
    for j in range(ny):
-      y[j] = j*2*np.pi/(ny-1)
       for n in range(nn):
          eny[j,n]=np.exp(-1j*n*y[j])
 
-   # factor of 1/2 for n=0
+   # Only computing half sum 
    eny[:,0] = 0.5*eny[:,0]
 
+print('INFO: (plot_fluct) Computation method: '+mode)
+   
 #------------------------------------------------------------------------
 # Real-space field reconstruction (if no pygacode)
 def maptoreal(nr,nn,nx,ny,c):
 
-    import numpy as np
-    import time
+   import numpy as np
+   import time
 
-    start = time.time()
+   start = time.time()
 
-    # This needs to be fast, so we use numpy.outer
-    f = np.zeros([nx,ny])
-    for p in range(nr):
-        for n in range(nn):
-            f[:,:] = f[:,:]+np.real(c[p,n]*np.outer(epx[:,p],eny[:,n]))
+   # This needs to be fast, so we use numpy.outer
+   f = np.zeros([nx,ny])
+   for p in range(nr):
+      for n in range(nn):
+         f[:,:] = f[:,:]+np.real(c[p,n]*np.outer(epx[:,p],eny[:,n]))
 
-    end = time.time()
+   end = time.time()
 
-    return f,end-start
+   return f,end-start
 #------------------------------------------------------------------------
 
 #------------------------------------------------------------------------
@@ -119,37 +114,42 @@ def maptoreal_fft(nr,nn,nx,ny,c):
    import numpy as np
    import time
 
-   d = np.zeros([nx,ny],dtype=complex)
-
-   # Mapping
-   # d[ ix, iy] = c[ ix,iy]
-   # d[ ix,-iy] = c[-ix,iy]^*
+   # Storage for numpy inverse real transform (irfft2)
+   d = np.zeros([nx,nn],dtype=complex)
 
    start = time.time()
 
-   for ix in range(-nr//2+1,nr//2):
-      i = ix
-      if ix < 0:
-         i = ix+nx
-      d[i,0:nn] = c[-ix+nr//2,0:nn]
+   for i in range(nr):
+      p = i-nr//2
+      # k is the "standard FFT index"
+      if -p < 0:
+         k = -p+nx
+      else:
+         k = -p
+      # Use identity f(p,-n) = f(-p,n)* 
+      d[k,0:nn] = np.conj(c[i,0:nn])
 
-   for ix in range(-nr//2,nr//2-1):
-      i = ix
-      if ix < 0:
-         i = ix+nx
-      for iy in range(1,nn):
-         d[i,ny-iy] = np.conj(c[ix+nr//2,iy])
-
-   # Sign convention negative exponent exp(-inx)
-   f = np.real(np.fft.fft2(d))*0.5
-
+   # 2D inverse real Hermitian transform
+   # NOTE: using inverse FFT with convention exp(ipx+iny), so need n -> -n 
+   # NOTE: need factor of 0.5 to match half-sum method of slow maptoreal()
+   f = np.fft.irfft2(d,s=[nx,ny],norm='forward')*0.5
+   
    end = time.time()
 
    return f,end-start
 #------------------------------------------------------------------------
 
 # Get filename and tags
-fdata,title,isfield = tag_helper(sim.mass[species],sim.z[species],moment)
+print('INFO: (plot_fluct) '+moment+' fluctuations')
+if moment == 't':
+	fdata,title,isfield = tag_helper(sim.mass[species],sim.z[species],'n')
+	fdata_n = 'bin' + fdata
+	fdata,title,isfield = tag_helper(sim.mass[species],sim.z[species],'e')	
+	fdata_e = 'bin' + fdata
+	u = specmap(sim.mass[species],sim.z[species])
+	title = r'${\delta \mathrm{T}}_'+u+'$'
+else:
+	fdata,title,isfield = tag_helper(sim.mass[species],sim.z[species],moment)
 
 # Check to see if data exists (try binary data first)
 if os.path.isfile('bin'+fdata):
@@ -176,6 +176,11 @@ def frame():
       if isfield:
          a = np.reshape(aa,(2,nr,nth,nn),order='F')
          c = a[0,:,itheta,:]+1j*a[1,:,itheta,:]
+      elif moment == 't':
+         a = np.reshape(aa,(2,nr,nth,ns,nn),order='F')
+         b = np.reshape(bb,(2,nr,nth,ns,nn),order='F')
+         a = ((2./3)*b - sim.temp[species]*a)/sim.dens[species] #dE = (3/2)*(T*delta n + n*deltaT)
+         c = a[0,:,itheta,species,:]+1j*a[1,:,itheta,species,:]
       else:
          a = np.reshape(aa,(2,nr,nth,ns,nn),order='F')
          c = a[0,:,itheta,species,:]+1j*a[1,:,itheta,species,:]
@@ -192,34 +197,56 @@ def frame():
       else:
          f,t = maptoreal(nr,nn,nx,ny,c)
 
+      # Correct for half-sum
+      f = 2*f
+            
       if fmin == 'auto':
          f0=np.min(f)
          f1=np.max(f)
+
+         #CH alternate suggestion ensure even range around 0 for fluctuations
+         flim = max(abs(f0),abs(f1))
+         f0=-flim
+         f1=flim
+
       else:
          f0=float(fmin)
          f1=float(fmax)
 
-      xp = x/(2*np.pi)*sim.length
-      # ky[1] < 0 is possible
-      yp = y/np.abs(sim.ky[1])
-      aspect = max(abs(yp))/max(abs(xp))
+      # Physical maxima
+      xmax = sim.length
+      ymax = (2*np.pi)/np.abs(sim.ky[1])
+      xp = x/(2*np.pi)*xmax
+      yp = y/(2*np.pi)*ymax
 
+      # Periodic extensions
+      xp = np.append(xp,xmax)
+      yp = np.append(yp,ymax)
+      fp = np.zeros([nx+1,ny+1])
+      fp[0:nx,0:ny] = f[:,:]
+      fp[-1,:] = fp[0,:]
+      fp[:,-1] = fp[:,0]
+      
       levels = np.arange(f0,f1,(f1-f0)/256)
       if land == 0:
          fig = plt.figure(figsize=(px/100.0,py/100.0))
          ax = fig.add_subplot(111)
          ax.set_xlabel(r'$x/\rho_s$')
          ax.set_ylabel(r'$y/\rho_s$')
-         ax.contourf(xp,yp,np.transpose(f),levels,cmap=plt.get_cmap(colormap))
-         plt.subplots_adjust(top=0.94)
+         ax.set_xlim([0,xmax])
+         ax.set_ylim([0,ymax])
+         ax.contourf(xp,yp,np.transpose(fp),levels,cmap=plt.get_cmap(colormap))
       else:
          fig = plt.figure(figsize=(px/100.0,py/100.0))
          ax = fig.add_subplot(111)
          ax.set_xlabel(r'$y/\rho_s$')
          ax.set_ylabel(r'$x/\rho_s$')
-         ax.contourf(yp,xp,f,levels,cmap=plt.get_cmap(colormap))
+         ax.set_xlim([0,ymax])
+         ax.set_ylim([0,xmax])
+         ax.contourf(yp,xp,fp,levels,cmap=plt.get_cmap(colormap))
 
       print('INFO: (plot_fluct '+mode+') min=%e , max=%e  (t=%e)' % (f0,f1,t))
+      print('INFO: (plot_fluct) Shape = '+str(f.shape))
 
       ax.set_title(title)
       ax.set_aspect('equal')
@@ -239,8 +266,23 @@ def frame():
     
 i = 0
 
-if hasbin:
+if moment == 't':
+   # Binary data
+   work = True
+   # Open binary file
+   with open(fdata_n,'rb') as fbin_n, open(fdata_e,'rb') as fbin_e:
+       while work:
+          try:
+             aa = struct.unpack(PREC*n_chunk,fbin_n.read(BIT*n_chunk))
+             bb = struct.unpack(PREC*n_chunk,fbin_e.read(BIT*n_chunk))
+          except:
+             sys.exit()
 
+          i = i+1
+          print('INFO: (plot_fluct) Time index '+str(i)) 
+          frame()
+
+elif hasbin:
    # Binary data
    work = True
    # Open binary file

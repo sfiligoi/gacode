@@ -158,7 +158,7 @@
         nky = nky0 + nky1 + nky_in
       endif
       if(spectrum_type.eq.4)then   ! APS07 spectrum with ky_min=0.05
-        nky=11
+        nky=12
 !        ky_min = 0.05*ky_factor*ABS(zs(2))/SQRT(taus(2)*mass(2))
         ky_min = 0.05*ky_factor/rho_ion
         ky_spectrum(1) = ky_min
@@ -169,12 +169,14 @@
         dky_spectrum(3) = ky_min
         ky_spectrum(4) = 4.0*ky_min
         dky_spectrum(4) = ky_min
-        ky_min = ky_spectrum(4)
+        ky_spectrum(5) = 5.0*ky_min
+        dky_spectrum(5) = ky_min        
+        ky_min = ky_spectrum(5)
 !        ky_max = 1.0*ky_factor*ABS(zs(2))/SQRT(taus(2)*mass(2))
         ky_max = 1.0*ky_factor/rho_ion
 !        dky0 = 0.1*ky_factor*ABS(zs(2))/SQRT(taus(2)*mass(2))
         dky0 = 0.1*ky_factor/rho_ion
-        do i=5,nky
+        do i=6,nky
           ky_spectrum(i) = ky_min + REAL(i-4)*dky0
           dky_spectrum(i) = dky0
         enddo

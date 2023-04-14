@@ -39,7 +39,10 @@ subroutine prgen_read_genf
           te_kev(i),&
           ti_kev(i),&
           ne_e19m3(i),&
-          ni_e19m3(i)
+          ni_e19m3(i),&
+          dummy(i),&
+          dummy(i),&
+          qohm(i)
   enddo
 
   dpsi = (-dpsi+dpsi(1))/(2*pi)
@@ -51,6 +54,8 @@ subroutine prgen_read_genf
   ne_e19m3 = ne_e19m3*1e-19
   ni_e19m3 = ni_e19m3*1e-19
 
+  zeff = 1.0
+  
   deallocate(dummy)
   
 end subroutine prgen_read_genf

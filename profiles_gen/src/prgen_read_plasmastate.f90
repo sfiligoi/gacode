@@ -183,8 +183,8 @@ subroutine prgen_read_plasmastate
 
   ! Z_eff
   err = nf90_inq_varid(ncid,trim('Zeff'),varid)
-  err = nf90_get_var(ncid,varid,plst_zeff(1:nx-1))
-  plst_zeff(nx) = plst_zeff(nx-1)
+  err = nf90_get_var(ncid,varid,zeff(1:nx-1))
+  zeff(nx) = zeff(nx-1)
 
   !---------------------------------------------------------------
   ! Density and temperature mapping
@@ -543,13 +543,10 @@ subroutine prgen_read_plasmastate
   err = nf90_get_var(ncid,varid,plst_curr_bootstrap(1:nx-1))
   plst_curr_bootstrap(nx) = 0.0
   !
-  ! Bootstrap current 
+  ! Total toroidal current 
   err = nf90_inq_varid(ncid,trim('curt'),varid)
   err = nf90_get_var(ncid,varid,plst_curt(1:nx-1))
   plst_curt(nx) = 0.0
-  !
-  ! Total current (scalar)
-
   !------------------------------------------------------------
 
   ! Angular momentum source torque
@@ -581,7 +578,8 @@ subroutine prgen_read_plasmastate
   !----------------------------------------------
   ! Error check for missing/zero boundary (n,T)
   !
-  do i=1,plst_dp1_nspec_th     
+  do i=1,plst_dp1_nspec_th
+     print *,i,plst_dp1_nspec_th
      call boundary_fix(rho,plst_ts(:,i),nx)
      call boundary_fix(rho,plst_ns(:,i),nx)
   enddo
@@ -609,6 +607,11 @@ subroutine boundary_fix(x,f,n)
   real, intent(inout), dimension(n) :: f
   real, parameter :: edge_tol = 1e-6
 
+  if (f(1) == 0.0) then
+     print *,'issue'
+     return
+  endif
+     
   if (f(n)/f(1) > edge_tol) then
 
      ! Exit if boundary point needs no correction

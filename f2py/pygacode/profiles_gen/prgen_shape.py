@@ -172,7 +172,7 @@ def plot_ang(r,z,x,vr,xr,cr,sr,outfile):
         pr = pr+cr[p]*np.cos(p*x)+sr[p]*np.sin(p*x)
 
     # Latex fonts
-    rc('text',usetex=True)
+    #rc('text',usetex=True)
     rc('font',size=18)
 
     fig = plt.figure(figsize=(18,9))
@@ -195,6 +195,7 @@ def plot_ang(r,z,x,vr,xr,cr,sr,outfile):
     
     # PLOT angle 
     ax = fig.add_subplot(122)
+    ax.set_title(r'$n_\mathrm{harm} = '+str(nf)+'$')
     ax.set_xlabel(r'$x = \theta_Z/(2\pi)$')
     ax.set_ylabel(r'$\theta_R-\theta_Z$')
     ax.grid(which="both",ls=":")
@@ -225,8 +226,9 @@ def plot_ang(r,z,x,vr,xr,cr,sr,outfile):
     ax.plot(x,vr,'-k',linewidth=2,alpha=0.3)
 
     plt.tight_layout()
-    print('INFO: (plot_ang) Writing '+outfile+'.png')
-    plt.savefig(outfile+'.png')
+    ofile = 'pnorm_'+outfile+'.pdf'
+    print('INFO: (prgen_shape) Writing '+ofile)
+    plt.savefig(ofile)
     plt.close()
 
     return
@@ -234,7 +236,7 @@ def plot_ang(r,z,x,vr,xr,cr,sr,outfile):
 def plot_coef(pnorm,ci,si,xi):
    
    # Latex fonts
-   rc('text',usetex=True)
+   #rc('text',usetex=True)
    rc('font',size=18)
 
    fig = plt.figure(figsize=(14,12))

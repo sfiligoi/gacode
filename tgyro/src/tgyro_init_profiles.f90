@@ -16,7 +16,6 @@ subroutine tgyro_init_profiles
 
   integer :: i_ion
   integer :: i
-  integer :: n
   real :: tmp_ped
   real :: p_ave
   real :: x0(1),y0(1)
@@ -72,24 +71,22 @@ subroutine tgyro_init_profiles
   !----------------------------------------------
   ! Generate radial vector:
   !
-  if (tgyro_rmin > 0.0) then
+  if (tgyro_rmin > 0.0 .and. n_r > 2) then
 
-     r(1) = 0.0
+     r(:) = 0.0
+
      do i=2,n_r
-
         ! Normalized r (dimensionless)
         r(i) = tgyro_rmin+(i-2)/(n_r-2.0)*(tgyro_rmax-tgyro_rmin)
-
      enddo
 
   else
 
      do i=1,n_r
-
         ! Normalized r (dimensionless)
         r(i) = (i-1)/(n_r-1.0)*tgyro_rmax
-
      enddo
+     
   endif
 
   ! Overwrite radii with special values
@@ -151,14 +148,16 @@ subroutine tgyro_init_profiles
 
   ! Is this a DT plasma
   dt_flag = 0
-  if (ion_name(1) == 'D' .and. ion_name(2) == 'T') dt_flag = 1
-  if (ion_name(1) == 'T' .and. ion_name(2) == 'D') dt_flag = 1
-
+  if (loc_n_ion > 1) then
+     if (ion_name(1) == 'D' .and. ion_name(2) == 'T') dt_flag = 1
+     if (ion_name(1) == 'T' .and. ion_name(2) == 'D') dt_flag = 1
+  endif
+  
   !------------------------------------------------------
   ! Convert dimensionless mass to grams.
   mi(:) = mi_vec(:)*(md*0.5)
   !------------------------------------------------------
-
+  
   !------------------------------------------------------------------------------------------
   ! Direct input of simple profiles:
   !
@@ -175,13 +174,16 @@ subroutine tgyro_init_profiles
   call cub_spline(expro_rmin(:)/r_min,expro_delta(:),n_exp,r,delta,n_r)
   call cub_spline(expro_rmin(:)/r_min,expro_skappa(:),n_exp,r,s_kappa,n_r)
   call cub_spline(expro_rmin(:)/r_min,expro_sdelta(:),n_exp,r,s_delta,n_r)
+  ! Convert r_maj to cm (from m):
+  call cub_spline(expro_rmin(:)/r_min,100*expro_rmaj(:),n_exp,r,r_maj,n_r)
   call cub_spline(expro_rmin(:)/r_min,expro_drmaj(:),n_exp,r,shift,n_r)
-  call cub_spline(expro_rmin(:)/r_min,expro_zmag(:),n_exp,r,zmag,n_r)
+  ! Convert zmag to cm (from m):
+  call cub_spline(expro_rmin(:)/r_min,100*expro_zmag(:),n_exp,r,zmag,n_r)
   call cub_spline(expro_rmin(:)/r_min,expro_dzmag(:),n_exp,r,dzmag,n_r)
   call cub_spline(expro_rmin(:)/r_min,expro_zeta(:),n_exp,r,zeta,n_r)
   call cub_spline(expro_rmin(:)/r_min,expro_szeta(:),n_exp,r,s_zeta,n_r)
 
-  ! New geometry (HAM)
+  ! Miller Extended Harmonic (MXH) geometry
   call cub_spline(expro_rmin(:)/r_min,expro_shape_sin3(:),n_exp,r,shape_sin3,n_r)
   call cub_spline(expro_rmin(:)/r_min,expro_shape_ssin3(:),n_exp,r,shape_ssin3,n_r)
   call cub_spline(expro_rmin(:)/r_min,expro_shape_cos0(:),n_exp,r,shape_cos0,n_r)
@@ -193,11 +195,17 @@ subroutine tgyro_init_profiles
   call cub_spline(expro_rmin(:)/r_min,expro_shape_cos3(:),n_exp,r,shape_cos3,n_r)
   call cub_spline(expro_rmin(:)/r_min,expro_shape_scos3(:),n_exp,r,shape_scos3,n_r)
 
+  ! Convert psi in Weber to Maxwell (1 Weber = 10^8 Maxwell)  
+  call cub_spline(expro_rmin(:)/r_min,expro_polflux(:)*1e8,n_exp,r,polflux,n_r)
+
   ! b_ref in Gauss (used for wce in Synchroton rad)
   call cub_spline(expro_rmin(:)/r_min,1e4*expro_bt0(:),n_exp,r,b_ref,n_r)
   
   ! Convert ptot to Ba from Pascals (1 Pa = 10 Ba)
   call cub_spline(expro_rmin(:)/r_min,expro_ptot(:)*10.0,n_exp,r,ptot,n_r)
+
+  ! Convert fpol to Gauss-cm from T-m (1 T-m = 10^6 G-cm)
+  call cub_spline(expro_rmin(:)/r_min,expro_fpol(:)*1e6,n_exp,r,fpol,n_r)
 
   ! Convert V and dV/dr from m^3 to cm^3
   call cub_spline(expro_rmin(:)/r_min,expro_vol(:)*1e6,n_exp,r,vol,n_r)
@@ -207,9 +215,6 @@ subroutine tgyro_init_profiles
 
   ! Convert B to Gauss (from T):
   call cub_spline(expro_rmin(:)/r_min,1e4*expro_bunit(:),n_exp,r,b_unit,n_r)
-
-  ! Convert r_maj to cm (from m):
-  call cub_spline(expro_rmin(:)/r_min,100*expro_rmaj(:),n_exp,r,r_maj,n_r)
 
   ! Convert T to eV (from keV) and length to cm (from m):
   call cub_spline(expro_rmin(:)/r_min,1e3*expro_te(:),n_exp,r,te,n_r)
@@ -287,10 +292,14 @@ subroutine tgyro_init_profiles
   !------------------------------------------------------------------------------------------
   ! Helium ash detection (diagnostic only -- set alpha source with evo_e=2)
   !
-  i_ash = 0
+  i_ash   = 0
+  i_alpha = 0
   do i=1,loc_n_ion
-     if (nint(zi_vec(i)) == 2 .and. nint(mi_vec(i)) == 4 .and. therm_flag(i) == 1) then
+     if (trim(ion_name(i)) == 'He' .and. therm_flag(i) == 1) then
         i_ash = i
+     endif
+     if (trim(ion_name(i)) == 'He' .and. therm_flag(i) == 0) then
+        i_alpha = i
      endif
   enddo
   !------------------------------------------------------------------------------------------
@@ -302,6 +311,15 @@ subroutine tgyro_init_profiles
   call cub_spline(expro_rmin(:)/r_min,expro_w0(:),n_exp,r,w0,n_r)
   ! w0p = d(w0)/dr (1/s/cm)
   call cub_spline(expro_rmin(:)/r_min,expro_w0p(:)/100.0,n_exp,r,w0p,n_r)
+  ! v_pol
+  do i_ion=1,loc_n_ion
+    call cub_spline(expro_rmin(:)/r_min,1e2*expro_vpol(i_ion,:),n_exp,r,v_pol(i_ion,:),n_r)
+  enddo  
+  ! vtor_p = d(vtor)/dr 
+  call bound_deriv(vtor_p, w0*r_maj, r, n_r)
+  ! vpol_p = d(vpol)/dr 
+  call bound_deriv(vpol_p, v_pol, r, n_r)
+
   !------------------------------------------------------------------------------------------
 
   !------------------------------------------------------------------------------------------
@@ -368,7 +386,8 @@ subroutine tgyro_init_profiles
   ! Integrated auxiliary heating powers (NB + RF + Ohmic)
   call cub_spline(expro_rmin(:)/r_min,expro_pow_e_aux(:)*1e13,n_exp,r,p_e_aux_in,n_r)
   call cub_spline(expro_rmin(:)/r_min,expro_pow_i_aux(:)*1e13,n_exp,r,p_i_aux_in,n_r)
-
+  call cub_spline(expro_rmin(:)/r_min,expro_pow_e_ohmic(:)*1e13,n_exp,r,p_e_ohmic_in,n_r)
+  
   ! Apply auxiliary power rescale
   ! 1. subtract off
   p_e_in = p_e_in-p_e_aux_in
@@ -533,9 +552,12 @@ subroutine tgyro_init_profiles
   ! Axis boundary conditions
   call tgyro_init_profiles_axis
 
-
 end subroutine tgyro_init_profiles
 
+
+!------------------------------------------------------------
+! Subroutine to compute z that corresponds to profile
+!------------------------------------------------------------
 subroutine math_zfind(n,p,r,z)
 
   implicit none

@@ -1,12 +1,12 @@
-! RK4 time-advance for the distribution 
-
 subroutine cgyro_step_gk
 
   use timer_lib
   use cgyro_globals
+  use cgyro_globals_math
 
   implicit none
 
+  ! RK4 time-advance for the distribution
   !
   !           z e             vpar            z e  vperp^2
   !  h = H - ----- G0 ( phi - ----- Apar ) + ----- ---------- Gperp Bpar
@@ -21,78 +21,50 @@ subroutine cgyro_step_gk
   ! Bpar -> field(3)
 
   call timer_lib_in('str_mem')
-!$omp parallel do collapse(2)
-  do iv_loc=1,nv_loc
-     do ic=1,nc
-       h0_x(ic,iv_loc) = h_x(ic,iv_loc)
-     enddo
-  enddo
+  call cgyro_vel_copy(h0_x, h_x)
   call timer_lib_out('str_mem')
 
   
   ! Stage 1
   call cgyro_rhs(1)
   call timer_lib_in('str')
-!$omp parallel do collapse(2)
-  do iv_loc=1,nv_loc
-     do ic=1,nc
-       h_x(ic,iv_loc) = h0_x(ic,iv_loc) + 0.5 * delta_t * rhs(ic,iv_loc,1)
-     enddo
-  enddo
+  call cgyro_vel_fma2(h_x, h0_x, 0.5 * delta_t, rhs(:,:,:,1))
   call timer_lib_out('str')
   call cgyro_field_c
 
   ! Stage 2
   call cgyro_rhs(2)
   call timer_lib_in('str')
-!$omp parallel do collapse(2)
-  do iv_loc=1,nv_loc
-     do ic=1,nc
-       h_x(ic,iv_loc) = h0_x(ic,iv_loc) + 0.5 * delta_t * rhs(ic,iv_loc,2)
-     enddo
-  enddo
+  call cgyro_vel_fma2(h_x, h0_x, 0.5 * delta_t, rhs(:,:,:,2))
   call timer_lib_out('str')
   call cgyro_field_c
 
   ! Stage 3
   call cgyro_rhs(3)
   call timer_lib_in('str')
-!$omp parallel do collapse(2)
-  do iv_loc=1,nv_loc
-     do ic=1,nc
-        h_x(ic,iv_loc) = h0_x(ic,iv_loc) + delta_t * rhs(ic,iv_loc,3)
-     enddo
-  enddo
+  call cgyro_vel_fma2(h_x, h0_x, delta_t, rhs(:,:,:,3))
   call timer_lib_out('str')
   call cgyro_field_c
 
   ! Stage 4
   call cgyro_rhs(4)
   call timer_lib_in('str')
-!$omp parallel do collapse(2)
-  do iv_loc=1,nv_loc
-     do ic=1,nc
-        h_x(ic,iv_loc) = h0_x(ic,iv_loc)+delta_t*(&
-                rhs(ic,iv_loc,1) &
-             +2*rhs(ic,iv_loc,2) &
-             +2*rhs(ic,iv_loc,3) &
-               +rhs(ic,iv_loc,4))/6  
-     enddo
-  enddo
+  call cgyro_vel_fmaN(4, h_x, &
+          h0_x, &
+          (/ delta_t/6, 2*delta_t/6, 2*delta_t/6, delta_t/6 /), &
+          rhs(:,:,:,1:4))
   call timer_lib_out('str')
   call cgyro_field_c
 
   ! rhs(1) = 3rd-order error estimate
   call timer_lib_in('str')
-!$omp parallel do collapse(2)
-  do iv_loc=1,nv_loc
-     do ic=1,nc
-        rhs(ic,iv_loc,1) = h0_x(ic,iv_loc) +delta_t*( &
-             rhs(ic,iv_loc,2)&
-            +2*rhs(ic,iv_loc,3))/3 &
-                            - h_x(ic,iv_loc)
-     enddo
-  enddo
+  ! cannot use cgyro_vel_fmaN, as the 3 arrays are not contiguous
+  call cgyro_vel_fma4(rhs(:,:,:,1), &
+          h0_x, &
+          delta_t/3, rhs(:,:,:,2), &
+          2*delta_t/3, rhs(:,:,:,3), &
+          -1.0, h_x)
   call timer_lib_out('str')
-    
+
 end subroutine cgyro_step_gk
+

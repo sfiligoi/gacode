@@ -37,6 +37,7 @@ le3/.VERSION
 glf23/src/glf23
 gyro/src/gyro
 cgyro/src/cgyro
+cgyro/mpi_tests/*
 neo/src/neo
 neo/tools/pneo/src/pneo
 neo/tools/pneo/src/pneo_rbf
@@ -67,3 +68,7 @@ f2py/MANIFEST
 # local working files not to be shared
 tmp.py
 *.optrpt
+
+# Vim Backup Files
+*.swp
+*.swo

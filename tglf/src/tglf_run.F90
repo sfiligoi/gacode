@@ -114,6 +114,7 @@ subroutine tglf_run()
           tglf_q_loc_in, &
           tglf_q_prime_loc_in, &
           tglf_p_prime_loc_in, &
+          tglf_beta_loc_in,  &
           tglf_kx0_loc_in)
 
   elseif (tglf_geometry_flag_in == 2)then

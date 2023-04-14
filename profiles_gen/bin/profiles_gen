@@ -115,13 +115,10 @@ then
    echo "             -i null"
    echo "             Toggle null profile data mode."
    echo
-   echo "             -n_null <int>"
-   echo "             Number of radial gridpoints (default: 40)"
-   echo
    echo "Flux-surface mapper control options"
    echo
    echo "             -npsi <int>"
-   echo "             Number of flux-surfaces to contour (default=200)"
+   echo "             Number of flux-surfaces to contour (default=256)"
    echo
    echo "             -psinorm <float>"
    echo "             Last flux-surface to retain (default=0.999)"
@@ -172,7 +169,7 @@ then
    echo
    echo "             -epar <val>"
    echo "             Flag to compute conductivity."
-   echo "             0=yes, 1=no"
+   echo "             0=no (default), 1=yes"
    echo
    echo "             -ix <index>"
    echo "             Index of ion species to match NEO and given velocities."
@@ -323,8 +320,6 @@ while [ $# -gt 0 ] ; do
   -nfourier) shift ; NFOURIER=$1 ;;
   -nharm) shift ; NHARM=$1 ;;
   -plotpng) PLOTPNG=1 ;;
-
-  -n_null) shift ; N_NULL=$1 ;;
 
   -mag) shift ; MAG=$1 ;;
   -narc) shift ; NARC=$1 ;;
@@ -628,13 +623,11 @@ echo $BTCCW >> $CONFIG
 
 # Fourier modes
 echo $NFOURIER >> $CONFIG
-echo $N_NULL >> $CONFIG
 echo $LUMP_FAST_FLAG >> $CONFIG
 echo $TRUE_AUX_FLAG >> $CONFIG
 
 # NOTE: reorder flags will be appended later.
 #=============================================================
-
 
 #==============================================================
 # Run Scikit-based mapper 

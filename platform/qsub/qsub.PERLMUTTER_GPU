@@ -17,6 +17,7 @@ echo "#SBATCH -o $SIMDIR/batch.out" >> $bfile
 echo "#SBATCH -e $SIMDIR/batch.err" >> $bfile
 echo "#SBATCH -q $QUEUE" >> $bfile
 echo "#SBATCH -t $WALLTIME" >> $bfile
+echo "#SBATCH -N $nodes" >> $bfile
 echo "#SBATCH -n $nmpi" >> $bfile
 echo "#SBATCH -c $nomp" >> $bfile
 echo "#SBATCH --gpus-per-node=4" >> $bfile

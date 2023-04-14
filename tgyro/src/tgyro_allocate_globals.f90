@@ -57,10 +57,15 @@ subroutine tgyro_allocate_globals
   ! Formulary exchange rate
   allocate(nu_exch(n_r))
 
+  ! Alpha slowing-down time
+  allocate(taus(n_r))
+
   ! Alpha heating parameters
   allocate(frac_ai(n_r))
   allocate(frac_ae(n_r))
   allocate(e_cross(n_r))
+  allocate(n_alpha(n_r))
+  allocate(t_alpha(n_r))
 
   ! Electron and ion temperatures
   allocate(te(n_r))
@@ -80,6 +85,9 @@ subroutine tgyro_allocate_globals
   allocate(gamma_eb(n_r))
   allocate(gamma_p(n_r))
   allocate(u00(n_r))
+  allocate(vtor_p(n_r))
+  allocate(vpol_p(n_r))
+  allocate(v_pol(loc_n_ion,n_r))
 
   allocate(pr(n_r))
   allocate(ptot(n_r))
@@ -89,12 +97,14 @@ subroutine tgyro_allocate_globals
   allocate(dlnptotdr(n_r))
   allocate(beta_unit(n_r))
   allocate(betae_unit(n_r))
+  allocate(fpol(n_r))
   allocate(c_s(n_r))
   allocate(v_i(n_r))
   allocate(er(n_r))
   allocate(f_rot(n_r))
 
   allocate(rho(n_r))
+  allocate(polflux(n_r))
   allocate(r(n_r))
   allocate(r_maj(n_r))
   allocate(q(n_r))
@@ -137,6 +147,7 @@ subroutine tgyro_allocate_globals
   allocate(p_e_fus_in(n_r))
   allocate(p_i_aux_in(n_r))
   allocate(p_e_aux_in(n_r))
+  allocate(p_e_ohmic_in(n_r))
   allocate(p_i(n_r))
   allocate(p_e(n_r))
   allocate(s_alpha_i(n_r))

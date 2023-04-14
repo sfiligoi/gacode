@@ -126,35 +126,35 @@ subroutine tgyro_comm_setup
 
   if (i_proc_global == 0) then
      open(unit=1,file=trim(runfile),position='append')
-     write(1,*) 'INFO: (TGYRO): In tgyro_comm_setup: Starting mpi_gathers'
+     write(1,*) 'INFO: (tgyro_comm_setup) Starting mpi_gathers'
      close(1)
   endif
   call MPI_GATHER(color,1,MPI_INTEGER,&
        colorvec,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
   if (i_proc_global == 0) then
      open(unit=1,file=trim(runfile),position='append')
-     write(1,*) 'INFO: (TGYRO): In tgyro_comm_setup: Done mpi_gather color'
+     write(1,*) 'INFO: (tgyro_comm_setup) Done mpi_gather color'
      close(1)
   endif
   call MPI_GATHER(worker,1,MPI_INTEGER,&
        workervec,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
   if (i_proc_global == 0) then
      open(unit=1,file=trim(runfile),position='append')
-     write(1,*) 'INFO: (TGYRO): In tgyro_comm_setup: Done mpi_gather worker'
+     write(1,*) 'INFO: (tgyro_comm_setup) Done mpi_gather worker'
      close(1)
   endif
   call MPI_GATHER(adjoint,1,MPI_INTEGER,&
        adjointvec,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
   if (i_proc_global == 0) then
      open(unit=1,file=trim(runfile),position='append')
-     write(1,*) 'INFO: (TGYRO): In tgyro_comm_setup: Done mpi_gather adjoint'
+     write(1,*) 'INFO: (tgyro_comm_setup) Done mpi_gather adjoint'
      close(1)
   endif
   call MPI_GATHER(workeradj,1,MPI_INTEGER,&
        workeradjvec,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
   if (i_proc_global == 0) then
      open(unit=1,file=trim(runfile),position='append')
-     write(1,*) 'INFO: (TGYRO): In tgyro_comm_setup: Done mpi_gather worker adjoint'
+     write(1,*) 'INFO: (tgyro_comm_setup) Done mpi_gather worker adjoint'
      close(1)
   endif
 
@@ -177,7 +177,7 @@ subroutine tgyro_comm_setup
 
   if (i_proc_global == 0) then
      open(unit=1,file=trim(runfile),position='append')
-     write(1,*) 'INFO: (TGYRO): In tgyro_comm_setup: Starting mpi_comm_split gyro_comm'
+     write(1,*) 'INFO: (tgyro_comm_setup) Starting mpi_comm_split gyro_comm'
      close(1)
   endif
   call MPI_COMM_SPLIT(MPI_COMM_WORLD,&
@@ -186,42 +186,33 @@ subroutine tgyro_comm_setup
        gyro_comm,&
        ierr)
   if (ierr /= 0) then
-     call tgyro_catch_error('ERROR: (TGYRO) GYRO_COMM not created') 
+     call tgyro_catch_error('ERROR: (tgyro_comm_setup) gyro_comm not created') 
   endif
 
-  if (i_proc_global == 0) then
-     open(unit=1,file=trim(runfile),position='append')
-     write(1,*) 'INFO: (TGYRO): In tgyro_comm_setup: Starting mpi_comm_split gyro_adj'
-     close(1)
-  endif
+  call tgyro_mpi_info('INFO: (tgyro_comm_setup) Starting mpi_comm_split gyro_adj')
+
   call MPI_COMM_SPLIT(MPI_COMM_WORLD,&
        adjoint,&
        splitkey,&
        gyro_adj,&
        ierr)
   if (ierr /= 0) then
-     call tgyro_catch_error('ERROR: (TGYRO) GYRO_ADJ not created') 
+     call tgyro_catch_error('ERROR: (tgyro_comm_setup) gyro_adj not created') 
   endif
 
-  if (i_proc_global == 0) then
-     open(unit=1,file=trim(runfile),position='append')
-     write(1,*) 'INFO: (TGYRO): In tgyro_comm_setup: Starting mpi_comm_split gyro_rad'
-     close(1)
-  endif
+  call tgyro_mpi_info('INFO: (tgyro_comm_setup) Starting mpi_comm_split gyro_rad')
+  
   call MPI_COMM_SPLIT(MPI_COMM_WORLD,&
        workeradj,&
        splitkey,&
        gyro_rad,&
        ierr)
   if (ierr /= 0) then
-     call tgyro_catch_error('ERROR: (TGYRO) GYRO_RAD not created') 
+     call tgyro_catch_error('ERROR: (tgyro_comm_setup) gyro_rad not created') 
   endif
 
-  if (i_proc_global == 0) then
-     open(unit=1,file=trim(runfile),position='append')
-     write(1,*) 'INFO: (TGYRO): In tgyro_comm_setup: Starting mpi_comm_rank'
-     close(1)
-  endif
+  call tgyro_mpi_info('INFO: (tgyro_comm_setup) Starting mpi_comm_rank')
+  
   call MPI_COMM_RANK(gyro_comm,gyro_comm_rank,ierr)
   call MPI_COMM_RANK(gyro_adj,gyro_adj_rank,ierr)
   call MPI_COMM_RANK(gyro_rad,gyro_rad_rank,ierr)
@@ -240,10 +231,6 @@ subroutine tgyro_comm_setup
 
   endif
 
-  if (i_proc_global == 0) then
-     open(unit=1,file=trim(runfile),position='append')
-     write(1,'(t2,a)') 'INFO: (TGYRO) MPI communicators split in TGYRO'
-     close(1)
-  endif
-
+  call tgyro_mpi_info('INFO: (tgyro_comm_setup) Finished MPI setup')
+ 
 end subroutine tgyro_comm_setup

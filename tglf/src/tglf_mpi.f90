@@ -158,4 +158,6 @@ program tglf
 30 format(a,1pe11.4,a,1pe11.4)
 40 format(a,I10,a,I10)
 
+  call MPI_FINALIZE(ierr)
+
 end program tglf

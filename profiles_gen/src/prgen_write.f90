@@ -46,6 +46,12 @@ subroutine prgen_write
      expro_shape_cos4 = shape_cos(4,:)
      expro_shape_cos5 = shape_cos(5,:)
      expro_shape_cos6 = shape_cos(6,:)
+
+     expro_z_eff = zeff
+     
+     ! EFIT passthrough functions
+     expro_ptot = p_tot
+     expro_fpol = fpol
   endif
   !-------------------------------------------------------------------------------------
 
@@ -60,6 +66,6 @@ subroutine prgen_write
   call expro_write('input.gacode')
   print '(a)','INFO: (prgen_write) Wrote input.gacode.'
   !-------------------------------------------------------------------------------------
-
+   
 end subroutine prgen_write
 

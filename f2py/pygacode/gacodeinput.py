@@ -26,10 +26,16 @@ class SimpleInput:
         self.error_msg = ""
         self.extension = ".gen"
 
-    def add(self,param,default):
-        self.data_dict[param]=default
-        self.data_orderlist.append(param)
-
+    def add(self,param,default,n=1):
+        if n == 1:
+            self.data_dict[param]=default
+            self.data_orderlist.append(param)
+        else:
+            for i in range(n):
+                p = param+'_'+str(i+1)
+                self.data_dict[p]=default
+                self.data_orderlist.append(p)
+              
     def dep(self,param,default):
         self.dep_dict[param]=default
         self.dep_orderlist.append(param)
@@ -245,6 +251,8 @@ class ManagerInput:
                    code='glf23'
                elif os.path.isfile(basedir+'/input.etg'):
                    code='etg'
+               elif os.path.isfile(basedir+'/input.mmm'):
+                   code='mmm'
                else:
                    code='unknown'
                    self.error=1
@@ -257,6 +265,9 @@ class ManagerInput:
                    continue
                if code == 'ifs':
                    print('INFO: (gacodeinput.py) Found ifs input in '+basedir)
+                   continue
+               elif code == 'mmm':
+                   print('INFO: (gacodeinput.py) Found mmm input in '+basedir)
                    continue
                else:
                    print('INFO: (gacodeinput.py) Found '+code+' input in '+basedir)

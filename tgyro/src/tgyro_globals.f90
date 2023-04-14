@@ -134,10 +134,15 @@ module tgyro_globals
   ! Formulary exchange rate
   real, dimension(:), allocatable :: nu_exch
 
+  ! Alpha slowing-down time
+  real, dimension(:), allocatable :: taus
+  
   ! Alpha heating coefficients
   real, dimension(:), allocatable :: frac_ae
   real, dimension(:), allocatable :: frac_ai
   real, dimension(:), allocatable :: e_cross
+  real, dimension(:), allocatable :: n_alpha
+  real, dimension(:), allocatable :: t_alpha
 
   ! Electron and ion temperatures
   real, dimension(:), allocatable :: te
@@ -157,6 +162,9 @@ module tgyro_globals
   real, dimension(:), allocatable :: gamma_eb
   real, dimension(:), allocatable :: gamma_p
   real, dimension(:), allocatable :: u00
+  real, dimension(:), allocatable :: vtor_p 
+  real, dimension(:), allocatable :: vpol_p 
+  real, dimension(:,:), allocatable :: v_pol 
   real :: w0_norm
 
   real, dimension(:), allocatable :: pr
@@ -167,12 +175,14 @@ module tgyro_globals
   real, dimension(:), allocatable :: dlnptotdr
   real, dimension(:), allocatable :: beta_unit
   real, dimension(:), allocatable :: betae_unit
+  real, dimension(:), allocatable :: fpol
   real, dimension(:), allocatable :: c_s
   real, dimension(:), allocatable :: v_i
   real, dimension(:), allocatable :: rho_s
   real, dimension(:), allocatable :: rho_i
 
   real, dimension(:), allocatable :: rho
+  real, dimension(:), allocatable :: polflux
   real, dimension(:), allocatable :: r
   real, dimension(:), allocatable :: r_maj
   real, dimension(:), allocatable :: q
@@ -217,6 +227,7 @@ module tgyro_globals
   real, dimension(:), allocatable :: p_i_fus_in
   real, dimension(:), allocatable :: p_e_aux_in
   real, dimension(:), allocatable :: p_i_aux_in
+  real, dimension(:), allocatable :: p_e_ohmic_in
   real, dimension(:), allocatable :: p_brem
   real, dimension(:), allocatable :: p_sync
   real, dimension(:), allocatable :: p_line
@@ -242,7 +253,6 @@ module tgyro_globals
   character(len=3), dimension(:), allocatable :: ion_name
   real, dimension(:), allocatable :: zi_vec,mi_vec,mi
 
- !real, dimension(n_ion_max) :: mi
   real, dimension(n_ion_max) :: n_ratio,t_ratio
 
   ! Physical constants
@@ -289,6 +299,7 @@ module tgyro_globals
   real :: loc_me_multiplier
   integer :: tgyro_tglf_revision
   integer :: tgyro_tglf_dump_flag
+  integer :: tgyro_tglf_ptot_flag
   integer :: tgyro_glf23_revision
   integer :: tgyro_glf23_dump_flag
   integer :: loc_ti_feedback_flag
@@ -329,7 +340,6 @@ module tgyro_globals
   integer :: tgyro_zero_dens_grad_flag
   real :: tgyro_residual_tol
   real :: tgyro_input_fusion_scale
-  !
   integer :: tgyro_cgyro_n_iterate
   !
   real, dimension(:), allocatable :: res
@@ -348,6 +358,7 @@ module tgyro_globals
   integer :: i_tran
   integer :: flux_counter
   integer :: i_ash
+  integer :: i_alpha
   integer :: evolve_indx(5)
   !
   integer :: use_trap

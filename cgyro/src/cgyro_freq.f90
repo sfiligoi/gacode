@@ -14,44 +14,60 @@ subroutine cgyro_freq
 
   implicit none
 
+  real :: mw
   real :: total_weight,dfr,dfi
   real, dimension(nc) :: mode_weight
+  integer :: itor
   complex, dimension(nc) :: freq_loc
+  complex :: fl,myfr,df,total_weighted_freq
 
   if (i_time == 0) then
 
-     freq = 0.0
-     freq_err = 0.0
+    freq(:) = 0.0
+    freq_err(:) = 0.0
 
   else
 
-     !--------------------------------------------------
-     ! Standard method: sum all wavenumbers at a given n
-     !--------------------------------------------------
+    !--------------------------------------------------
+    ! Standard method: sum all wavenumbers at a given n
+    !--------------------------------------------------
 
-     ! Use potential to compute frequency
-     mode_weight(:) = abs(field_old(1,:))
+    do itor=nt1,nt2
 
-     ! Define local frequencies
+     total_weight = 0.0
+     total_weighted_freq = (0.0,0.0)
      do ic=1,nc
-        if (abs(field_old(1,ic)) > 1e-12 .and. abs(field_old2(1,ic)) > 1e-12) then
-           freq_loc(ic) = (i_c/delta_t)*log(field_old(1,ic)/field_old2(1,ic))
+        ! Use potential to compute frequency
+        mw = abs(field_old(1,ic,itor))
+        mode_weight(ic) =  mw
+        total_weight = total_weight + mw
+        ! Define local frequencies
+        if (abs(field_old(1,ic,itor)) > 1e-12 .and. abs(field_old2(1,ic,itor)) > 1e-12) then
+           fl = (i_c/delta_t)*log(field_old(1,ic,itor)/field_old2(1,ic,itor))
         else
-           freq_loc(ic) = 0.0
+           fl = 0.0
         endif
+        freq_loc(ic) = fl
+        total_weighted_freq = total_weighted_freq + fl*mw
      enddo
 
-     total_weight = sum(mode_weight(:))
-
-     freq = sum(freq_loc(:)*mode_weight(:))/total_weight
+     myfr = total_weighted_freq/total_weight
+     freq(itor) = myfr
 
      ! Fractional Frequency Error
-     dfr = sum(abs(real(freq_loc(:)-freq))*mode_weight(:))
-     dfi = sum(abs(aimag(freq_loc(:)-freq))*mode_weight(:))
+     dfr = 0.0
+     dfi = 0.0
+     do ic=1,nc
+        mw = mode_weight(ic)
+        df = freq_loc(ic)-myfr
+        dfr = dfr + abs(real(df))*mw
+        dfi = dfi + abs(aimag(df))*mw
+     enddo
+     freq_err(itor) = (dfr+i_c*dfi)/total_weight/abs(myfr)
 
-     freq_err = (dfr+i_c*dfi)/total_weight/abs(freq)
+    enddo
 
-     if (n_toroidal == 1 .and. abs(freq_err) < freq_tol) signal=1
+    if (n_toroidal == 1 .and. abs(freq_err(nt1)) < freq_tol) signal=1
 
   endif
 

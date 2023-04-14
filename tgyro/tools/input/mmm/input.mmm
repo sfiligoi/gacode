@@ -1,0 +1,49 @@
+&mmm_input
+!.. Switches for component models
+!   1D0 - ON, 0D0 - OFF
+cmodel  =
+   0D0     ! Weiland
+   0D0     ! DRIBM
+   0D0     ! ETG
+   1D0     ! MTM
+
+!.. Weiland real options
+cW20 =
+   0D0     ! ExB shear coefficient
+   1D0     ! Momentum pinch scaling factor
+   1D-4    ! Lower bound of electron thermal diffusivity
+   1D2     ! Upper bound of electron thermal diffusivity
+   1D-4    ! Lower bound of ion thermal diffusivity
+   1D2     ! Upper bound of ion thermal diffusivity
+   1D-4    ! Lower bound of particle diffusivity
+   1D2     ! Upper bound of particle diffusivity
+
+!.. DRIBM real options
+cDBM =
+   0D0     ! ExB shear coefficient
+   0.2D0   ! kyrhos
+
+lDBM =
+   1       ! disable ExB flow shear model in DRIBM
+
+!.. MTM real options
+cMTM =
+   0.2D0   ! ky/kx for MTM
+   1.0D0   ! calibration factor
+
+!.. ETG integer options
+lETG =
+   1       ! Jenko threshold
+           ! applied to both electrostatic and electromagnetic regimes
+           ! Use 0 for the original Horton model
+           ! Use 1 for Horton model with ES Jenko threshold
+
+!.. ETG real options
+cETG =
+   6D-2    ! CEES scale
+   6D-2    ! CEEM scale
+
+lprint   = 0      ! Verbose level
+
+/
+# -- Begin overlay

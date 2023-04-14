@@ -13,6 +13,7 @@
       INTEGER :: nt,i,is,imax
       INTEGER :: save_nbasis
       INTEGER :: save_ibranch
+      INTEGER :: save_nu, save_ne
       REAL :: width_max=1.65
       REAL :: width_min=0.15
       REAL :: tp,dt
@@ -30,31 +31,36 @@
 !        gamma_reference_kx0(i)=0.0
 !        freq_reference_kx0(i)=0.0
 !      enddo
-      save_iflux = iflux_in
+!      save_iflux = iflux_in
       save_ibranch = ibranch_in
       save_nbasis = nbasis_max_in
       save_width = width_in
       save_bper = use_bper_in
       save_bpar = use_bpar_in
+!      save_nu = nu
+!      save_ne = ne
+!      nu = 5
+!      ne = 3
 !      save_vexb_shear = vexb_shear_s
 !      if(alpha_quench_in.eq.0.0)vexb_shear_s = 0.0
       ibranch_in = -1
       width_min = width_min_in
       width_max = ABS(width_in)
+!      write(*,*)"width_min = ",width_min,"  width_max = ", width_max
 !
 !      write(*,*)"R_unit=",R_unit,"q_unit=",q_unit
 !      write(*,*)ns0,ns,ky_s
-    if(alpha_p_in.gt.0.0)then
-      do is=ns0,ns
-        kyi = ky_s*SQRT(taus(is)*mass(is))/ABS(zs(is))
-        wgp_max = ABS((taus(is)/zs(is))*vpar_shear_s(is)/vs(is))*ky_s/(1+kyi**2)
-        width_p_max = 3.6*vs(is)/(sqrt_two*R_unit*q_unit*MAX(wgp_max,0.001))
-        width_p_max=MAX(width_p_max,0.1)
-         if(width_p_max.lt.width_min_in)then
-          width_min = width_p_max
-        endif
-      enddo
-    endif
+!    if(alpha_p_in.gt.0.0)then
+!      do is=ns0,ns
+!        kyi = ky_s*SQRT(taus(is)*mass(is))/ABS(zs(is))
+!        wgp_max = ABS((taus(is)/zs(is))*vpar_shear_s(is)/vs(is))*ky_s/(1+kyi**2)
+!        width_p_max = 3.6*vs(is)/(sqrt_two*R_unit*q_unit*MAX(wgp_max,0.001))
+!        width_p_max=MAX(width_p_max,0.1)
+!         if(width_p_max.lt.width_min_in)then
+!          width_min = width_p_max
+!        endif
+!      enddo
+ !   endif
 !        kyi = ky_s*SQRT(taus(2)*mass(2))/ABS(zs(2))
 !        wgp_max = ABS(vpar_shear_in(2)/vs(2))*kyi/(1+kyi**2)
 !        width_p_max = 3.6/(sqrt_two*R_unit*q_unit*MAX(wgp_max,0.001))
@@ -70,14 +76,14 @@
 ! for ibranch_in = -1 the unstable modes in rank order are stored in
 ! gamma_out(i) i=1,nmodes_in
 !
-      iflux_in=.FALSE.
+!      iflux_in=.FALSE.
       if(nbasis_min_in.ne.0)then
         nbasis = nbasis_min_in
       endif
-      if(sat_rule_in.eq.2)then
-        use_bper_in = .false.
-        use_bpar_in = .false.
-      endif
+!      if(sat_rule_in.eq.2)then
+!        use_bper_in = .false.
+!        use_bpar_in = .false.
+!      endif
 !       write(*,*)"nbasis = ",nbasis
       tmin=LOG10(width_min)
       tmax=LOG10(width_max)
@@ -97,7 +103,7 @@
 !       write(*,*)"width_in = ",width_in
        new_width = .TRUE.
        call gftm_LS
-!       write(*,*)i,width_in,gamma_out(1),freq_out(1),ft
+       write(*,*)i,width_in,nbasis,gamma_out(1),freq_out(1)
        width_n(i)=width_in
        gamma_n(i) = gamma_out(1)
        freq_n(i) = freq_out(1)
@@ -259,27 +265,29 @@
        if(gamma_max.ne.0.0)then
 ! refine eigenvalue with more basis functions
          nbasis = save_nbasis
+!         nu = save_nu
+!         ne = save_ne
          if(sat_rule_in.eq.2)then
           use_bper_in = save_bper
           use_bpar_in = save_bpar
          endif
-!         write(*,*)"nbasis=",nbasis
+         write(*,*)"nbasis=",nbasis, "width_in = ",width_in
          iflux_in=save_iflux
          new_width=.TRUE.
          call gftm_LS
-         if(ibranch_in.eq.-1)then
+!         if(ibranch_in.eq.-1)then
 ! check for inward ballooning modes
 !         write(*,*) ky_s,use_inboard_detrapped_in
 !         write(*,*)"modB_test = ",modB_test
 !         write(*,*)"ft_test = ",ft_test
-           if(use_inboard_detrapped_in.and.ft_test.gt.modB_test)then
-             fts(:) =  ft_min
+!           if(use_inboard_detrapped_in.and.ft_test.gt.modB_test)then
+!             fts(:) =  ft_min
 !           write(*,*)"changed ft",ft
-             new_geometry = .FALSE.
-             new_width = .FALSE.
-             new_matrix = .TRUE.
-             call gftm_LS
-           endif
+!             new_geometry = .FALSE.
+!             new_width = .FALSE.
+!             new_matrix = .TRUE.
+!             call gftm_LS
+!           endif
 !           if(alpha_quench_in.eq.0.0)then
 !             if(save_vexb_shear.ne.0.0.or.wgp_max.ne.0.0)then
 !               do i=1,nmodes_out
@@ -292,7 +300,7 @@
 !               call gftm_LS
 !             endif
 !           endif
-         endif  ! ibranch_in == -1
+!         endif  ! ibranch_in == -1
          gamma_max = MAX(gamma_out(1),gamma_out(2))  ! works for both ibranch_in cases
 !
 !        write(*,*)"width_p_max = ", width_p_max,width_in,gamma_max
@@ -321,7 +329,7 @@
        endif
 !
        nbasis=save_nbasis
-       iflux_in=save_iflux
+!       iflux_in=save_iflux
 !       vexb_shear_s = save_vexb_shear
 !
       END SUBROUTINE gftm_max   
