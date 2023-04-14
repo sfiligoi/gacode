@@ -14,7 +14,7 @@ TIME=r'$(c_s/a)\,t$'
 #---------------------------------------------------------------
 # Legacy average function (should go away eventually)
 def average(f,t,w,wmax):
-    imin,imax = time_index(t,w)
+    imin,imax = time_index(t,str(w))
     return time_average(f,t,imin,imax)
 #---------------------------------------------------------------
 
