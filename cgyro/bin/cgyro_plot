@@ -138,9 +138,6 @@ then
   echo "         -loc <loc>"
   echo "         Legend location (1-4)"  
   echo
-  echo "         -diss"
-  echo "         Toggle plotting of dissipation curve"  
-  echo
   echo "         -norm <int>"
   echo "         Species index for normalization (starts at 0)"  
   echo
@@ -148,11 +145,7 @@ then
   echo "         Toggle ABS rather than RMS normalization in -plot phi"  
   echo
   echo "         -nobar"
-  echo "         Don't use barplot for -plot ky_flux"  
-  echo
-  echo "         -deriv"
-  echo "         Plot second derivative"  
-  echo "         *Affects: kx_phi and kxky_phi"  
+  echo "         Don't use barplot for -plot ky_flux/kx_phi"  
   echo
   echo "OPTIONS FOR -plot fluct, -vis"
   echo
@@ -297,7 +290,6 @@ LEGACY_FLAG=0
 LAND_FLAG=0
 PX=800
 PY=800
-DISS=0
 NORM='elec'
 ABS=0
 BAR=1
@@ -333,7 +325,6 @@ while [ $# -gt 0 ] ; do
 
   -fc) FC=1 ;;
 
-  -diss) DISS=1 ;;
   -nobar) BAR=0 ;;
   -notex) TEX=0 ;;
   -abs) ABS=1 ;;
@@ -416,7 +407,7 @@ PYROOT=$GACODE_ROOT/f2py/pygacode/cgyro
 
 PLT="-m pygacode.cgyro.data_plot_single $TEX $FONTSIZE"
 
-PFLAGS="$PLOT_TYPE $LX $LY $W $NORM $EXT $TIME $FIELD $MOMENT $TMAX $THETA $YMIN $YMAX $N $ABS $FC $LOC $NSCALE $CFLUX $NORM $SPECIES $DISS $BAR $FC $IE $MESH"
+PFLAGS="$PLOT_TYPE $LX $LY $W $NORM $EXT $TIME $FIELD $MOMENT $TMAX $THETA $YMIN $YMAX $N $ABS $FC $LOC $NSCALE $CFLUX $NORM $SPECIES $BAR $FC $IE $MESH"
 
 case "$VIS_TYPE" in
 
