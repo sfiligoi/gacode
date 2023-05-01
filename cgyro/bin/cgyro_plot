@@ -47,6 +47,7 @@ then
   echo "                = phi      (time-dependent ZF vs. finite-n intensities)"
   echo "                = ky_phi   (time-dependent ky-phi intensities)"
   echo "                = kx_phi   (average kx-phi intensities)"
+  echo "                = kx_shift (kx-phi intensities in both domains)"
   echo "                = poly_phi (average Legendre intensities)"
   echo "                = kxky_phi (kx-ky spectra of ave(|phi|))"
   echo "                = rcorr_phi (time-average radial correlation function)"
@@ -94,13 +95,12 @@ then
   echo "         Add theta-xi mesh"
   echo "         *Affects: hb" 
   echo
-  echo "         -ymin <float>"
-  echo "         Minimum value of vertical axis (where applicable)."
+  echo "         -ymin | -ymax <float>"
+  echo "         Minimum | Maximum value of vertical axis (where applicable)."
   echo "         *Affects: flux, ky_flux"
   echo
-  echo "         -ymax <float>"
-  echo "         Maximum value of vertical axis (where applicable)."
-  echo "         *Affects: flux, ky_flux"
+  echo "         -kxmin | -kxmax <float>"
+  echo "         Minimum | Maximum value of kx axis (where applicable)."
   echo
   echo "         -lx <float>"
   echo "         Plot width (default 12)"
@@ -272,6 +272,8 @@ TIME=-1
 TMAX=-1.0
 YMIN=auto
 YMAX=auto
+KXMIN=auto
+KXMAX=auto
 W=0.5
 win=null
 MOMENT=phi
@@ -357,6 +359,8 @@ while [ $# -gt 0 ] ; do
 
   -ymax) shift ; YMAX=$1 ;;
   -ymin) shift ; YMIN=$1 ;;
+  -kxmax) shift ; KXMAX=$1 ;;
+  -kxmin) shift ; KXMIN=$1 ;;
   -lx) shift ; LX=$1 ;;
   -ly) shift ; LY=$1 ;;
   -px) shift ; PX=$1 ;;
@@ -416,7 +420,7 @@ PYROOT=$GACODE_ROOT/f2py/pygacode/cgyro
 
 PLT="-m pygacode.cgyro.data_plot_single $TEX $FONTSIZE"
 
-PFLAGS="$PLOT_TYPE $LX $LY $W $NORM $EXT $TIME $FIELD $MOMENT $TMAX $THETA $YMIN $YMAX $N $ABS $FC $LOC $NSCALE $CFLUX $NORM $SPECIES $DISS $BAR $FC $IE $MESH"
+PFLAGS="$PLOT_TYPE $LX $LY $W $NORM $EXT $TIME $FIELD $MOMENT $TMAX $THETA $YMIN $YMAX $KXMIN $KXMAX $N $ABS $FC $LOC $NSCALE $CFLUX $NORM $SPECIES $DISS $BAR $FC $IE $MESH"
 
 case "$VIS_TYPE" in
 

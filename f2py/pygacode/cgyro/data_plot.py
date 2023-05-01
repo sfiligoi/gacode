@@ -1252,7 +1252,8 @@ class cgyrodata_plot(data.cgyrodata):
          for n in nvec:
             num = r'$n='+str(n)+'$'
             ave = time_average(abs(f[:,n,:]),self.t,imin,imax)
-            ax.step(kx+dk/2,ave[:],label=num)
+            #ax.step(kx+dk/2,ave[:],label=num)
+            ax.plot(kx,ave[:],label=num)
             if self.n_n > 16:
                ax.legend(loc=4, ncol=5, prop={'size':12})
             else:
@@ -1260,6 +1261,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       ax.set_xlim([-x0,x0])
       ax.set_yscale('log')
+      
       if ymin == 'auto':
          ax.set_ylim(bottom=0.5*ave[-1])
       else:
@@ -1267,12 +1269,13 @@ class cgyrodata_plot(data.cgyrodata):
       if ymax != 'auto':
          ax.set_ylim(top=float(ymax))
          
-      # Dissipation curve             
-      if diss == 1:
-         ax.plot(kx,self.radialdiss*ax.get_ylim()[1]*0.5,linewidth=2,color='k',alpha=0.2)
+      if xin['kxmin'] != 'auto':
+         ax.set_xlim(left=float(xin['kxmin']))
+      if xin['kxmax'] != 'auto':
+         ax.set_xlim(right=float(xin['kxmax']))
 
       fig.tight_layout(pad=0.3)
-
+      
       return
    
    def plot_kx_shift(self,xin):
@@ -1346,15 +1349,20 @@ class cgyrodata_plot(data.cgyrodata):
             ax.plot(x,y[0,:],linestyle='-',color=mycol,label=num)
             ax.plot(x,y[1,:],linestyle='--',color=mycol)
             y[:,:] = 0.0
+            ax.legend(loc=4, ncol=6, prop={'size':12})
          elif nstr == '+' and n == nvec[-1]:
             ax.plot(x,y[0,:],linestyle='-',color='k')
             ax.plot(x,y[1,:],linestyle='--',color='k')
-            
 
-      #ax.legend(loc=4, ncol=6, prop={'size':12})
-      ax.set_xlim([-x0,x0])
       ax.set_yscale('log')
+      ax.set_xlim([-x0,x0])
+      
+      if xin['kxmin'] != 'auto':
+         ax.set_xlim(left=float(xin['kxmin']))
 
+      if xin['kxmax'] != 'auto':
+         ax.set_xlim(right=float(xin['kxmax']))
+ 
       return
       
 
