@@ -294,7 +294,7 @@ PX=800
 PY=800
 NORM='elec'
 ABS=0
-BAR=1
+BAR=0
 
 CFLUX=auto
 DN=1
@@ -327,7 +327,7 @@ while [ $# -gt 0 ] ; do
 
   -fc) FC=1 ;;
 
-  -nobar) BAR=0 ;;
+  -bar) BAR=1 ;;
   -notex) TEX=0 ;;
   -abs) ABS=1 ;;
   -norm) shift ; NORM=$1 ;;

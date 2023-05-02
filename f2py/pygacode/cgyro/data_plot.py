@@ -1211,6 +1211,7 @@ class cgyrodata_plot(data.cgyrodata):
       ymin   = xin['ymin']
       ymax   = xin['ymax']
       nstr   = xin['nstr']
+      bar    = xin['bar']
 
       if xin['fig'] is None:
          fig = plt.figure(MYDIR,figsize=(xin['lx'],xin['ly']))
@@ -1240,7 +1241,11 @@ class cgyrodata_plot(data.cgyrodata):
          y = np.sum(abs(f[:,:,:]),axis=1)/self.rho
          ave = time_average(y,self.t,imin,imax) 
          ax.set_ylabel(r'$\left\langle \sum_n \left|'+ft+r'_n\right|\right\rangle/\rho_{*D}$')
-         ax.step(kx+dk/2,ave[:],color='m')
+         if bar:
+            ax.step(kx+dk/2,ave,color='m')
+         else:
+            ax.plot(kx,ave,color='m')
+           
       else:
          nvec = str2list(nstr)
          print('INFO: (plot_kx_phi) n = '+str(nvec))
@@ -1248,8 +1253,15 @@ class cgyrodata_plot(data.cgyrodata):
          for n in nvec:
             num = r'$n='+str(n)+'$'
             ave = time_average(abs(f[:,n,:]),self.t,imin,imax)
-            #ax.step(kx+dk/2,ave[:],label=num)
-            ax.plot(kx,ave[:],label=num)
+            if bar:
+               ax.step(kx+dk/2,ave,label=num)
+            else:
+               if n == 0:
+                  ax.plot(kx[:nx//2],ave[:nx//2],label=num,color='k')
+                  ax.plot(kx[nx//2+1:],ave[nx//2+1:],color='k')
+               else:
+                  ax.plot(kx,ave,label=num)
+                  
             if self.n_n > 16:
                ax.legend(loc=4, ncol=5, prop={'size':12})
             else:
