@@ -41,12 +41,10 @@ xin['nscale'] = int(sys.argv[22])
 xin['cflux']  = sys.argv[23]
 xin['norm']   = sys.argv[24]
 xin['spec']   = int(sys.argv[25])
-xin['diss']   = int(sys.argv[26])
-xin['bar']    = bool(sys.argv[27])
-xin['fc']     = int(sys.argv[28])
-xin['ie']     = int(sys.argv[29])
-xin['mesh']   = int(sys.argv[30])
-
+xin['bar']    = bool(sys.argv[26])
+xin['fc']     = int(sys.argv[27])
+xin['ie']     = int(sys.argv[28])
+xin['mesh']   = int(sys.argv[29])
 
 # plotting control
 ftype   = xin['ftype']

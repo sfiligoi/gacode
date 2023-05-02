@@ -485,7 +485,7 @@ class cgyrodata_plot(data.cgyrodata):
          ftag = 'exch'
          y = ys[:,3,:]
       else:
-         raise ValueError('(plot_flux.py) Invalid moment.')
+         raise ValueError('(plot_flux.py) Unrecognized moment. Try: n,e,v,s')
 
       if usec:
          ntag = ntag+'~(central)'
@@ -1003,6 +1003,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       fig.tight_layout(pad=0.3)
 
+      
    def plot_ky_flux(self,xin):
 
       w      = xin['w']
@@ -1017,7 +1018,6 @@ class cgyrodata_plot(data.cgyrodata):
       cflux  = xin['cflux']
       norm   = xin['norm']
       bar    = xin['bar']
-      diss   = xin['diss']
 
       if self.n_n == 1:
          print('ERROR: (plot_ky_flux) Plot not available with a single mode.')
@@ -1125,12 +1125,9 @@ class cgyrodata_plot(data.cgyrodata):
                ax.grid(which="major",ls=":")
                ax.set_xscale('log')
                ax.set_yscale('log')
-               ax.plot(ky[1:],ave[1:,ispec],'-o',color=color[ispec])
+               ax.plot(ky[1:],ave[1:,ispec],'o',color='k',markersize=2,alpha=0.6)
+               ax.plot(ky[1:],ave[1:,ispec],color=color[ispec])
                
-            # Dissipation curve             
-            if diss == 1:
-               ax.plot(ky,self.alphadiss*ax.get_ylim()[1]*0.5,linewidth=2,color='k',alpha=0.2)
-
             if ymax != 'auto':
                ax.set_ylim(top=float(ymax))
             if ymin != 'auto':
@@ -1213,7 +1210,6 @@ class cgyrodata_plot(data.cgyrodata):
       theta  = xin['theta']
       ymin   = xin['ymin']
       ymax   = xin['ymax']
-      diss   = xin['diss']
       nstr   = xin['nstr']
 
       if xin['fig'] is None:
@@ -1261,23 +1257,22 @@ class cgyrodata_plot(data.cgyrodata):
 
       ax.set_xlim([-x0,x0])
       ax.set_yscale('log')
-      
+
       if ymin == 'auto':
          ax.set_ylim(bottom=0.5*ave[-1])
       else:
          ax.set_ylim(bottom=float(ymin))
       if ymax != 'auto':
          ax.set_ylim(top=float(ymax))
-         
+
       if xin['kxmin'] != 'auto':
          ax.set_xlim(left=float(xin['kxmin']))
       if xin['kxmax'] != 'auto':
          ax.set_xlim(right=float(xin['kxmax']))
 
       fig.tight_layout(pad=0.3)
-      
       return
-   
+
    def plot_kx_shift(self,xin):
 
       w      = xin['w']
