@@ -15,6 +15,7 @@ subroutine cgyro_kernel
   use timer_lib
   use mpi
   use cgyro_globals
+  use cgyro_step
   use cgyro_io
 
   implicit none
@@ -55,7 +56,18 @@ subroutine cgyro_kernel
         ! Normal timestep
         call cgyro_step_gk
      end select
-     
+
+     ! Timestep analysis
+     if (i_proc == 0) then
+        if (i_time == 1) then
+           open(unit=17,file='out.cgyro.adaptive',status='replace')
+           close(io)
+        endif
+        open(unit=17,file='out.cgyro.adaptive',status='old')        
+        write(17,'(i4,10(1pe12.5,1x))') i_time,deltah2_vec(1:istep)
+        close(io)
+     endif
+
      ! Collision step: returns new h_x, cap_h_x, fields
      if (collision_model == 5) then
         call cgyro_step_collision_simple

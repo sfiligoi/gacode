@@ -9,6 +9,7 @@ subroutine cgyro_write_timedata
 
   use mpi
   use cgyro_globals
+  use cgyro_step
 
   implicit none
 
@@ -142,7 +143,7 @@ subroutine cgyro_write_timedata
   else 
      call write_ascii(trim(path)//runfile_freq,2,fvec(:,:))
   endif
-
+  
   ! Output to screen
   if (printout) call print_scrdata()
 

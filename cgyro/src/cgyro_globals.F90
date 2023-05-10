@@ -279,7 +279,7 @@ module cgyro_globals
   !----------------------------------------------------
 
   !---------------------------------------------------------------
-  ! Time stepping
+  ! Time stepping (see detailed parameters in cgyro_step)
   integer :: i_time
   integer :: n_time
   integer :: i_current
@@ -288,10 +288,6 @@ module cgyro_globals
   complex, dimension(:), allocatable :: freq
   complex, dimension(:), allocatable :: freq_err
   integer(KIND=8) :: kernel_start_time, kernel_exit_time, kernel_count_rate, kernel_count_max
-  !
-  ! adaptive integrator parameters
-  real :: delta_t_gk
-  real :: total_local_error
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------

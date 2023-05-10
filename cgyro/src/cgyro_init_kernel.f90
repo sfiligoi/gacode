@@ -15,6 +15,7 @@ subroutine cgyro_init_kernel
   use timer_lib
   use mpi
   use cgyro_globals
+  use cgyro_step
   use cgyro_io
 
   implicit none
