@@ -437,6 +437,12 @@ contains
     integer :: ierr
     !-------------------------------------------------------
 
+#ifdef _OPENACC
+!$acc data present(x,xt)
+
+!$acc host_data use_device(x,xt)
+#endif
+
     call MPI_ALLTOALL(x, &
          nkeep*nk_loc*nsplit, &
          MPI_DOUBLE_COMPLEX, &
@@ -446,6 +452,11 @@ contains
          slib_comm, &
          ierr)
 
+#ifdef _OPENACC
+!$acc end host_data
+
+!$acc end data
+#endif
   end subroutine parallel_slib_f_nc
 
   subroutine parallel_slib_f_nc_async(x,xt,req)
