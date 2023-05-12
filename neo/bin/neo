@@ -108,7 +108,7 @@ while [ $# -gt 0 ] ; do
 
   -h) gacode_printversion NEO ; exit 0 ;;
 
-  -r) shift ; REGRESS=1 ;;
+  -r) REGRESS=1 ;;
 
   -rc) shift ; LOCDIR=$1 ; REGRESS=2 ;;
 
