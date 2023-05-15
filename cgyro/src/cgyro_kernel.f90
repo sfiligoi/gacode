@@ -20,6 +20,8 @@ subroutine cgyro_kernel
 
   implicit none
 
+  integer, parameter :: analysis = 0
+
   if (test_flag == 1) return
 
   !---------------------------------------------------------------------------
@@ -58,7 +60,7 @@ subroutine cgyro_kernel
      end select
 
      ! Timestep analysis
-     if (i_proc == 0) then
+     if (i_proc == 0 .and. analysis == 1) then
         if (i_time == 1) then
            open(unit=17,file='out.cgyro.adaptive',status='replace')
            close(io)

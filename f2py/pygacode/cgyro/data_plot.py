@@ -297,6 +297,8 @@ class cgyrodata_plot(data.cgyrodata):
       nstr  = xin['nstr']
       ymin  = xin['ymin']
       ymax  = xin['ymax']
+      moment = xin['moment']
+      spec   = xin['spec']
 
       if xin['fig'] is None:
          fig = plt.figure(MYDIR,figsize=(xin['lx'],xin['ly']))
@@ -304,7 +306,7 @@ class cgyrodata_plot(data.cgyrodata):
       self.getbigfield()
       self.getnorm(norm) ; t = self.tnorm 
 
-      f,ft = self.kxky_select(theta,field,'phi',0)
+      f,ft = self.kxky_select(theta,field,moment,spec)
       
       p = np.sum(abs(f[:,:,:]),axis=0)/self.rhonorm
 
@@ -351,13 +353,15 @@ class cgyrodata_plot(data.cgyrodata):
       ymin    = xin['ymin']
       ymax    = xin['ymax']
       absnorm = xin['abs']
+      moment = xin['moment']
+      spec   = xin['spec']
 
       if xin['fig'] is None:
          fig = plt.figure(MYDIR,figsize=(xin['lx'],xin['ly']))
 
       self.getbigfield()
 
-      f,ft = self.kxky_select(theta,field,'phi',0)
+      f,ft = self.kxky_select(theta,field,moment,spec)
 
       #======================================
       # Set figure size and axes
@@ -384,8 +388,8 @@ class cgyrodata_plot(data.cgyrodata):
       if absnorm == 0:
          s0_ave = time_average(s0,self.t,imin,imax)
          sn_ave = time_average(sn,self.t,imin,imax)
-         print('INFO: (plot_phi) sqrt[       <|phi_0|^2> ]/rho_*D = {:.4f}'.format(np.sqrt(s0_ave)))
-         print('INFO: (plot_phi) sqrt[ <sum_n |phi_n|^2> ]/rho_*D = {:.4f}'.format(np.sqrt(sn_ave)))
+         print('INFO: (plot_phi) sqrt[       <|'+ft+'_0|^2> ]/rho_*D = {:.4f}'.format(np.sqrt(s0_ave)))
+         print('INFO: (plot_phi) sqrt[ <sum_n |'+ft+'_n|^2> ]/rho_*D = {:.4f}'.format(np.sqrt(sn_ave)))
          lab0=r'$\sqrt{\left\langle\left|'+ft+r'_0\right|^2\right\rangle}/\rho_{*D}$'
          labn=r'$\sqrt{\left\langle\sum_{n>0} \left|'+ft+r'_n\right|^2\right\rangle}/\rho_{*D}$'
          ax.plot(self.t,np.sqrt(s0),label=lab0,linewidth=2)
@@ -395,8 +399,8 @@ class cgyrodata_plot(data.cgyrodata):
       else:
          y0_ave = time_average(y0,self.t,imin,imax)
          yn_ave = time_average(yn,self.t,imin,imax)
-         print('INFO: (plot_phi)       <|phi_0|>/rho_*D = {:.4f}'.format(y0_ave))
-         print('INFO: (plot_phi) <sum_n |phi_n|>/rho_*D = {:.4f}'.format(yn_ave))
+         print('INFO: (plot_phi)       <|'+ft+'_0|>/rho_*D = {:.4f}'.format(y0_ave))
+         print('INFO: (plot_phi) <sum_n |'+ft+'_n|>/rho_*D = {:.4f}'.format(yn_ave))
          lab0=r'$\left\langle \left|'+ft+r'_0\right|\right\rangle/\rho_{*D}$'
          labn=r'$\left\langle \sum_{n>0} \left|'+ft+r'_n\right|\right\rangle/\rho_{*D}$'
          ax.plot(self.t,y0,label=lab0,linewidth=2)
@@ -431,12 +435,13 @@ class cgyrodata_plot(data.cgyrodata):
       nscale = xin['nscale']
       cflux  = xin['cflux']
       norm   = xin['norm']
+      theta  = xin['theta']
  
       if xin['fig'] is None and ftype != 'nox':
          fig = plt.figure(MYDIR,figsize=(xin['lx'],xin['ly']))
 
       if moment == 'phi':
-         moment = 'e'
+         moment == 'e'
          
       usec = self.getflux(cflux)
 
@@ -1018,6 +1023,7 @@ class cgyrodata_plot(data.cgyrodata):
       cflux  = xin['cflux']
       norm   = xin['norm']
       bar    = xin['bar']
+      theta  = xin['theta']
 
       if self.n_n == 1:
          print('ERROR: (plot_ky_flux) Plot not available with a single mode.')
@@ -1028,6 +1034,7 @@ class cgyrodata_plot(data.cgyrodata):
       
       ns = self.n_species
       t  = self.t
+      nn = self.n_n
 
       if xin['fig'] is None and ftype != 'nox':
          if ns < 4:
@@ -1045,7 +1052,7 @@ class cgyrodata_plot(data.cgyrodata):
       field_tag = '\mathrm{Total}'
 
       if fc == 0:
-         ys = np.sum(self.ky_flux,axis=(2))
+         ys = np.sum(self.ky_flux,axis=2)
       else:
          ys = self.ky_flux[:,:,field,:,:]
          if field == 0:
@@ -1079,6 +1086,19 @@ class cgyrodata_plot(data.cgyrodata):
          ttag = 'S'
          ftag = 'exch'
          y = ys[:,3,:,:]
+      elif moment == 'k':
+         ntag = 'I'
+         mtag = 'I'
+         ttag = 'I'
+         ftag = 'i'
+         self.getbigfield()
+         # I and K
+         ns = 2
+         y = np.zeros([ns,nn,self.n_time])
+         f,ft = self.kxky_select(theta,field,'phi',0)
+         y[0,:,:] = np.sum(abs(f[:,:,:]),axis=0)
+         f,ft = self.kxky_select(theta,field,'k',0)
+         y[1,:,:] = np.sum(abs(f[:,:,:]),axis=0)
       else:
          raise ValueError('(plot_ky_flux.py) Invalid moment.')
       
@@ -1237,8 +1257,12 @@ class cgyrodata_plot(data.cgyrodata):
 
       f,ft = self.kxky_select(theta,field,moment,0)
                  
-      if nstr == 'null':
-         y = np.sum(abs(f[:,:,:]),axis=1)/self.rho
+      if nstr == 'null' or nstr == '+':
+         if nstr == '+':
+            #y = np.sum(abs(f[:,1:,:]),axis=1)/self.rho
+            y = np.sum(abs(f[:,1:,:])**2,axis=1)
+         else:
+            y = np.sum(abs(f[:,:,:]),axis=1)/self.rho
          ave = time_average(y,self.t,imin,imax) 
          ax.set_ylabel(r'$\left\langle \sum_n \left|'+ft+r'_n\right|\right\rangle/\rho_{*D}$')
          if bar:
