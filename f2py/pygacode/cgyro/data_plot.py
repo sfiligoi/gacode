@@ -353,8 +353,8 @@ class cgyrodata_plot(data.cgyrodata):
       ymin    = xin['ymin']
       ymax    = xin['ymax']
       absnorm = xin['abs']
-      moment = xin['moment']
-      spec   = xin['spec']
+      moment  = xin['moment']
+      spec    = xin['spec']
 
       if xin['fig'] is None:
          fig = plt.figure(MYDIR,figsize=(xin['lx'],xin['ly']))
@@ -375,7 +375,13 @@ class cgyrodata_plot(data.cgyrodata):
 
       # Get index for average window
       imin,imax=time_index(self.t,w)
-      
+
+      p0 = self.n_radial//2-1
+      for i in range(5):
+         j = i+1
+         f[p0-j,0,:] = 0
+         f[p0+j,0,:] = 0
+    
       # n=0 intensity
       y0 = np.sum(abs(f[:,0,:]),axis=0)/self.rho      
       s0 = np.sum(abs(f[:,0,:])**2,axis=0)/self.rho**2      
@@ -1172,13 +1178,20 @@ class cgyrodata_plot(data.cgyrodata):
       theta  = xin['theta']
       spec   = xin['spec']
 
-      x0 = max(abs(self.kx))*0.25
+      x0 = max(abs(self.kx))
       y0 = max(abs(self.ky))
 
-      asp=y0/(2*x0)
+      xl = -x0 ; xr = x0
+      
+      if xin['kxmin'] != 'auto':
+         xl = float(xin['kxmin'])
+      if xin['kxmax'] != 'auto':
+         xr = float(xin['kxmax'])
 
+      asp = y0/(xr-xl)
+      
       if xin['fig'] is None:
-         fig = plt.figure(MYDIR,figsize=(self.lx,self.lx*asp))
+         fig = plt.figure(MYDIR,figsize=(xin['lx'],asp*xin['lx']))
  
       self.getbigfield()
 
@@ -1196,28 +1209,27 @@ class cgyrodata_plot(data.cgyrodata):
       f,ft = self.kxky_select(theta,field,moment,spec)
 
       imin,imax=time_index(t,w)
-      for i in np.arange(imin,self.n_time):
-         fplot = fplot+abs(f[:,:,i])
+      y = np.sum(abs(f[:,:,imin:imax+1]),axis=2)
          
       # Fix (0,0)
       i0 = nx//2-1
-      fplot[i0,0] = fplot[i0+1,0]
+      y[i0,0] = y[i0+1,0]
 
       # Reverse y order, take transpose, take log
-      fplot = np.transpose(np.log(fplot[:,::-1]))
+      y = np.transpose(np.log(y[:,::-1]))
 
       ax = fig.add_subplot(111)
 
       windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[imax])+']$'
 
-      ax.set_xlabel(r'$k_x \rho_s/4$')
+      ax.set_xlabel(r'$k_x \rho_s$')
       ax.set_ylabel(r'$k_y \rho_s$')
-      ax.set_title(r'$\mathrm{Time}$-$\mathrm{averaged~'+ft+'~intensity} \quad $'+windowtxt)
+      ax.set_title(r'$\mathrm{Log} |'+ft+'| \quad $'+windowtxt)
 
-      ax.imshow(fplot,extent=[-x0,x0,0,y0],interpolation='none',cmap='plasma')
-      print('INFO: (plot_kxky_phi) min={:.2e} max={:.2e}'.format(np.min(f),np.max(f)))
+      ax.imshow(y,extent=[xl,xr,0,y0],interpolation='none',cmap='plasma')
+      print('INFO: (plot_kxky_phi) min={:.2e} max={:.2e}'.format(np.min(y),np.max(y)))
 
-      fig.tight_layout(pad=0.5)
+      fig.tight_layout()
 
       return
    
