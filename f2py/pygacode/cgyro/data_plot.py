@@ -12,47 +12,6 @@ from . import data
 MYDIR=os.path.basename(os.getcwd())
 
 class cgyrodata_plot(data.cgyrodata):
-
-   TEXPHI  = r'{\delta\phi}'
-   TEXK    = r'{K}'
-   TEXAPAR = r'\delta {A_\parallel}'
-   TEXBPAR = r'\delta {B_\parallel}'
-   TEXDN   = r'\delta n'
-   TEXDE   = r'\delta E'
-   TEXDV   = r'\delta v'
-   
-   def kxky_select(self,theta,field,moment,species):
-
-      itheta,thetapi = indx_theta(theta,self.theta_plot)
-      
-      if moment == 'phi':
-         if field == 0:
-            f  = self.kxky_phi[0,1:,itheta,:,:]+1j*self.kxky_phi[1,1:,itheta,:,:]
-            ft = self.TEXPHI
-         elif field == 1:
-            f  = self.kxky_apar[0,1:,itheta,:,:]+1j*self.kxky_apar[1,1:,itheta,:,:]
-            ft = self.TEXAPAR
-         else:
-            f  = self.kxky_bpar[0,1:,itheta,:,:]+1j*self.kxky_bpar[1,1:,itheta,:,:]
-            ft = self.TEXBPAR
-      elif moment == 'k':
-            f  = self.kxky_phi[0,1:,itheta,:,:]+1j*self.kxky_phi[1,1:,itheta,:,:]
-            for i in range(self.n_time):
-               f[:,:,i] = self.kperp[:,:]*f[:,:,i]
-            ft = self.TEXK
-      elif moment == 'n':
-         f  = self.kxky_n[0,1:,itheta,species,:,:]+1j*self.kxky_n[1,1:,itheta,species,:,:]
-         ft = self.TEXDN
-      elif moment == 'e':
-         f  = self.kxky_e[0,1:,itheta,species,:,:]+1j*self.kxky_e[1,1:,itheta,species,:,:]
-         ft = self.TEXDE
-      elif moment == 'v':
-         f  = self.kxky_v[0,1:,itheta,species,:,:]+1j*self.kxky_v[1,1:,itheta,species,:,:]
-         ft = self.TEXDV
-
-      # 3D structure: f[r,n,time]
-
-      return f,ft
       
    def plot_freq(self,xin):
       
@@ -1253,8 +1212,8 @@ class cgyrodata_plot(data.cgyrodata):
       t  = self.t
       kx = self.kx
       nx = self.n_radial-1 
-
-      imin,imax=time_index(self.t,w)
+      
+      imin,imax=time_index(t,w)
     
       dk = kx[1]-kx[0]
       x0 = kx[-1]+dk
@@ -1271,11 +1230,11 @@ class cgyrodata_plot(data.cgyrodata):
                  
       if nstr == 'null' or nstr == '+':
          if nstr == '+':
-            #y = np.sum(abs(f[:,1:,:]),axis=1)/self.rho
+            # K norm (no division by rho)
             y = np.sum(abs(f[:,1:,:])**2,axis=1)
          else:
             y = np.sum(abs(f[:,:,:]),axis=1)/self.rho
-         ave = time_average(y,self.t,imin,imax) 
+         ave = time_average(y,t,imin,imax) 
          ax.set_ylabel(r'$\left\langle \sum_n \left|'+ft+r'_n\right|\right\rangle/\rho_{*D}$')
          if bar:
             ax.step(kx+dk/2,ave,color='m')
@@ -1288,11 +1247,15 @@ class cgyrodata_plot(data.cgyrodata):
          ax.set_ylabel(r'$\left\langle\left|'+ft+r'_n\right|\right\rangle/\rho_{*D}$')
          for n in nvec:
             num = r'$n='+str(n)+'$'
-            ave = time_average(abs(f[:,n,:]),self.t,imin,imax)
+            ave = time_average(abs(f[:,n,:]),t,imin,imax)
             if bar:
                ax.step(kx+dk/2,ave,label=num)
             else:
                if n == 0:
+                  #ax.plot(kx[1:nx//2:2],ave[1:nx//2:2],label=num,color='k')
+                  #ax.plot(kx[nx//2+2::2],ave[nx//2+2::2],color='k')
+                  ax.plot(kx[:nx//2:2],ave[:nx//2:2],color='m',alpha=0.4)
+                  ax.plot(kx[nx//2+1::2],ave[nx//2+1::2],color='m',alpha=0.4)
                   ax.plot(kx[:nx//2],ave[:nx//2],label=num,color='k')
                   ax.plot(kx[nx//2+1:],ave[nx//2+1:],color='k')
                else:

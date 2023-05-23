@@ -136,7 +136,7 @@ class cgyrodata:
    def getflux(self,cflux='auto'):
 
       if cflux == 'auto':
-         if abs(self.gamma_e) > 0.0:
+         if abs(self.gamma_e) > 0.0 and self.n_n > 1:
             usec = True
          else:
             usec = False
@@ -413,6 +413,7 @@ class cgyrodata:
             self.thetap[i] = self.theta[m*i]
 
       # Construct k_perp
+      # NOTE: kx,ky and kperp are kx*rho, ky*rho, kperp*rho
       nx = self.n_radial-1
       ny = self.n_n
       self.kperp = np.sqrt(np.outer(self.kx[:]**2,np.ones(ny))+
@@ -552,3 +553,49 @@ class cgyrodata:
          self.qc = vc*(self.temp[i]/te)*rhoc**2
          self.gbnorm = '_\mathrm{GB'+str(i)+'}'
 
+   
+   def kxky_select(self,theta,field,moment,species):
+
+      self.TEXPHI  = r'{\delta\phi}'
+      self.TEXK    = r'{K}'
+      self.TEXAPAR = r'\delta {A_\parallel}'
+      self.TEXBPAR = r'\delta {B_\parallel}'
+      self.TEXDN   = r'\delta n'
+      self.TEXDE   = r'\delta E'
+      self.TEXDV   = r'\delta v'
+
+      itheta,thetapi = indx_theta(theta,self.theta_plot)
+
+      # phi
+      # I = phi_hat^2
+      # K = (k_perp rho)^2 phi_hat^2
+
+      if moment == 'phi':
+         if field == 0:
+            f  = self.kxky_phi[0,1:,itheta,:,:]+1j*self.kxky_phi[1,1:,itheta,:,:]
+            ft = self.TEXPHI
+         elif field == 1:
+            f  = self.kxky_apar[0,1:,itheta,:,:]+1j*self.kxky_apar[1,1:,itheta,:,:]
+            ft = self.TEXAPAR
+         else:
+            f  = self.kxky_bpar[0,1:,itheta,:,:]+1j*self.kxky_bpar[1,1:,itheta,:,:]
+            ft = self.TEXBPAR
+      elif moment == 'k':
+            f  = self.kxky_phi[0,1:,itheta,:,:]+1j*self.kxky_phi[1,1:,itheta,:,:]
+            for i in range(self.n_time):
+               # self.kperp -> kperp*rho
+               f[:,:,i] = self.kperp[:,:]*f[:,:,i]
+            ft = self.TEXK
+      elif moment == 'n':
+         f  = self.kxky_n[0,1:,itheta,species,:,:]+1j*self.kxky_n[1,1:,itheta,species,:,:]
+         ft = self.TEXDN
+      elif moment == 'e':
+         f  = self.kxky_e[0,1:,itheta,species,:,:]+1j*self.kxky_e[1,1:,itheta,species,:,:]
+         ft = self.TEXDE
+      elif moment == 'v':
+         f  = self.kxky_v[0,1:,itheta,species,:,:]+1j*self.kxky_v[1,1:,itheta,species,:,:]
+         ft = self.TEXDV
+
+      # 3D structure: f[r,n,time]
+
+      return f,ft
