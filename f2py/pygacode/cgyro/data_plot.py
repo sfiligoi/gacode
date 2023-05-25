@@ -334,12 +334,6 @@ class cgyrodata_plot(data.cgyrodata):
 
       # Get index for average window
       imin,imax=time_index(self.t,w)
-
-      p0 = self.n_radial//2-1
-      for i in range(5):
-         j = i+1
-         f[p0-j,0,:] = 0
-         f[p0+j,0,:] = 0
     
       # n=0 intensity
       y0 = np.sum(abs(f[:,0,:]),axis=0)/self.rho      
