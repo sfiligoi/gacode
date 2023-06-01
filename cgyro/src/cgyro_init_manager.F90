@@ -268,7 +268,7 @@ subroutine cgyro_init_manager
            ! the lowest energy(s) has the most spread, so treat differently
            n_low_energy = 1
            do ie=2,n_energy
-             if (ie<1.0e-2) then
+             if (energy(ie)<1.0e-2) then
                n_low_energy = ie
              endif
            enddo

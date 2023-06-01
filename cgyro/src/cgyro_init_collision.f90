@@ -26,10 +26,11 @@ subroutine cgyro_init_collision
   real, dimension(:,:,:,:,:,:), allocatable :: bessel
   ! diagnostics
   real :: amat_sum, cmat_sum, cmat_diff, cmat_rel_diff
-  integer, dimension(7:10) :: cmap_fp32_error_abs_cnt_loc
-  integer, dimension(7:10) :: cmap_fp32_error_rel_cnt_loc
-  integer, dimension(7:10) :: cmap_fp32_error_abs_cnt
-  integer, dimension(7:10) :: cmap_fp32_error_rel_cnt
+  ! use real as 32-bit int may overflow
+  real, dimension(7:10) :: cmap_fp32_error_abs_cnt_loc
+  real, dimension(7:10) :: cmap_fp32_error_rel_cnt_loc
+  real, dimension(7:10) :: cmap_fp32_error_abs_cnt
+  real, dimension(7:10) :: cmap_fp32_error_rel_cnt
 
   if (collision_model == 5) then
      call cgyro_init_collision_simple
@@ -725,14 +726,14 @@ subroutine cgyro_init_collision
      call MPI_ALLREDUCE(cmap_fp32_error_abs_cnt_loc,&
           cmap_fp32_error_abs_cnt,&
           4,&
-          MPI_INTEGER,&
+          MPI_DOUBLE_PRECISION,&
           MPI_SUM,&
           CGYRO_COMM_WORLD,&
           i_err)
      call MPI_ALLREDUCE(cmap_fp32_error_rel_cnt_loc,&
           cmap_fp32_error_rel_cnt,&
           4,&
-          MPI_INTEGER,&
+          MPI_DOUBLE_PRECISION,&
           MPI_SUM,&
           CGYRO_COMM_WORLD,&
           i_err)
