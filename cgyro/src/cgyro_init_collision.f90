@@ -766,15 +766,14 @@ subroutine cgyro_init_collision
      if (i_proc==0) then
         ! reuse amat_sum to reduce number of variables
         amat_sum = 0.01 * cmap_fp32_error_abs_cnt(19)
-        write (msg, "(A,A,A,A,A,A,A,A,A,A,A)") &
+        write (msg, "(A,A,A,A,A,A,A,A,A)") &
                     "                           ", &
                     " >1.e-8", "    e-9", &
                     "   e-10", "   e-11", &
                     "   e-12", "   e-13", &
-                    "   e-14", "   e-15", &
-                    "   e-16", "   e-17"
+                    "   e-14", "   e-15"
         call cgyro_info(msg)
-        write (msg, "(A,4(F6.2,A),6(F6.1,A))") &
+        write (msg, "(A,4(F6.2,A),4(F6.1,A))") &
                     "Abs cmat_fp32 error rates: ", cmap_fp32_error_abs_cnt(8)/amat_sum, &
                     "%",  cmap_fp32_error_abs_cnt(9)/amat_sum, &
                     "%", cmap_fp32_error_abs_cnt(10)/amat_sum, &
@@ -782,11 +781,9 @@ subroutine cgyro_init_collision
                     "%", cmap_fp32_error_abs_cnt(12)/amat_sum, &
                     "%", cmap_fp32_error_abs_cnt(13)/amat_sum, &
                     "%", cmap_fp32_error_abs_cnt(14)/amat_sum, &
-                    "%", cmap_fp32_error_abs_cnt(15)/amat_sum, &
-                    "%", cmap_fp32_error_abs_cnt(16)/amat_sum, &
-                    "%", cmap_fp32_error_abs_cnt(17)/amat_sum, "%"
+                    "%", cmap_fp32_error_abs_cnt(15)/amat_sum, "%"
         call cgyro_info(msg)
-        write (msg, "(A,4(F6.2,A),6(F6.1,A))") &
+        write (msg, "(A,4(F6.2,A),4(F6.1,A))") &
                     "Rel cmat_fp32 error rates: ", cmap_fp32_error_rel_cnt(8)/amat_sum, &
                     "%", cmap_fp32_error_rel_cnt(9)/amat_sum, &
                     "%",cmap_fp32_error_rel_cnt(10)/amat_sum, &
@@ -794,9 +791,7 @@ subroutine cgyro_init_collision
                     "%",cmap_fp32_error_rel_cnt(12)/amat_sum, &
                     "%",cmap_fp32_error_rel_cnt(13)/amat_sum, &
                     "%",cmap_fp32_error_rel_cnt(14)/amat_sum, &
-                    "%",cmap_fp32_error_rel_cnt(15)/amat_sum, &
-                    "%",cmap_fp32_error_rel_cnt(16)/amat_sum, &
-                    "%",cmap_fp32_error_rel_cnt(17)/amat_sum, "%"
+                    "%",cmap_fp32_error_rel_cnt(15)/amat_sum, "%"
         call cgyro_info(msg)
         write (msg, "(A,1PE9.2)") &
                     "Abs cmat_fp32 error avg: ", 0.01*cmap_fp32_error_sum(1)/amat_sum
