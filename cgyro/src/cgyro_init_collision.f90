@@ -25,6 +25,7 @@ subroutine cgyro_init_collision
   real, dimension(:,:,:,:,:,:), allocatable :: ctest
   real, dimension(:,:,:,:,:,:), allocatable :: bessel
   ! diagnostics
+  real :: my_cmat_fp32
   real :: amat_sum, cmat_sum, cmat_diff, cmat_rel_diff
   ! use real as 32-bit int may overflow
   real, dimension(7:10) :: cmap_fp32_error_abs_cnt_loc
@@ -249,7 +250,7 @@ subroutine cgyro_init_collision
 !$omp& private(ic,ic_loc,it,ir,info,rval) &
 !$omp& private(iv,is,ix,ie,jv,js,jx,je,ks) &
 !$omp& private(amat_sum,cmat_sum,cmat_diff,cmat_rel_diff) shared (cmap_fp32_error_abs_cnt_loc,cmap_fp32_error_rel_cnt_loc) &
-!$omp& private(amat,cmat_loc,i_piv,rs,rsvec,rsvect0,rsvect1) &
+!$omp& private(amat,cmat_loc,my_cmat_fp32,i_piv,rs,rsvec,rsvect0,rsvect1) &
 !$omp& firstprivate(collision_precision_mode,n_low_energy) &
 !$omp& shared(cmat,cmat_fp32,cmat_stripes,cmat_e1)
   do itor=nt1,nt2
@@ -676,23 +677,19 @@ subroutine cgyro_init_collision
               ie = ie_v(iv)
               is = is_v(iv)
               ix = ix_v(iv)
+              my_cmat_fp32 = cmat_fp32(iv,jv,ic_loc,itor)
               if (ie<=n_low_energy) then ! always keep all detail for lowest energy
-                 cmat_e1(ix,is,ie,jv,ic_loc,itor) = amat(iv,jv) - cmat_fp32(iv,jv,ic_loc,itor)
-                 ! re-use cmat_diff to avoid using another temp
-                 cmat_diff = cmat_fp32(iv,jv,ic_loc,itor)
-                 cmat_diff = cmat_diff + cmat_e1(ix,is,ie,jv,ic_loc,itor) ! for fp64 add
-                 cmat_sum = cmat_sum + abs(cmat_diff)
+                 cmat_e1(ix,is,ie,jv,ic_loc,itor) = amat(iv,jv) - my_cmat_fp32
+                 ! my_cmat_fp32 not used for the original purpose anymore, reuse to represent the reduced precsion
+                 my_cmat_fp32 = my_cmat_fp32 + cmat_e1(ix,is,ie,jv,ic_loc,itor) ! my_cmat_fp32 is actually fp64, so sum OK
               else ! only keep if energy and species the same
                  if ((je == ie) .AND. (js == is)) then
-                    cmat_stripes(ix,is,ie,jx,ic_loc,itor) = amat(iv,jv) - cmat_fp32(iv,jv,ic_loc,itor)
-                    ! re-use cmat_diff to avoid using another temp
-                    cmat_diff = cmat_fp32(iv,jv,ic_loc,itor)
-                    cmat_diff = cmat_diff + cmat_stripes(ix,is,ie,jx,ic_loc,itor) ! for fp64 add
-                    cmat_sum = cmat_sum + abs(cmat_diff)
-                 else
-                    cmat_sum = cmat_sum + abs(cmat_fp32(iv,jv,ic_loc,itor))
+                    cmat_stripes(ix,is,ie,jx,ic_loc,itor) = amat(iv,jv) - my_cmat_fp32
+                    ! my_cmat_fp32 not used for the original purpose anymore, reuse to represent the reduced precsion
+                    my_cmat_fp32 = my_cmat_fp32 + cmat_stripes(ix,is,ie,jx,ic_loc,itor) ! my_cmat_fp32 is actually fp64, so sum OK
                  endif
               endif
+              cmat_sum = cmat_sum + abs(my_cmat_fp32)
            enddo
            cmat_diff = abs(amat_sum-cmat_sum)
            cmat_rel_diff = cmat_diff/abs(amat_sum)
