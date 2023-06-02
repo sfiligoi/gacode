@@ -678,11 +678,17 @@ subroutine cgyro_init_collision
               ix = ix_v(iv)
               if (ie<=n_low_energy) then ! always keep all detail for lowest energy
                  cmat_e1(ix,is,ie,jv,ic_loc,itor) = amat(iv,jv) - cmat_fp32(iv,jv,ic_loc,itor)
-                 cmat_sum = cmat_sum + abs(cmat_fp32(iv,jv,ic_loc,itor) + cmat_e1(ix,is,ie,jv,ic_loc,itor))
+                 ! re-use cmat_diff to avoid using another temp
+                 cmat_diff = cmat_fp32(iv,jv,ic_loc,itor)
+                 cmat_diff = cmat_diff + cmat_e1(ix,is,ie,jv,ic_loc,itor) ! for fp64 add
+                 cmat_sum = cmat_sum + abs(cmat_diff)
               else ! only keep if energy and species the same
                  if ((je == ie) .AND. (js == is)) then
                     cmat_stripes(ix,is,ie,jx,ic_loc,itor) = amat(iv,jv) - cmat_fp32(iv,jv,ic_loc,itor)
-                    cmat_sum = cmat_sum + abs(cmat_fp32(iv,jv,ic_loc,itor) + cmat_stripes(ix,is,ie,jx,ic_loc,itor))
+                    ! re-use cmat_diff to avoid using another temp
+                    cmat_diff = cmat_fp32(iv,jv,ic_loc,itor)
+                    cmat_diff = cmat_diff + cmat_stripes(ix,is,ie,jx,ic_loc,itor) ! for fp64 add
+                    cmat_sum = cmat_sum + abs(cmat_diff)
                  else
                     cmat_sum = cmat_sum + abs(cmat_fp32(iv,jv,ic_loc,itor))
                  endif
