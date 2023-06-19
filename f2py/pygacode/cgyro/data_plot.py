@@ -207,13 +207,13 @@ class cgyrodata_plot(data.cgyrodata):
       # Construct complex eigenfunction at selected time
       if field == 0:
          f = self.phib[0,:,itime]+1j*self.phib[1,:,itime]
-         ytag = self.TEXPHI
+         ytag = TEXPHI
       elif field == 1:
          f = self.aparb[0,:,itime]+1j*self.aparb[1,:,itime]
-         ytag = self.TEXAPAR
+         ytag = TEXAPAR
       elif field == 2:
          f = self.bparb[0,:,itime]+1j*self.bparb[1,:,itime]
-         ytag = self.TEXBPAR
+         ytag = TEXBPAR
 
       ax = fig.add_subplot(111)
       ax.grid(which="both",ls=":")
@@ -401,13 +401,13 @@ class cgyrodata_plot(data.cgyrodata):
       cflux  = xin['cflux']
       norm   = xin['norm']
       theta  = xin['theta']
- 
+
       if xin['fig'] is None and ftype != 'nox':
          fig = plt.figure(MYDIR,figsize=(xin['lx'],xin['ly']))
 
       if moment == 'phi':
-         moment == 'e'
-         
+         moment = 'e'
+  
       usec = self.getflux(cflux)
 
       self.getnorm(norm) ; t = self.tnorm

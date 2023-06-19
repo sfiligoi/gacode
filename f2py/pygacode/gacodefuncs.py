@@ -11,6 +11,14 @@ import time
 # Useful labels
 TIME=r'$(c_s/a)\,t$'
 
+TEXPHI  = r'{\delta\phi}'
+TEXK    = r'{K}'
+TEXAPAR = r'\delta {A_\parallel}'
+TEXBPAR = r'\delta {B_\parallel}'
+TEXDN   = r'\delta n'
+TEXDE   = r'\delta E'
+TEXDV   = r'\delta v'
+
 #---------------------------------------------------------------
 # Legacy average function (should go away eventually)
 def average(f,t,w,wmax):

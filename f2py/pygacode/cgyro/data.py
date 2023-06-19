@@ -556,14 +556,6 @@ class cgyrodata:
    
    def kxky_select(self,theta,field,moment,species):
 
-      self.TEXPHI  = r'{\delta\phi}'
-      self.TEXK    = r'{K}'
-      self.TEXAPAR = r'\delta {A_\parallel}'
-      self.TEXBPAR = r'\delta {B_\parallel}'
-      self.TEXDN   = r'\delta n'
-      self.TEXDE   = r'\delta E'
-      self.TEXDV   = r'\delta v'
-
       itheta,thetapi = indx_theta(theta,self.theta_plot)
 
       # phi
@@ -573,28 +565,28 @@ class cgyrodata:
       if moment == 'phi':
          if field == 0:
             f  = self.kxky_phi[0,1:,itheta,:,:]+1j*self.kxky_phi[1,1:,itheta,:,:]
-            ft = self.TEXPHI
+            ft = TEXPHI
          elif field == 1:
             f  = self.kxky_apar[0,1:,itheta,:,:]+1j*self.kxky_apar[1,1:,itheta,:,:]
-            ft = self.TEXAPAR
+            ft = TEXAPAR
          else:
             f  = self.kxky_bpar[0,1:,itheta,:,:]+1j*self.kxky_bpar[1,1:,itheta,:,:]
-            ft = self.TEXBPAR
+            ft = TEXBPAR
       elif moment == 'k':
             f  = self.kxky_phi[0,1:,itheta,:,:]+1j*self.kxky_phi[1,1:,itheta,:,:]
             for i in range(self.n_time):
                # self.kperp -> kperp*rho
                f[:,:,i] = self.kperp[:,:]*f[:,:,i]
-            ft = self.TEXK
+            ft = TEXK
       elif moment == 'n':
          f  = self.kxky_n[0,1:,itheta,species,:,:]+1j*self.kxky_n[1,1:,itheta,species,:,:]
-         ft = self.TEXDN
+         ft = TEXDN
       elif moment == 'e':
          f  = self.kxky_e[0,1:,itheta,species,:,:]+1j*self.kxky_e[1,1:,itheta,species,:,:]
-         ft = self.TEXDE
+         ft = TEXDE
       elif moment == 'v':
          f  = self.kxky_v[0,1:,itheta,species,:,:]+1j*self.kxky_v[1,1:,itheta,species,:,:]
-         ft = self.TEXDV
+         ft = TEXDV
 
       # 3D structure: f[r,n,time]
 
