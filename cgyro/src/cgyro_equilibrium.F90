@@ -277,10 +277,6 @@ subroutine cgyro_equilibrium
      omega_trap(:,2,itor) = stream_factor*omega_trap(:,2,itor)
    end select
   enddo
-  omega_stream(:,1,:) = 0.0
-  omega_trap(:,1,:) = 0.0
-  omega_rdrift(:,1) = 0.0
-  omega_adrift(:,1) = omega_adrift(n_theta/2+1,1)
 
 #ifdef _OPENACC
 !$acc enter data copyin(xi,vel,omega_stream)
