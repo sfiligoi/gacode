@@ -119,7 +119,11 @@ subroutine cgyro_nl_fftw_comm1_r(ij)
               my_psi = (0.0,0.0)
            else
               my_psi = fpack(ir,itor-nt1+1,iexch)
+           endif           
+           if (itor == 0) then
+              my_psi = my_psi*zf_scale
            endif
+           
            ! RHS -> -[f,g] = [f,g]_{r,-alpha}
            rhs(ic_loc_m,iv_loc_m,itor,ij) = rhs(ic_loc_m,iv_loc_m,itor,ij)+psi_mul*my_psi
         enddo

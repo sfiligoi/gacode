@@ -155,6 +155,7 @@ module cgyro_globals
 
   real :: lambda_debye
   real :: rhos
+  real :: zf_scale=1.0
 
   ! Global conversion variables
   real :: b_unit, b_gs2
