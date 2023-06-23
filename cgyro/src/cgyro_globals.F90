@@ -150,12 +150,12 @@ module cgyro_globals
   real :: mach_scale
   real :: beta_star_scale, betae_unit_scale
   real :: nu_ee_scale
+  real :: zf_scale
   real, dimension(11) :: dlnndr_scale
   real, dimension(11) :: dlntdr_scale
 
   real :: lambda_debye
   real :: rhos
-  real :: zf_scale=1.0
 
   ! Global conversion variables
   real :: b_unit, b_gs2
