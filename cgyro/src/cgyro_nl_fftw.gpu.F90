@@ -47,6 +47,7 @@ subroutine cgyro_nl_fftw(ij)
   integer :: j,p,iexch
   integer :: it,ir,itm,itl,ix,iy
   integer :: itor,mytm
+  integer :: irbase,irmax
   integer :: i1,i2
   integer :: it_loc
   integer :: ierr
@@ -56,6 +57,12 @@ subroutine cgyro_nl_fftw(ij)
 
   real :: inv_nxny
 
+#ifdef HIPGPU
+  ! AMD GPUs do not seem to like tiling
+  integer, parameter :: tile_size  = 1
+#else
+  integer, parameter :: tile_size  = 4
+#endif
 
   call timer_lib_in('nl_mem')
   ! make sure reqs progress
@@ -104,20 +111,24 @@ subroutine cgyro_nl_fftw(ij)
 ! f_nl is (radial, nt_loc, theta, nv_loc1, toroidal_procs)
 ! where nv_loc1 * toroidal_procs >= nv_loc
 !$acc parallel loop gang vector independent collapse(4) async(2) &
-!$acc&         private(j,ir,p,ix,itor,iy,f0,g0,itm,itl)
+!$acc&         private(j,ir,p,ix,itor,iy,f0,g0,itm,itl,irbase,irmax)
   do j=1,nsplit
-     do ir=1,n_radial
+     do irbase=1,n_radial,1
        do itm=1,n_toroidal_procs
          do itl=1,nt_loc
            itor=itl + (itm-1)*nt_loc
-           p  = ir-1-nx0/2
-           ix = p
-           if (ix < 0) ix = ix+nx
-
            iy = itor-1
-           f0 = i_c*f_nl(ir,itl,j,itm)
-           fxmany(iy,ix,j) = p*f0
-           fymany(iy,ix,j) = iy*f0
+           ! process several ir to improve f_nl cache reuse
+           irmax=min(irbase+(tile_size-1),n_radial)
+           do ir=irbase,irmax
+              p  = ir-1-nx0/2
+              ix = p
+              if (ix < 0) ix = ix+nx
+
+              f0 = i_c*f_nl(ir,itl,j,itm)
+              fxmany(iy,ix,j) = p*f0
+              fymany(iy,ix,j) = iy*f0
+           enddo
          enddo
        enddo
      enddo
@@ -221,11 +232,11 @@ subroutine cgyro_nl_fftw(ij)
 ! jcev_c_nl is (n_field,n_radial,n_jtheta,nv_loc,nt_loc,n_toroidal_procs)
 
 !$acc parallel loop gang vector independent collapse(4) async(2) &
-!$acc&         private(j,ir,p,ix,itor,mytm,iy,g0,it,iv_loc,it_loc,jtheta_min,itm,itl) &
+!$acc&         private(j,ir,p,ix,itor,mytm,iy,g0,it,iv_loc,it_loc,jtheta_min,itm,itl,irbase,irmax) &
 !$acc&         present(g_nl,jvec_c_nl) &
 !$acc&         present(nsplit,n_radial,n_toroidal_procs,nt_loc,nt1,n_theta,nv_loc,nx0)
   do j=1,nsplit
-     do ir=1,n_radial
+     do irbase=1,n_radial,tile_size
        do itm=1,n_toroidal_procs
          do itl=1,nt_loc
            itor = itl + (itm-1)*nt_loc
@@ -234,19 +245,23 @@ subroutine cgyro_nl_fftw(ij)
            iv_loc = 1+modulo((mytm-1)*nsplit+j-1,nv_loc)
            jtheta_min = 1+((mytm-1)*nsplit)/nv_loc
            it_loc = it-jtheta_min+1
-
-           p  = ir-1-nx0/2
-           ix = p
-           if (ix < 0) ix = ix+nx
-
            iy = itor-1
-           if (it > n_theta) then
-              g0 = (0.0,0.0)
-           else
-              g0 = i_c*sum( jvec_c_nl(1:n_field,ir,it_loc,iv_loc,itor)*g_nl(1:n_field,ir,it_loc,itor))
-           endif
-           gxmany(iy,ix,j) = p*g0
-           gymany(iy,ix,j) = iy*g0
+
+           ! process several ir to improve jvec_nl and g_nl cache reuse
+           irmax=min(irbase+(tile_size-1),n_radial)
+           do ir=irbase,irmax
+              p  = ir-1-nx0/2
+              ix = p
+              if (ix < 0) ix = ix+nx
+
+              if (it > n_theta) then
+                 g0 = (0.0,0.0)
+              else
+                 g0 = i_c*sum( jvec_c_nl(1:n_field,ir,it_loc,iv_loc,itor)*g_nl(1:n_field,ir,it_loc,itor))
+              endif
+              gxmany(iy,ix,j) = p*g0
+              gymany(iy,ix,j) = iy*g0
+           enddo
          enddo
        enddo
      enddo

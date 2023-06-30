@@ -319,11 +319,11 @@ subroutine cgyro_init_manager
   nx0 = n_radial
   ny0 = 2*n_toroidal-1
 
-  nx2 = nx0/2
+  ! +1 to properly handle odd n_radial
+  nx2 = (nx0+1)/2
 
   ! 3/2-rule for dealiasing the nonlinear product
-  ! nx = (3*nx0)/2
-  nx = 3*nx2
+  nx = (3*nx0)/2
   ! old, obsolete defintion: ny = (3*ny0)/2
   ! new definiton: ny = (3*(ny0+1))/2
   ny = 3*n_toroidal
