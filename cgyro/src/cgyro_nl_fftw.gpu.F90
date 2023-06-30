@@ -10,25 +10,6 @@
 ! NOTE: Need to be careful with (p=-nr/2,n=0) component.
 !-----------------------------------------------------------------
 
-subroutine cgyro_nl_fftw_zero4(sz,v1,v2,v3,v4)
-  implicit none
-
-  integer, intent(in) :: sz
-  complex, dimension(*), intent(inout) :: v1,v2,v3,v4
-
-  integer :: i
-
-!$acc parallel loop independent gang vector &
-!$acc&         present(v1,v2,v3,v4) private(i)
-  do i=1,sz
-    v1(i) = 0.0
-    v2(i) = 0.0
-    v3(i) = 0.0
-    v4(i) = 0.0
-  enddo
-
-end subroutine
-
 subroutine cgyro_nl_fftw_mul(sz,uvm,uxm,vym,uym,vxm,inv_nxny)
   implicit none
 
@@ -66,6 +47,7 @@ subroutine cgyro_nl_fftw(ij)
   integer :: j,p,iexch
   integer :: it,ir,itm,itl,ix,iy
   integer :: itor,mytm
+  integer :: irbase,irmax
   integer :: i1,i2
   integer :: it_loc
   integer :: ierr
@@ -75,6 +57,43 @@ subroutine cgyro_nl_fftw(ij)
 
   real :: inv_nxny
 
+#ifdef HIPGPU
+  ! AMD GPUs do not seem to like tiling
+  integer, parameter :: tile_size  = 1
+#else
+  integer, parameter :: tile_size  = 4
+#endif
+
+  call timer_lib_in('nl_mem')
+  ! make sure reqs progress
+  call parallel_slib_test(f_req)
+  call parallel_slib_test(g_req)
+
+  ! we can zero the elements we know are zero while we wait
+!$acc parallel loop gang vector independent collapse(3) async(2) &
+!$acc&         private(j,ix,iy) &
+!$acc&         present(nsplit,ny2,nx0,nx2)
+  do j=1,nsplit
+     do ix=nx2,nx0-1
+       do iy=0,ny2
+         fxmany(iy,ix,j) = 0
+         fymany(iy,ix,j) = 0
+       enddo
+     enddo
+  enddo
+
+!$acc parallel loop gang vector independent collapse(3) async(2) &
+!$acc&         private(j,ix,iy) &
+!$acc&         present(nsplit,ny2,n_toroidal,nx)
+  do j=1,nsplit
+     do ix=0,nx-1
+       do iy=n_toroidal,ny2
+         fxmany(iy,ix,j) = 0
+         fymany(iy,ix,j) = 0
+       enddo
+     enddo
+  enddo
+  call timer_lib_out('nl_mem')
 
   ! time to wait for the F_nl to become avaialble
   call timer_lib_in('nl_comm')
@@ -83,35 +102,33 @@ subroutine cgyro_nl_fftw(ij)
   call parallel_slib_test(g_req)
   call timer_lib_out('nl_comm')
 
-  call timer_lib_in('nl_mem')
+  call timer_lib_in('nl')
 !$acc  data present(f_nl)  &
 !$acc&      present(fxmany,fymany,gxmany,gymany) &
 !$acc&      present(uxmany,uymany,vxmany,vymany) &
 !$acc&      present(uvmany)
 
-  call timer_lib_out('nl_mem')
-
-  call timer_lib_in('nl')
-
-  call cgyro_nl_fftw_zero4(size(fxmany,1)*size(fxmany,2)*size(fxmany,3), &
-                           fxmany,fymany,gxmany,gymany)
-
 ! f_nl is (radial, nt_loc, theta, nv_loc1, toroidal_procs)
 ! where nv_loc1 * toroidal_procs >= nv_loc
-!$acc parallel loop gang vector independent collapse(4) private(j,ir,p,ix,itor,iy,f0,g0) async
+!$acc parallel loop gang vector independent collapse(4) async(2) &
+!$acc&         private(j,ir,p,ix,itor,iy,f0,g0,itm,itl,irbase,irmax)
   do j=1,nsplit
-     do ir=1,n_radial
+     do irbase=1,n_radial,1
        do itm=1,n_toroidal_procs
          do itl=1,nt_loc
            itor=itl + (itm-1)*nt_loc
-           p  = ir-1-nx0/2
-           ix = p
-           if (ix < 0) ix = ix+nx
-
            iy = itor-1
-           f0 = i_c*f_nl(ir,itl,j,itm)
-           fxmany(iy,ix,j) = p*f0
-           fymany(iy,ix,j) = iy*f0
+           ! process several ir to improve f_nl cache reuse
+           irmax=min(irbase+(tile_size-1),n_radial)
+           do ir=irbase,irmax
+              p  = ir-1-nx0/2
+              ix = p
+              if (ix < 0) ix = ix+nx
+
+              f0 = i_c*f_nl(ir,itl,j,itm)
+              fxmany(iy,ix,j) = p*f0
+              fymany(iy,ix,j) = iy*f0
+           enddo
          enddo
        enddo
      enddo
@@ -120,7 +137,7 @@ subroutine cgyro_nl_fftw(ij)
   ! make sure g_req progresses
   call parallel_slib_test(g_req)
 
-!$acc wait
+!$acc wait(2)
   ! Average elements so as to ensure
   !   f(kx,ky=0) = f(-kx,ky=0)^*
   ! This symmetry is required for complex input to c2r
@@ -157,8 +174,11 @@ subroutine cgyro_nl_fftw(ij)
   ! make sure g_req progresses
   call parallel_slib_test(g_req)
 
-!$acc wait
+!$acc wait(2)
   ! fxmany is complete now
+
+  ! make sure g_req progresses
+  call parallel_slib_test(g_req)
 
 !$acc  host_data &
 !$acc& use_device(fxmany) &
@@ -171,6 +191,34 @@ subroutine cgyro_nl_fftw(ij)
 #endif
 
 !$acc end host_data
+
+  ! make sure g_req progresses
+  call parallel_slib_test(g_req)
+
+  ! we can zero the elements we know are zero while we wait for comm
+!$acc parallel loop gang vector independent collapse(3) async(2) &
+!$acc&         private(j,ix,iy) &
+!$acc&         present(nsplit,ny2,nx0,nx2)
+  do j=1,nsplit
+     do ix=nx2,nx0-1
+       do iy=0,ny2
+         gxmany(iy,ix,j) = 0
+         gymany(iy,ix,j) = 0
+       enddo
+     enddo
+  enddo
+
+!$acc parallel loop gang vector independent collapse(3) async(2) &
+!$acc&         private(j,ix,iy) &
+!$acc&         present(nsplit,ny2,n_toroidal,nx)
+  do j=1,nsplit
+     do ix=0,nx-1
+       do iy=n_toroidal,ny2
+         gxmany(iy,ix,j) = 0
+         gymany(iy,ix,j) = 0
+       enddo
+     enddo
+  enddo
   call timer_lib_out('nl')
 
   ! time to wait for the g_nl to become avaialble
@@ -183,12 +231,12 @@ subroutine cgyro_nl_fftw(ij)
 ! g_nl      is (n_field,n_radial,n_jtheta,nt_loc,n_toroidal_procs)
 ! jcev_c_nl is (n_field,n_radial,n_jtheta,nv_loc,nt_loc,n_toroidal_procs)
 
-!$acc parallel loop gang vector independent collapse(4) &
-!$acc&         private(j,ir,p,ix,itor,mytm,iy,g0,it,iv_loc,it_loc,jtheta_min) &
+!$acc parallel loop gang vector independent collapse(4) async(2) &
+!$acc&         private(j,ir,p,ix,itor,mytm,iy,g0,it,iv_loc,it_loc,jtheta_min,itm,itl,irbase,irmax) &
 !$acc&         present(g_nl,jvec_c_nl) &
 !$acc&         present(nsplit,n_radial,n_toroidal_procs,nt_loc,nt1,n_theta,nv_loc,nx0)
   do j=1,nsplit
-     do ir=1,n_radial
+     do irbase=1,n_radial,tile_size
        do itm=1,n_toroidal_procs
          do itl=1,nt_loc
            itor = itl + (itm-1)*nt_loc
@@ -197,23 +245,29 @@ subroutine cgyro_nl_fftw(ij)
            iv_loc = 1+modulo((mytm-1)*nsplit+j-1,nv_loc)
            jtheta_min = 1+((mytm-1)*nsplit)/nv_loc
            it_loc = it-jtheta_min+1
-
-           p  = ir-1-nx0/2
-           ix = p
-           if (ix < 0) ix = ix+nx
-
            iy = itor-1
-           if (it > n_theta) then
-              g0 = (0.0,0.0)
-           else
-              g0 = i_c*sum( jvec_c_nl(1:n_field,ir,it_loc,iv_loc,itor)*g_nl(1:n_field,ir,it_loc,itor))
-           endif
-           gxmany(iy,ix,j) = p*g0
-           gymany(iy,ix,j) = iy*g0
+
+           ! process several ir to improve jvec_nl and g_nl cache reuse
+           irmax=min(irbase+(tile_size-1),n_radial)
+           do ir=irbase,irmax
+              p  = ir-1-nx0/2
+              ix = p
+              if (ix < 0) ix = ix+nx
+
+              if (it > n_theta) then
+                 g0 = (0.0,0.0)
+              else
+                 g0 = i_c*sum( jvec_c_nl(1:n_field,ir,it_loc,iv_loc,itor)*g_nl(1:n_field,ir,it_loc,itor))
+              endif
+              gxmany(iy,ix,j) = p*g0
+              gymany(iy,ix,j) = iy*g0
+           enddo
          enddo
        enddo
      enddo
   enddo
+
+!$acc wait(2)
 
   ! Average elements so as to ensure
   !   g(kx,ky=0) = g(-kx,ky=0)^*
@@ -242,7 +296,7 @@ subroutine cgyro_nl_fftw(ij)
 
 !$acc end host_data
 
-!$acc wait
+!$acc wait(2)
   ! gxmany is complete now
 
 !$acc  host_data &

@@ -319,10 +319,16 @@ subroutine cgyro_init_manager
   nx0 = n_radial
   ny0 = 2*n_toroidal-1
 
+  ! +1 to properly handle odd n_radial
+  nx2 = (nx0+1)/2
+
   ! 3/2-rule for dealiasing the nonlinear product
   nx = (3*nx0)/2
-  !ny = (3*ny0)/2
-  ny = (3*(ny0+1))/2
+  ! old, obsolete defintion: ny = (3*ny0)/2
+  ! new definiton: ny = (3*(ny0+1))/2
+  ny = 3*n_toroidal
+
+  ny2 = ny/2
 
   call cgyro_check_memory(trim(path)//runfile_memory)
 
@@ -353,13 +359,13 @@ subroutine cgyro_init_manager
   ! Initialize nonlinear dimensions and arrays 
   call timer_lib_in('nl_init')
 
-!$acc enter data copyin(nx0,ny0,nx,ny)
+!$acc enter data copyin(nx0,ny0,nx,ny,nx2,ny2)
 
 #ifndef _OPENACC
-  allocate(fx(0:ny/2,0:nx-1,n_omp))
-  allocate(gx(0:ny/2,0:nx-1,n_omp))
-  allocate(fy(0:ny/2,0:nx-1,n_omp))
-  allocate(gy(0:ny/2,0:nx-1,n_omp))
+  allocate(fx(0:ny2,0:nx-1,n_omp))
+  allocate(gx(0:ny2,0:nx-1,n_omp))
+  allocate(fy(0:ny2,0:nx-1,n_omp))
+  allocate(gy(0:ny2,0:nx-1,n_omp))
 
   allocate(uxmany(0:ny-1,0:nx-1,nsplit))
   allocate(uymany(0:ny-1,0:nx-1,nsplit))
@@ -375,10 +381,10 @@ subroutine cgyro_init_manager
 #ifdef _OPENACC
   call cgyro_info('GPU-aware code triggered.')
 
-  allocate( fxmany(0:ny/2,0:nx-1,nsplit) )
-  allocate( fymany(0:ny/2,0:nx-1,nsplit) )
-  allocate( gxmany(0:ny/2,0:nx-1,nsplit) )
-  allocate( gymany(0:ny/2,0:nx-1,nsplit) )
+  allocate( fxmany(0:ny2,0:nx-1,nsplit) )
+  allocate( fymany(0:ny2,0:nx-1,nsplit) )
+  allocate( gxmany(0:ny2,0:nx-1,nsplit) )
+  allocate( gymany(0:ny2,0:nx-1,nsplit) )
 
   allocate( uxmany(0:ny-1,0:nx-1,nsplit) )
   allocate( uymany(0:ny-1,0:nx-1,nsplit) )
