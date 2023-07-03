@@ -413,6 +413,7 @@ module cgyro_globals
   ! 2D FFT dimensions 
   integer :: nx,ny
   integer :: nx0,ny0
+  integer :: nx2,ny2
   !
   ! 2D FFT work arrays
 #ifndef _OPENACC
