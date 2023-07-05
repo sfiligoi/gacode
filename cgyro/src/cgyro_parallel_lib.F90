@@ -360,6 +360,63 @@ contains
 
   !=========================================================
 
+  subroutine parallel_lib_sum_field(field_loc,field)
+
+    use mpi
+
+    implicit none
+
+    complex, intent(in), dimension(:,:,:) :: field_loc
+    complex, intent(inout), dimension(:,:,:) :: field
+    integer :: ierr
+
+
+    call MPI_ALLREDUCE(field_loc(:,:,:),&
+         field(:,:,:),&
+         size(field(:,:,:)),&
+         MPI_DOUBLE_COMPLEX,&
+         MPI_SUM,&
+         lib_comm,&
+         ierr)
+
+  end subroutine parallel_lib_sum_field
+
+  !=========================================================
+
+  subroutine parallel_lib_sum_field_gpu(field_loc,field)
+
+    use mpi
+
+    implicit none
+
+    complex, intent(in), dimension(:,:,:) :: field_loc
+    complex, intent(inout), dimension(:,:,:) :: field
+    integer :: ierr
+
+#ifdef DISABLE_GPUDIRECT_MPI
+!$acc update host(field_loc(:,:,:))
+#else
+!$acc host_data use_device(field_loc,field)
+#endif
+
+     call MPI_ALLREDUCE(field_loc(:,:,:),&
+          field(:,:,:),&
+          size(field(:,:,:)),&
+          MPI_DOUBLE_COMPLEX,&
+          MPI_SUM,&
+          lib_comm,&
+          ierr)
+
+#ifdef DISABLE_GPUDIRECT_MPI
+!$acc update device(field(:,:,:))
+#else
+!$acc end host_data
+#endif
+
+  end subroutine parallel_lib_sum_field_gpu
+
+  !=========================================================
+
   !  parallel_slib_f -> f(ni_loc,nj) -> g(nj_loc,ni) 
   !  parallel_slib_r -> g(nj_loc,ni) -> f(ni_loc,nj)
 
