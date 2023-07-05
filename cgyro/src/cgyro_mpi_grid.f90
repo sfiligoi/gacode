@@ -271,7 +271,6 @@ subroutine cgyro_mpi_grid
     endif
     i_group_3 = ns1
   endif
-  ns_loc = ns2-ns1+1
 
 ! when exchaning only specific species, we need a dedicated comm
   call MPI_COMM_SPLIT(NEW_COMM_1,&
@@ -285,6 +284,8 @@ subroutine cgyro_mpi_grid
   endif
   !
   call MPI_COMM_RANK(NEW_COMM_3,i_proc_3,i_err)
+
+  call parallel_clib_init(ns1,ns2,ns_loc,NEW_COMM_3)
 
 
   nc1 = 1+i_proc_1*nc_loc
