@@ -28,6 +28,12 @@ module parallel_lib
   complex, dimension(:,:,:,:), allocatable :: fsendf
   complex, dimension(:,:,:,:), allocatable :: fsendr
 
+  ! clib
+
+  integer, private :: ncproc,icproc
+  integer, private :: ns1,ns2
+  integer, private :: clib_comm
+
   ! slib
 
   integer :: nsproc,isproc
@@ -357,6 +363,158 @@ contains
          ierr)
 
   end subroutine parallel_lib_rtrans_real
+
+  !=========================================================
+
+  subroutine parallel_lib_sum_field(field_loc,field)
+
+    use mpi
+
+    implicit none
+
+    complex, intent(in), dimension(:,:,:) :: field_loc
+    complex, intent(inout), dimension(:,:,:) :: field
+    integer :: ierr
+
+
+    call MPI_ALLREDUCE(field_loc(:,:,:),&
+         field(:,:,:),&
+         size(field(:,:,:)),&
+         MPI_DOUBLE_COMPLEX,&
+         MPI_SUM,&
+         lib_comm,&
+         ierr)
+
+  end subroutine parallel_lib_sum_field
+
+  !=========================================================
+
+  subroutine parallel_lib_sum_field_gpu(field_loc,field)
+
+    use mpi
+
+    implicit none
+
+    complex, intent(in), dimension(:,:,:) :: field_loc
+    complex, intent(inout), dimension(:,:,:) :: field
+    integer :: ierr
+
+#ifdef DISABLE_GPUDIRECT_MPI
+!$acc update host(field_loc(:,:,:))
+#else
+!$acc host_data use_device(field_loc,field)
+#endif
+
+     call MPI_ALLREDUCE(field_loc(:,:,:),&
+          field(:,:,:),&
+          size(field(:,:,:)),&
+          MPI_DOUBLE_COMPLEX,&
+          MPI_SUM,&
+          lib_comm,&
+          ierr)
+
+#ifdef DISABLE_GPUDIRECT_MPI
+!$acc update device(field(:,:,:))
+#else
+!$acc end host_data
+#endif
+
+  end subroutine parallel_lib_sum_field_gpu
+
+  !=========================================================
+  !  Species communicator
+  !=========================================================
+
+  subroutine parallel_clib_init(ns1_in,ns2_in,ns_loc_out,comm)
+
+    use mpi
+
+    implicit none
+
+    integer, intent(in) :: ns1_in,ns2_in
+    integer, intent(inout) :: ns_loc_out
+    integer, intent(in) :: comm
+    integer :: ierr
+
+    clib_comm = comm
+
+    call MPI_COMM_RANK(clib_comm,icproc,ierr)
+    call MPI_COMM_SIZE(clib_comm,ncproc,ierr)
+
+    ns1 = ns1_in
+    ns2 = ns2_in
+
+    ns_loc_out = ns2-ns1+1
+
+  end subroutine parallel_clib_init
+
+  !=========================================================
+
+  subroutine parallel_clib_sum_upwind(upwind_loc,upwind)
+
+    use mpi
+
+    implicit none
+
+    complex, intent(in), dimension(:,:,:) :: upwind_loc
+    complex, intent(inout), dimension(:,:,:) :: upwind
+    integer :: ierr
+
+#ifdef DISABLE_GPUDIRECT_MPI
+!$acc update host(upwind_loc(:,:,:))
+#else
+!$acc host_data use_device(upwind_loc,upwind)
+#endif
+
+     call MPI_ALLREDUCE(upwind_loc(:,:,:),&
+          upwind(:,:,:),&
+          size(upwind(:,:,:)),&
+          MPI_DOUBLE_COMPLEX,&
+          MPI_SUM,&
+          clib_comm,&
+          ierr)
+
+#ifdef DISABLE_GPUDIRECT_MPI
+!$acc update device(upwind(:,:,:))
+#else
+!$acc end host_data
+#endif
+
+  end subroutine parallel_clib_sum_upwind
+
+  !=========================================================
+  subroutine parallel_clib_sum_upwind32(upwind_loc,upwind)
+
+    use mpi
+    use, intrinsic :: iso_fortran_env
+
+    implicit none
+
+    complex(KIND=REAL32), intent(in), dimension(:,:,:) :: upwind_loc
+    complex(KIND=REAL32), intent(inout), dimension(:,:,:) :: upwind
+    integer :: ierr
+
+#ifdef DISABLE_GPUDIRECT_MPI
+!$acc update host(upwind_loc(:,:,:))
+#else
+!$acc host_data use_device(upwind_loc,upwind)
+#endif
+
+     call MPI_ALLREDUCE(upwind_loc(:,:,:),&
+          upwind(:,:,:),&
+          size(upwind(:,:,:)),&
+          MPI_COMPLEX,&
+          MPI_SUM,&
+          clib_comm,&
+          ierr)
+
+#ifdef DISABLE_GPUDIRECT_MPI
+!$acc update device(upwind(:,:,:))
+#else
+!$acc end host_data
+#endif
+
+  end subroutine parallel_clib_sum_upwind32
 
   !=========================================================
 
