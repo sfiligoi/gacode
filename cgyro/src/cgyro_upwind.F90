@@ -31,7 +31,7 @@ subroutine cgyro_upwind_r64
 #ifdef OMPGPU
 !$omp target teams distribute parallel do collapse(3) &
 !$omp&         private(res_loc,iv,iv_loc) &
-!$omp&         map(to:g_x,upfac1,is_v) map(from:upwind_res_loc) &
+!$omp&         map(to:g_x(:,:,:),upfac1(:,:,:),is_v(:)) map(from:upwind_res_loc(:,:,:)) &
 !$omp&         firstprivate(nt1,nt2,ns1,ns2,nc,nv1,nv2) default(none)
 #else
 #ifdef _OPENACC
@@ -71,9 +71,9 @@ subroutine cgyro_upwind_r64
 
 #ifdef OMPGPU
 !$omp target teams distribute parallel do collapse(3) &
-!$acc&         map(to:is_v,ix_v,ie_v,xi,vel,upfac2,upwind_res) &
-!$acc&         map(from:g_x) &
-!$acc&         private(iv_loc,is,ix,ie) firstprivate(nt1,nt2,nv1,nv2,nc) default(none)
+!$omp&         map(to:is_v,ix_v,ie_v,xi,vel,upfac2,upwind_res) &
+!$omp&         map(from:g_x) &
+!$omp&         private(iv_loc,is,ix,ie) firstprivate(nt1,nt2,nv1,nv2,nc) default(none)
 #else
 #ifdef _OPENACC
 !$acc parallel loop collapse(3) independent gang vector &
@@ -158,9 +158,9 @@ subroutine cgyro_upwind_r32
 
 #ifdef OMPGPU
 !$omp target teams distribute parallel do collapse(3) &
-!$acc&         map(to:is_v,ix_v,ie_v,xi,vel,upfac2,upwind32_res) &
-!$acc&         map(from:g_x) &
-!$acc&         private(iv_loc,is,ix,ie) firstprivate(nt1,nt2,nv1,nv2,nc) default(none)
+!$omp&         map(to:is_v,ix_v,ie_v,xi,vel,upfac2,upwind32_res) &
+!$omp&         map(from:g_x) &
+!$omp&         private(iv_loc,is,ix,ie) firstprivate(nt1,nt2,nv1,nv2,nc) default(none)
 #else
 #ifdef _OPENACC
 !$acc parallel loop collapse(3) independent gang vector &
