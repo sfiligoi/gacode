@@ -30,9 +30,7 @@ subroutine cgyro_upwind_r64
 
 #ifdef OMPGPU
 !$omp target teams distribute parallel do collapse(3) &
-!$omp&         private(res_loc,iv,iv_loc) &
-!$omp&         map(to:g_x(:,:,:),upfac1(:,:,:),is_v(:)) map(from:upwind_res_loc(:,:,:)) &
-!$omp&         firstprivate(nt1,nt2,ns1,ns2,nc,nv1,nv2) default(none)
+!$omp&         private(res_loc,iv,iv_loc) 
 #else
 #ifdef _OPENACC
 !$acc parallel loop collapse(3) gang vector independent &
@@ -71,14 +69,12 @@ subroutine cgyro_upwind_r64
 
 #ifdef OMPGPU
 !$omp target teams distribute parallel do collapse(3) &
-!$omp&         map(to:is_v,ix_v,ie_v,xi,vel,upfac2,upwind_res) &
-!$omp&         map(from:g_x) &
-!$omp&         private(iv_loc,is,ix,ie) firstprivate(nt1,nt2,nv1,nv2,nc) default(none)
+!$omp&         private(iv_loc,is,ix,ie,ic)
 #else
 #ifdef _OPENACC
 !$acc parallel loop collapse(3) independent gang vector &
 !$acc&         present(is_v,ix_v,ie_v,xi,vel,upfac2,g_x,upwind_res) &
-!$acc&         private(iv_loc,is,ix,ie) present(nt1,nt2,nv1,nv2,nc) default(none)
+!$acc&         private(iv_loc,is,ix,ie,ic) present(nt1,nt2,nv1,nv2,nc) default(none)
 #else
 !$omp parallel do collapse(2) private(iv_loc,is,ix,ie,ic)
 #endif
@@ -116,9 +112,7 @@ subroutine cgyro_upwind_r32
 
 #ifdef OMPGPU
 !$omp target teams distribute parallel do collapse(3) &
-!$omp&         private(res_loc,iv,iv_loc) &
-!$omp&         map(to:g_x,upfac1,is_v) map(from:upwind32_res_loc) &
-!$omp&         firstprivate(nt1,nt2,ns1,ns2,nc,nv1,nv2) default(none)
+!$omp&         private(res_loc,iv,iv_loc) 
 #else
 #ifdef _OPENACC
 !$acc parallel loop collapse(3) gang vector independent &
@@ -158,14 +152,12 @@ subroutine cgyro_upwind_r32
 
 #ifdef OMPGPU
 !$omp target teams distribute parallel do collapse(3) &
-!$omp&         map(to:is_v,ix_v,ie_v,xi,vel,upfac2,upwind32_res) &
-!$omp&         map(from:g_x) &
-!$omp&         private(iv_loc,is,ix,ie) firstprivate(nt1,nt2,nv1,nv2,nc) default(none)
+!$omp&         private(iv_loc,is,ix,ie,ic)
 #else
 #ifdef _OPENACC
 !$acc parallel loop collapse(3) independent gang vector &
 !$acc&         present(is_v,ix_v,ie_v,xi,vel,upfac2,g_x,upwind32_res) &
-!$acc&         private(iv_loc,is,ix,ie) &
+!$acc&         private(iv_loc,is,ix,ie,ic) &
 !$acc&         present(nt1,nt2,nv1,nv2,nc) default(none)
 #else
 !$omp parallel do collapse(2) private(iv_loc,is,ix,ie,ic)
