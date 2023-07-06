@@ -162,6 +162,7 @@ subroutine cgyro_upwind_r32
 #else
 !$omp parallel do collapse(2) private(iv_loc,is,ix,ie,ic)
 #endif
+#endif
   do itor=nt1,nt2
    do iv=nv1,nv2
      do ic=1,nc
