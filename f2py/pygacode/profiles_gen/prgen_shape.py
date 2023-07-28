@@ -40,7 +40,7 @@ def prgen_shape(r,z,narc,nf,xplot):
    j = 0
    vz[0] = uz[0] ; vr[0] = ur[0]
    for i in range(1,narc):
-      if da[i-1] > 1.0 and da[i-1] < 6.0:
+      if da[i-1] > 0.9 and da[i-1] < 6.0:
          j=j+1
       if j==0:
          vz[i] = uz[i] ; vr[i] = ur[i]
