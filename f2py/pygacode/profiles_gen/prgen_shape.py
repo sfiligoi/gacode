@@ -25,27 +25,35 @@ def prgen_shape(r,z,narc,nf,xplot):
       # Reverse order (may be needed)
       r = np.flip(r,0) ; z = np.flip(z,0)
 
-   # Compute generalized angles
+   # Compute generalized angles (new method July 2023)
    eps = 1.0-1e-10
-   for i in range(narc):
-      # (ur,uz): principle angles (discontinuous)
-      uz[i] = np.arcsin(eps*(z[i]-zmaj)/zmin)
-      ur[i] = np.arccos(eps*(r[i]-rmaj)/rmin)
-      # (vr,vz): proper (continuous) branches
-      if i > 4:
-         if uz[i] > uz[i-1] and ur[i] > ur[i-1]:
-            vz[i] = uz[i] ; vr[i] = ur[i]
-         elif uz[i] < uz[i-1] and ur[i] > ur[i-1]:
-            vz[i] = np.pi-uz[i] ; vr[i] = ur[i]
-         elif uz[i] < uz[i-1] and ur[i] < ur[i-1]:
-            vz[i] = np.pi-uz[i] ; vr[i] = 2*np.pi-ur[i]
-         elif uz[i] > uz[i-1] and ur[i] < ur[i-1]:
-            vz[i] = 2*np.pi+uz[i] ; vr[i] = 2*np.pi-ur[i]
-      else:
+   # (ur,uz): principle angles (discontinuous)
+   uz[:] = np.arcsin(eps*(z[:]-zmaj)/zmin)
+   ur[:] = np.arccos(eps*(r[:]-rmaj)/rmin)
+   
+   # Need to determine correct branches (vr,vz)
+   ang = np.zeros(narc)
+   ang[:narc-1] = np.arctan2(np.diff(ur),np.diff(uz))   
+   ang[-1] = np.arctan2(ur[0]-ur[-1],uz[0]-uz[-1])
+   da = abs(np.diff(ang))
+
+   j = 0
+   vz[0] = uz[0] ; vr[0] = ur[0]
+   for i in range(1,narc):
+      if da[i-1] > 1.0 and da[i-1] < 6.0:
+         j=j+1
+      if j==0:
          vz[i] = uz[i] ; vr[i] = ur[i]
+      elif j==1:
+         vz[i] = np.pi-uz[i] ; vr[i] = ur[i]
+      elif j==2:
+         vz[i] = np.pi-uz[i] ; vr[i] = 2*np.pi-ur[i]
+      else:
+         # j might be 3 or 4 here
+         vz[i] = 2*np.pi+uz[i] ; vr[i] = 2*np.pi-ur[i]
 
    # Define vr as deviation from vz
-   vr = vr-vz ; vr[-1] = vr[0]
+   vr[:] = vr[:]-vz[:] ; vr[-1] = vr[0]
 
    x = vz
    # Now:
@@ -185,12 +193,13 @@ def plot_ang(r,z,x,vr,xr,cr,sr,outfile):
     ax.grid(which="both",ls=":")
 
     # Data
-    ax.plot(r,z,'--k',linewidth=1)
+    ax.plot(r,z,'--k',linewidth=1,label='data')
     
     # Parameterized contour
     rp = rmaj+rmin*np.cos(x+pr)
     zp = zmaj+zmin*np.sin(x)
-    ax.plot(rp,zp,'-g',linewidth=1)
+    ax.plot(rp,zp,'-m',linewidth=1,label='mapped')
+    ax.legend()
     #-------------------------------------------------------
     
     # PLOT angle 
