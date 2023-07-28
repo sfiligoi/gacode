@@ -14,7 +14,7 @@
 !-----------------------------------------------------------------
 subroutine cgyro_field_v
 
-  use mpi
+  use parallel_lib
   use timer_lib
   use cgyro_globals
 
@@ -42,15 +42,9 @@ subroutine cgyro_field_v
 
   call timer_lib_in('field_com')
 
-  call MPI_ALLREDUCE(field_loc(:,:,:),&
-       field(:,:,:),&
-       size(field(:,:,:)),&
-       MPI_DOUBLE_COMPLEX,&
-       MPI_SUM,&
-       NEW_COMM_1,&
-       i_err)
+  call parallel_lib_sum_field(field_loc,field)
 
-   call timer_lib_out('field_com')
+  call timer_lib_out('field_com')
   
   call timer_lib_in('field')
 
@@ -71,7 +65,7 @@ end subroutine cgyro_field_v
 ! like cgyro_field_v_notae, but with parametrized start_t
 subroutine cgyro_field_v_notae_s(start_t)
 
-  use mpi
+  use parallel_lib
   use timer_lib
   use cgyro_globals
 
@@ -101,15 +95,10 @@ subroutine cgyro_field_v_notae_s(start_t)
 
   call timer_lib_in('field_com')
 
-  call MPI_ALLREDUCE(field_loc(:,:,start_t:nt2),&
-       field(:,:,start_t:nt2),&
-       size(field(:,:,start_t:nt2)),&
-       MPI_DOUBLE_COMPLEX,&
-       MPI_SUM,&
-       NEW_COMM_1,&
-       i_err)
+  call parallel_lib_sum_field(field_loc(:,:,start_t:nt2), &
+                              field(:,:,start_t:nt2))
 
-   call timer_lib_out('field_com')
+  call timer_lib_out('field_com')
   
   call timer_lib_in('field')
 
@@ -126,7 +115,7 @@ end subroutine cgyro_field_v_notae_s
 ! like cgyro_field_v, but skip (itor == 0 .and. ae_flag == 1)
 subroutine cgyro_field_v_notae
 
-  use mpi
+  use parallel_lib
   use timer_lib
   use cgyro_globals
 
@@ -151,7 +140,7 @@ end subroutine cgyro_field_v_notae
 ! Note: Not supporting the ae-version of cgyro_field_v_gpu
 
 subroutine cgyro_field_v_notae_s_gpu(start_t)
-  use mpi
+  use parallel_lib
   use timer_lib
   use cgyro_globals
 
@@ -201,25 +190,8 @@ subroutine cgyro_field_v_notae_s_gpu(start_t)
 
   call timer_lib_in('field_com')
 
-#ifdef DISABLE_GPUDIRECT_MPI
-!$acc update host(field_loc(:,:,start_t:nt2))
-#else
-!$acc host_data use_device(field_loc,field)
-#endif
-
-  call MPI_ALLREDUCE(field_loc(:,:,start_t:nt2),&
-       field(:,:,start_t:nt2),&
-       size(field(:,:,start_t:nt2)),&
-       MPI_DOUBLE_COMPLEX,&
-       MPI_SUM,&
-       NEW_COMM_1,&
-       i_err)
-
-#ifdef DISABLE_GPUDIRECT_MPI
-!$acc update device(field(:,:,start_t:nt2))
-#else
-!$acc end host_data
-#endif
+  call parallel_lib_sum_field_gpu(field_loc(:,:,start_t:nt2), &
+                                  field(:,:,start_t:nt2))
 
   call timer_lib_out('field_com')
 
@@ -247,7 +219,7 @@ end subroutine cgyro_field_v_notae_s_gpu
 ! like cgyro_field_v, but skip (itor == 0 .and. ae_flag == 1)
 subroutine cgyro_field_v_notae_gpu
 
-  use mpi
+  use parallel_lib
   use timer_lib
   use cgyro_globals
 
@@ -270,7 +242,7 @@ end subroutine cgyro_field_v_notae_gpu
 !-----------------------------------------------------------------
 subroutine cgyro_field_c_cpu
 
-  use mpi
+  use parallel_lib
   use timer_lib
   use cgyro_globals
 
@@ -304,13 +276,7 @@ subroutine cgyro_field_c_cpu
 
   call timer_lib_in('field_com')
 
-  call MPI_ALLREDUCE(field_loc(:,:,:),&
-       field(:,:,:),&
-       size(field(:,:,:)),&
-       MPI_DOUBLE_COMPLEX,&
-       MPI_SUM,&
-       NEW_COMM_1,&
-       i_err)
+  call parallel_lib_sum_field(field_loc,field)
 
   call timer_lib_out('field_com')
 
@@ -358,7 +324,7 @@ end subroutine cgyro_field_c_cpu
 ! like cgyro_field_c, but assume (my_toroidal == 0 .and. ae_flag == 1)
 subroutine cgyro_field_c_ae_cpu
 
-  use mpi
+  use parallel_lib
   use timer_lib
   use cgyro_globals
 
@@ -390,13 +356,8 @@ subroutine cgyro_field_c_ae_cpu
 
   call timer_lib_in('field_com')
 
-  call MPI_ALLREDUCE(field_loc(:,:,0:0),&
-       field(:,:,0:0),&
-       size(field(:,:,0:0)),&
-       MPI_DOUBLE_COMPLEX,&
-       MPI_SUM,&
-       NEW_COMM_1,&
-       i_err)
+  call parallel_lib_sum_field(field_loc(:,:,0:0), &
+                              field(:,:,0:0))
 
   call timer_lib_out('field_com')
 
@@ -429,7 +390,7 @@ end subroutine cgyro_field_c_ae_cpu
 
 #ifdef _OPENACC
 subroutine cgyro_field_c_gpu
-  use mpi
+  use parallel_lib
   use timer_lib
   use cgyro_globals
   implicit none
@@ -464,25 +425,7 @@ subroutine cgyro_field_c_gpu
   call timer_lib_out('field')
   call timer_lib_in('field_com')
 
-#ifdef DISABLE_GPUDIRECT_MPI
-!$acc update host(field_loc)
-#else
-!$acc host_data use_device(field_loc,field)
-#endif
-
-  call MPI_ALLREDUCE(field_loc(:,:,:),&
-       field(:,:,:),&
-       size(field(:,:,:)),&
-       MPI_DOUBLE_COMPLEX,&
-       MPI_SUM,&
-       NEW_COMM_1,&
-       i_err)
-
-#ifdef DISABLE_GPUDIRECT_MPI
-!$acc update device(field)
-#else
-!$acc end host_data
-#endif
+  call parallel_lib_sum_field_gpu(field_loc,field)
 
   call timer_lib_out('field_com')
   call timer_lib_in('field')
@@ -561,7 +504,7 @@ end subroutine cgyro_field_c_gpu
 
 ! like cgyro_field_c, but assume (my_toroidal == 0 .and. ae_flag == 1)
 subroutine cgyro_field_c_ae_gpu
-  use mpi
+  use parallel_lib
   use timer_lib
   use cgyro_globals
   implicit none
@@ -595,25 +538,8 @@ subroutine cgyro_field_c_ae_gpu
   call timer_lib_out('field')
   call timer_lib_in('field_com')
 
-#ifdef DISABLE_GPUDIRECT_MPI
-!$acc update host(field_loc(:,:,0:0))
-#else
-!$acc host_data use_device(field_loc,field)
-#endif
-
-  call MPI_ALLREDUCE(field_loc(:,:,0:0),&
-       field(:,:,0:0),&
-       size(field(:,:,0:0)),&
-       MPI_DOUBLE_COMPLEX,&
-       MPI_SUM,&
-       NEW_COMM_1,&
-       i_err)
-
-#ifdef DISABLE_GPUDIRECT_MPI
-!$acc update device(field(:,:,0:0))
-#else
-!$acc end host_data
-#endif
+  call parallel_lib_sum_field_gpu(field_loc(:,:,0:0), &
+                                  field(:,:,0:0))
 
   call timer_lib_out('field_com')
   call timer_lib_in('field')

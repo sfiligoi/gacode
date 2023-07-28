@@ -18,7 +18,7 @@
 subroutine cgyro_upwind_r64
 
   use cgyro_globals
-  use mpi
+  use parallel_lib
   use timer_lib
 
   implicit none
@@ -56,25 +56,7 @@ subroutine cgyro_upwind_r64
 
   call timer_lib_in('str_comm')
 
-#ifdef DISABLE_GPUDIRECT_MPI
-!$acc update host(upwind_res_loc)
-#else
-!$acc host_data use_device(upwind_res_loc,upwind_res)
-#endif
-
-  call MPI_ALLREDUCE(upwind_res_loc(:,:,:),&
-       upwind_res(:,:,:),&
-       size(upwind_res(:,:,:)),&
-       MPI_DOUBLE_COMPLEX,&
-       MPI_SUM,&
-       NEW_COMM_3,&
-       i_err)
-
-#ifdef DISABLE_GPUDIRECT_MPI
-!$acc update device(upwind_res)
-#else
-!$acc end host_data
-#endif
+  call parallel_clib_sum_upwind(upwind_res_loc,upwind_res)
 
   call timer_lib_out('str_comm')
 
@@ -108,7 +90,7 @@ subroutine cgyro_upwind_r32
 
   use, intrinsic :: iso_fortran_env
   use cgyro_globals
-  use mpi
+  use parallel_lib
   use timer_lib
 
   implicit none
@@ -147,25 +129,7 @@ subroutine cgyro_upwind_r32
 
   call timer_lib_in('str_comm')
 
-#ifdef DISABLE_GPUDIRECT_MPI
-!$acc update host(upwind32_res_loc)
-#else
-!$acc host_data use_device(upwind32_res_loc,upwind32_res)
-#endif
-
-  call MPI_ALLREDUCE(upwind32_res_loc(:,:,:),&
-       upwind32_res(:,:,:),&
-       size(upwind32_res(:,:,:)),&
-       MPI_COMPLEX,&
-       MPI_SUM,&
-       NEW_COMM_3,&
-       i_err)
-
-#ifdef DISABLE_GPUDIRECT_MPI
-!$acc update device(upwind32_res)
-#else
-!$acc end host_data
-#endif
+  call parallel_clib_sum_upwind32(upwind32_res_loc,upwind32_res)
 
   call timer_lib_out('str_comm')
 
