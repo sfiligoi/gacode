@@ -13,7 +13,7 @@ jobs:
   build-and-test:
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [linux-gpu-cuda]
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v3
