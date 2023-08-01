@@ -17,7 +17,7 @@ rc('font',size=int(sys.argv[2]))
 
 plot_type = sys.argv[3]
 
-xin = {}
+xin = data_in.plot_dictinit()
 
 xin['fig']    = None
 xin['lx']     = int(sys.argv[4])
