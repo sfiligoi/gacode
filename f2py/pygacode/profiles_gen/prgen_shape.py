@@ -229,6 +229,9 @@ def plot_ang(r,z,x,vr,xr,cr,sr,i0,outfile):
     plt.savefig(ofile)
     plt.close()
 
+    err = 100*np.average(abs(vr-pr))
+
+    print('INFO: (prgen_shape) Mapper error (%) = {:.4f}'.format(err)) 
     return
 
 def plot_coef(pnorm,ci,si,xi):
