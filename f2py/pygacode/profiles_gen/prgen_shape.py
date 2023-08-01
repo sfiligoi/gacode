@@ -9,7 +9,6 @@ from ..gacodefuncs import *
 def prgen_shape(r,z,narc,nf,xplot):
 
    # Number of theta-points for plotting
-   dx = np.zeros(narc)
    ur = np.zeros(narc) ; uz = np.zeros(narc)
    vr = np.zeros(narc) ; vz = np.zeros(narc)
 
@@ -26,33 +25,26 @@ def prgen_shape(r,z,narc,nf,xplot):
       r = np.flip(r,0) ; z = np.flip(z,0)
 
    # Compute generalized angles (new method July 2023)
-   eps = 1.0-1e-10
+   eps = 1.0-1e-11
    # (ur,uz): principle angles (discontinuous)
    uz[:] = np.arcsin(eps*(z[:]-zmaj)/zmin)
    ur[:] = np.arccos(eps*(r[:]-rmaj)/rmin)
    
-   # Determine correct branches (vr,vz) via angle change (da)
-   #da = abs(np.diff(np.arctan2(np.diff(ur,append=ur[0]),np.diff(uz,append=uz[0]))))
-   
-   vz[0] = uz[0] ; vr[0] = ur[0]
-   
-   i00 = np.zeros(4,dtype=int)
+   # Determine correct branches (vr,vz) via extrema
+   i0 = np.zeros(4,dtype=int)
 
-   i00[0] = np.argmin(ur)
-   i00[1] = np.argmax(uz)
-   i00[2] = np.argmax(ur)
-   i00[3] = np.argmin(uz)
+   i0[0] = np.argmin(ur)
+   i0[1] = np.argmax(uz)
+   i0[2] = np.argmax(ur)
+   i0[3] = np.argmin(uz)
+  
+   j1 = i0[1] ; j2 = i0[2] ; j3 = i0[3]
 
-   j = 0
-   for i in range(1,narc):
-      if i < i00[1]:
-         vz[i] = uz[i] ; vr[i] = ur[i]
-      elif i < i00[2]:
-         vz[i] = np.pi-uz[i] ; vr[i] = ur[i]
-      elif i < i00[3]:
-         vz[i] = np.pi-uz[i] ; vr[i] = 2*np.pi-ur[i]
-      else:
-         vz[i] = 2*np.pi+uz[i] ; vr[i] = 2*np.pi-ur[i]
+   # Array notation for speed
+   vz[:j1]   = uz[:j1]         ; vr[:j1]   = ur[:j1]
+   vz[j1:j2] = np.pi-uz[j1:j2] ; vr[j1:j2] = ur[j1:j2]
+   vz[j2:j3] = np.pi-uz[j2:j3] ; vr[j2:j3] = 2*np.pi-ur[j2:j3]
+   vz[j3:]   = 2*np.pi+uz[j3:] ; vr[j3:]   = 2*np.pi-ur[j3:]
 
    # Define vr as deviation from vz
    vr[:] = vr[:]-vz[:] ; vr[-1] = vr[0]
@@ -71,10 +63,7 @@ def prgen_shape(r,z,narc,nf,xplot):
    xr[2] = zmin/rmin
    xr[3] = zmaj
 
-   for i in range(narc-1):
-      dx[i] = x[i+1]-x[i]
-
-   dx[-1] = dx[0]
+   dx = np.diff(x)
 
    # Compute expansion coefficients (cr):
    #  vr = sum cr*cos(nx)+sr*sin(nx)
@@ -88,7 +77,7 @@ def prgen_shape(r,z,narc,nf,xplot):
 
    if xplot > 0.0:
       outfile = '{:.3f}'.format(xplot)
-      plot_ang(r,z,x,vr,xr,cr,sr,i00,outfile)
+      plot_ang(r,z,x,vr,xr,cr,sr,i0,outfile)
 
    return cr,sr,xr
 
@@ -134,10 +123,10 @@ def oldfourier(ri,zi,nf,rnorm):
    # Repair origin
    ari[0,:] = extrap(rnorm,ari[0,:])
    azi[0,:] = extrap(rnorm,azi[0,:])
-   for i in range(1,nf+1):
-      ari[i,:] = zero(rnorm,ari[i,:]) ; bri[i,:] = zero(rnorm,bri[i,:])
-      azi[i,:] = zero(rnorm,azi[i,:]) ; bzi[i,:] = zero(rnorm,bzi[i,:])
 
+   ari[1:,0] = 0.0 ; bri[1:,0] = 0.0
+   azi[1:,0] = 0.0 ; bzi[1:,0] = 0.0
+      
    u = ari
    u = np.append(u,bri)
    u = np.append(u,azi)
@@ -150,8 +139,8 @@ def oldfourier(ri,zi,nf,rnorm):
 # f,w are periodic
 def moment(n,f,w,d):
 
-   s0 = np.sum((f[:-1]*w[:-1]+f[1:]*w[1:])*d[:-1])
-   s1 = np.sum((w[:-1]*w[:-1]+w[1:]*w[1:])*d[:-1])
+   s0 = np.sum((f[:-1]*w[:-1]+f[1:]*w[1:])*d[:])
+   s1 = np.sum((w[:-1]*w[:-1]+w[1:]*w[1:])*d[:])
    
    return s0/s1
     
@@ -162,11 +151,7 @@ def extrap(x,u):
     u[0] = b
     return u
 
-def zero(x,u):
-    u[0] = 0.0
-    return u
-
-def plot_ang(r,z,x,vr,xr,cr,sr,i00,outfile):
+def plot_ang(r,z,x,vr,xr,cr,sr,i0,outfile):
 
     nf = len(cr)-1
     
@@ -185,7 +170,7 @@ def plot_ang(r,z,x,vr,xr,cr,sr,i00,outfile):
     #rc('text',usetex=True)
     rc('font',size=18)
 
-    fig = plt.figure(figsize=(18,9))
+    fig = plt.figure(figsize=(18,10))
 
     # PLOT contour
     ax = fig.add_subplot(121,aspect='equal')
@@ -196,7 +181,7 @@ def plot_ang(r,z,x,vr,xr,cr,sr,i00,outfile):
 
     # Data
     ax.plot(r,z,'--k',linewidth=1,label='data')
-    ax.plot(r[i00],z[i00],'o')
+    ax.plot(r[i0],z[i0],'o')
     
     # Parameterized contour
     rp = rmaj+rmin*np.cos(x+pr)
