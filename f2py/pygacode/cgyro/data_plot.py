@@ -13,6 +13,40 @@ MYDIR=os.path.basename(os.getcwd())
 
 class cgyrodata_plot(data.cgyrodata):
       
+   def plot_dictinit(self):
+
+      # Init for OMFIT
+      
+      xin = {}
+      
+      xin['fig']    = None
+      xin['lx']     = 12
+      xin['ly']     = 6
+      xin['w']      = '0.5'
+      xin['norm']   = 'elec'
+      xin['ftype']  = 'screen'
+      xin['itime']  = -1
+      xin['field']  = 0
+      xin['moment'] = 'phi'
+      xin['tmax']   = -1.0
+      xin['theta']  = -1
+      xin['ymin']   = 'auto'
+      xin['ymax']   = 'auto'
+      xin['kxmin']  = 'auto'
+      xin['kxmax']  = 'auto'
+      xin['nstr']   = 'null'
+      xin['abs']    = 0
+      xin['fc']     = 0
+      xin['loc']    = 2
+      xin['nscale'] = 0
+      xin['cflux']  = 'auto'
+      xin['spec']   = 0
+      xin['bar']    = 0
+      xin['ie']     = 0
+      xin['mesh']   = 0
+
+      return xin
+   
    def plot_freq(self,xin):
       
       # Function: plot gamma and omega vs time
@@ -94,7 +128,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       return 'ky            omega            gamma',ky,y1,y2
 
-
+   
    def plot_error(self,xin):
 
       if xin['fig'] is None:
@@ -117,6 +151,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       return
 
+   
    def plot_geo(self,xin):
 
       self.getgeo()
@@ -250,12 +285,12 @@ class cgyrodata_plot(data.cgyrodata):
 
       # Plot fields versus time for each ky
 
-      norm  = xin['norm']
-      theta = xin['theta']
-      field = xin['field']
-      nstr  = xin['nstr']
-      ymin  = xin['ymin']
-      ymax  = xin['ymax']
+      norm   = xin['norm']
+      theta  = xin['theta']
+      field  = xin['field']
+      nstr   = xin['nstr']
+      ymin   = xin['ymin']
+      ymax   = xin['ymax']
       moment = xin['moment']
       spec   = xin['spec']
 

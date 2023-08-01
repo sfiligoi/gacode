@@ -18,6 +18,7 @@ rc('font',size=int(sys.argv[2]))
 plot_type = sys.argv[3]
 
 xin = {}
+
 xin['fig']    = None
 xin['lx']     = int(sys.argv[4])
 xin['ly']     = int(sys.argv[5])
@@ -31,20 +32,18 @@ xin['tmax']   = float(sys.argv[12])
 xin['theta']  = int(sys.argv[13])
 xin['ymin']   = sys.argv[14]
 xin['ymax']   = sys.argv[15]
-xin['kxmin']   = sys.argv[16]
-xin['kxmax']   = sys.argv[17]
+xin['kxmin']  = sys.argv[16]
+xin['kxmax']  = sys.argv[17]
 xin['nstr']   = sys.argv[18]
 xin['abs']    = int(sys.argv[19])
 xin['fc']     = int(sys.argv[20])
 xin['loc']    = int(sys.argv[21])
 xin['nscale'] = int(sys.argv[22])
 xin['cflux']  = sys.argv[23]
-xin['norm']   = sys.argv[24]
-xin['spec']   = int(sys.argv[25])
-xin['bar']    = bool(int(sys.argv[26]))
-xin['fc']     = int(sys.argv[27])
-xin['ie']     = int(sys.argv[28])
-xin['mesh']   = int(sys.argv[29])
+xin['spec']   = int(sys.argv[24])
+xin['bar']    = bool(int(sys.argv[25]))
+xin['ie']     = int(sys.argv[26])
+xin['mesh']   = int(sys.argv[27])
 
 # plotting control
 ftype   = xin['ftype']
