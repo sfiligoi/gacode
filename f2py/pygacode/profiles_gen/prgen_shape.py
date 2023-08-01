@@ -31,30 +31,32 @@ def prgen_shape(r,z,narc,nf,xplot):
    uz[:] = np.arcsin(eps*(z[:]-zmaj)/zmin)
    ur[:] = np.arccos(eps*(r[:]-rmaj)/rmin)
    
-   # Need to determine correct branches (vr,vz)
-   ang = np.zeros(narc)
-   ang[:narc-1] = np.arctan2(np.diff(ur),np.diff(uz))   
-   ang[-1] = np.arctan2(ur[0]-ur[-1],uz[0]-uz[-1])
-   da = abs(np.diff(ang))
+   # Determine correct branches (vr,vz) via angle change (da)
+   #da = abs(np.diff(np.arctan2(np.diff(ur,append=ur[0]),np.diff(uz,append=uz[0]))))
+   
+   vz[0] = uz[0] ; vr[0] = ur[0]
+   
+   i00 = np.zeros(4,dtype=int)
+
+   i00[0] = np.argmin(ur)
+   i00[1] = np.argmax(uz)
+   i00[2] = np.argmax(ur)
+   i00[3] = np.argmin(uz)
 
    j = 0
-   vz[0] = uz[0] ; vr[0] = ur[0]
    for i in range(1,narc):
-      if da[i-1] > 0.9 and da[i-1] < 6.0:
-         j=j+1
-      if j==0:
+      if i < i00[1]:
          vz[i] = uz[i] ; vr[i] = ur[i]
-      elif j==1:
+      elif i < i00[2]:
          vz[i] = np.pi-uz[i] ; vr[i] = ur[i]
-      elif j==2:
+      elif i < i00[3]:
          vz[i] = np.pi-uz[i] ; vr[i] = 2*np.pi-ur[i]
       else:
-         # j might be 3 or 4 here
          vz[i] = 2*np.pi+uz[i] ; vr[i] = 2*np.pi-ur[i]
 
    # Define vr as deviation from vz
    vr[:] = vr[:]-vz[:] ; vr[-1] = vr[0]
-
+   
    x = vz
    # Now:
    #
@@ -86,7 +88,7 @@ def prgen_shape(r,z,narc,nf,xplot):
 
    if xplot > 0.0:
       outfile = '{:.3f}'.format(xplot)
-      plot_ang(r,z,x,vr,xr,cr,sr,outfile)
+      plot_ang(r,z,x,vr,xr,cr,sr,i00,outfile)
 
    return cr,sr,xr
 
@@ -164,7 +166,7 @@ def zero(x,u):
     u[0] = 0.0
     return u
 
-def plot_ang(r,z,x,vr,xr,cr,sr,outfile):
+def plot_ang(r,z,x,vr,xr,cr,sr,i00,outfile):
 
     nf = len(cr)-1
     
@@ -194,6 +196,7 @@ def plot_ang(r,z,x,vr,xr,cr,sr,outfile):
 
     # Data
     ax.plot(r,z,'--k',linewidth=1,label='data')
+    ax.plot(r[i00],z[i00],'o')
     
     # Parameterized contour
     rp = rmaj+rmin*np.cos(x+pr)
@@ -211,10 +214,6 @@ def plot_ang(r,z,x,vr,xr,cr,sr,outfile):
 
     x=x/(2*np.pi)
 
-    ax.set_xlim([0,1])
-
-    ax.plot(x,pr,'-m',linewidth=1)
-
     # Shift elements so that x<1.0
     s=-2
     for i in range(n_arc):
@@ -231,8 +230,13 @@ def plot_ang(r,z,x,vr,xr,cr,sr,outfile):
         if x[n_arc-2-i] > x[n_arc-1-i]:
             x[n_arc-2-i] = x[n_arc-2-i]-1.0
 
-    # Angles from data
+    # Angle from data
     ax.plot(x,vr,'-k',linewidth=2,alpha=0.3)
+
+    # Angle from parameterization
+    ax.plot(x,pr,'-m',linewidth=1)
+
+    ax.set_xlim([0,1])
 
     plt.tight_layout()
     ofile = 'pnorm_'+outfile+'.pdf'
