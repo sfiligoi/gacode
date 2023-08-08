@@ -9,7 +9,8 @@ from ..gacodefuncs import *
 from .data import cgyrodata
 from mayavi import mlab
 try:
-   from pygacode import vis
+   #sys.path.append('/home/candy/GIT/gacode/f2py/vis')
+   from vis.vis import *
    from pygacode import geo
    print("INFO: (vis_torcut) Successfully imported vis")
 except:

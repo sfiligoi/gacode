@@ -12,8 +12,8 @@ pip:
 	python ./setup.py build
 	python ./setup.py sdist
 
-pip-test-release:
-	cd dist; pip install pygacode-$(VERSION).tar.gz
+vis:
+	cd vis ; python -m numpy.f2py -c -m vis vis.f90 --f90flags="-fopenmp" -lgomp
 
 pip-release:
 	python -m twine upload --repository pypi dist/pygacode-$(VERSION).tar.gz
@@ -26,8 +26,7 @@ clean:
 	cd expro ; make clean
 	cd module ; make clean
 	cd test ; make clean
-	rm -rf dist build MANIFEST sgn.pyf pygacode/lib *-info
-	cd ${GACODE_ROOT}/f2py/pygacode ; rm -rf gacode *-info
+	cd vis ; rm *.so
 
 .IGNORE:
 
