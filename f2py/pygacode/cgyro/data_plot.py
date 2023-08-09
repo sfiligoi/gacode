@@ -308,7 +308,7 @@ class cgyrodata_plot(data.cgyrodata):
       ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(self.tstr)
-      ax.set_ylabel(r'$\left| '+ft+r'_n \right|/'+self.rhoi+'$')
+      ax.set_ylabel(self.ylabeler('n',ft))
       ax.set_yscale('log')
       ax.set_title(r'$\mathrm{Fluctuation~intensity}$')
 
@@ -318,7 +318,7 @@ class cgyrodata_plot(data.cgyrodata):
          nvec = str2list(nstr)
 
       for n in nvec:
-         num = r'$n='+str(n)+'$'
+         num = '$n='+str(n)+'$'
          if n==0:
             ax.plot(t,p[n,:],linewidth=2,label=num)
          else:
@@ -373,22 +373,22 @@ class cgyrodata_plot(data.cgyrodata):
       imin,imax=time_index(self.t,w)
     
       # n=0 intensity (gyroBohm)
-      y0 = np.sum(abs(f[:,0,:]),axis=0)/self.rhonorm    
-      s0 = np.sum(abs(f[:,0,:])**2,axis=0)/self.rhonorm**2      
+      y0 = np.sum(abs(f[:,0,:]),axis=0)
+      s0 = np.sum(abs(f[:,0,:])**2,axis=0)  
 
       # finite-n intensity (gyroBohm)
-      yn = np.sum(abs(f[:,1:,:]),axis=(0,1))/self.rhonorm 
-      sn = np.sum(abs(f[:,1:,:])**2,axis=(0,1))/self.rhonorm**2
-         
+      yn = np.sum(abs(f[:,1:,:]),axis=(0,1))
+      sn = np.sum(abs(f[:,1:,:])**2,axis=(0,1))
+      
       s = np.ones(imax-imin+1)
       rstr = self.rhoi
       if absnorm == 0:
          s0_ave = time_average(s0,self.t,imin,imax)
          sn_ave = time_average(sn,self.t,imin,imax)
-         print('INFO: (plot_phi) sqrt[       <|'+ft+r'_0|^2> ]/'+rstr+' = {:.4f}'.format(np.sqrt(s0_ave)))
-         print('INFO: (plot_phi) sqrt[ <sum_n |'+ft+r'_n|^2> ]/'+rstr+' = {:.4f}'.format(np.sqrt(sn_ave)))
-         lab0=r'$\sqrt{\left\langle\left|'+ft+r'_0\right|^2\right\rangle}/'+rstr+'$'
-         labn=r'$\sqrt{\left\langle\sum_{n>0} \left|'+ft+r'_n\right|^2\right\rangle}/'+rstr+'$'
+         lab0 = self.ylabeler('0',ft,sq=True,tave=True,sqrt=True)
+         labn = self.ylabeler('+',ft,sq=True,tave=True,sqrt=True)
+         print('INFO: (plot_phi) [RMS NORM n=0] = {:.4f}'.format(np.sqrt(s0_ave)))
+         print('INFO: (plot_phi) [RMS NORM n>0] = {:.4f}'.format(np.sqrt(sn_ave)))
          ax.plot(self.t,np.sqrt(s0),label=lab0,linewidth=2)
          ax.plot(self.t,np.sqrt(sn),label=labn)
          ax.plot(self.t[imin:imax+1],np.sqrt(s0_ave)*s,'--k')
@@ -396,10 +396,10 @@ class cgyrodata_plot(data.cgyrodata):
       else:
          y0_ave = time_average(y0,self.t,imin,imax)
          yn_ave = time_average(yn,self.t,imin,imax)
-         print('INFO: (plot_phi)       <|'+ft+'_0|>/'+rstr+' = {:.4f}'.format(y0_ave))
-         print('INFO: (plot_phi) <sum_n |'+ft+'_n|>/'+rstr+' = {:.4f}'.format(yn_ave))
-         lab0=r'$\left\langle \left|'+ft+r'_0\right|\right\rangle/'+rstr+'$'
-         labn=r'$\left\langle \sum_{n>0} \left|'+ft+r'_n\right|\right\rangle/'+rstr+'$'
+         lab0 = self.ylabeler('0',ft,tave=True)
+         labn = self.ylabeler('+',ft,tave=True)
+         print('INFO: (plot_phi) [ABS NORM n=0] = {:.4f}'.format(y0_ave))
+         print('INFO: (plot_phi) [ABS NORM n>0] = {:.4f}'.format(yn_ave))
          ax.plot(self.t,y0,label=lab0,linewidth=2)
          ax.plot(self.t,yn,label=labn)
          ax.plot(self.t[imin:imax+1],y0_ave*s,'--k')
@@ -580,7 +580,7 @@ class cgyrodata_plot(data.cgyrodata):
       x0 = kx[-1]+dk
 
       color = ['m','k','b','c']
-      xlabel=r'$r/\rho_{sD}$'
+      xlabel=r'$r/\rho$'
       windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[imax])+']$'
 
       ax = fig.add_subplot(1,1,1)
@@ -629,6 +629,7 @@ class cgyrodata_plot(data.cgyrodata):
       w      = xin['w']
       theta  = xin['theta']
       moment = xin['moment']
+      field  = xin['field']
       ymin   = xin['ymin']
       ymax   = xin['ymax']
       ftype  = xin['ftype']
@@ -658,19 +659,22 @@ class cgyrodata_plot(data.cgyrodata):
 
       ax.set_title(windowtxt)
 
-      p0 = self.n_radial//2
+      nx = self.n_radial-1
+      # p=1
+      p1 = nx//2+1
       
-      f,ft = self.kxky_select(theta,0,moment,spec)
-      ax.set_ylabel(r'$\left|'+ft+r'\right|/$'+self.rhostr)
+      f,ft = self.kxky_select(theta,field,moment,spec)
 
-      yr = np.real(f[p0+1,0,:]) ; yi = np.imag(f[p0+1,0,:])
+      ax.set_ylabel(self.ylabeler('1',ft))
+
+      yr = np.real(f[p1,0,:]) ; yi = np.imag(f[p1,0,:])
       # Re
       ave = time_average(yr,t,imin,imax) ; y_ave = ave*np.ones(len(t))
-      ax.plot(self.t,yr,color=color[0],label=r'$\mathrm{Re:} '+str(round(ave,3))+'$')
+      ax.plot(self.t,yr,color=color[0],label=r'$\mathrm{Re} = '+str(round(ave,3))+'$')
       ax.plot(t[imin:imax+1],y_ave[imin:imax+1],'--',color=color[0])
       # Im
       ave = time_average(yi,t,imin,imax) ; y_ave = ave*np.ones(len(t))
-      ax.plot(self.t,yi,color=color[1],label=r'$\mathrm{Im:} '+str(round(ave,3))+'$' )
+      ax.plot(self.t,yi,color=color[1],label=r'$\mathrm{Im} = '+str(round(ave,3))+'$' )
       ax.plot(t[imin:imax+1],y_ave[imin:imax+1],'--',color=color[1])
 
       ax.legend(loc=2)
@@ -701,6 +705,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       self.getbigfield()
       self.getnorm(norm)
+      
       nx = self.n_radial-1
       
       #======================================
@@ -729,22 +734,19 @@ class cgyrodata_plot(data.cgyrodata):
       yi = time_average(np.imag(f[:,0,:]),t,imin,imax)
       
       nxp = 8*nx
-      yave = np.zeros(nxp)
-      y0ave = np.zeros(nxp)
-      x = np.linspace(0,2*np.pi,num=nxp)
+      fave = np.zeros(nxp)
+      dave = np.zeros(nxp)
+      x = np.linspace(0,2*np.pi,nxp)
       y = yr+1j*yi
-      # JC: should use array notation
+      # JC: should use array notation, check definitions
       for i in range(nx):
          p = i-nx//2
-         y0ave = y0ave + np.real(np.exp(1j*p*x)*y[i])
-         yave = yave + np.real(1j*p*np.exp(1j*p*x)*y[i])
-      yave = 2*yave*(2*np.pi/self.length)
-      y0ave = 2*y0ave*(2*np.pi/self.length)
+         fave = fave + np.real(     np.exp(1j*p*x)*y[i])
+         dave = dave + np.real(1j*p*np.exp(1j*p*x)*y[i])
+      dave = dave*(2*np.pi/self.length)
          
-      ax.plot(x/(2*np.pi),y0ave,color='k',
-              label=r'$\left|'+ft+r'\right|/$'+self.rhostr)
-      ax.plot(x/(2*np.pi),yave*self.rho,color='b',
-              label=r'$\left|'+ft+r'^\prime\right|$')
+      ax.plot(x/(2*np.pi),fave,color='k',label=self.ylabeler('0',ft,abs=False))
+      ax.plot(x/(2*np.pi),dave,color='b',label=self.ylabeler('0',ft,abs=False,d=True))
       ax.legend()
       
       ax.set_xlim([0,1])
@@ -1274,13 +1276,11 @@ class cgyrodata_plot(data.cgyrodata):
       if nstr == 'null' or nstr == '+':
          if nstr == '+':
             y = np.sum(abs(f[:,1:,:])**2,axis=1)
-            z = '{n>0}'
          else:
             y = np.sum(abs(f[:,:,:])**2,axis=1)
-            z = '{n}'
 
          ave = time_average(y,t,imin,imax)
-         ax.set_ylabel(r'$\left\langle \sum_'+z+r'\left|'+ft+r'_n/'+self.rhoi+r'\right|^2\right\rangle$')
+         ax.set_ylabel(self.ylabeler(nstr,ft,sq=True,tave=True))
          if bar:
             ax.step(kx+dk/2,ave,color='m')
          else:
@@ -1289,7 +1289,7 @@ class cgyrodata_plot(data.cgyrodata):
       else:
          nvec = str2list(nstr)
          print('INFO: (plot_kx_phi) n = '+str(nvec))
-         ax.set_ylabel(r'$\left\langle\left|'+ft+r'_n/'+self.rhoi+r'\right|^2\right\rangle$')
+         ax.set_ylabel(self.ylabeler('n',ft,sq=True,tave=True))
          for n in nvec:
             num = r'$n='+str(n)+'$'
             ave = time_average(abs(f[:,n,:])**2,t,imin,imax)
@@ -1371,10 +1371,10 @@ class cgyrodata_plot(data.cgyrodata):
       if nstr == 'null' or nstr == '+':
          nstr = '+'
          nvec = np.arange(1,nn)
-         ax.set_ylabel(r'$\left\langle \sum_{n>0} \left|'+ft+r'_n/'+self.rhoi+r'\right|^2\right\rangle$')
+         ax.set_ylabel(self.ylabeler('+',ft,sq=True,tave=True))
       else:
          nvec = str2list(nstr)
-         ax.set_ylabel(r'$\left\langle \left|'+ft+r'_n/'+self.rhoi+r'\right|^2\right\rangle$')
+         ax.set_ylabel(self.ylabeler('n',ft,sq=True,tave=True))
 
       y = np.zeros([2,len(x)])
       for i,n in enumerate(nvec):

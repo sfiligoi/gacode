@@ -513,6 +513,7 @@ class cgyrodata:
 
          self.rhonorm = self.rho
          self.rhoi    = r'\rho_{sD}'
+         self.rhoi    = r'\rho_{s}'
 
          self.kynorm = self.ky
          self.kstr   = r'$k_y \rho_{sD}$'
@@ -593,3 +594,40 @@ class cgyrodata:
       f[:,:,:] = f[:,:,:]/self.rhonorm
       
       return f,ft
+
+   def ylabeler(self,sub,ft,abs=True,sq=False,tave=False,sqrt=False,d=False):
+
+      if sub == '+' or sub == 'null':
+         z = 'n'
+      else:
+         z = sub
+
+      # add subscript
+      u = ft+'_'+z
+
+      if d:
+         u = u+r'^\prime'
+         
+      # gyroBohm norm
+      u = u+'/'+self.rhoi
+
+      # Absolute value
+      if abs:
+         u = r'\left|'+u+r'\right|'
+
+      if sub == '+':
+         u = r'\sum_{n>0}'+u
+      if sub == 'null':
+         u = r'\sum_{n}'+u
+
+      # Squared?
+      if sq:
+         u = u+'^2'
+
+      if tave:
+         u = r'\left\langle'+u+r'\right\rangle'
+
+      if sqrt:
+         u = r'\sqrt{'+u+'}'
+         
+      return '$'+u+'$'
