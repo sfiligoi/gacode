@@ -11,10 +11,9 @@ import time
 # Useful labels
 TIME=r'$(c_s/a)\,t$'
 
-TEXPHI  = r'{\delta\phi}'
-TEXK    = r'{K}'
-TEXAPAR = r'\delta {A_\parallel}'
-TEXBPAR = r'\delta {B_\parallel}'
+TEXPHI  = r'\delta\phi'
+TEXAPAR = r'{A_\parallel}'
+TEXBPAR = r'{B_\parallel}'
 TEXDN   = r'\delta n'
 TEXDE   = r'\delta E'
 TEXDV   = r'\delta v'

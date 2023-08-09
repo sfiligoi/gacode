@@ -367,14 +367,14 @@ class cgyrodata:
       self.n_energy  = int(data[5])
       self.n_xi      = int(data[6])
       self.m_box     = int(data[7])
-      self.length    = float(data[8])
+      self.length    = float(data[8]) # L/rho
       self.n_global  = int(data[9])
       self.theta_plot= int(data[10])
       # Set l to last data index plus one.
       l=11
 
       self.p = np.array(data[l:l+self.n_radial],dtype=int)
-      # Ignore leftmost "special" element
+      # kx*rho (ignore leftmost "special" element)
       self.kx = 2*np.pi*self.p[1:]/self.length
 
       mark = l+self.n_radial
@@ -512,7 +512,7 @@ class cgyrodata:
          self.fstr   = [r'$(a/c_{sD})\, \omega$',r'$(a/c_{sD})\, \gamma$']
 
          self.rhonorm = self.rho
-         self.rhostr = r'$\rho_{sD}$'
+         self.rhoi    = r'\rho_{sD}'
 
          self.kynorm = self.ky
          self.kstr   = r'$k_y \rho_{sD}$'
@@ -544,7 +544,7 @@ class cgyrodata:
          rhoc = vc/(self.z[i]/self.mass[i])
 
          self.rhonorm = self.rho*rhoc
-         self.rhostr  = r'$\rho_'+str(i)+'$'
+         self.rhoi = r'\rho_'+str(i)
 
          self.kynorm = self.ky*rhoc
          self.kstr   = r'$k_y \rho_'+str(i)+'$'
@@ -553,14 +553,13 @@ class cgyrodata:
          self.qc = vc*(self.temp[i]/te)*rhoc**2
          self.gbnorm = '_\mathrm{GB'+str(i)+'}'
 
-   
+      self.rhostr = r'$'+self.rhoi+'$'
+      self.kxlabel = r'$k_x'+self.rhoi+'$'
+
+      
    def kxky_select(self,theta,field,moment,species):
 
       itheta,thetapi = indx_theta(theta,self.theta_plot)
-
-      # phi
-      # I = phi_hat^2
-      # K = (k_perp rho)^2 phi_hat^2
 
       if moment == 'phi':
          if field == 0:
@@ -577,7 +576,7 @@ class cgyrodata:
             for i in range(self.n_time):
                # self.kperp -> kperp*rho
                f[:,:,i] = self.kperp[:,:]*f[:,:,i]
-            ft = TEXK
+            ft = r'k_\perp'+self.rhoi+r'\, \phi'
       elif moment == 'n':
          f  = self.kxky_n[0,1:,itheta,species,:,:]+1j*self.kxky_n[1,1:,itheta,species,:,:]
          ft = TEXDN
@@ -589,5 +588,8 @@ class cgyrodata:
          ft = TEXDV
 
       # 3D structure: f[r,n,time]
-
+      
+      # gyrBohm normalization
+      f[:,:,:] = f[:,:,:]/self.rhonorm
+      
       return f,ft
