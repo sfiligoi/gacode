@@ -19,7 +19,7 @@ NUMAS_PER_NODE=4
 FC     = mpifort -module ${GACODE_ROOT}/modules -I ${GACODE_ROOT}/modules -Mpreprocess -DUSE_INLINE -Mdefaultunit
 F77    = ${FC}
 
-FACC   =-acc -Minfo=accel -Mcudalib=cufft  # -DDISABLE_GPUDIRECT_MPI
+FACC   =-acc -gpu all -Minfo=accel -Mcudalib=cufft  # -DDISABLE_GPUDIRECT_MPI
 
 FOMP   =-mp -Mstack_arrays ${FACC}
 FMATH  =-r8 
