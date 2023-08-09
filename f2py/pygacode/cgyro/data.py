@@ -509,18 +509,19 @@ class cgyrodata:
          self.tstr   = TIME
 
          self.fnorm  = self.freq 
-         self.fstr   = [r'$(a/c_{sD})\, \omega$',r'$(a/c_{sD})\, \gamma$']
+         self.fstr   = [r'$(a/c_{s})\, \omega$',r'$(a/c_{s})\, \gamma$']
 
          self.rhonorm = self.rho
-         self.rhoi    = r'\rho_{sD}'
          self.rhoi    = r'\rho_{s}'
 
          self.kynorm = self.ky
-         self.kstr   = r'$k_y \rho_{sD}$'
+         self.kstr   = r'$k_y \rho_{s}$'
 
          self.qc     = 1.0
          self.gbnorm = '_\mathrm{GBD}'
-         
+
+         print('INFO: Using deuterium norm (rho_s = rho_sD, c_s = c_sD, etc)')
+
       else:
 
          # Species-i normalizations
@@ -554,11 +555,13 @@ class cgyrodata:
          self.qc = vc*(self.temp[i]/te)*rhoc**2
          self.gbnorm = '_\mathrm{GB'+str(i)+'}'
 
+         print('INFO: Using species '+norm+' norm')
+
       self.rhostr = r'$'+self.rhoi+'$'
       self.kxlabel = r'$k_x'+self.rhoi+'$'
 
       
-   def kxky_select(self,theta,field,moment,species):
+   def kxky_select(self,theta,field,moment,species,gbnorm=False):
 
       itheta,thetapi = indx_theta(theta,self.theta_plot)
 
@@ -589,9 +592,10 @@ class cgyrodata:
          ft = TEXDV
 
       # 3D structure: f[r,n,time]
-      
-      # gyrBohm normalization
-      f[:,:,:] = f[:,:,:]/self.rhonorm
+
+      if gbnorm:
+         # gyrBohm normalization
+         f[:,:,:] = f[:,:,:]/self.rhonorm
       
       return f,ft
 

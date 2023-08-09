@@ -300,7 +300,7 @@ class cgyrodata_plot(data.cgyrodata):
       self.getbigfield()
       self.getnorm(norm) ; t = self.tnorm 
 
-      f,ft = self.kxky_select(theta,field,moment,spec)
+      f,ft = self.kxky_select(theta,field,moment,spec,gbnorm=True)
 
       p = np.sum(abs(f[:,:,:]),axis=0)
 
@@ -357,7 +357,7 @@ class cgyrodata_plot(data.cgyrodata):
       self.getbigfield()
       self.getnorm(norm)
       
-      f,ft = self.kxky_select(theta,field,moment,spec)
+      f,ft = self.kxky_select(theta,field,moment,spec,gbnorm=True)
 
       #======================================
       # Set figure size and axes
@@ -663,7 +663,7 @@ class cgyrodata_plot(data.cgyrodata):
       # p=1
       p1 = nx//2+1
       
-      f,ft = self.kxky_select(theta,field,moment,spec)
+      f,ft = self.kxky_select(theta,field,moment,spec,gbnorm=True)
 
       ax.set_ylabel(self.ylabeler('1',ft))
 
@@ -727,7 +727,7 @@ class cgyrodata_plot(data.cgyrodata):
       ax.set_title(windowtxt)
       
       # f[p,n,t]
-      f,ft = self.kxky_select(theta,0,moment,spec)
+      f,ft = self.kxky_select(theta,0,moment,spec,gbnorm=True)
 
       # complex n=0 amplitudes
       yr = time_average(np.real(f[:,0,:]),t,imin,imax)
@@ -1209,7 +1209,6 @@ class cgyrodata_plot(data.cgyrodata):
       
       # Field data selector
       f,ft = self.kxky_select(theta,field,moment,spec)
-
       
       imin,imax=time_index(t,w)
       y = np.sum(abs(f[:,:,imin:imax+1]),axis=2)
@@ -1271,7 +1270,7 @@ class cgyrodata_plot(data.cgyrodata):
       ax.set_title(r'$\mathrm{Average~fluctuation~intensity} \quad $'+windowtxt)
       ax.set_xlabel(self.kxlabel)
 
-      f,ft = self.kxky_select(theta,field,moment,0)
+      f,ft = self.kxky_select(theta,field,moment,0,gbnorm=True)
 
       if nstr == 'null' or nstr == '+':
          if nstr == '+':
@@ -1362,7 +1361,7 @@ class cgyrodata_plot(data.cgyrodata):
       ax.set_title(r'$\mathrm{Average~fluctuation~intensity} \quad $'+windowtxt)
       ax.set_xlabel(self.kxlabel)
 
-      f,ft = self.kxky_select(theta,field,moment,0)
+      f,ft = self.kxky_select(theta,field,moment,0,gbnorm=True)
 
       lst = ['-','--']
       color = ['black','magenta','blue','red','green','purple']
