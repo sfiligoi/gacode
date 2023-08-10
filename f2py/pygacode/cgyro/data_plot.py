@@ -1128,10 +1128,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       if ky[-1] < 0.0:
          ky = -ky
-         xlabel=r'$-'+self.kystr+'$'
-      else:
-         xlabel=r'$'+self.kystr+'$'
-    
+
       dk = ky[1]-ky[0]
     
       ave = np.zeros((self.n_n,ns))
@@ -1144,7 +1141,7 @@ class cgyrodata_plot(data.cgyrodata):
          if not ftype == 'nox':
             ax = fig.add_subplot(nrow,ncol,ispec+1)
                
-            ax.set_xlabel(xlabel)
+            ax.set_xlabel(self.kystr)
             ax.set_ylabel(r'$'+mtag+'_'+u+'$',color='k')
             ax.set_title(windowtxt)
             if bar == True:
@@ -1230,8 +1227,8 @@ class cgyrodata_plot(data.cgyrodata):
 
       windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[imax])+']$'
 
-      ax.set_xlabel(r'$k_x$'+self.rhostr)
-      ax.set_ylabel(r'$k_y$'+self.rhostr)
+      ax.set_xlabel(self.kxstr)
+      ax.set_ylabel(self.kystr)
       ax.set_title(r'$\mathrm{Log} |'+ft+'| \quad $'+windowtxt)
 
       ax.imshow(y,extent=[xl,xr,0,y0],interpolation='none',cmap='plasma')

@@ -491,11 +491,11 @@ class cgyrodata:
          self.nu[i],p     = self.eget(data,p) 
 
       if p == -1:
-         print('ERROR: (data.py) Data format outdated. Please run cgyro -t')
+         print('ERROR: (getgrid) Data format outdated. Please run cgyro -t')
          sys.exit()
          
       if not self.silent:
-         print('INFO: (data.py) Read {:d} entries out.cgyro.equilibrium.'.format(p))
+         print('INFO: (getgrid) Read {:d} entries out.cgyro.equilibrium.'.format(p))
 
       #-----------------------------------------------------------------
 
@@ -522,7 +522,7 @@ class cgyrodata:
          self.qc     = 1.0
          self.gbnorm = '_\mathrm{GBD}'
 
-         print('INFO: Using deuterium norm (rho_s = rho_sD, c_s = c_sD, etc)')
+         print('INFO: (getnorm) Using deuterium norm (rho_s = rho_sD, c_s = c_sD, etc)')
 
       else:
 
@@ -559,9 +559,7 @@ class cgyrodata:
          self.qc = vc*(self.temp[i]/te)*rhoc**2
          self.gbnorm = '_\mathrm{GB'+str(i)+'}'
 
-         print('INFO: Using species '+norm+' norm')
-
-      self.rhostr = r'$'+self.rhoi+'$'
+         print('INFO: (getnorm) Using species '+norm+' norm')
 
       return self.tnorm
 
@@ -569,6 +567,10 @@ class cgyrodata:
    def kxky_select(self,theta,field,moment,species,gbnorm=False):
 
       itheta,thetapi = indx_theta(theta,self.theta_plot)
+
+      # Set norm if unset
+      if 'self.rhonorm' not in locals():
+         self.getnorm('elec')
 
       if moment == 'phi':
          if field == 0:
@@ -583,8 +585,8 @@ class cgyrodata:
       elif moment == 'k':
             f  = self.kxky_phi[0,1:,itheta,:,:]+1j*self.kxky_phi[1,1:,itheta,:,:]
             for i in range(self.n_time):
-               # self.kperp -> kperp*rho
-               f[:,:,i] = self.kperp[:,:]*f[:,:,i]
+               # self.kperp -> kperp*rhos 
+               f[:,:,i] = self.kperp[:,:]*f[:,:,i]*self.rhonorm/self.rho
             ft = r'k_\perp'+self.rhoi+r'\, \phi'
       elif moment == 'n':
          f  = self.kxky_n[0,1:,itheta,species,:,:]+1j*self.kxky_n[1,1:,itheta,species,:,:]
