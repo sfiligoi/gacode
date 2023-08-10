@@ -4,6 +4,10 @@ subroutine cgyro_cleanup
   use cgyro_globals
   use parallel_lib
 
+#if defined(_OPENACC) || defined(OMPGPU)
+#define CGYRO_GPU_FFT
+#endif
+
   !!!!!!!!!!!!!!!!!!!!!!!!!!
   ! From cgyro_init_manager
   !!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -246,7 +250,7 @@ subroutine cgyro_cleanup
      deallocate(cmat_simple)
   endif
 
-#ifndef _OPENACC
+#ifndef CGYRO_GPU_FFT
   if(allocated(fx))                deallocate(fx)
   if(allocated(gx))                deallocate(gx)
   if(allocated(fy))                deallocate(fy)
@@ -258,7 +262,7 @@ subroutine cgyro_cleanup
   if(allocated(uv))                deallocate(uv)
 #endif  
 
-#ifdef _OPENACC
+#ifdef CGYRO_GPU_FFT
   if(allocated(fxmany))    then
 !$acc exit data delete(fxmany)     
      deallocate(fxmany)

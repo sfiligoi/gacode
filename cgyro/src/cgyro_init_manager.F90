@@ -20,7 +20,11 @@ subroutine cgyro_init_manager
 
   use cgyro_io
 
-#ifdef _OPENACC
+#if defined(_OPENACC) || defined(OMPGPU)
+#define CGYRO_GPU_FFT
+#endif
+
+#ifdef CGYRO_GPU_FFT
 
 #ifdef HIPGPU
   use hipfort_hipfft, only : hipfftPlanMany, &
@@ -30,15 +34,15 @@ subroutine cgyro_init_manager
        CUFFT_C2R,CUFFT_Z2D,CUFFT_R2C,CUFFT_D2Z
 #endif
 
-#endif !_OPENACC
+#endif !CGYRO_GPU_FFT
 
   implicit none
 
-#ifndef _OPENACC
+#ifndef CGYRO_GPU_FFT
   include 'fftw3.f03'
 #endif
 
-#ifdef _OPENACC
+#ifdef CGYRO_GPU_FFT
   integer :: howmany,istatus
   integer, parameter :: irank = 2
   integer, dimension(irank) :: ndim,inembed,onembed
@@ -291,7 +295,7 @@ subroutine cgyro_init_manager
      return
   endif
 
-#ifndef _OPENACC
+#ifndef CGYRO_GPU_FFT
   gpu_bigmem_flag = 0
 #endif
 
@@ -361,7 +365,7 @@ subroutine cgyro_init_manager
 
 !$acc enter data copyin(nx0,ny0,nx,ny,nx2,ny2)
 
-#ifndef _OPENACC
+#ifndef CGYRO_GPU_FFT
   allocate(fx(0:ny2,0:nx-1,n_omp))
   allocate(gx(0:ny2,0:nx-1,n_omp))
   allocate(fy(0:ny2,0:nx-1,n_omp))
@@ -378,7 +382,7 @@ subroutine cgyro_init_manager
   plan_r2c = fftw_plan_dft_r2c_2d(nx,ny,uv(:,:,1),fx(:,:,1),FFTW_PATIENT)
 #endif
 
-#ifdef _OPENACC
+#ifdef CGYRO_GPU_FFT
   call cgyro_info('GPU-aware code triggered.')
 
   allocate( fxmany(0:ny2,0:nx-1,nsplit) )
@@ -480,7 +484,7 @@ subroutine cgyro_init_manager
        nsplit)
 #endif
 
-#endif ! _OPENACC
+#endif ! CGYRO_GPU_FFT
 
   call timer_lib_out('nl_init')
 
