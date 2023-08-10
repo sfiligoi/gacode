@@ -509,13 +509,15 @@ class cgyrodata:
          self.tstr   = TIME
 
          self.fnorm  = self.freq 
-         self.fstr   = [r'$(a/c_{s})\, \omega$',r'$(a/c_{s})\, \gamma$']
+         self.fstr   = [r'$(a/c_s)\, \omega$',r'$(a/c_s)\, \gamma$']
 
          self.rhonorm = self.rho
-         self.rhoi    = r'\rho_{s}'
+         self.rhoi    = r'\rho_s'
 
+         self.kxnorm = self.kx
          self.kynorm = self.ky
-         self.kstr   = r'$k_y \rho_{s}$'
+         self.kxstr  = r'$k_x \rho_s$'
+         self.kystr  = r'$k_\theta \rho_s$'
 
          self.qc     = 1.0
          self.gbnorm = '_\mathrm{GBD}'
@@ -548,8 +550,10 @@ class cgyrodata:
          self.rhonorm = self.rho*rhoc
          self.rhoi = r'\rho_'+str(i)
 
+         self.kxnorm = self.kx*rhoc
          self.kynorm = self.ky*rhoc
-         self.kstr   = r'$k_y \rho_'+str(i)+'$'
+         self.kxstr  = r'$k_x \rho_'+str(i)+'$'
+         self.kystr  = r'$k_\theta \rho_'+str(i)+'$'
 
           # Convert Q_GBD to Q_GBi
          self.qc = vc*(self.temp[i]/te)*rhoc**2
@@ -558,7 +562,8 @@ class cgyrodata:
          print('INFO: Using species '+norm+' norm')
 
       self.rhostr = r'$'+self.rhoi+'$'
-      self.kxlabel = r'$k_x'+self.rhoi+'$'
+
+      return self.tnorm
 
       
    def kxky_select(self,theta,field,moment,species,gbnorm=False):
