@@ -290,7 +290,7 @@ do n=1, n_proc
     endif
 
 #ifdef OMPGPU
-!$omp target teams distribute parallel do private(t2)
+!$omp target teams distribute parallel do private(n)
 #else
 #ifdef _OPENACC
 !$acc parallel loop gang vector independent present(t2) private(n)
@@ -344,7 +344,7 @@ do n=1, n_proc
 #endif
 
 #ifdef OMPGPU
-!$omp target teams distribute parallel do private(t1)
+!$omp target teams distribute parallel do private(n)
 #else
 #ifdef _OPENACC
 !$acc parallel loop gang vector independent present(t1) private(n)
