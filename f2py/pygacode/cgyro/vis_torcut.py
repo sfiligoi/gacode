@@ -9,7 +9,6 @@ from ..gacodefuncs import *
 from .data import cgyrodata
 from mayavi import mlab
 try:
-   #sys.path.append('/home/candy/GIT/gacode/f2py/vis')
    from vis.vis import *
    from pygacode import geo
    print("INFO: (vis_torcut) Successfully imported vis")
@@ -212,7 +211,7 @@ def frame():
    image = mlab.mesh(xp,yp,zp,scalars=f,colormap=colormap,vmin=f0,vmax=f1,opacity=1.0)
    # View from positive z-axis
    mlab.view(azimuth=0, elevation=0)
-   print('INFO: (vis_torcut) min={:.3f} | max={:.3f}'.format(f0,f1))
+   print('INFO: (vis_torcut) min={:.3E} | max={:.3E}'.format(f0,f1))
    
    if ftype == 'screen':
       mlab.show()

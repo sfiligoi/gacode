@@ -3,7 +3,7 @@ requires = ["setuptools", "wheel", "numpy"]
 
 [project]
 name = 'pygacode'
-version = '1.0'
-description = 'HONK HONK'
+version = '1.0.0'
+description = 'Python-GACODE'
 requires-python = ">=3.7"
 
