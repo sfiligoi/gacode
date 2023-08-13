@@ -1,5 +1,3 @@
-from gacode_ext import *
-
 def gapystr_get(s):
 
    try:
@@ -15,15 +13,21 @@ def gapystr_get(s):
 def gapystr_set(s, l=10, n=200):
    return [item.ljust(l) for item in s + [''] * n][:n]
 
-__all__ = ['gapystr_get',
-           'gapystr_set',
-           'tgyro',
-           'cgyro',
-           'gyro',
-           'neo',
-           'profiles_gen']
+try:
+   from gacode_ext import *
 
-# Pack extensions into pygacode
-tmp={}
-exec('from gacode_ext import *', tmp)
-__all__.extend(list(tmp.keys()))
+
+   __all__ = ['gapystr_get',
+              'gapystr_set',
+              'tgyro',
+              'cgyro',
+              'gyro',
+              'neo',
+              'profiles_gen']
+
+   # Pack extensions into pygacode
+   tmp={}
+   exec('from gacode_ext import *', tmp)
+   __all__.extend(list(tmp.keys()))
+except:
+   pass   
