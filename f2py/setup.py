@@ -1,13 +1,12 @@
 from numpy.distutils.core import setup,Extension
 
-wrapper = Extension('gacode_ext',
-                    sources=['expro/expro.f90',
-                             'expro/expro_util.f90',
-                             'expro/expro_pycomm.f90',
-                             'geo/geo.f90'])
+ext = Extension('gacode_ext',
+                 sources=['expro/expro.f90',
+                          'expro/expro_util.f90',
+                          'expro/expro_pycomm.f90',
+                          'geo/geo.f90'])
 
-setup(py_modules=['pygacode.__init__',
-                  'pygacode.gacodefuncs',
+setup(py_modules=['pygacode.gacodefuncs',
                   'pygacode.gacodeinput'],
       packages=['pygacode',
                 'pygacode.gyro',
@@ -16,6 +15,7 @@ setup(py_modules=['pygacode.__init__',
                 'pygacode.test',
                 'pygacode.neo',
                 'pygacode.profiles_gen'],
-      ext_modules=[wrapper]
+      package_data={'pygacode.test': ['input.gacode']},
+      ext_modules=[ext]
       )
 
