@@ -1,4 +1,3 @@
-import os
 import sys
 
 from . import gyro
@@ -7,10 +6,7 @@ from . import tgyro
 from . import neo
 from . import profiles_gen
 
-with open(os.path.dirname(__file__) + '/version', 'r') as f:
-    __version__ = f.read().strip()
-
-__all__ = ['gyro', 'cgyro', 'tgyro', 'neo', 'profiles_gen', '__version__']
+__all__ = ['gyro', 'cgyro', 'tgyro', 'neo', 'profiles_gen']
 
 try:
     from gacode_ext import *
@@ -39,29 +35,27 @@ try:
     # - expro_writes
     # - expro_writev
     # - geo
-    # - vis
     # - volint
 
     def gapystr_get(s):
         try:
             n = len(s)
         except:
-            return str(s, 'utf-8')
+            return str(s,'utf-8')
 
         u = []
         for i in range(len(s)):
             if sys.version_info[0] == 2:
                 u.append(str(s[i]).strip())
             else:
-                u.append(str(s[i], 'utf-8').strip())
+                u.append(str(s[i],'utf-8').strip())
         return u
 
 
-    def gapystr_set(s, l=10, n=20):
+    def gapystr_set(s, l=10, n=200):
         return [item.ljust(l) for item in s + [''] * n][:n]
 
-
-    __all__.extend(['gapystr_get', 'gapystr_set'])
+    __all__.extend(['gapystr_get','gapystr_set'])
 
 except ImportError:
     pass
