@@ -100,7 +100,7 @@ class cgyrodata_plot(data.cgyrodata):
       ax = fig.add_subplot(121)
       ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
-      ax.set_xlabel(self.kstr)
+      ax.set_xlabel(self.kystr)
       ax.set_ylabel(self.fstr[0])
 
       y1 = self.fnorm[0,:,-1] 
@@ -115,7 +115,7 @@ class cgyrodata_plot(data.cgyrodata):
       ax = fig.add_subplot(122)
       ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
-      ax.set_xlabel(self.kstr)
+      ax.set_xlabel(self.kystr)
       ax.set_ylabel(self.fstr[1])
 
       y2 = self.fnorm[1,:,-1] 
@@ -1198,13 +1198,12 @@ class cgyrodata_plot(data.cgyrodata):
          fig = plt.figure(MYDIR,figsize=(xin['lx'],asp*xin['lx']))
  
       self.getbigfield()
-      self.getnorm(norm)
+      t = self.getnorm(norm)
 
       #-----------------------------------------------------------------
       # Note array structure
       # self.phi = np.reshape(data,(2,self.n_radial,self.n_n,nt),'F')
 
-      t  = self.t  
       nx = self.n_radial
       ny = self.n_n
 
@@ -1234,7 +1233,7 @@ class cgyrodata_plot(data.cgyrodata):
       ax.imshow(y,extent=[xl,xr,0,y0],interpolation='none',cmap='plasma')
       print('INFO: (plot_kxky_phi) min={:.2e} max={:.2e}'.format(np.min(y),np.max(y)))
 
-      fig.tight_layout()
+      fig.tight_layout(pad=0.3)
 
       return
    
@@ -1326,6 +1325,7 @@ class cgyrodata_plot(data.cgyrodata):
          ax.set_xlim(right=float(xin['kxmax']))
 
       fig.tight_layout(pad=0.3)
+      
       return
 
    def plot_kx_shift(self,xin):
@@ -1412,7 +1412,9 @@ class cgyrodata_plot(data.cgyrodata):
 
       if xin['kxmax'] != 'auto':
          ax.set_xlim(right=float(xin['kxmax']))
- 
+
+      fig.tight_layout(pad=0.3)
+      
       return
       
 
