@@ -357,7 +357,7 @@ class cgyrodata:
       #
       # NOTE: Grid data is packed, so unpack into sensible bits
       #
-      data = np.fromfile(self.dir+'out.cgyro.grids',dtype='float32',sep=' ')
+      data = np.fromfile(self.dir+'out.cgyro.grids',sep=' ')
 
       self.n_n       = int(data[0])
       self.n_species = int(data[1])
@@ -427,7 +427,7 @@ class cgyrodata:
       nshape = 7
       ns = self.n_species
       p = 0
-      data = np.fromfile(self.dir+'out.cgyro.equilibrium',dtype='float32',sep=' ')
+      data = np.fromfile(self.dir+'out.cgyro.equilibrium',sep=' ')
       self.rmin,p    = self.eget(data,p)
       self.rmaj,p    = self.eget(data,p)        
       self.q,p       = self.eget(data,p)           

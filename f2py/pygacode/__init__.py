@@ -1,5 +1,5 @@
+# Map numpy to python string
 def gapystr_get(s):
-
    try:
       n = len(s)
    except:
@@ -10,12 +10,12 @@ def gapystr_get(s):
       u.append(str(s[i],'utf-8').strip())
    return u
 
+# Map python to numpy string
 def gapystr_set(s, l=10, n=200):
    return [item.ljust(l) for item in s + [''] * n][:n]
 
 try:
    from gacode_ext import *
-
 
    __all__ = ['gapystr_get',
               'gapystr_set',
@@ -30,4 +30,5 @@ try:
    exec('from gacode_ext import *', tmp)
    __all__.extend(list(tmp.keys()))
 except:
+   # Not using pygacode
    pass   
