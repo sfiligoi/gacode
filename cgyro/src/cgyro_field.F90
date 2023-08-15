@@ -12,55 +12,6 @@
 !-----------------------------------------------------------------
 ! Velocity (configuration-distributed) field solve
 !-----------------------------------------------------------------
-subroutine cgyro_field_v
-
-  use parallel_lib
-  use timer_lib
-  use cgyro_globals
-
-  implicit none
-  
-  integer :: itor
-
-  call timer_lib_in('field')
-
-  field_loc(:,:,:) = (0.0,0.0)
-
-  ! Poisson and Ampere RHS integrals of H
-
-!$omp parallel do collapse(2) private(ic_loc,iv)
-  do itor=nt1,nt2
-   do ic=nc1,nc2
-     ic_loc = ic-nc1+1
-     do iv=1,nv
-        field_loc(:,ic,itor) = field_loc(:,ic,itor)+dvjvec_v(:,ic_loc,itor,iv)*cap_h_v(ic_loc,itor,iv)
-     enddo
-   enddo
-  enddo
-
-  call timer_lib_out('field')
-
-  call timer_lib_in('field_com')
-
-  call parallel_lib_sum_field(field_loc,field)
-
-  call timer_lib_out('field_com')
-  
-  call timer_lib_in('field')
-
-  ! Poisson LHS factors
-!$omp parallel do
-  do itor=nt1,nt2
-   if (itor == 0 .and. ae_flag == 1) then
-     call cgyro_field_ae('v')
-   else
-     field(:,:,itor) = fcoef(:,:,itor)*field(:,:,itor)
-   endif
-  enddo
-
-  call timer_lib_out('field')
-
-end subroutine cgyro_field_v
 
 ! like cgyro_field_v_notae, but with parametrized start_t
 subroutine cgyro_field_v_notae_s(start_t)
@@ -73,7 +24,7 @@ subroutine cgyro_field_v_notae_s(start_t)
   ! ------------------ 
   integer, intent(in) :: start_t
   !
-  integer :: itor
+  integer :: itor,j,k
 
   call timer_lib_in('field')
 
@@ -81,12 +32,18 @@ subroutine cgyro_field_v_notae_s(start_t)
 
   ! Poisson and Ampere RHS integrals of H
 
-!$omp parallel do collapse(2) private(ic_loc,iv)
+  ! iv = j+(k-1)*nj_loc
+  ! cap_h_v(ic_loc,itor,iv) = fsendf(j,itor,ic_loc,k)
+
+!$omp parallel do collapse(2) private(ic_loc,iv,ic,k,j)
   do itor=start_t,nt2
    do ic=nc1,nc2
      ic_loc = ic-nc1+1
-     do iv=1,nv
-        field_loc(:,ic,itor) = field_loc(:,ic,itor)+dvjvec_v(:,ic_loc,itor,iv)*cap_h_v(ic_loc,itor,iv)
+     do k=1,nproc
+      do j=1,nj_loc
+        iv = j+(k-1)*nj_loc
+        field_loc(:,ic,itor) = field_loc(:,ic,itor)+dvjvec_v(:,ic_loc,itor,iv)*fsendf(j,itor,ic_loc,k)
+      enddo
      enddo
    enddo
   enddo
@@ -148,11 +105,15 @@ subroutine cgyro_field_v_notae_s_gpu(start_t)
   ! ------------------ 
   integer, intent(in) :: start_t
   !
-  integer :: i_f,itor
+  integer :: i_f,itor,j,k
   complex :: field_loc_l 
 
   call timer_lib_in('field')
-!$acc data present(cap_h_v)
+
+  ! iv = j+(k-1)*nj_loc
+  ! cap_h_v(ic_loc,itor,iv) = fsendf(j,itor,ic_loc,k)
+
+!$acc data present(sendf)
 !$acc data present(field,field_loc)
 
 
@@ -170,16 +131,19 @@ subroutine cgyro_field_v_notae_s_gpu(start_t)
   enddo
 
 !$acc parallel loop collapse(3) gang private(ic_loc,field_loc_l) copyin(start_t) &
-!$acc&         present(dvjvec_v,cap_h_v,field_loc) &
+!$acc&         present(dvjvec_v,fsendf,field_loc) &
 !$acc&         present(nt2,nc1,nc2,n_field,nv) default(none)
   do itor=start_t,nt2
    do ic=nc1,nc2
     do i_f=1,n_field
       ic_loc = ic-nc1+1
       field_loc_l = (0.0,0.0)
-!$acc loop vector reduction(+:field_loc_l)
-      do iv=1,nv
-        field_loc_l = field_loc_l+dvjvec_v(i_f,ic_loc,itor,iv)*cap_h_v(ic_loc,itor,iv)
+!$acc loop vector collapse(2) private(iv) reduction(+:field_loc_l)
+      do k=1,nproc
+       do j=1,nj_loc
+        iv = j+(k-1)*nj_loc
+        field_loc_l = field_loc_l+dvjvec_v(i_f,ic_loc,itor,iv)*fsendf(j,itor,ic_loc,k)
+      enddo
      enddo
      field_loc(i_f,ic,itor) = field_loc_l
     enddo
