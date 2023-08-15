@@ -432,12 +432,13 @@ subroutine cgyro_calc_collision_gpu_fp32(nj_loc)
 
 !$acc parallel loop collapse(4) gang vector&
 !$acc& private(b_re,b_im,cval,ivp,iv) firstprivate(nproc,nj_loc,nv) &
-!$acc& present(cmat_fp32,cmat_stripes,cmat_e1,cap_h_v,fsendf,ie_v,is_v,ix_v)  private(k,ic,j,ic_loc,ie,is,ix)
+!$acc& present(cmat_fp32,cmat_stripes,cmat_e1,cap_h_v,fsendf,ie_v,is_v,ix_v) &
+!$acc& private(k,ic,j,ic_loc,ie,is,ix)
   do itor=nt1,nt2
    do ic=nc1,nc2
-     ic_loc = ic-nc1+1
      do k=1,nproc
         do j=1,nj_loc
+           ic_loc = ic-nc1+1
            iv = j+(k-1)*nj_loc
            b_re = 0.0
            b_im = 0.0
