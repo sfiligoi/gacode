@@ -18,6 +18,7 @@ subroutine cgyro_init_arrays
   integer :: l,ll
   integer :: iltheta_min
   complex :: thfac,carg
+  complex :: jval
   real, dimension(:,:,:), allocatable :: res_loc
   real, dimension(:,:,:), allocatable :: jloc_c
   real, dimension(:,:,:), allocatable :: res_norm
@@ -121,30 +122,34 @@ subroutine cgyro_init_arrays
 ! 
 
 #ifdef _OPENACC
-!$acc parallel loop gang independent collapse(4) private(itor,it,iltheta_min,mytor) &
+!$acc parallel loop gang vector independent collapse(6) &
+!$acc&         private(itor,it,iltheta_min,mytor,ir,itf,jval) &
 !$acc&         present(jvec_c_nl,jvec_c,ic_c) &
 !$acc&         present(n_toroidal_procs,nt_loc,nv_loc,n_jtheta,n_radial) &
 !$acc&         present(nt1,n_theta,n_field,nsplit) default(none)
 #else
-!$omp parallel do collapse(3) private(it_loc,itor,mytor,it,iltheta_min)
+!$omp parallel do collapse(4) &
+!$omp&         private(it_loc,itor,mytor,it,ir,itf,iltheta_min,jval)
 #endif
    do itm=1,n_toroidal_procs
     do itl=1,nt_loc
      do iv_loc=1,nv_loc
       do it_loc=1,n_jtheta
-        iltheta_min = 1+((itm-1)*nsplit)/nv_loc
-        it = it_loc+iltheta_min-1
-        itor = itl+(itm-1)*nt_loc
-        if (it <= n_theta) then
-          mytor = nt1+itl-1
-!$acc loop vector
-          do ir=1,n_radial
-            jvec_c_nl(1:n_field,ir,it_loc,iv_loc,itor) = jvec_c(1:n_field,ic_c(ir,it),iv_loc,mytor)
-          enddo
-        else
-          ! just padding
-          jvec_c_nl(1:n_field,1:n_radial,it_loc,iv_loc,itor) = 0.0
-        endif
+       do ir=1,n_radial
+        do itf=1,n_field
+          iltheta_min = 1+((itm-1)*nsplit)/nv_loc
+          it = it_loc+iltheta_min-1
+          itor = itl+(itm-1)*nt_loc
+          jval = (0.0,0.0)
+          if (it <= n_theta) then
+            mytor = nt1+itl-1
+            ! ic_c(ir,it) = (ir-1)*n_theta+it
+            jval = jvec_c(itf,(ir-1)*n_theta+it,iv_loc,mytor)
+          endif
+          ! else just padding
+          jvec_c_nl(itf,ir,it_loc,iv_loc,itor) = jval
+        enddo
+       enddo
       enddo
      enddo
     enddo
