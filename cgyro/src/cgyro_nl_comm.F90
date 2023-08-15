@@ -182,6 +182,7 @@ subroutine cgyro_nl_fftw_comm2_async
        endif
        ! else just padding
        gpack(itf,ir,it_loc,itor) = gval
+      enddo
      enddo
     enddo
    enddo

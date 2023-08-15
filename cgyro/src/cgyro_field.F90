@@ -24,7 +24,7 @@ subroutine cgyro_field_v_notae_s(start_t)
   ! ------------------ 
   integer, intent(in) :: start_t
   !
-  integer :: itor,j,k
+  integer :: itor,j,k,nj_loc
 
   call timer_lib_in('field')
 
@@ -34,6 +34,7 @@ subroutine cgyro_field_v_notae_s(start_t)
 
   ! iv = j+(k-1)*nj_loc
   ! cap_h_v(ic_loc,itor,iv) = fsendf(j,itor,ic_loc,k)
+  call parallel_lib_nj_loc(nj_loc)
 
 !$omp parallel do collapse(2) private(ic_loc,iv,ic,k,j)
   do itor=start_t,nt2
@@ -105,15 +106,16 @@ subroutine cgyro_field_v_notae_s_gpu(start_t)
   ! ------------------ 
   integer, intent(in) :: start_t
   !
-  integer :: i_f,itor,j,k
+  integer :: i_f,itor,j,k,nj_loc
   complex :: field_loc_l 
 
   call timer_lib_in('field')
 
   ! iv = j+(k-1)*nj_loc
   ! cap_h_v(ic_loc,itor,iv) = fsendf(j,itor,ic_loc,k)
+  call parallel_lib_nj_loc(nj_loc)
 
-!$acc data present(sendf)
+!$acc data present(fsendf)
 !$acc data present(field,field_loc)
 
 
@@ -130,8 +132,8 @@ subroutine cgyro_field_v_notae_s_gpu(start_t)
    enddo
   enddo
 
-!$acc parallel loop collapse(3) gang private(ic_loc,field_loc_l) copyin(start_t) &
-!$acc&         present(dvjvec_v,fsendf,field_loc) &
+!$acc parallel loop collapse(3) gang private(ic_loc,field_loc_l) &
+!$acc&         present(dvjvec_v,fsendf,field_loc) copyin(start_t,nproc,nj_loc) &
 !$acc&         present(nt2,nc1,nc2,n_field,nv) default(none)
   do itor=start_t,nt2
    do ic=nc1,nc2
