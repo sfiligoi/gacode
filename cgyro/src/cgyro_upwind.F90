@@ -28,11 +28,10 @@ subroutine cgyro_upwind_r64
 
   call timer_lib_in('str')
 
-#ifdef OMPGPU
-!$omp target teams distribute parallel do collapse(3) &
+#if defined(OMPGPU)
+!$omp target teams distribute parallel do simd collapse(3) &
 !$omp&         private(res_loc,iv,iv_loc) 
-#else
-#ifdef _OPENACC
+#elif defined(_OPENACC)
 !$acc parallel loop collapse(3) gang vector independent &
 !$acc&         private(res_loc,iv,iv_loc) &
 !$acc&         present(g_x,upfac1,is_v,upwind_res_loc) &
@@ -40,7 +39,6 @@ subroutine cgyro_upwind_r64
 #else
 !$omp parallel do collapse(3) &
 !$omp&         private(res_loc,iv,iv_loc) 
-#endif
 #endif
   do itor=nt1,nt2
    do is=ns1,ns2
@@ -67,17 +65,15 @@ subroutine cgyro_upwind_r64
 
   call timer_lib_in('str')
 
-#ifdef OMPGPU
-!$omp target teams distribute parallel do collapse(3) &
+#if defined(OMPGPU)
+!$omp target teams distribute parallel do simd collapse(3) &
 !$omp&         private(iv_loc,is,ix,ie,ic)
-#else
-#ifdef _OPENACC
+#elif defined(_OPENACC)
 !$acc parallel loop collapse(3) independent gang vector &
 !$acc&         present(is_v,ix_v,ie_v,xi,vel,upfac2,g_x,upwind_res) &
 !$acc&         private(iv_loc,is,ix,ie,ic) present(nt1,nt2,nv1,nv2,nc) default(none)
 #else
 !$omp parallel do collapse(2) private(iv_loc,is,ix,ie,ic)
-#endif
 #endif
   do itor=nt1,nt2
    do iv=nv1,nv2
@@ -110,11 +106,10 @@ subroutine cgyro_upwind_r32
 
   call timer_lib_in('str')
 
-#ifdef OMPGPU
-!$omp target teams distribute parallel do collapse(3) &
+#if defined(OMPGPU)
+!$omp target teams distribute parallel do simd collapse(3) &
 !$omp&         private(res_loc,iv,iv_loc) 
-#else
-#ifdef _OPENACC
+#elif defined(_OPENACC)
 !$acc parallel loop collapse(3) gang vector independent &
 !$acc&         private(res_loc,iv,iv_loc) &
 !$acc&         present(g_x,upfac1,is_v,upwind32_res_loc) &
@@ -122,7 +117,6 @@ subroutine cgyro_upwind_r32
 #else
 !$omp parallel do collapse(3) &
 !$omp&         private(res_loc,iv,iv_loc) 
-#endif
 #endif
   do itor=nt1,nt2
    do is=ns1,ns2
@@ -150,18 +144,16 @@ subroutine cgyro_upwind_r32
 
   call timer_lib_in('str')
 
-#ifdef OMPGPU
-!$omp target teams distribute parallel do collapse(3) &
+#if defined(OMPGPU)
+!$omp target teams distribute parallel do simd collapse(3) &
 !$omp&         private(iv_loc,is,ix,ie,ic)
-#else
-#ifdef _OPENACC
+#elif defined(_OPENACC)
 !$acc parallel loop collapse(3) independent gang vector &
 !$acc&         present(is_v,ix_v,ie_v,xi,vel,upfac2,g_x,upwind32_res) &
 !$acc&         private(iv_loc,is,ix,ie,ic) &
 !$acc&         present(nt1,nt2,nv1,nv2,nc) default(none)
 #else
 !$omp parallel do collapse(2) private(iv_loc,is,ix,ie,ic)
-#endif
 #endif
   do itor=nt1,nt2
    do iv=nv1,nv2
