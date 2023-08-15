@@ -152,37 +152,42 @@ subroutine cgyro_nl_fftw_comm2_async
 
   implicit none
 
-  integer :: ir,it,it_loc,itm,itl
+  integer :: ir,it,it_loc,itm,itl,itf
   integer :: itor,mytor
   integer :: iltheta_min
+  complex :: gval
 
   call timer_lib_in('nl_mem')
 
 #ifdef _OPENACC
-!$acc parallel loop gang collapse(3) independent private(itor,it,iltheta_min,mytor) &
-!$acc&         present(ic_c,field,gpack) &
+!$acc parallel loop gang vector collapse(5) independent &
+!$acc&         private(itor,it,iltheta_min,mytor,gval) &
+!$acc&         present(field,gpack) &
 !$acc&         present(n_toroidal_procs,nt_loc,n_jtheta,nv_loc,nt1) &
 !$acc&         present(n_theta,n_radial,n_field,nsplit) &
 !$acc&         default(none)
 #else
-!$omp parallel do collapse(2) private(it_loc,itor,mytor,it,iltheta_min)
+!$omp parallel do collapse(3) &
+!$omp&         private(it_loc,itor,mytor,it,ir,iltheta_min,gval)
 #endif
   do itm=1,n_toroidal_procs
    do itl=1,nt_loc
     do it_loc=1,n_jtheta
-     iltheta_min = 1+((itm-1)*nsplit)/nv_loc
-     it = it_loc+iltheta_min-1
-     itor = itl+(itm-1)*nt_loc
-     if (it > n_theta) then
-        ! just padding
-        gpack(1:n_field,1:n_radial,it_loc,itor) = (0.0,0.0)
-     else
-        mytor = nt1+itl-1
-!$acc loop vector
-        do ir=1,n_radial
-           gpack(1:n_field,ir,it_loc,itor) = field(1:n_field,ic_c(ir,it),mytor)
-        enddo
-     endif
+     do ir=1,n_radial
+      do itf=1,n_field
+       iltheta_min = 1+((itm-1)*nsplit)/nv_loc
+       it = it_loc+iltheta_min-1
+       itor = itl+(itm-1)*nt_loc
+       gval = (0.0,0.0)
+       if (it <= n_theta) then
+         mytor = nt1+itl-1
+         ! ic_c(ir,it) = (ir-1)*n_theta+it
+         gval = field(itf,(ir-1)*n_theta+it,mytor)
+       endif
+       ! else just padding
+       gpack(itf,ir,it_loc,itor) = gval
+      enddo
+     enddo
     enddo
    enddo
   enddo

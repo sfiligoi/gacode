@@ -55,14 +55,6 @@ subroutine cgyro_calc_collision_cpu_fp64(nj_loc)
        enddo
     enddo
 
-    if (collision_field_model == 1) then
-       if (.not.(itor == 0 .and. ae_flag == 1)) then
-          ! cap_h_v not re-used else
-          do iv=1,nv
-             cap_h_v(ic_loc,itor,iv) = bvec(iv)
-          enddo
-       endif
-    endif
   enddo
  enddo
 
@@ -130,14 +122,6 @@ subroutine cgyro_calc_collision_cpu_fp32(nj_loc)
        enddo
     enddo
 
-    if (collision_field_model == 1) then
-       if (.not.(itor == 0 .and. ae_flag == 1)) then
-          ! cap_h_v not re-used else
-          do iv=1,nv
-             cap_h_v(ic_loc,itor,iv) = bvec(iv)
-          enddo
-     endif
-    endif
   enddo
  enddo
 end subroutine cgyro_calc_collision_cpu_fp32
@@ -332,14 +316,14 @@ subroutine cgyro_calc_collision_gpu_fp64(nj_loc)
   real :: cval
   ! --------------------------------------------------
 
-!$acc parallel loop collapse(2) gang firstprivate(nproc,nj_loc,nv) &
+!$acc parallel loop collapse(4) gang vector &
+!$acc& private(b_re,b_im,cval,ivp,iv) firstprivate(nproc,nj_loc,nv) &
 !$acc& present(cmat,cap_h_v,fsendf)  private(k,ic,j,ic_loc)
   do itor=nt1,nt2
-   do ic=nc1,nc2
-     ic_loc = ic-nc1+1
-!$acc loop vector collapse(2) private(b_re,b_im,cval,ivp,iv)
-     do k=1,nproc
+    do ic=nc1,nc2
+      do k=1,nproc
         do j=1,nj_loc
+           ic_loc = ic-nc1+1
            iv = j+(k-1)*nj_loc
            b_re = 0.0
            b_im = 0.0
@@ -352,21 +336,8 @@ subroutine cgyro_calc_collision_gpu_fp64(nj_loc)
 
            fsendf(j,itor,ic_loc,k) = cmplx(b_re,b_im)
         enddo
-     enddo
-
-    if (collision_field_model == 1) then
-      if (.not.(itor == 0 .and. ae_flag == 1)) then
-        ! cap_h_v not re-used else
-!$acc loop collapse(2) vector private(iv)
-        do k=1,nproc
-           do j=1,nj_loc
-              iv = j+(k-1)*nj_loc
-              cap_h_v(ic_loc,itor,iv) = fsendf(j,itor,ic_loc,k)
-           enddo
-        enddo
-       endif
-     endif
-   enddo
+      enddo
+    enddo
   enddo
 end subroutine cgyro_calc_collision_gpu_fp64
 
@@ -410,10 +381,10 @@ subroutine cgyro_calc_collision_gpu_b2_fp64(nj_loc)
     ! ensure there is not another even/odd already runnning
 !$acc wait(bb)
     ! now launch myself
-!$acc parallel loop gang firstprivate(nproc,nj_loc,nv) &
+!$acc parallel loop gang vector collapse(3) &
+!$acc& private(b_re,b_im,cval,ivp,iv) firstprivate(nproc,nj_loc,nv) &
 !$acc& copyin(cmat(:,:,bs:be,itor)) present(cap_h_v,fsendf)  private(k,j,ic_loc) async(bb)
     do ic_loc=bs,be
-!$acc loop vector collapse(2) private(b_re,b_im,cval,ivp,iv)
       do k=1,nproc
         do j=1,nj_loc
            iv = j+(k-1)*nj_loc
@@ -430,18 +401,6 @@ subroutine cgyro_calc_collision_gpu_b2_fp64(nj_loc)
         enddo
       enddo
 
-      if (collision_field_model == 1) then
-       if (.not.(itor == 0 .and. ae_flag == 1)) then
-        ! cap_h_v not re-used else
-!$acc loop collapse(2) vector private(iv)
-        do k=1,nproc
-           do j=1,nj_loc
-              iv = j+(k-1)*nj_loc
-              cap_h_v(ic_loc,itor,iv) = fsendf(j,itor,ic_loc,k)
-           enddo
-        enddo
-       endif
-      endif
     enddo ! ic
 
    enddo ! b
@@ -471,14 +430,15 @@ subroutine cgyro_calc_collision_gpu_fp32(nj_loc)
   real :: cval
   ! --------------------------------------------------
 
-!$acc parallel loop collapse(2) gang firstprivate(nproc,nj_loc,nv) &
-!$acc& present(cmat_fp32,cmat_stripes,cmat_e1,cap_h_v,fsendf,ie_v,is_v,ix_v)  private(k,ic,j,ic_loc,ie,is,ix)
+!$acc parallel loop collapse(4) gang vector&
+!$acc& private(b_re,b_im,cval,ivp,iv) firstprivate(nproc,nj_loc,nv) &
+!$acc& present(cmat_fp32,cmat_stripes,cmat_e1,cap_h_v,fsendf,ie_v,is_v,ix_v) &
+!$acc& private(k,ic,j,ic_loc,ie,is,ix)
   do itor=nt1,nt2
    do ic=nc1,nc2
-     ic_loc = ic-nc1+1
-!$acc loop vector collapse(2) private(b_re,b_im,cval,ivp,iv)
      do k=1,nproc
         do j=1,nj_loc
+           ic_loc = ic-nc1+1
            iv = j+(k-1)*nj_loc
            b_re = 0.0
            b_im = 0.0
@@ -508,18 +468,6 @@ subroutine cgyro_calc_collision_gpu_fp32(nj_loc)
         enddo
      enddo
 
-    if (collision_field_model == 1) then
-      if (.not.(itor == 0 .and. ae_flag == 1)) then
-        ! cap_h_v not re-used else
-!$acc loop collapse(2) vector private(iv)
-        do k=1,nproc
-           do j=1,nj_loc
-              iv = j+(k-1)*nj_loc
-              cap_h_v(ic_loc,itor,iv) = fsendf(j,itor,ic_loc,k)
-           enddo
-        enddo
-       endif
-     endif
    enddo
   enddo
 end subroutine cgyro_calc_collision_gpu_fp32
@@ -566,12 +514,12 @@ subroutine cgyro_calc_collision_gpu_b2_fp32(nj_loc)
     ! ensure there is not another even/odd already runnning
 !$acc wait(bb)
     ! now launch myself
-!$acc parallel loop gang firstprivate(nproc,nj_loc,nv) &
+!$acc parallel loop gang vector firstprivate(nproc,nj_loc,nv) &
+!$acc& collapse(3) private(b_re,b_im,cval,ivp,iv) &
 !$acc& present(cap_h_v,fsendf,ie_v,is_v,ix_v)  private(k,ic,j,ic_loc,ie,is,ix) &
 !$acc& copyin(cmat_fp32(:,:,bs:be,itor),cmat_stripes(:,:,:,:,bs:be,itor)) &
 !$acc& copyin(cmat_e1(:,:,:,:,bs:be,itor)) async(bb)
     do ic_loc=bs,be
-!$acc loop vector collapse(2) private(b_re,b_im,cval,ivp,iv)
        do k=1,nproc
          do j=1,nj_loc
            iv = j+(k-1)*nj_loc
@@ -603,18 +551,6 @@ subroutine cgyro_calc_collision_gpu_b2_fp32(nj_loc)
          enddo
        enddo
 
-      if (collision_field_model == 1) then
-       if (.not.(itor == 0 .and. ae_flag == 1)) then
-         ! cap_h_v not re-used else
-!$acc loop collapse(2) vector private(iv)
-         do k=1,nproc
-           do j=1,nj_loc
-              iv = j+(k-1)*nj_loc
-              cap_h_v(ic_loc,itor,iv) = fsendf(j,itor,ic_loc,k)
-           enddo
-         enddo
-       endif
-      endif
     enddo ! ic
 
    enddo ! b
@@ -809,10 +745,6 @@ subroutine cgyro_step_collision_gpu(use_simple)
 
       call timer_lib_in('coll_mem')
 !$acc update device(fsendf)
-      if (collision_field_model == 1) then
-         ! harmless if (my_toroidal == 0 .and. ae_flag == 1))
-!$acc update device (cap_h_v)
-      endif
       call timer_lib_out('coll_mem')
 
     endif !bigmem
