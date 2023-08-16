@@ -21,7 +21,9 @@ subroutine cgyro_nl_fftw_mul(sz,uvm,uxm,vym,uym,vxm,inv_nxny)
   integer :: i
 
 #if defined(OMPGPU)
-!$omp target teams distribute parallel do simd
+!$omp target teams distribute parallel do simd &
+!$omp&  map(to:uxm(1:sz),vym(1:sz),uym(1:sz),vxm(1:sz) &
+!$omp&  map(from:uvm(1:sz)
 #else
 !$acc parallel loop independent gang vector &
 !$acc&         present(uvm,uxm,vym,uym,vxm) private(i)
