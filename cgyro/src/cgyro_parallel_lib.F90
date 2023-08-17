@@ -47,6 +47,76 @@ module parallel_lib
 
 contains
 
+#ifdef DISABLE_GPUDIRECT_MPI
+
+#if defined(OMPGPU)
+
+#define cpl_use_device(fin,fout) \
+!$omp target update from(fin)
+#define cpl_release_device(fin,fout) \
+!$omp target update to(fout)
+  ! used for async, so no copy at this point
+#define cpl_unbind_device(fin,fout)
+
+#define cpl_finalize_device(fin,fout) \
+!$omp target update to(fout)
+
+#elif defined(_OPENACC)
+
+#define cpl_use_device(fin,fout) \
+!$acc update host(fin)
+#define cpl_release_device(fin,fout) \
+!$acc update device(fout)
+  ! used for async, so no copy at this point
+#define cpl_unbind_device(fin,fout)
+
+#define cpl_finalize_device(fin,fout) \
+!$acc update device(fout)
+
+#else
+  ! no devices, no-ops only
+#define cpl_use_device(fin,fout) 
+#define cpl_release_device(fin,fout) 
+#define cpl_unbind_device(fin,fout)
+#define cpl_finalize_device(fin,fout) 
+
+#endif
+
+#else
+
+#if defined(OMPGPU)
+
+#define cpl_use_device(fin,fout) \
+!$omp target data use_device_ptr(fin,fout)
+#define cpl_release_device(fin,fout) \
+!$omp end target data
+#define cpl_unbind_device(fin,fout) \
+!$omp end target data
+  ! no-op, as there was no copying involved
+#define cpl_finalize_device(fin,fout)
+
+#elif defined(_OPENACC)
+
+#define cpl_use_device(fin,fout) \
+!$acc host_data use_device(fin,fout)
+#define cpl_release_device(fin,fout) \
+!$acc end host_data
+#define cpl_unbind_device(fin,fout) \
+!$acc end host_data
+  ! no-op, as there was no copying involved
+#define cpl_finalize_device(fin,fout)
+
+#else
+  ! no devices, no-ops only
+#define cpl_use_device(fin,fout) 
+#define cpl_release_device(fin,fout) 
+#define cpl_unbind_device(fin,fout)
+#define cpl_finalize_device(fin,fout) 
+
+#endif
+
+#endif
+
   !=========================================================
   !  parallel_lib_f -> f(ni_loc,nj) -> g(nj_loc,ni) 
   !  parallel_lib_r -> g(nj_loc,ni) -> f(ni_loc,nj)
@@ -91,8 +161,13 @@ contains
     allocate(fsendr(ni_loc,nk1:nk2,nj_loc,nproc))
     if (.not. allocated(fsendr_real)) allocate(fsendr_real(ni_loc,nk1:nk2,nj_loc,nproc))
 
+#if defined(OMPGPU)
+!$omp target enter data map(alloc:fsendf,fsendr)
+!$omp target enter data map(to:nproc,nk1,nk2,ni_loc)
+#elif defined(_OPENACC)
 !$acc enter data create(fsendf,fsendr)
 !$acc enter data copyin(nproc,nk1,nk2,ni_loc)
+#endif
 
   end subroutine parallel_lib_init
 
@@ -129,11 +204,7 @@ contains
     complex, intent(inout), dimension(:,:,:) :: ft
     integer :: ierr
 
-#ifdef DISABLE_GPUDIRECT_MPI
-!$acc update host(fsendf)
-#else
-!$acc host_data use_device(fsendf,ft)
-#endif
+    cpl_use_device(fsendf,ft)
 
     call MPI_ALLTOALL(fsendf, &
          nsend, &
@@ -144,11 +215,7 @@ contains
          lib_comm, &
          ierr)
 
-#ifdef DISABLE_GPUDIRECT_MPI
-!$acc update device(ft)
-#else
-!$acc end host_data
-#endif
+    cpl_release_device(fsendf,ft)
 
   end subroutine parallel_lib_f_i_do_gpu
 
@@ -186,11 +253,7 @@ contains
 
     integer :: ierr
 
-#ifdef DISABLE_GPUDIRECT_MPI
-!$acc update host(fsendr)
-#else
-!$acc host_data use_device(fsendr,f)
-#endif
+    cpl_use_device(fsendr,f)
 
     call MPI_ALLTOALL(fsendr, &
          nsend, &
@@ -201,11 +264,7 @@ contains
          lib_comm, &
          ierr)
 
-#ifdef DISABLE_GPUDIRECT_MPI
-!$acc update device(f)
-#else
-!$acc end host_data
-#endif
+    cpl_release_device(fsendr,f)
 
   end subroutine parallel_lib_r_do_gpu
 
@@ -289,9 +348,14 @@ contains
 
     j1 = 1+iproc*nj_loc
     j2 = (1+iproc)*nj_loc
+#if defined(OMPGPU)
+!$omp target teams distribute parallel do simd collapse(4) &
+!$omp&  private(j_loc)
+#else
 !$acc parallel loop collapse(4) gang vector independent private(j_loc) &
 !$acc&         present(fsendr,fin) present(nproc,nk1,nk2,ni_loc) &
 !$acc&         copyin(j1,j2) default(none)
+#endif
     do k=1,nproc
      do itor=nk1,nk2
        do j=j1,j2
@@ -399,13 +463,9 @@ contains
     complex, intent(inout), dimension(:,:,:) :: field
     integer :: ierr
 
-#ifdef DISABLE_GPUDIRECT_MPI
-!$acc update host(field_loc(:,:,:))
-#else
-!$acc host_data use_device(field_loc,field)
-#endif
+    cpl_use_device(field_loc,field)
 
-     call MPI_ALLREDUCE(field_loc(:,:,:),&
+    call MPI_ALLREDUCE(field_loc(:,:,:),&
           field(:,:,:),&
           size(field(:,:,:)),&
           MPI_DOUBLE_COMPLEX,&
@@ -413,11 +473,7 @@ contains
           lib_comm,&
           ierr)
 
-#ifdef DISABLE_GPUDIRECT_MPI
-!$acc update device(field(:,:,:))
-#else
-!$acc end host_data
-#endif
+    cpl_release_device(field_loc,field)
 
   end subroutine parallel_lib_sum_field_gpu
 
@@ -460,13 +516,9 @@ contains
     complex, intent(inout), dimension(:,:,:) :: upwind
     integer :: ierr
 
-#ifdef DISABLE_GPUDIRECT_MPI
-!$acc update host(upwind_loc(:,:,:))
-#else
-!$acc host_data use_device(upwind_loc,upwind)
-#endif
+    cpl_use_device(upwind_loc,upwind)
 
-     call MPI_ALLREDUCE(upwind_loc(:,:,:),&
+    call MPI_ALLREDUCE(upwind_loc(:,:,:),&
           upwind(:,:,:),&
           size(upwind(:,:,:)),&
           MPI_DOUBLE_COMPLEX,&
@@ -474,11 +526,7 @@ contains
           clib_comm,&
           ierr)
 
-#ifdef DISABLE_GPUDIRECT_MPI
-!$acc update device(upwind(:,:,:))
-#else
-!$acc end host_data
-#endif
+    cpl_release_device(upwind_loc,upwind)
 
   end subroutine parallel_clib_sum_upwind
 
@@ -494,13 +542,9 @@ contains
     complex(KIND=REAL32), intent(inout), dimension(:,:,:) :: upwind
     integer :: ierr
 
-#ifdef DISABLE_GPUDIRECT_MPI
-!$acc update host(upwind_loc(:,:,:))
-#else
-!$acc host_data use_device(upwind_loc,upwind)
-#endif
+    cpl_use_device(upwind_loc,upwind)
 
-     call MPI_ALLREDUCE(upwind_loc(:,:,:),&
+    call MPI_ALLREDUCE(upwind_loc(:,:,:),&
           upwind(:,:,:),&
           size(upwind(:,:,:)),&
           MPI_COMPLEX,&
@@ -508,11 +552,7 @@ contains
           clib_comm,&
           ierr)
 
-#ifdef DISABLE_GPUDIRECT_MPI
-!$acc update device(upwind(:,:,:))
-#else
-!$acc end host_data
-#endif
+    cpl_release_device(upwind_loc,upwind)
 
   end subroutine parallel_clib_sum_upwind32
 
@@ -595,11 +635,7 @@ contains
     integer :: ierr
     !-------------------------------------------------------
 
-#ifdef _OPENACC
-!$acc data present(x,xt)
-
-!$acc host_data use_device(x,xt)
-#endif
+    cpl_use_device(x,xt)
 
     call MPI_ALLTOALL(x, &
          nkeep*nk_loc*nsplit, &
@@ -610,11 +646,8 @@ contains
          slib_comm, &
          ierr)
 
-#ifdef _OPENACC
-!$acc end host_data
+    cpl_release_device(x,xt)
 
-!$acc end data
-#endif
   end subroutine parallel_slib_f_nc
 
   subroutine parallel_slib_f_nc_async(x,xt,req)
@@ -634,15 +667,7 @@ contains
 
 #else
 
-#ifdef _OPENACC
-!$acc data present(x,xt)
-
-#ifdef DISABLE_GPUDIRECT_MPI
-!$acc update host(x)
-#else
-!$acc host_data use_device(x,xt)
-#endif
-#endif
+    cpl_use_device(x,xt)
 
    call MPI_IALLTOALL(x, &
          nkeep*nk_loc*nsplit, &
@@ -654,15 +679,7 @@ contains
          req, &
          ierr)
 
-#ifdef _OPENACC
-#ifdef DISABLE_GPUDIRECT_MPI
-   !do nothing yet, async
-#else
-!$acc end host_data
-#endif
-
-!$acc end data
-#endif
+    cpl_unbind_device(x,xt)
 
 #endif
 
@@ -684,22 +701,11 @@ contains
 
 #ifndef NO_ASYNC_MPI
 
-
-#ifdef _OPENACC
-!$acc data present(xt)
-#endif
-
     call MPI_WAIT(req, &
          istat, &
          ierr)
 
-#ifdef _OPENACC
-#ifdef DISABLE_GPUDIRECT_MPI
-!$acc update device(xt)
-#endif
-
-!$acc end data
-#endif
+    cpl_finalize_device(x,xt)
 
 #endif
    !else, noop
@@ -719,14 +725,7 @@ contains
     integer :: ierr
     !-------------------------------------------------------
 
-#ifdef _OPENACC
-!$acc data present(xt,x)
-#ifdef DISABLE_GPUDIRECT_MPI
-!$acc update host(xt)
-#else
-!$acc host_data use_device(xt,x)
-#endif
-#endif
+    cpl_use_device(xt,x)
 
     call MPI_ALLTOALL(xt, &
          nkeep*nk_loc*nsplit, &
@@ -737,14 +736,7 @@ contains
          slib_comm, &
          ierr)
 
-#ifdef _OPENACC
-#ifdef DISABLE_GPUDIRECT_MPI
-!$acc update device(x)
-#else
-!$acc end host_data
-#endif
-!$acc end data
-#endif
+    cpl_release_device(xt,x)
 
   end subroutine parallel_slib_r_nc
 
@@ -765,10 +757,7 @@ contains
     integer :: ierr
     !-------------------------------------------------------
 
-#ifdef _OPENACC
-!$acc data present(xt,x)
-!$acc host_data use_device(xt,x)
-#endif
+    cpl_use_device(x,xt)
 
     call MPI_ALLTOALL(x, &
          nels1*nels2*nels3*nk_loc, &
@@ -779,10 +768,7 @@ contains
          slib_comm, &
          ierr)
 
-#ifdef _OPENACC
-!$acc end host_data
-!$acc end data
-#endif
+    cpl_release_device(x,xt)
 
   end subroutine parallel_slib_f_fd
 
@@ -803,10 +789,7 @@ contains
     call parallel_slib_f_fd(nels1,nels2,nels3,x,xt)
 #else
 
-#ifdef _OPENACC
-!$acc data present(xt,x)
-!$acc host_data use_device(xt,x)
-#endif
+    cpl_use_device(x,xt)
 
    call MPI_IALLTOALL(x, &
          nels1*nels2*nels3*nk_loc, &
@@ -818,10 +801,7 @@ contains
          req, &
          ierr)
 
-#ifdef _OPENACC
-!$acc end host_data
-!$acc end data
-#endif
+    cpl_unbind_device(x,xt)
 
 #endif
 
@@ -844,17 +824,11 @@ contains
 
 #ifndef NO_ASYNC_MPI
 
-#ifdef _OPENACC
-!$acc data present(x,xt)
-#endif
-
     call MPI_WAIT(req, &
          istat, &
          ierr)
 
-#ifdef _OPENACC
-!$acc end data
-#endif
+    cpl_finalize_device(x,xt)
 
 #endif
   ! else noop
@@ -878,8 +852,22 @@ contains
     integer :: ierr
     !-------------------------------------------------------
 
-#ifdef _OPENACC
+#ifdef DISABLE_GPUDIRECT_MPI
+
+#if defined(OMPGPU)
+!$omp target update from(x(1:nels))
+#elif defined(_OPENACC)
+!$acc update host(x(1:nels))
+#endif
+
+#else
+
+#if defined(OMPGPU)
+!$omp target data use_device_ptr(x)
+#elif defined(_OPENACC)
 !$acc host_data use_device(x)
+#endif
+
 #endif
 
     call MPI_ALLTOALL(MPI_IN_PLACE, &
@@ -891,8 +879,22 @@ contains
          slib_comm, &
          ierr)
 
-#ifdef _OPENACC
+#ifdef DISABLE_GPUDIRECT_MPI
+
+#if defined(OMPGPU)
+!$omp target update to(x(1:nels))
+#elif defined(_OPENACC)
+!$acc update device(x(1:nels))
+#endif
+
+#else
+
+#if defined(OMPGPU)
+!$omp end target data
+#elif defined(_OPENACC)
 !$acc end host_data
+#endif
+
 #endif
 
   end subroutine parallel_slib_distribute_real
@@ -911,12 +913,20 @@ contains
     implicit none
     
     if(allocated(fsendf)) then
+#if defined(OMPGPU)
+!$omp target exit data map(release:fsendf)
+#elif defined(_OPENACC)
 !$acc exit data delete(fsendf)
+#endif
        deallocate(fsendf)
     endif
 
     if(allocated(fsendr)) then
+#if defined(OMPGPU)
+!$omp target exit data map(release:fsendr)
+#elif defined(_OPENACC)
 !$acc exit data delete(fsendr)
+#endif
        deallocate(fsendr)
     endif
 
