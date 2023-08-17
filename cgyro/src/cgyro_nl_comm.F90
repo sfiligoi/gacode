@@ -55,7 +55,7 @@ subroutine cgyro_nl_fftw_comm1_async
    enddo
   enddo
 
-  if ( (nv_loc*n_theta) < (nsplit*n_toroidal_procs) )
+  if ( (nv_loc*n_theta) < (nsplit*n_toroidal_procs) ) then
 #if defined(OMPGPU)
 !$omp target teams distribute parallel do simd
 #elif defined(_OPENACC)
