@@ -54,7 +54,9 @@ subroutine cgyro_rhs(ij)
 
   call timer_lib_in('str_mem')
 
+#if (!defined(OMPGPU)) && defined(_OPENACC)
 !$acc data present(h_x,g_x,rhs,field)
+#endif
 
   call timer_lib_out('str_mem')
 
@@ -63,11 +65,17 @@ subroutine cgyro_rhs(ij)
   if (n_field > 1) then
      call timer_lib_in('str')
 
+#if defined(OMPGPU)
+  ! no async for OMPGPU for now
+!$omp target teams distribute parallel do simd collapse(3) &
+!$omp&  private(iv_loc,is)
+#elif defined(_OPENACC)
 !$acc parallel loop  collapse(3) independent gang vector &
 !$acc&         private(iv_loc,is) &
 !$acc&         present(is_v,z,temp,jvec_c) &
 !$acc&         present(nt1,nt2,nv1,nv2,nc) &
 !$acc&         default(none) async(1)
+#endif
      do itor=nt1,nt2
       do iv=nv1,nv2
         do ic=1,nc
@@ -80,18 +88,26 @@ subroutine cgyro_rhs(ij)
       enddo
      enddo
 
+#if (!defined(OMPGPU)) && defined(_OPENACC)
      call cgyro_rhs_comm_test(1)
 !$acc wait(1)
+#endif
      call cgyro_rhs_comm_test(1)
 
      call timer_lib_out('str')
   else
      call timer_lib_in('str_mem')
 
+#if defined(OMPGPU)
+  ! no async for OMPGPU for now
+!$omp target teams distribute parallel do simd collapse(3) &
+!$omp&  private(iv_loc)
+#elif defined(_OPENACC)
 !$acc parallel loop  collapse(3) gang vector &
 !$acc&         independent private(iv_loc) &
 !$acc&         present(nt1,nt2,nv1,nv2,nc)  &
 !$acc&         default(none) async(1)
+#endif
      do itor=nt1,nt2
       do iv=nv1,nv2
         do ic=1,nc
@@ -101,8 +117,10 @@ subroutine cgyro_rhs(ij)
       enddo
      enddo
 
+#if (!defined(OMPGPU)) && defined(_OPENACC)
      call cgyro_rhs_comm_test(1)
 !$acc wait(1)
+#endif
      call cgyro_rhs_comm_test(1)
 
      call timer_lib_out('str_mem')
@@ -113,6 +131,7 @@ subroutine cgyro_rhs(ij)
   call cgyro_rhs_comm_test(1)
   call cgyro_rhs_comm_async(2)
 
+#if (!defined(OMPGPU)) && defined(_OPENACC)
   call timer_lib_in('str_mem')
 
 !$acc data  &
@@ -124,10 +143,18 @@ subroutine cgyro_rhs(ij)
 !$acc& present(dtheta,dtheta_up,icd_c)
 
   call timer_lib_out('str_mem')
+#endif
   call timer_lib_in('str')
 
+#if defined(OMPGPU)
+  ! no async for OMPGPU for now
+!$omp target teams distribute parallel do simd collapse(3) &
+!$omp&  private(iv,ic,iv_loc,is,rval,rval2,rhs_stream,id,jc,rhs_el) &
+!$omp&  map(to:cap_h_c)
+#elif defined(_OPENACC)
 !$acc  parallel loop gang vector collapse(3) & 
 !$acc& private(iv,ic,iv_loc,is,rval,rval2,rhs_stream,id,jc,rhs_el) async(1)
+#endif
   do itor=nt1,nt2
    do iv=nv1,nv2
      do ic=1,nc
@@ -156,8 +183,10 @@ subroutine cgyro_rhs(ij)
    enddo
   enddo
 
+#if (!defined(OMPGPU)) && defined(_OPENACC)
   call cgyro_rhs_comm_test(1)
 !$acc wait(1)
+#endif
   call cgyro_rhs_comm_test(1)
   call cgyro_rhs_comm_test(2)
 
@@ -177,6 +206,7 @@ subroutine cgyro_rhs(ij)
      call cgyro_nl_fftw(ij)
   endif
 
+#if (!defined(OMPGPU)) && defined(_OPENACC)
  call timer_lib_in('str_mem')
 
 !$acc end data    
@@ -185,5 +215,6 @@ subroutine cgyro_rhs(ij)
 !$acc end data 
  
   call timer_lib_out('str_mem')
+#endif
 
 end subroutine cgyro_rhs
