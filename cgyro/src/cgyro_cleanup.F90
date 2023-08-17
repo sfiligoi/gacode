@@ -16,7 +16,7 @@ subroutine cgyro_cleanup
 #elif defined(_OPENACC)
 
 #define ccl_del_device(x) \
-     ccl_del_device(x)
+!$acc exit data delete(x)
 
 #else
 
