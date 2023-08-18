@@ -736,7 +736,12 @@ subroutine cgyro_init_collision
 
 
   if (collision_precision_mode /= 0) then
+#if defined(OMPGPU)
+     ! no async for OMPGPU for now
+!$omp target enter data map(in:cmat_fp32,cmat_stripes,cmat_e1) if (gpu_bigmem_flag == 1)
+#elif defined(_OPENACC)
 !$acc enter data copyin(cmat_fp32,cmat_stripes,cmat_e1) async if (gpu_bigmem_flag == 1)
+#endif
      call MPI_ALLREDUCE(cmap_fp32_error_abs_cnt_loc,&
           cmap_fp32_error_abs_cnt,&
           12,&
@@ -801,9 +806,15 @@ subroutine cgyro_init_collision
         !            "Abs cmat plain fp32 error avg: ", 0.01*cmap_fp32_error_sum(2)/amat_sum
         !call cgyro_info(msg)
      endif
+#if (!defined(OMPGPU)) && defined(_OPENACC)
 !$acc wait
+#endif
   else
+#if defined(OMPGPU)
+!$omp target enter data map(in:cmat) if (gpu_bigmem_flag == 1)
+#elif defined(_OPENACC)
 !$acc enter data copyin(cmat) if (gpu_bigmem_flag == 1)
+#endif
   endif
 
   deallocate(i_piv)

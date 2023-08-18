@@ -105,7 +105,11 @@ subroutine cgyro_init_arrays
   enddo
  
   deallocate(jloc_c)
+#if defined(OMPGPU)
+!$omp target enter data map(in:jvec_c)
+#elif defined(_OPENACC)
 !$acc enter data copyin(jvec_c)
+#endif
 
   do i_field=1,n_field
      call parallel_lib_rtrans_real(jvec_c(i_field,:,:,:),jvec_v(i_field,:,:,:))
@@ -121,7 +125,10 @@ subroutine cgyro_init_arrays
 !  (n_field,n_radial,n_jtheta,nv_loc,nt_loc,n_toroidal_procs)
 ! 
 
-#ifdef _OPENACC
+#if defined(OMPGPU)
+!$omp target teams distribute parallel do simd collapse(6) &
+!$omp&   private(itor,it,iltheta_min,mytor,ir,itf,jval)
+#elif defined(_OPENACC)
 !$acc parallel loop gang vector independent collapse(6) &
 !$acc&         private(itor,it,iltheta_min,mytor,ir,itf,jval) &
 !$acc&         present(jvec_c_nl,jvec_c,ic_c) &
@@ -223,7 +230,11 @@ subroutine cgyro_init_arrays
   deallocate(res_norm)
   deallocate(res_loc)
   
+#if defined(OMPGPU)
+!$omp target enter data map(in:upfac1,upfac2)
+#elif defined(_OPENACC)
 !$acc enter data copyin(upfac1,upfac2)
+#endif
 
   !------------------------------------------------------------------------------
 
@@ -370,7 +381,11 @@ subroutine cgyro_init_arrays
      enddo
    enddo
   enddo
+#if defined(OMPGPU)
+!$omp target enter data map(in:dtheta,dtheta_up,icd_c,c_wave)
+#elif defined(_OPENACC)
 !$acc enter data copyin(dtheta,dtheta_up,icd_c,c_wave)
+#endif
 
   ! Streaming coefficients (for speed optimization)
 
@@ -442,7 +457,11 @@ subroutine cgyro_init_arrays
      enddo
    enddo
   enddo
+#if defined(OMPGPU)
+!$omp target enter data map(in:omega_cap_h,omega_h,omega_s,omega_ss)
+#elif defined(_OPENACC)
 !$acc enter data copyin(omega_cap_h,omega_h,omega_s,omega_ss)
+#endif
   !-------------------------------------------------------------------------
 
 end subroutine cgyro_init_arrays
