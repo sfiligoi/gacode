@@ -447,7 +447,7 @@ subroutine cgyro_field_c_gpu
   if (nt1 == 0 .and. ae_flag == 1) then
     ! Note: Called rarely, use the CPu version
 #if defined(OMPGPU)
-!$omp target update from (field)
+!$omp target update from(field)
 #elif defined(_OPENACC)
 !$acc update host(field)
 #endif
