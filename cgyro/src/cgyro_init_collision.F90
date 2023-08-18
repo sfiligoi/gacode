@@ -738,7 +738,7 @@ subroutine cgyro_init_collision
   if (collision_precision_mode /= 0) then
 #if defined(OMPGPU)
      ! no async for OMPGPU for now
-!$omp target enter data map(in:cmat_fp32,cmat_stripes,cmat_e1) if (gpu_bigmem_flag == 1)
+!$omp target enter data map(to:cmat_fp32,cmat_stripes,cmat_e1) if (gpu_bigmem_flag == 1)
 #elif defined(_OPENACC)
 !$acc enter data copyin(cmat_fp32,cmat_stripes,cmat_e1) async if (gpu_bigmem_flag == 1)
 #endif
@@ -811,7 +811,7 @@ subroutine cgyro_init_collision
 #endif
   else
 #if defined(OMPGPU)
-!$omp target enter data map(in:cmat) if (gpu_bigmem_flag == 1)
+!$omp target enter data map(to:cmat) if (gpu_bigmem_flag == 1)
 #elif defined(_OPENACC)
 !$acc enter data copyin(cmat) if (gpu_bigmem_flag == 1)
 #endif

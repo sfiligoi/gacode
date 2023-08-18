@@ -405,7 +405,7 @@ subroutine cgyro_init_manager
   call timer_lib_in('nl_init')
 
 #if defined(OMPGPU)
-!$omp target enter data map(in:nx0,ny0,nx,ny,nx2,ny2)
+!$omp target enter data map(to:nx0,ny0,nx,ny,nx2,ny2)
 #elif defined(_OPENACC)
 !$acc enter data copyin(nx0,ny0,nx,ny,nx2,ny2)
 #endif

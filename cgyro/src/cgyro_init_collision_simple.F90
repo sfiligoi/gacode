@@ -124,7 +124,7 @@ subroutine cgyro_init_collision_simple
    enddo
   enddo
 #if defined(OMPGPU)
-!$omp target enter data map(in:cmat_simple)
+!$omp target enter data map(to:cmat_simple)
 #elif defined(_OPENACC)
 !$acc enter data copyin(cmat_simple)
 #endif

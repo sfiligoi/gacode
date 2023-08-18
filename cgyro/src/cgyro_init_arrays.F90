@@ -106,7 +106,7 @@ subroutine cgyro_init_arrays
  
   deallocate(jloc_c)
 #if defined(OMPGPU)
-!$omp target enter data map(in:jvec_c)
+!$omp target enter data map(to:jvec_c)
 #elif defined(_OPENACC)
 !$acc enter data copyin(jvec_c)
 #endif
@@ -231,7 +231,7 @@ subroutine cgyro_init_arrays
   deallocate(res_loc)
   
 #if defined(OMPGPU)
-!$omp target enter data map(in:upfac1,upfac2)
+!$omp target enter data map(to:upfac1,upfac2)
 #elif defined(_OPENACC)
 !$acc enter data copyin(upfac1,upfac2)
 #endif
@@ -382,7 +382,7 @@ subroutine cgyro_init_arrays
    enddo
   enddo
 #if defined(OMPGPU)
-!$omp target enter data map(in:dtheta,dtheta_up,icd_c,c_wave)
+!$omp target enter data map(to:dtheta,dtheta_up,icd_c,c_wave)
 #elif defined(_OPENACC)
 !$acc enter data copyin(dtheta,dtheta_up,icd_c,c_wave)
 #endif
@@ -458,7 +458,7 @@ subroutine cgyro_init_arrays
    enddo
   enddo
 #if defined(OMPGPU)
-!$omp target enter data map(in:omega_cap_h,omega_h,omega_s,omega_ss)
+!$omp target enter data map(to:omega_cap_h,omega_h,omega_s,omega_ss)
 #elif defined(_OPENACC)
 !$acc enter data copyin(omega_cap_h,omega_h,omega_s,omega_ss)
 #endif
