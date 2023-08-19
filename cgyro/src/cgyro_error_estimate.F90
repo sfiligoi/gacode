@@ -114,10 +114,12 @@ subroutine cgyro_error_estimate
   h_s=0.0
   r_s=0.0
 #if defined(OMPGPU)
-  !no async for OMPG{U for now
-!$omp target teams distribute parallel do simd collapse(3) reduction(+:h_s,r_s)
+  ! no async for OMPG{U for now
+!$omp target teams distribute parallel do simd collapse(3) &
+!$omp&    reduction(+:h_s,r_s)
 #else
 !$omp parallel do collapse(3) reduction(+:h_s,r_s)
+#endif
   do itor=nt1,nt2
    do iv_loc=1,nv_loc
      do ic=1,nc
@@ -126,7 +128,6 @@ subroutine cgyro_error_estimate
      enddo
    enddo
   enddo
-#endif
 
 #endif
 
