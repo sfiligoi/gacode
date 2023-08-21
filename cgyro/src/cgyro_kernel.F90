@@ -115,6 +115,7 @@ subroutine cgyro_kernel
 #if defined(OMPGPU)
      ! no async for OMPGPU for now
 !$omp target update from(cap_h_c_dot)
+#elif defined(_OPENACC)
 !$acc update host(cap_h_c_dot)
        ! wait for cap_h_c to be synched into system memory, used by cgyro_write_timedata
 !$acc wait(4)
