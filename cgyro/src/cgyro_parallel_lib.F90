@@ -350,7 +350,7 @@ contains
     j2 = (1+iproc)*nj_loc
 #if defined(OMPGPU)
 !$omp target teams distribute parallel do simd collapse(4) &
-!$omp&  private(j_loc)
+!$omp&  private(j_loc) map(to:j1,j2)
 #else
 !$acc parallel loop collapse(4) gang vector independent private(j_loc) &
 !$acc&         present(fsendr,fin) present(nproc,nk1,nk2,ni_loc) &
