@@ -549,7 +549,7 @@ subroutine cgyro_field_c_ae_gpu
 
 #if defined(OMPGPU)
 !$omp target teams distribute parallel do simd collapse(3) &
-!$omp&   private(field_loc_l),iv_loc)
+!$omp&   private(field_loc_l,iv_loc)
 #elif defined(_OPENACC)
 !$acc parallel loop collapse(3) gang vector &
 !$acc&         independent private(field_loc_l) &
