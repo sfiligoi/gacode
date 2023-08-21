@@ -463,7 +463,7 @@ subroutine cgyro_make_profiles
 
   !-------------------------------------------------------------
 #if defined(OMPGPU)
-!$omp target enter data map(to:px,z,temp))
+!$omp target enter data map(to:px,z,temp)
 #elif defined(_OPENACC)
 !$acc enter data copyin(px,z,temp)
 #endif
