@@ -166,7 +166,7 @@ subroutine cgyro_cmpl_fma3(sz, left, r1, c2, r2, c3, r3, abssum)
     else
 #if defined(OMPGPU)
 !$omp target teams distribute parallel do simd &
-!$omp&         map(from:left(1:sz) &
+!$omp&         map(from:left(1:sz)) &
 !$omp&         map(to:r1(1:sz),r2(1:sz),r3(1:sz)) 
 #elif defined(_OPENACC)
 !$acc parallel loop independent gang vector &
