@@ -12,16 +12,21 @@ subroutine cgyro_cleanup
 
 #define ccl_del_device(x) \
 !$omp target exit data map(release:x)
+#define ccl_del_bigdevice(x) \
+!$omp target exit data map(release:x) if (gpu_bigmem_flag == 1)
 
 #elif defined(_OPENACC)
 
 #define ccl_del_device(x) \
 !$acc exit data delete(x)
+#define ccl_del_bigdevice(x) \
+!$acc exit data delete(x) if (gpu_bigmem_flag == 1)
 
 #else
 
   ! nothing to do
 #define ccl_del_device(x)
+#define ccl_del_bigdevice(x)
 
 #endif
 
@@ -251,15 +256,15 @@ subroutine cgyro_cleanup
      deallocate(gpack)
   endif
   if (allocated(cmat)) then
-     ccl_del_device(cmat) if (gpu_bigmem_flag == 1)
+     ccl_del_bigdevice(cmat)
      deallocate(cmat)
   endif
   if (allocated(cmat_fp32)) then
-     ccl_del_device(cmat_fp32) if (gpu_bigmem_flag == 1)
+     ccl_del_bigdevice(cmat_fp32)
      deallocate(cmat_fp32)
   endif
   if (allocated(cmat_stripes)) then
-     ccl_del_device(cmat_stripes) if (gpu_bigmem_flag == 1)
+     ccl_del_bigdevice(cmat_stripes)
      deallocate(cmat_stripes)
   endif
     if (allocated(cmat_simple)) then
