@@ -377,7 +377,7 @@ subroutine cgyro_field_c_ae_cpu
 
 end subroutine cgyro_field_c_ae_cpu
 
-#ifdef _OPENACC
+#if defined(OMPGPU) || defined(_OPENACC)
 subroutine cgyro_field_c_gpu
   use parallel_lib
   use timer_lib
@@ -636,7 +636,7 @@ end subroutine cgyro_field_c_ae_gpu
 
 subroutine cgyro_field_c
   implicit none
-#ifdef _OPENACC
+#if defined(OMPGPU) || defined(_OPENACC)
    call cgyro_field_c_gpu
 #else
    call cgyro_field_c_cpu
@@ -646,7 +646,7 @@ end subroutine cgyro_field_c
 ! like cgyro_field_c, but only for (itor == 0 .and. ae_flag == 1)
 subroutine cgyro_field_c_ae
   implicit none
-#ifdef _OPENACC
+#if defined(OMPGPU) || defined(_OPENACC)
    call cgyro_field_c_ae_gpu
 #else
    call cgyro_field_c_ae_cpu
