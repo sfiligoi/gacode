@@ -34,7 +34,10 @@ subroutine cgyro_nl_fftw_comm1_async
 
   call timer_lib_in('nl_mem')
 
-#ifdef _OPENACC
+#if defined(OMPGPU)
+!$omp target teams distribute parallel do simd collapse(4) &
+!$omp&         private(iexch)
+#elif defined(_OPENACC)
 !$acc parallel loop collapse(4) gang vector independent private(iexch) &
 !$acc&         present(ic_c,h_x,fpack) &
 !$acc&         present(n_theta,nv_loc,nt1,nt2,n_radial) default(none)
@@ -52,13 +55,17 @@ subroutine cgyro_nl_fftw_comm1_async
    enddo
   enddo
 
-#ifdef _OPENACC
+  if ( (nv_loc*n_theta) < (nsplit*n_toroidal_procs) ) then
+#if defined(OMPGPU)
+!$omp target teams distribute parallel do simd
+#elif defined(_OPENACC)
 !$acc parallel loop independent gang vector &
-!$acc&         present(fpack) if ( (nv_loc*n_theta) < (nsplit*n_toroidal_procs) )
+!$acc&         present(fpack)
 #endif
-  do iexch=nv_loc*n_theta+1,nsplit*n_toroidal_procs
+    do iexch=nv_loc*n_theta+1,nsplit*n_toroidal_procs
       fpack(1:n_radial,1:nt_loc,iexch) = (0.0,0.0)
-  enddo
+    enddo
+  endif
 
   call parallel_slib_f_nc_async(fpack,f_nl,f_req)
 
@@ -101,7 +108,10 @@ subroutine cgyro_nl_fftw_comm1_r(ij)
 
   psi_mul = (q*rho/rmin)*(2*pi/length)
 
-#ifdef _OPENACC
+#if defined(OMPGPU)
+!$omp target teams distribute parallel do simd collapse(4) &
+!$omp&         private(iexch,ic_loc_m,my_psi)
+#elif defined(_OPENACC)
 !$acc parallel loop collapse(4) gang vector independent private(iexch,ic_loc_m,my_psi) &
 !$acc&         present(ic_c,px,rhs,fpack) copyin(psi_mul) &
 !$acc&         present(nt1,nt2,nv_loc,n_theta,n_radial) copyin(ij) default(none)
@@ -159,7 +169,10 @@ subroutine cgyro_nl_fftw_comm2_async
 
   call timer_lib_in('nl_mem')
 
-#ifdef _OPENACC
+#if defined(OMPGPU)
+!$omp target teams distribute parallel do simd collapse(5) &
+!$omp&         private(itor,it,iltheta_min,mytor,gval)
+#elif defined(_OPENACC)
 !$acc parallel loop gang vector collapse(5) independent &
 !$acc&         private(itor,it,iltheta_min,mytor,gval) &
 !$acc&         present(field,gpack) &

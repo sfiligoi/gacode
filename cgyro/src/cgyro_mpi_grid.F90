@@ -112,7 +112,11 @@ subroutine cgyro_mpi_grid
      return
   endif
 
+#if defined(OMPGPU)
+!$omp target enter data map(to:ie_v,ix_v,is_v,iv_v)
+#elif defined(_OPENACC)
 !$acc enter data copyin(ie_v,ix_v,is_v,iv_v)
+#endif
 
   ! Configuration pointers
   ic = 0
@@ -124,7 +128,12 @@ subroutine cgyro_mpi_grid
         ic_c(ir,it) = ic
      enddo
   enddo
+
+#if defined(OMPGPU)
+!$omp target enter data map(to:ir_c,it_c,ic_c)
+#elif defined(_OPENACC)
 !$acc enter data copyin(ir_c,it_c,ic_c)
+#endif
 
   ! Shear pointers
   allocate(ica_c(nc))
@@ -167,8 +176,13 @@ subroutine cgyro_mpi_grid
      return
   endif
 
+#if defined(OMPGPU)
+!$omp target enter data map(to:nv,nc,n_toroidal,n_toroidal_procs)
+!$omp target enter data map(to:n_radial,n_theta,n_field,n_energy,n_xi,n_species,n_field)
+#elif defined(_OPENACC)
 !$acc enter data copyin(nv,nc,n_toroidal,n_toroidal_procs)
 !$acc enter data copyin(n_radial,n_theta,n_field,n_energy,n_xi,n_species,n_field)
+#endif
 
   ! Assign subgroup dimensions: n_proc = n_proc_1 * n_proc_2
 
@@ -308,7 +322,11 @@ subroutine cgyro_mpi_grid
      enddo
   endif
 
+#if defined(OMPGPU)
+!$omp target enter data map(to:nt1,nt2,nt_loc,nv1,nv2,nv_loc,ns1,ns2,ns_loc,nc1,nc2,nc_loc,n_jtheta,nsplit)
+#elif defined(_OPENACC)
 !$acc enter data copyin(nt1,nt2,nt_loc,nv1,nv2,nv_loc,ns1,ns2,ns_loc,nc1,nc2,nc_loc,n_jtheta,nsplit)
+#endif
 
   ! OMP code
   n_omp = omp_get_max_threads()

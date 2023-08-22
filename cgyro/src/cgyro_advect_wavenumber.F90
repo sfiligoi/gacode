@@ -21,10 +21,14 @@ subroutine cgyro_advect_wavenumber(ij)
   if (source_flag == 1) then
      call timer_lib_in('shear')
 
-#ifdef _OPENACC
+#if defined(OMPGPU)
+!$omp target teams distribute parallel do simd collapse(4) &
+!$omp&         private(ivc,ir,l,iccj) &
+!$omp&         private(ir,j,l,iccj,ll,rl,llnt,he1,he2)
+#elif defined(_OPENACC)
 !$acc parallel loop collapse(4) gang vector private(ivc,ir,l,iccj) &
-!$acc&                   private(ir,j,l,iccj,ll,rl,llnt,he1,he2) &
-!$acc&                   present(rhs(:,:,:,ij),omega_ss,field,h_x,c_wave)
+!$acc&         private(ir,j,l,iccj,ll,rl,llnt,he1,he2) &
+!$acc&         present(rhs(:,:,:,ij),omega_ss,field,h_x,c_wave)
 #else
 !$omp parallel do collapse(4) private(ivc,ir,j,iccj,l,ll,rl,llnt,he1,he2)
 #endif
@@ -37,7 +41,9 @@ subroutine cgyro_advect_wavenumber(ij)
            ! Wavenumber advection ExB shear
            if (shear_method == 2) then
                  rl = 0.0
+#if (!defined(OMPGPU)) && defined(_OPENACC)
 !$acc loop seq
+#endif
                  do l=1,n_wave
                     ll = (2*l-1)
                     llnt = ll*n_theta
@@ -64,7 +70,9 @@ subroutine cgyro_advect_wavenumber(ij)
            if (profile_shear_flag == 1) then
                  iccj = (ir-1)*n_theta+j
                  rl = rhs(iccj,ivc,itor,ij)
+#if (!defined(OMPGPU)) && defined(_OPENACC)
 !$acc loop seq
+#endif
                  do l=1,n_wave
                     ll = 2*l-1
                     llnt = ll*n_theta

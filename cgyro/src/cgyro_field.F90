@@ -115,15 +115,21 @@ subroutine cgyro_field_v_notae_s_gpu(start_t)
   ! cap_h_v(ic_loc,itor,iv) = fsendf(j,itor,ic_loc,k)
   call parallel_lib_nj_loc(nj_loc)
 
+#if (!defined(OMPGPU)) && defined(_OPENACC)
 !$acc data present(fsendf)
 !$acc data present(field,field_loc)
-
+#endif
 
   ! Poisson and Ampere RHS integrals of H
 
+#if defined(OMPGPU)
+!$omp target teams distribute parallel do simd collapse(3) &
+!$omp&   map(to:start_t)
+#elif defined(_OPENACC)
 !$acc parallel loop collapse(3) gang vector &
 !$acc&         independent copyin(start_t) &
 !$acc&         present(nt2,nc,n_field) default(none)
+#endif
   do itor=start_t,nt2
    do ic=1,nc
        do i_f=1,n_field
@@ -132,15 +138,25 @@ subroutine cgyro_field_v_notae_s_gpu(start_t)
    enddo
   enddo
 
+#if defined(OMPGPU)
+!$omp target teams distribute collapse(3) &
+!$omp&       private(ic_loc,field_loc_l) map(to:start_t,nproc,nj_loc)
+#elif defined(_OPENACC)
 !$acc parallel loop collapse(3) gang private(ic_loc,field_loc_l) &
 !$acc&         present(dvjvec_v,fsendf,field_loc) copyin(start_t,nproc,nj_loc) &
 !$acc&         present(nt2,nc1,nc2,n_field,nv) default(none)
+#endif
   do itor=start_t,nt2
    do ic=nc1,nc2
     do i_f=1,n_field
       ic_loc = ic-nc1+1
       field_loc_l = (0.0,0.0)
+#if defined(OMPGPU)
+!$omp parallel do simd collapse(2) reduction(+:field_loc_l) &
+!$omp&       private(iv)
+#elif defined(_OPENACC)
 !$acc loop vector collapse(2) private(iv) reduction(+:field_loc_l)
+#endif
       do k=1,nproc
        do j=1,nj_loc
         iv = j+(k-1)*nj_loc
@@ -163,9 +179,14 @@ subroutine cgyro_field_v_notae_s_gpu(start_t)
 
   call timer_lib_in('field')
   ! Poisson LHS factors
+#if defined(OMPGPU)
+!$omp target teams distribute parallel do simd collapse(3) &
+!$omp&    map(to:start_t)
+#elif defined(_OPENACC)
 !$acc parallel loop collapse(3) gang vector &
 !$acc&         independent present(fcoef) copyin(start_t) &
 !$acc&         present(nt2,nc,n_field) default(none)
+#endif
   do itor=start_t,nt2
      ! assuming  (.not.(itor == 0 .and. ae_flag == 1))
      do ic=1,nc
@@ -175,8 +196,10 @@ subroutine cgyro_field_v_notae_s_gpu(start_t)
      enddo
   enddo
 
+#if (!defined(OMPGPU)) && defined(_OPENACC)
 !$acc end data
 !$acc end data
+#endif
 
   call timer_lib_out('field')
 
@@ -354,7 +377,7 @@ subroutine cgyro_field_c_ae_cpu
 
 end subroutine cgyro_field_c_ae_cpu
 
-#ifdef _OPENACC
+#if defined(OMPGPU) || defined(_OPENACC)
 subroutine cgyro_field_c_gpu
   use parallel_lib
   use timer_lib
@@ -366,20 +389,29 @@ subroutine cgyro_field_c_gpu
   complex :: my_psi
 
   call timer_lib_in('field')
-!$acc data present(h_x,cap_h_c)
 
+#if (!defined(OMPGPU)) && defined(_OPENACC)
+!$acc data present(h_x,cap_h_c)
 !$acc data present(field,field_loc)
+#endif
 
   ! Poisson and Ampere RHS integrals of h
 
+#if defined(OMPGPU)
+!$omp target teams distribute parallel do simd collapse(3) &
+!$omp&   private(field_loc_l,iv_loc)
+#elif defined(_OPENACC)
 !$acc parallel loop collapse(3) gang vector &
 !$acc&         independent private(field_loc_l) &
 !$acc&         present(dvjvec_c) present(nt1,nt2,nc,n_field,nv1,nv2) default(none)
+#endif
   do itor=nt1,nt2
    do ic=1,nc
     do i_f=1,n_field
       field_loc_l = (0.0,0.0)    
+#if (!defined(OMPGPU)) && defined(_OPENACC)
 !$acc loop seq private(iv_loc)
+#endif
       do iv=nv1,nv2
          iv_loc = iv-nv1+1
          field_loc_l = field_loc_l+dvjvec_c(i_f,ic,iv_loc,itor)*h_x(ic,iv_loc,itor)
@@ -396,9 +428,13 @@ subroutine cgyro_field_c_gpu
   call timer_lib_out('field_com')
   call timer_lib_in('field')
   if (n_field > 2) then
+#if defined(OMPGPU)
+!$omp target teams distribute parallel do simd collapse(2)
+#elif defined(_OPENACC)
 !$acc parallel loop collapse(2) gang vector &
 !$acc&         independent present(fcoef) &
 !$acc&         present(nt1,nt2,nc) default(none)
+#endif
     do itor=nt1,nt2
       do ic=1,nc
        field(3,ic,itor) = field(3,ic,itor)*fcoef(3,ic,itor)
@@ -412,18 +448,31 @@ subroutine cgyro_field_c_gpu
 
   if (nt1 == 0 .and. ae_flag == 1) then
     ! Note: Called rarely, use the CPu version
+#if defined(OMPGPU)
+!$omp target update from(field)
+#elif defined(_OPENACC)
 !$acc update host(field)
+#endif
     call cgyro_field_ae('c')
+#if defined(OMPGPU)
+!$omp target update to(field)
+#elif defined(_OPENACC)
 !$acc update device(field)
+#endif
     ! mark we already processed ==0, nothing else to do there
     itor1=1
   endif
 
   if (itor1<=itor2) then
      if (n_field > 2) then
+#if defined(OMPGPU)
+!$omp target teams distribute parallel do simd collapse(2) &
+!$omp&   private(tmp) map(to:itor1,itor2)
+#elif defined(_OPENACC)
 !$acc parallel loop collapse(2) gang vector &
 !$acc&         independent private(tmp) present(gcoef) &
 !$acc&         copyin(itor1,itor2) present(nc) default(none)
+#endif
         do itor=itor1,itor2
          do ic=1,nc
           tmp = field(1,ic,itor)
@@ -435,9 +484,14 @@ subroutine cgyro_field_c_gpu
          enddo
         enddo
      else
+#if defined(OMPGPU)
+!$omp target teams distribute parallel do simd collapse(3) &
+!$omp&   map(to:itor1,itor2)
+#elif defined(_OPENACC)
 !$acc parallel loop collapse(3) gang vector &
 !$acc&         independent present(gcoef) &
 !$acc&         copyin(itor1,itor2) present(nc,n_field) default(none)
+#endif
         do itor=itor1,itor2
          do ic=1,nc
           do i_f=1,n_field
@@ -448,8 +502,13 @@ subroutine cgyro_field_c_gpu
      endif
   endif
 
+#if defined(OMPGPU)
+!$omp target teams distribute parallel do simd collapse(3) &
+!$omp&   private(iv_loc,is,my_psi)
+#elif defined(_OPENACC)
 !$acc parallel loop collapse(3) gang vector private(iv_loc,is,my_psi) &
 !$acc&         present(jvec_c,z,temp,is_v) present(nt1,nt2,nv1,nv2,nc) default(none)
+#endif
   do itor=nt1,nt2
    do iv=nv1,nv2
      do ic=1,nc
@@ -461,9 +520,10 @@ subroutine cgyro_field_c_gpu
    enddo
   enddo
 
+#if (!defined(OMPGPU)) && defined(_OPENACC)
 !$acc end data
-
 !$acc end data
+#endif
 
   call timer_lib_out('field')
 end subroutine cgyro_field_c_gpu
@@ -479,20 +539,29 @@ subroutine cgyro_field_c_ae_gpu
   complex :: my_psi
 
   call timer_lib_in('field')
-!$acc data present(h_x,cap_h_c)
 
+#if (!defined(OMPGPU)) && defined(_OPENACC)
+!$acc data present(h_x,cap_h_c)
 !$acc data present(field,field_loc)
+#endif
 
   ! Poisson and Ampere RHS integrals of h
 
+#if defined(OMPGPU)
+!$omp target teams distribute parallel do simd collapse(3) &
+!$omp&   private(field_loc_l,iv_loc)
+#elif defined(_OPENACC)
 !$acc parallel loop collapse(3) gang vector &
 !$acc&         independent private(field_loc_l) &
 !$acc&         present(dvjvec_c) present(nc,n_field,nv1,nv2) default(none)
+#endif
   do itor=0,0
    do ic=1,nc
     do i_f=1,n_field
       field_loc_l = (0.0,0.0)    
+#if (!defined(OMPGPU)) && defined(_OPENACC)
 !$acc loop seq private(iv_loc)
+#endif
       do iv=nv1,nv2
          iv_loc = iv-nv1+1
          field_loc_l = field_loc_l+dvjvec_c(i_f,ic,iv_loc,itor)*h_x(ic,iv_loc,itor)
@@ -510,8 +579,12 @@ subroutine cgyro_field_c_ae_gpu
   call timer_lib_out('field_com')
   call timer_lib_in('field')
   if (n_field > 2) then
+#if defined(OMPGPU)
+!$omp target teams distribute parallel do simd collapse(2)
+#elif defined(_OPENACC)
 !$acc parallel loop collapse(2) gang vector &
 !$acc&         independent present(fcoef) present(nc) default(none)
+#endif
     do itor=0,0
       do ic=1,nc
        field(3,ic,itor) = field(3,ic,itor)*fcoef(3,ic,itor)
@@ -520,12 +593,25 @@ subroutine cgyro_field_c_ae_gpu
   endif
   ! Poisson LHS factors
   ! Note: Called rarely, use the CPU version
+#if defined(OMPGPU)
+!$omp target update from(field(:,:,0:0))
+#elif defined(_OPENACC)
 !$acc update host(field(:,:,0:0))
+#endif
     call cgyro_field_ae('c')
+#if defined(OMPGPU)
+!$omp target update to(field(:,:,0:0))
+#elif defined(_OPENACC)
 !$acc update device(field(:,:,0:0))
+#endif
 
+#if defined(OMPGPU)
+!$omp target teams distribute parallel do simd collapse(3) &
+!$omp&   private(iv_loc,is,my_psi)
+#elif defined(_OPENACC)
 !$acc parallel loop collapse(3) gang vector private(iv_loc,is,my_psi) &
 !$acc&         present(jvec_c,z,temp,is_v) present(nv1,nv2,nc) default(none)
+#endif
   do itor=0,0
    do iv=nv1,nv2
      do ic=1,nc
@@ -537,9 +623,10 @@ subroutine cgyro_field_c_ae_gpu
    enddo
   enddo
 
+#if (!defined(OMPGPU)) && defined(_OPENACC)
 !$acc end data
-
 !$acc end data
+#endif
 
   call timer_lib_out('field')
 end subroutine cgyro_field_c_ae_gpu
@@ -549,7 +636,7 @@ end subroutine cgyro_field_c_ae_gpu
 
 subroutine cgyro_field_c
   implicit none
-#ifdef _OPENACC
+#if defined(OMPGPU) || defined(_OPENACC)
    call cgyro_field_c_gpu
 #else
    call cgyro_field_c_cpu
@@ -559,7 +646,7 @@ end subroutine cgyro_field_c
 ! like cgyro_field_c, but only for (itor == 0 .and. ae_flag == 1)
 subroutine cgyro_field_c_ae
   implicit none
-#ifdef _OPENACC
+#if defined(OMPGPU) || defined(_OPENACC)
    call cgyro_field_c_ae_gpu
 #else
    call cgyro_field_c_ae_cpu
