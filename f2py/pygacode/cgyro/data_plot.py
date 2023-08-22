@@ -160,7 +160,7 @@ class cgyrodata_plot(data.cgyrodata):
       self.getgeo()
 
       if xin['fig'] is None:
-         fig = plt.figure(MYDIR,figsize=(1.2*self.lx,1.2*self.ly))
+         fig = plt.figure(MYDIR,figsize=(1.2*xin['lx'],1.2*xin['ly']))
 
       # Decrease font size a bit for this plot
       rc('font',size=12)
@@ -1548,7 +1548,7 @@ class cgyrodata_plot(data.cgyrodata):
       mesh  = xin['mesh']
 
       if xin['fig'] is None:
-         fig = plt.figure(MYDIR,figsize=(self.lx,self.lx))
+         fig = plt.figure(MYDIR,figsize=(xin['lx'],xin['ly']))
 
       u = specmap(self.mass[spec],self.z[spec])
 
@@ -1640,7 +1640,7 @@ class cgyrodata_plot(data.cgyrodata):
       u = specmap(self.mass[spec],self.z[spec])
 
       if xin['fig'] is None:
-         fig = plt.figure(MYDIR,figsize=(self.lx,self.lx))
+         fig = plt.figure(MYDIR,figsize=(xin['lx'],xin['ly']))
        
       if itime > self.n_time-1:
          itime = self.n_time-1
