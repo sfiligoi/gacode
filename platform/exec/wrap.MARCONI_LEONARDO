@@ -7,9 +7,8 @@ if [ ${NTASKS_PER_GPU} -gt 1 ]; then
 
     let r4=SLURM_LOCALID/4
     let l4="$SLURM_LOCALID-($r4*4)"
-    let ACC_DEVICE_NUM=0
-    
-    echo "`uname -n` $SLURM_PROCID $SLURM_LOCALID $ACC_DEVICE_NUM `taskset -pc $$`"
+
+    #echo "`uname -n` $SLURM_PROCID $SLURM_LOCALID $ACC_DEVICE_NUM `taskset -pc $$`"
 
     #echo "$SLURM_PROCID `nvidia-smi -L` $SLURM_PROCID"
 
@@ -51,12 +50,9 @@ if [ ${NTASKS_PER_GPU} -gt 1 ]; then
 else
     # no need for MPS
 
-    let ACC_DEVICE_NUM="0"
-    export ACC_DEVICE_NUM
-    echo $CUDA_VISIBLE_DEVICES
-    echo "`uname -n` $SLURM_PROCID $SLURM_LOCALID $ACC_DEVICE_NUM `taskset -pc $$`"
+    # echo "`uname -n` $SLURM_PROCID $SLURM_LOCALID $ACC_DEVICE_NUM `taskset -pc $$`"
 
-    echo "$SLURM_PROCID `nvidia-smi -L` $SLURM_PROCID"
+    #echo "$SLURM_PROCID `nvidia-smi -L` $SLURM_PROCID"
 
     exec "$@"
     
