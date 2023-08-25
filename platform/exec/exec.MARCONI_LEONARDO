@@ -36,12 +36,5 @@ export NUMA=$numa
 
 export SLURM_CPU_BIND="cores"
 
-if [ ${ntasks_per_gpu} -gt 1 ]; then
-    echo "When running with >1 MPI per GPU it is best to only specify --ntasks, NOT --ntasks-per-gpu in the SBATCH script" 
-    echo "> srun --cpu-bind=cores -n $nmpi -c $nomp $GACODE_ROOT/platform/exec/wrap.${GACODE_PLATFORM} $exec"
-    srun --cpu-bind=cores -n $nmpi -c $nomp $GACODE_ROOT/platform/exec/wrap.${GACODE_PLATFORM} $exec
-else
-    echo "When running with 1 MPI per GPU it is best to only specify--ntasks-per-gpu=1 in the SBATCH script" 
-    echo "> srun --cpu-bind=cores -n $nmpi -c $nomp --ntasks-per-gpu $ntasks_per_gpu $GACODE_ROOT/platform/exec/wrap.${GACODE_PLATFORM} $exec"
-    srun --cpu-bind=cores -n $nmpi -c $nomp --ntasks-per-gpu $ntasks_per_gpu $GACODE_ROOT/platform/exec/wrap.${GACODE_PLATFORM} $exec
-fi
+echo "> srun --cpu-bind=cores -n $nmpi -c $nomp $GACODE_ROOT/platform/exec/wrap.${GACODE_PLATFORM} $exec"
+srun --cpu-bind=cores -n $nmpi -c $nomp $GACODE_ROOT/platform/exec/wrap.${GACODE_PLATFORM} $exec
