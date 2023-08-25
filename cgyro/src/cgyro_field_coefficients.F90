@@ -246,6 +246,10 @@ subroutine cgyro_field_coefficients
   enddo
   !-------------------------------------------------------------------------
 
+#if defined(OMPGPU)
+!$omp target update to(fcoef,gcoef,dvjvec_c,dvjvec_v)
+#elif defined(_OPENACC)
 !$acc update device(fcoef,gcoef,dvjvec_c,dvjvec_v)
+#endif
 
 end subroutine cgyro_field_coefficients
