@@ -113,7 +113,7 @@ subroutine cgyro_nl_fftw_comm1_r(ij)
 !$omp&         private(iexch,ic_loc_m,my_psi)
 #elif defined(_OPENACC)
 !$acc parallel loop collapse(4) gang vector independent private(iexch,ic_loc_m,my_psi) &
-!$acc&         present(ic_c,px,rhs,fpack) copyin(psi_mul) &
+!$acc&         present(ic_c,px,rhs,fpack) copyin(psi_mul,zf_scale) &
 !$acc&         present(nt1,nt2,nv_loc,n_theta,n_radial) copyin(ij) default(none)
 #else
 !$omp parallel do collapse(4) private(iexch,ic_loc_m,my_psi)
