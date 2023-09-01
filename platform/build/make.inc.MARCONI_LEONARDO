@@ -19,19 +19,17 @@ NUMAS_PER_NODE=4
 FC     = mpifort -module ${GACODE_ROOT}/modules -I ${GACODE_ROOT}/modules -Mpreprocess -DUSE_INLINE -Mdefaultunit
 F77    = ${FC}
 
-FACC   =-acc -gpu all -Minfo=accel -Mcudalib=cufft  # -DDISABLE_GPUDIRECT_MPI
+FACC   =-acc -gpu all -Minfo=accel -Mcudalib=cufft
 
-FOMP   =-mp -Mstack_arrays ${FACC}
+FOMP   =-mp -Mstack_arrays
 FMATH  =-r8 
 FOPT   =-fast -fastsse -Mvect
 FDEBUG =-g -Kieee -Ktrap=fp,divz -Mbounds -Mchkptr -Mchkstk -traceback -Minform=inform
-F2PY   = f2py --fcompiler=intelem
 
 
 # System math libraries
 
-LMATH = -llapack -lblas  -L${FFTW_LIB} -lfftw3_threads -lfftw3f_threads -lfftw3 -lfftw3f
-#       -L${FFTW_DIR}/lib -lfftw3_threads -lfftw3 -mkl=cluster
+LMATH = -llapack -lblas
 
 # NetCDF
 NETCDF  = -L${NETCDF_C_LIB} -lnetcdf -L${NETCDF_FORTRAN_LIB} -lnetcdff
