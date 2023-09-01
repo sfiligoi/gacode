@@ -9,7 +9,11 @@
 module cgyro_globals
 
   use, intrinsic :: iso_c_binding
-#ifdef _OPENACC
+#if defined(_OPENACC) || defined(OMPGPU)
+#define CGYRO_GPU_FFT
+#endif
+
+#ifdef CGYRO_GPU_FFT
 
 #ifdef HIPGPU
   use hipfort_hipfft
@@ -392,7 +396,7 @@ module cgyro_globals
   integer :: nflux
   !
   ! Nonlinear plans
-#ifndef _OPENACC
+#ifndef CGYRO_GPU_FFT
   ! CPU-FFTW plans
   type(C_PTR) :: plan_r2c
   type(C_PTR) :: plan_c2r
@@ -419,7 +423,7 @@ module cgyro_globals
   integer :: nx2,ny2
   !
   ! 2D FFT work arrays
-#ifndef _OPENACC
+#ifndef CGYRO_GPU_FFT
   real, dimension(:,:,:), allocatable :: uxmany
   real, dimension(:,:,:), allocatable :: uymany
   real, dimension(:,:,:), allocatable :: vx

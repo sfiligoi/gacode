@@ -17,10 +17,7 @@ mpinuma=${6}
 
 cd $simdir
 
-let proc_per_node=$CORES_PER_NODE/$nomp
-
 let ntasks_per_gpu=$nmpi/$numa/$SLURM_NNODES
-let ngpu=$numa*$SLURM_NNODES
 
 if [ ${ntasks_per_gpu} -lt 1 ]; then
     let ntasks_per_gpu=1

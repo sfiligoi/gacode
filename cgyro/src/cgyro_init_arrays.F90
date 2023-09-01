@@ -11,13 +11,14 @@ subroutine cgyro_init_arrays
   real :: u
   real :: fac
   integer :: ir,it,is,ie,ix
-  integer :: itm,itl,itor,mytor
+  integer :: itm,itl,itor,mytor,itf
   integer :: it_loc
   integer :: jr,jt,id
   integer :: i_field
   integer :: l,ll
   integer :: iltheta_min
   complex :: thfac,carg
+  complex :: jval
   real, dimension(:,:,:), allocatable :: res_loc
   real, dimension(:,:,:), allocatable :: jloc_c
   real, dimension(:,:,:), allocatable :: res_norm
@@ -104,7 +105,11 @@ subroutine cgyro_init_arrays
   enddo
  
   deallocate(jloc_c)
+#if defined(OMPGPU)
+!$omp target enter data map(to:jvec_c)
+#elif defined(_OPENACC)
 !$acc enter data copyin(jvec_c)
+#endif
 
   do i_field=1,n_field
      call parallel_lib_rtrans_real(jvec_c(i_field,:,:,:),jvec_v(i_field,:,:,:))
@@ -120,31 +125,38 @@ subroutine cgyro_init_arrays
 !  (n_field,n_radial,n_jtheta,nv_loc,nt_loc,n_toroidal_procs)
 ! 
 
-#ifdef _OPENACC
-!$acc parallel loop gang independent collapse(4) private(itor,it,iltheta_min,mytor) &
+#if defined(OMPGPU)
+!$omp target teams distribute parallel do simd collapse(6) &
+!$omp&   private(itor,it,iltheta_min,mytor,ir,itf,jval)
+#elif defined(_OPENACC)
+!$acc parallel loop gang vector independent collapse(6) &
+!$acc&         private(itor,it,iltheta_min,mytor,ir,itf,jval) &
 !$acc&         present(jvec_c_nl,jvec_c,ic_c) &
 !$acc&         present(n_toroidal_procs,nt_loc,nv_loc,n_jtheta,n_radial) &
 !$acc&         present(nt1,n_theta,n_field,nsplit) default(none)
 #else
-!$omp parallel do collapse(3) private(it_loc,itor,mytor,it,iltheta_min)
+!$omp parallel do collapse(4) &
+!$omp&         private(it_loc,itor,mytor,it,ir,itf,iltheta_min,jval)
 #endif
    do itm=1,n_toroidal_procs
     do itl=1,nt_loc
      do iv_loc=1,nv_loc
       do it_loc=1,n_jtheta
-        iltheta_min = 1+((itm-1)*nsplit)/nv_loc
-        it = it_loc+iltheta_min-1
-        itor = itl+(itm-1)*nt_loc
-        if (it <= n_theta) then
-          mytor = nt1+itl-1
-!$acc loop vector
-          do ir=1,n_radial
-            jvec_c_nl(1:n_field,ir,it_loc,iv_loc,itor) = jvec_c(1:n_field,ic_c(ir,it),iv_loc,mytor)
-          enddo
-        else
-          ! just padding
-          jvec_c_nl(1:n_field,1:n_radial,it_loc,iv_loc,itor) = 0.0
-        endif
+       do ir=1,n_radial
+        do itf=1,n_field
+          iltheta_min = 1+((itm-1)*nsplit)/nv_loc
+          it = it_loc+iltheta_min-1
+          itor = itl+(itm-1)*nt_loc
+          jval = (0.0,0.0)
+          if (it <= n_theta) then
+            mytor = nt1+itl-1
+            ! ic_c(ir,it) = (ir-1)*n_theta+it
+            jval = jvec_c(itf,(ir-1)*n_theta+it,iv_loc,mytor)
+          endif
+          ! else just padding
+          jvec_c_nl(itf,ir,it_loc,iv_loc,itor) = jval
+        enddo
+       enddo
       enddo
      enddo
     enddo
@@ -218,7 +230,11 @@ subroutine cgyro_init_arrays
   deallocate(res_norm)
   deallocate(res_loc)
   
+#if defined(OMPGPU)
+!$omp target enter data map(to:upfac1,upfac2)
+#elif defined(_OPENACC)
 !$acc enter data copyin(upfac1,upfac2)
+#endif
 
   !------------------------------------------------------------------------------
 
@@ -365,7 +381,11 @@ subroutine cgyro_init_arrays
      enddo
    enddo
   enddo
+#if defined(OMPGPU)
+!$omp target enter data map(to:dtheta,dtheta_up,icd_c,c_wave)
+#elif defined(_OPENACC)
 !$acc enter data copyin(dtheta,dtheta_up,icd_c,c_wave)
+#endif
 
   ! Streaming coefficients (for speed optimization)
 
@@ -437,7 +457,11 @@ subroutine cgyro_init_arrays
      enddo
    enddo
   enddo
+#if defined(OMPGPU)
+!$omp target enter data map(to:omega_cap_h,omega_h,omega_s,omega_ss)
+#elif defined(_OPENACC)
 !$acc enter data copyin(omega_cap_h,omega_h,omega_s,omega_ss)
+#endif
   !-------------------------------------------------------------------------
 
 end subroutine cgyro_init_arrays
