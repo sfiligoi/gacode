@@ -374,7 +374,7 @@ subroutine cgyro_cleanup
   endif
 
   if(allocated(iv_v)) then
-     ccl_del_device(ie_v)     
+     ccl_del_device(iv_v)     
      deallocate(iv_v)
   endif
 
