@@ -1269,7 +1269,7 @@ class cgyrodata_plot(data.cgyrodata):
       windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[imax])+']$'
 
       ax.set_title(r'$\mathrm{Average~fluctuation~intensity} \quad $'+windowtxt)
-      ax.set_xlabel(self.kxlabel)
+      ax.set_xlabel(self.kxstr)
 
       f,ft = self.kxky_select(theta,field,moment,0,gbnorm=True)
 
@@ -1360,7 +1360,7 @@ class cgyrodata_plot(data.cgyrodata):
       windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[imax])+']$'
 
       ax.set_title(r'$\mathrm{Average~fluctuation~intensity} \quad $'+windowtxt)
-      ax.set_xlabel(self.kxlabel)
+      ax.set_xlabel(self.kxstr)
 
       f,ft = self.kxky_select(theta,field,moment,0,gbnorm=True)
 
