@@ -45,7 +45,7 @@ distclean:
 	cd neo ; make clean
 	cd tglf ; make clean
 	cd cgyro ; make clean
-	cd gyro ; make distclean
+	cd gyro ; make clean
 	cd tgyro ; make clean
 	cd profiles_gen ; make clean
 	cd f2py ; make clean
