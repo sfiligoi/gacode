@@ -46,7 +46,11 @@ class cgyrodata_plot(data.cgyrodata):
       xin['mesh']   = 0
 
       return xin
-   
+
+   def wintxt(self,imin,imax,t):
+      s = '[{} < (c_s/a) t < {}]'.format(t[imin],t[imax])
+      return s
+
    def plot_freq(self,xin):
       
       # Function: plot gamma and omega vs time
@@ -510,9 +514,9 @@ class cgyrodata_plot(data.cgyrodata):
       imin,imax=time_index(t,w)
 
       color = ['k','m','b','c','g','r']
-      windowtxt = '['+str(t[imin])+' < (c_s/a) t < '+str(t[imax])+']'
+      wintxt = self.wintxt(imin,imax,t)
       
-      print('INFO: (text.py) Average Window:'+windowtxt)
+      print('INFO: (text.py) Average Window:'+wintxt)
 
       # Otherwise plot
       if not ftype == 'nox':
@@ -520,14 +524,14 @@ class cgyrodata_plot(data.cgyrodata):
          ax.grid(which="both",ls=":")
          ax.grid(which="major",ls=":")
          ax.set_xlabel(self.tstr)
-         ax.set_title(r'$\mathrm{'+ntag+'} \quad '+windowtxt+'\quad ['+field_tag+']$')
+         ax.set_title(r'$\mathrm{'+ntag+'} \quad '+wintxt+'\quad ['+field_tag+']$')
 
       for ispec in range(ns):
          y_norm = y[ispec,:]*norm_vec[ispec]
          ave   = time_average(y_norm,t,imin,imax)
          y_ave = ave*np.ones(len(t))
          u = specmap(self.mass[ispec],self.z[ispec])
-         label = r'$'+mtag+mnorm+'_'+u+'/'+mtag+self.gbnorm+': '+str(round(ave,3))+'$'
+         label = r'$'+mtag+mnorm+'_{'+u+'}/'+mtag+self.gbnorm+': '+str(round(ave,3))+'$'
          if not ftype == 'nox':
             # Average
             ax.plot(t[imin:imax+1],y_ave[imin:imax+1],'--',color=color[ispec])
@@ -588,10 +592,10 @@ class cgyrodata_plot(data.cgyrodata):
 
       color  = ['m','k','b','c']
       xlabel = r'$r/'+self.rhoi+'$'
-      windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[imax])+']$'
+      wintxt = self.wintxt(imin,imax,t)
 
       ax = fig.add_subplot(1,1,1)
-      ax.set_title(r'$\mathrm{Average~radial~correlation} \quad $'+windowtxt)
+      ax.set_title(r'$\mathrm{Average~radial~correlation} \quad '+wintxt+'$')
       ax.set_xlabel(xlabel)
 
       f,ft = self.kxky_select(theta,field,'phi',0)
