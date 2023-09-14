@@ -47,10 +47,6 @@ class cgyrodata_plot(data.cgyrodata):
 
       return xin
 
-   def wintxt(self,imin,imax,t):
-      s = '[{} < (c_s/a) t < {}]'.format(t[imin],t[imax])
-      return s
-
    def plot_freq(self,xin):
       
       # Function: plot gamma and omega vs time
@@ -442,7 +438,6 @@ class cgyrodata_plot(data.cgyrodata):
       norm   = xin['norm']
       theta  = xin['theta']
 
-      t = self.getnorm(xin['norm'])
       
       if xin['fig'] is None and ftype != 'nox':
          fig = plt.figure(MYDIR,figsize=(xin['lx'],xin['ly']))
@@ -450,57 +445,42 @@ class cgyrodata_plot(data.cgyrodata):
       if moment == 'phi':
          moment = 'e'
   
+      t    = self.getnorm(xin['norm'])
       usec = self.getflux(cflux)
-
-      ns = self.n_species
-
-      field_tag = '\mathrm{Total}'
+      ns   = self.n_species
 
       # Total flux or components
       if fc == 0:
          ys = np.sum(self.ky_flux,axis=(2,3))
       else:
          ys = np.sum(self.ky_flux[:,:,field,:,:],axis=2)
-         if field == 0:
-            field_tag = '\phi'
-         elif field == 1:
-            field_tag = 'A_\parallel'
-         else:
-            field_tag = 'B_\parallel'
 
       # Now, ys -> {n_species,3,nt}
 
       if moment == 'n':
-         ntag = 'Density~flux'
          mtag = '\Gamma'
          ttag = 'G'
          ftag = 'flux_n'
          y = ys[:,0,:]
       elif moment == 'e':
-         ntag = 'Energy~flux'
          mtag = 'Q'
          ttag = 'Q'
          ftag = 'flux_e'
          y = ys[:,1,:]/self.qc
       elif moment == 'v':
          # JC: correct for other norms?
-         ntag = 'Momentum~flux'
          mtag = '\Pi'
          ttag = 'Pi'
          ftag = 'flux_v'
          y = ys[:,2,:]
       elif moment == 's':
          # JC: correct for other norms?
-         ntag = 'Exchange'
          mtag = 'S'
          ttag = 'S'
          ftag = 'exch'
          y = ys[:,3,:]
       else:
          raise ValueError('(plot_flux.py) Unrecognized moment. Try: n,e,v,s')
-
-      if usec:
-         ntag = ntag+'~(central)'
 
       # Normalizations
       if nscale == 0:
@@ -510,13 +490,10 @@ class cgyrodata_plot(data.cgyrodata):
          norm_vec = 1.0/self.dens
          mnorm = '^\mathrm{norm}'
 
-      # Get index for average window
-      imin,imax=time_index(t,w)
-
       color = ['k','m','b','c','g','r']
-      wintxt = self.wintxt(imin,imax,t)
-      
-      print('INFO: (text.py) Average Window:'+wintxt)
+
+      imin,imax=time_index(t,w)
+      mpre,mwin = wintxt(imin,imax,t,user=usec,fc=fc,field=field)
 
       # Otherwise plot
       if not ftype == 'nox':
@@ -524,14 +501,14 @@ class cgyrodata_plot(data.cgyrodata):
          ax.grid(which="both",ls=":")
          ax.grid(which="major",ls=":")
          ax.set_xlabel(self.tstr)
-         ax.set_title(r'$\mathrm{'+ntag+'} \quad '+wintxt+'\quad ['+field_tag+']$')
+         ax.set_title(mpre+mwin)
 
       for ispec in range(ns):
          y_norm = y[ispec,:]*norm_vec[ispec]
          ave   = time_average(y_norm,t,imin,imax)
          y_ave = ave*np.ones(len(t))
          u = specmap(self.mass[ispec],self.z[ispec])
-         label = r'$'+mtag+mnorm+'_{'+u+'}/'+mtag+self.gbnorm+': '+str(round(ave,3))+'$'
+         label = r'$'+mtag+mnorm+'_\mathrm{'+u+'}/'+mtag+self.gbnorm+': '+str(round(ave,3))+'$'
          if not ftype == 'nox':
             # Average
             ax.plot(t[imin:imax+1],y_ave[imin:imax+1],'--',color=color[ispec])
@@ -564,6 +541,143 @@ class cgyrodata_plot(data.cgyrodata):
          print(tag[i]+' '+bstr)
 
 
+   def plot_ky_flux(self,xin):
+
+      w      = xin['w']
+      field  = xin['field']
+      moment = xin['moment']
+      ymin   = xin['ymin']
+      ymax   = xin['ymax']
+      fc     = xin['fc']
+      ftype  = xin['ftype']
+      loc    = xin['loc']
+      nscale = xin['nscale']
+      cflux  = xin['cflux']
+      norm   = xin['norm']
+      bar    = xin['bar']
+      theta  = xin['theta']
+
+      t = self.getnorm(xin['norm'])
+      
+      if self.n_n == 1:
+         print('ERROR: (plot_ky_flux) Plot not available with a single mode.')
+         return
+
+      if moment == 'phi':
+         moment = 'e'
+      
+      ns = self.n_species
+      nn = self.n_n
+
+      if xin['fig'] is None and ftype != 'nox':
+         if ns < 4:
+            nrow = 1 ; ncol = ns
+         elif ns == 4:
+            nrow = 2 ; ncol = 2
+         elif ns > 4:
+            nrow = 2 ; ncol = 3
+         fig = plt.figure(MYDIR,figsize=(xin['ly']*ncol,xin['ly']*nrow))
+
+      usec = self.getflux(cflux)
+      
+      ky = self.kynorm
+
+      if fc == 0:
+         ys = np.sum(self.ky_flux,axis=2)
+      else:
+         ys = self.ky_flux[:,:,field,:,:]
+
+      if moment == 'n':
+         mtag = '\Gamma'
+         ttag = 'G'
+         ftag = 'flux_n'
+         y = ys[:,0,:,:]
+      elif moment == 'e':
+         mtag = 'Q'
+         ttag = 'Q'
+         ftag = 'flux_e'
+         y = ys[:,1,:,:]/self.qc
+      elif moment == 'v':
+         mtag = '\Pi'
+         ttag = 'Pi'
+         ftag = 'flux_v'
+         y = ys[:,2,:,:]
+      elif moment == 's':
+         mtag = 'S'
+         ttag = 'S'
+         ftag = 'exch'
+         y = ys[:,3,:,:]
+      elif moment == 'k':
+         #  JC: needs work
+         mtag = 'I'
+         ttag = 'I'
+         ftag = 'i'
+         self.getbigfield()
+         # I and K
+         ns = 2
+         y = np.zeros([ns,nn,self.n_time])
+         f,ft = self.kxky_select(theta,field,'phi',0)
+         y[0,:,:] = np.sum(abs(f[:,:,:]),axis=0)
+         f,ft = self.kxky_select(theta,field,'k',0)
+         y[1,:,:] = np.sum(abs(f[:,:,:]),axis=0)
+      else:
+         raise ValueError('(plot_ky_flux.py) Invalid moment.')
+      
+      color = ['magenta','k','blue','cyan','red','green']
+
+      imin,imax=time_index(t,w)
+      mpre,mwin = wintxt(imin,imax,t,usec=usec,fc=fc,field=field)
+
+      if ky[-1] < 0.0:
+         ky = -ky
+
+      dk = ky[1]-ky[0]
+    
+      ave = np.zeros((self.n_n,ns))
+      for ispec in range(ns):
+         ave[:,ispec] = time_average(y[ispec,:,:],t,imin,imax)
+
+      # One plot per species
+      for ispec in range(ns):
+         u = specmap(self.mass[ispec],self.z[ispec])
+         if not ftype == 'nox':
+            ax = fig.add_subplot(nrow,ncol,ispec+1)
+               
+            ax.set_xlabel(self.kystr)
+            ax.set_ylabel(r'$'+mtag+'_\mathrm{'+u+'}/'+mtag+self.gbnorm+'$',color='k')
+
+            if ispec < ncol:
+               ax.set_title(mpre+mwin,fontsize=16)
+            if bar == True:
+               ax.bar(ky,ave[:,ispec],width=dk/1.1,color=color[ispec],
+                      alpha=0.5,edgecolor='black',align='center')
+               # Set axis ranges
+               ax.set_xlim([0,ky[-1]+dk])
+            else:
+               ax.grid(which="both",ls=":")
+               ax.grid(which="major",ls=":")
+               ax.set_xscale('log')
+               ax.set_yscale('log')
+               ax.plot(ky[1:],ave[1:,ispec],'o',color='k',markersize=2,alpha=0.6)
+               ax.plot(ky[1:],ave[1:,ispec],color=color[ispec])
+               
+            if ymax != 'auto':
+               ax.set_ylim(top=float(ymax))
+            if ymin != 'auto':
+               ax.set_ylim(bottom=float(ymin))
+               
+         # Maximum
+         j = np.argmax(ave[:,ispec])
+         if j < len(ky)-1 and j > 0:
+            xs,ys = quadratic_max(ky[j-1:j+2],ave[j-1:j+2,ispec])
+         else:
+            xs = ky[-1]
+         print('INFO: (data_plot.py) Max(flux) occurs at ky*rho = {:.3f}'.format(xs))
+
+      if not ftype == 'nox':
+         fig.tight_layout(pad=0.4)
+         
+         
    def plot_rcorr_phi(self,xin):
 
       # Should be checked by Chris after updated form of kxky_select to n_radial-1 points
@@ -592,10 +706,10 @@ class cgyrodata_plot(data.cgyrodata):
 
       color  = ['m','k','b','c']
       xlabel = r'$r/'+self.rhoi+'$'
-      wintxt = self.wintxt(imin,imax,t)
+      mpre,mwin = wintxt(imin,imax,t)
 
       ax = fig.add_subplot(1,1,1)
-      ax.set_title(r'$\mathrm{Average~radial~correlation} \quad '+wintxt+'$')
+      ax.set_title(r'$\mathrm{Average~radial~correlation} \quad $'+mwin)
       ax.set_xlabel(xlabel)
 
       f,ft = self.kxky_select(theta,field,'phi',0)
@@ -665,9 +779,9 @@ class cgyrodata_plot(data.cgyrodata):
       # Get index for average window
       imin,imax=time_index(t,w)
 
-      windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[imax])+']$'
+      mpre,mwin = wintxt(imin,imax,t)
 
-      ax.set_title(windowtxt)
+      ax.set_title(mwin)
 
       nx = self.n_radial-1
       # p=1
@@ -732,10 +846,9 @@ class cgyrodata_plot(data.cgyrodata):
 
       # Get index for average window
       imin,imax=time_index(t,w)
+      mpre,mwin = wintxt(imin,imax,t)
 
-      windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[imax])+']$'
-
-      ax.set_title(windowtxt)
+      ax.set_title(mwin)
       
       # f[p,n,t]
       f,ft = self.kxky_select(theta,0,moment,spec,gbnorm=True)
@@ -782,24 +895,23 @@ class cgyrodata_plot(data.cgyrodata):
 
       if xin['fig'] is None:
          fig = plt.figure(MYDIR,figsize=(xin['lx'],xin['ly']))
+            
+      t = self.getnorm(xin['norm'])  
+      self.getbigfield()
       
+      # Get index for average window
+      imin,imax=time_index(t,w)
+      mpre,mwin = wintxt(imin,imax,t)
+
       #======================================
       # Set figure size and axes
       ax = fig.add_subplot(111)
+      ax.set_title(mwin)
       ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
-      ax.set_xlabel(r'$k_y \rho_s$')
+      ax.set_xlabel(self.kystr)
       ax.set_ylabel(r'$\left\langle k_x \rho_s \right\rangle$')
       #======================================
-      
-      self.getbigfield()
-   
-      t = self.t
-
-      # Get index for average window
-      imin,imax=time_index(t,w)
-      windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[imax])+']$'
-      ax.set_title(windowtxt)
 
       ky = abs(self.ky)
       k0 = 2*np.pi/self.length
@@ -943,8 +1055,6 @@ class cgyrodata_plot(data.cgyrodata):
       else:
          mnorm = ''
 
-      # Determine tmin
-      imin,imax=time_index(t,w)
 
       #============================================================
       # Otherwise plot
@@ -955,11 +1065,12 @@ class cgyrodata_plot(data.cgyrodata):
 
       color = ['k','m','b','c','g','r']
 
-      windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[imax])+']$'
+      imin,imax=time_index(t,w)
+      mpre,mwin = wintxt(imin,imax,t)
 
-      ax.set_title(r'$\mathrm{'+ntag+'} \quad $'+windowtxt)
+      ax.set_title(r'$\mathrm{'+ntag+'} \quad $'+mwin)
     
-      t = -np.pi+2*np.pi*np.arange(0.0,1.0,0.001)
+      a = -np.pi+2*np.pi*np.arange(0.0,1.0,0.001)
 
       for ispec in range(ns):
 
@@ -969,8 +1080,8 @@ class cgyrodata_plot(data.cgyrodata):
          g = np.zeros(len(t))
          g = self.lky_xr[ispec,0] 
          for l in range(1,nl):
-            g = g+2*(np.cos(l*t)*self.lky_xr[ispec,l]-np.sin(l*t)*self.lky_xi[ispec,l])
-         ax.plot(t/(2*np.pi),g,color=color[ispec])
+            g = g+2*(np.cos(l*a)*self.lky_xr[ispec,l]-np.sin(l*a)*self.lky_xi[ispec,l])
+         ax.plot(a/(2*np.pi),g,color=color[ispec])
 
          #---------------------------------
          # Flux partial average over [-e,e]
@@ -1023,160 +1134,6 @@ class cgyrodata_plot(data.cgyrodata):
       fig.tight_layout(pad=0.3)
 
       
-   def plot_ky_flux(self,xin):
-
-      w      = xin['w']
-      field  = xin['field']
-      moment = xin['moment']
-      ymin   = xin['ymin']
-      ymax   = xin['ymax']
-      fc     = xin['fc']
-      ftype  = xin['ftype']
-      loc    = xin['loc']
-      nscale = xin['nscale']
-      cflux  = xin['cflux']
-      norm   = xin['norm']
-      bar    = xin['bar']
-      theta  = xin['theta']
-
-      t = self.getnorm(xin['norm'])
-      
-      if self.n_n == 1:
-         print('ERROR: (plot_ky_flux) Plot not available with a single mode.')
-         return
-
-      if moment == 'phi':
-         moment = 'e'
-      
-      ns = self.n_species
-      nn = self.n_n
-
-      if xin['fig'] is None and ftype != 'nox':
-         if ns < 4:
-            nrow = 1 ; ncol = ns
-         elif ns == 4:
-            nrow = 2 ; ncol = 2
-         elif ns > 4:
-            nrow = 2 ; ncol = 3
-         fig = plt.figure(MYDIR,figsize=(xin['ly']*ncol,xin['ly']*nrow))
-
-      usec = self.getflux(cflux)
-      
-      ky = self.kynorm
-
-      field_tag = '\mathrm{Total}'
-
-      if fc == 0:
-         ys = np.sum(self.ky_flux,axis=2)
-      else:
-         ys = self.ky_flux[:,:,field,:,:]
-         if field == 0:
-            field_tag = '\phi'
-         elif field == 1:
-            field_tag = 'A_\parallel'
-         else:
-            field_tag = 'B_\parallel'
-
-      if moment == 'n':
-         ntag = 'Density~flux'
-         mtag = '\Gamma'
-         ttag = 'G'
-         ftag = 'flux_n'
-         y = ys[:,0,:,:]
-      elif moment == 'e':
-         ntag = 'Energy~flux'
-         mtag = 'Q'
-         ttag = 'Q'
-         ftag = 'flux_e'
-         y = ys[:,1,:,:]/self.qc
-      elif moment == 'v':
-         ntag = 'Momentum~flux'
-         mtag = '\Pi'
-         ttag = 'Pi'
-         ftag = 'flux_v'
-         y = ys[:,2,:,:]
-      elif moment == 's':
-         ntag = 'Exchange'
-         mtag = 'S'
-         ttag = 'S'
-         ftag = 'exch'
-         y = ys[:,3,:,:]
-      elif moment == 'k':
-         #  JC: needs work
-         ntag = 'I'
-         mtag = 'I'
-         ttag = 'I'
-         ftag = 'i'
-         self.getbigfield()
-         # I and K
-         ns = 2
-         y = np.zeros([ns,nn,self.n_time])
-         f,ft = self.kxky_select(theta,field,'phi',0)
-         y[0,:,:] = np.sum(abs(f[:,:,:]),axis=0)
-         f,ft = self.kxky_select(theta,field,'k',0)
-         y[1,:,:] = np.sum(abs(f[:,:,:]),axis=0)
-      else:
-         raise ValueError('(plot_ky_flux.py) Invalid moment.')
-      
-      # Determine tmin
-      imin,imax=time_index(t,w)
-
-      color = ['magenta','k','blue','cyan','red','green']
-
-      if usec:
-         cstr = '~\mathrm{(central)}'
-      else:
-         cstr = ''
-         
-      windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[imax])+']'+cstr+'$'
-
-      if ky[-1] < 0.0:
-         ky = -ky
-
-      dk = ky[1]-ky[0]
-    
-      ave = np.zeros((self.n_n,ns))
-      for ispec in range(ns):
-         ave[:,ispec] = time_average(y[ispec,:,:],self.t,imin,imax)
-
-      # One plot per species
-      for ispec in range(ns):
-         u = specmap(self.mass[ispec],self.z[ispec])
-         if not ftype == 'nox':
-            ax = fig.add_subplot(nrow,ncol,ispec+1)
-               
-            ax.set_xlabel(self.kystr)
-            ax.set_ylabel(r'$'+mtag+'_'+u+'$',color='k')
-            ax.set_title(windowtxt)
-            if bar == True:
-               ax.bar(ky,ave[:,ispec],width=dk/1.1,color=color[ispec],
-                      alpha=0.5,edgecolor='black',align='center')
-               # Set axis ranges
-               ax.set_xlim([0,ky[-1]+dk])
-            else:
-               ax.grid(which="both",ls=":")
-               ax.grid(which="major",ls=":")
-               ax.set_xscale('log')
-               ax.set_yscale('log')
-               ax.plot(ky[1:],ave[1:,ispec],'o',color='k',markersize=2,alpha=0.6)
-               ax.plot(ky[1:],ave[1:,ispec],color=color[ispec])
-               
-            if ymax != 'auto':
-               ax.set_ylim(top=float(ymax))
-            if ymin != 'auto':
-               ax.set_ylim(bottom=float(ymin))
-               
-         # Maximum
-         j = np.argmax(ave[:,ispec])
-         if j < len(ky)-1 and j > 0:
-            xs,ys = quadratic_max(ky[j-1:j+2],ave[j-1:j+2,ispec])
-         else:
-            xs = ky[-1]
-         print('INFO: (data_plot.py) Max(flux) occurs at ky*rho = {:.3f}'.format(xs))
-
-      if not ftype == 'nox':
-         fig.tight_layout(pad=0.3)
-
    def plot_kxky_phi(self,xin):
 
       norm   = xin['norm']
@@ -1228,11 +1185,11 @@ class cgyrodata_plot(data.cgyrodata):
 
       ax = fig.add_subplot(111)
 
-      windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[imax])+']$'
+      mpre,mwin = wintxt(imin,imax,t)
 
       ax.set_xlabel(self.kxstr)
       ax.set_ylabel(self.kystr)
-      ax.set_title(r'$\mathrm{Log} |'+ft+'| \quad $'+windowtxt)
+      ax.set_title(r'$\mathrm{Log} |'+ft+'| \quad $'+mwin)
 
       ax.imshow(y,extent=[xl,xr,0,y0],interpolation='none',cmap='plasma')
       print('INFO: (plot_kxky_phi) min={:.2e} max={:.2e}'.format(np.min(y),np.max(y)))
@@ -1270,9 +1227,9 @@ class cgyrodata_plot(data.cgyrodata):
 
       ax = fig.add_subplot(1,1,1)
 
-      windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[imax])+']$'
+      mpre,mwin = self.wintxt(imin,imax,t,0,0,field)
 
-      ax.set_title(r'$\mathrm{Average~fluctuation~intensity} \quad $'+windowtxt)
+      ax.set_title(r'$\mathrm{Average~fluctuation~intensity} \quad $'+mwin)
       ax.set_xlabel(self.kxstr)
 
       f,ft = self.kxky_select(theta,field,moment,0,gbnorm=True)
@@ -1361,9 +1318,9 @@ class cgyrodata_plot(data.cgyrodata):
 
       ax = fig.add_subplot(1,1,1)
 
-      windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[imax])+']$'
+      mpre,mwin = self.wintxt(imin,imax,t,0,0,field)
 
-      ax.set_title(r'$\mathrm{Average~fluctuation~intensity} \quad $'+windowtxt)
+      ax.set_title(r'$\mathrm{Average~fluctuation~intensity} \quad $'+mwin)
       ax.set_xlabel(self.kxstr)
 
       f,ft = self.kxky_select(theta,field,moment,0,gbnorm=True)
@@ -1446,14 +1403,14 @@ class cgyrodata_plot(data.cgyrodata):
       t = self.t
 
       imin,imax=time_index(self.t,w)
+      mpre,mwin = self.wintxt(imin,imax,t,0,0,field)
 
       ax = fig.add_subplot(1,1,1)
 
       color = ['m','k','b','c']
       xlabel=r'$k$'
-      windowtxt = r'$['+str(t[imin])+' < (c_s/a) t < '+str(t[imax])+']$'
-
-      ax.set_title(r'$\mathrm{Average~fluctuation~intensity~(Legendre)} \quad $'+windowtxt)
+   
+      ax.set_title(r'$\mathrm{Average~fluctuation~intensity~(Legendre)} \quad $'+mwin)
       ax.set_xlabel(xlabel)
 
       y1 = np.zeros([nn])

@@ -138,9 +138,37 @@ def specmap(m_in,z_in):
      name = '?'
 
   return name
-#---------------------------------------------------------------
 
 #---------------------------------------------------------------
+# Generate time window text string
+def wintxt(imin,imax,t,usec=0,fc=0,field=0):
+
+    if usec:
+        cstr = 'domain/half'
+    else:
+        cstr = 'domain/full'
+
+    if fc == 0:
+        fstr = 'field/all'
+    elif field == 0:
+        fstr = '\phi'
+    elif field == 1:
+        fstr = 'A_\parallel'
+    else:
+        fstr = 'B_\parallel'
+
+    pre = '['+cstr+','+fstr+']'
+    win = '[{:.1f} < (c_s/a) t < {:.1f}]'.format(t[imin],t[imax])
+   
+    mpre = r'$\mathrm{'+pre+'}$'
+    mwin = r'$'+win+'$'
+
+    print('INFO: (wintxt.py) Average Window: '+win)
+      
+    return mpre,mwin
+
+#---------------------------------------------------------------
+# Generate smooth profile using exponential integration
 def smooth_pro(x,z,p,n,type='log'):
 
     nx = len(x)
@@ -328,7 +356,7 @@ def indx_theta(i,n):
    return itheta,thetapi
 #---------------------------------------------------------------
 
-def shift_fourier(f,t,imin,imax):
+def shift_fourier(f,imin,imax):
 
     nx = f.shape[0]+1
     nn = f.shape[1]
