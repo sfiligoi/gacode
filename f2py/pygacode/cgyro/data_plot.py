@@ -12,13 +12,13 @@ from . import data
 MYDIR=os.path.basename(os.getcwd())
 
 class cgyrodata_plot(data.cgyrodata):
-      
+
    def plot_dictinit(self):
 
       # Init for OMFIT
-      
+
       xin = {}
-      
+
       xin['fig']    = None
       xin['lx']     = 12
       xin['ly']     = 6
@@ -48,15 +48,15 @@ class cgyrodata_plot(data.cgyrodata):
       return xin
 
    def plot_freq(self,xin):
-      
+
       # Function: plot gamma and omega vs time
 
       if xin['fig'] is None:
          fig = plt.figure(MYDIR,figsize=(xin['lx'],xin['ly']))
 
       # set normalizations
-      t = self.getnorm(xin['norm']) 
-         
+      t = self.getnorm(xin['norm'])
+
       #======================================
       # Omega
       ax = fig.add_subplot(121)
@@ -118,7 +118,7 @@ class cgyrodata_plot(data.cgyrodata):
       ax.set_xlabel(self.kystr)
       ax.set_ylabel(self.fstr[1])
 
-      y2 = self.fnorm[1,:,-1] 
+      y2 = self.fnorm[1,:,-1]
       ax.plot(ky,y2,color='red')
       ax.plot(ky,y2,"o",color='k')
       if len(ky) > 1:
@@ -129,10 +129,10 @@ class cgyrodata_plot(data.cgyrodata):
 
       return 'ky            omega            gamma',ky,y1,y2
 
-   
+
    def plot_error(self,xin):
 
-      t = self.getnorm(xin['norm'])  
+      t = self.getnorm(xin['norm'])
 
       if xin['fig'] is None:
          fig = plt.figure(MYDIR,figsize=(xin['lx'],xin['ly']))
@@ -154,7 +154,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       return
 
-   
+
    def plot_geo(self,xin):
 
       self.getgeo()
@@ -493,7 +493,7 @@ class cgyrodata_plot(data.cgyrodata):
       color = ['k','m','b','c','g','r']
 
       imin,imax=time_index(t,w)
-      mpre,mwin = wintxt(imin,imax,t,user=usec,fc=fc,field=field)
+      mpre,mwin = wintxt(imin,imax,t,usec=usec,fc=fc,field=field)
 
       # Otherwise plot
       if not ftype == 'nox':
