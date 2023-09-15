@@ -14,7 +14,7 @@ subroutine cgyro_field_coefficients
   ! Field equation prefactors, sums.
   !
   allocate(sum_loc(nc,nt1:nt2))
-!$omp parallel do collapse(2) private(iv,iv_loc,is,it,sum_one)
+!$omp parallel do collapse(2) private(iv,iv_loc,is,it,sum_one) shared(sum_loc)
   do itor=nt1,nt2
     do ic=1,nc
       it = it_c(ic)
@@ -68,8 +68,7 @@ subroutine cgyro_field_coefficients
 
   if (n_field > 1) then
 
-     sum_loc(:,:) = 0.0
-!$omp parallel do collapse(2) private(iv,iv_loc,is,it,sum_one)
+!$omp parallel do collapse(2) private(iv,iv_loc,is,it,sum_one) shared(sum_loc)
      do itor=nt1,nt2
        do ic=1,nc
          it = it_c(ic)
@@ -129,21 +128,24 @@ subroutine cgyro_field_coefficients
       enddo
      enddo
 
-     sum_loc(:,:)  = 0.0
+!$omp parallel do collapse(2) shared(sum_loc) &
+!$omp&         private(iv,iv_loc,ir,it,sum_one,is,ix,ie)
      do itor=nt1,nt2
-      do iv=nv1,nv2
-        iv_loc = iv-nv1+1
-        is = is_v(iv)
-        ix = ix_v(iv)
-        ie = ie_v(iv)
-        do ic=1,nc
-           ir = ir_c(ic) 
-           it = it_c(ic)
-           sum_loc(ic,itor) = sum_loc(ic,itor)-w_xi(ix)*w_e(ie)*dens(is) &
+       do ic=1,nc
+         ir = ir_c(ic) 
+         it = it_c(ic)
+         sum_one = 0.0
+         do iv=nv1,nv2
+           iv_loc = iv-nv1+1
+           is = is_v(iv)
+           ix = ix_v(iv)
+           ie = ie_v(iv)
+           sum_one = sum_one - w_xi(ix)*w_e(ie)*dens(is) &
                 *z(is)*jvec_c(1,ic,iv_loc,itor)*jvec_c(3,ic,iv_loc,itor) &
                 *z(is)/temp(is)*dens_rot(it,is)
-        enddo
-      enddo
+         enddo
+         sum_loc(ic,itor) = sum_one
+       enddo
      enddo
 
      call MPI_ALLREDUCE(sum_loc,&
@@ -154,24 +156,26 @@ subroutine cgyro_field_coefficients
           NEW_COMM_1,&
           i_err)
 
-     pb21(:,:) = pb12(:,:)*betae_unit/(-2*dens_ele*temp_ele)
-
-     sum_loc(:,:)  = 0.0
+!$omp parallel do collapse(2) shared(sum_loc) &
+!$omp&         private(iv,iv_loc,ir,it,sum_one,is,ix,ie)
      do itor=nt1,nt2
-      do iv=nv1,nv2
-        iv_loc = iv-nv1+1
-        is = is_v(iv)
-        ix = ix_v(iv)
-        ie = ie_v(iv)
-        do ic=1,nc
-           ir = ir_c(ic) 
-           it = it_c(ic)
-           sum_loc(ic,itor) = sum_loc(ic,itor)+w_xi(ix)*w_e(ie)*dens(is) &
+       do ic=1,nc
+         ir = ir_c(ic) 
+         it = it_c(ic)
+         sum_one = 0.0
+         do iv=nv1,nv2
+           iv_loc = iv-nv1+1
+           is = is_v(iv)
+           ix = ix_v(iv)
+           ie = ie_v(iv)
+           sum_one = sum_one + w_xi(ix)*w_e(ie)*dens(is) &
                 *temp(is)*jvec_c(3,ic,iv_loc,itor)**2 &
                 *(z(is)/temp(is))**2 * dens_rot(it,is)
-        enddo
-      enddo
+         enddo
+         sum_loc(ic,itor) = sum_one
+       enddo
      enddo
+
      call MPI_ALLREDUCE(sum_loc,&
           pb22,&
           size(pb22),&
@@ -180,28 +184,25 @@ subroutine cgyro_field_coefficients
           NEW_COMM_1,&
           i_err)
 
-     pb22(:,:) = 1.0-pb22(:,:)*betae_unit/(-2*dens_ele*temp_ele) 
-
      ! Determinant
+!$omp parallel do collapse(2) shared(sum_loc) private(sum_one)
      do itor=nt1,nt2
-      do ic=1,nc
-        if (k_perp(ic,itor) > 0.0) then
-           sum_loc(ic,itor) = pb11(ic,itor)*pb22(ic,itor)-pb12(ic,itor)*pb21(ic,itor)
-        else
-           sum_loc(ic,itor) = 1.0
-        endif
-      enddo
+       do ic=1,nc
+         pb21(ic,itor) = pb12(ic,itor)*betae_unit/(-2*dens_ele*temp_ele)
+         pb22(ic,itor) = 1.0-pb22(ic,itor)*betae_unit/(-2*dens_ele*temp_ele) 
+
+         if (k_perp(ic,itor) > 0.0) then
+           sum_one = pb11(ic,itor)*pb22(ic,itor)-pb12(ic,itor)*pb21(ic,itor)
+         else
+           sum_one = 1.0
+         endif
+
+         gcoef(3,ic,itor) = pb11(ic,itor)/sum_one
+         gcoef(1,ic,itor) = pb22(ic,itor)/sum_one
+         gcoef(4,ic,itor) = -pb12(ic,itor)/sum_one
+         gcoef(5,ic,itor) = -pb21(ic,itor)/sum_one
+       enddo
      enddo
-
-     pb11 = pb11/sum_loc
-     pb12 = pb12/sum_loc
-     pb21 = pb21/sum_loc
-     pb22 = pb22/sum_loc
-
-     gcoef(3,:,:) = pb11
-     gcoef(1,:,:) = pb22
-     gcoef(4,:,:) = -pb12
-     gcoef(5,:,:) = -pb21
 
      deallocate(pb11)
      deallocate(pb12)
