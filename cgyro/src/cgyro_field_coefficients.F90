@@ -6,28 +6,28 @@ subroutine cgyro_field_coefficients
   implicit none
 
   integer :: ir,it,is,ie,ix,itor
-  real, dimension(nc,nt1:nt2) :: sum_loc
+  real :: sum_one
+  real, dimension(:,:), allocatable :: sum_loc
   real, dimension(:,:), allocatable :: pb11,pb12,pb21,pb22
  
   !-------------------------------------------------------------------------
   ! Field equation prefactors, sums.
   !
-  sum_loc(:,:) = 0.0
-!$omp parallel private(iv_loc,is,ic,it)
-!$omp do collapse(2) reduction(+:sum_loc)
+  allocate(sum_loc(nc,nt1:nt2))
+!$omp parallel do collapse(2) private(iv,iv_loc,is,it,sum_one)
   do itor=nt1,nt2
-   do iv=nv1,nv2
-     iv_loc = iv-nv1+1
-     is = is_v(iv)
-     do ic=1,nc
-        it = it_c(ic)
-        sum_loc(ic,itor) = sum_loc(ic,itor)+vfac(iv_loc)*dens_rot(it,is) &
+    do ic=1,nc
+      it = it_c(ic)
+      sum_one = 0.0
+      do iv=nv1,nv2
+        iv_loc = iv-nv1+1
+        is = is_v(iv)
+        sum_one = sum_one + vfac(iv_loc)*dens_rot(it,is) &
              *(1.0-jvec_c(1,ic,iv_loc,itor)**2) 
-     enddo
-   enddo
+      enddo
+      sum_loc(ic,itor) = sum_one
+    enddo
   enddo
-!$omp end do
-!$omp end parallel
 
   call MPI_ALLREDUCE(sum_loc,&
        sum_den_x,&
@@ -69,21 +69,20 @@ subroutine cgyro_field_coefficients
   if (n_field > 1) then
 
      sum_loc(:,:) = 0.0
-!$omp parallel private(iv,iv_loc,is,ic,it)
-!$omp do collapse(2) reduction(+:sum_loc)
+!$omp parallel do collapse(2) private(iv,iv_loc,is,it,sum_one)
      do itor=nt1,nt2
-      do iv=nv1,nv2
-        iv_loc = iv-nv1+1
-        is = is_v(iv)
-        do ic=1,nc
-           it = it_c(ic)
-           sum_loc(ic,itor) = sum_loc(ic,itor)+vfac(iv_loc)*dens_rot(it,is) &
+       do ic=1,nc
+         it = it_c(ic)
+         sum_one = 0.0
+         do iv=nv1,nv2
+           iv_loc = iv-nv1+1
+           is = is_v(iv)
+           sum_one = sum_one + vfac(iv_loc)*dens_rot(it,is) &
                 *jvec_c(2,ic,iv_loc,itor)**2 
-        enddo
-      enddo
+         enddo
+         sum_loc(ic,itor) = sum_one
+       enddo
      enddo
-!$omp end do
-!$omp end parallel
 
      call MPI_ALLREDUCE(sum_loc,&
           sum_cur_x,&
@@ -209,6 +208,8 @@ subroutine cgyro_field_coefficients
      deallocate(pb21)
      deallocate(pb22)
   endif
+
+  deallocate(sum_loc)
 
 !$omp parallel do private(iv,iv_loc,is,ie,ix,ic,it,ic_loc,ir) shared(gcoef,dvjvec_c,dvjvec_v)
   do itor=nt1,nt2
