@@ -695,7 +695,7 @@ subroutine write_timers(datafile)
         open(unit=io,file=datafile,status='replace')
         write(io,'(a)') 'Setup time'
         write(io,'(1x,9(a11,1x))') timer_cpu_tag(1:5)
-        write(io,'(9(1pe10.3,2x))') &
+        write(io,'(9(f10.3,2x))') &
              timer_lib_time('input'),&
              timer_lib_time('str_init'),&
              timer_lib_time('nl_init'),&
@@ -715,7 +715,7 @@ subroutine write_timers(datafile)
 
      if (i_proc == 0) then
         open(unit=io,file=datafile,status='old',position='append')
-        write(io,'(14(1pe10.3,1x))') &
+        write(io,'(14(f10.3,1x))') &
              timer_lib_time('str'),& 
              timer_lib_time('str_mem'),&
              timer_lib_time('str_comm'),& 
