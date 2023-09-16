@@ -694,12 +694,13 @@ subroutine write_timers(datafile)
      if (i_proc == 0) then
         open(unit=io,file=datafile,status='replace')
         write(io,'(a)') 'Setup time'
-        write(io,'(1x,9(a11,1x))') &
-             'input',&
-             'str_init',&
-             'nl_init',&
-             'coll_init',&
-             'io_init'
+        ! align for f10.3, i.e. at least 6 chars, last empty
+        write(io,'(1x,9(a10,2x))') &
+             '    input ', &
+             ' str_init ', &
+             '  nl_init ', &
+             'coll_init ', &
+             '  io_init '
         write(io,'(9(f10.3,2x))') &
              timer_lib_time('input'),&
              timer_lib_time('str_init'),&
@@ -707,21 +708,22 @@ subroutine write_timers(datafile)
              timer_lib_time('coll_init'),&
              timer_lib_time('io_init')
         write(io,'(a)') 'Run time'
+        ! align for f10.3, i.e. at least 6 chars, last empty
         write(io,'(1x,14(a10,1x))') &
-             'str',& 
-             'str_mem',&
-             'str_comm',& 
-             'nl',& 
-             'nl_mem',&
-             'nl_comm',&
-             'field',&
-             'field_com',&
-             'shear',&
-             'coll',&
-             'coll_mem',&
-             'coll_comm',&
-             'io',& 
-             'TOTAL' 
+             '    str   ', &
+             '  str_mem ', &
+             ' str_comm ', &
+             '    nl    ', &
+             '   nl_mem ', &
+             '  nl_comm ', &
+             '    field ', &
+             'field_com ', &
+             '    shear ', &
+             '    coll  ', &
+             ' coll_mem ', &
+             'coll_comm ', &
+             '    io    ', &
+             '    TOTAL '
         close(io)
      endif
 
