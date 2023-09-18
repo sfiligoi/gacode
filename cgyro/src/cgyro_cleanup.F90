@@ -39,6 +39,10 @@ subroutine cgyro_cleanup
      ccl_del_device(vel)
      deallocate(vel)
   endif
+  if(allocated(vel2))        then
+     ccl_del_device(vel2)
+     deallocate(vel2)
+  endif
   if(allocated(w_e))           deallocate(w_e)
   if(allocated(e_deriv1_mat))  deallocate(e_deriv1_mat)
   if(allocated(e_deriv1_rot_mat))  deallocate(e_deriv1_rot_mat)

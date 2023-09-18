@@ -76,6 +76,7 @@ subroutine cgyro_init_manager
   call timer_lib_in('str_init')
   allocate(energy(n_energy))
   allocate(vel(n_energy))
+  allocate(vel2(n_energy))
   allocate(w_e(n_energy))
   allocate(e_deriv1_mat(n_energy,n_energy))
   allocate(e_deriv1_rot_mat(n_energy,n_energy))
@@ -102,6 +103,13 @@ subroutine cgyro_init_manager
   n_low_energy = 0
 
   vel(:) = sqrt(energy(:))
+  vel2(:) = sqrt(2.0*energy(:))
+
+#if defined(OMPGPU)
+!$omp target enter data map(to:vel,vel2)
+#elif defined(_OPENACC)
+!$acc enter data copyin(vel,vel2)
+#endif
 
   e_deriv1_rot_mat(:,:) = e_deriv1_mat(:,:)
   if (e_fix == 2) then

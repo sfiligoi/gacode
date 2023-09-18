@@ -37,7 +37,7 @@ subroutine cgyro_zftest_em
         it = it_c(ic)
 
         arg = k_perp(ic,itor)*rho*vth(is)*mass(is)/(z(is)*bmag(it)) &
-             *sqrt(2.0*energy(ie))*sqrt(1.0-xi(ix)**2)
+             *vel2(ie)*sqrt(1.0-xi(ix)**2)
 
         sum_loc(is,it,itor) = sum_loc(is,it,itor) & 
              + w_xi(ix)*w_e(ie)*energy(ie)*(1.0-xi(ix)**2) &
@@ -70,7 +70,7 @@ subroutine cgyro_zftest_em
         it = it_c(ic)
 
         arg = k_perp(ic,itor)*rho*vth(is)*mass(is)/(z(is)*bmag(it)) &
-             *sqrt(2.0*energy(ie))*sqrt(1.0-xi(ix)**2)
+             *vel2(ie)*sqrt(1.0-xi(ix)**2)
 
         sum_loc(is,it,itor) = sum_loc(is,it,itor) & 
              + w_xi(ix)*w_e(ie)*energy(ie)*(1.0-xi(ix)**2) &
@@ -108,7 +108,7 @@ subroutine cgyro_zftest_em
 
         if (px(ir) /= 0) then
            arg = k_perp(ic,itor)*rho*vth(is)*mass(is)/(z(is)*bmag(it)) &
-                *sqrt(2.0*energy(ie))*sqrt(1.0-xi(ix)**2)           
+                *vel2(ie)*sqrt(1.0-xi(ix)**2)           
 
 
            h_x(ic,iv_loc,itor) = z(is)/temp(is) * (2.0 - bessel_j0(arg)) &

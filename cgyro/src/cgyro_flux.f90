@@ -68,7 +68,7 @@ subroutine cgyro_flux
      dv = w_xi(ix)*w_e(ie)
 
      ! Parallel velocity
-     vpar = vth(is)*sqrt(2.0)*vel(ie)*xi(ix)
+     vpar = vth(is)*vel2(ie)*xi(ix)
 
      do ic=1,nc
 
@@ -115,7 +115,7 @@ subroutine cgyro_flux
      dv = w_xi(ix)*w_e(ie)
 
      ! Parallel velocity
-     vpar = vth(is)*sqrt(2.0)*vel(ie)*xi(ix)
+     vpar = vth(is)*vel2(ie)*xi(ix)
 
      do ic=1,nc
 
