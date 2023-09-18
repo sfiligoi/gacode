@@ -65,7 +65,7 @@ subroutine cgyro_flux
      ie = ie_v(iv)
 
      ! Integration weight
-     dv = w_xi(ix)*w_e(ie)
+     dv = w_exi(ie,ix)
 
      ! Parallel velocity
      vpar = vth(is)*vel2(ie)*xi(ix)
@@ -112,7 +112,7 @@ subroutine cgyro_flux
      ie = ie_v(iv)
 
      ! Integration weight
-     dv = w_xi(ix)*w_e(ie)
+     dv = w_exi(ie,ix)
 
      ! Parallel velocity
      vpar = vth(is)*vel2(ie)*xi(ix)

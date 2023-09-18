@@ -51,6 +51,7 @@ subroutine cgyro_cleanup
      deallocate(xi)
   endif
   if(allocated(w_xi))          deallocate(w_xi)
+  if(allocated(w_exi))         deallocate(w_exi)
   if(allocated(xi_lor_mat))    deallocate(xi_lor_mat)
   if(allocated(xi_deriv_mat))  deallocate(xi_deriv_mat)
   

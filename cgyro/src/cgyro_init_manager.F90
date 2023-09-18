@@ -128,6 +128,13 @@ subroutine cgyro_init_manager
   call pseudo_legendre(n_xi,xi,w_xi,xi_deriv_mat,xi_lor_mat)
   w_xi = 0.5*w_xi
 
+  allocate(w_ex(n_energy,n_xi))
+  do ix=1,n_xi
+     do ie=1,n_energy
+        w_ex(ie,ix) = w_e(ie)*w_x(ix)
+     enddo
+  enddo
+
   allocate(theta(n_theta))
   allocate(thetab(n_theta,n_radial/box_size))
   allocate(w_theta(n_theta))

@@ -195,7 +195,7 @@ subroutine cgyro_init_arrays
      ie = ie_v(iv)
      do ic=1,nc
         res_loc(ic,is,itor) = res_loc(ic,is,itor) + &
-                w_xi(ix)*w_e(ie)*jvec_c(1,ic,iv_loc,itor)**2*res_weight(ix,ie)
+                w_exi(ie,ix)*jvec_c(1,ic,iv_loc,itor)**2*res_weight(ix,ie)
      enddo
    enddo
   enddo
@@ -218,7 +218,7 @@ subroutine cgyro_init_arrays
      ix = ix_v(iv)
      ie = ie_v(iv)
      do ic=1,nc
-        upfac1(ic,iv_loc,itor) = w_e(ie)*w_xi(ix)*abs(xi(ix))*vel(ie) * &
+        upfac1(ic,iv_loc,itor) = w_exi(ie,ix)*abs(xi(ix))*vel(ie) * &
                 jvec_c(1,ic,iv_loc,itor)
         upfac2(ic,iv_loc,itor) = jvec_c(1,ic,iv_loc,itor)*res_weight(ix,ie)/ &
                 res_norm(ic,is,itor)
@@ -249,7 +249,7 @@ subroutine cgyro_init_arrays
      ix = ix_v(iv)
      ie = ie_v(iv)
 
-     vfac(iv_loc) = w_xi(ix)*w_e(ie)*z(is)**2/temp(is)*dens(is)
+     vfac(iv_loc) = w_exi(ie,ix)*z(is)**2/temp(is)*dens(is)
 
   enddo
 
@@ -259,7 +259,7 @@ subroutine cgyro_init_arrays
      do ie=1,n_energy
         do ix=1,n_xi
            do it=1,n_theta
-              sum_den_h(it) = sum_den_h(it) + w_xi(ix)*w_e(ie) &
+              sum_den_h(it) = sum_den_h(it) + w_exi(ie,ix) &
                    *z(is)**2/temp(is)*dens(is)*dens_rot(it,is)
            enddo
         enddo

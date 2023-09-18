@@ -140,7 +140,7 @@ subroutine cgyro_field_coefficients
            is = is_v(iv)
            ix = ix_v(iv)
            ie = ie_v(iv)
-           sum_one = sum_one - w_xi(ix)*w_e(ie)*dens(is) &
+           sum_one = sum_one - w_exi(ie,ix)*dens(is) &
                 *z(is)*jvec_c(1,ic,iv_loc,itor)*jvec_c(3,ic,iv_loc,itor) &
                 *z(is)/temp(is)*dens_rot(it,is)
          enddo
@@ -168,7 +168,7 @@ subroutine cgyro_field_coefficients
            is = is_v(iv)
            ix = ix_v(iv)
            ie = ie_v(iv)
-           sum_one = sum_one + w_xi(ix)*w_e(ie)*dens(is) &
+           sum_one = sum_one + w_exi(ie,ix)*dens(is) &
                 *temp(is)*jvec_c(3,ic,iv_loc,itor)**2 &
                 *(z(is)/temp(is))**2 * dens_rot(it,is)
          enddo
@@ -230,7 +230,7 @@ subroutine cgyro_field_coefficients
      ix = ix_v(iv)
      do ic=1,nc
         it = it_c(ic)
-        dvjvec_c(:,ic,iv_loc,itor) = dens_rot(it,is)*w_e(ie)*w_xi(ix)*z(is)*dens(is)* &
+        dvjvec_c(:,ic,iv_loc,itor) = dens_rot(it,is)*w_exi(ie,ix)*z(is)*dens(is)* &
              jvec_c(:,ic,iv_loc,itor)
      enddo
    enddo
@@ -241,7 +241,7 @@ subroutine cgyro_field_coefficients
         is = is_v(iv)
         ix = ix_v(iv)
         ie = ie_v(iv)
-        dvjvec_v(:,ic_loc,itor,iv) = dens_rot(it,is)*w_e(ie)*w_xi(ix)*z(is)*dens(is)* &
+        dvjvec_v(:,ic_loc,itor,iv) = dens_rot(it,is)*w_exi(ie,ix)*z(is)*dens(is)* &
              jvec_v(:,ic_loc,itor,iv)
      enddo
    enddo

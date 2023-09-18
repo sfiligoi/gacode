@@ -324,6 +324,7 @@ module cgyro_globals
   integer, dimension(:), allocatable :: px
   real, dimension(:), allocatable :: energy, vel, vel2, w_e
   real, dimension(:), allocatable :: xi, w_xi
+  real, dimension(:,:), allocatable :: w_exi
   real, dimension(:,:), allocatable :: xi_deriv_mat, xi_lor_mat
   real, dimension(:,:), allocatable :: e_deriv1_mat, e_deriv1_rot_mat
   !

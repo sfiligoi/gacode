@@ -40,7 +40,7 @@ subroutine cgyro_zftest_em
              *vel2(ie)*sqrt(1.0-xi(ix)**2)
 
         sum_loc(is,it,itor) = sum_loc(is,it,itor) & 
-             + w_xi(ix)*w_e(ie)*energy(ie)*(1.0-xi(ix)**2) &
+             + w_exi(ie,ix)*energy(ie)*(1.0-xi(ix)**2) &
              *(2.0*(bessel_j1(arg)/arg)*(2.0-bessel_j0(arg)) -1.0)
      enddo
    enddo
@@ -73,7 +73,7 @@ subroutine cgyro_zftest_em
              *vel2(ie)*sqrt(1.0-xi(ix)**2)
 
         sum_loc(is,it,itor) = sum_loc(is,it,itor) & 
-             + w_xi(ix)*w_e(ie)*energy(ie)*(1.0-xi(ix)**2) &
+             + w_exi(ie,ix)*energy(ie)*(1.0-xi(ix)**2) &
              *2.0*(bessel_j1(arg)/arg)*(2.0-bessel_j0(arg))*(energy(ie)-1.5)
      enddo
    enddo
