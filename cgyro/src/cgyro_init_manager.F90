@@ -51,7 +51,7 @@ subroutine cgyro_init_manager
 #endif
 
   character(len=128) :: msg
-  integer :: ie
+  integer :: ie,ix
 
   if (hiprec_flag == 1) then
      fmtstr  = '(es16.9)'
@@ -128,10 +128,10 @@ subroutine cgyro_init_manager
   call pseudo_legendre(n_xi,xi,w_xi,xi_deriv_mat,xi_lor_mat)
   w_xi = 0.5*w_xi
 
-  allocate(w_ex(n_energy,n_xi))
+  allocate(w_exi(n_energy,n_xi))
   do ix=1,n_xi
      do ie=1,n_energy
-        w_ex(ie,ix) = w_e(ie)*w_x(ix)
+        w_exi(ie,ix) = w_e(ie)*w_xi(ix)
      enddo
   enddo
 

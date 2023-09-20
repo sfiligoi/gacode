@@ -250,7 +250,7 @@ subroutine cgyro_init_collision
 !$omp& shared(ae_flag,lambda_debye,dens_ele,temp_ele,dens_rot,dens2_rot) &
 !$omp& shared(betae_unit,sum_den_h) &
 !$omp& shared(it_c,ir_c,px,is_v,ix_v,ie_v,ctest,xi_deriv_mat) &
-!$omp& shared(temp,jvec_v,omega_trap,dens,energy,vel) &
+!$omp& shared(temp,jvec_v,omega_trap,dens,energy,vel,vel2) &
 !$omp& shared(omega_rot_trap,omega_rot_u,e_deriv1_mat,e_deriv1_rot_mat,e_max,bessel) &
 !$omp& shared(xi_lor_mat) &
 !$omp& shared(k_perp,vth,mass,z,bmag,nu_d,xi,nu_par,w_e,w_exi) &
