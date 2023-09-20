@@ -314,6 +314,7 @@ subroutine cgyro_init_collision
                          * xi(jx) * w_exi(je,jx) / rs(is,js)
              !else
              !   cmat_loc(iv,jv) = 0
+             endif
            enddo
        enddo
 
@@ -425,6 +426,7 @@ subroutine cgyro_init_collision
                                * rsvect1(js,is,jx,je) ) 
                     !else
                     !   cmat_loc(iv,jv) = 0
+                    endif
                  enddo
               enddo
         endif
