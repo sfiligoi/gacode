@@ -342,7 +342,7 @@ subroutine cgyro_init_collision
                                * vel2(je) * xi(jx)
                        enddo
                     enddo
-                    rsvt = rsvtmp * vth(is)
+                    rsvtmp = rsvtmp * vth(is)
                     rsvec(is,js,ix,ie) = rsvtmp
                     ! int v_par C_test_ab(v_par f0a,f0b) / n_0a
                     rs(is,js) = rs(is,js) + w_exi(ie,ix) * dens(is) &
@@ -367,8 +367,8 @@ subroutine cgyro_init_collision
                                   * w_exi(je,jx)
                           enddo
                        enddo
-                       rsvt = rsvtmp * vth(is)
-                       rsvec0(is,js,ix,ie) = rsvtmp
+                       rsvtmp = rsvtmp * vth(is)
+                       rsvect0(is,js,ix,ie) = rsvtmp
                    enddo
                  enddo
               enddo
@@ -490,7 +490,7 @@ subroutine cgyro_init_collision
                                * w_exi(je,jx)
                           enddo
                        enddo
-                       rsvec0(is,js,ix,ie) = rsvtmp
+                       rsvect0(is,js,ix,ie) = rsvtmp
                     enddo
                  enddo
               enddo
