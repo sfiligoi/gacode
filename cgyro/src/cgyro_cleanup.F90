@@ -82,6 +82,7 @@ subroutine cgyro_cleanup
   if(allocated(lambda_rot))          deallocate(lambda_rot)
   if(allocated(dlambda_rot))         deallocate(dlambda_rot)
   if(allocated(dens_rot))            deallocate(dens_rot)
+  if(allocated(dens2_rot))           deallocate(dens2_rot)
   if(allocated(dens_ele_rot))        deallocate(dens_ele_rot)
   if(allocated(dens_avg_rot))        deallocate(dens_avg_rot)
   if(allocated(dlnndr_avg_rot))      deallocate(dlnndr_avg_rot)

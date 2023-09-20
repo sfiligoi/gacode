@@ -161,6 +161,7 @@ subroutine cgyro_init_manager
   allocate(lambda_rot(n_theta,n_species))
   allocate(dlambda_rot(n_theta,n_species))
   allocate(dens_rot(n_theta,n_species))
+  allocate(dens2_rot(n_theta,n_species))
   allocate(dens_ele_rot(n_theta))
   allocate(dens_avg_rot(n_species))
   allocate(dlnndr_avg_rot(n_species))

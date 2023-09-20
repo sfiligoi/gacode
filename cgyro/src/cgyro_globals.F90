@@ -494,7 +494,7 @@ module cgyro_globals
   ! for centrifugal rotation
   real, dimension(:,:), allocatable :: lambda_rot
   real, dimension(:,:), allocatable :: dlambda_rot
-  real, dimension(:,:), allocatable :: dens_rot
+  real, dimension(:,:), allocatable :: dens_rot,dens2_rot
   real, dimension(:),   allocatable :: dens_ele_rot
   real, dimension(:),   allocatable :: dens_avg_rot
   real, dimension(:),   allocatable :: dlnndr_avg_rot

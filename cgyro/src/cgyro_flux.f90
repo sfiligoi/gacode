@@ -79,7 +79,7 @@ subroutine cgyro_flux
 
         if (itp(it) > 0) then
            cprod = cap_h_c(ic,iv_loc,itor)*dvjvec_c(1,ic,iv_loc,itor)/z(is)
-           cn    = dv*z(is)*dens(is)*dens_rot(it,is)/temp(is)
+           cn    = dv*z(is)*dens2_rot(it,is)/temp(is)
 
            ! Density moment: (delta n_a)/(n_norm rho_norm)
            moment_loc(ir,itp(it),is,itor,1) = moment_loc(ir,itp(it),is,itor,1)-(cn*field(1,ic,itor)-cprod)
@@ -155,7 +155,7 @@ subroutine cgyro_flux
 
         enddo
 
-        dvr  = w_theta(it)*dens_rot(it,is)*dens(is)*dv
+        dvr  = w_theta(it)*dens2_rot(it,is)*dv
         erot = (energy(ie)+lambda_rot(it,is))*temp(is)
 
         ! 1. Density flux: Gamma_a
