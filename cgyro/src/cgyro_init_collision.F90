@@ -54,9 +54,9 @@ subroutine cgyro_init_collision
   klor_fac(:,:) = 0.0
   kdiff_fac(:,:) = 0.0
   
-  do ie=1,n_energy
+  do js=1,n_species
      do is=1,n_species
-        do js=1,n_species
+        do ie=1,n_energy
 
            xa = vel(ie)
            xb = xa*vth(is)/vth(js)
@@ -189,33 +189,38 @@ subroutine cgyro_init_collision
   allocate(cmat_loc(nv,nv))
 
   ! Collision test particle component
-  ctest = 0.0
+  ! ctest
 
   ! Lorentz
-  do is=1,n_species
-     do ix=1,n_xi
-        do ie=1,n_energy
-           do js=1,n_species
-              do jx=1,n_xi
-                 je = ie
-                 ctest(is,js,ix,jx,ie,je) &
-                      = ctest(is,js,ix,jx,ie,je) &
-                      + xi_lor_mat(ix,jx) *0.5*nu_d(ie,is,js)
+!$omp parallel do collapse(2) private(is,js,ix,jx,ie,je)     
+  do je=1,n_energy
+     do ie=1,n_energy
+        if (je == ie ) then
+           do jx=1,n_xi
+              do ix=1,n_xi
+                 do js=1,n_species
+                    do is=1,n_species
+                       ctest(is,js,ix,jx,ie,je) = &
+                             + xi_lor_mat(ix,jx) *0.5*nu_d(ie,is,js)
+                    enddo
+                 enddo
               enddo
            enddo
-        enddo
+        else
+           ctest(:,:,:,:,ie,je) = 0
+        endif
      enddo
   enddo
 
   ! Diffusion
   if (collision_model == 4 .and. collision_ene_diffusion == 1) then
-!$omp parallel do collapse(5) private(is,ix,ie,js,je,jx)     
-     do is=1,n_species 
-        do ix=1,n_xi
-           do ie=1,n_energy
+!$omp parallel do collapse(2) private(is,js,ix,jx,ie,je)     
+     do je=1,n_energy
+        do ie=1,n_energy
+           do ix=1,n_xi
+              jx = ix
               do js=1,n_species
-                 do je=1,n_energy
-                    jx = ix
+                 do is=1,n_species
                     ! From K. Hallatschek
                     ! self-adjoint part of ctest written self-adjointly
                     ctest(is,js,ix,jx,ie,je) = ctest(is,js,ix,jx,ie,je) &
@@ -279,8 +284,8 @@ subroutine cgyro_init_collision
 
      case(2)
      if (collision_mom_restore == 1) then
-        do is=1,n_species
-           do js=1,n_species
+        do js=1,n_species
+           do is=1,n_species
               rs(is,js) = 0.0
               do ie=1,n_energy
                  rs(is,js) = rs(is,js) + w_e(ie)*nu_d(ie,is,js)*energy(ie)
@@ -288,28 +293,29 @@ subroutine cgyro_init_collision
            enddo
         enddo
 
+        do jv=1,nv
+           js = is_v(jv)
+           jx = ix_v(jv)
+           je = ie_v(jv)
+
            do iv=1,nv  
               is = is_v(iv)
               ix = ix_v(iv)
               ie = ie_v(iv)
 
-              do jv=1,nv
-                 js = is_v(jv)
-                 jx = ix_v(jv)
-                 je = ie_v(jv)
-
-                 if (abs(rs(is,js)) > epsilon(0.0)) then
-                    cmat_loc(iv,jv) = &
-                         cmat_loc(iv,jv) &
+              if (abs(rs(is,js)) > epsilon(0.0)) then
+                 ! we know we are the first one to modify cmat_loc, so no need for +=
+                 cmat_loc(iv,jv) = &
                          + 3.0 * (mass(js)/mass(is)) &
                          * dens2_rot(it,js) / dens(is)&
                          * (vth(js)/vth(is)) * nu_d(ie,is,js) &
                          * vel(ie) * xi(ix) &
                          * nu_d(je,js,is) * vel(je) &
                          * xi(jx) * w_exi(je,jx) / rs(is,js)
-                 endif
-              enddo
+             !else
+             !   cmat_loc(iv,jv) = 0
            enddo
+       enddo
 
      endif
 
@@ -324,12 +330,12 @@ subroutine cgyro_init_collision
         rsvect0 = 0.0
         rs(:,:) = 0.0
         
-        do is=1,n_species
-           do js=1,n_species
-              do ix=1,n_xi
-                 do jx=1,n_xi
-                    do ie=1,n_energy
-                       do je=1,n_energy
+        do ie=1,n_energy
+           do ix=1,n_xi
+              do js=1,n_species
+                 do is=1,n_species
+                    do je=1,n_energy
+                       do jx=1,n_xi
                           rsvec(is,js,ix,ie) = rsvec(is,js,ix,ie) &
                                + ctest(is,js,ix,jx,ie,je) &
                                * vel2(je) * xi(jx) * vth(is)
@@ -339,12 +345,7 @@ subroutine cgyro_init_collision
                                * w_exi(je,jx) * vth(is)
                        enddo
                     enddo
-                 enddo
-              enddo
-
-              ! int v_par C_test_ab(v_par f0a,f0b) / n_0a
-              do ix=1,n_xi
-                 do ie=1,n_energy
+                    ! int v_par C_test_ab(v_par f0a,f0b) / n_0a
                     rs(is,js) = rs(is,js) + w_exi(ie,ix) * dens(is) &
                          * rsvec(is,js,ix,ie) * vel2(ie) * xi(ix) &
                          * vth(is)
@@ -354,35 +355,37 @@ subroutine cgyro_init_collision
         enddo
 
         if (collision_kperp == 0) then
+           do jv=1,nv
+              js = is_v(jv)
+              jx = ix_v(jv)
+              je = ie_v(jv)
+
               do iv=1,nv  
                  is = is_v(iv)
                  ix = ix_v(iv)
                  ie = ie_v(iv)
 
-                 do jv=1,nv
-                    js = is_v(jv)
-                    jx = ix_v(jv)
-                    je = ie_v(jv)
-
-                    if (abs(rs(is,js))>epsilon(0.0)) then
-                       cmat_loc(iv,jv) &
-                            = cmat_loc(iv,jv) &
+                 if (abs(rs(is,js))>epsilon(0.0)) then
+                    ! we know we are the first one to modify cmat_loc, so no need for +=
+                    cmat_loc(iv,jv) = &
                             - mass(js)/mass(is) * dens2_rot(it,js) &
                             * rsvec(is,js,ix,ie) / rs(is,js) &
                             * rsvect0(js,is,jx,je)
-                    endif
-                 enddo
+                 !else
+                 !   cmat_loc(iv,jv) = 0
+                 endif
               enddo
+           enddo
 
         else
               rsvect0(:,:,:,:) = 0.0
               rsvect1(:,:,:,:) = 0.0
-              do is=1,n_species
-                 do js=1, n_species
-                    do ix=1,n_xi
-                       do jx=1,n_xi
-                          do ie=1,n_energy
-                             do je=1,n_energy
+              do ie=1,n_energy
+                 do ix=1,n_xi
+                    do js=1,n_species
+                       do is=1,n_species
+                          do je=1,n_energy
+                             do jx=1,n_xi
                                 rsvect0(is,js,ix,ie) = rsvect0(is,js,ix,ie) &
                                      + ctest(is,js,jx,ix,je,ie) &
                                      * vel2(je) * xi(jx) &
@@ -400,32 +403,28 @@ subroutine cgyro_init_collision
                  enddo
               enddo
               
-              do iv=1,nv  
-                 is = is_v(iv)
-                 ix = ix_v(iv)
-                 ie = ie_v(iv)
+              do jv=1,nv
+                 js = is_v(jv)
+                 jx = ix_v(jv)
+                 je = ie_v(jv)
 
-                 do jv=1,nv
-                    js = is_v(jv)
-                    jx = ix_v(jv)
-                    je = ie_v(jv)
+                 do iv=1,nv  
+                    is = is_v(iv)
+                    ix = ix_v(iv)
+                    ie = ie_v(iv)
 
                     if (abs(rs(is,js)) > epsilon(0.)) then 
-                       cmat_loc(iv,jv) &
-                            = cmat_loc(iv,jv) &
-                            - mass(js)/mass(is) &
-                            * dens2_rot(it,js) &
-                            * rsvec(is,js,ix,ie) &
-                            * bessel(is,ix,ie,0,ic_loc,itor) / rs(is,js) &
-                            * rsvect0(js,is,jx,je)
-                       cmat_loc(iv,jv) &
-                            = cmat_loc(iv,jv) &
+                       ! we know we are the first one to modify cmat_loc, so no need for +=
+                       cmat_loc(iv,jv) = &
                             - mass(js)/mass(is) &
                             * dens2_rot(it,js) &
                             * rsvec(is,js,ix,ie) / rs(is,js) &
-                            * bessel(is,ix,ie,1,ic_loc,itor) &
-                            * rsvect1(js,is,jx,je) 
-                    endif
+                            * (  bessel(is,ix,ie,0,ic_loc,itor) &
+                               * rsvect0(js,is,jx,je) &
+                               + bessel(is,ix,ie,1,ic_loc,itor) &
+                               * rsvect1(js,is,jx,je) ) 
+                    !else
+                    !   cmat_loc(iv,jv) = 0
                  enddo
               enddo
         endif
@@ -441,12 +440,12 @@ subroutine cgyro_init_collision
         rsvect0 = 0.0
         rs(:,:) = 0.0
 
-        do is=1,n_species
-           do js=1,n_species
-              do ix=1,n_xi
-                 do jx=1,n_xi
-                    do ie=1,n_energy
-                       do je=1,n_energy
+        do ie=1,n_energy
+           do ix=1,n_xi
+              do js=1,n_species
+                 do is=1,n_species
+                    do je=1,n_energy
+                       do jx=1,n_xi
                           rsvec(is,js,ix,ie) = rsvec(is,js,ix,ie) &
                                + ctest(is,js,ix,jx,ie,je) * energy(je)
                           rsvect0(is,js,ix,ie) = rsvect0(is,js,ix,ie) &
@@ -454,13 +453,7 @@ subroutine cgyro_init_collision
                                * w_exi(je,jx)
                        enddo
                     enddo
-                 enddo
-              enddo
-           
-              ! int v^2 C_test_ab(u_a^2 f0a,f0b) 
-              
-              do ix=1,n_xi
-                 do ie=1,n_energy
+                    ! int v^2 C_test_ab(u_a^2 f0a,f0b) 
                     rs(is,js) = rs(is,js) + w_exi(ie,ix) &
                          * dens(is) * rsvec(is,js,ix,ie) * energy(ie) 
                  enddo
@@ -469,17 +462,18 @@ subroutine cgyro_init_collision
         enddo
 
         if (collision_kperp == 0) then
-              do iv=1,nv  
-                 is = is_v(iv)
-                 ix = ix_v(iv)
-                 ie = ie_v(iv)
+              do jv=1,nv
+                 js = is_v(jv)
+                 jx = ix_v(jv)
+                 je = ie_v(jv)
 
-                 do jv=1,nv
-                    js = is_v(jv)
-                    jx = ix_v(jv)
-                    je = ie_v(jv)
+                 do iv=1,nv  
+                    is = is_v(iv)
+                    ix = ix_v(iv)
+                    ie = ie_v(iv)
 
                     if (abs(rs(is,js)) > epsilon(0.0)) then
+                       ! likely not the first, use +=
                        cmat_loc(iv,jv) &
                             = cmat_loc(iv,jv) &
                             - temp(js)/temp(is) * dens2_rot(it,js) &
@@ -491,12 +485,12 @@ subroutine cgyro_init_collision
 
         else
               rsvect0(:,:,:,:) = 0.0
-              do is=1,n_species
-                 do js=1,n_species
-                    do ix=1,n_xi
-                       do jx=1,n_xi
-                          do ie=1,n_energy
-                             do je=1,n_energy
+              do ie=1,n_energy
+                 do ix=1,n_xi
+                    do js=1,n_species
+                       do is=1,n_species
+                          do je=1,n_energy
+                             do jx=1,n_xi
                                 rsvect0(is,js,ix,ie) = rsvect0(is,js,ix,ie) &
                                      + ctest(is,js,jx,ix,je,ie) * energy(je) &
                                      * w_exi(je,jx) &
@@ -508,22 +502,23 @@ subroutine cgyro_init_collision
                  enddo
               enddo
               
-              do iv=1,nv  
-                 is = is_v(iv)
-                 ix = ix_v(iv)
-                 ie = ie_v(iv)
-                 
-                 do jv=1,nv
-                    js = is_v(jv)
-                    jx = ix_v(jv)
-                    je = ie_v(jv)
+              do jv=1,nv
+                 js = is_v(jv)
+                 jx = ix_v(jv)
+                 je = ie_v(jv)
                     
+                 do iv=1,nv  
+                    is = is_v(iv)
+                    ix = ix_v(iv)
+                    ie = ie_v(iv)
+                 
                     if (abs(rs(is,js)) > epsilon(0.0)) then
+                       ! likely not the first, use +=
                        cmat_loc(iv,jv) &
                             = cmat_loc(iv,jv) &
                             - temp(js)/temp(is) * dens2_rot(it,js) &
-                            * rsvec(is,js,ix,ie) &
-                            * bessel(is,ix,ie,0,ic_loc,itor) / rs(is,js) &
+                            * rsvec(is,js,ix,ie) / rs(is,js) &
+                            * bessel(is,ix,ie,0,ic_loc,itor) &
                             * rsvect0(js,is,jx,je)
                     endif
                  enddo
@@ -553,17 +548,17 @@ subroutine cgyro_init_collision
            enddo
         enddo
 
-        do iv=1,nv
+        do jv=1,nv
 
-           is = is_v(iv)
-           ix = ix_v(iv)
-           ie = ie_v(iv)
+           js = is_v(jv)
+           jx = ix_v(jv)
+           je = ie_v(jv)
 
-           do jv=1,nv
+           do iv=1,nv
 
-              js = is_v(jv)
-              jx = ix_v(jv)
-              je = ie_v(jv)
+              is = is_v(iv)
+              ix = ix_v(iv)
+              ie = ie_v(iv)
 
               ! Collision component: Test particle
               if (is == js) then
@@ -651,14 +646,14 @@ subroutine cgyro_init_collision
 
               endif
 
+              ! constant part
+              if ( iv == jv ) then
+                 cmat_loc(iv,iv) = cmat_loc(iv,iv) + 1.0
+                 amat(iv,iv) = amat(iv,iv) + 1.0
+              endif
            enddo
         enddo
 
-        ! constant part
-        do iv=1,nv
-           cmat_loc(iv,iv) = cmat_loc(iv,iv) + 1.0
-           amat(iv,iv) = amat(iv,iv) + 1.0
-        enddo
 
      endif
 
