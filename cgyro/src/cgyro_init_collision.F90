@@ -22,6 +22,7 @@ subroutine cgyro_init_collision
   integer :: is,ir,it,ix,ie,js,je,jx,ks
   integer :: itor
   ! parameters for matrix solve
+  real, dimension(:,:), allocatable :: cmat_base1,cmat_base2
   real, dimension(:,:), allocatable :: amat,cmat_loc
   real, dimension(:,:,:,:,:,:), allocatable :: ctest
   real, dimension(:,:,:,:,:,:), allocatable :: bessel
@@ -181,18 +182,12 @@ subroutine cgyro_init_collision
   endif
 
   allocate(ctest(n_species,n_species,n_xi,n_xi,n_energy,n_energy))
-  allocate(rs(n_species,n_species))
-  allocate(rsvec(n_species,n_species,n_xi,n_energy))
-  allocate(rsvect0(n_species,n_species,n_xi,n_energy))
-
-  allocate(amat(nv,nv))
-  allocate(cmat_loc(nv,nv))
 
   ! Collision test particle component
   ! ctest
 
   ! Lorentz
-!$omp parallel do collapse(2) private(is,js,ix,jx,ie,je)     
+!$omp parallel do collapse(2) private(is,js,ix,jx,ie,je)
   do je=1,n_energy
      do ie=1,n_energy
         if (je == ie ) then
@@ -214,7 +209,7 @@ subroutine cgyro_init_collision
 
   ! Diffusion
   if (collision_model == 4 .and. collision_ene_diffusion == 1) then
-!$omp parallel do collapse(2) private(is,js,ix,jx,ie,je)     
+!$omp parallel do collapse(2) private(is,js,ix,jx,ie,je)
      do je=1,n_energy
         do ie=1,n_energy
            do ix=1,n_xi
@@ -241,48 +236,16 @@ subroutine cgyro_init_collision
      enddo
   endif
 
-  ! matrix solve parameters
-  allocate(i_piv(nv))
+  allocate(cmat_base1(nv,nv))
+  allocate(cmat_base2(nv,nv))
 
-  ! Construct the collision matrix
-  cmat_diff_global_loc = 0.0
-  cmat32_diff_global_loc = 0.0
+  allocate(rs(n_species,n_species))
+  allocate(rsvec(n_species,n_species,n_xi,n_energy))
+  allocate(rsvect0(n_species,n_species,n_xi,n_energy))
 
-!$omp  parallel do collapse(2) default(none) &
-!$omp& shared(nc1,nc2,nt1,nt2,nv,delta_t,n_species,rho,is_ele,n_field,n_energy,n_xi) &
-!$omp& shared(collision_kperp,collision_field_model,explicit_trap_flag) &
-!$omp& firstprivate(collision_model,collision_mom_restore,collision_ene_restore) &
-!$omp& shared(ae_flag,lambda_debye,dens_ele,temp_ele,dens_rot,dens2_rot) &
-!$omp& shared(betae_unit,sum_den_h) &
-!$omp& shared(it_c,ir_c,px,is_v,ix_v,ie_v,ctest,xi_deriv_mat) &
-!$omp& shared(temp,jvec_v,omega_trap,dens,energy,vel,vel2) &
-!$omp& shared(omega_rot_trap,omega_rot_u,e_deriv1_mat,e_deriv1_rot_mat,e_max,bessel) &
-!$omp& shared(xi_lor_mat) &
-!$omp& shared(k_perp,vth,mass,z,bmag,nu_d,xi,nu_par,w_e,w_exi) &
-!$omp& shared(klor_fac,kdiff_fac) &
-!$omp& private(ic,ic_loc,it,ir,info,rval,rsvtmp,rsvtmp0) &
-!$omp& private(iv,is,ix,ie,jv,js,jx,je,ks) &
-!$omp& private(amat_sum,cmat_sum,cmat_diff,cmat_rel_diff,cmat32_sum,cmat32_diff) &
-!$omp& private(amat,cmat_loc,my_cmat_fp32,i_piv,rs,rsvec,rsvect0) &
-!$omp& firstprivate(collision_precision_mode,n_low_energy) &
-!$omp& shared(cmat,cmat_fp32,cmat_stripes,cmat_e1) &
-!$omp& reduction(+:cmat_diff_global_loc,cmat32_diff_global_loc) &
-!$omp& reduction(+:cmap_fp32_error_abs_cnt_loc,cmap_fp32_error_rel_cnt_loc)
-  do itor=nt1,nt2
-   do ic=nc1,nc2
-   
-     ic_loc = ic-nc1+1
+  select case (collision_model)
 
-     it = it_c(ic)
-     ir = ir_c(ic)
-
-     ! Collision field particle component
-     amat(:,:)   = 0.0
-     cmat_loc(:,:) = 0.0
-
-     select case (collision_model)
-
-     case(2)
+  case(2)
      if (collision_mom_restore == 1) then
         do js=1,n_species
            do is=1,n_species
@@ -293,34 +256,34 @@ subroutine cgyro_init_collision
            enddo
         enddo
 
+!$omp parallel do collapse(2) private(is,js,ix,jx,ie,je)
         do jv=1,nv
-           js = is_v(jv)
-           jx = ix_v(jv)
-           je = ie_v(jv)
+           do iv=1,nv
+              js = is_v(jv)
+              jx = ix_v(jv)
+              je = ie_v(jv)
 
-           do iv=1,nv  
               is = is_v(iv)
               ix = ix_v(iv)
               ie = ie_v(iv)
 
               if (abs(rs(is,js)) > epsilon(0.0)) then
-                 ! we know we are the first one to modify cmat_loc, so no need for +=
-                 cmat_loc(iv,jv) = &
+                 cmat_base1(iv,jv) = &
                          + 3.0 * (mass(js)/mass(is)) &
                          * (vth(js)/vth(is)) * nu_d(ie,is,js) &
                          * vel(ie) * xi(ix) &
                          * nu_d(je,js,is) * vel(je) &
                          * xi(jx) * w_exi(je,jx) / rs(is,js) &
-                         * dens2_rot(it,js) / dens(is)
-             !else
-             !   cmat_loc(iv,jv) = 0
+                         / dens(is)
+             else
+                cmat_base1(iv,jv) = 0
              endif
            enddo
        enddo
 
      endif
 
-     case(4)
+  case(4)
 
      ! Momentum Restoring
 
@@ -360,53 +323,47 @@ subroutine cgyro_init_collision
         enddo
 
         if (collision_kperp == 0) then
+!$omp parallel do collapse(2) private(is,js,ix,jx,ie,je)
            do jv=1,nv
-              js = is_v(jv)
-              jx = ix_v(jv)
-              je = ie_v(jv)
+              do iv=1,nv
+                 js = is_v(jv)
+                 jx = ix_v(jv)
+                 je = ie_v(jv)
 
-              do iv=1,nv  
                  is = is_v(iv)
                  ix = ix_v(iv)
                  ie = ie_v(iv)
 
                  if (abs(rs(is,js))>epsilon(0.0)) then
-                    ! we know we are the first one to modify cmat_loc, so no need for +=
-                    cmat_loc(iv,jv) = &
+                    cmat_base1(iv,jv) = &
                             - mass(js)/mass(is) &
                             * rsvec(is,js,ix,ie) / rs(is,js) &
-                            * rsvect0(js,is,jx,je) &
-                            * dens2_rot(it,js)
-                 !else
-                 !   cmat_loc(iv,jv) = 0
+                            * rsvect0(js,is,jx,je)
+                 else
+                    cmat_base1(iv,jv) = 0
                  endif
               enddo
            enddo
 
         else
+!$omp parallel do collapse(2) private(is,js,ix,jx,ie,je)
               do jv=1,nv
-                 js = is_v(jv)
-                 jx = ix_v(jv)
-                 je = ie_v(jv)
+                 do iv=1,nv
+                    js = is_v(jv)
+                    jx = ix_v(jv)
+                    je = ie_v(jv)
 
-                 do iv=1,nv  
                     is = is_v(iv)
                     ix = ix_v(iv)
                     ie = ie_v(iv)
 
                     if (abs(rs(is,js)) > epsilon(0.)) then 
-                       ! we know we are the first one to modify cmat_loc, so no need for +=
-                       cmat_loc(iv,jv) = &
+                       cmat_base1(iv,jv) = &
                             - mass(js)/mass(is) &
                             * rsvec(is,js,ix,ie) / rs(is,js) &
-                            * rsvect0(js,is,jx,je) &
-                            * (  bessel(is,ix,ie,0,ic_loc,itor) &
-                               * bessel(js,jx,je,0,ic_loc,itor) &
-                               + bessel(is,ix,ie,1,ic_loc,itor) &
-                               * bessel(js,jx,je,1,ic_loc,itor) ) &
-                            * dens2_rot(it,js)
-                    !else
-                    !   cmat_loc(iv,jv) = 0
+                            * rsvect0(js,is,jx,je)
+                    else
+                       cmat_base1(iv,jv) = 0
                     endif
                  enddo
               enddo
@@ -447,25 +404,182 @@ subroutine cgyro_init_collision
         enddo
 
         if (collision_kperp == 0) then
+!$omp parallel do collapse(2) private(is,js,ix,jx,ie,je)
               do jv=1,nv
-                 js = is_v(jv)
-                 jx = ix_v(jv)
-                 je = ie_v(jv)
+                 do iv=1,nv
+                    js = is_v(jv)
+                    jx = ix_v(jv)
+                    je = ie_v(jv)
 
-                 do iv=1,nv  
                     is = is_v(iv)
                     ix = ix_v(iv)
                     ie = ie_v(iv)
 
                     if (abs(rs(is,js)) > epsilon(0.0)) then
+                       cmat_base2(iv,jv) = &
+                            - temp(js)/temp(is) &
+                            * rsvec(is,js,ix,ie) / rs(is,js) &
+                            * rsvect0(js,is,jx,je)
+                    else
+                       cmat_base2(iv,jv) = 0
+                    endif
+                 enddo
+              enddo
+
+        else
+!$omp parallel do collapse(2) private(is,js,ix,jx,ie,je)
+              do jv=1,nv
+                 do iv=1,nv
+                    js = is_v(jv)
+                    jx = ix_v(jv)
+                    je = ie_v(jv)
+
+                    is = is_v(iv)
+                    ix = ix_v(iv)
+                    ie = ie_v(iv)
+                 
+                    if (abs(rs(is,js)) > epsilon(0.0)) then
+                       cmat_base2(iv,jv) = &
+                            - temp(js)/temp(is) &
+                            * rsvec(is,js,ix,ie) / rs(is,js) &
+                            * rsvect0(js,is,jx,je)
+                    else
+                       cmat_base2(iv,jv) = 0
+                    endif
+                 enddo
+              enddo
+        endif
+        
+     endif
+     
+  end select
+  deallocate(rs)
+  deallocate(rsvec)
+  deallocate(rsvect0)
+
+  ! matrix solve parameters
+  allocate(i_piv(nv))
+
+  allocate(amat(nv,nv))
+  allocate(cmat_loc(nv,nv))
+
+  ! Construct the collision matrix
+  cmat_diff_global_loc = 0.0
+  cmat32_diff_global_loc = 0.0
+
+!$omp  parallel do collapse(2) default(none) &
+!$omp& shared(nc1,nc2,nt1,nt2,nv,delta_t,n_species,rho,is_ele,n_field,n_energy,n_xi) &
+!$omp& shared(collision_kperp,collision_field_model,explicit_trap_flag) &
+!$omp& firstprivate(collision_model,collision_mom_restore,collision_ene_restore) &
+!$omp& shared(ae_flag,lambda_debye,dens_ele,temp_ele,dens_rot,dens2_rot) &
+!$omp& shared(cmat_base1,cmat_base2,bessel) &
+!$omp& shared(betae_unit,sum_den_h) &
+!$omp& shared(it_c,ir_c,px,is_v,ix_v,ie_v,ctest,xi_deriv_mat) &
+!$omp& shared(temp,jvec_v,omega_trap,dens,energy,vel,vel2) &
+!$omp& shared(omega_rot_trap,omega_rot_u,e_deriv1_mat,e_deriv1_rot_mat,e_max) &
+!$omp& shared(xi_lor_mat) &
+!$omp& shared(k_perp,vth,mass,z,bmag,nu_d,xi,nu_par,w_e,w_exi) &
+!$omp& shared(klor_fac,kdiff_fac) &
+!$omp& private(ic,ic_loc,it,ir,info,rval) &
+!$omp& private(iv,is,ix,ie,jv,js,jx,je,ks) &
+!$omp& private(amat_sum,cmat_sum,cmat_diff,cmat_rel_diff,cmat32_sum,cmat32_diff) &
+!$omp& private(amat,cmat_loc,my_cmat_fp32,i_piv) &
+!$omp& firstprivate(collision_precision_mode,n_low_energy) &
+!$omp& shared(cmat,cmat_fp32,cmat_stripes,cmat_e1) &
+!$omp& reduction(+:cmat_diff_global_loc,cmat32_diff_global_loc) &
+!$omp& reduction(+:cmap_fp32_error_abs_cnt_loc,cmap_fp32_error_rel_cnt_loc)
+  do itor=nt1,nt2
+   do ic=nc1,nc2
+   
+     ic_loc = ic-nc1+1
+
+     it = it_c(ic)
+     ir = ir_c(ic)
+
+     ! Collision field particle component
+     amat(:,:)   = 0.0
+
+     select case (collision_model)
+
+     case(2)
+     if (collision_mom_restore == 1) then
+        do jv=1,nv
+           js = is_v(jv)
+
+           do iv=1,nv
+
+                 ! we know we are the first one to modify cmat_loc, so no need for +=
+                 cmat_loc(iv,jv) = &
+                         cmat_base1(iv,jv) &
+                         * dens2_rot(it,js)
+           enddo
+       enddo
+
+     else
+       cmat_loc(:,:) = 0.0
+     endif
+
+     case(4)
+
+     ! Momentum Restoring
+
+     if (collision_mom_restore == 1) then
+
+        if (collision_kperp == 0) then
+           do jv=1,nv
+              js = is_v(jv)
+
+              do iv=1,nv
+
+                    ! we know we are the first one to modify cmat_loc, so no need for +=
+                    cmat_loc(iv,jv) = &
+                            cmat_base1(iv,jv) &
+                            * dens2_rot(it,js)
+              enddo
+           enddo
+
+        else
+              do jv=1,nv
+                 js = is_v(jv)
+                 jx = ix_v(jv)
+                 je = ie_v(jv)
+
+                 do iv=1,nv
+                    is = is_v(iv)
+                    ix = ix_v(iv)
+                    ie = ie_v(iv)
+
+                       ! we know we are the first one to modify cmat_loc, so no need for +=
+                       cmat_loc(iv,jv) = &
+                            cmat_base1(iv,jv) &
+                            * (  bessel(is,ix,ie,0,ic_loc,itor) &
+                               * bessel(js,jx,je,0,ic_loc,itor) &
+                               + bessel(is,ix,ie,1,ic_loc,itor) &
+                               * bessel(js,jx,je,1,ic_loc,itor) ) &
+                            * dens2_rot(it,js)
+                 enddo
+              enddo
+        endif
+
+     else
+       cmat_loc(:,:) = 0.0
+     endif
+
+     ! Energy Restoring
+
+     if (collision_ene_restore == 1) then
+
+        if (collision_kperp == 0) then
+              do jv=1,nv
+                 js = is_v(jv)
+
+                 do iv=1,nv
+
                        ! likely not the first, use +=
                        cmat_loc(iv,jv) &
                             = cmat_loc(iv,jv) &
-                            - temp(js)/temp(is) &
-                            * rsvec(is,js,ix,ie) / rs(is,js) &
-                            * rsvect0(js,is,jx,je) &
+                            + cmat_base2(iv,jv) &
                             * dens2_rot(it,js)
-                    endif
                  enddo
               enddo
 
@@ -475,27 +589,26 @@ subroutine cgyro_init_collision
                  jx = ix_v(jv)
                  je = ie_v(jv)
                     
-                 do iv=1,nv  
+                 do iv=1,nv
                     is = is_v(iv)
                     ix = ix_v(iv)
                     ie = ie_v(iv)
                  
-                    if (abs(rs(is,js)) > epsilon(0.0)) then
                        ! likely not the first, use +=
                        cmat_loc(iv,jv) &
                             = cmat_loc(iv,jv) &
-                            - temp(js)/temp(is) &
-                            * rsvec(is,js,ix,ie) / rs(is,js) &
-                            * rsvect0(js,is,jx,je) &
+                            + cmat_base2(iv,jv) &
                             * bessel(is,ix,ie,0,ic_loc,itor) &
                             * bessel(js,jx,je,0,ic_loc,itor) &
                             * dens2_rot(it,js)
-                    endif
                  enddo
               enddo
         endif
         
      endif
+
+     case default
+        cmat_loc(:,:) = 0.0
      
      end select
 
@@ -782,12 +895,11 @@ subroutine cgyro_init_collision
 #endif
   endif
 
+  deallocate(cmat_base2)
+  deallocate(cmat_base1)
   deallocate(i_piv)
   deallocate(nu_d)
   deallocate(nu_par)
-  deallocate(rs)
-  deallocate(rsvec)
-  deallocate(rsvect0)
   deallocate(ctest)
   deallocate(klor_fac)
   deallocate(kdiff_fac)
