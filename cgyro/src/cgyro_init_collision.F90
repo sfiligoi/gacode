@@ -13,6 +13,7 @@ subroutine cgyro_init_collision
   real, dimension(:,:,:,:), allocatable :: rsvec, rsvect0
   real, dimension(:,:), allocatable :: klor_fac, kdiff_fac
   real :: rsvtmp, rsvtmp0
+  real :: my_dens2_rot,my_bj0,my_bj1
 
   character(len=160) :: msg
   real :: arg,xi_s1s,xi_prop
@@ -25,7 +26,7 @@ subroutine cgyro_init_collision
   real, dimension(:,:), allocatable :: cmat_base1,cmat_base2
   real, dimension(:,:), allocatable :: amat,cmat_loc
   real, dimension(:,:,:,:,:,:), allocatable :: ctest
-  real, dimension(:,:,:,:,:,:), allocatable :: bessel
+  real, dimension(:,:,:,:), allocatable :: bessel
   ! diagnostics
   real :: my_cmat_fp32
   real :: amat_sum, cmat_sum, cmat_diff, cmat_rel_diff
@@ -158,24 +159,23 @@ subroutine cgyro_init_collision
 
   if ( collision_model == 4 .and. collision_kperp == 1 .and. &
        (collision_mom_restore == 1 .or. collision_ene_restore == 1)) then
-     allocate(bessel(n_species,n_xi,n_energy,0:1,nc_loc,nt1:nt2))
-!$omp parallel do collapse(2) private(ic_loc,it,ie,ix,is,arg,xi_s1s,xi_prop)
+     allocate(bessel(0:1,nv,nc_loc,nt1:nt2))
+!$omp parallel do collapse(2) private(ic_loc,it,ie,ix,is,iv,arg,xi_s1s,xi_prop)
      do itor=nt1,nt2
       do ic=nc1,nc2
         ic_loc = ic-nc1+1
         it = it_c(ic)
-        do ie=1,n_energy
-           do ix=1,n_xi
+        do iv=1,nv
+              is = is_v(iv)
+              ix = ix_v(iv)
+              ie = ie_v(iv)
               xi_s1s = sqrt(1.0-xi(ix)**2)
               xi_prop = xi_s1s / xi(ix)
-              do is=1,n_species   
                  arg = k_perp(ic,itor)*rho*vth(is)*mass(is)&
                       /(z(is)*bmag(it)) * vel2(ie) * xi_s1s
-                 bessel(is,ix,ie,0,ic_loc,itor) = bessel_j0(arg)
+                 bessel(0,iv,ic_loc,itor) = bessel_j0(arg)
                  ! always used with the correction, so do it here
-                 bessel(is,ix,ie,1,ic_loc,itor) = bessel_j1(arg) * xi_prop
-              enddo
-           enddo
+                 bessel(1,iv,ic_loc,itor) = bessel_j1(arg) * xi_prop
         enddo
       enddo
      enddo
@@ -480,7 +480,7 @@ subroutine cgyro_init_collision
 !$omp& shared(xi_lor_mat) &
 !$omp& shared(k_perp,vth,mass,z,bmag,nu_d,xi,nu_par,w_e,w_exi) &
 !$omp& shared(klor_fac,kdiff_fac) &
-!$omp& private(ic,ic_loc,it,ir,info,rval) &
+!$omp& private(ic,ic_loc,it,ir,info,rval,my_dens2_rot,my_bj0,my_bj1) &
 !$omp& private(iv,is,ix,ie,jv,js,jx,je,ks) &
 !$omp& private(amat_sum,cmat_sum,cmat_diff,cmat_rel_diff,cmat32_sum,cmat32_diff) &
 !$omp& private(amat,cmat_loc,my_cmat_fp32,i_piv) &
@@ -505,13 +505,14 @@ subroutine cgyro_init_collision
      if (collision_mom_restore == 1) then
         do jv=1,nv
            js = is_v(jv)
+           my_dens2_rot = dens2_rot(it,js)
 
            do iv=1,nv
 
                  ! we know we are the first one to modify cmat_loc, so no need for +=
                  cmat_loc(iv,jv) = &
                          cmat_base1(iv,jv) &
-                         * dens2_rot(it,js)
+                         * my_dens2_rot
            enddo
        enddo
 
@@ -528,35 +529,32 @@ subroutine cgyro_init_collision
         if (collision_kperp == 0) then
            do jv=1,nv
               js = is_v(jv)
+              my_dens2_rot = dens2_rot(it,js)
 
               do iv=1,nv
 
                     ! we know we are the first one to modify cmat_loc, so no need for +=
                     cmat_loc(iv,jv) = &
                             cmat_base1(iv,jv) &
-                            * dens2_rot(it,js)
+                            * my_dens2_rot
               enddo
            enddo
 
         else
               do jv=1,nv
                  js = is_v(jv)
-                 jx = ix_v(jv)
-                 je = ie_v(jv)
+                 my_dens2_rot = dens2_rot(it,js)
+                 my_bj0 = bessel(0,jv,ic_loc,itor)
+                 my_bj1 = bessel(1,jv,ic_loc,itor)
 
                  do iv=1,nv
-                    is = is_v(iv)
-                    ix = ix_v(iv)
-                    ie = ie_v(iv)
 
                        ! we know we are the first one to modify cmat_loc, so no need for +=
                        cmat_loc(iv,jv) = &
                             cmat_base1(iv,jv) &
-                            * (  bessel(is,ix,ie,0,ic_loc,itor) &
-                               * bessel(js,jx,je,0,ic_loc,itor) &
-                               + bessel(is,ix,ie,1,ic_loc,itor) &
-                               * bessel(js,jx,je,1,ic_loc,itor) ) &
-                            * dens2_rot(it,js)
+                            * (  bessel(0,iv,ic_loc,itor) * my_bj0 &
+                               + bessel(1,iv,ic_loc,itor) * my_bj1 ) &
+                            * my_dens2_rot
                  enddo
               enddo
         endif
@@ -572,6 +570,7 @@ subroutine cgyro_init_collision
         if (collision_kperp == 0) then
               do jv=1,nv
                  js = is_v(jv)
+                 my_dens2_rot = dens2_rot(it,js)
 
                  do iv=1,nv
 
@@ -579,28 +578,23 @@ subroutine cgyro_init_collision
                        cmat_loc(iv,jv) &
                             = cmat_loc(iv,jv) &
                             + cmat_base2(iv,jv) &
-                            * dens2_rot(it,js)
+                            * my_dens2_rot
                  enddo
               enddo
 
         else
               do jv=1,nv
                  js = is_v(jv)
-                 jx = ix_v(jv)
-                 je = ie_v(jv)
+                 my_dens2_rot = dens2_rot(it,js)
+                 my_bj0 = bessel(0,jv,ic_loc,itor)
                     
                  do iv=1,nv
-                    is = is_v(iv)
-                    ix = ix_v(iv)
-                    ie = ie_v(iv)
-                 
                        ! likely not the first, use +=
                        cmat_loc(iv,jv) &
                             = cmat_loc(iv,jv) &
                             + cmat_base2(iv,jv) &
-                            * bessel(is,ix,ie,0,ic_loc,itor) &
-                            * bessel(js,jx,je,0,ic_loc,itor) &
-                            * dens2_rot(it,js)
+                            * bessel(0,iv,ic_loc,itor) * my_bj0 &
+                            * my_dens2_rot
                  enddo
               enddo
         endif
