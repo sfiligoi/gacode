@@ -51,7 +51,7 @@ subroutine cgyro_init_manager
 #endif
 
   character(len=128) :: msg
-  integer :: ie
+  integer :: ie,ix
 
   if (hiprec_flag == 1) then
      fmtstr  = '(es16.9)'
@@ -76,6 +76,7 @@ subroutine cgyro_init_manager
   call timer_lib_in('str_init')
   allocate(energy(n_energy))
   allocate(vel(n_energy))
+  allocate(vel2(n_energy))
   allocate(w_e(n_energy))
   allocate(e_deriv1_mat(n_energy,n_energy))
   allocate(e_deriv1_rot_mat(n_energy,n_energy))
@@ -102,6 +103,13 @@ subroutine cgyro_init_manager
   n_low_energy = 0
 
   vel(:) = sqrt(energy(:))
+  vel2(:) = sqrt(2.0*energy(:))
+
+#if defined(OMPGPU)
+!$omp target enter data map(to:vel,vel2)
+#elif defined(_OPENACC)
+!$acc enter data copyin(vel,vel2)
+#endif
 
   e_deriv1_rot_mat(:,:) = e_deriv1_mat(:,:)
   if (e_fix == 2) then
@@ -119,6 +127,13 @@ subroutine cgyro_init_manager
   ! Construct xi (pitch-angle) nodes and weights
   call pseudo_legendre(n_xi,xi,w_xi,xi_deriv_mat,xi_lor_mat)
   w_xi = 0.5*w_xi
+
+  allocate(w_exi(n_energy,n_xi))
+  do ix=1,n_xi
+     do ie=1,n_energy
+        w_exi(ie,ix) = w_e(ie)*w_xi(ix)
+     enddo
+  enddo
 
   allocate(theta(n_theta))
   allocate(thetab(n_theta,n_radial/box_size))
@@ -146,6 +161,7 @@ subroutine cgyro_init_manager
   allocate(lambda_rot(n_theta,n_species))
   allocate(dlambda_rot(n_theta,n_species))
   allocate(dens_rot(n_theta,n_species))
+  allocate(dens2_rot(n_theta,n_species))
   allocate(dens_ele_rot(n_theta))
   allocate(dens_avg_rot(n_species))
   allocate(dlnndr_avg_rot(n_species))
