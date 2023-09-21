@@ -310,8 +310,8 @@ subroutine cgyro_init_collision
                          * (vth(js)/vth(is)) * nu_d(ie,is,js) &
                          * vel(ie) * xi(ix) &
                          * nu_d(je,js,is) * vel(je) &
-                         * xi(jx) * w_exi(je,jx) / rs(is,js)
-                         * dens2_rot(it,js) / dens(is)&
+                         * xi(jx) * w_exi(je,jx) / rs(is,js) &
+                         * dens2_rot(it,js) / dens(is)
              !else
              !   cmat_loc(iv,jv) = 0
              endif
@@ -349,7 +349,7 @@ subroutine cgyro_init_collision
                     rsvtmp = rsvtmp * vth(is)
                     rsvtmp0 = rsvtmp0 * vth(is)
                     rsvec(is,js,ix,ie) = rsvtmp
-                    rsvec0(is,js,ix,ie) = rsvtmp0
+                    rsvect0(is,js,ix,ie) = rsvtmp0
                     ! int v_par C_test_ab(v_par f0a,f0b) / n_0a
                     rs(is,js) = rs(is,js) + w_exi(ie,ix) * dens(is) &
                          * rsvtmp * vel2(ie) * xi(ix) &
@@ -373,9 +373,10 @@ subroutine cgyro_init_collision
                  if (abs(rs(is,js))>epsilon(0.0)) then
                     ! we know we are the first one to modify cmat_loc, so no need for +=
                     cmat_loc(iv,jv) = &
-                            - mass(js)/mass(is) * dens2_rot(it,js) &
+                            - mass(js)/mass(is) &
                             * rsvec(is,js,ix,ie) / rs(is,js) &
-                            * rsvect0(js,is,jx,je)
+                            * rsvect0(js,is,jx,je) &
+                            * dens2_rot(it,js)
                  !else
                  !   cmat_loc(iv,jv) = 0
                  endif
@@ -399,9 +400,9 @@ subroutine cgyro_init_collision
                             - mass(js)/mass(is) &
                             * rsvec(is,js,ix,ie) / rs(is,js) &
                             * rsvect0(js,is,jx,je) &
-                            * dens2_rot(it,js) &
                             * (  bessel(is,ix,ie,0,ic_loc,itor)**2 &
-                               + bessel(is,ix,ie,1,ic_loc,itor)**2 )
+                               + bessel(is,ix,ie,1,ic_loc,itor)**2 ) &
+                            * dens2_rot(it,js) 
                     !else
                     !   cmat_loc(iv,jv) = 0
                     endif
@@ -416,7 +417,6 @@ subroutine cgyro_init_collision
      if (collision_ene_restore == 1) then
               
         ! C_test_ab(u_a^2 f0a,f0b) and w_e u_a^2 C_test_ab(H_a)
-        rsvect0 = 0.0
         rs(:,:) = 0.0
 
         do ie=1,n_energy
@@ -435,7 +435,7 @@ subroutine cgyro_init_collision
                        enddo
                     enddo
                     rsvec(is,js,ix,ie) = rsvtmp
-                    rsvec0(is,js,ix,ie) = rsvtmp0
+                    rsvect0(is,js,ix,ie) = rsvtmp0
                     ! int v^2 C_test_ab(u_a^2 f0a,f0b) 
                     rs(is,js) = rs(is,js) + w_exi(ie,ix) &
                          * dens(is) * rsvtmp * energy(ie) 
@@ -485,8 +485,8 @@ subroutine cgyro_init_collision
                             - temp(js)/temp(is) &
                             * rsvec(is,js,ix,ie) / rs(is,js) &
                             * rsvect0(js,is,jx,je) &
-                            * dens2_rot(it,js) &
-                            * bessel(is,ix,ie,0,ic_loc,itor)**2
+                            * bessel(is,ix,ie,0,ic_loc,itor)**2 &
+                            * dens2_rot(it,js)
                     endif
                  enddo
               enddo
