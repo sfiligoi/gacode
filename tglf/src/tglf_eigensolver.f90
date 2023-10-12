@@ -227,9 +227,9 @@
        damp_sig = 0.0
        if(use_bpar_in)then
          if(nbasis.eq.2)then
-           betae_psi = 0.5*betae_s/(ky*ky+(damp_sig_in*vs(2)/(q_unit*width_in))**2)
+           betae_sig = 0.5*betae_s/(ky*ky+(damp_sig_in*vs(2)/(q_unit*width_in))**2)
          else
-           betae_psi = 0.5*betae_s/(ky*ky)
+           betae_sig = 0.5*betae_s/(ky*ky)
          endif
 !      damp_sig = damp_sig_in/MAX(betae_sig*vs(1)*vs(1),0.001)
        endif
