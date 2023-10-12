@@ -1297,7 +1297,7 @@
        ave_wdhr13p0(is,ib,jb) = wdhr13p0
        ave_wdhp1b0(is,ib,jb) = wdhp1b0
        ave_wdhr11b0(is,ib,jb) = wdhr11b0
-       ave_wdhr13b0(is,ib,jb) = wdhr13bp
+       ave_wdhr13b0(is,ib,jb) = wdhr13b0
        ave_wdhp1bp(is,ib,jb) = wdhp1bp
        ave_wdhr11bp(is,ib,jb) = wdhr11bp
        ave_wdhr13bp(is,ib,jb) = wdhr13bp
