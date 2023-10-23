@@ -49,9 +49,6 @@ subroutine cgyro_rhs(ij)
   real :: rval,rval2
   complex :: rhs_stream,rhs_el
 
-  ! h_x is not modified after this and before nl_fftw
-  call cgyro_rhs_comm_async(1)
-
   call timer_lib_in('str_mem')
 
 #if (!defined(OMPGPU)) && defined(_OPENACC)
@@ -89,10 +86,8 @@ subroutine cgyro_rhs(ij)
      enddo
 
 #if (!defined(OMPGPU)) && defined(_OPENACC)
-     call cgyro_rhs_comm_test(1)
 !$acc wait(1)
 #endif
-     call cgyro_rhs_comm_test(1)
 
      call timer_lib_out('str')
   else
@@ -118,18 +113,18 @@ subroutine cgyro_rhs(ij)
      enddo
 
 #if (!defined(OMPGPU)) && defined(_OPENACC)
-     call cgyro_rhs_comm_test(1)
 !$acc wait(1)
 #endif
-     call cgyro_rhs_comm_test(1)
 
      call timer_lib_out('str_mem')
   endif
 
   call cgyro_upwind
 
-  call cgyro_rhs_comm_test(1)
   call cgyro_rhs_comm_async(2)
+  ! comm2 is much smaller, so get that out of the way first
+  call cgyro_rhs_comm_async(1)
+
 
 #if (!defined(OMPGPU)) && defined(_OPENACC)
   call timer_lib_in('str_mem')
@@ -184,11 +179,11 @@ subroutine cgyro_rhs(ij)
   enddo
 
 #if (!defined(OMPGPU)) && defined(_OPENACC)
-  call cgyro_rhs_comm_test(1)
+  call cgyro_rhs_comm_test(2)
 !$acc wait(1)
 #endif
-  call cgyro_rhs_comm_test(1)
   call cgyro_rhs_comm_test(2)
+  call cgyro_rhs_comm_test(1)
 
   call timer_lib_out('str')
 
