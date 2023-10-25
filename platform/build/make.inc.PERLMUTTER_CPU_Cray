@@ -8,19 +8,20 @@ IDENTITY="NERSC Perlmutter CPU"
 CORES_PER_NODE=256
 NUMAS_PER_NODE=8
 
-# Compiler options/flags
-FC = ftn -module ${GACODE_ROOT}/modules -Mpreprocess -DUSE_INLINE -Mdefaultunit
+# Fortran 90/95 compiler
+FC = ftn -J ${GACODE_ROOT}/modules
 
 # Fortran 77 compiler
 F77 = ${FC}
 
 # Compiler options/flags
 FACC   =
-FOMP   =-mp -Mstack_arrays 
-FMATH  =-r8 
-FOPT   =-fast
-FDEBUG =-g -Kieee -Ktrap=fp,divz -Mbounds -Mchkptr -Mchkstk -traceback -Minform=inform
+FOMP   =-homp -hnoacc
+FMATH  =-s real64
+FOPT   =-Ofast
+FDEBUG =-O0 -g
 F2PY   = f2py --fcompiler=pg
+
 
 # System math libraries
 LMATH=-lfftw3_threads -lfftw3f_threads -lfftw3 -lfftw3f -llapack -lblas
