@@ -156,58 +156,6 @@ subroutine cgyro_nl_fftw(ij)
            i_omp = j ! j<n_omp in this branch
 
            select case(o)
-           case (3)
-              ! zero elements not otherwise set below
-              fx(0:ny2,nx2:nx0-1,i_omp) = 0.0
-
-              ! Array mapping
-              do ir=1,n_radial
-                 p  = ir-1-nx0/2
-                 ix = p
-                 if (ix < 0) ix = ix+nx
-                 do itm=1,n_toroidal_procs
-                   do itl=1,nt_loc
-                    itor=itl + (itm-1)*nt_loc
-                    iy = itor-1
-                    f0 = i_c*f_nl(ir,itl,j,itm)
-                    fx(iy,ix,i_omp) = p*f0
-                   enddo
-                 enddo
-                 if ((ix/=0) .and. (ix<(nx/2))) then ! happens after ix>nx/2
-                    ! Average elements so as to ensure
-                    !   f(kx,ky=0) = f(-kx,ky=0)^*
-                    ! This symmetry is required for complex input to c2r
-                    f0 = 0.5*( fx(0,ix,i_omp)+conjg(fx(0,nx-ix,i_omp)) )
-                    fx(0,ix   ,i_omp) = f0
-                    fx(0,nx-ix,i_omp) = conjg(f0)
-                 endif
-                 fx(n_toroidal:ny2,ix,i_omp) = 0.0
-              enddo
-
-              call fftw_execute_dft_c2r(plan_c2r,fx(:,:,i_omp),ux(:,:,i_omp))
-
-           case (4)
-              ! zero elements not otherwise set below
-              fy(0:ny2,nx2:nx0-1,i_omp) = 0.0
-
-              ! Array mapping
-              do ir=1,n_radial
-                 p  = ir-1-nx0/2
-                 ix = p
-                 if (ix < 0) ix = ix+nx
-                 do itm=1,n_toroidal_procs
-                   do itl=1,nt_loc
-                    itor=itl + (itm-1)*nt_loc
-                    iy = itor-1
-                    f0 = i_c*f_nl(ir,itl,j,itm)
-                    fy(iy,ix,i_omp) = iy*f0
-                   enddo
-                 enddo
-                 fy(n_toroidal:ny2,ix,i_omp) = 0.0
-              enddo
-
-              call fftw_execute_dft_c2r(plan_c2r,fy(:,:,i_omp),uy(:,:,i_omp))
-
            case (1)
               ! zero elements not otherwise set below
               gx(0:ny2,nx2:nx0-1,i_omp) = 0.0
@@ -279,6 +227,58 @@ subroutine cgyro_nl_fftw(ij)
               enddo
 
               call fftw_execute_dft_c2r(plan_c2r,gy(:,:,i_omp),vymany(:,:,j))
+
+           case (3)
+              ! zero elements not otherwise set below
+              fx(0:ny2,nx2:nx0-1,i_omp) = 0.0
+
+              ! Array mapping
+              do ir=1,n_radial
+                 p  = ir-1-nx0/2
+                 ix = p
+                 if (ix < 0) ix = ix+nx
+                 do itm=1,n_toroidal_procs
+                   do itl=1,nt_loc
+                    itor=itl + (itm-1)*nt_loc
+                    iy = itor-1
+                    f0 = i_c*f_nl(ir,itl,j,itm)
+                    fx(iy,ix,i_omp) = p*f0
+                   enddo
+                 enddo
+                 if ((ix/=0) .and. (ix<(nx/2))) then ! happens after ix>nx/2
+                    ! Average elements so as to ensure
+                    !   f(kx,ky=0) = f(-kx,ky=0)^*
+                    ! This symmetry is required for complex input to c2r
+                    f0 = 0.5*( fx(0,ix,i_omp)+conjg(fx(0,nx-ix,i_omp)) )
+                    fx(0,ix   ,i_omp) = f0
+                    fx(0,nx-ix,i_omp) = conjg(f0)
+                 endif
+                 fx(n_toroidal:ny2,ix,i_omp) = 0.0
+              enddo
+
+              call fftw_execute_dft_c2r(plan_c2r,fx(:,:,i_omp),ux(:,:,i_omp))
+
+           case (4)
+              ! zero elements not otherwise set below
+              fy(0:ny2,nx2:nx0-1,i_omp) = 0.0
+
+              ! Array mapping
+              do ir=1,n_radial
+                 p  = ir-1-nx0/2
+                 ix = p
+                 if (ix < 0) ix = ix+nx
+                 do itm=1,n_toroidal_procs
+                   do itl=1,nt_loc
+                    itor=itl + (itm-1)*nt_loc
+                    iy = itor-1
+                    f0 = i_c*f_nl(ir,itl,j,itm)
+                    fy(iy,ix,i_omp) = iy*f0
+                   enddo
+                 enddo
+                 fy(n_toroidal:ny2,ix,i_omp) = 0.0
+              enddo
+
+              call fftw_execute_dft_c2r(plan_c2r,fy(:,:,i_omp),uy(:,:,i_omp))
 
            end select
         enddo ! o
