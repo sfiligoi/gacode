@@ -82,23 +82,23 @@ subroutine cgyro_nl_fftw(ij)
   ! time to wait for the g_nl to become avaialble
   call timer_lib_in('nl_comm')
   call parallel_slib_f_fd_wait(n_field,n_radial,n_jtheta,gpack,g_nl,g_req)
-  ! make sure f_req progresses
-  call parallel_slib_test(f_req)
-  call timer_lib_out('nl_comm')
-
   if (force_early_comm2) then
      ! wait also for the f_nl to become avaialble
-     call timer_lib_in('nl_comm')
      call parallel_slib_f_nc_wait(fpack,f_nl,f_req)
-     call timer_lib_out('nl_comm')
+  else
+     ! make sure f_req progresses
+     call parallel_slib_test(f_req)
   endif
+  call timer_lib_out('nl_comm')
+
 
   call timer_lib_in('nl')
 
 ! g_nl      is (n_field,n_radial,n_jtheta,nt_loc,n_toroidal_procs)
 ! jcev_c_nl is (n_field,n_radial,n_jtheta,nv_loc,nt_loc,n_toroidal_procs)
   if (n_omp <= nsplit) then
-!$omp parallel do private(itor,mytm,itm,itl,iy,ir,p,ix,g0,i_omp,j,it,iv_loc,it_loc,jtheta_min)
+!$omp parallel do schedule(dynamic,1) &
+!$omp& private(itor,mytm,itm,itl,iy,ir,p,ix,g0,i_omp,j,it,iv_loc,it_loc,jtheta_min)
      do j=1,nsplit
         i_omp = omp_get_thread_num()+1
 
@@ -142,7 +142,18 @@ subroutine cgyro_nl_fftw(ij)
            gy(n_toroidal:ny2,ix,i_omp) = 0.0
         enddo
 
+        if (i_omp==1) then
+         ! use the main thread to progress the async MPI
+          call parallel_slib_test(f_req)
+        endif
+
         call fftw_execute_dft_c2r(plan_c2r,gx(:,:,i_omp),vxmany(:,:,j))
+
+        if (i_omp==1) then
+         ! use the main thread to progress the async MPI
+          call parallel_slib_test(f_req)
+        endif
+
         call fftw_execute_dft_c2r(plan_c2r,gy(:,:,i_omp),vymany(:,:,j))
      enddo ! j
   else ! (n_omp>nsplit), increase parallelism
