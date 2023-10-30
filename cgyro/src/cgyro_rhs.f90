@@ -52,9 +52,6 @@ subroutine cgyro_rhs(ij)
   complex, dimension(:), allocatable   :: bvec_trap
   integer :: nj_loc
 
-  ! h_x is not modified after this and before nl_fftw
-  call cgyro_rhs_comm_async(1)
-
   ! Prepare suitable distribution (g, not h) for conservative upwind method
   if (n_field > 1) then
      call timer_lib_in('str')
@@ -74,17 +71,23 @@ subroutine cgyro_rhs(ij)
   else
      call timer_lib_in('str_mem')
 
-     g_x(:,:,:) = h_x(:,:,:)
+!$omp parallel do collapse(2) private(iv_loc)
+     do itor=nt1,nt2
+      do iv=nv1,nv2
+        iv_loc = iv-nv1+1
+        g_x(:,iv_loc,itor) = h_x(:,iv_loc,itor)
+      enddo
+     enddo
 
      call timer_lib_out('str_mem')
   endif
-  call cgyro_rhs_comm_test(1)
 
   ! Correct g_x for number conservation
   call cgyro_upwind
 
-  call cgyro_rhs_comm_test(1)
   call cgyro_rhs_comm_async(2)
+  ! comm2 is much smaller, so get that out of the way first
+  call cgyro_rhs_comm_async(1)
 
   call timer_lib_in('str')
 
@@ -120,6 +123,7 @@ subroutine cgyro_rhs(ij)
      enddo
    enddo
   enddo
+  call cgyro_rhs_comm_test(2)
   call cgyro_rhs_comm_test(1)
 
   ! Explicit trapping term
@@ -185,6 +189,7 @@ subroutine cgyro_rhs(ij)
   endif
   
   call timer_lib_out('str')
+  call cgyro_rhs_comm_test(2)
   call cgyro_rhs_comm_test(1)
 
   ! Wavenumber advection shear terms
