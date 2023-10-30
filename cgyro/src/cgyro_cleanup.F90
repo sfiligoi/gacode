@@ -283,10 +283,10 @@ subroutine cgyro_cleanup
   if(allocated(gx))                deallocate(gx)
   if(allocated(fy))                deallocate(fy)
   if(allocated(gy))                deallocate(gy)
-  if(allocated(uxmany))            deallocate(uxmany)
-  if(allocated(uymany))            deallocate(uymany)
-  if(allocated(vx))                deallocate(vx)
-  if(allocated(vy))                deallocate(vy)
+  if(allocated(vxmany))            deallocate(vxmany)
+  if(allocated(vymany))            deallocate(vymany)
+  if(allocated(ux))                deallocate(ux)
+  if(allocated(uy))                deallocate(uy)
   if(allocated(uv))                deallocate(uv)
 #endif  
 
