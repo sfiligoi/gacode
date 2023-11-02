@@ -72,9 +72,12 @@ subroutine cgyro_nl_fftw(ij)
 
   call timer_lib_in('nl_mem')
   ! make sure reqs progress
-  call parallel_slib_test(g_req)
-  call parallel_slib_test(f_req)
+  call cgyro_nl_fftw_comm_test()
 
+#if !defined(OMPGPU)
+!$acc  data present(g_nl)  &
+!$acc&      present(gxmany,gymany)
+#endif
   ! we can zero the elements we know are zero while we wait for comm
 #if defined(OMPGPU)
   !no async for OMPGPU for now
@@ -114,8 +117,9 @@ subroutine cgyro_nl_fftw(ij)
   call timer_lib_in('nl_comm')
   ! time to wait for the g_nl to become avaialble
   call parallel_slib_f_fd_wait(n_field,n_radial,n_jtheta,gpack,g_nl,g_req)
+  g_req_valid = .FALSE.
   ! make sure reqs progress
-  call parallel_slib_test(f_req)
+  call cgyro_nl_fftw_comm_test()
   call timer_lib_out('nl_comm')
 
   call timer_lib_in('nl')
@@ -169,12 +173,12 @@ subroutine cgyro_nl_fftw(ij)
   !no async for OMPGPU for now
 #else
   ! make sure reqs progress
-  call parallel_slib_test(f_req)
+  call cgyro_nl_fftw_comm_test()
 !$acc wait(2)
 #endif
 
   ! make sure reqs progress
-  call parallel_slib_test(f_req)
+  call cgyro_nl_fftw_comm_test()
 
   ! Average elements so as to ensure
   !   g(kx,ky=0) = g(-kx,ky=0)^*
@@ -197,6 +201,10 @@ subroutine cgyro_nl_fftw(ij)
     enddo
   enddo
 
+#if !defined(OMPGPU)
+!$acc end data
+#endif
+
 #if defined(OMPGPU)
 !$omp target data use_device_ptr(gymany,vymany)
 #else
@@ -204,9 +212,9 @@ subroutine cgyro_nl_fftw(ij)
 #endif
 
 #ifdef HIPGPU
-  rc = hipfftExecZ2D(hip_plan_c2r_many,c_loc(gymany),c_loc(vymany))
+  rc = hipfftExecZ2D(hip_plan_c2r_manyG,c_loc(gymany),c_loc(vymany))
 #else
-  rc = cufftExecZ2D(cu_plan_c2r_many,gymany,vymany)
+  rc = cufftExecZ2D(cu_plan_c2r_manyG,gymany,vymany)
 #endif
 
 #if defined(OMPGPU)
@@ -219,12 +227,12 @@ subroutine cgyro_nl_fftw(ij)
   !no async for OMPGPU for now
 #else
   ! make sure reqs progress
-  call parallel_slib_test(f_req)
+  call cgyro_nl_fftw_comm_test()
 !$acc wait(2)
 #endif
 
   ! make sure reqs progress
-  call parallel_slib_test(f_req)
+  call cgyro_nl_fftw_comm_test()
   ! gxmany is complete now
 
 #if defined(OMPGPU)
@@ -234,22 +242,22 @@ subroutine cgyro_nl_fftw(ij)
 #endif
 
 #ifdef HIPGPU
-  rc = hipfftExecZ2D(hip_plan_c2r_many,c_loc(gxmany),c_loc(vxmany))
+  rc = hipfftExecZ2D(hip_plan_c2r_manyG,c_loc(gxmany),c_loc(vxmany))
 #else
-  rc = cufftExecZ2D(cu_plan_c2r_many,gxmany,vxmany)
+  rc = cufftExecZ2D(cu_plan_c2r_manyG,gxmany,vxmany)
 #endif
 
 #if defined(OMPGPU)
 !$omp end target data
 #else
   ! make sure reqs progress
-  call parallel_slib_test(f_req)
+  call cgyro_nl_fftw_comm_test()
 !$acc wait
 !$acc end host_data
 #endif
 
   ! make sure reqs progress
-  call parallel_slib_test(f_req)
+  call cgyro_nl_fftw_comm_test()
 
   ! we can zero the elements we know are zero while we wait
 #if defined(OMPGPU)
@@ -258,9 +266,9 @@ subroutine cgyro_nl_fftw(ij)
 #else
 !$acc parallel loop gang vector independent collapse(3) async(2) &
 !$acc&         private(j,ix,iy) &
-!$acc&         present(nsplit,ny2,nx0,nx2)
+!$acc&         present(nsplitA,ny2,nx0,nx2)
 #endif
-  do j=1,nsplit
+  do j=1,nsplitA
      do ix=nx2,nx0-1
        do iy=0,ny2
          fxmany(iy,ix,j) = 0
@@ -275,9 +283,9 @@ subroutine cgyro_nl_fftw(ij)
 #else
 !$acc parallel loop gang vector independent collapse(3) async(2) &
 !$acc&         private(j,ix,iy) &
-!$acc&         present(nsplit,ny2,n_toroidal,nx)
+!$acc&         present(nsplitA,ny2,n_toroidal,nx)
 #endif
-  do j=1,nsplit
+  do j=1,nsplitA
      do ix=0,nx-1
        do iy=n_toroidal,ny2
          fxmany(iy,ix,j) = 0
@@ -289,12 +297,15 @@ subroutine cgyro_nl_fftw(ij)
 
   ! time to wait for the F_nl to become avaialble
   call timer_lib_in('nl_comm')
-  call parallel_slib_f_nc_wait(fpack,f_nl,f_req)
+  call parallel_slib_f_nc_wait(nsplitA,fpackA,fA_nl,fA_req)
+  fA_req_valid = .FALSE.
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
   call timer_lib_out('nl_comm')
 
   call timer_lib_in('nl')
 #if !defined(OMPGPU)
-!$acc  data present(f_nl)  &
+!$acc  data present(fA_nl)  &
 !$acc&      present(fxmany,fymany,gxmany,gymany) &
 !$acc&      present(uxmany,uymany,vxmany,vymany) &
 !$acc&      present(uvmany)
@@ -310,7 +321,7 @@ subroutine cgyro_nl_fftw(ij)
 !$acc parallel loop gang vector independent collapse(4) async(2) &
 !$acc&         private(j,ir,p,ix,itor,iy,f0,g0,itm,itl,irbase,irmax)
 #endif
-  do j=1,nsplit
+  do j=1,nsplitA
      do irbase=1,n_radial,1
        do itm=1,n_toroidal_procs
          do itl=1,nt_loc
@@ -323,7 +334,7 @@ subroutine cgyro_nl_fftw(ij)
               ix = p
               if (ix < 0) ix = ix+nx
 
-              f0 = i_c*f_nl(ir,itl,j,itm)
+              f0 = i_c*fA_nl(ir,itl,j,itm)
               fxmany(iy,ix,j) = p*f0
               fymany(iy,ix,j) = iy*f0
            enddo
@@ -335,8 +346,13 @@ subroutine cgyro_nl_fftw(ij)
 #if defined(OMPGPU)
   !no async for OMPGPU for now
 #else
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
 !$acc wait(2)
 #endif
+
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
 
   ! Average elements so as to ensure
   !   f(kx,ky=0) = f(-kx,ky=0)^*
@@ -349,9 +365,9 @@ subroutine cgyro_nl_fftw(ij)
 !$acc parallel loop gang vector independent collapse(2) async(2) &
 !$acc&         private(j,ix,f0) &
 !$acc&         present(fxmany) &
-!$acc&         present(nsplit,nx)
+!$acc&         present(nsplitA,nx)
 #endif
-  do j=1,nsplit
+  do j=1,nsplitA
     do ix=1,nx/2-1
       f0 = 0.5*( fxmany(0,ix,j)+conjg(fxmany(0,nx-ix,j)) )
       fxmany(0,ix   ,j) = f0
@@ -370,9 +386,9 @@ subroutine cgyro_nl_fftw(ij)
 #endif
 
 #ifdef HIPGPU
-  rc = hipfftExecZ2D(hip_plan_c2r_many,c_loc(fymany),c_loc(uymany))
+  rc = hipfftExecZ2D(hip_plan_c2r_manyA,c_loc(fymany),c_loc(uymany))
 #else
-  rc = cufftExecZ2D(cu_plan_c2r_many,fymany,uymany)
+  rc = cufftExecZ2D(cu_plan_c2r_manyA,fymany,uymany)
 #endif
 
 #if defined(OMPGPU)
@@ -384,9 +400,14 @@ subroutine cgyro_nl_fftw(ij)
 #if defined(OMPGPU)
   !no async for OMPGPU for now
 #else
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
 !$acc wait(2)
 #endif
   ! fxmany is complete now
+
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
 
 #if defined(OMPGPU)
 !$omp target data use_device_ptr(fxmany,uxmany)
@@ -395,9 +416,9 @@ subroutine cgyro_nl_fftw(ij)
 #endif
 
 #ifdef HIPGPU
-  rc = hipfftExecZ2D(hip_plan_c2r_many,c_loc(fxmany),c_loc(uxmany))
+  rc = hipfftExecZ2D(hip_plan_c2r_manyA,c_loc(fxmany),c_loc(uxmany))
 #else
-  rc = cufftExecZ2D(cu_plan_c2r_many,fxmany,uxmany)
+  rc = cufftExecZ2D(cu_plan_c2r_manyA,fxmany,uxmany)
 #endif
 
 #if defined(OMPGPU)
@@ -406,13 +427,22 @@ subroutine cgyro_nl_fftw(ij)
 !$acc end host_data
 #endif
 
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+
   ! Poisson bracket in real space
   ! uv = (ux*vy-uy*vx)/(nx*ny)
 
   inv_nxny = 1.0/(nx*ny)
 
-  call cgyro_nl_fftw_mul(size(uvmany,1)*size(uvmany,2)*size(uvmany,3), &
-                         uvmany,uxmany,vymany,uymany,vxmany,inv_nxny)
+  call cgyro_nl_fftw_mul(size(uvmany,1)*size(uvmany,2)*nsplitA, &
+                         uvmany, &
+                         uxmany,vymany(:,:,1:nsplitA), &
+                         uymany,vxmany(:,:,1:nsplitA), &
+                         inv_nxny)
+
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
 
   ! ------------------
   ! Transform uv to fx
@@ -426,9 +456,9 @@ subroutine cgyro_nl_fftw(ij)
 #endif
 
 #ifdef HIPGPU
-  rc = hipfftExecD2Z(hip_plan_r2c_many,c_loc(uvmany),c_loc(fxmany))
+  rc = hipfftExecD2Z(hip_plan_r2c_manyA,c_loc(uvmany),c_loc(fxmany))
 #else
-  rc = cufftExecD2Z(cu_plan_r2c_many,uvmany,fxmany)
+  rc = cufftExecD2Z(cu_plan_r2c_manyA,uvmany,fxmany)
 #endif
 
 #if defined(OMPGPU)
@@ -438,6 +468,8 @@ subroutine cgyro_nl_fftw(ij)
 !$acc end host_data
 #endif
 
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
 
   call timer_lib_out('nl')
   call timer_lib_in('nl_mem')
@@ -450,29 +482,292 @@ subroutine cgyro_nl_fftw(ij)
 !$omp&   private(itor,ix,iy)
 #else
 !$acc parallel loop independent collapse(4) gang vector &
-!$acc&         private(itor,ix,iy) present(f_nl,fxmany)
+!$acc&         private(itor,ix,iy) present(fA_nl,fxmany)
 #endif
   do itm=1,n_toroidal_procs
      do itl=1,nt_loc
-       do j=1,nsplit
+       do j=1,nsplitA
          do ir=1,n_radial 
            itor=itl + (itm-1)*nt_loc
            ix = ir-1-nx0/2
            if (ix < 0) ix = ix+nx
 
            iy = itor-1
-           f_nl(ir,itl,j,itm) = fxmany(iy,ix,j)
+           fA_nl(ir,itl,j,itm) = fxmany(iy,ix,j)
          enddo
        enddo
     enddo
   enddo
 
 #if !defined(OMPGPU)
-  ! end data f_nl
+  ! end data fA_nl
+!$acc end data
+#endif
+
+  ! we can zero the elements we know are zero while we wait
+#if defined(OMPGPU)
+  !no async for OMPGPU for now
+!$omp target teams distribute parallel do simd collapse(3)
+#else
+!$acc parallel loop gang vector independent collapse(3) async(2) &
+!$acc&         private(j,ix,iy) &
+!$acc&         present(nsplitA,ny2,nx0,nx2)
+#endif
+  do j=1,nsplitA
+     do ix=nx2,nx0-1
+       do iy=0,ny2
+         fxmany(iy,ix,j) = 0
+         fymany(iy,ix,j) = 0
+       enddo
+     enddo
+  enddo
+
+#if defined(OMPGPU)
+  !no async for OMPGPU for now
+!$omp target teams distribute parallel do simd collapse(3)
+#else
+!$acc parallel loop gang vector independent collapse(3) async(2) &
+!$acc&         private(j,ix,iy) &
+!$acc&         present(nsplitA,ny2,n_toroidal,nx)
+#endif
+  do j=1,nsplitA
+     do ix=0,nx-1
+       do iy=n_toroidal,ny2
+         fxmany(iy,ix,j) = 0
+         fymany(iy,ix,j) = 0
+       enddo
+     enddo
+  enddo
+  call timer_lib_out('nl_mem')
+
+  call timer_lib_in('nl_comm')
+  ! start the async reverse comm
+  ! can reuse the same req, no overlap with forward fA_req
+  call parallel_slib_r_nc_async(nsplitA,fA_nl,fpackA,fA_req)
+  fA_req_valid = .TRUE.
+  call timer_lib_out('nl_comm')
+
+  ! time to wait for the 2nd half of F_nl to become avaialble
+  call timer_lib_in('nl_comm')
+  call parallel_slib_f_nc_wait(nsplitB,fpackB,fB_nl,fB_req)
+  fB_req_valid = .FALSE.
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+  call timer_lib_out('nl_comm')
+
+  call timer_lib_in('nl')
+#if !defined(OMPGPU)
+!$acc  data present(fB_nl)  &
+!$acc&      present(fxmany,fymany,gxmany,gymany) &
+!$acc&      present(uxmany,uymany,vxmany,vymany) &
+!$acc&      present(uvmany)
+#endif
+
+! f_nl is (radial, nt_loc, theta, nv_loc1, toroidal_procs)
+! where nv_loc1 * toroidal_procs >= nv_loc
+#if defined(OMPGPU)
+  !no async for OMPGPU for now
+!$omp target teams distribute parallel do simd collapse(4) &
+!$omp&  private(j,ir,p,ix,itor,iy,f0,g0,itm,itl,irbase,irmax)
+#else
+!$acc parallel loop gang vector independent collapse(4) async(2) &
+!$acc&         private(j,ir,p,ix,itor,iy,f0,g0,itm,itl,irbase,irmax)
+#endif
+  do j=1,nsplitB
+     do irbase=1,n_radial,1
+       do itm=1,n_toroidal_procs
+         do itl=1,nt_loc
+           itor=itl + (itm-1)*nt_loc
+           iy = itor-1
+           ! process several ir to improve f_nl cache reuse
+           irmax=min(irbase+(tile_size-1),n_radial)
+           do ir=irbase,irmax
+              p  = ir-1-nx0/2
+              ix = p
+              if (ix < 0) ix = ix+nx
+
+              f0 = i_c*fB_nl(ir,itl,j,itm)
+              fxmany(iy,ix,j) = p*f0
+              fymany(iy,ix,j) = iy*f0
+           enddo
+         enddo
+       enddo
+     enddo
+  enddo
+
+#if defined(OMPGPU)
+  !no async for OMPGPU for now
+#else
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+!$acc wait(2)
+#endif
+
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+
+  ! Average elements so as to ensure
+  !   f(kx,ky=0) = f(-kx,ky=0)^*
+  ! This symmetry is required for complex input to c2r
+#if defined(OMPGPU)
+  !no async for OMPGPU for now
+!$omp target teams distribute parallel do simd collapse(2) &
+!$omp&  private(j,ix,f0)
+#else
+!$acc parallel loop gang vector independent collapse(2) async(2) &
+!$acc&         private(j,ix,f0) &
+!$acc&         present(fxmany) &
+!$acc&         present(nsplitB,nx)
+#endif
+  do j=1,nsplitB
+    do ix=1,nx/2-1
+      f0 = 0.5*( fxmany(0,ix,j)+conjg(fxmany(0,nx-ix,j)) )
+      fxmany(0,ix   ,j) = f0
+      fxmany(0,nx-ix,j) = conjg(f0)
+    enddo
+  enddo
+
+     ! --------------------------------------
+     ! perform many Fourier Transforms at once
+     ! --------------------------------------
+
+#if defined(OMPGPU)
+!$omp target data use_device_ptr(fymany,uymany)
+#else
+!$acc  host_data use_device(fymany,uymany)
+#endif
+
+#ifdef HIPGPU
+  rc = hipfftExecZ2D(hip_plan_c2r_manyB,c_loc(fymany),c_loc(uymany))
+#else
+  rc = cufftExecZ2D(cu_plan_c2r_manyB,fymany,uymany)
+#endif
+
+#if defined(OMPGPU)
+!$omp end target data
+#else
+!$acc end host_data
+#endif
+
+#if defined(OMPGPU)
+  !no async for OMPGPU for now
+#else
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+!$acc wait(2)
+#endif
+  ! fxmany is complete now
+
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+
+#if defined(OMPGPU)
+!$omp target data use_device_ptr(fxmany,uxmany)
+#else
+!$acc  host_data use_device(fxmany,uxmany)
+#endif
+
+#ifdef HIPGPU
+  rc = hipfftExecZ2D(hip_plan_c2r_manyB,c_loc(fxmany),c_loc(uxmany))
+#else
+  rc = cufftExecZ2D(cu_plan_c2r_manyB,fxmany,uxmany)
+#endif
+
+#if defined(OMPGPU)
+!$omp end target data
+#else
+!$acc end host_data
+#endif
+
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+
+  ! Poisson bracket in real space
+  ! uv = (ux*vy-uy*vx)/(nx*ny)
+
+  inv_nxny = 1.0/(nx*ny)
+
+  call cgyro_nl_fftw_mul(size(uvmany,1)*size(uvmany,2)*nsplitB, &
+                         uvmany, &
+                         uxmany,vymany(:,:,(nsplitA+1):nsplit), &
+                         uymany,vxmany(:,:,(nsplitA+1):nsplit), &
+                         inv_nxny)
+
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+
+  ! ------------------
+  ! Transform uv to fx
+  ! ------------------
+
+#if defined(OMPGPU)
+!$omp target data use_device_ptr(uvmany,fxmany)
+#else
+!$acc wait
+!$acc  host_data use_device(uvmany,fxmany)
+#endif
+
+#ifdef HIPGPU
+  rc = hipfftExecD2Z(hip_plan_r2c_manyB,c_loc(uvmany),c_loc(fxmany))
+#else
+  rc = cufftExecD2Z(cu_plan_r2c_manyB,uvmany,fxmany)
+#endif
+
+#if defined(OMPGPU)
+!$omp end target data
+#else
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+!$acc wait
+!$acc end host_data
+#endif
+
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+
+  call timer_lib_out('nl')
+  call timer_lib_in('nl_mem')
+
+  ! NOTE: The FFT will generate an unwanted n=0,p=-nr/2 component
+  ! that will be filtered in the main time-stepping loop
+
+#if defined(OMPGPU)
+!$omp target teams distribute parallel do simd collapse(4) &
+!$omp&   private(itor,ix,iy)
+#else
+!$acc parallel loop independent collapse(4) gang vector &
+!$acc&         private(itor,ix,iy) present(fB_nl,fxmany)
+#endif
+  do itm=1,n_toroidal_procs
+     do itl=1,nt_loc
+       do j=1,nsplitB
+         do ir=1,n_radial 
+           itor=itl + (itm-1)*nt_loc
+           ix = ir-1-nx0/2
+           if (ix < 0) ix = ix+nx
+
+           iy = itor-1
+           fB_nl(ir,itl,j,itm) = fxmany(iy,ix,j)
+         enddo
+       enddo
+    enddo
+  enddo
+
+#if !defined(OMPGPU)
+  ! end data fB_nl
 !$acc end data
 #endif
 
   call timer_lib_out('nl_mem')
+
+  call timer_lib_in('nl_comm')
+  ! start the async reverse comm
+  ! can reuse the same req, no overlap with forward fB_req
+  call parallel_slib_r_nc_async(nsplitB,fB_nl,fpackB,fB_req)
+  fB_req_valid = .TRUE.
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+  call timer_lib_in('nl_comm')
 
   call cgyro_nl_fftw_comm1_r(ij)
 

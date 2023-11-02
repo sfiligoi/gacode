@@ -1,36 +1,25 @@
-subroutine cgyro_rhs_comm_async(which)
+subroutine cgyro_rhs_comm_async
   use cgyro_nl_comm
   use cgyro_globals
 
   implicit none
 
-  integer, intent(in) :: which
-
   if (nonlinear_flag == 1) then
-     if (which == 1) then
-       call cgyro_nl_fftw_comm1_async
-     else
        call cgyro_nl_fftw_comm2_async
-     endif
+       call cgyro_nl_fftw_comm1_async
   endif
 
 end subroutine cgyro_rhs_comm_async
 
 ! Note: Calling test propagates the async operations in some MPI implementations
-subroutine cgyro_rhs_comm_test(which)
+subroutine cgyro_rhs_comm_test
   use cgyro_nl_comm
   use cgyro_globals
 
   implicit none
 
-  integer, intent(in) :: which
-
   if (nonlinear_flag == 1) then
-     if (which == 1) then
-       call cgyro_nl_fftw_comm1_test
-     else
-       call cgyro_nl_fftw_comm2_test
-     endif
+     call cgyro_nl_fftw_comm_test
   endif
 
 end subroutine cgyro_rhs_comm_test
@@ -121,9 +110,7 @@ subroutine cgyro_rhs(ij)
 
   call cgyro_upwind
 
-  call cgyro_rhs_comm_async(2)
-  ! comm2 is much smaller, so get that out of the way first
-  call cgyro_rhs_comm_async(1)
+  call cgyro_rhs_comm_async
 
 
 #if (!defined(OMPGPU)) && defined(_OPENACC)
@@ -179,11 +166,10 @@ subroutine cgyro_rhs(ij)
   enddo
 
 #if (!defined(OMPGPU)) && defined(_OPENACC)
-  call cgyro_rhs_comm_test(2)
+  call cgyro_rhs_comm_test
 !$acc wait(1)
 #endif
-  call cgyro_rhs_comm_test(2)
-  call cgyro_rhs_comm_test(1)
+  call cgyro_rhs_comm_test
 
   call timer_lib_out('str')
 
