@@ -73,15 +73,15 @@ subroutine cgyro_step_gk_ck
      endif
      call timer_lib_out('str')
 
-     call cgyro_field_c
-     call cgyro_rhs(1)
+     call cgyro_field_c(.FALSE.)
+     call cgyro_rhs(1,.TRUE.)
 
      call timer_lib_in('str')
      call cgyro_vel_fma2(h_x, h0_x, 0.2d0*deltah2, rhs(:,:,:,1))
      call timer_lib_out('str')
 
-     call cgyro_field_c
-     call cgyro_rhs(2)
+     call cgyro_field_c(.FALSE.)
+     call cgyro_rhs(2,.TRUE.)
 
      call timer_lib_in('str')
      call cgyro_vel_fma3(h_x, &
@@ -90,8 +90,8 @@ subroutine cgyro_step_gk_ck
             1.0/40.0*deltah2*9.0, rhs(:,:,:,2))
      call timer_lib_out('str')
 
-     call cgyro_field_c
-     call cgyro_rhs(3)
+     call cgyro_field_c(.FALSE.)
+     call cgyro_rhs(3,.TRUE.)
 
      call timer_lib_in('str')
      call cgyro_vel_fmaN(3, h_x, &
@@ -102,8 +102,8 @@ subroutine cgyro_step_gk_ck
              rhs(:,:,:,1:3))
      call timer_lib_out('str')
 
-     call cgyro_field_c
-     call cgyro_rhs(4) 
+     call cgyro_field_c(.FALSE.)
+     call cgyro_rhs(4,.TRUE.) 
 
      call timer_lib_in('str')
      call cgyro_vel_fmaN(4, h_x, &
@@ -115,8 +115,8 @@ subroutine cgyro_step_gk_ck
             rhs(:,:,:,1:4))
      call timer_lib_out('str')
 
-     call cgyro_field_c
-     call cgyro_rhs(5)
+     call cgyro_field_c(.FALSE.)
+     call cgyro_rhs(5,.TRUE.)
 
      call timer_lib_in('str')
      call cgyro_vel_fmaN(5, h_x, &
@@ -129,8 +129,8 @@ subroutine cgyro_step_gk_ck
             rhs(:,:,:,1:5))
      call timer_lib_out('str')
 
-     call cgyro_field_c
-     call cgyro_rhs(6)
+     call cgyro_field_c(.FALSE.)
+     call cgyro_rhs(6,.TRUE.)
 
      !-------------------
      ! SOLUTION and ERROR
@@ -168,7 +168,9 @@ subroutine cgyro_step_gk_ck
 
      if (var_error < tol) then
 
-        call cgyro_field_c
+        ! TODO: Do we need this in the loop? Or can we move it out?
+        ! we re-compute at the beginnig of the loop
+        call cgyro_field_c(.TRUE.)
 
         istep = istep+1
         deltah2_vec(istep) = deltah2

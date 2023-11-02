@@ -39,7 +39,7 @@ subroutine cgyro_rhs_comm_test
 end subroutine cgyro_rhs_comm_test
 
 
-subroutine cgyro_rhs(ij)
+subroutine cgyro_rhs(ij,update_cap)
 
   use timer_lib
   use cgyro_globals
@@ -47,10 +47,12 @@ subroutine cgyro_rhs(ij)
   implicit none
 
   integer, intent(in) :: ij
+  logical, intent(in) :: update_cap
+  !--------------------------------
   integer :: is,itor
   integer :: id,jc
   real :: rval,rval2
-  complex :: rhs_stream,rhs_el
+  complex :: rhs_stream,h_el,cap_el,my_psi,rhs_el
 
   ! both h_x and field are ready by now
   call cgyro_rhs_comm_async
@@ -58,7 +60,7 @@ subroutine cgyro_rhs(ij)
   call timer_lib_in('str')
 
 #if (!defined(OMPGPU)) && defined(_OPENACC)
-!$acc data present(h_x,g_x,rhs,field) pcopyin(cap_h_c)
+!$acc data present(h_x,g_x,rhs,field,cap_h_c)
 #endif
 
 
@@ -66,7 +68,7 @@ subroutine cgyro_rhs(ij)
 
 !$acc data  &
 !$acc& present(rhs) &
-!$acc& present(cap_h_c) &
+!$acc& present(cap_h_c,z,temp,jvec_c) &
 !$acc& present(is_v,ix_v,ie_v,it_c) &
 !$acc& present(omega_cap_h,omega_h,omega_s) &
 !$acc& present(omega_stream,xi,vel) &
@@ -79,20 +81,28 @@ subroutine cgyro_rhs(ij)
 #if defined(OMPGPU)
   ! no async for OMPGPU for now
 !$omp target teams distribute parallel do simd collapse(3) &
-!$omp&  private(iv,ic,iv_loc,rhs_el) &
-!$omp&  map(to:cap_h_c)
+!$omp&  private(iv,ic,iv_loc,rhs_el,h_el,cap_el,my_psi)
 #elif defined(_OPENACC)
 !$acc  parallel loop gang vector collapse(3) & 
-!$acc& private(iv,ic,iv_loc,rhs_el) async(1)
+!$acc& private(iv,ic,iv_loc,rhs_el,h_el,cap_el,my_psi) async(1)
 #endif
   do itor=nt1,nt2
    do iv=nv1,nv2
      do ic=1,nc
         iv_loc = iv-nv1+1
+        h_el = h_x(ic,iv_loc,itor)
+        if (update_cap) then
+           is = is_v(iv)
+           my_psi = sum( jvec_c(:,ic,iv_loc,itor)*field(:,ic,itor))
+           cap_el = h_el+my_psi*z(is)/temp(is)
+           cap_h_c(ic,iv_loc,itor) = cap_el
+        else
+           cap_el = cap_h_c(ic,iv_loc,itor)
+        endif
         ! Diagonal terms
         rhs_el = &
-             omega_cap_h(ic,iv_loc,itor)*cap_h_c(ic,iv_loc,itor)+&
-             omega_h(ic,iv_loc,itor)*h_x(ic,iv_loc,itor)
+             omega_cap_h(ic,iv_loc,itor)*cap_el+&
+             omega_h(ic,iv_loc,itor)*h_el
 
         rhs(ic,iv_loc,itor,ij) = rhs_el + &
              sum(omega_s(:,ic,iv_loc,itor)*field(:,ic,itor))

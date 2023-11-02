@@ -35,7 +35,7 @@ subroutine cgyro_rhs_comm_test(which)
 
 end subroutine cgyro_rhs_comm_test
 
-subroutine cgyro_rhs(ij)
+subroutine cgyro_rhs(ij,update_cap)
 
   use timer_lib
   use parallel_lib
@@ -44,10 +44,12 @@ subroutine cgyro_rhs(ij)
   implicit none
 
   integer, intent(in) :: ij
+  logical, intent(in) :: update_cap
+  !--------------------------------
   integer :: is, ix, ie, js, jx, je, jv, it, j, k, itor
   integer :: id,jc
   real :: rval,rval2
-  complex :: rhs_stream,rhs_el
+  complex :: rhs_stream,h_el,cap_el,my_psi,rhs_el
   complex, dimension(:,:), allocatable :: rhs_trap
   complex, dimension(:), allocatable   :: bvec_trap
   integer :: nj_loc
@@ -92,15 +94,24 @@ subroutine cgyro_rhs(ij)
   call timer_lib_in('str')
 
 !$omp parallel do collapse(3) &
-!$omp& private(iv_loc,is,rval,rval2,rhs_stream,id,jc,rhs_el) 
+!$omp& private(iv_loc,is,rval,rval2,rhs_stream,id,jc,rhs_el,h_el,cap_el,my_psi) 
   do itor=nt1,nt2
    do iv=nv1,nv2
      do ic=1,nc
         iv_loc = iv-nv1+1
+        h_el = h_x(ic,iv_loc,itor)
+        if (update_cap) then
+           is = is_v(iv)
+           my_psi = sum( jvec_c(:,ic,iv_loc,itor)*field(:,ic,itor))
+           cap_el = h_el+my_psi*z(is)/temp(is)
+           cap_h_c(ic,iv_loc,itor) = cap_el
+        else
+           cap_el = cap_h_c(ic,iv_loc,itor)
+        endif
         ! Diagonal terms
         rhs_el = &
-             omega_cap_h(ic,iv_loc,itor)*cap_h_c(ic,iv_loc,itor)+&
-             omega_h(ic,iv_loc,itor)*h_x(ic,iv_loc,itor)
+             omega_cap_h(ic,iv_loc,itor)*cap_el + &
+             omega_h(ic,iv_loc,itor)*h_el
 
         is = is_v(iv)
         ! Parallel streaming with upwind dissipation 

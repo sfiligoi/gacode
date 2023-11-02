@@ -134,15 +134,15 @@ subroutine cgyro_step_gk_v76
      endif
      call timer_lib_out('str')
      
-     call cgyro_field_c
-     call cgyro_rhs(1)
+     call cgyro_field_c(.FALSE.)
+     call cgyro_rhs(1,.TRUE.)
 
      call timer_lib_in('str')
      call cgyro_vel_fma2(h_x, h0_x, a21*deltah2, rhs(:,:,:,1))
      call timer_lib_out('str')
 
-     call cgyro_field_c
-     call cgyro_rhs(2)
+     call cgyro_field_c(.FALSE.)
+     call cgyro_rhs(2,.TRUE.)
 
      call timer_lib_in('str')
      call cgyro_vel_fmaN(2,h_x, &
@@ -151,10 +151,10 @@ subroutine cgyro_step_gk_v76
             rhs(:,:,:,1:2))
      call timer_lib_out('str')
      
-     call cgyro_field_c
+     call cgyro_field_c(.FALSE.)
 
      ! rhs(*,2) is not used again, so shift down all the subsequent indexes
-     call cgyro_rhs(3-1)
+     call cgyro_rhs(3-1,.TRUE.)
      
      call timer_lib_in('str')
      call cgyro_vel_fmaN(2,h_x, &
@@ -163,8 +163,8 @@ subroutine cgyro_step_gk_v76
             rhs(:,:,:,1:(3-1)))
      call timer_lib_out('str')
 
-     call cgyro_field_c
-     call cgyro_rhs(4-1)
+     call cgyro_field_c(.FALSE.)
+     call cgyro_rhs(4-1,.TRUE.)
 
      call timer_lib_in('str')
      call cgyro_vel_fmaN(3,h_x, &
@@ -173,8 +173,8 @@ subroutine cgyro_step_gk_v76
             rhs(:,:,:,1:(4-1)))
      call timer_lib_out('str')
 
-     call cgyro_field_c
-     call cgyro_rhs(5-1)
+     call cgyro_field_c(.FALSE.)
+     call cgyro_rhs(5-1,.TRUE.)
 
      call timer_lib_in('str')
      call cgyro_vel_fmaN(4,h_x, &
@@ -183,8 +183,8 @@ subroutine cgyro_step_gk_v76
             rhs(:,:,:,1:(5-1)))
      call timer_lib_out('str')
 
-     call cgyro_field_c
-     call cgyro_rhs(6-1)
+     call cgyro_field_c(.FALSE.)
+     call cgyro_rhs(6-1,.TRUE.)
 
      call timer_lib_in('str')
      call cgyro_vel_fmaN(5,h_x, &
@@ -193,8 +193,8 @@ subroutine cgyro_step_gk_v76
             rhs(:,:,:,1:(6-1)))
      call timer_lib_out('str')
      
-     call cgyro_field_c
-     call cgyro_rhs(7-1)
+     call cgyro_field_c(.FALSE.)
+     call cgyro_rhs(7-1,.TRUE.)
 
      call timer_lib_in('str')
      call cgyro_vel_fmaN(6,h_x, &
@@ -204,8 +204,8 @@ subroutine cgyro_step_gk_v76
             rhs(:,:,:,1:(7-1)))
      call timer_lib_out('str')
 
-     call cgyro_field_c
-     call cgyro_rhs(8-1)
+     call cgyro_field_c(.FALSE.)
+     call cgyro_rhs(8-1,.TRUE.)
 
      call timer_lib_in('str')
      call cgyro_vel_fmaN(7,h_x, &
@@ -215,8 +215,8 @@ subroutine cgyro_step_gk_v76
             rhs(:,:,:,1:(8-1)))
      call timer_lib_out('str')
 
-     call cgyro_field_c
-     call cgyro_rhs(9-1)
+     call cgyro_field_c(.FALSE.)
+     call cgyro_rhs(9-1,.TRUE.)
      
      call timer_lib_in('str')
      call cgyro_vel_fmaN(6,h_x, &
@@ -226,8 +226,8 @@ subroutine cgyro_step_gk_v76
             rhs(:,:,:,1:(7-1)))
      call timer_lib_out('str')
 
-     call cgyro_field_c
-     call cgyro_rhs(10-1)
+     call cgyro_field_c(.FALSE.)
+     call cgyro_rhs(10-1,.TRUE.)
 
      !-------------------
      ! SOLUTION and ERROR
@@ -262,7 +262,9 @@ subroutine cgyro_step_gk_v76
     
      if (var_error < tol) then
 
-        call cgyro_field_c
+        ! TODO: Do we need this in the loop? Or can we move it out?
+        ! we re-compute at the beginnig of the loop
+        call cgyro_field_c(.TRUE.)
         
         conv = 1
         delta_t_tot = delta_t_tot + deltah2

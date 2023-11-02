@@ -895,7 +895,7 @@ subroutine cgyro_step_collision
 #endif
 
   if (collision_field_model == 0) then
-     call cgyro_field_c
+     call cgyro_field_c(.TRUE.)
   else if (nt1 == 0 .and. ae_flag == 1) then
      call cgyro_field_c_ae
   endif
@@ -915,7 +915,7 @@ subroutine cgyro_step_collision_simple
   call cgyro_step_collision_cpu(.TRUE.)
 #endif
 
-  call cgyro_field_c
+  call cgyro_field_c(.TRUE.)
 
 end subroutine cgyro_step_collision_simple
 
