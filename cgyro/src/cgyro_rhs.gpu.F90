@@ -11,6 +11,20 @@ subroutine cgyro_rhs_comm_async
 
 end subroutine cgyro_rhs_comm_async
 
+subroutine cgyro_rhs_r_comm_async(ij)
+  use cgyro_nl_comm
+  use cgyro_globals
+
+  implicit none
+
+  integer, intent(in) :: ij
+
+  if (nonlinear_flag == 1) then
+       call cgyro_nl_fftw_comm1_r(ij)
+  endif
+
+end subroutine cgyro_rhs_r_comm_async
+
 ! Note: Calling test propagates the async operations in some MPI implementations
 subroutine cgyro_rhs_comm_test
   use cgyro_nl_comm
@@ -38,18 +52,58 @@ subroutine cgyro_rhs(ij)
   real :: rval,rval2
   complex :: rhs_stream,rhs_el
 
-  call timer_lib_in('str_mem')
+  ! both h_x and field are ready by now
+  call cgyro_rhs_comm_async
+
+  call timer_lib_in('str')
 
 #if (!defined(OMPGPU)) && defined(_OPENACC)
-!$acc data present(h_x,g_x,rhs,field)
+!$acc data present(h_x,g_x,rhs,field) pcopyin(cap_h_c)
 #endif
 
-  call timer_lib_out('str_mem')
 
+#if (!defined(OMPGPU)) && defined(_OPENACC)
+
+!$acc data  &
+!$acc& present(rhs) &
+!$acc& present(cap_h_c) &
+!$acc& present(is_v,ix_v,ie_v,it_c) &
+!$acc& present(omega_cap_h,omega_h,omega_s) &
+!$acc& present(omega_stream,xi,vel) &
+!$acc& present(dtheta,dtheta_up,icd_c)
+
+#endif
+
+  ! get the initial rhs initialization
+  ! that depends on h_x,cap_h_c and field only
+#if defined(OMPGPU)
+  ! no async for OMPGPU for now
+!$omp target teams distribute parallel do simd collapse(3) &
+!$omp&  private(iv,ic,iv_loc,rhs_el) &
+!$omp&  map(to:cap_h_c)
+#elif defined(_OPENACC)
+!$acc  parallel loop gang vector collapse(3) & 
+!$acc& private(iv,ic,iv_loc,rhs_el) async(1)
+#endif
+  do itor=nt1,nt2
+   do iv=nv1,nv2
+     do ic=1,nc
+        iv_loc = iv-nv1+1
+        ! Diagonal terms
+        rhs_el = &
+             omega_cap_h(ic,iv_loc,itor)*cap_h_c(ic,iv_loc,itor)+&
+             omega_h(ic,iv_loc,itor)*h_x(ic,iv_loc,itor)
+
+        rhs(ic,iv_loc,itor,ij) = rhs_el + &
+             sum(omega_s(:,ic,iv_loc,itor)*field(:,ic,itor))
+     enddo
+   enddo
+  enddo
+
+  call cgyro_rhs_comm_test
 
   ! Prepare suitable distribution (g, not h) for conservative upwind method
   if (n_field > 1) then
-     call timer_lib_in('str')
 
 #if defined(OMPGPU)
   ! no async for OMPGPU for now
@@ -74,13 +128,7 @@ subroutine cgyro_rhs(ij)
       enddo
      enddo
 
-#if (!defined(OMPGPU)) && defined(_OPENACC)
-!$acc wait(1)
-#endif
-
-     call timer_lib_out('str')
   else
-     call timer_lib_in('str_mem')
 
 #if defined(OMPGPU)
   ! no async for OMPGPU for now
@@ -101,51 +149,50 @@ subroutine cgyro_rhs(ij)
       enddo
      enddo
 
+  endif
+
 #if (!defined(OMPGPU)) && defined(_OPENACC)
+  call cgyro_rhs_comm_test
 !$acc wait(1)
 #endif
 
-     call timer_lib_out('str_mem')
+  call cgyro_rhs_comm_test
+
+  call timer_lib_out('str')
+
+  ! Wavenumber advection shear terms
+  ! depends on h_x and field only, updates rhs
+  call cgyro_advect_wavenumber(ij)
+
+  call cgyro_rhs_comm_test
+
+  ! Nonlinear evaluation [f,g]
+  if (nonlinear_flag == 1) then
+     ! assumes someone already started the input comm
+     ! and will finish the output comm
+     call cgyro_nl_fftw()
   endif
 
   call cgyro_upwind
 
-  call cgyro_rhs_comm_async
+  call cgyro_rhs_comm_test
 
-
-#if (!defined(OMPGPU)) && defined(_OPENACC)
-  call timer_lib_in('str_mem')
-
-!$acc data  &
-!$acc& present(rhs) &
-!$acc& pcopyin(cap_h_c) &
-!$acc& present(is_v,ix_v,ie_v,it_c) &
-!$acc& present(omega_cap_h,omega_h,omega_s) &
-!$acc& present(omega_stream,xi,vel) &
-!$acc& present(dtheta,dtheta_up,icd_c)
-
-  call timer_lib_out('str_mem')
-#endif
   call timer_lib_in('str')
 
+  ! add stream to rhs
 #if defined(OMPGPU)
   ! no async for OMPGPU for now
 !$omp target teams distribute parallel do simd collapse(3) &
-!$omp&  private(iv,ic,iv_loc,is,rval,rval2,rhs_stream,id,jc,rhs_el) &
+!$omp&  private(iv,ic,iv_loc,is,rval,rval2,rhs_stream,id,jc) &
 !$omp&  map(to:cap_h_c)
 #elif defined(_OPENACC)
 !$acc  parallel loop gang vector collapse(3) & 
-!$acc& private(iv,ic,iv_loc,is,rval,rval2,rhs_stream,id,jc,rhs_el) async(1)
+!$acc& private(iv,ic,iv_loc,is,rval,rval2,rhs_stream,id,jc) async(1)
 #endif
   do itor=nt1,nt2
    do iv=nv1,nv2
      do ic=1,nc
         iv_loc = iv-nv1+1
-        ! Diagonal terms
-        rhs_el = &
-             omega_cap_h(ic,iv_loc,itor)*cap_h_c(ic,iv_loc,itor)+&
-             omega_h(ic,iv_loc,itor)*h_x(ic,iv_loc,itor)
-
         is = is_v(iv)
         ! Parallel streaming with upwind dissipation 
         rval  = omega_stream(it_c(ic),is,itor)*vel(ie_v(iv))*xi(ix_v(iv))
@@ -159,8 +206,7 @@ subroutine cgyro_rhs(ij)
                 -rval2*dtheta_up(id,ic,itor)*g_x(jc,iv_loc,itor)
         enddo
 
-        rhs(ic,iv_loc,itor,ij) = rhs_el + rhs_stream +&
-             sum(omega_s(:,ic,iv_loc,itor)*field(:,ic,itor))
+        rhs(ic,iv_loc,itor,ij) = rhs(ic,iv_loc,itor,ij) + rhs_stream
      enddo
    enddo
   enddo
@@ -169,33 +215,23 @@ subroutine cgyro_rhs(ij)
   call cgyro_rhs_comm_test
 !$acc wait(1)
 #endif
-  call cgyro_rhs_comm_test
+
+#if (!defined(OMPGPU)) && defined(_OPENACC)
+!$acc end data    
+
+! g_x and h_x
+!$acc end data 
+#endif
 
   call timer_lib_out('str')
+
+  ! updates rhs
+  call cgyro_rhs_r_comm_async(ij)
 
   if (explicit_trap_flag == 1) then
      ! we should never get in here... should have failed during init
      ! hard abort if we somehow end up here
      call abort
   endif
-
-  ! Wavenumber advection shear terms
-  call cgyro_advect_wavenumber(ij)
-
-  ! Nonlinear evaluation [f,g]
-  if (nonlinear_flag == 1) then     
-     call cgyro_nl_fftw(ij)
-  endif
-
-#if (!defined(OMPGPU)) && defined(_OPENACC)
- call timer_lib_in('str_mem')
-
-!$acc end data    
-
-! g_x and h_x
-!$acc end data 
- 
-  call timer_lib_out('str_mem')
-#endif
 
 end subroutine cgyro_rhs

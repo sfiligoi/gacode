@@ -34,7 +34,7 @@ subroutine cgyro_nl_fftw_mul(sz,uvm,uxm,vym,uym,vxm,inv_nxny)
 
 end subroutine
 
-subroutine cgyro_nl_fftw(ij)
+subroutine cgyro_nl_fftw
 
 #ifdef HIPGPU
   use hipfort_hipfft
@@ -47,8 +47,6 @@ subroutine cgyro_nl_fftw(ij)
   use cgyro_globals
 
   implicit none
-  !-----------------------------------
-  integer, intent(in) :: ij
   !-----------------------------------
   integer :: j,p,iexch
   integer :: it,ir,itm,itl,ix,iy
@@ -768,7 +766,5 @@ subroutine cgyro_nl_fftw(ij)
   ! make sure reqs progress
   call cgyro_nl_fftw_comm_test()
   call timer_lib_in('nl_comm')
-
-  call cgyro_nl_fftw_comm1_r(ij)
 
 end subroutine cgyro_nl_fftw
