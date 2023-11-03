@@ -55,7 +55,7 @@ subroutine cgyro_nl_fftw_comm1_async
 !$acc parallel loop collapse(4) gang vector independent &
 !$acc&         private(iexch0,itor0,isplit0,iexch_base,h_loc) &
 !$acc&         present(ic_c,h_x,fpackA,fpackB) &
-!$acc&         present(n_theta,nv_loc,nt1,nt2,n_radial) default(none)
+!$acc&         present(n_theta,nv_loc,nt1,nt2,n_radial,nsplit,nsplitA,nsplitB) default(none)
 #else
 !$omp parallel do collapse(3) &
 !$omp&         private(iexch0,itor0,isplit0,iexch_base,h_loc)
@@ -86,7 +86,7 @@ subroutine cgyro_nl_fftw_comm1_async
 !$omp&         private(iexch0,itor0,isplit0,iexch_base)
 #elif defined(_OPENACC)
 !$acc parallel loop independent gang vector &
-!$acc&         private(iexch0,itor0,isplit0,iexch_base) &
+!$acc&         private(iexch0,itor0,isplit0,iexch_base,nsplit,nsplitA,nsplitB) &
 !$acc&         present(fpackA,fpackB)
 #endif
     do iexch0=nv_loc*n_theta,nsplit*n_toroidal_procs-1
@@ -148,7 +148,7 @@ subroutine cgyro_nl_fftw_comm1_r(ij)
 !$acc parallel loop collapse(4) gang vector independent private(ic_loc_m,my_psi) &
 !$acc&         private(iexch0,itor0,isplit0,iexch_base) &
 !$acc&         present(ic_c,px,rhs,fpackA,fpackB) copyin(psi_mul,zf_scale) &
-!$acc&         present(nt1,nt2,nv_loc,n_theta,n_radial) copyin(ij) default(none)
+!$acc&         present(nt1,nt2,nv_loc,n_theta,n_radial,nsplit,nsplitA,nsplitB) copyin(ij) default(none)
 #else
 !$omp parallel do collapse(2) private(ic_loc_m,my_psi) &
 !$omp&         private(iexch0,itor0,isplit0,iexch_base)
