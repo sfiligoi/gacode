@@ -57,6 +57,8 @@ subroutine cgyro_rhs(ij,update_cap)
   ! both h_x and field are ready by now
   call cgyro_rhs_comm_async
 
+  call cgyro_upwind_prepare_async
+
   call timer_lib_in('str')
 
 #if (!defined(OMPGPU)) && defined(_OPENACC)
@@ -81,10 +83,10 @@ subroutine cgyro_rhs(ij,update_cap)
 #if defined(OMPGPU)
   ! no async for OMPGPU for now
 !$omp target teams distribute parallel do simd collapse(3) &
-!$omp&  private(iv,ic,iv_loc,rhs_el,h_el,cap_el,my_psi)
+!$omp&  private(iv,ic,iv_loc,rhs_el,h_el,is,cap_el,my_psi)
 #elif defined(_OPENACC)
 !$acc  parallel loop gang vector collapse(3) & 
-!$acc& private(iv,ic,iv_loc,rhs_el,h_el,cap_el,my_psi) async(1)
+!$acc& private(iv,ic,iv_loc,rhs_el,h_el,is,cap_el,my_psi) async(1)
 #endif
   do itor=nt1,nt2
    do iv=nv1,nv2
@@ -112,55 +114,6 @@ subroutine cgyro_rhs(ij,update_cap)
 
   call cgyro_rhs_comm_test
 
-  ! Prepare suitable distribution (g, not h) for conservative upwind method
-  if (n_field > 1) then
-
-#if defined(OMPGPU)
-  ! no async for OMPGPU for now
-!$omp target teams distribute parallel do simd collapse(3) &
-!$omp&  private(iv_loc,is)
-#elif defined(_OPENACC)
-!$acc parallel loop  collapse(3) independent gang vector &
-!$acc&         private(iv_loc,is) &
-!$acc&         present(is_v,z,temp,jvec_c) &
-!$acc&         present(nt1,nt2,nv1,nv2,nc) &
-!$acc&         default(none) async(1)
-#endif
-     do itor=nt1,nt2
-      do iv=nv1,nv2
-        do ic=1,nc
-           iv_loc = iv-nv1+1
-           is = is_v(iv)
-
-           g_x(ic,iv_loc,itor) = h_x(ic,iv_loc,itor)+ & 
-                (z(is)/temp(is))*jvec_c(2,ic,iv_loc,itor)*field(2,ic,itor)
-        enddo
-      enddo
-     enddo
-
-  else
-
-#if defined(OMPGPU)
-  ! no async for OMPGPU for now
-!$omp target teams distribute parallel do simd collapse(3) &
-!$omp&  private(iv_loc)
-#elif defined(_OPENACC)
-!$acc parallel loop  collapse(3) gang vector &
-!$acc&         independent private(iv_loc) &
-!$acc&         present(nt1,nt2,nv1,nv2,nc)  &
-!$acc&         default(none) async(1)
-#endif
-     do itor=nt1,nt2
-      do iv=nv1,nv2
-        do ic=1,nc
-           iv_loc = iv-nv1+1
-           g_x(ic,iv_loc,itor) = h_x(ic,iv_loc,itor)
-        enddo
-      enddo
-     enddo
-
-  endif
-
 #if (!defined(OMPGPU)) && defined(_OPENACC)
   call cgyro_rhs_comm_test
 !$acc wait(1)
@@ -183,7 +136,7 @@ subroutine cgyro_rhs(ij,update_cap)
      call cgyro_nl_fftw()
   endif
 
-  call cgyro_upwind
+  call cgyro_upwind_complete
 
   call cgyro_rhs_comm_test
 

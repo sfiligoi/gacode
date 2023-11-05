@@ -54,42 +54,13 @@ subroutine cgyro_rhs(ij,update_cap)
   complex, dimension(:), allocatable   :: bvec_trap
   integer :: nj_loc
 
-  ! Prepare suitable distribution (g, not h) for conservative upwind method
-  if (n_field > 1) then
-     call timer_lib_in('str')
-
-!$omp parallel do collapse(2) private(iv_loc,is,ic)
-     do itor=nt1,nt2
-      do iv=nv1,nv2
-        iv_loc = iv-nv1+1
-        is = is_v(iv)
-        do ic=1,nc
-           g_x(ic,iv_loc,itor) = h_x(ic,iv_loc,itor)+ & 
-                (z(is)/temp(is))*jvec_c(2,ic,iv_loc,itor)*field(2,ic,itor)
-        enddo
-      enddo
-     enddo
-     call timer_lib_out('str')
-  else
-     call timer_lib_in('str_mem')
-
-!$omp parallel do collapse(2) private(iv_loc)
-     do itor=nt1,nt2
-      do iv=nv1,nv2
-        iv_loc = iv-nv1+1
-        g_x(:,iv_loc,itor) = h_x(:,iv_loc,itor)
-      enddo
-     enddo
-
-     call timer_lib_out('str_mem')
-  endif
-
-  ! Correct g_x for number conservation
-  call cgyro_upwind
-
   call cgyro_rhs_comm_async(2)
   ! comm2 is much smaller, so get that out of the way first
   call cgyro_rhs_comm_async(1)
+
+  ! Create g_x for number conservation
+  call cgyro_upwind_prepare_async
+  call cgyro_upwind_complete
 
   call timer_lib_in('str')
 
