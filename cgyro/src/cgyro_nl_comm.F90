@@ -19,8 +19,8 @@ subroutine cgyro_nl_fftw_comm_test
   implicit none
 
   if (fA_req_valid) call parallel_slib_test(fA_req)
-  if (fB_req_valid) call parallel_slib_test(fB_req)
   if (g_req_valid) call parallel_slib_test(g_req)
+  if (fB_req_valid) call parallel_slib_test(fB_req)
 
 end subroutine cgyro_nl_fftw_comm_test
 
@@ -86,8 +86,8 @@ subroutine cgyro_nl_fftw_comm1_async
 !$omp&         private(iexch0,itor0,isplit0,iexch_base)
 #elif defined(_OPENACC)
 !$acc parallel loop independent gang vector &
-!$acc&         private(iexch0,itor0,isplit0,iexch_base,nsplit,nsplitA,nsplitB) &
-!$acc&         present(fpackA,fpackB)
+!$acc&         private(iexch0,itor0,isplit0,iexch_base) &
+!$acc&         present(fpackA,fpackB,nsplit,nsplitA,nsplitB)
 #endif
     do iexch0=nv_loc*n_theta,nsplit*n_toroidal_procs-1
        itor0 = iexch0/nsplit
@@ -105,12 +105,22 @@ subroutine cgyro_nl_fftw_comm1_async
   ! split the comm in two, so we can start working on first as soon as it is ready
   call parallel_slib_f_nc_async(nsplitA,fpackA,fA_nl,fA_req)
   fA_req_valid = .TRUE.
-  call parallel_slib_f_nc_async(nsplitB,fpackB,fB_nl,fB_req)
-  fB_req_valid = .TRUE.
+  ! send only the first half, use comm3 to send the other half
 
   call timer_lib_out('nl_mem')
 
 end subroutine cgyro_nl_fftw_comm1_async
+
+subroutine cgyro_nl_fftw_comm3_async
+  use timer_lib
+  use parallel_lib
+  use cgyro_globals
+
+  implicit none
+
+  call parallel_slib_f_nc_async(nsplitB,fpackB,fB_nl,fB_req)
+  fB_req_valid = .TRUE.
+end subroutine cgyro_nl_fftw_comm3_async
 
 subroutine cgyro_nl_fftw_comm1_r(ij)
   use timer_lib

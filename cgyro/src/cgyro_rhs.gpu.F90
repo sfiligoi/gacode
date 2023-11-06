@@ -1,15 +1,30 @@
-subroutine cgyro_rhs_comm_async
+subroutine cgyro_rhs_comm_async_hx
   use cgyro_nl_comm
   use cgyro_globals
 
   implicit none
 
   if (nonlinear_flag == 1) then
-       call cgyro_nl_fftw_comm2_async
+       ! prepare and transfer h_x (first half)
        call cgyro_nl_fftw_comm1_async
   endif
 
-end subroutine cgyro_rhs_comm_async
+end subroutine cgyro_rhs_comm_async_hx
+
+subroutine cgyro_rhs_comm_async_fd
+  use cgyro_nl_comm
+  use cgyro_globals
+
+  implicit none
+
+  if (nonlinear_flag == 1) then
+       ! transfer fields
+       call cgyro_nl_fftw_comm2_async
+       ! and the other half of h_x
+       call cgyro_nl_fftw_comm3_async
+  endif
+
+end subroutine cgyro_rhs_comm_async_fd
 
 subroutine cgyro_rhs_r_comm_async(ij)
   use cgyro_nl_comm
@@ -54,8 +69,8 @@ subroutine cgyro_rhs(ij,update_cap)
   real :: rval,rval2
   complex :: rhs_stream,h_el,cap_el,my_psi,rhs_el
 
-  ! both h_x and field are ready by now
-  call cgyro_rhs_comm_async
+  ! fields is ready by now
+  call cgyro_rhs_comm_async_fd
 
   call cgyro_upwind_prepare_async
 

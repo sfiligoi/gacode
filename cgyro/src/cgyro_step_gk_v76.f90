@@ -134,6 +134,7 @@ subroutine cgyro_step_gk_v76
      endif
      call timer_lib_out('str')
      
+     call cgyro_rhs_comm_async_hx
      call cgyro_field_c(.FALSE.)
      call cgyro_rhs(1,.TRUE.)
 
@@ -141,6 +142,7 @@ subroutine cgyro_step_gk_v76
      call cgyro_vel_fma2(h_x, h0_x, a21*deltah2, rhs(:,:,:,1))
      call timer_lib_out('str')
 
+     call cgyro_rhs_comm_async_hx
      call cgyro_field_c(.FALSE.)
      call cgyro_rhs(2,.TRUE.)
 
@@ -151,6 +153,7 @@ subroutine cgyro_step_gk_v76
             rhs(:,:,:,1:2))
      call timer_lib_out('str')
      
+     call cgyro_rhs_comm_async_hx
      call cgyro_field_c(.FALSE.)
 
      ! rhs(*,2) is not used again, so shift down all the subsequent indexes
@@ -163,6 +166,7 @@ subroutine cgyro_step_gk_v76
             rhs(:,:,:,1:(3-1)))
      call timer_lib_out('str')
 
+     call cgyro_rhs_comm_async_hx
      call cgyro_field_c(.FALSE.)
      call cgyro_rhs(4-1,.TRUE.)
 
@@ -173,6 +177,7 @@ subroutine cgyro_step_gk_v76
             rhs(:,:,:,1:(4-1)))
      call timer_lib_out('str')
 
+     call cgyro_rhs_comm_async_hx
      call cgyro_field_c(.FALSE.)
      call cgyro_rhs(5-1,.TRUE.)
 
@@ -183,6 +188,7 @@ subroutine cgyro_step_gk_v76
             rhs(:,:,:,1:(5-1)))
      call timer_lib_out('str')
 
+     call cgyro_rhs_comm_async_hx
      call cgyro_field_c(.FALSE.)
      call cgyro_rhs(6-1,.TRUE.)
 
@@ -193,6 +199,7 @@ subroutine cgyro_step_gk_v76
             rhs(:,:,:,1:(6-1)))
      call timer_lib_out('str')
      
+     call cgyro_rhs_comm_async_hx
      call cgyro_field_c(.FALSE.)
      call cgyro_rhs(7-1,.TRUE.)
 
@@ -204,6 +211,7 @@ subroutine cgyro_step_gk_v76
             rhs(:,:,:,1:(7-1)))
      call timer_lib_out('str')
 
+     call cgyro_rhs_comm_async_hx
      call cgyro_field_c(.FALSE.)
      call cgyro_rhs(8-1,.TRUE.)
 
@@ -215,6 +223,7 @@ subroutine cgyro_step_gk_v76
             rhs(:,:,:,1:(8-1)))
      call timer_lib_out('str')
 
+     call cgyro_rhs_comm_async_hx
      call cgyro_field_c(.FALSE.)
      call cgyro_rhs(9-1,.TRUE.)
      
@@ -226,6 +235,7 @@ subroutine cgyro_step_gk_v76
             rhs(:,:,:,1:(7-1)))
      call timer_lib_out('str')
 
+     call cgyro_rhs_comm_async_hx
      call cgyro_field_c(.FALSE.)
      call cgyro_rhs(10-1,.TRUE.)
 

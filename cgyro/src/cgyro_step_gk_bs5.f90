@@ -112,6 +112,7 @@ subroutine cgyro_step_gk_bs5
      endif
      call timer_lib_out('str')
 
+     call cgyro_rhs_comm_async_hx
      call cgyro_field_c(.FALSE.)
      call cgyro_rhs(1,.TRUE.)
 
@@ -119,6 +120,7 @@ subroutine cgyro_step_gk_bs5
      call cgyro_vel_fma2(h_x, h0_x, a21*deltah2, rhs(:,:,:,1))
      call timer_lib_out('str')
 
+     call cgyro_rhs_comm_async_hx
      call cgyro_field_c(.FALSE.)
      call cgyro_rhs(2,.TRUE.)
 
@@ -129,6 +131,7 @@ subroutine cgyro_step_gk_bs5
             rhs(:,:,:,1:2))
      call timer_lib_out('str')
 
+     call cgyro_rhs_comm_async_hx
      call cgyro_field_c(.FALSE.)
      call cgyro_rhs(3,.TRUE.)
 
@@ -139,6 +142,7 @@ subroutine cgyro_step_gk_bs5
             rhs(:,:,:,1:3))
      call timer_lib_out('str')
 
+     call cgyro_rhs_comm_async_hx
      call cgyro_field_c(.FALSE.)
      call cgyro_rhs(4,.TRUE.)
      
@@ -149,6 +153,7 @@ subroutine cgyro_step_gk_bs5
             rhs(:,:,:,1:4))
      call timer_lib_out('str')
 
+     call cgyro_rhs_comm_async_hx
      call cgyro_field_c(.FALSE.)
      call cgyro_rhs(5,.TRUE.)
 
@@ -159,6 +164,7 @@ subroutine cgyro_step_gk_bs5
             rhs(:,:,:,1:5))
      call timer_lib_out('str')
 
+     call cgyro_rhs_comm_async_hx
      call cgyro_field_c(.FALSE.)
      call cgyro_rhs(6,.TRUE.)
 
@@ -170,6 +176,7 @@ subroutine cgyro_step_gk_bs5
             rhs(:,:,:,1:6))
      call timer_lib_out('str')
 
+     call cgyro_rhs_comm_async_hx
      call cgyro_field_c(.FALSE.)
      call cgyro_rhs(7,.TRUE.)
 
