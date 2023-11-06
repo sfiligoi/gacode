@@ -89,6 +89,8 @@ subroutine cgyro_step_gk_v76
   real, parameter :: b9h = 0.d0
   real, parameter :: b10h = 0.20295184663356282227670547938d-1
 
+  logical :: is_first
+
   tol = error_tol
 
   itrk = 0
@@ -114,6 +116,8 @@ subroutine cgyro_step_gk_v76
   call cgyro_vel_copy(h0_old, h_x)
   call timer_lib_out('str_mem')
 
+  is_first = .TRUE.
+
   do while (delta_t_tot < delta_t .and. itrk <= itrk_max)
     
      call timer_lib_in('str')
@@ -135,8 +139,14 @@ subroutine cgyro_step_gk_v76
      call timer_lib_out('str')
      
      call cgyro_rhs_comm_async_hx
-     call cgyro_field_c(.FALSE.)
-     call cgyro_rhs(1,.TRUE.)
+     if (is_first) then
+        ! fields already in good shape in the beginning
+        call cgyro_rhs(1,.FALSE.)
+        is_first = .FALSE.
+     else
+        call cgyro_field_c(.FALSE.)
+        call cgyro_rhs(1,.TRUE.)
+     endif
 
      call timer_lib_in('str')
      call cgyro_vel_fma2(h_x, h0_x, a21*deltah2, rhs(:,:,:,1))
@@ -271,11 +281,6 @@ subroutine cgyro_step_gk_v76
      var_error = sqrt(total_local_error+rel_error*rel_error)
     
      if (var_error < tol) then
-
-        ! TODO: Do we need this in the loop? Or can we move it out?
-        ! we re-compute at the beginnig of the loop
-        call cgyro_field_c(.TRUE.)
-        
         conv = 1
         delta_t_tot = delta_t_tot + deltah2
         total_local_error = total_local_error + rel_error*rel_error
@@ -308,6 +313,9 @@ subroutine cgyro_step_gk_v76
      endif
 
   enddo
+
+  ! caller expects the fields to be updated on exit
+  call cgyro_field_c(.TRUE.)
 
   delta_t_gk = max(delta_t_last,6.0/7.0*deltah2)
   
