@@ -544,10 +544,8 @@ subroutine cgyro_nl_fftw
   ! can reuse the same req, no overlap with forward fA_req
   call parallel_slib_r_nc_async(nsplitA,fA_nl,fpackA,fA_req)
   fA_req_valid = .TRUE.
-  call timer_lib_out('nl_comm')
 
   ! time to wait for the 2nd half of F_nl to become avaialble
-  call timer_lib_in('nl_comm')
   call parallel_slib_f_nc_wait(nsplitB,fpackB,fB_nl,fB_req)
   fB_req_valid = .FALSE.
   ! make sure reqs progress

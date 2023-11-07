@@ -434,14 +434,16 @@ subroutine cgyro_init_manager
   allocate(fy(0:ny2,0:nx-1,n_omp))
   allocate(gy(0:ny2,0:nx-1,n_omp))
 
+  ! Note: Assuming nsplitA>=nsplitB
+  !       So we can use the same buffers for both
   allocate(vxmany(0:ny-1,0:nx-1,nsplit))
   allocate(vymany(0:ny-1,0:nx-1,nsplit))
-  allocate(ux(0:ny-1,0:nx-1,n_omp))
-  allocate(uy(0:ny-1,0:nx-1,n_omp))
+  allocate(uxmany(0:ny-1,0:nx-1,nsplitA))
+  allocate(uymany(0:ny-1,0:nx-1,nsplitA))
   allocate(uv(0:ny-1,0:nx-1,n_omp))
 
   ! Create plans once and for all, with global arrays fx,ux
-  plan_c2r = fftw_plan_dft_c2r_2d(nx,ny,fx(:,:,1),ux(:,:,1),FFTW_PATIENT)
+  plan_c2r = fftw_plan_dft_c2r_2d(nx,ny,fx(:,:,1),uxmany(:,:,1),FFTW_PATIENT)
   plan_r2c = fftw_plan_dft_r2c_2d(nx,ny,uv(:,:,1),fx(:,:,1),FFTW_PATIENT)
 #endif
 

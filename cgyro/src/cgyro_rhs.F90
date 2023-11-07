@@ -53,9 +53,6 @@ subroutine cgyro_rhs_comm_test
 
 end subroutine cgyro_rhs_comm_test
 
-#if defined(OMPGPU) || defined(_OPENACC)
-! gpu code
-
 subroutine cgyro_rhs_comp1(ij,update_cap)
 
   use timer_lib
@@ -91,6 +88,9 @@ subroutine cgyro_rhs_comp1(ij,update_cap)
 #elif defined(_OPENACC)
 !$acc  parallel loop gang vector collapse(3) & 
 !$acc& private(iv,ic,iv_loc,rhs_el,h_el,is,cap_el,my_psi) async(1)
+#else
+!$omp parallel do collapse(2) &
+!$omp& private(iv,iv_loc,itor,is,ic,rhs_el,h_el,cap_el,my_psi) 
 #endif
   do itor=nt1,nt2
    do iv=nv1,nv2
@@ -119,6 +119,7 @@ subroutine cgyro_rhs_comp1(ij,update_cap)
   call cgyro_rhs_comm_test
 
 #if (!defined(OMPGPU)) && defined(_OPENACC)
+  !no async for OMPGPU for now
 !$acc wait(1)
 
 !$acc end data    
@@ -167,6 +168,9 @@ subroutine cgyro_rhs_comp2(ij)
 #elif defined(_OPENACC)
 !$acc  parallel loop gang vector collapse(3) & 
 !$acc& private(iv,ic,iv_loc,is,rval,rval2,rhs_stream,id,jc) async(1)
+#else
+!$omp parallel do collapse(2) &
+!$omp& private(itor,iv,iv_loc,is,ic,rval,rval2,rhs_stream,id,jc) 
 #endif
   do itor=nt1,nt2
    do iv=nv1,nv2
@@ -204,6 +208,9 @@ subroutine cgyro_rhs_comp2(ij)
 
 end subroutine cgyro_rhs_comp2
 
+#if defined(OMPGPU) || defined(_OPENACC)
+! gpu code
+
 subroutine cgyro_rhs_trap(ij)
 
   use cgyro_globals
@@ -223,97 +230,6 @@ end subroutine cgyro_rhs_trap
 
 #else
 ! cpu code
-
-subroutine cgyro_rhs_comp1(ij,update_cap)
-
-  use timer_lib
-  use parallel_lib
-  use cgyro_globals
-
-  implicit none
-
-  integer, intent(in) :: ij
-  logical, intent(in) :: update_cap
-  !--------------------------------
-  integer :: is, itor
-  complex :: h_el,cap_el,my_psi,rhs_el
-
-  call timer_lib_in('str')
-
-!$omp parallel do collapse(2) &
-!$omp& private(iv_loc,is,ic,rhs_el,h_el,cap_el,my_psi) 
-  do itor=nt1,nt2
-   do iv=nv1,nv2
-     do ic=1,nc
-        iv_loc = iv-nv1+1
-        h_el = h_x(ic,iv_loc,itor)
-        if (update_cap) then
-           is = is_v(iv)
-           my_psi = sum( jvec_c(:,ic,iv_loc,itor)*field(:,ic,itor))
-           cap_el = h_el+my_psi*z(is)/temp(is)
-           cap_h_c(ic,iv_loc,itor) = cap_el
-        else
-           cap_el = cap_h_c(ic,iv_loc,itor)
-        endif
-        ! Diagonal terms
-        rhs_el = &
-             omega_cap_h(ic,iv_loc,itor)*cap_el + &
-             omega_h(ic,iv_loc,itor)*h_el
-
-        rhs_el = rhs_el + &
-             sum(omega_s(:,ic,iv_loc,itor)*field(:,ic,itor))
-     enddo
-   enddo
-  enddo
-
-  call timer_lib_out('str')
-
-end subroutine cgyro_rhs_comp1
-
-subroutine cgyro_rhs_comp2(ij)
-
-  use timer_lib
-  use cgyro_globals
-
-  implicit none
-
-  integer, intent(in) :: ij
-  !--------------------------------
-  integer :: is,itor
-  integer :: id,jc
-  real :: rval,rval2
-  complex :: rhs_stream
-
-  call timer_lib_in('str')
-
-!$omp parallel do collapse(2) &
-!$omp& private(iv_loc,is,ic,rval,rval2,rhs_stream,id,jc) 
-  do itor=nt1,nt2
-   do iv=nv1,nv2
-     do ic=1,nc
-        iv_loc = iv-nv1+1
-        is = is_v(iv)
-        ! Parallel streaming with upwind dissipation 
-        rval  = omega_stream(it_c(ic),is,itor)*vel(ie_v(iv))*xi(ix_v(iv))
-        rval2 = abs(omega_stream(it_c(ic),is,itor))
-
-        rhs_stream = 0.0
-        do id=-nup_theta,nup_theta
-           jc = icd_c(id, ic,itor)
-           rhs_stream = rhs_stream &
-                -rval*dtheta(id,ic,itor)*cap_h_c(jc,iv_loc,itor)  &
-                -rval2*dtheta_up(id,ic,itor)*g_x(jc,iv_loc,itor) 
-        enddo
-
-        rhs(ic,iv_loc,itor,ij) = rhs(ic,iv_loc,itor,ij) + rhs_stream
-
-     enddo
-   enddo
-  enddo
-
-  call timer_lib_out('str')
-
-end subroutine cgyro_rhs_comp2
 
 subroutine cgyro_rhs_trap(ij)
 

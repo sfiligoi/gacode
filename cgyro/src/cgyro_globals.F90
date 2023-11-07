@@ -425,8 +425,8 @@ module cgyro_globals
 #ifndef CGYRO_GPU_FFT
   real, dimension(:,:,:), allocatable :: vxmany
   real, dimension(:,:,:), allocatable :: vymany
-  real, dimension(:,:,:), allocatable :: ux
-  real, dimension(:,:,:), allocatable :: uy
+  real, dimension(:,:,:), allocatable :: uxmany
+  real, dimension(:,:,:), allocatable :: uymany
   real, dimension(:,:,:), allocatable :: uv
   complex, dimension(:,:,:),allocatable :: fx
   complex, dimension(:,:,:),allocatable :: fy
