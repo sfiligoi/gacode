@@ -248,6 +248,7 @@ subroutine cgyro_rhs_trap(ij)
 
   ! Explicit trapping term
   if (explicit_trap_flag == 1) then
+     call timer_lib_in('str')
 
      allocate(rhs_trap(nc,nv_loc))
      allocate(bvec_trap(nv))
@@ -306,9 +307,9 @@ subroutine cgyro_rhs_trap(ij)
      deallocate(rhs_trap)
      deallocate(bvec_trap)
      
+     call timer_lib_out('str')
   endif
   
-  call timer_lib_out('str')
 
 end subroutine cgyro_rhs_trap
 
@@ -333,8 +334,6 @@ subroutine cgyro_rhs(ij,update_cap)
   call cgyro_rhs_comp1(ij,update_cap)
 
   call cgyro_rhs_comm_test
-
-  call timer_lib_out('str')
 
   ! Wavenumber advection shear terms
   ! depends on h_x and field only, updates rhs

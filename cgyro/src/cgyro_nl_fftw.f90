@@ -307,6 +307,6 @@ subroutine cgyro_nl_fftw(ij)
   fB_req_valid = .TRUE.
   ! make sure reqs progress
   call cgyro_nl_fftw_comm_test()
-  call timer_lib_in('nl_comm')
+  call timer_lib_out('nl_comm')
 
 end subroutine cgyro_nl_fftw
