@@ -61,10 +61,10 @@ subroutine cgyro_nl_fftw
 
   real :: inv_nxny
 
-#ifdef HIPGPU
-  ! AMD GPUs do not seem to like tiling
+#ifndef CGYRO_NL_TILE_4
   integer, parameter :: tile_size  = 1
 #else
+  ! tiling seems to improve performance in only rare cases
   integer, parameter :: tile_size  = 4
 #endif
 
@@ -135,7 +135,7 @@ subroutine cgyro_nl_fftw
 !$acc&         private(j,ir,p,ix,itor,iy,f0,g0,itm,itl,irbase,irmax)
 #endif
   do j=1,nsplitA
-     do irbase=1,n_radial,1
+     do irbase=1,n_radial,tile_size
        do itm=1,n_toroidal_procs
          do itl=1,nt_loc
            itor=itl + (itm-1)*nt_loc
@@ -571,7 +571,7 @@ subroutine cgyro_nl_fftw
 !$acc&         private(j,ir,p,ix,itor,iy,f0,g0,itm,itl,irbase,irmax)
 #endif
   do j=1,nsplitB
-     do irbase=1,n_radial,1
+     do irbase=1,n_radial,tile_size
        do itm=1,n_toroidal_procs
          do itl=1,nt_loc
            itor=itl + (itm-1)*nt_loc
