@@ -502,6 +502,7 @@ subroutine cgyro_nl_fftw
 !$acc end data
 #endif
 
+  if (nsplitB > 0) then
   ! we can zero the elements we know are zero while we waita
   ! assuming nsplitB<=nsplitA
 #if defined(OMPGPU)
@@ -512,14 +513,14 @@ subroutine cgyro_nl_fftw
 !$acc&         private(j,ix,iy) &
 !$acc&         present(nsplitB,ny2,nx0,nx2)
 #endif
-  do j=1,nsplitB
+   do j=1,nsplitB
      do ix=nx2,nx0-1
        do iy=0,ny2
          fxmany(iy,ix,j) = 0
          fymany(iy,ix,j) = 0
        enddo
      enddo
-  enddo
+   enddo
 
 #if defined(OMPGPU)
   !no async for OMPGPU for now
@@ -529,14 +530,16 @@ subroutine cgyro_nl_fftw
 !$acc&         private(j,ix,iy) &
 !$acc&         present(nsplitB,ny2,n_toroidal,nx)
 #endif
-  do j=1,nsplitB
+   do j=1,nsplitB
      do ix=0,nx-1
        do iy=n_toroidal,ny2
          fxmany(iy,ix,j) = 0
          fymany(iy,ix,j) = 0
        enddo
      enddo
-  enddo
+   enddo
+  endif ! if nsplitB>0
+
   call timer_lib_out('nl_mem')
 
   call timer_lib_in('nl_comm')
@@ -545,12 +548,16 @@ subroutine cgyro_nl_fftw
   call parallel_slib_r_nc_async(nsplitA,fA_nl,fpackA,fA_req)
   fA_req_valid = .TRUE.
 
-  ! time to wait for the 2nd half of F_nl to become avaialble
-  call parallel_slib_f_nc_wait(nsplitB,fpackB,fB_nl,fB_req)
-  fB_req_valid = .FALSE.
+  if (nsplitB > 0) then
+    ! time to wait for the 2nd half of F_nl to become avaialble
+    call parallel_slib_f_nc_wait(nsplitB,fpackB,fB_nl,fB_req)
+    fB_req_valid = .FALSE.
+  endif
   ! make sure reqs progress
   call cgyro_nl_fftw_comm_test()
   call timer_lib_out('nl_comm')
+
+  if (nsplitB > 0) then
 
   call timer_lib_in('nl')
 #if !defined(OMPGPU)
@@ -765,5 +772,7 @@ subroutine cgyro_nl_fftw
   ! make sure reqs progress
   call cgyro_nl_fftw_comm_test()
   call timer_lib_out('nl_comm')
+
+  endif ! nsplitB>0
 
 end subroutine cgyro_nl_fftw
