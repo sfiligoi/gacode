@@ -2,13 +2,13 @@
 # Linux Mint 
 #---------------------------------------------------
 
-IDENTITY="Linux Mint gfortran+mpich+OpenBLAS (/usr)"
+IDENTITY="corg.gat.com gfortran+mpich+OpenBLAS (/usr)"
 CORES_PER_NODE=4
 NUMAS_PER_NODE=1
 
 FFTWDIR=/usr/lib/x86_64-linux-gnu
 
-ROOT=/home/candy/GIT
+ROOT=/home/math
 
 # Compilers
 
