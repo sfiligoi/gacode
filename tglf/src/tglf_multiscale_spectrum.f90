@@ -197,15 +197,19 @@
          sum_W_i = sum_W_i + QL_flux_spectrum_out(2,is,1,:,k)
         end do
         ! check for singularities in weight ratio near kmax
-        i = 1
-        do while (ky_spectrum(i) < kmax)
-         i = i + 1
-        end do
-        if(sum_W_i(i).eq.0.0 .OR. sum_W_i(i-1).eq.0.0)then
+        if(kmax<=ky_spectrum(1))then
          x = 0.5
         else
-         abs_W_ratio = abs(QL_flux_spectrum_out(2,1,1,:,k) / sum_W_i)
-         x = linear_interpolation(ky_spectrum, abs_W_ratio, kmax)
+         i = 1
+         do while (ky_spectrum(i) < kmax)
+          i = i + 1
+         end do
+         if(sum_W_i(i).eq.0.0 .OR. sum_W_i(i-1).eq.0.0)then
+          x = 0.5
+         else
+          abs_W_ratio = abs(QL_flux_spectrum_out(2,1,1,:,k) / sum_W_i)
+          x = linear_interpolation(ky_spectrum, abs_W_ratio, kmax)
+         end if
         end if
         xs(k) = x
         Y = mode_transition_function(x, Y_ITG, Y_TEM)  
@@ -434,7 +438,7 @@
          if(gamma_fp(j)==0)then
           Fky=0.0
          else
-          Fky =  ((gamma_kymix(j) / gamma_fp(j))**2) / ((1.0 + ay*(kx**2))**2)
+          Fky = ((gamma_kymix(j) / gamma_fp(j))**2) / ((1.0 + ay*(kx**2))**2)
          end if
          do i=1,nmodes_in
           field_spectrum_out(2,j,i) = 0.0  
