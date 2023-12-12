@@ -52,7 +52,6 @@ subroutine cgyro_nl_fftw
   integer :: j,p,iexch
   integer :: it,ir,itm,itl,ix,iy
   integer :: itor,mytm
-  integer :: irbase,irmax
   integer :: i1,i2
   integer :: it_loc
   integer :: ierr
@@ -64,15 +63,10 @@ subroutine cgyro_nl_fftw
   real :: inv_nxny
 
   ! AMD GPU  (MI250X) optimal
+  integer, parameter :: F_RADTILE = 4
+  integer, parameter :: F_TORTILE = 8
   integer, parameter :: R_RADTILE = 32
   integer, parameter :: R_TORTILE = 4
-
-#ifndef CGYRO_NL_TILE_4
-  integer, parameter :: tile_size  = 1
-#else
-  ! tiling seems to improve performance in only rare cases
-  integer, parameter :: tile_size  = 4
-#endif
 
   call timer_lib_in('nl_mem')
   ! make sure reqs progress
@@ -132,23 +126,22 @@ subroutine cgyro_nl_fftw
 
 ! f_nl is (radial, nt_loc, theta, nv_loc1, toroidal_procs)
 ! where nv_loc1 * toroidal_procs >= nv_loc
+
+  ! no tiling, does not seem to help
 #if defined(OMPGPU)
   !no async for OMPGPU for now
 !$omp target teams distribute parallel do simd collapse(4) &
-!$omp&  private(j,ir,p,ix,itor,iy,f0,g0,itm,itl,irbase,irmax)
+!$omp&  private(j,ir,p,ix,itor,iy,f0,itm,itl)
 #else
 !$acc parallel loop gang vector independent collapse(4) async(2) &
-!$acc&         private(j,ir,p,ix,itor,iy,f0,g0,itm,itl,irbase,irmax)
+!$acc&         private(j,ir,p,ix,itor,iy,f0,itm,itl)
 #endif
   do j=1,nsplitA
-     do irbase=1,n_radial,tile_size
+     do ir=1,n_radial
        do itm=1,n_toroidal_procs
          do itl=1,nt_loc
-           itor=itl + (itm-1)*nt_loc
-           iy = itor-1
-           ! process several ir to improve f_nl cache reuse
-           irmax=min(irbase+(tile_size-1),n_radial)
-           do ir=irbase,irmax
+              itor=itl + (itm-1)*nt_loc
+              iy = itor-1
               p  = ir-1-nx0/2
               ix = p
               if (ix < 0) ix = ix+nx
@@ -156,7 +149,6 @@ subroutine cgyro_nl_fftw
               f0 = i_c*fA_nl(ir,itl,j,itm)
               fxmany(iy,ix,j) = p*f0
               fymany(iy,ix,j) = iy*f0
-           enddo
          enddo
        enddo
      enddo
@@ -302,31 +294,35 @@ subroutine cgyro_nl_fftw
 ! g_nl      is (n_field,n_radial,n_jtheta,nt_loc,n_toroidal_procs)
 ! jcev_c_nl is (n_field,n_radial,n_jtheta,nv_loc,nt_loc,n_toroidal_procs)
 
+  ! tile for performance, since this is effectively a transpose
 #if defined(OMPGPU)
   !no async for OMPGPU for now
-!$omp target teams distribute parallel do simd collapse(4) &
-!$omp&   private(j,ir,p,ix,itor,mytm,iy,g0,it,iv_loc,it_loc,jtheta_min,itm,itl,irbase,irmax)
+!$omp target teams distribute parallel do simd collapse(5) &
+!$omp&   private(j,p,ix,itor,mytm,iy,g0,it,iv_loc,it_loc,jtheta_min,itm,itl,iy,ir)
 #else
-!$acc parallel loop gang vector independent collapse(4) async(2) &
-!$acc&         private(j,ir,p,ix,itor,mytm,iy,g0,it,iv_loc,it_loc,jtheta_min,itm,itl,irbase,irmax) &
+!$acc parallel loop gang vector independent collapse(5) async(2) &
+!$acc&         private(j,p,ix,itor,mytm,iy,g0,it,iv_loc,it_loc,jtheta_min,itm,itl,iy,ir) &
 !$acc&         present(g_nl,jvec_c_nl) &
 !$acc&         present(nsplit,n_radial,n_toroidal_procs,nt_loc,nt1,n_theta,nv_loc,nx0)
 #endif
   do j=1,nsplit
-     do irbase=1,n_radial,tile_size
-       do itm=1,n_toroidal_procs
-         do itl=1,nt_loc
-           itor = itl + (itm-1)*nt_loc
-           mytm = 1 + nt1/nt_loc !my toroidal proc number
-           it = 1+((mytm-1)*nsplit+j-1)/nv_loc
-           iv_loc = 1+modulo((mytm-1)*nsplit+j-1,nv_loc)
-           jtheta_min = 1+((mytm-1)*nsplit)/nv_loc
-           it_loc = it-jtheta_min+1
-           iy = itor-1
+    do iy0=0,n_toroidal+(F_TORTILE-1)-1,F_TORTILE  ! round up
+      do ir0=0,n_radial+(F_RADTILE-1)-1,F_RADTILE  ! round up
+        do iy1=0,(F_TORTILE-1)   ! tile
+          do ir1=0,(F_RADTILE-1)  ! tile
+            iy = iy0+iy1
+            ir = 1 + ir0+ir1
+            if ((iy < n_toroidal) .and. (ir <= n_radial)) then
+              itor = iy+1
+              itm = 1 + iy/nt_loc
+              itl = 1 + modulo(iy,nt_loc)
+              mytm = 1 + nt1/nt_loc !my toroidal proc number
+              it = 1+((mytm-1)*nsplit+j-1)/nv_loc
+              iv_loc = 1+modulo((mytm-1)*nsplit+j-1,nv_loc)
+              jtheta_min = 1+((mytm-1)*nsplit)/nv_loc
+              it_loc = it-jtheta_min+1
+              iy = itor-1
 
-           ! process several ir to improve jvec_nl and g_nl cache reuse
-           irmax=min(irbase+(tile_size-1),n_radial)
-           do ir=irbase,irmax
               p  = ir-1-nx0/2
               ix = p
               if (ix < 0) ix = ix+nx
@@ -338,10 +334,11 @@ subroutine cgyro_nl_fftw
               endif
               gxmany(iy,ix,j) = p*g0
               gymany(iy,ix,j) = iy*g0
-           enddo
-         enddo
-       enddo
-     enddo
+            endif
+          enddo
+        enddo
+      enddo
+    enddo
   enddo
 
 #if defined(OMPGPU)
@@ -595,23 +592,22 @@ subroutine cgyro_nl_fftw
 
 ! f_nl is (radial, nt_loc, theta, nv_loc1, toroidal_procs)
 ! where nv_loc1 * toroidal_procs >= nv_loc
+
+  ! no tiling, does not seem to help
 #if defined(OMPGPU)
   !no async for OMPGPU for now
 !$omp target teams distribute parallel do simd collapse(4) &
-!$omp&  private(j,ir,p,ix,itor,iy,f0,g0,itm,itl,irbase,irmax)
+!$omp&  private(j,ir,p,ix,itor,iy,f0,g0,itm,itl)
 #else
 !$acc parallel loop gang vector independent collapse(4) async(2) &
-!$acc&         private(j,ir,p,ix,itor,iy,f0,g0,itm,itl,irbase,irmax)
+!$acc&         private(j,ir,p,ix,itor,iy,f0,itm,itl)
 #endif
   do j=1,nsplitB
-     do irbase=1,n_radial,tile_size
+     do ir=1,n_radial
        do itm=1,n_toroidal_procs
          do itl=1,nt_loc
-           itor=itl + (itm-1)*nt_loc
-           iy = itor-1
-           ! process several ir to improve f_nl cache reuse
-           irmax=min(irbase+(tile_size-1),n_radial)
-           do ir=irbase,irmax
+              itor=itl + (itm-1)*nt_loc
+              iy = itor-1
               p  = ir-1-nx0/2
               ix = p
               if (ix < 0) ix = ix+nx
@@ -619,7 +615,6 @@ subroutine cgyro_nl_fftw
               f0 = i_c*fB_nl(ir,itl,j,itm)
               fxmany(iy,ix,j) = p*f0
               fymany(iy,ix,j) = iy*f0
-           enddo
          enddo
        enddo
      enddo
