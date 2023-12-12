@@ -37,6 +37,7 @@ end subroutine
 subroutine cgyro_nl_fftw
 
 #ifdef HIPGPU
+  use hipfort
   use hipfort_hipfft
 #else
   use cufft
@@ -235,6 +236,7 @@ subroutine cgyro_nl_fftw
 #endif
 
 #if defined(OMPGPU)
+  rc = hipDeviceSynchronize()
 !$omp end target data
 #else
 !$acc end host_data
@@ -417,6 +419,7 @@ subroutine cgyro_nl_fftw
 #endif
 
 #if defined(OMPGPU)
+  rc = hipDeviceSynchronize()
 !$omp end target data
 #else
   ! make sure reqs progress
@@ -460,6 +463,7 @@ subroutine cgyro_nl_fftw
 #endif
 
 #if defined(OMPGPU)
+  rc = hipDeviceSynchronize()
 !$omp end target data
 #else
 !$acc wait
@@ -648,6 +652,7 @@ subroutine cgyro_nl_fftw
 #endif
 
 #if defined(OMPGPU)
+  rc = hipDeviceSynchronize()
 !$omp end target data
 #else
 !$acc end host_data
@@ -678,6 +683,7 @@ subroutine cgyro_nl_fftw
 #endif
 
 #if defined(OMPGPU)
+  rc = hipDeviceSynchronize()
 !$omp end target data
 #else
 !$acc end host_data
@@ -718,6 +724,7 @@ subroutine cgyro_nl_fftw
 #endif
 
 #if defined(OMPGPU)
+  rc = hipDeviceSynchronize()
 !$omp end target data
 #else
   ! make sure reqs progress
