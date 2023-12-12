@@ -1227,7 +1227,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       ax = fig.add_subplot(1,1,1)
 
-      mpre,mwin = self.wintxt(imin,imax,t,0,0,field)
+      mpre,mwin = wintxt(imin,imax,t,0,0,field)
 
       ax.set_title(r'$\mathrm{Average~fluctuation~intensity} \quad $'+mwin)
       ax.set_xlabel(self.kxstr)
@@ -1318,7 +1318,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       ax = fig.add_subplot(1,1,1)
 
-      mpre,mwin = self.wintxt(imin,imax,t,0,0,field)
+      mpre,mwin = wintxt(imin,imax,t,0,0,field)
 
       ax.set_title(r'$\mathrm{Average~fluctuation~intensity} \quad $'+mwin)
       ax.set_xlabel(self.kxstr)
@@ -1403,7 +1403,7 @@ class cgyrodata_plot(data.cgyrodata):
       t = self.t
 
       imin,imax=time_index(self.t,w)
-      mpre,mwin = self.wintxt(imin,imax,t,0,0,field)
+      mpre,mwin = wintxt(imin,imax,t,0,0,field)
 
       ax = fig.add_subplot(1,1,1)
 
