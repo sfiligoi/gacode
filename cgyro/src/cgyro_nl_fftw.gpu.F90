@@ -236,7 +236,6 @@ subroutine cgyro_nl_fftw
 #endif
 
 #if defined(OMPGPU)
-  rc = hipDeviceSynchronize()
 !$omp end target data
 #else
 !$acc end host_data
@@ -418,8 +417,14 @@ subroutine cgyro_nl_fftw
   rc = cufftExecZ2D(cu_plan_c2r_manyG,gxmany,vxmany)
 #endif
 
-#if defined(OMPGPU)
+#ifdef HIPGPU
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+  ! hipfftExec is asynchronous, will need the results below
   rc = hipDeviceSynchronize()
+#endif
+
+#if defined(OMPGPU)
 !$omp end target data
 #else
   ! make sure reqs progress
@@ -462,8 +467,12 @@ subroutine cgyro_nl_fftw
   rc = cufftExecD2Z(cu_plan_r2c_manyA,uvmany,fxmany)
 #endif
 
-#if defined(OMPGPU)
+#ifdef HIPGPU
+  ! hipfftExec is asynchronous, will need the results below
   rc = hipDeviceSynchronize()
+#endif
+
+#if defined(OMPGPU)
 !$omp end target data
 #else
 !$acc wait
@@ -652,7 +661,6 @@ subroutine cgyro_nl_fftw
 #endif
 
 #if defined(OMPGPU)
-  rc = hipDeviceSynchronize()
 !$omp end target data
 #else
 !$acc end host_data
@@ -682,10 +690,19 @@ subroutine cgyro_nl_fftw
   rc = cufftExecZ2D(cu_plan_c2r_manyB,fxmany,uxmany)
 #endif
 
-#if defined(OMPGPU)
+#ifdef HIPGPU
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+  ! hipfftExec is asynchronous, will need the results below
   rc = hipDeviceSynchronize()
+#endif
+
+#if defined(OMPGPU)
 !$omp end target data
 #else
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+!$acc wait
 !$acc end host_data
 #endif
 
@@ -723,8 +740,14 @@ subroutine cgyro_nl_fftw
   rc = cufftExecD2Z(cu_plan_r2c_manyB,uvmany,fxmany)
 #endif
 
-#if defined(OMPGPU)
+#ifdef HIPGPU
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+  ! hipfftExec is asynchronous, will need the results below
   rc = hipDeviceSynchronize()
+#endif
+
+#if defined(OMPGPU)
 !$omp end target data
 #else
   ! make sure reqs progress
