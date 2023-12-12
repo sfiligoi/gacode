@@ -59,8 +59,13 @@ subroutine cgyro_nl_fftw
   integer :: rc
   complex :: f0,g0
   integer :: jtheta_min
+  integer :: iy0, iy1, ir0, ir1
 
   real :: inv_nxny
+
+  ! AMD GPU  (MI250X) optimal
+  integer, parameter :: R_RADTILE = 32
+  integer, parameter :: R_TORTILE = 4
 
 #ifndef CGYRO_NL_TILE_4
   integer, parameter :: tile_size  = 1
@@ -488,26 +493,34 @@ subroutine cgyro_nl_fftw
   ! NOTE: The FFT will generate an unwanted n=0,p=-nr/2 component
   ! that will be filtered in the main time-stepping loop
 
+  ! tile for performance, since this is effectively a transpose
 #if defined(OMPGPU)
-!$omp target teams distribute parallel do simd collapse(4) &
-!$omp&   private(itor,ix,iy)
+!$omp target teams distribute parallel do collapse(5) &
+!$omp&   private(iy,ir,itm,itl,ix)
 #else
-!$acc parallel loop independent collapse(4) gang vector &
-!$acc&         private(itor,ix,iy) present(fA_nl,fxmany)
+!$acc parallel loop independent collapse(5) gang &
+!$acc&         private(iy,ir,itm,itl,ix) present(fA_nl,fxmany)
 #endif
-  do itm=1,n_toroidal_procs
-     do itl=1,nt_loc
-       do j=1,nsplitA
-         do ir=1,n_radial 
-           itor=itl + (itm-1)*nt_loc
+  do j=1,nsplitA
+   do iy0=0,n_toroidal+(R_TORTILE-1)-1,R_TORTILE  ! round up
+    do ir0=0,n_radial+(R_RADTILE-1)-1,R_RADTILE  ! round up
+    do iy1=0,(R_TORTILE-1)   ! tile
+      do ir1=0,(R_RADTILE-1)  ! tile
+       iy = iy0 + iy1
+       ir = 1 + ir0 + ir1
+       if ((iy < n_toroidal) .and. (ir <= n_radial)) then
+           ! itor = iy+1
+           itm = 1 + iy/nt_loc
+           itl = 1 + modulo(iy,nt_loc)
            ix = ir-1-nx0/2
            if (ix < 0) ix = ix+nx
 
-           iy = itor-1
            fA_nl(ir,itl,j,itm) = fxmany(iy,ix,j)
-         enddo
-       enddo
+        endif
+      enddo
+     enddo
     enddo
+   enddo
   enddo
 
 #if !defined(OMPGPU)
@@ -765,26 +778,34 @@ subroutine cgyro_nl_fftw
   ! NOTE: The FFT will generate an unwanted n=0,p=-nr/2 component
   ! that will be filtered in the main time-stepping loop
 
+  ! tile for performance, since this is effectively a transpose
 #if defined(OMPGPU)
-!$omp target teams distribute parallel do simd collapse(4) &
-!$omp&   private(itor,ix,iy)
+!$omp target teams distribute parallel do collapse(5) &
+!$omp&   private(iy,ir,itm,itl,ix)
 #else
-!$acc parallel loop independent collapse(4) gang vector &
-!$acc&         private(itor,ix,iy) present(fB_nl,fxmany)
+!$acc parallel loop independent collapse(5) gang &
+!$acc&         private(iy,ir,itm,itl,ix) present(fB_nl,fxmany)
 #endif
-  do itm=1,n_toroidal_procs
-     do itl=1,nt_loc
-       do j=1,nsplitB
-         do ir=1,n_radial 
-           itor=itl + (itm-1)*nt_loc
+  do j=1,nsplitB
+   do iy0=0,n_toroidal+(R_TORTILE-1)-1,R_TORTILE  ! round up
+    do ir0=0,n_radial+(R_RADTILE-1)-1,R_RADTILE  ! round up
+    do iy1=0,(R_TORTILE-1)   ! tile
+      do ir1=0,(R_RADTILE-1)  ! tile
+       iy = iy0 + iy1
+       ir = 1 + ir0 + ir1
+       if ((iy < n_toroidal) .and. (ir <= n_radial)) then
+           ! itor = iy+1
+           itm = 1 + iy/nt_loc
+           itl = 1 + modulo(iy,nt_loc)
            ix = ir-1-nx0/2
            if (ix < 0) ix = ix+nx
 
-           iy = itor-1
            fB_nl(ir,itl,j,itm) = fxmany(iy,ix,j)
-         enddo
-       enddo
+        endif
+      enddo
+     enddo
     enddo
+   enddo
   enddo
 
 #if !defined(OMPGPU)
