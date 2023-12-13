@@ -62,11 +62,19 @@ subroutine cgyro_nl_fftw
 
   real :: inv_nxny
 
+#ifdef GACODE_GPU_AMD
   ! AMD GPU  (MI250X) optimal
-  integer, parameter :: F_RADTILE = 4
-  integer, parameter :: F_TORTILE = 8
+  integer, parameter :: F_RADTILE = 8
+  integer, parameter :: F_TORTILE = 16
   integer, parameter :: R_RADTILE = 32
-  integer, parameter :: R_TORTILE = 4
+  integer, parameter :: R_TORTILE = 8
+#else
+  ! NVIDIA GPU  (A100) optimal
+  integer, parameter :: F_RADTILE = 8
+  integer, parameter :: F_TORTILE = 16
+  integer, parameter :: R_RADTILE = 16
+  integer, parameter :: R_TORTILE = 8
+#endif
 
   call timer_lib_in('nl_mem')
   ! make sure reqs progress
