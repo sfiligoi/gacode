@@ -27,7 +27,7 @@ subroutine prgen_read_genf
   enddo
   close(1)
 
-  call prgen_allocate
+  call prgen_allocate('')
 
   ! Determine number of columns
   open(unit=1,file=file_state,status='old')
