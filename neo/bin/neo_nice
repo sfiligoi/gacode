@@ -26,6 +26,7 @@ eq = np.loadtxt('out.neo.equil')
 data = np.loadtxt('out.neo.theory')
 tr = np.loadtxt('out.neo.transport')
 gb = np.loadtxt('out.neo.transport_flux')
+sp = np.loadtxt('out.neo.species')
 
 # Number of species
 ns = int(grid[0])
@@ -35,8 +36,7 @@ rho2 = eq[3]**2
 # Charge Z
 z = np.zeros(ns)
 for j in range(ns):
-    z[j] = eq[7+6*j]
-
+    z[j] = sp[2*j+1]
 
 # Hirshman-Sigmar theory
 q_hs = np.zeros(ns)

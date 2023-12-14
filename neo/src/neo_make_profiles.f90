@@ -431,7 +431,6 @@ subroutine neo_make_profiles
         write (io,'(e16.8)',advance='no') omega_rot(ir)
         write (io,'(e16.8)',advance='no') omega_rot_deriv(ir)
         do is=1,n_species
-           write (io,'(e16.8)',advance='no') z(is)
            write (io,'(e16.8)',advance='no') dens(is,ir)
            write (io,'(e16.8)',advance='no') temp(is,ir)
            write (io,'(e16.8)',advance='no') dlnndr(is,ir)
@@ -439,6 +438,13 @@ subroutine neo_make_profiles
            write (io,'(e16.8)',advance='no') nu(is,ir)
         enddo
         write (io,*)
+     enddo
+     close(io)
+
+     open(unit=io,file=trim(path)//'out.neo.species',status='replace')
+     do is=1,n_species
+        write (io,'(e16.8)',advance='no') mass(is)
+        write (io,'(e16.8)',advance='no') z(is)
      enddo
      close(io)
      
