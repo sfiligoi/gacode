@@ -12,6 +12,7 @@
 !   SWIM        (plasmastate)
 !   PFILE       (peqdsk)
 !   GENF        (General Fusion)
+!   MANUAL      (Auto-import of text files)
 !
 !  Autodetected geometry formats:
 !   GFILE       (geqdsk equilibrium data)
@@ -96,6 +97,12 @@ program prgen
      format_type = 4
      call prgen_read_genf
 
+  case ('manual') ! MANUAL import
+     print '(a)','INFO: (prgen) Assuming MANUAL file import.'
+
+     format_type = 5
+     call prgen_read_manual
+
   case('GACODE') ! Note (we may or may not have gmerge_flag == 1)
      print '(a)','INFO: (prgen) Assuming input.gacode (GACODE) format.'
 
@@ -150,6 +157,8 @@ program prgen
      call prgen_map_peqdsk
   case (4)
      call prgen_map_genf
+  case (5)
+     call prgen_map_manual
   case (7,8)
      call prgen_map_inputgacode
   end select

@@ -448,14 +448,14 @@ if [ "$itype" == "GACODE" ] && [ $INFO_FLAG == 1 ] ; then
     exit 0
 fi
 #=============================================================
-# Managing input file (also catches UFILE mode)
+# Managing input file 
 
 if [ "$itype" == "null" ] ; then
 
    # gfile-only mode
    echo "INFO: (profiles_gen) Parsing GFILE only."
 
-else
+else 
 
    echo "INFO: (profiles_gen) $FILE is autodetected as $itype."
 
