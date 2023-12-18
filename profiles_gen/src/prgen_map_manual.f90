@@ -16,7 +16,7 @@ subroutine prgen_map_manual
   ! Map profile data onto single array:
   !
   expro_n_exp = nx
-  expro_n_ion = 1
+  expro_n_ion = 2
   call expro_init(1)
   !
   expro_rho(:)   = rho(:)
@@ -33,5 +33,13 @@ subroutine prgen_map_manual
   
   expro_ni(1,:) = ni_e19m3(:)
   expro_ti(1,:) = ti_kev(:)
+
+  expro_mass(2) = 12.0
+  expro_z(2) = 6.0
+  expro_name(2) = 'C'
+  expro_type(2) = type_therm
+  
+  expro_ni(2,:) = nz_e19m3(:)
+  expro_ti(2,:) = ti_kev(:)
   
 end subroutine prgen_map_manual

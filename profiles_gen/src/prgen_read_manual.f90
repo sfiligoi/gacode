@@ -18,16 +18,16 @@ subroutine prgen_read_manual
   real, dimension(:), allocatable :: rho0
 
   ! Number of resampled points
-  nx = 16
+  nx = 64
   call prgen_allocate('')
   
-  call getlen('te.txt',n0)
+  call getlen('TE.txt',n0)
   
   allocate(x(2,n0))
   allocate(rho0(n0))
 
   ! te
-  open(unit=1,file='te.txt',status='old')
+  open(unit=1,file='TE.txt',status='old')
   read(1,*) x(:,:)
   close(1)
   rho0 = x(1,:)
@@ -37,22 +37,28 @@ subroutine prgen_read_manual
   call bound_interp(rho0,x(2,:)*1e-3,n0,rho,te_kev,nx)
 
   ! ti
-  open(unit=1,file='ti.txt',status='old')
+  open(unit=1,file='TI.txt',status='old')
   read(1,*) x(:,:)
   close(1)
   call bound_interp(rho0,x(2,:)*1e-3,n0,rho,ti_kev,nx)
 
   ! ne
-  open(unit=1,file='ne.txt',status='old')
+  open(unit=1,file='NE.txt',status='old')
   read(1,*) x(:,:)
   close(1)
   call bound_interp(rho0,x(2,:)*1e-19,n0,rho,ne_e19m3,nx)
 
   ! ni
-  open(unit=1,file='ni.txt',status='old')
+  open(unit=1,file='NI.txt',status='old')
   read(1,*) x(:,:)
   close(1)
   call bound_interp(rho0,x(2,:)*1e-19,n0,rho,ni_e19m3,nx)
+
+  ! ni
+  open(unit=1,file='NZ.txt',status='old')
+  read(1,*) x(:,:)
+  close(1)
+  call bound_interp(rho0,x(2,:)*1e-19,n0,rho,nz_e19m3,nx)
 
 end subroutine prgen_read_manual
 
