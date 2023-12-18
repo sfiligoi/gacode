@@ -36,29 +36,35 @@ subroutine prgen_read_manual
   enddo
   call bound_interp(rho0,x(2,:)*1e-3,n0,rho,te_kev,nx)
 
-  ! ti
+  ! ti (eV)
   open(unit=1,file='TI.txt',status='old')
   read(1,*) x(:,:)
   close(1)
   call bound_interp(rho0,x(2,:)*1e-3,n0,rho,ti_kev,nx)
 
-  ! ne
+  ! ne (1/m^3)
   open(unit=1,file='NE.txt',status='old')
   read(1,*) x(:,:)
   close(1)
   call bound_interp(rho0,x(2,:)*1e-19,n0,rho,ne_e19m3,nx)
 
-  ! ni
+  ! ni (1/m^3)
   open(unit=1,file='NI.txt',status='old')
   read(1,*) x(:,:)
   close(1)
   call bound_interp(rho0,x(2,:)*1e-19,n0,rho,ni_e19m3,nx)
 
-  ! ni
+  ! nz (1/m^3)
   open(unit=1,file='NZ.txt',status='old')
   read(1,*) x(:,:)
   close(1)
   call bound_interp(rho0,x(2,:)*1e-19,n0,rho,nz_e19m3,nx)
+
+  ! omega (rad/s)
+  open(unit=1,file='VROT.txt',status='old')
+  read(1,*) x(:,:)
+  close(1)
+  call bound_interp(rho0,x(2,:)*1e-3,n0,rho,omega0,nx)
 
 end subroutine prgen_read_manual
 
