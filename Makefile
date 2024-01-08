@@ -10,6 +10,7 @@ all:
 	cd tgyro ; make
 	cd profiles_gen ; make
 	cd f2py ; make
+	cd qlgyro ; make
 	@echo "GACODE build done"
 
 clean:
@@ -23,6 +24,7 @@ clean:
 	cd tgyro ; make clean
 	cd profiles_gen ; make clean
 	cd f2py ; make clean
+	cd qlgyro ; make clean
 	rm -f f2py/*/*.pyc
 	rm -f f2py/*.pyc
 	rm -f f2py/pygacode/*/*.pyc
@@ -43,6 +45,7 @@ distclean:
 	cd tgyro ; make clean
 	cd profiles_gen ; make clean
 	cd f2py ; make clean
+	cd qlgyro ; make clean
 	rm -f python/*/*.pyc
 	rm -f python/*.pyc
 	rm -f modules/*genmod*
