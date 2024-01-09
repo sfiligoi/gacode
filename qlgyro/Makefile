@@ -1,6 +1,6 @@
-#----------------------------
+#-----------------------------
 # Toplevel makefile for qlgyro
-#----------------------------
+#-----------------------------
 
 include ${GACODE_ROOT}/platform/build/make.inc.${GACODE_PLATFORM}
 
@@ -16,10 +16,11 @@ export EXTRA_LIBS = \
 
 all:
 	gacode_getversion > .VERSION
-	#cd ${GACODE_ROOT}/shared ; make
-	#cd ${GACODE_ROOT}/neo ; make
-	#cd ${GACODE_ROOT}/tglf ; make
-	#cd ${GACODE_ROOT}/cgyro ; make
+	cd ${GACODE_ROOT}/shared ; make
+	cd ${GACODE_ROOT}/f2py ; make
+	cd ${GACODE_ROOT}/neo ; make
+	cd ${GACODE_ROOT}/tglf ; make
+	cd ${GACODE_ROOT}/cgyro ; make
 	cd src ; make
 
 clean:
