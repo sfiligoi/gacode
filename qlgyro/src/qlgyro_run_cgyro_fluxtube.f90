@@ -227,10 +227,10 @@ subroutine qlgyro_run_cgyro_fluxtube
            
            ! CGYRO has electrons at last index, TGLF has them in first so load them seperately
            qlgyro_flux_spectrum_out(1:3, 1, :cgyro_n_field_in, i_ky_local, i_px0_local) =         &
-                cgyro_gbflux_out(1:3, elec_ind, :cgyro_n_field_in, i_ky_local) * ky * i_ky_local * -cgyro_btccw_in
+                cgyro_gbflux_out(1:3, elec_ind, :cgyro_n_field_in, i_ky_local) * ky * i_ky_local * (-cgyro_btccw_in)
            
            qlgyro_flux_spectrum_out(1:3, 2:, :cgyro_n_field_in, i_ky_local, i_px0_local) = &
-                cgyro_gbflux_out(1:3, ion_start:ion_end, :cgyro_n_field_in, i_ky_local) * ky * i_ky_local * -cgyro_btccw_in
+                cgyro_gbflux_out(1:3, ion_start:ion_end, :cgyro_n_field_in, i_ky_local) * ky * i_ky_local * (-cgyro_btccw_in)
            
            qlgyro_theta_ballooning = cgyro_thetab_out
            qlgyro_field_spectrum_out(:, :, i_ky_local, i_px0_local) = cgyro_wavefunction_out(i_ky_local, :, :)

@@ -91,7 +91,7 @@
       a = 2.1
 
       ! Convert from using rho_s(B0) to rho_s(Bunit) by (bgs2**-2)
-      facnorm = bgs2**-2
+      facnorm = bgs2**(-2)
 
       b = exp(3.0)
       tglf_flux_spectrum_out = tglf_flux_spectrum_out * facnorm * b * ql_metric ** (a-1)

@@ -107,7 +107,7 @@ subroutine qlgyro_tglf_map
   !----------------------------------------------------------------
   ! TGLF-specific quantities
   q_prime = (q_abs/r_min)**2*s
-  p_prime = (q_abs/r_min)*(beta_unit/(8*pi))*-dlnpdr
+  p_prime = (q_abs/r_min)*(beta_unit/(8*pi))*(-dlnpdr)
   !----------------------------------------------------------------
 
   !----------------------------------------------------------------
