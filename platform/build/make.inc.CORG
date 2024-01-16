@@ -1,5 +1,5 @@
 #---------------------------------------------------
-# Linux Mint 
+# CORG (Ubuntu server)
 #---------------------------------------------------
 
 IDENTITY="corg.gat.com gfortran+mpich+OpenBLAS (/usr)"
