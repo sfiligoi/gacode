@@ -20,6 +20,6 @@ fi
 
 bfile=$SIMDIR/batch.src
 echo "#!/bin/bash " > $bfile
-echo "#SBATCH --time $WALLTIME -p hpc --ntasks-per-node=32 --mem=$MEMPERNOD -n $nmpi" >> $bfile
+echo "#SBATCH --time $WALLTIME -p hpc --ntasks-per-node=32 --mem=$MEMPERNODE -n $nmpi" >> $bfile
 
 echo "$CODE -e $LOCDIR -n $nmpi -nomp $nomp -numa $numa -mpinuma $mpinuma -p $SIMROOT" >> $bfile
