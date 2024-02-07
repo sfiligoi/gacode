@@ -7,7 +7,7 @@ echo "#SBATCH -e $SIMDIR/batch.err" >> $bfile
 echo "#SBATCH -t $WALLTIME" >> $bfile
 echo "#SBATCH -n $cores_used" >> $bfile
 
-if [ -n $MEMNODE ] 
+if [ -n $MEMPERNODE ] 
 then
   echo "#SBATCH --mem $MEMNODE" >> $bfile
 elif [ -n $MEMPERCPU ]
@@ -19,6 +19,8 @@ then
   echo "#SBATCH -p general" >> $bfile
 else
   echo "#SBATCH -p $QUEUE" >> $bfile
+else
+  echo "#SBATCH --mem-per-cpu 4GB" >> $bfile
 fi
 
 echo "$CODE -e $LOCDIR -n $nmpi -nomp $nomp -numa $numa -mpinuma $mpinuma -p $SIMROOT" >> $bfile

@@ -50,7 +50,7 @@ then
   echo "         Default unit MB. Slurm recognizes [K|M|G|T]"
   echo "         No space beween number and unit."
   echo "         Precedence is User then -mem"
-  echo "         (default --mem=16GB)."
+  echo "         (default set in platform/qsub/qsub.<PLATFORM>)."
   echo
   echo "         -queue"
   echo "         Queue name"
@@ -104,9 +104,8 @@ numa=0
 mpinuma=0
 
 #Default Memory Per Node
-MEMPERNODE=16G
+MEMPERNODE=
 MEMPERCPU=
-USERMPN=false
 
 #=============================================================
 # Parse command line options
@@ -130,7 +129,7 @@ while [[ $# -gt 0 ]] ; do
 
   -numa) shift ; numa=$1 ;;
 
-  -mem) shift ; MEMPERNODE=$1 ; USERMPN=true;;
+  -mem) shift ; MEMPERNODE=$1 ;;
 
   -mem-per-cpu) shift ; MEMPERCPU=$1 ;;
 
@@ -151,14 +150,11 @@ done
 #==============================================================
 # Resolve double specification of memory
 #
-if [[ $USERMPN == true && -n $MEMPERCPU ]]; then
+if [[ -n $MEMPERNODE && -n $MEMPERCPU ]]; then
   echo "WARNING: Both -mem and -mem-per-cpu specified."
   echo "Applying Precedence -mem=$MEMPERNODE."
   MEMPERCPU=
-elif [[ $USERMPN == false ]]; then
-  MEMPERNODE=
-fi
-export MEMP
+export MEMPERNODE MEMPERCPU
 
 #==============================================================
 # Manage paths
