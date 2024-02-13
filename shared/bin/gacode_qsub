@@ -154,7 +154,7 @@ if [[ -n $MEMPERNODE && -n $MEMPERCPU ]]; then
   echo "WARNING: Both -mem and -mem-per-cpu specified."
   echo "Applying Precedence -mem=$MEMPERNODE."
   MEMPERCPU=
-export MEMPERNODE MEMPERCPU
+fi
 
 #==============================================================
 # Manage paths
