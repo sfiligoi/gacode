@@ -44,6 +44,14 @@ then
   echo "         -mpinuma <n>" 
   echo "         MPI tasks per active NUMA."
   echo
+  echo "         -mem <n>[unit]" 
+  echo "         -mem-per-cpu <n>[unit]" 
+  echo "         Memory required per node or per cpu, resp."
+  echo "         Default unit MB. Slurm recognizes [K|M|G|T]"
+  echo "         No space beween number and unit."
+  echo "         Precedence is User then -mem"
+  echo "         (default set in platform/qsub/qsub.<PLATFORM>)."
+  echo
   echo "         -queue"
   echo "         Queue name"
   echo
@@ -95,6 +103,10 @@ nomp=1
 numa=0
 mpinuma=0
 
+#Default Memory Per Node
+MEMPERNODE=
+MEMPERCPU=
+
 #=============================================================
 # Parse command line options
 #
@@ -117,6 +129,10 @@ while [[ $# -gt 0 ]] ; do
 
   -numa) shift ; numa=$1 ;;
 
+  -mem) shift ; MEMPERNODE=$1 ;;
+
+  -mem-per-cpu) shift ; MEMPERCPU=$1 ;;
+
   -mpinuma) shift ; mpinuma=$1 ;;
 
   -queue) shift ; QUEUE=$1 ;;
@@ -130,7 +146,15 @@ while [[ $# -gt 0 ]] ; do
   esac
   shift
 done
+
 #==============================================================
+# Resolve double specification of memory
+#
+if [[ -n $MEMPERNODE && -n $MEMPERCPU ]]; then
+  echo "WARNING: Both -mem and -mem-per-cpu specified."
+  echo "Applying Precedence -mem=$MEMPERNODE."
+  MEMPERCPU=
+export MEMPERNODE MEMPERCPU
 
 #==============================================================
 # Manage paths
