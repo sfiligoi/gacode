@@ -36,15 +36,15 @@ OBJECTS += qlgyro_globals.o \
 .SUFFIXES : .o .f90 .F90
 
 all: qlgyro_lib.a $(EXEC).o $(EXTRA_LIBS)
-	$(FC) $(FFLAGS) -o $(EXEC) $(EXEC).o qlgyro_lib.a $(EXTRA_LIBS) $(LMATH) $(NN_LIB) $(HARVEST)
+	$(FC) $(FFLAGS) -o $(EXEC) $(EXEC).o qlgyro_lib.a $(EXTRA_LIBS) $(LMATH) $(NN_LIB) 
 
 qlgyro_lib.a: $(OBJECTS)
 	$(ARCH) qlgyro_lib.a $(OBJECTS)
 
 .f90.o .F90.o:
-	$(FC) $(FMATH) $(FFLAGS) $(NN_LIB) $(HARVEST) -c $<
+	$(FC) $(FMATH) $(FFLAGS) $(NN_LIB) -c $<
 
 clean:
-	rm -f $(EXEC) $(EXEC2)
+	rm -f $(EXEC)
 	rm -f *.o ${GACODE_ROOT}/modules/qlgyro*.mod
 	rm -f qlgyro_lib.a

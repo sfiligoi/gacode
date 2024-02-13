@@ -16,6 +16,7 @@ all:
 clean:
 	rm -f .VERSION
 	cd shared ; make clean
+	cd shared/hybridtest ; make clean
 	cd neo ; make clean
 	cd vgen ; make clean
 	cd tglf ; make clean
