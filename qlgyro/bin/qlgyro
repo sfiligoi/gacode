@@ -107,7 +107,7 @@ VERBASE='out.qlgyro.version'
 #
 # Default simulation root and qlgyro directory
 SIMROOT=$PWD
-QLGYRO_DIR=$GACODE_ADD_ROOT/qlgyro
+QLGYRO_DIR=$GACODE_ROOT/qlgyro
 GYRO_DIR=$GACODE_ROOT/gyro
 CGYRO_DIR=$GACODE_ROOT/cgyro
 CGYRO=0
