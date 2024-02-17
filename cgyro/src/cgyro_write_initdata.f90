@@ -13,7 +13,7 @@ subroutine cgyro_write_initdata
   implicit none
 
   integer :: p,in,is,it
-  real :: kymax,kyrat,dn
+  real :: kymax,kyrat,dn,dt
   real, external :: spectraldiss
   character(len=50) :: msg
 
@@ -120,13 +120,23 @@ subroutine cgyro_write_initdata
 
      write(io,*)
      write(io,'(a)') &
-          ' i  z  n/n_norm   T/T_norm   m/m_norm     a/Ln       a/Lt       nu        s(a/Ln)    s(a/Lt)'
+          ' i  z  n/n_norm   T/T_norm   m/m_norm     a/Ln       a/Lt       nu'
      do is=1,n_species
         write(io,'(t1,i2,1x,i2,3(2x,1pe9.3),2(1x,1pe10.3),(2x,1pe9.3),2(1x,1pe10.3))') &
-             is,int(z(is)),dens(is),temp(is),mass(is),dlnndr(is),dlntdr(is),nu(is),&
-             sdlnndr(is),sdlntdr(is)
+             is,int(z(is)),dens(is),temp(is),mass(is),dlnndr(is),dlntdr(is),nu(is)
      enddo
 
+     if (profile_shear_flag == 1) then
+        write(io,*)
+        write(io,'(a)') ' i  s(a/Ln)  (a/Ln)_L  (a/Ln)_R  |  s(a/Lt)  (a/Lt)_L  (a/Lt)_R ' 
+        do is=1,n_species
+           dn = sdlnndr(is)*length/rho/2
+           dt = sdlntdr(is)*length/rho/2
+           write(io,'(t1,i2,3(1x,1pe9.3),2x,3(1x,1pe9.3))') &
+             is,sdlnndr(is),dlnndr(is)-dn,dlnndr(is)+dn,sdlntdr(is),dlntdr(is)-dt,dlntdr(is)+dt
+        enddo
+     endif
+     
      if (profile_model == 2) then
         dn = rho/(rhos/a_meters)
         kyrat = abs(q/rmin*rhos/a_meters)
