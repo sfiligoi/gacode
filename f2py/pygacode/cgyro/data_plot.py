@@ -1006,7 +1006,7 @@ class cgyrodata_plot(data.cgyrodata):
       nscale = xin['nscale']
       ymin   = xin['ymin']
       ymax   = xin['ymax']
-      mirror = xin['abs'])
+      mirror = xin['abs']
 
       if xin['fig'] is None:
          fig = plt.figure(MYDIR,figsize=(xin['lx'],xin['ly']))
@@ -1059,8 +1059,7 @@ class cgyrodata_plot(data.cgyrodata):
       ax.set_title(r'$\mathrm{'+ntag+'} \quad $'+mwin)
 
       na = 128
-      
-      a = np.linspace(-np.pi,np.pi,na)
+      a  = np.linspace(-np.pi,np.pi,na)
       ah = np.linspace(0,-2*np.pi,na)
 
       for ispec in range(ns):
