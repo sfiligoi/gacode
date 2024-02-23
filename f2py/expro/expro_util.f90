@@ -262,9 +262,10 @@ subroutine expro_compute_derived
         geo_fourier_in(1:4,0:geo_nfourier_in) = expro_geo(:,:,i)/r_min
         geo_fourier_in(5:8,0:geo_nfourier_in) = expro_dgeo(:,:,i)
      endif
-     call geo_interp(1,theta,.true.)
+
+    call geo_interp(1,theta,.true.)
      if (minval(geov_jac_r) <= 0d0) then
-        print '(a,i3,a)','WARNING: (expro_util) Negative Jacobian for i =',i,' in input.gacode'
+        print '(a,i3,a,f5.2)','WARNING: (expro_util) J < 0 for i=',i,' in input.gacode: ',minval(geov_jac_r)
      endif
 
      ! V, dV/dr and S (note that S=dV/dr only in a circle)
