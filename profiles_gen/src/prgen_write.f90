@@ -63,6 +63,7 @@ subroutine prgen_write
   expro_head_gfile     = '#     *gfile : '//trim(file_g)
   expro_head_cerfile   = '#   *cerfile : '//trim(file_cer)
 
+  call expro_compute_derived
   call expro_write('input.gacode')
   print '(a)','INFO: (prgen_write) Wrote input.gacode.'
   !-------------------------------------------------------------------------------------

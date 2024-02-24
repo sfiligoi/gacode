@@ -254,7 +254,7 @@ N_NULL=128
 IPCCW=0
 BTCCW=0
 
-# OMFIT mapper variables
+# Mapper variables
 EFIT=0
 MAG=auto
 NPSI=256

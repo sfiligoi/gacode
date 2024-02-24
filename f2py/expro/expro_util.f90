@@ -8,7 +8,7 @@ subroutine expro_compute_derived
   integer :: n
   integer :: i
   integer :: is
-  integer :: nx
+  integer :: nx,err
 
   double precision, parameter :: k  = 1.6022d-12 ! erg/eV
   double precision, parameter :: e  = 4.8032d-10 ! statcoul
@@ -208,7 +208,8 @@ subroutine expro_compute_derived
 
   ! r_min = a [m]
   r_min = expro_rmin(expro_n_exp)
-
+  
+100 err=0
   do i=2,expro_n_exp
 
      ! Parameters to be passed to geo library   
@@ -263,9 +264,10 @@ subroutine expro_compute_derived
         geo_fourier_in(5:8,0:geo_nfourier_in) = expro_dgeo(:,:,i)
      endif
 
-    call geo_interp(1,theta,.true.)
+     call geo_interp(1,theta,.true.)
      if (minval(geov_jac_r) <= 0d0) then
         print '(a,i3,a,f5.2)','WARNING: (expro_util) J < 0 for i=',i,' in input.gacode: ',minval(geov_jac_r)
+        err = 1
      endif
 
      ! V, dV/dr and S (note that S=dV/dr only in a circle)
@@ -416,9 +418,9 @@ subroutine expro_compute_derived
         expro_ni_new(:) = expro_ni_new(:)+expro_z(is)*expro_ni(is,:)
         expro_dlnnidr_new(:) = expro_dlnnidr_new(:)+expro_z(is)*expro_ni(is,:)*expro_dlnnidr(is,:)
      enddo
-     
+
      ! New quasineutral ion 1 profiles:
-     
+
      ! density  
      expro_ni_new(:) = (expro_ne(:)-expro_ni_new(:))/expro_z(1)
      ! gradient scale length 1/L_ni = -dln(ni)/dr (1/m)
@@ -428,7 +430,7 @@ subroutine expro_compute_derived
      call bound_deriv(expro_sdlnnidr_new(:),expro_ni_new(:)*expro_dlnnidr_new(:),&
           expro_rmin,expro_n_exp)
      expro_sdlnnidr_new(:) = expro_sdlnnidr_new(:)/expro_ni_new(:)*expro_rhos(:)
-     
+
      if (minval(expro_ni_new(:)) <= 0d0) expro_error = 1
 
   else
@@ -499,7 +501,7 @@ subroutine expro_compute_derived
 
   ! Reset geo variables to standard values to prevent expro from leaving
   ! geo in a "mysterious" state
-  
+
   geo_rmin_in      = 1d0
   geo_rmaj_in      = 0.5d0
   geo_drmaj_in     = 3d0
