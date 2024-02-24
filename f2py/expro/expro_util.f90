@@ -8,7 +8,7 @@ subroutine expro_compute_derived
   integer :: n
   integer :: i
   integer :: is
-  integer :: nx,err
+  integer :: nx
 
   double precision, parameter :: k  = 1.6022d-12 ! erg/eV
   double precision, parameter :: e  = 4.8032d-10 ! statcoul
@@ -209,7 +209,6 @@ subroutine expro_compute_derived
   ! r_min = a [m]
   r_min = expro_rmin(expro_n_exp)
   
-100 err=0
   do i=2,expro_n_exp
 
      ! Parameters to be passed to geo library   
@@ -267,7 +266,7 @@ subroutine expro_compute_derived
      call geo_interp(1,theta,.true.)
      if (minval(geov_jac_r) <= 0d0) then
         print '(a,i3,a,f5.2)','WARNING: (expro_util) J < 0 for i=',i,' in input.gacode: ',minval(geov_jac_r)
-        err = 1
+        expro_jerr = 1
      endif
 
      ! V, dV/dr and S (note that S=dV/dr only in a circle)

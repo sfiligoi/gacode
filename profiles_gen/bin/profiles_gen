@@ -687,7 +687,13 @@ fi
 $EXEC
 
 if [ -f "success" ] ; then
-   echo "INFO: (profiles_gen) Done."
+   if [ `cat success` -eq "1" ] ; then
+      echo "INFO: (profiles_gen) Done."
+   else
+      m=0.001
+      r=$(echo "($PSINORM-$m)"| bc -l)
+      echo "ERROR: (profiles_gen) Rerun with -psinorm $r"
+   fi
 else
    echo "ERROR: (profiles_gen) *Failed*. Try running with -V option"
 fi

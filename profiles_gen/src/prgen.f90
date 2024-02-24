@@ -166,9 +166,4 @@ program prgen
   call prgen_swap
   call prgen_write
 
-  ! Successful completion
-  open(unit=1,file='success',status='replace')
-  write(1,*) 1
-  close(1)
-
 end program prgen
