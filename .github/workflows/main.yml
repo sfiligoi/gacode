@@ -70,7 +70,12 @@ jobs:
         env
         echo "=======  end env  ====="
         # test the code
-        (cd cgyro/bin && cgyro -r -n 4 -nomp 2)
+        (cd cgyro/bin && cgyro -r -n 4 -nomp 2) | tee cgyro_reg.log
+	echo "=======  results  ====="
+	grep reg cgyro_reg.log |tee  cgyro_reg.tests.log
+	grep PASS cgyro_reg.tests.log > cgyro_reg.tests.pass.log
+	cnt=`wc -l cgyro_reg.tests.pass.log |awk '{print $1}'`
+	if [ "$cnt" -eq 20 ]; then echo "== ALL passed =="; else echo "Some tests FAILED"; test -z "error"; fi
 
     - name: Sanity checks
       shell: bash -l {0}
