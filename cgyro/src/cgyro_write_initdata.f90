@@ -133,7 +133,7 @@ subroutine cgyro_write_initdata
         do is=1,n_species
            dn = sdlnndr(is)*length/rho/4
            dt = sdlntdr(is)*length/rho/4
-           write(io,'(t1,i2,3(1x,1pe9.3),2x,3(1x,1pe9.3))') &
+           write(io,'(t1,i2,3(1x,1pe9.2),2x,3(1x,1pe9.2))') &
              is,sdlnndr(is),dlnndr(is)-dn,dlnndr(is)+dn,sdlntdr(is),dlntdr(is)-dt,dlntdr(is)+dt
         enddo
      endif
