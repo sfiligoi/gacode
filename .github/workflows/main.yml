@@ -62,7 +62,15 @@ jobs:
       shell: bash -l {0}
       run: |
         conda activate gacode
-        echo "TODO"
+        export GACODE_PLATFORM=CONDA_CPU
+        export GACODE_ROOT=$PWD
+        . $GACODE_ROOT/shared/bin/gacode_setup
+        source $GACODE_ROOT/platform/env/env.${GACODE_PLATFORM}
+        echo "======= begin env ====="
+        env
+        echo "=======  end env  ====="
+        # test the code
+        (cd cgyro/bin && cgyro -r -n 4 -nomp 2)
 
     - name: Sanity checks
       shell: bash -l {0}
