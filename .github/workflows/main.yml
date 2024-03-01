@@ -25,7 +25,7 @@ jobs:
       shell: bash -l {0}
       run: |
         df -h .
-        conda create -q --yes --strict-channel-priority -n gacode -c conda-forge gxx_linux-64 gfortran_linux-64 make curl
+        conda create -q --yes --strict-channel-priority -n gacode -c conda-forge gxx_linux-64 gfortran_linux-64 make curl python
         conda clean --yes -t
         df -h .
         conda activate gacode
