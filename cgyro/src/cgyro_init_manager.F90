@@ -334,7 +334,7 @@ subroutine cgyro_init_manager
      if (collision_model == 5) then
         allocate(cmat_simple(n_xi,n_xi,n_energy,n_species,n_theta,nt1:nt2))
      else
-        if (collision_precision_mode /= 0) then
+        if (collision_precision_mode == 1) then
            ! the lowest energy(s) has the most spread, so treat differently
            n_low_energy = 1
            do ie=2,n_energy
@@ -348,6 +348,8 @@ subroutine cgyro_init_manager
 
            write (msg, "(A,I1,A)") "Using fp32 collision precision except e<=",n_low_energy," or same e&s."
            call cgyro_info(msg)
+        else if (collision_precision_mode == 32) then
+           allocate(cmat_fp32(nv,nv,nc_loc,nt1:nt2))
         else
            allocate(cmat(nv,nv,nc_loc,nt1:nt2))
         endif
