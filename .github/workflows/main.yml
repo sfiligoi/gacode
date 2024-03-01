@@ -39,7 +39,7 @@ jobs:
           which clang
           clang -v
         fi
-        conda install --strict-channel-priority -c conda-forge fftw openblas
+        conda install --strict-channel-priority -c conda-forge fftw 'libopenblas=*=*openmp*'
         if [[ "$(uname -s)" == "Linux" ]];
         then
           conda install --strict-channel-priority -c conda-forge mpich
