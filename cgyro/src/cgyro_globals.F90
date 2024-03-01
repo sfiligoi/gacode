@@ -457,10 +457,10 @@ module cgyro_globals
   !
   ! Collision operator
   integer :: n_low_energy
-  real, dimension(:,:,:,:), allocatable :: cmat ! only used if collision_precision_mode=0
-  real(KIND=REAL32), dimension(:,:,:,:), allocatable :: cmat_fp32 ! only used if collision_precision_mod/=0
-  real(KIND=REAL32), dimension(:,:,:,:,:,:), allocatable :: cmat_stripes ! only used if collision_precision_mod/=0
-  real(KIND=REAL32), dimension(:,:,:,:,:,:), allocatable :: cmat_e1 ! only used if collision_precision_mod/=0
+  real, dimension(:,:,:,:), allocatable :: cmat ! only used if collision_precision_mode=0 & 64
+  real(KIND=REAL32), dimension(:,:,:,:), allocatable :: cmat_fp32 ! only used if collision_precision_mode=1 & 32
+  real(KIND=REAL32), dimension(:,:,:,:,:,:), allocatable :: cmat_stripes ! only used if collision_precision_mode=1
+  real(KIND=REAL32), dimension(:,:,:,:,:,:), allocatable :: cmat_e1 ! only used if collision_precision_mode=1
   real, dimension(:,:,:,:,:,:), allocatable :: cmat_simple ! only used in collision_model=5
   ! 
   ! Equilibrium/geometry arrays
