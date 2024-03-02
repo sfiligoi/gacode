@@ -39,10 +39,10 @@ jobs:
           which clang
           clang -v
         fi
-        conda install --strict-channel-priority -c conda-forge fftw 'libopenblas=*=*openmp*'
+        conda install --yes --strict-channel-priority -c conda-forge fftw 'openblas=*=*openmp*'
         if [[ "$(uname -s)" == "Linux" ]];
         then
-          conda install --strict-channel-priority -c conda-forge mpich
+          conda install --yes --strict-channel-priority -c conda-forge mpich
           # TODO: install PGI but do not source it
           # the makefile will do it automatically
           #./scripts/install_hpc_sdk.sh </dev/null
