@@ -81,7 +81,7 @@ export NVHPC_SILENT=true
 # create helper scripts
 mkdir setup_scripts
 cat > setup_scripts/setup_nv_hpc_bins.sh << EOF
-PATH=$PWD/conda_nv_bins:`ls -d $PWD/hpc_sdk/*/202*/compilers/bin`:\$PATH
+PATH=$PWD/conda_nv_bins:`ls -d $PWD/hpc_sdk/*/202*/comm_libs/openmpi4/bin`:`ls -d $PWD/hpc_sdk/*/202*/compilers/bin`:\$PATH
 
 unset CPPFLAGS
 unset CXXFLAGS
