@@ -16,13 +16,15 @@ jobs:
         os: [linux-gpu-cuda]
         hwflavor: [cpu, cuda]
     runs-on: ${{ matrix.os }}
+    env:
+      hwflavor: ${{ matrix.hwflavor }}
     steps:
     - uses: actions/checkout@v3
     - uses: conda-incubator/setup-miniconda@v2
       with:
         miniconda-version: "latest"
         auto-update-conda: true
-    - name: Install 
+    - name: Install
       shell: bash -l {0}
       run: |
         df -h .
@@ -30,7 +32,7 @@ jobs:
         conda clean --yes -t
         df -h .
         conda activate gacode
-        echo "$(uname -s)"
+        echo "OS: '$(uname -s)'"
         if [[ "$(uname -s)" == "Linux" ]];
         then
           which x86_64-conda-linux-gnu-gcc
@@ -40,7 +42,8 @@ jobs:
           which clang
           clang -v
         fi
-        if [[ "$${{ matrix.hwflavor }}" == "cpu" ]]; then
+        echo "HW flavor: '${hwflavor}'"
+        if [[ "${hwflavor}" == "cpu" ]]; then
           conda install --yes --strict-channel-priority -c conda-forge fftw 'openblas=*=*openmp*'
           conda install --yes --strict-channel-priority -c conda-forge mpich
           export GACODE_PLATFORM=CONDA_CPU
@@ -49,7 +52,7 @@ jobs:
           .github/support_scripts/install_hpc_sdk.sh
           source setup_scripts/setup_nv_hpc_bins.sh
           export GACODE_PLATFORM=CONDA_NVHPC_GPU
-          if [[ "$${{ matrix.hwflavor }}" == "ompgpu" ]]; then
+          if [[ "${hwflavor}" == "ompgpu" ]]; then
              export GACODE_OMPGPU=1
           else
              export GACODE_OMPGPU=0
@@ -68,14 +71,14 @@ jobs:
     - name: Tests
       shell: bash -l {0}
       run: |
+        echo "HW flavor: '${hwflavor}'"
         conda activate gacode
-        setup_scripts/setup_nv_hpc_bins.sh
-        if [[ "$${{ matrix.hwflavor }}" == "cpu" ]]; then
+        if [[ "${hwflavor}" == "cpu" ]]; then
           export GACODE_PLATFORM=CONDA_CPU
         else
           source setup_scripts/setup_nv_hpc_bins.sh
           export GACODE_PLATFORM=CONDA_NVHPC_GPU
-          if [[ "$${{ matrix.hwflavor }}" == "ompgpu" ]]; then
+          if [[ "${hwflavor}" == "ompgpu" ]]; then
              export GACODE_OMPGPU=1
           else
              export GACODE_OMPGPU=0
