@@ -14,6 +14,7 @@ jobs:
     strategy:
       matrix:
         os: [linux-gpu-cuda]
+        hwflavor: [cpu, cuda]
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v3
@@ -39,16 +40,20 @@ jobs:
           which clang
           clang -v
         fi
-        conda install --yes --strict-channel-priority -c conda-forge fftw 'openblas=*=*openmp*'
-        if [[ "$(uname -s)" == "Linux" ]];
-        then
+        if [[ "$${{ matrix.hwflavor }}" == "cpu" ]]; then
+          conda install --yes --strict-channel-priority -c conda-forge fftw 'openblas=*=*openmp*'
           conda install --yes --strict-channel-priority -c conda-forge mpich
-          # TODO: install PGI but do not source it
-          # the makefile will do it automatically
-          #./scripts/install_hpc_sdk.sh </dev/null
+          export GACODE_PLATFORM=CONDA_CPU
+        else
+          # TODO: install PGI 
+          export GACODE_PLATFORM=CONDA_GPU
+          if [[ "$${{ matrix.hwflavor }}" == "ompgpu" ]]; then
+             export GACODE_OMPGPU=1
+          else
+             export GACODE_OMPGPU=0
+          fi
         fi
         df -h .
-        export GACODE_PLATFORM=CONDA_CPU
         export GACODE_ROOT=$PWD
         . $GACODE_ROOT/shared/bin/gacode_setup
         source $GACODE_ROOT/platform/env/env.${GACODE_PLATFORM}
