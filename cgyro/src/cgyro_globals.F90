@@ -45,6 +45,7 @@ module cgyro_globals
   real    :: max_time
   integer :: print_step
   integer :: restart_step
+  integer :: restart_preservation_mode
   real    :: freq_tol
   real    :: up_radial
   real    :: up_theta

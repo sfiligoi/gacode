@@ -24,6 +24,7 @@ subroutine cgyro_read_input
   call cgyro_readbc_real(max_time)
   call cgyro_readbc_int(print_step,'PRINT_STEP')
   call cgyro_readbc_int(restart_step,'RESTART_STEP')
+  call cgyro_readbc_int(restart_preservation_mode,'RESTART_PRESERVATION_MODE')
   call cgyro_readbc_real(freq_tol)
   call cgyro_readbc_real(up_radial)
   call cgyro_readbc_real(up_theta)
