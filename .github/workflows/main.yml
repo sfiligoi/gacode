@@ -45,8 +45,8 @@ jobs:
           conda install --yes --strict-channel-priority -c conda-forge mpich
           export GACODE_PLATFORM=CONDA_CPU
         else
-          # TODO: install PGI 
-          export GACODE_PLATFORM=CONDA_GPU
+          # TODO: install NVIDIA HPC SDK
+          export GACODE_PLATFORM=CONDA_NVHPC_GPU
           if [[ "$${{ matrix.hwflavor }}" == "ompgpu" ]]; then
              export GACODE_OMPGPU=1
           else
