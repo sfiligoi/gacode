@@ -26,7 +26,7 @@ jobs:
       shell: bash -l {0}
       run: |
         df -h .
-        conda create -q --yes --strict-channel-priority -n gacode -c conda-forge gxx_linux-64 gfortran_linux-64 make curl python
+        conda create -q --yes --strict-channel-priority -n gacode -c conda-forge gxx_linux-64 gfortran_linux-64 make curl wget python
         conda clean --yes -t
         df -h .
         conda activate gacode
@@ -45,7 +45,9 @@ jobs:
           conda install --yes --strict-channel-priority -c conda-forge mpich
           export GACODE_PLATFORM=CONDA_CPU
         else
-          # TODO: install NVIDIA HPC SDK
+          # install NVIDIA HPC SDK
+          .github/support_scripts/install_hpc_sdk.sh
+          source setup_scripts/setup_nv_hpc_bins.sh
           export GACODE_PLATFORM=CONDA_NVHPC_GPU
           if [[ "$${{ matrix.hwflavor }}" == "ompgpu" ]]; then
              export GACODE_OMPGPU=1
@@ -67,7 +69,18 @@ jobs:
       shell: bash -l {0}
       run: |
         conda activate gacode
-        export GACODE_PLATFORM=CONDA_CPU
+        setup_scripts/setup_nv_hpc_bins.sh
+        if [[ "$${{ matrix.hwflavor }}" == "cpu" ]]; then
+          export GACODE_PLATFORM=CONDA_CPU
+        else
+          source setup_scripts/setup_nv_hpc_bins.sh
+          export GACODE_PLATFORM=CONDA_NVHPC_GPU
+          if [[ "$${{ matrix.hwflavor }}" == "ompgpu" ]]; then
+             export GACODE_OMPGPU=1
+          else
+             export GACODE_OMPGPU=0
+          fi
+        fi
         export GACODE_ROOT=$PWD
         . $GACODE_ROOT/shared/bin/gacode_setup
         source $GACODE_ROOT/platform/env/env.${GACODE_PLATFORM}
