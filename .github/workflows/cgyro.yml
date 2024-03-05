@@ -1,4 +1,4 @@
-name: gacode CI
+name: cgyro CI
 
 on:
   push:
