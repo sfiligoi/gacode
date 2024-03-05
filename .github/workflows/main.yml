@@ -28,26 +28,20 @@ jobs:
       shell: bash -l {0}
       run: |
         df -h .
-        conda create -q --yes --strict-channel-priority -n gacode -c conda-forge gxx_linux-64 gfortran_linux-64 make curl wget python
-        conda clean --yes -t
-        df -h .
-        conda activate gacode
-        echo "OS: '$(uname -s)'"
-        if [[ "$(uname -s)" == "Linux" ]];
-        then
+        echo "HW flavor: '${hwflavor}'"
+        if [[ "${hwflavor}" == "cpu" ]]; then
+          conda create -q --yes --strict-channel-priority -n gacode -c conda-forge gxx_linux-64 gfortran_linux-64 make curl python
+          conda clean --yes -t
+          df -h .
+          conda activate gacode
           which x86_64-conda-linux-gnu-gcc
           x86_64-conda-linux-gnu-gcc -v
           x86_64-conda-linux-gnu-g++ -v
-        else
-          which clang
-          clang -v
-        fi
-        echo "HW flavor: '${hwflavor}'"
-        if [[ "${hwflavor}" == "cpu" ]]; then
           conda install --yes --strict-channel-priority -c conda-forge fftw 'openblas=*=*openmp*'
           conda install --yes --strict-channel-priority -c conda-forge mpich
           export GACODE_PLATFORM=CI_CPU
         else
+          # Assuming gfortran and modules are pre-installed
           # install NVIDIA HPC SDK
           .github/support_scripts/install_hpc_sdk.sh
           source setup_scripts/setup_nv_hpc_bins.sh
@@ -76,8 +70,8 @@ jobs:
       shell: bash -l {0}
       run: |
         echo "HW flavor: '${hwflavor}'"
-        conda activate gacode
         if [[ "${hwflavor}" == "cpu" ]]; then
+          conda activate gacode
           export GACODE_PLATFORM=CI_CPU
         else
           source setup_scripts/setup_nv_hpc_bins.sh
@@ -122,5 +116,4 @@ jobs:
     - name: Sanity checks
       shell: bash -l {0}
       run: |
-        conda activate gacode
         echo "TODO"
