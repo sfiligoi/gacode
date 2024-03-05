@@ -46,12 +46,12 @@ jobs:
         if [[ "${hwflavor}" == "cpu" ]]; then
           conda install --yes --strict-channel-priority -c conda-forge fftw 'openblas=*=*openmp*'
           conda install --yes --strict-channel-priority -c conda-forge mpich
-          export GACODE_PLATFORM=CONDA_CPU
+          export GACODE_PLATFORM=CI_CPU
         else
           # install NVIDIA HPC SDK
           .github/support_scripts/install_hpc_sdk.sh
           source setup_scripts/setup_nv_hpc_bins.sh
-          export GACODE_PLATFORM=CONDA_NVHPC_GPU
+          export GACODE_PLATFORM=CI_GPU
           if [[ "${hwflavor}" == "ompgpu" ]]; then
              export GACODE_OMPGPU=1
           else
@@ -78,10 +78,10 @@ jobs:
         echo "HW flavor: '${hwflavor}'"
         conda activate gacode
         if [[ "${hwflavor}" == "cpu" ]]; then
-          export GACODE_PLATFORM=CONDA_CPU
+          export GACODE_PLATFORM=CI_CPU
         else
           source setup_scripts/setup_nv_hpc_bins.sh
-          export GACODE_PLATFORM=CONDA_NVHPC_GPU
+          export GACODE_PLATFORM=CI_GPU
           if [[ "${hwflavor}" == "ompgpu" ]]; then
              export GACODE_OMPGPU=1
           else
