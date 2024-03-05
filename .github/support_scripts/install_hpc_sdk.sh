@@ -53,7 +53,7 @@ if [ "x${USE_CURL}" == "x" ]; then
     rm -f nvhpc.tgz
   else
     # Do not unpack things we do not use for cgyro
-    curl -s "${NV_URL}" | tar xpzf - --exclude '*libcusparse*' --exclude '*libcusolver*' --exclude '*libcurand*' --exclude '*profilers*' --exclude '*/doc/*' --exclude '*/plugin*'
+    curl -s "${NV_URL}" | tar xpzf - --exclude '*profilers*' --exclude '*/doc/*' --exclude '*/plugin*'
   fi
 elif [ "x${USE_ARIA2}" == "x" ]; then
   aria2c "${NV_URL}"
