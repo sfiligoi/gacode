@@ -66,7 +66,11 @@ jobs:
         env
         echo "=======  end env  ====="
         # build the code
+        echo "=======  building  ====="
         (cd cgyro && make)
+        echo "=======  cgyro bin  ====="
+        (cd cgyro/src; ls -l cgyro)
+        (cd cgyro/src; ldd cgyro)
             
     - name: Tests
       shell: bash -l {0}
@@ -90,13 +94,30 @@ jobs:
         echo "======= begin env ====="
         env
         echo "=======  end env  ====="
+        echo "=======  cgyro bin  ====="
+        (cd cgyro/src; ls -l cgyro)
+        (cd cgyro/src; ldd cgyro)
+        echo "=======  testing  ====="
         # test the code
         (cd cgyro/bin && cgyro -r -n 4 -nomp 2) | tee cgyro_reg.log
+        echo "=======  last out  ====="
+        if [ -f cgyro/bin/cgyro_regression_test/out ]; then cat cgyro/bin/cgyro_regression_test/out; fi
         echo "=======  results  ====="
-        grep reg cgyro_reg.log |tee  cgyro_reg.tests.log
-        grep PASS cgyro_reg.tests.log > cgyro_reg.tests.pass.log
+        (grep reg cgyro_reg.log || test -f cgyro_reg.log) |tee  cgyro_reg.tests.log
+        (grep PASS cgyro_reg.tests.log || test -f cgyro_reg.tests.log) > cgyro_reg.tests.pass.log
         cnt=`wc -l cgyro_reg.tests.pass.log |awk '{print $1}'`
-        if [ "$cnt" -eq 20 ]; then echo "== ALL passed =="; else echo "Some tests FAILED"; test -z "error"; fi
+        if [ "$cnt" -eq 20 ]; then
+          echo "== ALL passed =="
+        else 
+          echo "== Some tests FAILED"
+          find cgyro/bin/cgyro_regression_test
+          echo "==== cgyro_regression_test/out"
+          if [ -f cgyro/bin/cgyro_regression_test/out ]; then cat cgyro/bin/cgyro_regression_test/out; fi
+          echo "==== cgyro_regression_test/.../out.cgyro.info"
+          cat cgyro/bin/cgyro_regression_test/*/out.cgyro.info
+          echo "== Aborting"
+          test -z "error"
+        fi
 
     - name: Sanity checks
       shell: bash -l {0}
