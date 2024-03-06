@@ -273,8 +273,8 @@ module cgyro_globals
 
   logical :: printout=.true.
 
-  integer, parameter :: mpiio_small_stripe_factor = 4
-  integer, parameter :: mpiio_stripe_factor = 24
+  integer :: mpiio_small_stripe_factor   ! optional striping for data files
+  integer :: mpiio_stripe_factor         ! optional striping for restart file
   character(len=2) :: mpiio_small_stripe_str
   character(len=3) :: mpiio_stripe_str
   !

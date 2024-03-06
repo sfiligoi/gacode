@@ -360,10 +360,17 @@ subroutine cgyro_mpi_grid
   n_omp = omp_get_max_threads()
 
   !----------------------------------------------------------------------------
-  ! Restart communication setup
+  ! Restart IO setup
 
-  write (mpiio_stripe_str,"(I3.3)") mpiio_stripe_factor
-  write (mpiio_small_stripe_str,"(I2.2)") mpiio_small_stripe_factor
+  if (mpiio_stripe_factor > 0) then
+     call cgyro_info("MPI IO factor set for restart file")
+     write (mpiio_stripe_str,"(I3.3)") mpiio_stripe_factor
+  endif
+
+  if (mpiio_small_stripe_factor > 0) then
+     call cgyro_info("MPI IO factor set for data files")
+     write (mpiio_small_stripe_str,"(I2.2)") mpiio_small_stripe_factor
+  endif
 
   ! save hostname configuration
   call cgyro_write_hosts

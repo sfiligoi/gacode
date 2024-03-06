@@ -118,9 +118,12 @@ subroutine cgyro_write_restart_one
   ! TODO Error handling
   call MPI_INFO_CREATE(finfo,i_err)
 
-  ! write to a temp file name first, so we don't end up with partially written files
-  call MPI_INFO_SET(finfo,"striping_factor",mpiio_stripe_str,i_err)
+  if (mpiio_stripe_factor > 0) then
+    ! user asked us to explicitly set the MPI IO striping factor
+    call MPI_INFO_SET(finfo,"striping_factor",mpiio_stripe_str,i_err)
+  endif
 
+  ! write to a temp file name first, so we don't end up with partially written files
   call MPI_FILE_OPEN(CGYRO_COMM_WORLD,&
           trim(path)//runfile_restart//".part",&
           filemode,&
