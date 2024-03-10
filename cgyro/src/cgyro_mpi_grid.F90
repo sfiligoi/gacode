@@ -16,8 +16,7 @@ subroutine cgyro_mpi_grid
 
   implicit none
 
-  integer :: ie,ix,is,ir,it
-  integer :: iexch,itm,j
+  integer :: ie,ix,is,ir,it,itm
   integer :: iltheta_min,iltheta_max
   integer :: d
   integer :: splitkey

@@ -312,11 +312,13 @@ end subroutine cgyro_write_initdata
 
 subroutine prime_factors(n,pout)
 
+  implicit none
+  
   integer, intent(in) :: n
   character(len=50), intent(inout) :: pout
   character(len=50) :: warn
   integer, dimension(27) :: pvec,cvec
-  integer :: ptmp
+  integer :: i,ptmp
   character(len=4) :: fmt
   character(len=3) :: s1,s2
   
