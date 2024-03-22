@@ -15,7 +15,7 @@ subroutine cgyro_write_initdata
   integer :: p,in,is,it
   real :: kymax,kyrat,dn,dt
   real, external :: spectraldiss
-  character(len=50) :: msg
+  character(len=50) :: msg,lfmt
 
   !----------------------------------------------------------------------------
   ! Runfile to give complete summary to user
@@ -49,13 +49,19 @@ subroutine cgyro_write_initdata
            kymax = q/rmin*(n_toroidal-1)*rho
         endif
 
+        if (kymax < -99.9) then
+           lfmt = '(a,i4,2x,2(f7.2,2x),2x,f6.2,5x,i4,2a)'
+        else
+           lfmt = '(a,i4,2x,2(f7.3,2x),2x,f6.2,5x,i4,2a)'
+        endif
+        
         if (nonlinear_flag == 0) then
 
            write(io,*)
            write(io,*) '          n    Delta      Max     L/rho'
-           write(io,'(a,i4,2x,2(f7.3,2x),2x,f6.2)') ' kx*rho:',&
+           write(io,lfmt) ' kx*rho:',&
                 n_radial,2*pi*rho/length,2*pi*rho*(n_radial/2-1)/length,length/rho
-           write(io,'(a,i4,2x,2(f7.3,2x),2x,f6.2)') ' ky*rho:',&
+           write(io,lfmt) ' ky*rho:',&
                 n_toroidal,q/rmin*rho,kymax,2*pi/ky
 
         else
@@ -64,10 +70,10 @@ subroutine cgyro_write_initdata
            write(io,*)
            write(io,*) '          n    Delta      Max     L/rho    n_fft'
            call prime_factors(nx,msg)
-           write(io,'(a,i4,2x,2(f7.3,2x),2x,f6.2,5x,i4,2a)') ' kx*rho:',&
+           write(io,lfmt) ' kx*rho:',&
                 n_radial,2*pi*rho/length,2*pi*rho*(n_radial/2-1)/length,length/rho,nx,'  ',trim(msg)
            call prime_factors(ny,msg)
-           write(io,'(a,i4,2x,2(f7.3,2x),2x,f6.2,5x,i4,2a)') ' ky*rho:',&
+           write(io,lfmt) ' ky*rho:',&
                 n_toroidal,q/rmin*rho,kymax,2*pi/ky,ny,'  ',trim(msg)
         endif
 
