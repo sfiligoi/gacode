@@ -38,12 +38,6 @@ then
   echo "         -nomp <threads>" 
   echo "         Number of OpenMP threads per MPI task."
   echo
-  echo "         -numa <n>" 
-  echo "         NUMAs active per node."
-  echo
-  echo "         -mpinuma <n>" 
-  echo "         MPI tasks per active NUMA."
-  echo
   echo "         -mem <n>[unit]" 
   echo "         -mem-per-cpu <n>[unit]" 
   echo "         Memory required per node or per cpu, resp."
@@ -101,8 +95,6 @@ SIMROOT=$PWD
 # Default number of cores
 nmpi=1
 nomp=1
-numa=0
-mpinuma=0
 
 #Default Memory Per Node
 MEMPERNODE=
@@ -128,13 +120,9 @@ while [[ $# -gt 0 ]] ; do
 
   -nomp) shift ; nomp=$1 ;;
 
-  -numa) shift ; numa=$1 ;;
-
   -mem) shift ; MEMPERNODE=$1 ;;
 
   -mem-per-cpu) shift ; MEMPERCPU=$1 ;;
-
-  -mpinuma) shift ; mpinuma=$1 ;;
 
   -queue) shift ; QUEUE=$1 ;;
 
@@ -198,10 +186,8 @@ fi
 
 if [[ $SUB_FLAG -eq 0 ]] ; then
     # Query NERSC/ORNL repositories
-    if hash getnim 2> /dev/null; then
-       echo
-       echo "Your repositories"
-       getnim -U $user
+    if hash iris 2> /dev/null; then
+       iris
     elif hash showusage 2> /dev/null; then
        echo
        echo "Your repositories"
