@@ -36,4 +36,3 @@ NETCDF_INC = ${NETCDF_DIR}/include
 
 # Archive 
 ARCH = ar cr
-
