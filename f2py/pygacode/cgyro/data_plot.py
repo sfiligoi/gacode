@@ -942,6 +942,10 @@ class cgyrodata_plot(data.cgyrodata):
 
    def plot_zf(self,xin):
 
+      if not self.zf_test:
+         print('ERROR: (plot_zf) This plot is suitable only for ZF_TEST_MODE=1')
+         return
+      
       w     = xin['w']
       field = xin['field']
     
