@@ -369,8 +369,15 @@ class cgyrodata:
       l=11
 
       self.p = np.array(data[l:l+self.n_radial],dtype=int)
-      # kx*rho (ignore leftmost "special" element)
-      self.kx = 2*np.pi*self.p[1:]/self.length
+
+      if self.p[0] > 0:
+         # zonal flow test
+         self.kx = 2*np.pi*self.p[:]/self.length
+         self.zf_test = True
+      else:
+         # kx*rho (ignore leftmost "special" element)
+         self.kx = 2*np.pi*self.p[1:]/self.length
+         self.zf_test = False
 
       mark = l+self.n_radial
       self.theta = np.array(data[mark:mark+self.n_theta])
@@ -409,10 +416,11 @@ class cgyrodata:
 
       # Construct k_perp
       # NOTE: kx,ky and kperp are kx*rho, ky*rho, kperp*rho
-      nx = self.n_radial-1
-      ny = self.n_n
-      self.kperp = np.sqrt(np.outer(self.kx[:]**2,np.ones(ny))+
-                           np.outer(np.ones(nx),self.ky[:]**2))
+      if not self.zf_test:
+         nx = self.n_radial-1
+         ny = self.n_n
+         self.kperp = np.sqrt(np.outer(self.kx[:]**2,np.ones(ny))+
+                              np.outer(np.ones(nx),self.ky[:]**2))
       
       #-----------------------------------------------------------------
 

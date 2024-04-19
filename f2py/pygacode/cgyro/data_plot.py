@@ -353,6 +353,10 @@ class cgyrodata_plot(data.cgyrodata):
       moment  = xin['moment']
       spec    = xin['spec']
 
+      if self.n_n < 2:
+         print('ERROR: (plot_phi) This plot not suitable for a single toroidal mode.')
+         return [None,]*4
+      
       t = self.getnorm(xin['norm'])  
 
       if xin['fig'] is None:
@@ -944,56 +948,55 @@ class cgyrodata_plot(data.cgyrodata):
       if xin['fig'] is None:
          fig = plt.figure(MYDIR,figsize=(xin['lx'],xin['ly']))
 
-      if self.n_n > 1:
-         print('ERROR: (plot_zf) This plot option valid for ZF test only.')
-         return
-
-      t  = self.t
-      k0 = 2*np.pi/self.length
-
-      print('INFO: (plot_zf) Using index theta index n_theta/3+1')
-      if field == 0:
-         f = self.phib[0,self.n_theta//3,:]
-      elif field == 1:
-         f = self.aparb[0,self.n_theta//3,:]
-      else:
-         f = self.bparb[0,self.n_theta/3,:]
-
-      # Initialization in CGYRO is with 1e-6*besselj0 # phic[0]
-      gfactor = 1e6*(1-np.i0(k0**2)*np.exp(-k0**2))/(np.i0(k0**2)*np.exp(-k0**2))
-
-      y = f*gfactor
-      
-      #----------------------------------------------------
-      # Average calculations
-      imin,imax=time_index(t,w)
-      ave  = time_average(y,t,imin,imax)
-      print('INFO: (plot_zf) Integral time-average = {:.4f}'.format(ave))
-
-      ave_vec = ave*np.ones(len(t))
-      #----------------------------------------------------
-
       ax = fig.add_subplot(111)
       ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(TIME)
       ax.set_ylabel(r'$\mathrm{Re}\left( \delta\phi/\delta\phi_0 \right)$')
 
-      ax.plot(t,y,label=r'$k_x=%.3g$' % k0)
-    
-      ax.plot(t[imin:],ave_vec[imin:],color='b',
-              label=r'$\mathrm{Average}$',linewidth=1)
+      t = self.getnorm(xin['norm'])
+      self.getbigfield()
 
-      theory = 1.0/(1.0+1.6*self.q**2/np.sqrt(self.rmin/self.rmaj))
-      ax.plot([0,max(t)],[theory,theory],color='grey',
-              label=r'$\mathrm{RH \; theory}$',alpha=0.3,linewidth=4)
+      print('INFO: (plot_zf) Using theta index n_theta/3+1')
+      nselect=0 
+      if field == 0:
+         f = self.kxky_phi[0,:,nselect,0,:]
+      elif field == 1:
+         f = self.kxky_apar[0,:,nselect,0,:]
+      else:
+         f = self.kxky_bpar[0,:,nselect,0,:]
 
-      theory2 = 1./(1.0+2.*self.q**2)
-      ax.plot([0,max(t)],[theory2,theory2],color='m',
-              label=r'$\mathrm{fluid \; theory}$',alpha=0.3,linewidth=4)
+      for i,k0 in enumerate(self.kx):
+         # Initialization in CGYRO is with 1e-6*besselj0 # phic[0]
+         gfactor = 1e6*(1-np.i0(k0**2)*np.exp(-k0**2))/(np.i0(k0**2)*np.exp(-k0**2))
+
+         y = f[i,:]*gfactor
+         ax.plot(t,y,label=self.kxstr+'$={:.4f}$'.format(k0))
+
+         #----------------------------------------------------
+         # Average calculations
+         imin,imax=time_index(t,w)
+         ave = time_average(y,t,imin,imax)
+         print('INFO: (plot_zf) Time average = {:.4f} for kx = {:.4f}'.format(ave,k0))
+         ave_vec = ave*np.ones(len(t))
+         #----------------------------------------------------
+
+      if len(self.p) == 1:
+
+         ax.plot(t[imin:],ave_vec[imin:],color='b',
+                 label=r'$\mathrm{average}$',linewidth=1)
+
+         theory = 1.0/(1.0+1.6*self.q**2/np.sqrt(self.rmin/self.rmaj))
+         ax.plot([0,max(t)],[theory,theory],color='grey',
+                 label=r'$\mathrm{RH \; theory}$',alpha=0.3,linewidth=4)
+
+         theory2 = 1./(1.0+2.*self.q**2)
+         ax.plot([0,max(t)],[theory2,theory2],color='m',
+                 label=r'$\mathrm{fluid \; theory}$',alpha=0.3,linewidth=4)
 
       ax.legend(loc=1,prop={'size':14})
-
+      ax.set_xlim(0,t[-1])
+      
       fig.tight_layout(pad=0.3)
 
       return

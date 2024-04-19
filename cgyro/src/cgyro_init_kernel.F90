@@ -47,8 +47,8 @@ subroutine cgyro_init_kernel
   ! 1. MPI setup
   call cgyro_mpi_grid
   if (error_status > 0) then
-          call cgyro_final_kernel
-          return
+     call cgyro_final_kernel
+     return
   endif
   
   call system_clock(aftermpi_time,kernel_count_rate,kernel_count_max)

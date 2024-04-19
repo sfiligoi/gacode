@@ -39,6 +39,13 @@ subroutine cgyro_write_initdata
           write(io,'(t3,i4,t12,i4,t21,i4,t29,i5,t36,i3)') nc_loc,nv_loc,nsplit,n_proc,n_omp
         endif
      endif
+     write(io,*)
+
+     if (kymax < -99.9) then
+        lfmt = '(a,i4,2x,2(f7.2,2x),2x,f6.2,5x,i4,2a)'
+     else
+        lfmt = '(a,i4,2x,2(f7.3,2x),2x,f6.2,5x,i4,2a)'
+     endif
 
      if (zf_test_mode == 0) then
 
@@ -48,16 +55,9 @@ subroutine cgyro_write_initdata
         else
            kymax = q/rmin*(n_toroidal-1)*rho
         endif
-
-        if (kymax < -99.9) then
-           lfmt = '(a,i4,2x,2(f7.2,2x),2x,f6.2,5x,i4,2a)'
-        else
-           lfmt = '(a,i4,2x,2(f7.3,2x),2x,f6.2,5x,i4,2a)'
-        endif
         
         if (nonlinear_flag == 0) then
 
-           write(io,*)
            write(io,*) '          n    Delta      Max     L/rho'
            write(io,lfmt) ' kx*rho:',&
                 n_radial,2*pi*rho/length,2*pi*rho*(n_radial/2-1)/length,length/rho
@@ -66,8 +66,6 @@ subroutine cgyro_write_initdata
 
         else
            
-
-           write(io,*)
            write(io,*) '          n    Delta      Max     L/rho    n_fft'
            call prime_factors(nx,msg)
            write(io,lfmt) ' kx*rho:',&
@@ -81,14 +79,9 @@ subroutine cgyro_write_initdata
 
         ! ZONAL FLOW TEST ONLY
 
-        if (n_radial==1) then
-           write(io,*)
-           write(io,'(t2,a,1pe10.3)') ' kx*rho: ',2*pi*rho/length
-        else
-           write(io,*) '          n          Delta            Max           L/rho'
-           write(io,'(a,i4,2x,2(g0.8,2x),2x,g0.8)') ' kx*rho:',&
-                n_radial,2*pi*rho/length,2*pi*rho*(n_radial/2-1)/length,length/rho
-        endif
+        write(io,*) '          n    Delta      Max     L/rho'
+        write(io,lfmt) ' kx*rho:',&
+             n_radial,2*pi*rho/length,2*pi*rho*n_radial/length,length/rho
 
      endif
 
