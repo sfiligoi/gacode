@@ -19,8 +19,7 @@ FOPT   = -xSAPPHIRERAPIDS -Ofast
 FDEBUG = -eD -Ktrap=fp -m 1
 
 # System math libraries
-#LMATH = -L${TACC_FFTW3_LIB} -lfftw3_threads -lfftw3 -mkl
-LMATH = -mkl
+LMATH = -qmkl
 
 # NetCDF
 NETCDF_DIR=$TACC_NETCDF_DIR
