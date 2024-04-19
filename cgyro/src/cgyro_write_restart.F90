@@ -63,6 +63,7 @@ subroutine cgyro_write_restart_one
   integer(KIND=8) :: count_rate, count_max
   real :: cp_dt
   integer :: j,ic0,statusfd
+  integer :: ierr
 
   ! use system_clock to be consistent with cgyro_kernel
   call system_clock(start_time,count_rate,count_max)
@@ -103,7 +104,7 @@ subroutine cgyro_write_restart_one
     ! Anything but restart_preservation_mode == 4
     ! User does not want high guarntees for the old file
     ! So, remove .old file, if it exists
-    call UNLINK(trim(path)//runfile_restart//".old")
+    ierr  = UNLINK(trim(path)//runfile_restart//".old")
     ! NOTE: We will not check if it succeeded... not important, may not even exist (yet)
   endif
 
@@ -111,7 +112,7 @@ subroutine cgyro_write_restart_one
     ! restart_preservation_mode == 1
     ! User wants to save disk space
     ! So, remove existing restart file, if it exists
-    call UNLINK(trim(path)//runfile_restart)
+    ierr = UNLINK(trim(path)//runfile_restart)
     ! NOTE: We will not check if it succeeded... not important, may not even exist (yet)
   endif
 
