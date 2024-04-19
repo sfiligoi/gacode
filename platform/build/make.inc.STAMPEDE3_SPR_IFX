@@ -5,8 +5,8 @@
 #----------------------------------------------------------
 
 IDENTITY="TACC STAMPEDE3 SPR (ifx)"
-CORES_PER_NODE=56
-NUMAS_PER_NODE=2
+CORES_PER_NODE=112
+NUMAS_PER_NODE=16
 
 # Compilers and flags
 #FC     = mpiifx -gen-interfaces -module ${GACODE_ROOT}/modules -I${GACODE_ROOT}/module -I${TACC_FFTW3_INC}
