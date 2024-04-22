@@ -55,6 +55,7 @@ subroutine cgyro_write_restart_one
 #ifndef __INTEL_COMPILER
   integer :: rename
 #endif
+  integer :: UNLINK
 
   character(8)  :: sdate
   character(10) :: stime
