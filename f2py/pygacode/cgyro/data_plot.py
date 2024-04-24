@@ -1013,7 +1013,6 @@ class cgyrodata_plot(data.cgyrodata):
       nscale = xin['nscale']
       ymin   = xin['ymin']
       ymax   = xin['ymax']
-      mirror = xin['abs']
 
       if xin['fig'] is None:
          fig = plt.figure(MYDIR,figsize=(xin['lx'],xin['ly']))
