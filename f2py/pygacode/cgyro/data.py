@@ -603,13 +603,17 @@ class cgyrodata:
 
       # 3D structure: f[r,n,time]
 
+      # 2024.04 moments are divided by rho in cgyro, so denormalize now
+      if moment == 'n' or moment == 'e' or moment == 'v':
+         f[:,:,:] = f[:,:,:]*self.rhonorm
+         
       if gbnorm:
          # gyrBohm normalization
          f[:,:,:] = f[:,:,:]/self.rhonorm
       
       return f,ft
 
-   def ylabeler(self,sub,ft,abs=True,sq=False,tave=False,sqrt=False,d=False):
+   def ylabeler(self,sub,ft,abs=True,sq=False,tave=False,sqrt=False,d=False,gb=True):
 
       if sub == '+' or sub == 'null':
          z = 'n'
@@ -620,10 +624,11 @@ class cgyrodata:
       u = ft+'_'+z
 
       if d:
-         u = u+r'^\prime'
+         u = r'(\mathrm{Gradient~scale~length})~~\partial_r \;'+u
          
       # gyroBohm norm
-      u = u+'/'+self.rhoi
+      if gb:
+         u = u+'/'+self.rhoi
 
       # Absolute value
       if abs:

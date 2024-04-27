@@ -849,7 +849,7 @@ class cgyrodata_plot(data.cgyrodata):
       color = ['k','m','b','c','g','r']
 
       # Get index for average window
-      imin,imax=time_index(t,w)
+      imin,imax = time_index(t,w)
       mpre,mwin = wintxt(imin,imax,t)
 
       ax.set_title(mwin)
@@ -860,24 +860,28 @@ class cgyrodata_plot(data.cgyrodata):
       # complex n=0 amplitudes
       yr = time_average(np.real(f[:,0,:]),t,imin,imax)
       yi = time_average(np.imag(f[:,0,:]),t,imin,imax)
-      
+
       nxp = 8*nx
       fave = np.zeros(nxp)
       dave = np.zeros(nxp)
-      x = np.linspace(0,2*np.pi,nxp)
+      x = np.linspace(-np.pi,np.pi,nxp)
       y = yr+1j*yi
-      # JC: should use array notation, check definitions
-      for i in range(nx):
-         p = i-nx//2
-         fave = fave + np.real(     np.exp(1j*p*x)*y[i])
-         dave = dave + np.real(1j*p*np.exp(1j*p*x)*y[i])
+
+      # vectorized calculation of average function and derivative (fave,dave)
+      ivec = np.arange(nx)
+      pvec = ivec-nx//2
+      fave = np.sum(np.real(np.exp(1j*pvec[:,None]*x[None,:])*y[ivec[:,None]]),axis=0)
+      dave = np.sum(np.real(1j*pvec[:,None]*np.exp(1j*pvec[:,None]*x[None,:])*y[ivec[:,None]]),axis=0)
+
+      # NOTE: length=Lx/rho
       dave = dave*(2*np.pi/self.length)
-         
-      ax.plot(x/(2*np.pi),fave,color='k',label=self.ylabeler('0',ft,abs=False))
-      ax.plot(x/(2*np.pi),dave,color='b',label=self.ylabeler('0',ft,abs=False,d=True))
+
+      u = specmap(self.mass[int(spec)],self.z[int(spec)])
+      ax.plot(x/(2*np.pi),fave,color='k',label=self.ylabeler(u,ft,abs=False))
+      ax.plot(x/(2*np.pi),dave,color='b',label=self.ylabeler(u,ft,abs=False,d=True,gb=False))
       ax.legend()
       
-      ax.set_xlim([0,1])
+      ax.set_xlim([-0.5,0.5])
 
       if ymax != 'auto':
          ax.set_ylim(top=float(ymax))
