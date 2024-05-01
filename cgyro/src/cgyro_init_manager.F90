@@ -24,31 +24,8 @@ subroutine cgyro_init_manager
 #define CGYRO_GPU_FFT
 #endif
 
-#ifdef CGYRO_GPU_FFT
-
-#ifdef HIPGPU
-  use hipfort_hipfft, only : hipfftPlanMany, &
-       HIPFFT_C2R,HIPFFT_Z2D,HIPFFT_R2C,HIPFFT_D2Z
-#else
-  use cufft, only : cufftPlanMany, &
-       CUFFT_C2R,CUFFT_Z2D,CUFFT_R2C,CUFFT_D2Z
-#endif
-
-#endif !CGYRO_GPU_FFT
-
   implicit none
 
-#ifndef CGYRO_GPU_FFT
-  include 'fftw3.f03'
-#endif
-
-#ifdef CGYRO_GPU_FFT
-  integer :: howmany,istatus
-  integer, parameter :: irank = 2
-  integer, dimension(irank) :: ndim,inembed,onembed
-  integer :: idist,odist,istride,ostride
-  integer, parameter :: singlePrecision = selected_real_kind(6,30)
-#endif
 
   character(len=128) :: msg
   integer :: ie,ix
@@ -451,9 +428,6 @@ subroutine cgyro_init_manager
   allocate(uymany(0:ny-1,0:nx-1,nsplitA))
   allocate(uv(0:ny-1,0:nx-1,n_omp))
 
-  ! Create plans once and for all, with global arrays fx,ux
-  plan_c2r = fftw_plan_dft_c2r_2d(nx,ny,fx(:,:,1),uxmany(:,:,1),FFTW_PATIENT)
-  plan_r2c = fftw_plan_dft_r2c_2d(nx,ny,uv(:,:,1),fx(:,:,1),FFTW_PATIENT)
 #endif
 
 #ifdef CGYRO_GPU_FFT
@@ -483,178 +457,9 @@ subroutine cgyro_init_manager
 !$acc&           create(uxmany,uymany,vxmany,vymany,uvmany)
 #endif
 
-  !-------------------------------------------------------------------
-  ! 2D
-  !   input[ b*idist + (x * inembed[1] + y)*istride ]
-  !  output[ b*odist + (x * onembed[1] + y)*ostride ]
-  !  isign is the sign of the exponent in the formula that defines
-  !  Fourier transform  -1 == FFTW_FORWARD
-  !                      1 == FFTW_BACKWARD
-  !-------------------------------------------------------------------
-
-  ndim(1) = nx
-  ndim(2) = ny
-  idist = size(fxmany,1)*size(fxmany,2)
-  odist = size(uxmany,1)*size(uxmany,2)
-  istride = 1
-  ostride = 1
-  inembed = size(fxmany,1)
-  onembed = size(uxmany,1)
-
-#ifdef HIPGPU
-  hip_plan_c2r_manyA = c_null_ptr
-  istatus = hipfftPlanMany(&
-       hip_plan_c2r_manyA, &
-       irank, &
-       ndim, &
-       inembed, &
-       istride, &
-       idist, &
-       onembed, &
-       ostride, &
-       odist, &
-       merge(HIPFFT_C2R,HIPFFT_Z2D,kind(uxmany) == singlePrecision), &
-       nsplitA)
-
-  if (nsplitB > 0) then ! no fft if nsplitB==0
-    hip_plan_c2r_manyB = c_null_ptr
-    istatus = hipfftPlanMany(&
-       hip_plan_c2r_manyB, &
-       irank, &
-       ndim, &
-       inembed, &
-       istride, &
-       idist, &
-       onembed, &
-       ostride, &
-       odist, &
-       merge(HIPFFT_C2R,HIPFFT_Z2D,kind(uxmany) == singlePrecision), &
-       nsplitB)
-  endif
-
-  hip_plan_c2r_manyG = c_null_ptr
-  istatus = hipfftPlanMany(&
-       hip_plan_c2r_manyG, &
-       irank, &
-       ndim, &
-       inembed, &
-       istride, &
-       idist, &
-       onembed, &
-       ostride, &
-       odist, &
-       merge(HIPFFT_C2R,HIPFFT_Z2D,kind(uxmany) == singlePrecision), &
-       nsplit)
-#else
-  istatus = cufftPlanMany(&
-       cu_plan_c2r_manyA, &
-       irank, &
-       ndim, &
-       inembed, &
-       istride, &
-       idist, &
-       onembed, &
-       ostride, &
-       odist, &
-       merge(CUFFT_C2R,CUFFT_Z2D,kind(uxmany) == singlePrecision), &
-       nsplitA)
-
-  if (nsplitB > 0) then ! no fft if nsplitB==0
-    istatus = cufftPlanMany(&
-       cu_plan_c2r_manyB, &
-       irank, &
-       ndim, &
-       inembed, &
-       istride, &
-       idist, &
-       onembed, &
-       ostride, &
-       odist, &
-       merge(CUFFT_C2R,CUFFT_Z2D,kind(uxmany) == singlePrecision), &
-       nsplitB)
-  endif
-
-  istatus = cufftPlanMany(&
-       cu_plan_c2r_manyG, &
-       irank, &
-       ndim, &
-       inembed, &
-       istride, &
-       idist, &
-       onembed, &
-       ostride, &
-       odist, &
-       merge(CUFFT_C2R,CUFFT_Z2D,kind(uxmany) == singlePrecision), &
-       nsplit)
-#endif
-
-  idist = size(uxmany,1)*size(uxmany,2)
-  odist = size(fxmany,1)*size(fxmany,2)
-  inembed = size(uxmany,1)
-  onembed = size(fxmany,1) 
-  istride = 1
-  ostride = 1
-#ifdef HIPGPU
-  hip_plan_r2c_manyA = c_null_ptr
-  istatus = hipfftPlanMany(&
-       hip_plan_r2c_manyA, &
-       irank, &
-       ndim, &
-       inembed, &
-       istride, &
-       idist, &
-       onembed, &
-       ostride, &
-       odist, &
-       merge(HIPFFT_R2C,HIPFFT_D2Z,kind(uxmany) == singlePrecision), &
-       nsplitA)
-
-  if (nsplitB > 0) then ! no fft if nsplitB==0
-    hip_plan_r2c_manyB = c_null_ptr
-    istatus = hipfftPlanMany(&
-       hip_plan_r2c_manyB, &
-       irank, &
-       ndim, &
-       inembed, &
-       istride, &
-       idist, &
-       onembed, &
-       ostride, &
-       odist, &
-       merge(HIPFFT_R2C,HIPFFT_D2Z,kind(uxmany) == singlePrecision), &
-       nsplitB)
-  endif
-#else
-  istatus = cufftPlanMany(&
-       cu_plan_r2c_manyA, &
-       irank, &
-       ndim, &
-       inembed, &
-       istride, &
-       idist, &
-       onembed, &
-       ostride, &
-       odist, &
-       merge(CUFFT_R2C,CUFFT_D2Z,kind(uxmany) == singlePrecision), &
-       nsplitA)
-
-  if (nsplitB > 0) then ! no fft if nsplitB==0
-    istatus = cufftPlanMany(&
-       cu_plan_r2c_manyB, &
-       irank, &
-       ndim, &
-       inembed, &
-       istride, &
-       idist, &
-       onembed, &
-       ostride, &
-       odist, &
-       merge(CUFFT_R2C,CUFFT_D2Z,kind(uxmany) == singlePrecision), &
-       nsplitB)
-  endif
-#endif
-
 #endif ! CGYRO_GPU_FFT
+
+  call cgyro_nl_fftw_init
 
   call timer_lib_out('nl_init')
 

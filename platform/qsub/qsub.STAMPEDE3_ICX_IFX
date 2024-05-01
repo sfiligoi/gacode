@@ -4,7 +4,7 @@ echo "-queue: icx"
 
 # Default queue
 if [ "$QUEUE" == "null_queue" ] ; then
-   QUEUE=spr
+   QUEUE=icx
 fi
 
 bfile=$SIMDIR/batch.src
