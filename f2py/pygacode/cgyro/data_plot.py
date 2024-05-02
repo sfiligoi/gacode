@@ -48,7 +48,6 @@ class cgyrodata_plot(data.cgyrodata):
       return xin
 
    def plot_freq(self,xin):
-
       # Function: plot gamma and omega vs time
 
       if xin['fig'] is None:
@@ -857,28 +856,24 @@ class cgyrodata_plot(data.cgyrodata):
       # f[p,n,t]
       f,ft = self.kxky_select(theta,0,moment,spec,gbnorm=True)
 
-      # complex n=0 amplitudes
-      yr = time_average(np.real(f[:,0,:]),t,imin,imax)
-      yi = time_average(np.imag(f[:,0,:]),t,imin,imax)
-
       nxp = 8*nx
-      fave = np.zeros(nxp)
-      dave = np.zeros(nxp)
       x = np.linspace(-np.pi,np.pi,nxp)
-      y = yr+1j*yi
 
-      # vectorized calculation of average function and derivative (fave,dave)
+      # complex n=0 amplitude
+      y = time_average(f[:,0,:],t,imin,imax)
+
+      # vectorized calculation of average function and derivative (f_ave,df_ave)
       ivec = np.arange(nx)
       pvec = ivec-nx//2
-      fave = np.sum(np.real(np.exp(1j*pvec[:,None]*x[None,:])*y[ivec[:,None]]),axis=0)
-      dave = np.sum(np.real(1j*pvec[:,None]*np.exp(1j*pvec[:,None]*x[None,:])*y[ivec[:,None]]),axis=0)
+      f_ave = np.sum(np.real(np.exp(1j*pvec[:,None]*x[None,:])*y[ivec[:,None]]),axis=0)
+      df_ave = np.sum(np.real(1j*pvec[:,None]*np.exp(1j*pvec[:,None]*x[None,:])*y[ivec[:,None]]),axis=0)
 
       # NOTE: length=Lx/rho
-      dave = dave*(2*np.pi/self.length)
+      df_ave = df_ave*(2*np.pi/self.length)
 
       u = specmap(self.mass[int(spec)],self.z[int(spec)])
-      ax.plot(x/(2*np.pi),fave,color='k',label=self.ylabeler(u,ft,abs=False))
-      ax.plot(x/(2*np.pi),dave,color='b',label=self.ylabeler(u,ft,abs=False,d=True,gb=False))
+      ax.plot(x/(2*np.pi),f_ave,color='k',label=self.ylabeler(u,ft,abs=False))
+      ax.plot(x/(2*np.pi),df_ave,color='b',label=self.ylabeler(u,ft,abs=False,d=True,gb=False))
       ax.legend()
       
       ax.set_xlim([-0.5,0.5])
