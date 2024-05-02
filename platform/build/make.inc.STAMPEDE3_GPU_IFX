@@ -10,7 +10,7 @@ NUMAS_PER_NODE=8
 FC     = mpiifx -gen-interfaces -module ${GACODE_ROOT}/modules -I${GACODE_ROOT}/module -I${TACC_MKL_INC}/
 F77    = ${FC}
 
-FOMP   = -fiopenmp -fopenmp-targets=spir64 -DOMPGPU -DMKLGPU
+FOMP   = -fiopenmp -fopenmp-targets=spir64 -DOMPGPU -DMKLGPU -allow nofpp-comments
 FMATH  = -real-size 64 -qmkl=parallel -fpp -free
 FOPT   = -Ofast
 FDEBUG = -eD -Ktrap=fp -m 1
