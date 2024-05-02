@@ -87,7 +87,7 @@ contains
 #if defined(OMPGPU)
 
 #define cpl_use_device(fin,fout) \
-!$omp target data use_device_ptr(fin,fout)
+!$omp target data use_device_addr(fin,fout)
 #define cpl_release_device(fin,fout) \
 !$omp end target data
 #define cpl_unbind_device(fin,fout) \
@@ -930,7 +930,7 @@ contains
 #else
 
 #if defined(OMPGPU)
-!$omp target data use_device_ptr(x(1:nels))
+!$omp target data use_device_addr(x(1:nels))
 #elif defined(_OPENACC)
 !$acc host_data use_device(x)
 #endif
