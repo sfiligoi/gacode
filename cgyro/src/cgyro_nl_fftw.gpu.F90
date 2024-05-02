@@ -33,8 +33,13 @@ subroutine cgyro_nl_fftw_init
   integer :: howmany,istatus
   integer, parameter :: irank = 2
   integer, dimension(irank) :: ndim,inembed,onembed
-  integer :: idist,odist,istride,ostride
+  integer :: idist,odist
+  integer, parameter :: istride = 1
+  integer, parameter :: ostride = 1
+
+#if !defined(MKLGPU)
   integer, parameter :: singlePrecision = selected_real_kind(6,30)
+#endif
 
   !-------------------------------------------------------------------
   ! 2D
@@ -45,16 +50,24 @@ subroutine cgyro_nl_fftw_init
   !                      1 == FFTW_BACKWARD
   !-------------------------------------------------------------------
 
+#if defined(MKLGPU)
+  ! oneMKL offload uses the reverse ordering
+  ndim(2) = nx
+  ndim(1) = ny
+#else
   ndim(1) = nx
   ndim(2) = ny
+#endif
   idist = size(fxmany,1)*size(fxmany,2)
   odist = size(uxmany,1)*size(uxmany,2)
-  istride = 1
-  ostride = 1
   inembed = size(fxmany,1)
   onembed = size(uxmany,1)
+#if defined(MKLGPU)
+  inembed(2) = size(fxmany,2)
+  onembed(2) = size(uxmany,2)
+#endif
 
-#ifdef HIPGPU
+#if defined(HIPGPU)
   hip_plan_c2r_manyA = c_null_ptr
   istatus = hipfftPlanMany(&
        hip_plan_c2r_manyA, &
@@ -98,6 +111,64 @@ subroutine cgyro_nl_fftw_init
        odist, &
        merge(HIPFFT_C2R,HIPFFT_Z2D,kind(uxmany) == singlePrecision), &
        nsplit)
+#elif defined(MKLGPU)
+     dfftw_plan_c2r_manyA = 0
+!$omp target data map(tofrom: fymany,uymany)
+     !$omp dispatch
+     call dfftw_plan_many_dft_c2r(&
+          dfftw_plan_c2r_manyA, &
+          irank, &
+          ndim, &
+          nsplitA, &
+          fymany, &
+          inembed, &
+          istride, &
+          idist, &
+          uymany, &
+          onembed, &
+          ostride, &
+          odist, &
+          FFTW_ESTIMATE)
+
+  if (nsplitB > 0) then ! no fft if nsplitB==0
+     dfftw_plan_c2r_manyB = 0
+     !$omp dispatch
+     call dfftw_plan_many_dft_c2r(&
+          dfftw_plan_c2r_manyB, &
+          irank, &
+          ndim, &
+          nsplitB, &
+          fymany, &
+          inembed, &
+          istride, &
+          idist, &
+          uymany, &
+          onembed, &
+          ostride, &
+          odist, &
+          FFTW_ESTIMATE)
+  endif
+!$omp end target data
+
+     dfftw_plan_c2r_manyG = 0
+!$omp target data map(tofrom: gymany,vymany)
+     !$omp dispatch
+     call dfftw_plan_many_dft_c2r(&
+          dfftw_plan_c2r_manyG, &
+          irank, &
+          ndim, &
+          nsplit, &
+          gymany, &
+          inembed, &
+          istride, &
+          idist, &
+          vymany, &
+          onembed, &
+          ostride, &
+          odist, &
+          FFTW_ESTIMATE)
+!$omp end target data
+
 #else
   istatus = cufftPlanMany(&
        cu_plan_c2r_manyA, &
@@ -145,9 +216,12 @@ subroutine cgyro_nl_fftw_init
   odist = size(fxmany,1)*size(fxmany,2)
   inembed = size(uxmany,1)
   onembed = size(fxmany,1) 
-  istride = 1
-  ostride = 1
-#ifdef HIPGPU
+#if defined(MKLGPU)
+  inembed(2) = size(uxmany,2)
+  onembed(2) = size(fxmany,2) 
+#endif
+
+#if defined(HIPGPU)
   hip_plan_r2c_manyA = c_null_ptr
   istatus = hipfftPlanMany(&
        hip_plan_r2c_manyA, &
@@ -177,6 +251,45 @@ subroutine cgyro_nl_fftw_init
        merge(HIPFFT_R2C,HIPFFT_D2Z,kind(uxmany) == singlePrecision), &
        nsplitB)
   endif
+#elif defined(MKLGPU)
+     dfftw_plan_r2c_manyA = 0
+!$omp target data map(tofrom: uvmany,fxmany)
+     !$omp dispatch
+     call dfftw_plan_many_dft_r2c(&
+          dfftw_plan_r2c_manyA, &
+          irank, &
+          ndim, &
+          nsplitA, &
+          uvmany, &
+          inembed, &
+          istride, &
+          idist, &
+          fxmany, &
+          onembed, &
+          ostride, &
+          odist, &
+          FFTW_ESTIMATE)
+
+  if (nsplitB > 0) then ! no fft if nsplitB==0
+     dfftw_plan_r2c_manyB = 0
+     !$omp dispatch
+     call dfftw_plan_many_dft_r2c(&
+          dfftw_plan_r2c_manyB, &
+          irank, &
+          ndim, &
+          nsplitB, &
+          uvmany, &
+          inembed, &
+          istride, &
+          idist, &
+          fxmany, &
+          onembed, &
+          ostride, &
+          odist, &
+          FFTW_ESTIMATE)
+  endif
+!$omp end target data
+
 #else
   istatus = cufftPlanMany(&
        cu_plan_r2c_manyA, &
