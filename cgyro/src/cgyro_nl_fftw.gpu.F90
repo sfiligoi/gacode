@@ -643,10 +643,10 @@ subroutine cgyro_nl_fftw
 #if defined(OMPGPU)
   !no async for OMPGPU for now
 !$omp target teams distribute parallel do simd collapse(5) &
-!$omp&   private(j,p,ix,itor,mytm,iy,g0,it,iv_loc,it_loc,jtheta_min,itm,itl,iy,ir)
+!$omp&   private(j,p,ix,itor,mytm,iy,g0,it,iv_loc,it_loc,jtheta_min,itm,itl,ir)
 #else
 !$acc parallel loop gang vector independent collapse(5) async(2) &
-!$acc&         private(j,p,ix,itor,mytm,iy,g0,it,iv_loc,it_loc,jtheta_min,itm,itl,iy,ir) &
+!$acc&         private(j,p,ix,itor,mytm,iy,g0,it,iv_loc,it_loc,jtheta_min,itm,itl,ir) &
 !$acc&         present(g_nl,jvec_c_nl) &
 !$acc&         present(nsplit,n_radial,n_toroidal_procs,nt_loc,nt1,n_theta,nv_loc,nx0)
 #endif

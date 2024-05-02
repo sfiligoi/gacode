@@ -930,7 +930,7 @@ contains
 #else
 
 #if defined(OMPGPU)
-!$omp target data use_device_ptr(x)
+!$omp target data use_device_ptr(x(1:nels))
 #elif defined(_OPENACC)
 !$acc host_data use_device(x)
 #endif

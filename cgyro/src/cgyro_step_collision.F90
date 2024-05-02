@@ -377,7 +377,7 @@ subroutine cgyro_calc_collision_gpu_fp32(nj_loc)
 #if defined(OMPGPU)
 !$omp target teams distribute parallel do simd collapse(4) &
 !$omp&         private(b_re,b_im,cval,ivp,iv) firstprivate(nproc,nj_loc,nv) &
-!$omp&         private(k,ic,j,ic_loc) private(cval)
+!$omp&         private(k,ic,j,ic_loc)
 #else
 !$acc parallel loop collapse(4) gang vector &
 !$acc& private(b_re,b_im,cval,ivp,iv) firstprivate(nproc,nj_loc,nv) &
@@ -449,7 +449,7 @@ subroutine cgyro_calc_collision_gpu_b2_fp32(nj_loc)
 !$omp target teams distribute parallel do simd collapse(3) &
 !$omp&         private(b_re,b_im,cval,ivp,iv) firstprivate(nproc,nj_loc,nv) &
 !$omp&         map(to:cmat_fp32(:,:,bs:be,itor)) &
-!$omp&         private(k,j,ic_loc) private(cval)
+!$omp&         private(k,j,ic_loc)
 #else
     ! ensure there is not another even/odd already runnning
 !$acc wait(bb)
@@ -511,7 +511,7 @@ subroutine cgyro_calc_collision_gpu_fp64(nj_loc)
 #if defined(OMPGPU)
 !$omp target teams distribute parallel do simd collapse(4) &
 !$omp&         private(b_re,b_im,cval,ivp,iv) firstprivate(nproc,nj_loc,nv) &
-!$omp&         private(k,ic,j,ic_loc) private(cval)
+!$omp&         private(k,ic,j,ic_loc)
 #else
 !$acc parallel loop collapse(4) gang vector &
 !$acc& private(b_re,b_im,cval,ivp,iv) firstprivate(nproc,nj_loc,nv) &
@@ -583,7 +583,7 @@ subroutine cgyro_calc_collision_gpu_b2_fp64(nj_loc)
 !$omp target teams distribute parallel do simd collapse(3) &
 !$omp&         private(b_re,b_im,cval,ivp,iv) firstprivate(nproc,nj_loc,nv) &
 !$omp&         map(to:cmat(:,:,bs:be,itor)) &
-!$omp&         private(k,j,ic_loc) private(cval)
+!$omp&         private(k,j,ic_loc)
 #else
     ! ensure there is not another even/odd already runnning
 !$acc wait(bb)
@@ -648,13 +648,13 @@ subroutine cgyro_calc_collision_gpu_m1(nj_loc)
 !$omp target teams distribute parallel do simd collapse(4) &
 !$omp&         private(b_re,b_im,cval,ivp,iv) firstprivate(nproc,nj_loc,nv) &
 !$omp&         private(k,ic,j,ic_loc,ie,is,ix) &
-!$omp&         private(cval,iep,isp,ixp,h_re,h_im)
+!$omp&         private(iep,isp,ixp,h_re,h_im)
 #else
 !$acc parallel loop collapse(4) gang vector &
 !$acc& private(b_re,b_im,cval,ivp,iv) firstprivate(nproc,nj_loc,nv) &
 !$acc& present(cmat_fp32,cmat_stripes,cmat_e1,cap_h_v,fsendf,ie_v,is_v,ix_v) &
 !$acc& private(k,ic,j,ic_loc,ie,is,ix) &
-!$acc& private(cval,iep,isp,ixp,h_re,h_im)
+!$acc& private(iep,isp,ixp,h_re,h_im)
 #endif
   do itor=nt1,nt2
    do ic=nc1,nc2
@@ -739,7 +739,7 @@ subroutine cgyro_calc_collision_gpu_b2_m1(nj_loc)
 !$omp target teams distribute parallel do simd collapse(3) &
 !$omp&    firstprivate(nproc,nj_loc,nv) &
 !$omp&     private(b_re,b_im,cval,ivp,iv) &
-!$omp&     private(cval,iep,isp,ixp,h_re,h_im) &
+!$omp&     private(iep,isp,ixp,h_re,h_im) &
 !$omp&     private(k,ic,j,ic_loc,ie,is,ix) &
 !$omp&     map(to:cmat_fp32(:,:,bs:be,itor)) &
 !$omp&     map(to:cmat_stripes(:,:,:,:,bs:be,itor)) &
