@@ -1,10 +1,10 @@
 #!/bin/bash
 
-echo "-queue: icx"
+echo "-queue: pvc"
 
 # Default queue
 if [ "$QUEUE" == "null_queue" ] ; then
-   QUEUE=icx
+   QUEUE=pvc
 fi
 
 bfile=$SIMDIR/batch.src
