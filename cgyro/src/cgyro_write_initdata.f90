@@ -125,7 +125,11 @@ subroutine cgyro_write_initdata
              is,int(z(is)),dens(is),temp(is),mass(is),dlnndr(is),dlntdr(is),nu(is)
      enddo
 
-     ! Profile shear
+     ! Profile shear (let s=curvature, k=gradient)
+     !
+     !  k(x) = k(0) + s * r/rho
+     !
+     ! where x = r/rho. The half-domain has -L/4 < r < L/4.
      if (profile_shear_flag == 1) then
         write(io,*)
         write(io,'(a)') ' i  s(a/Ln)  (a/Ln)_L  (a/Ln)_R  |  s(a/Lt)  (a/Lt)_L  (a/Lt)_R ' 
@@ -218,6 +222,11 @@ subroutine cgyro_write_initdata
         write (io,fmtstr) dlnndr(is)
         write (io,fmtstr) dlntdr(is)
         write (io,fmtstr) nu(is)
+     enddo
+     ! Added 3 May 2024
+     do is=1,n_species
+        write (io,fmtstr) sdlnndr(is)
+        write (io,fmtstr) sdlntdr(is)
      enddo
      close(io)
 

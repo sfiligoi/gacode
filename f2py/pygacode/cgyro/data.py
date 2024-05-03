@@ -491,14 +491,20 @@ class cgyrodata:
          self.temp[i],p   = self.eget(data,p) 
          self.dlnndr[i],p = self.eget(data,p) 
          self.dlntdr[i],p = self.eget(data,p) 
-         self.nu[i],p     = self.eget(data,p) 
+         self.nu[i],p     = self.eget(data,p)
+
+      # Added 3 May 2024
+      self.sdlnndr = np.zeros(ns)
+      self.sdlntdr = np.zeros(ns)
+      for i in range(ns):
+         self.sdlnndr[i],p = self.eget(data,p) 
+         self.sdlntdr[i],p = self.eget(data,p)
 
       if p == -1:
-         print('ERROR: (getgrid) Data format outdated. Please run cgyro -t')
-         sys.exit()
-         
-      if not self.silent:
-         print('INFO: (getgrid) Read {:d} entries out.cgyro.equilibrium.'.format(p))
+         print('WARNING: (getgrid) Data format outdated. Please run cgyro -t')
+      else:
+         if not self.silent:
+            print('INFO: (getgrid) Read {:d} entries out.cgyro.equilibrium.'.format(p))
 
       #-----------------------------------------------------------------
 
