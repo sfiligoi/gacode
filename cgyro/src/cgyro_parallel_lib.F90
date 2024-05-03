@@ -51,6 +51,11 @@ contains
 
 #if defined(OMPGPU)
 
+#define cpl_use_device1(finout) \
+!$omp target update from(finout)
+#define cpl_release_device1(finout) \
+!$omp target update to(finout)
+
 #define cpl_use_device(fin,fout) \
 !$omp target update from(fin)
 #define cpl_release_device(fin,fout) \
@@ -62,6 +67,11 @@ contains
 !$omp target update to(fout)
 
 #elif defined(_OPENACC)
+
+#define cpl_use_device1(finout) \
+!$acc update host(finout)
+#define cpl_release_device1(finout) \
+!$acc update device(finout)
 
 #define cpl_use_device(fin,fout) \
 !$acc update host(fin)
@@ -75,6 +85,8 @@ contains
 
 #else
   ! no devices, no-ops only
+#define cpl_use_device1(finout) 
+#define cpl_release_device1(finout) 
 #define cpl_use_device(fin,fout) 
 #define cpl_release_device(fin,fout) 
 #define cpl_unbind_device(fin,fout)
@@ -85,6 +97,11 @@ contains
 #else
 
 #if defined(OMPGPU)
+
+#define cpl_use_device1(finout) \
+!$omp target data use_device_addr(finout)
+#define cpl_release_device1(finout) \
+!$omp end target data
 
 #define cpl_use_device(fin,fout) \
 !$omp target data use_device_addr(fin,fout)
@@ -97,6 +114,11 @@ contains
 
 #elif defined(_OPENACC)
 
+#define cpl_use_device1(finout) \
+!$acc host_data use_device(finout)
+#define cpl_release_device(finout) \
+!$acc end host_data
+
 #define cpl_use_device(fin,fout) \
 !$acc host_data use_device(fin,fout)
 #define cpl_release_device(fin,fout) \
@@ -108,6 +130,8 @@ contains
 
 #else
   ! no devices, no-ops only
+#define cpl_use_device1(fin,fout) 
+#define cpl_release_device1(fin,fout) 
 #define cpl_use_device(fin,fout) 
 #define cpl_release_device(fin,fout) 
 #define cpl_unbind_device(fin,fout)
@@ -905,37 +929,22 @@ contains
 
 !=========================================================
 
-  ! x is logically (nels,nn)
-  subroutine parallel_slib_distribute_real(nels,x)
+  subroutine parallel_slib_distribute_real(nels1,nels2,nels3,nels4,nels5,x)
 
     use mpi
 
     !-------------------------------------------------------
     implicit none
     !
-    integer, intent(in) :: nels
-    real, intent(inout), dimension(*) :: x
+    integer, intent(in) :: nels1,nels2,nels3,nels4,nels5
+    real, intent(inout), dimension(nels1,nels2,nels3,nels4,nels5,nn) :: x
     !
+    integer :: nels
     integer :: ierr
     !-------------------------------------------------------
 
-#ifdef DISABLE_GPUDIRECT_MPI
-
-#if defined(OMPGPU)
-!$omp target update from(x(1:nels))
-#elif defined(_OPENACC)
-!$acc update host(x(1:nels))
-#endif
-
-#else
-
-#if defined(OMPGPU)
-!$omp target data use_device_addr(x(1:nels))
-#elif defined(_OPENACC)
-!$acc host_data use_device(x)
-#endif
-
-#endif
+    nels = nels1*nels2*nels3*nels4*nels5
+    cpl_use_device1(x)
 
     call MPI_ALLTOALL(MPI_IN_PLACE, &
          nels, &
@@ -946,23 +955,7 @@ contains
          slib_comm, &
          ierr)
 
-#ifdef DISABLE_GPUDIRECT_MPI
-
-#if defined(OMPGPU)
-!$omp target update to(x(1:nels))
-#elif defined(_OPENACC)
-!$acc update device(x(1:nels))
-#endif
-
-#else
-
-#if defined(OMPGPU)
-!$omp end target data
-#elif defined(_OPENACC)
-!$acc end host_data
-#endif
-
-#endif
+   cpl_release_device1(x)
 
   end subroutine parallel_slib_distribute_real
 
