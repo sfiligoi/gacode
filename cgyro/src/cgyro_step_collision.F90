@@ -856,26 +856,22 @@ subroutine cgyro_calc_collision_simple_gpu(nj_loc)
   integer, intent(in) :: nj_loc
   !
 
-  integer :: is,ie,ix,jx,it,ir,j,k
+  integer :: is,ie,ix,jx,it,ir,j,k,jv
   integer :: ivp,itor
 
-  real, dimension(n_xi,n_energy,n_species) :: bvec_re,cvec_re
-  real, dimension(n_xi,n_energy,n_species) :: bvec_im,cvec_im
   real :: b_re,b_im
   real :: cval
   ! --------------------------------------------------
 
 #if defined(OMPGPU)
 !$omp target teams distribute collapse(2) &
-!$omp&         private(bvec_re,bvec_im,cvec_re,cvec_im) &
 !$omp&         private(ic_loc,ir,it,b_re,b_im,cval) &
-!$omp&         private(is,ie,ix,jx,iv,k,j)
+!$omp&         private(is,ie,ix,jx,iv,k,j,jv)
 #else
 !$acc parallel loop collapse(2) gang &
-!$acc&         present(ix_v,ie_v,is_v,ir_c,it_c,px,cap_h_v,cmat_simple,fsendf) &
-!$acc&         private(bvec_re,bvec_im,cvec_re,cvec_im) &
+!$acc&         present(ix_v,ie_v,is_v,iv_v,ir_c,it_c,px,cap_h_v,cmat_simple,fsendf) &
 !$acc&         private(ic_loc,ir,it,b_re,b_im,cval) &
-!$acc&         private(is,ie,ix,jx,iv,k,j)
+!$acc&         private(is,ie,ix,jx,iv,k,j,jv)
 #endif
   do itor=nt1,nt2
    do ic=nc1,nc2
@@ -903,48 +899,30 @@ subroutine cgyro_calc_collision_simple_gpu(nj_loc)
         enddo
      else
 #if defined(OMPGPU)
-!$omp parallel do simd
+!$omp parallel do simd collapse(2) private(iv,jv,is,ie,ix,jx,b_re,b_im,cval)
 #else
-!$acc loop vector
-#endif
-        do iv=1,nv
-           cvec_re(ix_v(iv),ie_v(iv),is_v(iv)) = real(cap_h_v(ic_loc,itor,iv))
-           cvec_im(ix_v(iv),ie_v(iv),is_v(iv)) = aimag(cap_h_v(ic_loc,itor,iv))
-        enddo
-
-#if defined(OMPGPU)
-!$omp parallel do simd collapse(3) private(b_re,b_im,cval,jx)
-#else
-!$acc loop vector collapse(3) private(b_re,b_im,cval,jx)
-#endif
-        do is=1,n_species
-           do ie=1,n_energy              
-              do ix=1,n_xi
-                 b_re = 0.0
-                 b_im = 0.0
-#if (!defined(OMPGPU)) && defined(_OPENACC)
-!$acc loop seq private(cval)
-#endif
-                 do jx=1,n_xi
-                     cval = cmat_simple(ix,jx,ie,is,it,itor)
-                     b_re = b_re + cval*cvec_re(jx,ie,is)
-                     b_im = b_im + cval*cvec_im(jx,ie,is)
-                 enddo
-                 bvec_re(ix,ie,is) = b_re
-                 bvec_im(ix,ie,is) = b_im
-              enddo
-           enddo
-        enddo
-
-#if defined(OMPGPU)
-!$omp parallel do simd collapse(2) private(iv)
-#else
-!$acc loop collapse(2) vector private(iv)
+!$acc loop collapse(2) vector private(iv,jv,is,ie,ix,jx,b_re,b_im,cval)
 #endif
         do k=1,nproc
            do j=1,nj_loc
-              iv=j+(k-1)*nj_loc
-              fsendf(j,itor,ic_loc,k) = cmplx(bvec_re(ix_v(iv),ie_v(iv),is_v(iv)),bvec_im(ix_v(iv),ie_v(iv),is_v(iv)))
+              iv = j+(k-1)*nj_loc
+              is = is_v(iv)
+              ie = ie_v(iv)
+              ix = ix_v(iv)
+              b_re = 0.0
+              b_im = 0.0
+#if (!defined(OMPGPU)) && defined(_OPENACC)
+!$acc loop seq private(cval,hval)
+#endif
+              do jx=1,n_xi
+                 jv = iv_v(ie,jx,is)
+                 cval = cmat_simple(ix,jx,ie,is,it,itor)
+                 ! cvec_re(ix_v(jv),ie_v(jv),is_v(jv)) = real(cap_h_v(ic_loc,itor,jv))
+                 ! b_re = b_re + cval*cvec_re(jx,ie,is)
+                 b_re = b_re + cval*real(cap_h_v(ic_loc,itor,jv))
+                 b_im = b_im + cval*aimag(cap_h_v(ic_loc,itor,jv))
+              enddo
+              fsendf(j,itor,ic_loc,k) = cmplx(b_re,b_im)
            enddo
         enddo
      endif
