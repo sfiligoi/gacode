@@ -130,8 +130,8 @@ contains
 
 #else
   ! no devices, no-ops only
-#define cpl_use_device1(fin,fout) 
-#define cpl_release_device1(fin,fout) 
+#define cpl_use_device1(finout) 
+#define cpl_release_device1(finout) 
 #define cpl_use_device(fin,fout) 
 #define cpl_release_device(fin,fout) 
 #define cpl_unbind_device(fin,fout)
