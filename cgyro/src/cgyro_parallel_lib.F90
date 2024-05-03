@@ -477,13 +477,16 @@ contains
 
   !=========================================================
 
+  ! Note: Using intent(inout) for field_loc due to possible copy from GPU to CPU memory
+  ! Same for many other argumnets in other subroutines
+
   subroutine parallel_lib_sum_field_gpu(field_loc,field)
 
     use mpi
 
     implicit none
 
-    complex, intent(in), dimension(:,:,:) :: field_loc
+    complex, intent(inout), dimension(:,:,:) :: field_loc
     complex, intent(inout), dimension(:,:,:) :: field
     integer :: ierr
 
@@ -536,7 +539,7 @@ contains
 
     implicit none
 
-    complex, intent(in), dimension(:,:,:) :: upwind_loc
+    complex, intent(inout), dimension(:,:,:) :: upwind_loc
     complex, intent(inout), dimension(:,:,:) :: upwind
     integer :: ierr
 
@@ -562,7 +565,7 @@ contains
 
     implicit none
 
-    complex(KIND=REAL32), intent(in), dimension(:,:,:) :: upwind_loc
+    complex(KIND=REAL32), intent(inout), dimension(:,:,:) :: upwind_loc
     complex(KIND=REAL32), intent(inout), dimension(:,:,:) :: upwind
     integer :: ierr
 
@@ -654,7 +657,7 @@ contains
     implicit none
     !
     integer, intent(in) :: nsx
-    complex, intent(in), dimension(nkeep,nk_loc,nsx*nn) :: x
+    complex, intent(inout), dimension(nkeep,nk_loc,nsx*nn) :: x
     complex, intent(inout), dimension(nkeep,nk_loc,nsx,nn) :: xt
     !
     integer :: ierr
@@ -681,7 +684,7 @@ contains
     implicit none
     !
     integer, intent(in) :: nsx
-    complex, intent(in), dimension(nkeep,nk_loc,nsx*nn) :: x
+    complex, intent(inout), dimension(nkeep,nk_loc,nsx*nn) :: x
     complex, intent(inout), dimension(nkeep,nk_loc,nsx,nn) :: xt
     integer, intent(inout) :: req
     !
@@ -718,7 +721,7 @@ contains
     implicit none
     !
     integer, intent(in) :: nsx
-    complex, intent(in), dimension(nkeep,nk_loc,nsx*nn) :: x
+    complex, intent(inout), dimension(nkeep,nk_loc,nsx*nn) :: x
     complex, intent(inout), dimension(nkeep,nk_loc,nsx,nn) :: xt
     integer, intent(inout) :: req
     !
@@ -747,7 +750,7 @@ contains
     implicit none
     !
     integer, intent(in) :: nsx
-    complex, intent(in), dimension(nkeep,nk_loc,nsx,nn) :: xt
+    complex, intent(inout), dimension(nkeep,nk_loc,nsx,nn) :: xt
     complex, intent(inout), dimension(nkeep,nk_loc,nsx*nn) :: x
     !
     integer :: ierr
@@ -774,7 +777,7 @@ contains
     implicit none
     !
     integer, intent(in) :: nsx
-    complex, intent(in), dimension(nkeep,nk_loc,nsx,nn) :: xt
+    complex, intent(inout), dimension(nkeep,nk_loc,nsx,nn) :: xt
     complex, intent(inout), dimension(nkeep,nk_loc,nsx*nn) :: x
     integer, intent(inout) :: req
     !
@@ -811,7 +814,7 @@ contains
     !
     integer, intent(in) :: nsx
     complex, intent(inout), dimension(nkeep,nk_loc,nsx,nn) :: xt
-    complex, intent(in), dimension(nkeep,nk_loc,nsx*nn) :: x
+    complex, intent(inout), dimension(nkeep,nk_loc,nsx*nn) :: x
     integer, intent(inout) :: req
     !
     integer :: ierr
@@ -842,7 +845,7 @@ contains
     implicit none
     !
     integer, intent(in) :: nels1,nels2,nels3
-    complex, intent(in), dimension(nels1,nels2,nels3,nk_loc*nn) :: x
+    complex, intent(inout), dimension(nels1,nels2,nels3,nk_loc*nn) :: x
     complex, intent(inout), dimension(nels1,nels2,nels3,nk_loc*nn) :: xt
     !
     integer :: ierr
@@ -869,7 +872,7 @@ contains
     implicit none
     !
     integer, intent(in) :: nels1,nels2,nels3
-    complex, intent(in), dimension(nels1,nels2,nels3,nk_loc*nn) :: x
+    complex, intent(inout), dimension(nels1,nels2,nels3,nk_loc*nn) :: x
     complex, intent(inout), dimension(nels1,nels2,nels3,nk_loc*nn) :: xt
     integer, intent(inout) :: req
     !
@@ -905,7 +908,7 @@ contains
     implicit none
     !
     integer, intent(in) :: nels1,nels2,nels3
-    complex, intent(in), dimension(nels1,nels2,nels3,nk_loc*nn) :: x
+    complex, intent(inout), dimension(nels1,nels2,nels3,nk_loc*nn) :: x
     complex, intent(inout), dimension(nels1,nels2,nels3,nk_loc*nn) :: xt
     integer, intent(inout) :: req
     !
