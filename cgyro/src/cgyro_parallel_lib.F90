@@ -116,7 +116,7 @@ contains
 
 #define cpl_use_device1(finout) \
 !$acc host_data use_device(finout)
-#define cpl_release_device(finout) \
+#define cpl_release_device1(finout) \
 !$acc end host_data
 
 #define cpl_use_device(fin,fout) \

@@ -912,7 +912,7 @@ subroutine cgyro_calc_collision_simple_gpu(nj_loc)
               b_re = 0.0
               b_im = 0.0
 #if (!defined(OMPGPU)) && defined(_OPENACC)
-!$acc loop seq private(cval,hval)
+!$acc loop seq private(cval,jv)
 #endif
               do jx=1,n_xi
                  jv = iv_v(ie,jx,is)
