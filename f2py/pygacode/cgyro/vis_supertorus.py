@@ -9,7 +9,6 @@ from ..gacodefuncs import *
 from .data import cgyrodata
 from mayavi import mlab
 try:
-   from pygacode import vis
    from pygacode import geo
    print("INFO: (vis_supertorus) Successfully imported vis")
 except:
