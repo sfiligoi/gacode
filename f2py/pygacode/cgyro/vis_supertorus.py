@@ -10,6 +10,7 @@ from .data import cgyrodata
 from mayavi import mlab
 try:
    from pygacode import geo
+   from vis.vis import vis
    print("INFO: (vis_supertorus) Successfully imported vis")
 except:
    print("ERROR: (vis_supertorus) Please type 'pip install pygacode'")
