@@ -3,6 +3,7 @@ subroutine cgyro_init_h
   use mpi
   use cgyro_globals
   use cgyro_io
+  use cgyro_restart
 
   implicit none
 
