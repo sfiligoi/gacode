@@ -1020,7 +1020,7 @@ class cgyrodata_plot(data.cgyrodata):
       
       ns = self.n_species
       ng = self.n_global+1
-      t  = self.t
+      t = self.getnorm(xin['norm'])
 
       if moment == 'phi':
          moment = 'e'
@@ -1038,7 +1038,6 @@ class cgyrodata_plot(data.cgyrodata):
          print('ERROR: (plot_xflux) Invalid moment.')
          sys.exit()
 
-
       # Call routine for domain average
       e = 0.2
       self.xfluxave(w,moment,e=e,nscale=nscale)
@@ -1054,7 +1053,7 @@ class cgyrodata_plot(data.cgyrodata):
       ax = fig.add_subplot(111)
       ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
-      ax.set_xlabel(r'$r/L_x$')
+      ax.set_xlabel(r'$r/'+self.rhoi+'$')
 
       color = ['k','m','b','c','g','r']
 
@@ -1064,43 +1063,48 @@ class cgyrodata_plot(data.cgyrodata):
       ax.set_title(r'$\mathrm{'+ntag+'} \quad $'+mwin)
 
       na = 128
-      a  = np.linspace(-np.pi,np.pi,na)
-      ah = np.linspace(0,-2*np.pi,na)
+
+      # Central half domain
+      a1  = np.linspace(-np.pi/2,np.pi/2,na)
+      # Mirror half domain
+      a2 = np.linspace(-np.pi/2,-1.5*np.pi,na)
+
+      # Length of half-domain
+      L  = self.length/2
+      r = L*np.linspace(0,1,na)-L/2  
 
       for ispec in range(ns):
 
          u = specmap(self.mass[ispec],self.z[ispec])
+         label = r'$'+mtag+mnorm+'_'+u+'/'+mtag+'_\mathrm{GB}$'
 
          #---------------------------------
          # Global flux versus x
          g = np.ones(na)*self.lky_xr[0,ispec]
          for l in range(1,ng):
-            g[:] = g[:]+2*(np.cos(l*a)*self.lky_xr[l,ispec]-np.sin(l*a)*self.lky_xi[l,ispec])
-         ax.plot(a/(2*np.pi),g,color=color[ispec])
+            g[:] = g[:]+2*(np.cos(l*a1)*self.lky_xr[l,ispec]-np.sin(l*a1)*self.lky_xi[l,ispec])
+         ax.plot(r,g,color=color[ispec],label=label)
          g = np.ones(na)*self.lky_xr[0,ispec]
          for l in range(1,ng):
-            g[:] = g[:]+2*(np.cos(l*ah)*self.lky_xr[l,ispec]-np.sin(l*ah)*self.lky_xi[l,ispec])
-         ax.plot(a/(2*np.pi),g,color=color[ispec],linestyle='--')
+            g[:] = g[:]+2*(np.cos(l*a2)*self.lky_xr[l,ispec]-np.sin(l*a2)*self.lky_xi[l,ispec])
+         ax.plot(r,g,color=color[ispec],linestyle='--',label=label+'$\mathrm{(mirror)}$')
          #---------------------------------
 
          #---------------------------------
          # Flux partial average over "positive" [-e,e] interval
          g0 = self.lky_flux_ave[ispec,0]
-         label = r'$'+mtag+mnorm+'_'+u+'/'+mtag+'_\mathrm{GB}: '+str(round(g0,3))+'$'
-         ax.plot([-e,e],[g0,g0],'o-',color=color[ispec],alpha=0.2,linewidth=3,label=label)
+         ax.plot([-L/2,L/2],[g0,g0],'o-',color=color[ispec],alpha=0.2,linewidth=2)
          #---------------------------------
 
          #---------------------------------
          # Flux partial average over "negative" [-e,e] interval
          g1 = self.lky_flux_ave[ispec,1]
-         ax.plot([0.5-e,0.5],[g1,g1],'o--',color=color[ispec],alpha=0.2,linewidth=3)
-         ax.plot([-0.5,-0.5+e],[g1,g1],'o--',color=color[ispec],alpha=0.2,linewidth=3)
+         ax.plot([-L/2,L/2],[g1,g1],'o--',color=color[ispec],alpha=0.2,linewidth=2)
          #---------------------------------
 
          #---------------------------------
          # Flux domain average
          ga = self.lky_xr[0,ispec]
-         ax.plot([-0.5,0.5],[ga,ga],color=color[ispec],alpha=0.5)
          #---------------------------------
 
          print('INFO: (plot_xflux) Ave [inner-e, outer-e, domain] = '
@@ -1111,18 +1115,18 @@ class cgyrodata_plot(data.cgyrodata):
          if ymin != 'auto':
             ax.set_ylim(bottom=float(ymin))
 
-         ax.axvspan(-0.25,0.25,facecolor='g',alpha=0.1)
-         ax.set_xlim([-0.5,0.5])
-         ax.set_xticks([-0.5,-0.375,-0.25,-0.125,0,0.125,0.25,0.375,0.5])
-         ax.set_xticklabels([r'$-0.5$',
-                             r'$-0.375$',
-                             r'$-0.25$',
-                             r'$-0.125$',
-                             r'$0$',
-                             r'$0.125$',
-                             r'$0.25$',
-                             r'$0.375$',
-                             r'$0.5$'])
+         #ax.axvspan(-0.25,0.25,facecolor='g',alpha=0.1)
+         ax.set_xlim([r[0],r[-1]])
+         #ax.set_xticks([-0.5,-0.375,-0.25,-0.125,0,0.125,0.25,0.375,0.5])
+         #ax.set_xticklabels([r'$-0.5$',
+          #                   r'$-0.375$',
+          #                   r'$-0.25$',
+          #                   r'$-0.125$',
+          #                   r'$0$',
+          #                   r'$0.125$',
+          #                   r'$0.25$',
+          #                   r'$0.375$',
+          #                   r'$0.5$'])
 
          ax.legend(loc=2)
 
