@@ -1,19 +1,19 @@
 import struct
 import sys
+import time
 import numpy as np
 import os
-import matplotlib.pyplot as plt
-from matplotlib import rc
 from matplotlib import cm
 from ..gacodefuncs import *
 from .data import cgyrodata
 from mayavi import mlab
+
 try:
    from pygacode import geo
    from vis.vis import vis
-   print("INFO: (vis_supertorus) Successfully imported vis")
+   print('INFO: (vis_supertorus) Successfully imported vis')
 except:
-   print("ERROR: (vis_supertorus) Please type 'pip install pygacode'")
+   print('ERROR: (vis_supertorus) Please type make in f2py/vis')
    sys.exit()
 
 ext      = sys.argv[1]
@@ -33,6 +33,8 @@ dn       = int(sys.argv[14])
 mag      = float(sys.argv[15])
 nozonal  = bool(int(sys.argv[16]))
 onlyzonal = bool(int(sys.argv[17]))
+px        = int(sys.argv[18])
+py        = int(sys.argv[19])
 
 sim = cgyrodata('./')
 nt = sim.n_time
@@ -41,11 +43,14 @@ nn = sim.n_n
 ns = sim.n_species
 nth = sim.theta_plot
 
+lovera = sim.length*sim.rho/dn*mag
+
 print('HINT: adjust -dn to match experimental dn (rho/a and Lx/a will shrink)')
 print('Lx/rho = {:.2f}'.format(sim.length))
 print('rho/a  = {:.4f}'.format(sim.rho/dn))
-lovera = sim.length*sim.rho/dn*mag
 print('Lx/a   = {:.4f}'.format(lovera))
+print('px = {}  py = {}'.format(px,py))
+print('nx = {}  nz = {}  nphi = {}'.format(nx,nz,nphi))
 
 ivec = time_vector(istr,nt)
 
@@ -170,8 +175,9 @@ def frame():
       a = np.reshape(aa,(2,nr,nth,nn),order='F')
    else:
       a = np.reshape(aa,(2,nr,nth,ns,nn),order='F')
-      
-   mlab.figure(size=(900,900),bgcolor=(1,1,1))
+
+   #mlab.figure(size=(px,py),bgcolor=(1,1,1))
+   mlab.figure(bgcolor=(1,1,1))
    if isfield:
       c = a[0,:,:,:]+1j*a[1,:,:,:]
    else:
@@ -214,30 +220,25 @@ def subframe_tp():
    f      = np.zeros([2,nz],order='F')
    
    for j in range(nphi):
-      #
-      for k in range(nz):
-         phi      = -j*dphi
-         g1[k]    = g10[k] - phi
-         xpp[0,k,j] = xp0[0,k] * np.cos(phi)
-         zpp[0,k,j] = xp0[0,k] * np.sin(phi)
-         ypp[0,k,j] = yp[0,k]
-         xpp[1,k,j] = xp0[nx-1,k] * np.cos(phi)
-         zpp[1,k,j] = xp0[nx-1,k] * np.sin(phi)
-         ypp[1,k,j] = yp[nx-1,k]
+      phi      = -j*dphi
+      g1[:]    = g10[:] - phi
+      xpp[0,:,j] = xp0[0,:] * np.cos(phi)
+      zpp[0,:,j] = xp0[0,:] * np.sin(phi)
+      ypp[0,:,j] = yp[0,:]
+      xpp[1,:,j] = xp0[nx-1,:] * np.cos(phi)
+      zpp[1,:,j] = xp0[nx-1,:] * np.sin(phi)
+      ypp[1,:,j] = yp[nx-1,:]
       #
       f[:,:] = 0.0
       vis.torcut(dn,sim.m_box,sim.q,sim.thetap,g1,g2,c,f)
-      for k in range(nz):
-         f_all[0,k,j] = f[0,k]
-         f_all[1,k,j] = f[1,k]
+      f_all[:,:,j] = f[:,:]
 
    for i in range(2):
       image = mlab.mesh(xpp[i,:,:],ypp[i,:,:],zpp[i,:,:],scalars=f_all[i,:,:],colormap=colormap,vmin=fmin_all,vmax=fmax_all,opacity=1.0) 
 
 PREC='f' ; BIT=4
 
-print("ivec")
-print(ivec)
+print('ivec {}'.format(ivec))
 
 # Open binary file
 with open(fdata,'rb') as fbin:
@@ -273,12 +274,12 @@ with open(fdata,'rb') as fbin:
          subframe_tp()
          ##################
          # View from positive z-axis
-         mlab.view(azimuth=0, elevation=0)
+         mlab.view(azimuth=1, elevation=1)
          if ftype == 'screen':
             mlab.show()
          else:
             # Filename uses frame number 
-            mlab.savefig(pre+str(i)+'.'+ftype)
+            mlab.savefig(pre+str(i)+'.'+ftype,size=(px,py))
             # Close each time to prevent memory accumulation
             mlab.close()
          
