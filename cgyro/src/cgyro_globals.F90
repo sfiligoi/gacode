@@ -251,8 +251,6 @@ module cgyro_globals
   ! Restart tags
   character(len=8) :: fmt='(I2.2)'
   character(len=6), dimension(100) :: rtag
-  integer, parameter :: restart_header_size = 1024
-  integer  :: restart_magic
   !
   ! error checking
   integer :: error_status = 0

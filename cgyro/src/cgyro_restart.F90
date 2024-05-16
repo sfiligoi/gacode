@@ -10,6 +10,14 @@ module cgyro_restart
 
   implicit none
 
+  integer, parameter :: restart_header_size = 1024
+  integer, parameter :: restart_magic = 140974129
+  integer, parameter :: restart_version = 3
+
+  integer, private :: t_velocity_order
+  integer, private :: t_nt_loc
+  integer, private :: t_nv_loc
+
 contains
 
 subroutine cgyro_write_restart
@@ -20,11 +28,26 @@ subroutine cgyro_write_restart
 
   implicit none
   
+  integer :: j,ic0
+
   ! Print this data on restart steps only; otherwise exit now
   if (mod(i_time,restart_step*print_step) /= 0) return
 
   call cgyro_write_restart_one
 
+  ! Unpack h(0,0) into source 
+  if (source_flag == 1 .and. nt1 == 0) then
+     ic0 = (n_radial/2)*n_theta
+     do j=1,n_theta
+        source(j,:,0) = h_x(ic0+j,:,0)
+        h_x(ic0+j,:,0) = 0.0
+     enddo
+     sa = 0.0
+     do j=1,nint(t_current/delta_t)
+        sa = 1.0+exp(-delta_t/tau_ave)*sa
+     enddo
+  endif
+  
   ! Write restart tag
   if (i_proc == 0) then
      open(unit=io,file=trim(path)//runfile_restart_tag,status='replace')
@@ -249,7 +272,6 @@ subroutine cgyro_write_restart_header_part
   !---------------------------------------------------
   implicit none
 
-  integer, parameter :: version = 2
   integer :: recid
 
   ! Different compilers have a different semantics for RECL... must use inquire
@@ -265,7 +287,7 @@ subroutine cgyro_write_restart_header_part
   recid = 1
   write(io,REC=recid) restart_magic
   recid = recid + 1
-  write(io,REC=recid) version
+  write(io,REC=recid) restart_version
   recid = recid + 1
   write(io,REC=recid) n_theta
   recid = recid + 1
@@ -279,9 +301,37 @@ subroutine cgyro_write_restart_header_part
   recid = recid + 1
   write(io,REC=recid) n_toroidal
   recid = recid + 1
-  write(io,REC=recid) mpi_rank_order
+  write(io,REC=recid) velocity_order
+  recid = recid + 1
+  write(io,REC=recid) nt_loc
+  recid = recid + 1
+  write(io,REC=recid) nv_loc
+  recid = recid + 1
+  write(io,REC=recid) nc_loc
+  recid = recid + 1
+  write(io,REC=recid) n_toroidal_procs
   recid = recid + 1
   write(io,REC=recid) n_proc
+  recid = recid + 1
+  write(io,REC=recid) mpi_rank_order
+  recid = recid + 1
+  write(io,REC=recid) delta_t_method
+  recid = recid + 1
+  write(io,REC=recid) nonlinear_flag
+  recid = recid + 1
+  write(io,REC=recid) n_jtheta
+  recid = recid + 1
+  write(io,REC=recid) nsplit
+  recid = recid + 1
+  write(io,REC=recid) nsplitA
+  recid = recid + 1
+  write(io,REC=recid) nsplitB
+  recid = recid + 1
+  write(io,REC=recid) nup_theta
+  recid = recid + 1
+  write(io,REC=recid) nv
+  recid = recid + 1
+  write(io,REC=recid) nc
   recid = recid + 1
   write(io,REC=recid) restart_magic ! just to have a clean end
 
@@ -347,6 +397,7 @@ subroutine cgyro_read_restart_verify
 
   integer :: magic, version, recid
   integer :: t_n_theta,t_n_radial,t_n_species,t_n_xi,t_n_energy,t_n_toroidal
+  integer :: restart_magic_v2
 
   ! Different compilers have a different semantics for RECL... must use inquire
   integer :: reclen
@@ -362,18 +413,36 @@ subroutine cgyro_read_restart_verify
 
   read(io,REC=recid) magic
   recid = recid + 1
-  if ( magic /= restart_magic) then
-     close(io)
-     call cgyro_error('Wrong magic number in restart header')
-     return
-  endif
-   
-  read(io,REC=recid) version
-  recid = recid + 1
-  if ( version /= 2) then
-     close(io)
-     call cgyro_error('Wrong version in restart header, only v2 supported')
-     return
+  if ( magic == restart_magic) then
+     read(io,REC=recid) version
+     recid = recid + 1
+     if ( version /= restart_version) then
+        close(io)
+        call cgyro_error('Wrong version in restart header, expected 3')
+        return
+     endif
+  else
+     ! older versions had different magic
+     if (velocity_order == 1) then
+       ! traditional ordering
+       restart_magic_v2 = 140906808
+     else
+       ! alternative ordering, needed different magic
+       restart_magic_v2 = 140916753
+     endif
+     if ( magic /= restart_magic_v2) then
+        ! we don't support anything else, abort
+        close(io)
+        call cgyro_error('Wrong magic number in restart header')
+        return
+     endif
+     read(io,REC=recid) version
+     recid = recid + 1
+     if ( version /= 2) then
+        close(io)
+        call cgyro_error('Wrong version in restart header, expected 2')
+        return
+     endif
   endif
 
   read(io,REC=recid) t_n_theta
@@ -396,7 +465,21 @@ subroutine cgyro_read_restart_verify
      return
   endif
 
-  ! follow MPI params... will ignore them for v2, as they do not change the file format
+  if ( magic == restart_magic) then
+     read(io,REC=recid) t_velocity_order
+     recid = recid + 1
+     read(io,REC=recid) t_nt_loc
+     recid = recid + 1
+     read(io,REC=recid) t_nv_loc
+     recid = recid + 1
+  else
+     ! not recorded, so assume they are the same as current run
+     t_velocity_order = velocity_order
+     t_nt_loc = nt_loc
+     t_nv_loc = nv_loc
+  endif
+
+  ! follow other params... will ignore them, as they do not change the file format
 
   close(io)
 
@@ -427,6 +510,7 @@ subroutine cgyro_read_restart_one
   integer(KIND=8) :: start_time,cp_time
   integer(KIND=8) :: count_rate, count_max
   real :: cp_dt
+  integer, dimension(3) :: mpibuf
   integer :: ic0,j,statusfd
 
   ! use system_clock to be consistent with cgyro_kernel
@@ -437,6 +521,29 @@ subroutine cgyro_read_restart_one
   if (i_proc == 0) then
      call cgyro_read_restart_verify
      if (error_status /=0 ) return
+     mpibuf(1) = t_nt_loc
+     mpibuf(2) = t_nv_loc
+     mpibuf(3) = t_velocity_order
+  endif
+
+  call MPI_Bcast(mpibuf, 3, MPI_INTEGER, 0, CGYRO_COMM_WORLD, i_err)
+
+  if (i_err /= 0) then
+     call cgyro_error('MPI in restart failed')
+     return
+  endif
+
+  if (i_proc /= 0) then
+     t_nt_loc = mpibuf(1)
+     t_nv_loc = mpibuf(2)
+     t_velocity_order = mpibuf(3)
+  endif
+
+  if ( (t_nt_loc /= nt_loc) .or. (t_nv_loc /= nv_loc) .or. (t_velocity_order /= velocity_order) ) then
+     ! the layout on disk does not align to current process distribution
+     ! use the more complicated (and slower) logic
+     call cgyro_read_restart_slow
+     return
   endif
 
   filemode = MPI_MODE_RDONLY
@@ -486,19 +593,6 @@ subroutine cgyro_read_restart_one
   call MPI_FILE_CLOSE(fhv,i_err)
   call MPI_INFO_FREE(finfo,i_err)
 
-  ! Unpack h(0,0) into source 
-  if (source_flag == 1 .and. nt1 == 0) then
-     ic0 = (n_radial/2)*n_theta
-     do j=1,n_theta
-        source(j,:,0) = h_x(ic0+j,:,0)
-        h_x(ic0+j,:,0) = 0.0
-     enddo
-     sa = 0.0
-     do j=1,nint(t_current/delta_t)
-        sa = 1.0+exp(-delta_t/tau_ave)*sa
-     enddo
-  endif
-  
   call system_clock(cp_time,count_rate,count_max)
   if (cp_time > start_time) then
     cp_dt = (cp_time-start_time)/real(count_rate)
@@ -518,6 +612,153 @@ subroutine cgyro_read_restart_one
   endif
 
 end subroutine cgyro_read_restart_one
+
+subroutine cgyro_read_restart_slow
+
+  use mpi
+  use cgyro_globals
+  use cgyro_io
+
+  !---------------------------------------------------
+  implicit none
+  !
+  ! Required for MPI-IO:
+  !
+  integer :: filemode
+  integer :: finfo
+  integer :: fhv
+  integer :: fstatus(MPI_STATUS_SIZE)
+  integer(kind=MPI_OFFSET_KIND) :: disp
+  integer(kind=MPI_OFFSET_KIND) :: offset1,off_block,off_row,off_col
+  !---------------------------------------------------
+
+  integer, dimension(:,:,:), allocatable :: t_iv_v
+  character(8)  :: sdate
+  character(10) :: stime
+  character(len=64) :: platform
+  integer(KIND=8) :: start_time,cp_time
+  integer(KIND=8) :: count_rate, count_max
+  real :: cp_dt
+  integer :: ic0,j,statusfd
+  integer :: ie,ix,is,itor
+  integer :: t_iv
+
+  ! we already checked what the format is
+  allocate(t_iv_v(n_energy,n_xi,n_species))
+
+  ! Velocity pointers for the restart velocity_order
+  t_iv = 0
+  if (t_velocity_order==1) then
+    !original
+    do ie=1,n_energy
+      do ix=1,n_xi
+        do is=1,n_species
+           t_iv = t_iv+1
+           t_iv_v(ie,ix,is) = t_iv
+        enddo
+      enddo
+    enddo
+  else if (t_velocity_order==2) then
+    ! optimized for minimizing species
+    do is=1,n_species
+      do ie=1,n_energy
+        do ix=1,n_xi
+           t_iv = t_iv+1
+           t_iv_v(ie,ix,is) = t_iv
+        enddo
+      enddo
+    enddo
+  else
+     call cgyro_error('Unknown restart VELOCITY_ORDER.')
+     return
+  endif
+
+
+  ! use system_clock to be consistent with cgyro_kernel
+  call system_clock(start_time,count_rate,count_max)
+
+  filemode = MPI_MODE_RDONLY
+  disp     = 0
+
+  call MPI_INFO_CREATE(finfo,i_err)
+
+  call MPI_FILE_OPEN(CGYRO_COMM_WORLD,&
+          trim(path)//runfile_restart,&
+          filemode,&
+          finfo,&
+          fhv,&
+          i_err)
+
+  if (i_err /= 0) then
+     call cgyro_error('MPI_FILE_OPEN in cgyro_read_restart_one failed')
+     return
+  endif
+
+  call MPI_FILE_SET_VIEW(fhv,&
+          disp,&
+          MPI_COMPLEX16,&
+          MPI_COMPLEX16,&
+          'native',&
+          finfo,&
+          i_err)
+
+  do itor=nt1,nt2  ! itor is 0-based
+     do iv=nv1,nv2
+        t_iv = t_iv_v(ie_v(iv),ix_v(iv),is_v(iv)) 
+        iv_loc = iv-nv1+1
+        off_block = modulo(t_iv-1,t_nv_loc) + modulo(itor,t_nt_loc)*t_nv_loc
+        off_row = ((t_iv-1)/t_nv_loc)*(t_nv_loc*t_nt_loc)
+        off_col = (itor/t_nt_loc)*(nv*t_nt_loc)
+        offset1 = size(h_x(:,iv_loc,itor),kind=MPI_OFFSET_KIND)*(off_block+off_row+off_col)
+        offset1 = offset1 + restart_header_size
+        if (offset1 < restart_header_size) then
+           call MPI_FILE_CLOSE(fhv,i_err)
+           call MPI_INFO_FREE(finfo,i_err)
+           call cgyro_error('Overflow detected in cgyro_read_restart_one')
+           return
+        endif
+
+        call MPI_FILE_READ_AT(fhv,&
+          offset1,&
+          h_x(:,iv_loc,itor),&
+          size(h_x(:,iv_loc,itor)),&
+          MPI_COMPLEX16,&
+          fstatus,&
+          i_err)
+
+        if (i_err /= 0) then
+           call MPI_FILE_CLOSE(fhv,i_err)
+           call MPI_INFO_FREE(finfo,i_err)
+           call cgyro_error('MPI_FILE_READ_AT in cgyro_read_restart_slow failed')
+           return
+        endif
+     enddo
+  enddo
+
+  call MPI_FILE_CLOSE(fhv,i_err)
+  call MPI_INFO_FREE(finfo,i_err)
+
+  call system_clock(cp_time,count_rate,count_max)
+  if (cp_time > start_time) then
+    cp_dt = (cp_time-start_time)/real(count_rate)
+  else
+    cp_dt = (cp_time-start_time+count_max)/real(count_rate)
+  endif
+
+  if (i_proc == 0) then
+    call date_and_time(sdate,stime);
+    call get_environment_variable('GACODE_PLATFORM',platform)
+    open(NEWUNIT=statusfd,FILE=trim(path)//runfile_startups,action='write',status='unknown',position='append')
+    write(statusfd,'(14(a),f7.3)') &
+         sdate(1:4),'/',sdate(5:6),'/',sdate(7:8),' ', &
+         stime(1:2),':',stime(3:4),':',stime(5:6),' ', &
+         trim(platform),' [ CHECKPOINT READ (slow)] Time =',cp_dt
+    close(statusfd)
+  endif
+
+  deallocate(t_iv_v)
+
+end subroutine cgyro_read_restart_slow
 
 end module cgyro_restart
 
