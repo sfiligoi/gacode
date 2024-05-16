@@ -24,8 +24,8 @@ nz       = int(sys.argv[5])
 nphi     = int(sys.argv[6])
 phimax   = float(sys.argv[7])
 istr     = sys.argv[8]
-fmin     = sys.argv[9]
-fmax     = sys.argv[10]
+fmin_in  = sys.argv[9]
+fmax_in  = sys.argv[10]
 colormap = sys.argv[11]
 font     = int(sys.argv[12])
 legacy   = bool(int(sys.argv[13]))
@@ -65,6 +65,8 @@ else:
 #------------------------------------------------------------------------
 # (r,theta)=(x,y) mesh setup 
 #
+start = time.time()
+
 if nth == 1:
    print('WARNING: (vis_supertorus) Should use THETA_PLOT > 1 in CGYRO.')
 
@@ -73,31 +75,31 @@ if nx < 0:
 if nz < 0:
    nz = 128
 
-x = np.zeros([nx])
-z = np.zeros([nz])
-
-for i in range(nx):
-   x[i] = i*2*np.pi/(nx-1.0)/dn
-for k in range(nz):
-   z[k] = k*2*np.pi/(nz-1.0)-np.pi
+x = np.linspace(0,2*np.pi,nx)/dn
+z = np.linspace(0,2*np.pi,nz)-np.pi
    
 xp = np.zeros([nx,nz])
 yp = np.zeros([nx,nz])
 zp = np.zeros([nx,nz])
 
-for i in range(nx):
-   r = sim.rmin+(dn*x[i]/(2*np.pi)-0.5)*lovera
-   for k in range(nz):
-      a = z[k] + (sim.shape_cos[0]
-         + sim.shape_cos[1]*np.cos(z[k]) 
-         + sim.shape_cos[2]*np.cos(2*z[k]) 
-         + sim.shape_cos[3]*np.cos(3*z[k])
-         + np.arcsin(sim.delta)*np.sin(z[k]) 
-         - sim.zeta*np.sin(2*z[k]) 
-         + sim.shape_sin[3]*np.sin(3*z[k]))
-      xp[i,k] = sim.rmaj+r*np.cos(a)
-      yp[i,k] = sim.zmag+sim.kappa*r*np.sin(z[k])
-      zp[i,k] = 0.0
+# minor radius
+r = sim.rmin+(dn*x/(2*np.pi)-0.5)*lovera
+
+# MXH angle
+a = z + (sim.shape_cos[0]
+         + sim.shape_cos[1]*np.cos(z) 
+         + sim.shape_cos[2]*np.cos(2*z) 
+         + sim.shape_cos[3]*np.cos(3*z)
+         + np.arcsin(sim.delta)*np.sin(z) 
+         - sim.zeta*np.sin(2*z) 
+         + sim.shape_sin[3]*np.sin(3*z))
+
+# MESH
+xp[:,:] = sim.rmaj+r[:,None]*np.cos(a[None,:])
+yp[:,:] = sim.zmag+sim.kappa*r[:,None]*np.sin(z[None,:])
+zp[:,:] = 0.0
+
+print('MESH TIME = '+'{:.3e}'.format(time.time()-start)+' s.')
 
 # Shape functions 
 geo.signb_in=1 # fix
@@ -169,6 +171,7 @@ else:
     n_chunk = 2*nr*ns*nn*nth
     
 def frame():
+
    global c
    
    if isfield:
@@ -176,7 +179,6 @@ def frame():
    else:
       a = np.reshape(aa,(2,nr,nth,ns,nn),order='F')
 
-   #mlab.figure(size=(px,py),bgcolor=(1,1,1))
    mlab.figure(bgcolor=(1,1,1))
    if isfield:
       c = a[0,:,:,:]+1j*a[1,:,:,:]
@@ -189,52 +191,53 @@ def frame():
       c[:,:,1:] = 0.0
    
 # This is the logic to generate an (r,theta) frame
-def subframe_rt(iframe):
-   global xp,yp,zp,g1,g2,c,fmin_all,fmax_all
+def subframe_torcut(iframe):
+
+   global c,fmin,fmax
    
+   phi = -2*np.pi*phimax*iframe
+   xpp = xp*np.cos(phi)
+   ypp = yp
+   zpp = xp*np.sin(phi)
+
    f = np.zeros([nx,nz],order='F')
    
-   vis.torcut(dn,sim.m_box,sim.q,sim.thetap,g1,g2,c,f)
+   vis.torcut(dn,sim.m_box,sim.q,sim.thetap,g1-phi/dn,g2,c,f)
 
    if iframe == 0:
-      if fmin == 'auto':
-         fmin_all=np.min(f)
-         fmax_all=np.max(f)
+      if fmin_in == 'auto':
+         fmin = np.min(f)
+         fmax = np.max(f)
       else:
-         fmin_all=float(fmin)
-         fmax_all=float(fmax)
+         fmin = float(fmin_in)
+         fmax = float(fmax_in)
+      print('INFO: (vis_supertorus) min={:.3f} | max={:.3f}'.format(fmin,fmax))
          
-   image = mlab.mesh(xp,yp,zp,scalars=f,colormap=colormap,vmin=fmin_all,vmax=fmax_all,opacity=1.0)
-   print('INFO: (vis_supertorus) min={:.3f} | max={:.3f}'.format(fmin_all,fmax_all))
+   image = mlab.mesh(xpp,ypp,zpp,scalars=f,
+                     colormap=colormap,vmin=fmin,vmax=fmax,opacity=1.0)
 
 # This is the logic to generate an (theta,phi) frame
-def subframe_tp():
-   global xp,yp,zp,g1,g2,c,g10,xp0,fmin_all,fmax_all
+def subframe_torside():
 
-   dphi = 2*np.pi*phimax/(nphi-1)
+   global c,fmin,fmax
    
-   xpp    = np.zeros([2,nz,nphi])
-   zpp    = np.zeros([2,nz,nphi])
-   ypp    = np.zeros([2,nz,nphi])
-   f_all  = np.zeros([2,nz,nphi],order='F')
-   f      = np.zeros([2,nz],order='F')
+   phi = -np.linspace(0,2*np.pi*phimax,nphi)
+   xpp = np.zeros([nz,nphi])
+   ypp = np.zeros([nz,nphi])
+   zpp = np.zeros([nz,nphi])
    
-   for j in range(nphi):
-      phi      = -j*dphi
-      g1[:]    = g10[:] - phi
-      xpp[0,:,j] = xp0[0,:] * np.cos(phi)
-      zpp[0,:,j] = xp0[0,:] * np.sin(phi)
-      ypp[0,:,j] = yp[0,:]
-      xpp[1,:,j] = xp0[nx-1,:] * np.cos(phi)
-      zpp[1,:,j] = xp0[nx-1,:] * np.sin(phi)
-      ypp[1,:,j] = yp[nx-1,:]
-      #
-      f[:,:] = 0.0
-      vis.torcut(dn,sim.m_box,sim.q,sim.thetap,g1,g2,c,f)
-      f_all[:,:,j] = f[:,:]
+   f = np.zeros([2,nz,nphi],order='F')
+   
+   vis.torside(dn,sim.m_box,sim.q,phimax,sim.thetap,g1,g2,c,f)
 
-   for i in range(2):
-      image = mlab.mesh(xpp[i,:,:],ypp[i,:,:],zpp[i,:,:],scalars=f_all[i,:,:],colormap=colormap,vmin=fmin_all,vmax=fmax_all,opacity=1.0) 
+   for i in [0,1]:
+      xpp[:,:] = xp[-i,:,None]*np.cos(phi[None,:])
+      ypp[:,:] = yp[-i,:,None]
+      zpp[:,:] = xp[-i,:,None]*np.sin(phi[None,:])
+
+      image = mlab.mesh(xpp[:,:],ypp[:,:],zpp[:,:],scalars=f[i,:,:],
+                        colormap=colormap,vmin=fmin,vmax=fmax,opacity=1.0) 
+
 
 PREC='f' ; BIT=4
 
@@ -253,28 +256,16 @@ with open(fdata,'rb') as fbin:
       print('INFO: (vis_supertorus) Time index {:d} '.format(i))
       if i in ivec:
          frame()
-         g10 = g1
-         xp0 = xp
-         ##################
+         start = time.time()
          # cap at phi=0
-         phi = 2*np.pi*0.0
-         g1 = g10 - phi
-         xp = xp0 * np.cos(phi)
-         zp = xp0 * np.sin(phi)
-         subframe_rt(0)
-         ##################
-         # cap at phi=phimax
-         phi = -2*np.pi*phimax
-         g1 = g10 - phi
-         xp = xp0 * np.cos(phi)
-         zp = xp0 * np.sin(phi)
-         subframe_rt(1)
-         ##################
+         subframe_torcut(0)
+         # cap at phi=-phimax
+         subframe_torcut(1)
          # inner and outer body of torus
-         subframe_tp()
-         ##################
+         subframe_torside()
          # View from positive z-axis
-         mlab.view(azimuth=1, elevation=1)
+         mlab.view(azimuth=0,elevation=0)
+         print('MAP TIME = '+'{:.3e}'.format(time.time()-start)+' s.')
          if ftype == 'screen':
             mlab.show()
          else:
