@@ -17,6 +17,7 @@ subroutine cgyro_kernel
   use cgyro_globals
   use cgyro_step
   use cgyro_io
+  use cgyro_restart
 
   implicit none
 
