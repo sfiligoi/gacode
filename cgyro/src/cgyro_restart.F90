@@ -212,7 +212,7 @@ subroutine cgyro_write_restart_one
   call MPI_BARRIER(CGYRO_COMM_WORLD,i_err)
   if (i_proc == 0) then 
      call cgyro_write_restart_header_part
-     if (error_status /=0 ) return
+     if (error_status > 0) return
   endif
 
   ! now that we know things worked well, move the file in its final location

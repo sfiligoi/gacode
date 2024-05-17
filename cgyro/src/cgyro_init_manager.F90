@@ -26,7 +26,6 @@ subroutine cgyro_init_manager
 
   implicit none
 
-
   character(len=128) :: msg
   integer :: ie,ix
 
@@ -335,7 +334,7 @@ subroutine cgyro_init_manager
   endif
 
   call cgyro_equilibrium
-  if (error_status /=0 ) then
+  if (error_status > 0) then
      ! something went terribly wrong
      return
   endif
@@ -348,7 +347,7 @@ subroutine cgyro_init_manager
 
      call cgyro_init_arrays
      call timer_lib_out('str_init')
-     if (error_status /=0 ) then
+     if (error_status > 0) then
         ! something went terribly wrong
         return
      endif
@@ -356,7 +355,7 @@ subroutine cgyro_init_manager
      call timer_lib_in('coll_init')
      call cgyro_init_collision
      call timer_lib_out('coll_init')
-     if (error_status /=0 ) then
+     if (error_status > 0) then
         ! something went terribly wrong
         return
      endif
@@ -394,7 +393,7 @@ subroutine cgyro_init_manager
   ! Initialize h (via restart or analytic IC)
   call timer_lib_in('str_init')
   call cgyro_init_h
-  if (error_status /=0 ) return
+  if (error_status > 0) return
   call timer_lib_out('str_init')
 
   ! Initialize nonlinear dimensions and arrays 
