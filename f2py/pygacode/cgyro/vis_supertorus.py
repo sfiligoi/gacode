@@ -6,15 +6,7 @@ import os
 from matplotlib import cm
 from ..gacodefuncs import *
 from .data import cgyrodata
-from mayavi import mlab
-
-try:
-   from pygacode import geo
-   from vis.vis import vis
-   print('INFO: (vis_supertorus) Successfully imported vis')
-except:
-   print('ERROR: (vis_supertorus) Please type make in f2py/vis')
-   sys.exit()
+from .vis_mesh import *
 
 ext      = sys.argv[1]
 moment   = sys.argv[2]
@@ -35,6 +27,27 @@ nozonal  = bool(int(sys.argv[16]))
 onlyzonal = bool(int(sys.argv[17]))
 px        = int(sys.argv[18])
 py        = int(sys.argv[19])
+
+try:
+   from vis.vis import vis
+   print("INFO: (vis_torcut) Successfully imported vis")
+except:
+   print("ERROR: (vis_torcut) Please 'make vismod' in gacode/f2py")
+   sys.exit()
+   
+try:
+   from pygacode import geo
+   print("INFO: (vis_torcut) Successfully imported geo")
+except:
+   print("ERROR: (vis_torcut) Please 'pip install pygacode'")
+   sys.exit()
+
+try:
+   from mayavi import mlab
+   print("INFO: (vis_torcut) Successfully imported mayavi")
+except:
+   print("ERROR: (vis_torcut) Mayavi module not found.")
+   sys.exit()
 
 sim = cgyrodata('./')
 nt = sim.n_time
@@ -63,7 +76,7 @@ else:
    ftype = s[0]
 
 #------------------------------------------------------------------------
-# (r,theta)=(x,y) mesh setup 
+# Mesh setup 
 #
 start = time.time()
 
@@ -75,72 +88,14 @@ if nx < 0:
 if nz < 0:
    nz = 128
 
-x = np.linspace(0,2*np.pi,nx)/dn
-z = np.linspace(0,2*np.pi,nz)-np.pi
-   
-xp = np.zeros([nx,nz])
-yp = np.zeros([nx,nz])
-zp = np.zeros([nx,nz])
-
-# minor radius
-r = sim.rmin+(dn*x/(2*np.pi)-0.5)*lovera
-
-# MXH angle
-a = z + (sim.shape_cos[0]
-         + sim.shape_cos[1]*np.cos(z) 
-         + sim.shape_cos[2]*np.cos(2*z) 
-         + sim.shape_cos[3]*np.cos(3*z)
-         + np.arcsin(sim.delta)*np.sin(z) 
-         - sim.zeta*np.sin(2*z) 
-         + sim.shape_sin[3]*np.sin(3*z))
-
-# MESH
-xp[:,:] = sim.rmaj+r[:,None]*np.cos(a[None,:])
-yp[:,:] = sim.zmag+sim.kappa*r[:,None]*np.sin(z[None,:])
-zp[:,:] = 0.0
+x,z,xp,yp,zp = vis_mesh(sim,nx,nz,dn,lovera)
 
 print('MESH TIME = '+'{:.3e}'.format(time.time()-start)+' s.')
 
-# Shape functions 
-geo.signb_in=1 # fix
-geo.geo_rmin_in=sim.rmin
-geo.geo_rmaj_in=sim.rmaj
-geo.geo_drmaj_in=sim.shift
-geo.geo_zmag_in=sim.zmag
-geo.geo_dzmag_in=sim.dzmag
-geo.geo_q_in=sim.q
-geo.geo_s_in=sim.shear
-geo.geo_kappa_in=sim.kappa
-geo.geo_delta_in=sim.delta
-geo.geo_zeta_in=sim.zeta
-geo.geo_s_kappa_in=sim.s_kappa
-geo.geo_s_delta_in=sim.s_delta
-geo.geo_s_zeta_in=sim.s_zeta
-geo.geo_beta_star_in=sim.beta_star
-geo.geo_shape_cos0_in = sim.shape_cos[0]
-geo.geo_shape_cos1_in = sim.shape_cos[1]
-geo.geo_shape_cos2_in = sim.shape_cos[2]
-geo.geo_shape_cos3_in = sim.shape_cos[3]
-geo.geo_shape_cos4_in = 0.0
-geo.geo_shape_cos5_in = 0.0
-geo.geo_shape_cos6_in = 0.0
-geo.geo_shape_sin3_in = sim.shape_sin[3]
-geo.geo_shape_sin4_in = 0.0
-geo.geo_shape_sin5_in = 0.0
-geo.geo_shape_sin6_in = 0.0
-geo.geo_shape_s_cos0_in = sim.shape_s_cos[0]
-geo.geo_shape_s_cos1_in = sim.shape_s_cos[1]
-geo.geo_shape_s_cos2_in = sim.shape_s_cos[2]
-geo.geo_shape_s_cos3_in = sim.shape_s_cos[3]
-geo.geo_shape_s_cos4_in = 0.0
-geo.geo_shape_s_cos5_in = 0.0
-geo.geo_shape_s_cos6_in = 0.0
-geo.geo_shape_s_sin3_in = sim.shape_s_sin[3]
-geo.geo_shape_s_sin4_in = 0.0
-geo.geo_shape_s_sin5_in = 0.0
-geo.geo_shape_s_sin6_in = 0.0
-
+# Define shape functions for GEO evaluation
+geo = vis_geo(sim,geo)
 geo.geo_interp(z,True)
+
 if legacy:
    # s-alpha approximate (apparently used in legacy GYRO movies)
    # g1 -> q*theta
