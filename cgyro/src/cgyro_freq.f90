@@ -66,9 +66,9 @@ subroutine cgyro_freq
      enddo
 
      if (abs(myfr) > 1e-12) then
-        ! Trap a division-by-zero error and halt
         freq_err(itor) = (dfr+i_c*dfi)/total_weight/abs(myfr)
      else
+        ! Trap a division-by-zero error and halt
         call cgyro_error('Underflow in calculation of frequency error')
      endif
      
