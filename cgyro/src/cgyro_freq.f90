@@ -25,7 +25,7 @@ subroutine cgyro_freq
   if (i_time == 0) then
 
     freq(:) = 0.0
-    freq_err(:) = 0.0
+    freq_err = 0.0
 
   else
 
@@ -54,27 +54,27 @@ subroutine cgyro_freq
 
      myfr = total_weighted_freq/total_weight
      freq(itor) = myfr
-     
-     ! Fractional Frequency Error
-     dfr = 0.0
-     dfi = 0.0
-     do ic=1,nc
-        mw = mode_weight(ic)
-        df = freq_loc(ic)-myfr
-        dfr = dfr + abs(real(df))*mw
-        dfi = dfi + abs(aimag(df))*mw
-     enddo
+    
+     if (n_toroidal == 1) then 
+        ! Fractional Frequency Error
+        dfr = 0.0
+        dfi = 0.0
+        do ic=1,nc
+           mw = mode_weight(ic)
+           df = freq_loc(ic)-myfr
+           dfr = dfr + abs(real(df))*mw
+           dfi = dfi + abs(aimag(df))*mw
+        enddo
 
-     if (abs(myfr) > 1e-12) then
-        freq_err(itor) = (dfr+i_c*dfi)/total_weight/abs(myfr)
-     else
-        ! Trap a division-by-zero error and halt
-        call cgyro_error('Underflow in calculation of frequency error')
+        if (abs(myfr) > 1e-12) then
+           freq_err = (dfr+i_c*dfi)/total_weight/abs(myfr)
+        else
+           ! Trap a division-by-zero error and halt
+           call cgyro_error('Underflow in calculation of frequency error')
+        endif
+        if (abs(freq_err) < freq_tol) signal = 1
      endif
-     
     enddo
-
-    if (n_toroidal == 1 .and. abs(freq_err(nt1)) < freq_tol) signal = 1
 
   endif
 
