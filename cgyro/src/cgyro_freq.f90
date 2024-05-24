@@ -21,6 +21,8 @@ subroutine cgyro_freq
   integer :: itor
   complex, dimension(nc) :: freq_loc
   complex :: fl,myfr,df,total_weighted_freq
+  complex :: fo1,fo2
+  complex :: icdt
 
   if (i_time == 0) then
 
@@ -33,18 +35,23 @@ subroutine cgyro_freq
     ! Standard method: sum all wavenumbers at a given n
     !--------------------------------------------------
 
+    icdt = i_c/delta_t
+!$omp do ordered
     do itor=nt1,nt2
 
      total_weight = 0.0
      total_weighted_freq = (0.0,0.0)
+!$omp do ordered
      do ic=1,nc
         ! Use potential to compute frequency
-        mw = abs(field_old(1,ic,itor))
+        fo1 = field_old(1,ic,itor)
+        fo2 = field_old2(1,ic,itor)
+        mw = abs(fo1)
         mode_weight(ic) =  mw
         total_weight = total_weight + mw
         ! Define local frequencies
-        if (abs(field_old(1,ic,itor)) > 1e-12 .and. abs(field_old2(1,ic,itor)) > 1e-12) then
-           fl = (i_c/delta_t)*log(field_old(1,ic,itor)/field_old2(1,ic,itor))
+        if ( (mw > 1e-12) .and. (abs(fo2) > 1e-12) ) then
+           fl = icdt*log(fo1/fo2)
         else
            fl = 0.0
         endif
