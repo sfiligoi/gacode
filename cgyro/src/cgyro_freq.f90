@@ -36,12 +36,16 @@ subroutine cgyro_freq
     !--------------------------------------------------
 
     icdt = i_c/delta_t
+#ifdef __INTEL_COMPILER
 !$omp do ordered
+#endif
     do itor=nt1,nt2
 
      total_weight = 0.0
      total_weighted_freq = (0.0,0.0)
+#ifdef __INTEL_COMPILER
 !$omp do ordered
+#endif
      do ic=1,nc
         ! Use potential to compute frequency
         fo1 = field_old(1,ic,itor)
