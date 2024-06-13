@@ -41,7 +41,6 @@
       REAL :: c_tor_par_gp1,c_tor_par_gr11
       REAL :: c_tor_par_gr13
       REAL :: betae_psi,betae_sig
-      REAL :: test
       REAL :: max_freq,test
       REAL :: gradB1
       REAL :: c35
