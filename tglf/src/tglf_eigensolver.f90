@@ -42,6 +42,7 @@
       REAL :: c_tor_par_gr13
       REAL :: betae_psi,betae_sig
       REAL :: test
+      REAL :: max_freq,test
       REAL :: gradB1
       REAL :: c35
       REAL :: xnuei,d_ab,d_ij,d_ee,d_ab_psi,d_11,d_1
@@ -91,6 +92,7 @@
       COMPLEX,ALLOCATABLE,DIMENSION(:,:) :: vleft,vright
       COMPLEX,ALLOCATABLE,DIMENSION(:) :: work
       COMPLEX,ALLOCATABLE,DIMENSION(:) :: zomega
+      COMMON /block/ max_freq
 !
       ifail = 0
       lwork = 8*iur
