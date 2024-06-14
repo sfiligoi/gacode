@@ -247,6 +247,8 @@ class ManagerInput:
                # Detect the code to be run in each directory            
                if os.path.isfile(basedir+'/input.gyro'):
                    code='gyro'
+               elif os.path.isfile(basedir+'/input.qlgyro'):
+                   code='qlgyro'
                elif os.path.isfile(basedir+'/input.cgyro'):
                    code='cgyro'
                elif os.path.isfile(basedir+'/input.tglf'):
