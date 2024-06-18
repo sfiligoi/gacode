@@ -32,7 +32,7 @@ OBJECTS = cgyro_globals.o \
           cgyro_field_coefficients.o \
           cgyro_flux.o \
           cgyro_freq.o \
-          cgyro_global.o \
+          cgyro_globalshear.o \
           cgyro_upwind.o \
           cgyro_init.o \
           cgyro_init_h.o \

@@ -8,7 +8,7 @@ subroutine cgyro_init_arrays
 
   real :: arg
   real :: efac
-  real :: u
+  real :: u,sm,sb
   real :: fac
   integer :: ir,it,is,ie,ix
   integer :: itm,itl,itor,mytor,itf
@@ -25,6 +25,14 @@ subroutine cgyro_init_arrays
   real, dimension(:,:), allocatable :: res_weight
   real, external :: spectraldiss
 
+  real, dimension(:), allocatable :: gdlnndr,gdlntdr
+
+  allocate(gdlnndr(n_species))
+  allocate(gdlntdr(n_species))
+
+  gdlntdr = 0
+  gdlnndr = 0
+  
   !-------------------------------------------------------------------------
   ! Distributed Bessel-function Gyroaverages
 
@@ -182,7 +190,7 @@ subroutine cgyro_init_arrays
         enddo
      enddo
   endif
-
+ 
   res_loc(:,:,:) = 0.0
 
 !$omp parallel private(ic,iv_loc,is,ix,ie)
@@ -390,80 +398,91 @@ subroutine cgyro_init_arrays
   ! Streaming coefficients (for speed optimization)
 
 !$omp parallel do collapse(3) &
-!$omp& private(iv,ic,iv_loc,is,ix,ie,ir,it,carg,u)
+!$omp& private(iv,ic,iv_loc,is,ix,ie,ir,it,arg,carg,u,sm,sb)
   do itor=nt1,nt2
-   do iv=nv1,nv2
-     do ic=1,nc
+     do iv=nv1,nv2
+        do ic=1,nc
 
-        iv_loc = iv-nv1+1
-        is = is_v(iv)
-        ix = ix_v(iv)
-        ie = ie_v(iv)
-        ir = ir_c(ic) 
-        it = it_c(ic)
+           iv_loc = iv-nv1+1
+           is = is_v(iv)
+           ix = ix_v(iv)
+           ie = ie_v(iv)
+           ir = ir_c(ic) 
+           it = it_c(ic)
 
-        u = (pi/n_toroidal)*itor
+           u = (pi/n_toroidal)*itor
 
-        ! omega_dalpha
-        omega_cap_h(ic,iv_loc,itor) = &
-             -omega_adrift(it,is)*energy(ie)*(1.0+xi(ix)**2)*&
-             (n_toroidal*q/pi/rmin)*(i_c*u)
+           ! omega_dalpha
+           omega_cap_h(ic,iv_loc,itor) = &
+                -omega_adrift(it,is)*energy(ie)*(1.0+xi(ix)**2)*&
+                (n_toroidal*q/pi/rmin)*(i_c*u)
 
-        ! omega_dalpha [UPWIND: iu -> spectraldiss]
-        omega_h(ic,iv_loc,itor) = &
-             -abs(omega_adrift(it,is))*energy(ie)*(1.0+xi(ix)**2)*&
-             (n_toroidal*q/pi/rmin)*spectraldiss(u,nup_alpha)*up_alpha
+           ! omega_dalpha [UPWIND: iu -> spectraldiss]
+           omega_h(ic,iv_loc,itor) = &
+                -abs(omega_adrift(it,is))*energy(ie)*(1.0+xi(ix)**2)*&
+                (n_toroidal*q/pi/rmin)*spectraldiss(u,nup_alpha)*up_alpha
 
-        ! (i ktheta) components from drifts        
-        omega_cap_h(ic,iv_loc,itor) = omega_cap_h(ic,iv_loc,itor) &
-             - i_c*k_theta_base*itor*(omega_aprdrift(it,is)*energy(ie)*xi(ix)**2 &
-             + omega_cdrift(it,is)*vel(ie)*xi(ix) + omega_rot_drift(it,is) &
-             + omega_rot_edrift(it))
+           ! (i ktheta) components from drifts        
+           omega_cap_h(ic,iv_loc,itor) = omega_cap_h(ic,iv_loc,itor) &
+                - i_c*k_theta_base*itor*(omega_aprdrift(it,is)*energy(ie)*xi(ix)**2 &
+                + omega_cdrift(it,is)*vel(ie)*xi(ix) + omega_rot_drift(it,is) &
+                + omega_rot_edrift(it))
         
-        ! Note that we shift the dissipation with px0 (ballooning angle linear mode)
-        u = (2.0*pi/n_radial)*(px(ir)+px0)
+           ! Note that we shift the dissipation with px0 (ballooning angle linear mode)
+           u = (2.0*pi/n_radial)*(px(ir)+px0)
 
-        ! (d/dr) components from drifts
+           ! (d/dr) components from drifts
         
-        omega_cap_h(ic,iv_loc,itor) = omega_cap_h(ic,iv_loc,itor) & 
-             - (n_radial/length)*i_c*u &
-             * (omega_rdrift(it,is)*energy(ie)*(1.0+xi(ix)**2) &
-             + omega_cdrift_r(it,is)*vel(ie)*xi(ix) &
-             + omega_rot_drift_r(it,is) &
-             + omega_rot_edrift_r(it))
+           omega_cap_h(ic,iv_loc,itor) = omega_cap_h(ic,iv_loc,itor) & 
+                - (n_radial/length)*i_c*u &
+                * (omega_rdrift(it,is)*energy(ie)*(1.0+xi(ix)**2) &
+                + omega_cdrift_r(it,is)*vel(ie)*xi(ix) &
+                + omega_rot_drift_r(it,is) &
+                + omega_rot_edrift_r(it))
         
-        ! (d/dr) upwind components from drifts [UPWIND: iu -> spectraldiss]
-        omega_h(ic,iv_loc,itor) = omega_h(ic,iv_loc,itor) &
-             - (n_radial/length)*spectraldiss(u,nup_radial)*up_radial &
-             * (abs(omega_rdrift(it,is))*energy(ie)*(1.0+xi(ix)**2) &
-             + abs(omega_cdrift_r(it,is)*xi(ix))*vel(ie) &
-             + abs(omega_rot_drift_r(it,is)) &
-             + abs(omega_rot_edrift_r(it)))          
+           ! (d/dr) upwind components from drifts [UPWIND: iu -> spectraldiss]
+           omega_h(ic,iv_loc,itor) = omega_h(ic,iv_loc,itor) &
+                - (n_radial/length)*spectraldiss(u,nup_radial)*up_radial &
+                * (abs(omega_rdrift(it,is))*energy(ie)*(1.0+xi(ix)**2) &
+                + abs(omega_cdrift_r(it,is)*xi(ix))*vel(ie) &
+                + abs(omega_rot_drift_r(it,is)) &
+                + abs(omega_rot_edrift_r(it)))          
              
-        ! omega_star 
-        carg = -i_c*k_theta_base*itor*rho*(dlnndr(is)+dlntdr(is)*(energy(ie)-1.5)) &
-             -i_c*k_theta_base*itor*rho*(vel2(ie)*xi(ix)/vth(is) &
-             *omega_gammap(it)) -i_c*k_theta_base*itor*rho*omega_rot_star(it,is)
+           ! omega_star 
+           carg = -i_c*k_theta_base*itor*rho*(dlnndr(is)+dlntdr(is)*(energy(ie)-1.5)) &
+                -i_c*k_theta_base*itor*rho*(vel2(ie)*xi(ix)/vth(is) &
+                *omega_gammap(it)) -i_c*k_theta_base*itor*rho*omega_rot_star(it,is)
+           
+           omega_s(:,ic,iv_loc,itor) = carg*jvec_c(:,ic,iv_loc,itor)
 
-        omega_s(:,ic,iv_loc,itor) = carg*jvec_c(:,ic,iv_loc,itor)
+           ! global-Taylor corrections via wavenumber advection (ix -> d/dp)
+           ! JC: Re-checked sign and normalization (Oct 2019)
 
-        ! Profile curvature via wavenumber advection (ix -> d/dp)
-        ! See whiteboard notes.
-        ! JC: Re-checked sign and normalization (Oct 2019)
-        carg = -k_theta_base*itor*length*(sdlnndr(is)+sdlntdr(is)*(energy(ie)-1.5))/(2*pi)
+           ! generalized profile curvature (phi shearing)
+           sm = sdlnndr(is)+sdlntdr(is)*(energy(ie)-1.5) &
+                +energy(ie)*gdlntdr(is)**2+gdlnndr(is)**2-gdlntdr(is)*gdlnndr(is)
 
-        omega_ss(:,ic,iv_loc,itor) = carg*jvec_c(:,ic,iv_loc,itor)
+           ! beta_star (H shearing)
+           sb = beta_star(0)*energy(ie)*(sdlntdr(is)+sdlnndr(is)-2*gdlntdr(is)*gdlnndr(is)) &
+                /(dlnndr(is)+dlntdr(is))
 
+           arg = -k_theta_base*itor*length/(2*pi)
+
+           omega_ss(:,ic,iv_loc,itor) = arg*sm*jvec_c(:,ic,iv_loc,itor)
+           omega_beta(iv_loc,itor)    = arg*sb
+
+        enddo
      enddo
-   enddo
   enddo
 #if defined(OMPGPU)
-!$omp target enter data map(to:omega_cap_h,omega_h,omega_s,omega_ss)
+!$omp target enter data map(to:omega_cap_h,omega_h,omega_s,omega_ss,omega_beta)
 #elif defined(_OPENACC)
-!$acc enter data copyin(omega_cap_h,omega_h,omega_s,omega_ss)
+!$acc enter data copyin(omega_cap_h,omega_h,omega_s,omega_ss,omega_beta)
 #endif
   !-------------------------------------------------------------------------
 
+  deallocate(gdlnndr,gdlntdr)
+  
 end subroutine cgyro_init_arrays
 
 ! Spectral dissipation function

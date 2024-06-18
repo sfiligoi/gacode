@@ -1,0 +1,78 @@
+!---------------------------------------------------------
+! cgyro_advect_wavenumber.f90
+!
+! PURPOSE:
+!  Manage shearing by wavenumber advection.
+!---------------------------------------------------------
+
+subroutine cgyro_global(ij)
+
+  use cgyro_globals
+  use timer_lib
+
+  implicit none
+
+  integer, intent(in) :: ij
+  integer :: ir,l,ll,j,iccj,ivc,itor,llnt
+  complex :: rl,h1,h2
+
+  if (nonlinear_flag == 0) return
+
+  call timer_lib_in('shear')
+
+#if defined(OMPGPU)
+!$omp target teams distribute parallel do simd collapse(4) &
+!$omp&         private(ivc,ir,l,iccj,j,ll,rl,llnt,h1,h2)
+#elif defined(_OPENACC)
+!$acc parallel loop collapse(4) gang vector &
+!$acc&         private(ivc,ir,l,iccj,j,ll,rl,llnt,h1,h2) &
+!$acc&         present(rhs(:,:,:,ij),omega_ss,field,h_x,cap_h_c,c_wave)
+#else
+!$omp parallel do collapse(4) private(ivc,ir,l,iccj,j,ll,rl,llnt,h1,h2)
+#endif
+  do itor=nt1,nt2
+     do ivc=1,nv_loc
+        do ir=1,n_radial
+           do j=1,n_theta
+
+              iccj = (ir-1)*n_theta+j
+              rl   = 0.0
+              
+#if (!defined(OMPGPU)) && defined(_OPENACC)
+!$acc loop seq
+#endif
+              do l=1,n_wave
+
+                 ll = (2*l-1)
+                 llnt = ll*n_theta
+
+                 if ( (ir+ll) <= n_radial ) then
+                    h1 = omega_eb_base*itor*h_x(iccj+llnt,ivc,itor)
+                    h1 = h1-sum(omega_ss(:,iccj+llnt,ivc,itor)*field(:,iccj+llnt,itor))
+                    h1 = h1-0*cap_h_c(iccj+llnt,ivc,itor)
+                 else
+                    h1 = 0.0
+                 endif
+                
+                 if ( (ir-ll) >= 1 ) then
+                    h2 = omega_eb_base*itor*h_x(iccj-llnt,ivc,itor)
+                    h2 = h2-sum(omega_ss(:,iccj-llnt,ivc,itor)*field(:,iccj-llnt,itor))
+                    h2 = h2-0*cap_h_c(iccj-llnt,ivc,itor)
+                 else
+                    h2 = 0.0
+                 endif
+                 
+                 rl = rl+c_wave(l)*(h1-h2)
+
+              enddo
+
+              rhs(iccj,ivc,itor,ij) = rl
+
+           enddo
+        enddo
+     enddo
+  enddo
+
+  call timer_lib_out('shear')
+
+end subroutine cgyro_global
