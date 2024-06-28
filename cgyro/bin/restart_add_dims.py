@@ -76,15 +76,15 @@ def get_arguments():
                        metavar='SCALE',
                        help="Scaling factor for exended elements (Default: 1.0)",
                        type=float,
-                       default=1.0,
+                       default=0.0,
                        required=False)
     
    args=parser.parse_args()
 
    return args.o,args.n,args.s
 
-
-def add_dims(org_dir, new_dir, org_grid, new_grid, dim_offset, scale_val):
+# use edge val, no scaling
+def add_dims_1(org_dir, new_dir, org_grid, new_grid, dim_offset):
     org_fname = os.path.join(org_dir,libcgyrorestart.restart_fname)
     new_fname = os.path.join(new_dir,libcgyrorestart.restart_fname)
 
@@ -132,8 +132,120 @@ def add_dims(org_dir, new_dir, org_grid, new_grid, dim_offset, scale_val):
                                                   j_t)
                 org_fd.seek(header_size+org_off)
                 tmp=org_fd.read(thetabytes)
-                if ( (j_t!=i_t) and ((j_r+dim_offset)!=i_r) and # only scale new elements
-                     (scale_val!=1.0) ):  # and only if the scale is not 1
+                new_fd.write(tmp)
+
+    return
+
+# just fill with zeros
+def add_dims_0(org_dir, new_dir, org_grid, new_grid, dim_offset):
+    org_fname = os.path.join(org_dir,libcgyrorestart.restart_fname)
+    new_fname = os.path.join(new_dir,libcgyrorestart.restart_fname)
+
+    header_size = libcgyrorestart.header_size
+
+    org_header = libcgyrorestart.CGyroRestartHeader()
+    org_header.load(org_dir)
+    if (not org_grid.isSame(org_header.grid)):
+        raise IOError("Wrong CGyroRestartHeader grid content")
+    thetabytes = org_header.get_thetabytes()
+    org_fsize = org_header.get_total_bytes()
+    if os.stat(org_fname).st_size!=org_fsize:
+        raise IOError("Wrong restart file size")
+
+    zerobuf = bytearray(thetabytes)
+    for i in range(thetabytes):
+        zerobuf[i] = 0  # 0.0 is also a binary 0
+
+    new_header = libcgyrorestart.CGyroRestartHeader()
+    new_header.load(org_dir)  # keep the same format as the old one
+    # Update the relevant dims
+    new_header.grid = new_grid
+    # nt_loc may not be compatible with new n_toroidal, just set to 1 to be safe
+    new_header.fmt.nt_loc = 1
+    # invalidate optional info, to maintain consistency
+    new_header.reset_info()
+    new_fsize = new_header.get_total_bytes()
+    with open(org_fname,"rb") as org_fd:
+        with  open(new_fname,"wb") as new_fd:
+          new_fd.truncate(new_fsize)
+          new_header.savev3(new_fd)
+
+          for i_t in range(new_grid.n_toroidal):
+           j_t = min(i_t, org_grid.n_toroidal-1) # will extend last element past the limit
+           for i_e in range(new_grid.n_energy):
+            for i_x in range(new_grid.n_xi):
+             for i_s in range(new_grid.n_species):
+              for i_r in range(new_grid.n_radial):
+                new_off = new_header.theta_offset(i_r,
+                                                  i_s, i_x, i_e,
+                                                  i_t)
+                new_fd.seek(header_size+new_off)
+                if i_r<dim_offset:
+                  j_r = 0 # use the lowest element for the left pad
+                else:
+                  j_r = min(i_r-dim_offset, org_grid.n_radial-1) # will extend the last eelement past the limit
+                if ( (j_t!=i_t) and ((j_r+dim_offset)!=i_r) ): # just zero new elements
+                    new_fd.write(zerobuf)
+                else:
+                    org_off = org_header.theta_offset(j_r,
+                                                      i_s, i_x, i_e,
+                                                      j_t)
+                    org_fd.seek(header_size+org_off)
+                    tmp=org_fd.read(thetabytes)
+                    new_fd.write(tmp)
+
+    return
+
+# flexible, use any scaling
+def add_dims_scale(org_dir, new_dir, org_grid, new_grid, dim_offset, scale_val):
+    org_fname = os.path.join(org_dir,libcgyrorestart.restart_fname)
+    new_fname = os.path.join(new_dir,libcgyrorestart.restart_fname)
+
+    header_size = libcgyrorestart.header_size
+
+    org_header = libcgyrorestart.CGyroRestartHeader()
+    org_header.load(org_dir)
+    if (not org_grid.isSame(org_header.grid)):
+        raise IOError("Wrong CGyroRestartHeader grid content")
+    thetabytes = org_header.get_thetabytes()
+    org_fsize = org_header.get_total_bytes()
+    if os.stat(org_fname).st_size!=org_fsize:
+        raise IOError("Wrong restart file size")
+
+    new_header = libcgyrorestart.CGyroRestartHeader()
+    new_header.load(org_dir)  # keep the same format as the old one
+    # Update the relevant dims
+    new_header.grid = new_grid
+    # nt_loc may not be compatible with new n_toroidal, just set to 1 to be safe
+    new_header.fmt.nt_loc = 1
+    # invalidate optional info, to maintain consistency
+    new_header.reset_info()
+    new_fsize = new_header.get_total_bytes()
+    with open(org_fname,"rb") as org_fd:
+        with  open(new_fname,"wb") as new_fd:
+          new_fd.truncate(new_fsize)
+          new_header.savev3(new_fd)
+
+          for i_t in range(new_grid.n_toroidal):
+           j_t = min(i_t, org_grid.n_toroidal-1) # will extend last element past the limit
+           for i_e in range(new_grid.n_energy):
+            for i_x in range(new_grid.n_xi):
+             for i_s in range(new_grid.n_species):
+              for i_r in range(new_grid.n_radial):
+                new_off = new_header.theta_offset(i_r,
+                                                  i_s, i_x, i_e,
+                                                  i_t)
+                new_fd.seek(header_size+new_off)
+                if i_r<dim_offset:
+                  j_r = 0 # use the lowest element for the left pad
+                else:
+                  j_r = min(i_r-dim_offset, org_grid.n_radial-1) # will extend the last eelement past the limit
+                org_off = org_header.theta_offset(j_r,
+                                                  i_s, i_x, i_e,
+                                                  j_t)
+                org_fd.seek(header_size+org_off)
+                tmp=org_fd.read(thetabytes)
+                if ( (j_t!=i_t) and ((j_r+dim_offset)!=i_r) ): # only scale new elements
                   tarr=array.array('d', tmp)
                   tlist=tarr.tolist()
                   for i in range(len(tlist)):
@@ -171,9 +283,6 @@ if (new_cfg.isSameDims(old_cfg)):
 if (not new_cfg.isDimsSuperset(old_cfg)):
     print("ERROR: New dimensions are not a superset of the old ones")
 
-if (scale_val!=1.0):
-  print("INFO: Scaling additional elements from border by %f"%scale_val)
-
 old_grid_obj =  libcgyrorestart.CGyroGrid()
 new_grid_obj =  libcgyrorestart.CGyroGrid()
 old_grid_obj.load_from_dict(old_cfg.user_dict)
@@ -185,7 +294,16 @@ if (dim_offset>0):
 
 
 try:
-  add_dims(old_dir, new_dir, old_grid_obj, new_grid_obj, dim_offset, scale_val)
+  if (scale_val==1.0):
+      print("INFO: Using elements from border as fill")
+      add_dims_1(old_dir, new_dir, old_grid_obj, new_grid_obj, dim_offset)
+  elif (scale_val==0.0):
+      print("INFO: Filling with zeros")
+      add_dims_0(old_dir, new_dir, old_grid_obj, new_grid_obj, dim_offset)
+  else:
+      print("INFO: Scaling additional elements from border by %f"%scale_val)
+      print("INFO: Using slow scaling variant")
+      add_dims_scale(old_dir, new_dir, old_grid_obj, new_grid_obj, dim_offset, scale_val)
 except IOError as err:
     print("IO error: {0}".format(err))
     sys.exit(21)
