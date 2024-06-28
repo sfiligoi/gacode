@@ -76,7 +76,7 @@ def get_arguments():
                        metavar='SCALE',
                        help="Scaling factor for exended elements (Default: 1.0)",
                        type=float,
-                       default=1.0,
+                       default=0.0,
                        required=False)
     
    args=parser.parse_args()
