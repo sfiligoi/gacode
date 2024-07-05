@@ -23,5 +23,13 @@ cd $simdir
 
 export OMP_NUM_THREADS=$nomp
 export OMP_STACKSIZE=32M
-echo ibrun $GACODE_ROOT/platform/exec/wrap.${GACODE_PLATFORM} $exec
-ibrun $GACODE_ROOT/platform/exec/wrap.${GACODE_PLATFORM} $exec
+
+#echo mpiexec.hydra -n ${nmpi} $exec
+mpiexec.hydra -n ${nmpi} $exec
+
+#
+# Note: ibrun was not GPU-aware as of Jul 5th 2024
+#       The Intel MPI setup above works on a single node 
+#
+#echo ibrun $GACODE_ROOT/platform/exec/wrap.${GACODE_PLATFORM} $exec
+#ibrun $GACODE_ROOT/platform/exec/wrap.${GACODE_PLATFORM} $exec

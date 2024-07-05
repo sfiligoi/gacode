@@ -1,5 +1,6 @@
 #! /usr/bin/env bash
-# GACODE Parallel execution script (FRONTIER_GPU)
+# GACODE Parallel execution script
+# Needed with ibrun, but not with Intel MPI directly
 
 #env 1>&2
 
