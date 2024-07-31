@@ -5,7 +5,7 @@
 !  Manage shearing by wavenumber advection.
 !---------------------------------------------------------
 
-subroutine cgyro_global(ij)
+subroutine cgyro_globalshear(ij)
 
   use cgyro_globals
   use timer_lib
@@ -75,4 +75,4 @@ subroutine cgyro_global(ij)
 
   call timer_lib_out('shear')
 
-end subroutine cgyro_global
+end subroutine cgyro_globalshear
