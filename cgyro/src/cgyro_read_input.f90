@@ -126,6 +126,7 @@ subroutine cgyro_read_input
   call cgyro_readbc_realv(dlntdr,is)
   call cgyro_readbc_realv(sdlnndr,is)
   call cgyro_readbc_realv(sdlntdr,is)
+  call cgyro_readbc_realv(sbeta_star,is)
   call cgyro_readbc_realv(dlnndr_scale,is)
   call cgyro_readbc_realv(dlntdr_scale,is)
 

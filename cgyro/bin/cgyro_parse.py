@@ -136,6 +136,7 @@ x.add('DLNNDR','1.0',n=n)
 x.add('DLNTDR','1.0',n=n)
 x.add('SDLNNDR','0.0',n=n)
 x.add('SDLNTDR','0.0',n=n)
+x.add('SBETA_STAR','0.0',n=n)
 x.add('DLNNDR_SCALE','1.0',n=n)
 x.add('DLNTDR_SCALE','1.0',n=n)
 

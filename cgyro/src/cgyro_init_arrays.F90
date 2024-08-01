@@ -459,17 +459,15 @@ subroutine cgyro_init_arrays
            ! JC: Re-checked sign and normalization (Oct 2019)
 
            ! generalized profile curvature (phi shearing)
-           sm = sdlnndr(is)+sdlntdr(is)*(energy(ie)-1.5) &
-                +energy(ie)*gdlntdr(is)**2+gdlnndr(is)**2-gdlntdr(is)*gdlnndr(is)
+           sm = sdlnndr(is)+sdlntdr(is)*(energy(ie)-1.5)
 
            ! beta_star (H shearing)
-           sb = beta_star(0)*energy(ie)*(sdlntdr(is)+sdlnndr(is)-2*gdlntdr(is)*gdlnndr(is)) &
-                /(dlnndr(is)+dlntdr(is))
+           sb = sbeta_star(is)*energy(ie)/bmag(it)**2
 
            arg = -k_theta_base*itor*length/(2*pi)
 
            omega_ss(:,ic,iv_loc,itor) = arg*sm*jvec_c(:,ic,iv_loc,itor)
-           omega_beta(iv_loc,itor)    = arg*sb
+           omega_sbeta(ic,iv_loc,itor) = arg*sb
 
         enddo
      enddo
