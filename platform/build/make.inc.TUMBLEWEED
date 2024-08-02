@@ -3,7 +3,7 @@
 #---------------------------------------------------
 
 IDENTITY="Linux TUMBLEWEED gfortran+OpenBLAS+OPENMPI"
-CORES_PER_NODE=4
+CORES_PER_NODE=8
 NUMAS_PER_NODE=1
 #SOLVER_OPT=slumt
 #need packages fftw_openmp_devel openblas_devel
