@@ -29,7 +29,7 @@ subroutine vgen_init
      EXPRO_ctrl_numeq_flag = 0
   endif
 
-  call expro_read('input.gacode')
+  call expro_read('input.gacode',MPI_COMM_WORLD)
    
   if (EXPRO_error == 1) then
      if (i_proc == 0) then
@@ -80,20 +80,26 @@ subroutine vgen_init
   allocate(vtor_measured(EXPRO_n_exp))
   allocate(pflux_sum(EXPRO_n_exp))
   allocate(jbs_neo(EXPRO_n_exp))
-  allocate(jbs_sauter(EXPRO_n_exp))
   allocate(jsigma_neo(EXPRO_n_exp))
-  allocate(jsigma_sauter(EXPRO_n_exp))
   allocate(jtor_neo(EXPRO_n_exp))
+  allocate(jbs_sauter(EXPRO_n_exp))
+  allocate(jsigma_sauter(EXPRO_n_exp))
   allocate(jtor_sauter(EXPRO_n_exp))
+  allocate(jbs_sauter_mod(EXPRO_n_exp))
+  allocate(jsigma_sauter_mod(EXPRO_n_exp))
+  allocate(jtor_sauter_mod(EXPRO_n_exp))
   
-  pflux_sum(:)     = 0.0
-  jbs_neo(:)       = 0.0
-  jbs_sauter(:)    = 0.0
-  jsigma_neo(:)    = 0.0
-  jsigma_sauter(:) = 0.0
-  jtor_neo(:)      = 0.0
-  jtor_sauter(:)   = 0.0
-
+  pflux_sum(:)         = 0.0
+  jbs_neo(:)           = 0.0
+  jsigma_neo(:)        = 0.0
+  jtor_neo(:)          = 0.0
+  jbs_sauter(:)        = 0.0
+  jsigma_sauter(:)     = 0.0
+  jtor_sauter(:)       = 0.0
+  jbs_sauter_mod(:)    = 0.0
+  jsigma_sauter_mod(:) = 0.0
+  jtor_sauter_mod(:)   = 0.0
+  
   do j=1,EXPRO_n_ion
      if (j == erspecies_indx) then
         vtor_measured(:) = EXPRO_vtor(j,:)

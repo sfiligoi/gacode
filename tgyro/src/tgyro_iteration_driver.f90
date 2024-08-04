@@ -13,10 +13,9 @@
 
 subroutine tgyro_iteration_driver
 
+  use mpi
   use tgyro_globals
   use tgyro_iteration_variables
-  use tgyro_ped
-  use mpi
 
   implicit none
   integer :: i_ion
@@ -91,7 +90,6 @@ subroutine tgyro_iteration_driver
   !---------------------------------------------
   allocate(flux_method_vec(n_inst))
   call MPI_ALLGATHER(flux_method,1,MPI_INTEGER,flux_method_vec,1,MPI_INTEGER,gyro_adj,ierr)
-
   call tgyro_write_input
 
   ! NOTE: See gyro/src/gyro_globals.f90 for definition of transport_method
@@ -104,10 +102,10 @@ subroutine tgyro_iteration_driver
   endif
 
   if (loc_restart_flag == 0) then
+     ! Initialize relaxation parameters to starting value.
+     relax(:) = 1.0 ; res(:) = 0.0
      ! Create, but do not write to, datafiles.
      call tgyro_write_data(0)
-     ! Initialize relaxation parameters to starting value.
-     relax(:) = 1.0
   endif
   if (i_proc_global == 0) then
      open(unit=1,file=trim(runfile),position='append')
@@ -166,16 +164,17 @@ subroutine tgyro_iteration_driver
      tgyro_iteration_method = 1
      tgyro_relax_iterations = 0
   endif
-
-
+ 
   select case (tgyro_iteration_method) 
 
   case (1) 
 
+     call tgyro_iteration_zero
      call tgyro_iteration_standard
 
   case (2) 
 
+     call tgyro_iteration_zero
      call tgyro_iteration_diagonal
 
   case (4) 
@@ -188,6 +187,7 @@ subroutine tgyro_iteration_driver
 
   case (6) 
 
+     call tgyro_iteration_zero
      call tgyro_iteration_simplerelax
 
   end select

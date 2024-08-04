@@ -72,6 +72,8 @@ subroutine neo_run()
   neo_jpar_thK_out    = neo_th_out(6)                ! <jpar B> / j_norm (Koh)
   neo_jpar_thN_out    = neo_th_out(7)                ! <jpar B> / j_norm (NCLASS)
   neo_jtor_thS_out    = neo_th_out(8)                ! <jtor/R> / <1/R> j_norm (Sauter)
+  neo_jpar_thSmod_out = neo_th_out(9)                ! <jpar B> / j_norm (Sauter modified 2021)
+  neo_jtor_thSmod_out = neo_th_out(10)               ! <jtor/R> / <1/R> j_norm (Sauter modified 2021)
   
   !!!!!!!!!!!!!!!!!!
   ! NCLASS results

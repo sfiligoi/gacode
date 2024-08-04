@@ -9,10 +9,16 @@ module locpargen_globals
   integer :: hasgeo
   integer :: qnflag
   integer :: appendflag
+  integer :: ntheta
+  integer :: nion
+  real, dimension(:), allocatable :: theta
   
   character(len=2) :: tag(9)
+  character(len=2) :: mytag
 
   real :: btccw,ipccw
-  real :: cc,loglam,nu_ee,pi,betae_unit
+  real :: pi
+  real :: cc,loglam,nu_ee
+  real :: betae_unit,lambda_star
 
 end module locpargen_globals

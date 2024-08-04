@@ -44,16 +44,28 @@ subroutine cgyro_equilibrium
   geo_beta_star_in = beta_star(0)
 
   ! Extended Miller
-  geo_shape_cos0_in = shape_cos0
-  geo_shape_cos1_in = shape_cos1
-  geo_shape_cos2_in = shape_cos2
-  geo_shape_cos3_in = shape_cos3
-  geo_shape_sin3_in = shape_sin3
-  geo_shape_s_cos0_in = shape_s_cos0
-  geo_shape_s_cos1_in = shape_s_cos1
-  geo_shape_s_cos2_in = shape_s_cos2
-  geo_shape_s_cos3_in = shape_s_cos3
-  geo_shape_s_sin3_in = shape_s_sin3
+  geo_shape_cos0_in = shape_cos(0)
+  geo_shape_cos1_in = shape_cos(1)
+  geo_shape_cos2_in = shape_cos(2)
+  geo_shape_cos3_in = shape_cos(3)
+  geo_shape_cos4_in = shape_cos(4)
+  geo_shape_cos5_in = shape_cos(5)
+  geo_shape_cos6_in = shape_cos(6)
+  geo_shape_sin3_in = shape_sin(3)
+  geo_shape_sin4_in = shape_sin(4)
+  geo_shape_sin5_in = shape_sin(5)
+  geo_shape_sin6_in = shape_sin(6)
+  geo_shape_s_cos0_in = shape_s_cos(0)
+  geo_shape_s_cos1_in = shape_s_cos(1)
+  geo_shape_s_cos2_in = shape_s_cos(2)
+  geo_shape_s_cos3_in = shape_s_cos(3)
+  geo_shape_s_cos4_in = shape_s_cos(4)
+  geo_shape_s_cos5_in = shape_s_cos(5)
+  geo_shape_s_cos6_in = shape_s_cos(6)
+  geo_shape_s_sin3_in = shape_s_sin(3)
+  geo_shape_s_sin4_in = shape_s_sin(4)
+  geo_shape_s_sin5_in = shape_s_sin(5)
+  geo_shape_s_sin6_in = shape_s_sin(6)
 
   geo_fourier_in(:,0:geo_nfourier_in) = geo_yin(:,:)
 
@@ -253,7 +265,7 @@ subroutine cgyro_equilibrium
      omega_trap(:,2) = stream_factor*omega_trap(:,2)
   end select
 
-  !$acc enter data copyin(xi,vel,omega_stream)
+!$acc enter data copyin(xi,vel,omega_stream)
 
 end subroutine cgyro_equilibrium
 

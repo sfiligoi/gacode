@@ -58,6 +58,10 @@ subroutine neo_check
      if(silent_flag == 0 .and. i_proc == 0) then
         write(io_neoout,30) 'sim_model','NEURAL NETWORK'
      endif
+  case(5)
+     if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_neoout,30) 'sim_model','THEORY (modified Sauter)'
+     endif
   case default   
      call neo_error('ERROR: (NEO) invalid sim_model')
      return
@@ -435,11 +439,17 @@ subroutine neo_check
         write(io_neoout,20) '    kappa:',kappa(ir),'  s_kappa:',s_kappa(ir)
         write(io_neoout,20) '    delta:',delta(ir),'  s_delta:',s_delta(ir)
         write(io_neoout,20) '     zeta:',zeta(ir), '   s_zeta:',s_zeta(ir)
-        write(io_neoout,20) '     sin3:',shape_sin3(ir), '   s_sin3:',shape_s_sin3(ir)
-        write(io_neoout,20) '     cos0:',shape_cos0(ir), '   s_cos0:',shape_s_cos0(ir)
-        write(io_neoout,20) '     cos1:',shape_cos1(ir), '   s_cos1:',shape_s_cos1(ir)
-        write(io_neoout,20) '     cos2:',shape_cos2(ir), '   s_cos2:',shape_s_cos2(ir)
-        write(io_neoout,20) '     cos3:',shape_cos3(ir), '   s_cos3:',shape_s_cos3(ir)
+        write(io_neoout,20) '     sin3:',shape_sin(3,ir), '   s_sin3:',shape_s_sin(3,ir)
+        write(io_neoout,20) '     sin4:',shape_sin(4,ir), '   s_sin4:',shape_s_sin(4,ir)
+        write(io_neoout,20) '     sin5:',shape_sin(5,ir), '   s_sin5:',shape_s_sin(5,ir)
+        write(io_neoout,20) '     sin6:',shape_sin(6,ir), '   s_sin6:',shape_s_sin(6,ir)
+        write(io_neoout,20) '     cos0:',shape_cos(0,ir), '   s_cos0:',shape_s_cos(0,ir)
+        write(io_neoout,20) '     cos1:',shape_cos(1,ir), '   s_cos1:',shape_s_cos(1,ir)
+        write(io_neoout,20) '     cos2:',shape_cos(2,ir), '   s_cos2:',shape_s_cos(2,ir)
+        write(io_neoout,20) '     cos3:',shape_cos(3,ir), '   s_cos3:',shape_s_cos(3,ir)
+        write(io_neoout,20) '     cos4:',shape_cos(4,ir), '   s_cos4:',shape_s_cos(4,ir)
+        write(io_neoout,20) '     cos5:',shape_cos(5,ir), '   s_cos5:',shape_s_cos(5,ir)
+        write(io_neoout,20) '     cos6:',shape_cos(6,ir), '   s_cos6:',shape_s_cos(6,ir)
         
         write(io_neoout,*)
         write(io_neoout,20) ' dphi0/dr:',dphi0dr(ir)

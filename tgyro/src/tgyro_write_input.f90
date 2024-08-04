@@ -12,18 +12,11 @@ subroutine tgyro_write_input
   !----------------------------------------------------------------
   ! Trap miscellaneous errors
   !
-  ! - Bogus matching radius
-  !
-  if (i_bc < 0) then
-     error_flag = 1
-     error_msg = 'ERROR: (TGYRO) Problem with matching radius.'
-  endif
-  !
   ! - Advanced iteration methods cannot do zero iterations:
   !
   if (tgyro_iteration_method /= 1 .and. tgyro_relax_iterations == 0) then
      error_flag = 1
-     error_msg = 'ERROR: (TGYRO) TGYRO_ITERATION_METHOD /= 4 requires TGYRO_RELAX_ITERATIONS > 0.'
+     error_msg = 'ERROR: (TGYRO) TGYRO_ITERATION_METHOD /= 1 requires TGYRO_RELAX_ITERATIONS > 0.'
   endif
   !
   ! - Need rotation physics to evolve Er
@@ -190,33 +183,6 @@ subroutine tgyro_write_input
      !--------------------------------------------------------
 
      !--------------------------------------------------------
-     if (loc_scenario > 2) then
-
-        select case (tgyro_dt_method)
-
-        case (1)
-
-           write(1,10) 'TGYRO_DT_METHOD','Reaction cross section <n1*n2> (use with separate D and T)'
-           if (loc_n_ion == 1) then
-              error_flag = 1
-              error_msg = 'ERROR: (tgyro) Need LOC_N_ION > 1 for D-T reaction cross-section'
-           endif
-
-        case (2)
-
-           write(1,10) 'TGYRO_DT_METHOD','Reaction cross section <n1*n1>/4 (use with single main ion)'
-
-        case default
-
-           error_flag = 1
-           error_msg = 'Error: TGYRO_DT_METHOD'
-
-        end select
-
-     endif
-     !--------------------------------------------------------
-
-     !--------------------------------------------------------
      select case (tgyro_neo_method)
 
      case (0)
@@ -368,6 +334,8 @@ subroutine tgyro_write_input
            write(1,10) 'TGYRO_DEN_METHOD'//itag,'ni'//itag//' evolution ON'
         case (2)
            write(1,10) 'TGYRO_DEN_METHOD'//itag,'ni'//itag//' evolution ON (alpha source)'
+        case (-2)
+           write(1,10) 'TGYRO_DEN_METHOD'//itag,'ni'//itag//' lock to shape of electron density'
         case default
            error_flag = 1
            error_msg = 'Error: TGYRO_DEN_METHOD'//itag//': invalid value.'
@@ -382,7 +350,6 @@ subroutine tgyro_write_input
 
      write(1,20) 'LOC_RMIN',r(2)/r_min
      write(1,20) 'LOC_RMAX',r(n_r)/r_min
-     write(1,20) 'Pivot radius',r(i_bc)/r_min
      write(1,20) 'LOC_NU_SCALE',loc_nu_scale
      write(1,20) 'LOC_BETAE_SCALE',loc_betae_scale
      if (loc_betae_scale > 0.0) then
@@ -411,24 +378,6 @@ subroutine tgyro_write_input
 
         error_flag = 1
         error_msg = 'Error: LOC_ZEFF_FLAG'
-
-     end select
-     !--------------------------------------------------------
-     !--------------------------------------------------------
-     select case (loc_num_equil_flag)
-
-     case (0)
-
-        write(1,10) 'LOC_NUM_EQUIL_FLAG','Using Miller model equilibrium in TGLF/GYRO/NEO.'
-
-     case (1)
-
-        write(1,10) 'LOC_NUM_EQUIL_FLAG','Using general Fourier equilibrium in TGLF/GYRO/NEO.'
-
-     case default
-
-        error_flag = 1
-        error_msg = 'Error: LOC_NUM_EQUIL_FLAG'
 
      end select
      !--------------------------------------------------------
@@ -506,10 +455,14 @@ subroutine tgyro_write_input
         if (calc_flag(i_ion) == 0) then
            ttext = trim(ttext)//' passthrough'
         endif
-        write(1,40) 'ion '//trim(ion_tag(i_ion))//' [mass,charge,type]',mi_vec(i_ion),zi_vec(i_ion),ttext
+        write(1,40) 'ion '//trim(ion_tag(i_ion))//' [mass,charge,type]',&
+             ion_name(i_ion),mi_vec(i_ion),zi_vec(i_ion),ttext
      enddo
      write(1,*) 
      write(1,10) 'INFO: (tgyro)','GyroBohm factors defined by ion 1 mass.'
+     if (dt_flag == 1) then
+        write(1,10) 'INFO: (tgyro)','DT plasma detected; computing DT fusion power.'
+     endif
      write(1,*)
      !--------------------------------------------------------
 
@@ -557,7 +510,7 @@ subroutine tgyro_write_input
 10 format(t2,a,t33,':',t35,a)
 20 format(t2,a,t33,':',t35,f8.4,1x,a)
 30 format(t2,a,t33,':',t35,i4)
-40 format(t2,a,t33,':',t35,f6.2,1x,f6.2,3x,a)
+40 format(t2,a,t33,':',t35,a,2x,f6.2,1x,f6.2,3x,a)
 
 end subroutine tgyro_write_input
 

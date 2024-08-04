@@ -20,12 +20,12 @@ program tglf
 
   integer :: i
   integer :: n
-  character (len=4) :: tag(5)=(/'ion1','ion2','ion3','ion4','ion5'/)
+  character (len=4) :: tag(6)=(/'ion1','ion2','ion3','ion4','ion5','ion6'/)
   real :: prec
 
   call tglf_read_input()
   call tglf_run()
-
+  call tglf_dump_global()
   if(units_in.eq.'GENE')then
      print 30,'GENE reference units used'
      print 30,'Conversion to TGLF units:'
@@ -41,6 +41,8 @@ program tglf
 
 ! write interchange stability criteria with ELITE conventions
   Print 30,'  D(R) = ',-interchange_DR,'  D(I) = ',0.25-interchange_DM
+!  write species info
+  print 40,'  kinetic species = ',ns_in,'  non-kinetic species = ',nstotal_in - ns_in
 
   if (tglf_use_transport_model_in) then
 
@@ -120,14 +122,17 @@ program tglf
      ! write QL flux (weight) spectrum per mode to file out.tglf.QL_weight_spectrum
      CALL write_tglf_QL_flux_spectrum
 
-     ! write saturation geometry facotor spectrum per mode to file out.tglf.
-     CALL write_tglf_sat_geo_spectrum
-
      ! write kx/ky-spectral shift spectrum to file out.tglf.spectral_shift
-     CALL write_tglf_spectral_shift
+     CALL write_tglf_spectral_shift_spectrum
+
+     ! write ave_p0 spectrum to file out.tglf.ave_p0_spectrum
+     CALL write_tglf_ave_p0_spectrum
 
      ! write intensity fluctuation amplitude spectrum per mode to file out.tglf.scalar_saturation_parameters
      CALL write_tglf_scalar_saturation_parameters
+
+     ! write Gaussian width spectrum to file out.tglf.width_spectrum
+     CALL write_tglf_width_spectrum
 
   else
 
@@ -153,5 +158,6 @@ program tglf
 10 format(a,10(1x,1pe11.4))
 20 format(t7,a,t19,a,t31,a,t43,a,t55,a)
 30 format(a,1pe11.4,a,1pe11.4)
+40 format(a,I10,a,I10)
 
 end program tglf

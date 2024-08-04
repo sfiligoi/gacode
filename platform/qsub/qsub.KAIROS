@@ -1,0 +1,17 @@
+#!/bin/bash
+if [ "$QUEUE" == "null_queue" ] ; then
+    QUEUE=regular
+fi
+
+bfile=$SIMDIR/batch.src
+echo "#!/bin/bash -l" > $bfile
+echo "#PBS -N $LOCDIR" >> $bfile
+echo "#PBS -o $SIMDIR/batch.out" >> $bfile
+echo "#PBS -e $SIMDIR/batch.err" >> $bfile
+echo "#PBS -q $QUEUE" >> $bfile
+echo "#PBS -l select=$nodes:ncpus=$CORES_PER_NODE:mpiprocs=$mpinode:ompthreads=$nomp" >> $bfile
+echo "#PBS -l walltime=$WALLTIME" >> $bfile
+
+echo "#PBS -V" >> $bfile
+
+echo "$CODE -e $LOCDIR -n $nmpi -nomp $nomp -numa $numa -mpinuma $mpinuma -p $SIMROOT" >> $bfile

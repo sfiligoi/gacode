@@ -12,39 +12,8 @@ subroutine tgyro_iteration_standard
   use tgyro_globals
   use tgyro_iteration_variables
 
-  if (i_proc_global == 0) then
-     open(unit=1,file=trim(runfile),position='append')
-     write(1,'(t2,a)') 'INFO: (TGYRO) Beginning standard iterations'
-     close(1)
-  endif
-
-  !---------------------------------------------------
-  ! ZEROTH ITERATION
-  !
-  ! One pass to get fluxes.
-  !
-  ! We *do* want the iteration number to increase in 
-  ! the case where we restart without iterating (this
-  ! can be used to compare transport models).
-  !  
-  if (tgyro_relax_iterations == 0 .and. loc_restart_flag == 1) i_tran=i_tran+1
-  !
-  call tgyro_target_vector(x_vec,g_vec)
-  if (loc_restart_flag == 0 .or. tgyro_relax_iterations == 0) then
-     ! Need to determine initial fluxes
-     call tgyro_flux_vector(x_vec,f_vec,0.0,0)
-  else
-     ! Initial fluxes already computed
-     call tgyro_flux_set(f_vec)
-     ! GYRO restart data available
-  endif
+  quasifix = 0
   res0 = 0.0
-  if (gyrotest_flag == 0) call tgyro_residual(f_vec,g_vec,res,p_max,loc_residual_method)
-
-  if (loc_restart_flag == 0 .or. tgyro_relax_iterations == 0) then
-     call tgyro_write_data(1)
-  endif
-  !----------------------------------------------------
 
   do i_tran_loop=1,tgyro_relax_iterations
 
@@ -85,7 +54,7 @@ subroutine tgyro_iteration_standard
      ! Reset profiles to be consistent with gradient.
      call tgyro_profile_set(x_vec,0.0,0)
      call tgyro_profile_functions 
- 
+
      ! Build dQ/dz (block diagonal matrix)
      !
      ! (p  ,p) (p  ,p+1) (p  ,p+2)
@@ -102,7 +71,7 @@ subroutine tgyro_iteration_standard
            enddo
         enddo
      enddo
- 
+
      !-----------------------------------------------------------
      ! END FLUX JACOBIAN
      !-----------------------------------------------------------
@@ -180,7 +149,7 @@ subroutine tgyro_iteration_standard
         ! Recompute solution
         call tgyro_target_vector(x_vec,g_vec)
         call tgyro_flux_vector(x_vec,f_vec,0.0,0)
-     
+
         ! Recompute residual
         call tgyro_residual(f_vec,g_vec,res,p_max,loc_residual_method)
         call tgyro_write_intermediate(1,res)

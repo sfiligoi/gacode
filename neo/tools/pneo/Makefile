@@ -4,8 +4,6 @@
 
 include ${GACODE_ROOT}/platform/build/make.inc.${GACODE_PLATFORM}
 
-# NOTE: $EXTRA_LIBS already exported by neo/Makefile
-
 all:
 	cd src ; make
 

@@ -8,12 +8,12 @@
       INTEGER, PARAMETER :: nb=32
       INTEGER, PARAMETER :: nxm=2*32-1
       INTEGER, PARAMETER :: nsm=12, nt0=40
-      INTEGER, PARAMETER :: nkym=480
+      INTEGER, PARAMETER :: nkym=512
       INTEGER, PARAMETER :: maxmodes=16
       INTEGER, PARAMETER :: max_ELITE=700
       INTEGER, PARAMETER :: max_fourier = 24
       INTEGER, PARAMETER :: ms = 128  ! ms needs to be divisible by 8
-      INTEGER, PARAMETER :: max_plot =6*ms/8+1
+      INTEGER, PARAMETER :: max_plot =18*ms/8+1
 !
       END MODULE tglf_max_dimensions
 !
@@ -25,7 +25,7 @@
       IMPLICIT NONE
       SAVE
 !
-      INTEGER nx,nbasis,nbasis_max,ns0,ns,nky,iur
+      INTEGER nx,nbasis,nbasis_max,ns0,ns,nky,iur,nroot
 !
       END MODULE tglf_dimensions
 !
@@ -68,7 +68,7 @@
 ! Input kys
       REAL :: ky_in=0.3
 ! Input species 
-      INTEGER :: ns_in=2
+      INTEGER :: ns_in=2, nstotal_in = 2
       REAL,DIMENSION(nsm) :: mass_in
       REAL,DIMENSION(nsm) :: zs_in
 ! input switches
@@ -78,14 +78,17 @@
       LOGICAL :: use_mhd_rule_in=.TRUE.
       LOGICAL :: use_bisection_in=.TRUE.
       LOGICAL :: use_inboard_detrapped_in=.FALSE.
+      LOGICAL :: use_ave_ion_grid_in=.FALSE.
       INTEGER :: ibranch_in=-1
       INTEGER :: nmodes_in=2
       INTEGER :: nbasis_max_in=4
       INTEGER :: nbasis_min_in=2
       INTEGER :: nxgrid_in=16
       INTEGER :: nky_in=12
+      INTEGER :: mainion=2
 ! input rare switches
       REAL :: theta_trapped_in=0.7
+      REAL :: wdia_trapped_in=0.0
       REAL :: park_in=1.0
       REAL :: ghat_in=1.0
       REAL :: gchat_in=1.0
@@ -95,10 +98,6 @@
       REAL :: filter_in=2.0
       REAL :: damp_psi_in = 0.0
       REAL :: damp_sig_in = 0.0
-      REAL :: alpha_kx_e_in=0.0  !not used
-      REAL :: alpha_kx_p_in=0.0  !not used
-      REAL :: alpha_kx_n_in=0.0  !not used
-      REAL :: alpha_kx_t_in=0.0  !not used
 ! Input model paramaters
       LOGICAL :: adiabatic_elec_in=.FALSE.
       REAL :: alpha_e_in=1.0
@@ -109,6 +108,7 @@
       REAL :: xnu_factor_in=1.0
       REAL :: debye_factor_in=1.0
       REAL :: etg_factor_in=1.25
+      REAL :: rlnp_cutoff_in = 18.0
       INTEGER :: sat_rule_in=0
       INTEGER :: kygrid_model_in=1
       INTEGER :: xnu_model_in=2
@@ -120,16 +120,16 @@
       REAL :: sign_Bt_in = 1.0
       REAL :: sign_It_in = 1.0
 ! Input field gradients
-      REAL,DIMENSION(nsm) :: rlns_in=1.0
-      REAL,DIMENSION(nsm) :: rlts_in=3.0
+      REAL,DIMENSION(nsm) :: rlns_in=0.0
+      REAL,DIMENSION(nsm) :: rlts_in=0.0
       REAL,DIMENSION(nsm) :: vpar_shear_in=0.0
       REAL :: vexb_shear_in=0.0
 ! Input profile shear
       REAL,DIMENSION(nsm) :: vns_shear_in=0.0
       REAL,DIMENSION(nsm) :: vts_shear_in=0.0
 ! Input field averages
-      REAL,DIMENSION(nsm) :: as_in
-      REAL,DIMENSION(nsm) :: taus_in
+      REAL,DIMENSION(nsm) :: as_in=0.0
+      REAL,DIMENSION(nsm) :: taus_in=0.0
       REAL,DIMENSION(nsm) :: vpar_in=0.0
       REAL :: vexb_in = 0.0
       REAL :: betae_in=0.0
@@ -193,8 +193,9 @@
       REAL :: Rmaj_input = 3.0
       REAL :: q_in = 2.0
       REAL :: rmin_input=0.5
-      REAL,DIMENSION(maxmodes) :: gamma_reference_kx0=0.0
-      REAL,DIMENSION(maxmodes) :: freq_reference_kx0=0.0
+      REAL,DIMENSION(maxmodes) :: gamma_reference_kx0 =0.0
+      REAL,DIMENSION(maxmodes) :: freq_reference_kx0 =0.0
+      REAL,DIMENSION(2,nkym,maxmodes) :: eigenvalue_first_pass =0.0
       REAL :: pol=1.0
       REAL :: U0=0.0
       REAL :: kx0=0.0
@@ -202,6 +203,8 @@
       REAL :: kx0_p = 0.0
       REAL :: midplane_shear=1.0
       REAL :: kx0_factor=1.0
+      REAL :: rho_ion=1.0
+      REAL :: rho_e=1.0
 ! output
       COMPLEX,DIMENSION(3,nb) :: field_weight_QL_out=0.0
       COMPLEX,DIMENSION(maxmodes,3,nb) :: field_weight_out=0.0
@@ -225,7 +228,7 @@
       REAL,DIMENSION(maxmodes) :: phi_bar_out=0.0,v_bar_out=0.0
       REAL,DIMENSION(maxmodes) :: a_par_bar_out=0.0,b_par_bar_out=0.0
       REAL,DIMENSION(maxmodes) :: wd_bar_out=0.0,b0_bar_out=0.0
-      REAL,DIMENSION(maxmodes) :: sat_geo_bar_out=0.0, ne_te_phase_out=0.0
+      REAL,DIMENSION(maxmodes) :: ne_te_phase_out=0.0
       REAL,DIMENSION(maxmodes) :: kx_bar_out=0.0,kpar_bar_out=0.0
       REAL,DIMENSION(maxmodes) :: modB_bar_out=0.0
       REAL,DIMENSION(nsm) :: n_bar_sum_out=0.0,t_bar_sum_out=0.0
@@ -237,11 +240,13 @@
       REAL,DIMENSION(5,nsm,3,nkym,maxmodes) :: flux_spectrum_out=0.0
       REAL,DIMENSION(5,nsm,3,nkym,maxmodes) :: QL_flux_spectrum_out=0.0
       REAL,DIMENSION(2,nkym,maxmodes) :: eigenvalue_spectrum_out=0.0
-      REAL,DIMENSION(nkym,maxmodes) :: sat_geo_spectrum_out = 0.0
       REAl,DIMENSION(nkym,maxmodes) :: ne_te_phase_spectrum_out=0.0
       REAl,DIMENSION(nsm,nkym,maxmodes) :: nsts_phase_spectrum_out=0.0
-      REAL,DIMENSION(nkym,maxmodes) :: sat_geo_out=0.0
       REAL,DIMENSION(nkym) :: spectral_shift_out=0.0
+      REAL,DIMENSION(nkym) :: ave_p0_spectrum_out=0.0
+      REAL,DIMENSION(nkym) :: width_out=0.0
+      REAL :: Vzf_out = 0.0
+      REAL :: kymax_out = 0.0
       REAL :: phi_bar_sum_out=0.0
       REAL :: v_bar_sum_out=0.0
       REAL :: gamma_nb_min_out=0.0
@@ -253,15 +258,19 @@
       REAL :: RBt_ave_out=1.0
       REAL :: Grad_r_ave_out=1.0
       REAL :: grad_r0_out=1.0
-      REAL :: SAT_geo_ave_out=1.0
+      REAL :: B_geo0_out = 1.0
+      REAL :: Bt0_out = 1.0
       REAL :: SAT_geo0_out=1.0
+      REAL :: SAT_geo1_out=1.0
+      REAL :: SAT_geo2_out=1.0
       REAL :: kx_geo0_out=1.0
       REAL :: DM_out = 0.25
       REAL :: DR_out = 0.0
       REAL :: Bref_out = 1.0
-      REAL :: ave_p0_out=1.0
-      INTEGER :: nmodes_out
-      INTEGER :: nfields_out
+      REAL :: ave_p0_out = 1.0
+      INTEGER :: nmodes_out = 2
+      INTEGER :: nfields_out = 1
+      INTEGER :: jmax_out = 0
       character (len=80) :: error_msg='null' 
 ! NN activation parameters (thresholds)  
       REAL :: nn_max_error_in = -1.0
@@ -320,11 +329,12 @@
       IMPLICIT NONE
 !
       REAL,ALLOCATABLE,DIMENSION(:,:) :: ei_exch, resist
-      REAL,ALLOCATABLE,DIMENSION(:) :: zs, mass, vs
-      REAL,ALLOCATABLE,DIMENSION(:) :: rlts, rlns, vpar_shear_s
-      REAL,ALLOCATABLE,DIMENSION(:) :: as, taus, vpar_s
-      REAL :: vexb_shear_s
-! 
+      REAL,ALLOCATABLE,DIMENSION(:) :: zs, mass, vs, fts
+      REAL,ALLOCATABLE,DIMENSION(:) :: rlts, rlns
+      REAL,ALLOCATABLE,DIMENSION(:) :: as, taus
+      REAL,ALLOCATABLE,DIMENSION(:) :: vpar_s, vpar_shear_s
+      REAL :: xnue_s, vexb_shear_s, ky_s
+!
       END MODULE tglf_species  
 !-------------------------------------------------
       MODULE tglf_kyspectrum
@@ -349,7 +359,7 @@
 !      USE tglf_dimensions
       IMPLICIT NONE
 !
-      INTEGER matz,nroot
+      INTEGER matz
       REAL,ALLOCATABLE,DIMENSION(:) :: fv1, fv2, fv3
       REAL,ALLOCATABLE,DIMENSION(:) :: rr, ri
       REAL,ALLOCATABLE,DIMENSION(:,:) :: ar, ai
@@ -379,7 +389,7 @@
       REAL :: phi_weight,a_par_weight,b_par_weight,v_weight
       REAL :: Ne_Te_phase,Ne_Te_cos,Ne_Te_sin
       REAL :: Ns_Ts_phase(nsm),Ns_Ts_cos,Ns_Ts_sin
-      REAL :: wd_bar,b0_bar,modB_bar,kx_bar,kpar_bar,sat_geo_bar
+      REAL :: wd_bar,b0_bar,modB_bar,kx_bar,kpar_bar
 !      
       END MODULE tglf_weight
 !
@@ -402,7 +412,7 @@
       REAL,DIMENSION(nxm) :: wdx, wdpx, b0x, b2x, kxx
       REAL,DIMENSION(nxm) :: cx_tor_par, cx_tor_per
       REAL,DIMENSION(nxm) :: cx_par_par
-      REAL,DIMENSION(nxm) :: p0x, Bx, sat_geo_invx
+      REAL,DIMENSION(nxm) :: p0x, Bx
       INTEGER,DIMENSION(nkym) :: mask_save
       REAL,DIMENSION(nkym) :: gamma_nb_min_save
       REAL,DIMENSION(nkym) :: width_save, ft_save
@@ -695,7 +705,6 @@
       REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gradBgu33
 !  ave_theta
       REAL :: gradB
-      REAL,ALLOCATABLE,DIMENSION(:,:) :: ave_sat_geo_inv
       REAL,ALLOCATABLE,DIMENSION(:,:) :: ave_kx
       REAL,ALLOCATABLE,DIMENSION(:,:) :: ave_c_tor_par, ave_c_tor_per
       REAL,ALLOCATABLE,DIMENSION(:,:) :: ave_c_par_par
@@ -754,6 +763,7 @@
       LOGICAL :: find_width_tg=.TRUE.
       LOGICAL :: adiabatic_elec_tg=.FALSE.
       LOGICAL :: new_eikonal_tg=.TRUE.
+      LOGICAL :: use_ave_ion_grid_tg=.false.
       INTEGER :: ibranch_tg=-1
       INTEGER :: nmodes_tg=2
       INTEGER :: nky_tg=12
@@ -798,9 +808,11 @@
       REAL :: Linsker_factor_tg=0.0
       REAL :: gradB_factor_tg=0.0
       REAL :: theta_trapped_tg=0.7
+      REAL :: wdia_trapped_tg=0.0
       REAL :: xnu_factor_tg=1.0
       REAL :: debye_factor_tg=1.0
       REAL :: etg_factor_tg = 1.25
+      REAL :: rlnp_cutoff_tg = 18.0
       REAL :: filter_tg = 2.0
       REAL :: alpha_kx_e_tg=0.0
       REAL :: alpha_kx_p_tg=0.0
@@ -854,7 +866,7 @@
         nmodes_tg, iflux_tg, ky_tg, width_max_tg, width_min_tg, &
         nwidth_tg, park_tg, ghat_tg, gchat_tg, &
         alpha_e_tg, alpha_n_tg, alpha_t_tg, alpha_p_tg, alpha_mach_tg, &
-        vexb_shear_tg, vpar_shear_tg, alpha_quench_tg, alpha_zf_tg, igeo_tg, theta_trapped_tg, &
+        vexb_shear_tg, vpar_shear_tg, alpha_quench_tg, alpha_zf_tg, igeo_tg, theta_trapped_tg, wdia_trapped_tg, &
         theta0_tg,taus_tg,as_tg,rlns_tg,rlts_tg,mass_tg,zs_tg, &
         rmin_tg, rmaj_tg, zmaj_tg,use_bisection_tg,vpar_tg, &
         q_tg, xnue_tg, wd_zero_tg, betae_tg, shat_tg, alpha_tg, &
@@ -863,7 +875,7 @@
         use_bpar_tg,use_mhd_rule_tg,q_prime_tg,damp_psi_tg,damp_sig_tg, &
         p_prime_tg, filter_tg, Linsker_factor_tg, gradB_factor_tg,  &
         b_model_tg, ft_model_tg, xnu_factor_tg, debye_factor_tg, &
-        nky_tg,etg_factor_tg,use_TM_tg,kygrid_model_tg,xnu_model_tg, &
+        nky_tg,etg_factor_tg,use_TM_tg,kygrid_model_tg,xnu_model_tg,rlnp_cutoff_tg, &
         sat_rule_tg,alpha_kx_e_tg,alpha_kx_p_tg,alpha_kx_n_tg, alpha_kx_t_tg, &
         vpar_shear_model_tg, j_surface_tg,vpar_model_tg,sign_Bt_tg,sign_It_tg, &
         vns_shear_tg,vts_shear_tg, nfourier_tg,fourier_tg,vexb_tg,kx0_tg, &

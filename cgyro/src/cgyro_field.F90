@@ -109,15 +109,6 @@ subroutine cgyro_field_v_gpu
 !$acc host_data use_device(field_loc,field)
 #endif
 
-#ifdef SUMMIT
-  call MPI_ALLREDUCE(field_loc,&
-       field,&
-       2*size(field(:,:)),&
-       MPI_DOUBLE_PRECISION,&
-       MPI_SUM,&
-       NEW_COMM_1,&
-       i_err)
-#else
   call MPI_ALLREDUCE(field_loc(:,:),&
        field(:,:),&
        size(field(:,:)),&
@@ -125,7 +116,6 @@ subroutine cgyro_field_v_gpu
        MPI_SUM,&
        NEW_COMM_1,&
        i_err)
-#endif
 
 #ifdef DISABLE_GPUDIRECT_MPI
 !$acc update device(field)
@@ -161,7 +151,7 @@ end subroutine cgyro_field_v_gpu
 !-----------------------------------------------------------------
 ! Configuration (velocity-distributed) field solve
 !-----------------------------------------------------------------
-subroutine cgyro_field_c
+subroutine cgyro_field_c_cpu
 
   use mpi
   use timer_lib
@@ -234,14 +224,13 @@ subroutine cgyro_field_c
      is = is_v(iv)
      do ic=1,nc
         psi(ic,iv_loc) = sum( jvec_c(:,ic,iv_loc)*field(:,ic))
-        chi(ic,iv_loc) = sum(jxvec_c(:,ic,iv_loc)*field(:,ic))
         cap_h_c(ic,iv_loc) = h_x(ic,iv_loc)+psi(ic,iv_loc)*z(is)/temp(is)
      enddo
   enddo
 
   call timer_lib_out('field')
 
-end subroutine cgyro_field_c
+end subroutine cgyro_field_c_cpu
 
 #ifdef _OPENACC
 subroutine cgyro_field_c_gpu
@@ -253,7 +242,7 @@ subroutine cgyro_field_c_gpu
   complex :: tmp,field_loc_l
 
   call timer_lib_in('field')
-!$acc data present(h_x,psi,chi,cap_h_c)
+!$acc data present(h_x,psi,cap_h_c)
 
 !$acc data present(field,field_loc)
 
@@ -281,15 +270,6 @@ subroutine cgyro_field_c_gpu
 !$acc host_data use_device(field_loc,field)
 #endif
 
-#ifdef SUMMIT
-  call MPI_ALLREDUCE(field_loc,&
-       field,&
-       2*size(field(:,:)),&
-       MPI_DOUBLE_PRECISION,&
-       MPI_SUM,&
-       NEW_COMM_1,&
-       i_err)
-#else
   call MPI_ALLREDUCE(field_loc(:,:),&
        field(:,:),&
        size(field(:,:)),&
@@ -297,7 +277,6 @@ subroutine cgyro_field_c_gpu
        MPI_SUM,&
        NEW_COMM_1,&
        i_err)
-#endif
 
 #ifdef DISABLE_GPUDIRECT_MPI
 !$acc update device(field)
@@ -339,13 +318,12 @@ subroutine cgyro_field_c_gpu
   endif
 
 !$acc parallel loop collapse(2) gang vector private(iv_loc,is) &
-!$acc&         present(jvec_c,jxvec_c,z,temp,is_v) default(none)
+!$acc&         present(jvec_c,z,temp,is_v) default(none)
   do iv=nv1,nv2
      do ic=1,nc
         iv_loc = iv-nv1+1
         is = is_v(iv)
         psi(ic,iv_loc) = sum( jvec_c(:,ic,iv_loc)*field(:,ic))
-        chi(ic,iv_loc) = sum(jxvec_c(:,ic,iv_loc)*field(:,ic))
         cap_h_c(ic,iv_loc) = h_x(ic,iv_loc)+psi(ic,iv_loc)*z(is)/temp(is)
      enddo
   enddo
@@ -359,6 +337,15 @@ end subroutine cgyro_field_c_gpu
 
 #endif
 
+
+subroutine cgyro_field_c
+  implicit none
+#ifdef _OPENACC
+   call cgyro_field_c_gpu
+#else
+   call cgyro_field_c_cpu
+#endif
+end subroutine cgyro_field_c
 
 !-----------------------------------------------------------------
 ! Adiabatic electron field solves for n=0

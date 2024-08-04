@@ -40,14 +40,16 @@ if os.path.isfile(checkdir+check1) == 0:
 
 # Get regression text string if it exists
 try:
-   for line in open(checkdir+regress,'r').readlines():
-      regtext = line.strip()
+   with open(checkdir+regress,'r') as f:
+      for line in f.readlines():
+         regtext = line.strip()
 except:
    regtext = ''
 
 # Get correct checksum from precision file (out.code.prec):
-for line in open(checkdir+check1,'r').readlines():
-   line = line.strip()
+with open(checkdir+check1,'r') as f:
+   for line in f.readlines():
+      line = line.strip()
 
 data = line.split()
 x1=eval(data[0])
@@ -62,8 +64,9 @@ if os.path.isfile(testdir+check1) == 0:
 
 # Need to initilize line here
 line='1e10'
-for line in open(testdir+check1,'r').readlines():
-   line = line.strip()
+with open(testdir+check1,'r') as f:
+   for line in f.readlines():
+      line = line.strip()
 
 data = line.split()
 y1   = eval(data[0])

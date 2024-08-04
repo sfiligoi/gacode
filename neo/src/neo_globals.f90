@@ -33,10 +33,11 @@ module neo_globals
   real :: s_delta_in
   real :: zeta_in
   real :: s_zeta_in
-  real :: shape_sin3_in
-  real :: shape_s_sin3_in
-  real :: shape_cos0_in, shape_cos1_in, shape_cos2_in, shape_cos3_in
-  real :: shape_s_cos0_in, shape_s_cos1_in, shape_s_cos2_in, shape_s_cos3_in
+  integer, parameter :: n_shape=6
+  real, dimension(0:n_shape) :: shape_sin_in
+  real, dimension(0:n_shape) :: shape_s_sin_in
+  real, dimension(0:n_shape) :: shape_cos_in
+  real, dimension(0:n_shape) :: shape_s_cos_in
   real :: beta_star_in
   integer :: geo_ny_in
   real, dimension(8,0:32) :: geo_yin_in
@@ -120,6 +121,7 @@ module neo_globals
   integer :: n_tptheta
   integer :: n_tpvarphi
   integer :: indx_c00
+  real    :: threed_bmag2_avg
   !
   ! LAPACK VARIABLES
   integer :: bw
@@ -166,10 +168,10 @@ module neo_globals
   real, dimension(:), allocatable :: s_delta
   real, dimension(:), allocatable :: zeta
   real, dimension(:), allocatable :: s_zeta
-  real, dimension(:), allocatable :: shape_sin3
-  real, dimension(:), allocatable :: shape_s_sin3
-  real, dimension(:), allocatable :: shape_cos0, shape_cos1, shape_cos2, shape_cos3
-  real, dimension(:), allocatable :: shape_s_cos0, shape_s_cos1, shape_s_cos2, shape_s_cos3
+  real, dimension(:,:), allocatable :: shape_sin
+  real, dimension(:,:), allocatable :: shape_s_sin
+  real, dimension(:,:), allocatable :: shape_cos
+  real, dimension(:,:), allocatable :: shape_s_cos
   real, dimension(:), allocatable :: beta_star
   integer :: geo_numeq_flag
   integer :: geo_ny
@@ -258,7 +260,8 @@ module neo_globals
 
   ! pure plasma theory
   ! Gamma_HH, Qi_HH, Qe_HH, Qi_CH, jpar_S, jpar_K, jpar_N, jtor_S
-  real, dimension(8)   :: neo_th_out=0.0
+  ! jpar_Smod, jtor_Smod
+  real, dimension(10)   :: neo_th_out=0.0
 
   ! nclass (n_species_max, transport coeff)
   ! transport coeff: 1-> gamma, 2-> Q, 3-> vpol,  4-> vtor, 5-> visc coeff

@@ -1,0 +1,39 @@
+#---------------------------------------------------
+# CSD3 [SKYLAKE component]
+#
+# SYSTEM INFO:
+# - 32-core Intel(R) Xeon(R) Platinum 8160 CPU @ 2.10GHz
+#   
+#---------------------------------------------------
+$(info Compiling for CSD3 SkyLake)
+
+#  FIXED Hardware parameters
+
+IDENTITY="CSD3 SkyLake"
+CORES_PER_NODE=32
+NUMAS_PER_NODE=1
+
+# Compilers and flags
+
+FC     = mpiifort -mod ${GACODE_ROOT}/modules -I ${GACODE_ROOT}/modules
+F77    = ${FC}
+
+FOMP   = -qopenmp
+FMATH  = -r8
+FOPT   = -xCORE-AVX512 -implicitnone -no-prec-div -O3 -fp-model fast=2 -pad -ip -qoverride-limits -mkl=cluster #-fast -no-ipo
+FDEBUG = -shared-intel -implicitnone -check all -check noarg_temp_created -traceback
+#FPETSC = 
+F2PY  = f2py
+
+# System math libraries
+LMATH = -L${LD_LIBRARY_PATH} -lfftw3_threads -lfftw3f_threads -lfftw3 -lfftw3f -mkl=cluster
+
+NETCDF  = -lnetcdf -lnetcdff
+NETCDF_INC = ${CPATH}
+
+GATOFLAGS = -r8 -i8
+
+# Archive 
+ARCH = ar cr
+
+

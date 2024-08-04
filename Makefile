@@ -24,12 +24,16 @@ clean:
 	cd tgyro ; make clean
 	cd profiles_gen ; make clean
 	cd f2py ; make clean
-	rm -f python/*/*.pyc
-	rm -f python/*.pyc
-	rm -rf python/*/__pycache__
+	rm -f f2py/*/*.pyc
+	rm -f f2py/*.pyc
+	rm -f f2py/pygacode/*/*.pyc
+	rm -rf f2py/*/__pycache__
+	rm -rf f2py/__pycache__
+	rm -rf f2py/pygacode/*/__pycache__
 	rm -f modules/*genmod*
 	rm -f *.log
 	rm -rf *regression_test/
+	rm -rf python
 
 distclean:
 	cd shared ; make distclean

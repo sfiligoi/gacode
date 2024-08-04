@@ -22,13 +22,18 @@ subroutine prgen_ion_name(m,z,name)
      endif
 
   case (4)
-     name = 'He4'
+     ! 2021/02/15: Changed alpha name to He from He4
+     name = 'He'
 
   case (7)
      name = 'Li'
 
   case (9)
      name = 'Be'
+
+  case (11)
+     ! 2021/04/12: Added Boron
+     name = 'B'
 
   case (12)
      name = 'C'
@@ -52,5 +57,5 @@ subroutine prgen_ion_name(m,z,name)
      name = 'LUMPED'
 
   end select
-
+  
 end subroutine prgen_ion_name

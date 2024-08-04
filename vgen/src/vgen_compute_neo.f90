@@ -63,6 +63,12 @@ subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, &
   neo_s_zeta_in       = EXPRO_szeta(i)
   neo_shape_sin3_in   = EXPRO_shape_sin3(i) 
   neo_shape_s_sin3_in = EXPRO_shape_ssin3(i)
+  neo_shape_sin4_in   = EXPRO_shape_sin4(i) 
+  neo_shape_s_sin4_in = EXPRO_shape_ssin4(i)
+  neo_shape_sin5_in   = EXPRO_shape_sin5(i) 
+  neo_shape_s_sin5_in = EXPRO_shape_ssin5(i)
+  neo_shape_sin6_in   = EXPRO_shape_sin6(i) 
+  neo_shape_s_sin6_in = EXPRO_shape_ssin6(i)
   neo_shape_cos0_in   = EXPRO_shape_cos0(i) 
   neo_shape_s_cos0_in = EXPRO_shape_scos0(i)
   neo_shape_cos1_in   = EXPRO_shape_cos1(i) 
@@ -71,6 +77,12 @@ subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, &
   neo_shape_s_cos2_in = EXPRO_shape_scos2(i)
   neo_shape_cos3_in   = EXPRO_shape_cos3(i) 
   neo_shape_s_cos3_in = EXPRO_shape_scos3(i)
+  neo_shape_cos4_in   = EXPRO_shape_cos4(i) 
+  neo_shape_s_cos4_in = EXPRO_shape_scos4(i)
+  neo_shape_cos5_in   = EXPRO_shape_cos5(i) 
+  neo_shape_s_cos5_in = EXPRO_shape_scos5(i)
+  neo_shape_cos6_in   = EXPRO_shape_cos6(i) 
+  neo_shape_s_cos6_in = EXPRO_shape_scos6(i)
   neo_zmag_over_a_in = EXPRO_zmag(i)/EXPRO_rmin(EXPRO_n_exp)
   neo_s_zmag_in      = EXPRO_dzmag(i) 
   
@@ -221,11 +233,17 @@ subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, &
   
   jbs_norm = charge_norm_fac*dens_norm*vth_norm &
        *EXPRO_rmin(EXPRO_n_exp)/1e6
-  jbs_neo(i)     = neo_jpar_dke_out*jbs_norm
-  jbs_sauter(i)  = neo_jpar_thS_out*jbs_norm
-  jtor_neo(i)    = neo_jtor_dke_out*jbs_norm
-  jtor_sauter(i) = neo_jtor_thS_out*jbs_norm
-  pflux_sum(i)   = 0.0
+  
+  jbs_neo(i)         = neo_jpar_dke_out*jbs_norm
+  jtor_neo(i)        = neo_jtor_dke_out*jbs_norm
+  
+  jbs_sauter(i)      = neo_jpar_thS_out*jbs_norm
+  jtor_sauter(i)     = neo_jtor_thS_out*jbs_norm
+  
+  jbs_sauter_mod(i)  = neo_jpar_thSmod_out*jbs_norm
+  jtor_sauter_mod(i) = neo_jtor_thSmod_out*jbs_norm
+  
+  pflux_sum(i)       = 0.0
   do j=1,neo_n_species_in
      pflux_sum(i) = pflux_sum(i) + neo_z_in(j)*neo_pflux_dke_out(j)
   enddo
@@ -247,8 +265,10 @@ subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, &
         stop
      endif
 
-     jsigma_neo(i)     = neo_jpar_dke_out*jbs_norm
-     jsigma_sauter(i)  = neo_jpar_thS_out*jbs_norm
+     e_norm    = temp_norm*1000.0/EXPRO_rmin(EXPRO_n_exp)    ! V/m = Tnorm[ev]/(e a[m])
+     jsigma_neo(i)         = neo_jpar_dke_out*jbs_norm/e_norm
+     jsigma_sauter(i)      = neo_jpar_thS_out*jbs_norm/e_norm
+     jsigma_sauter_mod(i)  = neo_jpar_thSmod_out*jbs_norm/e_norm
      
      neo_epar0_in = etemp
      

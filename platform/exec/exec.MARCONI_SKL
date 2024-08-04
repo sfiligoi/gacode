@@ -32,4 +32,9 @@ export KMP_AFFINITY=compact
 #mpirun -ppn $ppn -np $nmpi $exec 
 #Using for now ... instead of 48 processors per node.
 #mostly the processor numbers are actually powers of 2.
-mpirun -ppn 48 -np $nmpi $exec 
+#mpirun -ppn 48 -np $nmpi $exec
+echo $nomp
+echo $CORES_PER_NODE
+echo "> srun --cpu_bind=cores -n $nmpi -c $nomp $exec"
+#srun --cpu_bind=cores -n $nmpi -c $(($CORES_PER_NODE/$mpinode*2)) $exec
+srun --cpu_bind=cores -n $nmpi -c $nomp $exec

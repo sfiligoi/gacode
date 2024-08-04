@@ -21,10 +21,10 @@ objs:
 	${F2PYM} --quiet --overwrite-signature -m ${OBJ} -h sgn.pyf ${SRC}
 	${F2PY}  --quiet -lgomp -c sgn.pyf ${SRC}
 
-	cp *.so ${GACODE_ROOT}/python/
+	cp *.so ${GACODE_ROOT}/f2py/pygacode/
 
 clean:
-	rm -f sgn.pyf *~ *.so ${GACODE_ROOT}/python/*.so
+	rm -f sgn.pyf *~ *.so ${GACODE_ROOT}/f2py/pygacode/*.so
 
 exit:
 	echo "No f2py"

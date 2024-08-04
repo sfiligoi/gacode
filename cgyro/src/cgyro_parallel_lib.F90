@@ -73,7 +73,7 @@ contains
 
     allocate(fsendf(nj_loc,ni_loc,nproc))
     allocate(fsendr(ni_loc,nj_loc,nproc))
-    allocate(fsendr_real(ni_loc,nj_loc,nproc))
+    if (.not. allocated(fsendr_real)) allocate(fsendr_real(ni_loc,nj_loc,nproc))
 
 !$acc enter data create(fsendf,fsendr)
 
@@ -118,17 +118,6 @@ contains
 !$acc host_data use_device(fsendf,ft)
 #endif
 
-#ifdef SUMMIT
-    
-    call MPI_ALLTOALL(fsendf, &
-         2*nsend, &
-         MPI_DOUBLE_PRECISION, &
-         ft, &
-         2*nsend, &
-         MPI_DOUBLE_PRECISION, &
-         lib_comm, &
-         ierr)
-#else
     call MPI_ALLTOALL(fsendf, &
          nsend, &
          MPI_DOUBLE_COMPLEX, &
@@ -137,7 +126,6 @@ contains
          MPI_DOUBLE_COMPLEX, &
          lib_comm, &
          ierr)
-#endif
 
 #ifdef DISABLE_GPUDIRECT_MPI
 !$acc update device(ft)
@@ -187,16 +175,6 @@ contains
 !$acc host_data use_device(fsendr,f)
 #endif
 
-#ifdef SUMMIT
-    call MPI_ALLTOALL(fsendr, &
-         2*nsend, &
-         MPI_DOUBLE_PRECISION, &
-         f, &
-         2*nsend, &
-         MPI_DOUBLE_PRECISION, &
-         lib_comm, &
-         ierr)
-#else
     call MPI_ALLTOALL(fsendr, &
          nsend, &
          MPI_DOUBLE_COMPLEX, &
@@ -205,7 +183,6 @@ contains
          MPI_DOUBLE_COMPLEX, &
          lib_comm, &
          ierr)
-#endif
 
 #ifdef DISABLE_GPUDIRECT_MPI
 !$acc update device(f)
@@ -401,6 +378,24 @@ contains
 
   end subroutine parallel_slib_init
 
+  ! test an async req, to progress async operations
+  subroutine parallel_slib_test(req)
+    use mpi
+    !-------------------------------------------------------
+    implicit none
+    !
+    integer, intent(inout) :: req
+    !
+    logical :: iflag
+    integer :: ierr
+    integer :: istat(MPI_STATUS_SIZE)
+    !-------------------------------------------------------
+
+    call MPI_REQUEST_GET_STATUS(req, iflag, istat, ierr)
+    ! we discard all the outputs... it is just a way to progress async mpi
+
+  end subroutine parallel_slib_test
+
 !=========================================================
 
   subroutine parallel_slib_f_nc(x,xt)
@@ -427,14 +422,64 @@ contains
 
   end subroutine parallel_slib_f_nc
 
+  subroutine parallel_slib_f_nc_async(x,xt,req)
+
+    use mpi
+
+    !-------------------------------------------------------
+    implicit none
+    !
+    complex, intent(in), dimension(nkeep,nsplit*nn) :: x
+    complex, intent(inout), dimension(nkeep,nsplit,nn) :: xt
+    integer, intent(inout) :: req
+    !
+    integer :: ierr
+    !-------------------------------------------------------
+
+    call MPI_IALLTOALL(x, &
+         nkeep*nsplit, &
+         MPI_DOUBLE_COMPLEX, &
+         xt, &
+         nkeep*nsplit, &
+         MPI_DOUBLE_COMPLEX, &
+         slib_comm, &
+         req, &
+         ierr)
+
+  end subroutine parallel_slib_f_nc_async
+
+  ! require x and xt to ensure they exist until this finishes
+  subroutine parallel_slib_f_nc_wait(x,xt,req)
+
+    use mpi
+
+    !-------------------------------------------------------
+    implicit none
+    !
+    complex, intent(in), dimension(nkeep,nsplit*nn) :: x
+    complex, intent(inout), dimension(nkeep,nsplit,nn) :: xt
+    integer, intent(inout) :: req
+    !
+    integer :: ierr
+    integer :: istat(MPI_STATUS_SIZE)
+    !-------------------------------------------------------
+
+    call MPI_WAIT(req, &
+         istat, &
+         ierr)
+
+  end subroutine parallel_slib_f_nc_wait
+
 #ifdef _OPENACC
-  subroutine parallel_slib_f_nc_gpu(x,xt)
+
+  subroutine parallel_slib_f_nc_async_gpu(x,xt,req)
     use mpi
     !-------------------------------------------------------
     implicit none
     !
     complex, intent(in), dimension(nkeep,nsplit*nn) :: x
     complex, intent(inout), dimension(nkeep,nsplit,nn) :: xt
+    integer, intent(inout) :: req
     !
     integer :: ierr
     !-------------------------------------------------------
@@ -445,36 +490,55 @@ contains
 #else
 !$acc host_data use_device(x,xt)
 #endif
- 
-#ifdef SUMMIT
-   call MPI_ALLTOALL(x, &
-        2*nkeep*nsplit, &
-        MPI_DOUBLE_PRECISION, &
-        xt, &
-        2*nkeep*nsplit, &
-        MPI_DOUBLE_PRECISION, &
-        slib_comm, &
-        ierr)
-#else
-   call MPI_ALLTOALL(x, &
+
+   call MPI_IALLTOALL(x, &
          nkeep*nsplit, &
          MPI_DOUBLE_COMPLEX, &
          xt, &
          nkeep*nsplit, &
          MPI_DOUBLE_COMPLEX, &
          slib_comm, &
+         req, &
          ierr)
-#endif
 
 #ifdef DISABLE_GPUDIRECT_MPI
-!$acc update device(xt)
+   !do nothing yet, async
 #else
 !$acc end host_data
 #endif
 
 !$acc end data
 
-  end subroutine parallel_slib_f_nc_gpu
+  end subroutine parallel_slib_f_nc_async_gpu
+
+  ! require x and xt to ensure they exist until this finishes
+  subroutine parallel_slib_f_nc_wait_gpu(x,xt,req)
+    use mpi
+    !-------------------------------------------------------
+    implicit none
+    !
+    complex, intent(in), dimension(nkeep,nsplit*nn) :: x
+    complex, intent(inout), dimension(nkeep,nsplit,nn) :: xt
+    integer, intent(inout) :: req
+    !
+    integer :: ierr
+    integer :: istat(MPI_STATUS_SIZE)
+    !-------------------------------------------------------
+
+!$acc data present(xt)
+
+    call MPI_WAIT(req, &
+         istat, &
+         ierr)
+
+#ifdef DISABLE_GPUDIRECT_MPI
+!$acc update device(xt)
+#endif
+
+!$acc end data
+
+  end subroutine parallel_slib_f_nc_wait_gpu
+
 #endif
 
  !=========================================================
@@ -523,16 +587,6 @@ contains
 !$acc host_data use_device(xt,x)
 #endif
 
-#ifdef SUMMIT
-    call MPI_ALLTOALL(xt, &
-         2*nkeep*nsplit, &
-         MPI_DOUBLE_PRECISION, &
-         x, &
-         2*nkeep*nsplit, &
-         MPI_DOUBLE_PRECISION, &
-         slib_comm, &
-         ierr)
-#else
     call MPI_ALLTOALL(xt, &
          nkeep*nsplit, &
          MPI_DOUBLE_COMPLEX, &
@@ -541,7 +595,6 @@ contains
          MPI_DOUBLE_COMPLEX, &
          slib_comm, &
          ierr)
-#endif
 
 #ifdef DISABLE_GPUDIRECT_MPI
 !$acc update device(x)
@@ -560,5 +613,22 @@ contains
     
   end subroutine parallel_lib_nj_loc
 
+  subroutine parallel_lib_clean
+    implicit none
+    
+    if(allocated(fsendf)) then
+!$acc exit data delete(fsendf)
+       deallocate(fsendf)
+    endif
+
+    if(allocated(fsendr)) then
+!$acc exit data delete(fsendr)
+       deallocate(fsendr)
+    endif
+
+    if(allocated(fsendr_real))     deallocate(fsendr_real)
+    
+  end subroutine parallel_lib_clean
+  
 end module parallel_lib
 

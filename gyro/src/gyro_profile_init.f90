@@ -32,7 +32,7 @@ subroutine gyro_profile_init
   implicit none
   !
   integer :: ic
-  real :: loglam,x0,tri
+  real :: loglam
   real :: cc
   !---------------------------------------------------
 
@@ -149,14 +149,6 @@ subroutine gyro_profile_init
 
      ! Explicit sign convention
      q0 = q0*(ipccw)*(btccw)
-
-     ! Profile shears (constant)
-     do is=1,n_ion
-        sdlnndr(is) = sdlnndr_vec(is) 
-        sdlntdr(is) = sdlntdr_vec(is)
-     enddo
-     sdlnndr(n_spec) = sdlnndr_vec(0)
-     sdlntdr(n_spec) = sdlntdr_vec(0)
 
      do i=1,n_x
 
@@ -324,8 +316,6 @@ subroutine gyro_profile_init
      tem_s(1:n_spec,:)    = tem_s(n_spec:1:-1,:)
      dlntdr_s(1:n_spec,:) = dlntdr_s(n_spec:1:-1,:)
      dlnndr_s(1:n_spec,:) = dlnndr_s(n_spec:1:-1,:)
-     sdlntdr(1:n_spec)    = sdlntdr(n_spec:1:-1)
-     sdlnndr(1:n_spec)    = sdlnndr(n_spec:1:-1)
   endif
   !------------------------------------------------------------------
 
@@ -636,19 +626,6 @@ subroutine gyro_profile_init
   enddo
   !-------------------------------------------------------------
 
-  ! Profile shearing
-  if (i_proc == 0) open(unit=10,file='out.gyro.star',status='replace')
-  do i=1,n_x
-
-     x0 = (r(i)-r_norm)/x_length*2*pi
-     tri = (4.0/pi)*(sin(x0)-sin(3*x0)/9.0)
-     dlntdr_s(:,i) = dlntdr_s(:,ir_norm)+tri*sdlntdr(:)*x_length/rhosda_s(ir_norm)/(2*pi)
-     dlnndr_s(:,i) = dlnndr_s(:,ir_norm)+tri*sdlnndr(:)*x_length/rhosda_s(ir_norm)/(2*pi)
-
-     if (i_proc == 0) write(10,'(2(1pe12.5,1x))') x0,dlnndr_s(1,i) 
-  enddo
-  if (i_proc == 0) close(10)
-     
   if (debug_flag == 1 .and. i_proc == 0) then
      print *,"[gyro_profile_init done]"
   endif

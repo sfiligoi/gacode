@@ -5,7 +5,9 @@ inputfile = sys.argv[1]
 
 shot = '0'
 time = '0'
-for line in open(inputfile,'r').readlines():
+with open(inputfile,'r') as f:
+    datalines = f.readlines()
+for line in datalines:
    if 'SHOT' in line:
       line = line.strip()
       if len(line) > 1:
@@ -21,7 +23,6 @@ for line in open(inputfile,'r').readlines():
           if shot == '0':
              shot = x[3].split('#')[1]
 
-outfile = open('profile_shot','w')
-outfile.write(shot+'\n')
-outfile.write(time+'\n')
-outfile.close()
+with open('profile_shot','w') as outfile:
+   outfile.write(shot+'\n')
+   outfile.write(time+'\n')

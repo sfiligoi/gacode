@@ -106,11 +106,11 @@ if not os.path.exists(directory + '/input.gyro.orig'):
 
 shutil.copyfile('input.gyro.orig', 'input.gyro')
 
-input_gyro = open('input.gyro', 'a')
-input_gyro.write("\n")
-input_gyro.write("FIELDEIGEN_WR=%E\n" % startWR)
-input_gyro.write("FIELDEIGEN_WI=%E\n" % startWI)
-input_gyro.close()
+with open('input.gyro', 'a') as input_gyro:
+  input_gyro.write("\n")
+  input_gyro.write("FIELDEIGEN_WR=%E\n" % startWR)
+  input_gyro.write("FIELDEIGEN_WI=%E\n" % startWI)
+
 #----------------------------------------
 
 if start_over :
@@ -154,17 +154,15 @@ while not (currentRADIUS < RADIUSmin - MinFloat or currentRADIUS > RADIUSmax + M
 			print("**********************************************************")
 			print("RADIUS = %F" % currentRADIUS)
 			print("L_Y = %F" % currentL_Y)
-			input_gyro = open('input.gyro', 'a')
-			input_gyro.write("\n")
-			input_gyro.write("RADIUS=%F\n" % currentRADIUS)
-			input_gyro.write("L_Y=%F\n" % currentL_Y)
-			input_gyro.close()
+			with open('input.gyro', 'a') as input_gyro:
+			  input_gyro.write("\n")
+			  input_gyro.write("RADIUS=%F\n" % currentRADIUS)
+			  input_gyro.write("L_Y=%F\n" % currentL_Y)
 			#Run GYRO
 			subprocess.call(["gyro", "-e", ".", "-n", "%i" %nProc])
-			fieldeigen_out = open('fieldeigen.out', 'r')
-			lines = fieldeigen_out.readlines()
+			with open('fieldeigen.out', 'r') as fieldeigen_out:
+			  lines = fieldeigen_out.readlines()
 			results = list(map(float, lines[-1].split())) #Last line
-			fieldeigen_out.close()
 			resultsWR=results[0]
 			resultsWI=results[1]
 			det=results[2]
@@ -214,16 +212,13 @@ while not (currentRADIUS < RADIUSmin - MinFloat or currentRADIUS > RADIUSmax + M
 		if converged : #Write eigenvalue to output files if converged
 			if resultsWI >= (WI_STABLE_LIMIT - MinFloat) :
 				print("Writing to output")
-				radius_krho_fieldeigen_omega = open('radius_krho_fieldeigen_omega.out', 'a')
-				radius_krho_fieldeigen_omega.write("%F\t%F\t%E\t%E\t%E\t%E\n" % (currentRADIUS, currentL_Y, results[0], results[1], results[2], results[3]))
-				radius_krho_fieldeigen_omega.close()
+				with open('radius_krho_fieldeigen_omega.out', 'a') as radius_krho_fieldeigen_omega:
+					radius_krho_fieldeigen_omega.write("%F\t%F\t%E\t%E\t%E\t%E\n" % (currentRADIUS, currentL_Y, results[0], results[1], results[2], results[3]))
 
-				out_gyro_gbflux = open('out.gyro.gbflux', 'r')
-				lines = out_gyro_gbflux.readlines()
-				fieldeigen_gbflux = open('fieldeigen_gbflux.out', 'a')
-				fieldeigen_gbflux.write("%s\n" % lines[-1]) #Last line
-				fieldeigen_gbflux.close()
-				out_gyro_gbflux.close()
+				with open('out.gyro.gbflux', 'r') as out_gyro_gbflux:
+					lines = out_gyro_gbflux.readlines()
+				with open('fieldeigen_gbflux.out', 'a') as fieldeigen_gbflux:
+					fieldeigen_gbflux.write("%s\n" % lines[-1]) #Last line
 				
 				#####NOT YET IMPLEMENTED, CHECK IF NEEDED?
 				#profiles_gen -i input.profiles -loc_rad "$currentRADIUS" | grep "rho " >> rho.out
@@ -237,11 +232,10 @@ while not (currentRADIUS < RADIUSmin - MinFloat or currentRADIUS > RADIUSmax + M
 				downwardsL_Y=False
 				currentL_Y = L_Ystart + L_Ystep
 				shutil.copyfile('input.gyro.orig', 'input.gyro')
-				input_gyro = open('input.gyro', 'a')
-				input_gyro.write("\n")
-				input_gyro.write("FIELDEIGEN_WR=%E\n" % restartRadiusWR)
-				input_gyro.write("FIELDEIGEN_WI=%E\n" % restartRadiusWI)
-				input_gyro.close()
+				with open('input.gyro', 'a') as input_gyro:
+				  input_gyro.write("\n")
+				  input_gyro.write("FIELDEIGEN_WR=%E\n" % restartRadiusWR)
+				  input_gyro.write("FIELDEIGEN_WI=%E\n" % restartRadiusWI)
 				continue
 			else :
 				break #Can't continue on branch
@@ -253,11 +247,10 @@ while not (currentRADIUS < RADIUSmin - MinFloat or currentRADIUS > RADIUSmax + M
 				downwardsL_Y=False
 				currentL_Y = L_Ystart + L_Ystep
 				shutil.copyfile('input.gyro.orig', 'input.gyro')
-				input_gyro = open('input.gyro', 'a')
-				input_gyro.write("\n")
-				input_gyro.write("FIELDEIGEN_WR=%E\n" % restartRadiusWR)
-				input_gyro.write("FIELDEIGEN_WI=%E\n" % restartRadiusWI)
-				input_gyro.close()
+				with open('input.gyro', 'a') as input_gyro:
+				  input_gyro.write("\n")
+				  input_gyro.write("FIELDEIGEN_WR=%E\n" % restartRadiusWR)
+				  input_gyro.write("FIELDEIGEN_WI=%E\n" % restartRadiusWI)
 				continue
 			else :
 				break #Can't continue on branch
@@ -267,19 +260,17 @@ while not (currentRADIUS < RADIUSmin - MinFloat or currentRADIUS > RADIUSmax + M
 			restartRadiusWI=resultsWI
 		
 		shutil.copyfile('input.gyro.orig', 'input.gyro')
-		input_gyro = open('input.gyro', 'a')
-		input_gyro.write("\n")
-		input_gyro.write("FIELDEIGEN_WR=%E\n" % resultsWR)
-		input_gyro.write("FIELDEIGEN_WI=%E\n" % resultsWI)
-		input_gyro.close()
+		with open('input.gyro', 'a') as input_gyro:
+		  input_gyro.write("\n")
+		  input_gyro.write("FIELDEIGEN_WR=%E\n" % resultsWR)
+		  input_gyro.write("FIELDEIGEN_WI=%E\n" % resultsWI)
 
 		if (currentL_Y - L_Ystep) < (L_Ymin - MinFloat) : #Change to scanning upwards
 			downwardsL_Y = False
 			currentL_Y = L_Ystart
-			input_gyro = open('input.gyro', 'a')
-			input_gyro.write("FIELDEIGEN_WR=%E\n" % restartRadiusWR)
-			input_gyro.write("FIELDEIGEN_WI=%E\n" % restartRadiusWI)
-			input_gyro.close()
+			with open('input.gyro', 'a') as input_gyro:
+			  input_gyro.write("FIELDEIGEN_WR=%E\n" % restartRadiusWR)
+			  input_gyro.write("FIELDEIGEN_WI=%E\n" % restartRadiusWI)
 
 		if downwardsL_Y :
 			currentL_Y = currentL_Y - L_Ystep
@@ -291,30 +282,27 @@ while not (currentRADIUS < RADIUSmin - MinFloat or currentRADIUS > RADIUSmax + M
 			downwardsRadius = False
 			currentRADIUS = RADIUSstart + RADIUSstep
 			shutil.copyfile('input.gyro.orig', 'input.gyro')
-			input_gyro = open('input.gyro', 'a')
-			input_gyro.write("\n")
-			input_gyro.write("FIELDEIGEN_WR=%E\n" % startWR)
-			input_gyro.write("FIELDEIGEN_WI=%E\n" % startWI)
-			input_gyro.close()
+			with open('input.gyro', 'a') as input_gyro:
+			  input_gyro.write("\n")
+			  input_gyro.write("FIELDEIGEN_WR=%E\n" % startWR)
+			  input_gyro.write("FIELDEIGEN_WI=%E\n" % startWI)
 			continue
 		else :
 			break #Can't continue on branch, stop execution
 
 	shutil.copyfile('input.gyro.orig', 'input.gyro')
 
-	input_gyro = open('input.gyro', 'a')
-	input_gyro.write("\n")
-	input_gyro.write("FIELDEIGEN_WR=%E\n" % restartRadiusWR)
-	input_gyro.write("FIELDEIGEN_WI=%E\n" % restartRadiusWI)
-	input_gyro.close()
+	with open('input.gyro', 'a') as input_gyro:
+	  input_gyro.write("\n")
+	  input_gyro.write("FIELDEIGEN_WR=%E\n" % restartRadiusWR)
+	  input_gyro.write("FIELDEIGEN_WI=%E\n" % restartRadiusWI)
 
 	if (currentRADIUS - RADIUSstep) < (RADIUSmin - MinFloat) : #Change to scanning upwards
 		downwardsRadius = False
 		currentRADIUS = RADIUSstart
-		input_gyro = open('input.gyro', 'a')
-		input_gyro.write("FIELDEIGEN_WR=%E\n" % startWR)
-		input_gyro.write("FIELDEIGEN_WI=%E\n" % startWI)
-		input_gyro.close()
+		with open('input.gyro', 'a') as input_gyro:
+		  input_gyro.write("FIELDEIGEN_WR=%E\n" % startWR)
+		  input_gyro.write("FIELDEIGEN_WI=%E\n" % startWI)
 
 	if downwardsRadius :
 		currentRADIUS = currentRADIUS - RADIUSstep 

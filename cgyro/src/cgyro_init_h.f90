@@ -49,16 +49,23 @@ subroutine cgyro_init_h
 
      call cgyro_info('Restart data found.')
      call cgyro_read_restart
+     if (error_status /=0 ) return
      gtime = 0.0
 
+     ! Rescale to prevent overflow
+     if (nonlinear_flag == 0) then
+        h_x = h_x/sum(abs(h_x))
+     endif
+     
   case (2)
 
      call cgyro_info('Initializing with restart data.')
      call cgyro_read_restart
+     if (error_status /=0 ) return
      i_current = 0
      t_current = 0.0
      gtime = 0.0
-         
+
   case (0)
 
      i_current = 0
@@ -122,7 +129,11 @@ subroutine cgyro_init_h
                  ir = ir_c(ic) 
                  it = it_c(ic)
                  ang = theta(it)+2*pi*px(ir)
-                 h_x(ic,iv_loc) = rho/(1.0+ang**4) 
+                 if (amp >  0.0) then
+                    h_x(ic,iv_loc) = rho/(1.0+ang**4)
+                 else
+                    h_x(ic,iv_loc) = rho*ang/(1.0+ang**4)
+                 endif
               enddo
            endif
 
@@ -164,7 +175,7 @@ subroutine cgyro_init_h
      endif
   end select
 
-  call cgyro_field_c
+  call cgyro_field_c_cpu
 
   ! Initialize time-history of fields (-3,-2,-1) to initial field.
   field_old  = field

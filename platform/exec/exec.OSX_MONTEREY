@@ -1,0 +1,18 @@
+#!/bin/sh
+# GACODE Parallel execution script (OSX_MONTEREY)
+#
+# NOTES:
+# Used openmpi, so use mpirun rather than mpiexec
+
+simdir=${1}
+nmpi=${2}
+exec=${3}
+nomp=${4}
+numa=${5}
+mpinuma=${6}
+
+echo $simdir
+
+cd $simdir
+export OMP_NUM_THREADS=$nomp 
+mpirun-openmpi-mp -np $nmpi $exec

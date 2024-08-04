@@ -25,7 +25,7 @@ then
   echo
   echo "         -ext <prefix.filetype>"
   echo "         Output file type (and optional prefix)"
-  echo "         <filetype>=eps, pdf, png, svg, dump"
+  echo "         <filetype>=eps, pdf, png, svg, dump, nox"
   echo
   echo "         -notex"
   echo "         Disable latex fonts"
@@ -33,7 +33,7 @@ then
   echo "PLOT MODE"
   echo 
   echo "         -plot <type>"
-  echo "         <type> = text     (text summary of fluxes)"
+  echo "         <type> = distill  (data distillation)"
   echo "                = freq     (frequency versus time)"
   echo "                = ky_freq  (frequency versus ky)"
   echo "                = ball     (ballooning modes OR ZF test)"
@@ -48,6 +48,7 @@ then
   echo "                = phi      (time-dependent ZF vs. finite-n intensities)"
   echo "                = ky_phi   (time-dependent ky-phi intensities)"
   echo "                = kx_phi   (average kx-phi intensities)"
+  echo "                = poly_phi (average Legendre intensities)"
   echo "                = kxky_phi (kx-ky spectra of ave(|phi|))"
   echo "                = rcorr_phi (time-average radial correlation function)"
   echo "                = xflux    (radial profile of fluxes for all species)"
@@ -58,13 +59,13 @@ then
   echo "                = rt       (x-t fluctuation contours)"
   echo "                = vid      (create video from png files)"
   echo "                = template (create simple template file to read data)"
-  echo "                = fix      (fix old simulation directory)"
   echo
   echo "VISUALIZATION MODE (requires Mayavi)"
   echo 
   echo "         -vis <type>"
-  echo "         <type> = torcut   (toroidal cut: nx,nz)"
-  echo "                = wheel    (fluctuation wheel: nx,ny,nz)"
+  echo "         <type> = torcut     (toroidal cut: nx,nz)"
+  echo "                = wheel      (fluctuation wheel: nx,ny,nz)"
+  echo "                = supertorus (partial torus: nx,nz,nphi)"
   echo
   echo "OPTIONS"
   echo
@@ -144,8 +145,15 @@ then
   echo "         -norm <int>"
   echo "         Species index for normalization (starts at 0)"  
   echo
-  echo "         -rms"
-  echo "         Toggle RMS normalization (rather than abs) in -plot phi"  
+  echo "         -norms"
+  echo "         Toggle ABS rather than RMS normalization in -plot phi"  
+  echo
+  echo "         -nobar"
+  echo "         Don't use barplot for -plot ky_flux"  
+  echo
+  echo "         -deriv"
+  echo "         Plot second derivative"  
+  echo "         *Affects: kx_phi"  
   echo
   echo "OPTIONS FOR -plot fluct, -vis"
   echo
@@ -157,6 +165,12 @@ then
   echo
   echo "         -ny <int>"
   echo "         Number of alpha interpolation points (default FFT)"
+  echo
+  echo "         -nphi <int>"
+  echo "         Number of toroidal points for supertorus"
+  echo
+  echo "         -phimax <float>"
+  echo "         End toroidal angle for supertorus (-2*pi*phimax)"
   echo
   echo "         -px <int>"
   echo "         Number of horixontal pixels (default 800)"
@@ -224,13 +238,14 @@ then
   echo "  $ cgyro_plot -e . -plot ky_flux           [energy flux versus ky]"
   echo
   echo "VISUALIZATIONS [build gapy for speed]"
-  echo "  $ cyro_plot -plot fluct -t 16 -moment phi"
-  echo "  $ cyro_plot -plot fluct -t 16 -moment phi -land -nx 512 -ny 1024"
+  echo "  $ cgyro_plot -plot fluct -t 16 -moment phi"
+  echo "  $ cgyro_plot -plot fluct -t 16 -moment phi -land -nx 512 -ny 1024"
   echo
   echo "VISUALIZATIONS [*requires Mayavi*]"
-  echo "  $ cyro_plot -vis torcut -moment n -nx 256 -nz 512"
-  echo "  $ cyro_plot -vis wheel  -moment n -land -nx 256 -ny 256 -nz 256"
-  
+  echo "  $ cgyro_plot -vis torcut -moment n -nx 256 -nz 512"
+  echo "  $ cgyro_plot -vis wheel  -moment n -land -nx 256 -ny 256 -nz 256"
+  echo "  $ cgyro_plot -vis supertorus -moment n -nx 256 -nz 512 -nphi 50 -phimax 0.5"
+
   exit 1
 fi
 #==============================================================================
@@ -268,6 +283,8 @@ MESH=0
 NX=-1
 NY=-1
 NZ=-1
+NPHI=50
+PHIMAX=0.5
 ND=0
 NOMP=1
 NMPI=1
@@ -283,7 +300,9 @@ PX=800
 PY=800
 DISS=0
 NORM='elec'
-RMS=0
+NO_RMS=0
+BAR=1
+DERIV=0
 
 CFLUX=auto
 DN=1
@@ -294,7 +313,7 @@ ONLYZONAL=0
 
 PRE=
 FRAMERATE=20
-QUALITY=20 
+QUALITY=20
 #==============================================================================
 
 #==============================================================================
@@ -316,11 +335,13 @@ while [ $# -gt 0 ] ; do
 
   -fc) FC=1 ;;
 
+  -deriv) DERIV=1 ;;
   -diss) DISS=1 ;;
+  -nobar) BAR=0 ;;
   -notex) TEX=0 ;;
-  -rms) RMS=1 ;;
+  -norms) NO_RMS=1 ;;
   -norm) shift ; NORM=$1 ;;
-  
+
   -moment) shift ; MOMENT=$1 ;;
   -ie) shift ; IE=$1 ;;
 
@@ -355,6 +376,8 @@ while [ $# -gt 0 ] ; do
   -nx) shift ; NX=$1 ;;
   -ny) shift ; NY=$1 ;;
   -nz) shift ; NZ=$1 ;;
+  -nphi) shift ; NPHI=$1 ;;
+  -phimax) shift ; PHIMAX=$1 ;;
   -nd) shift ; ND=$1 ;;
   -fmin) shift ; FMIN=$1 ;;
   -fmax) shift ; FMAX=$1 ;;
@@ -391,24 +414,27 @@ fi
 SIMDIR=$SIMROOT/$LOCDIR
 cd $SIMDIR
 
-PYROOT=$GACODE_ROOT/python/cgyro
+PYROOT=$GACODE_ROOT/f2py/pygacode/cgyro
 
 #==============================================================================
-PLT="$PYROOT/data_plot_single.py $TEX $FONTSIZE $LX $LY"
+PLT="-m pygacode.cgyro.data_plot_single $TEX $FONTSIZE $LX $LY"
 
 case "$VIS_TYPE" in
 
    null) ;;
-	
+   
    slices)
-	python $PYROOT/vis_slices.py ;;
-	
-   torcut)
-	export OMP_NUM_THREADS=$NOMP ; python $PYROOT/vis_torcut.py $EXT $MOMENT $SPECIES $NX $NZ $TIME $FMIN $FMAX $CMAP $FONTSIZE $LEGACY_FLAG $DN $MAG $NOZONAL $ONLYZONAL ;;
+	python -m pygacode.cgyro.vis_slices ;;
 
+   torcut)
+	export OMP_NUM_THREADS=$NOMP ; python -m pygacode.cgyro.vis_torcut $EXT $MOMENT $SPECIES $NX $NZ $TIME $FMIN $FMAX $CMAP $FONTSIZE $LEGACY_FLAG $DN $MAG $NOZONAL $ONLYZONAL ;;
+   
    wheel)
-	export OMP_NUM_THREADS=$NOMP ; python $PYROOT/vis_wheel.py $EXT $MOMENT $SPECIES $NX $NY $NZ $TIME $FMIN $FMAX $CMAP $FONTSIZE ;;
-	   
+	export OMP_NUM_THREADS=$NOMP ; python -m pygacode.cgyro.vis_wheel $EXT $MOMENT $SPECIES $NX $NY $NZ $TIME $FMIN $FMAX $CMAP $FONTSIZE ;;
+
+   supertorus)
+	export OMP_NUM_THREADS=$NOMP ; python -m pygacode.cgyro.vis_supertorus $EXT $MOMENT $SPECIES $NX $NZ $NPHI $PHIMAX $TIME $FMIN $FMAX $CMAP $FONTSIZE $LEGACY_FLAG $DN $MAG $NOZONAL $ONLYZONAL ;;
+   
     *)
         echo "Unrecognized argument to -vis" ; exit 1 ;;
 esac
@@ -416,7 +442,10 @@ esac
 case "$PLOT_TYPE" in
 
    null) ;;
-	
+
+   distill)
+       python -m pygacode.cgyro.data_distill $W $THETA ;;
+
    ball)
 	python $PLT $PLOT_TYPE $TIME $FIELD $TMAX $EXT ;;
 
@@ -442,10 +471,10 @@ case "$PLOT_TYPE" in
         python $PLT $PLOT_TYPE $W $WMAX $FIELD $MOMENT $YMIN $YMAX $FC $EXT $LOC $NSCALE $CFLUX $NORM ;;
 
    ky_flux)
-	python $PLT $PLOT_TYPE $W $WMAX $FIELD $MOMENT $YMIN $YMAX $FC $EXT $DISS $CFLUX ;;
+	python $PLT $PLOT_TYPE $W $WMAX $FIELD $MOMENT $YMIN $YMAX $FC $EXT $DISS $BAR $CFLUX ;;
 
    phi)
-	python $PLT $PLOT_TYPE $W $WMAX $FIELD $THETA $YMIN $YMAX $RMS $EXT ;;
+	python $PLT $PLOT_TYPE $W $WMAX $FIELD $THETA $YMIN $YMAX $NO_RMS $EXT ;;
 
    low | corrug)
        python $PLT $PLOT_TYPE $W $WMAX $SPECIES $MOMENT $EXT $YMIN $YMAX ;;
@@ -457,10 +486,13 @@ case "$PLOT_TYPE" in
 	python $PLT $PLOT_TYPE $FIELD $THETA $YMIN $YMAX $N $NORM $EXT ;;
 
    kx_phi)
-	python $PLT $PLOT_TYPE $FIELD $THETA $W $WMAX $YMIN $YMAX $N $EXT $DISS ;;
+	python $PLT $PLOT_TYPE $FIELD $THETA $W $WMAX $YMIN $YMAX $N $EXT $DISS $DERIV ;;
+
+   poly_phi)
+	python $PLT $PLOT_TYPE $FIELD $THETA $W $WMAX $YMIN $YMAX $N $EXT $DISS $DERIV ;;
 
    kxky_phi | rcorr_phi)
-	python $PLT $PLOT_TYPE $FIELD $THETA $W $WMAX $EXT ;;
+	python $PLT $PLOT_TYPE $FIELD $MOMENT $SPECIES $THETA $W $WMAX $EXT ;;
 
    zf)
 	python $PLT $PLOT_TYPE $W $WMAX $FIELD $EXT ;;
@@ -470,23 +502,17 @@ case "$PLOT_TYPE" in
 
    fluct)
        export OMP_NUM_THREADS=$NOMP ; \
-       python $PYROOT/plot_fluct.py \
+       python -m pygacode.cgyro.plot_fluct \
 	      $EXT $MOMENT $SPECIES $PX $PY $NX $NY $TIME $FMIN $FMAX $CMAP $FONTSIZE $LAND_FLAG $THETA ;;
 
    fluct_mpi)
-       mpiexec -np $NMPI python $PYROOT/plot_fluct_mpi.py \
+       mpiexec -np $NMPI python -m pygacode.cgyro.plot_fluct_mpi \
 	       $EXT $MOMENT $SPECIES $PX $PY $NX $NY $TIME $FMIN $FMAX $CMAP $FONTSIZE $LAND_FLAG $THETA ;;
 
    rt)
        export OMP_NUM_THREADS=$NOMP ; \
-       python $PYROOT/plot_rt.py \
+       python -m pygacode.cgyro.plot_rt \
 	      $EXT $MOMENT $SPECIES $YMIN $YMAX $NX $ND $TIME $FMIN $FMAX $CMAP $FONTSIZE $THETA ;;
-
-   text)
-   	python $PYROOT/plot_text.py $W $WMAX $EXT ;;
-
-   fix)
-   	python $PYROOT/fix.py ;;
 
    template)
    	cp $PYROOT/plot_template.py . ;;

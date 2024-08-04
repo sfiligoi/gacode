@@ -255,12 +255,6 @@ subroutine gyro_do
      call gyro_read_restart
      !------------------------------------------------------------
 
-     !---------------------------------------
-     ! Write precision data:
-     !
-     call gyro_write_precision(10,sum(abs(gbflux)))
-     !---------------------------------------
-
   endif
 
   startup_time = MPI_Wtime()-startup_time

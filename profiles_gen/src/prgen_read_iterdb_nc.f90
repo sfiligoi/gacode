@@ -153,58 +153,52 @@ subroutine prgen_read_iterdb_nc
   err = nf90_inq_varid(ncid,trim('pressb'),varid)
   err = nf90_get_var(ncid,varid,onetwo_pressb(:,1:onetwo_nbion))
 
-  err = nf90_inq_varid(ncid,trim('sbcx'),varid)
-  err = nf90_get_var(ncid,varid,onetwo_sbcx(:,1:onetwo_nion))
+!==============================================================
+!    volumetric_electron_heating_terms = SortedDict(list(zip(
+!        ['qohm', 'qdelt', 'qrad', 'qione', 'qbeame', 'qrfe', 'qfuse'],
+!        [[1, 7], [-1, 11], [-1, 10], [-1, 602], [1, 2], [1, 3], [1, 6]]  # [sign, index_id]
+!    )))
+!--------------------------------------------------------------
+  err = nf90_inq_varid(ncid,trim('qohm'),varid)
+  err = nf90_get_var(ncid,varid,qohm) ; qohm = 1e-6*qohm ! W/m^3 -> MW/m^3
 
-  err = nf90_inq_varid(ncid,trim('sion'),varid)
-  err = nf90_get_var(ncid,varid,onetwo_sion(:,1:onetwo_nion))
-
-  sbcx_d(:) = 0.0
-  sion_d(:) = 0.0
-  do i=1,onetwo_nprim
-     sbcx_d(:) = sbcx_d(:)+onetwo_sbcx(:,i)
-     sion_d(:) = sion_d(:)+onetwo_sion(:,i)
-  enddo
-
-  err = nf90_inq_varid(ncid,trim('sbeam'),varid)
-  err = nf90_get_var(ncid,varid,onetwo_sbeam)
-
-  err = nf90_inq_varid(ncid,trim('sbeame'),varid)
-  err = nf90_get_var(ncid,varid,onetwo_sbeame)
-
-  err = nf90_inq_varid(ncid,trim('zeff'),varid)
-  err = nf90_get_var(ncid,varid,onetwo_zeff)
-
-  err = nf90_inq_varid(ncid,trim('angrot'),varid)
-  err = nf90_get_var(ncid,varid,onetwo_angrot)
-
-  err = nf90_inq_varid(ncid,trim('dpedt'),varid)
-  err = nf90_get_var(ncid,varid,onetwo_dpedt)
-
-  err = nf90_inq_varid(ncid,trim('dpidt'),varid)
-  err = nf90_get_var(ncid,varid,onetwo_dpidt)
-
-  err = nf90_inq_varid(ncid,trim('qbeame'),varid)
-  err = nf90_get_var(ncid,varid,onetwo_qbeame)
-
+! QUESTION: qdelt flipped sign after ONETWO v5.8
+!           version info is contained in netcdf global 'title' variable
+!           The sign flip refers to which version?
   err = nf90_inq_varid(ncid,trim('qdelt'),varid)
   err = nf90_get_var(ncid,varid,onetwo_qdelt)
   !Correct for difference in sign convention with ASCII format iterdb
   onetwo_qdelt(:) = -1*onetwo_qdelt(:)
 
-  err = nf90_inq_varid(ncid,trim('qbeami'),varid)
-  err = nf90_get_var(ncid,varid,onetwo_qbeami)
-
-  err = nf90_inq_varid(ncid,trim('qrfe'),varid)
-  err = nf90_get_var(ncid,varid,onetwo_qrfe)
-
-  err = nf90_inq_varid(ncid,trim('qrfi'),varid)
-  err = nf90_get_var(ncid,varid,onetwo_qrfi)
+  err = nf90_inq_varid(ncid,trim('qrad'),varid)
+  err = nf90_get_var(ncid,varid,onetwo_qrad)
+  !Correct for difference in sign convention with ASCII format iterdb
+  onetwo_qrad(:) = -1*onetwo_qrad(:)
 
   err = nf90_inq_varid(ncid,trim('qione'),varid)
   err = nf90_get_var(ncid,varid,onetwo_qione)
   !Correct for difference in sign convention with ASCII format iterdb
   onetwo_qione(:) = -1*onetwo_qione(:)
+
+  err = nf90_inq_varid(ncid,trim('qbeame'),varid)
+  err = nf90_get_var(ncid,varid,onetwo_qbeame)
+
+  err = nf90_inq_varid(ncid,trim('qrfe'),varid)
+  err = nf90_get_var(ncid,varid,onetwo_qrfe)
+
+  err = nf90_inq_varid(ncid,trim('qfuse'),varid)
+  err = nf90_get_var(ncid,varid,onetwo_qfuse)
+
+!==============================================================
+!    volumetric_ion_heating_terms = SortedDict(list(zip(
+!        ['qdelt', 'qioni', 'qcx', 'qbeami', 'qrfi', 'qfusi'],
+!        [[1, 11], [1, 602], [-1, 305], [1, 2], [1, 5], [1, 6]]
+!    )))
+!--------------------------------------------------------------
+!  err = nf90_inq_varid(ncid,trim('qdelt'),varid)
+!  err = nf90_get_var(ncid,varid,onetwo_qdelt)
+!  !Correct for difference in sign convention with ASCII format iterdb
+!  onetwo_qdelt(:) = -1*onetwo_qdelt(:)
 
   err = nf90_inq_varid(ncid,trim('qioni'),varid)
   err = nf90_get_var(ncid,varid,onetwo_qioni)
@@ -214,22 +208,87 @@ subroutine prgen_read_iterdb_nc
   !Correct for difference in sign convention with ASCII format iterdb
   onetwo_qcx(:) = -1*onetwo_qcx(:)
 
-  err = nf90_inq_varid(ncid,trim('qfuse'),varid)
-  err = nf90_get_var(ncid,varid,onetwo_qfuse)
+  err = nf90_inq_varid(ncid,trim('qbeami'),varid)
+  err = nf90_get_var(ncid,varid,onetwo_qbeami)
+
+  err = nf90_inq_varid(ncid,trim('qrfi'),varid)
+  err = nf90_get_var(ncid,varid,onetwo_qrfi)
 
   err = nf90_inq_varid(ncid,trim('qfusi'),varid)
   err = nf90_get_var(ncid,varid,onetwo_qfusi)
 
-  err = nf90_inq_varid(ncid,trim('qrad'),varid)
-  err = nf90_get_var(ncid,varid,onetwo_qrad)
-  !Correct for difference in sign convention with ASCII format iterdb
-  onetwo_qrad(:) = -1*onetwo_qrad(:)
+!==============================================================
+!    volumetric_electron_particles_terms = SortedDict(list(zip(
+!        ['sion_thermal_e', 'sbeame', 'srecom_e', 'sion_imp_e', 's2d_e', 'ssaw_e', 'spellet'],
+!        [[1, 601], [1, 2], [1, 602], [1, 0], [1, 0], [1, 0], [1, 14]]
+!    )))
+!--------------------------------------------------------------
+! NOTE: sum over sion is equivalent to sion_thermal_e
+! Source of electrons due to electron impact ionization of thermal neutrals
+!  err = nf90_inq_varid(ncid,trim('sion_thermal_e'),varid)
+!  err = nf90_get_var(ncid,varid,sion_d)
+  err = nf90_inq_varid(ncid,trim('sion'),varid)
+  err = nf90_get_var(ncid,varid,onetwo_sion(:,1:onetwo_nion))
+  sion_d(:) = 0.0
+  do i=1,onetwo_nprim
+     sion_d(:) = sion_d(:)+onetwo_sion(:,i)
+  enddo
 
-  err = nf90_inq_varid(ncid,trim('qohm'),varid)
-  err = nf90_get_var(ncid,varid,onetwo_qohm)
+! QUESTION: why should this be negative?
+! Source of fast ions (and thermal neutrals) due to charge exchange of beam neutrals with thermal ions
+!  err = nf90_inq_varid(ncid,trim('sbcx'),varid)
+!  err = nf90_get_var(ncid,varid,onetwo_sbcx(:,1:onetwo_nion))
+!  sbcx_d(:) = 0.0
+!  do i=1,onetwo_nprim
+!     sbcx_d(:) = sbcx_d(:)+onetwo_sbcx(:,i)
+!  enddo
 
+!  sbeame : beam electron source,#/(meter^3*second)
+  err = nf90_inq_varid(ncid,trim('sbeame'),varid)
+  err = nf90_get_var(ncid,varid,onetwo_sbeame)
+
+!  sbeam : beam ion  source,#/(meter^3*second), species: d
+  err = nf90_inq_varid(ncid,trim('sbeam'),varid)
+  err = nf90_get_var(ncid,varid,onetwo_sbeam)
+
+! Source of electrons due to recombination
+!  err = nf90_inq_varid(ncid,trim('srecom_e'),varid)
+!  err = nf90_get_var(ncid,varid,onetwo_srecom_e)
+
+!  err = nf90_inq_varid(ncid,trim('sion_imp_e'),varid)
+!  err = nf90_get_var(ncid,varid,onetwo_sion_imp_e)
+
+!  err = nf90_inq_varid(ncid,trim('s2d_e'),varid)
+!  err = nf90_get_var(ncid,varid,onetwo_s2d_e)
+
+!  err = nf90_inq_varid(ncid,trim('ssaw_e'),varid)
+!  err = nf90_get_var(ncid,varid,onetwo_ssaw_e)
+
+!  err = nf90_inq_varid(ncid,trim('spellet'),varid)
+!  err = nf90_get_var(ncid,varid,onetwo_spellet)
+
+!==============================================================
+!    volumetric_momentum_terms = SortedDict(list(zip(
+!        ['storqueb', ],  # this is the total rather than individual components
+!        [[1, 1]]
+!    )))
+!--------------------------------------------------------------
   err = nf90_inq_varid(ncid,trim('storqueb'),varid)
   err = nf90_get_var(ncid,varid,onetwo_storqueb)
+
+!==============================================================
+
+  err = nf90_inq_varid(ncid,trim('zeff'),varid)
+  err = nf90_get_var(ncid,varid,zeff)
+
+  err = nf90_inq_varid(ncid,trim('angrot'),varid)
+  err = nf90_get_var(ncid,varid,onetwo_angrot)
+
+  err = nf90_inq_varid(ncid,trim('dpedt'),varid)
+  err = nf90_get_var(ncid,varid,onetwo_dpedt)
+
+  err = nf90_inq_varid(ncid,trim('dpidt'),varid)
+  err = nf90_get_var(ncid,varid,onetwo_dpidt)
 
   err = nf90_inq_varid(ncid,trim('rho_mhd_gridnpsi'),varid)
   err = nf90_get_var(ncid,varid,work)

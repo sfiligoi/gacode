@@ -44,11 +44,11 @@ subroutine tgyro_glf23_map
   do i_ion=1,loc_n_ion
      glf23_zs_in(i_ion+1) = zi_vec(i_ion)
   enddo
-  ! Assuming mi(1) is normalizing mass
-  ! Mass ratios: me/mi(1),mi(1)/mi(1),m(2)/mi(1),...
-  glf23_mass_in(1) = (me*loc_me_multiplier)/mi(1)
+  ! Assuming md is normalizing mass
+  ! Mass ratios: me/md,m(2)/md,m(2)/md,...
+  glf23_mass_in(1) = (me*loc_me_multiplier)/md
   do i_ion=1,loc_n_ion 
-     glf23_mass_in(i_ion+1) = mi(i_ion)/mi(1)
+     glf23_mass_in(i_ion+1) = mi(i_ion)/md
   enddo
   !
   !----------------------------------------------------------------

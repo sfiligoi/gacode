@@ -102,8 +102,6 @@ subroutine prgen_map_iterdb
   expro_rmaj = rmaj(:)
   expro_te = onetwo_te(:)
   expro_ne = onetwo_ene(:)*1e-19
-  expro_z_eff = onetwo_zeff(:)
-  expro_ptot = p_tot(:) ! Total pressure
 
   do i=1,expro_n_ion
      expro_ni(i,:) = onetwo_enion_vec(i,:)
@@ -174,7 +172,7 @@ subroutine prgen_map_iterdb
   ! Power densities (q*) : source > 0, sink < 0
   !
   ! Ohmic
-  expro_qohme = 1e-6*onetwo_qohm
+  expro_qohme = qohm
   ! NBI
   expro_qbeame = 1e-6*onetwo_qbeame
   expro_qbeami = 1e-6*onetwo_qbeami
@@ -200,7 +198,8 @@ subroutine prgen_map_iterdb
   ! Particle/momentum sources
   !
   ! particles
-  expro_qpar = onetwo_sbeam+sbcx_d
+  expro_qpar_beam = onetwo_sbeame
+  expro_qpar_wall = sion_d
   !
   ! Torque (TAM flow) (nt-m)
   expro_qmom = -ipccw*onetwo_storqueb

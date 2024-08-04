@@ -19,6 +19,7 @@ subroutine cgyro_read_input
   call cgyro_readbc_int(n_field)
   call cgyro_readbc_real(e_max)
   call cgyro_readbc_real(alpha_poly)
+  call cgyro_readbc_int(e_fix)
   call cgyro_readbc_int(delta_t_method)
   call cgyro_readbc_real(delta_t)
   call cgyro_readbc_real(error_tol)
@@ -34,6 +35,7 @@ subroutine cgyro_read_input
   call cgyro_readbc_int(nup_alpha)
   call cgyro_readbc_int(n_wave)
   call cgyro_readbc_int(constant_stream_flag)
+  call cgyro_readbc_int(explicit_trap_flag)
   call cgyro_readbc_real(ky)
   call cgyro_readbc_int(box_size)
   call cgyro_readbc_real(ipccw)
@@ -49,6 +51,8 @@ subroutine cgyro_read_input
   call cgyro_readbc_int(collision_field_model)
   call cgyro_readbc_int(collision_ion_model)
   call cgyro_readbc_real(collision_ele_scale)
+  call cgyro_readbc_int(collision_precision_mode)
+  call cgyro_readbc_int(collision_full_stripes)
   call cgyro_readbc_int(collision_test_mode)
   call cgyro_readbc_int(collision_field_max_l)
   call cgyro_readbc_int(collision_test_max_l)
@@ -75,6 +79,7 @@ subroutine cgyro_read_input
   call cgyro_readbc_real(mach)
   call cgyro_readbc_int(rotation_model)
   call cgyro_readbc_int(mpi_rank_order)
+  call cgyro_readbc_int(velocity_order)
   call cgyro_readbc_int(hiprec_flag)
   call cgyro_readbc_int(udsymmetry_flag)
   call cgyro_readbc_int(shear_method)
@@ -83,6 +88,7 @@ subroutine cgyro_read_input
   call cgyro_readbc_int(profile_shear_flag)
   call cgyro_readbc_int(theta_plot)
   call cgyro_readbc_int(gpu_bigmem_flag)
+  call cgyro_readbc_int(upwind_single_flag)
   call cgyro_readbc_real(px0)
   call cgyro_readbc_int(stream_term)
   call cgyro_readbc_real(stream_factor)
@@ -100,32 +106,30 @@ subroutine cgyro_read_input
   call cgyro_readbc_real(s_zeta)
   call cgyro_readbc_real(zmag)       
   call cgyro_readbc_real(dzmag)
-  call cgyro_readbc_real(shape_sin3)        
-  call cgyro_readbc_real(shape_s_sin3)
-  call cgyro_readbc_real(shape_cos0)     
-  call cgyro_readbc_real(shape_s_cos0)
-  call cgyro_readbc_real(shape_cos1)
-  call cgyro_readbc_real(shape_s_cos1)
-  call cgyro_readbc_real(shape_cos2)     
-  call cgyro_readbc_real(shape_s_cos2)
-  call cgyro_readbc_real(shape_cos3)     
-  call cgyro_readbc_real(shape_s_cos3)
+  do is=3,n_shape
+     call cgyro_readbc_real(shape_sin(is))
+     call cgyro_readbc_real(shape_s_sin(is))
+  enddo
+  do is=0,n_shape
+     call cgyro_readbc_real(shape_cos(is))
+     call cgyro_readbc_real(shape_s_cos(is))
+  enddo
   call cgyro_readbc_real(betae_unit)
-  call cgyro_readbc_int(subroutine_flag)
   call cgyro_readbc_int(n_species)
-
   call cgyro_readbc_real(nu_ee)
 
-  do is=1,6
-     call cgyro_readbc_real(x)   ; z(is) = x
-     call cgyro_readbc_real(x)   ; mass(is) = x
-     call cgyro_readbc_real(x)   ; dens(is) = x
-     call cgyro_readbc_real(x)   ; temp(is) = x
-     call cgyro_readbc_real(x)   ; dlnndr(is) = x
-     call cgyro_readbc_real(x)   ; dlntdr(is) = x
-     call cgyro_readbc_real(x)   ; sdlnndr(is) = x
-     call cgyro_readbc_real(x)   ; sdlntdr(is) = x
-  enddo
+  ! vectors
+  is = size(z)
+  call cgyro_readbc_realv(z,is)   
+  call cgyro_readbc_realv(mass,is) 
+  call cgyro_readbc_realv(dens,is)   
+  call cgyro_readbc_realv(temp,is)
+  call cgyro_readbc_realv(dlnndr,is)
+  call cgyro_readbc_realv(dlntdr,is)
+  call cgyro_readbc_realv(sdlnndr,is)
+  call cgyro_readbc_realv(sdlntdr,is)
+  call cgyro_readbc_realv(dlnndr_scale,is)
+  call cgyro_readbc_realv(dlntdr_scale,is)
 
   call cgyro_readbc_int(quasineutral_flag)
   call cgyro_readbc_real(lambda_star_scale)
@@ -135,35 +139,9 @@ subroutine cgyro_read_input
   call cgyro_readbc_real(beta_star_scale)
   call cgyro_readbc_real(betae_unit_scale)
   call cgyro_readbc_real(nu_ee_scale)
-  do is=1,6
-     call cgyro_readbc_real(x)   ; dlnndr_scale(is) = x
-     call cgyro_readbc_real(x)   ; dlntdr_scale(is) = x
-  enddo
+  call cgyro_readbc_int(nonlinear_field)
 
   if (i_proc == 0) close(1)
-
-  ! GEO fourier coefficients
-  geo_ny_in = 0
-  geo_yin_in(:,:) = 0.0
-  if (subroutine_flag == 0 .and. equilibrium_model == 3 & 
-       .and. profile_model == 1) then
-     if (i_proc == 0) then
-        open(unit=1,file=trim(path)//'input.geo',status='old')
-        ! header skip
-        do
-           read(1,'(a)') cdummy
-           if (cdummy /= '#') exit
-        enddo
-        backspace 1
-        ! n_fourier
-        read(1,*) geo_ny_in
-        ! fourier coefficients
-        read(1,*) geo_yin_in(:,0:geo_ny_in)
-        close(1)
-     endif
-     call MPI_BCAST(geo_ny_in,1,MPI_INTEGER,0,CGYRO_COMM_WORLD,i_err)
-     call MPI_BCAST(geo_yin_in,size(geo_yin_in),MPI_DOUBLE_PRECISION,0,CGYRO_COMM_WORLD,i_err)
-  endif
 
 end subroutine cgyro_read_input
 
@@ -175,7 +153,7 @@ end subroutine cgyro_read_input
 subroutine cgyro_readbc_int(p)
 
   use mpi
-  use cgyro_globals
+  use cgyro_globals, only : i_proc,i_err,CGYRO_COMM_WORLD
 
   implicit none
   integer, intent(inout) :: p
@@ -191,7 +169,7 @@ end subroutine cgyro_readbc_int
 subroutine cgyro_readbc_real(x)
   
   use mpi
-  use cgyro_globals
+  use cgyro_globals, only : i_proc,i_err,CGYRO_COMM_WORLD
 
   implicit none
   real, intent(inout) :: x
@@ -201,4 +179,26 @@ subroutine cgyro_readbc_real(x)
   call MPI_BCAST(x,1,MPI_DOUBLE_PRECISION,0,CGYRO_COMM_WORLD,i_err)
 
 end subroutine cgyro_readbc_real
+!
+! (2) read and broadcast a vector of reals
+!
+subroutine cgyro_readbc_realv(x,n)
+
+  use mpi
+  use cgyro_globals, only : i_proc,i_err,CGYRO_COMM_WORLD
+
+  implicit none
+  integer, intent(in) :: n
+  real, intent(inout) :: x(n)
+  integer :: i
+  
+  if (i_proc == 0) then
+     do i=1,n
+        read(1,*) x(i)
+     enddo
+  endif
+
+  call MPI_BCAST(x,n,MPI_DOUBLE_PRECISION,0,CGYRO_COMM_WORLD,i_err)
+
+end subroutine cgyro_readbc_realv
 !------------------------------------------------------------

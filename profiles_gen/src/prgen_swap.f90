@@ -14,7 +14,7 @@ subroutine prgen_swap
   call swap2(expro_ti,expro_n_ion,expro_n_exp)
   call swap2(expro_vpol,expro_n_ion,expro_n_exp)
   call swap2(expro_vtor,expro_n_ion,expro_n_exp)
-
+  
 end subroutine prgen_swap
 
 subroutine swap1(f,nion)

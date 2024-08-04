@@ -38,6 +38,10 @@ cd $simdir
 export OMP_NUM_THREADS=$nomp
 export KMP_AFFINITY=compact
 #mpirun -ppn $ppn -np $nmpi $exec 
-#using for now 64 instead of 68 processors per node.
+#using for now 48
 #mostly the processor numbers are actually powers of 2.
-mpirun -ppn 64 -np $nmpi $exec 
+echo $nomp
+echo $CORES_PER_NODE
+echo "> srun --cpu_bind=cores -n $nmpi -c $nomp $exec"
+#srun --cpu_bind=cores -n $nmpi -c $(($CORES_PER_NODE/$mpinode*2)) $exec
+srun --cpu_bind=cores -n $nmpi -c $nomp $exec

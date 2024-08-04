@@ -12,7 +12,9 @@ except:
     sys.exit()
 
 outfile = open('pfile.ne','w')
-for line in open(infile,'r').readlines():
+with open(infile,'r') as fin:
+    in_lines = fin.readlines()
+for line in in_lines:
     if 'psinorm' in line:
         # split() with no argument splits on whitespace
         x   = line.split()
@@ -27,11 +29,12 @@ for line in open(infile,'r').readlines():
         outfile.write(n+'\n')
     elif 'SPECIES' in line:
         outfile.close()
-        outfile = open('pfile.species','w')
+        title = 'pfile.species'
+        outfile = open(title,'w')
         print('INFO: (gacode_pfile_tool.py) Found ion species header.')
+        print('INFO: (gacode_pfile_tool.py) Extracted '+title+'.')
         n = line[0]
         outfile.write(n+'\n')
     else:
         outfile.write(line)
-
-
+outfile.close()

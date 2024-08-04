@@ -28,6 +28,7 @@ SUBROUTINE xgrid_functions_sa
   INTEGER :: i
   REAL :: thx,dthx,sn,cn,eps,Rx,Rx1,Rx2
   REAL :: kyi,wE,a0,vexb_shear_kx0
+  REAL,PARAMETER :: small=0.00000001
   !
   ! debug
   ! write(*,*)"shat_sa=",shat_sa,"alpha_sa=",alpha_sa
@@ -66,9 +67,19 @@ SUBROUTINE xgrid_functions_sa
        wE=0.0
      endif
      kx0_e = -(0.36*vexb_shear_kx0/gamma_reference_kx0(1) + 0.38*wE*TANH((0.69*wE)**6))
-     if(sat_rule_in.eq.1)kx0_e = -(0.53*vexb_shear_kx0/gamma_reference_kx0(1) + 0.25*wE*TANH((0.69*wE)**6))
+     if(sat_rule_in.ge.1)kx0_e = -(0.53*vexb_shear_kx0/gamma_reference_kx0(1) + 0.25*wE*TANH((0.69*wE)**6))
+     if(sat_rule_in.eq.2)then
+       if(ABS(kymax_out*vzf_out*vexb_shear_kx0).gt.small)then
+         kx0_e = -0.32*((ky/kymax_out)**0.3)*vexb_shear_kx0/(ky*vzf_out)
+       else
+         kx0_e = 0.0
+      endif
+!      write(*,*)"kx0_e = ",kx0_e,kymax_out,vzf_out
+endif
+
      a0 = 1.3
      if(sat_rule_in.eq.1)a0=1.45
+     if(sat_rule_in.eq.2)a0=1.6
      if(ABS(kx0_e).gt.a0)kx0_e = a0*kx0_e/ABS(kx0_e)
 !     a0 = alpha_e_in*2.0
 !     if(alpha_e_in.ne.0.0)then
@@ -107,7 +118,6 @@ SUBROUTINE xgrid_functions_sa
      ! b0x(i) = 1.0+(shat_sa*(thx-theta0_sa) - alpha_sa*sn)**2
      b0x(i) = 1.0+(kxx(i))**2
      b2x(i) = 1.0
-     sat_geo_invx(i) = 1.0
      wdpx(i) = 0.0   ! not used for s-alpha
      if(b_model_sa.eq.1)then
         ! put B dependence into k_per**2
@@ -158,10 +168,15 @@ SUBROUTINE xgrid_functions_sa
   Grad_r_ave_out = 1.0
   kx_geo0_out = 1.0
   SAT_geo0_out = 1.0
+  SAT_geo1_out = 1.0
+  SAT_geo2_out = 1.0
+  grad_r0_out = 1.0
   !
   ! poloidal magnetic field at outboard midplane
   !
   Bp0_out = rmin_sa/(q_sa*(rmaj_sa+rmin_sa))
+  Bt0_out = f/Rmaj_input
+  B_geo0_out = Bt0_out
   !
 END SUBROUTINE xgrid_functions_sa
 !
@@ -192,12 +207,12 @@ SUBROUTINE xgrid_functions_geo
   REAL :: b1,b2
   REAL :: y1,y2
   REAL :: kxx1,kxx2
-  REAL :: sat_geo_inv1,sat_geo_inv2
   REAL :: cxtorper1,cxtorper2
   REAL :: B2x1,B2x2,R2x1,R2x2,norm_ave,dlp
   REAL :: kyi
   REAL :: wE,wd0,a0,vexb_shear_kx0
   REAL :: kykx_geo_ave
+  REAL,PARAMETER :: small=0.00000001
   !
   !
   ! find length along magnetic field y
@@ -258,8 +273,21 @@ SUBROUTINE xgrid_functions_geo
        kx0_factor = 1.0
        wE = 0.0
      endif
+     grad_r0_out = B_geo(0)/qrat_geo(0)
+     B_geo0_out = b_geo(0)
+     kx_geo0_out= 1.0/qrat_geo(0)
+!write(*,*)"kx_geo0_out = ",kx_geo0_out
+!write(*,*)"grad_r0_out = ",grad_r0_out
      kx0_e = -(0.36*vexb_shear_kx0/gamma_reference_kx0(1) + 0.38*wE*TANH((0.69*wE)**6))
      if(sat_rule_in.eq.1)kx0_e = -(0.53*vexb_shear_kx0/gamma_reference_kx0(1) + 0.25*wE*TANH((0.69*wE)**6))
+     if(sat_rule_in.eq.2)then
+       if(ABS(kymax_out*vzf_out*vexb_shear_kx0).gt.small)then
+         kx0_e = -0.32*((ky/kymax_out)**0.3)*vexb_shear_kx0/(ky*vzf_out)
+       else
+         kx0_e = 0.0
+       endif
+!       write(*,*)"kx0_e = ",kx0_e,kymax_out,vzf_out
+     endif
 !     a0 = alpha_e_in*2.0
 !     if(alpha_e_in.ne.0.0)then
 !        kx0_e = a0*TANH(kx0_e/a0)
@@ -268,15 +296,14 @@ SUBROUTINE xgrid_functions_geo
 !     endif
      a0 = 1.3
      if(sat_rule_in.eq.1)a0=1.45
+     if(sat_rule_in.eq.2)a0=1.6
      if(ABS(kx0_e).gt.a0)kx0_e = a0*kx0_e/ABS(kx0_e)
-     grad_r0_out = B_geo(0)/qrat_geo(0)
-     kx_geo0_out= 1.0/qrat_geo(0)
-     !write(*,*)"kx_geo0_out = ",kx_geo0_out
-     !write(*,*)"grad_r0_out = ",grad_r0_out
      if(units_in.eq.'GYRO')then
         kx0 = sign_Bt_in*kx0_e ! cancel the sign_Bt_in factor in kxx below
      else
-       kx0 = sign_Bt_in*kx0_e/(2.1)  ! note kx0 = alpha_e*gamma_ExB_HB/gamma Hahm - Burrell form of gamma_ExB
+       if(sat_rule_in.eq.1)kx0 = sign_Bt_in*kx0_e/(2.1)  ! goes with xnu_model=2
+       if(sat_rule_in.eq.2)kx0 = sign_Bt_in*kx0_e*0.7/grad_r0_out**2     ! goes with xnu_model=3, the factor 0.7/grad_r0_out**2 is needed for stress_tor
+       ! note kx0 = alpha_e*gamma_ExB_HB/gamma Hahm - Burrell form of gamma_ExB
        ! The 2.1 effectively increases ay0 & ax0 and reduces toroidal stress to agree with CGYRO
      endif
      !
@@ -381,10 +408,6 @@ SUBROUTINE xgrid_functions_geo
         write(*,*)"interpolation error b0x < 0",i,b0x(i),b1,b2
         b0x(i)=(b1+b2)/2.0
      endif
-     ! interpolate sat_geo_invx
-     sat_geo_inv1 = qrat_geo(m1)**2
-     sat_geo_inv2 = qrat_geo(m2)**2
-     sat_geo_invx(i) = sat_geo_inv1 + (sat_geo_inv2-sat_geo_inv1)*(y_x-y1)/(y2-y1)
      !
      ! interpolate viscous stress projection coefficients
      !
@@ -409,9 +432,10 @@ SUBROUTINE xgrid_functions_geo
   B_ave_out = 0.0
   Bt_ave_out = 0.0
   Grad_r_ave_out = 0.0
-  SAT_geo_ave_out=0.0
   kykx_geo_ave=0.0
   norm_ave=0.0
+  SAT_geo1_out = 0.0
+  SAT_geo2_out = 0.0
   do i=1,ms
      dlp = s_p(i)*ds*(0.5/Bp(i)+0.5/Bp(i-1))
      norm_ave = norm_ave + dlp
@@ -424,8 +448,9 @@ SUBROUTINE xgrid_functions_geo
      B_ave_out = B_ave_out + dlp*(b_geo(i-1)+b_geo(i))/2.0
      Bt_ave_out = Bt_ave_out + dlp*(f/b_geo(i-1)+f/b_geo(i))/(2.0*Rmaj_s)
      Grad_r_ave_out = Grad_r_ave_out + dlp*0.5*((R(i-1)*Bp(i-1))**2+(R(i)*Bp(i))**2)*(q_s/rmin_s)**2
-     SAT_geo_ave_out = SAT_geo_ave_out + dlp*0.5*(1.0/qrat_geo(i-1)**2 + 1.0/qrat_geo(i)**2)
      kykx_geo_ave = kykx_geo_ave + dlp*0.5*(B_geo(i-1)**2/qrat_geo(i-1)**4+B_geo(i)**2/qrat_geo(i)**4)
+     SAT_geo1_out = SAT_geo1_out +dlp*((b_geo(0)/b_geo(i-1))**4 +(b_geo(0)/b_geo(i))**4)/2.0
+     SAT_geo2_out = SAT_geo2_out +dlp*((qrat_geo(0)/qrat_geo(i-1))**4 +(qrat_geo(0)/qrat_geo(i))**4)/2.0
  enddo
   R2_ave_out = R2_ave_out/norm_ave
   B2_ave_out = B2_ave_out/norm_ave
@@ -433,19 +458,26 @@ SUBROUTINE xgrid_functions_geo
   B_ave_out = B_ave_out/norm_ave
   Bt_ave_out = Bt_ave_out/norm_ave
   Grad_r_ave_out = Grad_r_ave_out/norm_ave
-  SAT_geo_ave_out = SAT_geo_ave_out/norm_ave
   kykx_geo_ave = kykx_geo_ave/norm_ave
-   !
+  SAT_geo1_out = SAT_geo1_out/norm_ave
+  SAT_geo2_out = SAT_geo2_out/norm_ave
+  !
   ! poloidal magnetic field on outboard midplane
   !
   Bp0_out = Bp(0)/B_unit
-  if(units_in.eq.'GYRO') then
+   if(units_in.eq.'GYRO') then
     SAT_geo0_out = 1.0
+    SAT_geo1_out = 1.0
+    SAT_geo2_out = 1.0
   else
- ! Nov 2019     SAT_geo0_out = 0.946*kx_geo0_out      ! normed to GASTD with CGYRO
-     SAT_geo0_out = 0.941    ! normed to GASTD with CGYRO
-    !write(*,*)"kx_geo0 = ",kx_geo0_out
-    !write(*,*)"SAT_geo0 = ",SAT_geo0_out
+ ! Nov 2019     SAT_geo0_out = 0.946/qrat_geo(0) ! normed to GASTD with CGYRO
+    SAT_geo0_out = 0.946/qrat_geo(0)          ! normed to GASTD with CGYRO
+    if(sat_rule_in.eq.2)SAT_geo0_out = 1.0
+!    write(*,*)"SAT_geo0_out = ",SAT_geo0_out
+    grad_r0_out = B_geo(0)/qrat_geo(0)
+    B_geo0_out = b_geo(0)
+!    write(*,*)"B_geo0 = ",b_geo(0)
+    kx_geo0_out= 1.0/qrat_geo(0)
   endif
 ! for GENE units need to multiply intensity by (Bref/Bunit)**2
   if(units_in.eq.'GENE')then
@@ -456,7 +488,6 @@ SUBROUTINE xgrid_functions_geo
   ! write(*,*)"B2_ave_out=",B2_ave_out
   ! write(*,*)"B_ave_out=",B_ave_out
   ! write(*,*)"Bt_ave_out=",Bt_ave_out
-  ! write(*,*)"SAT_geo_ave_out=",1.0/SAT_geo_ave_out
   ! write(*,*)"Grad_r_ave_out =",Grad_r_ave_out
   ! write(*,*)"kykx_geo_ave = ",kykx_geo_ave
   ! write(*,*)"SAT_geo0_out=",SAT_geo0_out
@@ -473,7 +504,6 @@ SUBROUTINE xgrid_functions_geo
   !
   ! compute the effective trapped fraction
   call get_ft_geo
-  ! write(*,*)"ft_geo=",ft
   !
 END SUBROUTINE xgrid_functions_geo
 !
@@ -485,9 +515,10 @@ SUBROUTINE get_ft_sa
   USE tglf_dimensions
   USE tglf_global
   USE tglf_hermite
+  USE tglf_species
   !
   IMPLICIT NONE
-  INTEGER :: i
+  INTEGER :: i,is
   REAL :: norm,ww
   REAL :: eps,theta_max
   REAL :: cn,thx,ftx,Bmax,Bmin
@@ -496,7 +527,7 @@ SUBROUTINE get_ft_sa
   ! compute pitch angle at bounce average boundary
   !
   eps = rmin_sa/rmaj_sa
-  ! vshear_eff = 2.0*(ky/R_unit)*ABS(vpar_in)*sqrt_two*width_in
+  ! vshear_eff = 2.0*(ky/R_unit)*ABS(vpar_s)*sqrt_two*width_in
   ! theta_eff = width_in/MAX(1.0-vshear_eff,0.1)
   ! theta_max = theta_trapped_in*theta_eff*pi/sqrt_two
   theta_max = theta_trapped_in*width_in*pi/sqrt_two
@@ -564,6 +595,9 @@ SUBROUTINE get_ft_sa
      enddo
      ! write(*,*)"ft = ",ft,"ft0=",SQRT(1.0-Bmin/Bmax)
   endif
+  do is=ns0,ns
+    fts(is) = MAX(ft,ft_min)
+  enddo
   ! write(*,*)"ft = ",ft,"ft_model_sa =",ft_model_sa
   !
 END SUBROUTINE get_ft_sa
@@ -575,16 +609,18 @@ SUBROUTINE get_ft_geo
   USE tglf_dimensions
   USE tglf_global
   USE tglf_sgrid
+  USE tglf_species
   !
   IMPLICIT NONE
   !
   INTEGER,PARAMETER :: nb_grid=25
-  INTEGER :: i,j,m,m_max,m_min,j_max
+  INTEGER :: i,j,m,m_max,m_min,j_max,is
   INTEGER :: pm(2,0:nb_grid),qm
   REAL :: Bmax,Bmin,By(0:nb_grid),delta_y(0:nb_grid)
   REAL :: Ly
   REAL :: B_bounce,kpar
   REAL :: db,test1,test2,bounce_y
+  REAL :: wdia, cdt, ft0
   !
   !*************************************************************
   ! begin trapped fraction model
@@ -705,7 +741,7 @@ SUBROUTINE get_ft_geo
   kpar= pi_2/(Ly*sqrt_two*width_in)
   bounce_y = MIN(Ly,pi*theta_trapped_in/kpar)
   ! kpar = pi_2/(Ly*sqrt_two*width_in*theta_trapped_in) &
-  ! +xnu_factor_in*xnuei_in*(Ly/pi)*SQRT(mass_in(1))
+  ! +xnu_factor_in*xnuei_in*(Ly/pi)*SQRT(mass(1))
   ! bounce_y = MIN(Ly,pi/kpar)
   ! write(*,*)"bounce_y =",bounce_y,"kpar =",kpar,"Ly=",Ly
   ! write(*,*)"pi*theta_trapped/kpar =",pi*theta_trapped_in/kpar
@@ -721,7 +757,32 @@ SUBROUTINE get_ft_geo
   ft = SQRT(1.0 - Bmin/B_bounce)
   modB_min = ABS(Bmin)
   modB_test = 0.5*(Bmax + Bmin)/Bmin
-  ! write(*,*)"ft = ",ft
+  do is=ns0,ns
+  fts(is) = MAX(ft,ft_min)
+  enddo
+  if(xnu_model_in .eq.3 .and. wdia_trapped_in.gt.0.0) then
+    do is=ns0,ns
+      wdia = ABS(ky*rlns_in(is))/vs(is)
+!      write(*,*)is,"wdia = ",wdia
+      kpar= pi_2/(Ly*sqrt_two*width_in)
+      ft0 = SQRT(1.0 - Bmin/Bmax)
+      cdt = wdia_trapped_in*3.0*(1.0-ft0*ft0)
+      kpar = kpar/MAX(theta_trapped_in,0.0001) + wdia*cdt
+      bounce_y = MIN(Ly,pi/kpar)
+      B_bounce = Bmax
+      if(bounce_y.lt.Ly)then
+        do i=1,nb_grid
+          if(delta_y(i).gt.bounce_y)exit
+        enddo
+        B_bounce = By(i-1)+(By(i)-By(i-1))* &
+        (bounce_y-delta_y(i-1))/(delta_y(i)-delta_y(i-1))
+!       write(*,*)i,"B_bounce =",B_bounce,Bmax
+      endif
+      fts(is) = MAX(SQRT(1.0 - Bmin/B_bounce),ft_min)
+!     write(*,*)is,"fts(is) = ",fts(is)
+    enddo
+  endif
+!  write(*,*)"fts(1) = ",fts(1)
   !*************************************************************
   ! end of trapped fraction model
   !*************************************************************
@@ -875,6 +936,7 @@ SUBROUTINE mercier_luc
   f = pi_2*q_s/f
   ! write(*,*)"f = ",f,q_s
   ! write(*,*)"ds=",ds
+  Bt0_out = f/Rmaj_input
   Bref_out = 1.0
   betae_s = betae_in
   debye_s = debye_in
@@ -1261,6 +1323,7 @@ END SUBROUTINE mercier_write
 ! 15 June 2010: updated to GYRO conventions with squarness (zeta_loc) and
 ! squarness shear s_zeta_loc = rmin*d(zeta)/dx. Included elevation Zmaj_loc.
 ! Also changed definition of s_delta = rmin*d(delta)/dx from Waltz-Miller convention to GYRO's.
+! July 26, 2021 set elevation Zmaj_loc =0.0 and DZMAJDX_LOC=0.0 since these break the up/down symmetry of Miller by contributing to Grad_r
 !---------------------------------------------------------------
 
 SUBROUTINE miller_geo
@@ -1289,7 +1352,9 @@ SUBROUTINE miller_geo
   !
   rmin_input = rmin_loc
   Rmaj_input = rmaj_loc
-
+  ! set elevation to zero
+  zmaj_loc = 0.0
+  dzmajdx_loc=0.0
   ! write(*,*)"miller_geo"
   x_delta = ASIN(delta_loc)
   ! write(*,*)"pi = ",pi," x_delta = ",x_delta

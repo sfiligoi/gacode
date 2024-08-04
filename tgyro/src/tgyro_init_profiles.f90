@@ -31,16 +31,11 @@ subroutine tgyro_init_profiles
   e       = 4.8032e-10 ! statcoul
   k       = 1.6022e-12 ! erg/eV
   me      = 9.1094e-28 ! g
-  mp      = 1.6726e-24 ! g
-  malpha  = 4*mp       ! g
+  md      = expro_mass_deuterium ! g
+  malpha  = 2*md       ! g
   c       = 2.9979e10  ! cm/s
   !
   mu_0    = 4*pi*1e-7  ! N/A^2
-  !------------------------------------------------------
-
-  !------------------------------------------------------
-  ! Convert dimensionless mass to grams.
-  mi(:) = mi_vec(:)*mp
   !------------------------------------------------------
 
   !------------------------------------------------------
@@ -126,18 +121,24 @@ subroutine tgyro_init_profiles
   endif
   !----------------------------------------------
   
-  !----------------------------------------------
-  ! Radius where profiles will be matched.
-  !
-  i_bc = n_r-loc_bc_offset
-  !----------------------------------------------
-
   expro_ctrl_n_ion = loc_n_ion
   expro_ctrl_quasineutral_flag = 0
-  expro_ctrl_numeq_flag = loc_num_equil_flag
+  expro_ctrl_numeq_flag = 0
 
-  call expro_read('input.gacode') 
+  call expro_read('input.gacode',MPI_COMM_WORLD) 
 
+  ! Check for acceptable number of ions
+  if (expro_n_ion < loc_n_ion) then
+     call tgyro_catch_error('ERROR: (tgyro_init_profiles) LOC_N_ION > expro_n_ion')
+  endif
+
+  ! Mass and charge taken from input.gacode
+  mi_vec(:) = expro_mass(1:loc_n_ion)
+  zi_vec(:) = expro_z(1:loc_n_ion)
+
+  ! Get ion names (truncated to 3 characters)
+  ion_name = expro_name(1:loc_n_ion)
+  
   shot = 0
   
   n_exp = expro_n_exp
@@ -147,6 +148,16 @@ subroutine tgyro_init_profiles
 
   ! Aspect ratio
   aspect_rat = expro_rmaj(n_exp)/expro_rmin(n_exp)
+
+  ! Is this a DT plasma
+  dt_flag = 0
+  if (ion_name(1) == 'D' .and. ion_name(2) == 'T') dt_flag = 1
+  if (ion_name(1) == 'T' .and. ion_name(2) == 'D') dt_flag = 1
+
+  !------------------------------------------------------
+  ! Convert dimensionless mass to grams.
+  mi(:) = mi_vec(:)*(md*0.5)
+  !------------------------------------------------------
 
   !------------------------------------------------------------------------------------------
   ! Direct input of simple profiles:
@@ -164,17 +175,38 @@ subroutine tgyro_init_profiles
   call cub_spline(expro_rmin(:)/r_min,expro_delta(:),n_exp,r,delta,n_r)
   call cub_spline(expro_rmin(:)/r_min,expro_skappa(:),n_exp,r,s_kappa,n_r)
   call cub_spline(expro_rmin(:)/r_min,expro_sdelta(:),n_exp,r,s_delta,n_r)
+  ! Convert r_maj to cm (from m):
+  call cub_spline(expro_rmin(:)/r_min,100*expro_rmaj(:),n_exp,r,r_maj,n_r)
   call cub_spline(expro_rmin(:)/r_min,expro_drmaj(:),n_exp,r,shift,n_r)
-  call cub_spline(expro_rmin(:)/r_min,expro_zmag(:),n_exp,r,zmag,n_r)
+  ! Convert zmag to cm (from m):
+  call cub_spline(expro_rmin(:)/r_min,100*expro_zmag(:),n_exp,r,zmag,n_r)
   call cub_spline(expro_rmin(:)/r_min,expro_dzmag(:),n_exp,r,dzmag,n_r)
   call cub_spline(expro_rmin(:)/r_min,expro_zeta(:),n_exp,r,zeta,n_r)
   call cub_spline(expro_rmin(:)/r_min,expro_szeta(:),n_exp,r,s_zeta,n_r)
+
+  ! New geometry (HAM)
+  call cub_spline(expro_rmin(:)/r_min,expro_shape_sin3(:),n_exp,r,shape_sin3,n_r)
+  call cub_spline(expro_rmin(:)/r_min,expro_shape_ssin3(:),n_exp,r,shape_ssin3,n_r)
+  call cub_spline(expro_rmin(:)/r_min,expro_shape_cos0(:),n_exp,r,shape_cos0,n_r)
+  call cub_spline(expro_rmin(:)/r_min,expro_shape_scos0(:),n_exp,r,shape_scos0,n_r)
+  call cub_spline(expro_rmin(:)/r_min,expro_shape_cos1(:),n_exp,r,shape_cos1,n_r)
+  call cub_spline(expro_rmin(:)/r_min,expro_shape_scos1(:),n_exp,r,shape_scos1,n_r)
+  call cub_spline(expro_rmin(:)/r_min,expro_shape_cos2(:),n_exp,r,shape_cos2,n_r)
+  call cub_spline(expro_rmin(:)/r_min,expro_shape_scos2(:),n_exp,r,shape_scos2,n_r)
+  call cub_spline(expro_rmin(:)/r_min,expro_shape_cos3(:),n_exp,r,shape_cos3,n_r)
+  call cub_spline(expro_rmin(:)/r_min,expro_shape_scos3(:),n_exp,r,shape_scos3,n_r)
+
+  ! Convert psi in Weber to Maxwell (1 Weber = 10^8 Maxwell)  
+  call cub_spline(expro_rmin(:)/r_min,expro_polflux(:)*1e8,n_exp,r,polflux,n_r)
 
   ! b_ref in Gauss (used for wce in Synchroton rad)
   call cub_spline(expro_rmin(:)/r_min,1e4*expro_bt0(:),n_exp,r,b_ref,n_r)
   
   ! Convert ptot to Ba from Pascals (1 Pa = 10 Ba)
   call cub_spline(expro_rmin(:)/r_min,expro_ptot(:)*10.0,n_exp,r,ptot,n_r)
+
+  ! Convert fpol to Gauss-cm from T-m (1 T-m = 10^6 G-cm)
+  call cub_spline(expro_rmin(:)/r_min,expro_fpol(:)*1e6,n_exp,r,fpol,n_r)
 
   ! Convert V and dV/dr from m^3 to cm^3
   call cub_spline(expro_rmin(:)/r_min,expro_vol(:)*1e6,n_exp,r,vol,n_r)
@@ -184,9 +216,6 @@ subroutine tgyro_init_profiles
 
   ! Convert B to Gauss (from T):
   call cub_spline(expro_rmin(:)/r_min,1e4*expro_bunit(:),n_exp,r,b_unit,n_r)
-
-  ! Convert r_maj to cm (from m):
-  call cub_spline(expro_rmin(:)/r_min,100*expro_rmaj(:),n_exp,r,r_maj,n_r)
 
   ! Convert T to eV (from keV) and length to cm (from m):
   call cub_spline(expro_rmin(:)/r_min,1e3*expro_te(:),n_exp,r,te,n_r)
@@ -202,6 +231,9 @@ subroutine tgyro_init_profiles
      ! Define default ratios (these will change if tgyro_ped_ratio < 0.0)
      n_ratio(i_ion) = ni(i_ion,n_r)/ne(n_r)
      t_ratio(i_ion) = ti(i_ion,n_r)/te(n_r)
+     if (ni(i_ion,1) < 1e-10) then
+        call tgyro_catch_error('ERROR (tgyro_init_profiles) Zero density in ion '//ion_name(i_ion))
+     endif
   enddo
 
   if (tgyro_consistent_flag == 1) then
@@ -259,7 +291,7 @@ subroutine tgyro_init_profiles
   !------------------------------------------------------------------------------------------
 
   !------------------------------------------------------------------------------------------
-  ! Helium ash option
+  ! Helium ash detection (diagnostic only -- set alpha source with evo_e=2)
   !
   i_ash = 0
   do i=1,loc_n_ion
@@ -342,6 +374,7 @@ subroutine tgyro_init_profiles
   ! Integrated auxiliary heating powers (NB + RF + Ohmic)
   call cub_spline(expro_rmin(:)/r_min,expro_pow_e_aux(:)*1e13,n_exp,r,p_e_aux_in,n_r)
   call cub_spline(expro_rmin(:)/r_min,expro_pow_i_aux(:)*1e13,n_exp,r,p_i_aux_in,n_r)
+  call cub_spline(expro_rmin(:)/r_min,expro_pow_e_ohmic(:)*1e13,n_exp,r,p_e_ohmic_in,n_r)
 
   ! Apply auxiliary power rescale
   ! 1. subtract off
@@ -364,49 +397,6 @@ subroutine tgyro_init_profiles
   call cub_spline(expro_rmin(:)/r_min,expro_flow_mom(:)*1e7,n_exp,r,mf_in,n_r)
   !------------------------------------------------------------------------------------------
 
-  !------------------------------------------------------------------------------------------
-  ! Fourier coefficients for plasma shape
-  if (expro_nfourier > 0) then
-
-     if (i_proc_global == 0) then
-        open(unit=1,file=trim(runfile),position='append')
-        write(1,*) 'INFO: (TGYRO) Passing input.gacode.geo information to components'
-        write(1,*)
-        close(1)
-     endif
-
-     n_fourier_geo = expro_nfourier
-
-     do n=0,n_fourier_geo
-        do i=1,4  
-
-           ! aR_n = expro_geo(1,n,:)
-           ! bR_n = expro_geo(2,n,:)
-           ! aZ_n = expro_geo(3,n,:)
-           ! bZ_n = expro_geo(4,n,:)
-           ! d(aR_n)/dr
-           ! d(bR_n)/dr
-           ! d(aZ_n)/dr
-           ! d(bZ_n)/dr
-
-           call cub_spline(expro_rmin(:)/r_min,expro_geo(i,n,:)/r_min,&
-                n_exp,r,a_fourier_geo(i,n,:),n_r)
-           call cub_spline(expro_rmin(:)/r_min,expro_dgeo(i,n,:),&
-                n_exp,r,a_fourier_geo(i+4,n,:),n_r)
-
-        enddo
-     enddo
-
-  else
-
-     ! Numerical equilibrium not available
-
-     n_fourier_geo      = 0
-     loc_num_equil_flag = 0
-
-  endif
-  !------------------------------------------------------------------------------------------
-
   !-----------------------------------------------------------------
   ! Parameters for EPED pedestal model 
   ! ** BEWARE: these are NOT all in CGS units.
@@ -416,6 +406,7 @@ subroutine tgyro_init_profiles
   allocate(exp_ti(loc_n_ion,n_exp))
   allocate(exp_ni(loc_n_ion,n_exp))
   allocate(exp_w0(n_exp))
+  allocate(exp_nu_exch(n_exp))
   ! exp_ne, exp_ni: [1/cm^3]
   exp_ne = expro_ne*1e13
   exp_ni(1:loc_n_ion,:) = expro_ni(1:loc_n_ion,:)*1e13
@@ -424,6 +415,7 @@ subroutine tgyro_init_profiles
   exp_ti(1:loc_n_ion,:) = expro_ti(1:loc_n_ion,:)*1e3
   ! exp_w0 [1/s]
   exp_w0 = expro_w0
+  exp_nu_exch = 0.0
 
   allocate(volp_exp(n_exp))
   volp_exp = expro_volp
@@ -470,7 +462,7 @@ subroutine tgyro_init_profiles
      delta_in = expro_delta(n_exp-3)  
      ! Elongation [-]
      kappa_in = expro_kappa(n_exp-3) 
-     ! Main ion mass [mp]
+     ! Main ion mass [0.5*md]
      m_in = mi_vec(1)
      ! R0(a) [m]
      r_in = expro_rmaj(n_exp)
@@ -530,13 +522,14 @@ subroutine tgyro_init_profiles
   !
   ! w0_norm = c_s/R_maj at r=0.
   !
-  w0_norm = sqrt(k*te(1)/mi(1))/r_maj(1)
+  w0_norm = sqrt(k*te(1)/md)/r_maj(1)
   !
   f_rot(:) = w0p(:)/w0_norm
   !----------------------------------------------------------
-
+  
   !----------------------------------------------------------
   if (loc_restart_flag == 1) then
+     quasifix = 1
      call tgyro_restart
      w0p(:) = w0_norm*f_rot(:)
   else
@@ -546,7 +539,6 @@ subroutine tgyro_init_profiles
 
   ! Axis boundary conditions
   call tgyro_init_profiles_axis
-
 
 end subroutine tgyro_init_profiles
 

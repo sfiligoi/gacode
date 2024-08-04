@@ -14,6 +14,8 @@
 
 module tgyro_globals
 
+  integer :: quasifix = 0
+
   !===============================================================
   ! SHARED parameters for both transport methods:
   !
@@ -55,7 +57,8 @@ module tgyro_globals
   !
   integer :: transport_method
   integer :: gyrotest_flag
-  integer :: gyro_restart_method
+  integer :: gyro_restart_method=1
+  integer :: dt_flag
   !
   integer :: error_flag
   character(len=80) :: error_msg
@@ -164,12 +167,14 @@ module tgyro_globals
   real, dimension(:), allocatable :: dlnptotdr
   real, dimension(:), allocatable :: beta_unit
   real, dimension(:), allocatable :: betae_unit
+  real, dimension(:), allocatable :: fpol
   real, dimension(:), allocatable :: c_s
   real, dimension(:), allocatable :: v_i
   real, dimension(:), allocatable :: rho_s
   real, dimension(:), allocatable :: rho_i
 
   real, dimension(:), allocatable :: rho
+  real, dimension(:), allocatable :: polflux
   real, dimension(:), allocatable :: r
   real, dimension(:), allocatable :: r_maj
   real, dimension(:), allocatable :: q
@@ -184,6 +189,17 @@ module tgyro_globals
   real, dimension(:), allocatable :: zeta
   real, dimension(:), allocatable :: s_zeta
 
+  real, dimension(:), allocatable :: shape_sin3
+  real, dimension(:), allocatable :: shape_ssin3
+  real, dimension(:), allocatable :: shape_cos0
+  real, dimension(:), allocatable :: shape_scos0
+  real, dimension(:), allocatable :: shape_cos1
+  real, dimension(:), allocatable :: shape_scos1
+  real, dimension(:), allocatable :: shape_cos2
+  real, dimension(:), allocatable :: shape_scos2
+  real, dimension(:), allocatable :: shape_cos3
+  real, dimension(:), allocatable :: shape_scos3
+  
   real, dimension(:), allocatable :: b_ref
   real, dimension(:), allocatable :: b_unit
   real, dimension(:), allocatable :: volp
@@ -203,6 +219,7 @@ module tgyro_globals
   real, dimension(:), allocatable :: p_i_fus_in
   real, dimension(:), allocatable :: p_e_aux_in
   real, dimension(:), allocatable :: p_i_aux_in
+  real, dimension(:), allocatable :: p_e_ohmic_in
   real, dimension(:), allocatable :: p_brem
   real, dimension(:), allocatable :: p_sync
   real, dimension(:), allocatable :: p_line
@@ -216,6 +233,7 @@ module tgyro_globals
   real, dimension(:), allocatable :: sn_alpha
   real, dimension(:), allocatable :: s_brem
   real, dimension(:), allocatable :: s_sync
+  real, dimension(:), allocatable :: s_line
   real, dimension(:), allocatable :: s_exch
   real, dimension(:), allocatable :: s_expwd
   real, dimension(:), allocatable :: f_b_in
@@ -223,13 +241,10 @@ module tgyro_globals
   real, dimension(:), allocatable :: f_he_fus
   real, dimension(:), allocatable :: mf_in
 
-  real, dimension(:), allocatable :: res
-  real, dimension(:), allocatable :: res0
-  real, dimension(:), allocatable :: relax
-
   integer, dimension(:), allocatable :: therm_vec
+  character(len=3), dimension(:), allocatable :: ion_name
+  real, dimension(:), allocatable :: zi_vec,mi_vec,mi
 
-  real, dimension(n_ion_max) :: mi
   real, dimension(n_ion_max) :: n_ratio,t_ratio
 
   ! Physical constants
@@ -238,7 +253,7 @@ module tgyro_globals
   real :: e
   real :: k
   real :: me
-  real :: mp
+  real :: md
   real :: malpha
   real :: c
   real :: aspect_rat
@@ -248,11 +263,6 @@ module tgyro_globals
   !
   integer, dimension(:,:), allocatable :: pmap,mask
   character(len=1), dimension(:), allocatable :: b_flag
-  !
-  ! Geometry
-  !
-  integer :: n_fourier_geo
-  real, dimension(:,:,:), allocatable :: a_fourier_geo
   !
   ! Orientation
   !
@@ -273,16 +283,12 @@ module tgyro_globals
   integer :: loc_scenario
   integer :: tgyro_neo_method
   integer :: loc_n_ion
-  real, dimension(n_ion_max) :: zi_vec
-  real, dimension(n_ion_max) :: mi_vec
   integer, dimension(n_ion_max) :: therm_flag
   integer, dimension(n_ion_max) :: calc_flag
   integer, dimension(0:n_ion_max) :: evo_e
   real, dimension(0:n_ion_max) :: evo_c
   real :: loc_betae_scale
-  integer :: loc_chang_hinton
   real :: loc_me_multiplier
-  integer :: loc_bc_offset
   integer :: tgyro_tglf_revision
   integer :: tgyro_tglf_dump_flag
   integer :: tgyro_glf23_revision
@@ -293,7 +299,6 @@ module tgyro_globals
   integer :: loc_zeff_flag
   integer :: loc_pflux_method
   integer :: loc_residual_method
-  integer :: loc_num_equil_flag
   integer :: tgyro_neo_gv_flag
   integer :: tgyro_consistent_flag
   integer :: tgyro_iteration_method
@@ -310,7 +315,6 @@ module tgyro_globals
   integer :: tgyro_er_bc
   integer :: tgyro_noturb_flag
   integer :: tgyro_use_rho
-  integer :: tgyro_dt_method
   integer :: tgyro_gyro_restart_flag
   integer :: tgyro_write_profiles_flag
   integer :: tgyro_neo_n_theta
@@ -327,6 +331,12 @@ module tgyro_globals
   integer :: tgyro_zero_dens_grad_flag
   real :: tgyro_residual_tol
   real :: tgyro_input_fusion_scale
+  integer :: tgyro_cgyro_n_iterate
+  !
+  real, dimension(:), allocatable :: res
+  real, dimension(:), allocatable :: res_norm
+  real, dimension(:), allocatable :: res0
+  real, dimension(:), allocatable :: relax
   !
   ! Iteration variables (global)
   !
@@ -337,7 +347,6 @@ module tgyro_globals
   integer :: flux_method
   integer, dimension(:), allocatable :: flux_method_vec
   integer :: i_tran
-  integer :: i_bc
   integer :: flux_counter
   integer :: i_ash
   integer :: evolve_indx(5)
@@ -345,4 +354,19 @@ module tgyro_globals
   integer :: use_trap
   !---------------------------------------------------------
 
+  ! Variable for cgyro iteration
+  integer :: cgyro_var_in           
+  integer :: cgyro_n_species_out
+  real    :: cgyro_tave_min_out
+  real    :: cgyro_tave_max_out
+  real,dimension(:,:), allocatable :: cgyro_flux_tave_out
+  integer :: cgyro_status_out
+  integer :: cgyro_nflux
+  integer, dimension(:), allocatable   :: cgyro_status_vec
+  integer, dimension(:), allocatable   :: cgyro_n_species_vec
+  real, dimension(:), allocatable      :: cgyro_tave_min_vec
+  real, dimension(:), allocatable      :: cgyro_tave_max_vec
+  real, dimension(:,:,:), allocatable  :: cgyro_flux_tave_vec
+  character(len=21)       :: runfile_cgyro_eflux='out.tgyro.cgyro_eflux'
+  
 end module tgyro_globals

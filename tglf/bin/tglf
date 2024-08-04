@@ -213,12 +213,13 @@ then
    then
      echo 'no mpi'  >> $RUNBASE
      cd $SIMDIR
+     export OMP_NUM_THREADS=$NOMP
      $TGLF_DIR/src/tglf >> $RUNBASE
    else
      $GACODE_ROOT/platform/exec/exec.$GACODE_PLATFORM \
      $SIMDIR $NPROC $TGLF_DIR/src/tglf_mpi $NOMP $NUMA $MPINUMA >> $RUNBASE
    fi
-   #gacode_printversion TGLF
+   gacode_printversion TGLF
 
    cat $RUNBASE
 

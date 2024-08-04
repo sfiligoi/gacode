@@ -15,7 +15,7 @@ subroutine tglf_run()
   use tglf_pkg
   use tglf_interface
   use tglf_global
-  
+
 #ifdef MPI_TGLF
   use tglf_mpi
 #endif
@@ -66,9 +66,11 @@ subroutine tglf_run()
        tglf_nbasis_max_in, &
        tglf_nbasis_min_in, &
        tglf_nxgrid_in, &
-       tglf_nky_in)
-       
+       tglf_nky_in, &
+       tglf_use_ave_ion_grid_in)  
+
   call put_rare_switches(tglf_theta_trapped_in, &
+       tglf_wdia_trapped_in, &
        tglf_park_in, &
        tglf_ghat_in, &
        tglf_gchat_in, &
@@ -88,6 +90,7 @@ subroutine tglf_run()
        tglf_xnu_factor_in, &
        tglf_debye_factor_in, &
        tglf_etg_factor_in, &
+       tglf_rlnp_cutoff_in, &
        tglf_sat_rule_in, &
        tglf_kygrid_model_in, &
        tglf_xnu_model_in, &
@@ -138,6 +141,7 @@ subroutine tglf_run()
   ! Create parameter dump file
   if (tglf_dump_flag_in .eqv. .true.) then
      call tglf_dump_local
+     call tglf_dump_global
      if (tglf_test_flag_in == 1) return
   endif
 
@@ -154,10 +158,10 @@ subroutine tglf_run()
         call tglf_tm
 #endif
      endif
-     
+
      !---------------------------------------------
      ! Output (normalized to Q_GB)
-     ! 
+     !
      ! Electrons
 
      ! Gammae/Gamma_GB
@@ -225,7 +229,7 @@ subroutine tglf_run()
 #ifdef MPI_TGLF
      if (iProcTglf == iProc0Tglf .and. tglf_write_wavefunction_flag_in == 1) then
         call write_wavefunction_out(trim(tglf_path_in)//'out.tglf.wavefunction')
-     endif     
+     endif
 #else
      if (tglf_write_wavefunction_flag_in == 1) then
         call write_wavefunction_out(trim(tglf_path_in)//'out.tglf.wavefunction')

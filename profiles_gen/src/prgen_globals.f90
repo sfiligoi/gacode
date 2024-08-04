@@ -22,8 +22,8 @@ module prgen_globals
   integer :: btccw
   integer :: nfourier
   integer :: lump_fast_flag
-  real :: dpsi_efit
-  real :: dpsi_data
+  real :: psi0,psi1
+
   integer :: n_reorder
   integer, dimension(n_ion_max) :: reorder_vec
   integer :: n_null
@@ -41,19 +41,25 @@ module prgen_globals
   real, dimension(:), allocatable :: rmaj
   real, dimension(:), allocatable :: q
   real, dimension(:), allocatable :: p_tot
+  real, dimension(:), allocatable :: fpol
   real, dimension(:), allocatable :: omega0
   real, dimension(:), allocatable :: kappa
   real, dimension(:), allocatable :: delta
   real, dimension(:), allocatable :: zmag
   real, dimension(:), allocatable :: zeta
-  real, dimension(:), allocatable :: shape_sin3
-  real, dimension(:), allocatable :: shape_cos0
-  real, dimension(:), allocatable :: shape_cos1
-  real, dimension(:), allocatable :: shape_cos2
-  real, dimension(:), allocatable :: shape_cos3
+  
+  real, dimension(:,:), allocatable :: shape_sin
+  real, dimension(:,:), allocatable :: shape_cos
   real, dimension(:), allocatable :: vpolc_exp
   real, dimension(:), allocatable :: vtorc_exp
 
+  real, dimension(:), allocatable :: te_kev
+  real, dimension(:), allocatable :: ti_kev
+  real, dimension(:), allocatable :: ne_e19m3
+  real, dimension(:), allocatable :: ni_e19m3
+  real, dimension(:), allocatable :: zeff
+
+  real, dimension(:), allocatable :: jtot
   real, dimension(:), allocatable :: johm
   real, dimension(:), allocatable :: jbs
   real, dimension(:), allocatable :: jnb
@@ -70,9 +76,10 @@ module prgen_globals
   real :: bcentr
   real :: current
 
-  ! Power diagnostics
+  ! Power diagnostics (all MW/m^3)
   real, dimension(:), allocatable :: qpow_e,qpow_i
-  real, dimension(:), allocatable :: qspow_e,qspow_i 
+  real, dimension(:), allocatable :: qspow_e,qspow_i
+  real, dimension(:), allocatable :: qohm
 
   !---------------------------------------------------------
   ! ONETWO variables
@@ -107,7 +114,6 @@ module prgen_globals
   real, dimension(:), allocatable :: onetwo_hcap
   real, dimension(:), allocatable :: onetwo_qbeame
   real, dimension(:), allocatable :: onetwo_qrfe
-  real, dimension(:), allocatable :: onetwo_qohm
   real, dimension(:), allocatable :: onetwo_qrad
   real, dimension(:), allocatable :: onetwo_qione
   real, dimension(:), allocatable :: onetwo_qioni
@@ -128,7 +134,6 @@ module prgen_globals
   real, dimension(:), allocatable :: onetwo_talp
   real, dimension(:), allocatable :: onetwo_q
   real, dimension(:), allocatable :: onetwo_angrot
-  real, dimension(:), allocatable :: onetwo_zeff
   real, dimension(:), allocatable :: onetwo_ene
   real, dimension(:), allocatable :: onetwo_enalp
   real, dimension(:), allocatable :: onetwo_psi
@@ -199,12 +204,11 @@ module prgen_globals
   real, dimension(:), allocatable :: plst_phit
   real, dimension(:), allocatable :: plst_psipol
   real, dimension(:), allocatable :: plst_elong
-  real, dimension(:), allocatable :: plst_triang
+  real, dimension(:), allocatable :: plst_triang,plst_triangu
   real, dimension(:), allocatable :: plst_iota
   real, dimension(:), allocatable :: plst_r_midp_in
   real, dimension(:), allocatable :: plst_r_midp_out
   real, dimension(:), allocatable :: plst_z_midp
-  real, dimension(:), allocatable :: plst_zeff
   real, dimension(:), allocatable :: plst_epot
   real, dimension(:), allocatable :: plst_omegat
   real, dimension(:), allocatable :: plst_pe_trans
@@ -214,6 +218,7 @@ module prgen_globals
   real, dimension(:), allocatable :: plst_pbth
   real, dimension(:), allocatable :: plst_qie
   real, dimension(:), allocatable :: plst_peech
+  real, dimension(:,:), allocatable :: plst_picrf_totals     
   real, dimension(:), allocatable :: plst_pohme
   real, dimension(:), allocatable :: plst_pmine
   real, dimension(:), allocatable :: plst_pmini
@@ -222,6 +227,7 @@ module prgen_globals
   real, dimension(:), allocatable :: plst_pfusi
   real, dimension(:), allocatable :: plst_pfusth
   real, dimension(:), allocatable :: plst_pfuse
+  real, dimension(:), allocatable :: plst_prad
   real, dimension(:), allocatable :: plst_prad_br
   real, dimension(:), allocatable :: plst_prad_cy
   real, dimension(:), allocatable :: plst_prad_li
@@ -252,84 +258,6 @@ module prgen_globals
   real, dimension(n_ion_max) :: peqdsk_z
   real, dimension(n_ion_max) :: peqdsk_m
   character (len=7), dimension(5)  :: peqdsk_type
-  !---------------------------------------------------------
-
-  !---------------------------------------------------------
-  ! CORSICA variables
-  !
-  real :: corsica_time
-  real :: corsica_current
-  real :: corsica_loop_voltage
-  real :: corsica_fusion_power
-  real :: corsica_bootstrap_fraction
-  real :: corsica_betat
-  real :: corsica_betan
-  real :: corsica_taue
-  real :: corsica_q95
-  real :: corsica_r
-  real :: corsica_a
-  real :: corsica_kappa
-  real :: corsica_delta
-  real :: corsica_fusion_gain
-  real :: corsica_betap
-  real :: corsica_li3
-
-  integer, parameter :: corsica_nvals = 81
-  real, allocatable :: corsica_rho(:)
-  real, allocatable :: corsica_r_a(:)
-  real, allocatable :: corsica_psin(:)
-  real, allocatable :: corsica_vl(:)
-  real, allocatable :: corsica_te(:)
-  real, allocatable :: corsica_ti(:)
-  real, allocatable :: corsica_ne(:)
-  real, allocatable :: corsica_ndt(:)
-  real, allocatable :: corsica_nz(:)
-  real, allocatable :: corsica_nalpha(:)
-  real, allocatable :: corsica_zeff(:)
-  real, allocatable :: corsica_q(:)
-  real, allocatable :: corsica_j(:)
-  real, allocatable :: corsica_jbs(:)
-  !---------------------------------------------------------
-
-  !---------------------------------------------------------
-  ! UFILE variables
-  !
-  integer :: ufile_nion
-  real :: ufile_z(8)
-  real :: ufile_m(8)
-  character (len=10) :: ufile_tok
-  character (len=40) :: ufile_shot
-  character (len=10) :: ufile_time
-  character (len=5), dimension(8)  :: ufile_type
-  real, dimension(:), allocatable :: ufile_ne
-  real, dimension(:,:), allocatable :: ufile_ni
-  real, dimension(:), allocatable :: ufile_te
-  real, dimension(:,:), allocatable :: ufile_ti
-  real, dimension(:), allocatable :: ufile_zeff
-  real, dimension(:), allocatable :: ufile_pres
-  real, dimension(:), allocatable :: ufile_vrot
-  real, dimension(:), allocatable :: ufile_vrotm
-  real, dimension(:), allocatable :: ufile_volume
-  real, dimension(:), allocatable :: ufile_qnbii
-  real, dimension(:), allocatable :: ufile_qnbie
-  real, dimension(:), allocatable :: ufile_qicrhi
-  real, dimension(:), allocatable :: ufile_qicrhe
-  real, dimension(:), allocatable :: ufile_qei
-  real, dimension(:), allocatable :: ufile_qrad
-  real, dimension(:), allocatable :: ufile_qeche
-  real, dimension(:), allocatable :: ufile_qechi
-  real, dimension(:), allocatable :: ufile_qohm
-  real, dimension(:), allocatable :: ufile_qwalli
-  real, dimension(:), allocatable :: ufile_qwalle
-
-  real, dimension(:), allocatable :: ufile_qfuse
-  real, dimension(:), allocatable :: ufile_qfusi
-  real, dimension(:), allocatable :: ufile_qlhe
-  real, dimension(:), allocatable :: ufile_qlhi
-  real, dimension(:), allocatable :: ufile_snbie
-  real, dimension(:), allocatable :: ufile_snbii
-  real, dimension(:), allocatable :: ufile_swall
-  real, dimension(:), allocatable :: ufile_torq
   !---------------------------------------------------------
 
 end module prgen_globals

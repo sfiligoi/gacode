@@ -81,7 +81,7 @@ subroutine neo_do
   cderiv(1)  =  8
   cderiv(2)  = -1
 
-  if(sim_model == 0 .or. sim_model == 3) then
+  if(sim_model == 0 .or. sim_model == 3 .or. sim_model == 5) then
      ! Theory calculation only -- no numerical kinetic calculation
      call EQUIL_alloc(1)
      call THEORY_alloc(1)
@@ -108,6 +108,8 @@ subroutine neo_do
            neo_th_out(5)     = jpar_S
            neo_th_out(6)     = jpar_K
            neo_th_out(8)     = jtor_S
+           neo_th_out(9)     = jpar_Smod
+           neo_th_out(10)    = jtor_Smod
            neo_thHS_out(:,:) = 0.0
            do is=1, n_species
               neo_thHS_out(is,1) = pflux_multi_HS(is) 
@@ -530,6 +532,8 @@ subroutine neo_do
         neo_th_out(5)     = jpar_S
         neo_th_out(6)     = jpar_K
         neo_th_out(8)     = jtor_S
+        neo_th_out(9)     = jpar_Smod
+        neo_th_out(10)    = jtor_Smod
         if(sim_model == 1) then
            neo_th_out(7)     = jbs_nc
         endif

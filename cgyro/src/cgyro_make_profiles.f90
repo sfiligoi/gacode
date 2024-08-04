@@ -69,7 +69,9 @@ subroutine cgyro_make_profiles
           rmin,&
           btccw,&
           ipccw,&
-          a_meters)
+          a_meters,&
+          path,&
+          CGYRO_COMM_WORLD)
 
      do is=1,n_species
         z(is)    = z_loc(is)
@@ -84,18 +86,29 @@ subroutine cgyro_make_profiles
      s_delta = s_delta_loc
      s_zeta  = s_zeta_loc
 
-     ! HAM (will be reset to 0.0 if udsymmetry_flag=1)
-     shape_sin3 = shape_sin3_loc
-     shape_cos0 = shape_cos0_loc
-     shape_cos1 = shape_cos1_loc
-     shape_cos2 = shape_cos2_loc
-     shape_cos3 = shape_cos3_loc
-
-     shape_s_sin3 = shape_s_sin3_loc
-     shape_s_cos0 = shape_s_cos0_loc
-     shape_s_cos1 = shape_s_cos1_loc
-     shape_s_cos2 = shape_s_cos2_loc
-     shape_s_cos3 = shape_s_cos3_loc
+     ! HAM (cos's will be reset to 0.0 if udsymmetry_flag=1)
+     shape_sin(3)   = shape_sin3_loc
+     shape_s_sin(3) = shape_s_sin3_loc
+     shape_sin(4)   = shape_sin4_loc
+     shape_s_sin(4) = shape_s_sin4_loc
+     shape_sin(5)   = shape_sin5_loc
+     shape_s_sin(5) = shape_s_sin5_loc
+     shape_sin(6)   = shape_sin6_loc
+     shape_s_sin(6) = shape_s_sin6_loc
+     shape_cos(0)   = shape_cos0_loc
+     shape_s_cos(0) = shape_s_cos0_loc
+     shape_cos(1)   = shape_cos1_loc
+     shape_s_cos(1) = shape_s_cos1_loc
+     shape_cos(2)   = shape_cos2_loc
+     shape_s_cos(2) = shape_s_cos2_loc
+     shape_cos(3)   = shape_cos3_loc
+     shape_s_cos(3) = shape_s_cos3_loc
+     shape_cos(4)   = shape_cos4_loc
+     shape_s_cos(4) = shape_s_cos4_loc
+     shape_cos(5)   = shape_cos5_loc
+     shape_s_cos(5) = shape_s_cos5_loc
+     shape_cos(6)   = shape_cos6_loc
+     shape_s_cos(6) = shape_s_cos6_loc
  
      q       = q_loc
      s       = s_loc
@@ -203,15 +216,11 @@ subroutine cgyro_make_profiles
              * sqrt(mass_ele/mass(is)) * (temp_ele/temp(is))**1.5
      enddo
 
-     ! Always compute beta_* consistently
-     call set_betastar
-
      ! Re-scaling
      lambda_star      = lambda_star * lambda_star_scale
      gamma_e          = gamma_e      * gamma_e_scale
      gamma_p          = gamma_p      * gamma_p_scale
      mach             = mach         * mach_scale    
-     beta_star(0)     = beta_star(0) * beta_star_scale
      betae_unit       = betae_unit   * betae_unit_scale
      do is=1,n_species
         dlnndr(is) = dlnndr(is)  * dlnndr_scale(is) 
@@ -219,6 +228,12 @@ subroutine cgyro_make_profiles
         nu(is)     = nu(is)      * nu_ee_scale
      enddo
 
+     ! Set beta_* consistent with re-scaled beta and gradients and then re-scale
+     ! note: beta_star(0) will be over-written with sonic rotation
+     call set_betastar
+     beta_star(0)     = beta_star(0)  * beta_star_scale
+     beta_star_fac    = beta_star_fac * beta_star_scale
+     
   else
 
      a_meters      = 0.0
@@ -273,9 +288,11 @@ subroutine cgyro_make_profiles
 
      enddo
 
-     ! Always compute beta_* consistently
+     ! Always compute beta_* consistently with parameters in input.cgyro and then re-scale
+     ! note: beta_star(0) will be over-written with sonic rotation
      call set_betastar
      beta_star(0) = beta_star(0)*beta_star_scale
+     beta_star_fac  = beta_star_fac * beta_star_scale
 
   endif
 
@@ -316,11 +333,8 @@ subroutine cgyro_make_profiles
 
   if (udsymmetry_flag == 1) then
      zmag = 0.0 ; dzmag = 0.0
-     shape_sin3 = 0.0 ; shape_s_sin3 = 0.0
-     shape_cos0 = 0.0 ; shape_s_cos0 = 0.0
-     shape_cos1 = 0.0 ; shape_s_cos1 = 0.0
-     shape_cos2 = 0.0 ; shape_s_cos2 = 0.0
-     shape_cos3 = 0.0 ; shape_s_cos3 = 0.0
+     shape_cos(:)   = 0.0
+     shape_s_cos(:) = 0.0
   endif
 
   !-------------------------------------------------------------
@@ -388,6 +402,12 @@ subroutine cgyro_make_profiles
      sign_qs = -1
   else
      sign_qs = 1
+  endif
+
+  if (q*rho < 0.0) then
+     call cgyro_info('Ion direction: omega > 0') 
+  else
+     call cgyro_info('Ion direction: omega < 0') 
   endif
   !-------------------------------------------------------------
 
@@ -471,6 +491,6 @@ subroutine set_betastar
   endif
   beta_star(0)  = beta_star(0)*betae_unit
   ! 8*pi/Bunit^2 * scaling factor
-  beta_star_fac = -betae_unit/(dens_ele*temp_ele)*beta_star_scale  
+  beta_star_fac = -betae_unit/(dens_ele*temp_ele)
   
 end subroutine set_betastar

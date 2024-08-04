@@ -1,5 +1,5 @@
 #! /usr/bin/env bash
-# GACODE Parallel execution script (SUMMIT_JC)
+# GACODE Parallel execution script (SUMMIT)
 
 simdir=${1}
 nmpi=${2} # nodes
@@ -28,9 +28,6 @@ if [ $debug -eq 0 ] ; then
 
 ulimit -s 10240
 ulimit -c 0
-
-module unload darshan-runtime
-module list
 
 export PAMI_ENABLE_STRIPING=0
 export PAMI_IBV_ADAPTER_AFFINITY=1
@@ -64,12 +61,9 @@ fi
 
 # -- diagnostics
 
-cat > $simdir/batch.out << EOF
+cat >> $simdir/batch.out << EOF
 ulimit -s 10240
 ulimit -c 0
-
-module unload darshan-runtime
-module list
 
 export PAMI_ENABLE_STRIPING=0
 export PAMI_IBV_ADAPTER_AFFINITY=1

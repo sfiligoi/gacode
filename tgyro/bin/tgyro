@@ -71,10 +71,7 @@ then
   echo
   echo "UTILITY COMMANDS"
   echo
-  echo "         -noharvest"
-  echo "          Do not collect harvest data."
-  echo
-  echo "         -s <simdir>" 
+  echo "         -s <simdir>"
   echo "         Create copy of <simdir> stripped of restart files."
   echo 
   echo "    tgyro_dir: Replicate TGYRO directories."
@@ -313,7 +310,7 @@ echo "INFO: (tgyro script) See $RUNBASE for TGYRO run summary."
 
 if [ $EXEC_FLAG -eq 1 ]
 then
-   if [ $NPROC -ne $EPROC ] && [ "$GACODE_PLATFORM" != "SUMMIT_JC" ]
+   if [ $NPROC -ne $EPROC ] && [ "$GACODE_PLATFORM" != "SUMMIT" ]
    then
        #cat $LOG_FILE
        echo "ERROR: (tgyro script) processor count mismatch."

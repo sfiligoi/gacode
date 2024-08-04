@@ -22,8 +22,20 @@ module geo
   double precision :: geo_shape_s_cos2_in = 0.0
   double precision :: geo_shape_cos3_in = 0.0
   double precision :: geo_shape_s_cos3_in = 0.0
+  double precision :: geo_shape_cos4_in = 0.0
+  double precision :: geo_shape_s_cos4_in = 0.0
+  double precision :: geo_shape_cos5_in = 0.0
+  double precision :: geo_shape_s_cos5_in = 0.0
+  double precision :: geo_shape_cos6_in = 0.0
+  double precision :: geo_shape_s_cos6_in = 0.0
   double precision :: geo_shape_sin3_in = 0.0
   double precision :: geo_shape_s_sin3_in = 0.0
+  double precision :: geo_shape_sin4_in = 0.0
+  double precision :: geo_shape_s_sin4_in = 0.0
+  double precision :: geo_shape_sin5_in = 0.0
+  double precision :: geo_shape_s_sin5_in = 0.0
+  double precision :: geo_shape_sin6_in = 0.0
+  double precision :: geo_shape_s_sin6_in = 0.0
   double precision :: geo_beta_star_in = 0.0
   double precision :: geo_beta_star_1_in = 0.0
   double precision :: geo_beta_star_2_in = 0.0
@@ -55,8 +67,11 @@ module geo
   double precision, dimension(:), allocatable :: geo_usin
   double precision, dimension(:), allocatable :: geo_ucos
   double precision, dimension(:), allocatable :: geo_bigr
+  double precision, dimension(:), allocatable :: geo_bigz
   double precision, dimension(:), allocatable :: geo_bigr_r
   double precision, dimension(:), allocatable :: geo_bigr_t
+  double precision, dimension(:), allocatable :: geo_bigz_r
+  double precision, dimension(:), allocatable :: geo_bigz_t
   double precision, dimension(:), allocatable :: geo_theta_nc
   double precision, dimension(:), allocatable :: geo_theta_s
   double precision, dimension(:), allocatable :: geo_chi2
@@ -101,8 +116,11 @@ module geo
   double precision, dimension(:), allocatable :: geov_usin
   double precision, dimension(:), allocatable :: geov_ucos
   double precision, dimension(:), allocatable :: geov_bigr
+  double precision, dimension(:), allocatable :: geov_bigz
   double precision, dimension(:), allocatable :: geov_bigr_r
   double precision, dimension(:), allocatable :: geov_bigr_t
+  double precision, dimension(:), allocatable :: geov_bigz_r
+  double precision, dimension(:), allocatable :: geov_bigz_t
   double precision, dimension(:), allocatable :: geov_theta_nc
   double precision, dimension(:), allocatable :: geov_theta_s
   double precision, dimension(:), allocatable :: geov_chi2
@@ -273,6 +291,7 @@ contains
           geo_captheta(itheta) = geov_captheta(i1)+(geov_captheta(i2)-geov_captheta(i1))*z
           geo_nu(itheta)       = geov_nu(i1)+(geov_nu(i2)-geov_nu(i1))*z
           geo_bigr(itheta)     = geov_bigr(i1)+(geov_bigr(i2)-geov_bigr(i1))*z
+          geo_bigz(itheta)     = geov_bigz(i1)+(geov_bigz(i2)-geov_bigz(i1))*z
           geo_l_r(itheta)      = geov_l_r(i1)+(geov_l_r(i2)-geov_l_r(i1))*z
           geo_l_t(itheta)      = geov_l_t(i1)+(geov_l_t(i2)-geov_l_t(i1))*z
           geo_nsin(itheta)     = geov_nsin(i1)+(geov_nsin(i2)-geov_nsin(i1))*z
@@ -280,6 +299,8 @@ contains
           geo_ucos(itheta)     = geov_ucos(i1)+(geov_ucos(i2)-geov_ucos(i1))*z
           geo_bigr_r(itheta)   = geov_bigr_r(i1)+(geov_bigr_r(i2)-geov_bigr_r(i1))*z
           geo_bigr_t(itheta)   = geov_bigr_t(i1)+(geov_bigr_t(i2)-geov_bigr_t(i1))*z
+          geo_bigz_r(itheta)   = geov_bigz_r(i1)+(geov_bigz_r(i2)-geov_bigz_r(i1))*z
+          geo_bigz_t(itheta)   = geov_bigz_t(i1)+(geov_bigz_t(i2)-geov_bigz_t(i1))*z
           geo_theta_nc(itheta) = geov_theta_nc(i1)+(geov_theta_nc(i2)-geov_theta_nc(i1))*z
           geo_theta_s(itheta)  = geov_theta_s(i1)+(geov_theta_s(i2)-geov_theta_s(i1))*z
           geo_chi2(itheta)     = geov_chi2(i1)+(geov_chi2(i2)-geov_chi2(i1))*z
@@ -323,9 +344,6 @@ contains
     double precision :: b4
     double precision :: b5
     !
-    double precision, dimension(:), allocatable :: bigz
-    double precision, dimension(:), allocatable :: bigz_r
-    double precision, dimension(:), allocatable :: bigz_t
     double precision, dimension(:), allocatable :: bigz_l
     double precision, dimension(:), allocatable :: bigr_l
     double precision, dimension(:), allocatable :: r_c
@@ -389,9 +407,6 @@ contains
     !
     allocate(ic(2-n_theta:2*n_theta-2))
     !
-    allocate(bigz(n_theta))
-    allocate(bigz_r(n_theta))
-    allocate(bigz_t(n_theta))
     allocate(bigz_l(n_theta))
     allocate(bigr_l(n_theta))
     allocate(r_c(n_theta))
@@ -444,22 +459,40 @@ contains
                + geo_shape_cos1_in*cos(theta) &
                + geo_shape_cos2_in*cos(2*theta) &
                + geo_shape_cos3_in*cos(3*theta) &
+               + geo_shape_cos4_in*cos(4*theta) &
+               + geo_shape_cos5_in*cos(5*theta) &
+               + geo_shape_cos6_in*cos(6*theta) &
                + x*sin(theta) &
                - geo_zeta_in*sin(2*theta) &
-               + geo_shape_sin3_in*sin(3*theta) 
+               + geo_shape_sin3_in*sin(3*theta) &
+               + geo_shape_sin4_in*sin(4*theta) &
+               + geo_shape_sin5_in*sin(5*theta) &
+               + geo_shape_sin6_in*sin(6*theta)
           a_t  = 1.0 &
                - geo_shape_cos1_in*sin(theta) &
                - 2*geo_shape_cos2_in*sin(2*theta) &
                - 3*geo_shape_cos3_in*sin(3*theta) &
+               - 4*geo_shape_cos4_in*sin(4*theta) &
+               - 5*geo_shape_cos5_in*sin(5*theta) &
+               - 6*geo_shape_cos6_in*sin(6*theta) &
                + x*cos(theta) &
                - 2*geo_zeta_in*cos(2*theta) &
-               + 3*geo_shape_sin3_in*cos(3*theta)
+               + 3*geo_shape_sin3_in*cos(3*theta) &
+               + 4*geo_shape_sin4_in*cos(4*theta) &
+               + 5*geo_shape_sin5_in*cos(5*theta) &
+               + 6*geo_shape_sin6_in*cos(6*theta) 
           a_tt = -geo_shape_cos1_in*cos(theta) &
                - 4*geo_shape_cos2_in*cos(2*theta) &
                - 9*geo_shape_cos3_in*cos(3*theta) &
+               - 16*geo_shape_cos4_in*cos(4*theta) &
+               - 25*geo_shape_cos5_in*cos(5*theta) &
+               - 36*geo_shape_cos6_in*cos(6*theta) &
                - x*sin(theta) &
                + 4*geo_zeta_in*sin(2*theta) &
-               - 9*geo_shape_sin3_in*sin(3*theta)
+               - 9*geo_shape_sin3_in*sin(3*theta) &
+               - 16*geo_shape_sin4_in*sin(4*theta) &
+               - 25*geo_shape_sin5_in*sin(5*theta) &
+               - 36*geo_shape_sin6_in*sin(6*theta) 
 
           ! R(theta)
           ! dR/dr
@@ -472,9 +505,15 @@ contains
                + geo_shape_s_cos1_in*cos(theta) &
                + geo_shape_s_cos2_in*cos(2*theta) &
                + geo_shape_s_cos3_in*cos(3*theta) &
+               + geo_shape_s_cos4_in*cos(4*theta) &
+               + geo_shape_s_cos5_in*cos(5*theta) &
+               + geo_shape_s_cos6_in*cos(6*theta) &
                + geo_s_delta_in/cos(x)*sin(theta) &
                - geo_s_zeta_in*sin(2*theta) &
-               + geo_shape_s_sin3_in*sin(3*theta))
+               + geo_shape_s_sin3_in*sin(3*theta) &
+               + geo_shape_s_sin4_in*sin(4*theta) &
+               + geo_shape_s_sin5_in*sin(5*theta) &
+               + geo_shape_s_sin6_in*sin(6*theta))
           geov_bigr_t(i) = -geo_rmin_in * a_t * sin(a)
           bigr_tt = &
                -geo_rmin_in*a_t**2*cos(a) &
@@ -493,9 +532,9 @@ contains
           ! dZ/dr
           ! dZ/dtheta
           ! d^2Z/dtheta^2
-          bigz(i)   = geo_zmag_in+geo_kappa_in*geo_rmin_in*sin(a)
-          bigz_r(i) = geo_dzmag_in + geo_kappa_in*(1.0+geo_s_kappa_in)*sin(a) 
-          bigz_t(i) = geo_kappa_in*geo_rmin_in*cos(a)*a_t
+          geov_bigz(i)   = geo_zmag_in+geo_kappa_in*geo_rmin_in*sin(a)
+          geov_bigz_r(i) = geo_dzmag_in + geo_kappa_in*(1.0+geo_s_kappa_in)*sin(a) 
+          geov_bigz_t(i) = geo_kappa_in*geo_rmin_in*cos(a)*a_t
           bigz_tt   = -geo_kappa_in*geo_rmin_in*sin(a)*a_t**2+&
                geo_kappa_in*geo_rmin_in*cos(a)*a_tt
 
@@ -516,40 +555,40 @@ contains
              bigr_tt = bigr_tt-n*n*(a_R(n)*cos(n*theta)+b_R(n)*sin(n*theta)) 
           enddo
 
-          bigz(i)  = 0.5*a_Z(0)
-          bigz_r(i)= 0.5*a_Zp(0)
-          bigz_t(i) = 0.0
+          geov_bigz(i)   = 0.5*a_Z(0)
+          geov_bigz_r(i) = 0.5*a_Zp(0)
+          geov_bigz_t(i) = 0.0
           bigz_tt   = 0.0
           do n=1,ny
-             bigz(i)   = bigz(i)+a_Z(n)*cos(n*theta)+b_Z(n)*sin(n*theta)        
-             bigz_r(i) = bigz_r(i)+a_Zp(n)*cos(n*theta)+b_Zp(n)*sin(n*theta)        
-             bigz_t(i) = bigz_t(i)-n*a_Z(n)*sin(n*theta)+n*b_Z(n)*cos(n*theta) 
+             geov_bigz(i)   = geov_bigz(i)+a_Z(n)*cos(n*theta)+b_Z(n)*sin(n*theta)        
+             geov_bigz_r(i) = geov_bigz_r(i)+a_Zp(n)*cos(n*theta)+b_Zp(n)*sin(n*theta)        
+             geov_bigz_t(i) = geov_bigz_t(i)-n*a_Z(n)*sin(n*theta)+n*b_Z(n)*cos(n*theta) 
              bigz_tt   = bigz_tt-n*n*(a_Z(n)*cos(n*theta)+b_Z(n)*sin(n*theta)) 
           enddo
 
        endif
 
-       g_tt = geov_bigr_t(i)**2+bigz_t(i)**2
+       g_tt = geov_bigr_t(i)**2+geov_bigz_t(i)**2
 
-       geov_jac_r(i) = geov_bigr(i)*(geov_bigr_r(i)*bigz_t(i)-geov_bigr_t(i)*bigz_r(i))
+       geov_jac_r(i) = geov_bigr(i)*(geov_bigr_r(i)*geov_bigz_t(i)-geov_bigr_t(i)*geov_bigz_r(i))
 
        geov_grad_r(i) = geov_bigr(i)*sqrt(g_tt)/geov_jac_r(i)
 
        geov_l_t(i) = sqrt(g_tt)
 
        ! 1/(du/dl)
-       r_c(i) = geov_l_t(i)**3/(geov_bigr_t(i)*bigz_tt-bigz_t(i)*bigr_tt)
+       r_c(i) = geov_l_t(i)**3/(geov_bigr_t(i)*bigz_tt-geov_bigz_t(i)*bigr_tt)
 
        ! cos(u)
-       bigz_l(i) = bigz_t(i)/geov_l_t(i)
+       bigz_l(i) = geov_bigz_t(i)/geov_l_t(i)
 
        ! -sin(u)
        bigr_l(i) = geov_bigr_t(i)/geov_l_t(i)
 
        ! l_r = cos(u) dZ/dr - sin(u) dR/dr
-       geov_l_r(i) = bigz_l(i)*bigz_r(i)+bigr_l(i)*geov_bigr_r(i)
+       geov_l_r(i) = bigz_l(i)*geov_bigz_r(i)+bigr_l(i)*geov_bigr_r(i)
 
-       geov_nsin(i) = (geov_bigr_r(i)*geov_bigr_t(i)+bigz_r(i)*bigz_t(i))/geov_l_t(i)
+       geov_nsin(i) = (geov_bigr_r(i)*geov_bigr_t(i)+geov_bigz_r(i)*geov_bigz_t(i))/geov_l_t(i)
 
        ! beta_star(theta)
        beta_star(i) = geo_beta_star_in + &
@@ -712,7 +751,7 @@ contains
     ! dV = (0.5*R*dphi)*(R*dZ) 
     ! dS = (R*dphi)*(dl)
     !
-    geo_volume = 0.5*pi_2*sum(bigz_t(1:n_theta-1)*geov_bigr(1:n_theta-1)**2)*d_theta
+    geo_volume = 0.5*pi_2*sum(geov_bigz_t(1:n_theta-1)*geov_bigr(1:n_theta-1)**2)*d_theta
     geo_surf   = pi_2*sum(geov_l_t(1:n_theta-1)*geov_bigr(1:n_theta-1))*d_theta
     geo_bl     = sum(geov_l_t(:)*geov_bp(:))*d_theta
     !-----------------------------------------------------------
@@ -764,9 +803,6 @@ contains
     !
     deallocate(ic)
     !
-    deallocate(bigz)
-    deallocate(bigz_r)
-    deallocate(bigz_t)
     deallocate(bigz_l)
     deallocate(bigr_l)
     deallocate(r_c)
@@ -827,8 +863,11 @@ contains
        allocate(geov_usin(geo_ntheta_in))
        allocate(geov_ucos(geo_ntheta_in))
        allocate(geov_bigr(geo_ntheta_in))
+       allocate(geov_bigz(geo_ntheta_in))
        allocate(geov_bigr_r(geo_ntheta_in))
        allocate(geov_bigr_t(geo_ntheta_in))
+       allocate(geov_bigz_r(geo_ntheta_in))
+       allocate(geov_bigz_t(geo_ntheta_in))
        allocate(geov_theta_nc(geo_ntheta_in))
        allocate(geov_theta_s(geo_ntheta_in))
        allocate(geov_chi2(geo_ntheta_in))
@@ -856,8 +895,11 @@ contains
        deallocate(geov_usin)
        deallocate(geov_ucos)
        deallocate(geov_bigr)
+       deallocate(geov_bigz)
        deallocate(geov_bigr_r)
        deallocate(geov_bigr_t)
+       deallocate(geov_bigz_r)
+       deallocate(geov_bigz_t)
        deallocate(geov_theta_nc)
        deallocate(geov_theta_s)
        deallocate(geov_chi2)
@@ -895,8 +937,11 @@ contains
        allocate(geo_usin(n))
        allocate(geo_ucos(n))
        allocate(geo_bigr(n))
+       allocate(geo_bigz(n))
        allocate(geo_bigr_r(n))
        allocate(geo_bigr_t(n))
+       allocate(geo_bigz_r(n))
+       allocate(geo_bigz_t(n))
        allocate(geo_theta_nc(n))
        allocate(geo_theta_s(n))
        allocate(geo_chi2(n))
@@ -920,8 +965,11 @@ contains
        deallocate(geo_usin)
        deallocate(geo_ucos)
        deallocate(geo_bigr)
+       deallocate(geo_bigz)
        deallocate(geo_bigr_r)
        deallocate(geo_bigr_t)
+       deallocate(geo_bigz_r)
+       deallocate(geo_bigz_t)
        deallocate(geo_theta_nc)
        deallocate(geo_theta_s)
        deallocate(geo_chi2)

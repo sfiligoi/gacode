@@ -12,6 +12,7 @@ module cgyro_globals
 #ifdef _OPENACC
   use cuFFT
 #endif
+  use, intrinsic :: iso_fortran_env
 
   ! Data output precision setting
   integer, parameter :: BYTE=4 ! Change to 8 for double precision
@@ -27,6 +28,7 @@ module cgyro_globals
   integer :: n_field
   real    :: e_max
   real    :: alpha_poly
+  integer :: e_fix
   integer :: delta_t_method
   real    :: delta_t
   real    :: error_tol
@@ -42,6 +44,7 @@ module cgyro_globals
   integer :: nup_alpha
   integer :: n_wave
   integer :: constant_stream_flag
+  integer :: explicit_trap_flag
   real    :: ky
   integer :: box_size
   real    :: ipccw
@@ -57,6 +60,8 @@ module cgyro_globals
   integer :: collision_field_model
   integer :: collision_ion_model
   real    :: collision_ele_scale
+  integer :: collision_precision_mode
+  integer :: collision_full_stripes
   integer :: collision_test_mode
   integer :: collision_field_max_l
   integer :: collision_test_max_l
@@ -65,6 +70,7 @@ module cgyro_globals
   integer :: zf_test_mode 
   integer :: nonlinear_flag 
   integer :: nonlinear_method
+  integer :: nonlinear_field
   real :: temp_ae
   real :: dens_ae
   real :: mass_ae
@@ -83,6 +89,7 @@ module cgyro_globals
   real :: mach
   integer :: rotation_model
   integer :: mpi_rank_order
+  integer :: velocity_order
   integer :: hiprec_flag
   integer :: udsymmetry_flag
   integer :: shear_method
@@ -92,6 +99,7 @@ module cgyro_globals
   integer :: profile_shear_flag
   integer :: theta_plot
   integer :: gpu_bigmem_flag
+  integer :: upwind_single_flag
   real :: px0
   integer :: stream_term
   real :: stream_factor
@@ -111,16 +119,11 @@ module cgyro_globals
   real :: s_zeta
   real :: zmag
   real :: dzmag
-  real :: shape_sin3        
-  real :: shape_s_sin3
-  real :: shape_cos0    
-  real :: shape_s_cos0
-  real :: shape_cos1
-  real :: shape_s_cos1
-  real :: shape_cos2    
-  real :: shape_s_cos2
-  real :: shape_cos3    
-  real :: shape_s_cos3
+  integer, parameter :: n_shape=6
+  real, dimension(0:n_shape) :: shape_sin
+  real, dimension(0:n_shape) :: shape_s_sin
+  real, dimension(0:n_shape) :: shape_cos
+  real, dimension(0:n_shape) :: shape_s_cos
   real :: betae_unit
   !
   ! Species parameters
@@ -169,6 +172,7 @@ module cgyro_globals
   integer :: i_proc
   integer :: i_proc_1
   integer :: i_proc_2
+  integer :: i_proc_3
   integer :: i_proc_restart_io
   integer :: n_proc
   integer :: n_proc_1
@@ -176,20 +180,24 @@ module cgyro_globals
   integer :: n_proc_restart_io
   integer :: i_group_1
   integer :: i_group_2
+  integer :: i_group_3
   integer :: i_group_restart_io
   integer :: CGYRO_COMM_WORLD
   integer :: NEW_COMM_1
   integer :: NEW_COMM_2
+  integer :: NEW_COMM_3
   integer :: nv1,nv2,nc1,nc2
   integer :: nsplit
+  integer :: ns1,ns2
   integer, dimension(:), allocatable :: recv_status
-  logical :: is_staggered_comm_2
+  integer :: f_req, g_req
   !
   ! Pointers
   integer :: nv,iv
   integer :: nv_loc,iv_loc
   integer :: nc,ic
   integer :: nc_loc,ic_loc
+  integer :: ns_loc
   integer, dimension(:), allocatable :: ie_v
   integer, dimension(:), allocatable :: ix_v
   integer, dimension(:), allocatable :: is_v
@@ -242,7 +250,7 @@ module cgyro_globals
   character(len=8) :: fmt='(I2.2)'
   character(len=6), dimension(100) :: rtag
   integer, parameter :: restart_header_size = 1024
-  integer, parameter :: restart_magic = 140906808
+  integer  :: restart_magic
   !
   ! error checking
   integer :: error_status = 0
@@ -251,6 +259,9 @@ module cgyro_globals
   integer :: io_control
   integer :: signal
   integer :: restart_flag
+
+  logical :: printout=.true.
+
   integer, parameter :: mpiio_small_stripe_factor = 4
   integer, parameter :: mpiio_stripe_factor = 24
   character(len=2) :: mpiio_small_stripe_str
@@ -272,6 +283,7 @@ module cgyro_globals
   real    :: gtime
   complex :: freq
   complex :: freq_err
+  integer(KIND=8) :: kernel_start_time, kernel_exit_time, kernel_count_rate, kernel_count_max
   !
   ! adaptive integrator parameters
   real :: delta_t_gk
@@ -306,7 +318,7 @@ module cgyro_globals
   real, dimension(:), allocatable :: energy, vel, w_e
   real, dimension(:), allocatable :: xi, w_xi
   real, dimension(:,:), allocatable :: xi_deriv_mat, xi_lor_mat
-  real, dimension(:,:), allocatable :: e_deriv1_mat
+  real, dimension(:,:), allocatable :: e_deriv1_mat, e_deriv1_rot_mat
   !
   ! Parallel streaming
   real :: d_theta
@@ -331,7 +343,6 @@ module cgyro_globals
   complex, dimension(:,:), allocatable :: h0_x
   complex, dimension(:,:), allocatable :: h0_old
   complex, dimension(:,:), allocatable :: psi
-  complex, dimension(:,:), allocatable :: chi
   complex, dimension(:,:,:), allocatable :: f_nl
   complex, dimension(:,:,:), allocatable :: g_nl
   complex, dimension(:,:), allocatable :: fpack
@@ -353,7 +364,6 @@ module cgyro_globals
   ! Fields
   real, dimension(:,:), allocatable :: fcoef
   real, dimension(:,:), allocatable :: gcoef
-  real, dimension(:,:,:), allocatable :: res_norm
   complex, dimension(:,:), allocatable :: field
   complex, dimension(:,:), allocatable :: field_loc
   complex, dimension(:,:), allocatable :: field_old
@@ -367,6 +377,9 @@ module cgyro_globals
   real, dimension(:,:,:), allocatable :: cflux
   complex, dimension(:,:,:,:), allocatable :: gflux_loc
   complex, dimension(:,:,:,:), allocatable :: gflux
+  real, dimension(:,:), allocatable :: cflux_tave, gflux_tave
+  real :: tave_min, tave_max
+  integer :: tave_step
   !
   ! Nonlinear plans
   type(C_PTR) :: plan_r2c
@@ -400,6 +413,11 @@ module cgyro_globals
   !
   ! Work arrays
   real, dimension(2) :: integration_error
+  ! Upwind work arrays
+  complex, dimension(:,:,:),allocatable :: upwind_res_loc
+  complex, dimension(:,:,:),allocatable :: upwind_res
+  complex(KIND=REAL32), dimension(:,:,:),allocatable :: upwind32_res_loc
+  complex(KIND=REAL32), dimension(:,:,:),allocatable :: upwind32_res
   !
   ! LAPACK work arrays 
   real, dimension(:), allocatable :: work  
@@ -415,7 +433,9 @@ module cgyro_globals
   real, dimension(:,:,:), allocatable :: hzf, xzf 
   !
   ! Collision operator
-  real, dimension(:,:,:), allocatable :: cmat
+  real, dimension(:,:,:), allocatable :: cmat ! only used if collision_precision_mode=0
+  real, dimension(:,:,:), allocatable :: cmat_stripes ! only used if collision_precision_mod/=0
+  real(KIND=REAL32), dimension(:,:,:), allocatable :: cmat_fp32 ! only used if collision_precision_mod/=0
   real, dimension(:,:,:,:,:), allocatable :: cmat_simple ! only used in collision_model=5
   ! 
   ! Equilibrium/geometry arrays
@@ -475,5 +495,6 @@ module cgyro_globals
   !---------------------------------------------------------------
 
   real :: total_memory
+  real :: small
 
 end module cgyro_globals

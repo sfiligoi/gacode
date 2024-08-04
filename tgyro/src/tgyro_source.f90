@@ -12,109 +12,69 @@ subroutine tgyro_source
 
   implicit none
 
-  integer :: i,i_ion
-  real, external :: sigv
-  real, external :: dtrate_dv
-  real :: n_d,n_t
-  real :: s_alpha
-  real :: g,phi,wpe,wce
-  real, parameter :: r_coeff=0.8
+  integer :: i_ion,i
 
   !-------------------------------------------------------
   ! Source terms (erg/cm^3/s):
-  !
-  do i=1,n_r
+  !-------------------------------------------------------
 
-     if (loc_scenario > 2) then
-        !-------------------------------------------------------
-        ! Alpha power
-        !  - sigv in cm^3/s
-        if (tgyro_dt_method == 1) then
-           ! Assume D and T given by ion 1 and ion 2 
-           ! (order doesn't matter)
-           n_d = ni(1,i)
-           n_t = ni(2,i)
-        else
-           ! Assume ion 1 is DT hybrid.
-           n_d = 0.5*ni(1,i)
-           n_t = 0.5*ni(1,i)
-        endif
-        ! Alpha particle source and power 
-        ! - Can use 'hively' or 'bosch' formulae.
-        sn_alpha(i) = n_d*n_t*sigv(ti(1,i)/1e3,'bosch') * tgyro_input_fusion_scale
+  !-------------------------------------------------------
+  ! 1. Alpha power
+  call rad_alpha(ne,ni,te,ti,sn_alpha,s_alpha_i,s_alpha_e,frac_ai,e_cross,n_r,loc_n_ion)
+  frac_ae = 1-frac_ai
+  !-------------------------------------------------------
 
-        s_alpha      = sn_alpha(i)*e_alpha
-        s_alpha_i(i) = s_alpha*frac_ai(i)
-        s_alpha_e(i) = s_alpha*frac_ae(i)
-     else
-        sn_alpha(i)  = 0.0
-        s_alpha_i(i) = 0.0
-        s_alpha_e(i) = 0.0
+  !-------------------------------------------------------
+  ! 2. Bremsstrahlung and line radiation (s_brem,s_line)
+  call rad_ion_adas(te,ne,ni,zi_vec,ion_name,s_brem,s_line,loc_n_ion,n_r)
+  !-------------------------------------------------------
+
+  !-------------------------------------------------------
+  ! 3. Synchrotron radiation (s_sync) with reflection co.
+  call rad_sync(aspect_rat,r_min,b_ref,ne,te,s_sync,n_r)
+  !-------------------------------------------------------
+
+  !-------------------------------------------------------
+  ! 4. Classical electron-ion energy exchange
+  !  - Positive as defined on RHS of ion equation
+  !  - Multiply formulary expression by (3/2)ne:
+  s_exch(:) = 1.5*nu_exch(:)*ne(:)*k*(te(:)-ti(1,:))
+  !-------------------------------------------------------
+
+  !-------------------------------------------------------
+  ! 5. Anomalous electron-ion energy exchange
+  !  - Positive as defined on RHS of ion equation
+  !  - Skip exchange with fast ions
+  s_expwd(:) = 0.0
+  do i_ion=1,loc_n_ion
+     if (therm_flag(i_ion) == 1) then
+        s_expwd(:) = s_expwd(:)+expwd_i_tur(i_ion,:)*s_gb(:)
      endif
-     !-------------------------------------------------------
-
-     !-------------------------------------------------------
-     ! Bremsstrahlung radiation
-     ! - From NRL formulary 
-     ! - 1 W/cm^3 = 1e7 erg/cm^3/s
-
-     s_brem(i) = 1e7*1.69e-32*ne(i)**2*sqrt(te(i))*z_eff(i)
-     !-------------------------------------------------------
-
-     !-------------------------------------------------------
-     ! Synchrotron radiation
-     ! - Trubnikov, JETP Lett. 16 (1972) 25.
-     wpe = sqrt(4*pi*ne(i)*e**2/me)
-     wce = e*abs(b_ref(i))/(me*c)
-     g   = k*te(i)/(me*c**2)
-     phi = 60*g**1.5*sqrt((1.0-r_coeff)*(1+1/aspect_rat/sqrt(g))/(r_min*wpe**2/c/wce))
-
-     s_sync(i) = me/(3*pi*c)*g*(wpe*wce)**2*phi
-     !-------------------------------------------------------
-
-     !-------------------------------------------------------
-     ! Classical electron-ion energy exchange
-     ! - Positive as defined on RHS of ion equation
-     ! - Multiply formulary expression by (3/2)ne:
-
-     s_exch(i) = 1.5*nu_exch(i)*ne(i)*k*(te(i)-ti(1,i))
-     !-------------------------------------------------------
-
-     !-------------------------------------------------------
-     ! Anomalous electron-ion energy exchange
-     ! - Positive as defined on RHS of ion equation
-     ! - Skip exchange with fast ions
-
-     s_expwd(i) = 0.0
-     do i_ion=1,loc_n_ion
-        if (therm_flag(i_ion) == 1) then
-           s_expwd(i) = s_expwd(i)+expwd_i_tur(i_ion,i)*s_gb(i)
-        endif
-     enddo
-     !-------------------------------------------------------
-
   enddo
   !-------------------------------------------------------
 
   !-------------------------------------------------------
   ! Powers in units of erg/s
 
-  ! Get integrated alpha-power
+  ! Integrated alpha-power
   call tgyro_volume_int(s_alpha_i,p_i_fus)
   call tgyro_volume_int(s_alpha_e,p_e_fus)
   call tgyro_volume_int(sn_alpha,f_he_fus)
 
-  ! Get integrated collisional exchange power
-  call tgyro_volume_int(s_exch,p_exch)
-  
-  ! Get integrated anomalous exchange power
-  call tgyro_volume_int(s_expwd,p_expwd)
-
-  ! Get integrated Bremsstrahlung power
+  ! Integrated Bremsstrahlung power
   call tgyro_volume_int(s_brem,p_brem)
 
-  ! Get integrated Synchrotron power
+  ! Integrated Synchrotron power
   call tgyro_volume_int(s_sync,p_sync)
+
+  ! Integrated line power
+  call tgyro_volume_int(s_line,p_line)
+
+  ! Integrated collisional exchange power
+  call tgyro_volume_int(s_exch,p_exch)
+
+  ! Integrated anomalous exchange power
+  call tgyro_volume_int(s_expwd,p_expwd)
   !-------------------------------------------------------
 
   !-------------------------------------------------------
@@ -138,10 +98,10 @@ subroutine tgyro_source
      p_e(:) = p_e_in(:) &              ! Total electron input power 
           -(p_exch(:)-p_exch_in(:)) &  ! Consistent e-i exchange
           -p_expwd(:)*tgyro_expwd_flag ! Turbulent exchange
-     
+
   case (3)
 
-     ! Reactor with consistent alpha power, exchange and radiation.
+     ! Reactor with consistent alpha power, exchange, radiation and Ohmic heating
 
      p_i(:) = &
           +p_i_fus(:) &                ! Fusion power to ions
@@ -152,10 +112,11 @@ subroutine tgyro_source
      p_e(:) = &
           +p_e_fus(:) &                ! Fusion power to electrons
           +p_e_aux_in(:) &             ! Auxiliary electron heating [fixed]
+          +p_e_ohmic_in(:) &           ! Ohmic heating
           -p_exch(:)   &               ! Collisional exchange
           -p_brem(:) &                 ! Bremsstrahlung radiation
           -p_sync(:) &                 ! Synchrotron radiation
-          -p_line_in(:) &              ! Line radiation [fixed] 
+          -p_line(:) &                 ! Line radiation 
           -p_expwd(:)*tgyro_expwd_flag ! Turbulent exchange
 
   end select

@@ -33,7 +33,13 @@ module expro_locsim_interface
   double precision :: shape_cos1_loc
   double precision :: shape_cos2_loc
   double precision :: shape_cos3_loc
+  double precision :: shape_cos4_loc
+  double precision :: shape_cos5_loc
+  double precision :: shape_cos6_loc
   double precision :: shape_sin3_loc
+  double precision :: shape_sin4_loc
+  double precision :: shape_sin5_loc
+  double precision :: shape_sin6_loc
   double precision :: s_kappa_loc
   double precision :: s_delta_loc
   double precision :: s_zeta_loc
@@ -41,7 +47,13 @@ module expro_locsim_interface
   double precision :: shape_s_cos1_loc
   double precision :: shape_s_cos2_loc
   double precision :: shape_s_cos3_loc
+  double precision :: shape_s_cos4_loc
+  double precision :: shape_s_cos5_loc
+  double precision :: shape_s_cos6_loc
   double precision :: shape_s_sin3_loc
+  double precision :: shape_s_sin4_loc
+  double precision :: shape_s_sin5_loc
+  double precision :: shape_s_sin6_loc
   double precision :: zmag_loc
   double precision :: dzmag_loc
   double precision :: gamma_e_loc
@@ -153,7 +165,13 @@ end subroutine expro_locsim_alloc
 !  real :: shape_cos1_loc
 !  real :: shape_cos2_loc
 !  real :: shape_cos3_loc
+!  real :: shape_cos4_loc
+!  real :: shape_cos5_loc
+!  real :: shape_cos6_loc
 !  real :: shape_sin3_loc
+!  real :: shape_sin4_loc
+!  real :: shape_sin5_loc
+!  real :: shape_sin6_loc
 !  real :: s_kappa_loc
 !  real :: s_delta_loc
 !  real :: s_zeta_loc
@@ -161,7 +179,13 @@ end subroutine expro_locsim_alloc
 !  real :: shape_s_cos1_loc
 !  real :: shape_s_cos2_loc
 !  real :: shape_s_cos3_loc
+!  real :: shape_s_cos4_loc
+!  real :: shape_s_cos5_loc
+!  real :: shape_s_cos6_loc
 !  real :: shape_s_sin3_loc
+!  real :: shape_s_sin4_loc
+!  real :: shape_s_sin5_loc
+!  real :: shape_s_sin6_loc
 !  real :: zmag_loc
 !  real :: dzmag_loc
 !  real :: gamma_e_loc
@@ -193,7 +217,9 @@ subroutine expro_locsim_profiles(&
      rmin,&
      btccw,&
      ipccw,&
-     a_meters)
+     a_meters,&
+     path,&
+     comm)
 
   use expro
   use expro_locsim_interface
@@ -204,6 +230,8 @@ subroutine expro_locsim_profiles(&
   integer, intent(in) :: udsymmetry_flag
   integer, intent(in) :: quasineutral_flag
   integer, intent(in) :: n_species_in
+  integer, intent(in) :: comm
+  character(len=80), intent(in) :: path
   double precision, intent(in) :: rmin
   double precision, intent(inout) :: btccw,ipccw,a_meters
   integer :: i,j,i_ion
@@ -221,7 +249,7 @@ subroutine expro_locsim_profiles(&
   expro_ctrl_numeq_flag = numeq_flag
   expro_ctrl_n_ion = n_species_exp-1
 
-  call expro_read('input.gacode')
+  call expro_read(trim(path)//'input.gacode',comm)
   if (allocated(rmin_exp)) call expro_locsim_alloc(0)
   call expro_locsim_alloc(1)
   !--------------------------------------------------------------
@@ -304,8 +332,20 @@ subroutine expro_locsim_profiles(&
   call cub_spline1(rmin_exp,expro_shape_scos2,expro_n_exp,rmin,shape_s_cos2_loc)
   call cub_spline1(rmin_exp,expro_shape_cos3,expro_n_exp,rmin,shape_cos3_loc)
   call cub_spline1(rmin_exp,expro_shape_scos3,expro_n_exp,rmin,shape_s_cos3_loc)
+  call cub_spline1(rmin_exp,expro_shape_cos4,expro_n_exp,rmin,shape_cos4_loc)
+  call cub_spline1(rmin_exp,expro_shape_scos4,expro_n_exp,rmin,shape_s_cos4_loc)
+  call cub_spline1(rmin_exp,expro_shape_cos5,expro_n_exp,rmin,shape_cos5_loc)
+  call cub_spline1(rmin_exp,expro_shape_scos5,expro_n_exp,rmin,shape_s_cos5_loc)
+  call cub_spline1(rmin_exp,expro_shape_cos6,expro_n_exp,rmin,shape_cos6_loc)
+  call cub_spline1(rmin_exp,expro_shape_scos6,expro_n_exp,rmin,shape_s_cos6_loc)
   call cub_spline1(rmin_exp,expro_shape_sin3,expro_n_exp,rmin,shape_sin3_loc)
   call cub_spline1(rmin_exp,expro_shape_ssin3,expro_n_exp,rmin,shape_s_sin3_loc)
+  call cub_spline1(rmin_exp,expro_shape_sin4,expro_n_exp,rmin,shape_sin4_loc)
+  call cub_spline1(rmin_exp,expro_shape_ssin4,expro_n_exp,rmin,shape_s_sin4_loc)
+  call cub_spline1(rmin_exp,expro_shape_sin5,expro_n_exp,rmin,shape_sin5_loc)
+  call cub_spline1(rmin_exp,expro_shape_ssin5,expro_n_exp,rmin,shape_s_sin5_loc)
+  call cub_spline1(rmin_exp,expro_shape_sin6,expro_n_exp,rmin,shape_sin6_loc)
+  call cub_spline1(rmin_exp,expro_shape_ssin6,expro_n_exp,rmin,shape_s_sin6_loc)
   call cub_spline1(rmin_exp,expro_zmag/a_meters,expro_n_exp,rmin,zmag_loc)
   call cub_spline1(rmin_exp,expro_dzmag,expro_n_exp,rmin,dzmag_loc)
   call cub_spline1(rmin_exp,gamma_e_exp,expro_n_exp,rmin,gamma_e_loc)
@@ -499,12 +539,12 @@ subroutine cub_spline1(x,y,n,xi,yi)
   ! Check to see that interpolated point is inside data interval
   !
   if (xi > x(n)) then
-     print *,'ERROR: (cub_spline) Data above upper bound'
-     print *,'xi(ni) > x(n)',xi,x(n) 
+     print '(a)','ERROR: (cub_spline1) Data above upper bound'
+     print '(a)','xi(ni) > x(n)',xi,x(n) 
   endif 
   if (xi < x(1)) then
-     print *,'ERROR: (cub_spline) Data below lower bound'
-     print *,'xi(1) < x(1)',xi,x(1) 
+     print '(a)','ERROR: (cub_spline1) Data below lower bound'
+     print '(a)','xi(1) < x(1)',xi,x(1) 
   endif 
   !-------------------------------------------------------------
 

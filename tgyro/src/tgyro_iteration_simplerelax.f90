@@ -14,42 +14,8 @@ subroutine tgyro_iteration_simplerelax
 
   real :: simpledz
   
-  if (i_proc_global == 0) then
-     open(unit=1,file=trim(runfile),position='append')
-     write(1,'(t2,a)') 'INFO: (TGYRO) Beginning standard iterations'
-     close(1)
-  endif
-
-  !---------------------------------------------------
-  ! ZEROTH ITERATION
-  !
-  ! One pass to get fluxes.
-  !
-  ! We *do* want the iteration number to increase in 
-  ! the case where we restart without iterating (this
-  ! can be used to compare transport models).
-  !  
-  if (tgyro_relax_iterations == 0 .and. loc_restart_flag == 1) i_tran=i_tran+1
-  !
-  call tgyro_target_vector(x_vec,g_vec)
-  if (loc_restart_flag == 0 .or. tgyro_relax_iterations == 0) then
-     ! Need to determine initial fluxes
-     gyro_restart_method = 1
-     call tgyro_flux_vector(x_vec,f_vec,0.0,0)
-     gyro_restart_method = 2
-  else
-     ! Initial fluxes already computed
-     call tgyro_flux_set(f_vec)
-     ! GYRO restart data available
-     gyro_restart_method = 2
-  endif
+  quasifix = 0
   res0 = 0.0
-  call tgyro_residual(f_vec,g_vec,res,p_max,loc_residual_method)
-
-  if (loc_restart_flag == 0 .or. tgyro_relax_iterations == 0) then
-     call tgyro_write_data(1)
-  endif
-  !----------------------------------------------------
   
   do i_tran_loop=1,tgyro_relax_iterations
 
@@ -76,11 +42,13 @@ subroutine tgyro_iteration_simplerelax
         if (abs(simpledz) > loc_dx_max) then
            simpledz = loc_dx_max*simpledz/abs(simpledz)
         endif
-        if (mask(p,3) == 1) then 
-           x_vec(p) = x_vec(p)*(1.0+simpledz)
+
+        if (mask(p,3) == 1) then !evolving rotation, need to take a bit of extra care
+           x_vec(p) = x_vec(p)*(1.0-simpledz*sign(1.0,g_vec(p)))
         else
            x_vec(p) = x_vec(p)*(1.0-simpledz)
         endif
+
      enddo
 
      ! Update targets/profiles

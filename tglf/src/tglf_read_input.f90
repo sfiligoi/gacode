@@ -26,6 +26,7 @@ subroutine tglf_read_input
 
   ! Data passed to: put_rare_switches
   read(1,*) tglf_theta_trapped_in
+  read(1,*) tglf_wdia_trapped_in
   read(1,*) tglf_park_in
   read(1,*) tglf_ghat_in
   read(1,*) tglf_gchat_in
@@ -49,6 +50,7 @@ subroutine tglf_read_input
   read(1,*) tglf_nbasis_min_in
   read(1,*) tglf_nxgrid_in
   read(1,*) tglf_nky_in
+  read(1,*) tglf_use_ave_ion_grid_in
 
   ! Data passed to: put_model_parameters
   read(1,*) tglf_adiabatic_elec_in
@@ -60,6 +62,7 @@ subroutine tglf_read_input
   read(1,*) tglf_xnu_factor_in
   read(1,*) tglf_debye_factor_in
   read(1,*) tglf_etg_factor_in
+  read(1,*) tglf_rlnp_cutoff_in
   read(1,*) tglf_sat_rule_in
   read(1,*) tglf_kygrid_model_in
   read(1,*) tglf_xnu_model_in
@@ -74,12 +77,14 @@ subroutine tglf_read_input
   read(1,*) tglf_mass_in(4)
   read(1,*) tglf_mass_in(5)
   read(1,*) tglf_mass_in(6)
+  read(1,*) tglf_mass_in(7)
   read(1,*) tglf_zs_in(1)
   read(1,*) tglf_zs_in(2)
   read(1,*) tglf_zs_in(3)
   read(1,*) tglf_zs_in(4)
   read(1,*) tglf_zs_in(5)
   read(1,*) tglf_zs_in(6)
+  read(1,*) tglf_zs_in(7)
 
   ! Data passed to: put_kys
   read(1,*) tglf_ky_in
@@ -97,18 +102,21 @@ subroutine tglf_read_input
   read(1,*) tglf_rlns_in(4)
   read(1,*) tglf_rlns_in(5)
   read(1,*) tglf_rlns_in(6)
+  read(1,*) tglf_rlns_in(7)
   read(1,*) tglf_rlts_in(1)
   read(1,*) tglf_rlts_in(2)
   read(1,*) tglf_rlts_in(3)
   read(1,*) tglf_rlts_in(4)
   read(1,*) tglf_rlts_in(5)
   read(1,*) tglf_rlts_in(6)
-  read(1,*) tglf_vpar_shear_in(1) 
+  read(1,*) tglf_rlts_in(7)
+  read(1,*) tglf_vpar_shear_in(1)
   read(1,*) tglf_vpar_shear_in(2) 
   read(1,*) tglf_vpar_shear_in(3) 
   read(1,*) tglf_vpar_shear_in(4) 
   read(1,*) tglf_vpar_shear_in(5) 
   read(1,*) tglf_vpar_shear_in(6) 
+  read(1,*) tglf_vpar_shear_in(7)
   read(1,*) tglf_vexb_shear_in
 
   ! Data passed to: put_profile_shear
@@ -118,12 +126,14 @@ subroutine tglf_read_input
   read(1,*) tglf_vns_shear_in(4)
   read(1,*) tglf_vns_shear_in(5)
   read(1,*) tglf_vns_shear_in(6)
+  read(1,*) tglf_vns_shear_in(7)
   read(1,*) tglf_vts_shear_in(1)
   read(1,*) tglf_vts_shear_in(2)
   read(1,*) tglf_vts_shear_in(3)
   read(1,*) tglf_vts_shear_in(4)
   read(1,*) tglf_vts_shear_in(5)
   read(1,*) tglf_vts_shear_in(6)
+  read(1,*) tglf_vts_shear_in(7)
 
   ! Data passed to: put_averages
   read(1,*) tglf_taus_in(1)
@@ -132,18 +142,21 @@ subroutine tglf_read_input
   read(1,*) tglf_taus_in(4)
   read(1,*) tglf_taus_in(5)
   read(1,*) tglf_taus_in(6)
+  read(1,*) tglf_taus_in(7)
   read(1,*) tglf_as_in(1)
   read(1,*) tglf_as_in(2)
   read(1,*) tglf_as_in(3)
   read(1,*) tglf_as_in(4)
   read(1,*) tglf_as_in(5)
   read(1,*) tglf_as_in(6)
+  read(1,*) tglf_as_in(7)
   read(1,*) tglf_vpar_in(1)
   read(1,*) tglf_vpar_in(2)
   read(1,*) tglf_vpar_in(3)
   read(1,*) tglf_vpar_in(4)
   read(1,*) tglf_vpar_in(5)
   read(1,*) tglf_vpar_in(6)
+  read(1,*) tglf_vpar_in(7)
   read(1,*) tglf_vexb_in
   read(1,*) tglf_betae_in
   read(1,*) tglf_xnue_in

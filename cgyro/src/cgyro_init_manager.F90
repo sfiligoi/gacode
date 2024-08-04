@@ -18,8 +18,8 @@ subroutine cgyro_init_manager
   use cgyro_globals
   use half_hermite
 
-#ifdef _OPENACC
   use cgyro_io
+#ifdef _OPENACC
   use cufft, only : cufftPlanMany, &
        CUFFT_C2R,CUFFT_Z2D,CUFFT_R2C,CUFFT_D2Z
 #endif
@@ -37,6 +37,8 @@ subroutine cgyro_init_manager
   integer :: idist,odist,istride,ostride
   integer, parameter :: singlePrecision = selected_real_kind(6,30)
 #endif
+
+  character(len=128) :: msg
 
   if (hiprec_flag == 1) then
      fmtstr  = '(es16.9)'
@@ -63,6 +65,7 @@ subroutine cgyro_init_manager
   allocate(vel(n_energy))
   allocate(w_e(n_energy))
   allocate(e_deriv1_mat(n_energy,n_energy))
+  allocate(e_deriv1_rot_mat(n_energy,n_energy))
 
   if (i_proc==0) then
      call pseudo_maxwell_pliocene(n_energy,&
@@ -83,6 +86,15 @@ subroutine cgyro_init_manager
 
   vel(:) = sqrt(energy(:))
 
+  e_deriv1_rot_mat(:,:) = e_deriv1_mat(:,:)
+  if(e_fix == 2) then
+     e_deriv1_rot_mat(n_energy,:) = 0.0
+  endif
+  if(e_fix == 3) then
+     e_deriv1_rot_mat(n_energy,:) = 0.0
+     e_deriv1_mat(n_energy,:) = 0.0
+  endif
+  
   allocate(xi(n_xi))
   allocate(w_xi(n_xi))
   allocate(xi_lor_mat(n_xi,n_xi))
@@ -151,6 +163,9 @@ subroutine cgyro_init_manager
      allocate(cflux_loc(n_species,3,n_field))
      allocate(    gflux(0:n_global,n_species,3,n_field))
      allocate(gflux_loc(0:n_global,n_species,3,n_field))
+     allocate(cflux_tave(n_species,3))
+     allocate(gflux_tave(n_species,3))
+     
      allocate(recv_status(MPI_STATUS_SIZE))
 
      allocate(icd_c(-nup_theta:nup_theta, nc))
@@ -158,7 +173,7 @@ subroutine cgyro_init_manager
      allocate(dtheta_up(-nup_theta:nup_theta, nc))
      allocate(source(n_theta,nv_loc))
 
-!$acc enter data create(fcoef,gcoef,field,field_loc)
+!$acc enter data create(fcoef,gcoef,field,field_loc,source)
 
      ! Velocity-distributed arrays
 
@@ -166,22 +181,27 @@ subroutine cgyro_init_manager
      case(1)
         allocate(h0_old(nc,nv_loc))     
         allocate(rhs(nc,nv_loc,6))
+!$acc enter data create(rhs,h0_old)
      case(2)
         allocate(h0_old(nc,nv_loc))
         allocate(rhs(nc,nv_loc,7))
+!$acc enter data create(rhs,h0_old)
      case(3)
         allocate(h0_old(nc,nv_loc))
-        allocate(rhs(nc,nv_loc,10))
+        allocate(rhs(nc,nv_loc,9))
+!$acc enter data create(rhs,h0_old)
      case default
         ! Normal timestep
         allocate(rhs(nc,nv_loc,4))
+!$acc enter data create(rhs)
      end select
 
      allocate(h_x(nc,nv_loc))
      allocate(g_x(nc,nv_loc))
      allocate(psi(nc,nv_loc))
-     allocate(chi(nc,nv_loc))
      allocate(h0_x(nc,nv_loc))
+!$acc enter data create(h_x,g_x,psi,h0_x)
+
      allocate(cap_h_c(nc,nv_loc))
      allocate(cap_h_ct(nv_loc,nc))
      allocate(omega_cap_h(nc,nv_loc))
@@ -199,7 +219,17 @@ subroutine cgyro_init_manager
      allocate(cap_h_v(nc_loc,nv))
      allocate(cap_h_v_prime(nc_loc,nv))
 
-!$acc enter data create(rhs,h_x,g_x,psi,chi,h0_x,h0_old,cap_h_c,cap_h_ct,cap_h_v,dvjvec_c,dvjvec_v,jxvec_c)
+!$acc enter data create(cap_h_c,cap_h_ct,cap_h_v,dvjvec_c,dvjvec_v)
+
+     if (upwind_single_flag == 0) then
+       allocate(upwind_res_loc(nc,ns1:ns2,2))
+       allocate(upwind_res(nc,ns1:ns2,2))
+!$acc enter data create(upwind_res,upwind_res_loc)
+     else
+       allocate(upwind32_res_loc(nc,ns1:ns2,2))
+       allocate(upwind32_res(nc,ns1:ns2,2))
+!$acc enter data create(upwind32_res,upwind32_res_loc)
+     endif
 
      ! Nonlinear arrays
      if (nonlinear_flag == 1) then
@@ -221,7 +251,15 @@ subroutine cgyro_init_manager
      if (collision_model == 5) then
         allocate(cmat_simple(n_xi,n_xi,n_energy,n_species,n_theta))
      else
+        if (collision_precision_mode /= 0) then
+           allocate(cmat_stripes(-collision_full_stripes:collision_full_stripes,nv,nc_loc))
+           allocate(cmat_fp32(nv,nv,nc_loc))
+
+           write (msg, "(A35,I4,A14)") "Using fp32 collision precision with ",collision_full_stripes, " fp64 stripes."
+           call cgyro_info(msg)
+        else
         allocate(cmat(nv,nv,nc_loc))
+     endif
      endif
 
   endif
@@ -246,6 +284,14 @@ subroutine cgyro_init_manager
 
   call cgyro_check_memory(trim(path)//runfile_memory)
 
+  if (velocity_order==1) then
+    ! traditional ordering
+    restart_magic = 140906808
+  else
+    ! alternative ordering, need different magic
+    restart_magic = 140916753
+  endif
+
   call timer_lib_out('str_init')
 
   ! Write initial data
@@ -259,6 +305,7 @@ subroutine cgyro_init_manager
   ! Initialize h (via restart or analytic IC)
   call timer_lib_in('str_init')
   call cgyro_init_h
+  if (error_status /=0 ) return
   call timer_lib_out('str_init')
 
   ! Initialize nonlinear dimensions and arrays 
@@ -419,5 +466,9 @@ subroutine domain_renorm(u,w,n)
   call DGESV(n,1,a,n,i_piv,b,n,info)
 
   w = w+b
+
+  deallocate(i_piv)
+  deallocate(b)
+  deallocate(a)
 
 end subroutine domain_renorm

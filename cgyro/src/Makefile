@@ -16,6 +16,8 @@ EXEC = cgyro
 
 OBJECTS = cgyro_globals.o \
 	  cgyro_timer_lib.o \
+	  cgyro_math.o \
+	  cgyro_globals_math.o \
           cgyro_parallel_lib.o \
           cgyro_io.o \
           cgyro_advect_wavenumber.o \
@@ -37,9 +39,11 @@ OBJECTS = cgyro_globals.o \
 	  cgyro_init_collision_landau.o \
           cgyro_init_collision.o \
           cgyro_init_manager.o \
-	  cgyro_step_collision_simple.o \
+	  cgyro_init_kernel.o \
           cgyro_step_collision.o \
 	  cgyro_kernel.o \
+	  cgyro_cleanup.o \
+          cgyro_final_kernel.o \
           cgyro_mpi_grid.o \
 	  cgyro_make_profiles.o \
 	  cgyro_nl_direct.o \
@@ -75,5 +79,6 @@ cgyro_init_collision.o: cgyro_init_collision_landau.o
 
 clean:
 	rm -rf *.o cgyro_lib.a $(EXEC) *~ *.cub *.ptx *.gpu *.h *lst
+	cd ${GACODE_ROOT}/modules ; rm -f timer_lib.mod
 
 -include ../install/make.ext.${GACODE_PLATFORM}

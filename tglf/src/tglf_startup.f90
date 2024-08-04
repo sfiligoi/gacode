@@ -9,6 +9,7 @@
 !
       IMPLICIT NONE
       INTEGER :: i
+      LOGICAL :: USE_PRESETS = .TRUE.
 !
 ! initialized trace_path that records the flow of tglf internal calls
 !
@@ -35,6 +36,32 @@
       endif
       if(use_default_species)ns_in=2
       ns = ns_in
+!      write(*,*)"ns = ",ns,"   ns0 = ",ns0
+!
+      ! restrict user settings to three preset versions
+      ! SAT0 + GYRO + XNU 2
+      ! SAT1 + XNU 2
+      ! SAT2 + XNU 3 + UNITS != GYRO
+      if(USE_PRESETS)then
+        wdia_trapped_in=0.0
+        if(sat_rule_in.eq.2)then
+          xnu_model_in=3
+          wdia_trapped_in = 1.0
+          if(units_in.eq."GYRO")units_in = "CGYRO"
+          if(igeo .ne. 1)then
+            write(*,*)"SAT_RULE=2 requires Miller geometry, set GEOMETRY_FLAG=1"
+            STOP
+          endif
+        endif
+        if(sat_rule_in.eq.1)then
+          xnu_model_in = 2
+        endif
+        if(sat_rule_in.eq.0)then
+          units_in = 'GYRO'
+          xnu_model_in = 2
+        endif
+        if(use_bper_in)alpha_mach_in=0.0
+      endif
 ! SAT_RULE=0 has different fits for nmodes=2 and nmodes=4
       if(sat_rule_in.eq.0)then
         if(nmodes_in.gt.2)nmodes_in=4
@@ -86,16 +113,16 @@
 !
 !
       SUBROUTINE get_species
-!*********************************************
-!
-!*********************************************
+!******************************************************************************
+!  assign species arrays
+!******************************************************************************
       USE tglf_dimensions
       USE tglf_global
       USE tglf_species
 !
       IMPLICIT NONE
       INTEGER :: is
-      REAL :: xnu
+      REAL :: xnu, charge
 !
 ! electrons=1, ions =2,...
 !
@@ -108,43 +135,57 @@
        as_in(2) = 1.0
        taus_in(1)=1.0
        taus_in(2)=1.0
+       ns_in = 2
+       nstotal_in = 2
       endif
 !
       nfields_out = 1
       if(use_bper_in)nfields_out = nfields_out + 1
       if(use_bpar_in)nfields_out = nfields_out + 1
-!
+!  inputs
+      ky_s = ky_in
+      vexb_shear_s = vexb_shear_in*sign_It_in
+      xnue_s = xnue_in
       pol = 0.0
       U0 = 0.0
+      charge = 0.0
+      rho_ion = 0.0
+!      do is=1,nstotal_in  ! include all species inputs
       do is=1,ns
         rlns(is) = rlns_in(is)
         rlts(is) = rlts_in(is)
         taus(is) = taus_in(is)
         as(is) = as_in(is)
-        vpar_s(is)=0.0
-        if(vpar_model_in.eq.0)vpar_s(is)=alpha_mach_in*vpar_in(is)
-        vpar_shear_s(is)=alpha_p_in*vpar_shear_in(is)
-!        if(nbasis_min_in.eq.1.and.(vpar_shear_s(is).ne.0.0.or.vpar_s(is).ne.0.0))then
-!          nbasis_min_in = 2      
-!        endif
         zs(is) = zs_in(is)
         mass(is) = mass_in(is)
+        vpar_s(is) = alpha_mach_in*sign_It_in*vpar_in(is)
+        vpar_shear_s(is) = alpha_p_in*sign_It_in*vpar_shear_in(is)
         vs(is) = SQRT(taus(is)/mass(is))
         pol = pol +  zs(is)*zs(is)*as(is)/taus(is)
         U0 = U0 + as(is)*vpar_s(is)*zs(is)*zs(is)/taus(is)
+        fts(is) = 0.0
+        if(is.gt.1.and.zs(is)*as(is)/ABS(as(1)*zs(1)).gt.0.1)then
+          charge = charge + zs(is)*as(is)
+          rho_ion = rho_ion + zs(is)*as(is)*SQRT(mass(is)*taus(is))/zs(is) ! charge weighted average ion gyroradius
+        endif
+        rho_e =SQRT(mass(1)*taus(1))/ABS(zs(1))
 !        write(*,*)"species",is
+!        write(*,*)" vs = ",vs(is)
 !        write(*,*)rlns(is),rlts(is)
-!        write(*,*)taus(is),as(is)
-!        write(*,*)zs(is),mass(is)
+!        write(*,*)"taus = ",taus(is),"   mass = ",mass(is)
+!        write(*,*)zs(is),as(is)
       enddo
+      if(charge.eq.0.0)call tglf_error(1,"total ion charge = 0.0")
+      rho_ion = rho_ion/charge
+      if(use_ave_ion_grid_in .eqv. .false.)then
+        rho_ion = SQRT(mass(2)*taus(2))/zs(2)
+      endif
+!      write(*,*)"rho_ion = ",rho_ion
+!      write(*,*)"rho_e = ",rho_e
+!      write(*,*)"charge = ",charge
 !
-      vexb_shear_s = vexb_shear_in*sign_It_in
-!      if(vpar_shear_model_in.eq.1)then  
-!        vexb_shear_s = sign_Bt_in*vexb_shear_in
-!      endif
 !
-!
-      xnu = 0.0
+      xnu = 0.0   ! not used
 ! energy exchange
       ei_exch(1,1) = -3.0*xnu*taus(1)*mass(1)/mass(2)
       ei_exch(1,2) =  3.0*xnu*mass(1)/mass(2)

@@ -104,32 +104,38 @@ subroutine prgen_read_peqdsk
 
   ! nb(10^20/m^3)
   inquire(file='pfile.nb',exist=ierr)
+  peqdsk_nb(:) = 0.0
+  peqdsk_nbeams = 0
   if (ierr) then
      open(unit=1,file='pfile.nb',status='old')
      read(1,*) i
      allocate(xv(ncol,i))
      read(1,*) xv
-     call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_nb,nx)
+     ! Check for finite density
+     if (sum(abs(xv(2,:))) > 1e-10) then 
+        call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_nb,nx)
+        peqdsk_nbeams = 1
+     endif
      deallocate(xv)
      close(1)
-     peqdsk_nbeams = 1
-  else
-     peqdsk_nb(:) = 0.0
-     peqdsk_nbeams = 0
   endif
 
   ! pb(KPa)
   inquire(file='pfile.pb',exist=ierr)
-  if (ierr) then
+  peqdsk_pb(:) = 0.0
+  if (ierr .and. peqdsk_nbeams > 0) then
      open(unit=1,file='pfile.pb',status='old')
      read(1,*) i
      allocate(xv(ncol,i))
      read(1,*) xv
-     call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_pb,nx)
+     ! Check for finite pressure
+     if (sum(abs(xv(2,:))) > 1e-10) then 
+        call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_pb,nx)
+     else
+        peqdsk_nbeams = 0
+     endif
      deallocate(xv)
      close(1)
-  else
-     peqdsk_pb(:) = 0.0
   endif
 
   peqdsk_nimp = 0
@@ -183,8 +189,7 @@ subroutine prgen_read_peqdsk
      open(unit=1,file='pfile.species',status='old')
      read(1,*) num
      if (num > (1 + peqdsk_nimp + peqdsk_nbeams)) then
-        print '(a)','ERROR: (prgen) Species number in pfile incorrect'
-        stop
+        print '(a)','WARNING: (prgen) One or more ions densities is zero/missing. Ignoring.'
      endif
      do i=1,peqdsk_nimp
         read(1,*) y1, y2, y3
@@ -258,11 +263,11 @@ subroutine prgen_read_peqdsk
   else
      peqdsk_pow_e(:) = 0.0
   endif
-  
+
   dpsi(:)   = peqdsk_psi(:)-peqdsk_psi(1)
   rmin(:)   = 0.0
   rmaj(:)   = 0.0
   rho(:)    = 0.0
   omega0(:) = 0.0
-  
+
 end subroutine prgen_read_peqdsk

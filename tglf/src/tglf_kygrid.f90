@@ -41,10 +41,12 @@
       ky0 = ky_min
       ky1 = ky_max
       if(nk_zones.ge.2)ky1 = ky_max/SQRT(mass(1))
+!
       if(spectrum_type.eq.0)then
 !        dky0 = (ky_max-ky_min)/REAL(nky-1)
         ky1=ky_in
         dky0=ky1/REAL(nky)
+!        write(*,*)" ky_in = ", ky_in
         do i=1,nky
 !          ky_spectrum(i) = ky0 + REAL(i-1)*dky0
           ky_spectrum(i) = REAL(i)*dky0
@@ -62,14 +64,16 @@
       endif
       if(spectrum_type.eq.1)then   ! APS07 spectrum
         nky=9
-        ky_max = 0.9*ky_factor*ABS(zs(2))/SQRT(taus_in(2)*mass_in(2))  !k_theta*rho_ion = 0.9
+!        ky_max = 0.9*ky_factor*ABS(zs(2))/SQRT(taus(2)*mass(2))  !k_theta*rho_ion = 0.9
+        ky_max = 0.9*ky_factor/rho_ion  !k_theta*rho_ion = 0.9
         dky0 = ky_max/REAL(nky)
         do i=1,nky
           ky_spectrum(i) = REAL(i)*dky0
           dky_spectrum(i) = dky0
         enddo
         ky0 = ky_max+dky0
-        ky1 = 0.4*ky_factor*ABS(zs(1))/SQRT(taus_in(1)*mass_in(1))  !k_theta*rho_e = 0.4
+!        ky1 = 0.4*ky_factor*ABS(zs(1))/SQRT(taus(1)*mass(1))  !k_theta*rho_e = 0.4
+        ky1 = 0.4*ky_factor/rho_e  !k_theta*rho_e = 0.4
         dky0 = LOG(ky1/ky0)/REAL(nky_in-1)
         lnky = LOG(ky0)
         if(nky_in.gt.0)then
@@ -83,13 +87,15 @@
       endif
       if(spectrum_type.eq.2)then  ! IAEA08 spectrum
         nky1=8
-        dky0=0.05*ky_factor*ABS(zs(2))/SQRT(taus_in(2)*mass_in(2))
+!        dky0=0.05*ky_factor*ABS(zs(2))/SQRT(taus(2)*mass(2))
+        dky0=0.05*ky_factor/rho_ion
         do i=1,nky1
           ky_spectrum(i) = REAL(i)*dky0
           dky_spectrum(i) = dky0
         enddo
 !        dky0 = ky_max/REAL(nky)
-        dky0=0.2/SQRT(taus_in(2)*mass_in(2))
+!        dky0=0.2/SQRT(taus(2)*mass(2))
+        dky0=0.2/rho_ion
         ky0 = ky_spectrum(nky1)
         nky2=7
         nky = nky1+nky2
@@ -97,10 +103,11 @@
           ky_spectrum(i) = ky0 + REAL(i-nky1)*dky0
           dky_spectrum(i) = dky0
         enddo
-!        ky_max = 0.9*ABS(zs(2))/SQRT(taus_in(2)*mass_in(2))  !k_theta*rho_ion = 0.9
+!        ky_max = 0.9*ABS(zs(2))/SQRT(taus(2)*mass(2))  !k_theta*rho_ion = 0.9
 !        ky0 = ky_max+dky0
         ky0 = ky_spectrum(nky) + dky0
-        ky1 = 0.4*ky_factor*ABS(zs(1))/SQRT(taus_in(1)*mass_in(1))  !k_theta*rho_e = 0.4
+!        ky1 = 0.4*ky_factor*ABS(zs(1))/SQRT(taus(1)*mass(1))  !k_theta*rho_e = 0.4
+        ky1 = 0.4*ky_factor/rho_e    !k_theta*rho_e = 0.4
         dky0 = LOG(ky1/ky0)/REAL(nky_in-1)
         lnky = LOG(ky0)
         if(nky_in.gt.0)then
@@ -116,7 +123,8 @@
 !      the value of ky_in must be set externally e.g. ky_in = rhos*q/r
 !        ky_max = 6.0*ky_min  ! n=6
 !        nky0=6
-        ky_max = 1.0*ky_factor*ABS(zs(2))/SQRT(taus_in(2)*mass_in(2))  !k_theta*rho_ion = 1.0
+!        ky_max = 1.0*ky_factor*ABS(zs(2))/SQRT(taus(2)*mass(2))  !k_theta*rho_ion = 1.0
+        ky_max = 1.0*ky_factor/rho_ion  !k_theta*rho_ion = 1.0
         nky0 = INT(ky_max/ky_in)-1
         ky_min = ky_in
         dky0 = ky_min
@@ -139,8 +147,8 @@
           ky_max = ky_spectrum(nky0)
         endif       
         ky0 = ky_max
-        ky1 = 0.4*ky_factor*ABS(zs(1))/SQRT(taus_in(1)*mass_in(1))  !k_theta*rho_e = 0.4
-        dky0 = LOG(ky1/ky0)/REAL(nky_in)
+!        ky1 = 0.4*ky_factor*ABS(zs(1))/SQRT(taus(1)*mass(1))  !k_theta*rho_e = 0.4
+        ky1 = 0.4*ky_factor/rho_e !k_theta*rho_e = 0.4        dky0 = LOG(ky1/ky0)/REAL(nky_in)
         lnky = LOG(ky0+dky0)
         do i=1,nky_in     
           ky_spectrum(nky0+nky1+i) = EXP(lnky)
@@ -151,7 +159,8 @@
       endif
       if(spectrum_type.eq.4)then   ! APS07 spectrum with ky_min=0.05
         nky=11
-        ky_min = 0.05*ky_factor*ABS(zs(2))/SQRT(taus_in(2)*mass_in(2))
+!        ky_min = 0.05*ky_factor*ABS(zs(2))/SQRT(taus(2)*mass(2))
+        ky_min = 0.05*ky_factor/rho_ion
         ky_spectrum(1) = ky_min
         dky_spectrum(1) = ky_min
         ky_spectrum(2) = 2.0*ky_min
@@ -161,14 +170,18 @@
         ky_spectrum(4) = 4.0*ky_min
         dky_spectrum(4) = ky_min
         ky_min = ky_spectrum(4)
-        ky_max = 1.0*ky_factor*ABS(zs(2))/SQRT(taus_in(2)*mass_in(2))
-        dky0 = 0.1*ky_factor*ABS(zs(2))/SQRT(taus_in(2)*mass_in(2))
+!        ky_max = 1.0*ky_factor*ABS(zs(2))/SQRT(taus(2)*mass(2))
+        ky_max = 1.0*ky_factor/rho_ion
+!        dky0 = 0.1*ky_factor*ABS(zs(2))/SQRT(taus(2)*mass(2))
+        dky0 = 0.1*ky_factor/rho_ion
         do i=5,nky
           ky_spectrum(i) = ky_min + REAL(i-4)*dky0
           dky_spectrum(i) = dky0
         enddo
-        ky0 = 1.0*ky_factor*ABS(zs(2))/SQRT(taus_in(2)*mass_in(2))
-        ky1 = 0.4*ky_factor*ABS(zs(1))/SQRT(taus_in(1)*mass_in(1))  !k_theta*rho_e = 0.4
+!        ky0 = 1.0*ky_factor*ABS(zs(2))/SQRT(taus(2)*mass(2))
+!        ky1 = 0.4*ky_factor*ABS(zs(1))/SQRT(taus(1)*mass(1))  !k_theta*rho_e = 0.4
+        ky0 = 1.0*ky_factor/rho_ion
+        ky1 = 0.4*ky_factor/rho_e  !k_theta*rho_e = 0.4
         dky0 = LOG(ky1/ky0)/REAL(nky_in-1)
         lnky = LOG(ky0)
         if(nky_in.gt.0)then

@@ -7,7 +7,7 @@ ifeq ($(OPT),debug)
 else
    FFLAGS=${FOPT}
 endif
-      
+
 LLIB = UMFPACK_lib
 
 HARWELL	= mc21b.o mc13e.o

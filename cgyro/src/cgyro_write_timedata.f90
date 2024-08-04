@@ -137,7 +137,7 @@ subroutine cgyro_write_timedata
   endif
 
   ! Output to screen
-  call print_scrdata()
+  if (printout) call print_scrdata()
 
   ! Output to files
   vec(1) = t_current ; vec(2:3) = integration_error(:) ; vec(4) = delta_t_gk

@@ -8,7 +8,7 @@ NUMAS_PER_NODE=1
 
 FFTWDIR=/usr/lib/x86_64-linux-gnu
 
-ROOT=${HOME}/GIT
+ROOT=/home/candy/GIT
 
 # Compilers
 
@@ -17,7 +17,7 @@ F77    = mpif77
 FOMP   =-fopenmp
 FMATH  =-fdefault-real-8 -fdefault-double-8
 FOPT   =-Ofast
-FDEBUG =-Wall -W -fcheck=all -g -fbacktrace -ffpe-trap=invalid,zero,overflow
+FDEBUG =-Wall -W -fcheck=all -g -fbacktrace -ffpe-trap=invalid,zero,overflow -fimplicit-none -finit-real=nan
 F2PY   = f2py
 
 # System math libraries

@@ -17,6 +17,7 @@
       IF(ALLOCATED(zs))DEALLOCATE(zs)
       IF(ALLOCATED(mass))DEALLOCATE(mass)
       IF(ALLOCATED(vs))DEALLOCATE(vs)
+      IF(ALLOCATED(fts))DEALLOCATE(fts)
       IF(ALLOCATED(rlts))DEALLOCATE(rlts)
       IF(ALLOCATED(rlns))DEALLOCATE(rlns)
       IF(ALLOCATED(vpar_shear_s))DEALLOCATE(vpar_shear_s)
@@ -274,7 +275,6 @@
 !      write(*,*)"deallocated gradB_g"
 !  ave_theta
 !
-      IF(ALLOCATED(ave_sat_geo_inv))DEALLOCATE(ave_sat_geo_inv)
       IF(ALLOCATED(ave_kx))DEALLOCATE(ave_kx)
       IF(ALLOCATED(ave_c_tor_par))DEALLOCATE(ave_c_tor_par)
       IF(ALLOCATED(ave_c_tor_per))DEALLOCATE(ave_c_tor_per)

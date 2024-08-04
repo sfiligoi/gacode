@@ -12,7 +12,8 @@
       USE tglf_kyspectrum
       IMPLICIT NONE
 !
-      INTEGER :: i,j,is,imax
+      INTEGER :: i,j,is,imax, jmax_mix
+      LOGICAL :: save_iflux, save_find_width
       REAL :: dky
       REAL :: phi_bar0,phi_bar1
       REAl :: v_bar0,v_bar1
@@ -25,6 +26,7 @@
       REAL :: stress_par1(nsm,3),stress_tor1(nsm,3)
       REAL :: exch1(nsm,3)
       REAL :: nsum1(nsm),tsum1(nsm)
+      REAL :: save_vexb_shear
 !
       CALL tglf_startup
 !
@@ -53,10 +55,37 @@
       v_bar_sum_out = 0.0
       v_bar0 = 0.0
       phi_bar0 = 0.0     
+      do i=1,nky
+        width_out(i) = width_in ! needed for spectral shift model double pass
+      enddo
 !
 ! compute the flux spectrum
 !
-      CALL get_bilinear_spectrum
+!    write(*,*)"vexb_shear = ",vexb_shear_s
+    if(alpha_quench_in .eq. 0.0 .and. vexb_shear_s .ne. 0.0)then
+!      write(*,*)"spectral shift"
+!  spectral shift model double pass
+       save_vexb_shear = vexb_shear_s
+       save_find_width = find_width_in
+       save_iflux = iflux_in
+       iflux_in=.FALSE.     ! do not compute eigenvectors on first pass
+       vexb_shear_s = 0.0  ! do not use spectral shift on first pass
+       jmax_out = 0         ! ID for first pass
+       CALL get_bilinear_spectrum
+       eigenvalue_first_pass(:,:,:) = eigenvalue_spectrum_out(:,:,:)
+       vexb_shear_s = save_vexb_shear
+       find_width_in = .FALSE.
+       iflux_in = save_iflux
+       if(sat_rule_in.eq.0)jmax_out = 1   ! flag for second pass
+       CALL get_bilinear_spectrum
+!  reset eigenvalues to the values with vexb_shear=0.
+!  note ql weights are with vexb_shear
+       eigenvalue_spectrum_out(:,:,:) = eigenvalue_first_pass(:,:,:)
+       find_width_in = save_find_width
+      else
+        jmax_out = 0
+        CALL get_bilinear_spectrum
+      endif
 !
 ! sum over ky spectrum
 !
@@ -64,20 +93,22 @@
       dky0=0.0
       ky0=0.0 
       do i=1,nky
-        ky_in = ky_spectrum(i)
+        ky_s = ky_spectrum(i)
         dky = dky_spectrum(i)
-        ky1=ky_in
+        ky1=ky_s
         if(i.eq.1)then
           dky1=ky1
-        else
-          dky = LOG(ky1/ky0)/(ky1-ky0)
-          dky1 = ky1*(1.0 - ky0*dky)
-          dky0 = ky0*(ky1*dky - 1.0)
+        elseif(kygrid_model_in.ne.0)then
+            dky = LOG(ky1/ky0)/(ky1-ky0)
+            dky1 = ky1*(1.0 - ky0*dky)
+            dky0 = ky0*(ky1*dky - 1.0)
         endif
-! normalize the ky integral to make it independent of the 
-! choice of temperature and mass scales 
-        dky0 = dky0*SQRT(taus_in(1)*mass_in(2))
-        dky1 = dky1*SQRT(taus_in(1)*mass_in(2))
+! backward comatiblily for UNITS=GYRO
+!        if(units_in.eq.'GYRO')then
+! this is an error in the original integrator
+!           dky0 = dky0*SQRT(taus_in(1)*mass_in(2))
+!           dky1 = dky1*SQRT(taus_in(1)*mass_in(2))
+!       endif
 !
 ! compute the field integrals
 !
@@ -150,7 +181,7 @@
              stress_tor0(is,j) = stress_tor1(is,j)
              exch0(is,j) = exch1(is,j)
            enddo  ! j
-           if(ky_in*SQRT(taus_in(2)*mass_in(2)).le.1.0)then
+           if(ky_s.le.1.0)then
              q_low_out(is) = energy_flux_out(is,1)+energy_flux_out(is,2)
            endif
          enddo  ! is 
@@ -179,7 +210,7 @@
 !
       LOGICAL :: unstable
       INTEGER :: i,j,k,is,imax,t
-      REAL :: width_max
+      REAL :: save_width
       REAL :: gmax,fmax
       REAL :: phi_bar
       REAL :: gamma_cutoff,reduce,rexp
@@ -198,6 +229,7 @@
 !
       do i=1,nky
        spectral_shift_out(i) = 0.0
+       ave_p0_spectrum_out(i) = 0.0
        do k=1,nmodes_in
         do t = 1,2
           eigenvalue_spectrum_out(t,i,k) = 0.0
@@ -216,7 +248,6 @@
           enddo ! j
           nsts_phase_spectrum_out(is,i,k) = 0.0
         enddo ! is
-        sat_geo_spectrum_out(i,k)=0.0
         ne_te_phase_spectrum_out(i,k)=0.0
        enddo  !k
       enddo  !i
@@ -224,25 +255,37 @@
 ! loop over ky spectrum
 !
 ! save maximum width
-      width_max = width_in
+      save_width = width_in
       iflux_in=.TRUE. 
       gmax = 0.0
       fmax=0.0
       do i=1,nky
-        ky_in = ky_spectrum(i)
+        ky_s = ky_spectrum(i)
 !
         new_width=.TRUE.
 !
         if(new_eikonal_in)then
-          if(find_width_in)then
-            CALL tglf_max
-          else
-            CALL tglf_LS
-            gamma_nb_min_out = gamma_out(1)
+          if(jmax_out.eq.0)then   ! first pass
+            if(find_width_in)then
+              CALL tglf_max
+            else
+              nbasis = nbasis_max_in
+              new_width = .TRUE.
+              CALL tglf_LS
+              gamma_nb_min_out = gamma_out(1)
+            endif
+          else   ! second pass
+              gamma_reference_kx0(:) = eigenvalue_first_pass(1,i,:)
+              freq_reference_kx0(:) = eigenvalue_first_pass(2,i,:)
+              width_in = width_out(i)
+              nbasis = nbasis_max_in
+              new_width=.TRUE.
+              CALL tglf_LS
+              gamma_nb_min_out = gamma_out(1)
           endif
           mask_save(i) = 1
           if(gamma_out(1).eq.0.0)mask_save(i)=0
-!          write(*,*)i,"ky=",ky_in,mask_save(i),gamma_out(1)
+!          write(*,*)i,"ky=",ky_s,mask_save(i),gamma_out(1)
           gamma_nb_min_save(i) = gamma_nb_min_out
           width_save(i) = width_in
           ft_save(i) = ft
@@ -278,7 +321,7 @@
             gamma_out(1)=0.0
           endif
         endif
-!        write(*,*)i,"ky=",ky_in,"width=",width_in
+!        write(*,*)i,"ky=",ky_s,"width=",width_in
 !        write(*,*)"nbasis=",nbasis_max_in,nbasis_min_in
 !        write(*,*)"ft=",ft,"R=",R_unit,"q=",q_unit
 !        write(*,*)"wdx=",wdx(1),"b0x=",b0x(1)
@@ -287,21 +330,25 @@
         gamma_max = MAX(gamma_out(1),gamma_out(2)) ! this covers ibranch=-1,0
         if(gamma_max.eq.0.0.or.gamma_nb_min_out.eq.0.0)unstable=.FALSE.      
         gamma_net_1 = gamma_nb_min_out 
-        gamma_cutoff = (0.1*ky_in/R_unit)*SQRT(taus(1)*mass(2))  ! scaled like gamma
+!       gamma_cutoff = (0.1*ky_s/R_unit)*SQRT(taus(1)*mass(2))  ! scaled like gamma
+        gamma_cutoff = 0.1*ky_s/R_unit
         rexp = 1.0
         reduce = 1.0
         if(nbasis_max_in.ne.nbasis_min_in)then
           if(gamma_net_1.lt.gamma_out(1) &
              .and.gamma_net_1.lt.gamma_cutoff)then
           reduce = (gamma_net_1/gamma_cutoff)**rexp
-!            write(*,*)"phi reduced",ky_in,gamma_nb_min_out,gamma_out(1)
+!            write(*,*)"phi reduced",ky_s,gamma_nb_min_out,gamma_out(1)
           endif
         endif
-        if(sat_rule_in.eq.1)reduce=1.0
+        if(sat_rule_in.ge.1)reduce=1.0
 !
+!        width_out(i) = width_save(i)
+        width_out(i) = width_in
         if(unstable)then
 ! save the spectral shift of the radial wavenumber due to VEXB_SHEAR
          spectral_shift_out(i) = kx0_e
+         ave_p0_spectrum_out(i) = ave_p0_out
 ! save field_spectrum_out and eigenvalue_spectrum_out
          do imax=1,nmodes_out
            QL_field_spectrum_out(1,i,imax) = v_QL_out(imax)
@@ -314,11 +361,11 @@
            field_spectrum_out(4,i,imax) = reduce*b_par_bar_out(imax)
            eigenvalue_spectrum_out(1,i,imax)=gamma_out(imax)
            eigenvalue_spectrum_out(2,i,imax)=freq_out(imax)
-           if(ky_in.le.1.0.and.gamma_out(imax).gt.gmax)then
+           if(ky_s.le.1.0.and.gamma_out(imax).gt.gmax)then
              gmax=gamma_out(imax)
              fmax=freq_out(imax)
            endif
-!          write(*,*)ky_in,width_in
+!          write(*,*)ky_s,width_in
 !          write(*,*)"modes",imax,phi_QL_out(imax)
 !          write(*,*)gamma_out(imax),freq_out(imax)
          enddo
@@ -344,7 +391,7 @@
               eflux1 = energy_QL_out(imax,is,j)
               stress_tor1 = stress_tor_QL_out(imax,is,j)
               stress_par1 = stress_par_QL_out(imax,is,j)
-              exch1 = phi_bar*exchange_QL_out(imax,is,j)
+              exch1 = exchange_QL_out(imax,is,j)
               QL_flux_spectrum_out(1,is,j,i,imax) = pflux1
               QL_flux_spectrum_out(2,is,j,i,imax) = eflux1
               QL_flux_spectrum_out(3,is,j,i,imax) = stress_tor1
@@ -358,9 +405,8 @@
             enddo !imax
            enddo ! j
          enddo  ! is 
-! save sat_geo and ne_te crossphase
+! save ne_te crossphase
          do imax=1,nmodes_out
-           sat_geo_spectrum_out(i,imax) = sat_geo_bar_out(imax)
            ne_te_phase_spectrum_out(i,imax) = ne_te_phase_out(imax)
          enddo  !imax
 ! save ns_ts crossphase
@@ -372,12 +418,12 @@
         endif !unstable .T.
 !
 ! reset width to maximum if used tglf_max
-        if(find_width_in)width_in=width_max
+        if(find_width_in)width_in=save_width
 !
       enddo  ! i 
 !
 ! recompute spectrum using non-local in ky multiscale model
-     if(sat_rule_in .eq. 1) call get_multiscale_spectrum
+     if(sat_rule_in .ge. 1) call get_multiscale_spectrum
 !
       if(new_eikonal_in)eikonal_unsaved=.FALSE.
       gamma_out(1) = gmax

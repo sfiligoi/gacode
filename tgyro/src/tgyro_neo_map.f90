@@ -40,9 +40,21 @@ subroutine tgyro_neo_map
   neo_s_delta_in           = s_delta(i_r)
   neo_zeta_in              = zeta(i_r)
   neo_s_zeta_in            = s_zeta(i_r)
-  neo_zmag_over_a_in       = zmag(i_r)
+  neo_zmag_over_a_in       = zmag(i_r)/r_min
   neo_s_zmag_in            = dzmag(i_r)
 
+  ! New HAM shape parameters
+  neo_shape_sin3_in        = shape_sin3(i_r)
+  neo_shape_s_sin3_in      = shape_ssin3(i_r)
+  neo_shape_cos0_in        = shape_cos0(i_r)
+  neo_shape_s_cos0_in      = shape_scos0(i_r)
+  neo_shape_cos1_in        = shape_cos1(i_r)
+  neo_shape_s_cos1_in      = shape_scos1(i_r)
+  neo_shape_cos2_in        = shape_cos2(i_r)
+  neo_shape_s_cos2_in      = shape_scos2(i_r)
+  neo_shape_cos3_in        = shape_cos3(i_r)
+  neo_shape_s_cos3_in      = shape_scos3(i_r)
+  
   neo_ipccw_in = -signb*signq
   neo_btccw_in = -signb
 
@@ -54,9 +66,9 @@ subroutine tgyro_neo_map
      call tgyro_catch_error('ERROR: (TGYRO) n_species > 9 not supported in NEO interface.') 
   endif
 
-  ! Assuming NEO mass and temp norm based on first ion
+  ! Assuming NEO mass norm is m_deuterium and temp norm is based on first ion
   ! dens norm based on electrons
-  m_norm = mi(1)
+  m_norm = md
   t_norm = ti(1,i_r)
   n_norm = ne(i_r)
   
@@ -105,17 +117,7 @@ subroutine tgyro_neo_map
   neo_omega_rot_deriv_in = -gamma_p0 * r_min**2 / r_maj(i_r) &
        / (c_s(i_r) * sqrt(t_norm/te(i_r)))
 
-  ! Parameter only used for global runs.
+  ! Parameter only used for global runs
   neo_rmin_over_a_2_in = neo_rmin_over_a_in
-
-  ! General geometry Fourier coefficients
-
-  if (loc_num_equil_flag == 1) then
-     ! Resetting if numerical equilibrium wanted.
-     neo_equilibrium_model_in = 3
-  endif
-
-  neo_geo_ny_in = n_fourier_geo
-  neo_geo_yin_in(:,:) = a_fourier_geo(:,:,i_r)
 
 end subroutine tgyro_neo_map

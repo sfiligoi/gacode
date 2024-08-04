@@ -1,0 +1,28 @@
+#---------------------------------------------------
+# Azure HC
+#
+#---------------------------------------------------
+
+IDENTITY="Azure HC"
+CORES_PER_NODE=44
+NUMAS_PER_NODE=1
+
+FC  = mpif90 -std=f2008 -fall-intrinsics -I$(GACODE_ROOT)/modules -J $(GACODE_ROOT)/modules
+F77 = mpif77 -I$(GACODE_ROOT)/modules
+
+FOMP   = -fopenmp
+FMATH  = -fdefault-real-8 -fdefault-double-8
+FOPT   = -Ofast
+FDEBUG = -Wall -W -fcheck=mem,bounds -g -fbacktrace -ffpe-trap=invalid,zero,overflow
+
+# System math libraries
+
+LMATH  = -L$(BLAS_DIR)/lib -lopenblas -L$(FFTW_DIR)/lib -lfftw3
+FFTW_INC = $(FFTW_DIR)/include
+
+#NETCDF = -L$(NETCDF_DIR)/lib -lnetcdff -lnetcdf -Wl,-rpath,$(NETCDF_DIR)/lib
+#NETCDF_INC = $(NETCDF_DIR)/include
+
+# Archive
+
+ARCH = ar cr

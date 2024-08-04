@@ -6,7 +6,6 @@ subroutine cgyro_check
   implicit none
 
   integer :: is
-  logical :: lfe
   character(len=1), dimension(7) :: ctag
   character(1000) :: outstr
   character(len=7) :: floatstr
@@ -210,6 +209,17 @@ subroutine cgyro_check
      return
 
   end select
+
+  !------------------------------------------------------------------------
+  ! For adiabatic electrons, n=0 eqn does not have proper electron response
+  ! for sonic rotation and may give rise to instability at large Mach
+  ! Even for rotation_model=1, the collision eqn does not have the field
+  ! correction; explicit_trap_flag=1 will at least do the field correction
+  ! for the trapping terms
+  if(ae_flag == 1 .and. rotation_model > 1) then
+     call cgyro_info('WARNING -- n=0 eqn does not have proper adiabatic ele response')
+  endif
+  
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
@@ -394,7 +404,7 @@ subroutine cgyro_check
      call cgyro_error('Invalid value for nup_theta')
      return
   endif
-  if (nup_radial < 1 .or. nup_theta > 4) then
+  if (nup_radial < 1 .or. nup_radial > 4) then
      call cgyro_error('Invalid value for nup_radial')
      return
   endif

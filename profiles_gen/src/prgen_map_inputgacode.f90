@@ -14,7 +14,7 @@ subroutine prgen_map_inputgacode
 
   integer :: i
   real :: xnew(nx)
-  
+
   if (efit_method == 1) then
 
      call prgen_get_chi(nx,q,dpsi,rho,expro_torfluxa)
@@ -56,7 +56,8 @@ subroutine prgen_map_inputgacode
      call cub_spline(expro_rho,expro_qioni,nx,rho,xnew,nx) ; expro_qioni = xnew
      call cub_spline(expro_rho,expro_qcxi,nx,rho,xnew,nx)  ; expro_qcxi = xnew
      call cub_spline(expro_rho,expro_qmom,nx,rho,xnew,nx)  ; expro_qmom = xnew
-     call cub_spline(expro_rho,expro_qpar,nx,rho,xnew,nx)  ; expro_qpar = xnew
+     call cub_spline(expro_rho,expro_qpar_beam,nx,rho,xnew,nx)  ; expro_qpar_beam = xnew
+     call cub_spline(expro_rho,expro_qpar_wall,nx,rho,xnew,nx)  ; expro_qpar_wall = xnew
 
      !---------------------------------------------------------
      ! Map profile data into expro interface.
@@ -69,11 +70,37 @@ subroutine prgen_map_inputgacode
 
   endif
 
+  if (format_type == 8) then
+     
+     ! LEGACY (input.profiles input)
+
+     ipccw = 1
+     btccw = -1
+     if (bcentr < 0.0) then
+        btccw = 1
+     endif
+     if (current > 0.0) then
+        ipccw = -1
+     endif
+     
+     expro_torfluxa = -btccw*abs(torfluxa)
+     expro_q        = ipccw*btccw*abs(q)
+     expro_polflux  = -ipccw*abs(dpsi)
+     expro_kappa    = kappa
+     expro_delta    = delta
+     expro_zeta     = zeta
+     expro_zmag     = zmag
+     expro_current  = -ipccw*abs(current)
+     expro_bcentr   = bcentr
+     expro_rcentr   = rcentr
+
+  endif
+  
   !---------------------------------------------------------
   ! Notification about CER file
   !
   if (file_cer /= "null") then
-    print '(a)','INFO: (prgen_map_inputprofiles) IGNORING cer file'
+    print '(a)','INFO: (prgen_map_inputgacode) IGNORING cer file'
   endif
   !---------------------------------------------------------
 

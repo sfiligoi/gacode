@@ -13,8 +13,9 @@ subroutine cgyro_write_initdata
   implicit none
 
   integer :: p,in,is,it
-  real :: kymax
+  real :: kymax,kyrat,dn
   real, external :: spectraldiss
+  character(len=7),dimension(4) :: sv 
 
   !----------------------------------------------------------------------------
   ! Runfile to give complete summary to user
@@ -88,17 +89,20 @@ subroutine cgyro_write_initdata
           'C(theta):',maxval(abs(omega_stream))*maxval(vel)*maxval(xi)*delta_t/d_theta/1.6
 
      write(io,*) 
-     write(io,21) '    r/a:',rmin,      '      q:',q,           '     s:',s   
-     write(io,21) '    R/a:',rmaj,      '  shift:',shift,       '  zmag:',zmag,'dzmag:',dzmag
-     write(io,21) '  kappa:',kappa,     '  delta:',delta,       '  zeta:',zeta
-     write(io,21) 's_kappa:',s_kappa,   's_delta:',s_delta,     's_zeta:',s_zeta
-
-     if (udsymmetry_flag == 0) then
+     write(io,21) 'r/a',rmin,'R/a',rmaj,'q',q,'zmag',zmag,'kappa',kappa   
+     write(io,22) 'shift',shift,'s',s,'dzmag',dzmag,'s_kappa',s_kappa
         write(io,*)
-        write(io,21) '   c0:',shape_cos0,  '   c1:',shape_cos1,  '   c2:',shape_cos2,  '   c3:',shape_cos3,  '   s3:',shape_sin3
-        write(io,21) ' s_c0:',shape_s_cos0,' s_c1:',shape_s_cos1,' s_c2:',shape_s_cos2,' s_c3:',shape_s_cos3,' s_s3:',shape_s_sin3
+     if (abs(shape_cos(0))+abs(shape_s_cos(0)) > 1e-6) then
+        write(io,23) 'c0',shape_cos(0),'s_c0',shape_s_cos(0)
      endif
-
+     write(io,23) 'c1',shape_cos(1),'s_c1',shape_s_cos(1),'delta',delta,'s_delta',s_delta
+     write(io,23) 'c2',shape_cos(2),'s_c2',shape_s_cos(2),'zeta' ,zeta ,'s_zeta' ,s_zeta
+     if (abs(shape_cos(3))+abs(shape_s_cos(3))+abs(shape_sin(3))+abs(shape_s_sin(3)) > 1e-6) then
+        write(io,23) 'c3',shape_cos(3),'s_c3',shape_s_cos(3),'s3',shape_sin(3),'s_s3',shape_sin(3)
+        write(io,23) 'c4',shape_cos(4),'s_c4',shape_s_cos(4),'s4',shape_sin(4),'s_s4',shape_sin(4)
+        write(io,23) 'c5',shape_cos(5),'s_c5',shape_s_cos(5),'s5',shape_sin(5),'s_s5',shape_sin(5)
+        write(io,23) 'c6',shape_cos(6),'s_c6',shape_s_cos(6),'s6',shape_sin(6),'s_s6',shape_sin(6)
+     endif
      write(io,*)
      write(io,20) 'gamma_e:',gamma_e,   'gamma_p:',gamma_p,     '  mach:',mach,'[rho/a]:',rho
      write(io,20) '  betae:',betae_unit,' beta_*:',beta_star(0),'lamb_*:',lambda_star,'[z_eff]:',z_eff
@@ -113,16 +117,29 @@ subroutine cgyro_write_initdata
      enddo
 
      if (profile_model == 2) then
+        dn = rho/(rhos/a_meters)
+        kyrat = abs(q/rmin*rhos/a_meters)
         write(io,*)
-        write(io,10) '           a[m]:',a_meters,'  b_unit[T]:',b_unit,  '     rhos/a:',rhos/a_meters,' dn:',rho/(rhos/a_meters)
+        write(io,10) '           a[m]:',a_meters,'  b_unit[T]:',b_unit,  '     rhos/a:',rhos/a_meters,' dn:',dn
         write(io,10) 'n_norm[e19/m^3]:',dens_norm,'v_norm[m/s]:',vth_norm,'T_norm[keV]:',temp_norm
+        write(io,*)
+        write(io,'(t2,a)') ' n = 1         2         3         4         5         6         7         8'      
+        write(io,'(t2,a,8(1pe9.3,1x))') 'KY = ',kyrat,2*kyrat,3*kyrat,4*kyrat,5*kyrat,6*kyrat,7*kyrat,8*kyrat        
+        write(io,'(t2,a,8(1pe9.3,1x))') 'LY = ',&
+             2*pi/kyrat,&
+             2*pi/(2*kyrat),&
+             2*pi/(3*kyrat),&
+             2*pi/(4*kyrat),&
+             2*pi/(5*kyrat),& 
+             2*pi/(6*kyrat),& 
+             2*pi/(7*kyrat),& 
+             2*pi/(8*kyrat) 
      endif
      write(io,*)
 
      close(io)
 
   endif
-21 format(t2,5(a,1x,f8.5,2x))
   !----------------------------------------------------------------------------
 
   !----------------------------------------------------------------------------
@@ -144,16 +161,28 @@ subroutine cgyro_write_initdata
      write (io,fmtstr) s_zeta
      write (io,fmtstr) zmag
      write (io,fmtstr) dzmag
-     write (io,fmtstr) shape_sin3
-     write (io,fmtstr) shape_s_sin3
-     write (io,fmtstr) shape_cos0
-     write (io,fmtstr) shape_s_cos0
-     write (io,fmtstr) shape_cos1
-     write (io,fmtstr) shape_s_cos1
-     write (io,fmtstr) shape_cos2
-     write (io,fmtstr) shape_s_cos2
-     write (io,fmtstr) shape_cos3
-     write (io,fmtstr) shape_s_cos3
+     write (io,fmtstr) shape_sin(3)
+     write (io,fmtstr) shape_s_sin(3)
+     !write (io,fmtstr) shape_sin(4)
+     !write (io,fmtstr) shape_s_sin(4)
+     !write (io,fmtstr) shape_sin(5)
+     !write (io,fmtstr) shape_s_sin(5)
+     !write (io,fmtstr) shape_sin(6)
+     !write (io,fmtstr) shape_s_sin(6)
+     write (io,fmtstr) shape_cos(0)
+     write (io,fmtstr) shape_s_cos(0)
+     write (io,fmtstr) shape_cos(1)
+     write (io,fmtstr) shape_s_cos(1)
+     write (io,fmtstr) shape_cos(2)
+     write (io,fmtstr) shape_s_cos(2)
+     write (io,fmtstr) shape_cos(3)
+     write (io,fmtstr) shape_s_cos(3)
+     !write (io,fmtstr) shape_cos(4)
+     !write (io,fmtstr) shape_s_cos(4)
+     !write (io,fmtstr) shape_cos(5)
+     !write (io,fmtstr) shape_s_cos(5)
+     !write (io,fmtstr) shape_cos(6)
+     !write (io,fmtstr) shape_s_cos(6)
      write (io,fmtstr) rho
      write (io,fmtstr) ky
      write (io,fmtstr) betae_unit
@@ -264,5 +293,8 @@ subroutine cgyro_write_initdata
 
 10 format(t2,4(a,1x,1pe9.3,2x))  
 20 format(t2,4(a,1x,1pe10.3,2x)) 
+21 format(t3,a3,1x,f8.5,1x,a5,1x,f8.5,a4,1x,f8.5,a7,1x,f8.5,a9,1x,f8.5)
+22 format(t14,             a7,1x,f8.5,a4,1x,f8.5,a7,1x,f8.5,a9,1x,f8.5)
+23 format(t2,a3,1x,f8.5,2(a7,1x,f8.5,1x),a8,1x,f8.5)
 
 end subroutine cgyro_write_initdata

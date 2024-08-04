@@ -38,6 +38,7 @@ module tglf_interface
 
   ! CONTROL PARAMETERS
   character (len=256)  :: tglf_path_in       = ''
+  character (len=20)   :: file_dump_local = 'out.tglf.localdump'
   logical              :: tglf_dump_flag_in  = .false.
   logical              :: tglf_quiet_flag_in = .true.
   integer              :: tglf_test_flag_in  = 0
@@ -56,6 +57,7 @@ module tglf_interface
 
   ! Data passed to: put_rare_switches
   real    :: tglf_theta_trapped_in  = 0.7
+  real    :: tglf_wdia_trapped_in   = 0.0
   real    :: tglf_park_in           = 1.0
   real    :: tglf_ghat_in           = 1.0
   real    :: tglf_gchat_in          = 1.0
@@ -72,7 +74,8 @@ module tglf_interface
   logical :: tglf_use_bpar_in       = .false.
   logical :: tglf_use_mhd_rule_in   = .true.
   logical :: tglf_use_bisection_in  = .true.
-  logical :: tglf_use_inboard_detrapped_in = .false. 
+  logical :: tglf_use_inboard_detrapped_in = .false.
+  logical :: tglf_use_ave_ion_grid_in = .false.
   integer :: tglf_ibranch_in        = -1
   integer :: tglf_nmodes_in         = 2
   integer :: tglf_nbasis_max_in     = 4
@@ -90,6 +93,7 @@ module tglf_interface
   real    :: tglf_xnu_factor_in     = 1.0
   real    :: tglf_debye_factor_in   = 1.0
   real    :: tglf_etg_factor_in     = 1.25
+  real    :: tglf_rlnp_cutoff_in     = 18.0
   integer :: tglf_sat_rule_in       = 0
   integer :: tglf_kygrid_model_in   = 1
   integer :: tglf_xnu_model_in      = 2
@@ -177,9 +181,6 @@ module tglf_interface
   real     :: tglf_Z_elite_in(max_ELITE) 
   real     :: tglf_Bp_elite_in(max_ELITE) 
   
-  ! Extra HARVEST parameters
-  character (len=2000) :: tglf_harvest_extra_in = CHAR(0)
-
   ! TRANSPORT OUTPUT PARAMETERS
   real :: tglf_elec_pflux_out = 0.0
   real :: tglf_elec_eflux_out = 0.0
@@ -192,10 +193,25 @@ module tglf_interface
   real, dimension(nsm-1) :: tglf_ion_eflux_low_out = 0.0
   real, dimension(nsm-1) :: tglf_ion_mflux_out = 0.0
   real, dimension(nsm-1) :: tglf_ion_expwd_out = 0.0
+
+  real, dimension(nsm-1, 3) :: tglf_particle_flux_out = 0.0
+  real, dimension(nsm-1, 3) :: tglf_energy_flux_out = 0.0
+  real, dimension(nsm-1, 3) :: tglf_stress_tor_out = 0.0
+  real, dimension(nsm-1, 3) :: tglf_stress_par_out = 0.0
+  real, dimension(nsm-1, 3) :: tglf_exchange_out = 0.0
   
   ! LINEAR OUTPUT PARAMETERS
   complex :: tglf_eigenvalue_out(maxmodes)
 
+  ! GYRO TGLF input
+  real, allocatable, dimension(:, :, :) :: tglf_eigenvalue_spectrum_out
+  real, allocatable, dimension(:) :: tglf_ky_spectrum_out, tglf_dky_spectrum_out
+
+  real, allocatable, dimension(:, :, :) :: tglf_field_spectrum_out
+  real, allocatable, dimension(:, :, :, :, :) :: tglf_flux_spectrum_out
+  
+  
+  
   ! DIAGNOSTIC OUTPUT PARAMETERS
   real :: interchange_DR = 0.0
   real :: interchange_DM = 0.0
@@ -221,7 +237,7 @@ contains
 
     integer :: ierr, i
 
-    open(unit=1,file=trim(tglf_path_in)//'out.tglf.localdump',&
+    open(unit=1,file=trim(tglf_path_in)//trim(file_dump_local),&
          status='replace',iostat=ierr)
 
     if (tglf_geometry_flag_in == 2 ) then
@@ -246,6 +262,7 @@ contains
     write(1,10) 'USE_MHD_RULE',tglf_use_mhd_rule_in
     write(1,10) 'USE_BISECTION',tglf_use_bisection_in
     write(1,10) 'USE_INBOARD_DETRAPPED',tglf_use_inboard_detrapped_in
+    write(1,10) 'USE_AVE_ION_GRID',tglf_use_ave_ion_grid_in
     write(1,20) 'SAT_RULE',tglf_sat_rule_in
     write(1,20) 'KYGRID_MODEL',tglf_kygrid_model_in
     write(1,20) 'XNU_MODEL',tglf_xnu_model_in
@@ -277,6 +294,7 @@ contains
     write(1,30) 'XNU_FACTOR',tglf_xnu_factor_in
     write(1,30) 'DEBYE_FACTOR',tglf_debye_factor_in
     write(1,30) 'ETG_FACTOR',tglf_etg_factor_in
+    write(1,30) 'RLNP_CUTOFF',tglf_rlnp_cutoff_in
     write(1,20) 'WRITE_WAVEFUNCTION_FLAG',tglf_write_wavefunction_flag_in
     write(1,*) ' '
     write(1,*) '#---------------------------------------------------'
@@ -412,6 +430,7 @@ contains
     write(1,10) 'USE_MHD_RULE',use_mhd_rule_in
     write(1,10) 'USE_BISECTION',use_bisection_in
     write(1,10) 'USE_INBOARD_DETRAPPED',use_inboard_detrapped_in
+    write(1,10) 'USE_AVE_ION_GRID',use_ave_ion_grid_in
     write(1,20) 'SAT_RULE',sat_rule_in
     write(1,20) 'KYGRID_MODEL',kygrid_model_in
     write(1,20) 'XNU_MODEL',xnu_model_in
@@ -443,7 +462,7 @@ contains
     write(1,30) 'XNU_FACTOR',xnu_factor_in
     write(1,30) 'DEBYE_FACTOR',debye_factor_in
     write(1,30) 'ETG_FACTOR',etg_factor_in
-    write(1,20) 'WRITE_WAVEFUNCTION_FLAG',.FALSE.
+    write(1,30) 'RLNP_CUTOFF',rlnp_cutoff_in
     write(1,*) ' '
     write(1,*) '#---------------------------------------------------'
     write(1,*) '# Species vectors:'

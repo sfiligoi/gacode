@@ -1,7 +1,8 @@
 program cgyro
 
   use mpi
-  use cgyro_globals, only : path, CGYRO_COMM_WORLD, i_proc, n_proc, i_err, n_omp, test_flag
+  !use cgyro_globals, only : path, CGYRO_COMM_WORLD, i_proc, n_proc, i_err, n_omp, test_flag
+  use cgyro_globals
   use cgyro_io
   use timer_lib
 
@@ -61,8 +62,9 @@ program cgyro
   call cgyro_read_input
   call timer_lib_out('input')
 
+  call cgyro_init_kernel
   call cgyro_kernel
-
+  call cgyro_final_kernel
   call MPI_FINALIZE(i_err)
 
 end program cgyro

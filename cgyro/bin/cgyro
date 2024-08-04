@@ -22,6 +22,9 @@ then
   echo
   echo "TEST MODE"
   echo
+  echo "         -i <simdir>"
+  echo "         Print acceptable MPI tasks."
+  echo
   echo "         -t <simdir>"
   echo "         Sanity test for INPUT data in <simdir>."
   echo
@@ -67,7 +70,10 @@ then
   echo "         Version and platform information."
   echo
   echo "         -clean"
-  echo "         Clean simulation directory."
+  echo "         Clean simulation directory (all out.* and bin.* files)."
+  echo
+  echo "         -optclean"
+  echo "         Clean simulation directory except for timing files."
   echo
   echo "         -compress"
   echo "         Replicate directory, but without restart or nonstandard files."
@@ -90,7 +96,7 @@ MPINUMA=0
 TEST_FLAG=0
 GENERATE_FLAG=0
 REGRESS_FLAG=0
-CLEAN_FLAG=0
+CLEAN=0
 COMPRESS_FLAG=0
 RESET=0
 INIT_FLAG=0
@@ -132,7 +138,8 @@ while [ $# -gt 0 ] ; do
 
   -help) shift ; HELP_TAG=$1 ;;
 
-  -clean) CLEAN_FLAG=1 ;;
+  -clean) CLEAN=1 ;;
+  -optclean) CLEAN=2 ;;
 
   -compress) COMPRESS_FLAG=1 ;;
 
@@ -194,7 +201,7 @@ then
    N2=$[ NPROC / 2 ]
    if [ $[ NPROC - 2 * N2 ] -eq 1 ]
    then
-      echo "ERROR: (CGYRO) For regression test, number of processors must be multiple of 2." 
+      echo "ERROR: (CGYRO) For regression test, number of processors must be multiple of 2."
       exit 1
    fi
    # NOMP=1 RESET=0
@@ -218,11 +225,18 @@ cd $SIMDIR
 #============================================================
 # Clean/new options
 
-CFILES="out.* bin.* batch.out batch.err *~ *gen *header"
+CFILES="bin.* batch.out batch.err *~"
+C1FILES="out.* *gen"
+C2FILES="*egrid *equilibrium *grids *hosts *memory *rotation"
 
-if [ $CLEAN_FLAG -eq 1 ] ; then
-    rm -f $CFILES
+if [ $CLEAN -eq 1 ] ; then
+    rm -f $CFILES $C1FILES
     echo "INFO: (cgyro) Cleaned directory."
+    exit 1
+fi
+if [ $CLEAN -eq 2 ] ; then
+    rm -f $CFILES $C2FILES
+    echo "INFO: (cgyro) Thinned out directory."
     exit 1
 fi
 #============================================================

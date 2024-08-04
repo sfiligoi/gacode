@@ -23,6 +23,7 @@ subroutine cgyro_init_collision
   real :: mo1,mo2,en1,en2
   integer :: jv
   integer :: is,ir,it,ix,ie,js,je,jx,ks
+  integer :: dv
   ! parameters for matrix solve
   real, dimension(:,:), allocatable :: amat
   real, dimension(:,:,:,:,:,:), allocatable :: ctest
@@ -184,6 +185,13 @@ subroutine cgyro_init_collision
      allocate(rsvec(n_species,n_species,n_xi,n_energy))
      allocate(rsvect0(n_species,n_species,n_xi,n_energy))
      allocate(rsvect1(n_species,n_species,n_xi,n_energy))
+
+  if (collision_precision_mode /= 0) then
+     ! cmat is a temp variable in this case
+     allocate(cmat(nv,nv,nc_loc))
+  endif
+  ! else it is a global one
+
 
      ! Collision test particle component
      ctest = 0.0
@@ -690,22 +698,23 @@ subroutine cgyro_init_collision
 
   ! Construct the collision matrix
 
-  !$omp  parallel do  default(none) &
-  !$omp& shared(nc1,nc2,nv,n,delta_t,n_species,rho,is_ele,n_field) &
-  !$omp& shared(collision_kperp,collision_field_model) &
-  !$omp& firstprivate(collision_model) &
-  !$omp& shared(ae_flag,lambda_debye,dens_ele,temp_ele,dens_rot) &
-  !$omp& shared(betae_unit,sum_den_h) &
-  !$omp& shared(it_c,ir_c,px,is_v,ix_v,ie_v,xi_deriv_mat) &
-  !$omp& shared(temp,jvec_v,omega_trap,dens,energy,vel) &
-  !$omp& shared(omega_rot_trap,omega_rot_u,e_deriv1_mat,e_max) &
-  !$omp& shared(xi_lor_mat) &
-  !$omp& shared(k_perp,vth,mass,z,bmag,xi,w_e,w_xi) &
-  !$omp& shared(klor_fac,kdiff_fac) &
-  !$omp& private(ic,ic_loc,it,ir,info) &
-  !$omp& private(iv,is,ix,ie,jv,js,jx,je,ks) &
-  !$omp& private(amat,i_piv) &
-  !$omp& shared(cmat)
+!$omp  parallel do  default(none) &
+!$omp& shared(nc1,nc2,nv,n,delta_t,n_species,rho,is_ele,n_field) &
+!$omp& shared(collision_kperp,collision_field_model,explicit_trap_flag) &
+!$omp& firstprivate(collision_model) &
+!$omp& shared(ae_flag,lambda_debye,dens_ele,temp_ele,dens_rot) &
+!$omp& shared(betae_unit,sum_den_h) &
+!$omp& shared(it_c,ir_c,px,is_v,ix_v,ie_v,ctest,xi_deriv_mat) &
+!$omp& shared(temp,jvec_v,omega_trap,dens,energy,vel) &
+!$omp& shared(omega_rot_trap,omega_rot_u,e_deriv1_mat,e_deriv1_rot_mat,e_max) &
+!$omp& shared(xi_lor_mat) &
+!$omp& shared(k_perp,vth,mass,z,bmag,nu_d,xi,nu_par,w_e,w_xi) &
+!$omp& shared(klor_fac,kdiff_fac) &
+!$omp& private(ic,ic_loc,it,ir,info) &
+!$omp& private(iv,is,ix,ie,jv,js,jx,je,ks) &
+!$omp& private(amat,i_piv) &
+!$omp& private(dv) firstprivate(collision_precision_mode, collision_full_stripes) &
+!$omp& shared(cmat,cmat_fp32,cmat_stripes)
   do ic=nc1,nc2
 
      ic_loc = ic-nc1+1
@@ -744,7 +753,7 @@ subroutine cgyro_init_collision
 
               ! Trapping 
               ! (not part of collision operator but contains xi-derivative)
-              if (is == js .and. ie == je) then
+              if (explicit_trap_flag == 0 .and. is == js .and. ie == je) then
                  cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
                       + (0.5*delta_t) * (omega_trap(it,is) * vel(ie) &
                       + omega_rot_trap(it,is) / vel(ie)) &
@@ -757,13 +766,13 @@ subroutine cgyro_init_collision
 
               ! Rotation energy derivative
               ! (not part of collision operator but contains e-derivative)
-              if (is == js .and. ix == jx) then
+              if (explicit_trap_flag == 0 .and. is == js .and. ix == jx) then
                  cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
                       + (0.5*delta_t) * omega_rot_u(it,is) * xi(ix) &
-                      * e_deriv1_mat(ie,je)/sqrt(1.0*e_max)
+                      * e_deriv1_rot_mat(ie,je)/sqrt(1.0*e_max)
                  amat(iv,jv) = amat(iv,jv) &
                       - (0.5*delta_t) * omega_rot_u(it,is) * xi(ix) &
-                      * e_deriv1_mat(ie,je)/sqrt(1.0*e_max)
+                      * e_deriv1_rot_mat(ie,je)/sqrt(1.0*e_max)
               endif
 
 
@@ -797,13 +806,13 @@ subroutine cgyro_init_collision
                          + z(is)/temp(is) * (jvec_v(2,ic_loc,iv) &
                          / (2.0*k_perp(ic)**2 * rho**2 / betae_unit & 
                          * dens_ele * temp_ele)) &
-                         * z(js)*dens(js) &
+                         * z(js)*dens(js)*dens_rot(it,js) &
                          * jvec_v(2,ic_loc,jv) * w_e(je) * w_xi(jx)  
                     amat(iv,jv) = amat(iv,jv) &
                          + z(is)/temp(is) * (jvec_v(2,ic_loc,iv) &
                          / (2.0*k_perp(ic)**2 * rho**2 / betae_unit & 
                          * dens_ele * temp_ele)) &
-                         * z(js)*dens(js) &
+                         * z(js)*dens(js)*dens_rot(it,js) &
                          * jvec_v(2,ic_loc,jv) * w_e(je) * w_xi(jx) 
                  endif
 
@@ -812,12 +821,12 @@ subroutine cgyro_init_collision
                     cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
                          - jvec_v(3,ic_loc,iv) &
                          * (-0.5*betae_unit)/(dens_ele*temp_ele) &
-                         * w_e(je)*w_xi(jx)*dens(js)*temp(js) &
+                         * w_e(je)*w_xi(jx)*dens(js)*dens_rot(it,js)*temp(js) &
                          * jvec_v(3,ic_loc,jv)/(temp(is)/z(is))/(temp(js)/z(js))
                     amat(iv,jv) = amat(iv,jv) &
                          - jvec_v(3,ic_loc,iv) &
                          * (-0.5*betae_unit)/(dens_ele*temp_ele) &
-                         * w_e(je)*w_xi(jx)*dens(js)*temp(js) &
+                         * w_e(je)*w_xi(jx)*dens(js)*dens_rot(it,js)*temp(js) &
                          * jvec_v(3,ic_loc,jv)/(temp(is)/z(is))/(temp(js)/z(js))
                  endif
 
@@ -838,12 +847,43 @@ subroutine cgyro_init_collision
      ! Lapack factorization and inverse of LHS
      call DGESV(nv,nv,cmat(:,:,ic_loc),size(cmat,1), &
           i_piv,amat,size(amat,1),info)
-     cmat(:,:,ic_loc) = amat(:,:)
+
+
+     ! result in amat, transfer to the right cmat matrix
+     if (collision_precision_mode /= 0) then
+        do jv=1,nv
+           cmat_stripes(:,jv,ic_loc) = 0.0
+           do iv=1,nv
+              dv = iv-jv
+              if (abs(dv) .GT. collision_full_stripes) then
+                 ! far from diagonal, keep low precision only
+                 cmat_fp32(iv,jv,ic_loc) = amat(iv,jv)
+              else
+                 ! close to the diagonal, keep full precision
+                 cmat_stripes(dv,jv,ic_loc) = amat(iv,jv)
+                 ! set main matrix to 0, for ease of compute later
+                 cmat_fp32(iv,jv,ic_loc) = 0.0
+              endif
+           enddo
+        enddo
+     else
+        ! keep all cmat in full precision
+        cmat(:,:,ic_loc) = amat(:,:)
+     endif
 
   enddo
-  !$acc enter data copyin(cmat) if (gpu_bigmem_flag == 1)
-
   deallocate(amat)
+
+  if (collision_precision_mode /= 0) then
+     ! cmat was a temp variable
+     deallocate(cmat)
+!$acc enter data copyin(cmat_stripes,cmat_fp32) if (gpu_bigmem_flag == 1)
+  else
+  !$acc enter data copyin(cmat) if (gpu_bigmem_flag == 1)
+  endif
+
   deallocate(i_piv)
+  deallocate(klor_fac)
+  deallocate(kdiff_fac)
 
 end subroutine cgyro_init_collision

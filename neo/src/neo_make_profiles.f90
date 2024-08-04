@@ -52,29 +52,23 @@ subroutine neo_make_profiles
      
      ir = 1
      
-     rmaj(ir)         = rmaj_in
-     q(ir)            = abs(q_in) * sign_q
-     rho(ir)          = abs(rho_in) * sign_bunit
-     shear(ir)        = shear_in      
-     shift(ir)        = shift_in
-     zmag(ir)         = zmag_in    
-     s_zmag(ir)       = s_zmag_in
-     kappa(ir)        = kappa_in     
-     s_kappa(ir)      = s_kappa_in   
-     delta(ir)        = delta_in    
-     s_delta(ir)      = s_delta_in
-     zeta(ir)         = zeta_in    
-     s_zeta(ir)       = s_zeta_in
-     shape_sin3(ir)   = shape_sin3_in
-     shape_s_sin3(ir) = shape_s_sin3_in
-     shape_cos0(ir)   = shape_cos0_in
-     shape_s_cos0(ir) = shape_s_cos0_in
-     shape_cos1(ir)   = shape_cos1_in
-     shape_s_cos1(ir) = shape_s_cos1_in
-     shape_cos2(ir)   = shape_cos2_in
-     shape_s_cos2(ir) = shape_s_cos2_in
-     shape_cos3(ir)   = shape_cos3_in
-     shape_s_cos3(ir) = shape_s_cos3_in
+     rmaj(ir)          = rmaj_in
+     q(ir)             = abs(q_in) * sign_q
+     rho(ir)           = abs(rho_in) * sign_bunit
+     shear(ir)         = shear_in      
+     shift(ir)         = shift_in
+     zmag(ir)          = zmag_in    
+     s_zmag(ir)        = s_zmag_in
+     kappa(ir)         = kappa_in     
+     s_kappa(ir)       = s_kappa_in   
+     delta(ir)         = delta_in    
+     s_delta(ir)       = s_delta_in
+     zeta(ir)          = zeta_in    
+     s_zeta(ir)        = s_zeta_in
+     shape_sin(:,ir)   = shape_sin_in(:)
+     shape_s_sin(:,ir) = shape_s_sin_in(:)
+     shape_cos(:,ir)   = shape_cos_in(:)
+     shape_s_cos(:,ir) = shape_s_cos_in(:)
      beta_star(ir) = beta_star_in
      
      ! general geometry -- accessible only from interface 
@@ -180,7 +174,7 @@ subroutine neo_make_profiles
      endif
 
      do ir=1,n_radial
-        call EXPRO_locsim_profiles(&
+        call expro_locsim_profiles(&
              geo_numeq_flag,&
              udsymmetry_flag,&
              quasineutral_flag,&
@@ -188,7 +182,9 @@ subroutine neo_make_profiles
              r(ir),&
              btccw_exp,&
              ipccw_exp,&
-             a_meters)
+             a_meters,&
+             path,&
+             NEO_COMM_WORLD)
 
         do is=1,n_species
            z(is)    = z_loc(is)
@@ -220,16 +216,28 @@ subroutine neo_make_profiles
         s_delta(ir) = s_delta_loc  
         zeta(ir)    = zeta_loc     
         s_zeta(ir)  = s_zeta_loc   
-        shape_sin3(ir)   = shape_sin3_loc
-        shape_s_sin3(ir) = shape_s_sin3_loc
-        shape_cos0(ir)   = shape_cos0_loc
-        shape_s_cos0(ir) = shape_s_cos0_loc
-        shape_cos1(ir)   = shape_cos1_loc
-        shape_s_cos1(ir) = shape_s_cos1_loc
-        shape_cos2(ir)   = shape_cos2_loc
-        shape_s_cos2(ir) = shape_s_cos2_loc
-        shape_cos3(ir)   = shape_cos3_loc
-        shape_s_cos3(ir) = shape_s_cos3_loc
+        shape_sin(3,ir)   = shape_sin3_loc
+        shape_s_sin(3,ir) = shape_s_sin3_loc
+        shape_sin(4,ir)   = shape_sin4_loc
+        shape_s_sin(4,ir) = shape_s_sin4_loc
+        shape_sin(5,ir)   = shape_sin5_loc
+        shape_s_sin(5,ir) = shape_s_sin5_loc
+        shape_sin(6,ir)   = shape_sin6_loc
+        shape_s_sin(6,ir) = shape_s_sin6_loc
+        shape_cos(0,ir)   = shape_cos0_loc
+        shape_s_cos(0,ir) = shape_s_cos0_loc
+        shape_cos(1,ir)   = shape_cos1_loc
+        shape_s_cos(1,ir) = shape_s_cos1_loc
+        shape_cos(2,ir)   = shape_cos2_loc
+        shape_s_cos(2,ir) = shape_s_cos2_loc
+        shape_cos(3,ir)   = shape_cos3_loc
+        shape_s_cos(3,ir) = shape_s_cos3_loc
+        shape_cos(4,ir)   = shape_cos4_loc
+        shape_s_cos(4,ir) = shape_s_cos4_loc
+        shape_cos(5,ir)   = shape_cos5_loc
+        shape_s_cos(5,ir) = shape_s_cos5_loc
+        shape_cos(6,ir)   = shape_cos6_loc
+        shape_s_cos(6,ir) = shape_s_cos6_loc
         b_unit(ir)  = b_unit_loc
 
         dens(1:n_species,ir)   = dens_loc(1:n_species)     

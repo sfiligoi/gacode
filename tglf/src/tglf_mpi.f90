@@ -3,12 +3,13 @@ program tglf
   use tglf_mpi
   use tglf_pkg
   use tglf_interface
+  use tglf_global
 
   implicit none
 
   integer :: i
   integer :: n
-  character (len=4) :: tag(5)=(/'ion1','ion2','ion3','ion4','ion5'/)
+  character (len=4) :: tag(6)=(/'ion1','ion2','ion3','ion4','ion5','ion6'/)
   real(8) :: prec
   integer :: ierr
 
@@ -23,9 +24,24 @@ program tglf
   call tglf_run_mpi()
 
   if (iProcTglf == iProc0Tglf) then
+    if(units_in.eq.'GENE')then
+       print 30,'GENE reference units used'
+       print 30,'Conversion to TGLF units:'
+       print 30,'Bunit/Bref = ',1.0/Bref_out
+       print 30,'Te/Tref = ',taus_in(1)
+       print 30,'mi/mref = ',mass_in(2)
+       print 30,'a/Lref = ',1.0
+       print 30,'cs/cref = ',SQRT(taus_in(1)/mass_in(2))
+       print 30,'rhos/rhoref = ',SQRT(mass_in(2)*taus_in(1))*Bref_out
+    endif
+    if(alpha_zf_in.lt.0.0)print 30,' kx_geo0_out = ',kx_geo0_out, &
+        ' SAT_geo0_out = ',SAT_geo0_out
+
 
 ! write interchange stability criteria with ELITE conventions
-  Print 30,'  D(R) = ',-interchange_DR,'  D(I) = ',0.25-interchange_DM
+      print 30,'  D(R) = ',-interchange_DR,'  D(I) = ',0.25-interchange_DM
+!  write species info
+      print 40,'  kinetic species = ',ns_in,'  non-kinetic species = ',nstotal_in - ns_in
 
      if (tglf_use_transport_model_in) then
 
@@ -67,47 +83,53 @@ program tglf
              tglf_elec_expwd_out,tglf_ion_expwd_out(1:n)
         close(1)
 
-! write ky spectrum to file out.tglf.ky_spectrum
-CALL write_tglf_ky_spectrum
+        open(unit=1,file='out.tglf.grid',status='replace')
+        write(1,'(i2)') tglf_ns_in,tglf_nxgrid_in
+        close(1)
 
-! write flux spectrum summed over nmodes to file out.tglf.sum_flux_spectrum
-! this can be compared directly with the flux spectrum from CGYRO
+      ! write ky spectrum to file out.tglf.ky_spectrum
+      CALL write_tglf_ky_spectrum
 
-CALL write_tglf_sum_flux_spectrum
+     ! write flux spectrum summed over nmodes to file out.tglf.sum_flux_spectrum
+     ! this can be compared directly with the flux spectrum from CGYRO
 
-! write density fluctuation amplitude spectrum to file out.tglf.density_spectrum
-CALL write_tglf_density_spectrum
+      CALL write_tglf_sum_flux_spectrum
 
-! write temperature fluctuation amplitude spectrum to file out.tglf.temperature_spectrum
-CALL write_tglf_temperature_spectrum
+     ! write density fluctuation amplitude spectrum to file out.tglf.density_spectrum
+      CALL write_tglf_density_spectrum
 
-! write intensity fluctuation amplitude spectrum per mode to file out.tglf.intensity_spectrum
-CALL write_tglf_intensity_spectrum
+     ! write temperature fluctuation amplitude spectrum to file out.tglf.temperature_spectrum
+      CALL write_tglf_temperature_spectrum
 
-! write field fluctuation amplitude per mode spectrum to file out.tglf.field_spectrum
-CALL write_tglf_field_spectrum
+      ! write intensity fluctuation amplitude spectrum per mode to file out.tglf.intensity_spectrum
+      CALL write_tglf_intensity_spectrum
 
-! write eigenvalue spectrum to file out.tglf.eigenvalue_spectrum
-CALL write_tglf_eigenvalue_spectrum
+      ! write field fluctuation amplitude per mode spectrum to file out.tglf.field_spectrum
+      CALL write_tglf_field_spectrum
 
-! write ne-te crossphase spectrum to file out.tglf.nete_crossphase_spectrum
-CALL write_tglf_nete_crossphase_spectrum
+      ! write eigenvalue spectrum to file out.tglf.eigenvalue_spectrum
+      CALL write_tglf_eigenvalue_spectrum
 
-! write ns-ts crossphase spectrum to file out.tglf.nsts_crossphase_spectrum
-CALL write_tglf_nsts_crossphase_spectrum
+      ! write ne-te crossphase spectrum to file out.tglf.nete_crossphase_spectrum
+      CALL write_tglf_nete_crossphase_spectrum
 
-! write QL flux (weight) spectrum per mode to file out.tglf.QL_weight_spectrum
-CALL write_tglf_QL_flux_spectrum
+      ! write ns-ts crossphase spectrum to file out.tglf.nsts_crossphase_spectrum
+      CALL write_tglf_nsts_crossphase_spectrum
 
-! write saturation geometry facotor spectrum per mode to file out.tglf.
-CALL write_tglf_sat_geo_spectrum
+      ! write QL flux (weight) spectrum per mode to file out.tglf.QL_weight_spectrum
+      CALL write_tglf_QL_flux_spectrum
 
-! write kx/ky-spectral shift spectrum to file out.tglf.spectral_shift
-CALL write_tglf_spectral_shift
+      ! write kx/ky-spectral shift spectrum to file out.tglf.spectral_shift
+      CALL write_tglf_spectral_shift_spectrum
 
-! write intensity fluctuation amplitude spectrum per mode to file out.tglf.scalar_saturation_parameters
-CALL write_tglf_scalar_saturation_parameters
+      ! write ave_p0 spectrum to file out.tglf.ave_p0_spectrum
+      CALL write_tglf_ave_p0_spectrum
 
+      ! write intensity fluctuation amplitude spectrum per mode to file out.tglf.scalar_saturation_parameters
+      CALL write_tglf_scalar_saturation_parameters
+
+      ! write Gaussian width spectrum to file out.tglf.width_spectrum
+      CALL write_tglf_width_spectrum
 
      else
 
@@ -120,11 +142,10 @@ CALL write_tglf_scalar_saturation_parameters
 
         prec = sum(abs(tglf_eigenvalue_out))
 
-     endif
+        ! write single ky-eigenmode wavefunction to file
+        CALL write_wavefunction_out('out.tglf.wavefunction')
 
-     open(unit=1,file='out.tglf.grid',status='replace')
-     write(1,'(i2)') tglf_ns_in,tglf_nxgrid_in
-     close(1)
+     endif
 
      open(unit=1,file=trim(tglf_path_in)//'out.tglf.prec')
      write(1,*) prec
@@ -135,6 +156,8 @@ CALL write_tglf_scalar_saturation_parameters
 10 format(a,10(1x,1pe11.4))
 20 format(t7,a,t19,a,t31,a,t43,a,t55,a)
 30 format(a,1pe11.4,a,1pe11.4)
+40 format(a,I10,a,I10)
 
+  call MPI_FINALIZE(ierr)
 
 end program tglf

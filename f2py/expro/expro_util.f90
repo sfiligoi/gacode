@@ -114,8 +114,20 @@ subroutine expro_compute_derived
   expro_shape_scos2(:) = expro_rmin(:)*temp(:)
   call bound_deriv(temp,expro_shape_cos3,expro_rmin,expro_n_exp)
   expro_shape_scos3(:) = expro_rmin(:)*temp(:)
+  call bound_deriv(temp,expro_shape_cos4,expro_rmin,expro_n_exp)
+  expro_shape_scos4(:) = expro_rmin(:)*temp(:)
+  call bound_deriv(temp,expro_shape_cos5,expro_rmin,expro_n_exp)
+  expro_shape_scos5(:) = expro_rmin(:)*temp(:)
+  call bound_deriv(temp,expro_shape_cos6,expro_rmin,expro_n_exp)
+  expro_shape_scos6(:) = expro_rmin(:)*temp(:)
   call bound_deriv(temp,expro_shape_sin3,expro_rmin,expro_n_exp)
   expro_shape_ssin3(:) = expro_rmin(:)*temp(:)
+  call bound_deriv(temp,expro_shape_sin4,expro_rmin,expro_n_exp)
+  expro_shape_ssin4(:) = expro_rmin(:)*temp(:)
+  call bound_deriv(temp,expro_shape_sin5,expro_rmin,expro_n_exp)
+  expro_shape_ssin5(:) = expro_rmin(:)*temp(:)
+  call bound_deriv(temp,expro_shape_sin6,expro_rmin,expro_n_exp)
+  expro_shape_ssin6(:) = expro_rmin(:)*temp(:)
 
   ! 1/L_ne = -dln(ne)/dr (1/m)
   call bound_deriv(expro_dlnnedr,-log(expro_ne),expro_rmin,expro_n_exp)
@@ -224,24 +236,35 @@ subroutine expro_compute_derived
      geo_shape_s_cos2_in = expro_shape_scos2(i)
      geo_shape_cos3_in   = expro_shape_cos3(i)
      geo_shape_s_cos3_in = expro_shape_scos3(i)
+     geo_shape_cos4_in   = expro_shape_cos4(i)
+     geo_shape_s_cos4_in = expro_shape_scos4(i)
+     geo_shape_cos5_in   = expro_shape_cos5(i)
+     geo_shape_s_cos5_in = expro_shape_scos5(i)
+     geo_shape_cos6_in   = expro_shape_cos6(i)
+     geo_shape_s_cos6_in = expro_shape_scos6(i)
      geo_shape_sin3_in   = expro_shape_sin3(i)
      geo_shape_s_sin3_in = expro_shape_ssin3(i)
+     geo_shape_sin4_in   = expro_shape_sin4(i)
+     geo_shape_s_sin4_in = expro_shape_ssin4(i)
+     geo_shape_sin5_in   = expro_shape_sin5(i)
+     geo_shape_s_sin5_in = expro_shape_ssin5(i)
+     geo_shape_sin6_in   = expro_shape_sin6(i)
+     geo_shape_s_sin6_in = expro_shape_ssin6(i)
      geo_beta_star_in = 0d0
      !
      theta(1) = 0d0
      if (expro_ctrl_numeq_flag == 0) then
-        ! Call geo with model shape
+        ! Call geo with extended harmonic shape
         geo_model_in = 0
-        call geo_interp(1,theta,.true.)
      else
-        ! Call geo with general (numerical) shape
+        ! Call geo with Fourier shape
         geo_model_in = 1
         geo_fourier_in(1:4,0:geo_nfourier_in) = expro_geo(:,:,i)/r_min
         geo_fourier_in(5:8,0:geo_nfourier_in) = expro_dgeo(:,:,i)
-        call geo_interp(1,theta,.true.)
-        if (minval(geov_jac_r) <= 0d0) then
-           print '(a,i3,a)','WARNING: (expro) Negative geo Jacobian for i =',i,' in input.gacode'
-        endif
+     endif
+     call geo_interp(1,theta,.true.)
+     if (minval(geov_jac_r) <= 0d0) then
+        print '(a,i3,a)','WARNING: (expro_util) Negative Jacobian for i =',i,' in input.gacode'
      endif
 
      ! V, dV/dr and S (note that S=dV/dr only in a circle)
@@ -264,8 +287,6 @@ subroutine expro_compute_derived
      expro_bt2(i) = geo_fluxsurfave_bt2*expro_bunit(i)**2
 
      expro_thetascale(i) = geo_thetascale
-
-     expro_fpol(i) = geo_f*expro_bunit(i)*r_min
   enddo
 
   !--------------------------------------------------------------
@@ -346,8 +367,11 @@ subroutine expro_compute_derived
   !--------------------------------------------------------------
   ! Transport particle, momentum and energy sources
   !
+  ! Ohmic electron power  
+  temp = expro_qohme
+  call volint(temp,expro_pow_e_ohmic,expro_n_exp)
   ! Total auxiliary electron power  
-  temp = expro_qohme+expro_qbeame+expro_qrfe+expro_qione
+  temp = expro_qbeame+expro_qrfe+expro_qione
   call volint(temp,expro_pow_e_aux,expro_n_exp)
   ! Total electron power 
   temp = temp-expro_qbrem-expro_qsync-expro_qline-expro_qei+expro_qfuse
@@ -372,7 +396,8 @@ subroutine expro_compute_derived
   call volint(expro_qline,expro_pow_e_line,expro_n_exp)
 
   ! Particle/momentum
-  call volint(expro_qpar,expro_flow_beam,expro_n_exp)
+  call volint(expro_qpar_beam,expro_flow_beam,expro_n_exp)
+  call volint(expro_qpar_wall,expro_flow_wall,expro_n_exp)
   call volint(expro_qmom,expro_flow_mom,expro_n_exp)
   !--------------------------------------------------------------
 
@@ -428,7 +453,7 @@ subroutine expro_compute_derived
   ! ne_ave = <ne> in 10^19/m^3
   p_ave = 0d0
   ! bt2_ave/bp2_ave = <B^2> in T^2 
-  bt2_ave = 0d0 ; bp2_ave = 0d0
+  bt2_ave = 0d0 ; bp2_ave = 0d0 ; ne_ave = 0d0
   do i=2,nx
      ne_ave  = ne_ave+(expro_rmin(i)-expro_rmin(i-1))*(expro_ne(i)+expro_ne(i-1))/2
      p_ave   = p_ave+(expro_vol(i)-expro_vol(i-1))*(expro_ptot(i)+expro_ptot(i-1))/2
@@ -448,10 +473,10 @@ subroutine expro_compute_derived
   expro_betan = 1/(1/expro_betap+1/expro_betat)*(r_min*expro_bcentr/ipma)
   ! Greenwald density (current [MA])
   expro_greenwald = ipma/(pi*r_min**2)
+  ! Transport power (MW)
+  expro_ptransp = expro_pow_e(nx)+expro_pow_i(nx)
 
-  if (expro_pow_e(nx) > 1e-6) then
-     ! Transport power (MW)
-     expro_ptransp = expro_pow_e(nx)+expro_pow_i(nx)
+  if (expro_ptransp > 1e-6) then
      ! tau = W[MJ]/P[MW]
      expro_tau = (1.5*p_ave*expro_vol(nx)*1d-6)/expro_ptransp
 
@@ -465,6 +490,46 @@ subroutine expro_compute_derived
           eps0**0.59             * &
           expro_kappa(nx)**0.78
   endif
+
+  ! Reset geo variables to standard values to prevent expro from leaving
+  ! geo in a "mysterious" state
+  
+  geo_rmin_in      = 1d0
+  geo_rmaj_in      = 0.5d0
+  geo_drmaj_in     = 3d0
+  geo_zmag_in      = 0d0
+  geo_dzmag_in     = 0d0
+  geo_q_in         = 2d0
+  geo_s_in         = 1d0
+  geo_kappa_in     = 1d0
+  geo_s_kappa_in   = 0d0
+  geo_delta_in     = 0d0
+  geo_s_delta_in   = 0d0
+  geo_zeta_in      = 0d0
+  geo_s_zeta_in    = 0d0
+  geo_shape_cos0_in   = 0d0
+  geo_shape_s_cos0_in = 0d0
+  geo_shape_cos1_in   = 0d0
+  geo_shape_s_cos1_in = 0d0
+  geo_shape_cos2_in   = 0d0
+  geo_shape_s_cos2_in = 0d0
+  geo_shape_cos3_in   = 0d0
+  geo_shape_s_cos3_in = 0d0
+  geo_shape_cos4_in   = 0d0
+  geo_shape_s_cos4_in = 0d0
+  geo_shape_cos5_in   = 0d0
+  geo_shape_s_cos5_in = 0d0
+  geo_shape_cos6_in   = 0d0
+  geo_shape_s_cos6_in = 0d0
+  geo_shape_sin3_in   = 0d0
+  geo_shape_s_sin3_in = 0d0
+  geo_shape_sin4_in   = 0d0
+  geo_shape_s_sin4_in = 0d0
+  geo_shape_sin5_in   = 0d0
+  geo_shape_s_sin5_in = 0d0
+  geo_shape_sin6_in   = 0d0
+  geo_shape_s_sin6_in = 0d0
+  geo_beta_star_in = 0d0
 
 end subroutine expro_compute_derived
 

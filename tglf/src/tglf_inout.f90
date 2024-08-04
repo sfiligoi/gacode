@@ -210,7 +210,7 @@ SUBROUTINE put_averages(tsp,asp,vpar,vexb,betae,xnue,zeff,debye)
   IMPLICIT NONE
   REAL,INTENT(IN) :: tsp(nsm),asp(nsm),vpar(nsm)
   REAL,INTENT(IN) :: vexb,betae,xnue,zeff,debye
-  INTEGER :: is
+  INTEGER :: is, count
 
   do is=1,nsm
     if(tglf_isnan(tsp(is)))call tglf_error(1,"input taus_in is NAN")
@@ -236,16 +236,28 @@ SUBROUTINE put_averages(tsp,asp,vpar,vexb,betae,xnue,zeff,debye)
     if(tglf_isnan(debye))call tglf_error(1,"input debye_in is NAN")
     if(tglf_isinf(debye))call tglf_error(1,"input debye_in is INF")
     if(debye.lt.0.0)call tglf_error(1,"input debye_in is < 0")
-
   !
   ! set flow control switch
   new_matrix = .TRUE.
   ! transfer values
+  count = 0
   do is=1,nsm
      taus_in(is) = tsp(is)
      as_in(is) = asp(is)
      vpar_in(is) = vpar(is)
+      if(as_in(is) .gt. 0.0) count = count +1
   enddo
+  nstotal_in = count
+  if(as_in(1) .le. 0.0 .or. as_in(2) .le. 0.0)then
+     write(*,*)"error: electron or ion density <= zero. Setting them both to 1.0"
+      as_in(1) = 1.0
+      as_in(2) = 1.0
+  endif
+  if(taus_in(1) .le. 0.0 .or. taus_in(2) .le. 0.0)then
+     write(*,*)"error: electron or ion temperature <= zero. Setting them both to 1.0"
+      taus_in(1) = 1.0
+      taus_in(2) = 1.0
+  endif
   vexb_in = vexb
   betae_in = betae
   xnue_in = xnue
@@ -257,14 +269,14 @@ END SUBROUTINE put_averages
 !-----------------------------------------------------------------
 !
 SUBROUTINE put_switches(iflux,use_bper,use_bpar,use_mhd_rule,use_bisection, &
-     use_inboard_detrapped,ibranch,nmodes,nb_max,nb_min,nxgrid,nkys)
+     use_inboard_detrapped,ibranch,nmodes,nb_max,nb_min,nxgrid,nkys,use_ave_ion_grid)
   !
   USE tglf_global
   USE tglf_dimensions
   !
   IMPLICIT NONE
   LOGICAL :: iflux,use_bper,use_bpar,use_mhd_rule,use_bisection
-  LOGICAL :: use_inboard_detrapped
+  LOGICAL :: use_inboard_detrapped, use_ave_ion_grid
   INTEGER :: ibranch,nmodes,nb_max,nb_min
   INTEGER :: nxgrid,nkys
   !
@@ -302,25 +314,27 @@ SUBROUTINE put_switches(iflux,use_bper,use_bpar,use_mhd_rule,use_bisection, &
   nxgrid_in = nxgrid
   nky_in = nkys
   use_inboard_detrapped_in = use_inboard_detrapped
+  use_ave_ion_grid_in = use_ave_ion_grid
   !
 END SUBROUTINE put_switches
 !
 !-----------------------------------------------------------------
 !
-SUBROUTINE put_rare_switches(rtheta_trap,rpark,rghat,rgchat,rwd_zero,   &
-     rLinsker,rgradB,rfilter,rdamp_psi,rdamp_sig)
+SUBROUTINE put_rare_switches(rtheta_trap,rwdia_trap,rpark,rghat,rgchat, &
+     rwd_zero,rLinsker,rgradB,rfilter,rdamp_psi,rdamp_sig)
   !
   USE tglf_global
   USE tglf_dimensions
   !
   IMPLICIT NONE
-  REAL,INTENT(IN) :: rtheta_trap,rpark,rghat,rgchat,rwd_zero
+  REAL,INTENT(IN) :: rtheta_trap,rwdia_trap,rpark,rghat,rgchat,rwd_zero
   REAL,INTENT(IN) :: rLinsker,rgradB,rfilter
   REAL,INTENT(IN) :: rdamp_psi,rdamp_sig
   !
   ! transfer values
   !
   theta_trapped_in = rtheta_trap
+  wdia_trapped_in = rwdia_trap
   park_in = rpark
   ghat_in = rghat
   gchat_in = rgchat
@@ -336,7 +350,7 @@ END SUBROUTINE put_rare_switches
 !-----------------------------------------------------------------
 !
 SUBROUTINE put_model_parameters(adi_elec,alpha_e,alpha_p,alpha_mach,  &
-     alpha_quench,alpha_zf,xnu_fac,debye_fac,etg_fac, &
+     alpha_quench,alpha_zf,xnu_fac,debye_fac,etg_fac,rlnp_cut,        &
      sat_rule,kygrid_model,xnu_model,vpar_model,vpar_shear_model)
   !
   USE tglf_global
@@ -346,14 +360,14 @@ SUBROUTINE put_model_parameters(adi_elec,alpha_e,alpha_p,alpha_mach,  &
   INTEGER :: sat_rule,xnu_model,kygrid_model
   INTEGER :: vpar_model,vpar_shear_model
   REAL,INTENT(IN) :: alpha_e,alpha_p,alpha_mach,alpha_zf
-  REAL,INTENT(IN) :: alpha_quench,xnu_fac,debye_fac,etg_fac
+  REAL,INTENT(IN) :: alpha_quench,xnu_fac,debye_fac,etg_fac,rlnp_cut
   !
   ! check for changes and update flow controls
   !
   if(adi_elec .NEQV. adiabatic_elec_in)new_matrix = .TRUE.
   if(kygrid_model.lt.0.or.kygrid_model.gt.5)kygrid_model = kygrid_model_in
   if(xnu_model.lt.0.or.xnu_model.gt.3)xnu_model = xnu_model_in
-  if(sat_rule.lt.0.or.sat_rule.gt.1)sat_rule=sat_rule_in
+  if(sat_rule.lt.0.or.sat_rule.gt.2)sat_rule=sat_rule_in
   !if(vpar_model.lt.-1.or.vpar_model.gt.1)vpar_model=vpar_model_in
   if(vpar_shear_model.lt.0.or.vpar_shear_model.gt.1)vpar_shear_model=vpar_shear_model_in
   !
@@ -368,6 +382,7 @@ SUBROUTINE put_model_parameters(adi_elec,alpha_e,alpha_p,alpha_mach,  &
   xnu_factor_in = xnu_fac
   debye_factor_in = debye_fac
   etg_factor_in = etg_fac
+  rlnp_cutoff_in = rlnp_cut
   sat_rule_in = sat_rule
   xnu_model_in = xnu_model
   kygrid_model_in = kygrid_model
@@ -1579,6 +1594,7 @@ SUBROUTINE write_tglf_input
   write(11,*)"      zeff_tg= ",zeff_in
   write(11,*)"      xnue_tg= ",xnue_in
   write(11,*)"      theta_trapped_tg= ",theta_trapped_in
+  write(11,*)"      wdia_trapped_tg = ",wdia_trapped_in
   write(11,*)"      Linsker_factor_tg= ",Linsker_factor_in
   write(11,*)"      gradB_factor_tg= ", gradB_factor_in
   write(11,*)"      wd_zero_tg= ",wd_zero_in
@@ -1588,10 +1604,6 @@ SUBROUTINE write_tglf_input
   write(11,*)"      alpha_mach_tg= ",alpha_mach_in
   write(11,*)"      alpha_n_tg= ",alpha_n_in
   write(11,*)"      alpha_t_tg= ",alpha_t_in
-  write(11,*)"      alpha_kx_e_tg= ",alpha_kx_e_in
-  write(11,*)"      alpha_kx_p_tg= ", alpha_kx_p_in
-  write(11,*)"      alpha_kx_n_tg= ",alpha_kx_n_in
-  write(11,*)"      alpha_kx_t_tg= ", alpha_kx_t_in
   write(11,*)"      alpha_quench_tg= ",alpha_quench_in
   write(11,*)"      xnu_factor_tg= ",xnu_factor_in
   write(11,*)"      debye_factor_tg= ",debye_factor_in
@@ -1736,15 +1748,15 @@ SUBROUTINE write_tglf_sum_flux_spectrum
            ky1=ky_in
            if(i.eq.1)then
               dky1=ky1
-           else
+           elseif(kygrid_model_in.ne.0)then
               dky = LOG(ky1/ky0)/(ky1-ky0)
               dky1 = ky1*(1.0 - ky0*dky)
               dky0 = ky0*(ky1*dky - 1.0)
            endif
            ! normalize the ky integral to make it independent of the 
            ! choice of temperature and mass scales 
-           dky0 = dky0*SQRT(taus_in(1)*mass_in(2))
-           dky1 = dky1*SQRT(taus_in(1)*mass_in(2))
+!           dky0 = dky0*SQRT(taus_in(1)*mass_in(2))
+!           dky1 = dky1*SQRT(taus_in(1)*mass_in(2))
            !
            ! compute the fluxes in the same way as tglf_TM.f90 
            !
@@ -1779,7 +1791,7 @@ SUBROUTINE write_tglf_sum_flux_spectrum
   enddo  ! is 
   !
   CLOSE(33)
-  !    
+  !
 END SUBROUTINE write_tglf_sum_flux_spectrum
 !-----------------------------------------------------------------
 
@@ -1876,7 +1888,7 @@ SUBROUTINE write_tglf_intensity_spectrum
   !
   OPEN(unit=33,file=fluxfile,status='replace')
 !
-  write(33,*)"gyro-bohm normalized intensity fluctuation amplitude spectra per mode"
+  write(33,*)"gyro-bohm normalized fluctuation intensity spectra per mode"
   write(33,*)"density,temperature,parallel velocity,parallel energy"
   write(33,*)"index limits: ns,nky,nmodes"
   write(33,*)ns,nky,nmodes_in
@@ -1970,7 +1982,8 @@ SUBROUTINE write_tglf_eigenvalue_spectrum
   write(33,*)"gyro-bohm normalized eigenvalue spectra"
   write(33,*)"(gamma(n),freq(n),n=1,nmodes_in)"
   do i=1,nky
-    write(33,*)(eigenvalue_spectrum_out(1,i,n),eigenvalue_spectrum_out(2,i,n),n=1,nmodes_in)
+    write(33,*)(eigenvalue_spectrum_out(1,i,n), &
+              eigenvalue_spectrum_out(2,i,n),n=1,nmodes_in)
   enddo
 !
   CLOSE(33)
@@ -2048,67 +2061,53 @@ END SUBROUTINE write_tglf_nsts_crossphase_spectrum
 ! 
   IMPLICIT NONE
   CHARACTER(33) :: fluxfile="out.tglf.QL_flux_spectrum"
-  INTEGER :: i,j,k,is
+  INTEGER :: i,j,k,is,m,jflds
   REAL,PARAMETER :: small=1.0E-10
   !
   if(new_start)then
      write(*,*)"error: tglf_TM must be called before write_tglf_QL_weight_spectrum"
      write(*,*)"       NN doesn't compute spectra -> if needed set tglf_nn_max_error_in=-1"
   endif
+  jflds=1
+  if(use_bper_in)jflds = jflds+1
+  if(use_bpar_in)jflds = jflds+1
   !
   OPEN(unit=33,file=fluxfile,status='replace')
 !
   write(33,*)"QL weights per mode:"
-  write(33,*)"type: 1=particle,2=energy,3=toroidal stress,4=parallel stress,5=exchange"
-  write(33,*)"index limits: nky,nmodes,ns,field,type"
-  write(33,*)nky,nmodes_in,ns,3,5
+!  write(33,*)"type: 1=particle,2=energy,3=toroidal stress,4=parallel stress,5=exchange"
+  write(33,*)"QL_flux_spectrum_out(type,nspecies,field,ky,mode)"
+  write(33,*)"index limits: type,ns,field,nky,nmodes"
+  write(33,*)5,ns,jflds,nky,nmodes_in
 !
-      do j=1,nky
-         do i=1,nmodes_in
-            do is=1,ns
-               do k=1,3
-                  write(33,*)QL_flux_spectrum_out(1,is,k,j,i)
-                  write(33,*)QL_flux_spectrum_out(2,is,k,j,i)
-                  write(33,*)QL_flux_spectrum_out(3,is,k,j,i)
-                  write(33,*)QL_flux_spectrum_out(4,is,k,j,i)
-                  write(33,*)QL_flux_spectrum_out(5,is,k,j,i)
-              enddo
-           enddo
-        enddo
-      enddo
+!      do j=1,nky
+!         do i=1,nmodes_in
+!            do is=1,ns
+!             do k=1,3
+!                  write(33,*)QL_flux_spectrum_out(1,is,k,j,i)
+!                  write(33,*)QL_flux_spectrum_out(2,is,k,j,i)
+!                  write(33,*)QL_flux_spectrum_out(3,is,k,j,i)
+!                  write(33,*)QL_flux_spectrum_out(4,is,k,j,i)
+!                  write(33,*)QL_flux_spectrum_out(5,is,k,j,i)
+!              enddo
+!           enddo
+!        enddo
+!      enddo
+do is=ns0,ns
+    do j=1,jflds
+       write(33,*)"species = ",is,"field =",j
+       do m=1,nmodes_in
+         write(33,*)"mode = ",m
+         do i=1,nky
+           write(33,*)(QL_flux_spectrum_out(k,is,j,i,m),k=1,5)
+         enddo  ! i
+      enddo ! m
+    enddo  ! j
+ enddo  ! is
+
   CLOSE(33)
 !
  END SUBROUTINE write_tglf_QL_flux_spectrum
-!-----------------------------------------------------------------
-!
- SUBROUTINE write_tglf_sat_geo_spectrum
-!
-  USE tglf_dimensions
-  USE tglf_global
-  USE tglf_species
-  USE tglf_kyspectrum
-!
-  IMPLICIT NONE
-  CHARACTER(33) :: fluxfile="out.tglf.sat_geo_spectrum"
-  INTEGER :: i,j
-  !
-  if(new_start)then
-     write(*,*)"error: tglf_TM must be called before write_tglf_sat_geo_spectrum"
-     write(*,*)"       NN doesn't compute spectra -> if needed set tglf_nn_max_error_in=-1"
-  endif
-  !
-  OPEN(unit=33,file=fluxfile,status='replace')
-!
-  write(33,*)"saturation model geometry factor 1/(<phi|(B/(B_unit grad_r))**2\phi>/<phi|phi>) per mode:"
-  write(33,*)"index limits: nky,nmodes"
-  write(33,*)nky,nmodes_in
-!
-  do i=1,nky
-    write(33,*)(sat_geo_spectrum_out(i,j),j=1,nmodes_in)
-  enddo
-  CLOSE(33)
-!
- END SUBROUTINE write_tglf_sat_geo_spectrum
 !-----------------------------------------------------------------
 !
  SUBROUTINE write_tglf_ky_spectrum
@@ -2140,7 +2139,7 @@ END SUBROUTINE write_tglf_nsts_crossphase_spectrum
  END SUBROUTINE write_tglf_ky_spectrum
 !-----------------------------------------------------------------
 !
- SUBROUTINE write_tglf_spectral_shift
+ SUBROUTINE write_tglf_spectral_shift_spectrum
 !
   USE tglf_dimensions
   USE tglf_global
@@ -2148,7 +2147,7 @@ END SUBROUTINE write_tglf_nsts_crossphase_spectrum
   USE tglf_kyspectrum
 !
   IMPLICIT NONE
-  CHARACTER(33) :: fluxfile="out.tglf.spectral_shift"
+  CHARACTER(33) :: fluxfile="out.tglf.spectral_shift_spectrum"
   INTEGER :: i
   !
   if(new_start)then
@@ -2169,7 +2168,69 @@ END SUBROUTINE write_tglf_nsts_crossphase_spectrum
   enddo
   CLOSE(33)
 !
- END SUBROUTINE write_tglf_spectral_shift
+ END SUBROUTINE write_tglf_spectral_shift_spectrum
+!
+!______________________________________________________________
+!
+SUBROUTINE write_tglf_ave_p0_spectrum
+!
+  USE tglf_dimensions
+  USE tglf_global
+  USE tglf_species
+  USE tglf_kyspectrum
+!
+  IMPLICIT NONE
+  CHARACTER(33) :: fluxfile="out.tglf.ave_p0_spectrum"
+  INTEGER :: i
+!
+  if(new_start)then
+     write(*,*)"error: tglf_TM must be called before write_tglf_ave_p0_spectrum"
+     write(*,*)"       NN doesn't compute spectra -> if needed set tglf_nn_max_error_in=-1"
+  endif
+!
+  OPEN(unit=33,file=fluxfile,status='replace')
+!
+  write(33,*)"ave_p0 is used for normalization of SAT0"
+  write(33,*)"index limits: nky"
+  write(33,*)nky
+!
+  do i=1,nky
+    write(33,*)ave_p0_spectrum_out(i)
+  enddo
+  CLOSE(33)
+!
+ END SUBROUTINE write_tglf_ave_p0_spectrum
+!
+!______________________________________________________________
+!
+ SUBROUTINE write_tglf_width_spectrum
+!
+  USE tglf_dimensions
+  USE tglf_global
+  USE tglf_species
+  USE tglf_kyspectrum
+!
+  IMPLICIT NONE
+  CHARACTER(33) :: fluxfile="out.tglf.width_spectrum"
+  INTEGER :: i
+  !
+  if(new_start)then
+     write(*,*)"error: tglf_TM must be called before write_tglf_width_spectrum"
+     write(*,*)"       NN doesn't compute spectra -> if needed set tglf_nn_max_error_in=-1"
+  endif
+  !
+  OPEN(unit=33,file=fluxfile,status='replace')
+!
+  write(33,*)"width of the Gaussian envelope for the Hermite basis functions"
+  write(33,*)"index limits: nky"
+  write(33,*)nky
+!
+  do i=1,nky
+    write(33,*)width_out(i)
+  enddo
+  CLOSE(33)
+!
+ END SUBROUTINE write_tglf_width_spectrum
 !-----------------------------------------------------------------
 !
  SUBROUTINE write_tglf_scalar_saturation_parameters
@@ -2189,13 +2250,27 @@ END SUBROUTINE write_tglf_nsts_crossphase_spectrum
   !
   OPEN(unit=33,file=fluxfile,status='replace')
 !
-  write(33,*)"kx spectral shift model is used when ALPHA_QUENCH=0 and ALPHA_E=1.0"
-  write(33,*)"note: This file has all of the scalar staturation parameters used for different SAT_RULE UNITS and ALPHA_ZF settings"
-  write(33,*)"SAT_RULE, UNITS, ALPHA_ZF"
-  write(33,*)sat_rule_in, units_in, alpha_zf_in
-!
-  write(33,*)"ave_p0_out, B_unit, R_unit, q_unit, SAT_geo0_out, kx_geo0_out"
-  write(33,*) ave_p0_out, B_unit, R_unit, q_unit, SAT_geo0_out, kx_geo0_out
+  write(33,*)"!This file has all of the scalar staturation parameters used for different SAT_RULE options"
+  write(33,*)"SAT_RULE = ", sat_rule_in
+  write(33,*)"UNITS = ", units_in
+  write(33,*)"XNU_MODEL = ",xnu_model_in
+  write(33,*)"!   SAT0 model "
+  write(33,*)"ETG_FACTOR = ",etg_factor_in
+  write(33,*)"B_unit = ",B_unit
+  write(33,*)"R_unit = ",R_unit
+  write(33,*)"q_unit = ",q_unit
+  write(33,*)"!   SAT1 & SAT2 models "
+  write(33,*)"ALPHA_ZF = ",alpha_zf_in
+  write(33,*)"SAT_geo0_out = ",SAT_geo0_out
+  write(33,*)"SAT_geo1_out = ",SAT_geo1_out
+  write(33,*)"SAT_geo2_out = ",SAT_geo2_out
+  write(33,*)"Bt0_out = ",Bt0_out
+  write(33,*)"B_geo0_out = ",B_geo0_out
+  write(33,*)"grad_r0_out = ",grad_r0_out
+  write(33,*)"rho_ion = ",rho_ion
+  write(33,*)"rho_e = ",rho_e
+  write(33,*)"kymax_out = ",kymax_out
+  write(33,*)"vzf_out = ",vzf_out
 !
   CLOSE(33)
 !

@@ -28,10 +28,10 @@ subroutine tgyro_write_data(i_print)
   character(len=6) :: ntag,ttag
   character(len=50) :: date_str,time_str
   logical :: converged
-  real :: res_norm(p_max)
-  
+  real, dimension(:,:), allocatable :: dum2d
+
   ! Renormalize residuals so the error estimates are comparable
-  
+
   select case (loc_residual_method) 
 
   case (2)
@@ -47,7 +47,7 @@ subroutine tgyro_write_data(i_print)
   end select
 
   ! Convergence status
-  converged = sum(res_norm)/size(res_norm) < tgyro_residual_tol
+  converged = (sum(res_norm)/size(res_norm) < tgyro_residual_tol)
 
   !====================================================
   ! input.gacode
@@ -55,7 +55,7 @@ subroutine tgyro_write_data(i_print)
 
   if (tgyro_write_profiles_flag /= 0 .and. i_print > 0) then 
 
-     call expro_read('input.gacode')
+     call expro_read('input.gacode',MPI_COMM_WORLD)
 
      call tgyro_profile_reintegrate
 
@@ -66,16 +66,70 @@ subroutine tgyro_write_data(i_print)
      expro_ptot = ptot_exp
      expro_ne   = exp_ne*1e-13
      expro_te   = exp_te*1e-3
-    
+
      expro_ni(1:loc_n_ion,:) = exp_ni(1:loc_n_ion,:)*1e-13
      expro_ti(1:loc_n_ion,:) = exp_ti(1:loc_n_ion,:)*1e-3
      expro_w0   = exp_w0
      expro_ptot = ptot_exp ! already in Pa
      do i_exp=1,expro_n_exp
         expro_z_eff(i_exp) = sum(exp_ni(1:loc_n_ion,i_exp)*zi_vec(1:loc_n_ion)**2)/&
-             sum(exp_ni(1:loc_n_ion,i_exp)*zi_vec(1:loc_n_ion))
+             exp_ne(i_exp)
      enddo
-  
+
+     ! Alpha power density
+     call rad_alpha(exp_ne,&
+          exp_ni(1:loc_n_ion,:),& ! 1/cm^3
+          exp_te,               & ! eV
+          exp_ti(1:loc_n_ion,:),& ! eV
+          expro_qei,&             ! dummy arg
+          expro_qfusi,&           ! used (out) erg/cm^3/s
+          expro_qfuse,&           ! used (out) erg/cm^3/s
+          expro_qbrem,&           ! dummy arg
+          expro_qsync,&           ! dummy arg
+          expro_n_exp,&
+          loc_n_ion)
+
+     allocate(dum2d(loc_n_ion,expro_n_exp))
+
+     ! Collisional exchange power density
+     call collision_rates(&
+          exp_ne,&       ! 1/cm^3
+          exp_ni,&       ! 1/cm^3
+          exp_te,&       ! eV
+          exp_ti,&       ! eV
+          dum2d,&        ! dummy arg (nui)
+          expro_qsync,&  ! dummy arg (nue)
+          exp_nu_exch, & ! 1/s  
+          expro_n_exp,&
+          loc_n_ion)
+
+     deallocate(dum2d)
+
+     expro_qei = 1.5*exp_nu_exch(:)*exp_ne(:)*k*(exp_te(:)-exp_ti(1,:))
+
+     ! Synchrotron radiation
+     call rad_sync(aspect_rat,r_min,1e4*expro_bt0,exp_ne,exp_te,expro_qsync,expro_n_exp)
+
+     ! Bremsstrahlung and line radiation (Post 1977) 
+     call rad_ion_adas(&
+          exp_te,&                ! eV
+          exp_ne,&                ! 1/cm^3
+          exp_ni(1:loc_n_ion,:),& ! 1/cm^3   
+          zi_vec(1:loc_n_ion),&
+          ion_name,&
+          expro_qbrem,&
+          expro_qline,&
+          loc_n_ion,&
+          expro_n_exp)
+
+     ! Convert erg/cm^3/s -> W/cm^3 = MW/m^3
+     expro_qbrem = expro_qbrem*1e-7
+     expro_qsync = expro_qsync*1e-7
+     expro_qline = expro_qline*1e-7
+     expro_qfuse = expro_qfuse*1e-7
+     expro_qfusi = expro_qfusi*1e-7
+     expro_qei   = expro_qei*1e-7
+
      if (i_proc_global == 0) then
 
         call date_and_time(DATE=date_str,TIME=time_str)
@@ -255,16 +309,17 @@ subroutine tgyro_write_data(i_print)
 
      open(unit=1,file='out.tgyro.power_e',status='old',position='append')
 
-     write(1,20) 'r/a','p_e_fus','p_e_aux','p_brem','p_sync','p_line','p_exch[-]','p_expwd[-]','p_e_tot'
-     write(1,20) '','(MW)','(MW)','(MW)','(MW)','(MW)','(MW)','(MW)','(MW)'
+     write(1,20) 'r/a','p_e_fus','p_e_ohm','p_e_aux','p_brem','p_sync','p_line','p_exch[-]','p_expwd[-]','p_e_tot'
+     write(1,20) '','(MW)','(MW)','(MW)','(MW)','(MW)','(MW)','(MW)','(MW)','(MW)'
      do i=1,n_r
         write(1,10) &
              r(i)/r_min,&
              +p_e_fus(i)*1e-7*1e-6,&
              +p_e_aux_in(i)*1e-7*1e-6,&
+             +p_e_ohmic_in(i)*1e-7*1e-6,&
              -p_brem(i)*1e-7*1e-6,&
              -p_sync(i)*1e-7*1e-6,&
-             -p_line_in(i)*1e-7*1e-6, &
+             -p_line(i)*1e-7*1e-6, &
              -p_exch(i)*1e-7*1e-6,&
              -p_expwd(i)*1e-7*1e-6,&
              +p_e(i)*1e-7*1e-6

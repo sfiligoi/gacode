@@ -19,6 +19,7 @@
       ALLOCATE(zs(ns))
       ALLOCATE(mass(ns))
       ALLOCATE(vs(ns))
+      ALLOCATE(fts(ns))
       ALLOCATE(rlts(ns))
       ALLOCATE(rlns(ns))
       ALLOCATE(vpar_shear_s(ns))
@@ -266,7 +267,6 @@
       ALLOCATE(ave_gradBgu33(ns,nbasis,nbasis))
 !  ave_theta
       ALLOCATE(ave_kx(nbasis,nbasis))
-      ALLOCATE(ave_sat_geo_inv(nbasis,nbasis))
       ALLOCATE(ave_c_tor_par(nbasis,nbasis))
       ALLOCATE(ave_c_tor_per(nbasis,nbasis))
       ALLOCATE(ave_c_par_par(nbasis,nbasis))

@@ -1,0 +1,47 @@
+#-----------------
+#
+#  NEURON
+#
+# -----------------
+
+# FIXED Hardware parameters 
+
+IDENTITY="KISTI NEURON"
+
+CORES_PER_NODE=32
+NUMAS_PER_NODE=1
+
+# Compilers
+
+FC = mpif90 -module ${GACODE_ROOT}/modules -Mpreprocess -DUSE_INLINE
+# -I/apps/compiler/pgi/linux86-64/19.1/cudampi/10.0/openmpi/2.3/applib2/
+F77 = ${FC} 
+
+# Compiler options / flags
+
+FACC = -acc -Minfo=accel -Mcuda=cuda10.0 -ta=nvidia:cc70 -Mcudalib=cufft 
+FOMP = -mp -Mstack_arrays
+FMATH = -r8
+FOPT = -fast
+FDEBUG = -g -Kieee -Ktrap=fp,divz -Mbounds -Mchkptr -Mchstk -traceback -Minform=inform
+
+# System math libraries
+
+LIBDIR = /apps/compiler/pgi/linux86-64-llvm/19.1/applib1
+LMATH = -L${LIBDIR} -llapack -lblas
+
+# NetCDF
+
+NETCDF = -L${LIBDIR}/netcdf/4.6.1/lib -lnetcdff -lnetcdf
+NETCDF_INC = ${LIBDIR}/netcdf/4.6.1/include
+
+# Archive
+
+ARCH = ar cr
+
+
+
+
+
+
+

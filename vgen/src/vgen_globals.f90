@@ -23,20 +23,26 @@ module vgen_globals
   real, parameter :: temp_norm_fac   = 1602.2
   real, parameter :: charge_norm_fac = 1.6022
   
-  real :: dens_norm, temp_norm, mass_norm, vth_norm, jbs_norm
+  real :: dens_norm, temp_norm, mass_norm, vth_norm, jbs_norm, e_norm
 
   real, dimension(:), allocatable :: vtor_measured
 
   character(len=8) :: fmt='(I2.2)' 
   character(len=2), dimension(100) :: tag
 
-    real, dimension(:), allocatable :: pflux_sum
+  real, dimension(:), allocatable :: pflux_sum
+  
   real, dimension(:), allocatable :: jbs_neo
-  real, dimension(:), allocatable :: jbs_sauter
   real, dimension(:), allocatable :: jsigma_neo
-  real, dimension(:), allocatable :: jsigma_sauter
   real, dimension(:), allocatable :: jtor_neo
+  
+  real, dimension(:), allocatable :: jbs_sauter
+  real, dimension(:), allocatable :: jsigma_sauter
   real, dimension(:), allocatable :: jtor_sauter
+  
+  real, dimension(:), allocatable :: jbs_sauter_mod
+  real, dimension(:), allocatable :: jsigma_sauter_mod
+  real, dimension(:), allocatable :: jtor_sauter_mod
   
   integer :: n_ions
 

@@ -35,8 +35,8 @@ LMATH = -L${GSL_LIB} -mkl=sequential
 #NETCDF = -K${NETCDF_LIB} -l${NETCDF_LIB}netcdf -lnetcdff
 #NETCDF  = ${NETCDFF_LIB}/libnetcdff.a ${NETCDF_LIB}/libnetcdf.a -L{HDF5_LIB} -lhdf5_hl -lhdf5 -lcurl
 #NETCDF not tested since not needed for [c]gyro
-NETCDF  = -L${NETCDF_LIB} -lnetcdf
-NETCDF_INC = ${NETCDF_INCLUDE}
+NETCDF  = -L${NETCDF_LIB} -lnetcdf -L${NETCDFF_LIB} -lnetcdff
+NETCDF_INC = ${NETCDFF_INCLUDE}
 
 GATOFLAGS = -r8 -i8
 

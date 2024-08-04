@@ -24,6 +24,8 @@ subroutine tgyro_iteration_parallel
   allocate(f_vec_vec(p_max,n_worker))
   allocate(g_vec_vec(p_max,n_worker))
 
+  quasifix = 0
+  
   do i_tran_loop=1,tgyro_relax_iterations
 
      i_tran = i_tran+1

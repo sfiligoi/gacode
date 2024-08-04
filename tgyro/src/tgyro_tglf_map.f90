@@ -1,3 +1,4 @@
+
 !------------------------------------------------------------
 ! tgyro_tglf_map.f90
 !
@@ -53,9 +54,9 @@ subroutine tgyro_tglf_map
   ! Charges: e,i,z
   tglf_zs_in(1) = -1.0
   !
-  ! Mass ratios: me/mi(1),mi(1)/mi(1),m(2)/mi(1), ... 
-  !              [assume mi(1) is normalizing mass]
-  tglf_mass_in(1) = (me*loc_me_multiplier)/mi(1)
+  ! Mass ratios: me/md,m(1)/md,m(2)/md, ... 
+  !              [assume md is normalizing mass]
+  tglf_mass_in(1) = (me*loc_me_multiplier)/md
   !
   ! Density ratios: ne/ne,ni(1)/ne,ni(2)/ne, ...
   tglf_as_in(1) = 1.0
@@ -74,18 +75,18 @@ subroutine tgyro_tglf_map
      if (calc_flag(i_ion) == 0) cycle
      i0 = i0+1 
      tglf_zs_in(i0)   = zi_vec(i_ion)
-     tglf_mass_in(i0) = mi(i_ion)/mi(1)
+     tglf_mass_in(i0) = mi(i_ion)/md
      tglf_as_in(i0)   = ni(i_ion,i_r)/ne(i_r) 
      tglf_rlns_in(i0) = r_min*dlnnidr(i_ion,i_r)
      tglf_rlts_in(i0) = r_min*dlntidr(i_ion,i_r)
      tglf_taus_in(i0) = ti(i_ion,i_r)/te(i_r)
   enddo
-  
+
   ! Setting density gradient artificially to zero to compute D and v
   if (tgyro_zero_dens_grad_flag /= 0) then
      tglf_rlns_in(tgyro_zero_dens_grad_flag) = 0
   endif
-  
+
   !----------------------------------------------------------------
   !   debye length/rhos   te in ev, rho_s in cm ne in 10^13/cm^3
   tglf_debye_in = 7.43e2*sqrt(te(i_r)/(ne(i_r)))/abs(rho_s(i_r))
@@ -110,38 +111,23 @@ subroutine tgyro_tglf_map
   tglf_b_model_sa_in  = 0
   tglf_ft_model_sa_in = 1
 
-  if (loc_num_equil_flag == 1) then
+  ! Model (Miller) shape
+  tglf_geometry_flag_in = 1 
 
-     ! Numerical (Fourier) shape
-     tglf_geometry_flag_in = 2
-
-     tglf_q_fourier_in       = q_abs
-     tglf_q_prime_fourier_in = q_prime
-     tglf_p_prime_fourier_in = p_prime
-     tglf_nfourier_in        = n_fourier_geo
-     tglf_fourier_in(:,0:n_fourier_geo) = a_fourier_geo(:,0:n_fourier_geo,i_r)
-
-  else
-
-     ! Model (Miller) shape
-     tglf_geometry_flag_in = 1 
-
-     tglf_rmin_loc_in    = r(i_r)/r_min
-     tglf_rmaj_loc_in    = r_maj(i_r)/r_min
-     tglf_zmaj_loc_in    = zmag(i_r)/r_min
-     tglf_drmajdx_loc_in = shift(i_r)
-     tglf_dzmajdx_loc_in = dzmag(i_r)
-     tglf_kappa_loc_in   = kappa(i_r)
-     tglf_s_kappa_loc_in = s_kappa(i_r)
-     tglf_delta_loc_in   = delta(i_r)
-     tglf_s_delta_loc_in = s_delta(i_r)
-     tglf_zeta_loc_in    = zeta(i_r)
-     tglf_s_zeta_loc_in  = s_zeta(i_r)
-     tglf_q_loc_in       = q_abs
-     tglf_q_prime_loc_in = q_prime
-     tglf_p_prime_loc_in = p_prime
-
-  endif
+  tglf_rmin_loc_in    = r(i_r)/r_min
+  tglf_rmaj_loc_in    = r_maj(i_r)/r_min
+  tglf_zmaj_loc_in    = zmag(i_r)/r_min
+  tglf_drmajdx_loc_in = shift(i_r)
+  tglf_dzmajdx_loc_in = dzmag(i_r)
+  tglf_kappa_loc_in   = kappa(i_r)
+  tglf_s_kappa_loc_in = s_kappa(i_r)
+  tglf_delta_loc_in   = delta(i_r)
+  tglf_s_delta_loc_in = s_delta(i_r)
+  tglf_zeta_loc_in    = zeta(i_r)
+  tglf_s_zeta_loc_in  = s_zeta(i_r)
+  tglf_q_loc_in       = q_abs
+  tglf_q_prime_loc_in = q_prime
+  tglf_p_prime_loc_in = p_prime
   !----------------------------------------------------------------
 
   !----------------------------------------------------------------
@@ -224,8 +210,8 @@ subroutine tgyro_tglf_map
   ! CONTROL PARAMETERS
   !
   if (loc_betae_scale <= 0.0) then
-    tglf_use_bper_in = .false.
-    tglf_use_bpar_in = .false.
+     tglf_use_bper_in = .false.
+     tglf_use_bpar_in = .false.
   endif
   !
   ! Use adiabatic electrons
@@ -277,6 +263,18 @@ subroutine tgyro_tglf_map
      tglf_xnu_model_in    = 2
      tglf_alpha_e_in = 1.0
      tglf_alpha_p_in = 1.0
+
+  case (4)
+
+     ! Momentum transport without EM terms.
+
+     tglf_alpha_quench_in = 0.0
+     tglf_xnu_model_in    = 2
+     tglf_alpha_e_in = 1.0
+     tglf_alpha_p_in = 1.0
+     tglf_alpha_mach_in = 1.0
+     tglf_use_bper_in = .false.
+     tglf_use_bpar_in = .false.
 
   end select
 

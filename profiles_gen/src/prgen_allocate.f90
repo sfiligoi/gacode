@@ -10,10 +10,17 @@ subroutine prgen_allocate
   allocate(rmaj(nx))
   allocate(q(nx))
   allocate(p_tot(nx))
+  allocate(fpol(nx))
   allocate(omega0(nx))
   allocate(vpolc_exp(nx))
   allocate(vtorc_exp(nx))
+  allocate(te_kev(nx))
+  allocate(ti_kev(nx))
+  allocate(ne_e19m3(nx))
+  allocate(ni_e19m3(nx))
+  allocate(zeff(nx))
 
+  allocate(jtot(nx))
   allocate(johm(nx))
   allocate(jbs(nx))
   allocate(jnb(nx))
@@ -23,15 +30,13 @@ subroutine prgen_allocate
   allocate(delta(nx)) ; delta = 0.0
   allocate(zmag(nx))  ; zmag = 0.0
   allocate(zeta(nx))  ; zeta = 0.0
-  allocate(shape_sin3(nx)) ; shape_sin3 = 0.0
-  allocate(shape_cos0(nx)) ; shape_cos0 = 0.0
-  allocate(shape_cos1(nx)) ; shape_cos1 = 0.0
-  allocate(shape_cos2(nx)) ; shape_cos2 = 0.0
-  allocate(shape_cos3(nx)) ; shape_cos3 = 0.0
+  allocate(shape_sin(6,nx))   ; shape_sin = 0.0
+  allocate(shape_cos(0:6,nx)) ; shape_cos = 0.0 
 
   allocate(qspow_e(nx))
   allocate(qspow_i(nx))
   allocate(qpow_e(nx))
   allocate(qpow_i(nx))
+  allocate(qohm(nx))
 
 end subroutine prgen_allocate

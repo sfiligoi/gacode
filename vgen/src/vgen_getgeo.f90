@@ -38,6 +38,12 @@ subroutine vgen_getgeo
      GEO_s_zeta_in    = EXPRO_szeta(i)
      GEO_shape_sin3_in    = EXPRO_shape_sin3(i)
      GEO_shape_s_sin3_in  = EXPRO_shape_ssin3(i)
+     GEO_shape_sin4_in    = EXPRO_shape_sin4(i)
+     GEO_shape_s_sin4_in  = EXPRO_shape_ssin4(i)
+     GEO_shape_sin5_in    = EXPRO_shape_sin5(i)
+     GEO_shape_s_sin5_in  = EXPRO_shape_ssin5(i)
+     GEO_shape_sin6_in    = EXPRO_shape_sin6(i)
+     GEO_shape_s_sin6_in  = EXPRO_shape_ssin6(i)
      GEO_shape_cos0_in    = EXPRO_shape_cos0(i)
      GEO_shape_s_cos0_in  = EXPRO_shape_scos0(i)
      GEO_shape_cos1_in    = EXPRO_shape_cos1(i)
@@ -46,6 +52,12 @@ subroutine vgen_getgeo
      GEO_shape_s_cos2_in  = EXPRO_shape_scos2(i)
      GEO_shape_cos3_in    = EXPRO_shape_cos3(i)
      GEO_shape_s_cos3_in  = EXPRO_shape_scos3(i)
+     GEO_shape_cos4_in    = EXPRO_shape_cos4(i)
+     GEO_shape_s_cos4_in  = EXPRO_shape_scos4(i)
+     GEO_shape_cos5_in    = EXPRO_shape_cos5(i)
+     GEO_shape_s_cos5_in  = EXPRO_shape_scos5(i)
+     GEO_shape_cos6_in    = EXPRO_shape_cos6(i)
+     GEO_shape_s_cos6_in  = EXPRO_shape_scos6(i)
      GEO_beta_star_in = 0.0
      !
      if (EXPRO_ctrl_numeq_flag == 0) then

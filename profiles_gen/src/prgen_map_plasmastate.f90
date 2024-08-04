@@ -156,7 +156,8 @@ subroutine prgen_map_plasmastate
 
   endif
 
-  plst_zeff(:) = (f2_therm(:)+f2_fast(:))/(f1_therm(:)+f1_fast(:))
+  ! Overwrite zeff from statefile
+  zeff(:) = (f2_therm(:)+f2_fast(:))/(f1_therm(:)+f1_fast(:))
 
   ! Compute the quasineutrality error with max 9 ions:
 
@@ -173,7 +174,7 @@ subroutine prgen_map_plasmastate
   !-------------------------------------------------------------------------------
 
   !---------------------------------------------------------
-  ! Map profile data into expro interface variables
+  ! * Begin nmapping profile data into expro interface variables
   !
   expro_n_exp = nx
   expro_n_ion = plst_dp1_nspec_all-1
@@ -184,9 +185,7 @@ subroutine prgen_map_plasmastate
   expro_rmaj = rmaj
   expro_te = plst_ts(:,1)
   expro_ne = plst_ns(:,1)*1e-19
-  expro_z_eff = plst_zeff(:)
   expro_w0 = omega0(:) 
-  expro_ptot = p_tot ! total pressure, thermal + fast ion
 
   expro_ni = 0.0
   expro_ti = 0.0
@@ -219,9 +218,9 @@ subroutine prgen_map_plasmastate
   ! Ion identification
 
   do i=1,expro_n_ion
-     expro_mass(i) = plst_m_all(i+1)/1.66e-27
+     expro_mass(i) = plst_m_all(i+1)/(expro_mass_deuterium*1e-3/2)
      expro_z(i)    = nint(plst_q_all(i+1)/1.6022e-19)
-     call prgen_ion_name(nint(expro_mass(i)),expro_z(i),expro_name(i))     
+     call prgen_ion_name(nint(expro_mass(i)),nint(expro_z(i)),expro_name(i))     
      if (i+1 > plst_dp1_nspec_th) then
         expro_type(i) = type_fast
      else
@@ -254,12 +253,12 @@ subroutine prgen_map_plasmastate
      expro_qohme(i)  = 1e-6*plst_pohme(i-1)/dvol
      expro_qbeame(i) = 1e-6*plst_pbe(i-1)/dvol
      expro_qbeami(i) = 1e-6*(plst_pbi(i-1)+plst_pbth(i-1))/dvol
-     expro_qrfe(i)   = 1e-6*(plst_peech(i-1)+plst_pmine(i-1))/dvol
+     expro_qrfe(i)   = 1e-6*(plst_peech(i-1)+plst_pmine(i-1)+plst_picrf_totals(i-1,1))/dvol ! ECH + ICRF minority + ICRF direct
      expro_qrfi(i)   = 1e-6*(plst_pmini(i-1)+plst_pminth(i-1)+plst_picth(i-1))/dvol
 
      ! Radiation
      expro_qsync(i) = 1e-6*plst_prad_cy(i-1)/dvol
-     expro_qbrem(i) = 1e-6*plst_prad_br(i-1)/dvol
+     expro_qbrem(i) = 1e-6*(plst_prad(i-1) - plst_prad_cy(i-1) - plst_prad_li(i-1))/dvol
      expro_qline(i) = 1e-6*plst_prad_li(i-1)/dvol
 
      ! Momentum source (tq_trans already in Nm)
@@ -267,7 +266,8 @@ subroutine prgen_map_plasmastate
      expro_qmom(i) = -ipccw*plst_tq_trans(i-1)/dvol
 
      ! Particle source
-     expro_qpar(i) = plst_sn_trans(i-1)/dvol
+     expro_qpar_beam(i) = plst_sn_trans(i-1)/dvol
+     expro_qpar_wall(i) = 0.0
 
   enddo
   expro_qei(1)    = expro_qei(2)
@@ -282,7 +282,8 @@ subroutine prgen_map_plasmastate
   expro_qbrem(1)  = expro_qbrem(2)
   expro_qline(1)  = expro_qline(2)
   expro_qmom(1)   = expro_qmom(2)
-  expro_qpar(1)   = expro_qpar(2)
+  expro_qpar_beam(1)   = expro_qpar_beam(2)
+  expro_qpar_wall(1)   = expro_qpar_wall(2)
   qpow_e(1)       = qpow_e(2)
   qpow_i(1)       = qpow_i(2)
   

@@ -68,8 +68,11 @@ subroutine cgyro_mpi_grid
 
   ! Velocity pointers
   iv = 0
-  do ie=1,n_energy
-     do ix=1,n_xi
+  if (velocity_order==1) then
+    call cgyro_info('Velocity order 1')
+    !original
+    do ie=1,n_energy
+      do ix=1,n_xi
         do is=1,n_species
            iv = iv+1
            ie_v(iv) = ie
@@ -77,8 +80,27 @@ subroutine cgyro_mpi_grid
            is_v(iv) = is
            iv_v(ie,ix,is) = iv
         enddo
-     enddo
-  enddo
+      enddo
+    enddo
+  else if (velocity_order==2) then
+    call cgyro_info('Velocity order 2')
+    ! optimized for minimizing species
+    do is=1,n_species
+      do ie=1,n_energy
+        do ix=1,n_xi
+           iv = iv+1
+           ie_v(iv) = ie
+           ix_v(iv) = ix
+           is_v(iv) = is
+           iv_v(ie,ix,is) = iv
+        enddo
+      enddo
+    enddo
+  else
+     call cgyro_error('Unknown VELOCITY_ORDER.')
+     return
+  endif
+
 !$acc enter data copyin(ie_v,ix_v,is_v,iv_v)
 
   ! Configuration pointers
@@ -192,6 +214,40 @@ subroutine cgyro_mpi_grid
   nv1 = 1+i_proc_1*nv_loc
   nv2 = (1+i_proc_1)*nv_loc
 
+  ns1 = 1
+  ns2 = n_species
+  i_group_3 = 1
+  if (velocity_order==2) then
+    ! Paricles are contiguous in this order
+    ns1 = is_v(nv1)
+    ns2 = is_v(nv2)
+    ! We need a clean split, so that all ranks have the same number of species
+    if ( (n_proc_1 < n_species) .and. ( modulo(n_species, n_proc_1) /= 0 ) ) then
+      call cgyro_error('nv_species not a multiple of n_proc_1')
+      return
+    endif
+    if ( (n_proc_1 > n_species) .and. ( modulo(n_proc_1, n_species) /= 0 ) ) then
+      call cgyro_error('nv_proc_1 not a multiple of n_species')
+      return
+    endif
+    i_group_3 = ns1
+  endif
+  ns_loc = ns2-ns1+1
+
+  ! when exchaning only specific species, we need a dedicated comm
+  call MPI_COMM_SPLIT(NEW_COMM_1,&
+       i_group_3,&
+       splitkey,&
+       NEW_COMM_3, &
+       i_err)
+  if (i_err /= 0) then
+     call cgyro_error('NEW_COMM_3 not created')
+     return
+  endif
+  !
+  call MPI_COMM_RANK(NEW_COMM_3,i_proc_3,i_err)
+
+
   nc1 = 1+i_proc_1*nc_loc
   nc2 = (1+i_proc_1)*nc_loc
 
@@ -202,11 +258,6 @@ subroutine cgyro_mpi_grid
   else
      call parallel_slib_init(n_toroidal,nv_loc*n_theta,n_radial,nsplit,NEW_COMM_2)
   endif
-
-  ! Stagger COMM2 communication based on i_proc_1
-  ! Get the first half together, and second half together
-  ! This makes it more likely to have both types on all nodes
-  is_staggered_comm_2 = (modulo((i_proc_1*2)/n_proc_1,2) == 0)
 
   ! OMP code
   n_omp = omp_get_max_threads()

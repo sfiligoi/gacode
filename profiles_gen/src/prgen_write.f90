@@ -19,30 +19,40 @@ subroutine prgen_write
      print '(t6,i2,2(1x,a))',i,trim(expro_name(i)),trim(expro_type(i))
   enddo
 
-
   !-------------------------------------------------------------------------------------
   ! Map (common) data from EFIT analysis [skip if reading input.* without gfile]
-
+  !
   if (format_type < 7) then 
      expro_torfluxa = -btccw*abs(torfluxa)
      expro_rcentr   = rcentr
      expro_bcentr   = -btccw*abs(bcentr)
      expro_current  = -ipccw*abs(current)
 
-     expro_q          = ipccw*btccw*abs(q)
-     expro_polflux    = -ipccw*abs(dpsi)
-     expro_kappa      = kappa
-     expro_delta      = delta
-     expro_zeta       = zeta
-     expro_zmag       = zmag
+     expro_q       = ipccw*btccw*abs(q)
+     expro_polflux = -ipccw*abs(dpsi)
+     expro_kappa   = kappa
+     expro_delta   = delta
+     expro_zeta    = zeta
+     expro_zmag    = zmag
 
-     expro_shape_sin3 = shape_sin3
-     expro_shape_cos0 = shape_cos0
-     expro_shape_cos1 = shape_cos1
-     expro_shape_cos2 = shape_cos2
-     expro_shape_cos3 = shape_cos3
+     expro_shape_sin3 = shape_sin(3,:)
+     expro_shape_sin4 = shape_sin(4,:)
+     expro_shape_sin5 = shape_sin(5,:)
+     expro_shape_sin6 = shape_sin(6,:)
+     expro_shape_cos0 = shape_cos(0,:)
+     expro_shape_cos1 = shape_cos(1,:)
+     expro_shape_cos2 = shape_cos(2,:)
+     expro_shape_cos3 = shape_cos(3,:)
+     expro_shape_cos4 = shape_cos(4,:)
+     expro_shape_cos5 = shape_cos(5,:)
+     expro_shape_cos6 = shape_cos(6,:)
+
+     expro_z_eff = zeff
+     
+     ! EFIT passthrough functions
+     expro_ptot = p_tot
+     expro_fpol = fpol
   endif
-
   !-------------------------------------------------------------------------------------
 
   !-------------------------------------------------------------------------------------
@@ -56,6 +66,6 @@ subroutine prgen_write
   call expro_write('input.gacode')
   print '(a)','INFO: (prgen_write) Wrote input.gacode.'
   !-------------------------------------------------------------------------------------
-
+   
 end subroutine prgen_write
 

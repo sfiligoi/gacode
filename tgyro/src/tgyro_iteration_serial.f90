@@ -18,6 +18,8 @@ subroutine tgyro_iteration_serial
   allocate(f_vec1(p_max))
   allocate(g_vec1(p_max))
 
+  quasifix = 0
+  
   do i_tran_loop=1,tgyro_relax_iterations
 
      i_tran = i_tran+1
