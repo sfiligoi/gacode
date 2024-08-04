@@ -645,6 +645,8 @@ subroutine cgyro_init_collision
      ! in  else branch of do_old_coll if clause:
      deallocate(nu_d)
      deallocate(nu_par)
+     deallocate(klor_fac)
+     deallocate(kdiff_fac)
      deallocate(ctest)
      deallocate(rs)
      deallocate(rsvec)
@@ -709,7 +711,6 @@ subroutine cgyro_init_collision
 !$omp& shared(omega_rot_trap,omega_rot_u,e_deriv1_mat,e_deriv1_rot_mat,e_max) &
 !$omp& shared(xi_lor_mat) &
 !$omp& shared(k_perp,vth,mass,z,bmag,nu_d,xi,nu_par,w_e,w_xi) &
-!$omp& shared(klor_fac,kdiff_fac) &
 !$omp& private(ic,ic_loc,it,ir,info) &
 !$omp& private(iv,is,ix,ie,jv,js,jx,je,ks) &
 !$omp& private(amat,i_piv) &
@@ -883,7 +884,5 @@ subroutine cgyro_init_collision
   endif
 
   deallocate(i_piv)
-  deallocate(klor_fac)
-  deallocate(kdiff_fac)
 
 end subroutine cgyro_init_collision
