@@ -3,30 +3,31 @@
 #---------------------------------------------------
 
 IDENTITY="Linux TUMBLEWEED gfortran+OpenBLAS+OPENMPI"
-CORES_PER_NODE=2
+CORES_PER_NODE=8
 NUMAS_PER_NODE=1
 #SOLVER_OPT=slumt
 #need packages fftw_openmp_devel openblas_devel
-
-FFTWDIR=/usr/lib/x86_64-linux-gnu
+#need for old gyro: netcdf-fortran-gnu-openmpi4-hpc-devel
+#m lo gnu openmpi netcdf-fortran pfftw3
 
 #ROOT=${HOME}/GIT
 
 # Compilers
 
-#FC     = mpifort -fimplicit-none -J $(GACODE_ROOT)/modules #-fPIC
-FC     = mpifort -std=f2008 -fall-intrinsics -fimplicit-none -J $(GACODE_ROOT)/modules #-fPIC
-F77    = mpifort -fimplicit-none
-#F77    = gfortran
+FC     = mpifort -std=gnu -fallow-argument-mismatch -fall-intrinsics -fimplicit-none -J $(GACODE_ROOT)/modules #-fPIC
+#FC     = mpifort -std=f2008 -fall-intrinsics -fimplicit-none -J $(GACODE_ROOT)/modules #-fPIC
+F77    = mpifort -fimplicit-none -fallow-argument-mismatch
 FOMP   =-fopenmp
-FMATH  =-fdefault-real-8 -fdefault-double-8
-FOPT   =-O3 -march=native -ffree-line-length-0
+FMATH  =-fdefault-real-8 -fdefault-double-8 -I$(FFTW_INC)
+FOPT   =-O3 -fexternal-blas -march=native -ffree-line-length-0
+# -floop-nest-optimize -floop-parallelize-all -flto
 FDEBUG =-Wall -W -fcheck=all -g -fbacktrace # -std=f2003 -fall-intrinsics -ffpe-trap=invalid,zero,overflow
 F2PY   = f2py
 
 # System math libraries
-LMATH = -lopenblas_serial -lfftw3 -lfftw3_omp #-Wl,-rpath /usr/lib/hpc/gnu9/mpi/openmpi/3.1.4/lib64/
-FFTW_INC=/usr/include
+#LMATH = /usr/lib64/libopenblas_serial.so.0 -lfftw3 -lfftw3_omp
+LMATH = -lblas -lfftw3 -lfftw3_omp
+LMATH_EXTRA_GYRO = du.o -Wl,--defsym=fopen_=fopen,--defsym=fwrite_=fwrite,--defsym=fclose_=fclose
 
 ifdef FANN_ROOT
    # neural net libraries
@@ -35,7 +36,7 @@ endif
 
 # OPTIONAL NetCDF:
 NETCDF=-L/usr/lib -lnetcdff -lnetcdf
-NETCDF_INC=/usr/include
+NETCDF_INC=$(NETCDF_FORTRAN_INC)
 
 # Archive 
 

@@ -1,0 +1,2 @@
+du.o:	du.c
+	$(CC) -c -Wno-builtin-declaration-mismatch du.c
