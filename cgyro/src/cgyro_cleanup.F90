@@ -12,16 +12,21 @@ subroutine cgyro_cleanup
 
 #define ccl_del_device(x) \
 !$omp target exit data map(release:x)
+#define ccl_del_bigdevice(x) \
+!$omp target exit data map(release:x) if (gpu_bigmem_flag == 1)
 
 #elif defined(_OPENACC)
 
 #define ccl_del_device(x) \
 !$acc exit data delete(x)
+#define ccl_del_bigdevice(x) \
+!$acc exit data delete(x) if (gpu_bigmem_flag == 1)
 
 #else
 
   ! nothing to do
 #define ccl_del_device(x)
+#define ccl_del_bigdevice(x)
 
 #endif
 
@@ -34,6 +39,10 @@ subroutine cgyro_cleanup
      ccl_del_device(vel)
      deallocate(vel)
   endif
+  if(allocated(vel2))        then
+     ccl_del_device(vel2)
+     deallocate(vel2)
+  endif
   if(allocated(w_e))           deallocate(w_e)
   if(allocated(e_deriv1_mat))  deallocate(e_deriv1_mat)
   if(allocated(e_deriv1_rot_mat))  deallocate(e_deriv1_rot_mat)
@@ -42,6 +51,7 @@ subroutine cgyro_cleanup
      deallocate(xi)
   endif
   if(allocated(w_xi))          deallocate(w_xi)
+  if(allocated(w_exi))         deallocate(w_exi)
   if(allocated(xi_lor_mat))    deallocate(xi_lor_mat)
   if(allocated(xi_deriv_mat))  deallocate(xi_deriv_mat)
   
@@ -72,6 +82,7 @@ subroutine cgyro_cleanup
   if(allocated(lambda_rot))          deallocate(lambda_rot)
   if(allocated(dlambda_rot))         deallocate(dlambda_rot)
   if(allocated(dens_rot))            deallocate(dens_rot)
+  if(allocated(dens2_rot))           deallocate(dens2_rot)
   if(allocated(dens_ele_rot))        deallocate(dens_ele_rot)
   if(allocated(dens_avg_rot))        deallocate(dens_avg_rot)
   if(allocated(dlnndr_avg_rot))      deallocate(dlnndr_avg_rot)
@@ -251,15 +262,15 @@ subroutine cgyro_cleanup
      deallocate(gpack)
   endif
   if (allocated(cmat)) then
-     ccl_del_device(cmat) if (gpu_bigmem_flag == 1)
+     ccl_del_bigdevice(cmat)
      deallocate(cmat)
   endif
   if (allocated(cmat_fp32)) then
-     ccl_del_device(cmat_fp32) if (gpu_bigmem_flag == 1)
+     ccl_del_bigdevice(cmat_fp32)
      deallocate(cmat_fp32)
   endif
   if (allocated(cmat_stripes)) then
-     ccl_del_device(cmat_stripes) if (gpu_bigmem_flag == 1)
+     ccl_del_bigdevice(cmat_stripes)
      deallocate(cmat_stripes)
   endif
     if (allocated(cmat_simple)) then
@@ -369,7 +380,7 @@ subroutine cgyro_cleanup
   endif
 
   if(allocated(iv_v)) then
-     ccl_del_device(ie_v)     
+     ccl_del_device(iv_v)     
      deallocate(iv_v)
   endif
 

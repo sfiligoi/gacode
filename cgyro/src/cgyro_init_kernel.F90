@@ -15,6 +15,7 @@ subroutine cgyro_init_kernel
   use timer_lib
   use mpi
   use cgyro_globals
+  use cgyro_step
   use cgyro_io
 
   implicit none
@@ -107,7 +108,11 @@ subroutine cgyro_init_kernel
 
   ! GPU versions of step_gk and coll work on the following in the GPU memory
   call timer_lib_in('str_mem')
+#if defined(OMPGPU)
+!$omp target update to(field,cap_h_c,h_x,source)
+#elif defined(_OPENACC)
 !$acc update device(field,cap_h_c,h_x,source)
+#endif
   call timer_lib_out('str_mem')
 
   ! Initialize adaptive time-stepping parameter

@@ -20,7 +20,7 @@ subroutine cgyro_init_collision
   real, dimension(:,:), allocatable :: klor_fac, kdiff_fac
 
   character(len=160) :: msg
-  real :: arg
+  real :: arg,xi_s1s,xi_prop
   real :: xa, xb, tauinv_ab
   real :: rval
   integer :: jv
@@ -175,20 +175,22 @@ subroutine cgyro_init_collision
 
      if (collision_model >= 4 .and. collision_kperp == 1 .and. &
           (collision_mom_restore == 1 .or. collision_ene_restore == 1)) then
-     allocate(bessel(n_species,n_xi,n_energy,nc_loc,0:1,nt1:nt2))
-!$omp parallel do collapse(2) private(ic_loc,it,ie,ix,is,arg)
+     allocate(bessel(n_species,n_xi,n_energy,0:1,nc_loc,nt1:nt2))
+!$omp parallel do collapse(2) private(ic_loc,it,ie,ix,is,arg,xi_s1s,xi_prop)
      do itor=nt1,nt2
       do ic=nc1,nc2
            ic_loc = ic-nc1+1
            it = it_c(ic)
            do ie=1,n_energy
               do ix=1,n_xi
+              xi_s1s = sqrt(1.0-xi(ix)**2)
+              xi_prop = xi_s1s / xi(ix)
                  do is=1,n_species   
                  arg = k_perp(ic,itor)*rho*vth(is)*mass(is)&
-                         /(z(is)*bmag(it)) *sqrt(2.0*energy(ie)) &
-                         *sqrt(1.0-xi(ix)**2)
-                 bessel(is,ix,ie,ic_loc,0,itor) = bessel_j0(arg)
-                 bessel(is,ix,ie,ic_loc,1,itor) = bessel_j1(arg)
+                      /(z(is)*bmag(it)) * vel2(ie) * xi_s1s
+                 bessel(is,ix,ie,0,ic_loc,itor) = bessel_j0(arg)
+                 ! always used with the correction, so do it here
+                 bessel(is,ix,ie,1,ic_loc,itor) = bessel_j1(arg) * xi_prop
               enddo
            enddo
         enddo
@@ -269,13 +271,13 @@ subroutine cgyro_init_collision
 !$omp& shared(nc1,nc2,nt1,nt2,nv,delta_t,n_species,rho,is_ele,n_field,n_energy,n_xi) &
 !$omp& shared(collision_kperp,collision_field_model,explicit_trap_flag) &
 !$omp& firstprivate(collision_model,collision_mom_restore,collision_ene_restore,collision_test_mode) &
-!$omp& shared(ae_flag,lambda_debye,dens_ele,temp_ele,dens_rot) &
+!$omp& shared(ae_flag,lambda_debye,dens_ele,temp_ele,dens_rot,dens2_rot) &
 !$omp& shared(betae_unit,sum_den_h) &
 !$omp& shared(it_c,ir_c,px,is_v,ix_v,ie_v,ctest,xi_deriv_mat) &
-!$omp& shared(temp,jvec_v,omega_trap,dens,energy,vel) &
+!$omp& shared(temp,jvec_v,omega_trap,dens,energy,vel,vel2) &
 !$omp& shared(omega_rot_trap,omega_rot_u,e_deriv1_mat,e_deriv1_rot_mat,e_max,bessel) &
 !$omp& shared(xi_lor_mat) &
-!$omp& shared(k_perp,vth,mass,z,bmag,nu_d,xi,nu_par,w_e,w_xi) &
+!$omp& shared(k_perp,vth,mass,z,bmag,nu_d,xi,nu_par,w_e,w_exi) &
 !$omp& shared(klor_fac,kdiff_fac) &
 !$omp& private(ic,ic_loc,it,ir,info,rval) &
 !$omp& private(iv,is,ix,ie,jv,js,jx,je,ks) &
@@ -330,11 +332,11 @@ subroutine cgyro_init_collision
                        cmat_loc(iv,jv) = &
                             cmat_loc(iv,jv) &
                             + 3.0 * (mass(js)/mass(is)) &
-                            * (dens(js)/dens(is)) * dens_rot(it,js) &
+                         * dens2_rot(it,js) / dens(is)&
                             * (vth(js)/vth(is)) * nu_d(ie,is,js) &
                             * vel(ie) * xi(ix) &
-                            * nu_d(je,js,is) * sqrt(energy(je)) &
-                            * xi(jx) * w_e(je) * w_xi(jx) / rs(is,js)
+                         * nu_d(je,js,is) * vel(je) &
+                         * xi(jx) * w_exi(je,jx) / rs(is,js)
                     endif
                  enddo
               enddo
@@ -360,11 +362,11 @@ subroutine cgyro_init_collision
                              do je=1,n_energy
                                 rsvec(is,js,ix,ie) = rsvec(is,js,ix,ie) &
                                      + ctest(is,js,ix,jx,ie,je) &
-                                     * sqrt(2.0*energy(je)) * xi(jx) * vth(is)
+                               * vel2(je) * xi(jx) * vth(is)
                                 rsvect0(is,js,ix,ie) = rsvect0(is,js,ix,ie) &
                                      + ctest(is,js,jx,ix,je,ie) &
-                                     * sqrt(2.0*energy(je)) * xi(jx) &
-                                     * w_e(je)*w_xi(jx) * vth(is)
+                               * vel2(je) * xi(jx) &
+                               * w_exi(je,jx) * vth(is)
                              enddo
                           enddo
                        enddo
@@ -373,8 +375,8 @@ subroutine cgyro_init_collision
                     ! int v_par C_test_ab(v_par f0a,f0b) / n_0a
                     do ix=1,n_xi
                        do ie=1,n_energy
-                          rs(is,js) = rs(is,js) + w_e(ie)*w_xi(ix) * dens(is) &
-                               * rsvec(is,js,ix,ie) * sqrt(2.0*energy(ie)) * xi(ix) &
+                    rs(is,js) = rs(is,js) + w_exi(ie,ix) * dens(is) &
+                         * rsvec(is,js,ix,ie) * vel2(ie) * xi(ix) &
                                * vth(is)
                        enddo
                     enddo
@@ -397,7 +399,7 @@ subroutine cgyro_init_collision
                        if (abs(rs(is,js))>epsilon(0.0)) then
                           cmat_loc(iv,jv) &
                                = cmat_loc(iv,jv) &
-                               - mass(js)/mass(is) * dens(js) * dens_rot(it,js) &
+                            - mass(js)/mass(is) * dens2_rot(it,js) &
                                * rsvec(is,js,ix,ie) / rs(is,js) &
                                * rsvect0(js,is,jx,je)
                        endif
@@ -415,15 +417,14 @@ subroutine cgyro_init_collision
                                 do je=1,n_energy
                                    rsvect0(is,js,ix,ie) = rsvect0(is,js,ix,ie) &
                                         + ctest(is,js,jx,ix,je,ie) &
-                                        * sqrt(2.0*energy(je)) * xi(jx) &
-                                        * w_e(je)*w_xi(jx) * vth(is) &
-                                     * bessel(is,ix,ie,ic_loc,0,itor)
+                                     * vel2(je) * xi(jx) &
+                                     * w_exi(je,jx) * vth(is) &
+                                     * bessel(is,ix,ie,0,ic_loc,itor)
                                    rsvect1(is,js,ix,ie) = rsvect1(is,js,ix,ie) &
                                         + ctest(is,js,jx,ix,je,ie) &
-                                        * sqrt(2.0*energy(je)) * xi(jx) &
-                                        * w_e(je)*w_xi(jx) * vth(is) &
-                                     * bessel(is,ix,ie,ic_loc,1,itor) &
-                                        * sqrt(1.0-xi(ix)**2)/xi(ix)
+                                     * vel2(je) * xi(jx) &
+                                     * w_exi(je,jx) * vth(is) &
+                                     * bessel(is,ix,ie,1,ic_loc,itor)
                                 enddo
                              enddo
                           enddo
@@ -445,17 +446,16 @@ subroutine cgyro_init_collision
                           cmat_loc(iv,jv) &
                                = cmat_loc(iv,jv) &
                                - mass(js)/mass(is) &
-                               * dens(js) * dens_rot(it,js) &
+                            * dens2_rot(it,js) &
                                * rsvec(is,js,ix,ie) &
-                            * bessel(is,ix,ie,ic_loc,0,itor) / rs(is,js) &
+                            * bessel(is,ix,ie,0,ic_loc,itor) / rs(is,js) &
                                * rsvect0(js,is,jx,je)
                           cmat_loc(iv,jv) &
                                = cmat_loc(iv,jv) &
                                - mass(js)/mass(is) &
-                               * dens(js) * dens_rot(it,js) &
+                            * dens2_rot(it,js) &
                                * rsvec(is,js,ix,ie) / rs(is,js) &
-                            * bessel(is,ix,ie,ic_loc,1,itor) &
-                               * sqrt(1.0-xi(ix)**2)/xi(ix) &
+                            * bessel(is,ix,ie,1,ic_loc,itor) &
                                * rsvect1(js,is,jx,je) 
                        endif
                     enddo
@@ -483,7 +483,7 @@ subroutine cgyro_init_collision
                                      + ctest(is,js,ix,jx,ie,je) * energy(je)
                                 rsvect0(is,js,ix,ie) = rsvect0(is,js,ix,ie) &
                                      + ctest(is,js,jx,ix,je,ie) * energy(je) &
-                                     * w_e(je)*w_xi(jx)
+                               * w_exi(je,jx)
                              enddo
                           enddo
                        enddo
@@ -493,7 +493,7 @@ subroutine cgyro_init_collision
 
                     do ix=1,n_xi
                        do ie=1,n_energy
-                          rs(is,js) = rs(is,js) + w_e(ie)*w_xi(ix) &
+                    rs(is,js) = rs(is,js) + w_exi(ie,ix) &
                                * dens(is) * rsvec(is,js,ix,ie) * (energy(ie)-1.5)
                           !Using temperature, not energy here. Matters for Ta/=Tb.
                        enddo
@@ -515,7 +515,7 @@ subroutine cgyro_init_collision
                        if (abs(rs(is,js)) > epsilon(0.0)) then
                           cmat_loc(iv,jv) &
                                = cmat_loc(iv,jv) &
-                               - temp(js)/temp(is) * dens(js) * dens_rot(it,js) &
+                            - temp(js)/temp(is) * dens2_rot(it,js) &
                                * rsvec(is,js,ix,ie) &
                                / rs(is,js) * rsvect0(js,is,jx,je) 
                        endif
@@ -532,8 +532,8 @@ subroutine cgyro_init_collision
                                 do je=1,n_energy
                                    rsvect0(is,js,ix,ie) = rsvect0(is,js,ix,ie) &
                                         + ctest(is,js,jx,ix,je,ie) * energy(je) &
-                                        * w_e(je)*w_xi(jx) &
-                                     * bessel(is,ix,ie,ic_loc,0,itor) 
+                                     * w_exi(je,jx) &
+                                     * bessel(is,ix,ie,0,ic_loc,itor)
                                 enddo
                              enddo
                           enddo
@@ -554,9 +554,9 @@ subroutine cgyro_init_collision
                        if (abs(rs(is,js)) > epsilon(0.0)) then
                           cmat_loc(iv,jv) &
                                = cmat_loc(iv,jv) &
-                               - temp(js)/temp(is) * dens(js) * dens_rot(it,js) &
+                            - temp(js)/temp(is) * dens2_rot(it,js) &
                                * rsvec(is,js,ix,ie) &
-                            * bessel(is,ix,ie,ic_loc,0,itor) / rs(is,js) &
+                            * bessel(is,ix,ie,0,ic_loc,itor) / rs(is,js) &
                                * rsvect0(js,is,jx,je)
                        endif
                     enddo
@@ -674,8 +674,8 @@ subroutine cgyro_init_collision
                     rval =  z(is)/temp(is) * jvec_v(1,ic_loc,itor,iv) &
                          / (k_perp(ic,itor)**2 * lambda_debye**2 &
                             * dens_ele / temp_ele + sum_den_h(it)) &
-                            * z(js)*dens(js)*dens_rot(it,js) &
-                         * jvec_v(1,ic_loc,itor,jv) * w_e(je) * w_xi(jx) 
+                         * z(js)*dens2_rot(it,js) &
+                         * jvec_v(1,ic_loc,itor,jv) * w_exi(je,jx) 
                        cmat_loc(iv,jv) = cmat_loc(iv,jv) - rval
                        amat(iv,jv) = amat(iv,jv) - rval
                     endif
@@ -685,8 +685,8 @@ subroutine cgyro_init_collision
                     rval =  z(is)/temp(is) * (jvec_v(2,ic_loc,itor,iv) &
                          / (2.0*k_perp(ic,itor)**2 * rho**2 / betae_unit & 
                             * dens_ele * temp_ele)) &
-                            * z(js)*dens(js)*dens_rot(it,js) &
-                         * jvec_v(2,ic_loc,itor,jv) * w_e(je) * w_xi(jx)  
+                         * z(js)*dens2_rot(it,js) &
+                         * jvec_v(2,ic_loc,itor,jv) * w_exi(je,jx)  
                        cmat_loc(iv,jv) = cmat_loc(iv,jv) + rval
                        amat(iv,jv) = amat(iv,jv) + rval
                     endif
@@ -695,7 +695,7 @@ subroutine cgyro_init_collision
                     if (n_field > 2) then
                     rval = jvec_v(3,ic_loc,itor,iv) &
                             * (-0.5*betae_unit)/(dens_ele*temp_ele) &
-                            * w_e(je)*w_xi(jx)*dens(js)*dens_rot(it,js)*temp(js) &
+                         * w_exi(je,jx)*dens2_rot(it,js)*temp(js) &
                          * jvec_v(3,ic_loc,itor,jv)/(temp(is)/z(is))/(temp(js)/z(js))
                        cmat_loc(iv,jv) = cmat_loc(iv,jv) - rval
                        amat(iv,jv) = amat(iv,jv) - rval
@@ -795,7 +795,12 @@ subroutine cgyro_init_collision
   endif do_old_coll3
 
   if (collision_precision_mode /= 0) then
+#if defined(OMPGPU)
+     ! no async for OMPGPU for now
+!$omp target enter data map(to:cmat_fp32,cmat_stripes,cmat_e1) if (gpu_bigmem_flag == 1)
+#elif defined(_OPENACC)
 !$acc enter data copyin(cmat_fp32,cmat_stripes,cmat_e1) async if (gpu_bigmem_flag == 1)
+#endif
      call MPI_ALLREDUCE(cmap_fp32_error_abs_cnt_loc,&
           cmap_fp32_error_abs_cnt,&
           12,&
@@ -860,9 +865,15 @@ subroutine cgyro_init_collision
         !            "Abs cmat plain fp32 error avg: ", 0.01*cmap_fp32_error_sum(2)/amat_sum
         !call cgyro_info(msg)
      endif
+#if (!defined(OMPGPU)) && defined(_OPENACC)
 !$acc wait
+#endif
   else
+#if defined(OMPGPU)
+!$omp target enter data map(to:cmat) if (gpu_bigmem_flag == 1)
+#elif defined(_OPENACC)
 !$acc enter data copyin(cmat) if (gpu_bigmem_flag == 1)
+#endif
   endif
 
   do_old_coll4:  if (collision_model <= 4 .or. collision_test_mode/=0) then

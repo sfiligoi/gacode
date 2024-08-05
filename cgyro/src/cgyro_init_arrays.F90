@@ -46,7 +46,7 @@ subroutine cgyro_init_arrays
         ir = ir_c(ic)
 
         arg = k_perp(ic,itor)*rho*vth(is)*mass(is)/(z(is)*bmag(it)) &
-             *sqrt(2.0*energy(ie))*sqrt(1.0-xi(ix)**2)
+             *vel2(ie)*sqrt(1.0-xi(ix)**2)
 
         ! Need this for (Phi, A_parallel) terms in GK and field equations
 
@@ -66,7 +66,7 @@ subroutine cgyro_init_arrays
      
      if (n_field > 1) then
         ! J0 vpar Apar
-        efac = -xi(ix)*sqrt(2.0*energy(ie))*vth(is)
+        efac = -xi(ix)*vel2(ie)*vth(is)
         jvec_c(2,:,iv_loc,itor) = efac*jloc_c(1,:,itor)
         
         if (n_field > 2) then
@@ -86,7 +86,7 @@ subroutine cgyro_init_arrays
         jxvec_c(1,ic,iv_loc,itor) =  fac * (bmag(it) * jloc_c(2,ic,itor))
         
         if (n_field > 1) then
-           efac = -xi(ix)*sqrt(2.0*energy(ie))*vth(is)
+           efac = -xi(ix)*vel2(ie)*vth(is)
            jxvec_c(2,ic,iv_loc,itor) = efac * fac * (bmag(it) * jloc_c(2,ic,itor))
            
            if (n_field > 2) then
@@ -105,7 +105,11 @@ subroutine cgyro_init_arrays
   enddo
  
   deallocate(jloc_c)
+#if defined(OMPGPU)
+!$omp target enter data map(to:jvec_c)
+#elif defined(_OPENACC)
 !$acc enter data copyin(jvec_c)
+#endif
 
   do i_field=1,n_field
      call parallel_lib_rtrans_real(jvec_c(i_field,:,:,:),jvec_v(i_field,:,:,:))
@@ -121,7 +125,10 @@ subroutine cgyro_init_arrays
 !  (n_field,n_radial,n_jtheta,nv_loc,nt_loc,n_toroidal_procs)
 ! 
 
-#ifdef _OPENACC
+#if defined(OMPGPU)
+!$omp target teams distribute parallel do simd collapse(6) &
+!$omp&   private(itor,it,iltheta_min,mytor,ir,itf,jval)
+#elif defined(_OPENACC)
 !$acc parallel loop gang vector independent collapse(6) &
 !$acc&         private(itor,it,iltheta_min,mytor,ir,itf,jval) &
 !$acc&         present(jvec_c_nl,jvec_c,ic_c) &
@@ -188,7 +195,7 @@ subroutine cgyro_init_arrays
      ie = ie_v(iv)
      do ic=1,nc
         res_loc(ic,is,itor) = res_loc(ic,is,itor) + &
-                w_xi(ix)*w_e(ie)*jvec_c(1,ic,iv_loc,itor)**2*res_weight(ix,ie)
+                w_exi(ie,ix)*jvec_c(1,ic,iv_loc,itor)**2*res_weight(ix,ie)
      enddo
    enddo
   enddo
@@ -211,7 +218,7 @@ subroutine cgyro_init_arrays
      ix = ix_v(iv)
      ie = ie_v(iv)
      do ic=1,nc
-        upfac1(ic,iv_loc,itor) = w_e(ie)*w_xi(ix)*abs(xi(ix))*vel(ie) * &
+        upfac1(ic,iv_loc,itor) = w_exi(ie,ix)*abs(xi(ix))*vel(ie) * &
                 jvec_c(1,ic,iv_loc,itor)
         upfac2(ic,iv_loc,itor) = jvec_c(1,ic,iv_loc,itor)*res_weight(ix,ie)/ &
                 res_norm(ic,is,itor)
@@ -223,7 +230,11 @@ subroutine cgyro_init_arrays
   deallocate(res_norm)
   deallocate(res_loc)
   
+#if defined(OMPGPU)
+!$omp target enter data map(to:upfac1,upfac2)
+#elif defined(_OPENACC)
 !$acc enter data copyin(upfac1,upfac2)
+#endif
 
   !------------------------------------------------------------------------------
 
@@ -238,7 +249,7 @@ subroutine cgyro_init_arrays
      ix = ix_v(iv)
      ie = ie_v(iv)
 
-     vfac(iv_loc) = w_xi(ix)*w_e(ie)*z(is)**2/temp(is)*dens(is)
+     vfac(iv_loc) = w_exi(ie,ix)*z(is)**2/temp(is)*dens(is)
 
   enddo
 
@@ -248,8 +259,8 @@ subroutine cgyro_init_arrays
      do ie=1,n_energy
         do ix=1,n_xi
            do it=1,n_theta
-              sum_den_h(it) = sum_den_h(it) + w_xi(ix)*w_e(ie) &
-                   *z(is)**2/temp(is)*dens(is)*dens_rot(it,is)
+              sum_den_h(it) = sum_den_h(it) + w_exi(ie,ix) &
+                   *z(is)**2/temp(is)*dens2_rot(it,is)
            enddo
         enddo
      enddo
@@ -370,7 +381,11 @@ subroutine cgyro_init_arrays
      enddo
    enddo
   enddo
+#if defined(OMPGPU)
+!$omp target enter data map(to:dtheta,dtheta_up,icd_c,c_wave)
+#elif defined(_OPENACC)
 !$acc enter data copyin(dtheta,dtheta_up,icd_c,c_wave)
+#endif
 
   ! Streaming coefficients (for speed optimization)
 
@@ -427,7 +442,7 @@ subroutine cgyro_init_arrays
              
         ! omega_star 
         carg = -i_c*k_theta_base*itor*rho*(dlnndr(is)+dlntdr(is)*(energy(ie)-1.5)) &
-             -i_c*k_theta_base*itor*rho*(sqrt(2.0*energy(ie))*xi(ix)/vth(is) &
+             -i_c*k_theta_base*itor*rho*(vel2(ie)*xi(ix)/vth(is) &
              *omega_gammap(it)) -i_c*k_theta_base*itor*rho*omega_rot_star(it,is)
 
         omega_s(:,ic,iv_loc,itor) = carg*jvec_c(:,ic,iv_loc,itor)
@@ -442,7 +457,11 @@ subroutine cgyro_init_arrays
      enddo
    enddo
   enddo
+#if defined(OMPGPU)
+!$omp target enter data map(to:omega_cap_h,omega_h,omega_s,omega_ss)
+#elif defined(_OPENACC)
 !$acc enter data copyin(omega_cap_h,omega_h,omega_s,omega_ss)
+#endif
   !-------------------------------------------------------------------------
 
 end subroutine cgyro_init_arrays

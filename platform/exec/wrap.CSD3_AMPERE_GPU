@@ -8,12 +8,12 @@ export MPICH_GPU_SUPPORT_ENABLED=1
 #echo $SLURM_LOCALID
 let r4=SLURM_LOCALID/4
 let l4="$SLURM_LOCALID-($r4*4)"
-# GPU3 is connected to CPU0
-let ACC_DEVICE_NUM=3-${l4}
+#echo "$SLURM_PROCID `nvidia-smi topo -m` $SLURM_PROCID"
+let ACC_DEVICE_NUM=${l4}
 export ACC_DEVICE_NUM
-export OMP_DEFAULT_DEVICE=${ACC_DEVICE_NUM}
 
 echo "`uname -n` $SLURM_PROCID $SLURM_LOCALID $ACC_DEVICE_NUM `taskset -pc $$`"
+
 #ecno "uname -n` $SLURM_LOCALID LL $LD_LIBRARY_PATH"
 
 NTASKS_PER_NODE=$((SLURM_NTASKS / SLURM_NNODES))

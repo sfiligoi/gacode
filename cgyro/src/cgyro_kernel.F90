@@ -15,9 +15,12 @@ subroutine cgyro_kernel
   use timer_lib
   use mpi
   use cgyro_globals
+  use cgyro_step
   use cgyro_io
 
   implicit none
+
+  integer, parameter :: analysis = 0
 
   if (test_flag == 1) return
 
@@ -55,7 +58,18 @@ subroutine cgyro_kernel
         ! Normal timestep
         call cgyro_step_gk
      end select
-     
+
+     ! Timestep analysis
+     if (i_proc == 0 .and. analysis == 1) then
+        if (i_time == 1) then
+           open(unit=17,file='out.cgyro.adaptive',status='replace')
+           close(io)
+        endif
+        open(unit=17,file='out.cgyro.adaptive',status='old')        
+        write(17,'(i4,10(1pe12.5,1x))') i_time,deltah2_vec(1:istep)
+        close(io)
+     endif
+
      ! Collision step: returns new h_x, cap_h_x, fields
      if (collision_model == 5) then
         call cgyro_step_collision_simple
@@ -69,11 +83,21 @@ subroutine cgyro_kernel
      endif
 
      ! field will not be modified in GPU memory for the rest of the loop
+#if defined(OMPGPU)
+     ! no async for OMPGPU for now
+!$omp target update from(field)
+#elif defined(_OPENACC)
 !$acc update host(field) async(3)
+#endif
 
      if (mod(i_time,print_step) == 0) then
        ! cap_h_c will not be modified in GPU memory for the rest of the loop
+#if defined(OMPGPU)
+     ! no async for OMPGPU for now
+!$omp target update from(cap_h_c)
+#elif defined(_OPENACC)
 !$acc update host(cap_h_c) async(4)
+#endif
      endif
 
      call cgyro_source
@@ -84,10 +108,12 @@ subroutine cgyro_kernel
      !
      ! NOTE: Fluxes are calculated in cgyro_write_timedata
 
+#if (!defined(OMPGPU)) && defined(_OPENACC)
   call timer_lib_in('coll_mem')
   ! wait for fields to be synched into system memory, used by cgyro_error_estimate
 !$acc wait(3)
   call timer_lib_out('coll_mem')
+#endif
 
      ! Error estimate
      call cgyro_error_estimate
@@ -100,9 +126,14 @@ subroutine cgyro_kernel
      !
      if (mod(i_time,print_step) == 0) then
        call timer_lib_in('coll_mem')
+#if defined(OMPGPU)
+     ! no async for OMPGPU for now
+!$omp target update from(cap_h_c_dot)
+#elif defined(_OPENACC)
 !$acc update host(cap_h_c_dot)
        ! wait for cap_h_c to be synched into system memory, used by cgyro_write_timedata
 !$acc wait(4)
+#endif
        call timer_lib_out('coll_mem')
 
        call timer_lib_in('io')

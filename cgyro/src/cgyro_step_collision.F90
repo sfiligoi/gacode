@@ -827,7 +827,7 @@ subroutine cgyro_step_collision_gpu(use_simple)
 
       call timer_lib_in('coll_mem')
 #if defined(OMPGPU)
-!$omp target update from(fsendf)
+!$omp target update to(fsendf)
 #else
 !$acc update device(fsendf)
 #endif

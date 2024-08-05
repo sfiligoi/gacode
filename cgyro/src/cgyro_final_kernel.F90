@@ -22,7 +22,11 @@ subroutine cgyro_final_kernel
   real :: exit_dt
   
   call timer_lib_in('coll_mem')
+#if defined(OMPGPU)
+!$omp target update from(field,cap_h_c,h_x,source,rhs(:,:,:,1))
+#elif defined(_OPENACC)
 !$acc update host(field,cap_h_c,h_x,source,rhs(:,:,:,1))
+#endif
   call timer_lib_out('coll_mem')
 
   ! Manage exit message
