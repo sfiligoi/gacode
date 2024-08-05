@@ -26,7 +26,7 @@ contains
     ! populate cmat with Galerkin based gyrokinetic Landau operator.
     ! cmat1 is only for comparison purposes
     use cgyro_globals, only : vth,temp,mass,dens,temp_ele,mass_ele,dens_ele,rho,z,&
-         n_energy,e_max,n_xi,n_radial,n_theta,n_species,nc_loc,nc1,nc2,nc,&
+         n_energy,e_max,n_xi,n_radial,n_theta,n_species,nt1,nt2,nc_loc,nc1,nc2,nc,&
          nu_ee,&
          xi,w_xi,& !needed for projleg calc
          collision_model,&   ! if this is 7, we switch to calculating Sugama.
@@ -45,7 +45,7 @@ contains
     use, intrinsic :: ieee_exceptions
     implicit none
     !character(*),parameter :: sr='init_collision_landau: '
-    real, intent(in),optional :: cmat1(:,:,:)
+    real, intent(in),optional :: cmat1(:,:,:,:)
     real, dimension(:), allocatable :: a1,b1,c1,lg,a,bsq,sp,sw,gw,gp,gw2,gp2
     real, dimension(:,:), allocatable :: projsteen,projleg,L2xi,xi2L,poly2v,v2poly,Landau2v,&
          lor,lor1,lor_self,dif,dif1,dif_self,t1t2,t1t21,energymatrix
@@ -76,7 +76,7 @@ contains
     real,allocatable :: polyrep(:,:)
 
     integer ngauss
-    integer it,ic,ic_loc,ia,ib,ik,nkmax,is,is1,ns
+    integer it,ic,itor,ic_loc,ia,ib,ik,nkmax,is,is1,ns
     integer,allocatable :: nk(:,:)
     real, allocatable :: kperp_arr(:,:,:),loss(:),dist(:),id(:,:)
     real,allocatable:: AF(:,:),pv(:,:),em(:,:),Sc(:),ferr(:),berr(:)
@@ -107,8 +107,8 @@ contains
 
 
     if (i_proc==0 .and. verbose>0) then ! verboseness settings of modules
-       landauvb=1
-       gtvb=1
+      landauvb=1
+      gtvb=1
     end if
 
     !$    call MPI_Barrier(MPI_COMM_WORLD,ierror) ! may improve timing
@@ -119,16 +119,20 @@ contains
     ! 1st local:
     kperp_bmag_max=0
     if (i_proc==0) then
-       do i=1,nc
-9         format ("init_collision_landau: ",A,I0,A,5G24.16E3)
-          print 9,'kperp(',i,')=',k_perp(i)/bmag(it_c(i))*rho,bmag(it_c(i))
-       end do
+       do itor=nt1,nt2
+          do i=1,nc
+9            format ("init_collision_landau: ",A,I0,A,5G24.16E3)
+             print 9,'kperp(',i,')=',k_perp(i,itor)/bmag(it_c(i))*rho,bmag(it_c(i))
+          end do
+       enddo
     end if
-    do i=1,n_theta
-       do j=1,n_radial
-          kperp_bmag=k_perp(ic_c(j,i))/bmag(i)
-          !        global array k_perp(1 ... nc) nc=n_theta*n_radial
-          kperp_bmag_max=max(kperp_bmag_max,kperp_bmag)
+    do itor=nt1,nt2
+       do i=1,n_theta
+          do j=1,n_radial
+             kperp_bmag=k_perp(ic_c(j,i),itor)/bmag(i)
+             !        global array k_perp(1 ... nc,nt1 ... nt2) nc=n_theta*n_radial
+             kperp_bmag_max=max(kperp_bmag_max,kperp_bmag)
+          end do
        end do
     end do
     ! kperp_bmag_max is not completely global, there is still the n dependence.
@@ -924,39 +928,41 @@ contains
     ! now to the k-interpolation of cmat
     allocate(chebweightarr(nkmax))
     !allocate(m1(n_energy,n_xi,n_energy,n_xi))
-    do ic_loc=1,nc_loc
-       ic=ic_loc-1+nc1
-       it=it_c(ic)
-       target_k=k_perp(ic)/bmag(it)/kperp_bmag_max
-       !target_k=sin(.5*pi1*(target_ik-.5)/nk(ia,ib))**2
-       do ia=1,n_species
-          do ib=1,n_species
-             target_ik=asin(sqrt(target_k))*(nk(ia,ib)/(.5*pi1))+.5
-             ! for sinc --> see below
-             chebweightarr(1:nk(ia,ib))=[(sinc(target_ik-i,nk(ia,ib))+sinc(target_ik+i-1,nk(ia,ib)),&
-                  i=1,nk(ia,ib))]
-             if (verbose>4 .and. i_proc==0) then
-                print *,'interpolation for krel=',target_k,'target_ik=',target_ik,&
-                     'weightsum',sum(chebweightarr(1:nk(ia,ib))),&
-                     'ipoltest',sum(chebweightarr(1:nk(ia,ib))*kperp_arr(1:nk(ia,ib),ia,ib)),&
-                     'should be',target_k*rho_spec(ia)*kperp_bmag_max
-                print *,'interpolationtest',sum(chebweightarr(1:nk(ia,ib))*&
-                     [(sin(.5*pi1*(i-.5)/nk(ia,ib))**2,i=1,nk(ia,ib))]),&
-                     'should be',sin(.5*pi1*(target_ik-.5)/nk(ia,ib))**2,nk(ia,ib)
-             end if
-             call dgemm('N','N',n_xi**2*n_energy**2,1,nk(ia,ib),1.,&
-                  gyrocolmat(:,:,:,:,ia,ib,1),n_xi**2*n_energy**2*n_species**2,chebweightarr,nk(ia,ib),&
-                  0.,m1,n_xi**2*n_energy**2)
-             do jx=1,n_xi
-                do je=1,n_energy
-                   jv=iv_v(je,jx,ib)
-                   do ix=1,n_xi
-                      do ie=1,n_energy
-                         iv=iv_v(ie,ix,ia)
-                         cmat(iv,jv,ic_loc)=-m1(ie,ix,je,jx)
+    do itor=nt1,nt2
+       do ic_loc=1,nc_loc
+          ic=ic_loc-1+nc1
+          it=it_c(ic)
+          target_k=k_perp(ic,itor)/bmag(it)/kperp_bmag_max
+          !target_k=sin(.5*pi1*(target_ik-.5)/nk(ia,ib))**2
+          do ia=1,n_species
+             do ib=1,n_species
+                target_ik=asin(sqrt(target_k))*(nk(ia,ib)/(.5*pi1))+.5
+                ! for sinc --> see below
+                chebweightarr(1:nk(ia,ib))=[(sinc(target_ik-i,nk(ia,ib))+sinc(target_ik+i-1,nk(ia,ib)),&
+                     i=1,nk(ia,ib))]
+                if (verbose>4 .and. i_proc==0) then
+                   print *,'interpolation for krel=',target_k,'target_ik=',target_ik,&
+                        'weightsum',sum(chebweightarr(1:nk(ia,ib))),&
+                        'ipoltest',sum(chebweightarr(1:nk(ia,ib))*kperp_arr(1:nk(ia,ib),ia,ib)),&
+                        'should be',target_k*rho_spec(ia)*kperp_bmag_max
+                   print *,'interpolationtest',sum(chebweightarr(1:nk(ia,ib))*&
+                        [(sin(.5*pi1*(i-.5)/nk(ia,ib))**2,i=1,nk(ia,ib))]),&
+                        'should be',sin(.5*pi1*(target_ik-.5)/nk(ia,ib))**2,nk(ia,ib)
+                end if
+                call dgemm('N','N',n_xi**2*n_energy**2,1,nk(ia,ib),1.,&
+                     gyrocolmat(:,:,:,:,ia,ib,1),n_xi**2*n_energy**2*n_species**2,chebweightarr,nk(ia,ib),&
+                     0.,m1,n_xi**2*n_energy**2)
+                do jx=1,n_xi
+                   do je=1,n_energy
+                      jv=iv_v(je,jx,ib)
+                      do ix=1,n_xi
+                         do ie=1,n_energy
+                            iv=iv_v(ie,ix,ia)
+                            cmat(iv,jv,ic_loc,itor)=-m1(ie,ix,je,jx)
 !!$                           if (gyrocolmat(ie,ix,je,jx,ia,ib,1)==0 .and. ic_loc==1) &
 !!$                                print *,'zero gc i_proc',i_proc,&
 !!$                                '(ie,ix,ia,je,jx,ib,ic_loc)',ie,ix,ia,je,jx,ib,ic_loc
+                         end do
                       end do
                    end do
                 end do
@@ -1010,49 +1016,50 @@ contains
        call dgemm('n','n',n_energy,n_energy,n_energy,1.,energymatrix,n_energy,v2poly,n_energy,&
             0.,v2polytimesemat,n_energy)
        md=-1
-       do ic=1,nc,nc-1
-          ic_loc=ic+1-nc1
-          do ia=1,n_species
-             specbloop: do ib=1,n_species
-                if (ic>=nc1 .and. ic<=nc2) then
-                   do jx=1,n_xi
-                      do je=1,n_energy
-                         jv=iv_v(je,jx,ib)
-                         do ix=1,n_xi
-                            do ie=1,n_energy
-                               iv=iv_v(ie,ix,ia)
-                               c(ie,ix,je,jx,1)=cmat(iv,jv,ic_loc)
-                               c(ie,ix,je,jx,2)=cmat1(iv,jv,ic_loc)
+       do itor=nt1,nt2
+          do ic=1,nc,nc-1
+             ic_loc=ic+1-nc1
+             do ia=1,n_species
+                specbloop: do ib=1,n_species
+                   if (ic>=nc1 .and. ic<=nc2) then
+                      do jx=1,n_xi
+                         do je=1,n_energy
+                            jv=iv_v(je,jx,ib)
+                            do ix=1,n_xi
+                               do ie=1,n_energy
+                                  iv=iv_v(ie,ix,ia)
+                                  c(ie,ix,je,jx,1)=cmat(iv,jv,ic_loc,itor)
+                                  c(ie,ix,je,jx,2)=cmat1(iv,jv,ic_loc,itor)
+                               end do
                             end do
                          end do
                       end do
-                   end do
-                   do l=1,2
-                      call dgemm('N','N',n_energy,n_xi**2*n_energy,n_energy,1.,v2polytimesemat&
-                           ,n_energy,c(:,:,:,:,l),n_energy,0.,&
-                           m1,n_energy)
-                      do k=1,n_xi
-                         do j=1,n_energy
-                            call dgemm('N','T',n_energy,n_xi,n_xi,1.,m1(:,:,j,k),n_energy,&
-                                 xi2L,n_xi,0.,m2(:,:,j,k),n_energy)
+                      do l=1,2
+                         call dgemm('N','N',n_energy,n_xi**2*n_energy,n_energy,1.,v2polytimesemat&
+                              ,n_energy,c(:,:,:,:,l),n_energy,0.,&
+                              m1,n_energy)
+                         do k=1,n_xi
+                            do j=1,n_energy
+                               call dgemm('N','T',n_energy,n_xi,n_xi,1.,m1(:,:,j,k),n_energy,&
+                                    xi2L,n_xi,0.,m2(:,:,j,k),n_energy)
+                            end do
                          end do
+                         do j=1,n_xi
+                            call dgemm('N','T',n_xi*n_energy,n_energy,n_energy,1.,m2(:,:,:&
+                                 ,j),n_xi*n_energy,poly2v,n_energy,0.,&
+                                 m1(:,:,:,j),n_xi*n_energy)
+                         end do
+                         call  dgemm('N','N',n_xi*n_energy**2,n_xi,n_xi,1.,m1,n_xi*n_energy&
+                              **2,L2xi,n_xi,0.,c(:,:,:,:,l),n_xi*n_energy**2)
                       end do
-                      do j=1,n_xi
-                         call dgemm('N','T',n_xi*n_energy,n_energy,n_energy,1.,m2(:,:,:&
-                              ,j),n_xi*n_energy,poly2v,n_energy,0.,&
-                              m1(:,:,:,j),n_xi*n_energy)
-                      end do
-                      call  dgemm('N','N',n_xi*n_energy**2,n_xi,n_xi,1.,m1,n_xi*n_energy&
-                           **2,L2xi,n_xi,0.,c(:,:,:,:,l),n_xi*n_energy**2)
-                   end do
-                   if (i_proc/=0) then
-                      call MPI_SEND(c,size(c),MPI_REAL8,0,1234,MPI_COMM_WORLD,ierror)
+                      if (i_proc/=0) then
+                         call MPI_SEND(c,size(c),MPI_REAL8,0,1234,MPI_COMM_WORLD,ierror)
+                      end if
+                   else
+                      if (i_proc==0) then
+                         call MPI_RECV(c,size(c),MPI_REAL8,proc_c(ic),1234,MPI_COMM_WORLD,status,ierror)
+                      end if
                    end if
-                else
-                   if (i_proc==0) then
-                      call MPI_RECV(c,size(c),MPI_REAL8,proc_c(ic),1234,MPI_COMM_WORLD,status,ierror)
-                   end if
-                end if
 !!$                  block
 !!$                    real s(n_energy,n_xi),s1(n_energy,n_xi)
 !!$                    if (i_proc==0) then
@@ -1062,8 +1069,8 @@ contains
 !!$                          do ie=1,n_energy
 !!$                             do jx=1,n_xi
 !!$                                do je=1,n_energy
-!!$                                   s(je,jx)=s(je,jx)+cmat(iv_v(je,jx,ia),iv_v(ie,ix,ib),ic_loc)
-!!$                                   s1(je,jx)=s1(je,jx)+cmat1(iv_v(je,jx,ia),iv_v(ie,ix,ib),ic_loc)
+!!$                                   s(je,jx)=s(je,jx)+cmat(iv_v(je,jx,ia),iv_v(ie,ix,ib),ic_loc,itor)
+!!$                                   s1(je,jx)=s1(je,jx)+cmat1(iv_v(je,jx,ia),iv_v(ie,ix,ib),ic_loc,itor)
 !!$                                end do
 !!$                             end do
 !!$                          end do
@@ -1073,26 +1080,27 @@ contains
 !!$                       print *,'particle conservation',ia,ib,'s1',s1
 !!$                    end if
 !!$                  end block
-                if (i_proc==0) then
-                   jxloop: do jx=1,n_xi !n_xi
-                      do je=1,n_energy/2
-                         do ix=1,n_xi
-                            do ie=1,n_energy/2 !n_energy
-                               s=c(ie,ix,je,jx,1)
-                               s1=c(ie,ix,je,jx,2)
-                               d=abs(s-s1)
-                               if (d>md) then
-                                  md=d
-                               end if
-                               print '(A,3I3,G14.6,2(A,I3,I4),A,G25.16E3,A,2G25.16E3)','ia,ib,ic_loc,kp',ia,&
-                                    ib,ic_loc,k_perp(ic)/bmag(it_c(ic))*rho*sqrt(2.),&
-                                    'jx,je',jx,je,' ix,ie',ix,ie,' d',d,' c,c1',s,s1
+                   if (i_proc==0) then
+                      jxloop: do jx=1,n_xi !n_xi
+                         do je=1,n_energy/2
+                            do ix=1,n_xi
+                               do ie=1,n_energy/2 !n_energy
+                                  s=c(ie,ix,je,jx,1)
+                                  s1=c(ie,ix,je,jx,2)
+                                  d=abs(s-s1)
+                                  if (d>md) then
+                                     md=d
+                                  end if
+                                  print '(A,3I3,G14.6,2(A,I3,I4),A,G25.16E3,A,2G25.16E3)','ia,ib,ic_loc,kp',ia,&
+                                       ib,ic_loc,k_perp(ic,itor)/bmag(it_c(ic))*rho*sqrt(2.),&
+                                       'jx,je',jx,je,' ix,ie',ix,ie,' d',d,' c,c1',s,s1
+                               end do
                             end do
                          end do
-                      end do
-                   end do jxloop
-                end if
-             end do specbloop
+                      end do jxloop
+                   end if
+                end do specbloop
+             end do
           end do
        end do
        ! print out all kradial for certain moments:
@@ -1119,23 +1127,24 @@ contains
              enddo
           end do
        end if
-       do ic=1,nc
-          ic_loc=ic+1-nc1
-          do ia=1,n_species
-             specbloop2: do ib=1,n_species
-                if (ic>=nc1 .and. ic<=nc2) then
-                   do jx=1,n_xi
-                      do je=1,n_energy
-                         jv=iv_v(je,jx,ib)
-                         do ix=1,n_xi
-                            do ie=1,n_energy
-                               iv=iv_v(ie,ix,ia)
-                               c(ie,ix,je,jx,1)=cmat(iv,jv,ic_loc)
-                               c(ie,ix,je,jx,2)=cmat1(iv,jv,ic_loc)
+       do itor=nt1,nt2
+          do ic=1,nc
+             ic_loc=ic+1-nc1
+             do ia=1,n_species
+                specbloop2: do ib=1,n_species
+                   if (ic>=nc1 .and. ic<=nc2) then
+                      do jx=1,n_xi
+                         do je=1,n_energy
+                            jv=iv_v(je,jx,ib)
+                            do ix=1,n_xi
+                               do ie=1,n_energy
+                                  iv=iv_v(ie,ix,ia)
+                                  c(ie,ix,je,jx,1)=cmat(iv,jv,ic_loc,itor)
+                                  c(ie,ix,je,jx,2)=cmat1(iv,jv,ic_loc,itor)
+                               end do
                             end do
                          end do
                       end do
-                   end do
 !!$                     do l=1,2
 !!$                        call dgemm('N','N',n_energy,n_xi**2*n_energy,n_energy,1.,v2polytimesemat&
 !!$                             ,n_energy,c(:,:,:,:,l),n_energy,0.,&
@@ -1154,43 +1163,44 @@ contains
 !!$                        call  dgemm('N','N',n_xi*n_energy**2,n_xi,n_xi,1.,m1,n_xi*n_energy&
 !!$                             **2,L2xi,n_xi,0.,c(:,:,:,:,l),n_xi*n_energy**2)
 !!$                     end do
-
-                   do l=1,2
-                      call dgemm('N','N',3,n_xi**2*n_energy,n_energy,1.,v2momtimesemat&
-                           ,3,c(:,:,:,:,l),n_energy,0.,&
-                           m1,n_energy)
-                      do k=1,n_xi
-                         do j=1,n_energy
-                            call dgemm('N','T',n_energy,n_xi,n_xi,1.,m1(:,:,j,k),n_energy,&
-                                 xi2L,n_xi,0.,m2(:,:,j,k),n_energy)
+                      
+                      do l=1,2
+                         call dgemm('N','N',3,n_xi**2*n_energy,n_energy,1.,v2momtimesemat&
+                              ,3,c(:,:,:,:,l),n_energy,0.,&
+                              m1,n_energy)
+                         do k=1,n_xi
+                            do j=1,n_energy
+                               call dgemm('N','T',n_energy,n_xi,n_xi,1.,m1(:,:,j,k),n_energy,&
+                                    xi2L,n_xi,0.,m2(:,:,j,k),n_energy)
+                            end do
                          end do
+                         do j=1,n_xi
+                            call dgemm('N','T',n_xi*n_energy,3,n_energy,1.,m2(:,:,:&
+                                 ,j),n_xi*n_energy,mom2v,3,0.,&
+                                 m1(:,:,:,j),n_xi*n_energy)
+                         end do
+                         call  dgemm('N','N',n_xi*n_energy*3,n_xi,n_xi,1.,m1,n_xi*n_energy&
+                              **2,L2xi,n_xi,0.,c(:,:,:,:,l),n_xi*n_energy**2)
                       end do
-                      do j=1,n_xi
-                         call dgemm('N','T',n_xi*n_energy,3,n_energy,1.,m2(:,:,:&
-                              ,j),n_xi*n_energy,mom2v,3,0.,&
-                              m1(:,:,:,j),n_xi*n_energy)
-                      end do
-                      call  dgemm('N','N',n_xi*n_energy*3,n_xi,n_xi,1.,m1,n_xi*n_energy&
-                           **2,L2xi,n_xi,0.,c(:,:,:,:,l),n_xi*n_energy**2)
-                   end do
-                   if (i_proc/=0) then
-                      call MPI_SEND(c,size(c),MPI_REAL8,0,1234,MPI_COMM_WORLD,ierror)
+                      if (i_proc/=0) then
+                         call MPI_SEND(c,size(c),MPI_REAL8,0,1234,MPI_COMM_WORLD,ierror)
+                      end if
+                   else
+                      if (i_proc==0) then
+                         call MPI_RECV(c,size(c),MPI_REAL8,proc_c(ic),1234,MPI_COMM_WORLD,status,ierror)
+                      end if
                    end if
-                else
-                   if (i_proc==0) then
-                      call MPI_RECV(c,size(c),MPI_REAL8,proc_c(ic),1234,MPI_COMM_WORLD,status,ierror)
-                   end if
-                end if
 
-                if (i_proc==0) then
-                   do l=1,2
-                      ! kperp n-diff,mom-diff heat-diff T->n n->T
-                      write(6+ib+n_species*(ia+n_species*l),'(6(G24.16))') &
-                           k_perp(ic)/bmag(it_c(ic))*rho,c(1,1,1,1,l),c(2,2,2,2,l),&
-                           c(3,1,3,1,l),c(1,1,3,1,l),c(3,1,1,1,l)
-                   end do
-                end if
-             end do specbloop2
+                   if (i_proc==0) then
+                      do l=1,2
+                         ! kperp n-diff,mom-diff heat-diff T->n n->T
+                         write(6+ib+n_species*(ia+n_species*l),'(6(G24.16))') &
+                              k_perp(ic,itor)/bmag(it_c(ic))*rho,c(1,1,1,1,l),c(2,2,2,2,l),&
+                              c(3,1,3,1,l),c(1,1,3,1,l),c(3,1,1,1,l)
+                      end do
+                   end if
+                end do specbloop2
+             end do
           end do
        end do
        if (i_proc==0) then
