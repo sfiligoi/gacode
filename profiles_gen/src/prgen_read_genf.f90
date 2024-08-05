@@ -39,7 +39,10 @@ subroutine prgen_read_genf
           te_kev(i),&
           ti_kev(i),&
           ne_e19m3(i),&
-          ni_e19m3(i)
+          ni_e19m3(i),&
+          dummy(i),&
+          dummy(i),&
+          qohm(i)
   enddo
 
   dpsi = (-dpsi+dpsi(1))/(2*pi)

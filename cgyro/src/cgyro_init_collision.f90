@@ -8,6 +8,7 @@ subroutine cgyro_init_collision
   use gyrotransformation
   !  use mpi_f08
   use mpi
+  use cgyro_io
 
   implicit none
 
@@ -18,20 +19,32 @@ subroutine cgyro_init_collision
   real, dimension(:,:,:,:), allocatable :: rsvec, rsvect0, rsvect1
   real, dimension(:,:), allocatable :: klor_fac, kdiff_fac
 
+  character(len=160) :: msg
   real :: arg
   real :: xa, xb, tauinv_ab
-  real :: mo1,mo2,en1,en2
   real :: rval
   integer :: jv
   integer :: is,ir,it,ix,ie,js,je,jx,ks
-  integer :: dv
+  integer :: itor
   ! parameters for matrix solve
   real, dimension(:,:), allocatable :: amat,cmat_loc
   real, dimension(:,:,:,:,:,:), allocatable :: ctest
-  real, dimension(:,:,:,:,:), allocatable :: bessel
+  real, dimension(:,:,:,:,:,:), allocatable :: bessel
+  ! diagnostics
+  real :: my_cmat_fp32
+  real :: amat_sum, cmat_sum, cmat_diff, cmat_rel_diff
+  real :: cmat32_sum, cmat32_diff
+  real :: cmat_diff_global_loc, cmat32_diff_global_loc
+  ! use real as 32-bit int may overflow
+  real, dimension(8:19) :: cmap_fp32_error_abs_cnt_loc
+  real, dimension(8:18) :: cmap_fp32_error_rel_cnt_loc
+  real, dimension(8:19) :: cmap_fp32_error_abs_cnt
+  real, dimension(8:18) :: cmap_fp32_error_rel_cnt
+  real, dimension(2) :: cmap_fp32_error_sum_loc
+  real, dimension(2) :: cmap_fp32_error_sum
 
   !for collision_test_mode=1
-  real,allocatable :: cmat1(:,:,:)
+  real,allocatable :: cmat1(:,:,:,:)
   real md,d
 
   if (collision_model == 5) then
@@ -47,7 +60,10 @@ subroutine cgyro_init_collision
      end if
      call cgyro_init_landau
   else
-   
+
+  cmap_fp32_error_abs_cnt_loc(:) = 0
+  cmap_fp32_error_rel_cnt_loc(:) = 0
+
      allocate(nu_d(n_energy,n_species,n_species))
      allocate(nu_par(n_energy,n_species,n_species))
      allocate(klor_fac(n_species,n_species))
@@ -62,13 +78,8 @@ subroutine cgyro_init_collision
            do js=1,n_species
 
               xa = vel(ie)
-              xb = xa * vth(is) / vth(js)
-              tauinv_ab = nu(is) * z(js)**2 / z(is)**2 &
-                   * dens(js)/dens(is)
-              ! re-scale only electron collisions (ee,ei,ie)
-              if(is == is_ele .or. js == is_ele) then
-                 tauinv_ab = tauinv_ab * collision_ele_scale
-              endif
+           xb = xa*vth(is)/vth(js)
+           tauinv_ab = nu(is)*z(js)**2/z(is)**2*dens(js)/dens(is)
 
               select case (collision_model)
 
@@ -164,22 +175,24 @@ subroutine cgyro_init_collision
 
      if (collision_model >= 4 .and. collision_kperp == 1 .and. &
           (collision_mom_restore == 1 .or. collision_ene_restore == 1)) then
-        allocate(bessel(n_species,n_xi,n_energy,nc_loc,0:1))
-!$omp parallel do private(ic_loc,it,ie,ix,is,arg)
-        do ic=nc1,nc2
+     allocate(bessel(n_species,n_xi,n_energy,nc_loc,0:1,nt1:nt2))
+!$omp parallel do collapse(2) private(ic_loc,it,ie,ix,is,arg)
+     do itor=nt1,nt2
+      do ic=nc1,nc2
            ic_loc = ic-nc1+1
            it = it_c(ic)
            do ie=1,n_energy
               do ix=1,n_xi
                  do is=1,n_species   
-                    arg = k_perp(ic)*rho*vth(is)*mass(is)&
+                 arg = k_perp(ic,itor)*rho*vth(is)*mass(is)&
                          /(z(is)*bmag(it)) *sqrt(2.0*energy(ie)) &
                          *sqrt(1.0-xi(ix)**2)
-                    bessel(is,ix,ie,ic_loc,0) = bessel_j0(arg)
-                    bessel(is,ix,ie,ic_loc,1) = bessel_j1(arg)
-                 enddo
+                 bessel(is,ix,ie,ic_loc,0,itor) = bessel_j0(arg)
+                 bessel(is,ix,ie,ic_loc,1,itor) = bessel_j1(arg)
               enddo
            enddo
+        enddo
+      enddo
         enddo
      endif
 
@@ -249,9 +262,11 @@ subroutine cgyro_init_collision
   allocate(i_piv(nv))
 
   ! Construct the collision matrix
+  cmat_diff_global_loc = 0.0
+  cmat32_diff_global_loc = 0.0
 
-!$omp  parallel do  default(none) &
-!$omp& shared(nc1,nc2,nv,n,delta_t,n_species,rho,is_ele,n_field,n_energy,n_xi) &
+!$omp  parallel do collapse(2) default(none) &
+!$omp& shared(nc1,nc2,nt1,nt2,nv,delta_t,n_species,rho,is_ele,n_field,n_energy,n_xi) &
 !$omp& shared(collision_kperp,collision_field_model,explicit_trap_flag) &
 !$omp& firstprivate(collision_model,collision_mom_restore,collision_ene_restore,collision_test_mode) &
 !$omp& shared(ae_flag,lambda_debye,dens_ele,temp_ele,dens_rot) &
@@ -264,10 +279,14 @@ subroutine cgyro_init_collision
 !$omp& shared(klor_fac,kdiff_fac) &
 !$omp& private(ic,ic_loc,it,ir,info,rval) &
 !$omp& private(iv,is,ix,ie,jv,js,jx,je,ks) &
-!$omp& private(amat,cmat_loc,i_piv,rs,rsvec,rsvect0,rsvect1) &
-!$omp& private(dv) firstprivate(collision_precision_mode, collision_full_stripes) &
-!$omp& shared(cmat,cmat_fp32,cmat_stripes)
-  do ic=nc1,nc2
+!$omp& private(amat_sum,cmat_sum,cmat_diff,cmat_rel_diff,cmat32_sum,cmat32_diff) &
+!$omp& private(amat,cmat_loc,my_cmat_fp32,i_piv,rs,rsvec,rsvect0,rsvect1) &
+!$omp& firstprivate(collision_precision_mode,n_low_energy) &
+!$omp& shared(cmat,cmat_fp32,cmat_stripes,cmat_e1) &
+!$omp& reduction(+:cmat_diff_global_loc,cmat32_diff_global_loc) &
+!$omp& reduction(+:cmap_fp32_error_abs_cnt_loc,cmap_fp32_error_rel_cnt_loc)
+  do itor=nt1,nt2
+   do ic=nc1,nc2
      
      ic_loc = ic-nc1+1
 
@@ -277,7 +296,7 @@ subroutine cgyro_init_collision
      do_old_coll2:  if (.not. (collision_model <= 4 .or. collision_test_mode/=0)) then
         ! write the Landau collision matrix into the local array
         ! this is a quick fix to get the merges done.
-        cmat_loc(:,:)=cmat(:,:,ic_loc)
+        cmat_loc(:,:)=cmat(:,:,ic_loc,itor)
      else
 
         ! Collision field particle component
@@ -398,12 +417,12 @@ subroutine cgyro_init_collision
                                         + ctest(is,js,jx,ix,je,ie) &
                                         * sqrt(2.0*energy(je)) * xi(jx) &
                                         * w_e(je)*w_xi(jx) * vth(is) &
-                                        * bessel(is,ix,ie,ic_loc,0)
+                                     * bessel(is,ix,ie,ic_loc,0,itor)
                                    rsvect1(is,js,ix,ie) = rsvect1(is,js,ix,ie) &
                                         + ctest(is,js,jx,ix,je,ie) &
                                         * sqrt(2.0*energy(je)) * xi(jx) &
                                         * w_e(je)*w_xi(jx) * vth(is) &
-                                        * bessel(is,ix,ie,ic_loc,1) &
+                                     * bessel(is,ix,ie,ic_loc,1,itor) &
                                         * sqrt(1.0-xi(ix)**2)/xi(ix)
                                 enddo
                              enddo
@@ -428,14 +447,14 @@ subroutine cgyro_init_collision
                                - mass(js)/mass(is) &
                                * dens(js) * dens_rot(it,js) &
                                * rsvec(is,js,ix,ie) &
-                               * bessel(is,ix,ie,ic_loc,0) / rs(is,js) &
+                            * bessel(is,ix,ie,ic_loc,0,itor) / rs(is,js) &
                                * rsvect0(js,is,jx,je)
                           cmat_loc(iv,jv) &
                                = cmat_loc(iv,jv) &
                                - mass(js)/mass(is) &
                                * dens(js) * dens_rot(it,js) &
                                * rsvec(is,js,ix,ie) / rs(is,js) &
-                               * bessel(is,ix,ie,ic_loc,1) &
+                            * bessel(is,ix,ie,ic_loc,1,itor) &
                                * sqrt(1.0-xi(ix)**2)/xi(ix) &
                                * rsvect1(js,is,jx,je) 
                        endif
@@ -514,7 +533,7 @@ subroutine cgyro_init_collision
                                    rsvect0(is,js,ix,ie) = rsvect0(is,js,ix,ie) &
                                         + ctest(is,js,jx,ix,je,ie) * energy(je) &
                                         * w_e(je)*w_xi(jx) &
-                                        * bessel(is,ix,ie,ic_loc,0) 
+                                     * bessel(is,ix,ie,ic_loc,0,itor) 
                                 enddo
                              enddo
                           enddo
@@ -537,7 +556,7 @@ subroutine cgyro_init_collision
                                = cmat_loc(iv,jv) &
                                - temp(js)/temp(is) * dens(js) * dens_rot(it,js) &
                                * rsvec(is,js,ix,ie) &
-                               * bessel(is,ix,ie,ic_loc,0) / rs(is,js) &
+                            * bessel(is,ix,ie,ic_loc,0,itor) / rs(is,js) &
                                * rsvect0(js,is,jx,je)
                        endif
                     enddo
@@ -576,7 +595,7 @@ subroutine cgyro_init_collision
                  if (is == js .and. jx == ix .and. je == ie) then
                     do ks=1,n_species
                        cmat_loc(iv,jv) = cmat_loc(iv,jv) &
-                            + (-0.25*(k_perp(ic)*rho*vth(is)*mass(is) &
+                            + (-0.25*(k_perp(ic,itor)*rho*vth(is)*mass(is) &
                             / (z(is)*bmag(it)))**2 * 2.0*energy(ie) &
                             * (klor_fac(is,ks)*nu_d(ie,is,ks) * (1+xi(ix)**2) &
                             + kdiff_fac(is,ks)*nu_par(ie,is,ks)* (1-xi(ix)**2)))
@@ -593,7 +612,7 @@ subroutine cgyro_init_collision
      coltestmode: if (collision_test_mode==0) then
 
         ! Avoid singularity of n=0,p=0:
-        if (px(ir) == 0 .and. n == 0) then
+     if (px(ir) == 0 .and. itor == 0) then
 
            do iv=1,nv
               cmat_loc(iv,iv) =  1.0
@@ -626,7 +645,7 @@ subroutine cgyro_init_collision
                  ! Trapping 
                  ! (not part of collision operator but contains xi-derivative)
                  if (explicit_trap_flag == 0 .and. is == js .and. ie == je) then
-                    rval = (0.5*delta_t) * (omega_trap(it,is) * vel(ie) &
+                 rval = (0.5*delta_t) * (omega_trap(it,is,itor) * vel(ie) &
                          + omega_rot_trap(it,is) / vel(ie)) &
                          * (1.0 - xi(ix)**2) * xi_deriv_mat(ix,jx)
                     cmat_loc(iv,jv) = cmat_loc(iv,jv) + rval
@@ -645,39 +664,39 @@ subroutine cgyro_init_collision
                  if (collision_field_model == 1) then
 
                     ! Poisson component l
-                    if (n == 0 .and. ae_flag == 1) then
+                 if (itor == 0 .and. ae_flag == 1) then
                        ! Cannot include Poisson in collision matrix
                        ! for n=0 with ade because depends on theta
                        ! i.e. ne0 ~ phi - <phi>
                        !cmat_loc(iv,jv)    = cmat_loc(iv,jv) + 0.0
                        !amat(iv,jv)        = amat(iv,jv) + 0.0
                     else
-                       rval =  z(is)/temp(is) * jvec_v(1,ic_loc,iv) &
-                            / (k_perp(ic)**2 * lambda_debye**2 &
+                    rval =  z(is)/temp(is) * jvec_v(1,ic_loc,itor,iv) &
+                         / (k_perp(ic,itor)**2 * lambda_debye**2 &
                             * dens_ele / temp_ele + sum_den_h(it)) &
                             * z(js)*dens(js)*dens_rot(it,js) &
-                            * jvec_v(1,ic_loc,jv) * w_e(je) * w_xi(jx) 
+                         * jvec_v(1,ic_loc,itor,jv) * w_e(je) * w_xi(jx) 
                        cmat_loc(iv,jv) = cmat_loc(iv,jv) - rval
                        amat(iv,jv) = amat(iv,jv) - rval
                     endif
 
                     ! Ampere component
                     if (n_field > 1) then
-                       rval =  z(is)/temp(is) * (jvec_v(2,ic_loc,iv) &
-                            / (2.0*k_perp(ic)**2 * rho**2 / betae_unit & 
+                    rval =  z(is)/temp(is) * (jvec_v(2,ic_loc,itor,iv) &
+                         / (2.0*k_perp(ic,itor)**2 * rho**2 / betae_unit & 
                             * dens_ele * temp_ele)) &
                             * z(js)*dens(js)*dens_rot(it,js) &
-                            * jvec_v(2,ic_loc,jv) * w_e(je) * w_xi(jx)  
+                         * jvec_v(2,ic_loc,itor,jv) * w_e(je) * w_xi(jx)  
                        cmat_loc(iv,jv) = cmat_loc(iv,jv) + rval
                        amat(iv,jv) = amat(iv,jv) + rval
                     endif
 
                     ! Ampere Bpar component
                     if (n_field > 2) then
-                       rval = jvec_v(3,ic_loc,iv) &
+                    rval = jvec_v(3,ic_loc,itor,iv) &
                             * (-0.5*betae_unit)/(dens_ele*temp_ele) &
                             * w_e(je)*w_xi(jx)*dens(js)*dens_rot(it,js)*temp(js) &
-                            * jvec_v(3,ic_loc,jv)/(temp(is)/z(is))/(temp(js)/z(js))
+                         * jvec_v(3,ic_loc,itor,jv)/(temp(is)/z(is))/(temp(js)/z(js))
                        cmat_loc(iv,jv) = cmat_loc(iv,jv) - rval
                        amat(iv,jv) = amat(iv,jv) - rval
                     endif
@@ -703,30 +722,65 @@ subroutine cgyro_init_collision
 
         ! result in amat, transfer to the right cmat matrix
         if (collision_precision_mode /= 0) then
+        ! keep all cmat in fp32 precision
+        cmat_fp32(:,:,ic_loc,itor) = amat(:,:)
+        ! keep the remaining precision for select elements
            do jv=1,nv
-              cmat_stripes(:,jv,ic_loc) = 0.0
+           je = ie_v(jv)
+           js = is_v(jv)
+           jx = ix_v(jv)
+           amat_sum = 0.0
+           cmat_sum = 0.0
+           cmat32_sum = 0.0
               do iv=1,nv
-                 dv = iv-jv
-                 if (abs(dv) .GT. collision_full_stripes) then
-                    ! far from diagonal, keep low precision only
-                    cmat_fp32(iv,jv,ic_loc) = amat(iv,jv)
-                 else
-                    ! close to the diagonal, keep full precision
-                    cmat_stripes(dv,jv,ic_loc) = amat(iv,jv)
-                    ! set main matrix to 0, for ease of compute later
-                    cmat_fp32(iv,jv,ic_loc) = 0.0
+              ! using abs values, as I am gaugung precision errors, and this avoid symmetry cancellations
+              amat_sum = amat_sum + abs(amat(iv,jv))
+              cmat32_sum = cmat32_sum + abs(cmat_fp32(iv,jv,ic_loc,itor))
+              ie = ie_v(iv)
+              is = is_v(iv)
+              ix = ix_v(iv)
+              my_cmat_fp32 = cmat_fp32(iv,jv,ic_loc,itor)
+              if (ie<=n_low_energy) then ! always keep all detail for lowest energy
+                 cmat_e1(ix,is,ie,jv,ic_loc,itor) = amat(iv,jv) - my_cmat_fp32
+                 ! my_cmat_fp32 not used for the original purpose anymore, reuse to represent the reduced precsion
+                 my_cmat_fp32 = my_cmat_fp32 + cmat_e1(ix,is,ie,jv,ic_loc,itor) ! my_cmat_fp32 is actually fp64, so sum OK
+              else ! only keep if energy and species the same
+                 if ((je == ie) .AND. (js == is)) then
+                    cmat_stripes(ix,is,ie,jx,ic_loc,itor) = amat(iv,jv) - my_cmat_fp32
+                    ! my_cmat_fp32 not used for the original purpose anymore, reuse to represent the reduced precsion
+                    my_cmat_fp32 = my_cmat_fp32 + cmat_stripes(ix,is,ie,jx,ic_loc,itor) ! my_cmat_fp32 is actually fp64, so sum OK
                  endif
+                 endif
+              cmat_sum = cmat_sum + abs(my_cmat_fp32)
               enddo
+           cmat_diff = abs(amat_sum-cmat_sum)
+           cmat_diff_global_loc = cmat_diff_global_loc + cmat_diff
+           cmat32_diff = abs(amat_sum-cmat32_sum)
+           cmat32_diff_global_loc = cmat32_diff_global_loc + cmat32_diff
+           cmat_rel_diff = cmat_diff/abs(amat_sum)
+           ! reuse amt_sum as 10^-(ie), to reduce numbe rof variables in use 
+           do ie=8,18
+             amat_sum = 10.0 ** (-ie)
+             if (cmat_diff>amat_sum) then
+               cmap_fp32_error_abs_cnt_loc(ie) = cmap_fp32_error_abs_cnt_loc(ie) + 1
+             endif
+             if (cmat_rel_diff>amat_sum) then
+               cmap_fp32_error_rel_cnt_loc(ie) = cmap_fp32_error_rel_cnt_loc(ie) + 1
+             endif
+           enddo
+           ! use 19 as absolute counter for normalization
+           cmap_fp32_error_abs_cnt_loc(19) = cmap_fp32_error_abs_cnt_loc(19) + 1
            enddo
         else
            ! keep all cmat in full precision
-           cmat(:,:,ic_loc) = amat(:,:)
+        cmat(:,:,ic_loc,itor) = amat(:,:)
         endif
      else
         ! when testing, the old collision matrix needs to be written into cmat.
-        cmat(:,:,ic_loc) = cmat_loc(:,:)
+        cmat(:,:,ic_loc,itor) = cmat_loc(:,:)
      endif coltestmode
 
+   enddo
   enddo
   deallocate(cmat_loc)
   deallocate(amat)
@@ -737,13 +791,78 @@ subroutine cgyro_init_collision
           (collision_mom_restore == 1 .or. collision_ene_restore == 1)) then
         deallocate(bessel)
      end if
-     
+
   endif do_old_coll3
 
   if (collision_precision_mode /= 0) then
-     !$acc enter data copyin(cmat_stripes,cmat_fp32) if (gpu_bigmem_flag == 1)
+!$acc enter data copyin(cmat_fp32,cmat_stripes,cmat_e1) async if (gpu_bigmem_flag == 1)
+     call MPI_ALLREDUCE(cmap_fp32_error_abs_cnt_loc,&
+          cmap_fp32_error_abs_cnt,&
+          12,&
+          MPI_DOUBLE_PRECISION,&
+          MPI_SUM,&
+          CGYRO_COMM_WORLD,&
+          i_err)
+
+     call MPI_ALLREDUCE(cmap_fp32_error_rel_cnt_loc,&
+          cmap_fp32_error_rel_cnt,&
+          11,&
+          MPI_DOUBLE_PRECISION,&
+          MPI_SUM,&
+          CGYRO_COMM_WORLD,&
+          i_err)
+
+     cmap_fp32_error_sum_loc(1) = cmat_diff_global_loc
+     cmap_fp32_error_sum_loc(2) = cmat32_diff_global_loc
+     call MPI_ALLREDUCE(cmap_fp32_error_sum_loc,&
+          cmap_fp32_error_sum,&
+          2,&
+          MPI_DOUBLE_PRECISION,&
+          MPI_SUM,&
+          CGYRO_COMM_WORLD,&
+          i_err)
+
+     if (i_proc==0) then
+        ! reuse amat_sum to reduce number of variables
+        amat_sum = 0.01 * cmap_fp32_error_abs_cnt(19)
+        write (msg, "(A,A,A,A,A,A,A,A,A)") &
+                    "                           ", &
+                    " >1.e-8", "    e-9", &
+                    "   e-10", "   e-11", &
+                    "   e-12", "   e-13", &
+                    "   e-14", "   e-15"
+        call cgyro_info(msg)
+        write (msg, "(A,4(F6.2,A),4(F6.1,A))") &
+                    "Abs cmat_fp32 error rates: ", cmap_fp32_error_abs_cnt(8)/amat_sum, &
+                    "%",  cmap_fp32_error_abs_cnt(9)/amat_sum, &
+                    "%", cmap_fp32_error_abs_cnt(10)/amat_sum, &
+                    "%", cmap_fp32_error_abs_cnt(11)/amat_sum, &
+                    "%", cmap_fp32_error_abs_cnt(12)/amat_sum, &
+                    "%", cmap_fp32_error_abs_cnt(13)/amat_sum, &
+                    "%", cmap_fp32_error_abs_cnt(14)/amat_sum, &
+                    "%", cmap_fp32_error_abs_cnt(15)/amat_sum, "%"
+        call cgyro_info(msg)
+        write (msg, "(A,4(F6.2,A),4(F6.1,A))") &
+                    "Rel cmat_fp32 error rates: ", cmap_fp32_error_rel_cnt(8)/amat_sum, &
+                    "%", cmap_fp32_error_rel_cnt(9)/amat_sum, &
+                    "%",cmap_fp32_error_rel_cnt(10)/amat_sum, &
+                    "%",cmap_fp32_error_rel_cnt(11)/amat_sum, &
+                    "%",cmap_fp32_error_rel_cnt(12)/amat_sum, &
+                    "%",cmap_fp32_error_rel_cnt(13)/amat_sum, &
+                    "%",cmap_fp32_error_rel_cnt(14)/amat_sum, &
+                    "%",cmap_fp32_error_rel_cnt(15)/amat_sum, "%"
+        call cgyro_info(msg)
+        write (msg, "(A,1PE9.2)") &
+                    "Abs cmat_fp32 error avg: ", 0.01*cmap_fp32_error_sum(1)/amat_sum
+        call cgyro_info(msg)
+        ! Printout used for CGYRO paper.
+        !write (msg, "(A,1PE9.2)") &
+        !            "Abs cmat plain fp32 error avg: ", 0.01*cmap_fp32_error_sum(2)/amat_sum
+        !call cgyro_info(msg)
+     endif
+!$acc wait
   else
-     !$acc enter data copyin(cmat) if (gpu_bigmem_flag == 1)
+!$acc enter data copyin(cmat) if (gpu_bigmem_flag == 1)
   endif
 
   do_old_coll4:  if (collision_model <= 4 .or. collision_test_mode/=0) then
@@ -762,37 +881,39 @@ subroutine cgyro_init_collision
   ! Finally compare the Landau/new Sugama and old collision operator,
   ! if requested.
   if (collision_test_mode==1) then
-     allocate(cmat1(nv,nv,nc_loc))
+     allocate(cmat1(nv,nv,nc_loc,nt1:nt2))
      cmat1=cmat
      cmat=1e300
      call cgyro_init_landau(cmat1)
      ! now let's compare
      md=-1
-     do ic_loc=1,nc_loc
-        do is=1,n_species
-           do ix=1,n_xi
-              do ie=1,n_energy
-                 iv=iv_v(ie,ix,is)
-                 do js=1,n_species
-                    do jx=1,n_xi
-                       do je=1,n_energy
-                          jv=iv_v(je,jx,js)
-                          d=abs(cmat(iv,jv,ic_loc)-cmat1(iv,jv,ic_loc))
-                          if (d>md) then
-                             md=d
-7                            format (A,I3,2(A,3I3),3(A,G23.16))
-                             if (i_proc==0) &
-                                  print 7,'so far max cmat diff @ ic_loc',ic_loc,'(is,ix,ie)=',is,ix,ie,&
-                                  '(js,jx,je)=',js,jx,je,'d=',d,'c=',cmat(iv,jv,ic_loc),&
-                                  'c1=',cmat1(iv,jv,ic_loc)
-                          end if
+     do itor=nt1,nt2
+        do ic_loc=1,nc_loc
+           do is=1,n_species
+              do ix=1,n_xi
+                 do ie=1,n_energy
+                    iv=iv_v(ie,ix,is)
+                    do js=1,n_species
+                       do jx=1,n_xi
+                          do je=1,n_energy
+                             jv=iv_v(je,jx,js)
+                             d=abs(cmat(iv,jv,ic_loc,itor)-cmat1(iv,jv,ic_loc,itor))
+                             if (d>md) then
+                                md=d
+7                               format (A,2I3,2(A,3I3),3(A,G23.16))
+                                if (i_proc==0) &
+                                     print 7,'so far max cmat diff @ (itor,ic_loc)',itor,ic_loc,'(is,ix,ie)=',is,ix,ie,&
+                                     '(js,jx,je)=',js,jx,je,'d=',d,'c=',cmat(iv,jv,ic_loc,itor),&
+                                     'c1=',cmat1(iv,jv,ic_loc,itor)
+                             end if
+                          end do
                        end do
                     end do
                  end do
               end do
            end do
         end do
-     end do
+     enddo
      call MPI_reduce(md,d,1,MPI_REAL8,MPI_MAX,0,MPI_COMM_WORLD,ierror)
      if (i_proc==0) print 1,'Max. deviation over all processors:',d
 1    format ('cgyro_in._col.: ',A,G23.16)

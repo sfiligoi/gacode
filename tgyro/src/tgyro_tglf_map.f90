@@ -18,6 +18,7 @@ subroutine tgyro_tglf_map
   real :: q_abs
   real :: q_prime
   real :: p_prime
+  real :: beta
   real :: gamma_eb0
   real :: gamma_p0
 
@@ -94,7 +95,13 @@ subroutine tgyro_tglf_map
   !----------------------------------------------------------------
   ! TGLF-specific quantities
   q_prime = (q_abs/(r(i_r)/r_min))**2*s(i_r)
-  p_prime = (q_abs/(r(i_r)/r_min))*(beta_unit(i_r)/(8*pi))*(-r_min*dlnpdr(i_r))
+  if(tgyro_tglf_ptot_flag == 1)then
+    beta = beta_unit(i_r)*ptot(i_r)/pr(i_r)
+    p_prime = (q_abs/(r(i_r)/r_min))*(beta/(8*pi))*(-r_min*dlnptotdr(i_r))
+  else
+    beta = 0.0 ! tglf will compute its own dlnpdr
+    p_prime = (q_abs/(r(i_r)/r_min))*(beta_unit(i_r)/(8*pi))*(-r_min*dlnpdr(i_r))
+  endif
   !----------------------------------------------------------------
 
   !----------------------------------------------------------------
@@ -128,6 +135,7 @@ subroutine tgyro_tglf_map
   tglf_q_loc_in       = q_abs
   tglf_q_prime_loc_in = q_prime
   tglf_p_prime_loc_in = p_prime
+  tglf_beta_loc_in = beta
   !----------------------------------------------------------------
 
   !----------------------------------------------------------------
@@ -243,39 +251,73 @@ subroutine tgyro_tglf_map
 
   case (1)
 
-     ! APS07 
+     ! Original 1-D saturation model sat_rule = 0 (SAT0) with the Waltz quench rule for ExB velocity shear and the innacurate 
+     ! electron collision model
+           !   J. E. Kinsey, G. M. Staebler, and R. E. Waltz, “The First Transport Code Simulations using the Trapped Gyro-Landau Fluid Transport Model”, 
+           !    Phys. Plasmas 15, 055908 (2008).
 
+     tglf_sat_rule_in = 0
+     tglf_units_in = 'GYRO'
      tglf_alpha_quench_in = 1.0
      tglf_xnu_model_in    = 1
 
   case (2)
 
-     ! Summer 2009
+           !  Improved 2-D (kx,ky)saturation model with multi-scale ETG zonal flow mixing: sat_rule = 1  (SAT1)
+           !   G. M. Staebler, N. T. Howard, J. Candy, and C. Holland, "A model of the saturation of coupled electron and ion scale gyrokinetic turbulence", Nucl. Fusion 57 (2017) 066046.
+     ! Improved electron collision model (now the default) 
+           !   G. M. Staebler and J. E. Kinsey, “Electron Collisions in the Trapped Gyro-Landau Fluid Transport Model”, Phys. Plasmas 17, 122309 (2010) 
+     ! Turn on the "spectral shift" ExB shear model and turn off the Waltz quench rule
+     ! G. Staebler, R. Waltz, J. Candy, and J. Kinsey, "A new paradigm for suppression of gyrokinetic turbulence by velocity shear" ,Phys. Rev. Lett. 110, 055003 (2013)
 
-     tglf_alpha_quench_in = 1.0
-     tglf_xnu_model_in    = 2
+      tglf_sat_rule_in = 1
+      tglf_xnu_model_in = 2
+      tglf_units_in = 'GYRO'
+      tglf_alpha_quench_in = 0.0
+      tglf_alpha_e_in = 1.0
 
   case (3)
 
-     ! IAEA-2012 with spectral shift ExB shear model
+     ! SAT_RULE=2 (SAT2) settings determined for JET DTE2 experiments.
+     ! These are the recommended setting for using SAT_RULE =2
+     ! Note that SAT2 is a 3-D fit (kx,ky,theta) to the saturated potential fluctuation intensity from 64 CGYRO runs
+     ! SAT2 was fit to CGYRO using the most unstable CGYRO linear eigenmode spectrum not TGLF. 
+           !   G. Staebler, J. Candy, E. Belli, J. Kinsey, N. Bonanomi, and B. Patel. Geometry dependence of the fluctuation intensity in gyrokinetic turbulence. 
+           !   Plasma Phys. Control. Fusion 63, 015013 (2020). doi.org/10.1088/1361-6587/abc861
+     ! G. Staebler, E. Belli, J. Candy, J. Kinsey, H. Dudding, and B. Patel. "Verification of a quasi-linear model for gyrokinetic turbulent transport."
+           !   Nucl. Fusion 61, 116007, (2021). doi.org/10.1088/1361-6587/abc861
 
+     tglf_sat_rule_in = 2
+     tglf_units_in = 'CGYRO'
      tglf_alpha_quench_in = 0.0
-     tglf_xnu_model_in    = 2
      tglf_alpha_e_in = 1.0
      tglf_alpha_p_in = 1.0
-
+     tglf_alpha_mach_in = 0.0
+     tglf_use_bper_in = .true.
+     tglf_use_bpar_in = .false.
+     tglf_use_ave_ion_grid_in = .true.
+     tglf_kygrid_model_in = 4
+     tglf_nbasis_max_in = 6
+     tglf_nmodes_in = 8
+     tglf_geometry_flag_in = 1
+     tglf_use_mhd_rule_in = .false.
+     tglf_nky_in = 18
+ 
   case (4)
 
      ! Momentum transport without EM terms.
+     ! due to a bug in TGLF that shows up when you have both parallel flows (alpha_mach=1) and EM flutter use_bper = T 
+     ! the parallel flow should not be included for EM runs. However, parallel flows give an important pinch for momentum transport 
+     ! so for low-beta plasmas parallel flow should be included. These setting should be used for such cases with all saturation rules
 
      tglf_alpha_quench_in = 0.0
-     tglf_xnu_model_in    = 2
      tglf_alpha_e_in = 1.0
      tglf_alpha_p_in = 1.0
      tglf_alpha_mach_in = 1.0
      tglf_use_bper_in = .false.
      tglf_use_bpar_in = .false.
 
+ 
   end select
 
   !----------------------------------------------------------------

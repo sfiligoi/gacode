@@ -163,8 +163,9 @@
       REAL :: s_delta_loc=0.0
       REAL :: zeta_loc=0.0
       REAL :: s_zeta_loc=0.0
-      REAL :: p_prime_loc=0.0 
+      REAL :: p_prime_loc=0.0
       REAL :: q_prime_loc=16.0
+      REAL :: beta_loc = 0.0
       REAL :: kx0_loc = 0.0
 ! Fourier geometry inputs
       INTEGER :: nfourier_in        = 16

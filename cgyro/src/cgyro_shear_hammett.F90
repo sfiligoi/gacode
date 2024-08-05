@@ -19,65 +19,80 @@ subroutine cgyro_shear_hammett
 
   implicit none
 
-  integer :: ir
-  complex, dimension(n_theta) :: a1
+  integer :: ir,itor
+  integer :: n_changes
+  integer, dimension(nt1:nt2) :: change_sign
+  integer :: my_sign
 
   
-  gtime = gtime+omega_eb*delta_t
+  n_changes = 0
 
-  ! Forward shearing
-  if (gtime > 0.5) then
+  call timer_lib_in('shear')
+  do itor=nt1,nt2
+   gtime(itor) = gtime(itor)+omega_eb_base*itor*delta_t
 
-     call timer_lib_in('shear')
-     gtime = gtime-1.0
+   ! Forward shearing
+   if (gtime(itor) > 0.5) then
 
-#ifdef _OPENACC
-!$acc parallel loop independent gang private(a1,ir) present(h_x,ic_c)
+     gtime(itor) = gtime(itor)-1.0
+     n_changes = n_changes + 1
+     change_sign(itor) = 1
+
+   ! Backward shearing
+   else if (gtime(itor) < -0.5) then
+
+     gtime(itor) = gtime(itor)+1.0
+     n_changes = n_changes + 1
+     change_sign(itor) = -1
+
+   else
+     change_sign(itor) = 0
+   endif
+  enddo
+
+  if (n_changes > 0) then
+#if defined(OMPGPU)
+!$omp target teams distribute parallel do simd collapse(2) &
+!$omp&  private(ir,my_sign) map(to:change_sign)
+#elif defined(_OPENACC)
+!$acc parallel loop collapse(2) independent gang vector_length(n_theta) &
+!$acc&              private(ir,my_sign) present(h_x,ic_c) copyin(change_sign)
 #else
-!$omp parallel do private(a1,ir)
+!$omp parallel do collapse(2) private(ir,my_sign)
 #endif
+    do itor=nt1,nt2
      do iv_loc=1,nv_loc
-       a1(:) = h_x(ic_c(1,:),iv_loc)
 
+      my_sign = change_sign(itor)
+      if (my_sign == 1) then
+       ! Forward shearing
+#if (!defined(OMPGPU)) && defined(_OPENACC)
 !acc loop seq
+#endif
        do ir=2,n_radial
-         h_x(ic_c(ir-1,:),iv_loc) = h_x(ic_c(ir,:),iv_loc)
+         h_x(ic_c(ir-1,:),iv_loc,itor) = h_x(ic_c(ir,:),iv_loc,itor)
        enddo
 
-       h_x(ic_c(n_radial,:),iv_loc) = 0.0
+       h_x(ic_c(n_radial,:),iv_loc,itor) = 0.0
+      else if (my_sign == -1) then
+       ! Backward shearing
+#if (!defined(OMPGPU)) && defined(_OPENACC)
+!acc loop seq
+#endif
+       do ir=n_radial-1,1,-1
+         h_x(ic_c(ir+1,:),iv_loc,itor) = h_x(ic_c(ir,:),iv_loc,itor)
+       enddo
+
+       h_x(ic_c(1,:),iv_loc,itor) = 0.0
+      endif
      enddo
-
-     call timer_lib_out('shear')
-
-     call cgyro_field_c
-
+    enddo
   endif
 
-  ! Backward shearing
-  if (gtime < -0.5) then
+  call timer_lib_out('shear')
 
-     call timer_lib_in('shear')
-     gtime = gtime+1.0
-
-#ifdef _OPENACC
-!$acc parallel loop independent gang private(a1,ir) present(h_x,ic_c)
-#else
-!$omp parallel do private(a1,ir)
-#endif
-     do iv_loc=1,nv_loc
-       a1(:) = h_x(ic_c(n_radial,:),iv_loc) 
-
-!acc loop seq
-       do ir=n_radial-1,1,-1
-         h_x(ic_c(ir+1,:),iv_loc) = h_x(ic_c(ir,:),iv_loc)
-       enddo
-
-       h_x(ic_c(1,:),iv_loc) = 0.0
-     enddo
-     call timer_lib_out('shear')
-
+  if (n_changes > 0) then
      call cgyro_field_c
-
   endif
 
 end subroutine cgyro_shear_hammett

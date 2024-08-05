@@ -133,7 +133,7 @@ subroutine cgyro_check
      endif
 
   case (2) 
-     call cgyro_info('Equilibrium: HAM')
+     call cgyro_info('Equilibrium: Miller Extended Harmonic (MXH)')
 
   case (3) 
      call cgyro_info('Equilibrium: Fourier')

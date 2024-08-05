@@ -1,10 +1,18 @@
 #---------------------------------------------------
 # OSX,Linux mpich from conda
-# conda install -c smithsp -c conda-forge gacode
+#
+# 1. Install X-code and CONDA
+#
+# 2. Add conda packages required to build GACODE
+#    conda install -c smithsp -c conda-forge gacode
+#
+# 3. Set LIBRARY path for system libraries
+#    export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
+#    export LIBRARY_PATH="$SDKROOT/usr/lib"
 #---------------------------------------------------
 
 MAKE = make
-PREFIX = ${CONDA_PREFIX}
+PREFIX = ${CONDA}
 NETCDF_PATH=${PREFIX}
 MF90 = mpif90
 

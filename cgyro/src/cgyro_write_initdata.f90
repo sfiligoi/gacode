@@ -15,7 +15,7 @@ subroutine cgyro_write_initdata
   integer :: p,in,is,it
   real :: kymax,kyrat,dn
   real, external :: spectraldiss
-  character(len=7),dimension(4) :: sv 
+  character(len=50) :: msg
 
   !----------------------------------------------------------------------------
   ! Runfile to give complete summary to user
@@ -31,8 +31,13 @@ subroutine cgyro_write_initdata
      write(io,'(t4,i3,t16,i1,t26,i2,t36,i2)') n_theta,n_species,n_energy,n_xi
      if (test_flag == 0) then
         write(io,*) 
-        write(io,'(a)') ' nc_loc | nv_loc | nsplit | n_MPI | n_OMP'
-        write(io,'(t3,i4,t12,i4,t21,i4,t29,i5,t36,i3)') nc_loc,nv_loc,nsplit,n_proc,n_omp
+        if (nonlinear_flag == 1) then
+          write(io,'(a)') ' nc_loc | nv_loc | nsplit | n_jtheta | n_MPI | n_OMP'
+          write(io,'(t3,i4,t12,i4,t21,i4,t33,i3,t40,i5,t47,i3)') nc_loc,nv_loc,nsplit,n_jtheta,n_proc,n_omp
+        else
+          write(io,'(a)') ' nc_loc | nv_loc | nsplit | n_MPI | n_OMP'
+          write(io,'(t3,i4,t12,i4,t21,i4,t29,i5,t36,i3)') nc_loc,nv_loc,nsplit,n_proc,n_omp
+        endif
      endif
 
      if (zf_test_mode == 0) then
@@ -45,21 +50,25 @@ subroutine cgyro_write_initdata
         endif
 
         if (nonlinear_flag == 0) then
+
            write(io,*)
            write(io,*) '          n    Delta      Max     L/rho'
            write(io,'(a,i4,2x,2(f7.3,2x),2x,f6.2)') ' kx*rho:',&
                 n_radial,2*pi*rho/length,2*pi*rho*(n_radial/2-1)/length,length/rho
            write(io,'(a,i4,2x,2(f7.3,2x),2x,f6.2)') ' ky*rho:',&
                 n_toroidal,q/rmin*rho,kymax,2*pi/ky
+
         else
+           
 
            write(io,*)
            write(io,*) '          n    Delta      Max     L/rho    n_fft'
-           write(io,'(a,i4,2x,2(f7.3,2x),2x,f6.2,5x,i4)') ' kx*rho:',&
-                n_radial,2*pi*rho/length,2*pi*rho*(n_radial/2-1)/length,length/rho,&
-                (3*n_radial)/2
-           write(io,'(a,i4,2x,2(f7.3,2x),2x,f6.2,5x,i4)') ' ky*rho:',&
-                n_toroidal,q/rmin*rho,kymax,2*pi/ky,(3*(2*n_toroidal-1))/2
+           call prime_factors(nx,msg)
+           write(io,'(a,i4,2x,2(f7.3,2x),2x,f6.2,5x,i4,2a)') ' kx*rho:',&
+                n_radial,2*pi*rho/length,2*pi*rho*(n_radial/2-1)/length,length/rho,nx,'  ',trim(msg)
+           call prime_factors(ny,msg)
+           write(io,'(a,i4,2x,2(f7.3,2x),2x,f6.2,5x,i4,2a)') ' ky*rho:',&
+                n_toroidal,q/rmin*rho,kymax,2*pi/ky,ny,'  ',trim(msg)
         endif
 
      else
@@ -99,6 +108,8 @@ subroutine cgyro_write_initdata
      write(io,23) 'c2',shape_cos(2),'s_c2',shape_s_cos(2),'zeta' ,zeta ,'s_zeta' ,s_zeta
      if (abs(shape_cos(3))+abs(shape_s_cos(3))+abs(shape_sin(3))+abs(shape_s_sin(3)) > 1e-6) then
         write(io,23) 'c3',shape_cos(3),'s_c3',shape_s_cos(3),'s3',shape_sin(3),'s_s3',shape_sin(3)
+     endif
+     if (abs(shape_cos(4))+abs(shape_s_cos(4))+abs(shape_sin(4))+abs(shape_s_sin(4)) > 1e-6) then
         write(io,23) 'c4',shape_cos(4),'s_c4',shape_s_cos(4),'s4',shape_sin(4),'s_s4',shape_sin(4)
         write(io,23) 'c5',shape_cos(5),'s_c5',shape_s_cos(5),'s5',shape_sin(5),'s_s5',shape_sin(5)
         write(io,23) 'c6',shape_cos(6),'s_c6',shape_s_cos(6),'s6',shape_sin(6),'s_s6',shape_sin(6)
@@ -161,28 +172,14 @@ subroutine cgyro_write_initdata
      write (io,fmtstr) s_zeta
      write (io,fmtstr) zmag
      write (io,fmtstr) dzmag
-     write (io,fmtstr) shape_sin(3)
-     write (io,fmtstr) shape_s_sin(3)
-     !write (io,fmtstr) shape_sin(4)
-     !write (io,fmtstr) shape_s_sin(4)
-     !write (io,fmtstr) shape_sin(5)
-     !write (io,fmtstr) shape_s_sin(5)
-     !write (io,fmtstr) shape_sin(6)
-     !write (io,fmtstr) shape_s_sin(6)
-     write (io,fmtstr) shape_cos(0)
-     write (io,fmtstr) shape_s_cos(0)
-     write (io,fmtstr) shape_cos(1)
-     write (io,fmtstr) shape_s_cos(1)
-     write (io,fmtstr) shape_cos(2)
-     write (io,fmtstr) shape_s_cos(2)
-     write (io,fmtstr) shape_cos(3)
-     write (io,fmtstr) shape_s_cos(3)
-     !write (io,fmtstr) shape_cos(4)
-     !write (io,fmtstr) shape_s_cos(4)
-     !write (io,fmtstr) shape_cos(5)
-     !write (io,fmtstr) shape_s_cos(5)
-     !write (io,fmtstr) shape_cos(6)
-     !write (io,fmtstr) shape_s_cos(6)
+     do p=3,6
+        write (io,fmtstr) shape_sin(p)
+        write (io,fmtstr) shape_s_sin(p)
+     enddo
+     do p=0,6
+        write (io,fmtstr) shape_cos(p)
+        write (io,fmtstr) shape_s_cos(p)
+     enddo
      write (io,fmtstr) rho
      write (io,fmtstr) ky
      write (io,fmtstr) betae_unit
@@ -193,6 +190,7 @@ subroutine cgyro_write_initdata
      write (io,fmtstr) mach
      write (io,fmtstr) a_meters
      write (io,fmtstr) b_unit
+     write (io,fmtstr) b_gs2
      write (io,fmtstr) dens_norm
      write (io,fmtstr) temp_norm
      write (io,fmtstr) vth_norm
@@ -224,15 +222,16 @@ subroutine cgyro_write_initdata
      write(io) real(theta,kind=4)
      write(io) real(g_theta_geo,kind=4)
      write(io) real(bmag,kind=4)
-     write(io) real(omega_stream(:,1),kind=4)
-     write(io) real(omega_trap(:,1),kind=4)
+     write(io) real(omega_stream(:,1,nt1),kind=4)
+     write(io) real(omega_trap(:,1,nt1),kind=4)
      write(io) real(omega_rdrift(:,1),kind=4)
      write(io) real(omega_adrift(:,1),kind=4)
      write(io) real(omega_aprdrift(:,1),kind=4)
      write(io) real(omega_cdrift(:,1),kind=4)
      write(io) real(omega_cdrift_r(:,1),kind=4)
      write(io) real(omega_gammap(:),kind=4)
-     write(io) real(k_perp(ic_c(n_radial/2+1,:)),kind=4)
+     write(io) real(k_perp(ic_c(n_radial/2+1,:),nt1),kind=4)
+     write(io) real(captheta,kind=4)
      close(io)
 
   endif
@@ -298,3 +297,43 @@ subroutine cgyro_write_initdata
 23 format(t2,a3,1x,f8.5,2(a7,1x,f8.5,1x),a8,1x,f8.5)
 
 end subroutine cgyro_write_initdata
+
+subroutine prime_factors(n,pout)
+
+  integer, intent(in) :: n
+  character(len=50), intent(inout) :: pout
+  character(len=50) :: warn
+  integer, dimension(27) :: pvec,cvec
+  integer :: ptmp
+  character(len=4) :: fmt
+  character(len=3) :: s1,s2
+  
+  fmt = '(i0)'
+  
+  pvec = (/ 2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97,101,103 /)
+    
+  cvec = 0
+
+  ptmp = n
+  do i=1,size(pvec)
+     do while ((ptmp>1) .and. (modulo(ptmp,pvec(i))==0) )
+        cvec(i) = cvec(i) + 1
+        ptmp = ptmp/pvec(i)
+     enddo
+  enddo
+
+  pout = ''
+  warn = ''
+  do i=1,size(pvec)
+     if (cvec(i) > 0) then
+        write(s1,fmt) pvec(i)
+        write(s2,fmt) cvec(i)
+        pout = trim(pout)//trim(s1)//trim('(')//trim(s2)//')'
+        if (pvec(i) > 7) then
+           warn = 'WARNING: large prime factor'
+        endif
+     endif  
+  enddo
+  pout = trim(pout)//'  '//trim(warn)
+  
+end subroutine prime_factors

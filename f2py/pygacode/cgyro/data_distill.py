@@ -4,10 +4,6 @@ import numpy as np
 from gacodefuncs import *
 from .data import cgyrodata
 
-if len(sys.argv) < 2:
-    print("Usage: cgyro_distill.py <window> <theta_index>")
-    sys.exit()
-
 if not os.path.isfile('bin.cgyro.kxky_phi'):
     print("Error: no data found")
     sys.exit()

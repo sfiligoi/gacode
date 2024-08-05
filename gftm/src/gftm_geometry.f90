@@ -147,6 +147,7 @@ endif
      ! cn+sn*(shat_sa*(thx-theta0_sa) - alpha_sa*sn)
      ! wdx(i) = -xwell_sa*MIN(1.0,alpha_sa)+ cn - sn*kxx(i)
      wdx(i) = cn - sn*kxx(i)
+     wbx(i) = width_in*eps*sn/Rx
      ! b0x(i) = 1.0+(shat_sa*(thx-theta0_sa) - alpha_sa*sn)**2
      b0x(i) = 1.0+(kxx(i))**2
      b2x(i) = 1.0
@@ -230,7 +231,7 @@ SUBROUTINE xgrid_functions_geo
   REAL :: thx
   REAL :: sign_theta,loops
   REAL :: dkxky1,dkxky2
-  REAL :: wd1,wd2,wdp1,wdp2
+  REAL :: wd1,wd2,wdp1,wdp2,wb1,wb2
   REAL :: b1,b2
   REAL :: y1,y2
   REAL :: kxx1,kxx2
@@ -245,14 +246,15 @@ SUBROUTINE xgrid_functions_geo
   ! find length along magnetic field y
   !
   y(0)=0.0
-  ! pk_geo = Bp/Bt0 = ds/dy
+  ! pk_geo = Bp/B = ds/dy
   do m=1,ms
      y(m) = y(m-1)+s_p(m)*ds*2.0/(pk_geo(m)+pk_geo(m-1))
   enddo
   ! set the global units
   Ly=y(ms)
   ! R_unit = Rmaj_s*b_geo(0)/(qrat_geo(0)*(costheta_geo(0)+costheta_p_geo(0)))
-  R_unit = Rmaj_s*b_geo(0)/(qrat_geo(0)*costheta_geo(0))
+!  R_unit = Rmaj_s*b_geo(0)/(qrat_geo(0)*costheta_geo(0))
+  R_unit = Rmaj_s
   q_unit = Ly/(pi_2*R_unit)
   ! midplane effective shear: reduces to s-alpha in shifted circle
   ! note: S_prime(0)=0.0, S_prime(ms)=-2 pi q_prime, y(0)=0.0, y(ms)=Ly
@@ -409,13 +411,18 @@ SUBROUTINE xgrid_functions_geo
           +(kx_factor(m2)*(S_prime(m2)+dkxky2)-kx0*b_geo(m2)/qrat_geo(m2)**2)*sintheta_geo(m2))
      ! write(*,*)"wd1,,wd2=",wd1,wd2
      wdx(i) = wd1 +(wd2-wd1)*(y_x-y1)/(y2-y1)
-     wdx(i) = (R_unit/Rmaj_s)*wdx(i)
+!     wdx(i) = (R_unit/Rmaj_s)*wdx(i)
      ! write(*,*)i,"wdx = ",wdx(i),y_x,x(i),y1,y2
      ! interpolate wdpx
      wdp1 = (qrat_geo(m1)/b_geo(m1))*costheta_p_geo(m1)
      wdp2 = (qrat_geo(m2)/b_geo(m2))*costheta_p_geo(m2)
-     wdpx(i) = wdp1 + (wdp1-wdp2)*(y_x-y1)/(y2-y1)
-     wdpx(i) = (R_unit/Rmaj_s)*wdpx(i)
+     wdpx(i) = wdp1 + (wdp2-wdp1)*(y_x-y1)/(y2-y1)
+!     wdpx(i) = (R_unit/Rmaj_s)*wdpx(i)
+     ! interpolate wbx
+     wb1 = -(width_in*Ly/pi_2)*pk_geo(m1)*sintheta_geo(m1)*b_geo(m1)/(Rmaj_s*f/R(m1))
+     wb2 = -(width_in*Ly/pi_2)*pk_geo(m2)*sintheta_geo(m2)*b_geo(m2)/(Rmaj_s*f/R(m2))
+     wbx(i) = wb1 + (wb2-wb1)*(y_x-y1)/(y2-y1)
+!     write(*,*)i, thx, "wbx = ",wbx(i)
      ! interpolate b2x = b_geo**2
      b1 = b_geo(m1)**2
      b2 = b_geo(m2)**2
@@ -432,8 +439,8 @@ SUBROUTINE xgrid_functions_geo
         b0x(i)=(b1+b2)/2.0
      endif
      ! factor needed for k_par matrix
-     b1 = b_geo(m1)/Bt0_out
-     b2 = B_geo(m2)/Bt0_out
+     b1 = b_geo(m1)
+     b2 = b_geo(m2)
      Bx(i) = b1 +(b2-b1)*(y_x-y1)/(y2-y1)
      !
      ! interpolate viscous stress projection coefficients
@@ -779,8 +786,7 @@ SUBROUTINE mercier_luc
   !
   do m=0,ms
      b_geo(m) = B(m)
-!     pk_geo(m) = Bp(m)/B(m)
-     pk_geo(m) = Bp(m)/Bt0_out         ! note this includes the factor B from the map dz = dtheta Bt0/B
+     pk_geo(m) = Bp(m)/B(m)
      qrat_geo(m) = (rmin_s/R(m))*(B(m)/Bp(m))/q_s
   enddo
   !---------------------------------------------------------------

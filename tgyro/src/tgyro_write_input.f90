@@ -197,7 +197,7 @@ subroutine tgyro_write_input
 
         write(1,10) 'TGYRO_NEO_METHOD','(2) NEO code'
         if (loc_n_ion >= 4) then
-           write(1,10) 'INFO: (tgyro) Using reduced energy resolution to cope with so many ions'
+           write(1,'(t2,a)') 'INFO: (tgyro) Using reduced energy resolution to cope with so many ions'
         endif
 
      case default
@@ -451,6 +451,7 @@ subroutine tgyro_write_input
            if (i_ion == i_ash) ttext = 'ash'
         else
            ttext = 'fast'
+           if (i_ion == i_alpha) ttext = 'alpha'
         endif
         if (calc_flag(i_ion) == 0) then
            ttext = trim(ttext)//' passthrough'

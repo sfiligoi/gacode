@@ -37,7 +37,14 @@ if 'conda' in sys.argv:
 # ================================
 # pip
 # ================================
+import setuptools
+
+setuptools.setup(
+    setup_requires=[
+        'numpy'
+    ],)
 from numpy.distutils.core import setup, Extension
+from distutils.command.sdist import sdist
 
 wrapper = Extension('gacode_ext',
                     sources=['expro/expro.f90',
@@ -57,7 +64,8 @@ setup(name='pygacode',
       package_data={'pygacode.test': ['input.gacode'],
                     'pygacode': ['version']},
       packages=['pygacode', 'pygacode.test', 'pygacode.gyro', 'pygacode.cgyro', 'pygacode.tgyro', 'pygacode.neo', 'pygacode.profiles_gen'],
-      ext_modules=[wrapper]
+      ext_modules=[wrapper],
+      cmdclass={'sdist': sdist}
       )
 
 # only run tests when installing

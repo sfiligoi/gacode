@@ -138,7 +138,7 @@ subroutine cgyro_step_gk_v76
      call cgyro_rhs(1)
 
      call timer_lib_in('str')
-     call cgyro_vel_fma2(h_x, h0_x, a21*deltah2, rhs(:,:,1))
+     call cgyro_vel_fma2(h_x, h0_x, a21*deltah2, rhs(:,:,:,1))
      call timer_lib_out('str')
 
      call cgyro_field_c
@@ -148,7 +148,7 @@ subroutine cgyro_step_gk_v76
      call cgyro_vel_fmaN(2,h_x, &
             h0_x, &
             (/ deltah2*a31, deltah2*a32 /), &
-            rhs(:,:,1:2))
+            rhs(:,:,:,1:2))
      call timer_lib_out('str')
      
      call cgyro_field_c
@@ -160,7 +160,7 @@ subroutine cgyro_step_gk_v76
      call cgyro_vel_fmaN(2,h_x, &
             h0_x, &
             (/ deltah2*a41, deltah2*a43 /), &
-            rhs(:,:,1:(3-1)))
+            rhs(:,:,:,1:(3-1)))
      call timer_lib_out('str')
 
      call cgyro_field_c
@@ -170,7 +170,7 @@ subroutine cgyro_step_gk_v76
      call cgyro_vel_fmaN(3,h_x, &
             h0_x, &
             (/ deltah2*a51, deltah2*a53, deltah2*a54 /), &
-            rhs(:,:,1:(4-1)))
+            rhs(:,:,:,1:(4-1)))
      call timer_lib_out('str')
 
      call cgyro_field_c
@@ -180,7 +180,7 @@ subroutine cgyro_step_gk_v76
      call cgyro_vel_fmaN(4,h_x, &
             h0_x, &
             (/ deltah2*a61, deltah2*a63, deltah2*a64, deltah2*a65 /), &
-            rhs(:,:,1:(5-1)))
+            rhs(:,:,:,1:(5-1)))
      call timer_lib_out('str')
 
      call cgyro_field_c
@@ -190,7 +190,7 @@ subroutine cgyro_step_gk_v76
      call cgyro_vel_fmaN(5,h_x, &
             h0_x, &
             (/ deltah2*a71, deltah2*a73, deltah2*a74, deltah2*a75, deltah2*a76 /), &
-            rhs(:,:,1:(6-1)))
+            rhs(:,:,:,1:(6-1)))
      call timer_lib_out('str')
      
      call cgyro_field_c
@@ -201,7 +201,7 @@ subroutine cgyro_step_gk_v76
             h0_x, &
             (/ deltah2*a81, deltah2*a83, deltah2*a84, deltah2*a85, &
                deltah2*a86, deltah2*a87 /), &
-            rhs(:,:,1:(7-1)))
+            rhs(:,:,:,1:(7-1)))
      call timer_lib_out('str')
 
      call cgyro_field_c
@@ -212,7 +212,7 @@ subroutine cgyro_step_gk_v76
             h0_x, &
             (/ deltah2*a91, deltah2*a93, deltah2*a94, deltah2*a95, &
                deltah2*a96, deltah2*a97, deltah2*a98 /), &
-            rhs(:,:,1:(8-1)))
+            rhs(:,:,:,1:(8-1)))
      call timer_lib_out('str')
 
      call cgyro_field_c
@@ -223,7 +223,7 @@ subroutine cgyro_step_gk_v76
             h0_x, &
             (/ deltah2*a101, deltah2*a103, deltah2*a104, deltah2*a105, &
                deltah2*a106, deltah2*a107 /), &
-            rhs(:,:,1:(7-1)))
+            rhs(:,:,:,1:(7-1)))
      call timer_lib_out('str')
 
      call cgyro_field_c
@@ -237,10 +237,10 @@ subroutine cgyro_step_gk_v76
      ! using a multiplication by 0 in one element is still efffienct, since the matrix element was read for the 2nd equation
      call cgyro_vel_solution_werror(7, h_x, &
             h0_x, &
-            deltah2*b1, rhs(:,:,1), &
+            deltah2*b1, rhs(:,:,:,1), &
             (/ deltah2*b4, deltah2*b5, deltah2*b6, deltah2*b7, &
                deltah2*b8, deltah2*b9, deltah2*b10 /), &
-            rhs(:,:,(4-1):(10-1)), &
+            rhs(:,:,:,(4-1):(10-1)), &
             deltah2*(b1-b1h), &
             (/ deltah2*(b4-b4h), deltah2*(b5-b5h), deltah2*(b6-b6h), deltah2*(b7-b7h), &
                deltah2*(b8-b8h), deltah2*(b9-b9h), deltah2*(b10-b10h) /), &

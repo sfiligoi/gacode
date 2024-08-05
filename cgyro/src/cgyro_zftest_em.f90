@@ -15,19 +15,20 @@ subroutine cgyro_zftest_em
 
   implicit none
 
-  integer :: ir,it,is,ie,ix
+  integer :: ir,it,is,ie,ix,itor
   real :: arg
-  real, dimension(n_species,n_theta) :: ansum,adsum,alphah,sum_loc
+  real, dimension(n_species,n_theta,nt1:nt2) :: ansum,adsum,alphah,sum_loc
 
-  sum_loc(:,:) = 0.0
+  sum_loc(:,:,:) = 0.0
 
   ! Calculating the species and theta dependent function, alphah, that ensures
   !   no B|| fluctuation at t=0. It is a fraction of two integrals, 
   !   ansum and adsum, which are calculated first.  
 
 !$omp parallel private(iv_loc,is,ix,ie,ic,it,arg)
-!$omp do reduction(+:sum_loc)
-  do iv=nv1,nv2
+!$omp do collapse(2) reduction(+:sum_loc)
+  do itor=nt1,nt2
+   do iv=nv1,nv2
      iv_loc = iv-nv1+1
      is = is_v(iv)
      ix = ix_v(iv) 
@@ -35,13 +36,14 @@ subroutine cgyro_zftest_em
      do ic=1,nc
         it = it_c(ic)
 
-        arg = k_perp(ic)*rho*vth(is)*mass(is)/(z(is)*bmag(it)) &
+        arg = k_perp(ic,itor)*rho*vth(is)*mass(is)/(z(is)*bmag(it)) &
              *sqrt(2.0*energy(ie))*sqrt(1.0-xi(ix)**2)
 
-        sum_loc(is,it) = sum_loc(is,it) & 
+        sum_loc(is,it,itor) = sum_loc(is,it,itor) & 
              + w_xi(ix)*w_e(ie)*energy(ie)*(1.0-xi(ix)**2) &
              *(2.0*(bessel_j1(arg)/arg)*(2.0-bessel_j0(arg)) -1.0)
      enddo
+   enddo
   enddo
 !$omp end do
 !$omp end parallel
@@ -54,11 +56,12 @@ subroutine cgyro_zftest_em
        NEW_COMM_1,&
        i_err)
 
-  sum_loc(:,:) = 0.0
+  sum_loc(:,:,:) = 0.0
 
 !$omp parallel private(iv_loc,is,ix,ie,ic,it,arg)
-!$omp do reduction(+:sum_loc)
-  do iv=nv1,nv2
+!$omp do collapse(2) reduction(+:sum_loc)
+  do itor=nt1,nt2
+   do iv=nv1,nv2
      iv_loc = iv-nv1+1
      is = is_v(iv)
      ix = ix_v(iv) 
@@ -66,13 +69,14 @@ subroutine cgyro_zftest_em
      do ic=1,nc
         it = it_c(ic)
 
-        arg = k_perp(ic)*rho*vth(is)*mass(is)/(z(is)*bmag(it)) &
+        arg = k_perp(ic,itor)*rho*vth(is)*mass(is)/(z(is)*bmag(it)) &
              *sqrt(2.0*energy(ie))*sqrt(1.0-xi(ix)**2)
 
-        sum_loc(is,it) = sum_loc(is,it) & 
+        sum_loc(is,it,itor) = sum_loc(is,it,itor) & 
              + w_xi(ix)*w_e(ie)*energy(ie)*(1.0-xi(ix)**2) &
              *2.0*(bessel_j1(arg)/arg)*(2.0-bessel_j0(arg))*(energy(ie)-1.5)
      enddo
+   enddo
   enddo
 !$omp end do
 !$omp end parallel
@@ -85,10 +89,12 @@ subroutine cgyro_zftest_em
        NEW_COMM_1,&
        i_err)
 
-  alphah(:,:) = ansum(:,:) / adsum(:,:) 
+  alphah(:,:,:) = ansum(:,:,:) / adsum(:,:,:) 
 
   ! Constructing the h_x initial condition
-  do ic=1,nc
+!$omp parallel do private(ic,ir,it,iv,iv_loc,is,ix,ie,arg) shared(h_x)
+  do itor=nt1,nt2
+   do ic=1,nc
 
      ir = ir_c(ic) 
      it = it_c(ic)
@@ -101,16 +107,17 @@ subroutine cgyro_zftest_em
         ie = ie_v(iv)
 
         if (px(ir) /= 0) then
-           arg = k_perp(ic)*rho*vth(is)*mass(is)/(z(is)*bmag(it)) &
+           arg = k_perp(ic,itor)*rho*vth(is)*mass(is)/(z(is)*bmag(it)) &
                 *sqrt(2.0*energy(ie))*sqrt(1.0-xi(ix)**2)           
 
 
-           h_x(ic,iv_loc) = z(is)/temp(is) * (2.0 - bessel_j0(arg)) &
-                *(1.0 - alphah(is,it)*(energy(ie) - 1.5)) &
+           h_x(ic,iv_loc,itor) = z(is)/temp(is) * (2.0 - bessel_j0(arg)) &
+                *(1.0 - alphah(is,it,itor)*(energy(ie) - 1.5)) &
                 - z(is)/temp(is) * bessel_j0(arg)
 
         endif
      enddo
+   enddo
   enddo
 
 end subroutine cgyro_zftest_em

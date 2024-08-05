@@ -39,7 +39,10 @@ subroutine cgyro_init_kernel
   call system_clock(kernel_start_time,kernel_count_rate,kernel_count_max)
   
   i_time = 0
-  
+
+  ! Number of fluxes to output 
+  nflux = 3+exch_flag
+
   ! 1. MPI setup
   call cgyro_mpi_grid
   if (error_status > 0) call cgyro_final_kernel
@@ -71,7 +74,7 @@ subroutine cgyro_init_kernel
 
   if (test_flag == 1) return
   
-    if (restart_flag == 1) then
+  if (restart_flag == 1) then
      io_control = 3*(1-silent_flag)
   else
      io_control = 1*(1-silent_flag)
@@ -104,7 +107,7 @@ subroutine cgyro_init_kernel
 
   ! GPU versions of step_gk and coll work on the following in the GPU memory
   call timer_lib_in('str_mem')
-!$acc update device(field,psi,cap_h_c,h_x,source)
+!$acc update device(field,cap_h_c,h_x,source)
   call timer_lib_out('str_mem')
 
   ! Initialize adaptive time-stepping parameter

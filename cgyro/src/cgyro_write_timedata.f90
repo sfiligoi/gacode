@@ -12,14 +12,15 @@ subroutine cgyro_write_timedata
 
   implicit none
 
+  logical :: has_zf, has_balloon
   integer :: i_field,i_moment
   integer :: ir,it
   integer :: p_field
+  real :: fvec(2,nt1:nt2)
   real :: vec(4)
   complex :: a_norm
   complex :: ftemp(n_theta,n_radial)
-  complex :: field_plot(n_radial,theta_plot)
-  logical :: has_zf, has_balloon
+  complex :: field_plot(n_radial,theta_plot,nt1:nt2)
 
   ! Print this data on print steps only; otherwise exit now
   if (mod(i_time,print_step) /= 0) return
@@ -38,22 +39,22 @@ subroutine cgyro_write_timedata
   ! ky flux for all species with field breakdown
   call cgyro_write_distributed_breal(&
        trim(path)//binfile_ky_flux,&
-       size(gflux(0,:,:,:)),&
-       real(gflux(0,:,:,:)))
+       size(gflux(0,:,1:nflux,:,:)),&
+       real(gflux(0,:,1:nflux,:,:)))
 
   ! central ky flux for all species with field breakdown
   call cgyro_write_distributed_breal(&
        trim(path)//binfile_ky_cflux,&
-       size(cflux(:,:,:)),&
-       cflux(:,:,:))
+       size(cflux(:,1:nflux,:,:)),&
+       cflux(:,1:nflux,:,:))
 
   if (gflux_print_flag == 1) then
      ! Global (n,e,v) fluxes for all species
      do i_moment=1,3
         call cgyro_write_distributed_bcomplex(&
              trim(path)//binfile_lky_flux(i_moment),&
-             size(gflux(:,:,i_moment,:)),&
-             gflux(:,:,i_moment,:))
+             size(gflux(:,:,i_moment,:,:)),&
+             gflux(:,:,i_moment,:,:))
      enddo
   endif
 
@@ -62,8 +63,8 @@ subroutine cgyro_write_timedata
      do i_moment=1,3
         call cgyro_write_distributed_bcomplex(&
              trim(path)//binfile_kxky(i_moment),&
-             size(moment(:,:,:,i_moment)),&
-             moment(:,:,:,i_moment))
+             size(moment(:,:,:,:,i_moment)),&
+             moment(:,:,:,:,i_moment))
      enddo
   endif
 
@@ -79,7 +80,7 @@ subroutine cgyro_write_timedata
         ir = ir_c(ic)
         it = it_c(ic)
         if (itp(it) > 0) then
-           field_plot(ir,itp(it)) = field(i_field,ic)
+           field_plot(ir,itp(it),nt1:nt2) = field(i_field,ic,nt1:nt2)
         endif
      enddo
 
@@ -93,7 +94,8 @@ subroutine cgyro_write_timedata
   ! Checksum for regression testing
   ! Note that checksum is a distributed real scalar
   if (zf_test_mode == 0) then
-     call write_precision(trim(path)//runfile_prec,sum(abs(real(gflux(0,:,:,:)))))
+     ! Do not include exchange in precision
+     call write_precision(trim(path)//runfile_prec,sum(abs(real(gflux(0,:,1:3,:,:)))))
   else
      call write_precision(trim(path)//runfile_prec,sum(abs(field)))
   endif
@@ -102,21 +104,25 @@ subroutine cgyro_write_timedata
   ! Ballooning mode (or ZF) output for linear runs with a single mode
   ! (can both be plotted with cgyro_plot -plot ball)
   !
-  has_balloon = (n_toroidal == 1) .and. ((n > 0)  .and. (box_size == 1))
+  has_balloon = (n_toroidal == 1) .and. ((nt1 > 0)  .and. (box_size == 1))
   has_zf      = zf_test_mode > 0
-  if (has_zf .or. has_balloon) then
+  if ( (i_proc==0) .and. (has_zf .or. has_balloon) ) then
+     ! NOTE: Only process the first my_toroidal
 
      do i_field=1,n_field
 
         do ir=1,n_radial
            do it=1,n_theta
-              ftemp(it,ir) = field(i_field,ic_c(ir,it))
+              ftemp(it,ir) = field(i_field,ic_c(ir,it),nt1)
            enddo
         enddo
 
         if (has_balloon) then
-           if (i_field == 1) a_norm = ftemp(n_theta/2+1,n_radial/2+1) 
-           call extended_ang(ftemp)    
+           if (i_field == 1) then
+              it = maxloc(abs(ftemp(:,n_radial/2+1)),dim=1)
+              a_norm = ftemp(it,n_radial/2+1)
+           endif
+           call extended_ang(ftemp)
         else
            a_norm = 1.0
         endif
@@ -129,11 +135,12 @@ subroutine cgyro_write_timedata
 
   ! Linear frequency diagnostics for every value of n
   call cgyro_freq
-  vec(1) = real(freq) ; vec(2) = aimag(freq)
+  fvec(1,:) = real(freq(:)) ; fvec(2,:) = aimag(freq(:))
   if (n_toroidal > 1) then
-     call cgyro_write_distributed_breal(trim(path)//binfile_freq,2,vec(1:2))
+     ! NOTE: Update counter when having more than one my_toroidal
+     call cgyro_write_distributed_breal(trim(path)//binfile_freq,size(fvec),fvec(:,:))
   else 
-     call write_ascii(trim(path)//runfile_freq,2,vec(1:2))
+     call write_ascii(trim(path)//runfile_freq,2,fvec(:,:))
   endif
 
   ! Output to screen
@@ -273,16 +280,16 @@ subroutine cgyro_write_distributed_bcomplex(datafile,n_fn,fn)
 
         open(unit=io,file=datafile,status='old',access='stream',iostat=i_err)
         if (i_err/=0) then
-          call cgyro_error('[REWIND] Failed to open '//datafile)
-          return
+           call cgyro_error('[REWIND] Failed to open '//datafile)
+           return
         endif
         if (disp>0) then
-          read(io,pos=disp, iostat=i_err) cdummy
-          if (i_err/=0) then
-            call cgyro_error('[REWIND] Failed to rewind '//datafile)
-            close(io)
-            return
-          endif
+           read(io,pos=disp, iostat=i_err) cdummy
+           if (i_err/=0) then
+              call cgyro_error('[REWIND] Failed to rewind '//datafile)
+              close(io)
+              return
+           endif
         endif
         endfile(io)
         close(io)
@@ -383,7 +390,7 @@ subroutine cgyro_write_distributed_breal(datafile,n_fn,fn)
              fstatus,&
              i_err)
      else
-        
+
         call MPI_FILE_SET_VIEW(fh,&
              disp,&
              MPI_REAL8,&
@@ -416,16 +423,16 @@ subroutine cgyro_write_distributed_breal(datafile,n_fn,fn)
 
         open(unit=io,file=datafile,status='old',access='stream',iostat=i_err)
         if (i_err/=0) then
-          call cgyro_error('[REWIND] Failed to open '//datafile)
-          return
+           call cgyro_error('[REWIND] Failed to open '//datafile)
+           return
         endif
         if (disp>0) then
-          read(io,pos=disp, iostat=i_err) cdummy
-          if (i_err/=0) then
-            call cgyro_error('[REWIND] Failed to rewind '//datafile)
-            close(io)
-            return
-          endif
+           read(io,pos=disp, iostat=i_err) cdummy
+           if (i_err/=0) then
+              call cgyro_error('[REWIND] Failed to rewind '//datafile)
+              close(io)
+              return
+           endif
         endif
         endfile(io)
         close(io)
@@ -561,6 +568,7 @@ subroutine write_ascii(datafile,n_fn,fn)
 
 end subroutine write_ascii
 
+! NOTE: Can only be called with a single my_toroidal
 subroutine write_distribution(datafile)
 
   use mpi
@@ -598,13 +606,12 @@ subroutine write_distribution(datafile)
      endif
 
      allocate(h_x_glob(nc,nv))
-
      ! Collect distribution onto process 0
-     call MPI_GATHER(cap_h_c(:,:),&
-          size(h_x),&
+     call MPI_GATHER(cap_h_c(:,:,nt1),&
+          size(cap_h_c(:,:,nt1)),&
           MPI_DOUBLE_COMPLEX,&
           h_x_glob(:,:),&
-          size(h_x),&
+          size(h_x_glob),&
           MPI_DOUBLE_COMPLEX,&
           0,&
           NEW_COMM_1,&
@@ -775,10 +782,11 @@ subroutine print_scrdata()
           '[t: ',t_current,&
           '][e: ',integration_error(:),']'
   else
+     ! NOTE: There could be only one my_toroidal when n_toroidal <=1
      print '(a,1pe9.3,a,1pe10.3,1x,1pe10.3,a,1pe10.3,a,1pe9.3,1x,1pe9.3,a)',&
           '[t: ',t_current,&
-          '][w: ',freq,&
-          '][dw:',abs(freq_err),&
+          '][w: ',freq(nt1),&
+          '][dw:',abs(freq_err(nt1)),&
           '][e: ',integration_error(:),']'
 
   endif
@@ -833,16 +841,16 @@ subroutine write_binary(datafile,fn,n_fn)
 
      open(unit=io,file=datafile,status='old',access='stream', iostat=i_err)
      if (i_err/=0) then
-       call cgyro_error('[REWIND] Failed to open '//datafile)
-       return
+        call cgyro_error('[REWIND] Failed to open '//datafile)
+        return
      endif
      if (disp>0) then
-       read(io,pos=disp, iostat=i_err) cdummy
-       if (i_err/=0) then
-         call cgyro_error('[REWIND] Failed to rewind '//datafile)
-         close(io)
-         return
-       endif
+        read(io,pos=disp, iostat=i_err) cdummy
+        if (i_err/=0) then
+           call cgyro_error('[REWIND] Failed to rewind '//datafile)
+           close(io)
+           return
+        endif
      endif
      endfile(io)
      close(io)
@@ -858,6 +866,7 @@ end subroutine write_binary
 !
 ! Map from (r,theta) to extended angle (f2d -> f1d)
 !----------------------------------------------------------------
+! NOTE: Can only be called with a single my_toroidal
 
 subroutine extended_ang(f2d)
 
@@ -870,9 +879,9 @@ subroutine extended_ang(f2d)
   complex, dimension(n_theta,n_radial) :: f1d 
 
   ! Assumption is that box_size=1
-  
+
   do ir=1,n_radial
-     f1d(:,ir) = f2d(:,ir)*exp(-2*pi*i_c*(px(ir)+px0)*k_theta*rmin*sign_qs)
+     f1d(:,ir) = f2d(:,ir)*exp(-2*pi*i_c*(px(ir)+px0)*k_theta_base*nt1*rmin*sign_qs)
   enddo
 
   if (sign_qs < 0) then
@@ -883,5 +892,5 @@ subroutine extended_ang(f2d)
   else
      f2d = f1d
   endif
-  
+
 end subroutine extended_ang

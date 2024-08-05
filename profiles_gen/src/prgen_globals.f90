@@ -13,7 +13,7 @@ module prgen_globals
   !----------------------------------------------------------
   ! Internal control variables
   !
-  integer, parameter :: n_ion_max = 10
+  integer, parameter :: n_ion_max = 200
   integer :: nx
   integer :: format_type
   integer :: efit_method
@@ -26,7 +26,6 @@ module prgen_globals
 
   integer :: n_reorder
   integer, dimension(n_ion_max) :: reorder_vec
-  integer :: n_null
   integer :: n_lump
   integer, dimension(:), allocatable :: lump_vec
   integer :: ntop

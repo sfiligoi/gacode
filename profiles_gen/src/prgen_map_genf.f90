@@ -32,5 +32,7 @@ subroutine prgen_map_genf
   
   expro_ni(1,:) = ni_e19m3(:)
   expro_ti(1,:) = ti_kev(:)
+
+  expro_qohme(:) = qohm(:)
  
 end subroutine prgen_map_genf

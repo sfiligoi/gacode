@@ -78,18 +78,19 @@ def plot_select(ax, tag):
 
 def setprof(tag):
 
+    # First run through ion densities
+    for i in range(n_ion):
+        if tag == 'ni_'+str(i+1):
+            y = expro.expro_ni[i,:]
+            return y
+
+    # Now test others
     if tag == 'ne':
         y = expro.expro_ne
     elif tag == 'Te':
         y = expro.expro_te
     elif tag == 'Ti_1':
         y = expro.expro_ti[0, :]
-    elif tag == 'ni_1':
-        y = expro.expro_ni[0, :]
-    elif tag == 'ni_2':
-        y = expro.expro_ni[1, :]
-    elif tag == 'ni_3':
-        y = expro.expro_ni[2, :]
     elif tag == 'w0':
         y = expro.expro_w0/1e4
     elif tag == 'dlntedr':

@@ -17,8 +17,9 @@ module expro
   integer :: expro_n_ion
   integer :: expro_shot=0
   integer :: expro_time=0
-  character*10, dimension(20) :: expro_name
-  character*10, dimension(20) :: expro_type
+  integer, parameter :: expro_ion_max=200
+  character*10, dimension(expro_ion_max) :: expro_name
+  character*10, dimension(expro_ion_max) :: expro_type
 
   double precision :: expro_masse=5.44887413e-4   ! me/m_H
   double precision, dimension(:), allocatable :: expro_mass
@@ -766,7 +767,7 @@ contains
     call expro_writev(expro_qcxi,nexp,'qcxi','MW/m^3')
     call expro_writev(expro_qpar_beam,nexp,'qpar_beam','1/m^3/s') 
     call expro_writev(expro_qpar_wall,nexp,'qpar_wall','1/m^3/s')
-    call expro_writev(expro_qmom,nexp,'qmom','Nm')
+    call expro_writev(expro_qmom,nexp,'qmom','N/m^2')
 
     close(1)
 

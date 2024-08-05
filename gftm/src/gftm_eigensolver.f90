@@ -73,20 +73,36 @@
         tdamp = 0.510
         ndamp = 0.0028
         tdamp = 0.639
+        ndamp = 0.005*rmin_input/Rmaj_input
+        tdamp = 0.65
+! NUEE/2
+        ndamp = 0.0057
+        tdamp = 0.69
+        pdamp = 0.69
+! 35
+        ndamp = 0.0028
+        tdamp = 0.648
+        pdamp = 1.0
+
+! changed to dz=  ds B/Bp and added p_prime
+       ndamp = 0.0016
+       tdamp = 0.651
+
  !       write(*,*)"Bmin/Bmax = ",Bmin/Bmax
-!       ndamp = damp_psi_in
-!       tdamp = damp_sig_in
+ !      ndamp = damp_psi_in
+ !      tdamp = damp_sig_in
 !       pdamp = etg_factor_in*pi/2.0
-       pdamp = 0.0
-       nus(1)=1.0
-       nus(2)=SQRT(mass(1)/mass(2))*(taus(1)/taus(2))**1.5
+!       pdamp = 0.0
+!       nus(1)=1.0
+!       nus(2)=SQRT(mass(1)/mass(2))*(taus(1)/taus(2))**1.5
+!       nus(2)=0.0
 !       if(igeo.gt.0)then
 !        ndamp = ndamp*(grad_r0_out/kappa_loc)**2
 !       endif
 !
 !       gcut = 0.06  ! for nu=5, ne=3
 !
-       k_par0 = sqrt_two/(R_unit*q_unit*width_in)
+      k_par0 = sqrt_two/(R_unit*q_unit*width_in)
 !       write(*,*)"R_unit = ",R_unit," q_unit = ",q_unit," width_in = ",width_in
        w_d0 = ky/R_unit
        betapsi = 0.0
@@ -100,7 +116,7 @@
 !     call get_mat_uparc
      do iu = 1,nu
        do ju = 1,nu
-!         matuc(iu,ju)= mat_uparc(iu,ju)
+         matuc(iu,ju)= mat_upar(iu,ju)
          matu(iu,ju) = mat_upar(iu,ju)
          matdu(iu,ju) = mat_dupar(iu,ju)
        enddo
@@ -130,8 +146,10 @@
 !
 ! add the matu "closure"
 !
-     matu(nu-1,nu) = (1.0-tdamp)*matu(nu-1,nu)
-     matu(nu,nu-1) = (1.0-tdamp)*matu(nu,nu-1)
+     matuc(nu-1,nu) = (1.0 - tdamp)*matu(nu-1,nu)
+     matuc(nu,nu-1) = (1.0 - tdamp)*matu(nu,nu-1)
+     matdu(nu-1,nu) = (1.0 + tdamp)*matdu(nu-1,nu)
+     matdu(nu,nu-1) = (1.0 + tdamp)*matdu(nu,nu-1)
      do iu = 1,nu
      do ju = 1,nu
        matuu(iu,ju) = 0.0
@@ -149,7 +167,7 @@
      do ju = 1,nu
        iue = iu + nu*(ie-1)
        jue = ju + nu*(je-1)
-       matmirror(iue,jue) = matu(iu,ju)*matde(ie,je)-0.5*mate(ie,je)*matdu(iu,ju)
+       matmirror(iue,jue) = matuc(iu,ju)*matde(ie,je)-0.5*mate(ie,je)*matdu(iu,ju) 
 !       write(*,*)"matmirror",iue,jue,matmirror(iue,jue)
      enddo
      enddo
@@ -290,13 +308,13 @@
         jtot = jb+nbasis*(ju-1)+nbasis*nu*(je-1)+nbasis*nu*ne*(js-ns0)
         iue = iu + nu*(ie-1)
         jue = ju + nu*(je-1)
-        mateq(itot,jtot) = (-xi*vs(is)*k_par0*(ave_kpar(ib,jb)*matu(iu,ju)       &
-        + ndamp*ave_modkpar(ib,jb)*one(iu,ju))*one(ie,je)                                &
+        mateq(itot,jtot) = (-xi*vs(is)*k_par0*(ave_kpar(ib,jb)*matuc(iu,ju)      &
+        + ndamp*one(ib,jb)*one(iu,ju))*one(ie,je)                                &
         - 2.0*w_d0*(taus(is)/zs(is))*ave_wdpar(ib,jb)*matuu(iu,ju)*one(ie,je)    &
         - w_d0*(taus(is)/zs(is))*ave_wdper(ib,jb)*mate(ie,je)*one(iu,ju)         &
-        - xi*vs(is)*k_par0*ave_gradb(ib,jb)*matmirror(iue,jue)                   &
-        - xi*one(ib,jb)*xnue_in*(one(is,1)*zeff_in*collision1(ie,iu,je,ju)       &
-        + nus(is)*collision2(ie,iu,je,ju)))*one(is,js)
+        - xi*vs(is)*k_par0*ave_wb(ib,jb)*matmirror(iue,jue)                      &
+        - xi*one(ib,jb)*xnue_in*one(is,1)*(zeff_in*collision1(ie,iu,je,ju)       &
+        + collision2(ie,iu,je,ju)))*one(is,js)
 !        if((is.eq.1.and.js.eq.1).and.(ib.eq.1.and.jb.eq.1))then
 !        nuei1 = collision1(ie,iu,je,ju)
 !        write(*,*)"collision1",iue,jue,nuei1

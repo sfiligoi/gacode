@@ -1,0 +1,12 @@
+#! /usr/bin/env bash
+# GACODE Parallel execution script (PERLMUTTER_GPU)
+
+export MPICH_GPU_SUPPORT_ENABLED=1
+
+#env 1>&2
+
+let ACC_DEVICE_NUM="0"
+export ACC_DEVICE_NUM
+
+
+exec  "$@"

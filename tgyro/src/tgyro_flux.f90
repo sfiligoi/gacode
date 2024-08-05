@@ -12,16 +12,13 @@ subroutine tgyro_flux
 
   use mpi
   use tgyro_globals
-  use gyro_interface
   use neo_interface
   use tglf_interface
-  use glf23_interface
+  use tgyro_mmm_mod
 
   implicit none
 
   integer :: i_ion,i0
-  integer :: i1,i2
-  integer :: n_12
   real, dimension(8) :: x_out
   real :: a1,a2,a3,a4
 
@@ -40,12 +37,6 @@ subroutine tgyro_flux
   real :: Q_neo_GB
   real :: Pi_neo_GB
   !-------------------------------------------
-
-  call MPI_BARRIER(MPI_COMM_WORLD,ierr)
-  if (i_proc_global == 0) then
-     open(unit=1,file=trim(runfile),position='append')
-     close(1)
-  endif
 
   !-----------------------------
   ! Counter
@@ -218,55 +209,6 @@ subroutine tgyro_flux
         expwd_i_tur(i_ion,i_r) = tglf_ion_expwd_out(i0)
      enddo
 
-  case (3)  ! Map TGYRO parameters to GLF23
-
-     call tgyro_glf23_map
-
-     if (gyrotest_flag == 0) call glf23_run
-
-     pflux_e_tur(i_r) = glf23_elec_pflux_out
-     eflux_e_tur(i_r) = glf23_elec_eflux_out
-     mflux_e_tur(i_r) = glf23_elec_mflux_out
-     expwd_e_tur(i_r) = glf23_elec_expwd_out
-
-     pflux_i_tur(1:loc_n_ion,i_r) = glf23_ion_pflux_out(1:loc_n_ion)
-     eflux_i_tur(1:loc_n_ion,i_r) = glf23_ion_eflux_out(1:loc_n_ion)
-     mflux_i_tur(1:loc_n_ion,i_r) = glf23_ion_mflux_out(1:loc_n_ion)
-     expwd_i_tur(1:loc_n_ion,i_r) = glf23_ion_expwd_out(1:loc_n_ion)
-
-     call tgyro_trap_component_error(0,'null')
-
-  case (4)
-
-     ! Map TGYRO parameters to GYRO
-     call tgyro_gyro_map
-
-     call gyro_run(gyrotest_flag,gyro_restart_method,transport_method)
-
-     call tgyro_trap_component_error(gyro_error_status_out,gyro_error_message_out)
-
-     if (tgyro_mode == 1 .and. gyrotest_flag == 0) then
-
-        i1 = 1+gyro_explicit_damp_grid_in
-        i2 = gyro_radial_grid_in-gyro_explicit_damp_grid_in
-        n_12 = gyro_radial_grid_in-2*gyro_explicit_damp_grid_in
-
-        ! Map GYRO (local simulation) output to TGYRO
-
-        pflux_e_tur(i_r) = sum(gyro_elec_pflux_out(i1:i2))/n_12
-        eflux_e_tur(i_r) = sum(gyro_elec_eflux_out(i1:i2))/n_12
-        mflux_e_tur(i_r) = sum(gyro_elec_mflux_out(i1:i2))/n_12
-        expwd_e_tur(i_r) = sum(gyro_elec_expwd_out(i1:i2))/n_12
-
-        do i_ion=1,loc_n_ion
-           pflux_i_tur(i_ion,i_r) = sum(gyro_ion_pflux_out(i1:i2,i_ion))/n_12
-           eflux_i_tur(i_ion,i_r) = sum(gyro_ion_eflux_out(i1:i2,i_ion))/n_12
-           mflux_i_tur(i_ion,i_r) = sum(gyro_ion_mflux_out(i1:i2,i_ion))/n_12
-           expwd_i_tur(i_ion,i_r) = sum(gyro_ion_expwd_out(i1:i2,i_ion))/n_12
-        enddo
-
-     endif
-
   case (5) 
 
      call tgyro_etgcrit(a1,a2,a3,a4)
@@ -277,6 +219,25 @@ subroutine tgyro_flux
 
      call tgyro_trap_component_error(0,'null')
 
+  case (6) 
+     call tgyro_mmm_map(ierr)
+     if (ierr.ne.0) call tgyro_catch_error('ERROR: (TGYRO) error in TGYRO/MMM mapping')
+     call tgyro_mmm_run(ierr)
+     if (ierr.ne.0) call tgyro_catch_error('ERROR: Error in MMM subroutine')
+
+     eflux_e_tur(i_r) = (mmm_chi_e*dlntedr(i_r) + mmm_vheat_e)*r_min/chi_gb(i_r)
+     pflux_e_tur(i_r) = (mmm_chi_ne*dlnnedr(i_r) + mmm_vgx_ne)*r_min/chi_gb(i_r)
+     mflux_e_tur(i_r) = (-mmm_chi_phi*w0p(i_r) + mmm_vgx_phi*w0(i_r))*r_min/c_s(i_r)/chi_gb(i_r)
+
+     eflux_i_tur(1,i_r) = (mmm_chi_i*dlntidr(1, i_r) + mmm_vheat_i) &
+                           *r_min*ni(1,i_r)/ne(i_r)*ti(1,i_r)/te(i_r)/chi_gb(i_r)
+     do i_ion = 1, loc_n_ion
+       if (zi_vec(i_ion)>2.5) then
+         pflux_i_tur(i_ion,i_r) = (mmm_chi_nx*dlnnidr(i_ion,i_r) + mmm_vgx_nx)*r_min/chi_gb(i_r)
+       endif
+     enddo 
+     mflux_i_tur(1,i_r) =  (-mmm_chi_phi*w0p(i_r) + mmm_vgx_phi*w0(i_r))*r_min/c_s(i_r)/chi_gb(i_r) 
+          
   case default
 
      call tgyro_catch_error('ERROR: (TGYRO) No matching flux method in tgyro_flux.')

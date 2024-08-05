@@ -13,86 +13,91 @@ subroutine cgyro_advect_wavenumber(ij)
   implicit none
 
   integer, intent(in) :: ij
-  integer :: ir,l,ll,j,icc,in
-  complex, dimension(:,:),allocatable :: he
+  integer :: ir,l,ll,j,iccj,ivc,itor,llnt
+  complex :: rl,he1,he2
 
   if (nonlinear_flag == 0) return
 
   if (source_flag == 1) then
      call timer_lib_in('shear')
-     allocate(he(n_theta,1-2*n_wave:n_radial+2*n_wave))
 
-#ifdef _OPENACC
-!$acc parallel loop gang private(in,ir,l,icc,ll,he) &
-!$acc&                   present(rhs(:,:,ij),omega_ss,field,h_x,c_wave) &
-!$acc&                   vector_length(n_theta)
+#if defined(OMPGPU)
+!$omp target teams distribute parallel do simd collapse(4) &
+!$omp&         private(ivc,ir,l,iccj) &
+!$omp&         private(ir,j,l,iccj,ll,rl,llnt,he1,he2)
+#elif defined(_OPENACC)
+!$acc parallel loop collapse(4) gang vector private(ivc,ir,l,iccj) &
+!$acc&         private(ir,j,l,iccj,ll,rl,llnt,he1,he2) &
+!$acc&         present(rhs(:,:,:,ij),omega_ss,field,h_x,c_wave)
 #else
-!$omp parallel do private(in,ir,j,icc,l,ll,he)
+!$omp parallel do collapse(4) private(ivc,ir,j,iccj,l,ll,rl,llnt,he1,he2)
 #endif
-     do in=1,nv_loc
-        he(:,1-2*n_wave:0) = 0.0
-        he(:,n_radial+1:n_radial+2*n_wave) = 0.0
+     do itor=nt1,nt2
+      do ivc=1,nv_loc
+       do ir=1,n_radial
+         do j=1,n_theta
+           iccj = (ir-1)*n_theta+j
 
-        ! Wavenumber advection ExB shear
-        if (shear_method == 2) then
-
+           ! Wavenumber advection ExB shear
+           if (shear_method == 2) then
+                 rl = 0.0
+#if (!defined(OMPGPU)) && defined(_OPENACC)
 !$acc loop seq
-           do ir=1,n_radial
-              icc = (ir-1)*n_theta
-!$acc loop vector private(j)
-              do j=1,n_theta
-                 he(j,ir) = omega_eb*h_x(icc+j,in)
-              enddo
-           enddo
-
-!$acc loop seq
-           do ir=1,n_radial
-              icc = (ir-1)*n_theta
-!$acc loop seq
-              do l=1,n_wave
-                 ll = 2*l-1
-!$acc loop vector private(j)
-                 do j=1,n_theta
+#endif
+                 do l=1,n_wave
+                    ll = (2*l-1)
+                    llnt = ll*n_theta
+                    ! was he(j,ir+ll)
+                    if ( (ir+ll) <= n_radial ) then
+                       he1 = h_x(iccj+llnt,ivc,itor)
+                    else
+                       he1 = 0.0
+                    endif
+                    ! was he(j,ir-ll)
+                    if ( (ir-ll) >= 1 ) then
+                       he2 = h_x(iccj-llnt,ivc,itor)
+                    else
+                       he2 = 0.0
+                    endif
                     ! Sign throughout paper is incorrect (or gamma -> - gamma)
                     ! Thus sign below has been checked and is correct
-                    rhs(icc+j,in,ij) = rhs(icc+j,in,ij)+c_wave(l)*(he(j,ir+ll)-he(j,ir-ll))
+                    rl = rl+c_wave(l)*(he1-he2)
                  enddo
-              enddo
-           enddo
+                 rhs(iccj,ivc,itor,ij) = rhs(iccj,ivc,itor,ij) + omega_eb_base*itor*rl
+           endif
 
-        endif
-
-        ! Wavenumber advection profile shear
-        if (profile_shear_flag == 1) then
-
+           ! Wavenumber advection profile shear
+           if (profile_shear_flag == 1) then
+                 iccj = (ir-1)*n_theta+j
+                 rl = rhs(iccj,ivc,itor,ij)
+#if (!defined(OMPGPU)) && defined(_OPENACC)
 !$acc loop seq
-           do ir=1,n_radial
-              icc = (ir-1)*n_theta
-!$acc loop vector private(j)
-              do j=1,n_theta
-                 he(j,ir) = sum(omega_ss(:,icc+j,in)*field(:,icc+j))
-              enddo
-           enddo
-
-!$acc loop seq
-           do ir=1,n_radial
-              icc = (ir-1)*n_theta
-!$acc loop seq
-              do l=1,n_wave
-                 ll = 2*l-1
-!$acc loop vector private(j)
-                 do j=1,n_theta
+#endif
+                 do l=1,n_wave
+                    ll = 2*l-1
+                    llnt = ll*n_theta
+                    ! was he(j,ir+ll)
+                    if ( (ir+ll) <= n_radial ) then
+                       he1 = sum(omega_ss(:,iccj+llnt,ivc,itor)*field(:,iccj+llnt,itor))
+                    else
+                       he1 = 0.0
+                    endif
+                    ! was he(j,ir-ll)
+                    if ( (ir-ll) >= 1 ) then
+                       he2 = sum(omega_ss(:,iccj-llnt,ivc,itor)*field(:,iccj-llnt,itor))
+                    else
+                       he2 = 0.0
+                    endif
                     ! Note opposite sign to ExB shear
-                    rhs(icc+j,in,ij) = rhs(icc+j,in,ij)-c_wave(l)*(he(j,ir+ll)-he(j,ir-ll))
+                    rl = rl-c_wave(l)*(he1-he2)
                  enddo
-              enddo
-           enddo
-
-        endif
-
+                 rhs(iccj,ivc,itor,ij) = rl
+           endif
+         enddo
+       enddo
+      enddo
      enddo
 
-     deallocate(he)
      call timer_lib_out('shear')
 
   endif

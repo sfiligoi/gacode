@@ -6,6 +6,7 @@
 #----------------------------------------------------------------------
 
 import numpy as np
+import time
 
 # Useful labels
 TIME=r'$(c_s/a)\,t$'
@@ -42,15 +43,9 @@ def variance(f,t,wmin,wmax):
 #---------------------------------------------------------------
 def average(f,t,wmin,wmax):
 
+    t0 = time.time()
+    
     n_time = len(t)
-
-    # Manage case with 2 time points (eigenvalue)
-    if len(t) == 2:
-        tmin = t[-1]
-        tmax = tmin
-        ave  = f[-1]
-        return ave
-
     tmin = (1.0-wmin)*t[-1]
     tmax = (1.0-wmax)*t[-1]
 
@@ -62,7 +57,7 @@ def average(f,t,wmin,wmax):
             t_window = t_window+t[i+1]-t[i]
 
     ave = ave/t_window
-
+    
     return ave
 #---------------------------------------------------------------
 #---------------------------------------------------------------
@@ -304,6 +299,10 @@ def tag_helper(mass,z,moment):
       fdata = '.cgyro.kxky_e'
       title = r'${\delta \mathrm{E}}_'+u+'$'
       isfield = False
+  elif (moment == 'v'):
+      fdata = '.cgyro.kxky_v'
+      title = r'${\delta \mathrm{v}}_'+u+'$'
+      isfield = False
   elif (moment == 'phi'):
       fdata = '.cgyro.kxky_phi'
       title = r'$\delta\phi$'
@@ -402,7 +401,7 @@ def theta_indx(theta,theta_plot):
 
 def shift_fourier(f,imin,imax):
 
-    nx = f.shape[0]
+    nx = f.shape[0]+1
     nn = f.shape[1]
     nt = f.shape[2]
     
@@ -424,8 +423,8 @@ def shift_fourier(f,imin,imax):
 
     for n in range(nn):
         for p in range(1,nx):
-            phi[p,:] = f[p,n,:]
-            phip[p,:] = -(p-nx//2)*f[p,n,:]
+            phi[p,:] = f[p-1,n,:]
+            phip[p,:] = -(p-nx//2)*f[p-1,n,:]
             
         ephi[nx//2:3*nx//2,:]  = phi[:,:]
         ephip[nx//2:3*nx//2,:] = phip[:,:]            
@@ -464,7 +463,7 @@ def shift_legendre(f,imin,imax):
 
     import scipy.special as sp
 
-    nx = f.shape[0]
+    nx = f.shape[0]+1
     nn = f.shape[1]
     nt = f.shape[2]
     n0 = nx//2
@@ -482,8 +481,8 @@ def shift_legendre(f,imin,imax):
     pvec = np.arange(1,n0)
     z = pvec*np.pi/2
     for k in kvec:
-        mat1[k,:]  = sp.spherical_jn(k,z)
-        mat2[k,:]  = mat1[k,:]*(-1)**pvec[:]
+        mat1[k,:] = sp.spherical_jn(k,z)
+        mat2[k,:] = mat1[k,:]*(-1)**pvec[:]
 
     ai = 1j**kvec   
     ak = 2*kvec+1   
@@ -498,9 +497,11 @@ def shift_legendre(f,imin,imax):
 
             y = f[:,n,jt]
 
-            phim = y[n0-1:0:-1]
-            phi0 = y[n0]
-            phip = y[n0+1:]
+            phim = np.flip(y[0:n0-1])
+            phi0 = y[n0-1]
+            phip = y[n0:]
+
+            #print(len(phim),len(phip))
 
             mp1 = np.matmul(mat1,phip)
             mm1 = np.matmul(mat1,phim)

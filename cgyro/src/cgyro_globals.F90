@@ -9,11 +9,21 @@
 module cgyro_globals
 
   use, intrinsic :: iso_c_binding
-#ifdef _OPENACC
+#if defined(_OPENACC) || defined(OMPGPU)
+#define CGYRO_GPU_FFT
+#endif
+
+#ifdef CGYRO_GPU_FFT
+
+#ifdef HIPGPU
+  use hipfort_hipfft
+#else
   use cuFFT
 #endif
-  use, intrinsic :: iso_fortran_env
 
+#endif
+  use, intrinsic :: iso_fortran_env
+  
   ! Data output precision setting
   integer, parameter :: BYTE=4 ! Change to 8 for double precision
   
@@ -59,9 +69,7 @@ module cgyro_globals
   integer :: collision_kperp
   integer :: collision_field_model
   integer :: collision_ion_model
-  real    :: collision_ele_scale
   integer :: collision_precision_mode
-  integer :: collision_full_stripes
   integer :: collision_test_mode
   integer :: collision_field_max_l
   integer :: collision_test_max_l
@@ -69,8 +77,6 @@ module cgyro_globals
   integer :: z_eff_method
   integer :: zf_test_mode 
   integer :: nonlinear_flag 
-  integer :: nonlinear_method
-  integer :: nonlinear_field
   real :: temp_ae
   real :: dens_ae
   real :: mass_ae
@@ -103,6 +109,8 @@ module cgyro_globals
   real :: px0
   integer :: stream_term
   real :: stream_factor
+  integer :: exch_flag
+  real :: res_weight_power
   !
   ! Geometry input
   !
@@ -156,11 +164,11 @@ module cgyro_globals
   real :: rhos
 
   ! Global conversion variables
-  real :: b_unit
+  real :: b_unit, b_gs2
   real :: a_meters
   real :: dens_norm, temp_norm, vth_norm, mass_norm, rho_star_norm
   real :: gamma_gb_norm, q_gb_norm, pi_gb_norm
-
+  
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------
@@ -191,6 +199,8 @@ module cgyro_globals
   integer :: ns1,ns2
   integer, dimension(:), allocatable :: recv_status
   integer :: f_req, g_req
+  ! Thetas present in the process after NL AllToAll
+  integer :: n_jtheta
   !
   ! Pointers
   integer :: nv,iv
@@ -207,7 +217,8 @@ module cgyro_globals
   integer, dimension(:,:,:), allocatable :: iv_v
   integer, dimension(:), allocatable :: ica_c,icb_c
   !
-  integer :: n
+  integer :: nt1,nt2,nt_loc
+  integer :: n_toroidal_procs
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------
@@ -280,9 +291,9 @@ module cgyro_globals
   integer :: n_time
   integer :: i_current
   real    :: t_current
-  real    :: gtime
-  complex :: freq
-  complex :: freq_err
+  real, dimension(:), allocatable    :: gtime
+  complex, dimension(:), allocatable :: freq
+  complex, dimension(:), allocatable :: freq_err
   integer(KIND=8) :: kernel_start_time, kernel_exit_time, kernel_count_rate, kernel_count_max
   !
   ! adaptive integrator parameters
@@ -304,10 +315,12 @@ module cgyro_globals
   real, dimension(11) :: vth  
   real, dimension(11) :: nu
   real :: rho
-  real :: k_theta
   real :: length
-  real :: omega_eb
   integer :: sign_qs
+  ! k_theta = k_theta_base * my_toroidal
+  real :: k_theta_base
+  ! omega_eb = omega_eb_base * my_toroidal
+  real :: omega_eb_base
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------
@@ -325,81 +338,95 @@ module cgyro_globals
   real, dimension(:), allocatable :: theta
   real, dimension(:), allocatable :: uderiv
   real, dimension(:), allocatable :: cderiv
-  integer, dimension(:,:), allocatable :: icd_c
-  complex, dimension(:,:), allocatable :: dtheta
-  complex, dimension(:,:), allocatable :: dtheta_up
+  integer, dimension(:,:,:), allocatable :: icd_c
+  complex, dimension(:,:,:), allocatable :: dtheta
+  complex, dimension(:,:,:), allocatable :: dtheta_up
   !
   ! Wavenumber advection
   integer :: source_flag
   real, parameter :: tau_ave=50.0
   real, dimension(:), allocatable :: c_wave
-  complex, dimension(:,:), allocatable :: source
+  complex, dimension(:,:,:), allocatable :: source
   real :: sa
   !
   ! Distributions
-  complex, dimension(:,:,:), allocatable :: rhs
-  complex, dimension(:,:), allocatable :: h_x
-  complex, dimension(:,:), allocatable :: g_x
-  complex, dimension(:,:), allocatable :: h0_x
-  complex, dimension(:,:), allocatable :: h0_old
-  complex, dimension(:,:), allocatable :: psi
-  complex, dimension(:,:,:), allocatable :: f_nl
-  complex, dimension(:,:,:), allocatable :: g_nl
-  complex, dimension(:,:), allocatable :: fpack
-  complex, dimension(:,:), allocatable :: gpack
-  complex, dimension(:,:), allocatable :: omega_cap_h
-  complex, dimension(:,:), allocatable :: omega_h
-  complex, dimension(:,:,:), allocatable :: omega_s,omega_ss
-  complex, dimension(:,:), allocatable :: cap_h_c
-  complex, dimension(:,:), allocatable :: cap_h_ct
-  complex, dimension(:,:), allocatable :: cap_h_v
-  complex, dimension(:,:), allocatable :: cap_h_v_prime
-  real, dimension(:,:,:), allocatable :: jvec_c
-  real, dimension(:,:,:), allocatable :: jvec_v
-  real, dimension(:,:,:), allocatable :: dvjvec_c
-  real, dimension(:,:,:), allocatable :: dvjvec_v
-  real, dimension(:,:,:), allocatable :: jxvec_c
+  complex, dimension(:,:,:,:), allocatable :: rhs
+  complex, dimension(:,:,:), allocatable :: h_x
+  complex, dimension(:,:,:), allocatable :: g_x
+  complex, dimension(:,:,:), allocatable :: h0_x
+  complex, dimension(:,:,:), allocatable :: h0_old
+  complex, dimension(:,:,:,:), allocatable :: f_nl
+  complex, dimension(:,:,:,:), allocatable :: g_nl
+  complex, dimension(:,:,:), allocatable :: fpack
+  complex, dimension(:,:,:,:), allocatable :: gpack
+  complex, dimension(:,:,:), allocatable :: omega_cap_h
+  complex, dimension(:,:,:), allocatable :: omega_h
+  complex, dimension(:,:,:,:), allocatable :: omega_s,omega_ss
+  complex, dimension(:,:,:), allocatable :: cap_h_c
+  complex, dimension(:,:,:), allocatable :: cap_h_c_dot
+  complex, dimension(:,:,:), allocatable :: cap_h_c_old
+  complex, dimension(:,:,:), allocatable :: cap_h_c_old2
+  complex, dimension(:,:,:), allocatable :: cap_h_ct
+  complex, dimension(:,:,:), allocatable :: cap_h_v
+  real, dimension(:,:,:,:), allocatable :: jvec_c
+  real, dimension(:,:,:,:,:), allocatable :: jvec_c_nl ! used by NL only
+  real, dimension(:,:,:,:), allocatable :: jvec_v
+  real, dimension(:,:,:,:), allocatable :: dvjvec_c
+  real, dimension(:,:,:,:), allocatable :: dvjvec_v
+  real, dimension(:,:,:,:), allocatable :: jxvec_c
   real, dimension(:,:,:), allocatable :: upfac1,upfac2
   !
   ! Fields
-  real, dimension(:,:), allocatable :: fcoef
-  real, dimension(:,:), allocatable :: gcoef
-  complex, dimension(:,:), allocatable :: field
-  complex, dimension(:,:), allocatable :: field_loc
-  complex, dimension(:,:), allocatable :: field_old
-  complex, dimension(:,:), allocatable :: field_old2
-  complex, dimension(:,:), allocatable :: field_old3
-  complex, dimension(:,:,:,:), allocatable :: moment_loc
-  complex, dimension(:,:,:,:), allocatable :: moment
+  real, dimension(:,:,:), allocatable :: fcoef
+  real, dimension(:,:,:), allocatable :: gcoef
+  complex, dimension(:,:,:), allocatable :: field
+  complex, dimension(:,:,:), allocatable :: field_dot
+  complex, dimension(:,:,:), allocatable :: field_loc
+  complex, dimension(:,:,:), allocatable :: field_old
+  complex, dimension(:,:,:), allocatable :: field_old2
+  complex, dimension(:,:,:), allocatable :: field_old3
+  complex, dimension(:,:,:,:,:), allocatable :: moment_loc
+  complex, dimension(:,:,:,:,:), allocatable :: moment
   !
   ! Nonlinear fluxes (f=standard,c=central,g=global)
-  real, dimension(:,:,:), allocatable :: cflux_loc
-  real, dimension(:,:,:), allocatable :: cflux
-  complex, dimension(:,:,:,:), allocatable :: gflux_loc
-  complex, dimension(:,:,:,:), allocatable :: gflux
+  real, dimension(:,:,:,:), allocatable :: cflux_loc
+  real, dimension(:,:,:,:), allocatable :: cflux
+  complex, dimension(:,:,:,:,:), allocatable :: gflux_loc
+  complex, dimension(:,:,:,:,:), allocatable :: gflux
   real, dimension(:,:), allocatable :: cflux_tave, gflux_tave
   real :: tave_min, tave_max
   integer :: tave_step
+  integer :: nflux
   !
   ! Nonlinear plans
+#ifndef CGYRO_GPU_FFT
+  ! CPU-FFTW plans
   type(C_PTR) :: plan_r2c
   type(C_PTR) :: plan_c2r
   !
+#else
   ! GPU-FFTW plans
-#ifdef _OPENACC
+
+#ifdef HIPGPU
+  type(C_PTR) :: hip_plan_r2c_many
+  type(C_PTR) :: hip_plan_c2r_many
+#else
   integer(c_int) :: cu_plan_r2c_many
   integer(c_int) :: cu_plan_c2r_many
-  complex, dimension(:,:,:),allocatable :: fxmany,fymany,gxmany,gymany
-  real, dimension(:,:,:), allocatable :: uxmany,uymany
-  real, dimension(:,:,:), allocatable :: vxmany,vymany,uvmany
+#endif
+
+  complex, dimension(:,:,:),allocatable, target :: fxmany,fymany,gxmany,gymany
+  real, dimension(:,:,:), allocatable, target :: uxmany,uymany
+  real, dimension(:,:,:), allocatable, target :: vxmany,vymany,uvmany
 #endif
   ! 
   ! 2D FFT dimensions 
   integer :: nx,ny
   integer :: nx0,ny0
+  integer :: nx2,ny2
   !
   ! 2D FFT work arrays
-#ifndef _OPENACC
+#ifndef CGYRO_GPU_FFT
   real, dimension(:,:,:), allocatable :: uxmany
   real, dimension(:,:,:), allocatable :: uymany
   real, dimension(:,:,:), allocatable :: vx
@@ -426,17 +453,19 @@ module cgyro_globals
   !
   ! Field solve variables
   real, dimension(:), allocatable :: sum_den_h
-  real, dimension(:), allocatable :: sum_den_x, sum_cur_x
+  real, dimension(:,:), allocatable :: sum_den_x,sum_cur_x
   real, dimension(:), allocatable :: vfac
   !
   ! n=0 test variables
-  real, dimension(:,:,:), allocatable :: hzf, xzf 
+  real, dimension(:,:,:), allocatable :: hzf,xzf 
   !
   ! Collision operator
-  real, dimension(:,:,:), allocatable :: cmat ! only used if collision_precision_mode=0
-  real, dimension(:,:,:), allocatable :: cmat_stripes ! only used if collision_precision_mod/=0
-  real(KIND=REAL32), dimension(:,:,:), allocatable :: cmat_fp32 ! only used if collision_precision_mod/=0
-  real, dimension(:,:,:,:,:), allocatable :: cmat_simple ! only used in collision_model=5
+  integer :: n_low_energy
+  real, dimension(:,:,:,:), allocatable :: cmat ! only used if collision_precision_mode=0
+  real(KIND=REAL32), dimension(:,:,:,:), allocatable :: cmat_fp32 ! only used if collision_precision_mod/=0
+  real(KIND=REAL32), dimension(:,:,:,:,:,:), allocatable :: cmat_stripes ! only used if collision_precision_mod/=0
+  real(KIND=REAL32), dimension(:,:,:,:,:,:), allocatable :: cmat_e1 ! only used if collision_precision_mod/=0
+  real, dimension(:,:,:,:,:,:), allocatable :: cmat_simple ! only used in collision_model=5
   ! 
   ! Equilibrium/geometry arrays
   integer :: it0
@@ -447,15 +476,16 @@ module cgyro_globals
   real, dimension(:), allocatable   :: w_theta
   real, dimension(:), allocatable   :: g_theta
   real, dimension(:), allocatable   :: g_theta_geo
-  real, dimension(:), allocatable   :: k_perp
-  real, dimension(:), allocatable   :: k_x
+  real, dimension(:,:), allocatable :: k_perp
+  real, dimension(:,:), allocatable :: k_x
   real, dimension(:), allocatable   :: bmag
   real, dimension(:), allocatable   :: btor
   real, dimension(:), allocatable   :: bpol
   real, dimension(:), allocatable   :: bigr
   real, dimension(:), allocatable   :: bigr_r
-  real, dimension(:,:), allocatable :: omega_stream
-  real, dimension(:,:), allocatable :: omega_trap
+  real, dimension(:), allocatable   :: captheta
+  real, dimension(:,:,:), allocatable :: omega_stream
+  real, dimension(:,:,:), allocatable :: omega_trap
   real, dimension(:,:), allocatable :: omega_rdrift
   real, dimension(:,:), allocatable :: omega_adrift
   real, dimension(:,:), allocatable :: omega_aprdrift

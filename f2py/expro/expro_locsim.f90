@@ -445,12 +445,15 @@ subroutine cub_spline(x,y,n,xi,yi,ni)
   !
   if (xi(ni) > x(n)) then
      print *,'ERROR: (cub_spline) Data above upper bound'
-     print *,'xi(ni) > x(n)',xi(ni),x(n) 
+     print *,'xi(ni) > x(n)',xi(ni),x(n)
+     print *,'y(:)',y(:)
+     stop
   endif 
   if (xi(1) < x(1)) then
      print *,'ERROR: (cub_spline) Data below lower bound'
      print *,'xi(1) < x(1)',xi(1),x(1) 
-  endif 
+     stop
+  endif
   !-------------------------------------------------------------
 
   !-------------------------------------------------------------

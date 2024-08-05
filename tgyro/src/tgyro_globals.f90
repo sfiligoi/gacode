@@ -134,10 +134,15 @@ module tgyro_globals
   ! Formulary exchange rate
   real, dimension(:), allocatable :: nu_exch
 
+  ! Alpha slowing-down time
+  real, dimension(:), allocatable :: taus
+  
   ! Alpha heating coefficients
   real, dimension(:), allocatable :: frac_ae
   real, dimension(:), allocatable :: frac_ai
   real, dimension(:), allocatable :: e_cross
+  real, dimension(:), allocatable :: n_alpha
+  real, dimension(:), allocatable :: t_alpha
 
   ! Electron and ion temperatures
   real, dimension(:), allocatable :: te
@@ -157,6 +162,9 @@ module tgyro_globals
   real, dimension(:), allocatable :: gamma_eb
   real, dimension(:), allocatable :: gamma_p
   real, dimension(:), allocatable :: u00
+  real, dimension(:), allocatable :: vtor_p 
+  real, dimension(:), allocatable :: vpol_p 
+  real, dimension(:,:), allocatable :: v_pol 
   real :: w0_norm
 
   real, dimension(:), allocatable :: pr
@@ -291,6 +299,7 @@ module tgyro_globals
   real :: loc_me_multiplier
   integer :: tgyro_tglf_revision
   integer :: tgyro_tglf_dump_flag
+  integer :: tgyro_tglf_ptot_flag
   integer :: tgyro_glf23_revision
   integer :: tgyro_glf23_dump_flag
   integer :: loc_ti_feedback_flag
@@ -349,6 +358,7 @@ module tgyro_globals
   integer :: i_tran
   integer :: flux_counter
   integer :: i_ash
+  integer :: i_alpha
   integer :: evolve_indx(5)
   !
   integer :: use_trap

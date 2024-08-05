@@ -16,24 +16,28 @@ subroutine cgyro_error_estimate
 
   implicit none
 
-  integer :: i_f
+  integer :: i_f,itor
   real, dimension(2) :: norm_loc,norm
   real, dimension(2) :: pair_loc,pair
   real, dimension(2) :: error_loc
-  
+
   real :: norm_loc_s,error_loc_s,h_s,r_s
 
 #ifdef _OPENACC
   ! launch Estimate of collisionless error via 3rd-order linear estimate async ahead of time on GPU
   ! CPU-only code will work on it later
+  ! NOTE: If I have multiple itor, sum them all together
   h_s=0.0
   r_s=0.0
-!$acc parallel loop collapse(2) independent present(h_x,rhs(:,:,1)) reduction(+:h_s,r_s) async(2)
-  do iv_loc=1,nv_loc
+!$acc parallel loop collapse(3) independent gang vector &
+!$acc&         present(h_x,rhs(:,:,:,1)) reduction(+:h_s,r_s) async(2)
+  do itor=nt1,nt2
+   do iv_loc=1,nv_loc
      do ic=1,nc
-       h_s = h_s + abs(h_x(ic,iv_loc))
-       r_s = r_s + abs(rhs(ic,iv_loc,1))
+        h_s = h_s + abs(h_x(ic,iv_loc,itor))
+        r_s = r_s + abs(rhs(ic,iv_loc,itor,1))
      enddo
+   enddo
   enddo
 #endif
 
@@ -44,27 +48,54 @@ subroutine cgyro_error_estimate
 
   ! field_olds are always only in system memory... too expensive to keep in GPU memory
   ! assuming field was already synched to system memory
-!$omp parallel do collapse(2) reduction(+:norm_loc_s,error_loc_s)
-  do ic=1,nc
-    do i_f=1,n_field
+!$omp parallel do collapse(3) reduction(+:norm_loc_s,error_loc_s)
+  do itor=nt1,nt2
+   do ic=1,nc
+     do i_f=1,n_field
 
-      ! 1. Estimate of total (field) error via quadratic interpolation
+        ! 1. Estimate of total (field) error via quadratic interpolation
 
-      field_loc(i_f,ic) = 3.0*field_old(i_f,ic)-3.0*field_old2(i_f,ic)+field_old3(i_f,ic)
+        field_loc(i_f,ic,itor) = 3*field_old(i_f,ic,itor) - &
+                3*field_old2(i_f,ic,itor) + &
+                field_old3(i_f,ic,itor)
+        field_dot(i_f,ic,itor) = (3*field(i_f,ic,itor) - &
+                4*field_old(i_f,ic,itor) + &
+                field_old2(i_f,ic,itor) )/(2*delta_t)
 
-      ! Define norm and error for each mode number n
-      norm_loc_s  = norm_loc_s  + abs(field(i_f,ic))
-      error_loc_s = error_loc_s + abs(field(i_f,ic)-field_loc(i_f,ic))
+        ! Define norm and error for each mode number n
+        norm_loc_s  = norm_loc_s  + abs(field(i_f,ic,itor))
+        error_loc_s = error_loc_s + abs(field(i_f,ic,itor)-field_loc(i_f,ic,itor))
 
-      ! save old values for next iteration
-      field_old3(i_f,ic) = field_old2(i_f,ic)
-      field_old2(i_f,ic) = field_old(i_f,ic)
-      field_old(i_f,ic)  = field(i_f,ic)
-    enddo
+        ! save old values for next iteration
+        field_old3(i_f,ic,itor) = field_old2(i_f,ic,itor)
+        field_old2(i_f,ic,itor) = field_old(i_f,ic,itor)
+        field_old(i_f,ic,itor)  = field(i_f,ic,itor)
+     enddo
+   enddo
   enddo
 
   norm_loc(1)  = norm_loc_s
   error_loc(1) = error_loc_s
+
+#ifdef _OPENACC
+!$acc parallel loop collapse(3) gang vector private(iv_loc) &
+!$acc&         present(cap_h_c_dot,cap_h_c,cap_h_c_old,cap_h_c_old2) &
+!$acc&         present(nt1,nt2,nv1,nv2,nc) copyin(delta_t) default(none)
+#else
+!$omp parallel do collapse(3) private(iv_loc)
+#endif
+  do itor=nt1,nt2
+   do iv=nv1,nv2
+     do ic=1,nc
+        iv_loc = iv-nv1+1
+        cap_h_c_dot(ic,iv_loc,itor) = (3*cap_h_c(ic,iv_loc,itor) - &
+                4*cap_h_c_old(ic,iv_loc,itor) + &
+                cap_h_c_old2(ic,iv_loc,itor) )/(2*delta_t)
+        cap_h_c_old2(ic,iv_loc,itor) = cap_h_c_old(ic,iv_loc,itor)
+        cap_h_c_old(ic,iv_loc,itor) = cap_h_c(ic,iv_loc,itor)
+     enddo
+   enddo
+  enddo
 
   call timer_lib_out('field')
 
@@ -76,14 +107,17 @@ subroutine cgyro_error_estimate
   ! wait for the async GPU compute to be completed
 !$acc wait(2)
 #else
+  ! NOTE: If I have multiple itor, sum them all together
   h_s=0.0
   r_s=0.0
-!$omp parallel do collapse(2) reduction(+:h_s,r_s)
-  do iv_loc=1,nv_loc
+!$omp parallel do collapse(3) reduction(+:h_s,r_s)
+  do itor=nt1,nt2
+   do iv_loc=1,nv_loc
      do ic=1,nc
-       h_s = h_s + abs(h_x(ic,iv_loc))
-       r_s = r_s + abs(rhs(ic,iv_loc,1))
+        h_s = h_s + abs(h_x(ic,iv_loc,itor))
+        r_s = r_s + abs(rhs(ic,iv_loc,itor,1))
      enddo
+   enddo
   enddo
 #endif
 
@@ -105,7 +139,7 @@ subroutine cgyro_error_estimate
 
   norm_loc(2) = pair(1)
   error_loc(2) = pair(2)
-  
+
   ! Get sum of all errors
   call MPI_ALLREDUCE(error_loc, &
        integration_error, &

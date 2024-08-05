@@ -1,24 +1,31 @@
 from pygacode import expro
+from pygacode import gapystr_get as gapystr
 import numpy as np
-import os, sys
 
-filename = '../data/input.gacode'
+oldfile = 'input.gacode'
+newfile = 'input.gacode.new'
 
-for k in range(3):
-    print('READ: ' + filename)
-    expro.expro_read(filename)
+# Read existing input.gacode
+print('Reading {}'.format(oldfile))
+expro.expro_read(oldfile,0)
 
-    print(expro.expro_name)
-    print(expro.expro_type)
+# Print name and type of species
+nion = int(expro.expro_n_ion)
+print(gapystr(expro.expro_name)[0:nion])
+print(gapystr(expro.expro_type)[0:nion])
 
-    print('nexp  : ' + str(expro.expro_n_exp))
-    print('bunit : ' + str(expro.expro_bunit))
+# Number of radial points
+print('nexp = {:d}'.format(expro.expro_n_exp))
 
-    import tempfile
+# Ion 1 temperature
+print('Ti1 : {}'.format(expro.expro_ti[0,:]))
 
-    tmpdir = tempfile.gettempdir() + os.sep
-    filename = tmpdir + 'input.gacode'
-    print('WRITE: ' + filename)
-    expro.expro_write(filename)
+# Ion 1 temperature gradient scale length a/Lt (computed)
+print('a/LT1 : {}'.format(expro.expro_dlntidr[0,:]))
 
-    print('')
+# Let's modify q
+expro.expro_q = 1.1*expro.expro_q
+
+# Write modified input.gacode
+print('Writing {} '.format(newfile))
+expro.expro_write(newfile)

@@ -1,0 +1,42 @@
+#---------------------------------------------------
+# Freia UKAEA cluster
+#
+# SYSTEM INFO:
+# Intel(R) Xeon(R) CPU E5-2640 v3 @ 2.60GHz
+#   
+#---------------------------------------------------
+$(info Compiling for Freia)
+
+#  FIXED Hardware parameters
+
+IDENTITY="Freia"
+CORES_PER_NODE=8
+NUMAS_PER_NODE=1
+
+# Compilers and flags
+
+FC     = mpifort -mod ${GACODE_ROOT}/modules -I ${GACODE_ROOT}/modules
+F77    = ${FC}
+
+FOMP   = -qopenmp
+FMATH  = -r8
+FOPT   = -implicitnone -no-prec-div -O3 -fp-model fast=2 -pad -ip  -mkl=cluster #-fast -no-ipo
+FDEBUG = -shared-intel -implicitnone -check all -check noarg_temp_created -traceback
+#FPETSC = 
+F2PY  = f2py
+
+# System math libraries
+FFTW_DIR = /usr/local/depot/fftw-3.3.8-ifort-12.0/lib
+LMATH = -L${FFTW_DIR} -lfftw3_threads -lfftw3f_threads -lfftw3 -lfftw3f -mkl=cluster
+
+NETCDF_DIR = /usr/local/depot/netcdf-4.4.1-ifort12
+
+NETCDF  = -L${NETCDF_DIR}/lib -lnetcdf -lnetcdff
+NETCDF_INC = ${NETCDF_DIR}/include
+
+GATOFLAGS = -r8 -i8
+
+# Archive 
+ARCH = ar cr
+
+

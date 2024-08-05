@@ -4,20 +4,41 @@ subroutine cgyro_cleanup
   use cgyro_globals
   use parallel_lib
 
+#if defined(_OPENACC) || defined(OMPGPU)
+#define CGYRO_GPU_FFT
+#endif
+
+#if defined(OMPGPU)
+
+#define ccl_del_device(x) \
+!$omp target exit data map(release:x)
+
+#elif defined(_OPENACC)
+
+#define ccl_del_device(x) \
+!$acc exit data delete(x)
+
+#else
+
+  ! nothing to do
+#define ccl_del_device(x)
+
+#endif
+
   !!!!!!!!!!!!!!!!!!!!!!!!!!
   ! From cgyro_init_manager
   !!!!!!!!!!!!!!!!!!!!!!!!!!
   
   if(allocated(energy))        deallocate(energy)
   if(allocated(vel))        then
-!$acc exit data delete(vel)
+     ccl_del_device(vel)
      deallocate(vel)
   endif
   if(allocated(w_e))           deallocate(w_e)
   if(allocated(e_deriv1_mat))  deallocate(e_deriv1_mat)
   if(allocated(e_deriv1_rot_mat))  deallocate(e_deriv1_rot_mat)
   if(allocated(xi))            then
-!$acc exit data delete(xi)
+     ccl_del_device(xi)
      deallocate(xi)
   endif
   if(allocated(w_xi))          deallocate(w_xi)
@@ -38,7 +59,7 @@ subroutine cgyro_cleanup
   if(allocated(bigr_r))         deallocate(bigr_r)
   if(allocated(itp))            deallocate(itp)
   if(allocated(omega_stream))   then
-!$acc exit data delete(omega_stream)
+     ccl_del_device(omega_stream)
      deallocate(omega_stream)
   endif
   if(allocated(omega_trap))          deallocate(omega_trap)
@@ -61,22 +82,26 @@ subroutine cgyro_cleanup
   if(allocated(omega_rot_edrift))    deallocate(omega_rot_edrift)
   if(allocated(omega_rot_edrift_r))  deallocate(omega_rot_edrift_r)
   if(allocated(omega_rot_star))      deallocate(omega_rot_star)
+  if(allocated(gtime))               deallocate(gtime)
+  if(allocated(freq))                deallocate(freq)
+  if(allocated(freq_err))            deallocate(freq_err)
   if(allocated(fcoef))  then
-!$acc exit data delete(fcoef)     
+     ccl_del_device(fcoef)     
      deallocate(fcoef)
   endif
   if(allocated(gcoef))  then
-!$acc exit data delete(gcoef)     
+     ccl_del_device(gcoef)     
      deallocate(gcoef)
   endif
   if(allocated(field))  then
-!$acc exit data delete(field)     
+     ccl_del_device(field)     
      deallocate(field)
   endif
   if(allocated(field_loc))  then
-!$acc exit data delete(field_loc)     
+     ccl_del_device(field_loc)     
      deallocate(field_loc)
   endif
+  if(allocated(field_dot))           deallocate(field_dot)
   if(allocated(field_old))           deallocate(field_old)
   if(allocated(field_old2))          deallocate(field_old2)
   if(allocated(field_old3))          deallocate(field_old3)
@@ -90,148 +115,159 @@ subroutine cgyro_cleanup
   if(allocated(gflux_tave))          deallocate(gflux_tave)
   if(allocated(recv_status))         deallocate(recv_status)
   if(allocated(icd_c))  then
-!$acc exit data delete(icd_c)     
+     ccl_del_device(icd_c)     
      deallocate(icd_c)
   endif
   if(allocated(dtheta)) then
-!$acc exit data delete(dtheta)     
+     ccl_del_device(dtheta)     
      deallocate(dtheta)
   endif
   if(allocated(dtheta_up))  then
-!$acc exit data delete(dtheta_up)     
+     ccl_del_device(dtheta_up)     
      deallocate(dtheta_up)
   endif
   if(allocated(source)) then
- !$acc exit data delete(source)      
+      ccl_del_device(source)      
      deallocate(source)
   endif
   if(allocated(h0_old)) then
-!$acc exit data delete(h0_old)      
+     ccl_del_device(h0_old)      
      deallocate(h0_old)
   endif
   if(allocated(rhs)) then
-!$acc exit data delete(rhs)       
+     ccl_del_device(rhs)       
      deallocate(rhs)
   endif
   if(allocated(h_x)) then
-!$acc exit data delete(h_x)       
+     ccl_del_device(h_x)       
      deallocate(h_x)
   endif
   if(allocated(g_x)) then
-!$acc exit data delete(g_x)       
+     ccl_del_device(g_x)       
      deallocate(g_x)
   endif
-  if(allocated(psi)) then
-!$acc exit data delete(psi)       
-     deallocate(psi)
-  endif
   if(allocated(h0_x)) then
-!$acc exit data delete(h0_x)        
+     ccl_del_device(h0_x)        
      deallocate(h0_x)
   endif
   if(allocated(cap_h_c)) then
-!$acc exit data delete(cap_h_c)       
+     ccl_del_device(cap_h_c)       
      deallocate(cap_h_c)
   endif
   if(allocated(cap_h_ct))  then
-!$acc exit data delete(cap_h_ct)       
+     ccl_del_device(cap_h_ct)       
      deallocate(cap_h_ct)
   endif
+  if(allocated(cap_h_c_dot)) then
+     ccl_del_device(cap_h_c_dot)
+     deallocate(cap_h_c_dot)
+  endif
+  if(allocated(cap_h_c_old)) then
+     ccl_del_device(cap_h_c_old)
+     deallocate(cap_h_c_old)
+  endif
+  if(allocated(cap_h_c_old2)) then
+     ccl_del_device(cap_h_c_old2)
+     deallocate(cap_h_c_old2)
+  endif
   if(allocated(omega_cap_h)) then
-!$acc exit data delete(omega_cap_h)        
+     ccl_del_device(omega_cap_h)        
      deallocate(omega_cap_h)
   endif
   if(allocated(omega_h)) then
-!$acc exit data delete(omega_h)        
+     ccl_del_device(omega_h)        
      deallocate(omega_h)
   endif
   if(allocated(omega_s)) then
-!$acc exit data delete(omega_s)        
+     ccl_del_device(omega_s)        
      deallocate(omega_s)
   endif
   if(allocated(omega_ss)) then
-!$acc exit data delete(omega_ss)        
+     ccl_del_device(omega_ss)        
      deallocate(omega_ss)
   endif
   if(allocated(jvec_c))  then
-!$acc exit data delete(jvec_c)     
+     ccl_del_device(jvec_c)     
      deallocate(jvec_c)
+  endif
+  if(allocated(jvec_c_nl))  then
+     ccl_del_device(jvec_c_nl)
+     deallocate(jvec_c_nl)
   endif
   if(allocated(jvec_v))              deallocate(jvec_v)
   if(allocated(dvjvec_c)) then
-!$acc exit data delete(dvjvec_c)     
+     ccl_del_device(dvjvec_c)     
      deallocate(dvjvec_c)
   endif
   if(allocated(dvjvec_v)) then
-!$acc exit data delete(dvjvec_v)     
+     ccl_del_device(dvjvec_v)     
      deallocate(dvjvec_v)
   endif
   if(allocated(jxvec_c))  then
      deallocate(jxvec_c)
   endif
   if(allocated(upfac1))   then
-!$acc exit data delete(upfac1)
+     ccl_del_device(upfac1)
      deallocate(upfac1)
   endif
   if(allocated(upfac2))   then
-!$acc exit data delete(upfac2)
+     ccl_del_device(upfac2)
      deallocate(upfac2)
   endif
   if(allocated(cap_h_v))  then
-!$acc exit data delete(cap_h_v)     
+     ccl_del_device(cap_h_v)     
      deallocate(cap_h_v)
   endif
-  if(allocated(cap_h_v_prime))       deallocate(cap_h_v_prime)
   if(allocated(upwind_res_loc))   then
-!$acc exit data delete(upwind_res_loc)
+     ccl_del_device(upwind_res_loc)
      deallocate(upwind_res_loc)
   endif
   if(allocated(upwind_res))   then
-!$acc exit data delete(upwind_res)
+     ccl_del_device(upwind_res)
      deallocate(upwind_res)
   endif
   if(allocated(upwind32_res_loc))   then
-!$acc exit data delete(upwind32_res_loc)
+     ccl_del_device(upwind32_res_loc)
      deallocate(upwind32_res_loc)
   endif
   if(allocated(upwind32_res))   then
-!$acc exit data delete(upwind32_res)
+     ccl_del_device(upwind32_res)
      deallocate(upwind32_res)
   endif
   if(allocated(f_nl))   then
-!$acc exit data delete(f_nl)
+     ccl_del_device(f_nl)
      deallocate(f_nl)
   endif
   if(allocated(g_nl))   then
-!$acc exit data delete(g_nl)
+     ccl_del_device(g_nl)
      deallocate(g_nl)
   endif
   if(allocated(fpack))   then
-!$acc exit data delete(fpack)
+     ccl_del_device(fpack)
      deallocate(fpack)
   endif
   if(allocated(gpack))   then
-!$acc exit data delete(gpack)
+     ccl_del_device(gpack)
      deallocate(gpack)
   endif
   if (allocated(cmat)) then
-!$acc exit data delete(cmat) if (gpu_bigmem_flag == 1)
+     ccl_del_device(cmat) if (gpu_bigmem_flag == 1)
      deallocate(cmat)
   endif
   if (allocated(cmat_fp32)) then
-!$acc exit data delete(cmat_fp32) if (gpu_bigmem_flag == 1)
+     ccl_del_device(cmat_fp32) if (gpu_bigmem_flag == 1)
      deallocate(cmat_fp32)
   endif
   if (allocated(cmat_stripes)) then
-!$acc exit data delete(cmat_stripes) if (gpu_bigmem_flag == 1)
+     ccl_del_device(cmat_stripes) if (gpu_bigmem_flag == 1)
      deallocate(cmat_stripes)
   endif
     if (allocated(cmat_simple)) then
-!$acc exit data delete(cmat_simple)     
+     ccl_del_device(cmat_simple)     
      deallocate(cmat_simple)
   endif
 
-#ifndef _OPENACC
+#ifndef CGYRO_GPU_FFT
   if(allocated(fx))                deallocate(fx)
   if(allocated(gx))                deallocate(gx)
   if(allocated(fy))                deallocate(fy)
@@ -243,41 +279,41 @@ subroutine cgyro_cleanup
   if(allocated(uv))                deallocate(uv)
 #endif  
 
-#ifdef _OPENACC
+#ifdef CGYRO_GPU_FFT
   if(allocated(fxmany))    then
-!$acc exit data delete(fxmany)     
+     ccl_del_device(fxmany)     
      deallocate(fxmany)
   endif
   if(allocated(gxmany))    then
-!$acc exit data delete(gxmany)     
+     ccl_del_device(gxmany)     
      deallocate(gxmany)
   endif
   if(allocated(fymany))    then
-!$acc exit data delete(fymany)     
+     ccl_del_device(fymany)     
      deallocate(fymany)
   endif
   if(allocated(gymany))    then
-!$acc exit data delete(gymany)     
+     ccl_del_device(gymany)     
      deallocate(gymany)
   endif
   if(allocated(uxmany))    then
- !$acc exit data delete(uxmany)    
+      ccl_del_device(uxmany)    
      deallocate(uxmany)
   endif
   if(allocated(uymany))    then
-!$acc exit data delete(uymany)     
+     ccl_del_device(uymany)     
      deallocate(uymany)
   endif
   if(allocated(vxmany))     then
-!$acc exit data delete(vxmany)     
+     ccl_del_device(vxmany)     
      deallocate(vxmany)
   endif
   if(allocated(vymany))     then
-!$acc exit data delete(vymany)     
+     ccl_del_device(vymany)     
      deallocate(vymany)
   endif
   if(allocated(uvmany))     then
-!$acc exit data delete(uvmany)     
+     ccl_del_device(uvmany)     
      deallocate(uvmany)
   endif
 #endif    
@@ -287,15 +323,15 @@ subroutine cgyro_cleanup
   !!!!!!!!!!!!!!!!!!!!!!!!!!
   
   if(allocated(px))  then
-!$acc exit data delete(px)      
+     ccl_del_device(px)      
      deallocate(px)
   endif
 
   if(allocated(geo_yin))          deallocate(geo_yin)
   
-!$acc exit data delete(z)
+     ccl_del_device(z)
 
-!$acc exit data delete(temp) 
+     ccl_del_device(temp) 
   
   
   !!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -304,14 +340,10 @@ subroutine cgyro_cleanup
 
   if(allocated(vfac))             deallocate(vfac)
   if(allocated(sum_den_h))        deallocate(sum_den_h)
-  if(allocated(sum_den_x))        deallocate(sum_den_x)
-  if (n_field > 1) then
-     if(allocated(sum_cur_x))     deallocate(sum_cur_x)
-  end if
   if(allocated(cderiv))           deallocate(cderiv)
   if(allocated(uderiv))           deallocate(uderiv)
   if(allocated(c_wave)) then
-!$acc exit data delete(c_wave)     
+     ccl_del_device(c_wave)     
      deallocate(c_wave)
   endif
   if(allocated(hzf))              deallocate(hzf)
@@ -322,37 +354,37 @@ subroutine cgyro_cleanup
   !!!!!!!!!!!!!!!!!!!!!!!!!!
 
   if(allocated(ie_v)) then
-!$acc exit data delete(ie_v)     
+     ccl_del_device(ie_v)     
      deallocate(ie_v)
   endif
 
   if(allocated(ix_v)) then
-!$acc exit data delete(ix_v)     
+     ccl_del_device(ix_v)     
      deallocate(ix_v)
   endif
 
   if(allocated(is_v)) then
-!$acc exit data delete(is_v)     
+     ccl_del_device(is_v)     
      deallocate(is_v)
   endif
 
   if(allocated(iv_v)) then
-!$acc exit data delete(ie_v)     
+     ccl_del_device(ie_v)     
      deallocate(iv_v)
   endif
 
     if(allocated(ir_c)) then
-!$acc exit data delete(ir_c)     
+     ccl_del_device(ir_c)     
      deallocate(ir_c)
   endif
 
   if(allocated(it_c)) then
-!$acc exit data delete(it_c)     
+     ccl_del_device(it_c)     
      deallocate(it_c)
   endif
 
   if(allocated(ic_c)) then
-!$acc exit data delete(ic_c)     
+     ccl_del_device(ic_c)     
      deallocate(ic_c)
   endif
 

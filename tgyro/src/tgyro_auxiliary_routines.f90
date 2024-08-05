@@ -138,7 +138,7 @@ real function sivukhin(x)
 
 end function sivukhin
 
-subroutine rad_alpha(ne,ni,te,ti,s_alpha_he,s_alpha_i,s_alpha_e,frac_ai,e_cross,n,nion)
+subroutine rad_alpha(ne,ni,te,ti,s_alpha_he,s_alpha_i,s_alpha_e,frac_ai,e_cross,n_alpha,t_alpha,n,nion)
 
   use tgyro_globals, only : &
        pi,&
@@ -165,11 +165,14 @@ subroutine rad_alpha(ne,ni,te,ti,s_alpha_he,s_alpha_i,s_alpha_e,frac_ai,e_cross,
   real, intent(inout) :: s_alpha_e(n)
   real, intent(inout) :: frac_ai(n)
   real, intent(inout) :: e_cross(n)
+  real, intent(inout) :: n_alpha(n)
+  real, intent(inout) :: t_alpha(n)
 
   real, external :: sivukhin
   real, external :: sigv
 
   real :: x_a
+  real :: a,i2,i4,taus
   real :: n_d,n_t
   real :: s_alpha
   real, dimension(:), allocatable :: c_a
@@ -189,16 +192,18 @@ subroutine rad_alpha(ne,ni,te,ti,s_alpha_he,s_alpha_i,s_alpha_e,frac_ai,e_cross,
 
   n_d = 0.0
   n_t = 0.0
-  
-  do i=1,n
 
+  do i=1,n
+     
      if (dt_flag == 1) then
         ! D and T given by ion 1 and ion 2 (order doesn't matter)
         n_d = ni(1,i)
         n_t = ni(2,i)
      endif
 
+     ! e_cross = (1/2) malpha v_cross^2 [agrees with Estrada 2006]
      e_cross(i) = k*te(i)*(4*sqrt(me/malpha)/(3*sqrt(pi)*c_a(i)))**(-2.0/3.0)
+     ! x_a = (v_alpha/v_cross)^2
      x_a = e_alpha/e_cross(i)
      frac_ai(i) = sivukhin(x_a)
 
@@ -211,18 +216,35 @@ subroutine rad_alpha(ne,ni,te,ti,s_alpha_he,s_alpha_i,s_alpha_e,frac_ai,e_cross,
      s_alpha_i(i) = s_alpha*frac_ai(i)
      s_alpha_e(i) = s_alpha*(1-frac_ai(i))
 
+     ! JC 2022:
+     ! Adding alpha-particle density/temperature calculation [Estrada 2006]
+     ! Eqs (9),(10), where a=v_cross/v_alpha
+     a = 1/sqrt(x_a)
+     i2 = (1/3.0)*log((1+a**3)/a**3)
+     i4 = 0.5-a**2*((1/6.0)*log((1-a+a**2)/(1+a)**2)+ &
+          1/sqrt(3.0)*(atan((2-a)/(a*sqrt(3.0)))+pi/6))
+
+     taus = 0.0
+
+     ! Eqs (7),(15)
+     !n_alpha(i) = s_alpha_he(i)*taus*i2
+     !t_alpha(i) = 2*i4/(3*i2)*e_alpha
+
+     n_alpha(i) = 1.0 ; t_alpha(i) = 1.0
+     
   enddo
 
   deallocate(c_a)
 
 end subroutine rad_alpha
 
-subroutine collision_rates(ne,ni,te,ti,nui,nue,nu_exch,n,nion)
+subroutine collision_rates(ne,ni,te,ti,nui,nue,nu_exch,taus,n,nion)
 
   use tgyro_globals, only : &
        pi,&
        me,&
        mi,&
+       malpha,&
        e, &
        k, &
        therm_flag,&
@@ -239,9 +261,11 @@ subroutine collision_rates(ne,ni,te,ti,nui,nue,nu_exch,n,nion)
   real, intent(inout) :: nui(nion,n)
   real, intent(inout) :: nue(n)
   real, intent(inout) :: nu_exch(n)
+  real, intent(inout) :: taus(n)
 
   real, dimension(:), allocatable :: loglam
   real :: c_exch
+  real :: z_a
   
   integer :: i
 
@@ -272,6 +296,11 @@ subroutine collision_rates(ne,ni,te,ti,nui,nue,nu_exch,n,nion)
      endif
   enddo
 
+  ! JC: 2022
+  ! Alpha slowing-down time in terms of tau_ee = 1/nue [need to double-check)
+  z_a = 2.0
+  taus(:) = (3/4.0)*sqrt(pi)*(malpha/me)*1/(z_a**2*nue(:))
+  
   deallocate(loglam)
 
 end subroutine collision_rates

@@ -87,12 +87,12 @@ end subroutine expro_lcomm
 subroutine expro_tcomm(x,n)
 
   use mpi
-  use expro, only : hasmpi,expro_comm
+  use expro, only : hasmpi,expro_ion_max,expro_comm
 
   implicit none
 
   integer, intent(in) :: n
-  character*10, intent(inout), dimension(20) :: x
+  character*10, intent(inout), dimension(expro_ion_max) :: x
   integer :: iproc,ierr
      
   if (hasmpi) then

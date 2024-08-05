@@ -1,4 +1,5 @@
 include ${GACODE_ROOT}/platform/build/make.inc.${GACODE_PLATFORM}
+include ../Makefile.extra
 
 ifeq ($(OPT),debug)
    FFLAGS=${FDEBUG}
@@ -16,6 +17,14 @@ else
    NN=tgyro_eped_nn
 endif
 
+ifdef MMM_HOME
+  MMM_OBJ += tgyro_mmm_map.o
+  MMM_LIB = -L$(MMM_HOME)/src -lmmm
+  FFLAGS += -DMMM -I$(MMM_HOME)/src
+else
+  OBJECTS += tgyro_mmm_dummy.o
+endif
+
 OBJECTS += tgyro_globals.o \
            tgyro_iteration_variables.o \
            tgyro_allocate_globals.o \
@@ -26,10 +35,10 @@ OBJECTS += tgyro_globals.o \
            tgyro_comm_sync.o \
            tgyro_etgcrit.o \
            tgyro_expro_map.o \
+           $(MMM_OBJ) \
            tgyro_flux.o \
            tgyro_flux_set.o \
            tgyro_flux_vector.o \
-           tgyro_gyro_map.o \
            tgyro_ifs_pppl.o \
            tgyro_init_profiles.o \
            tgyro_init_profiles_axis.o \
@@ -56,7 +65,6 @@ OBJECTS += tgyro_globals.o \
            tgyro_source.o \
            tgyro_target_vector.o \
            tgyro_tglf_map.o \
-           tgyro_glf23_map.o \
            tgyro_trap_component_error.o \
            tgyro_volume_int.o \
            tgyro_write_input.o \
@@ -68,7 +76,7 @@ OBJECTS += tgyro_globals.o \
 .SUFFIXES : .o .f90
 
 all: $(OBJECTS) $(EXTRA_LIBS)
-	$(FC) $(FFLAGS) -o $(EXEC) $(OBJECTS) $(EXTRA_LIBS) $(LMATH) $(NN_LIB)
+	$(FC) $(FFLAGS) -o $(EXEC) $(OBJECTS) $(EXTRA_LIBS) $(LMATH) $(NN_LIB) $(MMM_LIB)
 
 .f90.o :
 	$(FC) $(FMATH) $(FFLAGS) $(NN_LIB) -c $<

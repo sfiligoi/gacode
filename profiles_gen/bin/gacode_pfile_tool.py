@@ -33,7 +33,7 @@ for line in in_lines:
         outfile = open(title,'w')
         print('INFO: (gacode_pfile_tool.py) Found ion species header.')
         print('INFO: (gacode_pfile_tool.py) Extracted '+title+'.')
-        n = line[0]
+        n = line.lstrip()[0]
         outfile.write(n+'\n')
     else:
         outfile.write(line)

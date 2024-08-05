@@ -165,6 +165,7 @@ def set_defaults() :
      t.add('Q_LOC','2.0')
      t.add('Q_PRIME_LOC','16.0')
      t.add('P_PRIME_LOC','0.0')
+     t.add('BETA_LOC','0.0')
      t.add('KX0_LOC','0.0')
      t.add('NN_MAX_ERROR','-1.0')
 
