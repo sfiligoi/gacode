@@ -21,8 +21,10 @@ module parallel_lib
   integer, private :: nk1,nk2
   integer, private :: lib_comm
   integer, private :: nsend
+  integer, private :: n_field
+  integer, private :: nsend_real
 
-  real, dimension(:,:,:,:), allocatable, private :: fsendr_real
+  real, dimension(:,:,:,:,:), allocatable, private :: fsendr_real
 
   ! (expose these)
   complex, dimension(:,:,:,:), allocatable :: fsendf
@@ -146,14 +148,14 @@ contains
   !  parallel_lib_r -> g(nj_loc,ni) -> f(ni_loc,nj)
   !=========================================================
 
-  subroutine parallel_lib_init(ni_in,nj_in,nk1_in,nk_loc_in,ni_loc_out,nj_loc_out,comm)
+  subroutine parallel_lib_init(ni_in,nj_in,nk1_in,nk_loc_in,n_field_in,ni_loc_out,nj_loc_out,comm)
 
     use mpi
 
     implicit none
 
     integer, intent(in) :: ni_in,nj_in
-    integer, intent(in) :: nk1_in,nk_loc_in
+    integer, intent(in) :: nk1_in,nk_loc_in,n_field_in
     integer, intent(in) :: comm
     integer, intent(inout) :: ni_loc_out,nj_loc_out
     integer, external :: parallel_dim
@@ -183,7 +185,10 @@ contains
 
     allocate(fsendf(nj_loc,nk1:nk2,ni_loc,nproc))
     allocate(fsendr(ni_loc,nk1:nk2,nj_loc,nproc))
-    if (.not. allocated(fsendr_real)) allocate(fsendr_real(ni_loc,nk1:nk2,nj_loc,nproc))
+
+    n_field = n_field_in
+    nsend_real = n_field*nsend
+    if (.not. allocated(fsendr_real)) allocate(fsendr_real(n_field,ni_loc,nk1:nk2,nj_loc,nproc))
 
 #if defined(OMPGPU)
 !$omp target enter data map(alloc:fsendf,fsendr)
@@ -419,33 +424,35 @@ contains
 
     implicit none
 
-    real, intent(in), dimension(:,:,:) :: fin
-    real, intent(inout), dimension(:,:,:) :: f
-    integer :: ierr,j_loc,i,j,k,j1,j2,itor
+    real, intent(in), dimension(:,:,:,:) :: fin
+    real, intent(inout), dimension(:,:,:,:) :: f
+    integer :: ierr,j_loc,i,j,k,j1,j2,itor,fi
 
     j1 = 1+iproc*nj_loc
     j2 = (1+iproc)*nj_loc
 
 !$omp parallel do collapse(2) if (size(fsendr_real) >= default_size) default(none) &
-!$omp& shared(nproc,j1,j2,ni_loc,nk1,nk2) &
-!$omp& private(j,j_loc,i) &
+!$omp& firstprivate(nproc,j1,j2,ni_loc,nk1,nk2,n_field) &
+!$omp& private(j,j_loc,i,fi) &
 !$omp& shared(fin,fsendr_real)
     do k=1,nproc
      do itor=nk1,nk2
        do j=j1,j2
           j_loc = j-j1+1
           do i=1,ni_loc
-             fsendr_real(i,itor,j_loc,k) = fin(i+(k-1)*ni_loc,j_loc,1+(itor-nk1)) 
+             do fi=1,n_field
+                fsendr_real(fi,i,itor,j_loc,k) = fin(fi,i+(k-1)*ni_loc,j_loc,1+(itor-nk1)) 
+             enddo
           enddo
        enddo
      enddo
     enddo
 
     call MPI_ALLTOALL(fsendr_real, &
-         nsend, &
+         nsend_real, &
          MPI_DOUBLE_PRECISION,&
          f, &
-         nsend, &
+         nsend_real, &
          MPI_DOUBLE_PRECISION, &
          lib_comm, &
          ierr)
