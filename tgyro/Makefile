@@ -4,8 +4,6 @@
 
 include ../platform/build/make.inc.${GACODE_PLATFORM}
 include Makefile.extra
-       ${GACODE_ROOT}/shared/landau/landau.o \
-       ${GACODE_ROOT}/shared/landau/gyrotransformation.o
 
 all:
 	gacode_getversion > .VERSION
