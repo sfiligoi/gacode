@@ -16,9 +16,9 @@ F77 = ${FC}
 
 # Compiler options/flags
 ifneq ($(GACODE_OMPGPU),1)
-FACC   =-hacc -DHIPGPU -I${HIPFORT_DIR}/include/hipfort/amdgcn -hacc_model=auto_async_none:no_fast_addr:no_deep_copy
+FACC   =-hacc -DHIPGPU -DGACODE_GPU_AMD -I${HIPFORT_DIR}/include/hipfort/amdgcn -hacc_model=auto_async_none:no_fast_addr:no_deep_copy
 else
-FACC = -DOMPGPU -DHIPGPU -I${HIPFORT_DIR}/include/hipfort/amdgcn
+FACC = -DOMPGPU -DHIPGPU -DGACODE_GPU_AMD -I${HIPFORT_DIR}/include/hipfort/amdgcn
 endif
 FOMP   =-homp
 FMATH  =-s real64
@@ -26,9 +26,8 @@ FOPT   =-Ofast
 FDEBUG =-O0 -g
 F2PY   = f2py --fcompiler=pg
 
-
 # System math libraries
-LMATH=-L${ROCM_PATH}/lib -L${HIPFORT_DIR}/lib -lhipfort-amdgcn -lhipfft -lamdhip64
+LMATH=-L${HIPFORT_DIR}/lib -L${ROCM_PATH}/lib -lhipfort-amdgcn -lhipfft -lamdhip64
 
 # NetCDF
 NETCDF=-L${NETCDF_DIR}/lib -lnetcdff -lnetcdf

@@ -49,26 +49,26 @@ subroutine cgyro_check_memory(datafile)
         write(io,*) 'Nonlinear'
         write(io,*)
         ! nsplit * n_toroidal = nv_loc * n_theta
-#ifndef _OPENACC
+#if !(defined(OMPGPU) || defined(_OPENACC))
         call cgyro_alloc_add_3d(io,(ny/2+1),nx,n_omp,16,'fx')
         call cgyro_alloc_add_3d(io,(ny/2+1),nx,n_omp,16,'gx')
         call cgyro_alloc_add_3d(io,(ny/2+1),nx,n_omp,16,'fy')
         call cgyro_alloc_add_3d(io,(ny/2+1),nx,n_omp,16,'gy')
-        call cgyro_alloc_add_3d(io,ny,nx,nsplit,8,'ux')
-        call cgyro_alloc_add_3d(io,ny,nx,n_omp,8,'vx')
-        call cgyro_alloc_add_3d(io,ny,nx,nsplit,8,'uy')
-        call cgyro_alloc_add_3d(io,ny,nx,n_omp,8,'vy')
+        call cgyro_alloc_add_3d(io,ny,nx,nsplitA,8,'ux')
+        call cgyro_alloc_add_3d(io,ny,nx,nsplit,8,'vx')
+        call cgyro_alloc_add_3d(io,ny,nx,nsplitA,8,'uy')
+        call cgyro_alloc_add_3d(io,ny,nx,nsplit,8,'vy')
         call cgyro_alloc_add_3d(io,ny,nx,n_omp,8,'uv')
 #else
-        call cgyro_alloc_add_3d(io,(ny/2+1),nx,nsplit,16,'fx')
+        call cgyro_alloc_add_3d(io,(ny/2+1),nx,nsplitA,16,'fx')
         call cgyro_alloc_add_3d(io,(ny/2+1),nx,nsplit,16,'gx')
-        call cgyro_alloc_add_3d(io,(ny/2+1),nx,nsplit,16,'fy')
+        call cgyro_alloc_add_3d(io,(ny/2+1),nx,nsplitA,16,'fy')
         call cgyro_alloc_add_3d(io,(ny/2+1),nx,nsplit,16,'gy')
-        call cgyro_alloc_add_3d(io,ny,nx,nsplit,8,'ux')
+        call cgyro_alloc_add_3d(io,ny,nx,nsplitA,8,'ux')
         call cgyro_alloc_add_3d(io,ny,nx,nsplit,8,'vx')
-        call cgyro_alloc_add_3d(io,ny,nx,nsplit,8,'uy')
+        call cgyro_alloc_add_3d(io,ny,nx,nsplitA,8,'uy')
         call cgyro_alloc_add_3d(io,ny,nx,nsplit,8,'vy')
-        call cgyro_alloc_add_3d(io,ny,nx,nsplit,8,'uv')
+        call cgyro_alloc_add_3d(io,ny,nx,nsplitA,8,'uv')
 #endif
      endif
 
@@ -124,9 +124,11 @@ subroutine cgyro_check_memory(datafile)
         write(io,*) 'Nonlinear bracket'
         write(io,*)
         ! nsplit * n_toroidal = nv_loc * n_theta
-        call cgyro_alloc_add_4d(io,n_radial,nt_loc,nsplit,n_toroidal_procs,16,'f_nl')
+        call cgyro_alloc_add_4d(io,n_radial,nt_loc,nsplitA,n_toroidal_procs,16,'fA_nl')
+        call cgyro_alloc_add_4d(io,n_radial,nt_loc,nsplitB,n_toroidal_procs,16,'fB_nl')
         call cgyro_alloc_add_4d(io,n_field,n_radial,n_jtheta,n_toroidal,16,'g_nl')
-        call cgyro_alloc_add_3d(io,n_radial,nt_loc,nsplit*n_toroidal_procs,16,'fpack')
+        call cgyro_alloc_add_3d(io,n_radial,nt_loc,nsplitA*n_toroidal_procs,16,'fpackA')
+        call cgyro_alloc_add_3d(io,n_radial,nt_loc,nsplitB*n_toroidal_procs,16,'fpackB')
         call cgyro_alloc_add_4d(io,n_field,n_radial,n_jtheta,n_toroidal,16,'gpack')
      endif
 
@@ -137,12 +139,14 @@ subroutine cgyro_check_memory(datafile)
      if(collision_model == 5) then
         call cgyro_alloc_add(io,(8.0*n_xi)*n_xi*n_species*n_energy*n_theta*nt_loc,'cmat')
      else
-        if (collision_precision_mode == 0) then
-           call cgyro_alloc_add_4d(io,nv,nv,nc_loc,nt_loc,8,'cmat')
-        else
+        if (collision_precision_mode == 1) then
            call cgyro_alloc_add_4d(io,nv,nv,nc_loc,nt_loc,4,'cmat_fp32')
            call cgyro_alloc_add(io,4.0*n_xi*n_species*(n_energy-n_low_energy)*n_xi*nc_loc*nt_loc,'cmat_stripes')
            call cgyro_alloc_add(io,4.0*n_xi*n_species*nv*nc_loc*n_low_energy*nt_loc,'cmat_e1')
+        else if (collision_precision_mode == 32) then
+           call cgyro_alloc_add_4d(io,nv,nv,nc_loc,nt_loc,4,'cmat_fp32')
+        else
+           call cgyro_alloc_add_4d(io,nv,nv,nc_loc,nt_loc,8,'cmat')
         endif
 #if defined(OMPGPU) || defined(_OPENACC)
         if (gpu_bigmem_flag /= 1) then

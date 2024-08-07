@@ -59,8 +59,9 @@ subroutine cgyro_write_timedata
      enddo
   endif
 
-  if (nonlinear_flag == 1 .and. moment_print_flag == 1) then
-     ! (n,e) moment for all species at selected thetas.
+  if (moment_print_flag == 1) then
+     ! (n,e,v) moment for all species at selected thetas.
+     ! prattq, allow moment printing for linear runs.
      do i_moment=1,3
         call cgyro_write_distributed_bcomplex(&
              trim(path)//binfile_kxky(i_moment),&
@@ -220,7 +221,10 @@ subroutine cgyro_write_distributed_bcomplex(datafile,n_fn,fn)
 
      call MPI_INFO_CREATE(finfo,i_err)
 
-     call MPI_INFO_SET(finfo,"striping_factor",mpiio_small_stripe_str,i_err)
+     if (mpiio_small_stripe_factor > 0) then
+        ! user asked us to explicitly set the MPI IO striping factor
+        call MPI_INFO_SET(finfo,"striping_factor",mpiio_small_stripe_str,i_err)
+     endif
 
      call MPI_FILE_OPEN(NEW_COMM_2,&
           datafile,&
@@ -363,7 +367,10 @@ subroutine cgyro_write_distributed_breal(datafile,n_fn,fn)
 
      call MPI_INFO_CREATE(finfo,i_err)
 
-     call MPI_INFO_SET(finfo,"striping_factor",mpiio_small_stripe_str,i_err)
+     if (mpiio_small_stripe_factor > 0) then
+        ! user asked us to explicitly set the MPI IO striping factor
+        call MPI_INFO_SET(finfo,"striping_factor",mpiio_small_stripe_str,i_err)
+     endif
 
      call MPI_FILE_OPEN(NEW_COMM_2,&
           datafile,&
@@ -804,11 +811,10 @@ subroutine print_scrdata()
           '[t: ',t_current,&
           '][e: ',integration_error(:),']'
   else
-     ! NOTE: There could be only one my_toroidal when n_toroidal <=1
      print '(a,1pe9.3,a,1pe10.3,1x,1pe10.3,a,1pe10.3,a,1pe9.3,1x,1pe9.3,a)',&
           '[t: ',t_current,&
           '][w: ',freq(nt1),&
-          '][dw:',abs(freq_err(nt1)),&
+          '][dw:',abs(freq_err),&
           '][e: ',integration_error(:),']'
 
   endif

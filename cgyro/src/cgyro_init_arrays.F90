@@ -111,9 +111,7 @@ subroutine cgyro_init_arrays
 !$acc enter data copyin(jvec_c)
 #endif
 
-  do i_field=1,n_field
-     call parallel_lib_rtrans_real(jvec_c(i_field,:,:,:),jvec_v(i_field,:,:,:))
-  enddo
+  call parallel_lib_rtrans_real(jvec_c,jvec_v)
 
   if (nonlinear_flag == 1) then
 !
@@ -161,7 +159,7 @@ subroutine cgyro_init_arrays
      enddo
     enddo
    enddo
-   call parallel_slib_distribute_real(n_field*n_radial*n_jtheta*nv_loc*nt_loc,jvec_c_nl)
+   call parallel_slib_distribute_real(n_field,n_radial,n_jtheta,nv_loc,nt_loc,jvec_c_nl)
   endif
 
   !-------------------------------------------------------------------------

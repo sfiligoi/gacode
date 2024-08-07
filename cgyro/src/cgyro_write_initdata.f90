@@ -13,9 +13,9 @@ subroutine cgyro_write_initdata
   implicit none
 
   integer :: p,in,is,it
-  real :: kymax,kyrat,dn
+  real :: kymax,kyrat,dn,dt
   real, external :: spectraldiss
-  character(len=50) :: msg
+  character(len=50) :: msg,lfmt
 
   !----------------------------------------------------------------------------
   ! Runfile to give complete summary to user
@@ -39,6 +39,13 @@ subroutine cgyro_write_initdata
           write(io,'(t3,i4,t12,i4,t21,i4,t29,i5,t36,i3)') nc_loc,nv_loc,nsplit,n_proc,n_omp
         endif
      endif
+     write(io,*)
+
+     if (kymax < -99.9) then
+        lfmt = '(a,i4,2x,2(f7.2,2x),2x,f6.2,5x,i4,2a)'
+     else
+        lfmt = '(a,i4,2x,2(f7.3,2x),2x,f6.2,5x,i4,2a)'
+     endif
 
      if (zf_test_mode == 0) then
 
@@ -48,26 +55,23 @@ subroutine cgyro_write_initdata
         else
            kymax = q/rmin*(n_toroidal-1)*rho
         endif
-
+        
         if (nonlinear_flag == 0) then
 
-           write(io,*)
            write(io,*) '          n    Delta      Max     L/rho'
-           write(io,'(a,i4,2x,2(f7.3,2x),2x,f6.2)') ' kx*rho:',&
+           write(io,lfmt) ' kx*rho:',&
                 n_radial,2*pi*rho/length,2*pi*rho*(n_radial/2-1)/length,length/rho
-           write(io,'(a,i4,2x,2(f7.3,2x),2x,f6.2)') ' ky*rho:',&
+           write(io,lfmt) ' ky*rho:',&
                 n_toroidal,q/rmin*rho,kymax,2*pi/ky
 
         else
            
-
-           write(io,*)
            write(io,*) '          n    Delta      Max     L/rho    n_fft'
            call prime_factors(nx,msg)
-           write(io,'(a,i4,2x,2(f7.3,2x),2x,f6.2,5x,i4,2a)') ' kx*rho:',&
+           write(io,lfmt) ' kx*rho:',&
                 n_radial,2*pi*rho/length,2*pi*rho*(n_radial/2-1)/length,length/rho,nx,'  ',trim(msg)
            call prime_factors(ny,msg)
-           write(io,'(a,i4,2x,2(f7.3,2x),2x,f6.2,5x,i4,2a)') ' ky*rho:',&
+           write(io,lfmt) ' ky*rho:',&
                 n_toroidal,q/rmin*rho,kymax,2*pi/ky,ny,'  ',trim(msg)
         endif
 
@@ -75,14 +79,9 @@ subroutine cgyro_write_initdata
 
         ! ZONAL FLOW TEST ONLY
 
-        if (n_radial==1) then
-           write(io,*)
-           write(io,'(t2,a,1pe10.3)') ' kx*rho: ',2*pi*rho/length
-        else
-           write(io,'(a)') '          n          Delta            Max          L/rho'
-           write(io,'(a7,i4,3g15.8)') 'kx*rho:',&
-                n_radial,2*pi*rho/length,2*pi*rho*(n_radial/2-1)/length,length/rho
-        endif
+        write(io,*) '          n    Delta      Max     L/rho'
+        write(io,lfmt) ' kx*rho:',&
+             n_radial,2*pi*rho/length,2*pi*rho*n_radial/length,length/rho
 
      endif
 
@@ -120,18 +119,34 @@ subroutine cgyro_write_initdata
 
      write(io,*)
      write(io,'(a)') &
-          ' i  z  n/n_norm   T/T_norm   m/m_norm     a/Ln       a/Lt       nu        s(a/Ln)    s(a/Lt)'
+          ' i  z  n/n_norm   T/T_norm   m/m_norm     a/Ln       a/Lt       nu'
      do is=1,n_species
         write(io,'(t1,i2,1x,i2,3(2x,1pe9.3),2(1x,1pe10.3),(2x,1pe9.3),2(1x,1pe10.3))') &
-             is,int(z(is)),dens(is),temp(is),mass(is),dlnndr(is),dlntdr(is),nu(is),&
-             sdlnndr(is),sdlntdr(is)
+             is,int(z(is)),dens(is),temp(is),mass(is),dlnndr(is),dlntdr(is),nu(is)
      enddo
 
+     ! Profile shear (let s=curvature, k=gradient)
+     !
+     !  k(x) = k(0) + s * r/rho
+     !
+     ! where x = r/rho. The half-domain has -L/4 < r < L/4.
+     if (profile_shear_flag == 1) then
+        write(io,*)
+        write(io,'(a)') ' i  s(a/Ln)  (a/Ln)_L  (a/Ln)_R  |  s(a/Lt)  (a/Lt)_L  (a/Lt)_R ' 
+        do is=1,n_species
+           dn = sdlnndr(is)*length/rho/4
+           dt = sdlntdr(is)*length/rho/4
+           write(io,'(t1,i2,3(1x,1pe9.2),2x,3(1x,1pe9.2))') &
+             is,sdlnndr(is),dlnndr(is)-dn,dlnndr(is)+dn,sdlntdr(is),dlntdr(is)-dt,dlntdr(is)+dt
+        enddo
+     endif
+
+     ! Running from input.gacode
      if (profile_model == 2) then
         dn = rho/(rhos/a_meters)
         kyrat = abs(q/rmin*rhos/a_meters)
         write(io,*)
-        write(io,10) '           a[m]:',a_meters,'  b_unit[T]:',b_unit,  '     rhos/a:',rhos/a_meters,' dn:',dn
+        write(io,10) '           a[m]:',a_meters, '|b_unit[T]|:',abs(b_unit),  '   |rhos/a|:',abs(rhos)/a_meters,' dn:',dn
         write(io,10) 'n_norm[e19/m^3]:',dens_norm,'v_norm[m/s]:',vth_norm,'T_norm[keV]:',temp_norm
         write(io,*)
         write(io,'(t2,a)') ' n = 1         2         3         4         5         6         7         8'      
@@ -207,6 +222,11 @@ subroutine cgyro_write_initdata
         write (io,fmtstr) dlnndr(is)
         write (io,fmtstr) dlntdr(is)
         write (io,fmtstr) nu(is)
+     enddo
+     ! Added 3 May 2024
+     do is=1,n_species
+        write (io,fmtstr) sdlnndr(is)
+        write (io,fmtstr) sdlntdr(is)
      enddo
      close(io)
 
@@ -301,11 +321,12 @@ end subroutine cgyro_write_initdata
 subroutine prime_factors(n,pout)
 
   implicit none
+  
   integer, intent(in) :: n
   character(len=50), intent(inout) :: pout
   character(len=50) :: warn
   integer, dimension(27) :: pvec,cvec
-  integer :: ptmp,i
+  integer :: i,ptmp
   character(len=4) :: fmt
   character(len=3) :: s1,s2
   

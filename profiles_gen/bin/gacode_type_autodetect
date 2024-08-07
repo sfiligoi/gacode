@@ -26,6 +26,10 @@ if [ "$1" == "null" ] ; then
    echo "null"
    exit 0
 fi
+if [ "$1" == "manual" ] ; then
+   echo "manual"
+   exit 0
+fi
 if [ ! -f $1 ] ; then
    echo "NOT_FOUND"
    exit 1
@@ -99,6 +103,13 @@ else
    y=`head -1 $1 | grep -o E | wc -l`
    if [[ $y -eq 1 ]] ; then
       echo "GFILE"
+      exit 0
+   fi
+
+   # Added a new gfile test
+   y=`head -1 $1 | grep -o VAC | wc -l`
+   if [[ $y -eq 1 ]] ; then
+      echo "VAC-GFILE"
       exit 0
    fi
 

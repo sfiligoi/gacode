@@ -13,15 +13,6 @@ module cgyro_globals
 #define CGYRO_GPU_FFT
 #endif
 
-#ifdef CGYRO_GPU_FFT
-
-#ifdef HIPGPU
-  use hipfort_hipfft
-#else
-  use cuFFT
-#endif
-
-#endif
   use, intrinsic :: iso_fortran_env
   
   ! Data output precision setting
@@ -45,6 +36,7 @@ module cgyro_globals
   real    :: max_time
   integer :: print_step
   integer :: restart_step
+  integer :: restart_preservation_mode
   real    :: freq_tol
   real    :: up_radial
   real    :: up_theta
@@ -196,10 +188,11 @@ module cgyro_globals
   integer :: NEW_COMM_2
   integer :: NEW_COMM_3
   integer :: nv1,nv2,nc1,nc2
-  integer :: nsplit
+  integer :: nsplit,nsplitA,nsplitB
   integer :: ns1,ns2
   integer, dimension(:), allocatable :: recv_status
-  integer :: f_req, g_req
+  integer :: fA_req, fB_req, g_req
+  logical :: fA_req_valid, fB_req_valid, g_req_valid
   ! Thetas present in the process after NL AllToAll
   integer :: n_jtheta
   !
@@ -261,8 +254,6 @@ module cgyro_globals
   ! Restart tags
   character(len=8) :: fmt='(I2.2)'
   character(len=6), dimension(100) :: rtag
-  integer, parameter :: restart_header_size = 1024
-  integer  :: restart_magic
   !
   ! error checking
   integer :: error_status = 0
@@ -274,8 +265,8 @@ module cgyro_globals
 
   logical :: printout=.true.
 
-  integer, parameter :: mpiio_small_stripe_factor = 4
-  integer, parameter :: mpiio_stripe_factor = 24
+  integer :: mpiio_small_stripe_factor   ! optional striping for data files
+  integer :: mpiio_stripe_factor         ! optional striping for restart file
   character(len=2) :: mpiio_small_stripe_str
   character(len=3) :: mpiio_stripe_str
   !
@@ -294,7 +285,7 @@ module cgyro_globals
   real    :: t_current
   real, dimension(:), allocatable    :: gtime
   complex, dimension(:), allocatable :: freq
-  complex, dimension(:), allocatable :: freq_err
+  complex :: freq_err
   integer(KIND=8) :: kernel_start_time, kernel_exit_time, kernel_count_rate, kernel_count_max
   !---------------------------------------------------------------
 
@@ -353,9 +344,9 @@ module cgyro_globals
   complex, dimension(:,:,:), allocatable :: g_x
   complex, dimension(:,:,:), allocatable :: h0_x
   complex, dimension(:,:,:), allocatable :: h0_old
-  complex, dimension(:,:,:,:), allocatable :: f_nl
+  complex, dimension(:,:,:,:), allocatable :: fA_nl,fB_nl
   complex, dimension(:,:,:,:), allocatable :: g_nl
-  complex, dimension(:,:,:), allocatable :: fpack
+  complex, dimension(:,:,:), allocatable :: fpackA,fpackB
   complex, dimension(:,:,:,:), allocatable :: gpack
   complex, dimension(:,:,:), allocatable :: omega_cap_h
   complex, dimension(:,:,:), allocatable :: omega_h
@@ -405,12 +396,15 @@ module cgyro_globals
 #else
   ! GPU-FFTW plans
 
-#ifdef HIPGPU
-  type(C_PTR) :: hip_plan_r2c_many
-  type(C_PTR) :: hip_plan_c2r_many
+#if defined(HIPGPU)
+  type(C_PTR) :: hip_plan_r2c_manyA,hip_plan_r2c_manyB
+  type(C_PTR) :: hip_plan_c2r_manyA,hip_plan_c2r_manyB,hip_plan_c2r_manyG
+#elif defined(MKLGPU)
+  INTEGER*8 :: dfftw_plan_r2c_manyA,dfftw_plan_r2c_manyB
+  INTEGER*8 :: dfftw_plan_c2r_manyA,dfftw_plan_c2r_manyB,dfftw_plan_c2r_manyG
 #else
-  integer(c_int) :: cu_plan_r2c_many
-  integer(c_int) :: cu_plan_c2r_many
+  integer(c_int) :: cu_plan_r2c_manyA,cu_plan_r2c_manyB
+  integer(c_int) :: cu_plan_c2r_manyA,cu_plan_c2r_manyB,cu_plan_c2r_manyG
 #endif
 
   complex, dimension(:,:,:),allocatable, target :: fxmany,fymany,gxmany,gymany
@@ -425,10 +419,10 @@ module cgyro_globals
   !
   ! 2D FFT work arrays
 #ifndef CGYRO_GPU_FFT
+  real, dimension(:,:,:), allocatable :: vxmany
+  real, dimension(:,:,:), allocatable :: vymany
   real, dimension(:,:,:), allocatable :: uxmany
   real, dimension(:,:,:), allocatable :: uymany
-  real, dimension(:,:,:), allocatable :: vx
-  real, dimension(:,:,:), allocatable :: vy
   real, dimension(:,:,:), allocatable :: uv
   complex, dimension(:,:,:),allocatable :: fx
   complex, dimension(:,:,:),allocatable :: fy
@@ -459,10 +453,10 @@ module cgyro_globals
   !
   ! Collision operator
   integer :: n_low_energy
-  real, dimension(:,:,:,:), allocatable :: cmat ! only used if collision_precision_mode=0
-  real(KIND=REAL32), dimension(:,:,:,:), allocatable :: cmat_fp32 ! only used if collision_precision_mod/=0
-  real(KIND=REAL32), dimension(:,:,:,:,:,:), allocatable :: cmat_stripes ! only used if collision_precision_mod/=0
-  real(KIND=REAL32), dimension(:,:,:,:,:,:), allocatable :: cmat_e1 ! only used if collision_precision_mod/=0
+  real, dimension(:,:,:,:), allocatable :: cmat ! only used if collision_precision_mode=0 & 64
+  real(KIND=REAL32), dimension(:,:,:,:), allocatable :: cmat_fp32 ! only used if collision_precision_mode=1 & 32
+  real(KIND=REAL32), dimension(:,:,:,:,:,:), allocatable :: cmat_stripes ! only used if collision_precision_mode=1
+  real(KIND=REAL32), dimension(:,:,:,:,:,:), allocatable :: cmat_e1 ! only used if collision_precision_mode=1
   real, dimension(:,:,:,:,:,:), allocatable :: cmat_simple ! only used in collision_model=5
   ! 
   ! Equilibrium/geometry arrays
