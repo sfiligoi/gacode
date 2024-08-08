@@ -257,10 +257,6 @@ subroutine cgyro_init_collision
 
      allocate(cmat_base1(nv,nv))
      allocate(cmat_base2(nv,nv))
-  ! the next part must happen even for the Landau collisions
-  endif do_old_coll
-  
-  do_old_coll2: if (collision_model <= 4 .or. collision_test_mode/=0) then
      allocate(rs(n_species,n_species))
      allocate(rsvec(n_species,n_species,n_xi,n_energy))
      allocate(rsvect0(n_species,n_species,n_xi,n_energy))
@@ -481,7 +477,7 @@ subroutine cgyro_init_collision
      deallocate(rs)
      deallocate(rsvec)
      deallocate(rsvect0)
-  endif do_old_coll2
+  endif do_old_coll
 
   ! the next part needs also to be carried out for the new collision scheme:
   
@@ -527,7 +523,7 @@ subroutine cgyro_init_collision
         ! Collision field particle component
         amat(:,:)   = 0.0
         
-        do_old_coll3:  if (.not. (collision_model <= 4 .or. collision_test_mode/=0)) then
+        do_old_coll2:  if (.not. (collision_model <= 4 .or. collision_test_mode/=0)) then
            ! write the Landau/new collision matrix into the local array
            ! this is a quick fix to get the merges done.
            cmat_loc(:,:)=cmat(:,:,ic_loc,itor)
@@ -678,7 +674,7 @@ subroutine cgyro_init_collision
                  endif
               end do
            end do
-        endif do_old_coll3
+        endif do_old_coll2
         
         ! Now comes the collision-step matrix composition and solution.
         ! This is always needed except when testing the collisions.
@@ -860,14 +856,14 @@ subroutine cgyro_init_collision
   deallocate(cmat_loc)
   deallocate(amat)
 
-  do_old_coll4:  if (collision_model <= 4 .or. collision_test_mode/=0) then
+  do_old_coll3:  if (collision_model <= 4 .or. collision_test_mode/=0) then
 
      if (collision_model >= 4 .and. collision_kperp == 1 .and. &
           (collision_mom_restore == 1 .or. collision_ene_restore == 1)) then
         deallocate(bessel)
      end if
 
-  endif do_old_coll4
+  endif do_old_coll3
 
   if (collision_precision_mode == 1) then
 #if defined(OMPGPU)
@@ -957,7 +953,7 @@ subroutine cgyro_init_collision
 #endif
   endif
 
-  do_old_coll5:  if (collision_model <= 4 .or. collision_test_mode/=0) then
+  do_old_coll4:  if (collision_model <= 4 .or. collision_test_mode/=0) then
      deallocate(cmat_base2)
      deallocate(cmat_base1)
      deallocate(i_piv)
@@ -966,7 +962,7 @@ subroutine cgyro_init_collision
      deallocate(ctest)
      deallocate(klor_fac)
      deallocate(kdiff_fac)
-  endif do_old_coll5
+  endif do_old_coll4
 
   ! Finally compare the Landau/new Sugama and old collision operator,
   ! if requested.
