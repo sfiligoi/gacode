@@ -1,6 +1,11 @@
 #! /usr/bin/env bash
 # GACODE Parallel execution script (LUMI)
 
+#
+# As recommended by
+# https://docs.lumi-supercomputer.eu/runjobs/scheduled-jobs/lumig-job/
+#
+
 export MPICH_GPU_SUPPORT_ENABLED=1
 
 #env 1>&2
@@ -9,6 +14,7 @@ export MPICH_GPU_SUPPORT_ENABLED=1
 let ACC_DEVICE_NUM=$SLURM_LOCALID
 export ACC_DEVICE_NUM
 export OMP_DEFAULT_DEVICE=${ACC_DEVICE_NUM}
+export HIP_VISIBLE_DEVICES=${ACC_DEVICE_NUM}
 
 echo "`uname -n` $SLURM_PROCID $SLURM_LOCALID $ACC_DEVICE_NUM `taskset -pc $$`"
 #ecno "uname -n` $SLURM_LOCALID LL $LD_LIBRARY_PATH"
