@@ -120,9 +120,10 @@ contains
     kperp_bmag_max=0
     if (i_proc==0) then
        do itor=nt1,nt2
+          print 9,"itor=",itor
           do i=1,nc
-9            format ("init_collision_landau: ",A,I0,A,5G24.16E3)
-             print 9,'kperp(',i,')=',k_perp(i,itor)/bmag(it_c(i))*rho,bmag(it_c(i))
+9            format ("init_collision_landau: ",A,I0,5(A,G24.16E3))
+             print 9,'kperp(',i,')=',k_perp(i,itor)/bmag(it_c(i))*rho,"bmag(it)=",bmag(it_c(i))
           end do
        enddo
     end if
