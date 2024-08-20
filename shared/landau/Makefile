@@ -23,3 +23,6 @@ clean:
 	rm -rf landau.o gyrotransformation.o
 	rm -f ${GACODE_ROOT}/modules/landau.mod
 	rm -f ${GACODE_ROOT}/modules/gyrotransformation.mod
+
+# module landau in landau.F90
+gyrotransformation.o: landau.o
