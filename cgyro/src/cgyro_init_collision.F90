@@ -551,7 +551,7 @@ subroutine cgyro_init_collision
                  cmat_loc(:,:) = 0.0
               endif
 
-           case(4)
+           case(4,6,7)
 
               ! Momentum Restoring
               
@@ -953,10 +953,10 @@ subroutine cgyro_init_collision
 #endif
   endif
 
+  deallocate(i_piv)
   do_old_coll4:  if (collision_model <= 4 .or. collision_test_mode/=0) then
      deallocate(cmat_base2)
      deallocate(cmat_base1)
-     deallocate(i_piv)
      deallocate(nu_d)
      deallocate(nu_par)
      deallocate(ctest)
