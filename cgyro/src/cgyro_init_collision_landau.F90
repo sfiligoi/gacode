@@ -26,7 +26,7 @@ contains
     ! populate cmat with Galerkin based gyrokinetic Landau operator.
     ! cmat1 is only for comparison purposes
     use cgyro_globals, only : vth,temp,mass,dens,temp_ele,mass_ele,dens_ele,rho,z,&
-         n_energy,e_max,n_xi,n_radial,n_theta,n_species,nt1,nt2,nc_loc,nc1,nc2,nc,&
+         n_energy,e_max,n_xi,n_radial,n_theta,n_species,n_toroidal,nt1,nt2,nc_loc,nc1,nc2,nc,&
          nu_ee,&
          xi,w_xi,& !needed for projleg calc
          collision_model,&   ! if this is 7, we switch to calculating Sugama.
@@ -96,7 +96,8 @@ contains
     character(1000) :: fn
     real, allocatable, dimension(:,:,:,:,:) :: c
     real, allocatable, dimension(:,:) :: v2polytimesemat,mommat,v2momtimesemat,mom2v
-    integer, allocatable, dimension(:) :: nc1_proc,nc2_proc,proc_c
+    integer, allocatable, dimension(:) :: nc1_proc,nc2_proc,nt1_proc,nt2_proc
+    integer, allocatable, dimension(:,:) :: proc_c
 1   format ("init_collision_landau: ",9A)
     if (i_proc==0) print 1,'WARNING: dens_rot not yet implemented!!'
     if (i_proc==0) print 1,'WARNING: nu_global not yet implemented!!'
@@ -1001,28 +1002,41 @@ contains
        allocate(m1(n_energy,n_xi,n_energy,n_xi),m2(n_energy,n_xi,n_energy,n_xi),&
             c(n_energy,n_xi,n_energy,n_xi,2))
        allocate(v2polytimesemat(n_energy,n_energy))
-       allocate (nc1_proc(n_proc),nc2_proc(n_proc),proc_c(nc))
+       ! I do not know how everything is distributed. I only know the collision matrix 
+       allocate (nc1_proc(n_proc),nc2_proc(n_proc),nt1_proc(n_proc),nt2_proc(n_proc),proc_c(nc,0:n_toroidal))
        nc1_proc(i_proc+1)=nc1
        nc2_proc(i_proc+1)=nc2
+       nt1_proc(i_proc+1)=nt1
+       nt2_proc(i_proc+1)=nt2
+       proc_c=0 ! dummy value if no processor is responsible
        do i=1,n_proc
           call MPI_BCAST(nc1_proc(i),1,MPI_INTEGER,i-1,MPI_COMM_WORLD,ierror)
           call MPI_BCAST(nc2_proc(i),1,MPI_INTEGER,i-1,MPI_COMM_WORLD,ierror)
-          proc_c(nc1_proc(i):nc2_proc(i))=i-1
+          call MPI_BCAST(nt1_proc(i),1,MPI_INTEGER,i-1,MPI_COMM_WORLD,ierror)
+          call MPI_BCAST(nt2_proc(i),1,MPI_INTEGER,i-1,MPI_COMM_WORLD,ierror)
+          ! this assigns the processor with the highest number to the respective
+          ! nc and nt range
+          proc_c(nc1_proc(i):nc2_proc(i),nt1_proc(i):nt2_proc(i))=i
        end do
        if (i_proc==0) then
           print *,'nc1',nc1_proc
           print *,'nc2',nc2_proc
+          print *,'nt1',nt1_proc
+          print *,'nt2',nt2_proc
           print *,'proc_c',proc_c
        end if
        call dgemm('n','n',n_energy,n_energy,n_energy,1.,energymatrix,n_energy,v2poly,n_energy,&
             0.,v2polytimesemat,n_energy)
        md=-1
-       do itor=nt1,nt2
+       do itor=1,n_toroidal ! don't know what toroidal indices actually exist. We don't try 0 here.
           do ic=1,nc,nc-1
+             ! If proc_c==0 then there is nothing to be done.
+             ! Otherwise we deal with it, if we are either the responsible processor or proc 0
+             if (.not. (proc_c(ic,itor)==i_proc+1 .or. i_proc==0 .and. proc_c(ic,itor)/=0)) continue
              ic_loc=ic+1-nc1
              do ia=1,n_species
                 specbloop: do ib=1,n_species
-                   if (ic>=nc1 .and. ic<=nc2) then
+                   if (proc_c(ic,itor)==i_proc+1) then
                       do jx=1,n_xi
                          do je=1,n_energy
                             jv=iv_v(je,jx,ib)
@@ -1058,7 +1072,7 @@ contains
                       end if
                    else
                       if (i_proc==0) then
-                         call MPI_RECV(c,size(c),MPI_REAL8,proc_c(ic),1234,MPI_COMM_WORLD,status,ierror)
+                         call MPI_RECV(c,size(c),MPI_REAL8,proc_c(ic,itor)-1,1234,MPI_COMM_WORLD,status,ierror)
                       end if
                    end if
 !!$                  block
@@ -1092,8 +1106,8 @@ contains
                                   if (d>md) then
                                      md=d
                                   end if
-                                  print '(A,3I3,G14.6,2(A,I3,I4),A,G25.16E3,A,2G25.16E3)','ia,ib,ic_loc,kp',ia,&
-                                       ib,ic_loc,k_perp(ic,itor)/bmag(it_c(ic))*rho*sqrt(2.),&
+                                  print '(A,4I3,G14.6,2(A,I3,I4),A,G25.16E3,A,2G25.16E3)','ia,ib,itor,ic_loc,kp',ia,&
+                                       ib,itor,ic_loc,k_perp(ic,itor)/bmag(it_c(ic))*rho*sqrt(2.),&
                                        'jx,je',jx,je,' ix,ie',ix,ie,' d',d,' c,c1',s,s1
                                end do
                             end do
@@ -1128,8 +1142,11 @@ contains
              enddo
           end do
        end if
-       do itor=nt1,nt2
+       do itor=1,n_toroidal ! don't know what toroidal indices actually exist. We don't try 0 here.
           do ic=1,nc
+             ! If proc_c==0 then there is nothing to be done.
+             ! Otherwise we deal with it, if we are either the responsible processor or proc 0
+             if (.not. (proc_c(ic,itor)==i_proc+1 .or. i_proc==0 .and. proc_c(ic,itor)/=0)) continue
              ic_loc=ic+1-nc1
              do ia=1,n_species
                 specbloop2: do ib=1,n_species
@@ -1188,7 +1205,7 @@ contains
                       end if
                    else
                       if (i_proc==0) then
-                         call MPI_RECV(c,size(c),MPI_REAL8,proc_c(ic),1234,MPI_COMM_WORLD,status,ierror)
+                         call MPI_RECV(c,size(c),MPI_REAL8,proc_c(ic,itor)-1,1234,MPI_COMM_WORLD,status,ierror)
                       end if
                    end if
 
