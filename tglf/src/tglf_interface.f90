@@ -161,6 +161,28 @@ module tglf_interface
   real    :: tglf_s_delta_loc_in    = 0.0
   real    :: tglf_zeta_loc_in       = 0.0
   real    :: tglf_s_zeta_loc_in     = 0.0
+  real    :: tglf_shape_sin3_loc_in = 0.0
+  real    :: tglf_shape_s_sin3_loc_in = 0.0
+  real    :: tglf_shape_sin4_loc_in = 0.0
+  real    :: tglf_shape_s_sin4_loc_in = 0.0
+  real    :: tglf_shape_sin5_loc_in = 0.0
+  real    :: tglf_shape_s_sin5_loc_in = 0.0
+  real    :: tglf_shape_sin6_loc_in = 0.0
+  real    :: tglf_shape_s_sin6_loc_in = 0.0
+  real    :: tglf_shape_cos0_loc_in = 0.0
+  real    :: tglf_shape_s_cos0_loc_in = 0.0
+  real    :: tglf_shape_cos1_loc_in = 0.0
+  real    :: tglf_shape_s_cos1_loc_in = 0.0
+  real    :: tglf_shape_cos2_loc_in = 0.0
+  real    :: tglf_shape_s_cos2_loc_in = 0.0
+  real    :: tglf_shape_cos3_loc_in = 0.0
+  real    :: tglf_shape_s_cos3_loc_in = 0.0
+  real    :: tglf_shape_cos4_loc_in = 0.0
+  real    :: tglf_shape_s_cos4_loc_in = 0.0
+  real    :: tglf_shape_cos5_loc_in = 0.0
+  real    :: tglf_shape_s_cos5_loc_in = 0.0
+  real    :: tglf_shape_cos6_loc_in = 0.0
+  real    :: tglf_shape_s_cos6_loc_in = 0.0
   real    :: tglf_q_loc_in          = 2.0
   real    :: tglf_q_prime_loc_in    = 16.0
   real    :: tglf_p_prime_loc_in    = 0.0
@@ -356,6 +378,28 @@ contains
     write(1,30) 'S_DELTA_LOC',tglf_s_delta_loc_in
     write(1,30) 'ZETA_LOC',tglf_zeta_loc_in
     write(1,30) 'S_ZETA_LOC',tglf_s_zeta_loc_in
+    write(1,30) 'SHAPE_SIN3',tglf_shape_sin3_loc_in
+    write(1,30) 'SHAPE_S_SIN3',tglf_shape_s_sin3_loc_in
+    write(1,30) 'SHAPE_SIN4',tglf_shape_sin4_loc_in
+    write(1,30) 'SHAPE_S_SIN4',tglf_shape_s_sin4_loc_in
+    write(1,30) 'SHAPE_SIN5',tglf_shape_sin5_loc_in
+    write(1,30) 'SHAPE_S_SIN5',tglf_shape_s_sin5_loc_in
+    write(1,30) 'SHAPE_SIN6',tglf_shape_sin6_loc_in
+    write(1,30) 'SHAPE_S_SIN6',tglf_shape_s_sin6_loc_in
+    write(1,30) 'SHAPE_COS0',tglf_shape_cos0_loc_in
+    write(1,30) 'SHAPE_S_COS0',tglf_shape_s_cos0_loc_in
+    write(1,30) 'SHAPE_COS1',tglf_shape_cos1_loc_in
+    write(1,30) 'SHAPE_S_COS1',tglf_shape_cos1_loc_in
+    write(1,30) 'SHAPE_COS2',tglf_shape_cos2_loc_in
+    write(1,30) 'SHAPE_S_COS2',tglf_shape_cos2_loc_in
+    write(1,30) 'SHAPE_COS3',tglf_shape_cos3_loc_in
+    write(1,30) 'SHAPE_S_COS3',tglf_shape_cos3_loc_in
+    write(1,30) 'SHAPE_COS4',tglf_shape_cos4_loc_in
+    write(1,30) 'SHAPE_S_COS4',tglf_shape_s_cos4_loc_in
+    write(1,30) 'SHAPE_COS5',tglf_shape_cos5_loc_in
+    write(1,30) 'SHAPE_S_COS5',tglf_shape_cos5_loc_in
+    write(1,30) 'SHAPE_COS6',tglf_shape_cos6_loc_in
+    write(1,30) 'SHAPE_S_COS6',tglf_shape_cos6_loc_in
     write(1,30) 'P_PRIME_LOC',tglf_p_prime_loc_in
     write(1,30) 'Q_PRIME_LOC',tglf_q_prime_loc_in
     write(1,30) 'BETA_LOC',tglf_beta_loc_in
