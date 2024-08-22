@@ -405,8 +405,7 @@ subroutine cgyro_init_collision
                        rsvect0(is,js,ix,ie) = rsvtmp0
                        ! int v^2 C_test_ab(u_a^2 f0a,f0b) 
                        rs(is,js) = rs(is,js) + w_exi(ie,ix) &
-                            * dens(is) * rsvec(is,js,ix,ie) * (energy(ie)-1.5)
-                       !Using temperature, not energy here. Matters for Ta/=Tb.
+                         * dens(is) * rsvtmp * energy(ie) 
                     enddo
                  enddo
               enddo
