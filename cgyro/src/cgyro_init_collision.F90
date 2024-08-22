@@ -45,10 +45,11 @@ subroutine cgyro_init_collision
      call cgyro_init_collision_simple
      return
   endif
-  do_old_coll:  if (collision_model >= 6) then
+  do_old_coll1:  if (collision_model>=6) then
      ! collision_model=6 (Landau) or 7 (New Sugama method [Galerkin])
      ! The way this is included now isn't harmonic with Igor's changes
      ! cmat -> cmat_loc. The reason is to make the merge simpler.
+     if (collision_precision_mode/=0) allocate(cmat(nv,nv,nc_loc,nt1:nt2))
      call cgyro_init_landau
   else
 
@@ -464,9 +465,7 @@ subroutine cgyro_init_collision
      deallocate(rs)
      deallocate(rsvec)
      deallocate(rsvect0)
-  endif do_old_coll
-
-  ! the next part needs also to be carried out for the new collision scheme:
+  endif do_old_coll1
   
   ! matrix solve parameters
   allocate(i_piv(nv))
@@ -506,21 +505,38 @@ subroutine cgyro_init_collision
 
         it = it_c(ic)
         ir = ir_c(ic)
-        
+
         ! Collision field particle component
         amat(:,:)   = 0.0
 
-        do_old_coll2:  if (collision_model >=6) then
-           ! write the Landau/new collision matrix into the local array
-           ! this is a quick fix to get the merges done.
-           cmat_loc(:,:)=cmat(:,:,ic_loc,itor)
-        else
+        select case (collision_model)
 
-           ! here we continue instead on the old collision matrix:
-           select case (collision_model)
+        case(2)
+           if (collision_mom_restore == 1) then
+              do jv=1,nv
+                 js = is_v(jv)
+                 my_dens2_rot = dens2_rot(it,js)
 
-           case(2)
-              if (collision_mom_restore == 1) then
+                 do iv=1,nv
+
+                    ! we know we are the first one to modify cmat_loc, so no need for +=
+                    cmat_loc(iv,jv) = &
+                         cmat_base1(iv,jv) &
+                         * my_dens2_rot
+                 enddo
+              enddo
+
+           else
+              cmat_loc(:,:) = 0.0
+           endif
+
+        case(4)
+
+           ! Momentum Restoring
+
+           if (collision_mom_restore == 1) then
+
+              if (collision_kperp == 0) then
                  do jv=1,nv
                     js = is_v(jv)
                     my_dens2_rot = dens2_rot(it,js)
@@ -535,137 +551,75 @@ subroutine cgyro_init_collision
                  enddo
 
               else
-                 cmat_loc(:,:) = 0.0
+                 do jv=1,nv
+                    js = is_v(jv)
+                    my_dens2_rot = dens2_rot(it,js)
+                    my_bj0 = bessel(0,jv,ic_loc,itor)
+                    my_bj1 = bessel(1,jv,ic_loc,itor)
+
+                    do iv=1,nv
+
+                       ! we know we are the first one to modify cmat_loc, so no need for +=
+                       cmat_loc(iv,jv) = &
+                            cmat_base1(iv,jv) &
+                            * (  bessel(0,iv,ic_loc,itor) * my_bj0 &
+                            + bessel(1,iv,ic_loc,itor) * my_bj1 ) &
+                            * my_dens2_rot
+                    enddo
+                 enddo
               endif
 
-           case(4)
+           else
+              cmat_loc(:,:) = 0.0
+           endif
 
-              ! Momentum Restoring
-              
-              if (collision_mom_restore == 1) then
+           ! Energy Restoring
 
-                 if (collision_kperp == 0) then
-                    do jv=1,nv
-                       js = is_v(jv)
-                       my_dens2_rot = dens2_rot(it,js)
-                       
-                       do iv=1,nv
+           if (collision_ene_restore == 1) then
 
-                          ! we know we are the first one to modify cmat_loc, so no need for +=
-                          cmat_loc(iv,jv) = &
-                               cmat_base1(iv,jv) &
-                               * my_dens2_rot
-                       enddo
+              if (collision_kperp == 0) then
+                 do jv=1,nv
+                    js = is_v(jv)
+                    my_dens2_rot = dens2_rot(it,js)
+
+                    do iv=1,nv
+
+                       ! likely not the first, use +=
+                       cmat_loc(iv,jv) &
+                            = cmat_loc(iv,jv) &
+                            + cmat_base2(iv,jv) &
+                            * my_dens2_rot
                     enddo
-
-                 else
-                    do jv=1,nv
-                       js = is_v(jv)
-                       my_dens2_rot = dens2_rot(it,js)
-                       my_bj0 = bessel(0,jv,ic_loc,itor)
-                       my_bj1 = bessel(1,jv,ic_loc,itor)
-
-                       do iv=1,nv
-
-                          ! we know we are the first one to modify cmat_loc, so no need for +=
-                          cmat_loc(iv,jv) = &
-                               cmat_base1(iv,jv) &
-                               * (  bessel(0,iv,ic_loc,itor) * my_bj0 &
-                               + bessel(1,iv,ic_loc,itor) * my_bj1 ) &
-                               * my_dens2_rot
-                       enddo
-                    enddo
-                 endif
+                 enddo
 
               else
-                 cmat_loc(:,:) = 0.0
-              endif
-              
-              ! Energy Restoring
-              
-              if (collision_ene_restore == 1) then
+                 do jv=1,nv
+                    js = is_v(jv)
+                    my_dens2_rot = dens2_rot(it,js)
+                    my_bj0 = bessel(0,jv,ic_loc,itor)
 
-                 if (collision_kperp == 0) then
-                    do jv=1,nv
-                       js = is_v(jv)
-                       my_dens2_rot = dens2_rot(it,js)
-
-                       do iv=1,nv
-
-                          ! likely not the first, use +=
-                          cmat_loc(iv,jv) &
-                               = cmat_loc(iv,jv) &
-                               + cmat_base2(iv,jv) &
-                               * my_dens2_rot
-                       enddo
+                    do iv=1,nv
+                       ! likely not the first, use +=
+                       cmat_loc(iv,jv) &
+                            = cmat_loc(iv,jv) &
+                            + cmat_base2(iv,jv) &
+                            * bessel(0,iv,ic_loc,itor) * my_bj0 &
+                            * my_dens2_rot
                     enddo
-
-                 else
-                    do jv=1,nv
-                       js = is_v(jv)
-                       my_dens2_rot = dens2_rot(it,js)
-                       my_bj0 = bessel(0,jv,ic_loc,itor)
-
-                       do iv=1,nv
-                          ! likely not the first, use +=
-                          cmat_loc(iv,jv) &
-                               = cmat_loc(iv,jv) &
-                               + cmat_base2(iv,jv) &
-                               * bessel(0,iv,ic_loc,itor) * my_bj0 &
-                               * my_dens2_rot
-                       enddo
-                    enddo
-                 endif
-
+                 enddo
               endif
 
-           case default
-              cmat_loc(:,:) = 0.0
+           endif
 
-           end select
+        case(6,7)
+           ! write the Landau/new collision matrix into the local array
+           cmat_loc(:,:)=cmat(:,:,ic_loc,itor)
 
-           ! Change necessary to be able to compare with Landau operator: combine
-           ! cmat and ctest right now here into one matrix cmat, including the kperp components.
+        case default
+           cmat_loc(:,:) = 0.0
 
-           do iv=1,nv
+        end select
 
-              is = is_v(iv)
-              ix = ix_v(iv)
-              ie = ie_v(iv)
-
-              do jv=1,nv
-
-                 js = is_v(jv)
-                 jx = ix_v(jv)
-                 je = ie_v(jv)
-
-                 ! Collision component: Test particle
-                 if (is == js) then
-                    do ks=1,n_species
-                       cmat_loc(iv,jv) = cmat_loc(iv,jv) &
-                            + ctest(is,ks,ix,jx,ie,je) &
-                            * dens_rot(it,ks)
-                    enddo
-                 endif
-                 ! Finite-kperp test particle corrections 
-                 if (collision_model>=4 .and. collision_kperp == 1) then
-                    if (is == js .and. jx == ix .and. je == ie) then
-                       do ks=1,n_species
-                          cmat_loc(iv,jv) = cmat_loc(iv,jv) &
-                               + (-0.25*(k_perp(ic,itor)*rho*vth(is)*mass(is) &
-                               / (z(is)*bmag(it)))**2 * 2.0*energy(ie) &
-                               * (klor_fac(is,ks)*nu_d(ie,is,ks) * (1+xi(ix)**2) &
-                               + kdiff_fac(is,ks)*nu_par(ie,is,ks)* (1-xi(ix)**2)))
-                       enddo
-                    endif
-                 endif
-              end do
-           end do
-        endif do_old_coll2
-        
-        ! Now comes the collision-step matrix composition and solution.
-        ! This is always needed except when testing the collisions.
-        
         ! Avoid singularity of n=0,p=0:
         if (px(ir) == 0 .and. itor == 0) then
 
@@ -673,7 +627,7 @@ subroutine cgyro_init_collision
               cmat_loc(iv,iv) =  1.0
               amat(iv,iv) = 1.0
            enddo
-           
+
         else
 
            ! Already has field particle collisions
@@ -686,7 +640,7 @@ subroutine cgyro_init_collision
            enddo
 
            do jv=1,nv
-              
+
               js = is_v(jv)
               jx = ix_v(jv)
               je = ie_v(jv)
@@ -697,6 +651,16 @@ subroutine cgyro_init_collision
                  ix = ix_v(iv)
                  ie = ie_v(iv)
 
+                 ! Collision component: Test particle
+                 if (collision_model<6 .and. is == js) then
+                    do ks=1,n_species
+                       rval = (0.5*delta_t) * ctest(is,ks,ix,jx,ie,je) &
+                            * dens_rot(it,ks)
+                       cmat_loc(iv,jv) = cmat_loc(iv,jv) - rval
+                       amat(iv,jv) = amat(iv,jv) + rval
+                    enddo
+                 endif
+
                  ! Trapping 
                  ! (not part of collision operator but contains xi-derivative)
                  if (explicit_trap_flag == 0 .and. is == js .and. ie == je) then
@@ -706,7 +670,7 @@ subroutine cgyro_init_collision
                     cmat_loc(iv,jv) = cmat_loc(iv,jv) + rval
                     amat(iv,jv) = amat(iv,jv) - rval
                  endif
-                 
+
                  ! Rotation energy derivative
                  ! (not part of collision operator but contains e-derivative)
                  if (explicit_trap_flag == 0 .and. is == js .and. ix == jx) then
@@ -716,8 +680,23 @@ subroutine cgyro_init_collision
                     amat(iv,jv) = amat(iv,jv) - rval
                  endif
 
+                 ! Finite-kperp test particle corrections 
+                 if (collision_model == 4 .and. collision_kperp == 1) then
+                    if (is == js .and. jx == ix .and. je == ie) then
+                       do ks=1,n_species
+                          rval = (0.5*delta_t) &
+                               * (-0.25*(k_perp(ic,itor)*rho*vth(is)*mass(is) &
+                               / (z(is)*bmag(it)))**2 * 2.0*energy(ie) &
+                               * (klor_fac(is,ks)*nu_d(ie,is,ks) * (1+xi(ix)**2) &
+                               + kdiff_fac(is,ks)*nu_par(ie,is,ks)* (1-xi(ix)**2)))
+                          cmat_loc(iv,jv) = cmat_loc(iv,jv) - rval
+                          amat(iv,jv) = amat(iv,jv) + rval
+                       enddo
+                    endif
+                 endif
+
                  if (collision_field_model == 1) then
-                    
+
                     ! Poisson component l
                     if (itor == 0 .and. ae_flag == 1) then
                        ! Cannot include Poisson in collision matrix
@@ -934,7 +913,7 @@ subroutine cgyro_init_collision
   endif
 
   deallocate(i_piv)
-  do_old_coll4:  if (collision_model < 6) then
+  do_old_coll2:  if (collision_model<6) then
      deallocate(cmat_base2)
      deallocate(cmat_base1)
      deallocate(nu_d)
@@ -942,6 +921,8 @@ subroutine cgyro_init_collision
      deallocate(ctest)
      deallocate(klor_fac)
      deallocate(kdiff_fac)
-  endif do_old_coll4
+  else if (collision_precision_mode/=0) then
+     deallocate(cmat)
+  endif do_old_coll2
 
 end subroutine cgyro_init_collision
