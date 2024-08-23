@@ -31,8 +31,3 @@ exec: $(OBJECTS) $(EXTRA_LIBS)
 clean:
 	rm -f *.o $(EXEC) *~
 	rm -f ${GACODE_ROOT}/modules/locpargen*.mod
-
-# all module induced dependencies in directory profiles_gen/locpargen
-
-# module locpargen_globals in locpargen_globals.f90
-locpargen.o locpargen_cgyro.o locpargen_geo.o locpargen_gyro.o locpargen_neo.o locpargen_tglf.o locpargen_tglf_stack.o: locpargen_globals.o

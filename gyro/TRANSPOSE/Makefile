@@ -31,11 +31,3 @@ clean:
 	rm -rf *.o $(LLIB).a
 	rm -rf ${GACODE_ROOT}/modules/ftransp*.mod
 	rm -rf ${GACODE_ROOT}/modules/rtransp*.mod
-
-# all module induced dependencies in directory gyro/TRANSPOSE
-
-# module fTRANSP_GLOBALS in fTRANSP_GLOBALS.f90
-fTRANSP_CLEANUP.o fTRANSP_DO.o fTRANSP_INIT.o: fTRANSP_GLOBALS.o
-
-# module rTRANSP_GLOBALS in rTRANSP_GLOBALS.f90
-rTRANSP_CLEANUP.o rTRANSP_DO.o rTRANSP_INIT.o: rTRANSP_GLOBALS.o

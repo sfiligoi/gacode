@@ -23,8 +23,3 @@ exec: $(OBJECTS)
 clean:
 	rm -f *.o $(EXEC)
 	rm -f ${GACODE_ROOT}/modules/gyro2gkv_globals.mod
-
-# all module induced dependencies in directory gyro/tools/gyro2gkv
-
-# module gyro2gkv_globals in gyro2gkv_globals.f90
-gyro2gkv_exec.o read_all.o: gyro2gkv_globals.o

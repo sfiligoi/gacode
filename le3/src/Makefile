@@ -30,8 +30,3 @@ all: $(OBJECTS) $(EXTRA_LIBS)
 
 clean:
 	rm -f *.o $(EXEC) 
-
-# all module induced dependencies in directory /home/ksh/gacode/le3/src:
-
-# module le3_globals in le3_globals.f90
-le3.o le3_alloc.o le3_basis.o le3_compute_theory.o le3_func.o le3_geometry.o le3_geometry_matrix.o le3_geometry_rho.o le3_rz.o: le3_globals.o

@@ -25,8 +25,3 @@ all: $(OBJECTS) $(EXTRA_LIBS)
 
 clean:
 	rm -f *.o $(EXEC) ${GACODE_ROOT}/modules/vgen_globals.mod
-
-# all module induced dependencies in directory /home/ksh/gacode/vgen/src:
-
-# module vgen_globals in vgen_globals.f90
-vgen.o vgen_compute_neo.o vgen_getgeo.o vgen_init.o vgen_reduce.o: vgen_globals.o
