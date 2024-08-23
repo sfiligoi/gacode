@@ -62,7 +62,9 @@ OBJECTS = cgyro_globals.o \
           cgyro_write_initdata.o \
           cgyro_write_timedata.o \
           cgyro_write_hosts.o \
-          cgyro_zftest_em.o 
+          cgyro_zftest_em.o \
+	  ${GACODE_ROOT}/shared/landau/landau.o \
+	  ${GACODE_ROOT}/shared/landau/gyrotransformation.o
 
 .SUFFIXES : .o .f90 .F90
 
