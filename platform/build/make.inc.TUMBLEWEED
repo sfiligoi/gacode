@@ -34,7 +34,7 @@ ifdef FANN_ROOT
 endif
 
 # OPTIONAL NetCDF:
-NETCDF=-L/usr/lib -lnetcdff -lnetcdf
+NETCDF=-lnetcdff -lnetcdf
 NETCDF_INC=$(NETCDF_FORTRAN_INC)
 
 # Archive 
