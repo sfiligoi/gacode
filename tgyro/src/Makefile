@@ -24,10 +24,6 @@ else
   OBJECTS += tgyro_mmm_dummy.o
 endif
 
-ifdef GACODE_ADD_ROOT
-  EXTRA_LIBS += $(GACODE_ADD_ROOT)/qlgyro/src/qlgyro_lib.a
-endif
-
 OBJECTS += tgyro_globals.o \
            tgyro_iteration_variables.o \
            tgyro_allocate_globals.o \
