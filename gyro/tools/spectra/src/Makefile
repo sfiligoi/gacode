@@ -28,3 +28,8 @@ spec_i: $(OBJECTS)
 
 clean:
 	rm -f *.o spec_xy spec_n spec_i *~
+
+# all module induced dependencies in directory gyro/tools/spectra/src
+
+# module input_data in input_data.f90
+read_input.o spec_i.o spec_n.o spec_xy.o: input_data.o

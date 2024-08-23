@@ -25,3 +25,11 @@ all: $(OBJ) $(EXEC).o
 clean:  
 	rm -f *.o $(EXEC)
 	rm -f ${GACODE_ROOT}/modules/fieldline*.mod
+
+# all module induced dependencies in directory gyro/tools/fieldline
+
+# module fieldline_input_data in fieldline_input_data.f90
+func.o poincare.o read_input.o setup.o: fieldline_input_data.o
+
+# module fieldline_runge_kutta in fieldline_runge_kutta.f90
+poincare.o: fieldline_runge_kutta.o

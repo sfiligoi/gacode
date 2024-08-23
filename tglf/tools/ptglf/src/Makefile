@@ -24,3 +24,8 @@ exec: $(OBJECTS)
 
 clean:
 	rm -f *.o $(EXEC) ${GACODE_ROOT}/modules/ptglf*.mod *~
+
+# all module induced dependencies in directory /home/ksh/gacode/tglf/tools/ptglf/src:
+
+# module ptglf_globals in ptglf_globals.f90
+ptglf.o ptglf_init.o: ptglf_globals.o

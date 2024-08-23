@@ -34,3 +34,8 @@ lib: $(OBJECTS)
 clean:
 	rm -rf *.o $(LLIB).a 
 	rm -rf ${GACODE_ROOT}/modules/blend*.mod
+
+# all module induced dependencies in directory gyro/BLEND
+
+# module BLEND_private in BLEND_private.f90
+BLEND_F.o BLEND_Fp.o BLEND_cleanup.o BLEND_do.o BLEND_init.o: BLEND_private.o

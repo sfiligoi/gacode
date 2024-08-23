@@ -27,3 +27,8 @@ lib: $(OBJECTS)
 clean:
 	rm -rf *.o $(LLIB).a
 	rm -rf ${GACODE_ROOT}/modules/ssub*.mod
+
+# all module induced dependencies in directory gyro/SSUB
+
+# module SSUB_private in SSUB_private.f90
+SSUB_init.o fSSUB.o rSSUB.o: SSUB_private.o

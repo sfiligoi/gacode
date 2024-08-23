@@ -31,3 +31,8 @@ clean:
 	rm -rf ${GACODE_ROOT}/modules/gkeigen*.mod	                
 
 -include ${GACODE_ROOT}/gyro/install/make.ext.${GACODE_PLATFORM}
+
+# all module induced dependencies in directory gyro/GKEIGEN
+
+# module GKEIGEN_globals in GKEIGEN_globals.f90
+GKEIGEN_catch_error.o GKEIGEN_matrix_read.o GKEIGEN_matrix_write.o: GKEIGEN_globals.o

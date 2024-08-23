@@ -48,3 +48,11 @@ clean:
 	rm -f $(EXEC)
 	rm -f *.o ${GACODE_ROOT}/modules/qlgyro*.mod
 	rm -f qlgyro_lib.a
+
+# all module induced dependencies in directory /home/ksh/gacode/qlgyro/src:
+
+# module qlgyro_cgyro_interface in qlgyro_cgyro_interface.f90
+qlgyro.o qlgyro_cgyro_cleanup.o qlgyro_cgyro_map.o qlgyro_run.o qlgyro_run_cgyro_balloon.o qlgyro_run_cgyro_fluxtube.o: qlgyro_cgyro_interface.o
+
+# module qlgyro_globals in qlgyro_globals.f90
+qlgyro.o qlgyro_allocate_globals.o qlgyro_catch_error.o qlgyro_cgyro_cleanup.o qlgyro_cgyro_map.o qlgyro_comm_setup.o qlgyro_comm_sync.o qlgyro_gyro_cleanup.o qlgyro_gyro_map.o qlgyro_inout.o qlgyro_px0_spectrum.o qlgyro_read_input.o qlgyro_run.o qlgyro_run_cgyro_balloon.o qlgyro_run_cgyro_fluxtube.o qlgyro_run_gyro.o qlgyro_sat1.o qlgyro_sat_mg.o qlgyro_sum_fluxes.o qlgyro_tglf_map.o qlgyro_trap_component_error.o: qlgyro_globals.o
