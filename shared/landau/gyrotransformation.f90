@@ -98,7 +98,11 @@ contains
        !polynomials up to degree 2k.
        !x should from pi/4k up to pi-pi/4k
 
-       sample(i)=bessel_jn(mm,(cos(x)+1)*(.5*kbound))-bessel_jn(mm,0.)
+       if (mm==0) then 
+         sample(i)=bessel_j0((cos(x)+1)*(.5*kbound))-1.
+       else 
+         sample(i)=bessel_jn(mm,(cos(x)+1)*(.5*kbound))
+       endif
        ! subtracting bessel(0) here cures numerical precision issues for krho~0
        !! sample(i)=gsl_sf_bessel_jl(mm,(sin(x)+1)*.5*kbound)-gsl_sf_bessel_jl(mm,0.)
     end do

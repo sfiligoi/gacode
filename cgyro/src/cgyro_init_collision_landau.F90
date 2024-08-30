@@ -439,7 +439,7 @@ contains
                    do l=1,lmax
                       ! in this case Landauop is self-adjoint, i.e. for given l and ia and ib
                       ! Landauop=Landauop^T
-#if !(defined(NO_DIMATCOPY)|defined(__PGI)|defined(__APPLE__))
+#ifdef DIMATCOPY
 #ifdef __INTEL_COMPILER
                       !use MKL
                       call mkl_domatcopy('c','t',nmaxpoly,nmaxpoly,1.,Landauop(:,:,l,is),&
@@ -716,7 +716,7 @@ contains
        ib=idx+1
        if (proc(ik,ia,ib)==0) exit
        if (i_proc==proc(ik,ia,ib)-1 .and. ia>ib .and. temp(ia)==temp(ib)) then
-#if !(defined(NO_DIMATCOPY)|defined(__PGI)|defined(__APPLE__))
+#ifdef DIMATCOPY
 #ifdef __INTEL_COMPILER
           !use MKL
           call mkl_domatcopy('c','t',n_xi*n_energy,n_xi*n_energy,1.,&
