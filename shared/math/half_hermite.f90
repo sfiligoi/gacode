@@ -202,6 +202,7 @@ contains
     a1(1)=0
     b1(1)=0
     c1(1)=1
+    logg(1)=0
     ! allocate enough space, so that we do not have to reallocate frequently
     minalloc=-10*nsafe-9
     maxalloc=10*nsafe+9+2*nintervals
