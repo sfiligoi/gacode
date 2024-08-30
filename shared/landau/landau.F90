@@ -849,7 +849,7 @@ contains
     ! hence:
 
     do l=1,lmax
-#if !(defined(NO_DIMATCOPY)|defined(__PGI)|defined(__APPLE__))
+#ifdef DIMATCOPY
 #ifdef __INTEL_COMPILER
        !use MKL
        call mkl_dimatcopy('c','t',n,n,1.,intkernel(:,:,l),n,n)
