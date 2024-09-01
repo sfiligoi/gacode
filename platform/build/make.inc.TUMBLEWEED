@@ -21,12 +21,12 @@ FOMP   =-fopenmp
 FMATH  =-fdefault-real-8 -fdefault-double-8 -I$(FFTW_INC)
 FOPT   =-O3 -fexternal-blas -march=native -ffree-line-length-0
 # -floop-nest-optimize -floop-parallelize-all -flto
-FDEBUG =-Wall -W -fcheck=all -g -fbacktrace # -std=f2003 -fall-intrinsics -ffpe-trap=invalid,zero,overflow
+FDEBUG =-Wall -W -fcheck=all -g -fbacktrace  -ffpe-trap=invalid,zero,overflow -finit-real=snan # -std=f2003 -fall-intrinsics
 F2PY   = f2py
 
 # System math libraries
 #LMATH = /usr/lib64/libopenblas_serial.so.0 -lfftw3 -lfftw3_omp
-LMATH = -lblas -lfftw3 -lfftw3_omp
+LMATH = -llapack -lblas -lfftw3 -lfftw3_omp
 
 ifdef FANN_ROOT
    # neural net libraries
