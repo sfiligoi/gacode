@@ -1,0 +1,39 @@
+#----------------------------------------------------------
+# Cray (lumi.csc.fi) [GPU nodes]
+#
+# - 7*2*4 CPU cores (AMD Epyc) + 4x2 GPUs (MI250X)
+#----------------------------------------------------------
+
+IDENTITY="LUMI"
+CORES_PER_NODE=56
+NUMAS_PER_NODE=8
+
+# Fortran 90/95 compiler
+FC = ftn -J ${GACODE_ROOT}/modules
+#FC = /opt/rocm/llvm/bin/flang -J ${GACODE_ROOT}/modules
+# Fortran 77 compiler
+F77 = ${FC}
+
+# Compiler options/flags
+ifneq ($(GACODE_OMPGPU),1)
+FACC   =-hacc -DHIPGPU -DGACODE_GPU_AMD -I${HIPFORT_DIR}/include/hipfort/amdgcn -hacc_model=auto_async_none:no_fast_addr:no_deep_copy
+else
+FACC = -DOMPGPU -DHIPGPU -DGACODE_GPU_AMD -I${HIPFORT_DIR}/include/hipfort/amdgcn
+endif
+FOMP   =-homp
+FMATH  =-s real64
+FOPT   =-Ofast
+FDEBUG =-O0 -g
+F2PY   = f2py --fcompiler=pg
+
+
+# System math libraries
+LMATH=-L${ROCM_PATH}/lib -L${HIPFORT_DIR}/lib -lhipfort-amdgcn -lhipfft -lamdhip64
+
+# NetCDF
+#NETCDF=-L${NETCDF_DIR}/lib -lnetcdff -lnetcdf
+#NETCDF_INC = ${NETCDF_DIR}/include
+
+# Archive 
+ARCH = ar cr
+
