@@ -337,8 +337,8 @@ subroutine cgyro_rhs(ij,update_cap)
 
   ! Wavenumber advection shear terms
   ! depends on h_x and field only, updates rhs
-  !call cgyro_advect_wavenumber(ij)
-  call cgyro_globalshear(ij)
+  call cgyro_advect_wavenumber(ij)
+  !call cgyro_globalshear(ij)
 
   call cgyro_rhs_comm_test
 
