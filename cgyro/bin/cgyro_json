@@ -1,0 +1,42 @@
+#!/usr/bin/env python
+
+import json
+from pygacode.cgyro import data
+
+sim = data.cgyrodata('./')
+
+d = {}
+
+d['RMIN'] = sim.rmin
+d['RMAJ'] = sim.rmaj
+d['SHEAR'] = sim.shear
+d['Q'] = sim.q
+d['Z'] = sim.z[:].tolist()
+d['MASS'] = sim.mass[:].tolist()
+d['DENS'] = sim.dens[:].tolist()
+d['TEMP'] = sim.temp[:].tolist()
+d['DLNNDR'] = sim.dlnndr[:].tolist()
+
+with open('json.cgyro.localdump','w') as f:
+   json.dump(d,f,indent=2,sort_keys=True)
+
+#--------------------------------------------------------------
+
+lref=sim.rmaj
+vthref = np.sqrt(2.0)
+
+d = {}
+d['r_minor_norm'] = sim.rmin/lref
+d['magnetic_shear_r_minor'] = sim.shear
+d['q'] = sim.q
+d['charge_norm'] = sim.z[:].tolist()
+d['mass_norm'] = sim.mass[:].tolist()
+d['density_norm'] = sim.dens[:].tolist()
+d['temperature_norm'] = sim.temp[:].tolist()
+d['density_log_gradient_norm'] = (lref*sim.dlnndr[:]).tolist()
+d['temperature_log_gradient_norm'] = (lref*sim.dlntdr[:]).tolist()
+d['velocity_tor_norm'] = 
+
+with open('json.cgyro.imas','w') as f:
+   json.dump(d,f,indent=2,sort_keys=True)
+
