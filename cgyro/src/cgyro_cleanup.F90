@@ -197,6 +197,10 @@ subroutine cgyro_cleanup
      ccl_del_device(omega_ss)        
      deallocate(omega_ss)
   endif
+  if(allocated(omega_sbeta)) then
+     ccl_del_device(omega_sbeta)        
+     deallocate(omega_sbeta)
+  endif
   if(allocated(jvec_c))  then
      ccl_del_device(jvec_c)     
      deallocate(jvec_c)
