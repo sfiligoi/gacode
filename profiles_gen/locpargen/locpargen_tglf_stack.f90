@@ -17,7 +17,18 @@ subroutine locpargen_tglf_stack
        'ZMAJ_LOC=',zmag_loc, 'DZMAJDX_LOC=',dzmag_loc, 'Q_LOC=',abs(q_loc), &
        'Q_PRIME_LOC=',(q_loc/r0)**2*s_loc, 'KAPPA_LOC=',kappa_loc, 'S_KAPPA_LOC=',s_kappa_loc, &
        'DELTA_LOC=',delta_loc, 'S_DELTA_LOC=',s_delta_loc, 'ZETA_LOC=',zeta_loc, &
-       'S_ZETA_LOC=',s_zeta_loc, 'SIGN_BT=',btccw, 'SIGN_IT=',ipccw, &
+       'S_ZETA_LOC=',s_zeta_loc, 'SHAPE_SIN3=',shape_sin3_loc, 'SHAPE_S_SIN3=',shape_s_sin3_loc, &
+       'SHAPE_SIN4=' ,shape_sin4_loc, 'SHAPE_S_SIN4=' ,shape_s_sin4_loc, &
+       'SHAPE_SIN5=' ,shape_sin5_loc, 'SHAPE_S_SIN5=' ,shape_s_sin5_loc, &
+       'SHAPE_SIN6=' ,shape_sin6_loc, 'SHAPE_S_SIN6=' ,shape_s_sin6_loc, &
+       'SHAPE_COS0=' ,shape_cos0_loc, 'SHAPE_S_COS0=' ,shape_s_cos0_loc, &
+       'SHAPE_COS1=' ,shape_cos1_loc, 'SHAPE_S_COS1=' ,shape_s_cos1_loc, &
+       'SHAPE_COS2=' ,shape_cos2_loc, 'SHAPE_S_COS2=' ,shape_s_cos2_loc, &
+       'SHAPE_COS3=' ,shape_cos3_loc, 'SHAPE_S_COS3=' ,shape_s_cos3_loc, &
+       'SHAPE_COS4=' ,shape_cos4_loc, 'SHAPE_S_COS4=' ,shape_s_cos4_loc, &
+       'SHAPE_COS5=' ,shape_cos5_loc, 'SHAPE_S_COS5=' ,shape_s_cos5_loc, &
+       'SHAPE_COS6=' ,shape_cos6_loc, 'SHAPE_S_COS6=' ,shape_s_cos6_loc, &
+       'SIGN_BT=',btccw, 'SIGN_IT=',ipccw, &
        'ZEFF=',z_eff_loc, 'XNUE=',nu_ee*a/cs_loc, &
        'DEBYE=',7.43*sqrt(1e3*temp_loc(ise)/(1e13*dens_loc(ise)))/abs(rhos_loc), &
        'BETAE=',betae_unit, 'P_PRIME_LOC=',(abs(q_loc)/r0)*(-beta_star_loc/(8*pi)), &

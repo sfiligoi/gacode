@@ -22,6 +22,31 @@ subroutine locpargen_tglf
   write(1,10) 'S_DELTA_LOC=',s_delta_loc
   write(1,10) 'ZETA_LOC=',zeta_loc
   write(1,10) 'S_ZETA_LOC=',s_zeta_loc
+  write(1,*)
+  write(1,'(a)')  '# Geometry (Advanced)'
+  write(1,10) 'SHAPE_SIN3=',shape_sin3_loc
+  write(1,10) 'SHAPE_S_SIN3=',shape_s_sin3_loc
+  write(1,10) 'SHAPE_SIN4=',shape_sin4_loc
+  write(1,10) 'SHAPE_S_SIN4=',shape_s_sin4_loc
+  write(1,10) 'SHAPE_SIN5=',shape_sin5_loc
+  write(1,10) 'SHAPE_S_SIN5=',shape_s_sin5_loc
+  write(1,10) 'SHAPE_SIN6=',shape_sin6_loc
+  write(1,10) 'SHAPE_S_SIN6=',shape_s_sin6_loc
+  write(1,10) 'SHAPE_COS0=',shape_cos0_loc
+  write(1,10) 'SHAPE_S_COS0=',shape_s_cos0_loc
+  write(1,10) 'SHAPE_COS1=',shape_cos1_loc
+  write(1,10) 'SHAPE_S_COS1=',shape_s_cos1_loc
+  write(1,10) 'SHAPE_COS2=',shape_cos2_loc
+  write(1,10) 'SHAPE_S_COS2=',shape_s_cos2_loc
+  write(1,10) 'SHAPE_COS3=',shape_cos3_loc
+  write(1,10) 'SHAPE_S_COS3=',shape_s_cos3_loc 
+  write(1,10) 'SHAPE_COS4=',shape_cos4_loc
+  write(1,10) 'SHAPE_S_COS4=',shape_s_cos4_loc 
+  write(1,10) 'SHAPE_COS5=',shape_cos5_loc
+  write(1,10) 'SHAPE_S_COS5=',shape_s_cos5_loc 
+  write(1,10) 'SHAPE_COS6=',shape_cos6_loc
+  write(1,10) 'SHAPE_S_COS6=',shape_s_cos6_loc 
+  write(1,*)
   write(1,10) 'SIGN_BT=',btccw
   write(1,10) 'SIGN_IT=',ipccw
   write(1,*)
