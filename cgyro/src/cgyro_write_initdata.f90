@@ -41,6 +41,13 @@ subroutine cgyro_write_initdata
      endif
      write(io,*)
 
+     ! Compute kymax
+     if (n_toroidal == 1) then
+        kymax = q/rmin*rho
+     else
+        kymax = q/rmin*(n_toroidal-1)*rho
+     endif
+
      if (kymax < -99.9) then
         lfmt = '(a,i4,2x,2(f7.2,2x),2x,f6.2,5x,i4,2a)'
      else
@@ -49,13 +56,6 @@ subroutine cgyro_write_initdata
 
      if (zf_test_mode == 0) then
 
-        ! Compute kymax
-        if (n_toroidal == 1) then
-           kymax = q/rmin*rho
-        else
-           kymax = q/rmin*(n_toroidal-1)*rho
-        endif
-        
         if (nonlinear_flag == 0) then
 
            write(io,*) '          n    Delta      Max     L/rho'
