@@ -471,9 +471,9 @@ subroutine cgyro_init_arrays
      enddo
   enddo
 #if defined(OMPGPU)
-!$omp target enter data map(to:omega_cap_h,omega_h,omega_s,omega_ss,omega_beta)
+!$omp target enter data map(to:omega_cap_h,omega_h,omega_s,omega_ss,omega_sbeta)
 #elif defined(_OPENACC)
-!$acc enter data copyin(omega_cap_h,omega_h,omega_s,omega_ss,omega_beta)
+!$acc enter data copyin(omega_cap_h,omega_h,omega_s,omega_ss,omega_sbeta)
 #endif
   !-------------------------------------------------------------------------
 
