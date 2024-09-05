@@ -1,0 +1,125 @@
+#!/usr/bin/env python
+
+import json
+import numpy as np
+
+from pygacode.cgyro import data
+
+sim = data.cgyrodata('./')
+
+try:
+   with open('out.cgyro.version', 'r') as file:
+      version = file.read().rstrip()
+except:
+   version = 'unavailable'
+    
+
+#--------------------------------------------------------------
+# json.cgyro.localdump
+
+d = {}
+
+d['RMIN'] = sim.rmin
+d['RMAJ'] = sim.rmaj
+d['Q'] = sim.q
+d['SHEAR'] = sim.shear
+d['MACH'] = sim.mach
+d['GAMMA_E'] = sim.gamma_e
+d['GAMMA_P'] = sim.gamma_p
+d['BETAE_UNIT'] = sim.betae_unit
+
+d['Z'] = sim.z[:].tolist()
+d['MASS'] = sim.mass[:].tolist()
+d['DENS'] = sim.dens[:].tolist()
+d['TEMP'] = sim.temp[:].tolist()
+d['DLNNDR'] = sim.dlnndr[:].tolist()
+d['DLNTDR'] = sim.dlntdr[:].tolist()
+
+d['ZMAG'] = sim.zmag
+d['DZMAG'] = sim.dzmag
+d['SHIFT'] = sim.shift
+d['KAPPA'] = sim.kappa
+d['S_KAPPA'] = sim.s_kappa
+d['DELTA'] = sim.delta
+d['S_DELTA'] = sim.s_delta
+d['ZETA'] = sim.zeta
+d['S_ZETA'] = sim.s_zeta
+
+d['SHAPE_SIN'] = sim.shape_sin[:].tolist()
+
+d['SHAPE_COS'] = sim.shape_cos[:].tolist()
+
+# JSON output
+with open('json.cgyro.localdump','w') as f:
+   json.dump(d,f,indent=2,sort_keys=True)
+
+# standard localdump output
+nmax = 0
+with open('out.cgyro.localdump','w') as f:
+   for key in d:
+      x = d[key]
+      if 'SHAPE' in key:
+         for i in range(len(x)):
+            if not x[i] == 0.0:
+               f.write(key+'_'+str(i)+'='+str(x[i])+'\n')
+               if i > nmax:
+                  nmax = i
+      elif isinstance(x,list):
+         for i in range(len(x)):
+            f.write(key+'_'+str(i+1)+'='+str(x[i])+'\n')
+      else:
+         f.write(key+'='+str(x)+'\n')
+         
+#--------------------------------------------------------------
+# json.cgyro.imas
+
+nmax = nmax+1
+
+lref=sim.rmaj
+vthref = np.sqrt(2.0)
+bref = sim.b_gs2
+
+d = {}
+
+d['name'] = 'CGYRO'
+d['version'] = version
+d['r_minor_norm'] = sim.rmin/lref
+d['magnetic_shear_r_minor'] = sim.shear
+d['q'] = sim.q
+d['charge_norm'] = sim.z[:].tolist()
+d['mass_norm'] = sim.mass[:].tolist()
+d['density_norm'] = sim.dens[:].tolist()
+d['temperature_norm'] = sim.temp[:].tolist()
+d['density_log_gradient_norm'] = (lref*sim.dlnndr[:]).tolist()
+d['temperature_log_gradient_norm'] = (lref*sim.dlntdr[:]).tolist()
+
+# Rotation parameters
+d['velocity_tor_norm'] = sim.mach/vthref
+# -L/v 1/B (r/q Bu) (-dw/dr) = L/v Bu/B (r/q dw/dr) = L/v Bu/B (-GAMMA_E)
+d['shearing_rate_norm'] = -(lref/vthref)/bref*sim.gamma_e
+# -L^2/v dw/dr = -L/v (L dw/dr) = -L/v (-GAMMA_P)
+d['velocity_tor_gradient_norm'] = lref/vthref*sim.gamma_p
+
+d['beta_reference'] = sim.betae_unit/bref**2
+
+d['dgeometric_axis_r_dr_minor'] = sim.shift
+d['dgeometric_axis_z_dr_minor'] = sim.dzmag
+
+d['elongation'] = sim.kappa
+d['delongation_dr_minor_norm'] = sim.s_kappa*sim.kappa*lref/sim.rmin
+
+# Shape coefficients (cn,sn)
+d['shapecoefficients_c'] = sim.shape_cos[:nmax].tolist()
+d['shapecoefficients_s'] = sim.shape_sin[:nmax].tolist()
+d['shapecoefficients_s'][1] = np.arcsin(sim.delta)
+d['shapecoefficients_s'][2] = -sim.zeta
+
+# Derivatives of (cn,sn)
+d['dc_dr_minor_norm'] = (sim.shape_s_cos[:nmax]*lref/sim.rmin).tolist()
+d['ds_dr_minor_norm'] = (sim.shape_s_sin[:nmax]*lref/sim.rmin).tolist()
+d['ds_dr_minor_norm'][1] = sim.s_delta*lref/sim.rmin/np.cos(np.arcsin(sim.delta))
+d['ds_dr_minor_norm'][2] = -sim.s_zeta*lref/sim.rmin 
+
+with open('json.cgyro.imas','w') as f:
+   json.dump(d,f,indent=2,sort_keys=True)
+

@@ -15,9 +15,9 @@ FC += ${FOMP} ${FACC}
 EXEC = cgyro
 
 OBJECTS = cgyro_globals.o \
-	  cgyro_timer_lib.o \
 	  cgyro_math.o \
 	  cgyro_globals_math.o \
+	  cgyro_timer_lib.o \
           cgyro_parallel_lib.o \
           cgyro_step.o \
           cgyro_io.o \
@@ -32,7 +32,7 @@ OBJECTS = cgyro_globals.o \
           cgyro_field_coefficients.o \
           cgyro_flux.o \
           cgyro_freq.o \
-          cgyro_global.o \
+          cgyro_globalshear.o \
           cgyro_upwind.o \
           cgyro_init.o \
           cgyro_init_h.o \
