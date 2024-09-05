@@ -108,10 +108,17 @@ d['dgeometric_axis_z_dr_minor'] = sim.dzmag
 d['elongation'] = sim.kappa
 d['delongation_dr_minor_norm'] = sim.s_kappa*sim.kappa*lref/sim.rmin
 
-d['shapecoefficient_c'] = sim.shape_cos[:nmax].tolist()
-d['shapecoefficient_s'] = sim.shape_sin[:nmax].tolist()
-d['shapecoefficient_s'][1] = np.arcsin(sim.delta)
-d['shapecoefficient_s'][2] = -sim.zeta
+# Shape coefficients (cn,sn)
+d['shapecoefficients_c'] = sim.shape_cos[:nmax].tolist()
+d['shapecoefficients_s'] = sim.shape_sin[:nmax].tolist()
+d['shapecoefficients_s'][1] = np.arcsin(sim.delta)
+d['shapecoefficients_s'][2] = -sim.zeta
+
+# Derivatives of (cn,sn)
+d['dc_dr_minor_norm'] = (sim.shape_s_cos[:nmax]*lref/sim.rmin).tolist()
+d['ds_dr_minor_norm'] = (sim.shape_s_sin[:nmax]*lref/sim.rmin).tolist()
+d['ds_dr_minor_norm'][1] = sim.s_delta*lref/sim.rmin/np.cos(np.arcsin(sim.delta))
+d['ds_dr_minor_norm'][2] = -sim.s_zeta*lref/sim.rmin 
 
 with open('json.cgyro.imas','w') as f:
    json.dump(d,f,indent=2,sort_keys=True)
