@@ -182,6 +182,7 @@ contains
     call ieee_set_flag(ieee_all,.false.)
     call ieee_get_status(ieee_status)
     call ieee_set_halting_mode(ieee_invalid,.false.)
+    call ieee_set_halting_mode(ieee_divide_by_zero,.false.)
     call dstevr('N','A',nmaxpoly,a(1:nmaxpoly),bsq(2:nmaxpoly),0.,0.,0,0,0.,m,sp,&
          projsteen,nmaxpoly,isuppz,work,lwork,iwork,liwork,info)
     if (info/=0 .or. m/=nmaxpoly) then
@@ -776,6 +777,9 @@ contains
     deallocate(projsteen)
 
     allocate(projsteen(n_energy,n_energy)) 
+    call ieee_get_status(ieee_status)
+    call ieee_set_halting_mode(ieee_invalid,.false.)
+    call ieee_set_halting_mode(ieee_divide_by_zero,.false.)
     call dstevr('N','A',n_energy,a(1:n_energy),bsq(2:n_energy),0.,0.,0,0,0.,m,sp,&
          projsteen,n_energy,isuppz,work,lwork,iwork,liwork,info)
     if (info/=0 .or. m/=n_energy) then
@@ -788,6 +792,7 @@ contains
        if (i_proc==0) print '(A,2I0," ",A,I0)','dstein error, here is i,info',i,info,'and ifail',ifail
        stop
     end if
+    call ieee_set_status(ieee_status)
     do i=1,n_energy
        if (projsteen(1,i)<0) projsteen(:,i)=-projsteen(:,i)
     end do

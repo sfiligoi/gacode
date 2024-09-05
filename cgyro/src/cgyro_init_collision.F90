@@ -45,6 +45,10 @@ subroutine cgyro_init_collision
      call cgyro_init_collision_simple
      return
   endif
+
+  cmap_fp32_error_abs_cnt_loc(:) = 0
+  cmap_fp32_error_rel_cnt_loc(:) = 0
+
   do_old_coll1:  if (collision_model>=6) then
      ! collision_model=6 (Landau) or 7 (New Sugama method [Galerkin])
      ! The way this is included now isn't harmonic with Igor's changes
@@ -52,10 +56,6 @@ subroutine cgyro_init_collision
      if (collision_precision_mode/=0) allocate(cmat(nv,nv,nc_loc,nt1:nt2))
      call cgyro_init_landau
   else
-
-     cmap_fp32_error_abs_cnt_loc(:) = 0
-     cmap_fp32_error_rel_cnt_loc(:) = 0
-
      allocate(nu_d(n_energy,n_species,n_species))
      allocate(nu_par(n_energy,n_species,n_species))
      allocate(klor_fac(n_species,n_species))
