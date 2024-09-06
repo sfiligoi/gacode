@@ -731,9 +731,13 @@ contains
 #endif
 #else
           !alternative to domatcopy
-          do k=1,n_xi*n_energy
-             do j=1,n_xi*n_energy
-                gyrocolmat(j,1,k,1,ib,ia,ik)=gyrocolmat(k,1,j,1,ia,ib,ik)
+          do k=1,n_xi
+             do l=1,n_energy
+                do j=1,n_xi
+                   do m=1,n_energy
+                      gyrocolmat(m,j,l,k,ib,ia,ik)=gyrocolmat(l,k,m,j,ia,ib,ik)
+                   end do
+                end do
              end do
           end do
 #endif
