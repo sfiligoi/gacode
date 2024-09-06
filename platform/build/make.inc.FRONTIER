@@ -23,7 +23,7 @@ endif
 FOMP   =-homp
 FMATH  =-s real64
 FOPT   =-Ofast
-FDEBUG =-O0 -g
+FDEBUG =-O1 -g
 F2PY   = f2py --fcompiler=pg
 
 # System math libraries
