@@ -1,9 +1,9 @@
-!---------------------------------------------------------
-! cgyro_advect_wavenumber.f90
+!-----------------------------------------------------------------
+! cgyro_globalshear.F90
 !
 ! PURPOSE:
-!  Manage shearing by wavenumber advection.
-!---------------------------------------------------------
+!  Manage shearing by wavenumber advection (new Dudkovskaia terms)
+!-----------------------------------------------------------------
 
 subroutine cgyro_globalshear(ij)
 
@@ -47,16 +47,22 @@ subroutine cgyro_globalshear(ij)
                  llnt = ll*n_theta
 
                  if ( (ir+ll) <= n_radial ) then
+                    ! ExB shear
                     h1 = omega_eb_base*itor*h_x(iccj+llnt,ivc,itor)
+                    ! omega_star shear
                     h1 = h1-sum(omega_ss(:,iccj+llnt,ivc,itor)*field(:,iccj+llnt,itor))
+                    ! beta_star shear
                     h1 = h1-omega_sbeta(iccj+llnt,ivc,itor)*cap_h_c(iccj+llnt,ivc,itor)
                  else
                     h1 = 0.0
                  endif
                 
                  if ( (ir-ll) >= 1 ) then
+                    ! ExB shear
                     h2 = omega_eb_base*itor*h_x(iccj-llnt,ivc,itor)
+                    ! omega_star shear
                     h2 = h2-sum(omega_ss(:,iccj-llnt,ivc,itor)*field(:,iccj-llnt,itor))
+                    ! beta_star shear
                     h2 = h2-omega_sbeta(iccj-llnt,ivc,itor)*cap_h_c(iccj-llnt,ivc,itor)
                  else
                     h2 = 0.0

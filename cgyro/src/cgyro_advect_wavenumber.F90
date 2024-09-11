@@ -2,7 +2,7 @@
 ! cgyro_advect_wavenumber.f90
 !
 ! PURPOSE:
-!  Manage shearing by wavenumber advection.
+!  Manage shearing by wavenumber advection (legacy method)
 !---------------------------------------------------------
 
 subroutine cgyro_advect_wavenumber(ij)

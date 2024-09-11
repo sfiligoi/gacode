@@ -456,15 +456,17 @@ subroutine cgyro_init_arrays
            ! global-Taylor corrections via wavenumber advection (ix -> d/dp)
            ! JC: Re-checked sign and normalization (Oct 2019)
 
-           ! generalized profile curvature (phi shearing)
+           ! NEW GLOBAL TERMS
+
+           ! generalized omega_star shear (acts on phi)
            sm = sdlnndr(is)+sdlntdr(is)*(energy(ie)-1.5)
 
-           ! beta_star (H shearing)
-           sb = sbeta_star(is)*energy(ie)/bmag(it)**2
+           ! generalized beta/drift shear (acts on H)
+           sb = beta_star(0)*sbeta_star(is)*energy(ie)/bmag(it)**2
 
            arg = -k_theta_base*itor*length/(2*pi)
 
-           omega_ss(:,ic,iv_loc,itor) = arg*sm*jvec_c(:,ic,iv_loc,itor)
+           omega_ss(:,ic,iv_loc,itor)  = arg*sm*jvec_c(:,ic,iv_loc,itor)
            omega_sbeta(ic,iv_loc,itor) = arg*sb
 
         enddo

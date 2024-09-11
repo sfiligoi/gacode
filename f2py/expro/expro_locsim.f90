@@ -14,6 +14,7 @@ module expro_locsim_interface
   double precision, dimension(:,:), allocatable :: dlnndr_exp
   double precision, dimension(:,:), allocatable :: sdlntdr_exp
   double precision, dimension(:,:), allocatable :: sdlnndr_exp
+  double precision, dimension(:,:), allocatable :: sbeta_exp
 
   double precision, dimension(:), allocatable :: gamma_e_exp
   double precision, dimension(:), allocatable :: gamma_p_exp
@@ -79,6 +80,7 @@ module expro_locsim_interface
   double precision, dimension(9) :: dlntdr_loc
   double precision, dimension(9) :: sdlnndr_loc
   double precision, dimension(9) :: sdlntdr_loc
+  double precision, dimension(9) :: sbeta_loc
 
   integer :: geo_ny_loc
   double precision, dimension(:,:), allocatable :: geo_yin_loc
@@ -106,6 +108,7 @@ subroutine expro_locsim_alloc(flag)
      allocate(dlnndr_exp(n_species_exp,expro_n_exp))
      allocate(sdlntdr_exp(n_species_exp,expro_n_exp))
      allocate(sdlnndr_exp(n_species_exp,expro_n_exp))
+     allocate(sbeta_exp(n_species_exp,expro_n_exp))
 
      allocate(gamma_e_exp(expro_n_exp))
      allocate(gamma_p_exp(expro_n_exp))
@@ -121,6 +124,7 @@ subroutine expro_locsim_alloc(flag)
      if (allocated(dlnndr_exp)) deallocate(dlnndr_exp)
      if (allocated(sdlntdr_exp)) deallocate(sdlntdr_exp)
      if (allocated(sdlnndr_exp)) deallocate(sdlnndr_exp)
+     if (allocated(sbeta_exp)) deallocate(sbeta_exp)
      
      if (allocated(gamma_e_exp)) deallocate(gamma_e_exp)
      if (allocated(gamma_p_exp)) deallocate(gamma_p_exp)
@@ -279,6 +283,7 @@ subroutine expro_locsim_profiles(&
   dens_exp(n_species_exp,:)    = expro_ne(:)
   dlnndr_exp(n_species_exp,:)  = expro_dlnnedr(:)*a_meters 
   sdlnndr_exp(n_species_exp,:) = expro_sdlnnedr(:)*a_meters
+  sbeta_exp(n_species_exp,:)   = expro_sbetae(:)*a_meters
 
   mass_loc(n_species_exp) = expro_masse
   z_loc(n_species_exp) = -1d0
@@ -303,6 +308,9 @@ subroutine expro_locsim_profiles(&
         dlnndr_exp(i_ion,:)  = expro_dlnnidr(i_ion,:)*a_meters
         sdlnndr_exp(i_ion,:) = expro_sdlnnidr(i_ion,:)*a_meters
      endif
+
+     sbeta_exp(i_ion,:) = expro_sbetai(i_ion,:)*a_meters 
+
   enddo
 
   ! Rotation
@@ -369,11 +377,12 @@ subroutine expro_locsim_profiles(&
      call cub_spline1(rmin_exp,dlnndr_exp(i,:),expro_n_exp,rmin,dlnndr_loc(i))
      call cub_spline1(rmin_exp,sdlntdr_exp(i,:),expro_n_exp,rmin,sdlntdr_loc(i))
      call cub_spline1(rmin_exp,sdlnndr_exp(i,:),expro_n_exp,rmin,sdlnndr_loc(i))
+     call cub_spline1(rmin_exp,sbeta_exp(i,:),expro_n_exp,rmin,sbeta_loc(i))
      beta_star_loc = beta_star_loc+dens_loc(i)*temp_loc(i)*(dlnndr_loc(i)+dlntdr_loc(i))
   enddo
-  ! CGS beta calculation
+  
+  ! CGS beta calculation (JC: is this needed?)
   betae_loc = 4.027e-3*dens_loc(n_species_exp)*temp_loc(n_species_exp)/b_unit_loc**2
-
   beta_star_loc = beta_star_loc*betae_loc/(dens_loc(n_species_exp)*temp_loc(n_species_exp))
   
   if (numeq_flag == 1 .and. expro_nfourier > 0) then
