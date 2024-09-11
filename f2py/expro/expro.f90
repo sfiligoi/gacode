@@ -414,6 +414,7 @@ contains
        deallocate(expro_dlntedr)      
        deallocate(expro_sdlnnedr)      
        deallocate(expro_sdlntedr)      
+       deallocate(expro_sbetae)      
        deallocate(expro_dlnptotdr)    
        deallocate(expro_w0p)          
        deallocate(expro_surf)          

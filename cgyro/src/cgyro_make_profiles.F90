@@ -180,17 +180,10 @@ subroutine cgyro_make_profiles
      loglam = 24.0 - log(sqrt(dens_ele*1e13)/(temp_ele*1e3))
      nu_ee  = cc * loglam * dens_ele / (sqrt(mass_ele)*temp_ele**1.5) &
           / (vth_norm/a_meters) 
-
-     ! beta calculation in CGS:
-     !
-     !         8*pi ( n[1e19/m^3]*1e-6*1e19 )( T[keV]*1.6022*1e-9 )
-     ! beta = ------------------------------------------------------
-     !                           ( 1e4*B[T] )^2
-     !
-     !      = 4.027e-3 n[1e19/m^3]*T[keV]/B[T]^2
-
-     betae_unit = 4.027e-3 * dens_ele * temp_ele / b_unit**2
-
+     
+     ! Electron beta
+     betae_unit = betae_loc
+     
      ! Debye length (from NRL plasma formulary):
      ! Use input lambda_debye as scaling parameter
 

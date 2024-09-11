@@ -241,11 +241,11 @@ subroutine expro_locsim_profiles(&
   integer :: i,j,i_ion
 
   rmin_loc = rmin
-  
+
   n_species_exp = n_species_in
 
   mass_deuterium = expro_mass_deuterium*1e24
-  
+
   !--------------------------------------------------------------
   ! use expro routines to read data:
   !
@@ -287,7 +287,7 @@ subroutine expro_locsim_profiles(&
 
   mass_loc(n_species_exp) = expro_masse
   z_loc(n_species_exp) = -1d0
- 
+
   ! Pack ions from the bottom
   do i_ion=1,n_species_exp-1
      ! ion temps should be equal, but not enforced 
@@ -297,7 +297,7 @@ subroutine expro_locsim_profiles(&
 
      mass_loc(i_ion) = expro_mass(i_ion)
      z_loc(i_ion) = expro_z(i_ion)
-   
+
      ! First species density is reset by quasi-neutrality
      if (quasineutral_flag == 1 .and. i_ion == 1) then
         dens_exp(i_ion,:)    = expro_ni_new(:)
@@ -367,7 +367,7 @@ subroutine expro_locsim_profiles(&
   call cub_spline1(rmin_exp,expro_polflux,expro_n_exp,rmin,psi_norm_loc)
   psi_norm_loc = psi_norm_loc/expro_polflux(expro_n_exp)
   psi_a_loc = expro_polflux(expro_n_exp)
-    
+
   beta_star_loc = 0d0  
   do i=1,n_species_exp
      ! Note: mapping is only done for n_species (not n_species_exp)
@@ -380,13 +380,20 @@ subroutine expro_locsim_profiles(&
      call cub_spline1(rmin_exp,sbeta_exp(i,:),expro_n_exp,rmin,sbeta_loc(i))
      beta_star_loc = beta_star_loc+dens_loc(i)*temp_loc(i)*(dlnndr_loc(i)+dlntdr_loc(i))
   enddo
-  
-  ! CGS beta calculation (JC: is this needed?)
+
+  ! beta calculation in CGS:
+  !
+  !         8*pi ( n[1e19/m^3]*1e-6*1e19 )( T[keV]*1.6022*1e-9 )
+  ! beta = ------------------------------------------------------
+  !                           ( 1e4*B[T] )^2
+  !
+  !      = 4.027e-3 n[1e19/m^3]*T[keV]/B[T]^2
+
   betae_loc = 4.027e-3*dens_loc(n_species_exp)*temp_loc(n_species_exp)/b_unit_loc**2
   beta_star_loc = beta_star_loc*betae_loc/(dens_loc(n_species_exp)*temp_loc(n_species_exp))
-  
+
   if (numeq_flag == 1 .and. expro_nfourier > 0) then
- 
+
      geo_ny_loc = expro_nfourier
      allocate(geo_yin_exp(8,0:geo_ny_loc,expro_n_exp))
      if(allocated(geo_yin_loc)) deallocate(geo_yin_loc)
