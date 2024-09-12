@@ -122,13 +122,14 @@ subroutine cgyro_make_profiles
      z_eff   = z_eff_loc
      b_unit  = b_unit_loc
 
-     dens(1:n_species) = dens_loc(1:n_species)     
-     temp(1:n_species) = temp_loc(1:n_species)     
-     dlnndr(1:n_species) = dlnndr_loc(1:n_species)     
-     dlntdr(1:n_species) = dlntdr_loc(1:n_species)
+     dens(1:n_species)    = dens_loc(1:n_species)     
+     temp(1:n_species)    = temp_loc(1:n_species)     
+     dlnndr(1:n_species)  = dlnndr_loc(1:n_species)     
+     dlntdr(1:n_species)  = dlntdr_loc(1:n_species)
      sdlnndr(1:n_species) = sdlnndr_loc(1:n_species)     
      sdlntdr(1:n_species) = sdlntdr_loc(1:n_species)     
-
+     sbeta_star(1:n_species) = sbeta_loc(1:n_species)     
+ 
      if (ae_flag == 1) then
         is_ele = n_species+1
      else
@@ -252,13 +253,13 @@ subroutine cgyro_make_profiles
         dlntdr_ele = dlntdr_ae
      else
         is_ele = -1
-        do is=1, n_species
-           if(z(is) < 0.0) then
+        do is=1,n_species
+           if (z(is) < 0.0) then
               is_ele = is
               exit
            endif
         enddo
-        if(is_ele == -1) then
+        if (is_ele == -1) then
            call cgyro_error('No electron species specified')
            return
         endif
@@ -284,8 +285,8 @@ subroutine cgyro_make_profiles
      ! Always compute beta_* consistently with parameters in input.cgyro and then re-scale
      ! note: beta_star(0) will be over-written with sonic rotation
      call set_betastar
-     beta_star(0) = beta_star(0)*beta_star_scale
-     beta_star_fac  = beta_star_fac * beta_star_scale
+     beta_star(0)  = beta_star(0)*beta_star_scale
+     beta_star_fac = beta_star_fac*beta_star_scale
 
   endif
 

@@ -22,8 +22,6 @@ subroutine expro_compute_derived
   double precision, dimension(:), allocatable :: temp
   double precision, dimension(:), allocatable :: cc
   double precision, dimension(:), allocatable :: loglam
-  double precision, dimension(:,:), allocatable :: sni,sti
-  double precision, dimension(:), allocatable  :: sne,ste
 
   double precision :: r_min
   double precision :: fa,fb
@@ -67,10 +65,6 @@ subroutine expro_compute_derived
   !
   allocate(torflux(expro_n_exp))
   allocate(temp(expro_n_exp))
-  allocate(sne(expro_n_exp))
-  allocate(ste(expro_n_exp))
-  allocate(sni(expro_n_ion,expro_n_exp))
-  allocate(sti(expro_n_ion,expro_n_exp))
 
   torflux(:) = expro_torfluxa*expro_rho(:)**2
 
@@ -145,17 +139,17 @@ subroutine expro_compute_derived
   ! NOTE: expro_sdln* will be renormalized after calculation of rhos later
   
   ! sne = -ne''/ne (1/m^2) [not fully normalized yet]
-  call bound_deriv(sne,expro_ne*expro_dlnnedr,expro_rmin,expro_n_exp)
-  sne = sne/expro_ne
+  call bound_deriv(expro_sdlnnedr,expro_ne*expro_dlnnedr,expro_rmin,expro_n_exp)
+  expro_sdlnnedr = expro_sdlnnedr/expro_ne
 
   ! sTe = -Te''/Te (1/m^2) [not fully normalized yet]
-  call bound_deriv(ste,expro_te*expro_dlntedr,expro_rmin,expro_n_exp)
-  ste = ste/expro_te
+  call bound_deriv(expro_sdlntedr,expro_te*expro_dlntedr,expro_rmin,expro_n_exp)
+  expro_sdlntedr = expro_sdlntedr/expro_te
 
   expro_dlnnidr = 0d0
   expro_dlntidr = 0d0
-  sni = 0d0
-  sti = 0d0
+  expro_sdlnnidr = 0d0
+  expro_sdlntidr = 0d0
 
   do is=1,expro_n_ion
      if (minval(expro_ni(is,:)) > 0d0 .and. minval(expro_ti(is,:)) > 0d0) then
@@ -166,25 +160,14 @@ subroutine expro_compute_derived
         call bound_deriv(expro_dlntidr(is,:),-log(expro_ti(is,:)),expro_rmin,expro_n_exp)
 
         ! sni = -ni''/ni (1/m^2) [not fully normalized yet]
-        call bound_deriv(sni(is,:),expro_ni(is,:)*expro_dlnnidr(is,:),expro_rmin,expro_n_exp)
-        sni(is,:) = sni(is,:)/expro_ni(is,:)
+        call bound_deriv(expro_sdlnnidr(is,:),expro_ni(is,:)*expro_dlnnidr(is,:),expro_rmin,expro_n_exp)
+        expro_sdlnnidr(is,:) = expro_sdlnnidr(is,:)/expro_ni(is,:)
 
         ! sTi = -Ti''/Ti (1/m^2) [not fully normalized yet]
         call bound_deriv(expro_sdlntidr(is,:),expro_ti(is,:)*expro_dlntidr(is,:),expro_rmin,expro_n_exp)
-        sti(is,:) = sti(is,:)/expro_ti(is,:)
+        expro_sdlntidr(is,:) = expro_sdlntidr(is,:)/expro_ti(is,:)
      endif
   enddo
-
-  ! omega_star shear
-  expro_sdlnnedr = sne+1.5*expro_dlntedr**2+expro_dlnnedr**2-expro_dlnnedr*expro_dlntedr
-  expro_sdlnnidr = sni-1.5*expro_dlntidr**2+expro_dlnnidr**2-expro_dlnnidr*expro_dlntidr
-
-  expro_sdlntedr = ste+expro_dlntedr**2
-  expro_sdlntidr = sti+expro_dlntidr**2
-
-  ! beta_star shear 
-  expro_sbetae = (sne+ste-2*expro_dlntedr*expro_dlnnedr)/(expro_dlnnedr+expro_dlntedr)
-  expro_sbetai = (sni+sti-2*expro_dlntidr*expro_dlnnidr)/(expro_dlnnidr+expro_dlntidr)
 
   ! 1/L_Ptot = -dln(Ptot)/dr (1/m)
   if (minval(expro_ptot) > 0d0) then
@@ -192,11 +175,6 @@ subroutine expro_compute_derived
   else
      expro_dlnptotdr = 0d0
   endif
-
-  deallocate(sne)
-  deallocate(ste)
-  deallocate(sni)
-  deallocate(sti)
   !--------------------------------------------------------------------
 
   !-------------------------------------------------------------------
@@ -353,18 +331,15 @@ subroutine expro_compute_derived
   !-----------------------------------------------------------------
 
   !-----------------------------------------------------------------
-  ! Renormalize shearing parameters
+  ! Renormalize curvatures
   !
   ! sn = -n''/n*rhos (1/m) 
   ! sT = -T''/T*rhos (1/m)
-  ! sbeta = sbeta*rhos (1/m)
   expro_sdlnnedr = expro_sdlnnedr*expro_rhos(:)
   expro_sdlntedr = expro_sdlntedr*expro_rhos(:)
-  expro_sbetae = expro_sbetae*expro_rhos(:)
   do is=1,expro_n_ion
      expro_sdlnnidr(is,:) = expro_sdlnnidr(is,:)*expro_rhos(:)
      expro_sdlntidr(is,:) = expro_sdlntidr(is,:)*expro_rhos(:)
-     expro_sbetai(is,:) = expro_sbetai(is,:)*expro_rhos(:)
   enddo
   !-----------------------------------------------------------------
 

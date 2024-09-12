@@ -121,7 +121,6 @@ module expro
        expro_dlntedr,&
        expro_sdlnnedr,&
        expro_sdlntedr,&
-       expro_sbetae,&
        expro_dlnptotdr,&
        expro_w0p,&
        expro_surf,&
@@ -161,8 +160,7 @@ module expro
        expro_dlnnidr,&
        expro_dlntidr,&
        expro_sdlnnidr,&
-       expro_sdlntidr,&
-       expro_sbetai
+       expro_sdlntidr
   !-----------------------------------------------------------
 
   ! input.gacode.geo dimension and arrays
@@ -289,7 +287,6 @@ contains
        allocate(expro_dlntedr(nexp))      ; expro_dlntedr = 0.0
        allocate(expro_sdlnnedr(nexp))     ; expro_sdlnnedr = 0.0
        allocate(expro_sdlntedr(nexp))     ; expro_sdlntedr = 0.0
-       allocate(expro_sbetae(nexp))       ; expro_sbetae = 0.0
        allocate(expro_dlnptotdr(nexp))    ; expro_dlnptotdr = 0.0
        allocate(expro_w0p(nexp))          ; expro_w0p = 0.0
        allocate(expro_surf(nexp))         ; expro_surf = 0.0
@@ -331,7 +328,6 @@ contains
        allocate(expro_dlntidr(nion,nexp))  ; expro_dlntidr = 0.0
        allocate(expro_sdlnnidr(nion,nexp)) ; expro_sdlnnidr = 0.0
        allocate(expro_sdlntidr(nion,nexp)) ; expro_sdlntidr = 0.0
-       allocate(expro_sbetai(nion,nexp))   ; expro_sbetai = 0.0
 
     else
 
@@ -414,7 +410,6 @@ contains
        deallocate(expro_dlntedr)      
        deallocate(expro_sdlnnedr)      
        deallocate(expro_sdlntedr)      
-       deallocate(expro_sbetae)      
        deallocate(expro_dlnptotdr)    
        deallocate(expro_w0p)          
        deallocate(expro_surf)          
@@ -456,7 +451,6 @@ contains
        deallocate(expro_dlntidr)  
        deallocate(expro_sdlnnidr) 
        deallocate(expro_sdlntidr)  
-       deallocate(expro_sbetai)  
 
     endif
 

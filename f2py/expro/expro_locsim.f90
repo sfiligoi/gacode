@@ -73,6 +73,7 @@ module expro_locsim_interface
   double precision :: beta_star_loc
 
   double precision, dimension(9) :: mass_loc
+
   double precision, dimension(9) :: z_loc
   double precision, dimension(9) :: dens_loc
   double precision, dimension(9) :: temp_loc
@@ -283,7 +284,6 @@ subroutine expro_locsim_profiles(&
   dens_exp(n_species_exp,:)    = expro_ne(:)
   dlnndr_exp(n_species_exp,:)  = expro_dlnnedr(:)*a_meters 
   sdlnndr_exp(n_species_exp,:) = expro_sdlnnedr(:)*a_meters
-  sbeta_exp(n_species_exp,:)   = expro_sbetae(:)*a_meters
 
   mass_loc(n_species_exp) = expro_masse
   z_loc(n_species_exp) = -1d0
@@ -308,8 +308,6 @@ subroutine expro_locsim_profiles(&
         dlnndr_exp(i_ion,:)  = expro_dlnnidr(i_ion,:)*a_meters
         sdlnndr_exp(i_ion,:) = expro_sdlnnidr(i_ion,:)*a_meters
      endif
-
-     sbeta_exp(i_ion,:) = expro_sbetai(i_ion,:)*a_meters 
 
   enddo
 
@@ -377,7 +375,6 @@ subroutine expro_locsim_profiles(&
      call cub_spline1(rmin_exp,dlnndr_exp(i,:),expro_n_exp,rmin,dlnndr_loc(i))
      call cub_spline1(rmin_exp,sdlntdr_exp(i,:),expro_n_exp,rmin,sdlntdr_loc(i))
      call cub_spline1(rmin_exp,sdlnndr_exp(i,:),expro_n_exp,rmin,sdlnndr_loc(i))
-     call cub_spline1(rmin_exp,sbeta_exp(i,:),expro_n_exp,rmin,sbeta_loc(i))
      beta_star_loc = beta_star_loc+dens_loc(i)*temp_loc(i)*(dlnndr_loc(i)+dlntdr_loc(i))
   enddo
 
@@ -392,6 +389,11 @@ subroutine expro_locsim_profiles(&
   betae_loc = 4.027e-3*dens_loc(n_species_exp)*temp_loc(n_species_exp)/b_unit_loc**2
   beta_star_loc = beta_star_loc*betae_loc/(dens_loc(n_species_exp)*temp_loc(n_species_exp))
 
+  ! Add extra effective curvature terms to omega_star shear
+  sdlnndr_loc = sdlnndr_loc+(1.5*dlntdr_loc**2+dlnndr_loc**2-dlnndr_loc*dlntdr_loc)*rhos_loc/a_meters
+  sdlntdr_loc = sdlntdr_loc+dlntdr_loc**2*rhos_loc/a_meters
+  sbeta_loc   = beta_star_loc*(sdlnndr_loc+sdlntdr_loc-2*dlntdr_loc*dlnndr_loc*rhos_loc/a_meters)/(dlnndr_loc+dlntdr_loc)
+  
   if (numeq_flag == 1 .and. expro_nfourier > 0) then
 
      geo_ny_loc = expro_nfourier
