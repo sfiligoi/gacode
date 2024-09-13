@@ -5,30 +5,32 @@ import numpy as np
 from pygacode.cgyro import data
 from pygacode.gacodefuncs import *
 
-# read minimal data for setup
+# read minimal data for setup (look in current directory)
 sim = data.cgyrodata('./',fast=True,silent=True)
 
+# copy time vector and number of species
 t = sim.t
 ns = sim.n_species
 
 # read bin.cgyro.ky_flux
 sim.getflux()
 
-# select field=0,moment=1, and sum over kx
-field=0 ; moment=1
-y = np.sum(sim.ky_flux[:,moment,field,:,:],axis=1)
+# select field=0 (phi), moment=1 (Q), species (0), and sum over kx
+field=0 ; moment=1 ; species=0
+y = np.sum(sim.ky_flux[species,moment,field,:,:],axis=0)
 
-# averaging (note that time_average function is fast/optimized)
-w='0.5'
-imin,imax=time_index(t,w)
-for ispec in range(ns):
-   ave = time_average(y[ispec,:],t,imin,imax)
-   print(ave)
+# Simulation length (max time)
+tmax = t[-1]
 
-w='0.75'
-imin,imax=time_index(t,w)
-for ispec in range(ns):
-   ave = time_average(y[ispec,:],t,imin,imax)
-   print(ave)
+# size and number of time windows
+dt = 50.0
+nwin = int(tmax/dt)
+t0 = tmax-nwin*dt
 
-   
+# averaging over all windows (note that time_average function is fast/optimized)
+for i in range(nwin):
+   w=str(tmax-(i+1)*dt)+','+str(tmax-i*dt)
+   imin,imax=time_index(t,w)
+   ave = time_average(y[:],t,imin,imax)
+   print(i,ave)
+
