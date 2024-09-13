@@ -1,0 +1,34 @@
+#!/usr/bin/env python
+
+import numpy as np
+
+from pygacode.cgyro import data
+from pygacode.gacodefuncs import *
+
+# read minimal data for setup
+sim = data.cgyrodata('./',fast=True,silent=True)
+
+t = sim.t
+ns = sim.n_species
+
+# read bin.cgyro.ky_flux
+sim.getflux()
+
+# select field=0,moment=1, and sum over kx
+field=0 ; moment=1
+y = np.sum(sim.ky_flux[:,moment,field,:,:],axis=1)
+
+# averaging (note that time_average function is fast/optimized)
+w='0.5'
+imin,imax=time_index(t,w)
+for ispec in range(ns):
+   ave = time_average(y[ispec,:],t,imin,imax)
+   print(ave)
+
+w='0.75'
+imin,imax=time_index(t,w)
+for ispec in range(ns):
+   ave = time_average(y[ispec,:],t,imin,imax)
+   print(ave)
+
+   
