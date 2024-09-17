@@ -325,7 +325,7 @@ then
    version_tag=`gacode_getversion`
    if [ -f out.cgyro.tag ]
    then
-      simtime=`tail -n2 out.cgyro.tag | head -n1`
+      simtime=`head -n2 out.cgyro.tag | tail -n1`
       simtime=`echo $simtime`
    else
       simtime=0.0
