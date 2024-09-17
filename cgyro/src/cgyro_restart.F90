@@ -25,6 +25,7 @@ subroutine cgyro_write_restart
   use mpi
   use cgyro_globals
   use cgyro_io
+  use cgyro_step
 
   implicit none
   
@@ -53,6 +54,7 @@ subroutine cgyro_write_restart
      open(unit=io,file=trim(path)//runfile_restart_tag,status='replace')
      write(io,*) i_current
      write(io,fmtstr) t_current
+     write(io,*) delta_t_gk
      close(io)
   endif
 
@@ -350,31 +352,34 @@ subroutine cgyro_read_restart
   use mpi
   use cgyro_globals
   use cgyro_io
+  use cgyro_step
 
   implicit none
 
+  integer :: igk
+  
   !---------------------------------------------------------
-  ! Read restart parameters from ASCII file.
+  ! Read restart parameters from ASCII tag file.
   !
   if (restart_flag == 1) then
+     delta_t_last = 0.0
      if (i_proc == 0) then
 
         open(unit=io,file=trim(path)//runfile_restart_tag,status='old')
 
         read(io,*) i_current
         read(io,fmtstr) t_current
+        read(io,*,iostat=igk) delta_t_last
         close(io)
-
+        
      endif
 
-     ! Broadcast to all cores.
+     ! Broadcast to all cores
 
-     call MPI_BCAST(i_current,&
-          1,MPI_INTEGER,0,CGYRO_COMM_WORLD,i_err)
-
-     call MPI_BCAST(t_current,&
-          1,MPI_DOUBLE_PRECISION,0,CGYRO_COMM_WORLD,i_err)
-
+     call MPI_BCAST(i_current,1,MPI_INTEGER,0,CGYRO_COMM_WORLD,i_err)
+     call MPI_BCAST(t_current,1,MPI_DOUBLE_PRECISION,0,CGYRO_COMM_WORLD,i_err)
+     call MPI_BCAST(delta_t_last,1,MPI_DOUBLE_PRECISION,0,CGYRO_COMM_WORLD,i_err)
+      
   endif
 
   if (i_proc == 0) then
