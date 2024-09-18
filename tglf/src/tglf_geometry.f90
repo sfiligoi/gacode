@@ -1324,7 +1324,7 @@ END SUBROUTINE mercier_write
 ! squarness shear s_zeta_loc = rmin*d(zeta)/dx. Included elevation Zmaj_loc.
 ! Also changed definition of s_delta = rmin*d(delta)/dx from Waltz-Miller convention to GYRO's.
 ! July 26, 2021 set elevation Zmaj_loc =0.0 and DZMAJDX_LOC=0.0 since these break the up/down symmetry of Miller by contributing to Grad_r
-! August 1, 2024 revised with MXH parameterization
+! August 1, 2024 Sophia Guizzo(s.guizzo@columbia.edu) revised with MXH parameterization (Arbon et al PPCF 2020)
 !---------------------------------------------------------------
 
 SUBROUTINE miller_geo
