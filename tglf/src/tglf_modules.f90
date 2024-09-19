@@ -163,6 +163,28 @@
       REAL :: s_delta_loc=0.0
       REAL :: zeta_loc=0.0
       REAL :: s_zeta_loc=0.0
+      REAL :: shape_sin3_loc=0.0
+      REAL :: shape_s_sin3_loc=0.0
+      REAL :: shape_sin4_loc=0.0
+      REAL :: shape_s_sin4_loc=0.0
+      REAL :: shape_sin5_loc=0.0
+      REAL :: shape_s_sin5_loc=0.0
+      REAL :: shape_sin6_loc=0.0
+      REAL :: shape_s_sin6_loc=0.0
+      REAL :: shape_cos0_loc=0.0
+      REAL :: shape_s_cos0_loc=0.0
+      REAL :: shape_cos1_loc=0.0
+      REAL :: shape_s_cos1_loc=0.0
+      REAL :: shape_cos2_loc=0.0
+      REAL :: shape_s_cos2_loc=0.0
+      REAL :: shape_cos3_loc=0.0
+      REAL :: shape_s_cos3_loc=0.0
+      REAL :: shape_cos4_loc=0.0
+      REAL :: shape_s_cos4_loc=0.0
+      REAL :: shape_cos5_loc=0.0
+      REAL :: shape_s_cos5_loc=0.0
+      REAL :: shape_cos6_loc=0.0
+      REAL :: shape_s_cos6_loc=0.0
       REAL :: p_prime_loc=0.0
       REAL :: q_prime_loc=16.0
       REAL :: beta_loc = 0.0
@@ -849,6 +871,28 @@
       REAL :: s_delta_tg=0.0
       REAL :: s_kappa_tg=0.0
       REAL :: s_zeta_tg=0.0
+      REAL :: shape_sin3_tg=0.0
+      REAL :: shape_s_sin3_tg=0.0
+      REAL :: shape_sin4_tg=0.0
+      REAL :: shape_s_sin4_tg=0.0
+      REAL :: shape_sin5_tg=0.0
+      REAL :: shape_s_sin5_tg=0.0
+      REAL :: shape_sin6_tg=0.0
+      REAL :: shape_s_sin6_tg=0.0
+      REAL :: shape_cos0_tg=0.0
+      REAL :: shape_s_cos0_tg=0.0
+      REAL :: shape_cos1_tg=0.0
+      REAL :: shape_s_cos1_tg=0.0
+      REAL :: shape_cos2_tg=0.0
+      REAL :: shape_s_cos2_tg=0.0
+      REAL :: shape_cos3_tg=0.0
+      REAL :: shape_s_cos3_tg=0.0
+      REAL :: shape_cos4_tg=0.0
+      REAL :: shape_s_cos4_tg=0.0
+      REAL :: shape_cos5_tg=0.0
+      REAL :: shape_s_cos5_tg=0.0
+      REAL :: shape_cos6_tg=0.0
+      REAL :: shape_s_cos6_tg=0.0
       REAL :: q_prime_tg=0.0
       REAL :: p_prime_tg=0.0
       REAL :: kx0_tg=0.0
@@ -873,6 +917,12 @@
         rmin_tg, rmaj_tg, zmaj_tg,use_bisection_tg,vpar_tg, &
         q_tg, xnue_tg, wd_zero_tg, betae_tg, shat_tg, alpha_tg, &
         xwell_tg,kappa_tg,s_kappa_tg,delta_tg,s_delta_tg,zeta_tg,s_zeta_tg, &
+        shape_sin3_tg, shape_s_sin3_tg, shape_sin4_tg, shape_s_sin4_tg, &
+        shape_sin5_tg, shape_s_sin5_tg, shape_sin6_tg, shape_s_sin6_tg, &
+        shape_cos0_tg, shape_s_cos0_tg, shape_cos1_tg, shape_s_cos1_tg, &
+        shape_cos2_tg, shape_s_cos2_tg, shape_cos3_tg, shape_s_cos3_tg, &
+        shape_cos4_tg, shape_s_cos4_tg, shape_cos5_tg, shape_s_cos5_tg, &
+        shape_cos6_tg, shape_s_cos6_tg, &
         drmindx_tg,drmajdx_tg,dzmajdx_tg,zeff_tg, debye_tg, use_bper_tg, &
         use_bpar_tg,use_mhd_rule_tg,q_prime_tg,damp_psi_tg,damp_sig_tg, &
         p_prime_tg, filter_tg, Linsker_factor_tg, gradB_factor_tg,  &
