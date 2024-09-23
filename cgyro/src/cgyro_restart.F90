@@ -29,8 +29,6 @@ subroutine cgyro_write_restart
 
   implicit none
   
-  integer :: j,ic0
-
   ! Print this data on restart steps only; otherwise exit now
   if (mod(i_time,restart_step*print_step) /= 0) return
 
@@ -344,6 +342,8 @@ subroutine cgyro_read_restart
   implicit none
 
   integer :: igk
+  integer :: j,ic0
+
   
   !---------------------------------------------------------
   ! Read restart parameters from ASCII tag file.
