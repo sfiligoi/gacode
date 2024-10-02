@@ -128,7 +128,7 @@ subroutine cgyro_make_profiles
      dlntdr(1:n_species)  = dlntdr_loc(1:n_species)
      sdlnndr(1:n_species) = sdlnndr_loc(1:n_species)     
      sdlntdr(1:n_species) = sdlntdr_loc(1:n_species)     
-     sbeta_star(1:n_species) = sbeta_loc(1:n_species)     
+     sbeta(1:n_species)   = sbeta_loc(1:n_species)     
  
      if (ae_flag == 1) then
         is_ele = n_species+1
@@ -418,7 +418,10 @@ subroutine cgyro_make_profiles
      case (1)
         call cgyro_info('ExB shear: Hammett discrete shift (do not use for production simulations)') 
      case (2)
-        call cgyro_info('ExB shear: Wavenumber advection') 
+        call cgyro_info('ExB shear: Wavenumber advection (h)') 
+        source_flag = 1
+     case (3)
+        call cgyro_info('ExB shear: Wavenumber advection (H)') 
         source_flag = 1
      case default
         call cgyro_error('Unknown ExB shear method') 
@@ -429,12 +432,13 @@ subroutine cgyro_make_profiles
      call cgyro_info('ExB shear: OFF') 
   endif
 
-  if (profile_shear_flag == 1) then
-     call cgyro_info('Profile shear: Wavenumber advection') 
+  if (global_flag == 1) then
+     call cgyro_info('Global profile variation: ON') 
      source_flag = 1
   else
      sdlnndr(1:n_species) = 0.0
      sdlntdr(1:n_species) = 0.0
+     sbeta(1:n_species)   = 0.0
   endif
 
 

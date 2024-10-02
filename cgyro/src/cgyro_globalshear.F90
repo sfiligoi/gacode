@@ -16,7 +16,7 @@ subroutine cgyro_globalshear(ij)
   integer :: ir,l,ll,j,iccj,ivc,itor,llnt
   complex :: rl,h1,h2
 
-  if (nonlinear_flag == 0) return
+  if (nonlinear_flag == 0 .or. source_flag == 0) return
 
   call timer_lib_in('shear')
 
@@ -26,7 +26,7 @@ subroutine cgyro_globalshear(ij)
 #elif defined(_OPENACC)
 !$acc parallel loop collapse(4) gang vector &
 !$acc&         private(ivc,ir,l,iccj,j,ll,rl,llnt,h1,h2) &
-!$acc&         present(rhs(:,:,:,ij),omega_ss,omega_sbeta,field,h_x,cap_h_c,c_wave)
+!$acc&         present(rhs(:,:,:,ij),omega_ss,omega_sbeta,field,cap_h_c,c_wave)
 #else
 !$omp parallel do collapse(4) private(ivc,ir,l,iccj,j,ll,rl,llnt,h1,h2)
 #endif
@@ -48,22 +48,22 @@ subroutine cgyro_globalshear(ij)
 
                  if ( (ir+ll) <= n_radial ) then
                     ! ExB shear
-                    h1 = omega_eb_base*itor*h_x(iccj+llnt,ivc,itor)
-                    ! omega_star shear
-                    h1 = h1-sum(omega_ss(:,iccj+llnt,ivc,itor)*field(:,iccj+llnt,itor))
+                    h1 = omega_eb_base*itor*cap_h_c(iccj+llnt,ivc,itor)
                     ! beta_star shear
                     h1 = h1-omega_sbeta(iccj+llnt,ivc,itor)*cap_h_c(iccj+llnt,ivc,itor)
+                    ! omega_star shear
+                    h1 = h1-sum(omega_ss(:,iccj+llnt,ivc,itor)*field(:,iccj+llnt,itor))
                  else
                     h1 = 0.0
                  endif
                 
                  if ( (ir-ll) >= 1 ) then
                     ! ExB shear
-                    h2 = omega_eb_base*itor*h_x(iccj-llnt,ivc,itor)
-                    ! omega_star shear
-                    h2 = h2-sum(omega_ss(:,iccj-llnt,ivc,itor)*field(:,iccj-llnt,itor))
+                    h2 = omega_eb_base*itor*cap_h_c(iccj-llnt,ivc,itor)
                     ! beta_star shear
                     h2 = h2-omega_sbeta(iccj-llnt,ivc,itor)*cap_h_c(iccj-llnt,ivc,itor)
+                    ! omega_star shear
+                    h2 = h2-sum(omega_ss(:,iccj-llnt,ivc,itor)*field(:,iccj-llnt,itor))
                  else
                     h2 = 0.0
                  endif

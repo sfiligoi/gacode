@@ -336,10 +336,14 @@ subroutine cgyro_rhs(ij,update_cap)
   call cgyro_rhs_comm_test
 
   ! Wavenumber advection shear terms
-  ! depends on h_x and field only, updates rhs
-  call cgyro_advect_wavenumber(ij)
-  !call cgyro_globalshear(ij)
-
+  if (shear_method == 2) then
+     ! s* Phi + gamma_E h
+     call cgyro_advect_wavenumber(ij)
+  else if (shear_method == 3) then
+     ! s* Phi + (gamma_E + sbeta) H     
+     call cgyro_globalshear(ij)
+  endif
+     
   call cgyro_rhs_comm_test
 
   ! Nonlinear evaluation [f,g]

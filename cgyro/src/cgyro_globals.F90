@@ -91,10 +91,10 @@ module cgyro_globals
   integer :: hiprec_flag
   integer :: udsymmetry_flag
   integer :: shear_method
+  integer :: global_flag
   integer :: n_global
   real    :: nu_global
   integer :: psym_flag
-  integer :: profile_shear_flag
   integer :: theta_plot
   integer :: gpu_bigmem_flag
   integer :: upwind_single_flag
@@ -138,7 +138,7 @@ module cgyro_globals
   real, dimension(11) :: dlntdr
   real, dimension(11) :: sdlnndr
   real, dimension(11) :: sdlntdr
-  real, dimension(11) :: sbeta_star
+  real, dimension(11) :: sbeta
 
   integer :: subroutine_flag  ! only used for cgyro_read_input
 

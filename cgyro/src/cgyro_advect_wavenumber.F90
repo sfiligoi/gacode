@@ -16,10 +16,9 @@ subroutine cgyro_advect_wavenumber(ij)
   integer :: ir,l,ll,j,iccj,ivc,itor,llnt
   complex :: rl,he1,he2
 
-  if (nonlinear_flag == 0) return
+  if (nonlinear_flag == 0 .or. source_flag == 0) return
 
-  if (source_flag == 1) then
-     call timer_lib_in('shear')
+  call timer_lib_in('shear')
 
 #if defined(OMPGPU)
 !$omp target teams distribute parallel do simd collapse(4) &
@@ -31,14 +30,14 @@ subroutine cgyro_advect_wavenumber(ij)
 #else
 !$omp parallel do collapse(4) private(ivc,ir,l,iccj,j,ll,rl,llnt,he1,he2)
 #endif
-     do itor=nt1,nt2
-      do ivc=1,nv_loc
-       do ir=1,n_radial
-         do j=1,n_theta
-           iccj = (ir-1)*n_theta+j
+  do itor=nt1,nt2
+     do ivc=1,nv_loc
+        do ir=1,n_radial
+           do j=1,n_theta
+              iccj = (ir-1)*n_theta+j
 
-           ! Wavenumber advection ExB shear
-           if (shear_method == 2) then
+              ! Wavenumber advection ExB shear
+              if (shear_method == 2) then
                  rl = 0.0
 #if (!defined(OMPGPU)) && defined(_OPENACC)
 !$acc loop seq
@@ -63,10 +62,10 @@ subroutine cgyro_advect_wavenumber(ij)
                     rl = rl+c_wave(l)*(he1-he2)
                  enddo
                  rhs(iccj,ivc,itor,ij) = rhs(iccj,ivc,itor,ij) + omega_eb_base*itor*rl
-           endif
+              endif
 
-           ! Wavenumber advection profile shear
-           if (profile_shear_flag == 1) then
+              ! Wavenumber advection profile shear
+              if (global_flag == 1) then
                  iccj = (ir-1)*n_theta+j
                  rl = rhs(iccj,ivc,itor,ij)
 #if (!defined(OMPGPU)) && defined(_OPENACC)
@@ -91,14 +90,12 @@ subroutine cgyro_advect_wavenumber(ij)
                     rl = rl-c_wave(l)*(he1-he2)
                  enddo
                  rhs(iccj,ivc,itor,ij) = rl
-           endif
-         enddo
-       enddo
-      enddo
+              endif
+           enddo
+        enddo
      enddo
+  enddo
 
-     call timer_lib_out('shear')
-
-  endif
+  call timer_lib_out('shear')
 
 end subroutine cgyro_advect_wavenumber
