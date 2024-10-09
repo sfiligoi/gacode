@@ -335,12 +335,8 @@ subroutine cgyro_rhs(ij,update_cap)
 
   call cgyro_rhs_comm_test
 
-  ! Wavenumber advection shear terms
-  if (shear_method == 2) then
-     ! s* Phi + gamma_E h
-     call cgyro_advect_wavenumber(ij)
-  else if (shear_method == 3) then
-     ! s* Phi + (gamma_E + sbeta) H     
+  ! Wavenumber advection (ExB shear and/or global) terms
+  if (source_flag == 1) then
      call cgyro_globalshear(ij)
   endif
      

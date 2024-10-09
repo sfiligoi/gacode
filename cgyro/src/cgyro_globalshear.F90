@@ -19,14 +19,14 @@ subroutine cgyro_globalshear(ij)
   if (nonlinear_flag == 0 .or. source_flag == 0) return
 
   call timer_lib_in('shear')
-
+  
 #if defined(OMPGPU)
 !$omp target teams distribute parallel do simd collapse(4) &
 !$omp&         private(ivc,ir,l,iccj,j,ll,rl,llnt,h1,h2)
 #elif defined(_OPENACC)
 !$acc parallel loop collapse(4) gang vector &
 !$acc&         private(ivc,ir,l,iccj,j,ll,rl,llnt,h1,h2) &
-!$acc&         present(rhs(:,:,:,ij),omega_ss,omega_sbeta,field,cap_h_c,c_wave)
+!$acc&         present(rhs(:,:,:,ij),omega_ss,omega_sbeta,field,cap_h_c,h_x,c_wave)
 #else
 !$omp parallel do collapse(4) private(ivc,ir,l,iccj,j,ll,rl,llnt,h1,h2)
 #endif
@@ -48,7 +48,11 @@ subroutine cgyro_globalshear(ij)
 
                  if ( (ir+ll) <= n_radial ) then
                     ! ExB shear
-                    h1 = omega_eb_base*itor*cap_h_c(iccj+llnt,ivc,itor)
+                    if (shear_method == 3) then
+                       h1 = omega_eb_base*itor*cap_h_c(iccj+llnt,ivc,itor)
+                    else
+                       h1 = omega_eb_base*itor*h_x(iccj+llnt,ivc,itor)
+                    endif
                     ! beta_star shear
                     h1 = h1-omega_sbeta(iccj+llnt,ivc,itor)*cap_h_c(iccj+llnt,ivc,itor)
                     ! omega_star shear
@@ -59,7 +63,11 @@ subroutine cgyro_globalshear(ij)
                 
                  if ( (ir-ll) >= 1 ) then
                     ! ExB shear
-                    h2 = omega_eb_base*itor*cap_h_c(iccj-llnt,ivc,itor)
+                    if (shear_method == 3) then                    
+                       h2 = omega_eb_base*itor*cap_h_c(iccj-llnt,ivc,itor)
+                    else
+                       h2 = omega_eb_base*itor*h_x(iccj-llnt,ivc,itor)
+                    endif
                     ! beta_star shear
                     h2 = h2-omega_sbeta(iccj-llnt,ivc,itor)*cap_h_c(iccj-llnt,ivc,itor)
                     ! omega_star shear
