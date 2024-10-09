@@ -30,7 +30,7 @@ subroutine cgyro_advect_wavenumber(ij)
 !$acc&         present(rhs(:,:,:,ij),omega_ss,field,h_x,c_wave)
 #else
 !$omp parallel do collapse(3) private(ivc,ir,l,iccj,j,ll,rl,rh,llnt,he1,he2) &
-!$omp&            firstprivate(shear_method,profile_shear_flag)
+!$omp&            firstprivate(shear_method,global_flag)
 #endif
      do itor=nt1,nt2
       do ivc=1,nv_loc
@@ -68,7 +68,7 @@ subroutine cgyro_advect_wavenumber(ij)
            endif
 
            ! Wavenumber advection profile shear
-           if (profile_shear_flag == 1) then
+           if (global_flag == 1) then
                  iccj = (ir-1)*n_theta+j
 #if (!defined(OMPGPU)) && defined(_OPENACC)
 !$acc loop seq
