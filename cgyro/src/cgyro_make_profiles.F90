@@ -428,7 +428,6 @@ subroutine cgyro_make_profiles
      end select
   else
      omega_eb_base = 0.0
-     shear_method = 0
      call cgyro_info('ExB shear: OFF') 
   endif
 
