@@ -182,7 +182,7 @@ def frame():
        ax.set_ylabel("Z/a")
        ax.set_xlabel("R/a")
    else:
-      mlab.figure(size=(900,900),bgcolor=(1,1,1))
+      mlab.figure(size=(350,500),bgcolor=(1,1,1))
 
    if isfield:
       c = a[0,:,:,:]+1j*a[1,:,:,:]
@@ -213,6 +213,7 @@ def frame():
        # View from positive z-axis
        mlab.view(azimuth=0, elevation=0)
 
+
    print('INFO: (vis_torcut) min={:.3E} | max={:.3E}'.format(f0,f1))
    
    if ftype == 'screen':
@@ -226,7 +227,7 @@ def frame():
            plt.close("all")
        else:
           # Filename uses frame number 
-          mlab.savefig(pre+str(i)+'.'+ftype)
+          mlab.savefig(pre+str(i)+'.'+ftype,magnification=2)
           # Close each time to prevent memory accumulation
           mlab.close()
                
