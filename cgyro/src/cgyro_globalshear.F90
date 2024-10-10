@@ -28,7 +28,8 @@ subroutine cgyro_globalshear(ij)
 !$acc&         private(ivc,ir,l,iccj,j,ll,rl,llnt,h1,h2) &
 !$acc&         present(rhs(:,:,:,ij),omega_ss,omega_sbeta,field,cap_h_c,h_x,c_wave)
 #else
-!$omp parallel do collapse(4) private(ivc,ir,l,iccj,j,ll,rl,llnt,h1,h2)
+!$omp parallel do collapse(3) private(ivc,ir,l,iccj,j,ll,rl,llnt,h1,h2)
+!$omp&         firstprivate(shear_method)
 #endif
   do itor=nt1,nt2
      do ivc=1,nv_loc
