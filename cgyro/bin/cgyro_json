@@ -28,26 +28,36 @@ for i in range(sim.n_species):
 
 d = {}
 
+with open('/home/candy/GIT/gacode/cgyro/bin/input.json','r') as file:
+   default = json.load(file)
+   
+# Determine non-default values in input.cgyro
+with open('input.cgyro.gen','r') as file:
+   for line in file:
+      u = line.split()
+      key = u[1]
+      value = u[0]
+      if key in default.keys():
+         if str(value) != str(default[key]):
+            d[key] = value
+
 # Code-specific parameters
+d['N_ENERGY'] = sim.n_energy
+d['N_XI'] = sim.n_xi
 d['N_THETA'] = sim.n_theta
-d['N_RADIAL'] = sim.n_theta
+d['N_RADIAL'] = sim.n_radial
+d['N_TOROIDAL'] = sim.n_n
+d['N_FIELD'] = sim.n_field
 
 # Physics parameters
 d['RMIN'] = sim.rmin
 d['RMAJ'] = sim.rmaj
 d['Q'] = sim.q
-d['SHEAR'] = sim.shear
+d['S'] = sim.shear
 d['MACH'] = sim.mach
 d['GAMMA_E'] = sim.gamma_e
 d['GAMMA_P'] = sim.gamma_p
 d['BETAE_UNIT'] = sim.betae_unit
-
-d['Z'] = sim.z[:].tolist()
-d['MASS'] = sim.mass[:].tolist()
-d['DENS'] = sim.dens[:].tolist()
-d['TEMP'] = sim.temp[:].tolist()
-d['DLNNDR'] = sim.dlnndr[:].tolist()
-d['DLNTDR'] = sim.dlntdr[:].tolist()
 
 d['ZMAG'] = sim.zmag
 d['DZMAG'] = sim.dzmag
@@ -60,8 +70,14 @@ d['ZETA'] = sim.zeta
 d['S_ZETA'] = sim.s_zeta
 
 d['SHAPE_SIN'] = sim.shape_sin[:].tolist()
-
 d['SHAPE_COS'] = sim.shape_cos[:].tolist()
+
+d['Z'] = sim.z[:].tolist()
+d['MASS'] = sim.mass[:].tolist()
+d['DENS'] = sim.dens[:].tolist()
+d['TEMP'] = sim.temp[:].tolist()
+d['DLNNDR'] = sim.dlnndr[:].tolist()
+d['DLNTDR'] = sim.dlntdr[:].tolist()
 
 # JSON output
 with open('json.cgyro.localdump','w') as f:
@@ -129,6 +145,10 @@ d['velocity_tor_gradient_norm'] = lref/vthref*sim.gamma_p
 d['collisionality_norm'] = (lref/vthref)*sim.nu[ielec]
 # electron beta
 d['beta_reference'] = sim.betae_unit/bref**2
+# pressure gradient
+d['pressure_gradient_norm'] = -lref*sim.beta_star/bref**2
+# Debye length (normalized to lref)
+d['debye_length_reference'] = sim.lambda_star*sim.rho_star_norm/lref
 #-----------------------------------------------------------------------
 
 #-----------------------------------------------------------------------
@@ -143,14 +163,14 @@ d['delongation_dr_minor_norm'] = sim.s_kappa*sim.kappa*lref/sim.rmin
 # Shape coefficients (cn,sn)
 d['shapecoefficients_c'] = sim.shape_cos[:nmax].tolist()
 d['shapecoefficients_s'] = sim.shape_sin[:nmax].tolist()
-d['shapecoefficients_s'][1] = np.arcsin(sim.delta)
-d['shapecoefficients_s'][2] = -sim.zeta
+#d['shapecoefficients_s'][1] = np.arcsin(sim.delta)
+#d['shapecoefficients_s'][2] = -sim.zeta
 
 # Derivatives of (cn,sn)
 d['dc_dr_minor_norm'] = (sim.shape_s_cos[:nmax]*lref/sim.rmin).tolist()
 d['ds_dr_minor_norm'] = (sim.shape_s_sin[:nmax]*lref/sim.rmin).tolist()
-d['ds_dr_minor_norm'][1] = sim.s_delta*lref/sim.rmin/np.cos(np.arcsin(sim.delta))
-d['ds_dr_minor_norm'][2] = -sim.s_zeta*lref/sim.rmin 
+#d['ds_dr_minor_norm'][1] = sim.s_delta*lref/sim.rmin/np.cos(np.arcsin(sim.delta))
+#d['ds_dr_minor_norm'][2] = -sim.s_zeta*lref/sim.rmin 
 #-----------------------------------------------------------------------
 
 with open('json.cgyro.imas','w') as f:
