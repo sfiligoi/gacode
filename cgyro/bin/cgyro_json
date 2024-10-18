@@ -37,8 +37,8 @@ with open('input.cgyro.gen','r') as file:
       u = line.split()
       key = u[1]
       value = u[0]
-      if key in default.keys():
-         if str(value) != str(default[key]):
+      if key in default.keys() and 'SHAPE' not in key:
+         if str(value) != str(default[key]): 
             d[key] = value
 
 # Code-specific parameters
@@ -71,6 +71,8 @@ d['S_ZETA'] = sim.s_zeta
 
 d['SHAPE_SIN'] = sim.shape_sin[:].tolist()
 d['SHAPE_COS'] = sim.shape_cos[:].tolist()
+d['SHAPE_S_SIN'] = sim.shape_s_sin[:].tolist()
+d['SHAPE_S_COS'] = sim.shape_s_cos[:].tolist()
 
 d['Z'] = sim.z[:].tolist()
 d['MASS'] = sim.mass[:].tolist()
@@ -92,15 +94,18 @@ with open('out.cgyro.localdump','w') as f:
    for key in d:
       x = d[key]
       if 'SHAPE' in key:
+         # shape parameter
          for i in range(len(x)):
             if not x[i] == 0.0:
-               f.write(key+'_'+str(i)+'='+str(x[i])+'\n')
+               f.write(key+str(i)+'='+str(x[i])+'\n')
                if i > nmax:
                   nmax = i
       elif isinstance(x,list):
+         # species parameter
          for i in range(len(x)):
             f.write(key+'_'+str(i+1)+'='+str(x[i])+'\n')
       else:
+         # standard scalar parameter
          f.write(key+'='+str(x)+'\n')
          
 #==================================================================

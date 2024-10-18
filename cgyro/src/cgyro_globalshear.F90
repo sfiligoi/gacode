@@ -22,14 +22,14 @@ subroutine cgyro_globalshear(ij)
   
 #if defined(OMPGPU)
 !$omp target teams distribute parallel do simd collapse(4) &
-!$omp&         private(ivc,ir,l,iccj,j,ll,rl,llnt,h1,h2)
+!$omp private(ivc,ir,l,iccj,j,ll,rl,llnt,h1,h2)
 #elif defined(_OPENACC)
 !$acc parallel loop collapse(4) gang vector &
-!$acc&         private(ivc,ir,l,iccj,j,ll,rl,llnt,h1,h2) &
-!$acc&         present(rhs(:,:,:,ij),omega_ss,omega_sbeta,field,cap_h_c,h_x,c_wave)
+!$acc private(ivc,ir,l,iccj,j,ll,rl,llnt,h1,h2) &
+!$acc present(rhs(:,:,:,ij),omega_ss,omega_sbeta,field,cap_h_c,h_x,c_wave)
 #else
-!$omp parallel do collapse(3) private(ivc,ir,l,iccj,j,ll,rl,llnt,h1,h2)
-!$omp&         firstprivate(shear_method)
+!$omp parallel do collapse(3) private(ivc,ir,l,iccj,j,ll,rl,llnt,h1,h2) &
+!$omp firstprivate(shear_method)
 #endif
   do itor=nt1,nt2
      do ivc=1,nv_loc
