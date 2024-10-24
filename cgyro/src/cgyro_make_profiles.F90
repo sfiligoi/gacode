@@ -416,12 +416,9 @@ subroutine cgyro_make_profiles
      omega_eb_base = k_theta_base*length*gamma_e/(2*pi)
      select case (shear_method)
      case (1)
-        call cgyro_info('ExB shear: Hammett discrete shift (do not use for production simulations)') 
+        call cgyro_info('ExB shear: Hammett discrete shift (WARNING: TESTING PURPOSES ONLY)') 
      case (2)
-        call cgyro_info('ExB shear: Wavenumber advection (h)') 
-        source_flag = 1
-     case (3)
-        call cgyro_info('ExB shear: Wavenumber advection (H)') 
+        call cgyro_info('ExB shear: Wavenumber advection') 
         source_flag = 1
      case default
         call cgyro_error('Unknown ExB shear method') 

@@ -28,8 +28,7 @@ subroutine cgyro_globalshear(ij)
 !$acc private(ivc,ir,l,iccj,j,ll,rl,llnt,h1,h2) &
 !$acc present(rhs(:,:,:,ij),omega_ss,omega_sbeta,field,cap_h_c,h_x,c_wave)
 #else
-!$omp parallel do collapse(3) private(ivc,ir,l,iccj,j,ll,rl,llnt,h1,h2) &
-!$omp firstprivate(shear_method)
+!$omp parallel do collapse(3) private(ivc,ir,l,iccj,j,ll,rl,llnt,h1,h2) 
 #endif
   do itor=nt1,nt2
      do ivc=1,nv_loc
@@ -49,11 +48,7 @@ subroutine cgyro_globalshear(ij)
 
                  if ( (ir+ll) <= n_radial ) then
                     ! ExB shear
-                    if (shear_method == 3) then
-                       h1 = omega_eb_base*itor*cap_h_c(iccj+llnt,ivc,itor)
-                    else
-                       h1 = omega_eb_base*itor*h_x(iccj+llnt,ivc,itor)
-                    endif
+                    h1 = omega_eb_base*itor*h_x(iccj+llnt,ivc,itor)
                     ! beta_star shear
                     h1 = h1-omega_sbeta(iccj+llnt,ivc,itor)*cap_h_c(iccj+llnt,ivc,itor)
                     ! omega_star shear
@@ -64,11 +59,7 @@ subroutine cgyro_globalshear(ij)
                 
                  if ( (ir-ll) >= 1 ) then
                     ! ExB shear
-                    if (shear_method == 3) then                    
-                       h2 = omega_eb_base*itor*cap_h_c(iccj-llnt,ivc,itor)
-                    else
-                       h2 = omega_eb_base*itor*h_x(iccj-llnt,ivc,itor)
-                    endif
+                    h2 = omega_eb_base*itor*h_x(iccj-llnt,ivc,itor)
                     ! beta_star shear
                     h2 = h2-omega_sbeta(iccj-llnt,ivc,itor)*cap_h_c(iccj-llnt,ivc,itor)
                     ! omega_star shear
