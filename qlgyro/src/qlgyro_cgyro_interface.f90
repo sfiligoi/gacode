@@ -87,7 +87,7 @@ module qlgyro_cgyro_interface
   integer :: cgyro_n_global_in = 4
   real :: cgyro_nu_global_in = 15.0
   integer :: cgyro_psym_flag_in = 0
-  integer :: cgyro_profile_shear_flag_in = 0
+  integer :: cgyro_global_flag_in = 0
   integer :: cgyro_theta_plot_in = 1
   integer :: cgyro_gpu_bigmem_flag_in = 1
   integer :: cgyro_upwind_single_flag_in = 0
@@ -283,7 +283,7 @@ contains
     cgyro_n_global_in = n_global
     cgyro_nu_global_in = nu_global
     cgyro_psym_flag_in = psym_flag
-    cgyro_profile_shear_flag_in = profile_shear_flag
+    cgyro_global_flag_in = global_flag
     cgyro_theta_plot_in = theta_plot
     cgyro_gpu_bigmem_flag_in = gpu_bigmem_flag
     cgyro_upwind_single_flag_in = upwind_single_flag
@@ -482,7 +482,7 @@ contains
     n_global = cgyro_n_global_in
     nu_global = cgyro_nu_global_in
     psym_flag = cgyro_psym_flag_in
-    profile_shear_flag = cgyro_profile_shear_flag_in
+    global_flag = cgyro_global_flag_in
     theta_plot = cgyro_theta_plot_in
     gpu_bigmem_flag = cgyro_gpu_bigmem_flag_in
     px0 = cgyro_px0_in
