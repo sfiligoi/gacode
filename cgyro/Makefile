@@ -12,6 +12,7 @@ export EXTRA_LIBS = \
 all:
 	gacode_getversion > .VERSION
 	cd ${GACODE_ROOT}/shared/math ; make
+	cd ${GACODE_ROOT}/shared/landau ; make
 	cd ${GACODE_ROOT}/f2py ; make
 	cd src  && make
 
@@ -27,6 +28,7 @@ clean:
 
 deepclean:
 	cd ${GACODE_ROOT}/shared/math ; make clean
+	cd ${GACODE_ROOT}/shared/landau ; make clean
 	cd ${GACODE_ROOT}/f2py ; make clean
 	cd ${GACODE_ROOT}/modules ; rm -f cgyro*.mod
 	cd src && make clean

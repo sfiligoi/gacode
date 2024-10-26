@@ -11,7 +11,6 @@ subroutine gyro_make_jpar_elec(i_print)
   use mpi
   use gyro_globals
   use gyro_pointers
-  use math_constants
 
   !---------------------------------------------------
   implicit none
@@ -88,7 +87,7 @@ subroutine gyro_make_jpar_elec(i_print)
 
   if (i_print == 1) then
 
-     d_theta = pi_2/n_blend
+     d_theta = 2*pi/n_blend
 
      do i=1,n_x
         print *,i

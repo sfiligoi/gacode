@@ -15,9 +15,9 @@ FC += ${FOMP} ${FACC}
 EXEC = cgyro
 
 OBJECTS = cgyro_globals.o \
-	  cgyro_timer_lib.o \
 	  cgyro_math.o \
 	  cgyro_globals_math.o \
+	  cgyro_timer_lib.o \
           cgyro_parallel_lib.o \
           cgyro_step.o \
           cgyro_io.o \
@@ -32,12 +32,13 @@ OBJECTS = cgyro_globals.o \
           cgyro_field_coefficients.o \
           cgyro_flux.o \
           cgyro_freq.o \
-          cgyro_global.o \
+          cgyro_globalshear.o \
           cgyro_upwind.o \
           cgyro_init.o \
           cgyro_init_h.o \
           cgyro_init_arrays.o \
 	  cgyro_init_collision_simple.o \
+	  cgyro_init_collision_landau.o \
           cgyro_init_collision.o \
           cgyro_init_manager.o \
 	  cgyro_init_kernel.o \
@@ -61,7 +62,9 @@ OBJECTS = cgyro_globals.o \
           cgyro_write_initdata.o \
           cgyro_write_timedata.o \
           cgyro_write_hosts.o \
-          cgyro_zftest_em.o 
+          cgyro_zftest_em.o \
+	  ${GACODE_ROOT}/shared/landau/landau.o \
+	  ${GACODE_ROOT}/shared/landau/gyrotransformation.o
 
 .SUFFIXES : .o .f90 .F90
 

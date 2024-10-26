@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Comment Information
-TITLE="CGYRO Turbulence"
+TITLE="CGYRO TEAM"
 TIMESTAMP=`date -Iseconds`
 
 START=$1
@@ -10,7 +10,7 @@ QUALITY=$3
 PRE=$4
 
 # Main movie definitions
-BASENAME=$PRE%d.png
+BASENAME=$PRE%d.jpg
 OUT=${PRE}movie.mp4
 
 if hash avconv 2>/dev/null ; then

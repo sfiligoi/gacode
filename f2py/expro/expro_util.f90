@@ -30,6 +30,7 @@ subroutine expro_compute_derived
   double precision :: eps0,m0,ipma
   double precision :: bt2_ave
   double precision :: bp2_ave
+  
 
   mp = expro_mass_deuterium/2d0  ! mass_deuterium/2.0 (g)
 
@@ -136,7 +137,7 @@ subroutine expro_compute_derived
   call bound_deriv(expro_dlntedr,-log(expro_te),expro_rmin,expro_n_exp)
 
   ! NOTE: expro_sdln* will be renormalized after calculation of rhos later
-
+  
   ! sne = -ne''/ne (1/m^2) [not fully normalized yet]
   call bound_deriv(expro_sdlnnedr,expro_ne*expro_dlnnedr,expro_rmin,expro_n_exp)
   expro_sdlnnedr = expro_sdlnnedr/expro_ne
@@ -314,7 +315,6 @@ subroutine expro_compute_derived
   expro_vol(1)  = 0d0
   expro_volp(1) = 0d0  
   expro_thetascale(1) = expro_thetascale(2)
-
   !--------------------------------------------------------------
 
   !-----------------------------------------------------------------
@@ -331,7 +331,7 @@ subroutine expro_compute_derived
   !-----------------------------------------------------------------
 
   !-----------------------------------------------------------------
-  ! Renormalize shearing parameters
+  ! Renormalize curvatures
   !
   ! sn = -n''/n*rhos (1/m) 
   ! sT = -T''/T*rhos (1/m)

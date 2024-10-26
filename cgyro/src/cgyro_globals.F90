@@ -62,6 +62,9 @@ module cgyro_globals
   integer :: collision_field_model
   integer :: collision_ion_model
   integer :: collision_precision_mode
+  integer :: collision_test_mode
+  integer :: collision_field_max_l
+  integer :: collision_test_max_l
   real    :: z_eff
   integer :: z_eff_method
   integer :: zf_test_mode 
@@ -135,6 +138,7 @@ module cgyro_globals
   real, dimension(11) :: dlntdr
   real, dimension(11) :: sdlnndr
   real, dimension(11) :: sdlntdr
+  real, dimension(11) :: sbeta_star
 
   integer :: subroutine_flag  ! only used for cgyro_read_input
 
@@ -348,6 +352,7 @@ module cgyro_globals
   complex, dimension(:,:,:), allocatable :: omega_cap_h
   complex, dimension(:,:,:), allocatable :: omega_h
   complex, dimension(:,:,:,:), allocatable :: omega_s,omega_ss
+  complex, dimension(:,:,:), allocatable :: omega_sbeta
   complex, dimension(:,:,:), allocatable :: cap_h_c
   complex, dimension(:,:,:), allocatable :: cap_h_c_dot
   complex, dimension(:,:,:), allocatable :: cap_h_c_old

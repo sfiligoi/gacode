@@ -12,7 +12,6 @@
 subroutine gyro_build_sparse_poisson
 
   use gyro_globals
-  use math_constants
   use gyro_poisson_private
 
   !------------------------

@@ -21,7 +21,6 @@ subroutine gyro_moments_plot
   use mpi
   use gyro_globals
   use gyro_pointers
-  use math_constants
   use ompdata
 
   !---------------------------------------------------

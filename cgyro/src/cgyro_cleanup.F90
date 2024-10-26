@@ -67,6 +67,7 @@ subroutine cgyro_cleanup
   if(allocated(k_x))            deallocate(k_x)
   if(allocated(bigr))           deallocate(bigr)
   if(allocated(bigr_r))         deallocate(bigr_r)
+  if(allocated(captheta))       deallocate(captheta)
   if(allocated(itp))            deallocate(itp)
   if(allocated(omega_stream))   then
      ccl_del_device(omega_stream)
@@ -195,6 +196,10 @@ subroutine cgyro_cleanup
   if(allocated(omega_ss)) then
      ccl_del_device(omega_ss)        
      deallocate(omega_ss)
+  endif
+  if(allocated(omega_sbeta)) then
+     ccl_del_device(omega_sbeta)        
+     deallocate(omega_sbeta)
   endif
   if(allocated(jvec_c))  then
      ccl_del_device(jvec_c)     

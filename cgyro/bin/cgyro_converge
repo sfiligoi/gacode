@@ -1,0 +1,116 @@
+#!/usr/bin/env python
+
+import numpy as np
+import os
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+
+from pygacode.cgyro import data
+from pygacode.gacodefuncs import *
+
+
+# --- to visualize results for one case plot=True------
+plot=True
+
+if plot:
+    directory='./'
+    write_output=False
+else:
+    directory= "/global/cfs/cdirs/cgyrodb/"
+    write_output=True
+    fout = "./cases_results_20%.txt"
+    fo = open(fout, "w")
+
+
+for path, folders, files in os.walk(directory):
+    # Open file#
+    for filename in files:
+      if 'out.cgyro.info' in filename:
+        if write_output:          
+           fo.write(f"#-----{path}-----#")
+        # read minimal data for setup (look in current directory)
+        sim = data.cgyrodata(f'{path}/',fast=True,silent=True)
+
+        # copy time vector and number of species
+        t = sim.t
+        ns = sim.n_species
+        linestyles=['-','--',':','-.']
+        # read bin.cgyro.ky_flux
+        sim.getflux()
+
+
+        # Simulation length (max time)
+        tmax = t[-1]
+        
+    
+
+
+        # size and number of time windows
+        #dt = 50.0
+        #nwin = int(tmax/dt)
+        nwin=8
+        dt=tmax/nwin
+        t0 = tmax-nwin*dt
+        
+
+        if plot:
+         #add plot for visualization
+         fig = plt.figure(figsize=(12,6))
+
+         plt.xlabel('time [$c_s$/a]')
+         plt.ylabel('Flux')
+         colors = mpl.cm.rainbow(np.linspace(0, 1, nwin))
+        
+
+        convergance = True
+
+        # select field=0 (phi), moment=1 (Q), species (0), and sum over kx
+        for species_index in range(ns):
+          field=0 ; moment=1 ; 
+          species=species_index
+          y = np.sum(sim.ky_flux[species,moment,field,:,:],axis=0)
+
+          if plot:
+           plt.plot(t,y, label=f"Q_{species_index}", linestyle=linestyles[species_index], color=colors[species_index])
+
+          average_array=[]
+
+         # averaging over all windows (note that time_average function is fast/optimized)
+          for i in range(nwin):
+            w=str(tmax-(i+1)*dt)+','+str(tmax-i*dt)
+
+            imin,imax=time_index(t,w)               
+            
+            ave = time_average(y[:],t,imin,imax)
+            average_array.append(ave)
+            if plot:
+              plt.hlines(y=ave, xmin=t[imin], xmax=t[imax], color=colors[i], lw=3, linestyle=linestyles[species_index])
+
+            
+
+
+
+        
+        
+        # define the convergence by std between last free averaged regions as a pesentage to the total
+
+          if np.std(average_array[:3]/np.mean(average_array[:3])) > 0.2:
+            convergance = False
+       
+        if convergance:
+            if write_output:
+              fo.write("TRUE \n")
+            else:
+               plt.title('Converged')
+        else:
+            if write_output:
+              fo.write("FALSE \n")
+            else:
+              plt.title("Didn't converge")
+  
+        if plot:
+          plt.legend()
+          plt.show()
+
+    
+

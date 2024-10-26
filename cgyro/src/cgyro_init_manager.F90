@@ -250,6 +250,7 @@ subroutine cgyro_init_manager
      allocate(omega_h(nc,nv_loc,nt1:nt2))
      allocate(omega_s(n_field,nc,nv_loc,nt1:nt2))
      allocate(omega_ss(n_field,nc,nv_loc,nt1:nt2))
+     allocate(omega_sbeta(nc,nv_loc,nt1:nt2))
      allocate(jvec_c(n_field,nc,nv_loc,nt1:nt2))
      allocate(jvec_v(n_field,nc_loc,nt1:nt2,nv))
      allocate(dvjvec_c(n_field,nc,nv_loc,nt1:nt2))
@@ -257,7 +258,7 @@ subroutine cgyro_init_manager
      allocate(jxvec_c(n_field,nc,nv_loc,nt1:nt2))
      allocate(upfac1(nc,nv_loc,nt1:nt2))
      allocate(upfac2(nc,nv_loc,nt1:nt2))
-
+     
 #if defined(OMPGPU)
 !$omp target enter data map(alloc:cap_h_c,cap_h_ct,cap_h_c_dot,cap_h_c_old,cap_h_c_old2)
 !$omp target enter data map(alloc:cap_h_v,dvjvec_c,dvjvec_v)

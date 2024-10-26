@@ -15,19 +15,19 @@ NUMAS_PER_NODE=2
 
 # Compilers and flags
 
-FC     = mpiifort -mod ${GACODE_ROOT}/modules -I ${GACODE_ROOT}/modules
+FC     = mpiifort -module ${GACODE_ROOT}/modules
 F77    = ${FC}
 
 FOMP   = -qopenmp
 FMATH  = -r8
-FOPT   = -xhost -implicitnone -no-prec-div -O3 -fp-model fast=2 -pad -ip -qoverride-limits -mkl=sequential#-fast -no-ipo
+FOPT   = -xhost -implicitnone -no-prec-div -O3 -fp-model fast=2 -pad -ipo -qoverride-limits #-ip -no-ipo
 FDEBUG = -shared-intel -implicitnone -check all -check noarg_temp_created -traceback
 #FPETSC = 
 F2PY  = f2py
 
 # System math libraries
 
-LMATH =  
+LMATH = -L${GSL_LIB} -mkl=sequential
 #       -L${FFTW_DIR}/lib -lfftw3_threads -lfftw3f_threads -lfftw3 -lfftw3f -mkl=cluster
 #       -L${FFTW_DIR}/lib -lfftw3_threads -lfftw3 -mkl=cluster
 

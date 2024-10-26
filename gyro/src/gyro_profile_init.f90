@@ -27,7 +27,6 @@ subroutine gyro_profile_init
 
   use gyro_globals
   use gyro_profile_exp
-  use math_constants
 
   !---------------------------------------------------
   implicit none
@@ -621,12 +620,12 @@ subroutine gyro_profile_init
   ! Calculation of phase
   !
   do i=1,n_x
-     phase(in_1,i) = exp(-pi_2*i_c*n_1(in_1)*q(i))
+     phase(in_1,i) = exp(-2*pi*i_c*n_1(in_1)*q(i))
      angp(i) = n_1(in_1)*q(i)-int(n_1(in_1)*q(i))
      if (angp(i) > 0.5) angp(i) = angp(i)-1.0
   enddo
   !-------------------------------------------------------------
-     
+
   if (debug_flag == 1 .and. i_proc == 0) then
      print *,"[gyro_profile_init done]"
   endif

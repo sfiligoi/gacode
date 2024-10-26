@@ -2,7 +2,7 @@
 ! cgyro_advect_wavenumber.f90
 !
 ! PURPOSE:
-!  Manage shearing by wavenumber advection.
+!  Manage shearing by wavenumber advection (legacy method)
 !---------------------------------------------------------
 
 subroutine cgyro_advect_wavenumber(ij)
@@ -14,7 +14,7 @@ subroutine cgyro_advect_wavenumber(ij)
 
   integer, intent(in) :: ij
   integer :: ir,l,ll,j,iccj,ivc,itor,llnt
-  complex :: rl,he1,he2
+  complex :: rh,rl,he1,he2
 
   if (nonlinear_flag == 0) return
 
@@ -23,19 +23,21 @@ subroutine cgyro_advect_wavenumber(ij)
 
 #if defined(OMPGPU)
 !$omp target teams distribute parallel do simd collapse(4) &
-!$omp&         private(ivc,ir,l,iccj,j,ll,rl,llnt,he1,he2)
+!$omp&         private(ivc,ir,l,iccj,j,ll,rl,rh,llnt,he1,he2)
 #elif defined(_OPENACC)
 !$acc parallel loop collapse(4) gang vector &
-!$acc&         private(ivc,ir,l,iccj,j,ll,rl,llnt,he1,he2) &
+!$acc&         private(ivc,ir,l,iccj,j,ll,rl,rh,llnt,he1,he2) &
 !$acc&         present(rhs(:,:,:,ij),omega_ss,field,h_x,c_wave)
 #else
-!$omp parallel do collapse(4) private(ivc,ir,l,iccj,j,ll,rl,llnt,he1,he2)
+!$omp parallel do collapse(3) private(ivc,ir,l,iccj,j,ll,rl,rh,llnt,he1,he2) &
+!$omp&            firstprivate(shear_method,profile_shear_flag)
 #endif
      do itor=nt1,nt2
       do ivc=1,nv_loc
        do ir=1,n_radial
          do j=1,n_theta
            iccj = (ir-1)*n_theta+j
+           rh = rhs(iccj,ivc,itor,ij)
 
            ! Wavenumber advection ExB shear
            if (shear_method == 2) then
@@ -62,13 +64,12 @@ subroutine cgyro_advect_wavenumber(ij)
                     ! Thus sign below has been checked and is correct
                     rl = rl+c_wave(l)*(he1-he2)
                  enddo
-                 rhs(iccj,ivc,itor,ij) = rhs(iccj,ivc,itor,ij) + omega_eb_base*itor*rl
+                 rh = rh + omega_eb_base*itor*rl
            endif
 
            ! Wavenumber advection profile shear
            if (profile_shear_flag == 1) then
                  iccj = (ir-1)*n_theta+j
-                 rl = rhs(iccj,ivc,itor,ij)
 #if (!defined(OMPGPU)) && defined(_OPENACC)
 !$acc loop seq
 #endif
@@ -88,10 +89,10 @@ subroutine cgyro_advect_wavenumber(ij)
                        he2 = 0.0
                     endif
                     ! Note opposite sign to ExB shear
-                    rl = rl-c_wave(l)*(he1-he2)
+                    rh = rh-c_wave(l)*(he1-he2)
                  enddo
-                 rhs(iccj,ivc,itor,ij) = rl
            endif
+           rhs(iccj,ivc,itor,ij) = rh
          enddo
        enddo
       enddo

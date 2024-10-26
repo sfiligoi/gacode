@@ -12,7 +12,6 @@
 subroutine gyro_set_phase_space(datafile,io)
 
   use gyro_globals
-  use math_constants
 
   implicit none
 
@@ -49,7 +48,7 @@ subroutine gyro_set_phase_space(datafile,io)
         write(io,'(a)') '--- ------------  ------------ ------------  -----------'
         do k=1,n_lambda
            write(io,'(i2,4(2x,f12.10))') & 
-                k,1.0/(pi_2*omega(i,k)),s_lambda(k),lambda(i,k),w_lambda(i,k)
+                k,1.0/(2*pi*omega(i,k)),s_lambda(k),lambda(i,k),w_lambda(i,k)
            if (k == n_pass) write(io,'(a,t33,f12.10)') 'lambda-TP:',lambda_tp(i)
            if (k == n_lambda) write(io,'(a,t33,f12.10)') 'lambda-MAX:',lambda_max(i) 
         enddo

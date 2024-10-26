@@ -25,7 +25,6 @@
 subroutine gyro_kxky_spectrum
 
   use gyro_globals
-  use math_constants
   use ompdata
 
   !-------------------------------------

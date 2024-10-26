@@ -10,7 +10,6 @@ subroutine gyro_bessel_stencils
 
   use gyro_globals
   use gyro_pointers
-  use math_constants
 
   !-----------------------------------------------------------------
   implicit none

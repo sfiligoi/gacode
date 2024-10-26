@@ -41,6 +41,13 @@ subroutine cgyro_write_initdata
      endif
      write(io,*)
 
+     ! Compute kymax
+     if (n_toroidal == 1) then
+        kymax = q/rmin*rho
+     else
+        kymax = q/rmin*(n_toroidal-1)*rho
+     endif
+
      if (kymax < -99.9) then
         lfmt = '(a,i4,2x,2(f7.2,2x),2x,f6.2,5x,i4,2a)'
      else
@@ -49,13 +56,6 @@ subroutine cgyro_write_initdata
 
      if (zf_test_mode == 0) then
 
-        ! Compute kymax
-        if (n_toroidal == 1) then
-           kymax = q/rmin*rho
-        else
-           kymax = q/rmin*(n_toroidal-1)*rho
-        endif
-        
         if (nonlinear_flag == 0) then
 
            write(io,*) '          n    Delta      Max     L/rho'
@@ -99,7 +99,7 @@ subroutine cgyro_write_initdata
      write(io,*) 
      write(io,21) 'r/a',rmin,'R/a',rmaj,'q',q,'zmag',zmag,'kappa',kappa   
      write(io,22) 'shift',shift,'s',s,'dzmag',dzmag,'s_kappa',s_kappa
-     write(io,*)
+        write(io,*)
      if (abs(shape_cos(0))+abs(shape_s_cos(0)) > 1e-6) then
         write(io,23) 'c0',shape_cos(0),'s_c0',shape_s_cos(0)
      endif
@@ -132,12 +132,12 @@ subroutine cgyro_write_initdata
      ! where x = r/rho. The half-domain has -L/4 < r < L/4.
      if (profile_shear_flag == 1) then
         write(io,*)
-        write(io,'(a)') ' i  s(a/Ln)  (a/Ln)_L  (a/Ln)_R  |  s(a/Lt)  (a/Lt)_L  (a/Lt)_R ' 
+        write(io,'(a)') ' i  s(a/Ln)  (a/Ln)_L  (a/Ln)_R  |  s(a/Lt)  (a/Lt)_L  (a/Lt)_R  |  sbeta_*' 
         do is=1,n_species
            dn = sdlnndr(is)*length/rho/4
            dt = sdlntdr(is)*length/rho/4
-           write(io,'(t1,i2,3(1x,1pe9.2),2x,3(1x,1pe9.2))') &
-             is,sdlnndr(is),dlnndr(is)-dn,dlnndr(is)+dn,sdlntdr(is),dlntdr(is)-dt,dlntdr(is)+dt
+           write(io,'(t1,i2,3(1x,1pe9.2),2x,3(1x,1pe9.2),2x,1(1x,1pe9.2))') &
+             is,sdlnndr(is),dlnndr(is)-dn,dlnndr(is)+dn,sdlntdr(is),dlntdr(is)-dt,dlntdr(is)+dt,sbeta_star(is)
         enddo
      endif
 

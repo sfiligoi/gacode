@@ -16,7 +16,6 @@ subroutine gyro_gbflux
 
   use mpi
   use gyro_globals
-  use math_constants
 
   !-------------------------------------------------------------
   implicit none

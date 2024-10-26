@@ -11,7 +11,6 @@ subroutine gyro_do
   use gyro_globals
   use gyro_pointers
   use gyro_interface
-  use math_constants
   use geo
 
   !--------------------------------------

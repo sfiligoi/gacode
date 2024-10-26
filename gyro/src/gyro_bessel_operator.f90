@@ -42,8 +42,7 @@
 
 subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
 
-  use gyro_globals, only : z_gyro, i_gyro, m_gyro, n_x
-  use math_constants
+  use gyro_globals, only : i_c,pi,z_gyro, i_gyro, m_gyro, n_x
 
   !-----------------------------------------
   implicit none
@@ -74,7 +73,7 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
 
      ! J_0
      do p=-p0,p0-1
-        x = abs(rho)*sqrt((pi_2*p*a+u)**2+v**2)
+        x = abs(rho)*sqrt((2*pi*p*a+u)**2+v**2)
         func(p) = bessel_j0(x)/n_x
      enddo
 
@@ -82,7 +81,7 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
 
      ! J_0^2
      do p=-p0,p0-1
-        x = abs(rho)*sqrt((pi_2*p*a+u)**2+v**2)
+        x = abs(rho)*sqrt((2*pi*p*a+u)**2+v**2)
         func(p) = bessel_j0(x)**2/n_x
      enddo
 
@@ -92,15 +91,15 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
 
      ! The factor -(i/2) will be applied outside this loop
      do p=-p0,p0-1
-        x = abs(rho)*sqrt((pi_2*p*a+u)**2+v**2)
-        func(p) = (pi_2*p*a+u)*rho*(bessel_j0(x)+bessel_jn(2,x))/n_x
+        x = abs(rho)*sqrt((2*pi*p*a+u)**2+v**2)
+        func(p) = (2*pi*p*a+u)*rho*(bessel_j0(x)+bessel_jn(2,x))/n_x
      enddo
 
   case (4)
 
      ! G = (1/2)*[ J_0(z)+J_2(z) ]
      do p=-p0,p0-1
-        x = abs(rho)*sqrt((pi_2*p*a+u)**2+v**2)
+        x = abs(rho)*sqrt((2*pi*p*a+u)**2+v**2)
         func(p) = 0.5*(bessel_j0(x)+bessel_jn(2,x))/n_x
      enddo
 
@@ -108,7 +107,7 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
 
      ! G^2
      do p=-p0,p0-1
-        x = abs(rho)*sqrt((pi_2*p*a+u)**2+v**2)
+        x = abs(rho)*sqrt((2*pi*p*a+u)**2+v**2)
         func(p) = (0.5*(bessel_j0(x)+bessel_jn(2,x)))**2/n_x
      enddo
 
@@ -116,7 +115,7 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
 
      ! G * J_0
      do p=-p0,p0-1
-        x = abs(rho)*sqrt((pi_2*p*a+u)**2+v**2)
+        x = abs(rho)*sqrt((2*pi*p*a+u)**2+v**2)
         func(p) = 0.5*(bessel_j0(x)+bessel_jn(2,x))*bessel_j0(x)/n_x
      enddo
 
@@ -124,7 +123,7 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
 
      ! I_0
      do p=-p0,p0-1
-        x = abs(rho)*sqrt((pi_2*p*a+u)**2+v**2)
+        x = abs(rho)*sqrt((2*pi*p*a+u)**2+v**2)
         func(p) = besei0(x*x)/n_x
      enddo
 
@@ -135,8 +134,8 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
      ! The factor i will be applied outside this loop
      if (u**2+v**2 > 1e-8) then
         do p=-p0,p0-1
-           x = abs(rho)*sqrt((pi_2*p*a+u)**2+v**2)
-           func(p) = (pi_2*p*a+u)*rho*(bessel_j0(x)-bessel_j1(x)/x)/x**2/n_x
+           x = abs(rho)*sqrt((2*pi*p*a+u)**2+v**2)
+           func(p) = (2*pi*p*a+u)*rho*(bessel_j0(x)-bessel_j1(x)/x)/x**2/n_x
         enddo
      else
         ! Case is n=0, which will ultimately give zero contribution so we 

@@ -2,7 +2,6 @@ subroutine gyro_collision_grid_write(datafile,io)
 
   use gyro_globals
   use gyro_collision_private
-  use math_constants
 
   !----------------------------------------
   implicit none

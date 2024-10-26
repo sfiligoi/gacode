@@ -111,6 +111,28 @@ subroutine tglf_run()
           tglf_s_delta_loc_in, &
           tglf_zeta_loc_in, &
           tglf_s_zeta_loc_in, &
+          tglf_shape_sin3_loc_in, &
+          tglf_shape_s_sin3_loc_in, &
+          tglf_shape_sin4_loc_in, &
+          tglf_shape_s_sin4_loc_in, &
+          tglf_shape_sin5_loc_in, &
+          tglf_shape_s_sin5_loc_in, &
+          tglf_shape_sin6_loc_in, &
+          tglf_shape_s_sin6_loc_in, &
+          tglf_shape_cos0_loc_in, &
+          tglf_shape_s_cos0_loc_in, &
+          tglf_shape_cos1_loc_in, &
+          tglf_shape_s_cos1_loc_in, &
+          tglf_shape_cos2_loc_in, &
+          tglf_shape_s_cos2_loc_in, &
+          tglf_shape_cos3_loc_in, &
+          tglf_shape_s_cos3_loc_in, &
+          tglf_shape_cos4_loc_in, &
+          tglf_shape_s_cos4_loc_in, &
+          tglf_shape_cos5_loc_in, &
+          tglf_shape_s_cos5_loc_in, &
+          tglf_shape_cos6_loc_in, &
+          tglf_shape_s_cos6_loc_in, &
           tglf_q_loc_in, &
           tglf_q_prime_loc_in, &
           tglf_p_prime_loc_in, &

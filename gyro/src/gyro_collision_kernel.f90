@@ -11,7 +11,6 @@ subroutine gyro_collision_kernel(ic)
   use gyro_globals
   use gyro_collision_private
   use gyro_pointers
-  use math_constants
 
   !--------------------------------------------------------------
   implicit none

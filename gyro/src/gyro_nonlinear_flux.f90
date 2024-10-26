@@ -19,7 +19,6 @@ subroutine gyro_nonlinear_flux
   use mpi
   use gyro_globals
   use gyro_pointers
-  use math_constants
   use ompdata
 
   !---------------------------------------------------

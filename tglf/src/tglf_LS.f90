@@ -42,7 +42,6 @@
       logical :: is_sup_to_drift
       REAL :: sum_phi, sum_abs_phi
       REAL, DIMENSION(max_plot) :: even_function, odd_function
-
 ! 
 !      cputime0=MPI_WTIME()
 !

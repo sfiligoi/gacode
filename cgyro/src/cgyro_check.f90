@@ -7,6 +7,7 @@ subroutine cgyro_check
 
   integer :: is
   character(len=1), dimension(7) :: ctag
+  character(1000) :: outstr
   character(len=7) :: floatstr
 
   !-----------------------------------------------------------------------
@@ -233,17 +234,32 @@ subroutine cgyro_check
      call cgyro_info('Collision model: Lorentz ee+ei')
   case (2) 
      call cgyro_info('Collision model: Connor')
-  case (4,6) 
+  case (4) 
      call cgyro_info('Collision model: Sugama')
      ctag(2) = 'x'
   case(5)
      call cgyro_info('Collision model: Simple Lorentz ee+ei')
+  case(6)
+     call cgyro_info('Collision model: Landau')
+  case(7)
+     call cgyro_info('Collision model: New (Galerkin) Sugama')
   case default
      call cgyro_error('Invalid value for collision_model')
      return
 
   end select
 
+  if (collision_model == 6 .or. collision_model == 7) then
+     ! if any is below -1 the l-numbers are unlimited.
+     if (collision_field_max_l>=-1) then
+        write(outstr,*) collision_field_max_l
+        call cgyro_info('Field particle collisions limited to l<='//trim(outstr)//' collisions')
+     endif
+     if (collision_test_max_l>=-1) then
+        write(outstr,*) collision_test_max_l
+        call cgyro_info('Test particle collisions limited to l<='//trim(outstr)//' collisions')
+     endif
+  end if
   if (collision_model /= 5) then
 
      if(collision_model /= 1) then
@@ -321,6 +337,8 @@ subroutine cgyro_check
      end select
   endif
 
+  if (collision_model > 5) ctag = 'x'
+  
   call cgyro_info('Collision terms: L D Rm Re kp ions field')
   call cgyro_info('               '// &
        '  '//ctag(1)// &
@@ -330,7 +348,7 @@ subroutine cgyro_check
        '  '//ctag(5)// &
        '   '//ctag(6)// &
        '     '//ctag(7))
-
+  
   if (collision_model == 5 .or. collision_model == 1) then
      select case(z_eff_method)
      case(1)
@@ -350,6 +368,13 @@ subroutine cgyro_check
      return
   endif
 
+
+  if (collision_test_mode>0) then
+     write(unit=outstr,fmt='(A,I1)') 'Warning, 0<collision_test_mode=',collision_test_mode
+     call cgyro_info(trim(outstr))
+  end if
+     
+  
   !------------------------------------------------------------------------
   ! Check profile parameters
   !

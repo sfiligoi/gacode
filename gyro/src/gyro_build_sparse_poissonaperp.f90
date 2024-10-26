@@ -8,7 +8,6 @@
 subroutine gyro_build_sparse_poissonaperp
 
   use gyro_globals
-  use math_constants
   use gyro_poissonaperp_private
 
   !------------------------

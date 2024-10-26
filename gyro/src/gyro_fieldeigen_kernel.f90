@@ -11,7 +11,6 @@ subroutine gyro_fieldeigen_kernel
   use mpi
   use gyro_globals
   use gyro_pointers
-  use math_constants
   use gyro_fieldeigen_private
 
   !---------------------------------------------------------------

@@ -52,6 +52,9 @@ subroutine cgyro_read_input
   call cgyro_readbc_int(collision_field_model,'COLLISION_FIELD_MODEL')
   call cgyro_readbc_int(collision_ion_model,'COLLISION_ION_MODEL')
   call cgyro_readbc_int(collision_precision_mode,'COLLISION_PRECISION_MODE')
+  call cgyro_readbc_int(collision_test_mode,'COLLISION_TEST_MODE')
+  call cgyro_readbc_int(collision_field_max_l,'COLLISION_FIELD_MAX_L')
+  call cgyro_readbc_int(collision_test_max_l,'COLLISION_TEST_MAX_L')
   call cgyro_readbc_real(z_eff)
   call cgyro_readbc_int(z_eff_method,'Z_EFF_METHOD')
   call cgyro_readbc_int(zf_test_mode,'ZF_TEST_MODE')
@@ -126,6 +129,7 @@ subroutine cgyro_read_input
   call cgyro_readbc_realv(dlntdr,is)
   call cgyro_readbc_realv(sdlnndr,is)
   call cgyro_readbc_realv(sdlntdr,is)
+  call cgyro_readbc_realv(sbeta_star,is)
   call cgyro_readbc_realv(dlnndr_scale,is)
   call cgyro_readbc_realv(dlntdr_scale,is)
 

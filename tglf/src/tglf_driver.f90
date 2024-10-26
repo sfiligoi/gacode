@@ -48,7 +48,11 @@
       elseif(igeo_tg.eq.1)then
 !        q_prime_tg = shat_tg*(q_tg/rmin_tg)**2
         CALL put_Miller_geometry(rmin_tg,rmaj_tg,zmaj_tg,drmindx_tg,drmajdx_tg,dzmajdx_tg, &
-         kappa_tg,s_kappa_tg,delta_tg,s_delta_tg,zeta_tg,s_zeta_tg,q_tg,q_prime_tg,p_prime_tg,kx0_tg)
+         kappa_tg,s_kappa_tg,delta_tg,s_delta_tg,zeta_tg,s_zeta_tg,shape_sin3_tg,shape_s_sin3_tg,& 
+         shape_sin4_tg,shape_s_sin4_tg,shape_sin5_tg,shape_s_sin5_tg,shape_sin6_tg,shape_s_sin6_tg,&
+         shape_cos0_tg,shape_s_cos0_tg,shape_cos1_tg,shape_s_cos1_tg,shape_cos2_tg,shape_s_cos2_tg,&
+         shape_cos3_tg,shape_s_cos3_tg,shape_cos4_tg,shape_s_cos4_tg,shape_cos5_tg,shape_s_cos5_tg,&
+         shape_cos6_tg,shape_s_cos6_tg,q_tg,q_prime_tg,p_prime_tg,kx0_tg)
       elseif(igeo_tg.eq.2)then
         CALL put_Fourier_geometry(q_tg,q_prime_tg,p_prime_tg,nfourier_tg,fourier_tg)
       elseif(igeo_tg.eq.3)then

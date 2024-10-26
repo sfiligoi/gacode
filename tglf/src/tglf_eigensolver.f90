@@ -91,7 +91,6 @@
       COMPLEX,ALLOCATABLE,DIMENSION(:,:) :: vleft,vright
       COMPLEX,ALLOCATABLE,DIMENSION(:) :: work
       COMPLEX,ALLOCATABLE,DIMENSION(:) :: zomega
-      COMMON /block/ max_freq
 !
       ifail = 0
       lwork = 8*iur

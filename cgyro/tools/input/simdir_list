@@ -17,6 +17,8 @@ reg14: c1+f1+lin+ie +pro+mil+frot
 reg15: c4+f2+lin+ie +loc+mil+frot [GPU_BIGMEM]
 reg16: c1+f1+lin+i  +loc+mil+ rot [negative shear]
 reg20: c4+f3+ nl+ie +loc+mil+nrot [t_method=1]
+reg21: c7+f1+lin+ie +loc+mil+nrot
+reg22: c6+f1+lin+ie +loc+mil+nrot
 
 Nonlinear cases:
 

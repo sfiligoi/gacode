@@ -10,7 +10,6 @@ subroutine gyro_get_he_implicit
 
   use gyro_globals
   use gyro_pointers
-  use math_constants
   use ompdata
 
   !---------------------------

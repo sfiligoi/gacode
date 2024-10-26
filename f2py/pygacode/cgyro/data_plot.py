@@ -55,7 +55,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       # set normalizations
       t = self.getnorm(xin['norm'])
-
+     
       #======================================
       # Omega
       ax = fig.add_subplot(121)
@@ -69,6 +69,13 @@ class cgyrodata_plot(data.cgyrodata):
 
       ax.set_xlim([0,t[-1]])
       #======================================
+
+      # Alfven diagnostic
+      rho   = sum(self.mass*self.dens)
+      betae = self.betae_unit/self.b_gs2**2
+      v_A   = np.sqrt(2/(betae*rho))
+      w_TAE = v_A/(2*self.q*self.rmaj) 
+      ax.plot([0,t[-1]],[w_TAE,w_TAE],linestyle='--')
 
       #======================================
       # Gamma

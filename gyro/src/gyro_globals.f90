@@ -8,6 +8,9 @@
 
 module gyro_globals
 
+  real, parameter :: pi=3.141592653589793238
+  complex, parameter :: i_c=(0.0,1.0)
+
   !----------------------------------------------------
   ! Standard precision for IO 
   !

@@ -8,7 +8,6 @@
 subroutine gyro_lambda_grid
 
   use gyro_globals
-  use math_constants
 
   !------------------------------------------
   implicit none

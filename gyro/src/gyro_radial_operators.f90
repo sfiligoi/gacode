@@ -11,7 +11,6 @@
 subroutine gyro_radial_operators
 
   use gyro_globals
-  use math_constants
 
   !--------------------------------------
   implicit none  
@@ -41,7 +40,7 @@ subroutine gyro_radial_operators
 
         ! c's are the matrix elements for m -> p
 
-        cr(i,ip) = exp(i_c*m*p*(pi_2/n_x))
+        cr(i,ip) = exp(i_c*m*p*(2*pi/n_x))
 
      enddo
   enddo
@@ -177,24 +176,24 @@ subroutine gyro_radial_operators
 
      do m=-m_dx,m_dx-1
         do p=-m_dx,m_dx-1
-           z0 = exp(i_c*p*m*(pi_2/n_x))
+           z0 = exp(i_c*p*m*(2*pi/n_x))
            w_d1(m) = w_d1(m)+p*z0
         enddo
      enddo
 
-     w_d1(:) = -(1.0/n_x)*(pi_2*i_c/x_length)*w_d1(:)
+     w_d1(:) = -(1.0/n_x)*(2*pi*i_c/x_length)*w_d1(:)
 
      w_d2(:) = (0.0,0.0)
 
      do m=-m_dx,m_dx-1
         do p=-m_dx,m_dx-1
-           z0 = exp(i_c*p*m*(pi_2/n_x))
+           z0 = exp(i_c*p*m*(2*pi/n_x))
            w_d2(m) = w_d2(m)+p*p*z0
         enddo
      enddo
 
      ! Note the sign change
-     w_d2(:) = (1.0/n_x)*(pi_2*i_c/x_length)**2*w_d2(:)
+     w_d2(:) = (1.0/n_x)*(2*pi*i_c/x_length)**2*w_d2(:)
 
      if (m_dx == 2) then
 

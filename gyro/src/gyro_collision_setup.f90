@@ -31,7 +31,6 @@ subroutine gyro_collision_setup
   use gyro_globals
   use gyro_collision_private
   use gyro_pointers
-  use math_constants
 
   !-----------------------------------------------------------
   implicit none

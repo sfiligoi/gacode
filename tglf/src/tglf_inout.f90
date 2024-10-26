@@ -454,7 +454,11 @@ END SUBROUTINE put_s_alpha_geometry
 !
 
 SUBROUTINE put_Miller_geometry(rmin,rmaj,zmaj,drmindx,drmajdx,dzmajdx, &
-  kappa,s_kappa,delta,s_delta,zeta,s_zeta,q,q_prime,p_prime,beta,kx0_m)
+  kappa,s_kappa,delta,s_delta,zeta,s_zeta,shape_sin3, shape_s_sin3, shape_sin4, &
+  shape_s_sin4, shape_sin5, shape_s_sin5, shape_sin6, shape_s_sin6, shape_cos0, &
+  shape_s_cos0, shape_cos1, shape_s_cos1, shape_cos2, shape_s_cos2, shape_cos3, &
+  shape_s_cos3, shape_cos4, shape_s_cos4, shape_cos5, shape_s_cos5, shape_cos6, &
+  shape_s_cos6,q,q_prime,p_prime,beta,kx0_m)
   !
   ! This routine eliminates the need for subroutine miller_init 
   ! and the miller.dat input file.
@@ -464,7 +468,11 @@ SUBROUTINE put_Miller_geometry(rmin,rmaj,zmaj,drmindx,drmajdx,dzmajdx, &
   IMPLICIT NONE
   REAL,INTENT(IN) :: rmin,rmaj,zmaj,q,q_prime,p_prime,kx0_m,beta
   REAL,INTENT(IN) :: drmindx,drmajdx,dzmajdx
-  REAL,INTENT(IN) :: kappa,s_kappa,delta,s_delta,zeta,s_zeta
+  REAL,INTENT(IN) :: kappa,s_kappa,delta,s_delta,zeta,s_zeta, shape_sin3, shape_s_sin3, shape_sin4, &
+  shape_s_sin4, shape_sin5, shape_s_sin5, shape_sin6, shape_s_sin6, shape_cos0, &
+  shape_s_cos0, shape_cos1, shape_s_cos1, shape_cos2, shape_s_cos2, shape_cos3, &
+  shape_s_cos3, shape_cos4, shape_s_cos4, shape_cos5, shape_s_cos5, shape_cos6, &
+  shape_s_cos6
 
   if(tglf_isnan(rmin))call tglf_error(1,"input rmin_loc is NAN")
   if(tglf_isinf(rmin))call tglf_error(1,"input rmin_loc is INF")
@@ -528,6 +536,28 @@ SUBROUTINE put_Miller_geometry(rmin,rmaj,zmaj,drmindx,drmajdx,dzmajdx, &
   s_zeta_loc = s_zeta
   beta_loc = beta
   kx0_loc = kx0_m
+  shape_sin3_loc = shape_sin3
+  shape_s_sin3_loc =  shape_s_sin3
+  shape_sin4_loc = shape_sin4
+  shape_s_sin4_loc = shape_s_sin4
+  shape_sin5_loc = shape_sin5
+  shape_s_sin5_loc = shape_s_sin5
+  shape_sin6_loc = shape_sin6
+  shape_s_sin6_loc = shape_s_sin6
+  shape_cos0_loc = shape_cos0
+  shape_s_cos0_loc = shape_s_cos0
+  shape_cos1_loc = shape_cos1
+  shape_s_cos1_loc = shape_s_cos1
+  shape_cos2_loc = shape_cos2
+  shape_s_cos2_loc = shape_s_cos2
+  shape_cos3_loc = shape_cos3
+  shape_s_cos3_loc = shape_s_cos3
+  shape_cos4_loc = shape_cos4
+  shape_s_cos4_loc = shape_s_cos4
+  shape_cos5_loc = shape_cos5
+  shape_s_cos5_loc =  shape_s_cos5
+  shape_cos6_loc = shape_cos6
+  shape_s_cos6_loc = shape_s_cos6
   !
   ! validatiy checks
   !
@@ -1581,6 +1611,28 @@ SUBROUTINE write_tglf_input
      write(11,*)"      s_delta_tg= ",s_delta_loc
      write(11,*)"      zeta_tg= ",zeta_loc
      write(11,*)"      s_zeta_tg= ",s_zeta_loc
+     write(11,*)"      shape_sin3_tg= ", shape_sin3_loc
+     write(11,*)"      shape_s_sin3_tg= ", shape_s_sin3_loc
+     write(11,*)"      shape_sin4_tg= ", shape_sin4_loc
+     write(11,*)"      shape_s_sin4_tg= ", shape_s_sin4_loc
+     write(11,*)"      shape_sin5_tg= ", shape_sin5_loc
+     write(11,*)"      shape_s_sin5_tg= ", shape_s_sin5_loc
+     write(11,*)"      shape_sin6_tg= ", shape_sin6_loc
+     write(11,*)"      shape_s_sin6_tg= ", shape_s_sin6_loc
+     write(11,*)"      shape_cos0_tg= ", shape_cos0_loc
+     write(11,*)"      shape_s_cos0_tg= ", shape_s_cos0_loc
+     write(11,*)"      shape_cos1_tg= ", shape_cos1_loc
+     write(11,*)"      shape_s_cos1_tg= ", shape_s_cos1_loc
+     write(11,*)"      shape_cos2_tg= ", shape_cos2_loc
+     write(11,*)"      shape_s_cos2_tg= ", shape_s_cos2_loc
+     write(11,*)"      shape_cos3_tg= ", shape_cos3_loc
+     write(11,*)"      shape_s_cos3_tg= ", shape_s_cos3_loc
+     write(11,*)"      shape_cos4_tg= ", shape_cos4_loc
+     write(11,*)"      shape_s_cos4_tg= ", shape_s_cos4_loc
+     write(11,*)"      shape_cos5_tg= ", shape_cos5_loc
+     write(11,*)"      shape_s_cos5_tg= ", shape_s_cos5_loc
+     write(11,*)"      shape_cos6_tg= ", shape_cos6_loc
+     write(11,*)"      shape_s_cos6_tg= ", shape_s_cos6_loc
      write(11,*)"      q_tg= ",q_loc
      write(11,*)"      p_prime_tg= ",p_prime_loc
      write(11,*)"      q_prime_tg= ",q_prime_loc

@@ -13,7 +13,6 @@ subroutine gyro_write_initdata(datafile1,datafile2,datafile3,io)
 
   use gyro_globals
   use gyro_profile_exp
-  use math_constants
   use geo
 
   !---------------------------------------------------
@@ -187,7 +186,7 @@ subroutine gyro_write_initdata(datafile1,datafile2,datafile3,io)
      GEO_fourier_in(:,:) = a_fourier_geo_s(:,:,i)
 
      do j=1,n_wedge
-        ttmp(j) = -pi+(j-1)*pi_2/n_wedge
+        ttmp(j) = -pi+(j-1)*2*pi/n_wedge
      enddo
      if (n_wedge == 1) ttmp = 0.0
 

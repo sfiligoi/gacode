@@ -1,0 +1,42 @@
+#---------------------------------------------------
+# Linux Tumbleweed modified from "Mint" 
+#---------------------------------------------------
+
+IDENTITY="Linux TUMBLEWEED gfortran+OpenBLAS+OPENMPI"
+CORES_PER_NODE=8
+NUMAS_PER_NODE=1
+#SOLVER_OPT=slumt
+#need packages fftw_openmp_devel openblas_devel
+#need for old gyro: netcdf-fortran-gnu-openmpi4-hpc-devel
+#m lo gnu openmpi netcdf-fortran pfftw3
+
+#ROOT=${HOME}/GIT
+
+# Compilers
+
+FC     = mpifort -DDIMATCOPY -std=gnu -fallow-argument-mismatch -fall-intrinsics -fimplicit-none -J $(GACODE_ROOT)/modules #-fPIC
+#FC     = mpifort -std=f2008 -fall-intrinsics -fimplicit-none -J $(GACODE_ROOT)/modules #-fPIC
+F77    = mpifort -fimplicit-none -fallow-argument-mismatch
+FOMP   =-fopenmp
+FMATH  =-fdefault-real-8 -fdefault-double-8 -I$(FFTW_INC)
+FOPT   =-O3 -fexternal-blas -march=native -ffree-line-length-0
+# -floop-nest-optimize -floop-parallelize-all -flto
+FDEBUG =-Wall -W -fcheck=all -g -fbacktrace  -ffpe-trap=invalid,zero,overflow -finit-real=snan # -std=f2003 -fall-intrinsics
+F2PY   = f2py
+
+# System math libraries
+#LMATH = /usr/lib64/libopenblas_serial.so.0 -lfftw3 -lfftw3_omp
+LMATH = -llapack -lblas -lfftw3 -lfftw3_omp
+
+ifdef FANN_ROOT
+   # neural net libraries
+   NN_LIB=-L$(GACODE_ROOT)/../neural/ -I$(GACODE_ROOT)/../neural/ -lbrainfuse -lfann
+endif
+
+# OPTIONAL NetCDF:
+NETCDF=-lnetcdff -lnetcdf
+NETCDF_INC=$(NETCDF_FORTRAN_INC)
+
+# Archive 
+
+ARCH = ar cr
