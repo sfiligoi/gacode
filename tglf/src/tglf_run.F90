@@ -148,11 +148,11 @@ subroutine tglf_run()
 
   if (tglf_use_transport_model_in) then
 
-     ! Call TGLFNN and later TGLF if TGLFNN was not accurate
-     if (tglf_nn_max_error_in .gt. 0) then
-        call tglf_nn_tm
-     endif
-     if (.not. valid_nn) then
+!     ! Call TGLFNN and later TGLF if TGLFNN was not accurate
+!     if (tglf_nn_max_error_in .gt. 0) then
+!        call tglf_nn_tm
+!     endif
+!     if (.not. valid_nn) then
 #ifdef MPI_TGLF
         call tglf_tm_mpi
 #else
