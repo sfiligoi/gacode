@@ -180,7 +180,7 @@ subroutine tglf_run()
 #else
         call tglf_tm
 #endif
-     endif
+!     endif
 
      !---------------------------------------------
      ! Output (normalized to Q_GB)
@@ -238,7 +238,7 @@ subroutine tglf_run()
 
      call get_error_status(tglf_error_message,tglf_error_status)
 
-  else
+  else  !(tglf_use_transport_model_in = .false)
 
      ! Run single-ky linear stability
      call tglf_ky
