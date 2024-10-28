@@ -42,6 +42,9 @@
       logical :: is_sup_to_drift
       REAL :: sum_phi, sum_abs_phi
       REAL, DIMENSION(max_plot) :: even_function, odd_function
+      REAL :: max_freq
+      COMMON /block/ max_freq
+
 ! 
 !      cputime0=MPI_WTIME()
 !
@@ -395,8 +398,7 @@ if(new_matrix)then
           if (info /= 0)CALL tglf_error(1,"ZGESV failed in tglf_LS")
 
 !  alpha/beta=-xi*(frequency+xi*growthrate)
-!          eigenvalue = xi*alpha(jmax(imax))/beta(jmax(imax))  
-          eigenvalue = xi*(rr(jmax(imax)) + xi*ri(jmax(imax)))
+          eigenvalue = xi*alpha(jmax(imax))/beta(jmax(imax))  
 !          write(*,*)"eigenvalue=",eigenvalue,imax
           call get_QL_weights
 !
