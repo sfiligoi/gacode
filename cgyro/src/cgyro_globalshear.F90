@@ -50,9 +50,9 @@ subroutine cgyro_globalshear(ij)
                     ! ExB shear
                     h1 = omega_eb_base*itor*h_x(iccj+llnt,ivc,itor)
                     ! beta_star shear
-                    h1 = h1-omega_sbeta(iccj+llnt,ivc,itor)*cap_h_c(iccj+llnt,ivc,itor)
+                    h1 = h1+omega_sbeta(iccj+llnt,ivc,itor)*cap_h_c(iccj+llnt,ivc,itor)
                     ! omega_star shear
-                    h1 = h1-sum(omega_ss(:,iccj+llnt,ivc,itor)*field(:,iccj+llnt,itor))
+                    h1 = h1+sum(omega_ss(:,iccj+llnt,ivc,itor)*field(:,iccj+llnt,itor))
                  else
                     h1 = 0.0
                  endif
@@ -61,9 +61,9 @@ subroutine cgyro_globalshear(ij)
                     ! ExB shear
                     h2 = omega_eb_base*itor*h_x(iccj-llnt,ivc,itor)
                     ! beta_star shear
-                    h2 = h2-omega_sbeta(iccj-llnt,ivc,itor)*cap_h_c(iccj-llnt,ivc,itor)
+                    h2 = h2+omega_sbeta(iccj-llnt,ivc,itor)*cap_h_c(iccj-llnt,ivc,itor)
                     ! omega_star shear
-                    h2 = h2-sum(omega_ss(:,iccj-llnt,ivc,itor)*field(:,iccj-llnt,itor))
+                    h2 = h2+sum(omega_ss(:,iccj-llnt,ivc,itor)*field(:,iccj-llnt,itor))
                  else
                     h2 = 0.0
                  endif

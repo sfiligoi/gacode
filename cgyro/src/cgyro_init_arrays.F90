@@ -447,9 +447,10 @@ subroutine cgyro_init_arrays
                 + abs(omega_rot_edrift_r(it)))          
              
            ! omega_star 
-           carg = -i_c*k_theta_base*itor*rho*(dlnndr(is)+dlntdr(is)*(energy(ie)-1.5)) &
-                -i_c*k_theta_base*itor*rho*(vel2(ie)*xi(ix)/vth(is) &
-                *omega_gammap(it)) -i_c*k_theta_base*itor*rho*omega_rot_star(it,is)
+           carg = &
+                -i_c*k_theta_base*itor*rho*(dlnndr(is)+dlntdr(is)*(energy(ie)-1.5)) &
+                -i_c*k_theta_base*itor*rho*(vel2(ie)*xi(ix)/vth(is)*omega_gammap(it)) &
+                -i_c*k_theta_base*itor*rho*omega_rot_star(it,is)
            
            omega_s(:,ic,iv_loc,itor) = carg*jvec_c(:,ic,iv_loc,itor)
 
@@ -462,9 +463,9 @@ subroutine cgyro_init_arrays
            sm = sdlnndr(is)+sdlntdr(is)*(energy(ie)-1.5)
 
            ! generalized beta/drift shear (acts on H)
-           sb = sbeta(is)*energy(ie)/bmag(it)**2
+           sb = -sbeta(is)*energy(ie)*xi(ix)**2/bmag(it)**3
 
-           arg = -k_theta_base*itor*length/(2*pi)
+           arg = k_theta_base*itor*length/(2*pi)
 
            omega_ss(:,ic,iv_loc,itor)  = arg*sm*jvec_c(:,ic,iv_loc,itor)
            omega_sbeta(ic,iv_loc,itor) = arg*sb
