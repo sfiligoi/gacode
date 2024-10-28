@@ -652,7 +652,7 @@ contains
     write(1,20) 'N_GLOBAL',cgyro_n_global_in
     write(1,30) 'NU_GLOBAL',cgyro_nu_global_in
     write(1,20) 'PSYM_FLAG',cgyro_psym_flag_in
-    write(1,20) 'PROFILE_SHEAR_FLAG',cgyro_profile_shear_flag_in
+    write(1,20) 'GLOBAL_FLAG',cgyro_global_flag_in
     write(1,20) 'THETA_PLOT', cgyro_theta_plot_in
     write(1,30) 'PX0',cgyro_px0_in
     write(1,20) 'STREAM_TERM',cgyro_stream_term_in
