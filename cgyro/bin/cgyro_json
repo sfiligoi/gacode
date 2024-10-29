@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 
-import os.path
+import os
 import sys
 import json
 import numpy as np
 from pygacode.cgyro import data
 
 sim = data.cgyrodata('./')
+
+myroot = os.environ['GACODE_ROOT']
 
 # Sanity check:
 if not os.path.isfile('input.cgyro.gen'):
@@ -36,7 +38,7 @@ for i in range(sim.n_species):
 
 d = {}
 
-with open('/home/candy/GIT/gacode/cgyro/bin/input.json','r') as file:
+with open(myroot+'/cgyro/bin/input.json','r') as file:
    default = json.load(file)
    
 # Determine non-default values in input.cgyro
