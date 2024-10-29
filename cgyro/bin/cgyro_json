@@ -1,21 +1,29 @@
 #!/usr/bin/env python
 
+import os.path
 import sys
 import json
 import numpy as np
-
 from pygacode.cgyro import data
 
 sim = data.cgyrodata('./')
 
+# Sanity check:
+if not os.path.isfile('input.cgyro.gen'):
+   print('cgyro_json: (ERROR) input.cgyro.gen missing')
+   sys.exit()
+
 try:
    with open('out.cgyro.version', 'r') as file:
-      version = file.read().rstrip()
+      for line in file:
+         pass
+      version = line.strip()
 except:
    version = 'unavailable'
+   print('cgyro_json: (WARNING) CGYRO version not available')
 
 if sim.n_species == 1:
-   print('Conversion not implemented for adiabatic electrons.')
+   print('cgyro_json: (ERROR) Conversion not implemented for adiabatic electrons.')
    sys.exit()
    
 # Electron index
@@ -84,6 +92,7 @@ d['DLNTDR'] = sim.dlntdr[:].tolist()
 # JSON output
 with open('json.cgyro.localdump','w') as f:
    json.dump(d,f,indent=2,sort_keys=True)
+   print('cgyro_json: wrote json.cgyro.localdump')
 #==================================================================
 
 #==================================================================
@@ -107,7 +116,8 @@ with open('out.cgyro.localdump','w') as f:
       else:
          # standard scalar parameter
          f.write(key+'='+str(x)+'\n')
-         
+
+print('cgyro_json: wrote out.cgyro.localdump')
 #==================================================================
 
 #==================================================================
@@ -168,17 +178,18 @@ d['delongation_dr_minor_norm'] = sim.s_kappa*sim.kappa*lref/sim.rmin
 # Shape coefficients (cn,sn)
 d['shapecoefficients_c'] = sim.shape_cos[:nmax].tolist()
 d['shapecoefficients_s'] = sim.shape_sin[:nmax].tolist()
-#d['shapecoefficients_s'][1] = np.arcsin(sim.delta)
-#d['shapecoefficients_s'][2] = -sim.zeta
+d['shapecoefficients_s'][1] = np.arcsin(sim.delta)
+d['shapecoefficients_s'][2] = -sim.zeta
 
 # Derivatives of (cn,sn)
 d['dc_dr_minor_norm'] = (sim.shape_s_cos[:nmax]*lref/sim.rmin).tolist()
 d['ds_dr_minor_norm'] = (sim.shape_s_sin[:nmax]*lref/sim.rmin).tolist()
-#d['ds_dr_minor_norm'][1] = sim.s_delta*lref/sim.rmin/np.cos(np.arcsin(sim.delta))
-#d['ds_dr_minor_norm'][2] = -sim.s_zeta*lref/sim.rmin 
+d['ds_dr_minor_norm'][1] = sim.s_delta*lref/sim.rmin/np.cos(np.arcsin(sim.delta))
+d['ds_dr_minor_norm'][2] = -sim.s_zeta*lref/sim.rmin 
 #-----------------------------------------------------------------------
 
 with open('json.cgyro.imas','w') as f:
    json.dump(d,f,indent=2,sort_keys=True)
+   print('cgyro_json: wrote json.cgyro.imas')
 #==================================================================
 
