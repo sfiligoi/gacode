@@ -84,13 +84,16 @@ subroutine cgyro_rhs_comp1(ij,update_cap)
 #if defined(OMPGPU)
   ! no async for OMPGPU for now
 !$omp target teams distribute parallel do simd collapse(3) &
+!$omp&  firstprivate(nv2,nv1,nt2,nt1,nc,update_cap,ij) &
 !$omp&  private(iv,ic,iv_loc,rhs_el,h_el,is,cap_el,my_psi)
 #elif defined(_OPENACC)
-!$acc  parallel loop gang vector collapse(3) & 
-!$acc& private(iv,ic,iv_loc,rhs_el,h_el,is,cap_el,my_psi) async(1)
+!$acc parallel loop gang vector collapse(3) async(1) &
+!$acc&  firstprivate(nv2,nv1,nt2,nt1,nc,update_cap,ij) &
+!$acc&  private(iv,ic,iv_loc,rhs_el,h_el,is,cap_el,my_psi)
 #else
 !$omp parallel do collapse(2) &
-!$omp& private(iv,iv_loc,itor,is,ic,rhs_el,h_el,cap_el,my_psi) 
+!$omp&  firstprivate(nv2,nv1,nt2,nt1,nc,update_cap,ij) &
+!$omp&  private(iv,iv_loc,itor,is,ic,rhs_el,h_el,cap_el,my_psi) 
 #endif
   do itor=nt1,nt2
    do iv=nv1,nv2
@@ -141,9 +144,21 @@ subroutine cgyro_rhs_comp2(ij)
 
   integer, intent(in) :: ij
   !--------------------------------
-  integer :: is,itor
-  integer :: id,jc
-  real :: rval,rval2
+  integer :: itor,ir,it
+  ! ir loop specific
+  integer :: itorbox
+  !integer :: iv_loc
+  integer :: is
+  integer :: jr0(0:2)   ! n_theta*(pre-compute jr-1)
+  real :: vel_xi
+  ! it loop specific
+  !integer :: ic
+  integer :: id
+  integer :: itd   ! precompute modulo(it+id-1,n_theta)+1, use for iteration
+  integer :: itd_class
+  integer :: jc
+  real :: rval,rval2,rval2s
+  complex :: thfac
   complex :: rhs_stream
 
 
@@ -157,40 +172,90 @@ subroutine cgyro_rhs_comp2(ij)
 !$acc& present(cap_h_c) &
 !$acc& present(is_v,ix_v,ie_v,it_c) &
 !$acc& present(omega_stream,xi,vel) &
-!$acc& present(dtheta,dtheta_up,icd_c)
+!$acc& present(thfac_itor,cderiv,uderiv)
 
 #endif
   ! add stream to rhs
 #if defined(OMPGPU)
   ! no async for OMPGPU for now
-!$omp target teams distribute parallel do simd collapse(3) &
-!$omp&  private(iv,ic,iv_loc,is,rval,rval2,rhs_stream,id,jc)
+!$omp target teams distribute parallel do simd collapse(4) &
+!$omp&  firstprivate(n_radial,nv2,nv1,nt2,nt1,n_theta) &
+!$omp&  firstprivate(sign_qs,nup_theta,ij,box_size,up_theta) &
+!$omp&  private(itor,iv,ir,it) &
+!$omp&  private(itorbox,iv_loc,is,jr0,vel_xi) &
+!$omp&  private(ic,id,itd,itd_class,jc,rval,rval2,rval2s,thfac,rhs_stream)
 #elif defined(_OPENACC)
-!$acc  parallel loop gang vector collapse(3) & 
-!$acc& private(iv,ic,iv_loc,is,rval,rval2,rhs_stream,id,jc) async(1)
+!$acc  parallel loop gang vector collapse(4) async(1) &
+!$acc&  firstprivate(n_radial,nv2,nv1,nt2,nt1,n_theta) &
+!$acc&  firstprivate(sign_qs,nup_theta,ij,box_size,up_theta) &
+!$acc&  private(itor,iv,ir,it) &
+!$acc&  private(itorbox,iv_loc,is,jr0,vel_xi) &
+!$acc&  private(ic,id,itd,itd_class,jc,rval,rval2,rval2s,thfac,rhs_stream)
 #else
-!$omp parallel do collapse(2) &
-!$omp& private(itor,iv,iv_loc,is,ic,rval,rval2,rhs_stream,id,jc) 
+!$omp parallel do collapse(3) &
+!$omp&  firstprivate(n_radial,nv2,nv1,nt2,nt1,n_theta) &
+!$omp&  firstprivate(sign_qs,nup_theta,ij,box_size,up_theta) &
+!$omp&  private(itor,iv,ir,it) &
+!$omp&  private(itorbox,iv_loc,is,jr0,vel_xi)
 #endif
   do itor=nt1,nt2
    do iv=nv1,nv2
-     do ic=1,nc
+    do ir=1,n_radial
+#if defined(OMPGPU) || defined(_OPENACC)
+     ! keep loop high for maximal collapse
+     do it=1,n_theta
+#endif
+        itorbox = itor*box_size*sign_qs
         iv_loc = iv-nv1+1
+
         is = is_v(iv)
-        ! Parallel streaming with upwind dissipation 
-        rval  = omega_stream(it_c(ic),is,itor)*vel(ie_v(iv))*xi(ix_v(iv))
-        rval2 = abs(omega_stream(it_c(ic),is,itor))
+        vel_xi = vel(ie_v(iv))*xi(ix_v(iv))
+        jr0(0) = n_theta*modulo(ir-itorbox-1,n_radial)
+        jr0(1) = n_theta*(ir-1)
+        jr0(2) = n_theta*modulo(ir+itorbox-1,n_radial)
 
-        rhs_stream = 0.0
-        do id=-nup_theta,nup_theta
-           jc = icd_c(id, ic, itor)
-           rhs_stream = rhs_stream &
-                -rval*dtheta(id,ic,itor)*cap_h_c(jc,iv_loc,itor)  &
-                -rval2*dtheta_up(id,ic,itor)*g_x(jc,iv_loc,itor)
-        enddo
+#if !(defined(OMPGPU) || defined(_OPENACC))
+        ! loop as late as possible, to minimize recompute
+!$omp loop &
+!$omp&  private(ic,id,itd,itd_class,jc,rval,rval2,rval2s,thfac,rhs_stream)
+        do it=1,n_theta
+#endif
+          ic = (ir-1)*n_theta + it ! ic_c(ir,it)
 
-        rhs(ic,iv_loc,itor,ij) = rhs(ic,iv_loc,itor,ij) + rhs_stream
+          ! Parallel streaming with upwind dissipation 
+          rval2s = omega_stream(it,is,itor)
+          rval  = rval2s*vel_xi
+          rval2 = abs(rval2s)
+
+          rhs_stream = 0.0
+
+          !icd_c(ic, id, itor)     = ic_c(jr,modulo(it+id-1,n_theta)+1)
+          !jc = icd_c(ic, id, itor)
+          !dtheta(ic, id, itor)    := cderiv(id)*thfac
+          !dtheta_up(ic, id, itor) := uderiv(id)*thfac*up_theta
+          itd = n_theta+it-nup_theta
+          itd_class = 0
+          jc = jr0(itd_class)+itd
+          thfac = thfac_itor(itd_class,itor)
+          do id=-nup_theta,nup_theta
+              if (itd > n_theta) then
+                ! move to next itd_class of compute
+                itd = itd - n_theta
+                itd_class = itd_class + 1
+                jc = jr0(itd_class)+itd
+                thfac = thfac_itor(itd_class,itor)
+              endif
+              rhs_stream = rhs_stream &
+                - thfac  &
+                  * ( rval*cderiv(id)*cap_h_c(jc,iv_loc,itor)  &
+                    + rval2*uderiv(id)*up_theta*g_x(jc,iv_loc,itor) )
+              itd = itd + 1
+              jc = jc + 1
+          enddo
+
+          rhs(ic,iv_loc,itor,ij) = rhs(ic,iv_loc,itor,ij) + rhs_stream
      enddo
+    enddo
    enddo
   enddo
 
