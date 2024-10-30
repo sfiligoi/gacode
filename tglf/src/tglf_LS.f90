@@ -384,8 +384,10 @@ if(new_matrix)then
           do i=1,iur
             v(i) = small
             do j=1,iur
-              zmat(i,j) = beta(jmax(imax))*amat(i,j)- &
-                         (small +alpha(jmax(imax)))*bmat(i,j)
+!              zmat(i,j) = beta(jmax(imax))*amat(i,j)- &
+!                         (small +alpha(jmax(imax)))*bmat(i,j)
+              zmat(i,j) = amat(i,j)- &
+                         (small + rr(jmax(imax))+xi*ri(jmax(imax)))*bmat(i,j)
             enddo
           enddo
           call zgesv(iur,1,zmat,iur,ipiv,v,iur,info)

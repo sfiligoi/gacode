@@ -14,12 +14,14 @@
       IMPLICIT NONE
 !
       CHARACTER(1) :: rightvectors
+      LOGICAL :: use_zgeev = .false.
       INTEGER :: is,js
       INTEGER ::  j1, j2, j, i
       INTEGER :: ifail,ib, jb, ia, ja, ia0, ja0
       INTEGER :: info,lwork
       INTEGER :: xnu_model
       INTEGER :: idum=0
+      INTEGER :: cpucount1, cpucount2, cpurate
       REAL :: ft2,ft3,ft4,ft5
       REAL :: Linsker,am,bm
       REAL :: w_s, w_dh, w_dg, w_d1, modw_d1,w_d0, w_cd
@@ -86,6 +88,7 @@
       COMPLEX :: psi_A,psi_B,psi_AN,psi_BN  
       COMPLEX :: sig_A,sig_B
       COMPLEX :: k_par,k_par_psi
+      INTEGER,ALLOCATABLE,DIMENSION(:) :: ipiv
       REAL,ALLOCATABLE,DIMENSION(:) :: rwork
       COMPLEX,ALLOCATABLE,DIMENSION(:,:) :: at,bt
       COMPLEX,ALLOCATABLE,DIMENSION(:,:) :: vleft,vright
@@ -102,6 +105,8 @@
       lwork = 33*iur
       ALLOCATE(work(lwork))
       ALLOCATE(zomega(iur))
+      ALLOCATE(ipiv(iur))
+!
 !      write(*,*)"eigensolver allocation done"
 !
       c35 = 3.0/5.0
@@ -2855,40 +2860,70 @@
 !        write(*,*)i,j,at(i,j),bt(i,j)
       enddo
       enddo
+     if(use_zgeev)then 
 !      call system_clock(cpucount1)
-      call zggev("N",rightvectors,iur,at,iur,bt,iur,    &
+!  New two-stage eigensolver to replace single call to zgeev. 
+!  Put in standard form with zgesv then solve standard form with zgeev
+      call zgesv(iur, iur, bt, iur, ipiv, at, iur, info)
+      IF (info .ne. 0) THEN
+!         WRITE (*,*) 'info = ', info
+         call tglf_error(1,"ERROR: zgesv failed in gftm_eigensolver.f90")
+      END IF
+      call zgeev('N', rightvectors, iur, at, iur, zomega,                    &
+                 vleft, iur, vright, iur, work, lwork, rwork, info)
+      IF (info .ne. 0) THEN
+!         WRITE (*,*) 'info = ', info
+         call tglf_error(1,"ERROR: zgeev failed in gftm_eigensolver.f90")
+      END IF
+!      call system_clock(cpucount2,cpurate)
+!      write(*,*)"cputime for zgeev =",REAL(cpucount2-cpucount1)/REAL(cpurate)
+      do j1=1,iur
+        rr(j1) = REAL(zomega(j1))
+        ri(j1) = AIMAG(zomega(j1))
+      enddo
+     else 
+!      use_zgeev .false.
+!
+!      call system_clock(cpucount1)
+
+       call zggev("N",rightvectors,iur,at,iur,bt,iur,    &
                   alpha,beta,vleft,iur,vright,iur,work,lwork,rwork,info)
 !      call system_clock(cpucount2,cpurate)
 !      write(*,*)"cputime for zggev =",REAL(cpucount2-cpucount1)/REAL(cpurate)
 !      write(*,*)"jmax = ",jmax,alpha(jmax)/beta(jmax)
 !      write(*,*)"work(1)",work(1)
 
-      if (info /= 0) then
-         call tglf_error(1,"ERROR: ZGGEV failed in tglf_eigensolver.f90")
-      endif
+        if (info /= 0) then
+           call tglf_error(1,"ERROR: ZGGEV failed in tglf_eigensolver.f90")
+        endif
 
 !      cputime2=MPI_WTIME()
-      do j1=1,iur
-        beta2=REAL(CONJG(beta(j1))*beta(j1))
-        if(beta2.ne.0.0)then  ! zomega = -xi*(frequency+xi*growthrate)
+!
+       do j1=1,iur
+         beta2=REAL(CONJG(beta(j1))*beta(j1))
+         if(beta2.ne.0.0)then  ! zomega = -xi*(frequency+xi*growthrate)
           zomega(j1)=alpha(j1)*CONJG(beta(j1))/beta2
-        else
+         else
           zomega(j1)=0.0
-        endif
+         endif
 !        write(*,*)j1,"zomega=",zomega(j1)
-        rr(j1) = REAL(zomega(j1))
-        ri(j1) = AIMAG(zomega(j1))
+!
+         rr(j1) = REAL(zomega(j1))
+         ri(j1) = AIMAG(zomega(j1))
+        enddo
+!
+      endif ! use_zgeev .false.
 ! filter out numerical instabilities that sometimes occur 
 ! with high mode frequency
         if(filter_in.gt.0.0)then
-          if(rr(j1).gt.0.0.and.ABS(ri(j1)).gt.max_freq)then
+          do j1=1,iur
+           if(rr(j1).gt.0.0.and.ABS(ri(j1)).gt.max_freq)then
             rr(j1)=-rr(j1)
 !            write(*,*)"filtered mode ",j1,rr(j1),ri(j1)
 !            write(*,*)"beta = ",beta(j1),"alpha =",alpha(j1)
 !            write(*,*)(vright(j1,j2),j2=1,iur)
-          endif
-        endif
-        do j2=1,iur
+           endif
+          do j2=1,iur
 !          if(iflux_in)then
 !            vr(j1,j2) = REAL(vright(j1,j2))
 !            vi(j1,j2) = AIMAG(vright(j1,j2))
@@ -2896,8 +2931,9 @@
             vr(j1,j2) = 0.0
             vi(j1,j2) = 0.0
 !          endif
-        enddo
-      enddo
+          enddo
+          enddo
+      endif
 !
       if(ALLOCATED(rwork))DEALLOCATE(rwork)
       if(ALLOCATED(at))DEALLOCATE(at)
@@ -2906,6 +2942,8 @@
       if(ALLOCATED(vright))DEALLOCATE(vright)
       if(ALLOCATED(work))DEALLOCATE(work)
       if(ALLOCATED(zomega))DEALLOCATE(zomega)
+      if(ALLOCATED(ipiv))DEALLOCATE(ipiv)
+
 !
       END SUBROUTINE tglf_eigensolver
 !
