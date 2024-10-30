@@ -5,16 +5,28 @@ import sys
 import json
 import numpy as np
 import argparse
+import textwrap
 from pygacode.cgyro import data
 
 garoot = os.environ['GACODE_ROOT']
 
 def opts():
 
-    parser=argparse.ArgumentParser(description="CGYRO localdump utility")
-      
+    mytext = '''\
+    output:
+      out.cgyro.localdump  (complete localdump file)
+      json.cgyro.imas      (IMAS data dictionary of inputs)
+      json.cgyro.localdump (useless JSON file containing inputs)
+    '''
+    
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawTextHelpFormatter,
+        prog = 'cgyro_json',
+        description="CGYRO localdump utility",
+        epilog=textwrap.dedent(mytext))
+    
     parser.add_argument('-dir',
-                        help="working directory",
+                        help="working directory (default: cwd)",
                         type=str,
                         default='.')
     
@@ -22,7 +34,9 @@ def opts():
 
     return args.dir
 
-mydir = opts()+'/'
+mydir = opts()
+
+mydir = mydir+'/'
 
 # Sanity checks:
 if not os.path.isdir(mydir):
