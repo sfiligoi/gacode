@@ -191,6 +191,12 @@ module qlgyro_globals
   real :: s_zeta
   real :: shape_sin3
   real :: shape_ssin3
+  real :: shape_sin4
+  real :: shape_ssin4
+  real :: shape_sin5
+  real :: shape_ssin5
+  real :: shape_sin6
+  real :: shape_ssin6
   real :: shape_cos0
   real :: shape_scos0
   real :: shape_cos1
@@ -199,6 +205,12 @@ module qlgyro_globals
   real :: shape_scos2
   real :: shape_cos3
   real :: shape_scos3
+  real :: shape_cos4
+  real :: shape_scos4
+  real :: shape_cos5
+  real :: shape_scos5
+  real :: shape_cos6
+  real :: shape_scos6
 
   real :: bunit
   real :: bgs2
