@@ -4,19 +4,42 @@ import os
 import sys
 import json
 import numpy as np
+import argparse
 from pygacode.cgyro import data
 
-sim = data.cgyrodata('./')
+garoot = os.environ['GACODE_ROOT']
 
-myroot = os.environ['GACODE_ROOT']
+def opts():
 
-# Sanity check:
-if not os.path.isfile('input.cgyro.gen'):
-   print('cgyro_json: (ERROR) input.cgyro.gen missing')
+    parser=argparse.ArgumentParser(description="CGYRO localdump utility")
+      
+    parser.add_argument('-dir',
+                        help="working directory",
+                        type=str,
+                        default='.')
+    
+    args=parser.parse_args()
+
+    return args.dir
+
+mydir = opts()+'/'
+
+# Sanity checks:
+if not os.path.isdir(mydir):
+   # No directory
+   print('cgyro_json: (ERROR) directory does not exist')
    sys.exit()
+else:
+   if not os.path.isfile(mydir+'input.cgyro.gen'):
+      # No data
+      print('cgyro_json: (ERROR) input.cgyro.gen missing')
+      sys.exit()
+   else:
+      # Read data
+      sim = data.cgyrodata(mydir)
 
 try:
-   with open('out.cgyro.version', 'r') as file:
+   with open(mydir+'out.cgyro.version', 'r') as file:
       for line in file:
          pass
       version = line.strip()
@@ -38,11 +61,11 @@ for i in range(sim.n_species):
 
 d = {}
 
-with open(myroot+'/cgyro/bin/input.json','r') as file:
+with open(garoot+'/cgyro/bin/input.json','r') as file:
    default = json.load(file)
    
 # Determine non-default values in input.cgyro
-with open('input.cgyro.gen','r') as file:
+with open(mydir+'input.cgyro.gen','r') as file:
    for line in file:
       u = line.split()
       key = u[1]

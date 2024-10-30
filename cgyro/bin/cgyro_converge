@@ -4,23 +4,54 @@ import numpy as np
 import os
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-
+import argparse
 from pygacode.cgyro import data
 from pygacode.gacodefuncs import *
 
+# number of time windows
+nwin=8
+field=0
+moment=1 
 
-# --- to visualize results for one case plot=True------
-plot=True
+def opts():
+
+    parser=argparse.ArgumentParser(description="CGYRO timetrace utility")
+      
+    parser.add_argument('-plot',
+                        help="plot result in working directory",
+                        action='store_true')
+    
+    args=parser.parse_args()
+
+    return args.plot
+
+def cgyrodatareader(moment,field,path):
+
+    # read minimal data for setup (look in current directory)
+    sim = data.cgyrodata(path+'/',fast=True,silent=True)
+
+    # copy time vector and number of species
+    t = sim.t
+
+    # read bin.cgyro.ky_flux
+    sim.getflux()
+
+    y = np.sum(sim.ky_flux[:,moment,field,:,:],axis=1)
+
+    return sim.n_species,t,y
+
+plot = opts()
 
 if plot:
+    # plot results for one case
     directory='./'
     write_output=False
 else:
-    directory= "/global/cfs/cdirs/cgyrodb/"
+    # traverse directories
+    directory= '/global/cfs/cdirs/cgyrodb/'
     write_output=True
     fout = "./cases_results_20%.txt"
     fo = open(fout, "w")
-
 
 for path, folders, files in os.walk(directory):
     # Open file#
@@ -28,31 +59,8 @@ for path, folders, files in os.walk(directory):
       if 'out.cgyro.info' in filename:
         if write_output:          
            fo.write(f"#-----{path}-----#")
-        # read minimal data for setup (look in current directory)
-        sim = data.cgyrodata(f'{path}/',fast=True,silent=True)
-
-        # copy time vector and number of species
-        t = sim.t
-        ns = sim.n_species
         linestyles=['-','--',':','-.']
-        # read bin.cgyro.ky_flux
-        sim.getflux()
-
-
-        # Simulation length (max time)
-        tmax = t[-1]
         
-    
-
-
-        # size and number of time windows
-        #dt = 50.0
-        #nwin = int(tmax/dt)
-        nwin=8
-        dt=tmax/nwin
-        t0 = tmax-nwin*dt
-        
-
         if plot:
          #add plot for visualization
          fig = plt.figure(figsize=(12,6))
@@ -61,17 +69,21 @@ for path, folders, files in os.walk(directory):
          plt.ylabel('Flux')
          colors = mpl.cm.rainbow(np.linspace(0, 1, nwin))
         
-
         convergance = True
 
         # select field=0 (phi), moment=1 (Q), species (0), and sum over kx
-        for species_index in range(ns):
-          field=0 ; moment=1 ; 
-          species=species_index
-          y = np.sum(sim.ky_flux[species,moment,field,:,:],axis=0)
+        ns,t,y = cgyrodatareader(moment,field,path)
 
+        # Simulation length (max time)
+        tmax = t[-1]
+        dt = tmax/nwin
+        t0 = tmax-nwin*dt
+
+        for species_index in range(ns):
+          species = species_index
+          
           if plot:
-           plt.plot(t,y, label=f"Q_{species_index}", linestyle=linestyles[species_index], color=colors[species_index])
+           plt.plot(t,y[species,:], label=f"Q_{species_index}", linestyle=linestyles[species_index], color=colors[species_index])
 
           average_array=[]
 
@@ -85,12 +97,6 @@ for path, folders, files in os.walk(directory):
             average_array.append(ave)
             if plot:
               plt.hlines(y=ave, xmin=t[imin], xmax=t[imax], color=colors[i], lw=3, linestyle=linestyles[species_index])
-
-            
-
-
-
-        
         
         # define the convergence by std between last free averaged regions as a pesentage to the total
 
