@@ -26,12 +26,12 @@ def opts():
         prog = 'cgyrodb',
         description="CGYRO database utility",
         epilog=textwrap.dedent(mytext))
-    
+
     parser.add_argument('-mode',
                         help='Mode switch (data,update)',
                         type=str,
                         default='data')
-        
+
     args=parser.parse_args()
 
     return args.mode
@@ -73,16 +73,19 @@ def gendict(sim,mode):
 
    return mydict
 
+ignore = 'eslshared'
+
 # First locate all directories
 y = []
 for root,xd,xf in os.walk('./'):
    if xd == []:
-      y.append(root)
+      if ignore not in root:
+          y.append(root)
 
 if mode == 'update':
    # Run through directories and update
    for mdir in y:
-      print('Updating '+mdir) 
+      print('Updating '+mdir)
       os.system('cgyro -t '+mdir)
 else:
    # Create master dictionary "meta"
