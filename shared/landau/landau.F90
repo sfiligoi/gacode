@@ -1,26 +1,28 @@
 !  gfortran -march=native -O3 -fno-stack-arrays -fimplicit-none -fdefault-real-8 landau.F90  -c
 !intel:
 !ifort -stand f15 -warn all -march=native -O3 -heap-arrays 10 -implicitnone -real-size 64 landau.F90 -c
-module landau
 #ifndef __PGI
   !can't use quad precision with frumpy pgi compiler
-  real(16), parameter,private :: pi1=atan(1._16)*4
+#define HIREAL real(16)
+#define HRS _16
+#else
+#define HIREAL real
+#define HRS
+#endif
+module landau
+  HIREAL, parameter,private :: pi1=atan(1.HRS)*4
   ! real, parameter :: intnorm=pi1**(-1.5)*4*pi1
   ! int gphys(v) d^3v=1=int g(x) x^2 dx *intnor
   ! Maybe one should normalise this once for a given xmax and density 1?
-  real, parameter :: vunit=sqrt(2._16)
+  real, parameter :: vunit=real(sqrt(2.HRS))
   ! v*vunit is v in units of sqrt(T/m)
   ! v itself is v in units of sqrt(2T/m) ("collision operator units")
-#else
-  real, parameter,private :: pi1=atan(1.)*4
-  real, parameter :: vunit=sqrt(2.)
-#endif
-  real, parameter :: intnorm=4/sqrt(pi1)
-  real, parameter :: normcol=sqrt(8/pi1)
+  real, parameter :: intnorm=real(4/sqrt(pi1))
+  real, parameter :: normcol=real(sqrt(8/pi1))
   ! Normalisation of ctest/emat cfield/emat for the self-collisions of the
   ! reference species without caa or cab.
   ! Note: must take into account muref^3=sqrt(1/8), since mu^2=m/(2T)
-  real, parameter :: normcolcgyro=4/sqrt(pi1)
+  real, parameter :: normcolcgyro=real(4/sqrt(pi1))
 
   integer :: verbose=0
 contains
@@ -56,7 +58,7 @@ contains
     if (present(nb)) nb1=nb
     if (present(mua)) mua1=mua
     if (present(mub)) mub1=mub
-    tau_ab_inv=sqrt(8./pi1)/3*za1**2*zb1**2*nb1/(mua1*Ta1**2)*&
+    tau_ab_inv=real(sqrt(8./pi1))/3*za1**2*zb1**2*nb1/(mua1*Ta1**2)*&
          (1+mua1**2*Ta1/(mub1**2*Tb1))/(1+mua1**2/(mub1**2))**1.5
   end function tau_ab_inv
     
@@ -71,36 +73,13 @@ contains
     optional :: t1t2_int ! only calculate that term if it is present.
     optional :: addcutoff
     !allocate(lor_int(n,n),dif_int(n,n))
-    real p0,p1,pi,q0,q1,qi,r0,r1,ri,s0,s1,si,x,x1,xmax1
+    real p0,p1,pi,q0,q1,qi,r0,r1,ri,s0,s1,si,x,xmax1
     real f1,f2
     integer i,j,k
-#ifndef __PGI
-    real(16) fct1,fct2,fct1lo,fct1hi,fct2lo,fct2hi !inline functions
-    real(16) w,xmaxx
-#else
-    real fct1,fct2,fct1lo,fct1hi,fct2lo,fct2hi !inline functions
-    real w,xmaxx
-#endif
+    HIREAL xmaxx,x1
     logical t1t2,addcutoff1
     real t1,t2 ! for timing
-#ifndef __PGI
-    fct1(w)=.125_16*w**(-3)*(exp(-w*w)*w+(2*w*w-1)*.5_16*sqrt(pi1)*erf(w))
-    fct2(w)=.25_16*w**(-1)*(.5_16*sqrt(pi1)*erf(w)-w*exp(-w**2))
-    fct2hi(w)=-w**(-1)*((1._16/12)*xmaxx*exp(-xmaxx**2)*(3+2*xmaxx**2)-(sqrt(pi1)/8)*erf(xmaxx))
-#else
-    fct1(w)=.125*w**(-3)*(exp(-w*w)*w+(2*w*w-1)*.5*sqrt(pi1)*erf(w))
-    fct2(w)=.25*w**(-1)*(.5*sqrt(pi1)*erf(w)-w*exp(-w**2))
-    fct2hi(w)=-w**(-1)*((1./12)*xmaxx*exp(-xmaxx**2)*(3+2*xmaxx**2)-(sqrt(pi1)/8)*erf(xmaxx))
-#endif
-    fct1lo(w)=fct1(w)-exp(-xmaxx**2)/6  ! for w<xmax
-    fct2lo(w)=fct2(w)-w*w*exp(-xmaxx**2)/6 !for w<xmax
-    !  fct1hi(w)=w**(-3)*((1./24)*exp(-xmaxx**2)*xmaxx*(3-6*w**2+2*xmaxx**2)+(sqrt(pi1)/16)*(2*w**2-1)*erf(xmaxx))
-    fct1hi(w)=-w**(-3)/48*((-2*exp(-xmaxx**2)*xmaxx*(3+2*xmaxx**2)+3*sqrt(pi1)*erf(xmaxx))+&
-         w**2*(12*exp(-xmaxx**2)*xmaxx-6*sqrt(pi1)*erf(xmaxx)))
 
-    !Inaccuracy for
-    !./hhv 5 .5 0 50 1 1
-    !was due to inaccuracies in this routine, likely due to cancellations in the fcts.
     xmaxx=xmax
     t1t2=present(t1t2_int)
     addcutoff1=.true.
@@ -197,23 +176,13 @@ contains
     do k=1,ngauss
        x=gp(k)*xmax1
        x1=x*beta
-#ifndef __PGI
        if (addcutoff1) then
-          f1=fct1lo(real(x1,16))
-          f2=fct2lo(real(x1,16))
+          f1=real(fct1lo(x1))
+          f2=real(fct2lo(x1))
        else
-          f1=fct1(real(x1,16))
-          f2=fct2(real(x1,16))
+          f1=real(fct1(x1))
+          f2=real(fct2(x1))
        endif
-#else
-       if (addcutoff1) then
-          f1=fct1lo(x1)
-          f2=fct2lo(x1)
-       else
-          f1=fct1(x1)
-          f2=fct2(x1)
-       endif
-#endif
        do j=1,n
           if (j==1) then
              q1=0
@@ -234,7 +203,7 @@ contains
           s1=0
           si=0
           lor_int(j,i)=lor_int(j,i)+pi*ri*f1
-          if (t1t2) t1t2_int(j,i)=t1t2_int(j,i)+2*qi*ri*x1*f2
+          if (t1t2) t1t2_int(j,i)=t1t2_int(j,i)+2*qi*ri*real(x1)*f2
           ! ^^ vgl 1.8.19 (2)
           do i=2,n
              s0=si
@@ -245,21 +214,16 @@ contains
              r1=r0
              lor_int(j,i)=lor_int(j,i)+pi*ri*f1
              dif_int(j,i)=dif_int(j,i)+qi*si*f2
-             if (t1t2) t1t2_int(j,i)=t1t2_int(j,i)+2*qi*ri*x1*f2
+             if (t1t2) t1t2_int(j,i)=t1t2_int(j,i)+2*qi*ri*real(x1)*f2
           enddo
        enddo
     enddo
     if (addcutoff1 .and. beta>1) then
        do k=1,ngauss
           x1=xmax*(1+(beta-1)*gp(k))
-          x=x1/beta
-#ifndef __PGI
-          f1=fct1hi(real(x1,16))
-          f2=fct2hi(real(x1,16))
-#else
-          f1=fct1hi(x1)
-          f2=fct2hi(x1)
-#endif
+          x=real(x1)/beta
+          f1=real(fct1hi(x1))
+          f2=real(fct2hi(x1))
 
           do j=1,n
              if (j==1) then
@@ -281,7 +245,7 @@ contains
              s1=0
              si=0
              lor_int(j,i)=lor_int(j,i)+pi*ri*f1
-             if (t1t2) t1t2_int(j,i)=t1t2_int(j,i)+2*qi*ri*x1*f2
+             if (t1t2) t1t2_int(j,i)=t1t2_int(j,i)+2*qi*ri*real(x1)*f2
              ! ^^ vgl 1.8.19 (2)
              do i=2,n
                 s0=si
@@ -292,7 +256,7 @@ contains
                 r1=r0
                 lor_int(j,i)=lor_int(j,i)+pi*ri*f1
                 dif_int(j,i)=dif_int(j,i)+qi*si*f2
-                if (t1t2) t1t2_int(j,i)=t1t2_int(j,i)+2*qi*ri*x1*f2
+                if (t1t2) t1t2_int(j,i)=t1t2_int(j,i)+2*qi*ri*real(x1)*f2
              enddo
           enddo
        enddo
@@ -320,8 +284,44 @@ contains
     ! i.e. we multiply with beta!!
     if (t1t2) t1t2_int=t1t2_int*beta**(-4) ! ***<--- must be multiplied with (Ta/Tb-1)
     call cpu_time(t2)
-    
+
     if (verbose>0) print '(A,G13.3)','gentestkernel took ',t2-t1
+  contains
+    elemental HIREAL function fct1(w)
+      implicit none
+      HIREAL,intent(in) :: w
+      fct1=.125HRS*w**(-3)*(exp(-w*w)*w+(2*w*w-1)*.5HRS*sqrt(pi1)*erf(w))
+    end function fct1
+    elemental HIREAL function fct2(w)
+      implicit none
+      HIREAL,intent(in) :: w
+      fct2=.25HRS*w**(-1)*(.5HRS*sqrt(pi1)*erf(w)-w*exp(-w**2))
+    end function fct2
+    elemental HIREAL function fct1lo(w)
+      implicit none
+      HIREAL,intent(in) :: w
+      fct1lo=fct1(w)-exp(-xmaxx**2)/6  ! for w<xmax
+    end function fct1lo
+    elemental HIREAL function fct1hi(w)
+      implicit none
+      HIREAL,intent(in) :: w
+      !  fct1hi(w)=w**(-3)*((1./24)*exp(-xmaxx**2)*xmaxx*(3-6*w**2+2*xmaxx**2)+(sqrt(pi1)/16)*(2*w**2-1)*erf(xmaxx))
+      fct1hi=-w**(-3)/48*((-2*exp(-xmaxx**2)*xmaxx*(3+2*xmaxx**2)+3*sqrt(pi1)*erf(xmaxx))+&
+           w**2*(12*exp(-xmaxx**2)*xmaxx-6*sqrt(pi1)*erf(xmaxx)))
+      !Inaccuracy for
+      !./hhv 5 .5 0 50 1 1
+      !was due to inaccuracies in this routine, likely due to cancellations in the fcts.
+    end function fct1hi
+    elemental HIREAL function fct2lo(w)
+      implicit none
+      HIREAL,intent(in) :: w
+      fct2lo=fct2(w)-w*w*exp(-xmaxx**2)/6 !for w<xmax
+    end function fct2lo
+    elemental HIREAL function fct2hi(w)
+      implicit none
+      HIREAL,intent(in) :: w
+      fct2hi=-w**(-1)*((1.HRS/12)*xmaxx*exp(-xmaxx**2)*(3+2*xmaxx**2)-(sqrt(pi1)/8)*erf(xmaxx))
+    end function fct2hi
   end subroutine gentestkernel
 
   subroutine genintkernel(n,lmax,a1,b1,c1,xmax,beta,t1t2ratio,gp,gw,ngauss,gp2,gw2,ng2,addcutoff,intkernel,intlokernel)
