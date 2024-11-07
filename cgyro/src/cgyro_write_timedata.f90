@@ -135,7 +135,7 @@ subroutine cgyro_write_timedata
   endif
   !---------------------------------------------------------------
 
-  ! Linear frequency diagnostics for every value of n
+  ! out.cgyro.freq: linear frequency diagnostics for every value of n
   call cgyro_freq
   fvec(1,:) = real(freq(:)) ; fvec(2,:) = aimag(freq(:))
   if (n_toroidal > 1) then
@@ -148,7 +148,7 @@ subroutine cgyro_write_timedata
   ! Output to screen
   if (printout) call print_scrdata()
 
-  ! Output to files
+  ! out.cgyro.time: time,total_error,rk_error,delta_t
   vec(1) = t_current ; vec(2:3) = integration_error(:) ; vec(4) = delta_t_gk
   call write_ascii(trim(path)//runfile_time,4,vec(1:4))
 
@@ -567,11 +567,11 @@ subroutine write_ascii(datafile,n_fn,fn)
 
      open(unit=io,file=datafile,status='old')
      do i=1,i_current
-        read(io,fmtstr) fn(1)
+        read(io,fmtstrn) fn(:)
      enddo
      endfile(io)
      close(io)
-
+     
   end select
 
 end subroutine write_ascii

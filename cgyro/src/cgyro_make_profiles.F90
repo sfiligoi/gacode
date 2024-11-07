@@ -122,13 +122,14 @@ subroutine cgyro_make_profiles
      z_eff   = z_eff_loc
      b_unit  = b_unit_loc
 
-     dens(1:n_species) = dens_loc(1:n_species)     
-     temp(1:n_species) = temp_loc(1:n_species)     
-     dlnndr(1:n_species) = dlnndr_loc(1:n_species)     
-     dlntdr(1:n_species) = dlntdr_loc(1:n_species)
+     dens(1:n_species)    = dens_loc(1:n_species)     
+     temp(1:n_species)    = temp_loc(1:n_species)     
+     dlnndr(1:n_species)  = dlnndr_loc(1:n_species)     
+     dlntdr(1:n_species)  = dlntdr_loc(1:n_species)
      sdlnndr(1:n_species) = sdlnndr_loc(1:n_species)     
      sdlntdr(1:n_species) = sdlntdr_loc(1:n_species)     
-
+     sbeta(1:n_species)   = sbeta_loc(1:n_species)     
+ 
      if (ae_flag == 1) then
         is_ele = n_species+1
      else
@@ -180,21 +181,14 @@ subroutine cgyro_make_profiles
      loglam = 24.0 - log(sqrt(dens_ele*1e13)/(temp_ele*1e3))
      nu_ee  = cc * loglam * dens_ele / (sqrt(mass_ele)*temp_ele**1.5) &
           / (vth_norm/a_meters) 
-
-     ! beta calculation in CGS:
-     !
-     !         8*pi ( n[1e19/m^3]*1e-6*1e19 )( T[keV]*1.6022*1e-9 )
-     ! beta = ------------------------------------------------------
-     !                           ( 1e4*B[T] )^2
-     !
-     !      = 4.027e-3 n[1e19/m^3]*T[keV]/B[T]^2
-
-     betae_unit = 4.027e-3 * dens_ele * temp_ele / b_unit**2
-
+     
+     ! Electron beta
+     betae_unit = betae_loc
+     
      ! Debye length (from NRL plasma formulary):
      ! Use input lambda_debye as scaling parameter
 
-     lambda_star = 7.43 * sqrt((1e3*temp_norm)/(1e13*dens_norm))/rhos
+     lambda_star = 7.434*sqrt((1e3*temp_norm)/(1e13*dens_norm))/rhos
 
      ! Normalize
      do is=1,n_species
@@ -218,14 +212,14 @@ subroutine cgyro_make_profiles
 
      ! Re-scaling
      lambda_star      = lambda_star * lambda_star_scale
-     gamma_e          = gamma_e      * gamma_e_scale
-     gamma_p          = gamma_p      * gamma_p_scale
-     mach             = mach         * mach_scale    
-     betae_unit       = betae_unit   * betae_unit_scale
+     gamma_e          = gamma_e     * gamma_e_scale
+     gamma_p          = gamma_p     * gamma_p_scale
+     mach             = mach        * mach_scale    
+     betae_unit       = betae_unit  * betae_unit_scale
      do is=1,n_species
-        dlnndr(is) = dlnndr(is)  * dlnndr_scale(is) 
-        dlntdr(is) = dlntdr(is)  * dlntdr_scale(is)  
-        nu(is)     = nu(is)      * nu_ee_scale
+        dlnndr(is) = dlnndr(is) * dlnndr_scale(is) 
+        dlntdr(is) = dlntdr(is) * dlntdr_scale(is)  
+        nu(is)     = nu(is)     * nu_ee_scale
      enddo
 
      ! Set beta_* consistent with re-scaled beta and gradients and then re-scale
@@ -259,13 +253,13 @@ subroutine cgyro_make_profiles
         dlntdr_ele = dlntdr_ae
      else
         is_ele = -1
-        do is=1, n_species
-           if(z(is) < 0.0) then
+        do is=1,n_species
+           if (z(is) < 0.0) then
               is_ele = is
               exit
            endif
         enddo
-        if(is_ele == -1) then
+        if (is_ele == -1) then
            call cgyro_error('No electron species specified')
            return
         endif
@@ -291,8 +285,8 @@ subroutine cgyro_make_profiles
      ! Always compute beta_* consistently with parameters in input.cgyro and then re-scale
      ! note: beta_star(0) will be over-written with sonic rotation
      call set_betastar
-     beta_star(0) = beta_star(0)*beta_star_scale
-     beta_star_fac  = beta_star_fac * beta_star_scale
+     beta_star(0)  = beta_star(0)*beta_star_scale
+     beta_star_fac = beta_star_fac*beta_star_scale
 
   endif
 
@@ -422,7 +416,7 @@ subroutine cgyro_make_profiles
      omega_eb_base = k_theta_base*length*gamma_e/(2*pi)
      select case (shear_method)
      case (1)
-        call cgyro_info('ExB shear: Hammett discrete shift (do not use for production simulations)') 
+        call cgyro_info('ExB shear: Hammett discrete shift (WARNING: TESTING PURPOSES ONLY)') 
      case (2)
         call cgyro_info('ExB shear: Wavenumber advection') 
         source_flag = 1
@@ -431,16 +425,16 @@ subroutine cgyro_make_profiles
      end select
   else
      omega_eb_base = 0.0
-     shear_method = 0
      call cgyro_info('ExB shear: OFF') 
   endif
 
-  if (profile_shear_flag == 1) then
-     call cgyro_info('Profile shear: Wavenumber advection') 
+  if (global_flag == 1) then
+     call cgyro_info('Global profile variation: ON') 
      source_flag = 1
   else
      sdlnndr(1:n_species) = 0.0
      sdlntdr(1:n_species) = 0.0
+     sbeta(1:n_species)   = 0.0
   endif
 
 

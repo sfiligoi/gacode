@@ -91,6 +91,8 @@ program locpargen
   print 10,'INFO: (locpargen) beta_*   =',beta_star_loc
   print 10,'INFO: (locpargen) ky*rhos (n=1) =',abs(q_loc/rmin_loc*rhos_loc/a)
 
+  betae_unit = betae_loc
+
   ! Compute collision frequency
   !
   !          4 pi ne e^4 ne ln(Lambda)
@@ -103,8 +105,6 @@ program locpargen
 
   loglam = 24.0-log(sqrt(dens_loc(ise)*1e13)/(temp_loc(ise)*1e3))
   nu_ee  = cc*loglam*dens_loc(ise)/(sqrt(mass_loc(ise)/2.0)*temp_loc(ise)**1.5)
-
-  betae_unit = 4.027e-3*dens_loc(ise)*temp_loc(ise)/b_unit_loc**2
 
   lambda_star = 7.43 * sqrt((1e3*temp_loc(ise))/(1e13*dens_loc(ise)))/rhos_loc
 

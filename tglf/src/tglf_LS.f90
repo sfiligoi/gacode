@@ -327,7 +327,7 @@ if(new_matrix)then
 	  endif
 
 	  ! Check if the mode is a numerical instability
-	  if (.not. (is_even .and. rr(jmax(imax)) > 0.0 .and. ri(jmax(imax)) > 0) ) then
+	  if (.not. is_even .or. rr(jmax(imax)) <= 0.0 .or. ri(jmax(imax)) <= 0) then
             rr(jmax(imax)) = -rr(jmax(imax))
 	  endif
 	endif
@@ -384,8 +384,10 @@ if(new_matrix)then
           do i=1,iur
             v(i) = small
             do j=1,iur
-              zmat(i,j) = beta(jmax(imax))*amat(i,j)- &
-                         (small +alpha(jmax(imax)))*bmat(i,j)
+!              zmat(i,j) = beta(jmax(imax))*amat(i,j)- &
+!                         (small +alpha(jmax(imax)))*bmat(i,j)
+              zmat(i,j) = amat(i,j)- &
+                         (small + rr(jmax(imax))+xi*ri(jmax(imax)))*bmat(i,j)
             enddo
           enddo
           call zgesv(iur,1,zmat,iur,ipiv,v,iur,info)
@@ -395,7 +397,8 @@ if(new_matrix)then
           if (info /= 0)CALL tglf_error(1,"ZGESV failed in tglf_LS")
 
 !  alpha/beta=-xi*(frequency+xi*growthrate)
-          eigenvalue = xi*alpha(jmax(imax))/beta(jmax(imax))  
+!          eigenvalue = xi*alpha(jmax(imax))/beta(jmax(imax))  
+          eigenvalue = xi*(rr(jmax(imax)) + xi*ri(jmax(imax)))
 !          write(*,*)"eigenvalue=",eigenvalue,imax
           call get_QL_weights
 !

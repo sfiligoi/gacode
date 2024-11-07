@@ -111,6 +111,28 @@ subroutine tglf_run()
           tglf_s_delta_loc_in, &
           tglf_zeta_loc_in, &
           tglf_s_zeta_loc_in, &
+          tglf_shape_sin3_loc_in, &
+          tglf_shape_s_sin3_loc_in, &
+          tglf_shape_sin4_loc_in, &
+          tglf_shape_s_sin4_loc_in, &
+          tglf_shape_sin5_loc_in, &
+          tglf_shape_s_sin5_loc_in, &
+          tglf_shape_sin6_loc_in, &
+          tglf_shape_s_sin6_loc_in, &
+          tglf_shape_cos0_loc_in, &
+          tglf_shape_s_cos0_loc_in, &
+          tglf_shape_cos1_loc_in, &
+          tglf_shape_s_cos1_loc_in, &
+          tglf_shape_cos2_loc_in, &
+          tglf_shape_s_cos2_loc_in, &
+          tglf_shape_cos3_loc_in, &
+          tglf_shape_s_cos3_loc_in, &
+          tglf_shape_cos4_loc_in, &
+          tglf_shape_s_cos4_loc_in, &
+          tglf_shape_cos5_loc_in, &
+          tglf_shape_s_cos5_loc_in, &
+          tglf_shape_cos6_loc_in, &
+          tglf_shape_s_cos6_loc_in, &
           tglf_q_loc_in, &
           tglf_q_prime_loc_in, &
           tglf_p_prime_loc_in, &
@@ -148,17 +170,17 @@ subroutine tglf_run()
 
   if (tglf_use_transport_model_in) then
 
-     ! Call TGLFNN and later TGLF if TGLFNN was not accurate
-     if (tglf_nn_max_error_in .gt. 0) then
-        call tglf_nn_tm
-     endif
-     if (.not. valid_nn) then
+!     ! Call TGLFNN and later TGLF if TGLFNN was not accurate
+!     if (tglf_nn_max_error_in .gt. 0) then
+!        call tglf_nn_tm
+!     endif
+!     if (.not. valid_nn) then
 #ifdef MPI_TGLF
         call tglf_tm_mpi
 #else
         call tglf_tm
 #endif
-     endif
+!     endif
 
      !---------------------------------------------
      ! Output (normalized to Q_GB)
@@ -216,7 +238,7 @@ subroutine tglf_run()
 
      call get_error_status(tglf_error_message,tglf_error_status)
 
-  else
+  else  !(tglf_use_transport_model_in = .false)
 
      ! Run single-ky linear stability
      call tglf_ky

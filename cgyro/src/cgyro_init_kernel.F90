@@ -120,6 +120,12 @@ subroutine cgyro_init_kernel
   call timer_lib_out('str_mem')
 
   ! Initialize adaptive time-stepping parameter
-  delta_t_gk = delta_t
+  if (delta_t_last > 0.0) then
+     ! Saved from restart data
+     delta_t_gk = delta_t_last
+  else
+     ! New run
+     delta_t_gk = delta_t
+  endif
   
 end subroutine cgyro_init_kernel

@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
 import os
-import sys, getopt
+import sys
+import argparse
+import textwrap
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
@@ -11,18 +13,30 @@ from cgyro.data import cgyrodata
 
 pd.set_option('display.max_rows', None)
 
-opts, args = getopt.getopt(sys.argv[1:],"hm:",[])
+# Command line option parser
+def opts():
 
-if opts == []:
-   print('cgyrodb -m <mode>')
-   sys.exit(2)
+    mytext = '''\
+    output:
+       NEED DOCUMENTATION HERE
+    '''
 
-for opt,arg in opts:
-   if opt == '-h' or opt == '':
-      print('cgyrodb -m <mode> with mode=[update,scan,flux]')
-      sys.exit()
-   elif opt == '-m':
-      mode = arg
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawTextHelpFormatter,
+        prog = 'cgyrodb',
+        description="CGYRO database utility",
+        epilog=textwrap.dedent(mytext))
+
+    parser.add_argument('-mode',
+                        help='Mode switch (data,update)',
+                        type=str,
+                        default='data')
+
+    args=parser.parse_args()
+
+    return args.mode
+
+mode = opts()
 
 meta = {}
 
@@ -30,10 +44,13 @@ def gendict(sim,mode):
 
    mydict = {}
 
+   mydict['n_n'] = sim.n_n
    mydict['n_radial'] = sim.n_radial
    mydict['n_theta'] = sim.n_theta
    mydict['q'] = sim.q
    mydict['s'] = sim.shear
+   mydict['kappa'] = sim.kappa
+   mydict['nuee'] = sim.nu[-1]
    mydict['a/Ln0'] = sim.dlnndr[0]
    mydict['a/Lt0'] = sim.dlntdr[0]
    if sim.n_species > 1:
@@ -56,17 +73,19 @@ def gendict(sim,mode):
 
    return mydict
 
+ignore = 'eslshared'
+
 # First locate all directories
 y = []
 for root,xd,xf in os.walk('./'):
    if xd == []:
-      y.append(root)
+      if ignore not in root:
+          y.append(root)
 
 if mode == 'update':
    # Run through directories and update
    for mdir in y:
-      print('Updating '+mdir) 
-      os.system('cgyro_plot -plot text -e '+mdir)
+      print('Updating '+mdir)
       os.system('cgyro -t '+mdir)
 else:
    # Create master dictionary "meta"
@@ -75,5 +94,5 @@ else:
       meta[mdir]=gendict(sim,mode)
 
    df = pd.DataFrame(meta)
-   dfpart = df.T[['n_radial','n_theta','q','s','a/Ln0','a/Lt0','a/Ln1','a/Lt1']]
+   dfpart = df.T[['n_n','n_radial','n_theta','q','s','kappa','a/Ln0','a/Lt0','a/Ln1','a/Lt1','nuee']]
    print(dfpart)

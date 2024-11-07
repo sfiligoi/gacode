@@ -134,11 +134,11 @@ def plot_select(ax,tag):
 
    if tag == 'sn':
       # sne
-      y = a*expro.expro_sdlnnedr ; ystr = 's_{ne}' ; plotit(ax,x,y,ystr)
+      y = a*expro.expro_sdlnnedr ; ystr = '-a \\rho_s n_e^{\prime\prime}' ; plotit(ax,x,y,ystr)
       # sni
       for p in range(n):
          if alls or stype[p] == '[therm]':
-            y = a*expro.expro_sdlnnidr[p,:] ; ystr = 's_{ni}~['+sname[p]+']' ; plotit(ax,x,y,ystr)
+            y = a*expro.expro_sdlnnidr[p,:] ; ystr = '-a \\rho_s n_i^{\prime\prime}~['+sname[p]+']' ; plotit(ax,x,y,ystr)
 
    if tag == 'T':
       y = expro.expro_te ; ystr = 'T_e' ; plotit(ax,x,y,ystr)
@@ -153,10 +153,10 @@ def plot_select(ax,tag):
             y = a*expro.expro_dlntidr[p,:] ; ystr = 'a/L_{Ti}~['+sname[p]+']' ; plotit(ax,x,y,ystr)
 
    if tag == 'sT':
-      y = a*expro.expro_sdlntedr ; ystr = 's_{Te}' ; plotit(ax,x,y,ystr)
+      y = a*expro.expro_sdlntedr ; ystr = '-a \\rho_s T_e^{\prime\prime}' ; plotit(ax,x,y,ystr)
       for p in range(n):
          if alls or stype[p] == '[therm]':
-            y = a*expro.expro_sdlntidr[p,:] ; ystr = 's_{Ti}~['+sname[p]+']' ; plotit(ax,x,y,ystr)
+            y = a*expro.expro_sdlntidr[p,:] ; ystr = '-a \\rho_s T_i^{\prime\prime}~['+sname[p]+']' ; plotit(ax,x,y,ystr)
 
    if tag == 'j':
        y = expro.expro_jbs ; ystr = 'J_\mathrm{bs}' ; plotit(ax,x,y,ystr)

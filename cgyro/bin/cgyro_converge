@@ -1,0 +1,157 @@
+#!/usr/bin/env python
+
+import numpy as np
+import os
+import sys
+import matplotlib.pyplot as plt
+import argparse
+import textwrap
+from pygacode.cgyro import data
+from pygacode.gacodefuncs import *
+
+# number of time windows
+field=0
+moment=1 
+
+# Command line option parser
+def opts():
+
+    mytext = '''\
+    output:
+       NEED DOCUMENTATION HERE
+    '''
+
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawTextHelpFormatter,
+        prog = 'cgyro_converge',
+        description="CGYRO timetrace utility",
+        epilog=textwrap.dedent(mytext))
+    
+    parser.add_argument('-dir',
+                        help="Comma-separated list of directories",
+                        type=str,
+                        default='.')
+      
+    parser.add_argument('-plot',
+                        help="plot result",
+                        action='store_true')
+
+    parser.add_argument('-dt',
+                        help="sample time window [default: 200.0]",
+                        type=float,
+                        default=200.0)
+
+    parser.add_argument('-species',
+                        help="species (0 to N-1) [default: 0]",
+                        type=int,
+                        default=0)
+
+    parser.add_argument('-nstd',
+                        help="Number of time samples",
+                        type=int,
+                        default=3)
+    
+    args=parser.parse_args()
+
+    return args.dir,args.plot,args.dt,args.species,args.nstd
+
+# Read CGYRO data for given (species,moment,field)
+def dataread(species,moment,field,path):
+
+    # read minimal data for setup (look in current directory)
+    sim = data.cgyrodata(path+'/',fast=True,silent=True)
+
+    # copy time vector and number of species
+    t = sim.t
+
+    # read bin.cgyro.ky_flux
+    sim.getflux()
+
+    y = np.sum(sim.ky_flux[species,moment,field,:,:],axis=0)
+
+    return t,y
+
+# Compute vector of averages
+def datacalc(y,dt0,nstd):
+
+    # Simulation length (max time)
+    tmax = t[-1]
+    nwin = int(tmax/dt0)
+    if nstd > nwin:
+        print('ERROR: nstd > nwin')
+        sys.exit()
+        
+    dt = tmax/nwin
+    t0 = tmax-nwin*dt
+
+    # Initialize array of partial averages
+    avec = np.zeros(nwin)
+    i0vec = np.zeros(nwin,dtype=int)
+    i1vec = np.zeros(nwin,dtype=int)
+    
+    # averaging over all windows (note that time_average function is fast/optimized)
+    # Note reverse order: avec[0] is last time window
+    for i in range(nwin):
+        w = str(tmax-(i+1)*dt)+','+str(tmax-i*dt)
+        imin,imax=time_index(t,w)               
+        avec[i] = time_average(y[:],t,imin,imax)
+        i0vec[i] = imin
+        i1vec[i] = imax
+        
+    # Standard deviation of last 3 windows
+    stdev = np.std(avec[:nstd])/np.mean(avec[:nstd])
+    
+    return i0vec,i1vec,avec,stdev
+
+# Create flux plot showing averaging windows
+def myplot(t,y,i0vec,i1vec,avec,title):
+    fig = plt.figure(figsize=(10,6))
+    ax = fig.add_subplot(111)
+    ax.grid(which="both",ls=":")
+    ax.grid(which="major",ls=":")
+    ax.set_xlabel(r'$(c_s/a)t$')
+    ax.set_title(title)
+    ax.set_xlim(t[0],t[-1])
+    ax.plot(t,y,color='k',linewidth=1)
+    n = len(avec)
+    for i in range(n):
+        t0 = t[i0vec[i]]
+        t1 = t[i1vec[i]]
+        ax.plot([t0,t1],[avec[i],avec[i]],color='r',marker='o',linewidth=1)        
+    plt.show()
+    
+#-------------------------------------------------------------------------------------
+# main program
+
+# Read command-line options
+dirs,plot,dt,species,nstd = opts()
+
+# List of directories
+dirvec = []
+
+if dirs == '.':
+    # Walk through everything
+    for path,folders,files in os.walk(dirs):
+        if 'input.cgyro.gen' in files:
+            dirvec.append(path)
+else:
+    # User-specified list
+    for path in dirs.split(','):
+       if os.path.isfile(path+'/input.cgyro.gen'):
+           dirvec.append(path)
+
+for path in dirvec:
+    # read data selecting for specific species/moment/field
+    t,y = dataread(species,moment,field,path)
+    i0vec,i1vec,avec,stdev = datacalc(y,dt,nstd)
+
+    # Set precision and suppress scientific notation
+    np.set_printoptions(precision=3, suppress=True)
+    astr = str(np.flip(avec))
+    print('{}: {} stdev = {:.3f}'.format(path,astr,stdev))
+
+if len(dirvec) == 1 and plot:
+    # plot output
+    myplot(t,y,i0vec,i1vec,avec,path)
+    
+

@@ -130,14 +130,14 @@ subroutine cgyro_write_initdata
      !  k(x) = k(0) + s * r/rho
      !
      ! where x = r/rho. The half-domain has -L/4 < r < L/4.
-     if (profile_shear_flag == 1) then
+     if (global_flag == 1) then
         write(io,*)
-        write(io,'(a)') ' i  s(a/Ln)  (a/Ln)_L  (a/Ln)_R  |  s(a/Lt)  (a/Lt)_L  (a/Lt)_R ' 
+        write(io,'(a)') ' i  s(a/Ln)  (a/Ln)_L  (a/Ln)_R  |  s(a/Lt)  (a/Lt)_L  (a/Lt)_R  |  sbeta_*' 
         do is=1,n_species
            dn = sdlnndr(is)*length/rho/4
            dt = sdlntdr(is)*length/rho/4
-           write(io,'(t1,i2,3(1x,1pe9.2),2x,3(1x,1pe9.2))') &
-             is,sdlnndr(is),dlnndr(is)-dn,dlnndr(is)+dn,sdlntdr(is),dlntdr(is)-dt,dlntdr(is)+dt
+           write(io,'(t1,i2,3(1x,1pe9.2),2x,3(1x,1pe9.2),2x,1(1x,1pe9.2))') &
+             is,sdlnndr(is),dlnndr(is)-dn,dlnndr(is)+dn,sdlntdr(is),dlntdr(is)-dt,dlntdr(is)+dt,sbeta(is)
         enddo
      endif
 

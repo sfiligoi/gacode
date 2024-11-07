@@ -67,16 +67,28 @@ subroutine qlgyro_cgyro_map
   dzmag  = cgyro_dzmag_in
   zeta   = cgyro_zeta_in
   s_zeta = cgyro_s_zeta_in
-  shape_sin3 = cgyro_shape_sin3_in
+  shape_sin3  = cgyro_shape_sin3_in
   shape_ssin3 = cgyro_shape_s_sin3_in
-  shape_cos0 = cgyro_shape_cos0_in
+  shape_sin4  = cgyro_shape_sin4_in
+  shape_ssin4 = cgyro_shape_s_sin4_in
+  shape_sin5  = cgyro_shape_sin5_in
+  shape_ssin5 = cgyro_shape_s_sin5_in
+  shape_sin6  = cgyro_shape_sin6_in
+  shape_ssin6 = cgyro_shape_s_sin6_in
+  shape_cos0  = cgyro_shape_cos0_in
   shape_scos0 = cgyro_shape_s_cos0_in
-  shape_cos1 = cgyro_shape_cos1_in
+  shape_cos1  = cgyro_shape_cos1_in
   shape_scos1 = cgyro_shape_s_cos1_in
-  shape_cos2 = cgyro_shape_cos2_in
+  shape_cos2  = cgyro_shape_cos2_in
   shape_scos2 = cgyro_shape_s_cos2_in
-  shape_cos3 = cgyro_shape_cos3_in
+  shape_cos3  = cgyro_shape_cos3_in
   shape_scos3 = cgyro_shape_s_cos3_in
+  shape_cos4  = cgyro_shape_cos4_in
+  shape_scos4 = cgyro_shape_s_cos4_in
+  shape_cos5  = cgyro_shape_cos5_in
+  shape_scos5 = cgyro_shape_s_cos5_in
+  shape_cos6  = cgyro_shape_cos6_in
+  shape_scos6 = cgyro_shape_s_cos6_in
 
   ! General geometry Fourier coefficients
 
@@ -192,16 +204,28 @@ subroutine cgyro_qlgyro_map
   cgyro_s_zeta_in  = s_zeta
   cgyro_q_in       = q
   cgyro_s_in = s
-  cgyro_shape_sin3_in = shape_sin3
+  cgyro_shape_sin3_in   = shape_sin3
   cgyro_shape_s_sin3_in = shape_ssin3
-  cgyro_shape_cos0_in = shape_cos0
+  cgyro_shape_sin4_in   = shape_sin4
+  cgyro_shape_s_sin4_in = shape_ssin4
+  cgyro_shape_sin5_in   = shape_sin5
+  cgyro_shape_s_sin5_in = shape_ssin5
+  cgyro_shape_sin6_in   = shape_sin6
+  cgyro_shape_s_sin6_in = shape_ssin6
+  cgyro_shape_cos0_in   = shape_cos0
   cgyro_shape_s_cos0_in = shape_scos0
-  cgyro_shape_cos1_in = shape_cos1
+  cgyro_shape_cos1_in   = shape_cos1
   cgyro_shape_s_cos1_in = shape_scos1
-  cgyro_shape_cos2_in = shape_cos2
+  cgyro_shape_cos2_in   = shape_cos2
   cgyro_shape_s_cos2_in = shape_scos2
-  cgyro_shape_cos3_in = shape_cos3
+  cgyro_shape_cos3_in   = shape_cos3
   cgyro_shape_s_cos3_in = shape_scos3
+  cgyro_shape_cos4_in   = shape_cos4
+  cgyro_shape_s_cos4_in = shape_scos4
+  cgyro_shape_cos5_in   = shape_cos5
+  cgyro_shape_s_cos5_in = shape_scos5
+  cgyro_shape_cos6_in   = shape_cos6
+  cgyro_shape_s_cos6_in = shape_scos6
 
   ! What should this be?
   cgyro_beta_star_scale_in = 1.0

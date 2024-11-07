@@ -17,7 +17,7 @@ subroutine cgyro_init_arrays
   integer :: i_field
   integer :: l,ll
   integer :: iltheta_min
-  complex :: thfac,carg
+  complex :: carg
   complex :: jval
   real, dimension(:,:,:), allocatable :: res_loc
   real, dimension(:,:,:), allocatable :: jloc_c
@@ -365,32 +365,35 @@ subroutine cgyro_init_arrays
   !-------------------------------------------------------------------------
   ! Streaming coefficient arrays
   !
+  allocate(thfac_itor(0:2,nt1:nt2))
+
   do itor=nt1,nt2
-   do ir=1,n_radial
-     do it=1,n_theta
-        do id=-nup_theta,nup_theta
-           jt = modulo(it+id-1,n_theta)+1
-           if (it+id < 1) then
-              thfac = exp(2*pi*i_c*k_theta_base*itor*rmin)
-              jr = modulo(ir-itor*box_size*sign_qs-1,n_radial)+1
-           else if (it+id > n_theta) then
-              thfac = exp(-2*pi*i_c*k_theta_base*itor*rmin)
-              jr = modulo(ir+itor*box_size*sign_qs-1,n_radial)+1
-           else
-              thfac = (1.0,0.0)
-              jr = ir
-           endif
-           dtheta(id, ic_c(ir,it), itor)    = cderiv(id)*thfac
-           dtheta_up(id, ic_c(ir,it), itor) = uderiv(id)*thfac*up_theta
-           icd_c(id, ic_c(ir,it), itor)     = ic_c(jr,modulo(it+id-1,n_theta)+1)
-        enddo
-     enddo
-   enddo
+   thfac_itor(0,itor) = exp(2*pi*i_c*k_theta_base*itor*rmin)
+   thfac_itor(1,itor) = (1.0,0.0)
+   thfac_itor(2,itor) = exp(-2*pi*i_c*k_theta_base*itor*rmin)
+   !do ir=1,n_radial
+   !  do it=1,n_theta
+   !     do id=-nup_theta,nup_theta
+   !        ! jt = modulo(it+id-1,n_theta)+1
+   !        if (it+id < 1) then
+   !           jr = modulo(ir-itor*box_size*sign_qs-1,n_radial)+1
+   !        else if (it+id > n_theta) then
+   !           jr = modulo(ir+itor*box_size*sign_qs-1,n_radial)+1
+   !        else
+   !           jr = ir
+   !        endif
+   !        thfac = thfac_itor((n_theta+it+id-1)/n_theta,itor)
+   !        dtheta(ic_c(ir,it), id, itor)    = cderiv(id)*thfac
+   !        dtheta_up(ic_c(ir,it), id, itor) = uderiv(id)*thfac*up_theta
+   !        icd_c(ic_c(ir,it), id, itor)     = ic_c(jr,modulo(it+id-1,n_theta)+1)
+   !     enddo
+   !  enddo
+   !enddo
   enddo
 #if defined(OMPGPU)
-!$omp target enter data map(to:dtheta,dtheta_up,icd_c,c_wave)
+!$omp target enter data map(to:c_wave,thfac_itor,cderiv,uderiv)
 #elif defined(_OPENACC)
-!$acc enter data copyin(dtheta,dtheta_up,icd_c,c_wave)
+!$acc enter data copyin(c_wave,thfac_itor,cderiv,uderiv)
 #endif
 
   ! Streaming coefficients (for speed optimization)
@@ -447,24 +450,27 @@ subroutine cgyro_init_arrays
                 + abs(omega_rot_edrift_r(it)))          
              
            ! omega_star 
-           carg = -i_c*k_theta_base*itor*rho*(dlnndr(is)+dlntdr(is)*(energy(ie)-1.5)) &
-                -i_c*k_theta_base*itor*rho*(vel2(ie)*xi(ix)/vth(is) &
-                *omega_gammap(it)) -i_c*k_theta_base*itor*rho*omega_rot_star(it,is)
+           carg = &
+                -i_c*k_theta_base*itor*rho*(dlnndr(is)+dlntdr(is)*(energy(ie)-1.5)) &
+                -i_c*k_theta_base*itor*rho*(vel2(ie)*xi(ix)/vth(is)*omega_gammap(it)) &
+                -i_c*k_theta_base*itor*rho*omega_rot_star(it,is)
            
            omega_s(:,ic,iv_loc,itor) = carg*jvec_c(:,ic,iv_loc,itor)
 
            ! global-Taylor corrections via wavenumber advection (ix -> d/dp)
            ! JC: Re-checked sign and normalization (Oct 2019)
 
-           ! generalized profile curvature (phi shearing)
+           ! NEW GLOBAL TERMS
+
+           ! generalized omega_star shear (acts on phi)
            sm = sdlnndr(is)+sdlntdr(is)*(energy(ie)-1.5)
 
-           ! beta_star (H shearing)
-           sb = sbeta_star(is)*energy(ie)/bmag(it)**2
+           ! generalized beta/drift shear (acts on H)
+           sb = -sbeta(is)*energy(ie)*xi(ix)**2/bmag(it)**3
 
-           arg = -k_theta_base*itor*length/(2*pi)
+           arg = k_theta_base*itor*length/(2*pi)
 
-           omega_ss(:,ic,iv_loc,itor) = arg*sm*jvec_c(:,ic,iv_loc,itor)
+           omega_ss(:,ic,iv_loc,itor)  = arg*sm*jvec_c(:,ic,iv_loc,itor)
            omega_sbeta(ic,iv_loc,itor) = arg*sb
 
         enddo

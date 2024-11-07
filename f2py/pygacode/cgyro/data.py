@@ -13,13 +13,13 @@ BYTE='float32'
 class cgyrodata:
 
    # constructor reads in basic (not all) simulation data
-   def __init__(self,sim_directory,silent=False):
+   def __init__(self,sim_directory,silent=False,fast=False):
 
       self.silent = silent
       self.dir = sim_directory
       hastime = self.gettime()
       self.getgrid()
-      if hastime:
+      if hastime and not fast:
          self.getdata()
       
    # standard routine to read binary or ASCII data 

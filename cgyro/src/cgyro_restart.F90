@@ -25,34 +25,21 @@ subroutine cgyro_write_restart
   use mpi
   use cgyro_globals
   use cgyro_io
+  use cgyro_step
 
   implicit none
   
-  integer :: j,ic0
-
   ! Print this data on restart steps only; otherwise exit now
   if (mod(i_time,restart_step*print_step) /= 0) return
 
   call cgyro_write_restart_one
-
-  ! Unpack h(0,0) into source 
-  if (source_flag == 1 .and. nt1 == 0) then
-     ic0 = (n_radial/2)*n_theta
-     do j=1,n_theta
-        source(j,:,0) = h_x(ic0+j,:,0)
-        h_x(ic0+j,:,0) = 0.0
-     enddo
-     sa = 0.0
-     do j=1,nint(t_current/delta_t)
-        sa = 1.0+exp(-delta_t/tau_ave)*sa
-     enddo
-  endif
   
   ! Write restart tag
   if (i_proc == 0) then
      open(unit=io,file=trim(path)//runfile_restart_tag,status='replace')
      write(io,*) i_current
      write(io,fmtstr) t_current
+     write(io,*) delta_t_gk
      close(io)
   endif
 
@@ -350,31 +337,36 @@ subroutine cgyro_read_restart
   use mpi
   use cgyro_globals
   use cgyro_io
+  use cgyro_step
 
   implicit none
 
+  integer :: igk
+  integer :: j,ic0
+
+  
   !---------------------------------------------------------
-  ! Read restart parameters from ASCII file.
+  ! Read restart parameters from ASCII tag file.
   !
   if (restart_flag == 1) then
+     delta_t_last = 0.0
      if (i_proc == 0) then
 
         open(unit=io,file=trim(path)//runfile_restart_tag,status='old')
 
         read(io,*) i_current
         read(io,fmtstr) t_current
+        read(io,*,iostat=igk) delta_t_last
         close(io)
-
+        
      endif
 
-     ! Broadcast to all cores.
+     ! Broadcast to all cores
 
-     call MPI_BCAST(i_current,&
-          1,MPI_INTEGER,0,CGYRO_COMM_WORLD,i_err)
-
-     call MPI_BCAST(t_current,&
-          1,MPI_DOUBLE_PRECISION,0,CGYRO_COMM_WORLD,i_err)
-
+     call MPI_BCAST(i_current,1,MPI_INTEGER,0,CGYRO_COMM_WORLD,i_err)
+     call MPI_BCAST(t_current,1,MPI_DOUBLE_PRECISION,0,CGYRO_COMM_WORLD,i_err)
+     call MPI_BCAST(delta_t_last,1,MPI_DOUBLE_PRECISION,0,CGYRO_COMM_WORLD,i_err)
+      
   endif
 
   if (i_proc == 0) then
@@ -383,6 +375,20 @@ subroutine cgyro_read_restart
   endif
 
   call cgyro_read_restart_one
+
+  ! Unpack h(0,0) into source
+  if (source_flag == 1 .and. nt1 == 0) then
+     ic0 = (n_radial/2)*n_theta
+     do j=1,n_theta
+        source(j,:,0) = h_x(ic0+j,:,0)
+        h_x(ic0+j,:,0) = 0.0
+     enddo
+     sa = 0.0
+     do j=1,nint(t_current/delta_t)
+        sa = 1.0+exp(-delta_t/tau_ave)*sa
+     enddo
+  endif
+
 
 end subroutine cgyro_read_restart
 
