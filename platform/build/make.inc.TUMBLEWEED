@@ -21,7 +21,7 @@ FOMP   =-fopenmp
 FMATH  =-fdefault-real-8 -fdefault-double-8 -I$(FFTW_INC)
 FOPT   =-O3 -std=gnu -fexternal-blas -march=native -ffree-line-length-0
 # -floop-nest-optimize -floop-parallelize-all -flto
-FDEBUG =-Wall -W -fcheck=all -g -fbacktrace  -ffpe-trap=invalid,zero,overflow -finit-real=snan -std=f2008 -fall-intrinsics
+FDEBUG =-Wall -W -fcheck=all -Wno-compare-reals  -Wno-integer-division -Wno-unused-variable -g -fbacktrace  -ffpe-trap=invalid,zero,overflow -finit-real=snan -std=f2008 -fall-intrinsics
 F2PY   = f2py
 
 # System math libraries
