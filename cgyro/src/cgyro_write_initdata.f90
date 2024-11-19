@@ -227,6 +227,7 @@ subroutine cgyro_write_initdata
      do is=1,n_species
         write (io,fmtstr) sdlnndr(is)
         write (io,fmtstr) sdlntdr(is)
+        write (io,fmtstr) sbeta(is)
      enddo
      close(io)
 

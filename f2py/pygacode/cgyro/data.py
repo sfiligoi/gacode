@@ -496,9 +496,11 @@ class cgyrodata:
       # Added 3 May 2024
       self.sdlnndr = np.zeros(ns)
       self.sdlntdr = np.zeros(ns)
+      self.sbeta = np.zeros(ns)
       for i in range(ns):
          self.sdlnndr[i],p = self.eget(data,p) 
          self.sdlntdr[i],p = self.eget(data,p)
+         self.sbeta[i],p = self.eget(data,p)
 
       if p == -1:
          print('WARNING: (getgrid) Data format outdated. Please run cgyro -t')
