@@ -25,7 +25,7 @@ contains
   subroutine cgyro_init_landau()
     ! populate cmat with Galerkin based gyrokinetic Landau operator.
     ! cmat1 is only for comparison purposes
-    use cgyro_globals, only : vth,temp,mass,dens,temp_ele,mass_ele,dens_ele,rho,z,&
+    use cgyro_globals, only : CGYRO_COMM_WORLD,vth,temp,mass,dens,temp_ele,mass_ele,dens_ele,rho,z,&
          n_energy,e_max,n_xi,n_radial,n_theta,n_species,n_toroidal,nt1,nt2,nc_loc,nc1,nc2,nc,nv,&
          nu_ee,&
          xi,w_xi,& !needed for projleg calc
@@ -119,7 +119,7 @@ contains
       gtvb=1
     end if
 
-    !$    call MPI_Barrier(MPI_COMM_WORLD,ierror) ! may improve timing
+    !$    call MPI_Barrier(CGYRO_COMM_WORLD,ierror) ! may improve timing
     call cpu_time(t1)
     ns=ispec(n_species,n_species) !number of non-redundant species pairs
     xmax=sqrt(e_max) !cut off at exp(-xmax^2)
@@ -146,7 +146,7 @@ contains
     end do
     ! kperp_bmag_max is not completely global, there is still the n dependence.
     ! we need to maximize over the toroidal mode numbers:
-    call MPI_ALLREDUCE(MPI_IN_PLACE,kperp_bmag_max,1,MPI_REAL8,MPI_MAX,MPI_COMM_WORLD,ierror)
+    call MPI_ALLREDUCE(MPI_IN_PLACE,kperp_bmag_max,1,MPI_REAL8,MPI_MAX,CGYRO_COMM_WORLD,ierror)
     rhomax=maxval(abs(rho_spec([(i,i=1,n_species)])))*xmax
     kperprhomax=kperp_bmag_max*rhomax
     if (verbose>0 .and. i_proc==0) print 6,'using kperprhomax=',kperprhomax
@@ -911,13 +911,13 @@ contains
        print 7,'pre_scatter timing:'
        do i=1,n_proc
           if (i>1) then
-             call MPI_Recv(t,11,MPI_REAL8,i-1,i-1,MPI_COMM_WORLD,status,ierror)
+             call MPI_Recv(t,11,MPI_REAL8,i-1,i-1,CGYRO_COMM_WORLD,status,ierror)
           end if
 5         format("init_collision_landau: ",A,I0,A,7G24.16E3,A,I0,A,G24.16E3)
           print 5,'i_proc=',i-1,' took',t(1:7),' load ',load(i),' rel',t(3)/load(i)
        end do
     else
-       call MPI_Send(t,11,MPI_REAL8,0,i_proc,MPI_COMM_WORLD,ierror)
+       call MPI_Send(t,11,MPI_REAL8,0,i_proc,CGYRO_COMM_WORLD,ierror)
     end if
     call cpu_time(t1)
     ! Now do the scatter
@@ -931,17 +931,17 @@ contains
        ib=idx+1
        if (proc(ik,ia,ib)/=0) then
 !!$          do j=1,n_proc
-!!$             call MPI_BARRIER(MPI_COMM_WORLD,ierror)
+!!$             call MPI_BARRIER(CGYRO_COMM_WORLD,ierror)
 !!$!          if (i_proc==0 .and. verbose>100) then
 !!$             if (i_proc==j-1) print *,'bcasting (ik,ia,ib,proc)=',ik,ia,ib,proc(ik,ia,ib)-1,'ip',i_proc
 !!$          !          end if
-!!$             call MPI_BARRIER(MPI_COMM_WORLD,ierror)
+!!$             call MPI_BARRIER(CGYRO_COMM_WORLD,ierror)
 !!$          end do
           call MPI_Bcast(gyrocolmat(:,:,:,:,ia,ib,ik),n_xi**2*n_energy**2,&
-               MPI_REAL8,proc(ik,ia,ib)-1,MPI_COMM_WORLD,ierror)
+               MPI_REAL8,proc(ik,ia,ib)-1,CGYRO_COMM_WORLD,ierror)
           if (ia>ib .and. temp(ia)==temp(ib)) then
              call MPI_Bcast(gyrocolmat(:,:,:,:,ib,ia,ik),n_xi**2*n_energy**2,&
-                  MPI_REAL8,proc(ik,ia,ib)-1,MPI_COMM_WORLD,ierror)
+                  MPI_REAL8,proc(ik,ia,ib)-1,CGYRO_COMM_WORLD,ierror)
           end if
        end if
     enddo
@@ -1003,12 +1003,12 @@ contains
     if (i_proc==0) then
        do i=1,n_proc
           if (i>1) then
-             call MPI_Recv(t,11,MPI_REAL8,i-1,i-1,MPI_COMM_WORLD,status,ierror)
+             call MPI_Recv(t,11,MPI_REAL8,i-1,i-1,CGYRO_COMM_WORLD,status,ierror)
           end if
           print *,'i_proc=',i-1,'took',t(1:10),'load',load(i),'rel',t(3)/load(i)
        end do
     else
-       call MPI_Send(t,11,MPI_REAL8,0,i_proc,MPI_COMM_WORLD,ierror)
+       call MPI_Send(t,11,MPI_REAL8,0,i_proc,CGYRO_COMM_WORLD,ierror)
     end if
     
     coltestmode: if(collision_test_mode==1) then
@@ -1036,10 +1036,10 @@ contains
        nt2_proc(i_proc+1)=nt2
        proc_c=0 ! dummy value if no processor is responsible
        do i=1,n_proc
-          call MPI_BCAST(nc1_proc(i),1,MPI_INTEGER,i-1,MPI_COMM_WORLD,ierror)
-          call MPI_BCAST(nc2_proc(i),1,MPI_INTEGER,i-1,MPI_COMM_WORLD,ierror)
-          call MPI_BCAST(nt1_proc(i),1,MPI_INTEGER,i-1,MPI_COMM_WORLD,ierror)
-          call MPI_BCAST(nt2_proc(i),1,MPI_INTEGER,i-1,MPI_COMM_WORLD,ierror)
+          call MPI_BCAST(nc1_proc(i),1,MPI_INTEGER,i-1,CGYRO_COMM_WORLD,ierror)
+          call MPI_BCAST(nc2_proc(i),1,MPI_INTEGER,i-1,CGYRO_COMM_WORLD,ierror)
+          call MPI_BCAST(nt1_proc(i),1,MPI_INTEGER,i-1,CGYRO_COMM_WORLD,ierror)
+          call MPI_BCAST(nt2_proc(i),1,MPI_INTEGER,i-1,CGYRO_COMM_WORLD,ierror)
           ! this assigns the processor with the highest number to the respective
           ! nc and nt range
           proc_c(nc1_proc(i):nc2_proc(i),nt1_proc(i):nt2_proc(i))=i
@@ -1094,11 +1094,11 @@ contains
                               **2,L2xi,n_xi,0.,c(:,:,:,:,l),n_xi*n_energy**2)
                       end do
                       if (i_proc/=0) then
-                         call MPI_SEND(c,size(c),MPI_REAL8,0,1234,MPI_COMM_WORLD,ierror)
+                         call MPI_SEND(c,size(c),MPI_REAL8,0,1234,CGYRO_COMM_WORLD,ierror)
                       end if
                    else
                       if (i_proc==0) then
-                         call MPI_RECV(c,size(c),MPI_REAL8,proc_c(ic,itor)-1,1234,MPI_COMM_WORLD,status,ierror)
+                         call MPI_RECV(c,size(c),MPI_REAL8,proc_c(ic,itor)-1,1234,CGYRO_COMM_WORLD,status,ierror)
                       end if
                    end if
 !!$                  block
@@ -1227,11 +1227,11 @@ contains
                               **2,L2xi,n_xi,0.,c(:,:,:,:,l),n_xi*n_energy**2)
                       end do
                       if (i_proc/=0) then
-                         call MPI_SEND(c,size(c),MPI_REAL8,0,1234,MPI_COMM_WORLD,ierror)
+                         call MPI_SEND(c,size(c),MPI_REAL8,0,1234,CGYRO_COMM_WORLD,ierror)
                       end if
                    else
                       if (i_proc==0) then
-                         call MPI_RECV(c,size(c),MPI_REAL8,proc_c(ic,itor)-1,1234,MPI_COMM_WORLD,status,ierror)
+                         call MPI_RECV(c,size(c),MPI_REAL8,proc_c(ic,itor)-1,1234,CGYRO_COMM_WORLD,status,ierror)
                       end if
                    end if
 
@@ -1285,18 +1285,18 @@ contains
              end do
           enddo
        end if
-       call MPI_reduce(md,d,1,MPI_REAL8,MPI_MAX,0,MPI_COMM_WORLD,ierror)
+       call MPI_reduce(md,d,1,MPI_REAL8,MPI_MAX,0,CGYRO_COMM_WORLD,ierror)
        if (i_proc==0) print 11,'Max. deviation over all processors:',d
 11      format ('cgyro_in._col.: ',A,G23.16)
 
-       call MPI_Barrier(MPI_COMM_WORLD,ierror)
+       call MPI_Barrier(CGYRO_COMM_WORLD,ierror)
        call MPI_finalize(ierror)
        stop
     end if coltestmode
 
-!!$    call MPI_Barrier(MPI_COMM_WORLD,ierror)
+!!$    call MPI_Barrier(CGYRO_COMM_WORLD,ierror)
 !!$    print *,'i_proc',i_proc,'done with init_landau'
-!!$    call MPI_Barrier(MPI_COMM_WORLD,ierror)
+!!$    call MPI_Barrier(CGYRO_COMM_WORLD,ierror)
 
   contains
     elemental real function sinc(target_k,halfperiod)
