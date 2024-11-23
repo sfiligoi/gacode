@@ -106,9 +106,6 @@ contains
     if (i_proc==0) print 1,'WARNING: dens_rot not yet implemented!!'
     if (i_proc==0) print 1,'WARNING: nu_global not yet implemented!!'
     if (i_proc==0 .and. collision_test_mode==1) print 1,'collision_test_mode==1, comparing ...'
-#ifdef __PGI
-    if (i_proc==0) print 1,'WARNING: precision loss in landau.F90 - can''t use quad precision in PGI!!'
-#endif
     if (i_proc==0 .and. maxval(abs(temp(1:n_species)-temp(1)))/=0) then
        print 1,'Warning: Landau not yet working for different species temperatures!!'
     end if

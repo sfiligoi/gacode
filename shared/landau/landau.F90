@@ -1,14 +1,17 @@
 !  gfortran -march=native -O3 -fno-stack-arrays -fimplicit-none -fdefault-real-8 landau.F90  -c
 !intel:
 !ifort -stand f15 -warn all -march=native -O3 -heap-arrays 10 -implicitnone -real-size 64 landau.F90 -c
-#ifndef __PGI
-  !can't use quad precision with frumpy pgi compiler
+
+#ifdef LANDAU_PREC16
+!at least in the past couldn't use quad precision with frumpy pgi compiler
+!for comparison purposes
 #define HIREAL real(16)
 #define HRS _16
 #else
 #define HIREAL real
 #define HRS
 #endif
+
 module landau
   HIREAL, parameter,private :: pi1=atan(1.HRS)*4
   ! real, parameter :: intnorm=pi1**(-1.5)*4*pi1
@@ -85,14 +88,13 @@ contains
     addcutoff1=.true.
     if (present(addcutoff)) addcutoff1=addcutoff
 
-#ifndef __PGI
 2   format (A,3G25.16)
     
     if (verbose>2) then
        print 2,'1,lo,hi',fct1lo(xmaxx),fct1hi(xmaxx),fct1(xmaxx)
        print 2,'2,lo,hi',fct2lo(xmaxx),fct2hi(xmaxx),fct2(xmaxx)
     end if
-#endif
+
     ! lor_int and dif_int are symmetric in i,j
     ! t1t2_int is not symmetric (but not antisymmetric.)
     ! The first index is in that case the output index
