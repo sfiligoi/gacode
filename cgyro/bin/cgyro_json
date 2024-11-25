@@ -105,6 +105,7 @@ d['MACH'] = sim.mach
 d['GAMMA_E'] = sim.gamma_e
 d['GAMMA_P'] = sim.gamma_p
 d['BETAE_UNIT'] = sim.betae_unit
+d['NU_EE'] = sim.nu[ielec]
 
 d['ZMAG'] = sim.zmag
 d['DZMAG'] = sim.dzmag
@@ -164,6 +165,9 @@ print('cgyro_json: wrote out.cgyro.localdump')
 
 nmax = nmax+1
 
+if nmax < 3:
+    nmax = 3
+    
 # Reference dimensions in CGYRO units
 lref=sim.rmaj
 vthref = np.sqrt(2.0)
