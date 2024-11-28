@@ -3,21 +3,20 @@
 !ifort -stand f15 -warn all -march=native -O3 -heap-arrays 10 -implicitnone -real-size 64 landau.F90 -c
 
 #ifdef LANDAU_PREC16
-!at least in the past couldn't use quad precision with frumpy pgi compiler
-!for comparison purposes
-#define HIREAL real(16)
-#define HRS _16
+!still cannot use quad precision with nvhpc/24.3 compiler version
+#define LP 16
 #else
-#define HIREAL real
-#define HRS
+#define LP 8
 #endif
 
+
 module landau
-  HIREAL, parameter,private :: pi1=atan(1.HRS)*4
+  integer, parameter,private :: PREC=LP
+  real(PREC), parameter,private :: pi1=atan(1._PREC)*4
   ! real, parameter :: intnorm=pi1**(-1.5)*4*pi1
   ! int gphys(v) d^3v=1=int g(x) x^2 dx *intnor
   ! Maybe one should normalise this once for a given xmax and density 1?
-  real, parameter :: vunit=real(sqrt(2.HRS))
+  real, parameter :: vunit=real(sqrt(2._PREC))
   ! v*vunit is v in units of sqrt(T/m)
   ! v itself is v in units of sqrt(2T/m) ("collision operator units")
   real, parameter :: intnorm=real(4/sqrt(pi1))
@@ -79,7 +78,7 @@ contains
     real p0,p1,pi,q0,q1,qi,r0,r1,ri,s0,s1,si,x,xmax1
     real f1,f2
     integer i,j,k
-    HIREAL xmaxx,x1
+    real(PREC) xmaxx,x1
     logical t1t2,addcutoff1
     real t1,t2 ! for timing
 
@@ -289,24 +288,24 @@ contains
 
     if (verbose>0) print '(A,G13.3)','gentestkernel took ',t2-t1
   contains
-    elemental HIREAL function fct1(w)
+    elemental real(PREC) function fct1(w)
       implicit none
-      HIREAL,intent(in) :: w
-      fct1=.125HRS*w**(-3)*(exp(-w*w)*w+(2*w*w-1)*.5HRS*sqrt(pi1)*erf(w))
+      real(PREC),intent(in) :: w
+      fct1=.125_PREC*w**(-3)*(exp(-w*w)*w+(2*w*w-1)*.5_PREC*sqrt(pi1)*erf(w))
     end function fct1
-    elemental HIREAL function fct2(w)
+    elemental real(PREC) function fct2(w)
       implicit none
-      HIREAL,intent(in) :: w
-      fct2=.25HRS*w**(-1)*(.5HRS*sqrt(pi1)*erf(w)-w*exp(-w**2))
+      real(PREC),intent(in) :: w
+      fct2=.25_PREC*w**(-1)*(.5_PREC*sqrt(pi1)*erf(w)-w*exp(-w**2))
     end function fct2
-    elemental HIREAL function fct1lo(w)
+    elemental real(PREC) function fct1lo(w)
       implicit none
-      HIREAL,intent(in) :: w
+      real(PREC),intent(in) :: w
       fct1lo=fct1(w)-exp(-xmaxx**2)/6  ! for w<xmax
     end function fct1lo
-    elemental HIREAL function fct1hi(w)
+    elemental real(PREC) function fct1hi(w)
       implicit none
-      HIREAL,intent(in) :: w
+      real(PREC),intent(in) :: w
       !  fct1hi(w)=w**(-3)*((1./24)*exp(-xmaxx**2)*xmaxx*(3-6*w**2+2*xmaxx**2)+(sqrt(pi1)/16)*(2*w**2-1)*erf(xmaxx))
       fct1hi=-w**(-3)/48*((-2*exp(-xmaxx**2)*xmaxx*(3+2*xmaxx**2)+3*sqrt(pi1)*erf(xmaxx))+&
            w**2*(12*exp(-xmaxx**2)*xmaxx-6*sqrt(pi1)*erf(xmaxx)))
@@ -314,15 +313,15 @@ contains
       !./hhv 5 .5 0 50 1 1
       !was due to inaccuracies in this routine, likely due to cancellations in the fcts.
     end function fct1hi
-    elemental HIREAL function fct2lo(w)
+    elemental real(PREC) function fct2lo(w)
       implicit none
-      HIREAL,intent(in) :: w
+      real(PREC),intent(in) :: w
       fct2lo=fct2(w)-w*w*exp(-xmaxx**2)/6 !for w<xmax
     end function fct2lo
-    elemental HIREAL function fct2hi(w)
+    elemental real(PREC) function fct2hi(w)
       implicit none
-      HIREAL,intent(in) :: w
-      fct2hi=-w**(-1)*((1.HRS/12)*xmaxx*exp(-xmaxx**2)*(3+2*xmaxx**2)-(sqrt(pi1)/8)*erf(xmaxx))
+      real(PREC),intent(in) :: w
+      fct2hi=-w**(-1)*((1._PREC/12)*xmaxx*exp(-xmaxx**2)*(3+2*xmaxx**2)-(sqrt(pi1)/8)*erf(xmaxx))
     end function fct2hi
   end subroutine gentestkernel
 
