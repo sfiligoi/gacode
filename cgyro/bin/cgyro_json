@@ -25,14 +25,14 @@ def opts():
         description="CGYRO localdump utility",
         epilog=textwrap.dedent(mytext))
     
-    parser.add_argument('-dir',
+    parser.add_argument('-e',
                         help="working directory (default: cwd)",
                         type=str,
                         default='.')
     
     args=parser.parse_args()
 
-    return args.dir
+    return args.e
 
 mydir = opts()
 
