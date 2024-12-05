@@ -130,7 +130,7 @@ d['DLNNDR'] = sim.dlnndr[:].tolist()
 d['DLNTDR'] = sim.dlntdr[:].tolist()
 
 # JSON output
-with open('json.cgyro.localdump','w') as f:
+with open(mydir+'json.cgyro.localdump','w') as f:
    json.dump(d,f,indent=2,sort_keys=True)
    print('cgyro_json: wrote json.cgyro.localdump')
 #==================================================================
@@ -139,7 +139,7 @@ with open('json.cgyro.localdump','w') as f:
 # standard localdump output
 #
 nmax = 0
-with open('out.cgyro.localdump','w') as f:
+with open(mydir+'out.cgyro.localdump','w') as f:
    for key in d:
       x = d[key]
       if 'SHAPE' in key:
@@ -231,7 +231,7 @@ d['ds_dr_minor_norm'][1] = sim.s_delta*lref/sim.rmin/np.cos(np.arcsin(sim.delta)
 d['ds_dr_minor_norm'][2] = -sim.s_zeta*lref/sim.rmin 
 #-----------------------------------------------------------------------
 
-with open('json.cgyro.imas','w') as f:
+with open(mydir+'json.cgyro.imas','w') as f:
    json.dump(d,f,indent=2,sort_keys=True)
    print('cgyro_json: wrote json.cgyro.imas')
 #==================================================================
