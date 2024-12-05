@@ -34,6 +34,7 @@ subroutine cgyro_field_v_notae_s(start_t)
 
   ! iv = j+(k-1)*nj_loc
   ! cap_h_v(ic_loc,itor,iv) = fsendf(j,itor,ic_loc,k)
+  ! Use aggregate comm, since it is used in step_collision
   call parallel_lib_nj_loc(nj_loc)
 
 !$omp parallel do collapse(2) private(ic_loc,iv,ic,k,j)
@@ -53,6 +54,7 @@ subroutine cgyro_field_v_notae_s(start_t)
 
   call timer_lib_in('field_com')
 
+  ! Use aggregate comm, since it is used in step_collision
   call parallel_lib_collect_field(field_loc_v, field_v)
 
   call timer_lib_out('field_com')
@@ -114,6 +116,7 @@ subroutine cgyro_field_v_notae_s_gpu(start_t)
 
   ! iv = j+(k-1)*nj_loc
   ! cap_h_v(ic_loc,itor,iv) = fsendf(j,itor,ic_loc,k)
+  ! Use aggregate comm, since it is used in step_collision
   call parallel_lib_nj_loc(nj_loc)
 
 #if (!defined(OMPGPU)) && defined(_OPENACC)
@@ -157,6 +160,7 @@ subroutine cgyro_field_v_notae_s_gpu(start_t)
 
   call timer_lib_in('field_com')
 
+  ! Use aggregate comm, since it is used in step_collision
   call parallel_lib_collect_field_gpu(field_loc_v, field_v)
 
   call timer_lib_out('field_com')
@@ -251,7 +255,7 @@ subroutine cgyro_field_c_cpu(update_cap)
 
   call timer_lib_in('field_com')
 
-  call parallel_lib_sum_field(field_loc,field)
+  call parallel_flib_sum_field(field_loc,field)
 
   call timer_lib_out('field_com')
 
@@ -333,7 +337,7 @@ subroutine cgyro_field_c_ae_cpu
 
   call timer_lib_in('field_com')
 
-  call parallel_lib_sum_field(field_loc(:,:,0:0), &
+  call parallel_flib_sum_field(field_loc(:,:,0:0), &
                               field(:,:,0:0))
 
   call timer_lib_out('field_com')
@@ -414,7 +418,7 @@ subroutine cgyro_field_c_gpu(update_cap)
   call timer_lib_out('field')
   call timer_lib_in('field_com')
 
-  call parallel_lib_sum_field_gpu(field_loc,field)
+  call parallel_flib_sum_field_gpu(field_loc,field)
 
   call timer_lib_out('field_com')
   call timer_lib_in('field')
@@ -566,7 +570,7 @@ subroutine cgyro_field_c_ae_gpu
   call timer_lib_out('field')
   call timer_lib_in('field_com')
 
-  call parallel_lib_sum_field_gpu(field_loc(:,:,0:0), &
+  call parallel_flib_sum_field_gpu(field_loc(:,:,0:0), &
                                   field(:,:,0:0))
 
   call timer_lib_out('field_com')
