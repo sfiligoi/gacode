@@ -519,9 +519,13 @@ class cgyrodata:
          self.tnorm  = self.t
          self.tstr   = TIME
 
-         self.fnorm  = self.freq 
-         self.fstr   = [r'$(a/c_s)\, \omega$',r'$(a/c_s)\, \gamma$']
+         try:
+            self.fnorm  = self.freq 
+            self.fstr   = [r'$(a/c_s)\, \omega$',r'$(a/c_s)\, \gamma$']
+         except:
+            pass
 
+            
          self.rhonorm = self.rho
          self.rhoi    = r'\rho_s'
 
