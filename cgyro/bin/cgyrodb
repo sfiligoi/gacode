@@ -53,7 +53,7 @@ meta = {}
 if (not ref) and (not json) and (not db):
     print('Type "cgyrodb -h" for help')
     sys.exit()
-    
+
 def gendict(sim,doflux):
 
    mydict = {}
@@ -76,7 +76,7 @@ def gendict(sim,doflux):
 
    if doflux:
       sim.getflux()
-      y = np.sum(sim.ky_flux,axis=(2,3))   
+      y = np.sum(sim.ky_flux,axis=(2,3))
       for ispec in range(sim.n_species):
          g = average(y[ispec,0,:],sim.t,0.5,0.0)
          q = average(y[ispec,1,:],sim.t,0.5,0.0)
@@ -98,7 +98,8 @@ if ref:
    # Run through directories and update
    for mdir in y:
       print('Refreshing '+mdir)
-      os.system('cgyro -t '+mdir)
+      os.system('cd '+mdir+' ; python $GACODE_ROOT/cgyro/bin/cgyro_parse.py')
+      os.system('cd '+mdir+' ; $GACODE_ROOT/cgyro/src/cgyro ')
 
 if json:
    # Run through directories and update
