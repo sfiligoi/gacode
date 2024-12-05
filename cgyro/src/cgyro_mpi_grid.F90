@@ -19,12 +19,24 @@ subroutine cgyro_mpi_grid
   integer :: ie,ix,is,ir,it,itm
   integer :: iltheta_min,iltheta_max
   integer :: d
+  integer :: i_group_1  !flib
+  integer :: i_group_2  !slib
+  integer :: i_group_3  !clib
+  integer :: i_group_4  !lib
   integer :: splitkey
   integer :: nproc_3
   character(len=192) :: msg
   integer :: nl_el_size
 
   integer, external :: omp_get_max_threads, omp_get_thread_num
+
+  if (.NOT. have_COMM_4) then
+     ! if a separate COMM_4 was not created
+     ! just reuse the main one
+     ! remanider: CGYRO_COMM_WORLD_4 is used for aggregatating multiple simulations
+     CGYRO_COMM_WORLD_4 = CGYRO_COMM_WORLD
+     have_COMM_4 = .TRUE.
+  endif
 
   ! Velocity-space (v) and configuration-space (c) dimensions
   nv = n_energy*n_xi*n_species
@@ -256,6 +268,17 @@ subroutine cgyro_mpi_grid
      return
   endif
 
+  splitkey = i_proc
+  call MPI_COMM_SPLIT(CGYRO_COMM_WORLD_4,&
+       i_group_1,& 
+       splitkey,&
+       NEW_COMM_4, &
+       i_err)
+  if (i_err /= 0) then
+     call cgyro_error('NEW_COMM_4 not created')
+     return
+  endif
+
   ! Local adjoint Group number
 
   call MPI_COMM_SPLIT(CGYRO_COMM_WORLD,&
@@ -269,6 +292,7 @@ subroutine cgyro_mpi_grid
   endif
   !
   call MPI_COMM_RANK(NEW_COMM_1,i_proc_1,i_err)
+  call MPI_COMM_RANK(NEW_COMM_4,i_proc_4,i_err)
   call MPI_COMM_RANK(NEW_COMM_2,i_proc_2,i_err)
   !-----------------------------------------------------------
 
@@ -294,8 +318,7 @@ subroutine cgyro_mpi_grid
   ! ni -> nc
   ! nj -> nv  
   call parallel_flib_init(nc,nv,nc_loc,nv_loc,NEW_COMM_1)
-  ! TODO: properly handle parallel_lib
-  call parallel_lib_init(nc,nv,nt1,nt_loc,n_field,nc_loc,nv_loc,NEW_COMM_1)
+  call parallel_lib_init(nc,nv,nv_loc,nt1,nt_loc,n_field,nc_loc_coll,nsim,NEW_COMM_4)
 
   nv1 = 1+i_proc_1*nv_loc
   nv2 = (1+i_proc_1)*nv_loc

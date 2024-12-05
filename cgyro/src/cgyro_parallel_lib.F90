@@ -30,6 +30,7 @@ module parallel_lib
   integer, private :: nj_loc
   integer, private :: nk_loc
   integer, private :: nk1,nk2
+  integer, private :: nsm
   integer, private :: lib_comm
   integer, private :: nsend
   integer, private :: n_field
@@ -161,16 +162,16 @@ contains
   !  parallel_lib_r -> g(nj_loc,ni) -> f(ni_loc,nj)
   !=========================================================
 
-  subroutine parallel_lib_init(ni_in,nj_in,nk1_in,nk_loc_in,n_field_in,ni_loc_out,nj_loc_out,comm)
+  subroutine parallel_lib_init(ni_in,nj_in,nj_loc_in,nk1_in,nk_loc_in,n_field_in,ni_loc_out,nsm_out,comm)
 
     use mpi
 
     implicit none
 
-    integer, intent(in) :: ni_in,nj_in
+    integer, intent(in) :: ni_in,nj_in,nj_loc_in
     integer, intent(in) :: nk1_in,nk_loc_in,n_field_in
     integer, intent(in) :: comm
-    integer, intent(inout) :: ni_loc_out,nj_loc_out
+    integer, intent(inout) :: ni_loc_out,nsm_out
     integer, external :: parallel_dim
     integer :: ierr
 
@@ -184,7 +185,8 @@ contains
 
     ! parallel_dim(x,y) ~= x/y
     ni_loc = parallel_dim(ni,nproc)
-    nj_loc = parallel_dim(nj,nproc)
+    nj_loc = nj_loc_in
+    nsm = parallel_dim(nj,nproc)/nj_loc
     nk_loc = nk_loc_in
 
     ! nk1_in is typically iproc*nk_loc, but not always
@@ -192,7 +194,7 @@ contains
     nk2 = nk1 + nk_loc -1
 
     ni_loc_out = ni_loc
-    nj_loc_out = nj_loc
+    nsm_out = nsm
 
     nsend = nj_loc*ni_loc*nk_loc
 

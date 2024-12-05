@@ -170,25 +170,23 @@ module cgyro_globals
   ! MPI/OpenMP variables and pointers
   ! 
   integer :: n_omp
+  logical :: have_COMM_4 = .FALSE.
   !
   integer :: i_err
   integer :: i_proc
   integer :: i_proc_1
   integer :: i_proc_2
   integer :: i_proc_3
-  integer :: i_proc_restart_io
+  integer :: i_proc_4
   integer :: n_proc
   integer :: n_proc_1
   integer :: n_proc_2
-  integer :: n_proc_restart_io
-  integer :: i_group_1
-  integer :: i_group_2
-  integer :: i_group_3
-  integer :: i_group_restart_io
   integer :: CGYRO_COMM_WORLD
-  integer :: NEW_COMM_1
-  integer :: NEW_COMM_2
-  integer :: NEW_COMM_3
+  integer :: NEW_COMM_1  ! simple Linear
+  integer :: NEW_COMM_2  ! non-linear
+  integer :: NEW_COMM_3  ! simple linear by species
+  integer :: CGYRO_COMM_WORLD_4
+  integer :: NEW_COMM_4  ! aggregate linear, coll
   integer :: nv1,nv2,nc1,nc2
   integer :: nsplit,nsplitA,nsplitB
   integer :: ns1,ns2
@@ -203,6 +201,8 @@ module cgyro_globals
   integer :: nv_loc,iv_loc
   integer :: nc,ic
   integer :: nc_loc,ic_loc
+  integer :: nc_loc_coll   ! nc local slice for collision purposes, on NEW_COMM_4
+  integer :: nsim          ! how many simulations is coll processing at once
   integer :: ns_loc
   integer, dimension(:), allocatable :: ie_v
   integer, dimension(:), allocatable :: ix_v
