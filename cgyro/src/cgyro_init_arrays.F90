@@ -13,8 +13,7 @@ subroutine cgyro_init_arrays
   integer :: ir,it,is,ie,ix
   integer :: itm,itl,itor,mytor,itf
   integer :: it_loc
-  integer :: jr,jt,id
-  integer :: i_field
+  integer :: jt
   integer :: l,ll
   integer :: iltheta_min
   complex :: carg
