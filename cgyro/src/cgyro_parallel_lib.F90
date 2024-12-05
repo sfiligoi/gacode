@@ -11,7 +11,18 @@ module parallel_lib
 
   implicit none
 
+  ! flib
+  ! simple Linear parallelization dimensions
+
+  integer :: nfproc,ifproc
+  integer, private :: nfi,nfj
+  integer, private :: nfi_loc
+  integer, private :: nfj_loc
+  integer, private :: flib_comm
+
   ! lib
+  ! aggregate Linear parallelization dimensions
+  ! can be shared by many independent simulations
 
   integer :: nproc,iproc
   integer, private :: ni,nj
@@ -31,12 +42,14 @@ module parallel_lib
   complex, dimension(:,:,:,:), allocatable :: fsendr
 
   ! clib
+  ! subset of flib
 
   integer, private :: ncproc,icproc
   integer, private :: ns1,ns2
   integer, private :: clib_comm
 
   ! slib
+  ! Nonlinear parallelization dimensions 
 
   integer :: nsproc,isproc
   integer, private :: nn
@@ -518,11 +531,11 @@ contains
     use mpi
 
     implicit none
-
+  
     complex, intent(in), dimension(:,:,:) :: field_loc_v
     complex, intent(inout), dimension(:,:,:) :: field_v
     integer :: ierr
-
+  
 
     call MPI_ALLGATHER(field_loc_v(:,:,:),&
          size(field_loc_v(:,:,:)),&
@@ -561,6 +574,89 @@ contains
     cpl_release_device(field_loc_v,field_v)
 
   end subroutine parallel_lib_collect_field_gpu
+
+  !=========================================================
+
+  subroutine parallel_flib_init(ni_in,nj_in,ni_loc_out,nj_loc_out,comm)
+
+    use mpi
+
+    implicit none
+
+    integer, intent(in) :: ni_in,nj_in
+    integer, intent(in) :: comm
+    integer, intent(inout) :: ni_loc_out,nj_loc_out
+    integer, external :: parallel_dim
+    integer :: ierr
+
+    flib_comm = comm
+
+    call MPI_COMM_RANK(flib_comm,ifproc,ierr)
+    call MPI_COMM_SIZE(flib_comm,nfproc,ierr)
+
+    nfi = ni_in
+    nfj = nj_in
+
+    ! parallel_dim(x,y) ~= x/y
+    nfi_loc = parallel_dim(nfi,nfproc)
+    nfj_loc = parallel_dim(nfj,nfproc)
+
+    ni_loc_out = nfi_loc
+    nj_loc_out = nfj_loc
+
+  end subroutine parallel_flib_init
+
+  !=========================================================
+
+  subroutine parallel_flib_sum_field(field_loc,field)
+
+    use mpi
+
+    implicit none
+
+    complex, intent(in), dimension(:,:,:) :: field_loc
+    complex, intent(inout), dimension(:,:,:) :: field
+    integer :: ierr
+
+
+    call MPI_ALLREDUCE(field_loc(:,:,:),&
+         field(:,:,:),&
+         size(field(:,:,:)),&
+         MPI_DOUBLE_COMPLEX,&
+         MPI_SUM,&
+         flib_comm,&
+         ierr)
+
+  end subroutine parallel_flib_sum_field
+
+  !=========================================================
+
+  ! Note: Using intent(inout) for field_loc due to possible copy from GPU to CPU memory
+  ! Same for many other argumnets in other subroutines
+
+  subroutine parallel_flib_sum_field_gpu(field_loc,field)
+
+    use mpi
+
+    implicit none
+
+    complex, intent(inout), dimension(:,:,:) :: field_loc
+    complex, intent(inout), dimension(:,:,:) :: field
+    integer :: ierr
+
+    cpl_use_device(field_loc,field)
+
+    call MPI_ALLREDUCE(field_loc(:,:,:),&
+          field(:,:,:),&
+          size(field(:,:,:)),&
+          MPI_DOUBLE_COMPLEX,&
+          MPI_SUM,&
+          flib_comm,&
+          ierr)
+
+    cpl_release_device(field_loc,field)
+
+  end subroutine parallel_flib_sum_field_gpu
 
   !=========================================================
   !  Species communicator

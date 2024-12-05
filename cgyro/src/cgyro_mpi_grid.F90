@@ -293,6 +293,8 @@ subroutine cgyro_mpi_grid
 
   ! ni -> nc
   ! nj -> nv  
+  call parallel_flib_init(nc,nv,nc_loc,nv_loc,NEW_COMM_1)
+  ! TODO: properly handle parallel_lib
   call parallel_lib_init(nc,nv,nt1,nt_loc,n_field,nc_loc,nv_loc,NEW_COMM_1)
 
   nv1 = 1+i_proc_1*nv_loc
