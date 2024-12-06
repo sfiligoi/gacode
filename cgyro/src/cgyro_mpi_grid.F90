@@ -234,13 +234,13 @@ subroutine cgyro_mpi_grid
   ! Check that nv and nc are multiples of toroidal MPI multiplier
 
   if (modulo(nv,n_proc_1) /= 0) then
-     write (msg, "(A,I6,A,I3,A)") "nv (",nv,") not a multiple of coll atoa procs (",n_proc_1,")"
+     write (msg, "(A,I6,A,I3,A)") "nv (",nv,") not a multiple of field ared procs (",n_proc_1,")"
      call cgyro_error(msg)
      return
   endif
 
   if (modulo(nc,n_proc_1) /= 0) then
-     write (msg, "(A,I6,A,I3,A)") "nc (",nc,") not a multiple of coll atoa procs (",n_proc_1,")"
+     write (msg, "(A,I6,A,I3,A)") "nc (",nc,") not a multiple of field ared procs (",n_proc_1,")"
      call cgyro_error(msg)
      return
   endif
@@ -324,6 +324,14 @@ subroutine cgyro_mpi_grid
   ! ni -> nc
   ! nj -> nv  
   call parallel_flib_init(nc,nv,nc_loc,nv_loc,NEW_COMM_1)
+
+  if (modulo(nc_loc, nsim) /= 0) then
+     write (msg, "(A,I6,A,I3,A)") "Field nc_loc (",nc_loc,") not a multiple of simulation ensamble number (",nsim,")"
+     call cgyro_error(msg)
+     return
+  endif
+
+
   call parallel_lib_init(nc,nv,nv_loc,nt1,nt_loc,n_field,nc_loc_coll,nsim,NEW_COMM_4)
 
   nv1 = 1+i_proc_1*nv_loc
