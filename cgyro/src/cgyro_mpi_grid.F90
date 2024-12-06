@@ -24,7 +24,7 @@ subroutine cgyro_mpi_grid
   integer :: i_group_3  !clib
   integer :: i_group_4  !lib
   integer :: splitkey
-  integer :: nproc_3
+  integer :: nproc_3,nproc_4
   character(len=192) :: msg
 
   integer, external :: omp_get_max_threads, omp_get_thread_num
@@ -34,6 +34,7 @@ subroutine cgyro_mpi_grid
      ! just reuse the main one
      ! remanider: CGYRO_COMM_WORLD_4 is used for aggregatating multiple simulations
      CGYRO_COMM_WORLD_4 = CGYRO_COMM_WORLD
+     nsim = 1
      have_COMM_4 = .TRUE.
   endif
 
@@ -63,24 +64,29 @@ subroutine cgyro_mpi_grid
      write(io,'(a,i5)') ' GCD(nv,nc): ',d
      write(io,'(a,i5)') ' n_toroidal: ',n_toroidal
      write(io,'(a,i5)') '     nt_loc: ',nt_loc
+     write(io,'(a,i5)') '       nsim: ',nsim
      write(io,*)
-     write(io,*) '          [coll]     [str]      [NL]      [NL]      [NL]    [coll]     [str]'
-     write(io,*) ' n_MPI    nc_loc    nv_loc   n_split  atoa[MB] atoa proc atoa proc ared proc'
-     write(io,*) '------    ------    ------   -------  -------- --------- --------- ---------'
+     write(io,*) '          [coll]     [str]      [NL]      [NL]      [NL]    [coll]   [field]     [str]'
+     write(io,*) ' n_MPI    nc_loc    nv_loc   n_split  atoa[MB] atoa proc atoa proc ared proc ared proc'
+     write(io,*) '------    ------    ------   -------  -------- --------- --------- --------- ---------'
      do it=1,d*n_toroidal_procs
         if (mod(d*n_toroidal_procs,it) == 0 .and. mod(it,n_toroidal_procs) == 0) then
            n_proc_1 = it/n_toroidal_procs
-           ! further filter out incompatible multiples for velocity==2
-           if ((velocity_order==1) .or. &
+           nc_loc = nc/n_proc_1
+           if (modulo(nc_loc, nsim) == 0) then ! aggregate mode filter
+            nc_loc_coll = nc_loc/nsim
+            ! further filter out incompatible multiples for velocity==2
+            if ((velocity_order==1) .or. &
                (n_proc_1 == 1) .or. ( modulo(n_proc_1, n_species) == 0 ) ) then
-                nc_loc = nc/n_proc_1           
-                nv_loc = nv/n_proc_1           
+                nv_loc = nv/n_proc_1
                 nsplit = 1+(nv_loc*n_theta-1)/n_toroidal_procs
+                nproc_4 = n_proc_1*nsim
                 nproc_3 = n_proc_1
                 if ((n_proc_1 /= 1) .and. (velocity_order==2)) nproc_3 = n_proc_1/n_species
-                write(io,'(t2,4(i6,4x),f6.2,4x,i6,4x,i6,4x,i6)') &
-                     it,nc_loc,nv_loc,nsplit,16.0*n_radial*nt_loc*nsplit/1e6,&
-                     n_toroidal_procs,n_proc_1,nproc_3
+                write(io,'(t2,4(i6,4x),f6.2,4x,i6,4x,i6,4x,i6,4x,i6)') &
+                     it,nc_loc_coll,nv_loc,nsplit,16.0*n_radial*nt_loc*nsplit/1e6,&
+                     n_toroidal_procs,nproc_4,n_proc_1,nproc_3
+            endif
            endif
         endif
      enddo
