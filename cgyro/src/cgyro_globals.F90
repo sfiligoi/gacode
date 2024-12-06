@@ -181,6 +181,7 @@ module cgyro_globals
   integer :: n_proc
   integer :: n_proc_1
   integer :: n_proc_2
+  integer :: n_proc_4
   integer :: CGYRO_COMM_WORLD
   integer :: NEW_COMM_1  ! simple Linear
   integer :: NEW_COMM_2  ! non-linear
