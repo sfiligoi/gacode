@@ -43,7 +43,7 @@ subroutine cgyro_field_v_notae_s(start_t)
      do k=1,nproc
       do j=1,nj_loc
         iv = j+(k-1)*nj_loc
-        field_loc_v(:,itor,ic) = field_loc_v(:,itor,ic)+dvjvec_v(:,ic_loc,itor,iv)*fsendf(j,itor,ic_loc,k)
+        field_loc_v(:,itor,ic) = field_loc_v(:,itor,ic)+dvjvec_v(:,iv,itor,ic_loc)*fsendf(j,itor,ic_loc,k)
       enddo
      enddo
    enddo
@@ -145,7 +145,7 @@ subroutine cgyro_field_v_notae_s_gpu(start_t)
       do k=1,nproc
        do j=1,nj_loc
         iv = j+(k-1)*nj_loc
-        field_loc_l = field_loc_l+dvjvec_v(i_f,ic_loc,itor,iv)*fsendf(j,itor,ic_loc,k)
+        field_loc_l = field_loc_l+dvjvec_v(i_f,iv,itor,ic_loc)*fsendf(j,itor,ic_loc,k)
       enddo
      enddo
      field_loc_v(i_f,itor,ic) = field_loc_l
