@@ -180,7 +180,7 @@ subroutine cgyro_init_manager
      allocate(gflux_loc(0:n_global,n_species,4,n_field,nt1:nt2))
      allocate(cflux_tave(n_species,4))
      allocate(gflux_tave(n_species,4))
-     
+
      allocate(recv_status(MPI_STATUS_SIZE))
 
      allocate(source(n_theta,nv_loc,nt1:nt2))
@@ -190,6 +190,17 @@ subroutine cgyro_init_manager
 #elif defined(_OPENACC)
 !$acc enter data create(fcoef,gcoef,field,field_loc,source)
 #endif
+
+     if (collision_field_model == 1) then
+       ! nc and nc_loc must be last, since it will be collated     
+       allocate(field_v(n_field,nt1:nt2,nc))
+       allocate(field_loc_v(n_field,nt1:nt2,nc1:nc2))
+#if defined(OMPGPU)
+!$omp target enter data map(alloc:field_v,field_loc_v)
+#elif defined(_OPENACC)
+!$acc enter data create(field_v,field_loc_v)
+#endif
+     endif
 
      ! Velocity-distributed arrays
 

@@ -28,7 +28,7 @@ subroutine cgyro_field_v_notae_s(start_t)
 
   call timer_lib_in('field')
 
-  field_loc(:,:,start_t:nt2) = (0.0,0.0)
+  field_loc_v(:,:,:) = (0.0,0.0)
 
   ! Poisson and Ampere RHS integrals of H
 
@@ -37,13 +37,13 @@ subroutine cgyro_field_v_notae_s(start_t)
   call parallel_lib_nj_loc(nj_loc)
 
 !$omp parallel do collapse(2) private(ic_loc,iv,ic,k,j)
-  do itor=start_t,nt2
-   do ic=nc1,nc2
+  do ic=nc1,nc2
+   do itor=start_t,nt2
      ic_loc = ic-nc1+1
      do k=1,nproc
       do j=1,nj_loc
         iv = j+(k-1)*nj_loc
-        field_loc(:,ic,itor) = field_loc(:,ic,itor)+dvjvec_v(:,ic_loc,itor,iv)*fsendf(j,itor,ic_loc,k)
+        field_loc_v(:,itor,ic) = field_loc_v(:,itor,ic)+dvjvec_v(:,ic_loc,itor,iv)*fsendf(j,itor,ic_loc,k)
       enddo
      enddo
    enddo
@@ -53,8 +53,7 @@ subroutine cgyro_field_v_notae_s(start_t)
 
   call timer_lib_in('field_com')
 
-  call parallel_lib_sum_field(field_loc(:,:,start_t:nt2), &
-                              field(:,:,start_t:nt2))
+  call parallel_lib_collect_field(field_loc_v, field_v)
 
   call timer_lib_out('field_com')
   
@@ -63,8 +62,10 @@ subroutine cgyro_field_v_notae_s(start_t)
   ! Poisson LHS factors
 !$omp parallel do
   do itor=start_t,nt2
+    do ic=1,nc
      ! assuming  (.not.(itor == 0 .and. ae_flag == 1))
-     field(:,:,itor) = fcoef(:,:,itor)*field(:,:,itor)
+     field(:,ic,itor) = fcoef(:,ic,itor)*field_v(:,itor,ic)
+    enddo
   enddo
 
   call timer_lib_out('field')
