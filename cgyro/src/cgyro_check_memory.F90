@@ -34,12 +34,19 @@ subroutine cgyro_check_memory(datafile)
      call cgyro_alloc_add_3d(io,n_field,nc,nt_loc,16,'field_old')
      call cgyro_alloc_add_3d(io,n_field,nc,nt_loc,16,'field_old2')
      call cgyro_alloc_add_3d(io,n_field,nc,nt_loc,16,'field_old3')
-     call cgyro_alloc_add_3d(io,n_field,nc,nt_loc,8,'fcoef')
+     call cgyro_alloc_add_3d(io,n_field,nc,nt_loc,16,'field_v')
      if (n_field < 3) then
         call cgyro_alloc_add_3d(io,n_field,nc,nt_loc,8,'gcoef')
      else
         call cgyro_alloc_add_3d(io,5,nc,nt_loc,8,'gcoef')
      endif
+     if ((collision_model /= 5) .AND. (collision_field_model == 1)) then
+       call cgyro_alloc_add_3d(io,n_field,nt_loc,nc,16,'field_v')
+       call cgyro_alloc_add_3d(io,n_field,nt_loc,nc_loc,16,'field_loc_v')
+       call cgyro_alloc_add_4d(io,n_field,nv,nt_loc,nc_loc,16,'dvjvec_v')
+     endif
+     call cgyro_alloc_add_4d(io,n_field,nc,nv_loc,nt_loc,16,'dvjvec_c')
+     call cgyro_alloc_add_4d(io,n_field,nc,nv_loc,nt_loc,16,'jxvec_c')
 
      if (nonlinear_flag == 1) then
         write(io,*)

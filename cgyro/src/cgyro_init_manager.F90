@@ -191,7 +191,7 @@ subroutine cgyro_init_manager
 !$acc enter data create(fcoef,gcoef,field,field_loc,source)
 #endif
 
-     if (collision_field_model == 1) then
+     if ((collision_model /= 5) .AND. (collision_field_model == 1)) then
        ! nc and nc_loc must be last, since it will be collated     
        allocate(field_v(n_field,nt1:nt2,nc))
        allocate(field_loc_v(n_field,nt1:nt2,nc1:nc2))

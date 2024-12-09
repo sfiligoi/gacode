@@ -234,7 +234,7 @@ subroutine cgyro_field_coefficients
              jvec_c(:,ic,iv_loc,itor)
      enddo
    enddo
-   if (collision_field_model == 1) then
+   if ((collision_model /= 5) .AND. (collision_field_model == 1)) then
     do ic=nc1,nc2
      ic_loc = ic-nc1+1
      it = it_c(ic)
@@ -255,7 +255,7 @@ subroutine cgyro_field_coefficients
 #elif defined(_OPENACC)
 !$acc update device(fcoef,gcoef,dvjvec_c)
 #endif
-  if (collision_field_model == 1) then
+  if ((collision_model /= 5) .AND. (collision_field_model == 1)) then
 #if defined(OMPGPU)
 !$omp target update to(dvjvec_v)
 #elif defined(_OPENACC)
