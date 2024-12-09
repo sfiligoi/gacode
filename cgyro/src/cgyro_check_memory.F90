@@ -43,10 +43,9 @@ subroutine cgyro_check_memory(datafile)
      if ((collision_model /= 5) .AND. (collision_field_model == 1)) then
        call cgyro_alloc_add_3d(io,n_field,nt_loc,nc,16,'field_v')
        call cgyro_alloc_add_3d(io,n_field,nt_loc,nc_loc,16,'field_loc_v')
-       call cgyro_alloc_add_4d(io,n_field,nv,nt_loc,nc_loc,16,'dvjvec_v')
+       call cgyro_alloc_add_4d(io,n_field,nv,nt_loc,nc_loc,8,'dvjvec_v')
      endif
-     call cgyro_alloc_add_4d(io,n_field,nc,nv_loc,nt_loc,16,'dvjvec_c')
-     call cgyro_alloc_add_4d(io,n_field,nc,nv_loc,nt_loc,16,'jxvec_c')
+     call cgyro_alloc_add_4d(io,n_field,nc,nv_loc,nt_loc,8,'dvjvec_c')
 
      if (nonlinear_flag == 1) then
         write(io,*)
