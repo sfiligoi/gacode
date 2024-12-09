@@ -34,7 +34,7 @@ subroutine cgyro_check_memory(datafile)
      call cgyro_alloc_add_3d(io,n_field,nc,nt_loc,16,'field_old')
      call cgyro_alloc_add_3d(io,n_field,nc,nt_loc,16,'field_old2')
      call cgyro_alloc_add_3d(io,n_field,nc,nt_loc,16,'field_old3')
-     call cgyro_alloc_add_3d(io,n_field,nc,nt_loc,16,'field_v')
+     call cgyro_alloc_add_3d(io,n_field,nc,nt_loc,8,'fcoef')
      if (n_field < 3) then
         call cgyro_alloc_add_3d(io,n_field,nc,nt_loc,8,'gcoef')
      else
