@@ -234,24 +234,33 @@ subroutine cgyro_field_coefficients
              jvec_c(:,ic,iv_loc,itor)
      enddo
    enddo
-   do ic=nc1,nc2
+   if ((collision_model /= 5) .AND. (collision_field_model == 1)) then
+    do ic=nc1,nc2
      ic_loc = ic-nc1+1
      it = it_c(ic)
      do iv=1,nv
         is = is_v(iv)
         ix = ix_v(iv)
         ie = ie_v(iv)
-        dvjvec_v(:,ic_loc,itor,iv) = dens2_rot(it,is)*w_exi(ie,ix)*z(is)* &
+        dvjvec_v(:,iv,itor,ic_loc) = dens2_rot(it,is)*w_exi(ie,ix)*z(is)* &
              jvec_v(:,ic_loc,itor,iv)
      enddo
-   enddo
+    enddo
+   endif
   enddo
   !-------------------------------------------------------------------------
 
 #if defined(OMPGPU)
-!$omp target update to(fcoef,gcoef,dvjvec_c,dvjvec_v)
+!$omp target update to(fcoef,gcoef,dvjvec_c)
 #elif defined(_OPENACC)
-!$acc update device(fcoef,gcoef,dvjvec_c,dvjvec_v)
+!$acc update device(fcoef,gcoef,dvjvec_c)
 #endif
+  if ((collision_model /= 5) .AND. (collision_field_model == 1)) then
+#if defined(OMPGPU)
+!$omp target update to(dvjvec_v)
+#elif defined(_OPENACC)
+!$acc update device(dvjvec_v)
+#endif
+  endif
 
 end subroutine cgyro_field_coefficients
