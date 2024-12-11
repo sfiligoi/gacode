@@ -118,7 +118,7 @@ subroutine cgyro_field_v_notae_s_gpu(start_t)
 
 #if (!defined(OMPGPU)) && defined(_OPENACC)
 !$acc data present(fsendf)
-!$acc data present(field,field_loc)
+!$acc data present(field,field_v,field_loc_v)
 #endif
 
   ! Poisson and Ampere RHS integrals of H
@@ -128,7 +128,7 @@ subroutine cgyro_field_v_notae_s_gpu(start_t)
 !$omp&       private(ic_loc,field_loc_l) map(to:start_t,nproc,nj_loc)
 #elif defined(_OPENACC)
 !$acc parallel loop collapse(3) gang private(ic_loc,field_loc_l) &
-!$acc&         present(dvjvec_v,fsendf,field_loc) copyin(start_t,nproc,nj_loc) &
+!$acc&         present(dvjvec_v,fsendf) copyin(start_t,nproc,nj_loc) &
 !$acc&         present(nt2,nc1,nc2,n_field,nv) default(none)
 #endif
   do ic=nc1,nc2
