@@ -200,6 +200,7 @@ module tglf_interface
   integer  :: tglf_n_elite_in   = 700
   real     :: tglf_q_elite_in   = 2.0
   real     :: tglf_q_prime_elite_in = 16.0
+  real     :: tglf_p_prime_elite_in = 0.0
   real     :: tglf_R_elite_in(max_ELITE) 
   real     :: tglf_Z_elite_in(max_ELITE) 
   real     :: tglf_Bp_elite_in(max_ELITE) 
