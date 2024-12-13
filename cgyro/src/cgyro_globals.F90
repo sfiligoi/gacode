@@ -202,7 +202,6 @@ module cgyro_globals
   integer :: nc,ic
   integer :: nc_loc,ic_loc
   integer :: nc_loc_coll   ! nc local slice for collision purposes, on NEW_COMM_4
-  integer :: nsim          ! how many simulations is coll processing at once
   integer :: ns_loc
   integer, dimension(:), allocatable :: ie_v
   integer, dimension(:), allocatable :: ix_v
@@ -215,6 +214,9 @@ module cgyro_globals
   !
   integer :: nt1,nt2,nt_loc
   integer :: n_toroidal_procs
+  ! For multi-simulation handling
+  integer :: n_sim          ! how many simulations is coll processing at once
+  integer :: i_sim          ! 0-based order in n_sim
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------
@@ -357,7 +359,7 @@ module cgyro_globals
   complex, dimension(:,:,:), allocatable :: cap_h_c_old
   complex, dimension(:,:,:), allocatable :: cap_h_c_old2
   complex, dimension(:,:,:), allocatable :: cap_h_ct
-  complex, dimension(:,:,:), allocatable :: cap_h_v
+  complex, dimension(:,:,:,:), allocatable :: cap_h_v
   real, dimension(:,:,:,:), allocatable :: jvec_c
   real, dimension(:,:,:,:,:), allocatable :: jvec_c_nl ! used by NL only
   real, dimension(:,:,:,:), allocatable :: jvec_v
@@ -369,14 +371,16 @@ module cgyro_globals
   ! Fields
   real, dimension(:,:,:), allocatable :: fcoef
   real, dimension(:,:,:), allocatable :: gcoef
-  complex, dimension(:,:,:), allocatable :: field, field_v
+  complex, dimension(:,:,:), allocatable :: field
   complex, dimension(:,:,:), allocatable :: field_dot
-  complex, dimension(:,:,:), allocatable :: field_loc, field_loc_v
+  complex, dimension(:,:,:), allocatable :: field_loc
   complex, dimension(:,:,:), allocatable :: field_old
   complex, dimension(:,:,:), allocatable :: field_old2
   complex, dimension(:,:,:), allocatable :: field_old3
   complex, dimension(:,:,:,:,:), allocatable :: moment_loc
   complex, dimension(:,:,:,:,:), allocatable :: moment
+  complex, dimension(:,:,:,:), allocatable :: field_v
+  complex, dimension(:,:,:,:), allocatable :: field_loc_v
   !
   ! Nonlinear fluxes (f=standard,c=central,g=global)
   real, dimension(:,:,:,:), allocatable :: cflux_loc

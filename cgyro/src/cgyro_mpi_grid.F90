@@ -34,7 +34,8 @@ subroutine cgyro_mpi_grid
      ! just reuse the main one
      ! remanider: CGYRO_COMM_WORLD_4 is used for aggregatating multiple simulations
      CGYRO_COMM_WORLD_4 = CGYRO_COMM_WORLD
-     nsim = 1
+     n_sim = 1
+     i_sim = 0
      have_COMM_4 = .TRUE.
   endif
 
@@ -64,7 +65,7 @@ subroutine cgyro_mpi_grid
      write(io,'(a,i5)') ' GCD(nv,nc): ',d
      write(io,'(a,i5)') ' n_toroidal: ',n_toroidal
      write(io,'(a,i5)') '     nt_loc: ',nt_loc
-     write(io,'(a,i5)') '       nsim: ',nsim
+     write(io,'(a,i5)') '      n_sim: ',n_sim
      write(io,*)
      write(io,*) '          [coll]     [str]      [NL]      [NL]      [NL]    [coll]   [field]     [str]'
      write(io,*) ' n_MPI    nc_loc    nv_loc   n_split  atoa[MB] atoa proc atoa proc ared proc ared proc'
@@ -73,14 +74,14 @@ subroutine cgyro_mpi_grid
         if (mod(d*n_toroidal_procs,it) == 0 .and. mod(it,n_toroidal_procs) == 0) then
            n_proc_1 = it/n_toroidal_procs
            nc_loc = nc/n_proc_1
-           if (modulo(nc_loc, nsim) == 0) then ! aggregate mode filter
-            nc_loc_coll = nc_loc/nsim
+           if (modulo(nc_loc, n_sim) == 0) then ! aggregate mode filter
+            nc_loc_coll = nc_loc/n_sim
             ! further filter out incompatible multiples for velocity==2
             if ((velocity_order==1) .or. &
                (n_proc_1 == 1) .or. ( modulo(n_proc_1, n_species) == 0 ) ) then
                 nv_loc = nv/n_proc_1
                 nsplit = 1+(nv_loc*n_theta-1)/n_toroidal_procs
-                nproc_4 = n_proc_1*nsim
+                nproc_4 = n_proc_1*n_sim
                 nproc_3 = n_proc_1
                 if ((n_proc_1 /= 1) .and. (velocity_order==2)) nproc_3 = n_proc_1/n_species
                 write(io,'(t2,4(i6,4x),f6.2,4x,i6,4x,i6,4x,i6,4x,i6)') &
@@ -247,7 +248,7 @@ subroutine cgyro_mpi_grid
   !------------------------------------------------
 
   !-----------------------------------------------------------
-  ! Split up GYRO_COMM_WORLD into groups and adjoint:
+  ! Split up CGYRO_COMM_WORLD into groups and adjoint:
   !
   !             NEW_COMM_1  and  NEW_COMM_2
   !
@@ -313,14 +314,14 @@ subroutine cgyro_mpi_grid
   ! nj -> nv  
   call parallel_flib_init(nc,nv,nc_loc,nv_loc,NEW_COMM_1)
 
-  if (modulo(nc_loc, nsim) /= 0) then
-     write (msg, "(A,I6,A,I3,A)") "Field nc_loc (",nc_loc,") not a multiple of simulation ensamble number (",nsim,")"
+  if (modulo(nc_loc, n_sim) /= 0) then
+     write (msg, "(A,I6,A,I3,A)") "Field nc_loc (",nc_loc,") not a multiple of simulation ensamble number (",n_sim,")"
      call cgyro_error(msg)
      return
   endif
 
 
-  call parallel_lib_init(nc,nv,nv_loc,nt1,nt_loc,n_field,nc_loc_coll,nsim,NEW_COMM_4)
+  call parallel_lib_init(nc,nv,nv_loc,nt1,nt_loc,n_field,nc_loc_coll,n_sim,NEW_COMM_4)
 
   nv1 = 1+i_proc_1*nv_loc
   nv2 = (1+i_proc_1)*nv_loc
