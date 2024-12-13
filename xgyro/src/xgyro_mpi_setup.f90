@@ -12,7 +12,7 @@ subroutine xgyro_mpi_setup
 
   use xgyro_globals
   use cgyro_globals, only : i_err, i_proc, n_proc, CGYRO_COMM_WORLD, &
-                            CGYRO_COMM_WORLD_4, nsim, have_COMM_4
+                            CGYRO_COMM_WORLD_4, n_sim, i_sim, have_COMM_4
   use xgyro_io
 
   implicit none
@@ -102,7 +102,8 @@ subroutine xgyro_mpi_setup
   ! TODO: Add support for running multiple simulations with common coll
   ! For now, just tell CGYRO that each simulation is independent
   CGYRO_COMM_WORLD_4 = CGYRO_COMM_WORLD
-  nsim = 1
+  n_sim = 1
+  i_sim = 0
   have_COMM_4 = .TRUE.
 
 end subroutine xgyro_mpi_setup

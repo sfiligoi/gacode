@@ -39,8 +39,8 @@ module parallel_lib
   real, dimension(:,:,:,:,:), allocatable, private :: fsendr_real
 
   ! (expose these)
-  complex, dimension(:,:,:,:), allocatable :: fsendf
-  complex, dimension(:,:,:,:), allocatable :: fsendr
+  complex, dimension(:,:,:,:,:), allocatable :: fsendf
+  complex, dimension(:,:,:,:,:), allocatable :: fsendr
 
   ! clib
   ! subset of flib
@@ -198,8 +198,8 @@ contains
 
     nsend = nj_loc*ni_loc*nk_loc
 
-    allocate(fsendf(nj_loc,nk1:nk2,ni_loc,nproc))
-    allocate(fsendr(ni_loc,nk1:nk2,nj_loc,nproc))
+    allocate(fsendf(nj_loc,nk1:nk2,ni_loc,nproc,nsm))
+    allocate(fsendr(ni_loc,nk1:nk2,nj_loc,nproc,nsm))
 
     n_field = n_field_in
     nsend_real = n_field*nsend
@@ -271,7 +271,7 @@ contains
 
     implicit none
 
-    complex, intent(inout), dimension(:,:,:) :: f
+    complex, intent(inout), dimension(:,:,:,:) :: f
     integer :: ierr
 
     call MPI_ALLTOALL(fsendr, &
@@ -293,7 +293,7 @@ contains
 
     implicit none
 
-    complex, intent(inout), dimension(:,:,:) :: f
+    complex, intent(inout), dimension(:,:,:,:) :: f
 
     integer :: ierr
 
@@ -314,37 +314,6 @@ contains
 
   !=========================================================
 
-  subroutine parallel_lib_r_pack(ft)
-
-    use mpi
-
-    implicit none
-
-    complex, intent(in), dimension(:,:,:) :: ft
-    integer :: j_loc,i,j,k,j1,j2,itor
-
-    j1 = 1+iproc*nj_loc
-    j2 = (1+iproc)*nj_loc
-
-!$omp parallel do collapse(2) if (size(fsendr) >= default_size) default(none) &
-!$omp& shared(nproc,j1,j2,ni_loc,nk1,nk2) &
-!$omp& private(j,j_loc,i) &
-!$omp& shared(ft,fsendr)
-    do k=1,nproc
-     do itor=nk1,nk2
-       do j=j1,j2
-          j_loc = j-j1+1 
-          do i=1,ni_loc
-             fsendr(i,itor,j_loc,k) = ft(j_loc,i+(k-1)*ni_loc,1+(itor-nk1))
-          enddo
-       enddo
-     enddo
-    enddo
-
-  end subroutine parallel_lib_r_pack
-
-  !=========================================================
-
   subroutine parallel_lib_rtrans_pack(fin)
 ! -----------------------------------------
 ! transpose version of parallel_lib_r_pack(fin)
@@ -354,23 +323,28 @@ contains
     implicit none
 
     complex, intent(in), dimension(:,:,:) :: fin
-    integer :: j_loc,i,j,k,j1,j2,itor
+    integer :: j_loc,i,j,k,j1,j2,itor,ism
+
+    ! fin is assumed to be cap_h_c(nc,nv_loc,nt_loc)
+    ! where nc = ni
 
     j1 = 1+iproc*nj_loc
     j2 = (1+iproc)*nj_loc
 
-!$omp parallel do collapse(2) if (size(fsendr) >= default_size) default(none) &
-!$omp& shared(nproc,j1,j2,ni_loc,nk1,nk2) &
+!$omp parallel do collapse(4) if (size(fsendr) >= default_size) default(none) &
+!$omp& shared(nproc,j1,j2,ni_loc,nk1,nk2,nsm) &
 !$omp& private(j,j_loc,i) &
 !$omp& shared(fin,fsendr)
-    do k=1,nproc
-     do itor=nk1,nk2
-       do j=j1,j2
-          j_loc = j-j1+1 
+    do ism=1,nsm
+     do k=1,nproc
+      do j=j1,j2
+       do itor=nk1,nk2
           do i=1,ni_loc
-             fsendr(i,itor,j_loc,k) = fin(i+(k-1)*ni_loc,j_loc,1+(itor-nk1))
+             j_loc = j-j1+1 
+             fsendr(i,itor,j_loc,k,ism) = fin(i+(k-1)*ni_loc+(ism-1)*ni_loc*nproc,j_loc,1+(itor-nk1))
           enddo
        enddo
+      enddo
      enddo
     enddo
 
@@ -388,26 +362,32 @@ contains
     implicit none
 
     complex, intent(in), dimension(:,:,:) :: fin
-    integer :: j_loc,i,j,k,j1,j2,itor
+    integer :: j_loc,i,j,k,j1,j2,itor,ism
+
+    ! fin is assumed to be cap_h_c(nc,nv_loc,nt_loc)
+    ! where nc = ni
 
     j1 = 1+iproc*nj_loc
     j2 = (1+iproc)*nj_loc
+
 #if defined(OMPGPU)
-!$omp target teams distribute parallel do simd collapse(4) &
+!$omp target teams distribute parallel do simd collapse(5) &
 !$omp&  private(j_loc) map(to:j1,j2)
 #else
-!$acc parallel loop collapse(4) gang vector independent private(j_loc) &
-!$acc&         present(fsendr,fin) present(nproc,nk1,nk2,ni_loc) &
+!$acc parallel loop collapse(5) gang vector independent private(j_loc) &
+!$acc&         present(fsendr,fin) present(nproc,nk1,nk2,ni_loc,nsm) &
 !$acc&         copyin(j1,j2) default(none)
 #endif
-    do k=1,nproc
-     do itor=nk1,nk2
-       do j=j1,j2
+    do ism=1,nsm
+     do k=1,nproc
+      do j=j1,j2
+       do itor=nk1,nk2
           do i=1,ni_loc
              j_loc = j-j1+1
-             fsendr(i,itor,j_loc,k) = fin(i+(k-1)*ni_loc,j_loc,1+(itor-nk1))
+             fsendr(i,itor,j_loc,k,ism) = fin(i+(k-1)*ni_loc+(ism-1)*ni_loc*nproc,j_loc,1+(itor-nk1))
           enddo
        enddo
+      enddo
      enddo
     enddo
 
@@ -424,7 +404,7 @@ contains
     implicit none
 
     complex, intent(in), dimension(:,:,:) :: fin
-    complex, intent(inout), dimension(:,:,:) :: f
+    complex, intent(inout), dimension(:,:,:,:) :: f
 
     call parallel_lib_rtrans_pack(fin)
     call parallel_lib_r_do(f)
@@ -476,74 +456,22 @@ contains
 
   !=========================================================
 
-  subroutine parallel_lib_sum_field(field_loc,field)
-
-    use mpi
-
-    implicit none
-
-    complex, intent(in), dimension(:,:,:) :: field_loc
-    complex, intent(inout), dimension(:,:,:) :: field
-    integer :: ierr
-
-
-    call MPI_ALLREDUCE(field_loc(:,:,:),&
-         field(:,:,:),&
-         size(field(:,:,:)),&
-         MPI_DOUBLE_COMPLEX,&
-         MPI_SUM,&
-         lib_comm,&
-         ierr)
-
-  end subroutine parallel_lib_sum_field
-
-  !=========================================================
-
-  ! Note: Using intent(inout) for field_loc due to possible copy from GPU to CPU memory
-  ! Same for many other argumnets in other subroutines
-
-  subroutine parallel_lib_sum_field_gpu(field_loc,field)
-
-    use mpi
-
-    implicit none
-
-    complex, intent(inout), dimension(:,:,:) :: field_loc
-    complex, intent(inout), dimension(:,:,:) :: field
-    integer :: ierr
-
-    cpl_use_device(field_loc,field)
-
-    call MPI_ALLREDUCE(field_loc(:,:,:),&
-          field(:,:,:),&
-          size(field(:,:,:)),&
-          MPI_DOUBLE_COMPLEX,&
-          MPI_SUM,&
-          lib_comm,&
-          ierr)
-
-    cpl_release_device(field_loc,field)
-
-  end subroutine parallel_lib_sum_field_gpu
-
-  !=========================================================
-
   subroutine parallel_lib_collect_field(field_loc_v,field_v)
 
     use mpi
 
     implicit none
   
-    complex, intent(in), dimension(:,:,:) :: field_loc_v
-    complex, intent(inout), dimension(:,:,:) :: field_v
+    complex, intent(in), dimension(:,:,:,:) :: field_loc_v
+    complex, intent(inout), dimension(:,:,:,:) :: field_v
     integer :: ierr
   
 
-    call MPI_ALLGATHER(field_loc_v(:,:,:),&
-         size(field_loc_v(:,:,:)),&
+    call MPI_ALLGATHER(field_loc_v(:,:,:,:),&
+         size(field_loc_v(:,:,:,:)),&
          MPI_DOUBLE_COMPLEX,&
-         field_v(:,:,:),&
-         size(field_loc_v(:,:,:)),&
+         field_v(:,:,:,:),&
+         size(field_loc_v(:,:,:,:)),&
          MPI_DOUBLE_COMPLEX,&
          lib_comm,&
          ierr)
@@ -558,17 +486,17 @@ contains
 
     implicit none
 
-    complex, intent(in), dimension(:,:,:) :: field_loc_v
-    complex, intent(inout), dimension(:,:,:) :: field_v
+    complex, intent(in), dimension(:,:,:,:) :: field_loc_v
+    complex, intent(inout), dimension(:,:,:,:) :: field_v
     integer :: ierr
 
     cpl_use_device(field_loc_v,field_v)
 
-    call MPI_ALLGATHER(field_loc_v(:,:,:),&
-         size(field_loc_v(:,:,:)),&
+    call MPI_ALLGATHER(field_loc_v(:,:,:,:),&
+         size(field_loc_v(:,:,:,:)),&
          MPI_DOUBLE_COMPLEX,&
-         field_v(:,:,:),&
-         size(field_loc_v(:,:,:)),&
+         field_v(:,:,:,:),&
+         size(field_loc_v(:,:,:,:)),&
          MPI_DOUBLE_COMPLEX,&
          lib_comm,&
          ierr)

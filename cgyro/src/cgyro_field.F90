@@ -24,11 +24,11 @@ subroutine cgyro_field_v_notae_s(start_t)
   ! ------------------ 
   integer, intent(in) :: start_t
   !
-  integer :: itor,j,k,nj_loc
+  integer :: itor,j,k,nj_loc,ism
 
   call timer_lib_in('field')
 
-  field_loc_v(:,:,:) = (0.0,0.0)
+  field_loc_v(:,:,:,:) = (0.0,0.0)
 
   ! Poisson and Ampere RHS integrals of H
 
@@ -37,16 +37,18 @@ subroutine cgyro_field_v_notae_s(start_t)
   ! Use aggregate comm, since it is used in step_collision
   call parallel_lib_nj_loc(nj_loc)
 
-!$omp parallel do collapse(2) private(ic_loc,iv,ic,k,j)
+!$omp parallel do collapse(3) private(ic_loc,iv,ic,k,j,ism)
   do ic=nc1,nc2
-   do itor=start_t,nt2
+   do ism=1,n_sim
+    do itor=start_t,nt2
      ic_loc = ic-nc1+1
      do k=1,nproc
       do j=1,nj_loc
         iv = j+(k-1)*nj_loc
-        field_loc_v(:,itor,ic) = field_loc_v(:,itor,ic)+dvjvec_v(:,iv,itor,ic_loc)*fsendf(j,itor,ic_loc,k)
+        field_loc_v(:,itor,ism,ic) = field_loc_v(:,itor,ism,ic)+dvjvec_v(:,iv,itor,ic_loc)*fsendf(j,itor,ic_loc,k,ism)
       enddo
      enddo
+    enddo
    enddo
   enddo
 
@@ -66,7 +68,7 @@ subroutine cgyro_field_v_notae_s(start_t)
   do itor=start_t,nt2
     do ic=1,nc
      ! assuming  (.not.(itor == 0 .and. ae_flag == 1))
-     field(:,ic,itor) = fcoef(:,ic,itor)*field_v(:,itor,ic)
+     field(:,ic,itor) = fcoef(:,ic,itor)*field_v(:,itor,i_sim+1,ic)
     enddo
   enddo
 
@@ -109,7 +111,7 @@ subroutine cgyro_field_v_notae_s_gpu(start_t)
   ! ------------------ 
   integer, intent(in) :: start_t
   !
-  integer :: i_f,itor,j,k,nj_loc
+  integer :: i_f,itor,j,k,nj_loc,ism
   complex :: field_loc_l 
 
   call timer_lib_in('field')
@@ -127,16 +129,17 @@ subroutine cgyro_field_v_notae_s_gpu(start_t)
   ! Poisson and Ampere RHS integrals of H
 
 #if defined(OMPGPU)
-!$omp target teams distribute collapse(3) &
+!$omp target teams distribute collapse(4) &
 !$omp&       private(ic_loc,field_loc_l) map(to:start_t,nproc,nj_loc)
 #elif defined(_OPENACC)
-!$acc parallel loop collapse(3) gang private(ic_loc,field_loc_l) &
+!$acc parallel loop collapse(4) gang private(ic_loc,field_loc_l) &
 !$acc&         present(dvjvec_v,fsendf) copyin(start_t,nproc,nj_loc) &
 !$acc&         present(nt2,nc1,nc2,n_field,nv) default(none)
 #endif
   do ic=nc1,nc2
-   do itor=start_t,nt2
-    do i_f=1,n_field
+   do ism=1,n_sim
+    do itor=start_t,nt2
+     do i_f=1,n_field
       ic_loc = ic-nc1+1
       field_loc_l = (0.0,0.0)
 #if defined(OMPGPU)
@@ -148,10 +151,11 @@ subroutine cgyro_field_v_notae_s_gpu(start_t)
       do k=1,nproc
        do j=1,nj_loc
         iv = j+(k-1)*nj_loc
-        field_loc_l = field_loc_l+dvjvec_v(i_f,iv,itor,ic_loc)*fsendf(j,itor,ic_loc,k)
+        field_loc_l = field_loc_l+dvjvec_v(i_f,iv,itor,ic_loc)*fsendf(j,itor,ic_loc,k,ism)
       enddo
+      enddo
+      field_loc_v(i_f,itor,ism,ic) = field_loc_l
      enddo
-     field_loc_v(i_f,itor,ic) = field_loc_l
     enddo
    enddo
   enddo
@@ -179,7 +183,7 @@ subroutine cgyro_field_v_notae_s_gpu(start_t)
      ! assuming  (.not.(itor == 0 .and. ae_flag == 1))
      do ic=1,nc
        do i_f=1,n_field
-        field(i_f,ic,itor) = fcoef(i_f,ic,itor)*field_v(i_f,itor,ic)
+        field(i_f,ic,itor) = fcoef(i_f,ic,itor)*field_v(i_f,itor,i_sim+1,ic)
        enddo
      enddo
   enddo

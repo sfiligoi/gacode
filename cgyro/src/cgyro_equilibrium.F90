@@ -303,6 +303,10 @@ subroutine cgyro_equilibrium
      return
   endif
 #endif
+  if ((explicit_trap_flag == 1) .AND. (n_sim>1)) then
+     call cgyro_error("explicit_trap_flag=1 not supported in multi-simulation code.")
+     return
+  endif
 
 end subroutine cgyro_equilibrium
 
