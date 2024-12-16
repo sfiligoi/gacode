@@ -215,6 +215,7 @@ subroutine tglf_read_input
   read(1,*) tglf_q_loc_in
   read(1,*) tglf_q_prime_loc_in
   read(1,*) tglf_p_prime_loc_in
+  read(1,*) tglf_beta_loc_in
   read(1,*) tglf_kx0_loc_in
 
   ! Set threshold for TGLF-NN execution versus full TGLF calculation
