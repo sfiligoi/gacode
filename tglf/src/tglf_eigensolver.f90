@@ -14,7 +14,7 @@
       IMPLICIT NONE
 !
       CHARACTER(1) :: rightvectors
-      LOGICAL :: use_zgeev = .false.
+      LOGICAL :: use_zgeev = .true.
       INTEGER :: is,js
       INTEGER ::  j1, j2, j, i
       INTEGER :: ifail,ib, jb, ia, ja, ia0, ja0
