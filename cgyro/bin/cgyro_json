@@ -106,6 +106,7 @@ d['GAMMA_E'] = sim.gamma_e
 d['GAMMA_P'] = sim.gamma_p
 d['BETAE_UNIT'] = sim.betae_unit
 d['NU_EE'] = sim.nu[ielec]
+d['Z_EFF'] = sim.z_eff
 
 d['ZMAG'] = sim.zmag
 d['DZMAG'] = sim.dzmag

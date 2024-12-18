@@ -500,6 +500,8 @@ class cgyrodata:
          self.sdlnndr[i],p = self.eget(data,p) 
          self.sdlntdr[i],p = self.eget(data,p)
          self.sbeta[i],p = self.eget(data,p)
+      # Added 17 Dec 2024
+      self.z_eff,p = self.eget(data,p) 
 
       if p == -1:
          print('WARNING: (getgrid) Data format outdated. Please run cgyro -t')
