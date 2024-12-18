@@ -229,6 +229,8 @@ subroutine cgyro_write_initdata
         write (io,fmtstr) sdlntdr(is)
         write (io,fmtstr) sbeta(is)
      enddo
+     ! Added 17 Dec 2024
+     write (io,fmtstr) z_eff
      close(io)
 
   endif
