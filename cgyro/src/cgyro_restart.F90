@@ -79,8 +79,8 @@ subroutine cgyro_write_restart_one
   integer(KIND=8) :: start_time,cp_time
   integer(KIND=8) :: count_rate, count_max
   real :: cp_dt
-  integer :: j,ic0,statusfd
-  integer :: ierr
+  integer :: statusfd
+  integer :: ierr,ic0,j
 
   ! use system_clock to be consistent with cgyro_kernel
   call system_clock(start_time,count_rate,count_max)
@@ -341,10 +341,8 @@ subroutine cgyro_read_restart
 
   implicit none
 
-  integer :: igk
-  integer :: j,ic0
-
-  
+  integer :: igk,ic0,j
+ 
   !---------------------------------------------------------
   ! Read restart parameters from ASCII tag file.
   !
@@ -388,7 +386,6 @@ subroutine cgyro_read_restart
         sa = 1.0+exp(-delta_t/tau_ave)*sa
      enddo
   endif
-
 
 end subroutine cgyro_read_restart
 
@@ -517,7 +514,7 @@ subroutine cgyro_read_restart_one
   integer(KIND=8) :: count_rate, count_max
   real :: cp_dt
   integer, dimension(3) :: mpibuf
-  integer :: ic0,j,statusfd
+  integer :: statusfd
 
   ! use system_clock to be consistent with cgyro_kernel
   call system_clock(start_time,count_rate,count_max)
@@ -645,7 +642,7 @@ subroutine cgyro_read_restart_slow
   integer(KIND=8) :: start_time,cp_time
   integer(KIND=8) :: count_rate, count_max
   real :: cp_dt
-  integer :: ic0,j,statusfd
+  integer :: statusfd
   integer :: ie,ix,is,itor
   integer :: t_iv
 

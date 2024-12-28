@@ -9,5 +9,5 @@ numa=${5}
 mpinuma=${6}
 
 cd $simdir
-mpiexec -x OMP_NUM_THREADS=$nomp -np $nmpi $exec
+mpiexec --use-hwthread-cpus -x OMP_NUM_THREADS=$nomp -np $nmpi $exec 
 

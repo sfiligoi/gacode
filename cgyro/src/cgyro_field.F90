@@ -28,7 +28,7 @@ subroutine cgyro_field_v_notae_s(start_t)
 
   call timer_lib_in('field')
 
-  field_loc(:,:,start_t:nt2) = (0.0,0.0)
+  field_loc_v(:,:,:) = (0.0,0.0)
 
   ! Poisson and Ampere RHS integrals of H
 
@@ -37,13 +37,13 @@ subroutine cgyro_field_v_notae_s(start_t)
   call parallel_lib_nj_loc(nj_loc)
 
 !$omp parallel do collapse(2) private(ic_loc,iv,ic,k,j)
-  do itor=start_t,nt2
-   do ic=nc1,nc2
+  do ic=nc1,nc2
+   do itor=start_t,nt2
      ic_loc = ic-nc1+1
      do k=1,nproc
       do j=1,nj_loc
         iv = j+(k-1)*nj_loc
-        field_loc(:,ic,itor) = field_loc(:,ic,itor)+dvjvec_v(:,ic_loc,itor,iv)*fsendf(j,itor,ic_loc,k)
+        field_loc_v(:,itor,ic) = field_loc_v(:,itor,ic)+dvjvec_v(:,iv,itor,ic_loc)*fsendf(j,itor,ic_loc,k)
       enddo
      enddo
    enddo
@@ -53,8 +53,7 @@ subroutine cgyro_field_v_notae_s(start_t)
 
   call timer_lib_in('field_com')
 
-  call parallel_lib_sum_field(field_loc(:,:,start_t:nt2), &
-                              field(:,:,start_t:nt2))
+  call parallel_lib_collect_field(field_loc_v, field_v)
 
   call timer_lib_out('field_com')
   
@@ -63,8 +62,10 @@ subroutine cgyro_field_v_notae_s(start_t)
   ! Poisson LHS factors
 !$omp parallel do
   do itor=start_t,nt2
+    do ic=1,nc
      ! assuming  (.not.(itor == 0 .and. ae_flag == 1))
-     field(:,:,itor) = fcoef(:,:,itor)*field(:,:,itor)
+     field(:,ic,itor) = fcoef(:,ic,itor)*field_v(:,itor,ic)
+    enddo
   enddo
 
   call timer_lib_out('field')
@@ -117,37 +118,21 @@ subroutine cgyro_field_v_notae_s_gpu(start_t)
 
 #if (!defined(OMPGPU)) && defined(_OPENACC)
 !$acc data present(fsendf)
-!$acc data present(field,field_loc)
+!$acc data present(field,field_v,field_loc_v)
 #endif
 
   ! Poisson and Ampere RHS integrals of H
-
-#if defined(OMPGPU)
-!$omp target teams distribute parallel do simd collapse(3) &
-!$omp&   map(to:start_t)
-#elif defined(_OPENACC)
-!$acc parallel loop collapse(3) gang vector &
-!$acc&         independent copyin(start_t) &
-!$acc&         present(nt2,nc,n_field) default(none)
-#endif
-  do itor=start_t,nt2
-   do ic=1,nc
-       do i_f=1,n_field
-        field_loc(i_f,ic,itor) = (0.0,0.0)
-       enddo
-   enddo
-  enddo
 
 #if defined(OMPGPU)
 !$omp target teams distribute collapse(3) &
 !$omp&       private(ic_loc,field_loc_l) map(to:start_t,nproc,nj_loc)
 #elif defined(_OPENACC)
 !$acc parallel loop collapse(3) gang private(ic_loc,field_loc_l) &
-!$acc&         present(dvjvec_v,fsendf,field_loc) copyin(start_t,nproc,nj_loc) &
+!$acc&         present(dvjvec_v,fsendf) copyin(start_t,nproc,nj_loc) &
 !$acc&         present(nt2,nc1,nc2,n_field,nv) default(none)
 #endif
-  do itor=start_t,nt2
-   do ic=nc1,nc2
+  do ic=nc1,nc2
+   do itor=start_t,nt2
     do i_f=1,n_field
       ic_loc = ic-nc1+1
       field_loc_l = (0.0,0.0)
@@ -160,10 +145,10 @@ subroutine cgyro_field_v_notae_s_gpu(start_t)
       do k=1,nproc
        do j=1,nj_loc
         iv = j+(k-1)*nj_loc
-        field_loc_l = field_loc_l+dvjvec_v(i_f,ic_loc,itor,iv)*fsendf(j,itor,ic_loc,k)
+        field_loc_l = field_loc_l+dvjvec_v(i_f,iv,itor,ic_loc)*fsendf(j,itor,ic_loc,k)
       enddo
      enddo
-     field_loc(i_f,ic,itor) = field_loc_l
+     field_loc_v(i_f,itor,ic) = field_loc_l
     enddo
    enddo
   enddo
@@ -172,8 +157,7 @@ subroutine cgyro_field_v_notae_s_gpu(start_t)
 
   call timer_lib_in('field_com')
 
-  call parallel_lib_sum_field_gpu(field_loc(:,:,start_t:nt2), &
-                                  field(:,:,start_t:nt2))
+  call parallel_lib_collect_field_gpu(field_loc_v, field_v)
 
   call timer_lib_out('field_com')
 
@@ -191,7 +175,7 @@ subroutine cgyro_field_v_notae_s_gpu(start_t)
      ! assuming  (.not.(itor == 0 .and. ae_flag == 1))
      do ic=1,nc
        do i_f=1,n_field
-        field(i_f,ic,itor) = fcoef(i_f,ic,itor)*field(i_f,ic,itor)
+        field(i_f,ic,itor) = fcoef(i_f,ic,itor)*field_v(i_f,itor,ic)
        enddo
      enddo
   enddo
