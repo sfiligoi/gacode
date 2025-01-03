@@ -14,14 +14,15 @@ NUMAS_PER_NODE=1
 
 # Compilers
 
-FC     = mpifort -DDIMATCOPY -std=gnu -fallow-argument-mismatch -fall-intrinsics -fimplicit-none -J $(GACODE_ROOT)/modules #-fPIC
+FC     = mpifort -DDIMATCOPY -fallow-argument-mismatch -fall-intrinsics -fimplicit-none -J $(GACODE_ROOT)/modules #-fPIC
+#FC     = mpifort -DDIMATCOPY -DLANDAU_PREC16 -fallow-argument-mismatch -fall-intrinsics -fimplicit-none -J $(GACODE_ROOT)/modules #-fPIC
 #FC     = mpifort -std=f2008 -fall-intrinsics -fimplicit-none -J $(GACODE_ROOT)/modules #-fPIC
 F77    = mpifort -fimplicit-none -fallow-argument-mismatch
 FOMP   =-fopenmp
 FMATH  =-fdefault-real-8 -fdefault-double-8 -I$(FFTW_INC)
-FOPT   =-O3 -fexternal-blas -march=native -ffree-line-length-0
+FOPT   =-O3 -std=gnu -fexternal-blas -march=native -ffree-line-length-0
 # -floop-nest-optimize -floop-parallelize-all -flto
-FDEBUG =-Wall -W -fcheck=all -g -fbacktrace  -ffpe-trap=invalid,zero,overflow -finit-real=snan # -std=f2003 -fall-intrinsics
+FDEBUG =-Wall -W -fcheck=all -Wno-compare-reals  -Wno-integer-division -Wno-unused-variable -g -fbacktrace  -ffpe-trap=invalid,zero,overflow -finit-real=snan -std=f2008 -fall-intrinsics
 F2PY   = f2py
 
 # System math libraries

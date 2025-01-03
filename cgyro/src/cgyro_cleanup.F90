@@ -104,6 +104,14 @@ subroutine cgyro_cleanup
      ccl_del_device(gcoef)     
      deallocate(gcoef)
   endif
+  if(allocated(field_v))  then
+     ccl_del_device(field_v)     
+     deallocate(field_v)
+  endif
+  if(allocated(field_loc_v))  then
+     ccl_del_device(field_loc_v)     
+     deallocate(field_loc_v)
+  endif
   if(allocated(field))  then
      ccl_del_device(field)     
      deallocate(field)

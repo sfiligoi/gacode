@@ -26,5 +26,5 @@ export OMP_STACKSIZE=32M
 
 export I_MPI_OFFLOAD=1
 
-echo ibrun $exec
-ibrun $exec
+echo ibrun -n ${nmpi} $exec
+ibrun -n ${nmpi} $exec

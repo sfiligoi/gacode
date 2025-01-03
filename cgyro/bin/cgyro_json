@@ -25,14 +25,14 @@ def opts():
         description="CGYRO localdump utility",
         epilog=textwrap.dedent(mytext))
     
-    parser.add_argument('-dir',
+    parser.add_argument('-e',
                         help="working directory (default: cwd)",
                         type=str,
                         default='.')
     
     args=parser.parse_args()
 
-    return args.dir
+    return args.e
 
 mydir = opts()
 
@@ -105,6 +105,8 @@ d['MACH'] = sim.mach
 d['GAMMA_E'] = sim.gamma_e
 d['GAMMA_P'] = sim.gamma_p
 d['BETAE_UNIT'] = sim.betae_unit
+d['NU_EE'] = sim.nu[ielec]
+d['Z_EFF'] = sim.z_eff
 
 d['ZMAG'] = sim.zmag
 d['DZMAG'] = sim.dzmag
@@ -129,7 +131,7 @@ d['DLNNDR'] = sim.dlnndr[:].tolist()
 d['DLNTDR'] = sim.dlntdr[:].tolist()
 
 # JSON output
-with open('json.cgyro.localdump','w') as f:
+with open(mydir+'json.cgyro.localdump','w') as f:
    json.dump(d,f,indent=2,sort_keys=True)
    print('cgyro_json: wrote json.cgyro.localdump')
 #==================================================================
@@ -138,7 +140,7 @@ with open('json.cgyro.localdump','w') as f:
 # standard localdump output
 #
 nmax = 0
-with open('out.cgyro.localdump','w') as f:
+with open(mydir+'out.cgyro.localdump','w') as f:
    for key in d:
       x = d[key]
       if 'SHAPE' in key:
@@ -164,6 +166,9 @@ print('cgyro_json: wrote out.cgyro.localdump')
 
 nmax = nmax+1
 
+if nmax < 3:
+    nmax = 3
+    
 # Reference dimensions in CGYRO units
 lref=sim.rmaj
 vthref = np.sqrt(2.0)
@@ -227,7 +232,7 @@ d['ds_dr_minor_norm'][1] = sim.s_delta*lref/sim.rmin/np.cos(np.arcsin(sim.delta)
 d['ds_dr_minor_norm'][2] = -sim.s_zeta*lref/sim.rmin 
 #-----------------------------------------------------------------------
 
-with open('json.cgyro.imas','w') as f:
+with open(mydir+'json.cgyro.imas','w') as f:
    json.dump(d,f,indent=2,sort_keys=True)
    print('cgyro_json: wrote json.cgyro.imas')
 #==================================================================
