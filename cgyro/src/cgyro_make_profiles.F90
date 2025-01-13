@@ -128,7 +128,7 @@ subroutine cgyro_make_profiles
      dlntdr(1:n_species)  = dlntdr_loc(1:n_species)
      sdlnndr(1:n_species) = sdlnndr_loc(1:n_species)     
      sdlntdr(1:n_species) = sdlntdr_loc(1:n_species)     
-     sbeta_star(1:n_species) = sbeta_loc(1:n_species)     
+     sbeta(1:n_species)   = sbeta_loc(1:n_species)     
  
      if (ae_flag == 1) then
         is_ele = n_species+1
@@ -188,7 +188,7 @@ subroutine cgyro_make_profiles
      ! Debye length (from NRL plasma formulary):
      ! Use input lambda_debye as scaling parameter
 
-     lambda_star = 7.43 * sqrt((1e3*temp_norm)/(1e13*dens_norm))/rhos
+     lambda_star = 7.434*sqrt((1e3*temp_norm)/(1e13*dens_norm))/rhos
 
      ! Normalize
      do is=1,n_species
@@ -212,14 +212,14 @@ subroutine cgyro_make_profiles
 
      ! Re-scaling
      lambda_star      = lambda_star * lambda_star_scale
-     gamma_e          = gamma_e      * gamma_e_scale
-     gamma_p          = gamma_p      * gamma_p_scale
-     mach             = mach         * mach_scale    
-     betae_unit       = betae_unit   * betae_unit_scale
+     gamma_e          = gamma_e     * gamma_e_scale
+     gamma_p          = gamma_p     * gamma_p_scale
+     mach             = mach        * mach_scale    
+     betae_unit       = betae_unit  * betae_unit_scale
      do is=1,n_species
-        dlnndr(is) = dlnndr(is)  * dlnndr_scale(is) 
-        dlntdr(is) = dlntdr(is)  * dlntdr_scale(is)  
-        nu(is)     = nu(is)      * nu_ee_scale
+        dlnndr(is) = dlnndr(is) * dlnndr_scale(is) 
+        dlntdr(is) = dlntdr(is) * dlntdr_scale(is)  
+        nu(is)     = nu(is)     * nu_ee_scale
      enddo
 
      ! Set beta_* consistent with re-scaled beta and gradients and then re-scale
@@ -290,7 +290,7 @@ subroutine cgyro_make_profiles
 
   endif
 
-  ! z_eff -- only use value from input.cgyro or input.profiles
+  ! z_eff -- only use value from input.cgyro or input.gacode
   ! if simple electron Lorentz collisions (1,5) and z_eff_method=1
   ! else compute z_eff from the input ions' densities and charges
   if (.not. (z_eff_method == 1 .and. &
@@ -416,7 +416,7 @@ subroutine cgyro_make_profiles
      omega_eb_base = k_theta_base*length*gamma_e/(2*pi)
      select case (shear_method)
      case (1)
-        call cgyro_info('ExB shear: Hammett discrete shift (do not use for production simulations)') 
+        call cgyro_info('ExB shear: Hammett discrete shift (WARNING: TESTING PURPOSES ONLY)') 
      case (2)
         call cgyro_info('ExB shear: Wavenumber advection') 
         source_flag = 1
@@ -425,16 +425,16 @@ subroutine cgyro_make_profiles
      end select
   else
      omega_eb_base = 0.0
-     shear_method = 0
      call cgyro_info('ExB shear: OFF') 
   endif
 
-  if (profile_shear_flag == 1) then
-     call cgyro_info('Profile shear: Wavenumber advection') 
+  if (global_flag == 1) then
+     call cgyro_info('Global profile variation: ON') 
      source_flag = 1
   else
      sdlnndr(1:n_species) = 0.0
      sdlntdr(1:n_species) = 0.0
+     sbeta(1:n_species)   = 0.0
   endif
 
 

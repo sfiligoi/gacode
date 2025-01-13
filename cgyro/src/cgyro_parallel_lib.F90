@@ -512,6 +512,57 @@ contains
   end subroutine parallel_lib_sum_field_gpu
 
   !=========================================================
+
+  subroutine parallel_lib_collect_field(field_loc_v,field_v)
+
+    use mpi
+
+    implicit none
+
+    complex, intent(in), dimension(:,:,:) :: field_loc_v
+    complex, intent(inout), dimension(:,:,:) :: field_v
+    integer :: ierr
+
+
+    call MPI_ALLGATHER(field_loc_v(:,:,:),&
+         size(field_loc_v(:,:,:)),&
+         MPI_DOUBLE_COMPLEX,&
+         field_v(:,:,:),&
+         size(field_loc_v(:,:,:)),&
+         MPI_DOUBLE_COMPLEX,&
+         lib_comm,&
+         ierr)
+
+  end subroutine parallel_lib_collect_field
+
+  !=========================================================
+
+  subroutine parallel_lib_collect_field_gpu(field_loc_v,field_v)
+
+    use mpi
+
+    implicit none
+
+    complex, intent(in), dimension(:,:,:) :: field_loc_v
+    complex, intent(inout), dimension(:,:,:) :: field_v
+    integer :: ierr
+
+    cpl_use_device(field_loc_v,field_v)
+
+    call MPI_ALLGATHER(field_loc_v(:,:,:),&
+         size(field_loc_v(:,:,:)),&
+         MPI_DOUBLE_COMPLEX,&
+         field_v(:,:,:),&
+         size(field_loc_v(:,:,:)),&
+         MPI_DOUBLE_COMPLEX,&
+         lib_comm,&
+         ierr)
+
+    cpl_release_device(field_loc_v,field_v)
+
+  end subroutine parallel_lib_collect_field_gpu
+
+  !=========================================================
   !  Species communicator
   !=========================================================
 

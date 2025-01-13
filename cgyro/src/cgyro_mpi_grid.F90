@@ -65,7 +65,7 @@ subroutine cgyro_mpi_grid
                 nv_loc = nv/n_proc_1           
                 nsplit = 1+(nv_loc*n_theta-1)/n_toroidal_procs
                 nproc_3 = n_proc_1
-                if ((n_proc_1 /= 1) .and. (velocity_order==2)) nproc_3 = n_proc_1/3
+                if ((n_proc_1 /= 1) .and. (velocity_order==2)) nproc_3 = n_proc_1/n_species
                 write(io,'(t2,4(i6,4x),f6.2,4x,i6,4x,i6,4x,i6)') &
                      it,nc_loc,nv_loc,nsplit,16.0*n_radial*nt_loc*nsplit/1e6,&
                      n_toroidal_procs,n_proc_1,nproc_3

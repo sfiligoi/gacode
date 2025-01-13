@@ -2,7 +2,7 @@ subroutine le3_geometry_matrix
 
   use le3_globals
   implicit none
-  integer :: i,j,its,ips,kt,kp
+  integer :: i,j,k,its,ips,kt,kp
   
   real, dimension(:), allocatable :: vec_vdriftx
   real, dimension(:), allocatable :: vec_flux
@@ -17,29 +17,107 @@ subroutine le3_geometry_matrix
   real :: J_boozer, I_boozer
   real, dimension(:), allocatable :: vec_boozer_p, vec_boozer_t, vec_boozer
   real, dimension(:,:), allocatable :: mat_boozer, t_boozer, p_boozer
+  real, dimension(:,:), allocatable :: xtemp
+  real, dimension(:), allocatable :: tmap
   real :: xsum
   integer, dimension(:), allocatable :: i_piv
 
-  ! bhat dot grad = bdotgrad * (iota d/dt + d/dp)  
+  ! anorm* bhat dot grad = bdotgrad * (iota d/dt + d/dp)  
   bdotgrad(:,:) = 1.0/(bmag * g)
 
-  ! (bhat dot grad B)/B
+  ! anorm * (bhat dot grad B)/B
   bdotgradB_overB(:,:) = bdotgrad * (iota * dbdt + dbdp) / bmag
 
-  ! bhat cross grad B dot grad r / B^2
-  vdrift_x(:,:) = 1/(rmin*bmag * g**2) &
+  ! bhat cross grad B dot grad chi / (B^2 * r)
+  vdrift_x(:,:) = 1/(rmin*bmag* g**2) &
        * (-dbdt * (gpp + iota * gpt) + dbdp * (gpt + iota*gtt)) / bmag**2
 
   ! bhat cross grad B dot grad theta / B^2
   vdrift_dt(:,:) = 1/g**2 &
        * ((b1*bmag/chi1 - dtheta*dbdt)*(gpp + iota * gpt) &
-       - dbdp*gc) / bmag**2
+       - dbdp*gc) / bmag**3
 
   ! bhat cross grad B dot grad phi / B^2
   vdrift_dp(:,:) = 1/g**2 &
        * (-(b1*bmag/chi1 - dtheta*dbdt)*(gpt + iota * gtt) &
-       + dbdt*gc) / bmag**2
+       + dbdt*gc) / bmag**3
+ 
+  ! (a/cs)*vdrift_gradB = 1/(cs*anorm*Omega_ca_unit)*(vperp^2/2+vpar^2)*[(1) d/d(r/a) + (2) (i k_theta a)]
+  ! Remap theta: 0..2pi -> -pi..pi
 
+  allocate(xtemp(nt,np))
+  allocate(tmap(nt))
+  do i=1,nt/2
+     k=nt/2+i
+     tmap(i) = t(k)-2*pi
+     tmap(k)   = t(i)
+  enddo
+
+  vdrift_gk(:,:,1) = vdrift_x(:,:)
+  call remap_theta(vdrift_gk(:,:,1),xtemp(:,:),0.0)
+  vdrift_gk(:,:,1) = xtemp(:,:)
+
+  vdrift_gk(:,:,2)  = (-iota*vdrift_dp(:,:) + vdrift_dt(:,:))*rmin
+  call remap_theta(vdrift_gk(:,:,2),xtemp(:,:),0.0)
+  vdrift_gk(:,:,2) = xtemp(:,:)
+  do i=1,nt
+     do j=1,np
+        vdrift_gk(i,j,2) = vdrift_gk(i,j,2) &
+             - vdrift_gk(i,j,1) * rmin**2 *(iota_p/iota)*tmap(i)
+     enddo
+  enddo
+
+  ! (a/cs)*vdrift_gradp =  1/(cs*anorm*Omega_ca_unit)*(vpar^2) [(3) (i k_theta a)]
+  vdrift_gk(:,:,3) = (-0.5*beta_star)/bmag(:,:)**2
+  call remap_theta(vdrift_gk(:,:,3),xtemp(:,:),0.0)
+  vdrift_gk(:,:,3) = xtemp(:,:)
+  
+  ! grad_perpsq: (1) d^2/d(r/a)^2 + (2) (k_theta a)^2 + (3) (i k_theta a) d/d(r/a)
+  grad_cc =  1.0/g**2 * (gtt * gpp - gpt**2)
+  grad_tt =  1.0/g**2 * (gpp * gcc - gcp**2)
+  grad_pp =  1.0/g**2 * (gtt * gcc - gct**2)
+  grad_pt =  1.0/g**2 * (gcp * gct - gpt*gcc)
+  grad_ct =  1.0/g**2 * (gpt * gcp - gpp*gct)
+  grad_cp =  1.0/g**2 * (gpt * gct - gtt*gcp)
+  
+  grad_perpsq_gk(:,:,1) = 1.0/rmin**2 * grad_cc(:,:)
+  call remap_theta(grad_perpsq_gk(:,:,1),xtemp(:,:),0.0)
+  grad_perpsq_gk(:,:,1) = xtemp(:,:)
+  
+  grad_perpsq_gk(:,:,2) = grad_pp + 1.0/iota**2*grad_tt - 2.0/iota*grad_pt
+  call remap_theta(grad_perpsq_gk(:,:,2),xtemp(:,:),0.0)
+  grad_perpsq_gk(:,:,2) = xtemp(:,:)
+  call remap_theta(grad_cc(:,:),xtemp(:,:),0.0)
+  do i=1,nt
+     do j=1,np
+        grad_perpsq_gk(i,j,2) = grad_perpsq_gk(i,j,2) + (iota_p/iota**2*tmap(i))**2 * xtemp(i,j)
+     enddo
+  enddo
+  call remap_theta(grad_cp(:,:),xtemp(:,:),0.0)
+    do i=1,nt
+     do j=1,np
+        grad_perpsq_gk(i,j,2) = grad_perpsq_gk(i,j,2) + 2.0*iota_p/iota**2*tmap(i)*xtemp(i,j)
+     enddo
+  enddo
+  call remap_theta(grad_ct(:,:),xtemp(:,:),0.0)
+    do i=1,nt
+     do j=1,np
+        grad_perpsq_gk(i,j,2) = grad_perpsq_gk(i,j,2) - 2.0*iota_p/iota**3*tmap(i)*xtemp(i,j)
+     enddo
+  enddo
+  grad_perpsq_gk(:,:,2) = grad_perpsq_gk(:,:,2)*(iota*rmin)**2
+  
+  grad_perpsq_gk(:,:,3) = grad_cp - 1.0/iota*grad_ct
+  call remap_theta(grad_perpsq_gk(:,:,3),xtemp(:,:),0.0)
+  grad_perpsq_gk(:,:,3) = xtemp(:,:)
+  call remap_theta(grad_cc(:,:),xtemp(:,:),0.0)
+  do i=1,nt
+     do j=1,np
+        grad_perpsq_gk(i,j,3) =  grad_perpsq_gk(i,j,3) + iota_p/iota**2*tmap(i)* xtemp(i,j)
+     enddo
+  enddo
+  grad_perpsq_gk(:,:,3) =  grad_perpsq_gk(:,:,3)*(-2.0*iota)
+  
   ! flux-surface d volume / dr
   vprime = 0.0
   do i=1,nt
@@ -64,7 +142,7 @@ subroutine le3_geometry_matrix
   vexb_dp(:,:) = -1/(rmin*bmag * g**2) & 
        * (gpt + iota*gtt) * bmag/bsq_avg
 
-  ! construct the geo collocation matices
+  ! construct the geo collocation matices for NEO-3D
 
   allocate(mat_stream_dt(matsize,matsize))
   allocate(mat_stream_dp(matsize,matsize))
@@ -174,7 +252,7 @@ subroutine le3_geometry_matrix
   enddo
   close(1)
 
-  ! Construct the geo vectors
+  ! Construct the geo vectors for NEO-3D
 
   vec_thetabar(:) = vec_thetabar(:) / (nt*np)
   vec_vdriftx(:)  = vec_vdriftx(:) / (nt*np)
@@ -212,7 +290,7 @@ subroutine le3_geometry_matrix
      write (1,'(i2,i2,i2)') itype(i),m_indx(i), n_indx(i)
   enddo
   close(1)
-
+  
   ! Map to Boozer coordinates
 
   ! J: B ~ J(psi) grad phi
@@ -412,6 +490,65 @@ subroutine le3_geometry_matrix
 
   call le3_compute_theory
 
+  ! Write out quantitites for GK-3D
+  ! remap theta: 0..2pi -> -pi..pi
+  
+  open(unit=1,file='out.le3.geogk',status='replace')
+  write (1,'(i4)') nt
+  write (1,'(i4)') np
+  write (1,'(e16.8)') tmap
+  write (1,'(e16.8)') p
+
+  ! theta_bar(theta,phi) and derivatives
+  call remap_theta(tb(:,:),xtemp(:,:),1.0)
+  write (1,'(e16.8)') xtemp(:,:)
+  call remap_theta(dtbdt(:,:),xtemp(:,:),0.0)
+  write (1,'(e16.8)') xtemp(:,:)
+  call remap_theta(dtbdp(:,:),xtemp(:,:),0.0)
+  write (1,'(e16.8)') xtemp(:,:)
+  
+  ! B/Bunit
+  call remap_theta(bmag(:,:),xtemp(:,:),0.0)
+  write (1,'(e16.8)') xtemp(:,:)
+
+  ! Btor/Bunit
+  call remap_theta(btor(:,:),xtemp(:,:),0.0)
+  write (1,'(e16.8)') xtemp(:,:)
+  
+  ! anorm*(bhat dot grad) = bdotgrad * (iota d/dt + d/dp) = (1) d/dt + (2) d/dp
+  call remap_theta(bdotgrad(:,:),xtemp(:,:),0.0)
+  write (1,'(e16.8)') xtemp(:,:)*iota
+  write (1,'(e16.8)') xtemp(:,:)
+  
+  ! anorm*(bhat dot grad B)/B
+  call remap_theta(bdotgradB_overB(:,:),xtemp(:,:),0.0)
+  write (1,'(e16.8)') xtemp(:,:)
+  
+  ! (a/cs)*vdrift_gradB = 1/(cs*anorm*Omega_ca_unit)*(vperp^2/2+vpar^2)*[(1) d/d(r/a) + (2) (i k_theta a)]
+  write (1,'(e16.8)') vdrift_gk(:,:,1)
+  write (1,'(e16.8)') vdrift_gk(:,:,2)
+  
+  ! (a/cs)*vdrift_gradp =  1/(cs*anorm*Omega_ca_unit)*(par^2)*(i k_theta a) [(3) (i ktheta a)]
+  write (1,'(e16.8)') vdrift_gk(:,:,3)
+  
+  ! grad_perpsq: (1) d^2/d(r/a)^2 + (2) (k_theta a)^2 + (3) (i k_theta a) d/d(r/a)
+  write (1,'(e16.8)') grad_perpsq_gk(:,:,1)
+  write (1,'(e16.8)') grad_perpsq_gk(:,:,2)
+  write (1,'(e16.8)') grad_perpsq_gk(:,:,3)
+
+  call remap_theta(chi1(:,:),xtemp(:,:),0.0)
+  write (1,'(e16.8)') xtemp(:,:)
+
+  call remap_theta(dchi(:,:),xtemp(:,:),0.0)
+  write (1,'(e16.8)') xtemp(:,:)
+
+  call remap_theta(dtheta(:,:),xtemp(:,:),0.0)
+  write (1,'(e16.8)') xtemp(:,:)
+  
+  close(1)
+  deallocate(xtemp)
+  deallocate(tmap)
+  
   deallocate(itype)
   deallocate(m_indx)
   deallocate(n_indx)
@@ -423,6 +560,9 @@ subroutine le3_geometry_matrix
   deallocate(gpp)
   deallocate(gtt)
   deallocate(gpt)
+  deallocate(gct)
+  deallocate(gcp)
+  deallocate(gcc)
   deallocate(cosu)
   deallocate(btor)
   deallocate(bpol)
@@ -440,6 +580,14 @@ subroutine le3_geometry_matrix
   deallocate(vexb_dp)
   deallocate(vdrift_dt)
   deallocate(vdrift_dp)
+  deallocate(vdrift_gk)
+  deallocate(grad_perpsq_gk)
+  deallocate(grad_cc)
+  deallocate(grad_tt)
+  deallocate(grad_pp)
+  deallocate(grad_pt)
+  deallocate(grad_ct)
+  deallocate(grad_cp)
   deallocate(mat_stream_dt)
   deallocate(mat_stream_dp)
   deallocate(mat_trap)
@@ -458,3 +606,18 @@ subroutine le3_geometry_matrix
   deallocate(vec_ntv)
 
 end subroutine le3_geometry_matrix
+
+subroutine remap_theta(xold,xnew,fac)
+  use le3_globals
+  implicit none
+  real, intent(inout), dimension(nt,np) :: xold,xnew
+  real, intent(in) :: fac
+  integer :: i,j,k
+  do i=1,nt/2
+     k=nt/2+i
+     do j=1,np
+        xnew(i,j)   = xold(k,j) - fac*2*pi
+        xnew(k,j)   = xold(i,j)
+     enddo
+  enddo
+end subroutine remap_theta

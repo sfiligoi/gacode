@@ -91,10 +91,10 @@ module cgyro_globals
   integer :: hiprec_flag
   integer :: udsymmetry_flag
   integer :: shear_method
+  integer :: global_flag
   integer :: n_global
   real    :: nu_global
   integer :: psym_flag
-  integer :: profile_shear_flag
   integer :: theta_plot
   integer :: gpu_bigmem_flag
   integer :: upwind_single_flag
@@ -138,7 +138,7 @@ module cgyro_globals
   real, dimension(11) :: dlntdr
   real, dimension(11) :: sdlnndr
   real, dimension(11) :: sdlntdr
-  real, dimension(11) :: sbeta_star
+  real, dimension(11) :: sbeta
 
   integer :: subroutine_flag  ! only used for cgyro_read_input
 
@@ -328,9 +328,7 @@ module cgyro_globals
   real, dimension(:), allocatable :: theta
   real, dimension(:), allocatable :: uderiv
   real, dimension(:), allocatable :: cderiv
-  integer, dimension(:,:,:), allocatable :: icd_c
-  complex, dimension(:,:,:), allocatable :: dtheta
-  complex, dimension(:,:,:), allocatable :: dtheta_up
+  complex, dimension(:,:), allocatable :: thfac_itor
   !
   ! Wavenumber advection
   integer :: source_flag
@@ -370,9 +368,9 @@ module cgyro_globals
   ! Fields
   real, dimension(:,:,:), allocatable :: fcoef
   real, dimension(:,:,:), allocatable :: gcoef
-  complex, dimension(:,:,:), allocatable :: field
+  complex, dimension(:,:,:), allocatable :: field, field_v
   complex, dimension(:,:,:), allocatable :: field_dot
-  complex, dimension(:,:,:), allocatable :: field_loc
+  complex, dimension(:,:,:), allocatable :: field_loc, field_loc_v
   complex, dimension(:,:,:), allocatable :: field_old
   complex, dimension(:,:,:), allocatable :: field_old2
   complex, dimension(:,:,:), allocatable :: field_old3

@@ -20,7 +20,12 @@ subroutine cgyro_source
 
   call timer_lib_in('shear')
 
-  nu_eff = nu_global*(abs(gamma_e)+maxval(abs(sdlnndr(:)))+maxval(abs(sdlntdr(:))))
+  if (nu_global > 0.0) then
+     nu_eff = nu_global*(abs(gamma_e)+maxval(abs(sdlnndr(:)))+maxval(abs(sdlntdr(:)))+maxval(abs(sbeta(:))))
+  else
+     nu_eff = abs(nu_global)
+  endif
+
   sa = 1.0+exp(-delta_t/tau_ave)*sa
 
   ! Time-delay source

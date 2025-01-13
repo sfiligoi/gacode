@@ -2,115 +2,156 @@
 
 import numpy as np
 import os
-import matplotlib as mpl
+import sys
 import matplotlib.pyplot as plt
-
+import argparse
+import textwrap
 from pygacode.cgyro import data
 from pygacode.gacodefuncs import *
 
+# number of time windows
+field=0
+moment=1 
 
-# --- to visualize results for one case plot=True------
-plot=True
+# Command line option parser
+def opts():
 
-if plot:
-    directory='./'
-    write_output=False
-else:
-    directory= "/global/cfs/cdirs/cgyrodb/"
-    write_output=True
-    fout = "./cases_results_20%.txt"
-    fo = open(fout, "w")
+    mytext = '''\
+    output:
+       NEED DOCUMENTATION HERE
+    '''
 
-
-for path, folders, files in os.walk(directory):
-    # Open file#
-    for filename in files:
-      if 'out.cgyro.info' in filename:
-        if write_output:          
-           fo.write(f"#-----{path}-----#")
-        # read minimal data for setup (look in current directory)
-        sim = data.cgyrodata(f'{path}/',fast=True,silent=True)
-
-        # copy time vector and number of species
-        t = sim.t
-        ns = sim.n_species
-        linestyles=['-','--',':','-.']
-        # read bin.cgyro.ky_flux
-        sim.getflux()
-
-
-        # Simulation length (max time)
-        tmax = t[-1]
-        
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawTextHelpFormatter,
+        prog = 'cgyro_converge',
+        description="CGYRO timetrace utility",
+        epilog=textwrap.dedent(mytext))
     
+    parser.add_argument('-dir',
+                        help="Comma-separated list of directories",
+                        type=str,
+                        default='.')
+      
+    parser.add_argument('-plot',
+                        help="plot result",
+                        action='store_true')
 
+    parser.add_argument('-dt',
+                        help="sample time window [default: 200.0]",
+                        type=float,
+                        default=200.0)
 
-        # size and number of time windows
-        #dt = 50.0
-        #nwin = int(tmax/dt)
-        nwin=8
-        dt=tmax/nwin
-        t0 = tmax-nwin*dt
+    parser.add_argument('-species',
+                        help="species (0 to N-1) [default: 0]",
+                        type=int,
+                        default=0)
+
+    parser.add_argument('-nstd',
+                        help="Number of time samples",
+                        type=int,
+                        default=3)
+    
+    args=parser.parse_args()
+
+    return args.dir,args.plot,args.dt,args.species,args.nstd
+
+# Read CGYRO data for given (species,moment,field)
+def dataread(species,moment,field,path):
+
+    # read minimal data for setup (look in current directory)
+    sim = data.cgyrodata(path+'/',fast=True,silent=True)
+
+    # copy time vector and number of species
+    t = sim.t
+
+    # read bin.cgyro.ky_flux
+    sim.getflux()
+
+    y = np.sum(sim.ky_flux[species,moment,field,:,:],axis=0)
+
+    return t,y
+
+# Compute vector of averages
+def datacalc(y,dt0,nstd):
+
+    # Simulation length (max time)
+    tmax = t[-1]
+    nwin = int(tmax/dt0)
+    if nstd > nwin:
+        print('ERROR: nstd > nwin')
+        sys.exit()
         
+    dt = tmax/nwin
+    t0 = tmax-nwin*dt
 
-        if plot:
-         #add plot for visualization
-         fig = plt.figure(figsize=(12,6))
-
-         plt.xlabel('time [$c_s$/a]')
-         plt.ylabel('Flux')
-         colors = mpl.cm.rainbow(np.linspace(0, 1, nwin))
+    # Initialize array of partial averages
+    avec = np.zeros(nwin)
+    i0vec = np.zeros(nwin,dtype=int)
+    i1vec = np.zeros(nwin,dtype=int)
+    
+    # averaging over all windows (note that time_average function is fast/optimized)
+    # Note reverse order: avec[0] is last time window
+    for i in range(nwin):
+        w = str(tmax-(i+1)*dt)+','+str(tmax-i*dt)
+        imin,imax=time_index(t,w)               
+        avec[i] = time_average(y[:],t,imin,imax)
+        i0vec[i] = imin
+        i1vec[i] = imax
         
+    # Standard deviation of last 3 windows
+    stdev = np.std(avec[:nstd])/np.mean(avec[:nstd])
+    
+    return i0vec,i1vec,avec,stdev
 
-        convergance = True
+# Create flux plot showing averaging windows
+def myplot(t,y,i0vec,i1vec,avec,title):
+    fig = plt.figure(figsize=(10,6))
+    ax = fig.add_subplot(111)
+    ax.grid(which="both",ls=":")
+    ax.grid(which="major",ls=":")
+    ax.set_xlabel(r'$(c_s/a)t$')
+    ax.set_title(title)
+    ax.set_xlim(t[0],t[-1])
+    ax.plot(t,y,color='k',linewidth=1)
+    n = len(avec)
+    for i in range(n):
+        t0 = t[i0vec[i]]
+        t1 = t[i1vec[i]]
+        ax.plot([t0,t1],[avec[i],avec[i]],color='r',marker='o',linewidth=1)        
+    plt.show()
+    
+#-------------------------------------------------------------------------------------
+# main program
 
-        # select field=0 (phi), moment=1 (Q), species (0), and sum over kx
-        for species_index in range(ns):
-          field=0 ; moment=1 ; 
-          species=species_index
-          y = np.sum(sim.ky_flux[species,moment,field,:,:],axis=0)
+# Read command-line options
+dirs,plot,dt,species,nstd = opts()
 
-          if plot:
-           plt.plot(t,y, label=f"Q_{species_index}", linestyle=linestyles[species_index], color=colors[species_index])
+# List of directories
+dirvec = []
 
-          average_array=[]
+if dirs == '.':
+    # Walk through everything
+    for path,folders,files in os.walk(dirs):
+        if 'input.cgyro.gen' in files:
+            dirvec.append(path)
+else:
+    # User-specified list
+    for path in dirs.split(','):
+       if os.path.isfile(path+'/input.cgyro.gen'):
+           dirvec.append(path)
 
-         # averaging over all windows (note that time_average function is fast/optimized)
-          for i in range(nwin):
-            w=str(tmax-(i+1)*dt)+','+str(tmax-i*dt)
+for path in dirvec:
+    # read data selecting for specific species/moment/field
+    t,y = dataread(species,moment,field,path)
+    i0vec,i1vec,avec,stdev = datacalc(y,dt,nstd)
 
-            imin,imax=time_index(t,w)               
-            
-            ave = time_average(y[:],t,imin,imax)
-            average_array.append(ave)
-            if plot:
-              plt.hlines(y=ave, xmin=t[imin], xmax=t[imax], color=colors[i], lw=3, linestyle=linestyles[species_index])
+    # Set precision and suppress scientific notation
+    np.set_printoptions(precision=3, suppress=True)
+    astr = str(np.flip(avec))
+    print('{}: {} stdev = {:.3f}'.format(path,astr,stdev))
 
-            
-
-
-
-        
-        
-        # define the convergence by std between last free averaged regions as a pesentage to the total
-
-          if np.std(average_array[:3]/np.mean(average_array[:3])) > 0.2:
-            convergance = False
-       
-        if convergance:
-            if write_output:
-              fo.write("TRUE \n")
-            else:
-               plt.title('Converged')
-        else:
-            if write_output:
-              fo.write("FALSE \n")
-            else:
-              plt.title("Didn't converge")
-  
-        if plot:
-          plt.legend()
-          plt.show()
-
+if len(dirvec) == 1 and plot:
+    # plot output
+    myplot(t,y,i0vec,i1vec,avec,path)
     
 

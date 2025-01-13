@@ -24,9 +24,6 @@ subroutine cgyro_check_memory(datafile)
      call cgyro_alloc_add(io,nc*4.0,'it_c')
      call cgyro_alloc_add(io,n_radial*n_theta*4.0,'ic_c')
      call cgyro_alloc_add(io,n_energy*n_xi*n_species*4.0,'iv_v')
-     call cgyro_alloc_add(io,nc*(2*nup_theta+1)*nt_loc*4.0,'icd_c')
-     call cgyro_alloc_add_3d(io,(2*nup_theta+1),nc,nt_loc,16,'dtheta')
-     call cgyro_alloc_add_3d(io,(2*nup_theta+1),nc,nt_loc,16,'dtheta_up')
 
      write(io,*)
      write(io,*) 'Fields and field solve'
@@ -43,6 +40,12 @@ subroutine cgyro_check_memory(datafile)
      else
         call cgyro_alloc_add_3d(io,5,nc,nt_loc,8,'gcoef')
      endif
+     if ((collision_model /= 5) .AND. (collision_field_model == 1)) then
+       call cgyro_alloc_add_3d(io,n_field,nt_loc,nc,16,'field_v')
+       call cgyro_alloc_add_3d(io,n_field,nt_loc,nc_loc,16,'field_loc_v')
+       call cgyro_alloc_add_4d(io,n_field,nv,nt_loc,nc_loc,8,'dvjvec_v')
+     endif
+     call cgyro_alloc_add_4d(io,n_field,nc,nv_loc,nt_loc,8,'dvjvec_c')
 
      if (nonlinear_flag == 1) then
         write(io,*)

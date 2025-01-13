@@ -180,12 +180,9 @@ subroutine cgyro_init_manager
      allocate(gflux_loc(0:n_global,n_species,4,n_field,nt1:nt2))
      allocate(cflux_tave(n_species,4))
      allocate(gflux_tave(n_species,4))
-     
+
      allocate(recv_status(MPI_STATUS_SIZE))
 
-     allocate(icd_c(-nup_theta:nup_theta, nc ,nt1:nt2))
-     allocate(dtheta(-nup_theta:nup_theta, nc ,nt1:nt2))
-     allocate(dtheta_up(-nup_theta:nup_theta, nc,nt1:nt2))
      allocate(source(n_theta,nv_loc,nt1:nt2))
 
 #if defined(OMPGPU)
@@ -193,6 +190,18 @@ subroutine cgyro_init_manager
 #elif defined(_OPENACC)
 !$acc enter data create(fcoef,gcoef,field,field_loc,source)
 #endif
+
+     if ((collision_model /= 5) .AND. (collision_field_model == 1)) then
+       ! nc and nc_loc must be last, since it will be collated     
+       allocate(field_v(n_field,nt1:nt2,nc))
+       allocate(field_loc_v(n_field,nt1:nt2,nc1:nc2))
+       allocate(dvjvec_v(n_field,nv,nt1:nt2,nc_loc))
+#if defined(OMPGPU)
+!$omp target enter data map(alloc:field_v,field_loc_v,dvjvec_v)
+#elif defined(_OPENACC)
+!$acc enter data create(field_v,field_loc_v,dvjvec_v)
+#endif
+     endif
 
      ! Velocity-distributed arrays
 
@@ -254,17 +263,16 @@ subroutine cgyro_init_manager
      allocate(jvec_c(n_field,nc,nv_loc,nt1:nt2))
      allocate(jvec_v(n_field,nc_loc,nt1:nt2,nv))
      allocate(dvjvec_c(n_field,nc,nv_loc,nt1:nt2))
-     allocate(dvjvec_v(n_field,nc_loc,nt1:nt2,nv))
      allocate(jxvec_c(n_field,nc,nv_loc,nt1:nt2))
      allocate(upfac1(nc,nv_loc,nt1:nt2))
      allocate(upfac2(nc,nv_loc,nt1:nt2))
      
 #if defined(OMPGPU)
 !$omp target enter data map(alloc:cap_h_c,cap_h_ct,cap_h_c_dot,cap_h_c_old,cap_h_c_old2)
-!$omp target enter data map(alloc:cap_h_v,dvjvec_c,dvjvec_v)
+!$omp target enter data map(alloc:cap_h_v,dvjvec_c)
 #elif defined(_OPENACC)
 !$acc enter data create(cap_h_c,cap_h_ct,cap_h_c_dot,cap_h_c_old,cap_h_c_old2)
-!$acc enter data create(cap_h_v,dvjvec_c,dvjvec_v)
+!$acc enter data create(cap_h_v,dvjvec_c)
 #endif
 
      if (upwind_single_flag == 0) then

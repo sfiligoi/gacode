@@ -104,6 +104,14 @@ subroutine cgyro_cleanup
      ccl_del_device(gcoef)     
      deallocate(gcoef)
   endif
+  if(allocated(field_v))  then
+     ccl_del_device(field_v)     
+     deallocate(field_v)
+  endif
+  if(allocated(field_loc_v))  then
+     ccl_del_device(field_loc_v)     
+     deallocate(field_loc_v)
+  endif
   if(allocated(field))  then
      ccl_del_device(field)     
      deallocate(field)
@@ -125,21 +133,13 @@ subroutine cgyro_cleanup
   if(allocated(cflux_tave))          deallocate(cflux_tave)
   if(allocated(gflux_tave))          deallocate(gflux_tave)
   if(allocated(recv_status))         deallocate(recv_status)
-  if(allocated(icd_c))  then
-     ccl_del_device(icd_c)     
-     deallocate(icd_c)
-  endif
-  if(allocated(dtheta)) then
-     ccl_del_device(dtheta)     
-     deallocate(dtheta)
-  endif
-  if(allocated(dtheta_up))  then
-     ccl_del_device(dtheta_up)     
-     deallocate(dtheta_up)
-  endif
   if(allocated(source)) then
       ccl_del_device(source)      
      deallocate(source)
+  endif
+  if(allocated(thfac_itor)) then
+      ccl_del_device(thfac_itor)
+     deallocate(thfac_itor)
   endif
   if(allocated(h0_old)) then
      ccl_del_device(h0_old)      
