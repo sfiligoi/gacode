@@ -124,11 +124,9 @@ subroutine tgyro_tglf_map
   ! In subsequent edits, maybe propagate the XMH flag to TGLF
   ! Match the XMH flag to an available tglf_geometry_flag
   tglf_geometry_flag_in = 1 
-  select case( tgyro_tglf_geometry_flag )
+  select case( tgyro_tglf_mxh_flag )
   case ( 1 )
-     shape_fac = 0.0 !Strictly Miller geometry for default geometry flag == 1
-  case ( 4 )
-     shape_fac = 1.0 !Use XMH for case 4
+     shape_fac = 1.0 !Strictly Miller geometry for default geometry flag == 1
   case default
      shape_fac = 0.0
   end select
