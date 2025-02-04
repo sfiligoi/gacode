@@ -207,10 +207,10 @@ contains
 
 #if defined(OMPGPU)
 !$omp target enter data map(alloc:fsendf,fsendr)
-!$omp target enter data map(to:nproc,nk1,nk2,ni_loc)
+!$omp target enter data map(to:nproc,nk1,nk2,ni_loc,nsm)
 #elif defined(_OPENACC)
 !$acc enter data create(fsendf,fsendr)
-!$acc enter data copyin(nproc,nk1,nk2,ni_loc)
+!$acc enter data copyin(nproc,nk1,nk2,ni_loc,nsm)
 #endif
 
   end subroutine parallel_lib_init
