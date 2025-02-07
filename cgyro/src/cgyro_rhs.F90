@@ -312,7 +312,7 @@ subroutine cgyro_rhs_trap(ij)
 
   ! Explicit trapping term
   if (explicit_trap_flag == 1) then
-     ! assert(n_sim==1)
+     ! assert(n_sim==1), not supported else
      call timer_lib_in('str')
 
      allocate(rhs_trap(nc,nv_loc))

@@ -73,9 +73,9 @@ subroutine cgyro_mpi_grid
      do it=1,d*n_toroidal_procs
         if (mod(d*n_toroidal_procs,it) == 0 .and. mod(it,n_toroidal_procs) == 0) then
            n_proc_1 = it/n_toroidal_procs
-           nc_loc = nc/n_proc_1
-           if (modulo(nc_loc, n_sim) == 0) then ! aggregate mode filter
-            nc_loc_coll = nc_loc/n_sim
+           nc_loc_field = nc/n_proc_1
+           if (modulo(nc_loc_field, n_sim) == 0) then ! aggregate mode filter
+            nc_loc = nc_loc_field/n_sim
             ! further filter out incompatible multiples for velocity==2
             if ((velocity_order==1) .or. &
                (n_proc_1 == 1) .or. ( modulo(n_proc_1, n_species) == 0 ) ) then
@@ -85,7 +85,7 @@ subroutine cgyro_mpi_grid
                 nproc_3 = n_proc_1
                 if ((n_proc_1 /= 1) .and. (velocity_order==2)) nproc_3 = n_proc_1/n_species
                 write(io,'(t2,4(i6,4x),f6.2,4x,i6,4x,i6,4x,i6,4x,i6)') &
-                     it,nc_loc_coll,nv_loc,nsplit,16.0*n_radial*nt_loc*nsplit/1e6,&
+                     it,nc_loc,nv_loc,nsplit,16.0*n_radial*nt_loc*nsplit/1e6,&
                      n_toroidal_procs,nproc_4,n_proc_1,nproc_3
             endif
            endif
@@ -183,7 +183,8 @@ subroutine cgyro_mpi_grid
   if (test_flag == 1) then
      ! Set dimensions for calculation of memory in test mode
      nv_loc = nv
-     nc_loc = nc
+     nc_loc_field = nc
+     nc_loc = nc_loc_field/n_sim
      nsplit = nv_loc*n_theta/n_toroidal
      nt_loc = 1
      nt1 = 0
@@ -312,16 +313,17 @@ subroutine cgyro_mpi_grid
 
   ! ni -> nc
   ! nj -> nv  
-  call parallel_flib_init(nc,nv,nc_loc,nv_loc,NEW_COMM_1)
+  call parallel_flib_init(nc,nv,nc_loc_field,nv_loc,NEW_COMM_1)
 
-  if (modulo(nc_loc, n_sim) /= 0) then
-     write (msg, "(A,I6,A,I3,A)") "Field nc_loc (",nc_loc,") not a multiple of simulation ensamble number (",n_sim,")"
+  if (modulo(nc_loc_field, n_sim) /= 0) then
+     write (msg, "(A,I6,A,I3,A)") "Field nc_loc_field (",nc_loc_field,") not a multiple of simulation ensamble number (",n_sim,")"
      call cgyro_error(msg)
      return
   endif
 
 
-  call parallel_lib_init(nc,nv,nv_loc,nt1,nt_loc,n_field,nc_loc_coll,n_sim,NEW_COMM_4)
+  call parallel_lib_init(nc,nv,nv_loc,nt1,nt_loc,n_field,nc_loc,n_sim,NEW_COMM_4)
+  ! asset(nc_loc==nc_loc_field/n_sim)
 
   nv1 = 1+i_proc_1*nv_loc
   nv2 = (1+i_proc_1)*nv_loc
@@ -336,7 +338,7 @@ subroutine cgyro_mpi_grid
     ! We need a clean split, so that all ranks have the same number of species
     ! n_proc_1 == 1 is an exception, since we do not need to split anything
     if ( (n_proc_1 /= 1) .and. ( modulo(n_proc_1, n_species) /= 0 ) ) then
-           write (msg, "(A,I3,A,I2,A)") "coll atoa procs (",n_proc_1,") not a multiple of n_species (",n_species,&
+           write (msg, "(A,I3,A,I2,A)") "field atoa procs (",n_proc_1,") not a multiple of n_species (",n_species,&
                    "), needed for VELOCITY_ORDER=2"
            call cgyro_error(msg)
            return
@@ -360,8 +362,8 @@ subroutine cgyro_mpi_grid
   call parallel_clib_init(ns1,ns2,ns_loc,NEW_COMM_3)
 
 
-  nc1 = 1+i_proc_1*nc_loc
-  nc2 = (1+i_proc_1)*nc_loc
+  nc1 = 1+i_proc_4*nc_loc
+  nc2 = (1+i_proc_4)*nc_loc
 
   ! Nonlinear parallelization dimensions (returns nsplit)
 
@@ -385,10 +387,10 @@ subroutine cgyro_mpi_grid
 
 #if defined(OMPGPU)
 !$omp target enter data map(to:nt1,nt2,nt_loc,nv1,nv2,nv_loc,ns1,ns2,ns_loc)
-!$omp target enter data map(to:nc1,nc2,nc_loc,n_jtheta,nsplit,nsplitA,nsplitB)
+!$omp target enter data map(to:nc1,nc2,nc_loc,nc_loc_field,n_jtheta,nsplit,nsplitA,nsplitB)
 #elif defined(_OPENACC)
 !$acc enter data copyin(nt1,nt2,nt_loc,nv1,nv2,nv_loc,ns1,ns2,ns_loc)
-!$acc enter data copyin(nc1,nc2,nc_loc,n_jtheta,nsplit,nsplitA,nsplitB)
+!$acc enter data copyin(nc1,nc2,nc_loc,nc_loc_field,n_jtheta,nsplit,nsplitA,nsplitB)
 #endif
 
   fA_req_valid = .FALSE.
