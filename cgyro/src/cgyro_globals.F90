@@ -202,7 +202,7 @@ module cgyro_globals
   integer :: nv_loc,iv_loc
   integer :: nc,ic
   integer :: nc_loc,ic_loc
-  integer :: nc_loc_coll   ! nc local slice for collision purposes, on NEW_COMM_4
+  integer :: nc_loc_field   ! nc local slice for field purposes, equals nc_loc for single simulation
   integer :: ns_loc
   integer, dimension(:), allocatable :: ie_v
   integer, dimension(:), allocatable :: ix_v
