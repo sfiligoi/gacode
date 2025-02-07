@@ -99,11 +99,18 @@ subroutine xgyro_mpi_setup
   call MPI_COMM_RANK(CGYRO_COMM_WORLD,i_proc,i_err)
   call MPI_COMM_SIZE(CGYRO_COMM_WORLD,n_proc,i_err)
 
-  ! TODO: Add support for running multiple simulations with common coll
-  ! For now, just tell CGYRO that each simulation is independent
-  CGYRO_COMM_WORLD_4 = CGYRO_COMM_WORLD
-  n_sim = 1
-  i_sim = 0
+  if (xgyro_share_cmat==1) then
+       ! TODO: We need some kind of validation that sharing of CMAT is OK
+       ! Spread coll compute over the whole XGYRO MPI communicator
+       CGYRO_COMM_WORLD_4 = XGYRO_COMM_WORLD
+       n_sim = xgyro_n_dirs
+       i_sim = xgyro_i_dir
+  else
+       ! tell CGYRO that each simulation is independent
+       CGYRO_COMM_WORLD_4 = CGYRO_COMM_WORLD
+       n_sim = 1
+       i_sim = 0
+  endif
   have_COMM_4 = .TRUE.
 
 end subroutine xgyro_mpi_setup
