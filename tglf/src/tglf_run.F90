@@ -147,7 +147,16 @@ subroutine tglf_run()
           tglf_nfourier_in, &
           tglf_fourier_in)
 
-  else
+  elseif (tglf_geometry_flag_in == 3) then
+
+      call put_ELITE_geometry(tglf_n_elite_in,  &
+           tglf_q_elite_in,  &
+           tglf_q_prime_elite_in,  &
+           tglf_p_prime_elite_in,  &
+           tglf_R_elite_in,  &
+           tglf_Z_elite_in, &
+           tglf_Bp_elite_in  )
+  else   ! default to s-alpha
 
      call put_s_alpha_geometry(tglf_rmin_sa_in, &
           tglf_rmaj_sa_in, &

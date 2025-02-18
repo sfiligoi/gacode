@@ -314,19 +314,19 @@ class cgyrodata:
          print('INFO: (data.py) Read data in '+fmt+'.cgyro.geo   '+t)
          self.geo = np.reshape(data,(self.n_theta,nfunc),'F')
 
-         tags = ['\theta',
-                 'G_\\theta',
-                 '|B|',
-                 '\omega_\mathrm{stream}',
-                 '\omega_\mathrm{trap}',
-                 '\omega_\mathrm{rdrift}',
-                 '\omega_\mathrm{adrift}',
-                 '\omega_\mathrm{aprdrift}',
-                 '\omega_\mathrm{cdrift}',
-                 '\omega_\mathrm{crdrift}',
-                 '\omega_\mathrm{gammap',
-                 'k_\perp',
-                 '\Theta']
+         tags = [r'\theta',
+                 r'G_\theta',
+                 r'|B|',
+                 r'\omega_\mathrm{stream}',
+                 r'\omega_\mathrm{trap}',
+                 r'\omega_\mathrm{rdrift}',
+                 r'\omega_\mathrm{adrift}',
+                 r'\omega_\mathrm{aprdrift}',
+                 r'\omega_\mathrm{cdrift}',
+                 r'\omega_\mathrm{crdrift}',
+                 r'\omega_\mathrm{gammap',
+                 r'k_\perp',
+                 r'\Theta']
 
          self.geotag = []
          for i in range(nfunc):
@@ -501,6 +501,8 @@ class cgyrodata:
          self.sdlnndr[i],p = self.eget(data,p) 
          self.sdlntdr[i],p = self.eget(data,p)
          self.sbeta[i],p = self.eget(data,p)
+      # Added 17 Dec 2024
+      self.z_eff,p = self.eget(data,p) 
 
       if p == -1:
          print('WARNING: (getgrid) Data format outdated. Please run cgyro -t')
@@ -519,9 +521,13 @@ class cgyrodata:
          self.tnorm  = self.t
          self.tstr   = TIME
 
-         self.fnorm  = self.freq 
-         self.fstr   = [r'$(a/c_s)\, \omega$',r'$(a/c_s)\, \gamma$']
+         try:
+            self.fnorm  = self.freq 
+            self.fstr   = [r'$(a/c_s)\, \omega$',r'$(a/c_s)\, \gamma$']
+         except:
+            pass
 
+            
          self.rhonorm = self.rho
          self.rhoi    = r'\rho_s'
 
@@ -531,7 +537,7 @@ class cgyrodata:
          self.kystr  = r'$k_\theta \rho_s$'
 
          self.qc     = 1.0
-         self.gbnorm = '_\mathrm{GBD}'
+         self.gbnorm = r'_\mathrm{GBD}'
 
          print('INFO: (getnorm) Using deuterium norm (rho_s = rho_sD, c_s = c_sD, etc)')
 
@@ -550,10 +556,10 @@ class cgyrodata:
          vc = np.sqrt(self.temp[i]/te/self.mass[i])
  
          self.tnorm = self.t*vc
-         self.tstr  = r'$(v_'+str(i)+'/a) \, t$'
+         self.tstr  = r'$(v_'+str(i)+r'/a) \, t$'
 
          self.fnorm = self.freq/vc
-         self.fstr  = [r'$(a/v_'+str(i)+') \, \omega$',r'$(a/v_'+str(i)+') \, \gamma$']
+         self.fstr  = [r'$(a/v_'+str(i)+r') \, \omega$',r'$(a/v_'+str(i)+r') \, \gamma$']
 
          # Convert rho_sD=csD/Omega_i to rho_i=vi/Omega_i
          rhoc = vc/(self.z[i]/self.mass[i])
@@ -568,7 +574,7 @@ class cgyrodata:
 
           # Convert Q_GBD to Q_GBi
          self.qc = vc*(self.temp[i]/te)*rhoc**2
-         self.gbnorm = '_\mathrm{GB'+str(i)+'}'
+         self.gbnorm = r'_\mathrm{GB'+str(i)+'}'
 
          print('INFO: (getnorm) Using species '+norm+' norm')
 

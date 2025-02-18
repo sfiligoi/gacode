@@ -90,7 +90,6 @@ contains
     real :: t00,t10
     real, parameter :: mori=.5,epsmori=1e-6,epsbase=5e-16,epsgauss=1e-18
     integer ngauss
-    real w,sech2,sech,sechb,tanhp1,tanhm1,tanhb
     real eps
     integer i,j,k,ia
     integer leftnew,rightnew ! How many points of the left or right summation have to be computed
@@ -164,15 +163,6 @@ contains
     ! n(i+1)=|-a(i)n(i)pn(i,x=0)-b(i)n(i-1)pn(i,x=0)|
     ! But we normalise to <P^2>
 
-
-    w(x)=x**alpha*exp(-sign*x*x) ! inline function for weight
-    sechb(x)=2.*x/(1.+x*x)
-    sech(x)=sechb(exp(-x))
-    sech2(x)=sech(abs(x))**2
-    tanhb(x)=2*x/(1+x)
-    tanhp1(x)=tanhb(exp(2*x))   ! tanh(x)+1 for x<0 approx. 2*exp(2*x) for x<<-1
-    tanhm1(x)=-tanhb(exp(-2*x)) ! tanh(x)-1 for x>0
-
     if (n==0) return
     nn=n
     vb=present(verbose)
@@ -182,7 +172,7 @@ contains
     t00=t0
     t10=t1
     if (vb) then
-       ngauss=n+xmax**2+xmax*sqrt(-2*log(epsgauss))-log(epsgauss)/3
+       ngauss=n+floor(xmax**2+xmax*sqrt(-2*log(epsgauss))-log(epsgauss)/3)
        ngauss=n+ceiling(10*xmax)+ceiling(alpha/2)
        print *,'ngauss=',ngauss
        allocate(gw(ngauss),gp(ngauss),gw2(ngauss*2),gp2(ngauss*2))
@@ -671,6 +661,42 @@ contains
     enddo
     if (vb) print *,'hhn used mem',2*(nsafe+nintervals)
     deallocate(mw,mp,poly,poly1) !deallocation may be necessary because these are pointers.
+  contains
+    elemental real function w(x)
+      implicit none
+      real,intent(in) :: x
+      w=x**alpha*exp(-sign*x*x) ! inline function for weight
+    end function w
+    elemental real function sechb(x)
+      implicit none
+      real,intent(in) :: x
+      sechb=2.*x/(1.+x*x)
+    end function sechb
+    elemental real function sech(x)
+      implicit none
+      real,intent(in) :: x
+      sech=sechb(exp(-x))
+    end function sech
+    elemental real function sech2(x)
+      implicit none
+      real,intent(in) :: x
+      sech2=sech(abs(x))**2
+    end function sech2
+    elemental real function tanhb(x)
+      implicit none
+      real,intent(in) :: x
+      tanhb=2*x/(1+x)
+    end function tanhb
+    elemental real function tanhp1(x)
+      implicit none
+      real,intent(in) :: x
+      tanhp1=tanhb(exp(2*x))   ! tanh(x)+1 for x<0 approx. 2*exp(2*x) for x<<-1
+    end function tanhp1
+    elemental real function tanhm1(x)
+      implicit none
+      real,intent(in) :: x
+      tanhm1=-tanhb(exp(-2*x)) ! tanh(x)-1 for x>0
+    end function tanhm1
   end subroutine half_hermite_norm
 
   subroutine gauss_nodes_functions(n,a,bsq,sp,ortho_f)

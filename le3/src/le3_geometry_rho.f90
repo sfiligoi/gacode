@@ -13,8 +13,9 @@ subroutine le3_geometry_rho
   real :: ycosuv
   real :: ysinuv
   real :: up,pp,pt
-  real :: d0,eta
-
+  real :: d0, eta, d1, gpp_1, gtt_1, gpt_1
+  real :: sum1, sum2, sum3, sum4
+  
   real, dimension(:,:), allocatable :: s1a,s1b
   real, dimension(:,:), allocatable :: s2a,s2b
   real, dimension(:,:), allocatable :: a11a,a11b
@@ -42,9 +43,13 @@ subroutine le3_geometry_rho
   ! Global second order quantities
   allocate(dtheta(nt,np))
   allocate(dchi(nt,np))
-  allocate(dthetap(nt,np))
+  allocate(dtheta_t(nt,np))
+  allocate(dtheta_p(nt,np))
   allocate(b1(nt,np))
   allocate(gc(nt,np))
+  allocate(gct(nt,np))
+  allocate(gcp(nt,np))
+  allocate(gcc(nt,np))
 
   do i=1,nt
      do j=1,np
@@ -62,7 +67,7 @@ subroutine le3_geometry_rho
         pt = (x/rc(i,j))*ycosuv-chi1t(i,j)/chi1(i,j)*ysinuv
 
         eta = 1.0/rc(i,j)+cosu(i,j)/r(i,j)
-
+        
         c_m0 = iota*x**2+x*ycosuv
         c_n0 = r(i,j)**2+y**2+iota*x*ycosuv
 
@@ -85,7 +90,6 @@ subroutine le3_geometry_rho
 
         a21a(i,j) = (-2*c_m0+iota*x**2)/d0
         a21b(i,j) = x**2/d0
-
 
      enddo
   enddo
@@ -180,17 +184,18 @@ subroutine le3_geometry_rho
 
   dtheta  = 0.0
   dchi    = 0.0
-  dthetap = 0.0
+  dtheta_t = 0.0
+  dtheta_p = 0.0
   do k=1,matsize
      call le3_basis(itype(k),m_indx(k),n_indx(k),bk(:,:),'d0')
      call le3_basis(itype(k),m_indx(k),n_indx(k),bk_t(:,:),'dt')
+     call le3_basis(itype(k),m_indx(k),n_indx(k),bk_p(:,:),'dp')
      do j=1,np
         do i=1,nt
-
-           dtheta(i,j) = dtheta(i,j) + sys_b(k)*bk(i,j)
-           dchi(i,j)   = dchi(i,j)   + sys_b(k+matsize)*bk(i,j)
-
-           dthetap(i,j) = dthetap(i,j) + sys_b(k)*bk_t(i,j)
+           dchi(i,j)     = dchi(i,j)     + sys_b(k+matsize)*bk(i,j)
+           dtheta(i,j)   = dtheta(i,j)   + sys_b(k)*bk(i,j)
+           dtheta_t(i,j) = dtheta_t(i,j) + sys_b(k)*bk_t(i,j)
+           dtheta_p(i,j) = dtheta_p(i,j) + sys_b(k)*bk_p(i,j)
 
         enddo
      enddo
@@ -224,53 +229,83 @@ subroutine le3_geometry_rho
         c_dm = x*up+pt+iota*x**2*2.0/rc(i,j)+chi1(i,j)*iota_p*x**2-c_m0*eta 
         c_dn = 2*r(i,j)*cosu(i,j)+iota*x*up+2*pp+iota*pt+chi1(i,j)*iota_p*x*ycosuv-c_n0*eta
 
+        ! D0 = sqrt(g_s)
         d0 = g(i,j)
+
+        ! D1/D0
+        d1 = eta - chi1(i,j)*(dchi(i,j)+dtheta_t(i,j))
+
+        gpp_1 = 2.0*(r(i,j)*cosu(i,j) - chi1p(i,j)/chi1(i,j)*ysinuv &
+             + (up - chi1(i,j)*x*dtheta_p(i,j))*ycosuv)
+
+        gtt_1 = 2.0 * x**2 * (1.0/rc(i,j)- chi1(i,j)*dtheta_t(i,j))
+
+        gpt_1 = x*(up - chi1(i,j)*x*dtheta_p(i,j)) &
+             + (x/rc(i,j) - chi1(i,j)*x*dtheta_t(i,j))*ycosuv &
+             - chi1t(i,j)/chi1(i,j)*ysinuv
+        
         !-------------------------------------------------------------
 
         ! B1/Bs
-        b1(i,j) = 0.5*chi1(i,j)/a12a(i,j)*(iota_p*c_m0/d0+s1a(i,j)) &
-             -0.5*(eta-dchi(i,j)-chi1(i,j)*dthetap(i,j))
-
+        b1(i,j) = -d1 &
+             + 0.5/(c_n0 + iota*c_m0) * (gpp_1 + iota**2 * gtt_1 + 2.0*iota*gpt_1 &
+             + chi1(i,j) * iota_p * (2*iota*gtt(i,j) + gpt(i,j)) )
+        
         ! g_cp + i g_ct
         gc(i,j) = ysinuv/chi1(i,j)-c_m0*dtheta(i,j)
+
+        ! g_ct
+        gct(i,j) = -dtheta(i,j) * x**2
+        
+        ! g_cp
+        gcp(i,j) = ysinuv/chi1(i,j) - dtheta(i,j)*x*ycosuv
+        
+        ! g_cc
+        gcc(i,j) = 1.0/chi1(i,j)**2 + dtheta(i,j)**2 * x**2
 
      enddo
   enddo
 
+  !do i=1,nt
+  !   j=1
+  !   x = sqrt(gtt(i,j))
+     !print *, b1(i,j), -1.0/(r(i,j)**2 + iota**2 * x**2) &
+     !     * (r(i,j)*cosu(i,j) + iota**2*x**2/rc(i,j)), &
+     !     chi1(i,j)*r(i,j)/sqrt(gtt(i,j)), &
+     !     r(i,j)/sqrt(gtt(i,j))&
+     !  *(-1/rc(i,j)+cosu(i,j)/r(i,j)+chi1(i,j)*(dchi(i,j)+dtheta_t(i,j)))/iota
+  !enddo
+  
   !--------------------------------------------------------------------
   ! Check with GEO result
   !
-  if (equilibrium_model == 0) then
-     GEO_model_in = 0
-     GEO_rmin_in = rmin
-     GEO_rmaj_in = rmaj
-     GEO_drmaj_in = shift
-     GEO_zmag_in = zmag
-     GEO_dzmag_in = dzmag
-     GEO_q_in = q
-     GEO_s_in = s
-     GEO_kappa_in = kappa
-     GEO_s_kappa_in = s_kappa
-     GEO_delta_in = delta
-     GEO_s_delta_in = s_delta
-     GEO_zeta_in = zeta
-     GEO_s_zeta_in = s_zeta
-     GEO_beta_star_in = beta_star
-     !call GEO_alloc(1)
-     !call GEO_do()
-     !open(unit=1,file='out.miller',status='replace')
-     !do i=1,n_theta
-     !   theta = (i-1)*2*pi/(n_theta-1)-pi
-     !   call GEO_interp(theta)
-     !   print '(2(1pe12.5,1x))', GEO_theta_s,GEO_chi2
-     !   write(1,*) GEO_theta_s,GEO_chi2
-     !enddo
-     !close(1)
-     !call GEO_alloc(0)
-
-  endif
+  !if (equilibrium_model == 0) then
+  !   GEO_model_in = 0
+  !   GEO_rmin_in = rmin
+  !   GEO_rmaj_in = rmaj
+  !   GEO_drmaj_in = shift
+  !   GEO_zmag_in = zmag
+  !   GEO_dzmag_in = dzmag
+  !   GEO_q_in = q
+  !   GEO_s_in = s
+  !   GEO_kappa_in = kappa
+  !   GEO_s_kappa_in = s_kappa
+  !   GEO_delta_in = delta
+  !   GEO_s_delta_in = s_delta
+  !   GEO_zeta_in = zeta
+  !   GEO_s_zeta_in = s_zeta
+  !   GEO_beta_star_in = beta_star
+  !   call GEO_alloc(1)
+  !   call GEO_do()
+  !call GEO_interp(nt,tb(:,1),.false.)
+  !do i=1,nt
+  !   print *, tb(i,1), btor(i,1), GEO_bt(i), bpol(i,1), GEO_bp(i)
+  !enddo
+  !close(1)
+  !call GEO_alloc(0)
+  !endif
   !--------------------------------------------------------------------
-
+  
   deallocate(sys_m)
   deallocate(sys_b)
   deallocate(i_piv)

@@ -290,7 +290,7 @@ subroutine cgyro_make_profiles
 
   endif
 
-  ! z_eff -- only use value from input.cgyro or input.profiles
+  ! z_eff -- only use value from input.cgyro or input.gacode
   ! if simple electron Lorentz collisions (1,5) and z_eff_method=1
   ! else compute z_eff from the input ions' densities and charges
   if (.not. (z_eff_method == 1 .and. &

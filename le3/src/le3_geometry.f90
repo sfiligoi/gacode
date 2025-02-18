@@ -46,6 +46,14 @@ subroutine le3_geometry
   allocate(vdrift_x(nt,np))
   allocate(vdrift_dt(nt,np))
   allocate(vdrift_dp(nt,np))
+  allocate(vdrift_gk(nt,np,3))
+  allocate(grad_perpsq_gk(nt,np,3))
+  allocate(grad_cc(nt,np))
+  allocate(grad_tt(nt,np))
+  allocate(grad_pp(nt,np))
+  allocate(grad_pt(nt,np))
+  allocate(grad_ct(nt,np))
+  allocate(grad_cp(nt,np))
   allocate(vexb_dt(nt,np))
   allocate(vexb_dp(nt,np))
   allocate(dgdp(nt,np))
@@ -118,7 +126,7 @@ subroutine le3_geometry
   ! cos(u) = Z_t/sqrt(g_tt)
   cosu(:,:) = dzdt/sqrt(gtt)
 
-  btor(:,:) = 1.0/(r*g)
+  btor(:,:) = 1.0/g*sqrt(gpp)
 
   bpol(:,:) = 1.0/g*(gpt/sqrt(gtt)+iota*sqrt(gtt))
 
