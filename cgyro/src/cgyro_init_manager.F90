@@ -19,6 +19,7 @@ subroutine cgyro_init_manager
   use half_hermite
 
   use cgyro_io
+  use cgyro_nl
 
 #if defined(_OPENACC) || defined(OMPGPU)
 #define CGYRO_GPU_FFT

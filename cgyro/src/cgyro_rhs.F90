@@ -383,6 +383,7 @@ subroutine cgyro_rhs(ij,update_cap)
 
   use timer_lib
   use cgyro_globals
+  use cgyro_nl
 
   implicit none
 

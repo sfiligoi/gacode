@@ -10,6 +10,12 @@
 ! NOTE: Need to be careful with (p=-nr/2,n=0) component.
 !-----------------------------------------------------------------
 
+module cgyro_nl
+
+  implicit none
+
+contains
+
 #if defined(_OPENACC) || defined(OMPGPU)
 #define CGYRO_GPU_FFT
 #endif
@@ -1687,4 +1693,6 @@ subroutine cgyro_nl_fftw
 end subroutine cgyro_nl_fftw
 
 #endif /* CGYRO_GPU_FFT */
+
+end module cgyro_nl
 
