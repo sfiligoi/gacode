@@ -384,7 +384,7 @@ subroutine cgyro_nl_fftw_mul(sz,uvm,uxm,vym,uym,vxm,inv_nxny)
 
 end subroutine
 
-subroutine cgyro_nl_fftw
+subroutine cgyro_fft_z2d(plan, indata, outdata)
 
 #if defined(HIPGPU)
   use hipfort
@@ -394,15 +394,142 @@ subroutine cgyro_nl_fftw
 #else
   use cufft
 #endif
+  use cgyro_nl_comm
+
+  implicit none
+#if defined(MKLGPU)
+  include 'fftw/fftw3.f'
+#endif
+  !-----------------------------------
+#if defined(HIPGPU)
+  type(C_PTR), intent(inout)    :: plan
+#elif defined(MKLGPU)
+  INTEGER*8, intent(inout)      :: plan
+#else
+  integer(c_int), intent(inout) :: plan
+#endif
+  complex, dimension(:,:,:), intent(inout) :: indata
+  real, dimension(:,:,:), intent(inout)    :: outdata
+  !-----------------------------------
+  integer :: rc
+
+#if defined(OMPGPU)
+
+#if defined(MKLGPU)
+!$omp target data map(tofrom: indata, outdata)
+#else
+!$omp target data use_device_ptr(indata, outdata)
+#endif
+
+#else
+!$acc  host_data use_device(indata, outdata)
+#endif
+
+#if defined(HIPGPU)
+  rc = hipfftExecZ2D(plan,c_loc(indata),c_loc(outdata))
+#elif defined(MKLGPU)
+  !$omp dispatch
+  call dfftw_execute_dft_rc2r(plan,indata, outdata)
+  rc = 0
+#else
+  rc = cufftExecZ2D(plan,indata, outdata)
+#endif
+
+#ifdef HIPGPU
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+  ! hipfftExec is asynchronous, will need the results below
+  rc = hipDeviceSynchronize()
+#endif
+
+#if defined(OMPGPU)
+!$omp end target data
+#else
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+!$acc wait
+!$acc end host_data
+#endif
+
+end subroutine cgyro_fft_z2d
+
+subroutine cgyro_fft_d2z(plan, indata, outdata)
+
+#if defined(HIPGPU)
+  use hipfort
+  use hipfort_hipfft
+#elif defined(MKLGPU)
+  use fftw3_omp_offload
+#else
+  use cufft
+#endif
+  use cgyro_nl_comm
+
+  implicit none
+#if defined(MKLGPU)
+  include 'fftw/fftw3.f'
+#endif
+  !-----------------------------------
+#if defined(HIPGPU)
+  type(C_PTR), intent(inout)    :: plan
+#elif defined(MKLGPU)
+  INTEGER*8, intent(inout)      :: plan
+#else
+  integer(c_int), intent(inout) :: plan
+#endif
+  real, dimension(:,:,:), intent(inout)    :: indata
+  complex, dimension(:,:,:), intent(inout) :: outdata
+  !-----------------------------------
+  integer :: rc
+
+#if defined(OMPGPU)
+
+#if defined(MKLGPU)
+!$omp target data map(tofrom: indata, outdata)
+#else
+!$omp target data use_device_ptr(indata, outdata)
+#endif
+
+#else
+!$acc  host_data use_device(indata, outdata)
+#endif
+
+#if defined(HIPGPU)
+  rc = hipfftExecD2Z(plan,c_loc(indata),c_loc(outdata))
+#elif defined(MKLGPU)
+  !$omp dispatch
+  call dfftw_execute_dft_r2c(plan,indata, outdata)
+  rc = 0
+#else
+  rc = cufftExecD2Z(plan,indata, outdata)
+#endif
+
+#ifdef HIPGPU
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+  ! hipfftExec is asynchronous, will need the results below
+  rc = hipDeviceSynchronize()
+#endif
+
+#if defined(OMPGPU)
+!$omp end target data
+#else
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+!$acc wait
+!$acc end host_data
+#endif
+
+end subroutine cgyro_fft_d2z
+
+subroutine cgyro_nl_fftw
+
   use timer_lib
   use parallel_lib
   use cgyro_nl_comm
   use cgyro_globals
 
   implicit none
-#if defined(MKLGPU)
-  include 'fftw/fftw3.f'
-#endif
   !-----------------------------------
   integer :: j,p,iexch
   integer :: it,ir,itm,itl,ix,iy
@@ -553,73 +680,17 @@ subroutine cgyro_nl_fftw
      ! perform many Fourier Transforms at once
      ! --------------------------------------
 
-#if defined(OMPGPU)
-
-#if defined(MKLGPU)
-!$omp target data map(tofrom: fymany,uymany)
-#else
-!$omp target data use_device_ptr(fymany,uymany)
-#endif
-
-#else
-!$acc  host_data use_device(fymany,uymany)
-#endif
-
-#if defined(HIPGPU)
-  rc = hipfftExecZ2D(plan_c2r_manyA,c_loc(fymany),c_loc(uymany))
-#elif defined(MKLGPU)
-  !$omp dispatch
-  call dfftw_execute_dft_c2r(plan_c2r_manyA,fymany,uymany)
-  rc = 0
-#else
-  rc = cufftExecZ2D(plan_c2r_manyA,fymany,uymany)
-#endif
-
-#if defined(OMPGPU)
-!$omp end target data
-#else
-!$acc end host_data
-#endif
-
-#if defined(OMPGPU)
-  !no async for OMPGPU for now
-#else
-  ! make sure reqs progress
-  call cgyro_nl_fftw_comm_test()
-!$acc wait(2)
-#endif
+  call cgyro_fft_z2d(plan_c2r_manyA,fymany,uymany)
   ! fxmany is complete now
 
   ! make sure reqs progress
   call cgyro_nl_fftw_comm_test()
 
-#if defined(OMPGPU)
-
-#if defined(MKLGPU)
-!$omp target data map(tofrom: fxmany,uxmany)
-#else
-!$omp target data use_device_ptr(fxmany,uxmany)
+#if !defined(OMPGPU)
+!$acc wait
 #endif
 
-#else
-!$acc  host_data use_device(fxmany,uxmany)
-#endif
-
-#if defined(HIPGPU)
-  rc = hipfftExecZ2D(plan_c2r_manyA,c_loc(fxmany),c_loc(uxmany))
-#elif defined(MKLGPU)
-  !$omp dispatch
-  call dfftw_execute_dft_c2r(plan_c2r_manyA,fxmany,uxmany)
-  rc = 0
-#else
-  rc = cufftExecZ2D(plan_c2r_manyA,fxmany,uxmany)
-#endif
-
-#if defined(OMPGPU)
-!$omp end target data
-#else
-!$acc end host_data
-#endif
+  call cgyro_fft_z2d(plan_c2r_manyA,fxmany,uxmany)
 
   ! make sure reqs progress
   call cgyro_nl_fftw_comm_test()
@@ -760,83 +831,13 @@ subroutine cgyro_nl_fftw
 !$acc end data
 #endif
 
-#if defined(OMPGPU)
-
-#if defined(MKLGPU)
-!$omp target data map(tofrom: gymany,vymany)
-#else
-!$omp target data use_device_ptr(gymany,vymany)
-#endif
-
-#else
-!$acc  host_data use_device(gymany,vymany)
-#endif
-
-#if defined(HIPGPU)
-  rc = hipfftExecZ2D(plan_c2r_manyG,c_loc(gymany),c_loc(vymany))
-#elif defined(MKLGPU)
-  !$omp dispatch
-  call dfftw_execute_dft_c2r(plan_c2r_manyG,gymany,vymany)
-  rc = 0
-#else
-  rc = cufftExecZ2D(plan_c2r_manyG,gymany,vymany)
-#endif
-
-#if defined(OMPGPU)
-!$omp end target data
-#else
-!$acc end host_data
-#endif
-
-#if defined(OMPGPU)
-  !no async for OMPGPU for now
-#else
-  ! make sure reqs progress
-  call cgyro_nl_fftw_comm_test()
-!$acc wait(2)
-#endif
+  call cgyro_fft_z2d(plan_c2r_manyG,gymany,vymany)
 
   ! make sure reqs progress
   call cgyro_nl_fftw_comm_test()
   ! gxmany is complete now
 
-#if defined(OMPGPU)
-
-#if defined(MKLGPU)
-!$omp target data map(tofrom: gxmany,vxmany)
-#else
-!$omp target data use_device_ptr(gxmany,vxmany)
-#endif
-
-#else
-!$acc  host_data use_device(gxmany,vxmany)
-#endif
-
-#if defined(HIPGPU)
-  rc = hipfftExecZ2D(plan_c2r_manyG,c_loc(gxmany),c_loc(vxmany))
-#elif defined(MKLGPU)
-  !$omp dispatch
-  call dfftw_execute_dft_c2r(plan_c2r_manyG,gxmany,vxmany)
-  rc = 0
-#else
-  rc = cufftExecZ2D(plan_c2r_manyG,gxmany,vxmany)
-#endif
-
-#ifdef HIPGPU
-  ! make sure reqs progress
-  call cgyro_nl_fftw_comm_test()
-  ! hipfftExec is asynchronous, will need the results below
-  rc = hipDeviceSynchronize()
-#endif
-
-#if defined(OMPGPU)
-!$omp end target data
-#else
-  ! make sure reqs progress
-  call cgyro_nl_fftw_comm_test()
-!$acc wait
-!$acc end host_data
-#endif
+  call cgyro_fft_z2d(plan_c2r_manyG,gxmany,vxmany)
 
   ! make sure reqs progress
   call cgyro_nl_fftw_comm_test()
@@ -859,40 +860,11 @@ subroutine cgyro_nl_fftw
   ! Transform uv to fx
   ! ------------------
 
-#if defined(OMPGPU)
-
-#if defined(MKLGPU)
-!$omp target data map(tofrom: uvmany,fxmany)
-#else
-!$omp target data use_device_ptr(uvmany,fxmany)
-#endif
-
-#else
+#if !defined(OMPGPU)
 !$acc wait
-!$acc  host_data use_device(uvmany,fxmany)
 #endif
 
-#if defined(HIPGPU)
-  rc = hipfftExecD2Z(plan_r2c_manyA,c_loc(uvmany),c_loc(fxmany))
-#elif defined(MKLGPU)
-  !$omp dispatch
-  call dfftw_execute_dft_r2c(plan_r2c_manyA,uvmany,fxmany)
-  rc = 0
-#else
-  rc = cufftExecD2Z(plan_r2c_manyA,uvmany,fxmany)
-#endif
-
-#ifdef HIPGPU
-  ! hipfftExec is asynchronous, will need the results below
-  rc = hipDeviceSynchronize()
-#endif
-
-#if defined(OMPGPU)
-!$omp end target data
-#else
-!$acc wait
-!$acc end host_data
-#endif
+  call cgyro_fft_d2z(plan_r2c_manyA,uvmany,fxmany)
 
   ! make sure reqs progress
   call cgyro_nl_fftw_comm_test()
@@ -1104,83 +1076,14 @@ subroutine cgyro_nl_fftw
      ! perform many Fourier Transforms at once
      ! --------------------------------------
 
-#if defined(OMPGPU)
+  call cgyro_fft_z2d(plan_c2r_manyB,fymany,uymany)
 
-#if defined(MKLGPU)
-!$omp target data map(tofrom: fymany,uymany)
-#else
-!$omp target data use_device_ptr(fymany,uymany)
-#endif
-
-#else
-!$acc  host_data use_device(fymany,uymany)
-#endif
-
-#if defined(HIPGPU)
-  rc = hipfftExecZ2D(plan_c2r_manyB,c_loc(fymany),c_loc(uymany))
-#elif defined(MKLGPU)
-  !$omp dispatch
-  call dfftw_execute_dft_c2r(plan_c2r_manyB,fymany,uymany)
-  rc = 0
-#else
-  rc = cufftExecZ2D(plan_c2r_manyB,fymany,uymany)
-#endif
-
-#if defined(OMPGPU)
-!$omp end target data
-#else
-!$acc end host_data
-#endif
-
-#if defined(OMPGPU)
-  !no async for OMPGPU for now
-#else
-  ! make sure reqs progress
-  call cgyro_nl_fftw_comm_test()
-!$acc wait(2)
-#endif
   ! fxmany is complete now
 
   ! make sure reqs progress
   call cgyro_nl_fftw_comm_test()
 
-#if defined(OMPGPU)
-
-#if defined(MKLGPU)
-!$omp target data map(tofrom: fxmany,uxmany)
-#else
-!$omp target data use_device_ptr(fxmany,uxmany)
-#endif
-
-#else
-!$acc  host_data use_device(fxmany,uxmany)
-#endif
-
-#if defined(HIPGPU)
-  rc = hipfftExecZ2D(plan_c2r_manyB,c_loc(fxmany),c_loc(uxmany))
-#elif defined(MKLGPU)
-  !$omp dispatch
-  call dfftw_execute_dft_c2r(plan_c2r_manyB,fxmany,uxmany)
-  rc = 0
-#else
-  rc = cufftExecZ2D(plan_c2r_manyB,fxmany,uxmany)
-#endif
-
-#ifdef HIPGPU
-  ! make sure reqs progress
-  call cgyro_nl_fftw_comm_test()
-  ! hipfftExec is asynchronous, will need the results below
-  rc = hipDeviceSynchronize()
-#endif
-
-#if defined(OMPGPU)
-!$omp end target data
-#else
-  ! make sure reqs progress
-  call cgyro_nl_fftw_comm_test()
-!$acc wait
-!$acc end host_data
-#endif
+  call cgyro_fft_z2d(plan_c2r_manyB,fxmany,uxmany)
 
   ! make sure reqs progress
   call cgyro_nl_fftw_comm_test()
@@ -1203,44 +1106,11 @@ subroutine cgyro_nl_fftw
   ! Transform uv to fx
   ! ------------------
 
-#if defined(OMPGPU)
-
-#if defined(MKLGPU)
-!$omp target data map(tofrom: uvmany,fxmany)
-#else
-!$omp target data use_device_ptr(uvmany,fxmany)
-#endif
-
-#else
+#if !defined(OMPGPU)
 !$acc wait
-!$acc  host_data use_device(uvmany,fxmany)
 #endif
 
-#if defined(HIPGPU)
-  rc = hipfftExecD2Z(plan_r2c_manyB,c_loc(uvmany),c_loc(fxmany))
-#elif defined(MKLGPU)
-  !$omp dispatch
-  call dfftw_execute_dft_r2c(plan_r2c_manyB,uvmany,fxmany)
-  rc = 0
-#else
-  rc = cufftExecD2Z(plan_r2c_manyB,uvmany,fxmany)
-#endif
-
-#ifdef HIPGPU
-  ! make sure reqs progress
-  call cgyro_nl_fftw_comm_test()
-  ! hipfftExec is asynchronous, will need the results below
-  rc = hipDeviceSynchronize()
-#endif
-
-#if defined(OMPGPU)
-!$omp end target data
-#else
-  ! make sure reqs progress
-  call cgyro_nl_fftw_comm_test()
-!$acc wait
-!$acc end host_data
-#endif
+  call cgyro_fft_d2z(plan_r2c_manyB,uvmany,fxmany)
 
   ! make sure reqs progress
   call cgyro_nl_fftw_comm_test()
