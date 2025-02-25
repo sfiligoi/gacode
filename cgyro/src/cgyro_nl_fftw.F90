@@ -84,9 +84,9 @@ subroutine cgyro_nl_fftw_init
 #endif
 
 #if defined(HIPGPU)
-  hip_plan_c2r_manyA = c_null_ptr
+  plan_c2r_manyA = c_null_ptr
   istatus = hipfftPlanMany(&
-       hip_plan_c2r_manyA, &
+       plan_c2r_manyA, &
        irank, &
        ndim, &
        inembed, &
@@ -99,9 +99,9 @@ subroutine cgyro_nl_fftw_init
        nsplitA)
 
   if (nsplitB > 0) then ! no fft if nsplitB==0
-    hip_plan_c2r_manyB = c_null_ptr
+    plan_c2r_manyB = c_null_ptr
     istatus = hipfftPlanMany(&
-       hip_plan_c2r_manyB, &
+       plan_c2r_manyB, &
        irank, &
        ndim, &
        inembed, &
@@ -114,9 +114,9 @@ subroutine cgyro_nl_fftw_init
        nsplitB)
   endif
 
-  hip_plan_c2r_manyG = c_null_ptr
+  plan_c2r_manyG = c_null_ptr
   istatus = hipfftPlanMany(&
-       hip_plan_c2r_manyG, &
+       plan_c2r_manyG, &
        irank, &
        ndim, &
        inembed, &
@@ -128,11 +128,11 @@ subroutine cgyro_nl_fftw_init
        merge(HIPFFT_C2R,HIPFFT_Z2D,kind(uxmany) == singlePrecision), &
        nsplit)
 #elif defined(MKLGPU)
-     dfftw_plan_c2r_manyA = 0
+     plan_c2r_manyA = 0
 !$omp target data map(tofrom: fymany,uymany)
      !$omp dispatch
      call dfftw_plan_many_dft_c2r(&
-          dfftw_plan_c2r_manyA, &
+          plan_c2r_manyA, &
           irank, &
           ndim, &
           nsplitA, &
@@ -147,10 +147,10 @@ subroutine cgyro_nl_fftw_init
           FFTW_ESTIMATE)
 
   if (nsplitB > 0) then ! no fft if nsplitB==0
-     dfftw_plan_c2r_manyB = 0
+     plan_c2r_manyB = 0
      !$omp dispatch
      call dfftw_plan_many_dft_c2r(&
-          dfftw_plan_c2r_manyB, &
+          plan_c2r_manyB, &
           irank, &
           ndim, &
           nsplitB, &
@@ -166,11 +166,11 @@ subroutine cgyro_nl_fftw_init
   endif
 !$omp end target data
 
-     dfftw_plan_c2r_manyG = 0
+     plan_c2r_manyG = 0
 !$omp target data map(tofrom: gymany,vymany)
      !$omp dispatch
      call dfftw_plan_many_dft_c2r(&
-          dfftw_plan_c2r_manyG, &
+          plan_c2r_manyG, &
           irank, &
           ndim, &
           nsplit, &
@@ -187,7 +187,7 @@ subroutine cgyro_nl_fftw_init
 
 #else
   istatus = cufftPlanMany(&
-       cu_plan_c2r_manyA, &
+       plan_c2r_manyA, &
        irank, &
        ndim, &
        inembed, &
@@ -201,7 +201,7 @@ subroutine cgyro_nl_fftw_init
 
   if (nsplitB > 0) then ! no fft if nsplitB==0
     istatus = cufftPlanMany(&
-       cu_plan_c2r_manyB, &
+       plan_c2r_manyB, &
        irank, &
        ndim, &
        inembed, &
@@ -215,7 +215,7 @@ subroutine cgyro_nl_fftw_init
   endif
 
   istatus = cufftPlanMany(&
-       cu_plan_c2r_manyG, &
+       plan_c2r_manyG, &
        irank, &
        ndim, &
        inembed, &
@@ -238,9 +238,9 @@ subroutine cgyro_nl_fftw_init
 #endif
 
 #if defined(HIPGPU)
-  hip_plan_r2c_manyA = c_null_ptr
+  plan_r2c_manyA = c_null_ptr
   istatus = hipfftPlanMany(&
-       hip_plan_r2c_manyA, &
+       plan_r2c_manyA, &
        irank, &
        ndim, &
        inembed, &
@@ -253,9 +253,9 @@ subroutine cgyro_nl_fftw_init
        nsplitA)
 
   if (nsplitB > 0) then ! no fft if nsplitB==0
-    hip_plan_r2c_manyB = c_null_ptr
+    plan_r2c_manyB = c_null_ptr
     istatus = hipfftPlanMany(&
-       hip_plan_r2c_manyB, &
+       plan_r2c_manyB, &
        irank, &
        ndim, &
        inembed, &
@@ -268,11 +268,11 @@ subroutine cgyro_nl_fftw_init
        nsplitB)
   endif
 #elif defined(MKLGPU)
-     dfftw_plan_r2c_manyA = 0
+     plan_r2c_manyA = 0
 !$omp target data map(tofrom: uvmany,fxmany)
      !$omp dispatch
      call dfftw_plan_many_dft_r2c(&
-          dfftw_plan_r2c_manyA, &
+          plan_r2c_manyA, &
           irank, &
           ndim, &
           nsplitA, &
@@ -287,10 +287,10 @@ subroutine cgyro_nl_fftw_init
           FFTW_ESTIMATE)
 
   if (nsplitB > 0) then ! no fft if nsplitB==0
-     dfftw_plan_r2c_manyB = 0
+     plan_r2c_manyB = 0
      !$omp dispatch
      call dfftw_plan_many_dft_r2c(&
-          dfftw_plan_r2c_manyB, &
+          plan_r2c_manyB, &
           irank, &
           ndim, &
           nsplitB, &
@@ -308,7 +308,7 @@ subroutine cgyro_nl_fftw_init
 
 #else
   istatus = cufftPlanMany(&
-       cu_plan_r2c_manyA, &
+       plan_r2c_manyA, &
        irank, &
        ndim, &
        inembed, &
@@ -322,7 +322,7 @@ subroutine cgyro_nl_fftw_init
 
   if (nsplitB > 0) then ! no fft if nsplitB==0
     istatus = cufftPlanMany(&
-       cu_plan_r2c_manyB, &
+       plan_r2c_manyB, &
        irank, &
        ndim, &
        inembed, &
@@ -566,13 +566,13 @@ subroutine cgyro_nl_fftw
 #endif
 
 #if defined(HIPGPU)
-  rc = hipfftExecZ2D(hip_plan_c2r_manyA,c_loc(fymany),c_loc(uymany))
+  rc = hipfftExecZ2D(plan_c2r_manyA,c_loc(fymany),c_loc(uymany))
 #elif defined(MKLGPU)
   !$omp dispatch
-  call dfftw_execute_dft_c2r(dfftw_plan_c2r_manyA,fymany,uymany)
+  call dfftw_execute_dft_c2r(plan_c2r_manyA,fymany,uymany)
   rc = 0
 #else
-  rc = cufftExecZ2D(cu_plan_c2r_manyA,fymany,uymany)
+  rc = cufftExecZ2D(plan_c2r_manyA,fymany,uymany)
 #endif
 
 #if defined(OMPGPU)
@@ -606,13 +606,13 @@ subroutine cgyro_nl_fftw
 #endif
 
 #if defined(HIPGPU)
-  rc = hipfftExecZ2D(hip_plan_c2r_manyA,c_loc(fxmany),c_loc(uxmany))
+  rc = hipfftExecZ2D(plan_c2r_manyA,c_loc(fxmany),c_loc(uxmany))
 #elif defined(MKLGPU)
   !$omp dispatch
-  call dfftw_execute_dft_c2r(dfftw_plan_c2r_manyA,fxmany,uxmany)
+  call dfftw_execute_dft_c2r(plan_c2r_manyA,fxmany,uxmany)
   rc = 0
 #else
-  rc = cufftExecZ2D(cu_plan_c2r_manyA,fxmany,uxmany)
+  rc = cufftExecZ2D(plan_c2r_manyA,fxmany,uxmany)
 #endif
 
 #if defined(OMPGPU)
@@ -773,13 +773,13 @@ subroutine cgyro_nl_fftw
 #endif
 
 #if defined(HIPGPU)
-  rc = hipfftExecZ2D(hip_plan_c2r_manyG,c_loc(gymany),c_loc(vymany))
+  rc = hipfftExecZ2D(plan_c2r_manyG,c_loc(gymany),c_loc(vymany))
 #elif defined(MKLGPU)
   !$omp dispatch
-  call dfftw_execute_dft_c2r(dfftw_plan_c2r_manyG,gymany,vymany)
+  call dfftw_execute_dft_c2r(plan_c2r_manyG,gymany,vymany)
   rc = 0
 #else
-  rc = cufftExecZ2D(cu_plan_c2r_manyG,gymany,vymany)
+  rc = cufftExecZ2D(plan_c2r_manyG,gymany,vymany)
 #endif
 
 #if defined(OMPGPU)
@@ -813,13 +813,13 @@ subroutine cgyro_nl_fftw
 #endif
 
 #if defined(HIPGPU)
-  rc = hipfftExecZ2D(hip_plan_c2r_manyG,c_loc(gxmany),c_loc(vxmany))
+  rc = hipfftExecZ2D(plan_c2r_manyG,c_loc(gxmany),c_loc(vxmany))
 #elif defined(MKLGPU)
   !$omp dispatch
-  call dfftw_execute_dft_c2r(dfftw_plan_c2r_manyG,gxmany,vxmany)
+  call dfftw_execute_dft_c2r(plan_c2r_manyG,gxmany,vxmany)
   rc = 0
 #else
-  rc = cufftExecZ2D(cu_plan_c2r_manyG,gxmany,vxmany)
+  rc = cufftExecZ2D(plan_c2r_manyG,gxmany,vxmany)
 #endif
 
 #ifdef HIPGPU
@@ -873,13 +873,13 @@ subroutine cgyro_nl_fftw
 #endif
 
 #if defined(HIPGPU)
-  rc = hipfftExecD2Z(hip_plan_r2c_manyA,c_loc(uvmany),c_loc(fxmany))
+  rc = hipfftExecD2Z(plan_r2c_manyA,c_loc(uvmany),c_loc(fxmany))
 #elif defined(MKLGPU)
   !$omp dispatch
-  call dfftw_execute_dft_r2c(dfftw_plan_r2c_manyA,uvmany,fxmany)
+  call dfftw_execute_dft_r2c(plan_r2c_manyA,uvmany,fxmany)
   rc = 0
 #else
-  rc = cufftExecD2Z(cu_plan_r2c_manyA,uvmany,fxmany)
+  rc = cufftExecD2Z(plan_r2c_manyA,uvmany,fxmany)
 #endif
 
 #ifdef HIPGPU
@@ -1117,13 +1117,13 @@ subroutine cgyro_nl_fftw
 #endif
 
 #if defined(HIPGPU)
-  rc = hipfftExecZ2D(hip_plan_c2r_manyB,c_loc(fymany),c_loc(uymany))
+  rc = hipfftExecZ2D(plan_c2r_manyB,c_loc(fymany),c_loc(uymany))
 #elif defined(MKLGPU)
   !$omp dispatch
-  call dfftw_execute_dft_c2r(dfftw_plan_c2r_manyB,fymany,uymany)
+  call dfftw_execute_dft_c2r(plan_c2r_manyB,fymany,uymany)
   rc = 0
 #else
-  rc = cufftExecZ2D(cu_plan_c2r_manyB,fymany,uymany)
+  rc = cufftExecZ2D(plan_c2r_manyB,fymany,uymany)
 #endif
 
 #if defined(OMPGPU)
@@ -1157,13 +1157,13 @@ subroutine cgyro_nl_fftw
 #endif
 
 #if defined(HIPGPU)
-  rc = hipfftExecZ2D(hip_plan_c2r_manyB,c_loc(fxmany),c_loc(uxmany))
+  rc = hipfftExecZ2D(plan_c2r_manyB,c_loc(fxmany),c_loc(uxmany))
 #elif defined(MKLGPU)
   !$omp dispatch
-  call dfftw_execute_dft_c2r(dfftw_plan_c2r_manyB,fxmany,uxmany)
+  call dfftw_execute_dft_c2r(plan_c2r_manyB,fxmany,uxmany)
   rc = 0
 #else
-  rc = cufftExecZ2D(cu_plan_c2r_manyB,fxmany,uxmany)
+  rc = cufftExecZ2D(plan_c2r_manyB,fxmany,uxmany)
 #endif
 
 #ifdef HIPGPU
@@ -1217,13 +1217,13 @@ subroutine cgyro_nl_fftw
 #endif
 
 #if defined(HIPGPU)
-  rc = hipfftExecD2Z(hip_plan_r2c_manyB,c_loc(uvmany),c_loc(fxmany))
+  rc = hipfftExecD2Z(plan_r2c_manyB,c_loc(uvmany),c_loc(fxmany))
 #elif defined(MKLGPU)
   !$omp dispatch
-  call dfftw_execute_dft_r2c(dfftw_plan_r2c_manyB,uvmany,fxmany)
+  call dfftw_execute_dft_r2c(plan_r2c_manyB,uvmany,fxmany)
   rc = 0
 #else
-  rc = cufftExecD2Z(cu_plan_r2c_manyB,uvmany,fxmany)
+  rc = cufftExecD2Z(plan_r2c_manyB,uvmany,fxmany)
 #endif
 
 #ifdef HIPGPU

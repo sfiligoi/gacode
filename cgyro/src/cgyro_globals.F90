@@ -400,14 +400,14 @@ module cgyro_globals
   ! GPU-FFTW plans
 
 #if defined(HIPGPU)
-  type(C_PTR) :: hip_plan_r2c_manyA,hip_plan_r2c_manyB
-  type(C_PTR) :: hip_plan_c2r_manyA,hip_plan_c2r_manyB,hip_plan_c2r_manyG
+  type(C_PTR)    :: plan_r2c_manyA,plan_r2c_manyB
+  type(C_PTR)    :: plan_c2r_manyA,plan_c2r_manyB,plan_c2r_manyG
 #elif defined(MKLGPU)
-  INTEGER*8 :: dfftw_plan_r2c_manyA,dfftw_plan_r2c_manyB
-  INTEGER*8 :: dfftw_plan_c2r_manyA,dfftw_plan_c2r_manyB,dfftw_plan_c2r_manyG
+  INTEGER*8      :: plan_r2c_manyA,plan_r2c_manyB
+  INTEGER*8      :: plan_c2r_manyA,plan_c2r_manyB,plan_c2r_manyG
 #else
-  integer(c_int) :: cu_plan_r2c_manyA,cu_plan_r2c_manyB
-  integer(c_int) :: cu_plan_c2r_manyA,cu_plan_c2r_manyB,cu_plan_c2r_manyG
+  integer(c_int) :: plan_r2c_manyA,plan_r2c_manyB
+  integer(c_int) :: plan_c2r_manyA,plan_c2r_manyB,plan_c2r_manyG
 #endif
 
   complex, dimension(:,:,:),allocatable, target :: fxmany,fymany,gxmany,gymany
