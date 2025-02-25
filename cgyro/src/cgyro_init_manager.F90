@@ -305,6 +305,15 @@ subroutine cgyro_init_manager
 #elif defined(_OPENACC)
 !$acc enter data create(fpackA,gpack,fA_nl,g_nl,jvec_c_nl)
 #endif
+        if (nl_single_flag .NE. 0) then
+          allocate(fA_nl32(n_radial,nt_loc,nsplitA,n_toroidal_procs))
+          allocate(fpackA32(n_radial,nt_loc,nsplitA*n_toroidal_procs))
+#if defined(OMPGPU)
+!$omp target enter data map(alloc:fpackA32,fA_nl32)
+#elif defined(_OPENACC)
+!$acc enter data create(fpackA32,fA_nl32)
+#endif
+        endif
         if (nsplitB > 0) then ! nsplitB can be zero at large MPI
           allocate(fB_nl(n_radial,nt_loc,nsplitB,n_toroidal_procs))
           allocate(fpackB(n_radial,nt_loc,nsplitB*n_toroidal_procs))
@@ -313,6 +322,15 @@ subroutine cgyro_init_manager
 #elif defined(_OPENACC)
 !$acc enter data create(fpackB,fB_nl)
 #endif
+          if (nl_single_flag .NE. 0) then
+          allocate(fB_nl32(n_radial,nt_loc,nsplitB,n_toroidal_procs))
+          allocate(fpackB32(n_radial,nt_loc,nsplitB*n_toroidal_procs))
+#if defined(OMPGPU)
+!$omp target enter data map(alloc:fpackB32,fB_nl32)
+#elif defined(_OPENACC)
+!$acc enter data create(fpackB32,fB_nl32)
+#endif
+          endif
         endif
      endif
 

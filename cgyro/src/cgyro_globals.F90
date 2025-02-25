@@ -98,6 +98,7 @@ module cgyro_globals
   integer :: theta_plot
   integer :: gpu_bigmem_flag
   integer :: upwind_single_flag
+  integer :: nl_single_flag
   real :: px0
   integer :: stream_term
   real :: stream_factor
@@ -344,8 +345,10 @@ module cgyro_globals
   complex, dimension(:,:,:), allocatable :: h0_x
   complex, dimension(:,:,:), allocatable :: h0_old
   complex, dimension(:,:,:,:), allocatable :: fA_nl,fB_nl
+  complex(KIND=REAL32), dimension(:,:,:,:), allocatable :: fA_nl32,fB_nl32
   complex, dimension(:,:,:,:), allocatable :: g_nl
   complex, dimension(:,:,:), allocatable :: fpackA,fpackB
+  complex(KIND=REAL32), dimension(:,:,:), allocatable :: fpackA32,fpackB32
   complex, dimension(:,:,:,:), allocatable :: gpack
   complex, dimension(:,:,:), allocatable :: omega_cap_h
   complex, dimension(:,:,:), allocatable :: omega_h

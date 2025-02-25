@@ -257,6 +257,14 @@ subroutine cgyro_cleanup
      ccl_del_device(fB_nl)
      deallocate(fB_nl)
   endif
+  if(allocated(fA_nl32))   then
+     ccl_del_device(fA_nl32)
+     deallocate(fA_nl32)
+  endif
+  if(allocated(fB_nl32))   then
+     ccl_del_device(fB_nl32)
+     deallocate(fB_nl32)
+  endif
   if(allocated(g_nl))   then
      ccl_del_device(g_nl)
      deallocate(g_nl)
@@ -268,6 +276,14 @@ subroutine cgyro_cleanup
   if(allocated(fpackB))   then
      ccl_del_device(fpackB)
      deallocate(fpackB)
+  endif
+  if(allocated(fpackA32))   then
+     ccl_del_device(fpackA32)
+     deallocate(fpackA32)
+  endif
+  if(allocated(fpackB32))   then
+     ccl_del_device(fpackB32)
+     deallocate(fpackB32)
   endif
   if(allocated(gpack))   then
      ccl_del_device(gpack)

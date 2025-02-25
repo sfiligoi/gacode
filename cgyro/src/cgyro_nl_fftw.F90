@@ -898,6 +898,7 @@ subroutine cgyro_nl_fftw
   ! that will be filtered in the main time-stepping loop
 
   ! tile for performance, since this is effectively a transpose
+  if (nl_single_flag .EQ. 0) then
 #if defined(OMPGPU)
 !$omp target teams distribute parallel do collapse(5) &
 !$omp&   private(iy,ir,itm,itl,ix)
@@ -905,7 +906,7 @@ subroutine cgyro_nl_fftw
 !$acc parallel loop independent collapse(5) gang &
 !$acc&         private(iy,ir,itm,itl,ix) present(fA_nl,fxmany)
 #endif
-  do j=1,nsplitA
+   do j=1,nsplitA
    do iy0=0,n_toroidal+(R_TORTILE-1)-1,R_TORTILE  ! round up
     do ir0=0,n_radial+(R_RADTILE-1)-1,R_RADTILE  ! round up
     do iy1=0,(R_TORTILE-1)   ! tile
@@ -925,7 +926,37 @@ subroutine cgyro_nl_fftw
      enddo
     enddo
    enddo
-  enddo
+   enddo
+  else ! fp32 return
+#if defined(OMPGPU)
+!$omp target teams distribute parallel do collapse(5) &
+!$omp&   private(iy,ir,itm,itl,ix)
+#else
+!$acc parallel loop independent collapse(5) gang &
+!$acc&         private(iy,ir,itm,itl,ix) present(fA_nl32,fxmany)
+#endif
+   do j=1,nsplitA
+   do iy0=0,n_toroidal+(R_TORTILE-1)-1,R_TORTILE  ! round up
+    do ir0=0,n_radial+(R_RADTILE-1)-1,R_RADTILE  ! round up
+    do iy1=0,(R_TORTILE-1)   ! tile
+      do ir1=0,(R_RADTILE-1)  ! tile
+       iy = iy0 + iy1
+       ir = 1 + ir0 + ir1
+       if ((iy < n_toroidal) .and. (ir <= n_radial)) then
+           ! itor = iy+1
+           itm = 1 + iy/nt_loc
+           itl = 1 + modulo(iy,nt_loc)
+           ix = ir-1-nx0/2
+           if (ix < 0) ix = ix+nx
+
+           fA_nl32(ir,itl,j,itm) = fxmany(iy,ix,j)
+        endif
+      enddo
+     enddo
+    enddo
+   enddo
+   enddo
+  endif
 
 #if !defined(OMPGPU)
   ! end data fA_nl
@@ -975,7 +1006,11 @@ subroutine cgyro_nl_fftw
   call timer_lib_in('nl_comm')
   ! start the async reverse comm
   ! can reuse the same req, no overlap with forward fA_req
-  call parallel_slib_r_nc_async(nsplitA,fA_nl,fpackA,fA_req)
+  if (nl_single_flag .EQ. 0) then
+    call parallel_slib_r_nc_async(nsplitA,fA_nl,fpackA,fA_req)
+  else
+    call parallel_slib_r_nc32_async(nsplitA,fA_nl32,fpackA32,fA_req)
+  endif
   fA_req_valid = .TRUE.
 
   if (nsplitB > 0) then
@@ -1211,6 +1246,7 @@ subroutine cgyro_nl_fftw
   ! that will be filtered in the main time-stepping loop
 
   ! tile for performance, since this is effectively a transpose
+  if (nl_single_flag .EQ. 0) then
 #if defined(OMPGPU)
 !$omp target teams distribute parallel do collapse(5) &
 !$omp&   private(iy,ir,itm,itl,ix)
@@ -1218,7 +1254,7 @@ subroutine cgyro_nl_fftw
 !$acc parallel loop independent collapse(5) gang &
 !$acc&         private(iy,ir,itm,itl,ix) present(fB_nl,fxmany)
 #endif
-  do j=1,nsplitB
+   do j=1,nsplitB
    do iy0=0,n_toroidal+(R_TORTILE-1)-1,R_TORTILE  ! round up
     do ir0=0,n_radial+(R_RADTILE-1)-1,R_RADTILE  ! round up
     do iy1=0,(R_TORTILE-1)   ! tile
@@ -1238,7 +1274,37 @@ subroutine cgyro_nl_fftw
      enddo
     enddo
    enddo
-  enddo
+   enddo
+  else
+#if defined(OMPGPU)
+!$omp target teams distribute parallel do collapse(5) &
+!$omp&   private(iy,ir,itm,itl,ix)
+#else
+!$acc parallel loop independent collapse(5) gang &
+!$acc&         private(iy,ir,itm,itl,ix) present(fB_nl32,fxmany)
+#endif
+   do j=1,nsplitB
+   do iy0=0,n_toroidal+(R_TORTILE-1)-1,R_TORTILE  ! round up
+    do ir0=0,n_radial+(R_RADTILE-1)-1,R_RADTILE  ! round up
+    do iy1=0,(R_TORTILE-1)   ! tile
+      do ir1=0,(R_RADTILE-1)  ! tile
+       iy = iy0 + iy1
+       ir = 1 + ir0 + ir1
+       if ((iy < n_toroidal) .and. (ir <= n_radial)) then
+           ! itor = iy+1
+           itm = 1 + iy/nt_loc
+           itl = 1 + modulo(iy,nt_loc)
+           ix = ir-1-nx0/2
+           if (ix < 0) ix = ix+nx
+
+           fB_nl32(ir,itl,j,itm) = fxmany(iy,ix,j)
+        endif
+      enddo
+     enddo
+    enddo
+   enddo
+   enddo
+  endif
 
 #if !defined(OMPGPU)
   ! end data fB_nl
@@ -1250,7 +1316,11 @@ subroutine cgyro_nl_fftw
   call timer_lib_in('nl_comm')
   ! start the async reverse comm
   ! can reuse the same req, no overlap with forward fB_req
-  call parallel_slib_r_nc_async(nsplitB,fB_nl,fpackB,fB_req)
+  if (nl_single_flag .EQ. 0) then
+    call parallel_slib_r_nc_async(nsplitB,fB_nl,fpackB,fB_req)
+  else
+    call parallel_slib_r_nc32_async(nsplitB,fB_nl32,fpackB32,fB_req)
+  endif
   fB_req_valid = .TRUE.
   ! make sure reqs progress
   call cgyro_nl_fftw_comm_test()
@@ -1287,21 +1357,63 @@ subroutine cgyro_nl_fftw_stepr(g_j, f_j, nl_idx, i_omp)
   ! that will be filtered in the main time-stepping loop
 
   ! this should really be accounted against nl_mem, but hard to do with OMP
-  do itm=1,n_toroidal_procs
-   do itl=1,nt_loc
-    itor=itl + (itm-1)*nt_loc
-    do ir=1,n_radial
-     ix = ir-1-nx0/2
-     if (ix < 0) ix = ix+nx
-     iy = itor-1
-     if (nl_idx==1) then
-       fA_nl(ir,itl,f_j,itm) = fx(iy,ix,i_omp)
-     else
-       fB_nl(ir,itl,f_j,itm) = fx(iy,ix,i_omp)
-     endif
+  if (nl_single_flag .EQ. 0) then
+
+   if (nl_idx==1) then
+    do itm=1,n_toroidal_procs
+     do itl=1,nt_loc
+      itor=itl + (itm-1)*nt_loc
+      do ir=1,n_radial
+        ix = ir-1-nx0/2
+        if (ix < 0) ix = ix+nx
+        iy = itor-1
+        fA_nl(ir,itl,f_j,itm) = fx(iy,ix,i_omp)
+      enddo
+     enddo
     enddo
-   enddo
-  enddo
+   else ! nl_idx>1
+    do itm=1,n_toroidal_procs
+     do itl=1,nt_loc
+      itor=itl + (itm-1)*nt_loc
+      do ir=1,n_radial
+        ix = ir-1-nx0/2
+        if (ix < 0) ix = ix+nx
+        iy = itor-1
+        fB_nl(ir,itl,f_j,itm) = fx(iy,ix,i_omp)
+      enddo
+     enddo
+    enddo
+   endif
+
+  else ! fp32 return
+
+   if (nl_idx==1) then
+    do itm=1,n_toroidal_procs
+     do itl=1,nt_loc
+      itor=itl + (itm-1)*nt_loc
+      do ir=1,n_radial
+        ix = ir-1-nx0/2
+        if (ix < 0) ix = ix+nx
+        iy = itor-1
+        fA_nl32(ir,itl,f_j,itm) = fx(iy,ix,i_omp)
+      enddo
+     enddo
+    enddo
+   else ! nl_idx>1
+    do itm=1,n_toroidal_procs
+     do itl=1,nt_loc
+      itor=itl + (itm-1)*nt_loc
+      do ir=1,n_radial
+        ix = ir-1-nx0/2
+        if (ix < 0) ix = ix+nx
+        iy = itor-1
+        fB_nl32(ir,itl,f_j,itm) = fx(iy,ix,i_omp)
+      enddo
+     enddo
+    enddo
+   endif
+
+  endif
 
 end subroutine cgyro_nl_fftw_stepr
 
@@ -1480,7 +1592,11 @@ subroutine cgyro_nl_fftw
   call timer_lib_in('nl_comm')
   ! start the async reverse comm
   ! can reuse the same req, no overlap with forward fA_req
-  call parallel_slib_r_nc_async(nsplitA,fA_nl,fpackA,fA_req)
+  if (nl_single_flag .EQ. 0) then
+    call parallel_slib_r_nc_async(nsplitA,fA_nl,fpackA,fA_req)
+  else
+    call parallel_slib_r_nc32_async(nsplitA,fA_nl32,fpackA32,fA_req)
+  endif
   fA_req_valid = .TRUE.
 
   if (nsplitB > 0) then
@@ -1557,7 +1673,11 @@ subroutine cgyro_nl_fftw
    call timer_lib_in('nl_comm')
    ! start the async reverse comm
    ! can reuse the same req, no overlap with forward fB_req
-   call parallel_slib_r_nc_async(nsplitB,fB_nl,fpackB,fB_req)
+   if (nl_single_flag .EQ. 0) then
+     call parallel_slib_r_nc_async(nsplitB,fB_nl,fpackB,fB_req)
+   else
+     call parallel_slib_r_nc32_async(nsplitB,fB_nl32,fpackB32,fB_req)
+   endif
    fB_req_valid = .TRUE.
    ! make sure reqs progress
    call cgyro_nl_fftw_comm_test()

@@ -829,6 +829,34 @@ contains
 
   end subroutine parallel_slib_r_nc
 
+  subroutine parallel_slib_r_nc32 (nsx,xt,x)
+    use mpi
+    use, intrinsic :: iso_fortran_env
+    !-------------------------------------------------------
+    implicit none
+    !
+    integer, intent(in) :: nsx
+    complex(KIND=REAL32), intent(inout), dimension(nkeep,nk_loc,nsx,nn) :: xt
+    complex(KIND=REAL32), intent(inout), dimension(nkeep,nk_loc,nsx*nn) :: x
+    !
+    integer :: ierr
+    !-------------------------------------------------------
+
+    cpl_use_device(xt,x)
+
+    call MPI_ALLTOALL(xt, &
+         nkeep*nk_loc*nsx, &
+         MPI_COMPLEX, &
+         x, &
+         nkeep*nk_loc*nsx, &
+         MPI_COMPLEX, &
+         slib_comm, &
+         ierr)
+
+    cpl_release_device(xt,x)
+
+  end subroutine parallel_slib_r_nc32
+
   subroutine parallel_slib_r_nc_async (nsx,xt,x,req)
     use mpi
     !-------------------------------------------------------
@@ -864,6 +892,42 @@ contains
 
   end subroutine parallel_slib_r_nc_async
 
+  subroutine parallel_slib_r_nc32_async (nsx,xt,x,req)
+    use mpi
+    use, intrinsic :: iso_fortran_env
+    !-------------------------------------------------------
+    implicit none
+    !
+    integer, intent(in) :: nsx
+    complex(KIND=REAL32), intent(inout), dimension(nkeep,nk_loc,nsx,nn) :: xt
+    complex(KIND=REAL32), intent(inout), dimension(nkeep,nk_loc,nsx*nn) :: x
+    integer, intent(inout) :: req
+    !
+    integer :: ierr
+    !-------------------------------------------------------
+
+#ifdef NO_ASYNC_MPI
+   call parallel_slib_r_nc32(nsx,xt,x)
+
+#else
+
+    cpl_use_device(xt,x)
+
+    call MPI_IALLTOALL(xt, &
+         nkeep*nk_loc*nsx, &
+         MPI_COMPLEX, &
+         x, &
+         nkeep*nk_loc*nsx, &
+         MPI_COMPLEX, &
+         slib_comm, &
+         req, &
+         ierr)
+
+    cpl_unbind_device(xt,x)
+#endif
+
+  end subroutine parallel_slib_r_nc32_async
+
   ! require x and xt to ensure they exist until this finishes
   subroutine parallel_slib_r_nc_wait(nsx,xt,x,req)
     use mpi
@@ -891,6 +955,34 @@ contains
    !else, noop
 
   end subroutine parallel_slib_r_nc_wait
+
+  subroutine parallel_slib_r_nc32_wait(nsx,xt,x,req)
+    use mpi
+    use, intrinsic :: iso_fortran_env
+    !-------------------------------------------------------
+    implicit none
+    !
+    integer, intent(in) :: nsx
+    complex(KIND=REAL32), intent(inout), dimension(nkeep,nk_loc,nsx,nn) :: xt
+    complex(KIND=REAL32), intent(inout), dimension(nkeep,nk_loc,nsx*nn) :: x
+    integer, intent(inout) :: req
+    !
+    integer :: ierr
+    integer :: istat(MPI_STATUS_SIZE)
+    !-------------------------------------------------------
+
+#ifndef NO_ASYNC_MPI
+
+    call MPI_WAIT(req, &
+         istat, &
+         ierr)
+
+    cpl_finalize_device(xt,x)
+
+#endif
+   !else, noop
+
+  end subroutine parallel_slib_r_nc32_wait
 
 !=========================================================
 
