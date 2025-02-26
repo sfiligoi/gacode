@@ -728,6 +728,116 @@ pure subroutine cgyro_sym_async(nj, many)
 
 end subroutine cgyro_sym_async
 
+pure subroutine cgyro_fmany_r_async(nj, fmany, f_nl)
+
+  use cgyro_globals
+
+  implicit none
+  !-----------------------------------
+  integer, intent(in) :: nj
+  complex, dimension(0:ny2,0:nx-1,nj), intent(in) :: fmany
+  complex, dimension(n_radial,nt_loc,nj,n_toroidal_procs), intent(inout) :: f_nl
+  !-----------------------------------
+  integer :: j,p
+  integer :: ir,itm,itl,ix,iy
+  integer :: iy0, iy1, ir0, ir1
+
+#ifdef GACODE_GPU_AMD
+  ! AMD GPU  (MI250X) optimal
+  integer, parameter :: R_RADTILE = 32
+  integer, parameter :: R_TORTILE = 8
+#else
+  ! NVIDIA GPU  (A100) optimal
+  integer, parameter :: R_RADTILE = 16
+  integer, parameter :: R_TORTILE = 8
+#endif
+
+#if defined(OMPGPU)
+!$omp target teams distribute parallel do collapse(5) &
+!$omp&   private(iy,ir,itm,itl,ix)
+#else
+!$acc parallel loop independent collapse(5) gang &
+!$acc&         private(iy,ir,itm,itl,ix) present(f_nl,fmany)
+#endif
+  do j=1,nsplitB
+   do iy0=0,n_toroidal+(R_TORTILE-1)-1,R_TORTILE  ! round up
+    do ir0=0,n_radial+(R_RADTILE-1)-1,R_RADTILE  ! round up
+    do iy1=0,(R_TORTILE-1)   ! tile
+      do ir1=0,(R_RADTILE-1)  ! tile
+       iy = iy0 + iy1
+       ir = 1 + ir0 + ir1
+       if ((iy < n_toroidal) .and. (ir <= n_radial)) then
+           ! itor = iy+1
+           itm = 1 + iy/nt_loc
+           itl = 1 + modulo(iy,nt_loc)
+           ix = ir-1-nx0/2
+           if (ix < 0) ix = ix+nx
+
+           f_nl(ir,itl,j,itm) = fmany(iy,ix,j)
+        endif
+      enddo
+     enddo
+    enddo
+   enddo
+  enddo
+
+end subroutine cgyro_fmany_r_async
+
+pure subroutine cgyro_fmany_r32_async(nj, fmany, f_nl)
+
+  use cgyro_globals
+
+  implicit none
+  !-----------------------------------
+  integer, intent(in) :: nj
+  complex, dimension(0:ny2,0:nx-1,nj), intent(in) :: fmany
+  complex(KIND=REAL32), dimension(n_radial,nt_loc,nj,n_toroidal_procs), intent(inout) :: f_nl
+  !-----------------------------------
+  integer :: j,p
+  integer :: ir,itm,itl,ix,iy
+  integer :: iy0, iy1, ir0, ir1
+
+#ifdef GACODE_GPU_AMD
+  ! AMD GPU  (MI250X) optimal
+  integer, parameter :: R_RADTILE = 32
+  integer, parameter :: R_TORTILE = 8
+#else
+  ! NVIDIA GPU  (A100) optimal
+  integer, parameter :: R_RADTILE = 16
+  integer, parameter :: R_TORTILE = 8
+#endif
+
+#if defined(OMPGPU)
+!$omp target teams distribute parallel do collapse(5) &
+!$omp&   private(iy,ir,itm,itl,ix)
+#else
+!$acc parallel loop independent collapse(5) gang &
+!$acc&         private(iy,ir,itm,itl,ix) present(f_nl,fmany)
+#endif
+  do j=1,nsplitB
+   do iy0=0,n_toroidal+(R_TORTILE-1)-1,R_TORTILE  ! round up
+    do ir0=0,n_radial+(R_RADTILE-1)-1,R_RADTILE  ! round up
+    do iy1=0,(R_TORTILE-1)   ! tile
+      do ir1=0,(R_RADTILE-1)  ! tile
+       iy = iy0 + iy1
+       ir = 1 + ir0 + ir1
+       if ((iy < n_toroidal) .and. (ir <= n_radial)) then
+           ! itor = iy+1
+           itm = 1 + iy/nt_loc
+           itl = 1 + modulo(iy,nt_loc)
+           ix = ir-1-nx0/2
+           if (ix < 0) ix = ix+nx
+
+           f_nl(ir,itl,j,itm) = fmany(iy,ix,j)
+        endif
+      enddo
+     enddo
+    enddo
+   enddo
+  enddo
+
+end subroutine cgyro_fmany_r32_async
+
 subroutine cgyro_nl_fftw
 
   use timer_lib
@@ -749,16 +859,6 @@ subroutine cgyro_nl_fftw
   integer :: iy0, iy1, ir0, ir1
 
   real :: inv_nxny
-
-#ifdef GACODE_GPU_AMD
-  ! AMD GPU  (MI250X) optimal
-  integer, parameter :: R_RADTILE = 32
-  integer, parameter :: R_TORTILE = 8
-#else
-  ! NVIDIA GPU  (A100) optimal
-  integer, parameter :: R_RADTILE = 16
-  integer, parameter :: R_TORTILE = 8
-#endif
 
   call timer_lib_in('nl_mem')
   ! make sure reqs progress
@@ -915,63 +1015,9 @@ subroutine cgyro_nl_fftw
 
   ! tile for performance, since this is effectively a transpose
   if (nl_single_flag .EQ. 0) then
-#if defined(OMPGPU)
-!$omp target teams distribute parallel do collapse(5) &
-!$omp&   private(iy,ir,itm,itl,ix)
-#else
-!$acc parallel loop independent collapse(5) gang &
-!$acc&         private(iy,ir,itm,itl,ix) present(fA_nl,fxmany)
-#endif
-   do j=1,nsplitA
-   do iy0=0,n_toroidal+(R_TORTILE-1)-1,R_TORTILE  ! round up
-    do ir0=0,n_radial+(R_RADTILE-1)-1,R_RADTILE  ! round up
-    do iy1=0,(R_TORTILE-1)   ! tile
-      do ir1=0,(R_RADTILE-1)  ! tile
-       iy = iy0 + iy1
-       ir = 1 + ir0 + ir1
-       if ((iy < n_toroidal) .and. (ir <= n_radial)) then
-           ! itor = iy+1
-           itm = 1 + iy/nt_loc
-           itl = 1 + modulo(iy,nt_loc)
-           ix = ir-1-nx0/2
-           if (ix < 0) ix = ix+nx
-
-           fA_nl(ir,itl,j,itm) = fxmany(iy,ix,j)
-        endif
-      enddo
-     enddo
-    enddo
-   enddo
-   enddo
+    call cgyro_fmany_r_async(nsplitA, fxmany, fA_nl)
   else ! fp32 return
-#if defined(OMPGPU)
-!$omp target teams distribute parallel do collapse(5) &
-!$omp&   private(iy,ir,itm,itl,ix)
-#else
-!$acc parallel loop independent collapse(5) gang &
-!$acc&         private(iy,ir,itm,itl,ix) present(fA_nl32,fxmany)
-#endif
-   do j=1,nsplitA
-   do iy0=0,n_toroidal+(R_TORTILE-1)-1,R_TORTILE  ! round up
-    do ir0=0,n_radial+(R_RADTILE-1)-1,R_RADTILE  ! round up
-    do iy1=0,(R_TORTILE-1)   ! tile
-      do ir1=0,(R_RADTILE-1)  ! tile
-       iy = iy0 + iy1
-       ir = 1 + ir0 + ir1
-       if ((iy < n_toroidal) .and. (ir <= n_radial)) then
-           ! itor = iy+1
-           itm = 1 + iy/nt_loc
-           itl = 1 + modulo(iy,nt_loc)
-           ix = ir-1-nx0/2
-           if (ix < 0) ix = ix+nx
-
-           fA_nl32(ir,itl,j,itm) = fxmany(iy,ix,j)
-        endif
-      enddo
-     enddo
-    enddo
-   enddo
-   enddo
+    call cgyro_fmany_r32_async(nsplitA, fxmany, fA_nl32)
   endif
 
 #if !defined(OMPGPU)
@@ -1088,63 +1134,9 @@ subroutine cgyro_nl_fftw
 
   ! tile for performance, since this is effectively a transpose
   if (nl_single_flag .EQ. 0) then
-#if defined(OMPGPU)
-!$omp target teams distribute parallel do collapse(5) &
-!$omp&   private(iy,ir,itm,itl,ix)
-#else
-!$acc parallel loop independent collapse(5) gang &
-!$acc&         private(iy,ir,itm,itl,ix) present(fB_nl,fxmany)
-#endif
-   do j=1,nsplitB
-   do iy0=0,n_toroidal+(R_TORTILE-1)-1,R_TORTILE  ! round up
-    do ir0=0,n_radial+(R_RADTILE-1)-1,R_RADTILE  ! round up
-    do iy1=0,(R_TORTILE-1)   ! tile
-      do ir1=0,(R_RADTILE-1)  ! tile
-       iy = iy0 + iy1
-       ir = 1 + ir0 + ir1
-       if ((iy < n_toroidal) .and. (ir <= n_radial)) then
-           ! itor = iy+1
-           itm = 1 + iy/nt_loc
-           itl = 1 + modulo(iy,nt_loc)
-           ix = ir-1-nx0/2
-           if (ix < 0) ix = ix+nx
-
-           fB_nl(ir,itl,j,itm) = fxmany(iy,ix,j)
-        endif
-      enddo
-     enddo
-    enddo
-   enddo
-   enddo
-  else
-#if defined(OMPGPU)
-!$omp target teams distribute parallel do collapse(5) &
-!$omp&   private(iy,ir,itm,itl,ix)
-#else
-!$acc parallel loop independent collapse(5) gang &
-!$acc&         private(iy,ir,itm,itl,ix) present(fB_nl32,fxmany)
-#endif
-   do j=1,nsplitB
-   do iy0=0,n_toroidal+(R_TORTILE-1)-1,R_TORTILE  ! round up
-    do ir0=0,n_radial+(R_RADTILE-1)-1,R_RADTILE  ! round up
-    do iy1=0,(R_TORTILE-1)   ! tile
-      do ir1=0,(R_RADTILE-1)  ! tile
-       iy = iy0 + iy1
-       ir = 1 + ir0 + ir1
-       if ((iy < n_toroidal) .and. (ir <= n_radial)) then
-           ! itor = iy+1
-           itm = 1 + iy/nt_loc
-           itl = 1 + modulo(iy,nt_loc)
-           ix = ir-1-nx0/2
-           if (ix < 0) ix = ix+nx
-
-           fB_nl32(ir,itl,j,itm) = fxmany(iy,ix,j)
-        endif
-      enddo
-     enddo
-    enddo
-   enddo
-   enddo
+    call cgyro_fmany_r_async(nsplitB, fxmany, fB_nl)
+  else ! fp32 return
+    call cgyro_fmany_r32_async(nsplitB, fxmany, fB_nl32)
   endif
 
 #if !defined(OMPGPU)
