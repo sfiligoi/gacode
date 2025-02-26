@@ -694,6 +694,40 @@ subroutine cgyro_gmany_async
   enddo
 end subroutine cgyro_gmany_async
 
+pure subroutine cgyro_sym_async(nj, many)
+
+  use cgyro_globals
+
+  implicit none
+  !-----------------------------------
+  integer, intent(in) :: nj
+  complex, dimension(0:ny2,0:nx-1,nj), intent(inout) :: many
+  !-----------------------------------
+  integer:: j, ix
+  complex :: f0
+
+  ! Average elements so as to ensure
+  !   f(kx,ky=0) = f(-kx,ky=0)^*
+  ! This symmetry is required for complex input to c2r
+#if defined(OMPGPU)
+  !no async for OMPGPU for now
+!$omp target teams distribute parallel do simd collapse(2) &
+!$omp&  private(j,ix,f0) firstprivate(nj,nx) 
+#else
+!$acc parallel loop gang vector independent collapse(2) async(2) &
+!$acc&         private(j,ix,f0) firstprivate(nj,nx) &
+!$acc&         present(many)
+#endif
+  do j=1,nj
+    do ix=1,nx/2-1
+      f0 = 0.5*( many(0,ix,j)+conjg(many(0,nx-ix,j)) )
+      many(0,ix   ,j) = f0
+      many(0,nx-ix,j) = conjg(f0)
+    enddo
+  enddo
+
+end subroutine cgyro_sym_async
+
 subroutine cgyro_nl_fftw
 
   use timer_lib
@@ -770,23 +804,7 @@ subroutine cgyro_nl_fftw
   ! Average elements so as to ensure
   !   f(kx,ky=0) = f(-kx,ky=0)^*
   ! This symmetry is required for complex input to c2r
-#if defined(OMPGPU)
-  !no async for OMPGPU for now
-!$omp target teams distribute parallel do simd collapse(2) &
-!$omp&  private(j,ix,f0)
-#else
-!$acc parallel loop gang vector independent collapse(2) async(2) &
-!$acc&         private(j,ix,f0) &
-!$acc&         present(fxmany) &
-!$acc&         present(nsplitA,nx)
-#endif
-  do j=1,nsplitA
-    do ix=1,nx/2-1
-      f0 = 0.5*( fxmany(0,ix,j)+conjg(fxmany(0,nx-ix,j)) )
-      fxmany(0,ix   ,j) = f0
-      fxmany(0,nx-ix,j) = conjg(f0)
-    enddo
-  enddo
+  call cgyro_sym_async(nsplitA,fxmany)
 
      ! --------------------------------------
      ! perform many Fourier Transforms at once
@@ -845,23 +863,7 @@ subroutine cgyro_nl_fftw
   ! Average elements so as to ensure
   !   g(kx,ky=0) = g(-kx,ky=0)^*
   ! This symmetry is required for complex input to c2r
-#if defined(OMPGPU)
-  !no async for OMPGPU for now
-!$omp target teams distribute parallel do simd collapse(2) &
-!$omp&   private(j,ix,g0)
-#else
-!$acc parallel loop gang vector independent collapse(2) async(2) &
-!$acc&         private(j,ix,g0) &
-!$acc&         present(gxmany) &
-!$acc&         present(nsplit,nx)
-#endif
-  do j=1,nsplit
-    do ix=1,nx/2-1
-      g0 = 0.5*( gxmany(0,ix,j)+conjg(gxmany(0,nx-ix,j)) )
-      gxmany(0,ix   ,j) = g0
-      gxmany(0,nx-ix,j) = conjg(g0)
-    enddo
-  enddo
+  call cgyro_sym_async(nsplit,gxmany)
 
 #if !defined(OMPGPU)
 !$acc end data
@@ -1033,23 +1035,7 @@ subroutine cgyro_nl_fftw
   ! Average elements so as to ensure
   !   f(kx,ky=0) = f(-kx,ky=0)^*
   ! This symmetry is required for complex input to c2r
-#if defined(OMPGPU)
-  !no async for OMPGPU for now
-!$omp target teams distribute parallel do simd collapse(2) &
-!$omp&  private(j,ix,f0)
-#else
-!$acc parallel loop gang vector independent collapse(2) async(2) &
-!$acc&         private(j,ix,f0) &
-!$acc&         present(fxmany) &
-!$acc&         present(nsplitB,nx)
-#endif
-  do j=1,nsplitB
-    do ix=1,nx/2-1
-      f0 = 0.5*( fxmany(0,ix,j)+conjg(fxmany(0,nx-ix,j)) )
-      fxmany(0,ix   ,j) = f0
-      fxmany(0,nx-ix,j) = conjg(f0)
-    enddo
-  enddo
+  call cgyro_sym_async(nsplitB,fxmany)
 
      ! --------------------------------------
      ! perform many Fourier Transforms at once
