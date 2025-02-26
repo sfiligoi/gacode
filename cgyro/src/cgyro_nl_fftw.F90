@@ -570,6 +570,52 @@ subroutine cgyro_zero_async_offdiag(nj,xmany,ymany)
 
 end subroutine cgyro_zero_async_offdiag
 
+subroutine cgyro_fmany_async(nj, f_nl)
+
+  use cgyro_globals
+
+  implicit none
+  !-----------------------------------
+  integer, intent(in) :: nj
+  complex, dimension(n_radial,nt_loc,nj,n_toroidal_procs), intent(in) :: f_nl
+  !-----------------------------------
+  integer :: j,p
+  integer :: ir,itm,itl,ix,iy
+  integer :: itor, it_loc
+  complex :: f0
+
+! f_nl is (radial, nt_loc, theta, nv_loc1, toroidal_procs)
+! where nv_loc1 * toroidal_procs >= nv_loc
+
+  ! no tiling, does not seem to help
+#if defined(OMPGPU)
+  !no async for OMPGPU for now
+!$omp target teams distribute parallel do simd collapse(4) &
+!$omp&  private(j,ir,p,ix,itor,iy,f0,itm,itl)
+#else
+!$acc parallel loop gang vector independent collapse(4) async(2) &
+!$acc&         private(j,ir,p,ix,itor,iy,f0,itm,itl) present(f_nl,fxmany,fymany)
+#endif
+  do j=1,nj
+     do ir=1,n_radial
+       do itm=1,n_toroidal_procs
+         do itl=1,nt_loc
+              itor=itl + (itm-1)*nt_loc
+              iy = itor-1
+              p  = ir-1-nx0/2
+              ix = p
+              if (ix < 0) ix = ix+nx
+
+              f0 = i_c*f_nl(ir,itl,j,itm)
+              fxmany(iy,ix,j) = p*f0
+              fymany(iy,ix,j) = iy*f0
+         enddo
+       enddo
+     enddo
+  enddo
+
+end subroutine cgyro_fmany_async
+
 subroutine cgyro_nl_fftw
 
   use timer_lib
@@ -634,32 +680,7 @@ subroutine cgyro_nl_fftw
 ! f_nl is (radial, nt_loc, theta, nv_loc1, toroidal_procs)
 ! where nv_loc1 * toroidal_procs >= nv_loc
 
-  ! no tiling, does not seem to help
-#if defined(OMPGPU)
-  !no async for OMPGPU for now
-!$omp target teams distribute parallel do simd collapse(4) &
-!$omp&  private(j,ir,p,ix,itor,iy,f0,itm,itl)
-#else
-!$acc parallel loop gang vector independent collapse(4) async(2) &
-!$acc&         private(j,ir,p,ix,itor,iy,f0,itm,itl)
-#endif
-  do j=1,nsplitA
-     do ir=1,n_radial
-       do itm=1,n_toroidal_procs
-         do itl=1,nt_loc
-              itor=itl + (itm-1)*nt_loc
-              iy = itor-1
-              p  = ir-1-nx0/2
-              ix = p
-              if (ix < 0) ix = ix+nx
-
-              f0 = i_c*fA_nl(ir,itl,j,itm)
-              fxmany(iy,ix,j) = p*f0
-              fymany(iy,ix,j) = iy*f0
-         enddo
-       enddo
-     enddo
-  enddo
+  call cgyro_fmany_async(nsplitA, fA_nl)
 
 #if defined(OMPGPU)
   !no async for OMPGPU for now
@@ -967,32 +988,7 @@ subroutine cgyro_nl_fftw
 ! f_nl is (radial, nt_loc, theta, nv_loc1, toroidal_procs)
 ! where nv_loc1 * toroidal_procs >= nv_loc
 
-  ! no tiling, does not seem to help
-#if defined(OMPGPU)
-  !no async for OMPGPU for now
-!$omp target teams distribute parallel do simd collapse(4) &
-!$omp&  private(j,ir,p,ix,itor,iy,f0,g0,itm,itl)
-#else
-!$acc parallel loop gang vector independent collapse(4) async(2) &
-!$acc&         private(j,ir,p,ix,itor,iy,f0,itm,itl)
-#endif
-  do j=1,nsplitB
-     do ir=1,n_radial
-       do itm=1,n_toroidal_procs
-         do itl=1,nt_loc
-              itor=itl + (itm-1)*nt_loc
-              iy = itor-1
-              p  = ir-1-nx0/2
-              ix = p
-              if (ix < 0) ix = ix+nx
-
-              f0 = i_c*fB_nl(ir,itl,j,itm)
-              fxmany(iy,ix,j) = p*f0
-              fymany(iy,ix,j) = iy*f0
-         enddo
-       enddo
-     enddo
-  enddo
+  call cgyro_fmany_async(nsplitB, fB_nl)
 
 #if defined(OMPGPU)
   !no async for OMPGPU for now
