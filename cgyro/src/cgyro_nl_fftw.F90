@@ -360,7 +360,7 @@ end subroutine cgyro_nl_fftw_init
 
 #ifdef CGYRO_GPU_FFT
 
-subroutine cgyro_nl_fftw_mul(sz,uvm,uxm,vym,uym,vxm,inv_nxny)
+pure subroutine cgyro_nl_fftw_mul(sz,uvm,uxm,vym,uym,vxm,inv_nxny)
   implicit none
 
   integer, intent(in) :: sz
@@ -522,7 +522,7 @@ subroutine cgyro_fft_d2z(plan, indata, outdata)
 
 end subroutine cgyro_fft_d2z
 
-subroutine cgyro_zero_async_offdiag(nj,xmany,ymany)
+pure subroutine cgyro_zero_offdiag_async(nj,xmany,ymany)
 
   use cgyro_globals
 
@@ -568,7 +568,7 @@ subroutine cgyro_zero_async_offdiag(nj,xmany,ymany)
      enddo
   enddo
 
-end subroutine cgyro_zero_async_offdiag
+end subroutine cgyro_zero_offdiag_async
 
 subroutine cgyro_fmany_async(nj, f_nl)
 
@@ -765,7 +765,7 @@ subroutine cgyro_nl_fftw
   call cgyro_nl_fftw_comm_test()
 
   ! we can zero the elements we know are zero while we wait
-  call cgyro_zero_async_offdiag(nsplitA,fxmany,fymany)
+  call cgyro_zero_offdiag_async(nsplitA,fxmany,fymany)
 
   call timer_lib_out('nl_mem')
 
@@ -830,7 +830,7 @@ subroutine cgyro_nl_fftw
 !$acc&      present(gxmany,gymany)
 #endif
   ! we can zero the elements we know are zero while we wait for comm
-  call cgyro_zero_async_offdiag(nsplit,gxmany,gymany)
+  call cgyro_zero_offdiag_async(nsplit,gxmany,gymany)
 
   call timer_lib_out('nl')
 
@@ -982,7 +982,7 @@ subroutine cgyro_nl_fftw
   if (nsplitB > 0) then
     ! we can zero the elements we know are zero while we waita
     ! assuming nsplitB<=nsplitA
-    call cgyro_zero_async_offdiag(nsplitB,fxmany,fymany)
+    call cgyro_zero_offdiag_async(nsplitB,fxmany,fymany)
   endif
 
   call timer_lib_out('nl_mem')
