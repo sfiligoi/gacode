@@ -847,18 +847,9 @@ subroutine cgyro_nl_fftw
 
   implicit none
   !-----------------------------------
-  integer :: j,p,iexch
-  integer :: it,ir,itm,itl,ix,iy
-  integer :: itor,mytm
-  integer :: i1,i2
-  integer :: it_loc
-  integer :: ierr
-  integer :: rc
-  complex :: f0,g0
-  integer :: jtheta_min
-  integer :: iy0, iy1, ir0, ir1
 
   real :: inv_nxny
+  inv_nxny = 1.0/(nx*ny)
 
   call timer_lib_in('nl_mem')
   ! make sure reqs progress
@@ -878,12 +869,6 @@ subroutine cgyro_nl_fftw
   call timer_lib_out('nl_comm')
 
   call timer_lib_in('nl')
-#if !defined(OMPGPU)
-!$acc  data present(fA_nl)  &
-!$acc&      present(fxmany,fymany,gxmany,gymany) &
-!$acc&      present(uxmany,uymany,vxmany,vymany) &
-!$acc&      present(uvmany)
-#endif
 
 ! f_nl is (radial, nt_loc, theta, nv_loc1, toroidal_procs)
 ! where nv_loc1 * toroidal_procs >= nv_loc
@@ -925,10 +910,6 @@ subroutine cgyro_nl_fftw
   ! make sure reqs progress
   call cgyro_nl_fftw_comm_test()
 
-#if !defined(OMPGPU)
-!$acc  data present(g_nl)  &
-!$acc&      present(gxmany,gymany)
-#endif
   ! we can zero the elements we know are zero while we wait for comm
   call cgyro_zero_offdiag_async(nsplit,gxmany,gymany)
 
@@ -965,10 +946,6 @@ subroutine cgyro_nl_fftw
   ! This symmetry is required for complex input to c2r
   call cgyro_sym_async(nsplit,gxmany)
 
-#if !defined(OMPGPU)
-!$acc end data
-#endif
-
   call cgyro_fft_z2d(plan_c2r_manyG,gymany,vymany)
 
   ! make sure reqs progress
@@ -982,8 +959,6 @@ subroutine cgyro_nl_fftw
 
   ! Poisson bracket in real space
   ! uv = (ux*vy-uy*vx)/(nx*ny)
-
-  inv_nxny = 1.0/(nx*ny)
 
   call cgyro_nl_fftw_mul(size(uvmany,1)*size(uvmany,2)*nsplitA, &
                          uvmany, &
@@ -1020,11 +995,6 @@ subroutine cgyro_nl_fftw
     call cgyro_fmany_r32_async(nsplitA, fxmany, fA_nl32)
   endif
 
-#if !defined(OMPGPU)
-  ! end data fA_nl
-!$acc end data
-#endif
-
   if (nsplitB > 0) then
     ! we can zero the elements we know are zero while we waita
     ! assuming nsplitB<=nsplitA
@@ -1055,12 +1025,6 @@ subroutine cgyro_nl_fftw
   if (nsplitB > 0) then
 
   call timer_lib_in('nl')
-#if !defined(OMPGPU)
-!$acc  data present(fB_nl)  &
-!$acc&      present(fxmany,fymany,gxmany,gymany) &
-!$acc&      present(uxmany,uymany,vxmany,vymany) &
-!$acc&      present(uvmany)
-#endif
 
 ! f_nl is (radial, nt_loc, theta, nv_loc1, toroidal_procs)
 ! where nv_loc1 * toroidal_procs >= nv_loc
@@ -1102,8 +1066,6 @@ subroutine cgyro_nl_fftw
   ! Poisson bracket in real space
   ! uv = (ux*vy-uy*vx)/(nx*ny)
 
-  inv_nxny = 1.0/(nx*ny)
-
   call cgyro_nl_fftw_mul(size(uvmany,1)*size(uvmany,2)*nsplitB, &
                          uvmany, &
                          uxmany,vymany(:,:,(nsplitA+1):nsplit), &
@@ -1138,11 +1100,6 @@ subroutine cgyro_nl_fftw
   else ! fp32 return
     call cgyro_fmany_r32_async(nsplitB, fxmany, fB_nl32)
   endif
-
-#if !defined(OMPGPU)
-  ! end data fB_nl
-!$acc end data
-#endif
 
   call timer_lib_out('nl_mem')
 
