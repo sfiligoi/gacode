@@ -616,6 +616,84 @@ subroutine cgyro_fmany_async(nj, f_nl)
 
 end subroutine cgyro_fmany_async
 
+subroutine cgyro_gmany_async
+
+  use cgyro_globals
+
+  implicit none
+  !-----------------------------------
+  integer :: j,p
+  integer :: it, ir,itm,itl,ix,iy
+  integer :: mytm, itor, it_loc
+  integer :: jtheta_min
+  integer :: iy0, iy1, ir0, ir1
+  complex :: g0
+
+#ifdef GACODE_GPU_AMD
+  ! AMD GPU  (MI250X) optimal
+  integer, parameter :: F_RADTILE = 8
+  integer, parameter :: F_TORTILE = 16
+  integer, parameter :: R_RADTILE = 32
+  integer, parameter :: R_TORTILE = 8
+#else
+  ! NVIDIA GPU  (A100) optimal
+  integer, parameter :: F_RADTILE = 8
+  integer, parameter :: F_TORTILE = 16
+  integer, parameter :: R_RADTILE = 16
+  integer, parameter :: R_TORTILE = 8
+#endif
+
+! g_nl      is (n_field,n_radial,n_jtheta,nt_loc,n_toroidal_procs)
+! jcev_c_nl is (n_field,n_radial,n_jtheta,nv_loc,nt_loc,n_toroidal_procs)
+
+  ! tile for performance, since this is effectively a transpose
+#if defined(OMPGPU)
+  !no async for OMPGPU for now
+!$omp target teams distribute parallel do simd collapse(5) &
+!$omp&   private(j,p,ix,itor,mytm,iy,g0,it,iv_loc,it_loc,jtheta_min,itm,itl,ir)
+#else
+!$acc parallel loop gang vector independent collapse(5) async(2) &
+!$acc&         private(j,p,ix,itor,mytm,iy,g0,it,iv_loc,it_loc,jtheta_min,itm,itl,ir) &
+!$acc&         present(g_nl,jvec_c_nl) &
+!$acc&         present(nsplit,n_radial,n_toroidal_procs,nt_loc,nt1,n_theta,nv_loc,nx0)
+#endif
+  do j=1,nsplit
+    do iy0=0,n_toroidal+(F_TORTILE-1)-1,F_TORTILE  ! round up
+      do ir0=0,n_radial+(F_RADTILE-1)-1,F_RADTILE  ! round up
+        do iy1=0,(F_TORTILE-1)   ! tile
+          do ir1=0,(F_RADTILE-1)  ! tile
+            iy = iy0+iy1
+            ir = 1 + ir0+ir1
+            if ((iy < n_toroidal) .and. (ir <= n_radial)) then
+              itor = iy+1
+              itm = 1 + iy/nt_loc
+              itl = 1 + modulo(iy,nt_loc)
+              mytm = 1 + nt1/nt_loc !my toroidal proc number
+              it = 1+((mytm-1)*nsplit+j-1)/nv_loc
+              iv_loc = 1+modulo((mytm-1)*nsplit+j-1,nv_loc)
+              jtheta_min = 1+((mytm-1)*nsplit)/nv_loc
+              it_loc = it-jtheta_min+1
+              iy = itor-1
+
+              p  = ir-1-nx0/2
+              ix = p
+              if (ix < 0) ix = ix+nx
+
+              if (it > n_theta) then
+                 g0 = (0.0,0.0)
+              else
+                 g0 = i_c*sum( jvec_c_nl(1:n_field,ir,it_loc,iv_loc,itor)*g_nl(1:n_field,ir,it_loc,itor))
+              endif
+              gxmany(iy,ix,j) = p*g0
+              gymany(iy,ix,j) = iy*g0
+            endif
+          enddo
+        enddo
+      enddo
+    enddo
+  enddo
+end subroutine cgyro_gmany_async
+
 subroutine cgyro_nl_fftw
 
   use timer_lib
@@ -640,14 +718,10 @@ subroutine cgyro_nl_fftw
 
 #ifdef GACODE_GPU_AMD
   ! AMD GPU  (MI250X) optimal
-  integer, parameter :: F_RADTILE = 8
-  integer, parameter :: F_TORTILE = 16
   integer, parameter :: R_RADTILE = 32
   integer, parameter :: R_TORTILE = 8
 #else
   ! NVIDIA GPU  (A100) optimal
-  integer, parameter :: F_RADTILE = 8
-  integer, parameter :: F_TORTILE = 16
   integer, parameter :: R_RADTILE = 16
   integer, parameter :: R_TORTILE = 8
 #endif
@@ -755,52 +829,7 @@ subroutine cgyro_nl_fftw
 ! g_nl      is (n_field,n_radial,n_jtheta,nt_loc,n_toroidal_procs)
 ! jcev_c_nl is (n_field,n_radial,n_jtheta,nv_loc,nt_loc,n_toroidal_procs)
 
-  ! tile for performance, since this is effectively a transpose
-#if defined(OMPGPU)
-  !no async for OMPGPU for now
-!$omp target teams distribute parallel do simd collapse(5) &
-!$omp&   private(j,p,ix,itor,mytm,iy,g0,it,iv_loc,it_loc,jtheta_min,itm,itl,ir)
-#else
-!$acc parallel loop gang vector independent collapse(5) async(2) &
-!$acc&         private(j,p,ix,itor,mytm,iy,g0,it,iv_loc,it_loc,jtheta_min,itm,itl,ir) &
-!$acc&         present(g_nl,jvec_c_nl) &
-!$acc&         present(nsplit,n_radial,n_toroidal_procs,nt_loc,nt1,n_theta,nv_loc,nx0)
-#endif
-  do j=1,nsplit
-    do iy0=0,n_toroidal+(F_TORTILE-1)-1,F_TORTILE  ! round up
-      do ir0=0,n_radial+(F_RADTILE-1)-1,F_RADTILE  ! round up
-        do iy1=0,(F_TORTILE-1)   ! tile
-          do ir1=0,(F_RADTILE-1)  ! tile
-            iy = iy0+iy1
-            ir = 1 + ir0+ir1
-            if ((iy < n_toroidal) .and. (ir <= n_radial)) then
-              itor = iy+1
-              itm = 1 + iy/nt_loc
-              itl = 1 + modulo(iy,nt_loc)
-              mytm = 1 + nt1/nt_loc !my toroidal proc number
-              it = 1+((mytm-1)*nsplit+j-1)/nv_loc
-              iv_loc = 1+modulo((mytm-1)*nsplit+j-1,nv_loc)
-              jtheta_min = 1+((mytm-1)*nsplit)/nv_loc
-              it_loc = it-jtheta_min+1
-              iy = itor-1
-
-              p  = ir-1-nx0/2
-              ix = p
-              if (ix < 0) ix = ix+nx
-
-              if (it > n_theta) then
-                 g0 = (0.0,0.0)
-              else
-                 g0 = i_c*sum( jvec_c_nl(1:n_field,ir,it_loc,iv_loc,itor)*g_nl(1:n_field,ir,it_loc,itor))
-              endif
-              gxmany(iy,ix,j) = p*g0
-              gymany(iy,ix,j) = iy*g0
-            endif
-          enddo
-        enddo
-      enddo
-    enddo
-  enddo
+  call cgyro_gmany_async
 
 #if defined(OMPGPU)
   !no async for OMPGPU for now
