@@ -522,6 +522,54 @@ subroutine cgyro_fft_d2z(plan, indata, outdata)
 
 end subroutine cgyro_fft_d2z
 
+subroutine cgyro_zero_async_offdiag(nj,xmany,ymany)
+
+  use cgyro_globals
+
+  implicit none
+  !-----------------------------------
+  integer, intent(in) :: nj
+  complex, dimension(0:ny2,0:nx-1,nj), intent(inout) :: xmany,ymany
+  !-----------------------------------
+  integer :: j
+  integer :: ix,iy
+
+#if defined(OMPGPU)
+  !no async for OMPGPU for now
+!$omp target teams distribute parallel do simd collapse(3)
+#else
+!$acc parallel loop gang vector independent collapse(3) async(2) &
+!$acc&         private(j,ix,iy) &
+!$acc&         present(xmany,ymany)
+#endif
+  do j=1,nj
+     do ix=nx2,nx0-1
+       do iy=0,ny2
+         xmany(iy,ix,j) = 0
+         ymany(iy,ix,j) = 0
+       enddo
+     enddo
+  enddo
+
+#if defined(OMPGPU)
+  !no async for OMPGPU for now
+!$omp target teams distribute parallel do simd collapse(3)
+#else
+!$acc parallel loop gang vector independent collapse(3) async(2) &
+!$acc&         private(j,ix,iy) &
+!$acc&         present(xmany,ymany)
+#endif
+  do j=1,nj
+     do ix=0,nx-1
+       do iy=n_toroidal,ny2
+         xmany(iy,ix,j) = 0
+         ymany(iy,ix,j) = 0
+       enddo
+     enddo
+  enddo
+
+end subroutine cgyro_zero_async_offdiag
+
 subroutine cgyro_nl_fftw
 
   use timer_lib
@@ -563,39 +611,8 @@ subroutine cgyro_nl_fftw
   call cgyro_nl_fftw_comm_test()
 
   ! we can zero the elements we know are zero while we wait
-#if defined(OMPGPU)
-  !no async for OMPGPU for now
-!$omp target teams distribute parallel do simd collapse(3)
-#else
-!$acc parallel loop gang vector independent collapse(3) async(2) &
-!$acc&         private(j,ix,iy) &
-!$acc&         present(nsplitA,ny2,nx0,nx2)
-#endif
-  do j=1,nsplitA
-     do ix=nx2,nx0-1
-       do iy=0,ny2
-         fxmany(iy,ix,j) = 0
-         fymany(iy,ix,j) = 0
-       enddo
-     enddo
-  enddo
+  call cgyro_zero_async_offdiag(nsplitA,fxmany,fymany)
 
-#if defined(OMPGPU)
-  !no async for OMPGPU for now
-!$omp target teams distribute parallel do simd collapse(3)
-#else
-!$acc parallel loop gang vector independent collapse(3) async(2) &
-!$acc&         private(j,ix,iy) &
-!$acc&         present(nsplitA,ny2,n_toroidal,nx)
-#endif
-  do j=1,nsplitA
-     do ix=0,nx-1
-       do iy=n_toroidal,ny2
-         fxmany(iy,ix,j) = 0
-         fymany(iy,ix,j) = 0
-       enddo
-     enddo
-  enddo
   call timer_lib_out('nl_mem')
 
   ! time to wait for the FA_nl to become avaialble
@@ -700,39 +717,8 @@ subroutine cgyro_nl_fftw
 !$acc&      present(gxmany,gymany)
 #endif
   ! we can zero the elements we know are zero while we wait for comm
-#if defined(OMPGPU)
-  !no async for OMPGPU for now
-!$omp target teams distribute parallel do simd collapse(3)
-#else
-!$acc parallel loop gang vector independent collapse(3) async(2) &
-!$acc&         private(j,ix,iy) &
-!$acc&         present(nsplit,ny2,nx0,nx2)
-#endif
-  do j=1,nsplit
-     do ix=nx2,nx0-1
-       do iy=0,ny2
-         gxmany(iy,ix,j) = 0
-         gymany(iy,ix,j) = 0
-       enddo
-     enddo
-  enddo
+  call cgyro_zero_async_offdiag(nsplit,gxmany,gymany)
 
-#if defined(OMPGPU)
-  !no async for OMPGPU for now
-!$omp target teams distribute parallel do simd collapse(3)
-#else
-!$acc parallel loop gang vector independent collapse(3) async(2) &
-!$acc&         private(j,ix,iy) &
-!$acc&         present(nsplit,ny2,n_toroidal,nx)
-#endif
-  do j=1,nsplit
-     do ix=0,nx-1
-       do iy=n_toroidal,ny2
-         gxmany(iy,ix,j) = 0
-         gymany(iy,ix,j) = 0
-       enddo
-     enddo
-  enddo
   call timer_lib_out('nl')
 
   call timer_lib_in('nl_comm')
@@ -942,42 +928,10 @@ subroutine cgyro_nl_fftw
 #endif
 
   if (nsplitB > 0) then
-  ! we can zero the elements we know are zero while we waita
-  ! assuming nsplitB<=nsplitA
-#if defined(OMPGPU)
-  !no async for OMPGPU for now
-!$omp target teams distribute parallel do simd collapse(3)
-#else
-!$acc parallel loop gang vector independent collapse(3) async(2) &
-!$acc&         private(j,ix,iy) &
-!$acc&         present(nsplitB,ny2,nx0,nx2)
-#endif
-   do j=1,nsplitB
-     do ix=nx2,nx0-1
-       do iy=0,ny2
-         fxmany(iy,ix,j) = 0
-         fymany(iy,ix,j) = 0
-       enddo
-     enddo
-   enddo
-
-#if defined(OMPGPU)
-  !no async for OMPGPU for now
-!$omp target teams distribute parallel do simd collapse(3)
-#else
-!$acc parallel loop gang vector independent collapse(3) async(2) &
-!$acc&         private(j,ix,iy) &
-!$acc&         present(nsplitB,ny2,n_toroidal,nx)
-#endif
-   do j=1,nsplitB
-     do ix=0,nx-1
-       do iy=n_toroidal,ny2
-         fxmany(iy,ix,j) = 0
-         fymany(iy,ix,j) = 0
-       enddo
-     enddo
-   enddo
-  endif ! if nsplitB>0
+    ! we can zero the elements we know are zero while we waita
+    ! assuming nsplitB<=nsplitA
+    call cgyro_zero_async_offdiag(nsplitB,fxmany,fymany)
+  endif
 
   call timer_lib_out('nl_mem')
 
