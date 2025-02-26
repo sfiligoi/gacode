@@ -1207,48 +1207,27 @@ subroutine cgyro_nl_fftw_stepr(g_j, f_j, nl_idx, i_omp)
 
 end subroutine cgyro_nl_fftw_stepr
 
-! NOTE: call cgyro_nl_fftw_comm1 before cgyro_nl_fftw
-subroutine cgyro_nl_fftw
+subroutine cgyro_f_one(i_omp, j, nj, f_nl)
 
-  use timer_lib
-  use parallel_lib
   use cgyro_nl_comm
   use cgyro_globals
 
   implicit none
-
+  !-----------------------------------
+  integer, intent(in) :: i_omp, j, nj
+  complex, dimension(n_radial,nt_loc,nj,n_toroidal_procs), intent(in) :: f_nl
   !-----------------------------------
   integer :: ix,iy
-  integer :: ir,it,itm,itl,it_loc
-  integer :: itor,mytm
-  integer :: j,p
-  integer :: i_omp
-  integer :: jtheta_min
+  integer :: ir,itm,itl
+  integer :: itor
+  integer :: p
 
-  complex :: f0,g0
-
-  integer, external :: omp_get_thread_num
+  complex :: f0
 
   include 'fftw3.f03'
-  
-  call cgyro_nl_fftw_comm_test()
-
-  ! time to wait for the FA_nl to become avaialble
-  call timer_lib_in('nl_comm')
-  call parallel_slib_f_nc_wait(nsplitA,fpackA,fA_nl,fA_req)
-  fA_req_valid = .FALSE.
-  ! make sure reqs progress
-  call cgyro_nl_fftw_comm_test()
-  call timer_lib_out('nl_comm')
-
-  call timer_lib_in('nl')
 
 ! f_nl is (radial, nt_loc, theta, nv_loc1, toroidal_procs)
 ! where nv_loc1 * toroidal_procs >= nv_loc
-!$omp parallel do schedule(dynamic,1) private(itm,itl,itor,iy,ir,p,ix,f0,i_omp,j)
-  do j=1,nsplitA
-        i_omp = omp_get_thread_num()+1
-
         ! zero elements not otherwise set below
         fx(0:ny2,nx2:nx0-1,i_omp) = 0.0
         fy(0:ny2,nx2:nx0-1,i_omp) = 0.0
@@ -1262,7 +1241,7 @@ subroutine cgyro_nl_fftw
             do itl=1,nt_loc
               itor=itl + (itm-1)*nt_loc
               iy = itor-1
-              f0 = i_c*fA_nl(ir,itl,j,itm)
+              f0 = i_c*f_nl(ir,itl,j,itm)
               fx(iy,ix,i_omp) = p*f0
               fy(iy,ix,i_omp) = iy*f0
             enddo
@@ -1291,27 +1270,30 @@ subroutine cgyro_nl_fftw
         endif
 
         call fftw_execute_dft_c2r(plan_c2r,fy(:,:,i_omp),uymany(:,:,j))
-  enddo ! j
 
-  call timer_lib_out('nl')
+end subroutine cgyro_f_one
 
-  call timer_lib_in('nl_comm')
-  ! time to wait for the g_nl to become avaialble
-  call parallel_slib_f_fd_wait(n_field,n_radial,n_jtheta,gpack,g_nl,g_req)
-  g_req_valid = .FALSE.
-  ! make sure reqs progress
-  call cgyro_nl_fftw_comm_test()
-  call timer_lib_out('nl_comm')
+subroutine cgyro_g_one(i_omp, j)
 
-  call timer_lib_in('nl')
+  use cgyro_nl_comm
+  use cgyro_globals
+
+  implicit none
+  !-----------------------------------
+  integer, intent(in) :: i_omp, j
+  !-----------------------------------
+  integer :: ix,iy
+  integer :: ir,itm,itl
+  integer :: it,itor,mytm,it_loc
+  integer :: p
+  integer :: jtheta_min
+
+  complex :: g0
+
+  include 'fftw3.f03'
 
 ! g_nl      is (n_field,n_radial,n_jtheta,nt_loc,n_toroidal_procs)
 ! jcev_c_nl is (n_field,n_radial,n_jtheta,nv_loc,nt_loc,n_toroidal_procs)
-!$omp parallel do schedule(dynamic,1) &
-!$omp& private(itor,mytm,itm,itl,iy,ir,p,ix,g0,i_omp,j,it,iv_loc,it_loc,jtheta_min)
-  do j=1,nsplit
-        i_omp = omp_get_thread_num()+1
-
         ! zero elements not otherwise set below
         gx(0:ny2,nx2:nx0-1,i_omp) = 0.0
         gy(0:ny2,nx2:nx0-1,i_omp) = 0.0
@@ -1365,7 +1347,71 @@ subroutine cgyro_nl_fftw
         endif
 
         call fftw_execute_dft_c2r(plan_c2r,gy(:,:,i_omp),vymany(:,:,j))
+end subroutine cgyro_g_one
 
+! NOTE: call cgyro_nl_fftw_comm1 before cgyro_nl_fftw
+subroutine cgyro_nl_fftw
+
+  use timer_lib
+  use parallel_lib
+  use cgyro_nl_comm
+  use cgyro_globals
+
+  implicit none
+
+  !-----------------------------------
+  integer :: ix,iy
+  integer :: ir,it,itm,itl,it_loc
+  integer :: itor,mytm
+  integer :: j,p
+  integer :: i_omp
+  integer :: jtheta_min
+
+  complex :: f0,g0
+
+  integer, external :: omp_get_thread_num
+
+  include 'fftw3.f03'
+  
+  call cgyro_nl_fftw_comm_test()
+
+  ! time to wait for the FA_nl to become avaialble
+  call timer_lib_in('nl_comm')
+  call parallel_slib_f_nc_wait(nsplitA,fpackA,fA_nl,fA_req)
+  fA_req_valid = .FALSE.
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+  call timer_lib_out('nl_comm')
+
+  call timer_lib_in('nl')
+
+! f_nl is (radial, nt_loc, theta, nv_loc1, toroidal_procs)
+! where nv_loc1 * toroidal_procs >= nv_loc
+! parallel do schedule(dynamic,1) private(itm,itl,itor,iy,ir,p,ix,f0,i_omp,j)
+!$omp parallel do schedule(dynamic,1) private(i_omp,j)
+  do j=1,nsplitA
+        i_omp = omp_get_thread_num()+1
+        call cgyro_f_one(i_omp, j, nsplitA, fA_nl)
+  enddo ! j
+
+  call timer_lib_out('nl')
+
+  call timer_lib_in('nl_comm')
+  ! time to wait for the g_nl to become avaialble
+  call parallel_slib_f_fd_wait(n_field,n_radial,n_jtheta,gpack,g_nl,g_req)
+  g_req_valid = .FALSE.
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+  call timer_lib_out('nl_comm')
+
+  call timer_lib_in('nl')
+
+! g_nl      is (n_field,n_radial,n_jtheta,nt_loc,n_toroidal_procs)
+! jcev_c_nl is (n_field,n_radial,n_jtheta,nv_loc,nt_loc,n_toroidal_procs)
+!$omp parallel do schedule(dynamic,1) private(i_omp,j)
+  do j=1,nsplit
+        i_omp = omp_get_thread_num()+1
+        call cgyro_g_one(i_omp, j)
         if (i_omp==1) then
          ! use the main thread to progress the async MPI
           call cgyro_nl_fftw_comm_test()
@@ -1404,52 +1450,11 @@ subroutine cgyro_nl_fftw
 
 ! f_nl is (radial, nt_loc, theta, nv_loc1, toroidal_procs)
 ! where nv_loc1 * toroidal_procs >= nv_loc
-!$omp parallel do schedule(dynamic,1) private(itm,itl,itor,iy,ir,p,ix,f0,i_omp,j)
+!$omp parallel do schedule(dynamic,1) private(i_omp,j)
    do j=1,nsplitB
         i_omp = omp_get_thread_num()+1
+        call cgyro_f_one(i_omp, j, nsplitB, fB_nl)
 
-        ! zero elements not otherwise set below
-        fx(0:ny2,nx2:nx0-1,i_omp) = 0.0
-        fy(0:ny2,nx2:nx0-1,i_omp) = 0.0
-
-        ! Array mapping
-        do ir=1,n_radial
-           p  = ir-1-nx0/2
-           ix = p
-           if (ix < 0) ix = ix+nx
-           do itm=1,n_toroidal_procs
-            do itl=1,nt_loc
-              itor=itl + (itm-1)*nt_loc
-              iy = itor-1
-              f0 = i_c*fB_nl(ir,itl,j,itm)
-              fx(iy,ix,i_omp) = p*f0
-              fy(iy,ix,i_omp) = iy*f0
-            enddo
-           enddo
-           if ((ix/=0) .and. (ix<(nx/2))) then ! happens after ix>nx/2
-             ! Average elements so as to ensure
-             !   f(kx,ky=0) = f(-kx,ky=0)^*
-             ! This symmetry is required for complex input to c2r
-             f0 = 0.5*( fx(0,ix,i_omp)+conjg(fx(0,nx-ix,i_omp)) )
-             fx(0,ix   ,i_omp) = f0
-             fx(0,nx-ix,i_omp) = conjg(f0)
-           endif
-           fx(n_toroidal:ny2,ix,i_omp) = 0.0
-           fy(n_toroidal:ny2,ix,i_omp) = 0.0
-        enddo
-
-        if (i_omp==1) then
-         ! use the main thread to progress the async MPI
-          call cgyro_nl_fftw_comm_test()
-        endif
-
-        call fftw_execute_dft_c2r(plan_c2r,fx(:,:,i_omp),uxmany(:,:,j))
-        if (i_omp==1) then
-         ! use the main thread to progress the async MPI
-          call cgyro_nl_fftw_comm_test()
-        endif
-
-        call fftw_execute_dft_c2r(plan_c2r,fy(:,:,i_omp),uymany(:,:,j))
         if (i_omp==1) then
          ! use the main thread to progress the async MPI
           call cgyro_nl_fftw_comm_test()
