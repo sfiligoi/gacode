@@ -1304,6 +1304,37 @@ contains
 
   end subroutine parallel_slib_distribute_real
 
+  subroutine parallel_slib_distribute_real32(nels1,nels2,nels3,nels4,nels5,x)
+
+    use mpi
+    use, intrinsic :: iso_fortran_env
+
+    !-------------------------------------------------------
+    implicit none
+    !
+    integer, intent(in) :: nels1,nels2,nels3,nels4,nels5
+    real(KIND=REAL32), intent(inout), dimension(nels1,nels2,nels3,nels4,nels5,nn) :: x
+    !
+    integer :: nels
+    integer :: ierr
+    !-------------------------------------------------------
+
+    nels = nels1*nels2*nels3*nels4*nels5
+    cpl_use_device1(x)
+
+    call MPI_ALLTOALL(MPI_IN_PLACE, &
+         nels, &
+         MPI_REAL, &
+         x, &
+         nels, &
+         MPI_REAL, &
+         slib_comm, &
+         ierr)
+
+   cpl_release_device1(x)
+
+  end subroutine parallel_slib_distribute_real32
+
 !=========================================================
 
   subroutine parallel_lib_nj_loc(nj_loc_in)
