@@ -269,6 +269,10 @@ subroutine cgyro_cleanup
      ccl_del_device(g_nl)
      deallocate(g_nl)
   endif
+  if(allocated(g_nl32))   then
+     ccl_del_device(g_nl32)
+     deallocate(g_nl32)
+  endif
   if(allocated(fpackA))   then
      ccl_del_device(fpackA)
      deallocate(fpackA)
@@ -288,6 +292,10 @@ subroutine cgyro_cleanup
   if(allocated(gpack))   then
      ccl_del_device(gpack)
      deallocate(gpack)
+  endif
+  if(allocated(gpack32))   then
+     ccl_del_device(gpack32)
+     deallocate(gpack32)
   endif
   if (allocated(cmat)) then
      ccl_del_bigdevice(cmat)
@@ -354,6 +362,42 @@ subroutine cgyro_cleanup
   if(allocated(uvmany))     then
      ccl_del_device(uvmany)     
      deallocate(uvmany)
+  endif
+  if(allocated(fxmany32))    then
+     ccl_del_device(fxmany32)     
+     deallocate(fxmany32)
+  endif
+  if(allocated(gxmany32))    then
+     ccl_del_device(gxmany32)     
+     deallocate(gxmany32)
+  endif
+  if(allocated(fymany32))    then
+     ccl_del_device(fymany32)     
+     deallocate(fymany32)
+  endif
+  if(allocated(gymany32))    then
+     ccl_del_device(gymany32)     
+     deallocate(gymany32)
+  endif
+  if(allocated(uxmany32))    then
+      ccl_del_device(uxmany32)    
+     deallocate(uxmany32)
+  endif
+  if(allocated(uymany32))    then
+     ccl_del_device(uymany32)     
+     deallocate(uymany32)
+  endif
+  if(allocated(vxmany32))     then
+     ccl_del_device(vxmany32)     
+     deallocate(vxmany32)
+  endif
+  if(allocated(vymany32))     then
+     ccl_del_device(vymany32)     
+     deallocate(vymany32)
+  endif
+  if(allocated(uvmany32))     then
+     ccl_del_device(uvmany32)     
+     deallocate(uvmany32)
   endif
 #endif    
 
