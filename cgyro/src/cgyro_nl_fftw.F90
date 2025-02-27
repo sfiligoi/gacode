@@ -360,13 +360,19 @@ end subroutine cgyro_nl_fftw_init
 
 #ifdef CGYRO_GPU_FFT
 
+!-----------------------------------------------------------------
+!  GPU code
+!-----------------------------------------------------------------
+
 pure subroutine cgyro_nl_fftw_mul(sz,uvm,uxm,vym,uym,vxm,inv_nxny)
   implicit none
 
+  !-----------------------------------
   integer, intent(in) :: sz
   real, dimension(*),intent(out) :: uvm
   real, dimension(*),intent(in) :: uxm,vym,uym,vxm
   real, intent(in) :: inv_nxny
+  !-----------------------------------
 
   integer :: i
 
@@ -382,7 +388,35 @@ pure subroutine cgyro_nl_fftw_mul(sz,uvm,uxm,vym,uym,vxm,inv_nxny)
     uvm(i) = (uxm(i)*vym(i)-uym(i)*vxm(i))*inv_nxny
   enddo
 
-end subroutine
+end subroutine cgyro_nl_fftw_mul
+
+pure subroutine cgyro_nl_fftw_mul32(sz,uvm,uxm,vym,uym,vxm,inv_nxny)
+  use, intrinsic :: iso_fortran_env
+
+  implicit none
+
+  !-----------------------------------
+  integer, intent(in) :: sz
+  real(KIND=REAL32), dimension(*),intent(out) :: uvm
+  real(KIND=REAL32), dimension(*),intent(in) :: uxm,vym,uym,vxm
+  real(KIND=REAL32), intent(in) :: inv_nxny
+  !-----------------------------------
+
+  integer :: i
+
+#if defined(OMPGPU)
+!$omp target teams distribute parallel do simd &
+!$omp&  map(to:uxm(1:sz),vym(1:sz),uym(1:sz),vxm(1:sz)) &
+!$omp&  map(from:uvm(1:sz))
+#else
+!$acc parallel loop independent gang vector &
+!$acc&         present(uvm,uxm,vym,uym,vxm) private(i)
+#endif
+  do i=1,sz
+    uvm(i) = (uxm(i)*vym(i)-uym(i)*vxm(i))*inv_nxny
+  enddo
+
+end subroutine cgyro_nl_fftw_mul32
 
 subroutine cgyro_fft_z2d(plan, indata, outdata)
 
@@ -429,7 +463,7 @@ subroutine cgyro_fft_z2d(plan, indata, outdata)
   rc = hipfftExecZ2D(plan,c_loc(indata),c_loc(outdata))
 #elif defined(MKLGPU)
   !$omp dispatch
-  call dfftw_execute_dft_rc2r(plan,indata, outdata)
+  call dfftw_execute_dft_c2r(plan,indata, outdata)
   rc = 0
 #else
   rc = cufftExecZ2D(plan,indata, outdata)
@@ -452,6 +486,76 @@ subroutine cgyro_fft_z2d(plan, indata, outdata)
 #endif
 
 end subroutine cgyro_fft_z2d
+
+subroutine cgyro_fft_c2r(plan, indata, outdata)
+
+#if defined(HIPGPU)
+  use hipfort
+  use hipfort_hipfft
+#elif defined(MKLGPU)
+  use fftw3_omp_offload
+#else
+  use cufft
+#endif
+  use cgyro_nl_comm
+  use, intrinsic :: iso_fortran_env
+
+  implicit none
+#if defined(MKLGPU)
+  include 'fftw/fftw3.f'
+#endif
+  !-----------------------------------
+#if defined(HIPGPU)
+  type(C_PTR), intent(inout)    :: plan
+#elif defined(MKLGPU)
+  INTEGER*8, intent(inout)      :: plan
+#else
+  integer(c_int), intent(inout) :: plan
+#endif
+  complex(KIND=REAL32), dimension(:,:,:), intent(inout) :: indata
+  real(KIND=REAL32), dimension(:,:,:), intent(inout)    :: outdata
+  !-----------------------------------
+  integer :: rc
+
+#if defined(OMPGPU)
+
+#if defined(MKLGPU)
+!$omp target data map(tofrom: indata, outdata)
+#else
+!$omp target data use_device_ptr(indata, outdata)
+#endif
+
+#else
+!$acc  host_data use_device(indata, outdata)
+#endif
+
+#if defined(HIPGPU)
+  rc = hipfftExecC2R(plan,c_loc(indata),c_loc(outdata))
+#elif defined(MKLGPU)
+  !$omp dispatch
+  call dfftw_execute_dft_c2r(plan,indata, outdata)
+  rc = 0
+#else
+  rc = cufftExecC2R(plan,indata, outdata)
+#endif
+
+#ifdef HIPGPU
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+  ! hipfftExec is asynchronous, will need the results below
+  rc = hipDeviceSynchronize()
+#endif
+
+#if defined(OMPGPU)
+!$omp end target data
+#else
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+!$acc wait
+!$acc end host_data
+#endif
+
+end subroutine cgyro_fft_c2r
 
 subroutine cgyro_fft_d2z(plan, indata, outdata)
 
@@ -522,6 +626,76 @@ subroutine cgyro_fft_d2z(plan, indata, outdata)
 
 end subroutine cgyro_fft_d2z
 
+subroutine cgyro_fft_r2c(plan, indata, outdata)
+
+#if defined(HIPGPU)
+  use hipfort
+  use hipfort_hipfft
+#elif defined(MKLGPU)
+  use fftw3_omp_offload
+#else
+  use cufft
+#endif
+  use cgyro_nl_comm
+  use, intrinsic :: iso_fortran_env
+
+  implicit none
+#if defined(MKLGPU)
+  include 'fftw/fftw3.f'
+#endif
+  !-----------------------------------
+#if defined(HIPGPU)
+  type(C_PTR), intent(inout)    :: plan
+#elif defined(MKLGPU)
+  INTEGER*8, intent(inout)      :: plan
+#else
+  integer(c_int), intent(inout) :: plan
+#endif
+  real(KIND=REAL32), dimension(:,:,:), intent(inout)    :: indata
+  complex(KIND=REAL32), dimension(:,:,:), intent(inout) :: outdata
+  !-----------------------------------
+  integer :: rc
+
+#if defined(OMPGPU)
+
+#if defined(MKLGPU)
+!$omp target data map(tofrom: indata, outdata)
+#else
+!$omp target data use_device_ptr(indata, outdata)
+#endif
+
+#else
+!$acc  host_data use_device(indata, outdata)
+#endif
+
+#if defined(HIPGPU)
+  rc = hipfftExecR2C(plan,c_loc(indata),c_loc(outdata))
+#elif defined(MKLGPU)
+  !$omp dispatch
+  call dfftw_execute_dft_r2c(plan,indata, outdata)
+  rc = 0
+#else
+  rc = cufftExecR2C(plan,indata, outdata)
+#endif
+
+#ifdef HIPGPU
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+  ! hipfftExec is asynchronous, will need the results below
+  rc = hipDeviceSynchronize()
+#endif
+
+#if defined(OMPGPU)
+!$omp end target data
+#else
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+!$acc wait
+!$acc end host_data
+#endif
+
+end subroutine cgyro_fft_r2c
+
 pure subroutine cgyro_zero_offdiag_async(nj,xmany,ymany)
 
   use cgyro_globals
@@ -570,6 +744,54 @@ pure subroutine cgyro_zero_offdiag_async(nj,xmany,ymany)
 
 end subroutine cgyro_zero_offdiag_async
 
+pure subroutine cgyro_zero_offdiag32_async(nj,xmany,ymany)
+
+  use cgyro_globals
+
+  implicit none
+  !-----------------------------------
+  integer, intent(in) :: nj
+  complex(KIND=REAL32), dimension(0:ny2,0:nx-1,nj), intent(inout) :: xmany,ymany
+  !-----------------------------------
+  integer :: j
+  integer :: ix,iy
+
+#if defined(OMPGPU)
+  !no async for OMPGPU for now
+!$omp target teams distribute parallel do simd collapse(3)
+#else
+!$acc parallel loop gang vector independent collapse(3) async(2) &
+!$acc&         private(j,ix,iy) &
+!$acc&         present(xmany,ymany)
+#endif
+  do j=1,nj
+     do ix=nx2,nx0-1
+       do iy=0,ny2
+         xmany(iy,ix,j) = 0
+         ymany(iy,ix,j) = 0
+       enddo
+     enddo
+  enddo
+
+#if defined(OMPGPU)
+  !no async for OMPGPU for now
+!$omp target teams distribute parallel do simd collapse(3)
+#else
+!$acc parallel loop gang vector independent collapse(3) async(2) &
+!$acc&         private(j,ix,iy) &
+!$acc&         present(xmany,ymany)
+#endif
+  do j=1,nj
+     do ix=0,nx-1
+       do iy=n_toroidal,ny2
+         xmany(iy,ix,j) = 0
+         ymany(iy,ix,j) = 0
+       enddo
+     enddo
+  enddo
+
+end subroutine cgyro_zero_offdiag32_async
+
 subroutine cgyro_fmany_async(nj, f_nl)
 
   use cgyro_globals
@@ -616,6 +838,52 @@ subroutine cgyro_fmany_async(nj, f_nl)
 
 end subroutine cgyro_fmany_async
 
+subroutine cgyro_fmany32_async(nj, f_nl)
+
+  use cgyro_globals
+
+  implicit none
+  !-----------------------------------
+  integer, intent(in) :: nj
+  complex(KIND=REAL32), dimension(n_radial,nt_loc,nj,n_toroidal_procs), intent(in) :: f_nl
+  !-----------------------------------
+  integer :: j,p
+  integer :: ir,itm,itl,ix,iy
+  integer :: itor, it_loc
+  complex(KIND=REAL32) :: f0
+
+! f_nl is (radial, nt_loc, theta, nv_loc1, toroidal_procs)
+! where nv_loc1 * toroidal_procs >= nv_loc
+
+  ! no tiling, does not seem to help
+#if defined(OMPGPU)
+  !no async for OMPGPU for now
+!$omp target teams distribute parallel do simd collapse(4) &
+!$omp&  private(j,ir,p,ix,itor,iy,f0,itm,itl)
+#else
+!$acc parallel loop gang vector independent collapse(4) async(2) &
+!$acc&         private(j,ir,p,ix,itor,iy,f0,itm,itl) present(f_nl,fxmany,fymany)
+#endif
+  do j=1,nj
+     do ir=1,n_radial
+       do itm=1,n_toroidal_procs
+         do itl=1,nt_loc
+              itor=itl + (itm-1)*nt_loc
+              iy = itor-1
+              p  = ir-1-nx0/2
+              ix = p
+              if (ix < 0) ix = ix+nx
+
+              f0 = i_c*f_nl(ir,itl,j,itm)
+              fxmany32(iy,ix,j) = p*f0
+              fymany32(iy,ix,j) = iy*f0
+         enddo
+       enddo
+     enddo
+  enddo
+
+end subroutine cgyro_fmany32_async
+
 subroutine cgyro_gmany_async
 
   use cgyro_globals
@@ -633,14 +901,10 @@ subroutine cgyro_gmany_async
   ! AMD GPU  (MI250X) optimal
   integer, parameter :: F_RADTILE = 8
   integer, parameter :: F_TORTILE = 16
-  integer, parameter :: R_RADTILE = 32
-  integer, parameter :: R_TORTILE = 8
 #else
   ! NVIDIA GPU  (A100) optimal
   integer, parameter :: F_RADTILE = 8
   integer, parameter :: F_TORTILE = 16
-  integer, parameter :: R_RADTILE = 16
-  integer, parameter :: R_TORTILE = 8
 #endif
 
 ! g_nl      is (n_field,n_radial,n_jtheta,nt_loc,n_toroidal_procs)
@@ -654,7 +918,7 @@ subroutine cgyro_gmany_async
 #else
 !$acc parallel loop gang vector independent collapse(5) async(2) &
 !$acc&         private(j,p,ix,itor,mytm,iy,g0,it,iv_loc,it_loc,jtheta_min,itm,itl,ir) &
-!$acc&         present(g_nl,jvec_c_nl) &
+!$acc&         present(g_nl,jvec_c_nl,gxmany,gymany) &
 !$acc&         present(nsplit,n_radial,n_toroidal_procs,nt_loc,nt1,n_theta,nv_loc,nx0)
 #endif
   do j=1,nsplit
@@ -694,6 +958,80 @@ subroutine cgyro_gmany_async
   enddo
 end subroutine cgyro_gmany_async
 
+subroutine cgyro_gmany32_async
+
+  use cgyro_globals
+
+  implicit none
+  !-----------------------------------
+  integer :: j,p
+  integer :: it, ir,itm,itl,ix,iy
+  integer :: mytm, itor, it_loc
+  integer :: jtheta_min
+  integer :: iy0, iy1, ir0, ir1
+  complex(KIND=REAL32) :: g0
+
+#ifdef GACODE_GPU_AMD
+  ! AMD GPU  (MI250X) optimal
+  integer, parameter :: F_RADTILE = 8
+  integer, parameter :: F_TORTILE = 16
+#else
+  ! NVIDIA GPU  (A100) optimal
+  integer, parameter :: F_RADTILE = 8
+  integer, parameter :: F_TORTILE = 16
+#endif
+
+! g_nl      is (n_field,n_radial,n_jtheta,nt_loc,n_toroidal_procs)
+! jcev_c_nl is (n_field,n_radial,n_jtheta,nv_loc,nt_loc,n_toroidal_procs)
+
+  ! tile for performance, since this is effectively a transpose
+#if defined(OMPGPU)
+  !no async for OMPGPU for now
+!$omp target teams distribute parallel do simd collapse(5) &
+!$omp&   private(j,p,ix,itor,mytm,iy,g0,it,iv_loc,it_loc,jtheta_min,itm,itl,ir)
+#else
+!$acc parallel loop gang vector independent collapse(5) async(2) &
+!$acc&         private(j,p,ix,itor,mytm,iy,g0,it,iv_loc,it_loc,jtheta_min,itm,itl,ir) &
+!$acc&         present(g_nl,jvec_c_nl,gxmany32,gymany32) &
+!$acc&         present(nsplit,n_radial,n_toroidal_procs,nt_loc,nt1,n_theta,nv_loc,nx0)
+#endif
+  do j=1,nsplit
+    do iy0=0,n_toroidal+(F_TORTILE-1)-1,F_TORTILE  ! round up
+      do ir0=0,n_radial+(F_RADTILE-1)-1,F_RADTILE  ! round up
+        do iy1=0,(F_TORTILE-1)   ! tile
+          do ir1=0,(F_RADTILE-1)  ! tile
+            iy = iy0+iy1
+            ir = 1 + ir0+ir1
+            if ((iy < n_toroidal) .and. (ir <= n_radial)) then
+              itor = iy+1
+              itm = 1 + iy/nt_loc
+              itl = 1 + modulo(iy,nt_loc)
+              mytm = 1 + nt1/nt_loc !my toroidal proc number
+              it = 1+((mytm-1)*nsplit+j-1)/nv_loc
+              iv_loc = 1+modulo((mytm-1)*nsplit+j-1,nv_loc)
+              jtheta_min = 1+((mytm-1)*nsplit)/nv_loc
+              it_loc = it-jtheta_min+1
+              iy = itor-1
+
+              p  = ir-1-nx0/2
+              ix = p
+              if (ix < 0) ix = ix+nx
+
+              if (it > n_theta) then
+                 g0 = (0.0,0.0)
+              else
+                 g0 = i_c*sum( jvec_c_nl32(1:n_field,ir,it_loc,iv_loc,itor)*g_nl32(1:n_field,ir,it_loc,itor))
+              endif
+              gxmany32(iy,ix,j) = p*g0
+              gymany32(iy,ix,j) = iy*g0
+            endif
+          enddo
+        enddo
+      enddo
+    enddo
+  enddo
+end subroutine cgyro_gmany32_async
+
 pure subroutine cgyro_sym_async(nj, many)
 
   use cgyro_globals
@@ -727,6 +1065,40 @@ pure subroutine cgyro_sym_async(nj, many)
   enddo
 
 end subroutine cgyro_sym_async
+
+pure subroutine cgyro_sym32_async(nj, many)
+
+  use cgyro_globals
+
+  implicit none
+  !-----------------------------------
+  integer, intent(in) :: nj
+  complex(KIND=REAL32), dimension(0:ny2,0:nx-1,nj), intent(inout) :: many
+  !-----------------------------------
+  integer:: j, ix
+  complex :: f0
+
+  ! Average elements so as to ensure
+  !   f(kx,ky=0) = f(-kx,ky=0)^*
+  ! This symmetry is required for complex input to c2r
+#if defined(OMPGPU)
+  !no async for OMPGPU for now
+!$omp target teams distribute parallel do simd collapse(2) &
+!$omp&  private(j,ix,f0) firstprivate(nj,nx) 
+#else
+!$acc parallel loop gang vector independent collapse(2) async(2) &
+!$acc&         private(j,ix,f0) firstprivate(nj,nx) &
+!$acc&         present(many)
+#endif
+  do j=1,nj
+    do ix=1,nx/2-1
+      f0 = 0.5*( many(0,ix,j)+conjg(many(0,nx-ix,j)) )
+      many(0,ix   ,j) = f0
+      many(0,nx-ix,j) = conjg(f0)
+    enddo
+  enddo
+
+end subroutine cgyro_sym32_async
 
 pure subroutine cgyro_fmany_r_async(nj, fmany, f_nl)
 
@@ -838,7 +1210,66 @@ pure subroutine cgyro_fmany_r32_async(nj, fmany, f_nl)
 
 end subroutine cgyro_fmany_r32_async
 
-subroutine cgyro_nl_fftw
+pure subroutine cgyro_fmany32_r32_async(nj, fmany, f_nl)
+
+  use cgyro_globals
+
+  implicit none
+  !-----------------------------------
+  integer, intent(in) :: nj
+  complex(KIND=REAL32), dimension(0:ny2,0:nx-1,nj), intent(in) :: fmany
+  complex(KIND=REAL32), dimension(n_radial,nt_loc,nj,n_toroidal_procs), intent(inout) :: f_nl
+  !-----------------------------------
+  integer :: j,p
+  integer :: ir,itm,itl,ix,iy
+  integer :: iy0, iy1, ir0, ir1
+
+#ifdef GACODE_GPU_AMD
+  ! AMD GPU  (MI250X) optimal
+  integer, parameter :: R_RADTILE = 32
+  integer, parameter :: R_TORTILE = 8
+#else
+  ! NVIDIA GPU  (A100) optimal
+  integer, parameter :: R_RADTILE = 16
+  integer, parameter :: R_TORTILE = 8
+#endif
+
+#if defined(OMPGPU)
+!$omp target teams distribute parallel do collapse(5) &
+!$omp&   private(iy,ir,itm,itl,ix)
+#else
+!$acc parallel loop independent collapse(5) gang &
+!$acc&         private(iy,ir,itm,itl,ix) present(f_nl,fmany)
+#endif
+  do j=1,nsplitB
+   do iy0=0,n_toroidal+(R_TORTILE-1)-1,R_TORTILE  ! round up
+    do ir0=0,n_radial+(R_RADTILE-1)-1,R_RADTILE  ! round up
+    do iy1=0,(R_TORTILE-1)   ! tile
+      do ir1=0,(R_RADTILE-1)  ! tile
+       iy = iy0 + iy1
+       ir = 1 + ir0 + ir1
+       if ((iy < n_toroidal) .and. (ir <= n_radial)) then
+           ! itor = iy+1
+           itm = 1 + iy/nt_loc
+           itl = 1 + modulo(iy,nt_loc)
+           ix = ir-1-nx0/2
+           if (ix < 0) ix = ix+nx
+
+           f_nl(ir,itl,j,itm) = fmany(iy,ix,j)
+        endif
+      enddo
+     enddo
+    enddo
+   enddo
+  enddo
+
+end subroutine cgyro_fmany32_r32_async
+
+!-----------------------------------------------------------------
+! High-level cgyro_nl_fftw logic
+!-----------------------------------------------------------------
+
+subroutine cgyro_nl_fftw_fp64
 
   use timer_lib
   use parallel_lib
@@ -1118,9 +1549,293 @@ subroutine cgyro_nl_fftw
 
   endif ! nsplitB>0
 
+end subroutine cgyro_nl_fftw_fp64
+
+subroutine cgyro_nl_fftw_fp32
+
+  use timer_lib
+  use parallel_lib
+  use cgyro_nl_comm
+  use cgyro_globals
+
+  implicit none
+  !-----------------------------------
+
+  real(KIND=REAL32) :: inv_nxny
+  inv_nxny = 1.0/(nx*ny)
+
+  call timer_lib_in('nl_mem')
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+
+  ! we can zero the elements we know are zero while we wait
+  call cgyro_zero_offdiag32_async(nsplitA,fxmany32,fymany32)
+
+  call timer_lib_out('nl_mem')
+
+  ! time to wait for the FA_nl to become avaialble
+  call timer_lib_in('nl_comm')
+  call parallel_slib_f_nc32_wait(nsplitA,fpackA32,fA_nl32,fA_req)
+  fA_req_valid = .FALSE.
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+  call timer_lib_out('nl_comm')
+
+  call timer_lib_in('nl')
+
+! f_nl is (radial, nt_loc, theta, nv_loc1, toroidal_procs)
+! where nv_loc1 * toroidal_procs >= nv_loc
+
+  call cgyro_fmany32_async(nsplitA, fA_nl32)
+
+#if defined(OMPGPU)
+  !no async for OMPGPU for now
+#else
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+!$acc wait(2)
+#endif
+
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+
+  ! Average elements so as to ensure
+  !   f(kx,ky=0) = f(-kx,ky=0)^*
+  ! This symmetry is required for complex input to c2r
+  call cgyro_sym32_async(nsplitA,fxmany32)
+
+     ! --------------------------------------
+     ! perform many Fourier Transforms at once
+     ! --------------------------------------
+
+  call cgyro_fft_c2r(plan_c2r_manyA,fymany32,uymany32)
+  ! fxmany is complete now
+
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+
+#if !defined(OMPGPU)
+!$acc wait
+#endif
+
+  call cgyro_fft_c2r(plan_c2r_manyA,fxmany32,uxmany32)
+
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+
+  ! we can zero the elements we know are zero while we wait for comm
+  call cgyro_zero_offdiag32_async(nsplit,gxmany32,gymany32)
+
+  call timer_lib_out('nl')
+
+  call timer_lib_in('nl_comm')
+  ! time to wait for the g_nl to become avaialble
+  call parallel_slib_f_fd32_wait(n_field,n_radial,n_jtheta,gpack32,g_nl32,g_req)
+  g_req_valid = .FALSE.
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+  call timer_lib_out('nl_comm')
+
+  call timer_lib_in('nl')
+
+! g_nl      is (n_field,n_radial,n_jtheta,nt_loc,n_toroidal_procs)
+! jcev_c_nl is (n_field,n_radial,n_jtheta,nv_loc,nt_loc,n_toroidal_procs)
+
+  call cgyro_gmany32_async
+
+#if defined(OMPGPU)
+  !no async for OMPGPU for now
+#else
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+!$acc wait(2)
+#endif
+
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+
+  ! Average elements so as to ensure
+  !   g(kx,ky=0) = g(-kx,ky=0)^*
+  ! This symmetry is required for complex input to c2r
+  call cgyro_sym32_async(nsplit,gxmany32)
+
+  call cgyro_fft_c2r(plan_c2r_manyG,gymany32,vymany32)
+
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+  ! gxmany is complete now
+
+  call cgyro_fft_c2r(plan_c2r_manyG,gxmany32,vxmany32)
+
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+
+  ! Poisson bracket in real space
+  ! uv = (ux*vy-uy*vx)/(nx*ny)
+
+  call cgyro_nl_fftw_mul32(size(uvmany32,1)*size(uvmany32,2)*nsplitA, &
+                         uvmany32, &
+                         uxmany32,vymany32(:,:,1:nsplitA), &
+                         uymany32,vxmany32(:,:,1:nsplitA), &
+                         inv_nxny)
+
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+
+  ! ------------------
+  ! Transform uv to fx
+  ! ------------------
+
+#if !defined(OMPGPU)
+!$acc wait
+#endif
+
+  call cgyro_fft_r2c(plan_r2c_manyA,uvmany32,fxmany32)
+
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+
+  call timer_lib_out('nl')
+  call timer_lib_in('nl_mem')
+
+  ! NOTE: The FFT will generate an unwanted n=0,p=-nr/2 component
+  ! that will be filtered in the main time-stepping loop
+
+  ! tile for performance, since this is effectively a transpose
+  call cgyro_fmany32_r32_async(nsplitA, fxmany32, fA_nl32)
+
+  if (nsplitB > 0) then
+    ! we can zero the elements we know are zero while we waita
+    ! assuming nsplitB<=nsplitA
+    call cgyro_zero_offdiag32_async(nsplitB,fxmany32,fymany32)
+  endif
+
+  call timer_lib_out('nl_mem')
+
+  call timer_lib_in('nl_comm')
+  ! start the async reverse comm
+  ! can reuse the same req, no overlap with forward fA_req
+  call parallel_slib_r_nc32_async(nsplitA,fA_nl32,fpackA32,fA_req)
+  fA_req_valid = .TRUE.
+
+  if (nsplitB > 0) then
+    ! time to wait for the 2nd half of F_nl to become avaialble
+    call parallel_slib_f_nc32_wait(nsplitB,fpackB32,fB_nl32,fB_req)
+    fB_req_valid = .FALSE.
+  endif
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+  call timer_lib_out('nl_comm')
+
+  if (nsplitB > 0) then
+
+  call timer_lib_in('nl')
+
+! f_nl is (radial, nt_loc, theta, nv_loc1, toroidal_procs)
+! where nv_loc1 * toroidal_procs >= nv_loc
+
+  call cgyro_fmany32_async(nsplitB, fB_nl32)
+
+#if defined(OMPGPU)
+  !no async for OMPGPU for now
+#else
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+!$acc wait(2)
+#endif
+
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+
+  ! Average elements so as to ensure
+  !   f(kx,ky=0) = f(-kx,ky=0)^*
+  ! This symmetry is required for complex input to c2r
+  call cgyro_sym32_async(nsplitB,fxmany32)
+
+     ! --------------------------------------
+     ! perform many Fourier Transforms at once
+     ! --------------------------------------
+
+  call cgyro_fft_c2r(plan_c2r_manyB,fymany32,uymany32)
+
+  ! fxmany is complete now
+
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+
+  call cgyro_fft_c2r(plan_c2r_manyB,fxmany32,uxmany32)
+
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+
+  ! Poisson bracket in real space
+  ! uv = (ux*vy-uy*vx)/(nx*ny)
+
+  call cgyro_nl_fftw_mul32(size(uvmany32,1)*size(uvmany32,2)*nsplitB, &
+                         uvmany32, &
+                         uxmany32,vymany32(:,:,(nsplitA+1):nsplit), &
+                         uymany32,vxmany32(:,:,(nsplitA+1):nsplit), &
+                         inv_nxny)
+
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+
+  ! ------------------
+  ! Transform uv to fx
+  ! ------------------
+
+#if !defined(OMPGPU)
+!$acc wait
+#endif
+
+  call cgyro_fft_r2c(plan_r2c_manyB,uvmany32,fxmany32)
+
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+
+  call timer_lib_out('nl')
+  call timer_lib_in('nl_mem')
+
+  ! NOTE: The FFT will generate an unwanted n=0,p=-nr/2 component
+  ! that will be filtered in the main time-stepping loop
+
+  ! tile for performance, since this is effectively a transpose
+  call cgyro_fmany32_r32_async(nsplitB, fxmany32, fB_nl32)
+
+  call timer_lib_out('nl_mem')
+
+  call timer_lib_in('nl_comm')
+  ! start the async reverse comm
+  ! can reuse the same req, no overlap with forward fB_req
+  call parallel_slib_r_nc32_async(nsplitB,fB_nl32,fpackB32,fB_req)
+  fB_req_valid = .TRUE.
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+  call timer_lib_out('nl_comm')
+
+  endif ! nsplitB>0
+
+end subroutine cgyro_nl_fftw_fp32
+
+subroutine cgyro_nl_fftw
+
+  use cgyro_globals
+
+  implicit none
+  !-----------------------------------
+
+  if (nl_single_flag > 1) then
+    call cgyro_nl_fftw_fp32
+  else
+    call cgyro_nl_fftw_fp64
+  endif
 end subroutine cgyro_nl_fftw
 
 #else  /* if not definedCGYRO_GPU_FFT */
+
+!-----------------------------------------------------------------
+!  CPU code
+!-----------------------------------------------------------------
 
 subroutine cgyro_nl_fftw_stepr(g_j, f_j, nl_idx, i_omp)
 
@@ -1348,6 +2063,10 @@ subroutine cgyro_g_one(i_omp, j)
 
         call fftw_execute_dft_c2r(plan_c2r,gy(:,:,i_omp),vymany(:,:,j))
 end subroutine cgyro_g_one
+
+!-----------------------------------------------------------------
+! High-level cgyro_nl_fftw logic
+!-----------------------------------------------------------------
 
 ! NOTE: call cgyro_nl_fftw_comm1 before cgyro_nl_fftw
 subroutine cgyro_nl_fftw

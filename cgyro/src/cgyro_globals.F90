@@ -347,9 +347,11 @@ module cgyro_globals
   complex, dimension(:,:,:,:), allocatable :: fA_nl,fB_nl
   complex(KIND=REAL32), dimension(:,:,:,:), allocatable :: fA_nl32,fB_nl32
   complex, dimension(:,:,:,:), allocatable :: g_nl
+  complex(KIND=REAL32), dimension(:,:,:,:), allocatable :: g_nl32
   complex, dimension(:,:,:), allocatable :: fpackA,fpackB
   complex(KIND=REAL32), dimension(:,:,:), allocatable :: fpackA32,fpackB32
   complex, dimension(:,:,:,:), allocatable :: gpack
+  complex(KIND=REAL32), dimension(:,:,:,:), allocatable :: gpack32
   complex, dimension(:,:,:), allocatable :: omega_cap_h
   complex, dimension(:,:,:), allocatable :: omega_h
   complex, dimension(:,:,:,:), allocatable :: omega_s,omega_ss
@@ -362,6 +364,7 @@ module cgyro_globals
   complex, dimension(:,:,:), allocatable :: cap_h_v
   real, dimension(:,:,:,:), allocatable :: jvec_c
   real, dimension(:,:,:,:,:), allocatable :: jvec_c_nl ! used by NL only
+  real(KIND=REAL32), dimension(:,:,:,:,:), allocatable :: jvec_c_nl32 ! used by NL only
   real, dimension(:,:,:,:), allocatable :: jvec_v
   real, dimension(:,:,:,:), allocatable :: dvjvec_c
   real, dimension(:,:,:,:), allocatable :: dvjvec_v
@@ -413,6 +416,10 @@ module cgyro_globals
   complex, dimension(:,:,:),allocatable, target :: fxmany,fymany,gxmany,gymany
   real, dimension(:,:,:), allocatable, target :: uxmany,uymany
   real, dimension(:,:,:), allocatable, target :: vxmany,vymany,uvmany
+
+  complex(KIND=REAL32), dimension(:,:,:),allocatable, target :: fxmany32,fymany32,gxmany32,gymany32
+  real(KIND=REAL32), dimension(:,:,:), allocatable, target :: uxmany32,uymany32
+  real(KIND=REAL32), dimension(:,:,:), allocatable, target :: vxmany32,vymany32,uvmany32
 #endif
   ! 
   ! 2D FFT dimensions 
