@@ -800,6 +800,35 @@ contains
 
   end subroutine parallel_slib_f_nc_wait
 
+  ! require x and xt to ensure they exist until this finishes
+  subroutine parallel_slib_f_nc32_wait(nsx,x,xt,req)
+    use mpi
+    use, intrinsic :: iso_fortran_env
+    !-------------------------------------------------------
+    implicit none
+    !
+    integer, intent(in) :: nsx
+    complex(KIND=REAL32), intent(inout), dimension(nkeep,nk_loc,nsx*nn) :: x
+    complex(KIND=REAL32), intent(inout), dimension(nkeep,nk_loc,nsx,nn) :: xt
+    integer, intent(inout) :: req
+    !
+    integer :: ierr
+    integer :: istat(MPI_STATUS_SIZE)
+    !-------------------------------------------------------
+
+#ifndef NO_ASYNC_MPI
+
+    call MPI_WAIT(req, &
+         istat, &
+         ierr)
+
+    cpl_finalize_device(x,xt)
+
+#endif
+   !else, noop
+
+  end subroutine parallel_slib_f_nc32_wait
+
  !=========================================================
 
   subroutine parallel_slib_r_nc (nsx,xt,x)
@@ -1079,6 +1108,36 @@ contains
 
 
   end subroutine parallel_slib_f_fd_wait
+
+  ! require x and xt to ensure they exist until this finishes
+  subroutine parallel_slib_f_fd32_wait(nels1,nels2,nels3,x,xt,req)
+    use mpi
+    use, intrinsic :: iso_fortran_env
+    !-------------------------------------------------------
+    implicit none
+    !
+    integer, intent(in) :: nels1,nels2,nels3
+    complex(KIND=REAL32), intent(inout), dimension(nels1,nels2,nels3,nk_loc*nn) :: x
+    complex(KIND=REAL32), intent(inout), dimension(nels1,nels2,nels3,nk_loc*nn) :: xt
+    integer, intent(inout) :: req
+    !
+    integer :: ierr
+    integer :: istat(MPI_STATUS_SIZE)
+    !-------------------------------------------------------
+
+#ifndef NO_ASYNC_MPI
+
+    call MPI_WAIT(req, &
+         istat, &
+         ierr)
+
+    cpl_finalize_device(x,xt)
+
+#endif
+  ! else noop
+
+
+  end subroutine parallel_slib_f_fd32_wait
 
 !=========================================================
 
