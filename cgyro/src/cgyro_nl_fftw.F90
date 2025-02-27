@@ -30,7 +30,7 @@ contains
 include 'fftw/offload/fftw3_omp_offload.f90'
 #endif
 
-subroutine cgyro_nl_fftw_init
+subroutine cgyro_nl_fftw_init_fp64
 
 #if defined(HIPGPU)
   use hipfort_hipfft
@@ -95,7 +95,7 @@ subroutine cgyro_nl_fftw_init
        onembed, &
        ostride, &
        odist, &
-       merge(HIPFFT_C2R,HIPFFT_Z2D,kind(uxmany) == singlePrecision), &
+       HIPFFT_Z2D, &
        nsplitA)
 
   if (nsplitB > 0) then ! no fft if nsplitB==0
@@ -110,7 +110,7 @@ subroutine cgyro_nl_fftw_init
        onembed, &
        ostride, &
        odist, &
-       merge(HIPFFT_C2R,HIPFFT_Z2D,kind(uxmany) == singlePrecision), &
+       HIPFFT_Z2D, &
        nsplitB)
   endif
 
@@ -125,7 +125,7 @@ subroutine cgyro_nl_fftw_init
        onembed, &
        ostride, &
        odist, &
-       merge(HIPFFT_C2R,HIPFFT_Z2D,kind(uxmany) == singlePrecision), &
+       HIPFFT_Z2D, &
        nsplit)
 #elif defined(MKLGPU)
      plan_c2r_manyA = 0
@@ -196,7 +196,7 @@ subroutine cgyro_nl_fftw_init
        onembed, &
        ostride, &
        odist, &
-       merge(CUFFT_C2R,CUFFT_Z2D,kind(uxmany) == singlePrecision), &
+       CUFFT_Z2D, &
        nsplitA)
 
   if (nsplitB > 0) then ! no fft if nsplitB==0
@@ -210,7 +210,7 @@ subroutine cgyro_nl_fftw_init
        onembed, &
        ostride, &
        odist, &
-       merge(CUFFT_C2R,CUFFT_Z2D,kind(uxmany) == singlePrecision), &
+       CUFFT_Z2D, &
        nsplitB)
   endif
 
@@ -224,7 +224,7 @@ subroutine cgyro_nl_fftw_init
        onembed, &
        ostride, &
        odist, &
-       merge(CUFFT_C2R,CUFFT_Z2D,kind(uxmany) == singlePrecision), &
+       CUFFT_Z2D, &
        nsplit)
 #endif
 
@@ -249,7 +249,7 @@ subroutine cgyro_nl_fftw_init
        onembed, &
        ostride, &
        odist, &
-       merge(HIPFFT_R2C,HIPFFT_D2Z,kind(uxmany) == singlePrecision), &
+       HIPFFT_D2Z, &
        nsplitA)
 
   if (nsplitB > 0) then ! no fft if nsplitB==0
@@ -264,7 +264,7 @@ subroutine cgyro_nl_fftw_init
        onembed, &
        ostride, &
        odist, &
-       merge(HIPFFT_R2C,HIPFFT_D2Z,kind(uxmany) == singlePrecision), &
+       HIPFFT_D2Z, &
        nsplitB)
   endif
 #elif defined(MKLGPU)
@@ -317,7 +317,7 @@ subroutine cgyro_nl_fftw_init
        onembed, &
        ostride, &
        odist, &
-       merge(CUFFT_R2C,CUFFT_D2Z,kind(uxmany) == singlePrecision), &
+       CUFFT_D2Z, &
        nsplitA)
 
   if (nsplitB > 0) then ! no fft if nsplitB==0
@@ -331,11 +331,333 @@ subroutine cgyro_nl_fftw_init
        onembed, &
        ostride, &
        odist, &
-       merge(CUFFT_R2C,CUFFT_D2Z,kind(uxmany) == singlePrecision), &
+       CUFFT_D2Z, &
        nsplitB)
   endif
 #endif
 
+end subroutine cgyro_nl_fftw_init_fp64
+
+subroutine cgyro_nl_fftw_init_fp32
+
+#if defined(HIPGPU)
+  use hipfort_hipfft
+#elif defined(MKLGPU)
+  use fftw3_omp_offload
+#else
+  use cufft
+#endif
+  use cgyro_globals
+
+  implicit none
+#if defined(MKLGPU)
+  include 'fftw/fftw3.f'
+#endif
+
+  integer :: howmany,istatus
+  integer, parameter :: irank = 2
+  integer, dimension(irank) :: ndim,inembed,onembed
+  integer :: idist,odist
+  integer, parameter :: istride = 1
+  integer, parameter :: ostride = 1
+
+#if !defined(MKLGPU)
+  integer, parameter :: singlePrecision = selected_real_kind(6,30)
+#endif
+
+  !-------------------------------------------------------------------
+  ! 2D
+  !   input[ b*idist + (x * inembed[1] + y)*istride ]
+  !  output[ b*odist + (x * onembed[1] + y)*ostride ]
+  !  isign is the sign of the exponent in the formula that defines
+  !  Fourier transform  -1 == FFTW_FORWARD
+  !                      1 == FFTW_BACKWARD
+  !-------------------------------------------------------------------
+
+#if defined(MKLGPU)
+  ! oneMKL offload uses the reverse ordering
+  ndim(2) = nx
+  ndim(1) = ny
+#else
+  ndim(1) = nx
+  ndim(2) = ny
+#endif
+  idist = size(fxmany32,1)*size(fxmany32,2)
+  odist = size(uxmany32,1)*size(uxmany32,2)
+  inembed = size(fxmany32,1)
+  onembed = size(uxmany32,1)
+#if defined(MKLGPU)
+  inembed(2) = size(fxmany32,2)
+  onembed(2) = size(uxmany32,2)
+#endif
+
+#if defined(HIPGPU)
+  plan_c2r_manyA = c_null_ptr
+  istatus = hipfftPlanMany(&
+       plan_c2r_manyA, &
+       irank, &
+       ndim, &
+       inembed, &
+       istride, &
+       idist, &
+       onembed, &
+       ostride, &
+       odist, &
+       HIPFFT_C2R, &
+       nsplitA)
+
+  if (nsplitB > 0) then ! no fft if nsplitB==0
+    plan_c2r_manyB = c_null_ptr
+    istatus = hipfftPlanMany(&
+       plan_c2r_manyB, &
+       irank, &
+       ndim, &
+       inembed, &
+       istride, &
+       idist, &
+       onembed, &
+       ostride, &
+       odist, &
+       HIPFFT_C2R, &
+       nsplitB)
+  endif
+
+  plan_c2r_manyG = c_null_ptr
+  istatus = hipfftPlanMany(&
+       plan_c2r_manyG, &
+       irank, &
+       ndim, &
+       inembed, &
+       istride, &
+       idist, &
+       onembed, &
+       ostride, &
+       odist, &
+       HIPFFT_C2R, &
+       nsplit)
+#elif defined(MKLGPU)
+     plan_c2r_manyA = 0
+!$omp target data map(tofrom: fymany32,uymany32)
+     !$omp dispatch
+     call dfftw_plan_many_dft_c2r(&
+          plan_c2r_manyA, &
+          irank, &
+          ndim, &
+          nsplitA, &
+          fymany32, &
+          inembed, &
+          istride, &
+          idist, &
+          uymany32, &
+          onembed, &
+          ostride, &
+          odist, &
+          FFTW_ESTIMATE)
+
+  if (nsplitB > 0) then ! no fft if nsplitB==0
+     plan_c2r_manyB = 0
+     !$omp dispatch
+     call dfftw_plan_many_dft_c2r(&
+          plan_c2r_manyB, &
+          irank, &
+          ndim, &
+          nsplitB, &
+          fymany32, &
+          inembed, &
+          istride, &
+          idist, &
+          uymany32, &
+          onembed, &
+          ostride, &
+          odist, &
+          FFTW_ESTIMATE)
+  endif
+!$omp end target data
+
+     plan_c2r_manyG = 0
+!$omp target data map(tofrom: gymany32,vymany32)
+     !$omp dispatch
+     call dfftw_plan_many_dft_c2r(&
+          plan_c2r_manyG, &
+          irank, &
+          ndim, &
+          nsplit, &
+          gymany32, &
+          inembed, &
+          istride, &
+          idist, &
+          vymany32, &
+          onembed, &
+          ostride, &
+          odist, &
+          FFTW_ESTIMATE)
+!$omp end target data
+
+#else
+  istatus = cufftPlanMany(&
+       plan_c2r_manyA, &
+       irank, &
+       ndim, &
+       inembed, &
+       istride, &
+       idist, &
+       onembed, &
+       ostride, &
+       odist, &
+       CUFFT_C2R, &
+       nsplitA)
+
+  if (nsplitB > 0) then ! no fft if nsplitB==0
+    istatus = cufftPlanMany(&
+       plan_c2r_manyB, &
+       irank, &
+       ndim, &
+       inembed, &
+       istride, &
+       idist, &
+       onembed, &
+       ostride, &
+       odist, &
+       CUFFT_C2R, &
+       nsplitB)
+  endif
+
+  istatus = cufftPlanMany(&
+       plan_c2r_manyG, &
+       irank, &
+       ndim, &
+       inembed, &
+       istride, &
+       idist, &
+       onembed, &
+       ostride, &
+       odist, &
+       CUFFT_C2R, &
+       nsplit)
+#endif
+
+  idist = size(uxmany32,1)*size(uxmany32,2)
+  odist = size(fxmany32,1)*size(fxmany32,2)
+  inembed = size(uxmany32,1)
+  onembed = size(fxmany32,1) 
+#if defined(MKLGPU)
+  inembed(2) = size(uxmany32,2)
+  onembed(2) = size(fxmany32,2) 
+#endif
+
+#if defined(HIPGPU)
+  plan_r2c_manyA = c_null_ptr
+  istatus = hipfftPlanMany(&
+       plan_r2c_manyA, &
+       irank, &
+       ndim, &
+       inembed, &
+       istride, &
+       idist, &
+       onembed, &
+       ostride, &
+       odist, &
+       HIPFFT_R2C, &
+       nsplitA)
+
+  if (nsplitB > 0) then ! no fft if nsplitB==0
+    plan_r2c_manyB = c_null_ptr
+    istatus = hipfftPlanMany(&
+       plan_r2c_manyB, &
+       irank, &
+       ndim, &
+       inembed, &
+       istride, &
+       idist, &
+       onembed, &
+       ostride, &
+       odist, &
+       HIPFFT_R2C, &
+       nsplitB)
+  endif
+#elif defined(MKLGPU)
+     plan_r2c_manyA = 0
+!$omp target data map(tofrom: uvmany32,fxmany32)
+     !$omp dispatch
+     call dfftw_plan_many_dft_r2c(&
+          plan_r2c_manyA, &
+          irank, &
+          ndim, &
+          nsplitA, &
+          uvmany32, &
+          inembed, &
+          istride, &
+          idist, &
+          fxmany32, &
+          onembed, &
+          ostride, &
+          odist, &
+          FFTW_ESTIMATE)
+
+  if (nsplitB > 0) then ! no fft if nsplitB==0
+     plan_r2c_manyB = 0
+     !$omp dispatch
+     call dfftw_plan_many_dft_r2c(&
+          plan_r2c_manyB, &
+          irank, &
+          ndim, &
+          nsplitB, &
+          uvmany32, &
+          inembed, &
+          istride, &
+          idist, &
+          fxmany32, &
+          onembed, &
+          ostride, &
+          odist, &
+          FFTW_ESTIMATE)
+  endif
+!$omp end target data
+
+#else
+  istatus = cufftPlanMany(&
+       plan_r2c_manyA, &
+       irank, &
+       ndim, &
+       inembed, &
+       istride, &
+       idist, &
+       onembed, &
+       ostride, &
+       odist, &
+       CUFFT_R2C, &
+       nsplitA)
+
+  if (nsplitB > 0) then ! no fft if nsplitB==0
+    istatus = cufftPlanMany(&
+       plan_r2c_manyB, &
+       irank, &
+       ndim, &
+       inembed, &
+       istride, &
+       idist, &
+       onembed, &
+       ostride, &
+       odist, &
+       CUFFT_R2C, &
+       nsplitB)
+  endif
+#endif
+
+end subroutine cgyro_nl_fftw_init_fp32
+
+subroutine cgyro_nl_fftw_init
+
+  use cgyro_globals
+
+  implicit none
+  !-----------------------------------
+
+  if (nl_single_flag > 1) then
+    call cgyro_nl_fftw_init_fp32
+  else
+    call cgyro_nl_fftw_init_fp64
+  endif
 end subroutine cgyro_nl_fftw_init
 
 #else  /* if not defined CGYRO_GPU_FFT */
