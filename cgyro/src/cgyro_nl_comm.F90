@@ -599,7 +599,7 @@ end subroutine cgyro_nl_fftw_comm1_r
 !  (n_field,n_radial,n_jtheta,nt_loc,n_toroidal_proc)xn_toroidal_proc -> (n_field,n_radial,n_jtheta,nt_loc,n_toroida_procl)xn_toroidal_proc
 ! 
 
-subroutine cgyro_nl_fftw_comm2_async
+subroutine cgyro_nl_fftw_comm2_f64_async
   use timer_lib
   use parallel_lib
   use cgyro_globals
@@ -657,6 +657,80 @@ subroutine cgyro_nl_fftw_comm2_async
 
   call timer_lib_out('nl_comm')
 
+end subroutine cgyro_nl_fftw_comm2_f64_async
+
+subroutine cgyro_nl_fftw_comm2_f32_async
+  use timer_lib
+  use parallel_lib
+  use cgyro_globals
+
+  implicit none
+
+  integer :: ir,it,it_loc,itm,itl,itf
+  integer :: itor,mytor
+  integer :: iltheta_min
+  complex(KIND=REAL32) :: gval
+
+  call timer_lib_in('nl_mem')
+
+#if defined(OMPGPU)
+!$omp target teams distribute parallel do simd collapse(5) &
+!$omp&         private(itor,it,iltheta_min,mytor,gval)
+#elif defined(_OPENACC)
+!$acc parallel loop gang vector collapse(5) independent &
+!$acc&         private(itor,it,iltheta_min,mytor,gval) &
+!$acc&         present(field,gpack32) &
+!$acc&         present(n_toroidal_procs,nt_loc,n_jtheta,nv_loc,nt1) &
+!$acc&         present(n_theta,n_radial,n_field,nsplit) &
+!$acc&         default(none)
+#else
+!$omp parallel do collapse(3) &
+!$omp&         private(it_loc,itor,mytor,it,ir,iltheta_min,gval)
+#endif
+  do itm=1,n_toroidal_procs
+   do itl=1,nt_loc
+    do it_loc=1,n_jtheta
+     do ir=1,n_radial
+      do itf=1,n_field
+       iltheta_min = 1+((itm-1)*nsplit)/nv_loc
+       it = it_loc+iltheta_min-1
+       itor = itl+(itm-1)*nt_loc
+       gval = (0.0,0.0)
+       if (it <= n_theta) then
+         mytor = nt1+itl-1
+         ! ic_c(ir,it) = (ir-1)*n_theta+it
+         gval = field(itf,(ir-1)*n_theta+it,mytor)
+       endif
+       ! else just padding
+       gpack32(itf,ir,it_loc,itor) = gval
+      enddo
+     enddo
+    enddo
+   enddo
+  enddo
+
+  call timer_lib_out('nl_mem')
+
+  call timer_lib_in('nl_comm')
+  call parallel_slib_f_fd32_async(n_field,n_radial,n_jtheta,gpack32,g_nl32,g_req)
+  g_req_valid = .TRUE.
+
+  call timer_lib_out('nl_comm')
+
+end subroutine cgyro_nl_fftw_comm2_f32_async
+
+subroutine cgyro_nl_fftw_comm2_async
+
+  use cgyro_globals
+
+  implicit none
+  !-----------------------------------
+
+  if (nl_single_flag > 1) then
+    call cgyro_nl_fftw_comm2_f32_async
+  else
+    call cgyro_nl_fftw_comm2_f64_async
+  endif
 end subroutine cgyro_nl_fftw_comm2_async
 
 end module cgyro_nl_comm

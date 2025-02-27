@@ -1147,6 +1147,72 @@ contains
 
   end subroutine parallel_slib_f_fd_async
 
+  subroutine parallel_slib_f_fd32(nels1,nels2,nels3,x,xt)
+
+    use mpi
+    use, intrinsic :: iso_fortran_env
+
+    !-------------------------------------------------------
+    implicit none
+    !
+    integer, intent(in) :: nels1,nels2,nels3
+    complex(KIND=REAL32), intent(inout), dimension(nels1,nels2,nels3,nk_loc*nn) :: x
+    complex(KIND=REAL32), intent(inout), dimension(nels1,nels2,nels3,nk_loc*nn) :: xt
+    !
+    integer :: ierr
+    !-------------------------------------------------------
+
+    cpl_use_device(x,xt)
+
+    call MPI_ALLTOALL(x, &
+         nels1*nels2*nels3*nk_loc, &
+         MPI_COMPLEX, &
+         xt, &
+         nels1*nels2*nels3*nk_loc, &
+         MPI_COMPLEX, &
+         slib_comm, &
+         ierr)
+
+    cpl_release_device(x,xt)
+
+  end subroutine parallel_slib_f_fd32
+
+  subroutine parallel_slib_f_fd32_async(nels1,nels2,nels3,x,xt,req)
+    use mpi
+    use, intrinsic :: iso_fortran_env
+    !-------------------------------------------------------
+    implicit none
+    !
+    integer, intent(in) :: nels1,nels2,nels3
+    complex(KIND=REAL32), intent(inout), dimension(nels1,nels2,nels3,nk_loc*nn) :: x
+    complex(KIND=REAL32), intent(inout), dimension(nels1,nels2,nels3,nk_loc*nn) :: xt
+    integer, intent(inout) :: req
+    !
+    integer :: ierr
+    !-------------------------------------------------------
+
+#ifdef NO_ASYNC_MPI
+    call parallel_slib_f_fd32(nels1,nels2,nels3,x,xt)
+#else
+
+    cpl_use_device(x,xt)
+
+   call MPI_IALLTOALL(x, &
+         nels1*nels2*nels3*nk_loc, &
+         MPI_COMPLEX, &
+         xt, &
+         nels1*nels2*nels3*nk_loc, &
+         MPI_COMPLEX, &
+         slib_comm, &
+         req, &
+         ierr)
+
+    cpl_unbind_device(x,xt)
+
+#endif
+
+  end subroutine parallel_slib_f_fd32_async
+
   ! require x and xt to ensure they exist until this finishes
   subroutine parallel_slib_f_fd_wait(nels1,nels2,nels3,x,xt,req)
     use mpi
