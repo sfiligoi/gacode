@@ -436,9 +436,11 @@ subroutine cgyro_init_manager
   if (error_status > 0) return
   call timer_lib_out('str_init')
 
-  ! Initialize nonlinear dimensions and arrays 
   call timer_lib_in('nl_init')
 
+  if (nonlinear_flag == 1) then
+
+  ! Initialize nonlinear dimensions and arrays 
 #if defined(OMPGPU)
 !$omp target enter data map(to:nx0,ny0,nx,ny,nx2,ny2)
 #elif defined(_OPENACC)
@@ -516,6 +518,9 @@ subroutine cgyro_init_manager
 #endif ! CGYRO_GPU_FFT
 
   call cgyro_nl_fftw_init
+
+  endif ! (nonlinear_flag == 1)
+
 
   call timer_lib_out('nl_init')
 
