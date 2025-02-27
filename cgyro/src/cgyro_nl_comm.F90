@@ -35,7 +35,7 @@ end subroutine cgyro_nl_fftw_comm_test
 !
 
 ! NOTE: call cgyro_nl_fftw_comm1/2_async before cgyro_nl_fftw
-subroutine cgyro_nl_fftw_comm1_async
+subroutine cgyro_nl_fftw_comm1_f64_async
   use timer_lib
   use parallel_lib
   use cgyro_globals
@@ -161,6 +161,148 @@ subroutine cgyro_nl_fftw_comm1_async
   ! send only the first half, use comm3 to send the other half
   call timer_lib_out('nl_comm')
 
+end subroutine cgyro_nl_fftw_comm1_f64_async
+
+subroutine cgyro_nl_fftw_comm1_f32_async
+  use timer_lib
+  use parallel_lib
+  use cgyro_globals
+
+  implicit none
+
+  integer :: ir,it,iv_loc_m,itor
+  integer :: iexch0,itor0,isplit0,iexch_base
+  complex(KIND=REAL32) :: h_loc
+
+  call timer_lib_in('nl_mem')
+
+  if (nsplitB > 0) then
+
+#if defined(OMPGPU)
+!$omp target teams distribute parallel do simd collapse(4) &
+!$omp&         private(iexch0,itor0,isplit0,iexch_base,h_loc)
+#elif defined(_OPENACC)
+!$acc parallel loop collapse(4) gang vector independent &
+!$acc&         private(iexch0,itor0,isplit0,iexch_base,h_loc) &
+!$acc&         present(ic_c,h_x,fpackA32,fpackB32) &
+!$acc&         present(n_theta,nv_loc,nt1,nt2,n_radial,nsplit,nsplitA,nsplitB) default(none)
+#else
+!$omp parallel do collapse(3) &
+!$omp&         private(iexch0,itor0,isplit0,iexch_base,h_loc)
+#endif
+  do it=1,n_theta
+   do iv_loc_m=1,nv_loc
+    do itor=nt1,nt2
+     do ir=1,n_radial
+       h_loc = h_x(ic_c(ir,it),iv_loc_m,itor)
+       iexch0 = (iv_loc_m-1) + (it-1)*nv_loc
+       itor0 = iexch0/nsplit
+       isplit0 = modulo(iexch0,nsplit)
+       if (isplit0 < nsplitA) then
+          iexch_base = 1+itor0*nsplitA
+          fpackA32(ir,itor-nt1+1,iexch_base+isplit0) = h_loc
+       else
+          iexch_base = 1+itor0*nsplitB
+          fpackB32(ir,itor-nt1+1,iexch_base+(isplit0-nsplitA)) = h_loc
+       endif
+     enddo
+    enddo
+   enddo
+  enddo
+
+  if ( (nv_loc*n_theta) < (nsplit*n_toroidal_procs) ) then
+#if defined(OMPGPU)
+!$omp target teams distribute parallel do simd &
+!$omp&         private(iexch0,itor0,isplit0,iexch_base)
+#elif defined(_OPENACC)
+!$acc parallel loop independent gang vector &
+!$acc&         private(iexch0,itor0,isplit0,iexch_base) &
+!$acc&         present(fpackA32,fpackB32,nsplit,nsplitA,nsplitB)
+#endif
+    do iexch0=nv_loc*n_theta,nsplit*n_toroidal_procs-1
+       itor0 = iexch0/nsplit
+       isplit0 = modulo(iexch0,nsplit)
+       if (isplit0 < nsplitA) then
+          iexch_base = 1+itor0*nsplitA
+          fpackA32(1:n_radial,1:nt_loc,iexch_base+isplit0) = (0.0,0.0)
+       else
+          iexch_base = 1+itor0*nsplitB
+          fpackB32(1:n_radial,1:nt_loc,iexch_base+(isplit0-nsplitA)) = (0.0,0.0)
+       endif
+    enddo
+  endif
+
+  else ! nsplitB==0
+
+#if defined(OMPGPU)
+!$omp target teams distribute parallel do simd collapse(4) &
+!$omp&         private(iexch0,itor0,isplit0,iexch_base,h_loc)
+#elif defined(_OPENACC)
+!$acc parallel loop collapse(4) gang vector independent &
+!$acc&         private(iexch0,itor0,isplit0,iexch_base,h_loc) &
+!$acc&         present(ic_c,h_x,fpackA32) &
+!$acc&         present(n_theta,nv_loc,nt1,nt2,n_radial,nsplit,nsplitA) default(none)
+#else
+!$omp parallel do collapse(3) &
+!$omp&         private(iexch0,itor0,isplit0,iexch_base,h_loc)
+#endif
+  do it=1,n_theta
+   do iv_loc_m=1,nv_loc
+    do itor=nt1,nt2
+     do ir=1,n_radial
+       h_loc = h_x(ic_c(ir,it),iv_loc_m,itor)
+       iexch0 = (iv_loc_m-1) + (it-1)*nv_loc
+       itor0 = iexch0/nsplit
+       isplit0 = modulo(iexch0,nsplit)
+       iexch_base = 1+itor0*nsplitA
+       fpackA32(ir,itor-nt1+1,iexch_base+isplit0) = h_loc
+     enddo
+    enddo
+   enddo
+  enddo
+
+  if ( (nv_loc*n_theta) < (nsplit*n_toroidal_procs) ) then
+#if defined(OMPGPU)
+!$omp target teams distribute parallel do simd &
+!$omp&         private(iexch0,itor0,isplit0,iexch_base)
+#elif defined(_OPENACC)
+!$acc parallel loop independent gang vector &
+!$acc&         private(iexch0,itor0,isplit0,iexch_base) &
+!$acc&         present(fpackA32,nsplit,nsplitA)
+#endif
+    do iexch0=nv_loc*n_theta,nsplit*n_toroidal_procs-1
+       itor0 = iexch0/nsplit
+       isplit0 = modulo(iexch0,nsplit)
+       iexch_base = 1+itor0*nsplitA
+       fpackA32(1:n_radial,1:nt_loc,iexch_base+isplit0) = (0.0,0.0)
+    enddo
+  endif
+
+  endif ! if nspliB>0
+
+  call timer_lib_out('nl_mem')
+
+  call timer_lib_in('nl_comm')
+  ! split the comm in two, so we can start working on first as soon as it is ready
+  call parallel_slib_f_nc32_async(nsplitA,fpackA32,fA_nl32,fA_req)
+  fA_req_valid = .TRUE.
+  ! send only the first half, use comm3 to send the other half
+  call timer_lib_out('nl_comm')
+
+end subroutine cgyro_nl_fftw_comm1_f32_async
+
+subroutine cgyro_nl_fftw_comm1_async
+
+  use cgyro_globals
+
+  implicit none
+  !-----------------------------------
+
+  if (nl_single_flag > 1) then
+    call cgyro_nl_fftw_comm1_f32_async
+  else
+    call cgyro_nl_fftw_comm1_f64_async
+  endif
 end subroutine cgyro_nl_fftw_comm1_async
 
 subroutine cgyro_nl_fftw_comm3_async
@@ -173,7 +315,11 @@ subroutine cgyro_nl_fftw_comm3_async
   if (nsplitB > 0) then
     call timer_lib_in('nl_comm')
 
-    call parallel_slib_f_nc_async(nsplitB,fpackB,fB_nl,fB_req)
+    if (nl_single_flag > 1) then
+      call parallel_slib_f_nc32_async(nsplitB,fpackB32,fB_nl32,fB_req)
+    else
+      call parallel_slib_f_nc_async(nsplitB,fpackB,fB_nl,fB_req)
+    endif
     fB_req_valid = .TRUE.
 
     call timer_lib_out('nl_comm')

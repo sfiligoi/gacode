@@ -772,6 +772,73 @@ contains
 
   end subroutine parallel_slib_f_nc_async
 
+  subroutine parallel_slib_f_nc32(nsx,x,xt)
+
+    use mpi
+    use, intrinsic :: iso_fortran_env
+
+    !-------------------------------------------------------
+    implicit none
+    !
+    integer, intent(in) :: nsx
+    complex(KIND=REAL32), intent(inout), dimension(nkeep,nk_loc,nsx*nn) :: x
+    complex(KIND=REAL32), intent(inout), dimension(nkeep,nk_loc,nsx,nn) :: xt
+    !
+    integer :: ierr
+    !-------------------------------------------------------
+
+    cpl_use_device(x,xt)
+
+    call MPI_ALLTOALL(x, &
+         nkeep*nk_loc*nsx, &
+         MPI_COMPLEX, &
+         xt, &
+         nkeep*nk_loc*nsx, &
+         MPI_COMPLEX, &
+         slib_comm, &
+         ierr)
+
+    cpl_release_device(x,xt)
+
+  end subroutine parallel_slib_f_nc32
+
+  subroutine parallel_slib_f_nc32_async(nsx,x,xt,req)
+    use mpi
+    use, intrinsic :: iso_fortran_env
+    !-------------------------------------------------------
+    implicit none
+    !
+    integer, intent(in) :: nsx
+    complex(KIND=REAL32), intent(inout), dimension(nkeep,nk_loc,nsx*nn) :: x
+    complex(KIND=REAL32), intent(inout), dimension(nkeep,nk_loc,nsx,nn) :: xt
+    integer, intent(inout) :: req
+    !
+    integer :: ierr
+    !-------------------------------------------------------
+
+#ifdef NO_ASYNC_MPI
+   call parallel_slib_f_nc32(nsx,x,xt)
+
+#else
+
+    cpl_use_device(x,xt)
+
+   call MPI_IALLTOALL(x, &
+         nkeep*nk_loc*nsx, &
+         MPI_COMPLEX, &
+         xt, &
+         nkeep*nk_loc*nsx, &
+         MPI_COMPLEX, &
+         slib_comm, &
+         req, &
+         ierr)
+
+    cpl_unbind_device(x,xt)
+
+#endif
+
+  end subroutine parallel_slib_f_nc32_async
+
   ! require x and xt to ensure they exist until this finishes
   subroutine parallel_slib_f_nc_wait(nsx,x,xt,req)
     use mpi
