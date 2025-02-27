@@ -364,7 +364,7 @@ end subroutine cgyro_nl_fftw_init
 !  GPU code
 !-----------------------------------------------------------------
 
-pure subroutine cgyro_nl_fftw_mul(sz,uvm,uxm,vym,uym,vxm,inv_nxny)
+subroutine cgyro_nl_fftw_mul(sz,uvm,uxm,vym,uym,vxm,inv_nxny)
   implicit none
 
   !-----------------------------------
@@ -390,7 +390,7 @@ pure subroutine cgyro_nl_fftw_mul(sz,uvm,uxm,vym,uym,vxm,inv_nxny)
 
 end subroutine cgyro_nl_fftw_mul
 
-pure subroutine cgyro_nl_fftw_mul32(sz,uvm,uxm,vym,uym,vxm,inv_nxny)
+subroutine cgyro_nl_fftw_mul32(sz,uvm,uxm,vym,uym,vxm,inv_nxny)
   use, intrinsic :: iso_fortran_env
 
   implicit none
@@ -696,7 +696,7 @@ subroutine cgyro_fft_r2c(plan, indata, outdata)
 
 end subroutine cgyro_fft_r2c
 
-pure subroutine cgyro_zero_offdiag_async(nj,xmany,ymany)
+subroutine cgyro_zero_offdiag_async(nj,xmany,ymany)
 
   use cgyro_globals
 
@@ -744,7 +744,7 @@ pure subroutine cgyro_zero_offdiag_async(nj,xmany,ymany)
 
 end subroutine cgyro_zero_offdiag_async
 
-pure subroutine cgyro_zero_offdiag32_async(nj,xmany,ymany)
+subroutine cgyro_zero_offdiag32_async(nj,xmany,ymany)
 
   use cgyro_globals
 
@@ -1032,7 +1032,7 @@ subroutine cgyro_gmany32_async
   enddo
 end subroutine cgyro_gmany32_async
 
-pure subroutine cgyro_sym_async(nj, many)
+subroutine cgyro_sym_async(nj, many)
 
   use cgyro_globals
 
@@ -1066,7 +1066,7 @@ pure subroutine cgyro_sym_async(nj, many)
 
 end subroutine cgyro_sym_async
 
-pure subroutine cgyro_sym32_async(nj, many)
+subroutine cgyro_sym32_async(nj, many)
 
   use cgyro_globals
 
@@ -1100,7 +1100,7 @@ pure subroutine cgyro_sym32_async(nj, many)
 
 end subroutine cgyro_sym32_async
 
-pure subroutine cgyro_fmany_r_async(nj, fmany, f_nl)
+subroutine cgyro_fmany_r_async(nj, fmany, f_nl)
 
   use cgyro_globals
 
@@ -1155,7 +1155,7 @@ pure subroutine cgyro_fmany_r_async(nj, fmany, f_nl)
 
 end subroutine cgyro_fmany_r_async
 
-pure subroutine cgyro_fmany_r32_async(nj, fmany, f_nl)
+ subroutine cgyro_fmany_r32_async(nj, fmany, f_nl)
 
   use cgyro_globals
 
@@ -1210,7 +1210,7 @@ pure subroutine cgyro_fmany_r32_async(nj, fmany, f_nl)
 
 end subroutine cgyro_fmany_r32_async
 
-pure subroutine cgyro_fmany32_r32_async(nj, fmany, f_nl)
+subroutine cgyro_fmany32_r32_async(nj, fmany, f_nl)
 
   use cgyro_globals
 
