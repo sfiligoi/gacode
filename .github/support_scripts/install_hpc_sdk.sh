@@ -26,9 +26,9 @@ export NVHPC_SILENT=true
 mkdir setup_scripts
 cat > setup_scripts/setup_nv_hpc_bins.sh << EOF
 #module add ./hpc_sdk/modulefiles/nvhpc/*
-export PATH=$NVHPC_INSTALL_DIR/Linux_x86_64/$NV_VER/compilers/bin:$PATH
-export PATH=$NVHPC_INSTALL_DIR/Linux_x86_64/$NV_VER/comm_libs/mpi/bin:$PATH
-export MANPATH=$NVHPC_INSTALL_DIR/Linux_x86_64/$NV_VER/compilers/man:$MANPATH
+export PATH=$NVHPC_INSTALL_DIR/Linux_x86_64/$NV_VER/compilers/bin:\$PATH
+export PATH=$NVHPC_INSTALL_DIR/Linux_x86_64/$NV_VER/comm_libs/mpi/bin:\$PATH
+export MANPATH=$NVHPC_INSTALL_DIR/Linux_x86_64/$NV_VER/compilers/man:\$MANPATH
 
 EOF
 
