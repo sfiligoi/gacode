@@ -8,8 +8,16 @@ ion_vec = ['W','B','He','Be','C',
            'Kr','Mo','Xe','Li','H']
 
 
-#version = 'aurora'
+#version = 'aurora_2021'
 version = 'aurora_2025'
+
+# Process comments string
+cstrf = ''
+cstrj = ''
+with open('comments.txt', 'r') as file:
+    for line in file:
+        cstrf = cstrf+'!'+line
+        cstrj = cstrj+'#'+line
 
 def radfmt(i,c,lang):
 
@@ -41,8 +49,8 @@ def radfmt(i,c,lang):
 # log-temperature bounds (convert to eV)
 nc = 12
 
-x = np.loadtxt('aurora/x.txt')
-t = np.loadtxt('aurora/te.txt')
+x = np.loadtxt(version+'/x.txt')
+t = np.loadtxt(version+'/te.txt')
 
 fstr = ''
 jstr = ''
@@ -56,9 +64,9 @@ for i in ion_vec:
     fstr = fstr+rstr
 
 myfile = open("julia.txt","w")
-myfile.write(jstr)
+myfile.write(cstrj+jstr)
 myfile.close()
 
 myfile = open("f90.txt","w")
-myfile.write(fstr)
+myfile.write(cstrf+fstr)
 myfile.close()
