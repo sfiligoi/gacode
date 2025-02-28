@@ -438,6 +438,16 @@ module cgyro_globals
   complex, dimension(:,:,:),allocatable :: fy
   complex, dimension(:,:,:),allocatable :: gx
   complex, dimension(:,:,:),allocatable :: gy
+
+  real(KIND=REAL32), dimension(:,:,:), allocatable :: vxmany32
+  real(KIND=REAL32), dimension(:,:,:), allocatable :: vymany32
+  real(KIND=REAL32), dimension(:,:,:), allocatable :: uxmany32
+  real(KIND=REAL32), dimension(:,:,:), allocatable :: uymany32
+  real(KIND=REAL32), dimension(:,:,:), allocatable :: uv32
+  complex(KIND=REAL32), dimension(:,:,:),allocatable :: fx32
+  complex(KIND=REAL32), dimension(:,:,:),allocatable :: fy32
+  complex(KIND=REAL32), dimension(:,:,:),allocatable :: gx32
+  complex(KIND=REAL32), dimension(:,:,:),allocatable :: gy32
 #endif
   !
   ! Work arrays

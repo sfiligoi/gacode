@@ -315,6 +315,16 @@ subroutine cgyro_cleanup
   endif
 
 #ifndef CGYRO_GPU_FFT
+  if(allocated(fx32))                deallocate(fx32)
+  if(allocated(gx32))                deallocate(gx32)
+  if(allocated(fy32))                deallocate(fy32)
+  if(allocated(gy32))                deallocate(gy32)
+  if(allocated(vxmany32))            deallocate(vxmany32)
+  if(allocated(vymany32))            deallocate(vymany32)
+  if(allocated(uxmany32))            deallocate(uxmany32)
+  if(allocated(uymany32))            deallocate(uymany32)
+  if(allocated(uv32))                deallocate(uv32)
+
   if(allocated(fx))                deallocate(fx)
   if(allocated(gx))                deallocate(gx)
   if(allocated(fy))                deallocate(fy)

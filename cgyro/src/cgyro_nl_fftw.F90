@@ -646,23 +646,9 @@ subroutine cgyro_nl_fftw_init_fp32
 
 end subroutine cgyro_nl_fftw_init_fp32
 
-subroutine cgyro_nl_fftw_init
-
-  use cgyro_globals
-
-  implicit none
-  !-----------------------------------
-
-  if (nl_single_flag > 1) then
-    call cgyro_nl_fftw_init_fp32
-  else
-    call cgyro_nl_fftw_init_fp64
-  endif
-end subroutine cgyro_nl_fftw_init
-
 #else  /* if not defined CGYRO_GPU_FFT */
 
-subroutine cgyro_nl_fftw_init
+subroutine cgyro_nl_fftw_init_fp64
   use cgyro_globals
   implicit none
   include 'fftw3.f03'
@@ -671,7 +657,18 @@ subroutine cgyro_nl_fftw_init
   plan_c2r = fftw_plan_dft_c2r_2d(nx,ny,fx(:,:,1),uxmany(:,:,1),FFTW_PATIENT)
   plan_r2c = fftw_plan_dft_r2c_2d(nx,ny,uv(:,:,1),fx(:,:,1),FFTW_PATIENT)
 
-end subroutine cgyro_nl_fftw_init
+end subroutine cgyro_nl_fftw_init_fp64
+
+subroutine cgyro_nl_fftw_init_fp32
+  use cgyro_globals
+  implicit none
+  include 'fftw3.f03'
+
+  ! Create plans once and for all, with global arrays fx,ux
+  plan_c2r = fftwf_plan_dft_c2r_2d(nx,ny,fx32(:,:,1),uxmany32(:,:,1),FFTW_PATIENT)
+  plan_r2c = fftwf_plan_dft_r2c_2d(nx,ny,uv32(:,:,1),fx32(:,:,1),FFTW_PATIENT)
+
+end subroutine cgyro_nl_fftw_init_fp32
 
 #endif /* CGYRO_GPU_FFT */
 
@@ -2139,20 +2136,6 @@ subroutine cgyro_nl_fftw_fp32
 
 end subroutine cgyro_nl_fftw_fp32
 
-subroutine cgyro_nl_fftw
-
-  use cgyro_globals
-
-  implicit none
-  !-----------------------------------
-
-  if (nl_single_flag > 1) then
-    call cgyro_nl_fftw_fp32
-  else
-    call cgyro_nl_fftw_fp64
-  endif
-end subroutine cgyro_nl_fftw
-
 #else  /* if not definedCGYRO_GPU_FFT */
 
 !-----------------------------------------------------------------
@@ -2244,6 +2227,59 @@ subroutine cgyro_nl_fftw_stepr(g_j, f_j, nl_idx, i_omp)
 
 end subroutine cgyro_nl_fftw_stepr
 
+subroutine cgyro_nl_fftw_stepr32(g_j, f_j, nl_idx, i_omp)
+
+  use timer_lib
+  use parallel_lib
+  use cgyro_globals
+
+  implicit none
+
+  integer, intent(in) :: g_j, f_j
+  integer,intent(in) :: nl_idx ! 1=>A, 2=>B
+  integer,intent(in) :: i_omp
+  integer :: ix,iy
+  integer :: ir,itm,itl,itor
+
+  include 'fftw3.f03'
+
+  ! Poisson bracket in real space
+  uv32(:,:,i_omp) = (uxmany32(:,:,f_j)*vymany32(:,:,g_j)-uymany32(:,:,f_j)*vxmany32(:,:,g_j))/(nx*ny)
+
+  call fftwf_execute_dft_r2c(plan_r2c,uv32(:,:,i_omp),fx32(:,:,i_omp))
+
+  ! NOTE: The FFT will generate an unwanted n=0,p=-nr/2 component
+  ! that will be filtered in the main time-stepping loop
+
+  ! this should really be accounted against nl_mem, but hard to do with OMP
+  if (nl_idx==1) then
+    do itm=1,n_toroidal_procs
+     do itl=1,nt_loc
+      itor=itl + (itm-1)*nt_loc
+      do ir=1,n_radial
+        ix = ir-1-nx0/2
+        if (ix < 0) ix = ix+nx
+        iy = itor-1
+        fA_nl32(ir,itl,f_j,itm) = fx32(iy,ix,i_omp)
+      enddo
+     enddo
+    enddo
+  else ! nl_idx>1
+    do itm=1,n_toroidal_procs
+     do itl=1,nt_loc
+      itor=itl + (itm-1)*nt_loc
+      do ir=1,n_radial
+        ix = ir-1-nx0/2
+        if (ix < 0) ix = ix+nx
+        iy = itor-1
+        fB_nl32(ir,itl,f_j,itm) = fx32(iy,ix,i_omp)
+      enddo
+     enddo
+    enddo
+  endif
+
+end subroutine cgyro_nl_fftw_stepr32
+
 subroutine cgyro_f_one(i_omp, j, nj, f_nl)
 
   use cgyro_nl_comm
@@ -2309,6 +2345,72 @@ subroutine cgyro_f_one(i_omp, j, nj, f_nl)
         call fftw_execute_dft_c2r(plan_c2r,fy(:,:,i_omp),uymany(:,:,j))
 
 end subroutine cgyro_f_one
+
+subroutine cgyro_f32_one(i_omp, j, nj, f_nl32)
+
+  use cgyro_nl_comm
+  use cgyro_globals
+
+  implicit none
+  !-----------------------------------
+  integer, intent(in) :: i_omp, j, nj
+  complex(KIND=REAL32), dimension(n_radial,nt_loc,nj,n_toroidal_procs), intent(in) :: f_nl32
+  !-----------------------------------
+  integer :: ix,iy
+  integer :: ir,itm,itl
+  integer :: itor
+  integer :: p
+
+  complex(KIND=REAL32) :: f0
+
+  include 'fftw3.f03'
+
+! f_nl is (radial, nt_loc, theta, nv_loc1, toroidal_procs)
+! where nv_loc1 * toroidal_procs >= nv_loc
+        ! zero elements not otherwise set below
+        fx32(0:ny2,nx2:nx0-1,i_omp) = 0.0
+        fy32(0:ny2,nx2:nx0-1,i_omp) = 0.0
+
+        ! Array mapping
+        do ir=1,n_radial
+           p  = ir-1-nx0/2
+           ix = p
+           if (ix < 0) ix = ix+nx
+           do itm=1,n_toroidal_procs
+            do itl=1,nt_loc
+              itor=itl + (itm-1)*nt_loc
+              iy = itor-1
+              f0 = i_c*f_nl32(ir,itl,j,itm)
+              fx32(iy,ix,i_omp) = p*f0
+              fy32(iy,ix,i_omp) = iy*f0
+            enddo
+           enddo
+           if ((ix/=0) .and. (ix<(nx/2))) then ! happens after ix>nx/2
+             ! Average elements so as to ensure
+             !   f(kx,ky=0) = f(-kx,ky=0)^*
+             ! This symmetry is required for complex input to c2r
+             f0 = 0.5*( fx32(0,ix,i_omp)+conjg(fx32(0,nx-ix,i_omp)) )
+             fx32(0,ix   ,i_omp) = f0
+             fx32(0,nx-ix,i_omp) = conjg(f0)
+           endif
+           fx32(n_toroidal:ny2,ix,i_omp) = 0.0
+           fy32(n_toroidal:ny2,ix,i_omp) = 0.0
+        enddo
+
+        if (i_omp==1) then
+         ! use the main thread to progress the async MPI
+          call cgyro_nl_fftw_comm_test()
+        endif
+
+        call fftwf_execute_dft_c2r(plan_c2r,fx32(:,:,i_omp),uxmany32(:,:,j))
+        if (i_omp==1) then
+         ! use the main thread to progress the async MPI
+          call cgyro_nl_fftw_comm_test()
+        endif
+
+        call fftwf_execute_dft_c2r(plan_c2r,fy32(:,:,i_omp),uymany32(:,:,j))
+
+end subroutine cgyro_f32_one
 
 subroutine cgyro_g_one(i_omp, j)
 
@@ -2386,12 +2488,88 @@ subroutine cgyro_g_one(i_omp, j)
         call fftw_execute_dft_c2r(plan_c2r,gy(:,:,i_omp),vymany(:,:,j))
 end subroutine cgyro_g_one
 
+subroutine cgyro_g32_one(i_omp, j)
+
+  use cgyro_nl_comm
+  use cgyro_globals
+
+  implicit none
+  !-----------------------------------
+  integer, intent(in) :: i_omp, j
+  !-----------------------------------
+  integer :: ix,iy
+  integer :: ir,itm,itl
+  integer :: it,itor,mytm,it_loc
+  integer :: p
+  integer :: jtheta_min
+
+  complex(KIND=REAL32) :: g0
+
+  include 'fftw3.f03'
+
+! g_nl      is (n_field,n_radial,n_jtheta,nt_loc,n_toroidal_procs)
+! jcev_c_nl is (n_field,n_radial,n_jtheta,nv_loc,nt_loc,n_toroidal_procs)
+        ! zero elements not otherwise set below
+        gx32(0:ny2,nx2:nx0-1,i_omp) = 0.0
+        gy32(0:ny2,nx2:nx0-1,i_omp) = 0.0
+
+        ! Array mapping
+        do ir=1,n_radial
+           p  = ir-1-nx0/2
+           ix = p
+           if (ix < 0) ix = ix+nx
+           do itm=1,n_toroidal_procs
+            do itl=1,nt_loc
+              itor = itl + (itm-1)*nt_loc
+              mytm = 1 + nt1/nt_loc !my toroidal proc number
+              it = 1+((mytm-1)*nsplit+j-1)/nv_loc
+              iv_loc = 1+modulo((mytm-1)*nsplit+j-1,nv_loc)
+              jtheta_min = 1+((mytm-1)*nsplit)/nv_loc
+              it_loc = it-jtheta_min+1
+
+              iy = itor-1
+              if (it > n_theta) then
+                 g0 = (0.0,0.0)
+              else
+                 g0 = i_c*sum( jvec_c_nl32(:,ir,it_loc,iv_loc,itor)*g_nl32(:,ir,it_loc,itor))
+              endif
+              gx32(iy,ix,i_omp) = p*g0
+              gy32(iy,ix,i_omp) = iy*g0
+            enddo
+           enddo
+           if ((ix/=0) .and. (ix<(nx/2))) then ! happens after ix>nx/2
+              ! Average elements so as to ensure
+              !   g(kx,ky=0) = g(-kx,ky=0)^*
+              ! This symmetry is required for complex input to c2r
+              g0 = 0.5*( gx32(0,ix,i_omp)+conjg(gx32(0,nx-ix,i_omp)) )
+              gx32(0,ix   ,i_omp) = g0
+              gx32(0,nx-ix,i_omp) = conjg(g0)
+           endif
+           gx32(n_toroidal:ny2,ix,i_omp) = 0.0
+           gy32(n_toroidal:ny2,ix,i_omp) = 0.0
+        enddo
+
+        if (i_omp==1) then
+         ! use the main thread to progress the async MPI
+          call cgyro_nl_fftw_comm_test()
+        endif
+
+        call fftwf_execute_dft_c2r(plan_c2r,gx32(:,:,i_omp),vxmany32(:,:,j))
+
+        if (i_omp==1) then
+         ! use the main thread to progress the async MPI
+          call cgyro_nl_fftw_comm_test()
+        endif
+
+        call fftwf_execute_dft_c2r(plan_c2r,gy32(:,:,i_omp),vymany32(:,:,j))
+end subroutine cgyro_g32_one
+
 !-----------------------------------------------------------------
 ! High-level cgyro_nl_fftw logic
 !-----------------------------------------------------------------
 
 ! NOTE: call cgyro_nl_fftw_comm1 before cgyro_nl_fftw
-subroutine cgyro_nl_fftw
+subroutine cgyro_nl_fftw_fp64
 
   use timer_lib
   use parallel_lib
@@ -2520,9 +2698,165 @@ subroutine cgyro_nl_fftw
    call timer_lib_out('nl_comm')
   endif ! if nsplitB>0
 
-end subroutine cgyro_nl_fftw
+end subroutine cgyro_nl_fftw_fp64
+
+subroutine cgyro_nl_fftw_fp32
+
+  use timer_lib
+  use parallel_lib
+  use cgyro_nl_comm
+  use cgyro_globals
+
+  implicit none
+
+  !-----------------------------------
+  integer :: ix,iy
+  integer :: ir,it,itm,itl,it_loc
+  integer :: itor,mytm
+  integer :: j,p
+  integer :: i_omp
+  integer :: jtheta_min
+
+  complex(KIND=REAL32) :: f0,g0
+
+  integer, external :: omp_get_thread_num
+
+  include 'fftw3.f03'
+  
+  call cgyro_nl_fftw_comm_test()
+
+  ! time to wait for the FA_nl to become avaialble
+  call timer_lib_in('nl_comm')
+  call parallel_slib_f_nc32_wait(nsplitA,fpackA32,fA_nl32,fA_req)
+  fA_req_valid = .FALSE.
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+  call timer_lib_out('nl_comm')
+
+  call timer_lib_in('nl')
+
+! f_nl is (radial, nt_loc, theta, nv_loc1, toroidal_procs)
+! where nv_loc1 * toroidal_procs >= nv_loc
+! parallel do schedule(dynamic,1) private(itm,itl,itor,iy,ir,p,ix,f0,i_omp,j)
+!$omp parallel do schedule(dynamic,1) private(i_omp,j)
+  do j=1,nsplitA
+        i_omp = omp_get_thread_num()+1
+        call cgyro_f32_one(i_omp, j, nsplitA, fA_nl32)
+  enddo ! j
+
+  call timer_lib_out('nl')
+
+  call timer_lib_in('nl_comm')
+  ! time to wait for the g_nl to become avaialble
+  call parallel_slib_f_fd32_wait(n_field,n_radial,n_jtheta,gpack32,g_nl32,g_req)
+  g_req_valid = .FALSE.
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+  call timer_lib_out('nl_comm')
+
+  call timer_lib_in('nl')
+
+! g_nl      is (n_field,n_radial,n_jtheta,nt_loc,n_toroidal_procs)
+! jcev_c_nl is (n_field,n_radial,n_jtheta,nv_loc,nt_loc,n_toroidal_procs)
+!$omp parallel do schedule(dynamic,1) private(i_omp,j)
+  do j=1,nsplit
+        i_omp = omp_get_thread_num()+1
+        call cgyro_g32_one(i_omp, j)
+        if (i_omp==1) then
+         ! use the main thread to progress the async MPI
+          call cgyro_nl_fftw_comm_test()
+        endif
+
+        if (j<=nsplitA) then
+           call cgyro_nl_fftw_stepr32(j, j, 1, i_omp)
+        endif
+        ! else we will do it in the next loop
+  enddo ! j
+
+  call timer_lib_out('nl')
+
+  call timer_lib_in('nl_comm')
+  ! start the async reverse comm
+  ! can reuse the same req, no overlap with forward fA_req
+  call parallel_slib_r_nc32_async(nsplitA,fA_nl32,fpackA32,fA_req)
+  fA_req_valid = .TRUE.
+
+  if (nsplitB > 0) then
+    ! time to wait for the 2nd half of F_nl to become avaialble
+    call parallel_slib_f_nc32_wait(nsplitB,fpackB32,fB_nl32,fB_req)
+    fB_req_valid = .FALSE.
+  endif
+
+  ! make sure reqs progress
+  call cgyro_nl_fftw_comm_test()
+  call timer_lib_out('nl_comm')
+
+  if (nsplitB > 0) then
+   call timer_lib_in('nl')
+
+! f_nl is (radial, nt_loc, theta, nv_loc1, toroidal_procs)
+! where nv_loc1 * toroidal_procs >= nv_loc
+!$omp parallel do schedule(dynamic,1) private(i_omp,j)
+   do j=1,nsplitB
+        i_omp = omp_get_thread_num()+1
+        call cgyro_f32_one(i_omp, j, nsplitB, fB_nl32)
+
+        if (i_omp==1) then
+         ! use the main thread to progress the async MPI
+          call cgyro_nl_fftw_comm_test()
+        endif
+
+        call cgyro_nl_fftw_stepr32(nsplitA+j, j, 2, i_omp)
+   enddo ! j
+
+   call timer_lib_out('nl')
+
+   call timer_lib_in('nl_comm')
+   ! start the async reverse comm
+   ! can reuse the same req, no overlap with forward fB_req
+   call parallel_slib_r_nc32_async(nsplitB,fB_nl32,fpackB32,fB_req)
+   fB_req_valid = .TRUE.
+   ! make sure reqs progress
+   call cgyro_nl_fftw_comm_test()
+   call timer_lib_out('nl_comm')
+  endif ! if nsplitB>0
+
+end subroutine cgyro_nl_fftw_fp32
 
 #endif /* CGYRO_GPU_FFT */
+
+!-----------------------------------------------------------------
+!  Shared code between CPU and GPU
+!-----------------------------------------------------------------
+
+subroutine cgyro_nl_fftw_init
+
+  use cgyro_globals
+
+  implicit none
+  !-----------------------------------
+
+  if (nl_single_flag > 1) then
+    call cgyro_nl_fftw_init_fp32
+  else
+    call cgyro_nl_fftw_init_fp64
+  endif
+end subroutine cgyro_nl_fftw_init
+
+! NOTE: call cgyro_nl_fftw_comm1 before cgyro_nl_fftw
+subroutine cgyro_nl_fftw
+
+  use cgyro_globals
+
+  implicit none
+  !-----------------------------------
+
+  if (nl_single_flag > 1) then
+    call cgyro_nl_fftw_fp32
+  else
+    call cgyro_nl_fftw_fp64
+  endif
+end subroutine cgyro_nl_fftw
 
 end module cgyro_nl
 

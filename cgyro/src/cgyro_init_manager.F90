@@ -448,20 +448,35 @@ subroutine cgyro_init_manager
 #endif
 
 #ifndef CGYRO_GPU_FFT
-  ! TODO: 32-bit logic for CPU code
 
-  allocate(fx(0:ny2,0:nx-1,n_omp))
-  allocate(gx(0:ny2,0:nx-1,n_omp))
-  allocate(fy(0:ny2,0:nx-1,n_omp))
-  allocate(gy(0:ny2,0:nx-1,n_omp))
+  if (nl_single_flag > 1) then
+    ! Use 32-bit NL
+    allocate(fx32(0:ny2,0:nx-1,n_omp))
+    allocate(gx32(0:ny2,0:nx-1,n_omp))
+    allocate(fy32(0:ny2,0:nx-1,n_omp))
+    allocate(gy32(0:ny2,0:nx-1,n_omp))
 
-  ! Note: Assuming nsplitA>=nsplitB
-  !       So we can use the same buffers for both
-  allocate(vxmany(0:ny-1,0:nx-1,nsplit))
-  allocate(vymany(0:ny-1,0:nx-1,nsplit))
-  allocate(uxmany(0:ny-1,0:nx-1,nsplitA))
-  allocate(uymany(0:ny-1,0:nx-1,nsplitA))
-  allocate(uv(0:ny-1,0:nx-1,n_omp))
+    ! Note: Assuming nsplitA>=nsplitB
+    !       So we can use the same buffers for both
+    allocate(vxmany32(0:ny-1,0:nx-1,nsplit))
+    allocate(vymany32(0:ny-1,0:nx-1,nsplit))
+    allocate(uxmany32(0:ny-1,0:nx-1,nsplitA))
+    allocate(uymany32(0:ny-1,0:nx-1,nsplitA))
+    allocate(uv32(0:ny-1,0:nx-1,n_omp))
+  else
+    allocate(fx(0:ny2,0:nx-1,n_omp))
+    allocate(gx(0:ny2,0:nx-1,n_omp))
+    allocate(fy(0:ny2,0:nx-1,n_omp))
+    allocate(gy(0:ny2,0:nx-1,n_omp))
+
+    ! Note: Assuming nsplitA>=nsplitB
+    !       So we can use the same buffers for both
+    allocate(vxmany(0:ny-1,0:nx-1,nsplit))
+    allocate(vymany(0:ny-1,0:nx-1,nsplit))
+    allocate(uxmany(0:ny-1,0:nx-1,nsplitA))
+    allocate(uymany(0:ny-1,0:nx-1,nsplitA))
+    allocate(uv(0:ny-1,0:nx-1,n_omp))
+  endif
 
 #endif
 
