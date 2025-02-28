@@ -13,11 +13,12 @@ version = 'aurora_2025'
 
 # Process comments string
 cstrf = ''
-cstrj = ''
+cstrj = '"""\n'
 with open('comments.txt', 'r') as file:
     for line in file:
         cstrf = cstrf+'!'+line
-        cstrj = cstrj+'#'+line
+        cstrj = cstrj+line
+cstrj = cstrj+'"""\n'
 
 def radfmt(i,c,lang):
 
@@ -37,7 +38,11 @@ def radfmt(i,c,lang):
         rstr += '              {:+.12e},{:+.12e},{:+.12e},{:+.12e}/)\n'.format(c[8],c[9],c[10],c[11])
     elif lang == 'julia':
         u = '''"'''+i+'''"'''
-        rstr  = '    elseif name == '+u+'\n'
+        if i == 'W':
+            rstr = '    if name == '+u+'\n'
+        else:
+            rstr = '    elseif name == '+u+'\n'
+            
         rstr += '        coefficients = [\n'
         for j in range(11):
             rstr += '            {:+.12e},\n'.format(c[j])
