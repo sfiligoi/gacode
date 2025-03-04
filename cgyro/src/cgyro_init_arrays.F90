@@ -138,7 +138,7 @@ subroutine cgyro_init_arrays
 !$acc&         private(itor,it,iltheta_min,mytor,ir,itf,jval) &
 !$acc&         present(jvec_c_nl,jvec_c_nl32,jvec_c,ic_c) &
 !$acc&         present(n_toroidal_procs,nt_loc,nv_loc,n_jtheta,n_radial) &
-!$acc&         present(nt1,n_theta,n_field,nsplit) default(none)
+!$acc&         present(nt1,n_theta,n_field,nsplit,nl_single_flag) default(none)
 #else
 !$omp parallel do collapse(4) &
 !$omp&         private(it_loc,itor,mytor,it,ir,itf,iltheta_min,jval)
