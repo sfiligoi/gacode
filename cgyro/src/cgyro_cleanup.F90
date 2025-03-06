@@ -419,8 +419,6 @@ subroutine cgyro_cleanup
      ccl_del_device(px)      
      deallocate(px)
   endif
-
-  if(allocated(geo_yin))          deallocate(geo_yin)
   
      ccl_del_device(z)
 

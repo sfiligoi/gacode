@@ -532,15 +532,6 @@ module cgyro_globals
   integer, parameter :: geo_ntheta=1001 
   !---------------------------------------------------------------
 
-  !---------------------------------------------------------------
-  integer :: geo_ny_in
-  real, dimension(8,0:32) :: geo_yin_in
-  !
-  integer :: geo_numeq_flag
-  integer :: geo_ny
-  real, dimension(:,:), allocatable :: geo_yin
-  !---------------------------------------------------------------
-
   real :: total_memory
   real :: small
 
