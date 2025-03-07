@@ -1450,7 +1450,7 @@ subroutine cgyro_fmany_r_async(nj, fmany, f_nl)
 !$acc parallel loop independent collapse(5) gang &
 !$acc&         private(iy,ir,itm,itl,ix) present(f_nl,fmany)
 #endif
-  do j=1,nsplitB
+  do j=1,nj
    do iy0=0,n_toroidal+(R_TORTILE-1)-1,R_TORTILE  ! round up
     do ir0=0,n_radial+(R_RADTILE-1)-1,R_RADTILE  ! round up
     do iy1=0,(R_TORTILE-1)   ! tile
@@ -1505,7 +1505,7 @@ end subroutine cgyro_fmany_r_async
 !$acc parallel loop independent collapse(5) gang &
 !$acc&         private(iy,ir,itm,itl,ix) present(f_nl,fmany)
 #endif
-  do j=1,nsplitB
+  do j=1,nj
    do iy0=0,n_toroidal+(R_TORTILE-1)-1,R_TORTILE  ! round up
     do ir0=0,n_radial+(R_RADTILE-1)-1,R_RADTILE  ! round up
     do iy1=0,(R_TORTILE-1)   ! tile
@@ -1560,7 +1560,7 @@ subroutine cgyro_fmany32_r32_async(nj, fmany, f_nl)
 !$acc parallel loop independent collapse(5) gang &
 !$acc&         private(iy,ir,itm,itl,ix) present(f_nl,fmany)
 #endif
-  do j=1,nsplitB
+  do j=1,nj
    do iy0=0,n_toroidal+(R_TORTILE-1)-1,R_TORTILE  ! round up
     do ir0=0,n_radial+(R_RADTILE-1)-1,R_RADTILE  ! round up
     do iy1=0,(R_TORTILE-1)   ! tile
