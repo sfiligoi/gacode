@@ -200,9 +200,14 @@ subroutine cgyro_init_manager
 
      if ((collision_model /= 5) .AND. (collision_field_model == 1)) then
        ! nc and nc_loc must be last, since it will be collated     
-       allocate(field_v(n_field,nt1:nt2,nc))
-       allocate(field_loc_v(n_field,nt1:nt2,nc1:nc2))
+       allocate(field_loc_v(n_field,nt1:nt2,n_sim,nc1:nc2))
+       ! assuming all collision constants are the same between the simulations
        allocate(dvjvec_v(n_field,nv,nt1:nt2,nc_loc))
+       ! we do not really need all n_sim in field_v
+       ! but since n_sim is assumed to be small, the added cost is small
+       ! and this drastically similifies the code
+       ! But could be improved in the future
+       allocate(field_v(n_field,nt1:nt2,n_sim,nc))
 #if defined(OMPGPU)
 !$omp target enter data map(alloc:field_v,field_loc_v,dvjvec_v)
 #elif defined(_OPENACC)
@@ -261,7 +266,7 @@ subroutine cgyro_init_manager
      allocate(cap_h_c_old(nc,nv_loc,nt1:nt2))
      allocate(cap_h_c_old2(nc,nv_loc,nt1:nt2))
      allocate(cap_h_ct(nv_loc,nt1:nt2,nc))
-     allocate(cap_h_v(nc_loc,nt1:nt2,nv))
+     allocate(cap_h_v(nc_loc,nt1:nt2,nv,n_sim))
      allocate(omega_cap_h(nc,nv_loc,nt1:nt2))
      allocate(omega_h(nc,nv_loc,nt1:nt2))
      allocate(omega_s(n_field,nc,nv_loc,nt1:nt2))
