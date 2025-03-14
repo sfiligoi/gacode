@@ -369,16 +369,16 @@ subroutine cgyro_init_manager
                n_low_energy = ie
              endif
            enddo
-           allocate(cmat_fp32(nv,nv,nc_loc,nt1:nt2))
-           allocate(cmat_stripes(n_xi,n_species,(n_low_energy+1):n_energy,n_xi,nc_loc,nt1:nt2))
-           allocate(cmat_e1(n_xi,n_species,n_low_energy,nv,nc_loc,nt1:nt2))
+           allocate(cmat_fp32(nv,nv,nc_loc_coll,nt1:nt2))
+           allocate(cmat_stripes(n_xi,n_species,(n_low_energy+1):n_energy,n_xi,nc_loc_coll,nt1:nt2))
+           allocate(cmat_e1(n_xi,n_species,n_low_energy,nv,nc_loc_coll,nt1:nt2))
 
            write (msg, "(A,I1,A)") "Using fp32 collision precision except e<=",n_low_energy," or same e&s."
            call cgyro_info(msg)
         else if (collision_precision_mode == 32) then
-           allocate(cmat_fp32(nv,nv,nc_loc,nt1:nt2))
+           allocate(cmat_fp32(nv,nv,nc_loc_coll,nt1:nt2))
         else
-           allocate(cmat(nv,nv,nc_loc,nt1:nt2))
+           allocate(cmat(nv,nv,nc_loc_coll,nt1:nt2))
         endif
      endif
 

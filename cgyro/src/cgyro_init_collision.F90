@@ -53,7 +53,7 @@ subroutine cgyro_init_collision
      ! collision_model=6 (Landau) or 7 (New Sugama method [Galerkin])
      ! The way this is included now isn't harmonic with Igor's changes
      ! cmat -> cmat_loc. The reason is to make the merge simpler.
-     if (collision_precision_mode/=0) allocate(cmat(nv,nv,nc_loc,nt1:nt2))
+     if (collision_precision_mode/=0) allocate(cmat(nv,nv,nc_loc_coll,nt1:nt2))
      call cgyro_init_landau
   else
      allocate(nu_d(n_energy,n_species,n_species))
@@ -167,11 +167,11 @@ subroutine cgyro_init_collision
      
      if ( collision_model == 4 .and. collision_kperp == 1 .and. &
           (collision_mom_restore == 1 .or. collision_ene_restore == 1)) then
-        allocate(bessel(0:1,nv,nc_loc,nt1:nt2))
+        allocate(bessel(0:1,nv,nc_loc_coll,nt1:nt2))
 !$omp parallel do collapse(2) private(ic_loc,it,ie,ix,is,iv,arg,xi_s1s,xi_prop)
         do itor=nt1,nt2
-           do ic=nc1,nc2
-              ic_loc = ic-nc1+1
+           do ic=nc_cl1,nc_cl2
+              ic_loc = ic-nc_cl1+1
               it = it_c(ic)
               do iv=1,nv
                  is = is_v(iv)
@@ -477,7 +477,7 @@ subroutine cgyro_init_collision
   cmat32_diff_global_loc = 0.0
 
 !$omp  parallel do collapse(2) default(none) &
-!$omp& shared(nc1,nc2,nt1,nt2,nv,delta_t,n_species,rho,is_ele,n_field,n_energy,n_xi) &
+!$omp& shared(nc_cl1,nc_cl2,nt1,nt2,nv,delta_t,n_species,rho,is_ele,n_field,n_energy,n_xi) &
 !$omp& shared(collision_kperp,collision_field_model,explicit_trap_flag) &
 !$omp& firstprivate(collision_model,collision_mom_restore,collision_ene_restore) &
 !$omp& shared(ae_flag,lambda_debye,dens_ele,temp_ele,dens_rot,dens2_rot) &
@@ -498,9 +498,9 @@ subroutine cgyro_init_collision
 !$omp& reduction(+:cmat_diff_global_loc,cmat32_diff_global_loc) &
 !$omp& reduction(+:cmap_fp32_error_abs_cnt_loc,cmap_fp32_error_rel_cnt_loc)
   do itor=nt1,nt2
-     do ic=nc1,nc2
+     do ic=nc_cl1,nc_cl2
 
-        ic_loc = ic-nc1+1
+        ic_loc = ic-nc_cl1+1
 
         it = it_c(ic)
         ir = ir_c(ic)
