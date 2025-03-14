@@ -276,6 +276,8 @@ subroutine cgyro_mpi_grid
      return
   endif
 
+  ! NEW_COMM_4 is same as NEW_COMM_1 for single simulation
+  ! but extend over all of xgyro in multi-simulation mode 
   splitkey = i_proc
   call MPI_COMM_SPLIT(CGYRO_COMM_WORLD_4,&
        i_group_1,& 
@@ -379,6 +381,10 @@ subroutine cgyro_mpi_grid
      return
   endif
 
+  nc_cl1 = 1+i_proc_4*nc_loc_coll
+  nc_cl2 = (1+i_proc_4)*nc_loc_coll
+
+
   ! Nonlinear parallelization dimensions (returns nsplit)
 
   call parallel_slib_init(n_toroidal_procs,nv_loc*n_theta,n_radial,nsplit,NEW_COMM_2)
@@ -401,10 +407,10 @@ subroutine cgyro_mpi_grid
 
 #if defined(OMPGPU)
 !$omp target enter data map(to:nt1,nt2,nt_loc,nv1,nv2,nv_loc,ns1,ns2,ns_loc)
-!$omp target enter data map(to:nc1,nc2,nc_loc,nc_loc_coll,n_jtheta,nsplit,nsplitA,nsplitB)
+!$omp target enter data map(to:nc1,nc2,nc_loc,nc_cl1,nc_cl2,nc_loc_coll,n_jtheta,nsplit,nsplitA,nsplitB)
 #elif defined(_OPENACC)
 !$acc enter data copyin(nt1,nt2,nt_loc,nv1,nv2,nv_loc,ns1,ns2,ns_loc)
-!$acc enter data copyin(nc1,nc2,nc_loc,nc_loc_coll,n_jtheta,nsplit,nsplitA,nsplitB)
+!$acc enter data copyin(nc1,nc2,nc_loc,nc_cl1,nc_cl2,nc_loc_coll,n_jtheta,nsplit,nsplitA,nsplitB)
 #endif
 
   fA_req_valid = .FALSE.

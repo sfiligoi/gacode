@@ -188,7 +188,7 @@ module cgyro_globals
   integer :: NEW_COMM_3  ! simple linear by species
   integer :: CGYRO_COMM_WORLD_4
   integer :: NEW_COMM_4  ! aggregate linear, coll
-  integer :: nv1,nv2,nc1,nc2
+  integer :: nv1,nv2,nc1,nc2,nc_cl1,nc_cl2
   integer :: nsplit,nsplitA,nsplitB
   integer :: ns1,ns2
   integer, dimension(:), allocatable :: recv_status

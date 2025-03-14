@@ -32,9 +32,9 @@ subroutine cgyro_calc_collision_cpu_fp32(nj_loc)
 !$omp&            private(ic,ic_loc,iv,ivp,cvec,bvec,cvec_re,cvec_im,cval,j,k) &
 !$omp&            shared(cap_h_v,fsendf,cmat_fp32)
   do itor=nt1,nt2
-   do ic=nc1,nc2
+   do ic=nc_cl1,nc_cl2
     do ism=1,n_sim
-     ic_loc = ic-nc1+1
+     ic_loc = ic-nc_cl1+1
      ! Set-up the RHS: H = f + ze/T G phi
 
      do iv=1,nv
@@ -85,10 +85,10 @@ subroutine cgyro_calc_collision_cpu_fp64(nj_loc)
 !$omp&            private(ic,ic_loc,iv,ivp,cvec,bvec,cvec_re,cvec_im,cval,j,k) &
 !$omp&            shared(cap_h_v,fsendf,cmat)
   do itor=nt1,nt2
-   do ic=nc1,nc2
+   do ic=nc_cl1,nc_cl2
     do ism=1,n_sim
 
-     ic_loc = ic-nc1+1
+     ic_loc = ic-nc_cl1+1
      ! Set-up the RHS: H = f + ze/T G phi
 
      do iv=1,nv
@@ -141,10 +141,10 @@ subroutine cgyro_calc_collision_cpu_m1(nj_loc)
 !$omp&            private(ie,is,ix,iep,isp,ixp) &
 !$omp&            shared(cap_h_v,fsendf,cmat_fp32,cmat_stripes,cmat_e1,ie_v,is_v,ix_v)
   do itor=nt1,nt2
-   do ic=nc1,nc2
+   do ic=nc_cl1,nc_cl2
     do ism=1,n_sim
 
-     ic_loc = ic-nc1+1
+     ic_loc = ic-nc_cl1+1
      ! Set-up the RHS: H = f + ze/T G phi
 
      do iv=1,nv
@@ -233,9 +233,9 @@ subroutine cgyro_calc_collision_simple_cpu(nj_loc)
 !$omp parallel do collapse(3) &
 !$omp&            private(ic_loc,ivp,iv,is,ix,jx,ie,ir,it,cvec_re,cvec_im,bvec,cvec,bvec_flat,k,j)
   do itor=nt1,nt2
-   do ic=nc1,nc2
+   do ic=nc_cl1,nc_cl2
     do ism=1,n_sim
-     ic_loc = ic-nc1+1
+     ic_loc = ic-nc_cl1+1
      ir = ir_c(ic)
      it = it_c(ic)
 
@@ -392,10 +392,10 @@ subroutine cgyro_calc_collision_gpu_fp32(nj_loc)
 !$acc& present(cmat_fp32,cap_h_v,fsendf)  private(k,ic,j,ic_loc,ism)
 #endif
   do itor=nt1,nt2
-    do ic=nc1,nc2
+    do ic=nc_cl1,nc_cl2
       do k=1,nproc
         do j=1,nj_loc
-           ic_loc = ic-nc1+1
+           ic_loc = ic-nc_cl1+1
            iv = j+(k-1)*nj_loc
 #if (!defined(OMPGPU)) && defined(_OPENACC)
 !$acc loop seq private(b_re,b_im,ivp)
@@ -442,19 +442,19 @@ subroutine cgyro_calc_collision_gpu_b2_fp32(nj_loc)
 
   bsplit = gpu_bigmem_flag*2
 
-  n_ic_loc = nc2-nc1+1
+  n_ic_loc = nc_cl2-nc_cl1+1
   d_ic_loc = n_ic_loc/bsplit
 
-  bic(1) = nc1
+  bic(1) = nc_cl1
   do b=2,bsplit
      bic(b) = bic(b-1) + d_ic_loc
   enddo
-  bic(bsplit+1) = nc2+1
+  bic(bsplit+1) = nc_cl2+1
 
   do itor=nt1,nt2
    do b=1,bsplit
-    bs = bic(b)-nc1+1
-    be = bic(b+1)-nc1
+    bs = bic(b)-nc_cl1+1
+    be = bic(b+1)-nc_cl1
     ! by keeping only 2 alive at any time, we limit GPU memory use
     bb = modulo(b+itor,2)+2
 #if defined(OMPGPU)
@@ -536,10 +536,10 @@ subroutine cgyro_calc_collision_gpu_fp64(nj_loc)
 !$acc& present(cmat,cap_h_v,fsendf)  private(k,ic,j,ic_loc,ism)
 #endif
   do itor=nt1,nt2
-    do ic=nc1,nc2
+    do ic=nc_cl1,nc_cl2
       do k=1,nproc
         do j=1,nj_loc
-           ic_loc = ic-nc1+1
+           ic_loc = ic-nc_cl1+1
            iv = j+(k-1)*nj_loc
 #if (!defined(OMPGPU)) && defined(_OPENACC)
 !$acc loop seq private(b_re,b_im,ivp)
@@ -586,19 +586,19 @@ subroutine cgyro_calc_collision_gpu_b2_fp64(nj_loc)
 
   bsplit = gpu_bigmem_flag*2
 
-  n_ic_loc = nc2-nc1+1
+  n_ic_loc = nc_cl2-nc_cl1+1
   d_ic_loc = n_ic_loc/bsplit
 
-  bic(1) = nc1
+  bic(1) = nc_cl1
   do b=2,bsplit
      bic(b) = bic(b-1) + d_ic_loc
   enddo
-  bic(bsplit+1) = nc2+1
+  bic(bsplit+1) = nc_cl2+1
 
   do itor=nt1,nt2
    do b=1,bsplit
-    bs = bic(b)-nc1+1
-    be = bic(b+1)-nc1
+    bs = bic(b)-nc_cl1+1
+    be = bic(b+1)-nc_cl1
     ! by keeping only 2 alive at any time, we limit GPU memory use
     bb = modulo(b+itor,2)+2
 #if defined(OMPGPU)
@@ -686,10 +686,10 @@ subroutine cgyro_calc_collision_gpu_m1(nj_loc)
 !$acc& private(iep,isp,ixp,h_re,h_im)
 #endif
   do itor=nt1,nt2
-   do ic=nc1,nc2
+   do ic=nc_cl1,nc_cl2
      do k=1,nproc
         do j=1,nj_loc
-          ic_loc = ic-nc1+1
+          ic_loc = ic-nc_cl1+1
           iv = j+(k-1)*nj_loc
           ie = ie_v(iv)
           is = is_v(iv)
@@ -754,19 +754,19 @@ subroutine cgyro_calc_collision_gpu_b2_m1(nj_loc)
 
   bsplit = gpu_bigmem_flag*2
 
-  n_ic_loc = nc2-nc1+1
+  n_ic_loc = nc_cl2-nc_cl1+1
   d_ic_loc = n_ic_loc/bsplit
 
-  bic(1) = nc1
+  bic(1) = nc_cl1
   do b=2,bsplit
      bic(b) = bic(b-1) + d_ic_loc
   enddo
-  bic(bsplit+1) = nc2+1
+  bic(bsplit+1) = nc_cl2+1
 
   do itor=nt1,nt2
    do b=1,bsplit
-    bs = bic(b)-nc1+1
-    be = bic(b+1)-nc1
+    bs = bic(b)-nc_cl1+1
+    be = bic(b+1)-nc_cl1
     ! by keeping only 2 alive at any time, we limit GPU memory use
 #if defined(OMPGPU)
     ! not using async for OMP for now
@@ -913,9 +913,9 @@ subroutine cgyro_calc_collision_simple_gpu(nj_loc)
 !$acc&         private(is,ie,ix,jx,iv,k,j,jv)
 #endif
   do itor=nt1,nt2
-   do ic=nc1,nc2
+   do ic=nc_cl1,nc_cl2
 
-     ic_loc = ic-nc1+1
+     ic_loc = ic-nc_cl1+1
      ir = ir_c(ic)
      it = it_c(ic)
 
