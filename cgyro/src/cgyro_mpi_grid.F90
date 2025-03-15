@@ -276,19 +276,6 @@ subroutine cgyro_mpi_grid
      return
   endif
 
-  ! NEW_COMM_4 is same as NEW_COMM_1 for single simulation
-  ! but extend over all of xgyro in multi-simulation mode 
-  splitkey = i_proc
-  call MPI_COMM_SPLIT(CGYRO_COMM_WORLD_4,&
-       i_group_1,& 
-       splitkey,&
-       NEW_COMM_4, &
-       i_err)
-  if (i_err /= 0) then
-     call cgyro_error('NEW_COMM_4 not created')
-     return
-  endif
-
   ! Local adjoint Group number
 
   call MPI_COMM_SPLIT(CGYRO_COMM_WORLD,&
@@ -302,7 +289,6 @@ subroutine cgyro_mpi_grid
   endif
   !
   call MPI_COMM_RANK(NEW_COMM_1,i_proc_1,i_err)
-  call MPI_COMM_RANK(NEW_COMM_4,i_proc_4,i_err)
   call MPI_COMM_RANK(NEW_COMM_2,i_proc_2,i_err)
   !-----------------------------------------------------------
 
@@ -375,7 +361,30 @@ subroutine cgyro_mpi_grid
 
   call parallel_clib_init(ns1,ns2,ns_loc,NEW_COMM_3)
 
-  call parallel_lib_init(nc,nv,nv_loc,nt1,nt_loc,n_field,nc_loc_coll,n_sim,NEW_COMM_4)
+  ! NEW_COMM_4 is same as NEW_COMM_1 for single simulation
+  ! but extend over all of xgyro in multi-simulation mode 
+  call MPI_COMM_RANK(CGYRO_COMM_WORLD_4,i_proc_4,i_err) ! temp reuse i_proc_4
+  call MPI_COMM_SIZE(CGYRO_COMM_WORLD_4,n_proc_4,i_err) ! temp reuse n_proc_4
+  n_proc_4 = n_proc_4/n_toroidal_procs
+  if (mpi_rank_order == 1) then
+     i_group_4 = i_proc_4/n_proc_4
+  else
+     i_group_4 = modulo(i_proc_4,n_proc_2)
+  endif
+
+  splitkey = i_proc_4
+  call MPI_COMM_SPLIT(CGYRO_COMM_WORLD_4,&
+       i_group_4,& 
+       splitkey,&
+       NEW_COMM_4, &
+       i_err)
+  if (i_err /= 0) then
+     call cgyro_error('NEW_COMM_4 not created')
+     return
+  endif
+  call MPI_COMM_RANK(NEW_COMM_4,i_proc_4,i_err)
+
+  call parallel_lib_init(nc,nv,nv_loc,nt1,nt_loc,n_field,n_sim,nc_loc_coll,NEW_COMM_4)
   if (nc_loc /= (nc_loc_coll*n_sim)) then
      call cgyro_error('LOGICAL ERROR: nc_loc /= (nc_loc_coll*n_sim)')
      return
