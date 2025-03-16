@@ -419,7 +419,7 @@ contains
     implicit none
 
     real, intent(in), dimension(:,:,:,:) :: fin
-    real, intent(inout), dimension(:,:,:,:) :: f
+    real, intent(inout), dimension(:,:,:,:,:) :: f
     integer :: ierr,j_loc,i,j,k,j1,j2,itor,fi
 
     j1 = 1+iproc*nj_loc

@@ -243,7 +243,7 @@ subroutine cgyro_field_coefficients
         ix = ix_v(iv)
         ie = ie_v(iv)
         dvjvec_v(:,iv,itor,ic_loc) = dens2_rot(it,is)*w_exi(ie,ix)*z(is)* &
-             jvec_v(:,ic_loc,itor,iv)
+             jvec_v(:,ic_loc,itor,iv,1) ! all nsm are the same, use the 1st one
      enddo
     enddo
    endif

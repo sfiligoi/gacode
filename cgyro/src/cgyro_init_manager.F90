@@ -273,7 +273,11 @@ subroutine cgyro_init_manager
      allocate(omega_ss(n_field,nc,nv_loc,nt1:nt2))
      allocate(omega_sbeta(nc,nv_loc,nt1:nt2))
      allocate(jvec_c(n_field,nc,nv_loc,nt1:nt2))
-     allocate(jvec_v(n_field,nc_loc_coll,nt1:nt2,nv))
+     ! we do not really need all n_sim in field_v
+     ! but since n_sim is assumed to be small, the added cost is small
+     ! and this drastically similifies the code
+     ! But could be improved in the future
+     allocate(jvec_v(n_field,nc_loc_coll,nt1:nt2,nv,n_sim))
      allocate(dvjvec_c(n_field,nc,nv_loc,nt1:nt2))
      allocate(jxvec_c(n_field,nc,nv_loc,nt1:nt2))
      allocate(upfac1(nc,nv_loc,nt1:nt2))
