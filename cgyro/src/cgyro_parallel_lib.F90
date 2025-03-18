@@ -40,7 +40,7 @@ module parallel_lib
 
   ! (expose these)
   complex, dimension(:,:,:,:,:), allocatable :: fsendf
-  complex, dimension(:,:,:,:,:), allocatable :: fsendr
+  complex, dimension(:,:,:,:), allocatable :: fsendr
 
   ! clib
   ! subset of flib
@@ -198,7 +198,7 @@ contains
     nsend = nj_loc*ni_loc*nk_loc
 
     allocate(fsendf(nj_loc,nk1:nk2,ni_loc,nproc,nsm))
-    allocate(fsendr(ni_loc,nk1:nk2,nj_loc,nproc,nsm))
+    allocate(fsendr(ni_loc,nk1:nk2,nj_loc,nproc))
 
     n_field = n_field_in
     nsend_real = n_field*nsend
@@ -322,7 +322,7 @@ contains
     implicit none
 
     complex, intent(in), dimension(:,:,:) :: fin
-    integer :: j_loc,i,j,k,j1,j2,itor,ism
+    integer :: j_loc,i,j,k,j1,j2,itor
 
     ! fin is assumed to be cap_h_c(nc,nv_loc,nt_loc)
     ! where nc = ni
@@ -334,17 +334,15 @@ contains
 !$omp& shared(nproc,j1,j2,ni_loc,nk1,nk2,nsm) &
 !$omp& private(j,j_loc,i) &
 !$omp& shared(fin,fsendr)
-    do ism=1,nsm
-     do k=1,nproc
+    do k=1,nproc
       do j=j1,j2
        do itor=nk1,nk2
           do i=1,ni_loc
              j_loc = j-j1+1 
-             fsendr(i,itor,j_loc,k,ism) = fin(i+(k-1)*ni_loc+(ism-1)*ni_loc*nproc,j_loc,1+(itor-nk1))
+             fsendr(i,itor,j_loc,k) = fin(i+(k-1)*ni_loc, j_loc, 1+(itor-nk1))
           enddo
        enddo
       enddo
-     enddo
     enddo
 
   end subroutine parallel_lib_rtrans_pack
@@ -361,7 +359,7 @@ contains
     implicit none
 
     complex, intent(in), dimension(:,:,:) :: fin
-    integer :: j_loc,i,j,k,j1,j2,itor,ism
+    integer :: j_loc,i,j,k,j1,j2,itor
 
     ! fin is assumed to be cap_h_c(nc,nv_loc,nt_loc)
     ! where nc = ni
@@ -377,17 +375,15 @@ contains
 !$acc&         present(fsendr,fin) present(nproc,nk1,nk2,ni_loc,nsm) &
 !$acc&         copyin(j1,j2) default(none)
 #endif
-    do ism=1,nsm
-     do k=1,nproc
+    do k=1,nproc
       do j=j1,j2
        do itor=nk1,nk2
           do i=1,ni_loc
              j_loc = j-j1+1
-             fsendr(i,itor,j_loc,k,ism) = fin(i+(k-1)*ni_loc+(ism-1)*ni_loc*nproc,j_loc,1+(itor-nk1))
+             fsendr(i,itor,j_loc,k) = fin(i+(k-1)*ni_loc,j_loc,1+(itor-nk1))
           enddo
        enddo
       enddo
-     enddo
     enddo
 
   end subroutine parallel_lib_rtrans_pack_gpu
