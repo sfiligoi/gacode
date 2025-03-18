@@ -22,6 +22,9 @@ contains
 
 !-----------------------------------------------------------------
 ! cgyro_nl_fftw_init
+!
+! Initialize all the relevant plan_r2c and plan_c2r variants
+! Many different variants due to many possible FFT backends
 !-----------------------------------------------------------------
 
 #ifdef CGYRO_GPU_FFT
@@ -673,14 +676,20 @@ end subroutine cgyro_nl_fftw_init_fp32
 #endif /* CGYRO_GPU_FFT */
 
 !-----------------------------------------------------------------
-! cgyro_nl_fftw_init
+! cgyro_nl_fftw
 ! (and all the helper sub-functions)
+!
+! Do the actual FFT-base NL step
 !-----------------------------------------------------------------
 
 #ifdef CGYRO_GPU_FFT
 
 !-----------------------------------------------------------------
-!  GPU code
+!  GPU code for cgyro_nl_fftw and dependent sub-functions
+!-----------------------------------------------------------------
+
+!-----------------------------------------------------------------
+! Helper vector multiply function with GPU offload
 !-----------------------------------------------------------------
 
 subroutine cgyro_nl_fftw_mul(sz,uvm,uxm,vym,uym,vxm,inv_nxny)
@@ -736,6 +745,13 @@ subroutine cgyro_nl_fftw_mul32(sz,uvm,uxm,vym,uym,vxm,inv_nxny)
   enddo
 
 end subroutine cgyro_nl_fftw_mul32
+
+!-----------------------------------------------------------------
+! Batch FFT invocations
+! All the c2r and r2c variants, both fp64 and fp32
+!
+! Many different internal variants due to many possible FFT backends
+!-----------------------------------------------------------------
 
 subroutine cgyro_fft_z2d(plan, indata, outdata)
 
@@ -1015,6 +1031,13 @@ subroutine cgyro_fft_r2c(plan, indata, outdata)
 
 end subroutine cgyro_fft_r2c
 
+!-----------------------------------------------------------------
+! Helper function for zero-ing off-diagonal elements
+! with proper GPU offload
+! Using async compute whenever possible
+! Caller responsible for synchronization
+!-----------------------------------------------------------------
+
 subroutine cgyro_zero_offdiag_async(nj,xmany,ymany)
 
   use cgyro_globals
@@ -1111,6 +1134,14 @@ subroutine cgyro_zero_offdiag32_async(nj,xmany,ymany)
 
 end subroutine cgyro_zero_offdiag32_async
 
+!-----------------------------------------------------------------
+! Helper function for filling fxmany and fymany (inputs to FFT)
+! with proper GPU offload.
+! Input either fA_nl or fB_nl, with nj being either nsplitA or nplitB
+! Using async compute whenever possible
+! Caller responsible for synchronization
+!-----------------------------------------------------------------
+
 subroutine cgyro_fmany_async(nj, f_nl)
 
   use cgyro_globals
@@ -1202,6 +1233,14 @@ subroutine cgyro_fmany32_async(nj, f_nl)
   enddo
 
 end subroutine cgyro_fmany32_async
+
+!-----------------------------------------------------------------
+! Helper function for filling gxmany and gymany (inputs to FFT)
+! with proper GPU offload.
+! No arguments, uses fixed logic and cgyro_globals.
+! Using async compute whenever possible
+! Caller responsible for synchronization
+!-----------------------------------------------------------------
 
 subroutine cgyro_gmany_async
 
@@ -1351,6 +1390,14 @@ subroutine cgyro_gmany32_async
   enddo
 end subroutine cgyro_gmany32_async
 
+!-----------------------------------------------------------------
+! Helper function for averaging elements to enforce FFT preconditions
+! with proper GPU offload.
+! Works for both fxmany and gxmany, actual size passed as nj
+! Using async compute whenever possible
+! Caller responsible for synchronization
+!-----------------------------------------------------------------
+
 subroutine cgyro_sym_async(nj, many)
 
   use cgyro_globals
@@ -1419,6 +1466,14 @@ subroutine cgyro_sym32_async(nj, many)
 
 end subroutine cgyro_sym32_async
 
+!-----------------------------------------------------------------
+! Helper function for transposing FFT output into MPI-friendly format
+! with proper GPU offload.
+! Acn be used to fill either fA_nl or fB_nl, with nl either nspitA or nsplitB
+! Using async compute whenever possible
+! Caller responsible for synchronization
+!-----------------------------------------------------------------
+
 subroutine cgyro_fmany_r_async(nj, fmany, f_nl)
 
   use cgyro_globals
@@ -1450,7 +1505,7 @@ subroutine cgyro_fmany_r_async(nj, fmany, f_nl)
 !$acc parallel loop independent collapse(5) gang &
 !$acc&         private(iy,ir,itm,itl,ix) present(f_nl,fmany)
 #endif
-  do j=1,nsplitB
+  do j=1,nj
    do iy0=0,n_toroidal+(R_TORTILE-1)-1,R_TORTILE  ! round up
     do ir0=0,n_radial+(R_RADTILE-1)-1,R_RADTILE  ! round up
     do iy1=0,(R_TORTILE-1)   ! tile
@@ -1505,7 +1560,7 @@ end subroutine cgyro_fmany_r_async
 !$acc parallel loop independent collapse(5) gang &
 !$acc&         private(iy,ir,itm,itl,ix) present(f_nl,fmany)
 #endif
-  do j=1,nsplitB
+  do j=1,nj
    do iy0=0,n_toroidal+(R_TORTILE-1)-1,R_TORTILE  ! round up
     do ir0=0,n_radial+(R_RADTILE-1)-1,R_RADTILE  ! round up
     do iy1=0,(R_TORTILE-1)   ! tile
@@ -1560,7 +1615,7 @@ subroutine cgyro_fmany32_r32_async(nj, fmany, f_nl)
 !$acc parallel loop independent collapse(5) gang &
 !$acc&         private(iy,ir,itm,itl,ix) present(f_nl,fmany)
 #endif
-  do j=1,nsplitB
+  do j=1,nj
    do iy0=0,n_toroidal+(R_TORTILE-1)-1,R_TORTILE  ! round up
     do ir0=0,n_radial+(R_RADTILE-1)-1,R_RADTILE  ! round up
     do iy1=0,(R_TORTILE-1)   ! tile
@@ -1586,6 +1641,8 @@ end subroutine cgyro_fmany32_r32_async
 
 !-----------------------------------------------------------------
 ! High-level cgyro_nl_fftw logic
+! Do the actual FFT-base NL step
+! NOTE: Expects cgyro_nl_fftw_comm1 to have been already called
 !-----------------------------------------------------------------
 
 subroutine cgyro_nl_fftw_fp64
@@ -2139,7 +2196,16 @@ end subroutine cgyro_nl_fftw_fp32
 #else  /* if not definedCGYRO_GPU_FFT */
 
 !-----------------------------------------------------------------
-!  CPU code
+!  CPU code for cgyro_nl_fftw and dependent sub-functions
+!-----------------------------------------------------------------
+
+!-----------------------------------------------------------------
+! Helper function for computing the reverse FFT transform
+! and then convert the output into the required MPI format
+! for a single i_omp partition from a single iteration of the j loop.
+! May be used for both fA_nl and fB_nl.
+! Single threaded and thread safe, as it is 
+! expected to be called from inside a OMP loop.
 !-----------------------------------------------------------------
 
 subroutine cgyro_nl_fftw_stepr(g_j, f_j, nl_idx, i_omp)
@@ -2280,6 +2346,14 @@ subroutine cgyro_nl_fftw_stepr32(g_j, f_j, nl_idx, i_omp)
 
 end subroutine cgyro_nl_fftw_stepr32
 
+!-----------------------------------------------------------------
+! Helper function for filling fx and fy (inputs to FFT)
+! for a single i_omp partition from a single iteration of the j loop.
+! The input matrix can be either fN_nl or fB_nl, with nj either nsplitA or nsplitB.
+! Single threaded and thread safe, as it is 
+! expected to be called from inside a OMP loop.
+!-----------------------------------------------------------------
+
 subroutine cgyro_f_one(i_omp, j, nj, f_nl)
 
   use cgyro_nl_comm
@@ -2411,6 +2485,13 @@ subroutine cgyro_f32_one(i_omp, j, nj, f_nl32)
         call fftwf_execute_dft_c2r(plan_c2r,fy32(:,:,i_omp),uymany32(:,:,j))
 
 end subroutine cgyro_f32_one
+
+!-----------------------------------------------------------------
+! Helper function for filling gx and gy (inputs to FFT)
+! for a single i_omp partition from a single iteration of the j loop.
+! Single threaded and thread safe, as it is 
+! expected to be called from inside a OMP loop.
+!-----------------------------------------------------------------
 
 subroutine cgyro_g_one(i_omp, j)
 
@@ -2566,9 +2647,10 @@ end subroutine cgyro_g32_one
 
 !-----------------------------------------------------------------
 ! High-level cgyro_nl_fftw logic
+! Do the actual FFT-base NL step
+! NOTE: Expects cgyro_nl_fftw_comm1 to have been already called
 !-----------------------------------------------------------------
 
-! NOTE: call cgyro_nl_fftw_comm1 before cgyro_nl_fftw
 subroutine cgyro_nl_fftw_fp64
 
   use timer_lib
@@ -2829,6 +2911,7 @@ end subroutine cgyro_nl_fftw_fp32
 !  Shared code between CPU and GPU
 !-----------------------------------------------------------------
 
+! Initialize all the relevant plan_r2c and plan_c2r variants
 subroutine cgyro_nl_fftw_init
 
   use cgyro_globals
@@ -2843,6 +2926,7 @@ subroutine cgyro_nl_fftw_init
   endif
 end subroutine cgyro_nl_fftw_init
 
+! Do the actual FFT-base NL step
 ! NOTE: call cgyro_nl_fftw_comm1 before cgyro_nl_fftw
 subroutine cgyro_nl_fftw
 
