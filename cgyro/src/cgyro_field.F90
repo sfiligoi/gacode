@@ -25,6 +25,7 @@ subroutine cgyro_field_v_notae_s(start_t)
   integer, intent(in) :: start_t
   !
   integer :: itor,j,k,nj_loc,ism
+  integer :: vcount
 
   call timer_lib_in('field')
 
@@ -37,15 +38,16 @@ subroutine cgyro_field_v_notae_s(start_t)
   ! Use aggregate comm, since it is used in step_collision
   call parallel_lib_nj_loc(nj_loc)
 
+  vcount = nv/nv_loc
 !$omp parallel do collapse(3) private(ic_loc,iv,ic,k,j,ism)
   do ic=nc1,nc2
    do ism=1,n_sim
     do itor=start_t,nt2
      ic_loc = ic-nc1+1
-     do k=1,nproc
+     do k=1,vcount
       do j=1,nj_loc
         iv = j+(k-1)*nj_loc
-        field_loc_v(:,itor,ism,ic) = field_loc_v(:,itor,ism,ic)+dvjvec_v(:,iv,itor,ic_loc)*fsendf(j,itor,ic_loc,k,ism)
+        field_loc_v(:,itor,ism,ic) = field_loc_v(:,itor,ism,ic)+dvjvec_v(:,iv,itor,ic_loc)*fsendf(j,itor,ic_loc,k+(ism-1)*vcount)
       enddo
      enddo
     enddo
@@ -112,9 +114,11 @@ subroutine cgyro_field_v_notae_s_gpu(start_t)
   integer, intent(in) :: start_t
   !
   integer :: i_f,itor,j,k,nj_loc,ism
+  integer :: vcount
   complex :: field_loc_l 
 
   call timer_lib_in('field')
+  vcount = nv/nv_loc
 
   ! iv = j+(k-1)*nj_loc
   ! cap_h_v(ic_loc,itor,iv) = fsendf(j,itor,ic_loc,k)
@@ -133,7 +137,7 @@ subroutine cgyro_field_v_notae_s_gpu(start_t)
 !$omp&       private(ic_loc,field_loc_l) map(to:start_t,nproc,nj_loc)
 #elif defined(_OPENACC)
 !$acc parallel loop collapse(4) gang private(ic_loc,field_loc_l) &
-!$acc&         present(dvjvec_v,fsendf) copyin(start_t,nproc,nj_loc) &
+!$acc&         present(dvjvec_v,fsendf) copyin(start_t,vproc,nj_loc) &
 !$acc&         present(nt2,nc1,nc2,n_field,nv) default(none)
 #endif
   do ic=nc1,nc2
@@ -148,10 +152,10 @@ subroutine cgyro_field_v_notae_s_gpu(start_t)
 #elif defined(_OPENACC)
 !$acc loop vector collapse(2) private(iv) reduction(+:field_loc_l)
 #endif
-      do k=1,nproc
+      do k=1,vcount
        do j=1,nj_loc
         iv = j+(k-1)*nj_loc
-        field_loc_l = field_loc_l+dvjvec_v(i_f,iv,itor,ic_loc)*fsendf(j,itor,ic_loc,k,ism)
+        field_loc_l = field_loc_l+dvjvec_v(i_f,iv,itor,ic_loc)*fsendf(j,itor,ic_loc,k+(ism-1)*vcount)
       enddo
       enddo
       field_loc_v(i_f,itor,ism,ic) = field_loc_l
