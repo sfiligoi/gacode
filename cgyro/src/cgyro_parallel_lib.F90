@@ -330,7 +330,7 @@ contains
     j1 = 1+iproc*nj_loc
     j2 = (1+iproc)*nj_loc
 
-!$omp parallel do collapse(4) if (size(fsendr) >= default_size) default(none) &
+!$omp parallel do collapse(3) if (size(fsendr) >= default_size) default(none) &
 !$omp& shared(nproc,j1,j2,ni_loc,nk1,nk2,nsm) &
 !$omp& private(j,j_loc,i) &
 !$omp& shared(fin,fsendr)
@@ -368,10 +368,10 @@ contains
     j2 = (1+iproc)*nj_loc
 
 #if defined(OMPGPU)
-!$omp target teams distribute parallel do simd collapse(5) &
+!$omp target teams distribute parallel do simd collapse(4) &
 !$omp&  private(j_loc) map(to:j1,j2)
 #else
-!$acc parallel loop collapse(5) gang vector independent private(j_loc) &
+!$acc parallel loop collapse(4) gang vector independent private(j_loc) &
 !$acc&         present(fsendr,fin) present(nproc,nk1,nk2,ni_loc,nsm) &
 !$acc&         copyin(j1,j2) default(none)
 #endif
