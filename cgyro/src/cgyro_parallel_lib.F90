@@ -39,7 +39,7 @@ module parallel_lib
   real, dimension(:,:,:,:,:), allocatable, private :: fsendr_real
 
   ! (expose these)
-  complex, dimension(:,:,:,:,:), allocatable :: fsendf
+  complex, dimension(:,:,:,:), allocatable :: fsendf
   complex, dimension(:,:,:,:), allocatable :: fsendr
 
   ! clib
@@ -197,7 +197,7 @@ contains
 
     nsend = nj_loc*ni_loc*nk_loc
 
-    allocate(fsendf(nj_loc,nk1:nk2,ni_loc,nproc,nsm))
+    allocate(fsendf(nj_loc,nk1:nk2,ni_loc,nproc))
     allocate(fsendr(ni_loc,nk1:nk2,nj_loc,nproc))
 
     n_field = n_field_in

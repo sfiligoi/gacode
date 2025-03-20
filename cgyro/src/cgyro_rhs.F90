@@ -351,7 +351,7 @@ subroutine cgyro_rhs_trap(ij)
 
         do k=1,nproc
            do j=1,nj_loc
-              fsendf(j,itor,ic_loc,k,i_sim) = bvec_trap(j+(k-1)*nj_loc)
+              fsendf(j,itor,ic_loc,k) = bvec_trap(j+(k-1)*nj_loc)
            enddo
         enddo
       enddo

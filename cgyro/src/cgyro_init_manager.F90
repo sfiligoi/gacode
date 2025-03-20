@@ -266,7 +266,7 @@ subroutine cgyro_init_manager
      allocate(cap_h_c_old(nc,nv_loc,nt1:nt2))
      allocate(cap_h_c_old2(nc,nv_loc,nt1:nt2))
      allocate(cap_h_ct(nv_loc,nt1:nt2,nc))
-     allocate(cap_h_v(nc_loc,nt1:nt2,nv,n_sim))
+     allocate(cap_h_v(nc_loc_coll,nt1:nt2,nv,n_sim))
      allocate(omega_cap_h(nc,nv_loc,nt1:nt2))
      allocate(omega_h(nc,nv_loc,nt1:nt2))
      allocate(omega_s(n_field,nc,nv_loc,nt1:nt2))
