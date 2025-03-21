@@ -134,7 +134,7 @@ subroutine cgyro_field_v_notae_s_gpu(start_t)
 
 #if defined(OMPGPU)
 !$omp target teams distribute collapse(4) firstprivate(start_t,nj_loc,vcount) &
-!$omp&       private(ic_loc,field_loc_l) map(to:start_t,nproc,nj_loc)
+!$omp&       private(ic_loc,field_loc_l) 
 #elif defined(_OPENACC)
 !$acc parallel loop collapse(4) gang private(ic_loc,field_loc_l) &
 !$acc&         present(dvjvec_v,fsendf) firstprivate(start_t,nj_loc,vcount) &
@@ -177,10 +177,10 @@ subroutine cgyro_field_v_notae_s_gpu(start_t)
   ! Poisson LHS factors
 #if defined(OMPGPU)
 !$omp target teams distribute parallel do simd collapse(3) &
-!$omp&    map(to:start_t)
+!$omp&    firstprivate(start_t,i_sim)
 #elif defined(_OPENACC)
 !$acc parallel loop collapse(3) gang vector &
-!$acc&         independent present(fcoef) copyin(start_t) &
+!$acc&         independent present(fcoef) firstprivate(start_t,i_sim) &
 !$acc&         present(nt2,nc,n_field) default(none)
 #endif
   do itor=start_t,nt2
