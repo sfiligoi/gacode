@@ -442,7 +442,7 @@ class cgyrodata:
       self.delta,p   = self.eget(data,p)
       self.s_delta,p = self.eget(data,p)
       self.zeta,p    = self.eget(data,p)
-      self.s_zeta,p  = self.eget(data,p
+      self.s_zeta,p  = self.eget(data,p)
       self.zmag,p    = self.eget(data,p)
       self.dzmag,p   = self.eget(data,p)
 
