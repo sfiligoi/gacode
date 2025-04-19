@@ -1136,18 +1136,7 @@ class cgyrodata_plot(data.cgyrodata):
          if ymin != 'auto':
             ax.set_ylim(bottom=float(ymin))
 
-         #ax.axvspan(-0.25,0.25,facecolor='g',alpha=0.1)
          ax.set_xlim([r[0],r[-1]])
-         #ax.set_xticks([-0.5,-0.375,-0.25,-0.125,0,0.125,0.25,0.375,0.5])
-         #ax.set_xticklabels([r'$-0.5$',
-          #                   r'$-0.375$',
-          #                   r'$-0.25$',
-          #                   r'$-0.125$',
-          #                   r'$0$',
-          #                   r'$0.125$',
-          #                   r'$0.25$',
-          #                   r'$0.375$',
-          #                   r'$0.5$'])
 
          ax.legend(loc=2)
 
