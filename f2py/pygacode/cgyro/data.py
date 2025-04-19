@@ -77,7 +77,7 @@ class cgyrodata:
       #
       data = np.fromfile(self.dir+'out.cgyro.time',dtype='float',sep=' ')
       nt = len(data)//4
-      data = np.reshape(data,(4,nt),'F')[:,::2]
+      data = np.reshape(data,(4,nt),'F')
 
       self.t    = data[0,:]
       self.err1 = data[1,:]
@@ -99,7 +99,7 @@ class cgyrodata:
       nd = 2*self.n_n*nt
       t,fmt,data = self.extract('.cgyro.freq')
       if fmt != 'null':
-         self.freq = np.reshape(data,(2,self.n_n,nt),'F')[:,:,::2]
+         self.freq = np.reshape(data,(2,self.n_n,nt),'F')
          if not self.silent:
             print('INFO: (getdata) Read data in '+fmt+'.cgyro.freq '+t)
       #-----------------------------------------------------------------
@@ -275,7 +275,7 @@ class cgyrodata:
       # 1a. kxky_phi
       t,fmt,data = self.extract('.cgyro.kxky_phi',cmplx=True)
       if fmt != 'null':
-         self.kxky_phi = np.reshape(data,(self.n_radial,self.theta_plot,self.n_n,nt),'F')[:,:,:,::2]
+         self.kxky_phi = np.reshape(data,(self.n_radial,self.theta_plot,self.n_n,nt),'F')
          if not self.silent:
             print('INFO: (getbigfield) Read data in '+fmt+'.cgyro.kxky_phi '+t)
 
