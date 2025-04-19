@@ -252,13 +252,13 @@ class cgyrodata_plot(data.cgyrodata):
 
       # Construct complex eigenfunction at selected time
       if field == 0:
-         f = self.phib[0,:,itime]+1j*self.phib[1,:,itime]
+         f = self.phib[:,itime]
          ytag = r'$\delta\phi$'
       elif field == 1:
-         f = self.aparb[0,:,itime]+1j*self.aparb[1,:,itime]
+         f = self.aparb[:,itime]
          ytag = r'$A_\parallel$'
       elif field == 2:
-         f = self.bparb[0,:,itime]+1j*self.bparb[1,:,itime]
+         f = self.bparb[:,itime]
          ytag = r'$B_\parallel$'
 
       ax = fig.add_subplot(111)
@@ -285,11 +285,11 @@ class cgyrodata_plot(data.cgyrodata):
 
       # Normalized real and imag parts
       if fnorm == 0:
-         f_norm = self.phib[0,n0,itime]+1j*self.phib[1,n0,itime]
+         f_norm = self.phib[n0,itime]
       elif fnorm == 1:
-         f_norm = self.aparb[0,n0,itime]+1j*self.aparb[1,n0,itime]
+         f_norm = self.aparb[n0,itime]
       else:
-         f_norm = self.bparb[0,n0,itime]+1j*self.bparb[1,n0,itime]
+         f_norm = self.bparb[n0,itime]
          
       y1 = np.real(f/f_norm)
       y2 = np.imag(f/f_norm)
