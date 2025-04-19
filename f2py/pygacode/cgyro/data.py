@@ -26,9 +26,11 @@ class cgyrodata:
       if self.hiprec_flag:
          # double
          self.BYTE = 'float64'
+         self.CBYTE = 'complex128'
       else:
          # single
          self.BYTE = 'float32'
+         self.CBYTE = 'complex64'
 
       if not self.silent:
          print('INFO: (__init__) Detected precision '+self.BYTE)
@@ -37,17 +39,22 @@ class cgyrodata:
          self.getdata()
 
    # standard routine to read binary or ASCII data
-   def extract(self,f):
+   def extract(self,f,cmplx=False):
 
       start = time.time()
       if os.path.isfile(self.dir+'bin'+f):
          fmt = 'bin'
-         data = np.fromfile(self.dir+'bin'+f,dtype=self.BYTE)
+         if cmplx:
+            dtype = self.CBYTE
+         else:
+            dtype = self.BYTE   
+         data = np.fromfile(self.dir+'bin'+f,dtype=dtype)
       elif os.path.isfile(self.dir+'out'+f):
          fmt = 'out'
          data = np.fromfile(self.dir+'out'+f,dtype='float',sep=' ')
       else:
-         fmt  = 'null'
+         # File not found
+         fmt = 'null'
          data = []
 
       t = '[T='+'{:.4f}s]'.format(time.time()-start)
@@ -261,9 +268,9 @@ class cgyrodata:
       nd = 2*self.n_radial*self.theta_plot*self.n_n*nt
 
       # 1a. kxky_phi
-      t,fmt,data = self.extract('.cgyro.kxky_phi')
+      t,fmt,data = self.extract('.cgyro.kxky_phi',cmplx=True)
       if fmt != 'null':
-         self.kxky_phi = np.reshape(data[0:nd],(2,self.n_radial,self.theta_plot,self.n_n,nt),'F')
+         self.kxky_phi = np.reshape(data,(self.n_radial,self.theta_plot,self.n_n,nt),'F')
          if not self.silent:
             print('INFO: (getbigfield) Read data in '+fmt+'.cgyro.kxky_phi '+t)
 
@@ -594,7 +601,7 @@ class cgyrodata:
 
       if moment == 'phi':
          if field == 0:
-            f  = self.kxky_phi[0,1:,itheta,:,:]+1j*self.kxky_phi[1,1:,itheta,:,:]
+            f  = self.kxky_phi[1:,itheta,:,:]
             ft = TEXPHI
          elif field == 1:
             f  = self.kxky_apar[0,1:,itheta,:,:]+1j*self.kxky_apar[1,1:,itheta,:,:]
