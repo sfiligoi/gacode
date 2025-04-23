@@ -102,22 +102,9 @@ subroutine gyro_read_experimental_profiles
   !----------------------------------------------------------------------------
 
   ! Retain up-down asymmetry from elevation in the case of Miller shape
-  if (num_equil_flag == 0 .and. udsymmetry_flag == 1) then
+  if (udsymmetry_flag == 1) then
      zmag_exp(:) = 0.0
      dzmag_p(:)  = 0.0
-  endif
-
-  ! Fill in general geometry parameters if they exist
-  if (num_equil_flag == 1) then
-
-     ! Fill in geometry arrays with original data from 
-     ! EXPRO routine.  Note that EXPRO_geo is in m, 
-     ! and EXPRO_dgeo is dimensionless.  All geo_p are 
-     ! dimensionless:
-
-     geo_p(1:4,:,:) = EXPRO_geo(:,:,:)/a_meters
-     geo_p(5:8,:,:) = EXPRO_dgeo(:,:,:)
-
   endif
 
   ! rhos_deuterium/a (dimensionless)

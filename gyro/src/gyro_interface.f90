@@ -151,7 +151,6 @@ module gyro_interface
   integer :: gyro_entropy_flag_in = 0
   integer :: gyro_extra_print_flag_in = 0
   integer :: gyro_ord_rbf_in = 3
-  integer :: gyro_num_equil_flag_in = 0
   real    :: gyro_zmag_in = 0.0
   real    :: gyro_dzmag_in = 0.0
   integer :: gyro_output_flag_in = 1
@@ -360,7 +359,6 @@ contains
     gyro_entropy_flag_in = entropy_flag
     gyro_extra_print_flag_in = extra_print_flag
     gyro_ord_rbf_in = ord_rbf
-    gyro_num_equil_flag_in = num_equil_flag
     gyro_zmag_in = zmag0
     gyro_dzmag_in = dzmag0
     gyro_output_flag_in = output_flag
@@ -558,7 +556,6 @@ contains
     entropy_flag = gyro_entropy_flag_in
     extra_print_flag = gyro_extra_print_flag_in
     ord_rbf = gyro_ord_rbf_in
-    num_equil_flag = gyro_num_equil_flag_in
     zmag0 = gyro_zmag_in
     dzmag0 = gyro_dzmag_in
     output_flag = gyro_output_flag_in
@@ -747,7 +744,6 @@ contains
     write(1,20) 'ENTROPY_FLAG',gyro_entropy_flag_in
     write(1,20) 'EXTRA_PRINT_FLAG',gyro_extra_print_flag_in
     write(1,20) 'ORD_RBF',gyro_ord_rbf_in
-    write(1,20) 'NUM_EQUIL_FLAG',gyro_num_equil_flag_in
     write(1,30) 'ZMAG',gyro_zmag_in
     write(1,30) 'DZMAG',gyro_dzmag_in
     write(1,20) 'OUTPUT_FLAG',gyro_output_flag_in
