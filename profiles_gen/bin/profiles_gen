@@ -540,13 +540,7 @@ then
    echo "SUBROUTINE_FLAG=1" >> input.neo
 
    cp ../$FILE input.gacode
-   if [ -f "../$FILE.geo" ]
-   then
-       cp ../$FILE.geo input.gacode.geo
-   else
-       echo "INFO: (profiles_gen) $FILE.geo not found -- using EQUILIBRIUM_MODEL=2 (miller geo)"
-       echo "EQUILIBRIUM_MODEL=2" >> input.neo
-   fi
+   echo "EQUILIBRIUM_MODEL=2" >> input.neo
 
    python $NEO_DIR/bin/neo_parse.py
 
