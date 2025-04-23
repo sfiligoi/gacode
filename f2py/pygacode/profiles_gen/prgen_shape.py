@@ -242,7 +242,7 @@ def plot_coef(pnorm,ci,si,xi):
 
    fig = plt.figure(figsize=(14,12))
 
-   label=['r','R','\kappa','Z']
+   label=['r','R',r'\kappa','Z']
    for i in range(4):
       ax = fig.add_subplot(3,4,i+1)
       ax.set_xlabel(r'$\psi$')
@@ -262,7 +262,7 @@ def plot_coef(pnorm,ci,si,xi):
       u = ci[i,:]
       ax.plot(pnorm,u,'-r',linewidth=1,alpha=1)
 
-   label=['-','\delta','-\zeta','s_3']
+   label=['-',r'\delta',r'-\zeta','s_3']
    for i in range(4):
       ax = fig.add_subplot(3,4,i+9)
       ax.set_xlabel(r'$\psi$')
