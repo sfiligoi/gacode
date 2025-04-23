@@ -315,7 +315,6 @@ while [ $# -gt 0 ] ; do
 
   -g) shift ; GFILE="$1" ; EFIT=1 ;;
 
-  -nfourier) shift ; NFOURIER=$1 ;;
   -nharm) shift ; NHARM=$1 ;;
   -plotpng) PLOTPNG=1 ;;
 
@@ -602,7 +601,6 @@ echo $VERBOSE_FLAG >> $CONFIG
 echo $IPCCW >> $CONFIG
 echo $BTCCW >> $CONFIG
 
-# Fourier modes
 echo $LUMP_FAST_FLAG >> $CONFIG
 echo $TRUE_AUX_FLAG >> $CONFIG
 
@@ -612,7 +610,7 @@ echo $TRUE_AUX_FLAG >> $CONFIG
 #==============================================================
 # Run Scikit-based mapper 
 if [ $EFIT -eq 1 ] ; then
-   python $MAPPER $GFILE $MAG $NARC $NPSI $NHARM 0 $PLOTPNG $PSINORM
+   python $MAPPER $GFILE $MAG $NARC $NPSI $NHARM $PLOTPNG $PSINORM
 fi
 #==============================================================
 
