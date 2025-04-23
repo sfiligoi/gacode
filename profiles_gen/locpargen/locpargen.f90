@@ -24,7 +24,6 @@ program locpargen
   read(1,*) r0
   read(1,*) rho0
   read(1,*) psi0
-  read(1,*) hasgeo
   read(1,*) qnflag
   read(1,*) appendflag
   read(1,*) ntheta
@@ -65,8 +64,6 @@ program locpargen
   endif
   
   call expro_locsim_profiles(&
-       hasgeo,&
-       0,&
        qnflag,&
        nion+1,&
        r0,&
