@@ -664,9 +664,6 @@ module gyro_globals
   real :: nu_ei_scale
   real :: nu_ii_scale
   !
-  ! Geometry Fourier coefficients
-  integer :: n_fourier_geo
-  real, dimension(8,0:32) :: a_fourier_geo
   !---------------------------------------------------------
 
   !---------------------------------------------

@@ -188,10 +188,6 @@ module gyro_interface
   real :: gyro_rhos_norm_in=8.3333333e-4
   real :: gyro_csda_norm_in=2.1850387e5
 
-  ! Inputs available via interface but not by INPUT
-  integer :: gyro_n_fourier_geo_in = 0
-  real, dimension(8,0:32) :: gyro_a_fourier_geo_in = 0.0
-
   ! Output parameters
   real, dimension(:), allocatable :: gyro_elec_pflux_out 
   real, dimension(:), allocatable :: gyro_elec_mflux_out 
@@ -393,9 +389,6 @@ contains
     gyro_ic_method_in = ic_method
     gyro_zf_test_flag_in = zf_test_flag
 
-    gyro_n_fourier_geo_in = n_fourier_geo
-    gyro_a_fourier_geo_in(:,:) = a_fourier_geo(:,:)
-
     ! Normalisation Values
     gyro_b_unit_norm_in = b_unit_norm
     gyro_a_meters_in = a_meters
@@ -593,9 +586,6 @@ contains
     fieldeigen_tol = gyro_fieldeigen_tol_in
     ic_method = gyro_ic_method_in
     zf_test_flag = gyro_zf_test_flag_in
-
-    n_fourier_geo = gyro_n_fourier_geo_in
-    a_fourier_geo(:,:) = gyro_a_fourier_geo_in(:,:)
 
     path = gyro_path_in
 
