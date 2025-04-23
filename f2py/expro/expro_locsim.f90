@@ -20,8 +20,6 @@ module expro_locsim_interface
   double precision, dimension(:), allocatable :: gamma_p_exp
   double precision, dimension(:), allocatable :: mach_exp
   
-  double precision, dimension(:,:,:), allocatable :: geo_yin_exp
-
   ! Local values
 
   double precision :: shift_loc
@@ -128,8 +126,6 @@ subroutine expro_locsim_alloc(flag)
      if (allocated(gamma_p_exp)) deallocate(gamma_p_exp)
      if (allocated(mach_exp)) deallocate(mach_exp)
      
-     if (allocated(geo_yin_exp)) deallocate(geo_yin_exp)
-
   endif
 
 end subroutine expro_locsim_alloc
