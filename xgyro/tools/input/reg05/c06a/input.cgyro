@@ -1,5 +1,7 @@
 # Disable COLLISION_FIELD comm
 COLLISION_FIELD_MODEL=0
+# disable BETA_STAR
+BETA_STAR_SCALE=0
 # Numerical Resolution
 N_TOROIDAL=2
 BOX_SIZE=4
