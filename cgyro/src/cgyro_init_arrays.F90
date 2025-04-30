@@ -118,7 +118,9 @@ subroutine cgyro_init_arrays
 !$acc enter data copyin(jvec_c)
 #endif
 
-  call parallel_lib_rtrans_real(jvec_c,jvec_v)
+  if ((collision_model /= 5) .AND. (collision_field_model == 1)) then
+    call parallel_lib_rtrans_real(jvec_c,jvec_v)
+  endif
 
   if (nonlinear_flag == 1) then
 !

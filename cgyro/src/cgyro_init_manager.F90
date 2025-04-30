@@ -208,6 +208,7 @@ subroutine cgyro_init_manager
        ! and this drastically similifies the code
        ! But could be improved in the future
        allocate(field_v(n_field,nt1:nt2,n_sim,nc))
+       allocate(jvec_v(n_field,nc_loc_coll,nt1:nt2,nv,n_sim))
 #if defined(OMPGPU)
 !$omp target enter data map(alloc:field_v,field_loc_v,dvjvec_v)
 #elif defined(_OPENACC)
@@ -273,11 +274,6 @@ subroutine cgyro_init_manager
      allocate(omega_ss(n_field,nc,nv_loc,nt1:nt2))
      allocate(omega_sbeta(nc,nv_loc,nt1:nt2))
      allocate(jvec_c(n_field,nc,nv_loc,nt1:nt2))
-     ! we do not really need all n_sim in field_v
-     ! but since n_sim is assumed to be small, the added cost is small
-     ! and this drastically similifies the code
-     ! But could be improved in the future
-     allocate(jvec_v(n_field,nc_loc_coll,nt1:nt2,nv,n_sim))
      allocate(dvjvec_c(n_field,nc,nv_loc,nt1:nt2))
      allocate(jxvec_c(n_field,nc,nv_loc,nt1:nt2))
      allocate(upfac1(nc,nv_loc,nt1:nt2))
