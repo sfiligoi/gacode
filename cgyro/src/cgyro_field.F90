@@ -138,7 +138,7 @@ subroutine cgyro_field_v_notae_s_gpu(start_t)
 #elif defined(_OPENACC)
 !$acc parallel loop collapse(4) gang private(ic_loc,field_loc_l) &
 !$acc&         present(dvjvec_v,fsendf) firstprivate(start_t,nj_loc,vcount) &
-!$acc&         firstprivate(nt2,nc1_cl1,nc2_cl2,n_field,nv) default(none)
+!$acc&         firstprivate(nt2,nc_cl1,nc_cl2,n_field,nv) default(none)
 #endif
   do ic=nc_cl1,nc_cl2
    do ism=1,n_sim
