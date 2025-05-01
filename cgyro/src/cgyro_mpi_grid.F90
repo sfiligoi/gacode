@@ -384,8 +384,6 @@ subroutine cgyro_mpi_grid
   endif
   call MPI_COMM_RANK(NEW_COMM_4,i_proc_4,i_err)
 
-  ! i_sim == i_proc_4+1
-
   call parallel_lib_init(nc,nv,nv_loc,nt1,nt_loc,n_field,n_sim,nc_loc_coll,NEW_COMM_4)
   if (nc_loc /= (nc_loc_coll*n_sim)) then
      call cgyro_error('LOGICAL ERROR: nc_loc /= (nc_loc_coll*n_sim)')

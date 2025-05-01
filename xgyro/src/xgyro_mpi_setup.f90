@@ -109,7 +109,7 @@ subroutine xgyro_mpi_setup
        ! tell CGYRO that each simulation is independent
        CGYRO_COMM_WORLD_4 = CGYRO_COMM_WORLD
        n_sim = 1
-       i_sim = 0
+       i_sim = 1
   endif
   have_COMM_4 = .TRUE.
 
