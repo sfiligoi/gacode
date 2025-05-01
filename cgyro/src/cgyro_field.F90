@@ -40,10 +40,10 @@ subroutine cgyro_field_v_notae_s(start_t)
 
   vcount = nv/nv_loc
 !$omp parallel do collapse(3) private(ic_loc,iv,ic,k,j,ism)
-  do ic=nc1,nc2
+  do ic=nc_cl1,nc_cl2
    do ism=1,n_sim
     do itor=start_t,nt2
-     ic_loc = ic-nc1+1
+     ic_loc = ic-nc_cl1+1
      do k=1,vcount
       do j=1,nj_loc
         iv = j+(k-1)*nj_loc
@@ -70,7 +70,7 @@ subroutine cgyro_field_v_notae_s(start_t)
   do itor=start_t,nt2
     do ic=1,nc
      ! assuming  (.not.(itor == 0 .and. ae_flag == 1))
-     field(:,ic,itor) = fcoef(:,ic,itor)*field_v(:,itor,i_sim+1,ic)
+     field(:,ic,itor) = fcoef(:,ic,itor)*field_v(:,itor,i_sim,ic)
     enddo
   enddo
 
@@ -138,13 +138,13 @@ subroutine cgyro_field_v_notae_s_gpu(start_t)
 #elif defined(_OPENACC)
 !$acc parallel loop collapse(4) gang private(ic_loc,field_loc_l) &
 !$acc&         present(dvjvec_v,fsendf) firstprivate(start_t,nj_loc,vcount) &
-!$acc&         present(nt2,nc1,nc2,n_field,nv) default(none)
+!$acc&         firstprivate(nt2,nc1_cl1,nc2_cl2,n_field,nv) default(none)
 #endif
-  do ic=nc1,nc2
+  do ic=nc_cl1,nc_cl2
    do ism=1,n_sim
     do itor=start_t,nt2
      do i_f=1,n_field
-      ic_loc = ic-nc1+1
+      ic_loc = ic-nc_cl1+1
       field_loc_l = (0.0,0.0)
 #if defined(OMPGPU)
 !$omp parallel do simd collapse(2) reduction(+:field_loc_l) &
@@ -187,7 +187,7 @@ subroutine cgyro_field_v_notae_s_gpu(start_t)
      ! assuming  (.not.(itor == 0 .and. ae_flag == 1))
      do ic=1,nc
        do i_f=1,n_field
-        field(i_f,ic,itor) = fcoef(i_f,ic,itor)*field_v(i_f,itor,i_sim+1,ic)
+        field(i_f,ic,itor) = fcoef(i_f,ic,itor)*field_v(i_f,itor,i_sim,ic)
        enddo
      enddo
   enddo
