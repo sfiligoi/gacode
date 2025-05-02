@@ -28,6 +28,8 @@ subroutine cgyro_mpi_grid
   character(len=192) :: msg
   integer :: nl_el_size
 
+  integer, dimension(10) :: sels_loc, sels_min, sels_max
+
   integer, external :: omp_get_max_threads, omp_get_thread_num
 
   if (.NOT. have_COMM_4) then
@@ -421,6 +423,33 @@ subroutine cgyro_mpi_grid
 !$acc enter data copyin(nt1,nt2,nt_loc,nv1,nv2,nv_loc,ns1,ns2,ns_loc)
 !$acc enter data copyin(nc1,nc2,nc_loc,nc_cl1,nc_cl2,nc_loc_coll,n_jtheta,nsplit,nsplitA,nsplitB)
 #endif
+
+  !----------------------------------------------------------------------------
+  ! check that all the ranks in an ensemble have the same fundamental dimensions
+
+  sels_loc(1) = nc
+  sels_loc(2) = nv
+  sels_loc(3) = nv_loc
+  sels_loc(4) = nc_loc
+  sels_loc(5) = nt_loc
+  sels_loc(6) = n_field
+  sels_loc(7) = nc_loc_coll
+  sels_loc(8) = collision_model
+  sels_loc(9) = collision_precision_mode
+  sels_loc(10) = n_sim
+
+  call MPI_ALLREDUCE(sels_loc,sels_max,10,MPI_INT,MPI_MAX,CGYRO_COMM_WORLD_4,i_err)
+  call MPI_ALLREDUCE(sels_loc,sels_min,10,MPI_INT,MPI_MIN,CGYRO_COMM_WORLD_4,i_err)
+
+  do d=1,10
+    if ((sels_loc(d)/=sels_max(d)) .or. (sels_loc(d)/=sels_min(d))) then
+     write (msg, "(A,I0,A,I0,A,I0,A)") "Inconsistent ensemble parameters (",d," ",sels_min(d),"/=",sels_max(d),")"
+     call cgyro_error(msg)
+     return
+    endif
+  enddo
+
+  !----------------------------------------------------------------------------
 
   fA_req_valid = .FALSE.
   fB_req_valid = .FALSE.
