@@ -100,7 +100,8 @@ subroutine xgyro_mpi_setup
   call MPI_COMM_SIZE(CGYRO_COMM_WORLD,n_proc,i_err)
 
   if (xgyro_share_cmat==1) then
-       ! TODO: We need some kind of validation that sharing of CMAT is OK
+       ! Note: Ensemble-wide validation happens inside CGYRO itself
+       ! TODO: Consider even better checks at this level
        ! Spread coll compute over the whole XGYRO MPI communicator
        CGYRO_COMM_WORLD_4 = XGYRO_COMM_WORLD
        n_sim = xgyro_n_dirs
