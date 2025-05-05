@@ -359,6 +359,10 @@ subroutine cgyro_init_manager
      endif
 
      if (collision_model == 5) then
+        if (nc_loc_coll/=nc_loc) then
+           call cgyro_error("CMAT sharing not supported for COLLISION_MODEL 5")
+           return
+        endif
         allocate(cmat_simple(n_xi,n_xi,n_energy,n_species,n_theta,nt1:nt2))
      else
         if (collision_precision_mode == 1) then
