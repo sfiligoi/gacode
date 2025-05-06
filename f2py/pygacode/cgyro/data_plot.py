@@ -1220,6 +1220,8 @@ class cgyrodata_plot(data.cgyrodata):
       ymax   = xin['ymax']
       nstr   = xin['nstr']
       bar    = xin['bar']
+      spec   = xin['spec']
+      
 
       t = self.getnorm(xin['norm'])
       
@@ -1243,7 +1245,7 @@ class cgyrodata_plot(data.cgyrodata):
       ax.set_title(r'$\mathrm{Average~fluctuation~intensity} \quad $'+mwin)
       ax.set_xlabel(self.kxstr)
 
-      f,ft = self.kxky_select(theta,field,moment,0,gbnorm=True)
+      f,ft = self.kxky_select(theta,field,moment,spec,gbnorm=True)
 
       if nstr == 'null' or nstr == '+':
          ax.set_ylabel(self.ylabeler(nstr,ft,sq=True,tave=True))
