@@ -41,7 +41,7 @@
       REAL :: mix1,mix2,mixnorm,gamma_ave
       REAL :: vzf,dvzf,vzf1,vzf2
       REAL :: vzf_mix, kymax_mix
-      REAL :: etg_streamer
+      REAL :: etg_streamer, etg_stiff
       REAL :: kxzf, sat_geo_factor
       REAL :: b0,b1,b2,b3
       REAL :: d1,d2,Gq,kx_width,dlnpdr,ptot
@@ -99,6 +99,13 @@
 !         write(*,*)"dlnpdr = ",dlnpdr
 !
       czf = ABS(alpha_zf_in)
+
+      if (etg_factor_in < 0) then
+        etg_stiff = abs(etg_factor_in)
+      else
+        etg_stiff = 1.0
+      endif
+
 !
 ! coefficients for SAT_RULE = 1
       if(sat_rule_in.eq.1) then
@@ -289,14 +296,14 @@
             if(ky0.lt.kymax1)then
               gamma(j) = MAX(gamma0  - cz1*(kymax1 - ky0)*vzf1,0.0)
             else
-              gamma(j) = cz2*gammamax1  +  Max(gamma0 - cz2*vzf1*ky0,0.0)          
+              gamma(j) = cz2*gammamax1  +  etg_stiff*Max(gamma0 - cz2*vzf1*ky0,0.0)
             endif
           elseif(sat_rule_in.eq.2 .OR. sat_rule_in.eq.3)then
 ! note that the gamma mixing is for gamma_model not G*gamma_model
             if(ky0.lt.kymax1)then
               gamma(j) = gamma0
             else
-              gamma(j) = gammamax1 +Max(gamma0 - cz2*vzf1*ky0,0.0)
+              gamma(j) = gammamax1 +  etg_stiff*Max(gamma0 - cz2*vzf1*ky0,0.0)
             endif
           endif
           gamma_kymix(j) = gamma(j)     ! used if USE_MIX=F 
