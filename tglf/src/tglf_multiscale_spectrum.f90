@@ -16,6 +16,8 @@
 !  TGLF multiscale saturation rule: sat_rule_in = 2 option
 !  Aug. 6, 2020 based on papers submitted to PPCF & NF
 !
+!  TGLF SAT3: H.G. Dudding et al 2022 Nucl. Fusion 62 096005 
+!
 !***********************************************************************
 !
       USE tglf_dimensions
