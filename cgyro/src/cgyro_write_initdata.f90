@@ -119,9 +119,9 @@ subroutine cgyro_write_initdata
 
      write(io,*)
      write(io,'(a)') &
-          ' i  z  n/n_norm   T/T_norm   m/m_norm     a/Ln       a/Lt       nu    rho/rhos'
+          ' i  z  n/n_norm   T/T_norm   m/m_norm     a/Ln       a/Lt       nu       rho/rhos'
      do is=1,n_species
-        rhoa = sqrt(temp(is)*mass(is))/z(is)
+        rhoa = sqrt(temp(is)*mass(is))/abs(z(is))
         write(io,'(t1,i2,1x,i2,3(2x,1pe9.3),2(1x,1pe10.3),(2x,1pe9.3),3(1x,1pe10.3))') &
              is,int(z(is)),dens(is),temp(is),mass(is),dlnndr(is),dlntdr(is),nu(is),rhoa
      enddo
