@@ -28,7 +28,7 @@ FDEBUG =-O1 -g -h bounds
 F2PY   = f2py --fcompiler=pg
 
 # System math libraries
-LMATH=-L${HIPFORT_DIR}/lib -L${ROCM_PATH}/lib -lhipfort-amdgcn -lhipfft -lamdhip64
+LMATH=-L${HIPFORT_DIR}/lib -L${ROCM_PATH}/lib -lhipfort-amdgcn -lhipfft -lamdhip64 -lsci_cray
 
 # NetCDF
 NETCDF=-L${NETCDF_DIR}/lib -lnetcdff -lnetcdf
