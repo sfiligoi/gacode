@@ -283,22 +283,17 @@ class cgyrodata_plot(data.cgyrodata):
       # normalization is phi(complex) where |phi| is max
       n0 = np.argmax(abs(self.phib[:,itime]))
       f_norm = self.phib[n0,itime]
-
-      #n0 = self.n_radial//2*self.n_theta+self.n_theta//2
-      # Normalized real and imag parts
-      #if fnorm == 0:
-      #   f_norm = self.phib[n0,itime]
-      #elif fnorm == 1:
-      #   f_norm = self.aparb[n0,itime]
-      #else:
-      #   f_norm = self.bparb[n0,itime]
          
       y1 = np.real(f/f_norm)
       y2 = np.imag(f/f_norm)
 
+      iwid = np.argmin(abs(y1-0.5))
+      w = x[iwid]/np.sqrt(np.log(2))
+
       ax.plot(x,y1,'-o',color='black',markersize=2,label=r'$\mathrm{Re}$')
       ax.plot(x,y2,'-o',color='red'  ,markersize=2,label=r'$\mathrm{Im}$')
-
+      ax.plot(x,np.exp(-(x/w)**2),color='black',linestyle=':')
+     
       ax.legend()
 
       fig.tight_layout(pad=0.3)
@@ -949,10 +944,6 @@ class cgyrodata_plot(data.cgyrodata):
       ax.plot(ky,k0*y1,color='k')
       ax.plot(ky,-k0*y2,linestyle='--',color='k')
 
-      # EAB print
-      #for i in range(len(ky)):
-      #   print(ky[i],k0*y1[i],-k0*y2[i])
-
       if ymax != 'auto':
          ax.set_ylim(top=float(ymax))
       if ymin != 'auto':
@@ -960,7 +951,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       fig.tight_layout(pad=0.3)
 
-      return '   ky*rho       kx*rho',ky,y1,None
+      return '  ky*rho          kx*rho          kx*rho',ky,k0*y1,-k0*y2
 
    def plot_zf(self,xin):
 
