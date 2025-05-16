@@ -13,8 +13,11 @@ jobs:
   build-and-test:
     strategy:
       matrix:
-        os: [linux-gpu-cuda]
+        os: [ubuntu-latest, linux-gpu-cuda]
         hwflavor: [cpu, openacc, ompgpu]
+        exclude:
+          - os: ubuntu-latest
+            hwflavor: [openacc, ompgpu]
     runs-on: ${{ matrix.os }}
     env:
       hwflavor: ${{ matrix.hwflavor }}
