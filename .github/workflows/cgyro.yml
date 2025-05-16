@@ -17,7 +17,9 @@ jobs:
         hwflavor: [cpu, openacc, ompgpu]
         exclude:
           - os: ubuntu-latest
-            hwflavor: [openacc, ompgpu]
+            hwflavor: openacc
+          - os: ubuntu-latest
+            hwflavor: ompgpu
     runs-on: ${{ matrix.os }}
     env:
       hwflavor: ${{ matrix.hwflavor }}
