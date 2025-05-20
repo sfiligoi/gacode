@@ -322,8 +322,6 @@ class cgyrodata_plot(data.cgyrodata):
 
       f,ft = self.kxky_select(theta,field,moment,spec,gbnorm=True)
 
-      p = np.sum(abs(f[:,:,:]),axis=0)
-
       ax = fig.add_subplot(111)
       ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
@@ -338,11 +336,12 @@ class cgyrodata_plot(data.cgyrodata):
          nvec = str2list(nstr)
 
       for n in nvec:
+         p = np.sum(abs(f[:,n,:]),axis=0)
          num = '$n='+str(n)+'$'
          if n==0:
-            ax.plot(t,p[n,:],linewidth=2,label=num)
+            ax.plot(t,p,linewidth=2,label=num)
          else:
-            ax.plot(t,p[n,:],label=num)
+            ax.plot(t,p,label=num)
 
       ax.set_xlim([0,max(t)])
 
