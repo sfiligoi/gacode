@@ -476,6 +476,7 @@ subroutine cgyro_init_collision
   cmat_diff_global_loc = 0.0
   cmat32_diff_global_loc = 0.0
 
+#ifndef DISABLE_CMAT_INIT_OMP
 !$omp  parallel do collapse(2) default(none) &
 !$omp& shared(nc_cl1,nc_cl2,nt1,nt2,nv,delta_t,n_species,rho,is_ele,n_field,n_energy,n_xi) &
 !$omp& shared(collision_kperp,collision_field_model,explicit_trap_flag) &
@@ -497,6 +498,7 @@ subroutine cgyro_init_collision
 !$omp& shared(cmat,cmat_fp32,cmat_stripes,cmat_e1) &
 !$omp& reduction(+:cmat_diff_global_loc,cmat32_diff_global_loc) &
 !$omp& reduction(+:cmap_fp32_error_abs_cnt_loc,cmap_fp32_error_rel_cnt_loc)
+#endif
   do itor=nt1,nt2
      do ic=nc_cl1,nc_cl2
 
