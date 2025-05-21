@@ -280,16 +280,18 @@ class cgyrodata_plot(data.cgyrodata):
             ax.set_xlim([-tmax,tmax])
 
             
-      # theta_* = 0
-      n0 = self.n_radial//2*self.n_theta+self.n_theta//2
+      # normalization is phi(complex) where |phi| is max
+      n0 = np.argmax(abs(self.phib[:,itime]))
+      f_norm = self.phib[n0,itime]
 
+      #n0 = self.n_radial//2*self.n_theta+self.n_theta//2
       # Normalized real and imag parts
-      if fnorm == 0:
-         f_norm = self.phib[n0,itime]
-      elif fnorm == 1:
-         f_norm = self.aparb[n0,itime]
-      else:
-         f_norm = self.bparb[n0,itime]
+      #if fnorm == 0:
+      #   f_norm = self.phib[n0,itime]
+      #elif fnorm == 1:
+      #   f_norm = self.aparb[n0,itime]
+      #else:
+      #   f_norm = self.bparb[n0,itime]
          
       y1 = np.real(f/f_norm)
       y2 = np.imag(f/f_norm)
@@ -1218,6 +1220,8 @@ class cgyrodata_plot(data.cgyrodata):
       ymax   = xin['ymax']
       nstr   = xin['nstr']
       bar    = xin['bar']
+      spec   = xin['spec']
+      
 
       t = self.getnorm(xin['norm'])
       
@@ -1241,7 +1245,7 @@ class cgyrodata_plot(data.cgyrodata):
       ax.set_title(r'$\mathrm{Average~fluctuation~intensity} \quad $'+mwin)
       ax.set_xlabel(self.kxstr)
 
-      f,ft = self.kxky_select(theta,field,moment,0,gbnorm=True)
+      f,ft = self.kxky_select(theta,field,moment,spec,gbnorm=True)
 
       if nstr == 'null' or nstr == '+':
          ax.set_ylabel(self.ylabeler(nstr,ft,sq=True,tave=True))
