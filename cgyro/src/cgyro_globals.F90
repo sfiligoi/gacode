@@ -14,9 +14,9 @@ module cgyro_globals
 #endif
 
   use, intrinsic :: iso_fortran_env
-  
-  ! Data output precision setting
-  integer, parameter :: BYTE=4 ! Change to 8 for double precision
+
+  integer :: sbeta_const_flag
+  real :: sbeta_h
   
   !---------------------------------------------------------------
   ! Input parameters:
@@ -98,6 +98,7 @@ module cgyro_globals
   integer :: theta_plot
   integer :: gpu_bigmem_flag
   integer :: upwind_single_flag
+  integer :: nl_single_flag
   real :: px0
   integer :: stream_term
   real :: stream_factor
@@ -138,7 +139,7 @@ module cgyro_globals
   real, dimension(11) :: dlntdr
   real, dimension(11) :: sdlnndr
   real, dimension(11) :: sdlntdr
-  real, dimension(11) :: sbeta
+  real :: sbeta
 
   integer :: subroutine_flag  ! only used for cgyro_read_input
 
@@ -169,26 +170,25 @@ module cgyro_globals
   ! MPI/OpenMP variables and pointers
   ! 
   integer :: n_omp
+  logical :: have_COMM_4 = .FALSE.
   !
   integer :: i_err
   integer :: i_proc
   integer :: i_proc_1
   integer :: i_proc_2
   integer :: i_proc_3
-  integer :: i_proc_restart_io
+  integer :: i_proc_4
   integer :: n_proc
   integer :: n_proc_1
   integer :: n_proc_2
-  integer :: n_proc_restart_io
-  integer :: i_group_1
-  integer :: i_group_2
-  integer :: i_group_3
-  integer :: i_group_restart_io
+  integer :: n_proc_4
   integer :: CGYRO_COMM_WORLD
-  integer :: NEW_COMM_1
-  integer :: NEW_COMM_2
-  integer :: NEW_COMM_3
-  integer :: nv1,nv2,nc1,nc2
+  integer :: NEW_COMM_1  ! simple Linear
+  integer :: NEW_COMM_2  ! non-linear
+  integer :: NEW_COMM_3  ! simple linear by species
+  integer :: CGYRO_COMM_WORLD_4
+  integer :: NEW_COMM_4  ! aggregate linear, coll
+  integer :: nv1,nv2,nc1,nc2,nc_cl1,nc_cl2
   integer :: nsplit,nsplitA,nsplitB
   integer :: ns1,ns2
   integer, dimension(:), allocatable :: recv_status
@@ -202,6 +202,7 @@ module cgyro_globals
   integer :: nv_loc,iv_loc
   integer :: nc,ic
   integer :: nc_loc,ic_loc
+  integer :: nc_loc_coll   ! nc local slice for coll purposes, equals nc_loc for single simulation
   integer :: ns_loc
   integer, dimension(:), allocatable :: ie_v
   integer, dimension(:), allocatable :: ix_v
@@ -214,6 +215,9 @@ module cgyro_globals
   !
   integer :: nt1,nt2,nt_loc
   integer :: n_toroidal_procs
+  ! For multi-simulation handling
+  integer :: n_sim          ! how many simulations is coll processing at once
+  integer :: i_sim          ! 0-based order in n_sim
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------
@@ -271,11 +275,16 @@ module cgyro_globals
   character(len=2) :: mpiio_small_stripe_str
   character(len=3) :: mpiio_stripe_str
   !
-  ! Standard precision for IO (there are optionally reset to higher precision later)
-  character(len=8)  :: fmtstr    ='(es11.4)'
-  integer           :: fmtstr_len = 12
-  character(len=15) :: fmtstrn   ='(10(es11.4,1x))'
-  character(len=9)  :: fmtstr_hi ='(es18.12)'
+  ! Precision for IO (these are set in cgyro_init_manager)
+  !
+  ! BYTE=4 (standard single precision)
+  ! BYTE=8 (double precision for DMD analysis)
+  !
+  integer :: BYTE
+  character(len=8)  :: fmtstr   
+  integer           :: fmtstr_len 
+  character(len=15) :: fmtstrn  
+  character(len=9)  :: fmtstr_prec ='(es18.12)'
   !----------------------------------------------------
 
   !---------------------------------------------------------------
@@ -344,9 +353,13 @@ module cgyro_globals
   complex, dimension(:,:,:), allocatable :: h0_x
   complex, dimension(:,:,:), allocatable :: h0_old
   complex, dimension(:,:,:,:), allocatable :: fA_nl,fB_nl
+  complex(KIND=REAL32), dimension(:,:,:,:), allocatable :: fA_nl32,fB_nl32
   complex, dimension(:,:,:,:), allocatable :: g_nl
+  complex(KIND=REAL32), dimension(:,:,:,:), allocatable :: g_nl32
   complex, dimension(:,:,:), allocatable :: fpackA,fpackB
+  complex(KIND=REAL32), dimension(:,:,:), allocatable :: fpackA32,fpackB32
   complex, dimension(:,:,:,:), allocatable :: gpack
+  complex(KIND=REAL32), dimension(:,:,:,:), allocatable :: gpack32
   complex, dimension(:,:,:), allocatable :: omega_cap_h
   complex, dimension(:,:,:), allocatable :: omega_h
   complex, dimension(:,:,:,:), allocatable :: omega_s,omega_ss
@@ -356,10 +369,11 @@ module cgyro_globals
   complex, dimension(:,:,:), allocatable :: cap_h_c_old
   complex, dimension(:,:,:), allocatable :: cap_h_c_old2
   complex, dimension(:,:,:), allocatable :: cap_h_ct
-  complex, dimension(:,:,:), allocatable :: cap_h_v
+  complex, dimension(:,:,:,:), allocatable :: cap_h_v
   real, dimension(:,:,:,:), allocatable :: jvec_c
   real, dimension(:,:,:,:,:), allocatable :: jvec_c_nl ! used by NL only
-  real, dimension(:,:,:,:), allocatable :: jvec_v
+  real(KIND=REAL32), dimension(:,:,:,:,:), allocatable :: jvec_c_nl32 ! used by NL only
+  real, dimension(:,:,:,:,:), allocatable :: jvec_v
   real, dimension(:,:,:,:), allocatable :: dvjvec_c
   real, dimension(:,:,:,:), allocatable :: dvjvec_v
   real, dimension(:,:,:,:), allocatable :: jxvec_c
@@ -368,14 +382,16 @@ module cgyro_globals
   ! Fields
   real, dimension(:,:,:), allocatable :: fcoef
   real, dimension(:,:,:), allocatable :: gcoef
-  complex, dimension(:,:,:), allocatable :: field, field_v
+  complex, dimension(:,:,:), allocatable :: field
   complex, dimension(:,:,:), allocatable :: field_dot
-  complex, dimension(:,:,:), allocatable :: field_loc, field_loc_v
+  complex, dimension(:,:,:), allocatable :: field_loc
   complex, dimension(:,:,:), allocatable :: field_old
   complex, dimension(:,:,:), allocatable :: field_old2
   complex, dimension(:,:,:), allocatable :: field_old3
   complex, dimension(:,:,:,:,:), allocatable :: moment_loc
   complex, dimension(:,:,:,:,:), allocatable :: moment
+  complex, dimension(:,:,:,:), allocatable :: field_v
+  complex, dimension(:,:,:,:), allocatable :: field_loc_v
   !
   ! Nonlinear fluxes (f=standard,c=central,g=global)
   real, dimension(:,:,:,:), allocatable :: cflux_loc
@@ -397,19 +413,23 @@ module cgyro_globals
   ! GPU-FFTW plans
 
 #if defined(HIPGPU)
-  type(C_PTR) :: hip_plan_r2c_manyA,hip_plan_r2c_manyB
-  type(C_PTR) :: hip_plan_c2r_manyA,hip_plan_c2r_manyB,hip_plan_c2r_manyG
+  type(C_PTR)    :: plan_r2c_manyA,plan_r2c_manyB
+  type(C_PTR)    :: plan_c2r_manyA,plan_c2r_manyB,plan_c2r_manyG
 #elif defined(MKLGPU)
-  INTEGER*8 :: dfftw_plan_r2c_manyA,dfftw_plan_r2c_manyB
-  INTEGER*8 :: dfftw_plan_c2r_manyA,dfftw_plan_c2r_manyB,dfftw_plan_c2r_manyG
+  INTEGER*8      :: plan_r2c_manyA,plan_r2c_manyB
+  INTEGER*8      :: plan_c2r_manyA,plan_c2r_manyB,plan_c2r_manyG
 #else
-  integer(c_int) :: cu_plan_r2c_manyA,cu_plan_r2c_manyB
-  integer(c_int) :: cu_plan_c2r_manyA,cu_plan_c2r_manyB,cu_plan_c2r_manyG
+  integer(c_int) :: plan_r2c_manyA,plan_r2c_manyB
+  integer(c_int) :: plan_c2r_manyA,plan_c2r_manyB,plan_c2r_manyG
 #endif
 
   complex, dimension(:,:,:),allocatable, target :: fxmany,fymany,gxmany,gymany
   real, dimension(:,:,:), allocatable, target :: uxmany,uymany
   real, dimension(:,:,:), allocatable, target :: vxmany,vymany,uvmany
+
+  complex(KIND=REAL32), dimension(:,:,:),allocatable, target :: fxmany32,fymany32,gxmany32,gymany32
+  real(KIND=REAL32), dimension(:,:,:), allocatable, target :: uxmany32,uymany32
+  real(KIND=REAL32), dimension(:,:,:), allocatable, target :: vxmany32,vymany32,uvmany32
 #endif
   ! 
   ! 2D FFT dimensions 
@@ -428,6 +448,16 @@ module cgyro_globals
   complex, dimension(:,:,:),allocatable :: fy
   complex, dimension(:,:,:),allocatable :: gx
   complex, dimension(:,:,:),allocatable :: gy
+
+  real(KIND=REAL32), dimension(:,:,:), allocatable :: vxmany32
+  real(KIND=REAL32), dimension(:,:,:), allocatable :: vymany32
+  real(KIND=REAL32), dimension(:,:,:), allocatable :: uxmany32
+  real(KIND=REAL32), dimension(:,:,:), allocatable :: uymany32
+  real(KIND=REAL32), dimension(:,:,:), allocatable :: uv32
+  complex(KIND=REAL32), dimension(:,:,:),allocatable :: fx32
+  complex(KIND=REAL32), dimension(:,:,:),allocatable :: fy32
+  complex(KIND=REAL32), dimension(:,:,:),allocatable :: gx32
+  complex(KIND=REAL32), dimension(:,:,:),allocatable :: gy32
 #endif
   !
   ! Work arrays
@@ -505,15 +535,6 @@ module cgyro_globals
   !
   ! Number of gridpoints for Miller geometry integration grid
   integer, parameter :: geo_ntheta=1001 
-  !---------------------------------------------------------------
-
-  !---------------------------------------------------------------
-  integer :: geo_ny_in
-  real, dimension(8,0:32) :: geo_yin_in
-  !
-  integer :: geo_numeq_flag
-  integer :: geo_ny
-  real, dimension(:,:), allocatable :: geo_yin
   !---------------------------------------------------------------
 
   real :: total_memory

@@ -85,6 +85,7 @@ x.add('NU_GLOBAL','15.0')
 x.add('THETA_PLOT','1')
 x.add('GPU_BIGMEM_FLAG','1')
 x.add('UPWIND_SINGLE_FLAG','0')
+x.add('NL_SINGLE_FLAG','0')
 x.add('PX0','0.0')
 x.add('STREAM_TERM','0')
 x.add('STREAM_FACTOR','1.0')
@@ -139,7 +140,8 @@ x.add('DLNNDR','1.0',n=n)
 x.add('DLNTDR','1.0',n=n)
 x.add('SDLNNDR','0.0',n=n)
 x.add('SDLNTDR','0.0',n=n)
-x.add('SBETA','0.0',n=n)
+x.add('SBETA','0.0')
+
 x.add('DLNNDR_SCALE','1.0',n=n)
 x.add('DLNTDR_SCALE','1.0',n=n)
 
@@ -152,6 +154,9 @@ x.add('BETA_STAR_SCALE','1.0')
 x.add('BETAE_UNIT_SCALE','1.0')
 x.add('NU_EE_SCALE','1.0')
 x.add('ZF_SCALE','1.0')
+
+x.add('SBETA_CONST_FLAG','0')
+x.add('SBETA_H','0.0')
 
 # Perform the parsing
 x.read_input('input.cgyro')

@@ -1,0 +1,60 @@
+#---------------------------------------------------
+# MIT Engaging Cluster (orcd-login###.mit.edu) [GCC]
+#
+#   export GACODE_ROOT=<top_of_cloned_repo>
+#   export GACODE_PLATFORM=ENGAGING_ROCKY8
+#   source ${GACODE_ROOT}/platform/env/env.${GACODE_PLATFORM}
+#   source ${GACODE_ROOT}/shared/bin/gacode_setup
+#
+#---------------------------------------------------
+
+#  FIXED Hardware parameters
+CORES_PER_NODE=64
+NUMAS_PER_NODE=1
+
+MAKE           = make
+CFC            = gfortran
+MF90           = mpif90
+
+GCC_LIB        = $(strip $(subst bin/gfortran,lib,$(shell which ${CFC})))
+OPENMPI_LIB    = $(strip $(subst bin/mpif90,lib,$(shell which ${MF90})))
+OPENBLAS_LIB   = $(shell pkg-config --variable=libdir openblas)
+FFTW_LIB       = $(shell pkg-config --variable=libdir fftw3)
+HDF5_LIB       = $(shell pkg-config --variable=libdir hdf5)
+NETCDF_LIB     = $(shell pkg-config --variable=libdir netcdf)
+NETCDFF_LIB    = $(shell pkg-config --variable=libdir netcdf-fortran)
+LIB            = -L${GCC_LIB} -L${OPENMPI_LIB}
+
+GCC_INCL       = $(strip $(subst bin/gfortran,include,$(shell which ${CFC})))
+OPENMPI_INCL   = $(strip $(subst bin/mpif90,include,$(shell which ${MF90})))
+OPENBLAS_INCL  = $(shell pkg-config --variable=includedir openblas)
+FFTW_INCL      = $(shell pkg-config --variable=includedir fftw3)
+HDF5_INCL      = $(shell pkg-config --variable=includedir hdf5)
+NETCDF_INCL    = $(shell pkg-config --variable=includedir netcdf)
+NETCDFF_INCL   = $(shell pkg-config --variable=includedir netcdf-fortran)
+INCLUDE        = -I/usr/include -I${GCC_INCL} -I${OPENMPI_INCL} -I${OPENBLAS_INCL} -I${FFTW_INCL} -I${HDF5_INCL}
+
+# Compilers and flags
+
+FC     = ${MF90} -std=f2008 -fall-intrinsics -fPIC -I$(GACODE_ROOT)/modules -J$(GACODE_ROOT)/modules -g ${INCLUDE} ${LIB}
+F77    = ${MF90} -g
+
+FMATH  = -fdefault-real-8 -fdefault-double-8
+FOPT   = -O3 -fallow-argument-mismatch
+FDEBUG = -Wall -fcheck=all -fbacktrace -fbounds-check -O0 -Wextra -finit-real=nan -Wunderflow -ffpe-trap=invalid,zero,overflow
+FBOUND = -Wall -fbounds-check
+FOMP   = -fopenmp
+
+# System math libraries
+
+LMATH = -L${OPENBLAS_LIB} -lopenblas -L${FFTW_LIB} -lfftw3 -lfftw3f -lfftw3_threads -lfftw3f_threads
+
+# Optional netCDF libraries
+
+NETCDF     = -L${NETCDFF_LIB} -lnetcdff -L${NETCDF_LIB} -lnetcdf -L${HDF5_LIB} -lhdf5 -lhdf5_hl
+NETCDF_INC = ${NETCDFF_INCL}
+
+# Archive
+
+ARCH = ar cr
+

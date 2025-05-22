@@ -151,11 +151,11 @@ def wintxt(imin,imax,t,usec=0,fc=0,field=0):
     if fc == 0:
         fstr = 'field/all'
     elif field == 0:
-        fstr = '\phi'
+        fstr = r'\phi'
     elif field == 1:
-        fstr = 'A_\parallel'
+        fstr = r'A_\parallel'
     else:
-        fstr = 'B_\parallel'
+        fstr = r'B_\parallel'
 
     pre = '['+cstr+','+fstr+']'
     win = '[{:.1f} < (c_s/a) t < {:.1f}]'.format(t[imin],t[imax])
@@ -496,3 +496,4 @@ def shift_legendre(f,imin,imax):
         y2[n] = n_all2/d_all2*(2.0/np.pi)
 
     return y1,y2
+

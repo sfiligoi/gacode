@@ -22,9 +22,9 @@ subroutine cgyro_check
      call cgyro_info('RESOLUTION WARNING -- n_radial not a multiple of box_size.')
   endif
 
-  if (zf_test_mode == 0 .and. n_radial < (n_toroidal-1)*box_size) then
-     call cgyro_info('RESOLUTION WARNING -- n_radial < n*box_size.')
-  endif
+  !if (zf_test_mode == 0 .and. n_radial < (n_toroidal-1)*box_size) then
+  !   call cgyro_info('RESOLUTION WARNING -- n_radial < n*box_size.')
+  !endif
 
   if (zf_test_mode == 0 .and. n_radial < box_size) then
      call cgyro_info('SEVERE RESOLUTION WARNING -- n_radial < box_size.')
@@ -127,28 +127,9 @@ subroutine cgyro_check
 
   case (1) 
      call cgyro_info('Equilibrium: s-alpha')
-     if (profile_model == 2) then
-        call cgyro_error('s-alpha equilibrium model not valid with experimental profiles')
-        return
-     endif
-
   case (2) 
      call cgyro_info('Equilibrium: Miller Extended Harmonic (MXH)')
-
-  case (3) 
-     call cgyro_info('Equilibrium: Fourier')
-
-     if (geo_ny <= 0) then
-        call cgyro_error('Fourier geometry coefficients missing.')
-        return
-     endif
-     if (udsymmetry_flag == 1) then
-        call cgyro_error('Cannot have UDSYMMETRY_FLAG=1 with general geometry.')
-        return
-     endif
-
   case default
-
      call cgyro_error('Invalid value for equilibrium_model')
      return
 
@@ -413,5 +394,12 @@ subroutine cgyro_check
      return
   endif
   !------------------------------------------------------------------------
+
+  if (global_flag == 1) then 
+     call cgyro_info('##################### IMPORTANT ######################')
+     call cgyro_info('#       GLOBAL_FLAG=1 not ready for production       #')
+     call cgyro_info('#  See https://github.com/gafusion/gacode/issues/451 #')
+     call cgyro_info('######################################################')
+  endif
 
 end subroutine cgyro_check

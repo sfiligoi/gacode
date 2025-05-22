@@ -2,6 +2,7 @@ subroutine cgyro_init_arrays
 
   use mpi
   use cgyro_globals
+  use cgyro_io
   use parallel_lib
 
   implicit none
@@ -118,7 +119,16 @@ subroutine cgyro_init_arrays
 !$acc enter data copyin(jvec_c)
 #endif
 
-  call parallel_lib_rtrans_real(jvec_c,jvec_v)
+  if ((collision_model /= 5) .AND. (collision_field_model == 1)) then
+    call parallel_lib_rtrans_real(jvec_c,jvec_v)
+    do l=2, n_sim
+      if (maxval(abs(jvec_v(:,:,:,:,1)-jvec_v(:,:,:,:,l)))>1.e-7) then ! allow minor rounding errors
+         write(*,*) "ERROR: Not all jvec_v in the ensemble identical"
+         call cgyro_error("Not all jvec_v in the ensemble identical")
+         return
+      endif
+    enddo
+  endif
 
   if (nonlinear_flag == 1) then
 !
@@ -136,9 +146,9 @@ subroutine cgyro_init_arrays
 #elif defined(_OPENACC)
 !$acc parallel loop gang vector independent collapse(6) &
 !$acc&         private(itor,it,iltheta_min,mytor,ir,itf,jval) &
-!$acc&         present(jvec_c_nl,jvec_c,ic_c) &
+!$acc&         present(jvec_c_nl,jvec_c_nl32,jvec_c,ic_c) &
 !$acc&         present(n_toroidal_procs,nt_loc,nv_loc,n_jtheta,n_radial) &
-!$acc&         present(nt1,n_theta,n_field,nsplit) default(none)
+!$acc&         present(nt1,n_theta,n_field,nsplit) firstprivate(nl_single_flag) default(none)
 #else
 !$omp parallel do collapse(4) &
 !$omp&         private(it_loc,itor,mytor,it,ir,itf,iltheta_min,jval)
@@ -159,15 +169,24 @@ subroutine cgyro_init_arrays
             jval = jvec_c(itf,(ir-1)*n_theta+it,iv_loc,mytor)
           endif
           ! else just padding
-          jvec_c_nl(itf,ir,it_loc,iv_loc,itor) = jval
+          if (nl_single_flag > 1) then
+             jvec_c_nl32(itf,ir,it_loc,iv_loc,itor) = jval
+          else
+             jvec_c_nl(itf,ir,it_loc,iv_loc,itor) = jval
+          endif
         enddo
        enddo
       enddo
      enddo
     enddo
    enddo
-   call parallel_slib_distribute_real(n_field,n_radial,n_jtheta,nv_loc,nt_loc,jvec_c_nl)
-  endif
+   if (nl_single_flag > 1) then
+     call parallel_slib_distribute_real32(n_field,n_radial,n_jtheta,nv_loc,nt_loc,jvec_c_nl32)
+   else
+     call parallel_slib_distribute_real(n_field,n_radial,n_jtheta,nv_loc,nt_loc,jvec_c_nl)
+   endif
+
+  endif ! if nl
 
   !-------------------------------------------------------------------------
 
@@ -367,27 +386,9 @@ subroutine cgyro_init_arrays
   allocate(thfac_itor(0:2,nt1:nt2))
 
   do itor=nt1,nt2
-   thfac_itor(0,itor) = exp(2*pi*i_c*k_theta_base*itor*rmin)
-   thfac_itor(1,itor) = (1.0,0.0)
-   thfac_itor(2,itor) = exp(-2*pi*i_c*k_theta_base*itor*rmin)
-   !do ir=1,n_radial
-   !  do it=1,n_theta
-   !     do id=-nup_theta,nup_theta
-   !        ! jt = modulo(it+id-1,n_theta)+1
-   !        if (it+id < 1) then
-   !           jr = modulo(ir-itor*box_size*sign_qs-1,n_radial)+1
-   !        else if (it+id > n_theta) then
-   !           jr = modulo(ir+itor*box_size*sign_qs-1,n_radial)+1
-   !        else
-   !           jr = ir
-   !        endif
-   !        thfac = thfac_itor((n_theta+it+id-1)/n_theta,itor)
-   !        dtheta(ic_c(ir,it), id, itor)    = cderiv(id)*thfac
-   !        dtheta_up(ic_c(ir,it), id, itor) = uderiv(id)*thfac*up_theta
-   !        icd_c(ic_c(ir,it), id, itor)     = ic_c(jr,modulo(it+id-1,n_theta)+1)
-   !     enddo
-   !  enddo
-   !enddo
+     thfac_itor(0,itor) = exp(2*pi*i_c*k_theta_base*itor*rmin)
+     thfac_itor(1,itor) = (1.0,0.0)
+     thfac_itor(2,itor) = exp(-2*pi*i_c*k_theta_base*itor*rmin)
   enddo
 #if defined(OMPGPU)
 !$omp target enter data map(to:c_wave,thfac_itor,cderiv,uderiv)
@@ -465,7 +466,11 @@ subroutine cgyro_init_arrays
            sm = sdlnndr(is)+sdlntdr(is)*(energy(ie)-1.5)
 
            ! generalized beta/drift shear (acts on H)
-           sb = -sbeta(is)*energy(ie)*xi(ix)**2/bmag(it)**3
+           if (sbeta_const_flag == 1) then
+              sb = -sbeta
+           else
+              sb = -sbeta*energy(ie)*xi(ix)**2/bmag(it)**3
+           endif
 
            arg = k_theta_base*itor*length/(2*pi)
 

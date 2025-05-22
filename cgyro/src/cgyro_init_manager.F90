@@ -19,6 +19,7 @@ subroutine cgyro_init_manager
   use half_hermite
 
   use cgyro_io
+  use cgyro_nl
 
 #if defined(_OPENACC) || defined(OMPGPU)
 #define CGYRO_GPU_FFT
@@ -30,10 +31,16 @@ subroutine cgyro_init_manager
   integer :: ie,ix
 
   if (hiprec_flag == 1) then
-     fmtstr  = '(es16.9)'
+     BYTE   = 8
+     fmtstr = '(es16.9)'
      fmtstr_len = 17
      fmtstrn = '(10(es16.9,1x))'
-  endif
+  else
+     BYTE   = 4
+     fmtstr ='(es11.4)'
+     fmtstr_len = 12
+     fmtstrn ='(10(es11.4,1x))'
+   endif
   
   !------------------------------------------------------
   ! Initialize startup timers 
@@ -192,10 +199,16 @@ subroutine cgyro_init_manager
 #endif
 
      if ((collision_model /= 5) .AND. (collision_field_model == 1)) then
-       ! nc and nc_loc must be last, since it will be collated     
-       allocate(field_v(n_field,nt1:nt2,nc))
-       allocate(field_loc_v(n_field,nt1:nt2,nc1:nc2))
-       allocate(dvjvec_v(n_field,nv,nt1:nt2,nc_loc))
+       ! assuming all collision constants are the same between the simulations
+       allocate(dvjvec_v(n_field,nv,nt1:nt2,nc_loc_coll))
+       ! we do not really need all n_sim
+       ! but since n_sim is assumed to be small, the added cost is small
+       ! and this drastically similifies the code
+       ! But could be improved in the future
+       allocate(jvec_v(n_field,nc_loc_coll,nt1:nt2,nv,n_sim))
+       ! nc and nc_loc_coll must be last, since it will be collated     
+       allocate(field_v(n_field,nt1:nt2,n_sim,nc))
+       allocate(field_loc_v(n_field,nt1:nt2,n_sim,nc_cl1:nc_cl2))
 #if defined(OMPGPU)
 !$omp target enter data map(alloc:field_v,field_loc_v,dvjvec_v)
 #elif defined(_OPENACC)
@@ -254,14 +267,13 @@ subroutine cgyro_init_manager
      allocate(cap_h_c_old(nc,nv_loc,nt1:nt2))
      allocate(cap_h_c_old2(nc,nv_loc,nt1:nt2))
      allocate(cap_h_ct(nv_loc,nt1:nt2,nc))
-     allocate(cap_h_v(nc_loc,nt1:nt2,nv))
+     allocate(cap_h_v(nc_loc_coll,nt1:nt2,nv,n_sim))
      allocate(omega_cap_h(nc,nv_loc,nt1:nt2))
      allocate(omega_h(nc,nv_loc,nt1:nt2))
      allocate(omega_s(n_field,nc,nv_loc,nt1:nt2))
      allocate(omega_ss(n_field,nc,nv_loc,nt1:nt2))
      allocate(omega_sbeta(nc,nv_loc,nt1:nt2))
      allocate(jvec_c(n_field,nc,nv_loc,nt1:nt2))
-     allocate(jvec_v(n_field,nc_loc,nt1:nt2,nv))
      allocate(dvjvec_c(n_field,nc,nv_loc,nt1:nt2))
      allocate(jxvec_c(n_field,nc,nv_loc,nt1:nt2))
      allocate(upfac1(nc,nv_loc,nt1:nt2))
@@ -295,16 +307,37 @@ subroutine cgyro_init_manager
 
      ! Nonlinear arrays
      if (nonlinear_flag == 1) then
-        allocate(fA_nl(n_radial,nt_loc,nsplitA,n_toroidal_procs))
-        allocate(g_nl(n_field,n_radial,n_jtheta,n_toroidal))
-        allocate(fpackA(n_radial,nt_loc,nsplitA*n_toroidal_procs))
-        allocate(gpack(n_field,n_radial,n_jtheta,n_toroidal))
-        allocate(jvec_c_nl(n_field,n_radial,n_jtheta,nv_loc,n_toroidal))
+        if (nl_single_flag < 2) then
+          allocate(fA_nl(n_radial,nt_loc,nsplitA,n_toroidal_procs))
+          allocate(g_nl(n_field,n_radial,n_jtheta,n_toroidal))
+          allocate(fpackA(n_radial,nt_loc,nsplitA*n_toroidal_procs))
+          allocate(gpack(n_field,n_radial,n_jtheta,n_toroidal))
+          allocate(jvec_c_nl(n_field,n_radial,n_jtheta,nv_loc,n_toroidal))
 #if defined(OMPGPU)
 !$omp target enter data map(alloc:fpackA,gpack,fA_nl,g_nl,jvec_c_nl)
 #elif defined(_OPENACC)
 !$acc enter data create(fpackA,gpack,fA_nl,g_nl,jvec_c_nl)
 #endif
+        endif
+        if (nl_single_flag > 1) then
+          allocate(g_nl32(n_field,n_radial,n_jtheta,n_toroidal))
+          allocate(gpack32(n_field,n_radial,n_jtheta,n_toroidal))
+          allocate(jvec_c_nl32(n_field,n_radial,n_jtheta,nv_loc,n_toroidal))
+#if defined(OMPGPU)
+!$omp target enter data map(alloc:gpack32,g_nl32,jvec_c_nl32)
+#elif defined(_OPENACC)
+!$acc enter data create(gpack32,g_nl32,jvec_c_nl32)
+#endif
+        endif
+        if (nl_single_flag .NE. 0) then
+          allocate(fA_nl32(n_radial,nt_loc,nsplitA,n_toroidal_procs))
+          allocate(fpackA32(n_radial,nt_loc,nsplitA*n_toroidal_procs))
+#if defined(OMPGPU)
+!$omp target enter data map(alloc:fpackA32,fA_nl32)
+#elif defined(_OPENACC)
+!$acc enter data create(fpackA32,fA_nl32)
+#endif
+        endif
         if (nsplitB > 0) then ! nsplitB can be zero at large MPI
           allocate(fB_nl(n_radial,nt_loc,nsplitB,n_toroidal_procs))
           allocate(fpackB(n_radial,nt_loc,nsplitB*n_toroidal_procs))
@@ -313,10 +346,23 @@ subroutine cgyro_init_manager
 #elif defined(_OPENACC)
 !$acc enter data create(fpackB,fB_nl)
 #endif
+          if (nl_single_flag .NE. 0) then
+          allocate(fB_nl32(n_radial,nt_loc,nsplitB,n_toroidal_procs))
+          allocate(fpackB32(n_radial,nt_loc,nsplitB*n_toroidal_procs))
+#if defined(OMPGPU)
+!$omp target enter data map(alloc:fpackB32,fB_nl32)
+#elif defined(_OPENACC)
+!$acc enter data create(fpackB32,fB_nl32)
+#endif
+          endif
         endif
      endif
 
      if (collision_model == 5) then
+        if (nc_loc_coll/=nc_loc) then
+           call cgyro_error("CMAT sharing not supported for COLLISION_MODEL 5")
+           return
+        endif
         allocate(cmat_simple(n_xi,n_xi,n_energy,n_species,n_theta,nt1:nt2))
      else
         if (collision_precision_mode == 1) then
@@ -327,16 +373,16 @@ subroutine cgyro_init_manager
                n_low_energy = ie
              endif
            enddo
-           allocate(cmat_fp32(nv,nv,nc_loc,nt1:nt2))
-           allocate(cmat_stripes(n_xi,n_species,(n_low_energy+1):n_energy,n_xi,nc_loc,nt1:nt2))
-           allocate(cmat_e1(n_xi,n_species,n_low_energy,nv,nc_loc,nt1:nt2))
+           allocate(cmat_fp32(nv,nv,nc_loc_coll,nt1:nt2))
+           allocate(cmat_stripes(n_xi,n_species,(n_low_energy+1):n_energy,n_xi,nc_loc_coll,nt1:nt2))
+           allocate(cmat_e1(n_xi,n_species,n_low_energy,nv,nc_loc_coll,nt1:nt2))
 
            write (msg, "(A,I1,A)") "Using fp32 collision precision except e<=",n_low_energy," or same e&s."
            call cgyro_info(msg)
         else if (collision_precision_mode == 32) then
-           allocate(cmat_fp32(nv,nv,nc_loc,nt1:nt2))
+           allocate(cmat_fp32(nv,nv,nc_loc_coll,nt1:nt2))
         else
-           allocate(cmat(nv,nv,nc_loc,nt1:nt2))
+           allocate(cmat(nv,nv,nc_loc_coll,nt1:nt2))
         endif
      endif
 
@@ -405,9 +451,11 @@ subroutine cgyro_init_manager
   if (error_status > 0) return
   call timer_lib_out('str_init')
 
-  ! Initialize nonlinear dimensions and arrays 
   call timer_lib_in('nl_init')
 
+  if (nonlinear_flag == 1) then
+
+  ! Initialize nonlinear dimensions and arrays 
 #if defined(OMPGPU)
 !$omp target enter data map(to:nx0,ny0,nx,ny,nx2,ny2)
 #elif defined(_OPENACC)
@@ -415,18 +463,35 @@ subroutine cgyro_init_manager
 #endif
 
 #ifndef CGYRO_GPU_FFT
-  allocate(fx(0:ny2,0:nx-1,n_omp))
-  allocate(gx(0:ny2,0:nx-1,n_omp))
-  allocate(fy(0:ny2,0:nx-1,n_omp))
-  allocate(gy(0:ny2,0:nx-1,n_omp))
 
-  ! Note: Assuming nsplitA>=nsplitB
-  !       So we can use the same buffers for both
-  allocate(vxmany(0:ny-1,0:nx-1,nsplit))
-  allocate(vymany(0:ny-1,0:nx-1,nsplit))
-  allocate(uxmany(0:ny-1,0:nx-1,nsplitA))
-  allocate(uymany(0:ny-1,0:nx-1,nsplitA))
-  allocate(uv(0:ny-1,0:nx-1,n_omp))
+  if (nl_single_flag > 1) then
+    ! Use 32-bit NL
+    allocate(fx32(0:ny2,0:nx-1,n_omp))
+    allocate(gx32(0:ny2,0:nx-1,n_omp))
+    allocate(fy32(0:ny2,0:nx-1,n_omp))
+    allocate(gy32(0:ny2,0:nx-1,n_omp))
+
+    ! Note: Assuming nsplitA>=nsplitB
+    !       So we can use the same buffers for both
+    allocate(vxmany32(0:ny-1,0:nx-1,nsplit))
+    allocate(vymany32(0:ny-1,0:nx-1,nsplit))
+    allocate(uxmany32(0:ny-1,0:nx-1,nsplitA))
+    allocate(uymany32(0:ny-1,0:nx-1,nsplitA))
+    allocate(uv32(0:ny-1,0:nx-1,n_omp))
+  else
+    allocate(fx(0:ny2,0:nx-1,n_omp))
+    allocate(gx(0:ny2,0:nx-1,n_omp))
+    allocate(fy(0:ny2,0:nx-1,n_omp))
+    allocate(gy(0:ny2,0:nx-1,n_omp))
+
+    ! Note: Assuming nsplitA>=nsplitB
+    !       So we can use the same buffers for both
+    allocate(vxmany(0:ny-1,0:nx-1,nsplit))
+    allocate(vymany(0:ny-1,0:nx-1,nsplit))
+    allocate(uxmany(0:ny-1,0:nx-1,nsplitA))
+    allocate(uymany(0:ny-1,0:nx-1,nsplitA))
+    allocate(uv(0:ny-1,0:nx-1,n_omp))
+  endif
 
 #endif
 
@@ -435,19 +500,38 @@ subroutine cgyro_init_manager
 
   ! Note: Assuming nsplitA>=nsplitB
   !       So we can use the same buffers for both
-  allocate( fxmany(0:ny2,0:nx-1,nsplitA) )
-  allocate( fymany(0:ny2,0:nx-1,nsplitA) )
-  allocate( gxmany(0:ny2,0:nx-1,nsplit) )
-  allocate( gymany(0:ny2,0:nx-1,nsplit) )
+  if (nl_single_flag > 1) then
+    ! Use 32-bit NL
+    allocate( fxmany32(0:ny2,0:nx-1,nsplitA) )
+    allocate( fymany32(0:ny2,0:nx-1,nsplitA) )
+    allocate( gxmany32(0:ny2,0:nx-1,nsplit) )
+    allocate( gymany32(0:ny2,0:nx-1,nsplit) )
 
-  allocate( uxmany(0:ny-1,0:nx-1,nsplitA) )
-  allocate( uymany(0:ny-1,0:nx-1,nsplitA) )
-  allocate( vxmany(0:ny-1,0:nx-1,nsplit) )
-  allocate( vymany(0:ny-1,0:nx-1,nsplit) )
-  allocate( uvmany(0:ny-1,0:nx-1,nsplitA) )
+    allocate( uxmany32(0:ny-1,0:nx-1,nsplitA) )
+    allocate( uymany32(0:ny-1,0:nx-1,nsplitA) )
+    allocate( vxmany32(0:ny-1,0:nx-1,nsplit) )
+    allocate( vymany32(0:ny-1,0:nx-1,nsplit) )
+    allocate( uvmany32(0:ny-1,0:nx-1,nsplitA) )
 
-  write (msg, "(A,I5,A,I5,A,I5)") "NL using FFT batching of ",nsplit,",",nsplitA," and ",nsplitB
-  call cgyro_info(msg)
+#if defined(OMPGPU)
+!$omp target enter data map(alloc:fxmany32,fymany32,gxmany32,gymany32) &
+!$omp&                  map(alloc:uxmany32,uymany32,vxmany32,vymany32,uvmany32)
+#elif defined(_OPENACC)
+!$acc enter data create(fxmany32,fymany32,gxmany32,gymany32) &
+!$acc&           create(uxmany32,uymany32,vxmany32,vymany32,uvmany32)
+#endif
+  else
+    ! use "regular", 64-bit FP for NL 
+    allocate( fxmany(0:ny2,0:nx-1,nsplitA) )
+    allocate( fymany(0:ny2,0:nx-1,nsplitA) )
+    allocate( gxmany(0:ny2,0:nx-1,nsplit) )
+    allocate( gymany(0:ny2,0:nx-1,nsplit) )
+
+    allocate( uxmany(0:ny-1,0:nx-1,nsplitA) )
+    allocate( uymany(0:ny-1,0:nx-1,nsplitA) )
+    allocate( vxmany(0:ny-1,0:nx-1,nsplit) )
+    allocate( vymany(0:ny-1,0:nx-1,nsplit) )
+    allocate( uvmany(0:ny-1,0:nx-1,nsplitA) )
 
 #if defined(OMPGPU)
 !$omp target enter data map(alloc:fxmany,fymany,gxmany,gymany) &
@@ -456,10 +540,17 @@ subroutine cgyro_init_manager
 !$acc enter data create(fxmany,fymany,gxmany,gymany) &
 !$acc&           create(uxmany,uymany,vxmany,vymany,uvmany)
 #endif
+  endif
+
+  write (msg, "(A,I5,A,I5,A,I5)") "NL using FFT batching of ",nsplit,",",nsplitA," and ",nsplitB
+  call cgyro_info(msg)
 
 #endif ! CGYRO_GPU_FFT
 
   call cgyro_nl_fftw_init
+
+  endif ! (nonlinear_flag == 1)
+
 
   call timer_lib_out('nl_init')
 

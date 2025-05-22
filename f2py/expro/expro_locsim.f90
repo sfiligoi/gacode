@@ -20,8 +20,6 @@ module expro_locsim_interface
   double precision, dimension(:), allocatable :: gamma_p_exp
   double precision, dimension(:), allocatable :: mach_exp
   
-  double precision, dimension(:,:,:), allocatable :: geo_yin_exp
-
   ! Local values
 
   double precision :: shift_loc
@@ -71,6 +69,7 @@ module expro_locsim_interface
   double precision :: cs_loc
   double precision :: betae_loc
   double precision :: beta_star_loc
+  double precision :: sbeta_loc
 
   double precision, dimension(9) :: mass_loc
 
@@ -81,10 +80,6 @@ module expro_locsim_interface
   double precision, dimension(9) :: dlntdr_loc
   double precision, dimension(9) :: sdlnndr_loc
   double precision, dimension(9) :: sdlntdr_loc
-  double precision, dimension(9) :: sbeta_loc
-
-  integer :: geo_ny_loc
-  double precision, dimension(:,:), allocatable :: geo_yin_loc
 
 end module expro_locsim_interface
 
@@ -131,8 +126,6 @@ subroutine expro_locsim_alloc(flag)
      if (allocated(gamma_p_exp)) deallocate(gamma_p_exp)
      if (allocated(mach_exp)) deallocate(mach_exp)
      
-     if (allocated(geo_yin_exp)) deallocate(geo_yin_exp)
-
   endif
 
 end subroutine expro_locsim_alloc
@@ -147,8 +140,6 @@ end subroutine expro_locsim_alloc
 ! INPUTS:
 !  path              : path to data
 !  comm              : MPI communicator
-!  numeq_flag        : Fourier series equilibrium (0=no,1=yes)
-!  udsymmetry_flag   : enforce up-down symmetry (0=no,1=yes)
 !  quasineutral_flag : enforce quasineutrality (0=no,1=yes)
 !  n_species_in      : total species (e+i)
 !  z                 : vector of charges (length n_species_in-1)
@@ -160,63 +151,10 @@ end subroutine expro_locsim_alloc
 !  a_meters          : minor radius i metres
 !
 ! OUTPUTS (interface):
-!  real :: shift_loc
-!  real :: q_loc
-!  real :: s_loc
-!  real :: kappa_loc
-!  real :: delta_loc
-!  real :: zeta_loc
-!  real :: shape_cos0_loc
-!  real :: shape_cos1_loc
-!  real :: shape_cos2_loc
-!  real :: shape_cos3_loc
-!  real :: shape_cos4_loc
-!  real :: shape_cos5_loc
-!  real :: shape_cos6_loc
-!  real :: shape_sin3_loc
-!  real :: shape_sin4_loc
-!  real :: shape_sin5_loc
-!  real :: shape_sin6_loc
-!  real :: s_kappa_loc
-!  real :: s_delta_loc
-!  real :: s_zeta_loc
-!  real :: shape_s_cos0_loc
-!  real :: shape_s_cos1_loc
-!  real :: shape_s_cos2_loc
-!  real :: shape_s_cos3_loc
-!  real :: shape_s_cos4_loc
-!  real :: shape_s_cos5_loc
-!  real :: shape_s_cos6_loc
-!  real :: shape_s_sin3_loc
-!  real :: shape_s_sin4_loc
-!  real :: shape_s_sin5_loc
-!  real :: shape_s_sin6_loc
-!  real :: zmag_loc
-!  real :: dzmag_loc
-!  real :: gamma_e_loc
-!  real :: gamma_p_loc
-!  real :: mach_loc
-!  real :: rmaj_loc
-!  real :: rhos_loc [m]
-!  real :: z_eff_loc
-!  real :: b_unit_loc
-!  real :: rho_norm_loc
-!  real :: psi_norm_loc
-!  real :: psi_a_loc
-!  real :: cs_loc
-!  real :: beta_star_loc
-!
-!  real, dimension(9) :: dens_loc
-!  real, dimension(9) :: temp_loc
-!  real, dimension(9) :: dlnndr_loc
-!  real, dimension(9) :: dlntdr_loc
-!  real, dimension(9) :: sdlnndr_loc
-!  real, dimension(9) :: sdlntdr_loc
+!  (see expro_locsim_interface)
 !----------------------------------------------------------------
 
 subroutine expro_locsim_profiles(&
-     numeq_flag,&
-     udsymmetry_flag,&
      quasineutral_flag,&
      n_species_in,&
      rmin,&
@@ -231,14 +169,14 @@ subroutine expro_locsim_profiles(&
 
   implicit none
 
-  integer, intent(in) :: numeq_flag
-  integer, intent(in) :: udsymmetry_flag
   integer, intent(in) :: quasineutral_flag
   integer, intent(in) :: n_species_in
   integer, intent(in) :: comm
   character(len=80), intent(in) :: path
   double precision, intent(in) :: rmin
   double precision, intent(inout) :: btccw,ipccw,a_meters
+  double precision :: rhostar
+  
   integer :: i,j,i_ion
 
   rmin_loc = rmin
@@ -251,7 +189,6 @@ subroutine expro_locsim_profiles(&
   ! use expro routines to read data:
   !
   expro_ctrl_quasineutral_flag = 1  ! quasi-neutrality density flag
-  expro_ctrl_numeq_flag = numeq_flag
   expro_ctrl_n_ion = n_species_exp-1
 
   call expro_read(trim(path)//'input.gacode',comm)
@@ -266,11 +203,6 @@ subroutine expro_locsim_profiles(&
   ipccw = -expro_signq*expro_signb
 
   rmin_exp(:) = expro_rmin(:)
-
-  if (udsymmetry_flag == 1) then
-     expro_zmag(:) = 0d0   
-     expro_dzmag(:) = 0d0
-  endif
 
   ! Minor radius, a, in meters:
   a_meters = rmin_exp(expro_n_exp)
@@ -366,7 +298,12 @@ subroutine expro_locsim_profiles(&
   psi_norm_loc = psi_norm_loc/expro_polflux(expro_n_exp)
   psi_a_loc = expro_polflux(expro_n_exp)
 
-  beta_star_loc = 0d0  
+  ! rhos/a for curvature corrections
+  rhostar = rhos_loc/a_meters
+
+  beta_star_loc = 0d0
+  sbeta_loc = 0d0
+  
   do i=1,n_species_exp
      ! Note: mapping is only done for n_species (not n_species_exp)
      call cub_spline1(rmin_exp,dens_exp(i,:),expro_n_exp,rmin,dens_loc(i))
@@ -376,6 +313,7 @@ subroutine expro_locsim_profiles(&
      call cub_spline1(rmin_exp,sdlntdr_exp(i,:),expro_n_exp,rmin,sdlntdr_loc(i))
      call cub_spline1(rmin_exp,sdlnndr_exp(i,:),expro_n_exp,rmin,sdlnndr_loc(i))
      beta_star_loc = beta_star_loc+dens_loc(i)*temp_loc(i)*(dlnndr_loc(i)+dlntdr_loc(i))
+     sbeta_loc = sbeta_loc+dens_loc(i)*temp_loc(i)*(sdlnndr_loc(i)+sdlntdr_loc(i)-2*dlnndr_loc(i)*dlntdr_loc(i)*rhostar)
   enddo
 
   ! beta calculation in CGS:
@@ -386,32 +324,17 @@ subroutine expro_locsim_profiles(&
   !
   !      = 4.027e-3 n[1e19/m^3]*T[keV]/B[T]^2
 
+  ! beta
   betae_loc = 4.027e-3*dens_loc(n_species_exp)*temp_loc(n_species_exp)/b_unit_loc**2
+  ! beta_* (local)
   beta_star_loc = beta_star_loc*betae_loc/(dens_loc(n_species_exp)*temp_loc(n_species_exp))
+  ! beta_S (global)
+  sbeta_loc = sbeta_loc*betae_loc/(dens_loc(n_species_exp)*temp_loc(n_species_exp))
 
-  ! Add extra effective curvature terms to omega_star shear
-  sdlnndr_loc = sdlnndr_loc+(1.5*dlntdr_loc**2+dlnndr_loc**2-dlnndr_loc*dlntdr_loc)*rhos_loc/a_meters
-  sdlntdr_loc = sdlntdr_loc+dlntdr_loc**2*rhos_loc/a_meters
-  sbeta_loc   = beta_star_loc*(sdlnndr_loc+sdlntdr_loc-2*dlntdr_loc*dlnndr_loc*rhos_loc/a_meters)/(dlnndr_loc+dlntdr_loc)
+  ! Define effective curvatures used in global formulation
+  sdlnndr_loc(:) = sdlnndr_loc(:)+(1.5*dlntdr_loc(:)**2+dlnndr_loc(:)**2-dlnndr_loc(:)*dlntdr_loc(:))*rhostar
+  sdlntdr_loc(:) = sdlntdr_loc(:)+dlntdr_loc(:)**2*rhostar
   
-  if (numeq_flag == 1 .and. expro_nfourier > 0) then
-
-     geo_ny_loc = expro_nfourier
-     allocate(geo_yin_exp(8,0:geo_ny_loc,expro_n_exp))
-     if(allocated(geo_yin_loc)) deallocate(geo_yin_loc)
-     allocate(geo_yin_loc(8,0:geo_ny_loc))
-     geo_yin_exp(1:4,:,:) = expro_geo(:,:,:)/a_meters
-     geo_yin_exp(5:8,:,:) = expro_dgeo(:,:,:)
-
-     do i=1,8
-        do j=0,geo_ny_loc
-           call cub_spline1(rmin_exp,geo_yin_exp(i,j,:),expro_n_exp,rmin, &
-                geo_yin_loc(i,j))
-        enddo
-     enddo
-
-  endif
-
 end subroutine expro_locsim_profiles
 
 !---------------------------------------------------------------
