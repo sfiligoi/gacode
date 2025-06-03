@@ -85,9 +85,6 @@ then
   echo
   echo "         -optclean"
   echo "         Clean simulation directory except for timing files."
-  echo
-  echo "         -compress"
-  echo "         Replicate directory, but without restart or nonstandard files."
  
   exit 1
 fi
@@ -110,7 +107,6 @@ REGRESS_FLAG=0
 REGRESS_RESTART=0
 MTEST_FLAG=0
 CLEAN=0
-COMPRESS_FLAG=0
 RESET=0
 INIT_FLAG=0
 HELP_TAG=null
@@ -161,8 +157,6 @@ while [ $# -gt 0 ] ; do
   -clean) CLEAN=1 ;;
   -optclean) CLEAN=2 ;;
 
-  -compress) COMPRESS_FLAG=1 ;;
-
   *) echo "ERROR (cgyro script): unknown option $1." ; exit 1 ;;
 
   esac
@@ -186,15 +180,6 @@ if [ $FLAG_SUM -gt 1 ]
 then
    echo "ERROR: Can only specify one of -e, -t, -i, -g, -r, -m"
    exit 1
-fi
-#============================================================
-
-#============================================================
-# compress option
-if [ $COMPRESS_FLAG -eq 1 ]
-then
-    cgyro_compress $SIMDIR $LOCDIR
-    exit 1
 fi
 #============================================================
 
@@ -343,8 +328,8 @@ then
    fi
    echo "$date_tag [$version_tag][$GACODE_PLATFORM][$simtime]" >> out.cgyro.version
 else
-   NUMA=1
-   MPINUMA=1
+    python $GACODE_ROOT/cgyro/bin/cgyro_parse.py
+    $GACODE_ROOT/cgyro/src/cgyro
 fi
 
 gacode_printversion CGYRO

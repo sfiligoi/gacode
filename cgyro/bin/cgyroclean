@@ -1,0 +1,60 @@
+#!/usr/bin/env python
+
+import os,sys
+import numpy as np
+import argparse
+import textwrap
+
+# Command line option parser
+def opts():
+
+    mytext = '''\
+    output:
+       This command provides tools for cleaning and copying cgyro directories.
+    '''
+
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawTextHelpFormatter,
+        prog = 'cgyroclean',
+        description="Directory clean/copy utility",
+        epilog=textwrap.dedent(mytext))
+
+    parser.add_argument('-i',
+                        help='initial directory (default: cwd)',
+                        type=str,
+                        default='.')
+    parser.add_argument('-t',
+                        help='target directory (default: _copy)',
+                        type=str,
+                        default='_copy')
+    parser.add_argument('-c',
+                        help='Clean directory (all out.* and bin.* files)',
+                        action='store_true')
+    parser.add_argument('-opt',
+                        help='Clean directory except for timing files',
+                        action='store_true')
+ 
+    args=parser.parse_args()
+
+    return args.i,args.t,args.c,args.opt
+
+#------------------------------------------------------------------------
+#
+idir,tdir,c,opt = opts()
+
+idir = idir+'/'
+tdir = tdir+'/'
+
+exclude = ['bin.cgyro.restart',
+           'bin.cgyro.restart.old']
+
+exstr = "--exclude={"
+for ex in exclude:
+    exstr = exstr+"'"+ex+"',"
+exstr = exstr+"} "
+
+print(exstr)
+
+os.system("rsync -a "+exstr+idir+" "+tdir)
+
+
