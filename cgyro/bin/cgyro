@@ -39,12 +39,6 @@ then
   echo "         -nomp <threads>"
   echo "         Number of OpenMP threads per MPI task."
   echo
-  echo "         -numa <n>"
-  echo "         NUMAs active per node."
-  echo
-  echo "         -mpinuma <n>"
-  echo "         MPI tasks per active NUMA."
-  echo
   echo "REGRESSION TESTING"
   echo
   echo "         -r"
@@ -79,13 +73,7 @@ then
   echo
   echo "         -h"
   echo "         Version and platform information."
-  echo
-  echo "         -clean"
-  echo "         Clean simulation directory (all out.* and bin.* files)."
-  echo
-  echo "         -optclean"
-  echo "         Clean simulation directory except for timing files."
- 
+  
   exit 1
 fi
 #=============================================================
@@ -98,15 +86,12 @@ CGYRO_DIR=$GACODE_ROOT/cgyro
 # Default number of cores
 NPROC=1
 NOMP=1
-NUMA=0
-MPINUMA=0
 # Execute/test mode flags
 TEST_FLAG=0
 GENERATE_FLAG=0
 REGRESS_FLAG=0
 REGRESS_RESTART=0
 MTEST_FLAG=0
-CLEAN=0
 RESET=0
 INIT_FLAG=0
 HELP_TAG=null
@@ -153,9 +138,6 @@ while [ $# -gt 0 ] ; do
   -h) gacode_printversion CGYRO ; exit 0 ;;
 
   -help) shift ; HELP_TAG=$1 ;;
-
-  -clean) CLEAN=1 ;;
-  -optclean) CLEAN=2 ;;
 
   *) echo "ERROR (cgyro script): unknown option $1." ; exit 1 ;;
 
@@ -255,25 +237,6 @@ cd $SIMDIR
 #============================================================
 
 #============================================================
-# Clean/new options
-
-CFILES="bin.* batch.out batch.err *~"
-C1FILES="out.* *gen"
-C2FILES="*egrid *equilibrium *grids *hosts *memory *rotation"
-
-if [ $CLEAN -eq 1 ] ; then
-    rm -f $CFILES $C1FILES
-    echo "INFO: (cgyro) Cleaned directory."
-    exit 1
-fi
-if [ $CLEAN -eq 2 ] ; then
-    rm -f $CFILES $C2FILES
-    echo "INFO: (cgyro) Thinned out directory."
-    exit 1
-fi
-#============================================================
-
-#============================================================
 # datafile check
 if [ -s 'out.cgyro.time' ] ; then
    ncol=`awk '{print NF}' out.cgyro.time | sort -nu | tail -n 1`
@@ -336,7 +299,7 @@ gacode_printversion CGYRO
 
 if [ -f $CGYRO_DIR/src/cgyro ] ; then
    $GACODE_ROOT/platform/exec/exec.$GACODE_PLATFORM \
-      $SIMDIR $NPROC "$CGYRO_DIR/src/cgyro $TEST_FLAG" $NOMP $NUMA $MPINUMA
+      $SIMDIR $NPROC "$CGYRO_DIR/src/cgyro $TEST_FLAG" $NOMP
 else
    echo "ERROR: CGYRO executable not found."
    exit 1

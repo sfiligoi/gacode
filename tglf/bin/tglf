@@ -75,8 +75,6 @@ TGLF_DIR=$GACODE_ROOT/tglf
 # Parallelization parameters
 NPROC=1
 NOMP=1
-NUMA=0
-MPINUMA=0
 # Execute/test mode flags
 EXEC_FLAG=0
 INIT_FLAG=0
@@ -217,7 +215,7 @@ then
      $TGLF_DIR/src/tglf >> $RUNBASE
    else
      $GACODE_ROOT/platform/exec/exec.$GACODE_PLATFORM \
-     $SIMDIR $NPROC $TGLF_DIR/src/tglf_mpi $NOMP $NUMA $MPINUMA >> $RUNBASE
+     $SIMDIR $NPROC $TGLF_DIR/src/tglf_mpi $NOMP >> $RUNBASE
    fi
    gacode_printversion TGLF
 

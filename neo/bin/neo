@@ -75,8 +75,6 @@ NEO_DIR=$GACODE_ROOT/neo
 # Default number of cores
 NPROC=1
 NOMP=1
-NUMA=0
-MPINUMA=0
 # Execute/test mode flags
 EXEC_FLAG=0
 GENERATE_FLAG=0
@@ -240,7 +238,7 @@ then
   #==========================================================
 
   $GACODE_ROOT/platform/exec/exec.$GACODE_PLATFORM \
-    $SIMDIR $NPROC $NEO_DIR/src/neo $NOMP $NUMA $MPINUMA
+    $SIMDIR $NPROC $NEO_DIR/src/neo $NOMP
 
 fi
 #===========================================================

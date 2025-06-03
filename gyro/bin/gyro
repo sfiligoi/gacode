@@ -111,8 +111,6 @@ GYRO_DIR=$GACODE_ROOT/gyro
 # Parallelization parameters
 NPROC=1
 NOMP=1
-NUMA=0
-MPINUMA=0
 # Execute/test mode flags
 EXEC_FLAG=0
 TEST_FLAG=0
@@ -364,7 +362,7 @@ esac
 if [ $INIT_FLAG -ne 1 ]
 then
   $GACODE_ROOT/platform/exec/exec.$GACODE_PLATFORM \
-    $SIMDIR $NPROC $GYRO_DIR/src/gyro $NOMP $NUMA $MPINUMA
+    $SIMDIR $NPROC $GYRO_DIR/src/gyro $NOMP
 fi
 
 if [ $TEST_FLAG -eq 1 ] ; then

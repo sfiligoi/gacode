@@ -11,6 +11,12 @@ def opts():
     mytext = '''\
     output:
        This command provides tools for cleaning and copying cgyro directories.
+       Examples:
+
+       cgyroclean -c              (cleans current directory)
+       cgyroclean -opt            (cleans current directory leaving timing files)
+       cgyroclean -i idir         (creates copy of idir without restart files)
+       cgyroclean -i idir -t tdir (creates tdir without restart files of idir)
     '''
 
     parser = argparse.ArgumentParser(
@@ -26,9 +32,12 @@ def opts():
     parser.add_argument('-t',
                         help='target directory (default: _copy)',
                         type=str,
-                        default='_copy')
+                        default='.')
     parser.add_argument('-c',
                         help='Clean directory (all out.* and bin.* files)',
+                        action='store_true')
+    parser.add_argument('-v',
+                        help='Verbose output',
                         action='store_true')
     parser.add_argument('-opt',
                         help='Clean directory except for timing files',
@@ -36,25 +45,40 @@ def opts():
  
     args=parser.parse_args()
 
-    return args.i,args.t,args.c,args.opt
+    return args.i,args.t,args.c,args.v,args.opt
 
 #------------------------------------------------------------------------
 #
-idir,tdir,c,opt = opts()
+idir,tdir,c,v,opt = opts()
+
+if tdir == '.':
+    tdir = idir+'_copy/'
 
 idir = idir+'/'
-tdir = tdir+'/'
 
-exclude = ['bin.cgyro.restart',
-           'bin.cgyro.restart.old']
+if v:
+    flags = '-av'
+else:
+    flags = '-a'
 
-exstr = "--exclude={"
-for ex in exclude:
-    exstr = exstr+"'"+ex+"',"
-exstr = exstr+"} "
+if opt:
+    exfiles = ['bin.cgyro.restart',
+               'bin.cgyro.restart.old',
+               'halt',
+               'gyrotest_flag',
+               'out.log',
+               'out.cgyro.timing']
+else:
+    exfiles = ['bin.cgyro.restart',
+               'bin.cgyro.restart.old',
+               'halt',
+               'gyrotest_flag',
+               'out.log']
 
-print(exstr)
+exstr = ""
+for ex in exfiles:
+    exstr = exstr+"--exclude '"+ex+"' "
 
-os.system("rsync -a "+exstr+idir+" "+tdir)
+os.system("rsync "+flags+" "+exstr+idir+" "+tdir)
 
 
