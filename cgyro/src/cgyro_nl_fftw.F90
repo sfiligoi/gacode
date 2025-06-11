@@ -10,6 +10,10 @@
 ! NOTE: Need to be careful with (p=-nr/2,n=0) component.
 !-----------------------------------------------------------------
 
+#if defined(MKLGPU)
+include 'fftw/offload/fftw3_omp_offload.f90'
+#endif
+
 module cgyro_nl
 
   implicit none
@@ -28,10 +32,6 @@ contains
 !-----------------------------------------------------------------
 
 #ifdef CGYRO_GPU_FFT
-
-#if defined(MKLGPU)
-include 'fftw/offload/fftw3_omp_offload.f90'
-#endif
 
 subroutine cgyro_nl_fftw_init_fp64
 
@@ -439,10 +439,11 @@ subroutine cgyro_nl_fftw_init_fp32
        HIPFFT_C2R, &
        nsplit)
 #elif defined(MKLGPU)
+#if 0
      plan_c2r_manyA = 0
 !$omp target data map(tofrom: fymany32,uymany32)
      !$omp dispatch
-     call dfftw_plan_many_dft_c2r(&
+     call sfftw_plan_many_dft_c2r(&
           plan_c2r_manyA, &
           irank, &
           ndim, &
@@ -460,7 +461,7 @@ subroutine cgyro_nl_fftw_init_fp32
   if (nsplitB > 0) then ! no fft if nsplitB==0
      plan_c2r_manyB = 0
      !$omp dispatch
-     call dfftw_plan_many_dft_c2r(&
+     call sfftw_plan_many_dft_c2r(&
           plan_c2r_manyB, &
           irank, &
           ndim, &
@@ -480,7 +481,7 @@ subroutine cgyro_nl_fftw_init_fp32
      plan_c2r_manyG = 0
 !$omp target data map(tofrom: gymany32,vymany32)
      !$omp dispatch
-     call dfftw_plan_many_dft_c2r(&
+     call sfftw_plan_many_dft_c2r(&
           plan_c2r_manyG, &
           irank, &
           ndim, &
@@ -495,7 +496,7 @@ subroutine cgyro_nl_fftw_init_fp32
           odist, &
           FFTW_ESTIMATE)
 !$omp end target data
-
+#endif
 #else
   istatus = cufftPlanMany(&
        plan_c2r_manyA, &
@@ -579,10 +580,11 @@ subroutine cgyro_nl_fftw_init_fp32
        nsplitB)
   endif
 #elif defined(MKLGPU)
+#if 0
      plan_r2c_manyA = 0
 !$omp target data map(tofrom: uvmany32,fxmany32)
      !$omp dispatch
-     call dfftw_plan_many_dft_r2c(&
+     call sfftw_plan_many_dft_r2c(&
           plan_r2c_manyA, &
           irank, &
           ndim, &
@@ -600,7 +602,7 @@ subroutine cgyro_nl_fftw_init_fp32
   if (nsplitB > 0) then ! no fft if nsplitB==0
      plan_r2c_manyB = 0
      !$omp dispatch
-     call dfftw_plan_many_dft_r2c(&
+     call sfftw_plan_many_dft_r2c(&
           plan_r2c_manyB, &
           irank, &
           ndim, &
@@ -616,7 +618,7 @@ subroutine cgyro_nl_fftw_init_fp32
           FFTW_ESTIMATE)
   endif
 !$omp end target data
-
+#endif
 #else
   istatus = cufftPlanMany(&
        plan_r2c_manyA, &
@@ -868,7 +870,7 @@ subroutine cgyro_fft_c2r(plan, indata, outdata)
   rc = hipfftExecC2R(plan,c_loc(indata),c_loc(outdata))
 #elif defined(MKLGPU)
   !$omp dispatch
-  call dfftw_execute_dft_c2r(plan,indata, outdata)
+  call sfftw_execute_dft_c2r(plan,indata, outdata)
   rc = 0
 #else
   rc = cufftExecC2R(plan,indata, outdata)
@@ -1007,7 +1009,7 @@ subroutine cgyro_fft_r2c(plan, indata, outdata)
   rc = hipfftExecR2C(plan,c_loc(indata),c_loc(outdata))
 #elif defined(MKLGPU)
   !$omp dispatch
-  call dfftw_execute_dft_r2c(plan,indata, outdata)
+  call sfftw_execute_dft_r2c(plan,indata, outdata)
   rc = 0
 #else
   rc = cufftExecR2C(plan,indata, outdata)
