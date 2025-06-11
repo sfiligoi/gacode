@@ -1,0 +1,20 @@
+#! /usr/bin/env bash
+# GACODE Parallel execution script (DAWN)
+
+#env 1>&2
+
+#echo $SLURM_LOCALID
+let r8=SLURM_LOCALID/8
+let l8="$SLURM_LOCALID-($r8*8)"
+
+let r2b=${l8}/2
+let l2b="${l8}-(${r2b}*2)"
+
+let gn="${r2b}+${l2b}*4"
+
+export ONEAPI_DEVICE_SELECTOR=level_zero:${gn}
+echo "[$SLURM_PROCID] ONEAPI_DEVICE_SELECTOR=${ONEAPI_DEVICE_SELECTOR}"
+
+echo "`uname -n` $SLURM_PROCID $SLURM_LOCALID $gn `taskset -pc $$`"
+exec  "$@"
+
