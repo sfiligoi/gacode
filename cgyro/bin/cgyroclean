@@ -14,7 +14,8 @@ def opts():
        Examples:
 
        cgyroclean -c              (cleans current directory)
-       cgyroclean -opt            (cleans current directory leaving timing files)
+       cgyroclean -c mydir        (cleans directory mydir)
+       cgyroclean -opt -c mydir   (cleans directory mydir leaving timing files)
        cgyroclean -i idir         (creates copy of idir without restart files)
        cgyroclean -i idir -t tdir (creates tdir without restart files of idir)
     '''
@@ -28,30 +29,48 @@ def opts():
     parser.add_argument('-i',
                         help='initial directory (default: cwd)',
                         type=str,
-                        default='.')
+                        default='null')
     parser.add_argument('-t',
                         help='target directory (default: _copy)',
                         type=str,
-                        default='.')
+                        default='null')
     parser.add_argument('-c',
                         help='Clean directory (all out.* and bin.* files)',
+                        type=str,
+                        nargs='?')
+    parser.add_argument('-opt',
+                        help='Preserve timing files',
                         action='store_true')
     parser.add_argument('-v',
                         help='Verbose output',
                         action='store_true')
-    parser.add_argument('-opt',
-                        help='Clean directory except for timing files',
-                        action='store_true')
- 
+    
     args=parser.parse_args()
 
-    return args.i,args.t,args.c,args.v,args.opt
+    return args.i,args.t,args.c,args.opt,args.v
 
 #------------------------------------------------------------------------
 #
-idir,tdir,c,v,opt = opts()
+idir,tdir,c,opt,v = opts()
 
-if tdir == '.':
+if idir == 'null' and tdir == 'null':
+    if c is None:
+        pre = ''
+    else:
+        pre = 'cd '+c+' ; '
+    if opt:
+        # clean preserving timing and version
+        os.system(pre+'rm -f bin* out.cgyro.[a-s]* out.cgyro.time out.cgyro.tag *gen')
+    else:
+        os.system(pre+'rm -f bin* out* *gen')
+
+    sys.exit()
+
+if idir == 'null':
+    print('ERROR: specify -i')
+    sys.exit()
+
+if tdir == 'null':
     tdir = idir+'_copy/'
 
 idir = idir+'/'
@@ -61,19 +80,12 @@ if v:
 else:
     flags = '-a'
 
-if opt:
-    exfiles = ['bin.cgyro.restart',
-               'bin.cgyro.restart.old',
-               'halt',
-               'gyrotest_flag',
-               'out.log',
-               'out.cgyro.timing']
-else:
-    exfiles = ['bin.cgyro.restart',
-               'bin.cgyro.restart.old',
-               'halt',
-               'gyrotest_flag',
-               'out.log']
+# Directory copy
+exfiles = ['bin.cgyro.restart',
+           'bin.cgyro.restart.old',
+           'halt',
+           'gyrotest_flag',
+           'out.log']
 
 exstr = ""
 for ex in exfiles:
