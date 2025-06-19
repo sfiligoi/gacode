@@ -39,7 +39,7 @@
 !      save_vexb_shear = vexb_shear_s
 !      if(alpha_quench_in.eq.0.0)vexb_shear_s = 0.0
       ibranch_in = -1
-      width_min = width_min_in
+      width_min = ABS(width_min_in)
       width_max = ABS(width_in)
 !
 !      write(*,*)"R_unit=",R_unit,"q_unit=",q_unit
@@ -50,7 +50,7 @@
         wgp_max = ABS((taus(is)/zs(is))*vpar_shear_s(is)/vs(is))*ky_s/(1+kyi**2)
         width_p_max = 3.6*vs(is)/(sqrt_two*R_unit*q_unit*MAX(wgp_max,0.001))
         width_p_max=MAX(width_p_max,0.1)
-         if(width_p_max.lt.width_min_in)then
+         if(width_p_max.lt.abs(width_min_in))then
           width_min = width_p_max
         endif
       enddo
@@ -59,7 +59,7 @@
 !        wgp_max = ABS(vpar_shear_in(2)/vs(2))*kyi/(1+kyi**2)
 !        width_p_max = 3.6/(sqrt_two*R_unit*q_unit*MAX(wgp_max,0.001))
 !        width_p_max=MAX(width_p_max,0.01)
-!         if(width_p_max.lt.width_min_in)then
+!         if(width_p_max.lt.abs(width_min_in))then
 !          width_min = width_p_max
 !        endif
 !      write(*,*)ky," width_p_max = ", width_p_max,width_min
@@ -75,8 +75,10 @@
         nbasis = nbasis_min_in
       endif
       if(sat_rule_in.eq.2 .OR. sat_rule_in.eq.3)then
-        use_bper_in = .false.
-        use_bpar_in = .false.
+        if (width_min_in > 0) then
+          use_bper_in = .false.
+          use_bpar_in = .false.
+        endif  
       endif
 !       write(*,*)"nbasis = ",nbasis
       tmin=LOG10(width_min)
