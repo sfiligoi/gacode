@@ -93,7 +93,7 @@ subroutine cgyro_read_input
   call cgyro_readbc_int(stream_term,'STREAM_TERM')
   call cgyro_readbc_real(stream_factor)
   call cgyro_readbc_int(exch_flag,'EXCH_FLAG')
-  call cgyro_readbc_real(res_weight_power)
+  call cgyro_readbc_int(nl_min,'NL_MIN')
 
   call cgyro_readbc_real(rmin)
   call cgyro_readbc_real(rmaj)
@@ -142,11 +142,6 @@ subroutine cgyro_read_input
   call cgyro_readbc_real(beta_star_scale)
   call cgyro_readbc_real(betae_unit_scale)
   call cgyro_readbc_real(nu_ee_scale)
-  call cgyro_readbc_real(zf_scale)
-
-  call cgyro_readbc_int(sbeta_const_flag,'SBETA_CONST_FLAG')
-  call cgyro_readbc_real(sbeta_h)
-
   
   if (i_proc == 0) close(1)
 

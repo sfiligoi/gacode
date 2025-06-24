@@ -391,8 +391,8 @@ subroutine cgyro_nl_fftw_comm1_r64(ij)
                  my_psi = fpackB(ir,itor-nt1+1,iexch_base+(isplit0-nsplitA))
               endif
            endif           
-           if (itor == 0) then
-              my_psi = my_psi*zf_scale
+           if (itor < nl_min) then
+              my_psi = (0.0,0.0)
            endif
            
            ! RHS -> -[f,g] = [f,g]_{r,-alpha}
@@ -432,8 +432,8 @@ subroutine cgyro_nl_fftw_comm1_r64(ij)
               iexch_base = 1+itor0*nsplitA
               my_psi = fpackA(ir,itor-nt1+1,iexch_base+isplit0)
            endif           
-           if (itor == 0) then
-              my_psi = my_psi*zf_scale
+           if (itor < nl_min) then
+              my_psi = (0.0,0.0)
            endif
            
            ! RHS -> -[f,g] = [f,g]_{r,-alpha}
@@ -515,8 +515,8 @@ subroutine cgyro_nl_fftw_comm1_r32(ij)
                  my_psi = fpackB32(ir,itor-nt1+1,iexch_base+(isplit0-nsplitA))
               endif
            endif           
-           if (itor == 0) then
-              my_psi = my_psi*zf_scale
+           if (itor < nl_min) then
+              my_psi = (0.0,0.0)
            endif
            
            ! RHS -> -[f,g] = [f,g]_{r,-alpha}
@@ -556,8 +556,8 @@ subroutine cgyro_nl_fftw_comm1_r32(ij)
               iexch_base = 1+itor0*nsplitA
               my_psi = fpackA32(ir,itor-nt1+1,iexch_base+isplit0)
            endif           
-           if (itor == 0) then
-              my_psi = my_psi*zf_scale
+           if (itor < nl_min) then
+              my_psi = (0.0,0.0)
            endif
            
            ! RHS -> -[f,g] = [f,g]_{r,-alpha}

@@ -197,7 +197,7 @@ subroutine cgyro_check
   ! Even for rotation_model=1, the collision eqn does not have the field
   ! correction; explicit_trap_flag=1 will at least do the field correction
   ! for the trapping terms
-  if(ae_flag == 1 .and. rotation_model > 1) then
+  if (ae_flag == 1 .and. rotation_model > 1) then
      call cgyro_info('WARNING -- n=0 eqn does not have proper adiabatic ele response')
   endif
   
@@ -350,10 +350,10 @@ subroutine cgyro_check
   endif
 
 
-  if (collision_test_mode>0) then
+  if (collision_test_mode > 0) then
      write(unit=outstr,fmt='(A,I1)') 'Warning, 0<collision_test_mode=',collision_test_mode
      call cgyro_info(trim(outstr))
-  end if
+  endif
      
   
   !------------------------------------------------------------------------
@@ -394,12 +394,5 @@ subroutine cgyro_check
      return
   endif
   !------------------------------------------------------------------------
-
-  if (global_flag == 1) then 
-     call cgyro_info('##################### IMPORTANT ######################')
-     call cgyro_info('#       GLOBAL_FLAG=1 not ready for production       #')
-     call cgyro_info('#  See https://github.com/gafusion/gacode/issues/451 #')
-     call cgyro_info('######################################################')
-  endif
 
 end subroutine cgyro_check

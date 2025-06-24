@@ -197,16 +197,11 @@ subroutine cgyro_init_arrays
   allocate(res_norm(nc,n_species,nt1:nt2))
   allocate(res_weight(n_xi,n_energy))
 
-  if (res_weight_power < 1e-2) then
-     res_weight(:,:) = 1.0
-  else
-     do ix=1,n_xi
-        do ie=1,n_energy
-           res_weight(ix,ie) = (abs(xi(ix))*vel(ie))**res_weight_power
-        enddo
+  do ix=1,n_xi
+     do ie=1,n_energy
+        res_weight(ix,ie) = abs(xi(ix))*vel(ie)
      enddo
-  endif
- 
+  enddo 
   res_loc(:,:,:) = 0.0
 
 !$omp parallel private(ic,iv_loc,is,ix,ie)
@@ -466,11 +461,7 @@ subroutine cgyro_init_arrays
            sm = sdlnndr(is)+sdlntdr(is)*(energy(ie)-1.5)
 
            ! generalized beta/drift shear (acts on H)
-           if (sbeta_const_flag == 1) then
-              sb = -sbeta
-           else
-              sb = -sbeta*energy(ie)*xi(ix)**2/bmag(it)**3
-           endif
+           sb = -sbeta*energy(ie)*xi(ix)**2/bmag(it)**3
 
            arg = k_theta_base*itor*length/(2*pi)
 

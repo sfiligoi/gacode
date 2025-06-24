@@ -90,7 +90,7 @@ x.add('PX0','0.0')
 x.add('STREAM_TERM','0')
 x.add('STREAM_FACTOR','1.0')
 x.add('EXCH_FLAG','0')
-x.add('RES_WEIGHT_POWER','1.0')
+x.add('NL_MIN','0')
 
 x.add('RMIN','0.5')
 x.add('RMAJ','3.0')
@@ -153,10 +153,6 @@ x.add('MACH_SCALE','1.0')
 x.add('BETA_STAR_SCALE','1.0')
 x.add('BETAE_UNIT_SCALE','1.0')
 x.add('NU_EE_SCALE','1.0')
-x.add('ZF_SCALE','1.0')
-
-x.add('SBETA_CONST_FLAG','0')
-x.add('SBETA_H','0.0')
 
 # Perform the parsing
 x.read_input('input.cgyro')

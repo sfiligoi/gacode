@@ -15,9 +15,6 @@ module cgyro_globals
 
   use, intrinsic :: iso_fortran_env
 
-  integer :: sbeta_const_flag
-  real :: sbeta_h
-  
   !---------------------------------------------------------------
   ! Input parameters:
   !
@@ -103,7 +100,7 @@ module cgyro_globals
   integer :: stream_term
   real :: stream_factor
   integer :: exch_flag
-  real :: res_weight_power
+  integer :: nl_min
   !
   ! Geometry input
   !
@@ -151,7 +148,6 @@ module cgyro_globals
   real :: mach_scale
   real :: beta_star_scale, betae_unit_scale
   real :: nu_ee_scale
-  real :: zf_scale
   real, dimension(11) :: dlnndr_scale
   real, dimension(11) :: dlntdr_scale
 
