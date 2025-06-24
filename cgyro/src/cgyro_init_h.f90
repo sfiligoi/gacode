@@ -51,15 +51,15 @@ subroutine cgyro_init_h
      call cgyro_info('Restart data found.')
      call cgyro_read_restart
      if (error_status > 0) return
-     
+
      gtime(:) = 0.0
-     
+
   case (2)
 
      call cgyro_info('Initializing with restart data.')
      call cgyro_read_restart
      if (error_status > 0) return
-     
+
      i_current = 0
      t_current = 0.0
      gtime(:) = 0.0
@@ -82,31 +82,31 @@ subroutine cgyro_init_h
 
 !$omp parallel do private(iv,iv_loc,is,ix,ie,ic,ir,it,arg) shared(h_x)
         do itor=nt1,nt2
-         do iv=nv1,nv2
+           do iv=nv1,nv2
 
-           iv_loc = iv-nv1+1
-           is = is_v(iv)
-           ix = ix_v(iv)
-           ie = ie_v(iv)
+              iv_loc = iv-nv1+1
+              is = is_v(iv)
+              ix = ix_v(iv)
+              ie = ie_v(iv)
 
-           do ic=1,nc
+              do ic=1,nc
 
-              ir = ir_c(ic) 
-              it = it_c(ic)
+                 ir = ir_c(ic) 
+                 it = it_c(ic)
 
-              if (is == 1) then
-                 arg = k_perp(ic,itor)*rho*vth(is)*mass(is)/(z(is)*bmag(it)) &
-                      *vel2(ie)*sqrt(1.0-xi(ix)**2)
-                 h_x(ic,iv_loc,itor) = 1e-6*bessel_j0(abs(arg))
+                 if (is == 1) then
+                    arg = k_perp(ic,itor)*rho*vth(is)*mass(is)/(z(is)*bmag(it)) &
+                         *vel2(ie)*sqrt(1.0-xi(ix)**2)
+                    h_x(ic,iv_loc,itor) = 1e-6*bessel_j0(abs(arg))
 
-                 ! J0 here for the ions is equivalent to having the electrons
-                 ! deviate in density. Alternatively this is the result of
-                 ! instantaneous gyroaveraging after the deposition of particles
-                 ! in a certain k_radial mode.
+                    ! J0 here for the ions is equivalent to having the electrons
+                    ! deviate in density. Alternatively this is the result of
+                    ! instantaneous gyroaveraging after the deposition of particles
+                    ! in a certain k_radial mode.
 
-              endif
+                 endif
+              enddo
            enddo
-         enddo
         enddo
 
      else if (zf_test_mode >= 2) then
@@ -147,33 +147,35 @@ subroutine cgyro_init_h
 
 !$omp parallel do private(ic,ir,it,arg) shared(h_x)
         do itor=nt1,nt2
-         do ic=1,nc
+           do ic=1,nc
 
-           ir = ir_c(ic) 
-           it = it_c(ic)
+              ir = ir_c(ic) 
+              it = it_c(ic)
 
-           if (itor == 0) then
+              if (itor >= nl_min) then
+                 if (itor == 0) then
 
-              ! Zonal-flow initial condition
+                    ! Zonal-flow initial condition
 
-              arg = abs(px(ir))/real(n_radial)
-              h_x(ic,:,itor) = amp0*rho*exp(-arg)
-              if (ir == 1 .or. px(ir) == 0) then
-                 h_x(ic,:,itor) = 0.0
+                    arg = abs(px(ir))/real(n_radial)
+                    h_x(ic,:,itor) = amp0*rho*exp(-arg)
+                    if (ir == 1 .or. px(ir) == 0) then
+                       h_x(ic,:,itor) = 0.0
+                    endif
+
+                 else 
+
+                    ! Finite-n initial condition
+
+                    if (amp > 0.0) then
+                       h_x(ic,:,itor) = amp*rho
+                    else
+                       h_x(ic,:,itor) = amp*rho/itor**2
+                    endif
+
+                 endif
               endif
-
-           else 
-
-              ! Finite-n initial condition
-
-              if (amp > 0.0) then
-                 h_x(ic,:,itor) = amp*rho
-              else
-                 h_x(ic,:,itor) = amp*rho/itor**2
-              endif
-
-           endif
-         enddo
+           enddo
         enddo
 
      endif
