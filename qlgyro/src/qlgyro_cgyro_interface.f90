@@ -95,7 +95,6 @@ module qlgyro_cgyro_interface
   integer :: cgyro_stream_term_in = 0
   real :: cgyro_stream_factor_in = 1.0
   integer :: cgyro_exch_flag_in = 0
-  real :: cgyro_res_weight_power_in = 1.0
 
   real :: cgyro_rmin_in = 0.5
   real :: cgyro_rmaj_in = 3.0
@@ -291,7 +290,6 @@ contains
     cgyro_stream_term_in = stream_term
     cgyro_stream_factor_in = stream_factor
     cgyro_exch_flag_in = exch_flag
-    cgyro_res_weight_power_in = res_weight_power
 
     cgyro_rmin_in = rmin
     cgyro_rmaj_in = rmaj
@@ -489,7 +487,6 @@ contains
     stream_term = cgyro_stream_term_in
     stream_factor = cgyro_stream_factor_in
     exch_flag = cgyro_exch_flag_in
-    res_weight_power = cgyro_res_weight_power_in
 
     rmin = cgyro_rmin_in
     rmaj = cgyro_rmaj_in
@@ -658,7 +655,6 @@ contains
     write(1,20) 'STREAM_TERM',cgyro_stream_term_in
     write(1,30) 'STREAM_FACTOR',cgyro_stream_factor_in
     write(1,20) 'EXCH_FLAG',cgyro_exch_flag_in
-    write(1,30) 'RES_WEIGHT_POWER',cgyro_res_weight_power_in
 
     write(1,30) 'RMIN',cgyro_rmin_in
     write(1,30) 'RMAJ',cgyro_rmaj_in

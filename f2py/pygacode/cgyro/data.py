@@ -228,7 +228,7 @@ class cgyrodata:
          sc[:] = 1.0
 
       # Sum moments over fields (3) and toroidal modes (4)
-      # NOTE: lky_flux_n[2,ng,ns,nfield,n_n,nt]
+      # NOTE: lky_flux_n[ng,ns,nfield,n_n,nt]
       if moment == 'n':
          z = np.sum(self.lky_flux_n,axis=(2,3))
       elif moment == 'e':
