@@ -190,27 +190,27 @@ class cgyrodata:
       #
       nt = self.n_time
       ng = self.n_global+1
-      nd = 2*ng*self.n_species*self.n_field*self.n_n*nt
+      nd = ng*self.n_species*self.n_field*self.n_n*nt
 
-      t,fmt,data = self.extract('.cgyro.lky_flux_n')
+      t,fmt,data = self.extract('.cgyro.lky_flux_n',cmplx=True)
       if fmt != 'null':
-         self.lky_flux_n = np.reshape(data[0:nd],(2,ng,self.n_species,self.n_field,self.n_n,nt),'F')
+         self.lky_flux_n = np.reshape(data[:nd],(ng,self.n_species,self.n_field,self.n_n,nt),'F')
          print('INFO: (getxflux) Read data in '+fmt+'.cgyro.lky_flux_n '+t)
 
-      t,fmt,data = self.extract('.cgyro.lky_flux_e')
+      t,fmt,data = self.extract('.cgyro.lky_flux_e',cmplx=True)
       if fmt != 'null':
-         self.lky_flux_e = np.reshape(data[0:nd],(2,ng,self.n_species,self.n_field,self.n_n,nt),'F')
+         self.lky_flux_e = np.reshape(data[:nd],(ng,self.n_species,self.n_field,self.n_n,nt),'F')
          print('INFO: (getxflux) Read data in '+fmt+'.cgyro.lky_flux_e '+t)
 
-      t,fmt,data = self.extract('.cgyro.lky_flux_v')
+      t,fmt,data = self.extract('.cgyro.lky_flux_v',cmplx=True)
       if fmt != 'null':
-         self.lky_flux_v = np.reshape(data[0:nd],(2,ng,self.n_species,self.n_field,self.n_n,nt),'F')
+         self.lky_flux_v = np.reshape(data[:nd],(ng,self.n_species,self.n_field,self.n_n,nt),'F')
          print('INFO: (getxflux) Read data in '+fmt+'.cgyro.lky_flux_v '+t)
       #-----------------------------------------------------------------
 
    def xfluxave(self,w,moment,e=0.2,nscale=0):
 
-      # Averaging functionfor global fluxes
+      # Averaging function for global fluxes
 
       print('INFO: (xfluxave) Computing partial-domain averages')
 
@@ -230,11 +230,11 @@ class cgyrodata:
       # Sum moments over fields (3) and toroidal modes (4)
       # NOTE: lky_flux_n[2,ng,ns,nfield,n_n,nt]
       if moment == 'n':
-         z = np.sum(self.lky_flux_n,axis=(3,4))
+         z = np.sum(self.lky_flux_n,axis=(2,3))
       elif moment == 'e':
-         z = np.sum(self.lky_flux_e,axis=(3,4))
+         z = np.sum(self.lky_flux_e,axis=(2,3))
       elif moment == 'v':
-         z = np.sum(self.lky_flux_v,axis=(3,4))
+         z = np.sum(self.lky_flux_v,axis=(2,3))
 
       #--------------------------------------------
       # Arrays required outside this routine
@@ -246,8 +246,8 @@ class cgyrodata:
       imin,imax = time_index(self.t,w)
 
       # Time averages of real and imaginary parts
-      self.lky_xr[:,:] = time_average(z[0,:,:,:],self.t,imin,imax)
-      self.lky_xi[:,:] = time_average(z[1,:,:,:],self.t,imin,imax)
+      self.lky_xr[:,:] = time_average(np.real(z[:,:,:]),self.t,imin,imax)
+      self.lky_xi[:,:] = time_average(np.imag(z[:,:,:]),self.t,imin,imax)
 
       l = np.arange(1,ng)
       u = (2*np.pi*e)*l
@@ -270,35 +270,35 @@ class cgyrodata:
       #
 
       nt = self.n_time
-      nd = 2*self.n_radial*self.theta_plot*self.n_n*nt
+      nd = self.n_radial*self.theta_plot*self.n_n*nt
 
       # 1a. kxky_phi
       t,fmt,data = self.extract('.cgyro.kxky_phi',cmplx=True)
       if fmt != 'null':
-         self.kxky_phi = np.reshape(data,(self.n_radial,self.theta_plot,self.n_n,nt),'F')
+         self.kxky_phi = np.reshape(data[:nd],(self.n_radial,self.theta_plot,self.n_n,nt),'F')
          if not self.silent:
             print('INFO: (getbigfield) Read data in '+fmt+'.cgyro.kxky_phi '+t)
 
       # 1b. kxky_apar
       t,fmt,data = self.extract('.cgyro.kxky_apar',cmplx=True)
       if fmt != 'null':
-        self.kxky_apar = np.reshape(data,(self.n_radial,self.theta_plot,self.n_n,nt),'F')
+        self.kxky_apar = np.reshape(data[:nd],(self.n_radial,self.theta_plot,self.n_n,nt),'F')
         if not self.silent:
            print('INFO: (getbigfield) Read data in '+fmt+'.cgyro.kxky_apar '+t)
  
       # 1c. kxky_bpar
       t,fmt,data = self.extract('.cgyro.kxky_bpar',cmplx=True)
       if fmt != 'null':
-         self.kxky_bpar = np.reshape(data,(self.n_radial,self.theta_plot,self.n_n,nt),'F')
+         self.kxky_bpar = np.reshape(data[:nd],(self.n_radial,self.theta_plot,self.n_n,nt),'F')
          if not self.silent:
             print('INFO: (getbigfield) Read data in '+fmt+'.cgyro.kxky_bpar '+t)
 
       # 2. kxky_n
-      nd = 2*self.n_radial*self.theta_plot*self.n_species*self.n_n*nt
+      nd = self.n_radial*self.theta_plot*self.n_species*self.n_n*nt
 
       t,fmt,data = self.extract('.cgyro.kxky_n',cmplx=True)
       if fmt != 'null':
-         self.kxky_n = np.reshape(data,(self.n_radial,self.theta_plot,self.n_species,self.n_n,nt),'F')
+         self.kxky_n = np.reshape(data[:nd],(self.n_radial,self.theta_plot,self.n_species,self.n_n,nt),'F')
          if not self.silent:
             print('INFO: (getbigfield) Read data in '+fmt+'.cgyro.kxky_n '+t)
 
@@ -306,7 +306,7 @@ class cgyrodata:
       t,fmt,data = self.extract('.cgyro.kxky_e',cmplx=True)
 
       if fmt != 'null':
-         self.kxky_e = np.reshape(data,(self.n_radial,self.theta_plot,self.n_species,self.n_n,nt),'F')
+         self.kxky_e = np.reshape(data[:nd],(self.n_radial,self.theta_plot,self.n_species,self.n_n,nt),'F')
          if not self.silent:
             print('INFO: (getbigfield) Read data in '+fmt+'.cgyro.kxky_e '+t)
 
@@ -314,7 +314,7 @@ class cgyrodata:
       t,fmt,data = self.extract('.cgyro.kxky_v',cmplx=True)
 
       if fmt != 'null':
-         self.kxky_v = np.reshape(data,(self.n_radial,self.theta_plot,self.n_species,self.n_n,nt),'F')
+         self.kxky_v = np.reshape(data[:nd],(self.n_radial,self.theta_plot,self.n_species,self.n_n,nt),'F')
          if not self.silent:
             print('INFO: (getbigfield) Read data in '+fmt+'.cgyro.kxky_v  '+t)
       #-----------------------------------------------------------------
