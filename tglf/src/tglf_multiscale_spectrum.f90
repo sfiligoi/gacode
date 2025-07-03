@@ -268,7 +268,9 @@
           jmax_out = jmax_mix
         else
           vzf_out_fp = vzf_out ! used for recreation of first pass for SAT3
-          vzf_out = vzf_out*gamma_net(jmax_out)/MAX(eigenvalue_spectrum_out(1,jmax_out,1),small)
+          if(gamma_net(jmax_out)/=0.0)then
+           vzf_out = vzf_out*gamma_net(jmax_out)/MAX(eigenvalue_spectrum_out(1,jmax_out,1),small)
+          endif
         endif
 !        write(*,*)"2nd PASS: vzf_out = ",vzf_out,"  jmax_out = ",jmax_out
 !        write(*,*)"2nd PASS: kymax_out = ",kymax_out,"  gammamax_out = ",kymax_out*vzf_out
