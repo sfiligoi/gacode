@@ -341,7 +341,11 @@
        if(ky0.lt.kymax1)then
         gamma(j) = gamma0
        else
-        gamma(j) = (gammamax1 * (vzf_out_fp/vzf_out)) + Max(gamma0 - cz2*vzf_out_fp*ky0,0.0)
+        if(vzf_out==0.0)then
+         gamma(j) = gammamax1 + Max(gamma0 - cz2*vzf_out_fp*ky0,0.0)
+        else
+         gamma(j) = (gammamax1 * (vzf_out_fp/vzf_out)) + Max(gamma0 - cz2*vzf_out_fp*ky0,0.0)
+        endif
        endif
        gamma_fp(j) = gamma(j)
       enddo
