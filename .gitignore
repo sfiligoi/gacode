@@ -1,5 +1,6 @@
 *~
 shared/neural
+CLAUDE.md
 
 # Object files and modules
 modules/*.mod

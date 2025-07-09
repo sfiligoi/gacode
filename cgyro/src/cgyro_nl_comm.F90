@@ -365,7 +365,7 @@ subroutine cgyro_nl_fftw_comm1_r64(ij)
 #elif defined(_OPENACC)
 !$acc parallel loop collapse(4) gang vector independent private(ic_loc_m,my_psi) &
 !$acc&         private(iexch0,itor0,isplit0,iexch_base) &
-!$acc&         present(ic_c,px,rhs,fpackA,fpackB) copyin(psi_mul,zf_scale) &
+!$acc&         present(ic_c,px,rhs,fpackA,fpackB) copyin(psi_mul,nl_min) &
 !$acc&         present(nt1,nt2,nv_loc,n_theta,n_radial,nsplit,nsplitA,nsplitB) copyin(ij) default(none)
 #else
 !$omp parallel do collapse(2) private(ic_loc_m,my_psi) &
@@ -411,7 +411,7 @@ subroutine cgyro_nl_fftw_comm1_r64(ij)
 #elif defined(_OPENACC)
 !$acc parallel loop collapse(4) gang vector independent private(ic_loc_m,my_psi) &
 !$acc&         private(iexch0,itor0,isplit0,iexch_base) &
-!$acc&         present(ic_c,px,rhs,fpackA) copyin(psi_mul,zf_scale) &
+!$acc&         present(ic_c,px,rhs,fpackA) copyin(psi_mul,nl_min) &
 !$acc&         present(nt1,nt2,nv_loc,n_theta,n_radial,nsplit,nsplitA) copyin(ij) default(none)
 #else
 !$omp parallel do collapse(2) private(ic_loc_m,my_psi) &
@@ -489,7 +489,7 @@ subroutine cgyro_nl_fftw_comm1_r32(ij)
 #elif defined(_OPENACC)
 !$acc parallel loop collapse(4) gang vector independent private(ic_loc_m,my_psi) &
 !$acc&         private(iexch0,itor0,isplit0,iexch_base) &
-!$acc&         present(ic_c,px,rhs,fpackA32,fpackB32) copyin(psi_mul,zf_scale) &
+!$acc&         present(ic_c,px,rhs,fpackA32,fpackB32) copyin(psi_mul,nl_min) &
 !$acc&         present(nt1,nt2,nv_loc,n_theta,n_radial,nsplit,nsplitA,nsplitB) copyin(ij) default(none)
 #else
 !$omp parallel do collapse(2) private(ic_loc_m,my_psi) &
@@ -535,7 +535,7 @@ subroutine cgyro_nl_fftw_comm1_r32(ij)
 #elif defined(_OPENACC)
 !$acc parallel loop collapse(4) gang vector independent private(ic_loc_m,my_psi) &
 !$acc&         private(iexch0,itor0,isplit0,iexch_base) &
-!$acc&         present(ic_c,px,rhs,fpackA32) copyin(psi_mul,zf_scale) &
+!$acc&         present(ic_c,px,rhs,fpackA32) copyin(psi_mul,nl_min) &
 !$acc&         present(nt1,nt2,nv_loc,n_theta,n_radial,nsplit,nsplitA) copyin(ij) default(none)
 #else
 !$omp parallel do collapse(2) private(ic_loc_m,my_psi) &
