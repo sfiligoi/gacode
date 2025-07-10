@@ -7,6 +7,36 @@ import time
 class tglfdata:
     """A class for management of TGLF output data.
 
+    This class provides methods to extract and manage data from TGLF output files.
+    It reads various spectra and total flux information related to the simulation.
+
+    Attributes:
+        silent (bool): If True, suppresses output messages.
+        dir (str): The directory where the TGLF output files are located.
+        nmodes (int): The number of modes from the simulation.
+        nspecies (int): The number of species in the simulation.
+        nfield (int): The number of fields in the simulation.
+        nky (int): The number of ky values.
+        ntype (int): The type of simulation.
+        gamma (list): List of eigenvalue growth rates for each mode.
+        freq (list): List of eigenvalue frequencies for each mode.
+        ky (numpy.ndarray): Array of ky spectrum values.
+        flux_spectrum_particle (numpy.ndarray): Particle flux spectrum.
+        flux_spectrum_energy (numpy.ndarray): Energy flux spectrum.
+        flux_spectrum_toroidal_stress (numpy.ndarray): Toroidal stress flux spectrum.
+        flux_spectrum_parallel_stress (numpy.ndarray): Parallel stress flux spectrum.
+        flux_spectrum_exchange (numpy.ndarray): Exchange flux spectrum.
+        particle_GB (list): Total particle flux for each species.
+        energy_GB (list): Total energy flux for each species.
+        momentum_GB (list): Total momentum flux for each species.
+
+    Example Usage:
+        >>> from pygacode.tglf.data import tglfdata
+        >>> sim1 = tglfdata('example_directory')
+    """
+class tglfdata:
+    """A class for management of TGLF output data.
+
     Data:
 
     Example Usage:
@@ -30,42 +60,31 @@ class tglfdata:
       self.get_total_flux()
 
     # standard routine to read binary or ASCII data
-    def extract(self,f, cmplx=False):
+    def extract(self,f):
 
-      self.BYTE = 'float64'
-      self.CBYTE = 'complex64'
       
-      if os.path.isfile(self.dir+'bin'+f):
-         
-         fmt = 'bin'
-         if cmplx:
-            dtype = self.CBYTE
-         else:
-            dtype = self.BYTE   
-         
-         data = np.fromfile(self.dir+'bin'+f,dtype=dtype)
-      elif os.path.isfile(self.dir+'out'+f):
+        
+      if os.path.isfile(self.dir+'out'+f):
          filename = self.dir+'out'+f
          with open(filename, 'r') as f:
             data = f.readlines()
 
-         fmt = 'out'
-         #data = np.fromfile(self.dir+'out'+f,dtype='float')
+         
       else:
          print("File not found")
          # File not found
-         fmt = 'null'
+        
          data = []
 
      
 
-      return fmt,data
+      return data
         
     #-------------------------------------------------------------------------#
 
     
     def getdata(self):
-      fmt, data = self.extract('.tglf.QL_flux_spectrum')
+      data = self.extract('.tglf.QL_flux_spectrum')
       
       
       
@@ -79,8 +98,8 @@ class tglfdata:
     def get_eigenvalue_spectrum(self):
         nmodes = self.nmodes
       
-        fmt,eigen=self.extract('.tglf.eigenvalue_spectrum')
-        fmt, ky = self.extract('.tglf.ky_spectrum')
+        eigen=self.extract('.tglf.eigenvalue_spectrum')
+        ky = self.extract('.tglf.ky_spectrum')
 
         eigen = ''.join(eigen[2:]).split()
         ky = ''.join(ky[2:]).split()
@@ -93,21 +112,21 @@ class tglfdata:
         
         self.gamma=gamma      
         self.freq=freq
-        self.ky=ky
+        self.ky=np.array(ky, dtype=float)
        
     def get_flux_spectrum(self):
-        nmodes = self.nmodes
-        
-        fmt,flux=self.extract('.tglf.sum_flux_spectrum')
         
         
-        flux_spectrum_particle = np.zeros((self.nky, self.nmodes))
-        flux_spectrum_energy = np.zeros((self.nky, self.nmodes))
-        flux_spectrum_toroidal_stress = np.zeros((self.nky, self.nmodes))
-        flux_spectrum_parallel_stress =np.zeros((self.nky, self.nmodes))
-        flux_spectrum_exchange =np.zeros((self.nky, self.nmodes))
+        flux=self.extract('.tglf.sum_flux_spectrum')
+        
+        
+        flux_spectrum_particle = np.zeros((self.nky, self.nspecies))
+        flux_spectrum_energy = np.zeros((self.nky, self.nspecies))
+        flux_spectrum_toroidal_stress = np.zeros((self.nky, self.nspecies))
+        flux_spectrum_parallel_stress =np.zeros((self.nky, self.nspecies))
+        flux_spectrum_exchange =np.zeros((self.nky, self.nspecies))
        
-        for n in range(self.nmodes):
+        for n in range(self.nspecies):
             data = flux[self.nky*n+2:self.nky*(n+1)+2] 
             
             if any([x.startswith((" s")) for x in data]):
@@ -141,4 +160,18 @@ class tglfdata:
     
     
     def get_total_flux(self):
-       print("")
+       
+       flux_GB=self.extract('.tglf.run')
+       flux_GB = ''.join(flux_GB[5:]).split()
+       particle_GB=[]
+       energy_GB=[]
+       momentum_GB=[]
+   
+       for ns in range(self.nspecies):
+          particle_GB.append(float(flux_GB[ns*6+1]))
+          energy_GB.append(float(flux_GB[ns*6+2]))
+          momentum_GB.append(float(flux_GB[ns*6+4]))
+       self.particle_GB = particle_GB
+       self.energy_GB = energy_GB
+       self.momentum_GB = momentum_GB
+       
