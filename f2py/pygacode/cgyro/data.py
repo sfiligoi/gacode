@@ -107,25 +107,25 @@ class cgyrodata:
       #-----------------------------------------------------------------
       # Ballooning potentials
       #
-      nd = 2*self.n_theta*self.n_radial*nt
+      nd = self.n_theta*self.n_radial*nt
       f='.cgyro.phib'
       t,fmt,data = self.extract(f,cmplx=True)
       if fmt != 'null':
-         self.phib = np.reshape(data,(self.n_theta*self.n_radial,nt),'F')
+         self.phib = np.reshape(data[:nd],(self.n_theta*self.n_radial,nt),'F')
          if not self.silent:
             print('INFO: (getdata) Read data in '+fmt+f+'  '+t)
 
       f='.cgyro.aparb'
       t,fmt,data = self.extract(f,cmplx=True)
       if fmt != 'null':
-         self.aparb = np.reshape(data,(self.n_theta*self.n_radial,nt),'F')
+         self.aparb = np.reshape(data[:nd],(self.n_theta*self.n_radial,nt),'F')
          if not self.silent:
             print('INFO: (getdata) Read data in '+fmt+f+' '+t)
 
       f='.cgyro.bparb'
       t,fmt,data = self.extract(f,cmplx=True)
       if fmt != 'null':
-         self.bparb = np.reshape(data,(self.n_theta*self.n_radial,nt),'F')
+         self.bparb = np.reshape(data[:nd],(self.n_theta*self.n_radial,nt),'F')
          if not self.silent:
             print('INFO: (getdata) Read data in '+fmt+f+' '+t)
       #-----------------------------------------------------------------
