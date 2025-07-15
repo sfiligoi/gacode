@@ -162,16 +162,16 @@ class cgyrodata:
 
       if usec:
          t,fmt,data = self.extract('.cgyro.ky_cflux')
-         m = data.shape[0]//nd
          if fmt != 'null':
+            m = data.shape[0]//nd
             self.ky_flux = np.reshape(data[:nd*m],(self.n_species,m,self.n_field,self.n_n,nt),'F')
             if not self.silent:
                print('INFO: (getflux) Read data in '+fmt+'.cgyro.ky_cflux '+t)
 
       if not usec or fmt == 'null':
          t,fmt,data = self.extract('.cgyro.ky_flux')
-         m = data.shape[0]//nd
          if fmt != 'null':
+            m = data.shape[0]//nd
             self.ky_flux = np.reshape(data[:nd*m],(self.n_species,m,self.n_field,self.n_n,nt),'F')
             if not self.silent:
                print('INFO: (getflux) Read data in '+fmt+'.cgyro.ky_flux '+t)
