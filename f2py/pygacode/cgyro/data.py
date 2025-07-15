@@ -99,7 +99,7 @@ class cgyrodata:
       nd = 2*self.n_n*nt
       t,fmt,data = self.extract('.cgyro.freq')
       if fmt != 'null':
-         self.freq = np.reshape(data,(2,self.n_n,nt),'F')
+         self.freq = np.reshape(data[:nd],(2,self.n_n,nt),'F')
          if not self.silent:
             print('INFO: (getdata) Read data in '+fmt+'.cgyro.freq '+t)
       #-----------------------------------------------------------------
@@ -164,7 +164,7 @@ class cgyrodata:
          t,fmt,data = self.extract('.cgyro.ky_cflux')
          m = data.shape[0]//nd
          if fmt != 'null':
-            self.ky_flux = np.reshape(data[0:nd*m],(self.n_species,m,self.n_field,self.n_n,nt),'F')
+            self.ky_flux = np.reshape(data[:nd*m],(self.n_species,m,self.n_field,self.n_n,nt),'F')
             if not self.silent:
                print('INFO: (getflux) Read data in '+fmt+'.cgyro.ky_cflux '+t)
 
@@ -172,7 +172,7 @@ class cgyrodata:
          t,fmt,data = self.extract('.cgyro.ky_flux')
          m = data.shape[0]//nd
          if fmt != 'null':
-            self.ky_flux = np.reshape(data[0:nd*m],(self.n_species,m,self.n_field,self.n_n,nt),'F')
+            self.ky_flux = np.reshape(data[:nd*m],(self.n_species,m,self.n_field,self.n_n,nt),'F')
             if not self.silent:
                print('INFO: (getflux) Read data in '+fmt+'.cgyro.ky_flux '+t)
 
