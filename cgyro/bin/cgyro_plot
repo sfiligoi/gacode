@@ -200,6 +200,9 @@ then
   echo "         -onlyzonal"
   echo "         Remove nonzonal (n>0) component of the fluctuations (-vis torcut only)"  
   echo
+  echo "         -xshift"
+  echo "         Shift x-axis range for global runs"  
+  echo
   echo "OPTIONS FOR -plot vid"
   echo
   echo "         -pre <prefix>"
@@ -303,6 +306,7 @@ MAG=1.0
 IE=0
 NOZONAL=0
 ONLYZONAL=0
+XSHIFT=0
 
 PRE=
 FRAMERATE=20
@@ -385,6 +389,7 @@ while [ $# -gt 0 ] ; do
   -mag) shift ; MAG=$1 ;;
   -nozonal) NOZONAL=1 ;;
   -onlyzonal) ONLYZONAL=1 ;;
+  -xshift) XSHIFT=1 ;;
 
   -pre) shift ; PRE=$1 ;;
   -q)  shift ; QUALITY=$1 ;;
@@ -451,7 +456,7 @@ case "$PLOT_TYPE" in
    fluct)
        export OMP_NUM_THREADS=$NOMP ; \
        python -m pygacode.cgyro.plot_fluct \
-	      $EXT $MOMENT $SPECIES $PX $PY $NX $NY $TIME $FMIN $FMAX $CMAP $FONTSIZE $LAND_FLAG $THETA ;;
+	      $EXT $MOMENT $SPECIES $PX $PY $NX $NY $TIME $FMIN $FMAX $CMAP $FONTSIZE $LAND_FLAG $THETA $XSHIFT ;;
 
    rt)
        export OMP_NUM_THREADS=$NOMP ; \
