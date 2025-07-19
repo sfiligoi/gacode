@@ -381,9 +381,9 @@ subroutine cgyro_read_restart
         source(j,:,0) = h_x(ic0+j,:,0)
         h_x(ic0+j,:,0) = 0.0
      enddo
-     sa = 0.0
+     dsrc = 0.0
      do j=1,nint(t_current/delta_t)
-        sa = 1.0+exp(-delta_t/tau_ave)*sa
+        dsrc = 1.0+exp(-delta_t/tau_ave)*dsrc
      enddo
   endif
 

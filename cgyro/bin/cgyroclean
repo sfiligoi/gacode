@@ -54,15 +54,18 @@ def opts():
 idir,tdir,c,opt,v = opts()
 
 if idir == 'null' and tdir == 'null':
+
+    # Common files to clean
+    cfile = 'bin* *gen batch.err batch.out'
     if c is None:
         pre = ''
     else:
         pre = 'cd '+c+' ; '
     if opt:
         # clean preserving timing and version
-        os.system(pre+'rm -f bin* out.cgyro.[a-s]* out.cgyro.time out.cgyro.tag *gen')
+        os.system(pre+'rm -f out.cgyro.[a-s]* out.cgyro.time out.cgyro.tag'+cfile)
     else:
-        os.system(pre+'rm -f bin* out* *gen')
+        os.system(pre+'rm -f out* '+cfile)
 
     sys.exit()
 

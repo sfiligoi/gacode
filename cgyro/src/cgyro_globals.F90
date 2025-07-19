@@ -340,7 +340,7 @@ module cgyro_globals
   real, parameter :: tau_ave=50.0
   real, dimension(:), allocatable :: c_wave
   complex, dimension(:,:,:), allocatable :: source
-  real :: sa
+  real :: dsrc
   !
   ! Distributions
   complex, dimension(:,:,:,:), allocatable :: rhs

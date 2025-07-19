@@ -11,6 +11,7 @@ PRE=$4
 
 # Main movie definitions
 BASENAME=$PRE%d.jpg
+BASENAME=$PRE%d.png
 OUT=${PRE}movie.mp4
 
 if hash avconv 2>/dev/null ; then
