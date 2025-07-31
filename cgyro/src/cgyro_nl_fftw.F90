@@ -439,7 +439,6 @@ subroutine cgyro_nl_fftw_init_fp32
        HIPFFT_C2R, &
        nsplit)
 #elif defined(MKLGPU)
-#if 0
      plan_c2r_manyA = 0
 !$omp target data map(tofrom: fymany32,uymany32)
      !$omp dispatch
@@ -496,7 +495,6 @@ subroutine cgyro_nl_fftw_init_fp32
           odist, &
           FFTW_ESTIMATE)
 !$omp end target data
-#endif
 #else
   istatus = cufftPlanMany(&
        plan_c2r_manyA, &
@@ -580,7 +578,6 @@ subroutine cgyro_nl_fftw_init_fp32
        nsplitB)
   endif
 #elif defined(MKLGPU)
-#if 0
      plan_r2c_manyA = 0
 !$omp target data map(tofrom: uvmany32,fxmany32)
      !$omp dispatch
@@ -618,7 +615,6 @@ subroutine cgyro_nl_fftw_init_fp32
           FFTW_ESTIMATE)
   endif
 !$omp end target data
-#endif
 #else
   istatus = cufftPlanMany(&
        plan_r2c_manyA, &
