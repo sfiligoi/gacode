@@ -1,0 +1,35 @@
+#!/bin/bash
+
+if [ "$nomp" -ne "12" ]; then
+  echo "WARNING: -nomp was not 12" 1>&2
+  echo "INFO: Forcing -nomp 12, changing number of nodes requested" 1>&2
+  nomp=12
+fi
+
+# round up to nmpi/8
+let "real_nodes=(7+$nmpi)/8"
+
+if [ "$nodes" -ne "$real_nodes" ]; then
+  echo "WARNING: Wrong number of nodes requested ($nodes vs $real_nodes)" 1>&2
+  echo "INFO: Forcing $real_nodes nodes" 1>&2
+  nodes=$real_nodes
+fi
+
+# Default queue
+if [ "$QUEUE" == "null_queue" ] ; then
+   QUEUE=pvc9
+fi
+
+bfile=$SIMDIR/batch.src
+
+echo "#!/bin/bash -l" > $bfile
+echo "#SBATCH -J $LOCDIR" >> $bfile
+echo "#SBATCH -A $REPO" >> $bfile
+echo "#SBATCH -o $SIMDIR/batch.out" >> $bfile
+echo "#SBATCH -e $SIMDIR/batch.err" >> $bfile
+echo "#SBATCH -p $QUEUE" >> $bfile
+echo "#SBATCH -t $WALLTIME" >> $bfile
+echo "#SBATCH -N $nodes" >> $bfile
+echo "#SBATCH -n $nmpi" >> $bfile
+echo "#SBATCH --gres=gpu:4" >> $bfile
+echo "$CODE -e $LOCDIR -n $nmpi -nomp $nomp -p $SIMROOT" >> $bfile 
