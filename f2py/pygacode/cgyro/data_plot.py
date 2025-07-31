@@ -876,7 +876,7 @@ class cgyrodata_plot(data.cgyrodata):
       nxp = 8*nx
       x = np.linspace(-np.pi,np.pi,nxp)
 
-      # complex n=0 amplitude
+      # complex n=0 amplitude: <y[x]>
       y = time_average(f[:,0,:],t,imin,imax)
 
       # vectorized calculation of average function and derivative (f_ave,df_ave)
