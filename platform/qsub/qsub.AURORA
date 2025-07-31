@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# Default queue
+if [ "$QUEUE" == "null_queue" ] ; then
+   QUEUE=prod
+fi
+
+bfile=$SIMDIR/batch.src
+
+if [ "x$nomp" != "x17" ]; then
+  echo "WARNING: nomp was $nomp, forcing to 17"
+  export nomp=17
+fi
+
+echo "#!/bin/bash -l" > $bfile
+echo "#PBS -N $LOCDIR" >> $bfile
+echo "#PBS -A $REPO" >> $bfile
+echo "#PBS -o $SIMDIR/batch.out" >> $bfile
+echo "#PBS -e $SIMDIR/batch.err" >> $bfile
+echo "#PBS -q $QUEUE" >> $bfile
+echo "#PBS -l walltime=$WALLTIME" >> $bfile
+echo "#PBS -l select=$nodes" >> $bfile
+echo "#PBS -l place=scatter" >> $bfile
+echo "#PBS -l filesystems=flare" >> $bfile
+echo "$CODE -e $LOCDIR -n $nmpi -nomp $nomp -p $SIMROOT" >> $bfile 
