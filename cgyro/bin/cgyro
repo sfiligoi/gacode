@@ -297,13 +297,13 @@ fi
 
 gacode_printversion CGYRO
 
-if [ -f $CGYRO_DIR/src/cgyro ] ; then
-   $GACODE_ROOT/platform/exec/exec.$GACODE_PLATFORM \
-      $SIMDIR $NPROC "$CGYRO_DIR/src/cgyro $TEST_FLAG" $NOMP
-else
-   echo "ERROR: CGYRO executable not found."
-   exit 1
-fi
+#if [ -f $CGYRO_DIR/src/cgyro ] ; then
+#   $GACODE_ROOT/platform/exec/exec.$GACODE_PLATFORM \
+#      $SIMDIR $NPROC "$CGYRO_DIR/src/cgyro $TEST_FLAG" $NOMP
+#else
+#   echo "ERROR: CGYRO executable not found."
+#   exit 1
+#fi
 #===========================================================
 
 #============================================================

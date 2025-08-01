@@ -217,9 +217,9 @@ def frame():
 
       # Map from x=[0,xmax] to x=[-xmax/2,xmax/2]
       if xshift:
-         ns = nr//2
-         xp = xp-xmax/nr*ns
-         f  = np.roll(f,ns,axis=0)
+         j = nr//2
+         xp = xp-xmax/nr*j
+         f  = np.roll(f,j,axis=0)
       
       # Periodic extensions
       if xshift:
