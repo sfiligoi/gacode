@@ -68,11 +68,26 @@ for i,line in enumerate(lines):
         os.system(action)
         print(action)
 
+n = len(cpu)
+
 # Create input.xgyro
-mpi = '# N_MPI={}'.format(sum(cpu))
-action = 'echo "{}" > input.xgyro'.format(mpi)
+mystr = '# This file created by xgyrodir'
+action = 'echo "{}" > input.xgyro'.format(mystr)
 print(action)
 os.system(action)
-for i in range(len(cpu)):
+
+# Write total
+mystr = '# N_MPI={}'.format(sum(cpu))
+action = 'echo "{}" >> input.xgyro'.format(mystr)
+print(action)
+os.system(action)
+
+# Write N_DIRS
+mystr = 'N_DIRS={}'.format(n)
+action = 'echo "{}" >> input.xgyro'.format(mystr)
+print(action)
+os.system(action)
+
+for i in range(n):
     action = 'echo "DIR_{} = {}{}" >> input.xgyro'.format(i+1,base,i+1)
     os.system(action)
