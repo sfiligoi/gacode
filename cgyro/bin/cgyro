@@ -271,6 +271,15 @@ fi
 #
 # Version stamp
 # NOTE: log all starts and restarts, but NOT test mode
+
+# Check for executable
+if [ -f $CGYRO_DIR/src/cgyro ] ; then
+   gacode_printversion CGYRO
+else
+   echo "ERROR: CGYRO executable not found."
+   exit 1
+fi
+
 if [ $TEST_FLAG -eq 0 ]
 then
    # If there are no restart files, its safe to overwrite the log file
@@ -290,26 +299,19 @@ then
       simtime=0.0
    fi
    echo "$date_tag [$version_tag][$GACODE_PLATFORM][$simtime]" >> out.cgyro.version
+
+   $GACODE_ROOT/platform/exec/exec.$GACODE_PLATFORM \
+      $SIMDIR $NPROC "$CGYRO_DIR/src/cgyro $TEST_FLAG" $NOMP
 else
     python $GACODE_ROOT/cgyro/bin/cgyro_parse.py
     $GACODE_ROOT/cgyro/src/cgyro
 fi
-
-gacode_printversion CGYRO
-
-#if [ -f $CGYRO_DIR/src/cgyro ] ; then
-#   $GACODE_ROOT/platform/exec/exec.$GACODE_PLATFORM \
-#      $SIMDIR $NPROC "$CGYRO_DIR/src/cgyro $TEST_FLAG" $NOMP
-#else
-#   echo "ERROR: CGYRO executable not found."
-#   exit 1
-#fi
 #===========================================================
 
 #============================================================
 # Print runfile if test case
 if [ $TEST_FLAG -eq 1 ]
 then
-    python $GACODE_ROOT/shared/bin/osxlist.py out.cgyro.info
+    cat out.cgyro.info
 fi
 #============================================================
