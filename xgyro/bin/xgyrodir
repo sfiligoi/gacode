@@ -70,22 +70,10 @@ for i,line in enumerate(lines):
 
 n = len(cpu)
 
-# Create input.xgyro
-mystr = '# This file created by xgyrodir'
+# input.xgyrov header
+mystr = '# This file created by xgyrodir\n# N_MPI={}\nN_DIRS={}'.format(sum(cpu),n)
 action = 'echo "{}" > input.xgyro'.format(mystr)
-print(action)
-os.system(action)
 
-# Write total
-mystr = '# N_MPI={}'.format(sum(cpu))
-action = 'echo "{}" >> input.xgyro'.format(mystr)
-print(action)
-os.system(action)
-
-# Write N_DIRS
-mystr = 'N_DIRS={}'.format(n)
-action = 'echo "{}" >> input.xgyro'.format(mystr)
-print(action)
 os.system(action)
 
 for i in range(n):
