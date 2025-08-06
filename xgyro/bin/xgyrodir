@@ -41,8 +41,8 @@ def opts():
 #
 infile,force,verbose = opts()
 
-with open('pre.xgyro', 'r') as file:
-    lines = file.readlines()
+with open('pre.xgyro', 'r') as f:
+    lines = [line for line in f if line.strip() and not line.strip().startswith('#')]
 
 cpu = []
 base = 'a'
