@@ -2,6 +2,7 @@
 
 import os
 import sys
+import json
 import argparse
 import textwrap
 import numpy as np
@@ -32,9 +33,6 @@ def opts():
     parser.add_argument('-ref',
                         help='Refresh directories',
                         action='store_true')
-    parser.add_argument('-json',
-                        help='Generate IMAS and localdump files',
-                        action='store_true')
     parser.add_argument('-db',
                         help='Load the DB and print',
                         action='store_true')
@@ -44,20 +42,21 @@ def opts():
 
     args=parser.parse_args()
 
-    return args.ref,args.json,args.db,args.flux
+    return args.ref,args.db,args.flux
 
-ref,json,db,doflux = opts()
+ref,db,doflux = opts()
 
 meta = {}
 
-if (not ref) and (not json) and (not db):
+if (not ref) and (not db):
     print('Type "cgyrodb -h" for help')
     sys.exit()
 
 def gendict(sim,doflux):
 
    mydict = {}
-
+   dat = {}
+   
    mydict['n_n'] = sim.n_n
    mydict['n_radial'] = sim.n_radial
    mydict['n_theta'] = sim.n_theta
@@ -77,15 +76,15 @@ def gendict(sim,doflux):
    if doflux:
       sim.getflux()
       y = np.sum(sim.ky_flux,axis=(2,3))
+      imin,imax=time_index(sim.t,'0.5')
       for ispec in range(sim.n_species):
-         g = average(y[ispec,0,:],sim.t,0.5,0.0)
-         q = average(y[ispec,1,:],sim.t,0.5,0.0)
-         v = average(y[ispec,2,:],sim.t,0.5,0.0)
-         mydict['g'+str(ispec)] = g
-         mydict['q'+str(ispec)] = q
-         mydict['v'+str(ispec)] = v
-
-   return mydict
+         g = time_average(y[:,0,:],sim.t,imin,imax)
+         q = time_average(y[:,1,:],sim.t,imin,imax)
+         v = time_average(y[:,2,:],sim.t,imin,imax)
+         dat['g'] = g.tolist()
+         dat['q'] = q.tolist()
+         dat['v'] = v.tolist()
+   return mydict,dat
 
 # First locate all directories
 y = []
@@ -100,19 +99,20 @@ if ref:
       print('Refreshing '+mdir)
       os.system('cd '+mdir+' ; python $GACODE_ROOT/cgyro/bin/cgyro_parse.py')
       os.system('cd '+mdir+' ; $GACODE_ROOT/cgyro/src/cgyro ')
-
-if json:
-   # Run through directories and update
-   for mdir in y:
       print('Dumping '+mdir)
       os.system('cgyro_json -e '+mdir)
 
 if db:
-   # Create master dictionary "meta"
-   for mdir in tqdm(y):
-      sim = cgyrodata(mdir+'/',silent=True)
-      meta[mdir]=gendict(sim,doflux)
+    # Create master dictionary "meta"
+    for mdir in tqdm(y):
+        sim = cgyrodata(mdir+'/',silent=True)
+        meta[mdir],dat=gendict(sim,doflux)
+        with open(mdir+'/json.flux','w') as f:
+            json.dump(dat,f,indent=2,sort_keys=True)
 
-   df = pd.DataFrame(meta)
-   dfpart = df.T[['n_n','n_radial','n_theta','q','s','kappa','a/Ln0','a/Lt0','a/Ln1','a/Lt1','nuee']]
-   print(dfpart)
+    df = pd.DataFrame(meta)
+    if doflux:
+        dfpart = df.T[['q','s','kappa','a/Ln0','a/Lt0','a/Ln1','a/Lt1','nuee']]
+    else:
+        dfpart = df.T[['n_n','n_radial','n_theta','q','s','kappa','a/Ln0','a/Lt0','a/Ln1','a/Lt1','nuee']]
+    print(dfpart)

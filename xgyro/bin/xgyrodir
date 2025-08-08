@@ -42,6 +42,7 @@ def opts():
 infile,force,verbose = opts()
 
 with open('pre.xgyro', 'r') as f:
+    # Reject lines that start with '#' or are blank
     lines = [line for line in f if line.strip() and not line.strip().startswith('#')]
 
 cpu = []

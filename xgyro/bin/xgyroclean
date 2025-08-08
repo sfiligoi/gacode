@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os,sys
+import os,sys,glob
 import numpy as np
 import argparse
 import textwrap
@@ -10,34 +10,31 @@ def opts():
 
     mytext = '''\
     output:
-       This command provides tools for cleaning and copying cgyro directories.
+       This command provides tools for cleaning and copying xgyro directories.
        Examples:
 
-       cgyroclean -c              (cleans current directory)
-       cgyroclean -c mydir        (cleans directory mydir)
-       cgyroclean -opt -c mydir   (cleans directory mydir leaving timing files)
-       cgyroclean -i idir         (creates copy of idir without restart files)
-       cgyroclean -i idir -t tdir (creates tdir without restart files of idir)
+       xgyroclean -c              (cleans current directory recursively)
+       xgyroclean -i idir         (creates copy of idir without restart files)
+       xgyroclean -i idir -t tdir (copies idir -> tdir without restart files)
     '''
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawTextHelpFormatter,
-        prog = 'cgyroclean',
+        prog = 'xgyroclean',
         description="Directory clean/copy utility",
         epilog=textwrap.dedent(mytext))
 
     parser.add_argument('-i',
                         help='initial directory (default: cwd)',
                         type=str,
-                        default='null')
+                        nargs='?')
     parser.add_argument('-t',
                         help='target directory (default: _copy)',
                         type=str,
-                        default='null')
-    parser.add_argument('-c',
-                        help='Clean directory (all out.* and bin.* files)',
-                        type=str,
                         nargs='?')
+    parser.add_argument('-c',
+                        help='Clean directories recursively (all out.* and bin.* files)',
+                        action='store_true')
     parser.add_argument('-opt',
                         help='Preserve timing files',
                         action='store_true')
@@ -53,27 +50,39 @@ def opts():
 #
 idir,tdir,c,opt,v = opts()
 
-if idir == 'null' and tdir == 'null':
-
-    # Common files to clean
-    cfile = 'bin* *gen batch.err batch.out'
-    if c is None:
-        pre = ''
-    else:
-        pre = 'cd '+c+' ; '
-    if opt:
-        # clean preserving timing and version
-        os.system(pre+'rm -f out.cgyro.[a-s]* out.cgyro.time out.cgyro.tag'+cfile)
-    else:
-        os.system(pre+'rm -f out* '+cfile)
-
+# Check for no arguments
+if idir is None and tdir is None and not c:
     sys.exit()
 
-if idir == 'null':
-    print('ERROR: specify -i')
+    
+if opt:
+    # Keep timing 
+    patterns = ['**/out.cgyro.[a-s]*',
+                '**/out.cgyro.time',
+                '**/bin.*',
+                '**/*gen',
+                '**/batch.err',
+                '**/batch.out']
+else:
+    patterns = ['**/out.cgyro.*',
+                '**/bin.*',
+                '**/*gen',
+                '**/batch.err',
+                '**/batch.out']
+ 
+# Recursive clean
+if c:
+    for pattern in patterns:
+        for file in glob.glob(pattern,recursive=True):
+            os.remove(file)
+    
     sys.exit()
 
-if tdir == 'null':
+if idir is None:
+    print('ERROR: specify -i <idir>')
+    sys.exit()
+
+if tdir is None:
     tdir = idir+'_copy/'
 
 idir = idir+'/'
