@@ -1,0 +1,66 @@
+# ----------------------- AI (in) --------------------
+
+# Scalar
+BETAE_UNIT
+BETA_STAR
+GAMMA_E
+GAMMA_P
+MACH
+NU_EE
+Z_EFF
+Q
+S
+RMIN
+
+# N_SPECIES
+MASS [s]
+Z [s]
+DENS [s]
+TEMP [s]
+DLNNDR [s]
+DLNTDR [s]
+
+# Shape (critical)
+DELTA
+S_DELTA
+KAPPA
+S_KAPPA
+ZETA
+S_ZETA
+RMAJ
+SHIFT
+ZMAG
+DZMAG
+
+# ----------------------- AI (out) ------------------
+
+Q [s]
+G [s]
+
+# ----------------------- NON-AI --------------------
+# (incomplete) 
+
+# Shape (non-critical)
+SHAPE_COS [g]
+SHAPE_SIN [g]
+SHAPE_S_COS [g]
+SHAPE_S_SIN [g]
+
+# Resolution
+KY
+BOX_SIZE
+COLLISION_MODEL
+DELTA_T
+ERROR_TOL
+E_MAX
+N_ENERGY
+N_FIELD
+N_RADIAL
+N_THETA
+N_TOROIDAL
+N_XI
+
+# Resolution (unneeded)
+PRINT_STEP (X)
+MAX_TIME (X)
+NONLINEAR_FLAG (X)
