@@ -57,21 +57,30 @@ if glob.glob(base+'*/'):
         sys.exit()
 
 # Create new directories
-for i,line in enumerate(lines):
+i = 1
+for line in lines:
     row = line.strip().split()
-    cpu.append(int(row[0]))
-    sdir = base+str(i+1)    
+    if row[0] == 'ALL':
+        apar = row[1:]
+        continue
+    sdir = base+str(i)
+    i = i+1
     os.system('mkdir '+sdir)
     os.system('cp input.cgyro '+sdir) 
+    cpu.append(int(row[0]))
     for par in row[1:]:
         # Add parameter to local input.cgyro
         action = 'echo {} >> {}/input.cgyro'.format(par,sdir)
         os.system(action)
-        print(action)
+        if apar is not None:
+            for par in apar:
+                action = 'echo {} >> {}/input.cgyro'.format(par,sdir)
+                os.system(action)
+
 
 n = len(cpu)
 
-# input.xgyrov header
+# header for input.xgyro 
 mystr = '# This file created by xgyrodir\n# N_MPI={}\nN_DIRS={}'.format(sum(cpu),n)
 action = 'echo "{}" > input.xgyro'.format(mystr)
 
