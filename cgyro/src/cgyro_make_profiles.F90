@@ -81,7 +81,7 @@ subroutine cgyro_make_profiles
      shape_s_cos(5) = shape_s_cos5_loc
      shape_cos(6)   = shape_cos6_loc
      shape_s_cos(6) = shape_s_cos6_loc
- 
+
      q       = q_loc
      s       = s_loc
      zmag    = zmag_loc
@@ -101,7 +101,7 @@ subroutine cgyro_make_profiles
      sdlnndr(1:n_species) = sdlnndr_loc(1:n_species)     
      sdlntdr(1:n_species) = sdlntdr_loc(1:n_species)     
      sbeta                = sbeta_loc
- 
+
      if (ae_flag == 1) then
         is_ele = n_species+1
      else
@@ -145,10 +145,10 @@ subroutine cgyro_make_profiles
      loglam = 24.0 - log(sqrt(dens_ele*1e13)/(temp_ele*1e3))
      nu_ee  = cc * loglam * dens_ele / (sqrt(mass_ele)*temp_ele**1.5) &
           / (vth_norm/a_meters) 
-     
+
      ! Electron beta
      betae_unit = betae_loc
-     
+
      ! Debye length (from NRL plasma formulary):
      ! Use input lambda_debye as scaling parameter
 
@@ -191,7 +191,7 @@ subroutine cgyro_make_profiles
      call set_betastar
      beta_star(0)     = beta_star(0)  * beta_star_scale
      beta_star_fac    = beta_star_fac * beta_star_scale
-     
+
   else
 
      a_meters      = 0.0
@@ -254,18 +254,13 @@ subroutine cgyro_make_profiles
 
   endif
 
-  ! z_eff -- only use value from input.cgyro or input.gacode
-  ! if simple electron Lorentz collisions (1,5) and z_eff_method=1
-  ! else compute z_eff from the input ions' densities and charges
-  if (.not. (z_eff_method == 1 .and. &
-       (collision_model==1 .or. collision_model==5))) then
-     z_eff = 0.0
-     do is=1,n_species
-        if (z(is) > 0.0) then 
-           z_eff = z_eff+dens(is)*z(is)**2/dens_ele
-        endif
-     enddo
-  endif
+  ! Compute effective charge (diagnostic)
+  z_eff = 0.0
+  do is=1,n_species
+     if (z(is) > 0.0) then 
+        z_eff = z_eff+dens(is)*z(is)**2/dens_ele
+     endif
+  enddo
 
   ! Check electron species consistency
   num_ele = 0
@@ -325,7 +320,7 @@ subroutine cgyro_make_profiles
      endif
 
      up_radial = 0.0
-     
+
   else if (n_toroidal == 1) then
 
      ! Single linear mode (assume n=1, compute rho)
@@ -427,9 +422,9 @@ subroutine cgyro_make_profiles
 
   !-------------------------------------------------------------
 #if defined(OMPGPU)
-!$omp target enter data map(to:px,z,temp)
+  !$omp target enter data map(to:px,z,temp)
 #elif defined(_OPENACC)
-!$acc enter data copyin(px,z,temp)
+  !$acc enter data copyin(px,z,temp)
 #endif
 
 end subroutine cgyro_make_profiles

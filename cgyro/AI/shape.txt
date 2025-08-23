@@ -1,0 +1,2 @@
+f(r) = [kappa(r), delta(r), shape_s(r), shape_c(r)]
+

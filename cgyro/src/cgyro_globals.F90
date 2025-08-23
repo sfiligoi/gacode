@@ -63,7 +63,6 @@ module cgyro_globals
   integer :: collision_field_max_l
   integer :: collision_test_max_l
   real    :: z_eff
-  integer :: z_eff_method
   integer :: zf_test_mode 
   integer :: nonlinear_flag 
   real :: temp_ae
