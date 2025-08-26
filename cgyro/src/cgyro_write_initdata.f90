@@ -13,7 +13,7 @@ subroutine cgyro_write_initdata
   implicit none
 
   integer :: p,in,is,it
-  real :: kymax,kyrat,dn,dt,rhoa
+  real :: kymax,dn,dt,rhoa
   real, external :: spectraldiss
   character(len=50) :: msg,lfmt
 
@@ -141,27 +141,7 @@ subroutine cgyro_write_initdata
              is,sdlnndr(is),dlnndr(is)-dn,dlnndr(is)+dn,sdlntdr(is),dlntdr(is)-dt,dlntdr(is)+dt,sbeta
         enddo
      endif
-
-     ! Running from input.gacode
-     if (profile_model == 2) then
-        dn = rho/(rhos/a_meters)
-        kyrat = abs(q/rmin*rhos/a_meters)
-        write(io,*)
-        write(io,10) '           a[m]:',a_meters, '|b_unit[T]|:',abs(b_unit),  '   |rhos/a|:',abs(rhos)/a_meters,' dn:',dn
-        write(io,10) 'n_norm[e19/m^3]:',dens_norm,'v_norm[m/s]:',vth_norm,'T_norm[keV]:',temp_norm
-        write(io,*)
-        write(io,'(t2,a)') ' n = 1         2         3         4         5         6         7         8'      
-        write(io,'(t2,a,8(1pe9.3,1x))') 'KY = ',kyrat,2*kyrat,3*kyrat,4*kyrat,5*kyrat,6*kyrat,7*kyrat,8*kyrat        
-        write(io,'(t2,a,8(1pe9.3,1x))') 'LY = ',&
-             2*pi/kyrat,&
-             2*pi/(2*kyrat),&
-             2*pi/(3*kyrat),&
-             2*pi/(4*kyrat),&
-             2*pi/(5*kyrat),& 
-             2*pi/(6*kyrat),& 
-             2*pi/(7*kyrat),& 
-             2*pi/(8*kyrat) 
-     endif
+     
      write(io,*)
 
      close(io)
@@ -204,17 +184,6 @@ subroutine cgyro_write_initdata
      write (io,fmtstr) gamma_e
      write (io,fmtstr) gamma_p
      write (io,fmtstr) mach
-     write (io,fmtstr) a_meters
-     write (io,fmtstr) b_unit
-     write (io,fmtstr) b_gs2
-     write (io,fmtstr) dens_norm
-     write (io,fmtstr) temp_norm
-     write (io,fmtstr) vth_norm
-     write (io,fmtstr) mass_norm
-     write (io,fmtstr) rho_star_norm
-     write (io,fmtstr) gamma_gb_norm
-     write (io,fmtstr) q_gb_norm
-     write (io,fmtstr) pi_gb_norm
      do is=1,n_species
         write (io,fmtstr) z(is)
         write (io,fmtstr) mass(is)
@@ -232,6 +201,7 @@ subroutine cgyro_write_initdata
      write (io,fmtstr) sbeta
      ! Added 17 Dec 2024
      write (io,fmtstr) z_eff
+     write (io,fmtstr) b_gs2     
      write (io,'(i0)') hiprec_flag
      close(io)
 
@@ -332,7 +302,6 @@ subroutine cgyro_write_initdata
   endif
   !----------------------------------------------------------------------------
 
-10 format(t2,4(a,1x,1pe9.3,2x))  
 20 format(t2,4(a,1x,1pe10.3,2x)) 
 21 format(t3,a3,1x,f8.5,1x,a5,1x,f8.5,a4,1x,f8.5,a7,1x,f8.5,a9,1x,f8.5)
 22 format(t14,             a7,1x,f8.5,a4,1x,f8.5,a7,1x,f8.5,a9,1x,f8.5)

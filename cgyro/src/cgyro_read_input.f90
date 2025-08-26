@@ -42,7 +42,6 @@ subroutine cgyro_read_input
   call cgyro_readbc_real(ipccw)
   call cgyro_readbc_real(btccw)
   call cgyro_readbc_int(silent_flag,'SILENT_FLAG')
-  call cgyro_readbc_int(profile_model,'PROFILE_MODEL')
   call cgyro_readbc_int(equilibrium_model,'EQUILIBRIUM_MODEL')
   call cgyro_readbc_int(collision_model,'COLLISION_MODEL')
   call cgyro_readbc_int(collision_mom_restore,'COLLISION_MOM_RESTORE')
@@ -115,6 +114,7 @@ subroutine cgyro_read_input
      call cgyro_readbc_real(shape_s_cos(is))
   enddo
   call cgyro_readbc_real(betae_unit)
+  call cgyro_readbc_real(beta_star_scale)
   call cgyro_readbc_int(n_species,'N_SPECIES')
   call cgyro_readbc_real(nu_ee)
 
@@ -129,17 +129,6 @@ subroutine cgyro_read_input
   call cgyro_readbc_realv(sdlnndr,is)
   call cgyro_readbc_realv(sdlntdr,is)
   call cgyro_readbc_real(sbeta)
-  call cgyro_readbc_realv(dlnndr_scale,is)
-  call cgyro_readbc_realv(dlntdr_scale,is)
-
-  call cgyro_readbc_int(quasineutral_flag,'QUASINEUTRAL_FLAG')
-  call cgyro_readbc_real(lambda_star_scale)
-  call cgyro_readbc_real(gamma_e_scale)
-  call cgyro_readbc_real(gamma_p_scale)
-  call cgyro_readbc_real(mach_scale)
-  call cgyro_readbc_real(beta_star_scale)
-  call cgyro_readbc_real(betae_unit_scale)
-  call cgyro_readbc_real(nu_ee_scale)
   
   if (i_proc == 0) close(1)
 

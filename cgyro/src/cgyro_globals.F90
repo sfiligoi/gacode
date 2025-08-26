@@ -49,7 +49,6 @@ module cgyro_globals
   real    :: ipccw
   real    :: btccw
   integer :: silent_flag
-  integer :: profile_model
   integer :: equilibrium_model
   integer :: collision_model
   integer :: collision_mom_restore
@@ -62,7 +61,6 @@ module cgyro_globals
   integer :: collision_test_mode
   integer :: collision_field_max_l
   integer :: collision_test_max_l
-  real    :: z_eff
   integer :: zf_test_mode 
   integer :: nonlinear_flag 
   real :: temp_ae
@@ -122,6 +120,7 @@ module cgyro_globals
   real, dimension(0:n_shape) :: shape_cos
   real, dimension(0:n_shape) :: shape_s_cos
   real :: betae_unit
+  real :: beta_star_scale
   !
   ! Species parameters
   !
@@ -138,27 +137,32 @@ module cgyro_globals
   real :: sbeta
 
   integer :: subroutine_flag  ! only used for cgyro_read_input
+  !---------------------------------------------------------------
 
-  ! Re-scaling parameters for experimental profiles
-  integer :: quasineutral_flag
-  real :: lambda_star_scale
-  real :: gamma_e_scale
-  real :: gamma_p_scale
-  real :: mach_scale
-  real :: beta_star_scale, betae_unit_scale
-  real :: nu_ee_scale
-  real, dimension(11) :: dlnndr_scale
-  real, dimension(11) :: dlntdr_scale
+  !---------------------------------------------------------------
+  ! Physics variables
+  !
+  integer :: ae_flag
+  integer :: is_ele
+  real :: dens_ele
+  real :: temp_ele
+  real :: mass_ele
+  real :: dlnndr_ele
+  real :: dlntdr_ele
+  !
+  real, dimension(11) :: vth  
+  real, dimension(11) :: nu
+  real :: rho
+  real :: length
+  integer :: sign_qs
+  ! k_theta = k_theta_base * my_toroidal
+  real :: k_theta_base
+  ! omega_eb = omega_eb_base * my_toroidal
+  real :: omega_eb_base
 
   real :: lambda_debye
-  real :: rhos
-
-  ! Global conversion variables
-  real :: b_unit, b_gs2
-  real :: a_meters
-  real :: dens_norm, temp_norm, vth_norm, mass_norm, rho_star_norm
-  real :: gamma_gb_norm, q_gb_norm, pi_gb_norm
-  
+  real :: z_eff
+  real :: b_gs2
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------
@@ -292,28 +296,6 @@ module cgyro_globals
   complex, dimension(:), allocatable :: freq
   complex :: freq_err
   integer(KIND=8) :: kernel_start_time, kernel_exit_time, kernel_count_rate, kernel_count_max
-  !---------------------------------------------------------------
-
-  !---------------------------------------------------------------
-  ! Physics variables
-  !
-  integer :: ae_flag
-  integer :: is_ele
-  real :: dens_ele
-  real :: temp_ele
-  real :: mass_ele
-  real :: dlnndr_ele
-  real :: dlntdr_ele
-  !
-  real, dimension(11) :: vth  
-  real, dimension(11) :: nu
-  real :: rho
-  real :: length
-  integer :: sign_qs
-  ! k_theta = k_theta_base * my_toroidal
-  real :: k_theta_base
-  ! omega_eb = omega_eb_base * my_toroidal
-  real :: omega_eb_base
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------

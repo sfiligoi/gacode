@@ -21,7 +21,8 @@ class cgyrodata:
 
       # get mesh/input data
       self.getgrid()
-
+      self.getequil() 
+      
       # set data resolution
       if self.hiprec_flag:
          # double
@@ -437,9 +438,89 @@ class cgyrodata:
                               np.outer(np.ones(nx),self.ky[:]**2))
       #-----------------------------------------------------------------
 
+   def getequil(self):
+   
       #-----------------------------------------------------------------
-      # Equil file
+      # equilibrium file (see also legacy read at bottom)
       #
+      nshape = 7
+      ns = self.n_species
+      p = 0
+      data = np.fromfile(self.dir+'out.cgyro.equilibrium',sep=' ')
+      self.rmin,p    = self.eget(data,p)
+      self.rmaj,p    = self.eget(data,p)
+      self.q,p       = self.eget(data,p)
+      self.shear,p   = self.eget(data,p)
+      self.shift,p   = self.eget(data,p)
+      self.kappa,p   = self.eget(data,p)
+      self.s_kappa,p = self.eget(data,p)
+      self.delta,p   = self.eget(data,p)
+      self.s_delta,p = self.eget(data,p)
+      self.zeta,p    = self.eget(data,p)
+      self.s_zeta,p  = self.eget(data,p)
+      self.zmag,p    = self.eget(data,p)
+      self.dzmag,p   = self.eget(data,p)
+
+      self.shape_sin   = np.zeros(nshape)
+      self.shape_s_sin = np.zeros(nshape)
+      self.shape_cos   = np.zeros(nshape)
+      self.shape_s_cos = np.zeros(nshape)
+      for i in range(3,nshape):
+         self.shape_sin[i],p   = self.eget(data,p)
+         self.shape_s_sin[i],p = self.eget(data,p)
+      for i in range(nshape):
+         self.shape_cos[i],p   = self.eget(data,p)
+         self.shape_s_cos[i],p = self.eget(data,p)
+
+      self.rho,p           = self.eget(data,p)
+      self.ky0,p           = self.eget(data,p)
+      self.betae_unit,p    = self.eget(data,p)
+      self.beta_star,p     = self.eget(data,p)
+      self.lambda_star,p   = self.eget(data,p)
+      self.gamma_e,p       = self.eget(data,p)
+      self.gamma_p,p       = self.eget(data,p)
+      self.mach,p          = self.eget(data,p)
+
+      # Define species vectors
+      self.z      = np.zeros(ns)
+      self.mass   = np.zeros(ns)
+      self.dens   = np.zeros(ns)
+      self.temp   = np.zeros(ns)
+      self.dlnndr = np.zeros(ns)
+      self.dlntdr = np.zeros(ns)
+      self.nu     = np.zeros(ns)
+      for i in range(ns):
+         self.z[i],p      = self.eget(data,p)
+         self.mass[i],p   = self.eget(data,p)
+         self.dens[i],p   = self.eget(data,p)
+         self.temp[i],p   = self.eget(data,p)
+         self.dlnndr[i],p = self.eget(data,p)
+         self.dlntdr[i],p = self.eget(data,p)
+         self.nu[i],p     = self.eget(data,p)
+
+      # Added 3 May 2024
+      self.sdlnndr = np.zeros(ns)
+      self.sdlntdr = np.zeros(ns)
+      self.sbeta = np.zeros(ns)
+      for i in range(ns):
+         self.sdlnndr[i],p = self.eget(data,p)
+         self.sdlntdr[i],p = self.eget(data,p)
+
+      # Updated 19 Feb 2025
+      self.sbeta,p = self.eget(data,p)
+      self.z_eff,p = self.eget(data,p)
+      self.b_gs2,p = self.eget(data,p) 
+      self.hiprec_flag,p = self.eget(data,p)
+
+      if p == -1:
+         print('WARNING: (getgrid) Data format outdated. Please run cgyro -t')
+      else:
+         if not self.silent:
+            print('INFO: (getgrid) Read {:d} entries out.cgyro.equilibrium.'.format(p))
+
+      
+   def getequil_legacy(self):
+
       nshape = 7
       ns = self.n_species
       p = 0
@@ -506,26 +587,7 @@ class cgyrodata:
          self.dlntdr[i],p = self.eget(data,p)
          self.nu[i],p     = self.eget(data,p)
 
-      # Added 3 May 2024
-      self.sdlnndr = np.zeros(ns)
-      self.sdlntdr = np.zeros(ns)
-      self.sbeta = np.zeros(ns)
-      for i in range(ns):
-         self.sdlnndr[i],p = self.eget(data,p)
-         self.sdlntdr[i],p = self.eget(data,p)
-
-      # Updated 19 Feb 2025
-      self.sbeta,p = self.eget(data,p)
-      self.z_eff,p = self.eget(data,p)
-      self.hiprec_flag,p = self.eget(data,p)
-
-      if p == -1:
-         print('WARNING: (getgrid) Data format outdated. Please run cgyro -t')
-      else:
-         if not self.silent:
-            print('INFO: (getgrid) Read {:d} entries out.cgyro.equilibrium.'.format(p))
-      #-----------------------------------------------------------------
-
+         
    def getnorm(self,norm):
 
       if norm == 'elec':

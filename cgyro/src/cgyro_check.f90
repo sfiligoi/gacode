@@ -81,36 +81,6 @@ subroutine cgyro_check
   end select
   !-----------------------------------------------------------------------
 
-  !-----------------------------------------------------------------------
-  ! Profile checks
-  !
-  select case (profile_model)
-
-  case (1)
-     call cgyro_info('Profile model: local input (input.cgyro)')
-
-  case (2)
-     call cgyro_info('Profile model: experimental (input.gacode)')
-
-  case default
-     call cgyro_error('Invalid value for profile_model')
-     return
-
-  end select
-  !-----------------------------------------------------------------------
-
-  if (profile_model == 2) then
-     select case(quasineutral_flag)
-     case(0)
-        call cgyro_info('QN flag: Not enforcing quasi-neutrality')
-     case(1)
-        call cgyro_info('QN flag: Enforcing quasi-neutrality')
-     case default
-        call cgyro_error('Invalid value for quasineutral_flag')
-        return
-     end select
-  endif
-
   !------------------------------------------------------------------------
   ! Equilibrium model
   !
