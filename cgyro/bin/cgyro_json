@@ -19,18 +19,18 @@ def opts():
       json.cgyro.localdump (useless JSON file containing inputs)
       out.cgyro.tglf       (equivalent TGLF input)
     '''
-    
+
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawTextHelpFormatter,
         prog = 'cgyro_json',
         description="CGYRO localdump utility",
         epilog=textwrap.dedent(mytext))
-    
+
     parser.add_argument('-e',
                         help="working directory (default: cwd)",
                         type=str,
                         default='.')
-    
+
     args=parser.parse_args()
 
     return args.e
@@ -51,13 +51,13 @@ else:
       sys.exit()
    else:
       # Read data
-      sim = data.cgyrodata(mydir)
+      sim = data.cgyrodata(mydir,silent=True)
       # Check for legacy global data
       if min(sim.z) > 0.0:
           print('cgyro_json: (WARNING) Detected old PROFILE_MODEL')
           sim.getequil_legacy()
 
-      
+
 try:
    with open(mydir+'out.cgyro.version', 'r') as file:
       for line in file:
@@ -70,7 +70,7 @@ except:
 if sim.n_species == 1:
    print('cgyro_json: (ERROR) Conversion not implemented for adiabatic electrons.')
    sys.exit()
-   
+
 # Electron index
 for i in range(sim.n_species):
    if sim.z[i] < 0.0:
@@ -83,7 +83,7 @@ d = {}
 
 with open(garoot+'/cgyro/bin/input.json','r') as file:
    default = json.load(file)
-   
+
 # Determine non-default values in input.cgyro
 with open(mydir+'input.cgyro.gen','r') as file:
    for line in file:
@@ -91,7 +91,7 @@ with open(mydir+'input.cgyro.gen','r') as file:
       key = u[1]
       value = u[0]
       if key in default.keys() and 'SHAPE' not in key:
-         if str(value) != str(default[key]): 
+         if str(value) != str(default[key]):
             d[key] = value
 
 # Code-specific parameters
@@ -218,7 +218,7 @@ for i in range(0,len(x)):
 tglf['ZS_1'] = d['Z'][-1]
 for i in range(2,len(d['Z'])+1):
    tglf[f'ZS_{i}']=d['Z'][i-2]
-    
+
 tglf['MASS_1']=d['MASS'][-1]
 for i in range(2,len(d['MASS'])+1):
    tglf[f'MASS_{i}']=d['MASS'][i-2]
@@ -249,7 +249,7 @@ nmax = nmax+1
 
 if nmax < 3:
     nmax = 3
-    
+
 # Reference dimensions in CGYRO units
 lref=sim.rmaj
 vthref = np.sqrt(2.0)
@@ -310,7 +310,7 @@ d['shapecoefficients_s'][2] = -sim.zeta
 d['dc_dr_minor_norm'] = (sim.shape_s_cos[:nmax]*lref/sim.rmin).tolist()
 d['ds_dr_minor_norm'] = (sim.shape_s_sin[:nmax]*lref/sim.rmin).tolist()
 d['ds_dr_minor_norm'][1] = sim.s_delta*lref/sim.rmin/np.cos(np.arcsin(sim.delta))
-d['ds_dr_minor_norm'][2] = -sim.s_zeta*lref/sim.rmin 
+d['ds_dr_minor_norm'][2] = -sim.s_zeta*lref/sim.rmin
 #-----------------------------------------------------------------------
 
 with open(mydir+'json.cgyro.imas','w') as f:

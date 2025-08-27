@@ -21,17 +21,20 @@ def opts():
 
     mytext = '''\
     output:
-       NEED DOCUMENTATION HERE
+       Command line tool to manage and query the CGYRO database (CGYRODB)
     '''
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawTextHelpFormatter,
         prog = 'cgyrodb',
-        description="CGYRO database utility",
+        description="CGYRO database utility (cgyrodb)",
         epilog=textwrap.dedent(mytext))
 
     parser.add_argument('-ref',
                         help='Refresh directories',
+                        action='store_true')
+    parser.add_argument('-lref',
+                        help='Legacy profile refresh',
                         action='store_true')
     parser.add_argument('-db',
                         help='Load the DB and print',
@@ -42,13 +45,13 @@ def opts():
 
     args=parser.parse_args()
 
-    return args.ref,args.db,args.flux
+    return args.ref,args.lref,args.db,args.flux
 
-ref,db,doflux = opts()
+ref,lref,db,doflux = opts()
 
 meta = {}
 
-if (not ref) and (not db):
+if (not ref) and (not lref) and (not db):
     print('Type "cgyrodb -h" for help')
     sys.exit()
 
@@ -56,7 +59,7 @@ def gendict(sim,doflux):
 
    mydict = {}
    dat = {}
-   
+
    mydict['n_n'] = sim.n_n
    mydict['n_radial'] = sim.n_radial
    mydict['n_theta'] = sim.n_theta
@@ -99,16 +102,30 @@ if ref:
       print('Refreshing '+mdir)
       os.system('cd '+mdir+' ; python $GACODE_ROOT/cgyro/bin/cgyro_parse.py')
       os.system('cd '+mdir+' ; $GACODE_ROOT/cgyro/src/cgyro ')
-      print('Dumping '+mdir)
+      #print('Dumping '+mdir)
       os.system('cgyro_json -e '+mdir)
+
+if lref:
+   # Run through directories and update
+   for mdir in y:
+      print('Legacy refreshing '+mdir)
+      os.system('cgyro_json -e '+mdir)
+      os.system('cd '+mdir+' ; cp out.cgyro.localdump input.cgyro')
+      os.system('cd '+mdir+' ; python $GACODE_ROOT/cgyro/bin/cgyro_parse.py')
+      os.system('cd '+mdir+' ; $GACODE_ROOT/cgyro/src/cgyro')
+      #print('Dumping '+mdir)
 
 if db:
     # Create master dictionary "meta"
     for mdir in tqdm(y):
-        sim = cgyrodata(mdir+'/',silent=True)
-        meta[mdir],dat=gendict(sim,doflux)
-        with open(mdir+'/json.flux','w') as f:
-            json.dump(dat,f,indent=2,sort_keys=True)
+       try:
+          sim = cgyrodata(mdir+'/',silent=True)
+       except:
+          print('FAILURE: {}'.format(mdir))
+
+       meta[mdir],dat=gendict(sim,doflux)
+       with open(mdir+'/json.flux','w') as f:
+          json.dump(dat,f,indent=2,sort_keys=True)
 
     df = pd.DataFrame(meta)
     if doflux:
