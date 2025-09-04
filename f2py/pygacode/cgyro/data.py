@@ -511,6 +511,7 @@ class cgyrodata:
       self.z_eff,p = self.eget(data,p)
       self.b_gs2,p = self.eget(data,p) 
       self.hiprec_flag,p = self.eget(data,p)
+      self.px0,p = self.eget(data,p)
 
       if p == -1:
          print('WARNING: (getgrid) Data format outdated. Please run cgyro -t')

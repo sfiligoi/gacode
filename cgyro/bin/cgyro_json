@@ -10,13 +10,18 @@ from pygacode.cgyro import data
 
 garoot = os.environ['GACODE_ROOT']
 
+ml_dict = ['RMIN',
+           'RMAJ']
+meta_dict = ['N_THETA'
+             'N_RADIAL']
+
 def opts():
 
     mytext = '''\
     output:
       out.cgyro.localdump  (complete localdump file)
       json.cgyro.imas      (IMAS data dictionary of inputs)
-      json.cgyro.localdump (useless JSON file containing inputs)
+      json.cgyro.ml        (JSON file containing ML data)
       out.cgyro.tglf       (equivalent TGLF input)
     '''
 

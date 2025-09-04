@@ -287,12 +287,13 @@ class cgyrodata_plot(data.cgyrodata):
       y1 = np.real(f/f_norm)
       y2 = np.imag(f/f_norm)
 
-      iwid = np.argmin(abs(y1-0.5))
-      w = x[iwid]/np.sqrt(np.log(2))
 
       ax.plot(x,y1,'-o',color='black',markersize=2,label=r'$\mathrm{Re}$')
       ax.plot(x,y2,'-o',color='red'  ,markersize=2,label=r'$\mathrm{Im}$')
-      ax.plot(x,np.exp(-(x/w)**2),color='black',linestyle=':')
+
+      #iwid = np.argmin(abs(y1-0.5))
+      #w = x[iwid]/np.sqrt(np.log(2))
+      #ax.plot(x,np.exp(-(x/w)**2),color='black',linestyle=':')
      
       ax.legend()
 

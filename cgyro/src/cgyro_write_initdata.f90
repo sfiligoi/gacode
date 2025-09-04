@@ -203,6 +203,7 @@ subroutine cgyro_write_initdata
      write (io,fmtstr) z_eff
      write (io,fmtstr) b_gs2     
      write (io,'(i0)') hiprec_flag
+     write (io,fmtstr) px0
      close(io)
 
   endif
