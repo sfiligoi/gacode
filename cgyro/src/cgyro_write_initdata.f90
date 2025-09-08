@@ -106,7 +106,7 @@ subroutine cgyro_write_initdata
      write(io,23) 'c1',shape_cos(1),'s_c1',shape_s_cos(1),'delta',delta,'s_delta',s_delta
      write(io,23) 'c2',shape_cos(2),'s_c2',shape_s_cos(2),'zeta' ,zeta ,'s_zeta' ,s_zeta
      if (abs(shape_cos(3))+abs(shape_s_cos(3))+abs(shape_sin(3))+abs(shape_s_sin(3)) > 1e-6) then
-        write(io,23) 'c3',shape_cos(3),'s_c3',shape_s_cos(3),'s3',shape_sin(3),'s_s3',shape_sin(3)
+        write(io,23) 'c3',shape_cos(3),'s_c3',shape_s_cos(3),'s3',shape_sin(3),'s_s3',shape_s_sin(3)
      endif
      if (abs(shape_cos(4))+abs(shape_s_cos(4))+abs(shape_sin(4))+abs(shape_s_sin(4)) > 1e-6) then
         write(io,23) 'c4',shape_cos(4),'s_c4',shape_s_cos(4),'s4',shape_sin(4),'s_s4',shape_s_sin(4)
