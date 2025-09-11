@@ -68,10 +68,13 @@ def opts():
     parser.add_argument('-noeig',
                         help='Switch off eigenmode plotting',
                         action='store_true')
+    parser.add_argument('--sort',
+                        help='Sort',
+                        action='store_true')
 
     args=parser.parse_args()
 
-    return args.e,args.tmax,args.k,args.mmin,args.obs,args.tol,args.eps,args.ext,args.noplot,args.noeig
+    return args.e,args.tmax,args.k,args.mmin,args.obs,args.tol,args.eps,args.ext,args.noplot,args.noeig,args.sort
 
 # DMD utility: Map from (kx,theta) to theta_*
 def map1d(f2d,q):
@@ -88,24 +91,6 @@ def map1d(f2d,q):
 
     return f1d,anorm
 
-# DMD utility: downsample with averaging (eps is flatness)
-def downsample(f,n,eps=0.01):
-    npar = f.shape[0]
-    nave = f.shape[1]
-
-    # array end trim
-    m = (nave//n)*n
-
-    # downsample
-
-    u = np.linspace(-1,1,n)
-
-    w = 1/(1+eps*u*u)
-    w = w/np.sum(w)
-
-    fdown = np.sum(f[:,:m].reshape(npar,-1,n)*w[None,None,:],axis=2)
-    return fdown
-
 def rundmd(k):
 
    # Start by limiting the max number of dmd modes
@@ -119,7 +104,7 @@ def rundmd(k):
    # dictionary of eigenmodes
    mdict = {}
    for x in ostr:
-      down = downsample(ovec[x],k,eps=eps)
+      down = dmddownsample(ovec[x],k,eps=eps)
       dmd.fit(down)
       edict[x] = 1j*np.log(dmd.eigs)/dt
       mdict[x] = dmd.modes
@@ -183,8 +168,14 @@ def rundmd(k):
       return nm,jm,dt,efreq,emode,error,edict,evec
 
 #------------------------------------------------------------------------
-#
-mydir,tmax,k,nmode_min,obs,tol,eps,ext,noplot,noeig = opts()
+
+#------------------------------------------------------------------------------------
+
+mydir,tmax,k,nmode_min,obs,tol,eps,ext,noplot,noeig,dosort = opts()
+
+if dosort:
+    dmdsort()
+    sys.exit()
 
 # process inputs
 mydir = mydir+'/'
