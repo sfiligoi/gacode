@@ -14,7 +14,7 @@ from cgyro.data import cgyrodata
 
 pd.set_option('display.max_rows', None)
 
-ignore = 'eslshared'
+ignore = ['global','linear']
 
 # Command line option parser
 def opts():
@@ -92,9 +92,9 @@ def gendict(sim,doflux):
 # First locate all directories
 y = []
 for root,xd,xf in os.walk('./'):
-   if xd == []:
-      if ignore not in root:
-          y.append(root)
+    if xd == []:
+        if not any(s in root for s in ignore):
+            y.append(root)
 
 if ref:
    # Run through directories and update
