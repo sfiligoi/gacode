@@ -1,3 +1,6 @@
+import os,re
+import numpy as np
+
 # Sorting functions for CGYRODMD
 
 def mygrep(f,param):

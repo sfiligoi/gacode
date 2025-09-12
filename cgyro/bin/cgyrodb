@@ -102,8 +102,7 @@ if ref:
       print('Refreshing '+mdir)
       os.system('cd '+mdir+' ; python $GACODE_ROOT/cgyro/bin/cgyro_parse.py')
       os.system('cd '+mdir+' ; $GACODE_ROOT/cgyro/src/cgyro ')
-      #print('Dumping '+mdir)
-      os.system('cgyro_json -e '+mdir)
+      #os.system('cgyro_json -e '+mdir)
 
 if lref:
    # Run through directories and update
@@ -113,7 +112,6 @@ if lref:
       os.system('cd '+mdir+' ; cp out.cgyro.localdump input.cgyro')
       os.system('cd '+mdir+' ; python $GACODE_ROOT/cgyro/bin/cgyro_parse.py')
       os.system('cd '+mdir+' ; $GACODE_ROOT/cgyro/src/cgyro')
-      #print('Dumping '+mdir)
 
 if db:
     # Create master dictionary "meta"
