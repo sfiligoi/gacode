@@ -1252,7 +1252,7 @@ subroutine cgyro_gmany_async
 #if defined(OMPGPU)
   !no async for OMPGPU for now
 !$omp target teams distribute parallel do simd collapse(3) &
-!$omp&   private(j,ix2,itor,iy,g0,it,iv_loc,it_loc,p0,p1,ix0,ix1,ir0,ir1,p0,p1,gx0,gy0,gx1,gy1)
+!$omp&   private(j,ix2,itor,iy,g0,it,iv_loc,it_loc,p0,p1,ix0,ix1,ir0,ir1,gx0,gy0,gx1,gy1)
 #else
 !$acc parallel loop gang vector independent collapse(3) async(2) &
 !$acc&         private(j,ix2,itor,iy,g0,it,iv_loc,it_loc,p0,p1,ix0,ix1,ir0,ir1,gx0,gy0,gx1,gy1) &
@@ -1342,7 +1342,7 @@ subroutine cgyro_gmany32_async
 #if defined(OMPGPU)
   !no async for OMPGPU for now
 !$omp target teams distribute parallel do simd collapse(3) &
-!$omp&   private(j,ix2,itor,iy,g0,it,iv_loc,it_loc,p0,p1,ix0,ix1,ir0,ir1,p0,p1,gx0,gy0,gx1,gy1)
+!$omp&   private(j,ix2,itor,iy,g0,it,iv_loc,it_loc,p0,p1,ix0,ix1,ir0,ir1,gx0,gy0,gx1,gy1)
 #else
 !$acc parallel loop gang vector independent collapse(3) async(2) &
 !$acc&         private(j,ix2,itor,iy,g0,it,iv_loc,it_loc,p0,p1,ix0,ix1,ir0,ir1,gx0,gy0,gx1,gy1) &
