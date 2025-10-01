@@ -1206,28 +1206,59 @@ class cgyrodata_plot(data.cgyrodata):
       field  = xin['field']
       theta  = xin['theta']
       spec   = xin['spec']
-
+      norm   = xin['norm']
+      nstr   = xin['nstr']
+      px     = xin['ie']
+    
       if xin['fig'] is None:
          fig = plt.figure(MYDIR,figsize=(xin['lx'],xin['ly']))
 
       if itime > self.n_time-1:
          itime = self.n_time-1
-
+         
       self.getbigfield()
       t = self.getnorm(norm)
+      nx = self.n_radial-1
 
-      # Construct complex eigenfunction at selected time
+      # f(p,theta,n)
       if field == 0:
-         f = self.phib[:,itime]
-         ytag = r'$\delta\phi$'
+         f  = self.kxky_phi[1:,:,:,itime]
+         ft = TEXPHI
       elif field == 1:
-         f = self.aparb[:,itime]
-         ytag = r'$A_\parallel$'
-      elif field == 2:
-         f = self.bparb[:,itime]
-         ytag = r'$B_\parallel$'
+         f  = self.kxky_apar[1:,:,:,itime]
+         ft = TEXAPAR
+      else:
+         f  = self.kxky_bpar[1:,:,:,itime]
+         ft = TEXBPAR
 
-      
+      f[:,:,:] = f[:,:,:]/self.rhonorm
+      ft = ft+r'/\rho_s'
+         
+      #======================================
+      # Set figure size and axes
+      ax = fig.add_subplot(111)
+      ax.grid(which="both",ls=":")
+      ax.grid(which="major",ls=":")
+      ax.set_xlabel(r'$\theta/\pi$')
+      ax.set_ylabel(r'${}$'.format(ft))
+      #======================================
+
+      # f[nx//2,:,0] = 0
+      p0 = nx//2
+      if nstr == 'null':
+         nvec = [0]
+      else:
+         nvec = str2list(nstr)
+      print('INFO: (plot_ftheta) n = '+str(nvec))
+      print('INFO: (plot_ftheta) p = '+str(px))
+      for n in nvec:
+         num = r'$n='+str(n)+'$'
+         ax.plot(self.thetap/np.pi,np.abs(f[p0+px,:,n]),label=num)
+
+      ax.legend(loc=4,ncol=6,prop={'size':11})         
+       
+      fig.tight_layout(pad=0.3)
+
       return
    
       
