@@ -133,6 +133,10 @@ elif plot_type == 'kxky_phi':
 
    head = data_in.plot_kxky_phi(xin)
 
+elif plot_type == 'ftheta':
+
+   head = data_in.plot_ftheta(xin)
+
 elif plot_type == 'kx_phi':
   
    head = data_in.plot_kx_phi(xin)

@@ -1200,68 +1200,34 @@ class cgyrodata_plot(data.cgyrodata):
 
       return
    
-   def plot_kxkytheta(self,xin):
+   def plot_ftheta(self,xin):
 
-      norm   = xin['norm']
-      w      = xin['w']
+      itime  = xin['itime']
       field  = xin['field']
-      moment = xin['moment']
       theta  = xin['theta']
       spec   = xin['spec']
 
-      x0 = max(abs(self.kx))
-      y0 = max(abs(self.ky))
-
-      xl = -x0 ; xr = x0
-
-      if xin['kxmin'] != 'auto':
-         xl = float(xin['kxmin'])
-      if xin['kxmax'] != 'auto':
-         xr = float(xin['kxmax'])
-
-      asp = y0/(xr-xl)
-      
       if xin['fig'] is None:
-         fig = plt.figure(MYDIR,figsize=(xin['lx'],asp*xin['lx']))
+         fig = plt.figure(MYDIR,figsize=(xin['lx'],xin['ly']))
+
+      if itime > self.n_time-1:
+         itime = self.n_time-1
 
       self.getbigfield()
       t = self.getnorm(norm)
 
-      #-----------------------------------------------------------------
-      # Note array structure
-      # self.phi = np.reshape(data,(2,self.n_radial,self.n_n,nt),'F')
+      # Construct complex eigenfunction at selected time
+      if field == 0:
+         f = self.phib[:,itime]
+         ytag = r'$\delta\phi$'
+      elif field == 1:
+         f = self.aparb[:,itime]
+         ytag = r'$A_\parallel$'
+      elif field == 2:
+         f = self.bparb[:,itime]
+         ytag = r'$B_\parallel$'
 
-      nx = self.n_radial
-      ny = self.n_n
-
-      fplot = np.zeros([nx-1,ny])
       
-      # Field data selector
-      f,ft = self.kxky_select(theta,field,moment,spec)
-      
-      imin,imax=time_index(t,w)
-      y = np.sum(abs(f[:,:,imin:imax+1]),axis=2)
-
-      # Fix (0,0)
-      i0 = nx//2-1
-      y[i0,0] = y[i0+1,0]
-
-      # Reverse y order, take transpose, take log
-      y = np.transpose(np.log(y[:,::-1]))
-
-      ax = fig.add_subplot(111)
-
-      mpre,mwin = wintxt(imin,imax,t)
-
-      ax.set_xlabel(self.kxstr)
-      ax.set_ylabel(self.kystr)
-      ax.set_title(r'$\mathrm{Log} |'+ft+r'| \quad $'+mwin)
-
-      ax.imshow(y,extent=[xl,xr,0,y0],interpolation='none',cmap='plasma')
-      print('INFO: (plot_kxky_phi) min={:.2e} max={:.2e}'.format(np.min(y),np.max(y)))
-
-      fig.tight_layout(pad=0.3)
-
       return
    
       
