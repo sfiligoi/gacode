@@ -1,64 +1,6 @@
 import os,re
 import numpy as np
 
-# Sorting functions for CGYRODMD
-
-def mygrep(f,param):
-   with open(f,'r') as file:
-      for line in file:
-         if re.search(param, line):
-            x = line.strip().split('=')[1]
-   return x
-
-def dmdsort():
-    param = 'KY'
-    #param = 'dir'
-
-    r = './'
-
-    dirs = os.listdir(r)
-    k = []
-    d = []
-    for d0 in dirs:
-        if os.path.isdir(d0):
-            d.append(d0)
-            if param == 'dir':
-                ky = int(d0[1:])
-            else:
-                ky = float(mygrep(d0+'/input.cgyro',param))
-            k.append(ky)
-
-    n = len(k)
-    i = np.argsort(k)
-
-    # (modes,points)
-    km = np.zeros([4,32])
-    g = np.zeros([4,32])
-    w = np.zeros([4,32])
-    p = np.zeros([4],dtype=int)
-
-    indx = np.genfromtxt('indx',dtype=int)
-   
-    for j,i0 in enumerate(i):
-        data = np.genfromtxt(d[i0]+'/out.cgyro.dmd',comments='#')
-        z = data.flatten()
-        n = len(z)//3
-
-        for mode in range(n):
-            i1 = indx[j,mode]-1
-            g[i1,p[i1]]  = z[3*mode]
-            w[i1,p[i1]]  = z[3*mode+1] 
-            km[i1,p[i1]] = k[i0]
-            p[i1] += 1
-
-    for branch in range(3):
-        f = open('mode'+str(branch),'w')
-        for i in range(p[branch]):
-            data = (km[branch,i],w[branch,i],g[branch,i])
-            str1 = '{:.5f}  {:+.5f}  {:.5f} \n'.format(*data)
-            f.write(str1)
-        f.close()
-
 # DMD utility: downsample with averaging (eps is flatness)
 def dmddownsample(f,n,eps=0.01):
     npar = f.shape[0]
@@ -75,4 +17,5 @@ def dmddownsample(f,n,eps=0.01):
     w = w/np.sum(w)
 
     fdown = np.sum(f[:,:m].reshape(npar,-1,n)*w[None,None,:],axis=2)
+
     return fdown

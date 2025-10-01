@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib import rc
 import argparse
 import textwrap
+import json
 from pydmd import DMD
 from cgyro.data import cgyrodata
 import libcgyro
@@ -15,6 +16,9 @@ nmode_max = 16
 
 # Default output file name
 outfile = 'out.cgyro.dmd'
+
+# Tagged eigenmode datafile
+outfile2 = 'json.cgyro.dmd'
 
 # Command line option parser
 def opts():
@@ -42,10 +46,6 @@ def opts():
     parser.add_argument('-k',
                         help='Time sample spacing (default=1)',
                         type=int,
-                        default=-1)
-    parser.add_argument('-mmin',
-                        help='Minimum number of modes for auto search (default=1)',
-                        type=int,
                         default=1)
     parser.add_argument('-obs',
                         help="Comma-separated list of 3 observables",
@@ -69,13 +69,14 @@ def opts():
     parser.add_argument('-noeig',
                         help='Switch off eigenmode plotting',
                         action='store_true')
-    parser.add_argument('--sort',
-                        help='Sort',
-                        action='store_true')
+    parser.add_argument('-tag',
+                        help='Tag eigenmodes',
+                        type=str,
+                        default='')
 
     args=parser.parse_args()
 
-    return args.e,args.tmax,args.k,args.mmin,args.obs,args.tol,args.eps,args.ext,args.noplot,args.noeig,args.sort
+    return args.e,args.tmax,args.k,args.obs,args.tol,args.eps,args.ext,args.noplot,args.noeig,args.tag
 
 # DMD utility: Map from (kx,theta) to theta_*
 def map1d(f2d,q):
@@ -172,11 +173,7 @@ def rundmd(k):
 
 #------------------------------------------------------------------------------------
 
-mydir,tmax,k,nmode_min,obs,tol,eps,ext,noplot,noeig,dosort = opts()
-
-if dosort:
-    libcgyro.dmdsort()
-    sys.exit()
+mydir,tmax,k,obs,tol,eps,ext,noplot,noeig,tag = opts()
 
 # process inputs
 mydir = mydir+'/'
@@ -288,7 +285,7 @@ dmd = DMD(svd_rank=0,exact=True,sorted_eigs='abs')
 
 nm,jm,dt,efreq,emode,error,edict,evec = rundmd(k)
 
-# OUTPUT
+# STANDARD OUTPUT
 str1 = '# cgyrodmd\n'
 str2 = '# k = {}\n'.format(k)
 str3 = '# tmax = {:.1f} a/cs | w*tmax = {:.2f}\n'.format(t[imax-1],abs(efreq[0])*t[imax-1])
@@ -311,16 +308,25 @@ f.close()
 print()
 os.system('cat '+mydir+outfile)
 
+# TAGGED OUTPUT
+if tag != '':
+    data = {}
+    # Case parameters for plotting
+    data['KY'] = sim.ky[0]
+    for m,name in enumerate(tag.split(',')):
+        data[name] = [efreq[m].imag,efreq[m].real]
+    with open(mydir+outfile2,'w') as f:
+        json.dump(data,f,indent=2)
+    
 if noplot:
     sys.exit()
 
 #---------------------------------------------------------------------------
 # PLOTTING
 
-if 0==1:
-    mlabel = [r'$\mathrm{KBM}$',r'$\mathrm{TEM}$',r'$\mathrm{ITG}$']
-else:
-    mlabel = ['A','B','C','D','E']
+mlabel = []
+for m in range(26):
+    mlabel.append(chr(65+m))  
 
 yeps = 0.004
 ss   = 200
