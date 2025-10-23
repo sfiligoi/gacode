@@ -11,6 +11,7 @@ from ..gacodefuncs import *
 from . import data
 
 MYDIR=os.path.basename(os.getcwd())
+colors = rcParams['axes.prop_cycle'].by_key()['color']     
 
 class cgyrodata_plot(data.cgyrodata):
 
@@ -1203,14 +1204,14 @@ class cgyrodata_plot(data.cgyrodata):
    
    def plot_ftheta(self,xin):
 
-      itime  = xin['itime']
-      field  = xin['field']
-      theta  = xin['theta']
-      spec   = xin['spec']
-      norm   = xin['norm']
-      nstr   = xin['nstr']
-      px     = xin['ie']
-    
+      itime = xin['itime']
+      field = xin['field']
+      theta = xin['theta']
+      spec  = xin['spec']
+      norm  = xin['norm']
+      nstr  = xin['nstr']
+      tmax  = xin['tmax']
+
       if xin['fig'] is None:
          fig = plt.figure(MYDIR,figsize=(xin['lx'],xin['ly']))
 
@@ -1259,8 +1260,6 @@ class cgyrodata_plot(data.cgyrodata):
       m = self.n_radial//2
       phi = 2*np.pi*self.q/self.m_box
       
-      colors = rcParams['axes.prop_cycle'].by_key()['color']     
-
       print('INFO: (plot_ftheta) n = {} [{} modes available]'.format(n,l0))
 
       # Dictionary with a key for every l0
@@ -1288,7 +1287,10 @@ class cgyrodata_plot(data.cgyrodata):
          ax.plot(tvec,np.imag(fvec),color=color,linestyle='--')
 
       ax.legend(loc=4,ncol=6,prop={'size':11})         
-       
+
+      if tmax > 0.0:
+         ax.set_xlim([-tmax,tmax])
+         
       fig.tight_layout(pad=0.3)
 
       return
