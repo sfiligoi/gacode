@@ -1286,7 +1286,8 @@ class cgyrodata_plot(data.cgyrodata):
          ax.plot(tvec,np.real(fvec),color=color,label=x)
          ax.plot(tvec,np.imag(fvec),color=color,linestyle='--')
 
-      ax.legend(loc=4,ncol=6,prop={'size':11})         
+      if l0 < 13:
+         ax.legend(loc=4,ncol=6,prop={'size':11})         
 
       if tmax > 0.0:
          ax.set_xlim([-tmax,tmax])
