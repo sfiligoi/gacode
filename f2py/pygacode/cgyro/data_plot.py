@@ -6,6 +6,7 @@ from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from matplotlib import rc
+from matplotlib import rcParams
 from ..gacodefuncs import *
 from . import data
 
@@ -1218,20 +1219,31 @@ class cgyrodata_plot(data.cgyrodata):
          
       self.getbigfield()
       t = self.getnorm(norm)
-      nx = self.n_radial-1
 
+      if nstr == 'null':
+         n = [0]
+      else:
+         n = str2list(nstr)[0]
+
+      if self.n_n == 1:
+         # only 1 mode
+         n0 = 0
+      else:
+         # many modes with first mode n=0
+         n0 = n 
+         
       # f(p,theta,n)
       if field == 0:
-         f  = self.kxky_phi[1:,:,:,itime]
+         f  = self.kxky_phi[:,:,n0,itime]
          ft = TEXPHI
       elif field == 1:
-         f  = self.kxky_apar[1:,:,:,itime]
+         f  = self.kxky_apar[:,:,n0,itime]
          ft = TEXAPAR
       else:
-         f  = self.kxky_bpar[1:,:,:,itime]
+         f  = self.kxky_bpar[:,:,n0,itime]
          ft = TEXBPAR
 
-      f[:,:,:] = f[:,:,:]/self.rhonorm
+      f[:,:] = f[:,:]/self.rhonorm
       ft = ft+r'/\rho_s'
          
       #======================================
@@ -1243,18 +1255,37 @@ class cgyrodata_plot(data.cgyrodata):
       ax.set_ylabel(r'${}$'.format(ft))
       #======================================
 
-      # f[nx//2,:,0] = 0
-      p0 = nx//2
-      if nstr == 'null':
-         nvec = [0]
-      else:
-         nvec = str2list(nstr)
-      print('INFO: (plot_ftheta) n = '+str(nvec))
-      print('INFO: (plot_ftheta) p = '+str(px))
-      for n in nvec:
-         num = r'$n='+str(n)+'$'
-         l1 = ax.plot(self.thetap/np.pi,np.real(f[p0+px,:,n]),label=num)
-         l2 = ax.plot(self.thetap/np.pi,np.imag(f[p0+px,:,n]),linestyle='--',color=l1[0].get_color())
+      l0 = self.m_box*n
+      m = self.n_radial//2
+      phi = 2*np.pi*self.q/self.m_box
+      
+      colors = rcParams['axes.prop_cycle'].by_key()['color']     
+
+      print('INFO: (plot_ftheta) n = {} [{} modes available]'.format(n,l0))
+
+      # Dictionary with a key for every l0
+      pvec = {i: [] for i in range(l0)}
+
+      # Loop through p indices and sort into ballooning angle (theta_0)
+      # categories (l)
+      for p in range(-m,m):
+         ir = p+m+1
+         l = np.mod(p,l0)
+         pvec[l].append(p)
+
+      # Plot the ballooning modes
+      for x in pvec.keys():
+         tstar = []
+         fstar = []
+         for p in pvec[x]:
+            tstar.append(self.thetap+2*np.pi/l0*p)
+            fstar.append(f[p+m,:]*np.exp(-1j*p*phi))
+
+         tvec = np.concatenate(tstar)
+         fvec = np.concatenate(fstar)
+         color = colors[int(x) % len(colors)] 
+         ax.plot(tvec,np.real(fvec),color=color,label=x)
+         ax.plot(tvec,np.imag(fvec),color=color,linestyle='--')
 
       ax.legend(loc=4,ncol=6,prop={'size':11})         
        
