@@ -3,8 +3,7 @@ shared/neural
 CLAUDE.md
 
 # Object files and modules
-modules/*.mod
-modules/*genmod*
+modules/*
 */*.o
 */*/*.o
 */*/*/*.o
