@@ -1253,7 +1253,8 @@ class cgyrodata_plot(data.cgyrodata):
       print('INFO: (plot_ftheta) p = '+str(px))
       for n in nvec:
          num = r'$n='+str(n)+'$'
-         ax.plot(self.thetap/np.pi,np.abs(f[p0+px,:,n]),label=num)
+         l1 = ax.plot(self.thetap/np.pi,np.real(f[p0+px,:,n]),label=num)
+         l2 = ax.plot(self.thetap/np.pi,np.imag(f[p0+px,:,n]),linestyle='--',color=l1[0].get_color())
 
       ax.legend(loc=4,ncol=6,prop={'size':11})         
        
