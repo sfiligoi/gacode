@@ -1283,7 +1283,7 @@ class cgyrodata_plot(data.cgyrodata):
          tvec = np.concatenate(tstar)
          fvec = np.concatenate(fstar)
          color = colors[int(x) % len(colors)] 
-         ax.plot(tvec,np.real(fvec),color=color,label=x)
+         ax.plot(tvec,np.real(fvec),'-o',color=color,markersize=2,label=x)
          ax.plot(tvec,np.imag(fvec),color=color,linestyle='--')
 
       if l0 < 25:
