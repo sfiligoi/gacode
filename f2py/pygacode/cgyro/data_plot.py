@@ -1201,7 +1201,7 @@ class cgyrodata_plot(data.cgyrodata):
       fig.tight_layout(pad=0.3)
 
       return
-   
+
    def plot_ftheta(self,xin):
 
       itime = xin['itime']
@@ -1217,7 +1217,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       if itime > self.n_time-1:
          itime = self.n_time-1
-         
+
       self.getbigfield()
       t = self.getnorm(norm)
 
@@ -1231,8 +1231,8 @@ class cgyrodata_plot(data.cgyrodata):
          n0 = 0
       else:
          # many modes with first mode n=0
-         n0 = n 
-         
+         n0 = n
+
       # f(p,theta,n)
       if field == 0:
          f  = self.kxky_phi[:,:,n0,itime]
@@ -1246,7 +1246,7 @@ class cgyrodata_plot(data.cgyrodata):
 
       f[:,:] = f[:,:]/self.rhonorm
       ft = ft+r'/\rho_s'
-         
+
       #======================================
       # Set figure size and axes
       ax = fig.add_subplot(111)
@@ -1259,7 +1259,7 @@ class cgyrodata_plot(data.cgyrodata):
       l0 = self.m_box*n
       m = self.n_radial//2
       phi = 2*np.pi*self.q/self.m_box
-      
+
       print('INFO: (plot_ftheta) n = {} [{} modes available]'.format(n,l0))
 
       # Dictionary with a key for every l0
@@ -1286,17 +1286,16 @@ class cgyrodata_plot(data.cgyrodata):
          ax.plot(tvec,np.real(fvec),color=color,label=x)
          ax.plot(tvec,np.imag(fvec),color=color,linestyle='--')
 
-      if l0 < 13:
-         ax.legend(loc=4,ncol=6,prop={'size':11})         
+      if l0 < 25:
+         ax.legend(loc=4,ncol=6,prop={'size':11})
 
       if tmax > 0.0:
          ax.set_xlim([-tmax,tmax])
-         
+
       fig.tight_layout(pad=0.3)
 
       return
-   
-      
+
    def plot_kx_phi(self,xin):
 
       w      = xin['w']
