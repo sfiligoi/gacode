@@ -1252,12 +1252,23 @@ class cgyrodata_plot(data.cgyrodata):
       ax = fig.add_subplot(111)
       ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
-      ax.set_xlabel(r'$\theta/\pi$')
+      ax.set_xlabel(r'$\theta_*/\pi$')
       ax.set_ylabel(r'${}$'.format(ft))
       #======================================
 
-      l0 = self.m_box*n
+      # Wavenumber M from CGYRO paper
       m = self.n_radial//2
+
+      # Special case for n=0 (zonal flow)
+      if n == 0:
+         for p in range(-m,m):
+            x = self.thetap+2*np.pi*p
+            ax.plot(x,np.real(f[p+m,:]))
+         return
+
+      # Total number of ballooning angles for finite-n ballooning modes 
+      l0 = self.m_box*n
+      # Phase factor
       phi = 2*np.pi*self.q/self.m_box
 
       print('INFO: (plot_ftheta) n = {} [{} modes available]'.format(n,l0))
@@ -1266,17 +1277,25 @@ class cgyrodata_plot(data.cgyrodata):
       pvec = {i: [] for i in range(l0)}
 
       # Loop through p indices and sort into ballooning angle (theta_0)
-      # categories (l)
+      # with index l
       for p in range(-m,m):
-         ir = p+m+1
          l = np.mod(p,l0)
          pvec[l].append(p)
 
-      # Plot the ballooning modes
+      # Construct and plot the ballooning modes
+      #
+      # Key formula (let z=theta, l=nB, B=box size)
+      #
+      #                         i*phi*p
+      # f(p,z) = F(z+2*pi*p/l) e
+      #
+      # where F is a continuous function and phi = 2*pi*q/B
+      
       for x in pvec.keys():
          tstar = []
          fstar = []
          for p in pvec[x]:
+            # String modes together using key formula
             tstar.append(self.thetap+2*np.pi/l0*p)
             fstar.append(f[p+m,:]*np.exp(-1j*p*phi))
 

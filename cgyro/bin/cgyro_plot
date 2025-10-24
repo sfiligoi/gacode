@@ -50,7 +50,7 @@ then
   echo "                = kx_shift (kx-phi intensities in both domains)"
   echo "                = poly_phi (average Legendre intensities)"
   echo "                = kxky_phi (kx-ky spectra of ave(|phi|))"
-  echo "                = ftheta    (theta-dependence f(theta)[kx,ky])"
+  echo "                = ftheta   (ballooning-angle dependence; use -n to specify mode)"
   echo "                = rcorr_phi (time-average radial correlation function)"
   echo "                = xflux    (radial profile of fluxes for all species)"
   echo "                = low      (long-wavelength moments versus time)"
