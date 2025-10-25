@@ -1213,8 +1213,6 @@ class cgyrodata_plot(data.cgyrodata):
       tmax  = xin['tmax']
       absn  = xin['abs']
       ie    = xin['ie']
-
-      print(absn)
       
       if ie == 0:
          ie = 1000
