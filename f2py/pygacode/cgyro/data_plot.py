@@ -1319,15 +1319,18 @@ class cgyrodata_plot(data.cgyrodata):
         
       # This loop could be optimized
       for x in xsrt[:ie]:
+         if x > l0//2:
+            ix = x-l0
+         else:
+            ix = x
          color = colors[int(x) % len(colors)]
          if absn == 0:
-            ax.plot(tdict[x],np.real(fdict[x]),'-o',color=color,markersize=2,label=x)
+            ax.plot(tdict[x],np.real(fdict[x]),'-o',color=color,markersize=2,label=ix)
             ax.plot(tdict[x],np.imag(fdict[x]),color=color,linestyle='--')
          else:
-            ax.plot(tdict[x],np.abs(fdict[x]),'-o',color=color,markersize=2,label=x)
+            ax.plot(tdict[x],np.abs(fdict[x]),'-o',color=color,markersize=2,label=ix)
             
-
-      ax.legend(loc=4,ncol=6,prop={'size':11})
+      ax.legend(loc=1,ncol=2,prop={'size':11})
 
       if tmax > 0.0:
          ax.set_xlim([-tmax,tmax])
