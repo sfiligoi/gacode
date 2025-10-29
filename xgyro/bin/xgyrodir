@@ -46,6 +46,7 @@ with open('pre.xgyro', 'r') as f:
     lines = [line for line in f if line.strip() and not line.strip().startswith('#')]
 
 cpu = []
+apar = []
 base = 'a'
 
 # Old directory check
@@ -72,7 +73,7 @@ for line in lines:
         # Add parameter to local input.cgyro
         action = 'echo {} >> {}/input.cgyro'.format(par,sdir)
         os.system(action)
-        if apar is not None:
+        if len(apar) > 0:
             for par in apar:
                 action = 'echo {} >> {}/input.cgyro'.format(par,sdir)
                 os.system(action)

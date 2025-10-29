@@ -1211,7 +1211,12 @@ class cgyrodata_plot(data.cgyrodata):
       norm  = xin['norm']
       nstr  = xin['nstr']
       tmax  = xin['tmax']
-
+      absn  = xin['abs']
+      ie    = xin['ie']
+      
+      if ie == 0:
+         ie = 1000
+ 
       if xin['fig'] is None:
          fig = plt.figure(MYDIR,figsize=(xin['lx'],xin['ly']))
 
@@ -1290,7 +1295,10 @@ class cgyrodata_plot(data.cgyrodata):
       # f(p,z) = F(z+2*pi*p/l) e
       #
       # where F is a continuous function and phi = 2*pi*q/B
-      
+
+      # This loop could be optimized
+      tdict = {}
+      fdict = {}
       for x in pvec.keys():
          tstar = []
          fstar = []
@@ -1299,14 +1307,30 @@ class cgyrodata_plot(data.cgyrodata):
             tstar.append(self.thetap+2*np.pi/l0*p)
             fstar.append(f[p+m,:]*np.exp(-1j*p*phi))
 
-         tvec = np.concatenate(tstar)
+         tvec = np.concatenate(tstar)/np.pi
          fvec = np.concatenate(fstar)
-         color = colors[int(x) % len(colors)] 
-         ax.plot(tvec,np.real(fvec),color=color,label=x)
-         ax.plot(tvec,np.imag(fvec),color=color,linestyle='--')
-
-      if l0 < 25:
-         ax.legend(loc=4,ncol=6,prop={'size':11})
+         
+         tdict[x] = tvec
+         fdict[x] = fvec
+         
+      xsrt = sorted(fdict.keys(), 
+                    key=lambda k: np.linalg.norm(fdict[k]), 
+                    reverse=True)
+        
+      # This loop could be optimized
+      for x in xsrt[:ie]:
+         if x > l0//2:
+            ix = x-l0
+         else:
+            ix = x
+         color = colors[int(x) % len(colors)]
+         if absn == 0:
+            ax.plot(tdict[x],np.real(fdict[x]),'-o',color=color,markersize=2,label=ix)
+            ax.plot(tdict[x],np.imag(fdict[x]),color=color,linestyle='--')
+         else:
+            ax.plot(tdict[x],np.abs(fdict[x]),'-o',color=color,markersize=2,label=ix)
+            
+      ax.legend(loc=1,ncol=2,prop={'size':11})
 
       if tmax > 0.0:
          ax.set_xlim([-tmax,tmax])
