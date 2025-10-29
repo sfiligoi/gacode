@@ -16,14 +16,14 @@ then
   echo
   echo "Usage:   cgyro [options]"
   echo
+  echo "         -h"
+  echo "         Version and platform information."
+  echo
   echo "         -p <path>"
   echo "         Set optional path to simulation directory."
   echo "         The default path is \$CGYRO_DIR/sim."
   echo
   echo "TEST MODE"
-  echo
-  echo "         -i <simdir>"
-  echo "         Print acceptable MPI tasks."
   echo
   echo "         -t <simdir>"
   echo "         Sanity test for INPUT data in <simdir>."
@@ -69,10 +69,22 @@ then
   echo "         -g <template>"
   echo "         Copy <template> into simulation path."
   echo
-  echo "UTILITIES"
+  echo "UTILITIES (call without further args for help)"
   echo
-  echo "         -h"
-  echo "         Version and platform information."
+  echo "         --i"
+  echo "         Print acceptable MPI tasks"
+  echo 
+  echo "         --converge"
+  echo "         Check convergence"
+  echo 
+  echo "         --db"
+  echo "         Database tool"
+  echo 
+  echo "         --json"
+  echo "         Input manager and converter"
+  echo 
+  echo "         --dmd"
+  echo "         DMD analysis"
   
   exit 1
 fi
@@ -83,6 +95,7 @@ fi
 #
 SIMROOT=$PWD
 CGYRO_DIR=$GACODE_ROOT/cgyro
+UTIL_DIR=$CGYRO_DIR/bin/util
 # Default number of cores
 NPROC=1
 NOMP=1
@@ -93,7 +106,6 @@ REGRESS_FLAG=0
 REGRESS_RESTART=0
 MTEST_FLAG=0
 RESET=0
-INIT_FLAG=0
 HELP_TAG=null
 SCASE=
 MCASE=
@@ -102,8 +114,24 @@ MCASE=
 #=============================================================
 # Parse command line options
 #
+if [ $# -le 1 ]; then
+    rem="-h"
+else
+    rem="${@:2}"
+fi
+
 while [ $# -gt 0 ] ; do
   case "$1" in
+
+  --i) python $UTIL_DIR/cgyro_mpi_grid.py $rem ; exit 0 ;;
+
+  --converge) $UTIL_DIR/cgyro_converge $rem ; exit 0 ;;
+
+  --db) $UTIL_DIR/cgyrodb $rem ; exit 0 ;;
+
+  --dmd) $UTIL_DIR/cgyrodmd $rem ; exit 0 ;;
+
+  --json) $UTIL_DIR/cgyro_json $rem ; exit 0 ;;
 
   -p) shift ; SIMROOT=$1 ;;
 
@@ -141,6 +169,7 @@ while [ $# -gt 0 ] ; do
 
   *) echo "ERROR (cgyro script): unknown option $1." ; exit 1 ;;
 
+  
   esac
   shift
 done
@@ -157,7 +186,7 @@ fi
 #============================================================
 # Check for inconsistent flags:
 FLAG_SUM=$[ $EXEC_FLAG + $TEST_FLAG + $GENERATE_FLAG
-                       + $REGRESS_FLAG + $MTEST_FLAG + $INIT_FLAG ]
+                       + $REGRESS_FLAG + $MTEST_FLAG ]
 if [ $FLAG_SUM -gt 1 ]
 then
    echo "ERROR: Can only specify one of -e, -t, -i, -g, -r, -m"
@@ -256,15 +285,6 @@ then
     exit 1
 fi
 #==========================================================
-
-#============================================================
-# Init mode
-if [ $INIT_FLAG -eq 1 ]
-then
-   python $GACODE_ROOT/cgyro/bin/cgyro_mpi_grid.py
-   exit 0
-fi
-#============================================================
 
 #===========================================================
 # RUN CGYRO

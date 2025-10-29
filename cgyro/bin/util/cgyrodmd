@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os,sys
+import os,re,sys
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import rc
@@ -77,6 +77,25 @@ def opts():
     args=parser.parse_args()
 
     return args.e,args.tmax,args.k,args.obs,args.tol,args.eps,args.ext,args.noplot,args.noeig,args.tag
+
+# DMD utility: downsample with averaging (eps is flatness)
+def dmddownsample(f,n,eps=0.01):
+    npar = f.shape[0]
+    nave = f.shape[1]
+
+    # array end trim
+    m = (nave//n)*n
+
+    # downsample
+
+    u = np.linspace(-1,1,n)
+
+    w = 1/(1+eps*u*u)
+    w = w/np.sum(w)
+
+    fdown = np.sum(f[:,:m].reshape(npar,-1,n)*w[None,None,:],axis=2)
+
+    return fdown
 
 # DMD utility: Map from (kx,theta) to theta_*
 def map1d(f2d,q):

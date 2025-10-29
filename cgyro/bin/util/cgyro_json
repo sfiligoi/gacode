@@ -15,6 +15,14 @@ ml_dict = ['RMIN',
 meta_dict = ['N_THETA'
              'N_RADIAL']
 
+def digit(f,n):
+    if n == 0:
+        x = round(f)
+    else:
+        x = round(10**n*f)/10**n
+
+    return x
+
 def opts():
 
     mytext = '''\
@@ -31,6 +39,22 @@ def opts():
         description="CGYRO localdump utility",
         epilog=textwrap.dedent(mytext))
 
+    parser.add_argument('-nx',
+                        help='N_RADIAL',
+                        type=int,
+                        default=0)
+    parser.add_argument('-ny',
+                        help='N_TOROIDAL',
+                        type=int,
+                        default=0)
+    parser.add_argument('-lx',
+                        help='LX',
+                        type=float,
+                        default=0.0)
+    parser.add_argument('-ly',
+                        help='LY',
+                        type=float,
+                        default=0.0)
     parser.add_argument('-e',
                         help="working directory (default: cwd)",
                         type=str,
@@ -38,9 +62,9 @@ def opts():
 
     args=parser.parse_args()
 
-    return args.e
+    return args.nx,args.ny,args.lx,args.ly,args.e
 
-mydir = opts()
+nx,ny,lx,ly,mydir = opts()
 
 mydir = mydir+'/'
 
@@ -86,7 +110,7 @@ for i in range(sim.n_species):
 
 d = {}
 
-with open(garoot+'/cgyro/bin/input.json','r') as file:
+with open(garoot+'/cgyro/bin/util/input.json','r') as file:
    default = json.load(file)
 
 # Determine non-default values in input.cgyro
@@ -141,34 +165,27 @@ d['TEMP'] = sim.temp[:].tolist()
 d['DLNNDR'] = sim.dlnndr[:].tolist()
 d['DLNTDR'] = sim.dlntdr[:].tolist()
 
+# Autoresolution
+if nx > 0:
+    d['N_RADIAL'] = nx
+    if ny == 0:
+        ny = 16
+    d['N_TOROIDAL'] = ny
+    if lx == 0.0:
+        lx = 90.0
+    if ly == 0.0:
+        ly = 90.0
+
+    d['KY'] = digit(2*np.pi/ly,4)
+    d['BOX_SIZE'] = digit(lx*d['S']*d['KY'],0)
+    d['DELTA_T_METHOD']=1
+    d['DELTA_T']=0.005
+
+#==================================================================
 # JSON output
 with open(mydir+'json.cgyro.localdump','w') as f:
    json.dump(d,f,indent=2,sort_keys=True)
 print('cgyro_json: wrote json.cgyro.localdump')
-#
-# standard localdump output
-#
-nmax = 0
-with open(mydir+'out.cgyro.localdump','w') as f:
-   for key in d:
-      x = d[key]
-      if 'SHAPE' in key:
-         # shape parameter
-         for i in range(len(x)):
-            if not x[i] == 0.0:
-               f.write(key+str(i)+'='+str(x[i])+'\n')
-               if i > nmax:
-                  nmax = i
-      elif isinstance(x,list):
-         # species parameter
-         for i in range(len(x)):
-            f.write(key+'_'+str(i+1)+'='+str(x[i])+'\n')
-      else:
-         # standard scalar parameter
-         f.write(key+'='+str(x)+'\n')
-
-print('cgyro_json: wrote out.cgyro.localdump')
-#==================================================================
 
 #==================================================================
 # Construct TGLF input file
@@ -245,6 +262,67 @@ with open(mydir+'out.cgyro.tglf','w') as f:
         f.write(item+'='+str(tglf[item])+'\n')
 
 print('cgyro_json: wrote out.cgyro.tglf')
+
+#==================================================================
+# localdump output
+#
+nmax = 0
+with open(mydir+'out.cgyro.localdump','w') as f:
+
+    f.write('# Numerical resolution\n')
+    for key in ['N_ENERGY','E_MAX','N_XI','N_TOROIDAL','N_RADIAL','N_THETA','THETA_PLOT']:
+        if key in d:
+            x = d.pop(key)
+            f.write(key+'='+str(x)+'\n')
+
+    f.write('\n# Simulation box\n')
+    for key in ['KY','BOX_SIZE']:
+        x = d.pop(key)
+        f.write(key+'='+str(x)+'\n')
+
+    f.write('\n# Time domain\n')
+    for key in ['DELTA_T_METHOD','DELTA_T','PRINT_STEP','MAX_TIME']:
+        if key in d:
+            x = d.pop(key)
+            f.write(key+'='+str(x)+'\n')
+
+    f.write('\n# Basic geometry\n')
+    for key in ['RMIN','RMAJ','Q','S','SHIFT','KAPPA','S_KAPPA','DELTA','S_DELTA']:
+        if key in d:
+            x = d.pop(key)
+            f.write(key+'='+str(x)+'\n')
+
+    f.write('\n# Physics\n')
+    for key in ['NONLINEAR_FLAG','N_FIELD','BETAE_UNIT','BETA_STAR_SCALE','LAMBDA_STAR','NU_EE','COLLISION_MODEL']:
+        if key in d:
+            x = d.pop(key)
+            f.write(key+'='+str(x)+'\n')
+
+    f.write('\n# Advanced shape\n')
+    for key in ['ZETA','S_ZETA','ZMAG','DZMAG']:
+        if key in d:
+            x = d.pop(key)
+            f.write(key+'='+str(x)+'\n')
+
+    d_copy = dict(d)
+    for key in d_copy:
+      if 'SHAPE' in key:
+         x = d.pop(key)
+         # shape parameter
+         for i in range(len(x)):
+            if not x[i] == 0.0:
+               f.write(key+str(i)+'='+str(x[i])+'\n')
+               if i > nmax:
+                  nmax = i
+
+    f.write('\n# Species parameters\n')
+    for key in d:
+       if isinstance(x,list):
+          # species parameter
+          for i in range(len(x)):
+             f.write(key+'_'+str(i+1)+'='+str(x[i])+'\n')
+
+print('cgyro_json: wrote out.cgyro.localdump')
 #==================================================================
 
 #==================================================================
