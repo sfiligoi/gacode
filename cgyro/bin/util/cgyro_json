@@ -59,26 +59,31 @@ def opts():
                         help="working directory (default: cwd)",
                         type=str,
                         default='.')
-    parser.add_argument('-parse',
-                        help="parse input.cgyro to create input.cgyro.gen",
-                        action='store_true')
+    parser.add_argument('-template',
+                        help="input.cgyro template file",
+                        type=str,
+                        default='null')
 
     args=parser.parse_args()
 
-    return args.nx,args.ny,args.lx,args.ly,args.e,args.parse
+    return args.nx,args.ny,args.lx,args.ly,args.e,args.template
 
-nx,ny,lx,ly,mydir,parse = opts()
+nx,ny,lx,ly,mydir,template = opts()
 
-mydir = mydir+'/'
-
+if template == 'null':
+    mydir = mydir+'/'
+else:
+    mydir = mydir+'/work/'
+    os.system('mkdir work')
+    os.system('cp '+template+' work/input.cgyro')
+    os.system('cd work ; cgyro -t')
+    
 # Sanity checks:
 if not os.path.isdir(mydir):
     # No directory
     print('cgyro_json: (ERROR) directory does not exist')
     sys.exit()
 else:
-    if parse:
-        os.system('python '+garoot+'/cgyro/bin/cgyro_parse.py')
     if not os.path.isfile(mydir+'input.cgyro.gen'):
         # No data
         print('cgyro_json: (ERROR) input.cgyro.gen missing')
@@ -348,6 +353,11 @@ with open(mydir+'out.cgyro.localdump','w') as f:
 
 print('cgyro_json: wrote out.cgyro.localdump')
 #==================================================================
+
+if template != 'null':
+    os.system('cp work/out.cgyro.localdump input.cgyro')
+    os.system('rm -r work')
+    sys.exit()
 
 #==================================================================
 # json.cgyro.imas
