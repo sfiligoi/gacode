@@ -59,32 +59,37 @@ def opts():
                         help="working directory (default: cwd)",
                         type=str,
                         default='.')
+    parser.add_argument('-parse',
+                        help="parse input.cgyro to create input.cgyro.gen",
+                        action='store_true')
 
     args=parser.parse_args()
 
-    return args.nx,args.ny,args.lx,args.ly,args.e
+    return args.nx,args.ny,args.lx,args.ly,args.e,args.parse
 
-nx,ny,lx,ly,mydir = opts()
+nx,ny,lx,ly,mydir,parse = opts()
 
 mydir = mydir+'/'
 
 # Sanity checks:
 if not os.path.isdir(mydir):
-   # No directory
-   print('cgyro_json: (ERROR) directory does not exist')
-   sys.exit()
+    # No directory
+    print('cgyro_json: (ERROR) directory does not exist')
+    sys.exit()
 else:
-   if not os.path.isfile(mydir+'input.cgyro.gen'):
-      # No data
-      print('cgyro_json: (ERROR) input.cgyro.gen missing')
-      sys.exit()
-   else:
-      # Read data
-      sim = data.cgyrodata(mydir,silent=True)
-      # Check for legacy global data
-      if min(sim.z) > 0.0:
-          print('cgyro_json: (WARNING) Detected old PROFILE_MODEL')
-          sim.getequil_legacy()
+    if parse:
+        os.system('python '+garoot+'/cgyro/bin/cgyro_parse.py')
+    if not os.path.isfile(mydir+'input.cgyro.gen'):
+        # No data
+        print('cgyro_json: (ERROR) input.cgyro.gen missing')
+        sys.exit()
+    else:
+       # Read data
+       sim = data.cgyrodata(mydir,silent=True)
+       # Check for legacy global data
+       if min(sim.z) > 0.0:
+           print('cgyro_json: (WARNING) Detected old PROFILE_MODEL')
+           sim.getequil_legacy()
 
 
 try:
@@ -120,7 +125,7 @@ with open(mydir+'input.cgyro.gen','r') as file:
       key = u[1]
       value = u[0]
       if key in default.keys() and 'SHAPE' not in key:
-         if str(value) != str(default[key]):
+         if float(value) != float(default[key]):
             d[key] = value
 
 # Code-specific parameters
@@ -298,6 +303,12 @@ with open(mydir+'out.cgyro.localdump','w') as f:
             x = d.pop(key)
             f.write(key+'='+str(x)+'\n')
 
+    f.write('\n# Rotation\n')
+    for key in ['ROTATION_MODEL','MACH','GAMMA_E','GAMMA_P']:
+        if key in d:
+            x = d.pop(key)
+            f.write(key+'='+str(x)+'\n')
+
     f.write('\n# Advanced shape\n')
     for key in ['ZETA','S_ZETA','ZMAG','DZMAG']:
         if key in d:
@@ -315,12 +326,25 @@ with open(mydir+'out.cgyro.localdump','w') as f:
                if i > nmax:
                   nmax = i
 
+    d_copy = dict(d)
     f.write('\n# Species parameters\n')
-    for key in d:
+    for key in ['N_SPECIES']:
+       if key in d:
+          x = d.pop(key)
+          f.write(key+'='+str(x)+'\n')
+    for key in d_copy:
+       x = d_copy[key]
        if isinstance(x,list):
+          d.pop(key) 
           # species parameter
           for i in range(len(x)):
              f.write(key+'_'+str(i+1)+'='+str(x[i])+'\n')
+
+    f.write('\n# Miscellaneous\n')
+    for key in d:
+        x = d[key]
+        f.write(key+'='+str(x)+'\n')
+
 
 print('cgyro_json: wrote out.cgyro.localdump')
 #==================================================================

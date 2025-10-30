@@ -714,7 +714,7 @@ class cgyrodata:
          z = sub
 
       # add subscript
-      u = ft+'_'+z
+      u = ft+'_'+'{'+z+'}'
 
       if d:
          u = r'(\mathrm{Gradient~scale~length})~~\partial_r \;'+u

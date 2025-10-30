@@ -85,6 +85,12 @@ then
   echo 
   echo "         --dmd"
   echo "         DMD analysis"
+  echo 
+  echo "         --c"
+  echo "         Cleanup"
+  echo 
+  echo "         --pre"
+  echo "         XGYRO proprocessor"
   
   exit 1
 fi
@@ -115,23 +121,29 @@ MCASE=
 # Parse command line options
 #
 if [ $# -le 1 ]; then
-    rem="-h"
+    uarg="-h"
 else
-    rem="${@:2}"
+    uarg="${@:2}"
 fi
 
 while [ $# -gt 0 ] ; do
   case "$1" in
 
-  --i) python $UTIL_DIR/cgyro_mpi_grid.py $rem ; exit 0 ;;
+  --i) python $CGYRO_DIR/bin/cgyro_parse.py ;
+       python $UTIL_DIR/cgyro_mpi_grid.py ;
+       exit 0 ;;
 
-  --converge) $UTIL_DIR/cgyro_converge $rem ; exit 0 ;;
+  --converge) $UTIL_DIR/cgyro_converge $uarg ; exit 0 ;;
 
-  --db) $UTIL_DIR/cgyrodb $rem ; exit 0 ;;
+  --db) $UTIL_DIR/cgyro_db $uarg ; exit 0 ;;
 
-  --dmd) $UTIL_DIR/cgyrodmd $rem ; exit 0 ;;
+  --dmd) $UTIL_DIR/cgyro_dmd $uarg ; exit 0 ;;
 
-  --json) $UTIL_DIR/cgyro_json $rem ; exit 0 ;;
+  --json) $UTIL_DIR/cgyro_json $uarg ; exit 0 ;;
+
+  --c) $UTIL_DIR/cgyro_clean $uarg ; exit 0 ;;
+
+  --pre) $UTIL_DIR/cgyro_pre $uarg ; exit 0 ;;
 
   -p) shift ; SIMROOT=$1 ;;
 
@@ -323,15 +335,8 @@ then
    $GACODE_ROOT/platform/exec/exec.$GACODE_PLATFORM \
       $SIMDIR $NPROC "$CGYRO_DIR/src/cgyro $TEST_FLAG" $NOMP
 else
-    python $GACODE_ROOT/cgyro/bin/cgyro_parse.py
     $GACODE_ROOT/cgyro/src/cgyro
-fi
-#===========================================================
-
-#============================================================
-# Print runfile if test case
-if [ $TEST_FLAG -eq 1 ]
-then
+    # Print runfile for test case
     cat out.cgyro.info
 fi
-#============================================================
+#===========================================================

@@ -1215,7 +1215,7 @@ class cgyrodata_plot(data.cgyrodata):
       ie    = xin['ie']
       
       if ie == 0:
-         ie = 1000
+         ie = 16
  
       if xin['fig'] is None:
          fig = plt.figure(MYDIR,figsize=(xin['lx'],xin['ly']))
@@ -1250,7 +1250,6 @@ class cgyrodata_plot(data.cgyrodata):
          ft = TEXBPAR
 
       f[:,:] = f[:,:]/self.rhonorm
-      ft = ft+r'/\rho_s'
 
       #======================================
       # Set figure size and axes
@@ -1258,7 +1257,8 @@ class cgyrodata_plot(data.cgyrodata):
       ax.grid(which="both",ls=":")
       ax.grid(which="major",ls=":")
       ax.set_xlabel(r'$\theta_*/\pi$')
-      ax.set_ylabel(r'${}$'.format(ft))
+      #ax.set_ylabel(r'${}$'.format(ft))
+      ax.set_ylabel(self.ylabeler(str(n),ft,abs=False))
       #======================================
 
       # Wavenumber M from CGYRO paper
@@ -1277,6 +1277,7 @@ class cgyrodata_plot(data.cgyrodata):
       phi = 2*np.pi*self.q/self.m_box
 
       print('INFO: (plot_ftheta) n = {} [{} modes available]'.format(n,l0))
+      print('INFO: (plot_ftheta) (c_s/a) t = {:.2f}'.format(t[itime]))
 
       # Dictionary with a key for every l0
       pvec = {i: [] for i in range(l0)}
@@ -1330,7 +1331,7 @@ class cgyrodata_plot(data.cgyrodata):
          else:
             ax.plot(tdict[x],np.abs(fdict[x]),'-o',color=color,markersize=2,label=ix)
             
-      ax.legend(loc=1,ncol=2,prop={'size':11})
+      ax.legend(title=r'$\theta_0~\mathrm{index}$',loc=1,ncol=2,prop={'size':11})
 
       if tmax > 0.0:
          ax.set_xlim([-tmax,tmax])
@@ -1351,7 +1352,6 @@ class cgyrodata_plot(data.cgyrodata):
       bar    = xin['bar']
       spec   = xin['spec']
       
-
       t = self.getnorm(xin['norm'])
       
       if xin['fig'] is None:

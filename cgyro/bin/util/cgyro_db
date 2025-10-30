@@ -102,13 +102,13 @@ if ref:
       print('Refreshing '+mdir)
       os.system('cd '+mdir+' ; python $GACODE_ROOT/cgyro/bin/cgyro_parse.py')
       os.system('cd '+mdir+' ; $GACODE_ROOT/cgyro/src/cgyro ')
-      #os.system('cgyro_json -e '+mdir)
 
 if lref:
    # Run through directories and update
    for mdir in y:
       print('Legacy refreshing '+mdir)
-      os.system('cgyro_json -e '+mdir)
+      # process input.cgyro.gen with cgyro --json
+      os.system('cgyro --json -e '+mdir)
       os.system('cd '+mdir+' ; cp out.cgyro.localdump input.cgyro')
       os.system('cd '+mdir+' ; python $GACODE_ROOT/cgyro/bin/cgyro_parse.py')
       os.system('cd '+mdir+' ; $GACODE_ROOT/cgyro/src/cgyro')
