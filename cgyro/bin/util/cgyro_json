@@ -55,7 +55,7 @@ def opts():
                         help='LY',
                         type=float,
                         default=0.0)
-    parser.add_argument('-e',
+   parser.add_argument('-e',
                         help="working directory (default: cwd)",
                         type=str,
                         default='.')
@@ -63,12 +63,15 @@ def opts():
                         help="input.cgyro template file",
                         type=str,
                         default='null')
-
+    parser.add_argument('-pure',
+                        help='pure plasma',
+                        action='store_true')
+ 
     args=parser.parse_args()
 
-    return args.nx,args.ny,args.lx,args.ly,args.e,args.template
+    return args.nx,args.ny,args.lx,args.ly,args.e,args.template,args.pure
 
-nx,ny,lx,ly,mydir,template = opts()
+nx,ny,lx,ly,mydir,template,pure = opts()
 
 if template == 'null':
     mydir = mydir+'/'
@@ -190,6 +193,10 @@ if nx > 0:
     d['BOX_SIZE'] = digit(lx*d['S']*d['KY'],0)
     d['DELTA_T_METHOD']=1
     d['DELTA_T']=0.005
+
+if pure:
+    d['N_SPECIES'] = 2
+    d['DENS'] = sim.dens[:].tolist()
 
 #==================================================================
 # JSON output
