@@ -9,7 +9,6 @@ import textwrap
 import json
 from pydmd import DMD
 from cgyro.data import cgyrodata
-import libcgyro
 
 # Number of roots to test
 nmode_max = 16
@@ -31,7 +30,7 @@ def opts():
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawTextHelpFormatter,
-        prog = 'cgyrodmd',
+        prog = 'cgyro_dmd',
         description="CGYRO DMD utility",
         epilog=textwrap.dedent(mytext))
 
@@ -70,7 +69,7 @@ def opts():
                         help='Switch off eigenmode plotting',
                         action='store_true')
     parser.add_argument('-tag',
-                        help='Tag eigenmodes',
+                        help='Tag eigenmodes (-tag ITG,null,TEM,null,KBM)',
                         type=str,
                         default='')
 
@@ -125,7 +124,7 @@ def rundmd(k):
    # dictionary of eigenmodes
    mdict = {}
    for x in ostr:
-      down = libcgyro.dmddownsample(ovec[x],k,eps=eps)
+      down = dmddownsample(ovec[x],k,eps=eps)
       dmd.fit(down)
       edict[x] = 1j*np.log(dmd.eigs)/dt
       mdict[x] = dmd.modes
