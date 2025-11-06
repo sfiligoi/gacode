@@ -1210,6 +1210,8 @@ class cgyrodata_plot(data.cgyrodata):
       spec  = xin['spec']
       norm  = xin['norm']
       nstr  = xin['nstr']
+      ymin  = xin['ymin']
+      ymax  = xin['ymax']
       tmax  = xin['tmax']
       absn  = xin['abs']
       ie    = xin['ie']
@@ -1335,6 +1337,11 @@ class cgyrodata_plot(data.cgyrodata):
 
       if tmax > 0.0:
          ax.set_xlim([-tmax,tmax])
+
+      if ymax != 'auto':
+         ax.set_ylim(top=float(ymax))
+      if ymin != 'auto':
+         ax.set_ylim(bottom=float(ymin))
 
       fig.tight_layout(pad=0.3)
 
