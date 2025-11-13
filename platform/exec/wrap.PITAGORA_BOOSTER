@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+# Robust wrapper: handle both cases:
+#  - caller passes executable + args separately: exec "$@"
+#  - caller passes a single string containing command+args: exec bash -c -- "$1"
+#
+# Usage: wrap.PITAGORA_BOOSTER <binary-or-command> [args...]
+
+if [ $# -lt 1 ]; then
+  echo "Usage: $0 <binary-or-command> [args...]"
+  exit 2
+fi
+
+# --- Disable problematic HCOLL plugin if present (optional) ---
+export HCOLL_ENABLE=0
+export OMPI_MCA_coll_hcoll_enable=0
+export OMPI_MCA_coll_hcoll_priority=0
+export OMPI_MCA_coll_base_verbose=0
+
+# Compute per-local-task GPU device index if SLURM variables exist
+if [ -n "${SLURM_LOCALID:-}" ] && [ -n "${NGPU:-}" ]; then
+  ACC_DEVICE_NUM=$(( SLURM_LOCALID % NGPU ))
+  export ACC_DEVICE_NUM
+  export CUDA_VISIBLE_DEVICES=${ACC_DEVICE_NUM}
+fi
+
+echo "`uname -n` $SLURM_PROCID ${SLURM_LOCALID:-(unset)} ACC_DEVICE_NUM=${ACC_DEVICE_NUM:-(unset)} CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-(unset)} `taskset -pc $$`"
+
+# If multiple tasks per GPU, set up MPS for sharing
+if [ ${NTASKS_PER_GPU:-0} -gt 1 ]; then
+    export CUDA_MPS_PIPE_DIRECTORY=/tmp/nvidia-mps
+    export CUDA_MPS_LOG_DIRECTORY=/tmp/nvidia-log
+
+    NODE_RANK=$((SLURM_PROCID % (NTASKS_PER_GPU*${NUMA:-1})))
+
+    if [ "$NODE_RANK" -eq 0 ]; then
+        echo $SLURM_PROCID starting nvidia-cuda-mps-control on $(hostname)
+        nvidia-cuda-mps-control -d 2>/dev/null || true
+    fi
+
+    sleep 2
+
+    if [ "$NODE_RANK" -eq 0 ]; then
+        echo "`uname -n` $SLURM_PROCID $SLURM_LOCALID mps ready: $(date --iso-8601=seconds)"
+    fi
+
+    # Run command robustly:
+    if [ $# -eq 1 ]; then
+        exec bash -c -- "$1"
+    else
+        # join all args into one command string and run under bash -c
+        cmd="$*"
+        exec bash -c -- "$cmd"
+    fi
+
+    # cleanup (exec won't return here unless command finished)
+    if [ "$NODE_RANK" -eq 0 ]; then
+        echo "`uname -n` $SLURM_PROCID $SLURM_LOCALID stopping nvidia-cuda-mps-control: $(date --iso-8601=seconds)"
+        echo quit | nvidia-cuda-mps-control 2>/dev/null || true
+        echo "`uname -n` $SLURM_PROCID $SLURM_LOCALID stopped nvidia-cuda-mps-control: $(date --iso-8601=seconds)"
+    fi
+
+else
+    # No MPS: prefer exec argv, but handle single-string case too
+    if [ $# -eq 1 ]; then
+        exec bash -c -- "$1"
+    else
+        exec "$@"
+    fi
+fi
+

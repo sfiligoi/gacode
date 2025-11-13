@@ -1,0 +1,51 @@
+#! /usr/bin/env bash
+# GACODE Parallel execution script
+
+simdir=${1}
+nmpi=${2}
+exec=${3}
+nomp=${4}
+numa=${5}
+mpinuma=${6}
+
+# nmpi = MPI tasks
+# nomp = OpenMP threads per MPI task
+# numa = NUMAs active per node
+# mpinuma = MPI tasks per active NUMA
+
+. "$GACODE_ROOT/shared/bin/gacode_mpi_tool"
+
+# defaults (robust for interactive/regression)
+NGPU=${NGPU:-${SLURM_GPUS_ON_NODE:-4}}
+export NGPU
+SLURM_NNODES=${SLURM_NNODES:-1}
+NUMA=${numa:-1}
+export NUMA
+
+# ensure integers / non-zero divisors
+NGPU=${NGPU:-1}
+NUMA=${NUMA:-1}
+SLURM_NNODES=${SLURM_NNODES:-1}
+
+# compute tasks-per-GPU safely
+ntasks_per_gpu=$(( (nmpi + 0) / NGPU / NUMA / SLURM_NNODES ))
+if [ "$ntasks_per_gpu" -lt 1 ] 2>/dev/null; then
+    ntasks_per_gpu=1
+fi
+export NTASKS_PER_GPU=$ntasks_per_gpu
+
+export MPICH_MAX_THREAD_SAFETY=funneled
+export OMP_NUM_THREADS=${nomp:-1}
+export OMP_STACKSIZE=400M
+export MPICH_GPU_SUPPORT_ENABLED=1
+export SLURM_CPU_BIND="cores"
+
+# prefer HPCX inside job (defensive)
+module unload openmpi 2>/dev/null || true
+module load hpcx-mpi/2.20 2>/dev/null || true
+
+# debug header (printed into regression logs)
+echo "DEBUG exec: nmpi=${nmpi:-(unset)} NGPU=${NGPU} NUMA=${NUMA} SLURM_NNODES=${SLURM_NNODES} NTASKS_PER_GPU=${NTASKS_PER_GPU} nomp=${nomp:-(unset)}"
+
+echo "> srun --cpu-bind=cores -n ${nmpi:-1} -c ${nomp:-1} \"$GACODE_ROOT/platform/exec/wrap.${GACODE_PLATFORM}\" \"$exec\""
+srun --cpu-bind=cores -n "${nmpi:-1}" -c "${nomp:-1}" "$GACODE_ROOT/platform/exec/wrap.${GACODE_PLATFORM}" "$exec"
