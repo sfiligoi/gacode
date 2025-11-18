@@ -11,6 +11,47 @@ module cgyro_nl_comm
 
 contains
 
+subroutine cgyro_nl_dealias_init
+
+  use cgyro_globals
+
+  implicit none
+
+  integer :: itor,l0,l,p,m
+  ! max_l0 = box_size*nt2*sign_qs
+  integer :: pvec_count(box_size*nt2*sign_qs)
+
+  ! Wavenumber M from CGYRO paper
+  m = n_radial/2
+
+  !
+  ! max_pvec_count is global and we are defining it here
+  !
+  ! We will have arrays that depend on this later on
+  ! so, precompute early
+  !
+  max_pvec_count = 1 ! make it >0, to always have valid arrays
+
+  do itor=nt1,nt2
+    if (itor/=0) then ! pvec not used else
+      ! Total number of ballooning angles for finite-n ballooning mode
+      l0 = box_size*itor*sign_qs
+
+      pvec_count(1:l0) = 0
+
+      ! Sort p indices by ballooning angle index l
+      do p=-m,m-1
+         l = mod(mod(p,l0)+l0,l0)+1
+         pvec_count(l) = pvec_count(l)+1
+         if (pvec_count(l) > max_pvec_count) then
+           max_pvec_count = pvec_count(l)
+         endif
+      enddo
+    endif
+  enddo
+end subroutine cgyro_nl_dealias_init
+
+
 ! === Internal ===
 ! Extended-angle filter for nonlinear dealiasing
 ! fraw (input unfiltered field)
@@ -61,10 +102,12 @@ subroutine impfilter5(fraw,f,itor)
   real :: u,a0,a1,a2,a3
   integer :: jm1,jm2,jm3,jp1,jp2,jp3
   integer :: ir,it,m,l,l0,p,nex,iex,panel
-  integer, allocatable :: pvec(:,:),pvec_count(:)
-  integer, allocatable :: ir_ex(:),it_ex(:)
-  complex :: fex(n_radial*n_theta) ! max possible size
   complex :: phase
+  integer, allocatable :: pvec(:,:),pvec_count(:)
+  ! pre-allocate max possible size
+  ! max_nex = n_theta*max_pvec_count
+  complex :: fex(n_theta*max_pvec_count)
+  integer :: ir_ex(n_theta*max_pvec_count),it_ex(n_theta*max_pvec_count)
 
   ! Maximally flat filters (3, 5, or 7-point):
   !
@@ -110,7 +153,7 @@ subroutine impfilter5(fraw,f,itor)
      l0 = box_size*itor*sign_qs
   endif
 
-  allocate(pvec(l0,n_radial),pvec_count(l0))
+  allocate(pvec(l0,max_pvec_count),pvec_count(l0))
 
   pvec_count(:) = 0
 
@@ -127,7 +170,6 @@ subroutine impfilter5(fraw,f,itor)
   ! iex = extended angle index
   do l=1,l0
      nex = n_theta*pvec_count(l)
-     allocate(ir_ex(nex),it_ex(nex))
      iex = 0
      do panel=1,pvec_count(l)
         p = pvec(l,panel)
@@ -164,7 +206,6 @@ subroutine impfilter5(fraw,f,itor)
         f(ir,it) = f(ir,it)*exp(i_c*p*phase)
 
      enddo
-     deallocate(ir_ex,it_ex)
   enddo
 
   deallocate(pvec,pvec_count)

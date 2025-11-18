@@ -381,6 +381,8 @@ module cgyro_globals
   real :: tave_min, tave_max
   integer :: tave_step
   integer :: nflux
+  ! NL dealias variables
+  integer :: max_pvec_count
   !
   ! Nonlinear plans
 #ifndef CGYRO_GPU_FFT

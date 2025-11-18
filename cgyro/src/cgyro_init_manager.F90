@@ -20,6 +20,7 @@ subroutine cgyro_init_manager
 
   use cgyro_io
   use cgyro_nl
+  use cgyro_nl_comm
 
 #if defined(_OPENACC) || defined(OMPGPU)
 #define CGYRO_GPU_FFT
@@ -307,6 +308,8 @@ subroutine cgyro_init_manager
 
      ! Nonlinear arrays
      if (nonlinear_flag == 1) then
+        call cgyro_nl_dealias_init
+
         if (nl_single_flag < 2) then
           allocate(fA_nl(n_radial,nt_loc,nsplitA,n_toroidal_procs))
           allocate(g_nl(n_field,n_radial,n_jtheta,n_toroidal))
