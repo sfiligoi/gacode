@@ -378,7 +378,7 @@ subroutine cgyro_nl_fftw_comm1_f32_async
 !$acc&         present(ic_c,h_x,fpackA32,fpackB32) &
 !$acc&         present(n_theta,nv_loc,nt1,nt2,n_radial,nsplit,nsplitA,nsplitB) default(none)
 #else
-!$omp parallel do collapse(3) &
+!$omp parallel do collapse(2) &
 !$omp&         private(iexch0,itor0,isplit0,iexch_base,h_loc,hfil)
 #endif
   do iv_loc_m=1,nv_loc
@@ -436,7 +436,7 @@ subroutine cgyro_nl_fftw_comm1_f32_async
 !$acc&         present(ic_c,h_x,fpackA32) &
 !$acc&         present(n_theta,nv_loc,nt1,nt2,n_radial,nsplit,nsplitA) default(none)
 #else
-!$omp parallel do collapse(3) &
+!$omp parallel do collapse(2) &
 !$omp&         private(iexch0,itor0,isplit0,iexch_base,h_loc,hfil)
 #endif
   do iv_loc_m=1,nv_loc
