@@ -171,18 +171,27 @@ pure recursive subroutine impfilter5_n0(&
 
 end subroutine impfilter5_n0
 
-subroutine impfilter5(fraw,f,itor)
-
-  use cgyro_globals
+pure recursive subroutine impfilter5(&
+                    n_theta,n_radial,max_pvec_count,&
+                    dealias_order,dealias,&
+                    box_size,q,sign_qs,&
+                    fraw,f,itor)
 
   implicit none
 
+  integer, intent(in) :: n_theta,n_radial,max_pvec_count
+  integer, intent(in) :: dealias_order
+  real, intent(in) :: dealias
+  integer, intent(in) :: box_size
+  real, intent(in) :: q
+  integer, intent(in) :: sign_qs
   complex, intent(in) :: fraw(n_radial,n_theta)
   complex, intent(out):: f(n_radial,n_theta)
   integer, intent(in) :: itor
   real :: a0,a1,a2,a3
   integer :: m,l0
   complex :: phase
+  real, parameter    :: pi   = 3.1415926535897932
 
   ! Maximally flat filters (3, 5, or 7-point):
   !
@@ -250,7 +259,10 @@ subroutine hx_dealias_one(iv_loc_m,itor,hfil)
     enddo
   enddo
   ! Extended-angle dealiasing filter
-  call impfilter5(hraw,hfil,itor)
+  call impfilter5(n_theta,n_radial,max_pvec_count,&
+                  dealias_order,dealias,&
+                  box_size,q,sign_qs,&
+                  hraw,hfil,itor)
 end subroutine hx_dealias_one
 
 subroutine field_dealias_one(i_field,itor,hfil)
@@ -271,7 +283,10 @@ subroutine field_dealias_one(i_field,itor,hfil)
     enddo
   enddo
   ! Extended angle dealiasing filter
-  call impfilter5(hraw,hfil,itor)
+  call impfilter5(n_theta,n_radial,max_pvec_count,&
+                  dealias_order,dealias,&
+                  box_size,q,sign_qs,&
+                  hraw,hfil,itor)
 end subroutine field_dealias_one
 
 ! Note: Calling test propagates the async operations in some MPI implementations
