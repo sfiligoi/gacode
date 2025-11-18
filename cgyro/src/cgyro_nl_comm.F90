@@ -15,6 +15,40 @@ contains
 ! Extended-angle filter for nonlinear dealiasing
 ! fraw (input unfiltered field)
 ! f    (output filtered field)
+
+! itor=0 special case
+! Pure periodicity 
+pure subroutine impfilter5_i0(n_theta,n_radial,a0,a1,a2,a3,fraw,f)
+  implicit none
+
+  integer, intent(in) :: n_theta,n_radial
+  real, intent(in) :: a0,a1,a2,a3
+  complex, intent(in) :: fraw(n_radial,n_theta)
+  complex, intent(out):: f(n_radial,n_theta)
+  !--------
+  integer :: it, ir
+  integer :: jm1,jm2,jm3,jp1,jp2,jp3
+
+  do it=1,n_theta
+     do ir=1,n_radial
+        jm1 = it-1; if (jm1 < 1) jm1 = n_theta
+        jm2 = it-2; if (jm2 < 1) jm2 = jm2+n_theta
+        jm3 = it-3; if (jm3 < 1) jm3 = jm3+n_theta
+        jp1 = it+1; if (jp1 > n_theta) jp1 = 1
+        jp2 = it+2; if (jp2 > n_theta) jp2 = jp2-n_theta
+        jp3 = it+3; if (jp3 > n_theta) jp3 = jp3-n_theta
+
+        ! Pure periodicity 
+        f(ir,it) = &
+                a0*fraw(ir,it) + &
+                a1*(fraw(ir,jm1) + fraw(ir,jp1)) + &
+                a2*(fraw(ir,jm2) + fraw(ir,jp2)) + &
+                a3*(fraw(ir,jm3) + fraw(ir,jp3))
+     enddo
+  enddo
+end subroutine impfilter5_i0
+
+
 subroutine impfilter5(fraw,f,itor)
 
   use cgyro_globals
@@ -68,24 +102,8 @@ subroutine impfilter5(fraw,f,itor)
   ! Phase factor
   phase = 2.0*pi*q/box_size
 
-  if (itor == 0) then     
-     do it=1,n_theta
-        do ir=1,n_radial
-           jm1 = it-1; if (jm1 < 1) jm1 = n_theta
-           jm2 = it-2; if (jm2 < 1) jm2 = jm2+n_theta
-           jm3 = it-3; if (jm3 < 1) jm3 = jm3+n_theta
-           jp1 = it+1; if (jp1 > n_theta) jp1 = 1
-           jp2 = it+2; if (jp2 > n_theta) jp2 = jp2-n_theta
-           jp3 = it+3; if (jp3 > n_theta) jp3 = jp3-n_theta
-
-           ! Pure periodicity 
-           f(ir,it) = &
-                a0*fraw(ir,it) + &
-                a1*(fraw(ir,jm1) + fraw(ir,jp1)) + &
-                a2*(fraw(ir,jm2) + fraw(ir,jp2)) + &
-                a3*(fraw(ir,jm3) + fraw(ir,jp3))
-        enddo
-     enddo
+  if (itor == 0) then
+     call impfilter5_i0(n_theta,n_radial,a0,a1,a2,a3,fraw,f)
      return
   else
      ! Total number of ballooning angles for finite-n ballooning mode
