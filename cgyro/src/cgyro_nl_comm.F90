@@ -11,6 +11,190 @@ module cgyro_nl_comm
 
 contains
 
+! === Internal ===
+! Extended-angle filter for nonlinear dealiasing
+! fraw (input unfiltered field)
+! f    (output filtered field)
+subroutine impfilter5(fraw,f,itor)
+
+  use cgyro_globals
+
+  implicit none
+
+  complex, intent(in) :: fraw(n_radial,n_theta)
+  complex, intent(out):: f(n_radial,n_theta)
+  integer, intent(in) :: itor
+  real :: u,a0,a1,a2,a3
+  integer :: jm1,jm2,jm3,jp1,jp2,jp3
+  integer :: ir,it,m,l,l0,p,nex,iex,panel
+  integer, allocatable :: pvec(:,:),pvec_count(:)
+  integer, allocatable :: ir_ex(:),it_ex(:),p_ex(:)
+  complex, allocatable :: fex(:)
+  complex :: phase
+
+  ! Maximally flat filters (3, 5, or 7-point):
+  !
+  ! H(0) = 1
+  ! H'(0) = H''(0) = ... = 0
+  ! H(pi) = 1-dealias
+  !
+  ! dealias = 0 (no filter)
+  ! dealias = 1 (max filter)
+  ! dealias_order = 1, 2, or 3 (for 3,5,7 pt)
+
+  if (dealias_order == 1) then
+     ! 3-point filter
+     a0 = (2-dealias)/2.0
+     a1 = dealias/4.0
+     a2 = 0.0
+     a3 = 0.0
+  elseif (dealias_order == 2) then
+     ! 5-point filter
+     a0 = (8-3*dealias)/8.0
+     a1 = dealias/4.0
+     a2 = -dealias/16.0
+     a3 = 0.0
+  else
+     ! 7-point filter (default)
+     a0 = (16-5*dealias)/16.0
+     a1 = (15/64.0)*dealias
+     a2 = -(6/64.0)*dealias
+     a3 = (1/64.0)*dealias
+  endif
+
+  ! Wavenumber M from CGYRO paper
+  m = n_radial/2
+
+  ! Phase factor
+  phase = 2.0*pi*q/box_size
+
+  if (itor == 0) then     
+     do it=1,n_theta
+        do ir=1,n_radial
+           jm1 = it-1; if (jm1 < 1) jm1 = n_theta
+           jm2 = it-2; if (jm2 < 1) jm2 = jm2+n_theta
+           jm3 = it-3; if (jm3 < 1) jm3 = jm3+n_theta
+           jp1 = it+1; if (jp1 > n_theta) jp1 = 1
+           jp2 = it+2; if (jp2 > n_theta) jp2 = jp2-n_theta
+           jp3 = it+3; if (jp3 > n_theta) jp3 = jp3-n_theta
+
+           ! Pure periodicity 
+           f(ir,it) = &
+                a0*fraw(ir,it) + &
+                a1*(fraw(ir,jm1) + fraw(ir,jp1)) + &
+                a2*(fraw(ir,jm2) + fraw(ir,jp2)) + &
+                a3*(fraw(ir,jm3) + fraw(ir,jp3))
+        enddo
+     enddo
+     return
+  else
+     ! Total number of ballooning angles for finite-n ballooning mode
+     l0 = box_size*itor*sign_qs
+  endif
+
+  allocate(pvec(l0,n_radial),pvec_count(l0))
+
+  pvec_count(:) = 0
+
+  ! Sort p indices by ballooning angle index l
+  do p=-m,m-1
+     l = mod(mod(p,l0)+l0,l0)+1
+     pvec_count(l) = pvec_count(l)+1
+     pvec(l,pvec_count(l)) = p
+  enddo
+
+  ! Construct ballooning modes
+  ! all _ex quantities refer to extended angle
+  ! nex = total number of points along extended angle
+  ! iex = extended angle index
+  do l=1,l0
+     nex = n_theta*pvec_count(l)
+     allocate(ir_ex(nex),it_ex(nex),p_ex(nex),fex(nex))
+     iex = 0
+     do panel=1,pvec_count(l)
+        p = pvec(l,panel)
+        ir = p+m+1
+        do it=1,n_theta
+           iex = iex+1
+           ir_ex(iex) = ir
+           it_ex(iex) = it
+           p_ex(iex) = p
+           ! add phase 
+           fex(iex) = fraw(ir,it)*exp(-i_c*p*phase)
+        enddo
+     enddo
+     do iex=1,nex
+        
+        jm1 = iex-1; if (jm1 < 1) jm1 = nex
+        jm2 = iex-2; if (jm2 < 1) jm2 = jm2+nex
+        jm3 = iex-3; if (jm3 < 1) jm3 = jm3+nex
+        jp1 = iex+1; if (jp1 > nex) jp1 = 1
+        jp2 = iex+2; if (jp2 > nex) jp2 = jp2-nex
+        jp3 = iex+3; if (jp3 > nex) jp3 = jp3-nex
+
+        ir = ir_ex(iex) 
+        it = it_ex(iex) 
+
+        ! filter
+        f(ir,it) = &
+             a0*fex(iex) + &
+             a1*(fex(jm1)+fex(jp1)) + &           
+             a2*(fex(jm2)+fex(jp2)) + &           
+             a3*(fex(jm3)+fex(jp3))            
+
+        ! dephase
+        f(ir,it) = f(ir,it)*exp(i_c*p_ex(iex)*phase)
+
+     enddo
+     deallocate(ir_ex,it_ex,p_ex,fex)
+  enddo
+
+  deallocate(pvec,pvec_count)
+
+end subroutine impfilter5
+
+subroutine hx_dealias_one(iv_loc_m,itor,hfil)
+  use cgyro_globals
+
+  implicit none
+  
+  integer, intent(in) :: iv_loc_m,itor
+  complex, dimension(n_radial,n_theta), intent(out) :: hfil
+  ! --------
+  complex, dimension(n_radial,n_theta) :: hraw
+  integer :: ir,it
+  
+  ! Construct h_x_dealias array
+  do it=1,n_theta
+    do ir=1,n_radial
+      hraw(ir,it) = h_x(ic_c(ir,it),iv_loc_m,itor)
+    enddo
+  enddo
+  ! Extended-angle dealiasing filter
+  call impfilter5(hraw,hfil,itor)
+end subroutine hx_dealias_one
+
+subroutine field_dealias_one(i_field,itor,hfil)
+  use cgyro_globals
+
+  implicit none
+  
+  integer, intent(in) :: i_field,itor
+  complex, dimension(n_radial,n_theta), intent(out) :: hfil
+  ! --------
+  complex, dimension(n_radial,n_theta) :: hraw
+  integer :: ir,it
+  
+  ! Construct field_dealias array
+  do it=1,n_theta
+    do ir=1,n_radial
+      hraw(ir,it) = field(i_field,ic_c(ir,it),itor)
+    enddo
+  enddo
+  ! Extended angle dealiasing filter
+  call impfilter5(hraw,hfil,itor)
+end subroutine field_dealias_one
+
 ! Note: Calling test propagates the async operations in some MPI implementations
 subroutine cgyro_nl_fftw_comm_test
   use parallel_lib
@@ -45,11 +229,13 @@ subroutine cgyro_nl_fftw_comm1_f64_async
   integer :: ir,it,iv_loc_m,itor
   integer :: iexch0,itor0,isplit0,iexch_base
   complex :: h_loc
+  complex, dimension(n_radial,n_theta) :: hfil
 
   call timer_lib_in('nl_mem')
 
   if (nsplitB > 0) then
 
+  ! TODO: GPU
 #if defined(OMPGPU)
 !$omp target teams distribute parallel do simd collapse(4) &
 !$omp&         private(iexch0,itor0,isplit0,iexch_base,h_loc)
@@ -59,14 +245,15 @@ subroutine cgyro_nl_fftw_comm1_f64_async
 !$acc&         present(ic_c,h_x,fpackA,fpackB) &
 !$acc&         present(n_theta,nv_loc,nt1,nt2,n_radial,nsplit,nsplitA,nsplitB) default(none)
 #else
-!$omp parallel do collapse(3) &
-!$omp&         private(iexch0,itor0,isplit0,iexch_base,h_loc)
+!$omp parallel do collapse(2) &
+!$omp&         private(iexch0,itor0,isplit0,iexch_base,h_loc,hfil)
 #endif
-  do it=1,n_theta
-   do iv_loc_m=1,nv_loc
-    do itor=nt1,nt2
+  do iv_loc_m=1,nv_loc
+   do itor=nt1,nt2
+    call hx_dealias_one(iv_loc_m,itor,hfil)
+    do it=1,n_theta
      do ir=1,n_radial
-       h_loc = h_x(ic_c(ir,it),iv_loc_m,itor)
+       h_loc = hfil(ir,it)
        iexch0 = (iv_loc_m-1) + (it-1)*nv_loc
        itor0 = iexch0/nsplit
        isplit0 = modulo(iexch0,nsplit)
@@ -106,6 +293,7 @@ subroutine cgyro_nl_fftw_comm1_f64_async
 
   else ! nsplitB==0
 
+  ! TODO: GPU
 #if defined(OMPGPU)
 !$omp target teams distribute parallel do simd collapse(4) &
 !$omp&         private(iexch0,itor0,isplit0,iexch_base,h_loc)
@@ -115,14 +303,15 @@ subroutine cgyro_nl_fftw_comm1_f64_async
 !$acc&         present(ic_c,h_x,fpackA) &
 !$acc&         present(n_theta,nv_loc,nt1,nt2,n_radial,nsplit,nsplitA) default(none)
 #else
-!$omp parallel do collapse(3) &
-!$omp&         private(iexch0,itor0,isplit0,iexch_base,h_loc)
+!$omp parallel do collapse(2) &
+!$omp&         private(iexch0,itor0,isplit0,iexch_base,h_loc,hfil)
 #endif
-  do it=1,n_theta
-   do iv_loc_m=1,nv_loc
-    do itor=nt1,nt2
+  do iv_loc_m=1,nv_loc
+   do itor=nt1,nt2
+    call hx_dealias_one(iv_loc_m,itor,hfil)
+    do it=1,n_theta
      do ir=1,n_radial
-       h_loc = h_x(ic_c(ir,it),iv_loc_m,itor)
+       h_loc = hfil(ir,it)
        iexch0 = (iv_loc_m-1) + (it-1)*nv_loc
        itor0 = iexch0/nsplit
        isplit0 = modulo(iexch0,nsplit)
@@ -173,11 +362,13 @@ subroutine cgyro_nl_fftw_comm1_f32_async
   integer :: ir,it,iv_loc_m,itor
   integer :: iexch0,itor0,isplit0,iexch_base
   complex(KIND=REAL32) :: h_loc
+  complex, dimension(n_radial,n_theta) :: hfil
 
   call timer_lib_in('nl_mem')
 
   if (nsplitB > 0) then
 
+  ! TODO: GPU
 #if defined(OMPGPU)
 !$omp target teams distribute parallel do simd collapse(4) &
 !$omp&         private(iexch0,itor0,isplit0,iexch_base,h_loc)
@@ -188,13 +379,14 @@ subroutine cgyro_nl_fftw_comm1_f32_async
 !$acc&         present(n_theta,nv_loc,nt1,nt2,n_radial,nsplit,nsplitA,nsplitB) default(none)
 #else
 !$omp parallel do collapse(3) &
-!$omp&         private(iexch0,itor0,isplit0,iexch_base,h_loc)
+!$omp&         private(iexch0,itor0,isplit0,iexch_base,h_loc,hfil)
 #endif
-  do it=1,n_theta
-   do iv_loc_m=1,nv_loc
-    do itor=nt1,nt2
+  do iv_loc_m=1,nv_loc
+   do itor=nt1,nt2
+    call hx_dealias_one(iv_loc_m,itor,hfil)
+    do it=1,n_theta
      do ir=1,n_radial
-       h_loc = h_x(ic_c(ir,it),iv_loc_m,itor)
+       h_loc = hfil(ir,it)
        iexch0 = (iv_loc_m-1) + (it-1)*nv_loc
        itor0 = iexch0/nsplit
        isplit0 = modulo(iexch0,nsplit)
@@ -234,6 +426,7 @@ subroutine cgyro_nl_fftw_comm1_f32_async
 
   else ! nsplitB==0
 
+  ! TODO: GPU
 #if defined(OMPGPU)
 !$omp target teams distribute parallel do simd collapse(4) &
 !$omp&         private(iexch0,itor0,isplit0,iexch_base,h_loc)
@@ -244,13 +437,14 @@ subroutine cgyro_nl_fftw_comm1_f32_async
 !$acc&         present(n_theta,nv_loc,nt1,nt2,n_radial,nsplit,nsplitA) default(none)
 #else
 !$omp parallel do collapse(3) &
-!$omp&         private(iexch0,itor0,isplit0,iexch_base,h_loc)
+!$omp&         private(iexch0,itor0,isplit0,iexch_base,h_loc,hfil)
 #endif
-  do it=1,n_theta
-   do iv_loc_m=1,nv_loc
-    do itor=nt1,nt2
+  do iv_loc_m=1,nv_loc
+   do itor=nt1,nt2
+    call hx_dealias_one(iv_loc_m,itor,hfil)
+    do it=1,n_theta
      do ir=1,n_radial
-       h_loc = h_x(ic_c(ir,it),iv_loc_m,itor)
+       h_loc = hfil(ir,it)
        iexch0 = (iv_loc_m-1) + (it-1)*nv_loc
        itor0 = iexch0/nsplit
        isplit0 = modulo(iexch0,nsplit)
@@ -610,8 +804,19 @@ subroutine cgyro_nl_fftw_comm2_f64_async
   integer :: itor,mytor
   integer :: iltheta_min
   complex :: gval
+  complex, dimension(n_radial,n_theta,n_field,nt1:nt2) :: field_dealias
 
   call timer_lib_in('nl_mem')
+
+  ! TODO:GPU
+  ! field-> gval processing is not uniform, create whole field_dealias
+  !          It is small, anyway
+!$omp parallel do collapse(2)
+  do itor=nt1,nt2
+    do itf=1,n_field
+      call field_dealias_one(itf,itor,field_dealias(:,:,itf,itor))
+    enddo
+  enddo
 
 #if defined(OMPGPU)
 !$omp target teams distribute parallel do simd collapse(5) &
@@ -619,7 +824,7 @@ subroutine cgyro_nl_fftw_comm2_f64_async
 #elif defined(_OPENACC)
 !$acc parallel loop gang vector collapse(5) independent &
 !$acc&         private(itor,it,iltheta_min,mytor,gval) &
-!$acc&         present(field,gpack) &
+!$acc&         present(field_dealias,gpack) &
 !$acc&         present(n_toroidal_procs,nt_loc,n_jtheta,nv_loc,nt1) &
 !$acc&         present(n_theta,n_radial,n_field,nsplit) &
 !$acc&         default(none)
@@ -638,8 +843,7 @@ subroutine cgyro_nl_fftw_comm2_f64_async
        gval = (0.0,0.0)
        if (it <= n_theta) then
          mytor = nt1+itl-1
-         ! ic_c(ir,it) = (ir-1)*n_theta+it
-         gval = field(itf,(ir-1)*n_theta+it,mytor)
+         gval = field_dealias(ir,it,itf,mytor)
        endif
        ! else just padding
        gpack(itf,ir,it_loc,itor) = gval
@@ -670,8 +874,19 @@ subroutine cgyro_nl_fftw_comm2_f32_async
   integer :: itor,mytor
   integer :: iltheta_min
   complex(KIND=REAL32) :: gval
+  complex, dimension(n_radial,n_theta,n_field,nt1:nt2) :: field_dealias
 
   call timer_lib_in('nl_mem')
+
+  ! TODO:GPU
+  ! field-> gval processing is not uniform, create whole field_dealias
+  !          It is small, anyway
+!$omp parallel do collapse(2)
+  do itor=nt1,nt2
+    do itf=1,n_field
+      call field_dealias_one(itf,itor,field_dealias(:,:,itf,itor))
+    enddo
+  enddo
 
 #if defined(OMPGPU)
 !$omp target teams distribute parallel do simd collapse(5) &
@@ -679,7 +894,7 @@ subroutine cgyro_nl_fftw_comm2_f32_async
 #elif defined(_OPENACC)
 !$acc parallel loop gang vector collapse(5) independent &
 !$acc&         private(itor,it,iltheta_min,mytor,gval) &
-!$acc&         present(field,gpack32) &
+!$acc&         present(field_dealias,gpack32) &
 !$acc&         present(n_toroidal_procs,nt_loc,n_jtheta,nv_loc,nt1) &
 !$acc&         present(n_theta,n_radial,n_field,nsplit) &
 !$acc&         default(none)
@@ -698,8 +913,7 @@ subroutine cgyro_nl_fftw_comm2_f32_async
        gval = (0.0,0.0)
        if (it <= n_theta) then
          mytor = nt1+itl-1
-         ! ic_c(ir,it) = (ir-1)*n_theta+it
-         gval = field(itf,(ir-1)*n_theta+it,mytor)
+         gval = field_dealias(ir,it,itf,mytor)
        endif
        ! else just padding
        gpack32(itf,ir,it_loc,itor) = gval
