@@ -59,7 +59,8 @@ end subroutine cgyro_nl_dealias_init
 
 ! itor=0 special case
 ! Pure periodicity 
-pure subroutine impfilter5_i0(n_theta,n_radial,a0,a1,a2,a3,fraw,f)
+pure recursive subroutine impfilter5_i0(&
+                    n_theta,n_radial,a0,a1,a2,a3,fraw,f)
   implicit none
 
   integer, intent(in) :: n_theta,n_radial
@@ -89,71 +90,31 @@ pure subroutine impfilter5_i0(n_theta,n_radial,a0,a1,a2,a3,fraw,f)
   enddo
 end subroutine impfilter5_i0
 
-
-subroutine impfilter5(fraw,f,itor)
-
-  use cgyro_globals
+! guaranteed that itor/=0
+pure recursive subroutine impfilter5_n0(&
+                    n_theta,n_radial,max_pvec_count,&
+                    a0,a1,a2,a3,m,phase,l0,&
+                    fraw,f,itor)
 
   implicit none
 
+  integer, intent(in) :: n_theta,n_radial,max_pvec_count
+  real, intent(in) :: a0,a1,a2,a3
+  integer, intent(in) :: m
+  complex, intent(in) :: phase
+  integer, intent(in) :: l0
   complex, intent(in) :: fraw(n_radial,n_theta)
   complex, intent(out):: f(n_radial,n_theta)
   integer, intent(in) :: itor
-  real :: u,a0,a1,a2,a3
   integer :: jm1,jm2,jm3,jp1,jp2,jp3
-  integer :: ir,it,m,l,l0,p,nex,iex,panel
-  complex :: phase
-  integer, allocatable :: pvec(:,:),pvec_count(:)
+  integer :: ir,it,l,p,nex,iex,panel
+  integer :: pvec(l0,max_pvec_count),pvec_count(l0)
   ! pre-allocate max possible size
   ! max_nex = n_theta*max_pvec_count
   complex :: fex(n_theta*max_pvec_count)
-  integer :: ir_ex(n_theta*max_pvec_count),it_ex(n_theta*max_pvec_count)
-
-  ! Maximally flat filters (3, 5, or 7-point):
-  !
-  ! H(0) = 1
-  ! H'(0) = H''(0) = ... = 0
-  ! H(pi) = 1-dealias
-  !
-  ! dealias = 0 (no filter)
-  ! dealias = 1 (max filter)
-  ! dealias_order = 1, 2, or 3 (for 3,5,7 pt)
-
-  if (dealias_order == 1) then
-     ! 3-point filter
-     a0 = (2-dealias)/2.0
-     a1 = dealias/4.0
-     a2 = 0.0
-     a3 = 0.0
-  elseif (dealias_order == 2) then
-     ! 5-point filter
-     a0 = (8-3*dealias)/8.0
-     a1 = dealias/4.0
-     a2 = -dealias/16.0
-     a3 = 0.0
-  else
-     ! 7-point filter (default)
-     a0 = (16-5*dealias)/16.0
-     a1 = (15/64.0)*dealias
-     a2 = -(6/64.0)*dealias
-     a3 = (1/64.0)*dealias
-  endif
-
-  ! Wavenumber M from CGYRO paper
-  m = n_radial/2
-
-  ! Phase factor
-  phase = 2.0*pi*q/box_size
-
-  if (itor == 0) then
-     call impfilter5_i0(n_theta,n_radial,a0,a1,a2,a3,fraw,f)
-     return
-  else
-     ! Total number of ballooning angles for finite-n ballooning mode
-     l0 = box_size*itor*sign_qs
-  endif
-
-  allocate(pvec(l0,max_pvec_count),pvec_count(l0))
+  integer :: ir_ex(n_theta*max_pvec_count)
+  integer :: it_ex(n_theta*max_pvec_count)
+  complex, parameter :: i_c  = (0.0,1.0)
 
   pvec_count(:) = 0
 
@@ -208,7 +169,66 @@ subroutine impfilter5(fraw,f,itor)
      enddo
   enddo
 
-  deallocate(pvec,pvec_count)
+end subroutine impfilter5_n0
+
+subroutine impfilter5(fraw,f,itor)
+
+  use cgyro_globals
+
+  implicit none
+
+  complex, intent(in) :: fraw(n_radial,n_theta)
+  complex, intent(out):: f(n_radial,n_theta)
+  integer, intent(in) :: itor
+  real :: a0,a1,a2,a3
+  integer :: m,l0
+  complex :: phase
+
+  ! Maximally flat filters (3, 5, or 7-point):
+  !
+  ! H(0) = 1
+  ! H'(0) = H''(0) = ... = 0
+  ! H(pi) = 1-dealias
+  !
+  ! dealias = 0 (no filter)
+  ! dealias = 1 (max filter)
+  ! dealias_order = 1, 2, or 3 (for 3,5,7 pt)
+
+  if (dealias_order == 1) then
+     ! 3-point filter
+     a0 = (2-dealias)/2.0
+     a1 = dealias/4.0
+     a2 = 0.0
+     a3 = 0.0
+  elseif (dealias_order == 2) then
+     ! 5-point filter
+     a0 = (8-3*dealias)/8.0
+     a1 = dealias/4.0
+     a2 = -dealias/16.0
+     a3 = 0.0
+  else
+     ! 7-point filter (default)
+     a0 = (16-5*dealias)/16.0
+     a1 = (15/64.0)*dealias
+     a2 = -(6/64.0)*dealias
+     a3 = (1/64.0)*dealias
+  endif
+
+  if (itor == 0) then
+     call impfilter5_i0(n_theta,n_radial,a0,a1,a2,a3,fraw,f)
+  else
+     ! Wavenumber M from CGYRO paper
+     m = n_radial/2
+
+     ! Phase factor
+     phase = 2.0*pi*q/box_size
+
+     ! Total number of ballooning angles for finite-n ballooning mode
+     l0 = box_size*itor*sign_qs
+     call impfilter5_n0(n_theta,n_radial,max_pvec_count,&
+                        a0,a1,a2,a3,m,phase,l0,&
+                        fraw,f,itor)
+  endif
 
 end subroutine impfilter5
 
