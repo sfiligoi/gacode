@@ -63,7 +63,7 @@ subroutine impfilter5(fraw,f,itor)
   integer :: ir,it,m,l,l0,p,nex,iex,panel
   integer, allocatable :: pvec(:,:),pvec_count(:)
   integer, allocatable :: ir_ex(:),it_ex(:)
-  complex, allocatable :: fex(:)
+  complex :: fex(n_radial*n_theta) ! max possible size
   complex :: phase
 
   ! Maximally flat filters (3, 5, or 7-point):
@@ -127,7 +127,7 @@ subroutine impfilter5(fraw,f,itor)
   ! iex = extended angle index
   do l=1,l0
      nex = n_theta*pvec_count(l)
-     allocate(ir_ex(nex),it_ex(nex),fex(nex))
+     allocate(ir_ex(nex),it_ex(nex))
      iex = 0
      do panel=1,pvec_count(l)
         p = pvec(l,panel)
@@ -164,7 +164,7 @@ subroutine impfilter5(fraw,f,itor)
         f(ir,it) = f(ir,it)*exp(i_c*p*phase)
 
      enddo
-     deallocate(ir_ex,it_ex,fex)
+     deallocate(ir_ex,it_ex)
   enddo
 
   deallocate(pvec,pvec_count)
