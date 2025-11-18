@@ -62,7 +62,7 @@ subroutine impfilter5(fraw,f,itor)
   integer :: jm1,jm2,jm3,jp1,jp2,jp3
   integer :: ir,it,m,l,l0,p,nex,iex,panel
   integer, allocatable :: pvec(:,:),pvec_count(:)
-  integer, allocatable :: ir_ex(:),it_ex(:),p_ex(:)
+  integer, allocatable :: ir_ex(:),it_ex(:)
   complex, allocatable :: fex(:)
   complex :: phase
 
@@ -127,7 +127,7 @@ subroutine impfilter5(fraw,f,itor)
   ! iex = extended angle index
   do l=1,l0
      nex = n_theta*pvec_count(l)
-     allocate(ir_ex(nex),it_ex(nex),p_ex(nex),fex(nex))
+     allocate(ir_ex(nex),it_ex(nex),fex(nex))
      iex = 0
      do panel=1,pvec_count(l)
         p = pvec(l,panel)
@@ -136,7 +136,6 @@ subroutine impfilter5(fraw,f,itor)
            iex = iex+1
            ir_ex(iex) = ir
            it_ex(iex) = it
-           p_ex(iex) = p
            ! add phase 
            fex(iex) = fraw(ir,it)*exp(-i_c*p*phase)
         enddo
@@ -161,10 +160,11 @@ subroutine impfilter5(fraw,f,itor)
              a3*(fex(jm3)+fex(jp3))            
 
         ! dephase
-        f(ir,it) = f(ir,it)*exp(i_c*p_ex(iex)*phase)
+        p = ir-m-1
+        f(ir,it) = f(ir,it)*exp(i_c*p*phase)
 
      enddo
-     deallocate(ir_ex,it_ex,p_ex,fex)
+     deallocate(ir_ex,it_ex,fex)
   enddo
 
   deallocate(pvec,pvec_count)
