@@ -98,6 +98,8 @@ module cgyro_globals
   real :: stream_factor
   integer :: exch_flag
   integer :: nl_min
+  real :: dealias
+  integer :: dealias_order
   !
   ! Geometry input
   !

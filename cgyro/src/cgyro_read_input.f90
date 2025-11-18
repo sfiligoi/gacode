@@ -92,6 +92,9 @@ subroutine cgyro_read_input
   call cgyro_readbc_int(exch_flag,'EXCH_FLAG')
   call cgyro_readbc_int(nl_min,'NL_MIN')
 
+  call cgyro_readbc_real(dealias)
+  call cgyro_readbc_int(dealias_order,'DEALIAS_ORDER')
+  !
   call cgyro_readbc_real(rmin)
   call cgyro_readbc_real(rmaj)
   call cgyro_readbc_real(q)

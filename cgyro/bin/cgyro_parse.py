@@ -88,6 +88,8 @@ x.add('STREAM_TERM','0')
 x.add('STREAM_FACTOR','1.0')
 x.add('EXCH_FLAG','0')
 x.add('NL_MIN','0')
+x.add('DEALIAS','0.0')
+x.add('DEALIAS_ORDER','3')
 
 x.add('RMIN','0.5')
 x.add('RMAJ','3.0')
