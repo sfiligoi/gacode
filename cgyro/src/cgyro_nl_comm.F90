@@ -186,20 +186,18 @@ subroutine impfilter5_n0(&
   ! pre-allocate max possible size
   ! max_nex = n_theta*max_pvec_count
   complex :: fex(n_theta*max_pvec_count)
-  integer :: ir_ex(n_theta*max_pvec_count)
-  integer :: it_ex(n_theta*max_pvec_count)
   complex, parameter :: i_c  = (0.0,1.0)
   complex :: fval
 
 #if defined(OMPGPU)
 !$omp target teams distribute collapse(2) default(firstprivate)&
-!$omp&         private(fex,ir_ex,it_ex) &
+!$omp&         private(fex) &
 !$omp&         shared(pvec_count,pvec,fraw,f)
 #elif defined(_OPENACC)
   ! TODO
 #else
 !$omp parallel do collapse(2) default(firstprivate)&
-!$omp&         private(fex,ir_ex,it_ex) &
+!$omp&         private(fex) &
 !$omp&         shared(pvec_count,pvec,fraw,f)
 #endif
   do itor=nt1,nt2
@@ -216,22 +214,20 @@ subroutine impfilter5_n0(&
      nex = n_theta*npanel
 #if defined(OMPGPU)
 !$omp parallel do collapse(2) default(firstprivate)&
-!$omp&         shared(fraw,fex,ir_ex,it_ex,pvec)
+!$omp&         shared(fraw,fex,pvec)
 #endif
      do panel=1,npanel
         do it=1,n_theta
            p = pvec(l,panel,itor-itor_offset)
            ir = p+m+1
            iex = (panel-1)*n_theta+it
-           ir_ex(iex) = ir
-           it_ex(iex) = it
            ! add phase 
            fex(iex) = fraw(ir,it,i3d,itor-itor_offset)*exp(-i_c*p*phase)
         enddo
      enddo
 #if defined(OMPGPU)
 !$omp parallel do default(firstprivate)&
-!$omp&         shared(f,fex,ir_ex,it_ex)
+!$omp&         shared(f,fex,pvec)
 #endif
      do iex=1,nex
         
@@ -242,8 +238,13 @@ subroutine impfilter5_n0(&
         jp2 = iex+2; if (jp2 > nex) jp2 = jp2-nex
         jp3 = iex+3; if (jp3 > nex) jp3 = jp3-nex
 
-        ir = ir_ex(iex) 
-        it = it_ex(iex) 
+        ! iex = (panel-1)*n_theta+it
+        ! p = pvec(l,panel,itor-itor_offset)
+        ! ir = p+m+1
+        it = 1+modulo(iex-1,n_theta)
+        panel = 1+(iex-1)/n_theta
+        p = pvec(l,panel,itor-itor_offset)
+        ir = p+m+1
 
         ! filter
         fval = &
@@ -253,7 +254,6 @@ subroutine impfilter5_n0(&
              a3*(fex(jm3)+fex(jp3))            
 
         ! dephase
-        p = ir-m-1
         f(ir,it,i3d,itor-itor_offset) = fval*exp(i_c*p*phase)
 
      enddo
