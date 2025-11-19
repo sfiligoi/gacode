@@ -116,10 +116,6 @@ subroutine cgyro_cleanup
      ccl_del_device(field)     
      deallocate(field)
   endif
-  if(allocated(field_dealias))  then
-     ccl_del_device(field_dealias)     
-     deallocate(field_dealias)
-  endif
   if(allocated(field_loc))  then
      ccl_del_device(field_loc)     
      deallocate(field_loc)
@@ -318,6 +314,7 @@ subroutine cgyro_cleanup
      deallocate(cmat_simple)
   endif
 
+
   if (allocated(dealias_pvec)) then
      ccl_del_bigdevice(dealias_pvec)
      deallocate(dealias_pvec)
@@ -325,6 +322,15 @@ subroutine cgyro_cleanup
   if (allocated(dealias_pvec_count)) then
      ccl_del_bigdevice(dealias_pvec_count)
      deallocate(dealias_pvec_count)
+  endif
+
+  if(allocated(inraw_dealias))  then
+     ccl_del_device(inraw_dealias)     
+     deallocate(inraw_dealias)
+  endif
+  if(allocated(outraw_dealias))  then
+     ccl_del_device(outraw_dealias)     
+     deallocate(outraw_dealias)
   endif
 
 #ifndef CGYRO_GPU_FFT

@@ -309,12 +309,6 @@ subroutine cgyro_init_manager
      ! Nonlinear arrays
      if (nonlinear_flag == 1) then
         call cgyro_nl_dealias_init
-        allocate(field_dealias(n_radial,n_theta,n_field,nt1:nt2))
-#if defined(OMPGPU)
-!$omp target enter data map(alloc:field_dealias)
-#elif defined(_OPENACC)
-!$acc enter data create(field_dealias)
-#endif
 
         if (nl_single_flag < 2) then
           allocate(fA_nl(n_radial,nt_loc,nsplitA,n_toroidal_procs))
