@@ -367,6 +367,7 @@ module cgyro_globals
   complex, dimension(:,:,:), allocatable :: field_old
   complex, dimension(:,:,:), allocatable :: field_old2
   complex, dimension(:,:,:), allocatable :: field_old3
+  complex, dimension(:,:,:,:), allocatable :: field_dealias
   complex, dimension(:,:,:,:,:), allocatable :: moment_loc
   complex, dimension(:,:,:,:,:), allocatable :: moment
   complex, dimension(:,:,:,:), allocatable :: field_v

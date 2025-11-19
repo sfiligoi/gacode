@@ -116,6 +116,10 @@ subroutine cgyro_cleanup
      ccl_del_device(field)     
      deallocate(field)
   endif
+  if(allocated(field_dealias))  then
+     ccl_del_device(field_dealias)     
+     deallocate(field_dealias)
+  endif
   if(allocated(field_loc))  then
      ccl_del_device(field_loc)     
      deallocate(field_loc)

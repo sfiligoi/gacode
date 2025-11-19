@@ -972,7 +972,6 @@ subroutine cgyro_nl_fftw_comm2_f64_async
   integer :: itor,mytor
   integer :: iltheta_min
   complex :: gval
-  complex, dimension(n_radial,n_theta,n_field,nt1:nt2) :: field_dealias
 
   call timer_lib_in('nl_mem')
 
@@ -1047,7 +1046,6 @@ subroutine cgyro_nl_fftw_comm2_f32_async
   integer :: itor,mytor
   integer :: iltheta_min
   complex(KIND=REAL32) :: gval
-  complex, dimension(n_radial,n_theta,n_field,nt1:nt2) :: field_dealias
 
   call timer_lib_in('nl_mem')
 
