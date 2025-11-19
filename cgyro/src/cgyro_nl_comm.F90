@@ -94,14 +94,16 @@ subroutine cgyro_nl_dealias_init
   if (n_field>nv_loc) then
      allocate(inraw_dealias(n_radial,n_theta,n_field,nt1:nt2))
      allocate(outraw_dealias(n_radial,n_theta,n_field,nt1:nt2))
+     allocate(fex_dealias(n_theta*max_pvec_count,n_field,nt1:nt2))
   else
      allocate(inraw_dealias(n_radial,n_theta,nv_loc,nt1:nt2))
      allocate(outraw_dealias(n_radial,n_theta,nv_loc,nt1:nt2))
+     allocate(fex_dealias(n_theta*max_pvec_count,nv_loc,nt1:nt2))
   endif
 #if defined(OMPGPU)
-!$omp target enter data map(alloc:inraw_dealias,outraw_dealias)
+!$omp target enter data map(alloc:inraw_dealias,outraw_dealias,fex_dealias)
 #elif defined(_OPENACC)
-!$acc enter data create(inraw_dealias,outraw_dealias)
+!$acc enter data create(inraw_dealias,outraw_dealias,fex_dealias)
 #endif
 
 end subroutine cgyro_nl_dealias_init
@@ -162,7 +164,7 @@ subroutine impfilter5_n0(&
                     n_theta,n_radial,n_3d,nt1,nt2,max_pvec_count,&
                     a0,a1,a2,a3,m,phase,l0_mult,&
                     pvec_count,pvec,&
-                    fraw,f,itor_offset)
+                    fraw,fex,f,itor_offset)
 
   implicit none
 
@@ -176,6 +178,7 @@ subroutine impfilter5_n0(&
   integer, intent(in) :: pvec_count(:,:),pvec(:,:,:)
   ! both are (n_radial,n_theta,:,itor_offset:(nt2-itor_offset))
   complex, intent(in) :: fraw(:,:,:,:)
+  complex, intent(inout) :: fex(:,:,:)
   complex, intent(out):: f(:,:,:,:)
   integer, intent(in) :: itor_offset
   ! -------------
@@ -183,22 +186,17 @@ subroutine impfilter5_n0(&
   integer :: ir,it,panel,iex
   integer :: l0,l,p,nex,npanel
   integer :: jm1,jm2,jm3,jp1,jp2,jp3
-  ! pre-allocate max possible size
-  ! max_nex = n_theta*max_pvec_count
-  complex :: fex(n_theta*max_pvec_count)
   complex, parameter :: i_c  = (0.0,1.0)
   complex :: fval
 
 #if defined(OMPGPU)
 !$omp target teams distribute collapse(2) default(firstprivate)&
-!$omp&         private(fex) &
-!$omp&         shared(pvec_count,pvec,fraw,f)
+!$omp&         shared(pvec_count,pvec,fraw,fex,f)
 #elif defined(_OPENACC)
   ! TODO
 #else
 !$omp parallel do collapse(2) default(firstprivate)&
-!$omp&         private(fex) &
-!$omp&         shared(pvec_count,pvec,fraw,f)
+!$omp&         shared(pvec_count,pvec,fraw,fex,f)
 #endif
   do itor=nt1,nt2
     do i3d=1,n_3d
@@ -222,7 +220,7 @@ subroutine impfilter5_n0(&
            ir = p+m+1
            iex = (panel-1)*n_theta+it
            ! add phase 
-           fex(iex) = fraw(ir,it,i3d,itor-itor_offset)*exp(-i_c*p*phase)
+           fex(iex,i3d,itor-itor_offset) = fraw(ir,it,i3d,itor-itor_offset)*exp(-i_c*p*phase)
         enddo
      enddo
 #if defined(OMPGPU)
@@ -248,10 +246,10 @@ subroutine impfilter5_n0(&
 
         ! filter
         fval = &
-             a0*fex(iex) + &
-             a1*(fex(jm1)+fex(jp1)) + &           
-             a2*(fex(jm2)+fex(jp2)) + &           
-             a3*(fex(jm3)+fex(jp3))            
+             a0*fex(iex,i3d,itor-itor_offset) + &
+             a1*(fex(jm1,i3d,itor-itor_offset)+fex(jp1,i3d,itor-itor_offset)) + &           
+             a2*(fex(jm2,i3d,itor-itor_offset)+fex(jp2,i3d,itor-itor_offset)) + &           
+             a3*(fex(jm3,i3d,itor-itor_offset)+fex(jp3,i3d,itor-itor_offset))            
 
         ! dephase
         f(ir,it,i3d,itor-itor_offset) = fval*exp(i_c*p*phase)
@@ -269,7 +267,7 @@ subroutine impfilter5(&
                     dealias_order,dealias,&
                     box_size,q,sign_qs,&
                     pvec_count,pvec,&
-                    fraw,f)
+                    fraw,fex,f)
 
   implicit none
 
@@ -283,6 +281,7 @@ subroutine impfilter5(&
   integer, intent(in) :: pvec_count(:,:),pvec(:,:,:)
   ! both are (n_radial,n_theta,:,1:(nt2-nt1+1))
   complex, intent(in) :: fraw(:,:,:,:)
+  complex, intent(inout) :: fex(:,:,:)
   complex, intent(out):: f(:,:,:,:)
   ! -----------
   real :: a0,a1,a2,a3
@@ -340,7 +339,7 @@ subroutine impfilter5(&
      call impfilter5_n0(n_theta,n_radial,n_3d,nstart,nt2,max_pvec_count,&
                         a0,a1,a2,a3,m,phase,l0_mult,&
                         pvec_count,pvec,&
-                        fraw,f,nt1-1)
+                        fraw,fex,f,nt1-1)
   endif
 
 end subroutine impfilter5
@@ -376,7 +375,7 @@ subroutine hx_dealias
                   dealias_order,dealias,&
                   box_size,q,sign_qs,&
                   dealias_pvec_count,dealias_pvec,&
-                  inraw_dealias,outraw_dealias)
+                  inraw_dealias,fex_dealias,outraw_dealias)
 end subroutine hx_dealias
 
 subroutine field_dealias
@@ -410,7 +409,7 @@ subroutine field_dealias
                   dealias_order,dealias,&
                   box_size,q,sign_qs,&
                   dealias_pvec_count,dealias_pvec,&
-                  inraw_dealias,outraw_dealias)
+                  inraw_dealias,fex_dealias,outraw_dealias)
 end subroutine field_dealias
 
 !
