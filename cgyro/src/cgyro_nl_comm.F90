@@ -205,6 +205,7 @@ subroutine impfilter5_n0(&
   do itor=nt1,nt2
     do i3d=1,n_3d
 
+  l0 = itor*l0_mult
 
   ! Construct ballooning modes
   ! all _ex quantities refer to extended angle
@@ -327,7 +328,7 @@ subroutine impfilter5(&
      nstart = nstart+1
   endif
 
-  if (nstart>nt2) then
+  if (nstart<=nt2) then
      ! Wavenumber M from CGYRO paper
      m = n_radial/2
 
