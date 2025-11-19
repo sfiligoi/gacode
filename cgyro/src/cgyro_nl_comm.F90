@@ -241,12 +241,23 @@ pure recursive subroutine impfilter5(&
 
 end subroutine impfilter5
 
-subroutine hx_dealias_one(iv_loc_m,itor,hfil)
-  use cgyro_globals
+pure recursive subroutine hx_dealias_one(&
+                    n_theta,n_radial,max_pvec_count,&
+                    dealias_order,dealias,&
+                    box_size,q,sign_qs,&
+                    h_x_one,&
+                    itor,hfil)
 
   implicit none
   
-  integer, intent(in) :: iv_loc_m,itor
+  integer, intent(in) :: n_theta,n_radial,max_pvec_count
+  integer, intent(in) :: dealias_order
+  real, intent(in) :: dealias
+  integer, intent(in) :: box_size
+  real, intent(in) :: q
+  integer, intent(in) :: sign_qs
+  complex, dimension(:), intent(in) :: h_x_one
+  integer, intent(in) :: itor
   complex, dimension(n_radial,n_theta), intent(out) :: hfil
   ! --------
   complex, dimension(n_radial,n_theta) :: hraw
@@ -255,7 +266,8 @@ subroutine hx_dealias_one(iv_loc_m,itor,hfil)
   ! Construct h_x_dealias array
   do it=1,n_theta
     do ir=1,n_radial
-      hraw(ir,it) = h_x(ic_c(ir,it),iv_loc_m,itor)
+      ! ic_c(ir,it) = (ir-1)*n_theta+it
+      hraw(ir,it) = h_x_one((ir-1)*n_theta+it)
     enddo
   enddo
   ! Extended-angle dealiasing filter
@@ -265,11 +277,22 @@ subroutine hx_dealias_one(iv_loc_m,itor,hfil)
                   hraw,hfil,itor)
 end subroutine hx_dealias_one
 
-subroutine field_dealias_one(i_field,itor,hfil)
-  use cgyro_globals
+pure recursive subroutine field_dealias_one(&
+                    n_theta,n_radial,max_pvec_count,&
+                    dealias_order,dealias,&
+                    box_size,q,sign_qs,&
+                    field_one,&
+                    i_field,itor,hfil)
 
   implicit none
   
+  integer, intent(in) :: n_theta,n_radial,max_pvec_count
+  integer, intent(in) :: dealias_order
+  real, intent(in) :: dealias
+  integer, intent(in) :: box_size
+  real, intent(in) :: q
+  integer, intent(in) :: sign_qs
+  complex, dimension(:,:), intent(in) :: field_one
   integer, intent(in) :: i_field,itor
   complex, dimension(n_radial,n_theta), intent(out) :: hfil
   ! --------
@@ -279,7 +302,8 @@ subroutine field_dealias_one(i_field,itor,hfil)
   ! Construct field_dealias array
   do it=1,n_theta
     do ir=1,n_radial
-      hraw(ir,it) = field(i_field,ic_c(ir,it),itor)
+      ! ic_c(ir,it) = (ir-1)*n_theta+it
+      hraw(ir,it) = field_one(i_field,(ir-1)*n_theta+it)
     enddo
   enddo
   ! Extended angle dealiasing filter
@@ -344,7 +368,12 @@ subroutine cgyro_nl_fftw_comm1_f64_async
 #endif
   do iv_loc_m=1,nv_loc
    do itor=nt1,nt2
-    call hx_dealias_one(iv_loc_m,itor,hfil)
+    call hx_dealias_one(&
+                  n_theta,n_radial,max_pvec_count,&
+                  dealias_order,dealias,&
+                  box_size,q,sign_qs,&
+                  h_x(:,iv_loc_m,itor),&
+                  itor,hfil)
     do it=1,n_theta
      do ir=1,n_radial
        h_loc = hfil(ir,it)
@@ -402,7 +431,12 @@ subroutine cgyro_nl_fftw_comm1_f64_async
 #endif
   do iv_loc_m=1,nv_loc
    do itor=nt1,nt2
-    call hx_dealias_one(iv_loc_m,itor,hfil)
+    call hx_dealias_one(&
+                  n_theta,n_radial,max_pvec_count,&
+                  dealias_order,dealias,&
+                  box_size,q,sign_qs,&
+                  h_x(:,iv_loc_m,itor),&
+                  itor,hfil)
     do it=1,n_theta
      do ir=1,n_radial
        h_loc = hfil(ir,it)
@@ -477,7 +511,12 @@ subroutine cgyro_nl_fftw_comm1_f32_async
 #endif
   do iv_loc_m=1,nv_loc
    do itor=nt1,nt2
-    call hx_dealias_one(iv_loc_m,itor,hfil)
+    call hx_dealias_one(&
+                  n_theta,n_radial,max_pvec_count,&
+                  dealias_order,dealias,&
+                  box_size,q,sign_qs,&
+                  h_x(:,iv_loc_m,itor),&
+                  itor,hfil)
     do it=1,n_theta
      do ir=1,n_radial
        h_loc = hfil(ir,it)
@@ -535,7 +574,12 @@ subroutine cgyro_nl_fftw_comm1_f32_async
 #endif
   do iv_loc_m=1,nv_loc
    do itor=nt1,nt2
-    call hx_dealias_one(iv_loc_m,itor,hfil)
+    call hx_dealias_one(&
+                  n_theta,n_radial,max_pvec_count,&
+                  dealias_order,dealias,&
+                  box_size,q,sign_qs,&
+                  h_x(:,iv_loc_m,itor),&
+                  itor,hfil)
     do it=1,n_theta
      do ir=1,n_radial
        h_loc = hfil(ir,it)
@@ -908,7 +952,12 @@ subroutine cgyro_nl_fftw_comm2_f64_async
 !$omp parallel do collapse(2)
   do itor=nt1,nt2
     do itf=1,n_field
-      call field_dealias_one(itf,itor,field_dealias(:,:,itf,itor))
+      call field_dealias_one(&
+                  n_theta,n_radial,max_pvec_count,&
+                  dealias_order,dealias,&
+                  box_size,q,sign_qs,&
+                  field(:,:,itor),&
+                  itf,itor,field_dealias(:,:,itf,itor))
     enddo
   enddo
 
@@ -978,7 +1027,12 @@ subroutine cgyro_nl_fftw_comm2_f32_async
 !$omp parallel do collapse(2)
   do itor=nt1,nt2
     do itf=1,n_field
-      call field_dealias_one(itf,itor,field_dealias(:,:,itf,itor))
+      call field_dealias_one(&
+                  n_theta,n_radial,max_pvec_count,&
+                  dealias_order,dealias,&
+                  box_size,q,sign_qs,&
+                  field(:,:,itor),&
+                  itf,itor,field_dealias(:,:,itf,itor))
     enddo
   enddo
 
