@@ -978,7 +978,13 @@ subroutine cgyro_nl_fftw_comm2_f64_async
   ! TODO:GPU
   ! field-> gval processing is not uniform, create whole field_dealias
   !          It is small, anyway
+#if defined(OMPGPU)
+!$omp target teams distribute collapse(2)
+#elif defined(_OPENACC)
+  ! TODO
+#else
 !$omp parallel do collapse(2)
+#endif
   do itor=nt1,nt2
     do itf=1,n_field
       call field_dealias_one(&
@@ -1052,7 +1058,13 @@ subroutine cgyro_nl_fftw_comm2_f32_async
   ! TODO:GPU
   ! field-> gval processing is not uniform, create whole field_dealias
   !          It is small, anyway
+#if defined(OMPGPU)
+!$omp target teams distribute collapse(2)
+#elif defined(_OPENACC)
+  ! TODO
+#else
 !$omp parallel do collapse(2)
+#endif
   do itor=nt1,nt2
     do itf=1,n_field
       call field_dealias_one(&
