@@ -171,6 +171,11 @@ pure recursive subroutine impfilter5_n0(&
 
 end subroutine impfilter5_n0
 
+#if defined(OMPGPU)
+!$omp declare target to(impfilter5_i0)
+!$omp declare target to(impfilter5_n0)
+#endif
+
 pure recursive subroutine impfilter5(&
                     n_theta,n_radial,max_pvec_count,&
                     dealias_order,dealias,&
@@ -240,6 +245,10 @@ pure recursive subroutine impfilter5(&
   endif
 
 end subroutine impfilter5
+
+#if defined(OMPGPU)
+!$omp declare target to(impfilter5)
+#endif
 
 pure recursive subroutine hx_dealias_one(&
                     n_theta,n_radial,max_pvec_count,&
@@ -313,6 +322,11 @@ pure recursive subroutine field_dealias_one(&
                   hraw,hfil,itor)
 end subroutine field_dealias_one
 
+#if defined(OMPGPU)
+!$omp declare target to(hx_dealias_one)
+!$omp declare target to(field_dealias_one)
+#endif
+
 ! Note: Calling test propagates the async operations in some MPI implementations
 subroutine cgyro_nl_fftw_comm_test
   use parallel_lib
@@ -355,8 +369,8 @@ subroutine cgyro_nl_fftw_comm1_f64_async
 
   ! TODO: GPU
 #if defined(OMPGPU)
-!$omp target teams distribute parallel do simd collapse(4) &
-!$omp&         private(iexch0,itor0,isplit0,iexch_base,h_loc)
+!$omp target teams distribute collapse(2) &
+!$omp&         private(h_loc)
 #elif defined(_OPENACC)
 !$acc parallel loop collapse(4) gang vector independent &
 !$acc&         private(iexch0,itor0,isplit0,iexch_base,h_loc) &
@@ -374,6 +388,10 @@ subroutine cgyro_nl_fftw_comm1_f64_async
                   box_size,q,sign_qs,&
                   h_x(:,iv_loc_m,itor),&
                   itor,hfil)
+#if defined(OMPGPU)
+!$omp parallel do collapse(2) &
+!$omp&         private(iexch0,itor0,isplit0,iexch_base)
+#endif
     do it=1,n_theta
      do ir=1,n_radial
        h_loc = hfil(ir,it)
@@ -418,8 +436,8 @@ subroutine cgyro_nl_fftw_comm1_f64_async
 
   ! TODO: GPU
 #if defined(OMPGPU)
-!$omp target teams distribute parallel do simd collapse(4) &
-!$omp&         private(iexch0,itor0,isplit0,iexch_base,h_loc)
+!$omp target teams distribute collapse(2) &
+!$omp&         private(h_loc)
 #elif defined(_OPENACC)
 !$acc parallel loop collapse(4) gang vector independent &
 !$acc&         private(iexch0,itor0,isplit0,iexch_base,h_loc) &
@@ -437,6 +455,10 @@ subroutine cgyro_nl_fftw_comm1_f64_async
                   box_size,q,sign_qs,&
                   h_x(:,iv_loc_m,itor),&
                   itor,hfil)
+#if defined(OMPGPU)
+!$omp parallel do collapse(2) &
+!$omp&         private(iexch0,itor0,isplit0,iexch_base)
+#endif
     do it=1,n_theta
      do ir=1,n_radial
        h_loc = hfil(ir,it)
@@ -498,8 +520,8 @@ subroutine cgyro_nl_fftw_comm1_f32_async
 
   ! TODO: GPU
 #if defined(OMPGPU)
-!$omp target teams distribute parallel do simd collapse(4) &
-!$omp&         private(iexch0,itor0,isplit0,iexch_base,h_loc)
+!$omp target teams distribute collapse(2) &
+!$omp&         private(h_loc)
 #elif defined(_OPENACC)
 !$acc parallel loop collapse(4) gang vector independent &
 !$acc&         private(iexch0,itor0,isplit0,iexch_base,h_loc) &
@@ -517,6 +539,10 @@ subroutine cgyro_nl_fftw_comm1_f32_async
                   box_size,q,sign_qs,&
                   h_x(:,iv_loc_m,itor),&
                   itor,hfil)
+#if defined(OMPGPU)
+!$omp parallel do collapse(2) &
+!$omp&         private(iexch0,itor0,isplit0,iexch_base)
+#endif
     do it=1,n_theta
      do ir=1,n_radial
        h_loc = hfil(ir,it)
@@ -561,8 +587,8 @@ subroutine cgyro_nl_fftw_comm1_f32_async
 
   ! TODO: GPU
 #if defined(OMPGPU)
-!$omp target teams distribute parallel do simd collapse(4) &
-!$omp&         private(iexch0,itor0,isplit0,iexch_base,h_loc)
+!$omp target teams distribute collapse(2) &
+!$omp&         private(h_loc)
 #elif defined(_OPENACC)
 !$acc parallel loop collapse(4) gang vector independent &
 !$acc&         private(iexch0,itor0,isplit0,iexch_base,h_loc) &
@@ -580,6 +606,10 @@ subroutine cgyro_nl_fftw_comm1_f32_async
                   box_size,q,sign_qs,&
                   h_x(:,iv_loc_m,itor),&
                   itor,hfil)
+#if defined(OMPGPU)
+!$omp parallel do collapse(2) &
+!$omp&         private(iexch0,itor0,isplit0,iexch_base)
+#endif
     do it=1,n_theta
      do ir=1,n_radial
        h_loc = hfil(ir,it)
