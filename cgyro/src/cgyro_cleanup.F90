@@ -318,6 +318,15 @@ subroutine cgyro_cleanup
      deallocate(cmat_simple)
   endif
 
+  if (allocated(dealias_pvec)) then
+     ccl_del_bigdevice(dealias_pvec)
+     deallocate(dealias_pvec)
+  endif
+  if (allocated(dealias_pvec_count)) then
+     ccl_del_bigdevice(dealias_pvec_count)
+     deallocate(dealias_pvec_count)
+  endif
+
 #ifndef CGYRO_GPU_FFT
   if(allocated(fx32))                deallocate(fx32)
   if(allocated(gx32))                deallocate(gx32)

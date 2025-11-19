@@ -384,6 +384,8 @@ module cgyro_globals
   integer :: nflux
   ! NL dealias variables
   integer :: max_pvec_count
+  integer, dimension(:,:), allocatable :: dealias_pvec_count
+  integer, dimension(:,:,:), allocatable :: dealias_pvec
   !
   ! Nonlinear plans
 #ifndef CGYRO_GPU_FFT

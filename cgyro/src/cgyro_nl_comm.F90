@@ -17,12 +17,19 @@ subroutine cgyro_nl_dealias_init
 
   implicit none
 
-  integer :: itor,l0,l,p,m
+  integer :: itor,l0,l,p,m,l0_max,nt1_nz
   ! max_l0 = box_size*nt2*sign_qs
-  integer :: pvec_count(box_size*nt2*sign_qs)
+  integer :: pvec_count(box_size*nt2*sign_qs) !local, temp copy
 
   ! Wavenumber M from CGYRO paper
   m = n_radial/2
+
+  if (nt1==0) then
+    ! don't need pvec for itor==0
+    nt1_nz = 1
+  else
+    nt1_nz = nt1
+  endif
 
   !
   ! max_pvec_count is global and we are defining it here
@@ -32,8 +39,7 @@ subroutine cgyro_nl_dealias_init
   !
   max_pvec_count = 1 ! make it >0, to always have valid arrays
 
-  do itor=nt1,nt2
-    if (itor/=0) then ! pvec not used else
+  do itor=nt1_nz,nt2
       ! Total number of ballooning angles for finite-n ballooning mode
       l0 = box_size*itor*sign_qs
 
@@ -47,8 +53,38 @@ subroutine cgyro_nl_dealias_init
            max_pvec_count = pvec_count(l)
          endif
       enddo
-    endif
   enddo
+
+  ! pre-compute pvec vectors, since they are re-used often
+  l0_max = box_size*nt2*sign_qs
+  if (l0_max==0) l0_max=1 ! need a valid array, even if not used
+
+  ! allocate eventual itor==0, too, to make it easier to use
+  allocate(dealias_pvec_count(l0_max,nt1:nt2))
+  allocate(dealias_pvec(l0_max,max_pvec_count,nt1:nt2))
+
+  ! now do the full compute on global buffers
+  ! cheap, since done only once, do on CPU
+  do itor=nt1_nz,nt2 ! we can leave eventual itor==0 unitialized, not used
+      ! Total number of ballooning angles for finite-n ballooning mode
+      l0 = box_size*itor*sign_qs
+
+      dealias_pvec_count(:,itor) = 0
+
+      ! Sort p indices by ballooning angle index l
+      do p=-m,m-1
+        l = mod(mod(p,l0)+l0,l0)+1
+        dealias_pvec_count(l,itor) = dealias_pvec_count(l,itor)+1
+        dealias_pvec(l,dealias_pvec_count(l,itor),itor) = p
+      enddo
+  enddo
+
+#if defined(OMPGPU)
+!$omp target enter data map(to:dealias_pvec_count,dealias_pvec)
+#elif defined(_OPENACC)
+!$acc enter data copyin(dealias_pvec_count,dealias_pvec)
+#endif
+
 end subroutine cgyro_nl_dealias_init
 
 
@@ -94,6 +130,7 @@ end subroutine impfilter5_i0
 pure recursive subroutine impfilter5_n0(&
                     n_theta,n_radial,max_pvec_count,&
                     a0,a1,a2,a3,m,phase,l0,&
+                    pvec_count,pvec,&
                     fraw,f,itor)
 
   implicit none
@@ -103,12 +140,12 @@ pure recursive subroutine impfilter5_n0(&
   integer, intent(in) :: m
   complex, intent(in) :: phase
   integer, intent(in) :: l0
+  integer, intent(in) :: pvec_count(:),pvec(:,:)
   complex, intent(in) :: fraw(n_radial,n_theta)
   complex, intent(out):: f(n_radial,n_theta)
   integer, intent(in) :: itor
   integer :: jm1,jm2,jm3,jp1,jp2,jp3
   integer :: ir,it,l,p,nex,iex,panel
-  integer :: pvec(l0,max_pvec_count),pvec_count(l0)
   ! pre-allocate max possible size
   ! max_nex = n_theta*max_pvec_count
   complex :: fex(n_theta*max_pvec_count)
@@ -116,27 +153,17 @@ pure recursive subroutine impfilter5_n0(&
   integer :: it_ex(n_theta*max_pvec_count)
   complex, parameter :: i_c  = (0.0,1.0)
 
-  pvec_count(:) = 0
-
-  ! Sort p indices by ballooning angle index l
-  do p=-m,m-1
-     l = mod(mod(p,l0)+l0,l0)+1
-     pvec_count(l) = pvec_count(l)+1
-     pvec(l,pvec_count(l)) = p
-  enddo
-
   ! Construct ballooning modes
   ! all _ex quantities refer to extended angle
   ! nex = total number of points along extended angle
   ! iex = extended angle index
   do l=1,l0
      nex = n_theta*pvec_count(l)
-     iex = 0
      do panel=1,pvec_count(l)
         p = pvec(l,panel)
         ir = p+m+1
         do it=1,n_theta
-           iex = iex+1
+           iex = (panel-1)*n_theta+it
            ir_ex(iex) = ir
            it_ex(iex) = it
            ! add phase 
@@ -180,6 +207,7 @@ pure recursive subroutine impfilter5(&
                     n_theta,n_radial,max_pvec_count,&
                     dealias_order,dealias,&
                     box_size,q,sign_qs,&
+                    pvec_count,pvec,&
                     fraw,f,itor)
 
   implicit none
@@ -190,6 +218,7 @@ pure recursive subroutine impfilter5(&
   integer, intent(in) :: box_size
   real, intent(in) :: q
   integer, intent(in) :: sign_qs
+  integer, intent(in) :: pvec_count(:),pvec(:,:)
   complex, intent(in) :: fraw(n_radial,n_theta)
   complex, intent(out):: f(n_radial,n_theta)
   integer, intent(in) :: itor
@@ -241,6 +270,7 @@ pure recursive subroutine impfilter5(&
      l0 = box_size*itor*sign_qs
      call impfilter5_n0(n_theta,n_radial,max_pvec_count,&
                         a0,a1,a2,a3,m,phase,l0,&
+                        pvec_count,pvec,&
                         fraw,f,itor)
   endif
 
@@ -254,6 +284,7 @@ pure recursive subroutine hx_dealias_one(&
                     n_theta,n_radial,max_pvec_count,&
                     dealias_order,dealias,&
                     box_size,q,sign_qs,&
+                    pvec_count,pvec,&
                     h_x_one,&
                     itor,hfil)
 
@@ -265,6 +296,7 @@ pure recursive subroutine hx_dealias_one(&
   integer, intent(in) :: box_size
   real, intent(in) :: q
   integer, intent(in) :: sign_qs
+  integer, intent(in) :: pvec_count(:),pvec(:,:)
   complex, dimension(:), intent(in) :: h_x_one
   integer, intent(in) :: itor
   complex, dimension(n_radial,n_theta), intent(out) :: hfil
@@ -283,6 +315,7 @@ pure recursive subroutine hx_dealias_one(&
   call impfilter5(n_theta,n_radial,max_pvec_count,&
                   dealias_order,dealias,&
                   box_size,q,sign_qs,&
+                  pvec_count,pvec,&
                   hraw,hfil,itor)
 end subroutine hx_dealias_one
 
@@ -290,6 +323,7 @@ pure recursive subroutine field_dealias_one(&
                     n_theta,n_radial,max_pvec_count,&
                     dealias_order,dealias,&
                     box_size,q,sign_qs,&
+                    pvec_count,pvec,&
                     field_one,&
                     i_field,itor,hfil)
 
@@ -301,6 +335,7 @@ pure recursive subroutine field_dealias_one(&
   integer, intent(in) :: box_size
   real, intent(in) :: q
   integer, intent(in) :: sign_qs
+  integer, intent(in) :: pvec_count(:),pvec(:,:)
   complex, dimension(:,:), intent(in) :: field_one
   integer, intent(in) :: i_field,itor
   complex, dimension(n_radial,n_theta), intent(out) :: hfil
@@ -319,6 +354,7 @@ pure recursive subroutine field_dealias_one(&
   call impfilter5(n_theta,n_radial,max_pvec_count,&
                   dealias_order,dealias,&
                   box_size,q,sign_qs,&
+                  pvec_count,pvec,&
                   hraw,hfil,itor)
 end subroutine field_dealias_one
 
@@ -386,6 +422,7 @@ subroutine cgyro_nl_fftw_comm1_f64_async
                   n_theta,n_radial,max_pvec_count,&
                   dealias_order,dealias,&
                   box_size,q,sign_qs,&
+                  dealias_pvec_count(:,itor),dealias_pvec(:,:,itor),&
                   h_x(:,iv_loc_m,itor),&
                   itor,hfil)
 #if defined(OMPGPU)
@@ -453,6 +490,7 @@ subroutine cgyro_nl_fftw_comm1_f64_async
                   n_theta,n_radial,max_pvec_count,&
                   dealias_order,dealias,&
                   box_size,q,sign_qs,&
+                  dealias_pvec_count(:,itor),dealias_pvec(:,:,itor),&
                   h_x(:,iv_loc_m,itor),&
                   itor,hfil)
 #if defined(OMPGPU)
@@ -537,6 +575,7 @@ subroutine cgyro_nl_fftw_comm1_f32_async
                   n_theta,n_radial,max_pvec_count,&
                   dealias_order,dealias,&
                   box_size,q,sign_qs,&
+                  dealias_pvec_count(:,itor),dealias_pvec(:,:,itor),&
                   h_x(:,iv_loc_m,itor),&
                   itor,hfil)
 #if defined(OMPGPU)
@@ -604,6 +643,7 @@ subroutine cgyro_nl_fftw_comm1_f32_async
                   n_theta,n_radial,max_pvec_count,&
                   dealias_order,dealias,&
                   box_size,q,sign_qs,&
+                  dealias_pvec_count(:,itor),dealias_pvec(:,:,itor),&
                   h_x(:,iv_loc_m,itor),&
                   itor,hfil)
 #if defined(OMPGPU)
@@ -991,6 +1031,7 @@ subroutine cgyro_nl_fftw_comm2_f64_async
                   n_theta,n_radial,max_pvec_count,&
                   dealias_order,dealias,&
                   box_size,q,sign_qs,&
+                  dealias_pvec_count(:,itor),dealias_pvec(:,:,itor),&
                   field(:,:,itor),&
                   itf,itor,field_dealias(:,:,itf,itor))
     enddo
@@ -1071,6 +1112,7 @@ subroutine cgyro_nl_fftw_comm2_f32_async
                   n_theta,n_radial,max_pvec_count,&
                   dealias_order,dealias,&
                   box_size,q,sign_qs,&
+                  dealias_pvec_count(:,itor),dealias_pvec(:,:,itor),&
                   field(:,:,itor),&
                   itf,itor,field_dealias(:,:,itf,itor))
     enddo
