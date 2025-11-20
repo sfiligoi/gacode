@@ -201,9 +201,9 @@ subroutine cgyro_flux
            flux_norm = flux_norm+sum(abs(field(1,ic_c(ir,:),itor))**2*w_theta(:))
         enddo
 
-        ! Correct for sign of q
-        flux_norm = flux_norm*q/abs(q)*2 ! need 2 for regression compatibility
-
+        ! Sign correction fixed 2025.11.19 (JC)
+        ! need 2 for regression compatibility
+        flux_norm = 2*flux_norm*sign(1.0,k_theta_base*rho)
         gflux_loc(:,:,:,:,itor) = gflux_loc(:,:,:,:,itor)/flux_norm 
         cflux_loc (:,:,:,itor)  = cflux_loc(:,:,:,itor)/flux_norm 
 
