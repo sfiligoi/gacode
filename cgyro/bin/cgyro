@@ -73,6 +73,9 @@ then
   echo
   echo "         --i"
   echo "         Print acceptable MPI tasks"
+  echo
+  echo "         --res"
+  echo "         Analyze radial resolution"
   echo 
   echo "         --converge"
   echo "         Check convergence"
@@ -136,6 +139,10 @@ while [ $# -gt 0 ] ; do
 
   --i) python $CGYRO_DIR/bin/cgyro_parse.py ;
        python $UTIL_DIR/cgyro_mpi_grid.py ;
+       exit 0 ;;
+
+  --res) python $CGYRO_DIR/bin/cgyro_parse.py ;
+       python $UTIL_DIR/cgyro_res_check.py ;
        exit 0 ;;
 
   --converge) $UTIL_DIR/cgyro_converge $uarg ; exit 0 ;;
