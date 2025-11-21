@@ -906,14 +906,15 @@ subroutine extended_ang(f2d)
 
   implicit none
 
-  integer :: ir
+  integer :: ir,p
   complex, intent(inout), dimension(n_theta,n_radial) :: f2d
   complex, dimension(n_theta,n_radial) :: f1d 
 
   ! Assumption is that box_size=1
 
   do ir=1,n_radial
-     f1d(:,ir) = f2d(:,ir)*exp(-2*pi*i_c*(ir - px_zero + px0)*k_theta_base*nt1*rmin*sign_qs)
+     p = ir-px_zero
+     f1d(:,ir) = f2d(:,ir)*exp(-2*pi*i_c*(p+px0)*q*sign_qs*nt1)
   enddo
 
   if (sign_qs < 0) then

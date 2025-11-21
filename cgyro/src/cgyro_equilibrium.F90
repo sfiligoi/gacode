@@ -7,7 +7,7 @@ subroutine cgyro_equilibrium
   implicit none
 
   integer :: m
-  integer :: it,ir,is,itor
+  integer :: it,ir,is,itor,p
   real :: gtheta_ave,gtheta0,err
   real, dimension(n_theta+1) :: x,y
   real, dimension(n_theta) :: ttmp
@@ -144,12 +144,18 @@ subroutine cgyro_equilibrium
   ! Construct balloon-mode extended angle
   ! (see also extended_ang in cgyro_write_timedata)
   !
+  ! px_zero = n_radial/2+1 = m+1
+  ! p = ir-(m+1) = ir-px_zero
+  !
   do ir=1,n_radial/box_size
+     p = ir-px_zero
      if (sign_qs > 0) then
-        thetab(:,ir) = theta(:)+2*pi*(ir - px_zero + px0)
+        thetab(:,ir) = theta(:)+2*pi*(p+px0)
      else
-        ! Reverse output direction (see extended_ang)
-        thetab(:,n_radial/box_size-ir+1) = theta(:)-2*pi*(ir - px_zero + px0)
+        ! Reverse output direction 
+        ! thetab(:,n_radial/box_size-ir+1) = theta(:)-2*pi*(p+px0)
+        ! n_radial-ir+1-px_zero = -(p+1)
+        thetab(:,ir) = theta(:)+2*pi*(p+1+px0)
      endif
   enddo
   !-----------------------------------------------------------------

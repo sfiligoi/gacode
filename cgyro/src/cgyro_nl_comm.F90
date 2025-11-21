@@ -18,8 +18,8 @@ subroutine cgyro_nl_dealias_init
   implicit none
 
   integer :: itor,l0,l,p,m,l0_max,nt1_nz
-  ! max_l0 = box_size*nt2*sign_qs
-  integer :: pvec_count(box_size*nt2*sign_qs) !local, temp copy
+  ! max_l0 = box_size*nt2
+  integer :: pvec_count(box_size*nt2) !local, temp copy
 
   ! Wavenumber M from CGYRO paper
   m = n_radial/2
@@ -41,7 +41,7 @@ subroutine cgyro_nl_dealias_init
 
   do itor=nt1_nz,nt2
       ! Total number of ballooning angles for finite-n ballooning mode
-      l0 = box_size*itor*sign_qs
+      l0 = box_size*itor
 
       pvec_count(1:l0) = 0
 
@@ -56,7 +56,7 @@ subroutine cgyro_nl_dealias_init
   enddo
 
   ! pre-compute pvec vectors, since they are re-used often
-  l0_max = box_size*nt2*sign_qs
+  l0_max = box_size*nt2
   if (l0_max==0) l0_max=1 ! need a valid array, even if not used
 
   ! allocate eventual itor==0, too, to make it easier to use
@@ -67,7 +67,7 @@ subroutine cgyro_nl_dealias_init
   ! cheap, since done only once, do on CPU
   do itor=nt1_nz,nt2 ! we can leave eventual itor==0 unitialized, not used
       ! Total number of ballooning angles for finite-n ballooning mode
-      l0 = box_size*itor*sign_qs
+      l0 = box_size*itor
 
       dealias_pvec_count(:,itor) = 0
 
@@ -162,7 +162,7 @@ end subroutine impfilter5_i0
 ! guaranteed that itor/=0
 subroutine impfilter5_n0(&
                     n_theta,n_radial,n_3d,nt1,nt2,max_pvec_count,&
-                    a0,a1,a2,a3,m,phase,l0_mult,&
+                    a0,a1,a2,a3,m,phase,box_size,sign_qs,&
                     pvec_count,pvec,&
                     fraw,fex,f,itor_offset)
 
@@ -173,8 +173,8 @@ subroutine impfilter5_n0(&
   integer, intent(in) :: max_pvec_count
   real, intent(in) :: a0,a1,a2,a3
   integer, intent(in) :: m
-  complex, intent(in) :: phase
-  integer, intent(in) :: l0_mult
+  real, intent(in) :: phase
+  integer, intent(in) :: box_size,sign_qs
   integer, intent(in) :: pvec_count(:,:),pvec(:,:,:)
   ! both are (n_radial,n_theta,:,itor_offset:(nt2-itor_offset))
   complex, intent(in) :: fraw(:,:,:,:)
@@ -201,7 +201,7 @@ subroutine impfilter5_n0(&
   do itor=nt1,nt2
     do i3d=1,n_3d
 
-  l0 = itor*l0_mult
+  l0 = itor*box_size
 
   ! Construct ballooning modes
   ! all _ex quantities refer to extended angle
@@ -217,7 +217,11 @@ subroutine impfilter5_n0(&
      do panel=1,npanel
         do it=1,n_theta
            p = pvec(l,panel,itor-itor_offset)
-           ir = p+m+1
+           if (sign_qs > 0.0) then 
+              ir = p+m+1
+           else
+              ir = n_radial-(p+m)
+           endif
            iex = (panel-1)*n_theta+it
            ! add phase 
            fex(iex,i3d,itor-itor_offset) = fraw(ir,it,i3d,itor-itor_offset)*exp(-i_c*p*phase)
@@ -242,7 +246,11 @@ subroutine impfilter5_n0(&
         it = 1+modulo(iex-1,n_theta)
         panel = 1+(iex-1)/n_theta
         p = pvec(l,panel,itor-itor_offset)
-        ir = p+m+1
+        if (sign_qs > 0.0) then
+           ir = p+m+1
+        else
+           ir = n_radial-(p+m)
+        endif
 
         ! filter
         fval = &
@@ -285,9 +293,9 @@ subroutine impfilter5(&
   complex, intent(out):: f(:,:,:,:)
   ! -----------
   real :: a0,a1,a2,a3
-  integer :: m,l0_mult,nstart
-  complex :: phase
-  real, parameter    :: pi   = 3.1415926535897932
+  integer :: m,nstart
+  real :: phase
+  real, parameter :: pi = 3.1415926535897932
 
   ! Maximally flat filters (3, 5, or 7-point):
   !
@@ -331,13 +339,11 @@ subroutine impfilter5(&
      ! Wavenumber M from CGYRO paper
      m = n_radial/2
 
-     ! Phase factor
-     phase = 2.0*pi*q/box_size
-
-     l0_mult = box_size*sign_qs
+     ! Phase factor (JC: is q*sign_qs correct?)
+     phase = 2.0*pi*(q*sign_qs)/box_size
 
      call impfilter5_n0(n_theta,n_radial,n_3d,nstart,nt2,max_pvec_count,&
-                        a0,a1,a2,a3,m,phase,l0_mult,&
+                        a0,a1,a2,a3,m,phase,box_size,sign_qs,&
                         pvec_count,pvec,&
                         fraw,fex,f,nt1-1)
   endif

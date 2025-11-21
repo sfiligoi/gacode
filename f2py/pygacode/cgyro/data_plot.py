@@ -1276,8 +1276,9 @@ class cgyrodata_plot(data.cgyrodata):
       # Total number of ballooning angles for finite-n ballooning modes 
       l0 = self.m_box*n
       # Phase factor
-      phi = 2*np.pi*self.q/self.m_box
-
+      sign_qs = np.sign(self.q*self.shear)
+      phi = 2*np.pi*(self.q*sign_qs)/self.m_box
+      
       print('INFO: (plot_ftheta) n = {} [{} modes available]'.format(n,l0))
       print('INFO: (plot_ftheta) (c_s/a) t = {:.2f}'.format(t[itime]))
 
@@ -1305,10 +1306,18 @@ class cgyrodata_plot(data.cgyrodata):
       for x in pvec.keys():
          tstar = []
          fstar = []
+         # String modes together using key formula
+         # NOTE: see thetab in cgyro_equilibrium.F90
          for p in pvec[x]:
-            # String modes together using key formula
-            tstar.append(self.thetap+2*np.pi/l0*p)
-            fstar.append(f[p+m,:]*np.exp(-1j*p*phi))
+            if sign_qs > 0:
+               ir = p+m
+               tstar.append(self.thetap+2*np.pi/l0*p)
+               fstar.append(f[ir,:]*np.exp(-1j*p*phi))
+            else:
+               ir = self.n_radial-(p+m)-1
+               tstar.append(self.thetap+2*np.pi/l0*(p+1))
+               fstar.append(f[ir,:]*np.exp(-1j*p*phi))
+
 
          tvec = np.concatenate(tstar)/np.pi
          fvec = np.concatenate(fstar)
@@ -1328,10 +1337,10 @@ class cgyrodata_plot(data.cgyrodata):
             ix = x
          color = colors[int(x) % len(colors)]
          if absn == 0:
-            ax.plot(tdict[x],np.real(fdict[x]),'-o',color=color,markersize=2,label=ix)
+            ax.plot(tdict[x],np.real(fdict[x]),'-o',color=color,markersize=1.5,label=ix)
             ax.plot(tdict[x],np.imag(fdict[x]),color=color,linestyle='--')
          else:
-            ax.plot(tdict[x],np.abs(fdict[x]),'-o',color=color,markersize=2,label=ix)
+            ax.plot(tdict[x],np.abs(fdict[x]),'-o',color=color,markersize=1.5,label=ix)
             
       ax.legend(title=r'$\theta_0~\mathrm{index}$',loc=1,ncol=2,prop={'size':11})
 
