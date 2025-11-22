@@ -126,10 +126,6 @@ MCASE=
 if [ $# -le 1 ]; then
     # No extra args means get help
     uarg="-h"
-    if [[ "$1" == "--c" ]]; then
-       # exception is clean
-       uarg="-c"
-    fi
 else
     uarg="${@:2}"
 fi

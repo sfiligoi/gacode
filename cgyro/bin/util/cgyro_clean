@@ -13,14 +13,14 @@ def opts():
        This command provides tools for cleaning and copying xgyro directories.
        Examples:
 
-       xgyroclean -c              (cleans current directory recursively)
-       xgyroclean -i idir         (creates copy of idir without restart files)
-       xgyroclean -i idir -t tdir (copies idir -> tdir without restart files)
+       cgyro --c -c              (cleans current directory recursively)
+       cgyro --c -i idir         (creates copy of idir without restart files)
+       cgyro --c -i idir -t tdir (copies idir -> tdir without restart files)
     '''
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawTextHelpFormatter,
-        prog = 'xgyroclean',
+        prog = 'cgyro_clean',
         description="Directory clean/copy utility",
         epilog=textwrap.dedent(mytext))
 

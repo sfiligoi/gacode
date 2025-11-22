@@ -25,11 +25,11 @@ def opts():
     parser.add_argument('-i',
                         help='input.cgyro template',
                         type=str,
-                        default='null')
+                        default='input.cgyro')
     parser.add_argument('-p',
                         help='pre.xgyro overlays',
                         type=str,
-                        default='null')
+                        default='pre.xgyro')
     parser.add_argument('-f',
                         help='Force overwrite',
                         action='store_true')
@@ -70,14 +70,14 @@ if glob.glob(base+'*/'):
         sys.exit()
 
 # Create new directories
-i = 1
+i = 0
 for line in lines:
     row = line.strip().split()
     if row[0] == 'ALL':
         apar = row[1:]
         continue
-    sdir = base+str(i)
     i = i+1
+    sdir = base+str(i)
     os.system('mkdir '+sdir)
     os.system('cp {} {}/input.cgyro'.format(infile,sdir))
     for par in row[:]:
