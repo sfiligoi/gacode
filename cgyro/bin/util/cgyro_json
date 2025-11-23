@@ -55,7 +55,7 @@ def opts():
                         help='LY',
                         type=float,
                         default=0.0)
-   parser.add_argument('-e',
+    parser.add_argument('-e',
                         help="working directory (default: cwd)",
                         type=str,
                         default='.')
@@ -364,6 +364,7 @@ print('cgyro_json: wrote out.cgyro.localdump')
 if template != 'null':
     os.system('cp work/out.cgyro.localdump input.cgyro')
     os.system('rm -r work')
+    print('cgyro_json: created new input.cgyro')
     sys.exit()
 
 #==================================================================
