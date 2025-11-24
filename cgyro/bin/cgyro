@@ -94,6 +94,9 @@ then
   echo 
   echo "         --pre"
   echo "         XGYRO proprocessor"
+  echo 
+  echo "         --pert"
+  echo "         Helper to create input.xgyro via perturbations"
   
   exit 1
 fi
@@ -152,6 +155,8 @@ while [ $# -gt 0 ] ; do
   --c) $UTIL_DIR/cgyro_clean $uarg ; exit 0 ;;
 
   --pre) $UTIL_DIR/cgyro_pre $uarg ; exit 0 ;;
+
+  --pert) $UTIL_DIR/cgyro_pert $uarg ; exit 0 ;;
 
   -p) shift ; SIMROOT=$1 ;;
 
