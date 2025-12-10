@@ -225,7 +225,7 @@ subroutine impfilter5_n0(&
 !$omp&         shared(fraw,fex,pvec)
 #elif defined(_OPENACC)
 !$acc loop vector collapse(2) &
-!$acc&         private(p,it,iex)
+!$acc&         private(p,it,iex,ir)
 #endif
      do panel=1,npanel
         do it=1,n_theta
