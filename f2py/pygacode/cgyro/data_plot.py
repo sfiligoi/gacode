@@ -559,7 +559,7 @@ class cgyrodata_plot(data.cgyrodata):
       for i in range(self.n_flux):
          bstr=''
          for ispec in range(ns):
-            ave = time_average(ys[ispec,i,:],t,imin,imax) ; var=0
+            ave = time_average(ys[ispec,i,:]*norm_vec[ispec],t,imin,imax) ; var=0
             bstr = bstr+"{:7.3f}".format(ave)+' '
          print(tag[i]+' '+bstr)
 
