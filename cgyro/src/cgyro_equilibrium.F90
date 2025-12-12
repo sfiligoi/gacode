@@ -267,34 +267,39 @@ subroutine cgyro_equilibrium
   enddo
 
   do itor=nt1,nt2
-   select case (stream_term)
-   case (1)
-     if (itor == 0) then
+     select case (stream_term)
+     case (1)
+        if (itor == 0) then
+           omega_stream(:,1,itor) = stream_factor*omega_stream(:,1,itor)
+           omega_trap(:,1,itor) = stream_factor*omega_trap(:,1,itor)
+        endif
+     case (2)
+        if (itor > 0) then
+           omega_stream(:,1,itor) = stream_factor*omega_stream(:,1,itor)
+           omega_trap(:,1,itor) = stream_factor*omega_trap(:,1,itor)
+        endif
+     case (12)
         omega_stream(:,1,itor) = stream_factor*omega_stream(:,1,itor)
         omega_trap(:,1,itor) = stream_factor*omega_trap(:,1,itor)
-     endif
-   case (2)
-     if (itor > 0) then
-        omega_stream(:,1,itor) = stream_factor*omega_stream(:,1,itor)
-        omega_trap(:,1,itor) = stream_factor*omega_trap(:,1,itor)
-     endif
-   case (12)
-     omega_stream(:,1,itor) = stream_factor*omega_stream(:,1,itor)
-     omega_trap(:,1,itor) = stream_factor*omega_trap(:,1,itor)
-   case (3)
-     if (itor == 0 .and. n_species > 1) then
+     case (3)
+        if (itor == 0 .and. n_species > 1) then
+           omega_stream(:,2,itor) = stream_factor*omega_stream(:,2,itor)
+           omega_trap(:,2,itor) = stream_factor*omega_trap(:,2,itor)
+        endif
+     case (4)
+        if (itor > 0 .and. n_species > 1) then
+           omega_stream(:,2,itor) = stream_factor*omega_stream(:,2,itor)
+           omega_trap(:,2,itor) = stream_factor*omega_trap(:,2,itor)
+        endif
+     case (34)
         omega_stream(:,2,itor) = stream_factor*omega_stream(:,2,itor)
         omega_trap(:,2,itor) = stream_factor*omega_trap(:,2,itor)
-     endif
-   case (4)
-     if (itor > 0 .and. n_species > 1) then
+     case (340)
         omega_stream(:,2,itor) = stream_factor*omega_stream(:,2,itor)
         omega_trap(:,2,itor) = stream_factor*omega_trap(:,2,itor)
-     endif
-   case (34)
-     omega_stream(:,2,itor) = stream_factor*omega_stream(:,2,itor)
-     omega_trap(:,2,itor) = stream_factor*omega_trap(:,2,itor)
-   end select
+        omega_rdrift(:,2) = stream_factor*omega_rdrift(:,2)
+        omega_adrift(:,2) = stream_factor*omega_adrift(:,2)
+     end select
   enddo
 
 #if defined(OMPGPU)
