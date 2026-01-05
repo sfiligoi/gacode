@@ -79,9 +79,6 @@ then
   echo 
   echo "         --converge"
   echo "         Check convergence"
-  echo 
-  echo "         --db"
-  echo "         Database tool"
   echo
   echo "         --ai"
   echo "         AI database manager"
@@ -149,9 +146,7 @@ while [ $# -gt 0 ] ; do
 
   --converge) $UTIL_DIR/cgyro_converge $uarg ; exit 0 ;;
 
-  --db) $UTIL_DIR/cgyro_db $uarg ; exit 0 ;;
-
-  --ai) $UTIL_DIR/cgyroai $uarg ; exit 0 ;;
+  --ai) $UTIL_DIR/cgyro_ai $uarg ; exit 0 ;;
 
   --dmd) $UTIL_DIR/cgyro_dmd $uarg ; exit 0 ;;
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-cgyroai - CGYRO AI Database Manager
+cgyro_ai - CGYRO AI Database Manager
 
 Command-line tool for creating and managing lightweight CGYRO databases
 optimized for AI training and analysis.
@@ -265,7 +265,7 @@ def show_info(db_path=None):
 
     print("="*70)
     print("\nNOTE: Use -q option to query by any metadata field")
-    print("      Example: cgyroai -q 'q=1.5:2.0' 'shear=0.8'")
+    print("      Example: cgyro_ai -q 'q=1.5:2.0' 'shear=0.8'")
     print("="*70 + "\n")
 
 
@@ -323,24 +323,140 @@ def get_default_db_path():
     return os.path.join(cgyro_dir, "cgyro_ai.db")
 
 
+def find_cgyro_cases(root_dir='./', ignore=['global', 'linear']):
+    """
+    Find all CGYRO case directories in the tree
+
+    Parameters:
+    -----------
+    root_dir : str
+        Root directory to search
+    ignore : list
+        Patterns to ignore in paths
+
+    Returns:
+    --------
+    list : List of case directories
+    """
+    cases = []
+    for root, dirs, files in os.walk(root_dir):
+        if is_cgyro_case(root):
+            if not any(pattern in root for pattern in ignore):
+                cases.append(root)
+    return cases
+
+
+def refresh_directories(root_dir='./'):
+    """
+    Refresh directories by re-running cgyro_parse.py and cgyro
+
+    Parameters:
+    -----------
+    root_dir : str
+        Root directory to search for CGYRO cases
+    """
+    import subprocess
+
+    cases = find_cgyro_cases(root_dir)
+    print(f"Found {len(cases)} CGYRO cases to refresh")
+
+    gacode_root = os.environ.get('GACODE_ROOT')
+    if not gacode_root:
+        print("ERROR: GACODE_ROOT environment variable not set")
+        sys.exit(1)
+
+    for case_dir in tqdm(cases, desc="Refreshing cases"):
+        print(f"Refreshing {case_dir}")
+        try:
+            # Run cgyro_parse.py
+            subprocess.run(
+                f"cd {case_dir} && python {gacode_root}/cgyro/bin/cgyro_parse.py",
+                shell=True,
+                check=True
+            )
+            # Run cgyro executable
+            subprocess.run(
+                f"cd {case_dir} && {gacode_root}/cgyro/src/cgyro",
+                shell=True,
+                check=True
+            )
+        except subprocess.CalledProcessError as e:
+            print(f"ERROR refreshing {case_dir}: {e}")
+            continue
+
+
+def legacy_refresh_directories(root_dir='./'):
+    """
+    Legacy profile refresh: convert old input format
+
+    Parameters:
+    -----------
+    root_dir : str
+        Root directory to search for CGYRO cases
+    """
+    import subprocess
+
+    cases = find_cgyro_cases(root_dir)
+    print(f"Found {len(cases)} CGYRO cases for legacy refresh")
+
+    gacode_root = os.environ.get('GACODE_ROOT')
+    if not gacode_root:
+        print("ERROR: GACODE_ROOT environment variable not set")
+        sys.exit(1)
+
+    for case_dir in tqdm(cases, desc="Legacy refreshing cases"):
+        print(f"Legacy refreshing {case_dir}")
+        try:
+            # Process input.cgyro.gen with cgyro --json
+            subprocess.run(
+                f"cgyro --json -e {case_dir}",
+                shell=True,
+                check=True
+            )
+            # Copy output to input
+            subprocess.run(
+                f"cd {case_dir} && cp out.cgyro.localdump input.cgyro",
+                shell=True,
+                check=True
+            )
+            # Run cgyro_parse.py
+            subprocess.run(
+                f"cd {case_dir} && python {gacode_root}/cgyro/bin/cgyro_parse.py",
+                shell=True,
+                check=True
+            )
+            # Run cgyro executable
+            subprocess.run(
+                f"cd {case_dir} && {gacode_root}/cgyro/src/cgyro",
+                shell=True,
+                check=True
+            )
+        except subprocess.CalledProcessError as e:
+            print(f"ERROR legacy refreshing {case_dir}: {e}")
+            continue
+
+
 def main():
-    """Main entry point for cgyroai CLI"""
+    """Main entry point for cgyro_ai CLI"""
     mytext = '''\
     examples:
-       cgyroai -info                        Show implemented fields
-       cgyroai -init                        Initialize/reset database
-       cgyroai -scan -flux                  Scan and include flux data
+       cgyro_ai -info                        Show implemented fields
+       cgyro_ai -init                        Initialize/reset database
+       cgyro_ai -scan -flux                  Scan and include flux data
 
-       cgyroai -q ""                        List all cases (minimal: #, path, hash)
-       cgyroai -q "" -fields standard       Add physics parameters (q, shear, kappa, etc.)
-       cgyroai -q "q=1.5:2.0"              Filter cases by q range
+       cgyro_ai -ref                         Refresh all CGYRO cases (re-run parse and cgyro)
+       cgyro_ai -lref                        Legacy refresh (convert old input format)
 
-       cgyroai -q "" -show-flux energy      Show energy flux for all species
-       cgyroai -q "" -show-flux s0_energy s0_particle   Show electron energy and particle flux
-       cgyroai -q "" -show-flux energy particle         Show all energy and particle fluxes
+       cgyro_ai -q ""                        List all cases (minimal: #, path, hash)
+       cgyro_ai -q "" -fields standard       Add physics parameters (q, shear, kappa, etc.)
+       cgyro_ai -q "q=1.5:2.0"              Filter cases by q range
 
-       cgyroai -q "q=1.5:2.0" -export csv -o results.csv
-       cgyroai -stats                       Show database statistics
+       cgyro_ai -q "" -show-flux energy      Show energy flux for all species
+       cgyro_ai -q "" -show-flux s0_energy s0_particle   Show electron energy and particle flux
+       cgyro_ai -q "" -show-flux energy particle         Show all energy and particle fluxes
+
+       cgyro_ai -q "q=1.5:2.0" -export csv -o results.csv
+       cgyro_ai -stats                       Show database statistics
 
     default database: ~/.cgyro/cgyro_ai.db
     flux column naming: s0_e (species 0 energy), s1_p (species 1 particle), s0_m (species 0 momentum)
@@ -348,7 +464,7 @@ def main():
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawTextHelpFormatter,
-        prog='cgyroai',
+        prog='cgyro_ai',
         description='CGYRO AI Database Manager - Create lightweight databases for AI training',
         epilog=textwrap.dedent(mytext))
 
@@ -395,13 +511,29 @@ def main():
                         help='Include flux data in scan',
                         action='store_true')
 
+    parser.add_argument('-ref', '--refresh',
+                        help='Refresh directories (re-run cgyro_parse.py and cgyro)',
+                        action='store_true')
+
+    parser.add_argument('-lref', '--legacy-refresh',
+                        help='Legacy profile refresh (convert old input format)',
+                        action='store_true')
+
     args = parser.parse_args()
 
     # Get default database path
     db_path = get_default_db_path()
 
     # Command execution
-    if args.initialize:
+    if args.refresh:
+        refresh_directories()
+        sys.exit(0)
+
+    elif args.legacy_refresh:
+        legacy_refresh_directories()
+        sys.exit(0)
+
+    elif args.initialize:
         # Check if database exists and ask for confirmation
         if os.path.exists(db_path):
             print(f"\nWARNING: Database already exists at: {db_path}")
