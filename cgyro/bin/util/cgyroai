@@ -1,0 +1,527 @@
+#!/usr/bin/env python
+"""
+cgyroai - CGYRO AI Database Manager
+
+Command-line tool for creating and managing lightweight CGYRO databases
+optimized for AI training and analysis.
+"""
+
+import os
+import sys
+import argparse
+import textwrap
+from tqdm import tqdm
+from cgyro.data import cgyrodata
+from cgyro_ai_db import AIDB
+from cgyro_db_extractors import (
+    extract_metadata,
+    extract_species,
+    extract_flux,
+    extract_provenance,
+    compute_file_hash,
+    is_cgyro_case,
+    get_git_version
+)
+
+
+def scan_and_update(db, root_dir, include_flux=False, ignore=['global', 'linear']):
+    """
+    Scan directory tree and update database
+
+    Parameters:
+    -----------
+    db : AIDB
+        Database object
+    root_dir : str
+        Root directory to scan
+    include_flux : bool
+        Whether to extract and store flux data
+    ignore : list
+        List of directory patterns to ignore
+    """
+    # Walk directory tree to find CGYRO cases
+    cases_found = []
+    print(f"Scanning directory tree: {root_dir}")
+
+    for root, dirs, files in os.walk(root_dir):
+        # Check if this is a CGYRO case directory
+        if is_cgyro_case(root):
+            # Check if should be ignored
+            if not any(pattern in root for pattern in ignore):
+                cases_found.append(root)
+
+    print(f"Found {len(cases_found)} CGYRO cases")
+
+    if len(cases_found) == 0:
+        print("No CGYRO cases found. Exiting.")
+        return
+
+    # Process each case
+    n_new = 0
+    n_updated = 0
+    n_unchanged = 0
+    n_errors = 0
+
+    for case_path in tqdm(cases_found, desc="Processing cases"):
+        try:
+            # Compute hashes for change detection
+            hash_tag = compute_file_hash(os.path.join(case_path, 'out.cgyro.tag'))
+            hash_time = compute_file_hash(os.path.join(case_path, 'out.cgyro.time'))
+
+            if hash_tag is None or hash_time is None:
+                print(f"Warning: Missing required files in {case_path}, skipping")
+                n_errors += 1
+                continue
+
+            # Check if case exists in database
+            existing = db.get_case_by_path(case_path)
+
+            if existing is None:
+                # NEW CASE - extract and insert
+                process_new_case(db, case_path, hash_tag, hash_time, include_flux)
+                n_new += 1
+            elif existing['hash_tag'] != hash_tag or existing['hash_time'] != hash_time:
+                # CHANGED CASE - re-extract and update
+                update_existing_case(db, existing['case_id'], case_path,
+                                   hash_tag, hash_time, include_flux)
+                n_updated += 1
+            else:
+                # UNCHANGED - skip
+                n_unchanged += 1
+
+        except Exception as e:
+            print(f"\nERROR processing {case_path}: {e}")
+            n_errors += 1
+            continue
+
+    # Print summary
+    print(f"\nScan complete:")
+    print(f"  New cases: {n_new}")
+    print(f"  Updated cases: {n_updated}")
+    print(f"  Unchanged cases: {n_unchanged}")
+    print(f"  Errors: {n_errors}")
+
+
+def process_new_case(db, case_path, hash_tag, hash_time, include_flux):
+    """Extract data and insert new case into database"""
+    # Load simulation data
+    sim = cgyrodata(case_path + '/', silent=True)
+
+    # Extract metadata
+    metadata = extract_metadata(sim)
+    species = extract_species(sim)
+
+    # Extract flux if requested
+    flux = None
+    if include_flux:
+        flux = extract_flux(sim, time_window='0.5')
+
+    # Extract provenance
+    provenance = extract_provenance(case_path)
+
+    # Insert into database
+    db.insert_case(
+        case_path=case_path,
+        hash_tag=hash_tag,
+        hash_time=hash_time,
+        metadata=metadata,
+        species=species,
+        flux=flux,
+        provenance=provenance
+    )
+
+
+def update_existing_case(db, case_id, case_path, hash_tag, hash_time, include_flux):
+    """Re-extract data and update existing case in database"""
+    # Load simulation data
+    sim = cgyrodata(case_path + '/', silent=True)
+
+    # Extract metadata
+    metadata = extract_metadata(sim)
+    species = extract_species(sim)
+
+    # Extract flux if requested
+    flux = None
+    if include_flux:
+        flux = extract_flux(sim, time_window='0.5')
+
+    # Extract provenance
+    provenance = extract_provenance(case_path)
+
+    # Update database
+    db.update_case(
+        case_id=case_id,
+        hash_tag=hash_tag,
+        hash_time=hash_time,
+        metadata=metadata,
+        species=species,
+        flux=flux,
+        provenance=provenance
+    )
+
+
+def show_info(db_path=None):
+    """
+    Display information about implemented inputs and outputs
+
+    Dynamically introspects the extraction functions and database schema
+    to show what data is actually stored.
+    """
+    print("\n" + "="*70)
+    print("CGYRO AI Database - Implemented Fields")
+    print("="*70)
+
+    # Get metadata fields by introspecting extract_metadata()
+    print("\n[METADATA - Grid and Equilibrium Parameters]")
+    print("Stored in SQL columns for fast queries\n")
+
+    # We can't run extract_metadata without a sim object, but we can
+    # inspect the function code or use a dummy. Let's read the function directly.
+    import inspect
+    metadata_source = inspect.getsource(extract_metadata)
+
+    # Extract field names from the source code
+    metadata_fields = []
+    for line in metadata_source.split('\n'):
+        if "': " in line and 'sim.' in line:
+            # Extract field name
+            field = line.split("'")[1]
+            # Extract source from sim object
+            if 'sim.' in line:
+                source = line.split('sim.')[1].split(')')[0].split(',')[0]
+                metadata_fields.append(f"  {field:20s} <- sim.{source}")
+
+    print('\n'.join(sorted(metadata_fields)))
+
+    # Get species fields
+    print("\n[SPECIES DATA]")
+    print("Stored as JSON array (variable number of species)\n")
+
+    species_source = inspect.getsource(extract_species)
+    species_fields = []
+    for line in species_source.split('\n'):
+        if "': sim." in line:
+            field = line.split("'")[1]
+            source = line.split('sim.')[1].split('.tolist')[0]
+            species_fields.append(f"  {field:20s} <- sim.{source}")
+
+    print('\n'.join(sorted(species_fields)))
+
+    # Get flux information
+    print("\n[FLUX DATA]")
+    print("Time-averaged over last 50% of simulation (configurable)\n")
+    print("  Particle flux (Γ)    <- time_average(ky_flux[species, 0, :, :])")
+    print("  Energy flux (Q)      <- time_average(ky_flux[species, 1, :, :])")
+    print("  Momentum flux (Π)    <- time_average(ky_flux[species, 2, :, :])")
+    print("  ky grid              <- sim.ky")
+    print("  Time window info     <- imin, imax, n_time")
+
+    # Get provenance fields
+    print("\n[PROVENANCE - Simulation Tracking]")
+    print("Metadata for change detection and versioning\n")
+
+    provenance_source = inspect.getsource(extract_provenance)
+    print("  input_hash           <- MD5 hash of input.cgyro (UNIQUE INPUT ID)")
+    print("  t_current            <- out.cgyro.tag (simulation end time)")
+    print("  i_current            <- out.cgyro.tag (timestep index)")
+    print("  created_timestamp    <- file creation time")
+    print("  modified_timestamp   <- file modification time")
+    print("  n_restarts           <- count of bin.cgyro.restart* files")
+    print("  file_hashes          <- MD5 hashes of key output files")
+
+    print("\n[UNIQUE INPUT IDENTIFIER]")
+    print("The input_hash is an MD5 hash of input.cgyro that uniquely identifies")
+    print("the input configuration. This allows you to:")
+    print("  - Find duplicate input configurations across different directories")
+    print("  - Track which outputs correspond to specific inputs")
+    print("  - Detect if inputs were modified between runs")
+
+    # If database exists, show actual schema
+    if db_path and os.path.exists(db_path):
+        print("\n[DATABASE SCHEMA]")
+        print(f"From: {db_path}\n")
+
+        try:
+            import sqlite3
+            conn = sqlite3.connect(db_path)
+            cursor = conn.cursor()
+
+            # Get table info
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
+            tables = [row[0] for row in cursor.fetchall()]
+
+            for table in tables:
+                cursor.execute(f"PRAGMA table_info({table})")
+                columns = cursor.fetchall()
+                print(f"  Table: {table}")
+                for col in columns:
+                    col_name, col_type = col[1], col[2]
+                    print(f"    {col_name:25s} {col_type}")
+                print()
+
+            conn.close()
+        except Exception as e:
+            print(f"  Could not read database schema: {e}")
+
+    print("="*70)
+    print("\nNOTE: Use -q option to query by any metadata field")
+    print("      Example: cgyroai -q 'q=1.5:2.0' 'shear=0.8'")
+    print("="*70 + "\n")
+
+
+def parse_filters(filter_args):
+    """
+    Parse filter arguments from command line
+
+    Examples:
+    ---------
+    'q=1.5:2.0' -> {'q': (1.5, 2.0)}
+    'shear=0.8' -> {'shear': 0.8}
+    'case_path=%scan%' -> {'case_path': '%scan%'}
+    """
+    if not filter_args:
+        return None
+
+    filters = {}
+    for arg in filter_args:
+        if '=' not in arg:
+            print(f"Warning: Invalid filter format '{arg}', skipping")
+            continue
+
+        key, value = arg.split('=', 1)
+
+        # Check if range query (contains :)
+        if ':' in value:
+            try:
+                vmin, vmax = value.split(':')
+                filters[key] = (float(vmin), float(vmax))
+            except ValueError:
+                print(f"Warning: Invalid range format '{value}', skipping")
+        else:
+            # Try to convert to float, else keep as string
+            try:
+                filters[key] = float(value)
+            except ValueError:
+                filters[key] = value
+
+    return filters if filters else None
+
+
+def get_default_db_path():
+    """
+    Get the default database path: ~/.cgyro/cgyro_ai.db
+
+    Creates the ~/.cgyro directory if it doesn't exist.
+    """
+    home = os.path.expanduser("~")
+    cgyro_dir = os.path.join(home, ".cgyro")
+
+    # Create directory if it doesn't exist
+    if not os.path.exists(cgyro_dir):
+        os.makedirs(cgyro_dir)
+
+    return os.path.join(cgyro_dir, "cgyro_ai.db")
+
+
+def main():
+    """Main entry point for cgyroai CLI"""
+    mytext = '''\
+    examples:
+       cgyroai -info                        Show implemented fields
+       cgyroai -init                        Initialize/reset database
+       cgyroai -scan -flux                  Scan and include flux data
+
+       cgyroai -q ""                        List all cases (minimal: #, path, hash)
+       cgyroai -q "" -fields standard       Add physics parameters (q, shear, kappa, etc.)
+       cgyroai -q "q=1.5:2.0"              Filter cases by q range
+
+       cgyroai -q "" -show-flux energy      Show energy flux for all species
+       cgyroai -q "" -show-flux s0_energy s0_particle   Show electron energy and particle flux
+       cgyroai -q "" -show-flux energy particle         Show all energy and particle fluxes
+
+       cgyroai -q "q=1.5:2.0" -export csv -o results.csv
+       cgyroai -stats                       Show database statistics
+
+    default database: ~/.cgyro/cgyro_ai.db
+    flux column naming: s0_e (species 0 energy), s1_p (species 1 particle), s0_m (species 0 momentum)
+    '''
+
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawTextHelpFormatter,
+        prog='cgyroai',
+        description='CGYRO AI Database Manager - Create lightweight databases for AI training',
+        epilog=textwrap.dedent(mytext))
+
+    parser.add_argument('-init', '--initialize',
+                        help='Initialize/reset the database (requires confirmation)',
+                        action='store_true')
+
+    parser.add_argument('-scan', '--scan',
+                        help='Scan and update AI database',
+                        action='store_true')
+
+    parser.add_argument('-q', '--query',
+                        help='Query database with filters (e.g., q=1.5:2.0 shear=0.8)',
+                        nargs='*')
+
+    parser.add_argument('-fields',
+                        help='Fields to show: minimal (default), standard, all',
+                        type=str,
+                        choices=['minimal', 'standard', 'all'],
+                        default='minimal')
+
+    parser.add_argument('-show-flux',
+                        help='Add flux columns: energy, particle, momentum, or species-specific (e.g., s0_energy)',
+                        nargs='*')
+
+    parser.add_argument('-export', '--export',
+                        help='Export results (csv or json)',
+                        type=str,
+                        choices=['csv', 'json'])
+
+    parser.add_argument('-o', '--output',
+                        help='Output file path',
+                        type=str)
+
+    parser.add_argument('-stats', '--statistics',
+                        help='Show database statistics',
+                        action='store_true')
+
+    parser.add_argument('-info', '--information',
+                        help='Show implemented fields and database schema',
+                        action='store_true')
+
+    parser.add_argument('-flux',
+                        help='Include flux data in scan',
+                        action='store_true')
+
+    args = parser.parse_args()
+
+    # Get default database path
+    db_path = get_default_db_path()
+
+    # Command execution
+    if args.initialize:
+        # Check if database exists and ask for confirmation
+        if os.path.exists(db_path):
+            print(f"\nWARNING: Database already exists at: {db_path}")
+            print("This will DELETE all existing data and create a fresh database.")
+            response = input("Are you sure you want to continue? (yes/no): ").strip().lower()
+
+            if response not in ['yes', 'y']:
+                print("Initialization cancelled.")
+                sys.exit(0)
+
+            # Remove existing database
+            os.remove(db_path)
+            print(f"Removed existing database.")
+
+        # Create new database
+        db = AIDB(db_path)
+        db.create_schema()
+        print(f"Initialized AI database: {db_path}")
+        db.close()
+
+    elif args.scan:
+        # Auto-initialize if database doesn't exist
+        if not os.path.exists(db_path):
+            print(f"Database not found. Creating new database at: {db_path}")
+            db = AIDB(db_path)
+            db.create_schema()
+            db.close()
+
+        db = AIDB(db_path)
+        scan_and_update(db, './', include_flux=args.flux)
+        db.close()
+
+    elif args.query is not None:
+        if not os.path.exists(db_path):
+            print(f"ERROR: Database not found at: {db_path}")
+            print(f"Run 'cgyro --ai -scan' to create and populate the database.")
+            sys.exit(1)
+
+        db = AIDB(db_path)
+        filters = parse_filters(args.query)
+
+        # Check if flux display is requested
+        if args.show_flux:
+            # First check if flux data exists in database
+            cursor = db.conn.execute("SELECT COUNT(*) FROM fluxes")
+            flux_count = cursor.fetchone()[0]
+
+            if flux_count == 0:
+                print("\nWARNING: No flux data found in database.")
+                print("Run 'cgyro --ai -scan -flux' to populate flux data.")
+                print("Showing query results without flux data:\n")
+                df = db.query(filters=filters, show_fields=args.fields)
+            else:
+                # Parse flux request
+                flux_types = []
+                species_list = []
+
+                for flux_spec in args.show_flux:
+                    if flux_spec in ['energy', 'particle', 'momentum']:
+                        flux_types.append(flux_spec)
+                    elif flux_spec.startswith('s') and '_' in flux_spec:
+                        # Format: s0_energy, s1_particle, etc.
+                        parts = flux_spec.split('_')
+                        sp = int(parts[0][1:])  # Extract species number
+                        ftype = parts[1]
+                        if sp not in species_list:
+                            species_list.append(sp)
+                        if ftype not in flux_types:
+                            flux_types.append(ftype)
+
+                # Use query_with_flux
+                df = db.query_with_flux(
+                    filters=filters,
+                    flux_type=flux_types if flux_types else None,
+                    species=species_list if species_list else None
+                )
+        else:
+            # Regular query
+            df = db.query(filters=filters, show_fields=args.fields)
+
+        if filters:
+            print(f"Querying database with filters: {filters}")
+
+        print(f"\nFound {len(df)} cases:")
+        # Display with better formatting
+        import pandas as pd
+        pd.set_option('display.max_columns', None)
+        pd.set_option('display.width', 200)
+        print(df.to_string(index=False))
+
+        if args.export and args.output:
+            if args.export == 'csv':
+                db.export_csv(df, args.output)
+            elif args.export == 'json':
+                db.export_json(df, args.output)
+
+        db.close()
+
+    elif args.statistics:
+        if not os.path.exists(db_path):
+            print(f"ERROR: Database not found at: {db_path}")
+            print(f"Run 'cgyro --ai -scan' to create and populate the database.")
+            sys.exit(1)
+
+        db = AIDB(db_path)
+        db.print_statistics()
+        db.close()
+
+    elif args.information:
+        show_info(db_path=db_path)
+
+    else:
+        print(f"Database location: {db_path}")
+        if os.path.exists(db_path):
+            print(f"Database exists (size: {os.path.getsize(db_path) / 1024:.1f} KB)")
+        else:
+            print("Database not yet created.")
+        print()
+        parser.print_help()
+
+
+if __name__ == '__main__':
+    main()

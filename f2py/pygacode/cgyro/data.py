@@ -143,7 +143,7 @@ class cgyrodata:
          self.hb = self.hb/np.max(self.hb)
       #-----------------------------------------------------------------
 
-   def getflux(self,cflux='auto'):
+   def getflux(self,cflux='auto',total=False):
 
       if cflux == 'auto':
          if abs(self.gamma_e) > 0.0 and self.n_n > 1:
@@ -180,6 +180,9 @@ class cgyrodata:
       self.n_flux = m
       #-----------------------------------------------------------------
 
+      if total:
+         self.fluxtot = np.sum(self.ky_flux,axis=(2,3)) 
+      
       return usec
 
    def getxflux(self):

@@ -82,10 +82,13 @@ then
   echo 
   echo "         --db"
   echo "         Database tool"
-  echo 
+  echo
+  echo "         --ai"
+  echo "         AI database manager"
+  echo
   echo "         --json"
   echo "         Input manager and converter"
-  echo 
+  echo
   echo "         --dmd"
   echo "         DMD analysis"
   echo 
@@ -147,6 +150,8 @@ while [ $# -gt 0 ] ; do
   --converge) $UTIL_DIR/cgyro_converge $uarg ; exit 0 ;;
 
   --db) $UTIL_DIR/cgyro_db $uarg ; exit 0 ;;
+
+  --ai) $UTIL_DIR/cgyroai $uarg ; exit 0 ;;
 
   --dmd) $UTIL_DIR/cgyro_dmd $uarg ; exit 0 ;;
 
