@@ -38,17 +38,20 @@ def opts():
     parser.add_argument('-opt',
                         help='Preserve timing files',
                         action='store_true')
+    parser.add_argument('-nokxky',
+                        help='Suppress copying bin.cgyro.kxky* files',
+                        action='store_true')
     parser.add_argument('-v',
                         help='Verbose output',
                         action='store_true')
-    
+
     args=parser.parse_args()
 
-    return args.i,args.t,args.c,args.opt,args.v
+    return args.i,args.t,args.c,args.opt,args.nokxky,args.v
 
 #------------------------------------------------------------------------
 #
-idir,tdir,c,opt,v = opts()
+idir,tdir,c,opt,nokxky,v = opts()
 
 # Check for no arguments
 if idir is None and tdir is None and not c:
@@ -98,6 +101,9 @@ exfiles = ['bin.cgyro.restart',
            'halt',
            'gyrotest_flag',
            'out.log']
+
+if nokxky:
+    exfiles.append('bin.cgyro.kxky*')
 
 exstr = ""
 for ex in exfiles:
