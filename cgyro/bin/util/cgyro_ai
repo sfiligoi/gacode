@@ -19,8 +19,7 @@ from cgyro_db_extractors import (
     extract_flux,
     extract_provenance,
     compute_file_hash,
-    is_cgyro_case,
-    get_git_version
+    is_cgyro_case
 )
 
 
@@ -40,16 +39,8 @@ def scan_and_update(db, root_dir, include_flux=False, ignore=['global', 'linear'
         List of directory patterns to ignore
     """
     # Walk directory tree to find CGYRO cases
-    cases_found = []
     print(f"Scanning directory tree: {root_dir}")
-
-    for root, dirs, files in os.walk(root_dir):
-        # Check if this is a CGYRO case directory
-        if is_cgyro_case(root):
-            # Check if should be ignored
-            if not any(pattern in root for pattern in ignore):
-                cases_found.append(root)
-
+    cases_found = find_cgyro_cases(root_dir, ignore)
     print(f"Found {len(cases_found)} CGYRO cases")
 
     if len(cases_found) == 0:
@@ -102,10 +93,23 @@ def scan_and_update(db, root_dir, include_flux=False, ignore=['global', 'linear'
     print(f"  Errors: {n_errors}")
 
 
-def process_new_case(db, case_path, hash_tag, hash_time, include_flux):
-    """Extract data and insert new case into database"""
+def extract_case_data(case_path, include_flux):
+    """
+    Extract all data for a case
+
+    Parameters:
+    -----------
+    case_path : str
+        Path to simulation directory
+    include_flux : bool
+        Whether to extract flux data
+
+    Returns:
+    --------
+    tuple : (metadata, species, flux, provenance)
+    """
     # Load simulation data
-    sim = cgyrodata(case_path + '/', silent=True)
+    sim = cgyrodata(os.path.join(case_path, ''), silent=True)
 
     # Extract metadata
     metadata = extract_metadata(sim)
@@ -120,6 +124,13 @@ def process_new_case(db, case_path, hash_tag, hash_time, include_flux):
     t_final = float(sim.t[-1]) if len(sim.t) > 0 else None
     i_final = len(sim.t) if len(sim.t) > 0 else None
     provenance = extract_provenance(case_path, t_final, i_final)
+
+    return metadata, species, flux, provenance
+
+
+def process_new_case(db, case_path, hash_tag, hash_time, include_flux):
+    """Extract data and insert new case into database"""
+    metadata, species, flux, provenance = extract_case_data(case_path, include_flux)
 
     # Insert into database
     db.insert_case(
@@ -135,22 +146,7 @@ def process_new_case(db, case_path, hash_tag, hash_time, include_flux):
 
 def update_existing_case(db, case_id, case_path, hash_tag, hash_time, include_flux):
     """Re-extract data and update existing case in database"""
-    # Load simulation data
-    sim = cgyrodata(case_path + '/', silent=True)
-
-    # Extract metadata
-    metadata = extract_metadata(sim)
-    species = extract_species(sim)
-
-    # Extract flux if requested
-    flux = None
-    if include_flux:
-        flux = extract_flux(sim, time_window='0.5')
-
-    # Extract provenance
-    t_final = float(sim.t[-1]) if len(sim.t) > 0 else None
-    i_final = len(sim.t) if len(sim.t) > 0 else None
-    provenance = extract_provenance(case_path, t_final, i_final)
+    metadata, species, flux, provenance = extract_case_data(case_path, include_flux)
 
     # Update database
     db.update_case(
@@ -273,6 +269,92 @@ def show_info(db_path=None):
     print("="*70 + "\n")
 
 
+def display_complete_case(case_record):
+    """
+    Display complete case record in formatted output
+
+    Parameters:
+    -----------
+    case_record : dict
+        Complete case record from db.get_complete_case()
+    """
+    import json
+
+    print("\n" + "="*80)
+    print("COMPLETE CASE RECORD")
+    print("="*80)
+
+    # Basic case info
+    print("\n[CASE INFO]")
+    print(f"  Case ID:       {case_record['case_id']}")
+    print(f"  Case Path:     {case_record['case_path']}")
+    print(f"  Case Name:     {case_record['case_name']}")
+    print(f"  Input Hash:    {case_record['input_hash']}")
+    print(f"  Last Updated:  {case_record.get('last_updated', 'N/A')}")
+    print(f"  t_final:       {case_record.get('t_final', 'N/A')}")
+    print(f"  i_final:       {case_record.get('i_final', 'N/A')}")
+    print(f"  Git Version:   {case_record.get('git_version', 'N/A')}")
+
+    # Metadata
+    if 'metadata' in case_record:
+        metadata = case_record['metadata']
+
+        # Resolution parameters
+        print("\n[RESOLUTION PARAMETERS]")
+        resolution_keys = ['n_n', 'n_radial', 'n_theta', 'n_species', 'n_field', 'n_energy', 'n_xi', 'ky0']
+        for key in resolution_keys:
+            if key in metadata:
+                print(f"  {key:20s} = {metadata[key]}")
+
+        # Physics inputs (equilibrium + plasma parameters)
+        print("\n[PHYSICS INPUTS]")
+        physics_keys = ['rmin', 'rmaj', 'q', 'shear', 'shift', 'kappa', 's_kappa',
+                        'delta', 's_delta', 'zeta', 's_zeta', 'zmag', 'dzmag',
+                        'betae_unit', 'beta_star', 'gamma_e', 'gamma_p', 'mach']
+        for key in physics_keys:
+            if key in metadata:
+                print(f"  {key:20s} = {metadata[key]}")
+
+    # Species data
+    if 'species' in case_record:
+        print("\n[SPECIES DATA]")
+        species = case_record['species']
+        n_species = len(species['z']) if 'z' in species else 0
+        print(f"  Number of species: {n_species}")
+        for key, values in sorted(species.items()):
+            print(f"  {key:20s} = {values}")
+
+    # Flux data
+    if 'fluxes' in case_record and len(case_record['fluxes']) > 0:
+        print("\n[FLUX DATA]")
+        print("  (Time-averaged and summed over ky)")
+        # Show time window once (same for all species)
+        first_flux = case_record['fluxes'][0]
+        print(f"  Time window:     {first_flux.get('time_window', 'N/A')}")
+        print(f"  Time max:        {first_flux.get('time_max', 'N/A')}")
+        print()
+        for flux in case_record['fluxes']:
+            print(f"  Species {flux['species_idx']}:")
+            print(f"    Particle flux:   {flux['particle_flux']}")
+            print(f"    Energy flux:     {flux['energy_flux']}")
+            print(f"    Momentum flux:   {flux['momentum_flux']}")
+
+    # Provenance
+    if 'provenance' in case_record:
+        print("\n[PROVENANCE]")
+        prov = case_record['provenance']
+        for key, value in sorted(prov.items()):
+            if key != 'case_id':
+                if key == 'file_hashes':
+                    print(f"  {key:20s} =")
+                    for fname, fhash in value.items():
+                        print(f"    {fname:25s} : {fhash}")
+                else:
+                    print(f"  {key:20s} = {value}")
+
+    print("\n" + "="*80 + "\n")
+
+
 def parse_filters(filter_args):
     """
     Parse filter arguments from command line
@@ -311,12 +393,25 @@ def parse_filters(filter_args):
     return filters if filters else None
 
 
-def get_default_db_path():
+def get_default_db_path(db_name='cgyro_ai.db'):
     """
-    Get the default database path: ~/.cgyro/cgyro_ai.db
+    Get the database path
+
+    If db_name contains a path separator, treat it as a full path.
+    Otherwise, place it in ~/.cgyro/
+
+    Parameters:
+    -----------
+    db_name : str, optional
+        Database filename or full path (default: 'cgyro_ai.db')
 
     Creates the ~/.cgyro directory if it doesn't exist.
     """
+    # If db_name contains path separator, treat as full path
+    if os.path.sep in db_name or db_name.startswith('~'):
+        return os.path.expanduser(db_name)
+
+    # Otherwise, place in ~/.cgyro/
     home = os.path.expanduser("~")
     cgyro_dir = os.path.join(home, ".cgyro")
 
@@ -324,7 +419,7 @@ def get_default_db_path():
     if not os.path.exists(cgyro_dir):
         os.makedirs(cgyro_dir)
 
-    return os.path.join(cgyro_dir, "cgyro_ai.db")
+    return os.path.join(cgyro_dir, db_name)
 
 
 def find_cgyro_cases(root_dir='./', ignore=['global', 'linear']):
@@ -448,6 +543,13 @@ def main():
        cgyro_ai -init                        Initialize/reset database
        cgyro_ai -scan -flux                  Scan and include flux data
 
+       cgyro_ai -db nersc.db -scan           Use custom database name
+       cgyro_ai -db /path/to/my.db -q ""     Use database at full path
+
+       cgyro_ai -show-case /path/to/case     Show complete record for a case
+       cgyro_ai -show-hash 12345678          Show complete record by 8-digit hash
+       cgyro_ai -db nersc.db -show-hash abc  Show case from custom database
+
        cgyro_ai -ref                         Refresh all CGYRO cases (re-run parse and cgyro)
        cgyro_ai -lref                        Legacy refresh (convert old input format)
 
@@ -523,13 +625,60 @@ def main():
                         help='Legacy profile refresh (convert old input format)',
                         action='store_true')
 
+    parser.add_argument('-db', '--database',
+                        help='Database name (placed in ~/.cgyro/) or full path',
+                        type=str,
+                        default='cgyro_ai.db')
+
+    parser.add_argument('-show-case',
+                        help='Show complete record for a case by path',
+                        type=str,
+                        metavar='PATH')
+
+    parser.add_argument('-show-hash',
+                        help='Show complete record for a case by 8-digit input hash',
+                        type=str,
+                        metavar='HASH')
+
     args = parser.parse_args()
 
-    # Get default database path
-    db_path = get_default_db_path()
+    # Get database path
+    db_path = get_default_db_path(args.database)
 
     # Command execution
-    if args.refresh:
+    if args.show_case:
+        if not os.path.exists(db_path):
+            print(f"ERROR: Database not found at: {db_path}")
+            sys.exit(1)
+
+        db = AIDB(db_path)
+        case = db.get_case_by_path(args.show_case)
+        if case is None:
+            print(f"ERROR: Case not found: {args.show_case}")
+            db.close()
+            sys.exit(1)
+
+        complete_case = db.get_complete_case(case['case_id'])
+        display_complete_case(complete_case)
+        db.close()
+
+    elif args.show_hash:
+        if not os.path.exists(db_path):
+            print(f"ERROR: Database not found at: {db_path}")
+            sys.exit(1)
+
+        db = AIDB(db_path)
+        case = db.get_case_by_hash(args.show_hash)
+        if case is None:
+            print(f"ERROR: Case not found with hash: {args.show_hash}")
+            db.close()
+            sys.exit(1)
+
+        complete_case = db.get_complete_case(case['case_id'])
+        display_complete_case(complete_case)
+        db.close()
+
+    elif args.refresh:
         refresh_directories()
         sys.exit(0)
 
@@ -573,7 +722,7 @@ def main():
     elif args.query is not None:
         if not os.path.exists(db_path):
             print(f"ERROR: Database not found at: {db_path}")
-            print(f"Run 'cgyro --ai -scan' to create and populate the database.")
+            print(f"Run 'cgyro_ai -scan' to create and populate the database.")
             sys.exit(1)
 
         db = AIDB(db_path)
@@ -587,7 +736,7 @@ def main():
 
             if flux_count == 0:
                 print("\nWARNING: No flux data found in database.")
-                print("Run 'cgyro --ai -scan -flux' to populate flux data.")
+                print("Run 'cgyro_ai -scan -flux' to populate flux data.")
                 print("Showing query results without flux data:\n")
                 df = db.query(filters=filters, show_fields=args.fields)
             else:
@@ -639,7 +788,7 @@ def main():
     elif args.statistics:
         if not os.path.exists(db_path):
             print(f"ERROR: Database not found at: {db_path}")
-            print(f"Run 'cgyro --ai -scan' to create and populate the database.")
+            print(f"Run 'cgyro_ai -scan' to create and populate the database.")
             sys.exit(1)
 
         db = AIDB(db_path)

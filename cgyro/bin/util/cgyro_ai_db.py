@@ -8,6 +8,7 @@ Provides database operations for the CGYRO AI database (SQLite).
 import os
 import json
 import sqlite3
+import numpy as np
 import pandas as pd
 from datetime import datetime
 
@@ -220,6 +221,121 @@ class AIDB:
             return dict(row)
         return None
 
+    def get_case_by_hash(self, input_hash):
+        """
+        Retrieve case by input hash (supports partial match)
+
+        Parameters:
+        -----------
+        input_hash : str
+            Input hash (full or first 8 characters)
+
+        Returns:
+        --------
+        dict or None : Case data or None if not found
+        """
+        cursor = self.conn.execute("""
+            SELECT * FROM cases WHERE input_hash LIKE ?
+        """, (input_hash + '%',))
+
+        row = cursor.fetchone()
+        if row:
+            return dict(row)
+        return None
+
+    def _build_filter_clause(self, filters):
+        """
+        Build SQL WHERE clause and parameters from filters dict
+
+        Parameters:
+        -----------
+        filters : dict
+            Filter dictionary
+
+        Returns:
+        --------
+        tuple : (sql_clause, params) to append to query
+        """
+        if not filters:
+            return '', []
+
+        sql_parts = []
+        params = []
+
+        for key, value in filters.items():
+            if isinstance(value, tuple) and len(value) == 2:
+                # Range query
+                sql_parts.append(f"m.{key} BETWEEN ? AND ?")
+                params.extend(value)
+            elif isinstance(value, str) and '%' in value:
+                # Pattern match
+                sql_parts.append(f"c.{key} LIKE ?")
+                params.append(value)
+            else:
+                # Exact match
+                sql_parts.append(f"m.{key} = ?")
+                params.append(value)
+
+        sql_clause = ' AND ' + ' AND '.join(sql_parts) if sql_parts else ''
+        return sql_clause, params
+
+    def get_complete_case(self, case_id):
+        """
+        Retrieve complete case record including all related data
+
+        Parameters:
+        -----------
+        case_id : int
+            Case ID
+
+        Returns:
+        --------
+        dict : Complete case record with metadata, species, flux, and provenance
+        """
+        # Get case info
+        cursor = self.conn.execute("SELECT * FROM cases WHERE case_id = ?", (case_id,))
+        row = cursor.fetchone()
+        if not row:
+            return None
+
+        result = dict(row)
+
+        # Get metadata
+        cursor = self.conn.execute("SELECT * FROM metadata WHERE case_id = ?", (case_id,))
+        metadata_row = cursor.fetchone()
+        if metadata_row:
+            result['metadata'] = dict(metadata_row)
+            # Parse species data from JSON
+            if 'species_data' in result['metadata']:
+                result['species'] = json.loads(result['metadata']['species_data'])
+                del result['metadata']['species_data']
+
+        # Get flux data
+        cursor = self.conn.execute("""
+            SELECT * FROM fluxes WHERE case_id = ? ORDER BY species_idx
+        """, (case_id,))
+        flux_rows = cursor.fetchall()
+        if flux_rows:
+            result['fluxes'] = []
+            for flux_row in flux_rows:
+                flux_dict = dict(flux_row)
+                # Parse JSON arrays
+                flux_dict['particle_flux'] = json.loads(flux_dict['particle_flux'])
+                flux_dict['energy_flux'] = json.loads(flux_dict['energy_flux'])
+                flux_dict['momentum_flux'] = json.loads(flux_dict['momentum_flux'])
+                result['fluxes'].append(flux_dict)
+
+        # Get provenance
+        cursor = self.conn.execute("SELECT * FROM provenance WHERE case_id = ?", (case_id,))
+        prov_row = cursor.fetchone()
+        if prov_row:
+            result['provenance'] = dict(prov_row)
+            # Parse file_hashes from JSON
+            if 'file_hashes' in result['provenance']:
+                result['provenance']['file_hashes'] = json.loads(result['provenance']['file_hashes'])
+
+        return result
+
     def query(self, filters=None, show_fields='minimal'):
         """
         Query database with filters
@@ -273,21 +389,8 @@ class AIDB:
             WHERE 1=1
         """
 
-        params = []
-        if filters:
-            for key, value in filters.items():
-                if isinstance(value, tuple) and len(value) == 2:
-                    # Range query
-                    sql += f" AND m.{key} BETWEEN ? AND ?"
-                    params.extend(value)
-                elif isinstance(value, str) and '%' in value:
-                    # Pattern match
-                    sql += f" AND c.{key} LIKE ?"
-                    params.append(value)
-                else:
-                    # Exact match
-                    sql += f" AND m.{key} = ?"
-                    params.append(value)
+        filter_clause, params = self._build_filter_clause(filters)
+        sql += filter_clause
 
         df = pd.read_sql_query(sql, self.conn, params=params)
 
@@ -321,9 +424,9 @@ class AIDB:
         row = cursor.fetchone()
         if row:
             return {
-                'particle': json.loads(row[1]),
-                'energy': json.loads(row[2]),
-                'momentum': json.loads(row[3]),
+                'particle': json.loads(row[0]),
+                'energy': json.loads(row[1]),
+                'momentum': json.loads(row[2]),
             }
         return None
 
@@ -360,18 +463,8 @@ class AIDB:
             WHERE 1=1
         """
 
-        params = []
-        if filters:
-            for key, value in filters.items():
-                if isinstance(value, tuple) and len(value) == 2:
-                    case_ids_sql += f" AND m.{key} BETWEEN ? AND ?"
-                    params.extend(value)
-                elif isinstance(value, str) and '%' in value:
-                    case_ids_sql += f" AND c.{key} LIKE ?"
-                    params.append(value)
-                else:
-                    case_ids_sql += f" AND m.{key} = ?"
-                    params.append(value)
+        filter_clause, params = self._build_filter_clause(filters)
+        case_ids_sql += filter_clause
 
         case_mapping = pd.read_sql_query(case_ids_sql, self.conn, params=params)
         path_to_id = dict(zip(case_mapping['case_path'], case_mapping['case_id']))
@@ -426,7 +519,6 @@ class AIDB:
                 for ftype in flux_types:
                     if ftype in flux_data:
                         # Store as sum (total flux across all ky modes)
-                        import numpy as np
                         total_flux = np.sum(flux_data[ftype])
                         col_name = f"s{sp_idx}_{ftype[0]}"  # e.g., s0_e for species 0 energy
                         if col_name not in df.columns:

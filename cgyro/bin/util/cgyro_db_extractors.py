@@ -53,15 +53,15 @@ def extract_metadata(sim):
         'zmag': float(sim.zmag),
         'dzmag': float(sim.dzmag),
 
-        # Plasma parameters
-        'rho': float(sim.rho),
+        # Resolution parameters
         'ky0': float(sim.ky0),
+
+        # Plasma parameters
         'betae_unit': float(sim.betae_unit),
         'beta_star': float(sim.beta_star),
         'gamma_e': float(sim.gamma_e),
         'gamma_p': float(sim.gamma_p),
         'mach': float(sim.mach),
-        'z_eff': float(sim.z_eff),
     }
 
     return metadata
@@ -132,7 +132,7 @@ def extract_flux(sim, time_window='0.5'):
             'fluxe': fluxe.tolist(),
             'fluxv': fluxv.tolist(),
             'time_window': time_window,
-            'time_max': int(sim.t[-1])
+            'time_max': float(sim.t[-1])
 
         }
         fluxes.append(flux_dict)
