@@ -65,7 +65,7 @@ def scan_and_update(db, root_dir, include_flux=False, ignore=['global', 'linear'
     for case_path in tqdm(cases_found, desc="Processing cases"):
         try:
             # Compute hashes for change detection
-            hash_tag = compute_file_hash(os.path.join(case_path, 'out.cgyro.tag'))
+            hash_tag = compute_file_hash(os.path.join(case_path, 'bin.cgyro.freq'))
             hash_time = compute_file_hash(os.path.join(case_path, 'out.cgyro.time'))
 
             if hash_tag is None or hash_time is None:
@@ -117,7 +117,9 @@ def process_new_case(db, case_path, hash_tag, hash_time, include_flux):
         flux = extract_flux(sim, time_window='0.5')
 
     # Extract provenance
-    provenance = extract_provenance(case_path)
+    t_final = float(sim.t[-1]) if len(sim.t) > 0 else None
+    i_final = len(sim.t) if len(sim.t) > 0 else None
+    provenance = extract_provenance(case_path, t_final, i_final)
 
     # Insert into database
     db.insert_case(
@@ -146,7 +148,9 @@ def update_existing_case(db, case_id, case_path, hash_tag, hash_time, include_fl
         flux = extract_flux(sim, time_window='0.5')
 
     # Extract provenance
-    provenance = extract_provenance(case_path)
+    t_final = float(sim.t[-1]) if len(sim.t) > 0 else None
+    i_final = len(sim.t) if len(sim.t) > 0 else None
+    provenance = extract_provenance(case_path, t_final, i_final)
 
     # Update database
     db.update_case(
@@ -222,8 +226,8 @@ def show_info(db_path=None):
 
     provenance_source = inspect.getsource(extract_provenance)
     print("  input_hash           <- MD5 hash of input.cgyro (UNIQUE INPUT ID)")
-    print("  t_current            <- out.cgyro.tag (simulation end time)")
-    print("  i_current            <- out.cgyro.tag (timestep index)")
+    print("  t_final              <- sim.t[-1] (final simulation time)")
+    print("  i_final              <- len(sim.t) (number of time steps)")
     print("  created_timestamp    <- file creation time")
     print("  modified_timestamp   <- file modification time")
     print("  n_restarts           <- count of bin.cgyro.restart* files")

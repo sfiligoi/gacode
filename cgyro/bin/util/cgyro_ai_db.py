@@ -81,7 +81,7 @@ class AIDB:
         case_path : str
             Relative path to simulation directory
         hash_tag : str
-            MD5 hash of out.cgyro.tag
+            MD5 hash of bin.cgyro.freq
         hash_time : str
             MD5 hash of out.cgyro.time
         metadata : dict
@@ -102,10 +102,10 @@ class AIDB:
         # Insert into cases table
         cursor = self.conn.execute("""
             INSERT INTO cases (case_path, case_name, input_hash, hash_tag, hash_time,
-                             t_current, i_current, git_version)
+                             t_final, i_final, git_version)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """, (case_path, case_name, provenance.get('input_hash'), hash_tag, hash_time,
-              provenance.get('t_current'), provenance.get('i_current'), git_version))
+              provenance.get('t_final'), provenance.get('i_final'), git_version))
 
         case_id = cursor.lastrowid
 
@@ -160,7 +160,7 @@ class AIDB:
         """, (case_id,
               provenance.get('created_timestamp'),
               provenance.get('modified_timestamp'),
-              provenance.get('t_current'),
+              provenance.get('t_final'),
               provenance.get('n_restarts'),
               provenance.get('file_hashes')))
 
@@ -178,10 +178,10 @@ class AIDB:
         self.conn.execute("""
             UPDATE cases
             SET input_hash = ?, hash_tag = ?, hash_time = ?, last_updated = CURRENT_TIMESTAMP,
-                t_current = ?, i_current = ?
+                t_final = ?, i_final = ?
             WHERE case_id = ?
-        """, (provenance.get('input_hash'), hash_tag, hash_time, provenance.get('t_current'),
-              provenance.get('i_current'), case_id))
+        """, (provenance.get('input_hash'), hash_tag, hash_time, provenance.get('t_final'),
+              provenance.get('i_final'), case_id))
 
         # Delete and re-insert metadata
         self.conn.execute("DELETE FROM metadata WHERE case_id = ?", (case_id,))
@@ -251,7 +251,7 @@ class AIDB:
             select_clause = """
                 SELECT c.case_path,
                        SUBSTR(c.input_hash, 1, 8) as input_hash,
-                       c.t_current, c.i_current,
+                       c.t_final, c.i_final,
                        m.q, m.shear, m.kappa, m.delta, m.shift,
                        m.n_n, m.n_radial, m.n_theta, m.n_species, m.n_field,
                        m.beta_star, m.gamma_e, m.gamma_p, m.mach,
@@ -261,7 +261,7 @@ class AIDB:
             select_clause = """
                 SELECT c.case_path,
                        SUBSTR(c.input_hash, 1, 8) as input_hash,
-                       c.t_current,
+                       c.t_final,
                        m.q, m.shear, m.kappa, m.delta,
                        m.n_n, m.n_radial, m.n_theta, m.n_species,
                        m.beta_star, m.gamma_e

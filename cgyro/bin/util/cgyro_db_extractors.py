@@ -196,7 +196,7 @@ def compute_input_hash(case_path):
     return compute_file_hash(input_file, algorithm='md5')
 
 
-def extract_provenance(case_path):
+def extract_provenance(case_path, t_final, i_final):
     """
     Extract simulation provenance information
 
@@ -204,36 +204,26 @@ def extract_provenance(case_path):
     -----------
     case_path : str
         Path to simulation directory
+    t_final : float
+        Final simulation time (sim.t[-1])
+    i_final : int
+        Number of time steps (len(sim.t))
 
     Returns:
     --------
     dict : Provenance data including timestamps, simulation state, file hashes
     """
-    tag_file = os.path.join(case_path, 'out.cgyro.tag')
-
-    # Extract simulation state from tag file
-    t_current = None
-    i_current = None
-
-    if os.path.exists(tag_file):
-        try:
-            with open(tag_file, 'r') as f:
-                lines = f.readlines()
-                if len(lines) >= 2:
-                    i_current = int(lines[0].strip())
-                    t_current = float(lines[1].strip())
-        except Exception as e:
-            print(f"Warning: Could not read {tag_file}: {e}")
+    time_file = os.path.join(case_path, 'out.cgyro.time')
 
     # Get file modification times
     created_timestamp = None
     modified_timestamp = None
 
-    if os.path.exists(tag_file):
-        modified_timestamp = os.path.getmtime(tag_file)
+    if os.path.exists(time_file):
+        modified_timestamp = os.path.getmtime(time_file)
         # Use creation time if available, else use modified time
         try:
-            created_timestamp = os.path.getctime(tag_file)
+            created_timestamp = os.path.getctime(time_file)
         except:
             created_timestamp = modified_timestamp
 
@@ -250,7 +240,7 @@ def extract_provenance(case_path):
 
     # Compute hashes of key output files for change detection
     file_hashes = {}
-    key_files = ['out.cgyro.tag', 'out.cgyro.time', 'out.cgyro.prec']
+    key_files = ['bin.cgyro.freq', 'out.cgyro.time', 'out.cgyro.prec']
     for fname in key_files:
         fpath = os.path.join(case_path, fname)
         h = compute_file_hash(fpath)
@@ -258,8 +248,8 @@ def extract_provenance(case_path):
             file_hashes[fname] = h
 
     provenance = {
-        't_current': t_current,
-        'i_current': i_current,
+        't_final': t_final,
+        'i_final': i_final,
         'created_timestamp': created_timestamp,
         'modified_timestamp': modified_timestamp,
         'n_restarts': restart_count,

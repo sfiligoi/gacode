@@ -98,6 +98,7 @@ else:
 # Directory copy
 exfiles = ['bin.cgyro.restart',
            'bin.cgyro.restart.old',
+           'bin.cgyro.restart.part',
            'halt',
            'gyrotest_flag',
            'out.log']

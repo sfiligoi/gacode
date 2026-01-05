@@ -11,8 +11,8 @@ CREATE TABLE IF NOT EXISTS cases (
     hash_tag TEXT,
     hash_time TEXT,
     last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    t_current REAL,
-    i_current INTEGER,
+    t_final REAL,
+    i_final INTEGER,
     git_version TEXT
 );
 
@@ -105,7 +105,7 @@ SELECT
     c.case_path,
     c.case_name,
     c.last_updated,
-    c.t_current,
+    c.t_final,
     m.q,
     m.shear,
     m.kappa,
