@@ -290,6 +290,43 @@ def get_git_version(directory):
     return None
 
 
+def is_linear_simulation(directory):
+    """
+    Check if a CGYRO simulation is linear (not nonlinear)
+
+    Reads input.cgyro.gen and checks for "0  NONLINEAR_FLAG" which indicates linear.
+
+    Parameters:
+    -----------
+    directory : str
+        Directory path to check
+
+    Returns:
+    --------
+    bool : True if simulation is linear (should be skipped)
+    """
+    input_gen = os.path.join(directory, 'input.cgyro.gen')
+
+    if not os.path.exists(input_gen):
+        # If input.cgyro.gen doesn't exist, assume nonlinear
+        return False
+
+    try:
+        with open(input_gen, 'r') as f:
+            for line in f:
+                # Look for NONLINEAR_FLAG line
+                if 'NONLINEAR_FLAG' in line:
+                    # Check if starts with 0 (linear) or 1 (nonlinear)
+                    parts = line.split()
+                    if len(parts) >= 2 and parts[0] == '0':
+                        return True  # Linear simulation
+                    break
+    except:
+        pass
+
+    return False  # Assume nonlinear if can't determine
+
+
 def is_cgyro_case(directory):
     """
     Check if a directory is a valid CGYRO simulation case

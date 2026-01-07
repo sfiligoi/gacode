@@ -83,6 +83,12 @@ then
   echo "         --ai"
   echo "         AI database manager"
   echo
+  echo "         --ml"
+  echo "         Machine learning tool"
+  echo
+  echo "         --dbplot"
+  echo "         Interactive database plotter"
+  echo
   echo "         --json"
   echo "         Input manager and converter"
   echo
@@ -147,6 +153,10 @@ while [ $# -gt 0 ] ; do
   --converge) $UTIL_DIR/cgyro_converge $uarg ; exit 0 ;;
 
   --ai) $UTIL_DIR/cgyro_ai $uarg ; exit 0 ;;
+
+  --ml) $UTIL_DIR/cgyro_ml $uarg ; exit 0 ;;
+
+  --dbplot) $UTIL_DIR/cgyro_dbplot $uarg ; exit 0 ;;
 
   --dmd) $UTIL_DIR/cgyro_dmd $uarg ; exit 0 ;;
 
