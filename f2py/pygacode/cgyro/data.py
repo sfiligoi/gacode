@@ -418,6 +418,12 @@ class cgyrodata:
       mark = mark+self.n_n
       self.radialdiss = np.array(data[mark:mark+self.n_radial])
 
+      mark = mark+self.n_radial
+      self.hiprec_flag = int(data[mark])
+
+      mark = mark+1
+      self.dealias = float(data[mark])
+ 
       if not self.silent:
          print('INFO: (getgrid) Read grid data in out.cgyro.grids')
       #-----------------------------------------------------------------

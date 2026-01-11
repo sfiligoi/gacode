@@ -701,12 +701,12 @@ def main():
     """Main entry point for cgyro_ml CLI"""
     mytext = '''\
     examples:
-       cgyro_ml train -db ~/.cgyro/cgyro_ai.db -o model.pkl
+       cgyro_ml train -db ~/.cgyro/cgyro.db -o model.pkl
        cgyro_ml train -db mydata.db -model gp -qmin 0.1 -qmax 100.0
 
        cgyro_ml info -model model.pkl
 
-       cgyro_ml evaluate -model model.pkl -db ~/.cgyro/cgyro_ai.db -plot
+       cgyro_ml evaluate -model model.pkl -db ~/.cgyro/cgyro.db -plot
        cgyro_ml evaluate -model model.pkl -db mydata.db -plot -o results.png
 
        cgyro_ml suggest -model model.pkl -n 50 -strategy uncertainty
@@ -717,7 +717,7 @@ def main():
        2. Evaluate: cgyro_ml evaluate -model model.pkl -db database.db -plot
        3. Suggest:  cgyro_ml suggest -model model.pkl -n 50 -o new_cases/
        4. Run CGYRO on suggested cases
-       5. Update:   cgyro --ai -scan -flux
+       5. Update:   cgyro --db -scan -flux
        6. Retrain:  cgyro_ml train -db database.db -o model_v2.pkl
 
     current scope:
@@ -740,7 +740,7 @@ def main():
     # Train command
     train_parser = subparsers.add_parser('train', help='Train ML model from database')
     train_parser.add_argument('-db', '--database', required=True,
-                              help='Path to CGYRO AI database')
+                              help='Path to CGYRO database')
     train_parser.add_argument('-o', '--output', default='cgyro_model.pkl',
                               help='Output model file (default: cgyro_model.pkl)')
     train_parser.add_argument('-model', '--model-type', default='gp',
@@ -761,7 +761,7 @@ def main():
     eval_parser.add_argument('-model', '--model', required=True,
                             help='Trained model file')
     eval_parser.add_argument('-db', '--database', required=True,
-                            help='Path to CGYRO AI database')
+                            help='Path to CGYRO database')
     eval_parser.add_argument('-plot', action='store_true',
                             help='Generate evaluation plots')
     eval_parser.add_argument('-o', '--output', default='cgyro_ml_evaluation.png',
@@ -889,8 +889,8 @@ def main():
         print(f"  1. Review suggested parameters in {args.output}/")
         print(f"  2. Create CGYRO input files from these parameters")
         print(f"  3. Run CGYRO simulations")
-        print(f"  4. Add results to database with: cgyro --ai -scan -flux")
-        print(f"  5. Retrain model with: cgyro --ml train -db <database>")
+        print(f"  4. Add results to database with: cgyro --db -scan -flux")
+        print(f"  5. Retrain model with: cgyro_ml train -db <database>")
 
     else:
         parser.print_help()

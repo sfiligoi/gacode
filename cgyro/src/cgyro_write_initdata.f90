@@ -303,6 +303,7 @@ subroutine cgyro_write_initdata
      write(io,'(1pe13.6)') (spectraldiss((pi/n_toroidal)*in,nup_alpha),in=0,n_toroidal-1)
      write(io,'(1pe13.6)') (spectraldiss((2*pi/n_radial)*p,nup_radial),p=-n_radial/2,n_radial/2-1)
      write(io,'(i0)') hiprec_flag
+     write(io,'(1pe13.6)') dealias
      close(io)
      deallocate(px)
 

@@ -80,8 +80,8 @@ then
   echo "         --converge"
   echo "         Check convergence"
   echo
-  echo "         --ai"
-  echo "         AI database manager"
+  echo "         --db"
+  echo "         Database manager"
   echo
   echo "         --ml"
   echo "         Machine learning tool"
@@ -152,7 +152,7 @@ while [ $# -gt 0 ] ; do
 
   --converge) $UTIL_DIR/cgyro_converge $uarg ; exit 0 ;;
 
-  --ai) $UTIL_DIR/cgyro_ai $uarg ; exit 0 ;;
+  --db) $UTIL_DIR/cgyro_db $uarg ; exit 0 ;;
 
   --ml) $UTIL_DIR/cgyro_ml $uarg ; exit 0 ;;
 
