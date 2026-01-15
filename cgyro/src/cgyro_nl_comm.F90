@@ -61,7 +61,7 @@ subroutine cgyro_nl_dealias_init
 
   ! allocate eventual itor==0, too, to make it easier to use
   allocate(dealias_pvec_count(l0_max,nt1:nt2))
-  allocate(dealias_pvec(l0_max,max_pvec_count,nt1:nt2))
+  allocate(dealias_pvec(l0_max,nt1:nt2))
 
   ! now do the full compute on global buffers
   ! cheap, since done only once, do on CPU
@@ -75,7 +75,10 @@ subroutine cgyro_nl_dealias_init
       do p=-m,m-1
         l = mod(mod(p,l0)+l0,l0)+1
         dealias_pvec_count(l,itor) = dealias_pvec_count(l,itor)+1
-        dealias_pvec(l,dealias_pvec_count(l,itor),itor) = p
+        if (dealias_pvec_count(l,itor)==1) then
+          dealias_pvec(l,itor) = p
+        ! else, we already know p == dealias_pvec(l,itor) + (dealias_pvec_count(l,itor)-1)*l0
+        endif
       enddo
   enddo
 
@@ -163,7 +166,7 @@ end subroutine impfilter5_i0
 
 ! guaranteed that itor/=0
 subroutine impfilter5_n0(&
-                    n_theta,n_radial,n_3d,nt1,nt2,max_pvec_count,&
+                    n_theta,n_radial,n_3d,nt1,nt2,&
                     a0,a1,a2,a3,m,phase,box_size,sign_qs,&
                     pvec_count,pvec,&
                     fraw,fex,f,itor_offset)
@@ -172,12 +175,11 @@ subroutine impfilter5_n0(&
 
   integer, intent(in) :: n_theta,n_radial,n_3d
   integer, intent(in) :: nt1,nt2
-  integer, intent(in) :: max_pvec_count
   real, intent(in) :: a0,a1,a2,a3
   integer, intent(in) :: m
   real, intent(in) :: phase
   integer, intent(in) :: box_size,sign_qs
-  integer, intent(in) :: pvec_count(:,:),pvec(:,:,:)
+  integer, intent(in) :: pvec_count(:,:),pvec(:,:)
   ! both are (n_radial,n_theta,:,itor_offset:(nt2-itor_offset))
   complex, intent(in) :: fraw(:,:,:,:)
   complex, intent(inout) :: fex(:,:,:)
@@ -186,7 +188,7 @@ subroutine impfilter5_n0(&
   ! -------------
   integer :: itor,i3d
   integer :: ir,it,panel,iex
-  integer :: l0,l,p,nex,npanel
+  integer :: l0,l,p0,p,nex,npanel
   integer :: jm1,jm2,jm3,jp1,jp2,jp3
   complex, parameter :: i_c  = (0.0,1.0)
   complex :: fval
@@ -197,7 +199,7 @@ subroutine impfilter5_n0(&
 #elif defined(_OPENACC)
 !$acc parallel loop gang collapse(2) &
 !$acc&         present(pvec_count,pvec,fraw,fex,f) &
-!$acc&         private(l0,l,npanel,nex)
+!$acc&         private(l0,l,npanel,nex,p0)
 #else
 !$omp parallel do collapse(2) default(firstprivate)&
 !$omp&         shared(pvec_count,pvec,fraw,fex,f)
@@ -215,21 +217,22 @@ subroutine impfilter5_n0(&
   ! nothing to do, no omp seq avail
 #elif defined(_OPENACC)
 !$acc loop seq &
-!$acc&         private(npanel,nex)
+!$acc&         private(npanel,nex,p0)
 #endif
   do l=1,l0
      npanel = pvec_count(l,itor-itor_offset)
+     p0 = pvec(l,itor-itor_offset)
      nex = n_theta*npanel
 #if defined(OMPGPU)
 !$omp parallel do collapse(2) default(firstprivate)&
-!$omp&         shared(fraw,fex,pvec)
+!$omp&         shared(fraw,fex)
 #elif defined(_OPENACC)
 !$acc loop vector collapse(2) &
 !$acc&         private(p,it,iex,ir)
 #endif
      do panel=1,npanel
         do it=1,n_theta
-           p = pvec(l,panel,itor-itor_offset)
+           p = p0 + (panel-1)*l0
            if (sign_qs > 0.0) then 
               ir = p+m+1
            else
@@ -242,7 +245,7 @@ subroutine impfilter5_n0(&
      enddo
 #if defined(OMPGPU)
 !$omp parallel do default(firstprivate)&
-!$omp&         shared(f,fex,pvec)
+!$omp&         shared(f,fex)
 #elif defined(_OPENACC)
 !$acc loop vector &
 !$acc&         private(jm1,jm2,jm3,jp1,jp2,jp3) &
@@ -262,7 +265,7 @@ subroutine impfilter5_n0(&
         ! ir = p+m+1
         it = 1+modulo(iex-1,n_theta)
         panel = 1+(iex-1)/n_theta
-        p = pvec(l,panel,itor-itor_offset)
+        p = p0+ (panel-1)*l0
         if (sign_qs > 0.0) then
            ir = p+m+1
         else
@@ -288,7 +291,6 @@ end subroutine impfilter5_n0
 
 subroutine impfilter5(&
                     n_theta,n_radial,n_3d,nt1,nt2,&
-                    max_pvec_count,&
                     dealias_order,dealias,&
                     box_size,q,sign_qs,&
                     pvec_count,pvec,&
@@ -297,13 +299,12 @@ subroutine impfilter5(&
   implicit none
 
   integer, intent(in) :: n_theta,n_radial,n_3d,nt1,nt2
-  integer, intent(in) :: max_pvec_count
   integer, intent(in) :: dealias_order
   real, intent(in) :: dealias
   integer, intent(in) :: box_size
   real, intent(in) :: q
   integer, intent(in) :: sign_qs
-  integer, intent(in) :: pvec_count(:,:),pvec(:,:,:)
+  integer, intent(in) :: pvec_count(:,:),pvec(:,:)
   ! both are (n_radial,n_theta,:,1:(nt2-nt1+1))
   complex, intent(in) :: fraw(:,:,:,:)
   complex, intent(inout) :: fex(:,:,:)
@@ -359,7 +360,7 @@ subroutine impfilter5(&
      ! Phase factor (JC: is q*sign_qs correct?)
      phase = 2.0*pi*(q*sign_qs)/box_size
 
-     call impfilter5_n0(n_theta,n_radial,n_3d,nstart,nt2,max_pvec_count,&
+     call impfilter5_n0(n_theta,n_radial,n_3d,nstart,nt2,&
                         a0,a1,a2,a3,m,phase,box_size,sign_qs,&
                         pvec_count,pvec,&
                         fraw,fex,f,nt1-1)
@@ -417,7 +418,7 @@ subroutine hx_dealias
     enddo
    enddo
    ! Extended-angle dealiasing filter
-   call impfilter5(n_theta,n_radial,nv_loc,nt1,nt2,max_pvec_count,&
+   call impfilter5(n_theta,n_radial,nv_loc,nt1,nt2,&
                   dealias_order,dealias,&
                   box_size,q,sign_qs,&
                   dealias_pvec_count,dealias_pvec,&
@@ -476,7 +477,7 @@ subroutine field_dealias
     enddo
    enddo
    ! Extended angle dealiasing filter
-   call impfilter5(n_theta,n_radial,n_field,nt1,nt2,max_pvec_count,&
+   call impfilter5(n_theta,n_radial,n_field,nt1,nt2,&
                   dealias_order,dealias,&
                   box_size,q,sign_qs,&
                   dealias_pvec_count,dealias_pvec,&

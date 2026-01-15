@@ -384,7 +384,7 @@ module cgyro_globals
   ! NL dealias variables
   integer :: max_pvec_count
   integer, dimension(:,:), allocatable :: dealias_pvec_count
-  integer, dimension(:,:,:), allocatable :: dealias_pvec
+  integer, dimension(:,:), allocatable :: dealias_pvec
   complex, dimension(:,:,:,:), allocatable :: inraw_dealias
   complex, dimension(:,:,:), allocatable :: fex_dealias
   complex, dimension(:,:,:,:), allocatable :: outraw_dealias
