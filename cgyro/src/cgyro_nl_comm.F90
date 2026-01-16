@@ -17,9 +17,7 @@ subroutine cgyro_nl_dealias_init
 
   implicit none
 
-  integer :: itor,l0,l,p,m,l0_max,nt1_nz
-  ! max_l0 = box_size*nt2
-  integer :: pvec_count(box_size*nt2) !local, temp copy
+  integer :: itor,l0,l,p,m,l0_max,nt1_nz,l0_mm
 
   ! Wavenumber M from CGYRO paper
   m = n_radial/2
@@ -30,30 +28,6 @@ subroutine cgyro_nl_dealias_init
   else
     nt1_nz = nt1
   endif
-
-  !
-  ! max_pvec_count is global and we are defining it here
-  !
-  ! We will have arrays that depend on this later on
-  ! so, precompute early
-  !
-  max_pvec_count = 1 ! make it >0, to always have valid arrays
-
-  do itor=nt1_nz,nt2
-      ! Total number of ballooning angles for finite-n ballooning mode
-      l0 = box_size*itor
-
-      pvec_count(1:l0) = 0
-
-      ! Sort p indices by ballooning angle index l
-      do p=-m,m-1
-         l = mod(mod(p,l0)+l0,l0)+1
-         pvec_count(l) = pvec_count(l)+1
-         if (pvec_count(l) > max_pvec_count) then
-           max_pvec_count = pvec_count(l)
-         endif
-      enddo
-  enddo
 
   ! pre-compute pvec vectors, since they are re-used often
   l0_max = box_size*nt2
@@ -68,12 +42,13 @@ subroutine cgyro_nl_dealias_init
   do itor=nt1_nz,nt2 ! we can leave eventual itor==0 unitialized, not used
       ! Total number of ballooning angles for finite-n ballooning mode
       l0 = box_size*itor
+      l0_mm = (m/l0 +1)*l0 ! multiple of l0, used in modulo(:,l0), >=m
 
       dealias_pvec_count(:,itor) = 0
 
       ! Sort p indices by ballooning angle index l
       do p=-m,m-1
-        l = mod(mod(p,l0)+l0,l0)+1
+        l = mod(p+l0_mm,l0)+1 ! +l0_mm to ensure mod is positive
         dealias_pvec_count(l,itor) = dealias_pvec_count(l,itor)+1
         if (dealias_pvec_count(l,itor)==1) then
           dealias_pvec(l,itor) = p

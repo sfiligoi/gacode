@@ -382,7 +382,6 @@ module cgyro_globals
   integer :: tave_step
   integer :: nflux
   ! NL dealias variables
-  integer :: max_pvec_count
   integer, dimension(:,:), allocatable :: dealias_pvec_count
   integer, dimension(:,:), allocatable :: dealias_pvec
   complex, dimension(:,:,:,:), allocatable :: inraw_dealias
