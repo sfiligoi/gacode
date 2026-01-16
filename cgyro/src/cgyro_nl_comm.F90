@@ -162,7 +162,7 @@ subroutine impfilter5_n0(&
   integer :: ir,it,panel,iex
   integer :: l0,l,p0,p,nex,npanel
   integer :: jm1,jm2,jm3,jp1,jp2,jp3
-  integer :: pp,dpanel,dit
+  integer :: pp,dpanel,dit,dp,l0_mm
   complex, parameter :: i_c  = (0.0,1.0)
   complex :: fval,ep
   complex :: vx,vxm1,vxm2,vxm3,vxp1,vxp2,vxp3
@@ -182,7 +182,8 @@ subroutine impfilter5_n0(&
    do i3d=1,n_3d
     do dit=1,n_theta
 
-  l0 = itor*box_size
+     l0 = itor*box_size
+     l0_mm = (m/l0 +1)*l0 ! multiple of l0, used in modulo(:,l0), >=m
 
   ! Construct ballooning modes
   ! all _ex quantities refer to extended angle
@@ -197,11 +198,14 @@ subroutine impfilter5_n0(&
 !$acc&         private(vxm1,vxm2,vxm3,vxp1,vxp2,vxp3,vx) &
 !$acc&         private(npanel,p0,nex,it,panel,p,pp,ir,ep,fval)
 #endif
-   do l=1,l0
-     npanel = pvec_count(l,itor-itor_offset)
-     p0 = pvec(l,itor-itor_offset)
-     nex = n_theta*npanel
-     do dpanel=1,npanel
+      do dp=-m,m-1
+        l = mod(dp+l0_mm,l0)+1 ! +l0_mm to ensure mod is positive
+        npanel = pvec_count(l,itor-itor_offset)
+        p0 = pvec(l,itor-itor_offset)
+        nex = n_theta*npanel
+        !dp = p0+ (dpanel-1)*l0
+        dpanel = 1 + (dp-p0)/l0
+
         iex = (dpanel-1)*n_theta+dit
         
         jm1 = iex-1; if (jm1 < 1) jm1 = nex
@@ -287,16 +291,16 @@ subroutine impfilter5_n0(&
         pp = p
         vxp3 = fraw(ir,it,i3d,itor-itor_offset)*ep
 
-        it = 1+modulo(iex-1,n_theta)
-        panel = 1+(iex-1)/n_theta
-        p = p0+ (panel-1)*l0
+        it = dit !1+modulo(iex-1,n_theta)
+        !panel = 1+(iex-1)/n_theta
+        p = dp ! p0+ (panel-1)*l0
         if (sign_qs > 0.0) then
            ir = p+m+1
         else
            ir = n_radial-(p+m)
         endif
         if (p/=pp) ep = exp(-i_c*p*phase)
-        pp = p
+        !pp = p
         vx = fraw(ir,it,i3d,itor-itor_offset)*ep
 
         ! filter
@@ -307,10 +311,8 @@ subroutine impfilter5_n0(&
              a3*(vxm3+vxp3)
 
         ! dephase
-        ! note dit==it
         f(ir,it,i3d,itor-itor_offset) = fval*CONJG(ep)
-     enddo
-  enddo
+     enddo ! dp=-1,m-1
 
     enddo !dit=1,n_theta
    enddo !do i3d=1,n_3d
