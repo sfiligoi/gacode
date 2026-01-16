@@ -332,10 +332,6 @@ subroutine cgyro_cleanup
      ccl_del_device(outraw_dealias)     
      deallocate(outraw_dealias)
   endif
-  if(allocated(fex_dealias))  then
-     ccl_del_device(fex_dealias)     
-     deallocate(fex_dealias)
-  endif
 
 #ifndef CGYRO_GPU_FFT
   if(allocated(fx32))                deallocate(fx32)
