@@ -193,18 +193,19 @@ subroutine impfilter5_n0(&
   complex :: vx,vxm1,vxm2,vxm3,vxp1,vxp2,vxp3
 
 #if defined(OMPGPU)
-!$omp target teams distribute collapse(2) default(firstprivate)&
+!$omp target teams distribute collapse(3) default(firstprivate)&
 !$omp&         shared(pvec_count,pvec,fraw,f)
 #elif defined(_OPENACC)
-!$acc parallel loop gang collapse(2) &
+!$acc parallel loop gang collapse(3) &
 !$acc&         present(pvec_count,pvec,fraw,f) &
-!$acc&         private(l0,l,npanel,nex,p0)
+!$acc&         private(l0,l)
 #else
-!$omp parallel do collapse(2) default(firstprivate)&
+!$omp parallel do collapse(3) default(firstprivate)&
 !$omp&         shared(pvec_count,pvec,fraw,f)
 #endif
   do itor=nt1,nt2
-    do i3d=1,n_3d
+   do i3d=1,n_3d
+    do dit=1,n_theta
 
   l0 = itor*box_size
 
@@ -213,25 +214,19 @@ subroutine impfilter5_n0(&
   ! nex = total number of points along extended angle
   ! iex = extended angle index
 #if defined(OMPGPU)
-  ! nothing to do, no omp seq avail
-#elif defined(_OPENACC)
-!$acc loop seq &
-!$acc&         private(npanel,nex,p0)
-#endif
-  do l=1,l0
-     npanel = pvec_count(l,itor-itor_offset)
-     p0 = pvec(l,itor-itor_offset)
-     nex = n_theta*npanel
-#if defined(OMPGPU)
 !$omp parallel do default(firstprivate)&
-!$omp&         shared(f,fraw)
+!$omp&         shared(f,fraw,pvec_count,pvec)
 #elif defined(_OPENACC)
 !$acc loop vector &
 !$acc&         private(jm1,jm2,jm3,jp1,jp2,jp3) &
-!$acc&         private(it,panel,p,ir,fval)
+!$acc&         private(vxm1,vxm2,vxm3,vxp1,vxp2,vxp3,vx) &
+!$acc&         private(npanel,p0,nex,it,panel,p,pp,ir,ep,fval)
 #endif
+   do l=1,l0
+     npanel = pvec_count(l,itor-itor_offset)
+     p0 = pvec(l,itor-itor_offset)
+     nex = n_theta*npanel
      do dpanel=1,npanel
-      do dit=1,n_theta
         iex = (dpanel-1)*n_theta+dit
         
         jm1 = iex-1; if (jm1 < 1) jm1 = nex
@@ -337,11 +332,12 @@ subroutine impfilter5_n0(&
              a3*(vxm3+vxp3)
 
         ! dephase
+        ! note dit==it
         f(ir,it,i3d,itor-itor_offset) = fval*CONJG(ep)
-      enddo
      enddo
   enddo
 
+    enddo !dit=1,n_theta
    enddo !do i3d=1,n_3d
   enddo !do itor=nt1,nt2
 end subroutine impfilter5_n0
