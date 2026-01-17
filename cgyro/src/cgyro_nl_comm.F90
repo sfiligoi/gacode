@@ -27,8 +27,8 @@ subroutine cgyro_nl_dealias_init
   integer, dimension(:), allocatable :: dealias_fex_ir
   integer, dimension(:), allocatable :: dealias_fex_it
   complex, dimension(:), allocatable :: dealias_fex_ph
-  integer, dimension(:,:), allocatable :: dealias_pvec_count
-  integer, dimension(:,:,:), allocatable :: dealias_pvec
+  integer, dimension(:), allocatable :: dealias_pvec_count
+  integer, dimension(:,:), allocatable :: dealias_pvec
 
   ! Wavenumber M from CGYRO paper
   m = n_radial/2
@@ -99,8 +99,8 @@ subroutine cgyro_nl_dealias_init
   if (l0_max==0) l0_max=1 ! need a valid array, even if not used
 
   ! allocate eventual itor==0, too, to make it easier to use
-  allocate(dealias_pvec_count(l0_max,nt1:nt2))
-  allocate(dealias_pvec(l0_max,max_pvec_count,nt1:nt2))
+  allocate(dealias_pvec_count(l0_max))
+  allocate(dealias_pvec(l0_max,max_pvec_count))
 
   ! now do the full compute on global buffers
   ! cheap, since done only once, do on CPU single threaded
@@ -108,13 +108,13 @@ subroutine cgyro_nl_dealias_init
       ! Total number of ballooning angles for finite-n ballooning mode
       l0 = box_size*itor
 
-      dealias_pvec_count(:,itor) = 0
+      dealias_pvec_count(:) = 0
 
       ! Sort p indices by ballooning angle index l
       do p=-m,m-1
         l = mod(mod(p,l0)+l0,l0)+1
-        dealias_pvec_count(l,itor) = dealias_pvec_count(l,itor)+1
-        dealias_pvec(l,dealias_pvec_count(l,itor),itor) = p
+        dealias_pvec_count(l) = dealias_pvec_count(l)+1
+        dealias_pvec(l,dealias_pvec_count(l)) = p
       enddo
 
       ! Construct ballooning modes
@@ -122,11 +122,11 @@ subroutine cgyro_nl_dealias_init
       ! nex = total number of points along extended angle
       ! iex = extended angle index
       do l=1,l0
-       npanel = dealias_pvec_count(l,itor)
+       npanel = dealias_pvec_count(l)
        nex = n_theta*npanel
        do panel=1,npanel
         do it=1,n_theta
-           p = dealias_pvec(l,panel,itor)
+           p = dealias_pvec(l,panel)
            if (sign_qs > 0.0) then 
               ir = p+m+1
            else
@@ -156,7 +156,7 @@ subroutine cgyro_nl_dealias_init
         ! ir = p+m+1
         it = 1+modulo(iex-1,n_theta)
         panel = 1+(iex-1)/n_theta
-        p = dealias_pvec(l,panel,itor)
+        p = dealias_pvec(l,panel)
         if (sign_qs > 0.0) then
            ir = p+m+1
         else
@@ -208,6 +208,9 @@ subroutine cgyro_nl_dealias_init
   deallocate(dealias_fex_ph)
   deallocate(dealias_fex_it)
   deallocate(dealias_fex_ir)
+
+  deallocate(dealias_pvec_count)
+  deallocate(dealias_pvec)
 
 end subroutine cgyro_nl_dealias_init
 
