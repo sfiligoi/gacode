@@ -266,20 +266,28 @@ subroutine impfilter5_n0(&
   complex :: fval,my_ph
 
 #if defined(OMPGPU)
-!$omp target teams distribute parallel do collapse(4) &
-!$omp&         private(fval,my_ph)
+!$omp target teams distribute parallel do collapse(3) &
+!$omp&         private(fval,my_ph,i3d)
+  do itor=nt1,nt2
+   do it=1,n_theta
+    do ir=1,n_radial
+     do i3d=1,n_3d  ! do sequentially, good for GPUs
 #elif defined(_OPENACC)
 !$acc parallel loop gang vector collapse(4) &
-!$acc&         private(fval,my_ph) &
+!$acc&         private(fval,my_ph,i3d) &
 !$acc&         present(fraw,f,dealias_raw_ir,dealias_raw_it,dealias_raw_ph)
+  do itor=nt1,nt2
+   do it=1,n_theta
+    do ir=1,n_radial
+     do i3d=1,n_3d  ! do sequentially, good for GPUs
 #else
 !$omp parallel do collapse(2) &
 !$omp&         private(fval,my_ph,ir,it)
-#endif
   do itor=nt1,nt2
    do i3d=1,n_3d
     do it=1,n_theta
      do ir=1,n_radial
+#endif
         ! ir == dealias_raw_ir(ir,it,0,itor)
         ! it == dealias_raw_it(ir,it,0,itor)
         my_ph = dealias_raw_ph(ir,it,0,itor)
