@@ -90,7 +90,6 @@ subroutine cgyro_nl_dealias_init
   allocate(dealias_fex_it(n_theta*max_pvec_count))
   allocate(dealias_fex_ph(n_theta*max_pvec_count))
 
-  ! allocate eventual itor==0, too, to make it easier to use
   allocate(dealias_raw_ir(n_radial,n_theta,-3:3,nt1:nt2))
   allocate(dealias_raw_it(n_radial,n_theta,-3:3,nt1:nt2))
   allocate(dealias_raw_ph(n_radial,n_theta,-3:3,nt1:nt2))
@@ -104,7 +103,7 @@ subroutine cgyro_nl_dealias_init
   allocate(dealias_pvec(l0_max,max_pvec_count,nt1:nt2))
 
   ! now do the full compute on global buffers
-  ! cheap, since done only once, do on CPU
+  ! cheap, since done only once, do on CPU single threaded
   do itor=nt1_nz,nt2 ! we can leave eventual itor==0 unitialized, not used
       ! Total number of ballooning angles for finite-n ballooning mode
       l0 = box_size*itor
@@ -169,15 +168,36 @@ subroutine cgyro_nl_dealias_init
           dealias_raw_it(ir,it,i,itor) = dealias_fex_it(dealias_iex(i))
           dealias_raw_ph(ir,it,i,itor) = dealias_fex_ph(dealias_iex(i))
         enddo
-        if (ir /= dealias_raw_ir(ir,it,0,itor)) then
-                write(*,*) "[i]Wrong ir ", ir, dealias_raw_ir(ir,it,0,itor), ir,it,dealias_iex(0)
-        endif
-        if (it /= dealias_raw_it(ir,it,0,itor)) then
-                write(*,*) "[i]Wrong it ", it, dealias_raw_it(ir,it,0,itor), ir,it,dealias_iex(0)
-        endif
        enddo ! do iex
       enddo ! do l
   enddo
+
+  if (nt1==0) then
+    ! itor=0 special case
+    ! Pure periodicity
+    itor = 0
+    do it=1,n_theta
+      do ir=1,n_radial
+        do i=-3,-1
+          dealias_raw_it(ir,it,i,itor) = it+i
+          if (dealias_raw_it(ir,it,i,itor) < 1) then
+            dealias_raw_it(ir,it,i,itor) = dealias_raw_it(ir,it,i,itor)+n_theta
+          endif
+        enddo 
+        dealias_raw_it(ir,it,i,itor) = it
+        do i=1,3
+          dealias_raw_it(ir,it,i,itor) = it+i
+          if (dealias_raw_it(ir,it,i,itor) > n_theta) then
+            dealias_raw_it(ir,it,i,itor) = dealias_raw_it(ir,it,i,itor)-n_theta
+          endif
+        enddo 
+        do i=-3,3
+          dealias_raw_ir(ir,it,i,itor) = ir
+          dealias_raw_ph(ir,it,i,itor) = 1.0
+        enddo
+      enddo
+    enddo
+  endif
 
 #if defined(OMPGPU)
 !$omp target enter data map(to:dealias_raw_ir,dealias_raw_it,dealias_raw_ph)
@@ -197,54 +217,6 @@ end subroutine cgyro_nl_dealias_init
 ! fraw (input unfiltered field) array
 ! f    (output filtered field) array
 
-! itor=0 special case
-! Pure periodicity 
-recursive subroutine impfilter5_i0(&
-                    n_theta,n_radial,n_3d,a0,a1,a2,a3,fraw,f)
-  implicit none
-
-  integer, intent(in) :: n_theta,n_radial,n_3d
-  real, intent(in) :: a0,a1,a2,a3
-  ! both are (n_radial,n_theta,:)
-  complex, intent(in) :: fraw(:,:,:)
-  complex, intent(out):: f(:,:,:)
-  !--------
-  integer :: it,ir,i3d
-  integer :: jm1,jm2,jm3,jp1,jp2,jp3
-
-#if defined(OMPGPU)
-!$omp target teams distribute parallel do collapse(3) &
-!$omp&         private(jm1,jm2,jm3,jp1,jp2,jp3)
-#elif defined(_OPENACC)
-!$acc parallel loop gang vector collapse(3) &
-!$acc&         private(jm1,jm2,jm3,jp1,jp2,jp3) &
-!$acc&         present(fraw,f)
-#else
-!$omp parallel do collapse(3) &
-!$omp&         private(jm1,jm2,jm3,jp1,jp2,jp3)
-#endif
-  do i3d=1,n_3d
-    do it=1,n_theta
-      do ir=1,n_radial
-        jm1 = it-1; if (jm1 < 1) jm1 = n_theta
-        jm2 = it-2; if (jm2 < 1) jm2 = jm2+n_theta
-        jm3 = it-3; if (jm3 < 1) jm3 = jm3+n_theta
-        jp1 = it+1; if (jp1 > n_theta) jp1 = 1
-        jp2 = it+2; if (jp2 > n_theta) jp2 = jp2-n_theta
-        jp3 = it+3; if (jp3 > n_theta) jp3 = jp3-n_theta
-
-        ! Pure periodicity 
-        f(ir,it,i3d) = &
-                a0*fraw(ir,it,i3d) + &
-                a1*(fraw(ir,jm1,i3d) + fraw(ir,jp1,i3d)) + &
-                a2*(fraw(ir,jm2,i3d) + fraw(ir,jp2,i3d)) + &
-                a3*(fraw(ir,jm3,i3d) + fraw(ir,jp3,i3d))
-      enddo
-    enddo
-  enddo
-end subroutine impfilter5_i0
-
-! guaranteed that itor/=0
 subroutine impfilter5_n0(&
                     n_theta,n_radial,n_3d,nt1,nt2,&
                     a0,a1,a2,a3,&
@@ -338,7 +310,6 @@ subroutine impfilter5(&
   complex, intent(out):: f(:,:,:,:)
   ! -----------
   real :: a0,a1,a2,a3
-  integer :: nstart
 
   ! Maximally flat filters (3, 5, or 7-point):
   !
@@ -370,19 +341,9 @@ subroutine impfilter5(&
      a3 = (1/64.0)*dealias
   endif
 
-  nstart = nt1
-  if (nt1 == 0) then
-     call impfilter5_i0(n_theta,n_radial,n_3d,&
-                        a0,a1,a2,a3,&
-                        fraw(:,:,:,1),f(:,:,:,1))
-     nstart = nstart+1
-  endif
-
-  if (nstart<=nt2) then
-     call impfilter5_n0(n_theta,n_radial,n_3d,nstart,nt2,&
+  call impfilter5_n0(n_theta,n_radial,n_3d,nt1,nt2,&
                         a0,a1,a2,a3,&
                         fraw,f,nt1-1)
-  endif
 
 end subroutine impfilter5
 
