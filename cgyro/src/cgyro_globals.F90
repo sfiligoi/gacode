@@ -382,11 +382,12 @@ module cgyro_globals
   integer :: tave_step
   integer :: nflux
   ! NL dealias variables
-  integer :: max_pvec_count
-  integer, dimension(:,:), allocatable :: dealias_pvec_count
-  integer, dimension(:,:,:), allocatable :: dealias_pvec
+  !integer, dimension(:,:), allocatable :: dealias_pvec_count
+  !integer, dimension(:,:,:), allocatable :: dealias_pvec
+  integer, dimension(:,:,:,:), allocatable :: dealias_raw_ir
+  integer, dimension(:,:,:,:), allocatable :: dealias_raw_it
+  complex, dimension(:,:,:,:), allocatable :: dealias_raw_ph
   complex, dimension(:,:,:,:), allocatable :: inraw_dealias
-  complex, dimension(:,:,:), allocatable :: fex_dealias
   complex, dimension(:,:,:,:), allocatable :: outraw_dealias
   !
   ! Nonlinear plans
