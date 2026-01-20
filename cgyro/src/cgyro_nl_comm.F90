@@ -248,7 +248,7 @@ subroutine impfilter5_n0(&
     do ir=1,n_radial
      do i3d=1,n_3d  ! do sequentially, good for GPUs
 #elif defined(_OPENACC)
-!$acc parallel loop gang vector collapse(4) &
+!$acc parallel loop gang vector collapse(3) &
 !$acc&         private(fval,my_ph,i3d) &
 !$acc&         present(fraw,f,dealias_raw_ir,dealias_raw_it,dealias_raw_ph)
   do itor=nt1,nt2
