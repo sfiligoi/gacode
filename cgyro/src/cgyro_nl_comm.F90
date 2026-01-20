@@ -202,7 +202,7 @@ subroutine cgyro_nl_dealias_init
 #if defined(OMPGPU)
 !$omp target enter data map(to:dealias_raw_ir,dealias_raw_it,dealias_raw_ph)
 #elif defined(_OPENACC)
-!$acc enter data copyin(dealias_raw_ph,dealias_raw_it,dealias_raw_ph)
+!$acc enter data copyin(dealias_raw_ir,dealias_raw_it,dealias_raw_ph)
 #endif
 
   deallocate(dealias_fex_ph)
