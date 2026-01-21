@@ -11,6 +11,40 @@ from pygacode.cgyro import data
 garoot = os.environ['GACODE_ROOT']
 
 #==================================================================
+# CGYRO parameter groups
+
+PARAM_GROUPS = {
+    'resolution': ['N_RADIAL', 'N_TOROIDAL', 'N_THETA', 'N_ENERGY', 'N_XI', 'E_MAX'],
+    'box': ['lx', 'ly'],
+    'time': ['DELTA_T', 'DELTA_T_METHOD', 'MAX_TIME', 'PRINT_STEP'],
+    'geometry': ['RMIN', 'RMAJ', 'Q', 'S', 'SHIFT', 'KAPPA', 'S_KAPPA',
+                 'DELTA', 'S_DELTA', 'ZETA', 'S_ZETA', 'ZMAG', 'DZMAG'],
+    'physics': ['NONLINEAR_FLAG', 'N_FIELD', 'BETAE_UNIT', 'BETA_STAR_SCALE',
+                'LAMBDA_STAR', 'NU_EE', 'COLLISION_MODEL'],
+    'rotation': ['ROTATION_MODEL', 'MACH', 'GAMMA_E', 'GAMMA_P'],
+    'species': ['N_SPECIES', 'Z', 'MASS', 'DENS', 'TEMP', 'DLNNDR', 'DLNTDR'],
+}
+
+# Derived lists for resolution handling
+RESOLUTION_PARAMS = PARAM_GROUPS['resolution'] + PARAM_GROUPS['time'][:2]
+
+RESOLUTION_KEYS = RESOLUTION_PARAMS + ['KY', 'BOX_SIZE']
+
+# Map parameter names to (argparse_attr, sentinel_value)
+ARG_MAP = {
+    'N_RADIAL': ('nx', 0),
+    'N_TOROIDAL': ('ny', 0),
+    'N_THETA': ('ntheta', 0),
+    'N_ENERGY': ('ne', 0),
+    'N_XI': ('nxi', 0),
+    'E_MAX': ('emax', 0.0),
+    'DELTA_T': ('dt', 0.0),
+    'DELTA_T_METHOD': ('dtm', -1),
+    'lx': ('lx', 0.0),
+    'ly': ('ly', 0.0),
+}
+
+#==================================================================
 # Helper functions
 
 def error_exit(msg):
@@ -58,6 +92,9 @@ Examples:
   cgyro -json -e /path/to/sim        Process simulation in specified directory
   cgyro -json -template in.cgyro     Generate input.cgyro with resolution defaults
   cgyro -json -template in.cgyro -nx 128 -ne 12   Override specific resolution
+  cgyro -json -template in.cgyro -resfile res.json   Use resolution from JSON file
+  cgyro -json -template ./templates -resfile res.json   Bulk mode: process all
+                                     input.cgyro files in templates/, output to a1/, a2/, ...
     '''
 
     parser = argparse.ArgumentParser(
@@ -76,9 +113,21 @@ Examples:
                         default='.')
 
     parser.add_argument('-template',
-                        metavar='FILE',
+                        metavar='FILE|DIR',
                         help="Process an input.cgyro physics template and generate\n"
-                             "a complete input.cgyro with resolution parameters",
+                             "a complete input.cgyro with resolution parameters.\n"
+                             "If a directory, scan for input.cgyro* files (e.g.,\n"
+                             "input.cgyro_case1, input.cgyro.sparc) and process each,\n"
+                             "creating output directories a1/, a2/, etc.\n"
+                             "To stop bulk processing: touch HALT",
+                        type=str,
+                        default='null')
+
+    parser.add_argument('-resfile',
+                        metavar='FILE',
+                        help="JSON file specifying resolution parameters: N_RADIAL,\n"
+                             "N_TOROIDAL, N_THETA, N_ENERGY, N_XI, E_MAX, lx, ly,\n"
+                             "DELTA_T, DELTA_T_METHOD. Command-line overrides resfile.",
                         type=str,
                         default='null')
 
@@ -159,10 +208,113 @@ Examples:
 
 args = opts()
 
+#==================================================================
+# Process resolution file if specified
+# Resfile values are used as defaults; command-line options override them
+
+if args.resfile != 'null':
+    if not os.path.isfile(args.resfile):
+        error_exit(f'resolution file not found: {args.resfile}')
+
+    msg(f'Loading resolution from {args.resfile}')
+    with open(args.resfile, 'r') as f:
+        resdata = json.load(f)
+
+    for key, value in resdata.items():
+        if key in ARG_MAP:
+            attr, sentinel = ARG_MAP[key]
+            if getattr(args, attr) == sentinel:
+                setattr(args, attr, value)
+
+#==================================================================
+# Determine processing mode: simulation, single template, or bulk templates
+
+bulk_mode = False
+template_list = []
+
 if args.template == 'null':
     mydir = args.e+'/'
     msg(f'Processing simulation in {mydir}')
-else:
+elif os.path.isdir(args.template):
+    # Bulk mode: scan directory for input.cgyro files
+    bulk_mode = True
+    msg(f'Scanning directory {args.template} for input.cgyro templates')
+    for root, dirs, files in os.walk(args.template):
+        for fname in files:
+            if fname.startswith('input.cgyro'):
+                template_list.append(os.path.join(root, fname))
+    template_list.sort()
+    if not template_list:
+        error_exit(f'no input.cgyro files found in {args.template}')
+    msg(f'Found {len(template_list)} template(s)')
+    for i, t in enumerate(template_list):
+        msg(f'  [{i+1}] {t}', indent=True)
+
+    # Bulk processing: process each template and output to a1/, a2/, etc.
+    # To stop: create a file named HALT in the current directory
+    msg('To stop bulk processing, create a file named HALT (e.g., touch HALT)')
+    completed = 0
+    for idx, template_path in enumerate(template_list):
+        if os.path.exists('HALT'):
+            msg('HALT file detected - stopping bulk processing')
+            os.remove('HALT')
+            break
+        outdir = f'a{idx+1}'
+        msg(f'Processing template {idx+1}/{len(template_list)}: {template_path} -> {outdir}/')
+
+        # Build the cgyro_json command for this template (use sys.argv[0] for full path)
+        cmd_parts = [sys.argv[0], '-template', f'"{template_path}"', '-e', '.', '-quiet']
+        if args.resfile != 'null':
+            cmd_parts.extend(['-resfile', args.resfile])
+        if args.pure:
+            cmd_parts.append('-pure')
+        if args.r:
+            cmd_parts.extend(['-r', args.r])
+        # Pass through resolution overrides
+        if args.nx > 0:
+            cmd_parts.extend(['-nx', str(args.nx)])
+        if args.ny > 0:
+            cmd_parts.extend(['-ny', str(args.ny)])
+        if args.ntheta > 0:
+            cmd_parts.extend(['-ntheta', str(args.ntheta)])
+        if args.ne > 0:
+            cmd_parts.extend(['-ne', str(args.ne)])
+        if args.nxi > 0:
+            cmd_parts.extend(['-nxi', str(args.nxi)])
+        if args.emax > 0.0:
+            cmd_parts.extend(['-emax', str(args.emax)])
+        if args.dt > 0.0:
+            cmd_parts.extend(['-dt', str(args.dt)])
+        if args.dtm >= 0:
+            cmd_parts.extend(['-dtm', str(args.dtm)])
+        if args.lx > 0.0:
+            cmd_parts.extend(['-lx', str(args.lx)])
+        if args.ly > 0.0:
+            cmd_parts.extend(['-ly', str(args.ly)])
+
+        # Run the command (which will create input.cgyro in current dir)
+        os.system(' '.join(cmd_parts))
+
+        # Move output to numbered directory
+        os.system(f'mkdir -p "{outdir}"')
+        os.system(f'mv input.cgyro "{outdir}/"')
+        completed += 1
+
+    # Generate input.xgyro file
+    with open('input.xgyro', 'w') as f:
+        f.write('# This file created by cgyro --json\n')
+        f.write(f'N_DIRS={completed}\n')
+        for i in range(1, completed + 1):
+            f.write(f'DIR_{i} = a{i}\n')
+
+    if completed == len(template_list):
+        msg(f'Bulk processing complete: created {completed} directories (a1-a{completed})')
+    else:
+        msg(f'Bulk processing stopped: created {completed} of {len(template_list)} directories')
+    msg('Wrote input.xgyro')
+    sys.exit()
+
+elif args.template != 'null':
     mydir = args.e+'/work/'
     msg(f'Processing template {args.template}')
     os.system('mkdir -p work')
@@ -315,23 +467,10 @@ if abs(qn_sum) > 1e-6:
 
 # Resolution parameter handling
 # Command-line overrides take priority; otherwise use existing or default
-# Tuple: (cmdline_value, sentinel) - sentinel is value meaning "not set"
-resolution_params = {
-    'N_RADIAL': (args.nx, 0),
-    'N_TOROIDAL': (args.ny, 0),
-    'N_THETA': (args.ntheta, 0),
-    'N_ENERGY': (args.ne, 0),
-    'N_XI': (args.nxi, 0),
-    'E_MAX': (args.emax, 0.0),
-    'DELTA_T': (args.dt, 0.0),
-    'DELTA_T_METHOD': (args.dtm, -1),
-}
-
-# Track which resolution params are set (for template mode output)
-resolution_keys = list(resolution_params.keys()) + ['KY', 'BOX_SIZE']
-
 msg('Setting resolution parameters')
-for key, (cmdval, sentinel) in resolution_params.items():
+for key in RESOLUTION_PARAMS:
+    attr, sentinel = ARG_MAP[key]
+    cmdval = getattr(args, attr)
     if cmdval != sentinel:
         # Command-line override
         d[key] = cmdval
@@ -438,7 +577,7 @@ d_full = dict(d)  # Keep full copy if needed later
 d = {}
 for key in d_full:
     # In template mode, always include resolution parameters
-    if args.template != 'null' and key in resolution_keys:
+    if args.template != 'null' and key in RESOLUTION_KEYS:
         d[key] = d_full[key]
     elif key in default:
         if isinstance(d_full[key], list):
@@ -454,16 +593,14 @@ for key in d_full:
 nmax = 0
 with open(mydir+'out.cgyro.localdump','w') as f:
 
-    write_section(f, 'Numerical resolution',
-        ['N_ENERGY', 'E_MAX', 'N_XI', 'N_TOROIDAL', 'N_RADIAL', 'N_THETA', 'THETA_PLOT'], d, first=True)
+    # Resolution (velocity first, then spatial, then box)
+    res_order = ['N_ENERGY', 'E_MAX', 'N_XI', 'N_TOROIDAL', 'N_RADIAL', 'N_THETA', 'THETA_PLOT']
+    write_section(f, 'Numerical resolution', res_order, d, first=True)
     write_section(f, 'Simulation box', ['KY', 'BOX_SIZE'], d)
-    write_section(f, 'Time domain', ['DELTA_T_METHOD', 'DELTA_T', 'PRINT_STEP', 'MAX_TIME'], d)
-    write_section(f, 'Basic geometry',
-        ['RMIN', 'RMAJ', 'Q', 'S', 'SHIFT', 'KAPPA', 'S_KAPPA', 'DELTA', 'S_DELTA'], d)
-    write_section(f, 'Physics',
-        ['NONLINEAR_FLAG', 'N_FIELD', 'BETAE_UNIT', 'BETA_STAR_SCALE', 'LAMBDA_STAR', 'NU_EE', 'COLLISION_MODEL'], d)
-    write_section(f, 'Rotation', ['ROTATION_MODEL', 'MACH', 'GAMMA_E', 'GAMMA_P'], d)
-    write_section(f, 'Advanced shape', ['ZETA', 'S_ZETA', 'ZMAG', 'DZMAG'], d)
+    write_section(f, 'Time domain', PARAM_GROUPS['time'], d)
+    write_section(f, 'Geometry', PARAM_GROUPS['geometry'], d)
+    write_section(f, 'Physics', PARAM_GROUPS['physics'], d)
+    write_section(f, 'Rotation', PARAM_GROUPS['rotation'], d)
 
     # Shape coefficients (write non-zero elements with index suffix)
     f.write('\n# Shape coefficients\n')

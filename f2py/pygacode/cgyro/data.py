@@ -70,7 +70,8 @@ class cgyrodata:
    def gettime(self):
 
       if not os.path.isfile(self.dir+'out.cgyro.time'):
-         print('INFO: (gettime) No time record exists')
+         if not self.silent:
+            print('INFO: (gettime) No time record exists')
          return False
 
       #-----------------------------------------------------------------
