@@ -10,131 +10,229 @@ from pygacode.cgyro import data
 
 garoot = os.environ['GACODE_ROOT']
 
-ml_dict = ['RMIN',
-           'RMAJ']
-meta_dict = ['N_THETA'
-             'N_RADIAL']
+#==================================================================
+# Helper functions
 
-def digit(f,n):
+def error_exit(msg):
+    """Print error message and exit."""
+    print(f'cgyro_json: (ERROR) {msg}')
+    sys.exit(1)
+
+def msg(text, indent=False):
+    """Print diagnostic message if not in quiet mode."""
+    if not args.quiet:
+        prefix = '   ' if indent else 'cgyro_json: '
+        print(f'{prefix}{text}')
+
+def digit(f, n):
+    """Round f to n decimal places."""
     if n == 0:
-        x = round(f)
-    else:
-        x = round(10**n*f)/10**n
+        return round(f)
+    return round(10**n * f) / 10**n
 
-    return x
+def write_section(f, title, keys, d, first=False):
+    """Write a section of key=value pairs to file, popping keys from d."""
+    prefix = '' if first else '\n'
+    f.write(f'{prefix}# {title}\n')
+    for key in keys:
+        if key in d:
+            f.write(f'{key}={d.pop(key)}\n')
+
+def tglf_species_array(tglf, prefix, arr):
+    """Add TGLF species array with electron first (index 1), ions following."""
+    tglf[f'{prefix}_1'] = arr[-1]  # Electron (last in CGYRO) -> first in TGLF
+    for i in range(2, len(arr) + 1):
+        tglf[f'{prefix}_{i}'] = arr[i-2]
 
 def opts():
 
     mytext = '''\
-    output:
-      out.cgyro.localdump  (complete localdump file)
-      json.cgyro.imas      (IMAS data dictionary of inputs)
-      json.cgyro.ml        (JSON file containing ML data)
-      out.cgyro.tglf       (equivalent TGLF input)
+Output files (written to working directory):
+  json.cgyro.localdump  Complete parameter dump in JSON format
+  json.cgyro.imas       IMAS-compatible data dictionary in JSON format
+  out.cgyro.localdump   Sparse localdump (non-default values only)
+  out.cgyro.tglf        Equivalent TGLF input file
+
+Examples:
+  cgyro -json                        Process simulation in current directory
+  cgyro -json -e /path/to/sim        Process simulation in specified directory
+  cgyro -json -template in.cgyro     Generate input.cgyro with resolution defaults
+  cgyro -json -template in.cgyro -nx 128 -ne 12   Override specific resolution
     '''
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawTextHelpFormatter,
         prog = 'cgyro_json',
-        description="CGYRO localdump utility",
+        description="Export CGYRO simulation data to JSON and other formats.\n"
+                    "Requires input.cgyro.gen (run 'cgyro -t' first if needed).\n\n"
+                    "With -template: Generate input.cgyro from physics template,\n"
+                    "adding resolution parameters (from defaults or command line).",
         epilog=textwrap.dedent(mytext))
 
+    parser.add_argument('-e',
+                        metavar='DIR',
+                        help="Working directory containing CGYRO data (default: cwd)",
+                        type=str,
+                        default='.')
+
+    parser.add_argument('-template',
+                        metavar='FILE',
+                        help="Process an input.cgyro physics template and generate\n"
+                             "a complete input.cgyro with resolution parameters",
+                        type=str,
+                        default='null')
+
+    # Spatial resolution
     parser.add_argument('-nx',
-                        help='N_RADIAL',
+                        metavar='N',
+                        help="Set N_RADIAL",
                         type=int,
                         default=0)
     parser.add_argument('-ny',
-                        help='N_TOROIDAL',
+                        metavar='N',
+                        help="Set N_TOROIDAL",
+                        type=int,
+                        default=0)
+    parser.add_argument('-ntheta',
+                        metavar='N',
+                        help="Set N_THETA",
                         type=int,
                         default=0)
     parser.add_argument('-lx',
-                        help='LX',
+                        metavar='L',
+                        help="Box size in x (sets BOX_SIZE via shear)",
                         type=float,
                         default=0.0)
     parser.add_argument('-ly',
-                        help='LY',
+                        metavar='L',
+                        help="Box size in y (sets KY = 2*pi/ly)",
                         type=float,
                         default=0.0)
-    parser.add_argument('-e',
-                        help="working directory (default: cwd)",
-                        type=str,
-                        default='.')
-    parser.add_argument('-template',
-                        help="input.cgyro template file",
-                        type=str,
-                        default='null')
+
+    # Velocity resolution
+    parser.add_argument('-ne',
+                        metavar='N',
+                        help="Set N_ENERGY",
+                        type=int,
+                        default=0)
+    parser.add_argument('-nxi',
+                        metavar='N',
+                        help="Set N_XI",
+                        type=int,
+                        default=0)
+    parser.add_argument('-emax',
+                        metavar='E',
+                        help="Set E_MAX",
+                        type=float,
+                        default=0.0)
+
+    # Time domain
+    parser.add_argument('-dt',
+                        metavar='T',
+                        help="Set DELTA_T",
+                        type=float,
+                        default=0.0)
+    parser.add_argument('-dtm',
+                        metavar='N',
+                        help="Set DELTA_T_METHOD",
+                        type=int,
+                        default=-1)
+
     parser.add_argument('-pure',
-                        help='pure plasma',
+                        help="Set N_SPECIES=2 for pure plasma",
                         action='store_true')
- 
+
+    parser.add_argument('-r',
+                        metavar='I,J',
+                        help="Remove ion species I, transfer density to species J\n"
+                             "(e.g., -r 4,1 removes species 4, adds its density to species 1)",
+                        type=str,
+                        default='')
+
+    parser.add_argument('-quiet',
+                        help="Suppress diagnostic output",
+                        action='store_true')
+
     args=parser.parse_args()
 
-    return args.nx,args.ny,args.lx,args.ly,args.e,args.template,args.pure
+    return args
 
-nx,ny,lx,ly,mydir,template,pure = opts()
+args = opts()
 
-if template == 'null':
-    mydir = mydir+'/'
+if args.template == 'null':
+    mydir = args.e+'/'
+    msg(f'Processing simulation in {mydir}')
 else:
-    mydir = mydir+'/work/'
-    os.system('mkdir work')
-    os.system('cp '+template+' work/input.cgyro')
-    os.system('cd work ; cgyro -t')
-    
-# Sanity checks:
+    mydir = args.e+'/work/'
+    msg(f'Processing template {args.template}')
+    os.system('mkdir -p work')
+    os.system('cp '+args.template+' work/input.cgyro')
+    msg('Running cgyro -t to parse template (see work/cgyro_t.log)')
+    os.system('cd work ; cgyro -t > cgyro_t.log 2>&1')
+
+# Sanity checks
 if not os.path.isdir(mydir):
-    # No directory
-    print('cgyro_json: (ERROR) directory does not exist')
-    sys.exit()
-else:
-    if not os.path.isfile(mydir+'input.cgyro.gen'):
-        # No data
-        print('cgyro_json: (ERROR) input.cgyro.gen missing')
-        sys.exit()
-    else:
-       # Read data
-       sim = data.cgyrodata(mydir,silent=True)
-       # Check for legacy global data
-       if min(sim.z) > 0.0:
-           print('cgyro_json: (WARNING) Detected old PROFILE_MODEL')
-           sim.getequil_legacy()
+    error_exit('directory does not exist')
 
+if not os.path.isfile(mydir+'input.cgyro.gen'):
+    error_exit('input.cgyro.gen missing')
+
+# Read data
+msg('Reading simulation data')
+sim = data.cgyrodata(mydir,silent=True)
+
+# Check for legacy global data
+if min(sim.z) > 0.0:
+    msg('(WARNING) Detected old PROFILE_MODEL')
+    sim.getequil_legacy()
 
 try:
-   with open(mydir+'out.cgyro.version', 'r') as file:
-      for line in file:
-         pass
-      version = line.strip()
+    with open(mydir+'out.cgyro.version', 'r') as file:
+        for line in file:
+            pass
+        version = line.strip()
 except:
-   version = 'unavailable'
-   print('cgyro_json: (WARNING) CGYRO version not available')
+    version = 'unavailable'
 
 if sim.n_species == 1:
-   print('cgyro_json: (ERROR) Conversion not implemented for adiabatic electrons.')
-   sys.exit()
+    error_exit('Conversion not implemented for adiabatic electrons.')
 
 # Electron index
 for i in range(sim.n_species):
-   if sim.z[i] < 0.0:
-      ielec = i
+    if sim.z[i] < 0.0:
+        ielec = i
+
+msg(f'Found {sim.n_species} species (electron index: {ielec+1})')
 
 #==================================================================
 # json.cgyro.localdump
 
 d = {}
 
+msg('Loading parameter defaults from input.json')
 with open(garoot+'/cgyro/bin/util/input.json','r') as file:
-   default = json.load(file)
+    default = json.load(file)
 
-# Determine non-default values in input.cgyro
+# Read all values from input.cgyro.gen (converted to proper numeric types)
 with open(mydir+'input.cgyro.gen','r') as file:
-   for line in file:
-      u = line.split()
-      key = u[1]
-      value = u[0]
-      if key in default.keys() and 'SHAPE' not in key:
-         if float(value) != float(default[key]):
-            d[key] = value
+    for line in file:
+        u = line.split()
+        key = u[1]
+        value = u[0]
+        if key in default.keys() and 'SHAPE' not in key:
+            # Convert to appropriate numeric type
+            try:
+                if '.' in value or 'e' in value.lower():
+                    d[key] = float(value)
+                else:
+                    d[key] = int(value)
+            except ValueError:
+                d[key] = value
+
+# Fill in any missing parameters from defaults (excluding arrays and SHAPE)
+for key in default:
+    if key not in d and not isinstance(default[key], list) and 'SHAPE' not in key:
+        d[key] = default[key]
 
 # Code-specific parameters
 d['N_ENERGY'] = sim.n_energy
@@ -178,31 +276,94 @@ d['TEMP'] = sim.temp[:].tolist()
 d['DLNNDR'] = sim.dlnndr[:].tolist()
 d['DLNTDR'] = sim.dlntdr[:].tolist()
 
-# Autoresolution
-if nx > 0:
-    d['N_RADIAL'] = nx
-    if ny == 0:
-        ny = 16
-    d['N_TOROIDAL'] = ny
-    if lx == 0.0:
-        lx = 90.0
-    if ly == 0.0:
-        ly = 90.0
+# Species removal: -r I,J removes species I, transfers density to species J
+if args.r:
+    try:
+        remove_spec, target_spec = map(int, args.r.split(','))
+        # Convert to 0-based indices
+        i_remove = remove_spec - 1
+        i_target = target_spec - 1
 
-    d['KY'] = digit(2*np.pi/ly,4)
-    d['BOX_SIZE'] = digit(lx*d['S']*d['KY'],0)
-    d['DELTA_T_METHOD']=1
-    d['DELTA_T']=0.005
+        n_species = sim.n_species
+        if i_remove < 0 or i_remove >= n_species:
+            error_exit(f'species {remove_spec} out of range')
+        if i_target < 0 or i_target >= n_species:
+            error_exit(f'target species {target_spec} out of range')
+        if i_remove == i_target:
+            error_exit('cannot remove species to itself')
 
-if pure:
+        # Transfer density to target species
+        d['DENS'][i_target] += d['DENS'][i_remove]
+
+        # Remove species from all arrays and shift down
+        for key in ['Z', 'MASS', 'DENS', 'TEMP', 'DLNNDR', 'DLNTDR']:
+            del d[key][i_remove]
+
+        # Update N_SPECIES
+        d['N_SPECIES'] = n_species - 1
+
+        msg(f'Removed species {remove_spec}, density transferred to species {target_spec}')
+
+    except ValueError:
+        error_exit('-r requires format I,J (e.g., -r 4,1)')
+
+# Quasineutrality check: sum(n_i * z_i) should be ~0
+qn_sum = sum(n*z for n, z in zip(d['DENS'], d['Z']))
+msg(f'Quasineutrality check: sum(n_i*z_i) = {qn_sum:.6e}')
+if abs(qn_sum) > 1e-6:
+    msg('(WARNING) Quasineutrality violated')
+
+# Resolution parameter handling
+# Command-line overrides take priority; otherwise use existing or default
+# Tuple: (cmdline_value, sentinel) - sentinel is value meaning "not set"
+resolution_params = {
+    'N_RADIAL': (args.nx, 0),
+    'N_TOROIDAL': (args.ny, 0),
+    'N_THETA': (args.ntheta, 0),
+    'N_ENERGY': (args.ne, 0),
+    'N_XI': (args.nxi, 0),
+    'E_MAX': (args.emax, 0.0),
+    'DELTA_T': (args.dt, 0.0),
+    'DELTA_T_METHOD': (args.dtm, -1),
+}
+
+# Track which resolution params are set (for template mode output)
+resolution_keys = list(resolution_params.keys()) + ['KY', 'BOX_SIZE']
+
+msg('Setting resolution parameters')
+for key, (cmdval, sentinel) in resolution_params.items():
+    if cmdval != sentinel:
+        # Command-line override
+        d[key] = cmdval
+        msg(f'{key}={cmdval} (command-line)', indent=True)
+    elif key not in d:
+        # Absent in template, use default
+        d[key] = default[key]
+        msg(f'{key}={default[key]} (default)', indent=True)
+    # else: keep existing value in d
+
+# Derived spatial parameters (KY, BOX_SIZE) from -lx, -ly
+if args.lx > 0.0 or args.ly > 0.0:
+    lx = args.lx if args.lx > 0.0 else 90.0
+    ly = args.ly if args.ly > 0.0 else 90.0
+    d['KY'] = digit(2*np.pi/ly, 4)
+    d['BOX_SIZE'] = digit(lx*d['S']*d['KY'], 0)
+    msg(f'KY={d["KY"]} BOX_SIZE={d["BOX_SIZE"]} (from lx={lx}, ly={ly})', indent=True)
+elif 'KY' not in d:
+    d['KY'] = default['KY']
+    d['BOX_SIZE'] = default['BOX_SIZE']
+    msg(f'KY={d["KY"]} BOX_SIZE={d["BOX_SIZE"]} (default)', indent=True)
+
+if args.pure:
     d['N_SPECIES'] = 2
     d['DENS'] = sim.dens[:].tolist()
+    msg('Pure plasma mode: N_SPECIES=2')
 
 #==================================================================
 # JSON output
 with open(mydir+'json.cgyro.localdump','w') as f:
-   json.dump(d,f,indent=2,sort_keys=True)
-print('cgyro_json: wrote json.cgyro.localdump')
+    json.dump(d, f, indent=2, sort_keys=True)
+msg('Wrote json.cgyro.localdump')
 
 #==================================================================
 # Construct TGLF input file
@@ -215,10 +376,10 @@ tglf['Q_LOC'] = abs(sim.q)
 tglf['Q_PRIME_LOC'] = sim.shear*(tglf['Q_LOC']/tglf['RMIN_LOC'])**2
 tglf['P_PRIME_LOC'] = ( -sim.beta_star/8/np.pi)*abs(tglf['Q_LOC']/tglf['RMIN_LOC'])
 
-tglf['NS']=sim.n_species
-for i in range(1,tglf['NS']+1):
-   tglf[f'VPAR_{i}']=abs(sim.mach)
-   tglf[f'VPAR_SHEAR_{i}']=abs(sim.gamma_p)
+tglf['NS'] = sim.n_species
+for i in range(1, tglf['NS']+1):
+    tglf[f'VPAR_{i}'] = abs(sim.mach)
+    tglf[f'VPAR_SHEAR_{i}'] = abs(sim.gamma_p)
 
 tglf['VEXB_SHEAR'] = sim.gamma_e
 tglf['BETAE'] = sim.betae_unit
@@ -254,117 +415,88 @@ for i in range(0,len(x)):
     if x[i] != 0:
         tglf[f'SHAPE_S_COS{i}']=x[i]
 
-tglf['ZS_1'] = d['Z'][-1]
-for i in range(2,len(d['Z'])+1):
-   tglf[f'ZS_{i}']=d['Z'][i-2]
-
-tglf['MASS_1']=d['MASS'][-1]
-for i in range(2,len(d['MASS'])+1):
-   tglf[f'MASS_{i}']=d['MASS'][i-2]
-tglf['AS_1']=d['DENS'][-1]
-for i in range(2,len(d['DENS'])+1):
-   tglf[f'AS_{i}']=d['DENS'][i-2]
-tglf['TAUS_1']=d['TEMP'][-1]
-for i in range(2,len(d['TEMP'])+1):
-   tglf[f'TAUS_{i}']=d['TEMP'][i-2]
-tglf['RLNS_1']=d['DLNNDR'][-1]
-for i in range(2,len(d['DLNNDR'])+1):
-   tglf[f'RLNS_{i}']=d['DLNNDR'][i-2]
-tglf['RLTS_1']=d['DLNTDR'][-1]
-for i in range(2,len(d['DLNTDR'])+1):
-   tglf[f'RLTS_{i}']=d['DLNTDR'][i-2]
+# Species arrays (TGLF has electron first, CGYRO has electron last)
+tglf_species_array(tglf, 'ZS', d['Z'])
+tglf_species_array(tglf, 'MASS', d['MASS'])
+tglf_species_array(tglf, 'AS', d['DENS'])
+tglf_species_array(tglf, 'TAUS', d['TEMP'])
+tglf_species_array(tglf, 'RLNS', d['DLNNDR'])
+tglf_species_array(tglf, 'RLTS', d['DLNTDR'])
 
 with open(mydir+'out.cgyro.tglf','w') as f:
     for item in tglf:
         f.write(item+'='+str(tglf[item])+'\n')
 
-print('cgyro_json: wrote out.cgyro.tglf')
+msg('Wrote out.cgyro.tglf')
 
 #==================================================================
-# localdump output
+# localdump output (sparse: non-default values only)
 #
+# Filter d to only include non-default values
+# In template mode, always include resolution parameters
+d_full = dict(d)  # Keep full copy if needed later
+d = {}
+for key in d_full:
+    # In template mode, always include resolution parameters
+    if args.template != 'null' and key in resolution_keys:
+        d[key] = d_full[key]
+    elif key in default:
+        if isinstance(d_full[key], list):
+            # For arrays, include if any element differs
+            if d_full[key] != default[key]:
+                d[key] = d_full[key]
+        elif d_full[key] != default[key]:
+            d[key] = d_full[key]
+    else:
+        # Key not in defaults (e.g., SHAPE arrays), always include
+        d[key] = d_full[key]
+
 nmax = 0
 with open(mydir+'out.cgyro.localdump','w') as f:
 
-    f.write('# Numerical resolution\n')
-    for key in ['N_ENERGY','E_MAX','N_XI','N_TOROIDAL','N_RADIAL','N_THETA','THETA_PLOT']:
-        if key in d:
+    write_section(f, 'Numerical resolution',
+        ['N_ENERGY', 'E_MAX', 'N_XI', 'N_TOROIDAL', 'N_RADIAL', 'N_THETA', 'THETA_PLOT'], d, first=True)
+    write_section(f, 'Simulation box', ['KY', 'BOX_SIZE'], d)
+    write_section(f, 'Time domain', ['DELTA_T_METHOD', 'DELTA_T', 'PRINT_STEP', 'MAX_TIME'], d)
+    write_section(f, 'Basic geometry',
+        ['RMIN', 'RMAJ', 'Q', 'S', 'SHIFT', 'KAPPA', 'S_KAPPA', 'DELTA', 'S_DELTA'], d)
+    write_section(f, 'Physics',
+        ['NONLINEAR_FLAG', 'N_FIELD', 'BETAE_UNIT', 'BETA_STAR_SCALE', 'LAMBDA_STAR', 'NU_EE', 'COLLISION_MODEL'], d)
+    write_section(f, 'Rotation', ['ROTATION_MODEL', 'MACH', 'GAMMA_E', 'GAMMA_P'], d)
+    write_section(f, 'Advanced shape', ['ZETA', 'S_ZETA', 'ZMAG', 'DZMAG'], d)
+
+    # Shape coefficients (write non-zero elements with index suffix)
+    f.write('\n# Shape coefficients\n')
+    for key in list(d.keys()):
+        if 'SHAPE' in key:
             x = d.pop(key)
-            f.write(key+'='+str(x)+'\n')
+            for i, val in enumerate(x):
+                if val != 0.0:
+                    f.write(f'{key}{i}={val}\n')
+                    nmax = max(nmax, i)
 
-    f.write('\n# Simulation box\n')
-    for key in ['KY','BOX_SIZE']:
-        x = d.pop(key)
-        f.write(key+'='+str(x)+'\n')
-
-    f.write('\n# Time domain\n')
-    for key in ['DELTA_T_METHOD','DELTA_T','PRINT_STEP','MAX_TIME']:
-        if key in d:
-            x = d.pop(key)
-            f.write(key+'='+str(x)+'\n')
-
-    f.write('\n# Basic geometry\n')
-    for key in ['RMIN','RMAJ','Q','S','SHIFT','KAPPA','S_KAPPA','DELTA','S_DELTA']:
-        if key in d:
-            x = d.pop(key)
-            f.write(key+'='+str(x)+'\n')
-
-    f.write('\n# Physics\n')
-    for key in ['NONLINEAR_FLAG','N_FIELD','BETAE_UNIT','BETA_STAR_SCALE','LAMBDA_STAR','NU_EE','COLLISION_MODEL']:
-        if key in d:
-            x = d.pop(key)
-            f.write(key+'='+str(x)+'\n')
-
-    f.write('\n# Rotation\n')
-    for key in ['ROTATION_MODEL','MACH','GAMMA_E','GAMMA_P']:
-        if key in d:
-            x = d.pop(key)
-            f.write(key+'='+str(x)+'\n')
-
-    f.write('\n# Advanced shape\n')
-    for key in ['ZETA','S_ZETA','ZMAG','DZMAG']:
-        if key in d:
-            x = d.pop(key)
-            f.write(key+'='+str(x)+'\n')
-
-    d_copy = dict(d)
-    for key in d_copy:
-      if 'SHAPE' in key:
-         x = d.pop(key)
-         # shape parameter
-         for i in range(len(x)):
-            if not x[i] == 0.0:
-               f.write(key+str(i)+'='+str(x[i])+'\n')
-               if i > nmax:
-                  nmax = i
-
-    d_copy = dict(d)
+    # Species parameters (write with _N suffix)
     f.write('\n# Species parameters\n')
-    for key in ['N_SPECIES']:
-       if key in d:
-          x = d.pop(key)
-          f.write(key+'='+str(x)+'\n')
-    for key in d_copy:
-       x = d_copy[key]
-       if isinstance(x,list):
-          d.pop(key) 
-          # species parameter
-          for i in range(len(x)):
-             f.write(key+'_'+str(i+1)+'='+str(x[i])+'\n')
+    if 'N_SPECIES' in d:
+        f.write(f'N_SPECIES={d.pop("N_SPECIES")}\n')
+    for key in list(d.keys()):
+        if isinstance(d[key], list):
+            arr = d.pop(key)
+            for i, val in enumerate(arr):
+                f.write(f'{key}_{i+1}={val}\n')
 
-    f.write('\n# Miscellaneous\n')
-    for key in d:
-        x = d[key]
-        f.write(key+'='+str(x)+'\n')
+    # Remaining parameters
+    write_section(f, 'Miscellaneous', list(d.keys()), d)
 
 
-print('cgyro_json: wrote out.cgyro.localdump')
+msg('Wrote out.cgyro.localdump')
 #==================================================================
 
-if template != 'null':
+if args.template != 'null':
     os.system('cp work/out.cgyro.localdump input.cgyro')
     os.system('rm -r work')
-    print('cgyro_json: created new input.cgyro')
+    msg('Template processing complete')
+    msg('Created input.cgyro with physics + resolution parameters')
     sys.exit()
 
 #==================================================================
@@ -439,7 +571,7 @@ d['ds_dr_minor_norm'][2] = -sim.s_zeta*lref/sim.rmin
 #-----------------------------------------------------------------------
 
 with open(mydir+'json.cgyro.imas','w') as f:
-   json.dump(d,f,indent=2,sort_keys=True)
-print('cgyro_json: wrote json.cgyro.imas')
+    json.dump(d, f, indent=2, sort_keys=True)
+msg('Wrote json.cgyro.imas')
 #==================================================================
 
