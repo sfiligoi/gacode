@@ -95,6 +95,21 @@ Examples:
   cgyro -json -template in.cgyro -resfile res.json   Use resolution from JSON file
   cgyro -json -template ./templates -resfile res.json   Bulk mode: process all
                                      input.cgyro files in templates/, output to a1/, a2/, ...
+  cgyro -json -sync -resfile res.json   Sync mode: update all input.cgyro files
+                                     in directories listed in input.xgyro with
+                                     parameters from res.json
+
+Resfile format (JSON):
+  The resfile can contain ANY valid CGYRO parameter. Example:
+  {
+    "N_RADIAL": 128,
+    "N_ENERGY": 12,
+    "DELTA_T": 0.01,
+    "MAX_TIME": 50.0,
+    "lx": 90.0,
+    "ly": 90.0
+  }
+  Special keys 'lx' and 'ly' are converted to KY and BOX_SIZE.
     '''
 
     parser = argparse.ArgumentParser(
@@ -125,11 +140,16 @@ Examples:
 
     parser.add_argument('-resfile',
                         metavar='FILE',
-                        help="JSON file specifying resolution parameters: N_RADIAL,\n"
-                             "N_TOROIDAL, N_THETA, N_ENERGY, N_XI, E_MAX, lx, ly,\n"
-                             "DELTA_T, DELTA_T_METHOD. Command-line overrides resfile.",
+                        help="JSON file specifying parameters to apply. Can include ANY\n"
+                             "valid CGYRO parameter. Command-line options override resfile.\n"
+                             "Special keys: lx, ly are converted to KY and BOX_SIZE.",
                         type=str,
                         default='null')
+
+    parser.add_argument('-sync',
+                        help="Sync mode: apply resfile parameters to all input.cgyro files\n"
+                             "in directories listed in input.xgyro. Requires -resfile.",
+                        action='store_true')
 
     # Spatial resolution
     parser.add_argument('-nx',
@@ -212,19 +232,127 @@ args = opts()
 # Process resolution file if specified
 # Resfile values are used as defaults; command-line options override them
 
+resdata = {}  # Store all resfile parameters for sync mode
+
 if args.resfile != 'null':
     if not os.path.isfile(args.resfile):
         error_exit(f'resolution file not found: {args.resfile}')
 
-    msg(f'Loading resolution from {args.resfile}')
+    msg(f'Loading parameters from {args.resfile}')
     with open(args.resfile, 'r') as f:
         resdata = json.load(f)
 
+    # For ARG_MAP parameters, update args if not overridden on command line
     for key, value in resdata.items():
         if key in ARG_MAP:
             attr, sentinel = ARG_MAP[key]
             if getattr(args, attr) == sentinel:
                 setattr(args, attr, value)
+
+#==================================================================
+# Sync mode: apply resfile parameters to existing input.cgyro files
+# Directories are read from input.xgyro
+
+if args.sync:
+    if args.resfile == 'null':
+        error_exit('-sync requires -resfile')
+
+    if not os.path.isfile('input.xgyro'):
+        error_exit('input.xgyro not found (required for -sync mode)')
+
+    # Parse input.xgyro to get directory list
+    sync_dirs = []
+    with open('input.xgyro', 'r') as f:
+        for line in f:
+            line = line.strip()
+            if line.startswith('#') or '=' not in line:
+                continue
+            key, value = line.split('=', 1)
+            key = key.strip()
+            value = value.strip()
+            if key.startswith('DIR_'):
+                sync_dirs.append(value)
+
+    if not sync_dirs:
+        error_exit('no directories found in input.xgyro')
+
+    msg(f'Sync mode: updating {len(sync_dirs)} directories from {args.resfile}')
+
+    # Handle special lx/ly parameters -> KY/BOX_SIZE conversion
+    # This requires reading shear from each input.cgyro
+    lx_override = resdata.pop('lx', None)
+    ly_override = resdata.pop('ly', None)
+
+    for sync_dir in sync_dirs:
+        input_file = os.path.join(sync_dir, 'input.cgyro')
+        if not os.path.isfile(input_file):
+            msg(f'(WARNING) {input_file} not found, skipping')
+            continue
+
+        # Read existing input.cgyro, preserving structure
+        lines = []
+        params = {}  # Track existing parameters and their line indices
+        with open(input_file, 'r') as f:
+            for i, line in enumerate(f):
+                lines.append(line)
+                stripped = line.strip()
+                if stripped.startswith('#') or '=' not in stripped:
+                    continue
+                key = stripped.split('=', 1)[0].strip()
+                params[key] = i
+
+        # Apply resfile parameters
+        updated_keys = []
+        for key, value in resdata.items():
+            if key in params:
+                # Update existing line
+                idx = params[key]
+                lines[idx] = f'{key}={value}\n'
+                updated_keys.append(key)
+            else:
+                # Add new parameter at end
+                lines.append(f'{key}={value}\n')
+                updated_keys.append(key)
+
+        # Handle lx/ly -> KY/BOX_SIZE conversion
+        if lx_override is not None or ly_override is not None:
+            # Need to read S (shear) from the file
+            shear = None
+            for line in lines:
+                stripped = line.strip()
+                if stripped.startswith('S='):
+                    shear = float(stripped.split('=')[1])
+                    break
+            if shear is None:
+                msg(f'(WARNING) S not found in {input_file}, cannot compute KY/BOX_SIZE')
+            else:
+                lx = lx_override if lx_override is not None else 90.0
+                ly = ly_override if ly_override is not None else 90.0
+                ky = digit(2*np.pi/ly, 4)
+                box_size = digit(lx*shear*ky, 0)
+
+                # Update or add KY
+                if 'KY' in params:
+                    lines[params['KY']] = f'KY={ky}\n'
+                else:
+                    lines.append(f'KY={ky}\n')
+                updated_keys.append('KY')
+
+                # Update or add BOX_SIZE
+                if 'BOX_SIZE' in params:
+                    lines[params['BOX_SIZE']] = f'BOX_SIZE={box_size}\n'
+                else:
+                    lines.append(f'BOX_SIZE={box_size}\n')
+                updated_keys.append('BOX_SIZE')
+
+        # Write back
+        with open(input_file, 'w') as f:
+            f.writelines(lines)
+
+        msg(f'Updated {input_file}: {", ".join(updated_keys)}', indent=True)
+
+    msg(f'Sync complete: {len(sync_dirs)} directories updated')
+    sys.exit()
 
 #==================================================================
 # Determine processing mode: simulation, single template, or bulk templates
@@ -480,6 +608,14 @@ for key in RESOLUTION_PARAMS:
         d[key] = default[key]
         msg(f'{key}={default[key]} (default)', indent=True)
     # else: keep existing value in d
+
+# Apply any additional resfile parameters (not in ARG_MAP)
+# These override simulation/template values
+if resdata:
+    for key, value in resdata.items():
+        if key not in ARG_MAP and key not in ('lx', 'ly'):
+            d[key] = value
+            msg(f'{key}={value} (resfile)', indent=True)
 
 # Derived spatial parameters (KY, BOX_SIZE) from -lx, -ly
 if args.lx > 0.0 or args.ly > 0.0:
