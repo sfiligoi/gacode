@@ -232,10 +232,51 @@ def process_template(template_path, default, resdata, args, log):
     if args.pure:
         d['N_SPECIES'] = 2
 
+    # Species removal: -r I,J removes species I, transfers density to species J
+    if args.r:
+        try:
+            remove_spec, target_spec = map(int, args.r.split(','))
+            i_remove = remove_spec - 1  # Convert to 0-based
+            i_target = target_spec - 1
+
+            n_species = d.get('N_SPECIES', len(d.get('Z', [])))
+            if i_remove < 0 or i_remove >= n_species:
+                log.error(f'species {remove_spec} out of range')
+            if i_target < 0 or i_target >= n_species:
+                log.error(f'target species {target_spec} out of range')
+            if i_remove == i_target:
+                log.error('cannot remove species to itself')
+
+            # Transfer density
+            if 'DENS' in d:
+                d['DENS'][i_target] += d['DENS'][i_remove]
+
+            # Remove from all species arrays
+            for key in ['Z', 'MASS', 'DENS', 'TEMP', 'DLNNDR', 'DLNTDR']:
+                if key in d and isinstance(d[key], list) and len(d[key]) > i_remove:
+                    del d[key][i_remove]
+
+            d['N_SPECIES'] = n_species - 1
+            log(f'Removed species {remove_spec}, density transferred to species {target_spec}')
+
+        except ValueError:
+            log.error('-r requires format I,J (e.g., -r 4,1)')
+
+    # Quasineutrality check
+    if 'DENS' in d and 'Z' in d:
+        qn_sum = sum(n * z for n, z in zip(d['DENS'], d['Z']))
+        log(f'Quasineutrality: sum(n_i*z_i) = {qn_sum:.3e}')
+
     return d
 
 def write_input_cgyro(d, default, filepath='input.cgyro'):
     """Write input.cgyro from parameter dict."""
+    # Keys to skip in physics section (handled separately)
+    skip = {'N_ENERGY', 'E_MAX', 'N_XI', 'N_TOROIDAL', 'N_RADIAL', 'N_THETA',
+            'KY', 'BOX_SIZE', 'DELTA_T', 'DELTA_T_METHOD', 'MAX_TIME', 'PRINT_STEP'}
+    # Species arrays need indexed output
+    species_keys = {'Z', 'MASS', 'DENS', 'TEMP', 'DLNNDR', 'DLNTDR'}
+
     with open(filepath, 'w') as f:
         f.write('# Numerical resolution\n')
         for k in ['N_ENERGY', 'E_MAX', 'N_XI', 'N_TOROIDAL', 'N_RADIAL', 'N_THETA']:
@@ -249,14 +290,35 @@ def write_input_cgyro(d, default, filepath='input.cgyro'):
         for k in ['DELTA_T', 'DELTA_T_METHOD', 'MAX_TIME', 'PRINT_STEP']:
             if k in d and (k not in default or d[k] != default[k]):
                 f.write(f'{k}={d[k]}\n')
+
         f.write('\n# Physics\n')
-        skip = {'N_ENERGY', 'E_MAX', 'N_XI', 'N_TOROIDAL', 'N_RADIAL', 'N_THETA',
-                'KY', 'BOX_SIZE', 'DELTA_T', 'DELTA_T_METHOD', 'MAX_TIME', 'PRINT_STEP'}
         for k in sorted(d.keys()):
-            if k in skip:
+            if k in skip or k in species_keys or 'SHAPE' in k:
                 continue
-            if (k in default and d[k] != default[k]) or k not in default:
-                f.write(f'{k}={d[k]}\n')
+            val = d[k]
+            if isinstance(val, list):
+                continue  # Skip any remaining lists
+            if (k in default and val != default[k]) or k not in default:
+                f.write(f'{k}={val}\n')
+
+        f.write('\n# Species\n')
+        n_species = d.get('N_SPECIES', 1)
+        f.write(f'N_SPECIES={n_species}\n')
+        for k in species_keys:
+            if k in d and isinstance(d[k], list):
+                for i in range(min(n_species, len(d[k]))):
+                    f.write(f'{k}_{i+1}={d[k][i]}\n')
+
+        # SHAPE arrays (non-zero only)
+        has_shape = False
+        for k in sorted(d.keys()):
+            if 'SHAPE' in k and isinstance(d[k], list):
+                for i, val in enumerate(d[k]):
+                    if val != 0.0:
+                        if not has_shape:
+                            f.write('\n# Shape coefficients\n')
+                            has_shape = True
+                        f.write(f'{k}{i}={val}\n')
 
 if args.template != 'null':
     default = load_defaults()

@@ -119,17 +119,59 @@ def write_section(f, title, keys, d, first=False):
             f.write(f'{key}={d.pop(key)}\n')
 
 def parse_cgyro_gen(filepath, default):
-    """Parse input.cgyro.gen into a dict."""
+    """Parse input.cgyro.gen into a dict, including species and SHAPE arrays."""
+    import re
     d = {}
+    species_keys = {'Z', 'MASS', 'DENS', 'TEMP', 'DLNNDR', 'DLNTDR'}
+    species_arrays = {k: {} for k in species_keys}
+    shape_arrays = {}
+
     with open(filepath, 'r') as f:
         for line in f:
             u = line.split()
-            key, value = u[1], u[0]
+            if len(u) < 2:
+                continue
+            value, key = u[0], u[1]
+
+            # Parse value
+            try:
+                val = float(value) if ('.' in value or 'e' in value.lower()) else int(value)
+            except ValueError:
+                val = value
+
+            # Check for species array (e.g., Z_1, MASS_2)
+            match = re.match(r'([A-Z_]+)_(\d+)$', key)
+            if match:
+                base, idx = match.groups()
+                if base in species_keys:
+                    species_arrays[base][int(idx)] = val
+                    continue
+
+            # Check for SHAPE array (e.g., SHAPE_SIN0, SHAPE_COS3)
+            match = re.match(r'(SHAPE_[A-Z_]+)(\d+)$', key)
+            if match:
+                base, idx = match.groups()
+                if base not in shape_arrays:
+                    shape_arrays[base] = {}
+                shape_arrays[base][int(idx)] = val
+                continue
+
+            # Regular scalar parameter
             if key in default and 'SHAPE' not in key:
-                try:
-                    d[key] = float(value) if ('.' in value or 'e' in value.lower()) else int(value)
-                except ValueError:
-                    d[key] = value
+                d[key] = val
+
+    # Convert species arrays to lists
+    for base, arr in species_arrays.items():
+        if arr:
+            max_idx = max(arr.keys())
+            d[base] = [arr.get(i, 0.0) for i in range(1, max_idx + 1)]
+
+    # Convert SHAPE arrays to lists
+    for base, arr in shape_arrays.items():
+        if arr:
+            max_idx = max(arr.keys())
+            d[base] = [arr.get(i, 0.0) for i in range(max_idx + 1)]
+
     return d
 
 class Logger:
