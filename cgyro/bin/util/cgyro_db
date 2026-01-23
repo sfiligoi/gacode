@@ -14,13 +14,11 @@ from tqdm import tqdm
 from cgyro.data import cgyrodata
 from cgyro_ai_db import AIDB
 from cgyro_db_extractors import (
-    extract_metadata,
-    extract_species,
-    extract_flux,
-    extract_provenance,
-    compute_file_hash,
-    is_cgyro_case,
-    is_linear_simulation
+    extract_metadata, extract_species, extract_flux, extract_provenance
+)
+from cgyro_util import (
+    compute_file_hash, is_cgyro_case, is_linear_simulation,
+    find_cgyro_cases, get_user_config_path
 )
 
 
@@ -421,55 +419,10 @@ def parse_filters(filter_args):
 
 
 def get_default_db_path(db_name='cgyro.db'):
-    """
-    Get the database path
-
-    If db_name contains a path separator, treat it as a full path.
-    Otherwise, place it in ~/.cgyro/
-
-    Parameters:
-    -----------
-    db_name : str, optional
-        Database filename or full path (default: 'cgyro.db')
-
-    Creates the ~/.cgyro directory if it doesn't exist.
-    """
-    # If db_name contains path separator, treat as full path
+    """Get database path, using ~/.cgyro/ for plain filenames."""
     if os.path.sep in db_name or db_name.startswith('~'):
         return os.path.expanduser(db_name)
-
-    # Otherwise, place in ~/.cgyro/
-    home = os.path.expanduser("~")
-    cgyro_dir = os.path.join(home, ".cgyro")
-
-    # Create directory if it doesn't exist
-    if not os.path.exists(cgyro_dir):
-        os.makedirs(cgyro_dir)
-
-    return os.path.join(cgyro_dir, db_name)
-
-
-def find_cgyro_cases(root_dir='./', ignore=['global', 'linear']):
-    """
-    Find all CGYRO case directories in the tree
-
-    Parameters:
-    -----------
-    root_dir : str
-        Root directory to search
-    ignore : list
-        Patterns to ignore in paths
-
-    Returns:
-    --------
-    list : List of case directories
-    """
-    cases = []
-    for root, dirs, files in os.walk(root_dir):
-        if is_cgyro_case(root):
-            if not any(pattern in root for pattern in ignore):
-                cases.append(root)
-    return cases
+    return get_user_config_path(db_name)
 
 
 def refresh_directories(root_dir='./'):

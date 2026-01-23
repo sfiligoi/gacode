@@ -90,16 +90,16 @@ then
   echo "         Interactive database plotter"
   echo
   echo "         --json"
-  echo "         Input manager and converter"
+  echo "         Export simulation data (JSON, TGLF, IMAS)"
   echo
   echo "         --dmd"
   echo "         DMD analysis"
-  echo 
+  echo
   echo "         --c"
   echo "         Cleanup"
-  echo 
+  echo
   echo "         --pre"
-  echo "         XGYRO proprocessor"
+  echo "         Input manager (create/modify input.cgyro)"
   echo 
   echo "         --pert"
   echo "         Helper to create input.xgyro via perturbations"
