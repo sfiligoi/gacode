@@ -180,6 +180,7 @@ subroutine cgyro_init_manager
      allocate(field_old(n_field,nc,nt1:nt2))
      allocate(field_old2(n_field,nc,nt1:nt2))
      allocate(field_old3(n_field,nc,nt1:nt2))
+     allocate(epar(nc,nt1:nt2))
      allocate(    moment(n_radial,theta_plot,n_species,nt1:nt2,3))
      allocate(moment_loc(n_radial,theta_plot,n_species,nt1:nt2,3))
      allocate(    cflux(n_species,4,n_field,nt1:nt2))

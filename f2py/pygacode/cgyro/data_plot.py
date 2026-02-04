@@ -262,6 +262,9 @@ class cgyrodata_plot(data.cgyrodata):
       elif field == 2:
          f = self.bparb[:,itime]
          ytag = r'$B_\parallel$'
+      elif field == 3:
+         f = self.eparb[:,itime]
+         ytag = r'$E_\parallel$'
 
       ax = fig.add_subplot(111)
       ax.grid(which="both",ls=":")

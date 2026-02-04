@@ -130,6 +130,13 @@ class cgyrodata:
          self.bparb = np.reshape(data[:nd],(self.n_theta*self.n_radial,nt),'F')
          if not self.silent:
             print('INFO: (getdata) Read data in '+fmt+f+' '+t)
+
+      f='.cgyro.eparb'
+      t,fmt,data = self.extract(f,cmplx=True)
+      if fmt != 'null':
+         self.eparb = np.reshape(data[:nd],(self.n_theta*self.n_radial,nt),'F')
+         if not self.silent:
+            print('INFO: (getdata) Read data in '+fmt+f+' '+t)
       #-----------------------------------------------------------------
 
       #-----------------------------------------------------------------

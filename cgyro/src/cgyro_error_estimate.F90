@@ -23,21 +23,33 @@ subroutine cgyro_error_estimate
 
   real :: norm_loc_s,error_loc_s,h_s,r_s
 
+  ! epar
+  complex :: wderiv,thfac
+  integer :: ir,it
+  ! ir loop specific
+  integer :: itorbox
+  integer :: jr0(0:2)   ! n_theta*(pre-compute jr-1)
+  ! it loop specific
+  integer :: id
+  integer :: itd   ! precompute modulo(it+id-1,n_theta)+1, use for iteration
+  integer :: itd_class
+  integer :: jc
+
 #if (!defined(OMPGPU)) && defined(_OPENACC)
   ! launch Estimate of collisionless error via 3rd-order linear estimate async ahead of time on GPU/ACC
   ! CPU-only and OMPGPU code will work on it later
   ! NOTE: If I have multiple itor, sum them all together
   h_s=0.0
   r_s=0.0
-!$acc parallel loop collapse(3) independent gang vector &
-!$acc&         present(h_x,rhs(:,:,:,1)) reduction(+:h_s,r_s) async(2)
+  !$acc parallel loop collapse(3) independent gang vector &
+  !$acc&         present(h_x,rhs(:,:,:,1)) reduction(+:h_s,r_s) async(2)
   do itor=nt1,nt2
-   do iv_loc=1,nv_loc
-     do ic=1,nc
-        h_s = h_s + abs(h_x(ic,iv_loc,itor))
-        r_s = r_s + abs(rhs(ic,iv_loc,itor,1))
+     do iv_loc=1,nv_loc
+        do ic=1,nc
+           h_s = h_s + abs(h_x(ic,iv_loc,itor))
+           r_s = r_s + abs(rhs(ic,iv_loc,itor,1))
+        enddo
      enddo
-   enddo
   enddo
 #endif
 
@@ -48,56 +60,101 @@ subroutine cgyro_error_estimate
 
   ! field_olds are always only in system memory... too expensive to keep in GPU memory
   ! assuming field was already synched to system memory
-!$omp parallel do collapse(3) reduction(+:norm_loc_s,error_loc_s)
+  !$omp parallel do collapse(3) reduction(+:norm_loc_s,error_loc_s)
   do itor=nt1,nt2
-   do ic=1,nc
-     do i_f=1,n_field
+     do ic=1,nc
+        do i_f=1,n_field
 
-        ! 1. Estimate of total (field) error via quadratic interpolation
+           ! 1. Estimate of total (field) error via quadratic interpolation
 
-        field_loc(i_f,ic,itor) = 3*field_old(i_f,ic,itor) - &
+           field_loc(i_f,ic,itor) = 3*field_old(i_f,ic,itor) - &
                 3*field_old2(i_f,ic,itor) + &
                 field_old3(i_f,ic,itor)
-        field_dot(i_f,ic,itor) = (3*field(i_f,ic,itor) - &
+           field_dot(i_f,ic,itor) = (3*field(i_f,ic,itor) - &
                 4*field_old(i_f,ic,itor) + &
                 field_old2(i_f,ic,itor) )/(2*delta_t)
 
-        ! Define norm and error for each mode number n
-        norm_loc_s  = norm_loc_s  + abs(field(i_f,ic,itor))
-        error_loc_s = error_loc_s + abs(field(i_f,ic,itor)-field_loc(i_f,ic,itor))
+           ! Define norm and error for each mode number n
+           norm_loc_s  = norm_loc_s  + abs(field(i_f,ic,itor))
+           error_loc_s = error_loc_s + abs(field(i_f,ic,itor)-field_loc(i_f,ic,itor))
 
-        ! save old values for next iteration
-        field_old3(i_f,ic,itor) = field_old2(i_f,ic,itor)
-        field_old2(i_f,ic,itor) = field_old(i_f,ic,itor)
-        field_old(i_f,ic,itor)  = field(i_f,ic,itor)
+           ! save old values for next iteration
+           field_old3(i_f,ic,itor) = field_old2(i_f,ic,itor)
+           field_old2(i_f,ic,itor) = field_old(i_f,ic,itor)
+           field_old(i_f,ic,itor)  = field(i_f,ic,itor)
+        enddo
      enddo
-   enddo
   enddo
 
   norm_loc(1)  = norm_loc_s
   error_loc(1) = error_loc_s
 
+  ! E_parallel
+  if (nonlinear_flag == 0) then
+
+     do itor=nt1,nt2
+        do ir=1,n_radial
+           itorbox = itor*box_size*sign_qs
+
+           jr0(0) = n_theta*modulo(ir-itorbox-1,n_radial)
+           jr0(1) = n_theta*(ir-1)
+           jr0(2) = n_theta*modulo(ir+itorbox-1,n_radial)
+
+           do it=1,n_theta
+
+              wderiv = 0.0
+
+              ic = (ir-1)*n_theta + it ! ic_c(ir,it)
+
+              ! Theta-derivative
+
+              itd = n_theta+it-nup_theta
+              itd_class = 0
+              jc = jr0(itd_class)+itd
+              thfac = thfac_itor(itd_class,itor)
+              do id=-nup_theta,nup_theta
+                 if (itd > n_theta) then
+                    ! move to next itd_class of compute
+                    itd = itd - n_theta
+                    itd_class = itd_class + 1
+                    jc = jr0(itd_class)+itd
+                    thfac = thfac_itor(itd_class,itor)
+                 endif
+                 wderiv = wderiv + thfac*cderiv(id)*field(1,jc,itor)
+                 itd = itd + 1
+                 jc = jc + 1
+              enddo
+
+              ! E_parallel = -b dot grad phi + (1/c) (d/dt) A_par
+              epar(ic,itor) = -wderiv/(q*rmaj*g_theta(it))-field_dot(2,ic,itor)
+
+           enddo
+        enddo
+     enddo
+
+  endif
+
 #if defined(OMPGPU)
-!$omp target teams distribute parallel do simd collapse(3) &
-!$omp&   private(iv_loc)
+  !$omp target teams distribute parallel do simd collapse(3) &
+  !$omp&   private(iv_loc)
 #elif defined(_OPENACC)
-!$acc parallel loop collapse(3) gang vector private(iv_loc) &
-!$acc&         present(cap_h_c_dot,cap_h_c,cap_h_c_old,cap_h_c_old2) &
-!$acc&         present(nt1,nt2,nv1,nv2,nc) copyin(delta_t) default(none)
+  !$acc parallel loop collapse(3) gang vector private(iv_loc) &
+  !$acc&         present(cap_h_c_dot,cap_h_c,cap_h_c_old,cap_h_c_old2) &
+  !$acc&         present(nt1,nt2,nv1,nv2,nc) copyin(delta_t) default(none)
 #else
-!$omp parallel do collapse(3) private(iv_loc)
+  !$omp parallel do collapse(3) private(iv_loc)
 #endif
   do itor=nt1,nt2
-   do iv=nv1,nv2
-     do ic=1,nc
-        iv_loc = iv-nv1+1
-        cap_h_c_dot(ic,iv_loc,itor) = (3*cap_h_c(ic,iv_loc,itor) - &
+     do iv=nv1,nv2
+        do ic=1,nc
+           iv_loc = iv-nv1+1
+           cap_h_c_dot(ic,iv_loc,itor) = (3*cap_h_c(ic,iv_loc,itor) - &
                 4*cap_h_c_old(ic,iv_loc,itor) + &
                 cap_h_c_old2(ic,iv_loc,itor) )/(2*delta_t)
-        cap_h_c_old2(ic,iv_loc,itor) = cap_h_c_old(ic,iv_loc,itor)
-        cap_h_c_old(ic,iv_loc,itor) = cap_h_c(ic,iv_loc,itor)
+           cap_h_c_old2(ic,iv_loc,itor) = cap_h_c_old(ic,iv_loc,itor)
+           cap_h_c_old(ic,iv_loc,itor) = cap_h_c(ic,iv_loc,itor)
+        enddo
      enddo
-   enddo
   enddo
 
   call timer_lib_out('field')
@@ -108,25 +165,25 @@ subroutine cgyro_error_estimate
 
 #if (!defined(OMPGPU)) && defined(_OPENACC)
   ! wait for the async GPU compute to be completed
-!$acc wait(2)
+  !$acc wait(2)
 #else
   ! NOTE: If I have multiple itor, sum them all together
   h_s=0.0
   r_s=0.0
 #if defined(OMPGPU)
   ! no async for OMPG{U for now
-!$omp target teams distribute parallel do simd collapse(3) &
-!$omp&    reduction(+:h_s,r_s)
+  !$omp target teams distribute parallel do simd collapse(3) &
+  !$omp&    reduction(+:h_s,r_s)
 #else
-!$omp parallel do collapse(3) reduction(+:h_s,r_s)
+  !$omp parallel do collapse(3) reduction(+:h_s,r_s)
 #endif
   do itor=nt1,nt2
-   do iv_loc=1,nv_loc
-     do ic=1,nc
-        h_s = h_s + abs(h_x(ic,iv_loc,itor))
-        r_s = r_s + abs(rhs(ic,iv_loc,itor,1))
+     do iv_loc=1,nv_loc
+        do ic=1,nc
+           h_s = h_s + abs(h_x(ic,iv_loc,itor))
+           r_s = r_s + abs(rhs(ic,iv_loc,itor,1))
+        enddo
      enddo
-   enddo
   enddo
 
 #endif

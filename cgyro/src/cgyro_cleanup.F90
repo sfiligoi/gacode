@@ -124,6 +124,7 @@ subroutine cgyro_cleanup
   if(allocated(field_old))           deallocate(field_old)
   if(allocated(field_old2))          deallocate(field_old2)
   if(allocated(field_old3))          deallocate(field_old3)
+  if(allocated(epar))                deallocate(epar)
   if(allocated(moment))              deallocate(moment)
   if(allocated(moment_loc))          deallocate(moment_loc)
   if(allocated(cflux))               deallocate(cflux)
