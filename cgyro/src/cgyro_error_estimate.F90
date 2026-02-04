@@ -41,8 +41,8 @@ subroutine cgyro_error_estimate
   ! NOTE: If I have multiple itor, sum them all together
   h_s=0.0
   r_s=0.0
-  !$acc parallel loop collapse(3) independent gang vector &
-  !$acc&         present(h_x,rhs(:,:,:,1)) reduction(+:h_s,r_s) async(2)
+!$acc parallel loop collapse(3) independent gang vector &
+!$acc&         present(h_x,rhs(:,:,:,1)) reduction(+:h_s,r_s) async(2)
   do itor=nt1,nt2
      do iv_loc=1,nv_loc
         do ic=1,nc
@@ -60,7 +60,7 @@ subroutine cgyro_error_estimate
 
   ! field_olds are always only in system memory... too expensive to keep in GPU memory
   ! assuming field was already synched to system memory
-  !$omp parallel do collapse(3) reduction(+:norm_loc_s,error_loc_s)
+!$omp parallel do collapse(3) reduction(+:norm_loc_s,error_loc_s)
   do itor=nt1,nt2
      do ic=1,nc
         do i_f=1,n_field
@@ -89,9 +89,11 @@ subroutine cgyro_error_estimate
   norm_loc(1)  = norm_loc_s
   error_loc(1) = error_loc_s
 
-  ! E_parallel
   if (nonlinear_flag == 0) then
 
+     epar(:,nt1:nt2) = 0.0
+     if (n_field >= 2) epar(:,nt1:nt2) = -field_dot(2,:,nt1:nt2)
+!$omp parallel do collapse(2) private(itorbox,jr0,wderiv,ic,itd,itd_class,jc,thfac,id)
      do itor=nt1,nt2
         do ir=1,n_radial
            itorbox = itor*box_size*sign_qs
@@ -103,10 +105,7 @@ subroutine cgyro_error_estimate
            do it=1,n_theta
 
               wderiv = 0.0
-
-              ic = (ir-1)*n_theta + it ! ic_c(ir,it)
-
-              ! Theta-derivative
+              ic = (ir-1)*n_theta + it
 
               itd = n_theta+it-nup_theta
               itd_class = 0
@@ -114,7 +113,6 @@ subroutine cgyro_error_estimate
               thfac = thfac_itor(itd_class,itor)
               do id=-nup_theta,nup_theta
                  if (itd > n_theta) then
-                    ! move to next itd_class of compute
                     itd = itd - n_theta
                     itd_class = itd_class + 1
                     jc = jr0(itd_class)+itd
@@ -125,8 +123,8 @@ subroutine cgyro_error_estimate
                  jc = jc + 1
               enddo
 
-              ! E_parallel = -b dot grad phi + (1/c) (d/dt) A_par
-              epar(ic,itor) = -wderiv/(q*rmaj*g_theta(it))-field_dot(2,ic,itor)
+              ! E_par = - (1/c) (d/dt) A_par - b dot grad phi
+              epar(ic,itor) = epar(ic,itor) - wderiv/(q*rmaj*g_theta(it))
 
            enddo
         enddo
@@ -135,14 +133,14 @@ subroutine cgyro_error_estimate
   endif
 
 #if defined(OMPGPU)
-  !$omp target teams distribute parallel do simd collapse(3) &
-  !$omp&   private(iv_loc)
+!$omp target teams distribute parallel do simd collapse(3) &
+!$omp&   private(iv_loc)
 #elif defined(_OPENACC)
-  !$acc parallel loop collapse(3) gang vector private(iv_loc) &
-  !$acc&         present(cap_h_c_dot,cap_h_c,cap_h_c_old,cap_h_c_old2) &
-  !$acc&         present(nt1,nt2,nv1,nv2,nc) copyin(delta_t) default(none)
+!$acc parallel loop collapse(3) gang vector private(iv_loc) &
+!$acc&         present(cap_h_c_dot,cap_h_c,cap_h_c_old,cap_h_c_old2) &
+!$acc&         present(nt1,nt2,nv1,nv2,nc) copyin(delta_t) default(none)
 #else
-  !$omp parallel do collapse(3) private(iv_loc)
+!$omp parallel do collapse(3) private(iv_loc)
 #endif
   do itor=nt1,nt2
      do iv=nv1,nv2
@@ -165,17 +163,17 @@ subroutine cgyro_error_estimate
 
 #if (!defined(OMPGPU)) && defined(_OPENACC)
   ! wait for the async GPU compute to be completed
-  !$acc wait(2)
+!$acc wait(2)
 #else
   ! NOTE: If I have multiple itor, sum them all together
   h_s=0.0
   r_s=0.0
 #if defined(OMPGPU)
-  ! no async for OMPG{U for now
-  !$omp target teams distribute parallel do simd collapse(3) &
-  !$omp&    reduction(+:h_s,r_s)
+  ! no async for OMPGPU for now
+!$omp target teams distribute parallel do simd collapse(3) &
+!$omp&    reduction(+:h_s,r_s)
 #else
-  !$omp parallel do collapse(3) reduction(+:h_s,r_s)
+!$omp parallel do collapse(3) reduction(+:h_s,r_s)
 #endif
   do itor=nt1,nt2
      do iv_loc=1,nv_loc

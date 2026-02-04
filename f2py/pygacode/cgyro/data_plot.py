@@ -258,13 +258,13 @@ class cgyrodata_plot(data.cgyrodata):
          ytag = r'$\delta\phi$'
       elif field == 1:
          f = self.aparb[:,itime]
-         ytag = r'$A_\parallel$'
+         ytag = r'$\delta A_\parallel$'
       elif field == 2:
          f = self.bparb[:,itime]
-         ytag = r'$B_\parallel$'
+         ytag = r'$\delta B_\parallel$'
       elif field == 3:
-         f = self.eparb[:,itime]
-         ytag = r'$E_\parallel$'
+         f = self.eparb[:,itime]*np.pi*self.q*self.rmaj
+         ytag = r'$\left( \pi q R_0 \right) \, \delta E_\parallel$'
 
       ax = fig.add_subplot(111)
       ax.grid(which="both",ls=":")
@@ -283,7 +283,6 @@ class cgyrodata_plot(data.cgyrodata):
             ax.set_xlim([1-self.n_radial,-1+self.n_radial])
          else:
             ax.set_xlim([-tmax,tmax])
-
             
       # normalization is phi(complex) where |phi| is max
       n0 = np.argmax(abs(self.phib[:,itime]))
@@ -292,14 +291,9 @@ class cgyrodata_plot(data.cgyrodata):
       y1 = np.real(f/f_norm)
       y2 = np.imag(f/f_norm)
 
-
       ax.plot(x,y1,'-o',color='black',markersize=2,label=r'$\mathrm{Re}$')
       ax.plot(x,y2,'-o',color='red'  ,markersize=2,label=r'$\mathrm{Im}$')
 
-      #iwid = np.argmin(abs(y1-0.5))
-      #w = x[iwid]/np.sqrt(np.log(2))
-      #ax.plot(x,np.exp(-(x/w)**2),color='black',linestyle=':')
-     
       ax.legend()
 
       fig.tight_layout(pad=0.3)
