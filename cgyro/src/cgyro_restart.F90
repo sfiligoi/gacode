@@ -34,15 +34,6 @@ subroutine cgyro_write_restart
 
   call cgyro_write_restart_one
   
-  ! Write restart tag
-  if (i_proc == 0) then
-     open(unit=io,file=trim(path)//runfile_restart_tag,status='replace')
-     write(io,*) i_current
-     write(io,fmtstr) t_current
-     write(io,*) delta_t_gk
-     close(io)
-  endif
-
 end subroutine cgyro_write_restart
 
 subroutine cgyro_write_restart_one
@@ -50,6 +41,7 @@ subroutine cgyro_write_restart_one
   use mpi
   use cgyro_globals
   use cgyro_io
+  use cgyro_step, ONLY: delta_t_gk
 #ifdef __INTEL_COMPILER
   ! ifort defined rename in the ifport module
   use ifport
@@ -123,6 +115,8 @@ subroutine cgyro_write_restart_one
     ! So, remove .old file, if it exists
     ierr  = UNLINK(trim(path)//runfile_restart//".old")
     ! NOTE: We will not check if it succeeded... not important, may not even exist (yet)
+    ! same for the tag file
+    ierr  = UNLINK(trim(path)//runfile_restart_tag//".old")
   endif
 
   if ((i_proc == 0) .and. (restart_preservation_mode<2)) then 
@@ -131,6 +125,8 @@ subroutine cgyro_write_restart_one
     ! So, remove existing restart file, if it exists
     ierr = UNLINK(trim(path)//runfile_restart)
     ! NOTE: We will not check if it succeeded... not important, may not even exist (yet)
+    ! same for the tag file
+    ierr  = UNLINK(trim(path)//runfile_restart_tag)
   endif
 
   ! TODO Error handling
@@ -209,6 +205,8 @@ subroutine cgyro_write_restart_one
         ! First try to save any existing restart file as old
         i_err = RENAME(trim(path)//runfile_restart, trim(path)//runfile_restart//".old")
         ! NOTE: We will not check if it succeeded... not important, may not even exist (yet)
+        ! same for the tag file
+        i_err = RENAME(trim(path)//runfile_restart_tag, trim(path)//runfile_restart_tag//".old")
      endif
 
      ! Rename part into the final expected file name
@@ -217,6 +215,13 @@ subroutine cgyro_write_restart_one
         call cgyro_error('Final rename in cgyro_write_restart failed')
         return
      endif
+
+     ! Write restart tag
+     open(unit=io,file=trim(path)//runfile_restart_tag,status='replace')
+     write(io,*) i_current
+     write(io,fmtstr) t_current
+     write(io,*) delta_t_gk
+     close(io)
   endif
 
   call system_clock(cp_time,count_rate,count_max)
