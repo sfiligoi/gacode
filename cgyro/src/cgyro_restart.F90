@@ -41,7 +41,7 @@ subroutine cgyro_write_restart_one
   use mpi
   use cgyro_globals
   use cgyro_io
-  use cgyro_step, ONLY: delta_t_gk
+  use cgyro_step, ONLY: delta_t_gk,delta_t_at_restart
 #ifdef __INTEL_COMPILER
   ! ifort defined rename in the ifport module
   use ifport
@@ -222,6 +222,11 @@ subroutine cgyro_write_restart_one
      write(io,fmtstr) t_current
      write(io,*) delta_t_gk
      close(io)
+
+     ! Save what were the values for the restart file we just created
+     i_at_restart = i_current
+     t_at_restart = t_current
+     delta_t_at_restart = delta_t_gk
   endif
 
   call system_clock(cp_time,count_rate,count_max)
@@ -369,6 +374,11 @@ subroutine cgyro_read_restart
      call MPI_BCAST(i_current,1,MPI_INTEGER,0,CGYRO_COMM_WORLD,i_err)
      call MPI_BCAST(t_current,1,MPI_DOUBLE_PRECISION,0,CGYRO_COMM_WORLD,i_err)
      call MPI_BCAST(delta_t_last,1,MPI_DOUBLE_PRECISION,0,CGYRO_COMM_WORLD,i_err)
+
+     ! Save what were the values for the restart file we just read
+     i_at_restart = i_current
+     t_at_restart = t_current
+     delta_t_at_restart = delta_t_last
       
   endif
 
