@@ -68,6 +68,7 @@ subroutine cgyro_write_restart_one
   character(8)  :: sdate
   character(10) :: stime
   character(len=64) :: platform
+  character(16)  :: istr
   integer(KIND=8) :: start_time,cp_time
   integer(KIND=8) :: count_rate, count_max
   real :: cp_dt
@@ -111,6 +112,7 @@ subroutine cgyro_write_restart_one
 
   if ((i_proc == 0) .and. (restart_preservation_mode<4)) then 
     ! Anything but restart_preservation_mode == 4
+    ! (and restart_preservation_mode>4 do not use .old)
     ! User does not want high guarntees for the old file
     ! So, remove .old file, if it exists
     ierr  = UNLINK(trim(path)//runfile_restart//".old")
@@ -200,7 +202,32 @@ subroutine cgyro_write_restart_one
 
   ! now that we know things worked well, move the file in its final location
   if (i_proc == 0) then 
-     if (restart_preservation_mode>2) then 
+     if (restart_preservation_mode==5) then 
+        ! restart_preservation_mode == 5
+        ! User requested to save every single restart file
+
+        ! but first check if an existing restart file exists at all
+        open(unit=io,&
+             file=trim(path)//runfile_restart,&
+             status='old',iostat=i_err)
+        close(io)
+
+        if (i_err == 0) then
+                WRITE(istr,"(A1,I8.8)") ".",i_at_restart
+                i_err = RENAME(trim(path)//runfile_restart, trim(path)//runfile_restart//trim(istr))
+                if (i_err /= 0) then
+                   call cgyro_error('Saving of existing restart file failed')
+                   return
+                endif
+                ! NOTE: We will not check if it succeeded... not important, may not even exist (yet)
+                ! same for the tag file
+                i_err = RENAME(trim(path)//runfile_restart_tag, trim(path)//runfile_restart_tag//trim(istr))
+                if (i_err /= 0) then
+                   call cgyro_error('Saving of existing restart file tag failed')
+                   return
+                endif
+        endif
+     elseif (restart_preservation_mode>2) then 
         ! restart_preservation_mode == 3 or 4
         ! First try to save any existing restart file as old
         i_err = RENAME(trim(path)//runfile_restart, trim(path)//runfile_restart//".old")
