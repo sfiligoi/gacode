@@ -55,7 +55,9 @@ def digit(f, n):
 def compute_ky_boxsize(lx, ly, shear):
     """Compute KY and BOX_SIZE from lx, ly, and shear."""
     ky = digit(2*np.pi/ly, 4)
-    return ky, digit(lx*shear*ky, 0)
+    bs = max(1, digit(lx*shear*ky, 0))
+    print(f'   lx={lx}  ly={ly}  BOX_SIZE={bs}')
+    return ky, bs
 
 def read_input_cgyro(filepath):
     """Read input.cgyro, return (lines, {param: line_index})."""
