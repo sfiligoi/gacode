@@ -7,7 +7,7 @@
 !
 ! Relevant parametes:
 !  RESTART_PRESERVATION_MODE
-!   1 - Do not create .old restart file, and remove last restart file before writing rew restart file (max 1 restart files on disk)
+!   1 - Do not create .old restart file, and remove last restart file before writing new restart file (max 1 restart files on disk)
 !   2 - Do not create .old restart file, but remove last restart file after successful creation (max 2 restart files on disk)
 !   3 - Do create .old restart file, remove previous .old before writing writing new restart file (max 2 restart files on disk, default)
 !   4 - Do create .old restart file, remove previous .old only after succesfully writing new restart file (max 3 restart files on disk)
