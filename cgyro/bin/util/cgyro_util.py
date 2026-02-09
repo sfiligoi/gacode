@@ -56,7 +56,9 @@ def compute_ky_boxsize(lx, ly, shear):
     """Compute KY and BOX_SIZE from lx, ly, and shear."""
     ky = digit(2*np.pi/ly, 4)
     bs = max(1, digit(lx*shear*ky, 0))
-    print(f'   lx={lx}  ly={ly}  BOX_SIZE={bs}')
+    actual_ly = 2*np.pi/ky
+    actual_lx = bs/(shear*ky)
+    print(f'cgyro_pre: LX={actual_lx:.4f}  LY={actual_ly:.4f}  BOX_SIZE={bs}')
     return ky, bs
 
 def read_input_cgyro(filepath):
