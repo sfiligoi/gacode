@@ -73,6 +73,9 @@ class CGyroRestartFormat:
            # some old versions did not have the option of changing toroidals_per_proc
            self.nt_loc = int(adict["TOROIDALS_PER_PROC"])
 
+#
+# Class that handles restart header 
+#
 class CGyroRestartHeader:
     def __init__(self):
         self.grid = CGyroGrid()
@@ -96,6 +99,9 @@ class CGyroRestartHeader:
 
     def load(self,fdir, allow_old=False):
         fname = os.path.join(fdir,restart_fname)
+        self.load_from_file(fname, allow_old)
+
+    def load_from_file(self,fname, allow_old=False):
         with open(fname,"rb") as fd:
             magic_b = fd.read(4)
             [magic] = struct.unpack('i',magic_b)
@@ -181,9 +187,11 @@ class CGyroRestartHeader:
         return ( header_size +
                 self.get_ncbytes()*self.grid.get_nv()*self.grid.n_toroidal)
 
+    # all indexes are 0-based
     def get_ic(self, i_t, i_r):
         return i_r*self.grid.n_theta+i_t
 
+    # all indexes are 0-based
     def get_iv(self, i_s, i_x, i_e):
         iv = 0
         if self.fmt.velocity_order==1:
@@ -209,4 +217,43 @@ class CGyroRestartHeader:
     # not including the header
     def theta_offset(self, i_r, i_s, i_x, i_e, i_t):
         return self.nc_offset(i_s,i_x,i_e,i_t)+i_r*self.get_thetabytes()
+
+#
+# Class that handles both the restart header and the restore data
+# Note: The whole restore file will be loaded in memory
+#
+class CGyroRestartData:
+    def __init__(self):
+        self.header = CGyroRestartHeader();
+        # data shape is
+        # (nt_dim,nv_dim,nt_loc,nv_loc,nc)
+        # all indexes are 0-based
+        self.data = None
+
+    def load(self,fdir):
+        fname = os.path.join(fdir,restart_fname)
+        self.load_from_file(fname)
+
+    # Note: We do not allow old restart format in this class
+    def load_from_file(self,fname):
+        import numpy as np
+        self.header.load_from_file(fname, False)
+        raw_data = np.fromfile(fname, dtype=np.complex128, count=-1, offset=1024*16)
+        nc = self.header.grid.get_nc()
+        nv = self.header.grid.get_nv()
+        nt = self.header.grid.n_toroidal
+        shape=(nt//self.header.fmt.nt_loc,nv//self.header.fmt.nv_loc,self.header.fmt.nt_loc,self.header.fmt.nv_loc,nc)
+        self.data = raw_data.reshape(shape)
+
+    # all indexes are 0-based
+    def el_tvc(self, i_t, i_v, i_c):
+        itm = i_t // self.header.fmt.nt_loc
+        itl = i_t % self.header.fmt.nt_loc
+        ivm = i_v // self.header.fmt.nv_loc
+        ivl = i_v % self.header.fmt.nv_loc
+        return self.data[itm, ivm, itl, ivl, i_c]
+
+    # all indexes are 0-based
+    def el(self, i_tor, i_s, i_x, i_e, i_theta, i_r):
+        return self.el_tvc(i_tor, self.header.get_iv(i_s, i_x, i_e), self.header.get_ic(i_theta, i_r))
 
