@@ -300,6 +300,9 @@ module cgyro_globals
   complex :: freq_err
   integer(KIND=8) :: kernel_start_time, kernel_exit_time, kernel_count_rate, kernel_count_max
   !---------------------------------------------------------------
+  integer :: i_at_restart
+  real    :: t_at_restart
+  !---------------------------------------------------------------
 
   !---------------------------------------------------------------
   ! Numerical/work arrays and dimensions
