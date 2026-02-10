@@ -76,6 +76,7 @@ subroutine cgyro_write_restart_one
   character(8)  :: sdate
   character(10) :: stime
   character(len=64) :: platform
+  character(16)  :: pistr
   integer(KIND=8) :: start_time,cp_time
   integer(KIND=8) :: count_rate, count_max
   real :: cp_dt
@@ -142,8 +143,9 @@ subroutine cgyro_write_restart_one
   endif
 
   ! write to a temp file name first, so we don't end up with partially written files
+  WRITE(pistr,"(A1,I8.8)") ".",i_current
   call MPI_FILE_OPEN(CGYRO_COMM_WORLD,&
-          trim(path)//runfile_restart//".part",&
+          trim(path)//runfile_restart//".part"//trim(pistr),&
           filemode,&
           finfo,&
           fhv,&
@@ -198,7 +200,7 @@ subroutine cgyro_write_restart_one
   ! now update the header
   call MPI_BARRIER(CGYRO_COMM_WORLD,i_err)
   if (i_proc == 0) then 
-     call cgyro_write_restart_header_part
+     call cgyro_write_restart_header_part(pistr)
      if (error_status > 0) return
   endif
 
@@ -212,7 +214,7 @@ subroutine cgyro_write_restart_one
      endif
 
      ! Rename part into the final expected file name
-     i_err = RENAME(trim(path)//runfile_restart//".part", trim(path)//runfile_restart)
+     i_err = RENAME(trim(path)//runfile_restart//".part"//trim(pistr), trim(path)//runfile_restart)
      if (i_err /= 0) then
         call cgyro_error('Final rename in cgyro_write_restart failed')
         return
@@ -252,12 +254,13 @@ subroutine cgyro_write_restart_one
   
 end subroutine cgyro_write_restart_one
 
-subroutine cgyro_write_restart_header_part
+subroutine cgyro_write_restart_header_part(pistr)
   use cgyro_globals
   use cgyro_io
 
   !---------------------------------------------------
   implicit none
+  character(16), intent(in)  :: pistr
 
   integer :: recid
 
@@ -268,7 +271,7 @@ subroutine cgyro_write_restart_header_part
   inquire(iolength=reclen) recltest
 
   open(unit=io,&
-       file=trim(path)//runfile_restart//".part",&
+       file=trim(path)//runfile_restart//".part"//trim(pistr),&
        status='old',access='DIRECT',RECL=reclen)
 
   recid = 1
