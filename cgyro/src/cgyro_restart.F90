@@ -73,6 +73,7 @@ subroutine cgyro_write_restart_one
   integer(KIND=8) :: count_rate, count_max
   real :: cp_dt
   integer :: statusfd
+  integer :: fcount
   integer :: ierr,ic0,j
 
   ! use system_clock to be consistent with cgyro_kernel
@@ -159,6 +160,11 @@ subroutine cgyro_write_restart_one
           'native',&
           finfo,&
           i_err)
+  if (i_err /= 0) then
+     call cgyro_error('MPI_FILE_SET_VIEW in cgyro_write_restart failed')
+     return
+  endif
+
 
   ! need h_x here
 #if defined(OMPGPU)
@@ -180,12 +186,21 @@ subroutine cgyro_write_restart_one
      return
   endif
 
+  fcount = 0;
+  call MPI_GET_COUNT(fstatus, MPI_COMPLEX16, fcount, i_err)
+  if (fcount /= size(h_x)) then
+     call cgyro_error('Partial restart write!')
+     return
+  endif
+
+  call MPI_BARRIER(CGYRO_COMM_WORLD,i_err)
   call MPI_FILE_SYNC(fhv,i_err)
   if (i_err /= 0) then
      call cgyro_error('MPI_FILE_SYNC in cgyro_write_restart failed')
      return
   endif
 
+  call MPI_BARRIER(CGYRO_COMM_WORLD,i_err)
   call MPI_FILE_CLOSE(fhv,i_err)
   if (i_err /= 0) then
      call cgyro_error('MPI_FILE_CLOSE in cgyro_write_restart failed')
