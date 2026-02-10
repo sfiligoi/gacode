@@ -81,6 +81,7 @@ subroutine cgyro_write_restart_one
   integer(KIND=8) :: count_rate, count_max
   real :: cp_dt
   integer :: statusfd
+  integer :: fcount
   integer :: ierr,ic0,j
 
   ! use system_clock to be consistent with cgyro_kernel
@@ -139,12 +140,33 @@ subroutine cgyro_write_restart_one
     ierr  = UNLINK(trim(path)//runfile_restart_tag)
   endif
 
+  call MPI_BARRIER(CGYRO_COMM_WORLD,i_err)
+  if (i_err /= 0) then
+     call cgyro_error('MPI_BARRIER in cgyro_write_restart failed')
+     return
+  endif
   ! TODO Error handling
   call MPI_INFO_CREATE(finfo,i_err)
+  if (i_err /= 0) then
+     call cgyro_error('MPI_INFO_CREATE in cgyro_write_restart failed')
+     return
+  endif
+
+  call MPI_BARRIER(CGYRO_COMM_WORLD,i_err)
+  if (i_err /= 0) then
+     call cgyro_error('MPI_BARRIER in cgyro_write_restart failed')
+     return
+  endif
 
   if (mpiio_stripe_factor > 0) then
     ! user asked us to explicitly set the MPI IO striping factor
     call MPI_INFO_SET(finfo,"striping_factor",mpiio_stripe_str,i_err)
+  endif
+
+  call MPI_BARRIER(CGYRO_COMM_WORLD,i_err)
+  if (i_err /= 0) then
+     call cgyro_error('MPI_BARRIER in cgyro_write_restart failed')
+     return
   endif
 
   ! write to a temp file name first, so we don't end up with partially written files
@@ -159,6 +181,12 @@ subroutine cgyro_write_restart_one
      return
   endif
 
+  call MPI_BARRIER(CGYRO_COMM_WORLD,i_err)
+  if (i_err /= 0) then
+     call cgyro_error('MPI_BARRIER in cgyro_write_restart failed')
+     return
+  endif
+
   call MPI_FILE_SET_VIEW(fhv,&
           disp,&
           MPI_COMPLEX16,&
@@ -166,6 +194,10 @@ subroutine cgyro_write_restart_one
           'native',&
           finfo,&
           i_err)
+  if (i_err /= 0) then
+     call cgyro_error('MPI_FILE_SET_VIEW in cgyro_write_restart failed')
+     return
+  endif
 
   ! need h_x here
 #if defined(OMPGPU)
@@ -173,6 +205,12 @@ subroutine cgyro_write_restart_one
 #elif defined(_OPENACC)
 !$acc wait(2)
 #endif
+
+  call MPI_BARRIER(CGYRO_COMM_WORLD,i_err)
+  if (i_err /= 0) then
+     call cgyro_error('MPI_BARRIER in cgyro_write_restart failed')
+     return
+  endif
 
   call MPI_FILE_WRITE_AT(fhv,&
           offset1,&
@@ -186,13 +224,33 @@ subroutine cgyro_write_restart_one
      call cgyro_error('MPI_FILE_WRITE_AT in cgyro_write_restart failed')
      return
   endif
+  fcount = 0;
+  call MPI_GET_COUNT(fstatus, MPI_COMPLEX16, fcount, i_err)
+  if (i_err /= 0) then
+     call cgyro_error('MPI_GET_COUNT in cgyro_write_restart failed')
+     return
+  endif
+  if (fcount /= size(h_x)) then
+     call cgyro_error('Partial restart write!')
+     return
+  endif
 
+  call MPI_BARRIER(CGYRO_COMM_WORLD,i_err)
+  if (i_err /= 0) then
+     call cgyro_error('MPI_BARRIER in cgyro_write_restart failed')
+     return
+  endif
   call MPI_FILE_SYNC(fhv,i_err)
   if (i_err /= 0) then
      call cgyro_error('MPI_FILE_SYNC in cgyro_write_restart failed')
      return
   endif
 
+  call MPI_BARRIER(CGYRO_COMM_WORLD,i_err)
+  if (i_err /= 0) then
+     call cgyro_error('MPI_BARRIER in cgyro_write_restart failed')
+     return
+  endif
   call MPI_FILE_CLOSE(fhv,i_err)
   if (i_err /= 0) then
      call cgyro_error('MPI_FILE_CLOSE in cgyro_write_restart failed')
