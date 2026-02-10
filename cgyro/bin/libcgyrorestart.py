@@ -1,4 +1,23 @@
-# restart_resize module
+
+#
+# restart_resize module libraries
+#
+
+#
+# Usage:
+# 1) Get metadata for the main restart file in a directory
+#   import libcgyrorestart
+#   head = libcgyrorestart.CGyroRestartHeader()
+#   head.load("my/sim/dir")
+#   print(head.grid.n_toroidal)
+# 2) Load a whole restart file in memory (WARNING: Uses lots of memory)
+#   import libcgyrorestart
+#   data = libcgyrorestart.CGyroRestartData()
+#   data.load_from_file('my/old/simulation/bin.cgyro.restart.old')
+#   print(data.el(11,0,6,2,13,32)) # Note: all indexes are 0-based
+#   print(data.el_tvc(11,38,781)) # Note: iv ordering depends on VELOCITY_ORDER
+#   
+
 
 import sys,os
 import struct
