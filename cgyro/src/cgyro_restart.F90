@@ -4,6 +4,14 @@
 ! PURPOSE:
 !  This is the master file controlling input and output of
 !  restart data using MPI-IO.
+!
+! Relevant parametes:
+!  RESTART_PRESERVATION_MODE
+!   1 - Do not create .old restart file, and remove last restart file before writing rew restart file (max 1 restart files on disk)
+!   2 - Do not create .old restart file, but remove last restart file after successful creation (max 2 restart files on disk)
+!   3 - Do create .old restart file, remove previous .old before writing writing new restart file (max 2 restart files on disk, default)
+!   4 - Do create .old restart file, remove previous .old only after succesfully writing new restart file (max 3 restart files on disk)
+!   5 - Rename previous restart files using start index as extension (no limit on number of restart files on disk)
 !------------------------------------------------
 
 module cgyro_restart
@@ -68,11 +76,12 @@ subroutine cgyro_write_restart_one
   character(8)  :: sdate
   character(10) :: stime
   character(len=64) :: platform
-  character(16)  :: istr
+  character(16)  :: istr,pistr
   integer(KIND=8) :: start_time,cp_time
   integer(KIND=8) :: count_rate, count_max
   real :: cp_dt
   integer :: statusfd
+  integer :: fcount
   integer :: ierr,ic0,j
 
   ! use system_clock to be consistent with cgyro_kernel
@@ -140,8 +149,9 @@ subroutine cgyro_write_restart_one
   endif
 
   ! write to a temp file name first, so we don't end up with partially written files
+  WRITE(pistr,"(A1,I8.8)") ".",i_current
   call MPI_FILE_OPEN(CGYRO_COMM_WORLD,&
-          trim(path)//runfile_restart//".part",&
+          trim(path)//runfile_restart//".part"//trim(pistr),&
           filemode,&
           finfo,&
           fhv,&
@@ -158,6 +168,11 @@ subroutine cgyro_write_restart_one
           'native',&
           finfo,&
           i_err)
+  if (i_err /= 0) then
+     call cgyro_error('MPI_FILE_SET_VIEW in cgyro_write_restart failed')
+     return
+  endif
+
 
   ! need h_x here
 #if defined(OMPGPU)
@@ -179,12 +194,21 @@ subroutine cgyro_write_restart_one
      return
   endif
 
+  fcount = 0;
+  call MPI_GET_COUNT(fstatus, MPI_COMPLEX16, fcount, i_err)
+  if (fcount /= size(h_x)) then
+     call cgyro_error('Partial restart write!')
+     return
+  endif
+
+  call MPI_BARRIER(CGYRO_COMM_WORLD,i_err)
   call MPI_FILE_SYNC(fhv,i_err)
   if (i_err /= 0) then
      call cgyro_error('MPI_FILE_SYNC in cgyro_write_restart failed')
      return
   endif
 
+  call MPI_BARRIER(CGYRO_COMM_WORLD,i_err)
   call MPI_FILE_CLOSE(fhv,i_err)
   if (i_err /= 0) then
      call cgyro_error('MPI_FILE_CLOSE in cgyro_write_restart failed')
@@ -196,7 +220,7 @@ subroutine cgyro_write_restart_one
   ! now update the header
   call MPI_BARRIER(CGYRO_COMM_WORLD,i_err)
   if (i_proc == 0) then 
-     call cgyro_write_restart_header_part
+     call cgyro_write_restart_header_part(pistr)
      if (error_status > 0) return
   endif
 
@@ -237,7 +261,7 @@ subroutine cgyro_write_restart_one
      endif
 
      ! Rename part into the final expected file name
-     i_err = RENAME(trim(path)//runfile_restart//".part", trim(path)//runfile_restart)
+     i_err = RENAME(trim(path)//runfile_restart//".part"//trim(pistr), trim(path)//runfile_restart)
      if (i_err /= 0) then
         call cgyro_error('Final rename in cgyro_write_restart failed')
         return
@@ -289,12 +313,13 @@ subroutine cgyro_write_restart_one
   
 end subroutine cgyro_write_restart_one
 
-subroutine cgyro_write_restart_header_part
+subroutine cgyro_write_restart_header_part(pistr)
   use cgyro_globals
   use cgyro_io
 
   !---------------------------------------------------
   implicit none
+  character(16), intent(in)  :: pistr
 
   integer :: recid
 
@@ -305,7 +330,7 @@ subroutine cgyro_write_restart_header_part
   inquire(iolength=reclen) recltest
 
   open(unit=io,&
-       file=trim(path)//runfile_restart//".part",&
+       file=trim(path)//runfile_restart//".part"//trim(pistr),&
        status='old',access='DIRECT',RECL=reclen)
 
   recid = 1
