@@ -15,7 +15,7 @@ p.add_argument('-e', metavar='DIR', type=str, default='./',
                help='Simulation directory (default: ./)')
 p.add_argument('-itime', metavar='N', type=int, default=-1,
                help='Time index (default: -1 = last)')
-p.add_argument('-n', metavar='N', type=int, required=True,
+p.add_argument('-n', metavar='N', type=int, default=1,
                help='Toroidal mode number')
 p.add_argument('-s', metavar='S', type=int, default=0,
                help='Ballooning mode index (default: 0)')
@@ -39,12 +39,18 @@ sim.getbigfield()
 t = sim.getnorm('elec')
 a.itime = min(a.itime, sim.n_time-1)
 
-f = sim.kxky_phi[:,:,a.n,a.itime]
+if sim.n_n == 1:
+   f = sim.kxky_phi[:,:,0,a.itime]
+   a.n = 1
+else:
+   f = sim.kxky_phi[:,:,a.n,a.itime]
+
 f /= sim.rhonorm
 
 m = sim.n_radial//2
 l = sim.m_box*a.n
-phi = 2*np.pi*np.sign(sim.q*sim.shear)*sim.q/sim.m_box
+
+phi = 2*np.pi*sim.q/sim.m_box
 theta0 = 2.0*a.s/l
 
 print('INFO: (cgyro_skew) n={}, l={}, s={}'.format(a.n,l,a.s))
@@ -75,9 +81,14 @@ boundaries = set()
 for p in pvec[a.s]:
    sl = -1.0 + 2.0*p/l - theta0
    sr =  1.0 + 2.0*p/l - theta0
-   c = 'lightcoral' if (p < -m or p >= m) else 'lightblue'
+   extended = (p < -m or p >= m)
+   c = 'lightcoral' if extended else 'lightblue'
    ax.axvspan(sl, sr, color=c, alpha=0.2)
-   ax.text((sl+sr)/2, 0.95, r'$p={}$'.format(p), ha='center', va='top',
+   label = r'$p={}$'.format(p)
+   if extended:
+      s_eff = ((p+m) % (2*m) - m) % l
+      label += '\n' + r'$s^\prime={}$'.format(s_eff)
+   ax.text((sl+sr)/2, 0.95, label, ha='center', va='top',
            transform=ax.get_xaxis_transform(), fontsize=12, color='black',
            bbox=dict(facecolor='lightgrey', edgecolor='black', linewidth=0.5, pad=3))
    boundaries |= {sl, sr}
