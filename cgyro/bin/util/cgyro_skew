@@ -1,0 +1,98 @@
+#!/usr/bin/env python
+import argparse
+from collections import defaultdict
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib import rc
+rc('text', usetex=True)
+rc('font', family='serif', size=16)
+from pygacode.gacodefuncs import TEXPHI
+from pygacode.cgyro import data
+
+p = argparse.ArgumentParser(prog='cgyro_skew',
+   description='Plot extended ballooning mode structure')
+p.add_argument('-e', metavar='DIR', type=str, default='./',
+               help='Simulation directory (default: ./)')
+p.add_argument('-itime', metavar='N', type=int, default=-1,
+               help='Time index (default: -1 = last)')
+p.add_argument('-n', metavar='N', type=int, required=True,
+               help='Toroidal mode number')
+p.add_argument('-s', metavar='S', type=int, default=0,
+               help='Ballooning mode index (default: 0)')
+p.add_argument('-lx', metavar='L', type=float, default=14,
+               help='Figure width (default: 14)')
+p.add_argument('-ly', metavar='L', type=float, default=6,
+               help='Figure height (default: 6)')
+p.add_argument('-dot', action='store_true',
+               help='Show data points as circles')
+p.add_argument('-save', metavar='FILE', type=str, default=None,
+               help='Save to file (format from extension: .pdf, .png)')
+a = p.parse_args()
+
+# Ensure trailing slash
+if not a.e.endswith('/'):
+   a.e += '/'
+
+# Load data
+sim = data.cgyrodata(a.e)
+sim.getbigfield()
+t = sim.getnorm('elec')
+a.itime = min(a.itime, sim.n_time-1)
+
+f = sim.kxky_phi[:,:,a.n,a.itime]
+f /= sim.rhonorm
+
+m = sim.n_radial//2
+l = sim.m_box*a.n
+phi = 2*np.pi*np.sign(sim.q*sim.shear)*sim.q/sim.m_box
+theta0 = 2.0*a.s/l
+
+print('INFO: (cgyro_skew) n={}, l={}, s={}'.format(a.n,l,a.s))
+print('INFO: (cgyro_skew) (c_s/a) t = {:.2f}'.format(t[a.itime]))
+
+# Sort extended p indices into ballooning angle bins
+pvec = defaultdict(list)
+for p in range(-l-m, m+l):
+   pvec[p % l].append(p)
+
+# Build ballooning mode curve for selected mode s
+#
+# Key formula: f(p,z) = F(z+2*pi*p/l) * exp(i*phi*p)
+tstar = [(sim.thetap+2*np.pi/l*p)/np.pi - theta0 for p in pvec[a.s]]
+fstar = [f[(p+m)%(2*m),:]*np.exp(-1j*p*phi) for p in pvec[a.s]]
+tvec = np.concatenate(tstar)
+fvec = np.concatenate(fstar)
+
+# Plot
+fig, ax = plt.subplots(figsize=(a.lx, a.ly))
+ax.grid(which='major', ls=':')
+ax.set_xlabel(r'$(\theta_*-\theta_0)/\pi$')
+ax.set_ylabel(sim.ylabeler(str(a.n), TEXPHI, abs=False))
+ax.set_title(r'$n={},\; \ell={},\; s={}$  ($s=0,\ldots,{})$'.format(a.n,l,a.s,l-1))
+
+# Shade strips and mark boundaries
+boundaries = set()
+for p in pvec[a.s]:
+   sl = -1.0 + 2.0*p/l - theta0
+   sr =  1.0 + 2.0*p/l - theta0
+   c = 'lightcoral' if (p < -m or p >= m) else 'lightblue'
+   ax.axvspan(sl, sr, color=c, alpha=0.2)
+   ax.text((sl+sr)/2, 0.95, r'$p={}$'.format(p), ha='center', va='top',
+           transform=ax.get_xaxis_transform(), fontsize=12, color='black',
+           bbox=dict(facecolor='lightgrey', edgecolor='black', linewidth=0.5, pad=3))
+   boundaries |= {sl, sr}
+
+for b in boundaries:
+   ax.axvline(b, color='grey', linewidth=0.5)
+ax.set_xticks(sorted(boundaries))
+
+# Data curves
+ax.plot(tvec, np.real(fvec), '-o' if a.dot else '-', color='black', markersize=1.5)
+ax.plot(tvec, np.imag(fvec), '--', color='black')
+
+fig.tight_layout(pad=0.3)
+if a.save:
+   fig.savefig(a.save)
+   print('INFO: (cgyro_skew) Saved to {}'.format(a.save))
+else:
+   plt.show()

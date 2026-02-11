@@ -168,6 +168,8 @@ while [ $# -gt 0 ] ; do
 
   --pert) $UTIL_DIR/cgyro_pert $uarg ; exit 0 ;;
 
+  --skew) $UTIL_DIR/cgyro_skew $uarg ; exit 0 ;;
+
   -p) shift ; SIMROOT=$1 ;;
 
   -e) shift ; LOCDIR=$1 ;;
