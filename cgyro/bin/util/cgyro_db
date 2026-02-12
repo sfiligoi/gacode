@@ -425,7 +425,7 @@ def get_default_db_path(db_name='cgyro.db'):
     return get_user_config_path(db_name)
 
 
-def refresh_directories(root_dir='./'):
+def refresh_directories(root_dir='./', linear=False):
     """
     Refresh directories by re-running cgyro_parse.py and cgyro
 
@@ -433,10 +433,12 @@ def refresh_directories(root_dir='./'):
     -----------
     root_dir : str
         Root directory to search for CGYRO cases
+    linear : bool
+        If True, include linear simulations in refresh
     """
     import subprocess
 
-    cases = find_cgyro_cases(root_dir)
+    cases = find_cgyro_cases(root_dir, linear=linear)
     print(f"Found {len(cases)} CGYRO cases to refresh")
 
     gacode_root = os.environ.get('GACODE_ROOT')
@@ -464,7 +466,7 @@ def refresh_directories(root_dir='./'):
             continue
 
 
-def legacy_refresh_directories(root_dir='./'):
+def legacy_refresh_directories(root_dir='./', linear=False):
     """
     Legacy profile refresh: convert old input format
 
@@ -472,10 +474,12 @@ def legacy_refresh_directories(root_dir='./'):
     -----------
     root_dir : str
         Root directory to search for CGYRO cases
+    linear : bool
+        If True, include linear simulations in refresh
     """
     import subprocess
 
-    cases = find_cgyro_cases(root_dir)
+    cases = find_cgyro_cases(root_dir, linear=linear)
     print(f"Found {len(cases)} CGYRO cases for legacy refresh")
 
     gacode_root = os.environ.get('GACODE_ROOT')
@@ -530,8 +534,10 @@ def main():
        cgyro_db -show-hash 12345678          Show complete record by 8-digit hash
        cgyro_db -i nersc.db -show-hash abc   Show case from custom database
 
-       cgyro_db -ref                         Refresh all CGYRO cases (re-run parse and cgyro)
+       cgyro_db -ref                         Refresh nonlinear CGYRO cases (re-run parse and cgyro)
+       cgyro_db -ref -linear                 Refresh all cases including linear
        cgyro_db -lref                        Legacy refresh (convert old input format)
+       cgyro_db -lref -linear                Legacy refresh including linear cases
 
        cgyro_db -q ""                        List all cases (minimal: #, path, hash)
        cgyro_db -q "" -fields standard       Add physics parameters (q, shear, kappa, etc.)
@@ -605,6 +611,10 @@ def main():
                         help='Legacy profile refresh (convert old input format)',
                         action='store_true')
 
+    parser.add_argument('-linear',
+                        help='Include linear simulations (use with -ref or -lref)',
+                        action='store_true')
+
     parser.add_argument('-i', '--input',
                         help='Database name (placed in ~/.cgyro/) or full path',
                         type=str,
@@ -659,11 +669,11 @@ def main():
         db.close()
 
     elif args.refresh:
-        refresh_directories()
+        refresh_directories(linear=args.linear)
         sys.exit(0)
 
     elif args.legacy_refresh:
-        legacy_refresh_directories()
+        legacy_refresh_directories(linear=args.linear)
         sys.exit(0)
 
     elif args.initialize:
