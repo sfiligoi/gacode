@@ -103,7 +103,10 @@ then
   echo 
   echo "         --pert"
   echo "         Helper to create input.xgyro via perturbations"
-  
+  echo
+  echo "         --loc"
+  echo "         Local parameter extraction (locpargen wrapper)"
+
   exit 1
 fi
 #=============================================================
@@ -169,6 +172,8 @@ while [ $# -gt 0 ] ; do
   --pert) $UTIL_DIR/cgyro_pert $uarg ; exit 0 ;;
 
   --skew) $UTIL_DIR/cgyro_skew $uarg ; exit 0 ;;
+
+  --loc) $UTIL_DIR/cgyro_loc $uarg ; exit 0 ;;
 
   -p) shift ; SIMROOT=$1 ;;
 
