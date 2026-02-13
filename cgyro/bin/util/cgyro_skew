@@ -74,7 +74,23 @@ fig, ax = plt.subplots(figsize=(a.lx, a.ly))
 ax.grid(which='major', ls=':')
 ax.set_xlabel(r'$(\theta_*-\theta_0)/\pi$')
 ax.set_ylabel(sim.ylabeler(str(a.n), TEXPHI, abs=False))
-ax.set_title(r'$n={},\; \ell={},\; s={}$  ($s=0,\ldots,{})$'.format(a.n,l,a.s,l-1))
+# Determine label placement: outside plot area to avoid data overlap
+# Title goes inside plot on the opposite side
+idx = np.argmax(np.abs(fvec))
+if np.real(fvec[idx]) > 0:
+   label_y, label_va = -0.02, 'top'
+   title_y, title_va = 0.97, 'top'
+else:
+   label_y, label_va = 1.02, 'bottom'
+   title_y, title_va = 0.03, 'bottom'
+
+title_str = r'$n={},\; \ell={},\; s={}$  ($s=0,\ldots,{})$'.format(a.n,l,a.s,l-1)
+ax.text(0.02, title_y, title_str, ha='left', va=title_va,
+        transform=ax.transAxes, fontsize=16,
+        bbox=dict(facecolor='white', edgecolor='black', linewidth=0.5, pad=4, alpha=0.8))
+
+n_strips = len(pvec[a.s])
+label_rotation = 90 if n_strips > 10 else 0
 
 # Shade strips and mark boundaries
 boundaries = set()
@@ -88,7 +104,8 @@ for p in pvec[a.s]:
    if extended:
       s_eff = ((p+m) % (2*m) - m) % l
       label += '\n' + r'$s^\prime={}$'.format(s_eff)
-   ax.text((sl+sr)/2, 0.95, label, ha='center', va='top',
+   ax.text((sl+sr)/2, label_y, label, ha='center', va=label_va,
+           rotation=label_rotation,
            transform=ax.get_xaxis_transform(), fontsize=12, color='black',
            bbox=dict(facecolor='lightgrey', edgecolor='black', linewidth=0.5, pad=3))
    boundaries |= {sl, sr}
@@ -100,6 +117,14 @@ ax.set_xticks(sorted(boundaries))
 # Data curves
 ax.plot(tvec, np.real(fvec), '-o' if a.dot else '-', color='black', markersize=1.5)
 ax.plot(tvec, np.imag(fvec), '--', color='black')
+
+# Set axis limits to data limits
+xpad = 0.01*(tvec.max() - tvec.min())
+ax.set_xlim(tvec.min() - xpad, tvec.max() + xpad)
+ymin = np.min([np.real(fvec), np.imag(fvec)])
+ymax = np.max([np.real(fvec), np.imag(fvec)])
+ypad = 0.1*(ymax - ymin)
+ax.set_ylim(ymin - ypad, ymax + ypad)
 
 fig.tight_layout(pad=0.3)
 if a.save:
