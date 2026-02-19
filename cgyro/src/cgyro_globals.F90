@@ -82,6 +82,7 @@ module cgyro_globals
   real :: gamma_p
   real :: mach
   integer :: rotation_model
+  integer :: nt_loc
   integer :: mpi_rank_order
   integer :: velocity_order
   integer :: hiprec_flag
@@ -90,18 +91,19 @@ module cgyro_globals
   integer :: global_flag
   integer :: n_global
   real    :: nu_global
-  integer :: psym_flag
   integer :: theta_plot
   integer :: gpu_bigmem_flag
   integer :: upwind_single_flag
   integer :: nl_single_flag
   real :: px0
-  integer :: stream_term
-  real :: stream_factor
   integer :: exch_flag
   integer :: nl_min
   real :: dealias
   integer :: dealias_order
+  integer :: scale_index
+  real :: scale_stream
+  real :: scale_trap
+  real :: scale_drift
   !
   ! Geometry input
   !
@@ -215,7 +217,7 @@ module cgyro_globals
   integer, dimension(:,:,:), allocatable :: iv_v
   integer, dimension(:), allocatable :: ica_c,icb_c
   !
-  integer :: nt1,nt2,nt_loc
+  integer :: nt1,nt2
   integer :: n_toroidal_procs
   ! For multi-simulation handling
   integer :: n_sim          ! how many simulations is coll processing at once

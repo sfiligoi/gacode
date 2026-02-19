@@ -89,13 +89,14 @@ subroutine cgyro_read_input
   call cgyro_readbc_int(upwind_single_flag,'UPWIND_SINGLE_FLAG')
   call cgyro_readbc_int(nl_single_flag,'NL_SINGLE_FLAG')
   call cgyro_readbc_real(px0)
-  call cgyro_readbc_int(stream_term,'STREAM_TERM')
-  call cgyro_readbc_real(stream_factor)
   call cgyro_readbc_int(exch_flag,'EXCH_FLAG')
   call cgyro_readbc_int(nl_min,'NL_MIN')
-
   call cgyro_readbc_real(dealias)
   call cgyro_readbc_int(dealias_order,'DEALIAS_ORDER')
+  call cgyro_readbc_int(scale_index,'SCALE_INDEX')
+  call cgyro_readbc_real(scale_stream)
+  call cgyro_readbc_real(scale_trap)
+  call cgyro_readbc_real(scale_drift)
   !
   call cgyro_readbc_real(rmin)
   call cgyro_readbc_real(rmaj)
