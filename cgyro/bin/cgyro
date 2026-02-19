@@ -96,7 +96,7 @@ then
   echo "         DMD analysis"
   echo
   echo "         --c"
-  echo "         Cleanup"
+  echo "         Clean/copy utility (clean, copy)"
   echo
   echo "         --pre"
   echo "         Input manager (create/modify input.cgyro)"
