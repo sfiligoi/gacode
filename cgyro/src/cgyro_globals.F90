@@ -475,8 +475,8 @@ module cgyro_globals
   !
   ! Collision operator
   integer :: n_low_energy
-  real, dimension(:,:,:,:), allocatable :: cmat ! only used if collision_precision_mode=0 & 64
-  real(KIND=REAL32), dimension(:,:,:,:), allocatable :: cmat_fp32 ! only used if collision_precision_mode=1 & 32
+  real, dimension(:,:,:,:), pointer :: cmat ! only used if collision_precision_mode=0 & 64
+  real(KIND=REAL32), dimension(:,:,:,:), pointer :: cmat_fp32 ! only used if collision_precision_mode=1 & 32
   real(KIND=REAL32), dimension(:,:,:,:,:,:), allocatable :: cmat_stripes ! only used if collision_precision_mode=1
   real(KIND=REAL32), dimension(:,:,:,:,:,:), allocatable :: cmat_e1 ! only used if collision_precision_mode=1
   real, dimension(:,:,:,:,:,:), allocatable :: cmat_simple ! only used in collision_model=5
@@ -532,4 +532,114 @@ module cgyro_globals
   real :: total_memory
   real :: small
 
+contains
+
+subroutine allocate_cmat_fp32(nv,nc_loc_coll,nt1,nt2)
+    use iso_c_binding
+    use omp_lib
+    implicit none
+
+    ! ----------------------
+    integer, intent(in)          :: nv,nc_loc_coll,nt1,nt2
+
+    ! Pointer to array, only need raw pointer locally, can recover
+    type(c_ptr) :: c_ptr_buffer
+    integer :: dev_id
+    ! Use c_sizeof to avoid integer wraparound
+    integer(c_size_t) :: total_bytes
+    integer(c_size_t) :: nv2
+    integer :: nt_loc
+
+    nv2 = nv*nv
+    nt_loc = nt2-nt1+1
+
+    total_bytes = (nv2*nc_loc_coll)*nt_loc*4 ! fp32 =  4 bytes
+
+    ! OMP supports multi-GPU setups, we only support 1-GPU ones
+    dev_id = omp_get_default_device()
+    c_ptr_buffer = omp_target_alloc(total_bytes, dev_id)
+
+    if (.not. c_associated(c_ptr_buffer)) then
+         ! Catastrophic error, do not even try to process cleanly
+         write(*,*) "Error: allocate_cmat_fp32 failed to allocate memory."
+        stop
+    end if
+
+    call c_f_pointer(c_ptr_buffer, cmat_fp32, [nv, nv, nc_loc_coll, nt_loc], [1,1,1,nt1])
+
+end subroutine allocate_cmat_fp32
+
+subroutine allocate_cmat(nv,nc_loc_coll,nt1,nt2)
+    use iso_c_binding
+    use omp_lib
+    implicit none
+
+    ! ----------------------
+    integer, intent(in)          :: nv,nc_loc_coll,nt1,nt2
+
+    ! Pointer to array, only need raw pointer locally, can recover
+    type(c_ptr) :: c_ptr_buffer
+    integer :: dev_id
+    ! Use c_sizeof to avoid integer wraparound
+    integer(c_size_t) :: total_bytes
+    integer(c_size_t) :: nv2
+    integer :: nt_loc
+
+    nv2 = nv*nv
+    nt_loc = nt2-nt1+1
+
+    total_bytes = (nv2*nc_loc_coll)*nt_loc*8 ! fp64 =  8 bytes
+
+    ! OMP supports multi-GPU setups, we only support 1-GPU ones
+    dev_id = omp_get_default_device()
+    c_ptr_buffer = omp_target_alloc(total_bytes, dev_id)
+
+    if (.not. c_associated(c_ptr_buffer)) then
+         ! Catastrophic error, do not even try to process cleanly
+         write(*,*) "Error: allocate_cmat failed to allocate memory."
+        stop
+    end if
+
+    call c_f_pointer(c_ptr_buffer, cmat, [nv, nv, nc_loc_coll, nt_loc], [1,1,1,nt1])
+
+end subroutine allocate_cmat
+
+subroutine deallocate_cmat_fp32
+    use iso_c_binding
+    use omp_lib
+    implicit none
+    ! Pointer to array, only need raw pointer locally, can recover
+    type(c_ptr) :: c_ptr_buffer
+    integer :: dev_id
+
+    if (associated(cmat_fp32)) then
+      c_ptr_buffer = c_loc(cmat_fp32(1,1,1,LBOUND(cmat_fp32,4))) ! only last element does not start with 1
+
+      ! OMP supports multi-GPU setups, we only support 1-GPU ones
+      ! Note: Must be the same as the one used in alloc
+      dev_id = omp_get_default_device()
+      call omp_target_free(c_ptr_buffer, dev_id)
+    endif
+
+end subroutine
+        
+subroutine deallocate_cmat
+    use iso_c_binding
+    use omp_lib
+    implicit none
+    ! Pointer to array, only need raw pointer locally, can recover
+    type(c_ptr) :: c_ptr_buffer
+    integer :: dev_id
+
+    if (associated(cmat)) then
+      c_ptr_buffer = c_loc(cmat(1,1,1,LBOUND(cmat,4))) ! only last element does not start with 1
+
+      ! OMP supports multi-GPU setups, we only support 1-GPU ones
+      ! Note: Must be the same as the one used in alloc
+      dev_id = omp_get_default_device()
+      call omp_target_free(c_ptr_buffer, dev_id)
+    endif
+
+end subroutine
+        
 end module cgyro_globals
