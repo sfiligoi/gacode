@@ -534,6 +534,13 @@ module cgyro_globals
 
 contains
 
+!
+! Avoid having two copies of cmat, one in CPU and one in GPU memory
+! On GPU systems under OMPGPU, keep it only in GPU memory (omp_target_alloc)
+! ON CPU-only systems and OpenACC, keep the old logic
+!
+
+#ifdef OMPGPU
 subroutine allocate_cmat_fp32(nv,nc_loc_coll,nt1,nt2)
     use iso_c_binding
     use omp_lib
@@ -641,5 +648,48 @@ subroutine deallocate_cmat
     endif
 
 end subroutine
+
+#else
+! not OMPGPU
+
+subroutine allocate_cmat_fp32(nv,nc_loc_coll,nt1,nt2)
+    implicit none
+
+    ! ----------------------
+    integer, intent(in)          :: nv,nc_loc_coll,nt1,nt2
+
+    allocate(cmat_fp32(nv,nv,nc_loc_coll,nt1:nt2))
+
+end subroutine allocate_cmat_fp32
+
+subroutine allocate_cmat(nv,nc_loc_coll,nt1,nt2)
+    implicit none
+
+    ! ----------------------
+    integer, intent(in)          :: nv,nc_loc_coll,nt1,nt2
+
+    allocate(cmat(nv,nv,nc_loc_coll,nt1:nt2))
+
+end subroutine allocate_cmat
+
+subroutine deallocate_cmat_fp32
+    implicit none
+
+    if (associated(cmat_fp32)) then
+      deallocate(cmat_fp32)
+    endif
+
+end subroutine
         
+subroutine deallocate_cmat
+    implicit none
+
+    if (associated(cmat)) then
+      deallocate(cmat)
+    endif
+
+end subroutine
+
+#endif
+
 end module cgyro_globals
