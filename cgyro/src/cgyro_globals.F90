@@ -647,43 +647,46 @@ subroutine deallocate_cmat
 
 end subroutine
 
-subroutine copy_into_cmat(amat,ic_loc,itor)
-    use iso_c_binding
-    use omp_lib
+! must pass cmat_gpu as argument, to make OMP happy
+! Cannot use is_device_ptr on a pointer
+subroutine copy_into_cmat_fp32(cmat_gpu,amat,ic_loc,itor)
     implicit none
 
     ! ----------------------
-    real, dimension(:,:), intent(in) :: amat
-    integer, intent(in)              :: ic_loc,itor
+    real(KIND=REAL32), intent(inout) :: cmat_gpu(nv,nv,nc_loc_coll,nt1:nt2)
+    real, intent(in)    :: amat(nv,nv)
+    integer, intent(in) :: ic_loc,itor
 
-    type(c_ptr) :: c_cmat,c_amat
-    integer :: dev_id,host_id
-    integer(c_size_t) zero_offset
-    integer(c_int) :: err
+    integer :: i,j
 
-    integer(c_size_t) :: total_bytes
-    integer(c_size_t) :: nv2
-    integer :: nt_loc
-    integer :: nv
-    nv = LBOUND(cmat,1)
+    ! both matrices are (nv,nv)
+!$omp target teams distribute parallel do collapse(2) map(to:amat) is_device_ptr(cmat_gpu)
+    do i=1,nv
+     do j=1,nv
+      cmat_gpu(j,i,ic_loc,itor) = amat(j,i)
+     enddo
+    enddo
 
-    nv2 = nv*nv
-    nt_loc = nt2-nt1+1
+end subroutine
 
-    total_bytes = nv2*8 ! fp64 =  8 bytes
+subroutine copy_into_cmat(cmat_gpu,amat,ic_loc,itor)
+    implicit none
 
-    c_cmat = c_loc(cmat(1,1,ic_loc,itor))
-    c_amat = c_loc(amat(1,1))
+    ! ----------------------
+    real, intent(inout) :: cmat_gpu(nv,nv,nc_loc_coll,nt1:nt2)
+    real, intent(in)    :: amat(nv,nv)
+    integer, intent(in) :: ic_loc,itor
 
-    ! OMP supports multi-GPU setups, we only support 1-GPU ones
-    ! Note: Must be the same as the one used in alloc
-    dev_id = omp_get_default_device()
-    host_id = omp_get_initial_device()
+    integer :: i,j
 
-    zero_offset = 0
-    ! copy to GPU memory only, we don't need it on the CPU side
-    err = omp_target_memcpy(c_cmat,c_amat,total_bytes, zero_offset,zero_offset, dev_id, host_id)
-    ! an error is unlikely, so ignore)
+    ! both matrices are (nv,nv)
+!$omp target teams distribute parallel do collapse(2) map(to:amat) is_device_ptr(cmat_gpu)
+    do i=1,nv
+     do j=1,nv
+      cmat_gpu(j,i,ic_loc,itor) = amat(j,i)
+     enddo
+    enddo
+
 end subroutine
 
 #else
@@ -731,18 +734,34 @@ subroutine deallocate_cmat
 
 end subroutine
 
-subroutine copy_into_cmat(amat,ic_loc,itor)
+! passing cmat_dest to be consistent with OMPGPU implementation
+subroutine copy_into_cmat_fp32(cmat_dest,amat,ic_loc,itor)
     implicit none
 
     ! ----------------------
-    real, dimension(:,:), intent(in) :: amat
-    integer, intent(in)              :: ic_loc,itor
-
-    !integer :: nv
-    !nv = LBOUND(cmat,1)
+    real(KIND=REAL32), intent(inout) :: cmat_gpu(nv,nv,nc_loc_coll,nt1:nt2)
+    real, intent(in)    :: amat(nv,nv)
+    integer, intent(in) :: ic_loc,itor
 
     ! both matrices are (nv,nv)
-    cmat(:,:,ic_loc,itor) = amat(:,:)
+    cmat_dest(:,:,ic_loc,itor) = amat(:,:)
+#if defined(_OPENACC)
+    ! TODO: openacc    
+!$acc enter data copyin(cmat) if (gpu_bigmem_flag > 0)
+#endif
+
+end subroutine
+
+subroutine copy_into_cmat(cmat_dest,amat,ic_loc,itor)
+    implicit none
+
+    ! ----------------------
+    real, intent(inout) :: cmat_gpu(nv,nv,nc_loc_coll,nt1:nt2)
+    real, intent(in)    :: amat(nv,nv)
+    integer, intent(in) :: ic_loc,itor
+
+    ! both matrices are (nv,nv)
+    cmat_dest(:,:,ic_loc,itor) = amat(:,:)
 #if defined(_OPENACC)
     ! TODO: openacc    
 !$acc enter data copyin(cmat) if (gpu_bigmem_flag > 0)

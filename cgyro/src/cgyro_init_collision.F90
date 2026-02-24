@@ -757,7 +757,8 @@ subroutine cgyro_init_collision
         ! result in amat, transfer to the right cmat matrix
         if (collision_precision_mode == 1) then
            ! keep all cmat in fp32 precision
-           cmat_fp32(:,:,ic_loc,itor) = amat(:,:)
+           call copy_into_cmat_fp32(cmat_fp32,amat,ic_loc,itor)
+           ! TODO: fix the rest of the code, cmat_fp32 is not accessible on the CPU
            ! keep the remaining precision for select elements
            do jv=1,nv
               je = ie_v(jv)
@@ -807,10 +808,10 @@ subroutine cgyro_init_collision
            enddo
         else if (collision_precision_mode == 32) then
            ! keep all cmat in fp32 precision
-           cmat_fp32(:,:,ic_loc,itor) = amat(:,:)
+           call copy_into_cmat_fp32(cmat_fp32,amat,ic_loc,itor)
         else
            ! keep all cmat in full precision
-           call copy_into_cmat(amat,ic_loc,itor)
+           call copy_into_cmat(cmat,amat,ic_loc,itor)
         endif
 
      enddo
@@ -827,7 +828,7 @@ subroutine cgyro_init_collision
   if (collision_precision_mode == 1) then
 #if defined(OMPGPU)
      ! no async for OMPGPU for now
-!$omp target enter data map(to:cmat_fp32,cmat_stripes,cmat_e1) if (gpu_bigmem_flag > 0)
+!$omp target enter data map(to:cmat_stripes,cmat_e1) if (gpu_bigmem_flag > 0)
 #elif defined(_OPENACC)
 !$acc enter data copyin(cmat_fp32,cmat_stripes,cmat_e1) async if (gpu_bigmem_flag > 0)
 #endif
@@ -897,12 +898,6 @@ subroutine cgyro_init_collision
      endif
 #if (!defined(OMPGPU)) && defined(_OPENACC)
 !$acc wait
-#endif
-  else if (collision_precision_mode == 32) then
-#if defined(OMPGPU)
-!$omp target enter data map(to:cmat_fp32) if (gpu_bigmem_flag > 0)
-#elif defined(_OPENACC)
-!$acc enter data copyin(cmat_fp32) if (gpu_bigmem_flag > 0)
 #endif
 
 !else already done in the loop above
