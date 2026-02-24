@@ -739,7 +739,7 @@ subroutine copy_into_cmat_fp32(cmat_dest,amat,ic_loc,itor)
     implicit none
 
     ! ----------------------
-    real(KIND=REAL32), intent(inout) :: cmat_gpu(nv,nv,nc_loc_coll,nt1:nt2)
+    real(KIND=REAL32), intent(inout) :: cmat_dest(nv,nv,nc_loc_coll,nt1:nt2)
     real, intent(in)    :: amat(nv,nv)
     integer, intent(in) :: ic_loc,itor
 
@@ -756,7 +756,7 @@ subroutine copy_into_cmat(cmat_dest,amat,ic_loc,itor)
     implicit none
 
     ! ----------------------
-    real, intent(inout) :: cmat_gpu(nv,nv,nc_loc_coll,nt1:nt2)
+    real, intent(inout) :: cmat_dest(nv,nv,nc_loc_coll,nt1:nt2)
     real, intent(in)    :: amat(nv,nv)
     integer, intent(in) :: ic_loc,itor
 
