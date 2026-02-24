@@ -810,7 +810,7 @@ subroutine cgyro_init_collision
            cmat_fp32(:,:,ic_loc,itor) = amat(:,:)
         else
            ! keep all cmat in full precision
-           cmat(:,:,ic_loc,itor) = amat(:,:)
+           call copy_into_cmat(amat,ic_loc,itor)
         endif
 
      enddo
@@ -904,12 +904,8 @@ subroutine cgyro_init_collision
 #elif defined(_OPENACC)
 !$acc enter data copyin(cmat_fp32) if (gpu_bigmem_flag > 0)
 #endif
-  else
-#if defined(OMPGPU)
-!$omp target enter data map(to:cmat) if (gpu_bigmem_flag > 0)
-#elif defined(_OPENACC)
-!$acc enter data copyin(cmat) if (gpu_bigmem_flag > 0)
-#endif
+
+!else already done in the loop above
   endif
 
   deallocate(i_piv)

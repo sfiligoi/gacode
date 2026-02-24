@@ -615,7 +615,6 @@ subroutine deallocate_cmat_fp32
     use iso_c_binding
     use omp_lib
     implicit none
-    ! Pointer to array, only need raw pointer locally, can recover
     type(c_ptr) :: c_ptr_buffer
     integer :: dev_id
 
@@ -634,7 +633,6 @@ subroutine deallocate_cmat
     use iso_c_binding
     use omp_lib
     implicit none
-    ! Pointer to array, only need raw pointer locally, can recover
     type(c_ptr) :: c_ptr_buffer
     integer :: dev_id
 
@@ -649,8 +647,47 @@ subroutine deallocate_cmat
 
 end subroutine
 
+subroutine copy_into_cmat(amat,ic_loc,itor)
+    use iso_c_binding
+    use omp_lib
+    implicit none
+
+    ! ----------------------
+    real, dimension(:,:), intent(in) :: amat
+    integer, intent(in)              :: ic_loc,itor
+
+    type(c_ptr) :: c_cmat,c_amat
+    integer :: dev_id,host_id
+    integer(c_size_t) zero_offset
+    integer(c_int) :: err
+
+    integer(c_size_t) :: total_bytes
+    integer(c_size_t) :: nv2
+    integer :: nt_loc
+    integer :: nv
+    nv = LBOUND(cmat,1)
+
+    nv2 = nv*nv
+    nt_loc = nt2-nt1+1
+
+    total_bytes = nv2*8 ! fp64 =  8 bytes
+
+    c_cmat = c_loc(cmat(1,1,ic_loc,itor))
+    c_amat = c_loc(amat(1,1))
+
+    ! OMP supports multi-GPU setups, we only support 1-GPU ones
+    ! Note: Must be the same as the one used in alloc
+    dev_id = omp_get_default_device()
+    host_id = omp_get_initial_device()
+
+    zero_offset = 0
+    ! copy to GPU memory only, we don't need it on the CPU side
+    err = omp_target_memcpy(c_cmat,c_amat,total_bytes, zero_offset,zero_offset, dev_id, host_id)
+    ! an error is unlikely, so ignore)
+end subroutine
+
 #else
-! not OMPGPU
+! =============  not OMPGPU =============
 
 subroutine allocate_cmat_fp32(nv,nc_loc_coll,nt1,nt2)
     implicit none
@@ -670,6 +707,10 @@ subroutine allocate_cmat(nv,nc_loc_coll,nt1,nt2)
 
     allocate(cmat(nv,nv,nc_loc_coll,nt1:nt2))
 
+#if defined(_OPENACC)
+    ! TODO: openacc    
+!$acc enter data copyin(cmat) if (gpu_bigmem_flag > 0)
+#endif
 end subroutine allocate_cmat
 
 subroutine deallocate_cmat_fp32
@@ -690,6 +731,26 @@ subroutine deallocate_cmat
 
 end subroutine
 
+subroutine copy_into_cmat(amat,ic_loc,itor)
+    implicit none
+
+    ! ----------------------
+    real, dimension(:,:), intent(in) :: amat
+    integer, intent(in)              :: ic_loc,itor
+
+    !integer :: nv
+    !nv = LBOUND(cmat,1)
+
+    ! both matrices are (nv,nv)
+    cmat(:,:,ic_loc,itor) = amat(:,:)
+#if defined(_OPENACC)
+    ! TODO: openacc    
+!$acc enter data copyin(cmat) if (gpu_bigmem_flag > 0)
 #endif
+
+end subroutine
+
+#endif
+
 
 end module cgyro_globals
