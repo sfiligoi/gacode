@@ -475,8 +475,12 @@ module cgyro_globals
   !
   ! Collision operator
   integer :: n_low_energy
+
+  ! Unlike most other arrays, last dimension is simply nt_loc
+  ! due to limis of pointer handling
   real, dimension(:,:,:,:), pointer :: cmat ! only used if collision_precision_mode=0 & 64
   real(KIND=REAL32), dimension(:,:,:,:), pointer :: cmat_fp32 ! only used if collision_precision_mode=1 & 32
+  !
   real(KIND=REAL32), dimension(:,:,:,:,:,:), allocatable :: cmat_stripes ! only used if collision_precision_mode=1
   real(KIND=REAL32), dimension(:,:,:,:,:,:), allocatable :: cmat_e1 ! only used if collision_precision_mode=1
   real, dimension(:,:,:,:,:,:), allocatable :: cmat_simple ! only used in collision_model=5
@@ -572,7 +576,7 @@ subroutine allocate_cmat_fp32(nv,nc_loc_coll,nt1,nt2)
         stop
     end if
 
-    call c_f_pointer(c_ptr_buffer, cmat_fp32, [nv, nv, nc_loc_coll, nt_loc], [1,1,1,nt1])
+    call c_f_pointer(c_ptr_buffer, cmat_fp32, [nv, nv, nc_loc_coll, nt_loc])
 
 end subroutine allocate_cmat_fp32
 
@@ -607,7 +611,7 @@ subroutine allocate_cmat(nv,nc_loc_coll,nt1,nt2)
         stop
     end if
 
-    call c_f_pointer(c_ptr_buffer, cmat, [nv, nv, nc_loc_coll, nt_loc], [1,1,1,nt1])
+    call c_f_pointer(c_ptr_buffer, cmat, [nv, nv, nc_loc_coll, nt_loc])
 
 end subroutine allocate_cmat
 
@@ -619,7 +623,7 @@ subroutine deallocate_cmat_fp32
     integer :: dev_id
 
     if (associated(cmat_fp32)) then
-      c_ptr_buffer = c_loc(cmat_fp32(1,1,1,LBOUND(cmat_fp32,4))) ! only last element does not start with 1
+      c_ptr_buffer = c_loc(cmat_fp32(1,1,1,1))
 
       ! OMP supports multi-GPU setups, we only support 1-GPU ones
       ! Note: Must be the same as the one used in alloc
@@ -637,7 +641,7 @@ subroutine deallocate_cmat
     integer :: dev_id
 
     if (associated(cmat)) then
-      c_ptr_buffer = c_loc(cmat(1,1,1,LBOUND(cmat,4))) ! only last element does not start with 1
+      c_ptr_buffer = c_loc(cmat(1,1,1,1))
 
       ! OMP supports multi-GPU setups, we only support 1-GPU ones
       ! Note: Must be the same as the one used in alloc
@@ -653,7 +657,7 @@ subroutine copy_into_cmat_fp32(cmat_gpu,amat,ic_loc,itor)
     implicit none
 
     ! ----------------------
-    real(KIND=REAL32), intent(inout) :: cmat_gpu(nv,nv,nc_loc_coll,nt1:nt2)
+    real(KIND=REAL32), intent(inout) :: cmat_gpu(nv,nv,nc_loc_coll,nt_loc)
     real, intent(in)    :: amat(nv,nv)
     integer, intent(in) :: ic_loc,itor
 
@@ -663,7 +667,7 @@ subroutine copy_into_cmat_fp32(cmat_gpu,amat,ic_loc,itor)
 !$omp target teams distribute parallel do collapse(2) map(to:amat) is_device_ptr(cmat_gpu)
     do i=1,nv
      do j=1,nv
-      cmat_gpu(j,i,ic_loc,itor) = amat(j,i)
+      cmat_gpu(j,i,ic_loc,itor-nt1+1) = amat(j,i)
      enddo
     enddo
 
@@ -673,7 +677,7 @@ subroutine copy_into_cmat(cmat_gpu,amat,ic_loc,itor)
     implicit none
 
     ! ----------------------
-    real, intent(inout) :: cmat_gpu(nv,nv,nc_loc_coll,nt1:nt2)
+    real, intent(inout) :: cmat_gpu(nv,nv,nc_loc_coll,nt_loc)
     real, intent(in)    :: amat(nv,nv)
     integer, intent(in) :: ic_loc,itor
 
@@ -683,7 +687,7 @@ subroutine copy_into_cmat(cmat_gpu,amat,ic_loc,itor)
 !$omp target teams distribute parallel do collapse(2) map(to:amat) is_device_ptr(cmat_gpu)
     do i=1,nv
      do j=1,nv
-      cmat_gpu(j,i,ic_loc,itor) = amat(j,i)
+      cmat_gpu(j,i,ic_loc,itor-nt1+1) = amat(j,i)
      enddo
     enddo
 
@@ -698,7 +702,10 @@ subroutine allocate_cmat_fp32(nv,nc_loc_coll,nt1,nt2)
     ! ----------------------
     integer, intent(in)          :: nv,nc_loc_coll,nt1,nt2
 
-    allocate(cmat_fp32(nv,nv,nc_loc_coll,nt1:nt2))
+    integer :: nt_loc
+    nt_loc = nt2-nt1+1
+
+    allocate(cmat_fp32(nv,nv,nc_loc_coll,nt_loc))
 
 end subroutine allocate_cmat_fp32
 
@@ -708,7 +715,10 @@ subroutine allocate_cmat(nv,nc_loc_coll,nt1,nt2)
     ! ----------------------
     integer, intent(in)          :: nv,nc_loc_coll,nt1,nt2
 
-    allocate(cmat(nv,nv,nc_loc_coll,nt1:nt2))
+    integer :: nt_loc
+    nt_loc = nt2-nt1+1
+
+    allocate(cmat(nv,nv,nc_loc_coll,nt_loc))
 
 #if defined(_OPENACC)
     ! TODO: openacc    
@@ -739,12 +749,12 @@ subroutine copy_into_cmat_fp32(cmat_dest,amat,ic_loc,itor)
     implicit none
 
     ! ----------------------
-    real(KIND=REAL32), intent(inout) :: cmat_dest(nv,nv,nc_loc_coll,nt1:nt2)
+    real(KIND=REAL32), intent(inout) :: cmat_dest(nv,nv,nc_loc_coll,nt_loc)
     real, intent(in)    :: amat(nv,nv)
     integer, intent(in) :: ic_loc,itor
 
     ! both matrices are (nv,nv)
-    cmat_dest(:,:,ic_loc,itor) = amat(:,:)
+    cmat_dest(:,:,ic_loc,itor-nt1+1) = amat(:,:)
 #if defined(_OPENACC)
     ! TODO: openacc    
 !$acc enter data copyin(cmat) if (gpu_bigmem_flag > 0)
@@ -756,12 +766,12 @@ subroutine copy_into_cmat(cmat_dest,amat,ic_loc,itor)
     implicit none
 
     ! ----------------------
-    real, intent(inout) :: cmat_dest(nv,nv,nc_loc_coll,nt1:nt2)
+    real, intent(inout) :: cmat_dest(nv,nv,nc_loc_coll,nt_loc)
     real, intent(in)    :: amat(nv,nv)
     integer, intent(in) :: ic_loc,itor
 
     ! both matrices are (nv,nv)
-    cmat_dest(:,:,ic_loc,itor) = amat(:,:)
+    cmat_dest(:,:,ic_loc,itor-nt1+1) = amat(:,:)
 #if defined(_OPENACC)
     ! TODO: openacc    
 !$acc enter data copyin(cmat) if (gpu_bigmem_flag > 0)
