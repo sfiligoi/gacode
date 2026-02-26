@@ -571,7 +571,7 @@ subroutine allocate_cmat_gpu_fp32(nv,nc_loc_coll,nt1,nt2)
     c_ptr_buffer = omp_target_alloc(total_bytes, dev_id)
 
     if (.not. c_associated(c_ptr_buffer)) then
-         ! Catastrophic error, do not even try to process cleanly
+         ! Catastrophic error, do not even try to process it cleanly
          write(*,*) "Error: allocate_cmat_fp32 failed to allocate memory."
         stop
     end if
@@ -606,7 +606,7 @@ write(*,*) "allocate_cmat_gpu"
     c_ptr_buffer = omp_target_alloc(total_bytes, dev_id)
 
     if (.not. c_associated(c_ptr_buffer)) then
-         ! Catastrophic error, do not even try to process cleanly
+         ! Catastrophic error, do not even try to process it cleanly
          write(*,*) "Error: allocate_cmat failed to allocate memory."
         stop
     end if
@@ -673,24 +673,46 @@ subroutine copy_into_cmat_gpu_fp32(cmat_gpu,amat,ic_loc,itor)
 
 end subroutine
 
-subroutine copy_into_cmat_gpu(cmat_gpu,amat,ic_loc,itor)
+subroutine copy_into_cmat_gpu(cmat_gpu, amat, ic_loc, itor)
+    use iso_c_binding
+    use omp_lib
     implicit none
+    
+    real, intent(inout) :: cmat_gpu(nv, nv, nc_loc_coll, nt_loc)
+    real, intent(in)    :: amat(nv, nv)
+    integer, intent(in) :: ic_loc, itor
+    
+    integer(c_size_t)   :: bytes_to_copy, dst_offset
+    integer             :: host_id, device_id
+    integer             :: ierr
+    
+    ! Size of the (nv, nv) block in bytes
+    bytes_to_copy = int(nv, c_size_t) * int(nv, c_size_t) * c_sizeof(amat(1,1))
+    
+    host_id   = omp_get_initial_device()
+    device_id = omp_get_default_device()
+    
+    ! 3. Calculate destination offset (0-based bytes)
+    ! We are targeting: cmat_gpu(1, 1, ic_loc, itor-nt1+1)
+    ! Offset = [(dim4_idx - 1) * (size_dim3 * size_dim2 * size_dim1) + (dim3_idx - 1) * (size_dim2 * size_dim1)] * element_size
+    dst_offset = ( int(itor - nt1, c_size_t) * int(nc_loc_coll, c_size_t) * int(nv * nv, c_size_t) + &
+                   int(ic_loc - 1, c_size_t) * int(nv * nv, c_size_t) ) * c_sizeof(amat(1,1))
 
-    ! ----------------------
-    real, intent(inout) :: cmat_gpu(nv,nv,nc_loc_coll,nt_loc)
-    real, intent(in)    :: amat(nv,nv)
-    integer, intent(in) :: ic_loc,itor
+    ierr = omp_target_memcpy( &
+        c_loc(cmat_gpu),    & ! Destination (device pointer)
+        c_loc(amat),        & ! Source (host pointer)
+        bytes_to_copy,      & ! Length in bytes
+        dst_offset,         & ! Offset in destination
+        0_c_size_t,         & ! Offset in source
+        device_id,          & ! Destination device
+        host_id             & ! Source device
+    )
 
-    integer :: i,j
-write(*,*) "copy_into_cmat_gpu"
-
-    ! both matrices are (nv,nv)
-!$omp target teams distribute parallel do collapse(2) map(to:amat) is_device_ptr(cmat_gpu)
-    do i=1,nv
-     do j=1,nv
-      cmat_gpu(j,i,ic_loc,itor-nt1+1) = amat(j,i)
-     enddo
-    enddo
+    if (ierr /= 0) then
+        ! Catastrophic error, do not even try to process it cleanly
+        write(*,*) "Error in omp_target_memcpy: ", ierr
+        stop
+    end if
 
 end subroutine
 
