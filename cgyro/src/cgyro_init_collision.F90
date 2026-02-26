@@ -54,7 +54,6 @@ subroutine cgyro_init_collision
      ! collision_model=6 (Landau) or 7 (New Sugama method [Galerkin])
      ! The way this is included now isn't harmonic with Igor's changes
      ! cmat -> cmat_loc. The reason is to make the merge simpler.
-     if (collision_precision_mode/=0) allocate(cmat(nv,nv,nc_loc_coll,nt1:nt2))
      call cgyro_init_landau
   else
      allocate(nu_d(n_energy,n_species,n_species))
@@ -619,7 +618,7 @@ subroutine cgyro_init_collision
 
         case(6,7)
            ! write the Landau/new collision matrix into the local array
-           cmat_loc(:,:)=cmat(:,:,ic_loc,itor)
+           call copy_from_cmat(cmat_loc,cmat,ic_loc,itor)
 
         case default
            cmat_loc(:,:) = 0.0
