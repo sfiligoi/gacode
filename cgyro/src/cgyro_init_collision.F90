@@ -26,6 +26,7 @@ subroutine cgyro_init_collision
   ! parameters for matrix solve
   real, dimension(:,:), allocatable :: cmat_base1,cmat_base2
   real, dimension(:,:), allocatable :: amat,cmat_loc
+  real(KIND=REAL32), dimension(:,:), allocatable :: amat_fp32
   real, dimension(:,:,:,:,:,:), allocatable :: ctest
   real, dimension(:,:,:,:), allocatable :: bessel
   ! diagnostics
@@ -468,6 +469,12 @@ subroutine cgyro_init_collision
   allocate(i_piv(nv))
   
   allocate(amat(nv,nv))
+  if ((collision_precision_mode==1).or.(collision_precision_mode==32)) then
+    allocate(amat_fp32(nv,nv))
+  else
+    ! not used, but avoid having it undefined
+    allocate(amat_fp32(1,1))
+  endif
   allocate(cmat_loc(nv,nv))
 
   ! Construct the collision matrix
@@ -491,7 +498,7 @@ subroutine cgyro_init_collision
 !$omp& private(ic,ic_loc,it,ir,info,rval,my_dens2_rot,my_bj0,my_bj1) &
 !$omp& private(iv,is,ix,ie,jv,js,jx,je,ks) &
 !$omp& private(amat_sum,cmat_sum,cmat_diff,cmat_rel_diff,cmat32_sum,cmat32_diff) &
-!$omp& private(amat,cmat_loc,my_cmat_fp32,i_piv) &
+!$omp& private(amat,amat_fp32,cmat_loc,my_cmat_fp32,i_piv) &
 !$omp& firstprivate(collision_precision_mode,n_low_energy) &
 !$omp& shared(cmat,cmat_fp32,cmat_stripes,cmat_e1) &
 !$omp& reduction(+:cmat_diff_global_loc,cmat32_diff_global_loc) &
@@ -757,8 +764,8 @@ subroutine cgyro_init_collision
         ! result in amat, transfer to the right cmat matrix
         if (collision_precision_mode == 1) then
            ! keep all cmat in fp32 precision
-           call copy_into_cmat_fp32(cmat_fp32,amat,ic_loc,itor)
-           ! TODO: fix the rest of the code, cmat_fp32 is not accessible on the CPU
+           amat_fp32(:,:) = amat(:,:)
+           call copy_into_cmat_fp32(cmat_fp32,amat_fp32,ic_loc,itor)
            ! keep the remaining precision for select elements
            do jv=1,nv
               je = ie_v(jv)
@@ -770,11 +777,11 @@ subroutine cgyro_init_collision
               do iv=1,nv
                  ! using abs values, as I am gaugung precision errors, and this avoid symmetry cancellations
                  amat_sum = amat_sum + abs(amat(iv,jv))
-                 cmat32_sum = cmat32_sum + abs(cmat_fp32(iv,jv,ic_loc,itor))
+                 cmat32_sum = cmat32_sum + abs(amat_fp32(iv,jv))
                  ie = ie_v(iv)
                  is = is_v(iv)
                  ix = ix_v(iv)
-                 my_cmat_fp32 = cmat_fp32(iv,jv,ic_loc,itor)
+                 my_cmat_fp32 = amat_fp32(iv,jv)
                  if (ie<=n_low_energy) then ! always keep all detail for lowest energy
                     cmat_e1(ix,is,ie,jv,ic_loc,itor) = amat(iv,jv) - my_cmat_fp32
                     ! my_cmat_fp32 not used for the original purpose anymore, reuse to represent the reduced precsion
@@ -808,7 +815,8 @@ subroutine cgyro_init_collision
            enddo
         else if (collision_precision_mode == 32) then
            ! keep all cmat in fp32 precision
-           call copy_into_cmat_fp32(cmat_fp32,amat,ic_loc,itor)
+           amat_fp32(:,:) = amat(:,:)
+           call copy_into_cmat_fp32(cmat_fp32,amat_fp32,ic_loc,itor)
         else
            ! keep all cmat in full precision
            call copy_into_cmat(cmat,amat,ic_loc,itor)
