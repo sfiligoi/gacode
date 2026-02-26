@@ -43,6 +43,10 @@ subroutine cgyro_init_manager
      fmtstrn ='(10(es11.4,1x))'
    endif
   
+#ifndef CGYRO_GPU_FFT
+  gpu_bigmem_flag = 0
+#endif
+
   !------------------------------------------------------
   ! Initialize startup timers 
   !  NOTE: "Runtime" timers are initialized in cgyro_write_timedata,
@@ -397,10 +401,6 @@ subroutine cgyro_init_manager
      ! something went terribly wrong
      return
   endif
-
-#ifndef CGYRO_GPU_FFT
-  gpu_bigmem_flag = 0
-#endif
 
   if (test_flag == 0) then
 

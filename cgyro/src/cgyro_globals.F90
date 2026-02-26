@@ -545,7 +545,7 @@ contains
 !
 
 #ifdef OMPGPU
-subroutine allocate_cmat_fp32(nv,nc_loc_coll,nt1,nt2)
+subroutine allocate_cmat_gpu_fp32(nv,nc_loc_coll,nt1,nt2)
     use iso_c_binding
     use omp_lib
     implicit none
@@ -578,9 +578,9 @@ subroutine allocate_cmat_fp32(nv,nc_loc_coll,nt1,nt2)
 
     call c_f_pointer(c_ptr_buffer, cmat_fp32, [nv, nv, nc_loc_coll, nt_loc])
 
-end subroutine allocate_cmat_fp32
+end subroutine allocate_cmat_gpu_fp32
 
-subroutine allocate_cmat(nv,nc_loc_coll,nt1,nt2)
+subroutine allocate_cmat_gpu(nv,nc_loc_coll,nt1,nt2)
     use iso_c_binding
     use omp_lib
     implicit none
@@ -595,7 +595,7 @@ subroutine allocate_cmat(nv,nc_loc_coll,nt1,nt2)
     integer(c_size_t) :: total_bytes
     integer(c_size_t) :: nv2
     integer :: nt_loc
-
+write(*,*) "allocate_cmat_gpu"
     nv2 = nv*nv
     nt_loc = nt2-nt1+1
 
@@ -613,9 +613,9 @@ subroutine allocate_cmat(nv,nc_loc_coll,nt1,nt2)
 
     call c_f_pointer(c_ptr_buffer, cmat, [nv, nv, nc_loc_coll, nt_loc])
 
-end subroutine allocate_cmat
+end subroutine allocate_cmat_gpu
 
-subroutine deallocate_cmat_fp32
+subroutine deallocate_cmat_gpu_fp32
     use iso_c_binding
     use omp_lib
     implicit none
@@ -633,7 +633,7 @@ subroutine deallocate_cmat_fp32
 
 end subroutine
         
-subroutine deallocate_cmat
+subroutine deallocate_cmat_gpu
     use iso_c_binding
     use omp_lib
     implicit none
@@ -653,7 +653,7 @@ end subroutine
 
 ! must pass cmat_gpu as argument, to make OMP happy
 ! Cannot use is_device_ptr on a pointer
-subroutine copy_into_cmat_fp32(cmat_gpu,amat,ic_loc,itor)
+subroutine copy_into_cmat_gpu_fp32(cmat_gpu,amat,ic_loc,itor)
     implicit none
 
     ! ----------------------
@@ -673,7 +673,7 @@ subroutine copy_into_cmat_fp32(cmat_gpu,amat,ic_loc,itor)
 
 end subroutine
 
-subroutine copy_into_cmat(cmat_gpu,amat,ic_loc,itor)
+subroutine copy_into_cmat_gpu(cmat_gpu,amat,ic_loc,itor)
     implicit none
 
     ! ----------------------
@@ -682,6 +682,7 @@ subroutine copy_into_cmat(cmat_gpu,amat,ic_loc,itor)
     integer, intent(in) :: ic_loc,itor
 
     integer :: i,j
+write(*,*) "copy_into_cmat_gpu"
 
     ! both matrices are (nv,nv)
 !$omp target teams distribute parallel do collapse(2) map(to:amat) is_device_ptr(cmat_gpu)
@@ -693,8 +694,8 @@ subroutine copy_into_cmat(cmat_gpu,amat,ic_loc,itor)
 
 end subroutine
 
-#else
-! =============  not OMPGPU =============
+#endif
+! =============  end OMPGPU =============
 
 subroutine allocate_cmat_fp32(nv,nc_loc_coll,nt1,nt2)
     implicit none
@@ -705,7 +706,19 @@ subroutine allocate_cmat_fp32(nv,nc_loc_coll,nt1,nt2)
     integer :: nt_loc
     nt_loc = nt2-nt1+1
 
-    allocate(cmat_fp32(nv,nv,nc_loc_coll,nt_loc))
+#ifdef OMPGPU
+    if (gpu_bigmem_flag > 0) then
+      ! we keep only the GPU buffer with BIGMEM
+      call allocate_cmat_gpu_fp32(nv,nc_loc_coll,nt1,nt2)
+    else
+#else
+    if (.TRUE.) then
+#endif
+      allocate(cmat_fp32(nv,nv,nc_loc_coll,nt_loc))
+#if defined(_OPENACC)
+!$acc enter data create(cmat_fp32) if (gpu_bigmem_flag > 0)
+#endif
+    endif
 
 end subroutine allocate_cmat_fp32
 
@@ -718,19 +731,34 @@ subroutine allocate_cmat(nv,nc_loc_coll,nt1,nt2)
     integer :: nt_loc
     nt_loc = nt2-nt1+1
 
-    allocate(cmat(nv,nv,nc_loc_coll,nt_loc))
-
-#if defined(_OPENACC)
-    ! TODO: openacc    
-!$acc enter data copyin(cmat) if (gpu_bigmem_flag > 0)
+#ifdef OMPGPU
+    if (gpu_bigmem_flag > 0) then
+      ! we keep only the GPU buffer with BIGMEM
+      call allocate_cmat_gpu(nv,nc_loc_coll,nt1,nt2)
+    else
+#else
+    if (.TRUE.) then
 #endif
+      allocate(cmat(nv,nv,nc_loc_coll,nt_loc))
+#if defined(_OPENACC)
+!$acc enter data create(cmat) if (gpu_bigmem_flag > 0)
+#endif
+    endif
 end subroutine allocate_cmat
 
 subroutine deallocate_cmat_fp32
     implicit none
 
     if (associated(cmat_fp32)) then
-      deallocate(cmat_fp32)
+#ifdef OMPGPU
+      if (gpu_bigmem_flag > 0) then
+        call deallocate_cmat_gpu_fp32
+      else
+#else
+      if (.TRUE.) then
+#endif
+        deallocate(cmat_fp32)
+      endif
     endif
 
 end subroutine
@@ -739,12 +767,19 @@ subroutine deallocate_cmat
     implicit none
 
     if (associated(cmat)) then
-      deallocate(cmat)
+#ifdef OMPGPU
+      if (gpu_bigmem_flag > 0) then
+        call deallocate_cmat_gpu
+      else
+#else
+      if (.TRUE.) then
+#endif
+        deallocate(cmat)
+      endif
     endif
 
 end subroutine
 
-! passing cmat_dest to be consistent with OMPGPU implementation
 subroutine copy_into_cmat_fp32(cmat_dest,amat,ic_loc,itor)
     implicit none
 
@@ -753,12 +788,18 @@ subroutine copy_into_cmat_fp32(cmat_dest,amat,ic_loc,itor)
     real, intent(in)    :: amat(nv,nv)
     integer, intent(in) :: ic_loc,itor
 
-    ! both matrices are (nv,nv)
-    cmat_dest(:,:,ic_loc,itor-nt1+1) = amat(:,:)
-#if defined(_OPENACC)
-    ! TODO: openacc    
-!$acc enter data copyin(cmat) if (gpu_bigmem_flag > 0)
+#ifdef OMPGPU
+    if (gpu_bigmem_flag > 0) then
+      call copy_into_cmat_gpu_fp32(cmat_dest,amat,ic_loc,itor)
+    else
+#else
+    if (.TRUE.) then
 #endif
+      cmat_dest(:,:,ic_loc,itor-nt1+1) = amat(:,:)
+#if defined(_OPENACC)
+!$acc cmat_dest(:,:,ic_loc,itor-nt1+1) if (gpu_bigmem_flag > 0)
+#endif
+    endif
 
 end subroutine
 
@@ -770,16 +811,19 @@ subroutine copy_into_cmat(cmat_dest,amat,ic_loc,itor)
     real, intent(in)    :: amat(nv,nv)
     integer, intent(in) :: ic_loc,itor
 
-    ! both matrices are (nv,nv)
-    cmat_dest(:,:,ic_loc,itor-nt1+1) = amat(:,:)
-#if defined(_OPENACC)
-    ! TODO: openacc    
-!$acc enter data copyin(cmat) if (gpu_bigmem_flag > 0)
+#ifdef OMPGPU
+    if (gpu_bigmem_flag > 0) then
+      call copy_into_cmat_gpu(cmat_dest,amat,ic_loc,itor)
+    else
+#else
+    if (.TRUE.) then
 #endif
+      cmat_dest(:,:,ic_loc,itor-nt1+1) = amat(:,:)
+#if defined(_OPENACC)
+!$acc update device(cmat_dest(:,:,ic_loc,itor-nt1+1)) if (gpu_bigmem_flag > 0)
+#endif
+    endif
 
 end subroutine
-
-#endif
-
 
 end module cgyro_globals
