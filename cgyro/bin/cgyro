@@ -104,6 +104,9 @@ then
   echo "         --pert"
   echo "         Helper to create input.xgyro via perturbations"
   echo
+  echo "         --skew"
+  echo "         Plot extended ballooning mode structure"
+  echo
   echo "         --loc"
   echo "         Local parameter extraction (locpargen wrapper)"
 
