@@ -297,14 +297,8 @@ subroutine cgyro_cleanup
      ccl_del_device(gpack32)
      deallocate(gpack32)
   endif
-  if (allocated(cmat)) then
-     ccl_del_bigdevice(cmat)
-     deallocate(cmat)
-  endif
-  if (allocated(cmat_fp32)) then
-     ccl_del_bigdevice(cmat_fp32)
-     deallocate(cmat_fp32)
-  endif
+  call deallocate_cmat
+  call deallocate_cmat_fp32
   if (allocated(cmat_stripes)) then
      ccl_del_bigdevice(cmat_stripes)
      deallocate(cmat_stripes)
