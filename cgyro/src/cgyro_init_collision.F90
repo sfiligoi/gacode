@@ -834,10 +834,10 @@ subroutine cgyro_init_collision
 
   if (collision_precision_mode == 1) then
 #if defined(OMPGPU)
-     ! no async for OMPGPU for now
 !$omp target enter data map(to:cmat_stripes,cmat_e1) if (gpu_bigmem_flag > 0)
 #elif defined(_OPENACC)
-!$acc enter data copyin(cmat_fp32,cmat_stripes,cmat_e1) async if (gpu_bigmem_flag > 0)
+!$acc enter data copyin(cmat_stripes,cmat_e1) async if (gpu_bigmem_flag > 0)
+!$acc update device(cmat_fp32) async if (gpu_bigmem_flag > 0)
 #endif
      call MPI_ALLREDUCE(cmap_fp32_error_abs_cnt_loc,&
           cmap_fp32_error_abs_cnt,&
@@ -906,8 +906,18 @@ subroutine cgyro_init_collision
 #if (!defined(OMPGPU)) && defined(_OPENACC)
 !$acc wait
 #endif
-
-!else already done in the loop above
+  else if (collision_precision_mode == 32) then
+#if defined(OMPGPU)
+    ! nothing to do
+#elif defined(_OPENACC)
+!$acc update device(cmat_fp32) if (gpu_bigmem_flag > 0)
+#endif
+  else
+#if defined(OMPGPU)
+    ! nothing to do
+#elif defined(_OPENACC)
+!$acc update device(cmat) if (gpu_bigmem_flag > 0)
+#endif
   endif
 
   deallocate(i_piv)

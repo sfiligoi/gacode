@@ -924,9 +924,6 @@ subroutine copy_into_cmat_fp32(cmat_dest,amat,ic_loc,itor)
     if (.TRUE.) then
 #endif
       cmat_dest(:,:,ic_loc,itor-nt1+1) = amat(:,:)
-#if defined(_OPENACC)
-!$acc update device(cmat_dest(:,:,ic_loc,itor-nt1+1)) if (gpu_bigmem_flag > 0)
-#endif
     endif
 
 end subroutine
@@ -948,9 +945,6 @@ subroutine copy_into_cmat(cmat_dest,amat,ic_loc,itor)
     if (.TRUE.) then
 #endif
       cmat_dest(:,:,ic_loc,itor-nt1+1) = amat(:,:)
-#if defined(_OPENACC)
-!$acc update device(cmat_dest(:,:,ic_loc,itor-nt1+1)) if (gpu_bigmem_flag > 0)
-#endif
     endif
 
 end subroutine
