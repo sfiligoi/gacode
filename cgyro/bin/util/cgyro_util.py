@@ -86,12 +86,16 @@ def parse_input_xgyro():
                     dirs.append(val.strip())
     return dirs
 
-def write_input_xgyro(dirs, comment="cgyro"):
+def write_input_xgyro(dirs, comment="cgyro", mpi_vals=None):
     """Write input.xgyro file."""
     with open('input.xgyro', 'w') as f:
         f.write(f'# Created by {comment}\n')
+        if mpi_vals is not None:
+            f.write(f'# Total MPI: {sum(int(v) for v in mpi_vals)}\n')
         f.write(f'N_DIRS={len(dirs)}\n')
         for i, d in enumerate(dirs):
+            if mpi_vals is not None:
+                f.write(f'MIN_MPI_{i+1} = {mpi_vals[i]}\n')
             f.write(f'DIR_{i+1} = {d}\n')
 
 def apply_params(lines, params, updates):

@@ -174,20 +174,35 @@ if args.overlay != 'null':
         template = f.read()
 
     dirs = []
+    mpi_vals = []
     for line in lines:
         row = line.strip().split()
         if row[0] == 'ALL':
             all_params = row[1:]
             continue
+        mpi = None
+        clean_row = []
+        for token in row:
+            if token.startswith('mpi='):
+                mpi = token.split('=', 1)[1]
+            else:
+                clean_row.append(token)
+        mpi_vals.append(mpi)
         dirs.append(f'{base}{len(dirs)+1}')
         os.makedirs(dirs[-1], exist_ok=True)
         with open(f'{dirs[-1]}/input.cgyro', 'w') as f:
             f.write(template)
-            for p in row + all_params:
+            for p in clean_row + all_params:
                 f.write(f'{p}\n')
         log(f'Created {dirs[-1]}/', indent=True)
 
-    write_input_xgyro(dirs, 'cgyro --pre')
+    has_mpi = [v is not None for v in mpi_vals]
+    if any(has_mpi) and not all(has_mpi):
+        log.error('mpi= must appear in every non-ALL line if used')
+    mpi_list = mpi_vals if all(has_mpi) else None
+    if mpi_list is not None:
+        log(f'Total MPI: {sum(int(v) for v in mpi_list)}')
+    write_input_xgyro(dirs, 'cgyro --pre', mpi_list)
     log(f'Created {len(dirs)} directories')
     sys.exit()
 
