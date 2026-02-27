@@ -595,7 +595,7 @@ subroutine allocate_cmat_gpu(nv,nc_loc_coll,nt1,nt2)
     integer(c_size_t) :: total_bytes
     integer(c_size_t) :: nv2
     integer :: nt_loc
-write(*,*) "allocate_cmat_gpu"
+
     nv2 = nv*nv
     nt_loc = nt2-nt1+1
 
@@ -651,16 +651,12 @@ subroutine deallocate_cmat_gpu
 
 end subroutine
 
-! must pass cmat_gpu as argument, to make OMP happy
-! Cannot use is_device_ptr on a pointer
-
-subroutine copy_into_cmat_gpu_fp32(cmat_gpu, amat, ic_loc, itor)
+subroutine copy_into_cmat_gpu_fp32(amat, ic_loc, itor)
     use iso_c_binding
     use omp_lib
     implicit none
     
-    real(KIND=REAL32), intent(inout) :: cmat_gpu(nv, nv, nc_loc_coll, nt_loc)
-    real(KIND=REAL32), intent(in)    :: amat(nv, nv)
+    real(KIND=REAL32), target, intent(in)    :: amat(nv, nv)
     integer, intent(in) :: ic_loc, itor
     
     integer(c_size_t)   :: bytes_to_copy, dst_offset
@@ -674,13 +670,13 @@ subroutine copy_into_cmat_gpu_fp32(cmat_gpu, amat, ic_loc, itor)
     device_id = omp_get_default_device()
     
     ! 3. Calculate destination offset (0-based bytes)
-    ! We are targeting: cmat_gpu(1, 1, ic_loc, itor-nt1+1)
+    ! We are targeting: cmat_fp32(1, 1, ic_loc, itor-nt1+1)
     ! Offset = [(dim4_idx - 1) * (size_dim3 * size_dim2 * size_dim1) + (dim3_idx - 1) * (size_dim2 * size_dim1)] * element_size
     dst_offset = ( int(itor - nt1, c_size_t) * int(nc_loc_coll, c_size_t) * int(nv * nv, c_size_t) + &
                    int(ic_loc - 1, c_size_t) * int(nv * nv, c_size_t) ) * c_sizeof(amat(1,1))
 
     ierr = omp_target_memcpy( &
-        c_loc(cmat_gpu),    & ! Destination (device pointer)
+        c_loc(cmat_fp32),    & ! Destination (device pointer)
         c_loc(amat),        & ! Source (host pointer)
         bytes_to_copy,      & ! Length in bytes
         dst_offset,         & ! Offset in destination
@@ -697,13 +693,12 @@ subroutine copy_into_cmat_gpu_fp32(cmat_gpu, amat, ic_loc, itor)
 
 end subroutine
 
-subroutine copy_into_cmat_gpu(cmat_gpu, amat, ic_loc, itor)
+subroutine copy_into_cmat_gpu(amat, ic_loc, itor)
     use iso_c_binding
     use omp_lib
     implicit none
     
-    real, intent(inout) :: cmat_gpu(nv, nv, nc_loc_coll, nt_loc)
-    real, intent(in)    :: amat(nv, nv)
+    real, target, intent(in)    :: amat(nv, nv)
     integer, intent(in) :: ic_loc, itor
     
     integer(c_size_t)   :: bytes_to_copy, dst_offset
@@ -717,13 +712,13 @@ subroutine copy_into_cmat_gpu(cmat_gpu, amat, ic_loc, itor)
     device_id = omp_get_default_device()
     
     ! 3. Calculate destination offset (0-based bytes)
-    ! We are targeting: cmat_gpu(1, 1, ic_loc, itor-nt1+1)
+    ! We are targeting: cmat(1, 1, ic_loc, itor-nt1+1)
     ! Offset = [(dim4_idx - 1) * (size_dim3 * size_dim2 * size_dim1) + (dim3_idx - 1) * (size_dim2 * size_dim1)] * element_size
     dst_offset = ( int(itor - nt1, c_size_t) * int(nc_loc_coll, c_size_t) * int(nv * nv, c_size_t) + &
                    int(ic_loc - 1, c_size_t) * int(nv * nv, c_size_t) ) * c_sizeof(amat(1,1))
 
     ierr = omp_target_memcpy( &
-        c_loc(cmat_gpu),    & ! Destination (device pointer)
+        c_loc(cmat),        & ! Destination (device pointer)
         c_loc(amat),        & ! Source (host pointer)
         bytes_to_copy,      & ! Length in bytes
         dst_offset,         & ! Offset in destination
@@ -740,13 +735,12 @@ subroutine copy_into_cmat_gpu(cmat_gpu, amat, ic_loc, itor)
 
 end subroutine
 
-subroutine copy_from_cmat_gpu(amat, cmat_gpu, ic_loc, itor)
+subroutine copy_from_cmat_gpu(amat, ic_loc, itor)
     use iso_c_binding
     use omp_lib
     implicit none
     
-    real, intent(inout) :: amat(nv, nv)
-    real, intent(in)    :: cmat_gpu(nv, nv, nc_loc_coll, nt_loc)
+    real, target, intent(inout) :: amat(nv, nv)
     integer, intent(in) :: ic_loc, itor
     
     integer(c_size_t)   :: bytes_to_copy, src_offset
@@ -760,14 +754,14 @@ subroutine copy_from_cmat_gpu(amat, cmat_gpu, ic_loc, itor)
     device_id = omp_get_default_device()
     
     ! 3. Calculate cmat offset (0-based bytes)
-    ! We are targeting: cmat_gpu(1, 1, ic_loc, itor-nt1+1)
+    ! We are targeting: cmat(1, 1, ic_loc, itor-nt1+1)
     ! Offset = [(dim4_idx - 1) * (size_dim3 * size_dim2 * size_dim1) + (dim3_idx - 1) * (size_dim2 * size_dim1)] * element_size
     src_offset = ( int(itor - nt1, c_size_t) * int(nc_loc_coll, c_size_t) * int(nv * nv, c_size_t) + &
                    int(ic_loc - 1, c_size_t) * int(nv * nv, c_size_t) ) * c_sizeof(amat(1,1))
 
     ierr = omp_target_memcpy( &
         c_loc(amat),        & ! Destination (host pointer)
-        c_loc(cmat_gpu),    & ! Source (device pointer)
+        c_loc(cmat),        & ! Source (device pointer)
         bytes_to_copy,      & ! Length in bytes
         0_c_size_t,         & ! Offset in destination
         src_offset,         & ! Offset in source
@@ -783,13 +777,12 @@ subroutine copy_from_cmat_gpu(amat, cmat_gpu, ic_loc, itor)
 
 end subroutine
 
-subroutine copy_from_cmat_gpu_all(cmat_cpu, cmat_gpu)
+subroutine copy_from_cmat_gpu_all(cmat_cpu)
     use iso_c_binding
     use omp_lib
     implicit none
     
-    real, intent(inout) :: cmat_cpu(nv, nv, nc_loc_coll, nt_loc)
-    real, intent(in)    :: cmat_gpu(nv, nv, nc_loc_coll, nt_loc)
+    real, target, intent(inout) :: cmat_cpu(nv, nv, nc_loc_coll, nt_loc)
     
     integer(c_size_t)   :: bytes_to_copy
     integer             :: host_id, device_id
@@ -805,7 +798,7 @@ subroutine copy_from_cmat_gpu_all(cmat_cpu, cmat_gpu)
     
     ierr = omp_target_memcpy( &
         c_loc(cmat_cpu),    & ! Destination (host pointer)
-        c_loc(cmat_gpu),    & ! Source (device pointer)
+        c_loc(cmat),        & ! Source (device pointer)
         bytes_to_copy,      & ! Length in bytes
         0_c_size_t,         & ! Offset in destination
         0_c_size_t,         & ! Offset in source
@@ -907,85 +900,81 @@ subroutine deallocate_cmat
 
 end subroutine
 
-subroutine copy_into_cmat_fp32(cmat_dest,amat,ic_loc,itor)
+subroutine copy_into_cmat_fp32(amat,ic_loc,itor)
     implicit none
 
     ! ----------------------
-    real(KIND=REAL32), intent(inout) :: cmat_dest(nv,nv,nc_loc_coll,nt_loc)
-    real(KIND=REAL32), intent(in)    :: amat(nv,nv)
+    real(KIND=REAL32), target, intent(in)    :: amat(nv,nv)
     integer, intent(in) :: ic_loc,itor
 
 #ifdef OMPGPU
     if (gpu_bigmem_flag > 0) then
       ! cmat_fp32 in GPU memory only
-      call copy_into_cmat_gpu_fp32(cmat_dest,amat,ic_loc,itor)
+      call copy_into_cmat_gpu_fp32(amat,ic_loc,itor)
     else
 #else
     if (.TRUE.) then
 #endif
-      cmat_dest(:,:,ic_loc,itor-nt1+1) = amat(:,:)
+      cmat_fp32(:,:,ic_loc,itor-nt1+1) = amat(:,:)
     endif
 
 end subroutine
 
-subroutine copy_into_cmat(cmat_dest,amat,ic_loc,itor)
+subroutine copy_into_cmat(amat,ic_loc,itor)
     implicit none
 
     ! ----------------------
-    real, intent(inout) :: cmat_dest(nv,nv,nc_loc_coll,nt_loc)
-    real, intent(in)    :: amat(nv,nv)
+    real, target, intent(in)    :: amat(nv,nv)
     integer, intent(in) :: ic_loc,itor
 
 #ifdef OMPGPU
     if (gpu_bigmem_flag > 0) then
       ! cmat in GPU memory only
-      call copy_into_cmat_gpu(cmat_dest,amat,ic_loc,itor)
+      call copy_into_cmat_gpu(amat,ic_loc,itor)
     else
 #else
     if (.TRUE.) then
 #endif
-      cmat_dest(:,:,ic_loc,itor-nt1+1) = amat(:,:)
+      cmat(:,:,ic_loc,itor-nt1+1) = amat(:,:)
     endif
 
 end subroutine
 
-subroutine copy_from_cmat(amat,cmat_source,ic_loc,itor)
+subroutine copy_from_cmat(amat,ic_loc,itor)
     implicit none
 
     ! ----------------------
-    real, intent(inout)    :: amat(nv,nv)
-    real, intent(in) :: cmat_source(nv,nv,nc_loc_coll,nt_loc)
+    real, target, intent(inout)    :: amat(nv,nv)
     integer, intent(in) :: ic_loc,itor
 
 #ifdef OMPGPU
     if (gpu_bigmem_flag > 0) then
       ! cmat in GPU memory only
-      call copy_from_cmat_gpu(amat,cmat_source,ic_loc,itor)
+      call copy_from_cmat_gpu(amat,ic_loc,itor)
     else
 #else
     if (.TRUE.) then
 #endif
-       amat(:,:) = cmat_source(:,:,ic_loc,itor-nt1+1)
+       amat(:,:) = cmat(:,:,ic_loc,itor-nt1+1)
     endif
 
 end subroutine
 
-subroutine copy_from_cmat_all(cmat_dest, cmat_source)
+subroutine copy_from_cmat_all(cmat_dest)
     implicit none
 
     ! ----------------------
-    real, intent(inout) :: cmat_dest(nv,nv,nc_loc_coll,nt_loc)
-    real, intent(inout) :: cmat_source(nv,nv,nc_loc_coll,nt_loc)
+    real, target, intent(inout) :: cmat_dest(nv,nv,nc_loc_coll,nt_loc)
 
 #ifdef OMPGPU
     if (gpu_bigmem_flag > 0) then
       ! cmat in GPU memory only
-      call copy_from_cmat_gpu_all(cmat_dest, cmat_source)
+      call copy_from_cmat_gpu_all(cmat_dest)
     else
 #else
     if (.TRUE.) then
 #endif
-      cmat_dest(:,:,:,:) = cmat_source(:,:,:,:)
+      cmat_dest(:,:,:,:) = cmat(:,:,:,:)
     endif
 
 end subroutine

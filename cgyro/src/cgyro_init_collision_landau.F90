@@ -53,7 +53,8 @@ contains
     real, dimension(:,:,:,:,:,:,:), allocatable :: gyrocolmat
 
     ! for comparison purposes only for collision_test_mode==1:
-    real, allocatable :: cmat1(:,:,:,:), cmat2(:,:,:,:)
+    real, allocatable :: cmat1(:,:,:,:)
+    real, target, allocatable :: cmat2(:,:,:,:)
     
     ! for Lapack
     real, dimension(:),allocatable :: work
@@ -87,7 +88,7 @@ contains
     real rcond
     character equed
     real, allocatable, dimension(:,:,:,:) :: m1,m2
-    real, dimension(:,:), allocatable :: cmat_loc
+    real, dimension(:,:), target, allocatable :: cmat_loc
     real, allocatable :: chebweightarr(:)
     real target_k,target_ik
     integer ix,ie,jx,je,iv,jv
@@ -989,7 +990,7 @@ contains
                       end do
                    end do
                 end do
-                call copy_into_cmat(cmat,cmat_loc,ic_loc,itor)
+                call copy_into_cmat(cmat_loc,ic_loc,itor)
              end do
           end do
        end do
@@ -1018,7 +1019,7 @@ contains
        ! compute old collision operator in cmat1
        call old_sugama(cmat1) !<--- this is in this module.
        ! Make a copy of the main cmat into cmat2, to ensure it is CPU-accessible
-       call copy_from_cmat_all(cmat2,cmat)
+       call copy_from_cmat_all(cmat2)
 !!$    do ia=1,n_species
 !!$       do ib=1,n_species
 !!$          if (ia>=ib .and. temp(ia)/=temp(ib)) then

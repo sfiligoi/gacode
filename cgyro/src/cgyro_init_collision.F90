@@ -25,8 +25,8 @@ subroutine cgyro_init_collision
   integer :: itor
   ! parameters for matrix solve
   real, dimension(:,:), allocatable :: cmat_base1,cmat_base2
-  real, dimension(:,:), allocatable :: amat,cmat_loc
-  real(KIND=REAL32), dimension(:,:), allocatable :: amat_fp32
+  real, dimension(:,:), allocatable, target :: amat,cmat_loc
+  real(KIND=REAL32), dimension(:,:), allocatable, target :: amat_fp32
   real, dimension(:,:,:,:,:,:), allocatable :: ctest
   real, dimension(:,:,:,:), allocatable :: bessel
   ! diagnostics
@@ -618,7 +618,7 @@ subroutine cgyro_init_collision
 
         case(6,7)
            ! write the Landau/new collision matrix into the local array
-           call copy_from_cmat(cmat_loc,cmat,ic_loc,itor)
+           call copy_from_cmat(cmat_loc,ic_loc,itor)
 
         case default
            cmat_loc(:,:) = 0.0
@@ -764,7 +764,7 @@ subroutine cgyro_init_collision
         if (collision_precision_mode == 1) then
            ! keep all cmat in fp32 precision
            amat_fp32(:,:) = amat(:,:)
-           call copy_into_cmat_fp32(cmat_fp32,amat_fp32,ic_loc,itor)
+           call copy_into_cmat_fp32(amat_fp32,ic_loc,itor)
            ! keep the remaining precision for select elements
            do jv=1,nv
               je = ie_v(jv)
@@ -815,10 +815,10 @@ subroutine cgyro_init_collision
         else if (collision_precision_mode == 32) then
            ! keep all cmat in fp32 precision
            amat_fp32(:,:) = amat(:,:)
-           call copy_into_cmat_fp32(cmat_fp32,amat_fp32,ic_loc,itor)
+           call copy_into_cmat_fp32(amat_fp32,ic_loc,itor)
         else
            ! keep all cmat in full precision
-           call copy_into_cmat(cmat,amat,ic_loc,itor)
+           call copy_into_cmat(amat,ic_loc,itor)
         endif
 
      enddo
