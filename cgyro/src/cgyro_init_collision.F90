@@ -824,6 +824,7 @@ subroutine cgyro_init_collision
      enddo
   enddo
   deallocate(cmat_loc)
+  deallocate(amat_fp32)
   deallocate(amat)
 
   if (collision_model == 4 .and. collision_kperp == 1 .and. &
