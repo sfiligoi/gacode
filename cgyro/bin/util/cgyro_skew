@@ -25,6 +25,8 @@ p.add_argument('-ly', metavar='L', type=float, default=6,
                help='Figure height (default: 6)')
 p.add_argument('-dot', action='store_true',
                help='Show data points as circles')
+p.add_argument('-corner', metavar='TEXT', type=str, default=None,
+               help='Corner annotation text (upper-left)')
 p.add_argument('-save', metavar='FILE', type=str, default=None,
                help='Save to file (format from extension: .pdf, .png)')
 p.add_argument('-remote', metavar='DIR', type=str, default=None,
@@ -154,6 +156,10 @@ ymax = np.max([np.real(fvec), np.imag(fvec)])
 ypad = 0.1*(ymax - ymin)
 ax.set_ylim(ymin - ypad, ymax + ypad)
 ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
+
+if a.corner:
+   ax.text(0.02, 0.95, r'\textbf{'+a.corner+'}', ha='left', va='top',
+           transform=ax.transAxes, fontsize=16)
 
 fig.tight_layout(pad=0.3)
 if a.save:
