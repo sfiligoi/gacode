@@ -4,8 +4,6 @@ from collections import defaultdict
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import rc, ticker
-rc('text', usetex=True)
-rc('font', family='serif', size=16)
 from pygacode.gacodefuncs import TEXPHI
 from pygacode.cgyro import data
 
@@ -27,6 +25,8 @@ p.add_argument('-dot', action='store_true',
                help='Show data points as circles')
 p.add_argument('-corner', metavar='TEXT', type=str, default=None,
                help='Corner annotation text (upper-left)')
+p.add_argument('-notex', action='store_true',
+               help='Disable LaTeX fonts (use matplotlib mathtext)')
 p.add_argument('-save', metavar='FILE', type=str, default=None,
                help='Save to file (format from extension: .pdf, .png)')
 p.add_argument('-remote', metavar='DIR', type=str, default=None,
@@ -34,6 +34,12 @@ p.add_argument('-remote', metavar='DIR', type=str, default=None,
 p.add_argument('-global', dest='use_global', action='store_true',
                help='Normalize by global fmax across all sectors (for cross-sector comparison)')
 a = p.parse_args()
+
+if a.notex:
+   rc('text', usetex=False)
+else:
+   rc('text', usetex=True)
+rc('font', family='serif', size=16)
 
 # Ensure trailing slash
 if not a.e.endswith('/'):
@@ -158,8 +164,10 @@ ax.set_ylim(ymin - ypad, ymax + ypad)
 ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
 
 if a.corner:
-   ax.text(0.02, 0.95, r'\textbf{'+a.corner+'}', ha='left', va='top',
-           transform=ax.transAxes, fontsize=16)
+   corner_str = r'\textbf{'+a.corner+'}' if not a.notex else a.corner
+   ax.text(0.02, 0.95, corner_str, ha='left', va='top',
+           transform=ax.transAxes, fontsize=16,
+           fontweight='bold' if a.notex else 'normal')
 
 fig.tight_layout(pad=0.3)
 if a.save:
