@@ -25,7 +25,7 @@ subroutine cgyro_upwind_prepare_async_r64
 
   integer :: is,itor
   complex :: res_loc
-  complex :: g_val
+  complex :: g_val,f_val
 
   call timer_lib_in('str')
 
@@ -36,15 +36,16 @@ subroutine cgyro_upwind_prepare_async_r64
 #if defined(OMPGPU)
   ! No async for OMPGPU for now
 !$omp target teams distribute parallel do simd collapse(2) &
-!$omp&         private(res_loc,is,iv,iv_loc,g_val) 
+!$omp&         private(res_loc,is,iv,iv_loc,g_val,f_val) 
 #else
 !$acc parallel loop collapse(2) gang vector independent async(1) &
-!$acc&         private(res_loc,is,iv,iv_loc,g_val) &
+!$acc&         private(res_loc,is,iv,iv_loc,g_val,f_val) &
 !$acc&         present(g_x,h_x,z,temp,jvec_c,field,upfac1,is_v,upwind_res_loc) &
 !$acc&         present(nt1,nt2,ns1,ns2,nc,nv1,nv2,n_field) default(none)
 #endif
   do itor=nt1,nt2
    do ic=1,nc
+     if (n_field > 1) f_val = field(2,ic,itor)
      do is=ns1,ns2
        res_loc = (0.0,0.0)
        do iv=nv1,nv2
@@ -53,7 +54,7 @@ subroutine cgyro_upwind_prepare_async_r64
              g_val = h_x(ic,iv_loc,itor)
              if (n_field > 1) then
                 g_val = g_val + & 
-                   (z(is)/temp(is))*jvec_c(2,ic,iv_loc,itor)*field(2,ic,itor)
+                   (z(is)/temp(is))*jvec_c(2,ic,iv_loc,itor)*f_val
              endif
              res_loc = res_loc+upfac1(ic,iv_loc,itor)*g_val
              g_x(ic,iv_loc,itor) = g_val
@@ -163,7 +164,7 @@ subroutine cgyro_upwind_prepare_async_r32
 
   integer :: is,itor
   complex(KIND=REAL32) :: res_loc
-  complex :: g_val
+  complex :: g_val,f_val
 
   call timer_lib_in('str')
 
@@ -174,15 +175,16 @@ subroutine cgyro_upwind_prepare_async_r32
 #if defined(OMPGPU)
   ! no sync for OMPGPU for now
 !$omp target teams distribute parallel do simd collapse(2) &
-!$omp&         private(res_loc,is,iv,iv_loc,g_val) 
+!$omp&         private(res_loc,is,iv,iv_loc,g_val,f_val) 
 #else
 !$acc parallel loop collapse(2) gang vector independent async(1) &
-!$acc&         private(res_loc,is,iv,iv_loc,g_val) &
+!$acc&         private(res_loc,is,iv,iv_loc,g_val,f_val) &
 !$acc&         present(g_x,h_x,z,temp,jvec_c,field,upfac1,is_v,upwind32_res_loc) &
 !$acc&         present(nt1,nt2,ns1,ns2,nc,nv1,nv2,n_field) default(none)
 #endif
   do itor=nt1,nt2
    do ic=1,nc
+     if (n_field > 1) f_val = field(2,ic,itor)
      do is=ns1,ns2
        res_loc = (0.0,0.0)
 
@@ -192,7 +194,7 @@ subroutine cgyro_upwind_prepare_async_r32
              g_val = h_x(ic,iv_loc,itor)
              if (n_field > 1) then
                 g_val = g_val + & 
-                   (z(is)/temp(is))*jvec_c(2,ic,iv_loc,itor)*field(2,ic,itor)
+                   (z(is)/temp(is))*jvec_c(2,ic,iv_loc,itor)*f_val
              endif
              res_loc = res_loc+upfac1(ic,iv_loc,itor)*g_val
              g_x(ic,iv_loc,itor) = g_val
