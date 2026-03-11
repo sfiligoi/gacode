@@ -35,17 +35,17 @@ subroutine cgyro_upwind_prepare_async_r64
   ! The vector/SIMT nature of the GPU allows us to compute effeciently both together
 #if defined(OMPGPU)
   ! No async for OMPGPU for now
-!$omp target teams distribute parallel do simd collapse(3) &
-!$omp&         private(res_loc,iv,iv_loc,g_val) 
+!$omp target teams distribute parallel do simd collapse(2) &
+!$omp&         private(res_loc,is,iv,iv_loc,g_val) 
 #else
-!$acc parallel loop collapse(3) gang vector independent async(1) &
-!$acc&         private(res_loc,iv,iv_loc,g_val) &
+!$acc parallel loop collapse(2) gang vector independent async(1) &
+!$acc&         private(res_loc,is,iv,iv_loc,g_val) &
 !$acc&         present(g_x,h_x,z,temp,jvec_c,field,upfac1,is_v,upwind_res_loc) &
 !$acc&         present(nt1,nt2,ns1,ns2,nc,nv1,nv2,n_field) default(none)
 #endif
   do itor=nt1,nt2
-   do is=ns1,ns2
-     do ic=1,nc
+   do ic=1,nc
+     do is=ns1,ns2
        res_loc = (0.0,0.0)
        do iv=nv1,nv2
           iv_loc = iv-nv1+1
@@ -173,17 +173,17 @@ subroutine cgyro_upwind_prepare_async_r32
   ! The vector/SIMT nature of the GPU allows us to compute effeciently both together
 #if defined(OMPGPU)
   ! no sync for OMPGPU for now
-!$omp target teams distribute parallel do simd collapse(3) &
-!$omp&         private(res_loc,iv,iv_loc,g_val) 
+!$omp target teams distribute parallel do simd collapse(2) &
+!$omp&         private(res_loc,is,iv,iv_loc,g_val) 
 #else
-!$acc parallel loop collapse(3) gang vector independent async(1) &
-!$acc&         private(res_loc,iv,iv_loc,g_val) &
+!$acc parallel loop collapse(2) gang vector independent async(1) &
+!$acc&         private(res_loc,is,iv,iv_loc,g_val) &
 !$acc&         present(g_x,h_x,z,temp,jvec_c,field,upfac1,is_v,upwind32_res_loc) &
 !$acc&         present(nt1,nt2,ns1,ns2,nc,nv1,nv2,n_field) default(none)
 #endif
   do itor=nt1,nt2
-   do is=ns1,ns2
-     do ic=1,nc
+   do ic=1,nc
+     do is=ns1,ns2
        res_loc = (0.0,0.0)
 
        do iv=nv1,nv2
