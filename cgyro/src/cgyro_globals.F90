@@ -94,16 +94,17 @@ module cgyro_globals
   integer :: global_flag
   integer :: n_global
   real    :: nu_global
-  integer :: psym_flag
   integer :: theta_plot
   integer :: gpu_bigmem_flag
   integer :: upwind_single_flag
   integer :: nl_single_flag
   real :: px0
-  integer :: stream_term
-  real :: stream_factor
   integer :: exch_flag
   real :: res_weight_power
+  integer :: scale_index
+  real :: scale_stream
+  real :: scale_trap
+  real :: scale_drift
   !
   ! Geometry input
   !
