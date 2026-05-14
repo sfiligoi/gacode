@@ -6,6 +6,7 @@ subroutine cgyro_step_gk_v76
   use mpi
   use cgyro_globals
   use cgyro_globals_math
+  use cgyro_field_mod
   use cgyro_io
   use cgyro_step
 

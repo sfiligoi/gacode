@@ -18,6 +18,7 @@
 subroutine cgyro_upwind_prepare_async_r64
 
   use cgyro_globals
+  use cgyro_field_mod
   use parallel_lib
   use timer_lib
 
@@ -156,6 +157,7 @@ subroutine cgyro_upwind_prepare_async_r32
 
   use, intrinsic :: iso_fortran_env
   use cgyro_globals
+  use cgyro_field_mod
   use parallel_lib
   use timer_lib
 

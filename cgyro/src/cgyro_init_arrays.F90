@@ -2,6 +2,7 @@ subroutine cgyro_init_arrays
 
   use mpi
   use cgyro_globals
+  use cgyro_field_mod
   use cgyro_io
   use parallel_lib
 

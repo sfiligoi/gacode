@@ -15,6 +15,7 @@ subroutine cgyro_kernel
   use timer_lib
   use mpi
   use cgyro_globals
+  use cgyro_field_mod
   use cgyro_step
   use cgyro_io
   use cgyro_restart

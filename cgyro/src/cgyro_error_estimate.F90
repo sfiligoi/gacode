@@ -12,6 +12,7 @@ subroutine cgyro_error_estimate
   use mpi
   use cgyro_globals
   use cgyro_io
+  use cgyro_field_mod
   use timer_lib
 
   implicit none
@@ -53,38 +54,9 @@ subroutine cgyro_error_estimate
   enddo
 #endif
 
+  call cgyro_field_e_compute(delta_t, norm_loc_s,error_loc_s)
+
   call timer_lib_in('field')
-
-  norm_loc_s = 0.0
-  error_loc_s = 0.0
-
-  ! field_olds are always only in system memory... too expensive to keep in GPU memory
-  ! assuming field was already synched to system memory
-!$omp parallel do collapse(3) reduction(+:norm_loc_s,error_loc_s)
-  do itor=nt1,nt2
-   do ic=1,nc
-     do i_f=1,n_field
-
-        ! 1. Estimate of total (field) error via quadratic interpolation
-
-        field_loc(i_f,ic,itor) = 3*field_old(i_f,ic,itor) - &
-                3*field_old2(i_f,ic,itor) + &
-                field_old3(i_f,ic,itor)
-        field_dot(i_f,ic,itor) = (3*field(i_f,ic,itor) - &
-                4*field_old(i_f,ic,itor) + &
-                field_old2(i_f,ic,itor) )/(2*delta_t)
-
-        ! Define norm and error for each mode number n
-        norm_loc_s  = norm_loc_s  + abs(field(i_f,ic,itor))
-        error_loc_s = error_loc_s + abs(field(i_f,ic,itor)-field_loc(i_f,ic,itor))
-
-        ! save old values for next iteration
-        field_old3(i_f,ic,itor) = field_old2(i_f,ic,itor)
-        field_old2(i_f,ic,itor) = field_old(i_f,ic,itor)
-        field_old(i_f,ic,itor)  = field(i_f,ic,itor)
-     enddo
-   enddo
-  enddo
 
   norm_loc(1)  = norm_loc_s
   error_loc(1) = error_loc_s
@@ -169,7 +141,7 @@ subroutine cgyro_error_estimate
   h_s=0.0
   r_s=0.0
 #if defined(OMPGPU)
-  ! no async for OMPG{U for now
+  ! no async for OMPGPU for now
 !$omp target teams distribute parallel do simd collapse(3) &
 !$omp&    reduction(+:h_s,r_s)
 #else

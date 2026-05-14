@@ -303,6 +303,7 @@ subroutine cgyro_step_collision_cpu(use_simple)
   use timer_lib
 
   use cgyro_globals
+  use cgyro_field_mod
 
   ! --------------------------------------------------
   implicit none
@@ -704,6 +705,7 @@ subroutine cgyro_step_collision_gpu(use_simple)
   use timer_lib
 
   use cgyro_globals
+  use cgyro_field_mod
 
   ! --------------------------------------------------
   implicit none
@@ -814,6 +816,7 @@ subroutine cgyro_step_collision
 
   use timer_lib
   use cgyro_globals
+  use cgyro_field_mod
 
   implicit none
 
@@ -835,6 +838,7 @@ subroutine cgyro_step_collision_simple
 
   use timer_lib
   use cgyro_globals
+  use cgyro_field_mod
 
   implicit none
 

@@ -3,6 +3,7 @@ subroutine cgyro_step_gk
   use timer_lib
   use cgyro_globals
   use cgyro_globals_math
+  use cgyro_field_mod
 
   implicit none
 

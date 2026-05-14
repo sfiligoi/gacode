@@ -9,6 +9,135 @@
 !  - cgyro_field_c() (velocity distributed)
 !-----------------------------------------------------------------
 
+module cgyro_field_mod
+
+  implicit none
+
+  !
+  ! Field_c
+  real, private, dimension(:,:,:), allocatable :: fcoef
+  real, private, dimension(:,:,:), allocatable :: gcoef
+  complex, dimension(:,:,:), allocatable :: field
+  complex, private, dimension(:,:,:), allocatable :: field_loc
+  !
+  ! Field_v
+  complex, dimension(:,:,:,:), allocatable :: field_v
+  complex, private, dimension(:,:,:,:), allocatable :: field_loc_v
+  !
+  ! Field_e - used for error estimation and fluxes
+  complex, dimension(:,:,:), allocatable :: field_dot
+  complex, private, dimension(:,:,:), allocatable :: field_old
+  complex, private, dimension(:,:,:), allocatable :: field_old2
+  complex, private, dimension(:,:,:), allocatable :: field_old3
+
+contains
+
+!-----------------------------------------------------------------
+! Initialization and cleanup, to be called once
+!-----------------------------------------------------------------
+
+subroutine cgyro_field_c_init(n_field,nc,nt1,nt2)
+
+  implicit none
+
+  integer, intent(in) :: n_field,nc,nt1,nt2
+
+  allocate(fcoef(n_field,nc,nt1:nt2))
+  if (n_field < 3) then
+     allocate(gcoef(n_field,nc,nt1:nt2))
+  else
+     allocate(gcoef(5,nc,nt1:nt2))
+  endif
+  allocate(field(n_field,nc,nt1:nt2))
+  allocate(field_loc(n_field,nc,nt1:nt2))
+#if defined(OMPGPU)
+!$omp target enter data map(alloc:fcoef,gcoef,field,field_loc)
+#elif defined(_OPENACC)
+!$acc enter data create(fcoef,gcoef,field,field_loc)
+#endif
+end subroutine cgyro_field_c_init
+
+subroutine cgyro_field_e_init(n_field,nc,nt1,nt2)
+
+  implicit none
+
+  integer, intent(in) :: n_field,nc,nt1,nt2
+
+  ! These are in CPU-memory only
+  allocate(field_dot(n_field,nc,nt1:nt2))
+  allocate(field_old(n_field,nc,nt1:nt2))
+  allocate(field_old2(n_field,nc,nt1:nt2))
+  allocate(field_old3(n_field,nc,nt1:nt2))
+
+  ! Initialize time-history of fields (-3,-2,-1) to initial field.
+  field_old  = field
+  field_old2 = field
+  field_old3 = field
+end subroutine cgyro_field_e_init
+
+subroutine cgyro_field_v_init(n_field,nc,nt1,nt2,n_sim,nc_cl1,nc_cl2)
+
+  implicit none
+
+  integer, intent(in) :: n_field,nc,nt1,nt2,n_sim,nc_cl1,nc_cl2
+
+  ! nc and nc_loc_coll must be last, since it will be collated     
+  allocate(field_v(n_field,nt1:nt2,n_sim,nc))
+  allocate(field_loc_v(n_field,nt1:nt2,n_sim,nc_cl1:nc_cl2))
+#if defined(OMPGPU)
+!$omp target enter data map(alloc:field_v,field_loc_v)
+#elif defined(_OPENACC)
+!$acc enter data create(field_v,field_loc_v)
+#endif
+
+end subroutine cgyro_field_v_init
+
+
+subroutine cgyro_field_c_cleanup
+
+  implicit none
+
+  if(allocated(fcoef))  then ! one test enough
+#if defined(OMPGPU)
+!$omp target exit data map(release:fcoef,gcoef,field,field_loc)
+#elif defined(_OPENACC)
+!$acc exit data delete(fcoef,gcoef,field,field_loc)
+#endif
+    deallocate(field_loc)
+    deallocate(field)
+    deallocate(gcoef)
+    deallocate(fcoef)
+  endif
+end subroutine cgyro_field_c_cleanup
+
+subroutine cgyro_field_e_cleanup
+
+  implicit none
+
+  if(allocated(field_dot))  then ! one test enough
+    deallocate(field_old3)
+    deallocate(field_old2)
+    deallocate(field_old)
+    deallocate(field_dot)
+  endif
+end subroutine cgyro_field_e_cleanup
+
+subroutine cgyro_field_v_cleanup
+
+  implicit none
+
+  if(allocated(field_v))  then ! one test enough
+#if defined(OMPGPU)
+!$omp target exit data map(release:field_v,field_loc_v)
+#elif defined(_OPENACC)
+!$acc exit data delete(field_v,field_loc_v)
+#endif
+    deallocate(field_loc_v)
+    deallocate(field_v)
+  endif
+end subroutine cgyro_field_v_cleanup
+
+
 !-----------------------------------------------------------------
 ! Velocity (configuration-distributed) field solve
 !-----------------------------------------------------------------
@@ -717,3 +846,335 @@ subroutine cgyro_field_ae(space)
   endif
 
 end subroutine cgyro_field_ae
+
+
+! compute filed error and save the old values for next round
+subroutine cgyro_field_e_compute(delta_t, norm_loc_s,error_loc_s)
+
+  use timer_lib
+  use cgyro_globals, only : nt1, nt2, nc, n_field
+
+  implicit none
+
+  real, intent(in) :: delta_t
+  real, intent(out) :: norm_loc_s,error_loc_s
+
+  integer :: itor,ic,i_f
+
+  call timer_lib_in('field')
+
+  norm_loc_s = 0.0
+  error_loc_s = 0.0
+
+  ! field_olds are always only in system memory... too expensive to keep in GPU memory
+  ! assuming field was already synched to system memory
+!$omp parallel do collapse(3) reduction(+:norm_loc_s,error_loc_s)
+  do itor=nt1,nt2
+   do ic=1,nc
+     do i_f=1,n_field
+
+        ! 1. Estimate of total (field) error via quadratic interpolation
+
+        field_loc(i_f,ic,itor) = 3*field_old(i_f,ic,itor) - &
+                3*field_old2(i_f,ic,itor) + &
+                field_old3(i_f,ic,itor)
+        field_dot(i_f,ic,itor) = (3*field(i_f,ic,itor) - &
+                4*field_old(i_f,ic,itor) + &
+                field_old2(i_f,ic,itor) )/(2*delta_t)
+
+        ! Define norm and error for each mode number n
+        norm_loc_s  = norm_loc_s  + abs(field(i_f,ic,itor))
+        error_loc_s = error_loc_s + abs(field(i_f,ic,itor)-field_loc(i_f,ic,itor))
+
+        ! save old values for next iteration
+        field_old3(i_f,ic,itor) = field_old2(i_f,ic,itor)
+        field_old2(i_f,ic,itor) = field_old(i_f,ic,itor)
+        field_old(i_f,ic,itor)  = field(i_f,ic,itor)
+     enddo
+   enddo
+  enddo
+
+  call timer_lib_out('field')
+
+end subroutine cgyro_field_e_compute
+
+! get the top two old elements for field 1, for a single ic and itor
+subroutine cgyro_field_e_get_diff1(ic,itor, fo1,fo2)
+
+  implicit none
+  integer, intent(in) :: ic,itor
+  complex, intent(out) :: fo1,fo2
+    
+  fo1 = field_old(1,ic,itor)
+  fo2 = field_old2(1,ic,itor)
+end subroutine cgyro_field_e_get_diff1
+
+subroutine cgyro_field_coefficients
+
+  use mpi
+  use cgyro_globals
+
+  implicit none
+
+  integer :: ir,it,is,ie,ix,itor
+  real :: sum_one
+  real, dimension(:,:), allocatable :: sum_loc
+  real, dimension(:,:), allocatable :: pb11,pb12,pb21,pb22
+ 
+  !-------------------------------------------------------------------------
+  ! Field equation prefactors, sums.
+  !
+  allocate(sum_loc(nc,nt1:nt2))
+!$omp parallel do collapse(2) private(iv,iv_loc,is,it,sum_one) shared(sum_loc)
+  do itor=nt1,nt2
+    do ic=1,nc
+      it = it_c(ic)
+      sum_one = 0.0
+      do iv=nv1,nv2
+        iv_loc = iv-nv1+1
+        is = is_v(iv)
+        sum_one = sum_one + vfac(iv_loc)*dens_rot(it,is) &
+             *(1.0-jvec_c(1,ic,iv_loc,itor)**2) 
+      enddo
+      sum_loc(ic,itor) = sum_one
+    enddo
+  enddo
+
+  call MPI_ALLREDUCE(sum_loc,&
+       sum_den_x,&
+       size(sum_den_x),&
+       MPI_DOUBLE_PRECISION,&
+       MPI_SUM,&
+       NEW_COMM_1,&
+       i_err)
+
+  if (ae_flag == 1) then
+    do itor=nt1,nt2
+     do ic=1,nc
+        it = it_c(ic)
+        sum_den_x(ic,itor) = sum_den_x(ic,itor)+dens_ele*dens_ele_rot(it)/temp_ele
+     enddo
+    enddo
+  endif
+  !----------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------
+  ! Field-solve coefficients (i.e., final numerical factors).
+  !
+  do itor=nt1,nt2
+   do ic=1,nc
+     ir = ir_c(ic) 
+     it = it_c(ic)
+     if (itor == 0 .and. (px(ir) == 0 .or. ir == 1) .and. zf_test_mode == 0) then
+        fcoef(:,ic,itor) = 0.0
+     else
+        fcoef(1,ic,itor) = 1.0/(k_perp(ic,itor)**2*lambda_debye**2*dens_ele/temp_ele &
+             + sum_den_h(it))
+        if (n_field > 1) fcoef(2,ic,itor) = 1.0/(-2.0*k_perp(ic,itor)**2* &
+             rho**2/betae_unit*dens_ele*temp_ele)
+        if (n_field > 2) fcoef(3,ic,itor) = -betae_unit/(2.0*dens_ele*temp_ele)
+     endif
+   enddo
+  enddo
+
+  if (n_field > 1) then
+
+!$omp parallel do collapse(2) private(iv,iv_loc,is,it,sum_one) shared(sum_loc)
+     do itor=nt1,nt2
+       do ic=1,nc
+         it = it_c(ic)
+         sum_one = 0.0
+         do iv=nv1,nv2
+           iv_loc = iv-nv1+1
+           is = is_v(iv)
+           sum_one = sum_one + vfac(iv_loc)*dens_rot(it,is) &
+                *jvec_c(2,ic,iv_loc,itor)**2 
+         enddo
+         sum_loc(ic,itor) = sum_one
+       enddo
+     enddo
+
+     call MPI_ALLREDUCE(sum_loc,&
+          sum_cur_x,&
+          size(sum_cur_x),&
+          MPI_DOUBLE_PRECISION,&
+          MPI_SUM,&
+          NEW_COMM_1,&
+          i_err)
+
+  endif
+
+  if (n_field == 1 .or. n_field == 2) then
+    do itor=nt1,nt2
+     do ic=1,nc
+        if (k_perp(ic,itor) > 0.0) then
+           gcoef(1,ic,itor) = 1.0/(k_perp(ic,itor)**2*lambda_debye**2*&
+                dens_ele/temp_ele+sum_den_x(ic,itor))
+        endif
+     enddo
+    enddo
+  endif
+
+  if (n_field > 1) then
+    do itor=nt1,nt2
+     do ic=1,nc
+        if (k_perp(ic,itor) > 0.0) then
+           gcoef(2,ic,itor) = 1.0/(-2.0*k_perp(ic,itor)**2*&
+                rho**2/betae_unit*dens_ele*temp_ele-sum_cur_x(ic,itor))
+        endif
+     enddo
+    enddo
+  endif
+
+  if (n_field > 2) then
+     allocate(pb11(nc,nt1:nt2))
+     allocate(pb12(nc,nt1:nt2))
+     allocate(pb21(nc,nt1:nt2))
+     allocate(pb22(nc,nt1:nt2))
+
+     do itor=nt1,nt2
+      do ic=1,nc
+        pb11(ic,itor) = k_perp(ic,itor)**2*lambda_debye**2* &
+             dens_ele/temp_ele+sum_den_x(ic,itor)
+      enddo
+     enddo
+
+!$omp parallel do collapse(2) shared(sum_loc) &
+!$omp&         private(iv,iv_loc,ir,it,sum_one,is,ix,ie)
+     do itor=nt1,nt2
+       do ic=1,nc
+         ir = ir_c(ic) 
+         it = it_c(ic)
+         sum_one = 0.0
+         do iv=nv1,nv2
+           iv_loc = iv-nv1+1
+           is = is_v(iv)
+           ix = ix_v(iv)
+           ie = ie_v(iv)
+           sum_one = sum_one - w_exi(ie,ix)*dens2_rot(it,is) &
+                *z(is)*jvec_c(1,ic,iv_loc,itor)*jvec_c(3,ic,iv_loc,itor) &
+                *z(is)/temp(is)
+         enddo
+         sum_loc(ic,itor) = sum_one
+       enddo
+     enddo
+
+     call MPI_ALLREDUCE(sum_loc,&
+          pb12,&
+          size(pb12),&
+          MPI_DOUBLE_PRECISION,&
+          MPI_SUM,&
+          NEW_COMM_1,&
+          i_err)
+
+!$omp parallel do collapse(2) shared(sum_loc) &
+!$omp&         private(iv,iv_loc,ir,it,sum_one,is,ix,ie)
+     do itor=nt1,nt2
+       do ic=1,nc
+         ir = ir_c(ic) 
+         it = it_c(ic)
+         sum_one = 0.0
+         do iv=nv1,nv2
+           iv_loc = iv-nv1+1
+           is = is_v(iv)
+           ix = ix_v(iv)
+           ie = ie_v(iv)
+           sum_one = sum_one + w_exi(ie,ix)*dens2_rot(it,is) &
+                *temp(is)*jvec_c(3,ic,iv_loc,itor)**2 &
+                *(z(is)/temp(is))**2
+         enddo
+         sum_loc(ic,itor) = sum_one
+       enddo
+     enddo
+
+     call MPI_ALLREDUCE(sum_loc,&
+          pb22,&
+          size(pb22),&
+          MPI_DOUBLE_PRECISION,&
+          MPI_SUM,&
+          NEW_COMM_1,&
+          i_err)
+
+     ! Determinant
+!$omp parallel do collapse(2) shared(sum_loc) private(sum_one)
+     do itor=nt1,nt2
+       do ic=1,nc
+         pb21(ic,itor) = pb12(ic,itor)*betae_unit/(-2*dens_ele*temp_ele)
+         pb22(ic,itor) = 1.0-pb22(ic,itor)*betae_unit/(-2*dens_ele*temp_ele) 
+
+         if (k_perp(ic,itor) > 0.0) then
+           sum_one = pb11(ic,itor)*pb22(ic,itor)-pb12(ic,itor)*pb21(ic,itor)
+         else
+           sum_one = 1.0
+         endif
+
+         gcoef(3,ic,itor) = pb11(ic,itor)/sum_one
+         gcoef(1,ic,itor) = pb22(ic,itor)/sum_one
+         gcoef(4,ic,itor) = -pb12(ic,itor)/sum_one
+         gcoef(5,ic,itor) = -pb21(ic,itor)/sum_one
+       enddo
+     enddo
+
+     deallocate(pb11)
+     deallocate(pb12)
+     deallocate(pb21)
+     deallocate(pb22)
+  endif
+
+  deallocate(sum_loc)
+
+!$omp parallel do private(iv,iv_loc,is,ie,ix,ic,it,ic_loc,ir) shared(gcoef,dvjvec_c,dvjvec_v)
+  do itor=nt1,nt2
+   ! Set selected zeros
+   do ic=1,nc
+     ir = ir_c(ic) 
+     if (itor == 0 .and. (px(ir) == 0 .or. ir == 1) .and. zf_test_mode == 0) then
+        gcoef(:,ic,itor) = 0.0
+     endif
+   enddo
+
+   ! Arrays to speed up velocity integrals in Maxwell equations
+   do iv=nv1,nv2
+     iv_loc = iv-nv1+1
+     is = is_v(iv)
+     ie = ie_v(iv)
+     ix = ix_v(iv)
+     do ic=1,nc
+        it = it_c(ic)
+        dvjvec_c(:,ic,iv_loc,itor) = dens2_rot(it,is)*w_exi(ie,ix)*z(is)* &
+             jvec_c(:,ic,iv_loc,itor)
+     enddo
+   enddo
+   if ((collision_model /= 5) .AND. (collision_field_model == 1)) then
+    do ic=nc_cl1,nc_cl2
+     ic_loc = ic-nc_cl1+1
+     it = it_c(ic)
+     do iv=1,nv
+        is = is_v(iv)
+        ix = ix_v(iv)
+        ie = ie_v(iv)
+        dvjvec_v(:,iv,itor,ic_loc) = dens2_rot(it,is)*w_exi(ie,ix)*z(is)* &
+             jvec_v(:,ic_loc,itor,iv,1) ! all nsm are the same, use the 1st one
+     enddo
+    enddo
+   endif
+  enddo
+  !-------------------------------------------------------------------------
+
+#if defined(OMPGPU)
+!$omp target update to(fcoef,gcoef,dvjvec_c)
+#elif defined(_OPENACC)
+!$acc update device(fcoef,gcoef,dvjvec_c)
+#endif
+  if ((collision_model /= 5) .AND. (collision_field_model == 1)) then
+#if defined(OMPGPU)
+!$omp target update to(dvjvec_v)
+#elif defined(_OPENACC)
+!$acc update device(dvjvec_v)
+#endif
+  endif
+
+end subroutine cgyro_field_coefficients
+
+end module cgyro_field_mod
+

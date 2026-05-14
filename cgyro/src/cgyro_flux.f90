@@ -30,6 +30,7 @@ subroutine cgyro_flux
 
   use mpi
   use cgyro_globals
+  use cgyro_field_mod
 
   implicit none
 

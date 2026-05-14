@@ -8,6 +8,7 @@
 subroutine cgyro_globalshear(ij)
 
   use cgyro_globals
+  use cgyro_field_mod
   use timer_lib
 
   implicit none
