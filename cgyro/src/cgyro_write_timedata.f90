@@ -131,6 +131,15 @@ subroutine cgyro_write_timedata
         call write_binary(trim(path)//binfile_fieldb(i_field),&
              ftemp(:,:)/a_norm,size(ftemp))
      enddo
+     if (has_balloon) then
+        do ir=1,n_radial
+           do it=1,n_theta
+              ftemp(it,ir) = epar(ic_c(ir,it),nt1)
+           enddo
+        enddo
+        call extended_ang(ftemp)
+        call write_binary(trim(path)//binfile_fieldb(4),ftemp(:,:),size(ftemp))
+     endif
   endif
   !---------------------------------------------------------------
 
