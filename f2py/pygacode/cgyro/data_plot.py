@@ -259,7 +259,10 @@ class cgyrodata_plot(data.cgyrodata):
          ytag = r'$A_\parallel$'
       elif field == 2:
          f = self.bparb[:,itime]
-         ytag = r'$B_\parallel$'
+         ytag = r'$\delta B_\parallel$'
+      elif field == 3:
+         f = self.eparb[:,itime]*np.pi*self.q*self.rmaj
+         ytag = r'$\left( \pi q R_0 \right) \, \delta E_\parallel$'
 
       ax = fig.add_subplot(111)
       ax.grid(which="both",ls=":")

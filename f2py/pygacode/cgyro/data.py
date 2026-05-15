@@ -141,6 +141,15 @@ class cgyrodata:
          self.bparb = np.reshape(data,(spatial_size,actual_nt),'F')
          if not self.silent:
             print('INFO: (getdata) Read data in '+fmt+f+' '+t)
+
+      f='.cgyro.eparb'
+      t,fmt,data = self.extract(f,cmplx=True)
+      if fmt != 'null':
+         spatial_size = self.n_theta*self.n_radial
+         actual_nt = len(data) // spatial_size
+         self.eparb = np.reshape(data,(spatial_size,actual_nt),'F')
+         if not self.silent:
+            print('INFO: (getdata) Read data in '+fmt+f+' '+t)
       #-----------------------------------------------------------------
 
       #-----------------------------------------------------------------
