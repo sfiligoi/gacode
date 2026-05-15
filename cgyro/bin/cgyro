@@ -88,7 +88,10 @@ then
   echo
   echo "         -compress"
   echo "         Replicate directory, but without restart or nonstandard files."
- 
+  echo
+  echo "         -refresh"
+  echo "         Run cgyro (test mode) on cwd and all subdirectories."
+
   exit 1
 fi
 #=============================================================
@@ -111,6 +114,7 @@ REGRESS_RESTART=0
 MTEST_FLAG=0
 CLEAN=0
 COMPRESS_FLAG=0
+REFRESH_FLAG=0
 RESET=0
 INIT_FLAG=0
 HELP_TAG=null
@@ -163,6 +167,8 @@ while [ $# -gt 0 ] ; do
 
   -compress) COMPRESS_FLAG=1 ;;
 
+  -refresh) REFRESH_FLAG=1 ;;
+
   *) echo "ERROR (cgyro script): unknown option $1." ; exit 1 ;;
 
   esac
@@ -195,6 +201,24 @@ if [ $COMPRESS_FLAG -eq 1 ]
 then
     cgyro_compress $SIMDIR $LOCDIR
     exit 1
+fi
+#============================================================
+
+#============================================================
+# refresh option: run cgyro test mode on cwd and all subdirs
+if [ $REFRESH_FLAG -eq 1 ]
+then
+   if [ ! -f $CGYRO_DIR/src/cgyro ]
+   then
+      echo "ERROR: CGYRO executable not found."
+      exit 1
+   fi
+   while IFS= read -r f; do
+      dir=$(dirname "$f")
+      echo "INFO: (cgyro) Refreshing $dir"
+      ( cd "$dir" && $CGYRO_DIR/src/cgyro 1 )
+   done < <(find "$PWD" -name "input.cgyro" | sort)
+   exit 0
 fi
 #============================================================
 
