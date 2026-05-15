@@ -79,11 +79,13 @@ subroutine cgyro_read_input
   call cgyro_readbc_int(nt_loc,'TOROIDALS_PER_PROC')
   call cgyro_readbc_int(mpi_rank_order,'MPI_RANK_ORDER')
   call cgyro_readbc_int(velocity_order,'VELOCITY_ORDER')
-  call cgyro_readbc_int(hiprec_flag,'HIPREC_FLAG')
+  !call cgyro_readbc_int(hiprec_flag,'HIPREC_FLAG')
+  hiprec_flag = 0
   call cgyro_readbc_int(udsymmetry_flag,'UDSYMMETRY_FLAG')
   call cgyro_readbc_int(shear_method,'SHEAR_METHOD')
   call cgyro_readbc_int(global_flag,'GLOBAL_FLAG')
-  call cgyro_readbc_int(n_global,'N_GLOBAL')
+  !call cgyro_readbc_int(n_global,'N_GLOBAL')
+  n_global=4
   call cgyro_readbc_real(nu_global)
   call cgyro_readbc_int(theta_plot,'THETA_PLOT')
   call cgyro_readbc_int(gpu_bigmem_flag,'GPU_BIGMEM_FLAG')
