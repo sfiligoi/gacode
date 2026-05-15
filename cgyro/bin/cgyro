@@ -216,7 +216,7 @@ then
    while IFS= read -r f; do
       dir=$(dirname "$f")
       echo "INFO: (cgyro) Refreshing $dir"
-      ( cd "$dir" && $CGYRO_DIR/src/cgyro 1 )
+      ( cd "$dir" && python $CGYRO_DIR/bin/cgyro_parse.py && $CGYRO_DIR/src/cgyro 1 )
    done < <(find "$PWD" -name "input.cgyro" | sort)
    exit 0
 fi
