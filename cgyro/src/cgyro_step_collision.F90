@@ -395,9 +395,17 @@ subroutine cgyro_calc_collision_gpu_fp32(nj_loc,cmat_gpu)
 
   vcount = nv/nv_loc
 #if defined(OMPGPU)
+
+#if defined(OMPGPU_DEVICE_ADDR)
+!$omp target teams distribute parallel do simd collapse(4) &
+!$omp&         private(b_re,b_im,cval,ivp,iv) firstprivate(nproc,nj_loc,nv,n_sim,vcount) &
+!$omp&         private(k,ic,j,ic_loc,ism) has_device_addr(cmat_gpu)
+#else
 !$omp target teams distribute parallel do simd collapse(4) &
 !$omp&         private(b_re,b_im,cval,ivp,iv) firstprivate(nproc,nj_loc,nv,n_sim,vcount) &
 !$omp&         private(k,ic,j,ic_loc,ism) is_device_ptr(cmat_gpu)
+#endif
+
 #else
 !$acc parallel loop collapse(4) gang vector &
 !$acc& private(b_re,b_im,cval,ivp,iv) firstprivate(nproc,nj_loc,nv,n_sim,vcount) &
@@ -452,9 +460,17 @@ subroutine cgyro_calc_collision_gpu_fp64(nj_loc,cmat_gpu)
 
   vcount = nv/nv_loc
 #if defined(OMPGPU)
+
+#if defined(OMPGPU_DEVICE_ADDR)
+!$omp target teams distribute parallel do simd collapse(4) &
+!$omp&         private(b_re,b_im,cval,ivp,iv) firstprivate(nproc,nj_loc,nv,n_sim,vcount) &
+!$omp&         private(k,ic,j,ic_loc,ism) has_device_addr(cmat_gpu)
+#else
 !$omp target teams distribute parallel do simd collapse(4) &
 !$omp&         private(b_re,b_im,cval,ivp,iv) firstprivate(nproc,nj_loc,nv,n_sim,vcount) &
 !$omp&         private(k,ic,j,ic_loc,ism) is_device_ptr(cmat_gpu)
+#endif
+
 #else
 !$acc parallel loop collapse(4) gang vector &
 !$acc& private(b_re,b_im,cval,ivp,iv) firstprivate(nproc,nj_loc,nv,n_sim,vcount) &

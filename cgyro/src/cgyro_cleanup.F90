@@ -8,46 +8,36 @@ subroutine cgyro_cleanup
 #define CGYRO_GPU_FFT
 #endif
 
-#if defined(OMPGPU)
-
-#define ccl_del_device(x) \
-!$omp target exit data map(release:x)
-#define ccl_del_bigdevice(x) \
-!$omp target exit data map(release:x) if (gpu_bigmem_flag > 0)
-
-#elif defined(_OPENACC)
-
-#define ccl_del_device(x) \
-!$acc exit data delete(x)
-#define ccl_del_bigdevice(x) \
-!$acc exit data delete(x) if (gpu_bigmem_flag > 0)
-
-#else
-
-  ! nothing to do
-#define ccl_del_device(x)
-#define ccl_del_bigdevice(x)
-
-#endif
-
   !!!!!!!!!!!!!!!!!!!!!!!!!!
   ! From cgyro_init_manager
   !!!!!!!!!!!!!!!!!!!!!!!!!!
   
   if(allocated(energy))        deallocate(energy)
   if(allocated(vel))        then
-     ccl_del_device(vel)
+#if defined(OMPGPU)
+!$omp target exit data map(release:vel)
+#elif defined(_OPENACC)
+!$acc exit data delete(vel)
+#endif
      deallocate(vel)
   endif
   if(allocated(vel2))        then
-     ccl_del_device(vel2)
+#if defined(OMPGPU)
+!$omp target exit data map(release:vel2)
+#elif defined(_OPENACC)
+!$acc exit data delete(vel2)
+#endif
      deallocate(vel2)
   endif
   if(allocated(w_e))           deallocate(w_e)
   if(allocated(e_deriv1_mat))  deallocate(e_deriv1_mat)
   if(allocated(e_deriv1_rot_mat))  deallocate(e_deriv1_rot_mat)
   if(allocated(xi))            then
-     ccl_del_device(xi)
+#if defined(OMPGPU)
+!$omp target exit data map(release:xi)
+#elif defined(_OPENACC)
+!$acc exit data delete(xi)
+#endif
      deallocate(xi)
   endif
   if(allocated(w_xi))          deallocate(w_xi)
@@ -70,7 +60,11 @@ subroutine cgyro_cleanup
   if(allocated(captheta))       deallocate(captheta)
   if(allocated(itp))            deallocate(itp)
   if(allocated(omega_stream))   then
-     ccl_del_device(omega_stream)
+#if defined(OMPGPU)
+!$omp target exit data map(release:omega_stream)
+#elif defined(_OPENACC)
+!$acc exit data delete(omega_stream)
+#endif
      deallocate(omega_stream)
   endif
   if(allocated(omega_trap))          deallocate(omega_trap)
@@ -97,27 +91,51 @@ subroutine cgyro_cleanup
   if(allocated(gtime))               deallocate(gtime)
   if(allocated(freq))                deallocate(freq)
   if(allocated(fcoef))  then
-     ccl_del_device(fcoef)     
+#if defined(OMPGPU)
+!$omp target exit data map(release:fcoef)
+#elif defined(_OPENACC)
+!$acc exit data delete(fcoef)
+#endif
      deallocate(fcoef)
   endif
   if(allocated(gcoef))  then
-     ccl_del_device(gcoef)     
+#if defined(OMPGPU)
+!$omp target exit data map(release:gcoef)
+#elif defined(_OPENACC)
+!$acc exit data delete(gcoef)
+#endif
      deallocate(gcoef)
   endif
   if(allocated(field_v))  then
-     ccl_del_device(field_v)     
+#if defined(OMPGPU)
+!$omp target exit data map(release:field_v)
+#elif defined(_OPENACC)
+!$acc exit data delete(field_v)
+#endif
      deallocate(field_v)
   endif
   if(allocated(field_loc_v))  then
-     ccl_del_device(field_loc_v)     
+#if defined(OMPGPU)
+!$omp target exit data map(release:field_loc_v)
+#elif defined(_OPENACC)
+!$acc exit data delete(field_loc_v)
+#endif
      deallocate(field_loc_v)
   endif
   if(allocated(field))  then
-     ccl_del_device(field)     
+#if defined(OMPGPU)
+!$omp target exit data map(release:field)
+#elif defined(_OPENACC)
+!$acc exit data delete(field)
+#endif
      deallocate(field)
   endif
   if(allocated(field_loc))  then
-     ccl_del_device(field_loc)     
+#if defined(OMPGPU)
+!$omp target exit data map(release:field_loc)
+#elif defined(_OPENACC)
+!$acc exit data delete(field_loc)
+#endif
      deallocate(field_loc)
   endif
   if(allocated(field_dot))           deallocate(field_dot)
@@ -135,177 +153,345 @@ subroutine cgyro_cleanup
   if(allocated(gflux_tave))          deallocate(gflux_tave)
   if(allocated(recv_status))         deallocate(recv_status)
   if(allocated(source)) then
-      ccl_del_device(source)      
+#if defined(OMPGPU)
+!$omp target exit data map(release:source)
+#elif defined(_OPENACC)
+!$acc exit data delete(source)
+#endif
      deallocate(source)
   endif
   if(allocated(thfac_itor)) then
-      ccl_del_device(thfac_itor)
+#if defined(OMPGPU)
+!$omp target exit data map(release:thfac_itor)
+#elif defined(_OPENACC)
+!$acc exit data delete(thfac_itor)
+#endif
      deallocate(thfac_itor)
   endif
   if(allocated(h0_old)) then
-     ccl_del_device(h0_old)      
+#if defined(OMPGPU)
+!$omp target exit data map(release:h0_old)
+#elif defined(_OPENACC)
+!$acc exit data delete(h0_old)
+#endif
      deallocate(h0_old)
   endif
   if(allocated(rhs)) then
-     ccl_del_device(rhs)       
+#if defined(OMPGPU)
+!$omp target exit data map(release:rhs)
+#elif defined(_OPENACC)
+!$acc exit data delete(rhs)
+#endif
      deallocate(rhs)
   endif
   if(allocated(h_x)) then
-     ccl_del_device(h_x)       
+#if defined(OMPGPU)
+!$omp target exit data map(release:h_x)
+#elif defined(_OPENACC)
+!$acc exit data delete(h_x)
+#endif
      deallocate(h_x)
   endif
   if(allocated(g_x)) then
-     ccl_del_device(g_x)       
+#if defined(OMPGPU)
+!$omp target exit data map(release:g_x)
+#elif defined(_OPENACC)
+!$acc exit data delete(g_x)
+#endif
      deallocate(g_x)
   endif
   if(allocated(h0_x)) then
-     ccl_del_device(h0_x)        
+#if defined(OMPGPU)
+!$omp target exit data map(release:h0_x)
+#elif defined(_OPENACC)
+!$acc exit data delete(h0_x)
+#endif
      deallocate(h0_x)
   endif
   if(allocated(cap_h_c)) then
-     ccl_del_device(cap_h_c)       
+#if defined(OMPGPU)
+!$omp target exit data map(release:cap_h_c)
+#elif defined(_OPENACC)
+!$acc exit data delete(cap_h_c)
+#endif
      deallocate(cap_h_c)
   endif
   if(allocated(cap_h_ct))  then
-     ccl_del_device(cap_h_ct)       
+#if defined(OMPGPU)
+!$omp target exit data map(release:cap_h_ct)
+#elif defined(_OPENACC)
+!$acc exit data delete(cap_h_ct)
+#endif
      deallocate(cap_h_ct)
   endif
   if(allocated(cap_h_c_dot)) then
-     ccl_del_device(cap_h_c_dot)
+#if defined(OMPGPU)
+!$omp target exit data map(release:cap_h_c_dot)
+#elif defined(_OPENACC)
+!$acc exit data delete(cap_h_c_dot)
+#endif
      deallocate(cap_h_c_dot)
   endif
   if(allocated(cap_h_c_old)) then
-     ccl_del_device(cap_h_c_old)
+#if defined(OMPGPU)
+!$omp target exit data map(release:cap_h_c_old)
+#elif defined(_OPENACC)
+!$acc exit data delete(cap_h_c_old)
+#endif
      deallocate(cap_h_c_old)
   endif
   if(allocated(cap_h_c_old2)) then
-     ccl_del_device(cap_h_c_old2)
+#if defined(OMPGPU)
+!$omp target exit data map(release:cap_h_c_old2)
+#elif defined(_OPENACC)
+!$acc exit data delete(cap_h_c_old2)
+#endif
      deallocate(cap_h_c_old2)
   endif
   if(allocated(omega_cap_h)) then
-     ccl_del_device(omega_cap_h)        
+#if defined(OMPGPU)
+!$omp target exit data map(release:omega_cap_h)
+#elif defined(_OPENACC)
+!$acc exit data delete(omega_cap_h)
+#endif
      deallocate(omega_cap_h)
   endif
   if(allocated(omega_h)) then
-     ccl_del_device(omega_h)        
+#if defined(OMPGPU)
+!$omp target exit data map(release:omega_h)
+#elif defined(_OPENACC)
+!$acc exit data delete(omega_h)
+#endif
      deallocate(omega_h)
   endif
   if(allocated(omega_s)) then
-     ccl_del_device(omega_s)        
+#if defined(OMPGPU)
+!$omp target exit data map(release:omega_s)
+#elif defined(_OPENACC)
+!$acc exit data delete(omega_s)
+#endif
      deallocate(omega_s)
   endif
   if(allocated(omega_ss)) then
-     ccl_del_device(omega_ss)        
+#if defined(OMPGPU)
+!$omp target exit data map(release:omega_ss)
+#elif defined(_OPENACC)
+!$acc exit data delete(omega_ss)
+#endif
      deallocate(omega_ss)
   endif
   if(allocated(omega_sbeta)) then
-     ccl_del_device(omega_sbeta)        
+#if defined(OMPGPU)
+!$omp target exit data map(release:omega_sbeta)
+#elif defined(_OPENACC)
+!$acc exit data delete(omega_sbeta)
+#endif
      deallocate(omega_sbeta)
   endif
   if(allocated(jvec_c))  then
-     ccl_del_device(jvec_c)     
+#if defined(OMPGPU)
+!$omp target exit data map(release:jvec_c)
+#elif defined(_OPENACC)
+!$acc exit data delete(jvec_c)
+#endif
      deallocate(jvec_c)
   endif
   if(allocated(jvec_c_nl))  then
-     ccl_del_device(jvec_c_nl)
+#if defined(OMPGPU)
+!$omp target exit data map(release:jvec_c_nl)
+#elif defined(_OPENACC)
+!$acc exit data delete(jvec_c_nl)
+#endif
      deallocate(jvec_c_nl)
   endif
   if(allocated(jvec_v))              deallocate(jvec_v)
   if(allocated(dvjvec_c)) then
-     ccl_del_device(dvjvec_c)     
+#if defined(OMPGPU)
+!$omp target exit data map(release:dvjvec_c)
+#elif defined(_OPENACC)
+!$acc exit data delete(dvjvec_c)
+#endif
      deallocate(dvjvec_c)
   endif
   if(allocated(dvjvec_v)) then
-     ccl_del_device(dvjvec_v)     
+#if defined(OMPGPU)
+!$omp target exit data map(release:dvjvec_v)
+#elif defined(_OPENACC)
+!$acc exit data delete(dvjvec_v)
+#endif
      deallocate(dvjvec_v)
   endif
   if(allocated(jxvec_c))  then
      deallocate(jxvec_c)
   endif
   if(allocated(upfac1))   then
-     ccl_del_device(upfac1)
+#if defined(OMPGPU)
+!$omp target exit data map(release:upfac1)
+#elif defined(_OPENACC)
+!$acc exit data delete(upfac1)
+#endif
      deallocate(upfac1)
   endif
   if(allocated(upfac2))   then
-     ccl_del_device(upfac2)
+#if defined(OMPGPU)
+!$omp target exit data map(release:upfac2)
+#elif defined(_OPENACC)
+!$acc exit data delete(upfac2)
+#endif
      deallocate(upfac2)
   endif
   if(allocated(cap_h_v))  then
-     ccl_del_device(cap_h_v)     
+#if defined(OMPGPU)
+!$omp target exit data map(release:cap_h_v)
+#elif defined(_OPENACC)
+!$acc exit data delete(cap_h_v)
+#endif
      deallocate(cap_h_v)
   endif
   if(allocated(upwind_res_loc))   then
-     ccl_del_device(upwind_res_loc)
+#if defined(OMPGPU)
+!$omp target exit data map(release:upwind_res_loc)
+#elif defined(_OPENACC)
+!$acc exit data delete(upwind_res_loc)
+#endif
      deallocate(upwind_res_loc)
   endif
   if(allocated(upwind_res))   then
-     ccl_del_device(upwind_res)
+#if defined(OMPGPU)
+!$omp target exit data map(release:upwind_res)
+#elif defined(_OPENACC)
+!$acc exit data delete(upwind_res)
+#endif
      deallocate(upwind_res)
   endif
   if(allocated(upwind32_res_loc))   then
-     ccl_del_device(upwind32_res_loc)
+#if defined(OMPGPU)
+!$omp target exit data map(release:upwind32_res_loc)
+#elif defined(_OPENACC)
+!$acc exit data delete(upwind32_res_loc)
+#endif
      deallocate(upwind32_res_loc)
   endif
   if(allocated(upwind32_res))   then
-     ccl_del_device(upwind32_res)
+#if defined(OMPGPU)
+!$omp target exit data map(release:upwind32_res)
+#elif defined(_OPENACC)
+!$acc exit data delete(upwind32_res)
+#endif
      deallocate(upwind32_res)
   endif
   if(allocated(fA_nl))   then
-     ccl_del_device(fA_nl)
+#if defined(OMPGPU)
+!$omp target exit data map(release:fA_nl)
+#elif defined(_OPENACC)
+!$acc exit data delete(fA_nl)
+#endif
      deallocate(fA_nl)
   endif
   if(allocated(fB_nl))   then
-     ccl_del_device(fB_nl)
+#if defined(OMPGPU)
+!$omp target exit data map(release:fB_nl)
+#elif defined(_OPENACC)
+!$acc exit data delete(fB_nl)
+#endif
      deallocate(fB_nl)
   endif
   if(allocated(fA_nl32))   then
-     ccl_del_device(fA_nl32)
+#if defined(OMPGPU)
+!$omp target exit data map(release:fA_nl32)
+#elif defined(_OPENACC)
+!$acc exit data delete(fA_nl32)
+#endif
      deallocate(fA_nl32)
   endif
   if(allocated(fB_nl32))   then
-     ccl_del_device(fB_nl32)
+#if defined(OMPGPU)
+!$omp target exit data map(release:fB_nl32)
+#elif defined(_OPENACC)
+!$acc exit data delete(fB_nl32)
+#endif
      deallocate(fB_nl32)
   endif
   if(allocated(g_nl))   then
-     ccl_del_device(g_nl)
+#if defined(OMPGPU)
+!$omp target exit data map(release:g_nl)
+#elif defined(_OPENACC)
+!$acc exit data delete(g_nl)
+#endif
      deallocate(g_nl)
   endif
   if(allocated(g_nl32))   then
-     ccl_del_device(g_nl32)
+#if defined(OMPGPU)
+!$omp target exit data map(release:g_nl32)
+#elif defined(_OPENACC)
+!$acc exit data delete(g_nl32)
+#endif
      deallocate(g_nl32)
   endif
   if(allocated(fpackA))   then
-     ccl_del_device(fpackA)
+#if defined(OMPGPU)
+!$omp target exit data map(release:fpackA)
+#elif defined(_OPENACC)
+!$acc exit data delete(fpackA)
+#endif
      deallocate(fpackA)
   endif
   if(allocated(fpackB))   then
-     ccl_del_device(fpackB)
+#if defined(OMPGPU)
+!$omp target exit data map(release:fpackB)
+#elif defined(_OPENACC)
+!$acc exit data delete(fpackB)
+#endif
      deallocate(fpackB)
   endif
   if(allocated(fpackA32))   then
-     ccl_del_device(fpackA32)
+#if defined(OMPGPU)
+!$omp target exit data map(release:fpackA32)
+#elif defined(_OPENACC)
+!$acc exit data delete(fpackA32)
+#endif
      deallocate(fpackA32)
   endif
   if(allocated(fpackB32))   then
-     ccl_del_device(fpackB32)
+#if defined(OMPGPU)
+!$omp target exit data map(release:fpackB32)
+#elif defined(_OPENACC)
+!$acc exit data delete(fpackB32)
+#endif
      deallocate(fpackB32)
   endif
   if(allocated(gpack))   then
-     ccl_del_device(gpack)
+#if defined(OMPGPU)
+!$omp target exit data map(release:gpack)
+#elif defined(_OPENACC)
+!$acc exit data delete(gpack)
+#endif
      deallocate(gpack)
   endif
   if(allocated(gpack32))   then
-     ccl_del_device(gpack32)
+#if defined(OMPGPU)
+!$omp target exit data map(release:gpack32)
+#elif defined(_OPENACC)
+!$acc exit data delete(gpack32)
+#endif
      deallocate(gpack32)
   endif
   call deallocate_cmat
   call deallocate_cmat_fp32
   if (allocated(cmat_stripes)) then
-     ccl_del_bigdevice(cmat_stripes)
+#if defined(OMPGPU)
+!$omp target exit data map(release:cmat_stripes) if (gpu_bigmem_flag > 0)
+#elif defined(_OPENACC)
+!$acc exit data delete(cmat_stripes) if (gpu_bigmem_flag > 0)
+#endif
      deallocate(cmat_stripes)
   endif
     if (allocated(cmat_simple)) then
-     ccl_del_device(cmat_simple)     
+#if defined(OMPGPU)
+!$omp target exit data map(release:cmat_simple)
+#elif defined(_OPENACC)
+!$acc exit data delete(cmat_simple)
+#endif
      deallocate(cmat_simple)
   endif
 
@@ -333,75 +519,147 @@ subroutine cgyro_cleanup
 
 #ifdef CGYRO_GPU_FFT
   if(allocated(fxmany))    then
-     ccl_del_device(fxmany)     
+#if defined(OMPGPU)
+!$omp target exit data map(release:fxmany)
+#elif defined(_OPENACC)
+!$acc exit data delete(fxmany)
+#endif
      deallocate(fxmany)
   endif
   if(allocated(gxmany))    then
-     ccl_del_device(gxmany)     
+#if defined(OMPGPU)
+!$omp target exit data map(release:gxmany)
+#elif defined(_OPENACC)
+!$acc exit data delete(gxmany)
+#endif
      deallocate(gxmany)
   endif
   if(allocated(fymany))    then
-     ccl_del_device(fymany)     
+#if defined(OMPGPU)
+!$omp target exit data map(release:fymany)
+#elif defined(_OPENACC)
+!$acc exit data delete(fymany)
+#endif
      deallocate(fymany)
   endif
   if(allocated(gymany))    then
-     ccl_del_device(gymany)     
+#if defined(OMPGPU)
+!$omp target exit data map(release:gymany)
+#elif defined(_OPENACC)
+!$acc exit data delete(gymany)
+#endif
      deallocate(gymany)
   endif
   if(allocated(uxmany))    then
-      ccl_del_device(uxmany)    
+#if defined(OMPGPU)
+!$omp target exit data map(release:uxmany)
+#elif defined(_OPENACC)
+!$acc exit data delete(uxmany)
+#endif
      deallocate(uxmany)
   endif
   if(allocated(uymany))    then
-     ccl_del_device(uymany)     
+#if defined(OMPGPU)
+!$omp target exit data map(release:uymany)
+#elif defined(_OPENACC)
+!$acc exit data delete(uymany)
+#endif
      deallocate(uymany)
   endif
   if(allocated(vxmany))     then
-     ccl_del_device(vxmany)     
+#if defined(OMPGPU)
+!$omp target exit data map(release:vxmany)
+#elif defined(_OPENACC)
+!$acc exit data delete(vxmany)
+#endif
      deallocate(vxmany)
   endif
   if(allocated(vymany))     then
-     ccl_del_device(vymany)     
+#if defined(OMPGPU)
+!$omp target exit data map(release:vymany)
+#elif defined(_OPENACC)
+!$acc exit data delete(vymany)
+#endif
      deallocate(vymany)
   endif
   if(allocated(uvmany))     then
-     ccl_del_device(uvmany)     
+#if defined(OMPGPU)
+!$omp target exit data map(release:uvmany)
+#elif defined(_OPENACC)
+!$acc exit data delete(uvmany)
+#endif
      deallocate(uvmany)
   endif
   if(allocated(fxmany32))    then
-     ccl_del_device(fxmany32)     
+#if defined(OMPGPU)
+!$omp target exit data map(release:fxmany32)
+#elif defined(_OPENACC)
+!$acc exit data delete(fxmany32)
+#endif
      deallocate(fxmany32)
   endif
   if(allocated(gxmany32))    then
-     ccl_del_device(gxmany32)     
+#if defined(OMPGPU)
+!$omp target exit data map(release:gxmany32)
+#elif defined(_OPENACC)
+!$acc exit data delete(gxmany32)
+#endif
      deallocate(gxmany32)
   endif
   if(allocated(fymany32))    then
-     ccl_del_device(fymany32)     
+#if defined(OMPGPU)
+!$omp target exit data map(release:fymany32)
+#elif defined(_OPENACC)
+!$acc exit data delete(fymany32)
+#endif
      deallocate(fymany32)
   endif
   if(allocated(gymany32))    then
-     ccl_del_device(gymany32)     
+#if defined(OMPGPU)
+!$omp target exit data map(release:gymany32)
+#elif defined(_OPENACC)
+!$acc exit data delete(gymany32)
+#endif
      deallocate(gymany32)
   endif
   if(allocated(uxmany32))    then
-      ccl_del_device(uxmany32)    
+#if defined(OMPGPU)
+!$omp target exit data map(release:uxmany32)
+#elif defined(_OPENACC)
+!$acc exit data delete(uxmany32)
+#endif
      deallocate(uxmany32)
   endif
   if(allocated(uymany32))    then
-     ccl_del_device(uymany32)     
+#if defined(OMPGPU)
+!$omp target exit data map(release:uymany32)
+#elif defined(_OPENACC)
+!$acc exit data delete(uymany32)
+#endif
      deallocate(uymany32)
   endif
   if(allocated(vxmany32))     then
-     ccl_del_device(vxmany32)     
+#if defined(OMPGPU)
+!$omp target exit data map(release:vxmany32)
+#elif defined(_OPENACC)
+!$acc exit data delete(vxmany32)
+#endif
      deallocate(vxmany32)
   endif
   if(allocated(vymany32))     then
-     ccl_del_device(vymany32)     
+#if defined(OMPGPU)
+!$omp target exit data map(release:vymany32)
+#elif defined(_OPENACC)
+!$acc exit data delete(vymany32)
+#endif
      deallocate(vymany32)
   endif
   if(allocated(uvmany32))     then
-     ccl_del_device(uvmany32)     
+#if defined(OMPGPU)
+!$omp target exit data map(release:uvmany32)
+#elif defined(_OPENACC)
+!$acc exit data delete(uvmany32)
+#endif
      deallocate(uvmany32)
   endif
 #endif    
@@ -411,13 +669,25 @@ subroutine cgyro_cleanup
   !!!!!!!!!!!!!!!!!!!!!!!!!!
   
   if(allocated(px))  then
-     ccl_del_device(px)      
+#if defined(OMPGPU)
+!$omp target exit data map(release:px)
+#elif defined(_OPENACC)
+!$acc exit data delete(px)
+#endif
      deallocate(px)
   endif
   
-     ccl_del_device(z)
+#if defined(OMPGPU)
+!$omp target exit data map(release:z)
+#elif defined(_OPENACC)
+!$acc exit data delete(z)
+#endif
 
-     ccl_del_device(temp) 
+#if defined(OMPGPU)
+!$omp target exit data map(release:temp)
+#elif defined(_OPENACC)
+!$acc exit data delete(temp)
+#endif
   
   
   !!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -429,7 +699,11 @@ subroutine cgyro_cleanup
   if(allocated(cderiv))           deallocate(cderiv)
   if(allocated(uderiv))           deallocate(uderiv)
   if(allocated(c_wave)) then
-     ccl_del_device(c_wave)     
+#if defined(OMPGPU)
+!$omp target exit data map(release:c_wave)
+#elif defined(_OPENACC)
+!$acc exit data delete(c_wave)
+#endif
      deallocate(c_wave)
   endif
   if(allocated(hzf))              deallocate(hzf)
@@ -440,37 +714,65 @@ subroutine cgyro_cleanup
   !!!!!!!!!!!!!!!!!!!!!!!!!!
 
   if(allocated(ie_v)) then
-     ccl_del_device(ie_v)     
+#if defined(OMPGPU)
+!$omp target exit data map(release:ie_v)
+#elif defined(_OPENACC)
+!$acc exit data delete(ie_v)
+#endif
      deallocate(ie_v)
   endif
 
   if(allocated(ix_v)) then
-     ccl_del_device(ix_v)     
+#if defined(OMPGPU)
+!$omp target exit data map(release:ix_v)
+#elif defined(_OPENACC)
+!$acc exit data delete(ix_v)
+#endif
      deallocate(ix_v)
   endif
 
   if(allocated(is_v)) then
-     ccl_del_device(is_v)     
+#if defined(OMPGPU)
+!$omp target exit data map(release:is_v)
+#elif defined(_OPENACC)
+!$acc exit data delete(is_v)
+#endif
      deallocate(is_v)
   endif
 
   if(allocated(iv_v)) then
-     ccl_del_device(iv_v)     
+#if defined(OMPGPU)
+!$omp target exit data map(release:iv_v)
+#elif defined(_OPENACC)
+!$acc exit data delete(iv_v)
+#endif
      deallocate(iv_v)
   endif
 
     if(allocated(ir_c)) then
-     ccl_del_device(ir_c)     
+#if defined(OMPGPU)
+!$omp target exit data map(release:ir_c)
+#elif defined(_OPENACC)
+!$acc exit data delete(ir_c)
+#endif
      deallocate(ir_c)
   endif
 
   if(allocated(it_c)) then
-     ccl_del_device(it_c)     
+#if defined(OMPGPU)
+!$omp target exit data map(release:it_c)
+#elif defined(_OPENACC)
+!$acc exit data delete(it_c)
+#endif
      deallocate(it_c)
   endif
 
   if(allocated(ic_c)) then
-     ccl_del_device(ic_c)     
+#if defined(OMPGPU)
+!$omp target exit data map(release:ic_c)
+#elif defined(_OPENACC)
+!$acc exit data delete(ic_c)
+#endif
      deallocate(ic_c)
   endif
 
