@@ -776,8 +776,8 @@ subroutine cgyro_fft_z2d(plan, indata, outdata)
 #else
   integer(c_int), intent(inout) :: plan
 #endif
-  complex, dimension(:,:,:), intent(inout) :: indata
-  real, dimension(:,:,:), intent(inout)    :: outdata
+  complex, dimension(:,:,:), target, intent(inout) :: indata
+  real, dimension(:,:,:), target, intent(inout)    :: outdata
   !-----------------------------------
   integer :: rc
 
@@ -786,7 +786,13 @@ subroutine cgyro_fft_z2d(plan, indata, outdata)
 #if defined(MKLGPU)
 !$omp target data map(tofrom: indata, outdata)
 #else
+
+#if defined(OMPGPU_DEVICE_ADDR)
+!$omp target data use_device_addr(indata, outdata)
+#else
 !$omp target data use_device_ptr(indata, outdata)
+#endif
+
 #endif
 
 #else
@@ -847,8 +853,8 @@ subroutine cgyro_fft_c2r(plan, indata, outdata)
 #else
   integer(c_int), intent(inout) :: plan
 #endif
-  complex(KIND=REAL32), dimension(:,:,:), intent(inout) :: indata
-  real(KIND=REAL32), dimension(:,:,:), intent(inout)    :: outdata
+  complex(KIND=REAL32), dimension(:,:,:), target, intent(inout) :: indata
+  real(KIND=REAL32), dimension(:,:,:), target, intent(inout)    :: outdata
   !-----------------------------------
   integer :: rc
 
@@ -857,7 +863,13 @@ subroutine cgyro_fft_c2r(plan, indata, outdata)
 #if defined(MKLGPU)
 !$omp target data map(tofrom: indata, outdata)
 #else
+
+#if defined(OMPGPU_DEVICE_ADDR)
+!$omp target data use_device_addr(indata, outdata)
+#else
 !$omp target data use_device_ptr(indata, outdata)
+#endif
+
 #endif
 
 #else
@@ -917,8 +929,8 @@ subroutine cgyro_fft_d2z(plan, indata, outdata)
 #else
   integer(c_int), intent(inout) :: plan
 #endif
-  real, dimension(:,:,:), intent(inout)    :: indata
-  complex, dimension(:,:,:), intent(inout) :: outdata
+  real, dimension(:,:,:), target, intent(inout)    :: indata
+  complex, dimension(:,:,:), target, intent(inout) :: outdata
   !-----------------------------------
   integer :: rc
 
@@ -927,7 +939,13 @@ subroutine cgyro_fft_d2z(plan, indata, outdata)
 #if defined(MKLGPU)
 !$omp target data map(tofrom: indata, outdata)
 #else
+
+#if defined(OMPGPU_DEVICE_ADDR)
+!$omp target data use_device_addr(indata, outdata)
+#else
 !$omp target data use_device_ptr(indata, outdata)
+#endif
+
 #endif
 
 #else
@@ -988,8 +1006,8 @@ subroutine cgyro_fft_r2c(plan, indata, outdata)
 #else
   integer(c_int), intent(inout) :: plan
 #endif
-  real(KIND=REAL32), dimension(:,:,:), intent(inout)    :: indata
-  complex(KIND=REAL32), dimension(:,:,:), intent(inout) :: outdata
+  real(KIND=REAL32), dimension(:,:,:), target, intent(inout)    :: indata
+  complex(KIND=REAL32), dimension(:,:,:), target, intent(inout) :: outdata
   !-----------------------------------
   integer :: rc
 
@@ -998,7 +1016,13 @@ subroutine cgyro_fft_r2c(plan, indata, outdata)
 #if defined(MKLGPU)
 !$omp target data map(tofrom: indata, outdata)
 #else
+
+#if defined(OMPGPU_DEVICE_ADDR)
+!$omp target data use_device_addr(indata, outdata)
+#else
 !$omp target data use_device_ptr(indata, outdata)
+#endif
+
 #endif
 
 #else
