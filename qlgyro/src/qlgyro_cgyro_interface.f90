@@ -86,14 +86,11 @@ module qlgyro_cgyro_interface
   integer :: cgyro_shear_method_in = 2
   integer :: cgyro_n_global_in = 4
   real :: cgyro_nu_global_in = 15.0
-  integer :: cgyro_psym_flag_in = 0
   integer :: cgyro_global_flag_in = 0
   integer :: cgyro_theta_plot_in = 1
   integer :: cgyro_gpu_bigmem_flag_in = 1
   integer :: cgyro_upwind_single_flag_in = 0
   real :: cgyro_px0_in = 0.0
-  integer :: cgyro_stream_term_in = 0
-  real :: cgyro_stream_factor_in = 1.0
   integer :: cgyro_exch_flag_in = 0
   real :: cgyro_res_weight_power_in = 1.0
 
@@ -282,14 +279,11 @@ contains
     cgyro_shear_method_in = shear_method
     cgyro_n_global_in = n_global
     cgyro_nu_global_in = nu_global
-    cgyro_psym_flag_in = psym_flag
     cgyro_global_flag_in = global_flag
     cgyro_theta_plot_in = theta_plot
     cgyro_gpu_bigmem_flag_in = gpu_bigmem_flag
     cgyro_upwind_single_flag_in = upwind_single_flag
     cgyro_px0_in = px0
-    cgyro_stream_term_in = stream_term
-    cgyro_stream_factor_in = stream_factor
     cgyro_exch_flag_in = exch_flag
     cgyro_res_weight_power_in = res_weight_power
 
@@ -481,13 +475,10 @@ contains
     shear_method = cgyro_shear_method_in
     n_global = cgyro_n_global_in
     nu_global = cgyro_nu_global_in
-    psym_flag = cgyro_psym_flag_in
     global_flag = cgyro_global_flag_in
     theta_plot = cgyro_theta_plot_in
     gpu_bigmem_flag = cgyro_gpu_bigmem_flag_in
     px0 = cgyro_px0_in
-    stream_term = cgyro_stream_term_in
-    stream_factor = cgyro_stream_factor_in
     exch_flag = cgyro_exch_flag_in
     res_weight_power = cgyro_res_weight_power_in
 
@@ -651,12 +642,9 @@ contains
     write(1,20) 'SHEAR_METHOD',cgyro_shear_method_in
     write(1,20) 'N_GLOBAL',cgyro_n_global_in
     write(1,30) 'NU_GLOBAL',cgyro_nu_global_in
-    write(1,20) 'PSYM_FLAG',cgyro_psym_flag_in
     write(1,20) 'GLOBAL_FLAG',cgyro_global_flag_in
     write(1,20) 'THETA_PLOT', cgyro_theta_plot_in
     write(1,30) 'PX0',cgyro_px0_in
-    write(1,20) 'STREAM_TERM',cgyro_stream_term_in
-    write(1,30) 'STREAM_FACTOR',cgyro_stream_factor_in
     write(1,20) 'EXCH_FLAG',cgyro_exch_flag_in
     write(1,30) 'RES_WEIGHT_POWER',cgyro_res_weight_power_in
 
