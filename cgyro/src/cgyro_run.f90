@@ -17,6 +17,7 @@ subroutine cgyro_run(test_flag_in,var_in,n_species_out,flux_tave_out,tave_min_ou
 
   use mpi
   use cgyro_globals
+  use cgyro_flux_mod
   use timer_lib
 
   implicit none

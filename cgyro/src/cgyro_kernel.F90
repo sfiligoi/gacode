@@ -15,7 +15,8 @@ subroutine cgyro_kernel
   use timer_lib
   use mpi
   use cgyro_globals
-  use cgyro_field_mod
+  use cgyro_field_mod, only : field
+  use cgyro_flux_mod, only : cgyro_flux_tave_reset
   use cgyro_step
   use cgyro_io
   use cgyro_restart
@@ -32,11 +33,7 @@ subroutine cgyro_kernel
   n_time = nint(max_time/delta_t)
 
   ! Time-averaged fluxes for this time-stepping segment
-  tave_step  = 0
-  tave_min   = t_current
-  tave_max   = t_current
-  cflux_tave = 0.0
-  gflux_tave = (0.0,0.0)
+  call cgyro_flux_tave_reset(t_current)
   
   do i_time=1,n_time
 

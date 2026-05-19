@@ -382,18 +382,8 @@ module cgyro_globals
 
   !
   complex, dimension(:,:), allocatable :: epar
-  complex, dimension(:,:,:,:,:), allocatable :: moment_loc
-  complex, dimension(:,:,:,:,:), allocatable :: moment
-
-  ! Nonlinear fluxes (f=standard,c=central,g=global)
-  real, dimension(:,:,:,:), allocatable :: cflux_loc
-  real, dimension(:,:,:,:), allocatable :: cflux
-  complex, dimension(:,:,:,:,:), allocatable :: gflux_loc
-  complex, dimension(:,:,:,:,:), allocatable :: gflux
-  real, dimension(:,:), allocatable :: cflux_tave, gflux_tave
-  real :: tave_min, tave_max
-  integer :: tave_step
   integer :: nflux
+
   !
   ! Nonlinear plans
 #ifndef CGYRO_GPU_FFT

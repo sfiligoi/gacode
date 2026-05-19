@@ -21,6 +21,7 @@ subroutine cgyro_init_manager
   use cgyro_io
   use cgyro_nl
   use cgyro_field_mod
+  use cgyro_flux_mod
 
 #if defined(_OPENACC) || defined(OMPGPU)
 #define CGYRO_GPU_FFT
@@ -175,15 +176,8 @@ subroutine cgyro_init_manager
      call cgyro_field_c_init(n_field,nc,nt1,nt2)
      ! Note: cgyro_field_e_init called in cgyro_init_h
 
+     call cgyro_flux_init(n_radial,theta_plot,n_species,n_field,n_global,nt1,nt2)
      allocate(epar(nc,nt1:nt2))
-     allocate(    moment(n_radial,theta_plot,n_species,nt1:nt2,3))
-     allocate(moment_loc(n_radial,theta_plot,n_species,nt1:nt2,3))
-     allocate(    cflux(n_species,4,n_field,nt1:nt2))
-     allocate(cflux_loc(n_species,4,n_field,nt1:nt2))
-     allocate(    gflux(0:n_global,n_species,4,n_field,nt1:nt2))
-     allocate(gflux_loc(0:n_global,n_species,4,n_field,nt1:nt2))
-     allocate(cflux_tave(n_species,4))
-     allocate(gflux_tave(n_species,4))
 
      allocate(recv_status(MPI_STATUS_SIZE))
 

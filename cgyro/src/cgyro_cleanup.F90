@@ -4,6 +4,7 @@ subroutine cgyro_cleanup
   use cgyro_globals
   use parallel_lib
   use cgyro_field_mod
+  use cgyro_flux_mod
 
 #if defined(_OPENACC) || defined(OMPGPU)
 #define CGYRO_GPU_FFT
@@ -94,15 +95,8 @@ subroutine cgyro_cleanup
   call cgyro_field_e_cleanup
   call cgyro_field_v_cleanup
   call cgyro_field_c_cleanup
+  call cgyro_flux_cleanup
   if(allocated(epar))                deallocate(epar)
-  if(allocated(moment))              deallocate(moment)
-  if(allocated(moment_loc))          deallocate(moment_loc)
-  if(allocated(cflux))               deallocate(cflux)
-  if(allocated(cflux_loc))           deallocate(cflux_loc)
-  if(allocated(gflux))               deallocate(gflux)
-  if(allocated(gflux_loc))           deallocate(gflux_loc)
-  if(allocated(cflux_tave))          deallocate(cflux_tave)
-  if(allocated(gflux_tave))          deallocate(gflux_tave)
   if(allocated(recv_status))         deallocate(recv_status)
   if(allocated(source)) then
 #if defined(OMPGPU)
