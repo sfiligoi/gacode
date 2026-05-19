@@ -9,6 +9,8 @@ subroutine cgyro_write_timedata
 
   use mpi
   use cgyro_globals
+  use cgyro_field_mod
+  use cgyro_flux_mod
   use cgyro_step
 
   implicit none

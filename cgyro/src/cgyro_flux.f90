@@ -26,10 +26,85 @@
 !  gflux(ky,0)-cflux is the flux in the "negative-shear region"
 !---------------------------------------------------------------------------
 
+module cgyro_flux_mod
+
+  implicit none
+
+  complex, private, dimension(:,:,:,:,:), allocatable :: moment_loc
+  complex, dimension(:,:,:,:,:), allocatable :: moment
+
+  ! Nonlinear fluxes (f=standard,c=central,g=global)
+  real, private, dimension(:,:,:,:), allocatable :: cflux_loc
+  real, dimension(:,:,:,:), allocatable :: cflux
+  complex, private, dimension(:,:,:,:,:), allocatable :: gflux_loc
+  complex, dimension(:,:,:,:,:), allocatable :: gflux
+  real, dimension(:,:), allocatable :: cflux_tave, gflux_tave
+
+  real :: tave_min, tave_max
+  integer :: tave_step
+
+contains
+
+subroutine cgyro_flux_tave_reset(t_current)
+
+  implicit none
+
+  real, intent(in) :: t_current
+
+  tave_step  = 0
+  tave_min   = t_current
+  tave_max   = t_current
+  cflux_tave = 0.0
+  gflux_tave = (0.0,0.0)
+
+end subroutine cgyro_flux_tave_reset
+
+
+!-----------------------------------------------------------------
+! Initialization and cleanup, to be called once
+!-----------------------------------------------------------------
+
+subroutine cgyro_flux_init(n_radial,theta_plot,n_species,n_field,n_global,nt1,nt2)
+
+  implicit none
+
+  integer, intent(in) :: n_radial,theta_plot,n_species,n_field,n_global,nt1,nt2
+
+  allocate(    moment(n_radial,theta_plot,n_species,nt1:nt2,3))
+  allocate(moment_loc(n_radial,theta_plot,n_species,nt1:nt2,3))
+  allocate(    cflux(n_species,4,n_field,nt1:nt2))
+  allocate(cflux_loc(n_species,4,n_field,nt1:nt2))
+  allocate(    gflux(0:n_global,n_species,4,n_field,nt1:nt2))
+  allocate(gflux_loc(0:n_global,n_species,4,n_field,nt1:nt2))
+  allocate(cflux_tave(n_species,4))
+  allocate(gflux_tave(n_species,4))
+
+  call cgyro_flux_tave_reset(0.0)
+
+end subroutine cgyro_flux_init
+
+subroutine cgyro_flux_cleanup
+
+  implicit none
+
+  if(allocated(moment))              deallocate(moment)
+  if(allocated(moment_loc))          deallocate(moment_loc)
+  if(allocated(cflux))               deallocate(cflux)
+  if(allocated(cflux_loc))           deallocate(cflux_loc)
+  if(allocated(gflux))               deallocate(gflux)
+  if(allocated(gflux_loc))           deallocate(gflux_loc)
+  if(allocated(cflux_tave))          deallocate(cflux_tave)
+  if(allocated(gflux_tave))          deallocate(gflux_tave)
+
+end subroutine cgyro_flux_cleanup
+
+!-----------------------------------------------------------------
+
 subroutine cgyro_flux
 
   use mpi
   use cgyro_globals
+  use cgyro_field_mod
 
   implicit none
 
@@ -262,3 +337,6 @@ subroutine cgyro_flux
   enddo
      
 end subroutine cgyro_flux
+
+end module cgyro_flux_mod
+

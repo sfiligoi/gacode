@@ -3,6 +3,8 @@
 subroutine cgyro_cleanup
   use cgyro_globals
   use parallel_lib
+  use cgyro_field_mod
+  use cgyro_flux_mod
 
 #if defined(_OPENACC) || defined(OMPGPU)
 #define CGYRO_GPU_FFT
@@ -90,67 +92,11 @@ subroutine cgyro_cleanup
   if(allocated(omega_rot_star))      deallocate(omega_rot_star)
   if(allocated(gtime))               deallocate(gtime)
   if(allocated(freq))                deallocate(freq)
-  if(allocated(fcoef))  then
-#if defined(OMPGPU)
-!$omp target exit data map(release:fcoef)
-#elif defined(_OPENACC)
-!$acc exit data delete(fcoef)
-#endif
-     deallocate(fcoef)
-  endif
-  if(allocated(gcoef))  then
-#if defined(OMPGPU)
-!$omp target exit data map(release:gcoef)
-#elif defined(_OPENACC)
-!$acc exit data delete(gcoef)
-#endif
-     deallocate(gcoef)
-  endif
-  if(allocated(field_v))  then
-#if defined(OMPGPU)
-!$omp target exit data map(release:field_v)
-#elif defined(_OPENACC)
-!$acc exit data delete(field_v)
-#endif
-     deallocate(field_v)
-  endif
-  if(allocated(field_loc_v))  then
-#if defined(OMPGPU)
-!$omp target exit data map(release:field_loc_v)
-#elif defined(_OPENACC)
-!$acc exit data delete(field_loc_v)
-#endif
-     deallocate(field_loc_v)
-  endif
-  if(allocated(field))  then
-#if defined(OMPGPU)
-!$omp target exit data map(release:field)
-#elif defined(_OPENACC)
-!$acc exit data delete(field)
-#endif
-     deallocate(field)
-  endif
-  if(allocated(field_loc))  then
-#if defined(OMPGPU)
-!$omp target exit data map(release:field_loc)
-#elif defined(_OPENACC)
-!$acc exit data delete(field_loc)
-#endif
-     deallocate(field_loc)
-  endif
-  if(allocated(field_dot))           deallocate(field_dot)
-  if(allocated(field_old))           deallocate(field_old)
-  if(allocated(field_old2))          deallocate(field_old2)
-  if(allocated(field_old3))          deallocate(field_old3)
+  call cgyro_field_e_cleanup
+  call cgyro_field_v_cleanup
+  call cgyro_field_c_cleanup
+  call cgyro_flux_cleanup
   if(allocated(epar))                deallocate(epar)
-  if(allocated(moment))              deallocate(moment)
-  if(allocated(moment_loc))          deallocate(moment_loc)
-  if(allocated(cflux))               deallocate(cflux)
-  if(allocated(cflux_loc))           deallocate(cflux_loc)
-  if(allocated(gflux))               deallocate(gflux)
-  if(allocated(gflux_loc))           deallocate(gflux_loc)
-  if(allocated(cflux_tave))          deallocate(cflux_tave)
-  if(allocated(gflux_tave))          deallocate(gflux_tave)
   if(allocated(recv_status))         deallocate(recv_status)
   if(allocated(source)) then
 #if defined(OMPGPU)

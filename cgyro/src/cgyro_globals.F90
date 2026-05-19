@@ -379,31 +379,11 @@ module cgyro_globals
   real, dimension(:,:,:,:), allocatable :: dvjvec_v
   real, dimension(:,:,:,:), allocatable :: jxvec_c
   real, dimension(:,:,:), allocatable :: upfac1,upfac2
+
   !
-  ! Fields
-  real, dimension(:,:,:), allocatable :: fcoef
-  real, dimension(:,:,:), allocatable :: gcoef
-  complex, dimension(:,:,:), allocatable :: field
-  complex, dimension(:,:,:), allocatable :: field_dot
-  complex, dimension(:,:,:), allocatable :: field_loc
-  complex, dimension(:,:,:), allocatable :: field_old
-  complex, dimension(:,:,:), allocatable :: field_old2
-  complex, dimension(:,:,:), allocatable :: field_old3
   complex, dimension(:,:), allocatable :: epar
-  complex, dimension(:,:,:,:,:), allocatable :: moment_loc
-  complex, dimension(:,:,:,:,:), allocatable :: moment
-  complex, dimension(:,:,:,:), allocatable :: field_v
-  complex, dimension(:,:,:,:), allocatable :: field_loc_v
-  !
-  ! Nonlinear fluxes (f=standard,c=central,g=global)
-  real, dimension(:,:,:,:), allocatable :: cflux_loc
-  real, dimension(:,:,:,:), allocatable :: cflux
-  complex, dimension(:,:,:,:,:), allocatable :: gflux_loc
-  complex, dimension(:,:,:,:,:), allocatable :: gflux
-  real, dimension(:,:), allocatable :: cflux_tave, gflux_tave
-  real :: tave_min, tave_max
-  integer :: tave_step
   integer :: nflux
+
   !
   ! Nonlinear plans
 #ifndef CGYRO_GPU_FFT

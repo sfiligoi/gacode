@@ -20,6 +20,8 @@ subroutine cgyro_init_manager
 
   use cgyro_io
   use cgyro_nl
+  use cgyro_field_mod
+  use cgyro_flux_mod
 
 #if defined(_OPENACC) || defined(OMPGPU)
 #define CGYRO_GPU_FFT
@@ -171,36 +173,20 @@ subroutine cgyro_init_manager
      !----------------------------------------------------
 
      ! Global (undistributed) arrays
-     allocate(fcoef(n_field,nc,nt1:nt2))
-     if (n_field < 3) then
-        allocate(gcoef(n_field,nc,nt1:nt2))
-     else
-        allocate(gcoef(5,nc,nt1:nt2))
-     endif
-     allocate(field(n_field,nc,nt1:nt2))
-     allocate(field_dot(n_field,nc,nt1:nt2))
-     allocate(field_loc(n_field,nc,nt1:nt2))
-     allocate(field_old(n_field,nc,nt1:nt2))
-     allocate(field_old2(n_field,nc,nt1:nt2))
-     allocate(field_old3(n_field,nc,nt1:nt2))
+     call cgyro_field_c_init(n_field,nc,nt1,nt2)
+     ! Note: cgyro_field_e_init called in cgyro_init_h
+
+     call cgyro_flux_init(n_radial,theta_plot,n_species,n_field,n_global,nt1,nt2)
      allocate(epar(nc,nt1:nt2))
-     allocate(    moment(n_radial,theta_plot,n_species,nt1:nt2,3))
-     allocate(moment_loc(n_radial,theta_plot,n_species,nt1:nt2,3))
-     allocate(    cflux(n_species,4,n_field,nt1:nt2))
-     allocate(cflux_loc(n_species,4,n_field,nt1:nt2))
-     allocate(    gflux(0:n_global,n_species,4,n_field,nt1:nt2))
-     allocate(gflux_loc(0:n_global,n_species,4,n_field,nt1:nt2))
-     allocate(cflux_tave(n_species,4))
-     allocate(gflux_tave(n_species,4))
 
      allocate(recv_status(MPI_STATUS_SIZE))
 
      allocate(source(n_theta,nv_loc,nt1:nt2))
 
 #if defined(OMPGPU)
-!$omp target enter data map(alloc:fcoef,gcoef,field,field_loc,source)
+!$omp target enter data map(alloc:source)
 #elif defined(_OPENACC)
-!$acc enter data create(fcoef,gcoef,field,field_loc,source)
+!$acc enter data create(source)
 #endif
 
      if ((collision_model /= 5) .AND. (collision_field_model == 1)) then
@@ -211,14 +197,12 @@ subroutine cgyro_init_manager
        ! and this drastically similifies the code
        ! But could be improved in the future
        allocate(jvec_v(n_field,nc_loc_coll,nt1:nt2,nv,n_sim))
-       ! nc and nc_loc_coll must be last, since it will be collated     
-       allocate(field_v(n_field,nt1:nt2,n_sim,nc))
-       allocate(field_loc_v(n_field,nt1:nt2,n_sim,nc_cl1:nc_cl2))
 #if defined(OMPGPU)
-!$omp target enter data map(alloc:field_v,field_loc_v,dvjvec_v)
+!$omp target enter data map(alloc:dvjvec_v)
 #elif defined(_OPENACC)
-!$acc enter data create(field_v,field_loc_v,dvjvec_v)
+!$acc enter data create(dvjvec_v)
 #endif
+       call cgyro_field_v_init(n_field,nc,nt1,nt2,n_sim,nc_cl1,nc_cl2)
      endif
 
      ! Velocity-distributed arrays

@@ -2,6 +2,7 @@ subroutine cgyro_init_h
 
   use mpi
   use cgyro_globals
+  use cgyro_field_mod
   use cgyro_io
   use cgyro_restart
 
@@ -182,8 +183,6 @@ subroutine cgyro_init_h
   call cgyro_field_c_cpu(.TRUE.)
 
   ! Initialize time-history of fields (-3,-2,-1) to initial field.
-  field_old  = field
-  field_old2 = field
-  field_old3 = field
+  call cgyro_field_e_init(n_field,nc,nt1,nt2)
 
 end subroutine cgyro_init_h
