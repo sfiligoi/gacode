@@ -11,6 +11,8 @@ subroutine qlgyro_cgyro_cleanup
   use parallel_lib
   use timer_lib
   use cgyro_globals
+  use cgyro_field_mod, only : field
+  use cgyro_flux_mod, only : gflux
   use qlgyro_cgyro_interface
   use qlgyro_globals
 
