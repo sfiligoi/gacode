@@ -406,7 +406,7 @@ subroutine cgyro_field_c_cpu(update_cap)
 
    ! Poisson LHS factors
    if (itor == 0 .and. ae_flag == 1) then
-    call cgyro_field_ae('c')
+    call cgyro_field_ae_c
    else
      if (n_field > 2) then
         tmp(:) = field(1,:,itor)
@@ -487,7 +487,7 @@ subroutine cgyro_field_c_ae_cpu
    endif
 
    ! Poisson LHS factors
-   call cgyro_field_ae('c')
+   call cgyro_field_ae_c
   enddo
 
 !$omp parallel do collapse(2) private(iv_loc,is,ic,my_psi)
@@ -585,7 +585,7 @@ subroutine cgyro_field_c_gpu(update_cap)
 #elif defined(_OPENACC)
 !$acc update host(field)
 #endif
-    call cgyro_field_ae('c')
+    call cgyro_field_ae_c
 #if defined(OMPGPU)
 !$omp target update to(field)
 #elif defined(_OPENACC)
@@ -732,7 +732,7 @@ subroutine cgyro_field_c_ae_gpu
 #elif defined(_OPENACC)
 !$acc update host(field(:,:,0:0))
 #endif
-    call cgyro_field_ae('c')
+    call cgyro_field_ae_c
 #if defined(OMPGPU)
 !$omp target update to(field(:,:,0:0))
 #elif defined(_OPENACC)
@@ -794,19 +794,17 @@ end subroutine cgyro_field_c_ae
 ! Adiabatic electron field solves for n=0
 ! Can only be called if itor==0
 !-----------------------------------------------------------------
-subroutine cgyro_field_ae(space)
+subroutine cgyro_field_ae_c
 
   use cgyro_globals
   use timer_lib  
 
   implicit none
 
-  character(len=1), intent(in) :: space
   integer :: ir,i,j
   complex, dimension(n_theta) :: pvec_in,pvec_out
 
-  if (space == 'c') then
-     do ir=1,n_radial
+  do ir=1,n_radial
         if ((px(ir) == 0 .or. ir == 1) .and. zf_test_mode == 0) then
            field(1,ic_c(ir,:),0) = 0.0
         else
@@ -823,29 +821,9 @@ subroutine cgyro_field_ae(space)
               field(1,ic_c(ir,i),0) = pvec_out(i)
            enddo
         endif
-     enddo
-  else
-     do ir=1,n_radial
-        if ((px(ir) == 0 .or. ir == 1) .and. zf_test_mode == 0) then
-           field(1,ic_c(ir,:),0) = 0.0
-        else
-           do i=1,n_theta
-              pvec_out(i) = 0.0
-              pvec_in(i)  =  field(1,ic_c(ir,i),0)
-           enddo
-           do j=1,n_theta
-              do i=1,n_theta
-                 pvec_out(i) = pvec_out(i)+hzf(ir,i,j)*pvec_in(j)
-              enddo
-           enddo
-           do i=1,n_theta
-              field(1,ic_c(ir,i),0) = pvec_out(i)
-           enddo
-        endif
-     enddo
-  endif
+  enddo
 
-end subroutine cgyro_field_ae
+end subroutine cgyro_field_ae_c
 
 
 ! compute filed error and save the old values for next round
