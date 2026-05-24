@@ -2,7 +2,7 @@ subroutine cgyro_init_h
 
   use mpi
   use cgyro_globals
-  use cgyro_field_mod
+  use cgyro_field_mod, only : cgyro_field_c_cpu, cgyro_field_e_init
   use cgyro_io
   use cgyro_restart
 

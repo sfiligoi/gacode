@@ -2,9 +2,11 @@
 
 subroutine cgyro_cleanup
   use cgyro_globals
-  use cgyro_coll_data
+  use cgyro_coll_data, only : cmat_simple, cmat_stripes, deallocate_cmat, &
+       deallocate_cmat_fp32
   use parallel_lib
-  use cgyro_field_mod
+  use cgyro_field_mod, only : cgyro_field_c_cleanup, cgyro_field_e_cleanup, &
+       cgyro_field_v_cleanup
   use cgyro_flux_mod
 
 #if defined(_OPENACC) || defined(OMPGPU)

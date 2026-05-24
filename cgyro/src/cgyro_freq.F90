@@ -12,7 +12,7 @@ subroutine cgyro_freq
 
   use cgyro_globals
   use cgyro_io
-  use cgyro_field_mod
+  use cgyro_field_mod, only : cgyro_field_e_get_diff1
 
   implicit none
 

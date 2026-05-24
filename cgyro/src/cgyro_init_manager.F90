@@ -16,12 +16,13 @@ subroutine cgyro_init_manager
   use mpi
   use timer_lib
   use cgyro_globals
-  use cgyro_coll_data
+  use cgyro_coll_data, only : allocate_cmat, allocate_cmat_fp32, cmat_e1, &
+       cmat_simple, cmat_stripes, n_low_energy
   use half_hermite
 
   use cgyro_io
   use cgyro_nl
-  use cgyro_field_mod
+  use cgyro_field_mod, only : cgyro_field_c_init, cgyro_field_v_init
   use cgyro_flux_mod
 
 #if defined(_OPENACC) || defined(OMPGPU)
@@ -549,4 +550,3 @@ subroutine cgyro_init_manager
   call timer_lib_out('nl_init')
 
 end subroutine cgyro_init_manager
-

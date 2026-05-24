@@ -3,7 +3,7 @@ subroutine cgyro_init_collision_simple
   use timer_lib
 
   use cgyro_globals
-  use cgyro_coll_data
+  use cgyro_coll_data, only : cmat_simple
 
   implicit none
 

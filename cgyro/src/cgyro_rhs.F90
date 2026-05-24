@@ -57,7 +57,7 @@ subroutine cgyro_rhs_comp1(ij,update_cap)
 
   use timer_lib
   use cgyro_globals
-  use cgyro_field_mod
+  use cgyro_field_mod, only : field
 
   implicit none
 
@@ -140,7 +140,7 @@ subroutine cgyro_rhs_comp2(ij)
 
   use timer_lib
   use cgyro_globals
-  use cgyro_field_mod
+  use cgyro_field_mod, only : field
 
   implicit none
 
@@ -429,4 +429,3 @@ subroutine cgyro_rhs(ij,update_cap)
   call cgyro_rhs_r_comm_async(ij)
 
 end subroutine cgyro_rhs
-
