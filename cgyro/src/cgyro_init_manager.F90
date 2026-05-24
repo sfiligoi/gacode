@@ -16,11 +16,12 @@ subroutine cgyro_init_manager
   use mpi
   use timer_lib
   use cgyro_globals
+  use cgyro_coll_data, only : cgyro_coll_data_init
   use half_hermite
 
   use cgyro_io
   use cgyro_nl
-  use cgyro_field_mod
+  use cgyro_field_mod, only : cgyro_field_c_init, cgyro_field_v_init
   use cgyro_flux_mod
 
 #if defined(_OPENACC) || defined(OMPGPU)
@@ -88,9 +89,6 @@ subroutine cgyro_init_manager
           alpha_poly) ! only write results on i_proc zero.
   endif
   
-  ! Default value for collision data compression
-  n_low_energy = 0
-
   vel(:) = sqrt(energy(:))
   vel2(:) = sqrt(2.0*energy(:))
 
@@ -347,41 +345,8 @@ subroutine cgyro_init_manager
         endif
      endif
 
-     if (collision_model == 5) then
-        if (nc_loc_coll/=nc_loc) then
-           call cgyro_error("CMAT sharing not supported for COLLISION_MODEL 5")
-           return
-        endif
-        allocate(cmat_simple(n_xi,n_xi,n_energy,n_species,n_theta,nt1:nt2))
-     else
-        if (collision_precision_mode == 1) then
-           if (collision_model>=6) then
-             call cgyro_error("COLLISION_PRECISION_MODE 1 not supported for COLLISION_MODEL >=6")
-             return
-           endif
-           ! the lowest energy(s) has the most spread, so treat differently
-           n_low_energy = 1
-           do ie=2,n_energy
-             if (energy(ie)<1.0e-2) then
-               n_low_energy = ie
-             endif
-           enddo
-           call allocate_cmat_fp32(nv,nc_loc_coll,nt1,nt2)
-           allocate(cmat_stripes(n_xi,n_species,(n_low_energy+1):n_energy,n_xi,nc_loc_coll,nt1:nt2))
-           allocate(cmat_e1(n_xi,n_species,n_low_energy,nv,nc_loc_coll,nt1:nt2))
-
-           write (msg, "(A,I1,A)") "Using fp32 collision precision except e<=",n_low_energy," or same e&s."
-           call cgyro_info(msg)
-        else if (collision_precision_mode == 32) then
-           if (collision_model>=6) then
-             call cgyro_error("COLLISION_PRECISION_MODE 32 not supported for COLLISION_MODEL >=6")
-             return
-           endif
-           call allocate_cmat_fp32(nv,nc_loc_coll,nt1,nt2)
-        else
-           call allocate_cmat(nv,nc_loc_coll,nt1,nt2)
-        endif
-     endif
+     call cgyro_coll_data_init
+     if (error_status > 0) return
 
   endif
 
@@ -548,4 +513,3 @@ subroutine cgyro_init_manager
   call timer_lib_out('nl_init')
 
 end subroutine cgyro_init_manager
-

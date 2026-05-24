@@ -12,7 +12,7 @@ subroutine cgyro_error_estimate
   use mpi
   use cgyro_globals
   use cgyro_io
-  use cgyro_field_mod
+  use cgyro_field_mod, only : cgyro_field_e_compute, field, field_dot
   use timer_lib
 
   implicit none

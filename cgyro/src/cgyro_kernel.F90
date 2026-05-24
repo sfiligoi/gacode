@@ -18,6 +18,7 @@ subroutine cgyro_kernel
   use cgyro_field_mod, only : field
   use cgyro_flux_mod, only : cgyro_flux_tave_reset
   use cgyro_step
+  use cgyro_step_collision_mod, only : cgyro_step_collision
   use cgyro_io
   use cgyro_restart
 
@@ -70,11 +71,7 @@ subroutine cgyro_kernel
      endif
 
      ! Collision step: returns new h_x, cap_h_x, fields
-     if (collision_model == 5) then
-        call cgyro_step_collision_simple
-     else
-        call cgyro_step_collision
-     endif
+     call cgyro_step_collision
 
      if (shear_method == 1) then
         ! Discrete shift (Hammett) 

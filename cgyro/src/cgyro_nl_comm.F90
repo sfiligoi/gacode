@@ -603,7 +603,7 @@ subroutine cgyro_nl_fftw_comm2_f64_async
   use timer_lib
   use parallel_lib
   use cgyro_globals
-  use cgyro_field_mod
+  use cgyro_field_mod, only : field
 
   implicit none
 
@@ -664,7 +664,7 @@ subroutine cgyro_nl_fftw_comm2_f32_async
   use timer_lib
   use parallel_lib
   use cgyro_globals
-  use cgyro_field_mod
+  use cgyro_field_mod, only : field
 
   implicit none
 
@@ -736,4 +736,3 @@ subroutine cgyro_nl_fftw_comm2_async
 end subroutine cgyro_nl_fftw_comm2_async
 
 end module cgyro_nl_comm
-

@@ -104,7 +104,7 @@ subroutine cgyro_flux
 
   use mpi
   use cgyro_globals
-  use cgyro_field_mod
+  use cgyro_field_mod, only : field, field_dot
 
   implicit none
 
@@ -339,4 +339,3 @@ subroutine cgyro_flux
 end subroutine cgyro_flux
 
 end module cgyro_flux_mod
-

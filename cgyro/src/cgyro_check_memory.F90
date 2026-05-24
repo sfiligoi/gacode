@@ -1,6 +1,7 @@
 subroutine cgyro_check_memory(datafile)
 
   use cgyro_globals
+  use cgyro_coll_data, only: n_low_energy
 
   implicit none
 

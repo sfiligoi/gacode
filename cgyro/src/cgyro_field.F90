@@ -145,15 +145,17 @@ end subroutine cgyro_field_v_cleanup
 ! like cgyro_field_v_notae, but with parametrized start_t
 subroutine cgyro_field_v_notae_s(start_t)
 
-  use parallel_lib
-  use timer_lib
-  use cgyro_globals
+  use parallel_lib, only : fsendf, parallel_lib_collect_field, &
+       parallel_lib_nj_loc
+  use timer_lib, only : timer_lib_in, timer_lib_out
+  use cgyro_globals, only : dvjvec_v, i_sim, nc, nc_cl1, nc_cl2, &
+       n_sim, nt2, nv, nv_loc
 
   implicit none
   ! ------------------ 
   integer, intent(in) :: start_t
   !
-  integer :: itor,j,k,nj_loc,ism
+  integer :: ic,ic_loc,iv,itor,j,k,nj_loc,ism
   integer :: vcount
 
   call timer_lib_in('field')
@@ -209,9 +211,7 @@ end subroutine cgyro_field_v_notae_s
 ! like cgyro_field_v, but skip (itor == 0 .and. ae_flag == 1)
 subroutine cgyro_field_v_notae
 
-  use parallel_lib
-  use timer_lib
-  use cgyro_globals
+  use cgyro_globals, only : ae_flag, nt1, nt2
 
   implicit none
 
@@ -234,15 +234,17 @@ end subroutine cgyro_field_v_notae
 ! Note: Not supporting the ae-version of cgyro_field_v_gpu
 
 subroutine cgyro_field_v_notae_s_gpu(start_t)
-  use parallel_lib
-  use timer_lib
-  use cgyro_globals
+  use parallel_lib, only : fsendf, parallel_lib_collect_field_gpu, &
+       parallel_lib_nj_loc
+  use timer_lib, only : timer_lib_in, timer_lib_out
+  use cgyro_globals, only : dvjvec_v, i_sim, nc, nc_cl1, nc_cl2, &
+       n_field, n_sim, nt2, nv, nv_loc
 
   implicit none
   ! ------------------ 
   integer, intent(in) :: start_t
   !
-  integer :: i_f,itor,j,k,nj_loc,ism
+  integer :: ic,ic_loc,iv,i_f,itor,j,k,nj_loc,ism
   integer :: vcount
   complex :: field_loc_l 
 
@@ -333,9 +335,7 @@ end subroutine cgyro_field_v_notae_s_gpu
 ! like cgyro_field_v, but skip (itor == 0 .and. ae_flag == 1)
 subroutine cgyro_field_v_notae_gpu
 
-  use parallel_lib
-  use timer_lib
-  use cgyro_globals
+  use cgyro_globals, only : ae_flag, nt1, nt2
 
   implicit none
 
@@ -356,15 +356,16 @@ end subroutine cgyro_field_v_notae_gpu
 !-----------------------------------------------------------------
 subroutine cgyro_field_c_cpu(update_cap)
 
-  use parallel_lib
-  use timer_lib
-  use cgyro_globals
+  use parallel_lib, only : parallel_flib_sum_field
+  use timer_lib, only : timer_lib_in, timer_lib_out
+  use cgyro_globals, only : ae_flag, cap_h_c, dvjvec_c, h_x, is_v, &
+       jvec_c, nc, n_field, nt1, nt2, nv1, nv2, temp, z
 
   implicit none
 
   logical, intent(in) :: update_cap
 
-  integer :: is,itor
+  integer :: ic,is,iv,iv_loc,itor
   complex :: my_psi
   
   complex, dimension(nc) :: tmp
@@ -442,13 +443,14 @@ end subroutine cgyro_field_c_cpu
 ! like cgyro_field_c, but assume (my_toroidal == 0 .and. ae_flag == 1)
 subroutine cgyro_field_c_ae_cpu
 
-  use parallel_lib
-  use timer_lib
-  use cgyro_globals
+  use parallel_lib, only : parallel_flib_sum_field
+  use timer_lib, only : timer_lib_in, timer_lib_out
+  use cgyro_globals, only : cap_h_c, dvjvec_c, h_x, is_v, jvec_c, &
+       nc, n_field, nv1, nv2, temp, z
 
   implicit none
 
-  integer :: is,itor
+  integer :: ic,is,iv,iv_loc,itor
   complex :: my_psi
   
   call timer_lib_in('field')
@@ -508,14 +510,15 @@ end subroutine cgyro_field_c_ae_cpu
 
 #if defined(OMPGPU) || defined(_OPENACC)
 subroutine cgyro_field_c_gpu(update_cap)
-  use parallel_lib
-  use timer_lib
-  use cgyro_globals
+  use parallel_lib, only : parallel_flib_sum_field_gpu
+  use timer_lib, only : timer_lib_in, timer_lib_out
+  use cgyro_globals, only : ae_flag, cap_h_c, dvjvec_c, h_x, is_v, &
+       jvec_c, nc, n_field, nt1, nt2, nv1, nv2, temp, z
   implicit none
 
   logical, intent(in) :: update_cap
 
-  integer :: is,i_f,itor
+  integer :: ic,is,iv,iv_loc,i_f,itor
   integer :: itor1,itor2
   complex :: tmp,field_loc_l
   complex :: my_psi
@@ -664,11 +667,12 @@ end subroutine cgyro_field_c_gpu
 
 ! like cgyro_field_c, but assume (my_toroidal == 0 .and. ae_flag == 1)
 subroutine cgyro_field_c_ae_gpu
-  use parallel_lib
-  use timer_lib
-  use cgyro_globals
+  use parallel_lib, only : parallel_flib_sum_field_gpu
+  use timer_lib, only : timer_lib_in, timer_lib_out
+  use cgyro_globals, only : cap_h_c, dvjvec_c, h_x, is_v, jvec_c, &
+       nc, n_field, nv1, nv2, temp, z
   implicit none
-  integer :: is,i_f,itor
+  integer :: ic,is,iv,iv_loc,i_f,itor
   complex :: tmp,field_loc_l
   complex :: my_psi
 
@@ -796,8 +800,8 @@ end subroutine cgyro_field_c_ae
 !-----------------------------------------------------------------
 subroutine cgyro_field_ae_c
 
-  use cgyro_globals
-  use timer_lib  
+  use cgyro_globals, only : ic_c, n_radial, n_theta, px, xzf, &
+       zf_test_mode
 
   implicit none
 
@@ -829,7 +833,7 @@ end subroutine cgyro_field_ae_c
 ! compute filed error and save the old values for next round
 subroutine cgyro_field_e_compute(delta_t, norm_loc_s,error_loc_s)
 
-  use timer_lib
+  use timer_lib, only : timer_lib_in, timer_lib_out
   use cgyro_globals, only : nt1, nt2, nc, n_field
 
   implicit none
@@ -889,12 +893,18 @@ end subroutine cgyro_field_e_get_diff1
 
 subroutine cgyro_field_coefficients
 
-  use mpi
-  use cgyro_globals
+  use mpi, only : MPI_ALLREDUCE, MPI_DOUBLE_PRECISION, MPI_SUM
+  use cgyro_globals, only : ae_flag, betae_unit, collision_field_model, &
+       collision_model, dens2_rot, dens_ele, dens_ele_rot, dens_rot, &
+       dvjvec_c, dvjvec_v, i_err, ie_v, ir_c, is_v, it_c, ix_v, &
+       jvec_c, jvec_v, k_perp, lambda_debye, nc, nc_cl1, nc_cl2, &
+       NEW_COMM_1, n_field, nt1, nt2, nv, nv1, nv2, px, rho, &
+       sum_cur_x, sum_den_h, sum_den_x, temp, temp_ele, vfac, w_exi, &
+       z, zf_test_mode
 
   implicit none
 
-  integer :: ir,it,is,ie,ix,itor
+  integer :: ic,ic_loc,ir,it,is,ie,ix,iv,iv_loc,itor
   real :: sum_one
   real, dimension(:,:), allocatable :: sum_loc
   real, dimension(:,:), allocatable :: pb11,pb12,pb21,pb22
@@ -1155,4 +1165,3 @@ subroutine cgyro_field_coefficients
 end subroutine cgyro_field_coefficients
 
 end module cgyro_field_mod
-
