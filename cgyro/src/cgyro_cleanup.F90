@@ -2,6 +2,7 @@
 
 subroutine cgyro_cleanup
   use cgyro_globals
+  use cgyro_coll_data
   use parallel_lib
   use cgyro_field_mod
   use cgyro_flux_mod

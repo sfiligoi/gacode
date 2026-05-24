@@ -3,6 +3,7 @@ subroutine cgyro_init_collision
   use timer_lib
 
   use cgyro_globals
+  use cgyro_coll_data
   use mpi
   use cgyro_io
   use cgyro_init_collision_landau

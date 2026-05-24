@@ -16,6 +16,7 @@ subroutine cgyro_init_manager
   use mpi
   use timer_lib
   use cgyro_globals
+  use cgyro_coll_data
   use half_hermite
 
   use cgyro_io

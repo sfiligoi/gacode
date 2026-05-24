@@ -16,6 +16,7 @@ subroutine cgyro_calc_collision_cpu_fp32(nj_loc)
 
   use parallel_lib
   use cgyro_globals
+  use cgyro_coll_data
 
   ! --------------------------------------------------
   implicit none
@@ -71,6 +72,7 @@ subroutine cgyro_calc_collision_cpu_fp64(nj_loc)
 
   use parallel_lib
   use cgyro_globals
+  use cgyro_coll_data
 
   ! --------------------------------------------------
   implicit none
@@ -127,6 +129,7 @@ subroutine cgyro_calc_collision_cpu_m1(nj_loc)
 
   use parallel_lib
   use cgyro_globals
+  use cgyro_coll_data
 
   ! --------------------------------------------------
   implicit none
@@ -196,6 +199,7 @@ end subroutine cgyro_calc_collision_cpu_m1
 subroutine cgyro_calc_collision_cpu(nj_loc)
 
   use cgyro_globals
+  use cgyro_coll_data
 
   ! --------------------------------------------------
   implicit none
@@ -219,6 +223,7 @@ subroutine cgyro_calc_collision_simple_cpu(nj_loc)
 
   use parallel_lib
   use cgyro_globals
+  use cgyro_coll_data
 
   ! --------------------------------------------------
   implicit none
@@ -303,6 +308,7 @@ subroutine cgyro_step_collision_cpu(use_simple)
   use timer_lib
 
   use cgyro_globals
+  use cgyro_coll_data
   use cgyro_field_mod
 
   ! --------------------------------------------------
@@ -380,6 +386,7 @@ subroutine cgyro_calc_collision_gpu_fp32(nj_loc,cmat_gpu)
 
   use parallel_lib
   use cgyro_globals
+  use cgyro_coll_data
 
   ! --------------------------------------------------
   implicit none
@@ -445,6 +452,7 @@ subroutine cgyro_calc_collision_gpu_fp64(nj_loc,cmat_gpu)
 
   use parallel_lib
   use cgyro_globals
+  use cgyro_coll_data
 
   ! --------------------------------------------------
   implicit none
@@ -510,6 +518,7 @@ subroutine cgyro_calc_collision_gpu_m1(nj_loc)
 
   use parallel_lib
   use cgyro_globals
+  use cgyro_coll_data
 
   ! --------------------------------------------------
   implicit none
@@ -586,6 +595,7 @@ end subroutine cgyro_calc_collision_gpu_m1
 subroutine cgyro_calc_collision_gpu(nj_loc)
 
   use cgyro_globals
+  use cgyro_coll_data
 
   ! --------------------------------------------------
   implicit none
@@ -608,6 +618,7 @@ subroutine cgyro_calc_collision_simple_gpu(nj_loc)
   use parallel_lib
 
   use cgyro_globals
+  use cgyro_coll_data
 
   ! --------------------------------------------------
   implicit none
@@ -705,6 +716,7 @@ subroutine cgyro_step_collision_gpu(use_simple)
   use timer_lib
 
   use cgyro_globals
+  use cgyro_coll_data
   use cgyro_field_mod
 
   ! --------------------------------------------------
@@ -816,6 +828,7 @@ subroutine cgyro_step_collision
 
   use timer_lib
   use cgyro_globals
+  use cgyro_coll_data
   use cgyro_field_mod
 
   implicit none
@@ -838,6 +851,7 @@ subroutine cgyro_step_collision_simple
 
   use timer_lib
   use cgyro_globals
+  use cgyro_coll_data
   use cgyro_field_mod
 
   implicit none
