@@ -14,8 +14,9 @@
 
 subroutine cgyro_calc_collision_cpu_fp32(nj_loc)
 
-  use parallel_lib
-  use cgyro_globals
+  use parallel_lib, only : fsendf
+  use cgyro_globals, only : cap_h_v, nc_cl1, nc_cl2, n_sim, nt1, nt2, &
+       nv, nv_loc
   use cgyro_coll_data, only : cmat_fp32
 
   ! --------------------------------------------------
@@ -23,7 +24,7 @@ subroutine cgyro_calc_collision_cpu_fp32(nj_loc)
   !
   integer, intent(in) :: nj_loc
   !
-  integer :: ivp,j,k,itor,ism
+  integer :: ic,ic_loc,iv,ivp,j,k,itor,ism
   integer :: vcount
   complex, dimension(nv) :: bvec,cvec
   real :: cvec_re,cvec_im
@@ -70,8 +71,9 @@ end subroutine cgyro_calc_collision_cpu_fp32
 
 subroutine cgyro_calc_collision_cpu_fp64(nj_loc)
 
-  use parallel_lib
-  use cgyro_globals
+  use parallel_lib, only : fsendf
+  use cgyro_globals, only : cap_h_v, nc_cl1, nc_cl2, n_sim, nt1, nt2, &
+       nv, nv_loc
   use cgyro_coll_data, only : cmat
 
   ! --------------------------------------------------
@@ -79,7 +81,7 @@ subroutine cgyro_calc_collision_cpu_fp64(nj_loc)
   !
   integer, intent(in) :: nj_loc
   !
-  integer :: ivp,j,k,itor,ism
+  integer :: ic,ic_loc,iv,ivp,j,k,itor,ism
   integer :: vcount
   complex, dimension(nv) :: bvec,cvec
   real :: cvec_re,cvec_im
@@ -127,8 +129,9 @@ end subroutine cgyro_calc_collision_cpu_fp64
 
 subroutine cgyro_calc_collision_cpu_m1(nj_loc)
 
-  use parallel_lib
-  use cgyro_globals
+  use parallel_lib, only : fsendf
+  use cgyro_globals, only : cap_h_v, ie_v, is_v, ix_v, nc_cl1, nc_cl2, &
+       n_sim, nt1, nt2, nv, nv_loc
   use cgyro_coll_data, only : cmat_e1, cmat_fp32, cmat_stripes, n_low_energy
 
   ! --------------------------------------------------
@@ -136,7 +139,7 @@ subroutine cgyro_calc_collision_cpu_m1(nj_loc)
   !
   integer, intent(in) :: nj_loc
   !
-  integer :: ivp,j,k,itor,ism
+  integer :: ic,ic_loc,iv,ivp,j,k,itor,ism
   integer :: ie,is,ix,iep,isp,ixp
   integer :: vcount
   complex, dimension(nv) :: bvec,cvec
@@ -198,7 +201,7 @@ end subroutine cgyro_calc_collision_cpu_m1
 
 subroutine cgyro_calc_collision_cpu(nj_loc)
 
-  use cgyro_globals
+  use cgyro_globals, only : collision_precision_mode
 
   ! --------------------------------------------------
   implicit none
@@ -220,8 +223,10 @@ end subroutine cgyro_calc_collision_cpu
 
 subroutine cgyro_calc_collision_simple_cpu(nj_loc)
 
-  use parallel_lib
-  use cgyro_globals
+  use parallel_lib, only : fsendf, nproc
+  use cgyro_globals, only : cap_h_v, ie_v, ir_c, is_v, it_c, ix_v, &
+       nc_cl1, nc_cl2, n_energy, n_sim, n_species, nt1, nt2, nv, &
+       nv_loc, n_xi, px
   use cgyro_coll_data, only : cmat_simple
 
   ! --------------------------------------------------
@@ -230,7 +235,7 @@ subroutine cgyro_calc_collision_simple_cpu(nj_loc)
   integer, intent(in) :: nj_loc
   !
 
-  integer :: is,ie,ix,jx,it,ir,j,k
+  integer :: ic,ic_loc,iv,is,ie,ix,jx,it,ir,j,k
   integer :: ivp,itor,ism
   integer :: vcount
   complex, dimension(:,:,:),allocatable :: bvec,cvec
@@ -303,10 +308,13 @@ end subroutine cgyro_calc_collision_simple_cpu
 
 subroutine cgyro_step_collision_cpu(use_simple)
 
-  use parallel_lib
-  use timer_lib
+  use parallel_lib, only : parallel_lib_f_i_do, parallel_lib_nj_loc, &
+       parallel_lib_r_do, parallel_lib_rtrans_pack
+  use timer_lib, only : timer_lib_in, timer_lib_out
 
-  use cgyro_globals
+  use cgyro_globals, only : cap_h_c, cap_h_ct, cap_h_v, &
+       collision_field_model, h_x, is_v, jvec_c, nc, nt1, nt2, nv1, &
+       nv2, temp, z
   use cgyro_field_mod, only : cgyro_field_v_notae, field
 
   ! --------------------------------------------------
@@ -315,7 +323,7 @@ subroutine cgyro_step_collision_cpu(use_simple)
   logical, intent(in) :: use_simple
   !
 
-  integer :: is,nj_loc,itor
+  integer :: ic,is,iv,iv_loc,nj_loc,itor
   complex :: my_psi,my_ch
   ! --------------------------------------------------
 
@@ -382,8 +390,9 @@ end subroutine cgyro_step_collision_cpu
 
 subroutine cgyro_calc_collision_gpu_fp32(nj_loc)
 
-  use parallel_lib
-  use cgyro_globals
+  use parallel_lib, only : fsendf, nproc
+  use cgyro_globals, only : cap_h_v, nc_cl1, nc_cl2, n_sim, nt1, nt2, &
+       nv, nv_loc
   use cgyro_coll_data, only : cmat_fp32
 
   ! --------------------------------------------------
@@ -392,7 +401,7 @@ subroutine cgyro_calc_collision_gpu_fp32(nj_loc)
   integer, intent(in) :: nj_loc
   !
 
-  integer :: j,k,ivp,itor,ism
+  integer :: ic,ic_loc,iv,j,k,ivp,itor,ism
   integer :: vcount
   real :: b_re,b_im
   real :: cval
@@ -447,8 +456,9 @@ end subroutine cgyro_calc_collision_gpu_fp32
 
 subroutine cgyro_calc_collision_gpu_fp64(nj_loc)
 
-  use parallel_lib
-  use cgyro_globals
+  use parallel_lib, only : fsendf, nproc
+  use cgyro_globals, only : cap_h_v, nc_cl1, nc_cl2, n_sim, nt1, nt2, &
+       nv, nv_loc
   use cgyro_coll_data, only : cmat
 
   ! --------------------------------------------------
@@ -457,7 +467,7 @@ subroutine cgyro_calc_collision_gpu_fp64(nj_loc)
   integer, intent(in) :: nj_loc
   !
 
-  integer :: j,k,ivp,itor,ism
+  integer :: ic,ic_loc,iv,j,k,ivp,itor,ism
   integer :: vcount
   real :: b_re,b_im
   real :: cval
@@ -512,8 +522,9 @@ end subroutine cgyro_calc_collision_gpu_fp64
 
 subroutine cgyro_calc_collision_gpu_m1(nj_loc)
 
-  use parallel_lib
-  use cgyro_globals
+  use parallel_lib, only : fsendf, nproc
+  use cgyro_globals, only : cap_h_v, ie_v, is_v, ix_v, nc_cl1, nc_cl2, &
+       n_sim, nt1, nt2, nv, nv_loc
   use cgyro_coll_data, only : cmat_e1, cmat_fp32, cmat_stripes, n_low_energy
 
   ! --------------------------------------------------
@@ -522,7 +533,7 @@ subroutine cgyro_calc_collision_gpu_m1(nj_loc)
   integer, intent(in) :: nj_loc
   !
 
-  integer :: j,k,ivp,itor,ism
+  integer :: ic,ic_loc,iv,j,k,ivp,itor,ism
   integer :: ie,is,ix,iep,isp,ixp
   integer :: vcount
   real :: b_re,b_im
@@ -590,7 +601,7 @@ end subroutine cgyro_calc_collision_gpu_m1
 
 subroutine cgyro_calc_collision_gpu(nj_loc)
 
-  use cgyro_globals
+  use cgyro_globals, only : collision_precision_mode
   use cgyro_coll_data, only : cmat, cmat_fp32
 
   ! --------------------------------------------------
@@ -611,9 +622,10 @@ end subroutine cgyro_calc_collision_gpu
 
 subroutine cgyro_calc_collision_simple_gpu(nj_loc)
 
-  use parallel_lib
+  use parallel_lib, only : fsendf
 
-  use cgyro_globals
+  use cgyro_globals, only : cap_h_v, ie_v, ir_c, is_v, it_c, iv_v, &
+       ix_v, nc_cl1, nc_cl2, n_sim, nt1, nt2, nv, nv_loc, n_xi, px
   use cgyro_coll_data, only : cmat_simple
 
   ! --------------------------------------------------
@@ -622,7 +634,7 @@ subroutine cgyro_calc_collision_simple_gpu(nj_loc)
   integer, intent(in) :: nj_loc
   !
 
-  integer :: is,ie,ix,jx,it,ir,j,k,jv
+  integer :: ic,ic_loc,iv,is,ie,ix,jx,it,ir,j,k,jv
   integer :: ivp,itor, ism
   integer :: vcount
 
@@ -708,10 +720,14 @@ end subroutine cgyro_calc_collision_simple_gpu
 
 subroutine cgyro_step_collision_gpu(use_simple)
 
-  use parallel_lib
-  use timer_lib
+  use parallel_lib, only : fsendf, parallel_lib_f_i_do_gpu, &
+       parallel_lib_nj_loc, parallel_lib_r_do_gpu, &
+       parallel_lib_rtrans_pack_gpu
+  use timer_lib, only : timer_lib_in, timer_lib_out
 
-  use cgyro_globals
+  use cgyro_globals, only : cap_h_c, cap_h_ct, cap_h_v, &
+       collision_field_model, gpu_bigmem_flag, h_x, is_v, jvec_c, nc, &
+       nt1, nt2, nv1, nv2, temp, z
   use cgyro_field_mod, only : cgyro_field_v_notae_gpu, field
 
   ! --------------------------------------------------
@@ -720,7 +736,7 @@ subroutine cgyro_step_collision_gpu(use_simple)
   logical, intent(in) :: use_simple
   !
 
-  integer :: is,nj_loc,itor
+  integer :: ic,is,iv,iv_loc,nj_loc,itor
   complex :: my_psi,my_ch
   ! --------------------------------------------------
 
@@ -821,8 +837,7 @@ end subroutine cgyro_step_collision_gpu
 
 subroutine cgyro_step_collision
 
-  use timer_lib
-  use cgyro_globals
+  use cgyro_globals, only : ae_flag, collision_field_model, nt1
   use cgyro_field_mod, only : cgyro_field_c, cgyro_field_c_ae
 
   implicit none
@@ -843,8 +858,6 @@ end subroutine cgyro_step_collision
 
 subroutine cgyro_step_collision_simple
 
-  use timer_lib
-  use cgyro_globals
   use cgyro_field_mod, only : cgyro_field_c
 
   implicit none
