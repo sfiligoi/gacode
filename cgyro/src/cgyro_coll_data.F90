@@ -360,6 +360,89 @@ subroutine allocate_cmat(nv,nc_loc_coll,nt1,nt2)
     endif
 end subroutine allocate_cmat
 
+! -------------------------------------
+! Initialization and cleanup of cmat
+! -------------------------------------
+
+subroutine cgyro_coll_data_init
+
+    use cgyro_globals, only : collision_model, collision_precision_mode, &
+         energy, nc_loc, nc_loc_coll, n_energy, n_species, n_theta, nt1, &
+         nt2, nv, n_xi
+    use cgyro_io, only : cgyro_error, cgyro_info
+
+    implicit none
+
+    character(len=128) :: msg
+    integer :: ie
+
+    n_low_energy = 0
+
+    if (collision_model == 5) then
+       if (nc_loc_coll/=nc_loc) then
+          call cgyro_error("CMAT sharing not supported for COLLISION_MODEL 5")
+          return
+       endif
+       allocate(cmat_simple(n_xi,n_xi,n_energy,n_species,n_theta,nt1:nt2))
+    else
+       if (collision_precision_mode == 1) then
+          if (collision_model>=6) then
+            call cgyro_error("COLLISION_PRECISION_MODE 1 not supported for COLLISION_MODEL >=6")
+            return
+          endif
+          ! the lowest energy(s) has the most spread, so treat differently
+          n_low_energy = 1
+          do ie=2,n_energy
+            if (energy(ie)<1.0e-2) then
+              n_low_energy = ie
+            endif
+          enddo
+          call allocate_cmat_fp32(nv,nc_loc_coll,nt1,nt2)
+          allocate(cmat_stripes(n_xi,n_species,(n_low_energy+1):n_energy,n_xi,nc_loc_coll,nt1:nt2))
+          allocate(cmat_e1(n_xi,n_species,n_low_energy,nv,nc_loc_coll,nt1:nt2))
+
+          write (msg, "(A,I1,A)") "Using fp32 collision precision except e<=",n_low_energy," or same e&s."
+          call cgyro_info(msg)
+       else if (collision_precision_mode == 32) then
+          if (collision_model>=6) then
+            call cgyro_error("COLLISION_PRECISION_MODE 32 not supported for COLLISION_MODEL >=6")
+            return
+          endif
+          call allocate_cmat_fp32(nv,nc_loc_coll,nt1,nt2)
+       else
+          call allocate_cmat(nv,nc_loc_coll,nt1,nt2)
+       endif
+    endif
+
+end subroutine cgyro_coll_data_init
+
+subroutine cgyro_coll_data_cleanup(gpu_bigmem_flag)
+
+    implicit none
+
+    integer, intent(in) :: gpu_bigmem_flag
+
+    call deallocate_cmat
+    call deallocate_cmat_fp32
+    if (allocated(cmat_stripes)) then
+#if defined(OMPGPU)
+!$omp target exit data map(release:cmat_stripes) if (gpu_bigmem_flag > 0)
+#elif defined(_OPENACC)
+!$acc exit data delete(cmat_stripes) if (gpu_bigmem_flag > 0)
+#endif
+       deallocate(cmat_stripes)
+    endif
+    if (allocated(cmat_simple)) then
+#if defined(OMPGPU)
+!$omp target exit data map(release:cmat_simple)
+#elif defined(_OPENACC)
+!$acc exit data delete(cmat_simple)
+#endif
+       deallocate(cmat_simple)
+    endif
+
+end subroutine cgyro_coll_data_cleanup
+
 subroutine deallocate_cmat_fp32
     use cgyro_globals, only : gpu_bigmem_flag
     implicit none

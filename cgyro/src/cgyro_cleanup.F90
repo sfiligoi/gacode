@@ -2,8 +2,7 @@
 
 subroutine cgyro_cleanup
   use cgyro_globals
-  use cgyro_coll_data, only : cmat_simple, cmat_stripes, deallocate_cmat, &
-       deallocate_cmat_fp32
+  use cgyro_coll_data, only : cgyro_coll_data_cleanup
   use parallel_lib
   use cgyro_field_mod, only : cgyro_field_c_cleanup, cgyro_field_e_cleanup, &
        cgyro_field_v_cleanup
@@ -425,24 +424,7 @@ subroutine cgyro_cleanup
 #endif
      deallocate(gpack32)
   endif
-  call deallocate_cmat
-  call deallocate_cmat_fp32
-  if (allocated(cmat_stripes)) then
-#if defined(OMPGPU)
-!$omp target exit data map(release:cmat_stripes) if (gpu_bigmem_flag > 0)
-#elif defined(_OPENACC)
-!$acc exit data delete(cmat_stripes) if (gpu_bigmem_flag > 0)
-#endif
-     deallocate(cmat_stripes)
-  endif
-    if (allocated(cmat_simple)) then
-#if defined(OMPGPU)
-!$omp target exit data map(release:cmat_simple)
-#elif defined(_OPENACC)
-!$acc exit data delete(cmat_simple)
-#endif
-     deallocate(cmat_simple)
-  endif
+  call cgyro_coll_data_cleanup(gpu_bigmem_flag)
 
 #ifndef CGYRO_GPU_FFT
   if(allocated(fx32))                deallocate(fx32)
