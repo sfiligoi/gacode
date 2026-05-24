@@ -312,31 +312,8 @@ subroutine cgyro_init_arrays
   !-------------------------------------------------------------------------
   ! Zonal flow with adiabatic electrons:
   !
-  do itor=nt1,nt2
-   if (itor == 0 .and. ae_flag == 1) then
+  if (nt1 == 0 .and. ae_flag == 1) then
      ! since this applies only to itor == 0, we do not need to extend the matrix
-     allocate(hzf(n_radial,n_theta,n_theta))
-     hzf(:,:,:) = 0.0      
-     do ir=1,n_radial
-        do it=1,n_theta
-           ! my_toroidal==0
-           hzf(ir,it,it) = k_perp(ic_c(ir,it),0)**2 * lambda_debye**2 &
-                * dens_ele/temp_ele + sum_den_h(it)
-           do jt=1,n_theta
-              hzf(ir,it,jt) = hzf(ir,it,jt) &
-                   - dens_ele*dens_ele_rot(it)/temp_ele*w_theta(jt)
-           enddo
-        enddo
-     enddo
-
-     allocate(work(n_theta))
-     allocate(i_piv(n_theta))
-     do ir=1,n_radial
-        call DGETRF(n_theta,n_theta,hzf(ir,:,:),n_theta,i_piv,info)
-        call DGETRI(n_theta,hzf(ir,:,:),n_theta,i_piv,work,n_theta,info)
-     enddo
-     deallocate(i_piv)
-     deallocate(work)
 
      allocate(xzf(n_radial,n_theta,n_theta))
      xzf(:,:,:) = 0.0     
@@ -361,8 +338,7 @@ subroutine cgyro_init_arrays
      deallocate(i_piv)
      deallocate(work)
 
-   endif
-  enddo
+  endif
 
   if (n_field > 1) deallocate(sum_cur_x)
   deallocate(sum_den_x)

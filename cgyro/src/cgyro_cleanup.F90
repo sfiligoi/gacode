@@ -652,7 +652,6 @@ subroutine cgyro_cleanup
 #endif
      deallocate(c_wave)
   endif
-  if(allocated(hzf))              deallocate(hzf)
   if(allocated(xzf))              deallocate(xzf)
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!

@@ -461,7 +461,7 @@ module cgyro_globals
   real, dimension(:), allocatable :: vfac
   !
   ! n=0 test variables
-  real, dimension(:,:,:), allocatable :: hzf,xzf 
+  real, dimension(:,:,:), allocatable :: xzf
   !
   ! Collision operator
   integer :: n_low_energy
