@@ -18,6 +18,8 @@ subroutine cgyro_kernel
   use cgyro_field_mod, only : field
   use cgyro_flux_mod, only : cgyro_flux_tave_reset
   use cgyro_step
+  use cgyro_step_collision_mod, only : cgyro_step_collision, &
+       cgyro_step_collision_simple
   use cgyro_io
   use cgyro_restart
 

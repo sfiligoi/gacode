@@ -12,6 +12,16 @@
 #define CGYRO_GPU_ROUTINES
 #endif
 
+module cgyro_step_collision_mod
+
+  implicit none
+
+  private
+  public :: cgyro_step_collision
+  public :: cgyro_step_collision_simple
+
+contains
+
 subroutine cgyro_calc_collision_cpu_fp32(nj_loc)
 
   use parallel_lib, only : fsendf
@@ -602,7 +612,6 @@ end subroutine cgyro_calc_collision_gpu_m1
 subroutine cgyro_calc_collision_gpu(nj_loc)
 
   use cgyro_globals, only : collision_precision_mode
-  use cgyro_coll_data, only : cmat, cmat_fp32
 
   ! --------------------------------------------------
   implicit none
@@ -613,9 +622,9 @@ subroutine cgyro_calc_collision_gpu(nj_loc)
   if (collision_precision_mode == 1) then
      call cgyro_calc_collision_gpu_m1(nj_loc)
   else if (collision_precision_mode == 32) then
-     call cgyro_calc_collision_gpu_fp32(nj_loc,cmat_fp32)
+     call cgyro_calc_collision_gpu_fp32(nj_loc)
   else
-     call cgyro_calc_collision_gpu_fp64(nj_loc,cmat)
+     call cgyro_calc_collision_gpu_fp64(nj_loc)
   endif
 
 end subroutine cgyro_calc_collision_gpu
@@ -871,3 +880,5 @@ subroutine cgyro_step_collision_simple
   call cgyro_field_c(.TRUE.)
 
 end subroutine cgyro_step_collision_simple
+
+end module cgyro_step_collision_mod
