@@ -844,7 +844,7 @@ end subroutine cgyro_step_collision_gpu
 
   ! ==================================================
 
-subroutine cgyro_step_collision
+subroutine cgyro_step_collision_full
 
   use cgyro_globals, only : ae_flag, collision_field_model, nt1
   use cgyro_field_mod, only : cgyro_field_c, cgyro_field_c_ae
@@ -863,7 +863,7 @@ subroutine cgyro_step_collision
      call cgyro_field_c_ae
   endif
 
-end subroutine cgyro_step_collision
+end subroutine cgyro_step_collision_full
 
 subroutine cgyro_step_collision_simple
 
@@ -880,5 +880,22 @@ subroutine cgyro_step_collision_simple
   call cgyro_field_c(.TRUE.)
 
 end subroutine cgyro_step_collision_simple
+
+! ==================================================
+
+subroutine cgyro_step_collision
+
+  use cgyro_globals, only : collision_model
+
+  implicit none
+
+  if (collision_model == 5) then
+    call cgyro_step_collision_simple
+  else
+    call cgyro_step_collision_full
+  endif
+
+end subroutine cgyro_step_collision
+
 
 end module cgyro_step_collision_mod
